@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.22 2002-08-30 10:35:24 bird Exp $
+/* $Id: buildenv.cmd,v 1.23 2002-08-30 18:28:57 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -26,7 +26,7 @@
     /*
      * Version
      */
-    sVersion = '1.0.4 [2002-08-29]';
+    sVersion = '1.0.5 [2002-08-30]';
 
     /*
      * Create argument array with lowercase arguments.
@@ -106,6 +106,7 @@
     /* Tool id                      The tool's group            The function with args.                 Optional verify data.                       increment index */
     aCfg.i.sId = 'cvs';             aCfg.i.sGrp = 'version';    aCfg.i.sSet = 'CVS';                    aCfg.i.sDesc = 'CVS v1.10 or later';        i = i + 1;
     aCfg.i.sId = 'db2v52';          aCfg.i.sGrp = 'database';   aCfg.i.sSet = 'db2v52';                 aCfg.i.sDesc = 'DB2 v5.2 Dev Edition';      i = i + 1;
+    aCfg.i.sId = 'ddk';             aCfg.i.sGrp = 'ddk';        aCfg.i.sSet = 'DDK';                    aCfg.i.sDesc = 'OS/2 DDK (recent)';         i = i + 1;
     aCfg.i.sId = 'ddkbase';         aCfg.i.sGrp = 'ddk';        aCfg.i.sSet = 'DDKBase';                aCfg.i.sDesc = 'DDK Base (recent)';         i = i + 1;
     aCfg.i.sId = 'ddkvideo';        aCfg.i.sGrp = 'ddk';        aCfg.i.sSet = 'DDKVideo';               aCfg.i.sDesc = 'DDK Video (recent)';        i = i + 1;
     aCfg.i.sId = 'emx';             aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'EMX';                    aCfg.i.sDesc = 'EMX v0.9d fixpack 04';      i = i + 1;
@@ -339,7 +340,8 @@ exit(0);
  */
 NoValueHandler:
     say 'NoValueHandler: line 'SIGL;
-return 0;
+exit(16);
+
 
 
 /**
@@ -447,7 +449,7 @@ CfgConfigure: procedure expose aCfg. aPath. sPathFile
     /*
      * We have to configure it!
      */
-    say 'Config of the 'aCfg.iTool.sId' ('CfgDesc(aCfg.iTool.sId)') tool.';
+    say '- Config of the 'aCfg.iTool.sId' ('CfgDesc(aCfg.iTool.sId)') tool.';
 
     /* make rexx expression */
     if (pos(',', aCfg.iTool.sSet) > 0) then
@@ -575,17 +577,24 @@ return (iRc = 0);
 
 /**
  * Checks if a file exists.
- * @param   sFile   Name of the file to look for.
- * @param   fQuiet  Flag which tells whether to be quiet or not.
+ * @param   sFile       Name of the file to look for.
+ * @param   fQuiet      Flag which tells whether to be quiet or not.
+ * @param   fOptional   Flag to say that this file is optiona.
  * @returns TRUE if file exists.
  *          FALSE if file doesn't exists.
  */
 CfgVerifyFile: procedure expose aCfg. aPath. sPathFile
-    parse arg sFile, fQuiet
+    parse arg sFile, fQuiet, fOptional
+    if (fOptional = '') then fOptional = 0;
     rc = stream(sFile, 'c', 'query exist');
     if ((rc = '') & \fQuiet) then
-        say 'Verify existance of '''sFile''' failed.';
-return rc <> '';
+    do
+        if (fOptional) then
+            say 'Warning: Installation is missing '''sFile'''.';
+        else
+            say 'Verify existance of '''sFile''' failed.';
+    end
+return rc <> '' | fOptional;
 
 
 /**
@@ -776,6 +785,35 @@ PathRemove: procedure expose aCfg. aPath. sPathFile
 return 0;
 
 
+/**
+ * Sets a given path.
+ * @param   sPathId     Path id.
+ * @param   sNewPath    Path.
+ */
+PathSet: procedure expose aCfg. aPath. sPathFile
+parse arg sPathId, sNewPath
+
+    /*
+     * Search for the path.
+     */
+    do i = 1 to aPath.0
+        if (aPath.i.sPId = sPathId) then
+        do
+            aPath.i.sPath = sNewPath;
+            return 0;
+        end
+    end
+
+    /*
+     * Not found, so add it.
+     */
+    i = aPath.0 + 1;
+    aPath.i.sPId = sPathId;
+    aPath.i.sPath = sNewPath;
+    aPath.0 = i;
+return 0;
+
+
 
 /**
  * Fills 'aPath.' with default settings overwriting anything in the table.
@@ -950,7 +988,7 @@ PathConfig: procedure expose aCfg. aPath. sPathFile
      */
     if (sOperation <> 'forcedconfig') then
     do
-        say 'Do you want to configure the path '''sPathId''' for the '''sToolId'''('CfgDesc(sToolId)') tool? (y/N)';
+        say 'Do you want to configure the path '''sPathId''/* for the '''sToolId'''('CfgDesc(sToolId)') tool?*/ '(y/N)';
         sAnswer = PullUser(1);
         if (substr(strip(sAnswer),1,1) <> 'Y') then
             return '';
@@ -1003,15 +1041,38 @@ PullUser: procedure
     if (fUpper = '') then
         fUpper = 0;
 
-    if (fUpper) then
-        pull sAnswer;
-    else
-        parse pull sAnswer;
+    signal on halt name PullUser_Handler
+    signal on syntax name PullUser_Handler
+    signal on notready name PullUser_Handler
+    parse pull sAnswer;
+    signal off syntax
+    signal off halt
+    signal off notready
+    /*say 'Debug: sAnswer='c2x(sAnswer);
+    sAnswer = strip(strip(sAnswer, 'T', '0A'x), 'T', '0D'x);*/
 
+    if (fUpper) then
+        sAnswer = translate(sAnswer);
+    /* flush input */
     do while (Queued())
         pull dummy;
     end
 return sAnswer;
+
+
+/**
+ * No value handler
+ */
+PullUser_Handler:
+    say 'fatal error: Believe Ctrl-Break/C might have been pressed.';
+    signal off syntax
+    signal off halt
+    signal off syntax
+    signal off notready
+    do while (Queued())
+        pull dummy;
+    end
+exit(16);
 
 
 /**
@@ -1225,14 +1286,15 @@ EnvAddEnd2: procedure
 
     if (sOrgEnvVar <> '') then
     do
-    /* Remove previously sToAdd if exists. (Changing sOrgEnvVar). */
-    i = pos(translate(sToAdd), translate(sOrgEnvVar));
-    if (i > 0) then
-        sOrgEnvVar = substr(sOrgEnvVar, 1, i-1) || substr(sOrgEnvVar, i + length(sToAdd));
+        /* Remove previously sToAdd if exists. (Changing sOrgEnvVar). */
+        i = pos(translate(sToAdd), translate(sOrgEnvVar));
+        if (i > 0) then
+            sOrgEnvVar = substr(sOrgEnvVar, 1, i-1) || substr(sOrgEnvVar, i + length(sToAdd));
 
-    /* checks that sOrgEnvVar ends with a separator. Adds one if not. */
-    if (substr(sOrgEnvVar, length(sOrgEnvVar), 1) <> sSeparator) then
-        sOrgEnvVar = sOrgEnvVar || sSeparator;
+        /* checks that sOrgEnvVar ends with a separator. Adds one if not. */
+        if (sOrgEnvVar = '') then
+            if (right(sOrgEnvVar,1) <> sSeparator) then
+                sOrgEnvVar = sOrgEnvVar || sSeparator;
     end
 
     /* set environment */
@@ -1553,6 +1615,38 @@ db2v52: procedure expose aCfg. aPath. sPathFile
         ) then
         return 2;
     rc = CheckCmdOutput('echo quit | db2', 0, fQuiet, 'Command Line Processor for DB2 SDK 5.2.0');
+return rc;
+
+
+
+/*
+ *  Device Driver Kit (DDK) base.
+ */
+DDK: procedure expose aCfg. aPath. sPathFile
+    parse arg sToolId,sOperation,fRM,fQuiet
+
+    /*
+     * Device Driver Kit (DDK) (v4.0+) Main Directory.
+     */
+    sPathDDK    = PathQuery('ddk', sToolId, sOperation);
+    if (sPathDDK = '') then
+        return 1;
+    /* If config operation we're done now. */
+    if (pos('config', sOperation) > 0) then
+    do
+        /* Set the ddk subpaths */
+        if (PathQuery('ddkbase', 'ddkbase', 'quietisconfig') = '') then
+            call PathSet 'ddkbase', sPathDDK'\base';
+        if (PathQuery('ddkvideo', 'ddkvideo', 'quietisconfig') = '') then
+            call PathSet 'ddkvideo', sPathDDK'\video';
+        if (PathQuery('ddkprint', 'ddkvideo', 'quietisconfig') = '') then
+            call PathSet 'ddkprint', sPathDDK'\print';
+        return 0;
+    end
+    call EnvSet      fRM, 'PATH_DDK',    sPathDDK;
+    rc = DDKBase('ddkbase',sOperation,fRM,fQuiet)
+    if (rc = 0) then
+        rc = DDKVideo('ddkvideo',sOperation,fRM,fQuiet)
 return rc;
 
 
@@ -2422,7 +2516,8 @@ Toolkit40: procedure expose aCfg. aPath. sPathFile
     call EnvAddFront fRM, 'bookshelf',      sPathTK'\BETA\BOOK;'sPathTK'\BOOK;'sPathTK'\ARCHIVED;'
     call EnvAddFront fRM, 'somir',          sPathTK'\SOM\COMMON\ETC\214\SOM.IR;'sPathTK'\OPENDOC\BASE\AVLSHELL.IR;'
     call EnvAddEnd   fRM, 'somir',          sPathTK'\OPENDOC\CUSTOM\OD.IR;'sPathTK'\SAMPLES\REXX\SOM\ANIMAL\ORXSMP.IR;'
-    call EnvAddFront fRM, 'include',        sPathTK'\SPEECH\H;'sPathTK'\BETA\H;'sPathTK'\SAMPLES\OPENDOC\PARTS\INCLUDE;'sPathTK'\SOM\INCLUDE;'sPathTK'\INC;'sPathTK'\H\GL;'sPathTK'\H;'
+/*    call EnvAddFront fRM, 'include',        sPathTK'\SPEECH\H;'sPathTK'\BETA\H;'sPathTK'\SAMPLES\OPENDOC\PARTS\INCLUDE;'sPathTK'\SOM\INCLUDE;'sPathTK'\INC;'sPathTK'\H\GL;'sPathTK'\H;' */
+    call EnvAddFront fRM, 'include',        /*sPathTK'\SPEECH\H;'*/sPathTK'\BETA\H;'sPathTK'\SAMPLES\OPENDOC\PARTS\INCLUDE;'sPathTK'\SOM\INCLUDE;'sPathTK'\INC;'sPathTK'\H\GL;'sPathTK'\H;'
     call EnvAddEnd   fRM, 'include',        sPathTK'\H\LIBC;.;'
     call EnvAddFront fRM, 'lib',            sPathTK'\SPEECH\LIB;'sPathTK'\SAMPLES\MM\LIB;'sPathTK'\LIB;'sPathTK'\SOM\LIB;'sPathTK'\OPENDOC\BASE\LIB;'
     call EnvAddFront fRM, 'nlspath',        sPathTK'\OPENDOC\BASE\LOCALE\EN_US\%N;'sPathTK'\MSG\%N;C:\MPTN\MSG\NLS\%N;C:\TCPIP\msg\ENUS850\%N;'
@@ -2519,8 +2614,8 @@ Toolkit45: procedure expose aCfg. aPath. sPathFile
     call EnvAddFront fRM, 'nlspath',     sPathTK'\msg\%N;'
     call EnvAddEnd   fRM, 'ulspath',     sPathTK'\language;'
     call EnvAddFront fRM, 'include',     sPathTK'\H;'
-    call EnvAddFront fRM, 'include',     sPathTK'\H\GL;'
-    call EnvAddFront fRM, 'include',     sPathTK'\SPEECH\H;'
+/*    call EnvAddFront fRM, 'include',     sPathTK'\H\GL;' */
+/*    call EnvAddFront fRM, 'include',     sPathTK'\SPEECH\H;' includes tend to get too long :-( */
     call EnvAddFront fRM, 'include',     sPathTK'\H\RPC;'
     call EnvAddFront fRM, 'include',     sPathTK'\H\NETNB;'
     call EnvAddFront fRM, 'include',     sPathTK'\H\NETINET;'
@@ -2602,7 +2697,8 @@ Toolkit451: procedure expose aCfg. aPath. sPathFile
     call EnvAddEnd   fRM, 'somir',       sPathTK'\SAMPLES\REXX\SOM\ANIMAL\ORXSMP.IR;'
     call EnvAddFront fRM, 'nlspath',     sPathTK'\msg\%N;'
     call EnvAddEnd   fRM, 'ulspath',     sPathTK'\language;'
-    call EnvAddFront fRM, 'include',     sPathTK'\H\ARPA;'sPathTK'\H\NET;'sPathTK'\H\NETINET;'sPathTK'\H\NETNB;'sPathTK'\H\RPC;'sPathTK'\SPEECH\H;'sPathTK'\H\GL;'sPathTK'\H;'sPathTK'\SOM\INCLUDE;'sPathTK'\INC;'
+    /*call EnvAddFront fRM, 'include',     sPathTK'\H\ARPA;'sPathTK'\H\NET;'sPathTK'\H\NETINET;'sPathTK'\H\NETNB;'sPathTK'\H\RPC;'sPathTK'\SPEECH\H;'sPathTK'\H\GL;'sPathTK'\H;'sPathTK'\SOM\INCLUDE;'sPathTK'\INC;'*/
+    call EnvAddFront fRM, 'include',     sPathTK'\H\ARPA;'sPathTK'\H\NET;'sPathTK'\H\NETINET;'sPathTK'\H\NETNB;'sPathTK'\H\RPC;'/*sPathTK'\SPEECH\H;'sPathTK'\H\GL;'*/sPathTK'\H;'sPathTK'\SOM\INCLUDE;'sPathTK'\INC;'
     call EnvAddFront fRM, 'lib',         sPathTK'\lib;'sPathTK'\som\lib;'
     call EnvAddEnd   fRM, 'lib',         sPathTK'\SAMPLES\MM\LIB;'sPathTK'\SPEECH\LIB;'
     call EnvAddFront fRM, 'helpndx',     'EPMKWHLP.NDX+', '+'
@@ -2694,7 +2790,9 @@ Toolkit452: procedure expose aCfg. aPath. sPathFile
     call EnvAddEnd   fRM, 'somir',       sPathTK'\SAMPLES\REXX\SOM\ANIMAL\ORXSMP.IR;'
     call EnvAddFront fRM, 'nlspath',     sPathTK'\msg\%N;'
     call EnvAddEnd   fRM, 'ulspath',     sPathTK'\language;'
-    call EnvAddFront fRM, 'include',     sPathTK'\H\ARPA;'sPathTK'\H\NET;'sPathTK'\H\NETINET;'sPathTK'\H\NETNB;'sPathTK'\H\RPC;'sPathTK'\SPEECH\H;'sPathTK'\H\GL;'sPathTK'\H;'sPathTK'\SOM\INCLUDE;'sPathTK'\INC;'
+    /*call EnvAddFront fRM, 'include',     sPathTK'\H\ARPA;'sPathTK'\H\NET;'sPathTK'\H\NETINET;'sPathTK'\H\NETNB;'sPathTK'\H\RPC;'sPathTK'\SPEECH\H;'sPathTK'\H\GL;'sPathTK'\H;'sPathTK'\SOM\INCLUDE;'sPathTK'\INC;'*/
+    /* the include mustn't be too long :-/ */
+    call EnvAddFront fRM, 'include',     sPathTK'\H\ARPA;'sPathTK'\H\NET;'sPathTK'\H\NETINET;'sPathTK'\H\NETNB;'sPathTK'\H\RPC;'/*sPathTK'\SPEECH\H;'sPathTK'\H\GL;'*/sPathTK'\H;'sPathTK'\SOM\INCLUDE;'sPathTK'\INC;'
     call EnvAddFront fRM, 'lib',         sPathTK'\lib;'sPathTK'\som\lib;'
     call EnvAddEnd   fRM, 'lib',         sPathTK'\SAMPLES\MM\LIB;'sPathTK'\SPEECH\LIB;'
     call EnvAddFront fRM, 'helpndx',     'EPMKWHLP.NDX+', '+'
@@ -2726,7 +2824,8 @@ Toolkit452: procedure expose aCfg. aPath. sPathFile
     if (pos('verify', sOperation) <= 0) then
         return 0;
     if (    \CfgVerifyFile(sPathTK'\bin\alp.exe', fQuiet),
-        |   \CfgVerifyFile(sPathTK'\bin\rc.exe', fQuiet),
+        /*|   \CfgVerifyFile(sPathTK'\bin\rc.exe', fQuiet)*/,
+        |   \CfgVerifyFile(sPathTK'\bin\rc16.exe', fQuiet),
         |   \CfgVerifyFile(sPathTK'\bin\ipfc.exe', fQuiet),
         |   \CfgVerifyFile(sPathTK'\bin\implib.exe', fQuiet),
         |   \CfgVerifyFile(sPathTK'\bin\mkmsgf.exe', fQuiet),
@@ -2745,8 +2844,10 @@ Toolkit452: procedure expose aCfg. aPath. sPathFile
     rc = CheckCmdOutput('syslevel '||sPathTK||'\bin', 0, fQuiet, 'IBM OS/2 Developer''s Toolkit Version 4.5'||'0d0a'x||'Version 4.50.2     Component ID 5639F9300');
     if (rc = 0) then
         rc = CheckCmdOutput('sc -V', -1, fQuiet, '", Version: 2.54.');
+    /*if (rc = 0) then
+        rc = CheckCmdOutput('rc', 1, fQuiet, 'Version 4.00.011 Oct 04 2001');*/
     if (rc = 0) then
-        rc = CheckCmdOutput('rc', 1, fQuiet, 'Version 4.00.011 Oct 04 2001');
+        rc = CheckCmdOutput('rc16', 1, fQuiet, 'Version 4.00.011 Oct 04 2001');
     if (rc = 0) then
         rc = CheckCmdOutput('ipfc', 0, fQuiet, 'Version 4.00.007 Oct 02 2000');
     if (rc = 0) then
@@ -2802,13 +2903,13 @@ Unix: procedure expose aCfg. aPath. sPathFile
      */
     if (pos('verify', sOperation) <= 0) then
         return 0;
-    if (    \CfgVerifyFile(sUnixBack'\bin\bash.exe', fQuiet),
+    if (    \CfgVerifyFile(sUnixBack'\bin\bash.exe', fQuiet, 1),
         |   \CfgVerifyFile(sUnixBack'\bin\sh.exe', fQuiet),
         |   \CfgVerifyFile(sUnixBack'\bin\yes.exe', fQuiet),
         |   \CfgVerifyFile(sUnixBack'\bin\rm.exe', fQuiet),
-        |   \CfgVerifyFile(sUnixBack'\bin\cp.exe', fQuiet),
-        |   \CfgVerifyFile(sUnixBack'\bin\mv.exe', fQuiet),
-        |   \CfgVerifyFile(sXF86Back'\bin\xf86config.exe', fQuiet),
+        |   \CfgVerifyFile(sUnixBack'\bin\cp.exe', fQuiet, 1),
+        |   \CfgVerifyFile(sUnixBack'\bin\mv.exe', fQuiet. 1),
+        |   \CfgVerifyFile(sXF86Back'\bin\xf86config.exe', fQuiet, 1),
         ) then
         return 2;
 return 0;
@@ -2897,8 +2998,8 @@ VAC308: procedure expose aCfg. aPath. sPathFile
         |   \CfgVerifyFile(sPathCPP'\lib\cppom30o.lib', fQuiet),
         |   \CfgVerifyFile(sPathCPP'\lib\cppon30i.lib', fQuiet),
         |   \CfgVerifyFile(sPathCPP'\lib\cppon30o.lib', fQuiet),
-        |   \CfgVerifyFile(sPathCPP'\lib\_doscall.lib', fQuiet),
-        |   \CfgVerifyFile(sPathCPP'\lib\_pmwin.lib', fQuiet),
+        |   \CfgVerifyFile(sPathCPP'\lib\_doscall.lib', fQuiet, 1),
+        |   \CfgVerifyFile(sPathCPP'\lib\_pmwin.lib', fQuiet, 1),
         |   \CfgVerifyFile(sPathCPP'\include\builtin.h', fQuiet),
         |   \CfgVerifyFile(sPathCPP'\include\conio.h', fQuiet),
         |   \CfgVerifyFile(sPathCPP'\include\ismkss.h', fQuiet),
@@ -3173,9 +3274,9 @@ WatComC11: procedure expose aCfg. aPath. sPathFile
         |   \CfgVerifyFile(sPathWatcom'\lib286\os2\os2.lib', fQuiet),
         |   \CfgVerifyFile(sPathWatcom'\lib386\os2\clbrdll.lib', fQuiet),
         |   \CfgVerifyFile(sPathWatcom'\lib386\os2\clib3r.lib', fQuiet),
-        |   \CfgVerifyFile(sPathWatcom'\lib386\nt\kernel32.lib', fQuiet),
-        |   \CfgVerifyFile(sPathWatcom'\lib386\nt\clbrdll.lib', fQuiet),
-        |   \CfgVerifyFile(sPathWatcom'\lib386\nt\clib3r.lib', fQuiet),
+        |   \CfgVerifyFile(sPathWatcom'\lib386\nt\kernel32.lib', fQuiet,1),
+        |   \CfgVerifyFile(sPathWatcom'\lib386\nt\clbrdll.lib', fQuiet,1),
+        |   \CfgVerifyFile(sPathWatcom'\lib386\nt\clib3r.lib', fQuiet,1),
         ) then
         return 2;
     rc = CheckCmdOutput('wcc', 8, fQuiet, 'Watcom C16 Optimizing Compiler  Version 11.0 '||'0d0a'x);
@@ -3245,9 +3346,9 @@ WatComC11c: procedure expose aCfg. aPath. sPathFile
         |   \CfgVerifyFile(sPathWatcom'\lib286\os2\os2.lib', fQuiet),
         |   \CfgVerifyFile(sPathWatcom'\lib386\os2\clbrdll.lib', fQuiet),
         |   \CfgVerifyFile(sPathWatcom'\lib386\os2\clib3r.lib', fQuiet),
-        |   \CfgVerifyFile(sPathWatcom'\lib386\nt\kernel32.lib', fQuiet),
-        |   \CfgVerifyFile(sPathWatcom'\lib386\nt\clbrdll.lib', fQuiet),
-        |   \CfgVerifyFile(sPathWatcom'\lib386\nt\clib3r.lib', fQuiet),
+        |   \CfgVerifyFile(sPathWatcom'\lib386\nt\kernel32.lib', fQuiet, 1),
+        |   \CfgVerifyFile(sPathWatcom'\lib386\nt\clbrdll.lib', fQuiet, 1),
+        |   \CfgVerifyFile(sPathWatcom'\lib386\nt\clib3r.lib', fQuiet, 1),
         ) then
         return 2;
     rc = CheckCmdOutput('wcc', 8, fQuiet, 'Watcom C16 Optimizing Compiler  Version 11.0c');
