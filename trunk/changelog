@@ -1,4 +1,9 @@
- /* $Id: changelog,v 1.652 2000-01-15 17:26:38 sandervl Exp $ */
+ /* $Id: changelog,v 1.653 2000-01-15 22:01:35 sandervl Exp $ */
+
+ 2000-01-15: Jens Wiessner <wiessnej@rfi.de>
+	- TWAIN_32: Update
+	- WINMM\MCIANIM,MCIAVI32,MCISEQ,MCIWAVE,MIDIMAP
+                    Updated to Wine level 20000109 + corrected compile errors
 
  2000-01-15: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: Fixed scroll repaints (never use GetMessage with window
@@ -57,11 +62,6 @@
 	- KERNEL32:   Added DisableLogging & EnableLogging functions to
                       disable logging in parts of code. Logging will only be
                       done if the logcount is bigger than 0.
-<<<<<<< ChangeLog
->>>>>>> 1.646
-
-=======
->>>>>>> 1.648
 
  2000-01-12: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32/NEW: fixed WM_CALCVALIDRECTS
