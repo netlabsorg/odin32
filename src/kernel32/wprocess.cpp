@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.164 2002-12-13 16:46:44 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.165 2002-12-13 16:54:17 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -1790,9 +1790,9 @@ BOOL WIN32API ODIN_QueryLoaders(LPSTR pszPECmdLoader, INT cchPECmdLoader,
                                 LPSTR pszPEGUILoader, INT cchPEGUILoader,
                                 LPSTR pszNELoader, INT cchNELoader)
 {
-    if(pszPECmdLoader)   strncpy(szPECmdLoader, szPECmdLoader, cchPECmdLoader);
-    if(pszPEGUILoader)   strncpy(szPEGUILoader, szPEGUILoader, cchPEGUILoader);
-    if(pszNELoader)      strncpy(szNELoader, szNELoader, cchNELoader);
+    if(pszPECmdLoader)   strncpy(pszPECmdLoader, szPECmdLoader, cchPECmdLoader);
+    if(pszPEGUILoader)   strncpy(pszPEGUILoader, szPEGUILoader, cchPEGUILoader);
+    if(pszNELoader)      strncpy(pszNELoader, szNELoader, cchNELoader);
 
     return TRUE;
 }
