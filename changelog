@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1583 2001-07-09 08:15:42 bird Exp $ */
+/* $Id: changelog,v 1.1584 2001-07-09 18:38:24 sandervl Exp $ */
 
  2001-07-09: knut st. osmundsen <kosmunds@csc.com>:
     - CRTDLL:   o When renaming dlls we still use the original importlibrary
@@ -11,6 +11,9 @@
     - KERNEL32: o Directly import registry functions from REGISTRY.DLL
     - GDI32:    o Never use object handle 0
                   (fixes bad icons in dialogs)
+    - USER32:   o Same edit fix as applied yesterday, but this time for
+                  single line edit control painting.
+                  (Opera url editbox now displays selected text properly)
 
  2001-07-08: Achim Hasenmueller <achimha@innotek.de>
     - WSOCK32:  o error message to human readable text translation
