@@ -1,4 +1,4 @@
-/* $Id: heapstring.cpp,v 1.10 1999-09-14 13:44:21 phaller Exp $ */
+/* $Id: heapstring.cpp,v 1.11 1999-09-18 15:59:29 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -17,6 +17,7 @@
 #include <string.h>
 #include <winnls.h>
 #include <unicode.h>
+#include <ctype.h>
 #include <wcstr.h>
 #include "heap.h"
 #include <heapstring.h>
@@ -201,6 +202,37 @@ int WIN32API lstrncmpA(LPCSTR arg1, LPCSTR  arg2, int l)
   return strncmp(arg1, arg2, l);
 }
 
+/*****************************************************************************
+ * Name      : lstrncmpiA
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Przemyslaw Dobrowolski
+ *****************************************************************************/
+INT WINAPI lstrncmpiA( LPCSTR str1, LPCSTR str2, INT n )
+{
+  INT firstch,lastch;
+  INT result = 0;
+
+  if (n)
+  {
+    do
+    {
+      firstch = tolower(*str1);
+      lastch = tolower(*str2);
+      str1++;
+      str2++;
+    } while (--n && str1 && str2 && firstch == lastch);
+
+    result = firstch - lastch;
+  }
+
+  return(result);
+}
 
 
 /*****************************************************************************

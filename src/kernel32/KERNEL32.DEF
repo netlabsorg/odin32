@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.38 1999-09-15 23:38:01 sandervl Exp $
+; $Id: KERNEL32.DEF,v 1.39 1999-09-18 15:59:29 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -932,6 +932,7 @@ EXPORTS
     lstrcpyWtoA                = _lstrcpyWtoA@8              @784
     lstrncmpA                  = _lstrncmpA@12               @785
     lstrncmpW                  = _lstrncmpW@12               @786
+    lstrncmpiA		       = _lstrncmpiA@12              @887
 
 
 
