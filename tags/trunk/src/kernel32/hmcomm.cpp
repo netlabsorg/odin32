@@ -1,4 +1,4 @@
-/* $Id: hmcomm.cpp,v 1.32 2001-12-09 21:19:28 sandervl Exp $ */
+/* $Id: hmcomm.cpp,v 1.33 2001-12-10 12:55:12 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -237,7 +237,8 @@ DWORD HMDeviceCommClass::CreateFile(LPCSTR lpFileName,
 
             comnr = comname[3] - '1';
 
-            if(handler[comnr] == NULL) {
+            if(handler[comnr] == NULL) 
+            {
                 try {
                     handler[comnr] = new OverlappedIOHandler(CommReadIOHandler, CommWriteIOHandler, CommPollIOHandler);
                 }
@@ -271,7 +272,6 @@ fail:
  *
  * Author    : SvL
  *****************************************************************************/
-
 DWORD HMDeviceCommClass::GetFileType(PHMHANDLEDATA pHMHandleData)
 {
     dprintf(("KERNEL32: HMDeviceCommClass::GetFileType %s(%08x)\n",
@@ -420,6 +420,22 @@ DWORD CommPollIOHandler(LPASYNCIOREQUEST lpRequest, DWORD *lpdwResult, DWORD *lp
         dwEvent |= (COMEvt&0x0040)? EV_BREAK:0;
         dwEvent |= (COMEvt&0x0080)? EV_ERR:0;
         dwEvent |= (COMEvt&0x0100)? EV_RING:0;
+ 
+        if((dwEvent & EV_RXCHAR) && (dwMask & EV_RXCHAR)) 
+        {
+            //check if there's really data in the in queue
+            RXQUEUE qInfo;
+            ULONG ulLen = sizeof(qInfo);
+            ULONG rc = OSLibDosDevIOCtl(pHMHandleData->hHMHandle,
+                                        IOCTL_ASYNC,
+                                        ASYNC_GETINQUECOUNT,
+                                        0,0,0,
+                                        &qInfo,ulLen,&ulLen);
+            if(qInfo.cch == 0) {
+                dprintf(("!WARNING!: CommPollIOHandler -> EV_RXCHAR but no DATA"));
+                dwEvent &= ~EV_RXCHAR;
+            }
+        }
         if((dwEvent & dwMask)) {
             dprintf(("CommPollIOHandler: event(s) %x occured", (dwEvent & dwMask)));
             *lpdwResult = (dwEvent & dwMask);
@@ -725,7 +741,7 @@ BOOL HMDeviceCommClass::GetOverlappedResult(PHMHANDLEDATA pHMHandleData,
 {
   PHMDEVCOMDATA pDevData = (PHMDEVCOMDATA)pHMHandleData->lpHandlerData;
 
-    dprintf(("KERNEL32-WARNING: HMDeviceCommClass::GetOverlappedResult(%08xh,%08xh,%08xh,%08xh)",
+    dprintf(("KERNEL32-HMDeviceCommClass: HMDeviceCommClass::GetOverlappedResult(%08xh,%08xh,%08xh,%08xh)",
              pHMHandleData->hHMHandle, lpOverlapped, lpcbTransfer, fWait));
 
     if(!(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED)) {
