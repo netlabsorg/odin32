@@ -11,7 +11,7 @@ if (isset($sFile))
     $sOperation = "viewfile";
     if (!isset($sRevision))
         $sRevision = "";
-    $sTitle = $sFile;
+    $sTitle = substr($sFile, 0, -2);
 }
 else if (isset($sDir))
 {
