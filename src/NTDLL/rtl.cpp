@@ -1,4 +1,4 @@
-/* $Id: rtl.cpp,v 1.7 1999-08-22 22:45:53 sandervl Exp $ */
+/* $Id: rtl.cpp,v 1.8 1999-11-09 00:44:02 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -498,39 +498,16 @@ BOOLEAN WINAPI RtlGetNtProductType(LPDWORD type)
  */
 /* longlong in VAC++ ? */
 
-INT WINAPI RtlEnlargedIntegerMultiply(INT factor1,
-                                      INT factor2)
-{
-  dprintf(("NTDLL: RtlEnlargedIntegerMultiply(%08xh,%08xh) not implemented.\n",
-           factor1,
-           factor2));
-
-  return factor1 * factor2;
-}
+extern INT WINAPI RtlEnlargedIntegerMultiply(INT factor1,
+                                             INT factor2);
 
 
 /******************************************************************************
  * RtlExtendedLargeIntegerDivide [NTDLL.359]
  */
-INT WINAPI RtlExtendedLargeIntegerDivide(LARGE_INTEGER dividend,
-                                         DWORD         divisor,
-                                         LPDWORD       rest)
-{
-#if SIZEOF_LONG_LONG==8
-   long long x1 = *(long long*)&dividend;
-
-   if (*rest)
-      *rest = x1 % divisor;
-   return x1/divisor;
-#else
-  dprintf(("NTDLL: RtlExtendedLargeIntegerDevice(%08xh,%08xh,%08xh) not implemented.\n",
-           dividend,
-           divisor,
-           rest));
-
-  return 0;
-#endif
-}
+extern INT WINAPI RtlExtendedLargeIntegerDivide(LARGE_INTEGER dividend,
+                                                DWORD         divisor,
+                                                LPDWORD       rest);
 
 /******************************************************************************
  * RtlExtendedLargeIntegerMultiply [NTDLL.358]
@@ -539,22 +516,8 @@ INT WINAPI RtlExtendedLargeIntegerDivide(LARGE_INTEGER dividend,
  */
 /* longlong in VAC++ ? */
 
-LARGE_INTEGER WINAPI RtlExtendedIntegerMultiply(LARGE_INTEGER factor1,
-                                                INT           factor2)
-{
-  LARGE_INTEGER li;
-
-  dprintf(("NTDLL: RtlExtendedIntegerMultiply(%08xh,%08xh) not implemented.\n",
-           factor1,
-           factor2));
-
-  li.LowPart  = factor1.LowPart * factor2;
-  li.HighPart = factor1.HighPart * factor2;
-  // note: overflow from LowPart To HighPart NOT handled !
-
-  return li;
-}
-
+extern LARGE_INTEGER WINAPI RtlExtendedIntegerMultiply(LARGE_INTEGER factor1,
+                                                       INT           factor2);
 
 /******************************************************************************
  *  RtlFormatCurrentUserKeyPath             [NTDLL.371]

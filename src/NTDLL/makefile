@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 1999-11-03 23:28:04 sandervl Exp $
+# $Id: makefile,v 1.11 1999-11-09 00:44:01 phaller Exp $
 
 #
 # PD-Win32 API
@@ -31,7 +31,8 @@ OBJS = NTDLL.obj\
        initterm.obj\
        crt.obj\
        time.obj\
-       unknown.obj
+       unknown.obj\
+       arith64.obj
 
 
 TARGET = NTDLL
@@ -78,6 +79,7 @@ unknown.obj: .\unknown.cpp .\ntdll.h
 
 exception.obj: .\exception.cpp .\ntdll.h
 
+arith64.obj: .\arith64.asm
 
 clean:
         $(RM) *.obj *.lib *.dll *~ *.map *.pch
