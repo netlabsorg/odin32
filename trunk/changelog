@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2211 2002-07-08 12:56:05 sandervl Exp $ */
+/* $Id: changelog,v 1.2212 2002-07-11 15:18:53 sandervl Exp $ */
+
+ 2002-07-11: Platon Fomichev <platon@innotek.de>
+    - COMCTL32: o Listview: clear background for area without items (ownerdrawn)
 
  2002-07-08: Sander van Leeuwen <sandervl@innotek.de> 
     - USER32:   o Changed SetFocus fix; only disallow focus change for minimized
