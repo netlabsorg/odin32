@@ -1,4 +1,27 @@
-/* $Id: ChangeLog,v 1.2751 2005-01-15 22:16:13 sao2l02 Exp $ */
+/* $Id: ChangeLog,v 1.2752 2005-01-23 18:40:12 sao2l02 Exp $ */
+2005-01-23: Dietrich Teickner <dietrich_teickner@arcor   >
+    - kernel32: o src/kernel32/directory.cpp
+                  src/kernel32/kernel32.def,kernel32dbg.def
+                  src/kernel32/lang.cpp
+                  src/kernel32/mmapview.cpp
+                  src/kernel32/unicode/string.c
+    - advapi32: o src/advapi32/ADVAPI32.DEF
+                  src/advapi32/security.c
+    - shell32: o  src/shell32/shell32_main.c                  
+    - wininet: o  src/wininet/http.c
+    - NTDLL:   o  src/NTDLL/error.c
+                  src/NTDLL/nt.c
+                  src/NTDLL/sync.c
+    - include: o  include/win/ntstatus.h,sddl.h            
+                  include/win/cderr.h           
+                  include/win/dlgs.h            
+                  include/win/rpcnterr.h        
+                  include/win/thread.h         
+                  include/win/winnt.h 
+                  2 new headers from wine. Some reorders for more wine-like, for msi,
+                  new stups,functions for msi.
+                  Please, Test this for regression in others, msi will more work yet, not properly end.
+                  One (not complete) change for Acrobat 5.01.          
 2005-01-15: Dietrich Teickner <dietrich_teickner@arcor   > 
     - kernel32: o \src\kernel32\Fileio.cpp GetLongPathNameA/W, no copy into longPath,
                   if the Size zero. Crash in audacity.exe (longPath is also zero).
