@@ -1,4 +1,4 @@
-; $Id: mytkExecPgm.asm,v 1.5 2000-02-21 09:24:01 bird Exp $
+; $Id: mytkExecPgm.asm,v 1.6 2000-02-21 09:35:45 bird Exp $
 ;
 ; mytkExecPgm - tkExecPgm overload
 ;
@@ -198,6 +198,8 @@ mytkExecPgm_CalltkExecPgm_1:
     jb      mytkExecPgm_CalltkExecPgm_2
     pushad
     mov     ecx, [ebp+cchArgs]
+    mov     bx,[ebp+SegBuffer]
+    mov     ex, bx
     mov     bx, di                      ; ds:si -> arguments
     push    cs                          ; Problem calling far into the calltab segement.
     call    near ptr FLAT:f_FuBuff
