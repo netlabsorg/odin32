@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.134 2003-01-01 18:46:15 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.135 2003-01-02 15:21:58 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -731,7 +731,10 @@ void OSLibMapWINDOWPOStoSWP(struct tagWINDOWPOS *pwpos, PSWP pswp, PSWP pswpOld,
    if (  fuFlags & SWP_NOREDRAW_W  )  flags |= SWP_NOREDRAW;
    if (!(fuFlags & SWP_NOACTIVATE_W)) flags |= SWP_ACTIVATE;
    if (  fuFlags & SWP_SHOWWINDOW_W)  flags |= SWP_SHOW;
-   if (  fuFlags & SWP_HIDEWINDOW_W)  flags |= SWP_HIDE;
+   //SvL: Must also deactivate the window when hiding it or else focus won't
+   //     change. (NOTE: make sure this doesn't cause regressions (01-02-2003)
+   if (  fuFlags & SWP_HIDEWINDOW_W)  flags |= SWP_HIDE|SWP_DEACTIVATE;
+
    if (  fuFlags & SWP_NOSENDCHANGING_W) flags |= SWP_NOADJUST;
 
    if(flags & (SWP_MOVE | SWP_SIZE))
