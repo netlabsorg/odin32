@@ -1,4 +1,4 @@
-/* $Id: region.cpp,v 1.39 2004-02-12 12:44:13 sandervl Exp $ */
+/* $Id: region.cpp,v 1.40 2004-02-16 15:20:12 sandervl Exp $ */
 
 /*
  * GDI32 region code
@@ -645,8 +645,10 @@ INT WIN32API GdiCombineVisRgnClipRgn(pDCData pHps, HRGN hrgn, INT operation)
             checkOrigin(pHps);
             if(hrgnOldClip) GpiDestroyRegion(pHps->hps, hrgnOldClip);
         }
-        //else already NULL, so nothing to do.
-
+        else 
+        {// already NULL, so nothing to do.
+            GpiDestroyRegion(pHps->hps, hrgnNewClip);
+        }
         pHps->hrgnWin32Clip = hrgn;
         return NULLREGION_W;
     }
