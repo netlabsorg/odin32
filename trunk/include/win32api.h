@@ -1,4 +1,4 @@
-/* $Id: win32api.h,v 1.2 2000-03-04 19:51:13 sandervl Exp $ */
+/* $Id: win32api.h,v 1.3 2000-03-09 18:56:18 sandervl Exp $ */
 
 /*
  *
@@ -51,5 +51,7 @@ VOID  WIN32API ExitProcess(DWORD exitcode);
 
 BOOL  WIN32API PostMessageA(HWND,UINT,WPARAM,LPARAM);
 BOOL  WIN32API PostMessageW(HWND,UINT,WPARAM,LPARAM);
+
+DWORD WIN32API GetTickCount(void);
 
 #endif
