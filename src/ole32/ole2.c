@@ -402,6 +402,16 @@ HRESULT WINAPI RevokeDragDrop(
   if (dropTargetInfo==NULL)
     return DRAGDROP_E_NOTREGISTERED;
 
+#ifdef __WIN32OS2__
+  //just in case dragleave wasn't called...
+  if(dropTargetInfo->hDrop) {
+      GlobalFree(dropTargetInfo->hDrop);
+  }
+  if(dropTargetInfo->pDataObject) {
+      IDataObject_Release(dropTargetInfo->pDataObject);
+  }
+#endif
+
   /*
    * If it's in there, clean-up it's used memory and
    * references

@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.176 2002-06-02 19:34:28 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.177 2002-06-03 07:25:13 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -861,9 +861,12 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         if(pszFiles) {
             POINT point = {sxDrop, syDrop};
             if(DragDropFiles(win32wnd->getWindowHandle(), point, cItems, pszFiles, ulBytes) == FALSE) {
-                    rc = (MRFROM2SHORT (DOR_NEVERDROP, 0));
+                rc = (MRFROM2SHORT (DOR_NEVERDROP, 0));
             }
-            else    rc = (MRFROM2SHORT(DOR_DROP, DO_MOVE));
+            else {
+                rc = (MRFROM2SHORT(DOR_DROP, DO_MOVE));
+                win32wnd->setDragDropActive(FALSE);
+            }
             free(pszFiles);
         }
         else {
