@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.248 1999-09-26 22:25:14 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.249 1999-09-28 00:39:40 phaller Exp $ */
+
+ 99-09-28: Patrick Haller <phaller@gmx.net>
+	- KERNEL32: Add: debug info for missing API imports (WinImagePeLdr)
 
  99-09-25: Daniela Engert <dani@ngrt.de>
 	- USER32: SetTimer/KillTimer work now.

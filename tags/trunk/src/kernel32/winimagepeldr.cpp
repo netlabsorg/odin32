@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.2 1999-09-18 17:47:10 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.3 1999-09-28 00:37:39 phaller Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -59,7 +59,7 @@ extern ULONG flAllocMem;    /*Tue 03.03.1998: knut */
 //******************************************************************************
 //******************************************************************************
 Win32PeLdrImage::Win32PeLdrImage(char *szFileName) :
-    Win32ImageBase(-1), 
+    Win32ImageBase(-1),
     nrsections(0), imageSize(0),
     imageVirtBase(-1), realBaseAddress(0), imageVirtEnd(0),
     nrNameExports(0), nrOrdExports(0), nameexports(NULL), ordexports(NULL),
@@ -713,7 +713,12 @@ void Win32PeLdrImage::StoreImportByOrd(Win32DllBase *WinDll, ULONG ordinal, ULON
 
   import  = (ULONG *)(impaddr - oh.ImageBase + realBaseAddress);
   apiaddr = WinDll->getApi(ordinal);
-  if(apiaddr == 0) {
+  if(apiaddr == 0)
+  {
+    dprintf(("KERNEL32:Win32PeLdrImage - %s.%u not found\n",
+             WinDll->getName(),
+             ordinal));
+
     	fout << "--->>> NOT FOUND!";
     	*import = (ULONG)MissingApi;
   }
@@ -728,7 +733,12 @@ void Win32PeLdrImage::StoreImportByName(Win32DllBase *WinDll, char *impname, ULO
 
   import = (ULONG *)(impaddr - oh.ImageBase + realBaseAddress);
   apiaddr = WinDll->getApi(impname);
-  if(apiaddr == 0) {
+  if(apiaddr == 0)
+  {
+    dprintf(("KERNEL32:Win32PeLdrImage - %s.%s not found\n",
+             WinDll->getName(),
+             impname));
+
     	fout << "--->>> NOT FOUND!";
     	*import = (ULONG)MissingApi;
   }
@@ -1007,7 +1017,7 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
     WinDll = (Win32PeLdrDll *)Win32DllBase::findModule(pszCurModule);
     if(WinDll == NULL)
     {  //not found, so load it
-	if(isPEImage(pszCurModule) == FALSE) 
+	if(isPEImage(pszCurModule) == FALSE)
 	{//LX image, so let OS/2 do all the work for us
 		APIRET rc;
   		char   szModuleFailure[CCHMAXPATH] = "";
