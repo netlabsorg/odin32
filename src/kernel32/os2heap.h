@@ -1,4 +1,4 @@
-/* $Id: os2heap.h,v 1.5 2001-07-06 13:47:19 sandervl Exp $ */
+/* $Id: os2heap.h,v 1.6 2001-07-17 12:10:22 sandervl Exp $ */
 
 /*
  *
@@ -15,6 +15,7 @@
 #define __OS2HEAP_H__
 
 #include "vmutex.h"
+#include <umalloc.h>
 
 #define MAGIC_NR_HEAP  0x87654321
 //must be a multiple of 8 bytes (alignment)
@@ -59,6 +60,9 @@ protected:
     HANDLE    hPrimaryHeap;
     BOOL      fInitialized;
     HEAPELEM *heapelem;
+
+    char     *pInitialHeapMem;
+    Heap_t    uheap;
 
           OS2Heap *next;
    static OS2Heap *heap;
