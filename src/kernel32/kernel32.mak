@@ -1,4 +1,4 @@
-# $Id: kernel32.mak,v 1.30 2002-05-10 14:55:12 sandervl Exp $
+# $Id: kernel32.mak,v 1.31 2002-06-06 11:31:12 sandervl Exp $
 
 #
 # Odin32 API
@@ -138,6 +138,7 @@ $(OBJDIR)\queue.obj \
 $(OBJDIR)\hmthread.obj \
 $(OBJDIR)\hmnpipe.obj \
 $(OBJDIR)\hmdisk.obj \
+$(OBJDIR)\oslibcdio.obj \
 $(OBJDIR)\version.obj \
 !ifdef DEBUG
 $(OBJDIR)\exceptstackdump.obj \
