@@ -1,4 +1,4 @@
-/* $Id: win32class.h,v 1.13 2001-02-02 19:04:02 sandervl Exp $ */
+/* $Id: win32class.h,v 1.14 2001-02-22 10:37:30 sandervl Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -41,7 +41,7 @@ public:
 
        WNDPROC  getWindowProc()         { return windowProc; };
          LPSTR  getMenuNameA()          { return menuNameA; };
-         DWORD  getExtraWndWords()      { return nrExtraWindowWords; };
+         DWORD  getExtraWndBytes()      { return nrExtraWindowBytes; };
 
          HICON  getIcon()               { return hIcon; };
          HICON  getIconSm()             { return hIconSm; };
@@ -76,8 +76,8 @@ private:
 
  //Standard class words/longs
  ULONG          windowStyle;            //GCL_STYLE     * must be offset 14h *
- ULONG          nrExtraClassWords;      //GCL_CBCLSEXTRA
- ULONG          nrExtraWindowWords;     //GCL_CBWNDEXTRA
+ ULONG          nrExtraClassBytes;      //GCL_CBCLSEXTRA
+ ULONG          nrExtraWindowBytes;     //GCL_CBWNDEXTRA
  HBRUSH         backgroundBrush;        //GCL_HBRBACKGROUND
  HCURSOR        hCursor;                //GCL_HCURSOR
  HICON          hIcon;                  //GCL_HICON
@@ -92,8 +92,8 @@ private:
  HICON          hIconSm;                //GCW_HICONSM
  HDC            hdcClass;
 
- //User data class words/longs
- ULONG         *userClassLong;
+ //User data class bytse
+ char          *userClassBytes;
  ULONG          processId;
 
  //nr of windows created with this class

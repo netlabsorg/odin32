@@ -1,4 +1,4 @@
-/* $Id: windowclass.cpp,v 1.15 2001-02-02 19:04:03 sandervl Exp $ */
+/* $Id: windowclass.cpp,v 1.16 2001-02-22 10:37:31 sandervl Exp $ */
 /*
  * Win32 Window Class Code for OS/2
  *
@@ -362,10 +362,9 @@ LONG WIN32API SetClassLongA(HWND hwnd, int nIndex, LONG lNewVal)
 {
  Win32BaseWindow *wnd;
 
-    dprintf(("USER32: SetClassLongA %x %d %x", hwnd, nIndex, lNewVal));
     wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!wnd) {
-        dprintf(("SetClassLongA wnd == NULL"));
+        dprintf(("SetClassLongA %x %d %x wnd == NULL", hwnd, nIndex, lNewVal));
         return(0);
     }
     return (wnd->getClass())->setClassLongA(nIndex, lNewVal);
@@ -376,10 +375,9 @@ LONG WIN32API SetClassLongW(HWND hwnd, int nIndex, LONG lNewVal)
 {
  Win32BaseWindow *wnd;
 
-    dprintf(("USER32: SetClassLongW\n"));
     wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!wnd) {
-        dprintf(("SetClassLongW wnd == NULL"));
+        dprintf(("SetClassLongW %x %d %x wnd == NULL", hwnd, nIndex, lNewVal));
         return(0);
     }
     return (wnd->getClass())->setClassLongW(nIndex, lNewVal);
@@ -390,10 +388,10 @@ WORD WIN32API SetClassWord(HWND hwnd, int nIndex, WORD  wNewVal)
 {
  Win32BaseWindow *wnd;
 
-    dprintf(("USER32: SetClassWordA\n"));
+    dprintf(("USER32: SetClassWord %x %d %x", hwnd, nIndex, (ULONG)wNewVal));
     wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!wnd) {
-        dprintf(("SetClassWordA wnd == NULL"));
+        dprintf(("SetClassWordA %x %d %x wnd == NULL", hwnd, nIndex, wNewVal));
         return(0);
     }
     return (wnd->getClass())->setClassWord(nIndex, wNewVal);
@@ -403,14 +401,16 @@ WORD WIN32API SetClassWord(HWND hwnd, int nIndex, WORD  wNewVal)
 WORD WIN32API GetClassWord(HWND hwnd, int nIndex)
 {
  Win32BaseWindow *wnd;
+ WORD             ret;
 
-    dprintf(("USER32: GetClassWordA\n"));
     wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!wnd) {
-        dprintf(("GetClassWordA wnd == NULL"));
+        dprintf(("GetClassWordA %x %d wnd == NULL", hwnd, nIndex));
         return(0);
     }
-    return (wnd->getClass())->getClassWord(nIndex);
+    ret = (wnd->getClass())->getClassWord(nIndex);
+    dprintf(("USER32: GetClassWord %x %d returned %x", hwnd, nIndex, (ULONG)ret));
+    return ret;
 }
 //******************************************************************************
 //******************************************************************************
