@@ -1,4 +1,4 @@
-/* $Id: windllpeldr.cpp,v 1.3 1999-11-24 19:31:23 sandervl Exp $ */
+/* $Id: windllpeldr.cpp,v 1.4 1999-11-26 00:05:19 sandervl Exp $ */
 
 /*
  * Win32 PE loader Dll class
@@ -77,62 +77,6 @@ BOOL Win32PeLdrDll::init(ULONG reservedMem)
   fRet = Win32PeLdrImage::init(0);
   dllEntryPoint = (WIN32DLLENTRY)entryPoint;
   return fRet;
-}
-//******************************************************************************
-//******************************************************************************
-ULONG Win32PeLdrDll::getApi(char *name)
-{
-  ULONG       apiaddr, i, apilen;
-  char       *apiname;
-  char        tmp[4];
-  NameExport *curexport;
-  ULONG       ulAPIOrdinal;                      /* api requested by ordinal */
-  
-  apilen = strlen(name) + 1;
-  if(apilen < 4) 
-  {
-	*(ULONG *)tmp = 0;
-	strcpy(tmp, name);
-	apiname = tmp;
-  }
-  else	apiname = name;
-
-  curexport = nameexports;
-  for(i=0; i<nrNameExports; i++) 
-  {
-    if(apilen == curexport->nlength && 
-       *(ULONG *)curexport->name == *(ULONG *)name) 
-    {
-      	if(strcmp(curexport->name, name) == 0) 
-        	return(curexport->virtaddr);
-    }
-    curexport = (NameExport *)((ULONG)curexport->name + curexport->nlength);
-  }
-  return(0);
-}
-//******************************************************************************
-//******************************************************************************
-ULONG Win32PeLdrDll::getApi(int ordinal)
-{
- ULONG       apiaddr, i;
- OrdExport  *curexport;
- NameExport *nexport;
-
-  curexport = ordexports;
-  for(i=0;i<nrOrdExports;i++) {
-	if(curexport->ordinal == ordinal)
-		return(curexport->virtaddr);
-	curexport++;
-  }
-  //Name exports also contain an ordinal, so check this 
-  nexport = nameexports;
-  for(i=0;i<nrNameExports;i++) {
-	if(nexport->ordinal == ordinal)
-		return(nexport->virtaddr);
-
-	nexport = (NameExport *)((ULONG)nexport->name + nexport->nlength);
-  }
-  return(0);
 }
 //******************************************************************************
 //******************************************************************************

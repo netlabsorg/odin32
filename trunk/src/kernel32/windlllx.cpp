@@ -1,4 +1,4 @@
-/* $Id: windlllx.cpp,v 1.4 1999-10-23 23:02:17 sandervl Exp $ */
+/* $Id: windlllx.cpp,v 1.5 1999-11-26 00:05:19 sandervl Exp $ */
 
 /*
  * Win32 LX Dll class (compiled in OS/2 using Odin32 api)
@@ -110,49 +110,6 @@ ULONG Win32LxDll::Release()
 	DosFreeModule(hinstance);
   }
   return(ret);
-}
-//******************************************************************************
-//******************************************************************************
-ULONG Win32LxDll::getApi(char *name)
-{
-  APIRET      rc;
-  ULONG       apiaddr;
-
-  rc = DosQueryProcAddr(hinstance, 0, name, (PFN *)&apiaddr);
-  if(rc)  
-  {
-	if(rc == ERROR_INVALID_HANDLE) 
-        {//handle invalid for some silly reason, so load module again (initterm entrypoint not called twice)
-		char szErrName[CCHMAXPATH];
-
-		rc = DosLoadModule(szErrName, sizeof(szErrName), szFileName, &hinstance);
-		if(!rc)
-			rc = DosQueryProcAddr(hinstance, 0, name, (PFN *)&apiaddr);
-	}
-	if(rc) 	return(0);
-  }
-  return(apiaddr);
-}
-//******************************************************************************
-//******************************************************************************
-ULONG Win32LxDll::getApi(int ordinal)
-{
- APIRET      rc;
- ULONG       apiaddr;
-
-  rc = DosQueryProcAddr(hinstance, ordinal, NULL, (PFN *)&apiaddr);
-  if(rc) {
-	if(rc == ERROR_INVALID_HANDLE) 
-        {//handle invalid for some silly reason, so load module again (initterm entrypoint not called twice)
-		char szErrName[CCHMAXPATH];
-
-		rc = DosLoadModule(szErrName, sizeof(szErrName), szFileName, &hinstance);
-		if(!rc)
-			rc = DosQueryProcAddr(hinstance, ordinal, NULL, (PFN *)&apiaddr);
-	}
-	if(rc) 	return(0);
-  }
-  return(apiaddr);
 }
 //******************************************************************************
 //******************************************************************************
