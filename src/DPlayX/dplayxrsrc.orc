@@ -1,4 +1,4 @@
-/* $Id: dplayxrsrc.orc,v 1.1 2000-03-06 23:38:14 bird Exp $ */
+/* $Id: dplayxrsrc.orc,v 1.2 2000-08-18 21:38:57 sandervl Exp $ */
 
 #include "winuser.h"
 #include "odinrsrc.h"
@@ -10,8 +10,8 @@
 //
 
 1 VERSIONINFO
- FILEVERSION ODIN_FILEVERSION
- PRODUCTVERSION ODIN_PRODUCTVERSION
+ FILEVERSION 0x04, 0x06, 0x0565, 0x0258
+ PRODUCTVERSION 0x04, 0x06, 0x0565, 0x0258
  FILEFLAGSMASK 0x3fL
  FILEFLAGS 0xaL
  FILEOS 0x10001L
