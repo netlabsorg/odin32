@@ -1,6 +1,6 @@
-; $Id: mini.asm,v 1.1.2.11 2001-08-16 15:14:40 bird Exp $
+; $Id: mini.asm,v 1.1.2.12 2001-08-20 18:47:53 bird Exp $
 ;
-; Haveing great fun making small executables...
+; Having great fun making small executables...
 ;
 ; Copyright (c) 2001 knut st. osmundsen (kosmunds@csc.com)
 ;
@@ -14,6 +14,13 @@ ifdef NORMAL  ;
 ;
 ; High-octane stock.
 ;
+; Build this in the Odin32 VAC3 environment to get a 273 bytes result.
+; Exehdr, alp and ilink is required.
+;       nmake -f mini.mak NORMAL=1 -a
+;
+; Build this in the Odin32 Watcom environment to get a 274 bytes result.
+; Exehdr, alp and wlink is required.
+;       nmake -f mini.mak NORMAL=1 -a
 ;
 ;
     .386
@@ -74,11 +81,14 @@ endif
 
 
 ifndef NORMAL
+
 ;
 ;
 ;
-; Tiny edition - everything but the code is hardcoded!
+; Tiny edition - Custom category - everything but the code is hardcoded!
 ;
+; Build it in an Odin32 VACxx/Watcom environment. ALP and link.exe is required.
+;       nmake -f mini.mak
 ;
 ;
     .386

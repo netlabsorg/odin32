@@ -1,4 +1,4 @@
-# $Id: mini.mak,v 1.1.2.7 2001-08-16 15:14:41 bird Exp $
+# $Id: mini.mak,v 1.1.2.8 2001-08-20 18:47:54 bird Exp $
 
 #
 # Odin32 API
@@ -67,24 +67,25 @@ DEFFILE = $(TARGET).def
 TARGET  = mini
 
 
-#
-# Main rule
-#
 !ifdef NORMAL
+#
+# Main rule for the high octane category.
+#
 !if 1
 $(OBJDIR)\$(TARGET).exe: $(OBJS)  $(DEFFILE) $(OBJDIR)\$(TARGET).lrf
-!ifdef WATCOM
+!ifdef WATCOM # 274 bytes
     wlink system os2v2 file {$(OBJS)} name $(OBJDIR)\.exe \
     import vprintf LIBCN.150 \
 #    import DosPutMessage MSG.5   \
         option offset=0x0000 option alignment=1 option stack=4060
+# skip this step if it aint allowed, but then LXLITE has to get $(OBJDIR)\.exe as input. :-)
     mv $(OBJDIR)\.exe $@
 !else
 !if 0
     link386 /ALIGNMENT:1 /NONULLSDOSSEG /NOSECTORALIGNCODE /BASE:0x10000 /PACKCODE /PACKDATA \
         $(OBJS), $(OBJDIR)\$(TARGET).exe, $(OBJDIR)\$(TARGET).map, os2386.lib, mini.def;
 !else
-!ifndef VAC36
+!ifndef VAC36 # 273 bytes
     -12 ilink /NOFREE /FORCE /ALIGNMENT:1 /Map /BASE:0x10000 /PACKCODE /PACKDATA /NOEXEPACK \
         $(OBJS), $(OBJDIR)\$(TARGET).exe, $(OBJDIR)\$(TARGET).map, os2386.lib, mini.def;
 !else
@@ -106,12 +107,20 @@ $(OBJDIR)\$(TARGET).exe: $(OBJS)  $(DEFFILE) $(OBJDIR)\$(TARGET).lrf
 
 !else
 
-$(OBJDIR)\$(TARGET).exe: $(OBJS)  $(DEFFILE) $(OBJDIR)\$(TARGET).lrf
+#
+# Builds the custom 196 bytes mini.exe.
+#
+$(OBJDIR)\$(TARGET).exe: $(OBJS)  $(DEFFILE) myexe2bin.exe
     link $(OBJS), $(OBJDIR)\$(TARGET)ne.exe, $(OBJDIR)\$(TARGET).map;
     myexe2bin $(OBJDIR)\$(TARGET)ne.exe $@ 512
 
-#    exe2bin $(OBJDIR)\$(TARGET)ne.exe $@
-
+# help tool, custom exe2bin.
+myexe2bin.exe myexe2bin: myexe2bin.c
+!ifndef WATCOM
+    icc myexe2bin.c
+!else
+    wcl386 myexe2bin.c
+!endif
 !endif
 
 

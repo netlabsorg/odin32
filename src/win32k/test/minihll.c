@@ -1,4 +1,4 @@
-/* $Id: minihll.c,v 1.1.2.4 2001-08-16 15:57:01 bird Exp $
+/* $Id: minihll.c,v 1.1.2.5 2001-08-20 18:47:54 bird Exp $
  *
  * Minimal 'High Level Language' executable.
  *
@@ -6,6 +6,21 @@
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
+ *
+ * Build this in a WATCOM Odin32 environment using wmake.
+ * wcc386, and wlink is required.
+ *      SET DEBUG=
+ *      mkdir bin
+ *      mkdir bin\release.wac36
+ *
+ *  For 276 bytes result which uses LIBCN:
+ *      wmake -f minihll.mak -u -a LIBC=1
+
+ *  For 286 bytes result which uses MSG.DosPutMessage:
+ *      wmake -f minihll.mak -u -a
+ *
+ * Any attempt to compile in a VACxx environment will produce a exefile with a
+ * bad stack. Causing SYS0189.
  */
 
 /*
