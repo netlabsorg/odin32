@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.76 2000-04-14 22:35:29 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.77 2000-04-16 06:49:07 bird Exp $ */
 
 /*
  * Win32 process functions
@@ -11,6 +11,12 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+
+
+
+/*******************************************************************************
+*   Header Files                                                               *
+*******************************************************************************/
 #include <odin.h>
 #include <odinwrap.h>
 #include <os2win.h>
@@ -31,6 +37,7 @@
 #include <builtin.h>
 #endif
 
+#include "odin32validate.h"
 #include "exceptutil.h"
 #include "oslibmisc.h"
 #include "oslibdebug.h"
@@ -47,8 +54,9 @@
 ODINDEBUGCHANNEL(KERNEL32-WPROCESS)
 
 
-//******************************************************************************
-//******************************************************************************
+/******************************************************************************
+*   Global Variables                                                          *
+******************************************************************************/
 BOOL      fFreeLibrary = FALSE;
 BOOL      fIsOS2Image = FALSE;  //TRUE  -> Odin32 OS/2 application (not converted!)
                             //FALSE -> otherwise
@@ -60,6 +68,9 @@ DWORD    *TIBFlatPtr    = 0;
 //list of thread database structures
 static THDB     *threadList = 0;
 static VMutex    threadListMutex;
+
+
+
 //******************************************************************************
 //******************************************************************************
 TEB *WIN32API GetThreadTEB()
@@ -353,8 +364,8 @@ USHORT WIN32API SetWin32TIB()
 //******************************************************************************
 VOID WIN32API ExitProcess(DWORD exitcode)
 {
-    dprintf(("KERNEL32:  ExitProcess %d\n", exitcode));
-    dprintf(("KERNEL32:  ExitProcess FS = %x\n", GetFS()));
+    dprintf(("KERNEL32: ExitProcess %d\n", exitcode));
+    dprintf(("KERNEL32: ExitProcess FS = %x\n", GetFS()));
 
     SetOS2ExceptionChain(-1);
 
@@ -413,90 +424,6 @@ BOOL WIN32API FreeLibrary(HINSTANCE hinstance)
     return(TRUE);
 }
 /******************************************************************************/
-/******************************************************************************/
-static HINSTANCE iLoadLibraryA(LPCTSTR lpszLibFile, DWORD dwFlags)
-{
- char        modname[CCHMAXPATH];
- HINSTANCE   hDll;
- Win32DllBase *module;
-
-    module = Win32DllBase::findModule((LPSTR)lpszLibFile);
-    if(module) {
-        if(module->isLxDll() && !module->isLoaded() && fPeLoader) {
-            //can happen with i.e. wininet
-            //wininet depends on wsock32; when the app loads wsock32 afterwards
-            //with LoadLibrary or as a child of another dll, we need to make
-            //sure it's loaded once with DosLoadModule
-            module->setLoadLibrary();
-        }
-        module->incDynamicLib();
-        module->AddRef();
-        dprintf(("iLoadLibrary: found %s -> handle %x", lpszLibFile, module->getInstanceHandle()));
-        return module->getInstanceHandle();
-    }
-
-    strcpy(modname, lpszLibFile);
-    strupr(modname);
-    //rename dll if necessary (i.e. OLE32 -> OLE32OS2)
-    Win32DllBase::renameDll(modname);
-
-    hDll = O32_LoadLibrary(modname);
-    dprintf(("KERNEL32:  iLoadLibraryA %s returned %X (%d)\n",
-           lpszLibFile,
-           hDll,
-           GetLastError()));
-    if(hDll)
-    {
-        module = Win32DllBase::findModule(hDll);
-        if(module && module->isLxDll() && fPeLoader) {
-            module->setLoadLibrary();
-            module->AddRef();
-        }
-        if(module)
-            module->incDynamicLib();
-        //system dll, converted dll or win32k took care of it
-        return hDll;
-    }
-
-    if(!strstr(modname, ".")) {
-        strcat(modname,".DLL");
-    }
-
-    if(Win32ImageBase::isPEImage((char *)modname))
-    {
-        module = Win32DllBase::findModule((char *)modname);
-        if(module) {//don't load it again
-        module->incDynamicLib();
-            module->AddRef();
-            return module->getInstanceHandle();
-        }
-
-        Win32PeLdrDll *peldrDll = new Win32PeLdrDll((char *)modname);
-        if(peldrDll == NULL)
-            return(0);
-
-        peldrDll->init(0);
-        if(peldrDll->getError() != NO_ERROR) {
-            dprintf(("LoadLibary %s failed (::init)\n", lpszLibFile));
-            delete(peldrDll);
-            return(0);
-        }
-        if(dwFlags & DONT_RESOLVE_DLL_REFERENCES) {
-            peldrDll->setNoEntryCalls();
-        }
-        peldrDll->incDynamicLib();
-        peldrDll->AddRef();
-
-        if(peldrDll->attachProcess() == FALSE) {
-            dprintf(("LoadLibary %s failed (::attachProcess)\n", lpszLibFile));
-            delete(peldrDll);
-            return(0);
-        }
-        return peldrDll->getInstanceHandle();
-    }
-    else  return(0);
-}
-//******************************************************************************
 //******************************************************************************
 HINSTANCE16 WIN32API LoadLibrary16(LPCTSTR lpszLibFile)
 {
@@ -517,85 +444,556 @@ FARPROC WIN32API GetProcAddress16(HMODULE hModule, LPCSTR lpszProc)
     return 0;
 }
 //******************************************************************************
-//******************************************************************************
+
+/**
+ * LoadLibraryA can be used to map a DLL module into the calling process's
+ * addressspace. It returns a handle that can be used with GetProcAddress to
+ * get addresses of exported entry points (functions and variables).
+ *
+ * LoadLibraryA can also be used to map executable (.exe) modules into the
+ * address to access resources in the module. However, LoadLibrary can't be
+ * used to run an executable (.exe) module.
+ *
+ * @returns   Handle to the library which was loaded.
+ * @param     lpszLibFile   Pointer to zero ASCII string giving the name of the
+ *                  executable image (either a Dll or an Exe) which is to be
+ *                  loaded.
+ *
+ *                  If no extention is specified the default .DLL extention is
+ *                  appended to the name. End the filename with an '.' if the
+ *                  file does not have an extention (and don't want the .DLL
+ *                  appended).
+ *
+ *                  If no path is specified, this API will use the Odin32
+ *                  standard search strategy to find the file. This strategy
+ *                  is described in the method Win32ImageBase::findDLL.
+ *
+ *                  This API likes to have backslashes (\), but will probably
+ *                  accept forward slashes too. Win32 SDK docs says that it
+ *                  should not contain forward slashes.
+ *
+ *                  Win32 SDK docs adds:
+ *                      "The name specified is the file name of the module and
+ *                       is not related to the name stored in the library module
+ *                       itself, as specified by the LIBRARY keyword in the
+ *                       module-definition (.def) file."
+ *
+ * @sketch    Call LoadLibraryExA with flags set to 0.
+ * @status    Odin32 Completely Implemented.
+ * @author    Sander van Leeuwen (sandervl@xs4all.nl)
+ *            knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @remark    Forwards to LoadLibraryExA.
+ */
 HINSTANCE WIN32API LoadLibraryA(LPCTSTR lpszLibFile)
 {
-  HINSTANCE hDll;
+    HINSTANCE hDll;
 
-    dprintf(("KERNEL32:  LoadLibraryA(%s)\n",
-           lpszLibFile));
-    dprintf(("KERNEL32: LoadLibrary %x FS = %x\n", GetCurrentThreadId(), GetFS()));
+    dprintf(("KERNEL32: LoadLibraryA(%s) --> LoadLibraryExA(lpszLibFile, 0, 0)",
+             lpszLibFile));
+    hDll = LoadLibraryExA(lpszLibFile, 0, 0);
+    dprintf(("KERNEL32: LoadLibraryA(%s) returns 0x%x",
+             lpszLibFile, hDll));
+    return hDll;
+}
 
-    hDll = iLoadLibraryA(lpszLibFile, 0);
-    if (hDll == 0)
+
+/**
+ * LoadLibraryW can be used to map a DLL module into the calling process's
+ * addressspace. It returns a handle that can be used with GetProcAddress to
+ * get addresses of exported entry points (functions and variables).
+ *
+ * LoadLibraryW can also be used to map executable (.exe) modules into the
+ * address to access resources in the module. However, LoadLibrary can't be
+ * used to run an executable (.exe) module.
+ *
+ * @returns   Handle to the library which was loaded.
+ * @param     lpszLibFile   Pointer to Unicode string giving the name of
+ *                  the executable image (either a Dll or an Exe) which is to
+ *                  be loaded.
+ *
+ *                  If no extention is specified the default .DLL extention is
+ *                  appended to the name. End the filename with an '.' if the
+ *                  file does not have an extention (and don't want the .DLL
+ *                  appended).
+ *
+ *                  If no path is specified, this API will use the Odin32
+ *                  standard search strategy to find the file. This strategy
+ *                  is described in the method Win32ImageBase::findDLL.
+ *
+ *                  This API likes to have backslashes (\), but will probably
+ *                  accept forward slashes too. Win32 SDK docs says that it
+ *                  should not contain forward slashes.
+ *
+ *                  Win32 SDK docs adds:
+ *                      "The name specified is the file name of the module and
+ *                       is not related to the name stored in the library module
+ *                       itself, as specified by the LIBRARY keyword in the
+ *                       module-definition (.def) file."
+ *
+ * @sketch    Convert Unicode name to ascii.
+ *            Call LoadLibraryExA with flags set to 0.
+ *            free ascii string.
+ * @status    Odin32 Completely Implemented.
+ * @author    Sander van Leeuwen (sandervl@xs4all.nl)
+ *            knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @remark    Forwards to LoadLibraryExA.
+ */
+HINSTANCE WIN32API LoadLibraryW(LPCWSTR lpszLibFile)
+{
+    char *      pszAsciiLibFile;
+    HINSTANCE   hDll;
+
+    pszAsciiLibFile = UnicodeToAsciiString(lpszLibFile);
+    dprintf(("KERNEL32: LoadLibraryW(%s) --> LoadLibraryExA(lpszLibFile, 0, 0)",
+             pszAsciiLibFile));
+    hDll = LoadLibraryExA(pszAsciiLibFile, NULL, 0);
+    dprintf(("KERNEL32: LoadLibraryW(%s) returns 0x%x",
+             pszAsciiLibFile, hDll));
+    free(pszAsciiLibFile);
+
+    return hDll;
+}
+
+
+/**
+ * LoadLibraryExA can be used to map a DLL module into the calling process's
+ * addressspace. It returns a handle that can be used with GetProcAddress to
+ * get addresses of exported entry points (functions and variables).
+ *
+ * LoadLibraryExA can also be used to map executable (.exe) modules into the
+ * address to access resources in the module. However, LoadLibrary can't be
+ * used to run an executable (.exe) module.
+ *
+ * @returns   Handle to the library which was loaded.
+ * @param     lpszLibFile   Pointer to Unicode string giving the name of
+ *                  the executable image (either a Dll or an Exe) which is to
+ *                  be loaded.
+ *
+ *                  If no extention is specified the default .DLL extention is
+ *                  appended to the name. End the filename with an '.' if the
+ *                  file does not have an extention (and don't want the .DLL
+ *                  appended).
+ *
+ *                  If no path is specified, this API will use the Odin32
+ *                  standard search strategy to find the file. This strategy
+ *                  is described in the method Win32ImageBase::findDLL.
+ *                  This may be alterned by the LOAD_WITH_ALTERED_SEARCH_PATH
+ *                  flag, see below.
+ *
+ *                  This API likes to have backslashes (\), but will probably
+ *                  accept forward slashes too. Win32 SDK docs says that it
+ *                  should not contain forward slashes.
+ *
+ *                  Win32 SDK docs adds:
+ *                      "The name specified is the file name of the module and
+ *                       is not related to the name stored in the library module
+ *                       itself, as specified by the LIBRARY keyword in the
+ *                       module-definition (.def) file."
+ *
+ * @param     hFile     Reserved. Must be 0.
+ *
+ * @param     dwFlags   Flags which specifies the taken when loading the module.
+ *                  The value 0 makes it identical to LoadLibraryA/W.
+ *
+ *                  Flags:
+ *
+ *                  DONT_RESOLVE_DLL_REFERENCES
+ *                      (WinNT/2K feature): Don't load imported modules and
+ *                      hence don't resolve imported symbols.
+ *                      DllMain isn't called either. (Which is obvious since
+ *                      it may use one of the importe symbols.)
+ *
+ *                      On the other hand, if this flag is NOT set, the system
+ *                      load imported modules, resolves imported symbols, calls
+ *                      DllMain for process and thread init and term (if wished
+ *                      by the module).
+ *
+ *                  partially implemented yet - imports are resolved it seems.
+ *
+ *                  LOAD_LIBRARY_AS_DATAFILE
+ *                      If this flag is set, the module is mapped into the
+ *                      address space but is not prepared for execution. Though
+ *                      it's preparted for resource API. Hence, you'll use this
+ *                      flag when you want to load a DLL for extracting
+ *                      messages or resources from it.
+ *
+ *                      The resulting handle can be used with any Odin32 API
+ *                      which operates on resources.
+ *                      (WinNt/2k supports all resource APIs while Win9x don't
+ *                      support the specialized resource APIs: LoadBitmap,
+ *                      LoadCursor, LoadIcon, LoadImage, LoadMenu.)
+ *
+ *                  not implemented yet.
+ *
+ *                  LOAD_WITH_ALTERED_SEARCH_PATH
+ *                      If this flag is set and lpszLibFile specifies a path
+ *                      we'll use an alternative file search strategy to find
+ *                      imported modules. This stratgy is simply to use the
+ *                      path of the module being loaded instead of the path
+ *                      of the executable module as the first location
+ *                      to search for imported modules.
+ *
+ *                      If this flag is clear, the standard Odin32 standard
+ *                      search strategy. See Win32ImageBase::findDll for
+ *                      further information.
+ *
+ *                  not implemented yet.
+ *
+ * @status    Open32 Partially Implemented.
+ * @author    Sander van Leeuwen (sandervl@xs4all.nl)
+ *            knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @remark    Forwards to LoadLibraryExA.
+ */
+HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFlags)
+{
+    HINSTANCE       hDll;
+    Win32DllBase *  pModule;
+    char            szModname[CCHMAXPATH];
+    BOOL            fPath;              /* Flags which is set if the    */
+                                        /* lpszLibFile contains a path. */
+    BOOL            fPE;                /* isPEImage return value. */
+
+    /** @sketch
+     * Some parameter validations is probably useful.
+     */
+    if (!VALID_PSZ(lpszLibFile))
     {
-        char * pszName;
+        dprintf(("KERNEL32: LoadLibraryExA(0x%x, 0x%x, 0x%x): invalid pointer lpszLibFile = 0x%x\n",
+                 lpszLibFile, hFile, dwFlags, lpszLibFile));
+        SetLastError(ERROR_INVALID_PARAMETER); //or maybe ERROR_ACCESS_DENIED is more appropriate?
+        return NULL;
+    }
+    if (!VALID_PSZMAXSIZE(lpszLibFile, CCHMAXPATH))
+    {
+        dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): lpszLibFile string too long, %d\n",
+                 lpszLibFile, hFile, dwFlags, strlen(lpszLibFile)));
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return NULL;
+    }
+    if ((dwFlags & ~(DONT_RESOLVE_DLL_REFERENCES | LOAD_WITH_ALTERED_SEARCH_PATH | LOAD_LIBRARY_AS_DATAFILE)) != 0)
+    {
+        dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): dwFlags have invalid or unsupported flags\n",
+                 lpszLibFile, hFile, dwFlags));
+        SetLastError(ERROR_INVALID_PARAMETER);
+    }
 
-        // remove path from the image name
-        pszName = strrchr((char *)lpszLibFile,
-                      '\\');
-        if (pszName != NULL)
+
+    /** @sketch
+     *  First we'll see if the module is allready loaded.
+     *  IF allready loaded THEN
+     *      IF it's a LX dll which isn't loaded and we're using the PeLoader THEN
+     *          Set Load library.
+     *      Endif
+     *      Inc dynamic reference count.
+     *      Inc reference count.
+     *      RETURN instance handle.
+     *  Endif
+     */
+    pModule = Win32DllBase::findModule((LPSTR)lpszLibFile);
+    if (pModule)
+    {
+        if (pModule->isLxDll() && !pModule->isLoaded() && fPeLoader)
         {
-            pszName++;                // skip backslash
-
-            // now try again without fully qualified path
-            hDll = iLoadLibraryA(pszName, 0);
+            //can happen with i.e. wininet
+            //wininet depends on wsock32; when the app loads wsock32 afterwards
+            //with LoadLibrary or as a child of another dll, we need to make
+            //sure it's loaded once with DosLoadModule
+            pModule->setLoadLibrary();
         }
+        pModule->incDynamicLib();
+        pModule->AddRef();
+        dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): returns 0x%x. Dll found %s",
+                 lpszLibFile, hFile, dwFlags, pModule->getInstanceHandle(), pModule->getFullPath()));
+        return pModule->getInstanceHandle();
+    }
+
+
+    /** @sketch
+     *  Test if lpszLibFile has a path or not.
+     *  Copy the lpszLibFile to szModname, rename the dll and uppercase the name.
+     *  IF it hasn't a path THEN
+     *      Issue a findDll to find the dll/executable to be loaded.
+     *      IF the Dll isn't found THEN
+     *          Set last error and RETURN.
+     *      Endif.
+     *  Endif
+     */
+    fPath = strchr(lpszLibFile, '\\') || strchr(lpszLibFile, '/');
+    strcpy(szModname, lpszLibFile);
+    Win32DllBase::renameDll(szModname);
+    strupr(szModname);
+
+    if (!fPath)
+    {
+        char    szModName2[CCHMAXPATH];
+        strcpy(szModName2, szModname);
+        if (!Win32ImageBase::findDll(szModName2, szModname, sizeof(szModname)))
+        {
+            dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): module wasn't found. returns NULL",
+                     lpszLibFile, hFile, dwFlags));
+            SetLastError(ERROR_FILE_NOT_FOUND);
+            return NULL;
+        }
+    }
+
+
+    /** @sketch
+     *  IF dwFlags == 0 THEN
+     *      Try load the executable using LoadLibrary
+     *      IF successfully loaded THEN
+     *          IF LX dll and is using the PE Loader THEN
+     *              Set Load library.
+     *              Inc reference count.
+     *          Endif
+     *          Inc dynamic reference count.
+     *          RETURN successfully.
+     *      Endif
+     *  Endif
+     */
+    if (dwFlags == 0)
+    {
+        hDll = O32_LoadLibrary(szModname);
+        if (hDll)
+        {
+            /* OS/2 dll, system dll, converted dll or win32k took care of it.*/
+            pModule = Win32DllBase::findModule(hDll);
+            if (pModule)
+            {
+                if (pModule->isLxDll() && fPeLoader)
+                {
+                    pModule->setLoadLibrary();
+                    pModule->AddRef();
+                }
+                pModule->incDynamicLib();
+            }
+            dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): returns 0x%x. Loaded %s using O32_LoadLibrary.",
+                     lpszLibFile, hFile, dwFlags, hDll, szModname));
+            return hDll;
+        }
+        dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): O32_LoadLibrary(%s) failed. LastError=%d",
+                 lpszLibFile, hFile, dwFlags, szModname, GetLastError()));
+    }
+    else
+        hDll = NULL;
+
+
+    /** @sketch
+     *  If PE image THEN
+     *      Check again(!) if the module is allready loaded.
+     *      IF Allready loaded THEN
+     *          Inc dynamic ref count.
+     *          Inc ref count.
+     *          hDll <- instance handle.
+     *      ELSE
+     *          Try load the file using the Win32PeLdrDll class.
+     *          <sketch continued further down>
+     *      Endif
+     *      Try load the file using the peldr.
+     *  Else
+     *      Set last error.
+     *      (hDll is NULL)
+     *  Endif
+     *  return hDll.
+     */
+
+    if ((fPE = Win32ImageBase::isPEImage(szModname)))
+    {
+        pModule = Win32DllBase::findModule(szModname); /* This should _NEVER_ succeed! */
+        if (pModule)
+        {
+            pModule->incDynamicLib();
+            pModule->AddRef();
+            hDll = pModule->getInstanceHandle();
+            dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): returns 0x%x, Dll found (2) %s",
+                     lpszLibFile, hFile, dwFlags, pModule->getInstanceHandle(), pModule->getFullPath()));
+        }
+        else
+        {
+            /* TODO EXE loading - will use the Win32PeLdrRsrcImg for that */
+            Win32PeLdrDll * peldrDll;
+
+            peldrDll = new Win32PeLdrDll(szModname);
+            if (peldrDll == NULL)
+            {
+                dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): Failed to created instance of Win32PeLdrDll. returns NULL.",
+                         lpszLibFile, hFile, dwFlags));
+                SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+                return NULL;
+            }
+
+            /** @sketch
+             * Process dwFlags
+             */
+            if (dwFlags & (DONT_RESOLVE_DLL_REFERENCES | LOAD_LIBRARY_AS_DATAFILE))
+            {
+                peldrDll->setNoEntryCalls();
+                //peldrDll->setDontProcessImports(); not implemented?
+            }
+            if (dwFlags & LOAD_WITH_ALTERED_SEARCH_PATH)
+            {
+                dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): Warning dwFlags LOAD_WITH_ALTERED_SEARCH_PATH is not implemented.",
+                          lpszLibFile, hFile, dwFlags));
+                //peldrDll->setLoadWithAlteredSearchPath();
+            }
+            if (dwFlags & LOAD_LIBRARY_AS_DATAFILE)
+            {
+                dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): Warning dwFlags LOAD_LIBRARY_AS_DATAFILE is not implemented.",
+                         lpszLibFile, hFile, dwFlags));
+                //peldrDll->setLoadAsDatafile();
+            }
+
+            /** @sketch
+             *  Initiate the peldr DLL.
+             *  IF successful init THEN
+             *      Inc dynamic ref count.
+             *      Inc ref count.
+             *      Attach to process
+             *      IF successful THEN
+             *          hDLL <- instance handle.
+             *      ELSE
+             *          set last error
+             *          delete Win32PeLdrDll instance.
+             *      Endif
+             *  ELSE
+             *      set last error
+             *      delete Win32PeLdrDll instance.
+             *  Endif.
+             */
+            if (peldrDll->init(0))
+            {
+                peldrDll->incDynamicLib();
+                peldrDll->AddRef();
+                if (peldrDll->attachProcess())
+                    hDll = peldrDll->getInstanceHandle();
+                else
+                {
+                    dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): attachProcess call to Win32PeLdrDll instance failed. returns NULL.",
+                             lpszLibFile, hFile, dwFlags));
+                    SetLastError(ERROR_DLL_INIT_FAILED);
+                    delete peldrDll;
+                }
+            }
+            else
+            {
+                dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): Failed to init Win32PeLdrDll instance. error=%d returns NULL.",
+                         lpszLibFile, hFile, dwFlags, peldrDll->getError()));
+                SetLastError(ERROR_INVALID_EXE_SIGNATURE);
+                delete peldrDll;
+            }
+        }
+    }
+    else
+    {
+        dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x) library were found (%s) but it's not loadable!",
+                 lpszLibFile, hFile, dwFlags, szModname));
+        SetLastError(ERROR_INVALID_EXE_SIGNATURE);
     }
 
     return hDll;
 }
-//******************************************************************************
-//******************************************************************************
-HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFlags)
+
+
+/**
+ * LoadLibraryExW can be used to map a DLL module into the calling process's
+ * addressspace. It returns a handle that can be used with GetProcAddress to
+ * get addresses of exported entry points (functions and variables).
+ *
+ * LoadLibraryExW can also be used to map executable (.exe) modules into the
+ * address to access resources in the module. However, LoadLibrary can't be
+ * used to run an executable (.exe) module.
+ *
+ * @returns   Handle to the library which was loaded.
+ * @param     lpszLibFile   Pointer to Unicode string giving the name of
+ *                  the executable image (either a Dll or an Exe) which is to
+ *                  be loaded.
+ *
+ *                  If no extention is specified the default .DLL extention is
+ *                  appended to the name. End the filename with an '.' if the
+ *                  file does not have an extention (and don't want the .DLL
+ *                  appended).
+ *
+ *                  If no path is specified, this API will use the Odin32
+ *                  standard search strategy to find the file. This strategy
+ *                  is described in the method Win32ImageBase::findDLL.
+ *                  This may be alterned by the LOAD_WITH_ALTERED_SEARCH_PATH
+ *                  flag, see below.
+ *
+ *                  This API likes to have backslashes (\), but will probably
+ *                  accept forward slashes too. Win32 SDK docs says that it
+ *                  should not contain forward slashes.
+ *
+ *                  Win32 SDK docs adds:
+ *                      "The name specified is the file name of the module and
+ *                       is not related to the name stored in the library module
+ *                       itself, as specified by the LIBRARY keyword in the
+ *                       module-definition (.def) file."
+ *
+ * @param     hFile     Reserved. Must be 0.
+ *
+ * @param     dwFlags   Flags which specifies the taken when loading the module.
+ *                  The value 0 makes it identical to LoadLibraryA/W.
+ *
+ *                  Flags:
+ *
+ *                  DONT_RESOLVE_DLL_REFERENCES
+ *                      (WinNT/2K feature): Don't load imported modules and
+ *                      hence don't resolve imported symbols.
+ *                      DllMain isn't called either. (Which is obvious since
+ *                      it may use one of the importe symbols.)
+ *
+ *                      On the other hand, if this flag is NOT set, the system
+ *                      load imported modules, resolves imported symbols, calls
+ *                      DllMain for process and thread init and term (if wished
+ *                      by the module).
+ *
+ *                  LOAD_LIBRARY_AS_DATAFILE
+ *                      If this flag is set, the module is mapped into the
+ *                      address space but is not prepared for execution. Though
+ *                      it's preparted for resource API. Hence, you'll use this
+ *                      flag when you want to load a DLL for extracting
+ *                      messages or resources from it.
+ *
+ *                      The resulting handle can be used with any Odin32 API
+ *                      which operates on resources.
+ *                      (WinNt/2k supports all resource APIs while Win9x don't
+ *                      support the specialized resource APIs: LoadBitmap,
+ *                      LoadCursor, LoadIcon, LoadImage, LoadMenu.)
+ *
+ *                  LOAD_WITH_ALTERED_SEARCH_PATH
+ *                      If this flag is set and lpszLibFile specifies a path
+ *                      we'll use an alternative file search strategy to find
+ *                      imported modules. This stratgy is simply to use the
+ *                      path of the module being loaded instead of the path
+ *                      of the executable module as the first location
+ *                      to search for imported modules.
+ *
+ *                      If this flag is clear, the standard Odin32 standard
+ *                      search strategy. See Win32ImageBase::findDll for
+ *                      further information.
+ *
+ * @sketch    Convert Unicode name to ascii.
+ *            Call LoadLibraryExA.
+ *            Free ascii string.
+ *            return handle from LoadLibraryExA.
+ * @status    Open32 Partially Implemented.
+ * @author    Sander van Leeuwen (sandervl@xs4all.nl)
+ *            knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @remark    Forwards to LoadLibraryExA.
+ */
+HINSTANCE WIN32API LoadLibraryExW(LPCWSTR lpszLibFile, HANDLE hFile, DWORD dwFlags)
 {
- HINSTANCE     hDll;
+    char *      pszAsciiLibFile;
+    HINSTANCE   hDll;
 
-  dprintf(("KERNEL32:  LoadLibraryExA %s (%X)\n", lpszLibFile, dwFlags));
-  hDll = iLoadLibraryA(lpszLibFile, dwFlags);
-  if (hDll == 0)
-  {
-    char * pszName;
+    pszAsciiLibFile = UnicodeToAsciiString(lpszLibFile);
+    dprintf(("KERNEL32: LoadLibraryExW(%s, 0x%x, 0x%x) --> LoadLibraryExA",
+             pszAsciiLibFile, hFile, dwFlags));
+    hDll = LoadLibraryExA(pszAsciiLibFile, hFile, dwFlags);
+    dprintf(("KERNEL32: LoadLibraryExW(%s, 0x%x, 0x%x) returns 0x%x",
+             pszAsciiLibFile, hFile, dwFlags, hDll));
+    free(pszAsciiLibFile);
 
-    // remove path from the image name
-    pszName = strrchr((char *)lpszLibFile,
-                      '\\');
-    if (pszName != NULL)
-    {
-      pszName++;                // skip backslash
-
-      // now try again without fully qualified path
-      hDll = iLoadLibraryA(pszName, dwFlags);
-    }
-  }
-
-  return hDll;
-}
-//******************************************************************************
-//******************************************************************************
-HINSTANCE WIN32API LoadLibraryW(LPCWSTR lpModule)
-{
- char     *asciimodule;
- HINSTANCE rc;
-
-    asciimodule = UnicodeToAsciiString((LPWSTR)lpModule);
-    dprintf(("KERNEL32:  OS2LoadLibraryW %s\n", asciimodule));
-    rc = LoadLibraryA(asciimodule);
-    free(asciimodule);
-    return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-HINSTANCE WIN32API LoadLibraryExW(LPCWSTR lpModule, HANDLE hFile, DWORD dwFlags)
-{
- char     *asciimodule;
- HINSTANCE rc;
-
-    asciimodule = UnicodeToAsciiString((LPWSTR)lpModule);
-    dprintf(("KERNEL32:  OS2LoadLibraryExW %s (%d)\n", asciimodule, dwFlags));
-    rc = LoadLibraryExA(asciimodule, hFile, dwFlags);
-    free(asciimodule);
-    return(rc);
+    return hDll;
 }
 //******************************************************************************
 //******************************************************************************
@@ -609,8 +1007,8 @@ LPCSTR WIN32API GetCommandLineA()
   if(cmdline == NULL) //not used for converted exes
     cmdline = O32_GetCommandLine();
 
-  dprintf(("KERNEL32:  GetCommandLine %s\n", cmdline));
-  dprintf(("KERNEL32:  FS = %x\n", GetFS()));
+  dprintf(("KERNEL32: GetCommandLine %s\n", cmdline));
+  dprintf(("KERNEL32: FS = %x\n", GetFS()));
   return(cmdline);
 }
 //******************************************************************************
@@ -620,7 +1018,7 @@ LPCWSTR WIN32API GetCommandLineW(void)
  static WCHAR *UnicodeCmdLine = NULL;
          char *asciicmdline = NULL;
 
-    dprintf(("KERNEL32:  FS = %x\n", GetFS()));
+    dprintf(("KERNEL32: FS = %x\n", GetFS()));
 
     if(UnicodeCmdLine)
         return(UnicodeCmdLine); //already called before
@@ -635,10 +1033,10 @@ LPCWSTR WIN32API GetCommandLineW(void)
     if(asciicmdline) {
         UnicodeCmdLine = (WCHAR *)malloc(strlen(asciicmdline)*2 + 2);
         AsciiToUnicode(asciicmdline, UnicodeCmdLine);
-        dprintf(("KERNEL32:  OS2GetCommandLineW: %s\n", asciicmdline));
+        dprintf(("KERNEL32: OS2GetCommandLineW: %s\n", asciicmdline));
         return(UnicodeCmdLine);
     }
-    dprintf(("KERNEL32:  OS2GetCommandLineW: asciicmdline == NULL\n"));
+    dprintf(("KERNEL32: OS2GetCommandLineW: asciicmdline == NULL\n"));
     return NULL;
 }
 //******************************************************************************
@@ -679,7 +1077,7 @@ DWORD WIN32API GetModuleFileNameW(HMODULE hModule, LPWSTR lpFileName, DWORD nSiz
  char *asciifilename = (char *)malloc(nSize+1);
  DWORD rc;
 
-    dprintf(("KERNEL32:  OSLibGetModuleFileNameW\n"));
+    dprintf(("KERNEL32: OSLibGetModuleFileNameW\n"));
     rc = GetModuleFileNameA(hModule, asciifilename, nSize);
     if(rc)      AsciiToUnicode(asciifilename, lpFileName);
     free(asciifilename);
@@ -730,7 +1128,7 @@ HANDLE WIN32API GetModuleHandleA(LPCTSTR lpszModule)
     }
   }
 
-  dprintf(("KERNEL32:  GetModuleHandle %s returned %X\n", lpszModule, hMod));
+  dprintf(("KERNEL32: GetModuleHandle %s returned %X\n", lpszModule, hMod));
   return(hMod);
 }
 //******************************************************************************
@@ -742,7 +1140,7 @@ HMODULE WIN32API GetModuleHandleW(LPCWSTR arg1)
 
     astring = UnicodeToAsciiString((LPWSTR)arg1);
     rc = GetModuleHandleA(astring);
-    dprintf(("KERNEL32:  OS2GetModuleHandleW %s returned %X\n", astring, rc));
+    dprintf(("KERNEL32: OS2GetModuleHandleW %s returned %X\n", astring, rc));
     FreeAsciiString(astring);
     return(rc);
 }
@@ -812,7 +1210,7 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
         cmdline = (char *)malloc(strlen(lpCommandLine) + 16);
         sprintf(cmdline, "PE.EXE %s", lpCommandLine);
     }
-    dprintf(("KERNEL32:  CreateProcess %s\n", cmdline));
+    dprintf(("KERNEL32: CreateProcess %s\n", cmdline));
     rc = O32_CreateProcess("PE.EXE", (LPCSTR)cmdline,lpProcessAttributes,
                          lpThreadAttributes, bInheritHandles, dwCreationFlags,
                          lpEnvironment, lpCurrentDirectory, lpStartupInfo,
@@ -838,11 +1236,11 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
         free(cmdline);
 
     if(lpProcessInfo)
-      dprintf(("KERNEL32:  CreateProcess returned %d hPro:%x hThr:%x pid:%x tid:%x\n",
+      dprintf(("KERNEL32: CreateProcess returned %d hPro:%x hThr:%x pid:%x tid:%x\n",
                rc, lpProcessInfo->hProcess, lpProcessInfo->hThread,
                    lpProcessInfo->dwProcessId,lpProcessInfo->dwThreadId));
     else
-      dprintf(("KERNEL32:  CreateProcess returned %d\n", rc));
+      dprintf(("KERNEL32: CreateProcess returned %d\n", rc));
     return(rc);
 }
 //******************************************************************************
@@ -905,11 +1303,7 @@ FARPROC WIN32API GetProcAddress(HMODULE hModule, LPCSTR lpszProc)
  FARPROC   proc;
  ULONG     ulAPIOrdinal;
 
-  if(hModule == 0 || hModule == -1 || (WinExe && hModule == WinExe->getInstanceHandle())) {
-    winmod = WinExe;
-  }
-  else  winmod = (Win32ImageBase *)Win32DllBase::findModule((HINSTANCE)hModule);
-
+  winmod = Win32ImageBase::findModule(hModule);
   if(winmod) {
         ulAPIOrdinal = (ULONG)lpszProc;
         if (ulAPIOrdinal <= 0x0000FFFF) {
@@ -923,8 +1317,8 @@ FARPROC WIN32API GetProcAddress(HMODULE hModule, LPCSTR lpszProc)
   }
   proc = O32_GetProcAddress(hModule, lpszProc);
   if(HIWORD(lpszProc))
-    dprintf(("KERNEL32:  GetProcAddress %s from %X returned %X\n", lpszProc, hModule, proc));
-  else  dprintf(("KERNEL32:  GetProcAddress %x from %X returned %X\n", lpszProc, hModule, proc));
+    dprintf(("KERNEL32: GetProcAddress %s from %X returned %X\n", lpszProc, hModule, proc));
+  else  dprintf(("KERNEL32: GetProcAddress %x from %X returned %X\n", lpszProc, hModule, proc));
   return(proc);
 }
 //******************************************************************************
