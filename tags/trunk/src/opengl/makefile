@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.11 2000-02-25 00:57:10 sandervl Exp $
+# $Id: makefile,v 1.12 2000-03-01 14:26:49 sandervl Exp $
 #
 # PD-Win32 API
 #
@@ -14,15 +14,9 @@ PDWIN32_TOOLS = ..\..\tools\bin
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 
 
-!ifdef DEBUG
-!ifdef NODEBUGINFO
-MAKE_CMD=nmake DEBUG=1 NODEBUGINFO=1
-!else
-MAKE_CMD=nmake DEBUG=1
-!endif
-!else
+#SvL: Only build the release version of glide, mesa & glu(t)
+#     There's no need for debug (even without dbg info) builds in the daily build archive
 MAKE_CMD=nmake
-!endif
 
 CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE)
 CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)

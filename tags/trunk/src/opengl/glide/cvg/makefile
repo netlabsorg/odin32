@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2000-02-27 19:10:01 sandervl Exp $
+# $Id: makefile,v 1.5 2000-03-01 14:26:49 sandervl Exp $
 #
 # PD-Win32 API
 #
@@ -29,7 +29,7 @@ all: ..\swlibs\pcilib\pcilib.lib init\init.lib texus\texus.lib glide\glide.lib $
 ..\swlibs\pcilib\pcilib.lib:
     cd ..\swlibs\pcilib
     $(MAKE_CMD)
-    cd ..\..\sst1
+    cd ..\..\cvg
 
 init\init.lib:
     cd init
