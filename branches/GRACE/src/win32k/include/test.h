@@ -1,4 +1,4 @@
-/* $Id: test.h,v 1.1.4.3 2000-08-19 14:37:11 bird Exp $
+/* $Id: test.h,v 1.1.4.6 2000-08-23 04:14:58 bird Exp $
  *
  * Definitions and declarations for test moduls.
  *
@@ -92,24 +92,32 @@ APIRET KRNLCALL fakeVMObjHandleInfo(
     USHORT  usHob,
     PULONG  pulAddr,
     PUSHORT pushPTDA);
-ULONG LDRCALL fakeldrOpenPath(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *plv, PULONG pful);
-ULONG LDRCALL fakeLDRClearSem(void);
-ULONG KRNLCALL fakeKSEMRequestMutex(HKMTX hkmtx, ULONG ulTimeout);
-ULONG KRNLCALL fakeKSEMReleaseMutex(HKMTX hkmtx);
-extern HKMTX        fakeLDRSem;
-ULONG KRNLCALL   fakeTKFuBuff(PVOID pv, PVOID pvUsr, ULONG cb, ULONG fl);
-ULONG KRNLCALL   fakeTKSuBuff(PVOID pvUsr, PVOID pv, ULONG cb, ULONG fl);
-ULONG KRNLCALL   fakeTKFuBufLen(PLONG pcch, PVOID pvUsr, ULONG cchMax, ULONG fl, BOOL fDblNULL);
-PMTE LDRCALL  fakeldrValidateMteHandle(HMTE hMTE);
-void _Optlink fakeg_tkExecPgm(void);    /* Not callable! (fakea.asm) */
-void _Optlink fakef_FuStrLenZ(void);    /* Not callable! (fakea.asm) */
-void _Optlink fakef_FuStrLen(void);     /* Not callable! (fakea.asm) */
-void _Optlink fakef_FuBuff(void);       /* Not callable! (fakea.asm) */
+PMTE KRNLCALL fakeldrASMpMTEFromHandle(
+    HMTE  hMTE);
+ULONG LDRCALL   fakeldrOpenPath(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *plv, PULONG pful);
+ULONG LDRCALL   fakeLDRClearSem(void);
+ULONG LDRCALL   fakeldrFindModule(PCHAR pachFilename, USHORT cchFilename, USHORT usClass, PPMTE ppMTE);
+ULONG KRNLCALL  fakeKSEMRequestMutex(HKSEMMTX hkmtx, ULONG ulTimeout);
+ULONG KRNLCALL  fakeKSEMReleaseMutex(HKSEMMTX hkmtx);
+BOOL  KRNLCALL  fakeKSEMQueryMutex(HKSEMMTX hkmtx, PUSHORT pcusNest);
+VOID  KRNLCALL  fakeKSEMInit(PKSEM pksem, ULONG fulType, ULONG fulFlags);
+extern KSEMMTX  fakeLDRSem;
+extern char *   fakeLDRLibPath;
+ULONG KRNLCALL  fakeTKFuBuff(PVOID pv, PVOID pvUsr, ULONG cb, ULONG fl);
+ULONG KRNLCALL  fakeTKSuBuff(PVOID pvUsr, PVOID pv, ULONG cb, ULONG fl);
+ULONG KRNLCALL  fakeTKFuBufLen(PLONG pcch, PVOID pvUsr, ULONG cchMax, ULONG fl, BOOL fDblNULL);
+PMTE LDRCALL    fakeldrValidateMteHandle(HMTE hMTE);
+void _Optlink   fakeg_tkExecPgm(void);    /* Not callable! (fakea.asm) */
+void _Optlink   fake_tkStartProcess(void);/* Not callable! (fakea.asm) */
+void _Optlink   fakef_FuStrLenZ(void);    /* Not callable! (fakea.asm) */
+void _Optlink   fakef_FuStrLen(void);     /* Not callable! (fakea.asm) */
+void _Optlink   fakef_FuBuff(void);       /* Not callable! (fakea.asm) */
 extern PTCB     fakepTCBCur;
 extern PPTDA    fakepPTDACur;
 extern char     fakeptda_start;
 extern USHORT   fakeptda_environ;
 extern HMTE     fakeptda_module;
+extern PSZ      fakeldrpFileNameBuf;
 
 #endif /* INCL_NO_FAKE */
 
