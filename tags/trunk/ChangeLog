@@ -1,7 +1,7 @@
- /* $Id: ChangeLog,v 1.936 2000-05-13 07:16:39 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.937 2000-05-13 07:46:59 sandervl Exp $ */
 
  2000-05-12: Edgar Buerkle <Edgar.Buerkle@gmx.net>
-    - KERNEL32: Print name of image referenced by EIP
+    - KERNEL32: Print name of image referenced by EIP (stackdump)
 
  2000-05-12: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   
@@ -11,7 +11,7 @@
     - COMDLG32: 
                 Fixed initial directory for GetOpen/SaveFileNameW
                 If initial dir string == "" -> use current dir (not only
-                when ptr equals NULL)
+                when ptr equals NULL) (verified this behaviour in NT 4)
     - GDI32:    
                 Do manual image flip in dib section blit (fixes wrong position
                 of Palm Emulator bitmap)
