@@ -1,10 +1,5 @@
-/* $Id: KERNEL32.CPP,v 1.13 1999-08-17 16:35:09 phaller Exp $ */
+/* $Id: KERNEL32.CPP,v 1.14 1999-08-17 17:04:51 sandervl Exp $ */
 
-/*
- *
- * Project Odin Software License can be found in LICENSE.TXT
- *
- */
 /*
  * Win32 compatibility file functions for OS/2
  *
@@ -14,6 +9,9 @@
  * Copyright 1998 Knut St. Osmundsen
  *
  * @(#) KERNEL32.CPP            1.0.1   1998/06/12 PH added HandleManager support
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
  */
 
 
@@ -25,7 +23,6 @@
 #include <winnls.h>
 #include <stdlib.h>
 #include <string.h>
-//#include <odincrt.h>
 
 #include "misc.h"
 #include "devio.h"

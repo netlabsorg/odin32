@@ -1,4 +1,4 @@
-/* $Id: os2heap.cpp,v 1.7 1999-08-17 16:35:09 phaller Exp $ */
+/* $Id: os2heap.cpp,v 1.8 1999-08-17 17:04:51 sandervl Exp $ */
 
 /*
  * Heap class for OS/2
@@ -90,7 +90,7 @@ OS2Heap::~OS2Heap()
   if(hmutex)
   {
     hmutex->leave();
-    delete hmutex;
+    delete(hmutex);
   }
 
   heaplistmutex.enter();
