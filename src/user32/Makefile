@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.106 2003-03-20 13:20:44 sandervl Exp $
+# $Id: Makefile,v 1.107 2003-07-28 11:27:44 sandervl Exp $
 
 #
 # Odin32 API
@@ -110,6 +110,7 @@ $(OBJDIR)\oldnls32.obj \
 $(OBJDIR)\user32rsrc.obj \
 $(OBJDIR)\oslibprf.obj \
 $(OBJDIR)\dragdrop.obj \
+$(OBJDIR)\oslibdnd.obj \
 !ifdef DEBUG
 $(OBJDIR)\dbgwrap.obj \
 !endif

@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.42 2003-05-16 10:59:28 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.43 2003-07-28 11:27:50 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -104,10 +104,10 @@ BOOL WIN32API TranslateMessage(const MSG *msg)
         SetLastError(ERROR_INVALID_PARAMETER);
         return FALSE;
     }
-  
+
     // only WM_KEYDOWN, WM_KEYUP, WM_SYSKEYDOWN, WM_SYSKEYUP
     // can go into TranslateMessage
-  
+
     return OSLibWinTranslateMessage((MSG *)msg);
 }
 //******************************************************************************
@@ -139,7 +139,7 @@ BOOL WIN32API PeekMessageA(LPMSG msg, HWND hwndOwner, UINT uMsgFilterMin,
                            UINT uMsgFilterMax, UINT fuRemoveMsg)
 {
     BOOL fFoundMsg;
- 
+
     dprintf2(("PeekMessageA %x %d-%d %d", hwndOwner, uMsgFilterMin, uMsgFilterMax, fuRemoveMsg));
     fFoundMsg = OSLibWinPeekMsg(msg, hwndOwner, uMsgFilterMin, uMsgFilterMax,
                                 fuRemoveMsg, FALSE);
@@ -313,14 +313,14 @@ BOOL WINPROC_TestLBForStr ( HWND hwnd )
  *  the first four bytes are the handle of the icon
  *  when the WM_SETTEXT message has been used to set the icon
  */
-INT WINPROC_MapMsg32ATo32W( HWND hwnd, UINT msg, WPARAM wParam, LPARAM *plparam )
+INT WINPROC_MapMsg32ATo32W( HWND hwnd, UINT msg, WPARAM *pwparam, LPARAM *plparam )
 {
     switch(msg)
     {
     case WM_GETTEXT:
         {
             LPARAM *ptr = (LPARAM *)HeapAlloc( GetProcessHeap(), 0,
-                                     wParam * sizeof(WCHAR) + sizeof(LPARAM) );
+                                     *pwparam * sizeof(WCHAR) + sizeof(LPARAM) );
             if (!ptr) return -1;
             *ptr++ = *plparam;  /* Store previous lParam */
             *plparam = (LPARAM)ptr;
@@ -430,11 +430,20 @@ INT WINPROC_MapMsg32ATo32W( HWND hwnd, UINT msg, WPARAM wParam, LPARAM *plparam 
         }
         return 1;
 
+    /* kso 2003-07-03: to make password field work, I took this from latest wine code. (winproc.c) */
+    case EM_SETPASSWORDCHAR:
+        {
+            BYTE    ch = LOWORD(*pwparam);
+            WCHAR   wch = 0;
+            MultiByteToWideChar(CP_ACP, 0, (LPCSTR)&ch, 1, &wch, 1);
+            *pwparam = MAKEWPARAM( wch, HIWORD(*pwparam) );
+        }
+        return 0;
+
     case WM_ASKCBFORMATNAME:
     case WM_DEVMODECHANGE:
     case WM_PAINTCLIPBOARD:
     case WM_SIZECLIPBOARD:
-    case EM_SETPASSWORDCHAR:
         // FIXME_(msg)("message %s (0x%x) needs translation, please report\n", SPY_GetMsgName(msg), msg );
         return -1;
     default:  /* No translation needed */
@@ -809,7 +818,7 @@ LRESULT WINPROC_CallProc32ATo32W( WNDPROC func, HWND hwnd,
 {
     LRESULT result;
 
-    if (WINPROC_MapMsg32ATo32W( hwnd, msg, wParam, &lParam ) == -1) return 0;
+    if (WINPROC_MapMsg32ATo32W( hwnd, msg, &wParam, &lParam ) == -1) return 0;
     result = func( hwnd, msg, wParam, lParam );
     WINPROC_UnmapMsg32ATo32W( hwnd, msg, wParam, lParam );
     return result;
@@ -910,7 +919,7 @@ DWORD WIN32API MsgWaitForMultipleObjects(DWORD nCount, LPHANDLE pHandles, BOOL f
               }
               //TODO: Ignoring all messages could be dangerous. But processing them,
               //while the app doesn't expect any, isn't safe either.
-              if(PeekMessageA(&msg, NULL, 0, 0, PM_REMOVE)) 
+              if(PeekMessageA(&msg, NULL, 0, 0, PM_REMOVE))
               {
                   if (msg.message == WM_QUIT) {
                        dprintf(("ERROR: MsgWaitForMultipleObjects call abandoned because WM_QUIT msg was received!!"));
@@ -964,13 +973,13 @@ DWORD WIN32API MsgWaitForMultipleObjects(DWORD nCount, LPHANDLE pHandles, BOOL f
                 }
                 //TODO: Ignoring all messages could be dangerous. But processing them,
                 //while the app doesn't expect any, isn't safe either.
-                if(PeekMessageA(&msg, NULL, 0, 0, PM_REMOVE)) 
+                if(PeekMessageA(&msg, NULL, 0, 0, PM_REMOVE))
                 {
                     if (msg.message == WM_QUIT) {
                          dprintf(("ERROR: MsgWaitForMultipleObjects call abandoned because WM_QUIT msg was received!!"));
                          return WAIT_ABANDONED;
                     }
-   
+
                     /* otherwise dispatch it */
                     DispatchMessageA(&msg);
                 }
@@ -1035,7 +1044,7 @@ DWORD WIN32API MsgWaitForMultipleObjects(DWORD nCount, LPHANDLE pHandles, BOOL f
         }
         //TODO: Ignoring all messages could be dangerous. But processing them,
         //while the app doesn't expect any, isn't safe either.
-        if(PeekMessageA(&msg, NULL, 0, 0, PM_REMOVE)) 
+        if(PeekMessageA(&msg, NULL, 0, 0, PM_REMOVE))
         {
             if (msg.message == WM_QUIT) {
                 dprintf(("ERROR: MsgWaitForMultipleObjects call abandoned because WM_QUIT msg was received!!"));

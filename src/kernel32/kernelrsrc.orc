@@ -1,4 +1,4 @@
-/* $Id: kernelrsrc.orc,v 1.3 2002-02-07 16:34:52 sandervl Exp $ */
+/* $Id: kernelrsrc.orc,v 1.4 2003-07-28 11:35:31 sandervl Exp $ */
 
 #include "winuser.h"
 #include "odinrsrc.h"
@@ -41,3 +41,4 @@ BEGIN
 END
 
 #include "nls\locale_rc.rc"
+#include "messages\winerr_enu.mc.rc"

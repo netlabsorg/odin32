@@ -1,4 +1,4 @@
-/* $Id: olepro32.cpp,v 1.2 2000-08-02 16:29:41 bird Exp $ */
+/* $Id: olepro32.cpp,v 1.3 2003-07-28 11:29:30 sandervl Exp $ */
 /*
  * OlePro32 Stubs
  *
@@ -58,25 +58,25 @@ HRESULT WINAPI OleLoadPicture( LPSTREAM lpstream, LONG lSize, BOOL fRunmode,
 	return S_OK;
 }
 
-HRESULT WINAPI DllUnregisterServer()
+HRESULT WINAPI OLEPRO32_DllUnregisterServer()
 {
 	dprintf(("not implemented (olepro32.dll) \n"));
 	return S_OK;
 }
 
-HRESULT WINAPI DllRegisterServer()
+HRESULT WINAPI OLEPRO32_DllRegisterServer()
 {
 	dprintf(("not implemented (olepro32.dll) \n"));
 	return S_OK;
 }
 
-HRESULT WINAPI DllCanUnloadNow( )
+HRESULT WINAPI OLEPRO32_DllCanUnloadNow( )
 {
 	dprintf(("not implemented (olepro32.dll) \n"));
 	return S_OK;
 }
 
-HRESULT WINAPI DllGetClassObject( REFCLSID rclsid, REFIID riid, LPVOID* ppv )
+HRESULT WINAPI OLEPRO32_DllGetClassObject( REFCLSID rclsid, REFIID riid, LPVOID* ppv )
 {
 	dprintf(("not implemented (olepro32.dll) \n"));
 	return S_OK;

@@ -1,4 +1,4 @@
-/* $Id: winmouse.cpp,v 1.26 2002-08-16 16:49:05 sandervl Exp $ */
+/* $Id: winmouse.cpp,v 1.27 2003-07-28 11:27:50 sandervl Exp $ */
 /*
  * Win32 mouse functions
  *
@@ -38,6 +38,8 @@
 #include "pmwindow.h"
 #include "oslibwin.h"
 #include "hook.h"
+
+#include <winkeyboard.h>
 
 #define DBG_LOCALLOG	DBG_winmouse
 #include "dbglocal.h"
@@ -149,6 +151,8 @@ HWND WIN32API SetCapture(HWND hwnd)
   if(hwnd == hwndPrev) 
   {
     dprintf(("USER32: SetCapture %x; already set to that window; ignore", hwnd));
+    //TODO: NT4 SP6 sends this message even now
+////////    SendMessageA(hwndPrev, WM_CAPTURECHANGED, 0L, hwnd);
     return hwndPrev;
   }
   
@@ -251,7 +255,6 @@ VOID WIN32API mouse_event(DWORD dwFlags, DWORD dx, DWORD dy, DWORD cButtons,
 {
   INPUT i;
   
-  // format input packet
   i.type           = INPUT_MOUSE;
   i.mi.dx          = dx;
   i.mi.dy          = dy;
@@ -291,8 +294,9 @@ UINT WIN32API SendInput(UINT nInputs, LPINPUT pInputs, int chSize)
   // After GetMessage or PeekMessage,
   // TranslateMessage posts an appropriate
   // WM_CHAR message.
+
   HWND hwnd = GetForegroundWindow();
-  
+    
   LPINPUT piBase = pInputs;
   for (int i = 0;
        i < nInputs;
@@ -304,10 +308,63 @@ UINT WIN32API SendInput(UINT nInputs, LPINPUT pInputs, int chSize)
       case INPUT_MOUSE:
       {
         PMOUSEINPUT p = (PMOUSEINPUT)&piBase->mi;
-        MSG msg;
-        
-        // simulate mouse input message
-        // @@@PH
+        MSG msg; 
+        HWND hwndCapture;
+
+        hwndCapture = GetCapture();
+        if(hwndCapture) hwnd = hwndCapture;
+       
+        if(p->dwFlags & MOUSEEVENTF_MOVE) 
+        {
+            if(!(p->dwFlags & MOUSEEVENTF_ABSOLUTE)) {
+                POINT pt;
+
+                if(GetCursorPos(&pt) == TRUE) {
+                    LONG relx = (LONG)p->dx;
+                    LONG rely = (LONG)p->dy;
+
+                    p->dx = pt.x + relx;
+                    p->dy = pt.y + rely;
+                }
+                else {
+                    DebugInt3();
+                    return 0;
+                }
+            }
+            SetCursorPos(p->dx, p->dy);    
+            OSLibSendWinMessage(hwnd, WM_MOUSEMOVE);
+        }
+
+        if(p->dwFlags & MOUSEEVENTF_LEFTDOWN) 
+        {
+            KeySetOverlayKeyState(VK_LBUTTON, KEYOVERLAYSTATE_DOWN);
+            OSLibSendWinMessage(hwnd, WM_LBUTTONDOWN);
+        }
+        if(p->dwFlags & MOUSEEVENTF_LEFTUP) 
+        {
+            KeySetOverlayKeyState(VK_LBUTTON, KEYOVERLAYSTATE_DONTCARE);
+            OSLibSendWinMessage(hwnd, WM_LBUTTONUP);
+        }
+        if(p->dwFlags & MOUSEEVENTF_RIGHTDOWN) 
+        {
+            KeySetOverlayKeyState(VK_RBUTTON, KEYOVERLAYSTATE_DOWN);
+            OSLibSendWinMessage(hwnd, WM_RBUTTONDOWN);
+        }
+        if(p->dwFlags & MOUSEEVENTF_RIGHTUP) 
+        {
+            KeySetOverlayKeyState(VK_RBUTTON, KEYOVERLAYSTATE_DONTCARE);
+            OSLibSendWinMessage(hwnd, WM_RBUTTONUP);
+        }
+        if(p->dwFlags & MOUSEEVENTF_MIDDLEDOWN) 
+        {
+            KeySetOverlayKeyState(VK_MBUTTON, KEYOVERLAYSTATE_DOWN);
+            OSLibSendWinMessage(hwnd, WM_MBUTTONDOWN);
+        }
+        if(p->dwFlags & MOUSEEVENTF_MIDDLEUP) 
+        {
+            KeySetOverlayKeyState(VK_MBUTTON, KEYOVERLAYSTATE_DONTCARE);
+            OSLibSendWinMessage(hwnd, WM_MBUTTONUP);
+        }
       }  
       break;
       
@@ -318,6 +375,10 @@ UINT WIN32API SendInput(UINT nInputs, LPINPUT pInputs, int chSize)
         MSG msg;
         BOOL fUnicode = (p->dwFlags & KEYEVENTF_UNICODE) == KEYEVENTF_UNICODE;
         DWORD extrainfo = GetMessageExtraInfo();
+
+        //TODO: We should really send an OS/2 WM_CHAR message here and let
+        //      our existing code handle everything (WM_CHAR generation)
+        //      This is a quick and dirty implementation. Not entirely correct.
         
         // build keyboard message
         msg.message = (p->dwFlags & KEYEVENTF_KEYUP) ? WM_KEYUP : WM_KEYDOWN;
@@ -359,12 +420,24 @@ UINT WIN32API SendInput(UINT nInputs, LPINPUT pInputs, int chSize)
         // unknown: do we have to post or to send the message?
 
         SetMessageExtraInfo( (LPARAM)p->dwExtraInfo );
+
+        KeySetOverlayKeyState(msg.wParam, (msg.message == WM_KEYDOWN) ? KEYOVERLAYSTATE_DOWN : KEYOVERLAYSTATE_DONTCARE);
         
         if (fUnicode)
           SendMessageW(hwnd, msg.message, msg.wParam, msg.lParam);
         else
           SendMessageA(hwnd, msg.message, msg.wParam, msg.lParam);
-        
+
+        if(msg.message == WM_KEYDOWN) {
+            char keybstate[256];
+            WORD key = 0;
+
+            GetKeyboardState((LPBYTE)&keybstate[0]);
+            if(ToAscii(p->wVk, p->wScan, (LPBYTE)&keybstate[0], &key, 0) != 0) {
+                SendMessageA(hwnd, WM_CHAR, key, msg.lParam);
+            }
+        }
+
         //restore extra info
         SetMessageExtraInfo(extrainfo);
         break;
@@ -652,6 +725,25 @@ TrackMouseEvent (TRACKMOUSEEVENT *ptme)
     }
 
     return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+ULONG GetMouseKeyState()
+{
+  ULONG keystate = 0;
+
+  if(GetKeyState(VK_LBUTTON) & 0x8000)
+    keystate |= MK_LBUTTON;
+  if(GetKeyState(VK_RBUTTON) & 0x8000)
+    keystate |= MK_RBUTTON;
+  if(GetKeyState(VK_MBUTTON) & 0x8000)
+    keystate |= MK_MBUTTON;
+  if(GetKeyState(VK_SHIFT) & 0x8000)
+    keystate |= MK_SHIFT;
+  if(GetKeyState(VK_CONTROL) & 0x8000)
+    keystate |= MK_CONTROL;
+
+  return keystate;
 }
 //******************************************************************************
 //******************************************************************************

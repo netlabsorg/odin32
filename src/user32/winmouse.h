@@ -1,4 +1,4 @@
-/* $Id: winmouse.h,v 1.8 2002-04-30 14:54:07 sandervl Exp $ */
+/* $Id: winmouse.h,v 1.9 2003-07-28 11:27:51 sandervl Exp $ */
 /*
  * Mouse handler for DINPUT
  *
@@ -10,5 +10,7 @@
  */
 #ifndef __WINMOUSE_H__
 #define __WINMOUSE_H__
+
+ULONG GetMouseKeyState();
 
 #endif //__WINMOUSE_H__

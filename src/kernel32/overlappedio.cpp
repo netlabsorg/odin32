@@ -1,4 +1,4 @@
-/* $Id: overlappedio.cpp,v 1.20 2002-10-10 16:28:40 sandervl Exp $ */
+/* $Id: overlappedio.cpp,v 1.21 2003-07-28 11:35:32 sandervl Exp $ */
 
 /*
  * Win32 overlapped IO class
@@ -86,6 +86,7 @@ OverlappedIOHandler::OverlappedIOHandler(LPOVERLAPPED_HANDLER lpReadHandler,
         threadparam->dwOperation     = ASYNCIO_WRITE;
         threadparam->lpOverlappedObj = this;
         hThreadWrite = ::CreateThread(NULL, 32*1024, OverlappedIOThread, (LPVOID)threadparam, 0, &dwThreadId);
+        SetThreadPriority(hThreadWrite, THREAD_PRIORITY_TIME_CRITICAL);
         if(hThreadWrite) {//thread uses this object; keep reference count to avoid premature destruction
             AddRef();
         }
