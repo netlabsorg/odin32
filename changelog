@@ -1,7 +1,12 @@
-/* $Id: changelog,v 1.2278 2002-08-21 12:33:56 sandervl Exp $ */
+/* $Id: changelog,v 1.2279 2002-08-21 15:38:49 sandervl Exp $ */
 
  2002-08-21: Platon Fomichev <platon@innotek   >
-    - USER32:   o Added OSLibWinControlWindow; fixed OSLibWinSetSysValue
+    - USER32:   o Fixed OSLibWinSetSysValue
+                o Fixed OSLibSetWindowStyle; delete frame controls if required
+
+ 2002-08-21: Yuri Dario <mc6530@mclink   >
+     - USER32:  o OSLibWinChangeTaskList & OSLibWinAddToTaskList bugfixes;
+                  wrong CharToOemBuffA call.
 
  2002-08-20: knut st. osmundsen <bird@anduin   >
     - FASTDEP:  o Support for special makefile chars.
