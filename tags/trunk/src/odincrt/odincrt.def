@@ -1,4 +1,4 @@
-; $Id: odincrt.def,v 1.16 1999-08-17 12:46:04 sandervl Exp $
+; $Id: odincrt.def,v 1.17 1999-12-01 00:11:22 sandervl Exp $
 ; Odin VAC++ 3.08 shared multithreaded runtime
 LIBRARY ODINCRT INITINSTANCE TERMINSTANCE
 PROTMODE
@@ -17,15 +17,20 @@ EXPORTS
 ; -----------------
 ; memory management
 ; -----------------
-       calloc                            		@346
-       realloc                          		@583
-       malloc                            		@351
-       free                                		@219
-       _debug_calloc               			@117
-       _debug_realloc             			@182
-       _debug_malloc               			@119
-       _debug_free                   			@59
-       strdup                  			       	@472
+       calloc = os2calloc                      		@346
+       realloc = os2realloc                    		@583
+       malloc = os2malloc                   		@351
+       free = os2free                         		@219
+       _debug_calloc = os2_debug_calloc              	@117
+       _debug_realloc = os2_debug_realloc       	@182
+       _debug_malloc = os2_debug_malloc			@119
+       _debug_free = os2_debug_free    			@59
+       _umalloc = os2_umalloc                           @749
+       _debug_umalloc =os2_debug_umalloc                @185
+       _ucalloc = os2_ucalloc                           @704
+       _debug_ucalloc = os2_debug_ucalloc               @181
+  
+     strdup                  			       	@472
 
 ; original exports
     __ct__8ifstreamFPCciT2                             @1
@@ -205,10 +210,8 @@ EXPORTS
     open__11fstreambaseFPCciT2                        @178
     setbuf__11fstreambaseFPci                         @179
     _debug_tcalloc                                    @180
-    _debug_ucalloc                                    @181
     doallocate__9streambufFv                          @183
     _debug_tmalloc                                    @184
-    _debug_umalloc                                    @185
     __vtt8ifstream                                    @186
     unexpected__Fv                                    @187
     xalloc__3iosFv                                    @188
@@ -722,7 +725,6 @@ EXPORTS
     _fltused                                          @701
     strrchr                                           @702
     strncmp                                           @703
-    _ucalloc                                          @704
     _ucreate                                          @705
     _spawnl                                           @706
     __getche                                          @707
@@ -767,7 +769,6 @@ EXPORTS
     _InitBuf                                          @746
     _tmalloc                                          @747
     _makepath                                         @748
-    _umalloc                                          @749
     _spawnv                                           @750
     strncpy                                           @751
     hex__Fli                                          @752
