@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.22 1999-11-10 14:16:01 sandervl Exp $ */
+/* $Id: virtual.cpp,v 1.23 1999-11-22 20:35:52 sandervl Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -500,7 +500,12 @@ ODINFUNCTION4(BOOL, VirtualProtect, LPVOID, lpvAddress,
   }
   ULONG offset = ((ULONG)lpvAddress & 0xFFF);
   npages = (cbSize >> 12);
-  if(cbSize & 0xFFF + offset) {
+
+  if( (cbSize & 0xFFF) + offset > 0 ) {
+	npages++;
+  }
+
+  if( (cbSize & 0xFFF) + offset >= 4096 ) {
 	npages++;
   }
 

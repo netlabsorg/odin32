@@ -1,4 +1,4 @@
-/* $Id: oslibdos.h,v 1.7 1999-11-12 11:38:40 sandervl Exp $ */
+/* $Id: oslibdos.h,v 1.8 1999-11-22 20:35:50 sandervl Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -92,5 +92,9 @@ DWORD OSLibDosCreate(CHAR *lpFileName,
 DWORD OSLibDosResetBuffer(DWORD hFile);
 DWORD OSLibDosDupHandle(DWORD hFile, DWORD *hNew);
 DWORD OSLibDosSetFilePtr2(DWORD hFile, DWORD offset, DWORD method);
+
+#ifndef PAGE_SIZE
+#define PAGE_SIZE 4096
+#endif
 
 #endif

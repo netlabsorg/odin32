@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.49 1999-11-11 19:10:09 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.50 1999-11-22 20:35:52 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -264,10 +264,11 @@ VOID WIN32API ExitProcess(DWORD exitcode)
 
   SetOS2ExceptionChain(-1);
 
+  Win32DllExitList(0);
+ 
+  //Note: Needs to be done after Win32DllExitList (destruction of exe + dll objects)
   //Flush and delete all open memory mapped files
   Win32MemMap::deleteAll();
-
-  Win32DllExitList(0);
 
   //Restore original OS/2 TIB selector
   DestroyTIB();

@@ -1,4 +1,4 @@
-/* $Id: windllbase.cpp,v 1.4 1999-11-09 19:22:32 sandervl Exp $ */
+/* $Id: windllbase.cpp,v 1.5 1999-11-22 20:35:52 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
@@ -270,6 +270,27 @@ void Win32DllBase::deleteAll()
 
   while(Win32DllBase::head) {
 	delete Win32DllBase::head;
+  }
+}
+//******************************************************************************
+//Add renaming profile strings for ole32 & netapi32 to odin.ini if they aren't
+//already there
+//******************************************************************************
+void Win32DllBase::setDefaultRenaming()
+{
+ char renameddll[CCHMAXPATH];
+
+  if(ODIN_PROFILE_GetOdinIniString(DLLRENAMEWIN_SECTION, "OLE32", "", renameddll, 
+                                   sizeof(renameddll)-1) <= 1) 
+  {
+	ODIN_PROFILE_SetOdinIniString(DLLRENAMEWIN_SECTION, "OLE32", "OLE32OS2");
+	ODIN_PROFILE_SetOdinIniString(DLLRENAMEOS2_SECTION, "OLE32OS2", "OLE32");
+  }
+  if(ODIN_PROFILE_GetOdinIniString(DLLRENAMEWIN_SECTION, "NETAPI32", "", renameddll, 
+                                   sizeof(renameddll)-1) <= 1) 
+  {
+	ODIN_PROFILE_SetOdinIniString(DLLRENAMEWIN_SECTION, "NETAPI32", "WNETAP32");
+	ODIN_PROFILE_SetOdinIniString(DLLRENAMEOS2_SECTION, "WNETAP32", "NETAPI32");
   }
 }
 //******************************************************************************
