@@ -1,4 +1,4 @@
-/* $Id: odinlx.h,v 1.5 2000-08-11 10:54:20 sandervl Exp $ */
+/* $Id: odinlx.h,v 1.6 2001-01-11 18:03:48 sandervl Exp $ */
 
 /*
  *
@@ -49,16 +49,5 @@ BOOL WIN32API UnregisterLxDll(HINSTANCE hInstance);
 //System dlls set EntryPoint to 0
 //******************************************************************************
 BOOL WIN32API RegisterLxExe(WINMAIN EntryPoint, PVOID pResData);
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void  OS2SetExceptionHandler(void *exceptframe);
-void  OS2UnsetExceptionHandler(void *exceptframe);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif
