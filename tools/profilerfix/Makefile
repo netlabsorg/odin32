@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.2 2002-04-11 21:29:13 bird Exp $
+# $Id: Makefile,v 1.3 2002-04-19 05:58:57 bird Exp $
 
 #
 # Odin32 API
@@ -16,12 +16,13 @@
 #
 # The all rule.
 #
-!ifdef VAC3
-all:    $(ODIN32_LIB)\cppopa3_fix2.obj \
-        $(ODIN32_LIB)\cppopa3.obj
-!else
-all:
-!endif
+#!ifdef VAC3
+#all:    $(ODIN32_LIB)\cppopa3_fix2.obj \
+#        $(ODIN32_LIB)\cppopa3.obj
+all:     $(ODIN32_LIB)\cpppan40.obj
+#!else
+#all:
+#!endif
 
 # aliases for all...
 needed: all
@@ -43,6 +44,13 @@ cppopa3_fix2.obj $(ODIN32_LIB)\cppopa3_fix2.obj: cppopa3_fix2.asm
 cppopa3.obj $(ODIN32_LIB)\cppopa3.obj: $(CPPMAIN)\lib\cppopa3.obj
     $(CP) $(CPPMAIN)\lib\cppopa3.obj $(ODIN32_LIB)\cppopa3.obj
     .\prfpatch.cmd $(ODIN32_LIB)\cppopa3.obj
+
+
+#
+# Assemble the cpppan40 module with FS fixes.
+#
+cpppan40.obj $(ODIN32_LIB)\cpppan40.obj: cppopa4.asm
+    $(AS) $(ASFLAGS) +Scs cppopa4.asm -Fo:$(ODIN32_LIB)\cpppan40.obj -Fl:cpppan40.lst
 
 
 #
