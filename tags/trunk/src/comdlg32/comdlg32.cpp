@@ -1,4 +1,4 @@
-/* $Id: comdlg32.cpp,v 1.30 2001-07-07 19:08:39 sandervl Exp $ */
+/* $Id: comdlg32.cpp,v 1.31 2001-07-15 14:35:11 sandervl Exp $ */
 
 /*
  * COMDLG32 implementation
@@ -83,6 +83,7 @@ HGLOBAL GlobalCopy(HGLOBAL hDest, HGLOBAL hSource, BOOL fToOpen32)
       return hDest;
 }
 #endif
+#if 1
 /*****************************************************************************
  * Name      :
  * Purpose   :
@@ -251,3 +252,4 @@ ODINFUNCTION1(BOOL, PageSetupDlgW,
   return(FALSE);
 }
 
+#endif
