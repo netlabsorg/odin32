@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.37 2000-03-17 16:08:38 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.38 2000-03-24 23:14:59 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -346,9 +346,9 @@ DWORD HMInitialize(void)
            sizeof(HMGlobals));
 
     /* copy standard handles from OS/2's Open32 Subsystem */
-    HMSetStdHandle(STD_INPUT_HANDLE,  GetStdHandle(STD_INPUT_HANDLE));
-    HMSetStdHandle(STD_OUTPUT_HANDLE, GetStdHandle(STD_OUTPUT_HANDLE));
-    HMSetStdHandle(STD_ERROR_HANDLE,  GetStdHandle(STD_ERROR_HANDLE));
+    HMSetStdHandle(STD_INPUT_HANDLE,  O32_GetStdHandle(STD_INPUT_HANDLE));
+    HMSetStdHandle(STD_OUTPUT_HANDLE, O32_GetStdHandle(STD_OUTPUT_HANDLE));
+    HMSetStdHandle(STD_ERROR_HANDLE,  O32_GetStdHandle(STD_ERROR_HANDLE));
 
                         /* create handle manager instance for Open32 handles */
     HMGlobals.pHMOpen32     = new HMDeviceOpen32Class("\\\\.\\");
