@@ -1,4 +1,11 @@
- /* $Id: ChangeLog,v 1.671 2000-01-28 12:00:56 bird Exp $ */
+ /* $Id: ChangeLog,v 1.672 2000-01-28 22:26:40 sandervl Exp $ */
+
+ 2000-01-28: Sander van Leeuwen <sandervl@xs4all.nl>
+	- GDI32: Wrong return values for GetDIBits & SetDIBitsToDevice
+                 (nr of scan lines copied; not true/false)
+	- USER32: Don't call default frame handler for WM_ADJUSTWINDOWPOS
+                  (fixes window resize when playing videos in RealPlayer v7 &
+                   dragging titlebar in Professional Mine Sweeper)
 
  2000-01-28: Knut St. Osmundsen <knut.stange.osmundsen@pmsc.no>
         - Win32k: Heap is splitted into a swappable and a resident heap.
