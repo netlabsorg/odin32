@@ -1,4 +1,4 @@
-/* $Id: odin.cmd,v 1.21 2000-12-03 20:18:26 bird Exp $
+/* $Id: odin.cmd,v 1.22 2000-12-24 14:36:54 sandervl Exp $
  *
  * Odin32 API WarpIn installation script generator.
  *
@@ -126,32 +126,9 @@ rc = lineout(sInstFile, '     CONFIGSYS="DEVICE=WIN32K.SYS | REMOVELINE"');
 rc = lineout(sInstFile, '     CONFIGSYS="DEVICE=WIN32K.SYS | REMOVELINE"');
 rc = lineout(sInstFile, '     CONFIGSYS="DEVICE=WIN32K.SYS | REMOVELINE"');
 rc = lineout(sInstFile, '     CONFIGSYS="DEVICE=WIN32K.SYS | REMOVELINE"');
-rc = lineout(sInstFile, '     CONFIGSYS="DEVICE=$(1)\SYSTEM32\Win32k.sys -pe:pe | UNIQUE ADDTOP"');
+rc = lineout(sInstFile, '     CONFIGSYS="DEVICE=$(1)\SYSTEM32\Win32k.sys -pe:pe -Dllfixes:D | UNIQUE ADDTOP"');
 rc = lineout(sInstFile, '     >Add Win32k.sys to Config.sys .</PCK>');
 rc = lineout(sInstFile, '');
-rc = lineout(sInstFile, '<PCK INDEX=4');
-rc = lineout(sInstFile, '     PACKAGEID="Odin\Odin\Odin 3dfx Voodoo OpenGL Files\0\0\5"');
-rc = lineout(sInstFile, '     TARGET="C:\ODIN\SYSTEM32"');
-rc = lineout(sInstFile, '     FIXED');
-title = "     TITLE=""Odin Daily Build 3dfx Voodoo OpenGL Files ("date()")""";
-rc = lineout(sInstFile, title);
-rc = lineout(sInstFile, '     >Installation of Odin 3dfx Voodoo OpenGL files .</PCK>');
-rc = lineout(sInstFile, '');
-rc = lineout(sInstFile, '<PCK INDEX=5');
-rc = lineout(sInstFile, '     PACKAGEID="Odin\Odin\Odin 3dfx Voodoo 1 Glide Files\0\0\5"');
-rc = lineout(sInstFile, '     TARGET="C:\ODIN\SYSTEM32"');
-rc = lineout(sInstFile, '     FIXED');
-title = "     TITLE=""Odin Daily Build 3dfx Voodoo 1 Glide Files ("date()")""";
-rc = lineout(sInstFile, title);
-rc = lineout(sInstFile, '     >Installation of Odin 3dfx Voodoo 1 Glide files .</PCK>');
-rc = lineout(sInstFile, '');
-rc = lineout(sInstFile, '<PCK INDEX=6');
-rc = lineout(sInstFile, '     PACKAGEID="Odin\Odin\Odin 3dfx Voodoo 2 Glide Files\0\0\5"');
-rc = lineout(sInstFile, '     TARGET="C:\ODIN\SYSTEM32"');
-rc = lineout(sInstFile, '     FIXED');
-title = "     TITLE=""Odin Daily Build 3dfx Voodoo 2 Glide Files ("date()")""";
-rc = lineout(sInstFile, title);
-rc = lineout(sInstFile, '     >Installation of Odin 3dfx Voodoo 2 Glide files .</PCK>');
 rc = lineout(sInstFile, '</HEAD>');
 rc = lineout(sInstFile, '<BODY>');
 rc = lineout(sInstFile, '<PAGE INDEX=1 TYPE=TEXT>');
@@ -388,24 +365,6 @@ end
  * Packet 3 is only win32k.sys config.sys line but it seems like we have to add something.
  */
 sWICCmd '3 -c'||sDllDir '*.ddp';
-if (rc <> 0) then return rc;
-
-/*
- * Packet 4
- */
-sWICCmd '4 -c'||sDllDir||'\Glide *.dll';
-if (rc <> 0) then return rc;
-
-/*
- * Packet 5
- */
-sWICCmd '5 -c'||sDllDir||'\Glide\Voodoo1 *.dll';
-if (rc <> 0) then return rc;
-
-/*
- * Packet 6
- */
-sWICCmd '6 -c'||sDllDir||'\Glide\Voodoo2 *.dll';
 if (rc <> 0) then return rc;
 
 return rc;
