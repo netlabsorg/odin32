@@ -1,4 +1,4 @@
-/* $Id: CmdQd.c,v 1.4 2001-09-02 02:51:41 bird Exp $
+/* $Id: CmdQd.c,v 1.5 2001-09-02 03:33:30 bird Exp $
  *
  * Command Queue Daemon / Client.
  *
@@ -112,7 +112,7 @@ void *my_malloc(size_t);
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
 *******************************************************************************/
-#define SHARED_MEM_NAME     "\\SHAREMEM\\CmdQd2"
+#define SHARED_MEM_NAME     "\\SHAREMEM\\CmdQd"
 #define SHARED_MEM_SIZE     65536
 #define IDLE_TIMEOUT_MS     -1 //(60*1000*3)
 #define OUTPUT_CHUNK        (8192-8)
