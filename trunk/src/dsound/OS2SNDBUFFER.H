@@ -1,4 +1,4 @@
-/* $Id: OS2SNDBUFFER.H,v 1.7 2000-05-18 20:37:09 mike Exp $ */
+/* $Id: OS2SNDBUFFER.H,v 1.8 2001-03-10 06:21:06 mike Exp $ */
 
 /*
  * DirectSound SoundBuffer class
@@ -17,6 +17,14 @@
 #undef THIS_
 #define THIS_ VOID*This,
 
+// simple structure to handle duplicated buffers - the first DWORD of
+// a sound buffer contains the buffer's usage count (to prevent freeing
+// of buffers still in use)
+typedef struct _SOUNDBUF {
+    DWORD   dwReferences;
+    char    pData[1];
+} SOUNDBUF;
+
 // a forward declaration of some classes is needed here!
 class OS2IDirectSoundNotify;
 class OS2IDirectSound3DBuffer;
@@ -30,6 +38,7 @@ class OS2IDirectSoundBuffer
     IDirectSoundBufferVtbl  Vtbl;
 
     OS2IDirectSoundBuffer(OS2IDirectSound *DSound, const DSBUFFERDESC *lpDSBufferDesc);
+    OS2IDirectSoundBuffer(OS2IDirectSound *DSound, OS2IDirectSoundBuffer *srcBuf);
     OS2IDirectSoundBuffer() {};
     ~OS2IDirectSoundBuffer();
 
@@ -38,9 +47,9 @@ class OS2IDirectSoundBuffer
     int     Referenced;
     inline  HRESULT       GetLastError()    { return lastError;    };
     inline  void          SetNotify(OS2IDirectSoundNotify *_notify) {
-                                    notify = _notify; };
+                          notify = _notify; };
     inline  void          Set3DBuffer(OS2IDirectSound3DBuffer *_buffer3D) {
-                                      buffer3D = _buffer3D; };
+                          buffer3D = _buffer3D; };
  private:
 
  protected:
@@ -60,7 +69,8 @@ class OS2IDirectSoundBuffer
     DSBUFFERDESC bufferdesc;   // DSB description
     LONG  frac;                // saved mixer position overflow
 
-    char *lpBuffer;            // sound data
+    SOUNDBUF *lpSndBuffer;     // sound data + reference count
+    char     *lpBuffer;        // actual sound data
 
     OS2IDirectSoundNotify*   notify;    // pointer to the associated Notify object (if exists)
     OS2IDirectSound3DBuffer* buffer3D;  // pointer to the associated 3DBuffer object (if exists)

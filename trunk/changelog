@@ -1,8 +1,10 @@
-/* $Id: changelog,v 1.1298 2001-03-09 22:48:45 mike Exp $ */
+/* $Id: changelog,v 1.1299 2001-03-10 06:21:04 mike Exp $ */
 
  2000-03-09: Michal Necasek <michalnec@volny.cz>
     - DDRAW:    o Watcomized (not complete) and cleaned up a bit.
                   Also synced DDRAW\NEW with the main directory.
+    - DSOUND:   o Implemented DuplicateSoundBuffer (finally!). That
+                  fixed missing sound in The Corporate Machine.
 
  2001-03-07: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Win32k:   o Fixed trap in k32QuerySystemMemInfo when

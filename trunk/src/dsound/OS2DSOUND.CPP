@@ -1,10 +1,11 @@
-/* $Id: OS2DSOUND.CPP,v 1.7 2000-05-18 20:37:08 mike Exp $ */
+/* $Id: OS2DSOUND.CPP,v 1.8 2001-03-10 06:21:06 mike Exp $ */
 
 /*
  * DirectSound main class
  *
  * Copyright 1998 Sander van Leeuwen
- * Copyright 2000 Michal Necasek
+ * Copyright 2000 Kevin Langman
+ * Copyright 2001 Michal Necasek
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -17,11 +18,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-
-
 #include <stdio.h> /****** DEBUGGING ********/
-
-
 
 #define INITGUID
 #include <dsound.h>
@@ -33,8 +30,6 @@
 #include "OS2Notify.h"
 #include <misc.h>
 
-// TODO: primary buffer should probably created right away when creating the DSound
-// object
 // TODO: handle cooperative levels properly!!
 
 // this flag is set if the OS2IDirectObject exists
@@ -59,7 +54,7 @@ OS2IDirectSound::OS2IDirectSound(const GUID *lpGUID) : Referenced(0),
    Vtbl.SetSpeakerConfig     = SoundSetSpeakerConfig;
    Vtbl.Initialize           = SoundInitialize;
 
-   dprintf(("DSOUND-OS2IDirectSound::OS2IDirectSound\n"));
+   dprintf(("DSOUND-OS2IDirectSound::OS2IDirectSound"));
 
    speakerConfig = DSSPEAKER_STEREO;
    CoopLevel     = DSSCL_EXCLUSIVE;  //default
@@ -74,15 +69,16 @@ OS2IDirectSound::OS2IDirectSound(const GUID *lpGUID) : Referenced(0),
    }
    if ( primary->GetLastError() != DS_OK ){
       ULONG lastErr = primary->GetLastError();
-      dprintf(("LastErr = %d\n", lastErr));
+      dprintf(("LastErr = %d", lastErr));
       delete primary;
       lastError = lastErr;
       return;
    }
    primary->Vtbl.AddRef(primary);
 
-   dprintf(("Sound init OK\n"));
+   dprintf(("Sound init OK"));
 }
+
 //******************************************************************************
 //******************************************************************************
 OS2IDirectSound::~OS2IDirectSound()
@@ -91,11 +87,12 @@ OS2IDirectSound::~OS2IDirectSound()
    OS2IDirectSoundBuffer::DestroyAllBuffers();
    OS2IDirectSound::fDSExists = FALSE;
 }
+
 //******************************************************************************
 //******************************************************************************
 HRESULT WIN32API SoundQueryInterface(THIS, REFIID riid, LPVOID * ppvObj)
 {
-   dprintf(("DSOUND-OS2IDirectSound::QueryInterface\n"));
+   dprintf(("DSOUND-OS2IDirectSound::QueryInterface"));
    if (This == NULL) {
       return DSERR_INVALIDPARAM;
    }
@@ -117,7 +114,7 @@ ULONG WIN32API SoundAddRef(THIS)
 {
    OS2IDirectSound *me = (OS2IDirectSound *)This;
 
-   dprintf(("DSOUND-OS2IDirectSound::AddRef %d\n", me->Referenced+1));
+   dprintf(("DSOUND-OS2IDirectSound::AddRef %d", me->Referenced+1));
    return ++me->Referenced;
 }
 
@@ -127,7 +124,7 @@ ULONG WIN32API SoundRelease(THIS)
 {
    OS2IDirectSound *me = (OS2IDirectSound *)This;
 
-   dprintf(("DSOUND-OS2IDirectSound::Release %d\n", me->Referenced-1));
+   dprintf(("DSOUND-OS2IDirectSound::Release %d", me->Referenced-1));
    if (me->Referenced) {
       me->Referenced--;
       if (me->Referenced == 0) {
@@ -145,7 +142,7 @@ ULONG WIN32API SoundRelease(THIS)
 //******************************************************************************
 HRESULT WIN32API SoundCompact(THIS)
 {
-  dprintf(("DSOUND-OS2IDirectSound::Compact\n"));
+  dprintf(("DSOUND-OS2IDirectSound::Compact - NOP"));
   return DS_OK;
 }
 
@@ -159,7 +156,7 @@ HRESULT WIN32API SoundCreateSoundBuffer(THIS_
    OS2IDirectSound *me = (OS2IDirectSound *)This;
    OS2IDirectSoundBuffer *sndbuf;
 
-   dprintf(("DSOUND-OS2IDirectSound::CreateSoundBuffer\n"));
+   dprintf(("DSOUND-OS2IDirectSound::CreateSoundBuffer"));
    if (me == NULL || lpDSBufferDesc == NULL || lplpDirectSoundBuffer == NULL) {
       return DSERR_INVALIDPARAM;
    }
@@ -170,31 +167,6 @@ HRESULT WIN32API SoundCreateSoundBuffer(THIS_
    }
 
    if (lpDSBufferDesc->dwFlags & DSBCAPS_PRIMARYBUFFER) {
-
-/*
-
-      // The Primary buffer is now created by the Constructor.. This only
-      // makes sence becuse you can really only have one primary buffer and
-      // you need it before you can to do anything.
-
-      OS2PrimBuff *primbuff;
-      primbuff = new OS2PrimBuff(me, lpDSBufferDesc);
-
-      if (primbuff == NULL)
-         return DSERR_OUTOFMEMORY;
-
-      if ( primbuff->GetLastError() != DS_OK ){
-         ULONG lastErr = primbuff->GetLastError();
-
-         dprintf(("LastErr = %d\n", lastErr));
-         delete primbuff;
-         return lastErr;
-      }
-      *lplpDirectSoundBuffer = (LPDIRECTSOUNDBUFFER)primbuff;
-      primbuff->Vtbl.AddRef(primbuff);
-      dprintf(("Created PrimBuff... Exiting Create Buffer function\n"));
-*/
-
       *lplpDirectSoundBuffer = (LPDIRECTSOUNDBUFFER)me->primary;
       return DS_OK;
    }
@@ -203,7 +175,7 @@ HRESULT WIN32API SoundCreateSoundBuffer(THIS_
    if (sndbuf == NULL) {
       return DSERR_OUTOFMEMORY;
    }
-   if(sndbuf->GetLastError() != DS_OK) {
+   if (sndbuf->GetLastError() != DS_OK) {
       ULONG lastErr = sndbuf->GetLastError();
       delete sndbuf;
       return lastErr;
@@ -219,7 +191,7 @@ HRESULT WIN32API SoundCreateSoundBuffer(THIS_
 //******************************************************************************
 HRESULT WIN32API SoundGetCaps(THIS_ LPDSCAPS lpCaps)
 {
-   dprintf(("DSOUND-OS2IDirectSound::GetCaps\n"));
+   dprintf(("DSOUND-OS2IDirectSound::GetCaps"));
 
    if (lpCaps == NULL)
       return DSERR_INVALIDPARAM;
@@ -257,10 +229,32 @@ HRESULT WIN32API SoundGetCaps(THIS_ LPDSCAPS lpCaps)
 
 //******************************************************************************
 //******************************************************************************
-HRESULT WIN32API SoundDuplicateSoundBuffer(THIS_ LPDIRECTSOUNDBUFFER, LPLPDIRECTSOUNDBUFFER )
+HRESULT WIN32API SoundDuplicateSoundBuffer(THIS_ LPDIRECTSOUNDBUFFER lpBuf, LPLPDIRECTSOUNDBUFFER lplpDirectSoundBuffer)
 {
-   dprintf(("DSOUND-OS2IDirectSound::DuplicateSoundBuffer\n"));
-   return DSERR_OUTOFMEMORY;
+   OS2IDirectSound *me = (OS2IDirectSound *)This;
+   OS2IDirectSoundBuffer *srcBuf = (OS2IDirectSoundBuffer*)lpBuf;
+   OS2IDirectSoundBuffer *tgtBuf;
+
+   dprintf(("DSOUND-OS2IDirectSound::DuplicateSoundBuffer (%X to %X)", lpBuf, lplpDirectSoundBuffer));
+   if (me == NULL || lpBuf == NULL || lplpDirectSoundBuffer == NULL) {
+      return DSERR_INVALIDPARAM;
+   }
+
+   tgtBuf = new OS2IDirectSoundBuffer(me, srcBuf);
+   if (tgtBuf == NULL) {
+      return DSERR_OUTOFMEMORY;
+   }
+
+   if (tgtBuf->GetLastError() != DS_OK) {
+      ULONG lastErr = tgtBuf->GetLastError();
+      delete tgtBuf;
+      return lastErr;
+   }
+   tgtBuf->Vtbl.AddRef(tgtBuf);
+
+   *lplpDirectSoundBuffer = (LPDIRECTSOUNDBUFFER)tgtBuf;
+
+   return DS_OK;
 }
 
 //******************************************************************************
@@ -269,7 +263,7 @@ HRESULT WIN32API SoundSetCooperativeLevel(THIS_ HWND hwndClient, DWORD level)
 {
    OS2IDirectSound *me = (OS2IDirectSound *)This;
 
-   dprintf(("DSOUND-OS2IDirectSound::SetCooperativeLevel (to %d)\n", level));
+   dprintf(("DSOUND-OS2IDirectSound::SetCooperativeLevel (to %d)", level));
    if (me == NULL) {
      return DSERR_INVALIDPARAM;
    }
@@ -277,13 +271,14 @@ HRESULT WIN32API SoundSetCooperativeLevel(THIS_ HWND hwndClient, DWORD level)
    me->CoopLevel  = level;
    return DS_OK;
 }
+
 //******************************************************************************
 //******************************************************************************
 HRESULT WIN32API SoundGetSpeakerConfig(THIS_ LPDWORD lpSpeakerCfg)
 {
    OS2IDirectSound *me = (OS2IDirectSound *)This;
 
-   dprintf(("DSOUND-OS2IDirectSound::GetSpeakerConfig\n"));
+   dprintf(("DSOUND-OS2IDirectSound::GetSpeakerConfig"));
    if (me == NULL) {
       return(DSERR_INVALIDPARAM);
    }
@@ -298,7 +293,7 @@ HRESULT WIN32API SoundSetSpeakerConfig(THIS_ DWORD speakerCfg)
 {
    OS2IDirectSound *me = (OS2IDirectSound *)This;
 
-   dprintf(("DSOUND-OS2IDirectSound::SetSpeakerConfig %X\n", speakerCfg));
+   dprintf(("DSOUND-OS2IDirectSound::SetSpeakerConfig %X", speakerCfg));
    if (me == NULL) {
      return DSERR_INVALIDPARAM;
    }
@@ -310,7 +305,7 @@ HRESULT WIN32API SoundSetSpeakerConfig(THIS_ DWORD speakerCfg)
 //******************************************************************************
 HRESULT WIN32API SoundInitialize(THIS_ LPGUID)
 {
-   dprintf(("DSOUND-OS2IDirectSound::Initialize NOP\n"));
+   dprintf(("DSOUND-OS2IDirectSound::Initialize NOP"));
    return DS_OK;
 }
 //******************************************************************************

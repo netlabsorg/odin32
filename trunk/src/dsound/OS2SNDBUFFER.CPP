@@ -1,10 +1,10 @@
-/* $Id: OS2SNDBUFFER.CPP,v 1.9 2001-03-06 20:11:16 mike Exp $ */
+/* $Id: OS2SNDBUFFER.CPP,v 1.10 2001-03-10 06:21:06 mike Exp $ */
 
 /*
  * DirectSound SoundBuffer class
  *
  * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
- * Copyright 2000 Michal Necasek
+ * Copyright 2001 Michal Necasek
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -49,6 +49,7 @@ OS2IDirectSoundBuffer *OS2IDirectSoundBuffer::primary = NULL;
 OS2IDirectSoundBuffer::OS2IDirectSoundBuffer(OS2IDirectSound *DSound, const DSBUFFERDESC *lpDSBufferDesc)
         : Referenced(0), lastError(DS_OK)
 {
+   //This is the "normal" constructor
    lpVtbl = &Vtbl;
    Vtbl.AddRef               = SoundBufAddRef;
    Vtbl.Release              = SoundBufRelease;
@@ -109,7 +110,6 @@ OS2IDirectSoundBuffer::OS2IDirectSoundBuffer(OS2IDirectSound *DSound, const DSBU
    pan       = 0;
    DSpan     = 0;
    lpfxFormat= NULL;
-   lpBuffer  = NULL;
    fPlaying  = FALSE;
    fLoop     = FALSE;
    notify    = NULL;
@@ -134,13 +134,100 @@ OS2IDirectSoundBuffer::OS2IDirectSoundBuffer(OS2IDirectSound *DSound, const DSBU
 
    dprintf((" Buffer format: %dHz, %dbit, %d channels", lpfxFormat->nSamplesPerSec, lpfxFormat->wBitsPerSample, lpfxFormat->nChannels));
 
-   lpBuffer = (LPSTR)VirtualAlloc(0, bufferdesc.dwBufferBytes, MEM_COMMIT, PAGE_READWRITE);
-   if (lpBuffer == NULL) {
+   lpSndBuffer = (SOUNDBUF*)VirtualAlloc(0, bufferdesc.dwBufferBytes + sizeof(DWORD), MEM_COMMIT, PAGE_READWRITE);
+   if (lpSndBuffer == NULL) {
       dprintf(("VirtualAlloc failed"));
-      lpBuffer  = NULL;
+      lpSndBuffer  = NULL;
       lastError = DSERR_OUTOFMEMORY;
       return;
    }
+   lpBuffer = &(lpSndBuffer->pData[0]);
+   lpSndBuffer->dwReferences = 1;
+
+   next = dsbroot;
+   dsbroot = this;
+}
+
+//******************************************************************************
+//******************************************************************************
+OS2IDirectSoundBuffer::OS2IDirectSoundBuffer(OS2IDirectSound *DSound, OS2IDirectSoundBuffer *srcBuf)
+        : Referenced(0), lastError(DS_OK)
+{
+   //This is the constructor used for duplicating sound buffers
+   lpVtbl = &Vtbl;
+   Vtbl.AddRef               = SoundBufAddRef;
+   Vtbl.Release              = SoundBufRelease;
+   Vtbl.QueryInterface       = SoundBufQueryInterface;
+   Vtbl.GetCaps              = SoundBufGetCaps;
+   Vtbl.GetFormat            = SoundBufGetFormat;
+   Vtbl.GetVolume            = SoundBufGetVolume;
+   Vtbl.GetStatus            = SoundBufGetStatus;
+   Vtbl.GetCurrentPosition   = SoundBufGetCurrentPosition;
+   Vtbl.GetPan               = SoundBufGetPan;
+   Vtbl.GetFrequency         = SoundBufGetFrequency;
+   Vtbl.Initialize           = SoundBufInitialize;
+   Vtbl.Restore              = SoundBufRestore;
+   Vtbl.SetFormat            = SoundBufSetFormat;
+   Vtbl.SetVolume            = SoundBufSetVolume;
+   Vtbl.SetCurrentPosition   = SoundBufSetCurrentPosition;
+   Vtbl.SetPan               = SoundBufSetPan;
+   Vtbl.SetFrequency         = SoundBufSetFrequency;
+   Vtbl.Lock                 = SoundBufLock;
+   Vtbl.Unlock               = SoundBufUnlock;
+   Vtbl.Stop                 = SoundBufStop;
+   Vtbl.Play                 = SoundBufPlay;
+
+   dprintf(("DSOUND-OS2IDirectSoundBuffer::OS2IDirectSoundBuffer/Duplicate (buf=%X)", this));
+
+   if (srcBuf->fPrimary) {
+      dprintf(("Error: Cannot duplicate primary sound buffer!"));
+      lpBuffer  = NULL;
+      lastError = DSERR_INVALIDPARAM;
+      return;
+   }
+
+   // get the primary buffer from the DSound instance.
+   primary = DSound->primary;
+
+   // No need to check if primary exists - it has to (this can't be the first
+   // secondary buffer being created)
+
+   // Add a reference to the primary buffer for _every_ secondary buffer; this makes
+   // sure that as long as a secondary buffer exists the primary buffer won't get
+   // destroyed; moreover if the user didn't create  a primary buffer himself/herself,
+   // it will automatically get created and destroyed with the last secondary buffer
+   primary->Vtbl.AddRef(primary);
+
+   parentDS  = DSound;
+   writepos  = 0;
+   playpos   = 0;
+   status    = 0;
+   fLocked   = FALSE;
+   fPrimary  = FALSE;
+   volume    = srcBuf->volume;
+   DSvolume  = srcBuf->DSvolume;
+   pan       = srcBuf->pan;
+   DSpan     = srcBuf->DSpan;
+   lpBuffer  = srcBuf->lpBuffer;
+   fPlaying  = FALSE;
+   fLoop     = srcBuf->fLoop;
+   notify    = NULL;
+   memcpy(&bufferdesc, &(srcBuf->bufferdesc), sizeof(DSBUFFERDESC));
+
+   // Note: this cannot be a primary buffer - those take a different route
+
+   // frequency has to be set according to the bufer format
+   frequency = srcBuf->frequency;
+
+   lpfxFormat = (WAVEFORMATEX *)malloc(sizeof(WAVEFORMATEX));
+   memcpy(lpfxFormat,srcBuf->lpfxFormat,
+          sizeof(WAVEFORMATEX));
+
+   dprintf((" Buffer format: %dHz, %dbit, %d channels", lpfxFormat->nSamplesPerSec, lpfxFormat->wBitsPerSample, lpfxFormat->nChannels));
+
+   // Increment reference count for the buffer memory
+   lpSndBuffer  = srcBuf->lpSndBuffer;
+   lpSndBuffer->dwReferences++;
 
    next = dsbroot;
    dsbroot = this;
@@ -156,9 +243,12 @@ OS2IDirectSoundBuffer::~OS2IDirectSoundBuffer()
 
    dprintf(("DSOUND-OS2IDirectSoundBuffer::~OS2IDirectSoundBuffer (buf=%X)", this));
 
-   // free allocted memory
-   if (lpBuffer)
-      VirtualFree(lpBuffer, 0, MEM_RELEASE);
+   // free allocted memory - unless it's shared by a duplicated buffer
+   if (lpSndBuffer) {
+      lpSndBuffer->dwReferences--;
+      if (lpSndBuffer->dwReferences == 0)
+         VirtualFree(lpSndBuffer, 0, MEM_RELEASE);
+   }
 
    if (lpfxFormat)
       free(lpfxFormat);
@@ -327,7 +417,7 @@ HRESULT __stdcall SoundBufGetFormat(THIS_ LPWAVEFORMATEX lpwfxFormat,
    if (me == NULL || lpwfxFormat == NULL || ddwSizeAllocated == 0) {
       return DSERR_INVALIDPARAM;
    }
-   copysize = MIN(ddwSizeAllocated, (me->lpfxFormat->cbSize + sizeof(WAVEFORMATEX)));
+   copysize = min(ddwSizeAllocated, (me->lpfxFormat->cbSize + sizeof(WAVEFORMATEX)));
    memcpy(lpwfxFormat, me->lpfxFormat, copysize);
 
    if (lpdwSizeWritten) {
@@ -456,6 +546,8 @@ HRESULT __stdcall SoundBufLock(THIS_ DWORD dwWriteCursor, DWORD dwWriteBytes,
 HRESULT __stdcall SoundBufPlay(THIS_ DWORD dwRes1, DWORD dwRes2, DWORD dwFlags)
 {
    OS2IDirectSoundBuffer *me = (OS2IDirectSoundBuffer *)This;
+
+   ULONG ulBytesToPlay;
 
    dprintf(("DSOUND-OS2IDirectSoundBuffer::SoundBufPlay (buf=%X)", me));
    if (me == NULL) {
