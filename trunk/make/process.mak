@@ -1,4 +1,4 @@
-# $Id: process.mak,v 1.23 2002-08-24 22:31:24 bird Exp $
+# $Id: process.mak,v 1.24 2002-08-27 03:01:01 bird Exp $
 
 #
 # Unix-like tools for OS/2
@@ -114,7 +114,7 @@
 
 # Default target mode is executable.
 !ifndef TARGET_MODE
-! if "$(BUILD_PROJECT)" != "Odin32"
+! if "$(_BUILD_PROJECT)" != "Odin32"
 TARGET_MODE = EXE
 ! else
 # Odin32 defaults.
@@ -213,17 +213,20 @@ TARGET_DEF_LINK = $(PATH_TARGET)\$(TARGET_NAME)_link.def
 
 # Default definition file for generating the import library. (input)
 !ifndef TARGET_IDEF
-! if "$(BUILD_PROJECT)" != "Odin32"
+! if "$(_BUILD_PROJECT)" != "Odin32"
 TARGET_IDEF = $(TARGET_DEF)
 ! else
-!  ifdef TARGET_IDEF_CONV
+!  if defined(TARGET_IDEF_CONV) || "$(TARGET_IDEF_ORG)" != ""
 TARGET_IDEF = $(PATH_TARGET)\$(TARGET_NAME)_implib.def
+!   ifndef TARGET_IDEF_ORG
 TARGET_IDEF_ORG = $(TARGET_DEF)
+!   endif
 !  else
 TARGET_IDEF = $(TARGET_DEF)
 TARGET_IDEF_ORG = $(TARGET_DEF)
 !  endif
 ! endif
+
 !endif
 
 # Default map file. (output)
@@ -410,6 +413,11 @@ $(ECHO) Target path $(CLRFIL)$(PATH_TARGET)$(CLRTXT) does NOT exist. Creating. $
 !endif
 # not 100% sure about the != EMPTY stuff, but this is way faster.
 
+
+# -----------------------------------------------------------------------------
+# Make all targets 'unprecious'. (works only on nmake5)
+# -----------------------------------------------------------------------------
+.PRECIOUS: .force
 
 
 # -----------------------------------------------------------------------------
@@ -1021,6 +1029,7 @@ publish: publish_target
 ! endif
 !endif
 
+
 #
 # Publish rule which doesn't go down into subdirs and submakes.
 # This one is invoked when a target is 'needed' or early published.
@@ -1045,7 +1054,6 @@ publish_target:
 !if "$(TARGET_DOCS)" != ""
     $(TOOL_COPY) $(TARGET_DOCS) $(PATH_DOC)
 !endif
-
 
 
 
