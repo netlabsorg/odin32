@@ -1,4 +1,4 @@
-# $Id: msvcrt40.mak,v 1.5 2003-01-06 13:26:38 sandervl Exp $
+# $Id: msvcrt40.mak,v 1.6 2003-01-10 13:13:50 sandervl Exp $
 
 #
 # Odin32 API
