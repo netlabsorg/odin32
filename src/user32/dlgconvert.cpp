@@ -1,4 +1,4 @@
-/* $Id: dlgconvert.cpp,v 1.8 1999-08-18 17:17:04 sandervl Exp $ */
+/* $Id: dlgconvert.cpp,v 1.9 1999-08-24 11:42:19 phaller Exp $ */
 
 /*
  * Win32 runtime dialog conversion functions for OS/2
@@ -16,6 +16,15 @@
 #define INCL_DOSPROCESS          /* DOS Process values       */
 #define INCL_DOSMISC             /* DOS Miscellanous values  */
 #define INCL_WIN
+
+#define INCL_WINLISTBOXES       /* List box controls              */
+#define INCL_WINSTDFIND         /* standard find/replace dialogs  */
+#define INCL_WINSTDCOLOR        /* standard color dialog          */
+#define INCL_WINSTDPRINT        /* standard print dialog          */
+#define INCL_WINSTDMLE          /* Multiple Line Edit             */
+
+#include <os2ctlwx.h>           /* support for Open32 WinX styles */
+
 #include <os2wrap.h>    //Odin32 OS/2 api wrappers
 #include <stdio.h>
 #include <string.h>
@@ -724,12 +733,12 @@ static int ConvertClassAndStyle(int winclass, int style, USHORT *os2class, BOOL 
   //    if(style & WINES_UPPERCASE)   os2style |= ;
   //    if(style & WINES_LOWERCASE)   os2style |= ;
   //    if(style & WINES_PASSWORD)    os2style |= ;
-  //    if(style & WINES_AUTOVSCROLL) os2style |= ;
+        if(style & WINES_AUTOVSCROLL) os2style |= MLS_VSCROLL;
   //    if(style & WINES_AUTOHSCROLL) os2style |= ; // @@@PH: experiment
   //    if(style & WINES_NOHIDESEL)   os2style |= ;
   //    if(style & WINES_OEMCONVERT)  os2style |= ;
         if(style & WINES_READONLY)    os2style |= MLS_READONLY;
-  //    if(style & WINES_WANTRETURN)  os2style |= ;
+        if(style & WINES_WANTRETURN)  os2style |= MLS_WANTRETURN;
   //    if(style & WINES_NUMBER)      os2style |= ;
         if(style & WINWS_BORDER)      os2style |= MLS_BORDER;   // @@@PH: experiment
       }
@@ -790,18 +799,19 @@ static int ConvertClassAndStyle(int winclass, int style, USHORT *os2class, BOOL 
 
    case WIN_LISTBOX:
       *os2class = (int)WC_LISTBOX & 0xFFFF;
-//    if(style & WINLBS_NOTIFY)                  os2style |= ;
+      if(style & WINLBS_NOTIFY)                  os2style |= LS_NOTIFY;
 //    if(style & WINLBS_SORT)                    os2style |= ;
 //    if(style & WINLBS_NOREDRAW)                os2style |= ;
       if(style & WINLBS_MULTIPLESEL)             os2style |= LS_MULTIPLESEL;
       if(style & WINLBS_OWNERDRAWFIXED)          os2style |= LS_OWNERDRAW;       //TODO: Correct?
-      if(style & WINLBS_OWNERDRAWVARIABLE)       os2style |= LS_OWNERDRAW;       //TODO: Correct?
-//    if(style & WINLBS_HASSTRINGS)              os2style |= ;
-//    if(style & WINLBS_USETABSTOPS)             os2style |= ;
+      if(style & WINLBS_OWNERDRAWVARIABLE)       os2style |= LS_OWNERDRAWVARIABLE;       //TODO: Correct?
+      if(style & WINLBS_HASSTRINGS)              os2style &= ~LS_NOSTRINGS;
+      else                                       os2style |= LS_NOSTRINGS;
+      if(style & WINLBS_USETABSTOPS)             os2style |= LS_TABSTOPS;
 //    if(style & WINLBS_NOINTEGRALHEIGHT)        os2style |= ;
 //    if(style & WINLBS_MULTICOLUMN)             os2style |= ;
 //    if(style & WINLBS_WANTKEYBOARDINPUT)       os2style |= ;
-//    if(style & WINLBS_EXTENDEDSEL)             os2style |= LS_EXTENDEDSEL;
+      if(style & WINLBS_EXTENDEDSEL)             os2style |= LS_EXTENDEDSEL;
 //    if(style & WINLBS_DISABLENOSCROLL)         os2style |= ;
 //    if(style & WINLBS_NODATA)                  os2style |= ;
       break;
@@ -828,12 +838,14 @@ static int ConvertClassAndStyle(int winclass, int style, USHORT *os2class, BOOL 
       if(style & WINCBS_DROPDOWN)                os2style |= CBS_DROPDOWN;
       else
       if(style & WINCBS_DROPDOWNLIST)            os2style |= CBS_DROPDOWNLIST;
-//    if(style & WINCBS_OWNERDRAWFIXED)          os2style |= ;
-//    if(style & WINCBS_OWNERDRAWVARIABLE)       os2style |= ;
+
+      if(style & WINCBS_OWNERDRAWFIXED)          os2style |= CBS_OWNERDRAW;
+      if(style & WINCBS_OWNERDRAWVARIABLE)       os2style |= CBS_OWNERDRAWVARIABLE;
 //    if(style & WINCBS_AUTOHSCROLL)             os2style |= ;
 //    if(style & WINCBS_OEMCONVERT)              os2style |= ;
 //    if(style & WINCBS_SORT)                    os2style |= ;
-//    if(style & WINCBS_HASSTRINGS)              os2style |= ;
+      if(style & WINCBS_HASSTRINGS)              os2style &= ~CBS_NOSTRINGS;
+      else                                       os2style |= CBS_NOSTRINGS;
 //    if(style & WINCBS_NOINTEGRALHEIGHT)        os2style |= ;
 //    if(style & WINCBS_DISABLENOSCROLL)         os2style |= ;
       break;
