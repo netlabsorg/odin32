@@ -1,4 +1,4 @@
-/* $Id: HOOK.CPP,v 1.14 2000-05-12 18:09:39 sandervl Exp $ */
+/* $Id: HOOK.CPP,v 1.15 2000-10-05 13:47:06 sandervl Exp $ */
 
 /*
  * Windows hook functions
@@ -268,8 +268,7 @@ static HHOOK HOOK_SetHook( INT id, LPVOID proc, INT type,
         return 0;
     }
 
-    dprintf(("Setting hook %d: %08x %04x %08lx\n",
-             id, (UINT)proc, hModule, dwThreadId ));
+    dprintf(("Setting hook %d: %08x %04x %08lx\n", id, (UINT)proc, hModule, dwThreadId ));
 
 #ifndef __WIN32OS2__
     /* Create task queue if none present */
@@ -645,8 +644,10 @@ BOOL WINAPI UnhookWindowsHook( INT id, HOOKPROC proc )
  */
 BOOL WINAPI UnhookWindowsHookEx( HHOOK hhook )
 {
-    if (CHECK_MAGIC(hhook) == FALSE)
+    if (CHECK_MAGIC(hhook) == FALSE) {
+	dprintf(("ERROR: UnhookWindowsHookEx invalid hook %x", hhook));
         return FALSE;
+    }
 
     return HOOK_RemoveHook( (HOOKDATA *)hhook );
 }
@@ -663,9 +664,10 @@ LRESULT WINAPI CallNextHookEx( HHOOK hhook, INT code, WPARAM wParam,
     INT fromtype;       /* figure out Ansi/Unicode */
     HOOKDATA *oldhook;
 
-    if (CHECK_MAGIC(hhook) == FALSE)
+    if (CHECK_MAGIC(hhook) == FALSE) {
+	dprintf(("ERROR: CallNextHookEx invalid hook %x", hhook));
         return FALSE;
-
+    }
     if (!(next = HOOK_GetNextHook( hhook ))) return 0;
 
     oldhook = (HOOKDATA *)hhook ;
