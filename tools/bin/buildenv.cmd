@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.32 2002-09-14 16:01:03 bird Exp $
+/* $Id: buildenv.cmd,v 1.33 2002-09-14 16:29:05 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -2278,6 +2278,7 @@ MSCV6_16: procedure expose aCfg. aPath. sPathFile
     call EnvSet      fRM, 'BUILD_PLATFORM', 'OS2'
     call EnvSet      fRM, 'PATH_MSC',   sPathMSC;
     call EnvAddFront fRM, 'path',       sPathMSC'\binp;'
+    call EnvAddFront fRM, 'endlibpath', sPathMSC'\dll;'
     call EnvAddFront fRM, 'include',    sPathMSC'\include;'
     call EnvAddFront fRM, 'include16',  sPathMSC'\include;'
     call EnvAddFront fRM, 'lib',        sPathMSC'\lib;'
@@ -2370,6 +2371,7 @@ MSCV7_16: procedure expose aCfg. aPath. sPathFile
     call EnvSet      fRM, 'BUILD_PLATFORM', 'OS2'
     call EnvSet      fRM, 'PATH_MSC',   sPathMSC;
     call EnvAddFront fRM, 'path',       sPathMSC'\binp;'
+    call EnvAddFront fRM, 'endlibpath', sPathMSC'\dll;'
     call EnvAddFront fRM, 'include',    sPathMSC'\include;'
     call EnvAddFront fRM, 'include16',  sPathMSC'\include;'
     call EnvAddFront fRM, 'lib',        sPathMSC'\lib;'
