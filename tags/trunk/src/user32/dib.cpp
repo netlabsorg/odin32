@@ -1,4 +1,4 @@
-/* $Id: dib.cpp,v 1.7 2000-11-14 14:27:49 sandervl Exp $ */
+/* $Id: dib.cpp,v 1.8 2000-11-15 20:44:26 sandervl Exp $ */
 
 /*
  * Win32 DIB functions for OS/2
@@ -215,7 +215,7 @@ void DIB_FixColorsToLoadflags(BITMAPINFO * bmi, UINT loadflags, BYTE pix)
  * Return number of bytes taken by a scanline of 16-bit aligned Windows DDB
  * data.
  */
-int BITMAP_GetWidthBytes( INT bmWidth, INT bpp )
+int WIN32API BITMAP_GetWidthBytes( INT bmWidth, INT bpp )
 {
     switch(bpp)
     {
