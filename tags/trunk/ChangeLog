@@ -1,4 +1,14 @@
- /* $Id: ChangeLog,v 1.385 1999-10-30 09:21:41 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.386 1999-10-30 10:56:51 sandervl Exp $ */
+
+ 99-10-30: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Ported Wine MapDialogRect -> fixes Calc dialogs
+
+ 99-10-30: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+	- USER32: Port Wine ascii <-> unicode message conversion for user32 controls
+                  (Wine controls only support ascii msgs)
+
+ 99-10-30: Jens Wiessner <wiessnej@rfi.de>
+	- MSVCRT: Fixed .def file
 
  99-10-29: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: rewrote scrollbar code
