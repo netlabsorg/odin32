@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2328 2002-09-30 12:52:39 sandervl Exp $ */
+/* $Id: changelog,v 1.2329 2002-10-01 11:36:24 sandervl Exp $ */
+
+ 2002-10-01: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Be careful with stack usage in exception handler during
+                  XCPT_GUARD_PAGE_VIOLATION. 
 
  2002-09-30: Sander van Leeuwen <sandervl@innotek   >
     - SHELL32:  o Fixed crash when deleting a file in the file dialog
