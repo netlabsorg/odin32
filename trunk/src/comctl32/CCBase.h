@@ -1,4 +1,4 @@
-/* $Id: CCBase.h,v 1.6 2000-03-21 17:30:40 cbratschi Exp $ */
+/* $Id: CCBase.h,v 1.7 2000-03-30 15:39:09 cbratschi Exp $ */
 /*
  * COMCTL32 Base Functions and Macros for all Controls
  *
@@ -32,7 +32,9 @@ HWND getNotifyWindow(COMCTL32_HEADER *infoPtr);
 HWND getNotifyWindow(COMCTL32_HEADER *infoPtr);
 
 LRESULT sendNotify(HWND hwnd,UINT code);
+LRESULT sendNotify(HWND hwndFrom,HWND hwndTo,UINT code);
 LRESULT sendNotify(HWND hwnd,UINT code,LPNMHDR nmhdr);
+LRESULT sendNotify(HWND hwndFrom,HWND hwndTo,UINT code,LPNMHDR nmhdr);
 LRESULT sendNotifyFormat(HWND hwnd,HWND hwndFrom,LPARAM command);
 LRESULT sendCommand(HWND hwnd,UINT wNotifyCode);
 LRESULT sendHScroll(HWND hwnd,UINT wNotifyCode);
@@ -42,5 +44,7 @@ HWND createToolTip(HWND hwnd,UINT flags,BOOL addtool);
 VOID destroyToolTip(HWND hwndToolTip);
 
 VOID drawStubControl(HWND hwnd,HDC hdc);
+
+INT lstrcmpAtoW(CHAR* textA,WCHAR* textW);
 
 #endif

@@ -1,4 +1,4 @@
-/* $Id: tooltips.cpp,v 1.5 2000-03-21 17:30:45 cbratschi Exp $ */
+/* $Id: tooltips.cpp,v 1.6 2000-03-30 15:39:09 cbratschi Exp $ */
 /*
  * Tool tip control
  *
@@ -441,7 +441,7 @@ TOOLTIPS_Hide (HWND hwnd, TOOLTIPS_INFO *infoPtr)
         return;
 
     toolPtr = &infoPtr->tools[infoPtr->nCurrentTool];
-//    TRACE (tooltips, "Hide tooltip %d!\n", infoPtr->nCurrentTool);
+    //TRACE (tooltips, "Hide tooltip %d!\n", infoPtr->nCurrentTool);
     KillTimer (hwnd, ID_TIMERPOP);
 
     hdr.hwndFrom = hwnd;
@@ -2079,11 +2079,47 @@ TOOLTIPS_GetFont (HWND hwnd, WPARAM wParam, LPARAM lParam)
 static LRESULT
 TOOLTIPS_MouseMessage (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-    TOOLTIPS_INFO *infoPtr = TOOLTIPS_GetInfoPtr (hwnd);
+  TOOLTIPS_INFO *infoPtr = TOOLTIPS_GetInfoPtr (hwnd);
 
+  if (infoPtr->nTrackTool > -1)
+  {
+    DWORD code = 0;
+
+    switch (uMsg)
+    {
+      case WM_LBUTTONDOWN:
+        code = NM_CLICK;
+        break;
+
+      case WM_LBUTTONDBLCLK:
+        code = NM_DBLCLK;
+        break;
+
+      case WM_RBUTTONDOWN:
+        code = NM_RCLICK;
+        break;
+
+      case WM_RBUTTONDBLCLK:
+        code = NM_RDBLCLK;
+        break;
+    }
+
+    if (code)
+    {
+      TTTOOL_INFO *toolPtr = &infoPtr->tools[infoPtr->nTrackTool];
+      NMHDR hdr;
+
+      hdr.hwndFrom = hwnd;
+      hdr.idFrom = toolPtr->uId;
+      hdr.code = code;
+      SendMessageA(toolPtr->hwnd,WM_NOTIFY,(WPARAM)toolPtr->uId,(LPARAM)&hdr);
+    }
+  } else
+  {
     TOOLTIPS_Hide (hwnd, infoPtr);
+  }
 
-    return 0;
+  return 0;
 }
 
 
@@ -2251,6 +2287,10 @@ TOOLTIPS_WinIniChange (HWND hwnd, WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
+LRESULT TOOLTIPS_MouseActivate(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  return MA_NOACTIVATE;
+}
 
 LRESULT CALLBACK
 TOOLTIPS_SubclassProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -2450,12 +2490,18 @@ TOOLTIPS_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
         case WM_LBUTTONDOWN:
         case WM_LBUTTONUP:
+        case WM_LBUTTONDBLCLK:
         case WM_MBUTTONDOWN:
         case WM_MBUTTONUP:
+        case WM_MBUTTONDBLCLK:
         case WM_RBUTTONDOWN:
         case WM_RBUTTONUP:
+        case WM_RBUTTONDBLCLK:
         case WM_MOUSEMOVE:
             return TOOLTIPS_MouseMessage (hwnd, uMsg, wParam, lParam);
+
+        case WM_MOUSEACTIVATE:
+            return TOOLTIPS_MouseActivate(hwnd,wParam,lParam);
 
         case WM_NCCREATE:
             return TOOLTIPS_NCCreate (hwnd, wParam, lParam);
