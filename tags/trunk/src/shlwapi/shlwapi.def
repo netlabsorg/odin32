@@ -1,4 +1,4 @@
-; $Id: shlwapi.def,v 1.1 1999-11-02 20:53:37 phaller Exp $
+; $Id: shlwapi.def,v 1.2 1999-11-02 21:11:07 phaller Exp $
 
 LIBRARY SHLWAPI INITINSTANCE TERMINSTANCE
 DATA MULTIPLE NONSHARED
@@ -250,8 +250,8 @@ IMPORTS
     ; 241    stub    PathRemoveArgsA
     ; 242    stub    PathRemoveArgsW
 
-    _PathRemoveBackslashA              = SHELL32.PathRemoveBackslashA
-    _PathRemoveBackslashW              = SHELL32.PathRemoveBackslashW
+    PathRemoveBackslashA               = SHELL32.PathRemoveBackslashA
+    PathRemoveBackslashW               = SHELL32.PathRemoveBackslashW
 
     ; 245    stdcall PathRemoveBlanksA(str) PathRemoveBlanksA
     ; 246    stdcall PathRemoveBlanksW(wstr) PathRemoveBlanksW
@@ -408,6 +408,6 @@ IMPORTS
     ;
 
 EXPORTS
-    _PathRemoveBackslashA              @243
-    _PathRemoveBackslashW              @244
+    PathRemoveBackslashA              @243
+    PathRemoveBackslashW              @244
 
