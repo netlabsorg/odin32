@@ -1,4 +1,4 @@
-/* $Id: inituser32.cpp,v 1.13 2003-09-11 12:59:14 sandervl Exp $ */
+/* $Id: inituser32.cpp,v 1.14 2003-10-02 10:35:59 sandervl Exp $ */
 /*
  * USER32 DLL entry point
  *
@@ -265,6 +265,7 @@ void APIENTRY cleanupUser32(ULONG ulReason)
    MONITOR_Finalize(&MONITOR_PrimaryMonitor);
    SYSCOLOR_Save();
    CloseSpyQueue();
+   FinalizeWindowHandles();
    STATS_DumpStatsUSER32();
    dprintf(("user32 exit done\n"));
 }

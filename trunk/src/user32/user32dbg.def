@@ -1,4 +1,4 @@
-; $Id: user32dbg.def,v 1.13 2003-07-28 11:27:49 sandervl Exp $
+; $Id: user32dbg.def,v 1.14 2003-10-02 10:36:00 sandervl Exp $
 
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
 DESCRIPTION 'Odin32 System Dll - User32'
@@ -676,6 +676,10 @@ EXPORTS
     PrivateExtractIconExW      = _PrivateExtractIconExW@20     @1017
     PrivateExtractIconExA      = _PrivateExtractIconExA@20     @1018
 
+;
+; ENDOFEXPORTS
+; Internal function marker
+;
 
 ;------------------------------------------------------------------------------
 ; Wine/Odin helper function

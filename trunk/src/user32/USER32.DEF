@@ -1,4 +1,4 @@
-; $Id: USER32.DEF,v 1.80 2003-07-28 11:27:44 sandervl Exp $
+; $Id: USER32.DEF,v 1.81 2003-10-02 10:35:59 sandervl Exp $
 
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
 DESCRIPTION 'Odin32 System Dll - User32'
@@ -676,6 +676,11 @@ EXPORTS
     PrivateExtractIconsA       = _PrivateExtractIconsA@32      @1016
     PrivateExtractIconExW      = _PrivateExtractIconExW@20     @1017
     PrivateExtractIconExA      = _PrivateExtractIconExA@20     @1018
+
+;
+; ENDOFEXPORTS
+; Internal function marker
+;
 
 
 ;------------------------------------------------------------------------------

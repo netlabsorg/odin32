@@ -1,4 +1,4 @@
-/* $Id: win32wndhandle.h,v 1.5 2002-04-07 14:37:00 sandervl Exp $ */
+/* $Id: win32wndhandle.h,v 1.6 2003-10-02 10:36:00 sandervl Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
@@ -19,6 +19,7 @@
 #define WINHANDLE_CRITSECTION_NAME "\\SEM32\\ODIN_WINHANDLE.SEM"
 
 void  InitializeWindowHandles();
+void  FinalizeWindowHandles();
 BOOL  HwAllocateWindowHandle(HWND *hwnd, DWORD dwUserData);
 void  HwFreeWindowHandle(HWND hwnd);
 BOOL  HwGetWindowHandleData(HWND hwnd, DWORD *pdwUserData);
