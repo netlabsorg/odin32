@@ -1,4 +1,4 @@
-/* $Id: oslibgpi.cpp,v 1.12 2002-11-29 13:46:04 sandervl Exp $ */
+/* $Id: oslibgpi.cpp,v 1.13 2003-01-28 16:21:48 sandervl Exp $ */
 
 /*
  * GPI interface code
@@ -406,7 +406,9 @@ int OSLibGpiQueryFontMaxHeight(HDC hdc)
 
   rc = GpiQueryFontMetrics(hdc, sizeof(metrics), &metrics);
   if(rc) {
-  	return metrics.lMaxAscender;
+  	return max(metrics.lMaxBaselineExt, 
+                   max(metrics.lMaxAscender+metrics.lMaxDescender, 
+                       metrics.lInternalLeading+metrics.lEmHeight));
   }
   else {
 	dprintf(("GpiQueryFontMetrics returned FALSE!!"));
