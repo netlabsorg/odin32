@@ -1,4 +1,4 @@
-/* $Id: progress.h,v 1.1 1999-05-24 20:19:17 ktk Exp $ */
+/* $Id: progress.h,v 1.2 2000-03-17 17:10:52 cbratschi Exp $ */
 
 /*
  * Progress class extra info
@@ -13,12 +13,14 @@
 
 typedef struct
 {
+  COMCTL32_HEADER header;
+
   INT       CurVal;       /* Current progress value */
   INT       MinVal;       /* Minimum progress value */
   INT       MaxVal;       /* Maximum progress value */
   INT       Step;         /* Step to use on PMB_STEPIT */
-  COLORREF    ColorBar;     /* Bar color */
-  COLORREF    ColorBk;      /* Background color */
+  COLORREF  ColorBar;     /* Bar color */
+  COLORREF  ColorBk;      /* Background color */
   HFONT     hFont;        /* Handle to font (not unused) */
 } PROGRESS_INFO;
 

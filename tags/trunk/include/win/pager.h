@@ -1,4 +1,4 @@
-/* $Id: pager.h,v 1.1 1999-05-24 20:19:16 ktk Exp $ */
+/* $Id: pager.h,v 1.2 2000-03-17 17:10:52 cbratschi Exp $ */
 
 /*
  * Pager class extra info
@@ -12,6 +12,8 @@
 
 typedef struct tagPAGER_INFO
 {
+    COMCTL32_HEADER header;
+
     HWND   hwndChild;
     COLORREF clrBk;
     INT    nBorder;
