@@ -1,4 +1,3 @@
-/* $Id: obj_misc.h,v 1.6 2002-11-12 17:04:37 sandervl Exp $ */
 /*
  * Defines miscellaneous COM interfaces and APIs defined in objidl.h.
  * These did not really fit into the other categories, whould have 
