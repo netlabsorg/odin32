@@ -1,4 +1,4 @@
-/* $Id: odinwrap.h,v 1.24 2000-10-02 15:52:06 phaller Exp $ */
+/* $Id: odinwrap.h,v 1.25 2000-10-02 16:20:11 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -54,16 +54,7 @@
 
 
 // ---------------------------------------------------------------------------
-//SvL: Eases locating apis that corrupt FS
-#define error_FSSelector "!!! ERROR - FS Selector for thread %d corrupted by this function call !!!"
-
 extern int IsExeStarted(); //kernel32
-
-#define FS_check()                       \
-  { USHORT sel = GetFS();                \
-    if(sel == 0x150b && IsExeStarted())  \
-      dprintf(((char *)error_FSSelector, GetCurrentThreadId()));    \
-  }
 
 
 // ---------------------------------------------------------------------------
@@ -105,13 +96,15 @@ extern int IsExeStarted(); //kernel32
 
 
 #define FNPROLOGUE(a)   \
+  USHORT sel = GetFS(); \
   ODIN_HEAPCHECK();     \
   PROFILE_START(a)
 
 #define FNEPILOGUE(a)   \
   PROFILE_STOP(a)       \
-  FS_check();           \
   ODIN_HEAPCHECK();     \
+  if (sel != GetFS() && IsExeStarted()) \
+    dprintf(("ERROR: FS: for thread %08xh corrupted!", GetCurrentThreadId()));
   
   
 /****************************************************************************
