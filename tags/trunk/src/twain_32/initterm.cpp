@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.2 2000-01-04 22:26:19 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.3 2000-01-05 19:52:37 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -34,13 +34,22 @@
 #include <win32type.h>
 #include <odinlx.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
+#include <twain.h>
 
 extern "C" {
 void CDECL _ctordtorInit( void );
 void CDECL _ctordtorTerm( void );
 
- //Win32 resource table (produced by wrc)
- extern DWORD _Resource_PEResTab;
+//Win32 resource table (produced by wrc)
+extern DWORD _Resource_PEResTab;
+
+extern FARPROC   WINAPI GetProcAddress(HMODULE,LPCSTR);
+extern HMODULE   WINAPI LoadLibraryA(LPCSTR);
+extern BOOL      WINAPI FreeLibrary(HMODULE);
+TW_UINT16 (APIENTRY *TWAINOS2_DSM_Entry)( pTW_IDENTITY, pTW_IDENTITY,
+	   TW_UINT32, TW_UINT16, TW_UINT16, TW_MEMREF) = 0;
+static HINSTANCE hTWAINOS2 = 0;
+
 }
 
 /*-------------------------------------------------------------------*/
@@ -90,8 +99,18 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          if(rc)
                 return 0UL;
 
+         hTWAINOS2 = LoadLibraryA("TWAINOS2.DLL");
+         if(hTWAINOS2) 
+         {   
+                *(VOID **)&TWAINOS2_DSM_Entry=(void*)GetProcAddress(hTWAINOS2, (LPCSTR)"DSM_Entry");
+         }
+	 else 	return 0;	//SvL: fail to load otherwise
+
          break;
       case 1 :
+         if(hTWAINOS2) 
+	 	FreeLibrary(hTWAINOS2);
+         hTWAINOS2 = 0;
 	 UnregisterLxDll(hModule);
          break;
       default  :
