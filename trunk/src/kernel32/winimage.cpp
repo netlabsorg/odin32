@@ -1,4 +1,4 @@
-/* $Id: winimage.cpp,v 1.14 1999-08-23 13:54:43 sandervl Exp $ */
+/* $Id: winimage.cpp,v 1.15 1999-08-23 17:02:35 sandervl Exp $ */
 
 /*
  * Win32 PE Image class
@@ -88,7 +88,7 @@ Win32Image::Win32Image(char *szFileName) :
     char logname[32];
 	sprintf(logname, "pe_%d.log", loadNr);
     	fout.open(logname, ios::out | ios::trunc);
-	dprintf(("PE LOGFILE for %s: %s (rc=%d)", szModule, logname));
+	dprintf(("PE LOGFILE for %s: %s", szModule, logname));
     	foutInit = TRUE;
   }
 
@@ -1131,7 +1131,7 @@ BOOL Win32Image::processImports(char *win32file)
     WinDll = Win32Dll::findModule(pszCurModule);
     if(WinDll == NULL)
     {  //not found, so load it
-        WinDll = new Win32Dll(pszCurModule);
+        WinDll = new Win32Dll(pszCurModule, this);
 
         if(WinDll == NULL) {
             fout << "WinDll: Error allocating memory" << endl;
