@@ -1,4 +1,4 @@
-/* $Id: obj_propertystorage.h,v 1.5 1999-08-22 22:52:10 sandervl Exp $ */
+/* $Id: obj_propertystorage.h,v 1.6 2004-01-30 22:22:02 bird Exp $ */
 /*
  * Defines the COM interfaces and APIs related to saving properties to file.
  */
@@ -90,7 +90,7 @@ extern const FMTID FMTID_UserDefinedProperties;
 typedef struct tagPROPSPEC
 {
     ULONG ulKind;
-    union 
+    union
     {
         PROPID propid;
         LPOLESTR lpwstr;
@@ -169,7 +169,7 @@ ICOM_DEFINE(IEnumSTATPROPSETSTG,IUnknown)
     ICOM_METHOD1(HRESULT,Clone, IEnumSTATPROPSTG**,ppenum)
 #define IEnumSTATPROPSTG_IMETHODS \
 		IUnknown_IMETHODS \
-		IEnumSTATPROPSTG_METHODS 
+		IEnumSTATPROPSTG_METHODS
 ICOM_DEFINE(IEnumSTATPROPSTG,IUnknown)
 #undef ICOM_INTERFACE
 
@@ -350,9 +350,10 @@ struct tagPROPVARIANT
     WORD wReserved1;
     WORD wReserved2;
     WORD wReserved3;
-    union 
+    union
     {
-         /* Empty union arm */ 
+         /* Empty union arm */
+        char cVal;
         UCHAR bVal;
         short iVal;
         USHORT uiVal;
