@@ -1,4 +1,4 @@
-# $Id: pdwin32.vac36.dbg,v 1.10 2000-03-04 23:45:31 sandervl Exp $
+# $Id: pdwin32.vac36.dbg,v 1.11 2000-03-05 14:37:39 bird Exp $
 # ODIN / win32os2 Project
 #
 # DEBUG makefile for the VAC 3.6.5 compiler environment
@@ -23,6 +23,7 @@ LD2    = ilink
 IMPLIB = implib
 ILIB   = ilib
 RC     = $(PDWIN32_TOOLS)\wrc
+OS2RC  = rc
 
 #
 # Tool Flags
@@ -46,6 +47,7 @@ LD2FLAGS_ODINCRT = /nologo /DE /noe /map /dbgpack /packcode /packdata /exepack:2
 IMPLIBFLAGS      = /nologo
 ILIBFLAGS        = /nofree /quiet /nologo
 RCFLAGS          = -s -I. -I$(CPPMAIN)\include -I$(PDWIN32_INCLUDE) -I$(PDWIN32_INCLUDE)\win
+OS2RCFLAGS       = -r
 
 !ifdef NODEBUGINFO
 LDFLAGS          = $(LDFLAGS) /B"/nodebug /nodbgpack"
