@@ -1,4 +1,4 @@
-/* $Id: odin32env.cmd,v 1.21 2001-09-06 03:23:20 bird Exp $
+/* $Id: odin32env.cmd,v 1.22 2002-02-08 10:54:03 bird Exp $
  *
  * Sets the build environment.
  *
@@ -9,6 +9,7 @@
  */
 
 parse arg sCompiler
+    sCompiler = translate(sCompiler, 'abcdeghijklmnopqrstuvwxyz', 'ABCDEGHIJKLMNOPQRSTUVWXYZ');
 
     /*
      * To use this script you'll have to adjust some paths to match your local
@@ -38,26 +39,47 @@ parse arg sCompiler
     call EMX 0;
     if (sCompiler = 'watcom') then
     do /* watcom */
+        say 'Watcom';
         call VAC30 1;
         call VAC36 1;
+        call VAC40 1;
         call VAC36 0;
         call Watcom 0;
+        call Toolkit40 0;
     end
-    else if (sCompiler = 'vac36') then
+    else if ((sCompiler = 'vac36') | (sCompiler = 'vac365')) then
     do /* vac36 */
+        say 'VAC36(5)';
+        call VAC30 1;
+        call Watcom 1;
+        call NetQOS2 0;
+        call VAC40 1;
+        call VAC36 0;
+        call Toolkit40 0;
+    end
+    else if (sCompiler = 'vac40') then
+    do /* vac40 */
+        say 'VAC40';
         call VAC30 1;
         call Watcom 1;
         call NetQOS2 0;
         call VAC36 0;
+        call Toolkit40 0;
+        call VAC40 0;
     end
     else
     do /* default is vac30 */
+        say 'VAC30';
         call VAC36 1;
         call Watcom 1;
+        call VAC40 1;
         call VAC30 0;
+        call Toolkit40 0;
     end
-    call Toolkit40 0;
+
     call EnvVar_Set 0, 'DEBUG',      '1'
+    call EnvVar_Set 0, 'BUILD_MODE', 'DEBUG'
+    call EnvVar_Set 0, 'BUILD_PLATFORM', 'OS2'
 
     exit(0);
 
@@ -204,7 +226,7 @@ mySQL: procedure
     /*
      * mySQL Database system main directory.
      */
-    sMySQLMain    = 'd:\knut\apps\MySql';
+    sMySQLMain    = 'd:\knut\apps\MySql-3.23.42-rel3';
     call EnvVar_Set      fRM, 'mysqlmain',      sMySQLMain;
     call EnvVar_AddFront fRM, 'path',           sMySQLMain'\bin;'
     call EnvVar_AddFront fRM, 'beginlibpath',   sMySQLMain'\dll;'
@@ -387,6 +409,7 @@ VAC30: procedure
      */
     sCPPMain = 'c:\appl\os2\ibmcpp30'
     call EnvVar_Set      fRM, 'CCENV',      'VAC30'
+    call EnvVar_Set      fRM, 'build_env',  'VAC308'
     call EnvVar_Set      fRM, 'CPPMAIN',        sCPPMain
     call EnvVar_AddFront fRM, 'beginlibpath',   sCPPMain'\DLL;'sCPPMain'\SAMPLES\TOOLKIT\DLL;'
     call EnvVar_AddFront fRM, 'path',           sCPPMain'\BIN;'sCPPMain'\SMARTS\SCRIPTS;'sCPPMain'\HELP;'
@@ -444,6 +467,7 @@ VAC36: procedure
     sCxxMain    = 'e:\apps\ibmcxxo';
 
     call EnvVar_Set      fRM, 'CCENV',      'VAC36'
+    call EnvVar_Set      fRM, 'build_env',  'VAC365'
     call EnvVar_Set      fRM, 'cxxmain', sCxxMain;
     call EnvVar_AddFront fRM, 'beginlibpath', sCxxMain'\dll;'sCxxMain'\runtime;'
     call EnvVar_AddFront fRM, 'dpath',       sCxxMain'\help;'sCxxMain'\local;'
@@ -462,7 +486,7 @@ VAC36: procedure
 /*
  * Visual Age for C++ v4.0 for OS/2.
  */
-VAC36: procedure
+VAC40: procedure
     parse arg fRM
 
     /*
@@ -470,7 +494,9 @@ VAC36: procedure
      */
     sVACppMain    = 'e:\apps\ibmcpp40';
 
-    call EnvVar_Set      fRM, 'vacppmain', sVACppMain;
+    call EnvVar_Set      fRM, 'vacppmain',  sVACppMain;
+    call EnvVar_Set      fRM, 'build_env',  'VAC365' /* on purpose! */
+    call EnvVar_Set      fRM, 'CCENV',      'VAC36'
 
     call EnvVar_AddFront fRM, 'beginlibpath', sVACppMain'\dll;'sVACppMain'\runtime;'
     call EnvVar_AddFront fRM, 'dpath',       sVACppMain'\etc;'sVACppMain'\help;'sVACppMain'\runtime;'
@@ -501,6 +527,7 @@ Watcom: procedure
     sWatcom = 'd:\knut\apps\Watcom';
 
     call EnvVar_Set      fRM, 'CCENV',      'WAT'
+    call EnvVar_Set      fRM, 'build_env',  'WATCOM'
     call EnvVar_Set      fRM, 'watcom', sWatcom;
     call EnvVar_Set      fRM, 'edpath',      sWatcom'\eddat'
     call EnvVar_AddFront fRM, 'beginlibpath', sWatcom'\binp\dll;'
