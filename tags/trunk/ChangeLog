@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.370 1999-10-26 17:52:00 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.371 1999-10-26 22:48:22 phaller Exp $ */
 
  99-10-26: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Fixed bugs in menu apis (Append/InsertMenuA/W)
@@ -20,7 +20,8 @@
                 (workaround: save original config.sys and restore it afterwards)
 
  99-10-26: Patrick Haller <phaller@gmx.net>
-	- USER32: Ported Wine menu(ex) parser and integrated it into menu code
+	- USER32: Add: Ported Wine menu(ex) parser and integrated it into menu code
+	- WINMM:  Fix: invalid callback check in dwaveout.cpp (Q2 makes noise again) 
 
  99-10-25: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Removed SetFocus call in Edit control (WM_LBUTTONDOWN)
