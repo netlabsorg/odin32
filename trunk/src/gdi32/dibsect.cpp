@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.14 2000-02-01 12:53:29 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.15 2000-02-02 23:45:06 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -14,11 +14,12 @@
 #include <os2wrap.h>  //Odin32 OS/2 api wrappers
 #include <stdlib.h>
 #include <string.h>
-#include "win32type.h"
-#include "misc.h"
+#include <win32type.h>
+#include <misc.h>
 #define  OS2_ONLY
 #include "dibsect.h"
 #include <vmutex.h>
+#include <winconst.h>
 
 HWND WIN32API WindowFromDC(HDC hdc);
 HWND Win32ToOS2Handle(HWND hwnd);
@@ -42,7 +43,7 @@ static VMutex dibMutex;
 //This is not a complete solution for CreateDIBSection, but enough for Quake 2!
 //******************************************************************************
 //******************************************************************************
-DIBSection::DIBSection(WINBITMAPINFOHEADER *pbmi, DWORD iUsage, DWORD handle, int fFlip)
+DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DWORD handle, int fFlip)
                 : bmpBits(NULL), pOS2bmp(NULL), next(NULL)
 {
   int  os2bmpsize;
@@ -96,7 +97,7 @@ DIBSection::DIBSection(WINBITMAPINFOHEADER *pbmi, DWORD iUsage, DWORD handle, in
    pOS2bmp->cBitCount     = pbmi->biBitCount;
    pOS2bmp->ulCompression = pbmi->biCompression;
    //SvL: Ignore BI_BITFIELDS type (GpiDrawBits fails otherwise)
-   if(pOS2bmp->ulCompression == 3) {
+   if(pOS2bmp->ulCompression == BI_BITFIELDS) {
 	pOS2bmp->ulCompression = 0;
    }
    pOS2bmp->cbImage       = pbmi->biSizeImage;
@@ -108,6 +109,29 @@ DIBSection::DIBSection(WINBITMAPINFOHEADER *pbmi, DWORD iUsage, DWORD handle, in
    dprintf(("pOS2bmp->ulCompression %d\n", pOS2bmp->ulCompression));
    dprintf(("pOS2bmp->cbImage       %d\n", pOS2bmp->cbImage));
    dprintf(("Bits at %x, size %d",bmpBits, bmpsize*pbmi->biHeight));
+
+   // clear DIBSECTION structure
+   memset(&dibinfo, 0, sizeof(dibinfo));
+
+   // copy BITMAPINFOHEADER data into DIBSECTION structure
+   memcpy(&dibinfo.dsBmih, pbmi, sizeof(*pbmi));
+   dibinfo.dsBm.bmType      = 0;
+   dibinfo.dsBm.bmWidth     = pbmi->biWidth;
+   dibinfo.dsBm.bmHeight    = pbmi->biHeight;
+   dibinfo.dsBm.bmWidthBytes= bmpsize;
+   dibinfo.dsBm.bmPlanes    = pbmi->biPlanes;
+   dibinfo.dsBm.bmBitsPixel = pbmi->biBitCount;
+   dibinfo.dsBm.bmBits      = bmpBits;
+
+   dibinfo.dshSection       = handle;
+   dibinfo.dsOffset         = 0; // TODO: put the correct value here (if createdibsection with file handle)
+
+   if(pbmi->biCompression == BI_BITFIELDS) {
+    	dibinfo.dsBitfields[0] = *((DWORD *)pColors);
+    	dibinfo.dsBitfields[1] = *((DWORD *)pColors+1);
+    	dibinfo.dsBitfields[2] = *((DWORD *)pColors+2);
+	dprintf(("BI_BITFIELDS %x %x %x", dibinfo.dsBitfields[0], dibinfo.dsBitfields[1], dibinfo.dsBitfields[2]));
+   }
 
    this->handle = handle;
    this->iUsage = iUsage;
@@ -164,7 +188,7 @@ DIBSection::~DIBSection()
 //******************************************************************************
 //******************************************************************************
 int DIBSection::SetDIBits(HDC hdc, HBITMAP hbitmap, UINT startscan, UINT
-                          lines, const VOID *bits, WINBITMAPINFOHEADER *pbmi,
+                          lines, const VOID *bits, BITMAPINFOHEADER_W *pbmi,
                           UINT coloruse)
 {
   lines = (int)lines >= 0 ? (int)lines : (int)-lines;
@@ -382,53 +406,19 @@ void DIBSection::deleteSection(DWORD handle)
 int DIBSection::GetDIBSection(int iSize, void *lpBuffer)
 {
  DIBSECTION *pDIBSection = (DIBSECTION *)lpBuffer;
- LPWINBITMAP dsBm        = (LPWINBITMAP)lpBuffer;
+ LPBITMAP_W  dsBm        = (LPBITMAP_W)lpBuffer;
 
   dprintf2(("GetDIBSection %x %d %x", handle, iSize, lpBuffer));
   if(iSize == sizeof(DIBSECTION))
   {
-    // BITMAP struct
-    pDIBSection->dsBm.bmType       = 0;  // TODO: put the correct value here
-    pDIBSection->dsBm.bmWidth      = pOS2bmp->cx;
-    pDIBSection->dsBm.bmHeight     = pOS2bmp->cy;
-    pDIBSection->dsBm.bmWidthBytes = bmpsize;
-    pDIBSection->dsBm.bmPlanes     = pOS2bmp->cPlanes;
-    pDIBSection->dsBm.bmBitsPixel  = pOS2bmp->cBitCount;
-    pDIBSection->dsBm.bmBits       = bmpBits;
-    // BITMAPINFOHEADER data
-    pDIBSection->dsBmih.biSize = sizeof(BITMAPINFOHEADER);
-    pDIBSection->dsBmih.biWidth       = pOS2bmp->cx;
-    pDIBSection->dsBmih.biHeight      = pOS2bmp->cy;
-    pDIBSection->dsBmih.biPlanes      = pOS2bmp->cPlanes;
-    pDIBSection->dsBmih.biBitCount    = pOS2bmp->cBitCount;
-    pDIBSection->dsBmih.biCompression = pOS2bmp->ulCompression;
-    pDIBSection->dsBmih.biSizeImage   = pOS2bmp->cbImage;
-    pDIBSection->dsBmih.biXPelsPerMeter = 0; // TODO: put the correct value here
-    pDIBSection->dsBmih.biYPelsPerMeter = 0;
-    pDIBSection->dsBmih.biClrUsed       = (1<< pOS2bmp->cBitCount);
-    pDIBSection->dsBmih.biClrImportant  = 0;
-
-    pDIBSection->dsBitfields[0] = 0; // TODO: put the correct value here
-    pDIBSection->dsBitfields[1] = 0;
-    pDIBSection->dsBitfields[2] = 0;
-
-    pDIBSection->dshSection = this->handle;
-
-    pDIBSection->dsOffset = 0; // TODO: put the correct value here
-
-    return sizeof(DIBSECTION);
+	memcpy(pDIBSection, &dibinfo, sizeof(dibinfo));
+        return sizeof(DIBSECTION);
   }
   else
-  if(iSize == sizeof(WINBITMAP))
+  if(iSize == sizeof(BITMAP_W))
   {
-    	dsBm->bmType       = 0;  // TODO: put the correct value here
-    	dsBm->bmWidth      = pOS2bmp->cx;
-    	dsBm->bmHeight     = pOS2bmp->cy;
-    	dsBm->bmWidthBytes = bmpsize;
-    	dsBm->bmPlanes     = pOS2bmp->cPlanes;
-    	dsBm->bmBitsPixel  = pOS2bmp->cBitCount;
-    	dsBm->bmBits       = bmpBits;
-	return sizeof(WINBITMAP);
+	memcpy(dsBm, &dibinfo.dsBm, sizeof(dibinfo.dsBm));
+	return sizeof(BITMAP_W);
   }
   return 0;
 

@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.37 2000-02-01 12:53:30 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.38 2000-02-02 23:45:06 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -776,6 +776,7 @@ int WIN32API GetDeviceCaps(HDC hdc, int nIndex)
     //SvL: 13-9-'98: NT returns -1 when using 16 bits colors, NOT 65536!
     if(nIndex == NUMCOLORS && rc > 256)
         return -1;
+
     return(rc);
 }
 //******************************************************************************

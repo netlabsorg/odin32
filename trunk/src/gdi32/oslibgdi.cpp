@@ -1,4 +1,4 @@
-/* $Id: oslibgdi.cpp,v 1.4 2000-02-01 12:53:30 sandervl Exp $ */
+/* $Id: oslibgdi.cpp,v 1.5 2000-02-02 23:45:07 sandervl Exp $ */
 
 /*
  * GDI32 support code
@@ -23,7 +23,7 @@
 //******************************************************************************
 INT OSLibSetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx, DWORD cy,
                            INT xSrc, INT ySrc, UINT startscan, UINT lines,
-                           LPCVOID bits, WINBITMAPINFOHEADER *info,
+                           LPCVOID bits, BITMAPINFOHEADER_W *info,
                            UINT coloruse)
 {
   INT result, rc;

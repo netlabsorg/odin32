@@ -1,4 +1,4 @@
-/* $Id: dibitmap.cpp,v 1.1 2000-02-01 12:53:29 sandervl Exp $ */
+/* $Id: dibitmap.cpp,v 1.2 2000-02-02 23:45:06 sandervl Exp $ */
 
 /*
  * GDI32 dib & bitmap code
@@ -81,7 +81,7 @@ HBITMAP WIN32API CreateDIBSection( HDC hdc, BITMAPINFO *pbmi, UINT iUsage,
 {
  HBITMAP res = 0;
  BOOL    fFlip = 0;
- int iHeight, iWidth;
+ int     iHeight, iWidth;
 
   dprintf(("GDI32: CreateDIBSection %x %x %x %x %d", hdc, iUsage, ppvBits, hSection, dwOffset));
   if(hSection)
@@ -109,17 +109,18 @@ HBITMAP WIN32API CreateDIBSection( HDC hdc, BITMAPINFO *pbmi, UINT iUsage,
   res = O32_CreateDIBitmap(hdc, &pbmi->bmiHeader, 0, NULL, pbmi, iUsage);
   if (res)
   {
-    ULONG Pal[256];
     char PalSize;
-    LOGPALETTE tmpPal = { 0x300,1,{0,0,0,0}};
-    HPALETTE hpalCur, hpalTmp;
-    DIBSection *dsect = new DIBSection((WINBITMAPINFOHEADER *)&pbmi->bmiHeader, iUsage, (DWORD)res, fFlip);
+    DIBSection *dsect = new DIBSection((BITMAPINFOHEADER_W *)&pbmi->bmiHeader, (char *)&pbmi->bmiColors, iUsage, (DWORD)res, fFlip);
 
-    if(NULL!=dsect)
+    if(dsect != NULL)
     {
       PalSize = dsect->GetBitCount();
-      if(PalSize<=8)
+      if(PalSize <= 8)
       {
+       ULONG Pal[256];
+       LOGPALETTE tmpPal = { 0x300,1,{0,0,0,0}};
+       HPALETTE hpalCur, hpalTmp;
+
         // Now get the current Palette from the DC
         hpalTmp = CreatePalette(&tmpPal);
         hpalCur = SelectPalette(hdc, hpalTmp, FALSE);
@@ -169,7 +170,7 @@ HBITMAP WIN32API CreateDIBSection( HDC hdc, BITMAPINFO *pbmi, UINT iUsage,
 UINT WIN32API GetDIBColorTable( HDC hdc, UINT uStartIndex, UINT cEntries,
                                   RGBQUAD *pColors)
 {
- HPALETTE hpal = O32_GetCurrentObject(hdc, OBJ_PAL);
+ HPALETTE hpal = GetCurrentObject(hdc, OBJ_PAL);
  UINT rc;
  int i;
 
@@ -207,24 +208,24 @@ UINT WIN32API SetDIBColorTable(HDC hdc, UINT uStartIndex, UINT cEntries,
 }
 //******************************************************************************
 //******************************************************************************
-LONG WIN32API GetBitmapBits( HBITMAP arg1, LONG arg2, PVOID  arg3)
+LONG WIN32API GetBitmapBits( HBITMAP hBitmap, LONG arg2, PVOID  arg3)
 {
-    dprintf(("GDI32: GetBitmapBits"));
-    return O32_GetBitmapBits(arg1, arg2, arg3);
+    dprintf(("GDI32: GetBitmapBits %x", hBitmap));
+    return O32_GetBitmapBits(hBitmap, arg2, arg3);
 }
 //******************************************************************************
 //******************************************************************************
-LONG WIN32API SetBitmapBits( HBITMAP arg1, LONG arg2, const VOID *  arg3)
+LONG WIN32API SetBitmapBits( HBITMAP hBitmap, LONG arg2, const VOID *  arg3)
 {
-    dprintf(("GDI32: SetBitmapBits"));
-    return O32_SetBitmapBits(arg1, (DWORD)arg2, arg3);
+    dprintf(("GDI32: SetBitmapBits %x", hBitmap));
+    return O32_SetBitmapBits(hBitmap, (DWORD)arg2, arg3);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GetBitmapDimensionEx( HBITMAP arg1, PSIZE  arg2)
+BOOL WIN32API GetBitmapDimensionEx( HBITMAP hBitmap, PSIZE pSize)
 {
-    dprintf(("GDI32: GetBitmapDimensionEx"));
-    return O32_GetBitmapDimensionEx(arg1, arg2);
+    dprintf(("GDI32: GetBitmapDimensionEx %x (%d,%d)", hBitmap, pSize->cx, pSize->cy));
+    return O32_GetBitmapDimensionEx(hBitmap, pSize);
 }
 //******************************************************************************
 //******************************************************************************
@@ -250,12 +251,13 @@ int WIN32API SetDIBits( HDC arg1, HBITMAP arg2, UINT arg3, UINT arg4, const VOID
 {
     dprintf(("GDI32: SetDIBits %x %x %x %x %x %x %x\n", arg1, arg2, arg3, arg4, arg5, arg6, arg7));
 
-    if(DIBSection::getSection() != NULL) {
+    if(DIBSection::getSection() != NULL) 
+    {
         DIBSection *dsect;
 
         dsect = DIBSection::find((DWORD)arg2);
         if(dsect) {
-           return dsect->SetDIBits(arg1, arg2, arg3, arg4, arg5, (WINBITMAPINFOHEADER *)&arg6->bmiHeader, arg7);
+           return dsect->SetDIBits(arg1, arg2, arg3, arg4, arg5, (BITMAPINFOHEADER_W *)&arg6->bmiHeader, arg7);
         }
     }
     return O32_SetDIBits(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
