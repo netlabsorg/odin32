@@ -1,4 +1,4 @@
-/* $Id: OS2DDRAW.CPP,v 1.29 2001-06-16 16:12:03 sandervl Exp $ */
+/* $Id: OS2DDRAW.CPP,v 1.30 2001-09-24 18:42:00 sandervl Exp $ */
 
 /*
  * DX Draw base class implementation
@@ -207,6 +207,10 @@ OS2IDirectDraw::OS2IDirectDraw(GUID *lpGUID) :
   pdwUnknownData[235] = dCaps.ulHorizontalResolution;
   pdwUnknownData[236] = dCaps.ulVerticalResolution;
   pdwUnknownData[241] = dCaps.ulDepth;
+
+  screenwidth  = dCaps.ulVerticalResolution;
+  screenheight = dCaps.ulHorizontalResolution;
+  screenbpp    = dCaps.ulDepth;
 
   // Shall we run in FS mode ?
   if(ERROR_SUCCESS==RegOpenKeyA(HKEY_LOCAL_MACHINE,KEY_DIRECT2DRAW,&hkDirectDraw2))
@@ -761,6 +765,7 @@ HRESULT WIN32API DrawEnumDisplayModes( THIS This,
               break;
           }
 
+          dprintf(("Call lpDDEnumModesCallback with mode (%d,%d) bps %d", DDSurfAct.dwWidth, DDSurfAct.dwHeight, ModesDive[iMode].iBits));
           fCallAgain = lpDDEnumModesCallback(&DDSurfAct,lpContext);
         }
         iMode++;
@@ -1035,6 +1040,7 @@ HRESULT WIN32API DrawEnumDisplayModes4(THIS This, DWORD dwFlags, LPDDSURFACEDESC
               break;
           }
 
+          dprintf(("Call lpDDEnumModesCallback with mode (%d,%d) bps %d", DDSurfAct.dwWidth, DDSurfAct.dwHeight, ModesDive[iMode].iBits));
           fCallAgain = lpDDEnumModesCallback2(&DDSurfAct,lpContext);
         }
         iMode++;
