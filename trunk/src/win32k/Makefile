@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.64 2000-12-11 06:53:47 bird Exp $
+# $Id: Makefile,v 1.65 2000-12-16 23:07:25 bird Exp $
 
 #
 # Win32k makefile.
@@ -82,7 +82,8 @@ clean:
     $(RM) $(WIN32KOBJ)\*obj* \
         $(WIN32KOBJ)\*lnk* \
         $(WIN32KOBJ)\*res* \
-        $(WIN32KOBJ)\*lib*
+        $(WIN32KOBJ)\*lib* \
+        $(WIN32KOBJ)\*def*
 !endif
 !if "$(WIN32KLIST)" != ""
     $(RM) $(WIN32KLIST)\*lst* \
