@@ -1,4 +1,4 @@
-/* $Id: version.cpp,v 1.6 2001-12-08 14:48:54 sandervl Exp $ */
+/* $Id: version.cpp,v 1.7 2001-12-08 16:17:34 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -101,7 +101,7 @@ static VERSION_DATA VersionData[WINVERSION_MAX] =
 };
 
 static BOOL fCheckVersion = FALSE;
-static int  winversion    = WINVERSION_NT40;
+static int  winversion    = WINVERSION_WIN2000;
 
 //******************************************************************************
 //******************************************************************************
@@ -135,6 +135,10 @@ void CheckVersion()
 	else
 	if(!stricmp(szVersion, PROFILE_WINVERSION_WINME)) {
 		winversion = WINVERSION_WINME;
+	}
+	else
+	if(!stricmp(szVersion, PROFILE_WINVERSION_NT40)) {
+		winversion = WINVERSION_NT40;
 	}
 	else
 	if(!stricmp(szVersion, PROFILE_WINVERSION_WIN2000)) {
