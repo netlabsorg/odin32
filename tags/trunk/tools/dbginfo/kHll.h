@@ -1,4 +1,4 @@
-/* $Id: kHll.h,v 1.6 2000-04-05 18:45:21 bird Exp $
+/* $Id: kHll.h,v 1.7 2000-04-07 02:47:01 bird Exp $
  *
  * kHll - Declarations of the class kHll.
  *        That class is used to create HLL debuginfo.
@@ -66,38 +66,64 @@ public:
 
 
 /**
- * HLL Source entry.
- * @shortdesc
- * @dstruct
- * @version
- * @verdesc
+ * Linenumber chunk.
  * @author      knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
- * @approval
+ */
+class kHllLineNumberChunk : public kHllBaseEntry
+{
+private:
+    PHLLLINENUMBERENTRY paLines;
+    HLLFIRSTENTRY       FirstEntry;
+
+public:
+    kHllLineNumberChunk(
+        unsigned short int  iSeg,
+        unsigned long int   offBase = 0
+        );
+    ~kHllLineNumberChunk();
+
+    BOOL            addLineInfo(
+                        unsigned short int  iusFile,
+                        unsigned short int  usLine,
+                        unsigned long int   off
+                        );
+
+    int             write(FILE *phFile);
+    int             getSeg()    { return FirstEntry.hll04.iSeg; }
+};
+
+
+/**
+ * HLL Source entry.
+ * @author      knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
  */
 class kHllSrcEntry
 {
 private:
-    int                 cFilenames;
-    char *              pchFilenames;
+    unsigned long int   cFilenames;
+    char *              pachFilenames;
+    unsigned long int   cbFilenames;
+    unsigned long int   cbFilenamesAllocated;
 
-    int                 cLines;
-    HLLLINENUMBERENTRY  paLines;
+    kList<kHllLineNumberChunk>
+                        Lines;
 
 public:
-
+    kHllSrcEntry();
     ~kHllSrcEntry();
 
-    BOOL            addLineInfo(
-                        int                 iFile,
-                        int                 iLine,
-                        unsigned short int  iObject,
-                        unsigned long int   off
+    kHllLineNumberChunk *
+                    addLineNumberChunk(
+                        unsigned short int  iSeg,
+                        unsigned long int   offBase = 0
                         );
-    int             addFile(
-                        const char *        pszFilename,
-
+    unsigned short  addFile(
+                        const char *        pszFilename
                         );
-
+    unsigned short  addFile(
+                        const char *        pachFilename,
+                        int                 cchFilename
+                        );
     int             write(FILE *phFile);
 };
 
@@ -122,8 +148,8 @@ private:
     /*
     kList<kHllTypeEntry>        Types;
     kList<kHllSymEntry>         Symbols;
-    kList<kHllSrcEntry>         Source;
     */
+    kHllSrcEntry                Source;
 
     BOOL                        fValidOffsetsAndSizes;
     unsigned long               offModule;
@@ -179,6 +205,7 @@ public:
                         unsigned short int  iObject,
                         const void *        pvType
                         );
+    kHllSrcEntry *  getSourceEntry()    { return &Source; }
 
 
     /** @cat
