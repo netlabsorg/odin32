@@ -1,4 +1,4 @@
-/* $Id: odincrt.h,v 1.2 1999-08-10 13:52:09 phaller Exp $ */
+/* $Id: odincrt.h,v 1.3 1999-08-11 22:25:50 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -96,7 +96,7 @@ char*  ODINAPI  ODIN_strdup       ( const char * );
  * C++ wrappers (experimental)                                              *
  ****************************************************************************/
 
-void*  ODINAPI  __nw__FUi         ( void* p1 );              // operator new()
+void*  ODINAPI  __nw__FUi         ( unsigned int i );        // operator new()
 
 //@@@PH ODIN_new(myClass, ##myParams) new ....
 //@@@PH ODIN_delete(myObject) ... delete myObject ...

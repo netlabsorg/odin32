@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.17 1999-08-09 22:10:09 phaller Exp $ */
+/* $Id: wprocess.cpp,v 1.18 1999-08-11 22:27:56 phaller Exp $ */
 
 /*
  * Win32 process functions
@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <odincrt.h>
+#include <odinwrap.h>
 
 #include "unicode.h"
 #include "windll.h"
@@ -40,6 +41,9 @@ USHORT     ProcessTIBSel = 0;
 DWORD    *TIBFlatPtr    = 0;
 
 extern "C" ULONG QueryExceptionChain();
+
+
+ODINDEBUGCHANNEL(KERNEL32-WPROCESS)
 
 //******************************************************************************
 //******************************************************************************
@@ -420,7 +424,8 @@ static HINSTANCE iLoadLibraryA(LPCTSTR lpszLibFile)
 }
 
 
-HINSTANCE WIN32API LoadLibraryA(LPCTSTR lpszLibFile)
+ODINFUNCTION1(HINSTANCE,LoadLibraryA,LPCTSTR,lpszLibFile)
+//HINSTANCE WIN32API LoadLibraryA(LPCTSTR lpszLibFile)
 {
   HINSTANCE hDll;
 
