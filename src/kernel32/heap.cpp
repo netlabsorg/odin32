@@ -1,4 +1,4 @@
-/* $Id: heap.cpp,v 1.1 1999-05-24 20:19:41 ktk Exp $ */
+/* $Id: heap.cpp,v 1.2 1999-05-31 22:08:08 phaller Exp $ */
 
 /*
  *
@@ -15,6 +15,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <builtin.h>
+#include "misc.h"
+
 #define  _WIN32
 #include "os2heap.h"
 

@@ -1,4 +1,4 @@
-/* $Id: resource.cpp,v 1.1 1999-05-24 20:19:48 ktk Exp $ */
+/* $Id: resource.cpp,v 1.2 1999-05-31 22:08:12 phaller Exp $ */
 
 /*
  *
@@ -17,6 +17,8 @@
 #include "winres.h"
 #include "winimage.h"
 #include "winexe.h"
+#include "misc.h"
+
 
 //******************************************************************************
 //lpszName = integer id (high word 0), else string (name or "#237")

@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.2 1999-05-31 19:22:44 phaller Exp $ */
+/* $Id: thread.cpp,v 1.3 1999-05-31 22:08:13 phaller Exp $ */
 
 /*
  *
@@ -15,6 +15,7 @@
 #include <stdarg.h>
 #include "thread.h"
 #include "except.h"
+#include "misc.h"
 
 static DWORD OPEN32API Win32ThreadProc(LPVOID lpData);
 

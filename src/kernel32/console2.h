@@ -79,13 +79,10 @@ extern "C" {
 #endif
 
   
-DWORD EXPENTRY ConsoleInit(void);       /* creation of the console subsystem */
-  
-DWORD EXPENTRY ConsoleDevicesRegister(void);       /* create console devices */
-  
-void EXPENTRY ConsoleWaitClose(void);      /* wait for user to close console */
-
-BOOL EXPENTRY ConsoleIsActive(void);  /* returns TRUE if console window open */
+DWORD EXPORT ConsoleInit(void);        /* creation of the console subsystem */  
+DWORD EXPORT ConsoleDevicesRegister(void);        /* create console devices */  
+void  EXPORT ConsoleWaitClose(void);      /* wait for user to close console */
+BOOL  EXPORT ConsoleIsActive(void);  /* returns TRUE if console window open */
 
 
 
