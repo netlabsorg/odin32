@@ -1,4 +1,4 @@
-# $Id: process.forwarder.mak,v 1.3 2002-05-16 11:36:59 bird Exp $
+# $Id: process.forwarder.mak,v 1.4 2002-06-19 02:16:08 bird Exp $
 
 #
 # Generic makefile system.
@@ -50,8 +50,12 @@ MAKEFILE = $(BUILD_MAKEFILE)
 # Tell user what we're doing.
 # -----------------------------------------------------------------------------
 !ifndef BUILD_QUIET
-!if [$(ECHO) Forwarding to another (shell) environment setup...$(CLRRST)]
-!endif
+! ifndef MAKEVER
+!  if [$(ECHO) Forwarding to another (shell) environment setup...$(CLRRST)]
+!  endif
+! else
+$(ECHO) Forwarding to another (shell) environment setup...$(CLRRST)
+! endif
 !endif
 
 
@@ -60,17 +64,19 @@ MAKEFILE = $(BUILD_MAKEFILE)
 # -----------------------------------------------------------------------------
 
 .SUFFIXES:
-.SUFFIXES: .$(EXT_OBJ) .c .cpp .asm .$(EXT_RES) .rc .pre-c .pre-cpp # .h .def
+.SUFFIXES: .c .cpp .asm .$(EXT_OBJ) .rc .$(EXT_RES) .ii .s
 
 
 # Assembling assembly source.
 .asm{$(PATH_TARGET)}.$(EXT_OBJ):
+    \
 !ifndef BUILD_VERBOSE
     @ \
 !endif
     $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
 
 .asm.$(EXT_OBJ):
+    \
 !ifndef BUILD_VERBOSE
     @ \
 !endif
@@ -79,12 +85,14 @@ MAKEFILE = $(BUILD_MAKEFILE)
 
 # Compiling C++ source.
 .cpp{$(PATH_TARGET)}.$(EXT_OBJ):
+    \
 !ifndef BUILD_VERBOSE
     @ \
 !endif
     $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
 
 .cpp.$(EXT_OBJ):
+    \
 !ifndef BUILD_VERBOSE
     @ \
 !endif
@@ -92,7 +100,17 @@ MAKEFILE = $(BUILD_MAKEFILE)
 
 
 # Pre-Compiling C++ source.
-.cpp.pre-cpp:
+.cpp.ii:
+    \
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
+    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
+
+
+# Compiler C++ source to assembly.
+.cpp.s:
+    \
 !ifndef BUILD_VERBOSE
     @ \
 !endif
@@ -101,12 +119,14 @@ MAKEFILE = $(BUILD_MAKEFILE)
 
 # Compiling C source.
 .c{$(PATH_TARGET)}.$(EXT_OBJ):
+    \
 !ifndef BUILD_VERBOSE
     @ \
 !endif
     $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
 
 .c.$(EXT_OBJ):
+    \
 !ifndef BUILD_VERBOSE
     @ \
 !endif
@@ -114,7 +134,17 @@ MAKEFILE = $(BUILD_MAKEFILE)
 
 
 # Pre-Compiling C source.
-.c.pre-c:
+.c.ii:
+    \
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
+    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
+
+
+# Compiler C source to assembly.
+.c.s:
+    \
 !ifndef BUILD_VERBOSE
     @ \
 !endif
@@ -123,12 +153,14 @@ MAKEFILE = $(BUILD_MAKEFILE)
 
 # Compiling resources.
 .rc{$(PATH_TARGET)}.res:
+    \
 !ifndef BUILD_VERBOSE
     @ \
 !endif
     $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
 
 .rc.res:
+    \
 !ifndef BUILD_VERBOSE
     @ \
 !endif
@@ -149,6 +181,7 @@ all: build
 # The build rule - Build the target.
 # -----------------------------------------------------------------------------
 build:
+    \
 !ifndef BUILD_VERBOSE
     @ \
 !endif
@@ -160,6 +193,7 @@ build:
 # The lib rule - Make Public libraries.
 # -----------------------------------------------------------------------------
 lib:
+    \
 !ifndef BUILD_VERBOSE
     @ \
 !endif
@@ -171,6 +205,7 @@ lib:
 # The install rule - Copies target to main binary directory.
 # -----------------------------------------------------------------------------
 install:
+    \
 !ifndef BUILD_VERBOSE
     @ \
 !endif
@@ -182,6 +217,7 @@ install:
 # The testcase rule - Execute testcases when present.
 # -----------------------------------------------------------------------------
 testcase:
+    \
 !ifndef BUILD_VERBOSE
     @ \
 !endif
@@ -193,10 +229,11 @@ testcase:
 # The shell rule - Setup the correcte shell environment and start a shell.
 # -----------------------------------------------------------------------------
 shell:
+    \
 !ifndef BUILD_VERBOSE
     @ \
 !endif
-    -$(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(COMSPEC)
+    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(COMSPEC)
 
 
 
@@ -204,6 +241,7 @@ shell:
 # The dep rule - Make dependencies.
 # -----------------------------------------------------------------------------
 dep:
+    \
 !ifndef BUILD_VERBOSE
     @ \
 !endif
@@ -216,6 +254,19 @@ dep:
 #   The current setup doesn't clean the installed ones.
 # -----------------------------------------------------------------------------
 clean:
+    \
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
+    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
+
+
+
+# -----------------------------------------------------------------------------
+# The nothing rule - Rule for testing the makefile structure.
+# -----------------------------------------------------------------------------
+nothing:
+    \
 !ifndef BUILD_VERBOSE
     @ \
 !endif
@@ -228,6 +279,7 @@ clean:
 # -----------------------------------------------------------------------------
 !if "$(TARGET_MODE)" == "EXE" || "$(TARGET_MODE)" == "DLL" || "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "IFS" || "$(TARGET_MODE)" == "VDD"
 $(TARGET):
+    \
 !ifndef BUILD_VERBOSE
     @ \
 !endif
@@ -241,6 +293,7 @@ $(TARGET):
 # -----------------------------------------------------------------------------
 !if "$(TARGET_MODE)" == "LIB" || "$(TARGET_MODE)" == "SYSLIB" || "$(TARGET_MODE)" == "IFSLIB"
 $(TARGET):
+    \
 !ifndef BUILD_VERBOSE
     @ \
 !endif
@@ -264,6 +317,7 @@ $(TARGET):
 # -----------------------------------------------------------------------------
 !ifdef TARGET_ILIB
 $(TARGET_ILIB):
+    \
 !ifndef BUILD_VERBOSE
     @ \
 !endif
@@ -277,6 +331,7 @@ $(TARGET_ILIB):
 # The .force rule - Force a remake of something everytime.
 # -----------------------------------------------------------------------------
 .force:
+    \
 !ifndef BUILD_VERBOSE
     @$(ECHO) .
 !else
