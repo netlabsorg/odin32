@@ -1,4 +1,4 @@
-# $Id: odin32.post.emx.mk,v 1.8 2000-12-16 23:40:53 bird Exp $
+# $Id: odin32.post.emx.mk,v 1.9 2001-01-08 22:53:03 bird Exp $
 
 #
 # Odin32 API
@@ -137,6 +137,9 @@ $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS) $(OS2RES) $(DEFFILE) $(OBJDIR)\
 !ifdef OS2RES
     $(OS2RC) $(OS2RCLFLAGS) $(OS2RES) $@
 !endif
+!ifndef DEBUG
+    $(LXLITE) $@
+!endif
 !endif
 
 
@@ -192,6 +195,9 @@ $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS) $(OS2RES) $(DEFFILE) $(OBJDIR)\
     -4 $(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lrf
 !ifdef OS2RES
     $(OS2RC) $(OS2RCLFLAGS) $(OS2RES) $@
+!endif
+!ifndef DEBUG
+    $(LXLITE) $@
 !endif
 !endif
 
