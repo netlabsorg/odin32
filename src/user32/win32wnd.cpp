@@ -1,4 +1,4 @@
-/* $Id: win32wnd.cpp,v 1.2 1999-10-28 12:00:37 sandervl Exp $ */
+/* $Id: win32wnd.cpp,v 1.3 1999-12-16 00:11:48 sandervl Exp $ */
 /*
  * Win32 Window Class for OS/2
  *
@@ -24,7 +24,6 @@
 #include <heapstring.h>
 #include <spy.h>
 #include "wndmsg.h"
-#include "hooks.h"
 #include <oslibwin.h>
 #include <oslibutil.h>
 #include <oslibgdi.h>

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.53 1999-12-14 19:13:20 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.54 1999-12-16 00:11:47 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -39,7 +39,7 @@ typedef struct {
 } CUSTOMWNDDATA;
 
 #define WIN32APP_USERMSGBASE      0x1000
-#define WIN32APP_POSTMSG          0x6666
+#define WIN32APP_POSTMSG          0x1000
 
 typedef struct
 {
@@ -48,9 +48,6 @@ typedef struct
         ULONG           lParam;
 	ULONG           fUnicode;
 } POSTMSG_PACKET;
-
-#define WM_WIN32_POSTMESSAGEA   0x4000
-#define WM_WIN32_POSTMESSAGEW   0x4001
 
 #define BROADCAST_SEND		0
 #define BROADCAST_POST		1
@@ -212,14 +209,14 @@ Win32BaseWindow *getOwner()                   { return owner; };
 
        LRESULT  SendMessageA(ULONG msg, WPARAM wParam, LPARAM lParam);
        LRESULT  SendMessageW(ULONG msg, WPARAM wParam, LPARAM lParam);
-       LRESULT  SendMessageToProcess(UINT msg, WPARAM wParam, LPARAM lParam, BOOL fUnicode);
        BOOL     PostMessageA(ULONG msg, WPARAM wParam, LPARAM lParam);
        BOOL     PostMessageW(ULONG msg, WPARAM wParam, LPARAM lParam);
-       void     PostMessage(POSTMSG_PACKET *packet);
+       ULONG    PostMessage(POSTMSG_PACKET *packet);
 static BOOL     PostThreadMessageA(ULONG threadid, UINT msg, WPARAM wParam, LPARAM lParam);
 static BOOL     PostThreadMessageW(ULONG threadid, UINT msg, WPARAM wParam, LPARAM lParam);
 static LRESULT  BroadcastMessageA(int type, UINT msg, WPARAM wParam, LPARAM lParam);
 static LRESULT  BroadcastMessageW(int type, UINT msg, WPARAM wParam, LPARAM lParam);
+       void     CallWindowHookProc(ULONG hooktype, ULONG Msg, WPARAM wParam, LPARAM lParam, BOOL fUnicode = FALSE);
 
        LRESULT  DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam);
        LRESULT  DefWindowProcW(UINT msg, WPARAM wParam, LPARAM lParam);
@@ -305,10 +302,13 @@ protected:
                                         //sent by PM and those sent by apps
         BOOL    fNoSizeMsg;
         BOOL    fIsDestroyed;
+        BOOL    fDestroyWindowCalled;   //DestroyWindow was called for this window
         BOOL    fCreated;
 	BOOL    fTaskList;		//should be listed in PM tasklist or not
 	BOOL    fParentDC;
 
+	DWORD   dwThreadId;		//id of thread that created this window
+	DWORD   dwProcessId;		//id of process that created this window
         PVOID   pOldFrameProc;
         ULONG   borderWidth;
         ULONG   borderHeight;
