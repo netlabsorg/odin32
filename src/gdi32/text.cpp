@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.9 2000-05-02 20:49:58 sandervl Exp $ */
+/* $Id: text.cpp,v 1.10 2000-06-01 19:00:05 sandervl Exp $ */
 
 /*
  * GDI32 text apis
@@ -575,19 +575,22 @@ BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR
 
   if (!pHps || (cbCount < 0) || ((lpszString == NULL) && (cbCount != 0)))
   {
-    SetLastError(ERROR_INVALID_HANDLE);
-    return FALSE;
+	dprintf(("InternalTextOutA: invalid parameter"));
+    	SetLastError(ERROR_INVALID_HANDLE);
+    	return FALSE;
   }
 
   if (cbCount > 512)
   {
-    SetLastError(ERROR_INVALID_PARAMETER);
-    return FALSE;
+	dprintf(("InternalTextOutA: invalid parameter cbCount"));
+    	SetLastError(ERROR_INVALID_PARAMETER);
+    	return FALSE;
   }
   if (fuOptions & ~((UINT)(ETO_CLIPPED | ETO_OPAQUE)))
   {
-    //ETO_GLYPH_INDEX, ETO_RTLLEADING, ETO_NUMERICSLOCAL, ETO_NUMERICSLATIN, ETO_IGNORELANGUAGE, ETO_PDY  are ignored
-    return TRUE;
+	dprintf(("InternalTextOutA: invalid fuOptions"));
+    	//ETO_GLYPH_INDEX, ETO_RTLLEADING, ETO_NUMERICSLOCAL, ETO_NUMERICSLATIN, ETO_IGNORELANGUAGE, ETO_PDY  are ignored
+    	return TRUE;
   }
 
   //CB: add metafile info
@@ -599,18 +602,21 @@ BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR
       MapWin32ToOS2Rect(*lprc,pmRect);
       if (excludeBottomRightPoint(pHps,(PPOINTLOS2)&pmRect) == 0)
       {
+	dprintf(("InternalTextOutA: excludeBottomRightPoint returned 0"));
         return TRUE;
       }
 
       if (fuOptions & ETO_CLIPPED) flOptions |= CHSOS_CLIP;
       if (fuOptions & ETO_OPAQUE)  flOptions |= CHSOS_OPAQUE;
     }
-  } else
+  } 
+  else
   {
     if (fuOptions)
     {
-      SetLastError(ERROR_INVALID_HANDLE);
-      return FALSE;
+	dprintf(("InternalTextOutA: ERROR_INVALID_HANDLE"));
+      	SetLastError(ERROR_INVALID_HANDLE);
+      	return FALSE;
     }
   }
 
@@ -618,10 +624,14 @@ BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR
   {
     if (fuOptions & ETO_OPAQUE)
     {
-      lpszString = " ";
-      cbCount = 1;
-      flOptions |= CHSOS_CLIP;
-    } else return TRUE;
+      	lpszString = " ";
+      	cbCount = 1;
+      	flOptions |= CHSOS_CLIP;
+    } 
+    else {
+	dprintf(("InternalTextOutA: cbCount == 0"));
+	return TRUE;
+    }
   }
   if (lpDx)
     flOptions |= CHSOS_VECTOR;
@@ -632,7 +642,8 @@ BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR
     ptl.y = Y;
 
     flOptions |= CHSOS_LEAVEPOS;
-  } else OSLibGpiQueryCurrentPosition(pHps,&ptl);
+  } 
+  else OSLibGpiQueryCurrentPosition(pHps,&ptl);
 
   UINT align = GetTextAlign(hdc);
   LONG pmHAlign,pmVAlign;
@@ -662,8 +673,10 @@ BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR
   if (lprc && ((align & 0x18) == TA_BASELINE))
     OSLibGpiSetTextAlignment(pHps,pmHAlign,pmVAlign);
 
-  if (hits == GPIOS_ERROR)
-    return FALSE;
+  if(hits == GPIOS_ERROR) {
+	dprintf(("InternalTextOutA: OSLibGpiCharStringPosAt returned GPIOS_ERROR"));
+    	return FALSE;
+  }
 
   if (getAlignUpdateCP(pHps))
   {
