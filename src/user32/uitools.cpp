@@ -1,4 +1,4 @@
-/* $Id: uitools.cpp,v 1.26 2000-02-23 17:05:17 cbratschi Exp $ */
+/* $Id: uitools.cpp,v 1.27 2000-05-02 20:50:49 sandervl Exp $ */
 /*
  * User Interface Functions
  *
@@ -1613,12 +1613,13 @@ BOOL WIN32API DrawStateW(HDC hdc, HBRUSH hbc, DRAWSTATEPROC lpOutputFunc, LPARAM
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API DrawFocusRect( HDC arg1, const RECT *  arg2)
+BOOL WIN32API DrawFocusRect( HDC hdc, const RECT *lpRect)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  DrawFocusRect\n");
-#endif
-    return O32_DrawFocusRect(arg1, arg2);
+ BOOL rc;
+
+    rc = O32_DrawFocusRect(hdc, lpRect);
+    dprintf(("USER32:  DrawFocusRect %x %x returned %d", hdc, lpRect, rc));
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1630,9 +1631,7 @@ BOOL WIN32API DrawIcon( HDC hDC, int X, int Y, HICON  hIcon)
   HBITMAP oldBmp;
   COLORREF oldFg,oldBg;
 
-#ifdef DEBUG
-  WriteLog("USER32:  DrawIcon\n");
-#endif
+  dprintf(("USER32:  DrawIcon\n"));
 
   if (!hDC || !hIcon)
   {
@@ -1680,9 +1679,7 @@ BOOL WIN32API DrawIconEx(HDC hdc, int xLeft, int yTop, HICON hIcon,
   COLORREF oldFg,oldBg;
   INT oldStretchMode;
 
-#ifdef DEBUG
-  WriteLog("USER32:  DrawIconEx\n");
-#endif
+  dprintf(("USER32:  DrawIconEx"));
 
   //CB: istepIfAniCur, DI_COMPAT ignored
 

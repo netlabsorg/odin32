@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.47 2000-03-09 19:05:39 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.48 2000-05-02 20:50:51 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -75,9 +75,14 @@ Win32Dialog::Win32Dialog(HINSTANCE hInst, LPCSTR dlgTemplate, HWND owner,
     /* Create custom font if needed */
     if (dlgInfo.style & DS_SETFONT)
     {
-        /* The font height must be negative as it is a point size */
-        /* (see CreateFont() documentation in the Windows SDK).   */
-        hUserFont = CreateFontW(-(dlgInfo.pointSize*3)/2, 0, 0, 0,
+	  /* The font height must be negative as it is a point size */
+	  /* and must be converted to pixels first */
+          /* (see CreateFont() documentation in the Windows SDK).   */
+	HDC dc = GetDC(0);
+	int pixels = dlgInfo.pointSize * GetDeviceCaps(dc , LOGPIXELSY)/72;
+	ReleaseDC(0, dc);
+
+        hUserFont = CreateFontW(-pixels, 0, 0, 0,
                             dlgInfo.weight, dlgInfo.italic, FALSE,
                             FALSE, DEFAULT_CHARSET, 0, 0, PROOF_QUALITY,
                             FF_DONTCARE, (LPCWSTR)dlgInfo.faceName );
@@ -124,7 +129,7 @@ Win32Dialog::Win32Dialog(HINSTANCE hInst, LPCSTR dlgTemplate, HWND owner,
         {
             INT dX, dY;
 
-            if( !(dlgInfo.style & DS_ABSALIGN) )
+            if( !(dlgInfo.style & DS_ABSALIGN) && owner)
                 ClientToScreen(owner, (POINT *)&rect );
 
             /* try to fit it into the desktop */
@@ -231,8 +236,17 @@ ULONG Win32Dialog::MsgCreate(HWND hwndFrame, HWND hwndClient)
         /* Send initialisation messages and set focus */
         hwndFocus = GetNextDlgTabItem( getWindowHandle(), 0, FALSE );
 
-        if (SendInternalMessageA(WM_INITDIALOG, (WPARAM)hwndFocus, param))
-             SetFocus(hwndFocus);
+	HWND hwndPreInitFocus = GetFocus();
+        if(SendInternalMessageA(WM_INITDIALOG, (WPARAM)hwndFocus, param)) {
+          	SetFocus(hwndFocus);
+	}
+	else
+	{
+   	    	/* If the dlgproc has returned FALSE (indicating handling of keyboard focus)
+	       	   but the focus has not changed, set the focus where we expect it. */
+            	if ( (getStyle() & WS_VISIBLE) && ( GetFocus() == hwndPreInitFocus ) )
+                	SetFocus( hwndFocus );
+	}
 
         if (dlgInfo.style & WS_VISIBLE && !(getStyle() & WS_VISIBLE))
         {
