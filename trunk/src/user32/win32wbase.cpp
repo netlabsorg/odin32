@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.104 1999-12-05 00:31:48 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.105 1999-12-05 16:37:58 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -145,6 +145,7 @@ void Win32BaseWindow::Init()
   fNoSizeMsg       = FALSE;
   fIsDestroyed     = FALSE;
   fCreated         = FALSE;
+  fTaskList        = FALSE;
 
   windowNameA      = NULL;
   windowNameW      = NULL;
@@ -508,6 +509,11 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         if (cs->cy <= 0) cs->cy = 1;
   }
 
+  if(((cs->style & 0xC0000000) == WS_OVERLAPPED) && ((cs->style & WS_CAPTION) == WS_CAPTION) && owner == NULL)
+  {
+            fTaskList = TRUE;
+  }
+
   DWORD dwOSWinStyle, dwOSFrameStyle;
 
   OSLibWinConvertStyle(dwStyle, &dwExStyle, &dwOSWinStyle, &dwOSFrameStyle, &borderWidth, &borderHeight);
@@ -560,7 +566,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
                                  dwOSWinStyle, dwOSFrameStyle, (char *)windowNameA,
                                  (owner) ? owner->getOS2WindowHandle() : OSLIB_HWND_DESKTOP,
                                  (hwndLinkAfter == HWND_BOTTOM) ? TRUE : FALSE,
-                                 &OS2HwndFrame, 0);
+                                 &OS2HwndFrame, 0, fTaskList);
 
   if(OS2Hwnd == 0) {
         dprintf(("Window creation failed!!"));
@@ -717,7 +723,7 @@ ULONG Win32BaseWindow::MsgQuit()
 ULONG Win32BaseWindow::MsgClose()
 {
   if(SendInternalMessageA(WM_CLOSE, 0, 0) == 0) {
-	dprintf(("Win32BaseWindow::MsgClose, app handles msg"));
+    dprintf(("Win32BaseWindow::MsgClose, app handles msg"));
         return 0; //app handles this message
   }
   return 1;
@@ -1673,22 +1679,22 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam, 
     }
     case WM_PAINTICON:
     case WM_PAINT:
-	{
-	    PAINTSTRUCT ps;
-	    HDC hdc = BeginPaint(getWindowHandle(), &ps );
-	    if( hdc )
-	    {
-	      if( (getStyle() & WS_MINIMIZE) && getWindowClass()->getIcon())
-	      {
-	        int x = (rectWindow.right - rectWindow.left - GetSystemMetrics(SM_CXICON))/2;
-	        int y = (rectWindow.bottom - rectWindow.top - GetSystemMetrics(SM_CYICON))/2;
-		    dprintf(("Painting class icon: vis rect=(%i,%i - %i,%i)\n", ps.rcPaint.left, ps.rcPaint.top, ps.rcPaint.right, ps.rcPaint.bottom ));
-	        DrawIcon(hdc, x, y, getWindowClass()->getIcon() );
-	      }
-	      EndPaint(getWindowHandle(), &ps );
-	    }
-	    return 0;
-	}
+    {
+        PAINTSTRUCT ps;
+        HDC hdc = BeginPaint(getWindowHandle(), &ps );
+        if( hdc )
+        {
+          if( (getStyle() & WS_MINIMIZE) && getWindowClass()->getIcon())
+          {
+            int x = (rectWindow.right - rectWindow.left - GetSystemMetrics(SM_CXICON))/2;
+            int y = (rectWindow.bottom - rectWindow.top - GetSystemMetrics(SM_CYICON))/2;
+            dprintf(("Painting class icon: vis rect=(%i,%i - %i,%i)\n", ps.rcPaint.left, ps.rcPaint.top, ps.rcPaint.right, ps.rcPaint.bottom ));
+            DrawIcon(hdc, x, y, getWindowClass()->getIcon() );
+          }
+          EndPaint(getWindowHandle(), &ps );
+        }
+        return 0;
+    }
 
     case WM_GETDLGCODE:
         return 0;
@@ -2342,6 +2348,7 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
     else    setStyle(getStyle() & ~WS_VISIBLE);
 
     BOOL rc = OSLibWinShowWindow(OS2HwndFrame, showstate);
+
     return rc;
 }
 //******************************************************************************
@@ -2956,22 +2963,7 @@ VOID Win32BaseWindow::updateWindowStyle(DWORD oldExStyle,DWORD oldStyle)
 {
   if(IsWindowDestroyed()) return;
 
-/*
-  if (isChild())
-  {
-    DWORD dwOSWinStyle,dwOSFrameStyle,newBorderWidth,newBorderHeight;
-
-    OSLibWinConvertStyle(dwStyle,&dwExStyle,&dwOSWinStyle,&dwOSFrameStyle,&newBorderWidth,&newBorderHeight);
-    if (newBorderWidth != borderWidth || newBorderHeight != borderHeight)
-    {
-      borderWidth = newBorderWidth;
-      borderHeight = newBorderHeight;
-      FrameSetBorderSize(this,TRUE);
-    }
-  }
-*/
-
-  if (dwStyle != oldStyle) OSLibSetWindowStyle(OS2HwndFrame,dwStyle);
+  if (dwStyle != oldStyle) OSLibSetWindowStyle(OS2HwndFrame, dwStyle, fTaskList);
 }
 //******************************************************************************
 //******************************************************************************
