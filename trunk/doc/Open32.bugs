@@ -52,6 +52,8 @@ A list of Open32 bugs (under construction):
   (nr of scan lines copied; not true/false)
 - SetDIBitsToDevice can't handle compressed bitmaps (presumably all other
   bitmap apis as well)
+- Workaround added for bugs in Open32's SetDIBits; messes up colors for 1 bpp bitmaps
+  (reversing scanlines and calling SetBitmapBits works, but only if the all scanlines are updated!)
 
 Limitations:
 - No support for COMCTL32 controls.
