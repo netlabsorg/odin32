@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.98 2003-01-04 12:21:44 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.99 2003-02-06 20:28:38 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -196,6 +196,10 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
     case WM_SHOW:
         winMsg->message = WINWM_SHOWWINDOW;
         winMsg->wParam  = SHORT1FROMMP(os2Msg->mp1);
+        break;
+
+    case WM_REALIZEPALETTE:
+        winMsg->message = WINWM_PALETTECHANGED;
         break;
 
     case WM_WINDOWPOSCHANGED:
