@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2438 2003-01-10 12:56:37 sandervl Exp $ */
+/* $Id: changelog,v 1.2439 2003-01-10 13:13:09 sandervl Exp $ */
 
  2003-01-10: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Don't close handle in CloseHandle if HANDLE_FLAG_PROTECT_FROM_CLOSE
@@ -8,6 +8,10 @@
                               processes
                 o Named Pipes: default = not inherited by child processes
                 o DuplicateHandle; set inheritance flag with SetHandleInformation
+
+ 2003-01-10: Platon Fomichev <platon@innotek   >
+    - MSVCRT:   o Updates
+    - CRTDLL:   o Wine port (forwarder dll to msvcrt)
 
  2003-01-10: Herwig Bauernfeind <herwig.bauernfeind@aon   >
     - ODINBUG:  o Updated to version 0.5.8
