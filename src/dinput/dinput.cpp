@@ -1,4 +1,4 @@
-/* $Id: dinput.cpp,v 1.6 2000-05-09 18:58:40 sandervl Exp $ */
+/* $Id: dinput.cpp,v 1.7 2000-05-29 21:30:17 mike Exp $ */
 /*              DirectInput
  *
  * Copyright 1998 Marcus Meissner
@@ -625,6 +625,18 @@ LRESULT CALLBACK event_keyHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPa
 
    SysKeyboardAImpl* This = (SysKeyboardAImpl*) current_keylock;
    BYTE  scan = (lParam >> 16) & 0xFF;
+
+   /* messages may arrive mustiple times; we need to check for duplicates */
+   static HWND   oldhwnd = NULL;
+   static UINT   oldmsg  = 0;
+   static WPARAM oldwParam = 0;
+   static LPARAM oldlParam = 0;
+
+   if ((hwnd == oldhwnd) && (msg == oldmsg) && (wParam == oldwParam) && (lParam == oldlParam)) {
+      // we already saw this message
+      return TRUE;
+   }
+   oldhwnd = hwnd; oldmsg = msg; oldwParam = wParam; oldlParam = lParam;
 
    // fake a key up transition for typematic repeat
    if (msg == WM_KEYDOWN)
