@@ -1,4 +1,4 @@
-/* $Id: pe.cpp,v 1.31 2001-07-14 07:44:40 sandervl Exp $ */
+/* $Id: pe.cpp,v 1.32 2002-02-20 09:45:49 sandervl Exp $ */
 
 /*
  * PELDR main exe loader code
@@ -154,9 +154,29 @@ tryagain:
 		cmdline = exeName + strlen(exeName) - 1;
 		while(*cmdline == ' ') cmdline--;
 		cmdline[1] = 0;
-		if(DosQueryPathInfo(exeName, FIL_QUERYFULLNAME, (PVOID)fullpath, sizeof(fullpath)) == 0) {
-			strcpy(exeName, fullpath);
-		}
+
+                char drive[_MAX_DRIVE];
+                char dir[_MAX_DIR];
+                char fname[_MAX_FNAME];
+                char ext[_MAX_EXT];
+                char exeShortName[_MAX_FNAME+_MAX_EXT];
+                _splitpath(exeName, drive, dir, fname, ext);
+
+                strcpy(fullpath, drive);
+                strcat(fullpath, dir);
+
+                strcpy(exeShortName, fname);
+                strcat(exeShortName, ext);
+
+                if ( strlen(fullpath) == 0 ) {
+                        DosSearchPath( SEARCH_CUR_DIRECTORY | SEARCH_ENVIRONMENT | SEARCH_IGNORENETERRS
+                                     , "WINDOWSPATH"           /* environment value */
+                                     , exeShortName            /* Name of file to look for */
+                                     , exeName                 /* Result of the search     */
+                                     , sizeof(exeName)         /* Length of search buffer  */
+                                     );
+                }
+
 		FILESTATUS3 fstat3;
 		if(DosQueryPathInfo(exeName, FIL_STANDARD, (PVOID)&fstat3, sizeof(fstat3))) 
 		{
