@@ -1,4 +1,4 @@
-/* $Id: iphlpapi.cpp,v 1.4 2001-10-10 22:55:21 phaller Exp $ */
+/* $Id: iphlpapi.cpp,v 1.5 2001-10-29 13:37:29 phaller Exp $ */
 /*
  *	IPHLPAPI library
  *
@@ -43,13 +43,15 @@ static void i_initializeAdapterInformation(void)
   pipAdapters->ComboIndex = 1;
   strcpy(pipAdapters->AdapterName, "ODIN IPHLPAPI Test Adapter");
   strcpy(pipAdapters->Description, "ODIN IPHLPAPI Test Adapter (faked information)");
-  pipAdapters->AddressLength = 4;
-  pipAdapters->Address[0] = 127;
-  pipAdapters->Address[1] = 0;
-  pipAdapters->Address[2] = 0;
-  pipAdapters->Address[3] = 1;
-  pipAdapters->Index = 1;
-  pipAdapters->Type = 1;
+  pipAdapters->AddressLength = 6; // MAX address
+  pipAdapters->Address[0] = 'V';
+  pipAdapters->Address[1] = 'P';
+  pipAdapters->Address[2] = 'C';
+  pipAdapters->Address[3] = 'O';
+  pipAdapters->Address[4] = 'S';
+  pipAdapters->Address[5] = '2';
+  pipAdapters->Index = 16777218;
+  pipAdapters->Type = 6;
   pipAdapters->DhcpEnabled = 0;
   
   static IP_ADDR_STRING iasLocalhost;
@@ -58,9 +60,16 @@ static void i_initializeAdapterInformation(void)
   strcpy((char*)&iasLocalhost.IpMask, "255.0.0.0");
   iasLocalhost.Context = 0;
   
+  static IP_ADDR_STRING iasGateway;
+  iasGateway.Next = NULL;
+  strcpy((char*)&iasGateway.IpAddress,"192.168.1.1");
+  strcpy((char*)&iasGateway.IpMask, "255.255.255.0");
+  iasGateway.Context = 0;
+  
+  
   memcpy((char*)&pipAdapters->IpAddressList, (char*)&iasLocalhost, sizeof(iasLocalhost));
   pipAdapters->CurrentIpAddress = &pipAdapters->IpAddressList;
-  memcpy((char*)&pipAdapters->GatewayList,   (char*)&iasLocalhost, sizeof(iasLocalhost));
+  memcpy((char*)&pipAdapters->GatewayList,   (char*)&iasGateway, sizeof(iasGateway));
   memset((char*)&pipAdapters->DhcpServer, 0, sizeof( IP_ADDR_STRING ) );
   pipAdapters->HaveWins = 0;
   memset((char*)&pipAdapters->PrimaryWinsServer, 0, sizeof( IP_ADDR_STRING ) );
@@ -129,6 +138,10 @@ static DWORD i_sizeOfIP_ADAPTER_INFO(PIP_ADAPTER_INFO piai)
 
 //******************************************************************************
 //******************************************************************************
+
+// Note: returns error 50 under NT4 (NOT_SUPPORTED)
+// so we better check out alternative ways, too.
+
 ODINFUNCTION2(DWORD,            GetAdaptersInfo,
               PIP_ADAPTER_INFO, pAdapterInfo,
               PULONG,           pOutBufLen)
