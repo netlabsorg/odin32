@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2208 2002-07-05 18:14:39 sandervl Exp $ */
+/* $Id: changelog,v 1.2209 2002-07-06 09:57:07 sandervl Exp $ */
+
+ 2002-07-06: Sander van Leeuwen <sandervl@innotek.de> 
+    - KERNEL32: o Com overlapped IO changes for reference counts
 
  2002-07-05: Platon Fomichev <platon@innotek.de>
     - USER32:   o SetFocus not allowed on invisible windows
