@@ -1,4 +1,4 @@
-/* $Id: profile.cpp,v 1.13 1999-08-18 10:56:53 sandervl Exp $ */
+/* $Id: profile.cpp,v 1.14 1999-08-18 16:44:45 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -157,12 +157,12 @@ static void PROFILE_Save( FILE *file, PROFILESECTION *section )
 
     for ( ; section; section = section->next)
     {
-        if (section->name) fprintf( file, "\n[%s]\n", section->name );
+        if (section->name) fprintf( file, "\r\n[%s]\r\n", section->name );
         for (key = section->key; key; key = key->next)
         {
             fprintf( file, "%s", key->name );
             if (key->value) fprintf( file, "=%s", key->value );
-            fprintf( file, "\n" );
+            fprintf( file, "\r\n" );
         }
     }
 }
@@ -505,8 +505,8 @@ static BOOL PROFILE_Open( LPCSTR filename )
 
     /* check for path */
 
-    if ((!strchr( filename,'/') &&
-        !strchr( filename,'\\')) ||
+    if (!strchr( filename,'/') ||
+        !strchr( filename,'\\') ||
         !strchr( filename,':'))
     {
       char fullname[MAX_PATHNAME_LEN];
@@ -904,7 +904,7 @@ int PROFILE_LoadWineIni(void)
         {
             PROFILE_WineProfile = PROFILE_Load( f );
             fclose( f );
-       	    strncpy(PROFILE_WineIniUsed,buffer,MAX_PATHNAME_LEN-1);
+       strncpy(PROFILE_WineIniUsed,buffer,MAX_PATHNAME_LEN-1);
             return 1;
         }
     }
@@ -1176,7 +1176,6 @@ BOOL WINAPI WritePrivateProfileStringA( LPCSTR section, LPCSTR entry,
 {
     BOOL ret = FALSE;
 
-    dprintf(("WritePrivateProfileStringA: %s %s %s", section, entry, string));
     EnterCriticalSection( &PROFILE_CritSect );
 
     if (PROFILE_Open( filename ))
@@ -1398,20 +1397,22 @@ void WINAPI WriteOutProfiles(void)
     PROFILE *lastCurProfile;
     INT x;
 
-    dprintf(("WriteOutProfiles"));
     EnterCriticalSection(&PROFILE_CritSect);
-    PROFILE_FlushFile(); //flash current
-    lastCurProfile = CurProfile;
-    for(x = 1;x < N_CACHED_PROFILES;x++)
+    if (MRUProfile && CurProfile->filename)
     {
-      if (MRUProfile[x])
+      PROFILE_FlushFile(); //flash current
+      lastCurProfile = CurProfile;
+      for(x = 1;x < N_CACHED_PROFILES;x++)
+      {
         if (MRUProfile[x]->filename)
         {
           CurProfile = MRUProfile[x];
           PROFILE_FlushFile();
         }
+      }
+      CurProfile = lastCurProfile;
     }
-    CurProfile = lastCurProfile;
     LeaveCriticalSection(&PROFILE_CritSect);
 }
+
 
