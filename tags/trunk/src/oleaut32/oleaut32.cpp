@@ -1,4 +1,4 @@
-/* $Id: oleaut32.cpp,v 1.6 2000-12-24 14:39:54 sandervl Exp $ */
+/* $Id: oleaut32.cpp,v 1.7 2001-05-03 18:18:53 sandervl Exp $ */
 /* 
  * OLEAUT32 
  * 
@@ -28,14 +28,18 @@
 //******************************************************************************
 void OpenPrivateLogFiles()
 {
-//    OpenPrivateLogFileTypelib();
+#ifdef DEBUG
+    OpenPrivateLogFileTypelib();
+#endif
 }
 //******************************************************************************
 //Used to close all private logfiles used in oleaut32
 //******************************************************************************
 void ClosePrivateLogFiles()
 {
-//    ClosePrivateLogFileTypelib();
+#ifdef DEBUG
+    ClosePrivateLogFileTypelib();
+#endif
 }
 
 
