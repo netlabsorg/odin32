@@ -1,4 +1,4 @@
-/* $Id: pe.cpp,v 1.10 1999-10-10 08:58:51 sandervl Exp $ */
+/* $Id: pe.cpp,v 1.11 1999-11-13 15:39:45 sandervl Exp $ */
 
 /*
  * PELDR main exe loader code
@@ -36,6 +36,7 @@ char szPEErrorMsg[]     = "Not a valid win32 exe. (perhaps 16 bits windows)";
 char szCPUErrorMsg[]    = "Executable doesn't run on x86 machines";
 char szExeErrorMsg[]    = "File isn't an executable";
 char szInteralErrorMsg[]= "Internal Error";
+char szNoKernel32Msg[]  = "Can't load/find kernel32.dll";
 
 char fullpath[CCHMAXPATH];
 
@@ -76,9 +77,6 @@ int main(int argc, char *argv[])
   rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32DESTROYMSGQUEUE, NULL, (PFN *)&MyWinDestroyMsgQueue);
   rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32MESSAGEBOX, NULL, (PFN *)&MyWinMessageBox);
 
-  rc = DosLoadModule(exeName, sizeof(exeName), "KERNEL32.DLL", &hmodKernel32);
-  rc = DosQueryProcAddr(hmodKernel32, 0, "_CreateWin32PeLdrExe@8", (PFN *)&CreateWin32Exe);
-
   if ((hab = MyWinInitialize(0)) == 0L) /* Initialize PM     */
 	goto fail;
 
@@ -89,13 +87,19 @@ int main(int argc, char *argv[])
         goto fail;
   }
 
+  rc = DosLoadModule(exeName, sizeof(exeName), "KERNEL32.DLL", &hmodKernel32);
+  if(rc) {
+	MyWinMessageBox(HWND_DESKTOP, NULL, szNoKernel32Msg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
+        goto fail;
+  }
+  rc = DosQueryProcAddr(hmodKernel32, 0, "_CreateWin32PeLdrExe@8", (PFN *)&CreateWin32Exe);
+
   strcpy(exeName, argv[1]);
   strupr(exeName);
   if(strstr(exeName, ".EXE") == NULL) {
         strcat(exeName, ".EXE");
   }
   if(CreateWin32Exe(exeName, ReserveMem()) == FALSE) {
-        MyWinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szLoadErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
         goto fail;
   }
 
