@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.12 1999-06-20 10:55:35 sandervl Exp $
+; $Id: KERNEL32.DEF,v 1.13 1999-06-26 18:24:49 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -966,3 +966,4 @@ EXPORTS
 
    RestoreOS2TIB        = _RestoreOS2TIB@0                         @1228
    SetWin32TIB          = _SetWin32TIB@0                           @1229
+   RestoreOS2FS         = RestoreOS2FS                             @1230
