@@ -1,3 +1,4 @@
+/* $Id: filter.cpp,v 1.2 2000-08-02 15:49:31 bird Exp $ */
 /*
  *      MSACM32 library
  *
@@ -71,7 +72,7 @@ MMRESULT WINAPI acmFilterDetailsW(
  *           acmFilterEnumA (MSACM32.17)
  */
 MMRESULT WINAPI acmFilterEnumA(
-  HACMDRIVER had, PACMFILTERDETAILSA pafd, 
+  HACMDRIVER had, PACMFILTERDETAILSA pafd,
   ACMFILTERENUMCBA fnCallback, DWORD dwInstance, DWORD fdwEnum)
 {
   dprintf(("(0x%08x, %p, %p, %ld, %ld): stub\n",
@@ -85,7 +86,7 @@ MMRESULT WINAPI acmFilterEnumA(
  *           acmFilterEnumW (MSACM32.18)
  */
 MMRESULT WINAPI acmFilterEnumW(
-  HACMDRIVER had, PACMFILTERDETAILSW pafd, 
+  HACMDRIVER had, PACMFILTERDETAILSW pafd,
   ACMFILTERENUMCBW fnCallback, DWORD dwInstance, DWORD fdwEnum)
 {
   dprintf(("(0x%08x, %p, %p, %ld, %ld): stub\n",
@@ -101,7 +102,7 @@ MMRESULT WINAPI acmFilterEnumW(
 MMRESULT WINAPI acmFilterTagDetailsA(
   HACMDRIVER had, PACMFILTERTAGDETAILSA paftd, DWORD fdwDetails)
 {
-  if(fdwDetails & 
+  if(fdwDetails &
      ~(ACM_FILTERTAGDETAILSF_FILTERTAG|
        ACM_FILTERTAGDETAILSF_LARGESTSIZE))
     return MMSYSERR_INVALFLAG;

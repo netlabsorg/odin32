@@ -1,3 +1,4 @@
+/* $Id: format.cpp,v 1.2 2000-08-02 15:49:32 bird Exp $ */
 /*
  *      MSACM32 library
  *
@@ -116,7 +117,7 @@ MMRESULT WINAPI acmFormatSuggest(
 MMRESULT WINAPI acmFormatTagDetailsA(
   HACMDRIVER had, PACMFORMATTAGDETAILSA paftd, DWORD fdwDetails)
 {
-  if(fdwDetails & 
+  if(fdwDetails &
      ~(ACM_FORMATTAGDETAILSF_FORMATTAG|ACM_FORMATTAGDETAILSF_LARGESTSIZE))
     return MMSYSERR_INVALFLAG;
 
@@ -151,7 +152,7 @@ MMRESULT WINAPI acmFormatTagEnumA(
 {
   dprintf(("(0x%08x, %p, %p, %ld, %ld): stub\n",
     had, paftd, fnCallback, dwInstance, fdwEnum
-  )); 
+  ));
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return MMSYSERR_ERROR;
 }
@@ -165,7 +166,7 @@ MMRESULT WINAPI acmFormatTagEnumW(
 {
   dprintf(("(0x%08x, %p, %p, %ld, %ld): stub\n",
     had, paftd, fnCallback, dwInstance, fdwEnum
-  )); 
+  ));
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return MMSYSERR_ERROR;
 }

@@ -1,3 +1,4 @@
+/* $Id: genvol.c,v 1.2 2000-08-02 15:48:27 bird Exp $ */
 
 /* A quick-n'-dirty DirectSound volume conversion table generator */
 

@@ -1,3 +1,4 @@
+/* $Id: internal.cpp,v 1.5 2000-08-02 15:49:32 bird Exp $ */
 /* -*- tab-width: 8; c-basic-offset: 4 -*- */
 
 /*
@@ -21,7 +22,7 @@
 #include "wineacm.h"
 #include "debugtools.h"
 
-DEFAULT_DEBUG_CHANNEL(msacm)	
+DEFAULT_DEBUG_CHANNEL(msacm)
 
 /**********************************************************************/
 
@@ -30,11 +31,11 @@ PWINE_ACMDRIVERID MSACM_pFirstACMDriverID = NULL;
 PWINE_ACMDRIVERID MSACM_pLastACMDriverID = NULL;
 
 /***********************************************************************
- *           MSACM_RegisterDriver32() 
+ *           MSACM_RegisterDriver32()
  */
 PWINE_ACMDRIVERID MSACM_RegisterDriver(LPSTR pszDriverAlias, LPSTR pszFileName,
 				       HINSTANCE hinstModule)
-{ 
+{
     PWINE_ACMDRIVERID padid;
 
     TRACE("('%s', '%s', 0x%08x)\n", pszDriverAlias, pszFileName, hinstModule);
@@ -52,29 +53,29 @@ PWINE_ACMDRIVERID MSACM_RegisterDriver(LPSTR pszDriverAlias, LPSTR pszFileName,
     MSACM_pLastACMDriverID = padid;
     if (!MSACM_pFirstACMDriverID)
 	MSACM_pFirstACMDriverID = padid;
-    
+
     return padid;
 }
 
 /***********************************************************************
- *           MSACM_RegisterAllDrivers32() 
+ *           MSACM_RegisterAllDrivers32()
  */
 void MSACM_RegisterAllDrivers(void)
 {
     LPSTR pszBuffer;
     DWORD dwBufferLength;
-    
-    /* FIXME 
+
+    /* FIXME
      *  What if the user edits system.ini while the program is running?
      *  Does Windows handle that?
      */
     if (MSACM_pFirstACMDriverID)
 	return;
-    
+
     /* FIXME: Do not work! How do I determine the section length? */
     dwBufferLength = 1024;
 /* EPP 	GetPrivateProfileSectionA("drivers32", NULL, 0, "system.ini"); */
-    
+
     pszBuffer = (LPSTR) HeapAlloc(MSACM_hHeap, 0, dwBufferLength);
     if (GetPrivateProfileSectionA("drivers32", pszBuffer, dwBufferLength, "system.ini")) {
 	char* s = pszBuffer;
@@ -86,11 +87,11 @@ void MSACM_RegisterAllDrivers(void)
 		    *s2++ = '\0';
 		    MSACM_RegisterDriver(s, s2, 0);
 		}
-	    }  
+	    }
 	    s += lstrlenA(s) + 1; /* Either next char or \0 */
 	}
     }
-    
+
     HeapFree(MSACM_hHeap, 0, pszBuffer);
 }
 
@@ -100,15 +101,15 @@ void MSACM_RegisterAllDrivers(void)
 PWINE_ACMDRIVERID MSACM_UnregisterDriver(PWINE_ACMDRIVERID p)
 {
     PWINE_ACMDRIVERID pNextACMDriverID;
-    
+
     if (p->pACMDriverList)
 	acmDriverClose((HACMDRIVER) p->pACMDriverList, 0);
-    
+
     if (p->pszDriverAlias)
 	HeapFree(MSACM_hHeap, 0, p->pszDriverAlias);
     if (p->pszFileName)
 	HeapFree(MSACM_hHeap, 0, p->pszFileName);
-    
+
     if (p == MSACM_pFirstACMDriverID)
 	MSACM_pFirstACMDriverID = p->pNextACMDriverID;
     if (p == MSACM_pLastACMDriverID)
@@ -118,11 +119,11 @@ PWINE_ACMDRIVERID MSACM_UnregisterDriver(PWINE_ACMDRIVERID p)
 	p->pPrevACMDriverID->pNextACMDriverID = p->pNextACMDriverID;
     if (p->pNextACMDriverID)
 	p->pNextACMDriverID->pPrevACMDriverID = p->pPrevACMDriverID;
-    
+
     pNextACMDriverID = p->pNextACMDriverID;
-    
+
     HeapFree(MSACM_hHeap, 0, p);
-    
+
     return pNextACMDriverID;
 }
 
@@ -139,7 +140,7 @@ void MSACM_UnregisterAllDrivers(void)
 }
 
 /***********************************************************************
- *           MSACM_GetDriverID32() 
+ *           MSACM_GetDriverID32()
  */
 PWINE_ACMDRIVERID MSACM_GetDriverID(HACMDRIVERID hDriverID)
 {

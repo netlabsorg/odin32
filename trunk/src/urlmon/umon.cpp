@@ -1,3 +1,4 @@
+/* $Id: umon.cpp,v 1.2 2000-08-02 15:50:41 bird Exp $ */
 /*
  * UrlMon
  *
@@ -11,9 +12,9 @@
 #include "objbase.h"
 #include "debugtools.h"
 
-#include "urlmon.h" 
+#include "urlmon.h"
 /*
-DEFAULT_DEBUG_CHANNEL(win32); 
+DEFAULT_DEBUG_CHANNEL(win32);
 
 #include <os2win.h>
 #include <odinwrap.h>
@@ -31,7 +32,7 @@ DEFAULT_DEBUG_CHANNEL(win32);
  *
  * RETURNS
  *    S_OK 		success
- *    E_OUTOFMEMORY	out of memory 
+ *    E_OUTOFMEMORY	out of memory
  *    MK_E_SYNTAX	not a valid url
  *
  */

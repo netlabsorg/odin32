@@ -1,3 +1,4 @@
+/* $Id: OS2PrimBuff.cpp,v 1.4 2000-08-02 15:48:26 bird Exp $ */
 /*
  *  DirectSound Primary Buffer
  *
@@ -16,11 +17,11 @@
       when dart has finished playing one of the buffer, from a 32kb buffer
       that the Win32 program can write to. The GetPosition function will
       determine what buffer is being played, and return the offset to the
-      end of this buffer. 
+      end of this buffer.
 
       The Lock function will call the GetCurrentPosition function to determine
       where the end of the currently playing buffer is and allow the Win32
-      program to lock between that location and 15ms from there 
+      program to lock between that location and 15ms from there
       (15ms should be past the next buffer).
 
 */
@@ -523,7 +524,7 @@ HRESULT __stdcall PrimBufStop(THIS  )
 //******************************************************************************
 HRESULT __stdcall PrimBufUnlock(THIS_ LPVOID,DWORD,LPVOID,DWORD )
 {
-   // I don't think we really need any code here.. 
+   // I don't think we really need any code here..
 
    dprintf(("DSOUND-PrimBuff: Unlock"));
 

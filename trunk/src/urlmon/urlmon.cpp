@@ -1,3 +1,4 @@
+/* $Id: urlmon.cpp,v 1.2 2000-08-02 15:50:41 bird Exp $ */
 /*
  * UrlMon
  *

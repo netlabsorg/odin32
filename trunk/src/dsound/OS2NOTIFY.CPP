@@ -1,3 +1,4 @@
+/* $Id: OS2NOTIFY.CPP,v 1.2 2000-08-02 15:48:26 bird Exp $ */
 /*
  * DirectSound DirectSoundNotify class
  *
