@@ -1,8 +1,8 @@
-/* $Id: d32ElfIOCtl.c,v 1.2 2000-09-02 21:07:57 bird Exp $
+/* $Id: d32ElfIOCtl.c,v 1.3 2000-12-11 06:53:48 bird Exp $
  *
  * Elf driver IOCtl handler function.
  *
- * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -31,7 +31,7 @@
  * @param     pRpIOCtl  Pointer to 32-bit request packet. (not to the original packet)
  * @sketch
  * @status    stub.
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
 USHORT _loadds _Far32 _Pascal ElfIOCtl(PRP32GENIOCTL pRpIOCtl)
 {

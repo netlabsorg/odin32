@@ -66,13 +66,6 @@ Win32k is not tested with Warp 3. It is _supposed_ to work with Warp 3
 provided you are running fixpack 32 or later.
 (Fixpack 32 + y2kclock.exe is required for Y2K readyness anyway so...)
 
-2.3.2.1 OS/2 2.11
------------------
-
-For the curiose user, Win32k.sys will probably work with OS/2 2.11 too.
-I've not test this. But I have run successful Ring-3 tests against the
-lates 2.11 fixpack kernels.
-
 
 2.3.3 Installation
 ------------------
@@ -161,6 +154,25 @@ Heap parameters:
 
 -Resheapinit:   Initial resident in bytes.
                 Default: 16MB
+
+
+OS/2 Loader parameter:
+-Dllfixes<:E|:D>
+                Enables or Disables the long DLL name and non .DLL
+                extention fixes. OS/2 DLLs have been limited to 8 chars
+                names since version 2.<something>. This is a very bad
+                limitation. Also OS/2 forces all DLL loaded to loadtime
+                to have the extention '.DLL'.
+                Both these retritions are removed if this option is
+                enabled.
+                For DLL with non .DLL extention the internal name must
+                have to the extention included. (If you the experiences
+                problems with IMPLIB.EXE, enclose the internal name
+                in double-quotes.)
+                You should not make a DLL with a name starting with
+                DOSCALLS, DOSCALLS1, IBMVGA32, IBMDEV32 or IBMXGA32.
+                Current state for this feature is EXPERIMENTAL.
+                Default: Enabled
 
 
 Obsolete:

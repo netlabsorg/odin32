@@ -1,8 +1,8 @@
-/* $Id: win32ktst.c,v 1.3 2000-09-22 09:22:43 bird Exp $
+/* $Id: win32ktst.c,v 1.4 2000-12-11 06:53:57 bird Exp $
  *
  * Win32k test module.
  *
- * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -326,7 +326,7 @@ int main(int argc, char **argv)
 /**
  * Prints syntax information.
  * @status  partially implemented.
- * @author  knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
 void    syntax(void)
 {
@@ -346,7 +346,7 @@ void    syntax(void)
  * @param   argc    main argc
  * @param   argv    main argv
  * @status  completely implemented.
- * @author  knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
 int     kernelInit(int iTest, int argc, char **argv)
 {
@@ -544,7 +544,7 @@ int     kernelInit(int iTest, int argc, char **argv)
  * @param   pRpInit         Pointer to request packet to init.
  * @param   pszInitArgs     Pointer to init arguments.
  * @status  completely implemented.
- * @author  knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
 void initRPInit(RP32INIT *pRpInit, char *pszInitArgs)
 {
@@ -565,7 +565,7 @@ void initRPInit(RP32INIT *pRpInit, char *pszInitArgs)
  * @param   argc    main argc
  * @param   argv    main argv
  * @status  completely implemented.
- * @author  knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
 int tests(int iTest, int argc, char **argv)
 {
@@ -604,7 +604,7 @@ int tests(int iTest, int argc, char **argv)
  * @returns 0 on success.
  *          1 on failure.
  * @status  completely implemented.
- * @author  knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
 int TestCase1(int argc, char **argv)
 {
@@ -670,7 +670,7 @@ int TestCase1(int argc, char **argv)
  * @returns 0 on success.
  *          1 on failure.
  * @status  completely implemented.
- * @author  knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
 int TestCase2(void)
 {
@@ -731,7 +731,7 @@ int TestCase2(void)
  * @returns 0 on success.
  *          1 on failure.
  * @status  completely implemented.
- * @author  knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
 int TestCase3(void)
 {
@@ -788,7 +788,7 @@ int TestCase3(void)
  *          number of mismatches on error.
  * @param   pOpt
  * @status  completely implemented.
- * @author  knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
 int CompareOptions(struct options *pOpt)
 {
@@ -849,7 +849,7 @@ int CompareOptions(struct options *pOpt)
  *          > 0 on failure.
  * @sketch
  * @status
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  * @remark
  */
 int TestCaseExeLoad2(void)

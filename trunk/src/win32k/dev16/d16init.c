@@ -1,4 +1,4 @@
-/* $Id: d16init.c,v 1.8 2000-09-04 16:40:47 bird Exp $
+/* $Id: d16init.c,v 1.9 2000-12-11 06:53:48 bird Exp $
  *
  * d16init - init routines for both drivers.
  *
@@ -257,7 +257,7 @@ USHORT NEAR  R0Init16(PRP_GENIOCTL pRp)
  * This data is TKSSBase16, R0FlatCS16 and R0FlatDS16.
  * @returns   Same as DevHelp_GetDosVar.
  * @status    completely implemented.
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  * @remark    If you are not sure if TKSSBase16 is set or not, call this.
  *            After R0Init16 is called TKSSBase16 _is_ set.
  *            IMPORTANT! This function must _not_ be called after the initiation of the second device driver!!!

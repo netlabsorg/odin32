@@ -1,8 +1,8 @@
-/* $Id: OS2KTCB.h,v 1.1 2000-07-16 22:21:18 bird Exp $
+/* $Id: OS2KTCB.h,v 1.2 2000-12-11 06:53:50 bird Exp $
  *
  * TCB - Thread Control Block access methods.
  *
- * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *

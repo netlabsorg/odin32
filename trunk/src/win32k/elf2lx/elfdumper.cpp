@@ -1,8 +1,8 @@
-/* $Id: elfdumper.cpp,v 1.2 2000-02-26 00:46:30 bird Exp $
+/* $Id: elfdumper.cpp,v 1.3 2000-12-11 06:53:49 bird Exp $
  *
  * ELF dumper utility
  *
- * Copyright (c) 1999-2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * Copyright (c) 1999-2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -693,7 +693,7 @@ int dumpELFProgramHeader(Elf32_Ehdr * pHdr32, int iPhdr)
  * @returns   0 on success.
  * @param     pHdr32  Pointer to ELF header (and base of the loaded file).
  * @param     pPhdr   Pointer to program header.
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
 int dumpELFDynamicSegment(Elf32_Ehdr * pHdr32,  Elf32_Phdr * pPhdr)
 {
@@ -854,7 +854,7 @@ int dumpELFDynamicSegment(Elf32_Ehdr * pHdr32,  Elf32_Phdr * pPhdr)
  * @param     pDyn   Pointer to start of tag array.
  * @param     tag    Tag type to find.
  * @param     pword  Pointer to Elf32_Word which will hold the tag value if found.
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
 int getELFDynmaicTagValue(Elf32_Dyn *pDyn, Elf32_Sword tag, Elf32_Word *pword)
 {
@@ -874,7 +874,7 @@ int getELFDynmaicTagValue(Elf32_Dyn *pDyn, Elf32_Sword tag, Elf32_Word *pword)
  * @returns   0 on success.
  * @param     pHdr32  Pointer to ELF header (and base of the loaded file).
  * @param     pPhdr   Pointer to program header.
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
 int dumpELFInterpreterSegment(Elf32_Ehdr * pHdr32,  Elf32_Phdr * pPhdr)
 {
@@ -888,7 +888,7 @@ int dumpELFInterpreterSegment(Elf32_Ehdr * pHdr32,  Elf32_Phdr * pPhdr)
  * @returns   0 on success.
  * @param     pHdr32  Pointer to ELF header (and base of the loaded file).
  * @param     pPhdr   Pointer to program header.
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
 int dumpELFNoteSegment(Elf32_Ehdr * pHdr32,  Elf32_Phdr * pPhdr)
 {

@@ -1,8 +1,8 @@
-/* $Id: env.h,v 1.3 2000-09-02 21:08:01 bird Exp $
+/* $Id: env.h,v 1.4 2000-12-11 06:53:51 bird Exp $
  *
  * Environment access functions
  *
- * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *

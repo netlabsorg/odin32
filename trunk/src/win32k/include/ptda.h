@@ -1,8 +1,8 @@
-/* $Id: ptda.h,v 1.2 2000-04-17 02:26:29 bird Exp $
+/* $Id: ptda.h,v 1.3 2000-12-11 06:53:52 bird Exp $
  *
  * PTDA access functions.
  *
- * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *

@@ -1,8 +1,8 @@
-/* $Id: d32Win32kIOCtl.c,v 1.3 2000-10-01 02:58:15 bird Exp $
+/* $Id: d32Win32kIOCtl.c,v 1.4 2000-12-11 06:53:48 bird Exp $
  *
  * Win32k driver IOCtl handler function.
  *
- * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -34,7 +34,7 @@
  * IOCtl handler for the Win32k part of the driver.
  * @returns   Gen IOCtl return code.
  * @param     pRpIOCtl  Pointer to 32-bit request packet. (not to the original packet)
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
 USHORT _loadds _Far32 _Pascal Win32kIOCtl(PRP32GENIOCTL pRpIOCtl)
 {

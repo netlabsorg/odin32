@@ -1,8 +1,8 @@
-/* $Id: elf2lx.cpp,v 1.4 2000-09-02 21:07:58 bird Exp $
+/* $Id: elf2lx.cpp,v 1.5 2000-12-11 06:53:48 bird Exp $
  *
  * Elf2Lx - implementation.
  *
- * Copyright (c) 1999-2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * Copyright (c) 1999-2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -246,7 +246,7 @@ ULONG Elf2Lx::init(PCSZ pszFilename)
  *            FALSE: invalid header.
  * @param     pEhdr  Pointer to elf header.
  * @status    completely implemented.
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
 BOOL Elf2Lx::validHeader(Elf32_Ehdr *pEhdr)
 {

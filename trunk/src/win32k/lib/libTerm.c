@@ -1,8 +1,8 @@
-/* $Id: libTerm.c,v 1.2 2000-02-26 17:48:23 bird Exp $
+/* $Id: libTerm.c,v 1.3 2000-12-11 06:53:54 bird Exp $
  *
  * Terminates the Win32k library functions.
  *
- * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -34,7 +34,7 @@ extern HFILE       hWin32k;
  * Initiates the library.
  * @returns   OS/2 return code.
  * @status    completely implemented.
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
 APIRET APIENTRY  libWin32kTerm(void)
 {

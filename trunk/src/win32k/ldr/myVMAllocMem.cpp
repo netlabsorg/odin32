@@ -1,8 +1,8 @@
-/* $Id: myVMAllocMem.cpp,v 1.1 2000-02-15 23:39:20 bird Exp $
+/* $Id: myVMAllocMem.cpp,v 1.2 2000-12-11 06:53:53 bird Exp $
  *
  * Debug module - overloads VMAllocMem to analyse input parameters....
  *
- * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -43,7 +43,7 @@
  * @time
  * @sketch
  * @status
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  * @remark
  */
 APIRET KRNLCALL myVMAllocMem(ULONG p1, ULONG p2, ULONG p3, USHORT p4, USHORT p5, USHORT p6, ULONG p7, ULONG p8, ULONG p9)

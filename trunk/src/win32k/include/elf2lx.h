@@ -1,8 +1,8 @@
-/* $Id: elf2lx.h,v 1.3 2000-02-27 02:16:04 bird Exp $
+/* $Id: elf2lx.h,v 1.4 2000-12-11 06:53:51 bird Exp $
  *
  * Elf2Lx - Declaration.
  *
- * Copyright (c) 1999-2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * Copyright (c) 1999-2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -16,7 +16,7 @@
  * Elf to LX converter class.
  * @version
  * @verdesc
- * @author      knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  * @approval
  */
 class Elf2Lx : public ModuleBase

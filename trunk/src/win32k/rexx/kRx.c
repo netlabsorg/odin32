@@ -1,10 +1,10 @@
-/* $Id: kRx.c,v 1.2 2000-06-03 03:50:45 bird Exp $
+/* $Id: kRx.c,v 1.3 2000-12-11 06:53:56 bird Exp $
  *
  * kRx - Small rexx script interpreter.
  *
  * Will be re-written in assembly later!!!
  *
- * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -41,7 +41,7 @@
  *                  ont to the rexx script.
  * @sketch
  * @status
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  * @remark
  */
 int main(int argc, char **argv)

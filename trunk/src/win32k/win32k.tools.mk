@@ -1,4 +1,4 @@
-# $Id: win32k.tools.mk,v 1.2 2000-12-03 21:45:10 bird Exp $
+# $Id: win32k.tools.mk,v 1.3 2000-12-11 06:53:47 bird Exp $
 
 #
 # Win32k common tools makefile.
@@ -48,9 +48,9 @@ CFLAGS16    = -c -W3 -Asfw /NTCODE16 /NDDATA16 -G2s -Zp -Zl -nologo -Zi -Owis
 CFLAGS      = -q -Ge -Gs- -Gr+ -Rn -Ss+ -Mp -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext- -Ti+ -Oc+ -Os-
 CPPFLAGS    = -q -Ge -Gs- -Gr+ -Rn -Ss+ -Mp -Wall+ppt-ppc-inl-cnv-gnr-vft-        -Gx+ -Ti+ -Oc+ -Os-
 !ifdef NODEBUGINFO
-LFLAGS      = /nologo /MAP /NOI /NOE /NOD /A:16 /PACKCODE /PACKDATA /NOEXEPACK /DEBUG
-!else
 LFLAGS      = /nologo /MAP /NOI /NOE /NOD /A:16 /PACKCODE /PACKDATA /EXEPACK:2 /NODEBUG
+!else
+LFLAGS      = /nologo /MAP /NOI /NOE /NOD /A:16 /PACKCODE /PACKDATA /NOEXEPACK /DEBUG
 !endif
 !endif
 

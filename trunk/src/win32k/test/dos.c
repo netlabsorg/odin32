@@ -1,11 +1,11 @@
-/* $Id: dos.c,v 1.2 2000-09-02 21:08:20 bird Exp $
+/* $Id: dos.c,v 1.3 2000-12-11 06:53:57 bird Exp $
  *
  * Thunkers for OS/2 APIs.
  *
  * Some APIs requires Linear Stack, some have to overridden to
  * emulate different things.
  *
- * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *

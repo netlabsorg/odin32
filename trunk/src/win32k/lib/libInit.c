@@ -1,8 +1,8 @@
-/* $Id: libInit.c,v 1.2 2000-02-26 17:48:22 bird Exp $
+/* $Id: libInit.c,v 1.3 2000-12-11 06:53:54 bird Exp $
  *
  * Inits the Win32k library functions.
  *
- * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -34,7 +34,7 @@ HFILE   hWin32k = NULLHANDLE;
  * Initiates the library.
  * @returns   OS/2 return code.
  * @status
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  * @remark
  */
 APIRET APIENTRY  libWin32kInit(void)
