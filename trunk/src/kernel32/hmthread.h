@@ -1,4 +1,4 @@
-/* $Id: hmthread.h,v 1.3 2001-04-26 13:22:47 sandervl Exp $ */
+/* $Id: hmthread.h,v 1.4 2001-12-03 12:13:09 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -33,27 +33,27 @@ public:
                               BOOL                   fFirstThread);
 
   /* this is a handler method for calls to WaitForSingleObject */
-  virtual DWORD WaitForSingleObject(PHMHANDLEDATA pHMHandleData,
-                                    DWORD  dwTimeout);
+  virtual DWORD  WaitForSingleObject(PHMHANDLEDATA pHMHandleData,
+                                     DWORD  dwTimeout);
 
   /* this is a handler method for calls to WaitForSingleObjectEx */
-  virtual DWORD WaitForSingleObjectEx(PHMHANDLEDATA pHMHandleData,
-                                      DWORD  dwTimeout,
-                                      BOOL   fAlertable);
+  virtual DWORD  WaitForSingleObjectEx(PHMHANDLEDATA pHMHandleData,
+                                       DWORD  dwTimeout,
+                                       BOOL   fAlertable);
 
-  virtual INT    GetThreadPriority(PHMHANDLEDATA pHMHandleData);
-  virtual DWORD  SuspendThread(PHMHANDLEDATA pHMHandleData);
-  virtual BOOL   SetThreadPriority(PHMHANDLEDATA pHMHandleData, int priority);
+  virtual INT    GetThreadPriority(HANDLE hThread, PHMHANDLEDATA pHMHandleData);
+  virtual DWORD  SuspendThread(HANDLE hThread, PHMHANDLEDATA pHMHandleData);
+  virtual BOOL   SetThreadPriority(HANDLE hThread, PHMHANDLEDATA pHMHandleData, int priority);
 
-  virtual BOOL   GetThreadContext(PHMHANDLEDATA pHMHandleData, PCONTEXT lpContext);
-  virtual BOOL   SetThreadContext(PHMHANDLEDATA pHMHandleData, const CONTEXT *lpContext);
+  virtual BOOL   GetThreadContext(HANDLE hThread, PHMHANDLEDATA pHMHandleData, PCONTEXT lpContext);
+  virtual BOOL   SetThreadContext(HANDLE hThread, PHMHANDLEDATA pHMHandleData, const CONTEXT *lpContext);
  
-  virtual BOOL   TerminateThread(PHMHANDLEDATA pHMHandleData, DWORD exitcode);
-  virtual DWORD  ResumeThread(PHMHANDLEDATA pHMHandleData);
-  virtual BOOL   GetExitCodeThread(PHMHANDLEDATA pHMHandleData, LPDWORD lpExitCode);
-  virtual BOOL   SetThreadTerminated(PHMHANDLEDATA pHMHandleData);
+  virtual BOOL   TerminateThread(HANDLE hThread, PHMHANDLEDATA pHMHandleData, DWORD exitcode);
+  virtual DWORD  ResumeThread(HANDLE hThread, PHMHANDLEDATA pHMHandleData);
+  virtual BOOL   GetExitCodeThread(HANDLE hThread, PHMHANDLEDATA pHMHandleData, LPDWORD lpExitCode);
+  virtual BOOL   SetThreadTerminated(HANDLE hThread, PHMHANDLEDATA pHMHandleData);
 
-  virtual BOOL CloseHandle(PHMHANDLEDATA pHMHandleData);
+  virtual BOOL   CloseHandle(PHMHANDLEDATA pHMHandleData);
 };
 
 

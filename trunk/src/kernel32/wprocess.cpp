@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.138 2001-12-01 20:41:38 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.139 2001-12-03 12:13:10 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -182,7 +182,8 @@ TEB * WIN32API InitializeTIB(BOOL fMainThread)
     winteb->queue       = 0;                       /* 28 Message queue */
     winteb->tls_ptr     = &winteb->tls_array[0];   /* 2c Pointer to TLS array */
     winteb->process     = &ProcessPDB;             /* 30 owning process (used by NT3.51 applets)*/
-
+    
+    winteb->delta_priority  = THREAD_PRIORITY_NORMAL;
     winteb->process         = &ProcessPDB;
 ////    winteb->exit_code       = 0x103; /* STILL_ACTIVE */
     winteb->teb_sel         = tibsel;
@@ -1933,27 +1934,6 @@ DWORD WIN32API WaitForInputIdle(HANDLE hProcess, DWORD dwTimeOut)
         return 0;        
   }
   else  return O32_WaitForInputIdle(hProcess, dwTimeOut);
-}
-//******************************************************************************
-//******************************************************************************
-VOID WIN32API Sleep(DWORD arg1)
-{
-    dprintf2(("KERNEL32:  Sleep %d\n", arg1));
-    O32_Sleep(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API GetPriorityClass(HANDLE hProcess)
-{
-    dprintf(("KERNEL32: GetPriorityClass %x", hProcess));
-    return O32_GetPriorityClass(hProcess);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SetPriorityClass(HANDLE hProcess, DWORD dwPriority)
-{
-    dprintf(("KERNEL32: SetPriorityClass %x %x", hProcess, dwPriority));
-    return O32_SetPriorityClass(hProcess, dwPriority);
 }
 /**********************************************************************
  * LoadModule    (KERNEL32.499)

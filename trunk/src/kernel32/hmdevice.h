@@ -1,4 +1,4 @@
-/* $Id: hmdevice.h,v 1.30 2001-11-26 14:54:00 sandervl Exp $ */
+/* $Id: hmdevice.h,v 1.31 2001-12-03 12:13:08 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -398,18 +398,18 @@ public:
                              LPDWORD                lpIDThread,
                              BOOL                   fFirstThread);
 
- virtual INT    GetThreadPriority(PHMHANDLEDATA pHMHandleData);
- virtual DWORD  SuspendThread(PHMHANDLEDATA pHMHandleData);
- virtual BOOL   SetThreadPriority(PHMHANDLEDATA pHMHandleData, int priority);
+ virtual INT    GetThreadPriority(HANDLE hThread, PHMHANDLEDATA pHMHandleData);
+ virtual DWORD  SuspendThread(HANDLE hThread, PHMHANDLEDATA pHMHandleData);
+ virtual BOOL   SetThreadPriority(HANDLE hThread, PHMHANDLEDATA pHMHandleData, int priority);
 
- virtual BOOL   GetThreadContext(PHMHANDLEDATA pHMHandleData, PCONTEXT lpContext);
- virtual BOOL   SetThreadContext(PHMHANDLEDATA pHMHandleData, const CONTEXT *lpContext);
+ virtual BOOL   GetThreadContext(HANDLE hThread, PHMHANDLEDATA pHMHandleData, PCONTEXT lpContext);
+ virtual BOOL   SetThreadContext(HANDLE hThread, PHMHANDLEDATA pHMHandleData, const CONTEXT *lpContext);
 
- virtual BOOL   TerminateThread(PHMHANDLEDATA pHMHandleData, DWORD exitcode);
- virtual DWORD  ResumeThread(PHMHANDLEDATA pHMHandleData);
- virtual BOOL   SetThreadTerminated(PHMHANDLEDATA pHMHandleData);
+ virtual BOOL   TerminateThread(HANDLE hThread, PHMHANDLEDATA pHMHandleData, DWORD exitcode);
+ virtual DWORD  ResumeThread(HANDLE hThread, PHMHANDLEDATA pHMHandleData);
+ virtual BOOL   SetThreadTerminated(HANDLE hThread, PHMHANDLEDATA pHMHandleData);
 
- virtual BOOL   GetExitCodeThread(PHMHANDLEDATA pHMHandleData, LPDWORD lpExitCode);
+ virtual BOOL   GetExitCodeThread(HANDLE hThread, PHMHANDLEDATA pHMHandleData, LPDWORD lpExitCode);
 
  /* Named pipes */
   virtual BOOL  PeekNamedPipe(PHMHANDLEDATA pHMHandleData,
