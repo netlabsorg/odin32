@@ -1,4 +1,4 @@
-/* $Id: glut_dials.c,v 1.2 2000-02-09 08:46:09 jeroen Exp $ */
+/* $Id: glut_dials.c,v 1.3 2000-03-11 15:07:44 sandervl Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1994. */
 
 /* This program is freely distributable without licensing fees
@@ -7,7 +7,7 @@
 
 #include "glutint.h"
 
-void APIENTRY
+void GLAPIENTRY
 glutButtonBoxFunc(GLUTbuttonBoxCB buttonBoxFunc)
 {
   __glutCurrentWindow->buttonBox = buttonBoxFunc;
@@ -16,7 +16,7 @@ glutButtonBoxFunc(GLUTbuttonBoxCB buttonBoxFunc)
     GLUT_DEVICE_MASK_WORK);
 }
 
-void APIENTRY
+void GLAPIENTRY
 glutDialsFunc(GLUTdialsCB dialsFunc)
 {
   __glutCurrentWindow->dials = dialsFunc;

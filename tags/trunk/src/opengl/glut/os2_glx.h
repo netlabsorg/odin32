@@ -1,4 +1,4 @@
-/* $Id: os2_glx.h,v 1.2 2000-02-09 08:46:21 jeroen Exp $ */
+/* $Id: os2_glx.h,v 1.3 2000-03-11 15:07:47 sandervl Exp $ */
 #ifndef __os2_glx_h__
 #define __os2_glx_h__
 
@@ -13,7 +13,6 @@
 #include "os2_x11.h"
 
 /* Type definitions (conversions). */
-typedef ULONG HGLRC;
 typedef HGLRC GLXContext;
 
 #define GLX_USE_GL              1       /* support GLX rendering */

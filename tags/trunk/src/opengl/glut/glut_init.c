@@ -1,4 +1,4 @@
-/* $Id: glut_init.c,v 1.3 2000-03-04 19:10:15 jeroen Exp $ */
+/* $Id: glut_init.c,v 1.4 2000-03-11 15:07:45 sandervl Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1994, 1997. */
 
 /* This program is freely distributable without licensing fees
@@ -16,7 +16,6 @@
 
 #if defined(__WIN32OS2__)
 #include <windows.h>
-#include "winconst.h"
 #include "GL\gl.h"
 #undef WH_NB_HOOKS /* Get rid of copiler warning... */
 #endif
@@ -68,13 +67,8 @@ void
 __glutOpenWin32Connection(char* display)
 {
   static char *classname;
-#if defined(__WIN32OS2__)
-  WNDCLASSA wc;
-  HINSTANCE hInstance = GetModuleHandleA(NULL);
-#else
   WNDCLASS  wc;
   HINSTANCE hInstance = GetModuleHandle(NULL);
-#endif
 
   /* Make sure we register the window only once. */
   if(classname)
@@ -94,15 +88,9 @@ __glutOpenWin32Connection(char* display)
   classname = "GLUT";
 
   /* Clear (important!) and then fill in the window class structure. */
-#if defined(__WIN32OS2__)
-  memset(&wc, 0, sizeof(WNDCLASSA));
-  wc.hIcon         = LoadIconA(hInstance, "GLUT_ICON");
-  wc.hCursor       = LoadCursorA(hInstance, IDC_ARROWA);
-#else
   memset(&wc, 0, sizeof(WNDCLASS));
   wc.hIcon         = LoadIcon(hInstance, "GLUT_ICON");
   wc.hCursor       = LoadCursor(hInstance, IDC_ARROW);
-#endif
 
   wc.lpfnWndProc   = (WNDPROC)__glutWindowProc;
   wc.style         = CS_OWNDC;
@@ -113,17 +101,9 @@ __glutOpenWin32Connection(char* display)
 
   /* Fill in a default icon if one isn't specified as a resource. */
   if(!wc.hIcon)
-#if defined(__WIN32OS2__)
-    wc.hIcon = LoadIconA(NULL, MAKEINTRESOURCEA(IDI_WINLOGO_W));
-#else
     wc.hIcon = LoadIcon(NULL, IDI_WINLOGO);
-#endif
 
-#if defined(__WIN32OS2__)
-  if(!RegisterClassA(&wc)) {
-#else
   if(!RegisterClass(&wc)) {
-#endif
     __glutFatalError("RegisterClass() failed:"
                      "Cannot register GLUT window class.");
   }
@@ -197,11 +177,9 @@ removeArgs(int *argcp, char **argv, int numToRemove)
   *argcp -= numToRemove;
 }
 
-void APIENTRY
+void GLAPIENTRY
 glutInit(int *argcp, char **argv)
 {
-  dprintf(("GLUT32: glutInit()\n"));
-
   char *display = NULL;
   char *str, *geometry = NULL;
   struct timeval unused;
@@ -345,7 +323,7 @@ glutInit(int *argcp, char **argv)
 }
 
 /* CENTRY */
-void APIENTRY
+void GLAPIENTRY
 glutInitWindowPosition(int x, int y)
 {
   __glutInitX = x;
@@ -359,7 +337,7 @@ glutInitWindowPosition(int x, int y)
   }
 }
 
-void APIENTRY
+void GLAPIENTRY
 glutInitWindowSize(int width, int height)
 {
   __glutInitWidth = width;
@@ -373,7 +351,7 @@ glutInitWindowSize(int width, int height)
   }
 }
 
-void APIENTRY
+void GLAPIENTRY
 glutInitDisplayMode(unsigned int mask)
 {
   dprintf(("GLUT32: glutInitDisplayMode()\n"));

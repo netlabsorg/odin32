@@ -1,4 +1,4 @@
-/* $Id: win32_winproc.c,v 1.4 2000-03-05 10:19:39 jeroen Exp $ */
+/* $Id: win32_winproc.c,v 1.5 2000-03-11 15:07:48 sandervl Exp $ */
 /* Copyright (c) Nate Robins, 1997. */
 /* portions Copyright (c) Mark Kilgard, 1997, 1998. */
 
@@ -18,7 +18,7 @@ typedef MINMAXINFO* LPMINMAXINFO;
 #include <sys/timeb.h>
 #endif
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__WIN32OS2__)
 #include <mmsystem.h>  /* Win32 Multimedia API header. */
 #endif
 
@@ -162,11 +162,7 @@ __glutWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
       /* *INDENT-ON* */
       default:
         if (window->keyboardUp) {
-#if defined(__WIN32OS2__)
-          key = MapVirtualKeyA(wParam, 2);                 /* Map to ASCII.*/
-#else
           key = MapVirtualKey(wParam, 2);                  /* Map to ASCII.*/
-#endif
           if (isascii(key) && (key != 0)) {
 
             /* XXX Attempt to determine modified ASCII character
@@ -704,11 +700,7 @@ __glutWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     window = __glutGetWindow(hwnd);
     /* Make sure we re-select the correct palette if needed. */
     if (LOWORD(wParam)) {
-#if defined(__WIN32OS2__)
-      PostMessageA(hwnd, WM_PALETTECHANGED, 0, 0);
-#else
       PostMessage(hwnd, WM_PALETTECHANGED, 0, 0);
-#endif
     }
     if (window) {
       int visState;
@@ -838,9 +830,5 @@ __glutWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
   }
 
 defproc:
-#if defined(__WIN32OS2__)
-  return DefWindowProcA(hwnd, msg, wParam, lParam);
-#else
   return DefWindowProc(hwnd, msg, wParam, lParam);
-#endif
 }

@@ -1,4 +1,4 @@
-/* $Id: os2_x11.h,v 1.2 2000-02-09 08:46:21 jeroen Exp $ */
+/* $Id: os2_x11.h,v 1.3 2000-03-11 15:07:47 sandervl Exp $ */
 #ifndef __os2_x11_h__
 #define __os2_x11_h__
 
@@ -11,7 +11,7 @@
 /* JvdH 30/01/2000 - GLUT port to Odin */
 
 #include <stdlib.h>
-#include <os2win.h>
+#include <windows.h>
 
 /* Type definitions (conversions) */
 typedef int Visual;                     /* OS/2 equivalent of X11 type */
