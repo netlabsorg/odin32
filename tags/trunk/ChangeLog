@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.2716 2004-03-24 09:24:05 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2717 2004-03-24 16:56:20 sandervl Exp $ */
+
+ 2004-03-24: Sander van Leeuwen <sandervl@innotek   >
+    - GDI32:    o CreateDIBitmap: added workaround for DIB_PAL_COLORS mode
 
  2004-03-24: Vitali Pelenyov <sunlover@innotek   >
     - KERNEL32: o GetVolumeInformation: check for file system buffer size
