@@ -1,0 +1,18 @@
+*
+* $Id: win32k.ddp,v 1.1 1999-11-10 02:51:43 bird Exp $
+*
+* Win32k.sys
+*
+* Copyright (c) 1998-1999 knut st. osmundsen
+*
+* ALPHA.
+
+:TITLE
+win32k - Odin32 Ring 0 PE loader/converter for OS/2.
+
+:FILES
+win32k.sys \os2\boot\win32k.sys
+win32k.sym \os2\boot\win32k.sym
+
+:CONFIG
+deivce=\os2\boot\win32k.sys
