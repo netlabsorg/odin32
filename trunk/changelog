@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.507 1999-12-05 10:01:18 sandervl Exp $ */
+ /* $Id: changelog,v 1.508 1999-12-05 13:41:55 sandervl Exp $ */
 
  99-12-05: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- KERNEL32: Better logging for CreateProcessA
@@ -13,6 +13,8 @@
                  -> fixes wrong button position in RealPlayer
 	- INCLUDE\heapstring.h: Changed definition of lstrcpy(n)AtoW/WtoA
         - KERNEL32: CHanged lstrcpy(n)AtoW/WtoA
+                    Fixed bug in InterlockedExchange (ret 4 should be ret 8)
+                    -> fixes crashes in Mozilla viewer & WinAmp (2.5e)
 	- LZ32: Removed prototype of lstrcpyAtoW
 
  99-12-04 Achim Hasenmueller <achimha@innotek.de>
