@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.336 2002-08-23 15:06:01 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.337 2002-08-27 09:30:50 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -364,6 +364,9 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
                     SetLastError(ERROR_INVALID_PARAMETER);
                     return FALSE;
             }
+            if (window->getExStyle() & WS_EX_TOPMOST)
+                 cs->dwExStyle |= WS_EX_TOPMOST;          
+
             RELEASE_WNDOBJ(window);
             /* Windows does this for overlapped windows
              * (I don't know about other styles.) */
@@ -3610,6 +3613,7 @@ LONG Win32BaseWindow::SetWindowLong(int index, ULONG value, BOOL fUnicode)
                 SendMessageA(getWindowHandle(),WM_STYLECHANGING,GWL_EXSTYLE,(LPARAM)&ss);
                 setExStyle(ss.styleNew);
                 SendMessageA(getWindowHandle(),WM_STYLECHANGED,GWL_EXSTYLE,(LPARAM)&ss);
+                OSLibSetWindowStyle(getOS2FrameWindowHandle(), getOS2WindowHandle(), getStyle(), getExStyle());
                 oldval = ss.styleOld;
                 break;
         }
