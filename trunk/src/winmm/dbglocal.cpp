@@ -1,4 +1,4 @@
-/* $Id: dbglocal.cpp,v 1.4 2001-03-19 19:28:37 sandervl Exp $ */
+/* $Id: dbglocal.cpp,v 1.5 2001-03-23 16:23:42 sandervl Exp $ */
 
 /*
  * debug logging functions for OS/2
@@ -22,7 +22,7 @@ char  *DbgFileNames[DBG_MAXFILES] =
 {
 "os2timer",
 "waveout",
-"dwaveout",
+"waveoutdart",
 "time",
 "wavein",
 "auxiliary",
@@ -39,7 +39,10 @@ char  *DbgFileNames[DBG_MAXFILES] =
 "playsound",
 "joyos2",
 "resource",
-"dwavein"
+"waveindart",
+"waveoutdaud",
+"waveoutbase",
+"waveinoutbase"
 };
 //******************************************************************************
 //******************************************************************************

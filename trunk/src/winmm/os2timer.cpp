@@ -1,4 +1,4 @@
-/* $Id: os2timer.cpp,v 1.17 2000-10-10 21:28:56 sandervl Exp $ */
+/* $Id: os2timer.cpp,v 1.18 2001-03-23 16:23:44 sandervl Exp $ */
 
 /*
  * OS/2 Timer class
@@ -21,6 +21,7 @@
 #include <os2wrap.h>      //Odin32 OS/2 api wrappers
 #include <process.h>
 #include <win32type.h>
+#include <win32api.h>
 #include <wprocess.h>
 #include <misc.h>
 
@@ -34,41 +35,13 @@
 /****************************************************************************
  * Structures                                                               *
  ****************************************************************************/
-
-
-/***********************************
- * PH: fixups for missing os2win.h *
- ***********************************/
-
-extern "C"
-{
-  typedef DWORD (* CALLBACK LPTHREAD_START_ROUTINE)(LPVOID);
   
-  DWORD WIN32API GetLastError();
-  
-  HANDLE WIN32API CreateThread(LPSECURITY_ATTRIBUTES lpsa,
-                               DWORD cbStack,
-                               LPTHREAD_START_ROUTINE lpStartAddr,
-                               LPVOID lpvThreadParm,
-                               DWORD fdwCreate,
-                               LPDWORD lpIDThread);
-  
-  VOID WIN32API ExitThread(DWORD dwExitCode);
-  
-  BOOL WIN32API TerminateThread(HANDLE hThread,
-                                DWORD dwExitCode);
-  
-  BOOL WIN32API SetEvent   (HANDLE hEvent);
-    
-  BOOL WIN32API PulseEvent (HANDLE hEvent);
-    
-}
 
 /****************************************************************************
  * Local Prototypes                                                         *
  ****************************************************************************/
 
-static DWORD _System TimerHlpHandler(LPVOID timer);
+static DWORD WIN32API TimerHlpHandler(LPVOID timer);
 
 
 
@@ -281,7 +254,7 @@ OS2Timer::OS2Timer() : TimerSem(0), TimerHandle(0), hTimerThread(0),
   //hTimerThread = _beginthread(TimerHlpHandler, NULL, 0x4000, (void *)this);
   hTimerThread = CreateThread(NULL,
                               0x4000,
-                              (LPTHREAD_START_ROUTINE)TimerHlpHandler,
+                              TimerHlpHandler,
                               (LPVOID)this,
                               0, // thread creation flags
                               &TimerThreadID);
@@ -475,12 +448,10 @@ void OS2Timer::TimerHandler()
 }
 //******************************************************************************
 //******************************************************************************
-//static void _Optlink TimerHlpHandler(void *timer)
-static DWORD _System TimerHlpHandler(LPVOID timer)
+static DWORD WIN32API TimerHlpHandler(LPVOID timer)
 {
   ((OS2Timer *)timer)->TimerHandler();
 
-  //_endthread(); isn't really required
   return 0;
 }
 

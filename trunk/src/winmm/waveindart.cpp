@@ -1,4 +1,4 @@
-/* $Id: dwavein.cpp,v 1.2 2001-03-19 19:28:38 sandervl Exp $ */
+/* $Id: waveindart.cpp,v 1.1 2001-03-23 16:23:44 sandervl Exp $ */
 
 /*
  * Wave record class
@@ -29,9 +29,9 @@
 #include <wprocess.h>
 
 #include "misc.h"
-#include "dwavein.h"
+#include "waveindart.h"
 
-#define DBG_LOCALLOG    DBG_dwavein
+#define DBG_LOCALLOG    DBG_waveindart
 #include "dbglocal.h"
 
 #ifndef min
@@ -47,105 +47,45 @@ LONG APIENTRY WaveInHandler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFla
 //TODO: mulaw, alaw & adpcm
 /******************************************************************************/
 /******************************************************************************/
-DartWaveIn::DartWaveIn(LPWAVEFORMATEX pwfx)
-{
-   Init(pwfx);
-}
-/******************************************************************************/
-/******************************************************************************/
-DartWaveIn::DartWaveIn(LPWAVEFORMATEX pwfx, ULONG nCallback, ULONG dwInstance)
-{
-   Init(pwfx);
-
-   mthdCallback     = (LPDRVCALLBACK)nCallback; // callback function
-   this->dwInstance = dwInstance;
-   fOverrun        = FALSE;
-
-   if(!ulError)
-        callback((ULONG)this, WIM_OPEN, dwInstance, 0, 0);
-}
-/******************************************************************************/
-/******************************************************************************/
-DartWaveIn::DartWaveIn(LPWAVEFORMATEX pwfx, HWND hwndCallback)
-{
-   Init(pwfx);
-
-   this->hwndCallback = hwndCallback;
-
-   if(!ulError)
-        PostMessageA(hwndCallback, WIM_OPEN, 0, 0);
-}
-/******************************************************************************/
-/******************************************************************************/
-void DartWaveIn::callback(HDRVR h, UINT uMessage, DWORD dwUser, DWORD dw1, DWORD dw2)
-{
-  USHORT selTIB = GetFS(); // save current FS selector
-  USHORT selCallback;
-
-    dprintf(("WINMM:DartWaveIn::callback(HDRVR h=%08xh, UINT uMessage=%08xh, DWORD dwUser=%08xh, DWORD dw1=%08xh, DWORD dw2=%08xh)\n",
-              h, uMessage, dwUser, dw1, dw2));
-
-    selCallback = GetProcessTIBSel();
-
-    //TODO: may not be very safe. perhaps we should allocate a new TIB for the DART thread or let another thread do the actual callback
-    if(selCallback)
-    {
-        SetFS(selCallback);      // switch to callback win32 tib selector (stored in waveOutOpen)
-
-        //@@@PH 1999/12/28 Shockwave Flashes seem to make assumptions on a
-        // specific stack layout. Do we have the correct calling convention here?
-        mthdCallback(h,uMessage,dwUser,dw1,dw2);
-        SetFS(selTIB);           // switch back to the saved FS selector
-    }
-    else {
-        dprintf(("WARNING: no valid selector of main thread available (process exiting); skipping waveout notify"));
-    }
-    dprintf(("WINMM:DartWaveOut::callback returned"));
-}
-/******************************************************************************/
-/******************************************************************************/
-void DartWaveIn::Init(LPWAVEFORMATEX pwfx)
+DartWaveIn::DartWaveIn(LPWAVEFORMATEX pwfx, ULONG fdwOpen, ULONG nCallback, ULONG dwInstance)
+              : WaveInOut(pwfx, fdwOpen, nCallback, dwInstance)
 {
  MCI_GENERIC_PARMS  GenericParms;
  MCI_AMP_OPEN_PARMS AmpOpenParms;
  APIRET rc;
 
-   fMixerSetup   = FALSE;
-   next          = NULL;
-   wavehdr       = NULL;
-   mthdCallback  = NULL;
-   hwndCallback  = 0;
-   dwInstance    = 0;
-   ulError       = 0;
-   State         = STATE_STOPPED;
+    fOverrun        = FALSE;
+    fMixerSetup   = FALSE;
 
-   MixBuffer     = (MCI_MIX_BUFFER *)malloc(PREFILLBUF_DART_REC*sizeof(MCI_MIX_BUFFER));
-   MixSetupParms = (MCI_MIXSETUP_PARMS *)malloc(sizeof(MCI_MIXSETUP_PARMS));
-   BufferParms   = (MCI_BUFFER_PARMS *)malloc(sizeof(MCI_BUFFER_PARMS));
+    MixBuffer     = (MCI_MIX_BUFFER *)malloc(PREFILLBUF_DART_REC*sizeof(MCI_MIX_BUFFER));
+    MixSetupParms = (MCI_MIXSETUP_PARMS *)malloc(sizeof(MCI_MIXSETUP_PARMS));
+    BufferParms   = (MCI_BUFFER_PARMS *)malloc(sizeof(MCI_BUFFER_PARMS));
+    if(!MixBuffer || !MixSetupParms || !BufferParms) {
+        dprintf(("ERROR: malloc failed!!"));
+        ulError = MMSYSERR_NOMEM;
+        return;
+    }
 
-   BitsPerSample   = pwfx->wBitsPerSample;
-   SampleRate      = pwfx->nSamplesPerSec;
-   this->nChannels = pwfx->nChannels;
-   ulBufSize       = DART_BUFSIZE_REC;
+    ulBufSize       = DART_BUFSIZE_REC;
 
-   dprintf(("waveInOpen: samplerate %d, numChan %d bps %d (%d), format %x", SampleRate, nChannels, BitsPerSample, pwfx->nBlockAlign, pwfx->wFormatTag));
-   // Setup the open structure, pass the playlist and tell MCI_OPEN to use it
-   memset(&AmpOpenParms,0,sizeof(AmpOpenParms));
+    dprintf(("waveInOpen: samplerate %d, numChan %d bps %d (%d), format %x", SampleRate, nChannels, BitsPerSample, pwfx->nBlockAlign, pwfx->wFormatTag));
+    // Setup the open structure, pass the playlist and tell MCI_OPEN to use it
+    memset(&AmpOpenParms,0,sizeof(AmpOpenParms));
 
-   AmpOpenParms.usDeviceID = ( USHORT ) 0;
-   AmpOpenParms.pszDeviceType = ( PSZ ) MCI_DEVTYPE_AUDIO_AMPMIX;
+    AmpOpenParms.usDeviceID = ( USHORT ) 0;
+    AmpOpenParms.pszDeviceType = ( PSZ ) MCI_DEVTYPE_AUDIO_AMPMIX;
 
-   rc = mciSendCommand(0, MCI_OPEN,
+    rc = mciSendCommand(0, MCI_OPEN,
                        MCI_WAIT | MCI_OPEN_TYPE_ID | MCI_OPEN_SHAREABLE,
                        (PVOID) &AmpOpenParms,
                        0);
-   DeviceId = AmpOpenParms.usDeviceID;
-   if(rc) {
+    DeviceId = AmpOpenParms.usDeviceID;
+    if(rc) {
         dprintf(("MCI_OPEN failed\n"));
         mciError(rc);
         ulError = MMSYSERR_NODRIVER;
-   }
-   if(rc == 0) {
+    }
+    if(rc == 0) {
         //Grab exclusive rights to device instance (NOT entire device)
         GenericParms.hwndCallback = 0;  //Not needed, so set to 0
         rc = mciSendCommand(DeviceId, MCI_ACQUIREDEVICE, MCI_EXCLUSIVE_INSTANCE,
@@ -155,31 +95,10 @@ void DartWaveIn::Init(LPWAVEFORMATEX pwfx)
             mciError(rc);
             ulError = MMSYSERR_NOTENABLED;
         }
-   }
-   State    = STATE_STOPPED;
+    }
 
-   wmutex   = new VMutex();
-   if(wmutex == NULL) {
-        DebugInt3();
-        ulError = MMSYSERR_NOTSUPPORTED;
-   }
-   if(wmutex)
-        wmutex->enter(VMUTEX_WAIT_FOREVER);
-
-   if(wavein == NULL) {
-        wavein = this;
-   }
-   else {
-        DartWaveIn *dwave = wavein;
-
-        while(dwave->next) {
-            dwave = dwave->next;
-        }
-        dwave->next = this;
-   }
-
-   if(wmutex)
-        wmutex->leave();
+    if(!ulError)
+        callback(WIM_OPEN, 0, 0);
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -187,8 +106,10 @@ DartWaveIn::~DartWaveIn()
 {
    MCI_GENERIC_PARMS    GenericParms;
 
-   if(!ulError)
-   {
+   State = STATE_STOPPED;
+
+    if(!ulError)
+    {
         // Generic parameters
         GenericParms.hwndCallback = 0;   //hwndFrame
 
@@ -206,83 +127,21 @@ DartWaveIn::~DartWaveIn()
 
         // Close the device
         mciSendCommand(DeviceId, MCI_CLOSE, MCI_WAIT, (PVOID)&GenericParms, 0);
-   }
+    }
+    if(!ulError)
+    {
+        callback(WIM_CLOSE, 0, 0);
+    }
 
-   if(wmutex)
-        wmutex->enter(VMUTEX_WAIT_FOREVER);
-
-   State = STATE_STOPPED;
-
-   if(wavein == this) {
-        wavein = this->next;
-   }
-   else {
-        DartWaveIn *dwave = wavein;
-
-        while(dwave->next != this) {
-            dwave = dwave->next;
-        }
-        dwave->next = this->next;
-   }
-   if(wmutex)
-        wmutex->leave();
-
-   if(!ulError) {
-        if(mthdCallback) {
-            callback((ULONG)this, WIM_CLOSE, dwInstance, 0, 0);
-        }
-        else
-        if(hwndCallback)
-            PostMessageA(hwndCallback, WIM_CLOSE, 0, 0);
-   }
-
-   if(wmutex)
-        delete wmutex;
-
-   if(MixBuffer)
+    if(MixBuffer)
         free(MixBuffer);
-   if(MixSetupParms)
+    if(MixSetupParms)
         free(MixSetupParms);
-   if(BufferParms)
+    if(BufferParms)
         free(BufferParms);
 }
 /******************************************************************************/
 /******************************************************************************/
-MMRESULT DartWaveIn::getError()
-{
-  return(ulError);
-}
-/******************************************************************************/
-/******************************************************************************/
-int DartWaveIn::getNumDevices()
-{
- MCI_GENERIC_PARMS  GenericParms;
- MCI_AMP_OPEN_PARMS AmpOpenParms;
- APIRET rc;
-
-    // Setup the open structure, pass the playlist and tell MCI_OPEN to use it
-    memset(&AmpOpenParms,0,sizeof(AmpOpenParms));
-
-    //TODO: correct for recording??
-    AmpOpenParms.usDeviceID = ( USHORT ) 0;
-    AmpOpenParms.pszDeviceType = ( PSZ ) MCI_DEVTYPE_AUDIO_AMPMIX;
-
-    rc = mciSendCommand(0, MCI_OPEN,
-                        MCI_WAIT | MCI_OPEN_TYPE_ID | MCI_OPEN_SHAREABLE,
-                        (PVOID) &AmpOpenParms,
-                        0);
-
-    if(rc) {
-        return 0; //no devices present
-    }
-
-    // Generic parameters
-    GenericParms.hwndCallback = 0;   //hwndFrame
-
-    // Close the device
-    mciSendCommand(AmpOpenParms.usDeviceID, MCI_CLOSE, MCI_WAIT, (PVOID)&GenericParms, 0);
-    return 1;
-}
 /******************************************************************************/
 /******************************************************************************/
 MMRESULT DartWaveIn::start()
@@ -401,7 +260,7 @@ MMRESULT DartWaveIn::start()
                             ( PVOID ) &AmpSetParms,
                             0 );
 
-        wmutex->enter(VMUTEX_WAIT_FOREVER);
+        wmutex.enter(VMUTEX_WAIT_FOREVER);
         fMixerSetup = TRUE;
     }
 
@@ -413,7 +272,7 @@ MMRESULT DartWaveIn::start()
     dprintf(("MixSetupParms = %X\n", MixSetupParms));
     State     = STATE_RECORDING;
     fOverrun = FALSE;
-    wmutex->leave();
+    wmutex.leave();
 
     dprintf(("Dart recording"));
 
@@ -432,15 +291,15 @@ MMRESULT DartWaveIn::stop()
 {
  MCI_GENERIC_PARMS Params;
 
-    wmutex->enter(VMUTEX_WAIT_FOREVER);
+    wmutex.enter(VMUTEX_WAIT_FOREVER);
     if(State != STATE_RECORDING) {
         State = STATE_STOPPED;
-        wmutex->leave();
+        wmutex.leave();
         return(MMSYSERR_NOERROR);
     }
 
     State = STATE_STOPPED;
-    wmutex->leave();
+    wmutex.leave();
 
     memset(&Params, 0, sizeof(Params));
 
@@ -465,9 +324,9 @@ MMRESULT DartWaveIn::reset()
     // Stop recording
     mciSendCommand(DeviceId, MCI_STOP, MCI_WAIT, (PVOID)&Params, 0);
 
-    dprintf(("Nr of threads blocked on mutex = %d\n", wmutex->getNrBlocked()));
+    dprintf(("Nr of threads blocked on mutex = %d\n", wmutex.getNrBlocked()));
 
-    wmutex->enter(VMUTEX_WAIT_FOREVER);
+    wmutex.enter(VMUTEX_WAIT_FOREVER);
     while(wavehdr)
     {
         wavehdr->dwFlags |= WHDR_DONE;
@@ -476,22 +335,17 @@ MMRESULT DartWaveIn::reset()
         wavehdr            = wavehdr->lpNext;
         tmpwavehdr->lpNext = NULL;
 
-        wmutex->leave();
-        if(mthdCallback) {
-            callback((ULONG)this, WIM_DATA, dwInstance, (ULONG)tmpwavehdr, 0);
-        }
-        else
-        if(hwndCallback) {
-            dprintf(("Callback (msg) for buffer %x", wavehdr));
-            PostMessageA(hwndCallback, WIM_DATA, (WPARAM)this, (ULONG)tmpwavehdr);
-        }
-        wmutex->enter(VMUTEX_WAIT_FOREVER);
+        wmutex.leave();
+
+        callback(WIM_DATA, (ULONG)tmpwavehdr, 0);
+
+        wmutex.enter(VMUTEX_WAIT_FOREVER);
     }
     wavehdr   = NULL;
     State     = STATE_STOPPED;
     fOverrun = FALSE;
 
-    wmutex->leave();
+    wmutex.leave();
     return(MMSYSERR_NOERROR);
 }
 /******************************************************************************/
@@ -500,7 +354,7 @@ MMRESULT DartWaveIn::addBuffer(LPWAVEHDR pwh, UINT cbwh)
 {
  int i;
 
-    wmutex->enter(VMUTEX_WAIT_FOREVER);
+    wmutex.enter(VMUTEX_WAIT_FOREVER);
     pwh->lpNext          = NULL;
     pwh->dwBytesRecorded = 0;
     if(wavehdr) {
@@ -511,7 +365,7 @@ MMRESULT DartWaveIn::addBuffer(LPWAVEHDR pwh, UINT cbwh)
         chdr->lpNext = pwh;
     }
     else    wavehdr = pwh;
-    wmutex->leave();
+    wmutex.leave();
 
     return(MMSYSERR_NOERROR);
 }
@@ -530,6 +384,37 @@ ULONG DartWaveIn::getPosition()
     }
     mciError(rc);
     return 0xFFFFFFFF;
+}
+/******************************************************************************/
+/******************************************************************************/
+int DartWaveIn::getNumDevices()
+{
+ MCI_GENERIC_PARMS  GenericParms;
+ MCI_AMP_OPEN_PARMS AmpOpenParms;
+ APIRET rc;
+
+   // Setup the open structure, pass the playlist and tell MCI_OPEN to use it
+   memset(&AmpOpenParms,0,sizeof(AmpOpenParms));
+
+   AmpOpenParms.usDeviceID = ( USHORT ) 0;
+   AmpOpenParms.pszDeviceType = ( PSZ ) MCI_DEVTYPE_AUDIO_AMPMIX;
+
+   rc = mciSendCommand(0, MCI_OPEN,
+                       MCI_WAIT | MCI_OPEN_TYPE_ID | MCI_OPEN_SHAREABLE,
+                       (PVOID) &AmpOpenParms,
+                       0);
+
+   if(rc) {
+        return 0; //no devices present
+   }
+
+   // Generic parameters
+   GenericParms.hwndCallback = 0;   //hwndFrame
+
+   // Close the device
+   mciSendCommand(AmpOpenParms.usDeviceID, MCI_CLOSE, MCI_WAIT, (PVOID)&GenericParms, 0);
+
+   return 1;
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -597,22 +482,6 @@ void DartWaveIn::mciError(ULONG ulError)
     dprintf(("WINMM: DartWaveIn: %s\n", szError));
 #endif
 }
-//******************************************************************************
-//******************************************************************************
-BOOL DartWaveIn::find(DartWaveIn *dwave)
-{
-    DartWaveIn *curwave = wavein;
-
-    while(curwave) {
-        if(dwave == curwave) {
-            return(TRUE);
-        }
-        curwave = curwave->next;
-    }
-
-    dprintf2(("WINMM:DartWaveIn not found!"));
-    return(FALSE);
-}
 /******************************************************************************/
 //Simple implementation of recording. We fill up buffers queued by the application
 //until we run out of data or buffers. If we run out of buffers, the recorded data
@@ -636,11 +505,11 @@ void DartWaveIn::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags)
         dprintf(("WINMM: WaveIn handler, Unknown error %X\n", ulStatus));
         return;
     }
-    wmutex->enter(VMUTEX_WAIT_FOREVER);
+    wmutex.enter(VMUTEX_WAIT_FOREVER);
 
     whdr = wavehdr;
     if(whdr == NULL) {
-        wmutex->leave();
+        wmutex.leave();
         //last buffer recorded -> no new ones -> overrun
         //Windows doesn't care -> just continue
         dprintf(("WINMM: WARNING: WaveIn handler OVERRUN!\n"));
@@ -669,22 +538,16 @@ void DartWaveIn::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags)
 
                 wavehdr = whdr->lpNext;
                 whdr->lpNext = NULL;
-                wmutex->leave();
+                wmutex.leave();
 
-                if(mthdCallback) {
-                    callback((ULONG)this, WIM_DATA, dwInstance, (ULONG)whdr, whdr->dwBytesRecorded);
-                }
-                else
-                if(hwndCallback) {
-                    dprintf(("Callback (msg) for buffer %x", whdr));
-                    PostMessageA(hwndCallback, WIM_DATA, (WPARAM)this, (ULONG)whdr);
-                }
-                wmutex->enter(VMUTEX_WAIT_FOREVER);
+                callback(WIM_DATA, (ULONG)whdr, whdr->dwBytesRecorded);
+
+                wmutex.enter(VMUTEX_WAIT_FOREVER);
             }
         }
         else break;
     }
-    wmutex->leave();
+    wmutex.leave();
 
     //Transfer buffer to DART
     // MCI_MIXSETUP_PARMS->pMixWrite does alter FS: selector!
@@ -709,5 +572,4 @@ LONG APIENTRY WaveInHandler(ULONG ulStatus,
 }
 /******************************************************************************/
 /******************************************************************************/
-DartWaveIn *DartWaveIn::wavein = NULL;
 

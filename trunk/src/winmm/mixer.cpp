@@ -1,4 +1,4 @@
-/* $Id: mixer.cpp,v 1.8 2001-02-11 10:33:29 sandervl Exp $ */
+/* $Id: mixer.cpp,v 1.9 2001-03-23 16:23:44 sandervl Exp $ */
 
 /*
  * Mixer stubs
@@ -29,7 +29,7 @@
 #include <odinwrap.h>
 #include <misc.h>
 
-#include "dwaveout.h"
+#include "waveoutdart.h"
 #include "winmm.h"
 
 #define DBG_LOCALLOG	DBG_mixer

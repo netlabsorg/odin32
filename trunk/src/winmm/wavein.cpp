@@ -1,4 +1,4 @@
-/* $Id: wavein.cpp,v 1.8 2001-03-19 19:28:38 sandervl Exp $ */
+/* $Id: wavein.cpp,v 1.9 2001-03-23 16:23:44 sandervl Exp $ */
 
 /*
  * Wave in MM apis
@@ -27,7 +27,7 @@
 #include <unicode.h>
 
 #include "winmm.h"
-#include "dwavein.h"
+#include "waveindart.h"
 
 #define DBG_LOCALLOG    DBG_wavein
 #include "dbglocal.h"
@@ -47,40 +47,32 @@ ODINFUNCTION6(MMRESULT, waveInOpen,
 {
   MMRESULT rc;
 
-  if(pwfx == NULL)
+    if(pwfx == NULL)
         return(WAVERR_BADFORMAT);
 
-  if(fdwOpen == WAVE_FORMAT_QUERY) {
+    if(fdwOpen == WAVE_FORMAT_QUERY) {
         if(DartWaveIn::queryFormat(pwfx->wFormatTag, pwfx->nChannels, pwfx->nSamplesPerSec,
                                    pwfx->wBitsPerSample) == TRUE) {
                 return(MMSYSERR_NOERROR);
         }
         else    return(WAVERR_BADFORMAT);
-  }
+    }
 
-  if(phwi == NULL)
+    if(phwi == NULL)
         return(MMSYSERR_INVALPARAM);
 
-  if(fdwOpen == CALLBACK_WINDOW) {
-        *phwi = (HWAVEOUT)new DartWaveIn(pwfx, (HWND)dwCallback);
-  }
-  else
-  if(fdwOpen == CALLBACK_FUNCTION)
-  {
-        *phwi = (HWAVEOUT)new DartWaveIn(pwfx, dwCallback, dwInstance);
-  }
-  else  *phwi = (HWAVEOUT)new DartWaveIn(pwfx);
+    *phwi = (HWAVEOUT)new DartWaveIn(pwfx, fdwOpen, dwCallback, dwInstance);
 
-  if(*phwi == NULL) {
+    if(*phwi == NULL) {
         return(MMSYSERR_NODRIVER);
-  }
+    }
 
-  rc = ((DartWaveIn *)*phwi)->getError();
-  if(rc != MMSYSERR_NOERROR) {
+    rc = ((DartWaveIn *)*phwi)->getError();
+    if(rc != MMSYSERR_NOERROR) {
         delete (DartWaveIn *)*phwi;
         return(rc);
-  }
-  return(MMSYSERR_NOERROR);
+    }
+    return(MMSYSERR_NOERROR);
 }
 /******************************************************************************/
 /******************************************************************************/
