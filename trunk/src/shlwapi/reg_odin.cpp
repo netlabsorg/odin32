@@ -1,4 +1,4 @@
-/* $Id: reg_odin.cpp,v 1.2 2001-08-30 19:19:57 phaller Exp $ */
+/* $Id: reg_odin.cpp,v 1.3 2002-02-06 20:18:28 sandervl Exp $ */
 
 /*
  * Win32 URL-handling APIs for OS/2
@@ -26,12 +26,16 @@
 #include "debugtools.h"
 #include "winnls.h"
 #include "winversion.h"
+#include "winuser.h"
 #include "winreg.h"
+#include "wingdi.h"
 
 #include <heapstring.h>
 #include <misc.h>
 #include <win\winerror.h>
 #include "shlwapi_odin.h"
+#define NO_SHLWAPI_STREAM
+#include <shlwapi.h>
 
 
 ODINDEBUGCHANNEL(SHLWAPI-REG)
@@ -49,8 +53,8 @@ ODINDEBUGCHANNEL(SHLWAPI-REG)
  * Author    : Patrick Haller [Wed, 1999/12/29 23:02]
  *****************************************************************************/
 
-ODINFUNCTION5(DWORD,  SHRegCreateUSKeyA,
-              LPSTR,  lpszKeyName,
+ODINFUNCTION5(LONG,  SHRegCreateUSKeyA,
+              LPCSTR,  lpszKeyName,
               REGSAM,  AccessType,
               HUSKEY,  hRelativeUSKey,
               PHUSKEY, phNewUSKey,
@@ -73,8 +77,8 @@ ODINFUNCTION5(DWORD,  SHRegCreateUSKeyA,
  * Author    : Patrick Haller [Wed, 1999/12/29 23:02]
  *****************************************************************************/
 
-ODINFUNCTION5(DWORD,   SHRegCreateUSKeyW,
-              LPWSTR,  lpszKeyName,
+ODINFUNCTION5(LONG,   SHRegCreateUSKeyW,
+              LPCWSTR,  lpszKeyName,
               REGSAM,  AccessType,
               HUSKEY,  hRelativeUSKey,
               PHUSKEY, phNewUSKey,
@@ -112,90 +116,6 @@ ODINFUNCTION5(DWORD,   SHRegCreateUSKeyW,
 
 /* gets a user-specific registry value. */
 
-
-/*****************************************************************************
- * Name      : DWORD SHRegGetBoolUSValueA
- * Purpose   : unknown
- * Parameters: unknown
- * Variables :
- * Result    : unknown
- * Remark    : SHLWAPI.SHRegGetBoolUSValueA
- * Status    : COMPLETELY IMPLEMENTED ? UNTESTED
- *
- * Author    : Patrick Haller [Wed, 1999/12/29 23:02]
- *****************************************************************************/
-
-ODINFUNCTION4(BOOL,    SHRegGetBoolUSValueA,
-              LPCSTR,  pszSubKey,
-              LPCSTR,  pszValue,
-              BOOL,    fIgnoreHKCU,
-              BOOL,    fDefault)
-{
-  char  szBuffer[260];
-  DWORD dwLength = sizeof(szBuffer);
-  LONG  rc;
-
-  dprintf(("subkey=%s, value=%s\n",
-           pszSubKey,
-           pszValue));
-
-  rc = SHRegGetUSValueA(pszSubKey,
-                        pszValue,
-                        &fDefault,
-                        szBuffer,
-                        &dwLength,
-                        fIgnoreHKCU,
-                        fDefault ? "YES" : "NO",
-                        fDefault ? 4 : 3);
-  if (rc != ERROR_SUCCESS)
-    return rc;
-
-  if (lstrcmpiA("YES",
-                szBuffer) == 0)
-    return 1;
-  else
-  if (lstrcmpiA("TRUE",
-                szBuffer) == 0)
-    return 1;
-  else
-  if (lstrcmpiA("NO",
-                szBuffer) == 0)
-    return 0;
-  else
-  if (lstrcmpiA("FALSE",
-                szBuffer) == 0)
-    return 0;
-
-
-  return ERROR_SUCCESS;  /* return success */
-}
-
-
-/*****************************************************************************
- * Name      : DWORD SHRegGetBoolUSValueW
- * Purpose   : unknown
- * Parameters: unknown
- * Variables :
- * Result    : unknown
- * Remark    : SHLWAPI.SHRegGetBoolUSValueW
- * Status    : STUB UNTESTED
- *
- * Author    : Patrick Haller [Wed, 1999/12/29 23:02]
- *****************************************************************************/
-
-ODINFUNCTION4(BOOL,    SHRegGetBoolUSValueW,
-              LPCWSTR, pszSubKey,
-              LPCWSTR, pszValue,
-              BOOL,    fIgnoreHKCU,
-              BOOL,    fDefault)
-{
-  char  szBuffer[264];
-  int   iLength;
-
-  dprintf(("(%p),stub!\n", pszSubKey));
-
-  return ERROR_SUCCESS;  /* return success */
-}
 
 
 /*****************************************************************************
@@ -254,27 +174,6 @@ ODINFUNCTION6(LONG,    SHRegSetUSValueW,
 }
 
 
-/*****************************************************************************
- * Name      : LONG SHRegCloseUSKey
- * Purpose   :
- * Parameters:
- * Variables :
- * Result    :
- * Remark    : 
- * Status    : STUB UNTESTED
- *
- * Author    : Patrick Haller [2001-08-30]
- *****************************************************************************/
-
-ODINFUNCTION1(LONG,    SHRegCloseUSKey,
-              HUSKEY,  hUSKey)
-{
-  dprintf(("not implemented\n"));
-  
-  LONG rc = RegCloseKey(hUSKey);
-  return rc;
-}
-
 
 /*****************************************************************************
  * Name      : LONG SHRegDeleteUSValueA
@@ -290,13 +189,13 @@ ODINFUNCTION1(LONG,    SHRegCloseUSKey,
 
 ODINFUNCTION3(LONG,    SHRegDeleteUSValueA,
               HUSKEY,  hUSKey,
-              LPSTR,   lpValue,
-              DWORD,   dwFlags)
+              LPCSTR,   lpValue,
+              SHREGDEL_FLAGS,   dwFlags)
 {
   dprintf(("not implemented\n"));
   
   LONG rc = RegDeleteValueA(hUSKey,
-                            lpValue);
+                            (LPSTR)lpValue);
   return rc;
 }
 
@@ -314,64 +213,17 @@ ODINFUNCTION3(LONG,    SHRegDeleteUSValueA,
  *****************************************************************************/
 
 ODINFUNCTION3(LONG,    SHRegDeleteUSValueW,
-              HKEY,    hKey,
-              LPWSTR,  lpValue,
-              DWORD,   dwFlags)
+              HUSKEY,   hKey,
+              LPCWSTR,  lpValue,
+              SHREGDEL_FLAGS,   dwFlags)
 {
   dprintf(("not implemented\n"));
   
   LONG rc = RegDeleteValueW(hKey,
-                            lpValue);
+                            (LPWSTR)lpValue);
   return rc;
 }
 
-
-/*****************************************************************************
- * Name      : LONG SHDeleteOrphanKeyA
- * Purpose   :
- * Parameters:
- * Variables :
- * Result    :
- * Remark    : 
- * Status    : STUB UNTESTED
- *
- * Author    : Patrick Haller [2001-08-30]
- *****************************************************************************/
-
-ODINFUNCTION2(LONG,    SHDeleteOrphanKeyA,
-              HKEY,    hKey,
-              LPCSTR,  lpszSubkey)
-{
-  dprintf(("not implemented\n"));
-  
-  LONG rc = RegDeleteKeyA(hKey,
-                          lpszSubkey);
-  return rc;
-}
-
-
-/*****************************************************************************
- * Name      : LONG SHDeleteOrphanKeyW
- * Purpose   :
- * Parameters:
- * Variables :
- * Result    :
- * Remark    : 
- * Status    : STUB UNTESTED
- *
- * Author    : Patrick Haller [2001-08-30]
- *****************************************************************************/
-
-ODINFUNCTION2(LONG,    SHDeleteOrphanKeyW,
-              HKEY,    hKey,
-              LPWSTR,  lpszSubkey)
-{
-  dprintf(("not implemented\n"));
-  
-  LONG rc = RegDeleteKeyW(hKey,
-                          lpszSubkey);
-  return rc;
-}
 
 
 /*****************************************************************************
@@ -388,8 +240,8 @@ ODINFUNCTION2(LONG,    SHDeleteOrphanKeyW,
 
 ODINFUNCTION3(LONG,    SHRegDeleteEmptyUSKeyA,
               HUSKEY,  hUSKey,
-              LPSTR,   lpszSubkey,
-              DWORD,   dwFlags)
+              LPCSTR,   lpszSubkey,
+              SHREGDEL_FLAGS,   dwFlags)
 {
   dprintf(("not yet implemented"));
   return 0;
@@ -410,8 +262,8 @@ ODINFUNCTION3(LONG,    SHRegDeleteEmptyUSKeyA,
 
 ODINFUNCTION3(LONG,    SHRegDeleteEmptyUSKeyW,
               HUSKEY,  hUSKey,
-              LPWSTR,  lpszSubkey,
-              DWORD,   dwFlags)
+              LPCWSTR,  lpszSubkey,
+              SHREGDEL_FLAGS,   dwFlags)
 {
   dprintf(("not yet implemented"));
   return 0;
@@ -462,52 +314,6 @@ ODINFUNCTION3(LONG,    SHRegDeleteUSKeyW,
 }
 
 
-/*****************************************************************************
- * Name      : LONG SHRegEnumUSKeyA
- * Purpose   :
- * Parameters:
- * Variables :
- * Result    :
- * Remark    : 
- * Status    : STUB UNTESTED
- *
- * Author    : Patrick Haller [2001-08-30]
- *****************************************************************************/
-
-ODINFUNCTION5(LONG,    SHRegEnumUSKeyA,
-              HUSKEY,  hUSKey,
-              DWORD,   dwIndex,
-              LPSTR,   lpszKeyName,
-              LPDWORD, lpdwKeyNameSize,
-              SHREGENUM_FLAGS, dwFlags)
-{
-  dprintf(("not yet implemented"));
-  return 0;
-}
-
-
-/*****************************************************************************
- * Name      : LONG SHRegEnumUSKeyW
- * Purpose   :
- * Parameters:
- * Variables :
- * Result    :
- * Remark    : 
- * Status    : STUB UNTESTED
- *
- * Author    : Patrick Haller [2001-08-30]
- *****************************************************************************/
-
-ODINFUNCTION5(LONG,    SHRegEnumUSKeyW,
-              HUSKEY,  hUSKey,
-              DWORD,   dwIndex,
-              LPWSTR,  lpszKeyName,
-              LPDWORD, lpdwKeyNameSize,
-              SHREGENUM_FLAGS, dwFlags)
-{
-  dprintf(("not yet implemented"));
-  return 0;
-}
 
 
 /*****************************************************************************
@@ -564,99 +370,4 @@ ODINFUNCTION8(LONG,    SHRegEnumUSValueW,
 }
 
 
-/*****************************************************************************
- * Name      : LONG SHRegQueryInfoUSKeyA
- * Purpose   :
- * Parameters:
- * Variables :
- * Result    :
- * Remark    : 
- * Status    : STUB UNTESTED
- *
- * Author    : Patrick Haller [2001-08-30]
- *****************************************************************************/
 
-ODINFUNCTION5(LONG,    SHRegQueryInfoUSKeyA,
-              LPDWORD,  lpdwSubKeyNum,
-              LPDWORD,  lpdwMaxSubKeyNameSize,
-              LPDWORD,  lpdwValueNum,
-              LPDWORD,  lpdwMaxValueNameSize,
-              SHREGENUM_FLAGS, dwFlags)
-{
-  dprintf(("not yet implemented"));
-  return 0;
-}
-
-
-/*****************************************************************************
- * Name      : LONG SHRegQueryInfoUSKeyW
- * Purpose   :
- * Parameters:
- * Variables :
- * Result    :
- * Remark    : 
- * Status    : STUB UNTESTED
- *
- * Author    : Patrick Haller [2001-08-30]
- *****************************************************************************/
-
-ODINFUNCTION5(LONG,    SHRegQueryInfoUSKeyW,
-              LPDWORD,  lpdwSubKeyNum,
-              LPDWORD,  lpdwMaxSubKeyNameSize,
-              LPDWORD,  lpdwValueNum,
-              LPDWORD,  lpdwMaxValueNameSize,
-              SHREGENUM_FLAGS, dwFlags)
-{
-  dprintf(("not yet implemented"));
-  return 0;
-}
-
-
-/*****************************************************************************
- * Name      : LONG SHRegWriteUSValueA
- * Purpose   :
- * Parameters:
- * Variables :
- * Result    :
- * Remark    : 
- * Status    : STUB UNTESTED
- *
- * Author    : Patrick Haller [2001-08-30]
- *****************************************************************************/
-
-ODINFUNCTION6(LONG,     SHRegWriteUSValueA,
-              HUSKEY,   hUSKey,
-              LPCSTR,   lpszValueName,
-              DWORD,    dwValueType,
-              LPVOID,   lpValue,
-              DWORD,    dwValueSize,
-              DWORD,    dwFlags)
-{
-  dprintf(("not yet implemented"));
-  return 0;
-}
-
-
-/*****************************************************************************
- * Name      : LONG SHRegWriteUSValueW
- * Purpose   :
- * Parameters:
- * Variables :
- * Result    :
- * Remark    : 
- * Status    : STUB UNTESTED
- *
- * Author    : Patrick Haller [2001-08-30]
- *****************************************************************************/
-
-ODINFUNCTION6(LONG,     SHRegWriteUSValueW,
-              HUSKEY,   hUSKey,
-              LPCWSTR,  lpszValueName,
-              DWORD,    dwValueType,
-              LPVOID,   lpValue,
-              DWORD,    dwValueSize,
-              DWORD,    dwFlags)
-{
-  dprintf(("not yet implemented"));
-  return 0;
-}

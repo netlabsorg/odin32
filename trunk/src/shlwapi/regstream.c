@@ -1,28 +1,13 @@
 /*
  *	SHRegOpenStream
  */
-#ifdef __WIN32OS2__
-#include <odin.h>
-#include <odinwrap.h>
-#include <os2sel.h>
-
-#include <string.h>
-#include <ctype.h>
-#include <wctype.h>
-#define HAVE_WCTYPE_H
-
-#define ICOM_CINTERFACE 1
-#define CINTERFACE 1
-
-#endif
-
 #include <string.h>
 
 #include "winerror.h"
+#include "winbase.h"
 #include "winreg.h"
-#include "wine/obj_storage.h"
+#include "shlobj.h"
 
-#include "heap.h"
 #include "debugtools.h"
 
 DEFAULT_DEBUG_CHANNEL(shell);
@@ -119,7 +104,7 @@ static HRESULT WINAPI IStream_fnQueryInterface(IStream *iface, REFIID riid, LPVO
 {
 	ICOM_THIS(ISHRegStream, iface);
 
-////	TRACE("(%p)->(\n\tIID:\t%s,%p)\n",This,debugstr_guid(riid),ppvObj);
+	TRACE("(%p)->(\n\tIID:\t%s,%p)\n",This,debugstr_guid(riid),ppvObj);
 
 	*ppvObj = NULL;
 
@@ -306,6 +291,7 @@ static struct ICOM_VTABLE(IStream) rstvt =
 
 /*************************************************************************
  * SHOpenRegStreamA				[SHLWAPI.@]
+ * SHOpenRegStream2A				[SHLWAPI.@]
  */
 IStream * WINAPI SHOpenRegStreamA(
 	HKEY hkey,
@@ -321,6 +307,7 @@ IStream * WINAPI SHOpenRegStreamA(
 
 /*************************************************************************
  * SHOpenRegStreamW				[SHLWAPI.@]
+ * SHOpenRegStream2W				[SHLWAPI.@]
  */
 IStream * WINAPI SHOpenRegStreamW(
 	HKEY hkey,

@@ -18,27 +18,84 @@
 #include "commdlg.h"
 #include "wine/unicode.h"
 #include "wine/obj_base.h"
+#include "wine/obj_inplace.h"
+#include "wine/obj_serviceprovider.h"
 #include "wingdi.h"
+#include "winreg.h"
 #include "winuser.h"
 #include "debugtools.h"
+#include "ordinal.h"
+#include "shlwapi.h"
 
 DEFAULT_DEBUG_CHANNEL(shell);
 
-#ifdef __WIN32OS2__
-extern HINSTANCE shlwapi_hInstance = 0;
-extern HMODULE SHLWAPI_hshell32 = 0;
-extern HMODULE SHLWAPI_hwinmm = 0;
-extern HMODULE SHLWAPI_hcomdlg32 = 0;
-extern HMODULE SHLWAPI_hmpr = 0;
-extern HMODULE SHLWAPI_hmlang = 0;
-#else
 extern HINSTANCE shlwapi_hInstance;
 extern HMODULE SHLWAPI_hshell32;
 extern HMODULE SHLWAPI_hwinmm;
 extern HMODULE SHLWAPI_hcomdlg32;
 extern HMODULE SHLWAPI_hmpr;
 extern HMODULE SHLWAPI_hmlang;
-#endif
+
+typedef HANDLE HSHARED; /* Shared memory */
+
+/* following is GUID for IObjectWithSite::SetSite  -- see _174           */
+static DWORD id1[4] = {0xfc4801a3, 0x11cf2ba9, 0xaa0029a2, 0x52733d00};
+/* following is GUID for IPersistMoniker::GetClassID  -- see _174        */
+static DWORD id2[4] = {0x79eac9ee, 0x11cebaf9, 0xaa00828c, 0x0ba94b00};
+
+/* The following schemes were identified in the native version of
+ * SHLWAPI.DLL version 5.50
+ */
+typedef enum {
+    URL_SCHEME_INVALID     = -1,
+    URL_SCHEME_UNKNOWN     =  0,
+    URL_SCHEME_FTP,
+    URL_SCHEME_HTTP,
+    URL_SCHEME_GOPHER,
+    URL_SCHEME_MAILTO,
+    URL_SCHEME_NEWS,
+    URL_SCHEME_NNTP,
+    URL_SCHEME_TELNET,
+    URL_SCHEME_WAIS,
+    URL_SCHEME_FILE,
+    URL_SCHEME_MK,
+    URL_SCHEME_HTTPS,
+    URL_SCHEME_SHELL,
+    URL_SCHEME_SNEWS,
+    URL_SCHEME_LOCAL,
+    URL_SCHEME_JAVASCRIPT,
+    URL_SCHEME_VBSCRIPT,
+    URL_SCHEME_ABOUT,
+    URL_SCHEME_RES,
+    URL_SCHEME_MAXVALUE
+} URL_SCHEME;
+
+typedef struct {
+    URL_SCHEME  scheme_number;
+    LPCSTR scheme_name;
+} SHL_2_inet_scheme;
+
+static const SHL_2_inet_scheme shlwapi_schemes[] = {
+  {URL_SCHEME_FTP,        "ftp"},
+  {URL_SCHEME_HTTP,       "http"},
+  {URL_SCHEME_GOPHER,     "gopher"},
+  {URL_SCHEME_MAILTO,     "mailto"},
+  {URL_SCHEME_NEWS,       "news"},
+  {URL_SCHEME_NNTP,       "nntp"},
+  {URL_SCHEME_TELNET,     "telnet"},
+  {URL_SCHEME_WAIS,       "wais"},
+  {URL_SCHEME_FILE,       "file"},
+  {URL_SCHEME_MK,         "mk"},
+  {URL_SCHEME_HTTPS,      "https"},
+  {URL_SCHEME_SHELL,      "shell"},
+  {URL_SCHEME_SNEWS,      "snews"},
+  {URL_SCHEME_LOCAL,      "local"},
+  {URL_SCHEME_JAVASCRIPT, "javascript"},
+  {URL_SCHEME_VBSCRIPT,   "vbscript"},
+  {URL_SCHEME_ABOUT,      "about"},
+  {URL_SCHEME_RES,        "res"},
+  {0, 0}
+};
 
 /* Macro to get function pointer for a module*/
 #define GET_FUNC(module, name, fail) \
@@ -56,39 +113,518 @@ extern HMODULE SHLWAPI_hmlang;
  fail. However, its better to implement the functions in the forward DLL
  and recommend the builtin rather than reimplementing the calls here!
 */
-#ifndef __WIN32OS2__
+
 /*************************************************************************
- *      SHLWAPI_1	[SHLWAPI.1]
+ *      @	[SHLWAPI.1]
+ *
+ * Identifies the Internet "scheme" in the passed string. ASCII based.
+ * Also determines start and length of item after the ':'
  */
-DWORD WINAPI SHLWAPI_1 (
-	LPSTR   lpURL,
-	LPDWORD lpdwFlags)
+DWORD WINAPI SHLWAPI_1 (LPCSTR x, UNKNOWN_SHLWAPI_1 *y)
 {
-  if (lpURL == NULL)
-    return E_INVALIDARG;
-  
-  if (lpdwFlags == NULL)
-    return E_INVALIDARG;
-  
-  // verify flags
-  if (*lpdwFlags != 0x18)   // some unknown flag
-    return E_INVALIDARG;      // some unknown error condition
-  
-  FIXME("(%p %s %p %s)\n",lpStr, debugstr_a(lpStr),x, debugstr_a(x));
-  return 0;
+    DWORD cnt;
+    const SHL_2_inet_scheme *inet_pro;
+
+    if (y->size != 0x18) return E_INVALIDARG;
+    /* FIXME: leading white space generates error of 0x80041001 which 
+     *        is undefined
+     */
+    if (*x <= ' ') return 0x80041001;
+    cnt = 0;
+    y->sizep1 = 0;
+    y->ap1 = x;
+    while (*x) {
+	if (*x == ':') {
+	    y->sizep1 = cnt;
+	    cnt = -1;
+	    y->ap2 = x+1;
+	    break;
+	}
+	x++;
+	cnt++;
+    }
+
+    /* check for no scheme in string start */
+    /* (apparently schemes *must* be larger than a single character)  */
+    if ((*x == '\0') || (y->sizep1 <= 1)) {
+	y->ap1 = 0;
+	return 0x80041001;
+    }
+
+    /* found scheme, set length of remainder */
+    y->sizep2 = lstrlenA(y->ap2);
+
+    /* see if known scheme and return indicator number */
+    y->fcncde = URL_SCHEME_UNKNOWN;
+    inet_pro = shlwapi_schemes;
+    while (inet_pro->scheme_name) {
+	if (!strncasecmp(inet_pro->scheme_name, y->ap1,
+		    min(y->sizep1, lstrlenA(inet_pro->scheme_name)))) {
+	    y->fcncde = inet_pro->scheme_number;
+	    break;
+	}
+	inet_pro++;
+    }
+    return S_OK;
 }
 
 /*************************************************************************
- *      SHLWAPI_2	[SHLWAPI.2]
+ *      @	[SHLWAPI.2]
+ *
+ * Identifies the Internet "scheme" in the passed string. UNICODE based.
+ * Also determines start and length of item after the ':'
  */
-DWORD WINAPI SHLWAPI_2 (LPCWSTR x,LPVOID y)
+DWORD WINAPI SHLWAPI_2 (LPCWSTR x, UNKNOWN_SHLWAPI_2 *y)
 {
-	FIXME("(%s,%p)\n",debugstr_w(x),y);
+    DWORD cnt;
+    const SHL_2_inet_scheme *inet_pro;
+    LPSTR cmpstr;
+    INT len;
+
+    if (y->size != 0x18) return E_INVALIDARG;
+    /* FIXME: leading white space generates error of 0x80041001 which 
+     *        is undefined
+     */
+    if (*x <= L' ') return 0x80041001;
+    cnt = 0;
+    y->sizep1 = 0;
+    y->ap1 = x;
+    while (*x) {
+	if (*x == L':') {
+	    y->sizep1 = cnt;
+	    cnt = -1;
+	    y->ap2 = x+1;
+	    break;
+	}
+	x++;
+	cnt++;
+    }
+
+    /* check for no scheme in string start */
+    /* (apparently schemes *must* be larger than a single character)  */
+    if ((*x == L'\0') || (y->sizep1 <= 1)) {
+	y->ap1 = 0;
+	return 0x80041001;
+    }
+
+    /* found scheme, set length of remainder */
+    y->sizep2 = lstrlenW(y->ap2);
+
+    /* see if known scheme and return indicator number */
+    len = WideCharToMultiByte(0, 0, y->ap1, y->sizep1, 0, 0, 0, 0);
+    cmpstr = (LPSTR)HeapAlloc(GetProcessHeap(), 0, len+1);
+    WideCharToMultiByte(0, 0, y->ap1, y->sizep1, cmpstr, len+1, 0, 0);
+    y->fcncde = URL_SCHEME_UNKNOWN;
+    inet_pro = shlwapi_schemes;
+    while (inet_pro->scheme_name) {
+	if (!strncasecmp(inet_pro->scheme_name, cmpstr,
+		    min(len, lstrlenA(inet_pro->scheme_name)))) {
+	    y->fcncde = inet_pro->scheme_number;
+	    break;
+	}
+	inet_pro++;
+    }
+    HeapFree(GetProcessHeap(), 0, cmpstr);
+    return S_OK;
+}
+
+/*************************************************************************
+ * SHLWAPI_DupSharedHandle
+ *
+ * Internal implemetation of SHLWAPI_11.
+ */
+static
+HSHARED WINAPI SHLWAPI_DupSharedHandle(HSHARED hShared, DWORD dwDstProcId,
+                                       DWORD dwSrcProcId, DWORD dwAccess,
+                                       DWORD dwOptions)
+{
+  HANDLE hDst, hSrc;
+  DWORD dwMyProcId = GetCurrentProcessId();
+  HSHARED hRet = (HSHARED)NULL;
+
+  TRACE("(%p,%ld,%ld,%08lx,%08lx)\n", (PVOID)hShared, dwDstProcId, dwSrcProcId,
+        dwAccess, dwOptions);
+
+  /* Get dest process handle */
+  if (dwDstProcId == dwMyProcId)
+    hDst = GetCurrentProcess();
+  else
+    hDst = OpenProcess(PROCESS_DUP_HANDLE, 0, dwDstProcId);
+
+  if (hDst)
+  {
+    /* Get src process handle */
+    if (dwSrcProcId == dwMyProcId)
+      hSrc = GetCurrentProcess();
+    else
+      hSrc = OpenProcess(PROCESS_DUP_HANDLE, 0, dwSrcProcId);
+
+    if (hSrc)
+    {
+      /* Make handle available to dest process */
+      if (!DuplicateHandle(hDst, (HANDLE)hShared, hSrc, &hRet,
+                           dwAccess, 0, dwOptions | DUPLICATE_SAME_ACCESS))
+        hRet = (HSHARED)NULL;
+
+      if (dwSrcProcId != dwMyProcId)
+        CloseHandle(hSrc);
+    }
+
+    if (dwDstProcId != dwMyProcId)
+      CloseHandle(hDst);
+  }
+
+  TRACE("Returning handle %p\n", (PVOID)hRet);
+  return hRet;
+}
+
+/*************************************************************************
+ * @  [SHLWAPI.7]
+ *
+ * Create a block of sharable memory and initialise it with data.
+ *
+ * PARAMS
+ * dwProcId [I] ID of process owning data
+ * lpvData  [I] Pointer to data to write
+ * dwSize   [I] Size of data
+ *
+ * RETURNS
+ * Success: A shared memory handle
+ * Failure: NULL
+ *
+ * NOTES
+ * Ordinals 7-11 provide a set of calls to create shared memory between a
+ * group of processes. The shared memory is treated opaquely in that its size
+ * is not exposed to clients who map it. This is accomplished by storing
+ * the size of the map as the first DWORD of mapped data, and then offsetting
+ * the view pointer returned by this size.
+ *
+ * SHLWAPI_7/SHLWAPI_10 - Create/Destroy the shared memory handle
+ * SHLWAPI_8/SHLWAPI_9  - Get/Release a pointer to the shared data
+ * SHLWAPI_11           - Helper function; Duplicate cross-process handles
+   */
+HSHARED WINAPI SHLWAPI_7 (DWORD dwProcId, LPCVOID lpvData, DWORD dwSize)
+{
+  HANDLE hMap;
+  LPVOID pMapped;
+  HSHARED hRet = (HSHARED)NULL;
+
+  TRACE("(%ld,%p,%ld)\n", dwProcId, lpvData, dwSize);
+
+  /* Create file mapping of the correct length */
+  hMap = CreateFileMappingA(INVALID_HANDLE_VALUE, NULL, FILE_MAP_READ, 0,
+                            dwSize + sizeof(dwSize), NULL);
+  if (!hMap)
+    return hRet;
+
+  /* Get a view in our process address space */
+  pMapped = MapViewOfFile(hMap, FILE_MAP_READ | FILE_MAP_WRITE, 0, 0, 0);
+
+  if (pMapped)
+  {
+    /* Write size of data, followed by the data, to the view */
+    *((DWORD*)pMapped) = dwSize;
+    if (dwSize)
+      memcpy((char *) pMapped + sizeof(dwSize), lpvData, dwSize);
+
+    /* Release view. All further views mapped will be opaque */
+    UnmapViewOfFile(pMapped);
+    hRet = SHLWAPI_DupSharedHandle((HSHARED)hMap, dwProcId,
+                                   GetCurrentProcessId(), FILE_MAP_ALL_ACCESS,
+                                   DUPLICATE_SAME_ACCESS);
+  }
+
+  CloseHandle(hMap);
+  return hRet;
+}
+
+/*************************************************************************
+ * @ [SHLWAPI.8]
+ *
+ * Get a pointer to a block of shared memory from a shared memory handle.
+ *
+ * PARAMS
+ * hShared  [I] Shared memory handle
+ * dwProcId [I] ID of process owning hShared
+ *
+ * RETURNS
+ * Success: A pointer to the shared memory
+ * Failure: NULL
+ *
+ * NOTES
+ * See SHLWAPI_7.
+   */
+PVOID WINAPI SHLWAPI_8 (HSHARED hShared, DWORD dwProcId)
+  {
+  HSHARED hDup;
+  LPVOID pMapped;
+
+  TRACE("(%p %ld)\n", (PVOID)hShared, dwProcId);
+
+  /* Get handle to shared memory for current process */
+  hDup = SHLWAPI_DupSharedHandle(hShared, dwProcId, GetCurrentProcessId(),
+                                 FILE_MAP_ALL_ACCESS, 0);
+  /* Get View */
+  pMapped = MapViewOfFile((HANDLE)hDup, FILE_MAP_READ | FILE_MAP_WRITE, 0, 0, 0);
+  CloseHandle(hDup);
+
+  if (pMapped)
+    return (char *) pMapped + sizeof(DWORD); /* Hide size */
+  return NULL;
+}
+
+/*************************************************************************
+ * @ [SHLWAPI.9]
+ *
+ * Release a pointer to a block of shared memory.
+ *
+ * PARAMS
+ * lpView [I] Shared memory pointer
+ *
+ * RETURNS
+ * Success: TRUE
+ * Failure: FALSE
+ *
+ * NOTES
+ * See SHLWAPI_7.
+ */
+BOOL WINAPI SHLWAPI_9 (LPVOID lpView)
+{
+  TRACE("(%p)\n", lpView);
+  return UnmapViewOfFile((char *) lpView - sizeof(DWORD)); /* Include size */
+}
+
+/*************************************************************************
+ * @ [SHLWAPI.10]
+ *
+ * Destroy a block of sharable memory.
+ *
+ * PARAMS
+ * hShared  [I] Shared memory handle
+ * dwProcId [I] ID of process owning hShared
+ *
+ * RETURNS
+ * Success: TRUE
+ * Failure: FALSE
+ *
+ * NOTES
+ * See SHLWAPI_7.
+ */
+BOOL WINAPI SHLWAPI_10 (HSHARED hShared, DWORD dwProcId)
+{
+  HSHARED hClose;
+
+  TRACE("(%p %ld)\n", (PVOID)hShared, dwProcId);
+
+  /* Get a copy of the handle for our process, closing the source handle */
+  hClose = SHLWAPI_DupSharedHandle(hShared, dwProcId, GetCurrentProcessId(),
+                                   FILE_MAP_ALL_ACCESS,DUPLICATE_CLOSE_SOURCE);
+  /* Close local copy */
+  return CloseHandle((HANDLE)hClose);
+}
+
+/*************************************************************************
+ * @   [SHLWAPI.11]
+ *
+ * Copy a sharable memory handle from one process to another.
+ *
+ * PARAMS
+ * hShared     [I] Shared memory handle to duplicate
+ * dwDstProcId [I] ID of the process wanting the duplicated handle
+ * dwSrcProcId [I] ID of the process owning hShared
+ * dwAccess    [I] Desired DuplicateHandle access
+ * dwOptions   [I] Desired DuplicateHandle options
+ *
+ * RETURNS
+ * Success: A handle suitable for use by the dwDstProcId process.
+ * Failure: A NULL handle.
+ *
+ * NOTES
+ * See SHLWAPI_7.
+ */
+HSHARED WINAPI SHLWAPI_11(HSHARED hShared, DWORD dwDstProcId, DWORD dwSrcProcId,
+                          DWORD dwAccess, DWORD dwOptions)
+{
+  HSHARED hRet;
+
+  hRet = SHLWAPI_DupSharedHandle(hShared, dwDstProcId, dwSrcProcId,
+                                 dwAccess, dwOptions);
+  return hRet;
+}
+
+/*************************************************************************
+ *      @	[SHLWAPI.13]
+ * (Used by IE4 during startup)
+ */
+HRESULT WINAPI SHLWAPI_13 (
+	LPVOID w,
+	LPVOID x)
+{
+	FIXME("(%p %p)stub\n",w,x);
+	return 1;
+#if 0
+	/* pseudo code extracted from relay trace */
+	RegOpenKeyA(HKLM, "Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\\Aceepted Documents", &newkey);
+	ret = 0;
+	i = 0;
+	size = 0;
+	while(!ret) {
+	    ret = RegEnumValueA(newkey, i, a1, a2, 0, a3, 0, 0);
+	    size += ???;
+	    i++;
+	}
+	b1 = LocalAlloc(0x40, size);
+	ret = 0;
+	i = 0;
+	while(!ret) {
+	    ret = RegEnumValueA(newkey, i, a1, a2, 0, a3, a4, a5);
+	    RegisterClipBoardFormatA(a4);
+	    i++;
+	}
+	hwnd1 = GetModuleHandleA("URLMON.DLL");
+	proc = GetProcAddress(hwnd1, "CreateFormatEnumerator");
+	HeapAlloc(??, 0, 0x14);
+	HeapAlloc(??, 0, 0x50);
+	LocalAlloc(0x40, 0x78);
+	/* FIXME: bad string below */
+	lstrlenW(L"{D0FCA420-D3F5-11CF-B211-00AA004AE837}");
+	StrCpyW(a6,  L"{D0FCA420-D3F5-11CF-B211-00AA004AE837}");
+
+	GetTickCount();
+	IsBadReadPtr(c1 = 0x403fd210,4);
+	InterlockedIncrement(c1+4);
+	LocalFree(b1);
+	RegCloseKey(newkey);
+	IsBadReadPtr(c1 = 0x403fd210,4);
+	InterlockedIncrement(c1+4);
+
+	HeapAlloc(40350000,00000000,00000014) retval=403fd0a8;
+	HeapAlloc(40350000,00000000,00000050) retval=403feb44;
+	hwnd1 = GetModuleHandleA("URLMON.DLL");
+	proc = GetProcAddress(hwnd1, "RegisterFormatEnumerator");
+	/* 0x1a40c88c is in URLMON.DLL just before above proc
+	 * content is L"_EnumFORMATETC_"
+	 * label is d1
+	 */
+        IsBadReadPtr(d1 = 0x1a40c88c,00000002);
+	lstrlenW(d1);
+	lstrlenW(d1);
+	HeapAlloc(40350000,00000000,0000001e) retval=403fed44;
+	IsBadReadPtr(d2 = 0x403fd0a8,00000004);
+	InterlockedIncrement(d2+4);
+	IsBadReadPtr(d2 = 0x403fd0a8,00000004);
+	InterlockedDecrement(d2+4);
+	IsBadReadPtr(c1,00000004);
+	InterlockedDecrement(c1+4);
+	IsBadReadPtr(c1,00000004);
+	InterlockedDecrement(c1+4);
+
+#endif
+}
+
+/*************************************************************************
+ *      @	[SHLWAPI.14]
+ *
+ * Function:
+ *    Retrieves IE "AcceptLanguage" value from registry. ASCII mode.
+ *  
+ */
+HRESULT WINAPI SHLWAPI_14 (
+	LPSTR langbuf,
+	LPDWORD buflen)
+{
+	CHAR *mystr;
+	DWORD mystrlen, mytype;
+	HKEY mykey;
+	LCID mylcid;
+
+	mystrlen = (*buflen > 6) ? *buflen : 6;
+	mystr = (CHAR*)HeapAlloc(GetProcessHeap(), 
+				 HEAP_ZERO_MEMORY, mystrlen);
+	RegOpenKeyA(HKEY_CURRENT_USER, 
+		    "Software\\Microsoft\\Internet Explorer\\International", 
+		    &mykey);
+	if (RegQueryValueExA(mykey, "AcceptLanguage", 
+			      0, &mytype, mystr, &mystrlen)) {
+	    /* Did not find value */
+	    mylcid = GetUserDefaultLCID();
+	    /* somehow the mylcid translates into "en-us"
+	     *  this is similar to "LOCALE_SABBREVLANGNAME"
+	     *  which could be gotten via GetLocaleInfo.
+	     *  The only problem is LOCALE_SABBREVLANGUAGE" is
+	     *  a 3 char string (first 2 are country code and third is
+	     *  letter for "sublanguage", which does not come close to
+	     *  "en-us"
+	     */
+	    lstrcpyA(mystr, "en-us");
+	    mystrlen = lstrlenA(mystr);
+	}
+	else {
+	    /* handle returned string */
+	    FIXME("missing code\n");
+	}
+	if (mystrlen > *buflen) 
+	    lstrcpynA(langbuf, mystr, *buflen);
+	else {
+	    lstrcpyA(langbuf, mystr);
+	    *buflen = lstrlenA(langbuf);
+	}        
+	RegCloseKey(mykey);
+	HeapFree(GetProcessHeap(), 0, mystr);
+	TRACE("language is %s\n", debugstr_a(langbuf));
 	return 0;
 }
 
 /*************************************************************************
- *      SHLWAPI_16	[SHLWAPI.16]
+ *      @	[SHLWAPI.15]
+ *
+ * Function:
+ *    Retrieves IE "AcceptLanguage" value from registry. UNICODE mode.
+ *  
+ */
+HRESULT WINAPI SHLWAPI_15 (
+	LPWSTR langbuf,
+	LPDWORD buflen)
+{
+	CHAR *mystr;
+	DWORD mystrlen, mytype;
+	HKEY mykey;
+	LCID mylcid;
+
+	mystrlen = (*buflen > 6) ? *buflen : 6;
+	mystr = (CHAR*)HeapAlloc(GetProcessHeap(), 
+				 HEAP_ZERO_MEMORY, mystrlen);
+	RegOpenKeyA(HKEY_CURRENT_USER, 
+		    "Software\\Microsoft\\Internet Explorer\\International", 
+		    &mykey);
+	if (RegQueryValueExA(mykey, "AcceptLanguage", 
+			      0, &mytype, mystr, &mystrlen)) {
+	    /* Did not find value */
+	    mylcid = GetUserDefaultLCID();
+	    /* somehow the mylcid translates into "en-us"
+	     *  this is similar to "LOCALE_SABBREVLANGNAME"
+	     *  which could be gotten via GetLocaleInfo.
+	     *  The only problem is LOCALE_SABBREVLANGUAGE" is
+	     *  a 3 char string (first 2 are country code and third is
+	     *  letter for "sublanguage", which does not come close to
+	     *  "en-us"
+	     */
+	    lstrcpyA(mystr, "en-us");
+	    mystrlen = lstrlenA(mystr);
+	}
+	else {
+	    /* handle returned string */
+	    FIXME("missing code\n");
+	}
+	RegCloseKey(mykey);
+	*buflen = MultiByteToWideChar(0, 0, mystr, -1, langbuf, (*buflen)-1);
+	HeapFree(GetProcessHeap(), 0, mystr);
+	TRACE("language is %s\n", debugstr_w(langbuf));
+	return 0;
+}
+
+/*************************************************************************
+ *      @	[SHLWAPI.16]
  */
 HRESULT WINAPI SHLWAPI_16 (
 	LPVOID w,
@@ -99,10 +635,81 @@ HRESULT WINAPI SHLWAPI_16 (
 	FIXME("(%p %p %p %p)stub\n",w,x,y,z);
 	return 0xabba1252;
 }
-#endif
 
 /*************************************************************************
- *      SHLWAPI_23	[SHLWAPI.23]
+ *      @	[SHLWAPI.18]
+ *
+ *  w is pointer to address of callback routine
+ *  x is pointer to LPVOID to receive address of locally allocated
+ *         space size 0x14
+ *  return is 0 (unless out of memory???)
+ *
+ * related to _19, _21 and _22 below
+ *  only seen invoked by SHDOCVW
+ */
+LONG WINAPI SHLWAPI_18 (
+	LPVOID *w,
+	LPVOID x)
+{
+	FIXME("(%p %p)stub\n",w,x);
+	*((LPDWORD)x) = 0;
+	return 0;
+}
+
+/*************************************************************************
+ *      @	[SHLWAPI.19]
+ *
+ *  w is address of allocated memory from _21
+ *  return is 0 (unless out of memory???)
+ *
+ * related to _18, _21 and _22 below
+ *  only seen invoked by SHDOCVW
+ */
+LONG WINAPI SHLWAPI_19 (
+	LPVOID w)
+{
+	FIXME("(%p) stub\n",w);
+	return 0;
+}
+
+/*************************************************************************
+ *      @	[SHLWAPI.21]
+ *
+ *  w points to space allocated via .18 above
+ *      LocalSize is done on it (retrieves 18)
+ *      LocalReAlloc is done on it to size 8 with LMEM_MOVEABLE & LMEM_ZEROINIT
+ *  x values seen 0xa0000005
+ *  returns 1
+ *
+ *  relates to _18, _19 and _22 above and below
+ *   only seen invoked by SHDOCVW
+ */
+LONG WINAPI SHLWAPI_21 (
+	LPVOID w,
+	DWORD  x)
+{
+	FIXME("(%p %lx)stub\n",w,x);
+	return 1;
+}
+
+/*************************************************************************
+ *      @	[SHLWAPI.22]
+ *
+ *  return is 'w' value seen in x is 0xa0000005
+ *
+ *  relates to _18, _19 and _21 above
+ *   only seen invoked by SHDOCVW
+ */
+LPVOID WINAPI SHLWAPI_22 (
+	LPVOID w,
+	DWORD  x)
+{
+	FIXME("(%p %lx)stub\n",w,x);
+	return w;
+}
+
+/*************************************************************************
+ *      @	[SHLWAPI.23]
  *
  * NOTES
  *	converts a guid to a string
@@ -126,7 +733,7 @@ DWORD WINAPI SHLWAPI_23 (
 }
 
 /*************************************************************************
- *      SHLWAPI_24	[SHLWAPI.24]
+ *      @	[SHLWAPI.24]
  *
  * NOTES
  *	converts a guid to a string
@@ -147,40 +754,128 @@ DWORD WINAPI SHLWAPI_24 (
 }
 
 /*************************************************************************
- *      SHLWAPI_30	[SHLWAPI.30]
+ *      @	[SHLWAPI.25]
  *
- * Seems to be an isspaceW.
+ * Seems to be iswalpha
  */
-BOOL WINAPI SHLWAPI_30(LPWSTR lpcChar)
+BOOL WINAPI SHLWAPI_25(WCHAR wc)
 {
-  switch (*lpcChar)
-  {
-  case (WCHAR)'\t':
-  case (WCHAR)' ':
-  case 160:
-  case 12288:
-  case 65279:
+    return (get_char_typeW(wc) & C1_ALPHA) != 0;
+}
+
+/*************************************************************************
+ *      @	[SHLWAPI.26]
+ *
+ * Seems to be iswupper
+ */
+BOOL WINAPI SHLWAPI_26(WCHAR wc)
+{
+    return (get_char_typeW(wc) & C1_UPPER) != 0;
+}
+
+/*************************************************************************
+ *      @	[SHLWAPI.27]
+ *
+ * Seems to be iswlower
+ */
+BOOL WINAPI SHLWAPI_27(WCHAR wc)
+{
+    return (get_char_typeW(wc) & C1_LOWER) != 0;
+}
+
+/*************************************************************************
+ *      @	[SHLWAPI.28]
+ *
+ * Seems to be iswalnum
+ */
+BOOL WINAPI SHLWAPI_28(WCHAR wc)
+{
+    return (get_char_typeW(wc) & (C1_ALPHA|C1_DIGIT)) != 0;
+}
+
+/*************************************************************************
+ *      @	[SHLWAPI.29]
+ *
+ * Seems to be iswspace
+ */
+BOOL WINAPI SHLWAPI_29(WCHAR wc)
+{
+    return (get_char_typeW(wc) & C1_SPACE) != 0;
+}
+
+/*************************************************************************
+ *      @	[SHLWAPI.30]
+ *
+ * Seems to be iswblank
+ */
+BOOL WINAPI SHLWAPI_30(WCHAR wc)
+{
+    return (get_char_typeW(wc) & C1_BLANK) != 0;
+}
+
+/*************************************************************************
+ *      @	[SHLWAPI.31]
+ *
+ * Seems to be iswpunct
+ */
+BOOL WINAPI SHLWAPI_31(WCHAR wc)
+{
+    return (get_char_typeW(wc) & C1_PUNCT) != 0;
+}
+
+/*************************************************************************
+ *      @	[SHLWAPI.32]
+ *
+ * Seems to be iswcntrl
+ */
+BOOL WINAPI SHLWAPI_32(WCHAR wc)
+{
+    return (get_char_typeW(wc) & C1_CNTRL) != 0;
+}
+
+/*************************************************************************
+ *      @	[SHLWAPI.33]
+ *
+ * Seems to be iswdigit
+ */
+BOOL WINAPI SHLWAPI_33(WCHAR wc)
+{
+    return (get_char_typeW(wc) & C1_DIGIT) != 0;
+}
+
+/*************************************************************************
+ *      @	[SHLWAPI.34]
+ *
+ * Seems to be iswxdigit
+ */
+BOOL WINAPI SHLWAPI_34(WCHAR wc)
+{
+    return (get_char_typeW(wc) & C1_XDIGIT) != 0;
+}
+
+/*************************************************************************
+ *      @	[SHLWAPI.35]
+ *
+ */
+BOOL WINAPI SHLWAPI_35(LPVOID p1, DWORD dw2, LPVOID p3)
+{
+    FIXME("(%p, 0x%08lx, %p): stub\n", p1, dw2, p3);
     return TRUE;
-  }
-  return FALSE;
 }
 
 /*************************************************************************
- *      SHLWAPI_32	[SHLWAPI.32]
+ *      @	[SHLWAPI.36]
+ *
  */
-BOOL WINAPI SHLWAPI_32(LPCWSTR lpcChar)
+BOOL WINAPI SHLWAPI_36(HMENU h1, UINT ui2, UINT h3, LPCWSTR p4)
 {
- if (*lpcChar < (WCHAR)' ')
-   return TRUE;
-
- /* This is probably a shlwapi bug, but we do it the same for compatability */
- if (((DWORD)lpcChar & 0xffff) - 127 <= (WCHAR)' ')
-   return TRUE;
- return FALSE;
+    TRACE("(0x%08x, 0x%08x, 0x%08x, %s): stub\n", 
+	  h1, ui2, h3, debugstr_w(p4));
+    return AppendMenuW(h1, ui2, h3, p4);
 }
 
 /*************************************************************************
- *      SHLWAPI_40	[SHLWAPI.40]
+ *      @	[SHLWAPI.40]
  *
  * Get pointer to next Unicode character.
  */
@@ -190,7 +885,7 @@ LPCWSTR WINAPI SHLWAPI_40(LPCWSTR str)
 }
 
 /*************************************************************************
- *      SHLWAPI_74	[SHLWAPI.74]
+ *      @	[SHLWAPI.74]
  *
  * Get the text from a given dialog item.
  */
@@ -204,91 +899,71 @@ INT WINAPI SHLWAPI_74(HWND hWnd, INT nItem, LPWSTR lpsDest,INT nDestLen)
     *lpsDest = (WCHAR)'\0';
   return 0;
 }
+
 /*************************************************************************
- *      SHLWAPI_151	[SHLWAPI.151]
+ *      @	[SHLWAPI.151]
+ * Function:  Compare two ASCII strings for "len" bytes.
+ * Returns:   *str1-*str2  (case sensitive)
  */
-#ifdef __WIN32OS2__
 DWORD WINAPI SHLWAPI_151(LPSTR str1, LPSTR str2, INT len)
 {
-  dprintf(("SHLWAPI_151 (strcmpn) %s %s %d", str1, str2, len));
-  if (!len)
-    return 0;
-
-  while (--len && *str1 && *str1 == *str2)
-  {
-    str1++;
-    str2++;
-  }
-  return *str1 - *str2;
-
+    return strncmp( str1, str2, len );
 }
-#else
-DWORD WINAPI SHLWAPI_151(void)
-{
-  FIXME(": stub\n");
-  return 0;
-}
-#endif
 
 /*************************************************************************
- *      SHLWAPI_152	[SHLWAPI.152]
+ *      @	[SHLWAPI.152]
+ *
+ * Function:  Compare two WIDE strings for "len" bytes.
+ * Returns:   *str1-*str2  (case sensitive)
  */
 DWORD WINAPI SHLWAPI_152(LPWSTR str1, LPWSTR str2, INT len)
 {
-  if (!len)
-    return 0;
-
-  while (--len && *str1 && *str1 == *str2)
-  {
-    str1++;
-    str2++;
-  }
-  return *str1 - *str2;
+    return strncmpW( str1, str2, len );
 }
 
 /*************************************************************************
- *      SHLWAPI_153	[SHLWAPI.153]
+ *      @	[SHLWAPI.153]
+ * Function:  Compare two ASCII strings for "len" bytes via caseless compare.
+ * Returns:   *str1-*str2  (case insensitive)
  */
-#ifdef __WIN32OS2__
-//case insensitive string compare with length (ascii)
 DWORD WINAPI SHLWAPI_153(LPSTR str1, LPSTR str2, DWORD len)
 {
-  if (!len)
-    return 0;
-
-  return lstrncmpiA(str1, str2, len);
+    return strncasecmp( str1, str2, len );
 }
-
-//case insensitive string compare with length (unicode)
-DWORD WINAPI SHLWAPI_154(LPWSTR str1, LPWSTR str2, DWORD len)
-{
-  if (!len)
-    return 0;
-
-  return lstrncmpiW(str1, str2, len);
-}
-
-#else
-DWORD WINAPI SHLWAPI_153(DWORD dw1, DWORD dw2, DWORD dw3)
-{
-    FIXME("%08lx %08lx %08lx - stub\n", dw1, dw2, dw3);
-    return 0;
-}
-#endif
 
 /*************************************************************************
- *      SHLWAPI_156	[SHLWAPI.156]
+ *      @	[SHLWAPI.154]
+ *
+ * Function:  Compare two WIDE strings for "len" bytes via caseless compare.
+ * Returns:   *str1-*str2  (case insensitive)
+ */
+DWORD WINAPI SHLWAPI_154(LPWSTR str1, LPWSTR str2, DWORD len)
+{
+    return strncmpiW( str1, str2, len );
+}
+
+/*************************************************************************
+ *      @	[SHLWAPI.156]
  *
  *	Case sensitive string compare. Does not SetLastError().
  */
 DWORD WINAPI SHLWAPI_156 ( LPWSTR str1, LPWSTR str2)
 {
-  while (*str1 && (*str1 == *str2)) { str1++; str2++; }
-  return (INT)(*str1 - *str2);
+    return strcmpW( str1, str2 );
 }
 
 /*************************************************************************
- *      SHLWAPI_162	[SHLWAPI.162]
+ *      @	[SHLWAPI.158]
+ *
+ *	Case insensitive string compare. Does not SetLastError(). ??
+ */
+DWORD WINAPI SHLWAPI_158 ( LPWSTR str1, LPWSTR str2)
+{
+    return strcmpiW( str1, str2 );
+}
+
+/*************************************************************************
+ *      @	[SHLWAPI.162]
  *
  * Ensure a multibyte character string doesn't end in a hanging lead byte.
  */
@@ -312,7 +987,22 @@ DWORD WINAPI SHLWAPI_162(LPSTR lpStr, DWORD size)
 }
 
 /*************************************************************************
- *      SHLWAPI_165	[SHLWAPI.165]
+ *      @	[SHLWAPI.164]
+ */
+DWORD WINAPI SHLWAPI_164 (
+	LPVOID u,
+	LPVOID v,
+	LPVOID w,
+	LPVOID x,
+	LPVOID y,
+	LPVOID z)
+{
+        TRACE("(%p %p %p %p %p %p) stub\n",u,v,w,x,y,z);
+	return 0x80004002;    /* E_NOINTERFACE */
+}
+
+/*************************************************************************
+ *      @	[SHLWAPI.165]
  *
  * SetWindowLongA with mask.
  */
@@ -327,20 +1017,24 @@ LONG WINAPI SHLWAPI_165(HWND hwnd, INT offset, UINT wFlags, UINT wMask)
 }
 
 /*************************************************************************
- *      SHLWAPI_169	[SHLWAPI.169]
+ *      @	[SHLWAPI.169]
+ *
+ *  Do IUnknown::Release on passed object.
  */
-DWORD WINAPI SHLWAPI_169 (IUnknown * lpUnknown)
+DWORD WINAPI SHLWAPI_169 (IUnknown ** lpUnknown)
 {
+        IUnknown *temp;
+
 	TRACE("(%p)\n",lpUnknown);
-#if 0
 	if(!lpUnknown || !*((LPDWORD)lpUnknown)) return 0;
-	return IUnknown_Release(lpUnknown);
-#endif
-	return 0;
+	temp = *lpUnknown;
+	*lpUnknown = NULL;
+	TRACE("doing Release\n");
+	return IUnknown_Release(temp);
 }
 
 /*************************************************************************
- *      SHLWAPI_170	[SHLWAPI.170]
+ *      @	[SHLWAPI.170]
  *
  * Skip URL '//' sequence.
  */
@@ -352,7 +1046,103 @@ LPCSTR WINAPI SHLWAPI_170(LPCSTR lpszSrc)
 }
 
 /*************************************************************************
- *      SHLWAPI_181	[SHLWAPI.181]
+ *      @	[SHLWAPI.172]
+ * Get window handle of OLE object
+ */
+DWORD WINAPI SHLWAPI_172 (
+	IUnknown *y,       /* [in]   OLE object interface */
+	LPHWND z)          /* [out]  location to put window handle */
+{
+        DWORD ret;
+	IUnknown *pv;
+
+        TRACE("(%p %p)\n",y,z);
+	if (!y) return E_FAIL;
+
+	if ((ret = IUnknown_QueryInterface(y, &IID_IOleWindow,(LPVOID *)&pv)) < 0) {
+	    /* error */
+	    return ret;
+	}
+	ret = IOleWindow_GetWindow((IOleWindow *)pv, z);
+	IUnknown_Release(pv);
+	TRACE("result hwnd=%08x\n", *z);
+	return ret;
+}
+
+/*************************************************************************
+ *      @	[SHLWAPI.174]
+ *
+ * Seems to do call either IObjectWithSite::SetSite or 
+ *   IPersistMoniker::GetClassID.  But since we do not implement either
+ *   of those classes in our headers, we will fake it out.
+ */
+DWORD WINAPI SHLWAPI_174(
+	IUnknown *p1,     /* [in]   OLE object                          */
+        LPVOID *p2)       /* [out]  ptr to result of either GetClassID 
+                                    or SetSite call.                    */
+{
+    DWORD ret, aa;
+
+    if (!p1) return E_FAIL;
+
+    /* see if SetSite interface exists for IObjectWithSite object */
+    ret = IUnknown_QueryInterface((IUnknown *)p1, (REFIID)id1, (LPVOID *)&p1);
+    TRACE("first IU_QI ret=%08lx, p1=%p\n", ret, p1);
+    if (ret) { 
+
+	/* see if GetClassId interface exists for IPersistMoniker object */
+	ret = IUnknown_QueryInterface((IUnknown *)p1, (REFIID)id2, (LPVOID *)&aa);
+	TRACE("second IU_QI ret=%08lx, aa=%08lx\n", ret, aa);
+	if (ret) return ret;
+
+	/* fake a GetClassId call */
+	ret = IOleWindow_GetWindow((IOleWindow *)aa, (HWND*)p2);
+	TRACE("second IU_QI doing 0x0c ret=%08lx, *p2=%08lx\n", ret, 
+	      *(LPDWORD)p2);
+	IUnknown_Release((IUnknown *)aa);
+    }
+    else {
+	/* fake a SetSite call */
+	ret = IOleWindow_GetWindow((IOleWindow *)p1, (HWND*)p2);
+	TRACE("first IU_QI doing 0x0c ret=%08lx, *p2=%08lx\n", ret, 
+	      *(LPDWORD)p2);
+	IUnknown_Release((IUnknown *)p1);
+    }
+    return ret;
+}
+
+/*************************************************************************
+ *      @	[SHLWAPI.176]
+ *
+ * Function appears to be interface to IServiceProvider::QueryService
+ *
+ * NOTE:
+ *   returns E_NOINTERFACE
+ *           E_FAIL  if w == 0
+ *           S_OK    if _219 called successfully
+ */
+DWORD WINAPI SHLWAPI_176 (
+	IUnknown* unk,    /* [in]    object to give Service Provider */
+	REFGUID   sid,    /* [in]    Service ID                      */
+        REFIID    riid,   /* [in]    Function requested              */
+	LPVOID    *z)     /* [out]   place to save interface pointer */
+{
+    DWORD ret;
+    LPVOID aa;
+    *z = 0;
+    if (!unk) return E_FAIL;
+    ret = IUnknown_QueryInterface(unk, &IID_IServiceProvider, &aa);
+    TRACE("did IU_QI retval=%08lx, aa=%p\n", ret, aa); 
+    if (ret) return ret;
+    ret = IServiceProvider_QueryService((IServiceProvider *)aa, sid, riid, 
+					(void **)z);
+    TRACE("did ISP_QS retval=%08lx, *z=%p\n", ret, (LPVOID)*z); 
+    IUnknown_Release((IUnknown*)aa);
+    return ret;
+}
+
+/*************************************************************************
+ *      @	[SHLWAPI.181]
  *
  *	Enable or disable a menu item.
  */
@@ -362,7 +1152,7 @@ UINT WINAPI SHLWAPI_181(HMENU hMenu, UINT wItemID, BOOL bEnable)
 }
 
 /*************************************************************************
- *      SHLWAPI_183	[SHLWAPI.183]
+ *      @	[SHLWAPI.183]
  *
  * Register a window class if it isn't already.
  */
@@ -375,7 +1165,7 @@ DWORD WINAPI SHLWAPI_183(WNDCLASSA *wndclass)
 }
 
 /*************************************************************************
- *      SHLWAPI_193	[SHLWAPI.193]
+ *      @	[SHLWAPI.193]
  */
 DWORD WINAPI SHLWAPI_193 ()
 {
@@ -391,33 +1181,99 @@ DWORD WINAPI SHLWAPI_193 ()
 }
 
 /*************************************************************************
- *      SHLWAPI_215	[SHLWAPI.215]
+ *      @	[SHLWAPI.199]
+ *
+ * Copy interface pointer
+ */
+DWORD WINAPI SHLWAPI_199 (
+	IUnknown **dest,   /* [out] pointer to copy of interface ptr */
+	IUnknown *src)     /* [in]  interface pointer */
+{
+        TRACE("(%p %p)\n",dest,src);
+	if (*dest != src) {
+	    if (*dest)
+		IUnknown_Release(*dest);
+	    if (src) {
+		IUnknown_AddRef(src);
+		*dest = src;
+	    }
+	}
+	return 4;
+}
+
+/*************************************************************************
+ *      @	[SHLWAPI.208]
+ *
+ * Some sort of memory management process - associated with _210
+ */
+DWORD WINAPI SHLWAPI_208 (
+	DWORD    a,
+	DWORD    b,
+	LPVOID   c,
+	LPVOID   d,
+	DWORD    e)
+{
+    FIXME("(0x%08lx 0x%08lx %p %p 0x%08lx) stub\n",
+	  a, b, c, d, e);
+    return 1;
+}
+
+/*************************************************************************
+ *      @	[SHLWAPI.210]
+ *
+ * Some sort of memory management process - associated with _208
+ */
+DWORD WINAPI SHLWAPI_210 (
+	LPVOID   a,
+	DWORD    b,
+	LPVOID   c)
+{
+    FIXME("(%p 0x%08lx %p) stub\n",
+	  a, b, c);
+    return 0;
+}
+
+/*************************************************************************
+ *      @	[SHLWAPI.211]
+ */
+DWORD WINAPI SHLWAPI_211 (
+	LPVOID   a,
+	DWORD    b)
+{
+    FIXME("(%p 0x%08lx) stub\n",
+	  a, b);
+    return 1;
+}
+
+/*************************************************************************
+ *      @	[SHLWAPI.215]
  *
  * NOTES
  *  check me!
  */
-LPWSTR WINAPI SHLWAPI_215 (
-	LPWSTR lpStrSrc,
-	LPVOID lpwStrDest,
+DWORD WINAPI SHLWAPI_215 (
+	LPCSTR lpStrSrc,
+	LPWSTR lpwStrDest,
 	int len)
 {
-	WARN("(%p %p %u)\n",lpStrSrc,lpwStrDest,len);
-	return strncpyW(lpwStrDest, lpStrSrc, len);
+	INT len_a, ret;
+
+	len_a = lstrlenA(lpStrSrc);
+	ret = MultiByteToWideChar(0, 0, lpStrSrc, len_a, lpwStrDest, len);
+	TRACE("%s %s %d, ret=%d\n", 
+	      debugstr_a(lpStrSrc), debugstr_w(lpwStrDest), len, ret);
+	return ret;
 }
 
 /*************************************************************************
- *      SHLWAPI_218	[SHLWAPI.218]
+ *      @	[SHLWAPI.218]
  *
  * WideCharToMultiByte with multi language support.
  */
 INT WINAPI SHLWAPI_218(UINT CodePage, LPCWSTR lpSrcStr, LPSTR lpDstStr,
                        LPINT lpnMultiCharCount)
 {
-#ifdef __WIN32OS2__
   static HRESULT (* WINAPI pfnFunc)(LPDWORD,DWORD,LPCWSTR,LPINT,LPSTR,LPINT);
-#else
-  static HRESULT (* WINAPI pfnFunc)(LPDWORD,DWORD,LPCWSTR,LPINT,LPSTR,LPINT);
-#endif
   WCHAR emptyW[] = { '\0' };
   int len , reqLen;
   LPSTR mem;
@@ -500,34 +1356,77 @@ INT WINAPI SHLWAPI_218(UINT CodePage, LPCWSTR lpSrcStr, LPSTR lpDstStr,
 }
 
 /*************************************************************************
- *      SHLWAPI_217	[SHLWAPI.217]
+ *      @	[SHLWAPI.217]
  *
+ * Hmm, some program used lpnMultiCharCount == 0x3 (and lpSrcStr was "C")
+ * --> Crash. Something wrong here.
+ *
+ * It seems from OE v5 that the third param is the count. (GA 11/2001)
  */
-INT WINAPI SHLWAPI_217(LPCWSTR lpSrcStr, LPSTR lpDstStr, LPINT lpnMultiCharCount)
+INT WINAPI SHLWAPI_217(LPCWSTR lpSrcStr, LPSTR lpDstStr, INT MultiCharCount)
 {
-  return SHLWAPI_218(CP_ACP, lpSrcStr, lpDstStr, lpnMultiCharCount);
+    INT myint = MultiCharCount;
+
+    return SHLWAPI_218(CP_ACP, lpSrcStr, lpDstStr, &myint);
 }
 
-#ifndef __WIN32OS2__
 /*************************************************************************
- *      SHLWAPI_219	[SHLWAPI.219]
+ *      @	[SHLWAPI.219]
+ *
+ * Seems to be "super" QueryInterface. Supplied with at table of interfaces
+ * and an array of IIDs and offsets into the table.
  *
  * NOTES
  *  error codes: E_POINTER, E_NOINTERFACE
  */
+typedef struct {
+    REFIID   refid;
+    DWORD    indx;
+} IFACE_INDEX_TBL;
+
 HRESULT WINAPI SHLWAPI_219 (
-	LPVOID w, /* [???] NOTE: returned by LocalAlloc, 0x450 bytes, iface */
-	LPVOID x,
-	REFIID riid,
-	LPWSTR z) /* [???] NOTE: OUT: path */
+	LPVOID w,           /* [in]   table of interfaces                   */
+	IFACE_INDEX_TBL *x, /* [in]   array of REFIIDs and indexes to above */
+	REFIID riid,        /* [in]   REFIID to get interface for           */
+	LPVOID *z)          /* [out]  location to get interface pointer     */
 {
-	FIXME("(%p %p %s %p)stub\n",w,x,debugstr_guid(riid),z);
-	return 0xabba1252;
+	HRESULT ret;
+	IUnknown *a_vtbl;
+	IFACE_INDEX_TBL *xmove;
+
+	TRACE("(%p %p %s %p)\n",
+	      w,x,debugstr_guid(riid),z);
+	if (z) {
+	    xmove = x;
+	    while (xmove->refid) {
+		TRACE("trying (indx %ld) %s\n", xmove->indx, 
+		      debugstr_guid(xmove->refid));
+		if (IsEqualIID(riid, xmove->refid)) {
+		    a_vtbl = (IUnknown*)(xmove->indx + (LPBYTE)w);
+		    TRACE("matched, returning (%p)\n", a_vtbl);
+		    *z = (LPVOID)a_vtbl;
+		    IUnknown_AddRef(a_vtbl);
+		    return S_OK;
+		}
+		xmove++;
+	    }
+
+	    if (IsEqualIID(riid, &IID_IUnknown)) {
+		a_vtbl = (IUnknown*)(x->indx + (LPBYTE)w);
+		TRACE("returning first for IUnknown (%p)\n", a_vtbl);
+		*z = (LPVOID)a_vtbl;
+		IUnknown_AddRef(a_vtbl);
+		return S_OK;
+	    }
+	    *z = 0;
+	    ret = E_NOINTERFACE;
+	} else
+	    ret = E_POINTER;
+	return ret;
 }
-#endif
 
 /*************************************************************************
- *      SHLWAPI_222	[SHLWAPI.222]
+ *      @	[SHLWAPI.222]
  *
  * NOTES
  *  securityattributes missing
@@ -545,7 +1444,7 @@ HANDLE WINAPI SHLWAPI_222 (LPCLSID guid)
 }
 
 /*************************************************************************
- *      SHLWAPI_223	[SHLWAPI.223]
+ *      @	[SHLWAPI.223]
  *
  * NOTES
  *  get the count of the semaphore
@@ -562,7 +1461,27 @@ DWORD WINAPI SHLWAPI_223 (HANDLE handle)
 }
 
 /*************************************************************************
- *      SHLWAPI_237	[SHLWAPI.237]
+ *      @	[SHLWAPI.236]
+ */
+HMODULE WINAPI SHLWAPI_236 (REFIID lpUnknown)
+{
+    HKEY newkey;
+    DWORD type, count;
+    CHAR value[MAX_PATH], string[MAX_PATH];
+
+    strcpy(string, "CLSID\\");
+    strcat(string, debugstr_guid(lpUnknown));
+    strcat(string, "\\InProcServer32");
+
+    count = MAX_PATH;
+    RegOpenKeyExA(HKEY_CLASSES_ROOT, string, 0, 1, &newkey);
+    RegQueryValueExA(newkey, 0, 0, &type, value, &count);
+    RegCloseKey(newkey);
+    return LoadLibraryExA(value, 0, 0);
+}
+
+/*************************************************************************
+ *      @	[SHLWAPI.237]
  *
  * Unicode version of SHLWAPI_183.
  */
@@ -578,7 +1497,29 @@ DWORD WINAPI SHLWAPI_237 (WNDCLASSW * lpWndClass)
 }
 
 /*************************************************************************
- *      SHLWAPI_240	[SHLWAPI.240]
+ *      @	[SHLWAPI.239]
+ */
+DWORD WINAPI SHLWAPI_239(HINSTANCE hInstance, LPVOID p2, DWORD dw3)
+{
+    FIXME("(0x%08x %p 0x%08lx) stub\n",
+	  hInstance, p2, dw3);
+    return 0;
+#if 0
+    /* pseudo code from relay trace */
+    WideCharToMultiByte(0, 0, L"Shell DocObject View", -1, &aa, 0x0207, 0, 0);
+    GetClassInfoA(70fe0000,405868ec "Shell DocObject View",40586b14);
+    /* above pair repeated for:
+           TridentThicketUrlDlClass
+	   Shell Embedding
+	   CIESplashScreen
+	   Inet Notify_Hidden
+	   OCHost
+    */
+#endif
+}
+
+/*************************************************************************
+ *      @	[SHLWAPI.240]
  *
  *	Calls ASCII or Unicode WindowProc for the given window.
  */
@@ -588,19 +1529,19 @@ LRESULT CALLBACK SHLWAPI_240(HWND hWnd, UINT uMessage, WPARAM wParam, LPARAM lPa
 		return DefWindowProcW(hWnd, uMessage, wParam, lParam);
 	return DefWindowProcA(hWnd, uMessage, wParam, lParam);
 }
-#ifndef __WIN32OS2__
+
 /*************************************************************************
- *      SHLWAPI_241	[SHLWAPI.241]
+ *      @	[SHLWAPI.241]
  *
  */
 DWORD WINAPI SHLWAPI_241 ()
 {
 	FIXME("()stub\n");
-	return 0xabba1243;
+	return /* 0xabba1243 */ 0;
 }
 
 /*************************************************************************
- *      SHLWAPI_266	[SHLWAPI.266]
+ *      @	[SHLWAPI.266]
  */
 DWORD WINAPI SHLWAPI_266 (
 	LPVOID w,
@@ -613,7 +1554,7 @@ DWORD WINAPI SHLWAPI_266 (
 }
 
 /*************************************************************************
- *      SHLWAPI_267	[SHLWAPI.267]
+ *      @	[SHLWAPI.267]
  */
 HRESULT WINAPI SHLWAPI_267 (
 	LPVOID w, /* [???] NOTE: same as 1th parameter of SHLWAPI_219 */
@@ -627,7 +1568,7 @@ HRESULT WINAPI SHLWAPI_267 (
 }
 
 /*************************************************************************
- *      SHLWAPI_268	[SHLWAPI.268]
+ *      @	[SHLWAPI.268]
  */
 DWORD WINAPI SHLWAPI_268 (
 	LPVOID w,
@@ -638,20 +1579,20 @@ DWORD WINAPI SHLWAPI_268 (
 }
 
 /*************************************************************************
- *      SHLWAPI_276	[SHLWAPI.276]
+ *      @	[SHLWAPI.276]
  *
  */
 DWORD WINAPI SHLWAPI_276 ()
 {
 	FIXME("()stub\n");
-	return 0xabba1244;
+	return /* 0xabba1244 */ 0;
 }
-#endif
+
 /*************************************************************************
- *      SHLWAPI_278	[SHLWAPI.278]
+ *      @	[SHLWAPI.278]
  *
  */
-DWORD WINAPI SHLWAPI_278 (
+HWND WINAPI SHLWAPI_278 (
 	LONG wndProc,
 	HWND hWndParent,
 	DWORD dwExStyle,
@@ -664,7 +1605,7 @@ DWORD WINAPI SHLWAPI_278 (
 	HCURSOR hCursor;
 	char * clsname = "WorkerA";
 
-	FIXME("(0x%08lx 0x%08x 0x%08lx 0x%08lx 0x%08x 0x%08lx)stub\n",
+	FIXME("(0x%08lx 0x%08x 0x%08lx 0x%08lx 0x%08x 0x%08lx) partial stub\n",
 	  wndProc,hWndParent,dwExStyle,dwStyle,hMenu,z);
 
 	hCursor = LoadCursorA(0x00000000,IDC_ARROWA);
@@ -689,7 +1630,7 @@ DWORD WINAPI SHLWAPI_278 (
 }
 
 /*************************************************************************
- *      SHLWAPI_289	[SHLWAPI.289]
+ *      @	[SHLWAPI.289]
  *
  * Late bound call to winmm.PlaySoundW
  */
@@ -702,7 +1643,31 @@ BOOL WINAPI SHLWAPI_289(LPCWSTR pszSound, HMODULE hmod, DWORD fdwSound)
 }
 
 /*************************************************************************
- *      SHLWAPI_313	[SHLWAPI.313]
+ *      @	[SHLWAPI.294]
+ */
+BOOL WINAPI SHLWAPI_294(LPSTR str1, LPSTR str2, LPSTR pStr, DWORD some_len,  LPCSTR lpStr2)
+{
+    /*
+     * str1:		"I"	"I"	pushl esp+0x20
+     * str2:		"U"	"I"	pushl 0x77c93810
+     * (is "I" and "U" "integer" and "unsigned" ??)
+     *
+     * pStr:		""	""	pushl eax
+     * some_len:	0x824	0x104	pushl 0x824
+     * lpStr2:		"%l"	"%l"	pushl esp+0xc
+     *
+     * shlwapi. StrCpyNW(lpStr2, irrelevant_var, 0x104);
+     * LocalAlloc(0x00, some_len) -> irrelevant_var
+     * LocalAlloc(0x40, irrelevant_len) -> pStr
+     * shlwapi.294(str1, str2, pStr, some_len, lpStr2);
+     * shlwapi.PathRemoveBlanksW(pStr);
+     */
+    ERR("('%s', '%s', '%s', %08lx, '%s'): stub!\n", str1, str2, pStr, some_len, lpStr2);
+    return TRUE;
+}
+
+/*************************************************************************
+ *      @	[SHLWAPI.313]
  *
  * Late bound call to shell32.SHGetFileInfoW
  */
@@ -716,7 +1681,7 @@ DWORD WINAPI SHLWAPI_313(LPCWSTR path, DWORD dwFileAttributes,
 }
 
 /*************************************************************************
- *      SHLWAPI_318	[SHLWAPI.318]
+ *      @	[SHLWAPI.318]
  *
  * Late bound call to shell32.DragQueryFileW
  */
@@ -729,7 +1694,7 @@ UINT WINAPI SHLWAPI_318(HDROP hDrop, UINT lFile, LPWSTR lpszFile, UINT lLength)
 }
 
 /*************************************************************************
- *      SHLWAPI_333	[SHLWAPI.333]
+ *      @	[SHLWAPI.333]
  *
  * Late bound call to shell32.SHBrowseForFolderW
  */
@@ -742,7 +1707,7 @@ LPITEMIDLIST WINAPI SHLWAPI_333(LPBROWSEINFOW lpBi)
 }
 
 /*************************************************************************
- *      SHLWAPI_334	[SHLWAPI.334]
+ *      @	[SHLWAPI.334]
  *
  * Late bound call to shell32.SHGetPathFromIDListW
  */
@@ -755,7 +1720,7 @@ BOOL WINAPI SHLWAPI_334(LPCITEMIDLIST pidl,LPWSTR pszPath)
 }
 
 /*************************************************************************
- *      SHLWAPI_335	[SHLWAPI.335]
+ *      @	[SHLWAPI.335]
  *
  * Late bound call to shell32.ShellExecuteExW
  */
@@ -768,7 +1733,7 @@ BOOL WINAPI SHLWAPI_335(LPSHELLEXECUTEINFOW lpExecInfo)
 }
 
 /*************************************************************************
- *      SHLWAPI_336	[SHLWAPI.336]
+ *      @	[SHLWAPI.336]
  *
  * Late bound call to shell32.SHFileOperationW.
  */
@@ -781,7 +1746,7 @@ DWORD WINAPI SHLWAPI_336(LPSHFILEOPSTRUCTW lpFileOp)
 }
 
 /*************************************************************************
- *      SHLWAPI_337	[SHLWAPI.337]
+ *      @	[SHLWAPI.337]
  *
  * Late bound call to shell32.ExtractIconExW.
  */
@@ -793,24 +1758,23 @@ HICON WINAPI SHLWAPI_337(LPCWSTR lpszFile, INT nIconIndex, HICON *phiconLarge,
   GET_FUNC(shell32, "ExtractIconExW", (HICON)0);
   return pfnFunc(lpszFile, nIconIndex, phiconLarge, phiconSmall, nIcons);
 }
-#ifndef __WIN32OS2__
-//Bugbug: is forwarder for InterlockedCompareExchange
+
 /*************************************************************************
- *      SHLWAPI_342	[SHLWAPI.342]
+ *      @	[SHLWAPI.342]
  *
  */
 DWORD WINAPI SHLWAPI_342 (
-	LPVOID w,
-	LPVOID x,
-	LPVOID y,
-	LPVOID z)
+	LPDWORD  w,   /* [out] location to put HKEY value???   */
+	HKEY     x,   /* [in]  appears to be HKEY_CURRENT_USER */
+	LPVOID y)
 {
-	FIXME("(%p %p %p %p)stub\n",w,x,y,z);
-	return 0xabba1249;
+	FIXME("(%p 0x%08x %p)stub\n", w,x,y);
+	*w = (DWORD)x;
+	return /* 0xabba1249 */ 0;
 }
-#endif
+
 /*************************************************************************
- *      SHLWAPI_346	[SHLWAPI.346]
+ *      @	[SHLWAPI.346]
  */
 DWORD WINAPI SHLWAPI_346 (
 	LPCWSTR src,
@@ -823,7 +1787,19 @@ DWORD WINAPI SHLWAPI_346 (
 }
 
 /*************************************************************************
- *      SHLWAPI_357	[SHLWAPI.357]
+ *      @	[SHLWAPI.356]
+ */
+DWORD WINAPI SHLWAPI_356 (
+	LPVOID x,
+	LPVOID y,
+	LPVOID z)
+{
+	FIXME("(%p %p %p)stub\n", x,y,z);
+	return 0;
+}
+
+/*************************************************************************
+ *      @	[SHLWAPI.357]
  *
  * Late bound call to shell32.SHGetNewLinkInfoW
  */
@@ -837,7 +1813,7 @@ BOOL WINAPI SHLWAPI_357(LPCWSTR pszLinkTo, LPCWSTR pszDir, LPWSTR pszName,
 }
 
 /*************************************************************************
- *      SHLWAPI_358	[SHLWAPI.358]
+ *      @	[SHLWAPI.358]
  *
  * Late bound call to shell32.SHDefExtractIconW
  */
@@ -852,7 +1828,7 @@ DWORD WINAPI SHLWAPI_358(LPVOID arg1, LPVOID arg2, LPVOID arg3, LPVOID arg4,
 }
 
 /*************************************************************************
- *      SHLWAPI_364	[SHLWAPI.364]
+ *      @	[SHLWAPI.364]
  *
  * Wrapper for lstrcpynA with src and dst swapped.
  */
@@ -863,7 +1839,7 @@ DWORD WINAPI SHLWAPI_364(LPCSTR src, LPSTR dst, INT n)
 }
 
 /*************************************************************************
- *      SHLWAPI_370	[SHLWAPI.370]
+ *      @	[SHLWAPI.370]
  *
  * Late bound call to shell32.ExtractIconW
  */
@@ -877,40 +1853,78 @@ HICON WINAPI SHLWAPI_370(HINSTANCE hInstance, LPCWSTR lpszExeFileName,
 }
 
 /*************************************************************************
- *      SHLWAPI_376	[SHLWAPI.376]
+ *      @	[SHLWAPI.376]
  */
-DWORD WINAPI SHLWAPI_376 (LONG x)
+LANGID WINAPI SHLWAPI_376 ()
 {
-	FIXME("(0x%08lx)stub\n", x );
-  /* FIXME: This should be a forward in the .spec file to the win2k function
-   * kernel32.GetUserDefaultUILanguage, however that function isn't there yet.
-   */
-  return 0xabba1245;
-}
-#ifndef __WIN32OS2__
-/*************************************************************************
- *      SHLWAPI_377	[SHLWAPI.377]
- */
-DWORD WINAPI SHLWAPI_377 (LPVOID x, LPVOID y, LPVOID z)
-{
-	FIXME("(%p %p %p)stub\n", x,y,z);
-	return 0xabba1246;
-}
-#endif
-/*************************************************************************
- *      SHLWAPI_378	[SHLWAPI.378]
- */
-DWORD WINAPI SHLWAPI_378 (
-	LPSTR x,
-	LPVOID y, /* [???] 0x50000000 */
-	LPVOID z) /* [???] 4 */
-{
-	FIXME("(%s %p %p)stub\n", x,y,z);
-	return LoadLibraryA(x);
+    FIXME("() stub\n");
+    /* FIXME: This should be a forward in the .spec file to the win2k function
+     * kernel32.GetUserDefaultUILanguage, however that function isn't there yet.
+     */
+    return GetUserDefaultLangID();
 }
 
 /*************************************************************************
- *      SHLWAPI_389	[SHLWAPI.389]
+ *      @	[SHLWAPI.377]
+ *
+ * FIXME: Native appears to do DPA_Create and a DPA_InsertPtr for 
+ *        each call here.
+ * FIXME: Native shows calls to:
+ *  SHRegGetUSValue for "Software\Microsoft\Internet Explorer\International"
+ *                      CheckVersion
+ *  RegOpenKeyExA for "HKLM\Software\Microsoft\Internet Explorer"
+ *  RegQueryValueExA for "LPKInstalled"
+ *  RegCloseKey
+ *  RegOpenKeyExA for "HKCU\Software\Microsoft\Internet Explorer\International"
+ *  RegQueryValueExA for "ResourceLocale"
+ *  RegCloseKey
+ *  RegOpenKeyExA for "HKLM\Software\Microsoft\Active Setup\Installed Components\{guid}"
+ *  RegQueryValueExA for "Locale"
+ *  RegCloseKey
+ *  and then tests the Locale ("en" for me).
+ *     code below
+ *  after the code then a DPA_Create (first time) and DPA_InsertPtr are done.
+ */
+DWORD WINAPI SHLWAPI_377 (LPCSTR new_mod, HMODULE inst_hwnd, LPVOID z)
+{
+    CHAR mod_path[2*MAX_PATH];
+    LPSTR ptr;
+
+    GetModuleFileNameA(inst_hwnd, mod_path, 2*MAX_PATH);
+    ptr = strrchr(mod_path, '\\');
+    if (ptr) {
+	strcpy(ptr+1, new_mod);
+	TRACE("loading %s\n", debugstr_a(mod_path));
+	return (DWORD)LoadLibraryA(mod_path);
+    }
+    return 0;
+}
+
+/*************************************************************************
+ *      @	[SHLWAPI.378]
+ *
+ *  This is Unicode version of .377
+ */
+DWORD WINAPI SHLWAPI_378 (
+	LPCWSTR   new_mod,          /* [in] new module name        */
+	HMODULE   inst_hwnd,        /* [in] calling module handle  */
+	LPVOID z)                   /* [???] 4 */
+{
+    WCHAR mod_path[2*MAX_PATH];
+    LPWSTR ptr;
+
+    GetModuleFileNameW(inst_hwnd, mod_path, 2*MAX_PATH);
+    ptr = strrchrW(mod_path, '\\');
+    if (ptr) {
+	strcpyW(ptr+1, new_mod);
+	TRACE("loading %s\n", debugstr_w(mod_path));
+	return (DWORD)LoadLibraryW(mod_path);
+    }
+    return 0;
+}
+
+/*************************************************************************
+ *      @	[SHLWAPI.389]
  *
  * Late bound call to comdlg32.GetSaveFileNameW
  */
@@ -923,7 +1937,7 @@ BOOL WINAPI SHLWAPI_389(LPOPENFILENAMEW ofn)
 }
 
 /*************************************************************************
- *      SHLWAPI_390	[SHLWAPI.390]
+ *      @	[SHLWAPI.390]
  *
  * Late bound call to mpr.WNetRestoreConnectionW
  */
@@ -937,7 +1951,7 @@ DWORD WINAPI SHLWAPI_390(LPVOID arg1, LPVOID arg2)
 }
 
 /*************************************************************************
- *      SHLWAPI_391	[SHLWAPI.391]
+ *      @	[SHLWAPI.391]
  *
  * Late bound call to mpr.WNetGetLastErrorW
  */
@@ -952,7 +1966,7 @@ DWORD WINAPI SHLWAPI_391(LPVOID arg1, LPVOID arg2, LPVOID arg3, LPVOID arg4,
 }
 
 /*************************************************************************
- *      SHLWAPI_401	[SHLWAPI.401]
+ *      @	[SHLWAPI.401]
  *
  * Late bound call to comdlg32.PageSetupDlgW
  */
@@ -965,7 +1979,7 @@ BOOL WINAPI SHLWAPI_401(LPPAGESETUPDLGW pagedlg)
 }
 
 /*************************************************************************
- *      SHLWAPI_402	[SHLWAPI.402]
+ *      @	[SHLWAPI.402]
  *
  * Late bound call to comdlg32.PrintDlgW
  */
@@ -978,7 +1992,7 @@ BOOL WINAPI SHLWAPI_402(LPPRINTDLGW printdlg)
 }
 
 /*************************************************************************
- *      SHLWAPI_403	[SHLWAPI.403]
+ *      @	[SHLWAPI.403]
  *
  * Late bound call to comdlg32.GetOpenFileNameW
  */
@@ -1043,7 +2057,18 @@ COLORREF WINAPI ColorHLSToRGB(WORD wHue, WORD wLuminosity, WORD wSaturation)
 }
 
 /*************************************************************************
- *      SHLWAPI_431	[SHLWAPI.431]
+ *      @	[SHLWAPI.413]
+ *
+ * Function unknown seems to always to return 0
+ */
+DWORD WINAPI SHLWAPI_413 (DWORD x)
+{
+	FIXME("(0x%08lx)stub\n", x);
+	return 0;
+}
+
+/*************************************************************************
+ *      @	[SHLWAPI.431]
  */
 DWORD WINAPI SHLWAPI_431 (DWORD x)
 {
@@ -1053,10 +2078,10 @@ DWORD WINAPI SHLWAPI_431 (DWORD x)
 
 #ifndef __WIN32OS2__
 /*************************************************************************
- *      SHLWAPI_437	[SHLWAPI.437]
+ *      @	[SHLWAPI.437]
  *
  * NOTES
- *  In the real shlwapi, One time initilisation calls GetVersionEx and reads
+ *  In the real shlwapi, One time initialisation calls GetVersionEx and reads
  *  the registry to determine what O/S & Service Pack level is running, and
  *  therefore which functions are available. Currently we always run as NT,
  *  since this means that we don't need extra code to emulate Unicode calls,
@@ -1067,9 +2092,23 @@ DWORD WINAPI SHLWAPI_431 (DWORD x)
 DWORD WINAPI SHLWAPI_437 (DWORD functionToCall)
 {
 	FIXME("(0x%08lx)stub\n", functionToCall);
-	return 0xabba1247;
+	return /* 0xabba1247 */ 0;
 }
 #endif
+/*************************************************************************
+ *      ColorRGBToHLS	[SHLWAPI.445]
+ *
+ * Convert from RGB COLORREF into the HLS color space.
+ *
+ * NOTES
+ * Input HLS values are constrained to the range (0..240).
+ */
+VOID WINAPI ColorRGBToHLS(COLORREF drRGB, LPWORD pwHue, 
+			  LPWORD wLuminance, LPWORD pwSaturation)
+{
+    FIXME("stub\n");
+    return;
+}
 
 /*************************************************************************
  *      SHCreateShellPalette	[SHLWAPI.@]
@@ -1081,13 +2120,14 @@ HPALETTE WINAPI SHCreateShellPalette(HDC hdc)
 }
 
 /*************************************************************************
- *	SHGetInverseCMAP
+ *	SHGetInverseCMAP (SHLWAPI.@)
  */
 DWORD WINAPI SHGetInverseCMAP (LPVOID x, DWORD why)
 {
 	FIXME("(%p, %#lx)stub\n", x, why);
 	return 0;
 }
+
 #ifndef __WIN32OS2__
 /*************************************************************************
  *      SHIsLowMemoryMachine	[SHLWAPI.@]
@@ -1098,7 +2138,6 @@ DWORD WINAPI SHIsLowMemoryMachine (DWORD x)
 	return 0;
 }
 #endif
-
 /*************************************************************************
  *      GetMenuPosFromID	[SHLWAPI.@]
  */
@@ -1118,7 +2157,7 @@ INT WINAPI GetMenuPosFromID(HMENU hMenu, UINT wID)
 }
 
 /*************************************************************************
- *      _SHGetInstanceExplorer	[SHLWAPI.@]
+ *      _SHGetInstanceExplorer@4	[SHLWAPI.@]
  *
  * Late bound call to shell32.SHGetInstanceExplorer.
  */

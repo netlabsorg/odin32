@@ -1,4 +1,4 @@
-/* $Id: shlwapi_odin.h,v 1.2 2001-08-30 19:19:58 phaller Exp $ */
+/* $Id: shlwapi_odin.h,v 1.3 2002-02-06 20:18:29 sandervl Exp $ */
 
 /*
  * Win32 Lightweight SHELL32 for OS/2
@@ -30,18 +30,7 @@
 typedef HKEY HUSKEY;
 typedef HUSKEY *PHUSKEY;
 
-typedef DWORD SHREGDEL_FLAGS;
-#define SHREGDEL_BOTH
-
-typedef DWORD SHREGENUM_FLAGS;
-#define SHREGENUM_HKCU    
-#define SHREGENUM_DEFAULT 
-#define SHREGENUM_HKLM
-
-typedef DWORD SHREGSET_FLAGS;
-#define SHREGSET_HKLM
-#define SHREGSET_DEFAULT
-    
+   
     
     
 /*****************************************************************************
