@@ -1,4 +1,4 @@
-/* $Id: oslibgdi.cpp,v 1.1 1999-10-01 10:14:59 sandervl Exp $ */
+/* $Id: oslibgdi.cpp,v 1.2 1999-12-09 16:49:45 cbratschi Exp $ */
 
 /*
  * GDI32 support code
@@ -10,7 +10,7 @@
  */
 #define  INCL_GPI
 #define  INCL_WIN
-#include <os2wrap.h>	//Odin32 OS/2 api wrappers
+#include <os2wrap.h>    //Odin32 OS/2 api wrappers
 #include <stdlib.h>
 #include <string.h>
 #include <win32type.h>
@@ -21,9 +21,9 @@
 
 //******************************************************************************
 //******************************************************************************
-INT OSLibSetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx, DWORD cy, 
-                           INT xSrc, INT ySrc, UINT startscan, UINT lines, 
-                           LPCVOID bits, WINBITMAPINFOHEADER *info, 
+INT OSLibSetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx, DWORD cy,
+                           INT xSrc, INT ySrc, UINT startscan, UINT lines,
+                           LPCVOID bits, WINBITMAPINFOHEADER *info,
                            UINT coloruse)
 {
   INT result;
@@ -55,7 +55,7 @@ INT OSLibSetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx, DWORD cy,
     descr.drawable  = physDev->drawable;
     descr.gc        = physDev->gc;
     descr.xSrc      = xSrc;
-    descr.ySrc      = tmpheight >= 0 ? lines-(ySrc-startscan)-cy+(oldcy-cy) 
+    descr.ySrc      = tmpheight >= 0 ? lines-(ySrc-startscan)-cy+(oldcy-cy)
                                      : ySrc - startscan;
     descr.xDest     = dc->w.DCOrgX + XLPTODP( dc, xDest );
     descr.yDest     = dc->w.DCOrgY + YLPTODP( dc, yDest ) +
@@ -76,8 +76,9 @@ INT OSLibSetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx, DWORD cy,
   // WINBITMAPINFOHEADER and BITMAPINFO2 are identical
   GpiDrawBits((HPS)hdc, (VOID *)bits, (BITMAPINFO2 *)info, 4,
               points, ROP_SRCCOPY, BBO_IGNORE);
- 
+
   return lines;
 }
 //******************************************************************************
 //******************************************************************************
+
