@@ -1,0 +1,84 @@
+# $Id: makefile.gcc,v 1.1 1999-09-05 02:09:18 bird Exp $
+
+#
+# Tools common library, GCC version.
+#
+# Copyright 1999 knut st. osmundsen
+#
+
+# common include directory
+PDWIN32_INCLUDE = ..\..\include
+
+!ifndef RM
+RM = rm -f
+!endif
+!ifndef OMF
+OMF=0
+!endif
+
+#
+# gcc defines
+#
+CC  = gcc
+CXX = gcc
+LD  = gcc
+
+!if $(OMF) == 0
+O        = o
+LIB      = a
+AR       = ar
+CFZOMF   =
+
+!else
+
+O        = gobj
+LIB      = lib
+AR       = emxomfar
+CFZOMF   = -Zomf
+!endif
+
+CDEFINES  = -D__WIN32OS2__ -D__WINE__
+CINCLUDES = -I$(PDWIN32_INCLUDE)\Win -I$(PDWIN32_INCLUDE)
+
+#Note: Add -fhandle-exceptions if old gcc version (< 2.8.x?).
+!ifndef DEBUG
+CFLAGS        = $(CFZOMF) -Wall -Zmap -Zmt -mprobe -Wall -s -O
+!else
+CFLAGS        = $(CFZOMF) -Wall -Zmap -Zmt -mprobe -Wall -g
+!endif
+CXXFLAGS  = $(CFLAGS)
+
+
+#
+# interference rules
+#
+.c.$(O):
+    $(CC) -c $(CFLAGS) $(CDEFINES) $(CINCLUDES) $< -o $@
+
+.cpp.$(O):
+    $(CXX) -c $(CXXFLAGS) $(CDEFINES) $(CINCLUDES) $< -o $@
+
+
+
+all: commongcc.$(LIB)
+
+
+commongcc.$(LIB): kFilePE.$(O) kFileDef.$(O)
+   -$(RM) $@
+   $(AR) cr $@ kFilePE.$(O) kFileDef.$(O)
+
+
+clean:
+   -@$(RM) *.$(O)
+   -@$(RM) commongcc.$(LIB)
+
+
+# dependencies
+kFilePE.$(O):   kFilePE.cpp   \
+                kFilePE.h     \
+                kFileFormatBase.h
+
+kFileDef.$(O):  kFileDef.cpp  \
+                kFileDef.h    \
+                kFileFormatBase.h
+
