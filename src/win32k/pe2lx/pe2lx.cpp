@@ -1,8 +1,8 @@
-/* $Id: pe2lx.cpp,v 1.15 2000-01-22 18:21:03 bird Exp $
+/* $Id: pe2lx.cpp,v 1.16 2000-01-27 23:45:59 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
- * Copyright (c) 1998-1999 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * Copyright (c) 1998-2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
  * Copyright (c) 1998 Sander van Leeuwen (sandervl@xs4all.nl)
  * Copyright (c) 1998 Peter Fitzsimmons
  *
@@ -103,7 +103,9 @@
 #include <newexe.h>                         /* OS/2 NE structs and definitions. */
 #include <exe386.h>                         /* OS/2 LX structs and definitions. */
 
-#include "malloc.h"                         /* win32k malloc. Not C library! */
+#include "malloc.h"                         /* win32k malloc (resident). Not C library! */
+#include "smalloc.h"                        /* win32k swappable heap. */
+#include "rmalloc.h"                        /* win32k resident heap. */
 
 #include <string.h>                         /* C library string.h. */
 #include <stdlib.h>                         /* C library stdlib.h. */
@@ -248,7 +250,8 @@ Pe2Lx::Pe2Lx(SFN hFile) :
     pvCrossPageFixup(NULL), cbCrossPageFixup(0),
     pachImpModuleNames(NULL), offCurImpModuleName(0), cchIMNAllocated(0),
     pachImpFunctionNames(NULL), offCurImpFunctionName(0), cchIFNAllocated(0),
-    offNtHeaders(0), pNtHdrs(NULL), ulImageBase(0UL)
+    offNtHeaders(0), pNtHdrs(NULL), ulImageBase(0UL), pBaseRelocs(0),
+    fApplyFixups(~0UL), fDeltaOnly(0)
 {
     memset(&LXHdr, 0, sizeof(LXHdr));
     LXHdr.e32_magic[0]  = E32MAGIC1;
@@ -325,6 +328,13 @@ Pe2Lx::~Pe2Lx()
         free(pNtHdrs);
         pNtHdrs = NULL;
     }
+    if (pBaseRelocs != NULL)
+    {
+        sfree(pBaseRelocs);
+        pBaseRelocs = NULL;
+    }
+    _res_heapmin();
+    _swp_heapmin();
 }
 
 
@@ -704,6 +714,10 @@ ULONG Pe2Lx::init(PCSZ pszFilename)
     dumpVirtualLxFile();
 
     Yield();
+    _res_heapmin();
+    #if 0 /* testing */
+    testApplyFixups();
+    #endif
 
     return NO_ERROR;
 }
@@ -1021,19 +1035,303 @@ ULONG Pe2Lx::read(ULONG offLXFile, PVOID pvBuffer, ULONG cbToRead, ULONG flFlags
  * @param      pvPTDA         Pointer to Per Task Data Aera
  *
  * @sketch     Find RVA.
+ * @remarks    Some more information on relocations:
+ * From Web:
+ *   IMAGE_REL_I386_ABSOLUTE Reference is absolute, no relocation is necessary
+ *   IMAGE_REL_I386_DIR16    Direct 16-bit reference to the symbols virtual address
+ *   IMAGE_REL_I386_REL16    PC-relative 16-bit reference to the symbols virtual address
+ *   IMAGE_REL_I386_DIR32    Direct 32-bit reference to the symbols virtual address
+ *   IMAGE_REL_I386_DIR32NB  Direct 32-bit reference to the symbols virtual address, base not included
+ *   IMAGE_REL_I386_SEG12    Direct 16-bit reference to the segment-selector bits of a 32-bit virtual address
+ *   IMAGE_REL_I386_SECTION  ?
+ *   IMAGE_REL_I386_SECREL   ?
+ *   IMAGE_REL_I386_REL32    PC-relative 32-bit reference to the symbols virtual address
+ *
+ * From TIS:
+ *   Type = 4­bit fixup type. This value has the following definitions:
+ *   0h     Absolute. This is a NOP. The fixup is skipped.
+ *   1h     High. Add the high 16 bits of the delta to the 16 bit field at Offset.
+ *          The 16bit field represents the high value of a 32 bit word.
+ *   2h     Low. Add the low 16 bits of the delta to the 16 bit field at Offset.
+ *          The 16 bit field represents the low half value of a 32 bit word. This
+ *          fixup will only be emitted for a RISC machine when the image Object
+ *          Align isn't the default of 64K.
+ *   3h     Highlow. Apply the 32 bit delta to the 32 bit field at Offset.
+ *   4h     Highadjust. This fixup requires a full 32 bit value. The high 16 bits
+ *          is located at Offset, and the low 16 bits is located in the next Offset
+ *          array element (this array element is included in the Size field). The
+ *          two need to be combined into a signed variable. Add the 32 bit delta.
+ *          Then add 0x8000 and store the high 16 bits of the signed variable to
+ *          the 16 bit field at Offset.
+ *   5h ­ Mipsjmpaddr.
+ *
+ * TODO: implement the above mentioned fixups.
  */
 ULONG  Pe2Lx::applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID pvPage,
                           ULONG ulPageAddress, PVOID pvPTDA)
 {
-    ULONG ulRVA;
+    APIRET rc;
 
-    NOREF(ulRVA);
+    if (fApplyFixups != FALSE && pBaseRelocs != NULL)
+    {
+        ULONG ulRVAPage;
+        ULONG ulDelta;
+        PSMTE pSMTE = pMTE->mte_swapmte;
 
-    NOREF(pMTE);
-    NOREF(iObject);
+        /* validate input */
+        if (pSMTE < (PSMTE)0x10000)
+        {
+            printErr(("Invalid pSMTE(0x%08x)\n", pSMTE));
+            return ERROR_INVALID_PARAMETER;
+        }
+        #ifdef DEBUG
+        if (pSMTE->smte_objcnt <= iObject)
+        {
+            printErr(("Invalid iObject(%d), smte_objcnt=%d\n", iObject, pSMTE->smte_objcnt));
+            return ERROR_INVALID_PARAMETER;
+        }
+        if (cObjects <= iObject)
+        {
+            printErr(("Invalid iObject(%d), cObjects=%d\n", iObject, cObjects));
+            return ERROR_INVALID_PARAMETER;
+        }
+        #endif
+
+        /* some calculations */
+        ulDelta     = pSMTE->smte_objtab[iObject].ote_base - paObjects[iObject].ulRVA - ulImageBase;
+        ulRVAPage   = paObjects[iObject].ulRVA + ulPageAddress - pSMTE->smte_objtab[iObject].ote_base;
+
+        /* check if the fixup needs to be applied? */
+        if (fApplyFixups == ~0UL)
+        {
+            fDeltaOnly = TRUE;          /* IMPORTANT: Later code assumes that this is true when fAllInOneObject is true. */
+            if (fAllInOneObject)
+                fApplyFixups = ulImageBase == pSMTE->smte_objtab[0].ote_base;
+            else
+            {
+                int i = 0;
+                #ifdef DEBUG
+                if (cObjects != pSMTE->smte_objcnt)
+                    printErr(("cObject(%d) != smte_objcnt(%d)\n", cObjects, pSMTE->smte_objcnt));
+                #endif
+                fApplyFixups = FALSE;
+                while (i < cObjects && (!fApplyFixups || fDeltaOnly))
+                {
+                    register ULONG ulTmp = pSMTE->smte_objtab[i].ote_base - ulImageBase - paObjects[i].ulRVA;
+                    if (ulTmp != 0)
+                        fApplyFixups = TRUE;
+                    if (ulTmp != ulDelta)
+                        fDeltaOnly = FALSE;
+                    i++;
+                }
+            }
+            if (!fApplyFixups)
+                return NO_ERROR;
+        }
+
+        PIMAGE_BASE_RELOCATION pbr = pBaseRelocs;
+        ULONG ulBefore;
+        ULONG ulAfter;
+        ULONG flRead = 0;   /* bitmask: 0 = no read, 1 = ulBefore is read, 2 = ulAfter is read */
+
+        while ((unsigned)pbr - (unsigned)pBaseRelocs + 8 < cbBaseRelocs /* 8= VirtualAddress and SizeOfBlock members */
+               && pbr->VirtualAddress < ulRVAPage + PAGESIZE)
+        {
+            if (pbr->VirtualAddress + PAGESIZE >= ulRVAPage)
+            {
+                PWORD pwoffFixup   = &pbr->TypeOffset[0];
+                ULONG cRelocations = (pbr->SizeOfBlock - offsetof(IMAGE_BASE_RELOCATION, TypeOffset)) / sizeof(WORD); /* note that sizeof(BaseReloc) is 12 bytes! */
+
+                /* Some bound checking just to be sure it works... */
+                if ((unsigned)pbr - (unsigned)pBaseRelocs + pbr->SizeOfBlock > cbBaseRelocs)
+                {
+                    printWar(("Block ends after BaseRelocation datadirectory.\n"));
+                    cRelocations = (((unsigned)pBaseRelocs + cbBaseRelocs) - (unsigned)pbr - offsetof(IMAGE_BASE_RELOCATION, TypeOffset)) / sizeof(WORD);
+                }
+
+                while (cRelocations != 0)
+                {
+                    static char acbFixupTypes[16] = {0x00, 0x02, 0x02, 0x04,
+                                                     0xFF, 0xFF, 0xFF, 0xFF,
+                                                     0xFF, 0xFF, 0xFF, 0xFF,
+                                                     0xFF, 0xFF, 0xFF, 0xFF};
+                    int   offFixup  = *pwoffFixup & (PAGESIZE-1);
+                    int   fType     = *pwoffFixup >> 12;
+                    int   cbFixup   = acbFixupTypes[fType];
+
+                    if (cbFixup != 0 && cbFixup <= 4
+                        && offFixup + pbr->VirtualAddress + (cbFixup-1) >= ulRVAPage
+                        && offFixup + pbr->VirtualAddress < ulRVAPage + PAGESIZE
+                        )
+                    {
+                        ULONG       iObj;
+                        ULONG       ulTarget;
+                        PULONG      pul;        /* Pointer to fixup target */
+                        ULONG       ul;         /* Crosspage fixups: Conent of fixup target */
+                        unsigned    uShift1;    /* Crosspage fixups: Shift */
+                        unsigned    uShift2;    /* Crosspage fixups: Inverse of Shift1 */
+
+                        if (offFixup + pbr->VirtualAddress < ulRVAPage)
+                        {   /*
+                             * Crosspagefixup - from the page before
+                             */
+                            uShift1 = (unsigned)((offFixup + pbr->VirtualAddress) % cbFixup) * 8;
+                            uShift2 = cbFixup * 8 - uShift1;
+                            pul     = (PULONG)pvPage;
+                            ul      = *pul;
+                            if (!fDeltaOnly && fType == IMAGE_REL_BASED_HIGHLOW)
+                            {
+                                /* Read? */
+                                if ((flRead & 1) == 0)
+                                {
+                                    rc = readAtRVA(ulRVAPage - 4, SSToDS(&ulBefore), sizeof(ulBefore));
+                                    if (rc != NO_ERROR)
+                                    {
+                                        printErr(("readAtRVA(0x%08x, ulBefore..) failed with rc=%d\n", ulRVAPage-4, rc));
+                                        return rc;
+                                    }
+                                    flRead |= 1;
+                                }
+                                /* Get target pointer, find it's object and apply the fixup */
+                                ulTarget = (ulBefore >> uShift1) | (ul << uShift2);
+                                ulTarget -= ulImageBase; /* ulTarget is now an RVA */
+                                iObj = 0UL;
+                                while (iObj < cObjects
+                                       && ulTarget >= (iObj + 1 < cObjects ? paObjects[iObj+1].ulRVA
+                                                      : ALIGN(paObjects[iObj].cbVirtual, PAGESIZE) + paObjects[iObj].ulRVA)
+                                       )
+                                    iObj++;
+                                if (iObj < cObjects)
+                                    *pul = ((pSMTE->smte_objtab[iObj].ote_base + ulTarget - paObjects[iObj].ulRVA) >> uShift2)
+                                                         | (ul & ((~0UL) << uShift1));
+                                else
+                                    *pul = (((ulDelta >> uShift2) + ul) & ((~0UL) >> uShift2)) | (ul & ((~0UL) << uShift1));
+                            }
+                            else
+                            {   /* apply delta fixup */
+                                switch (fType)
+                                {
+                                    case IMAGE_REL_BASED_HIGHLOW:
+                                        *pul = (((ulDelta >> uShift2) + ul) & ((~0UL) >> uShift2)) | (ul & ((~0UL) << uShift1));
+                                        break;
+                                    case IMAGE_REL_BASED_HIGH:
+                                    case IMAGE_REL_BASED_HIGHADJ:  /* According to M$ docs these seems to be the same fixups. */
+                                    case IMAGE_REL_BASED_HIGH3ADJ:
+                                        *pul = (((ulDelta >> 24) + ul) & 0xFF) | (ul & 0xFFFFFF00UL);
+                                        break;
+                                    case IMAGE_REL_BASED_LOW:
+                                        *pul = (((ulDelta >>  8) + ul) & 0xFF) | (ul & 0xFFFFFF00UL);
+                                        break;
+                                }
+                            }
+                        }
+                        else if (offFixup + pbr->VirtualAddress + cbFixup > ulRVAPage + PAGESIZE)
+                        {   /*
+                             * Crosspagefixup - into the page afterwards
+                             */
+                            uShift1 = (unsigned)((offFixup + pbr->VirtualAddress) % cbFixup) * 8;
+                            uShift2 = cbFixup * 8 - uShift1;
+                            pul = (PULONG)((unsigned)pvPage + PAGESIZE - sizeof(ULONG));
+                            ul = *pul;
+                            if (!fDeltaOnly && fType == IMAGE_REL_BASED_HIGHLOW)
+                            {
+                                /* Read? */
+                                if ((flRead & 2) == 0)
+                                {
+                                    rc = readAtRVA(ulRVAPage+PAGESIZE, SSToDS(&ulAfter), sizeof(ulAfter));
+                                    if (rc != NO_ERROR)
+                                    {
+                                        printErr(("readAtRVA(0x%08x, ulAfter..) failed with rc=%d\n", ulRVAPage+PAGESIZE, rc));
+                                        return rc;
+                                    }
+                                    flRead |= 2;
+                                }
+                                /* Get target pointer, find it's object and apply the fixup */
+                                ulTarget = (ulAfter << uShift2) | (ul >> uShift1);
+                                ulTarget -= ulImageBase; /* ulTarget is now an RVA */
+                                iObj = 0UL;
+                                while (iObj < cObjects
+                                       && ulTarget >= (iObj + 1 < cObjects ? paObjects[iObj+1].ulRVA
+                                                      : ALIGN(paObjects[iObj].cbVirtual, PAGESIZE) + paObjects[iObj].ulRVA)
+                                       )
+                                    iObj++;
+                                if (iObj < cObjects)
+                                    *pul = ((pSMTE->smte_objtab[iObj].ote_base + ulTarget - paObjects[iObj].ulRVA) << uShift1)
+                                           | (ul & ((~0UL) >> uShift2));
+                                else
+                                    *pul += ulDelta << uShift1;
+                            }
+                            else
+                            {   /* apply delta fixup */
+                                switch (fType)
+                                {
+                                    case IMAGE_REL_BASED_HIGHLOW:
+                                        *pul += ulDelta << uShift1;
+                                        break;
+                                    case IMAGE_REL_BASED_HIGH:
+                                    case IMAGE_REL_BASED_HIGHADJ:  /* According to M$ docs these seems to be the same fixups. */
+                                    case IMAGE_REL_BASED_HIGH3ADJ:
+                                        *pul += ulDelta << 8;
+                                        break;
+                                    case IMAGE_REL_BASED_LOW:
+                                        *pul += ulDelta << 24;
+                                        break;
+                                }
+                            }
+                        }
+                        else
+                        {   /*
+                             * Common fixup
+                             */
+                            pul = (PULONG)((unsigned)pvPage + offFixup + pbr->VirtualAddress - ulRVAPage);
+                            switch (fType)
+                            {
+                                case IMAGE_REL_BASED_HIGHLOW:
+                                    if (fDeltaOnly)
+                                        *pul += ulDelta;
+                                    else
+                                    {
+                                        ulTarget = *pul;
+                                        ulTarget -= ulImageBase; /* ulTarget is now an RVA */
+                                        iObj = 0UL;
+                                        while (iObj < cObjects
+                                               && ulTarget >= (iObj + 1 < cObjects ? paObjects[iObj+1].ulRVA
+                                                              : ALIGN(paObjects[iObj].cbVirtual, PAGESIZE) + paObjects[iObj].ulRVA)
+                                               )
+                                            iObj++;
+                                        if (iObj < cObjects)
+                                            *pul = pSMTE->smte_objtab[iObj].ote_base + ulTarget - paObjects[iObj].ulRVA;
+                                        else
+                                            *pul += ulDelta;
+                                    }
+                                    break;
+                                /* Will probably not work very well until the 64KB object alignment is gone! */
+                                case IMAGE_REL_BASED_HIGH:
+                                case IMAGE_REL_BASED_HIGHADJ:   /* According to M$ docs these seems to be the same fixups. */
+                                case IMAGE_REL_BASED_HIGH3ADJ:
+                                    printInf(("IMAGE_REL_BASED_HIGH offset=0x%08x\n", offFixup));
+                                    *(PUSHORT)pul += (USHORT)(ulDelta >> 16);
+                                    break;
+                                /* Will probably not work very well until the 64KB object alignment is gone! */
+                                case IMAGE_REL_BASED_LOW:
+                                    printInf(("IMAGE_REL_BASED_LOW  offset=0x%08x\n", offFixup));
+                                    *(PUSHORT)pul += (USHORT)ulDelta;
+                                    break;
+                            }
+                        }
+                    }
+
+                    /* Next offset/type */
+                    pwoffFixup++;
+                    cRelocations--;
+                }
+            }
+
+            /* next */
+            pbr = (PIMAGE_BASE_RELOCATION)((unsigned)pbr + pbr->SizeOfBlock);
+        }
+    }
     NOREF(iPageTable);
-    NOREF(pvPage);
-    NOREF(ulPageAddress);
     NOREF(pvPTDA);
 
     return NO_ERROR;
@@ -1042,6 +1340,58 @@ ULONG  Pe2Lx::applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID pvPa
 
 
 #ifndef RING0
+/**
+ * This method test the applyFixups method.
+ * @returns   Last rc from applyFixups.
+ * @status
+ * @author    knut st. osmundsen
+ * @remark    Testing only...
+ */
+ULONG Pe2Lx::testApplyFixups()
+{
+    static SMTE smte;
+    static MTE  mte;
+    static      achPage[PAGESIZE];
+    int         i;
+    APIRET      rc;
+
+    mte.mte_swapmte = &smte;
+    smte.smte_objcnt = cObjects;
+    smte.smte_objtab = (POTE)malloc(cObjects * sizeof(OTE));
+    makeObjectTable();
+    memcpy(smte.smte_objtab, paObjTab, sizeof(OTE) * cObjects);
+    smte.smte_objtab[0].ote_base = 0x125D0000;
+    for (i = 1; i < cObjects; i++)
+        smte.smte_objtab[i].ote_base = ALIGN(smte.smte_objtab[i-1].ote_size + smte.smte_objtab[i-1].ote_base, 0x10000);
+
+    rc = loadBaseRelocations();
+    if (rc != NO_ERROR)
+    {
+        printErr(("loadBaseRelocations failed with rc=%d\n", rc));
+        return rc;
+    }
+
+    rc = readAtRVA(0x00000000, &achPage[0], PAGESIZE);
+    if (rc != NO_ERROR)
+    {
+        printErr(("readAtRVA failed with rc=%d\n"));
+        return rc;
+    }
+    rc = applyFixups(&mte, 0, ~0UL, &achPage[0], 0x125D0000, NULL);
+
+    rc = readAtRVA(0x00001000, &achPage[0], PAGESIZE);
+    if (rc != NO_ERROR)
+    {
+        printErr(("readAtRVA failed with rc=%d\n"));
+        return rc;
+    }
+    rc = applyFixups(&mte, 1, 1, &achPage[0], 0x125E0000, NULL);
+
+    return rc;
+}
+
+
+
 /**
  * Writes the virtual LX file to a file. (Ring 3 only!)
  * @returns   NO_ERROR on success. Error code on error.
@@ -1803,14 +2153,14 @@ ULONG Pe2Lx::makeFixups()
     ULONG                       ulModuleOrdinal;    /* Module ordinal. Valid as long as fImport is set. */
     ULONG                       ulRVAFirstThunk;    /* Current first thunk array RVA. Points at current entry. */
     ULONG                       ulRVAOrgFirstThunk; /* Current original first thunk array RVA. Points at current entry. */
-
+    #ifndef RING0
     BOOL                        fBaseRelocs;        /* fBaseReloc is set when a valid base reloc directory is present. */
     ULONG                       ulRVABaseReloc;     /* RVA of the current base relocation chunk. (Not the first!) */
     LONG                        cbBaseRelocs;       /* Count of bytes left of base relocation. Used to determin eof baserelocs. */
     IMAGE_BASE_RELOCATION       BaseReloc;          /* Base Relocation struct which is used while reading. */
     BufferedRVARead            *pPageReader;        /* Buffered reader for page reads; ie. getting the target address. */
     BufferedRVARead            *pRelocReader;       /* Buffered reader for relocation reads; ie getting the type/offset word. */
-
+    #endif
     ULONG                       ulRVAPage;          /* RVA for the current page. */
     ULONG                       ul;                 /* temporary unsigned long variable. Many uses. */
     PSZ                         psz;                /* temporary string pointer. Used for modulenames and functionnames. */
@@ -1847,19 +2197,25 @@ ULONG Pe2Lx::makeFixups()
         ulRVAImportDesc < pNtHdrs->OptionalHeader.SizeOfImage;
 
     /* Check if empty base relocation directory. */
+    #ifndef RING0
     fBaseRelocs = (cbBaseRelocs = pNtHdrs->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].Size) > 0UL
         &&
         (ulRVABaseReloc = pNtHdrs->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].VirtualAddress) > 0UL
         &&
         ulRVABaseReloc < pNtHdrs->OptionalHeader.SizeOfImage;
-
+    #endif
     printInf(("\n"));
+    #ifndef RING0
     printInf(("Make fixups, fBaseReloc=%s, fImports=%s\n",
               fBaseRelocs ? "true" : "false",
               fImports ? "true" : "false"));
+    #else
+    printInf(("Make fixups, fImports=%s\n", fImports ? "true" : "false"));
+    #endif
     printInf(("\n"));
 
     /* create reader buffers */
+    #ifndef RING0
     if (fBaseRelocs)
     {
         pPageReader = new BufferedRVARead(hFile, cObjects, paObjects);
@@ -1869,6 +2225,7 @@ ULONG Pe2Lx::makeFixups()
     }
     else
         pRelocReader = pPageReader = NULL;
+    #endif
     if (fImports)
     {
         pImportReader = new BufferedRVARead(hFile, cObjects, paObjects);
@@ -1883,10 +2240,12 @@ ULONG Pe2Lx::makeFixups()
     /* check for errors */
     if (rc != NO_ERROR)
     {   /* error: clean up and return! */
+        #ifndef RING0
         if (pPageReader != NULL)
             delete pPageReader;
         if (pRelocReader != NULL)
             delete pRelocReader;
+        #endif
         if (pImportReader != NULL)
             delete pImportReader;
         if (pImpNameReader  != NULL)
@@ -1935,9 +2294,12 @@ ULONG Pe2Lx::makeFixups()
         }
     }
 
+
     /* read start of the first basereloc chunk */
+    #ifndef RING0
     if (fBaseRelocs && rc == NO_ERROR)
         rc = pRelocReader->readAtRVA(ulRVABaseReloc, SSToDS(&BaseReloc), sizeof(BaseReloc));
+    #endif
 
 
     /*
@@ -2052,6 +2414,7 @@ ULONG Pe2Lx::makeFixups()
 
 
         /* check for fixups for this page. ASSUMES that fixups are sorted and that each chunk covers one page, no more no less. */
+        #ifndef RING0
         if (fBaseRelocs && BaseReloc.VirtualAddress == ulRVAPage)
         {
             ULONG c = (BaseReloc.SizeOfBlock - sizeof(BaseReloc.SizeOfBlock) - sizeof(BaseReloc.VirtualAddress)) / sizeof(WORD); /* note that sizeof(BaseReloc) is 12 bytes! */
@@ -2117,6 +2480,7 @@ ULONG Pe2Lx::makeFixups()
             else
                 fBaseRelocs = FALSE;
         }
+        #endif /*ifndef RING */
 
         /**  next  **/
         if (ulRVAPage + PAGESIZE >=
@@ -2139,10 +2503,12 @@ ULONG Pe2Lx::makeFixups()
         rc = addPageFixupEntry(TRUE);
 
     /* finished! - cleanup! */
+    #ifndef RING0
     if (pPageReader != NULL)
         delete pPageReader;
     if (pRelocReader != NULL)
         delete pRelocReader;
+    #endif
     if (pImportReader != NULL)
         delete pImportReader;
     if (pImpNameReader  != NULL)
@@ -2156,6 +2522,11 @@ ULONG Pe2Lx::makeFixups()
         finalizeImportNames();
         finalizeFixups();
     }
+    #ifdef RING0
+    /* load base relocations... */
+    if (rc == NO_ERROR)
+        return loadBaseRelocations();
+    #endif
     return rc;
 }
 
@@ -2401,6 +2772,73 @@ VOID Pe2Lx::releaseNtHeaders()
         free(pNtHdrs);
         pNtHdrs = NULL;
     }
+}
+
+
+/**
+ * Loads the baserelocations from the PE-file.
+ * @returns   NO_ERROR on success, appropriate error message.
+ * @sketch
+ * @status    completely implemented; untestd.
+ * @author    knut st. osmundsen
+ */
+ULONG Pe2Lx::loadBaseRelocations()
+{
+    APIRET rc;
+    ULONG ulRVA;
+
+    /* ? */
+    rc = loadNtHeaders();
+    if (rc != NO_ERROR)
+        return rc;
+    /* end ? */
+
+    ulRVA  = pNtHdrs->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].VirtualAddress;
+    cbBaseRelocs = pNtHdrs->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].Size;
+
+    if (ulRVA > 0UL && cbBaseRelocs > 0UL && ulRVA < ~0UL && cbBaseRelocs < ~0UL)
+    {
+        pBaseRelocs = (PIMAGE_BASE_RELOCATION)smalloc((size_t)cbBaseRelocs);
+        if (pBaseRelocs != NULL)
+        {
+            rc = readAtRVA(ulRVA, pBaseRelocs, cbBaseRelocs);
+            if (rc != NO_ERROR)
+            {
+                printErr(("readAtRVA(0x%08x, 0x%08x, 0x%08x) failed with rc = %d\n",
+                          ulRVA, pBaseRelocs, cbBaseRelocs, rc));
+                sfree(pBaseRelocs);
+                pBaseRelocs = NULL;
+            }
+            #ifdef DEBUG
+            else
+            {
+                PIMAGE_BASE_RELOCATION pbrCur = pBaseRelocs;
+                while ((void*)pbrCur < (void*)((unsigned)pBaseRelocs + cbBaseRelocs))
+                {
+                    if ((unsigned)pbrCur->SizeOfBlock + (unsigned)pbrCur > (unsigned)pBaseRelocs + cbBaseRelocs)
+                        printErr(("Debug-check - Chunk is larger than the base relocation directory. "
+                                  "SizeOfBlock=0x%08x, VirtualAddress=0x%08x\n",
+                                  pbrCur->SizeOfBlock, pbrCur->VirtualAddress));
+                    pbrCur = (PIMAGE_BASE_RELOCATION)((unsigned)pbrCur + pbrCur->SizeOfBlock);
+                }
+            }
+            #endif
+            return rc;
+        }
+        else
+        {
+            printErr(("rmalloc failed when allocating memory for pBaseReloc, cbSize=0x%x(%d)\n",
+                      cbBaseRelocs, cbBaseRelocs));
+            rc = ERROR_NOT_ENOUGH_MEMORY;
+        }
+    }
+    else
+    {
+        pBaseRelocs = NULL;
+        cbBaseRelocs = 0;
+    }
+
+    return NO_ERROR;
 }
 
 
@@ -3866,6 +4304,70 @@ ULONG  Pe2Lx::queryObjectAndOffset(ULONG ulRVA, PULONG pulObject, PULONG poffObj
 
 
 /**
+ * Reads a chunk of data at the spcified RVA.
+ * @returns   NO_ERROR on success.
+ *            ERROR_INVALID_PARAMETER
+ *            <Whatever rc ReadAt returns>
+ * @param     ulRVA     RVA to read from. Within the filesize.
+ * @param     pvBuffer  Pointer to output buffer. pvBuffer > 64KB
+ * @param     cbBuffer  Number of bytes to read. 0 < cbBuffer > 256MB
+ * @status    completely implemented; tested.
+ * @author    knut st. osmundsen
+ */
+ULONG Pe2Lx::readAtRVA(ULONG ulRVA, PVOID pvBuffer, ULONG cbBuffer)
+{
+    #ifdef DEBUG
+    if (ulRVA == ~0UL || (ULONG)pvBuffer < 0x10000UL || cbBuffer == 0UL || cbBuffer >= 0x10000000UL)
+        return ERROR_INVALID_PARAMETER;
+    #endif
+
+    ULONG iObj = 0;
+    while (cbBuffer != 0UL)
+    {
+        while (iObj < cObjects
+               && ulRVA >= (iObj + 1 < cObjects ? paObjects[iObj+1].ulRVA
+                            : paObjects[iObj].ulRVA + ALIGN(paObjects[iObj].cbVirtual, PAGESIZE))
+               )
+            iObj++;
+        if (iObj >= cObjects)
+            return ERROR_INVALID_PARAMETER;
+
+        /* ulRVA points at physical or virtual data? */
+        if (ulRVA < paObjects[iObj].ulRVA + paObjects[iObj].cbPhysical)
+        {   /* physical data - read from file */
+            APIRET rc;
+            ULONG  cbToRead = min(paObjects[iObj].ulRVA + paObjects[iObj].cbPhysical - ulRVA, cbBuffer);
+            rc = ReadAt(hFile,
+                        ulRVA - paObjects[iObj].ulRVA + paObjects[iObj].offPEFile,
+                        pvBuffer,
+                        cbToRead
+                        );
+            if (rc != NO_ERROR)
+                return rc;
+            ulRVA += cbToRead;
+            cbBuffer -= cbToRead;
+            pvBuffer = (void*)((unsigned)pvBuffer + cbToRead);
+        }
+        else
+        {   /* virtual data - memset(,0,) */
+            ULONG cbToSet = (iObj + 1 < cObjects ? paObjects[iObj+1].ulRVA
+                              : paObjects[iObj].ulRVA + ALIGN(paObjects[iObj].cbVirtual, PAGESIZE))
+                            - ulRVA; /* calcs size of virtual data left in this object */
+            cbToSet = min(cbToSet, cbBuffer);
+
+            memset(pvBuffer, 0, (size_t)cbToSet);
+            ulRVA += cbToSet;
+            cbBuffer -= cbToSet;
+            pvBuffer = (void*)((unsigned)pvBuffer + cbToSet);
+        }
+    } /* while */
+
+    return NO_ERROR;
+}
+
+
+
+/**
  * Check if the modulename exists in the lielist. If not the passed in modulename is returned.
  * @returns   Pointer (readonly) to Odin32 modulename.
  * @param     pszWin32ModuleName  Win32 modulename.
@@ -4236,7 +4738,7 @@ ULONG BufferedRVARead::readToBuffer(ULONG ulRVA)
     ULONG ulRVARead;
 
     /* where to read? */
-    if (ulRVA != this->ulRVA + sizeof(achBuffer) != ulRVA || this->ulRVA != ~0UL)
+    if (ulRVA != this->ulRVA + sizeof(achBuffer) || this->ulRVA == ~0UL)
         ulRVARead = this->ulRVA = ulRVA & ~(PAGESIZE-1UL); /* align on page boundrary - ASSUMES: buffersize >= PAGESIZE! */
     else
         ulRVARead = this->ulRVA += sizeof(achBuffer); /* immediately after current buffer */
@@ -4245,8 +4747,9 @@ ULONG BufferedRVARead::readToBuffer(ULONG ulRVA)
     ULONG iObj = 0;
     while (cbLeftToRead != 0UL)
     {
-        while (iObj < cObjects && ulRVARead >= (iObj + 1 < cObjects ? paObjects[iObj+1].ulRVA
-                                               : paObjects[iObj].ulRVA + ALIGN(paObjects[iObj].cbVirtual, PAGESIZE))
+        while (iObj < cObjects
+               && ulRVARead >= (iObj + 1 < cObjects ? paObjects[iObj+1].ulRVA
+                                : paObjects[iObj].ulRVA + ALIGN(paObjects[iObj].cbVirtual, PAGESIZE))
               )
             iObj++;
         if (iObj >= cObjects)
