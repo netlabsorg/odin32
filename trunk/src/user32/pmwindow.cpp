@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.72 1999-12-27 18:43:42 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.73 1999-12-29 14:37:16 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -166,7 +166,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         WinQueryMsgPos(thdb->hab, &qmsg.ptl);
         qmsg.reserved = 0;
 
-        if(OS2ToWinMsgTranslate((PVOID)thdb, &qmsg, &winMsg, FALSE, ODINMSG_NOEXTRAMSGS) == FALSE)
+        if(OS2ToWinMsgTranslate((PVOID)thdb, &qmsg, &winMsg, FALSE, MSG_REMOVE) == FALSE)
         {//message was not translated
             memset(&winMsg, 0, sizeof(MSG));
         }
@@ -177,9 +177,15 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         thdb->msgstate++;
   }
 
-  if(msg == WIN32APP_POSTMSG && (ULONG)mp1 == WIN32PM_MAGIC) {
-        //win32 app user message
-        return (MRESULT)win32wnd->PostMessage((POSTMSG_PACKET *)mp2);
+  if(msg == WIN32APP_POSTMSG) {
+        //probably win32 app user message
+        if((ULONG)mp1 == WIN32MSG_MAGICA) {
+            return (MRESULT)win32wnd->DispatchMsgA(pWinMsg);
+        }
+        else
+        if((ULONG)mp1 == WIN32MSG_MAGICW) {
+            return (MRESULT)win32wnd->DispatchMsgW(pWinMsg);
+        }
   }
   switch( msg )
   {
@@ -402,15 +408,15 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
     case WM_COMMAND:
         dprintf(("OS2: WM_COMMAND %x %x %x", hwnd, mp1, mp2));
-        win32wnd->DispatchMsg(pWinMsg);
+        win32wnd->DispatchMsgA(pWinMsg);
         break;
 
     case WM_SYSCOMMAND:
-        win32wnd->DispatchMsg(pWinMsg);
+        win32wnd->DispatchMsgA(pWinMsg);
         break;
 
     case WM_CHAR:
-        win32wnd->DispatchMsg(pWinMsg);
+        win32wnd->DispatchMsgA(pWinMsg);
         break;
 
     case WM_INITMENU:
@@ -418,7 +424,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         break;
 
     case WM_TIMER:
-        win32wnd->DispatchMsg(pWinMsg);
+        win32wnd->DispatchMsgA(pWinMsg);
         goto RunDefWndProc;
 
     case WM_MENUSELECT:
@@ -460,7 +466,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     }
 
     case WM_PAINT:
-        win32wnd->DispatchMsg(pWinMsg);
+        win32wnd->DispatchMsgA(pWinMsg);
         goto RunDefWndProc;
 
     case WM_HITTEST:
@@ -487,7 +493,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
     case WM_CONTEXTMENU:
     {
-        win32wnd->DispatchMsg(pWinMsg);
+        win32wnd->DispatchMsgA(pWinMsg);
 
         RestoreOS2TIB();
         return (MRESULT)TRUE;

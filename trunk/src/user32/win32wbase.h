@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.58 1999-12-26 17:30:19 cbratschi Exp $ */
+/* $Id: win32wbase.h,v 1.59 1999-12-29 14:37:18 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -40,13 +40,14 @@ typedef struct {
 
 #define WIN32APP_USERMSGBASE      0x1000
 #define WIN32APP_POSTMSG          0x1000
+#define WIN32MSG_MAGICA           0x12345678
+#define WIN32MSG_MAGICW           0x12345679
 
 typedef struct
 {
         ULONG           Msg;
         ULONG           wParam;
         ULONG           lParam;
-        ULONG           fUnicode;
 } POSTMSG_PACKET;
 
 #define BROADCAST_SEND          0
@@ -81,7 +82,8 @@ virtual  ULONG  MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd);
 	 ULONG  MsgInitMenu(MSG *msg);
 	 ULONG  MsgHitTest(MSG *msg);
          ULONG  MsgNCPaint();
-	 ULONG  DispatchMsg(MSG *msg);
+	 ULONG  DispatchMsgA(MSG *msg);
+	 ULONG  DispatchMsgW(MSG *msg);
 
          ULONG  MsgSetText(LPSTR lpsz, LONG cch);
          ULONG  MsgGetTextLength();
@@ -204,11 +206,6 @@ Win32BaseWindow *getOwner()                   { return owner; };
 
        LRESULT  SendMessageA(ULONG msg, WPARAM wParam, LPARAM lParam);
        LRESULT  SendMessageW(ULONG msg, WPARAM wParam, LPARAM lParam);
-       BOOL     PostMessageA(ULONG msg, WPARAM wParam, LPARAM lParam);
-       BOOL     PostMessageW(ULONG msg, WPARAM wParam, LPARAM lParam);
-       ULONG    PostMessage(POSTMSG_PACKET *packet);
-static BOOL     PostThreadMessageA(ULONG threadid, UINT msg, WPARAM wParam, LPARAM lParam);
-static BOOL     PostThreadMessageW(ULONG threadid, UINT msg, WPARAM wParam, LPARAM lParam);
 static LRESULT  BroadcastMessageA(int type, UINT msg, WPARAM wParam, LPARAM lParam);
 static LRESULT  BroadcastMessageW(int type, UINT msg, WPARAM wParam, LPARAM lParam);
        void     CallWindowHookProc(ULONG hooktype, ULONG Msg, WPARAM wParam, LPARAM lParam, BOOL fUnicode = FALSE);

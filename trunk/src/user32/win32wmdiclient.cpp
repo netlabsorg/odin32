@@ -1,4 +1,4 @@
-/* $Id: win32wmdiclient.cpp,v 1.18 1999-12-22 18:09:32 cbratschi Exp $ */
+/* $Id: win32wmdiclient.cpp,v 1.19 1999-12-29 14:37:18 sandervl Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -1225,7 +1225,7 @@ void Win32MDIClientWindow::postUpdate(WORD recalc)
     if( !(mdiFlags & MDIF_NEEDUPDATE) )
     {
         mdiFlags |= MDIF_NEEDUPDATE;
-        PostMessageA(WM_MDICALCCHILDSCROLL, 0, 0);
+        PostMessageA(getWindowHandle(), WM_MDICALCCHILDSCROLL, 0, 0);
     }
     sbRecalc = recalc;
 }

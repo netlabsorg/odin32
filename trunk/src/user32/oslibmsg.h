@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.h,v 1.9 1999-12-29 12:39:44 sandervl Exp $ */
+/* $Id: oslibmsg.h,v 1.10 1999-12-29 14:37:16 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -14,11 +14,11 @@
 
 ULONG TranslateWinMsg(ULONG msg);
 
-#define ODINMSG_NOEXTRAMSGS	0
-#define ODINMSG_EXTRAMSGS	1
+#define MSG_NOREMOVE	0
+#define MSG_REMOVE	1
 
 #ifdef OS2DEF_INCLUDED
-BOOL  OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode, BOOL fTranslateExtraMsgs = ODINMSG_EXTRAMSGS);
+BOOL  OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode, BOOL fMsgRemoved);
 void  WinToOS2MsgTranslate(MSG *winMsg, QMSG *os2Msg, BOOL isUnicode);
 
 extern QMSG *MsgThreadPtr;
@@ -42,9 +42,9 @@ LONG  OSLibWinGetMessageTime();
 BOOL  OSLibWinReplyMessage(ULONG result);
 ULONG OSLibWinQueryQueueStatus();
 
-BOOL  OSLibPostThreadMessage(ULONG threadid, UINT msg, WPARAM wParam, LPARAM lParam);
-BOOL  OSLibPostMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam);
-ULONG OSLibSendMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam);
+BOOL  OSLibPostThreadMessage(ULONG threadid, UINT msg, WPARAM wParam, LPARAM lParam, BOOL fUnicode);
+BOOL  OSLibPostMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam, BOOL fUnicode);
+ULONG OSLibSendMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam, BOOL fUnicode);
 ULONG OSLibWinBroadcastMsg(ULONG msg, ULONG wParam, ULONG lParam, BOOL fSend);
 
 #define WINWM_NULL                  0x0000

@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.4 1999-12-29 12:39:44 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.5 1999-12-29 14:37:16 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -101,7 +101,7 @@ USHORT virtualKeyTable [66] = {
 
 //******************************************************************************
 //******************************************************************************
-BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode, BOOL fTranslateExtraMsgs)
+BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode, BOOL fMsgRemoved)
 {
   Win32BaseWindow *win32wnd = 0;
   OSLIBPOINT       point, ClientPoint;
@@ -127,13 +127,11 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
     case WIN32APP_POSTMSG:
     {
         packet = (POSTMSG_PACKET *)os2Msg->mp2;
-        if(packet && (ULONG)os2Msg->mp1 == WIN32PM_MAGIC) {
+        if(packet && ((ULONG)os2Msg->mp1 == WIN32MSG_MAGICA || (ULONG)os2Msg->mp1 == WIN32MSG_MAGICW)) {
             winMsg->message = packet->Msg;
             winMsg->wParam  = packet->wParam;
             winMsg->lParam  = packet->lParam;
-            if(win32wnd == NULL) {
-                free(packet); //messages posted by PostThreadMessage are never dispatched, so free the memory here
-            }
+            if(fMsgRemoved == MSG_REMOVE) free(packet); //free the shared memory here
             break;
         }
         goto dummymessage;
