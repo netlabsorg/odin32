@@ -959,5 +959,6 @@ EXPORTS
     _MAKE_LDBL_POSITIVE                               @912
     do_osfx__7ostreamFv                               @913
     _Exception                                        @914
-
+    __ctordtorInit                                    @915
+    __ctordtorTerm                                    @916
 
