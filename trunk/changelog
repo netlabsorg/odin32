@@ -1,7 +1,8 @@
-/* $Id: changelog,v 1.2020 2002-03-18 09:31:51 sandervl Exp $ */
+/* $Id: changelog,v 1.2021 2002-03-18 10:04:36 sandervl Exp $ */
 
  2002-03-18: Sander van Leeuwen <sandervl@xs4all.nl>
     - WGSS50:   o WGSS update from IBM
+    - WSOCK32:  o Return requested version in WSAStartup
 
  2002-03-14: knut st. osmundsen <bird@anduin.net>
     - Fastdep:  o Some minor -E<somthing> issues (non Odin32 use).
