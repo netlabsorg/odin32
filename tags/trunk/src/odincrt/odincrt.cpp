@@ -18,6 +18,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <odincrt.h>
 
 typedef unsigned short USHORT;
@@ -39,7 +40,7 @@ typedef unsigned short USHORT;
 
 
 /****************************************************************************
- * Implementation                                                           *
+ * Memory Management                                                        *
  ****************************************************************************/
 
 void* ODINAPI ODIN_calloc ( size_t s1, size_t s2 )
@@ -61,5 +62,16 @@ void ODINAPI ODIN_free    (void *ptr)
   ODIN_TEB_OFF
   free(ptr);
   ODIN_TEB_ON0()
+
+
+
+/****************************************************************************
+ * String operations                                                        *
+ ****************************************************************************/
+
+char* ODINAPI ODIN_strdup( const char *s1)
+  ODIN_TEB_OFF
+  char *rc = strdup(s1);
+  ODIN_TEB_ON1(rc)
 
 
