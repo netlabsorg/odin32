@@ -1,4 +1,4 @@
-/* $Id: winprop.cpp,v 1.3 2000-01-01 14:57:39 cbratschi Exp $ */
+/* $Id: winprop.cpp,v 1.4 2000-01-15 14:18:18 cbratschi Exp $ */
 /*
  * Win32 Property apis for OS/2
  *
@@ -42,7 +42,7 @@ int WIN32API EnumPropsExA( HWND hwnd, PROPENUMPROCEXA arg2, LPARAM  arg3)
 int WIN32API EnumPropsExW( HWND hwnd, PROPENUMPROCEXW arg2, LPARAM  arg3)
 {
 #ifdef DEBUG
-    WriteLog("USER32:  EnumPropsExW\n");
+    WriteLog("USER32:  EnumPropsExW DOES NOT WORK\n");
 #endif
     // NOTE: This will not work as is (needs UNICODE support)
     //calling convention problems
@@ -54,7 +54,7 @@ int WIN32API EnumPropsExW( HWND hwnd, PROPENUMPROCEXW arg2, LPARAM  arg3)
 int WIN32API EnumPropsW( HWND hwnd, PROPENUMPROCW  arg2)
 {
 #ifdef DEBUG
-    WriteLog("USER32:  EnumPropsW\n");
+    WriteLog("USER32:  EnumPropsW DOES NOT WORK\n");
 #endif
     // NOTE: This will not work as is (needs UNICODE support)
     //calling convention problems
@@ -71,7 +71,7 @@ HANDLE WIN32API GetPropA(HWND hwnd, LPCSTR arg2)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("GetPropA, window %x not found", hwnd));
-	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     rc = O32_GetProp(window->getOS2WindowHandle(), arg2);
@@ -108,7 +108,7 @@ HANDLE WIN32API RemovePropA( HWND hwnd, LPCSTR  arg2)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("RemovePropA, window %x not found", hwnd));
-	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
 #ifdef DEBUG
@@ -144,7 +144,7 @@ BOOL WIN32API SetPropA( HWND hwnd, LPCSTR arg2, HANDLE  arg3)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("SetPropA, window %x not found", hwnd));
-	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
 #ifdef DEBUG

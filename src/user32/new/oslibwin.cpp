@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.37 2000-01-14 14:45:16 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.38 2000-01-15 14:18:16 cbratschi Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -50,7 +50,7 @@ BOOL OSLibWinSetOwner(HWND hwnd, HWND hwndOwner)
 //******************************************************************************
 HWND OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle,
                           char *pszName, HWND Owner, ULONG fHWND_BOTTOM, HWND *hwndFrame,
-                          ULONG id, BOOL fTaskList)
+                          ULONG id, BOOL fTaskList,BOOL saveBits)
 {
  HWND  hwndClient;
 
@@ -74,6 +74,7 @@ HWND OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle,
   FRAMECDATA FCData = {sizeof (FRAMECDATA), 0, 0, 0};
 
   dwClientStyle = dwWinStyle & ~(WS_TABSTOP | WS_GROUP | WS_CLIPSIBLINGS);
+  if (saveBits) dwWinStyle |= WS_SAVEBITS;
 
   dwFrameStyle |= FCF_NOBYTEALIGN;
   if(fTaskList)
@@ -91,7 +92,7 @@ HWND OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle,
                                 id, &FCData, NULL);
 
   if (*hwndFrame) {
-    hwndClient = WinCreateWindow (*hwndFrame, WIN32_STDCLASS,
+    hwndClient = WinCreateWindow (*hwndFrame,saveBits ? WIN32_STDCLASS:WIN32_STDCLASS2,
                                   NULL, dwClientStyle, 0, 0, 0, 0,
                                   *hwndFrame, HWND_TOP, FID_CLIENT, NULL, NULL);
     return hwndClient;
