@@ -1,4 +1,4 @@
-/* $Id: DoWithDirs.cmd,v 1.7 2000-11-20 03:09:38 bird Exp $
+/* $Id: DoWithDirs.cmd,v 1.8 2000-11-20 05:03:14 bird Exp $
  *
  * Syntax: dowithdirs.cmd [-e<list of excludes>] [-c] [-i] [-l] [-r] <cmd with args...>
  *    -e      Exclude directories.
@@ -83,7 +83,7 @@
 
                     when ch = 'S' then
                     do
-                        fDontStop = 1;
+                        fExitOnLock = 0;
                     end
 
                     otherwise
@@ -160,18 +160,10 @@
                         do
                             /* restore old directory and return sucessfully */
                             call directory sOldDir;
-                            if (fDontStop) then
-                            do
-                                say '[ !Lock found, skips directory.]';
-                                iterate;
-                            end
-                            else
-                            do
-                                say '[ !Lock found, stops processing.]';
-                                exit(0);
-                            end
+                            say '[ !Lock found, stops processing.]';
+                            exit(0);
                         end
-                        say '[ - warning: Skipping '|| asDirs.i || ' - directory was locked.]';
+                        say '[ !Skipping ' || asDirs.i || ' - directory was locked.]';
                         fOK = 0;
                     end
 
@@ -190,7 +182,7 @@
                     if (ret <> 0) then
                     do
                         /* complain and fail if errors aren't ignored. */
-                        say '[ - rc = 'ret']';
+                        say '[ - rc = 'ret' ' || asDirs.i || ']';
                         if (\fIgnoreFailure) then
                             exit(rc);
                     end
