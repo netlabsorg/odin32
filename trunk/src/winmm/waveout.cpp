@@ -1,4 +1,4 @@
-/* $Id: waveout.cpp,v 1.11 2000-02-27 20:29:47 sandervl Exp $ */
+/* $Id: waveout.cpp,v 1.12 2000-03-02 14:51:16 sandervl Exp $ */
 //#undef DEBUG
 /*
  * Wave out MM apis
@@ -108,6 +108,7 @@ ODINFUNCTION3(MMRESULT, waveOutWrite,
         pwh->dwFlags |= WHDR_INQUEUE;
         pwh->dwFlags &= ~WHDR_DONE;
 
+	 dprintf(("waveOutWrite %x %d %x", pwh->lpData, pwh->dwBufferLength, pwh->dwFlags));
         return(dwave->write(pwh, cbwh));
   }
   else  return(MMSYSERR_INVALHANDLE);
