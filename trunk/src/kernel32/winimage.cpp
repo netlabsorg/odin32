@@ -1,4 +1,4 @@
-/* $Id: winimage.cpp,v 1.6 1999-08-09 22:10:09 phaller Exp $ */
+/* $Id: winimage.cpp,v 1.7 1999-08-11 22:27:56 phaller Exp $ */
 
 /*
  * Win32 PE Image class
@@ -26,8 +26,8 @@
 
 #include <odincrt.h>
 
-#include <iostream.h>
-#include <fstream.h>
+//#include <iostream.h>
+//#include <fstream.h>
 #include <assert.h>
 #include "misc.h"
 #include "nameid.h"
@@ -1077,9 +1077,12 @@ BOOL Win32Image::isPEImage(char *szFileName)
                OPEN_ACCESS_READONLY,           /* Open mode of the file */
                0L);                            /* No extended attribute */
 
-  if (rc != NO_ERROR) {
-    fout << "isPEImage: DosOpen returned " << rc << endl;
-        return(FALSE);
+  if (rc != NO_ERROR)
+  {
+    dprintf(("KERNEL32:Win32Image::isPEImage(%s) failed with %u\n",
+             szFileName,
+             rc));
+    return(FALSE);
   }
 
   /* Move the file pointer back to the beginning of the file */

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 1999-08-11 21:19:50 phaller Exp $
+# $Id: makefile,v 1.7 1999-08-11 22:22:31 phaller Exp $
 
 #
 # PD-Win32 API
@@ -37,8 +37,8 @@ $(TARGET).lib: $(TARGET)exp.def
         $(CP) $@ $(PDWIN32_LIB)
 
 
-advapi32.obj: advapi32.cpp advapi32.h
-registry.obj: registry.cpp
+advapi32.obj: advapi32.cpp advapi32.h $(PDWIN32_INCLUDE)\odinwrap.h
+registry.obj: registry.cpp $(PDWIN32_INCLUDE)\odinwrap.h
 initterm.obj: initterm.cpp
 
 clean:

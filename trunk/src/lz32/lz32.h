@@ -1,4 +1,4 @@
-/* $Id: lz32.h,v 1.2 1999-08-11 12:49:22 phaller Exp $ */
+/* $Id: lz32.h,v 1.3 1999-08-11 22:22:44 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -55,19 +55,32 @@
  ****************************************************************************/
 
 // external interface
-VOID        WINAPI ODIN_LZDone(void);
-LONG        WINAPI ODIN_CopyLZFile(HFILE,HFILE);
-HFILE       WINAPI ODIN_LZOpenFileA(LPCSTR,LPOFSTRUCT,UINT);
-HFILE       WINAPI ODIN_LZOpenFileW(LPCWSTR,LPOFSTRUCT,UINT);
-INT         WINAPI ODIN_LZRead(HFILE,LPVOID,UINT);
-INT         WINAPI ODIN_LZStart(void);
-void        WINAPI ODIN_LZClose(HFILE);
-LONG        WINAPI ODIN_LZCopy(HFILE,HFILE);
-HFILE       WINAPI ODIN_LZInit(HFILE);
-LONG        WINAPI ODIN_LZSeek(HFILE,LONG,INT);
-INT         WINAPI ODIN_GetExpandedNameA(LPCSTR,LPSTR);
-INT         WINAPI ODIN_GetExpandedNameW(LPCWSTR,LPWSTR);
+VOID        WIN32API LZDone(void);
+LONG        WIN32API CopyLZFile(HFILE,HFILE);
+HFILE       WIN32API LZOpenFileA(LPCSTR,LPOFSTRUCT,UINT);
+HFILE       WIN32API LZOpenFileW(LPCWSTR,LPOFSTRUCT,UINT);
+INT         WIN32API LZRead(HFILE,LPVOID,UINT);
+INT         WIN32API LZStart(void);
+void        WIN32API LZClose(HFILE);
+LONG        WIN32API LZCopy(HFILE,HFILE);
+HFILE       WIN32API LZInit(HFILE);
+LONG        WIN32API LZSeek(HFILE,LONG,INT);
+INT         WIN32API GetExpandedNameA(LPCSTR,LPSTR);
+INT         WIN32API GetExpandedNameW(LPCWSTR,LPWSTR);
 
+// internal interface
+VOID        ODIN_INTERNAL ODIN_LZDone(void);
+LONG        ODIN_INTERNAL ODIN_CopyLZFile(HFILE,HFILE);
+HFILE       ODIN_INTERNAL ODIN_LZOpenFileA(LPCSTR,LPOFSTRUCT,UINT);
+HFILE       ODIN_INTERNAL ODIN_LZOpenFileW(LPCWSTR,LPOFSTRUCT,UINT);
+INT         ODIN_INTERNAL ODIN_LZRead(HFILE,LPVOID,UINT);
+INT         ODIN_INTERNAL ODIN_LZStart(void);
+void        ODIN_INTERNAL ODIN_LZClose(HFILE);
+LONG        ODIN_INTERNAL ODIN_LZCopy(HFILE,HFILE);
+HFILE       ODIN_INTERNAL ODIN_LZInit(HFILE);
+LONG        ODIN_INTERNAL ODIN_LZSeek(HFILE,LONG,INT);
+INT         ODIN_INTERNAL ODIN_GetExpandedNameA(LPCSTR,LPSTR);
+INT         ODIN_INTERNAL ODIN_GetExpandedNameW(LPCWSTR,LPWSTR);
 
 #ifdef __cplusplus
   } /* extern "C" */
