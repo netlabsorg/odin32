@@ -1,16 +1,18 @@
-# $Id: makefile,v 1.1 1999-09-05 02:09:18 bird Exp $
+# $Id: makefile,v 1.2 1999-09-05 02:30:45 bird Exp $
 
 #
-# Tools common parts
+# PD-Win32 API
 #
-#       Top of the src tree makefile
-#
+#       Tools common parts
 #
 #       Usage: nmake ( all | clean )
 #
 #            all: Build the entire src.
 #            clean: Back to a "virgin" state.
-#
+#            needed: Builds the tools used during compilation of the src tree.
+#            commonicc.lib: Build the IBM VA for C++ version of the library.
+#            commongcc.a:   Build the gcc version of the library - aout
+#            commongcc.lib: Build the gcc version of the library - OMF.
 #
 #
 !ifdef DEBUG
