@@ -121,7 +121,8 @@ void ParseLogStatusKERNEL32();
 #define DBG_module         101
 #define DBG_mailslot       102
 #define DBG_hmmailslot     103
-#define DBG_MAXFILES       104
+#define DBG_hmparport      104
+#define DBG_MAXFILES       105
 
 extern USHORT DbgEnabledKERNEL32[DBG_MAXFILES];
 extern USHORT DbgEnabledLvl2KERNEL32[DBG_MAXFILES];
