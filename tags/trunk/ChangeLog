@@ -1,4 +1,12 @@
- /* $Id: ChangeLog,v 1.517 1999-12-06 21:30:35 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.518 1999-12-07 12:30:18 sandervl Exp $ */
+
+ 99-12-07: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: Fixed string resource load bug (last character of string resource set to 0)
+	- KERNEL32: Always commit memory for page memory maps
+	- USER32: Do not call selectClientArea during BeginPaint -> creates
+                  painting problems for i.e. memory SDK sample & AbiWord
+                  Disabled CS_OWNDC support for now -> otherwise certain
+                  windows never receive a WM_ERASEBKGND message. (memory SDK sample)
 
  99-12-06: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32/OLEAUT32: Renamed OLEAUT32 to OLAUTOS2 to avoid conflicts
