@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 1999-08-21 12:29:32 sandervl Exp $
+# $Id: makefile,v 1.9 1999-08-31 15:04:10 phaller Exp $
 
 #
 # PD-Win32 API
@@ -20,7 +20,7 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 TARGET = winmm
 
-OBJS =  winmm.obj os2timer.obj waveout.obj dwaveout.obj timegettime.obj \
+OBJS =  os2timer.obj waveout.obj dwaveout.obj time.obj \
         wavein.obj aux.obj auxos2.obj mixer.obj \
         midi.obj irtmidi.obj midistrm.obj initterm.obj mci.obj joy.obj \
         mmio.obj driver.obj playsound.obj joyos2.obj
@@ -45,8 +45,7 @@ $(TARGET).lib: $(TARGET).dll
 
 
 driver.obj:     driver.cpp
-winmm.obj:      winmm.cpp
-os2timer.obj:   os2timer.h wintimer.h
+os2timer.obj:   os2timer.cpp os2timer.h time.h
 waveout.obj:    waveout.cpp  dwaveout.h
 wavein.obj:     wavein.cpp
 mixer.obj:      mixer.cpp  midi.hpp
@@ -59,7 +58,7 @@ midi.obj:       midi.cpp midi.hpp  irtmidi.hpp
 midistrm.obj:   midistrm.cpp midi.hpp   irtmidi.hpp
 irtmidi.obj:    irtmidi.cpp irtmidi.hpp
 dwaveout.obj:   dwaveout.cpp dwaveout.h $(PDWIN32_INCLUDE)\vmutex.h
-timegettime.obj: timegettime.cpp
+time.obj:       time.cpp
 initterm.obj:   initterm.cpp aux.h
 playsound.obj:  playsound.cpp
 joyos2.obj:     joyos2.cpp joyos2.h
