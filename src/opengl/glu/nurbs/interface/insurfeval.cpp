@@ -1,4 +1,4 @@
-/* $Id: insurfeval.cpp,v 1.1 2000-02-09 08:49:02 jeroen Exp $ */
+/* $Id: insurfeval.cpp,v 1.2 2000-03-11 09:05:03 jeroen Exp $ */
 /*
 ** License Applicability. Except to the extent portions of this file are
 ** made subject to an alternative license as permitted in the SGI Free
@@ -32,10 +32,10 @@
 ** published by SGI, but has not been independently verified as being
 ** compliant with the OpenGL(R) version 1.2.1 Specification.
 **
-** $Date: 2000-02-09 08:49:02 $ $Revision: 1.1 $
+** $Date: 2000-03-11 09:05:03 $ $Revision: 1.2 $
 */
 /*
-** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glu/nurbs/interface/insurfeval.cpp,v 1.1 2000-02-09 08:49:02 jeroen Exp $
+** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glu/nurbs/interface/insurfeval.cpp,v 1.2 2000-03-11 09:05:03 jeroen Exp $
 */
 
 #include "gluos.h"
@@ -65,7 +65,7 @@
 #define LOD_EVAL_COORD(u,v) glEvalCoord2f(u,v)
 
 static void LOD_interpolate(REAL A[2], REAL B[2], REAL C[2], int j, int k, int pow2_level,
-			    REAL& u, REAL& v)
+                            REAL& u, REAL& v)
 {
   REAL a,a1,b,b1;
 
@@ -93,7 +93,7 @@ static void LOD_interpolate(REAL A[2], REAL B[2], REAL C[2], int j, int k, int p
 }
 
 void OpenGLSurfaceEvaluator::LOD_triangle(REAL A[2], REAL B[2], REAL C[2],
-			 int level)
+                         int level)
 {
   int k,j;
   int pow2_level;
@@ -117,32 +117,32 @@ glBegin(GL_TRIANGLE_STRIP);
 #endif
 
       for(k=0; k<=j; k++)
-	{
-	  LOD_interpolate(A,B,C,j,j-k,pow2_level, u,v);
+        {
+          LOD_interpolate(A,B,C,j,j-k,pow2_level, u,v);
 #ifdef USE_LOD
           LOD_EVAL_COORD(u,v);
-//	  glEvalCoord2f(u,v);
+//        glEvalCoord2f(u,v);
 #else
-	  inDoEvalCoord2EM(u,v);
+          inDoEvalCoord2EM(u,v);
 #endif
 
-	  LOD_interpolate(A,B,C,j+1,j-k,pow2_level, u,v);
+          LOD_interpolate(A,B,C,j+1,j-k,pow2_level, u,v);
 
 #ifdef USE_LOD
-	  LOD_EVAL_COORD(u,v);
-//	  glEvalCoord2f(u,v);
+          LOD_EVAL_COORD(u,v);
+//        glEvalCoord2f(u,v);
 #else
-	  inDoEvalCoord2EM(u,v);
+          inDoEvalCoord2EM(u,v);
 #endif
-	}
-//      endCallBack();	
+        }
+//      endCallBack();
 glEnd();
     }
 }
 
 void OpenGLSurfaceEvaluator::LOD_eval(int num_vert, REAL* verts, int type,
-		     int level
-		     )
+                     int level
+                     )
 {
   int i,k;
   switch(type){
@@ -150,26 +150,26 @@ void OpenGLSurfaceEvaluator::LOD_eval(int num_vert, REAL* verts, int type,
   case GL_QUAD_STRIP:
     for(i=2, k=4; i<=num_vert-2; i+=2, k+=4)
       {
-	LOD_triangle(verts+k-4, verts+k-2, verts+k,
-		     level
-		     );
-	LOD_triangle(verts+k-2, verts+k+2, verts+k,
-		     level
-		     );
+        LOD_triangle(verts+k-4, verts+k-2, verts+k,
+                     level
+                     );
+        LOD_triangle(verts+k-2, verts+k+2, verts+k,
+                     level
+                     );
       }
     if(num_vert % 2 ==1)
       {
-	LOD_triangle(verts+2*(num_vert-3), verts+2*(num_vert-2), verts+2*(num_vert-1),
-		     level
-		     );
+        LOD_triangle(verts+2*(num_vert-3), verts+2*(num_vert-2), verts+2*(num_vert-1),
+                     level
+                     );
       }
     break;
   case GL_TRIANGLE_FAN:
     for(i=1, k=2; i<=num_vert-2; i++, k+=2)
       {
-	LOD_triangle(verts,verts+k, verts+k+2,
-		     level
-		     );
+        LOD_triangle(verts,verts+k, verts+k+2,
+                     level
+                     );
       }
     break;
 
@@ -177,7 +177,7 @@ void OpenGLSurfaceEvaluator::LOD_eval(int num_vert, REAL* verts, int type,
     fprintf(stderr, "typy not supported in LOD_\n");
   }
 }
-	
+
 
 #endif //USE_LOD
 
@@ -255,16 +255,16 @@ void OpenGLSurfaceEvaluator::inBPMEval(bezierPatchMesh* bpm)
   int ustride = bpm->bpatch->dimension * bpm->bpatch->vorder;
   int vstride = bpm->bpatch->dimension;
   inMap2f(
-	  (bpm->bpatch->dimension == 3)? GL_MAP2_VERTEX_3 : GL_MAP2_VERTEX_4,
-	  bpm->bpatch->umin,
-	  bpm->bpatch->umax,
-	  ustride,
-	  bpm->bpatch->uorder,
-	  bpm->bpatch->vmin,
-	  bpm->bpatch->vmax,
-	  vstride,
-	  bpm->bpatch->vorder,
-	  bpm->bpatch->ctlpoints);
+          (bpm->bpatch->dimension == 3)? GL_MAP2_VERTEX_3 : GL_MAP2_VERTEX_4,
+          bpm->bpatch->umin,
+          bpm->bpatch->umax,
+          ustride,
+          bpm->bpatch->uorder,
+          bpm->bpatch->vmin,
+          bpm->bpatch->vmax,
+          vstride,
+          bpm->bpatch->vorder,
+          bpm->bpatch->ctlpoints);
 
   bpm->vertex_array = (float*) malloc(sizeof(float)* (bpm->index_UVarray/2) * 3+1); /*in case the origional dimenion is 4, then we need 4 space to pass to evaluator.*/
   assert(bpm->vertex_array);
@@ -1338,8 +1338,8 @@ void OpenGLSurfaceEvaluator::inEvalUStrip(int n_upper, REAL v_upper, REAL* upper
 	      leftMostV[0] = lower_val[j-1];
 	      leftMostV[1] = v_lower;
 
-	      leftMostNormal = lowerNormal[j-1];
-	      leftMostXYZ = lowerXYZ[j-1];
+              leftMostNormal = lowerNormal[j-1];
+              leftMostXYZ = lowerXYZ[j-1];
             }
         }
     }
@@ -1422,13 +1422,13 @@ void OpenGLSurfaceEvaluator::inEvalVStrip(int n_left, REAL u_left, REAL* left_va
           if(j<n_right-1) /*at least two vertices in right*/
             {
               bgntfan();
-	      glNormal3fv(botMostNormal);
+              glNormal3fv(botMostNormal);
               glVertex3fv(botMostXYZ);
 
               while(j<n_right){
-		glNormal3fv(rightNormal[j]);
-		glVertex3fv(rightXYZ[j]);
-		j++;
+                glNormal3fv(rightNormal[j]);
+                glVertex3fv(rightXYZ[j]);
+                j++;
 
               }
               endtfan();
@@ -1440,14 +1440,14 @@ void OpenGLSurfaceEvaluator::inEvalVStrip(int n_left, REAL u_left, REAL* left_va
           if(i<n_left-1) /*at least two vertices in left*/
             {
               bgntfan();
-	      glNormal3fv(botMostNormal);
-	      glVertex3fv(botMostXYZ);
-	
+              glNormal3fv(botMostNormal);
+              glVertex3fv(botMostXYZ);
+
               for(k=n_left-1; k>=i; k--) /*reverse order for two-side lighting*/
-		{
-		  glNormal3fv(leftNormal[k]);
-		  glVertex3fv(leftXYZ[k]);
-		}
+                {
+                  glNormal3fv(leftNormal[k]);
+                  glVertex3fv(leftXYZ[k]);
+                }
 
               endtfan();
             }
@@ -1457,10 +1457,10 @@ void OpenGLSurfaceEvaluator::inEvalVStrip(int n_left, REAL u_left, REAL* left_va
         {
           if(left_val[i] <= right_val[j])
             {
-	      bgntfan();
+              bgntfan();
 
-	      glNormal3fv(rightNormal[j]);
-	      glVertex3fv(rightXYZ[j]);
+              glNormal3fv(rightNormal[j]);
+              glVertex3fv(rightXYZ[j]);
 
               /*find the last k>=i such that
                *leftverts[k][0] <= rightverts[j][0]
@@ -1479,12 +1479,12 @@ void OpenGLSurfaceEvaluator::inEvalVStrip(int n_left, REAL u_left, REAL* left_va
 
               for(l=k; l>=i; l--)/*the reverse is for two-side lighting*/
                 {
-		  glNormal3fv(leftNormal[l]);
-		  glVertex3fv(leftXYZ[l]);
+                  glNormal3fv(leftNormal[l]);
+                  glVertex3fv(leftXYZ[l]);
 
                 }
-	      glNormal3fv(botMostNormal);
-	      glVertex3fv(botMostXYZ);
+              glNormal3fv(botMostNormal);
+              glVertex3fv(botMostXYZ);
 
               endtfan();
 
@@ -1492,20 +1492,20 @@ void OpenGLSurfaceEvaluator::inEvalVStrip(int n_left, REAL u_left, REAL* left_va
                */
               i = k+1;
 
-	      botMostV[0] = u_left;
-	      botMostV[1] = left_val[k];
-	      botMostNormal = leftNormal[k];
-	      botMostXYZ = leftXYZ[k];
+              botMostV[0] = u_left;
+              botMostV[1] = left_val[k];
+              botMostNormal = leftNormal[k];
+              botMostXYZ = leftXYZ[k];
             }
           else /*left_val[i] > right_val[j])*/
             {
-	      bgntfan();
-	      glNormal3fv(leftNormal[i]);
-	      glVertex3fv(leftXYZ[i]);
-	
+              bgntfan();
+              glNormal3fv(leftNormal[i]);
+              glVertex3fv(leftXYZ[i]);
+
               glNormal3fv(botMostNormal);
-	      glVertex3fv(botMostXYZ);
-	
+              glVertex3fv(botMostXYZ);
+
 
               /*find the last k>=j such that
                *rightverts[k][0] < leftverts[i][0]
@@ -1515,8 +1515,8 @@ void OpenGLSurfaceEvaluator::inEvalVStrip(int n_left, REAL u_left, REAL* left_va
                 {
                   if(right_val[k] >= left_val[i])
                     break;
-		  glNormal3fv(rightNormal[k]);
-		  glVertex3fv(rightXYZ[k]);
+                  glNormal3fv(rightNormal[k]);
+                  glVertex3fv(rightXYZ[k]);
 
                   k++;
                 }
@@ -1525,32 +1525,32 @@ void OpenGLSurfaceEvaluator::inEvalVStrip(int n_left, REAL u_left, REAL* left_va
               /*update j and botMostV for next loop
                */
               j=k;
-	      botMostV[0] = u_right;
-	      botMostV[1] = right_val[j-1];
+              botMostV[0] = u_right;
+              botMostV[1] = right_val[j-1];
 
-	      botMostNormal = rightNormal[j-1];
-	      botMostXYZ = rightXYZ[j-1];
+              botMostNormal = rightNormal[j-1];
+              botMostXYZ = rightXYZ[j-1];
             }
         }
     }
   //clean up
   free(leftXYZ);
-  free(leftXYZ);
-  free(rightNormal);
+  free(rightXYZ);
+  free(leftNormal);
   free(rightNormal);
 }
 
 /*-----------------------begin evalMachine-------------------*/
 void OpenGLSurfaceEvaluator::inMap2fEM(int which, int k,
-	     REAL ulower,
-	     REAL uupper,
-	     int ustride,
-	     int uorder,
-	     REAL vlower,
-	     REAL vupper,
-	     int vstride,
-	     int vorder,
-	     REAL *ctlPoints)
+             REAL ulower,
+             REAL uupper,
+             int ustride,
+             int uorder,
+             REAL vlower,
+             REAL vupper,
+             int vstride,
+             int vorder,
+             REAL *ctlPoints)
 {
   int i,j,x;
   surfEvalMachine *temp_em;
@@ -2045,12 +2045,12 @@ return;
 	  else
 #endif //GENERIC_TEST
 
-	    inDoEvalCoord2EM(u,v);
+            inDoEvalCoord2EM(u,v);
 
 #endif //USE_LOD
 
-	  k += 2;
-	}
+          k += 2;
+        }
       endCallBack(userData);
 
 #endif //USE_LOD

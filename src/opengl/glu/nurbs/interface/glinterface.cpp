@@ -1,4 +1,4 @@
-/* $Id: glinterface.cpp,v 1.2 2000-02-29 13:56:48 sandervl Exp $ */
+/* $Id: glinterface.cpp,v 1.3 2000-03-11 09:05:02 jeroen Exp $ */
 /*
 ** License Applicability. Except to the extent portions of this file are
 ** made subject to an alternative license as permitted in the SGI Free
@@ -32,10 +32,10 @@
 ** published by SGI, but has not been independently verified as being
 ** compliant with the OpenGL(R) version 1.2.1 Specification.
 **
-** $Date: 2000-02-29 13:56:48 $ $Revision: 1.2 $
+** $Date: 2000-03-11 09:05:02 $ $Revision: 1.3 $
 */
 /*
-** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glu/nurbs/interface/glinterface.cpp,v 1.2 2000-02-29 13:56:48 sandervl Exp $
+** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glu/nurbs/interface/glinterface.cpp,v 1.3 2000-03-11 09:05:02 jeroen Exp $
 */
 
 #include "gluos.h"
@@ -62,7 +62,7 @@ extern "C" {void glu_LOD_eval_list(GLUnurbs *nurb, int level);}
 
 void glu_LOD_eval_list(GLUnurbs *nurb, int level)
 {
-	nurb->LOD_eval_list(level);
+        nurb->LOD_eval_list(level);
 }
 
 GLUnurbs * GLAPI
@@ -151,7 +151,7 @@ OTL_endTrim(tempTrim);
 
 void GLAPI
 gluPwlCurve(GLUnurbs *r, GLint count, INREAL array[],
-		GLint stride, GLenum type)
+                GLint stride, GLenum type)
 {
 #ifdef DOWN_LOAD_NURBS
 OTL_pwlCurve(tempTrim, count, array, stride, type);
@@ -160,21 +160,21 @@ OTL_pwlCurve(tempTrim, count, array, stride, type);
     int realType;
     switch(type) {
       case GLU_MAP1_TRIM_2:
-	realType = N_P2D;
-	break;
+        realType = N_P2D;
+        break;
       case GLU_MAP1_TRIM_3:
-	realType = N_P2DR;
-	break;
+        realType = N_P2DR;
+        break;
       default:
-	realType = type;
-	break;
+        realType = type;
+        break;
     }
     r->pwlcurve(count, array, sizeof(INREAL) * stride, realType);
 }
 
 void GLAPI
 gluNurbsCurve(GLUnurbs *r, GLint nknots, INREAL knot[], GLint stride,
-		  INREAL ctlarray[], GLint order, GLenum type)
+                  INREAL ctlarray[], GLint order, GLenum type)
 {
 #ifdef DOWN_LOAD_NURBS
 OTL_nurbsCurve(tempTrim, nknots, knot, stride, ctlarray, order, type);
@@ -184,26 +184,26 @@ OTL_nurbsCurve(tempTrim, nknots, knot, stride, ctlarray, order, type);
 
     switch(type) {
       case GLU_MAP1_TRIM_2:
-	realType = N_P2D;
-	break;
+        realType = N_P2D;
+        break;
       case GLU_MAP1_TRIM_3:
-	realType = N_P2DR;
-	break;
+        realType = N_P2DR;
+        break;
       default:
-	realType = type;
-	break;
+        realType = type;
+        break;
     }
 
     r->nurbscurve(nknots, knot, sizeof(INREAL) * stride, ctlarray, order,
-	    realType);
+            realType);
 }
 
 void GLAPI
 gluNurbsSurface(GLUnurbs *r, GLint sknot_count, GLfloat *sknot,
-			    GLint tknot_count, GLfloat *tknot,
-			    GLint s_stride, GLint t_stride,
-			    GLfloat *ctlarray, GLint sorder, GLint torder,
-			    GLenum type)
+                            GLint tknot_count, GLfloat *tknot,
+                            GLint s_stride, GLint t_stride,
+                            GLfloat *ctlarray, GLint sorder, GLint torder,
+                            GLenum type)
 {
 #ifdef DOWN_LOAD_NURBS
   {
@@ -220,24 +220,24 @@ gluNurbsSurface(GLUnurbs *r, GLint sknot_count, GLfloat *sknot,
       exit(1);
     }
 tempNurb = nurbSurfMake(sknot_count, sknot,
-			tknot_count, tknot,
-			sorder, torder,
-			dimension,
-			ctlarray,
-			s_stride, t_stride);
-			
+                        tknot_count, tknot,
+                        sorder, torder,
+                        dimension,
+                        ctlarray,
+                        s_stride, t_stride);
+
   }
 #endif
 
     r->nurbssurface(sknot_count, sknot, tknot_count, tknot,
-	    sizeof(INREAL) * s_stride, sizeof(INREAL) * t_stride,
-	    ctlarray, sorder, torder, type);
+            sizeof(INREAL) * s_stride, sizeof(INREAL) * t_stride,
+            ctlarray, sorder, torder, type);
 }
 
 void GLAPI
 gluLoadSamplingMatrices(GLUnurbs *r, const GLfloat modelMatrix[16],
-			    const GLfloat projMatrix[16],
-			    const GLint viewport[4])
+                            const GLfloat projMatrix[16],
+                            const GLint viewport[4])
 {
     r->useGLMatrices(modelMatrix, projMatrix, viewport);
 }
@@ -250,88 +250,88 @@ gluNurbsProperty(GLUnurbs *r, GLenum property, GLfloat value)
     switch (property) {
       case GLU_AUTO_LOAD_MATRIX:
         r->setautoloadmode(value);
-	return;
+        return;
 
       case GLU_CULLING:
-	if (value != 0.0) {
-	    nurbsValue = N_CULLINGON;
-	} else {
-	    nurbsValue = N_NOCULLING;
-	}
-	r->setnurbsproperty(GL_MAP2_VERTEX_3, N_CULLING, nurbsValue);
-	r->setnurbsproperty(GL_MAP2_VERTEX_4, N_CULLING, nurbsValue);
-	r->setnurbsproperty(GL_MAP1_VERTEX_3, N_CULLING, nurbsValue);
-	r->setnurbsproperty(GL_MAP1_VERTEX_4, N_CULLING, nurbsValue);
+        if (value != 0.0) {
+            nurbsValue = N_CULLINGON;
+        } else {
+            nurbsValue = N_NOCULLING;
+        }
+        r->setnurbsproperty(GL_MAP2_VERTEX_3, N_CULLING, nurbsValue);
+        r->setnurbsproperty(GL_MAP2_VERTEX_4, N_CULLING, nurbsValue);
+        r->setnurbsproperty(GL_MAP1_VERTEX_3, N_CULLING, nurbsValue);
+        r->setnurbsproperty(GL_MAP1_VERTEX_4, N_CULLING, nurbsValue);
         return;
 
       case GLU_SAMPLING_METHOD:
-	if (value == GLU_PATH_LENGTH) {
-	    nurbsValue = N_PATHLENGTH;
-	} else if (value == GLU_PARAMETRIC_ERROR) {
-	    nurbsValue = N_PARAMETRICDISTANCE;
-	} else if (value == GLU_DOMAIN_DISTANCE) {
-	    nurbsValue = N_DOMAINDISTANCE;
+        if (value == GLU_PATH_LENGTH) {
+            nurbsValue = N_PATHLENGTH;
+        } else if (value == GLU_PARAMETRIC_ERROR) {
+            nurbsValue = N_PARAMETRICDISTANCE;
+        } else if (value == GLU_DOMAIN_DISTANCE) {
+            nurbsValue = N_DOMAINDISTANCE;
             r->set_is_domain_distance_sampling(1); //optimzing untrimmed case
 
-	} else if (value == GLU_OBJECT_PARAMETRIC_ERROR) {
-	    nurbsValue = N_OBJECTSPACE_PARA;
-	    r->setautoloadmode( 0.0 );
-	    r->setSamplingMatrixIdentity();
-	} else if (value == GLU_OBJECT_PATH_LENGTH) {
-	    nurbsValue = N_OBJECTSPACE_PATH;
-	    r->setautoloadmode( 0.0 );
-	    r->setSamplingMatrixIdentity();
-	} else {
+        } else if (value == GLU_OBJECT_PARAMETRIC_ERROR) {
+            nurbsValue = N_OBJECTSPACE_PARA;
+            r->setautoloadmode( 0.0 );
+            r->setSamplingMatrixIdentity();
+        } else if (value == GLU_OBJECT_PATH_LENGTH) {
+            nurbsValue = N_OBJECTSPACE_PATH;
+            r->setautoloadmode( 0.0 );
+            r->setSamplingMatrixIdentity();
+        } else {
             r->postError(GLU_INVALID_VALUE);
             return;
         }
 
-	r->setnurbsproperty(GL_MAP2_VERTEX_3, N_SAMPLINGMETHOD, nurbsValue);
-	r->setnurbsproperty(GL_MAP2_VERTEX_4, N_SAMPLINGMETHOD, nurbsValue);
-	r->setnurbsproperty(GL_MAP1_VERTEX_3, N_SAMPLINGMETHOD, nurbsValue);
-	r->setnurbsproperty(GL_MAP1_VERTEX_4, N_SAMPLINGMETHOD, nurbsValue);
-	return;
+        r->setnurbsproperty(GL_MAP2_VERTEX_3, N_SAMPLINGMETHOD, nurbsValue);
+        r->setnurbsproperty(GL_MAP2_VERTEX_4, N_SAMPLINGMETHOD, nurbsValue);
+        r->setnurbsproperty(GL_MAP1_VERTEX_3, N_SAMPLINGMETHOD, nurbsValue);
+        r->setnurbsproperty(GL_MAP1_VERTEX_4, N_SAMPLINGMETHOD, nurbsValue);
+        return;
 
       case GLU_SAMPLING_TOLERANCE:
-	r->setnurbsproperty(GL_MAP2_VERTEX_3, N_PIXEL_TOLERANCE, value);
-	r->setnurbsproperty(GL_MAP2_VERTEX_4, N_PIXEL_TOLERANCE, value);
-	r->setnurbsproperty(GL_MAP1_VERTEX_3, N_PIXEL_TOLERANCE, value);
-	r->setnurbsproperty(GL_MAP1_VERTEX_4, N_PIXEL_TOLERANCE, value);
-	return;
+        r->setnurbsproperty(GL_MAP2_VERTEX_3, N_PIXEL_TOLERANCE, value);
+        r->setnurbsproperty(GL_MAP2_VERTEX_4, N_PIXEL_TOLERANCE, value);
+        r->setnurbsproperty(GL_MAP1_VERTEX_3, N_PIXEL_TOLERANCE, value);
+        r->setnurbsproperty(GL_MAP1_VERTEX_4, N_PIXEL_TOLERANCE, value);
+        return;
 
       case GLU_PARAMETRIC_TOLERANCE:
-	r->setnurbsproperty(GL_MAP2_VERTEX_3, N_ERROR_TOLERANCE, value);
+        r->setnurbsproperty(GL_MAP2_VERTEX_3, N_ERROR_TOLERANCE, value);
         r->setnurbsproperty(GL_MAP2_VERTEX_4, N_ERROR_TOLERANCE, value);
         r->setnurbsproperty(GL_MAP1_VERTEX_3, N_ERROR_TOLERANCE, value);
         r->setnurbsproperty(GL_MAP1_VERTEX_4, N_ERROR_TOLERANCE, value);
         return;
-	
+
 
       case GLU_DISPLAY_MODE:
-	
-	if (value == GLU_FILL) {
-	  nurbsValue = N_FILL;
-	} else if (value == GLU_OUTLINE_POLYGON) {
-	  nurbsValue = N_OUTLINE_POLY;
-	} else if (value == GLU_OUTLINE_PATCH) {
-	  nurbsValue = N_OUTLINE_PATCH;
-	} else {
-	  r->postError(GLU_INVALID_VALUE);
-	  return;
-	}
-	r->setnurbsproperty(N_DISPLAY, nurbsValue);
-	
-	break;
+
+        if (value == GLU_FILL) {
+          nurbsValue = N_FILL;
+        } else if (value == GLU_OUTLINE_POLYGON) {
+          nurbsValue = N_OUTLINE_POLY;
+        } else if (value == GLU_OUTLINE_PATCH) {
+          nurbsValue = N_OUTLINE_PATCH;
+        } else {
+          r->postError(GLU_INVALID_VALUE);
+          return;
+        }
+        r->setnurbsproperty(N_DISPLAY, nurbsValue);
+
+        break;
 
       case GLU_U_STEP:
-    	r->setnurbsproperty(GL_MAP1_VERTEX_3, N_S_STEPS, value);
-    	r->setnurbsproperty(GL_MAP1_VERTEX_4, N_S_STEPS, value);
-    	r->setnurbsproperty(GL_MAP2_VERTEX_3, N_S_STEPS, value);
-    	r->setnurbsproperty(GL_MAP2_VERTEX_4, N_S_STEPS, value);
-	
-	//added for optimizing untrimmed case
+        r->setnurbsproperty(GL_MAP1_VERTEX_3, N_S_STEPS, value);
+        r->setnurbsproperty(GL_MAP1_VERTEX_4, N_S_STEPS, value);
+        r->setnurbsproperty(GL_MAP2_VERTEX_3, N_S_STEPS, value);
+        r->setnurbsproperty(GL_MAP2_VERTEX_4, N_S_STEPS, value);
+
+        //added for optimizing untrimmed case
         r->set_domain_distance_u_rate(value);
-	break;
+        break;
 
       case GLU_V_STEP:
         r->setnurbsproperty(GL_MAP1_VERTEX_3, N_T_STEPS, value);
@@ -339,22 +339,22 @@ gluNurbsProperty(GLUnurbs *r, GLenum property, GLfloat value)
         r->setnurbsproperty(GL_MAP2_VERTEX_3, N_T_STEPS, value);
         r->setnurbsproperty(GL_MAP2_VERTEX_4, N_T_STEPS, value);
 
-	//added for optimizing untrimmed case
+        //added for optimizing untrimmed case
         r->set_domain_distance_v_rate(value);
-	break;
-	
+        break;
+
       case GLU_NURBS_MODE:
-	if(value == GLU_NURBS_RENDERER)
-	  r->put_callbackFlag(0);
-	else if(value == GLU_NURBS_TESSELLATOR)
-	  r->put_callbackFlag(1);
-	else
-	  r->postError(GLU_INVALID_ENUM);
-	break;
+        if(value == GLU_NURBS_RENDERER)
+          r->put_callbackFlag(0);
+        else if(value == GLU_NURBS_TESSELLATOR)
+          r->put_callbackFlag(1);
+        else
+          r->postError(GLU_INVALID_ENUM);
+        break;
 
       default:
-	r->postError(GLU_INVALID_ENUM);
-	return;	
+        r->postError(GLU_INVALID_ENUM);
+        return;
     }
 }
 
@@ -365,67 +365,67 @@ gluGetNurbsProperty(GLUnurbs *r, GLenum property, GLfloat *value)
 
     switch(property) {
       case GLU_AUTO_LOAD_MATRIX:
-	if (r->getautoloadmode()) {
-	    *value = GL_TRUE;
-	} else {
-	    *value = GL_FALSE;
-	}
-	break;
+        if (r->getautoloadmode()) {
+            *value = GL_TRUE;
+        } else {
+            *value = GL_FALSE;
+        }
+        break;
       case GLU_CULLING:
-	r->getnurbsproperty(GL_MAP2_VERTEX_3, N_CULLING, &nurbsValue);
-	if (nurbsValue == N_CULLINGON) {
-	    *value = GL_TRUE;
-	} else {
-	    *value = GL_FALSE;
-	}
-	break;
+        r->getnurbsproperty(GL_MAP2_VERTEX_3, N_CULLING, &nurbsValue);
+        if (nurbsValue == N_CULLINGON) {
+            *value = GL_TRUE;
+        } else {
+            *value = GL_FALSE;
+        }
+        break;
       case GLU_SAMPLING_METHOD:
-	r->getnurbsproperty(GL_MAP2_VERTEX_3, N_SAMPLINGMETHOD, value);
-	if(*value == N_PATHLENGTH)
-	  *value = GLU_PATH_LENGTH;
-	else if(*value == N_PARAMETRICDISTANCE)
-	  *value = GLU_PARAMETRIC_ERROR;
-	else if(*value == N_DOMAINDISTANCE)
-	  *value = GLU_DOMAIN_DISTANCE;
-	else if(*value == N_OBJECTSPACE_PATH)
-	  *value = GLU_OBJECT_PATH_LENGTH;
-	else if(*value == N_OBJECTSPACE_PARA)
-	  *value = GLU_OBJECT_PARAMETRIC_ERROR;	
-	break;
+        r->getnurbsproperty(GL_MAP2_VERTEX_3, N_SAMPLINGMETHOD, value);
+        if(*value == N_PATHLENGTH)
+          *value = GLU_PATH_LENGTH;
+        else if(*value == N_PARAMETRICDISTANCE)
+          *value = GLU_PARAMETRIC_ERROR;
+        else if(*value == N_DOMAINDISTANCE)
+          *value = GLU_DOMAIN_DISTANCE;
+        else if(*value == N_OBJECTSPACE_PATH)
+          *value = GLU_OBJECT_PATH_LENGTH;
+        else if(*value == N_OBJECTSPACE_PARA)
+          *value = GLU_OBJECT_PARAMETRIC_ERROR;
+        break;
       case GLU_SAMPLING_TOLERANCE:
-	r->getnurbsproperty(GL_MAP2_VERTEX_3, N_PIXEL_TOLERANCE, value);
-	break;
+        r->getnurbsproperty(GL_MAP2_VERTEX_3, N_PIXEL_TOLERANCE, value);
+        break;
       case GLU_PARAMETRIC_TOLERANCE:
-	r->getnurbsproperty(GL_MAP2_VERTEX_3, N_ERROR_TOLERANCE, value);
+        r->getnurbsproperty(GL_MAP2_VERTEX_3, N_ERROR_TOLERANCE, value);
         break;
 
       case GLU_U_STEP:
-    	r->getnurbsproperty(GL_MAP2_VERTEX_3, N_S_STEPS, value);
-	break;
+        r->getnurbsproperty(GL_MAP2_VERTEX_3, N_S_STEPS, value);
+        break;
       case GLU_V_STEP:
-    	r->getnurbsproperty(GL_MAP2_VERTEX_3, N_T_STEPS, value);
-	break;
+        r->getnurbsproperty(GL_MAP2_VERTEX_3, N_T_STEPS, value);
+        break;
       case GLU_DISPLAY_MODE:
-	r->getnurbsproperty(N_DISPLAY, &nurbsValue);
-	if (nurbsValue == N_FILL) {
-	    *value = GLU_FILL;
-	} else if (nurbsValue == N_OUTLINE_POLY) {
-	    *value = GLU_OUTLINE_POLYGON;
-	} else {
-	    *value = GLU_OUTLINE_PATCH;
-	}
-	break;
+        r->getnurbsproperty(N_DISPLAY, &nurbsValue);
+        if (nurbsValue == N_FILL) {
+            *value = GLU_FILL;
+        } else if (nurbsValue == N_OUTLINE_POLY) {
+            *value = GLU_OUTLINE_POLYGON;
+        } else {
+            *value = GLU_OUTLINE_PATCH;
+        }
+        break;
 
       case GLU_NURBS_MODE:
-	if(r->is_callback())
-	  *value = GLU_NURBS_TESSELLATOR;
-	else
-	  *value = GLU_NURBS_RENDERER;
-	break;
-	
+        if(r->is_callback())
+          *value = GLU_NURBS_TESSELLATOR;
+        else
+          *value = GLU_NURBS_RENDERER;
+        break;
+
       default:
-	r->postError(GLU_INVALID_ENUM);
-	return;
+        r->postError(GLU_INVALID_ENUM);
+        return;
     }
 }
 
@@ -445,11 +445,11 @@ GLUAPI void GLAPIENTRY gluNurbsCallback( GLUnurbsObj *nobj, GLenum which,
     case GLU_NURBS_NORMAL_DATA:
     case GLU_NURBS_TEXTURE_COORD_DATA:
     case GLU_NURBS_COLOR_DATA:
-        nobj->putSurfCallBack(which, (GLvoid (*)(...))fn);
+        nobj->putSurfCallBack(which, (GLvoid (* GLCALLBACK)(...))fn);
         break;
 
     case GLU_NURBS_ERROR:
-        nobj->errorCallback = (void (*)( GLenum )) fn;
+        nobj->errorCallback = (void (* GLCALLBACK)( GLenum )) fn;
         break;
     default:
         nobj->postError(GLU_INVALID_ENUM);

@@ -1,4 +1,4 @@
-/* $Id: glut_event.c,v 1.5 2000-03-05 10:19:38 jeroen Exp $ */
+/* $Id: glut_event.c,v 1.6 2000-03-11 09:05:04 jeroen Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1994, 1995, 1996, 1997, 1998. */
 
 /* This program is freely distributable without licensing fees
@@ -320,6 +320,7 @@ interruptibleXNextEvent(Display * dpy, XEvent * event)
 static void
 processEventsAndTimeouts(void)
 {
+  WriteLog("processEventsAndTimeouts() entry\n");
   do {
 #if defined(_WIN32) || defined(__WIN32OS2__)
     MSG event;
@@ -825,7 +826,9 @@ processEventsAndTimeouts(void)
     }
 #endif /* _WIN32 */
     if (__glutTimerList) {
+  WriteLog("processEventsAndTimeouts -> Calling handleTimeouts\n");
       handleTimeouts();
+  WriteLog("processEventsAndTimeouts -> Call handleTimeouts returned\n");
     }
   }
   while (XPending(__glutDisplay));
@@ -930,7 +933,9 @@ waitForSomething(void)
      timeouts. */
   if (XPending(__glutDisplay)) {
   immediatelyHandleXinput:
+    WriteLog("waitForSmoething: Calling processEventsAndTimeouts\n");
     processEventsAndTimeouts();
+    WriteLog("waitForSmoething: Call processEventsAndTimeouts returned\n");
   } else {
     if (__glutTimerList)
       handleTimeouts();
@@ -941,7 +946,9 @@ static void
 idleWait(void)
 {
   if (XPending(__glutDisplay)) {
+    WriteLog("idleWait: Calling processEventsAndTimeouts\n");
     processEventsAndTimeouts();
+    WriteLog("idleWait: Call processEventsAndTimeouts returned\n");
   } else {
     if (__glutTimerList) {
       handleTimeouts();
@@ -1370,7 +1377,9 @@ glutMainLoop(void)
       if (__glutTimerList) {
         waitForSomething();
       } else {
+    WriteLog("glutMainLoop: Calling processEventsAndTimeouts\n");
         processEventsAndTimeouts();
+    WriteLog("glutMainLoop: Call processEventsAndTimeouts returned\n");
       }
     }
   }
