@@ -1,40 +1,62 @@
-# $Id: makefile,v 1.10 2000-07-19 19:05:16 sandervl Exp $
+# $Id: makefile,v 1.11 2000-11-19 08:58:16 bird Exp $
 #
 # Odin32 API
 #
-# Makefile for Mesa OpenGL
+#       Mesa/3dxf Makefile - opengl.dll.
 #
 
+
+#
 # Directory macros.
+#
 PDWIN32_INCLUDE = ..\..\..\..\include
 PDWIN32_LIB     = ..\..\..\..\lib
-PDWIN32_BIN     = ..\..\..\..\$(OBJDIR)
+PDWIN32_BIN     = ..\..\..\..\$(OBJDIR)\Glide
 PDWIN32_TOOLS   = ..\..\..\..\tools\bin
 
 
+#
+# Tell buildenvironment that we should not copy this into /bin.
+#
+NO_MAIN_BIN_COPY = 1
+
+
+#
 # Compiler, tools, and interference rules.
+#
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
-MESADEFS= -DNO_PARALLEL -DNO_STEREO -DGL_MESA_window_pos -DOS2_THREADS \
-          -DUSE_X86_ASM -DUSE_MMX_ASM -DUSE_3DNOW_ASM_NOT \
-          -DFX -DFX_V2 -DFX_SILENT -DBUILD_GL32 -DFAST_MATH
 
-CFLAGS   = -I.. -I..\GL $(CFLAGS_WIN32APP) -I..\..\glut -I..\..\glide\cvg\glide -I..\..\glide\swlibs\fxmisc -I..\..\glide\cvg\incsrc $(MESADEFS) /Wcnd- /Tdp
-CXXFLAGS = -I.. -I..\GL $(CXXFLAGS_WIN32APP) -I..\..\glut -I..\..\glide\cvg\glide -I..\..\glide\swlibs\fxmisc -I..\..\glide\cvg\incsrc $(MESADEFS)
 
-ASFLAGS=$(ASFLAGS) -Fdo:$(OBJDIR)
+#
+# Overrides.
+#
+CINCLUDES   = -I.. -I..\GL $(CINCLUDES) -I..\..\glut -I..\..\glide\cvg\glide \
+              -I..\..\glide\swlibs\fxmisc -I..\..\glide\cvg\incsrc
+CDEFINES    = $(CDEFINES_WIN32APP) \
+              -DNO_PARALLEL -DNO_STEREO -DGL_MESA_window_pos -DOS2_THREADS \
+              -DUSE_X86_ASM -DUSE_MMX_ASM -DUSE_3DNOW_ASM_NOT \
+              -DFX -DFX_V2 -DFX_SILENT -DBUILD_GL32 -DFAST_MATH
+
+CFLAGS      = $(CFLAGS) /Wcnd- /Tdp
+!ifdef WAT
+!error "Compiler not supported yet!"
+!endif
 
 
 #
 # Interference rule for sources in the parent directory.
+#   This is BAD! Try make library in parent directory? Problem with different objects.
 #
 {..}.c{$(OBJDIR)}.obj:
-    $(CC) $(CFLAGS) -c -Fo$(OBJDIR)\$(@B).obj $<
+    $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES) -c -Fo$(OBJDIR)\$(@B).obj $<
 
 {..}.asm{$(OBJDIR)}.obj:
     $(AS) $(ASFLAGS) -Fdo:$(OBJDIR) $<
 
 
-# Object files. All objects should be prefixed with $(OBJDIR)!
+#
+# Object files. Prefix with OBJDIR and one space before the '\'.
+#
 OBJS = \
 $(OBJDIR)\fxapi.obj \
 $(OBJDIR)\fxcva.obj \
@@ -132,57 +154,40 @@ $(OBJDIR)\x86.obj \
 $(OBJDIR)\x86a.obj \
 $(OBJDIR)\common_x86.obj \
 $(OBJDIR)\mmx_blend.obj \
-$(OBJDIR)\vertex.obj
+$(OBJDIR)\vertex.obj \
+$(OBJDIR)\mem.obj
 
 
+#
+# Libraries. One space before the '\'.
+#
+LIBS = \
+$(PDWIN32_LIB)/$(ODINCRT).lib \
+$(PDWIN32_LIB)\kernel32.lib \
+$(PDWIN32_LIB)\gdi32.lib \
+$(PDWIN32_LIB)\user32.lib \
+$(PDWIN32_LIB)\glide2x.lib \
+$(RTLLIB_O) \
+os2386.lib
+
+
+#
 # Target name - name of the dll without extention and path.
+#
 TARGET = opengl32
 
 
-# All rule - build objs, target dll, copies dll to bin and makes libs.
-all:    $(OBJDIR) \
-        $(OBJDIR)\$(TARGET).dll \
-        $(PDWIN32_BIN)\Glide\$(TARGET).dll \
-        lib
-
-
-# Lib rule - build importlibrary (and evt. other libs)
-lib: $(TARGET).lib $(PDWIN32_LIB)\$(TARGET).lib
-
-
-# Dll rule - builds the target dll.
-$(OBJDIR)\$(TARGET).dll: $(OBJS) $(TARGET).def $(OBJDIR)\$(TARGET).lrf
-    -4 $(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lrf
-
-
-# Linker file - creates the parameter file passed on to the linker.
-$(OBJDIR)\$(TARGET).lrf: makefile
-    @echo Creating file <<$@
-/OUT:$(OBJDIR)\$(TARGET).dll
-/MAP:$(OBJDIR)\$(TARGET).map
-$(OBJS)
-$(PDWIN32_LIB)/$(ODINCRT).lib
-$(PDWIN32_LIB)\KERNEL32.LIB
-$(PDWIN32_LIB)\GDI32.LIB
-$(PDWIN32_LIB)\USER32.LIB
-$(PDWIN32_LIB)\glide2x.lib
-$(RTLLIB_O)
-OS2386.LIB
-$(TARGET).def
-<<keep
-
-
-# Copy rule.
-$(PDWIN32_BIN)\Glide\$(TARGET).dll: $(OBJDIR)\$(TARGET).dll
-    $(CP) $** $@
-
-
-# Dep rule - makes depenencies for C, C++ and Asm files.
-dep:
-    $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win -I..\..\glut -I..\GL -I.. -I$(PDWIN32_INCLUDE)\glide \
-        *.c *.cpp *.h *.asm *.inc ..\*.c $(PDWIN32_INCLUDE)\*.h
-
-
+#
 # Includes the common rules.
+#
 !include $(PDWIN32_INCLUDE)/pdwin32.post
+
+
+#
+# Additional dep rule - adds dependencies for some additional headers.
+#
+mydep:
+    $(DEPEND) -a $(CINCLUDES) \
+        ..\*.c ..\*.asm ..\*.h ..\GL\*.h ..\..\glut\*.h ..\..\glide\cvg\glide\*.h \
+        ..\..\glide\swlibs\fxmisc\*.h ..\..\glide\cvg\incsrc\*.h
 

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2000-03-06 23:33:49 bird Exp $
+# $Id: makefile,v 1.5 2000-11-19 08:58:14 bird Exp $
 
 #
 # Odin32 API
@@ -6,30 +6,39 @@
 #       glu/nurbs/nurbtess makefile
 #
 
+
+#
 # Directory macros.
+#
 PDWIN32_INCLUDE = ..\..\..\..\..\include
 PDWIN32_LIB     = ..\..\..\..\..\lib
 PDWIN32_BIN     = ..\..\..\..\..\$(OBJDIR)
 PDWIN32_TOOLS   = ..\..\..\..\..\tools\bin
 
 
-# Local cleanup only.
-LOCALCLEAN = 1
+#
+# Tell buildenvironmet to build an object library and to invoke additional dep rule.
+#
+LIBTARGET = 1
+ADDITIONAL_DEP = mydep
 
 
+#
 # Compiler, tools, and interference rules.
+#
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 
 
-# Flag overloads and local macros.
-CLEANEXTRAS =
+#
+# Flag overloads.
+#
+CINCLUDES   = $(CINCLUDES) -I..\internals -I..\nurbtess -I..\..\..\mesa\GL -I..\..\include
+CDEFINES    = $(CDEFINES)  -DNDEBUG
 
-CINCLUDE    = -I..\internals -I..\nurbtess -I..\..\..\mesa\GL -I..\..\include
-CFLAGS      = $(CFLAGS) $(CINCLUDE) -DNDEBUG
-CXXFLAGS    = $(CXXFLAGS) $(CINCLUDE) -DNDEBUG
 
-
-# Object files. All objects should be prefixed with $(OBJDIR)!
+#
+# Object files. Prefix with OBJDIR and one space before the '\'.
+#
 OBJS = \
 $(OBJDIR)\directedLine.obj \
 $(OBJDIR)\gridWrap.obj \
@@ -52,31 +61,22 @@ $(OBJDIR)\monoChain.obj \
 $(OBJDIR)\monoPolyPart.obj
 
 
+#
 # Target name - name of the library without extention and path.
+#
 TARGET = nurbtess
 
 
-# Create all libraries (not importlibraries)
-all:    $(OBJDIR) \
-        $(OBJDIR)\$(TARGET).lib
-
-
-# Create all libraries (not importlibraries)
-libs: all
-
-
-# Lib rule - build importlibrary (and evt. other libs)
-$(OBJDIR)\$(TARGET).lib: $(OBJS)
-    $(RM) $@
-    $(ILIB) $(ILIBFLAGS) $@ $(OBJS);
-
-
-# Dep rule - makes depenencies for C, C++ and Asm files.
-dep:
-    $(DEPEND) $(CINCLUDE) *.c *.cpp *.h *.asm *.inc  \
-        ..\..\mesa\*.h ..\nurbtess\*.h ..\internals\*.h ..\..\include\*.h
-
-
+#
 # Includes the common rules.
+#
 !include $(PDWIN32_INCLUDE)/pdwin32.post
+
+
+#
+# Additional dep rule - adds dependencies for some additional headers.
+#
+mydep:
+    $(DEPEND) -a $(CINCLUDES) \
+        ..\..\mesa\*.h ..\nurbtess\*.h ..\internals\*.h ..\..\include\*.h
 

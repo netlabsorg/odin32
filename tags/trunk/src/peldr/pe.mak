@@ -1,10 +1,15 @@
-# $Id: makefile,v 1.13 2000-11-19 09:13:58 bird Exp $
+# $Id: pe.mak,v 1.1 2000-11-19 08:57:05 bird Exp $
 
 #
 # Odin32 API
 #
-#       lz32.dll makefile
+#       pe.exe makefile
 #
+
+#
+# Tell that we're producing an executable
+#
+EXETARGET = 1
 
 
 #
@@ -14,28 +19,33 @@
 
 
 #
+# Overrides.
+#
+!if "$(VAC3)" == "1" || "$(VAC36)" == "1"
+LD2FLAGS = /PMTYPE:pm /STACK:0x100000 /NOBASE
+!else
+!error Compiler not supported yet
+!endif
+
+
+#
 # Object files. Prefix with OBJDIR and one space before the '\'.
 #
 OBJS = \
-$(OBJDIR)\lz32.obj \
-$(OBJDIR)\lz32rsrc.obj \
-$(DLLENTRY)
+$(OBJDIR)\pe.obj
 
 
 #
 # Libraries. One space before the '\'.
 #
 LIBS = \
-$(PDWIN32_LIB)/$(ODINCRT).lib \
-$(PDWIN32_LIB)/kernel32.lib \
-os2386.lib \
-$(RTLLIB_O)
+os2386.lib
 
 
 #
 # Target name - name of the dll without extention and path.
 #
-TARGET = lz32
+TARGET  = pe
 
 
 #
