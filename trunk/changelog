@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.2401 2002-12-28 14:01:25 sandervl Exp $ */
+/* $Id: changelog,v 1.2402 2002-12-29 14:10:30 sandervl Exp $ */
+
+ 2002-12-29: Sander van Leeuwen <sandervl@innotek   >
+    - DDRAW:    o Cleanup
+    - KERNEL32: o Fix return value in case of error in SetThreadPriority
+                o Fixed GetSystemTimeAsFileTime
 
  2002-12-28: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Changed default WM_MOUSEACTIVATE handler (like Wine now)
