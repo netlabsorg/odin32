@@ -1,4 +1,4 @@
-/* $Id: wprocess.h,v 1.10 1999-11-30 14:19:02 sandervl Exp $ */
+/* $Id: wprocess.h,v 1.11 1999-11-30 14:32:50 sandervl Exp $ */
 /*
  * Process help functions
  *
@@ -14,7 +14,9 @@
 #define WIN32_TIBSEL
 
 #ifndef OS2_INCLUDED
-#include <win\process.h>
+#include <winprocess.h>
+#else
+typedef ULONG PDB;
 #endif
 #include <thread.h>
 
@@ -38,9 +40,11 @@ extern PDB ProcessPDB;
 TEB  *WIN32API GetThreadTEB();
 THDB *WIN32API GetThreadTHDB();
 
-inline PDB * WINE_UNUSED PROCESS_Current(void)
+#ifndef OS2_INCLUDED
+inline PDB * PROCESS_Current(void)
 {
     return NtCurrentTeb()->process;
 }
+#endif
 
 #endif 
