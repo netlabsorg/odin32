@@ -1,4 +1,4 @@
-/* $Id: winexe.cpp,v 1.4 1999-06-17 18:21:43 phaller Exp $ */
+/* $Id: winexe.cpp,v 1.5 1999-06-17 18:25:22 phaller Exp $ */
 
 /*
  *
@@ -30,12 +30,7 @@
 #include "pefile.h"
 #include "cio.h"
 
-
-// PH: to soothe the compiler
-#define BY_HANDLE_FILE_INFORMATION void
-#define LPFILETIME void*
-#define OFSTRUCT void
-
+#include "conwin.h"          // Windows Header for console only
 #include "console.h"
 #include "handlemanager.h"
 
