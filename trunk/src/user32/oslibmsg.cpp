@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.52 2001-12-12 16:40:43 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.53 2002-02-26 11:12:25 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -606,18 +606,6 @@ BOOL OSLibPostMessageDirect(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam)
     return WinPostMsg(hwnd, msg, (MPARAM)wParam, (MPARAM)lParam);
 }
 //******************************************************************************
-BOOL    _System _O32_PostThreadMessage( DWORD, UINT, WPARAM, LPARAM );
-
-inline BOOL O32_PostThreadMessage(DWORD a, UINT b, WPARAM c, LPARAM d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = _O32_PostThreadMessage(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-}
 //******************************************************************************
 BOOL OSLibPostThreadMessage(ULONG threadid, UINT msg, WPARAM wParam, LPARAM lParam, BOOL fUnicode)
 {

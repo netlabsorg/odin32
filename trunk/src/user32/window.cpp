@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.120 2002-02-12 18:07:21 sandervl Exp $ */
+/* $Id: window.cpp,v 1.121 2002-02-26 11:12:26 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -1633,6 +1633,8 @@ HWND WIN32API WindowFromPoint( POINT point)
                     dprintf(("WindowFromPoint (%d,%d) %x->%x\n", point.x, point.y, hwndOS2, hwnd));
                     return hwnd;
                 }
+                hwnd = GetWindow(hwnd, GW_HWNDNEXT);
+#if 0
                 //try siblings
                 HWND hwndSibling;
                 HWND hwndParent = GetParent(hwnd);
@@ -1650,6 +1652,7 @@ HWND WIN32API WindowFromPoint( POINT point)
                     }
                 }
                 hwnd = hwndParent;
+#endif
         }
     }
     dprintf(("WindowFromPoint (%d,%d) %x->1\n", point.x, point.y, hwndOS2));
@@ -1870,14 +1873,23 @@ HWND WIN32API GetLastActivePopup(HWND hWnd)
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API GetWindowThreadProcessId(HWND hwnd,  PDWORD lpdwProcessId)
+DWORD WIN32API GetWindowThreadProcessId(HWND hwnd, PDWORD lpdwProcessId)
 {
-    DWORD dwThreadId;
+  Win32BaseWindow *window;
+  DWORD dwThreadId;
 
-    dwThreadId = O32_GetWindowThreadProcessId(Win32ToOS2Handle(hwnd), lpdwProcessId);
-    if(dwThreadId == 0) {
-        dprintf(("!WARNING! GetWindowThreadProcessId %x failed!!", hwnd));
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if(!window) {
+        dprintf(("GetWindowThreadProcessId, window %x not found", hwnd));
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        return 0;
     }
+    dwThreadId = window->getThreadId();
+    if(lpdwProcessId) {
+        *lpdwProcessId = window->getProcessId();
+    }
+    RELEASE_WNDOBJ(window);
+    
     return dwThreadId;
 }
 //******************************************************************************
