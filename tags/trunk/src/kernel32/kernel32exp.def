@@ -1,4 +1,4 @@
-; $Id: kernel32exp.def,v 1.16 1999-08-25 14:27:06 sandervl Exp $
+; $Id: kernel32exp.def,v 1.17 1999-08-28 19:33:44 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -814,7 +814,7 @@ WriteLogError                  @1214
 _RegisterExe@44                @1203
 enter__6VMutexFUl                                               @1204
 leave__6VMutexFv                                                @1205
-__ct__6VMutexFv                                                 @1206
+__ct__6VMutexFi                                                 @1206
 __dt__6VMutexFv                                                 @1207
 ;;;_DLLExitList@4                 @1208
 _RegisterDll@44                @1209

@@ -1,4 +1,4 @@
-/* $Id: vmutex.cpp,v 1.5 1999-08-24 12:23:25 sandervl Exp $ */
+/* $Id: vmutex.cpp,v 1.6 1999-08-28 19:33:44 sandervl Exp $ */
 
 /*
  * Mutex class
@@ -17,11 +17,11 @@
 
 /******************************************************************************/
 /******************************************************************************/
-VMutex::VMutex() : waiting(0)
+VMutex::VMutex(int fShared) : waiting(0)
 {
  APIRET rc;
 
-  rc = DosCreateMutexSem(NULL, &sem_handle, 0, FALSE);
+  rc = DosCreateMutexSem(NULL, &sem_handle, (fShared) ? DC_SEM_SHARED : 0, FALSE);
   if(rc != 0) {
     dprintf(("Error creating mutex %X\n", rc));
     sem_handle = 0;

@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.31 1999-08-27 16:51:00 sandervl Exp $
+; $Id: kernel32.def,v 1.32 1999-08-28 19:33:44 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -951,7 +951,7 @@ EXPORTS
 ;VMutex
    enter__6VMutexFUl                                              @1204
    leave__6VMutexFv                                               @1205
-   __ct__6VMutexFv                                                @1206
+   __ct__6VMutexFi                                                @1206
    __dt__6VMutexFv                                                @1207
 ;Used by tibfix page in dll (change ordinal in lx.cpp too!!)
 ;   DLLExitList                   = _DLLExitList@4                @1208
