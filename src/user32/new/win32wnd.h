@@ -1,4 +1,4 @@
-/* $Id: win32wnd.h,v 1.26 1999-08-27 17:50:57 dengert Exp $ */
+/* $Id: win32wnd.h,v 1.27 1999-08-28 14:09:30 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -44,9 +44,7 @@ typedef struct
 #define WM_WIN32_POSTMESSAGEA   0x4000
 #define WM_WIN32_POSTMESSAGEW   0x4001
 
-#define MAX_WINDOW_NAMELENGTH   256
-
-class Win32Window : private GenericObject, private ChildWindow
+class Win32Window : public GenericObject, private ChildWindow
 {
 public:
         DWORD   magic;
@@ -90,6 +88,8 @@ virtual  WORD   GetWindowWord(int index);
          HWND   getWindowHandle()               { return Win32Hwnd; };
          HWND   getOS2WindowHandle()            { return OS2Hwnd; };
          HWND   getOS2FrameWindowHandle()       { return OS2HwndFrame; };
+ Win32WndClass *getWindowClass()                { return windowClass; };
+
          BOOL   isFrameWindow()                 { return OS2Hwnd != OS2HwndFrame; };
    Win32Window *getParent()                     { return (Win32Window *)ChildWindow::GetParent(); };
          void   setParent(Win32Window *pwindow) { ChildWindow::SetParent((ChildWindow *)pwindow); };
@@ -145,7 +145,8 @@ void   setWindowRect(LONG left, LONG top, LONG right, LONG bottom)
          BOOL   GetWindowRect(PRECT pRect);
          int    GetWindowTextLengthA();
          int    GetWindowTextA(LPSTR lpsz, int cch);
-         BOOL   SetWindowTextA(LPCSTR lpsz);
+         BOOL   SetWindowText(LPSTR lpsz);
+          BOOL  hasWindowName(LPSTR wndname, BOOL fUnicode = 0);
 
        LRESULT  SendMessageA(ULONG msg, WPARAM wParam, LPARAM lParam);
        LRESULT  SendMessageW(ULONG msg, WPARAM wParam, LPARAM lParam);
@@ -157,6 +158,9 @@ void   setWindowRect(LONG left, LONG top, LONG right, LONG bottom)
          void   NotifyParent(UINT Msg, WPARAM wParam, LPARAM lParam);
 
 Win32WndClass  *getClass()  { return windowClass; };
+
+    static HWND FindWindowEx(HWND hwndParent, HWND hwndChildAfter, LPSTR lpszClass, LPSTR lpszWindow,
+                             BOOL fUnicode = 0);
 
 static   HWND  Win32ToOS2Handle(HWND hwnd)
 {
@@ -218,9 +222,9 @@ protected:
  Win32Resource *menuResource;
  Win32Resource *iconResource;
 
-        char    windowNameA[MAX_WINDOW_NAMELENGTH];
-        WCHAR   windowNameW[MAX_WINDOW_NAMELENGTH];
-        ULONG   wndNameLength;
+        char   *windowNameA;
+        WCHAR  *windowNameW;
+        ULONG   wndNameLength; //including 0 terminator
 
         ULONG  *userWindowLong;
         ULONG   nrUserWindowLong;

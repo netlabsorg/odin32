@@ -1,4 +1,4 @@
-/* $Id: win32class.cpp,v 1.7 1999-08-24 09:20:30 sandervl Exp $ */
+/* $Id: win32class.cpp,v 1.8 1999-08-28 14:09:30 sandervl Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -27,14 +27,14 @@ Win32WndClass::Win32WndClass(WNDCLASSEXA *wndclass, BOOL isUnicode) : GenericObj
         if(isUnicode) {
                 INT len = lstrlenW((LPWSTR)wndclass->lpszClassName)+1;
 
-                classNameA = (PCHAR)malloc(len);
-                classNameW = (WCHAR *)malloc(len*sizeof(WCHAR));
+                classNameA = (PCHAR)_smalloc(len);
+                classNameW = (WCHAR *)_smalloc(len*sizeof(WCHAR));
         }
         else {
                 INT len = strlen(wndclass->lpszClassName)+1;
 
-                classNameA = (PCHAR)malloc(len);
-                classNameW = (WCHAR *)malloc(len*sizeof(WCHAR));
+                classNameA = (PCHAR)_smalloc(len);
+                classNameW = (WCHAR *)_smalloc(len*sizeof(WCHAR));
         }
         if(classNameA == NULL || classNameW == NULL) {
                 dprintf(("Win32Class ctr; classNameA/classNameW == NULL"));
@@ -89,7 +89,7 @@ Win32WndClass::Win32WndClass(WNDCLASSEXA *wndclass, BOOL isUnicode) : GenericObj
 
   //User data class words/longs
   if(nrExtraClassWords) {
-        userClassLong = (ULONG *)malloc(nrExtraClassWords);
+        userClassLong = (ULONG *)_smalloc(nrExtraClassWords);
         if(userClassLong == NULL) {
                 dprintf(("Win32Class ctr: userClassLong == NULL!"));
                 exit(1);
@@ -114,6 +114,18 @@ Win32WndClass::~Win32WndClass()
         assert(menuNameW);
         free(menuNameW);
   }
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32WndClass::hasClassName(LPSTR classname, BOOL fUnicode)
+{
+  if(HIWORD(classname) == 0) {
+	return classAtom == (DWORD)classname;
+  }
+  if(fUnicode) {
+	return (lstrcmpW(classNameW, (LPWSTR)classname) == 0);
+  }
+  else	return (strcmp(classNameA, classname) == 0);
 }
 //******************************************************************************
 //******************************************************************************
@@ -237,12 +249,12 @@ void Win32WndClass::setMenuName(LPSTR newMenuName)
   }
   if(HIWORD(newMenuName)) {
         if(isUnicode) {
-                menuNameA = (PCHAR)malloc(lstrlenW((LPWSTR)newMenuName)+1);
-                menuNameW = (WCHAR *)malloc((lstrlenW((LPWSTR)newMenuName)+1)*sizeof(WCHAR));
+                menuNameA = (PCHAR)_smalloc(lstrlenW((LPWSTR)newMenuName)+1);
+                menuNameW = (WCHAR *)_smalloc((lstrlenW((LPWSTR)newMenuName)+1)*sizeof(WCHAR));
         }
         else {
-                menuNameA = (PCHAR)malloc(strlen(newMenuName)+1);
-                menuNameW = (WCHAR *)malloc((strlen(newMenuName)+1)*sizeof(WCHAR));
+                menuNameA = (PCHAR)_smalloc(strlen(newMenuName)+1);
+                menuNameW = (WCHAR *)_smalloc((strlen(newMenuName)+1)*sizeof(WCHAR));
         }
         if(menuNameA == NULL || menuNameW == NULL) {
                 dprintf(("Win32Class ctr; menuName/menuNameW == NULL"));

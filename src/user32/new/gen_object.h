@@ -1,4 +1,4 @@
-/* $Id: gen_object.h,v 1.2 1999-08-24 09:20:30 sandervl Exp $ */
+/* $Id: gen_object.h,v 1.3 1999-08-28 14:09:29 sandervl Exp $ */
 /*
  * Generic Object Class for OS/2
  *
@@ -7,6 +7,8 @@
  */
 #ifndef __GEN_OBJECT_H__
 #define __GEN_OBJECT_H__
+
+#include "heapshared.h"
 
 #define OBJTYPE_WINDOW 		0
 #define OBJTYPE_DIALOG		1
@@ -36,6 +38,26 @@ GenericObject *GetNext()	{ return next;  };
 
 static	 void  enterMutex(DWORD objType);
 static	 void  leaveMutex(DWORD objType);
+
+#ifdef __DEBUG_ALLOC__
+	void *operator new(size_t size, const char *filename, size_t lineno)
+	{
+		return _umalloc(sharedHeap, size);
+	}
+	void operator delete(void *location, const char *filename, size_t lineno)
+	{
+		free(location);
+	}
+#else
+	void *operator new(size_t size)
+	{
+		return _umalloc(sharedHeap, size);
+	}
+	void operator delete(void *location)
+	{
+		free(location);
+	}
+#endif
 
 private:
 

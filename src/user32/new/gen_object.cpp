@@ -1,6 +1,10 @@
-/* $Id: gen_object.cpp,v 1.3 1999-08-24 09:20:30 sandervl Exp $ */
+/* $Id: gen_object.cpp,v 1.4 1999-08-28 14:09:29 sandervl Exp $ */
 /*
  * Generic Object Class for OS/2
+ *
+ * Allocated in shared memory, so other processes can access the objects
+ * 
+ * NOTE: Requires safety precautions to use objects in multiple threads or processes
  *
  * Copyright 1999 Sander van Leeuwen (sandervl@xs4all.nl)
  *
