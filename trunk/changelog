@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2415 2003-01-03 11:26:20 sandervl Exp $ */
+/* $Id: changelog,v 1.2416 2003-01-03 11:27:06 sandervl Exp $ */
 
  2002-01-03: Dietrich Teickner <Dietrich_Teickner@t-online   >
     - KERNEL32: o Convert timezone names in Set/GetTimeZoneInformation as
@@ -58,11 +58,11 @@
                   in the system LIBPATH.
     - GDI32:    o SetDIBitsToDevice fix for inverted blitting
 
- 2001-12-28: Dietrich Teickner <Dietrich_Teickner@t-online   >
+ 2002-12-28: Dietrich Teickner <Dietrich_Teickner@t-online   >
     - USER32:   o Listbox fix for WM_SETFONT; update listbox height
     - SHELL32:  o FO_RENAME updates for shell file operations
 
- 2001-12-28: Jochen Sch„fer <josch@joschs-robotics   >
+ 2002-12-28: Jochen Sch„fer <josch@joschs-robotics   >
     - GDI32:    o Compile fixes for IBM VAC 3.6.5
 
  2002-12-27: Sander van Leeuwen <sandervl@innotek   >
@@ -78,7 +78,7 @@
     - USER32:   o Send WM_H/VSCROLL with SB_THUMBTRACK when the scrollbar thumb
                   receives a WM_LBUTTONDOWN message
 
- 2001-12-19: Dietrich Teickner <Dietrich_Teickner@t-online   >
+ 2002-12-19: Dietrich Teickner <Dietrich_Teickner@t-online   >
     - KERNEL32: o GetFileTime & SetFileTime fixes; need to convert between
                   UTC and local file time
 
@@ -207,7 +207,7 @@
     - OLE32, OLEAUT32:
                 o Wine resync
 
- 2001-11-12: Dietrich Teickner <Dietrich_Teickner@t-online   >
+ 2002-11-12: Dietrich Teickner <Dietrich_Teickner@t-online   >
     - COMCTL32: o Wine resync (comboex)
 
  2002-11-05: Platon Fomichev <platon@innotek   >
@@ -251,7 +251,7 @@
                   with heavy threaded apps on SMP systems)
                 o Fix for IP logging
 
- 2001-10-08: Dietrich Teickner <Dietrich_Teickner@t-online   >
+ 2002-10-08: Dietrich Teickner <Dietrich_Teickner@t-online   >
     - SHELL32:  o SHFileOperationA updates
 
  2002-10-08: Sander van Leeuwen <sandervl@innotek   >
@@ -354,7 +354,7 @@
     - USER32:   o Combobox fix to update selected item when the control is rolled
                   up
 
- 2001-09-15: Dietrich Teickner <Dietrich_Teickner@t-online   >
+ 2002-09-15: Dietrich Teickner <Dietrich_Teickner@t-online   >
     - SHELL32:  o Wine resync for shfileop.c
 
  2002-09-14: Sander van Leeuwen <sandervl@innotek   >
