@@ -1,4 +1,4 @@
-/* $Id: oslibmisc.cpp,v 1.11 2000-09-12 04:27:45 bird Exp $ */
+/* $Id: oslibmisc.cpp,v 1.12 2001-03-25 22:35:37 sandervl Exp $ */
 /*
  * Misc OS/2 util. procedures
  *
@@ -233,14 +233,15 @@ char *OSLibStripPath(char *path)
 {
   /* @@@PH what does this function do ? Strip the path from a FQFN name ? */
   char *pszFilename;
+  char *pszFilename1;
 
-  pszFilename = strrchr(path, '\\');                 /* find rightmost slash */
-  if (pszFilename != NULL)
+  pszFilename  = strrchr(path, '\\');                 /* find rightmost backslash */
+  pszFilename1 = strrchr(path, '/');                  /* find rightmost slash */
+  if(pszFilename > pszFilename1 && pszFilename != NULL)
     return (++pszFilename);              /* return pointer to next character */
 
-  pszFilename = strrchr(path, '/');                  /* find rightmost slash */
-  if (pszFilename != NULL)
-    return (++pszFilename);              /* return pointer to next character */
+  if (pszFilename1 != NULL)
+    return (++pszFilename1);              /* return pointer to next character */
 
   return (path);                                     /* default return value */
 }
