@@ -1,4 +1,16 @@
- /* $Id: ChangeLog,v 1.1104 2000-09-04 17:52:38 bird Exp $ */
+ /* $Id: ChangeLog,v 1.1105 2000-09-04 18:17:54 sandervl Exp $ */
+
+ 2000-09-04: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: GetDiskFreeSpaceExA: added support for 64 bits disk size
+                Rewrote GetDiskFreeSpace (no longer uses Open32)
+    - USER32:   SetWindowLong GWL_WNDPROC changes/fixes
+		Type of SetWindowLong determines new window proc type
+                UNLESS the new window proc has already been registered
+                (use the old type in that case) (VERIFIED in NT 4, SP6)
+                Return original window procedure if types match (SetWindowLongX & proc type)
+                otherwise window proc wrapper.
+                Fixes wrong strings in Notes 5.0. (new string problems, but they
+                are caused by something else)
 
  2000-09-04: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Win32k:   Improved error reporting.
@@ -16,7 +28,7 @@
                 Added prototype for HMDeviceIoControl which Sander forgot.
 
  2000-09-03: Patrick Haller <phaller@gmx.net>
-    - KERNEL32: - NLS sync with WINE
+    - KERNEL32: NLS sync with WINE
 
  2000-09-03: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: More logging;
