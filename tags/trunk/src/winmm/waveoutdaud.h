@@ -1,4 +1,4 @@
-/* $Id: waveoutdaud.h,v 1.1 2001-03-23 16:23:47 sandervl Exp $ */
+/* $Id: waveoutdaud.h,v 1.2 2001-03-24 15:40:04 sandervl Exp $ */
 
 /*
  * Wave playback class (DirectAudio)
@@ -11,6 +11,11 @@
 #define __DWAVEOUTEX_H__
 
 #include "waveoutbase.h"
+#include <daudio.h>
+
+#ifdef _OS2WIN_H
+typedef DWORD HEV;
+#endif
 
 class DAudioWaveOut : public WaveOut
 {
@@ -29,6 +34,8 @@ public:
      static   BOOL     queryFormat(ULONG formatTag, ULONG nChannels,
                                    ULONG nSamplesPerSec, ULONG sampleSize);
 
+
+     static   BOOL     isDirectAudioAvailable();
 
 protected:
 

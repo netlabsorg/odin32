@@ -1,4 +1,4 @@
-/* $Id: waveoutdaud.cpp,v 1.1 2001-03-23 16:23:46 sandervl Exp $ */
+/* $Id: waveoutdaud.cpp,v 1.2 2001-03-24 15:40:04 sandervl Exp $ */
 
 /*
  * Wave playback class (DirectAudio)
@@ -72,7 +72,7 @@ DAudioWaveOut::DAudioWaveOut(LPWAVEFORMATEX pwfx, ULONG fdwOpen, ULONG nCallback
     init.sMode          = PCM;  //todo!!
 
     rc = DosDevIOCtl(hDAudioDrv, DAUDIO_IOCTL_CAT, DAUDIO_OPEN, NULL, 0,
- 	                 &ParmLength, &init, DataLength, &DataLength);
+                     &ParmLength, &init, DataLength, &DataLength);
     if(rc) {
         dprintf(("DosDevIOCtl failed with error %d\n", rc));
         ulError = MMSYSERR_NODRIVER;
@@ -92,7 +92,7 @@ DAudioWaveOut::DAudioWaveOut(LPWAVEFORMATEX pwfx, ULONG fdwOpen, ULONG nCallback
     }
     cmd.Thread.hSemaphore = hSem;
     rc = DosDevIOCtl(hDAudioDrv, DAUDIO_IOCTL_CAT, DAUDIO_REGISTER_THREAD, NULL, 0,
- 	                 &ParmLength, &cmd, DataLength, &DataLength);
+                     &ParmLength, &cmd, DataLength, &DataLength);
     if(rc) {
         dprintf(("DosDevIOCtl failed with error %d\n", rc));
         ulError = MMSYSERR_NODRIVER;
@@ -336,6 +336,32 @@ fail:
 }
 /******************************************************************************/
 /******************************************************************************/
+BOOL DAudioWaveOut::isDirectAudioAvailable()
+{
+    static BOOL fAvailable = FALSE;
+    static BOOL fTested    = FALSE;
+
+    APIRET          rc;
+    ULONG           action;
+    HFILE           hDriver;
+
+    if(!fTested) {
+        rc = DosOpen("DAUDIO1$", &hDriver, &action, 0,
+                     FILE_NORMAL, FILE_OPEN, OPEN_ACCESS_READWRITE |
+                     OPEN_SHARE_DENYNONE | OPEN_FLAGS_WRITE_THROUGH,
+                     NULL );
+        fTested = TRUE;
+        if(rc) {
+            return FALSE;
+        }
+        DosClose(hDriver);
+        fAvailable = TRUE;
+    }
+    return fAvailable;
+
+}
+/******************************************************************************/
+/******************************************************************************/
 MMRESULT DAudioWaveOut::setVolume(ULONG ulVol)
 {
     DAUDIO_CMD cmd;
@@ -353,7 +379,7 @@ MMRESULT DAudioWaveOut::sendIOCTL(ULONG cmd, DAUDIO_CMD *pDataPacket)
     DataLength = sizeof(DAUDIO_CMD);
 
     rc = DosDevIOCtl(hDAudioDrv, DAUDIO_IOCTL_CAT, cmd, NULL, 0,
- 	                 &ParmLength, pDataPacket, DataLength, &DataLength);
+                     &ParmLength, pDataPacket, DataLength, &DataLength);
     if(rc) {
         dprintf(("DosDevIOCtl failed with error %d (command %d)", rc, cmd));
         return MMSYSERR_ERROR;
@@ -416,7 +442,9 @@ DWORD WIN32API DAudioThreadHandler(LPVOID pUserData)
             dprintf(("DosWaitEventSem failed with error %d\n", rc));
             return 0;
         }
-        dwave->handler();
+        for(int i=0;i<postcnt;i++) {
+            dwave->handler();
+        }
     }
 
 }
