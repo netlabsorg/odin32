@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.40 2004-01-11 11:42:22 sandervl Exp $ */
+/* $Id: text.cpp,v 1.41 2004-01-14 11:07:35 sandervl Exp $ */
 
 /*
  * GDI32 text apis
@@ -26,6 +26,7 @@
 #include "dibsect.h"
 #include "ft2supp.h"
 #include "font.h"
+#include <math.h>
 
 #define DBG_LOCALLOG    DBG_text
 #include "dbglocal.h"
@@ -33,6 +34,21 @@
 #define ELLIPSIS    "..."
 #define ELLIPSISLEN 3
 
+//******************************************************************************
+//******************************************************************************
+CHAR getBrokenDBCS( LPCSTR strA, INT lenA )
+{
+    int i;
+
+    for( i = 0; i < lenA; i++ )
+        if( IsDBCSLeadByte( strA[ i ]))
+            i++;
+
+    if( lenA < i ) // terminated at DBCS lead byte
+        return strA[ lenA ];
+
+    return 0;
+}
 //******************************************************************************
 //******************************************************************************
 UINT WINAPI GetTextCharsetInfo(
@@ -90,6 +106,7 @@ BOOL InternalTextOutAW(HDC hdc,int X,int Y,UINT fuOptions,
   RECTLOS2 pmRect;
   POINTLOS2 ptl;
   LONG hits;
+  RECT rect;
 
   if (!pHps || (cbCount < 0) || (((lpszStringA == NULL && !fUnicode) || (lpszStringW == NULL && fUnicode)) && (cbCount != 0)))
   {
@@ -99,7 +116,7 @@ BOOL InternalTextOutAW(HDC hdc,int X,int Y,UINT fuOptions,
   }
 
   if(cbCount == -1) {
-       if(fUnicode) 
+       if(fUnicode)
             cbCount = lstrlenW(lpszStringW);
        else cbCount = lstrlenA(lpszStringA);
   }
@@ -127,6 +144,29 @@ BOOL InternalTextOutAW(HDC hdc,int X,int Y,UINT fuOptions,
   int oldyinv = GpiQueryYInversion(pHps->hps);
   Y = oldyinv - Y;
 #endif
+
+  // When using font association, the height of DBCS and SBCS chars may be different.
+  // In this case, background color make stair below chars
+  if( IsDBCSEnv() && !lprc && ( GetBkMode( hdc ) & OPAQUE ))
+  {
+      SIZE   size;
+      TEXTMETRICA tmA;
+
+      if( fUnicode )
+        GetTextExtentPointW( hdc, lpszStringW, cbCount, &size );
+      else
+        GetTextExtentPointA( hdc, lpszStringA, cbCount, &size );
+
+      GetTextMetricsA( hdc, &tmA );
+
+      rect.left = X;
+      rect.right = X + size.cx;
+      rect.top = Y;
+      rect.bottom = Y + tmA.tmHeight;
+
+      lprc = &rect;
+      fuOptions |= ETO_OPAQUE;
+  }
 
   //CB: add metafile info
 
@@ -263,7 +303,7 @@ BOOL InternalTextOutAW(HDC hdc,int X,int Y,UINT fuOptions,
   ptl.y -= vertAdjust;
 #endif
 
-  if(fUnicode) 
+  if(fUnicode)
        hits = FT2Module.Ft2CharStringPosAtW(pHps->hps,&ptl,&pmRect,flOptions,cbCount,lpszStringW,lpDx, fuOptions & ETO_GLYPH_INDEX);
   else hits = FT2Module.Ft2CharStringPosAtA(pHps->hps,&ptl,&pmRect,flOptions,cbCount,lpszStringA,lpDx, fuOptions & ETO_GLYPH_INDEX);
 
@@ -382,9 +422,30 @@ BOOL WIN32API GetTextExtentPointA(HDC hdc, LPCTSTR lpsz, int cbString,
 {
    BOOL ret = FALSE;
    INT  wlen;
-   LPWSTR p = FONT_mbtowc(hdc, lpsz, cbString, &wlen, NULL);
+   LPWSTR p;
+   CHAR brokenDBCS = 0;
+
+   if( IsDBCSEnv())
+      brokenDBCS = getBrokenDBCS( lpsz, cbString );
+
+   if( brokenDBCS )
+      cbString--;
+
+   p = FONT_mbtowc(hdc, lpsz, cbString, &wlen, NULL);
    if (p) {
        ret = GetTextExtentPointW( hdc, p, wlen, lpsSize );
+       // For broken DBCS. Correct for FIXED WIDTH, but approx. for VARIABLE WIDTH
+       if( brokenDBCS )
+       {
+          TEXTMETRICA tmA;
+
+          GetTextMetricsA( hdc, &tmA );
+          lpsSize->cx += tmA.tmAveCharWidth;
+
+          if( cbString == 0 )
+            lpsSize->cy = tmA.tmHeight;
+       }
+
        HeapFree( GetProcessHeap(), 0, p );
    }
    else DebugInt3();
@@ -398,7 +459,6 @@ BOOL WIN32API GetTextExtentPointW(HDC    hdc,
                                   PSIZE  lpSize)
 {
    BOOL       rc;
-   POINTLOS2  pts[TXTBOXOS_COUNT];
    POINTLOS2  widthHeight = { 0, 0};
    pDCData    pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
 
@@ -435,8 +495,6 @@ BOOL WIN32API GetTextExtentPointW(HDC    hdc,
       SIZE  newSize;
 
       dprintf(("WARNING: string longer than 512 chars; splitting up"));
-      lpSize->cx = 0;
-      lpSize->cy = 0;
       while(cbString) {
          cbStringNew = min(500, cbString);
          rc = GetTextExtentPointW(hdc, lpString, cbStringNew, &newSize);
@@ -451,13 +509,12 @@ BOOL WIN32API GetTextExtentPointW(HDC    hdc,
       return TRUE;
    }
 
-   rc = FT2Module.Ft2GetTextExtentW(pHps->hps, cbString, lpString, TXTBOXOS_COUNT, pts);
+   rc = FT2Module.Ft2GetTextExtentW(pHps->hps, cbString, lpString, &widthHeight);
    if(rc == FALSE)
    {
       SetLastError(ERROR_INVALID_PARAMETER);    //todo wrong error
       return FALSE;
    }
-   calcDimensions(pts, &widthHeight);
    lpSize->cx = widthHeight.x;
    lpSize->cy = widthHeight.y;
 
@@ -497,31 +554,72 @@ BOOL WIN32API GetTextExtentExPointA(HDC hdc,
 {
     BOOL ret;
     INT wlen;
-    LPWSTR p = FONT_mbtowc( hdc, str, count, &wlen, NULL);
-    ret = GetTextExtentExPointW( hdc, p, wlen, maxExt, lpnFit, alpDx, size);
-    if (lpnFit) *lpnFit = WideCharToMultiByte(CP_ACP,0,p,*lpnFit,NULL,0,NULL,NULL);
-    if( IsDBCSEnv() && alpDx ) /* index of alpDx between ansi and wide may not match in DBCS !!! */
+    LPWSTR p;
+    INT nFit;
+    TEXTMETRICA tmA;
+    CHAR brokenDBCS = 0;
+
+    if( IsDBCSEnv())
     {
-        LPINT alpDxNew = ( LPINT )HeapAlloc( GetProcessHeap(), 0, sizeof( alpDx[ 0 ] ) * *lpnFit );
+        brokenDBCS = getBrokenDBCS( str, count );
+
+        GetTextMetricsA( hdc, &tmA );
+    }
+
+    if( brokenDBCS )
+       count--;
+
+    p = FONT_mbtowc( hdc, str, count, &wlen, NULL);
+    ret = GetTextExtentExPointW( hdc, p, wlen, maxExt, &nFit, alpDx, size);
+    nFit = WideCharToMultiByte(CP_ACP,0,p,nFit,NULL,0,NULL,NULL);
+    if( IsDBCSEnv() && alpDx ) // index of alpDx between ansi and wide may not match in DBCS !!!
+    {
+        LPINT alpDxNew = ( LPINT )HeapAlloc( GetProcessHeap(), 0, sizeof( alpDx[ 0 ] ) * ( nFit + 1 ));
+        INT prevDx;
         int i, j;
 
-        for( i = j = 0; i < *lpnFit; i++, j++ )
+        for( i = j = 0; i < nFit; i++, j++ )
         {
             if( IsDBCSLeadByte( str[ i ]))
             {
-                alpDxNew[ i++ ] = alpDx[ j ] >> 1;
-                if( i < *lpnFit )
-                    alpDxNew[ i ] = alpDx[ j ] >> 1;
+                prevDx = ( i > 0 ) ? alpDxNew[ i - 1 ] : 0;
+                alpDxNew[ i++ ] = prevDx + tmA.tmAveCharWidth;
+                if( i >= nFit )
+                    break;
             }
-            else
-                alpDxNew[ i ] = alpDx[ j ];
-
+            alpDxNew[ i ] = alpDx[ j ];
         }
 
-        memcpy( alpDx, alpDxNew, sizeof( alpDx[ 0 ] ) * *lpnFit );
+        if(( nFit < count ) && IsDBCSLeadByte( str[ nFit ]))
+        {
+            prevDx = ( nFit > 0 ) ? alpDxNew[ nFit - 1 ] : 0;
+            if( maxExt >= prevDx + tmA.tmAveCharWidth )
+                alpDxNew[ nFit++ ] = prevDx + tmA.tmAveCharWidth;
+        }
+
+        memcpy( alpDx, alpDxNew, sizeof( alpDx[ 0 ] ) * nFit );
 
         HeapFree( GetProcessHeap(), 0, alpDxNew );
     }
+
+    // for broken DBCS. correct for FIXED WIDTH, not approx. for VARIABLE WIDTH
+    if( brokenDBCS )
+    {
+       size->cx += tmA.tmAveCharWidth;
+       if( count == 0 )
+          size->cy = tmA.tmHeight;
+
+       if(( maxExt > size->cx ) && ( nFit <= count )) // decreaed count by 1 above
+       {
+          if( alpDx )
+            alpDx[ nFit ] = size->cx;
+
+          nFit++;
+       }
+    }
+
+    if (lpnFit) *lpnFit = nFit;
+
     HeapFree( GetProcessHeap(), 0, p );
     return ret;
 }
@@ -535,29 +633,31 @@ BOOL WIN32API GetTextExtentExPointW(HDC hdc,
                                     LPINT   alpDx,
                                     LPSIZE  size)
 {
-    int index, nFit, extent;
+    int i, nFit, extent;
     SIZE tSize;
     BOOL ret = FALSE;
 
     size->cx = size->cy = nFit = extent = 0;
-    for(index = 0; index < count; index++)
+
+    for( i = 1; i <= count; i++ )
     {
- 	if(!GetTextExtentPoint32W( hdc, str, 1, &tSize )) goto done;
-        /* GetTextExtentPoint includes intercharacter spacing. */
-        /* FIXME - justification needs doing yet.  Remember that the base
-         * data will not be in logical coordinates.
-         */
-	extent += tSize.cx;
-	if( !lpnFit || extent <= maxExt )
-        /* It is allowed to be equal. */
-        {
-	    nFit++;
-	    if( alpDx ) alpDx[index] = extent;
-        }
-	if( tSize.cy > size->cy ) size->cy = tSize.cy;
-	str++;
+        if( !GetTextExtentPoint32W( hdc, str, i, &tSize )) goto done;
+
+        if( maxExt < tSize.cx )
+            break;
+
+        if( alpDx )
+            alpDx[ nFit ] = tSize.cx;
+
+        nFit++;
     }
-    size->cx = extent;
+
+    if( i >= count )
+        size->cx = tSize.cx;
+    else if( !GetTextExtentPoint32W( hdc, str, count, size )) goto done;
+
+    size->cy = tSize.cy; // The height of a font is constant.
+
     if(lpnFit) *lpnFit = nFit;
     ret = TRUE;
 
@@ -571,12 +671,12 @@ done:
 BOOL WIN32API GetCharWidth32A( HDC hdc, UINT iFirstChar, UINT iLastChar, PINT pWidthArray)
 {
     BOOL ret = FALSE;
-      
+
     for (int i = iFirstChar; i <= iLastChar; i++)
     {
         SIZE size;
         CHAR c = i;
-        
+
         if (GetTextExtentPointA(hdc, &c, 1, &size))
         {
             pWidthArray[i-iFirstChar] = size.cx;
@@ -588,10 +688,10 @@ BOOL WIN32API GetCharWidth32A( HDC hdc, UINT iFirstChar, UINT iLastChar, PINT pW
             // default value for unprocessed characters
             pWidthArray[i-iFirstChar] = 0;
         }
-        
+
         dprintf2(("Char 0x%x('%c') -> width %d", i, i<256? i: '.', pWidthArray[i-iFirstChar]));
     }
-   
+
     return ret;
 }
 //******************************************************************************
@@ -599,12 +699,12 @@ BOOL WIN32API GetCharWidth32A( HDC hdc, UINT iFirstChar, UINT iLastChar, PINT pW
 BOOL WIN32API GetCharWidth32W(HDC hdc, UINT iFirstChar, UINT iLastChar, PINT pWidthArray)
 {
     BOOL ret = FALSE;
-      
+
     for (int i = iFirstChar; i <= iLastChar; i++)
     {
         SIZE size;
         WCHAR wc = i;
-        
+
         if (GetTextExtentPointW(hdc, &wc, 1, &size))
         {
             pWidthArray[i-iFirstChar] = size.cx;
@@ -616,10 +716,10 @@ BOOL WIN32API GetCharWidth32W(HDC hdc, UINT iFirstChar, UINT iLastChar, PINT pWi
             // default value for unprocessed characters
             pWidthArray[i-iFirstChar] = 0;
         }
-        
+
         dprintf2(("Char 0x%x('%c') -> width %d", i, i<256? i: '.', pWidthArray[i-iFirstChar]));
     }
-   
+
     return ret;
 }
 //******************************************************************************
@@ -631,9 +731,9 @@ BOOL WIN32API GetCharWidth32W(HDC hdc, UINT iFirstChar, UINT iLastChar, PINT pWi
 //    HDC    hdc            - device context handle
 //    LPWSTR lpszString     - unicod string pointer
 //    UINT   cbString       - number of valid characters in string
-//    PINT   pWidthArray    - array that receives the character width (must be 
+//    PINT   pWidthArray    - array that receives the character width (must be
 //                            large enough to contain cbString elements
-//   
+//
 // Returns:
 //    FALSE                 - failure
 //    TRUE                  - success
@@ -663,7 +763,7 @@ BOOL WIN32API GetCharWidthFloatW(HDC hdc, UINT iFirstChar, UINT iLastChar, PFLOA
 //******************************************************************************
 BOOL WIN32API GetCharABCWidthsA(HDC hdc, UINT firstChar, UINT lastChar, LPABC abc)
 {
-    if(FT2Module.isEnabled() == FALSE) 
+    if(FT2Module.isEnabled() == FALSE)
     {//fallback method
         return O32_GetCharABCWidths(hdc, firstChar, lastChar, abc);
     }
@@ -681,18 +781,18 @@ BOOL WIN32API GetCharABCWidthsA(HDC hdc, UINT firstChar, UINT lastChar, LPABC ab
 
     str = (LPSTR)HeapAlloc(GetProcessHeap(), 0, count);
     for(i = 0; i < count; i++)
-	str[i] = (BYTE)(firstChar + i);
+    str[i] = (BYTE)(firstChar + i);
 
     wstr = FONT_mbtowc(hdc, str, count, &wlen, NULL);
 
     for(i = 0; i < wlen; i++)
     {
-	if(!GetCharABCWidthsW(hdc, wstr[i], wstr[i], abc))
-	{
-	    ret = FALSE;
-	    break;
-	}
-	abc++;
+    if(!GetCharABCWidthsW(hdc, wstr[i], wstr[i], abc))
+    {
+        ret = FALSE;
+        break;
+    }
+    abc++;
     }
 
     HeapFree(GetProcessHeap(), 0, str);
@@ -704,7 +804,7 @@ BOOL WIN32API GetCharABCWidthsA(HDC hdc, UINT firstChar, UINT lastChar, LPABC ab
 //******************************************************************************
 BOOL WIN32API GetCharABCWidthsW( HDC hdc, UINT firstChar, UINT lastChar, LPABC abc)
 {
-    if(FT2Module.isEnabled() == FALSE) 
+    if(FT2Module.isEnabled() == FALSE)
     {//no fallback method (yet)
         DebugInt3();
         return FALSE;
@@ -713,9 +813,9 @@ BOOL WIN32API GetCharABCWidthsW( HDC hdc, UINT firstChar, UINT lastChar, LPABC a
     int i;
     GLYPHMETRICS gm;
 
-    for (i=firstChar;i<=lastChar;i++) 
+    for (i=firstChar;i<=lastChar;i++)
     {
-        if(GetGlyphOutlineW(hdc, i, GGO_METRICS, &gm, 0, NULL, NULL) == GDI_ERROR) 
+        if(GetGlyphOutlineW(hdc, i, GGO_METRICS, &gm, 0, NULL, NULL) == GDI_ERROR)
         {
             dprintf(("ERROR: GetGlyphOutlineW failed!!"));
             return FALSE;
@@ -748,3 +848,4 @@ BOOL WIN32API GetCharABCWidthsFloatW(HDC hdc,
 }
 //******************************************************************************
 //******************************************************************************
+
