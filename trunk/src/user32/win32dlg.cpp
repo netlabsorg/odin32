@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.64 2001-05-24 19:27:00 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.65 2001-05-25 16:59:11 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -31,6 +31,8 @@
 #include "dbglocal.h"
 
 #define DEFAULT_DLGFONT "9.WarpSans"
+
+#define GET_SHORT(ptr)     (*(SHORT *)(ptr))
 
 //******************************************************************************
 //******************************************************************************
@@ -531,8 +533,9 @@ LPCSTR Win32Dialog::parseTemplate( LPCSTR dlgtemplate, DLG_TEMPLATE * result )
         result->exStyle  = GET_DWORD(p); p += 2;
     }
     result->nbItems = GET_WORD(p); p++;
-    result->x       = GET_WORD(p); p++;
-    result->y       = GET_WORD(p); p++;
+    //x & y are signed words
+    result->x       = GET_SHORT(p); p++;
+    result->y       = GET_SHORT(p); p++;
     result->cx      = GET_WORD(p); p++;
     result->cy      = GET_WORD(p); p++;
 
@@ -619,8 +622,9 @@ WORD *Win32Dialog::getControl(const WORD *p, DLG_CONTROL_INFO *info, BOOL dialog
         info->style   = GET_DWORD(p); p += 2;
         info->exStyle = GET_DWORD(p); p += 2;
     }
-    info->x       = GET_WORD(p); p++;
-    info->y       = GET_WORD(p); p++;
+    //x & y are signed words (VirtualPC Settings dailog)
+    info->x       = GET_SHORT(p); p++;
+    info->y       = GET_SHORT(p); p++;
     info->cx      = GET_WORD(p); p++;
     info->cy      = GET_WORD(p); p++;
 
