@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.88 2001-06-27 13:35:47 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.89 2001-07-03 06:53:39 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -730,6 +730,10 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
  ULONG    offset, size, sectionsize, protflags, fileoffset, range, attr;
  ULONG    ulNewPos, ulRead, orgVirtAddress = virtAddress;
  APIRET   rc;
+
+    if(virtAddress == 0) {
+        return FALSE;
+    }
 
     //Round down to nearest page boundary
     virtAddress = virtAddress & ~0xFFF;
