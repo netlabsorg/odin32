@@ -1,4 +1,4 @@
-; $Id: ntdll.def,v 1.41 2001-10-29 02:26:38 bird Exp $
+; $Id: ntdll.def,v 1.42 2002-02-21 22:52:42 sandervl Exp $
 
 ;
 ; Based on NT 4.0 SP6: NTDLL.DLL
@@ -63,7 +63,7 @@ EXPORTS
 ;   NlsMbCodePageTag                                @52
 ;   NlsMbOemCodePageTag                             @53
     NtAcceptConnectPort           = _NtAcceptConnectPort@24     @54
-;   NtAccessCheck                                   @55
+    NtAccessCheck                 = _NtAccessCheck@32            @55
 ;   NtAccessCheckAndAuditAlarm                      @56
 ;   NtAddAtom                                   @57
 ;   NtAdjustGroupsToken                             @58
@@ -243,7 +243,7 @@ EXPORTS
 ;   NtSetLowEventPair                           @230
 ;   NtSetLowWaitHighEventPair                       @231
 ;   NtSetLowWaitHighThread                      @232
-;   NtSetSecurityObject                         @233
+    NtSetSecurityObject           = _NtSetSecurityObject@12             @233
 ;   NtSetSystemEnvironmentValue                     @234
 ;   NtSetSystemInformation                      @235
 ;   NtSetSystemPowerState                       @236
@@ -429,7 +429,7 @@ EXPORTS
     RtlGetAce                     = _RtlGetAce@12                       @413
 ;   RtlGetCallersAddress                        @414
 ;   RtlGetCompressionWorkSpaceSize                  @415
-;   RtlGetControlSecurityDescriptor                 @416
+    RtlGetControlSecurityDescriptor = _RtlGetControlSecurityDescriptor@12 @416
 ;   RtlGetCurrentDirectory_U                        @417
     RtlGetDaclSecurityDescriptor  = _RtlGetDaclSecurityDescriptor@16    @418
 ;   RtlGetElementGenericTable                       @419
@@ -448,7 +448,7 @@ EXPORTS
     RtlImageNtHeader          = _RtlImageNtHeader@4         @432
 ;   RtlImageRvaToSection                        @433
 ;   RtlImageRvaToVa                         @434
-;   RtlImpersonateSelf                          @435
+    RtlImpersonateSelf            = _RtlImpersonateSelf@4               @435
     RtlInitAnsiString             = _RtlInitAnsiString@8                @436
 ;   RtlInitCodePageTable                        @437
 ;   RtlInitNlsTables                            @438
@@ -489,7 +489,7 @@ EXPORTS
 ;   RtlLockHeap                             @473
 ;   RtlLookupAtomInAtomTable                        @474
 ;   RtlLookupElementGenericTable                    @475
-;   RtlMakeSelfRelativeSD                       @476
+    RtlMakeSelfRelativeSD          = _RtlMakeSelfRelativeSD@12          @476
 ;   RtlMapGenericMask                           @477
     RtlMoveMemory                  = _RtlMoveMemory@12                  @478
     RtlMultiByteToUnicodeN         = _RtlMultiByteToUnicodeN@20         @479

@@ -1,4 +1,4 @@
-/* $Id: sec.cpp,v 1.8 2001-04-22 10:38:59 sandervl Exp $ */
+/* $Id: sec.cpp,v 1.9 2002-02-21 22:52:43 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -25,6 +25,7 @@
 #include <os2win.h>
 #include "ntdll.h"
 
+#include <debugtools.h>
 
 ODINDEBUGCHANNEL(NTDLL-SEC)
 
@@ -806,3 +807,73 @@ DWORD WINAPI RtlAdjustPrivilege(DWORD x1,
   return 0;
 }
 
+
+/******************************************************************************
+ *  RtlImpersonateSelf		[NTDLL.@]
+ */
+BOOL WINAPI
+RtlImpersonateSelf(SECURITY_IMPERSONATION_LEVEL ImpersonationLevel)
+{
+	FIXME("(%08x), stub\n", ImpersonationLevel);
+	return TRUE;
+}
+
+/******************************************************************************
+ *  NtAccessCheck		[NTDLL.@]
+ */
+NTSTATUS WINAPI 
+NtAccessCheck(
+	IN PSECURITY_DESCRIPTOR SecurityDescriptor,
+	IN HANDLE ClientToken,
+	IN ACCESS_MASK DesiredAccess,
+	IN PGENERIC_MAPPING GenericMapping,
+	OUT PPRIVILEGE_SET PrivilegeSet,
+	OUT PULONG ReturnLength,
+	OUT PULONG GrantedAccess,
+	OUT PBOOLEAN AccessStatus)
+{
+	FIXME("(%p, %04x, %08lx, %p, %p, %p, %p, %p), stub\n",
+          SecurityDescriptor, ClientToken, DesiredAccess, GenericMapping, 
+          PrivilegeSet, ReturnLength, GrantedAccess, AccessStatus);
+	*AccessStatus = TRUE;
+	return STATUS_SUCCESS;
+}
+
+/******************************************************************************
+ *  NtSetSecurityObject		[NTDLL.@]
+ */
+NTSTATUS WINAPI
+NtSetSecurityObject(
+        IN HANDLE Handle,
+        IN SECURITY_INFORMATION SecurityInformation,
+        IN PSECURITY_DESCRIPTOR SecurityDescriptor) 
+{
+	FIXME("0x%08x 0x%08lx %p\n", Handle, SecurityInformation, SecurityDescriptor);
+	return STATUS_SUCCESS;
+}
+
+/******************************************************************************
+ * RtlGetControlSecurityDescriptor (NTDLL.@)
+ */
+
+NTSTATUS WINAPI RtlGetControlSecurityDescriptor(
+	PSECURITY_DESCRIPTOR  pSecurityDescriptor,
+	PSECURITY_DESCRIPTOR_CONTROL pControl,
+	LPDWORD lpdwRevision)
+{
+	FIXME("(%p,%p,%p),stub!\n",pSecurityDescriptor,pControl,lpdwRevision);
+	return STATUS_SUCCESS;
+}		
+
+/**************************************************************************
+ *                 RtlMakeSelfRelativeSD		[NTDLL.@]
+ */
+NTSTATUS WINAPI RtlMakeSelfRelativeSD(
+	IN PSECURITY_DESCRIPTOR pAbsoluteSecurityDescriptor,
+	IN PSECURITY_DESCRIPTOR pSelfRelativeSecurityDescriptor,
+	IN OUT LPDWORD lpdwBufferLength)
+{
+	FIXME("(%p,%p,%p(%lu))\n", pAbsoluteSecurityDescriptor,
+	pSelfRelativeSecurityDescriptor, lpdwBufferLength,*lpdwBufferLength);
+	return STATUS_SUCCESS;
+}

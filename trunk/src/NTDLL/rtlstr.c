@@ -605,7 +605,7 @@ NTSTATUS WINAPI RtlUpcaseUnicodeToOemN( LPSTR dst, DWORD dstlen, LPDWORD reslen,
  * Return the size in bytes necessary for the Unicode conversion of 'str',
  * including the terminating NULL.
  */
-UINT WINAPI RtlOemStringToUnicodeSize(PSTRING str)
+UINT WINAPI RtlOemStringToUnicodeSize( const STRING *str )
 {
     DWORD ret = MultiByteToWideChar( CP_OEMCP, 0, str->Buffer, str->Length, NULL, 0 );
     return (ret + 1) * sizeof(WCHAR);
@@ -618,7 +618,7 @@ UINT WINAPI RtlOemStringToUnicodeSize(PSTRING str)
  * Return the size in bytes necessary for the Unicode conversion of 'str',
  * including the terminating NULL.
  */
-DWORD WINAPI RtlAnsiStringToUnicodeSize(PSTRING str)
+DWORD WINAPI RtlAnsiStringToUnicodeSize( const STRING *str )
 {
     DWORD ret = MultiByteToWideChar( CP_ACP, 0, str->Buffer, str->Length, NULL, 0 );
     return (ret + 1) * sizeof(WCHAR);

@@ -1,4 +1,4 @@
-/* $Id: lsa.cpp,v 1.6 2000-10-03 05:38:09 bird Exp $ */
+/* $Id: lsa.cpp,v 1.7 2002-02-21 22:51:59 sandervl Exp $ */
 
 /*
  * Win32 Security Database API functions for OS/2
@@ -283,7 +283,6 @@ NTSTATUS WIN32API LsaAddAccountRights(LSA_HANDLE           PolicyHandle,
                                       PLSA_UNICODE_STRING  UserRights,
                                       ULONG                CountOfRights);
 
-NTSTATUS WIN32API LsaClose(LSA_HANDLE hLsaObject);
 
 NTSTATUS WIN32API LsaCreateTrustedDomainEx(LSA_HANDLE                       PolicyHandle,
                                            PTRUSTED_DOMAIN_INFORMATION_EX   TrustedDomainInformation,
@@ -316,7 +315,6 @@ NTSTATUS WIN32API LsaEnumerateTrustedDomainsEx(LSA_HANDLE               PolicyHa
                                                ULONG                    PreferredMaximumLength,
                                                PULONG                   CountReturned);
 
-NTSTATUS WIN32API LsaFreeMemory(PVOID Buffer);
 
 NTSTATUS WIN32API LsaLookupNames(LSA_HANDLE                   PolicyHandle,
                                  ULONG                        Count,
@@ -324,11 +322,6 @@ NTSTATUS WIN32API LsaLookupNames(LSA_HANDLE                   PolicyHandle,
                                  PLSA_REFERENCED_DOMAIN_LIST* ReferencedDomains,
                                  PLSA_TRANSLATED_SID*         Sids);
 
-NTSTATUS WIN32API LsaLookupSids(LSA_HANDLE                   PolicyHandle,
-                                ULONG                        Count,
-                                PSID*                        Sids,
-                                PLSA_REFERENCED_DOMAIN_LIST* ReferencedDomains,
-                                PLSA_TRANSLATED_NAME*        Names);
 
 ULONG WIN32API LsaNtStatusToWinError(NTSTATUS Status);
 
@@ -342,9 +335,6 @@ NTSTATUS WIN32API LsaOpenTrustedDomainByName(LSA_HANDLE          PolicyHandle,
                                              ACCESS_MASK         DesiredAccess,
                                              PLSA_HANDLE         TrustedDomainHandle);
 
-NTSTATUS WIN32API LsaQueryInformationPolicy(LSA_HANDLE               PolicyHandle,
-                                            POLICY_INFORMATION_CLASS InformationClass,
-                                            PVOID *                  Buffer);
 
 NTSTATUS WIN32API LsaQueryTrustedDomainInfo(LSA_HANDLE                 PolicyHandle,
                                             PSID                       TrustedDomainSid,
@@ -419,23 +409,6 @@ ODINFUNCTION4(NTSTATUS,            LsaAddAccountRights,
 }
 
 
-/*****************************************************************************
- * Name      : LsaClose
- * Purpose   : The LsaClose function closes a handle to an LSA policy object.
- * Parameters: LSA_HANDLE ObjectHandle
- * Variables :
- * Result    : NTSTATUS
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1999/11/04 23:00]
- *****************************************************************************/
-
-ODINFUNCTION1(NTSTATUS,LsaClose,LSA_HANDLE,hLsaObject)
-{
-  dprintf(("ADVAPI32:Lsa: LsaClose not implemented.\n"));
-  return 0;
-}
 
 
 /*****************************************************************************
@@ -607,29 +580,6 @@ ODINFUNCTION5(NTSTATUS,                LsaEnumerateTrustedDomainsEx,
 }
 
 
-/*****************************************************************************
- * Name      : LsaFreeMemory
- * Purpose   : The LsaFreeMemory function frees memory allocated for
- *             an output buffer by an LSA function call. LSA functions that
- *             return variable-length output buffers always allocate the
- *             buffer on behalf of the caller. The caller must free this
- *             memory by passing the returned buffer pointer to
- *             LsaFreeMemory when the memory is no longer required.
- * Parameters: PVOID Buffer
- * Variables :
- * Result    : NTSTATUS
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1999/11/04 23:00]
- *****************************************************************************/
-
-ODINFUNCTION1(NTSTATUS, LsaFreeMemory,
-              PVOID,    Buffer)
-{
-  dprintf(("ADVAPI32:Lsa: LsaFreeMemory not implemented.\n"));
-  return 0;
-}
 
 
 /*****************************************************************************
@@ -662,35 +612,6 @@ ODINFUNCTION5(NTSTATUS,                    LsaLookupNames,
 }
 
 
-/*****************************************************************************
- * Name      : LsaLookupSids
- * Purpose   : The LsaLookupSids function looks up the names
- *             that corresponding to an array of SIDs. If a name can
- *             not be mapped to a SID, LsaLookupSids converts
- *             the SID to character form.
- * Parameters: LSA_HANDLE PolicyHandle,
- *             ULONG                       Count
- *             PSID                        *Sids
- *             PLSA_REFERENCED_DOMAIN_LIST *ReferencedDomains
- *             PLSA_TRANSLATED_NAME        *Names
- * Variables :
- * Result    : NTSTATUS
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1999/11/04 23:00]
- *****************************************************************************/
-
-ODINFUNCTION5(NTSTATUS,                    LsaLookupSids,
-              LSA_HANDLE,                  PolicyHandle,
-              ULONG,                       Count,
-              PSID*,                       Sids,
-              PLSA_REFERENCED_DOMAIN_LIST*,ReferencedDomains,
-              PLSA_TRANSLATED_NAME*,       Names)
-{
-  dprintf(("ADVAPI32:Lsa: LsaLookupNames not implemented.\n"));
-  return 0;
-}
 
 
 /*****************************************************************************
@@ -744,30 +665,6 @@ ODINFUNCTION4(NTSTATUS,            LsaOpenTrustedDomainByName,
   return 0;
 }
 
-
-/*****************************************************************************
- * Name      : LsaQueryInformationPolicy
- * Purpose   : The LsaQueryInformationPolicy function
- *             retrieves information about an LSA policy object.
- * Parameters:  LSA_HANDLE PolicyHandle,
- *              POLICY_INFORMATION_CLASS InformationClass,
- *              PVOID *Buffer
- * Variables :
- * Result    : NTSTATUS
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1999/11/04 23:00]
- *****************************************************************************/
-
-ODINFUNCTION3(NTSTATUS,                 LsaQueryInformationPolicy,
-              LSA_HANDLE,               PolicyHandle,
-              POLICY_INFORMATION_CLASS, InformationClass,
-              PVOID *,                  Buffer)
-{
-  dprintf(("ADVAPI32:Lsa: LsaQueryInformationPolicy not implemented.\n"));
-  return 0;
-}
 
 
 /*****************************************************************************
