@@ -1,7 +1,10 @@
-/* $Id: changelog,v 1.2399 2002-12-28 10:16:08 sandervl Exp $ */
+/* $Id: changelog,v 1.2400 2002-12-28 13:39:35 sandervl Exp $ */
 
  2002-12-28: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Changed default WM_MOUSEACTIVATE handler (like Wine now)
+    - PELDR:    o Change BEGINLIBPATH before loading any dlls. It's now no
+                  longer required to have the system32 directory present
+                  in the system LIBPATH.
 
  2001-12-28: Dietrich Teickner <Dietrich_Teickner@t-online   >
     - USER32:   o Listbox fix for WM_SETFONT; update listbox height
