@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.1190 2000-10-10 18:00:18 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1191 2000-10-10 21:28:28 sandervl Exp $ */
 
  2000-10-10: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: Print date and time of build during init (log)
@@ -11,6 +11,10 @@
     - MSVCRT:   Put WriteLog call in util.asm in IFDEF DEBUG statement
     - INCLUDE\makefiles
                 Add -D:DEBUG to alp command line for debug build
+
+ 2000-10-10: Michal Necasek <mike@mendelu.cz>
+    - WINMM:    Timers: Don't reset TimerStatus in timer thread; timer may
+                have already been started.
 
  2000-10-09: Yuri Dario <mc6530@mclink.it>
     - USER32:   Corrected background brush for MDI windows
