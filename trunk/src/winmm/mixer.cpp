@@ -1,4 +1,4 @@
-/* $Id: mixer.cpp,v 1.15 2002-05-24 18:02:47 sandervl Exp $ */
+/* $Id: mixer.cpp,v 1.16 2002-05-25 08:07:59 sandervl Exp $ */
 
 /*
  * Mixer functions
@@ -907,7 +907,7 @@ BOOL mixerInit()
     memset(mixerLineControls, -1, sizeof(mixerLineControls));
     memset(mixerDestInputs, -1, sizeof(mixerDestInputs));
 
-    if(OSLibMixerOpen() == FALSE) {
+    if(OSLibMixerOpen() == TRUE) {
         //Line out destination
         pDestLine = mixerAddDestination(MIXER_DEST_LINEOUT);
 
@@ -917,8 +917,8 @@ BOOL mixerInit()
         pLineOutMix->cMultipleItems = pDestLine->cConnections;
 
         //WaveIn destination
-        pDestLine = mixerAddDestination(MIXER_DEST_WAVEIN);
-        mixerAddControl(pDestLine, MIX_CTRL_MUX_IN_W_SRC, pDestLine);
+        pDestLine  = mixerAddDestination(MIXER_DEST_WAVEIN);
+        pWaveInMux = mixerAddControl(pDestLine, MIX_CTRL_MUX_IN_W_SRC, pDestLine);
         mixerAddControl(pDestLine, MIX_CTRL_VOL_IN_W_MIC, pDestLine);
         mixerAddControl(pDestLine, MIX_CTRL_VOL_IN_W_LINE, pDestLine);
         pWaveInMux->cMultipleItems = pDestLine->cConnections;
