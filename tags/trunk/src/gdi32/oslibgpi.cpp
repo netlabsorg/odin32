@@ -1,4 +1,4 @@
-/* $Id: oslibgpi.cpp,v 1.2 1999-12-16 16:52:32 cbratschi Exp $ */
+/* $Id: oslibgpi.cpp,v 1.3 2000-01-20 21:39:36 sandervl Exp $ */
 
 /*
  * GPI interface code
@@ -336,3 +336,14 @@ BOOL drawLinePoint(PVOID pHps,PPOINTLOS2 pt,LONG color)
 
   return rc;
 }
+
+ULONG OSLibGpiQueryCp(HDC hdc)
+{
+  return GpiQueryCp(hdc);
+}
+
+BOOL OSLibGpiSetCp(HDC hdc, ULONG codepage)
+{
+  return GpiSetCp(hdc, codepage);
+}
+
