@@ -1,4 +1,4 @@
-/* $Id: winkeyboard.cpp,v 1.12 2001-07-04 06:39:01 sandervl Exp $ */
+/* $Id: winkeyboard.cpp,v 1.13 2001-07-08 15:51:43 sandervl Exp $ */
 /*
  * Win32 <-> PM key translation
  *
@@ -16,7 +16,7 @@
 #include <pmscan.h>
 #include <winuser32.h>
 
-#define DBG_LOCALLOG	DBG_winkeyboard
+#define DBG_LOCALLOG    DBG_winkeyboard
 #include "dbglocal.h"
 
 BOOL OPEN32API _O32_GetKeyboardState( PBYTE lpKeyState );
@@ -30,269 +30,269 @@ inline BOOL O32_GetKeyboardState(PBYTE lpKeyState)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 
-BYTE abPMScanToWinVKey[256] =
+BYTE abPMScanToWinVKey[256][2] =
 /****************************************************************************/
-/* PM Scancode              *    Win32 vkey                                 */
+/* PM Scancode              *    Win32 vkey                 Extended Key     */
 /****************************************************************************/
-/* 0x00                     */ { 0x00
-/* 0x01 PMSCAN_ESC          */ , VK_ESCAPE
-/* 0x02 PMSCAN_ONE          */ , VK_1
-/* 0x03 PMSCAN_TWO          */ , VK_2
-/* 0x04 PMSCAN_THREE        */ , VK_3
-/* 0x05 PMSCAN_FOUR         */ , VK_4
-/* 0x06 PMSCAN_FIVE         */ , VK_5
-/* 0x07 PMSCAN_SIX          */ , VK_6
-/* 0x08 PMSCAN_SEVEN        */ , VK_7
-/* 0x09 PMSCAN_EIGHT        */ , VK_8
-/* 0x0A PMSCAN_NINE         */ , VK_9
-/* 0x0B PMSCAN_ZERO         */ , VK_0
-/* 0x0C PMSCAN_HYPHEN       */ , VK_HYPHEN
-/* 0x0D PMSCAN_EQUAL        */ , VK_EQUAL
-/* 0x0E PMSCAN_BACKSPACE    */ , VK_BACK
-/* 0x0F PMSCAN_TAB          */ , VK_TAB
-/* 0x10 PMSCAN_Q            */ , VK_Q
-/* 0x11 PMSCAN_W            */ , VK_W
-/* 0x12 PMSCAN_E            */ , VK_E
-/* 0x13 PMSCAN_R            */ , VK_R
-/* 0x14 PMSCAN_T            */ , VK_T
-/* 0x15 PMSCAN_Y            */ , VK_Y
-/* 0x16 PMSCAN_U            */ , VK_U
-/* 0x17 PMSCAN_I            */ , VK_I
-/* 0x18 PMSCAN_O            */ , VK_O
-/* 0x19 PMSCAN_P            */ , VK_P
-/* 0x1A PMSCAN_BRACKETLEFT  */ , VK_BRACKETLEFT
-/* 0x1B PMSCAN_BRACKETRIGHT */ , VK_BRACKETRIGHT
-/* 0x1C PMSCAN_ENTER        */ , VK_RETURN
-/* 0x1D PMSCAN_CTRLLEFT     */ , VK_LCONTROL
-/* 0x1E PMSCAN_A            */ , VK_A
-/* 0x1F PMSCAN_S            */ , VK_S
-/* 0x20 PMSCAN_D            */ , VK_D
-/* 0x21 PMSCAN_F            */ , VK_F
-/* 0x22 PMSCAN_G            */ , VK_G
-/* 0x23 PMSCAN_H            */ , VK_H
-/* 0x24 PMSCAN_J            */ , VK_J
-/* 0x25 PMSCAN_K            */ , VK_K
-/* 0x26 PMSCAN_L            */ , VK_L
-/* 0x27 PMSCAN_SEMICOLON    */ , VK_SEMICOLON
-/* 0x28 PMSCAN_QUOTESINGLE  */ , VK_QUOTESINGLE
-/* 0x29 PMSCAN_GRAVE        */ , VK_GRAVE
-/* 0x2A PMSCAN_SHIFTLEFT    */ , VK_LSHIFT
-/* 0x2B PMSCAN_BACKSLASH    */ , VK_BACKSLASH
-/* 0x2C PMSCAN_Z            */ , VK_Z
-/* 0x2D PMSCAN_X            */ , VK_X
-/* 0x2E PMSCAN_C            */ , VK_C
-/* 0x2F PMSCAN_V            */ , VK_V
-/* 0x30 PMSCAN_B            */ , VK_B
-/* 0x31 PMSCAN_N            */ , VK_N
-/* 0x32 PMSCAN_M            */ , VK_M
-/* 0x33 PMSCAN_COMMA        */ , VK_COMMA
-/* 0x34 PMSCAN_PERIOD       */ , VK_PERIOD
-/* 0x35 PMSCAN_SLASH        */ , VK_SLASH
-/* 0x36 PMSCAN_SHIFTRIGHT   */ , VK_RSHIFT
-/* 0x37 PMSCAN_PADASTERISK  */ , VK_MULTIPLY
-/* 0x38 PMSCAN_ALTLEFT      */ , VK_LMENU
-/* 0x39 PMSCAN_SPACE        */ , VK_SPACE
-/* 0x3A PMSCAN_CAPSLOCK     */ , VK_CAPITAL
-/* 0x3B PMSCAN_F1           */ , VK_F1
-/* 0x3C PMSCAN_F2           */ , VK_F2
-/* 0x3D PMSCAN_F3           */ , VK_F3
-/* 0x3E PMSCAN_F4           */ , VK_F4
-/* 0x3F PMSCAN_F5           */ , VK_F5
-/* 0x40 PMSCAN_F6           */ , VK_F6
-/* 0x41 PMSCAN_F7           */ , VK_F7
-/* 0x42 PMSCAN_F8           */ , VK_F8
-/* 0x43 PMSCAN_F9           */ , VK_F9
-/* 0x44 PMSCAN_F10          */ , VK_F10
-/* 0x45 PMSCAN_NUMLOCK      */ , VK_NUMLOCK
-/* 0x46 PMSCAN_SCROLLLOCK   */ , VK_SCROLL
-/* 0x47 PMSCAN_PAD7         */ , VK_NUMPAD7
-/* 0x48 PMSCAN_PAD8         */ , VK_NUMPAD8
-/* 0x49 PMSCAN_PAD9         */ , VK_NUMPAD9
-/* 0x4A PMSCAN_PADMINUS     */ , VK_SUBTRACT
-/* 0x4B PMSCAN_PAD4         */ , VK_NUMPAD4
-/* 0x4C PMSCAN_PAD5         */ , VK_NUMPAD5
-/* 0x4D PMSCAN_PAD6         */ , VK_NUMPAD6
-/* 0x4E PMSCAN_PADPLUS      */ , VK_ADD
-/* 0x4F PMSCAN_PAD1         */ , VK_NUMPAD1
-/* 0x50 PMSCAN_PAD2         */ , VK_NUMPAD2
-/* 0x51 PMSCAN_PAD3         */ , VK_NUMPAD3
-/* 0x52 PMSCAN_PAD0         */ , VK_NUMPAD0
-/* 0x53 PMSCAN_PADPERIOD    */ , VK_DECIMAL
-/* 0x54 PMSCAN_SYSREQ       */ , 0x00
-/* 0x55 PMSCAN_RESET        */ , 0x00
-/* 0x56 PMSCAN_EXTRA        */ , VK_EXTRA
-/* 0x57 PMSCAN_F11          */ , VK_F11
-/* 0x58 PMSCAN_F12          */ , VK_F12
-/* 0x59 PMSCAN_BACKTAB      */ , 0x00
-/* 0x5A PMSCAN_PADENTER     */ , VK_RETURN
-/* 0x5B PMSCAN_CTRLRIGHT    */ , VK_CONTROL
-/* 0x5C PMSCAN_PADSLASH     */ , VK_DIVIDE
-/* 0x5D PMSCAN_PRINT        */ , VK_PRINT
-/* 0x5E PMSCAN_ALTRIGHT     */ , VK_RMENU
-/* 0x5F PMSCAN_PAUSE        */ , VK_PAUSE
-/* 0x60 PMSCAN_HOME         */ , VK_HOME
-/* 0x61 PMSCAN_UP           */ , VK_UP
-/* 0x62 PMSCAN_PAGEUP       */ , VK_PRIOR
-/* 0x63 PMSCAN_LEFT         */ , VK_LEFT
-/* 0x64 PMSCAN_RIGHT        */ , VK_RIGHT
-/* 0x65 PMSCAN_END          */ , VK_END
-/* 0x66 PMSCAN_DOWN         */ , VK_DOWN
-/* 0x67 PMSCAN_PAGEDOWN     */ , VK_NEXT
-/* 0x68 PMSCAN_INSERT       */ , VK_INSERT
-/* 0x69 PMSCAN_DELETE       */ , VK_DELETE
-/* 0x6A PMSCAN_F23          */ , VK_F23
-/* 0x6B PMSCAN_F24          */ , VK_F24
-/* 0x6C PMSCAN_SYSMEM       */ , 0x00
-/* 0x6D PMSCAN_ERASEEOF     */ , VK_EREOF
-/* 0x6E PMSCAN_BREAK        */ , VK_CANCEL
-/* 0x6F PMSCAN_MOVEWIN      */ , 0x00
-/* 0x70 PMSCAN_NLS3         */ , 0x00
-/* 0x71 PMSCAN_HELP         */ , VK_HELP
-/* 0x72 PMSCAN_TASKMAN      */ , 0x00
-/* 0x73 PMSCAN_B11          */ , 0x00
-/* 0x74 PMSCAN_JUMP         */ , 0x00
-/* 0x75 PMSCAN_MINWIN       */ , 0x00
-/* 0x76 PMSCAN_CLEAR        */ , 0x00
-/* 0x77 PMSCAN_77           */ , 0x00
-/* 0x78 PMSCAN_78           */ , 0x00
-/* 0x79 PMSCAN_NLS2         */ , 0x00
-/* 0x7a PMSCAN_SIZE         */ , 0x00
-/* 0x7b PMSCAN_NLS1         */ , 0x00
-/* 0x7c PMSCAN_APPLICATION  */ , VK_APPS
-/* 0x7d PMSCAN_E13          */ , 0x00
-/* 0x7e PMSCAN              */ , 0x00
-/* 0x7f PMSCAN              */ , 0x00
-/* 0x80 PMSCAN_PA1          */ , VK_PA1
-/* 0x81 PMSCAN_F13          */ , VK_F13
-/* 0x82 PMSCAN_F14          */ , VK_F14
-/* 0x83 PMSCAN_F15          */ , VK_F15
-/* 0x84 PMSCAN_PA2          */ , 0x00
-/* 0x85 PMSCAN_PA3          */ , 0x00
-/* 0x86 PMSCAN_SPACEBREAK   */ , 0x00
-/* 0x87 PMSCAN_TABRIGHT     */ , 0x00
-/* 0x88 PMSCAN_NOOP         */ , 0x00
-/* 0x89 PMSCAN_F16          */ , VK_F16
-/* 0x8a PMSCAN_F17          */ , VK_F17
-/* 0x8b PMSCAN_F18          */ , VK_F18
-/* 0x8c PMSCAN_F19          */ , VK_F19
-/* 0x8d PMSCAN_F20          */ , VK_F20
-/* 0x8e PMSCAN_F21          */ , VK_F21
-/* 0x8f PMSCAN_F22          */ , VK_F22
-/* 0x90                     */ , 0x00
-/* 0x91                     */ , 0x00
-/* 0x92                     */ , 0x00
-/* 0x93                     */ , 0x00
-/* 0x94                     */ , 0x00
-/* 0x95                     */ , 0x00
-/* 0x96                     */ , 0x00
-/* 0x97                     */ , 0x00
-/* 0x98                     */ , 0x00
-/* 0x99                     */ , 0x00
-/* 0x9A                     */ , 0x00
-/* 0x9B                     */ , 0x00
-/* 0x9C                     */ , 0x00
-/* 0x9D                     */ , 0x00
-/* 0x9E                     */ , 0x00
-/* 0x9F                     */ , 0x00
-/* 0xA0                     */ , 0x00
-/* 0xA1                     */ , 0x00
-/* 0xA2                     */ , 0x00
-/* 0xA3                     */ , 0x00
-/* 0xA4                     */ , 0x00
-/* 0xA5                     */ , 0x00
-/* 0xA6                     */ , 0x00
-/* 0xA7                     */ , 0x00
-/* 0xA8                     */ , 0x00
-/* 0xA9                     */ , 0x00
-/* 0xAA                     */ , 0x00
-/* 0xAB                     */ , 0x00
-/* 0xAC                     */ , 0x00
-/* 0xAD                     */ , 0x00
-/* 0xAE                     */ , 0x00
-/* 0xAF                     */ , 0x00
-/* 0xB0                     */ , 0x00
-/* 0xB1                     */ , 0x00
-/* 0xB2                     */ , 0x00
-/* 0xB3                     */ , 0x00
-/* 0xB4                     */ , 0x00
-/* 0xB5                     */ , 0x00
-/* 0xB6                     */ , 0x00
-/* 0xB7                     */ , 0x00
-/* 0xB8                     */ , 0x00
-/* 0xB9                     */ , 0x00
-/* 0xBA                     */ , 0x00
-/* 0xBB                     */ , 0x00
-/* 0xBC                     */ , 0x00
-/* 0xBD                     */ , 0x00
-/* 0xBE                     */ , 0x00
-/* 0xBF                     */ , 0x00
-/* 0xC0                     */ , 0x00
-/* 0xC1                     */ , 0x00
-/* 0xC2                     */ , 0x00
-/* 0xC3                     */ , 0x00
-/* 0xC4                     */ , 0x00
-/* 0xC5                     */ , 0x00
-/* 0xC6                     */ , 0x00
-/* 0xC7                     */ , 0x00
-/* 0xC8                     */ , 0x00
-/* 0xC9                     */ , 0x00
-/* 0xCA                     */ , 0x00
-/* 0xCB                     */ , 0x00
-/* 0xCC                     */ , 0x00
-/* 0xCD                     */ , 0x00
-/* 0xCE                     */ , 0x00
-/* 0xCF                     */ , 0x00
-/* 0xD0                     */ , 0x00
-/* 0xD1                     */ , 0x00
-/* 0xD2                     */ , 0x00
-/* 0xD3                     */ , 0x00
-/* 0xD4                     */ , 0x00
-/* 0xD5                     */ , 0x00
-/* 0xD6                     */ , 0x00
-/* 0xD7                     */ , 0x00
-/* 0xD8                     */ , 0x00
-/* 0xD9                     */ , 0x00
-/* 0xDA                     */ , 0x00
-/* 0xDB                     */ , 0x00
-/* 0xDC                     */ , 0x00
-/* 0xDD                     */ , 0x00
-/* 0xDE                     */ , 0x00
-/* 0xDF                     */ , 0x00
-/* 0xE0                     */ , 0x00
-/* 0xE1                     */ , 0x00
-/* 0xE2                     */ , 0x00
-/* 0xE3                     */ , 0x00
-/* 0xE4                     */ , 0x00
-/* 0xE5                     */ , 0x00
-/* 0xE6                     */ , 0x00
-/* 0xE7                     */ , 0x00
-/* 0xE8                     */ , 0x00
-/* 0xE9                     */ , 0x00
-/* 0xEA                     */ , 0x00
-/* 0xEB                     */ , 0x00
-/* 0xEC                     */ , 0x00
-/* 0xED                     */ , 0x00
-/* 0xEE                     */ , 0x00
-/* 0xEF                     */ , 0x00
-/* 0xF0                     */ , 0x00
-/* 0xF1                     */ , 0x00
-/* 0xF2                     */ , 0x00
-/* 0xF3                     */ , 0x00
-/* 0xF4                     */ , 0x00
-/* 0xF5                     */ , 0x00
-/* 0xF6                     */ , 0x00
-/* 0xF7                     */ , 0x00
-/* 0xF8                     */ , 0x00
-/* 0xF9                     */ , 0x00
-/* 0xFA                     */ , 0x00
-/* 0xFB                     */ , 0x00
-/* 0xFC                     */ , 0x00
-/* 0xFD                     */ , 0x00
-/* 0xFE                     */ , 0x00
-/* 0xFF                     */ , 0x00
+/* 0x00                     */ { 0x00,                      FALSE
+/* 0x01 PMSCAN_ESC          */ , VK_ESCAPE                  ,FALSE
+/* 0x02 PMSCAN_ONE          */ , VK_1                       ,FALSE
+/* 0x03 PMSCAN_TWO          */ , VK_2                       ,FALSE
+/* 0x04 PMSCAN_THREE        */ , VK_3                       ,FALSE
+/* 0x05 PMSCAN_FOUR         */ , VK_4                       ,FALSE
+/* 0x06 PMSCAN_FIVE         */ , VK_5                       ,FALSE
+/* 0x07 PMSCAN_SIX          */ , VK_6                       ,FALSE
+/* 0x08 PMSCAN_SEVEN        */ , VK_7                       ,FALSE
+/* 0x09 PMSCAN_EIGHT        */ , VK_8                       ,FALSE
+/* 0x0A PMSCAN_NINE         */ , VK_9                       ,FALSE
+/* 0x0B PMSCAN_ZERO         */ , VK_0                       ,FALSE
+/* 0x0C PMSCAN_HYPHEN       */ , VK_HYPHEN                  ,FALSE
+/* 0x0D PMSCAN_EQUAL        */ , VK_EQUAL                   ,FALSE
+/* 0x0E PMSCAN_BACKSPACE    */ , VK_BACK                    ,FALSE
+/* 0x0F PMSCAN_TAB          */ , VK_TAB                     ,FALSE
+/* 0x10 PMSCAN_Q            */ , VK_Q                       ,FALSE
+/* 0x11 PMSCAN_W            */ , VK_W                       ,FALSE
+/* 0x12 PMSCAN_E            */ , VK_E                       ,FALSE
+/* 0x13 PMSCAN_R            */ , VK_R                       ,FALSE
+/* 0x14 PMSCAN_T            */ , VK_T                       ,FALSE
+/* 0x15 PMSCAN_Y            */ , VK_Y                       ,FALSE
+/* 0x16 PMSCAN_U            */ , VK_U                       ,FALSE
+/* 0x17 PMSCAN_I            */ , VK_I                       ,FALSE
+/* 0x18 PMSCAN_O            */ , VK_O                       ,FALSE
+/* 0x19 PMSCAN_P            */ , VK_P                       ,FALSE
+/* 0x1A PMSCAN_BRACKETLEFT  */ , VK_BRACKETLEFT             ,FALSE
+/* 0x1B PMSCAN_BRACKETRIGHT */ , VK_BRACKETRIGHT            ,FALSE
+/* 0x1C PMSCAN_ENTER        */ , VK_RETURN                  ,FALSE
+/* 0x1D PMSCAN_CTRLLEFT     */ , VK_LCONTROL                ,FALSE
+/* 0x1E PMSCAN_A            */ , VK_A                       ,FALSE
+/* 0x1F PMSCAN_S            */ , VK_S                       ,FALSE
+/* 0x20 PMSCAN_D            */ , VK_D                       ,FALSE
+/* 0x21 PMSCAN_F            */ , VK_F                       ,FALSE
+/* 0x22 PMSCAN_G            */ , VK_G                       ,FALSE
+/* 0x23 PMSCAN_H            */ , VK_H                       ,FALSE
+/* 0x24 PMSCAN_J            */ , VK_J                       ,FALSE
+/* 0x25 PMSCAN_K            */ , VK_K                       ,FALSE
+/* 0x26 PMSCAN_L            */ , VK_L                       ,FALSE
+/* 0x27 PMSCAN_SEMICOLON    */ , VK_SEMICOLON               ,FALSE
+/* 0x28 PMSCAN_QUOTESINGLE  */ , VK_QUOTESINGLE             ,FALSE
+/* 0x29 PMSCAN_GRAVE        */ , VK_GRAVE                   ,FALSE
+/* 0x2A PMSCAN_SHIFTLEFT    */ , VK_LSHIFT                  ,FALSE
+/* 0x2B PMSCAN_BACKSLASH    */ , VK_BACKSLASH               ,FALSE
+/* 0x2C PMSCAN_Z            */ , VK_Z                       ,FALSE
+/* 0x2D PMSCAN_X            */ , VK_X                       ,FALSE
+/* 0x2E PMSCAN_C            */ , VK_C                       ,FALSE
+/* 0x2F PMSCAN_V            */ , VK_V                       ,FALSE
+/* 0x30 PMSCAN_B            */ , VK_B                       ,FALSE
+/* 0x31 PMSCAN_N            */ , VK_N                       ,FALSE
+/* 0x32 PMSCAN_M            */ , VK_M                       ,FALSE
+/* 0x33 PMSCAN_COMMA        */ , VK_COMMA                   ,FALSE
+/* 0x34 PMSCAN_PERIOD       */ , VK_PERIOD                  ,FALSE
+/* 0x35 PMSCAN_SLASH        */ , VK_SLASH                   ,FALSE
+/* 0x36 PMSCAN_SHIFTRIGHT   */ , VK_RSHIFT                  ,FALSE
+/* 0x37 PMSCAN_PADASTERISK  */ , VK_MULTIPLY                ,FALSE
+/* 0x38 PMSCAN_ALTLEFT      */ , VK_LMENU                   ,FALSE
+/* 0x39 PMSCAN_SPACE        */ , VK_SPACE                   ,FALSE
+/* 0x3A PMSCAN_CAPSLOCK     */ , VK_CAPITAL                 ,FALSE
+/* 0x3B PMSCAN_F1           */ , VK_F1                      ,FALSE
+/* 0x3C PMSCAN_F2           */ , VK_F2                      ,FALSE
+/* 0x3D PMSCAN_F3           */ , VK_F3                      ,FALSE
+/* 0x3E PMSCAN_F4           */ , VK_F4                      ,FALSE
+/* 0x3F PMSCAN_F5           */ , VK_F5                      ,FALSE
+/* 0x40 PMSCAN_F6           */ , VK_F6                      ,FALSE
+/* 0x41 PMSCAN_F7           */ , VK_F7                      ,FALSE
+/* 0x42 PMSCAN_F8           */ , VK_F8                      ,FALSE
+/* 0x43 PMSCAN_F9           */ , VK_F9                      ,FALSE
+/* 0x44 PMSCAN_F10          */ , VK_F10                     ,FALSE
+/* 0x45 PMSCAN_NUMLOCK      */ , VK_NUMLOCK                 ,TRUE
+/* 0x46 PMSCAN_SCROLLLOCK   */ , VK_SCROLL                  ,FALSE
+/* 0x47 PMSCAN_PAD7         */ , VK_NUMPAD7                 ,FALSE
+/* 0x48 PMSCAN_PAD8         */ , VK_NUMPAD8                 ,FALSE
+/* 0x49 PMSCAN_PAD9         */ , VK_NUMPAD9                 ,FALSE
+/* 0x4A PMSCAN_PADMINUS     */ , VK_SUBTRACT                ,FALSE
+/* 0x4B PMSCAN_PAD4         */ , VK_NUMPAD4                 ,FALSE
+/* 0x4C PMSCAN_PAD5         */ , VK_NUMPAD5                 ,FALSE
+/* 0x4D PMSCAN_PAD6         */ , VK_NUMPAD6                 ,FALSE
+/* 0x4E PMSCAN_PADPLUS      */ , VK_ADD                     ,FALSE
+/* 0x4F PMSCAN_PAD1         */ , VK_NUMPAD1                 ,FALSE
+/* 0x50 PMSCAN_PAD2         */ , VK_NUMPAD2                 ,FALSE
+/* 0x51 PMSCAN_PAD3         */ , VK_NUMPAD3                 ,FALSE
+/* 0x52 PMSCAN_PAD0         */ , VK_NUMPAD0                 ,FALSE
+/* 0x53 PMSCAN_PADPERIOD    */ , VK_DECIMAL                 ,FALSE
+/* 0x54 PMSCAN_SYSREQ       */ , 0x00                       ,FALSE
+/* 0x55 PMSCAN_RESET        */ , 0x00                       ,FALSE
+/* 0x56 PMSCAN_EXTRA        */ , VK_EXTRA                   ,FALSE
+/* 0x57 PMSCAN_F11          */ , VK_F11                     ,FALSE
+/* 0x58 PMSCAN_F12          */ , VK_F12                     ,FALSE
+/* 0x59 PMSCAN_BACKTAB      */ , 0x00                       ,FALSE
+/* 0x5A PMSCAN_PADENTER     */ , VK_RETURN                  ,TRUE
+/* 0x5B PMSCAN_CTRLRIGHT    */ , VK_CONTROL                 ,TRUE
+/* 0x5C PMSCAN_PADSLASH     */ , VK_DIVIDE                  ,TRUE
+/* 0x5D PMSCAN_PRINT        */ , VK_PRINT                   ,FALSE
+/* 0x5E PMSCAN_ALTRIGHT     */ , VK_RMENU                   ,TRUE
+/* 0x5F PMSCAN_PAUSE        */ , VK_PAUSE                   ,FALSE
+/* 0x60 PMSCAN_HOME         */ , VK_HOME                    ,TRUE
+/* 0x61 PMSCAN_UP           */ , VK_UP                      ,TRUE
+/* 0x62 PMSCAN_PAGEUP       */ , VK_PRIOR                   ,TRUE
+/* 0x63 PMSCAN_LEFT         */ , VK_LEFT                    ,TRUE
+/* 0x64 PMSCAN_RIGHT        */ , VK_RIGHT                   ,TRUE
+/* 0x65 PMSCAN_END          */ , VK_END                     ,TRUE
+/* 0x66 PMSCAN_DOWN         */ , VK_DOWN                    ,TRUE
+/* 0x67 PMSCAN_PAGEDOWN     */ , VK_NEXT                    ,TRUE
+/* 0x68 PMSCAN_INSERT       */ , VK_INSERT                  ,TRUE
+/* 0x69 PMSCAN_DELETE       */ , VK_DELETE                  ,TRUE
+/* 0x6A PMSCAN_F23          */ , VK_F23                     ,FALSE
+/* 0x6B PMSCAN_F24          */ , VK_F24                     ,FALSE
+/* 0x6C PMSCAN_SYSMEM       */ , 0x00                       ,FALSE
+/* 0x6D PMSCAN_ERASEEOF     */ , VK_EREOF                   ,FALSE
+/* 0x6E PMSCAN_BREAK        */ , VK_CANCEL                  ,TRUE
+/* 0x6F PMSCAN_MOVEWIN      */ , 0x00                       ,FALSE
+/* 0x70 PMSCAN_NLS3         */ , 0x00                       ,FALSE
+/* 0x71 PMSCAN_HELP         */ , VK_HELP                    ,FALSE
+/* 0x72 PMSCAN_TASKMAN      */ , 0x00                       ,FALSE
+/* 0x73 PMSCAN_B11          */ , 0x00                       ,FALSE
+/* 0x74 PMSCAN_JUMP         */ , 0x00                       ,FALSE
+/* 0x75 PMSCAN_MINWIN       */ , 0x00                       ,FALSE
+/* 0x76 PMSCAN_CLEAR        */ , 0x00                       ,FALSE
+/* 0x77 PMSCAN_77           */ , 0x00                       ,FALSE
+/* 0x78 PMSCAN_78           */ , 0x00                       ,FALSE
+/* 0x79 PMSCAN_NLS2         */ , 0x00                       ,FALSE
+/* 0x7a PMSCAN_SIZE         */ , 0x00                       ,FALSE
+/* 0x7b PMSCAN_NLS1         */ , 0x00                       ,FALSE
+/* 0x7c PMSCAN_APPLICATION  */ , VK_APPS                    ,FALSE
+/* 0x7d PMSCAN_E13          */ , 0x00                       ,FALSE
+/* 0x7e PMSCAN              */ , 0x00                       ,FALSE
+/* 0x7f PMSCAN              */ , 0x00                       ,FALSE
+/* 0x80 PMSCAN_PA1          */ , VK_PA1                     ,FALSE
+/* 0x81 PMSCAN_F13          */ , VK_F13                     ,FALSE
+/* 0x82 PMSCAN_F14          */ , VK_F14                     ,FALSE
+/* 0x83 PMSCAN_F15          */ , VK_F15                     ,FALSE
+/* 0x84 PMSCAN_PA2          */ , 0x00                       ,FALSE
+/* 0x85 PMSCAN_PA3          */ , 0x00                       ,FALSE
+/* 0x86 PMSCAN_SPACEBREAK   */ , 0x00                       ,FALSE
+/* 0x87 PMSCAN_TABRIGHT     */ , 0x00                       ,FALSE
+/* 0x88 PMSCAN_NOOP         */ , 0x00                       ,FALSE
+/* 0x89 PMSCAN_F16          */ , VK_F16                     ,FALSE
+/* 0x8a PMSCAN_F17          */ , VK_F17                     ,FALSE
+/* 0x8b PMSCAN_F18          */ , VK_F18                     ,FALSE
+/* 0x8c PMSCAN_F19          */ , VK_F19                     ,FALSE
+/* 0x8d PMSCAN_F20          */ , VK_F20                     ,FALSE
+/* 0x8e PMSCAN_F21          */ , VK_F21                     ,FALSE
+/* 0x8f PMSCAN_F22          */ , VK_F22                     ,FALSE
+/* 0x90                     */ , 0x00                       ,FALSE
+/* 0x91                     */ , 0x00                       ,FALSE
+/* 0x92                     */ , 0x00                       ,FALSE
+/* 0x93                     */ , 0x00                       ,FALSE
+/* 0x94                     */ , 0x00                       ,FALSE
+/* 0x95                     */ , 0x00                       ,FALSE
+/* 0x96                     */ , 0x00                       ,FALSE
+/* 0x97                     */ , 0x00                       ,FALSE
+/* 0x98                     */ , 0x00                       ,FALSE
+/* 0x99                     */ , 0x00                       ,FALSE
+/* 0x9A                     */ , 0x00                       ,FALSE
+/* 0x9B                     */ , 0x00                       ,FALSE
+/* 0x9C                     */ , 0x00                       ,FALSE
+/* 0x9D                     */ , 0x00                       ,FALSE
+/* 0x9E                     */ , 0x00                       ,FALSE
+/* 0x9F                     */ , 0x00                       ,FALSE
+/* 0xA0                     */ , 0x00                       ,FALSE
+/* 0xA1                     */ , 0x00                       ,FALSE
+/* 0xA2                     */ , 0x00                       ,FALSE
+/* 0xA3                     */ , 0x00                       ,FALSE
+/* 0xA4                     */ , 0x00                       ,FALSE
+/* 0xA5                     */ , 0x00                       ,FALSE
+/* 0xA6                     */ , 0x00                       ,FALSE
+/* 0xA7                     */ , 0x00                       ,FALSE
+/* 0xA8                     */ , 0x00                       ,FALSE
+/* 0xA9                     */ , 0x00                       ,FALSE
+/* 0xAA                     */ , 0x00                       ,FALSE
+/* 0xAB                     */ , 0x00                       ,FALSE
+/* 0xAC                     */ , 0x00                       ,FALSE
+/* 0xAD                     */ , 0x00                       ,FALSE
+/* 0xAE                     */ , 0x00                       ,FALSE
+/* 0xAF                     */ , 0x00                       ,FALSE
+/* 0xB0                     */ , 0x00                       ,FALSE
+/* 0xB1                     */ , 0x00                       ,FALSE
+/* 0xB2                     */ , 0x00                       ,FALSE
+/* 0xB3                     */ , 0x00                       ,FALSE
+/* 0xB4                     */ , 0x00                       ,FALSE
+/* 0xB5                     */ , 0x00                       ,FALSE
+/* 0xB6                     */ , 0x00                       ,FALSE
+/* 0xB7                     */ , 0x00                       ,FALSE
+/* 0xB8                     */ , 0x00                       ,FALSE
+/* 0xB9                     */ , 0x00                       ,FALSE
+/* 0xBA                     */ , 0x00                       ,FALSE
+/* 0xBB                     */ , 0x00                       ,FALSE
+/* 0xBC                     */ , 0x00                       ,FALSE
+/* 0xBD                     */ , 0x00                       ,FALSE
+/* 0xBE                     */ , 0x00                       ,FALSE
+/* 0xBF                     */ , 0x00                       ,FALSE
+/* 0xC0                     */ , 0x00                       ,FALSE
+/* 0xC1                     */ , 0x00                       ,FALSE
+/* 0xC2                     */ , 0x00                       ,FALSE
+/* 0xC3                     */ , 0x00                       ,FALSE
+/* 0xC4                     */ , 0x00                       ,FALSE
+/* 0xC5                     */ , 0x00                       ,FALSE
+/* 0xC6                     */ , 0x00                       ,FALSE
+/* 0xC7                     */ , 0x00                       ,FALSE
+/* 0xC8                     */ , 0x00                       ,FALSE
+/* 0xC9                     */ , 0x00                       ,FALSE
+/* 0xCA                     */ , 0x00                       ,FALSE
+/* 0xCB                     */ , 0x00                       ,FALSE
+/* 0xCC                     */ , 0x00                       ,FALSE
+/* 0xCD                     */ , 0x00                       ,FALSE
+/* 0xCE                     */ , 0x00                       ,FALSE
+/* 0xCF                     */ , 0x00                       ,FALSE
+/* 0xD0                     */ , 0x00                       ,FALSE
+/* 0xD1                     */ , 0x00                       ,FALSE
+/* 0xD2                     */ , 0x00                       ,FALSE
+/* 0xD3                     */ , 0x00                       ,FALSE
+/* 0xD4                     */ , 0x00                       ,FALSE
+/* 0xD5                     */ , 0x00                       ,FALSE
+/* 0xD6                     */ , 0x00                       ,FALSE
+/* 0xD7                     */ , 0x00                       ,FALSE
+/* 0xD8                     */ , 0x00                       ,FALSE
+/* 0xD9                     */ , 0x00                       ,FALSE
+/* 0xDA                     */ , 0x00                       ,FALSE
+/* 0xDB                     */ , 0x00                       ,FALSE
+/* 0xDC                     */ , 0x00                       ,FALSE
+/* 0xDD                     */ , 0x00                       ,FALSE
+/* 0xDE                     */ , 0x00                       ,FALSE
+/* 0xDF                     */ , 0x00                       ,FALSE
+/* 0xE0                     */ , 0x00                       ,FALSE
+/* 0xE1                     */ , 0x00                       ,FALSE
+/* 0xE2                     */ , 0x00                       ,FALSE
+/* 0xE3                     */ , 0x00                       ,FALSE
+/* 0xE4                     */ , 0x00                       ,FALSE
+/* 0xE5                     */ , 0x00                       ,FALSE
+/* 0xE6                     */ , 0x00                       ,FALSE
+/* 0xE7                     */ , 0x00                       ,FALSE
+/* 0xE8                     */ , 0x00                       ,FALSE
+/* 0xE9                     */ , 0x00                       ,FALSE
+/* 0xEA                     */ , 0x00                       ,FALSE
+/* 0xEB                     */ , 0x00                       ,FALSE
+/* 0xEC                     */ , 0x00                       ,FALSE
+/* 0xED                     */ , 0x00                       ,FALSE
+/* 0xEE                     */ , 0x00                       ,FALSE
+/* 0xEF                     */ , 0x00                       ,FALSE
+/* 0xF0                     */ , 0x00                       ,FALSE
+/* 0xF1                     */ , 0x00                       ,FALSE
+/* 0xF2                     */ , 0x00                       ,FALSE
+/* 0xF3                     */ , 0x00                       ,FALSE
+/* 0xF4                     */ , 0x00                       ,FALSE
+/* 0xF5                     */ , 0x00                       ,FALSE
+/* 0xF6                     */ , 0x00                       ,FALSE
+/* 0xF7                     */ , 0x00                       ,FALSE
+/* 0xF8                     */ , 0x00                       ,FALSE
+/* 0xF9                     */ , 0x00                       ,FALSE
+/* 0xFA                     */ , 0x00                       ,FALSE
+/* 0xFB                     */ , 0x00                       ,FALSE
+/* 0xFC                     */ , 0x00                       ,FALSE
+/* 0xFD                     */ , 0x00                       ,FALSE
+/* 0xFE                     */ , 0x00                       ,FALSE
+/* 0xFF                     */ , 0x00                       ,FALSE
                                };
 
 BYTE abWinVKeyToPMScan[256] =
@@ -589,9 +589,9 @@ BOOL WIN32API GetKeyboardState(PBYTE lpKeyState)
   memset(lpKeyState, 0, 256);
   rc = OSLibWinGetKeyboardStateTable((PBYTE)&PMKeyState[0] );
 ////  rc = O32_GetKeyboardState(lpKeyState);
-  if(rc == TRUE) 
+  if(rc == TRUE)
   {
-    	KeyTranslatePMToWinBuf((BYTE *)&PMKeyState[0], lpKeyState, 256);
+        KeyTranslatePMToWinBuf((BYTE *)&PMKeyState[0], lpKeyState, 256);
 #ifdef DEBUG
         for(int i=0;i<256;i++) {
             if(PMKeyState[i] & 0x80) {
@@ -604,7 +604,7 @@ BOOL WIN32API GetKeyboardState(PBYTE lpKeyState)
             }
         }
 #endif
-    	return TRUE;
+        return TRUE;
   }
   return FALSE;
 }
@@ -616,9 +616,9 @@ BOOL WIN32API SetKeyboardState(PBYTE lpKeyState)
   return(TRUE);
 }
 /***********************************************************************
- *           GetKeyboardLayout			(USER32.250)
+ *           GetKeyboardLayout          (USER32.250)
  *
- * FIXME: - device handle for keyboard layout defaulted to 
+ * FIXME: - device handle for keyboard layout defaulted to
  *          the language id. This is the way Windows default works.
  *        - the thread identifier (dwLayout) is also ignored.
  */
@@ -677,12 +677,12 @@ INT WIN32API GetKeyboardLayoutNameW(LPWSTR pwszKLID)
    return res;
 }
 /***********************************************************************
- *           GetKeyboardLayoutList		(USER32.251)
+ *           GetKeyboardLayoutList      (USER32.251)
  *
- * FIXME: Supports only the system default language and layout and 
+ * FIXME: Supports only the system default language and layout and
  *          returns only 1 value.
  *
- * Return number of values available if either input parm is 
+ * Return number of values available if either input parm is
  *  0, per MS documentation.
  *
  * Remark    : Based on Wine version (991031)
@@ -692,9 +692,9 @@ INT WINAPI GetKeyboardLayoutList(INT nBuff,HKL *layouts)
         dprintf(("GetKeyboardLayoutList(%d,%p)\n",nBuff,layouts));
         if (!nBuff || !layouts)
             return 1;
-	if (layouts)
-		layouts[0] = GetKeyboardLayout(0);
-	return 1;
+    if (layouts)
+        layouts[0] = GetKeyboardLayout(0);
+    return 1;
 }
 /*****************************************************************************
  * Name      : int WIN32API ToAscii

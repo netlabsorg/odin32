@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.56 2001-07-03 20:36:54 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.57 2001-07-08 15:51:42 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -139,18 +139,18 @@ USHORT pmscan2winkey [][2] = {
     0x2D, 0x152,    // 0x5D PrtSc
     0x12, 0x5E,     // 0x5E RAlt
     0x13, 0x45,     // 0x5F Pause
-    0, 0,           // 0x60
-    0, 0,           // 0x61
-    0, 0,           // 0x62
-    0, 0,           // 0x63
-    0, 0,           // 0x64
-    0, 0,           // 0x65
-    0, 0,           // 0x66
-    0, 0,           // 0x67
-    0, 0,           // 0x68
-    0, 0,           // 0x69
-    0, 0,           // 0x6A
-    0, 0,           // 0x6B
+    VK_HOME_W,   0x60,           // 0x60
+    VK_UP_W,     0x61,           // 0x61
+    VK_PRIOR_W,  0x62,           // 0x62
+    VK_LEFT_W,   0x63,           // 0x63
+    VK_RIGHT_W,  0x64,           // 0x64
+    VK_END_W,    0x65,           // 0x65
+    VK_DOWN_W,   0x66,           // 0x66
+    VK_NEXT_W,   0x67,           // 0x67
+    VK_INSERT_W, 0x68,           // 0x68
+    VK_DELETE_W, 0x69,           // 0x69
+    VK_F23_W,    0x6A,           // 0x6A
+    VK_F24_W,    0x6B,           // 0x6B
     0x5D, 0x15D,    // 0x6C RWin (PM scan 0x7C)
     0, 0,           // 0x6D
     0x5B, 0x15B,    // 0x6E LWin (PM scan 0x7E)
@@ -603,7 +603,9 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             // an extended key ( arrows, ins, del and so on )
             // get "virtual" scancode from character code because
             // for "regular" keys they are equal
-            scanCode = ( SHORT1FROMMP(os2Msg->mp2) >> 8) & 0x0FF;
+            if(!(flags & (KC_SHIFT|KC_ALT|KC_CTRL))) {
+                scanCode = ( SHORT1FROMMP(os2Msg->mp2) >> 8) & 0x0FF;
+            }
             isExtended = TRUE;
         }
         // vitali add end
@@ -650,7 +652,7 @@ VirtualKeyFound:
         if (isExtended)
             winMsg->lParam = winMsg->lParam | (1<<24);
 
-        if (!(SHORT1FROMMP(os2Msg->mp1) & KC_ALT))
+        if (!(flags & KC_ALT))
         {
             //
             // the Alt key is not pressed
@@ -686,9 +688,12 @@ VirtualKeyFound:
                 if (keyWasPressed)
                     winMsg->lParam |= 1 << 30;                          // bit 30, previous state, 1 means key was pressed
             }
+//NT sends WM_SYSKEYDOWN for single Alt key
+#if 0
             if(winMsg->wParam == VK_MENU_W) {
                 winMsg->message = 0; //WM_SYS* already implies Alt
             }
+#endif
         }
         if (ISKDB_CAPTURED())
         {

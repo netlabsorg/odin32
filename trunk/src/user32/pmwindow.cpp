@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.138 2001-07-04 09:29:51 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.139 2001-07-08 15:51:42 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -489,11 +489,12 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         break;
 
     case WM_CHAR:
+        dprintf(("OS2: WM_CHAR %x %x %x, %x %x", win32wnd->getWindowHandle(), mp1, mp2, pWinMsg->wParam, pWinMsg->lParam));
         win32wnd->MsgChar(pWinMsg);
         break;
 
     case WM_TIMER:
-        dprintf(("WM_TIMER %x %x time %x", win32wnd->getWindowHandle(), pWinMsg->wParam, GetTickCount()));
+        dprintf(("OS2: WM_TIMER %x %x time %x", win32wnd->getWindowHandle(), pWinMsg->wParam, GetTickCount()));
         win32wnd->DispatchMsgA(pWinMsg);
         goto RunDefWndProc;
 
