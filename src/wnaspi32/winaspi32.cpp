@@ -1,4 +1,4 @@
-/* $Id: winaspi32.cpp,v 1.11 2000-10-02 19:03:19 sandervl Exp $ */
+/* $Id: winaspi32.cpp,v 1.12 2000-12-16 15:42:42 sandervl Exp $ */
 /*
  * WNASPI routines
  *
@@ -465,6 +465,7 @@ DWORD CDECL SendASPI32Command(LPSRB lpSRB)
     }
     else
     {
+        dprintf(("Unable to access aspi!!"));
         dwRC = SS_NO_ASPI;
     }
 
