@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.22 1999-10-04 09:56:02 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.23 1999-10-04 20:53:45 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -78,6 +78,7 @@ void Win32BaseWindow::Init()
   fCreated         = FALSE;
   fFirstShow       = TRUE;
   fIsDialog        = FALSE;
+  fInternalMsg     = FALSE;
 
   windowNameA      = NULL;
   windowNameW      = NULL;
@@ -1408,7 +1409,10 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         return min(wndNameLength, wParam);
 
     case WM_SETTEXT:
-        return 0;
+	if(!fInternalMsg) {
+        	return SetWindowTextA((LPSTR)lParam);
+	}
+	else	return 0;
 
     case WM_SETREDRAW:
         if(wParam)
@@ -1564,6 +1568,12 @@ LRESULT Win32BaseWindow::DefWindowProcW(UINT Msg, WPARAM wParam, LPARAM lParam)
         lstrcpynW((LPWSTR)lParam, windowNameW, wParam);
         return min(wndNameLength, wParam);
 
+    case WM_SETTEXT:
+	if(!fInternalMsg) {
+        	return SetWindowTextW((LPWSTR)lParam);
+	}
+	else	return 0;
+
     default:
         return DefWindowProcA(Msg, wParam, lParam);
     }
@@ -1572,6 +1582,9 @@ LRESULT Win32BaseWindow::DefWindowProcW(UINT Msg, WPARAM wParam, LPARAM lParam)
 //******************************************************************************
 LRESULT Win32BaseWindow::SendMessageA(ULONG Msg, WPARAM wParam, LPARAM lParam)
 {
+ LRESULT rc;
+ BOOL    fInternalMsgBackup = fInternalMsg;
+
   if(Msg != WM_GETDLGCODE && Msg != WM_ENTERIDLE) {//sent *very* often
         if(PostSpyMessage(getWindowHandle(), Msg, wParam, lParam) == FALSE)
             dprintf(("SendMessageA %s for %x %x %x", GetMsgText(Msg), getWindowHandle(), wParam, lParam));
@@ -1580,39 +1593,50 @@ LRESULT Win32BaseWindow::SendMessageA(ULONG Msg, WPARAM wParam, LPARAM lParam)
   if(HkCBT::OS2HkCBTProc(getWindowHandle(), Msg, wParam, lParam) == TRUE) {//hook swallowed msg
         return(0);
   }
+  fInternalMsg = FALSE;
   switch(Msg)
   {
         case WM_CREATE:
         {
                 if(win32wndproc(getWindowHandle(), WM_CREATE, 0, lParam) == -1) {
                         dprintf(("WM_CREATE returned -1\n"));
-                        return(-1); //don't create window
+                        rc = -1; //don't create window
+			break;
                 }
                 NotifyParent(Msg, wParam, lParam);
 
-                return(0);
+                rc = 0;
+		break;
         }
-        case WM_SETTEXT: //TODO: Nothing happens if passed to DefWindowProc
-                return win32wndproc(getWindowHandle(), WM_SETTEXT, wParam, lParam);
+        case WM_SETTEXT:
+                rc = win32wndproc(getWindowHandle(), WM_SETTEXT, wParam, lParam);
+		break;
 
         case WM_LBUTTONDOWN:
         case WM_MBUTTONDOWN:
         case WM_RBUTTONDOWN:
                 NotifyParent(Msg, wParam, lParam);
-                return win32wndproc(getWindowHandle(), Msg, wParam, lParam);
+                rc = win32wndproc(getWindowHandle(), Msg, wParam, lParam);
+		break;
 
         case WM_DESTROY:
-                win32wndproc(getWindowHandle(), WM_NCDESTROY, 0, 0);
-                NotifyParent(Msg, wParam, lParam);
-                return win32wndproc(getWindowHandle(), WM_DESTROY, 0, 0);
+                rc = win32wndproc(getWindowHandle(), WM_DESTROY, 0, 0);
+		break;
+
         default:
-                return win32wndproc(getWindowHandle(), Msg, wParam, lParam);
+ 		rc = win32wndproc(getWindowHandle(), Msg, wParam, lParam);
+		break;
   }
+  fInternalMsg = fInternalMsgBackup;
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************
 LRESULT Win32BaseWindow::SendMessageW(ULONG Msg, WPARAM wParam, LPARAM lParam)
 {
+ LRESULT rc;
+ BOOL    fInternalMsgBackup = fInternalMsg;
+
   if(Msg != WM_GETDLGCODE && Msg != WM_ENTERIDLE) {//sent *very* often
         if(PostSpyMessage(getWindowHandle(), Msg, wParam, lParam) == FALSE)
             dprintf(("SendMessageW %s for %x %x %x", GetMsgText(Msg), getWindowHandle(), wParam, lParam));
@@ -1621,72 +1645,91 @@ LRESULT Win32BaseWindow::SendMessageW(ULONG Msg, WPARAM wParam, LPARAM lParam)
   if(HkCBT::OS2HkCBTProc(getWindowHandle(), Msg, wParam, lParam) == TRUE) {//hook swallowed msg
         return(0);
   }
+  fInternalMsg = FALSE;
   switch(Msg)
   {
         case WM_CREATE:
         {
                 if(win32wndproc(getWindowHandle(), WM_CREATE, 0, lParam) == -1) {
                         dprintf(("WM_CREATE returned -1\n"));
-                        return(-1); //don't create window
+                        rc = -1; //don't create window
+			break;
                 }
                 NotifyParent(Msg, wParam, lParam);
 
-                return(0);
+                rc = 0;
+		break;
         }
-        case WM_SETTEXT: //TODO: Nothing happens if passed to DefWindowProc
-                return win32wndproc(getWindowHandle(), WM_SETTEXT, wParam, lParam);
+        case WM_SETTEXT:
+                rc = win32wndproc(getWindowHandle(), WM_SETTEXT, wParam, lParam);
+		break;
 
         case WM_LBUTTONDOWN:
         case WM_MBUTTONDOWN:
         case WM_RBUTTONDOWN:
                 NotifyParent(Msg, wParam, lParam);
-                return win32wndproc(getWindowHandle(), Msg, wParam, lParam);
+                rc = win32wndproc(getWindowHandle(), Msg, wParam, lParam);
+		break;
 
         case WM_DESTROY:
                 win32wndproc(getWindowHandle(), WM_NCDESTROY, 0, 0);
                 NotifyParent(Msg, wParam, lParam);
-                return win32wndproc(getWindowHandle(), WM_DESTROY, 0, 0);
+                rc = win32wndproc(getWindowHandle(), WM_DESTROY, 0, 0);
+		break;
 
         default:
-                return win32wndproc(getWindowHandle(), Msg, wParam, lParam);
+ 		rc = win32wndproc(getWindowHandle(), Msg, wParam, lParam);
+		break;
   }
+  fInternalMsg = fInternalMsgBackup;
+  return rc;
 }
 //******************************************************************************
 //Called as a result of an OS/2 message
 //******************************************************************************
 LRESULT Win32BaseWindow::SendInternalMessageA(ULONG Msg, WPARAM wParam, LPARAM lParam)
 {
+ LRESULT rc;
+ BOOL    fInternalMsgBackup = fInternalMsg;
+
   if(PostSpyMessage(getWindowHandle(), Msg, wParam, lParam) == FALSE)
         dprintf(("SendInternalMessageA %s for %x %x %x", GetMsgText(Msg), getWindowHandle(), wParam, lParam));
 
   if(HkCBT::OS2HkCBTProc(getWindowHandle(), Msg, wParam, lParam) == TRUE) {//hook swallowed msg
         return(0);
   }
+  fInternalMsg = TRUE;
   switch(Msg)
   {
         case WM_CREATE:
         {
                 if(win32wndproc(getWindowHandle(), WM_CREATE, 0, lParam) == -1) {
                         dprintf(("WM_CREATE returned -1\n"));
-                        return(-1); //don't create window
+                        rc = -1; //don't create window
+			break;
                 }
                 NotifyParent(Msg, wParam, lParam);
-
-                return(0);
+                rc = 0;
+		break;
         }
         case WM_LBUTTONDOWN:
         case WM_MBUTTONDOWN:
         case WM_RBUTTONDOWN:
                 NotifyParent(Msg, wParam, lParam);
-                return win32wndproc(getWindowHandle(), Msg, wParam, lParam);
+                rc = win32wndproc(getWindowHandle(), Msg, wParam, lParam);
+		break;
 
         case WM_DESTROY:
                 win32wndproc(getWindowHandle(), WM_NCDESTROY, 0, 0);
                 NotifyParent(Msg, wParam, lParam);
-                return win32wndproc(getWindowHandle(), WM_DESTROY, 0, 0);
+                rc = win32wndproc(getWindowHandle(), WM_DESTROY, 0, 0);
+		break;
         default:
-                return win32wndproc(getWindowHandle(), Msg, wParam, lParam);
+ 		rc = win32wndproc(getWindowHandle(), Msg, wParam, lParam);
+		break;
   }
+  fInternalMsg = fInternalMsgBackup;
+  return rc;
 }
 //******************************************************************************
 //Called as a result of an OS/2 message
@@ -1694,37 +1737,47 @@ LRESULT Win32BaseWindow::SendInternalMessageA(ULONG Msg, WPARAM wParam, LPARAM l
 //******************************************************************************
 LRESULT Win32BaseWindow::SendInternalMessageW(ULONG Msg, WPARAM wParam, LPARAM lParam)
 {
+ LRESULT rc;
+ BOOL    fInternalMsgBackup = fInternalMsg;
+
   if(PostSpyMessage(getWindowHandle(), Msg, wParam, lParam) == FALSE)
         dprintf(("SendInternalMessageW %s for %x %x %x", GetMsgText(Msg), getWindowHandle(), wParam, lParam));
 
   if(HkCBT::OS2HkCBTProc(getWindowHandle(), Msg, wParam, lParam) == TRUE) {//hook swallowed msg
         return(0);
   }
+  fInternalMsg = TRUE;
   switch(Msg)
   {
         case WM_CREATE:
         {
                 if(win32wndproc(getWindowHandle(), WM_CREATE, 0, lParam) == -1) {
                         dprintf(("WM_CREATE returned -1\n"));
-                        return(-1); //don't create window
+                        rc = -1; //don't create window
+			break;
                 }
                 NotifyParent(Msg, wParam, lParam);
-
-                return(0);
+                rc = 0;
+                break;
         }
         case WM_LBUTTONDOWN:
         case WM_MBUTTONDOWN:
         case WM_RBUTTONDOWN:
                 NotifyParent(Msg, wParam, lParam);
-                return win32wndproc(getWindowHandle(), Msg, wParam, lParam);
+                rc = win32wndproc(getWindowHandle(), Msg, wParam, lParam);
+		break;
 
         case WM_DESTROY:
                 win32wndproc(getWindowHandle(), WM_NCDESTROY, 0, 0);
                 NotifyParent(Msg, wParam, lParam);
-                return win32wndproc(getWindowHandle(), WM_DESTROY, 0, 0);
+                rc = win32wndproc(getWindowHandle(), WM_DESTROY, 0, 0);
+		break;
         default:
-                return win32wndproc(getWindowHandle(), Msg, wParam, lParam);
+ 		rc = win32wndproc(getWindowHandle(), Msg, wParam, lParam);
+		break;
   }
+  fInternalMsg = fInternalMsgBackup;
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************
