@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2179 2002-06-20 14:26:15 sandervl Exp $ */
+/* $Id: changelog,v 1.2180 2002-06-20 19:16:54 sandervl Exp $ */
+
+ 2002-06-20: Platon Fomichev <platon@innotek.de>
+    - COMCTL32: o Don't erase background for ownerdrawn listview controls
+                  (LISTVIEW_RefreshReport)
 
  2002-06-20: Sander van Leeuwen <sandervl@innotek.de>
     - OLE32:    o Drag 'n drop fix
