@@ -1,4 +1,4 @@
-/* $Id: ntddscsi.h,v 1.1 2000-09-13 20:58:28 sandervl Exp $ */
+/* $Id: ntddscsi.h,v 1.2 2003-01-12 16:19:56 sandervl Exp $ */
 #ifndef __NTDDSCSI_H__
 #define __NTDDSCSI_H__
 
@@ -66,7 +66,7 @@ typedef struct _SCSI_INQUIRY_DATA {
     UCHAR PathId;
     UCHAR TargetId;
     UCHAR Lun;
-    BOOL DeviceClaimed;
+    BOOLEAN DeviceClaimed;
     ULONG InquiryDataLength;
     ULONG NextInquiryDataOffset;
     UCHAR InquiryData[1];
@@ -87,9 +87,9 @@ typedef struct _IO_SCSI_CAPABILITIES {
     ULONG MaximumPhysicalPages;
     ULONG SupportedAsynchronousEvents;
     ULONG AlignmentMask;
-    BOOL TaggedQueuing;
-    BOOL AdapterScansDown;
-    BOOL AdapterUsesPio;
+    BOOLEAN TaggedQueuing;
+    BOOLEAN AdapterScansDown;
+    BOOLEAN AdapterUsesPio;
 } IO_SCSI_CAPABILITIES, *PIO_SCSI_CAPABILITIES;
 
 typedef struct _SCSI_ADDRESS {
@@ -109,7 +109,7 @@ typedef struct _DUMP_POINTERS {
     PVOID CommonBufferVa;
     LARGE_INTEGER CommonBufferPa;
     ULONG CommonBufferSize;
-    BOOL AllocateCommonBuffers;
+    BOOLEAN AllocateCommonBuffers;
     UCHAR Spare1[3];
     PVOID DeviceObject;
 } DUMP_POINTERS, *PDUMP_POINTERS;
