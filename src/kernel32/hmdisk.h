@@ -1,4 +1,4 @@
-/* $Id: hmdisk.h,v 1.4 2001-06-16 16:10:12 sandervl Exp $ */
+/* $Id: hmdisk.h,v 1.5 2001-10-30 00:46:17 sandervl Exp $ */
 
 #ifndef __HMDISK_H__
 #define __HMDISK_H__
@@ -49,6 +49,9 @@ public:
                                      LPVOID lpInBuffer, DWORD nInBufferSize,
                                      LPVOID lpOutBuffer, DWORD nOutBufferSize,
                                      LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped);
+
+private:
+          DWORD  OpenDisk(PVOID pDrvInfo);
 };
 
 
