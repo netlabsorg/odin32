@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 1999-09-15 11:25:04 phaller Exp $
+# $Id: makefile,v 1.2 1999-09-20 10:18:58 phaller Exp $
 
 #
 # PD-Win32 API
@@ -20,7 +20,7 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 TARGET = wnaspi32
 
-OBJS =  winaspi32.obj initterm.obj
+OBJS =  odinaspi.obj winaspi32.obj initterm.obj
 
 all: $(TARGET).dll $(TARGET).lib
 
@@ -29,7 +29,7 @@ $(TARGET).dll: $(OBJS) $(TARGET).def
         $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
               $(PDWIN32_LIB)/pmwinx.lib $(PDWIN32_LIB)/kernel32.lib \
               $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O) \
-              $(PDWIN32_LIB)/ole32.lib $(PDWIN32_LIB)/msvfw32.lib
+              $(PDWIN32_LIB)/advapi32.lib
         $(CP) $@ $(PDWIN32_BIN)
 
 
@@ -39,8 +39,8 @@ $(TARGET).lib: $(TARGET).dll
 
 
 initterm.obj:  initterm.cpp
-ainaspi32.obj: wnaspi32.cpp
-
+ainaspi32.obj: wnaspi32.cpp odinaspi.h srbos2.h
+odinaspi.obj:  odinaspi.cpp odinaspi.h srbos2.h
 clean:
         $(RM) *.obj *.lib *.dll *~ *.map *.pch
         $(RM) $(PDWIN32_BIN)\$(TARGET).dll
