@@ -68,7 +68,9 @@ static const COLORREF predefcolors[6][8]=
 struct CCPRIVATE
 {
  LPCHOOSECOLORW lpcc;  /* points to public known data structure */
+#ifndef __WIN32OS2__
  LPCHOOSECOLOR16 lpcc16; /* save the 16 bits pointer */
+#endif
  int nextuserdef;     /* next free place in user defined color array */
  HDC hdcMem;        /* color graph used for BitBlt() */
  HBITMAP hbmMem;    /* color graph bitmap */    
