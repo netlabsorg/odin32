@@ -49,7 +49,7 @@ part under the terms of this license. Only the Odin management
 team is allowed to put parts of the work under a different
 license and remove the part specific licenses. The purpose
 of using different licenses is solely for allowing code
-sharing of certain parts of the work with other project that
+sharing of certain parts of the work with other projects that
 have incompatible licenses. These parts should either have
 this license in a version that makes it compatible with the
 license of the second project, or the license of the second
