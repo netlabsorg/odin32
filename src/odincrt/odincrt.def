@@ -953,3 +953,4 @@ EXPORTS
       __ctordtorTerm
       _dllentry
       _Exception_CPP
+      __ctdtused
