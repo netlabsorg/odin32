@@ -1,8 +1,10 @@
-/* $Id: changelog,v 1.1631 2001-08-04 14:20:16 sandervl Exp $ */
+/* $Id: changelog,v 1.1632 2001-08-04 15:30:02 sandervl Exp $ */
 
  2001-08-04: Sander van Leeuwen <sandervl@xs4all.nl>
     - CUSTOMBUILD: 
                 o Add registration of gdi32 & advapi32
+                o Use toupperW in kernel32 instead of toupper (C runtime lib)
+    - CRTDLL:   o Use toupperW in kernel32 instead of toupper (C runtime lib)
 
  2001-08-03: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Temporarily disabled new name lookup (resources) until
