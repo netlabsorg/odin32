@@ -1,4 +1,4 @@
-/* $Id: filedlg95.c,v 1.13 2000-08-21 18:36:39 sandervl Exp $*/
+/* $Id: filedlg95.c,v 1.14 2000-08-24 12:02:23 sandervl Exp $*/
 /*
  * COMMDLG - File Open Dialogs Win95 look and feel
  *
@@ -18,8 +18,6 @@
 
 #define MapHModuleSL(a) a
 #define MapHModuleLS(a) a
-
-#define strcasecmp stricmp
 
 #endif
 
