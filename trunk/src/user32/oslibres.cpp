@@ -1,4 +1,4 @@
-/* $Id: oslibres.cpp,v 1.30 2002-02-18 10:14:56 sandervl Exp $ */
+/* $Id: oslibres.cpp,v 1.31 2002-06-25 07:11:10 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -246,7 +246,7 @@ BOOL isMonoBitmap(BITMAP_W *pXorBmp, PBYTE os2rgb)
         for(j=0;j<pXorBmp->bmWidth;j++) {
             pixel = 0;
             memcpy(&pixel, os2rgb, increment);
-            if(nrcolors == 0) { 
+            if(nrcolors == 0) {
                 color[0] = pixel;
                 nrcolors = 1;
             }
@@ -256,7 +256,7 @@ BOOL isMonoBitmap(BITMAP_W *pXorBmp, PBYTE os2rgb)
                 nrcolors = 2;
             }
             else {
-                if(color[0] != pixel && color[1] != pixel) 
+                if(color[0] != pixel && color[1] != pixel)
                 {
                     return FALSE;
                 }
@@ -270,12 +270,12 @@ BOOL isMonoBitmap(BITMAP_W *pXorBmp, PBYTE os2rgb)
 //******************************************************************************
 //******************************************************************************
 char *colorToMonoBitmap(HBITMAP bmpsrc, BITMAPINFO2 *pBmpDest)
-{ 
+{
     HDC hdcDest = 0;            /* device context handle                */
     HPS hpsDest = 0;
     SIZEL sizl = { 0, 0 };  /* use same page size as device         */
     DEVOPENSTRUC dop = {0L, "DISPLAY", NULL, 0L, 0L, 0L, 0L, 0L, 0L};
-    LONG lHits; 
+    LONG lHits;
     char *bmpbuffer = 0;
     BITMAPINFO2 *bmpinfo = NULL;
     HAB hab;
@@ -286,12 +286,12 @@ char *colorToMonoBitmap(HBITMAP bmpsrc, BITMAPINFO2 *pBmpDest)
 
     /* create memory device context */
     hdcDest = DevOpenDC(hab, OD_MEMORY, "*", 5L, (PDEVOPENDATA)&dop, NULLHANDLE);
- 
+
     /* Create the presentation and associate the memory device
        context. */
     hpsDest = GpiCreatePS(hab, hdcDest, &sizl, PU_PELS |
                           GPIT_MICRO | GPIA_ASSOC);
-    if(!hpsDest) goto fail; 
+    if(!hpsDest) goto fail;
 
     GpiSetBitmap(hpsDest, bmpsrc);
 
@@ -321,7 +321,7 @@ char *colorToMonoBitmap(HBITMAP bmpsrc, BITMAPINFO2 *pBmpDest)
                 }
                 else WriteLogNoEOL(".");
             }
-            else 
+            else
             if(j<16) {
                 if((*(bmpbuffer+1+i*4)) & (1<<(15-j))) {
                     WriteLogNoEOL("X");
@@ -354,7 +354,7 @@ char *colorToMonoBitmap(HBITMAP bmpsrc, BITMAPINFO2 *pBmpDest)
     DevCloseDC(hdcDest);         /* closes device context       */
     free(bmpinfo);
 
-    return bmpbuffer; 
+    return bmpbuffer;
 
 fail:
     if(bmpinfo)   free(bmpinfo);
@@ -373,7 +373,7 @@ fail:
 //NOTE: Depends on origin of bitmap data!!!
 //      Assumes 1 bpp bitmaps have a top left origin and all others have a bottom left origin
 //******************************************************************************
-HANDLE OSLibWinCreatePointer(CURSORICONINFO *pInfo, char *pAndBits, BITMAP_W *pAndBmp, char *pXorBits, 
+HANDLE OSLibWinCreatePointer(CURSORICONINFO *pInfo, char *pAndBits, BITMAP_W *pAndBmp, char *pXorBits,
                              BITMAP_W *pXorBmp, BOOL fCursor)
 {
  POINTERINFO  pointerInfo = {0};
@@ -433,7 +433,7 @@ HANDLE OSLibWinCreatePointer(CURSORICONINFO *pInfo, char *pAndBits, BITMAP_W *pA
                     src  += pXorBmp->bmWidthBytes;
                 }
         }
-        else    
+        else
         if(pXorBmp->bmBitsPixel == 16) {
                 ConvertRGB555to565(os2rgb, rgb, pXorBmp->bmHeight * pXorBmp->bmWidthBytes);
         }
@@ -446,9 +446,9 @@ HANDLE OSLibWinCreatePointer(CURSORICONINFO *pInfo, char *pAndBits, BITMAP_W *pA
                 dprintf(("OSLibWinCreateIcon: GpiCreateBitmap failed!"));
                 goto fail;
         }
-        if(fCursor && pXorBmp->bmBitsPixel >= 8) 
+        if(fCursor && pXorBmp->bmBitsPixel >= 8)
         {
-            if(fForceMonoCursor || isMonoBitmap(pXorBmp, (PBYTE)os2rgb) == TRUE) 
+            if(fForceMonoCursor || isMonoBitmap(pXorBmp, (PBYTE)os2rgb) == TRUE)
             {
                 pOS2XorBits = colorToMonoBitmap(hbmColor, pBmpColor);
                 if(pOS2XorBits) {
@@ -465,7 +465,10 @@ HANDLE OSLibWinCreatePointer(CURSORICONINFO *pInfo, char *pAndBits, BITMAP_W *pA
 
     //SvL: 2*sizeof(RGB2) is enough, but GpiCreateBitmap seems to touch more
     //     memory. (Adobe Photoshop 6 running in the debugger)
-    masksize = sizeof(BITMAPINFO2) + (pAndBmp->bmHeight * 2 * pAndBmp->bmWidthBytes) + 16*sizeof(RGB2);
+    //bird: We should reserve the amount required anythingelse is stupid.
+    //      Looks like it's reading 3 bytes too much... Hopefully that's due to the
+    //      &pBmpMask->argbColor[2] which it assumes is 16 colors long. But no proofs.
+    masksize = sizeof(BITMAPINFO2) + (pAndBmp->bmHeight * 2 * pAndBmp->bmWidthBytes) + (16+2)*sizeof(RGB2);
     pBmpMask = (BITMAPINFO2 *)malloc(masksize);
     if(pBmpMask == NULL) {
         DebugInt3();
@@ -722,8 +725,8 @@ void OSLibStripFile(char *path)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API OSLibWinCreateObject(LPSTR pszPath, LPSTR pszArgs, 
-                                   LPSTR pszWorkDir, LPSTR pszLink, 
+BOOL WIN32API OSLibWinCreateObject(LPSTR pszPath, LPSTR pszArgs,
+                                   LPSTR pszWorkDir, LPSTR pszLink,
                                    LPSTR pszDescription, LPSTR pszIcoPath,
                                    INT iIcoNdx, BOOL fDesktop)
 {
@@ -747,7 +750,7 @@ BOOL WIN32API OSLibWinCreateObject(LPSTR pszPath, LPSTR pszArgs,
            tmp++;
        }
    }
-   dprintf(("OSLibWinCreateObject %s %s %s\n    %s %s %s %d %d", pszPath, pszArgs, 
+   dprintf(("OSLibWinCreateObject %s %s %s\n    %s %s %s %d %d", pszPath, pszArgs,
             pszWorkDir, pszName, pszDescription, pszIcoPath, iIcoNdx, fDesktop));
    dprintf(("Link path %s", pszLink));
 
@@ -760,11 +763,11 @@ BOOL WIN32API OSLibWinCreateObject(LPSTR pszPath, LPSTR pszArgs,
        OSLibStripFile(szWorkDir);
    }
 
-   pszSetupString = (LPSTR)malloc(128 + strlen(pszPath) + strlen(pszName) + 
+   pszSetupString = (LPSTR)malloc(128 + strlen(pszPath) + strlen(pszName) +
                                   strlen(pszLink) + 2*strlen(szSystemDir) +
                                   strlen(szWorkDir) + strlen(pszIcoPath) +
-                                  ((pszArgs) ? strlen(pszArgs) : 0) + 
-                                  ((pszWorkDir) ? strlen(pszWorkDir) : 0)); 
+                                  ((pszArgs) ? strlen(pszArgs) : 0) +
+                                  ((pszWorkDir) ? strlen(pszWorkDir) : 0));
 
    sprintf(pszSetupString, "PROGTYPE=PM;OBJECTID=<%s>;EXENAME=%s\\PE.EXE;SET BEGINLIBPATH=%s;STARTUPDIR=%s;ICONFILE=%s;PARAMETERS=\"%s\"", pszName, szSystemDir, szSystemDir, szWorkDir, pszIcoPath, pszPath);
    if(pszArgs && *pszArgs) {
@@ -776,7 +779,7 @@ BOOL WIN32API OSLibWinCreateObject(LPSTR pszPath, LPSTR pszArgs,
    if(fDesktop) {
        dprintf(("Name = %s", pszName));
        dprintf(("Setup string = %s", pszSetupString));
-       hObject = WinCreateObject("WPProgram", pszName, pszSetupString, 
+       hObject = WinCreateObject("WPProgram", pszName, pszSetupString,
                                  "<WP_DESKTOP>", CO_REPLACEIFEXISTS);
    }
    else {
@@ -787,11 +790,11 @@ BOOL WIN32API OSLibWinCreateObject(LPSTR pszPath, LPSTR pszArgs,
        sprintf(szWorkDir, "OBJECTID=%s;", temp);
        hObject = WinCreateObject("WPFolder", pszFolder, szWorkDir,
                                  "<ODINFOLDER>", CO_UPDATEIFEXISTS);
-       hObject = WinCreateObject("WPProgram", pszName, pszSetupString, 
+       hObject = WinCreateObject("WPProgram", pszName, pszSetupString,
                                  temp, CO_REPLACEIFEXISTS);
    }
 // If SysCreateObject("WPProgram", "WarpMix", "<ICHAUDIO>",,
-//                    "PROGTYPE=PM;OBJECTID=<WARPMIX>;ICONFILE=WARPMIX.ICO;EXENAME="||bootDrive||"\MMOS2\WARPMIX.EXE")  
+//                    "PROGTYPE=PM;OBJECTID=<WARPMIX>;ICONFILE=WARPMIX.ICO;EXENAME="||bootDrive||"\MMOS2\WARPMIX.EXE")
 
    free(pszSetupString);
    if(!hObject) {
