@@ -1,4 +1,4 @@
-/* $Id: time.cpp,v 1.9 2000-02-17 14:09:32 sandervl Exp $ */
+/* $Id: time.cpp,v 1.10 2001-03-21 12:33:22 sandervl Exp $ */
 
 /*
  * Timer MM apis
@@ -222,6 +222,7 @@ ODINFUNCTION2(MMRESULT, timeGetSystemTime,
               LPMMTIME, arg1,
               UINT,     arg2)
 {
+  dprintf2(("timeGetSystemTime %x %d", arg1, arg2));
   return O32_timeGetSystemTime(arg1, arg2);
 }
 
@@ -240,6 +241,25 @@ ODINFUNCTION2(MMRESULT, timeGetSystemTime,
 
 DWORD WIN32API timeGetTime()
 {
-  return O32_timeGetTime();
+ DWORD time;
+#if 0
+ LARGE_INTEGER lint;
+ static LARGE_INTEGER freq;
+ static BOOL fInit = FALSE;
+
+  if(fInit == FALSE) {
+     QueryPerformanceFrequency(&freq);
+     freq.LowPart /= 1000;
+     fInit = TRUE;
+  }
+  QueryPerformanceCounter(&lint);
+  time = lint.LowPart/freq.LowPart;
+  dprintf2(("timeGetTime %x (%x:%x)", time, lint.LowPart, lint.HighPart));
+#else
+  //SvL: TODO: Inaccurate
+  time = O32_timeGetTime();
+  dprintf2(("timeGetTime %x", time));
+#endif
+  return time;
 }
 

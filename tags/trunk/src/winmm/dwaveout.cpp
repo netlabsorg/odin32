@@ -1,4 +1,4 @@
-/* $Id: dwaveout.cpp,v 1.32 2001-03-19 19:28:38 sandervl Exp $ */
+/* $Id: dwaveout.cpp,v 1.33 2001-03-21 12:33:22 sandervl Exp $ */
 
 /*
  * Wave playback class
@@ -117,7 +117,7 @@ void DartWaveOut::Init(LPWAVEFORMATEX pwfx)
     APIRET rc;
 
     curPlayBuf = curFillBuf = curFillPos = curPlayPos = 0;
-    readPos = writePos = 0;
+    bytesPlayed = bytesCopied = bytesReturned = 0;
 
     fMixerSetup   = FALSE;
     next          = NULL;
@@ -129,6 +129,7 @@ void DartWaveOut::Init(LPWAVEFORMATEX pwfx)
     ulError       = 0;
     volume        = defvolume;
     State         = STATE_STOPPED;
+    queuedbuffers = 0;
 
     MixBuffer     = (MCI_MIX_BUFFER *)malloc(PREFILLBUF_DART*sizeof(MCI_MIX_BUFFER));
     MixSetupParms = (MCI_MIXSETUP_PARMS *)malloc(sizeof(MCI_MIXSETUP_PARMS));
@@ -300,6 +301,7 @@ MMRESULT DartWaveOut::write(LPWAVEHDR pwh, UINT cbwh)
     APIRET rc;
     int i, buflength;
 
+    queuedbuffers++;
     if(fMixerSetup == FALSE)
     {
         dprintf(("device acquired\n"));
@@ -382,7 +384,7 @@ MMRESULT DartWaveOut::write(LPWAVEHDR pwh, UINT cbwh)
         fMixerSetup = TRUE;
 
         curPlayBuf = curFillBuf = curFillPos = curPlayPos = 0;
-        readPos = writePos = 0;
+        bytesPlayed = bytesCopied = bytesReturned = 0;
 
         for(i=0;i<PREFILLBUF_DART;i++) {
             memset(MixBuffer[i].pBuffer, 0, MixBuffer[i].ulBufferLength);
@@ -432,10 +434,29 @@ MMRESULT DartWaveOut::write(LPWAVEHDR pwh, UINT cbwh)
         else wavehdr = pwh;
 
         writeBuffer();  //must be called before (re)starting playback
-
         wmutex->leave();
+
         if(State == STATE_STOPPED) {//continue playback
             restart();
+        }
+        else
+        if(fUnderrun) {
+            dprintf(("Resume playback after underrun"));
+            fUnderrun = FALSE;
+            State = STATE_PLAYING;
+
+            memset(&GenericParms, 0, sizeof(GenericParms));
+
+            // Resume the playback.
+            mciSendCommand(DeviceId, MCI_RESUME, MCI_WAIT, (PVOID)&GenericParms, 0);
+
+            //write buffers to DART; starts playback
+            // MCI_MIXSETUP_PARMS->pMixWrite does alter FS: selector!
+            USHORT selTIB = GetFS(); // save current FS selector
+
+            MixSetupParms->pmixWrite(MixSetupParms->ulMixHandle, &MixBuffer[curPlayBuf], 1);
+
+            SetFS(selTIB);           // switch back to the saved FS selector
         }
     }
     return(MMSYSERR_NOERROR);
@@ -445,6 +466,8 @@ MMRESULT DartWaveOut::write(LPWAVEHDR pwh, UINT cbwh)
 MMRESULT DartWaveOut::pause()
 {
  MCI_GENERIC_PARMS Params;
+
+    dprintf(("WINMM: DartWaveOut::pause"));
 
     wmutex->enter(VMUTEX_WAIT_FOREVER);
     if(State != STATE_PLAYING) {
@@ -458,7 +481,7 @@ MMRESULT DartWaveOut::pause()
 
     memset(&Params, 0, sizeof(Params));
 
-    // Stop the playback.
+    // Pause the playback.
     mciSendCommand(DeviceId, MCI_PAUSE, MCI_WAIT, (PVOID)&Params, 0);
 
     return(MMSYSERR_NOERROR);
@@ -482,7 +505,7 @@ MMRESULT DartWaveOut::stop()
     fUnderrun = FALSE;
 
     curPlayBuf = curFillBuf = curFillPos = curPlayPos = 0;
-    readPos = writePos = 0;
+    bytesPlayed = bytesCopied = bytesReturned = 0;
 
     return(MMSYSERR_NOERROR);
 }
@@ -509,6 +532,7 @@ MMRESULT DartWaveOut::reset()
     {
         wavehdr->dwFlags  |= WHDR_DONE;
         wavehdr->dwFlags  &= ~WHDR_INQUEUE;
+        wavehdr->reserved  = 0;
         tmpwavehdr         = wavehdr;
         wavehdr            = wavehdr->lpNext;
         tmpwavehdr->lpNext = NULL;
@@ -529,7 +553,8 @@ MMRESULT DartWaveOut::reset()
     fUnderrun = FALSE;
 
     curPlayBuf = curFillBuf = curFillPos = curPlayPos = 0;
-    readPos = writePos = 0;
+    bytesPlayed = bytesCopied = bytesReturned = 0;
+    queuedbuffers = 0;
 
     wmutex->leave();
     return(MMSYSERR_NOERROR);
@@ -566,6 +591,7 @@ MMRESULT DartWaveOut::restart()
         }
         SetFS(selTIB);           // switch back to the saved FS selector
     }
+
     return(MMSYSERR_NOERROR);
 }
 /******************************************************************************/
@@ -673,7 +699,7 @@ void DartWaveOut::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags
  ULONG    buflength;
  WAVEHDR *whdr, *prevhdr = NULL;
 
-    dprintf2(("WINMM: handler %d\n", curPlayBuf));
+    dprintf2(("WINMM: handler %d; buffers left %d", curPlayBuf, queuedbuffers));
     if(ulFlags == MIX_STREAM_ERROR) {
         if(ulStatus == ERROR_DEVICE_UNDERRUN) {
             dprintf(("WINMM: WaveOut handler UNDERRUN! state %s", (State == STATE_PLAYING) ? "playing" : "stopped"));
@@ -692,36 +718,29 @@ void DartWaveOut::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags
 
     wmutex->enter(VMUTEX_WAIT_FOREVER);
 
-    readPos += MixBuffer[curPlayBuf].ulBufferLength;
+    bytesPlayed += MixBuffer[curPlayBuf].ulBufferLength;
 
     if(curPlayBuf == PREFILLBUF_DART-1)
          curPlayBuf = 0;
     else curPlayBuf++;
 
-    whdr = wavehdr;
-    if(whdr == NULL) {
-        //last buffer played -> no new ones -> silence buffer & continue
-        dprintf(("WINMM: WaveOut handler LAST BUFFER PLAYED! state %s", (State == STATE_PLAYING) ? "playing" : "stopped"));
-        if(State == STATE_PLAYING) {
-            fUnderrun = TRUE;
-////            memset(MixBuffer[curPlayBuf].pBuffer, 0, MixBuffer[curPlayBuf].ulBufferLength);
-            goto sendbuffer;
-        }
-        wmutex->leave();
-        return;
-    }
     fUnderrun = FALSE;
+
+    whdr = wavehdr;
     while(whdr) {
         if(whdr->reserved == WHDR_DONE)
         {
-            if(readPos < writePos + whdr->dwBufferLength) {
-                dprintf2(("Buffer marked done, but not yet played completely (%d,%d)", readPos, writePos));
+            if(bytesPlayed < bytesReturned + whdr->dwBufferLength) {
+                dprintf2(("Buffer marked done, but not yet played completely (play %d/%d, cop %d, ret %d)", bytesPlayed, getPosition(), bytesCopied, bytesReturned));
                 break;  //not yet done
             }
 
-            dprintf2(("WINMM: handler buf %X done (read %d, write %d)", whdr, readPos, writePos));
-            whdr->dwFlags &= ~WHDR_INQUEUE;
-            whdr->dwFlags |= WHDR_DONE;
+            dprintf2(("WINMM: handler buf %X done (play %d/%d, cop %d, ret %d)", whdr, bytesPlayed, getPosition(), bytesCopied, bytesReturned));
+            queuedbuffers--;
+
+            whdr->dwFlags  &= ~WHDR_INQUEUE;
+            whdr->dwFlags  |= WHDR_DONE;
+            whdr->reserved  = 0;
 
             if(prevhdr == NULL)
                  wavehdr = whdr->lpNext;
@@ -729,7 +748,7 @@ void DartWaveOut::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags
 
             whdr->lpNext = NULL;
 
-            writePos += whdr->dwBufferLength;
+            bytesReturned += whdr->dwBufferLength;
             wmutex->leave();
 
             if(mthdCallback) {
@@ -749,6 +768,19 @@ void DartWaveOut::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags
         whdr    = whdr->lpNext;
     }
 
+    if(wavehdr == NULL) {
+        //last buffer played -> no new ones -> silence buffer & continue
+        dprintf(("WINMM: WaveOut handler LAST BUFFER PLAYED! state %s (play %d (%d), cop %d, ret %d)", (State == STATE_PLAYING) ? "playing" : "stopped", bytesPlayed, getPosition(), bytesCopied, bytesReturned));
+        if(State == STATE_PLAYING) {
+            fUnderrun = TRUE;
+            pause();
+////            memset(MixBuffer[curPlayBuf].pBuffer, 0, MixBuffer[curPlayBuf].ulBufferLength);
+////            goto sendbuffer;
+        }
+        wmutex->leave();
+        return;
+    }
+
     writeBuffer();
 
 sendbuffer:
@@ -759,6 +791,8 @@ sendbuffer:
     USHORT selTIB = GetFS(); // save current FS selector
     MixSetupParms->pmixWrite(MixSetupParms->ulMixHandle, &MixBuffer[curPlayBuf], 1);
     SetFS(selTIB);           // switch back to the saved FS selector
+
+    dprintf2(("WINMM: handler DONE"));
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -791,12 +825,13 @@ void DartWaveOut::writeBuffer()
 
         memcpy((char *)MixBuffer[curFillBuf].pBuffer + curPlayPos,
                curhdr->lpData + curFillPos,  buflength);
-        curPlayPos += buflength;
-        curFillPos += buflength;
-
+        curPlayPos  += buflength;
+        curFillPos  += buflength;
+        bytesCopied += buflength;
 
         if(curFillPos == curhdr->dwBufferLength) {
-            dprintf2(("Buffer %d done (%x)", curFillBuf, curhdr));
+            dprintf2(("Buffer %d done ptr %x size %d %x %x %x %x %x %x", curFillBuf, curhdr->lpData, curhdr->dwBufferLength, curhdr->dwBytesRecorded, curhdr->dwUser, curhdr->dwFlags, curhdr->dwLoops, curhdr->lpNext, curhdr->reserved));
+
             curFillPos = 0;
             curhdr->reserved = WHDR_DONE;
             //search for next unprocessed buffer
