@@ -1,4 +1,4 @@
-/* $Id: console.cpp,v 1.27 2001-04-04 09:00:57 sandervl Exp $ */
+/* $Id: console.cpp,v 1.28 2001-10-01 01:47:01 bird Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -52,6 +52,7 @@
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
+#include <process.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -447,10 +448,10 @@ APIRET iConsoleDevicesRegister(void)
                                 0,
                                 CONSOLE_TEXTMODE_BUFFER,
                                 0);
- 
+
    HMSetStdHandle(STD_INPUT_HANDLE,
                   hStandardIn);
- 
+
    /***********************************************************************
     * initialize stdout handle                                            *
     ***********************************************************************/
@@ -464,10 +465,10 @@ APIRET iConsoleDevicesRegister(void)
                                  0,
                                  CONSOLE_TEXTMODE_BUFFER,
                                  0);
- 
+
    HMSetStdHandle(STD_OUTPUT_HANDLE,
                   hStandardOut);
- 
+
    /***********************************************************************
     * initialize stderr handle                                            *
     ***********************************************************************/
@@ -481,7 +482,7 @@ APIRET iConsoleDevicesRegister(void)
                                    0,
                                    CONSOLE_TEXTMODE_BUFFER,
                                    0);
- 
+
    HMSetStdHandle(STD_ERROR_HANDLE,
                   hStandardError);
   }
