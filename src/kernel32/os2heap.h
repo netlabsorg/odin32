@@ -1,4 +1,4 @@
-/* $Id: os2heap.h,v 1.10 2001-11-16 14:52:56 phaller Exp $ */
+/* $Id: os2heap.h,v 1.11 2002-01-06 16:48:47 sandervl Exp $ */
 
 /*
  *
@@ -18,14 +18,20 @@
 #include <umalloc.h>
 
 #define MAGIC_NR_HEAP  0x87654321
-//must be a multiple of 8 bytes (alignment)
+//must be a multiple of 8 bytes (alignment)!!
 typedef struct _tagHEAPELEM {
   DWORD  magic;     //magic number
   LPVOID lpMem;     //pointer returned by malloc
+  DWORD  cursize;   //current size (HeapReAlloc changes this)
+  DWORD  orgsize;   //size used to allocate this memory block
 } HEAPELEM;
 
-//+8 to make sure we can align the pointer at 8 byte boundary
-#define HEAP_OVERHEAD (sizeof(HEAPELEM)+8)
+#define HEAP_ALIGNMENT		8
+#define HEAP_ALIGNMENT_MASK	(~7)
+
+#define HEAP_OVERHEAD (sizeof(HEAPELEM))
+
+#define HEAP_ALIGN(a)     (((DWORD)a+HEAP_ALIGNMENT-1) & HEAP_ALIGNMENT_MASK)
 
 #define GET_HEAPOBJ(ptr) (HEAPELEM *)((char *)ptr - sizeof(HEAPELEM));
 
