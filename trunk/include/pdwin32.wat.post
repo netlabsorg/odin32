@@ -1,4 +1,4 @@
-# $Id: pdwin32.wat.post,v 1.6 2000-11-20 04:58:14 bird Exp $
+# $Id: pdwin32.wat.post,v 1.7 2000-11-20 05:16:21 bird Exp $
 #
 # Odin32 API
 #
@@ -126,9 +126,9 @@ $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS) $(OS2RES) $(DEFFILE) $(OBJDIR)\
 # Dll: Linker file - creates the parameter file passed on to the linker.
 #
 !ifndef NO_LNKFILE_RULE
-$(OBJDIR)\$(TARGET).lnk: makefile $(DEFFILE) $(PDWIN32_INCLUDE)\pdwin32.wat.post
-    $(RM) $(OBJDIR)\$(TARGET).lnk2 $@
-    $(KDEF2WAT) $(DEFFILE) $@ <<$(OBJDIR)\$(TARGET).lnk2
+$(OBJDIR)\$(TARGET).lrf: makefile $(DEFFILE) $(PDWIN32_INCLUDE)\pdwin32.wat.post
+    $(RM) $(OBJDIR)\$(TARGET).lrf2 $@
+    $(KDEF2WAT) $(DEFFILE) $@ <<$(OBJDIR)\$(TARGET).lrf2
 $(LD2FLAGS)
 name $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
 option map=$(OBJDIR)\$(TARGET).map
@@ -179,9 +179,13 @@ $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS) $(OS2RES) $(DEFFILE) $(OBJDIR)\
 # Exe: Linker file - creates the parameter file passed on to the linker.
 #
 !ifndef NO_LNKFILE_RULE
-$(OBJDIR)\$(TARGET).lnk: makefile  $(PDWIN32_INCLUDE)\pdwin32.wat.post $(DEFFILE)
-    $(RM) $(OBJDIR)\$(TARGET).lnk2 $@
-    $(KDEF2WAT) $(DEFFILE) $@ <<$(OBJDIR)\$(TARGET).lnk2
+$(OBJDIR)\$(TARGET).lrf: makefile  $(PDWIN32_INCLUDE)\pdwin32.wat.post $(DEFFILE)
+    $(RM) $(OBJDIR)\$(TARGET).lrf2 $@
+!ifdef DEFFILE
+    $(KDEF2WAT) $(DEFFILE) $@ <<$(OBJDIR)\$(TARGET).lrf2
+!else
+    $(ECHO) Creating <<$@
+!endif
 $(LD2FLAGS)
 name $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
 option map=$(OBJDIR)\$(TARGET).map
