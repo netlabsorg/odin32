@@ -1,4 +1,4 @@
-;/* $Id: oleaut32dbg.def,v 1.1 2002-02-15 15:07:37 sandervl Exp $ */
+;/* $Id: oleaut32dbg.def,v 1.2 2002-02-15 15:23:43 sandervl Exp $ */
 LIBRARY OLAUTOS2 INITINSTANCE
 DESCRIPTION 'Odin32 System DLL - OleAut32'
 DATA MULTIPLE NONSHARED
@@ -157,9 +157,9 @@ VarDecFromCy = _DbgVarDecFromCy@12  @196
 VarDecFromStr = _DbgVarDecFromStr@16  @197
 VarDecFromDisp = _DbgVarDecFromDisp@12  @198
 VarDecFromBool = _DbgVarDecFromBool@8  @199
-GetErrorInfo = _DbgGetErrorInfo@8  @200
-SetErrorInfo = _DbgSetErrorInfo@8  @201
-CreateErrorInfo = _DbgCreateErrorInfo@4  @202
+GetErrorInfo = _GetErrorInfo@8  @200
+SetErrorInfo = _SetErrorInfo@8  @201
+CreateErrorInfo = _CreateErrorInfo@4  @202
 VarI2FromI1 = _DbgVarI2FromI1@8  @205
 VarI2FromUI2 = _DbgVarI2FromUI2@8  @206
 VarI2FromUI4 = _DbgVarI2FromUI4@8  @207
