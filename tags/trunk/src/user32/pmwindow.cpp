@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.106 2000-10-22 14:54:35 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.107 2000-11-15 20:30:46 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -788,6 +788,11 @@ PosChangedEnd:
         break;
 
     case WM_SYSCOMMAND:
+        win32wnd->DispatchMsgA(pWinMsg);
+        break;
+
+    case WM_RENDERFMT:
+    case WM_RENDERALLFMTS:
         win32wnd->DispatchMsgA(pWinMsg);
         break;
 
