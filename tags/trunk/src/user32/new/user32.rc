@@ -1,0 +1,3 @@
+#define OBM_CHECKBOXES      32759
+
+BITMAP OBM_CHECKBOXES "checkboxes.bmp"

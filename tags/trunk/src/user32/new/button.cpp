@@ -9,6 +9,8 @@
 
 /* CB: todo
    - window words not right implemented
+   - update checkboxes.bmp to Win9x style
+   - LoadBitmapA() doesn't work with native resources
 */
 
 #include <string.h>
@@ -18,6 +20,8 @@
 #include "winbase.h"
 #include "controls.h"
 #include "button.h"
+
+#define BUTTONCLASSNAME "Button"
 
 //Prototypes
 
@@ -905,16 +909,16 @@ void BUTTON_Register()
 {
     WNDCLASSA wndClass;
 
-    if (GlobalFindAtomA ("BUTTON")) return;
+    if (GlobalFindAtomA (BUTTONCLASSNAME)) return;
 
     ZeroMemory (&wndClass, sizeof(WNDCLASSA));
-    wndClass.style         = CS_GLOBALCLASS | CS_DBLCLKS;
+    wndClass.style         = CS_GLOBALCLASS;
     wndClass.lpfnWndProc   = (WNDPROC)ButtonWndProc;
     wndClass.cbClsExtra    = 0;
     wndClass.cbWndExtra    = sizeof(BUTTONINFO*);
     wndClass.hCursor       = LoadCursorA (0, IDC_ARROWA);
     wndClass.hbrBackground = (HBRUSH)(COLOR_3DFACE + 1);
-    wndClass.lpszClassName = "BUTTON";
+    wndClass.lpszClassName = BUTTONCLASSNAME;
 
     RegisterClassA (&wndClass);
 }
@@ -922,6 +926,6 @@ void BUTTON_Register()
 
 void BUTTON_Unregister()
 {
-    if (GlobalFindAtomA ("BUTTON"))
-        UnregisterClassA ("BUTTON", (HINSTANCE)NULL);
+    if (GlobalFindAtomA (BUTTONCLASSNAME))
+        UnregisterClassA (BUTTONCLASSNAME, (HINSTANCE)NULL);
 }
