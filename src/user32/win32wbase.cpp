@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.297 2001-10-28 10:38:13 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.298 2001-11-07 15:36:10 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2470,6 +2470,7 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
         dprintf(("SetWindowPos; window already destroyed"));
         return TRUE;
     }
+
 #if 0
     /* Fix redundant flags */
     if(getStyle() & WS_VISIBLE) {
@@ -2482,8 +2483,8 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
         fuFlags &= ~SWP_HIDEWINDOW;
     }
 
-    if(cx < 0) cx = 0;
-    if(cy < 0) cy = 0;
+////    if(cx < 0) cx = 0;
+////    if(cy < 0) cy = 0;
 
     if((rectWindow.right - rectWindow.left == cx) && (rectWindow.bottom - rectWindow.top == cy)) {
         fuFlags |= SWP_NOSIZE;    /* Already the right size */
@@ -2505,6 +2506,8 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
             hwndInsertAfter = HWND_TOP;
         }
     }
+    /* TODO: Check hwndInsertAfter */
+
 #endif
 
     //Note: Solitaire crashes when receiving WM_SIZE messages before WM_CREATE
@@ -2645,9 +2648,10 @@ void Win32BaseWindow::NotifyFrameChanged(WINDOWPOS *wpos, RECT *oldClientRect)
          wpos->x      = rectWindow.left;
          wpos->y      = rectWindow.top;
     }
-
+   
     WINDOWPOS wpOld = *wpos;
-    SendInternalMessageA(WM_WINDOWPOSCHANGING, 0, (LPARAM)wpos);
+    if(!(wpos->flags & SWP_NOSENDCHANGING))
+        SendInternalMessageA(WM_WINDOWPOSCHANGING, 0, (LPARAM)wpos);
 
     if ((wpos->hwndInsertAfter != wpOld.hwndInsertAfter) ||
         (wpos->x != wpOld.x) || (wpos->y != wpOld.y) || (wpos->cx != wpOld.cx) || (wpos->cy != wpOld.cy) || (wpos->flags != wpOld.flags))
@@ -3446,7 +3450,6 @@ HWND Win32BaseWindow::GetActiveWindow()
  HWND          hwndActive;
 
   hwndActive = OSLibWinQueryActiveWindow();
-
   return OS2ToWin32Handle(hwndActive);
 }
 //******************************************************************************
