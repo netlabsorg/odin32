@@ -1,4 +1,4 @@
-/* $Id: win32api.h,v 1.10 2000-04-18 20:05:40 sandervl Exp $ */
+/* $Id: win32api.h,v 1.11 2000-05-28 16:40:23 sandervl Exp $ */
 
 /*
  *
@@ -92,5 +92,11 @@ int    WIN32API SelectClipRgn( HDC hdc, HRGN hRgn);
 BOOL   WIN32API GetWindowRect( HWND hwnd, RECT *pRect);
 BOOL   WIN32API GetClientRect( HWND hwnd, RECT *pRect);
 int    WIN32API GetStretchBltMode( HDC hdc);
+
+HRSRC   WIN32API FindResourceA(HINSTANCE hModule, LPCSTR lpszName, LPCSTR lpszType);
+HRSRC   WIN32API FindResourceW(HINSTANCE hModule, LPCSTR lpszName, LPCSTR lpszType);
+HGLOBAL WIN32API LoadResource(HINSTANCE hModule, HRSRC hRes);
+DWORD   WIN32API SizeofResource(HINSTANCE hModule, HRSRC hRes);
+PVOID   WIN32API LockResource(HGLOBAL hRes);
 
 #endif
