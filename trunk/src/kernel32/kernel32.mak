@@ -1,4 +1,4 @@
-# $Id: kernel32.mak,v 1.25 2002-02-11 13:46:36 sandervl Exp $
+# $Id: kernel32.mak,v 1.26 2002-02-11 15:52:16 achimha Exp $
 
 #
 # Odin32 API
@@ -54,7 +54,9 @@ $(OBJDIR)\heapcode.obj \
 $(OBJDIR)\lfile.obj \
 $(OBJDIR)\npipe.obj \
 $(OBJDIR)\oslibdos.obj \
+!ifndef CUSTOMBUILD
 $(OBJDIR)\char.obj \
+!endif
 $(OBJDIR)\oslibmisc.obj \
 $(OBJDIR)\ole2nls.obj \
 $(OBJDIR)\misc.obj \
