@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.30 2001-07-09 12:56:53 bird Exp $
+/* $Id: pe2lx.cpp,v 1.31 2001-07-10 16:39:18 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -1765,7 +1765,7 @@ ULONG  Pe2Lx::openPath2(PCHAR pachFilename, ULONG cchFilename, ldrlv_t *pLdrLv, 
 
             case FINDDLL_PATH:
             {
-                PPTD    pptd = GetTaskData(0);
+                PPTD    pptd = GetTaskData(NULL, FALSE);
                 pszPath = NULL;
                 if (pptd)
                     pszPath = pptd->pszzOdin32Env;

@@ -1,4 +1,4 @@
-/* $Id: k32SetEnvironment.cpp,v 1.1 2001-07-08 02:52:11 bird Exp $
+/* $Id: k32SetEnvironment.cpp,v 1.2 2001-07-10 16:39:17 bird Exp $
  *
  * k32SetEnvironment - Sets the Odin32 environment for a process.
  *
@@ -14,6 +14,7 @@
 *******************************************************************************/
 #define INCL_DOSERRORS
 #define INCL_OS2KRNL_TK
+#define INCL_OS2KRNL_PTDA
 #define INCL_OS2KRNL_SEM
 #define INCL_OS2KRNL_LDR
 #define NO_WIN32K_LIB_FUNCTIONS
@@ -23,6 +24,7 @@
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>
+#include <memory.h>
 #include "devSegDf.h"                   /* Win32k segment definitions. */
 #include "OS2Krnl.h"
 #include "win32k.h"
@@ -55,13 +57,18 @@ APIRET k32SetEnvironment(PSZ pszzEnvironment, ULONG cchEnvironment, PID pid)
     APIRET  rc;
     PPTD    pptd;
 
-
     /*
      * Validate pid a little bit...
      */
     if (pid >= 0x10000)
     {
         kprintf(("k32SetEnvironment: invalid pid=%x\n", pid));
+        return ERROR_INVALID_PARAMETER;
+    }
+
+    if (pid != 0)
+    {
+        kprintf(("k32SetEnvironment: currently only supported for current pid. pid=%x\n", pid));
         return ERROR_INVALID_PARAMETER;
     }
 
@@ -80,25 +87,17 @@ APIRET k32SetEnvironment(PSZ pszzEnvironment, ULONG cchEnvironment, PID pid)
     /*
      * Get Per Task Data and try set next environment pointer.
      */
-    pptd = GetTaskData(pid);
+    pptd = GetTaskData(ptdaGetCur(), TRUE);
     if (pptd)
     {
-        if (pptd->cUsage != 0 && pptd->pszzOdin32Env)
+        if (*(PULONG)&pptd->lockOdin32Env)
+        {
             D32Hlp_VMUnLock(&pptd->lockOdin32Env);
+            memset(&pptd->lockOdin32Env, 0, sizeof(pptd->lockOdin32Env));
+        }
         pptd->pszzOdin32Env = NULL;
         if (pptd->cUsage != 0 && pszzEnvironment != NULL && cchEnvironment != 0)
         {
-            /*
-             * Currently we're limited to the current process.
-             */
-            if (pid != 0 || GetTaskData(0) != pptd)
-            {
-                kprintf(("k32SetEnvironment: not current process (pid=%d)\n", pid));
-                LDRClearSem();
-                return ERROR_INVALID_PARAMETER;
-            }
-
-
             /*
              * Lock the memory (so we don't block or trap during environment searchs).
              */
@@ -109,6 +108,7 @@ APIRET k32SetEnvironment(PSZ pszzEnvironment, ULONG cchEnvironment, PID pid)
             else
             {
                 kprintf(("k32SetEnvironment: VMLock2 failed with rc=%d\n", rc));
+                memset(&pptd->lockOdin32Env, 0, sizeof(pptd->lockOdin32Env));
             }
         }
         else
