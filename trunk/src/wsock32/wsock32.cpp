@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.38 2001-10-10 14:41:22 sandervl Exp $ */
+/* $Id: wsock32.cpp,v 1.39 2001-10-10 17:20:17 sandervl Exp $ */
 
 /*
  *
@@ -57,6 +57,7 @@
 #include <misc.h>
 
 #include "wsock32.h"
+#include <ws2tcpip.h>
 #include "wsastruct.h"
 #include "asyncthread.h"
 
@@ -1010,6 +1011,7 @@ tryagain:
        switch (optname)
        {
            case IP_MULTICAST_IF:
+           case WS2_IPPROTO_OPT(IP_MULTICAST_IF_WS2):
            {
                if (optlen < sizeof(in_addr))
                {
@@ -1024,6 +1026,8 @@ tryagain:
 
            case IP_ADD_MEMBERSHIP:
            case IP_DROP_MEMBERSHIP:
+           case WS2_IPPROTO_OPT(IP_ADD_MEMBERSHIP_WS2):
+           case WS2_IPPROTO_OPT(IP_DROP_MEMBERSHIP_WS2):
                if (optlen < sizeof(struct ip_mreq))
                {
                    dprintf(("IPPROTO_IP, IP_ADD_MEMBERSHIP/IP_DROP_MEMBERSHIP, optlen too small"));
@@ -1034,10 +1038,26 @@ tryagain:
                break;
 
            case IP_MULTICAST_LOOP:
-           case IP_MULTICAST_TTL:
+           case WS2_IPPROTO_OPT(IP_MULTICAST_LOOP_WS2):
+           {
+               u_int flLoop;
                if (optlen < sizeof(u_char))
                {
                    dprintf(("IPPROTO_IP, IP_MULTICAST_LOOP/IP_MULTICAST_TTL, optlen too small"));
+                   WSASetLastError(WSAEFAULT);
+                   return SOCKET_ERROR;
+               }
+               flLoop = (*optval == 0) ? 0 : 1;
+               dprintf(("IP_MULTICAST_LOOP/IP_MULTICAST_TTL %d", *optval));
+               ret = setsockopt(s, level, optname, (char *)&flLoop, optlen);
+               break;
+           }
+
+           case IP_MULTICAST_TTL:
+           case WS2_IPPROTO_OPT(IP_MULTICAST_TTL_WS2):
+               if (optlen < sizeof(u_char))
+               {
+                   dprintf(("IPPROTO_IP, IP_MULTICAST_TTL, optlen too small"));
                    WSASetLastError(WSAEFAULT);
                    return SOCKET_ERROR;
                }
