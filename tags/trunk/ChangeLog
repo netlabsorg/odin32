@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.613 2000-01-05 21:29:42 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.614 2000-01-05 23:31:09 sandervl Exp $ */
+
+ 2000-01-05: Jens Wiessner <wiessnej@rfi.de>
+	- TWAIN_32: Update
 
  2000-01-05: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32/NEW: single window works now
@@ -9,6 +12,7 @@
                           MS Office 2000 install (first part) almost working.
                           (installs windows installer as system service)
 	- OLEAUT32: Typelib bugfix for MS Office 2k install
+	- odin_ini.txt: Added information about CODEPAGES & TWAIN section
 
  2000-01-05: David Raison <djr@lemur.co.uk>
         - OLEAUT32: LHashValOfNameSys(A)
