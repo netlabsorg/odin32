@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.40 1999-10-23 12:34:48 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.41 1999-10-26 17:54:16 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -366,6 +366,7 @@ HINSTANCE WIN32API LoadLibraryA(LPCTSTR lpszLibFile)
 
   dprintf(("KERNEL32:  LoadLibraryA(%s)\n",
            lpszLibFile));
+  dprintf(("KERNEL32: LoadLibrary FS = %x\n", GetFS()));
 
   hDll = iLoadLibraryA(lpszLibFile, 0);
   if (hDll == 0)
