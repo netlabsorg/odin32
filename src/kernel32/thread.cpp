@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.3 1999-05-31 22:08:13 phaller Exp $ */
+/* $Id: thread.cpp,v 1.4 1999-06-02 16:00:38 cbratschi Exp $ */
 
 /*
  *
@@ -109,7 +109,7 @@ DWORD WIN32API SuspendThread(HANDLE hThread)
 BOOL WIN32API SetThreadPriority(HANDLE hThread, int priority)
 {
     dprintf(("OS2SetThreadPriority (%08xh,%08xh)\n",
-             hThread
+             hThread,
              priority));
 
     return O32_SetThreadPriority(hThread, priority);
@@ -152,7 +152,7 @@ static DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
 
   delete me;    //only called once
 
-  dprintf(("Win32ThreadProc %d\n", 
+  dprintf(("Win32ThreadProc %d\n",
            GetCurrentThreadId()));
 
   ReplaceExceptionHandler();

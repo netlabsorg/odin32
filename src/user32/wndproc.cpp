@@ -1,4 +1,4 @@
-/* $Id: wndproc.cpp,v 1.1 1999-05-24 20:20:00 ktk Exp $ */
+/* $Id: wndproc.cpp,v 1.2 1999-06-02 16:00:38 cbratschi Exp $ */
 
 /*
  *
@@ -93,19 +93,19 @@ Win32WindowProc::Win32WindowProc(HINSTANCE hinst, LPCSTR lpszClassName)
 Win32WindowProc::~Win32WindowProc()
 {
   Win32WindowProc *window = Win32WindowProc::windows;
-  
+
   /* @@@PH 98/07/13 what's this whole code good for ? */
-  if(window == this) 
+  if(window == this)
   {
     windows = next;
   }
-  else 
+  else
   {
     /* @@@PH 98/07/13 window can be NULL */
     if (window != NULL)
-      while(window->next != NULL) 
+      while(window->next != NULL)
       {
-        if(window->next == this) 
+        if(window->next == this)
         {
           window->next = next;
           break;
@@ -113,8 +113,8 @@ Win32WindowProc::~Win32WindowProc()
         window = window->next;
       }
   }
-  
-  if(os2dlg) 
+
+  if(os2dlg)
   {
     DeleteWin32DlgTemplate(os2dlg);
     os2dlg = NULL;
