@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.105 2001-04-21 11:22:25 sandervl Exp $
+; $Id: kernel32.def,v 1.106 2001-04-28 13:30:44 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -957,6 +957,11 @@ EXPORTS
 
     GetLongPathNameA           = _GetLongPathNameA@12        @900
     GetLongPathNameW           = _GetLongPathNameW@12        @901
+
+; Windows 2000, Terminal Server 4.0 SP4 functions
+    GetSystemWindowsDirectoryA = _GetWindowsDirectoryA@8     @902
+    GetSystemWindowsDirectoryW = _GetWindowsDirectoryW@8     @903
+
 ;
 ; First free ordinal is 890
 ;
