@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.124 2002-07-08 10:21:55 sandervl Exp $ */
+/* $Id: window.cpp,v 1.125 2002-07-08 10:51:01 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -726,6 +726,24 @@ end:
 }
 //******************************************************************************
 //******************************************************************************
+HWND WINAPI GetAncestor( HWND hwnd, UINT type )
+{
+    HWND hwndAncestor = 0;
+
+    if (type == GA_PARENT)
+    {
+        LONG dwStyle = GetWindowLongW( hwnd, GWL_STYLE );
+        if(dwStyle & WS_CHILD) {
+            hwndAncestor = GetParent(hwnd);
+        }
+        //else no child -> no parent (GetParent returns owner otherwise!)
+        return hwndAncestor;
+    }
+    dprintf(("Unsupported type %d", type));
+    return 0;
+}
+//******************************************************************************
+//******************************************************************************
 HWND WIN32API SetFocus(HWND hwnd)
 {
  Win32BaseWindow *window;
@@ -737,13 +755,6 @@ HWND WIN32API SetFocus(HWND hwnd)
     teb = GetThreadTEB();
     if(teb == NULL) {
         DebugInt3();
-        return 0;
-    }
-
-    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
-    if(!window) {
-        dprintf(("SetFocus, window %x not found", hwnd));
-        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
 
@@ -759,9 +770,16 @@ HWND WIN32API SetFocus(HWND hwnd)
             dprintf(("SetFocus, %x not allowed on minimized or disabled window (%x)", hwnd, style));
             return 0;
         }
-        parent = GetParent(hwndTop);
+        parent = GetAncestor(hwndTop, GA_PARENT);
         if (!parent || parent == GetDesktopWindow()) break;
         hwndTop = parent;
+    }
+
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if(!window) {
+        dprintf(("SetFocus, window %x not found", hwnd));
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        return 0;
     }
 
     hwnd_O = window->getOS2WindowHandle();
