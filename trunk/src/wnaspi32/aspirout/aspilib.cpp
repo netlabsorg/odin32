@@ -1,4 +1,4 @@
-/* $Id: aspilib.cpp,v 1.7 2001-01-19 23:04:26 sandervl Exp $ */
+/* $Id: aspilib.cpp,v 1.1 2002-06-08 11:42:03 sandervl Exp $ */
 /*
  *  ASPI Router Library
  *  for Odin WNASPI32.DLL

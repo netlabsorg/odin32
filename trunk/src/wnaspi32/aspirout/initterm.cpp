@@ -1,4 +1,4 @@
-/* $Id: initwnaspi32.cpp,v 1.7 2002-06-08 11:42:02 sandervl Exp $
+/* $Id: initterm.cpp,v 1.1 2002-06-08 11:42:03 sandervl Exp $
  *
  * DLL entry point
  *
@@ -31,59 +31,11 @@
 #include <string.h>
 #include <odin.h>
 #include <win32type.h>
-#include <win32api.h>
 #include <winconst.h>
 #include <odinlx.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
 #include <initdll.h>
-#include <custombuild.h>
-#include "cdio.h"
 
-extern "C" {
- //Win32 resource table (produced by wrc)
- extern DWORD wnaspi32_PEResTab;
-}
-static HMODULE dllHandle = 0;
-BOOL fASPIAvailable = TRUE;
-
-//******************************************************************************
-//******************************************************************************
-void WIN32API DisableASPI()
-{
-   dprintf(("DisableASPI"));
-   fASPIAvailable = FALSE;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WINAPI Wnaspi32LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
-{
-   switch (fdwReason)
-   {
-   case DLL_PROCESS_ATTACH:
-   {
-       if(fASPIAvailable == FALSE) return TRUE;
-
-       if(OSLibCdIoInitialize() == FALSE) {
-           dprintf(("WNASPI32: LibMain; can't allocate aspi object! APIs will not work!"));
-           // @@@AH 20011020 we shouldn't prevent DLL loading in this case
-           // just make sure that all API calls fail
-           return TRUE;
-       }
-       fASPIAvailable = TRUE;
-       dprintf(("WNASPI32: LibMain; os2cdrom.dmd ASPI interface available"));
-       return TRUE;
-   }
-
-   case DLL_THREAD_ATTACH:
-   case DLL_THREAD_DETACH:
-       return TRUE;
-
-   case DLL_PROCESS_DETACH:
-       OSLibCdIoTerminate();
-       return TRUE;
-   }
-   return FALSE;
-}
 /****************************************************************************/
 /* _DLL_InitTerm is the function that gets called by the operating system   */
 /* loader when it loads and frees this DLL for each process that accesses   */
@@ -92,7 +44,7 @@ BOOL WINAPI Wnaspi32LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad
 /* linkage convention MUST be used because the operating system loader is   */
 /* calling this function.                                                   */
 /****************************************************************************/
-ULONG APIENTRY inittermWnaspi32(ULONG hModule, ULONG ulFlag)
+ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
 {
    size_t i;
    APIRET rc;
@@ -104,18 +56,18 @@ ULONG APIENTRY inittermWnaspi32(ULONG hModule, ULONG ulFlag)
    /*-------------------------------------------------------------------------*/
 
    switch (ulFlag) {
-      case 0 :
-         dllHandle = RegisterLxDll(hModule, Wnaspi32LibMain, (PVOID)&wnaspi32_PEResTab);
-         if(dllHandle == 0)
-             return 0UL;
+      case 0:
+         ctordtorInit();
 
+         CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
+
+         return inittermWnaspi32(hModule, ulFlag);
+
+      case 1:
+         inittermWnaspi32(hModule, ulFlag);
+         ctordtorTerm();
          break;
-      case 1 :
-         if(dllHandle) {
-             UnregisterLxDll(dllHandle);
-         }
-         break;
-      default  :
+      default:
          return 0UL;
    }
 

@@ -1,4 +1,4 @@
-/* $Id: initwnaspi32.cpp,v 1.7 2002-06-08 11:42:02 sandervl Exp $
+/* $Id: initwnaspi32.cpp,v 1.1 2002-06-08 11:42:03 sandervl Exp $
  *
  * DLL entry point
  *
@@ -36,22 +36,23 @@
 #include <odinlx.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
 #include <initdll.h>
+#include "aspilib.h"
 #include <custombuild.h>
-#include "cdio.h"
 
 extern "C" {
  //Win32 resource table (produced by wrc)
  extern DWORD wnaspi32_PEResTab;
 }
+scsiObj *aspi = NULL;
 static HMODULE dllHandle = 0;
-BOOL fASPIAvailable = TRUE;
+static BOOL fDisableASPI = FALSE;
 
 //******************************************************************************
 //******************************************************************************
 void WIN32API DisableASPI()
 {
    dprintf(("DisableASPI"));
-   fASPIAvailable = FALSE;
+   fDisableASPI = TRUE;
 }
 //******************************************************************************
 //******************************************************************************
@@ -61,16 +62,24 @@ BOOL WINAPI Wnaspi32LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad
    {
    case DLL_PROCESS_ATTACH:
    {
-       if(fASPIAvailable == FALSE) return TRUE;
+       if(fDisableASPI) return TRUE;
 
-       if(OSLibCdIoInitialize() == FALSE) {
+       aspi = new scsiObj();
+       if(aspi == NULL) {
            dprintf(("WNASPI32: LibMain; can't allocate aspi object! APIs will not work!"));
            // @@@AH 20011020 we shouldn't prevent DLL loading in this case
            // just make sure that all API calls fail
            return TRUE;
        }
-       fASPIAvailable = TRUE;
-       dprintf(("WNASPI32: LibMain; os2cdrom.dmd ASPI interface available"));
+       if(aspi->init(65535) == FALSE)
+       {
+           delete aspi;
+           aspi = NULL;
+           dprintf(("WNASPI32: LibMain; can't init aspi object!"));
+           // @@@20011026 and also in this case we shouldn't prevent DLL loading...
+           return TRUE;
+       }
+       dprintf(("WNASPI32: LibMain; aspi object created successfully"));
        return TRUE;
    }
 
@@ -79,7 +88,11 @@ BOOL WINAPI Wnaspi32LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad
        return TRUE;
 
    case DLL_PROCESS_DETACH:
-       OSLibCdIoTerminate();
+       if(aspi) {
+           aspi->close();
+           delete aspi;
+           aspi = NULL;
+       }
        return TRUE;
    }
    return FALSE;
