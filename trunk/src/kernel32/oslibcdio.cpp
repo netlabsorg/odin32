@@ -28,9 +28,9 @@
 
 
 //needed for high memory support check
-DWORD OSLibDosDevIOCtl( DWORD hFile, DWORD dwCat, DWORD dwFunc,
-                        PVOID pParm, DWORD dwParmMaxLen, DWORD *pdwParmLen,
-                        PVOID pData, DWORD dwDataMaxLen, DWORD *pdwDataLen);
+DWORD SYSTEM OSLibDosDevIOCtl( DWORD hFile, DWORD dwCat, DWORD dwFunc,
+                               PVOID pParm, DWORD dwParmMaxLen, DWORD *pdwParmLen,
+                               PVOID pData, DWORD dwDataMaxLen, DWORD *pdwDataLen);
 
 
 //----------------------------------------------------------------------//

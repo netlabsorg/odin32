@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.46 2002-06-06 11:31:12 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.47 2002-06-08 11:40:14 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -19,7 +19,7 @@
 #include "mmap.h"
 #include <win\winioctl.h>
 #include <win\ntddscsi.h>
-#include <win\aspi.h>
+#include <win\wnaspi32.h>
 #include "oslibdos.h"
 #include "osliblvm.h"
 #include "oslibcdio.h"
@@ -35,6 +35,7 @@
 
 //Converts BCD to decimal; doesn't check for illegal BCD nrs
 #define BCDToDec(a) ((a >> 4) * 10 + (a & 0xF))
+
 
 typedef struct
 {
@@ -1470,6 +1471,10 @@ writecheckfail:
         case SCSI_IOCTL_DATA_UNSPECIFIED:
             cdiocmd.flDirection = CMDDIR_OUTPUT|CMDDIR_INPUT;;
             break;
+        default:
+            dprintf(("Invalid DataIn (%d)!!", pPacket->DataIn));
+            SetLastError(ERROR_INVALID_PARAMETER);
+            return FALSE;
         }
 
         cdiocmd.cbCDB = pPacket->CdbLength;
