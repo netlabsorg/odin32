@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.54 2001-06-08 11:03:33 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.55 2001-06-12 17:01:10 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -398,6 +398,7 @@ int DIBSection::SetDIBColorTable(int startIdx, int cEntries, RGBQUAD *rgb)
   end = startIdx + cEntries;
   if(end > (1 << pOS2bmp->cBitCount)) {
       end = (1 << pOS2bmp->cBitCount);
+      cEntries = end - startIdx;
   }
 
   memcpy(&pOS2bmp->argbColor[startIdx], rgb, cEntries*sizeof(RGB2));
@@ -409,7 +410,6 @@ int DIBSection::SetDIBColorTable(int startIdx, int cEntries, RGBQUAD *rgb)
     dprintf2(("Index %d : 0x%08X\n",i, *((ULONG*)(&pOS2bmp->argbColor[i])) ));
 #endif
   }
-
   return(cEntries);
 }
 //******************************************************************************
