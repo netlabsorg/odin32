@@ -1,4 +1,4 @@
-/* $Id: windowclass.cpp,v 1.9 2000-02-16 14:28:26 sandervl Exp $ */
+/* $Id: windowclass.cpp,v 1.10 2000-05-28 16:43:48 sandervl Exp $ */
 /*
  * Win32 Window Class Code for OS/2
  *
@@ -196,22 +196,24 @@ BOOL WIN32API GetClassInfoW(HINSTANCE  hinst, LPCWSTR lpszClass, WNDCLASSW *lpwc
  *             LPWNDCLASSEX lpwcx     address of structure for class data
  * Variables :
  * Result    : If the function finds a matching class and successfully copies
- *               the data, the return value is TRUE;
+ *             the data, the return value is TRUE;
  *             otherwise, it is FALSE.
  *             To get extended error information, call GetLastError.
  * Remark    : PH: does not obtain handle of the small icon
  *****************************************************************************/
 BOOL WIN32API GetClassInfoExA(HINSTANCE     hInstance,
-                                 LPCTSTR       lpszClass,
-                                 LPWNDCLASSEXA lpwcx)
+                              LPCTSTR       lpszClass,
+                              LPWNDCLASSEXA lpwcx)
 {
  BOOL           rc;
  Win32WndClass *wndclass;
 
-  dprintf(("USER32:GetClassInfoExA (%08xh,%x,%08x).\n",
-         hInstance,
-         lpszClass,
-         lpwcx));
+  if(HIWORD(lpszClass)) {
+       dprintf(("USER32:GetClassInfoExA (%08xh,%s,%08x)",
+                 hInstance, lpszClass, lpwcx));
+  }
+  else dprintf(("USER32:GetClassInfoExA (%08xh,%x,%08x)",
+                 hInstance, lpszClass, lpwcx));
 
   wndclass = Win32WndClass::FindClass(hInstance, (LPSTR)lpszClass);
   if(wndclass) {

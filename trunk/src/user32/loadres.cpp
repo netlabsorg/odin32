@@ -1,4 +1,4 @@
-/* $Id: loadres.cpp,v 1.28 2000-05-02 20:50:48 sandervl Exp $ */
+/* $Id: loadres.cpp,v 1.29 2000-05-28 16:43:45 sandervl Exp $ */
 
 /*
  * Win32 resource API functions for OS/2
@@ -19,13 +19,13 @@
  */
 #include <os2win.h>
 #include <user32.h>
-#include <winres.h>
 #include <heapstring.h>
 #include <oslibres.h>
 #include <win\virtual.h>
 #include "dib.h"
 #include "initterm.h"
 #include <win\cursoricon.h>
+#include <winres.h>
 
 #define DBG_LOCALLOG    DBG_loadres
 #include "dbglocal.h"
@@ -59,21 +59,21 @@ INT WIN32API LoadStringA(HINSTANCE instance, UINT resource_id,
 //******************************************************************************
 int WIN32API LoadStringW(HINSTANCE hinst, UINT wID, LPWSTR lpBuffer, int cchBuffer)
 {
- Win32Resource *winres;
  WCHAR *p;
  int string_num;
  int i = 0;
+ HRSRC hRes;
 
     /* Use bits 4 - 19 (incremented by 1) as resourceid, mask out
      * 20 - 31. */
-    winres = (Win32Resource *)FindResourceW(hinst, (LPWSTR)(((wID>>4)&0xffff)+1), RT_STRINGW);
-    if(winres == NULL) {
+    hRes = FindResourceW(hinst, (LPWSTR)(((wID>>4)&0xffff)+1), RT_STRINGW);
+    if(hRes == NULL) {
         dprintf(("LoadStringW NOT FOUND from %X, id %d buffersize %d\n", hinst, wID, cchBuffer));
         *lpBuffer = 0;
         return 0;
     }
 
-    p = (LPWSTR)winres->lockResource();
+    p = (LPWSTR)LockResource(LoadResource(hinst, hRes));
     if(p) {
         string_num = wID & 0x000f;
         for (i = 0; i < string_num; i++)
@@ -92,7 +92,6 @@ int WIN32API LoadStringW(HINSTANCE hinst, UINT wID, LPWSTR lpBuffer, int cchBuff
                 }
         }
     }
-    delete winres;
 
 #ifdef DEBUG_ENABLELOG_LEVEL2
     if(i) {
@@ -110,10 +109,11 @@ int WIN32API LoadStringW(HINSTANCE hinst, UINT wID, LPWSTR lpBuffer, int cchBuff
 HICON LoadIconA(HINSTANCE hinst, LPCSTR lpszIcon, DWORD cxDesired,
                 DWORD cyDesired, DWORD fuLoad)
 {
- Win32Resource *winres;
  HICON          hIcon;
  HANDLE 	hMapping = 0;
  char 	       *ptr = NULL;
+ HRSRC          hRes;
+ LPSTR     	restype = RT_ICONA;
 
     if(fuLoad & LR_LOADFROMFILE) 
     {
@@ -127,25 +127,26 @@ HICON LoadIconA(HINSTANCE hinst, LPCSTR lpszIcon, DWORD cxDesired,
     {
     	if(!hinst)
     	{
-	      	winres = (Win32Resource*)FindResourceA(hInstanceUser32,lpszIcon,RT_ICONA);
-	      	if(!winres) 
-			winres = (Win32Resource*)FindResourceA(hInstanceUser32,lpszIcon,RT_GROUP_ICONA);
-	      	if(winres)
+	      	hRes = FindResourceA(hInstanceUser32,lpszIcon,RT_ICONA);
+	      	if(!hRes)  {
+			hRes = FindResourceA(hInstanceUser32,lpszIcon,RT_GROUP_ICONA);
+			restype = RT_GROUP_ICONA;
+		}
+	      	if(hRes)
 	      	{
-	        	hIcon = OSLibWinCreateIcon(winres->lockOS2Resource());
-	        	delete winres;
+	                hIcon = OSLibWinCreateIcon(ConvertResourceToOS2(hInstanceUser32, restype, hRes));
 	      	} 
-		else hIcon = OSLibWinQuerySysIcon((ULONG)lpszIcon,GetSystemMetrics(SM_CXICON),GetSystemMetrics(SM_CYICON));
+		else 	hIcon = OSLibWinQuerySysIcon((ULONG)lpszIcon,GetSystemMetrics(SM_CXICON),GetSystemMetrics(SM_CYICON));
     	} 
     	else
     	{ //not a system icon
-	        winres = (Win32Resource *)FindResourceA(hinst, lpszIcon, RT_ICONA);
-	        if(winres == 0) {
-	                winres = (Win32Resource *)FindResourceA(hinst, lpszIcon, RT_GROUP_ICONA);
-	        }
-	        if(winres) {
-	                hIcon = OSLibWinCreateIcon(winres->lockOS2Resource());
-	                delete winres;
+	      	hRes = FindResourceA(hinst,lpszIcon,RT_ICONA);
+	      	if(!hRes)  {
+			hRes = FindResourceA(hinst,lpszIcon,RT_GROUP_ICONA);
+			restype = RT_GROUP_ICONA;
+		}
+	        if(hRes) {
+	                hIcon = OSLibWinCreateIcon(ConvertResourceToOS2(hinst, restype, hRes));
 	        } 
 		else 	hIcon = 0;
 	}
@@ -159,10 +160,11 @@ HICON LoadIconA(HINSTANCE hinst, LPCSTR lpszIcon, DWORD cxDesired,
 HICON LoadIconW(HINSTANCE hinst, LPCWSTR lpszIcon, DWORD cxDesired,
                 DWORD cyDesired, DWORD fuLoad)
 {
- Win32Resource *winres;
  HICON          hIcon;
  HANDLE 	hMapping = 0;
  char 	       *ptr = NULL;
+ HRSRC          hRes;
+ LPSTR     	restype = RT_ICONA;
 
     if(fuLoad & LR_LOADFROMFILE) 
     {
@@ -176,27 +178,28 @@ HICON LoadIconW(HINSTANCE hinst, LPCWSTR lpszIcon, DWORD cxDesired,
     {
     	if (!hinst)
     	{
-	      	winres = (Win32Resource*)FindResourceW(hInstanceUser32,lpszIcon,RT_ICONW);
-	      	if(!winres) 
-			winres = (Win32Resource*)FindResourceW(hInstanceUser32,lpszIcon,RT_GROUP_ICONW);
-	      	if(winres)
+	      	hRes = FindResourceW(hInstanceUser32,lpszIcon,RT_ICONW);
+	      	if(!hRes)  {
+			hRes = FindResourceW(hInstanceUser32,lpszIcon,RT_GROUP_ICONW);
+			restype = RT_GROUP_ICONA;
+		}
+	      	if(hRes)
 	      	{
-	        	hIcon = OSLibWinCreateIcon(winres->lockOS2Resource());
-	        	delete winres;
+	                hIcon = OSLibWinCreateIcon(ConvertResourceToOS2(hInstanceUser32, restype, hRes));
 	      	} 
-	      	else 	hIcon = OSLibWinQuerySysIcon((ULONG)lpszIcon,GetSystemMetrics(SM_CXICON),GetSystemMetrics(SM_CYICON));
+		else 	hIcon = OSLibWinQuerySysIcon((ULONG)lpszIcon,GetSystemMetrics(SM_CXICON),GetSystemMetrics(SM_CYICON));
 	} 
 	else
     	{//not a system icon
-	        winres = (Win32Resource *)FindResourceW(hinst, lpszIcon, RT_ICONW);
-	        if(winres == 0) {
-	                winres = (Win32Resource *)FindResourceW(hinst, lpszIcon, RT_GROUP_ICONW);
-	        }
-	        if(winres) {
-	                hIcon = OSLibWinCreateIcon(winres->lockOS2Resource());
-	                delete winres;
+	      	hRes = FindResourceW(hinst,lpszIcon,RT_ICONW);
+	      	if(!hRes)  {
+			hRes = FindResourceW(hinst,lpszIcon,RT_GROUP_ICONW);
+			restype = RT_GROUP_ICONA;
+		}
+	        if(hRes) {
+	                hIcon = OSLibWinCreateIcon(ConvertResourceToOS2(hinst, restype, hRes));
 	        } 
-	        else 	hIcon = 0;
+		else 	hIcon = 0;
 	}
     }
     dprintf(("LoadIconW (%X) returned %x\n", hinst, hIcon));
@@ -220,10 +223,11 @@ HICON WIN32API LoadIconW(HINSTANCE hinst, LPCWSTR lpszIcon)
 HCURSOR LoadCursorA(HINSTANCE hinst, LPCSTR lpszCursor, DWORD cxDesired, 
                     DWORD cyDesired, DWORD fuLoad)
 {
- Win32Resource *winres;
  HCURSOR        hCursor;
  HANDLE 	hMapping = 0;
  char 	       *ptr = NULL;
+ HRSRC          hRes;
+ LPSTR     	restype = RT_CURSORA;
 
     if(fuLoad & LR_LOADFROMFILE) 
     {
@@ -235,30 +239,31 @@ HCURSOR LoadCursorA(HINSTANCE hinst, LPCSTR lpszCursor, DWORD cxDesired,
     }
     else
     {
-    	if (!hinst)
+    	if(!hinst)
     	{
-	      	winres = (Win32Resource*)FindResourceA(hInstanceUser32,lpszCursor,RT_CURSORA);
-	      	if(!winres) 
-			winres = (Win32Resource*)FindResourceA(hInstanceUser32,lpszCursor,RT_GROUP_CURSORA);
-	      	if(winres)
+	      	hRes = FindResourceA(hInstanceUser32,lpszCursor,RT_CURSORA);
+	      	if(!hRes)  {
+			hRes = FindResourceA(hInstanceUser32,lpszCursor,RT_GROUP_CURSORA);
+			restype = RT_GROUP_CURSORA;
+		}
+	      	if(hRes)
 	      	{
-	        	hCursor = OSLibWinCreatePointer(winres->lockOS2Resource());
-	        	delete winres;
+	                hCursor = OSLibWinCreatePointer(ConvertResourceToOS2(hInstanceUser32, restype, hRes));
 	      	} 
 		else 	hCursor = OSLibWinQuerySysPointer((ULONG)lpszCursor,GetSystemMetrics(SM_CXCURSOR),GetSystemMetrics(SM_CYCURSOR));
-	} 
-	else
-	{//not a system pointer
-	        winres = (Win32Resource *)FindResourceA(hinst, lpszCursor, RT_CURSORA);
-	        if(winres == 0) {
-	                winres = (Win32Resource *)FindResourceA(hinst, lpszCursor, RT_GROUP_CURSORA);
-	        }
-        	if(winres) {
-	                hCursor = OSLibWinCreatePointer(winres->lockOS2Resource());
-	                delete winres;
+    	} 
+    	else
+    	{ //not a system icon
+	      	hRes = FindResourceA(hinst,lpszCursor,RT_CURSORA);
+	      	if(!hRes)  {
+			hRes = FindResourceA(hinst,lpszCursor,RT_GROUP_CURSORA);
+			restype = RT_GROUP_CURSORA;
+		}
+	        if(hRes) {
+	                hCursor = OSLibWinCreatePointer(ConvertResourceToOS2(hinst, restype, hRes));
 	        } 
 		else 	hCursor = 0;
-    	}
+	}
     }
     if(HIWORD(lpszCursor)) {
          dprintf(("LoadCursorA %s from %x returned %x\n", lpszCursor, hinst, hCursor));
@@ -272,10 +277,11 @@ HCURSOR LoadCursorA(HINSTANCE hinst, LPCSTR lpszCursor, DWORD cxDesired,
 HCURSOR LoadCursorW(HINSTANCE hinst, LPCWSTR lpszCursor, DWORD cxDesired, 
                     DWORD cyDesired, DWORD fuLoad)
 {
- Win32Resource *winres;
  HCURSOR        hCursor;
  HANDLE 	hMapping = 0;
  char 	       *ptr = NULL;
+ HRSRC          hRes;
+ LPSTR     	restype = RT_CURSORA;
 
     if(fuLoad & LR_LOADFROMFILE) 
     {
@@ -289,28 +295,29 @@ HCURSOR LoadCursorW(HINSTANCE hinst, LPCWSTR lpszCursor, DWORD cxDesired,
     {
     	if(!hinst)
     	{
-      		winres = (Win32Resource*)FindResourceW(hInstanceUser32,lpszCursor,RT_CURSORW);
-      		if(!winres) 
-			winres = (Win32Resource*)FindResourceW(hInstanceUser32,lpszCursor,RT_GROUP_CURSORW);
-	      	if(winres)
+	      	hRes = FindResourceW(hInstanceUser32,lpszCursor,RT_CURSORW);
+	      	if(!hRes)  {
+			hRes = FindResourceW(hInstanceUser32,lpszCursor,RT_GROUP_CURSORW);
+			restype = RT_GROUP_CURSORA;
+		}
+	      	if(hRes)
 	      	{
-	        	hCursor = OSLibWinCreatePointer(winres->lockOS2Resource());
-	        	delete winres;
+	                hCursor = OSLibWinCreatePointer(ConvertResourceToOS2(hInstanceUser32, restype, hRes));
 	      	} 
 		else 	hCursor = OSLibWinQuerySysPointer((ULONG)lpszCursor,GetSystemMetrics(SM_CXCURSOR),GetSystemMetrics(SM_CYCURSOR));
-	    } 
-	    else
-	    {//not a system pointer
-	        winres = (Win32Resource *)FindResourceW(hinst, lpszCursor, RT_CURSORW);
-	        if(winres == 0) {
-	                winres = (Win32Resource *)FindResourceW(hinst, lpszCursor, RT_GROUP_CURSORW);
-	        }
-	        if(winres) {
-	                hCursor = OSLibWinCreatePointer(winres->lockOS2Resource());
-	                delete winres;
+    	} 
+    	else
+    	{ //not a system icon
+	      	hRes = FindResourceW(hinst,lpszCursor,RT_CURSORW);
+	      	if(!hRes)  {
+			hRes = FindResourceW(hinst,lpszCursor,RT_GROUP_CURSORW);
+			restype = RT_GROUP_CURSORA;
+		}
+	        if(hRes) {
+	                hCursor = OSLibWinCreatePointer(ConvertResourceToOS2(hinst, restype, hRes));
 	        } 
 		else 	hCursor = 0;
-	    }
+	}
     }
     dprintf(("LoadCursorW (%X) returned %x\n", hinst, hCursor));
 
@@ -497,7 +504,10 @@ HBITMAP WIN32API LoadBitmapA(HINSTANCE hinst, LPCSTR lpszBitmap)
   if(!hBitmap)
         hBitmap = LoadBitmapA(hinst, lpszBitmap, 0, 0, 0);
 
-  dprintf(("LoadBitmapA returned %08xh\n", hBitmap));
+  if(HIWORD(lpszBitmap)) {
+  	dprintf(("LoadBitmapA %x %s returned %08xh\n", hinst, lpszBitmap, hBitmap));
+  }
+  else  dprintf(("LoadBitmapA %x %x returned %08xh\n", hinst, lpszBitmap, hBitmap));
 
   return(hBitmap);
 }
@@ -516,7 +526,10 @@ HBITMAP WIN32API LoadBitmapW(HINSTANCE hinst, LPCWSTR lpszBitmap)
   if(HIWORD(lpszBitmap) != 0)
     FreeAsciiString((LPSTR)lpszBitmap);
 
-  dprintf(("LoadBitmapW returned %08xh\n", hBitmap));
+  if(HIWORD(lpszBitmap)) {
+  	dprintf(("LoadBitmapW %x %s returned %08xh\n", hinst, lpszBitmap, hBitmap));
+  }
+  else  dprintf(("LoadBitmapW %x %x returned %08xh\n", hinst, lpszBitmap, hBitmap));
 
   return(hBitmap);
 }

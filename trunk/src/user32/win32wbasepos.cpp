@@ -1,4 +1,4 @@
-/* $Id: win32wbasepos.cpp,v 1.13 2000-02-16 14:28:24 sandervl Exp $ */
+/* $Id: win32wbasepos.cpp,v 1.14 2000-05-28 16:43:47 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (nonclient/position methods)
  *
@@ -24,7 +24,6 @@
 #include <assert.h>
 #include <misc.h>
 #include <win32wbase.h>
-#include <winres.h>
 #include <spy.h>
 #include "wndmsg.h"
 #include "oslibwin.h"

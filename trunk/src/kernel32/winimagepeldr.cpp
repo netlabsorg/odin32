@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.43 2000-05-26 18:42:56 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.44 2000-05-28 16:45:13 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -42,7 +42,6 @@
 #include "windllpeldr.h"
 #include <pefile.h>
 #include <unicode.h>
-#include <winres.h>
 #include "oslibmisc.h"
 #include "initterm.h"
 #include <win\virtual.h>

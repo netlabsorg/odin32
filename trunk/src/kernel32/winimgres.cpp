@@ -1,4 +1,4 @@
-/* $Id: winimgres.cpp,v 1.37 2000-05-22 19:08:00 sandervl Exp $ */
+/* $Id: winimgres.cpp,v 1.38 2000-05-28 16:45:13 sandervl Exp $ */
 
 /*
  * Win32 PE Image class (resource methods)
@@ -22,7 +22,6 @@
 
 #include <misc.h>
 #include <winimagebase.h>
-#include <winres.h>
 #include <unicode.h>
 #include <heapstring.h>
 #include "pefile.h"
@@ -30,6 +29,12 @@
 
 #define DBG_LOCALLOG	DBG_winimgres
 #include "dbglocal.h"
+
+#define MAX_RES 17
+char *ResTypes[MAX_RES] =
+      {"niks", "CURSOR", "BITMAP", "ICON", "MENU", "DIALOG", "STRING",
+       "FONTDIR", "FONT", "ACCELERATOR", "RCDATA",  "MESSAGETABLE",
+       "GROUP_CURSOR", "niks", "GROUP_ICON", "niks", "VERSION"};
 
 //SvL: VPBuddy bugfix, seems to load bitmaps with type name 'DIB'
 #define BITMAP_TYPENAME2    "DIB"
@@ -261,11 +266,39 @@ ULONG Win32ImageBase::getPEResourceSize(ULONG id, ULONG type, ULONG lang)
     return pData->Size;
 }
 //******************************************************************************
+//Returns pointer to data of resource handle
+//******************************************************************************
+char *Win32ImageBase::getResourceAddr(HRSRC hResource)
+{
+ PIMAGE_RESOURCE_DATA_ENTRY pData = (PIMAGE_RESOURCE_DATA_ENTRY)hResource;
+
+  if(pData == NULL) {
+	DebugInt3();
+	return NULL;
+  }
+  //ulRVAResourceSection contains the relative virtual address (relative to the start of the image)
+  //for the resource section (images loaded by the pe.exe and pe2lx/win32k)
+  //For LX images, this is 0 as OffsetToData contains a relative offset
+  return (char *)((char *)pResDir + (pData->OffsetToData - ulRVAResourceSection));
+}
+//******************************************************************************
+//******************************************************************************
+ULONG Win32ImageBase::getResourceSize(HRSRC hResource)
+{
+ PIMAGE_RESOURCE_DATA_ENTRY pData = (PIMAGE_RESOURCE_DATA_ENTRY)hResource;
+
+  if(pData == NULL) {
+	DebugInt3();
+	return NULL;
+  }
+  return pData->Size;
+}
+//******************************************************************************
+//findResource returns the pointer of the resource's IMAGE_RESOURCE_DATA_ENTRY structure
 //******************************************************************************
 HRSRC Win32ImageBase::findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG langid)
 {
  PIMAGE_RESOURCE_DATA_ENTRY      pData = NULL;
- Win32Resource                  *res;
  BOOL   fNumType;
  char  *winres = NULL;
  ULONG  id, type, lang;
@@ -333,13 +366,8 @@ HRSRC Win32ImageBase::findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG langi
             dprintf(("FindResource %s: resource %s (type %d, lang %x)", szModule, id, type, lang));
     }
     else    dprintf(("FindResource %s: resource %d (type %d, lang %x)", szModule, id, type, lang));
-    //ulRVAResourceSection contains the relative virtual address (relative to the start of the image)
-    //for the resource section (images loaded by the pe.exe and pe2lx/win32k)
-    //For LX images, this is 0 as OffsetToData contains a relative offset
-    char *resdata = (char *)((char *)pResDir + (pData->OffsetToData - ulRVAResourceSection));
-    res = new Win32Resource(this, id, type, pData->Size, resdata);
 
-    return (HRSRC) res;
+    return (HRSRC) pData;
 }
 //******************************************************************************
 //******************************************************************************
@@ -358,7 +386,7 @@ HRSRC Win32ImageBase::findResourceW(LPWSTR lpszName, LPWSTR lpszType, ULONG lang
     }
     else    astring2 = (char *)lpszType;
 
-    hres = (HRSRC) findResourceA(astring1, astring2, lang);
+    hres = findResourceA(astring1, astring2, lang);
 
     if(HIWORD(astring1)) FreeAsciiString(astring1);
     if(HIWORD(astring2)) FreeAsciiString(astring2);

@@ -1,4 +1,4 @@
-/* $Id: win32wmdiclient.cpp,v 1.27 2000-05-24 19:30:08 sandervl Exp $ */
+/* $Id: win32wmdiclient.cpp,v 1.28 2000-05-28 16:43:47 sandervl Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -32,7 +32,6 @@
 #include <oslibgdi.h>
 #include <oslibres.h>
 #include "oslibdos.h"
-#include <winres.h>
 #include "syscolor.h"
 #include "win32wndhandle.h"
 

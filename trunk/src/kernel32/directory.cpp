@@ -1,4 +1,4 @@
-/* $Id: directory.cpp,v 1.21 2000-05-26 18:53:18 sandervl Exp $ */
+/* $Id: directory.cpp,v 1.22 2000-05-28 16:45:12 sandervl Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
@@ -380,7 +380,7 @@ ODINFUNCTION1(BOOL,RemoveDirectoryA,LPCSTR,arg1)
   if(tmp[len -1] == '\\')
     tmp[len -1] = 0;
 
-  dprintf(("RemoveDirectory %S", arg1));
+  dprintf(("RemoveDirectory %s", arg1));
 
   return O32_RemoveDirectory(tmp);
 }

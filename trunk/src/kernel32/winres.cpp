@@ -1,4 +1,4 @@
-/* $Id: winres.cpp,v 1.26 2000-02-16 14:22:12 sandervl Exp $ */
+/* $Id: winres.cpp,v 1.27 2000-05-28 16:45:14 sandervl Exp $ */
 
 /*
  * Win32 resource class
@@ -25,180 +25,55 @@
 #include <string.h>
 #define INCL_WINRES
 #include <win32type.h>
+#include <win32api.h>
+#include <winconst.h>
 #include <winres.h>
 #include <misc.h>
-#include <winexepe2lx.h>
-#include <windllpe2lx.h>
+#include <winimagebase.h>
+#include <winexebase.h>
+#include <windllbase.h>
 #include "cvtresource.h"
-#include <vmutex.h>
 
 #define DBG_LOCALLOG	DBG_winres
 #include "dbglocal.h"
 
-VMutex resmutex;
-
-char *ResTypes[MAX_RES] =
-      {"niks", "CURSOR", "BITMAP", "ICON", "MENU", "DIALOG", "STRING",
-       "FONTDIR", "FONT", "ACCELERATOR", "RCDATA",  "MESSAGETABLE",
-       "GROUP_CURSOR", "niks", "GROUP_ICON", "niks", "VERSION"};
-
 //******************************************************************************
 //******************************************************************************
-Win32Resource::Win32Resource() :
-        os2resdata(NULL), winresdata(NULL), resType(RSRC_CUSTOMNODATA)
+PVOID WIN32API ConvertResourceToOS2(HINSTANCE hInstance, LPSTR restype, HRSRC hResource)
 {
-  next       = NULL;
-  module     = NULL;
+ PIMAGE_RESOURCE_DATA_ENTRY pData = (PIMAGE_RESOURCE_DATA_ENTRY)hResource;
+ Win32ImageBase *module;
+ char           *resdata;
+ int             ressize, cvtressize;
 
-  id         = -1;
-  type       = -1;
-  hres       = 0;
-  OS2ResHandle = 0;
-  //resources are in Unicode format by default; indirectly created resources
-  //can also be in ascii format
-  isUnicode  = TRUE;
-}
-//******************************************************************************
-//******************************************************************************
-Win32Resource::Win32Resource(Win32ImageBase *module, ULONG id, ULONG type,
-                 ULONG size, char *resdata) : hres(NULL),
-        os2resdata(NULL), winresdata(NULL), resType(RSRC_PELOADER)
-{
-  resmutex.enter();
-  next           = module->winres;
-  module->winres = this;
-  resmutex.leave();
-
-  this->module   = module;
-  this->id       = id;
-  this->type     = type;
-  this->ressize  = size;
-  winresdata     = (char *)malloc(size+sizeof(WCHAR));
-  if(winresdata == NULL) {
-    DebugInt3();
-    return;
-  }
-  OS2ResHandle = 0;
-
-  if(type == NTRT_STRING) {
-    	memcpy(winresdata, resdata, size);
-        ((USHORT *)winresdata)[size/sizeof(WCHAR)] = 0;
-//        ((USHORT *)winresdata)[size/sizeof(WCHAR)-1] = 0;
-  }
-  else  memcpy(winresdata, resdata, size);
-
-  //resources are in Unicode format by default
-  isUnicode  = TRUE;
-}
-//******************************************************************************
-//******************************************************************************
-Win32Resource::~Win32Resource()
-{
- Win32Resource *res = module->winres;
-
-  if(os2resdata && (resType == RSRC_PELOADER || resType == RSRC_CUSTOMINDIRECT))
-    free(os2resdata);
-
-  if(winresdata)    free(winresdata);
-
-  resmutex.enter();
-  if(res == this) {
-    module->winres = res->next;
+  if(hInstance == 0 || hInstance == -1 || (WinExe && hInstance == WinExe->getInstanceHandle())) {
+        module = (Win32ImageBase *)WinExe;
   }
   else {
-    while(res->next != this) {
-        res  = res->next;
-    }
-    if(res)
-        res->next = next;
+        module = (Win32ImageBase *)Win32DllBase::findModule(hInstance);
   }
-  resmutex.leave();
-}
-//******************************************************************************
-//******************************************************************************
-PVOID Win32Resource::lockResource()
-{
-  dprintf(("Win32Resource::lockResource %d %x\n", id, winresdata));
+  resdata = (char *)LockResource(LoadResource(hInstance, hResource));
+  ressize = SizeofResource(hInstance, hResource);
 
-  if(winresdata)
-    return(winresdata);
-
-  dprintf(("Win32Resource::lockResource: NO windows resource!"));
-  return NULL;
-}
-//******************************************************************************
-//******************************************************************************
-PVOID Win32Resource::lockOS2Resource()
-{
- APIRET rc;
- PVOID  resdata;
-
-   dprintf(("Win32Resource::lockOS2Resource %d\n", id));
-   if(os2resdata == NULL) {
-        os2resdata = convertResource(winresdata);
-   }
-   return os2resdata;
-}
-//******************************************************************************
-//return size of converted win32 resource
-//******************************************************************************
-ULONG Win32Resource::getOS2Size()
-{
-  switch(type) {
+  switch((int)restype) {
     case NTRT_NEWBITMAP:
     case NTRT_BITMAP:
-    	return QueryConvertedBitmapSize((WINBITMAPINFOHEADER *)winresdata, ressize);
+    	return ConvertBitmap((WINBITMAPINFOHEADER *)resdata, ressize, (PULONG)&cvtressize);
 
     case NTRT_CURSOR:
-    	return QueryConvertedCursorSize((CursorComponent *)winresdata, ressize);
-
-    case NTRT_ICON:
-    	return QueryConvertedIconSize((WINBITMAPINFOHEADER *)winresdata, ressize);
-
-    case NTRT_GROUP_ICON:
-    case NTRT_GROUP_CURSOR:
-    case NTRT_ACCELERATORS:
-    case NTRT_NEWMENU:
-    case NTRT_MENU:
-    case NTRT_NEWDIALOG:
-    case NTRT_DIALOG:
-    case NTRT_FONTDIR:
-    case NTRT_FONT:
-    case NTRT_MESSAGETABLE:
-    case NTRT_RCDATA:
-    case NTRT_VERSION:
-    case NTRT_STRING:
-    default:
-    	dprintf(("Win32Resource::getOS2Size SHOULDN'T BE CALLED for this resource type (%d) (NOT IMPLEMENTED)!!", type));
-    	break;
-  }
-  return 0;
-}
-//******************************************************************************
-//******************************************************************************
-PVOID Win32Resource::convertResource(void *win32res)
-{
- int cvtressize;
-
-  switch(type) {
-    case NTRT_NEWBITMAP:
-    case NTRT_BITMAP:
-    	return ConvertBitmap((WINBITMAPINFOHEADER *)win32res, ressize, &ressize);
-
-    case NTRT_CURSOR:
-    	return ConvertCursor((CursorComponent *)win32res, ressize, &cvtressize);
+    	return ConvertCursor((CursorComponent *)resdata, ressize, &cvtressize);
 
     case NTRT_GROUP_CURSOR:
-    	return ConvertCursorGroup((CursorHeader *)win32res, ressize, module);
+    	return ConvertCursorGroup((CursorHeader *)resdata, ressize, module);
 
     case NTRT_GROUP_ICON:
-    	return ConvertIconGroup((IconHeader *)win32res, ressize, module);
+    	return ConvertIconGroup((IconHeader *)resdata, ressize, module);
 
     case NTRT_ICON:
-    	return ConvertIcon((WINBITMAPINFOHEADER *)win32res, ressize, &cvtressize);
+    	return ConvertIcon((WINBITMAPINFOHEADER *)resdata, ressize, &cvtressize);
 
     case NTRT_ACCELERATORS:
-    	return ConvertAccelerator((WINACCEL *)win32res, ressize);
+    	return ConvertAccelerator((WINACCEL *)resdata, ressize);
 
     case NTRT_NEWMENU:
     case NTRT_MENU:
@@ -215,20 +90,56 @@ PVOID Win32Resource::convertResource(void *win32res)
     default:
         break;
   }
-  dprintf(("Win32Resource::convertResource: Can't convert resource %d (type %d)", id, type));
+  dprintf(("ConvertResourceToOS2: Can't convert resource %x (inst %x)", hResource, hInstance));
   return 0;
 }
 //******************************************************************************
 //******************************************************************************
-void Win32Resource::destroyAll(Win32ImageBase *module)
+ULONG WIN32API QueryConvertedResourceSize(HINSTANCE hInstance, LPSTR restype, HRSRC hResource)
 {
- Win32Resource *res = module->winres, *next;
+ PIMAGE_RESOURCE_DATA_ENTRY pData = (PIMAGE_RESOURCE_DATA_ENTRY)hResource;
+ Win32ImageBase *module;
+ char           *resdata;
+ int             ressize, cvtressize;
 
-   while(res) {
-    next = res->next;
-    delete(res);
-    res  = next;
-   }
+  if(hInstance == 0 || hInstance == -1 || (WinExe && hInstance == WinExe->getInstanceHandle())) {
+        module = (Win32ImageBase *)WinExe;
+  }
+  else {
+        module = (Win32ImageBase *)Win32DllBase::findModule(hInstance);
+  }
+  resdata = (char *)LockResource(LoadResource(hInstance, hResource));
+  ressize = SizeofResource(hInstance, hResource);
+
+  switch((int)restype) {
+    case NTRT_NEWBITMAP:
+    case NTRT_BITMAP:
+    	return QueryConvertedBitmapSize((WINBITMAPINFOHEADER *)resdata, ressize);
+
+    case NTRT_CURSOR:
+    	return QueryConvertedCursorSize((CursorComponent *)resdata, ressize);
+
+    case NTRT_ICON:
+    	return QueryConvertedIconSize((WINBITMAPINFOHEADER *)resdata, ressize);
+
+    case NTRT_GROUP_ICON:
+    case NTRT_GROUP_CURSOR:
+    case NTRT_ACCELERATORS:
+    case NTRT_NEWMENU:
+    case NTRT_MENU:
+    case NTRT_NEWDIALOG:
+    case NTRT_DIALOG:
+    case NTRT_FONTDIR:
+    case NTRT_FONT:
+    case NTRT_MESSAGETABLE:
+    case NTRT_RCDATA:
+    case NTRT_VERSION:
+    case NTRT_STRING:
+    default:
+    	dprintf(("Win32Resource::getOS2Size SHOULDN'T BE CALLED for this resource type (%d) (NOT IMPLEMENTED)!!", restype));
+    	break;
+  }
+  return 0;
 }
 //******************************************************************************
 //******************************************************************************

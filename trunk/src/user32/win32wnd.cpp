@@ -1,4 +1,4 @@
-/* $Id: win32wnd.cpp,v 1.8 2000-02-16 14:28:24 sandervl Exp $ */
+/* $Id: win32wnd.cpp,v 1.9 2000-05-28 16:43:48 sandervl Exp $ */
 /*
  * Win32 Window Class for OS/2
  *
@@ -29,7 +29,6 @@
 #include <oslibgdi.h>
 #include <oslibres.h>
 #include "oslibdos.h"
-#include <winres.h>
 #include "syscolor.h"
 #include "win32wndhandle.h"
 #include "mdi.h"
