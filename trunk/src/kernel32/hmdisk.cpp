@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.18 2001-10-25 13:19:05 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.19 2001-10-26 13:03:04 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -24,12 +24,16 @@
 #define DBG_LOCALLOG    DBG_hmdisk
 #include "dbglocal.h"
 
+#define BIT_0     (1)
+#define BIT_11    (1<<11)
+
 typedef struct 
 {
     HINSTANCE hInstAspi;
     DWORD (WIN32API *GetASPI32SupportInfo)();
     DWORD (CDECL *SendASPI32Command)(LPSRB lpSRB);
     ULONG     driveLetter;
+    ULONG     driveType;
     CHAR      signature[8];
 } DRIVE_INFO;
 
@@ -134,7 +138,9 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
             drvInfo->driveLetter = drvInfo->driveLetter - ((int)'a' - (int)'A');
         }
 
-        if(GetDriveTypeA(lpFileName) == DRIVE_CDROM) {
+        drvInfo->driveType = GetDriveTypeA(lpFileName);
+        if(drvInfo->driveType == DRIVE_CDROM) 
+        {
             drvInfo->hInstAspi = LoadLibraryA("WNASPI32.DLL");
             if(drvInfo->hInstAspi == NULL) {
                 if(pHMHandleData->hHMHandle) OSLibDosClose(pHMHandleData->hHMHandle);
@@ -144,13 +150,14 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
             *(FARPROC *)&drvInfo->GetASPI32SupportInfo = GetProcAddress(drvInfo->hInstAspi, "GetASPI32SupportInfo");
             *(FARPROC *)&drvInfo->SendASPI32Command    = GetProcAddress(drvInfo->hInstAspi, "SendASPI32Command");
    
-            //get cdrom signature (TODO: why doesn't this work???)
+            //get cdrom signature
             DWORD parsize = 4;
             DWORD datasize = 4;
             strcpy(drvInfo->signature, "CD01");
-            OSLibDosDevIOCtl(pHMHandleData->hHMHandle, 0x81, 0x60, &drvInfo->signature[0], 4, &parsize,
+            OSLibDosDevIOCtl(pHMHandleData->hHMHandle, 0x80, 0x61, &drvInfo->signature[0], 4, &parsize,
                              &drvInfo->signature[0], 4, &datasize);
         }
+
         return (NO_ERROR);
     }
     else {
@@ -185,7 +192,7 @@ BOOL HMDeviceDiskClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
 static BOOL ioctlCDROMSimple(PHMHANDLEDATA pHMHandleData,
                              DWORD dwCategory,
                              DWORD dwFunction,
-                             LPDWORD lpBytesReturned)
+                             LPDWORD lpBytesReturned, DRIVE_INFO *pdrvInfo)
 {
   DWORD dwParameterSize = 4;
   DWORD dwDataSize      = 0;
@@ -197,7 +204,7 @@ static BOOL ioctlCDROMSimple(PHMHANDLEDATA pHMHandleData,
   ret = OSLibDosDevIOCtl(pHMHandleData->hHMHandle,
                          dwCategory,
                          dwFunction,
-                         "CD01",
+                         pdrvInfo->signature,
                          4,
                          &dwParameterSize,
                          NULL,
@@ -549,9 +556,92 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
     // -----------
     // CDROM class
     // -----------
+    case IOCTL_CDROM_READ_TOC:
+    {
+#pragma pack(1)
+        typedef struct
+        {
+            BYTE  ucFirstTrack;
+            BYTE  ucLastTrack;
+            DWORD ulLeadOutAddr;
+        } AudioDiskInfo;
+        typedef struct
+        {
+            DWORD ulTrackAddr;
+            BYTE  ucTrackControl;
+        } AudioTrackInfo;
+        typedef struct 
+        {
+            BYTE  signature[4];
+            BYTE  ucTrack;
+        } ParameterBlock;
+#pragma pack()
+
+        PCDROM_TOC pTOC = (PCDROM_TOC)lpOutBuffer;
+        DWORD rc, numtracks;
+        DWORD parsize = 4;
+        DWORD datasize;
+        AudioDiskInfo diskinfo;
+        AudioTrackInfo trackinfo;
+        ParameterBlock parm;
+
+        if(lpBytesReturned)
+            *lpBytesReturned = 0;
+
+        if(nOutBufferSize < 4 || !pTOC) {
+            SetLastError(ERROR_INSUFFICIENT_BUFFER);
+            return FALSE;
+        }
+
+        //IOCTL_CDROMAUDIO (0x81), CDROMAUDIO_GETAUDIODISK (0x61)
+        datasize = sizeof(diskinfo);
+        rc = OSLibDosDevIOCtl(pHMHandleData->hHMHandle, 0x81, 0x61, &drvInfo->signature[0], 4, &parsize,
+                              &diskinfo, sizeof(diskinfo), &datasize);
+        if(rc != NO_ERROR) {
+            dprintf(("OSLibDosDevIOCtl failed with rc %d", rc));
+            return FALSE;
+        }
+        pTOC->FirstTrack = diskinfo.ucFirstTrack;
+        pTOC->LastTrack  = diskinfo.ucLastTrack;
+        numtracks = pTOC->LastTrack - pTOC->FirstTrack + 1;
+        *(WORD *)&pTOC->Length = 4 + numtracks*sizeof(TRACK_DATA);
+        dprintf(("first %d, last %d, num %d", pTOC->FirstTrack, pTOC->LastTrack, numtracks));
+
+        if(nOutBufferSize < 4+numtracks*sizeof(TRACK_DATA)) {
+            SetLastError(ERROR_INSUFFICIENT_BUFFER);
+            return FALSE;
+        }
+
+        for(int i=0;i<numtracks;i++) 
+        {
+            parsize = sizeof(parm);
+            memcpy(parm.signature, drvInfo->signature, 4);
+            parm.ucTrack = i;
+
+            datasize = sizeof(trackinfo);
+
+            //IOCTL_CDROMAUDIO (0x81), CDROMAUDIO_GETAUDIOTRACK (0x62)
+            rc = OSLibDosDevIOCtl(pHMHandleData->hHMHandle, 0x81, 0x62, &parm, sizeof(parm), &parsize,
+                                  &trackinfo, sizeof(trackinfo), &datasize);
+            if(rc != NO_ERROR) {
+                dprintf(("OSLibDosDevIOCtl failed with rc %d", rc));
+                return FALSE;
+            }
+            pTOC->TrackData[i].TrackNumber = pTOC->FirstTrack + i;
+            pTOC->TrackData[i].Reserved    = 0;
+            pTOC->TrackData[i].Control     = trackinfo.ucTrackControl >> 4;
+            pTOC->TrackData[i].Adr         = trackinfo.ucTrackControl & 0xF;
+            pTOC->TrackData[i].Reserved1   = 0;
+            *(DWORD *)&pTOC->TrackData[i].Address = trackinfo.ulTrackAddr;
+        }        
+        if(lpBytesReturned)
+            *lpBytesReturned = 4 + numtracks*sizeof(TRACK_DATA);
+
+        SetLastError(ERROR_SUCCESS);
+        return TRUE;
+    }
 
     case IOCTL_CDROM_UNLOAD_DRIVER:
-    case IOCTL_CDROM_READ_TOC:
     case IOCTL_CDROM_GET_CONTROL:
         break;
     
@@ -573,7 +663,7 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
       
       // setup the parameter block
       
-      ParameterBlock.ucSignature = 0x31304443; // 'CD01'
+      memcpy(&ParameterBlock.ucSignature, drvInfo->signature, 4);
       ParameterBlock.ucAddressingMode = 1;     // MSF format
       
       // @@@PH unknown if this kind of MSF conversion is correct!
@@ -622,7 +712,7 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
       return ioctlCDROMSimple(pHMHandleData, 
                               0x81,   // IOCTL_CDROMAUDIO
                               0x51,   // CDROMAUDIO_STOPAUDIO
-                              lpBytesReturned);
+                              lpBytesReturned, drvInfo);
     }
       
     case IOCTL_CDROM_RESUME_AUDIO:
@@ -631,7 +721,7 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
       return ioctlCDROMSimple(pHMHandleData, 
                               0x81,   // IOCTL_CDROMAUDIO
                               0x52,   // CDROMAUDIO_RESUMEAUDIO
-                              lpBytesReturned);
+                              lpBytesReturned, drvInfo);
     }
 
     case IOCTL_CDROM_GET_VOLUME:
@@ -649,7 +739,7 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
         }
         parsize = 4;
         datasize = 8;
-        ret = OSLibDosDevIOCtl(pHMHandleData->hHMHandle, 0x81, 0x60, "CD01", 4, &parsize,
+        ret = OSLibDosDevIOCtl(pHMHandleData->hHMHandle, 0x81, 0x60, drvInfo->signature, 4, &parsize,
                                volbuf, 8, &datasize);
 
         if(ret) {
@@ -691,7 +781,7 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
         volbuf[6] = 3;
         volbuf[7] = pVol->PortVolume[3];
         dprintf(("Set CD volume (%d,%d)(%d,%d)", pVol->PortVolume[0], pVol->PortVolume[1], pVol->PortVolume[2], pVol->PortVolume[3]));
-        ret = OSLibDosDevIOCtl(pHMHandleData->hHMHandle, 0x81, 0x40, "CD01", 4, &parsize,
+        ret = OSLibDosDevIOCtl(pHMHandleData->hHMHandle, 0x81, 0x40, drvInfo->signature, 4, &parsize,
                                volbuf, 8, &datasize);
 
         if(ret) {
@@ -706,7 +796,6 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
     case IOCTL_CDROM_RAW_READ:
     case IOCTL_CDROM_DISK_TYPE:
     case IOCTL_CDROM_GET_DRIVE_GEOMETRY:
-    case IOCTL_CDROM_CHECK_VERIFY:
     case IOCTL_CDROM_MEDIA_REMOVAL:
         break;
       
@@ -716,7 +805,7 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
       return ioctlCDROMSimple(pHMHandleData, 
                               0x80,   // IOCTL_CDROM
                               0x44,   // CDROMDISK_EJECTDISK
-                              lpBytesReturned);
+                              lpBytesReturned, drvInfo);
     }
       
     case IOCTL_CDROM_LOAD_MEDIA:
@@ -725,7 +814,7 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
       return ioctlCDROMSimple(pHMHandleData, 
                               0x80,   // IOCTL_CDROM
                               0x45,   // CDROMDISK_CLOSETRAY
-                              lpBytesReturned);
+                              lpBytesReturned, drvInfo);
     }
       
     case IOCTL_CDROM_RESERVE:
@@ -738,16 +827,50 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
     // STORAGE class
     // -------------
       
+    case IOCTL_CDROM_CHECK_VERIFY:
+        if(drvInfo->driveType != DRIVE_CDROM) {
+            SetLastError(ERROR_GEN_FAILURE); //TODO: right error?
+            return FALSE;
+        }
+        //no break;
     case IOCTL_DISK_CHECK_VERIFY:
     case IOCTL_STORAGE_CHECK_VERIFY:
-      dprintf(("IOCTL_STORAGE_CHECK_VERIFY incompletely implemented"));
+        dprintf(("IOCTL_CDROM(DISK/STORAGE)CHECK_VERIFY %s", drvInfo->signature));
         if(lpBytesReturned) {
             *lpBytesReturned = 0;
         }
         //TODO: check if disk has been inserted or removed
         if(pHMHandleData->hHMHandle == 0) {
-            SetLastError(ERROR_NOT_READY);
+            SetLastError(NO_ERROR); //TODO: correct???
+//            SetLastError(ERROR_NOT_READY);         
             return FALSE;
+        }
+
+        if(drvInfo->driveType == DRIVE_CDROM) 
+        {
+            DWORD parsize = 4;
+            DWORD datasize = 4;
+            DWORD status = 0;
+            DWORD rc;
+
+            //IOCTL_CDROM (0x80), CDROMDISK_DEVICESTATUS (0x60)
+            rc = OSLibDosDevIOCtl(pHMHandleData->hHMHandle, 0x80, 0x60, &drvInfo->signature[0], 4, &parsize,
+                                  &status, sizeof(status), &datasize);
+            if(rc != NO_ERROR) {
+                dprintf(("OSLibDosDevIOCtl failed with rc %d", rc));
+                return FALSE;
+            }
+            dprintf(("CDROM status 0x%x", status));
+            //if door open or no disk present, return FALSE
+            if(status & (BIT_0|BIT_11)) {
+                 rc = FALSE;
+            }
+            else rc = TRUE;
+            SetLastError(NO_ERROR);
+            return rc;
+        }
+        else {
+            dprintf(("IOCTL_STORAGE_CHECK_VERIFY incompletely implemented"));
         }
         SetLastError(NO_ERROR);
         return TRUE;
@@ -839,6 +962,7 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
              SetLastError(ERROR_INVALID_PARAMETER);
              return FALSE;
         }
+        dprintf(("IOCTL_SCSI_PASS_THROUGH_DIRECT %x", pPacket->Cdb[0]));
         psrb->SRB_BufPointer = (BYTE *)pPacket->DataBuffer;
         memcpy(&psrb->CDBByte[0], &pPacket->Cdb[0], 16);
         if(psrb->SRB_SenseLen) {
@@ -880,7 +1004,12 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
         addr->PortNumber = 0;
         addr->PathId     = 0;
         numAdapters = drvInfo->GetASPI32SupportInfo();
-        if(LOBYTE(numAdapters) == 0) goto failure;
+
+        if(LOBYTE(numAdapters) == 0) {
+            //testestest
+            i=j=k=0;
+            goto done; //failure;
+        }
 
         memset(&srb, 0, sizeof(srb));
         srb.common.SRB_Cmd = SC_HA_INQUIRY;
