@@ -1,5 +1,5 @@
-/* $Id: StateUpd.cpp,v 1.4 1999-12-06 18:11:49 bird Exp $ */
-/*
+/* $Id: StateUpd.cpp,v 1.5 1999-12-06 23:52:42 bird Exp $
+ *
  * StateUpd - Scans source files for API functions and imports data on them.
  *
  * Copyright (c) 1999 knut st. osmundsen
@@ -35,7 +35,7 @@ static FILE  *phSignal = NULL;
 static void syntax(void);
 static void openLogs(void);
 static void closeLogs(void);
-static unsigned long processDir(char *pszDir, BOOL fFile, POPTIONS pOptions);
+static unsigned long processDir(const char *pszDirOrFile, POPTIONS pOptions);
 static unsigned long processFile(const char *pszFilename, POPTIONS pOptions);
 static unsigned long processAPI(char **papszLines, int i, int &iRet, const char *pszFilename, POPTIONS pOptions);
 static unsigned long analyseFnHdr(PFNDESC pFnDesc, char **papszLines, int i, const char *pszFilename, POPTIONS pOptions);
@@ -214,13 +214,11 @@ int main(int argc, char **argv)
         {
             /* processing */
             if (argv[argi] == NULL || *argv[argi] == '\0')
-                ulRc = processDir(".", FALSE, &options);
+                ulRc = processDir(".", &options);
             else
                 while (argv[argi] != NULL)
                 {
-                    ulRc += processDir(argv[argi],
-                                       argv[argi][strlen(argv[argi])-1] != '\\' && argv[argi][strlen(argv[argi])-1] != '/',
-                                       &options);
+                    ulRc += processDir(argv[argi], &options);
                     argi++;
                 }
 
@@ -343,33 +341,42 @@ static void closeLogs(void)
 
 
 /**
- * Processes a subdirectory and files.
+ * Processes a file or a subdirectory with files.
  * @returns   high word = number of signals
  *            low  word = number of APIs processed. (1 or 0).
- * @param     pszDir    Directory or file, see fFile.
- * @param     fFile     File indicator, TRUE: pszDir is a file, FALSE: pszDir is a dir.
- * @param     pOptions  Pointer to options.
- * @sketch    0. Interpret parameters.
+ * @param     pszDirOrFile  Directory or file, see fFile.
+ * @param     pOptions      Pointer to options.
+ * @sketch    -0. Determin dir or file.
+ *            0. Interpret parameters.
  *            1. Scan current directory for *.cpp and *.c files and process them.
  *            2. If recusion option is enabled:
  *                   Scan current directory for sub-directories, scan them using recursion.
  */
-static unsigned long processDir(char *pszDir, BOOL fFile, POPTIONS pOptions)
+static unsigned long processDir(const char *pszDirOrFile, POPTIONS pOptions)
 {
     unsigned long ulRc = 0; /* high word = #signals, low word = #APIs successfully processed */
+    char         szBuf[CCHMAXPATH];
     char         szFileSpec[CCHMAXPATH];
     APIRET       rc;
     FILEFINDBUF3 ffb;
+    FILESTATUS3  fs;
     ULONG        ul = 1;
     HDIR         hDir = (HDIR)HDIR_CREATE;
-    char        *pszFile;
+    PSZ          pszDir;
+    PSZ          pszFile;
+    BOOL         fFile;
 
-    /* O. */
+    /* -0.*/
+    rc = DosQueryPathInfo(pszDirOrFile, FIL_STANDARD, &fs , sizeof(fs));
+    fFile = rc == NO_ERROR && (fs.attrFile & FILE_DIRECTORY) != FILE_DIRECTORY;
+
+    /* 0. */
+    strcpy(szBuf, pszDirOrFile);
+    pszDir = szBuf;
     if (fFile)
     {
-        if ((pszFile = strrchr(pszDir, '\\')) == NULL)
-            pszFile = strrchr(pszDir, '/');
-        if (pszFile != NULL)
+        if ((pszFile = strrchr(pszDir, '\\')) != NULL
+            || (pszFile = strrchr(pszDir, '/')) != NULL)
             *pszFile++ = '\0';
         else
         {
@@ -378,7 +385,12 @@ static unsigned long processDir(char *pszDir, BOOL fFile, POPTIONS pOptions)
         }
     }
     else
+    {
         pszFile = NULL;
+        ul = strlen(pszDir)-1;
+        if (pszDir[ul] == '\\' || pszDir[ul] == '/')
+            pszDir[ul] = '\0';
+    }
 
 
     /* 1. */
@@ -386,6 +398,7 @@ static unsigned long processDir(char *pszDir, BOOL fFile, POPTIONS pOptions)
         strcat(strcat(strcpy(&szFileSpec[0], pszDir), "\\"), pszFile);
     else
         strcat(strcpy(&szFileSpec[0], pszDir), "\\*.c*");
+    ul = 1;
     rc = DosFindFirst((PCSZ)&szFileSpec[0], &hDir,
                       FILE_READONLY | FILE_HIDDEN | FILE_SYSTEM | FILE_ARCHIVED,
                       (PVOID)&ffb, sizeof(ffb), &ul, FIL_STANDARD);
@@ -418,7 +431,7 @@ static unsigned long processDir(char *pszDir, BOOL fFile, POPTIONS pOptions)
                 strcat(strcat(strcpy(&szFileSpec[0], pszDir), "\\"), &ffb.achName[0]);
                 if (fFile)
                     strcat(strcat(&szFileSpec[0], "\\"), pszFile);
-                ulRc += processDir(&szFileSpec[0], fFile, pOptions);
+                ulRc += processDir(&szFileSpec[0], pOptions);
             }
 
             /* next */

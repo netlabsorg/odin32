@@ -19,7 +19,7 @@ gdicc.lib: force
    @nmake /nologo -f makefile.icc $@
 
 force:
-    @echo -
+    @echo ...
 
 clean:
    @nmake /nologo -f makefile.icc clean
