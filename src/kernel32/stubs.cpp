@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.13 1999-12-18 16:19:19 sandervl Exp $ */
+/* $Id: stubs.cpp,v 1.14 1999-12-18 17:17:55 sandervl Exp $ */
 
 /*
  * Win32 KERNEL32 Subsystem for OS/2
@@ -19,6 +19,7 @@
 #include "unicode.h"
 #include <builtin.h>
 #include "handlemanager.h"
+#include <string.h>
 
 #include "stubs.h"
 
@@ -2497,8 +2498,49 @@ DWORD WIN32API ReadProcessMemory(HANDLE  hProcess,
            lpBuffer,
            cbRead,
            lpNumberOfBytesRead));
+  // FIXME: check this, if we ever run win32 binaries in different addressspaces
+  //    ... and add a sizecheck
+  memcpy(lpBuffer,lpBaseAddress,cbRead);
+  if (lpNumberOfBytesRead) *lpNumberOfBytesRead = cbRead;
+  return TRUE;
+}
 
-  return (FALSE);
+/*****************************************************************************
+ * Name      : DWORD WriteProcessMemory
+ * Purpose   : The WriteProcessMemory function writes memory in a specified
+ *             process. The entire area to be written to must be accessible,
+ *             or the operation fails.
+ * Parameters: HANDLE  hProcess               handle of process whose memory is written to
+ *             LPVOID  lpBaseAddress          address to start writing to
+ *             LPVOID  lpBuffer               address of buffer to write data to
+ *             DWORD   cbWrite                number of bytes to write
+ *             LPDWORD lpNumberOfBytesWritten actual number of bytes written
+ * Variables :
+ * Result    : TRUE / FALSE
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
+ *****************************************************************************/
+
+DWORD WIN32API WriteProcessMemory(HANDLE  hProcess,
+                                     LPCVOID lpBaseAddress,
+                                     LPVOID  lpBuffer,
+                                     DWORD   cbWrite,
+                                     LPDWORD lpNumberOfBytesWritten)
+{
+  dprintf(("Kernel32: WriteProcessMemory(%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
+           hProcess,
+           lpBaseAddress,
+           lpBuffer,
+           cbWrite,
+           lpNumberOfBytesWritten));
+
+  // FIXME: check this, if we ever run win32 binaries in different addressspaces
+  //    ... and add a sizecheck
+  memcpy((void*)lpBaseAddress,lpBuffer,cbWrite);
+  if (lpNumberOfBytesWritten) *lpNumberOfBytesWritten = cbWrite;
+  return TRUE;
 }
 
 
@@ -2995,39 +3037,6 @@ BOOL WIN32API WaitNamedPipeW(LPCWSTR lpszNamedPipeName,
 }
 
 
-/*****************************************************************************
- * Name      : DWORD WriteProcessMemory
- * Purpose   : The WriteProcessMemory function writes memory in a specified
- *             process. The entire area to be written to must be accessible,
- *             or the operation fails.
- * Parameters: HANDLE  hProcess               handle of process whose memory is written to
- *             LPVOID  lpBaseAddress          address to start writing to
- *             LPVOID  lpBuffer               address of buffer to write data to
- *             DWORD   cbWrite                number of bytes to write
- *             LPDWORD lpNumberOfBytesWritten actual number of bytes written
- * Variables :
- * Result    : TRUE / FALSE
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-
-DWORD WIN32API WriteProcessMemory(HANDLE  hProcess,
-                                     LPCVOID lpBaseAddress,
-                                     LPVOID  lpBuffer,
-                                     DWORD   cbWrite,
-                                     LPDWORD lpNumberOfBytesWritten)
-{
-  dprintf(("Kernel32: WriteProcessMemory(%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
-           hProcess,
-           lpBaseAddress,
-           lpBuffer,
-           cbWrite,
-           lpNumberOfBytesWritten));
-
-  return (FALSE);
-}
 
 
 /*****************************************************************************
