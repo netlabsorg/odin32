@@ -1,4 +1,4 @@
-/* $Id: waveoutdart.cpp,v 1.21 2003-04-03 13:07:03 sandervl Exp $ */
+/* $Id: waveoutdart.cpp,v 1.22 2003-04-03 14:04:50 sandervl Exp $ */
 
 /*
  * Wave playback class (DART)
@@ -92,6 +92,7 @@ DartWaveOut::DartWaveOut(LPWAVEFORMATEX pwfx, ULONG fdwOpen, ULONG nCallback, UL
     curPlayBuf = curFillBuf = curFillPos = curPlayPos = 0;
     fMixerSetup   = FALSE;
     fUnderrun     = FALSE;
+    ulUnderrunBase= 0;
 
     ulBufSize     = DART_BUFSIZE;
 
@@ -463,7 +464,7 @@ MMRESULT DartWaveOut::reset()
     memset(&Params, 0, sizeof(Params));
 
     wmutex.enter();
-    State     = STATE_STOPPED;
+    State = STATE_STOPPED;
     wmutex.leave();
 
     // Stop the playback.
@@ -483,12 +484,13 @@ MMRESULT DartWaveOut::reset()
         callback(WOM_DONE, (ULONG)tmpwavehdr, 0);
         wmutex.enter();
     }
-    wavehdr   = NULL;
-    fUnderrun = FALSE;
+    wavehdr        = NULL;
+    fUnderrun      = FALSE;
+    ulUnderrunBase = 0;
 
-    curPlayBuf = curFillBuf = curFillPos = curPlayPos = 0;
-    bytesPlayed = bytesCopied = bytesReturned = 0;
-    queuedbuffers = 0;
+    curPlayBuf     = curFillBuf = curFillPos = curPlayPos = 0;
+    bytesPlayed    = bytesCopied = bytesReturned = 0;
+    queuedbuffers  = 0;
 
     wmutex.leave();
     return(MMSYSERR_NOERROR);
@@ -502,14 +504,14 @@ ULONG DartWaveOut::getPosition()
 
     if(State == STATE_STOPPED) {
         dprintf(("Not playing; return 0 position"));
-        return 0;
+        return ulUnderrunBase;
     }
 
     mciStatus.ulItem = MCI_STATUS_POSITION;
     rc = mymciSendCommand(DeviceId, MCI_STATUS, MCI_STATUS_ITEM|MCI_WAIT, (PVOID)&mciStatus, 0);
     if((rc & 0xFFFF) == MCIERR_SUCCESS) {
         nrbytes = (ULONG)(((double)mciStatus.ulReturn * (double)getAvgBytesPerSecond())/1000.0);
-        return nrbytes;;
+        return ulUnderrunBase+nrbytes;
     }
     mciError(rc);
     return 0xFFFFFFFF;
@@ -593,6 +595,8 @@ void DartWaveOut::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags
             dprintf(("WINMM: WaveOut handler UNDERRUN! state %s", (State == STATE_PLAYING) ? "playing" : "stopped"));
             if(State == STATE_PLAYING) {
                 fUnderrun = TRUE;
+                //save current position for when we continue later
+                ulUnderrunBase = bytesPlayed;
                 stop();    //out of buffers, so stop playback
             }
             return;
@@ -653,6 +657,13 @@ void DartWaveOut::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags
     if(wavehdr == NULL) {
         //last buffer played -> no new ones -> return now
         dprintf(("WINMM: WaveOut handler LAST BUFFER PLAYED! state %s (play %d (%d), cop %d, ret %d)", (State == STATE_PLAYING) ? "playing" : "stopped", bytesPlayed, getPosition(), bytesCopied, bytesReturned));
+        if(getPosition() > bytesPlayed) {
+            dprintf(("WINMM: WaveOut handler UNDERRUN! state %s", (State == STATE_PLAYING) ? "playing" : "stopped"));
+            //save current position for when we continue later
+            ulUnderrunBase = bytesPlayed;
+            fUnderrun = TRUE;
+            stop();    //out of buffers, so stop playback
+        }
         wmutex.leave();
         return;
     }
@@ -676,7 +687,7 @@ void DartWaveOut::writeBuffer()
 {
     ULONG buflength;
 
-    if(!fUnderrun && State == STATE_PLAYING && curFillBuf == curPlayBuf) {
+    if(!fUnderrun && State == STATE_PLAYING && wavehdr == NULL && curFillBuf == curPlayBuf) {
         dprintf2(("writeBuffer: no more room for more audio data"));
         return; //no room left
     }
