@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.15 2000-01-13 13:54:52 sandervl Exp $ */
+/* $Id: pmframe.cpp,v 1.16 2000-01-13 20:11:37 sandervl Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -286,7 +286,8 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
           win32wnd->MsgFormatFrame(&wp);
 
           //CB: todo: use result for WM_CALCVALIDRECTS
-          mapWin32ToOS2Rect(WinQueryWindow(hwnd,QW_PARENT),hwnd,win32wnd->getClientRectPtr(),(PRECTLOS2)&rect);
+//          mapWin32ToOS2Rect(WinQueryWindow(hwnd,QW_PARENT),hwnd,win32wnd->getClientRectPtr(),(PRECTLOS2)&rect);
+          mapWin32ToOS2Rect(win32wnd->getOS2FrameWindowHandle(), win32wnd->getClientRectPtr(), (PRECTLOS2)&rect);
 
           swpClient.hwnd = win32wnd->getOS2WindowHandle();
           swpClient.hwndInsertBehind = 0;
@@ -450,7 +451,9 @@ VOID FrameUpdateClient(Win32BaseWindow *win32wnd)
 
         win32wnd->MsgFormatFrame(NULL);
         //CB: todo: use result for WM_CALCVALIDRECTS
-        mapWin32ToOS2Rect(WinQueryWindow(win32wnd->getOS2FrameWindowHandle(),QW_PARENT),win32wnd->getOS2FrameWindowHandle(),win32wnd->getClientRectPtr(),(PRECTLOS2)&rect);
+//        mapWin32ToOS2Rect(WinQueryWindow(win32wnd->getOS2FrameWindowHandle(),QW_PARENT),win32wnd->getOS2FrameWindowHandle(),win32wnd->getClientRectPtr(),(PRECTLOS2)&rect);
+        mapWin32ToOS2Rect(win32wnd->getOS2FrameWindowHandle(), win32wnd->getClientRectPtr(), (PRECTLOS2)&rect);
+
 
         swpClient.hwnd = win32wnd->getOS2WindowHandle();
         swpClient.hwndInsertBehind = 0;

@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.11 2000-01-12 17:37:28 cbratschi Exp $ */
+/* $Id: dc.cpp,v 1.12 2000-01-13 20:11:36 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -678,7 +678,7 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
    //SvL: Hack for memory.exe (doesn't get repainted properly otherwise)
 //   isWindowOwnDC = (((hWindow == HWND_DESKTOP) ? FALSE : (wnd->isOwnDC() && wnd->getOwnDC()))
    isWindowOwnDC = (((hWindow == HWND_DESKTOP) ? FALSE : (wnd->isOwnDC()))
-                 && !(flags & DCX_CACHE_W));
+                 && !(flags & DCX_CACHE_W|DCX_WINDOW_W));
 
    if (isWindowOwnDC)
    {
@@ -813,7 +813,7 @@ int WIN32API ReleaseDC (HWND hwnd, HDC hdc)
       Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
       //SvL: Hack for memory.exe (doesn't get repainted properly otherwise)
 //      isOwnDC = wnd->isOwnDC() && wnd->getOwnDC();
-      isOwnDC = wnd->isOwnDC();
+      isOwnDC = wnd->isOwnDC() && (wnd->getOwnDC() == hdc);
    }
    if (isOwnDC)
       rc = TRUE;
@@ -838,11 +838,7 @@ BOOL WIN32API UpdateWindow (HWND hwnd)
        sendEraseBkgnd (wnd);
 #endif
 
-#if 1
    WinUpdateWindow(wnd->getOS2FrameWindowHandle());
-#else
-   wnd->MsgPaint(0);
-#endif
 
    return (TRUE);
 }
@@ -1270,6 +1266,7 @@ BOOL WIN32API ScrollWindow(HWND hwnd, int dx, int dy, const RECT *pScroll, const
     }
     dprintf(("ScrollWindow %x %d %d %x %x", hwnd, dx, dy, pScroll, pClip));
     mapWin32ToOS2Rect(window,window->getClientRectPtr(),(PRECTLOS2)&clientRect);
+#if 0
     //Rectangle could be relative to parent window, so fix this
     if(clientRect.yBottom != 0) {
         clientRect.yTop   -= clientRect.yBottom;
@@ -1279,6 +1276,7 @@ BOOL WIN32API ScrollWindow(HWND hwnd, int dx, int dy, const RECT *pScroll, const
         clientRect.xRight -= clientRect.xLeft;
         clientRect.xLeft   = 0;
     }
+#endif
     if(pScroll) {
          mapWin32ToOS2Rect(window,(RECT *)pScroll, (PRECTLOS2)&scrollRect);
          pScrollRect = &scrollRect;

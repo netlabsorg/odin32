@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.38 2000-01-13 13:54:53 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.39 2000-01-13 20:11:37 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -12,6 +12,8 @@
  *           1995 Alex Korobka
  *
  * TODO: Not thread/process safe
+ *
+ * NOTE: Client rectangle always relative to frame window; window rectangle in screen coordinates
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -638,7 +640,6 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
 
   // Subclass frame
   pOldFrameProc = FrameSubclassFrameWindow(this);
-  //if (isChild()) FrameSetBorderSize(this,TRUE);
 
   //preset rects
   rectWindow.left = cs->x;
@@ -646,6 +647,8 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
   rectWindow.top = cs->y;
   rectWindow.bottom = cs->y+cs->cy;
   rectClient = rectWindow; //dummy client rect
+  OffsetRect(&rectClient, -rectClient.left, -rectClient.top);
+
   if (getParent()) mapWin32Rect(getParent()->getOS2WindowHandle(),OSLIB_HWND_DESKTOP,&rectWindow);
   /* Send the WM_CREATE message
    * Perhaps we shouldn't allow width/height changes as well.
@@ -659,17 +662,22 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
 
   if (SendInternalMessageA(WM_NCCREATE,0,(LPARAM)cs))
   {
+        RECT tmpRect;
+
         //update rect
         rectWindow.left = cs->x;
         rectWindow.right = cs->x+cs->cx;
         rectWindow.top = cs->y;
         rectWindow.bottom = cs->y+cs->cy;
+        tmpRect = rectWindow;
         if (getParent()) mapWin32Rect(getParent()->getOS2WindowHandle(),OSLIB_HWND_DESKTOP,&rectWindow);
         OffsetRect(&rectWindow, maxPos.x - rectWindow.left, maxPos.y - rectWindow.top);
+
         rectClient = rectWindow;
-        if (getParent()) mapWin32Rect(OSLIB_HWND_DESKTOP,getParent()->getOS2WindowHandle(),&rectClient);
+        OffsetRect(&rectClient, -rectClient.left, -rectClient.top);
+
         //set the window size and update the client
-        SetWindowPos(hwndLinkAfter,rectClient.left,rectClient.top,rectClient.right-rectClient.left,rectClient.bottom-rectClient.top,SWP_NOACTIVATE | SWP_NOREDRAW | SWP_FRAMECHANGED);
+        SetWindowPos(hwndLinkAfter, tmpRect.left, tmpRect.top, tmpRect.right-tmpRect.left, tmpRect.bottom-tmpRect.top,SWP_NOACTIVATE | SWP_NOREDRAW | SWP_FRAMECHANGED);
         fNoSizeMsg = FALSE;
         if (cs->style & WS_VISIBLE) dwStyle |= WS_VISIBLE; //program could change position in WM_CREATE
         if( (SendInternalMessageA(WM_CREATE, 0, (LPARAM)cs )) != -1 )
@@ -678,7 +686,21 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
                 SendInternalMessageA(WM_SIZE, SIZE_RESTORED,
                                 MAKELONG(rectClient.right-rectClient.left,
                                          rectClient.bottom-rectClient.top));
-                SendInternalMessageA(WM_MOVE, 0, MAKELONG( rectClient.left, rectClient.top ) );
+                DWORD lParam;
+
+                if(getParent()) {//in parent coordinates
+                    POINT point;
+
+                    point.x = rectClient.left;
+                    point.y = rectClient.top;
+                    MapWindowPoints(getWindowHandle(), getParent()->getWindowHandle(), &point, 1);
+
+                    lParam = MAKELONG(point.x, point.y);
+                }
+                else {//in screen coordinates
+                    lParam = MAKELONG(rectWindow.left+rectClient.left, rectWindow.top+rectClient.top);
+                }
+                SendInternalMessageA(WM_MOVE, 0, lParam);
             }
 
             if( (getStyle() & WS_CHILD) && !(getExStyle() & WS_EX_NOPARENTNOTIFY) )
@@ -1035,7 +1057,7 @@ ULONG Win32BaseWindow::MsgNCPaint()
     ULONG rc;
     RECT client = rectClient;
 
-    mapWin32Rect(getParent() ? getParent()->getOS2WindowHandle():OSLIB_HWND_DESKTOP,OS2HwndFrame,&client);
+////    mapWin32Rect(getParent() ? getParent()->getOS2WindowHandle():OSLIB_HWND_DESKTOP,OS2HwndFrame,&client);
     if ((rect.left >= client.left) && (rect.left < client.right) &&
         (rect.right >= client.left) && (rect.right < client.right) &&
         (rect.top  >= client.top) && (rect.top < client.bottom) &&
@@ -1404,24 +1426,34 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 
     case WM_WINDOWPOSCHANGED:
     {
-
-/* undocumented SWP flags - from SDK 3.1 */
-#define SWP_NOCLIENTSIZE        0x0800
-#define SWP_NOCLIENTMOVE        0x1000
-
         PWINDOWPOS wpos = (PWINDOWPOS)lParam;
         WPARAM     wp   = SIZE_RESTORED;
 
         if (!(wpos->flags & SWP_NOMOVE) && !(wpos->flags & SWP_NOCLIENTMOVE))
-            SendInternalMessageA(WM_MOVE, 0, MAKELONG(rectClient.left, rectClient.top));
+        {
+            DWORD lParam;
 
+            if(getParent()) {//in parent coordinates
+                POINT point;
+
+                point.x = rectClient.left;
+                point.y = rectClient.top;
+                MapWindowPoints(getWindowHandle(), getParent()->getWindowHandle(), &point, 1);
+
+                lParam = MAKELONG(point.x, point.y);
+            }
+            else {//in screen coordinates
+                lParam = MAKELONG(rectWindow.left+rectClient.left, rectWindow.top+rectClient.top);
+            }
+            SendInternalMessageA(WM_MOVE, 0, lParam);
+        }
         if (!(wpos->flags & SWP_NOSIZE) && !(wpos->flags & SWP_NOCLIENTSIZE))
         {
             if (dwStyle & WS_MAXIMIZE) wp = SIZE_MAXIMIZED;
             else if (dwStyle & WS_MINIMIZE) wp = SIZE_MINIMIZED;
 
             SendInternalMessageA(WM_SIZE, wp, MAKELONG(rectClient.right  - rectClient.left,
-                                               rectClient.bottom - rectClient.top));
+                                                       rectClient.bottom - rectClient.top));
         }
         return 0;
     }
@@ -1938,7 +1970,7 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
  HWND hWinAfter;
 
     dprintf(("ShowWindow %x %x", getWindowHandle(), nCmdShow));
-#if 1
+
     if (flags & WIN_NEED_SIZE)
     {
         /* should happen only in CreateWindowEx() */
@@ -1954,20 +1986,22 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
         SendInternalMessageA(WM_SIZE, wParam,
                      MAKELONG(rectClient.right-rectClient.left,
                               rectClient.bottom-rectClient.top));
-        SendInternalMessageA(WM_MOVE, 0, MAKELONG( rectClient.left, rectClient.top ) );
-    }
-#else
-    if(fFirstShow) {
-        if(isFrameWindow() && IS_OVERLAPPED(getStyle()) && !isChild()) {
-                SendInternalMessageA(WM_SIZE, SIZE_RESTORED,
-                                MAKELONG(rectClient.right-rectClient.left,
-                                         rectClient.bottom-rectClient.top));
-                SendInternalMessageA(WM_MOVE, 0, MAKELONG( rectClient.left, rectClient.top ) );
+        DWORD lParam;
 
+        if(getParent()) {//in parent coordinates
+            POINT point;
+
+            point.x = rectClient.left;
+            point.y = rectClient.top;
+            MapWindowPoints(getWindowHandle(), getParent()->getWindowHandle(), &point, 1);
+
+            lParam = MAKELONG(point.x, point.y);
         }
-        fFirstShow = FALSE;
+        else {//in screen coordinates
+            lParam = MAKELONG(rectWindow.left+rectClient.left, rectWindow.top+rectClient.top);
+        }
+        SendInternalMessageA(WM_MOVE, 0, lParam);
     }
-#endif
     switch(nCmdShow)
     {
     case SW_SHOW:

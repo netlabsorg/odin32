@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.10 2000-01-13 13:54:53 sandervl Exp $ */
+/* $Id: scroll.cpp,v 1.11 2000-01-13 20:11:37 sandervl Exp $ */
 /*
  * Scrollbar control
  *
@@ -124,8 +124,6 @@ static BOOL SCROLL_GetScrollBarRect( HWND hwnd, INT nBar, RECT *lprect,
 
         if (!win32wnd) return FALSE;
         rectClient = *win32wnd->getClientRectPtr();
-	if(win32wnd->getParent())
-        	mapWin32Rect(win32wnd->getParent() ? win32wnd->getParent()->getOS2WindowHandle():OSLIB_HWND_DESKTOP,win32wnd->getOS2FrameWindowHandle(),&rectClient);
         lprect->left   = rectClient.left;
         lprect->top    = rectClient.bottom;
         lprect->right  = rectClient.right;
@@ -147,8 +145,6 @@ static BOOL SCROLL_GetScrollBarRect( HWND hwnd, INT nBar, RECT *lprect,
 
         if (!win32wnd) return FALSE;
         rectClient = *win32wnd->getClientRectPtr();
-	if(win32wnd->getParent())
-        	mapWin32Rect(win32wnd->getParent() ? win32wnd->getParent()->getOS2WindowHandle():OSLIB_HWND_DESKTOP,win32wnd->getOS2FrameWindowHandle(),&rectClient);
         lprect->left   = rectClient.right;
         lprect->top    = rectClient.top;
         lprect->right  = lprect->left+GetSystemMetrics(SM_CXVSCROLL);
@@ -1472,7 +1468,6 @@ BOOL WINAPI ShowScrollBar(
                     BOOL fShow  /* [I] TRUE = show, FALSE = hide  */)
 {
     Win32BaseWindow *win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
-//    BOOL fShowH = (nBar == SB_HORZ) ? 0:fShow,fShowV = (nBar == SB_VERT) ? 0:fShow;
     BOOL fShowH = (nBar == SB_HORZ) ? fShow : 0;
     BOOL fShowV = (nBar == SB_VERT) ? fShow : 0;
 

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.26 2000-01-13 13:54:54 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.27 2000-01-13 20:11:38 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -205,6 +205,7 @@ Win32BaseWindow *getParent();
          HWND   SetActiveWindow();
          HWND   GetParent();
          HWND   SetParent(HWND hwndNewParent);
+
          BOOL   IsChild(HWND hwndParent);
          HWND   GetTopWindow();
 Win32BaseWindow *GetTopParent();

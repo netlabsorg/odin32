@@ -1,4 +1,4 @@
-/* $Id: win32wbasepos.cpp,v 1.5 2000-01-11 17:34:44 cbratschi Exp $ */
+/* $Id: win32wbasepos.cpp,v 1.6 2000-01-13 20:11:39 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (nonclient/position methods)
  *
@@ -133,16 +133,33 @@ LONG Win32BaseWindow::SendNCCalcSize(BOOL calcValidRect, RECT *newWindowRect,
    {
         winposCopy = *winpos;
         params.rgrc[1] = *oldWindowRect;
+#if 0
+        if(getParent()) {//in parent coordinates
+            MapWindowPoints(getWindowHandle(), getParent()->getWindowHandle(), (POINT *)oldClientRect, 2);
+        }
+        else {//in screen coordinates (just add window rectangle origin (already in screen coordinates))
+            OffsetRect(oldClientRect, rectWindow.left, rectWindow.top);
+        }
+#endif
         params.rgrc[2] = *oldClientRect;
         params.lppos = &winposCopy;
    }
-   result = SendInternalMessageA(WM_NCCALCSIZE, calcValidRect,
-                         (LPARAM)&params );
+   result = SendInternalMessageA(WM_NCCALCSIZE, calcValidRect, (LPARAM)&params );
    if (calcValidRect)
    {
       /* If the application send back garbage, ignore it */
       if (params.rgrc[2].left <= params.rgrc[2].right && params.rgrc[2].top <= params.rgrc[2].bottom)
-         *newClientRect = params.rgrc[2];
+      {
+        *newClientRect = params.rgrc[2];
+#if 0
+        if(getParent()) {//in parent coordinates
+            MapWindowPoints(getParent()->getWindowHandle(), getWindowHandle(), (POINT *)newClientRect, 2);
+        }
+        else {//in screen coordinates (just add window rectangle origin (already in screen coordinates))
+            OffsetRect(newClientRect, -rectWindow.left, -rectWindow.top);
+        }
+#endif
+      }
       else
         SetRectEmpty(newClientRect);
    }
