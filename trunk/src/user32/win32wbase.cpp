@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.328 2002-06-09 19:53:32 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.329 2002-07-30 18:20:42 achimha Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -133,6 +133,7 @@ Win32BaseWindow::Win32BaseWindow(CREATESTRUCTA *lpCreateStructA, ATOM classAtom,
 {
     Init();
     this->isUnicode = isUnicode;
+    // call member function
     CreateWindowExA(lpCreateStructA, classAtom);
 }
 //******************************************************************************
@@ -168,6 +169,8 @@ void Win32BaseWindow::Init()
   hSysMenu         = 0;
   Win32Hwnd        = 0;
 
+  // allocate a Win32 HWND, return it in Win32Hwnd and associate object
+  // pointer with it
   if(HwAllocateWindowHandle(&Win32Hwnd, (ULONG)this) == FALSE)
   {
         dprintf(("Win32BaseWindow::Init HwAllocateWindowHandle failed!!"));
@@ -415,8 +418,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
        /* Never believe Microsoft's documentation... CreateWindowEx doc says
         * that if an overlapped window is created with WS_VISIBLE style bit
         * set and the x parameter is set to CW_USEDEFAULT, the system ignores
-        * the y parameter. However, disassembling NT implementation (WIN32K.SYS)
-        * reveals that
+        * the y parameter. However, looking at NT reveals that
         *
         * 1) not only if checks for CW_USEDEFAULT but also for CW_USEDEFAULT16
         * 2) it does not ignore the y parameter as the docs claim; instead, it
@@ -547,11 +549,9 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         ExitProcess(666);
         return FALSE;
     }
-
     teb->o.odin.newWindow = (ULONG)this;
 
     DWORD dwOSWinStyle, dwOSFrameStyle;
-
     OSLibWinConvertStyle(dwStyle,dwExStyle,&dwOSWinStyle, &dwOSFrameStyle);
 
     OS2Hwnd = OSLibWinCreateWindow((getParent()) ? getParent()->getOS2WindowHandle() : OSLIB_HWND_DESKTOP,
