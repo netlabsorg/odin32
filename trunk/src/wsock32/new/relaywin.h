@@ -1,4 +1,4 @@
-/* $Id: relaywin.h,v 1.3 1999-12-02 15:22:05 achimha Exp $ */
+/* $Id: relaywin.h,v 1.4 1999-12-02 21:35:29 phaller Exp $ */
 
 /*
  *
@@ -36,8 +36,15 @@
  *****************************************************************************/
 
 /* these are the request types so we can interpret the messages and convert the results */
-#define ASYNCREQUEST_SELECT 0
-#define ASYNCREQUEST_GETHOSTBYNAME 1
+
+#define  ASYNCREQUEST_GETHOSTBYNAME     0
+#define  ASYNCREQUEST_GETHOSTBYADDR     1
+#define  ASYNCREQUEST_GETSERVBYNAME     2
+#define  ASYNCREQUEST_GETSERVBYPORT     3
+#define  ASYNCREQUEST_GETPROTOBYNAME    4
+#define  ASYNCREQUEST_GETPROTOBYNUMBER  5
+#define  ASYNCREQUEST_SELECT            6
+
 
 typedef struct tagHwndMsgPair
 {
@@ -48,18 +55,32 @@ typedef struct tagHwndMsgPair
   PVOID pvUserData2; /* request specific data field */
 } HWNDMSGPAIR, *PHWNDMSGPAIR;
 
+
 /*****************************************************************************
  * Prototypes                                                                *
  *****************************************************************************/
 
-ULONG RelayAlloc(HWND hwnd, ULONG ulMsg, ULONG ulRequestType,
-                 PVOID pvUserData1 = 0, PVOID pvUserData2 = 0);
-ULONG        RelayFree      (ULONG ulID);
-ULONG        RelayFreeByHwnd(HWND  hwnd);
-PHWNDMSGPAIR RelayQuery     (ULONG ulID);
-MRESULT EXPENTRY RelayWindowProc(HWND  hwnd, ULONG  ulMsg, MPARAM mp1, MPARAM mp2);
-HWND         RelayInitialize(HWND  hwndPost);
-BOOL         RelayTerminate (HWND  hwndRelay);
+ULONG            RelayAlloc     (HWND  hwnd,
+                                 ULONG ulMsg, 
+                                 ULONG ulRequestType,
+                                 BOOL  fSingleRequestPerWindow,
+                                 PVOID pvUserData1 = 0, 
+                                 PVOID pvUserData2 = 0);
+
+ULONG            RelayFree      (ULONG ulID);
+
+ULONG            RelayFreeByHwnd(HWND  hwnd);
+
+PHWNDMSGPAIR     RelayQuery     (ULONG ulID);
+
+MRESULT EXPENTRY RelayWindowProc(HWND   hwnd,
+                                 ULONG  ulMsg, 
+                                 MPARAM mp1, 
+                                 MPARAM mp2);
+
+HWND             RelayInitialize(HWND  hwndPost);
+
+BOOL             RelayTerminate (HWND  hwndRelay);
 
 
 #endif /* _RELAYWIN_H_ */

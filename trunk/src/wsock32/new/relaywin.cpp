@@ -1,4 +1,4 @@
-/* $Id: relaywin.cpp,v 1.7 1999-12-02 16:39:46 achimha Exp $ */
+/* $Id: relaywin.cpp,v 1.8 1999-12-02 21:35:29 phaller Exp $ */
 
 /*
  *
@@ -74,8 +74,12 @@ BOOL __stdcall PostMessageA(HWND,UINT,ULONG,ULONG);
  * Author    : Patrick Haller [Tue, 1999/11/30 23:00]
  *****************************************************************************/
 
-ULONG RelayAlloc(HWND hwnd, ULONG ulMsg, ULONG ulRequestType,
-                 PVOID pvUserData1, PVOID pvUserData2)
+ULONG RelayAlloc(HWND  hwnd,
+                 ULONG ulMsg, 
+                 ULONG ulRequestType,
+                 BOOL  fSingleRequestPerWindow,
+                 PVOID pvUserData1, 
+                 PVOID pvUserData2)
 {
   ULONG ulCounter;
 
@@ -83,15 +87,17 @@ ULONG RelayAlloc(HWND hwnd, ULONG ulMsg, ULONG ulRequestType,
        ulCounter < MAX_ASYNC_SOCKETS;
        ulCounter++)
     if ( (arrHwndMsgPair[ulCounter].hwnd == 0) ||    // slot free?
-         (arrHwndMsgPair[ulCounter].hwnd == hwnd) )  // same window?
+         ( (fSingleRequestPerWindow == TRUE) &&      // more than one request
+                                                     // per window ?
+           (arrHwndMsgPair[ulCounter].hwnd == hwnd) ) ) // same window?
     {
       // occupy slot
-      arrHwndMsgPair[ulCounter].hwnd  = hwnd;
-      arrHwndMsgPair[ulCounter].ulMsg = ulMsg;
+      arrHwndMsgPair[ulCounter].hwnd          = hwnd;
+      arrHwndMsgPair[ulCounter].ulMsg         = ulMsg;
       arrHwndMsgPair[ulCounter].ulRequestType = ulRequestType;
-      arrHwndMsgPair[ulCounter].pvUserData1 = pvUserData1;
-      arrHwndMsgPair[ulCounter].pvUserData2 = pvUserData2;
-      return ulCounter; // return "id"
+      arrHwndMsgPair[ulCounter].pvUserData1   = pvUserData1;
+      arrHwndMsgPair[ulCounter].pvUserData2   = pvUserData2;
+      return ulCounter + 1; // return "id"
     }
 
   return -1; // not found
@@ -112,11 +118,11 @@ ULONG RelayAlloc(HWND hwnd, ULONG ulMsg, ULONG ulRequestType,
 
 ULONG RelayFree(ULONG ulID)
 {
-  if ( (ulID < 0) ||  // check range
-       (ulID >= MAX_ASYNC_SOCKETS) )
+  if ( (ulID < 1) ||  // check range
+       (ulID > MAX_ASYNC_SOCKETS) )
     return -1; // error
 
-  arrHwndMsgPair[ulID].hwnd = 0; // mark free
+  arrHwndMsgPair[ulID-1].hwnd = 0; // mark free
 
   return 0; // OK
 }
@@ -165,14 +171,14 @@ ULONG RelayFreeByHwnd(HWND hwnd)
 
 PHWNDMSGPAIR RelayQuery(ULONG ulID)
 {
-  if ( (ulID < 0) ||  // check range
-       (ulID >= MAX_ASYNC_SOCKETS) )
+  if ( (ulID < 1) ||  // check range
+       (ulID > MAX_ASYNC_SOCKETS) )
     return NULL; // error
   
-  if (arrHwndMsgPair[ulID].hwnd == 0)
+  if (arrHwndMsgPair[ulID-1].hwnd == 0)
     return NULL; // error, free entry
   else
-    return (&arrHwndMsgPair[ulID]);
+    return (&arrHwndMsgPair[ulID-1]);
 }
 
 
@@ -194,6 +200,7 @@ MRESULT EXPENTRY RelayWindowProc(HWND   hwnd,
                                  MPARAM mp2)
 {
   PHWNDMSGPAIR pHM;
+  int          rc;
 
   // termination flag handling?
   // if (fTerminate)
@@ -202,41 +209,184 @@ MRESULT EXPENTRY RelayWindowProc(HWND   hwnd,
   pHM = RelayQuery(ulMsg);                          // find registered message
   if (pHM != NULL)                                  // message pair found
   {
+    rc = SHORT1FROMMP(mp2);                /* asynchronous operation result */
+    
     /* check request type for special handling */
     switch (pHM->ulRequestType)
     {
+      /**********
+       * SELECT *
+       **********/
       case ASYNCREQUEST_SELECT:
       {
         dprintf(("WSOCK32:RelayWindowProc, AsyncSelect notification\n"));
         break;
       }
+      
+      
+      /*****************
+       * GETHOSTBYNAME *
+       *****************/
       case ASYNCREQUEST_GETHOSTBYNAME:
       {
         dprintf(("WSOCK32:RelayWindowProc, Converting hostent for "
                  "WSAAyncGetHostByName\n"));
-        /* we need to convert the hostent structure here */
-        Whostent *WinHostent = (Whostent*)pHM->pvUserData1;
-        hostent *OS2Hostent = (hostent*)pHM->pvUserData1;
-        short h_addrtype = (short)OS2Hostent->h_addrtype;
-        WinHostent->h_addrtype = h_addrtype;
-        short h_length = (short)OS2Hostent->h_length;
-        WinHostent->h_length = h_length;
-        char **h_addr_list = OS2Hostent->h_addr_list;
-        WinHostent->h_addr_list = h_addr_list;
-  //TODO: the size of OS/2 hostent is 4 bytes bigger so the original buffer *might* be too small
-
+        
+        /* is there a valid result ? */
+        if (rc == 0)
+        {
+          /* we need to convert the hostent structure here */
+          Whostent *WinHostent             = (Whostent*)pHM->pvUserData1;
+          hostent  *OS2Hostent             = (hostent*)pHM->pvUserData1;
+          
+          short    h_addrtype              = (short)OS2Hostent->h_addrtype;
+                   WinHostent->h_addrtype  = h_addrtype;
+          short    h_length                = (short)OS2Hostent->h_length;
+                   WinHostent->h_length    = h_length;
+          char     **h_addr_list           = OS2Hostent->h_addr_list;
+                   WinHostent->h_addr_list = h_addr_list;
+          //TODO: the size of OS/2 hostent is 4 bytes bigger 
+          //      so the original buffer *might* be too small
+        }
+        break;
+      }
+      
+      
+      /*****************
+       * GETHOSTBYADDR *
+       *****************/
+      case ASYNCREQUEST_GETHOSTBYADDR:
+      {
+        dprintf(("WSOCK32:RelayWindowProc, Converting hostent for "
+                 "WSAAyncGetHostByAddr\n"));
+        
+        if (rc == 0)
+        {
+          /* we need to convert the hostent structure here */
+          Whostent *WinHostent             = (Whostent*)pHM->pvUserData1;
+          hostent  *OS2Hostent             = (hostent*)pHM->pvUserData1;
+          
+          short    h_addrtype              = (short)OS2Hostent->h_addrtype;
+                   WinHostent->h_addrtype  = h_addrtype;
+          short    h_length                = (short)OS2Hostent->h_length;
+                   WinHostent->h_length    = h_length;
+          char     **h_addr_list           = OS2Hostent->h_addr_list;
+                   WinHostent->h_addr_list = h_addr_list;
+          //TODO: the size of OS/2 hostent is 4 bytes bigger 
+          //      so the original buffer *might* be too small
+        }
+        break;
+      }      
+      
+      
+      /*****************
+       * GETSERVBYNAME *
+       *****************/
+      case ASYNCREQUEST_GETSERVBYNAME:
+      {
+        dprintf(("WSOCK32:RelayWindowProc, Converting servent for "
+                 "WSAAyncGetServByName\n"));
+        
+        if (rc == 0)
+        {
+          /* we need to convert the servent structure here */
+          Wservent *WinServent             = (Wservent*)pHM->pvUserData1;
+          servent  *OS2Servent             = (servent*)pHM->pvUserData1;
+          
+          WinServent->s_port  = OS2Servent->s_port;
+          WinServent->s_proto = OS2Servent->s_proto;
+          //TODO: the size of OS/2 servent is 2 bytes bigger
+          //      so the original buffer *might* be too small
+        }
+        break;
+      }            
+      
+      
+      /*****************
+       * GETSERVBYPORT *
+       *****************/
+      case ASYNCREQUEST_GETSERVBYPORT:
+      {
+        dprintf(("WSOCK32:RelayWindowProc, Converting servent for "
+                 "WSAAyncGetServByPort\n"));
+        
+        if (rc == 0)
+        {
+          /* we need to convert the servent structure here */
+          Wservent *WinServent             = (Wservent*)pHM->pvUserData1;
+          servent  *OS2Servent             = (servent*)pHM->pvUserData1;
+          
+          WinServent->s_port  = OS2Servent->s_port;
+          WinServent->s_proto = OS2Servent->s_proto;
+          //TODO: the size of OS/2 servent is 2 bytes bigger
+          //      so the original buffer *might* be too small
+        }
+        break;
+      }            
+      
+      
+      /******************
+       * GETPROTOBYNAME *
+       ******************/
+      case ASYNCREQUEST_GETPROTOBYNAME:
+      {
+        dprintf(("WSOCK32:RelayWindowProc, Converting protoent for "
+                 "WSAAyncGetProtoByName\n"));
+        
+        if (rc == 0)
+        {
+          /* we need to convert the protoent structure here */
+          Wprotoent *WinProtoent             = (Wprotoent*)pHM->pvUserData1;
+          protoent  *OS2Protoent             = (protoent*)pHM->pvUserData1;
+          
+          WinProtoent->p_proto = OS2Protoent->p_proto;
+          
+          //TODO: the size of OS/2 hostent is 2 bytes bigger
+          //      so the original buffer *might* be too small
+        }
+        break;
+      }                  
+      
+      
+      /********************
+       * GETPROTOBYNUMBER *
+       ********************/
+      case ASYNCREQUEST_GETPROTOBYNUMBER:
+      {
+        dprintf(("WSOCK32:RelayWindowProc, Converting protoent for "
+                 "WSAAyncGetProtoByNumber\n"));
+        
+        if (rc == 0)
+        {
+          /* we need to convert the protoent structure here */
+          Wprotoent *WinProtoent             = (Wprotoent*)pHM->pvUserData1;
+          protoent  *OS2Protoent             = (protoent*)pHM->pvUserData1;
+          
+          WinProtoent->p_proto = OS2Protoent->p_proto;
+          
+          //TODO: the size of OS/2 hostent is 2 bytes bigger
+          //      so the original buffer *might* be too small
+        }
         break;
       }
     }
-
-    dprintf(("WSOCK32:RelayWinProc, Posting %d to %d\n", pHM->ulMsg, pHM->hwnd));
+    
+    
+    dprintf(("WSOCK32:RelayWinProc, Posting hwnd=%08xh, msg=%08xh, w=%08xh, l=%08xh\n",
+             pHM->hwnd,
+             pHM->ulMsg,
+             mp1,
+             mp2));
+    
     PostMessageA(pHM->hwnd,
                  pHM->ulMsg,
                  (ULONG)mp1,
                  (ULONG)mp2);
 
-    // if socket close, free entry
-    //@@@PH
+    // if socket close or non-select call, free entry
+    // @@@PH
+    if (pHM->ulRequestType != ASYNCREQUEST_SELECT)
+      RelayFree(pHM->ulMsg);
 
     return FALSE;                                   // OK, message sent
   }
