@@ -1,4 +1,4 @@
-/* $Id: commctrl.h,v 1.9 1999-07-10 17:16:43 achimha Exp $ */
+/* $Id: commctrl.h,v 1.10 1999-08-14 17:23:23 achimha Exp $ */
 /*
  * Common controls definitions
  */
@@ -7,6 +7,7 @@
 #define __WINE_COMMCTRL_H
 
 #include "windef.h"
+#include "winbase.h"
 #include "winuser.h"
 #include "imagelist.h"
 //#include "prsht.h"
@@ -151,7 +152,7 @@ typedef struct tagNMTOOLTIPSCREATED
 #define CDRF_NOTIFYITEMDRAW     0x00000020
 #define CDRF_NOTIFYSUBITEMDRAW  0x00000020
 #define CDRF_NOTIFYPOSTERASE    0x00000040
-/* #define CDRF_NOTIFYITEMERASE    0x00000080          obsolete ? */
+#define CDRF_NOTIFYITEMERASE    0x00000080         /* obsolete ??? */
 
 
 /* drawstage flags */
@@ -494,6 +495,25 @@ BOOL     WINAPI ImageList_Write(HIMAGELIST, LPSTREAM);
 #define FLATSB_CLASSA       "flatsb_class32"
 #define FLATSB_CLASSW       L"flatsb_class32"
 #define FLATSB_CLASS          WINELIB_NAME_AW(FLATSB_CLASS)
+
+#define WSB_PROP_CYVSCROLL     0x00000001L
+#define WSB_PROP_CXHSCROLL     0x00000002L
+#define WSB_PROP_CYHSCROLL     0x00000004L
+#define WSB_PROP_CXVSCROLL     0x00000008L
+#define WSB_PROP_CXHTHUMB      0x00000010L
+#define WSB_PROP_CYVTHUMB      0x00000020L
+#define WSB_PROP_VBKGCOLOR     0x00000040L
+#define WSB_PROP_HBKGCOLOR     0x00000080L
+#define WSB_PROP_VSTYLE        0x00000100L
+#define WSB_PROP_HSTYLE        0x00000200L
+#define WSB_PROP_WINSTYLE      0x00000400L
+#define WSB_PROP_PALETTE       0x00000800L
+#define WSB_PROP_MASK          0x00000FFFL
+
+#define FSB_REGULAR_MODE       0
+#define FSB_ENCARTA_MODE       1
+#define FSB_FLAT_MODE          2
+
 
 BOOL  WINAPI FlatSB_EnableScrollBar(HWND, INT, UINT);
 BOOL  WINAPI FlatSB_ShowScrollBar(HWND, INT, BOOL);
@@ -1496,6 +1516,7 @@ typedef struct _RB_HITTESTINFO
 #define TBS_FIXEDLENGTH         0x0040
 #define TBS_NOTHUMB             0x0080
 #define TBS_TOOLTIPS            0x0100
+#define TBS_REVERSED            0x0200
 
 #define TBTS_TOP                0
 #define TBTS_LEFT               1
@@ -1685,8 +1706,33 @@ typedef struct
 #define TVM_UNKNOWN36           (TV_FIRST+36)
 #define TVM_SETINSERTMARKCOLOR  (TV_FIRST+37)
 #define TVM_GETINSERTMARKCOLOR  (TV_FIRST+38)
+#define TVM_GETITEMSTATE        (TV_FIRST+39)
+#define TVM_SETLINECOLOR        (TV_FIRST+40)
+#define TVM_GETLINECOLOR        (TV_FIRST+41)
 #define TVM_SETUNICODEFORMAT    CCM_SETUNICODEFORMAT
 #define TVM_GETUNICODEFORMAT    CCM_GETUNICODEFORMAT
+
+#define TreeView_GetItemState(hwndTV, hti, mask) \
+   (UINT)SendMessageA((hwndTV), TVM_GETITEMSTATE, (WPARAM)(hti), (LPARAM)(mask))
+#define TreeView_GetCheckState(hwndTV, hti) \
+   ((((UINT)(SendMessageA((hwndTV), TVM_GETITEMSTATE, (WPARAM)(hti),  \
+                     TVIS_STATEIMAGEMASK))) >> 12) -1)
+#define TreeView_SetLineColor(hwnd, clr) \
+    (COLORREF)SendMessageA((hwnd), TVM_SETLINECOLOR, 0, (LPARAM)(clr))
+#define TreeView_GetLineColor(hwnd) \
+    (COLORREF)SendMessageA((hwnd), TVM_GETLINECOLOR, 0, 0)
+#define TreeView_SetItemState(hwndTV, hti, data, _mask) \
+{ TVITEM _TVi; \
+  _TVi.mask = TVIF_STATE; \
+  _TVi.hItem = hti; \
+  _TVi.stateMask = _mask; \
+  _TVi.state = data; \
+  SendMessageA((hwndTV), TVM_SETITEM, 0, (LPARAM)(TV_ITEM *)&_TVi); \
+}
+
+
+
+
 
 #define TVN_FIRST               (0U-400U)
 #define TVN_LAST                (0U-499U)
@@ -1985,14 +2031,12 @@ typedef struct tagNMTVGETINFOTIPW
 } NMTVGETINFOTIPW, *LPNMTVGETINFOTIPW;
 
 
-
-
-
-
-
 #define TreeView_InsertItemA(hwnd, phdi) \
   (INT)SendMessageA((hwnd), TVM_INSERTITEMA, 0, \
                             (LPARAM)(LPTVINSERTSTRUCTA)(phdi))
+#define TreeView_InsertItemW(hwnd,phdi) \
+  (INT)SendMessageW((hwnd), TVM_INSERTITEMW, 0, \
+                            (LPARAM)(LPTVINSERTSTRUCTW)(phdi))
 #define TreeView_DeleteItem(hwnd, hItem) \
   (BOOL)SendMessageA((hwnd), TVM_DELETEITEM, 0, (LPARAM)(HTREEITEM)(hItem))
 #define TreeView_DeleteAllItems(hwnd) \
@@ -2188,12 +2232,6 @@ typedef struct tagNMTVGETINFOTIPW
 #define LVSIL_NORMAL            0
 #define LVSIL_SMALL             1
 #define LVSIL_STATE             2
-
-#define LVIS_FOCUSED            0x0001
-#define LVIS_SELECTED           0x0002
-#define LVIS_CUT                0x0004
-#define LVIS_DROPHILITED        0x0008
-#define LVIS_ACTIVATING         0x0020
 
 #define LVFI_PARAM              0X0001
 #define LVFI_STRING             0X0002
@@ -2682,77 +2720,62 @@ typedef INT (*PFNLVCOMPARE)(LPARAM, LPARAM, LPARAM);
 
 /* TabCtrl Macros */
 #define TabCtrl_GetImageList(hwnd) \
-                                    (HIMAGELIST)SNDMSG((hwnd), TCM_GETIMAGELIST, 0, 0L)
-
+    (HIMAGELIST)SendMessageA((hwnd), TCM_GETIMAGELIST, 0, 0L)
 #define TabCtrl_SetImageList(hwnd, himl) \
-                                    (HIMAGELIST)SNDMSG((hwnd), TCM_SETIMAGELIST, 0, (LPARAM)(UINT)(HIMAGELIST)(himl))
-
+    (HIMAGELIST)SendMessageA((hwnd), TCM_SETIMAGELIST, 0, (LPARAM)(UINT)(HIMAGELIST)(himl))
 #define TabCtrl_GetItemCount(hwnd) \
-                                    (int)SNDMSG((hwnd), TCM_GETITEMCOUNT, 0, 0L)
-
-#define TabCtrl_GetItem(hwnd, iItem, pitem) \
-                                    (BOOL)SNDMSG((hwnd), TCM_GETITEM, (WPARAM)(int)iItem, (LPARAM)(TC_ITEM FAR*)(pitem))
-
-#define TabCtrl_SetItem(hwnd, iItem, pitem) \
-                                    (BOOL)SNDMSG((hwnd), TCM_SETITEM, (WPARAM)(int)iItem, (LPARAM)(TC_ITEM FAR*)(pitem))
-
-#define TabCtrl_InsertItem(hwnd, iItem, pitem)   \
-                                    (int)SNDMSG((hwnd), TCM_INSERTITEM, (WPARAM)(int)iItem, (LPARAM)(const TC_ITEM FAR*)(pitem))
-
+    (int)SendMessageA((hwnd), TCM_GETITEMCOUNT, 0, 0L)
+#define TabCtrl_GetItemA(hwnd, iItem, pitem) \
+    (BOOL)SendMessageA((hwnd), TCM_GETITEM, (WPARAM)(int)iItem, (LPARAM)(TC_ITEM *)(pitem))
+#define TabCtrl_GetItemW(hwnd, iItem, pitem) \
+    (BOOL)SendMessageW((hwnd), TCM_GETITEM, (WPARAM)(int)iItem, (LPARAM)(TC_ITEM *)(pitem))
+#define TabCtrl_GetItem WINELIB_NAME_AW(TabCtrl_GetItem)
+#define TabCtrl_SetItemA(hwnd, iItem, pitem) \
+    (BOOL)SendMessageA((hwnd), TCM_SETITEM, (WPARAM)(int)iItem, (LPARAM)(TC_ITEM *)(pitem))
+#define TabCtrl_SetItemW(hwnd, iItem, pitem) \
+    (BOOL)SendMessageW((hwnd), TCM_SETITEM, (WPARAM)(int)iItem, (LPARAM)(TC_ITEM *)(pitem))
+#define TabCtrl_SetItem WINELIB_NAME_AW(TabCtrl_GetItem)
+#define TabCtrl_InsertItemA(hwnd, iItem, pitem)   \
+    (int)SendMessageA((hwnd), TCM_INSERTITEM, (WPARAM)(int)iItem, (LPARAM)(const TC_ITEM *)(pitem))
+#define TabCtrl_InsertItemW(hwnd, iItem, pitem)   \
+    (int)SendMessageW((hwnd), TCM_INSERTITEM, (WPARAM)(int)iItem, (LPARAM)(const TC_ITEM *)(pitem))
+#define TabCtrl_InsertItem WINELIB_NAME_AW(TabCtrl_InsertItem)
 #define TabCtrl_DeleteItem(hwnd, i) \
-                                    (BOOL)SNDMSG((hwnd), TCM_DELETEITEM, (WPARAM)(int)(i), 0L)
-
+    (BOOL)SendMessageA((hwnd), TCM_DELETEITEM, (WPARAM)(int)(i), 0L)
 #define TabCtrl_DeleteAllItems(hwnd) \
-                                    (BOOL)SNDMSG((hwnd), TCM_DELETEALLITEMS, 0, 0L)
-
+    (BOOL)SendMessageA((hwnd), TCM_DELETEALLITEMS, 0, 0L)
 #define TabCtrl_GetItemRect(hwnd, i, prc) \
-                                    (BOOL)SNDMSG((hwnd), TCM_GETITEMRECT, (WPARAM)(int)(i), (LPARAM)(RECT FAR*)(prc))
-
+    (BOOL)SendMessageA((hwnd), TCM_GETITEMRECT, (WPARAM)(int)(i), (LPARAM)(RECT *)(prc))
 #define TabCtrl_GetCurSel(hwnd) \
-                                    (int)::SNDMSG((hwnd), TCM_GETCURSEL, 0, 0)
-
+    (int)SendMessageA((hwnd), TCM_GETCURSEL, 0, 0)
 #define TabCtrl_SetCurSel(hwnd, i) \
-                                    (int)SNDMSG((hwnd), TCM_SETCURSEL, (WPARAM)i, 0)
-
+    (int)SendMessageA((hwnd), TCM_SETCURSEL, (WPARAM)i, 0)
 #define TabCtrl_HitTest(hwndTC, pinfo) \
-                                    (int)SNDMSG((hwndTC), TCM_HITTEST, 0, (LPARAM)(TC_HITTESTINFO FAR*)(pinfo))
-
+    (int)SendMessageA((hwndTC), TCM_HITTEST, 0, (LPARAM)(TC_HITTESTINFO *)(pinfo))
 #define TabCtrl_SetItemExtra(hwndTC, cb) \
-                                    (BOOL)SNDMSG((hwndTC), TCM_SETITEMEXTRA, (WPARAM)(cb), 0L)
-
+    (BOOL)SendMessageA((hwndTC), TCM_SETITEMEXTRA, (WPARAM)(cb), 0L)
 #define TabCtrl_AdjustRect(hwnd, bLarger, prc) \
-                                    (int)SNDMSG(hwnd, TCM_ADJUSTRECT, (WPARAM)(BOOL)bLarger, (LPARAM)(RECT FAR *)prc)
-
+    (int)SendMessageA(hwnd, TCM_ADJUSTRECT, (WPARAM)(BOOL)bLarger, (LPARAM)(RECT *)prc)
 #define TabCtrl_SetItemSize(hwnd, x, y) \
-                                    (DWORD)SNDMSG((hwnd), TCM_SETITEMSIZE, 0, MAKELPARAM(x,y))
-
+    (DWORD)SendMessageA((hwnd), TCM_SETITEMSIZE, 0, MAKELPARAM(x,y))
 #define TabCtrl_RemoveImage(hwnd, i) \
-                                        (void)SNDMSG((hwnd), TCM_REMOVEIMAGE, i, 0L)
-
+    (void)SendMessageA((hwnd), TCM_REMOVEIMAGE, i, 0L)
 #define TabCtrl_SetPadding(hwnd,  cx, cy) \
-                                        (void)SNDMSG((hwnd), TCM_SETPADDING, 0, MAKELPARAM(cx, cy))
-
+    (void)SendMessageA((hwnd), TCM_SETPADDING, 0, MAKELPARAM(cx, cy))
 #define TabCtrl_GetRowCount(hwnd) \
-                                        (int)SNDMSG((hwnd), TCM_GETROWCOUNT, 0, 0L)
-
+    (int)SendMessageA((hwnd), TCM_GETROWCOUNT, 0, 0L)
 #define TabCtrl_GetToolTips(hwnd) \
-                                        (HWND)SNDMSG((hwnd), TCM_GETTOOLTIPS, 0, 0L)
-
+    (HWND)SendMessageA((hwnd), TCM_GETTOOLTIPS, 0, 0L)
 #define TabCtrl_SetToolTips(hwnd, hwndTT) \
-                                        (void)SNDMSG((hwnd), TCM_SETTOOLTIPS, (WPARAM)hwndTT, 0L)
-
+    (void)SendMessageA((hwnd), TCM_SETTOOLTIPS, (WPARAM)hwndTT, 0L)
 #define TabCtrl_GetCurFocus(hwnd) \
-                                    (int)SNDMSG((hwnd), TCM_GETCURFOCUS, 0, 0)
-
+    (int)SendMessageA((hwnd), TCM_GETCURFOCUS, 0, 0)
 #define TabCtrl_SetCurFocus(hwnd, i) \
-                                    SNDMSG((hwnd),TCM_SETCURFOCUS, i, 0)
-
+    SendMessageA((hwnd),TCM_SETCURFOCUS, i, 0)
 #define TabCtrl_SetMinTabWidth(hwnd, x) \
-                                        (int)SNDMSG((hwnd), TCM_SETMINTABWIDTH, 0, x)
-
+    (int)SendMessageA((hwnd), TCM_SETMINTABWIDTH, 0, x)
 #define TabCtrl_DeselectAll(hwnd, fExcludeFocus)\
-                                        (void)SNDMSG((hwnd), TCM_DESELECTALL, fExcludeFocus, 0)
-
+    (void)SendMessageA((hwnd), TCM_DESELECTALL, fExcludeFocus, 0)
 
 /* constants for TCHITTESTINFO */
 
@@ -2951,12 +2974,148 @@ typedef struct tagNMIPADDRESS
 
 /**************************************************************************
  * Month calendar control
+ *
  */
 
 #define MONTHCAL_CLASSA "SysMonthCal32"
 #define MONTHCAL_CLASSW L"SysMonthCal32"
 #define MONTHCAL_CLASS          WINELIB_NAME_AW(MONTHCAL_CLASS)
+#define MCM_FIRST             0x1000
+#define MCN_FIRST             (0U-750U)
+#define MCN_LAST              (0U-759U)
 
+#define MCM_GETCURSEL         (MCM_FIRST + 1)
+#define MCM_SETCURSEL         (MCM_FIRST + 2)
+#define MCM_GETMAXSELCOUNT    (MCM_FIRST + 3)
+#define MCM_SETMAXSELCOUNT    (MCM_FIRST + 4)
+#define MCM_GETSELRANGE       (MCM_FIRST + 5)
+#define MCM_SETSELRANGE       (MCM_FIRST + 6)
+#define MCM_GETMONTHRANGE     (MCM_FIRST + 7)
+#define MCM_SETDAYSTATE       (MCM_FIRST + 8)
+#define MCM_GETMINREQRECT     (MCM_FIRST + 9)
+#define MCM_SETCOLOR          (MCM_FIRST + 10)
+#define MCM_GETCOLOR          (MCM_FIRST + 11)
+#define MCM_SETTODAY          (MCM_FIRST + 12)
+#define MCM_GETTODAY          (MCM_FIRST + 13)
+#define MCM_HITTEST           (MCM_FIRST + 14)
+#define MCM_SETFIRSTDAYOFWEEK (MCM_FIRST + 15)
+#define MCM_GETFIRSTDAYOFWEEK (MCM_FIRST + 16)
+#define MCM_GETRANGE          (MCM_FIRST + 17)
+#define MCM_SETRANGE          (MCM_FIRST + 18)
+#define MCM_GETMONTHDELTA     (MCM_FIRST + 19)
+#define MCM_SETMONTHDELTA     (MCM_FIRST + 20)
+#define MCM_GETMAXTODAYWIDTH  (MCM_FIRST + 21)
+#define MCM_GETUNICODEFORMAT   CCM_GETUNICODEFORMAT
+#define MCM_SETUNICODEFORMAT   CCM_SETUNICODEFORMAT
+
+/* Notifications */
+#define MCN_SELCHANGE         (MCN_FIRST + 1)
+#define MCN_GETDAYSTATE       (MCN_FIRST + 3)
+#define MCN_SELECT            (MCN_FIRST + 4)
+#define MCSC_BACKGROUND   0
+#define MCSC_TEXT         1
+#define MCSC_TITLEBK      2
+#define MCSC_TITLETEXT    3
+#define MCSC_MONTHBK      4
+#define MCSC_TRAILINGTEXT 5
+#define MCS_DAYSTATE           0x0001
+#define MCS_MULTISELECT        0x0002
+#define MCS_WEEKNUMBERS        0x0004
+#define MCS_NOTODAY            0x0010
+#define MCS_NOTODAYCIRCLE      0x0008
+#define MCHT_TITLE             0x00010000
+#define MCHT_CALENDAR          0x00020000
+#define MCHT_TODAYLINK         0x00030000
+#define MCHT_NEXT              0x01000000
+#define MCHT_PREV              0x02000000
+#define MCHT_NOWHERE           0x00000000
+#define MCHT_TITLEBK           (MCHT_TITLE)
+#define MCHT_TITLEMONTH        (MCHT_TITLE | 0x0001)
+#define MCHT_TITLEYEAR         (MCHT_TITLE | 0x0002)
+#define MCHT_TITLEBTNNEXT      (MCHT_TITLE | MCHT_NEXT | 0x0003)
+#define MCHT_TITLEBTNPREV      (MCHT_TITLE | MCHT_PREV | 0x0003)
+#define MCHT_CALENDARBK        (MCHT_CALENDAR)
+#define MCHT_CALENDARDATE      (MCHT_CALENDAR | 0x0001)
+#define MCHT_CALENDARDATENEXT  (MCHT_CALENDARDATE | MCHT_NEXT)
+#define MCHT_CALENDARDATEPREV  (MCHT_CALENDARDATE | MCHT_PREV)
+#define MCHT_CALENDARDAY       (MCHT_CALENDAR | 0x0002)
+#define MCHT_CALENDARWEEKNUM   (MCHT_CALENDAR | 0x0003)
+
+
+#define GMR_VISIBLE     0
+#define GMR_DAYSTATE    1
+
+/*  Month calendar's structures */
+
+typedef struct {
+        UINT cbSize;
+        POINT pt;
+        UINT uHit;
+        SYSTEMTIME st;
+} MCHITTESTINFO, *PMCHITTESTINFO;
+typedef struct tagNMSELCHANGE
+{
+    NMHDR           nmhdr;
+    SYSTEMTIME      stSelStart;
+    SYSTEMTIME      stSelEnd;
+} NMSELCHANGE, *LPNMSELCHANGE;
+typedef NMSELCHANGE NMSELECT, *LPNMSELECT;
+typedef DWORD MONTHDAYSTATE, *LPMONTHDAYSTATE;
+typedef struct tagNMDAYSTATE
+{
+    NMHDR           nmhdr;
+    SYSTEMTIME      stStart;
+    int             cDayState;
+    LPMONTHDAYSTATE prgDayState;
+} NMDAYSTATE, *LPNMDAYSTATE;
+
+/* macros */
+#define MonthCal_GetCurSel(hmc, pst) \
+                (BOOL)SendMessageA(hmc, MCM_GETCURSEL, 0, (LPARAM)(pst))
+#define MonthCal_SetCurSel(hmc, pst)  \
+                (BOOL)SendMessageA(hmc, MCM_SETCURSEL, 0, (LPARAM)(pst))
+#define MonthCal_GetMaxSelCount(hmc) \
+                (DWORD)SendMessageA(hmc, MCM_GETMAXSELCOUNT, 0, 0L)
+#define MonthCal_SetMaxSelCount(hmc, n) \
+                (BOOL)SendMessageA(hmc, MCM_SETMAXSELCOUNT, (WPARAM)(n), 0L)
+#define MonthCal_GetSelRange(hmc, rgst) \
+                SendMessageA(hmc, MCM_GETSELRANGE, 0, (LPARAM) (rgst))
+#define MonthCal_SetSelRange(hmc, rgst) \
+                SendMessageA(hmc, MCM_SETSELRANGE, 0, (LPARAM) (rgst))
+#define MonthCal_GetMonthRange(hmc, gmr, rgst) \
+                (DWORD)SendMessageA(hmc, MCM_GETMONTHRANGE, (WPARAM)(gmr), (LPARAM)(rgst))
+#define MonthCal_SetDayState(hmc, cbds, rgds) \
+                SendMessageA(hmc, MCM_SETDAYSTATE, (WPARAM)(cbds), (LPARAM)(rgds))
+#define MonthCal_GetMinReqRect(hmc, prc) \
+                SendMessageA(hmc, MCM_GETMINREQRECT, 0, (LPARAM)(prc))
+#define MonthCal_SetColor(hmc, iColor, clr)\
+                SendMessageA(hmc, MCM_SETCOLOR, iColor, clr
+#define MonthCal_GetColor(hmc, iColor) \
+                SendMessageA(hmc, MCM_SETCOLOR, iColor, 0)
+#define MonthCal_GetToday(hmc, pst)\
+                (BOOL)SendMessageA(hmc, MCM_GETTODAY, 0, (LPARAM)pst)
+#define MonthCal_SetToday(hmc, pst)\
+                SendMessageA(hmc, MCM_SETTODAY, 0, (LPARAM)pst)
+#define MonthCal_HitTest(hmc, pinfo) \
+        SendMessageA(hmc, MCM_HITTEST, 0, (LPARAM)(PMCHITTESTINFO)pinfo)
+#define MonthCal_SetFirstDayOfWeek(hmc, iDay) \
+        SendMessageA(hmc, MCM_SETFIRSTDAYOFWEEK, 0, iDay)
+#define MonthCal_GetFirstDayOfWeek(hmc) \
+        (DWORD)SendMessageA(hmc, MCM_GETFIRSTDAYOFWEEK, 0, 0)
+#define MonthCal_GetRange(hmc, rgst) \
+        (DWORD)SendMessageA(hmc, MCM_GETRANGE, 0, (LPARAM)(rgst))
+#define MonthCal_SetRange(hmc, gd, rgst) \
+        (BOOL)SendMessageA(hmc, MCM_SETRANGE, (WPARAM)(gd), (LPARAM)(rgst))
+#define MonthCal_GetMonthDelta(hmc) \
+        (int)SendMessageA(hmc, MCM_GETMONTHDELTA, 0, 0)
+#define MonthCal_SetMonthDelta(hmc, n) \
+        (int)SendMessageA(hmc, MCM_SETMONTHDELTA, n, 0)
+#define MonthCal_GetMaxTodayWidth(hmc) \
+        (DWORD)SendMessageA(hmc, MCM_GETMAXTODAYWIDTH, 0, 0)
+#define MonthCal_SetUnicodeFormat(hwnd, fUnicode)  \
+        (BOOL)SendMessageA((hwnd), MCM_SETUNICODEFORMAT, (WPARAM)(fUnicode), 0)
+#define MonthCal_GetUnicodeFormat(hwnd)  \
+        (BOOL)SendMessageA((hwnd), MCM_GETUNICODEFORMAT, 0, 0)
 
 /**************************************************************************
  * Date and time picker control
@@ -2967,21 +3126,115 @@ typedef struct tagNMIPADDRESS
 #define DATETIMEPICK_CLASS      WINELIB_NAME_AW(DATETIMEPICK_CLASS)
 
 #define DTM_FIRST        0x1000
+#define DTN_FIRST       (0U-760U)
+#define DTN_LAST        (0U-799U)
 
 #define DTM_GETSYSTEMTIME       (DTM_FIRST+1)
 #define DTM_SETSYSTEMTIME       (DTM_FIRST+2)
 #define DTM_GETRANGE            (DTM_FIRST+3)
 #define DTM_SETRANGE            (DTM_FIRST+4)
-#define DTM_SETFORMATA  (DTM_FIRST+5)
-#define DTM_SETFORMATW  (DTM_FIRST + 50)
+#define DTM_SETFORMATA          (DTM_FIRST+5)
+#define DTM_SETFORMATW          (DTM_FIRST + 50)
 #define DTM_SETFORMAT           WINELIB_NAME_AW(DTM_SETFORMAT)
 #define DTM_SETMCCOLOR          (DTM_FIRST+6)
 #define DTM_GETMCCOLOR          (DTM_FIRST+7)
-
 #define DTM_GETMONTHCAL         (DTM_FIRST+8)
-
 #define DTM_SETMCFONT           (DTM_FIRST+9)
 #define DTM_GETMCFONT           (DTM_FIRST+10)
+
+/* Datetime Notifications */
+#define DTN_DATETIMECHANGE  (DTN_FIRST + 1)
+#define DTN_USERSTRINGA     (DTN_FIRST + 2)
+#define DTN_WMKEYDOWNA      (DTN_FIRST + 3)
+#define DTN_FORMATA         (DTN_FIRST + 4)
+#define DTN_FORMATQUERYA    (DTN_FIRST + 5)
+#define DTN_DROPDOWN        (DTN_FIRST + 6)
+#define DTN_CLOSEUP         (DTN_FIRST + 7)
+#define DTN_USERSTRINGW     (DTN_FIRST + 15)
+#define DTN_WMKEYDOWNW      (DTN_FIRST + 16)
+#define DTN_FORMATW         (DTN_FIRST + 17)
+#define DTN_FORMATQUERYW    (DTN_FIRST + 18)
+
+#define DTS_SHORTDATEFORMAT 0x0000
+#define DTS_UPDOWN          0x0001
+#define DTS_SHOWNONE        0x0002
+#define DTS_LONGDATEFORMAT  0x0004
+#define DTS_TIMEFORMAT      0x0009
+#define DTS_APPCANPARSE     0x0010
+#define DTS_RIGHTALIGN      0x0020
+typedef struct tagNMDATETIMECHANGE
+{
+    NMHDR       nmhdr;
+    DWORD       dwFlags;
+    SYSTEMTIME  st;
+} NMDATETIMECHANGE, *LPNMDATETIMECHANGE;
+typedef struct tagNMDATETIMESTRINGA
+{
+    NMHDR      nmhdr;
+    LPCSTR     pszUserString;
+    SYSTEMTIME st;
+    DWORD      dwFlags;
+} NMDATETIMESTRINGA, *LPNMDATETIMESTRINGA;
+typedef struct tagNMDATETIMESTRINGW
+{
+    NMHDR      nmhdr;
+    LPCWSTR    pszUserString;
+    SYSTEMTIME st;
+    DWORD      dwFlags;
+} NMDATETIMESTRINGW, *LPNMDATETIMESTRINGW;
+
+typedef struct tagNMDATETIMEWMKEYDOWNA
+{
+    NMHDR      nmhdr;
+    int        nVirtKey;
+    LPCSTR     pszFormat;
+    SYSTEMTIME st;
+} NMDATETIMEWMKEYDOWNA, *LPNMDATETIMEWMKEYDOWNA;
+typedef struct tagNMDATETIMEWMKEYDOWNW
+{
+    NMHDR      nmhdr;
+    int        nVirtKey;
+    LPCWSTR    pszFormat;
+    SYSTEMTIME st;
+} NMDATETIMEWMKEYDOWNW, *LPNMDATETIMEWMKEYDOWNW;
+
+
+typedef struct tagNMDATETIMEFORMATA
+{
+    NMHDR nmhdr;
+    LPCSTR  pszFormat;
+    SYSTEMTIME st;
+    LPCSTR pszDisplay;
+    CHAR szDisplay[64];
+} NMDATETIMEFORMATA, *LPNMDATETIMEFORMATA;
+
+typedef struct tagNMDATETIMEFORMATW
+{
+    NMHDR nmhdr;
+    LPCWSTR pszFormat;
+    SYSTEMTIME st;
+    LPCWSTR pszDisplay;
+    WCHAR szDisplay[64];
+} NMDATETIMEFORMATW, *LPNMDATETIMEFORMATW;
+
+
+typedef struct tagNMDATETIMEFORMATQUERYA
+{
+    NMHDR nmhdr;
+    LPCSTR pszFormat;
+    SIZE szMax;
+} NMDATETIMEFORMATQUERYA, *LPNMDATETIMEFORMATQUERYA;
+typedef struct tagNMDATETIMEFORMATQUERYW
+{
+    NMHDR nmhdr;
+    LPCWSTR pszFormat;
+    SIZE szMax;
+} NMDATETIMEFORMATQUERYW, *LPNMDATETIMEFORMATQUERYW;
+
+#define NMDATETIMESTRING WINELIB_NAME_AW(NMDATETIMESTRING)
+#define NMDATETIMEWMKEYDOWN WINELIB_NAME_AW(NMDATETIMEWMKEYDOWN)
+#define NMDATETIMEFORMAT WINELIB_NAME_AW(NMDATETIMEFORMAT)
+#define NMDATETIMEFORMATQUERY WINELIB_NAME_AW(NMDATETIMEFORMATQUERY)
 
 
 
@@ -2992,6 +3245,28 @@ typedef struct tagNMIPADDRESS
 
 #define GDTR_MIN     0x0001
 #define GDTR_MAX     0x0002
+
+#define DateTime_GetSystemtime(hdp, pst)   \\
+  (DWORD)SendMessageA (hdp, DTM_GETSYSTEMTIME , 0, (LPARAM)(pst))
+#define DateTime_SetSystemtime(hdp, gd, pst)   \\
+  (BOOL)SendMessageA (hdp, DTM_SETSYSTEMTIME, (LPARAM)(gd), (LPARAM)(pst))
+#define DateTime_GetRange(hdp, rgst)  \\
+  (DWORD)SendMessageA (hdp, DTM_GETRANGE, 0, (LPARAM)(rgst))
+#define DateTime_SetRange(hdp, gd, rgst) \\
+   (BOOL)SendMessageA (hdp, DTM_SETRANGE, (WPARAM)(gd), (LPARAM)(rgst))
+#define DateTime_SetFormat WINELIB_NAME_AW(DateTime_SetFormat)
+#define DateTime_SetFormatA(hdp, sz)  \\
+  (BOOL)SendMessageA (hdp, DTM_SETFORMAT, 0, (LPARAM)(sz))
+#define DateTime_SetFormatW(hdp, sz)  \\
+  (BOOL)SendMessageW (hdp, DTM_SETFORMAT, 0, (LPARAM)(sz))
+#define DateTime_GetMonthCalColor(hdp, iColor) \\
+  SendMessageA (hdp, DTM_GETMCCOLOR, iColor, 0)
+#define DateTime_GetMonthCal(hdp)  \\
+  (HWND) SendMessageA (hdp, DTM_GETMONTHCAL, 0, 0)
+#define DateTime_SetMonthCalFont(hdp, hfont, fRedraw) \\
+  SendMessageA (hdp, DTM_SETMCFONT, (WPARAM)hfont, (LPARAM)fRedraw)
+#define DateTime_GetMonthCalFont(hdp) \\
+  SendMessageA (hdp, DTM_GETMCFONT, 0, 0)
 
 
 
