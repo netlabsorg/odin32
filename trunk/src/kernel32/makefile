@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.59 1999-11-22 20:35:50 sandervl Exp $
+# $Id: makefile,v 1.60 1999-11-23 19:31:35 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -31,7 +31,7 @@ CXXFLAGS = $(CXXFLAGS) -DDEBUG_ENABLELOG_LEVEL2
 OBJS = KERNEL32.OBJ KOBJECTS.OBJ CONSOLE.OBJ CONIN.OBJ \
 CONBUFFER.OBJ CONOUT.OBJ UNICODE.OBJ network.OBJ HMDEVIO.OBJ \
 profile.obj THREAD.OBJ virtual.obj THUNK.OBJ OBSOLETE.OBJ COMM.OBJ\
-MESSAGE.OBJ RESOURCE.OBJ EXCEPTIONS.OBJ heapshared.obj \
+MESSAGE.OBJ RESOURCE.OBJ EXCEPTIONS.OBJ heapshared.obj cpuhlp.obj \
 LFILE.OBJ NPIPE.OBJ oslibdos.obj oslibmisc.obj MISC.OBJ EXCEPTUTIL.OBJ \
 LANG.OBJ ICCIO.OBJ MAP.OBJ WIN32UTIL.OBJ heap.OBJ heapstring.obj \
 os2heap.OBJ vmutex.OBJ initterm.OBJ handlemanager.OBJ  \
@@ -42,7 +42,7 @@ winimagepe2lx.obj winimagepeldr.obj windllpe2lx.obj windlllx.obj windllpeldr.obj
 winexepe2lx.obj winexelx.obj winexepeldr.obj WINRES.OBJ critsection.obj \
 pefile.OBJ winimgres.OBJ wintls.obj async.OBJ fileio.obj \
 atom.obj disk.obj directory.obj cvtbitmap.obj hmmmap.obj winfakepeldr.obj \
-cvtaccel.obj cvticon.obj cvticongrp.obj oslibexcept.obj \
+cvtaccel.obj cvticon.obj cvticongrp.obj oslibexcept.obj cpu.obj \
 cvtcursor.obj cvtcursorgrp.obj stubs.obj interlock.obj toolhelp.obj
 
 
@@ -73,6 +73,7 @@ $(PDWIN32_LIB)\PMWINX.LIB
 $(PDWIN32_LIB)\LIBULS.LIB
 $(PDWIN32_LIB)\LIBCONV.LIB
 $(PDWIN32_LIB)\odincrt.lib
+$(PDWIN32_LIB)\advapi32.lib
 OS2386.LIB
 $(RTLLIB_O)
 $(TARGET).def
@@ -144,7 +145,7 @@ os2heap.OBJ: \
     os2heap.h \
     initterm.h
 
-initterm.OBJ: .\initterm.cpp initterm.h  $(PDWIN32_INCLUDE)\heapshared.h  mmap.h directory.h hmdevio.h
+initterm.OBJ: .\initterm.cpp initterm.h  $(PDWIN32_INCLUDE)\heapshared.h  mmap.h directory.h hmdevio.h cpuhlp.h
 
 thunk.OBJ: \
     .\thunk.cpp \
@@ -375,7 +376,8 @@ interlock.obj: interlock.asm
 toolhelp.obj: toolhelp.cpp
 
 heapshared.obj: heapshared.cpp $(PDWIN32_INCLUDE)\heapshared.h
-
+cpu.obj: cpu.cpp cpuhlp.h
+cpuhlp.obj: cpuhlp.asm
 
 clean:
         $(RM) *.OBJ *.LIB *.dll *.lrf *.res *.map *.pch
