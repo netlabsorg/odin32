@@ -1,4 +1,4 @@
-/* $Id: ioctl.cpp,v 1.2 2001-10-10 22:42:30 phaller Exp $ */
+/* $Id: ioctl.cpp,v 1.3 2001-11-18 14:32:13 sandervl Exp $ */
 /*
  * based on Windows Sockets 1.1 specs
  * (ftp.microsoft.com:/Advsys/winsock/spec11/WINSOCK.TXT)
@@ -26,28 +26,17 @@
 
 #include <odin.h>
 #include <odinwrap.h>
-#include <os2sel.h>
 
-
-#define INCL_BASE
-#include <os2wrap.h>
-#include <stdio.h>
-#include <string.h>
+#include <windows.h>
+#include <winsock2.h>
 #include <misc.h>
-#include <win32api.h>
+
 
 #define DBG_LOCALLOG	DBG_wsa
 #include "dbglocal.h"
 
-// PH: ugly ...
-#include "../wsock32/wsock32.h"
-
 
 ODINDEBUGCHANNEL(WS2_32-IOCTL)
-
-
-typedef LPVOID LPWSAOVERLAPPED;
-typedef LPVOID LPWSAOVERLAPPED_COMPLETION_ROUTINE;
 
 
 /*****************************************************************************
