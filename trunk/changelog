@@ -1,9 +1,10 @@
-/* $Id: changelog,v 1.2507 2003-02-28 10:25:58 sandervl Exp $ */
+/* $Id: changelog,v 1.2508 2003-02-28 11:32:13 sandervl Exp $ */
 
  2003-02-28: Sander van Leeuwen <sandervl@innotek   >
     - SRC\makefile:
                 o Skip msvcrt & crtdll for now. Causes too many problems with 
                   Odin builds.
+    - KERNEL32: o Fixed CreateProcessA regression (Lotus Notes)
 
  2003-02-28: knut st. osmundsen <Knut.Osmundsen@innotek   >
     - MAKEFILES:
