@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.38 2000-08-30 18:05:24 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.39 2000-10-01 21:16:17 phaller Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -524,12 +524,29 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
 
 	if(bmpBitsDblBuffer == NULL)
 		DebugInt3();
+    
+    // PH 2000/10/01 - Fix for Beyond Compare 1.9d
+    // Note: according to documentation, cmImage can be zero for
+    // RGB- / non-compressed bitmaps.
+    int iLength = pOS2bmp->cbImage;
+    if (iLength == 0)
+      iLength = pOS2bmp->cx * pOS2bmp->cy * (pOS2bmp->cBitCount >> 3);
+      
+    if (iLength > 0)
+    {
+      if(CPUFeatures & CPUID_MMX) 
+        RGB555to565MMX((WORD *)bmpBitsDblBuffer, (WORD *)bitmapBits, iLength/sizeof(WORD));
+      else   	
+        RGB555to565((WORD *)bmpBitsDblBuffer, (WORD *)bitmapBits, iLength/sizeof(WORD));
+    }
+    else
+    {
+      dprintf(("GDI32: DIBSect::BitBlt: WARNING! zero-length bitmap! %08xh",
+               pOS2bmp));
+    }
 
-	if(CPUFeatures & CPUID_MMX) {
-		RGB555to565MMX((WORD *)bmpBitsDblBuffer, (WORD *)bitmapBits, pOS2bmp->cbImage/sizeof(WORD));
-	}
-	else   	RGB555to565((WORD *)bmpBitsDblBuffer, (WORD *)bitmapBits, pOS2bmp->cbImage/sizeof(WORD));
-	rc = GpiDrawBits(hps, bmpBitsDblBuffer, pOS2bmp, 4, &point[0], ROP_SRCCOPY, os2mode);
+
+    rc = GpiDrawBits(hps, bmpBitsDblBuffer, pOS2bmp, 4, &point[0], ROP_SRCCOPY, os2mode);
   }
   else	rc = GpiDrawBits(hps, bitmapBits, pOS2bmp, 4, &point[0], ROP_SRCCOPY, os2mode);
 
