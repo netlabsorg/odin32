@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.14 1999-10-07 09:28:02 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.15 1999-10-08 16:13:09 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -75,7 +75,7 @@ virtual  ULONG  MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd);
          ULONG  MsgSetFocus(HWND hwnd);
          ULONG  MsgKillFocus(HWND hwnd);
          ULONG  MsgTimer(ULONG TimerID);
-	 ULONG  MsgScroll(ULONG msg, ULONG scrollCode, ULONG scrollPos);
+         ULONG  MsgScroll(ULONG msg, ULONG scrollCode, ULONG scrollPos);
          ULONG  MsgCommand(ULONG cmd, ULONG Id, HWND hwnd);
          ULONG  MsgSysCommand(ULONG win32sc, ULONG x, ULONG y);
          ULONG  MsgChar(ULONG cmd, ULONG repeatcnt, ULONG scancode, ULONG vkey, ULONG keyflags);
@@ -198,6 +198,12 @@ Win32BaseWindow *getTopParent();
 
 static Win32BaseWindow *GetWindowFromHandle(HWND hwnd);
 static Win32BaseWindow *GetWindowFromOS2Handle(HWND hwnd);
+static Win32BaseWindow *GetWindowFromFrameHandle(HWND hwnd);
+
+       PVOID getOldFrameProc() { return pOldFrameProc; };
+       VOID  setOldFrameProc(PVOID aOldFrameProc) { pOldFrameProc = aOldFrameProc; };
+       ULONG   getBorderWidth() { return borderWidth; };
+       ULONG   getBorderHeight() { return borderHeight; };
 
 protected:
 #ifndef OS2_INCLUDED
@@ -234,8 +240,13 @@ protected:
         BOOL    fCreated;
         BOOL    fFirstShow;
         BOOL    fIsDialog;
-        BOOL    fInternalMsg;           //Used to distinguish between messages 
+        BOOL    fInternalMsg;           //Used to distinguish between messages
                                         //sent by PM and those sent by apps
+
+        PVOID   pOldFrameProc;
+        ULONG   borderWidth;
+        ULONG   borderHeight;
+
    Win32BaseWindow *owner;
 
  Win32Resource *acceltableResource;

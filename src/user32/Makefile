@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.25 1999-09-28 08:00:57 dengert Exp $
+# $Id: Makefile,v 1.26 1999-10-08 16:13:07 cbratschi Exp $
 
 #
 # PD-Win32 API
@@ -26,7 +26,7 @@ OBJS =  user32.obj loadres.obj \
         icon.obj hook.obj hooks.obj winmenu.obj \
         defwndproc.obj syscolor.obj char.obj initterm.obj \
         uitools.obj unknown.obj spy.obj wndmsg.obj \
-        pmwindow.obj win32class.obj win32wnd.obj win32dlg.obj \
+        pmwindow.obj pmframe.obj win32class.obj win32wnd.obj win32dlg.obj \
         msgbox.obj window.obj windowmsg.obj windowclass.obj win32wbase.obj \
         windowword.obj gen_object.obj oslibwin.obj win32wndchild.obj \
         controls.obj button.obj static.obj scroll.obj listbox.obj \
@@ -102,8 +102,9 @@ windlgmsg.obj: windlgmsg.cpp win32class.h win32wbase.h win32dlg.h win32wndchild.
 win32wndhandle.obj: win32wndhandle.cpp win32wndhandle.h
 
 pmwindow.obj:   pmwindow.cpp win32class.h win32wbase.h win32dlg.h pmwindow.h win32wndchild.h $(PDWIN32_INCLUDE)\wprocess.h oslibgdi.h oslibwin.h dc.h
+pmframe.obj: pmframe.cpp win32class.h win32wbase.h pmframe.h win32wndchild.h
 win32class.obj: win32class.cpp win32class.h win32wbase.h win32dlg.h gen_object.h heapshared.h oslibwin.h win32wndchild.h
-win32wbase.obj:   win32wbase.cpp win32class.h win32wbase.h win32dlg.h gen_object.h heapshared.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h win32wndhandle.h oslibdos.h dc.h
+win32wbase.obj:   win32wbase.cpp win32class.h win32wbase.h win32dlg.h gen_object.h heapshared.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h win32wndhandle.h oslibdos.h dc.h pmframe.h
 win32wnd.obj:   win32wnd.cpp win32class.h win32wbase.h win32wnd.h win32dlg.h gen_object.h heapshared.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h win32wndhandle.h oslibdos.h oslibmenu.h
 win32dlg.obj:   win32dlg.cpp win32class.h win32wbase.h win32dlg.h gen_object.h heapshared.h oslibwin.h win32wndchild.h oslibmsg.h
 win32wndchild.obj: win32wndchild.cpp win32wndchild.h gen_object.h
