@@ -1,4 +1,4 @@
-/* $Id: midi.cpp,v 1.6 1999-09-01 19:12:23 phaller Exp $ */
+/* $Id: midi.cpp,v 1.7 1999-09-23 09:35:25 sandervl Exp $ */
 
 /*
  * RTMIDI code
@@ -28,6 +28,9 @@
 #include <wprocess.h>
 
 ODINDEBUGCHANNEL(WINMM-MIDI)
+
+//SvL: 23/09/99: WinPostMsg no longer works, as win32 window handles are no longer PM handles
+BOOL WIN32API PostMessageA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 /*
    Work to do:
@@ -896,7 +899,7 @@ void Midi::callback( UINT msg, DWORD p1, DWORD p2)
    else
    if ( iCallbackWindow )
    {
-      WinPostMsg( iCallbackWindow, msg, (MPARAM)p1, (MPARAM)p2 );
+      PostMessageA( iCallbackWindow, msg, (WPARAM)p1, (LPARAM)p2 );
    }
 }
 
