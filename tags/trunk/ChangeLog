@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.1538 2001-06-23 07:27:31 achimha Exp $ */
+/* $Id: ChangeLog,v 1.1539 2001-06-23 07:41:41 bird Exp $ */
+
+ 2001-06-23: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - KERNEL32: o Added Odin32 Spesific API for getting Odin build number.
+                  (Requested by Yuri.)
 
  2001-06-23: Achim Hasenmueller <achimha@innotek.de>
     - USER32:   o added OS/2 INI file access library (oslibprf)
