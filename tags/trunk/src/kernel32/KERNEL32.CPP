@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.26 1999-10-28 12:01:11 sandervl Exp $ */
+/* $Id: KERNEL32.CPP,v 1.27 1999-11-08 13:43:12 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -469,7 +469,7 @@ BOOL WIN32API TerminateProcess( HANDLE arg1, DWORD arg2)
 //******************************************************************************
 VOID WIN32API Sleep(DWORD arg1)
 {
-    dprintf(("KERNEL32:  Sleep %d\n", arg1));
+//    dprintf(("KERNEL32:  Sleep %d\n", arg1));
     O32_Sleep(arg1);
 }
 //******************************************************************************

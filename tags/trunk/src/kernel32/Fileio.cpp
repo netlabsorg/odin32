@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.13 1999-11-03 17:12:20 phaller Exp $ */
+/* $Id: Fileio.cpp,v 1.14 1999-11-08 13:43:11 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -28,7 +28,6 @@
 #include "handlemanager.h"
 #include "devio.h"
 #include "oslibdos.h"
-
 
 ODINDEBUGCHANNEL(KERNEL32-FILEIO)
 
@@ -359,70 +358,6 @@ ODINFUNCTION5(BOOL, WriteFile,
                       nrbytes,
                       nrbyteswritten,
                       lpOverlapped));
-}
-//******************************************************************************
-//******************************************************************************
-ODINFUNCTION6(DWORD,  SearchPathA,
-              LPCSTR, lpszPath,
-              LPCSTR, lpszFile,
-              LPCSTR, lpszExtension,
-              DWORD,  cchReturnBuffer,
-              LPSTR,  lpszReturnBuffer,
-              LPSTR *, plpszFilePart)
-{
-  LPSTR lpszFilePart;
-
-  // @@@PH 1999/11/03 ANV.EXE seems to pass in NULL here, looks like
-  // windows ignores that behaviour altough it's undocumented.
-  if (plpszFilePart == NULL)
-    plpszFilePart = &lpszFilePart; // just provide a valid pointer
-
-  return O32_SearchPath(lpszPath,
-                        lpszFile,
-                        lpszExtension,
-                        cchReturnBuffer,
-                        lpszReturnBuffer,
-                        plpszFilePart);
-}
-//******************************************************************************
-//******************************************************************************
-ODINFUNCTION6(DWORD,    SearchPathW,
-              LPCWSTR,  lpszPath,
-              LPCWSTR,  lpszFileName,
-              LPCWSTR,  lpszExtension,
-              DWORD,    cchReturnBufferLength,
-              LPWSTR,   lpszReturnBuffer,
-              LPWSTR *, plpszFilePart)
-{
-  char *asciipath,
-       *asciifile,
-       *asciiext,
-       *asciibuffer,
-       *asciipart;
-  DWORD rc;
-
-  asciibuffer = (char *)malloc(cchReturnBufferLength+1);
-  asciipath = UnicodeToAsciiString((LPWSTR)lpszPath);
-  asciifile = UnicodeToAsciiString((LPWSTR)lpszFileName);
-  asciiext  = UnicodeToAsciiString((LPWSTR)lpszExtension);
-  rc = ODIN_SearchPathA(asciipath,
-                        asciifile,
-                        asciiext,
-                        cchReturnBufferLength,
-                        asciibuffer,
-                        &asciipart);
-
-  if(rc)
-  {
-      AsciiToUnicode(asciibuffer, lpszReturnBuffer);
-      *plpszFilePart = lpszReturnBuffer + ((int)asciipart - (int)asciibuffer);
-  }
-
-  FreeAsciiString(asciiext);
-  FreeAsciiString(asciifile);
-  FreeAsciiString(asciipath);
-  free(asciibuffer);
-  return(rc);
 }
 //******************************************************************************
 //******************************************************************************

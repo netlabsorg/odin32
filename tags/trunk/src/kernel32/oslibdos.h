@@ -1,4 +1,4 @@
-/* $Id: oslibdos.h,v 1.5 1999-10-24 22:51:22 sandervl Exp $ */
+/* $Id: oslibdos.h,v 1.6 1999-11-08 13:43:12 sandervl Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -21,7 +21,7 @@ DWORD OSLibDosSetMem(LPVOID lpMemAddr, DWORD size, DWORD flags);
 DWORD OSLibDosAllocSharedMem(LPVOID *lplpMemAddr, DWORD size, DWORD flags, LPSTR name);
 DWORD OSLibDosGetNamedSharedMem(LPVOID *lplpMemAddr, LPSTR name);
 
-BOOL OSLibDosGetFileAttributesEx(PSZ pszName, ULONG ulDummy, PVOID pBuffer);
+BOOL OSLibDosGetFileAttributesEx(LPSTR pszName, ULONG ulDummy, PVOID pBuffer);
 
 #define OSLIB_NOERROR			0
 #define OSLIB_ERROR_INVALID_ADDRESS	1
@@ -71,5 +71,12 @@ DWORD OSLibDosWrite(DWORD hFile, LPVOID lpBuffer, DWORD size, DWORD *nrBytesWrit
 #define OSLIB_SETPTR_FILE_END		3
 
 DWORD OSLibDosSetFilePtr(DWORD hFile, DWORD offset, DWORD method);
+
+#define OSLIB_SEARCHDIR		1
+#define OSLIB_SEARCHCURDIR	2
+#define OSLIB_SEARCHFILE	3
+#define OSLIB_SEARCHENV		4
+
+DWORD OSLibDosSearchPath(DWORD cmd, char *path, char *name, char *full_name, DWORD length_fullname);
 
 #endif
