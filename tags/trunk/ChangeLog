@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.2661 2004-01-15 10:42:25 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2662 2004-01-15 11:19:32 sandervl Exp $ */
+
+ 2004-01-15: KO Myung-Hun <komh@chollian    >
+    - GDI32:    o Cleanup of text functions
 
  2004-01-15: knut st. osmundsen <bird-changelog@innotek    >
     - DBGWRAP:  o Added optional display of caller address.
