@@ -1,4 +1,4 @@
-/* $Id: winicon.cpp,v 1.33 2001-10-27 10:30:11 sandervl Exp $ */
+/* $Id: winicon.cpp,v 1.34 2002-05-31 09:54:05 sandervl Exp $ */
 /*
  * Win32 Icon Code for OS/2
  *
@@ -450,47 +450,6 @@ HCURSOR WIN32API SetCursor( HCURSOR hCursor)
 
     return hOldCursor;
 }
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetCursorPos( PPOINT lpPoint)
-{
-    dprintf2(("USER32: GetCursorPos %x", lpPoint));
-
-    if (!lpPoint) return FALSE;
-
-    if (OSLibWinQueryPointerPos(lpPoint)) //POINT == POINTL
-    {
-        mapScreenPoint((OSLIBPOINT*)lpPoint);
-        return TRUE;
-    }
-    else return FALSE;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SetCursorPos( int X, int Y)
-{
-    dprintf(("USER32: SetCursorPos %d %d", X,Y));
-    return OSLibWinSetPointerPos(X, mapScreenY(Y));
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API ClipCursor(const RECT * lpRect)
-{
-    if(lpRect) {
-         dprintf(("USER32: ClipCursor (%d,%d)(%d,%d)", lpRect->left, lpRect->top, lpRect->right, lpRect->bottom));
-    }
-    else dprintf(("USER32: ClipCursor NULL"));
-    return OSLibWinClipCursor(lpRect);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetClipCursor( LPRECT lpRect)
-{
-    dprintf(("USER32: GetClipCursor %x", lpRect));
-    return OSLibWinGetClipCursor(lpRect);
-}
-//******************************************************************************
-//******************************************************************************
 /*****************************************************************************
  * Name      : BOOL WIN32API SetSystemCursor
  * Purpose   : The SetSystemCursor function replaces the contents of the system
