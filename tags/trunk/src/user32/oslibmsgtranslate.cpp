@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.21 2000-03-04 19:54:03 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.22 2000-03-09 21:50:11 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -194,7 +194,7 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
         }
         if(ISMOUSE_CAPTURED())
         {
-            if(DInputMouseHandler(win32wnd->getWindowHandle(), MOUSEMSG_BUTTON, winMsg->pt.x, winMsg->pt.y))
+            if(DInputMouseHandler(win32wnd->getWindowHandle(), winMsg->message, winMsg->pt.x, winMsg->pt.y))
                 goto dummymessage; //dinput swallowed message
         }
 
@@ -230,7 +230,7 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
         }
         if(ISMOUSE_CAPTURED())
         {
-            if(DInputMouseHandler(win32wnd->getWindowHandle(), MOUSEMSG_MOVE, winMsg->pt.x, winMsg->pt.y))
+            if(DInputMouseHandler(win32wnd->getWindowHandle(), winMsg->message, winMsg->pt.x, winMsg->pt.y))
                 goto dummymessage; //dinput swallowed message
         }
         //OS/2 Window coordinates -> Win32 Window coordinates
@@ -448,7 +448,7 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
         }
         if(ISMOUSE_CAPTURED())
         {
-            if(DInputMouseHandler(win32wnd->getWindowHandle(), MOUSEMSG_BUTTON, winMsg->pt.x, winMsg->pt.y))
+            if(DInputMouseHandler(win32wnd->getWindowHandle(), winMsg->message, winMsg->pt.x, winMsg->pt.y))
                 goto dummymessage; //dinput swallowed message
         }
 
@@ -484,7 +484,7 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
         }
         if(ISMOUSE_CAPTURED())
         {
-            if(DInputMouseHandler(win32wnd->getWindowHandle(), MOUSEMSG_MOVE, winMsg->pt.x, winMsg->pt.y))
+            if(DInputMouseHandler(win32wnd->getWindowHandle(), winMsg->message, winMsg->pt.x, winMsg->pt.y))
                 goto dummymessage; //dinput swallowed message
         }
         //OS/2 Window coordinates -> Win32 Window coordinates
