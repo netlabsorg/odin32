@@ -1,4 +1,12 @@
-/* $Id: ChangeLog,v 1.1326 2001-03-28 16:19:34 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1327 2001-03-29 17:38:55 sandervl Exp $ */
+
+ 2001-03-29: Sander van Leeuwen <sandervl@xs4all.nl>   
+    - KERNEL32: o CreateFile (disk): disable error popus. NT allows an app to 
+                  open a cdrom/dvd drive without a disk inside.
+                  OS/2 fails in that case with error ERROR_NOT_READY
+                  Ignore that error and return success.
+                  (removes annoying popups when starting windvd without DVD
+                   disk in drive)
 
  2001-03-28: Sander van Leeuwen <sandervl@xs4all.nl>   
     - KERNEL32: o GetSystemPowerStatus fix; SYSTEM_POWER_STATUS structure
