@@ -1,4 +1,4 @@
-/* $Id: malloc.h,v 1.1 1999-09-06 02:19:58 bird Exp $
+/* $Id: malloc.h,v 1.2 1999-10-14 01:16:50 bird Exp $
  *
  * Heap.
  *
@@ -12,6 +12,10 @@
 /* XLATOFF */
 #ifndef _MALLOC_H_
 #define _MALLOC_H_
+#ifdef __MALLOC_H
+    #error("A different version of malloc.h has allready been loaded!")
+#endif
+#define __malloc_h
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,7 +47,7 @@ extern unsigned  _uHeapMaxPtr;/* heap pointers are less than this. */
 
 #define HEAP_SIZE 0x00600000U /* 10MB of heap */
 
-/* HeapPointer assert */
+/* HeapPointer assert - old ones... */
 #define ltasserthp(a)         if (!_validptr((void*)(a))){ _ltasserthp((void*)(a), #a,__FILE__,__LINE__); return FALSE;}
 #define ltasserthp2(a,b)      if (!_validptr((void*)(a))){ _ltasserthp((void*)(a), #a,__FILE__,__LINE__); b; return FALSE;}
 #define _ltasserthp(a,b,c,d)  _kprintf("ltasserthp: pv=%#.8x - '%s' in %s line %d - returns FALSE\n",a,b,c,d)

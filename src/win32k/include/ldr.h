@@ -1,4 +1,4 @@
-/* $Id: ldr.h,v 1.1 1999-09-06 02:19:58 bird Exp $
+/* $Id: ldr.h,v 1.2 1999-10-14 01:16:49 bird Exp $
  *
  * ldr - loader header file.
  *
@@ -18,39 +18,16 @@
         /***************************************************************/
         #define MAX_FILE_HANDLES 0x10000
 
-        extern unsigned char ahStates[MAX_FILE_HANDLES/4];
+        extern unsigned char achHandleStates[MAX_FILE_HANDLES/8];
 
-        #define HSTATE_UNUSED       0x00    /* nowhere */
-        #define HSTATE_CHECK        0x01    /* look in uncertain files */
-        #define HSTATE_NOT_PE       0x02    /* nowhere */
-        #define HSTATE_PE           0x03    /* look in PE handles */
-        #define HSTATE_MASK         0xFC
-        #define HSTATE_UMASK        0x03
+        #define HSTATE_UNUSED       0x00    /* Handle not used (or OS/2). */
+        #define HSTATE_OS2          0x00    /* OS/2 module filehandle. */
+        #define HSTATE_OUR          0x01    /* Our module filehandle. */
+        #define HSTATE_MASK         0xFE
+        #define HSTATE_UMASK        0x01
 
-        #define GetState(a)         (HSTATE_UMASK & (ahStates[a/4] >> (a%4)*2))
-        #define SetState(a,b)       (ahStates[a/4] = (ahStates[a/4] & (HSTATE_MASK << (a%4)*2 | HSTATE_MASK >> 8-(a%4)*2) | b << (a%4)*2))
-
-
-
-        /*********************/
-        /* uncertain file(s) */
-        /*********************/
-        #define MAX_UNCERTAIN_FILES 0x10 /* probably never more that one uncertain file at the time */
-
-        typedef struct _uncertain
-        {
-            SFN             hFile;
-            ULONG           offsetNEHdr;
-            PSZ             pszName;
-            unsigned int    fMZ:1;
-            unsigned int    fPE:1;
-        } UNCERTAIN, *PUNCERTAIN;
-
-        extern UNCERTAIN ahUncertain[MAX_UNCERTAIN_FILES];
-
-        ULONG getFreeUncertainEntry(void);
-        ULONG freeUncertainEntry(SFN hFile);
-        ULONG findUncertainEntry(SFN hFile);
+        #define GetState(a)         (HSTATE_UMASK & (achHandleStates[(a)/8] >> ((a)%8)))
+        #define SetState(a,b)       (achHandleStates[(a)/8] = (achHandleStates[(a)/8] & (HSTATE_MASK << ((a)%8) | HSTATE_MASK >> 8-((a)%8)) | ((b) & 0x1) << ((a)%8)))
 
 
         /**************/
@@ -68,18 +45,19 @@
             /* misc */
             PMTE pMTE;                      /* pointer to MTE if we got one - may be NULL */
 
-            /* LXFile object */
-            LXFile lxfile;
+            /* Pe2Lx object */
+            Pe2Lx *pPe2Lx;
         } PENODE, *PPENODE;
 
         #define SIZEOF_NODE (sizeof(NODE))
 
         ULONG       insertNode(PPENODE pNode);
-        ULONG       deleteNode(SFN key);
+        ULONG       deleteNode(SFN key);        /* removes from tree and freeNode */
         PPENODE     getNodePtr(SFN key);
         PPENODE     findNodePtr(const char *pszFilename);
         ULONG       depthPE(void);
         PPENODE     allocateNode(void);
+        ULONG       freeNode(PPENODE pNode);    /* don't remove from tree! */
 
         /* if sequential insertion - this will give a lower tree. */
         /* testing shows that 3 gives best results for 27 to 134 nodes */
