@@ -125,5 +125,8 @@ void WIN32API SetCustomFullScreenMode(DWORD dwWidth, DWORD dwHeight, DWORD dwBPP
 //Force DirectSurface Lock & Unlock methods to hide & show the mouse cursor
 BOOL WIN32API SetCustomHideCursorOnLock(BOOL state);
 
+//Call to enable access to physical disks or volumes (default is disabled)
+void WIN32API EnablePhysicalDiskAccess(BOOL fEnable);
+
 #endif  /*__CUSTOMBUILD_H__*/
 
