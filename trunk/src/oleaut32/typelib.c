@@ -67,24 +67,6 @@ DECLARE_DEBUG_CHANNEL(typelib);
 
 #ifdef __WIN32OS2__
 #include <neexe.h>
-#undef FIXME
-#undef TRACE
-#ifdef DEBUG
-// PH 2001-11-30
-// this macro definition causes the control leave the scope of a
-// non-curly-braced preceeding if statement. Therefore,
-//   if (p!=NULL) 
-//      TRACE("p->a=%d", p->a)
-// crashes.
-//
-// !!! ENSURE TRACES AND FIXMES WITH PRECEEDING IF STATEMENT 
-// !!! ARE PUT INTO CURLY BRACES
-#define TRACE WriteLog("OLEAUT32: %s", __FUNCTION__); WriteLog
-#define FIXME WriteLog("OLEAUT32: FIXME %s", __FUNCTION__); WriteLog
-#else
-#define TRACE 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
-#define FIXME 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
-#endif
 #endif
 
 #ifndef __WIN32OS2__
@@ -2373,10 +2355,8 @@ static void SLTG_DoRefs(SLTG_RefInfo *pRef, ITypeInfoImpl *pTI,
 			       sizeof(**ppRefType));
 
 	name += SLTG_ReadStringA(name, &refname);
-        if(sscanf(refname, "*\\R%x*#%x", &lib_offs, &type_num) != 2)
-        {
-          FIXME("Can't sscanf ref\n");
-        }
+	if(sscanf(refname, "*\\R%x*#%x", &lib_offs, &type_num) != 2)
+	    FIXME("Can't sscanf ref\n");
 	if(lib_offs != 0xffff) {
 	    TLBImpLib **import = &pTI->pTypeLib->pImpLibs;
 
@@ -2402,10 +2382,8 @@ static void SLTG_DoRefs(SLTG_RefInfo *pRef, ITypeInfoImpl *pTI,
 			pNameTable + lib_offs + 40);
 		}
 		len = strlen(fname);
-                if(fname[len-1] != '#')
-                {
-                  FIXME("fname = %s\n", fname);
-                }
+		if(fname[len-1] != '#')
+		    FIXME("fname = %s\n", fname);
 		fname[len-1] = '\0';
 		(*import)->name = TLB_MultiByteToBSTR(fname);
 	    }
@@ -2420,9 +2398,7 @@ static void SLTG_DoRefs(SLTG_RefInfo *pRef, ITypeInfoImpl *pTI,
 	ppRefType = &(*ppRefType)->next;
     }
     if((BYTE)*name != SLTG_REF_MAGIC)
-    {
       FIXME("End of ref block magic = %x\n", *name);
-    }
     dump_TLBRefType(pTI->reflist);
 }
 
@@ -2449,10 +2425,8 @@ static char *SLTG_DoImpls(char *pBlk, ITypeInfoImpl *pTI,
 
         if(info->next == 0xffff)
 	    break;
-        if(OneOnly)
-        {
-          FIXME("Interface inheriting more than one interface\n");
-        }
+	if(OneOnly)
+	    FIXME("Interface inheriting more than one interface\n");
 	info = (SLTG_ImplInfo*)(pBlk + info->next);
     }
     info++; /* see comment at top of function */
@@ -2906,13 +2880,10 @@ static ITypeLib2* ITypeLib2_Constructor_SLTG(LPVOID pLib, DWORD dwTLBLength)
 	(pTIHeader->typeflags1 >> 3) | (pTIHeader->typeflags2 << 5);
       
       if((pTIHeader->typeflags1 & 7) != 2)
-      {
-        FIXME("typeflags1 = %02x\n", pTIHeader->typeflags1);
-      }
+	FIXME("typeflags1 = %02x\n", pTIHeader->typeflags1);
       if(pTIHeader->typeflags3 != 2)
-      {
-        FIXME("typeflags3 = %02x\n", pTIHeader->typeflags3);
-      }
+	FIXME("typeflags3 = %02x\n", pTIHeader->typeflags3);
+
       TRACE("TypeInfo %s of kind %s guid %s typeflags %04x\n",
 	    debugstr_w((*ppTypeInfoImpl)->Name),
 	    typekind_desc[pTIHeader->typekind],
@@ -3910,9 +3881,7 @@ static HRESULT WINAPI ITypeInfo_fnGetIDsOfNames( ITypeInfo2 *iface,
         }
         WARN("Could not search inherited interface!\n");
     } else
-    {
-      WARN("no names found\n");
-    }
+        WARN("no names found\n");
     return DISP_E_UNKNOWNNAME;
 }
 
@@ -4044,12 +4013,10 @@ static HRESULT WINAPI ITypeInfo_fnInvoke(
 			args[i+1] = (DWORD)(pVarResult+(i-pDispParams->cArgs));
 		}
 	    }
-            if (pFDesc->funcdesc.cParamsOpt)
-            {
+	    if (pFDesc->funcdesc.cParamsOpt)
 		FIXME("Does not support optional parameters (%d)\n",
 			pFDesc->funcdesc.cParamsOpt
-                     );
-            }
+		);
 
 	    res = _invoke((*(DWORD***)pIUnk)[pFDesc->funcdesc.oVft/4],
 		    pFDesc->funcdesc.callconv,
@@ -4100,10 +4067,8 @@ static HRESULT WINAPI ITypeInfo_fnInvoke(
 	       disp,memid,&IID_NULL,LOCALE_USER_DEFAULT,dwFlags,pDispParams,
 	       pVarResult,pExcepInfo,pArgErr
 	   );
-           if (hr)
-           {
-            FIXME("IDispatch::Invoke failed with %08lx. (Could be not a real error?)\n",hr);
-           }
+	   if (hr)
+	       FIXME("IDispatch::Invoke failed with %08lx. (Could be not a real error?)\n",hr);
 	   IDispatch_Release(disp);
 	   return hr;
 	}
@@ -4241,10 +4206,8 @@ static HRESULT WINAPI ITypeInfo_fnGetRefTypeInfo(
 	    if(pRefType->reference == hRefType)
 	        break;
 	}
-        if(!pRefType)
-        {
-          FIXME("Can't find pRefType for ref %lx\n", hRefType);
-        }
+	if(!pRefType)
+	  FIXME("Can't find pRefType for ref %lx\n", hRefType);
 	if(pRefType && hRefType != -1) {
             ITypeLib *pTLib;
 

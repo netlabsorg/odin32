@@ -29,26 +29,6 @@
 #define NO_DCDATA
 #include <winuser32.h>
 #include <winres.h>
-
-#undef WARN
-#undef TRACE
-#ifdef DEBUG
-// PH 2001-11-30
-// this macro definition causes the control leave the scope of a
-// non-curly-braced preceeding if statement. Therefore,
-//   if (p!=NULL) 
-//      TRACE("p->a=%d", p->a)
-// crashes.
-//
-// !!! ENSURE TRACES AND FIXMES WITH PRECEEDING IF STATEMENT 
-// !!! ARE PUT INTO CURLY BRACES
-#define TRACE WriteLog("SHELL32: %s", __FUNCTION__); WriteLog
-#define WARN WriteLog("WARNING: SHELL32: %s", __FUNCTION__); WriteLog
-#else
-#define TRACE 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
-#define WARN 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
-#endif
-
 #else
 #include "bitmaps/wine.xpm"
 #endif
