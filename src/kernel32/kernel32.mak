@@ -1,4 +1,4 @@
-# $Id: kernel32.mak,v 1.31 2002-06-06 11:31:12 sandervl Exp $
+# $Id: kernel32.mak,v 1.32 2002-06-26 07:14:18 sandervl Exp $
 
 #
 # Odin32 API
@@ -147,6 +147,8 @@ $(OBJDIR)\dbgwrap.obj \
 $(OBJDIR)\module.obj \
 $(OBJDIR)\hmmailslot.obj \
 $(OBJDIR)\mailslot.obj \
+$(OBJDIR)\oslibtime.obj \
+$(OBJDIR)\conodin32.obj \
 $(OBJDIR)\kernelrsrc.obj
 
 
