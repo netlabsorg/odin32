@@ -1,4 +1,16 @@
- /* $Id: changelog,v 1.965 2000-05-29 21:30:14 mike Exp $ */
+ /* $Id: changelog,v 1.966 2000-05-29 22:37:02 sandervl Exp $ */
+
+ 2000-05-29: Jens Wiessner <wiessnej@rfi.de>
+    - URLMON:   Added (Wine 26/05/2000)
+    - IMAGEHLP: Updated (Wine 26/05/2000)
+
+ 2000-05-29: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: Make resource section read/write
+                GDI32 changes some bitmap structures to avoid problems in Open32
+                -> causes crashes if resource section is readonly
+                -> make it readonly again when gdi32 has been rewritten
+    - GDI32:    StretchDIBits bugfix (check if return value equals src height; not destination)
+    - USER32:   Groupbox should return HT_TRANSPARENT during WM_NCHITTEST
 
  2000-05-28: Michal Necasek <mike@mendelu.cz>
     - DINPUT:   Discard messages received multiple times. Fixes keyboard
