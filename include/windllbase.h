@@ -1,4 +1,4 @@
-/* $Id: windllbase.h,v 1.3 1999-11-09 14:14:17 sandervl Exp $ */
+/* $Id: windllbase.h,v 1.4 1999-11-22 20:36:53 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
@@ -80,6 +80,7 @@ virtual BOOL      isLxDll() = 0;
 virtual BOOL      isDll();
 
 static  void      renameDll(char *dllname, BOOL fWinToOS2=TRUE);
+static  void      setDefaultRenaming();
 
 static  Win32DllBase *findModule(char *dllname);
 static  Win32DllBase *findModule(HINSTANCE hinstance);
