@@ -1,4 +1,4 @@
-/* $Id: hmfile.cpp,v 1.12 2000-07-15 17:12:48 sandervl Exp $ */
+/* $Id: hmfile.cpp,v 1.13 2000-07-17 00:34:05 phaller Exp $ */
 
 /*
  * File IO win32 apis
@@ -421,10 +421,10 @@ BOOL HMDeviceFileClass::ReadFile(PHMHANDLEDATA pHMHandleData,
            lpOverlapped));
 
   //SvL: It's legal for this pointer to be NULL
-  if(lpNumberOfBytesRead) {
-	lpNumberOfBytesRead = 0;
-  }
-  else  lpNumberOfBytesRead = &bytesread;
+  if(lpNumberOfBytesRead)
+    *lpNumberOfBytesRead = 0;
+  else  
+    lpNumberOfBytesRead = &bytesread;
 
   if((pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && !lpOverlapped) {
 	dprintf(("FILE_FLAG_OVERLAPPED flag set, but lpOverlapped NULL!!"));
@@ -544,10 +544,10 @@ BOOL HMDeviceFileClass::WriteFile(PHMHANDLEDATA pHMHandleData,
            lpOverlapped));
 
   //SvL: It's legal for this pointer to be NULL
-  if(lpNumberOfBytesWritten) {
-	lpNumberOfBytesWritten = 0;
-  }
-  else  lpNumberOfBytesWritten = &byteswritten;
+  if(lpNumberOfBytesWritten)
+    *lpNumberOfBytesWritten = 0;
+  else  
+    lpNumberOfBytesWritten = &byteswritten;
 
   if((pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && !lpOverlapped) {
 	dprintf(("FILE_FLAG_OVERLAPPED flag set, but lpOverlapped NULL!!"));

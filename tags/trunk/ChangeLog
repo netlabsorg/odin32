@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.1033 2000-07-16 23:18:14 bird Exp $ */
+ /* $Id: ChangeLog,v 1.1034 2000-07-17 00:34:03 phaller Exp $ */
+
+ 2000-07-17: Patrick Haller <phaller@gmx.net>
+    - KERNEL32: fixed ReadFile/WriteFile bugfix
 
  2000-07-16: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Win32k:   Created a development branch called "Grace" and checked my
