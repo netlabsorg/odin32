@@ -1,4 +1,4 @@
-/* $Id: hmcomm.cpp,v 1.21 2001-11-29 13:38:50 sandervl Exp $ */
+/* $Id: hmcomm.cpp,v 1.22 2001-11-30 13:52:32 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -317,7 +317,7 @@ BOOL HMDeviceCommClass::WriteFile(PHMHANDLEDATA pHMHandleData,
 
   if(lpNumberOfBytesWritten) {
        *lpNumberOfBytesWritten = (ret) ? ulBytesWritten : 0;
-       dprintf2(("KERNEL32:HMDeviceCommClass::WriteFile %d bytes written", ulBytesWritten));
+       dprintf2(("KERNEL32:HMDeviceCommClass::WriteFile %d byte(s) written", *lpNumberOfBytesWritten));
   }
   if(ret == FALSE) {
        dprintf(("!ERROR!: WriteFile failed with rc %d", GetLastError()));
@@ -411,12 +411,21 @@ BOOL HMDeviceCommClass::ReadFile(PHMHANDLEDATA pHMHandleData,
     dprintf(("!WARNING!: lpOverlapped != NULL & !FILE_FLAG_OVERLAPPED; sync operation"));
   }
 
+  RXQUEUE qInfo;
+  ULONG ulLen = sizeof(qInfo);
+  ULONG rc = OSLibDosDevIOCtl( pHMHandleData->hHMHandle,
+                        IOCTL_ASYNC,
+                        ASYNC_GETINQUECOUNT,
+                        0,0,0,
+                        &qInfo,ulLen,&ulLen);
+  dprintf(("ASYNC_GETINQUECOUNT -> qInfo.cch %d (queue size %d) rc %d", qInfo.cch, qInfo.cb, rc));
+
   ret = OSLibDosRead(pHMHandleData->hHMHandle, (LPVOID)lpBuffer, nNumberOfBytesToRead,
                      &ulBytesRead);
 
   if(lpNumberOfBytesRead) {
        *lpNumberOfBytesRead = (ret) ? ulBytesRead : 0;
-       dprintf2(("KERNEL32:HMDeviceCommClass::ReadFile %d bytes read", ulBytesRead));
+       dprintf2(("KERNEL32:HMDeviceCommClass::ReadFile %d bytes read", *lpNumberOfBytesRead));
   }
   if(ret == FALSE) {
        dprintf(("!ERROR!: ReadFile failed with rc %d", GetLastError()));
@@ -616,6 +625,22 @@ DWORD CALLBACK SerialCommThread(LPVOID lpThreadParam)
 
           DosSleep(TIMEOUT_COMM);
       }
+      if(pDevData->fClosing) {
+          dprintf(("Cleaning up async comm thread"));
+          SetEvent(hEvent); //signal to CloseHandle that we're done
+          return 0;
+      }
+      else
+      if(pDevData->fCancelIo) {
+          pDevData->overlapped.Internal = 0;
+          pDevData->dwLastError = ERROR_OPERATION_ABORTED;
+          if(pDevData->lpfdwEvtMask) *pDevData->lpfdwEvtMask = 0;
+          dprintf(("Overlapped: WaitCommEvent ERROR_OPERATION_ABORTED"));
+
+          //signal to app that a comm event has occurred
+          SetEvent(hOverlappedEvent);
+      }
+      else
       if((dwEvent & dwMask) && (dwMask == pDevData->dwEventMask)) {
           pDevData->overlapped.Internal |= (rc==0) ? (dwEvent & dwMask) : 0;
           pDevData->dwLastError = rc;
@@ -875,11 +900,34 @@ BOOL HMDeviceCommClass::SetCommMask( PHMHANDLEDATA pHMHandleData,
 BOOL HMDeviceCommClass::PurgeComm( PHMHANDLEDATA pHMHandleData,
                                    DWORD fdwAction)
 {
-  dprintf(("HMDeviceCommClass::PurgeComm (flags 0x%x) unimplemented stub!",fdwAction));
+  ULONG ulParLen, ulDataLen, rc = ERROR_SUCCESS;
+  BYTE par  = 0;
+  WORD data = 0;
+
+  dprintf(("HMDeviceCommClass::PurgeComm (flags 0x%x) partly implemented",fdwAction));
   // ToDo: find a way to stop the current transmision didn't find
   // any clue how to in Control Program Guide and reference
 
-  return(TRUE);
+  ulParLen  = sizeof(par);
+  ulDataLen = sizeof(data);
+  if(fdwAction & PURGE_TXCLEAR) {
+    rc = OSLibDosDevIOCtl( pHMHandleData->hHMHandle,
+                           IOCTL_GENERAL,
+                           DEV_FLUSHOUTPUT,
+                           &par,ulParLen,&ulParLen,
+                           &data,ulDataLen,&ulDataLen);
+  }
+  if(fdwAction & PURGE_RXCLEAR) {
+    rc = OSLibDosDevIOCtl( pHMHandleData->hHMHandle,
+                           IOCTL_GENERAL,
+                           DEV_FLUSHINPUT,
+                           &par,ulParLen,&ulParLen,
+                           &data,ulDataLen,&ulDataLen);
+  }
+  if(rc) {
+      dprintf(("!WARNING! OSLibDosDevIOCtl failed with rc %d", rc)); 
+  }
+  return (rc == ERROR_SUCCESS);
 }
 //******************************************************************************
 //******************************************************************************
