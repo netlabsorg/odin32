@@ -1,8 +1,8 @@
-/* $Id: elf.h,v 1.4 2000-02-18 20:52:35 bird Exp $
+/* $Id: elf.h,v 1.5 2000-02-26 00:46:30 bird Exp $
  *
  * ELF stuff.
  *
- * Copyright (c) 1999 knut st. osmundsen
+ * Copyright (c) 1999-2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -241,17 +241,94 @@ typedef struct                          /* 0x0c */
 /*
  * ELF Program Header
  */
-typedef struct
+typedef struct                          /* 0x20 */
 {
-    Elf32_Word      p_type;
-    Elf32_Off       p_offset;
-    Elf32_Addr      p_vaddr;
-    Elf32_Addr      p_paddr;
-    Elf32_Word      p_filesz;
-    Elf32_Word      p_memsz;
-    Elf32_Word      p_flags;
-    Elf32_Word      p_align;
+    Elf32_Word      p_type;             /* 0x00  Tells what this header describes or how to interpret it. */
+    Elf32_Off       p_offset;           /* 0x04  Offset of the first byte of this segment. */
+    Elf32_Addr      p_vaddr;            /* 0x08  Virtual address of the segment. */
+    Elf32_Addr      p_paddr;            /* 0x0c  Physical address. Usually ignorable. */
+    Elf32_Word      p_filesz;           /* 0x10  Count of bytes in the file image of this segment. Zero allowed. */
+    Elf32_Word      p_memsz;            /* 0x14  Count of bytes in  the memory image of this segment. Zero allowed. */
+    Elf32_Word      p_flags;            /* 0x18  Flags relevant to the segement. */
+    Elf32_Word      p_align;            /* 0x1c  Alignment. 0 and 1 means no alignment. */
 } Elf32_Phdr;
+
+/* p_type - segment types */
+#define PT_NULL         0               /* Unused header. */
+#define PT_LOAD         1               /* Loadable segment. p_filesz, p_memsz and p_vaddr applies. */
+#define PT_DYNAMIC      2               /* Dynamic linking information. */
+#define PT_INTERP       3               /* Interpreter path. */
+#define PT_NOTE         4               /* Auxiliary information. */
+#define PT_SHLIB        5               /* Reserved. */
+#define PT_PHDR         6               /* This header specifies the location and size of the program header table in file and memory. */
+#define PT_LOPROC       0x70000000      /* Reserved processor-specific semantics range start. */
+#define PT_HIPROC       0x7fffffff      /* Reserved processor-specific semantics range end (included). */
+
+/* p_flags - permission flags */
+#define PF_X            1               /* Executable */
+#define PF_W            2               /* Writeable */
+#define PF_R            4               /* Readable */
+
+
+/*
+ * Dynamic Structure
+ */
+typedef struct                          /* 0x08 */
+{
+    Elf32_Sword     d_tag;              /* 0x00 Tag type. */
+    union
+    {
+        Elf32_Word  d_val;              /* 0x04 Value, interpreted according to the tag type. */
+        Elf32_Addr  d_ptr;              /* 0x04 Virtual address, interpreted according to the tag type. */
+    } d_un;
+} Elf32_Dyn;
+
+/* d_tag - tag types */                 /* d_un  exe so: '-' is ignored; '+' is mandatory; '*' is optional. */
+#define DT_NULL         0               /*   -    -   -   Marks the end of the dynamic array. */
+#define DT_NEEDED       1               /* d_val  *   *   This element holds the string table offset of a
+                                                          null-terminated  string, giving the name of a needed
+                                                          library. The offset is an index into the table
+                                                          recoreded in the DT_STRTAB entry. */
+#define DT_PLTRELSZ     2               /* d_val  *   *   This element holds the total size, in bytes, of the
+                                                          relocation entries associated with the procedure
+                                                          linkage table. If an entry of type DT_JMPREL is
+                                                          present, a DT_PLTRELSZ must accompany it. */
+#define DT_PLTGOT       3               /* d_ptr  *   *    */
+#define DT_HASH         4               /* d_ptr  +   +    */
+#define DT_STRTAB       5               /* d_ptr  +   +   This element holds the address of the string table.
+                                                          Symbol names, library names, and other strings reside
+                                                          in this table. */
+#define DT_SYMTAB       6               /* d_ptr  +   +    */
+#define DT_RELA         7               /* d_ptr  +   *    */
+#define DT_RELASZ       8               /* d_val  +   *    */
+#define DT_RELAENT      9               /* d_val  +   *    */
+#define DT_STRSZ        10              /* d_val  +   +    */
+#define DT_SYMENT       11              /* d_val  +   +    */
+#define DT_INIT         12              /* d_ptr  *   *   This element holds the address of the initialization function. */
+#define DT_FINI         13              /* d_ptr  *   *   This element holds the address of the termination function. */
+#define DT_SONAME       14              /* d_val  -   *   This element holds the string table offset of a
+                                                          null-terminated string, giving the name of the shared
+                                                          object. The offset is an index into the table recorded
+                                                          in the DT_STRTAB entry. */
+#define DT_RPATH        15              /* d_val  +   +   This element holds the string table offset of a null-terminated
+                                                          search library search path string. The offset is an index int
+                                                          the table recorded in the DT_STRTAB entry. */
+#define DT_SYMBOLIC     16              /*   -    -   *   This element's presence in a shared object library alters the
+                                                          dynamic linker's symbol resolution algorithm for references
+                                                          within the library. Instead of starting a symbol search with
+                                                          the executable file, the dynamic linker starts from the shared
+                                                          object file itself. If the shared object fails to supply the
+                                                          referenced symbol, the dynamic linker then searches the
+                                                          executable file and other shared objects as usual. */
+#define DT_REL          17              /* d_ptr  +   *    */
+#define DT_RELSZ        18              /* d_val  +   *    */
+#define DT_RELENT       19              /* d_val  +   *    */
+#define DT_PLTREL       20              /* d_val  *   *    */
+#define DT_DEBUG        21              /* d_ptr  *   -    */
+#define DT_TEXTREL      22              /*   -    *   *    */
+#define DT_JMPREL       23              /* d_ptr  *   *    */
+#define DT_LOPROC       0x70000000      /* Reserved processor-specific semantics range start. */
+#define DT_HIPROC       0x7fffffff      /* Reserved processor-specific semantics range end (included). */
 
 #pragma pack()
 #endif /*_elf_h_*/
