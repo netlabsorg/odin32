@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.1961 2002-02-07 11:19:58 sandervl Exp $ */
+/* $Id: changelog,v 1.1962 2002-02-08 00:46:32 bird Exp $ */
+
+ 2002-02-08: knut st. osmundsen <bird@anduin.net>
+    - WRC:      o Added codepage.c from kernel32 as a hotfix to the
+                  unresolved external issue. Only the get_char_typeW
+                  is enabled.
 
  2002-02-07: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Thread change: determine if thread callback is inside
