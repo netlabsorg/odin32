@@ -1,4 +1,4 @@
-/* $Id: job.cmd,v 1.4 2000-09-07 17:16:49 bird Exp $
+/* $Id: job.cmd,v 1.5 2001-01-08 22:08:28 bird Exp $
  *
  * Main job for building OS/2.
  *
@@ -33,8 +33,12 @@
     if (rc <> 0) then call failure rc, 'Clean failed.';
     'call' sScriptDir || 'odin32get.cmd'
     if (rc <> 0) then call failure rc, 'Get failed.';
+    'call' sScriptDir || 'odin32bldnr.cmd inc'
+    if (rc <> 0) then call failure rc, 'Build Nr inc failed.';
     'call' sScriptDir || 'odin32build.cmd 2>&1 | tee /a ' || sLogFile; /* 4OS/2 tee command. */
     if (rc <> 0) then call failure rc, 'Build failed.';
+    'call' sScriptDir || 'odin32bldnr.cmd commit'
+    if (rc <> 0) then call failure rc, 'Build Nr commit failed.';
 
     /*
      * Pack and upload it.
