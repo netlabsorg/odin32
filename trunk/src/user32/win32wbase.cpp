@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.316 2002-03-07 19:41:18 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.317 2002-03-18 15:26:30 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2652,7 +2652,7 @@ BOOL Win32BaseWindow::GetWindowPlacement(LPWINDOWPLACEMENT wndpl)
    wndpl->ptMinPosition    = windowpos.ptMinPosition;
    wndpl->ptMaxPosition    = windowpos.ptMaxPosition;
    //Must be in parent coordinates (or screen if no parent); verified in NT4, SP6
-   wndpl->rcNormalPosition = rectWindow;
+   wndpl->rcNormalPosition = windowpos.rcNormalPosition;
 
    return TRUE;
 }
@@ -3347,7 +3347,9 @@ BOOL Win32BaseWindow::EnableWindow(BOOL fEnable)
 //******************************************************************************
 BOOL Win32BaseWindow::CloseWindow()
 {
-  return OSLibWinMinimizeWindow(getOS2FrameWindowHandle());
+     if (::GetWindowLongW( getWindowHandle() , GWL_STYLE ) & WS_CHILD) return FALSE;
+     ShowWindow( SW_MINIMIZE );
+     return TRUE;
 }
 //******************************************************************************
 //TODO: Not be 100% correct; should return active window of current thread
