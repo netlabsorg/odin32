@@ -1,19 +1,13 @@
-/* $Id: odin32ftp.cmd,v 1.3 2002-06-26 22:10:45 bird Exp $
+/* $Id: odin32ftp.cmd,v 1.2 2001-01-10 14:17:23 bird Exp $
  *
  * Old FTP routines using only RexxFTP.
  *
- * Copyright (c) 1999-2002 knut st. osmundsen (bird@anduin.net)
+ * Copyright (c) 1999-2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 /*Trace 'A'*/
-
-/* get build settings */
-sDate = value('BUILD_DATE',, 'OS2ENVIRONMENT');
-sType = value('BUILD_TYPE',, 'OS2ENVIRONMENT');
-if ((sDate = '') | (sType = '')) then do say 'BUILD_DATE/BUILD_TYPE unset, you didn''t start job.cmd.'; exit(16); end
-
 
 rc = RxFuncAdd('FtpLoadFuncs','rxFtp','FtpLoadFuncs');
 rc = FtpLoadFuncs();
@@ -21,8 +15,8 @@ rc = FtpLoadFuncs();
 parse arg sLoc
 
 do i = 1 to 7
-    sFile   = 'odin32bin-'|| sDate;
-    sDelete = 'odin32bin-'|| DateSub(sDate, 7);
+    sFile   = 'odin32bin-'|| DATE(S);
+    sDelete = 'odin32bin-'|| DateSub(DATE('S'), 7);
     sFileDbg   = sFile   || '-debug.zip';
     sDeleteDbg = sDelete || '-debug.zip';
     sFileRel   = sFile   || '-release.zip';
@@ -75,7 +69,7 @@ putfunction: procedure
         if (rc = 1) then
         do
             rc = 0;
-            if (sType <> 'D') then
+            if (DATE('B')//7 <> 5) then
                 rc = FtpDelete(sFileRemote);
             rcPut = FtpPut(sFile, sFileRemote, 'Binary');
             if (rcPut <> 0) then
@@ -108,7 +102,7 @@ failure: procedure
 parse arg rc, sText, iftperrno;
     say 'rc='rc sText
     say 'FTPerrno:'||iftperrno
-return;
+    return;
 
 
 
@@ -157,7 +151,7 @@ GetPassword: procedure;
         end
     end
     call stream sPasswd, 'c', 'close';
-return sRet;
+    return sRet;
 
 
 /**
@@ -201,8 +195,8 @@ parse arg sDate, cDays
         else
             sDate = sDate - iDayInMonth - 8869;   /* last day of last year */
     end
-return sDate;
 
+    return sDate;
 
 /*
  * Gets the number of days in a given month.
@@ -227,6 +221,6 @@ DateGetDaysInMonth: procedure
         otherwise
             cDays = 31;
     end /* select */
-return cDays;
+    return cDays;
 
 

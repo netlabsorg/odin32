@@ -1,19 +1,13 @@
-/* $Id: odin32ftp2.cmd,v 1.19 2002-06-26 22:11:28 bird Exp $
+/* $Id: odin32ftp2.cmd,v 1.18 2001-10-26 22:19:29 bird Exp $
  *
  * Uploads the relase and debug builds to the FTP sites.
  *
- * Copyright (c) 1999-2002 knut st. osmundsen (bird@anduin.net)
+ * Copyright (c) 1999-2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 /*Trace 'A'*/
-
-/* get build settings */
-sDate = value('BUILD_DATE',, 'OS2ENVIRONMENT');
-sType = value('BUILD_TYPE',, 'OS2ENVIRONMENT');
-if ((sDate = '') | (sType = '')) then do say 'BUILD_DATE/BUILD_TYPE unset, you didn''t start job.cmd.'; exit(16); end
-
 
 rc = RxFuncAdd('FtpLoadFuncs','rxFtp','FtpLoadFuncs');
 rc = FtpLoadFuncs();
@@ -23,29 +17,29 @@ parse arg sLoc
 /*
  * Determin files to upload and files to delete.
  */
-if (sType = 'W') then
+if (DATE('B')//7 = 3) then              /* Thursdays only! */
 do  /* weekly .wpi build */
     asUploads.0 = 3;
     asUploads.1 = 'ChangeLog';
-    asUploads.2 = 'odin32bin-'sDate'-release.wpi';
-    asUploads.3 = 'odin32bin-'sDate'-debug.wpi';
+    asUploads.2 = 'odin32bin-'DATE('S')'-release.wpi';
+    asUploads.3 = 'odin32bin-'DATE('S')'-debug.wpi';
     sDirectory  = 'weekly';
 end
 else
 do  /* daily .zip build */
     asUploads.0 = 3;
     asUploads.1 = 'ChangeLog';
-    asUploads.2 = 'odin32bin-'sDate'-release.zip';
-    asUploads.3 = 'odin32bin-'sDate'-debug.zip';
+    asUploads.2 = 'odin32bin-'DATE('S')'-release.zip';
+    asUploads.3 = 'odin32bin-'DATE('S')'-debug.zip';
     sDirectory  = 'daily';
 end
 
 asDelete.0 = 25;
 do i = 1 to 12
     j = i * 2;
-    asDelete.j = 'odin32bin-'DateSub(sDate, 31+i)'-release.zip';
+    asDelete.j = 'odin32bin-'DateSub(Date('S'), 31+i)'-release.zip';
     j = j + 1;
-    asDelete.j = 'odin32bin-'DateSub(sDate, 31+i)'-debug.zip';
+    asDelete.j = 'odin32bin-'DateSub(Date('S'), 31+i)'-debug.zip';
 end
 
 
@@ -110,8 +104,8 @@ cleanSF: procedure
         end
         'echo ok >' sLockFile
     end
-return 0;
 
+    return 0;
 
 
 /*
@@ -133,8 +127,8 @@ putSF: procedure
         end
         'echo ok >' sLockFile
     end
-return 0;
 
+    return 0;
 
 
 /*
@@ -167,7 +161,8 @@ forwardSF: procedure
         end
         'echo ok >' sLockFile;
     end
-return 0;
+
+    return 0;
 
 
 
@@ -214,8 +209,8 @@ putFtp: procedure
     end
     else
         rc = 0;
-return 0;
 
+    return 0;
 
 
 /*
@@ -267,8 +262,8 @@ cleanFtp: procedure expose asDelete.;
     end
     else
         rc = 0;
-return rc;
 
+    return rc;
 
 
 /*
@@ -319,8 +314,7 @@ putRexxFtp: procedure
     end
     else
         rc = 0;
-return 0;
-
+    return 0;
 
 /*
  * Report error. (non-fatal)
@@ -329,7 +323,7 @@ failure: procedure
 parse arg rc, sText, iftperrno;
     say 'rc='rc sText
     say 'FTPerrno:'||iftperrno
-return;
+    return;
 
 
 /*
@@ -375,16 +369,16 @@ GetPassword: procedure;
         end
     end
     call stream sPasswd, 'c', 'close';
-return sRet;
+    return sRet;
 
 
-testdatesub: procedure
+testdatesub:
     sDate='20010131';
 
     do i = 1 to 365*2+1
         say sDate '-' i '=' DateSub(sDate, i);
     end
-exit;
+    exit;
 
 
 /**
@@ -428,8 +422,8 @@ parse arg sDate, cDays
         else
             sDate = sDate - iDayInMonth - 8869;   /* last day of last year */
     end
-return sDate;
 
+    return sDate;
 
 /*
  * Gets the number of days in a given month.
@@ -454,5 +448,5 @@ DateGetDaysInMonth: procedure
         otherwise
             cDays = 31;
     end /* select */
-return cDays;
+    return cDays;
 

@@ -1,4 +1,4 @@
-/* $Id: odin32pack.cmd,v 1.23 2002-06-26 22:11:57 bird Exp $
+/* $Id: odin32pack.cmd,v 1.22 2002-01-06 16:53:23 bird Exp $
  *
  * Make the two zip files.
  *
@@ -10,23 +10,19 @@
  *
  */
     sStartDir = directory();
-    sDate = value('BUILD_DATE',, 'OS2ENVIRONMENT');
-    sType = value('BUILD_TYPE',, 'OS2ENVIRONMENT');
-    if ((sDate = '') | (sType = '')) then do say 'BUILD_DATE/BUILD_TYPE unset, you didn''t start job.cmd.'; exit(16); end
 
-    if (sType = 'W') then
-        sTypeOdinCMD = '-Weekly';
+    if (DATE('B')//7 = 3) then  /* weekly on Thursdays */
+        sType = '-Weekly';
     else
-        sTypeOdinCMD = '-Daily';
-
+        sType = '-Daily';
 
     /*
      * Make .WPI files.
      */
     call ChDir 'tools\install';
-    'call odin.cmd 'sTypeOdinCMD' debug'
+    'call odin.cmd 'sType' debug'
     if (RC <> 0) then call failure rc, 'odin.cmd debug failed.';
-    'call odin.cmd 'sTypeOdinCMD' release'
+    'call odin.cmd 'sType' release'
     if (RC <> 0) then call failure rc, 'odin.cmd release failed.';
     'move *.wpi' sStartDir;
     if (RC <> 0) then call failure rc, 'failed to move the *.wpi ->' sStartDir;
@@ -43,7 +39,7 @@
     /*
      * Make copy.
      */
-    if (sType = 'W') then
+    if (DATE('B')//7 = 3) then
         'copy *.wpi e:\DailyBuildArchive\'
     else
         'copy *.zip e:\DailyBuildArchive\'
@@ -52,10 +48,10 @@
     exit(0);
 
 
-packdir: procedure expose sStartDir sDate sType;
-parse arg sDir, sBldType;
+packdir: procedure expose sStartDir;
+parse arg sDir, sType;
 
-    sZipFile = directory() || '\odin32bin-' || sDate || '-' || sBldType || '.zip';
+    sZipFile = directory() || '\odin32bin-' || DATE(S) || '-' || sType || '.zip';
 
     /*
      * Change into the directory we're to pack and do some fixups
@@ -104,13 +100,13 @@ parse arg sDir, sBldType;
     if (RC <> 0) then
     do
         rc2 = rc;
-        call backout sDir, sBldType, sRoot;
+        call backout sDir, sType, sRoot;
         call failure rc2, 'renaming system32\glide -> ..\glide_tmp failed';
     end
 
     call copy sRoot'\bin\wgss50.dll', 'system32\wgss50.dll';
     /*call copy sRoot'\bin\odin.ini', 'system32\Odin.ini';*/
-    if (pos('debug', sBldType) > 0) then
+    if (pos('debug', sType) > 0) then
     do
         call copy sRoot'\bin\release\odincrt.dll', 'system32\odincrt.dll'
         call copy sRoot'\bin\release\odincrt.sym', 'system32\odincrt.sym'
@@ -121,12 +117,12 @@ parse arg sDir, sBldType;
     if (RC <> 0) then
     do
         rc2 = rc;
-        call backout sDir, sBldType, sRoot;
+        call backout sDir, sType, sRoot;
         call failure rc2, 'zip...';
     end
 
     /* resotre */
-    call backout sDir, sBldType, sRoot;
+    call backout sDir, sType, sRoot;
 
     /* restore directory */
     call directory(sRoot);
@@ -134,8 +130,8 @@ parse arg sDir, sBldType;
 
 /* backout procedure for packdir */
 backout: procedure;
-    parse arg sDir, sBldType, sRoot
-    if (pos('debug', sBldType) > 0) then
+    parse arg sDir, sType, sRoot
+    if (pos('debug', sType) > 0) then
     do
         'del system32\odincrt.dll'
         'del system32\odincrt.sym'
@@ -147,9 +143,9 @@ backout: procedure;
 /*
  * Pack the 3dx dlls.
  */
-packdir3dx: procedure expose sStartDir sDate sType;
-parse arg sDir, sBldType;
-    sZipFile = directory()||'\odin32bin-' || sDate || '-' || sBldType || '.zip';
+packdir3dx: procedure expose sStartDir;
+parse arg sDir, sType;
+    sZipFile = directory()||'\odin32bin-' || DATE(S) || '-' || sType || '.zip';
 
     sRoot = directory();
     call ChDir sDir
