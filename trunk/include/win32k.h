@@ -1,4 +1,4 @@
-/* $Id: win32k.h,v 1.8 2001-02-20 04:56:28 bird Exp $
+/* $Id: win32k.h,v 1.9 2001-02-20 05:13:15 bird Exp $
  *
  * Top level make file for the Win32k library.
  * Contains library and 32-bit IOCtl definition.
@@ -336,7 +336,6 @@ APIRET APIENTRY  libWin32kTerm(void);
 BOOL   APIENTRY  libWin32kInstalled(void);
 APIRET APIENTRY  libWin32kQueryOptionsStatus(PK32OPTIONS pOptions, PK32STATUS pStatus);
 APIRET APIENTRY  libWin32kSetOptions(PK32OPTIONS pOptions);
-APIRET APIENTRY  libWin32kSetOption(PK32OPTIONS pOptions);
 
 /* "Extra OS2 APIs" */
 APIRET APIENTRY  DosAllocMemEx(PPVOID ppv, ULONG cb, ULONG flag);
