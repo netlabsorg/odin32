@@ -1,4 +1,4 @@
-/* $Id: iphlpapi.cpp,v 1.7 2002-02-21 17:01:57 sandervl Exp $ */
+/* $Id: iphlpapi.cpp,v 1.8 2002-04-28 15:46:31 sandervl Exp $ */
 /*
  *	IPHLPAPI library
  *
@@ -113,7 +113,7 @@ static void i_initializeAdapterInformation(void)
   struct sockaddr_in * sin;
   struct ifmib ifmibget;
   int rc,i;
-  char *buffer,*buffer2;
+  char *buffer=NULL,*buffer2=NULL;
   struct ifnet *pifnet;
   short int cInterfaces;
 #ifndef TCPV40HDRS
