@@ -69,4 +69,30 @@ typedef BOOL (* WIN32API VISRGN_NOTIFY_PROC)(HWND hwnd, BOOL fDrawingAllowed, DW
 //******************************************************************************
 BOOL WIN32API WinSetVisibleRgnNotifyProc(HWND hwnd, VISRGN_NOTIFY_PROC lpNotifyProc, DWORD dwUserData);
 
+
+//
+// PM message definitions for Odin
+//
+
+//PostThreadMessage is done through Open32; which means the message id will be translated
+//(0xc00 added)
+#define OPEN32_MSGDIFF            0xC00
+#define WIN32APP_POSTMSG          (0x1000+OPEN32_MSGDIFF)
+
+//PM doesn't allow SetFocus during WM_SETFOCUS message processing; must delay
+//this by posting a message
+//NOTE Must be smaller than WIN32APP_POSTMSG!
+#define WIN32APP_SETFOCUSMSG      (WIN32APP_POSTMSG-1)
+#define WIN32APP_POSTPONEDESTROY  (WIN32APP_POSTMSG-2)
+#define WIN32APP_DDRAWFULLSCREEN  (WIN32APP_POSTMSG-3)
+
+#define WIN32MSG_MAGICA           0x12345678
+#define WIN32MSG_MAGICW           0x12345679
+
+typedef struct
+{
+   ULONG wParam;
+   ULONG lParam;
+} POSTMSG_PACKET;
+
 #endif //__WINUSER32_H__
