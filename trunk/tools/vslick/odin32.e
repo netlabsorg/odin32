@@ -1,4 +1,4 @@
-/* $Id: odin32.e,v 1.4 2000-05-19 21:22:51 bird Exp $
+/* $Id: odin32.e,v 1.5 2000-07-21 14:56:24 bird Exp $
  *
  * Visual SlickEdit Documentation Macros.
  *
@@ -303,7 +303,7 @@ void odin32_modulebox()
     _begin_line();
     if (file_eq(p_extension, 'asm'))
     {
-        _insert_text("; $Id: odin32.e,v 1.4 2000-05-19 21:22:51 bird Exp $\n");
+        _insert_text("; $Id: odin32.e,v 1.5 2000-07-21 14:56:24 bird Exp $\n");
         _insert_text("; \n");
         _insert_text("; \n");
         _insert_text("; \n");
@@ -316,7 +316,7 @@ void odin32_modulebox()
     }
     else
     {
-        _insert_text("/* $Id: odin32.e,v 1.4 2000-05-19 21:22:51 bird Exp $\n");
+        _insert_text("/* $Id: odin32.e,v 1.5 2000-07-21 14:56:24 bird Exp $\n");
         _insert_text(" * \n");
         _insert_text(" * \n");
         _insert_text(" * \n");
@@ -340,5 +340,5 @@ _command void odin32_maketagfile()
 _command void odin32_setcurrentdir()
 {
     _ini_get_value(_project_name,"COMPILER","WORKINGDIR", workingdir);
-    chdir(workingdir, 1);
+    cd(workingdir);
 }
