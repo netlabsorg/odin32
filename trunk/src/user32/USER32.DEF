@@ -1,4 +1,4 @@
-; $Id: USER32.DEF,v 1.35 2000-07-04 08:42:05 sandervl Exp $
+; $Id: USER32.DEF,v 1.36 2000-08-02 19:41:06 bird Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
@@ -628,6 +628,15 @@ EXPORTS
     MonitorFromPoint              = _MonitorFromPoint@12        @1004
     EnumDisplayMonitors        = _EnumDisplayMonitors@16        @1005
 
+;
+; These are also APIs.
+;
+    _SetMapMode@8                                                @1050
+    _GetMapMode@4                                                @1051
+    _SetViewportExtEx@16                                         @1052
+    _GetViewportExtEx@8                                          @1053
+
+
 ; Wine/Odin helper function
     GetSysColorPen              = _GetSysColorPen@4              @2002
     GetPattern55AABrush         = _GetPattern55AABrush@0         @2003
@@ -648,8 +657,3 @@ EXPORTS
     ;SvL: Used by GDI32
     OSLibGetScreenHeight__Fv                                     @2013
     OSLibGetScreenWidth__Fv                                      @2014
-
-    _SetMapMode@8                                                @2015
-    _GetMapMode@4                                                @2016
-    _SetViewportExtEx@16                                         @2017
-    _GetViewportExtEx@8                                          @2018
