@@ -1,4 +1,4 @@
-/* $Id: docobj.h,v 1.2 1999-09-09 21:04:37 phaller Exp $ */
+/* $Id: docobj.h,v 1.3 2000-03-18 16:57:19 davidr Exp $ */
 
 #ifndef __WINE_DOCOBJ_H
 #define __WINE_DOCOBJ_H
@@ -107,6 +107,7 @@ typedef struct IContinueCallback IContinueCallback, *LPCONTINUECALLBACK;
 DEFINE_GUID(IID_IPrint, 0xb722bcc9,0x4e68,0x101b,0xa2,0xbc,0x00,0xaa,0x00,0x40,0x47,0x70);
 typedef struct IPrint IPrint, *LPPRINT;
 
+DEFINE_GUID( IID_StdOleLink,0x00000300,0,0,0xc0,0,0,0,0,0,0,0x46); 
 
 /*****************************************************************************
  * IOleDocument interface
