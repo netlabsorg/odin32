@@ -1,4 +1,4 @@
-/* $Id: win32wnd.cpp,v 1.26 1999-08-20 20:09:51 sandervl Exp $ */
+/* $Id: win32wnd.cpp,v 1.27 1999-08-22 08:30:52 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -923,13 +923,15 @@ ULONG Win32Window::MsgPaint(ULONG tmp1, ULONG tmp2)
     return SendInternalMessageA(WM_PAINT, 0, 0);
 }
 //******************************************************************************
+//TODO: Is the clipper region of the window DC equal to the invalidated rectangle?
+//      (or are we simply erasing too much here)
 //******************************************************************************
-ULONG Win32Window::MsgEraseBackGround(ULONG hps)
+ULONG Win32Window::MsgEraseBackGround()
 {
     if(isIcon) {
-            return SendInternalMessageA(WM_ICONERASEBKGND, hps, 0);
+            return SendInternalMessageA(WM_ICONERASEBKGND, GetDC(getWindowHandle()), 0);
     }
-    else    return SendInternalMessageA(WM_ERASEBKGND, hps, 0);
+    else    return SendInternalMessageA(WM_ERASEBKGND, GetDC(getWindowHandle()), 0);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1032,7 +1034,20 @@ LRESULT Win32Window::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 
     case WM_ERASEBKGND:
     case WM_ICONERASEBKGND:
-        return 0;
+    {
+      RECT rect;
+
+	if (!windowClass->getBackgroundBrush()) return 0;
+
+        /*  Since WM_ERASEBKGND may receive either a window dc or a    */ 
+        /*  client dc, the area to be erased has to be retrieved from  */
+        /*  the device context.      				   */
+        GetClipBox( (HDC)wParam, &rect );
+
+        FillRect( (HDC)wParam, &rect, windowClass->getBackgroundBrush());
+
+	return 1;
+    }
 
     case WM_NCLBUTTONDOWN:
     case WM_NCLBUTTONUP:
