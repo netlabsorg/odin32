@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.175 1999-09-04 19:23:45 sandervl Exp $ */
+ /* $Id: changelog,v 1.176 1999-09-05 12:04:18 sandervl Exp $ */
+
+ 99-09-05: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32\NEW: Dialog updates (not yet done)
 
  99-09-04: Daniela Engert <dani@ngrt.de>
 	- USER32\NEW: beginning with 'DAXifying' of our windows
