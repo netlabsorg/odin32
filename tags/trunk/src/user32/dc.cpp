@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.100 2001-05-11 13:31:54 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.101 2001-05-11 19:02:01 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -721,6 +721,8 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
         if(lComplexity == RGN_NULL) {
             dprintf (("BeginPaint %x: EMPTY update rectangle (show=%d/%d vis=%d/%d", hWnd,  WinIsWindowVisible(wnd->getOS2FrameWindowHandle()), WinIsWindowVisible(wnd->getOS2WindowHandle()),  WinIsWindowShowing(wnd->getOS2FrameWindowHandle()), WinIsWindowShowing(wnd->getOS2WindowHandle())));
         }
+        else dprintf (("BeginPaint %x: (show=%d/%d vis=%d/%d)", hWnd,  WinIsWindowVisible(wnd->getOS2FrameWindowHandle()), WinIsWindowVisible(wnd->getOS2WindowHandle()),  WinIsWindowShowing(wnd->getOS2FrameWindowHandle()), WinIsWindowShowing(wnd->getOS2WindowHandle())));
+
         selectClientArea(wnd, pHps);
 
 #ifdef DEBUG
