@@ -1,7 +1,9 @@
-/* $Id: OS2WIN.H,v 1.2 1999-05-27 15:17:57 phaller Exp $ */
+/* $Id: OS2WIN.H,v 1.3 1999-05-31 17:04:18 phaller Exp $ */
 
 #ifndef _OS2WIN_H
 #define _OS2WIN_H
+
+#include "misc.h"
 
 #include <windef.h>
 #include <winbase.h>
@@ -12,7 +14,6 @@
 #include <ddeml.h>
 #include <mmsystem.h>
 
-#include "misc.h"
 
 #define OPEN32API       _System
 #define EXPENTRY_O32    _System
