@@ -1,4 +1,4 @@
-/* $Id: hmcomm.cpp,v 1.18 2001-11-28 23:33:35 phaller Exp $ */
+/* $Id: hmcomm.cpp,v 1.19 2001-11-28 23:52:50 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -98,12 +98,16 @@ HMDeviceCommClass::HMDeviceCommClass(LPCSTR lpDeviceName) : HMDeviceHandler(lpDe
     // HandleNamesAddSymbolicLink("\\Device\\ParallelPort3", "COM3");
     
     PSZ pszCOM = strdup("\\\\.\\COMx");
+    PSZ pszCOM2 = strdup("\\\\.\\COMx:");
     for (char ch = '1'; ch <= '9'; ch++)
     {
       pszCOM[7] = ch;
+      pszCOM2[7] = ch;
       HandleNamesAddSymbolicLink(pszCOM, pszCOM+4);
+      HandleNamesAddSymbolicLink(pszCOM2, pszCOM+4);
     }
     free(pszCOM);
+    free(pszCOM2);
   }
 }
 
