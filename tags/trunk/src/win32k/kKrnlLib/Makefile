@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.12 2001-09-27 03:01:41 bird Exp $
+# $Id: Makefile,v 1.13 2001-09-27 03:26:12 bird Exp $
 
 #
 # kKrnlLib.sys makefile.
@@ -67,6 +67,7 @@ OBJS  =\
     $(WIN32KOBJ)\vsprintf.obj \
     $(WIN32KOBJ)\vprintf.obj \
     $(WIN32KOBJ)\abort.obj \
+    $(WIN32KOBJ)\fltused.obj \
     $(WIN32KOBJ)\OS2KTCB.obj \
     $(WIN32KOBJ)\OS2KPTDA.obj \
     $(WIN32KOBJ)\env.obj \
@@ -177,6 +178,7 @@ TSTOBJS =\
     $(WIN32KOBJ)\vsprintf.obj \
     $(WIN32KOBJ)\vprintf.obj_tst. \
     $(WIN32KOBJ)\abort.obj \
+    $(WIN32KOBJ)\fltused.obj \
     $(WIN32KOBJ)\OS2KTCB.obj \
     $(WIN32KOBJ)\OS2KPTDA.obj \
     $(WIN32KOBJ)\env.obj \
