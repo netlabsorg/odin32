@@ -1,4 +1,4 @@
-/* $Id: windlg.cpp,v 1.1 1999-07-18 10:39:52 sandervl Exp $ */
+/* $Id: windlg.cpp,v 1.2 1999-07-18 13:57:48 cbratschi Exp $ */
 /*
  * Win32 dialog apis for OS/2
  *
@@ -8,6 +8,7 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+#include <wchar.h>
 #include <os2win.h>
 #include <misc.h>
 #include <string.h>
@@ -88,13 +89,17 @@ UINT WIN32API GetDlgItemTextA(HWND arg1, int arg2, LPSTR arg3, UINT arg4)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetDlgItemInt( HWND arg1, int arg2, UINT arg3, BOOL  arg4)
+BOOL WIN32API SetDlgItemInt( HWND hwndDlg, int idControl, UINT uValue, BOOL  fSigned)
 {
+    char buf[30];
+
 #ifdef DEBUG
     WriteLog("USER32:  SetDlgItemInt\n");
 #endif
-    //get item text and translate to int
-    return O32_SetDlgItemInt(arg1, arg2, arg3, arg4);
+    if (fSigned) sprintf(buf,"%u",uValue);
+    else sprintf(buf,"%d",uValue);
+
+    return SetDlgItemTextA(hwndDlg,idControl,buf);
 }
 //******************************************************************************
 //******************************************************************************
