@@ -1,4 +1,4 @@
-# $Id: pdwin32.vac36.dbg,v 1.14 2000-05-26 18:40:59 sandervl Exp $
+# $Id: pdwin32.vac36.dbg,v 1.15 2000-06-29 11:11:34 sandervl Exp $
 # ODIN / win32os2 Project
 #
 # DEBUG makefile for the VAC 3.6.5 compiler environment
@@ -28,8 +28,8 @@ OS2RC  = rc
 #
 # Tool Flags
 #
-CFLAGS           = -Q  -Si -Ti -Tm+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLUDE)\Win -I. -I$(PDWIN32_INCLUDE) -D__WIN32OS2__  -D__WINE__ -DDEBUG -D__i386__  -DTCPV40HDRS
-CXXFLAGS         = -Q  -Si -Ti -Tm+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLUDE)\Win -I. -I$(PDWIN32_INCLUDE) -D__WIN32OS2__ -D__WINE__ -DDEBUG -D__i386__  -DTCPV40HDRS
+CFLAGS           = -Q  -Si -Ti -Tm+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLUDE)\Win -I. -I$(PDWIN32_INCLUDE) -D__WIN32OS2__  -D__WINE__ -DDEBUG -D__i386__  -DTCPV40HDRS -DCOMCTL32UNDOC
+CXXFLAGS         = -Q  -Si -Ti -Tm+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLUDE)\Win -I. -I$(PDWIN32_INCLUDE) -D__WIN32OS2__ -D__WINE__ -DDEBUG -D__i386__  -DTCPV40HDRS -DCOMCTL32UNDOC
 CXXFLAGS_ODINCRT = -Q  -Si -Ti -Tm+ -Ge- -Ss+ -W3 -Gm+ /Gn- -I$(PDWIN32_INCLUDE)\Win -I. -I$(PDWIN32_INCLUDE) -D__WIN32OS2__ -D__WINE__ -DDEBUG -D__i386__
 CFLAGS_WIN32APP  = -Q  -Si -Ti -Tm+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLUDE)\Win -I. -I$(PDWIN32_INCLUDE) -D__WIN32OS2__ -D__i386__
 CXXFLAGS_WIN32APP= -Q  -Si -Ti -Tm+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLUDE)\Win -I. -I$(PDWIN32_INCLUDE) -D__WIN32OS2__ -D__i386__
