@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.8 2000-03-04 19:10:13 jeroen Exp $
+# $Id: Makefile,v 1.9 2000-03-04 19:55:35 bird Exp $
 
 #
 # PD-Win32 API
@@ -15,15 +15,7 @@ PDWIN32_TOOLS = ..\..\..\tools\bin
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 
 
-!ifdef DEBUG
-!ifdef NODEBUGINFO
-L=/NODEBUG
-!else
-L=/DE
-!endif
-!endif
-
-CFLAGS = -Tdp -I..\mesa\GL -I..\glu $(CFLAGS) -I$(PDWIN32_INCLUDE) -I..\mesa
+CFLAGS   = -Tdp -I..\mesa\GL -I..\glu $(CFLAGS) -I$(PDWIN32_INCLUDE) -I..\mesa
 CXXFLAGS = -Tdp -I..\mesa\GL -I..\glu $(CXXFLAGS) -I$(PDWIN32_INCLUDE) -I..\mesa
 
 CFLAGS=$(CFLAGS) -O-
@@ -46,7 +38,7 @@ OBJS = glut_8x13.obj glut_9x15.obj glut_bitmap.obj glut_bwidth.obj glut_cindex.o
 all: $(TARGET).DLL
 
 $(TARGET).DLL: $(OBJS) $(TARGET).def $(TARGET).lrf
-    ILINK /FREE /NOE $(L) @$(TARGET).lrf
+    $(LD2) $(LD2FLAGS) /FREE @$(TARGET).lrf
     $(CP) $@ $(PDWIN32_BIN)
 
 
