@@ -1,4 +1,4 @@
-/* $Id: ole32.h,v 1.9 1999-09-24 21:49:44 davidr Exp $ */
+/* $Id: ole32.h,v 1.10 2000-03-19 15:35:14 davidr Exp $ */
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -38,6 +38,7 @@
 #include <winreg.h>
 
 #include "objbase.h"
+#include "docobj.h"    /* for the IID_StdOleLink */
 
 #include "wine/obj_inplace.h"
 #include "wine/obj_oleobj.h"

@@ -1,4 +1,4 @@
-/* $Id: clsid.cpp,v 1.9 1999-11-23 20:37:42 davidr Exp $ */
+/* $Id: clsid.cpp,v 1.10 2000-03-19 15:33:05 davidr Exp $ */
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -21,6 +21,39 @@
 #include "ole32.h"
 
 #include "oString.h"
+
+// ----------------------------------------------------------------------
+// CLSIDFromProgID16()
+// ----------------------------------------------------------------------
+HRESULT WIN32API CLSIDFromProgID16(
+    LPCOLESTR16		lpszProgID,	// [in] - UNICODE program id as found in registry
+    LPCLSID		pclsid)		// [out] - CLSID
+{
+    dprintf(("OLE32: CLSIDFromProgID16"));
+
+    LONG		lDataLen = 80;
+    oStringA		szKey(lpszProgID);
+    oStringA		szCLSID(lDataLen, 1);
+    HKEY		hKey;
+    HRESULT		rc;
+
+    // Create the registry lookup string...
+    szKey += "\\CLSID";
+
+    // Try to open the key in the registry...
+    rc = RegOpenKeyA(HKEY_CLASSES_ROOT, szKey, &hKey);
+    if (rc != 0)
+    	return OLE_ERROR_GENERIC;
+
+    // Now get the data from the _default_ entry on this key...
+    rc = RegQueryValueA(hKey, NULL, szCLSID, &lDataLen);
+    RegCloseKey(hKey);
+    if (rc != 0)
+    	return OLE_ERROR_GENERIC;
+
+    // Now convert from a string to a UUID
+    return CLSIDFromString16(szCLSID, pclsid);
+}
 
 // ----------------------------------------------------------------------
 // CLSIDFromProgID()
@@ -71,41 +104,25 @@ HRESULT WIN32API IIDFromString(LPSTR lpsz, LPIID lpiid)
 //        which used to accept ASCII strings instead of OLE strings
 // ----------------------------------------------------------------------
 
-// missing prototype
-LPWSTR WIN32API HEAP_strdupAtoW( HANDLE heap, DWORD flags, LPCSTR str );
-
 HRESULT WIN32API CLSIDFromStringA(
     LPCSTR		lpsz,		// [in] - ASCII string CLSID
     LPCLSID		pclsid)		// [out] - Binary CLSID
 {
-  LPWSTR  lpszOle = HEAP_strdupAtoW(GetProcessHeap(),
-                                    0,
-                                    lpsz);
-  HRESULT hRes;
-
-  dprintf(("OLE32: CLSIDFromStringA"));
-
-  hRes = CLSIDFromString(lpszOle, pclsid);
-  HeapFree(GetProcessHeap(), 0, lpszOle);
-  return hRes;
+    return CLSIDFromString16(lpsz, pclsid);
 }
 
 
 // ----------------------------------------------------------------------
-// CLSIDFromString()
+// CLSIDFromString16()
 // ----------------------------------------------------------------------
-HRESULT WIN32API CLSIDFromString(
-    LPCOLESTR		lpsz,		// [in] - Unicode string CLSID
+HRESULT WIN32API CLSIDFromString16(
+    LPCOLESTR16		lpsz,		// [in] - Unicode string CLSID
     LPCLSID		pclsid)		// [out] - Binary CLSID
 {
-    dprintf(("OLE32: CLSIDFromString"));
-
-    oStringA		tClsId(lpsz);
-
-    HRESULT		ret = OLE_ERROR_GENERIC;
+    dprintf(("OLE32: CLSIDFromString16"));
 
     // Convert to binary CLSID
-    char *s = (char *) tClsId;
+    char *s = (char *) lpsz;
     char *p;
     int   i;
     char table[256];
@@ -125,7 +142,7 @@ HRESULT WIN32API CLSIDFromString(
 
     /* in form {XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX} */
 
-    if (lstrlenW(lpsz) != 38)
+    if (lstrlenA(lpsz) != 38)
 	return OLE_ERROR_OBJECT;
 
     p = (char *) pclsid;
@@ -170,6 +187,20 @@ HRESULT WIN32API CLSIDFromString(
     }
 
     return S_OK;
+}
+
+// ----------------------------------------------------------------------
+// CLSIDFromString()
+// ----------------------------------------------------------------------
+HRESULT WIN32API CLSIDFromString(
+    LPCOLESTR		lpsz,		// [in] - Unicode string CLSID
+    LPCLSID		pclsid)		// [out] - Binary CLSID
+{
+    dprintf(("OLE32: CLSIDFromString"));
+
+    oStringA		tClsId(lpsz);
+
+    return CLSIDFromString16(tClsId, pclsid);
 }
 
 // ----------------------------------------------------------------------

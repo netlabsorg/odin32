@@ -1,4 +1,4 @@
-/* $Id: datacache.cpp,v 1.1 1999-09-24 21:49:42 davidr Exp $ */
+/* $Id: datacache.cpp,v 1.2 2000-03-19 15:33:05 davidr Exp $ */
 /* 
  *  OLE 2 Data cache
  * 
@@ -1314,15 +1314,18 @@ static HRESULT WINAPI DataCache_SaveCompleted(
 {
   TRACE("(%p, %p)\n", iface, pStgNew);
 
-  /*
-   * First, make sure we get our hands off any storage we have.
-   */
-  DataCache_HandsOffStorage(iface);
+  if (pStgNew)
+  {
+      /*
+       * First, make sure we get our hands off any storage we have.
+       */
+      DataCache_HandsOffStorage(iface);
 
-  /*
-   * Then, attach to the new storage.
-   */
-  DataCache_Load(iface, pStgNew);
+      /*
+       * Then, attach to the new storage.
+       */
+      DataCache_Load(iface, pStgNew);
+  }
 
   return S_OK;
 }
@@ -1441,6 +1444,14 @@ static HRESULT WINAPI DataCache_Draw(
    */
   if (lprcBounds==NULL)
     return E_INVALIDARG;
+
+/** Hack for WPO2000 release. */
+  if (dwDrawAspect != DVASPECT_CONTENT)
+  {
+      FIXME("only CONTENT aspect implemented\n");
+      dwDrawAspect = DVASPECT_CONTENT;
+  }
+/***/
 
   /*
    * First, we need to retrieve the dimensions of the
