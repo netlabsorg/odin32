@@ -68,44 +68,8 @@ static BOOL  bTheKeyIsOpen    = FALSE;
 /* Delimiters used to parse the "value" to query queryValue*/
 #define QUERY_VALUE_MAX_ARGS  1 
 
-static const char *setValueDelim[SET_VALUE_MAX_ARGS]   = {"=", ""};  
-static const char *queryValueDelim[QUERY_VALUE_MAX_ARGS]   = {""};  
-
-/* Array used to extract the data type from a string in getDataType. */
-typedef struct tagDataTypeMap
-{
-  char  mask[15];
-  DWORD dataType;
-} dataTypeMap; 
-  
-static const dataTypeMap typeMap[] = 
-{
-  {"hex:",            REG_BINARY},/* could be REG_NONE (?) */
-  {"dword:",          REG_DWORD},
-  {"hex(0):",         REG_NONE},
-  {"hex(1):",         REG_SZ},
-  {"hex(2):",         REG_EXPAND_SZ},
-  {"hex(3):",         REG_BINARY},
-  {"hex(4):",         REG_DWORD},
-  {"hex(5):",         REG_DWORD_BIG_ENDIAN},
-  {"hex(6):",         REG_LINK},
-  {"hex(7):",         REG_MULTI_SZ},
-  {"hex(8):",         REG_RESOURCE_LIST},
-  {"hex(9):",         REG_FULL_RESOURCE_DESCRIPTOR},
-  {"hex(10):",        REG_RESOURCE_REQUIREMENTS_LIST},
-  {"hex(80000000):",  0x80000000},
-  {"hex(80000001):",  0x80000001},
-  {"hex(80000002):",  0x80000002},
-  {"hex(80000003):",  0x80000003},
-  {"hex(80000004):",  0x80000004},
-  {"hex(80000005):",  0x80000005},
-  {"hex(80000006):",  0x80000006},
-  {"hex(80000007):",  0x80000007},
-  {"hex(80000008):",  0x80000008},
-  {"hex(80000009):",  0x80000000},
-  {"hex(8000000a):",  0x8000000A}
-};
-const static int LAST_TYPE_MAP = sizeof(typeMap)/sizeof(dataTypeMap);
+static const char *setValueDelim[SET_VALUE_MAX_ARGS]   = {"=", ""};
+static const char *queryValueDelim[QUERY_VALUE_MAX_ARGS]   = {""};
 
 
 /* 
@@ -163,7 +127,7 @@ static const BOOL commandSaveRegistry[COMMAND_COUNT] = {
 /* 
  * Generic prototypes
  */
-static DWORD   getDataType(LPSTR *lpValue);
+static DWORD   getDataType(LPSTR *lpValue, DWORD* parse_type);
 static LPSTR   getRegKeyName(LPSTR lpLine);
 static HKEY    getRegClass(LPSTR lpLine);
 static LPSTR   getArg(LPSTR arg);
@@ -249,35 +213,59 @@ static char helpText[] =
 "               The input file format is a list of DLLs to unregister\n"
 "                                February 1999.\n"
 ;
-              
+
 
 /******************************************************************************
  * This function returns the HKEY associated with the data type encoded in the 
  * value.  It modifies the input parameter (key value) in order to skip this 
  * "now useless" data type information.
+ *
+ * Note: Updated based on the algorithm used in 'server/registry.c'
  */
-DWORD getDataType(LPSTR *lpValue) 
+DWORD getDataType(LPSTR *lpValue, DWORD* parse_type)
 {
-  INT   counter  = 0;
-  DWORD dwReturn = REG_SZ;
+    struct data_type { const char *tag; int len; int type; int parse_type; };
 
-  for (; counter < LAST_TYPE_MAP; counter++)
-  {
-    LONG len = strlen(typeMap[counter].mask);
-    if ( strncasecmp( *lpValue, typeMap[counter].mask, len) == IDENTICAL)
+    static const struct data_type data_types[] =
+    {                   /* actual type */  /* type to assume for parsing */
+        { "\"",        1,   REG_SZ,              REG_SZ },
+        { "str:\"",    5,   REG_SZ,              REG_SZ },
+        { "str(2):\"", 8,   REG_EXPAND_SZ,       REG_SZ },
+        { "str(7):\"", 8,   REG_MULTI_SZ,        REG_SZ },
+        { "hex:",      4,   REG_BINARY,          REG_BINARY },
+        { "dword:",    6,   REG_DWORD,           REG_DWORD },
+        { "hex(",      4,   -1,                  REG_BINARY },
+        { NULL,        0,    0,                  0 }
+    };
+
+    const struct data_type *ptr;
+    int type;
+
+    for (ptr = data_types; ptr->tag; ptr++)
     {
-      /*
-       * We found it, modify the value's pointer in order to skip the data 
-       * type identifier, set the return value and exit the loop.
-       */
-      (*lpValue) += len;
-      dwReturn    = typeMap[counter].dataType;
-      break; 
-    }
-  }
+        if (memcmp( ptr->tag, *lpValue, ptr->len ))
+            continue;
 
-  return dwReturn;
+        /* Found! */
+        *parse_type = ptr->parse_type;
+        type=ptr->type;
+        *lpValue+=ptr->len;
+        if (type == -1) {
+            char* end;
+            /* "hex(xx):" is special */
+            *lpValue += 4;
+            type = (int)strtoul( *lpValue , &end, 16 );
+            if (**lpValue=='\0' || *end!=')' || *(end+1)!=':') {
+                type=REG_NONE;
+            } else {
+                *lpValue=end+2;
+            }
+        }
+        return type;
+    }
+    return (**lpValue=='\0'?REG_SZ:REG_NONE);
 }
+
 /******************************************************************************
  * Extracts from a [HKEY\some\key\path] type of line the key name (what starts 
  * after the first '\' and end before the ']'
@@ -340,6 +328,32 @@ static HKEY getRegClass(LPSTR lpClass)
 }
 
 /******************************************************************************
+ * This is a replacement for strsep which is not portable (missing on Solaris).
+ */
+static char* getToken(char** str, const char* delims)
+{
+    char* token;
+
+    if (*str==NULL) {
+        /* No more tokens */
+        return NULL;
+    }
+
+    token=*str;
+    while (**str!='\0') {
+        if (strchr(delims,**str)!=NULL) {
+            **str='\0';
+            (*str)++;
+            return token;
+        }
+        (*str)++;
+    }
+    /* There is no other token */
+    *str=NULL;
+    return token;
+}
+
+/******************************************************************************
  * Returns an allocated buffer with a cleaned copy (removed the surrounding 
  * dbl quotes) of the passed value.
  */
@@ -383,26 +397,14 @@ static INT getCommand(LPSTR commandName)
  */
 static DWORD convertHexToDWord(char *str, BYTE *buf)
 {
-  char  *s        = str;  /* Pointer to current */
-  char  *b        = buf;  /* Pointer to result  */
-  ULONG strPos    = 0;    
+  DWORD dw;
+  char xbuf[9];
 
-  memset(buf, 0, 4);
-
-  while (strPos < 4)  /* 8 byte in a DWORD */
-  {
-    char xbuf[3];
-    char wc;
-
-    memcpy(xbuf,s,2); xbuf[2]='\0';
-    sscanf(xbuf,"%02x",(UINT*)&wc);
-    *b++ =(unsigned char)wc;
-
-    s+=2;
-    strPos+=1;
-  }                                   
-
-  return 4; /* always 4 byte for the word */
+  memcpy(xbuf,str,8);
+  xbuf[8]='\0';
+  sscanf(xbuf,"%08lx",&dw);
+  memcpy(buf,&dw,sizeof(DWORD));
+  return sizeof(DWORD);
 }
 
 /******************************************************************************
@@ -442,24 +444,14 @@ static char* convertHexToHexCSV(BYTE *buf, ULONG bufLen)
 static char* convertHexToDWORDStr(BYTE *buf, ULONG bufLen)
 {
   char* str;
-  char* ptrStr;
-  BYTE* ptrBuf;
+  DWORD dw;
 
-  ULONG current = 0;
+  if ( bufLen != sizeof(DWORD) ) return NULL;
 
-  str    = HeapAlloc(GetProcessHeap(), 0, (bufLen*2)+1);
-  memset(str, 0, (bufLen*2)+1);
-  ptrStr = str;  /* Pointer to result  */
-  ptrBuf = buf;  /* Pointer to current */
+  str = HeapAlloc(GetProcessHeap(), 0, (bufLen*2)+1);
 
-  while (current < bufLen)
-  {
-    BYTE bCur = ptrBuf[current++];
-    char res[3];
-
-    sprintf(res, "%02x", (unsigned int)*&bCur);
-    strcat(str, res);
-  }                                   
+  memcpy(&dw,buf,sizeof(DWORD));
+  sprintf(str, "%08lx", dw);
 
   /* Get rid of the last comma */
   return str;
@@ -513,11 +505,11 @@ static HRESULT setValue(LPSTR *argv)
   HRESULT hRes;
   DWORD   dwSize          = KEY_MAX_LEN;
   DWORD   dwType          = 0;
-  DWORD   dwDataType;
+  DWORD   dwDataType,dwParseType;
 
   LPSTR   lpsCurrentValue;
 
-  LPSTR   keyValue = argv[0];
+  LPSTR   keyValue = getArg(argv[0]);
   LPSTR   keyData  = argv[1];
 
   /* Make some checks */
@@ -533,8 +525,8 @@ static HRESULT setValue(LPSTR *argv)
     keyValue[0] = '\0';
 
   /* Get the data type stored into the value field */
-  dwDataType = getDataType(&keyData);
-    
+  dwDataType = getDataType(&keyData,&dwParseType);
+
   memset(lpsCurrentValue, 0, KEY_MAX_LEN);
   hRes = RegQueryValueExA(
           currentKeyHandle, 
@@ -557,12 +549,17 @@ static HRESULT setValue(LPSTR *argv)
     BYTE   convert[KEY_MAX_LEN];
     DWORD  dwLen;
 
-    if ( dwDataType == REG_SZ )        /* no convertion for string */
+    if ( dwParseType == REG_SZ)        /* no conversion for string */
     {
       dwLen   = strlen(keyData);
+      if (dwLen>0 && keyData[dwLen-1]=='"')
+      {
+        dwLen--;
+        keyData[dwLen]='\0';
+      }
       lpbData = keyData;
     } 
-    else if (dwDataType == REG_DWORD)  /* Convert the dword types */
+    else if (dwParseType == REG_DWORD)  /* Convert the dword types */
     {
       dwLen   = convertHexToDWord(keyData, convert);
       lpbData = convert;
@@ -592,11 +589,13 @@ static HRESULT setValue(LPSTR *argv)
       if ( argv[1] != NULL ) {
         strncpy(argv[1], lpsCurrentValue, dwSize);
         argv[1][dwSize]='\0';
-    }
+      }
     }
 
-    return KEY_VALUE_ALREADY_SET;
+    hRes=KEY_VALUE_ALREADY_SET;
   }
+  if (keyValue != NULL)
+      HeapFree(GetProcessHeap(), 0, keyValue);
   return hRes;
 }
 
@@ -660,9 +659,9 @@ static void processSetValue(LPSTR cmdline)
   for (counter=0; counter<SET_VALUE_MAX_ARGS; counter++)
     argv[counter]=NULL;
 
-  while( (token = strsep(&cmdline, setValueDelim[argCounter])) != NULL ) 
+  while( (token = getToken(&cmdline, setValueDelim[argCounter])) != NULL ) 
   {
-    argv[argCounter++] = getArg(token);
+    argv[argCounter++] = token;
 
     if (argCounter == SET_VALUE_MAX_ARGS)
       break;  /* Stop processing args no matter what */
@@ -682,19 +681,12 @@ static void processSetValue(LPSTR cmdline)
       argv[0], 
       argv[1], 
       currentKeyName);
-  
+
   else
     printf("regapi: ERROR Key %s not created. Value: %s, Data: %s\n",
       currentKeyName,
       argv[0], 
       argv[1]);
-    
-  /*
-   * Do some cleanup
-   */
-  for (counter=0; counter<argCounter; counter++)
-    if (argv[counter] != NULL)
-      HeapFree(GetProcessHeap(), 0, argv[counter]);
 }
 
 /******************************************************************************
@@ -717,7 +709,7 @@ static void processQueryValue(LPSTR cmdline)
   for (counter=0; counter<QUERY_VALUE_MAX_ARGS; counter++)
     argv[counter]=NULL;
 
-  while( (token = strsep(&cmdline, queryValueDelim[argCounter])) != NULL ) 
+  while( (token = getToken(&cmdline, queryValueDelim[argCounter])) != NULL ) 
   {
     argv[argCounter++] = getArg(token);
 
@@ -727,7 +719,7 @@ static void processQueryValue(LPSTR cmdline)
 
   /* The value we look for is the first token on the line */
   if ( argv[0] == NULL )
-    return; /* SHOULD NOT OCCURS */
+    return; /* SHOULD NOT HAPPEN */
   else
     keyValue = argv[0]; 
 
@@ -1021,7 +1013,7 @@ static void doUnregisterDLL(LPSTR stdInput) {
 
 /******************************************************************************
  * MAIN - WinMain simply validates the first parameter (command to perform)
- *        It then reads the STDIN lines by lines forwarding their processing
+ *        It then reads the STDIN line by line forwarding their processing
  *        to the appropriate method.
  */
 int PASCAL WinMain (HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
@@ -1041,7 +1033,11 @@ int PASCAL WinMain (HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
   /*
    * get the command, should be the first arg (modify cmdLine)
    */ 
-  token = strsep(&cmdline, " "); 
+#ifdef __WIN32OS2__
+  token = "setValue";
+#else
+  token = getToken(&cmdline, " "); 
+#endif
   if (token != NULL) 
   {
     cmdIndex = getCommand(token);
@@ -1061,8 +1057,8 @@ int PASCAL WinMain (HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
   }
 
   /* 
-   * check to see weather we force the action 
-   * (meaning differ depending on the command performed)
+   * check to see wether we force the action 
+   * (meaning differs depending on the command performed)
    */
   if ( cmdline != NULL ) /* will be NULL if '-force' is not provided */
     if ( strstr(cmdline, "-force") != NULL )
