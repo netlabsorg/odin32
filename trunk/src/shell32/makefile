@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.24 2000-05-18 14:16:03 sandervl Exp $
+# $Id: makefile,v 1.25 2000-05-18 18:06:59 sandervl Exp $
 
 #
 # Odin32 API
@@ -41,6 +41,7 @@ $(OBJDIR)\shelllink.obj \
 $(OBJDIR)\shlmenu.obj \
 $(OBJDIR)\shellpath.obj \
 $(OBJDIR)\shellole.obj \
+$(OBJDIR)\shellstub.obj \
 $(OBJDIR)\shellord.obj \
 $(OBJDIR)\shv_bg_cmenu.obj \
 $(OBJDIR)\shlfolder.obj \

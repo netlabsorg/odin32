@@ -1,4 +1,4 @@
-; $Id: shell32.def,v 1.24 2000-05-18 14:16:03 sandervl Exp $
+; $Id: shell32.def,v 1.25 2000-05-18 18:06:59 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;based on Windows 95
@@ -33,7 +33,7 @@ EXPORTS
     ILFindChild                       = _ILFindChild@8                        @24
     ILCombine                         = _ILCombine@8                          @25
     ILLoadFromStream                  = _ILLoadFromStream@8                   @26
-;   ILSaveToStream                    = _ILSaveToStream@8                     @27
+    ILSaveToStream                    = _ILSaveToStream@8                     @27
     SHILCreateFromPath                = _SHILCreateFromPathAW@12              @28
     PathIsRoot                        = _PathIsRootAW@4                       @29
     PathBuildRoot                     = _PathBuildRootA@8                     @30
@@ -71,8 +71,8 @@ EXPORTS
     PickIconDlg                       = _PickIconDlg@16                       @62
     GetFileNameFromBrowse             = _GetFileNameFromBrowse@28             @63
     DriveType                         = _DriveType@4                          @64
-;   InvalidateDriveType               = _InvalidateDriveType@?                @65
-;   IsNetDrive                        = _IsNetDrive@?                         @66
+    InvalidateDriveType               = _InvalidateDriveType@4                @65
+    IsNetDrive                        = _IsNetDrive@4                         @66
     Shell_MergeMenus                  = _Shell_MergeMenus@24                  @67
     SHGetSettings                     = _SHGetSettings@12                     @68
 ;   SHGetNetResource                  = _SHGetNetResource@?                   @69
@@ -82,7 +82,7 @@ EXPORTS
 ;   Shell_GetCachedImageIndexW        = _Shell_GetCachedImageIndexW@12
 ;   Shell_GetCachedImageIndexA        = _Shell_GetCachedImageIndexA@12
     SHShellFolderView_Message         = _SHShellFolderView_Message@12         @73
-;   SHCreateStdEnumFmtEtc             = _SHCreateStdEnumFmtEtc@?              @74
+    SHCreateStdEnumFmtEtc             = _SHCreateStdEnumFmtEtc@12             @74
     PathYetAnotherMakeUniqueName      = _PathYetAnotherMakeUniqueNameAW@16    @75
 ;   DragQueryInfo                     = _DragQueryInfo@?                      @76
     SHMapPIDLToSystemImageListIndex   = _SHMapPIDLToSystemImageListIndex@12   @77
@@ -91,15 +91,15 @@ EXPORTS
     DragFinish                        = _DragFinish@4                         @80
     DragQueryFile                     = _DragQueryFileA@16                    @81
     DragQueryFileA                    = _DragQueryFileA@16                    @82
-;   CIDLData_CreateFromIDArray        = _CIDLData_CreateFromIDArray@?         @83
+    CIDLData_CreateFromIDArray        = _CIDLData_CreateFromIDArray@16        @83
 ;   SHIsBadInterfacePtr               = _SHIsBadInterfacePtr@?                @84
     OpenRegStream                     = _OpenRegStream@16                     @85
     SHRegisterDragDrop                = _SHRegisterDragDrop@8                 @86
     SHRevokeDragDrop                  = _SHRevokeDragDrop@4                   @87
     SHDoDragDrop                      = _SHDoDragDrop@24                      @88
     SHCloneSpecialIDList              = _SHCloneSpecialIDList@12              @89
-;   SHFindFiles                       = _SHFindFiles@?                        @90
-;   SHFindComputer                    = _SHFindComputer@?                     @91
+    SHFindFiles                       = _SHFindFiles@8                        @90
+    SHFindComputer                    = _SHFindComputer@8                     @91
     PathGetShortPath                  = _PathGetShortPathAW@4                 @92
 ;   Win32CreateDirectory              = _Win32CreateDirectory@?               @93
 ;   Win32RemoveDirectory              = _Win32RemoveDirectory@?               @94
@@ -137,17 +137,17 @@ EXPORTS
     SHOutOfMemoryMessageBox           = _SHOutOfMemoryMessageBox@12           @126
     SHWinHelp                         = _SHWinHelp@16                         @127
     DllGetClassObject                 = _SHELL32_DllGetClassObject@12         @128
-;   DAD_AutoScroll                    = _DAD_AutoScroll@?                     @129
-;   DAD_DragEnter                     = _DAD_DragEnter@?                      @130
-;   DAD_DragEnterEx                   = _DAD_DragEnterEx@?                    @131
-;   DAD_DragLeave                     = _DAD_DragLeave@?                      @132
+    DAD_AutoScroll                    = _DAD_AutoScroll@12                    @129
+    DAD_DragEnter                     = _DAD_DragEnter@4                      @130
+    DAD_DragEnterEx                   = _DAD_DragEnterEx@12                   @131
+    DAD_DragLeave                     = _DAD_DragLeave@0                      @132
     DragQueryFileW                    = _DragQueryFileW@16                    @133
-;   DAD_DragMove                      = _DAD_DragMove@?                       @134
+    DAD_DragMove                      = _DAD_DragMove@8                       @134
     DragQueryPoint                    = _DragQueryPoint@8                     @135
     DAD_SetDragImage                  = _DAD_SetDragImage@8                   @136
     DAD_ShowDragImage                 = _DAD_ShowDragImage@4                  @137
     DuplicateIcon                     = _DuplicateIcon@4                      @138
-;   Desktop_UpdateBriefcaseOnEvent    = _Desktop_UpdateBriefcaseOnEvent@?     @139
+    Desktop_UpdateBriefcaseOnEvent    = _Desktop_UpdateBriefcaseOnEvent@4     @139
     FileMenu_DeleteItemByIndex        = _FileMenu_DeleteItemByIndex@8         @140
     FileMenu_DeleteItemByFirstID      = _FileMenu_DeleteItemByFirstID@8       @141
     FileMenu_DeleteSeparator          = _FileMenu_DeleteSeparator@4           @142
@@ -172,7 +172,7 @@ EXPORTS
     SHRunControlPanel                 = _SHRunControlPanel@8                  @161
     SHSimpleIDListFromPath            = _SHSimpleIDListFromPathAW@4           @162
     StrToOleStr                       = _StrToOleStr@8                        @163
-;   Win32DeleteFile                   = _Win32DeleteFile@?                    @164
+    Win32DeleteFile                   = _Win32DeleteFile@4                    @164
     SHCreateDirectory                 = _SHCreateDirectory@8                  @165
 ;   CallCPLEntry16                    = _CallCPLEntry16@?                     @166
 ;   SHAddFromPropSheetExtArray        = _SHAddFromPropSheetExtArray@?         @167
@@ -193,7 +193,7 @@ EXPORTS
     ShellMessageBoxW                  = _ShellMessageBoxW                     @182 ;cdecl
     ShellMessageBoxA                  = _ShellMessageBoxA                     @183 ;cdecl
     ArrangeWindows                    = _ArrangeWindows@20                    @184
-;   SHHandleDiskFull                  = _SHHandleDiskFull@?                   @185
+    SHHandleDiskFull                  = _SHHandleDiskFull@8                   @185
     ExtractAssociatedIconExW          = _ExtractAssociatedIconExW@12          @186
     ExtractAssociatedIconW            = _ExtractAssociatedIconW@12            @187
     ExtractIconA                      = _ExtractIconA@12                      @188
@@ -205,7 +205,7 @@ EXPORTS
     ExtractIconW                      = _ExtractIconW@12                      @194
     SHFree                            = _SHFree@4                             @195
     SHAlloc                           = _SHAlloc@4                            @196
-;   SHGlobalDefect                    = _SHGlobalDefect@?                     @197
+    SHGlobalDefect                    = _SHGlobalDefect@4                     @197
     SHAbortInvokeCommand              = _SHAbortInvokeCommand@0               @198
 ;   SHGetFileIcon                     = _SHGetFileIcon@?                      @199
 ;   SHLocalAlloc                      = _SHLocalAlloc@?                       @200
@@ -370,6 +370,8 @@ EXPORTS
     IsUserAdmin                       = _IsUserAdmin@0                        @680
 
 ;   FOOBAR1217                        = _FOOBAR1217@?                         @1217
+
+    DllGetVersion                     = _SHELL32_DllGetVersion@4              @1220
 
     VERSION_OsIsUnicode                   @1000
     _StrRetToStrNA@16                     @1004
