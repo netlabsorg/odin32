@@ -1,4 +1,4 @@
-/* $Id: winmenu.cpp,v 1.22 2000-01-08 12:05:57 sandervl Exp $ */
+/* $Id: winmenu.cpp,v 1.23 2000-01-09 15:56:06 sandervl Exp $ */
 
 /*
  * Win32 menu API functions for OS/2
@@ -506,7 +506,7 @@ ODINFUNCTION2(HMENU, GetSystemMenu,
         return 0;
     }
 
-    return O32_GetSystemMenu(window->getOS2FrameWindowHandle(), bRevert);
+    return window->GetSystemMenu(bRevert);
 }
 //******************************************************************************
 //******************************************************************************

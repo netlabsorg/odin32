@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.58 2000-01-09 14:37:09 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.59 2000-01-09 15:56:03 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -1170,7 +1170,7 @@ HWND OSLibWinIsFrameControl(HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
-HWND OSLibWinGetFrameControlHandle(HWND hwndFrame, int framecontrol, RECT *lpRect)
+HWND OSLibWinGetFrameControlHandle(HWND hwndFrame, int framecontrol)
 {
     switch(framecontrol) {
     case OSLIB_FID_TITLEBAR:

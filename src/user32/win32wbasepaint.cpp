@@ -1,4 +1,4 @@
-/* $Id: win32wbasepaint.cpp,v 1.1 2000-01-09 14:38:30 sandervl Exp $ */
+/* $Id: win32wbasepaint.cpp,v 1.2 2000-01-09 15:56:05 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -40,6 +40,7 @@
 #include "win32wdesktop.h"
 #include "pmwindow.h"
 #include "controls.h"
+#include "initterm.h"
 
 #define HAS_DLGFRAME(style,exStyle) \
     (((exStyle) & WS_EX_DLGMODALFRAME) || \
@@ -80,6 +81,7 @@ static HBITMAP hbitmapMaximize = 0;
 static HBITMAP hbitmapMaximizeD = 0;
 static HBITMAP hbitmapRestore = 0;
 static HBITMAP hbitmapRestoreD = 0;
+static HMENU   hSysMenu = 0;
 
 BYTE lpGrayMask[] = { 0xAA, 0xA0,
                       0x55, 0x50,
@@ -107,18 +109,16 @@ VOID Win32BaseWindow::TrackMinMaxBox(WORD wParam)
     if (!(dwStyle & WS_MINIMIZEBOX))
       return;
     /* Check if the sysmenu item for minimize is there  */
-#if 0 //CB: todo
     state = GetMenuState(hSysMenu,SC_MINIMIZE,MF_BYCOMMAND);
-#endif
-  } else
+  }
+  else
   {
     /* If the style is not present, do nothing */
     if (!(dwStyle & WS_MAXIMIZEBOX))
       return;
+
     /* Check if the sysmenu item for maximize is there  */
-#if 0 //CB: todo
     state = GetMenuState(hSysMenu, SC_MAXIMIZE, MF_BYCOMMAND);
-#endif
   }
   SetCapture(Win32Hwnd);
   hdc = GetWindowDC(Win32Hwnd);
@@ -170,13 +170,11 @@ VOID Win32BaseWindow::TrackCloseButton(WORD wParam)
   BOOL pressed = TRUE;
   UINT state;
 
-#if 0 //CB: todo
   if (hSysMenu == 0)
     return;
+
   state = GetMenuState(hSysMenu, SC_CLOSE, MF_BYCOMMAND);
-#else
-state = 0;
-#endif
+
   /* If the item close of the sysmenu is disabled or not there do nothing */
   if((state & MF_DISABLED) || (state & MF_GRAYED) || (state == 0xFFFFFFFF))
     return;
@@ -733,12 +731,9 @@ VOID Win32BaseWindow::DrawCaption(HDC hdc,RECT *rect,BOOL active)
   if (dwStyle & WS_SYSMENU)
   {
     UINT state;
-#if 0 //CB: todo
     /* Go get the sysmenu */
     state = GetMenuState(hSysMenu, SC_CLOSE, MF_BYCOMMAND);
-#else
-    state = 0;
-#endif
+
     /* Draw a grayed close button if disabled and a normal one if SC_CLOSE is not there */
     DrawCloseButton(hdc, FALSE,
                     ((((state & MF_DISABLED) || (state & MF_GRAYED))) && (state != 0xFFFFFFFF)));
@@ -785,7 +780,12 @@ VOID Win32BaseWindow::HandleNCPaint(HRGN clip, BOOL suppress_menupaint)
   HDC hdc;
   RECT rect,rectClip,rfuzz;
 
-  if (dwStyle & WS_MINIMIZE) return;
+    if (dwStyle & WS_MINIMIZE) return;
+
+    //Load system menu (once)
+    if(!hSysMenu) {
+        hSysMenu = LoadMenuA(hInstanceUser32, (LPCSTR)"SYSMENU");
+    }
 
   /* MSDN docs are pretty idiotic here, they say app CAN use clipRgn in
      the call to GetDCEx implying that it is allowed not to use it either.
@@ -929,6 +929,136 @@ LONG Win32BaseWindow::HandleNCActivate(WPARAM wParam)
       HandleNCPaint((HRGN)1,FALSE);
   }
   return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+/***********************************************************************
+ *           NC_HandleSysCommand
+ *
+ * Handle a WM_SYSCOMMAND message. Called from DefWindowProc().
+ *
+ * TODO: Not done (see #if 0)
+ */
+LONG Win32BaseWindow::HandleSysCommand(WPARAM wParam, POINT *pt32)
+{
+    UINT uCommand = wParam & 0xFFF0;
+
+    if ((getStyle() & WS_CHILD) && (uCommand != SC_KEYMENU))
+        ScreenToClient(getParent()->getWindowHandle(), pt32 );
+
+    switch (uCommand)
+    {
+
+    case SC_SIZE:
+    {
+      DWORD flags = 0;
+
+      switch ((wParam & 0xF)+2)
+      {
+        case HTLEFT:
+          flags = TFOS_LEFT;
+          break;
+
+        case HTRIGHT:
+          flags = TFOS_RIGHT;
+          break;
+
+        case HTTOP:
+          flags = TFOS_TOP;
+          break;
+
+        case HTTOPLEFT:
+          flags = TFOS_TOP | TFOS_LEFT;
+          break;
+
+        case HTTOPRIGHT:
+          flags = TFOS_TOP | TFOS_RIGHT;
+          break;
+
+        case HTBOTTOM:
+          flags = TFOS_BOTTOM;
+          break;
+
+        case HTBOTTOMLEFT:
+          flags = TFOS_BOTTOM | TFOS_LEFT;
+          break;
+
+        case HTBOTTOMRIGHT:
+          flags = TFOS_BOTTOM | TFOS_RIGHT;
+          break;
+      }
+      if (flags) FrameTrackFrame(this,flags);
+      break;
+    }
+
+    case SC_MOVE:
+      FrameTrackFrame(this,TFOS_MOVE);
+      break;
+
+    case SC_MINIMIZE:
+        ShowWindow(SW_MINIMIZE);
+        break;
+
+    case SC_MAXIMIZE:
+        ShowWindow(SW_MAXIMIZE);
+        break;
+
+    case SC_RESTORE:
+        ShowWindow(SW_RESTORE);
+        break;
+
+    case SC_CLOSE:
+        return SendInternalMessageA(WM_CLOSE, 0, 0);
+
+    case SC_MOUSEMENU:
+        if((wParam & 0x000F) == HTSYSMENU)
+        {
+         RECT rect;
+         HWND hwndTitleBar;
+
+            hwndTitleBar = OSLibWinGetFrameControlHandle(getOS2FrameWindowHandle(), OSLIB_FID_TITLEBAR);
+            OSLibWinQueryWindowRect(hwndTitleBar, &rect, RELATIVE_TO_SCREEN);
+            TrackPopupMenu((OS2SysMenu) ? OS2SysMenu : hSysMenu, TPM_LEFTALIGN|TPM_LEFTBUTTON,
+                           rect.left, rect.bottom+1,
+                           0, getWindowHandle(), NULL);
+        }
+        //MENU_TrackMouseMenuBar( wndPtr, wParam & 0x000F, pt32 );
+        break;
+
+#if 0
+    case SC_VSCROLL:
+    case SC_HSCROLL:
+        NC_TrackScrollBar( hwnd, wParam, pt32 );
+        break;
+
+    case SC_MOUSEMENU:
+        MENU_TrackMouseMenuBar( wndPtr, wParam & 0x000F, pt32 );
+        break;
+
+    case SC_KEYMENU:
+        MENU_TrackKbdMenuBar( wndPtr , wParam , pt.x );
+        break;
+
+    case SC_TASKLIST:
+        WinExec( "taskman.exe", SW_SHOWNORMAL );
+        break;
+
+    case SC_SCREENSAVE:
+        if (wParam == SC_ABOUTWINE)
+            ShellAboutA(hwnd, "Odin", WINE_RELEASE_INFO, 0);
+        else
+        if (wParam == SC_PUTMARK)
+            dprintf(("Mark requested by user\n"));
+        break;
+
+    case SC_HOTKEY:
+    case SC_ARRANGE:
+    case SC_NEXTWINDOW:
+    case SC_PREVWINDOW:
+        break;
+#endif
+    }
+    return 0;
 }
 //******************************************************************************
 //******************************************************************************
