@@ -1,4 +1,4 @@
-# $Id: odin32.post.mk,v 1.8 2002-03-08 10:58:53 sandervl Exp $
+# $Id: odin32.post.mk,v 1.9 2003-02-28 10:28:10 sandervl Exp $
 
 #
 # Odin32 API
@@ -72,3 +72,18 @@ $(LIB_DEMANGLE) \
 #
 nothing:
     @echo Did nothing with makefile $(MAKEDIR)\$(MAKEFILE)
+!if "$(SUBDIRS)" != ""
+	$(DODIRS) "$(SUBDIRS)" $(MAKE_CMD) $@
+!endif
+	
+	
+#
+# Common: Global clean rule.
+# @todo Make separate define for this recursive delete.
+#
+cleanall:
+    $(RM) -Rf bin .depend
+!if "$(SUBDIRS)" != ""
+	$(DODIRS) "$(SUBDIRS)" $(MAKE_CMD) NODEP=1 $@
+!endif
+

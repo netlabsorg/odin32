@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.73 2002-04-29 14:03:36 bird Exp $
+# $Id: Makefile,v 1.74 2003-02-28 10:32:23 sandervl Exp $
 
 #
 # Win32k makefile.
@@ -129,6 +129,12 @@ clean:
 !endif
     $(DODIRS) "$(SUBDIRS)" $(MAKE_CMD) clean
 
+#
+# cleanall
+#
+cleanall:
+	$(RM) -Rf Bin Object List
+    $(DODIRS) ".\lib" $(MAKE_CMD) cleanall
 
 #
 # Dependencies - all deps are autogenereated.

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.15 2001-10-01 01:35:38 bird Exp $
+# $Id: makefile,v 1.16 2003-02-28 10:31:34 sandervl Exp $
 
 #
 # Odin32 API
@@ -64,10 +64,10 @@ $(ODIN32_TOOLS)\kDef2Wat.exe $(OBJDIR)\kDef2Wat.exe kDef2Wat.exe : force
 
 
 #
-# Clean rule.
+# Clean rules.
 #
-clean:  $(SYMBOLIC)
-    @$(DOMAKES) "common.mak kDef2Wat.mak kDump.mak" $(MAKE_CMD) clean
+clean cleanall:  $(SYMBOLIC)
+    @$(DOMAKES) "common.mak kDef2Wat.mak kDump.mak" $(MAKE_CMD) $@
 
 
 #
