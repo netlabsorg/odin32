@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1219 2001-01-14 17:11:52 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1220 2001-01-14 20:59:22 sandervl Exp $ */
 
  2001-01-13: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMDLG32: o Get current directory if initial dir == NULL (win31 style
@@ -27,6 +27,7 @@
                   (Napster install now doesn't block PM anymore (forcing a reboot))
                 o Add class keys for SHDOCVW during install
     - SHDOCVW:  o Added (Wine 20010112 port)
+    - WSOCK32:  o Changed File and Product version to 0x0400, 0x0565012C (NT4, SP6)
 
  2001-01-12: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - tools\install, tools\dailybuild:
