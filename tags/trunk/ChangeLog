@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.211 1999-09-18 17:44:56 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.212 1999-09-19 08:24:02 sandervl Exp $ */
+
+ 99-09-19: David Raison <djr@lemur.co.uk>
+	- USER32: Partially implemented MessageBoxIndirectA/W (forwarded to MessageBox)
 
  99-09-18: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Added resource support for win32 apps compiled in OS/2
