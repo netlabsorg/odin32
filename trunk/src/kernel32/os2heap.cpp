@@ -1,4 +1,4 @@
-/* $Id: os2heap.cpp,v 1.16 2001-03-13 18:45:33 sandervl Exp $ */
+/* $Id: os2heap.cpp,v 1.17 2001-04-27 17:35:41 sandervl Exp $ */
 
 /*
  * Heap class for OS/2
@@ -299,8 +299,10 @@ LPVOID OS2Heap::ReAlloc(DWORD dwFlags, LPVOID lpMem, DWORD dwBytes)
   }
 
   oldSize = Size(0,lpMem);
-  if (oldSize == dwBytes) return lpMem; // if reallocation with same size
-                                        // don't do anything
+  if (oldSize >= dwBytes) {
+       dprintf(("ReAlloc with smaller size than original (%d); return old pointer", oldSize));
+       return lpMem; // if reallocation with same size don't do anything
+  }
   lpNewMem = Alloc(dwFlags, dwBytes);
   memcpy(lpNewMem, lpMem, dwBytes < oldSize ? dwBytes : oldSize);
   Free(0, lpMem);
