@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.41 2001-08-17 11:18:37 sandervl Exp $ */
+/* $Id: misc.cpp,v 1.42 2001-09-26 15:31:05 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -335,18 +335,41 @@ int SYSTEM WriteLog(char *tekst, ...)
   if(fLogging && flog && (dwEnableLogging > 0))
   {
     va_start(argptr, tekst);
-    if(teb) {
-        teb->o.odin.logfile = (DWORD)flog;
-#ifdef LOG_TIME
-        if(sel == 0x150b && !fIsOS2Image) {
-             fprintf(flog, "t%d: (%x) (FS=150B) ", teb->o.odin.threadId, GetTickCount());
-        }
-        else fprintf(flog, "t%d: (%x) ", teb->o.odin.threadId, GetTickCount());
+    if(teb) 
+    {
+      ULONG ulCallDepth;
+#ifdef DEBUG
+      ulCallDepth = teb->o.odin.dbgCallDepth;
 #else
-        if(sel == 0x150b && !fIsOS2Image) {
-             fprintf(flog, "t%d: (FS=150B) ", teb->o.odin.threadId);
-        }
-        else fprintf(flog, "t%d: ", teb->o.odin.threadId);
+      ulCallDepth = 0;
+#endif
+      
+      teb->o.odin.logfile = (DWORD)flog;
+      
+#ifdef LOG_TIME
+      if(sel == 0x150b && !fIsOS2Image)
+        fprintf(flog, 
+                "t%02d (%3d): (%x) (FS=150B) ",
+                teb->o.odin.threadId,
+                ulCallDepth,
+                GetTickCount());
+      else 
+        fprintf(flog, 
+                "t%02d (%3d): (%x) ",
+                teb->o.odin.threadId, 
+                ulCallDepth,
+                GetTickCount());
+#else
+      if(sel == 0x150b && !fIsOS2Image) 
+        fprintf(flog, 
+                "t%02d (%3d): (FS=150B) ",
+                teb->o.odin.threadId,
+                ulCallDepth);
+      else 
+        fprintf(flog, 
+                "t%02d (%3d): ",
+                teb->o.odin.threadId,
+                ulCallDepth);
 #endif
     }
 #ifdef LOG_TIME
