@@ -1,4 +1,4 @@
-/* $Id: winexepe2lx.cpp,v 1.10 2001-07-08 02:49:47 bird Exp $ */
+/* $Id: winexepe2lx.cpp,v 1.11 2002-05-16 13:45:32 sandervl Exp $ */
 
 /*
  * Win32 PE2LX Exe class
@@ -27,11 +27,17 @@
 #include <win32type.h>
 #include <win32k.h>
 #include "winexepe2lx.h"
+#include <cpuhlp.h>
+#include <wprocess.h>
+#include <win32api.h>
 
 #include "cio.h"            // I/O
 #include "oslibmisc.h"      // OSLibGetDllName
 #include "conwin.h"         // Windows Header for console only
 #include "console.h"
+
+#include "exceptions.h"
+#include "exceptutil.h"
 
 #define DBG_LOCALLOG    DBG_winexepe2lx
 #include "dbglocal.h"
@@ -197,4 +203,38 @@ BOOL Win32Pe2LxExe::earlyInit()
 
     return FALSE;
 }
+//******************************************************************************
+//******************************************************************************
+ULONG Win32Pe2LxExe::start()
+{
+ WINEXCEPTION_FRAME exceptFrame;
+ ULONG rc;
 
+  dprintf(("Start executable %X\n", WinExe));
+
+  fExeStarted  = TRUE;
+
+  //Allocate TLS index for this module
+  tlsAlloc();
+  tlsAttachThread();	//setup TLS (main thread)
+
+  //Note: The Win32 exception structure references by FS:[0] is the same
+  //      in OS/2
+  OS2SetExceptionHandler((void *)&exceptFrame);
+  USHORT sel = SetWin32TIB(isPEImage() ? TIB_SWITCH_FORCE_WIN32 : TIB_SWITCH_DEFAULT);
+
+  //Set FPU control word to 0x27F (same as in NT)
+  CONTROL87(0x27F, 0xFFF);
+  dprintf(("KERNEL32: Win32ExeBase::start exe at %08xh\n",
+          (void*)entryPoint ));
+  rc = CallEntryPoint(entryPoint, NULL);
+
+  SetFS(sel);           //restore FS
+
+  OS2UnsetExceptionHandler((void *)&exceptFrame);
+
+  ExitProcess(rc);
+  return rc;
+}
+//******************************************************************************
+//******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: winexepe2lx.h,v 1.4 2001-07-08 02:49:47 bird Exp $ */
+/* $Id: winexepe2lx.h,v 1.5 2002-05-16 13:45:32 sandervl Exp $ */
 
 /*
  * Win32 PE2LX Exe class
@@ -30,6 +30,8 @@ public:
     virtual ~Win32Pe2LxExe();
     BOOL        init();
     static BOOL earlyInit();
+
+    virtual ULONG start();
 
 public:
     static BOOL fEarlyInit;
