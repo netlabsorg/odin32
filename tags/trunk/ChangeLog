@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.1105 2000-09-04 18:17:54 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1106 2000-09-04 18:47:28 sandervl Exp $ */
 
  2000-09-04: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: GetDiskFreeSpaceExA: added support for 64 bits disk size
@@ -11,6 +11,8 @@
                 otherwise window proc wrapper.
                 Fixes wrong strings in Notes 5.0. (new string problems, but they
                 are caused by something else)
+    - COMCTL32: CreateUpDownControl was not exported correctly 
+                (reported by Reinhold Kopper)
 
  2000-09-04: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Win32k:   Improved error reporting.
