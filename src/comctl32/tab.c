@@ -1,4 +1,4 @@
-/* $Id: tab.c,v 1.6 1999-06-28 15:46:26 cbratschi Exp $ */
+/* $Id: tab.c,v 1.7 1999-06-30 15:52:17 cbratschi Exp $ */
 /*
  * Tab control
  *
@@ -1353,7 +1353,7 @@ TAB_SetItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
    len = lstrlenA (tabItem->pszText);
    if (len>wineItem->cchTextMax)
      wineItem->pszText = COMCTL32_ReAlloc (wineItem->pszText, len+1);
-   lstrcpynA (wineItem->pszText, tabItem->pszText, len);
+   lstrcpynA (wineItem->pszText, tabItem->pszText, len+1);
   }
 
   return TRUE;

@@ -1,4 +1,4 @@
-/* $Id: status.c,v 1.6 1999-06-28 15:46:26 cbratschi Exp $ */
+/* $Id: status.c,v 1.7 1999-06-30 15:52:17 cbratschi Exp $ */
 /*
  * Interface code to StatusWindow widget/control
  *
@@ -440,7 +440,7 @@ STATUSBAR_GetTipTextA (HWND hwnd, WPARAM wParam, LPARAM lParam)
         SendMessageA (infoPtr->hwndToolTip, TTM_GETTEXTA, 0, (LPARAM)&ti);
 
         if (ti.lpszText)
-            lstrcpynA ((LPSTR)lParam, ti.lpszText, MIN(HIWORD(wParam),lstrlenA(ti.lpszText)));
+            lstrcpynA ((LPSTR)lParam, ti.lpszText, HIWORD(wParam));
     }
 
     return 0;
@@ -460,7 +460,7 @@ STATUSBAR_GetTipTextW (HWND hwnd, WPARAM wParam, LPARAM lParam)
         SendMessageW (infoPtr->hwndToolTip, TTM_GETTEXTW, 0, (LPARAM)&ti);
 
         if (ti.lpszText)
-            lstrcpynW ((LPWSTR)lParam, ti.lpszText, MIN(HIWORD(wParam),lstrlenW(ti.lpszText)));
+            lstrcpynW ((LPWSTR)lParam, ti.lpszText, HIWORD(wParam));
     }
 
     return 0;

@@ -1,4 +1,4 @@
-/* $Id: trackbar.c,v 1.9 1999-06-28 15:46:28 cbratschi Exp $ */
+/* $Id: trackbar.c,v 1.10 1999-06-30 15:52:18 cbratschi Exp $ */
 /*
  * Trackbar control
  *
@@ -66,6 +66,11 @@
 #define SCROLL_TIME     500 //ms
 #define SCROLL_TIMER_ID 1
 
+/* Tooltips */
+
+#define TOOLTIP_XSPACE 5
+#define TOOLTIP_YSPACE 5
+
 static BOOL TRACKBAR_SendNotify (HWND hwnd, UINT code);
 
 void TRACKBAR_RecalculateTics (HWND hwnd,TRACKBAR_INFO *infoPtr,BOOL restoreOld)
@@ -77,6 +82,7 @@ void TRACKBAR_RecalculateTics (HWND hwnd,TRACKBAR_INFO *infoPtr,BOOL restoreOld)
     {
       COMCTL32_Free(infoPtr->tics);
       infoPtr->tics = NULL;
+
       infoPtr->uNumTics = 0;
       return;
     }
@@ -1571,6 +1577,21 @@ TRACKBAR_Destroy (HWND hwnd, WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
+/* pt intialized with cursor position */
+
+static VOID TRACKBAR_CalcToolTipPos(HWND hwnd,DWORD dwStyle,TRACKBAR_INFO *infoPtr,POINT *pt)
+{
+  if (dwStyle & TBS_VERT)
+  {
+    pt->x += 5;
+    pt->y += 15;
+  } else
+  {
+    pt->x += 15;
+    pt->y += 5;
+  }
+}
+
 static LRESULT
 TRACKBAR_LButtonDown (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
@@ -1612,6 +1633,7 @@ TRACKBAR_LButtonDown (HWND hwnd, WPARAM wParam, LPARAM lParam)
            char buf[80];
 
            GetCursorPos(&pt);
+           TRACKBAR_CalcToolTipPos(hwnd,dwStyle,infoPtr,&pt);
            SendMessageA(infoPtr->hwndToolTip,TTM_TRACKPOSITION,0,(LPARAM)MAKELPARAM(pt.x,pt.y));
 
            ti.cbSize   = sizeof(TTTOOLINFOA);
@@ -1905,15 +1927,10 @@ TRACKBAR_MouseMove (HWND hwnd, WPARAM wParam, LPARAM lParam)
       sprintf (buf,"%d",infoPtr->nPos);
       ti.lpszText = (LPSTR)buf;
       GetCursorPos(&pt);
+      TRACKBAR_CalcToolTipPos(hwnd,dwStyle,infoPtr,&pt);
 
       SendMessageA(infoPtr->hwndToolTip,TTM_UPDATETIPTEXTA,0,(LPARAM)&ti);
-      if (dwStyle & TBS_VERT)
-      {
-        SendMessageA(infoPtr->hwndToolTip,TTM_TRACKPOSITION,0,(LPARAM)MAKELPARAM(pt.x+5,pt.y+15)); //CB: optimize
-      } else
-      {
-        SendMessageA(infoPtr->hwndToolTip,TTM_TRACKPOSITION,0,(LPARAM)MAKELPARAM(pt.x+15,pt.y+5)); //CB: optimize
-      }
+      SendMessageA(infoPtr->hwndToolTip,TTM_TRACKPOSITION,0,(LPARAM)MAKELPARAM(pt.x,pt.y));
     }
 
     return TRUE;
