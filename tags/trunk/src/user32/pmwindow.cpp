@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.145 2001-09-15 15:23:12 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.146 2001-09-17 13:31:30 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -771,9 +771,13 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
       PSWP     pswp = (PSWP)mp1;
       SWP      swpOld;
       WINDOWPOS wp,wpOld;
+      ULONG     ulFlags;
+      ULONG     ret = 0;
       HWND      hParent = NULLHANDLE, hwndAfter;
 
         dprintf(("PMFRAME:WM_ADJUSTWINDOWPOS %x %x %x (%d,%d) (%d,%d)", win32wnd->getWindowHandle(), pswp->hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
+
+        ulFlags = pswp->fl;
 
         if(win32wnd->IsParentChanging()) {
             rc = 0;
@@ -891,10 +895,25 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
             pswp->hwndInsertBehind = hwndAfter;
             pswp->hwnd = hwnd;
 
-            rc = (MRESULT)0xf;
+            ret = 0xf;
+            //Setting these flags is necessary to avoid activation/focus problems
+            if(ulFlags & SWP_DEACTIVATE) {
+                ret |= AWP_DEACTIVATE;
+            }
+            if(ulFlags & SWP_ACTIVATE) {
+                ret |= AWP_ACTIVATE;
+            }
+            rc = (MRESULT)ret;
             break;
         }
-        rc = 0;
+        //Setting these flags is necessary to avoid activation/focus problems
+        if(ulFlags & SWP_DEACTIVATE) {
+            ret |= AWP_DEACTIVATE;
+        }
+        if(ulFlags & SWP_ACTIVATE) {
+            ret |= AWP_ACTIVATE;
+        }
+        rc = (MRESULT)ret;
         break;
     }
 
@@ -924,28 +943,6 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
             if(pswp->fl & SWP_HIDE) {
                 WinShowWindow(win32wnd->getOS2WindowHandle(), 0);
             }
-/*
-            if(pswp->fl & SWP_ACTIVATE)
-            {
-                //Only send PM WM_ACTIVATE to top-level windows (frame windows)
-                if(!(WinQueryWindowULong(WinWindowFromID(hwnd,FID_CLIENT), OFFSET_WIN32FLAGS) & WINDOWFLAG_ACTIVE))
-                {
-                    WinSendDlgItemMsg(hwnd, FID_CLIENT, WM_ACTIVATE, (MPARAM)TRUE, (MPARAM)hwnd);
-//                    WinSendMsg(hwnd, WM_ACTIVATE, (MPARAM)TRUE, (MPARAM)hwnd);
-                }
-            }
-            else
-            if(pswp->fl & SWP_DEACTIVATE)
-            {
-                //Only send PM WM_ACTIVATE to top-level windows (frame windows)
-                if(WinQueryWindowULong(WinWindowFromID(hwnd,FID_CLIENT), OFFSET_WIN32FLAGS) & WINDOWFLAG_ACTIVE)
-                {
-                    WinSendDlgItemMsg(hwnd, FID_CLIENT, WM_ACTIVATE, (MPARAM)FALSE, (MPARAM)hwnd);
-//                    WinSendMsg(hwnd, WM_ACTIVATE, (MPARAM)FALSE, (MPARAM)hwnd);
-                }
-            }
-*/
-//            goto RunDefWndProc;
             goto RunDefFrameWndProc;
         }
 
@@ -1079,26 +1076,6 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
 #ifndef USE_CALCVALIDRECT
         }
 #endif
-
-        if(pswp->fl & SWP_ACTIVATE)
-        {
-             //Only send PM WM_ACTIVATE to top-level windows (frame windows)
-             if(!(WinQueryWindowULong(WinWindowFromID(hwnd,FID_CLIENT), OFFSET_WIN32FLAGS) & WINDOWFLAG_ACTIVE))
-             {
-//                WinSendDlgItemMsg(hwnd, FID_CLIENT, WM_ACTIVATE, (MPARAM)TRUE, (MPARAM)hwnd);
-                WinSendMsg(hwnd, WM_ACTIVATE, (MPARAM)TRUE, (MPARAM)hwnd);
-             }
-        }
-        else
-        if(pswp->fl & SWP_DEACTIVATE)
-        {
-            //Only send PM WM_ACTIVATE to top-level windows (frame windows)
-            if(WinQueryWindowULong(WinWindowFromID(hwnd,FID_CLIENT), OFFSET_WIN32FLAGS) & WINDOWFLAG_ACTIVE)
-            {
-//                WinSendDlgItemMsg(hwnd, FID_CLIENT, WM_ACTIVATE, (MPARAM)FALSE, (MPARAM)hwnd);
-                    WinSendMsg(hwnd, WM_ACTIVATE, (MPARAM)FALSE, (MPARAM)hwnd);
-            }
-        }
 
 PosChangedEnd:
         rc = (MRESULT)FALSE;

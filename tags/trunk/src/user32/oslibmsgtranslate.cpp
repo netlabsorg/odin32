@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.59 2001-09-15 15:23:11 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.60 2001-09-17 13:31:29 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -556,15 +556,20 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             break;
         case SC_CLOSE:
         {
-            HWND hwnd = win32wnd->GetTopParent();
-            if(win32wnd->getWindowHandle() != hwnd) {
-                RELEASE_WNDOBJ(win32wnd);
-                win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
-                if(win32wnd == NULL) {
-                    DebugInt3();
-                    goto dummymessage;
+            //FALSE -> keyboard operation = user pressed Alt-F4 -> close app
+            //TRUE  -> user clicked on close button -> close window
+            if(SHORT2FROMMP(os2Msg->mp2) == FALSE) 
+            {
+                HWND hwnd = win32wnd->GetTopParent();
+                if(win32wnd->getWindowHandle() != hwnd) {
+                    RELEASE_WNDOBJ(win32wnd);
+                    win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
+                    if(win32wnd == NULL) {
+                        DebugInt3();
+                        goto dummymessage;
+                    }
+                    winMsg->hwnd = hwnd;
                 }
-                winMsg->hwnd = hwnd;
             }
             win32sc = SC_CLOSE_W;
             break;
