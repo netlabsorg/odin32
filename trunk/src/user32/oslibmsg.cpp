@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.75 2003-08-08 13:30:19 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.76 2003-08-22 13:16:44 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -692,7 +692,17 @@ void * OSLibPackMessage(HWND hwndOdin, HWND hwndOS2, ULONG msg, ULONG wParam, UL
          */
         default:
         {
-            pMsgPacket = (POSTMSG_PACKET *)_smalloc(sizeof(POSTMSG_PACKET));
+            ULONG pid;
+
+            GetWindowThreadProcessId(hwndOdin, &pid);
+
+            //use shared or local memory depending on the target window
+            //(sfree can be used for any heap)
+            if(pid != GetCurrentProcessId()) {
+                 pMsgPacket = (POSTMSG_PACKET *)_smalloc(sizeof(POSTMSG_PACKET));
+            }
+            else pMsgPacket = (POSTMSG_PACKET *)malloc(sizeof(POSTMSG_PACKET));
+
             if (!pMsgPacket)
             {
                 dprintf(("user32::oslibmsg::OSLibPackMessage - allocated packet structure is NULL"));
@@ -717,21 +727,27 @@ void * OSLibPackMessage(HWND hwndOdin, HWND hwndOS2, ULONG msg, ULONG wParam, UL
  * Send an inter thread/proces message.
  *
  * @returns
- * @param   hwnd        OS/2 hwnd.
+ * @param   hwndWin32   Odin window handle.
+ * @param   hwndOS2     OS/2 window handle
  * @param   msg         Odin message id.
  * @param   wParam      Message param.
  * @param   lParam      Message param.
  * @param   fUnicode    Unicode indicator.
  */
-ULONG OSLibSendMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam, BOOL fUnicode)
+ULONG OSLibSendMessage(HWND hwndWin32, HWND hwndOS2, ULONG msg, ULONG wParam, ULONG lParam, BOOL fUnicode)
 {
     ULONG           rc;                 /* return code on packing failure */
     void *          pvMsgPacket;        /* packed message (shared memory) */
 
+    if(GetDesktopWindow() == hwndWin32) {
+        dprintf(("Ignore messages sent to the desktop window"));
+        return TRUE;
+    }
+
     /*
      * Call message packer.
      */
-    pvMsgPacket = OSLibPackMessage(NULLHANDLE, hwnd, msg, wParam, lParam, fUnicode, &rc);
+    pvMsgPacket = OSLibPackMessage(hwndWin32, hwndOS2, msg, wParam, lParam, fUnicode, &rc);
     if (!pvMsgPacket)
     {
         dprintf(("user32::oslibmsg::OSLibSendMessage - Failed to pack message !!"));
@@ -739,7 +755,7 @@ ULONG OSLibSendMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam, BOOL fU
         return rc;
     }
 
-    return (ULONG)WinSendMsg(hwnd, WIN32APP_POSTMSG+msg, (MPARAM)((fUnicode) ? WIN32MSG_MAGICW : WIN32MSG_MAGICA), pvMsgPacket);
+    return (ULONG)WinSendMsg(hwndOS2, WIN32APP_POSTMSG+msg, (MPARAM)((fUnicode) ? WIN32MSG_MAGICW : WIN32MSG_MAGICA), pvMsgPacket);
 }
 //******************************************************************************
 //******************************************************************************
@@ -778,6 +794,11 @@ ULONG OSLibWinBroadcastMsg(ULONG msg, ULONG wParam, ULONG lParam, BOOL fSend)
 BOOL OSLibPostMessage(HWND hwndWin32, HWND hwndOS2, ULONG msg, ULONG wParam, ULONG lParam, BOOL fUnicode)
 {
     void *          pvMsgPacket;        /* packed message (shared memory) */
+
+    if(GetDesktopWindow() == hwndWin32) {
+        dprintf(("Ignore messages posted to the desktop window"));
+        return TRUE;
+    }
 
     /*
      * Call message packer.
