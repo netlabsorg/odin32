@@ -1,6 +1,6 @@
-/* $Id: ChangeLog,v 1.2670 2004-02-04 15:02:04 bird Exp $ */
+/* $Id: ChangeLog,v 1.2671 2004-02-04 15:03:30 bird Exp $ */
 
- 2004-04-02: Platon Fomichev <platon@innotek   >
+ 2004-04-04: Platon Fomichev <pfomichev@alarity    >
     - USER32:   o Fixed typo in PeekMessageA/W.
 
  2004-01-30: knut st. osmundsen <bird-changelog@innotek    >
