@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.588 1999-12-29 14:39:23 sandervl Exp $ */
+ /* $Id: changelog,v 1.589 1999-12-29 18:52:23 sandervl Exp $ */
 
  99-12-29: Patrick Haller <phaller@gmx.net>
 	- INCLUDE: ODINWRAP: new macros to save FS register for callback registration
@@ -12,8 +12,12 @@
                   that aren't dispatched were never freed)
                   (InterVideo WinDVD 2.0 install almost works; tries to overwrite
                    msvcrt.dll (which fails as the install program uses that dll))
+                  Fixed version resource (based on NT 4 SP3)
 	- KERNEL32: Removed logging from icon & cursor (group) conversion
                     (compile with DEBUGALL=1 to enable it)
+                    Added version resource (based on NT 4 SP3)
+	- GDI32: Added version resource (based on NT 4 SP3)
+	- MSVCRT/20/40: Added version information based on NT 4 SP3 msvcrt dlls
 
  99-12-28: Vit Timchishin <tvv@sbs.kiev.ua>
 	- USER32: Listbox fix; Commented out 'if (index == oldsel) return LB_OKAY;'
