@@ -1,4 +1,4 @@
-/* $Id: asyncthread.cpp,v 1.8 2001-04-29 15:42:26 sandervl Exp $ */
+/* $Id: asyncthread.cpp,v 1.9 2001-04-29 18:47:31 sandervl Exp $ */
 
 /*
  * Async thread help functions
@@ -58,7 +58,9 @@ ULONG QueueAsyncJob(ASYNCTHREADPROC asyncproc, PASYNCTHREADPARM pThreadParm, BOO
 
    if(fSetBlocking) WSASetBlocking(TRUE);
 
+   USHORT sel = GetFS();
    tid = _beginthread(AsyncThread, NULL, 16384, (PVOID)pThreadParm);
+   SetFS(sel);
    if (tid == -1) {
    	dprintf(("QueueAsyncJob: _beginthread failed"));
    	if(fSetBlocking) WSASetBlocking(FALSE);
