@@ -1,4 +1,4 @@
-/* $Id: initterm.h,v 1.7 2001-07-15 15:18:57 sandervl Exp $ */
+/* $Id: initterm.h,v 1.8 2001-11-24 13:55:57 sandervl Exp $ */
 /*
  * KERNEL32 DLL entry point header
  *
@@ -30,6 +30,7 @@ void CloseLogFile(); //misc.cpp
 extern int globLoadNr; //global data
 extern int loadNr;
 extern BOOL fVersionWarp3;
+extern BOOL fInit;
 
 /* Tue 03.03.1998: knut */
 

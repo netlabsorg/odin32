@@ -1,4 +1,4 @@
-/* $Id: initkernel32.cpp,v 1.8 2001-11-10 12:47:46 sandervl Exp $
+/* $Id: initkernel32.cpp,v 1.9 2001-11-24 13:55:57 sandervl Exp $
  *
  * KERNEL32 DLL entry point
  *
@@ -71,6 +71,7 @@ extern "C" {
        int     loadNr = 0;
        char    kernel32Path[CCHMAXPATH] = "";
 static HMODULE dllHandle = 0;
+       BOOL    fInit     = FALSE;
 
 /****************************************************************************/
 /* _DLL_InitTerm is the function that gets called by the operating system   */
@@ -91,6 +92,11 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
     /* be performed.  If ulFlag is 1 then the DLL is being freed so            */
     /* termination should be performed.                                        */
     /*-------------------------------------------------------------------------*/
+
+    if(fInit == TRUE && ulFlag == 0) {
+        return 1; //already initialized
+    }
+    fInit = TRUE;
 
     switch (ulFlag)
     {
