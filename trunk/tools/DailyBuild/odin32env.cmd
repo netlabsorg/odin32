@@ -1,4 +1,4 @@
-/* $Id: odin32env.cmd,v 1.5 2000-05-27 14:26:54 bird Exp $
+/* $Id: odin32env.cmd,v 1.6 2000-06-07 22:14:21 bird Exp $
  *
  * Sets the build environment.
  *
@@ -23,6 +23,7 @@
      * Call the procedures which configure each tool.
      * (The order this is done is _very_ important!)
      */
+    call WarpIn 0;
     call EMX 0;
     call mySQL 0;
     call CVS 0;
@@ -365,6 +366,21 @@ VAC36: procedure
     call EnvVar_Set      fRM, 'CPP_DBG_LANG', 'CPP'
     return 0;
 
+
+/*
+ * WarpIn
+ */
+WarpIn: procedure
+    parse arg fRM
+
+    /*
+     * Concurrent Versions System (CVS) main directory.
+     */
+    sWarpInMain = 'd:\knut\tools\WarpIn';
+    call EnvVar_Set      fRM, 'sWarpInMain', sWarpInMain;
+    call EnvVar_AddFront fRM, 'path',        sWarpInMain';'
+    call EnvVar_AddFront fRM, 'bookshelf',   sWarpInMain';'
+    return 0;
 
 
 
