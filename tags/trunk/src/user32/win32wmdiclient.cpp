@@ -1,4 +1,4 @@
-/* $Id: win32wmdiclient.cpp,v 1.14 1999-12-16 00:11:48 sandervl Exp $ */
+/* $Id: win32wmdiclient.cpp,v 1.15 1999-12-17 17:18:04 cbratschi Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -16,6 +16,7 @@
 #include <os2win.h>
 #include <win.h>
 #include <stdlib.h>
+#include <math.h>
 #include <string.h>
 #include <stdarg.h>
 #include <assert.h>
@@ -130,11 +131,9 @@ LRESULT Win32MDIClientWindow::MDIClientWndProc(UINT message, WPARAM wParam, LPAR
         retvalue = 0;
         goto END;
 
-#if 0
     case WM_MDICASCADE:
-        retvalue = MDICascade(w, ci);
+        retvalue = cascade(wParam);
         goto END;
-#endif
 
     case WM_MDICREATE:
         if (lParam) {
@@ -158,15 +157,13 @@ LRESULT Win32MDIClientWindow::MDIClientWndProc(UINT message, WPARAM wParam, LPAR
         retvalue = (activeChild) ? activeChild->getWindowHandle() : 0;
         goto END;
 
-#if 0
     case WM_MDIICONARRANGE:
         mdiFlags |= MDIF_NEEDUPDATE;
-        ArrangeIconicWindows(hwnd);
+        ArrangeIconicWindows(Win32Hwnd);
         sbRecalc = SB_BOTH+1;
-        SendMessageA(hwnd, WM_MDICALCCHILDSCROLL, 0, 0L);
+        SendMessageA(WM_MDICALCCHILDSCROLL,0,0L);
         retvalue = 0;
         goto END;
-#endif
 
     case WM_MDIMAXIMIZE:
         ::ShowWindow( (HWND)wParam, SW_MAXIMIZE );
@@ -192,11 +189,10 @@ LRESULT Win32MDIClientWindow::MDIClientWndProc(UINT message, WPARAM wParam, LPAR
         retvalue = refreshMDIMenu((HMENU)wParam, (HMENU)lParam );
         goto END;
 
-#if 0
     case WM_MDITILE:
         mdiFlags |= MDIF_NEEDUPDATE;
-        ShowScrollBar(hwnd,SB_BOTH,FALSE);
-        MDITile(w, ci, wParam);
+        ShowScrollBar(Win32Hwnd,SB_BOTH,FALSE);
+        tile(wParam);
         mdiFlags &= ~MDIF_NEEDUPDATE;
         retvalue = 0;
         goto END;
@@ -204,11 +200,10 @@ LRESULT Win32MDIClientWindow::MDIClientWndProc(UINT message, WPARAM wParam, LPAR
     case WM_VSCROLL:
     case WM_HSCROLL:
         mdiFlags |= MDIF_NEEDUPDATE;
-        ScrollChildren(hwnd, message, wParam, lParam);
+        ScrollChildren(Win32Hwnd, message, wParam, lParam);
         mdiFlags &= ~MDIF_NEEDUPDATE;
         retvalue = 0;
         goto END;
-#endif
 
     case WM_SETFOCUS:
         if( activeChild )
@@ -257,17 +252,15 @@ LRESULT Win32MDIClientWindow::MDIClientWndProc(UINT message, WPARAM wParam, LPAR
         else postUpdate(SB_BOTH+1);
         break;
 
-#if 0
     case WM_MDICALCCHILDSCROLL:
         if( (mdiFlags & MDIF_NEEDUPDATE) && sbRecalc )
         {
-            CalcChildScroll(hwnd, sbRecalc-1);
+            CalcChildScroll(Win32Hwnd, sbRecalc-1);
             sbRecalc = 0;
             mdiFlags &= ~MDIF_NEEDUPDATE;
         }
         retvalue = 0;
         goto END;
-#endif
     }
     retvalue = DefWindowProcA(message, wParam, lParam );
 END:
@@ -648,126 +641,189 @@ BOOL Win32MDIClientWindow::restoreFrameMenu(Win32BaseWindow *child)
     return 1;
 }
 
-#if 0
+Win32BaseWindow** Win32MDIClientWindow::buildWindowArray(UINT bwaFlags,PUINT total)
+{
+  Win32BaseWindow **list = NULL,*win32wnd,**pos;
+  UINT skipHidden;
+  DWORD skipFlags;
+
+  skipHidden = bwaFlags & BWA_SKIPHIDDEN;
+  skipFlags = (bwaFlags & BWA_SKIPDISABLED) ? WS_DISABLED : 0;
+  if (bwaFlags & BWA_SKIPICONIC) skipFlags |= WS_MINIMIZE;
+
+  /* First count the windows */
+  *total = 0;
+  win32wnd = (Win32BaseWindow*)this->getFirstChild();
+  while (win32wnd)
+  {
+    if (!(win32wnd->getStyle() & skipFlags) && (!skipHidden || (win32wnd->getStyle() & WS_VISIBLE)))
+          (*total)++;
+    win32wnd = (Win32BaseWindow*)win32wnd->getNextChild();
+  }
+
+  if (*total)
+  {
+    /* Now build the list of all windows */
+    list = (Win32BaseWindow**)HeapAlloc(GetProcessHeap(),0,sizeof(Win32BaseWindow*)*(*total+1));
+    if (list)
+    {
+      for (win32wnd = (Win32BaseWindow*)this->getFirstChild(),pos = list;win32wnd;win32wnd = (Win32BaseWindow*)win32wnd->getNextChild())
+      {
+        if ((win32wnd->getStyle() & skipFlags));
+        else if(!skipHidden || win32wnd->getStyle() & WS_VISIBLE)
+          *pos++ = win32wnd;
+      }
+      *pos = NULL;
+    }
+  }
+
+  return list;
+}
+
+void Win32MDIClientWindow::releaseWindowArray(Win32BaseWindow **wndArray)
+{
+  HeapFree(GetProcessHeap(),0,wndArray);
+}
+
+/**********************************************************************
+ *			MDI_CalcDefaultChildPos
+ *
+ *  It seems that the default height is about 2/3 of the client rect
+ */
+void Win32MDIClientWindow::calcDefaultChildPos(WORD n,LPPOINT lpPos,INT delta)
+{
+    INT  nstagger;
+    RECT rect = *this->getClientRect();
+    INT  spacing = GetSystemMetrics(SM_CYCAPTION) +
+		     GetSystemMetrics(SM_CYFRAME) - 1;
+
+    if( rect.bottom - rect.top - delta >= spacing )
+	rect.bottom -= delta;
+
+    nstagger = (rect.bottom - rect.top)/(3 * spacing);
+    lpPos[1].x = (rect.right - rect.left - nstagger * spacing);
+    lpPos[1].y = (rect.bottom - rect.top - nstagger * spacing);
+    lpPos[0].x = lpPos[0].y = spacing * (n%(nstagger+1));
+}
+
 /**********************************************************************
  *              MDICascade
  */
-LONG Win32MDIClientWindow::cascade()
+BOOL Win32MDIClientWindow::cascade(UINT fuCascade)
 {
-    WND**   ppWnd;
-    UINT    total;
+  Win32BaseWindow **list;
+  UINT total = 0;
 
-    if (getMaximizedChild())
-        SendInternalMessageA(WM_MDIRESTORE, (WPARAM)getMaximizedChild()->getWindowHandle(), 0);
+  if (getMaximizedChild())
+    SendInternalMessageA(WM_MDIRESTORE, (WPARAM)getMaximizedChild()->getWindowHandle(), 0);
 
-    if (nActiveChildren == 0) return 0;
+  if (nActiveChildren == 0) return 0;
 
-    if ((ppWnd = WIN_BuildWinArray(clientWnd, BWA_SKIPHIDDEN | BWA_SKIPOWNED |
-                          BWA_SKIPICONIC, &total)))
+  list = buildWindowArray(BWA_SKIPHIDDEN | BWA_SKIPOWNED | BWA_SKIPICONIC,&total);
+  if (list)
+  {
+    Win32BaseWindow** heapPtr = list;
+    if (total)
     {
-        WND**   heapPtr = ppWnd;
-        if( total )
-        {
-            INT delta = 0, n = 0;
-            POINT   pos[2];
-            if( total < ci->nActiveChildren )
-                delta = GetSystemMetrics(SM_CYICONSPACING) +
-            GetSystemMetrics(SM_CYICON);
+      INT delta = 0,n = 0;
+      POINT pos[2];
 
-            /* walk the list (backwards) and move windows */
-            while (*ppWnd) ppWnd++;
-                while (ppWnd != heapPtr)
-                {
-                    ppWnd--;
 
-                    MDI_CalcDefaultChildPos(clientWnd, n++, pos, delta);
-                    SetWindowPos( (*ppWnd)->hwndSelf, 0, pos[0].x, pos[0].y,
-                                pos[1].x, pos[1].y,
-                                SWP_DRAWFRAME | SWP_NOACTIVATE | SWP_NOZORDER);
-                }
-        }
-        WIN_ReleaseWinArray(heapPtr);
+      if (total < nActiveChildren)
+        delta = GetSystemMetrics(SM_CYICONSPACING)+GetSystemMetrics(SM_CYICON);
+
+      // walk the list (backwards) and move windows
+      while (*list) list++;
+      while (list != heapPtr)
+      {
+        list--;
+
+        calcDefaultChildPos(n++,pos,delta);
+        ::SetWindowPos((*list)->getWindowHandle(),0,pos[0].x,pos[0].y,pos[1].x,pos[1].y,SWP_DRAWFRAME | SWP_NOACTIVATE | SWP_NOZORDER);
+      }
     }
+    releaseWindowArray(heapPtr);
+  }
 
-    if( total < ci->nActiveChildren )
-        ArrangeIconicWindows( clientWnd->hwndSelf );
+  if (total < nActiveChildren)
+    ArrangeIconicWindows(Win32Hwnd);
 
-    return 0;
+  return TRUE;
 }
 
 /**********************************************************************
  *                  MDITile
  */
-void Win32MDIClientWindow::MDITile(WPARAM wParam )
+BOOL Win32MDIClientWindow::tile(UINT fuTile)
 {
-    WND**   ppWnd;
-    UINT    total = 0;
+  Win32BaseWindow** list;
+  UINT total = 0;
 
-    if (getMaximizedChild())
-        SendInternalMessageA(WM_MDIRESTORE, (WPARAM)getMaximizedChild()->getWindowHandle(), 0);
+  if (getMaximizedChild())
+    SendInternalMessageA(WM_MDIRESTORE, (WPARAM)getMaximizedChild()->getWindowHandle(), 0);
 
-    if (nActiveChildren == 0) return;
+  if (nActiveChildren == 0) return TRUE;
 
-    ppWnd = WIN_BuildWinArray(wndClient, BWA_SKIPHIDDEN | BWA_SKIPOWNED | BWA_SKIPICONIC |
-            ((wParam & MDITILE_SKIPDISABLED)? BWA_SKIPDISABLED : 0), &total );
+  list = buildWindowArray(BWA_SKIPHIDDEN | BWA_SKIPOWNED | BWA_SKIPICONIC |
+          ((fuTile & MDITILE_SKIPDISABLED)? BWA_SKIPDISABLED : 0), &total );
 
-    TRACE("%u windows to tile\n", total);
+  if (list)
+  {
+    Win32BaseWindow** heapPtr = list;
 
-    if( ppWnd )
+    if (total)
     {
-        WND**   heapPtr = ppWnd;
+      RECT    rect;
+      int     x, y, xsize, ysize;
+      int     rows, columns, r, c, i;
 
-        if( total )
+      GetClientRect(Win32Hwnd,&rect);
+      rows    = (int) sqrt((double)total);
+      columns = total / rows;
+
+      if( fuTile & MDITILE_HORIZONTAL )  // version >= 3.1
+      {
+        i = rows;
+        rows = columns;  // exchange r and c
+        columns = i;
+      }
+
+      if( total != nActiveChildren)
+      {
+        y = rect.bottom - 2 * GetSystemMetrics(SM_CYICONSPACING) - GetSystemMetrics(SM_CYICON);
+        rect.bottom = ( y - GetSystemMetrics(SM_CYICON) < rect.top )? rect.bottom: y;
+      }
+
+      ysize   = rect.bottom / rows;
+      xsize   = rect.right  / columns;
+
+      for (x = i = 0, c = 1; c <= columns && *list; c++)
+      {
+        if (c == columns)
         {
-            RECT    rect;
-            int     x, y, xsize, ysize;
-            int     rows, columns, r, c, i;
+          rows  = total - i;
+          ysize = rect.bottom / rows;
+        }
 
-            GetClientRect(wndClient->hwndSelf,&rect);
-            rows    = (int) sqrt((double)total);
-            columns = total / rows;
-
-            if( wParam & MDITILE_HORIZONTAL )  /* version >= 3.1 */
-            {
-                i = rows;
-                rows = columns;  /* exchange r and c */
-                columns = i;
-            }
-
-            if( total != ci->nActiveChildren)
-            {
-                y = rect.bottom - 2 * GetSystemMetrics(SM_CYICONSPACING) - GetSystemMetrics(SM_CYICON);
-                rect.bottom = ( y - GetSystemMetrics(SM_CYICON) < rect.top )? rect.bottom: y;
-            }
-
-            ysize   = rect.bottom / rows;
-            xsize   = rect.right  / columns;
-
-            for (x = i = 0, c = 1; c <= columns && *ppWnd; c++)
-            {
-                if (c == columns)
-                {
-                    rows  = total - i;
-                    ysize = rect.bottom / rows;
-                }
-
-                y = 0;
-                for (r = 1; r <= rows && *ppWnd; r++, i++)
-                {
-                    SetWindowPos((*ppWnd)->hwndSelf, 0, x, y, xsize, ysize,
-                        SWP_DRAWFRAME | SWP_NOACTIVATE | SWP_NOZORDER);
-                            y += ysize;
-                    ppWnd++;
-                }
-                x += xsize;
-            }
+        y = 0;
+        for (r = 1; r <= rows && *list; r++, i++)
+        {
+          ::SetWindowPos((*list)->getWindowHandle(), 0, x, y, xsize, ysize,
+                         SWP_DRAWFRAME | SWP_NOACTIVATE | SWP_NOZORDER);
+          y += ysize;
+          list++;
+        }
+        x += xsize;
+      }
     }
-    WIN_ReleaseWinArray(heapPtr);
-    }
+    releaseWindowArray(heapPtr);
+  }
 
-    if( total < ci->nActiveChildren ) ArrangeIconicWindows( wndClient->hwndSelf );
+  if( total < nActiveChildren ) ArrangeIconicWindows(Win32Hwnd);
+
+  return TRUE;
 }
-
+#if 0
 /* ----------------------- Frame window ---------------------------- */
 
 /**********************************************************************
@@ -911,6 +967,146 @@ static BOOL MDI_RestoreFrameMenu( WND *frameWnd, HWND hChild )
     return 1;
 }
 #endif
+
+/***********************************************************************
+ *           CalcChildScroll   (USER.462)
+ */
+void WINAPI CalcChildScroll(HWND hwnd,WORD scroll)
+{
+    Win32BaseWindow *win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    SCROLLINFO info;
+    RECT childRect, clientRect;
+    INT  vmin, vmax, hmin, hmax, vpos, hpos;
+
+    if (!win32wnd) return;
+
+    GetClientRect( hwnd, &clientRect );
+    SetRectEmpty( &childRect );
+
+    for (win32wnd = (Win32BaseWindow*)win32wnd->getFirstChild();win32wnd;win32wnd = (Win32BaseWindow*)win32wnd->getNextChild())
+    {
+          if( win32wnd->getStyle() & WS_MAXIMIZE )
+          {
+              ShowScrollBar(hwnd, SB_BOTH, FALSE);
+              return;
+          }
+          UnionRect(&childRect,win32wnd->getWindowRect(),&childRect);
+    }
+    UnionRect( &childRect, &clientRect, &childRect );
+
+    hmin = childRect.left; hmax = childRect.right - clientRect.right;
+    hpos = clientRect.left - childRect.left;
+    vmin = childRect.top; vmax = childRect.bottom - clientRect.bottom;
+    vpos = clientRect.top - childRect.top;
+
+    switch( scroll )
+    {
+        case SB_HORZ:
+                        vpos = hpos; vmin = hmin; vmax = hmax;
+        case SB_VERT:
+                        info.cbSize = sizeof(info);
+                        info.nMax = vmax; info.nMin = vmin; info.nPos = vpos;
+                        info.fMask = SIF_POS | SIF_RANGE;
+                        SetScrollInfo(hwnd, scroll, &info, TRUE);
+                        break;
+        case SB_BOTH:
+        {
+          SCROLLINFO vInfo, hInfo;
+
+          vInfo.cbSize = hInfo.cbSize = sizeof(SCROLLINFO);
+          vInfo.nMin   = vmin;
+          hInfo.nMin   = hmin;
+          vInfo.nMax   = vmax;
+          hInfo.nMax   = hmax;
+          vInfo.nPos   = vpos;
+          hInfo.nPos   = hpos;
+          vInfo.fMask  = hInfo.fMask = SIF_RANGE | SIF_POS;
+
+          SetScrollInfo(hwnd,SB_VERT,&vInfo,TRUE);
+          SetScrollInfo(hwnd,SB_HORZ,&hInfo,TRUE);
+        }
+    }
+}
+
+/***********************************************************************
+ *           ScrollChildren32   (USER32.448)
+ */
+void WINAPI ScrollChildren(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
+{
+  Win32BaseWindow *win32wnd = Win32BaseWindow::GetWindowFromHandle(hWnd);
+  INT newPos = -1;
+  INT curPos, length, minPos, maxPos, shift;
+
+  if (!win32wnd) return;
+
+  if (uMsg == WM_HSCROLL)
+  {
+    GetScrollRange(hWnd,SB_HORZ,&minPos,&maxPos);
+    curPos = GetScrollPos(hWnd,SB_HORZ);
+    length = win32wnd->getWindowWidth()/2;
+    shift = GetSystemMetrics(SM_CYHSCROLL);
+  } else if (uMsg == WM_VSCROLL)
+  {
+    GetScrollRange(hWnd,SB_VERT,&minPos,&maxPos);
+    curPos = GetScrollPos(hWnd,SB_VERT);
+    length = win32wnd->getWindowHeight()/2;
+    shift = GetSystemMetrics(SM_CXVSCROLL);
+  } else return;
+
+  switch( wParam )
+  {
+    case SB_LINEUP:
+      newPos = curPos - shift;
+      break;
+
+    case SB_LINEDOWN:
+      newPos = curPos + shift;
+      break;
+
+    case SB_PAGEUP:
+      newPos = curPos - length;
+      break;
+
+    case SB_PAGEDOWN:
+      newPos = curPos + length;
+      break;
+
+    case SB_THUMBPOSITION:
+      newPos = LOWORD(lParam);
+      break;
+
+    case SB_THUMBTRACK:
+      return;
+
+    case SB_TOP:
+      newPos = minPos;
+      break;
+
+    case SB_BOTTOM:
+      newPos = maxPos;
+      break;
+
+    case SB_ENDSCROLL:
+      CalcChildScroll(hWnd,(uMsg == WM_VSCROLL)?SB_VERT:SB_HORZ);
+      return;
+  }
+
+  if( newPos > maxPos )
+    newPos = maxPos;
+  else
+    if( newPos < minPos )
+      newPos = minPos;
+
+  SetScrollPos(hWnd, (uMsg == WM_VSCROLL)?SB_VERT:SB_HORZ , newPos, TRUE);
+
+  if( uMsg == WM_VSCROLL )
+    ScrollWindowEx(hWnd ,0 ,curPos - newPos, NULL, NULL, 0, NULL,
+                   SW_INVALIDATE | SW_ERASE | SW_SCROLLCHILDREN );
+  else
+    ScrollWindowEx(hWnd ,curPos - newPos, 0, NULL, NULL, 0, NULL,
+                   SW_INVALIDATE | SW_ERASE | SW_SCROLLCHILDREN );
+}
+
 /* -------- Miscellaneous service functions ----------
  *
  *          MDI_GetChildByID
