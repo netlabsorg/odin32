@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.31 2000-01-01 14:57:21 cbratschi Exp $ */
+/* $Id: pmwindow.cpp,v 1.32 2000-01-01 17:07:42 cbratschi Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -53,8 +53,6 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
 //******************************************************************************
 BOOL InitPM()
 {
-  CLASSINFO FrameClassInfo;
-
   hab = WinInitialize(0);
   dprintf(("Winitialize returned %x", hab));
   hmq = WinCreateMsgQueue(hab, 0);
@@ -92,13 +90,21 @@ BOOL InitPM()
      hab,                               /* Anchor block handle          */
      (PSZ)WIN32_STDCLASS,               /* Window class name            */
      (PFNWP)Win32WindowProc,            /* Address of window procedure  */
-//     CS_SIZEREDRAW | CS_HITTEST | CS_MOVENOTIFY,
-     //CS_SIZEREDRAW | CS_HITTEST,
      CS_HITTEST,
      NROF_WIN32WNDBYTES)) {
         dprintf(("WinRegisterClass Win32BaseWindow failed"));
         return(FALSE);
    }
+  if(!WinRegisterClass(                 /* Register window class        */
+     hab,                               /* Anchor block handle          */
+     (PSZ)WIN32_STDCLASS2,              /* Window class name            */
+     (PFNWP)Win32WindowProc,            /* Address of window procedure  */
+     CS_HITTEST | CS_SAVEBITS,
+     NROF_WIN32WNDBYTES)) {
+        dprintf(("WinRegisterClass Win32BaseWindow failed"));
+        return(FALSE);
+   }
+/* //CB: perhaps reuse it for own frame
    if (!WinQueryClassInfo (hab, WC_FRAME, &FrameClassInfo)) {
      dprintf (("WinQueryClassInfo WC_FRAME failed"));
      return (FALSE);
@@ -112,7 +118,7 @@ BOOL InitPM()
      dprintf (("WinRegisterClass Win32InnerFrame failed"));
      return (FALSE);
    }
-
+*/
    WinQueryWindowRect(HWND_DESKTOP, &desktopRectl);
    ScreenWidth  = desktopRectl.xRight;
    ScreenHeight = desktopRectl.yTop;

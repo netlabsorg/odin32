@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.1 2000-01-01 14:57:19 cbratschi Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.2 2000-01-01 17:07:41 cbratschi Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -121,6 +121,104 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
   winMsg->pt.y = mapScreenY(os2Msg->ptl.y);
   if(win32wnd) //==0 for WM_CREATE
     winMsg->hwnd = win32wnd->getWindowHandle();
+
+  if (win32wnd && (os2Msg->hwnd == win32wnd->getOS2FrameWindowHandle()))
+  {
+    //special frame messages
+
+    switch (os2Msg->msg)
+    {
+      case WM_BUTTON1DOWN:
+      case WM_BUTTON1UP:
+      case WM_BUTTON1DBLCLK:
+      case WM_BUTTON2DOWN:
+      case WM_BUTTON2UP:
+      case WM_BUTTON2DBLCLK:
+      case WM_BUTTON3DOWN:
+      case WM_BUTTON3UP:
+      case WM_BUTTON3DBLCLK:
+        //WM_NC*BUTTON* is posted when the cursor is in a non-client area of the window
+        if(win32wnd->lastHitTestVal != HTCLIENT_W) {
+            winMsg->message = WINWM_NCLBUTTONDOWN + (os2Msg->msg - WM_BUTTON1DOWN);
+            winMsg->wParam  = win32wnd->lastHitTestVal;
+            winMsg->lParam  = MAKELONG(winMsg->pt.x, winMsg->pt.y); //screen coordinates
+        }
+        else {
+            point.x         = (*(POINTS *)&os2Msg->mp1).x;
+            point.y         = (*(POINTS *)&os2Msg->mp1).y;
+            ClientPoint.x   = point.x;
+            ClientPoint.y   = mapOS2ToWin32Y(os2Msg->hwnd,win32wnd->getOS2WindowHandle(),point.y);
+
+            winMsg->message = WINWM_LBUTTONDOWN + (os2Msg->msg - WM_BUTTON1DOWN);
+            winMsg->lParam  = MAKELONG(ClientPoint.x, ClientPoint.y); //client coordinates
+        }
+
+        return TRUE;
+
+      case WM_BUTTON2MOTIONSTART:
+      case WM_BUTTON2MOTIONEND:
+      case WM_BUTTON2CLICK:
+      case WM_BUTTON1MOTIONSTART:
+      case WM_BUTTON1MOTIONEND:
+      case WM_BUTTON1CLICK:
+      case WM_BUTTON3MOTIONSTART:
+      case WM_BUTTON3MOTIONEND:
+      case WM_BUTTON3CLICK:
+        goto dummymessage;
+
+      case WM_MOUSEMOVE:
+      {
+        ULONG keystate = 0, setcursormsg = WINWM_MOUSEMOVE;
+
+        if(WinGetKeyState(HWND_DESKTOP, VK_BUTTON1) & 0x8000)
+            keystate |= MK_LBUTTON_W;
+        if(WinGetKeyState(HWND_DESKTOP, VK_BUTTON2) & 0x8000)
+            keystate |= MK_RBUTTON_W;
+        if(WinGetKeyState(HWND_DESKTOP, VK_BUTTON3) & 0x8000)
+            keystate |= MK_MBUTTON_W;
+        if(WinGetKeyState(HWND_DESKTOP, VK_SHIFT) & 0x8000)
+            keystate |= MK_SHIFT_W;
+        if(WinGetKeyState(HWND_DESKTOP, VK_CTRL) & 0x8000)
+            keystate |= MK_CONTROL_W;
+
+        //WM_NCMOUSEMOVE is posted when the cursor moves into a non-client area of the window
+        if(win32wnd->lastHitTestVal != HTCLIENT_W)
+        {
+          setcursormsg   = WINWM_NCMOUSEMOVE;
+          winMsg->wParam = (WPARAM)win32wnd->lastHitTestVal;
+          winMsg->lParam = MAKELONG(winMsg->pt.x,winMsg->pt.y);
+        } else
+        {
+          winMsg->wParam = (WPARAM)keystate;
+          winMsg->lParam  = MAKELONG(SHORT1FROMMP(os2Msg->mp1),mapOS2ToWin32Y(win32wnd->getOS2FrameWindowHandle(),win32wnd->getOS2WindowHandle(),SHORT2FROMMP(os2Msg->mp1)));
+        }
+        //OS/2 Window coordinates -> Win32 Window coordinates
+        winMsg->message = setcursormsg;
+        return TRUE;
+      }
+
+      case WM_PAINT:
+      {
+        winMsg->message = WINWM_NCPAINT;
+        return TRUE;
+      }
+
+      case WM_HITTEST:
+      {
+        OSLIBPOINT pt;
+
+        pt.x = (*(POINTS *)&os2Msg->mp1).x;
+        pt.y = (*(POINTS *)&os2Msg->mp1).y;
+
+        mapOS2ToWin32Point(os2Msg->hwnd,OSLIB_HWND_DESKTOP,&pt);
+        winMsg->message  = WINWM_NCHITTEST;
+        winMsg->wParam  = 0;
+        winMsg->lParam  = MAKELONG((USHORT)pt.x, (USHORT)pt.y);
+        return TRUE;
+      }
+    }
+    //do normal translation for all other messages
+  }
 
   switch(os2Msg->msg)
   {
