@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.28 1999-08-23 13:54:43 sandervl Exp $
+; $Id: kernel32.def,v 1.29 1999-08-25 12:30:47 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -1003,5 +1003,5 @@ EXPORTS
     HEAP_strdupA               = _HEAP_strdupA@12                 @1247
     HEAP_strdupW               = _HEAP_strdupW@12                 @1248
 
-    VIRTUAL_MapFileA           = _VIRTUAL_MapFileA@4              @1249
-    VIRTUAL_MapFileW           = _VIRTUAL_MapFileW@4              @1250
+    VIRTUAL_MapFileA           = _VIRTUAL_MapFileA@8              @1249
+    VIRTUAL_MapFileW           = _VIRTUAL_MapFileW@8              @1250

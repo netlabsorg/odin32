@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.31 1999-08-25 11:40:18 sandervl Exp $
+# $Id: makefile,v 1.32 1999-08-25 12:30:48 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -308,7 +308,7 @@ virtual.obj:   virtual.cpp $(PDWIN32_INCLUDE)\win\virtual.h $(PDWIN32_INCLUDE)\h
 mmap.obj:      mmap.cpp mmap.h $(PDWIN32_INCLUDE)\vmutex.h
 
 pefile.OBJ:    pefile.cpp $(PDWIN32_INCLUDE)\pefile.h
-winimage.OBJ:  winimage.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h $(PDWIN32_INCLUDE)\pefile.h $(PDWIN32_INCLUDE)\winres.h initterm.h
+winimage.OBJ:  winimage.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h $(PDWIN32_INCLUDE)\pefile.h $(PDWIN32_INCLUDE)\winres.h initterm.h $(PDWIN32_INCLUDE)\win\virtual.h
 winimgres.OBJ: winimgres.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h $(PDWIN32_INCLUDE)\pefile.h $(PDWIN32_INCLUDE)\winexe.h $(PDWIN32_INCLUDE)\winres.h
 windll.OBJ:    windll.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h
 winexe.OBJ:    winexe.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h $(PDWIN32_INCLUDE)\winexe.h
