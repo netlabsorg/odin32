@@ -1,4 +1,4 @@
-/* $Id: winmouse.cpp,v 1.19 2001-10-12 07:05:15 phaller Exp $ */
+/* $Id: winmouse.cpp,v 1.20 2001-12-12 16:40:45 sandervl Exp $ */
 /*
  * Mouse handler for DINPUT
  *
@@ -339,6 +339,7 @@ ODINFUNCTION3(UINT,    SendInput,
         PKEYBDINPUT p = (PKEYBDINPUT)&piBase->ki;
         MSG msg;
         BOOL fUnicode = (p->dwFlags & KEYEVENTF_UNICODE) == KEYEVENTF_UNICODE;
+        DWORD extrainfo = GetMessageExtraInfo();
         
         // build keyboard message
         msg.message = (p->dwFlags & KEYEVENTF_KEYUP) ? WM_KEYUP : WM_KEYDOWN;
@@ -378,15 +379,18 @@ ODINFUNCTION3(UINT,    SendInput,
         
         // @@@PH
         // unknown: do we have to post or to send the message?
+
+        SetMessageExtraInfo( (LPARAM)p->dwExtraInfo );
         
         if (fUnicode)
-          PostMessageW(hwnd, msg.message, msg.wParam, msg.lParam);
+          SendMessageW(hwnd, msg.message, msg.wParam, msg.lParam);
         else
-          PostMessageA(hwnd, msg.message, msg.wParam, msg.lParam);
+          SendMessageA(hwnd, msg.message, msg.wParam, msg.lParam);
         
-        SetMessageExtraInfo( (LPARAM)p->dwExtraInfo );
+        //restore extra info
+        SetMessageExtraInfo(extrainfo);
+        break;
       }  
-      break;
       
       case INPUT_HARDWARE:
       {

@@ -1,4 +1,4 @@
-/* $Id: oslibutil.cpp,v 1.6 2000-11-21 11:36:08 sandervl Exp $ */
+/* $Id: oslibutil.cpp,v 1.7 2001-12-12 16:40:44 sandervl Exp $ */
 /*
  * Window API utility functions for OS/2
  *
@@ -75,30 +75,3 @@ void SetThreadMessageQueue(HMQ hmq)
 }
 //******************************************************************************
 //******************************************************************************
-DWORD GetThreadMessageExtraInfo()
-{
- TEB *teb;
-
-  teb = GetThreadTEB();
-  if(teb)
-  {
-        return teb->o.odin.lParam;
-  }
-
-  dprintf(("GetThreadMessageExtraInfo: teb == NULL!!"));
-  return 0;
-}
-//******************************************************************************
-//******************************************************************************
-DWORD SetThreadMessageExtraInfo(DWORD lParam)
-{
- TEB *teb;
-
-  teb = GetThreadTEB();
-  if(teb)
-  {
-        teb->o.odin.lParam = lParam;
-  }
-  else  dprintf(("SetThreadMessageExtraInfo: teb == NULL!!"));
-  return 0;
-}
