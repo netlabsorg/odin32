@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.29 1999-10-15 09:26:22 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.30 1999-10-15 13:52:54 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -260,8 +260,12 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         WinQueryWindowPos(hwnd, &swpOld);
 
         if(pswp->fl & (SWP_MOVE | SWP_SIZE)) {
-            if (win32wnd->isChild())
-                hParent = win32wnd->getParent()->getOS2WindowHandle();
+            if (win32wnd->isChild()) {
+		if(win32wnd->getParent()) {
+                	hParent = win32wnd->getParent()->getOS2WindowHandle();
+		}
+		else	break;
+	    }
             else
                 hFrame = win32wnd->getOS2FrameWindowHandle();
         }
@@ -293,8 +297,12 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         if ((pswp->fl & (SWP_SIZE | SWP_MOVE | SWP_ZORDER)) == 0) break;
 
         if(pswp->fl & (SWP_MOVE | SWP_SIZE)) {
-            if (win32wnd->isChild())
-                hParent = win32wnd->getParent()->getOS2WindowHandle();
+            if (win32wnd->isChild()) {
+		if(win32wnd->getParent()) {
+                	hParent = win32wnd->getParent()->getOS2WindowHandle();
+		}
+		else	goto RunDefWndProc; //parent has just been destroyed
+            }
             else
                 hFrame = WinQueryWindow(hwnd, QW_PARENT);
         }
