@@ -1,4 +1,4 @@
-/* $Id: oslibexcept.cpp,v 1.4 2000-09-09 08:59:55 sandervl Exp $ */
+/* $Id: oslibexcept.cpp,v 1.5 2000-11-21 11:35:08 sandervl Exp $ */
 /*
  * Exception handler util. procedures
  *
@@ -127,15 +127,14 @@ BOOL APIENTRY OSLibDispatchException(PEXCEPTIONREPORTRECORD pReportRec,
         wincontextrec.Eax     = pContextRec->ctx_RegEax;
   }
 
-  TEB  *winteb = GetThreadTEB();
-  THDB *thdb   = (THDB *)(winteb+1);
+  TEB *winteb = GetThreadTEB();
 
   if(pContextRec->ContextFlags & CONTEXT_SEGMENTS) {
         wincontextrec.ContextFlags |= WINCONTEXT_SEGMENTS;
         wincontextrec.SegGs   = pContextRec->ctx_SegGs;
 //   This resets FS to 0x150B - we DON'T want that!!
 //      wincontextrec.SegFs   = pContextRec->ctx_SegFs;
-        wincontextrec.SegFs   = thdb->teb_sel;
+        wincontextrec.SegFs   = winteb->teb_sel;
         wincontextrec.SegEs   = pContextRec->ctx_SegEs;
         wincontextrec.SegDs   = pContextRec->ctx_SegDs;
   }
@@ -152,7 +151,7 @@ BOOL APIENTRY OSLibDispatchException(PEXCEPTIONREPORTRECORD pReportRec,
   // We need to reset FS to its original (Win32) value, otherwise we'll likely
   // fuck up the Win32 exception handlers. They could end up using the wrong
   // exception chain if they access FS:[0] directly.
-  DWORD oldsel = SetReturnFS(thdb->teb_sel);
+  DWORD oldsel = SetReturnFS(winteb->teb_sel);
 
   switch(pReportRec->ExceptionNum) {
   case XCPT_FLOAT_DENORMAL_OPERAND:

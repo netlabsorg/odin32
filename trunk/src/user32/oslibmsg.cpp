@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.33 2000-05-12 18:09:40 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.34 2000-11-21 11:36:08 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -77,11 +77,9 @@ MSGTRANSTAB MsgTransTab[] = {
    WM_CHAR,          WINWM_SYSDEADCHAR,
    WM_CHAR,          WINWM_KEYLAST,
 
-   WM_COMMAND,       WINWM_COMMAND,
-   WM_SYSCOMMAND,    WINWM_SYSCOMMAND,
    //
    WM_TIMER,         WINWM_TIMER,
-   WM_INITMENU,      WINWM_INITMENU,
+
    //
    WM_MOUSEMOVE,     WINWM_MOUSEMOVE,
    WM_BUTTON1DOWN,   WINWM_LBUTTONDOWN,
@@ -97,8 +95,6 @@ MSGTRANSTAB MsgTransTab[] = {
    999999999,        999999999,
 };
 #define MAX_MSGTRANSTAB (sizeof(MsgTransTab)/sizeof(MsgTransTab[0]))
-
-LRESULT WIN32API SendMessageA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 //******************************************************************************
 //******************************************************************************
@@ -133,7 +129,8 @@ ULONG TranslateWinMsg(ULONG msg, BOOL fMinFilter)
         }
     }
 
-    return 0;
+    //not found, probaby WIN32APP_POSTMSG
+    return WIN32APP_POSTMSG;
 }
 //******************************************************************************
 //******************************************************************************
@@ -148,12 +145,12 @@ void OSLibWinPostQuitMessage(ULONG nExitCode)
 //******************************************************************************
 LONG OSLibWinDispatchMsg(MSG *msg, BOOL isUnicode)
 {
- THDB *thdb;
+ TEB  *teb;
  QMSG  os2msg;
  LONG  rc;
 
-  thdb = GetThreadTHDB();
-  if(thdb == NULL) {
+  teb = GetThreadTEB();
+  if(teb == NULL) {
         DebugInt3();
         return FALSE;
   }
@@ -161,19 +158,19 @@ LONG OSLibWinDispatchMsg(MSG *msg, BOOL isUnicode)
   //TODO: What to do if app changed msg? (translate)
   //  WinToOS2MsgTranslate(msg, &qmsg, isUnicode);
 
-  if(!memcmp(msg, &thdb->winmsg, sizeof(MSG)) || msg->hwnd == 0) {
-        memcpy(&os2msg, &thdb->os2msg, sizeof(QMSG));
-        thdb->os2msg.time = -1;
-        thdb->winmsg.time = -1;
+  if(!memcmp(msg, &teb->o.odin.winmsg, sizeof(MSG)) || msg->hwnd == 0) {
+        memcpy(&os2msg, &teb->o.odin.os2msg, sizeof(QMSG));
+        teb->o.odin.os2msg.time = -1;
+        teb->o.odin.winmsg.time = -1;
         if(msg->hwnd) {
-            	thdb->nrOfMsgs = 1;
-            	thdb->msgstate++; //odd -> next call to our PM window handler should dispatch the translated msg
-            	memcpy(&thdb->msg, msg, sizeof(MSG));
+            	teb->o.odin.nrOfMsgs = 1;
+            	teb->o.odin.msgstate++; //odd -> next call to our PM window handler should dispatch the translated msg
+            	memcpy(&teb->o.odin.msg, msg, sizeof(MSG));
         }
         if(os2msg.hwnd || os2msg.msg == WM_QUIT) {
-		memset(&thdb->os2msg, 0, sizeof(thdb->os2msg));
-		memset(&thdb->winmsg, 0, sizeof(thdb->winmsg));
-            	return (LONG)WinDispatchMsg(thdb->hab, &os2msg);
+		memset(&teb->o.odin.os2msg, 0, sizeof(teb->o.odin.os2msg));
+		memset(&teb->o.odin.winmsg, 0, sizeof(teb->o.odin.winmsg));
+            	return (LONG)WinDispatchMsg(teb->o.odin.hab, &os2msg);
         }
         //SvL: Don't dispatch messages sent by PostThreadMessage (correct??)
         //     Or WM_TIMER msgs with no window handle or timer proc
@@ -191,9 +188,10 @@ BOOL OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMa
                     BOOL isUnicode)
 {
  BOOL rc, eaten;
- THDB *thdb;
+ TEB  *teb;
  QMSG  os2msg;
  HWND  hwndOS2 = 0;
+ ULONG filtermin, filtermax;
 
   if(hwnd) {
   	hwndOS2 = Win32BaseWindow::Win32ToOS2Handle(hwnd);
@@ -205,33 +203,40 @@ BOOL OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMa
 	}
   }
 
-  thdb = GetThreadTHDB();
-  if(thdb == NULL) {
+  teb = GetThreadTEB();
+  if(teb == NULL) {
         DebugInt3();
 	return TRUE;
   }
 
-  if(thdb->fTranslated && (!hwnd || hwnd == thdb->msgWCHAR.hwnd)) {
+  if(teb->o.odin.fTranslated && (!hwnd || hwnd == teb->o.odin.msgWCHAR.hwnd)) {
         if(uMsgFilterMin) {
-            if(thdb->msgWCHAR.message < uMsgFilterMin)
+            if(teb->o.odin.msgWCHAR.message < uMsgFilterMin)
                 goto continuegetmsg;
         }
         if(uMsgFilterMax) {
-            if(thdb->msgWCHAR.message > uMsgFilterMax)
+            if(teb->o.odin.msgWCHAR.message > uMsgFilterMax)
                 goto continuegetmsg;
         }
-        thdb->fTranslated = FALSE;
-        memcpy(pMsg, &thdb->msgWCHAR, sizeof(MSG));
-        thdb->os2msg.msg  = 0;
-        thdb->os2msg.hwnd = 0;
+        teb->o.odin.fTranslated = FALSE;
+        memcpy(pMsg, &teb->o.odin.msgWCHAR, sizeof(MSG));
+        teb->o.odin.os2msg.msg  = 0;
+        teb->o.odin.os2msg.hwnd = 0;
         return (pMsg->message != WINWM_QUIT);
   }
 
 continuegetmsg:
   if(hwnd) {
+    	filtermin = TranslateWinMsg(uMsgFilterMin, TRUE);
+	filtermax = TranslateWinMsg(uMsgFilterMax, FALSE);
+	if(filtermin > filtermax) {
+		ULONG tmp = filtermin;
+		filtermin = filtermax;
+		filtermax = filtermin;
+	}
         do {
-            WinWaitMsg(thdb->hab, TranslateWinMsg(uMsgFilterMin, TRUE), TranslateWinMsg(uMsgFilterMax, FALSE));
-            rc = OSLibWinPeekMsg(pMsg, hwnd, uMsgFilterMin, uMsgFilterMax, PM_REMOVE_W, isUnicode);
+            	WinWaitMsg(teb->o.odin.hab, filtermin, filtermax);
+            	rc = OSLibWinPeekMsg(pMsg, hwnd, uMsgFilterMin, uMsgFilterMax, PM_REMOVE_W, isUnicode);
         }
         while(rc == FALSE);
 
@@ -239,17 +244,24 @@ continuegetmsg:
   }
   else
   {
-    do {
-        eaten = FALSE;
-        rc = WinGetMsg(thdb->hab, &os2msg, TranslateWinMsg(uMsgFilterMin, TRUE), TranslateWinMsg(uMsgFilterMax, FALSE), 0);
-        if (os2msg.msg == WM_TIMER)
-            eaten = TIMER_HandleTimer(&os2msg);
-    } while (eaten);
+    	filtermin = TranslateWinMsg(uMsgFilterMin, TRUE);
+	filtermax = TranslateWinMsg(uMsgFilterMax, FALSE);
+	if(filtermin > filtermax) {
+		ULONG tmp = filtermin;
+		filtermin = filtermax;
+		filtermax = filtermin;
+	}
+    	do {
+        	eaten = FALSE;
+	        rc = WinGetMsg(teb->o.odin.hab, &os2msg, filtermin, filtermax, 0);
+	        if (os2msg.msg == WM_TIMER)
+	            eaten = TIMER_HandleTimer(&os2msg);
+	} while (eaten);
   }
 
-  OS2ToWinMsgTranslate((PVOID)thdb, &os2msg, pMsg, isUnicode, MSG_REMOVE);
-  memcpy(&thdb->os2msg, &os2msg, sizeof(QMSG));
-  memcpy(&thdb->winmsg, pMsg, sizeof(MSG));
+  OS2ToWinMsgTranslate((PVOID)teb, &os2msg, pMsg, isUnicode, MSG_REMOVE);
+  memcpy(&teb->o.odin.os2msg, &os2msg, sizeof(QMSG));
+  memcpy(&teb->o.odin.winmsg, pMsg, sizeof(MSG));
 
   if(pMsg->message <= WINWM_KEYLAST && pMsg->message >= WINWM_KEYDOWN)
   {
@@ -274,7 +286,7 @@ BOOL OSLibWinPeekMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterM
                      DWORD fRemove, BOOL isUnicode)
 {
  BOOL  rc, eaten;
- THDB *thdb;
+ TEB  *teb;
  QMSG  os2msg;
  HWND  hwndOS2 = 0;
 
@@ -287,35 +299,35 @@ BOOL OSLibWinPeekMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterM
 	}
   }
 
-  thdb = GetThreadTHDB();
-  if(thdb == NULL) {
+  teb = GetThreadTEB();
+  if(teb == NULL) {
         DebugInt3();
         return FALSE;
   }
 
-  if(thdb->fTranslated && (!hwnd || hwnd == thdb->msgWCHAR.hwnd)) {
+  if(teb->o.odin.fTranslated && (!hwnd || hwnd == teb->o.odin.msgWCHAR.hwnd)) {
         if(uMsgFilterMin) {
-            if(thdb->msgWCHAR.message < uMsgFilterMin)
+            if(teb->o.odin.msgWCHAR.message < uMsgFilterMin)
                 goto continuepeekmsg;
         }
         if(uMsgFilterMax) {
-            if(thdb->msgWCHAR.message > uMsgFilterMax)
+            if(teb->o.odin.msgWCHAR.message > uMsgFilterMax)
                 goto continuepeekmsg;
         }
 
         if(fRemove & PM_REMOVE_W) {
-            thdb->fTranslated = FALSE;
-            thdb->os2msg.msg  = 0;
-            thdb->os2msg.hwnd = 0;
+            teb->o.odin.fTranslated = FALSE;
+            teb->o.odin.os2msg.msg  = 0;
+            teb->o.odin.os2msg.hwnd = 0;
         }
-        memcpy(pMsg, &thdb->msgWCHAR, sizeof(MSG));
+        memcpy(pMsg, &teb->o.odin.msgWCHAR, sizeof(MSG));
         return TRUE;
   }
 
 continuepeekmsg:
   do {
         eaten = FALSE;
-        rc = WinPeekMsg(thdb->hab, &os2msg, hwndOS2, TranslateWinMsg(uMsgFilterMin, TRUE),
+        rc = WinPeekMsg(teb->o.odin.hab, &os2msg, hwndOS2, TranslateWinMsg(uMsgFilterMin, TRUE),
                         TranslateWinMsg(uMsgFilterMax, FALSE), (fRemove & PM_REMOVE_W) ? PM_REMOVE : PM_NOREMOVE);
 
         if (rc && (fRemove & PM_REMOVE_W) && os2msg.msg == WM_TIMER) {
@@ -328,11 +340,11 @@ continuepeekmsg:
     return FALSE;
   }
 
-  OS2ToWinMsgTranslate((PVOID)thdb, &os2msg, pMsg, isUnicode, (fRemove & PM_REMOVE_W) ? MSG_REMOVE : MSG_NOREMOVE);
+  OS2ToWinMsgTranslate((PVOID)teb, &os2msg, pMsg, isUnicode, (fRemove & PM_REMOVE_W) ? MSG_REMOVE : MSG_NOREMOVE);
   //TODO: This is not safe! There's no guarantee this message will be dispatched and it might overwrite a previous message
   if(fRemove & PM_REMOVE_W) {
-  	memcpy(&thdb->os2msg, &os2msg, sizeof(QMSG));
-  	memcpy(&thdb->winmsg, pMsg, sizeof(MSG));
+  	memcpy(&teb->o.odin.os2msg, &os2msg, sizeof(QMSG));
+  	memcpy(&teb->o.odin.winmsg, pMsg, sizeof(MSG));
   }
 
   if(pMsg->message <= WINWM_KEYLAST && pMsg->message >= WINWM_KEYDOWN)
@@ -459,10 +471,10 @@ inline BOOL O32_PostThreadMessage(DWORD a, UINT b, WPARAM c, LPARAM d)
 //******************************************************************************
 BOOL OSLibPostThreadMessage(ULONG threadid, UINT msg, WPARAM wParam, LPARAM lParam, BOOL fUnicode)
 {
-// THDB *thdb = GetTHDBFromThreadId(threadid);
+// TEB *teb = GetTEBFromThreadId(threadid);
  POSTMSG_PACKET *packet = (POSTMSG_PACKET *)_smalloc(sizeof(POSTMSG_PACKET));
 
-//    if(thdb == NULL) {
+//    if(teb == NULL) {
 //        dprintf(("OSLibPostThreadMessage: thread %x not found!", threadid));
 //        return FALSE;
 //    }

@@ -1,4 +1,4 @@
-/* $Id: lang.cpp,v 1.30 2000-11-09 18:18:10 sandervl Exp $ */
+/* $Id: lang.cpp,v 1.31 2000-11-21 11:35:08 sandervl Exp $ */
 /*
  * Win32 language API functions for OS/2
  *
@@ -887,27 +887,27 @@ ODINFUNCTION4(int, GetLocaleInfoA, LCID, lcid, LCTYPE, LCType, LPSTR, buf,
 //******************************************************************************
 LCID WIN32API GetThreadLocale()
 {
- THDB *thdb = GetThreadTHDB();
+ TEB *teb = GetThreadTEB();
 
-  if(thdb == NULL) {
-  	dprintf(("KERNEL32: ERROR: GetThreadLocale thdb == NULL!"));
+  if(teb == NULL) {
+  	dprintf(("KERNEL32: ERROR: GetThreadLocale teb == NULL!"));
 	return FALSE;
   }
-  dprintf(("KERNEL32: GetThreadLocale returned %x", thdb->lcid));
-  return(thdb->lcid);
+  dprintf(("KERNEL32: GetThreadLocale returned %x", teb->o.odin.lcid));
+  return(teb->o.odin.lcid);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API SetThreadLocale(LCID locale)
 {
- THDB *thdb = GetThreadTHDB();
+ TEB *teb = GetThreadTEB();
  
-  if(thdb == NULL) {
-  	dprintf(("KERNEL32: ERROR SetThreadLocale thdb == NULL!"));
+  if(teb == NULL) {
+  	dprintf(("KERNEL32: ERROR SetThreadLocale teb == NULL!"));
 	return FALSE;
   }
   dprintf(("KERNEL32: SetThreadLocale %x", locale));
-  thdb->lcid = locale;
+  teb->o.odin.lcid = locale;
   return(TRUE);
 }
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.38 2000-11-15 20:30:46 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.39 2000-11-21 11:36:08 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -131,12 +131,12 @@ LONG IsNCMouseMsg(Win32BaseWindow *win32wnd)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode, BOOL fMsgRemoved)
+BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode, BOOL fMsgRemoved)
 {
   Win32BaseWindow *win32wnd = 0;
   OSLIBPOINT       point, ClientPoint;
   POSTMSG_PACKET  *packet;
-  THDB            *thdb = (THDB *)pThdb;
+  TEB             *teb = (TEB *)pTeb;
   BOOL             fWasDisabled = FALSE;
   int i;
 
@@ -175,12 +175,12 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
     //OS/2 msgs
     case WM_CREATE:
     {
-        if(thdb->newWindow == 0) {
+        if(teb->o.odin.newWindow == 0) {
             DebugInt3();
             goto dummymessage;
         }
 
-        win32wnd = (Win32BaseWindow *)thdb->newWindow;
+        win32wnd = (Win32BaseWindow *)teb->o.odin.newWindow;
 
         winMsg->message = WINWM_CREATE;
         winMsg->hwnd    = win32wnd->getWindowHandle();
@@ -232,12 +232,12 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
             }
         }
         if(win32wnd->getParent()) {
-   	      OSLibMapSWPtoWINDOWPOS(pswp, &thdb->wp, &swpOld, win32wnd->getParent()->getWindowHeight(), 
+   	      OSLibMapSWPtoWINDOWPOS(pswp, &teb->o.odin.wp, &swpOld, win32wnd->getParent()->getWindowHeight(), 
                                      win32wnd->getParent()->getClientRectPtr()->left,
                                      win32wnd->getParent()->getClientRectPtr()->top,
                                      win32wnd->getOS2WindowHandle());
         } 
-        else  OSLibMapSWPtoWINDOWPOS(pswp, &thdb->wp, &swpOld, OSLibQueryScreenHeight(), 0, 0, win32wnd->getOS2WindowHandle());
+        else  OSLibMapSWPtoWINDOWPOS(pswp, &teb->o.odin.wp, &swpOld, OSLibQueryScreenHeight(), 0, 0, win32wnd->getOS2WindowHandle());
 
         if (!win32wnd->CanReceiveSizeMsgs())    goto dummymessage;
 
@@ -245,17 +245,17 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
 /////                dprintf(("Set client rectangle to (%d,%d)(%d,%d)", swpOld.x, swpOld.y, swpOld.x + swpOld.cx, swpOld.y + swpOld.cy));
 /////                win32wnd->setClientRect(swpOld.x, swpOld.y, swpOld.x + swpOld.cx, swpOld.y + swpOld.cy);
 
-                thdb->wp.hwnd = win32wnd->getWindowHandle();
+                teb->o.odin.wp.hwnd = win32wnd->getWindowHandle();
                 if ((pswp->fl & SWP_ZORDER) && (pswp->hwndInsertBehind > HWND_BOTTOM))
                 {
                         Win32BaseWindow *wndAfter = Win32BaseWindow::GetWindowFromOS2Handle(pswp->hwndInsertBehind);
                         if(wndAfter)
-                  	      thdb->wp.hwndInsertAfter = wndAfter->getWindowHandle();
-			else  thdb->wp.hwndInsertAfter = HWND_TOP_W;
+                  	      teb->o.odin.wp.hwndInsertAfter = wndAfter->getWindowHandle();
+			else  teb->o.odin.wp.hwndInsertAfter = HWND_TOP_W;
                 }
         }
         winMsg->message = WINWM_WINDOWPOSCHANGED;
-        winMsg->lParam  = (LPARAM)&thdb->wp;
+        winMsg->lParam  = (LPARAM)&teb->o.odin.wp;
         break;
     }
 
@@ -495,7 +495,7 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
         BOOL keyWasPressed;
         char c;
 
-        thdb->fTranslated = FALSE;
+        teb->o.odin.fTranslated = FALSE;
         repeatCount = CHAR3FROMMP(os2Msg->mp1);
         scanCode = CHAR4FROMMP(os2Msg->mp1);
         keyWasPressed = ((SHORT1FROMMP (os2Msg->mp1) & KC_PREVDOWN) == KC_PREVDOWN);
@@ -695,6 +695,10 @@ VirtualKeyFound:
         winMsg->message = WINWM_RENDERALLFORMATS;
         break;
 
+    case WM_DESTROYCLIPBOARD:
+        winMsg->message = WINWM_DESTROYCLIPBOARD;
+        break;
+
     case WM_INITMENU:
     case WM_MENUSELECT:
     case WM_MENUEND:
@@ -732,21 +736,21 @@ dummymessage:
 //******************************************************************************
 BOOL OSLibWinTranslateMessage(MSG *msg)
 {
- THDB *thdb;
+ TEB *teb;
 
-    thdb = GetThreadTHDB();
-    if(!thdb) {
+    teb = GetThreadTEB();
+    if(!teb) {
         return FALSE;
     }
     //NOTE: These actually need to be posted so that the next message retrieved by GetMessage contains
     //      the newly generated WM_CHAR message.
-    if(!thdb->fTranslated && thdb->os2msg.msg == WM_CHAR && !((SHORT1FROMMP(thdb->os2msg.mp1) & KC_KEYUP) == KC_KEYUP))
+    if(!teb->o.odin.fTranslated && teb->o.odin.os2msg.msg == WM_CHAR && !((SHORT1FROMMP(teb->o.odin.os2msg.mp1) & KC_KEYUP) == KC_KEYUP))
     {//TranslatedMessage was called before DispatchMessage, so queue WM_CHAR message
-            ULONG fl = SHORT1FROMMP(thdb->os2msg.mp1);
+            ULONG fl = SHORT1FROMMP(teb->o.odin.os2msg.mp1);
             MSG extramsg;
 
             memcpy(&extramsg, msg, sizeof(MSG));
-            extramsg.wParam = SHORT1FROMMP(thdb->os2msg.mp2);
+            extramsg.wParam = SHORT1FROMMP(teb->o.odin.os2msg.mp2);
             extramsg.lParam = 0;
 
             if(!(fl & KC_CHAR) && msg->message < WINWM_SYSKEYDOWN) {
@@ -756,7 +760,7 @@ BOOL OSLibWinTranslateMessage(MSG *msg)
             if(fl & KC_VIRTUALKEY) {
                 if(msg->wParam)
                         extramsg.wParam = msg->wParam;
-                else    extramsg.wParam = SHORT2FROMMP(thdb->os2msg.mp2);
+                else    extramsg.wParam = SHORT2FROMMP(teb->o.odin.os2msg.mp2);
             }
 
 
@@ -777,8 +781,8 @@ BOOL OSLibWinTranslateMessage(MSG *msg)
             if(fl & KC_KEYUP)
                 extramsg.lParam |= (1<<31);
 
-            thdb->fTranslated = TRUE;
-            memcpy(&thdb->msgWCHAR, &extramsg, sizeof(MSG));
+            teb->o.odin.fTranslated = TRUE;
+            memcpy(&teb->o.odin.msgWCHAR, &extramsg, sizeof(MSG));
             return TRUE;
     }
     return FALSE;

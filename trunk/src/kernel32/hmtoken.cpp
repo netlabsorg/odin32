@@ -1,4 +1,4 @@
-/* $Id: hmtoken.cpp,v 1.3 2000-02-16 14:24:00 sandervl Exp $ */
+/* $Id: hmtoken.cpp,v 1.4 2000-11-21 11:35:08 sandervl Exp $ */
 
 /*
  * Win32 process/thread token handle manager class
@@ -51,13 +51,13 @@ DWORD HMDeviceTokenClass::OpenThreadToken(PHMHANDLEDATA pHMHandleData,
                                           HANDLE  ThreadHandle,
                                           BOOL    OpenAsSelf)
 {
- THDB *thdb = GetTHDBFromThreadHandle(ThreadHandle);
+ TEB *teb = GetTEBFromThreadHandle(ThreadHandle);
 
-  if(thdb == 0) {
+  if(teb == 0) {
 	dprintf(("HMDeviceTokenClass::OpenThreadToken: thread handle %x not found", ThreadHandle));
 	return ERROR_INVALID_PARAMETER;
   }
-  pHMHandleData->dwUserData = (DWORD)&thdb->threadinfo;
+  pHMHandleData->dwUserData = (DWORD)&teb->o.odin.threadinfo;
   pHMHandleData->dwInternalType = HMTYPE_THREADTOKEN;
   return STATUS_SUCCESS;
 }

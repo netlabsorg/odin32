@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.27 2000-10-18 17:09:33 sandervl Exp $ */
+/* $Id: misc.cpp,v 1.28 2000-11-21 11:35:08 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -288,18 +288,18 @@ int SYSTEM EXPORT WriteLog(char *tekst, ...)
 
   if(fLogging && flog && (dwEnableLogging > 0))
   {
-    THDB *thdb = GetThreadTHDB();
+    TEB *teb = GetThreadTEB();
 
     va_start(argptr, tekst);
-    if(thdb) {
-    thdb->logfile = (DWORD)flog;
+    if(teb) {
+        teb->o.odin.logfile = (DWORD)flog;
         if(sel == 0x150b && !fIsOS2Image) {
-        fprintf(flog, "t%d: (FS=150B) ", thdb->threadId);
+        fprintf(flog, "t%d: (FS=150B) ", teb->o.odin.threadId);
     }
-    else    fprintf(flog, "t%d: ", thdb->threadId);
+    else    fprintf(flog, "t%d: ", teb->o.odin.threadId);
     }
     vfprintf(flog, tekst, argptr);
-    if(thdb) thdb->logfile = 0;
+    if(teb) teb->o.odin.logfile = 0;
     va_end(argptr);
 
     if(tekst[strlen(tekst)-1] != '\n')
@@ -341,14 +341,14 @@ int SYSTEM EXPORT WriteLogNoEOL(char *tekst, ...)
 
   if(fLogging && flog && (dwEnableLogging > 0))
   {
-    THDB *thdb = GetThreadTHDB();
+    TEB *teb = GetThreadTEB();
 
     va_start(argptr, tekst);
-    if(thdb) {
-        thdb->logfile = (DWORD)flog;
+    if(teb) {
+        teb->o.odin.logfile = (DWORD)flog;
     }
     vfprintf(flog, tekst, argptr);
-    if(thdb) thdb->logfile = 0;
+    if(teb) teb->o.odin.logfile = 0;
     va_end(argptr);
   }
   SetFS(sel);
@@ -375,14 +375,14 @@ int SYSTEM EXPORT WritePrivateLog(void *logfile, char *tekst, ...)
 
   if(fLogging && logfile)
   {
-    THDB *thdb = GetThreadTHDB();
+    TEB *teb = GetThreadTEB();
 
     va_start(argptr, tekst);
-    if(thdb) {
-        thdb->logfile = (DWORD)flog;
+    if(teb) {
+        teb->o.odin.logfile = (DWORD)flog;
     }
     vfprintf((FILE *)logfile, tekst, argptr);
-    if(thdb) thdb->logfile = 0;
+    if(teb) teb->o.odin.logfile = 0;
     va_end(argptr);
 
     if(tekst[strlen(tekst)-1] != '\n')
@@ -399,15 +399,15 @@ int SYSTEM EXPORT WritePrivateLog(void *logfile, char *tekst, ...)
 //******************************************************************************
 void LogException(int state)
 {
-  THDB *thdb = GetThreadTHDB();
+  TEB *teb = GetThreadTEB();
   USHORT *lock;
 
-  if(!thdb) return;
+  if(!teb) return;
 
-  if(thdb->logfile) {
+  if(teb->o.odin.logfile) {
     if(state == ENTER_EXCEPTION) {
 #if (__IBMCPP__ == 300) || (__IBMC__ == 300)
-        lock = (USHORT *)(thdb->logfile+0x1C);
+        lock = (USHORT *)(teb->o.odin.logfile+0x1C);
 #else
 #error Check the offset of the lock count word in the file stream structure for this compiler revision!!!!!
 #endif
@@ -415,7 +415,7 @@ void LogException(int state)
     }
     else { //LEAVE_EXCEPTION
 #if (__IBMCPP__ == 300) || (__IBMC__ == 300)
-        lock = (USHORT *)(thdb->logfile+0x1C);
+        lock = (USHORT *)(teb->o.odin.logfile+0x1C);
 #else
 #error Check the offset of the lock count word in the file stream structure for this compiler revision!!!!!
 #endif
@@ -430,15 +430,15 @@ void LogException(int state)
 //******************************************************************************
 void CheckLogException()
 {
-  THDB *thdb = GetThreadTHDB();
+  TEB *teb = GetThreadTEB();
   USHORT *lock;
 
-  if(!thdb) return;
+  if(!teb) return;
 
-  if(thdb->logfile) {
+  if(teb->o.odin.logfile) {
     //oops, exception in vfprintf; let's clear the lock count
 #if (__IBMCPP__ == 300) || (__IBMC__ == 300)
-    lock = (USHORT *)(thdb->logfile+0x1C);
+    lock = (USHORT *)(teb->o.odin.logfile+0x1C);
 #else
 #error Check the offset of the lock count word in the file stream structure for this compiler revision!!!!!
 #endif

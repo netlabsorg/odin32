@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.25 2000-04-18 20:06:38 sandervl Exp $ */
+/* $Id: thread.cpp,v 1.26 2000-11-21 11:35:09 sandervl Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -47,27 +47,27 @@ DWORD WIN32API GetCurrentThreadId()
 //******************************************************************************
 HANDLE WIN32API GetCurrentThread()
 {
- THDB *thdb;
+ TEB *teb;
 
-    thdb = GetThreadTHDB();
-    if(thdb == 0) {
+    teb = GetThreadTEB();
+    if(teb == 0) {
 	SetLastError(ERROR_INVALID_HANDLE); //todo 
 	return 0;
     }
-    return thdb->hThread;
+    return teb->o.odin.hThread;
 }
 //******************************************************************************
 //******************************************************************************
 VOID WIN32API ExitThread(DWORD exitcode)
 {
  EXCEPTION_FRAME *exceptFrame;
- THDB            *thdb;
+ TEB             *teb;
 
   dprintf(("ExitThread %x (%x)", GetCurrentThread(), exitcode));
 
-  thdb = GetThreadTHDB();
-  if(thdb != 0) {
-	exceptFrame = (EXCEPTION_FRAME *)thdb->exceptFrame;
+  teb = GetThreadTEB();
+  if(teb != 0) {
+	exceptFrame = (EXCEPTION_FRAME *)teb->o.odin.exceptFrame;
   }
   else  DebugInt3();
 
@@ -112,19 +112,18 @@ DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
   }
   winteb->flags = me->dwFlags;
 
-  THDB *thdb   = (THDB *)(winteb+1);
-  thdb->entry_point = (void *)winthread;
-  thdb->entry_arg   = (void *)userdata;
-  thdb->hThread     = hThread;
+  winteb->entry_point = (void *)winthread;
+  winteb->entry_arg   = (void *)userdata;
+  winteb->o.odin.hThread = hThread;
 
-  thdb->hab = OSLibWinInitialize();
-  thdb->hmq = OSLibWinQueryMsgQueue(thdb->hab);
-  dprintf(("Win32ThreadProc: hab %x hmq %x", thdb->hab, thdb->hmq));
+  winteb->o.odin.hab = OSLibWinInitialize();
+  winteb->o.odin.hmq = OSLibWinQueryMsgQueue(winteb->o.odin.hab);
+  dprintf(("Win32ThreadProc: hab %x hmq %x", winteb->o.odin.hab, winteb->o.odin.hmq));
 
   //Note: The Win32 exception structure referenced by FS:[0] is the same
   //      in OS/2
   OS2SetExceptionHandler((void *)&exceptFrame);
-  thdb->exceptFrame = (ULONG)&exceptFrame;
+  winteb->o.odin.exceptFrame = (ULONG)&exceptFrame;
 
   SetWin32TIB();
   WinExe->tlsAttachThread();		  //setup TLS structure of main exe
@@ -136,7 +135,7 @@ DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
   rc = winthread(userdata);
 
   HMSetThreadTerminated(GetCurrentThread());
-  thdb->exceptFrame = 0;
+  winteb->o.odin.exceptFrame = 0;
   Win32DllBase::detachThreadFromAllDlls();  //send DLL_THREAD_DETACH message to all dlls
   Win32DllBase::tlsDetachThreadFromAllDlls(); //destroy TLS structures of all dlls
   WinExe->tlsDetachThread();		  //destroy TLS structure of main exe
