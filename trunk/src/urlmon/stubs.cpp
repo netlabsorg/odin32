@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.1 2001-07-07 04:36:06 bird Exp $
+/* $Id: stubs.cpp,v 1.2 2004-02-12 16:15:32 sandervl Exp $
  *
  * Stubs.
  *
@@ -95,5 +95,28 @@ HRESULT WIN32API RegisterBindStatusCallback(
 {
     dprintf(("URLMON: RegisterBindStatusCallback(%x, %x, %x, %x) - STUB\n",
              pbc, pbsc, ppbscPrevious, dwReserved));
+    return E_INVALIDARG;
+}
+
+HRESULT WIN32API HlinkNavigateString(IUnknown *pUnk, LPCWSTR szTarget)
+{
+    dprintf(("URLMON: HlinkNavigateString(%x, %x) - STUB\n",
+             pUnk, szTarget));
+    return E_INVALIDARG;
+}
+
+HRESULT WIN32API IsAsyncMoniker(IMoniker *pmk)
+{
+    dprintf(("URLMON: IsAsyncMoniker(%x) - STUB\n",
+             pmk));
+    return E_INVALIDARG;
+}
+
+HRESULT WIN32API CreateAsyncBindCtx(DWORD dwReserved, IBindStatusCallback *pbsc,
+                           IEnumFORMATETC *penumfmtetc, IBindCtx **ppbc)
+
+{
+    dprintf(("URLMON: CreateAsyncBindCtx(%x, %x %x %x) - STUB\n",
+             dwReserved, pbsc, penumfmtetc, ppbc));
     return E_INVALIDARG;
 }
