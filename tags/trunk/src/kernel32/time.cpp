@@ -1,4 +1,4 @@
-/* $Id: time.cpp,v 1.20 2002-06-25 18:01:53 sandervl Exp $ */
+/* $Id: time.cpp,v 1.21 2002-06-26 07:42:35 sandervl Exp $ */
 
 /*
  * Win32 time/date API functions
@@ -35,55 +35,6 @@
 
 #define DBG_LOCALLOG	DBG_time
 #include "dbglocal.h"
-
-/*****************************************************************************
- * Defines                                                                   *
- *****************************************************************************/
-
-ODINDEBUGCHANNEL(KERNEL32-TIME)
-
-
-
-#define lstrcpynAtoW(unicode,ascii,asciilen) AsciiToUnicodeN(ascii,unicode,asciilen);
-
-#define WPRINTF_LEFTALIGN   0x0001  /* Align output on the left ('-' prefix) */
-#define WPRINTF_PREFIX_HEX  0x0002  /* Prefix hex with 0x ('#' prefix) */
-#define WPRINTF_ZEROPAD     0x0004  /* Pad with zeros ('0' prefix) */
-#define WPRINTF_LONG        0x0008  /* Long arg ('l' prefix) */
-#define WPRINTF_SHORT       0x0010  /* Short arg ('h' prefix) */
-#define WPRINTF_UPPER_HEX   0x0020  /* Upper-case hex ('X' specifier) */
-#define WPRINTF_WIDE        0x0040  /* Wide arg ('w' prefix) */
-
-typedef enum
-{
-    WPR_UNKNOWN,
-    WPR_CHAR,
-    WPR_WCHAR,
-    WPR_STRING,
-    WPR_WSTRING,
-    WPR_SIGNED,
-    WPR_UNSIGNED,
-    WPR_HEXA
-} WPRINTF_TYPE;
-
-typedef struct
-{
-    UINT         flags;
-    UINT         width;
-    UINT         precision;
-    WPRINTF_TYPE   type;
-} WPRINTF_FORMAT;
-
-typedef union {
-    WCHAR   wchar_view;
-    CHAR    char_view;
-    LPCSTR  lpcstr_view;
-    LPCWSTR lpcwstr_view;
-    INT     int_view;
-} WPRINTF_DATA;
-
-static const CHAR null_stringA[] = "(null)";
-static const WCHAR null_stringW[] = { '(', 'n', 'u', 'l', 'l', ')', 0 };
 
 //******************************************************************************
 //******************************************************************************
@@ -128,18 +79,7 @@ BOOL WIN32API FileTimeToSystemTime(const FILETIME * arg1, LPSYSTEMTIME arg2)
 //******************************************************************************
 BOOL WIN32API DosDateTimeToFileTime(WORD arg1, WORD arg2, LPFILETIME arg3)
 {
-    BOOL rc; 
-    rc = O32_DosDateTimeToFileTime(arg1, arg2, arg3);
-    /* Bug in WGSS after that we must have UCT file time on return,
-       instead we have local! */
-    if (rc)
-    {
-      FILETIME dummy;
-      /* Convert it to UCT */ 
-      rc = LocalFileTimeToFileTime(arg3,&dummy);
-      memcpy(arg3,&dummy,sizeof(FILETIME));
-    }
-    return rc;
+    return O32_DosDateTimeToFileTime(arg1, arg2, arg3);
 }
 //******************************************************************************
 //******************************************************************************
@@ -165,18 +105,7 @@ void WIN32API GetSystemTime(LPSYSTEMTIME arg1)
 BOOL WIN32API SystemTimeToFileTime(const SYSTEMTIME * arg1, 
                                    LPFILETIME arg2)
 {
-    BOOL rc; 
-    rc = O32_SystemTimeToFileTime(arg1, arg2);
-    /* Bug in WGSS after that we must have UCT file time on return,
-       instead we have local! */
-    if (rc)
-    {
-      FILETIME dummy;
-      /* Convert it to local */ 
-      rc = LocalFileTimeToFileTime(arg2,&dummy);
-      memcpy(arg2,&dummy,sizeof(FILETIME));
-    }
-    return rc;
+    return O32_SystemTimeToFileTime(arg1, arg2);
 }
 //******************************************************************************
 //******************************************************************************
