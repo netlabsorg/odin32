@@ -1,4 +1,4 @@
-/* $Id: windlg.cpp,v 1.23 2001-06-09 14:50:25 sandervl Exp $ */
+/* $Id: windlg.cpp,v 1.24 2001-07-23 19:16:41 sandervl Exp $ */
 /*
  * Win32 dialog apis for OS/2
  *
@@ -67,16 +67,16 @@ HWND WIN32API CreateDialogParamW(HINSTANCE hInst, LPCWSTR lpszTemplate,
 //******************************************************************************
 HWND WIN32API CreateDialogIndirectParamA(HINSTANCE hInst,
                          LPCDLGTEMPLATEA dlgtemplate,
-                         HWND hwndParent, DLGPROC dlgproc,
+                         HWND hwndOwner, DLGPROC dlgproc,
                          LPARAM lParamInit)
 {
  Win32Dialog *dialog;
 
-    dprintf(("CreateDialogIndirectParamA: %x %x %x %x %x", hInst, dlgtemplate, hwndParent, dlgproc, lParamInit));
+    dprintf(("CreateDialogIndirectParamA: %x %x %x %x %x", hInst, dlgtemplate, hwndOwner, dlgproc, lParamInit));
 
     if (!dlgtemplate) return 0;
 
-    dialog = new Win32Dialog(hInst, (LPCSTR)dlgtemplate, hwndParent, dlgproc, lParamInit, FALSE);
+    dialog = new Win32Dialog(hInst, (LPCSTR)dlgtemplate, hwndOwner, dlgproc, lParamInit, FALSE);
 
     if(dialog == NULL)
     {
@@ -98,16 +98,16 @@ HWND WIN32API CreateDialogIndirectParamA(HINSTANCE hInst,
 //******************************************************************************
 HWND WIN32API CreateDialogIndirectParamW(HINSTANCE hInst,
                          LPCDLGTEMPLATEW dlgtemplate,
-                         HWND hwndParent, DLGPROC dlgproc,
+                         HWND hwndOwner, DLGPROC dlgproc,
                          LPARAM lParamInit)
 {
  Win32Dialog *dialog;
 
-    dprintf(("CreateDialogIndirectParamW: %x %x %x %x %x", hInst, dlgtemplate, hwndParent, dlgproc, lParamInit));
+    dprintf(("CreateDialogIndirectParamW: %x %x %x %x %x", hInst, dlgtemplate, hwndOwner, dlgproc, lParamInit));
 
     if (!dlgtemplate) return 0;
 
-    dialog = new Win32Dialog(hInst, (LPCSTR)dlgtemplate, hwndParent, dlgproc, lParamInit, TRUE);
+    dialog = new Win32Dialog(hInst, (LPCSTR)dlgtemplate, hwndOwner, dlgproc, lParamInit, TRUE);
 
     if(dialog == NULL)
     {
@@ -129,11 +129,11 @@ HWND WIN32API CreateDialogIndirectParamW(HINSTANCE hInst,
 //******************************************************************************
 INT  WIN32API DialogBoxIndirectParamA(HINSTANCE hInst,
                       LPCDLGTEMPLATEA dlgtemplate,
-                      HWND hwndParent, DLGPROC dlgproc,
+                      HWND hwndOwner, DLGPROC dlgproc,
                       LPARAM lParamInit)
 {
     INT result;
-    HWND hwnd = CreateDialogIndirectParamA(hInst, dlgtemplate, hwndParent, dlgproc,
+    HWND hwnd = CreateDialogIndirectParamA(hInst, dlgtemplate, hwndOwner, dlgproc,
                                            lParamInit);
     if (hwnd)
     {
@@ -155,11 +155,11 @@ INT  WIN32API DialogBoxIndirectParamA(HINSTANCE hInst,
 //******************************************************************************
 //******************************************************************************
 INT  WIN32API DialogBoxIndirectParamW(HINSTANCE hInst, LPCDLGTEMPLATEW dlgtemplate,
-                                      HWND hwndParent, DLGPROC dlgproc,
+                                      HWND hwndOwner, DLGPROC dlgproc,
                                       LPARAM lParamInit)
 {
     INT result;
-    HWND hwnd = CreateDialogIndirectParamW(hInst, dlgtemplate, hwndParent, dlgproc,
+    HWND hwnd = CreateDialogIndirectParamW(hInst, dlgtemplate, hwndOwner, dlgproc,
                                            lParamInit);
     if (hwnd)
     {
