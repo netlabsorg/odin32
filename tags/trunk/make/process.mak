@@ -1,12 +1,13 @@
-# $Id: process.mak,v 1.32 2002-09-20 03:39:41 bird Exp $
-
+# $Id: process.mak,v 1.33 2002-09-20 04:24:05 bird Exp $
 #
-# Unix-like tools for OS/2
+# Generic Buildsystem
 #
 #   The common build process rules
 #
-# Note: this makefile is supposed to be included from the
-# current source path.
+# Copyright (c) 2001-2002 knut st. osmundsen <bird@anduin.net>
+# Copyright (c) 2001 Patrick Haller
+#
+# This file is part of Generic Buildsystem.
 #
 
 
@@ -1775,5 +1776,4 @@ $(TARGET_ALWAYS): .force
 !  endif
 ! endif
 !endif
-
 
