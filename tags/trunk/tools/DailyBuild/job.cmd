@@ -1,4 +1,4 @@
-/* $Id: job.cmd,v 1.10 2003-04-14 22:08:03 bird Exp $
+/* $Id: job.cmd,v 1.11 2003-08-05 00:16:17 bird Exp $
  *
  * Main job for building OS/2.
  *
@@ -9,8 +9,22 @@
  */
 
     /* Load rexxutils functions */
-    call RxFuncAdd 'SysLoadFuncs', 'RexxUtil', 'SysLoadFuncs';
-    call SysloadFuncs;
+    if (RxFuncQuery('SysLoadFuncs') = 1) then
+    do
+        rc = RxFuncAdd('SysLoadFuncs', 'RexxUtil', 'SysLoadFuncs');
+        if (rc <> 0) then
+        do
+            say 'RxFuncAdd -> 'rc'';
+            do i = 1 to 1000
+                rc = RxFuncAdd('SysDropFuncs', 'RexxUtil', 'SysDropFuncs');
+                call SysDropFuncs;
+                rc = RxFuncAdd('SysDropFuncs', 'RexxUtil', 'SysDropFuncs');
+                call SysDropFuncs;
+            end
+            rc = RxFuncAdd('SysLoadFuncs', 'RexxUtil', 'SysLoadFuncs');
+        end
+        call SysLoadFuncs;
+    end
 
     /*
      * Get and set the build date.
