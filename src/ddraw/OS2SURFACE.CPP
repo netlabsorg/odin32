@@ -358,15 +358,19 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
 
     if( surfaceType & DDSCAPS_PRIMARYSURFACE)
     {
+      #ifdef DEBUG
+        WriteLog("Primary surface!\n");
+      #endif
+
       if( lpDraw->HasPrimarySurface())
       {
+        #ifdef DEBUG
+          WriteLog("Primary surface already exits!\n");
+        #endif
         lastError = DDERR_PRIMARYSURFACEALREADYEXISTS;
         return;
       }
 
-      #ifdef DEBUG
-        WriteLog("Primary surface!\n");
-      #endif
       if( (lpDDSurfaceDesc->dwFlags & DDSD_HEIGHT) ||
           (lpDDSurfaceDesc->dwFlags & DDSD_WIDTH)  ||
           (lpDDSurfaceDesc->dwFlags & DDSD_PIXELFORMAT)
@@ -562,8 +566,13 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
     {
       DWORD dwBpp;
       DWORD dwCaps;
+      WriteLog( " Requested Size %dx%d\n",
+                DDSurfaceDesc.dwWidth,
+                DDSurfaceDesc.dwHeight);
+
       if(DDSurfaceDesc.dwFlags & DDSD_PIXELFORMAT)         // Pixelformat passed in ?
       {
+        WriteLog(" Pixelformat requested :");
         // YES use it
         if(DDSurfaceDesc.ddpfPixelFormat.dwFlags & DDPF_RGB)
         {
@@ -578,7 +587,59 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
         }
       }
       else
+      {
+        WriteLog(" Use Screen Format :");
         dwBpp = dwBytesPPDive << 3; // No use Screenformat
+        lpDDSurfaceDesc->ddpfPixelFormat.dwSize = sizeof(DDPIXELFORMAT);
+        lpDDSurfaceDesc->ddpfPixelFormat.dwFourCC = (DWORD) lpDraw->GetScreenFourCC();
+        lpDDSurfaceDesc->ddpfPixelFormat.dwRGBBitCount = dwBpp;
+        DDSurfaceDesc.ddpfPixelFormat.dwSize = sizeof(DDPIXELFORMAT);
+        DDSurfaceDesc.ddpfPixelFormat.dwFourCC = (DWORD) lpDraw->GetScreenFourCC();
+        DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount = dwBpp;
+        switch(DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount)
+        {
+          case 4:
+            lpDDSurfaceDesc->ddpfPixelFormat.dwFlags = DDPF_PALETTEINDEXED4 | DDPF_RGB;
+            DDSurfaceDesc.ddpfPixelFormat.dwFlags = DDPF_PALETTEINDEXED4 | DDPF_RGB;
+            break;
+          case 8:
+            lpDDSurfaceDesc->ddpfPixelFormat.dwFlags = DDPF_PALETTEINDEXED8 | DDPF_FOURCC | DDPF_RGB;
+            DDSurfaceDesc.ddpfPixelFormat.dwFlags = DDPF_PALETTEINDEXED8 | DDPF_FOURCC | DDPF_RGB;
+            break;
+          case 16:
+            lpDDSurfaceDesc->ddpfPixelFormat.dwFlags = DDPF_FOURCC | DDPF_RGB;
+            lpDDSurfaceDesc->ddpfPixelFormat.dwRBitMask = 0x0000F800;
+            lpDDSurfaceDesc->ddpfPixelFormat.dwGBitMask = 0x000007E0;
+            lpDDSurfaceDesc->ddpfPixelFormat.dwBBitMask = 0x0000001F;
+            DDSurfaceDesc.ddpfPixelFormat.dwFlags = DDPF_FOURCC | DDPF_RGB;
+            DDSurfaceDesc.ddpfPixelFormat.dwRBitMask = 0x0000F800;
+            DDSurfaceDesc.ddpfPixelFormat.dwGBitMask = 0x000007E0;
+            DDSurfaceDesc.ddpfPixelFormat.dwBBitMask = 0x0000001F;
+            break;
+          case 24:
+          case 32:
+            lpDDSurfaceDesc->ddpfPixelFormat.dwFlags = DDPF_FOURCC | DDPF_RGB;
+            lpDDSurfaceDesc->ddpfPixelFormat.dwRBitMask = 0x00FF0000;
+            lpDDSurfaceDesc->ddpfPixelFormat.dwGBitMask = 0x0000FF00;
+            lpDDSurfaceDesc->ddpfPixelFormat.dwBBitMask = 0x000000FF;
+            DDSurfaceDesc.ddpfPixelFormat.dwFlags = DDPF_FOURCC | DDPF_RGB;
+            DDSurfaceDesc.ddpfPixelFormat.dwRBitMask = 0x00FF0000;
+            DDSurfaceDesc.ddpfPixelFormat.dwGBitMask = 0x0000FF00;
+            DDSurfaceDesc.ddpfPixelFormat.dwBBitMask = 0x000000FF;
+            break;
+          default:
+            // Remove the Pixelformat flag
+            lpDDSurfaceDesc->dwFlags &= ~DDSD_PIXELFORMAT;
+            DDSurfaceDesc.dwFlags    &= ~DDSD_PIXELFORMAT;
+            #ifdef DEBUG
+              WriteLog("Unexpected BitDepth : %d\n",lpDraw->GetScreenBpp());
+            #endif
+            break;
+        } // end switch
+
+      }
+
+      WriteLog("%d Bits\n",dwBpp);
 
       // three possible situaltions
       // 1. User supplied pointer to surface -> use it
@@ -591,6 +652,8 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
       if(DDSurfaceDesc.dwFlags & DDSD_LPSURFACE)
       {
         // 1.
+
+        WriteLog(" Usersupplied Surface\n");
 
         if(NULL==DDSurfaceDesc.lpSurface)
         {
@@ -610,7 +673,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
         diveBufNr    = -1;
         dwPitchFB    = DDSurfaceDesc.lPitch;
 
-        if( (lpDraw->dCaps.ulDepth ) == dwBpp )
+        if( lpDraw->dCaps.ulDepth  == dwBpp )
         {
           // Yes No Colorconversion is needed so point to the same buffer
           dwPitchDB    = dwPitchFB;
@@ -642,6 +705,8 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
         {
           // 2.
 
+          WriteLog(" Alloc on Load Texture?!\n");
+
           dwCaps &= ~DDSCAPS_ALLOCONLOAD; // remove flag
 
           // only allow this flag for textures
@@ -665,6 +730,8 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
         else
         {
           // 3.
+
+          WriteLog(" Alloc now!\n");
 
           lpDDSurfaceDesc->dwFlags  |= DDSD_PITCH|DDSD_LPSURFACE;
           DDSurfaceDesc.dwFlags      = lpDDSurfaceDesc->dwFlags;
@@ -695,34 +762,43 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
 
           pFrameBuffer = (char*)(((int)pFBreal + 7) & ~7); // align to QWORD
 
+          WriteLog( " Framebuffer @ %08X QWAligned @ %08X with a Pitch of %d",
+                    pFBreal, pFrameBuffer, dwPitchFB);
+
           lpDDSurfaceDesc->lpSurface = pFrameBuffer;
           DDSurfaceDesc.lpSurface    = pFrameBuffer;
 
-          if(Mainchain)
-          {
-            // This surface is part of flipchain with the primary surface use dive to alloc
-            diveBufNr = 0;
-            DiveAllocImageBuffer( hDive,
-                                  &diveBufNr,
-                                  lpDraw->dCaps.fccColorEncoding,
-                                  lpDDSurfaceDesc->dwWidth,
-                                  lpDDSurfaceDesc->dwHeight,
-                                  (lpDDSurfaceDesc->dwWidth * (lpDraw->dCaps.ulDepth/8) +7) & ~7,
-                                  (PBYTE)pDiveBuffer);
-          }
 
           if( (lpDraw->dCaps.ulDepth ) == dwBpp )
           {
+            WriteLog(" No CC_Buffer needed\n");
             // Yes => No Colorconversion is needed so point to the same buffer
             pDiveBuffer  = pFrameBuffer;
           }
           else
           {
-            // No so we must create the Divebuffer to do the colortranslation
-            // and blit to the real framebuffer on Unlock to do color conversion
-            pDiveBuffer = (char*)malloc( lpDDSurfaceDesc->dwHeight *
-                                 ((lpDDSurfaceDesc->dwWidth * (lpDraw->dCaps.ulDepth/8) +7) & ~7) );
-
+            WriteLog(" Alloc CCBuf ");
+            if(Mainchain)
+            {
+              WriteLog("with DIVE\n");
+              // This surface is part of flipchain with the primary surface use dive to alloc
+              diveBufNr = 0;
+              DiveAllocImageBuffer( hDive,
+                                    &diveBufNr,
+                                    lpDraw->dCaps.fccColorEncoding,
+                                    lpDDSurfaceDesc->dwWidth,
+                                    lpDDSurfaceDesc->dwHeight,
+                                    (lpDDSurfaceDesc->dwWidth * (lpDraw->dCaps.ulDepth/8) +7) & ~7,
+                                    (PBYTE)pDiveBuffer);
+            }
+            else
+            {
+              WriteLog("with malloc");
+              // No so we must create the Divebuffer to do the colortranslation
+              // and blit to the real framebuffer on Unlock to do color conversion
+              pDiveBuffer = (char*)malloc( lpDDSurfaceDesc->dwHeight *
+                                   ((lpDDSurfaceDesc->dwWidth * (lpDraw->dCaps.ulDepth/8) +7) & ~7) );
+            }
           }
 
         }  // end of 3rd case
@@ -820,8 +896,10 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
     }
   } // Endif DDCAPS is valid
   else
+  {
+    WriteLog("CAPS not valid\n");
     lastError = DDERR_INVALIDPARAMS;
-
+  }
   #ifdef DEBUG
     WriteLog("Buf %X Screen Caps (%d,%d), bitcount %d\n\n", this, lpDraw->GetScreenHeight(), lpDraw->GetScreenWidth(),
     lpDraw->dCaps.ulDepth);

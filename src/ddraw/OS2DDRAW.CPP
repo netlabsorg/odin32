@@ -125,7 +125,9 @@ OS2IDirectDraw::OS2IDirectDraw(GUID *lpGUID) :
     }
   }
 
-  ULONG rc = DiveOpen(&hDive, FALSE, &pFrameBuffer);
+  ULONG rc = DiveOpen( &hDive,
+                       FALSE,
+                       &pFrameBuffer);
   if(rc)
   {
     WriteLog("ERROR: DiveOpen returned %d\n", rc);
@@ -134,7 +136,9 @@ OS2IDirectDraw::OS2IDirectDraw(GUID *lpGUID) :
   }
   else
   {
-    rc = DiveQueryCaps(&dCaps,DIVE_BUFFER_SCREEN);
+    WriteLog("DiveOpen OK\n");
+    rc = DiveQueryCaps( &dCaps,
+                        DIVE_BUFFER_SCREEN);
   }
 
   // Shall we run in FS mode ?
