@@ -1,4 +1,9 @@
- /* $Id: changelog,v 1.261 1999-10-01 16:01:41 sandervl Exp $ */
+ /* $Id: changelog,v 1.262 1999-10-02 04:10:14 sandervl Exp $ */
+
+ 99-10-02: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+	- VERSION: Allocation bugfix in VerQueryValueA
+	- USER32: Added style changes for PM windows + don't clear WS_VISIBLE
+                  flag when converting window styles. (fixes buttons in winhlp32)
 
  99-10-01: Sander van Leeuwen <sandervl@xs4all.nl>
 	- DDRAW: ifdef'ed out code that causes crash (OS2Surface destructor)
