@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.17 1999-06-30 16:08:40 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.18 1999-07-10 15:57:31 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -1491,7 +1491,7 @@ HWND WIN32API CreateWindowExW(DWORD     arg1,
   Win32WindowProc *window = NULL;
 
   /* @@@PH 98/06/21 changed to call OS2CreateWindowExA */
-  if((int)arg2 >> 16 != 0)
+  if(HIWORD(arg2) != 0)
     astring1 = UnicodeToAsciiString((LPWSTR)arg2);
   else
     astring1 = (char *)arg2;
@@ -1531,7 +1531,8 @@ HWND WIN32API CreateWindowExW(DWORD     arg1,
     if(astring1)
         FreeAsciiString(astring1);
 
-    FreeAsciiString(astring2);
+    if(HIWORD(arg2) != 0)
+    	FreeAsciiString(astring2);
 
 #ifdef DEBUG
     WriteLog("USER32:  ************CreateWindowExW hwnd = %X (%X)\n", hwnd, GetLastError());
