@@ -1,4 +1,4 @@
-/* $Id: hmdevio.cpp,v 1.19 2001-12-05 14:16:00 sandervl Exp $ */
+/* $Id: hmdevio.cpp,v 1.20 2001-12-08 10:39:33 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -136,12 +136,13 @@ void RegisterDevices()
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API RegisterCustomDriver(PFNDRVOPEN pfnDriverOpen, PFNDRVCLOSE pfnDriverClose, 
-                                   PFNDRVIOCTL pfnDriverIOCtl, LPCSTR lpDeviceName)
+                                   PFNDRVIOCTL pfnDriverIOCtl, PFNDRVREAD pfnDriverRead,
+                                   PFNDRVWRITE pfnDriverWrite, LPCSTR lpDeviceName)
 {
  HMDeviceDriver *driver;
  DWORD rc;
  
-    driver = new HMCustomDriver(pfnDriverOpen, pfnDriverClose, pfnDriverIOCtl, lpDeviceName);
+    driver = new HMCustomDriver(pfnDriverOpen, pfnDriverClose, pfnDriverIOCtl, pfnDriverRead, pfnDriverWrite, lpDeviceName);
     if(driver == NULL) {
         DebugInt3();
         return FALSE;
@@ -468,19 +469,27 @@ HMCustomDriver::HMCustomDriver(HINSTANCE hInstance, LPCSTR lpDeviceName)
                 : HMDeviceDriver(lpDeviceName), hDrvDll(0)
 {
     hDrvDll = hInstance ;
-    *(ULONG *)&driverOpen  = (ULONG)GetProcAddress(hDrvDll, "DrvOpen");
-    *(ULONG *)&driverClose = (ULONG)GetProcAddress(hDrvDll, "DrvClose");
-    *(ULONG *)&driverIOCtl = (ULONG)GetProcAddress(hDrvDll, "DrvIOCtl");
+    pfnDriverOpen  = (PFNDRVOPEN) GetProcAddress(hDrvDll, "DrvOpen");
+    pfnDriverClose = (PFNDRVCLOSE)GetProcAddress(hDrvDll, "DrvClose");
+    pfnDriverRead  = (PFNDRVREAD) GetProcAddress(hDrvDll, "DrvRead");
+    pfnDriverWrite = (PFNDRVWRITE)GetProcAddress(hDrvDll, "DrvWrite");
+    pfnDriverIOCtl = (PFNDRVIOCTL)GetProcAddress(hDrvDll, "DrvIOCtl");
 }
 //******************************************************************************
 //******************************************************************************
 HMCustomDriver::HMCustomDriver(PFNDRVOPEN pfnDriverOpen, PFNDRVCLOSE pfnDriverClose, 
-                               PFNDRVIOCTL pfnDriverIOCtl, LPCSTR lpDeviceName)
+                               PFNDRVIOCTL pfnDriverIOCtl, PFNDRVREAD pfnDriverRead,
+                               PFNDRVWRITE pfnDriverWrite, LPCSTR lpDeviceName)
                 : HMDeviceDriver(lpDeviceName), hDrvDll(0)
 {
-    driverOpen  = pfnDriverOpen;
-    driverClose = pfnDriverClose;
-    driverIOCtl = pfnDriverIOCtl;
+    if(!pfnDriverOpen || !pfnDriverClose) {
+        DebugInt3();
+    }
+    this->pfnDriverOpen  = pfnDriverOpen;
+    this->pfnDriverClose = pfnDriverClose;
+    this->pfnDriverIOCtl = pfnDriverIOCtl;
+    this->pfnDriverRead  = pfnDriverRead;
+    this->pfnDriverWrite = pfnDriverWrite;
 }
 //******************************************************************************
 //******************************************************************************
@@ -495,18 +504,18 @@ DWORD HMCustomDriver::CreateFile (LPCSTR lpFileName,
                                   PVOID         lpSecurityAttributes,
                                   PHMHANDLEDATA pHMHandleDataTemplate)
 {
-   pHMHandleData->hHMHandle = driverOpen(pHMHandleData->dwAccess, pHMHandleData->dwShare);
+   pHMHandleData->hHMHandle = pfnDriverOpen(pHMHandleData->dwAccess, pHMHandleData->dwShare);
    if(pHMHandleData->hHMHandle == 0) {
-       return 2;
+       return ERROR_FILE_NOT_FOUND_W;
    }
-   return 0;
+   return ERROR_SUCCESS_W;
 }
 //******************************************************************************
 //******************************************************************************
 BOOL HMCustomDriver::CloseHandle(PHMHANDLEDATA pHMHandleData)
 {
    if(pHMHandleData->hHMHandle) {
-	driverClose(pHMHandleData->hHMHandle);
+	pfnDriverClose(pHMHandleData->hHMHandle);
    }
    pHMHandleData->hHMHandle = 0;
    return TRUE;
@@ -520,9 +529,89 @@ BOOL HMCustomDriver::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoCont
 {
    BOOL ret;
 
-   ret = driverIOCtl(pHMHandleData->hHMHandle, dwIoControlCode, lpInBuffer, nInBufferSize,
-                     lpOutBuffer, nOutBufferSize, lpBytesReturned, lpOverlapped);
+   if(pfnDriverIOCtl == NULL) {
+       dprintf(("HMCustomDriver::DeviceIoControl: pfnDriverIOCtl == NULL"));
+       ::SetLastError(ERROR_INVALID_FUNCTION_W);
+       return FALSE;
+   }
+
+   ret = pfnDriverIOCtl(pHMHandleData->hHMHandle, dwIoControlCode, lpInBuffer, nInBufferSize,
+                        lpOutBuffer, nOutBufferSize, lpBytesReturned, lpOverlapped);
    dprintf(("DeviceIoControl %x returned %d", dwIoControlCode, ret));
+   return ret;
+}
+/*****************************************************************************
+ * Name      : BOOL HMCustomDriver::ReadFile
+ * Purpose   : read data from handle / device
+ * Parameters: PHMHANDLEDATA pHMHandleData,
+ *             LPCVOID       lpBuffer,
+ *             DWORD         nNumberOfBytesToRead,
+ *             LPDWORD       lpNumberOfBytesRead,
+ *             LPOVERLAPPED  lpOverlapped
+ *             LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine
+ * Variables :
+ * Result    : Boolean
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+
+BOOL HMCustomDriver::ReadFile(PHMHANDLEDATA pHMHandleData,
+                              LPCVOID       lpBuffer,
+                              DWORD         nNumberOfBytesToRead,
+                              LPDWORD       lpNumberOfBytesRead,
+                              LPOVERLAPPED  lpOverlapped,
+                              LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
+{
+   BOOL ret;
+
+   if(pfnDriverRead == NULL) {
+       dprintf(("HMCustomDriver::ReadFile: pfnDriverRead == NULL"));
+       ::SetLastError(ERROR_INVALID_FUNCTION_W);
+       return FALSE;
+   }
+   ret = pfnDriverRead(pHMHandleData->hHMHandle, lpBuffer, nNumberOfBytesToRead,
+                      lpNumberOfBytesRead, lpOverlapped, lpCompletionRoutine);
+   dprintf(("pfnDriverRead %x %x %x %x %x %x returned %x", pHMHandleData->hHMHandle, lpBuffer, nNumberOfBytesToRead,
+             lpNumberOfBytesRead, lpOverlapped, lpCompletionRoutine, ret));
+   return ret;
+}
+/*****************************************************************************
+ * Name      : BOOL HMCustomDriver::WriteFile
+ * Purpose   : write data to handle / device
+ * Parameters: PHMHANDLEDATA pHMHandleData,
+ *             LPCVOID       lpBuffer,
+ *             DWORD         nNumberOfBytesToWrite,
+ *             LPDWORD       lpNumberOfBytesWritten,
+ *             LPOVERLAPPED  lpOverlapped
+ *             LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine
+ * Variables :
+ * Result    : Boolean
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+
+BOOL HMCustomDriver::WriteFile(PHMHANDLEDATA pHMHandleData,
+                               LPCVOID       lpBuffer,
+                               DWORD         nNumberOfBytesToWrite,
+                               LPDWORD       lpNumberOfBytesWritten,
+                               LPOVERLAPPED  lpOverlapped,
+                               LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
+{
+   BOOL ret;
+
+   if(pfnDriverWrite == NULL) {
+       dprintf(("HMCustomDriver::WriteFile: pfnDriverWrite == NULL"));
+       ::SetLastError(ERROR_INVALID_FUNCTION_W);
+       return FALSE;
+   }
+   ret = pfnDriverWrite(pHMHandleData->hHMHandle, lpBuffer, nNumberOfBytesToWrite,
+                        lpNumberOfBytesWritten, lpOverlapped, lpCompletionRoutine);
+   dprintf(("pfnDriverWrite %x %x %x %x %x %x returned %x", pHMHandleData->hHMHandle, lpBuffer, nNumberOfBytesToWrite,
+            lpNumberOfBytesWritten, lpOverlapped, lpCompletionRoutine, ret));
    return ret;
 }
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: hmdevio.h,v 1.7 2001-12-05 14:16:00 sandervl Exp $ */
+/* $Id: hmdevio.h,v 1.8 2001-12-08 10:39:33 sandervl Exp $ */
 
 #ifndef __DEVIO_H__
 #define __DEVIO_H__
@@ -146,7 +146,8 @@ class HMCustomDriver : public HMDeviceDriver
 public:
   HMCustomDriver(HINSTANCE hInstance, LPCSTR lpDeviceName);
   HMCustomDriver(PFNDRVOPEN pfnDriverOpen, PFNDRVCLOSE pfnDriverClose, 
-                 PFNDRVIOCTL pfnDriverIOCtl, LPCSTR lpDeviceName);
+                 PFNDRVIOCTL pfnDriverIOCtl, PFNDRVREAD pfnDriverRead,
+                 PFNDRVWRITE pfnDriverWrite, LPCSTR lpDeviceName);
 
   virtual ~HMCustomDriver();
 
@@ -163,11 +164,30 @@ public:
                                      LPVOID lpInBuffer, DWORD nInBufferSize,
                                      LPVOID lpOutBuffer, DWORD nOutBufferSize,
                                      LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped);
+
+  /* this is a handler method for calls to ReadFile/Ex */
+  virtual BOOL   ReadFile   (PHMHANDLEDATA pHMHandleData,
+                             LPCVOID       lpBuffer,
+                             DWORD         nNumberOfBytesToRead,
+                             LPDWORD       lpNumberOfBytesRead,
+                             LPOVERLAPPED  lpOverlapped,
+                             LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine);
+
+  /* this is a handler method for calls to WriteFile/Ex */
+  virtual BOOL   WriteFile  (PHMHANDLEDATA pHMHandleData,
+                             LPCVOID       lpBuffer,
+                             DWORD         nNumberOfBytesToWrite,
+                             LPDWORD       lpNumberOfBytesWritten,
+                             LPOVERLAPPED  lpOverlapped,
+                             LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine);
+
 private:
-  PFNDRVOPEN  driverOpen;
-  PFNDRVCLOSE driverClose;
-  PFNDRVIOCTL driverIOCtl;
-  HINSTANCE hDrvDll;
+  PFNDRVOPEN  pfnDriverOpen;
+  PFNDRVREAD  pfnDriverRead;
+  PFNDRVWRITE pfnDriverWrite;
+  PFNDRVIOCTL pfnDriverIOCtl;
+  PFNDRVCLOSE pfnDriverClose;
+  HINSTANCE   hDrvDll;
 };
 
 void  RegisterDevices();
