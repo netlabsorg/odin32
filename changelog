@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.1149 2000-09-28 03:31:56 bird Exp $ */
+ /* $Id: changelog,v 1.1150 2000-09-29 07:24:25 achimha Exp $ */
+
+ 2000-09-29: Achim Hasenmueller <achimha@innotek.de>
+    - COMCTL32: Added _TrackMouseEvent export for VisualAge Micro Edition
 
  2000-09-29: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - INCLUDE\pdwin32.*:
