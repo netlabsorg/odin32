@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.124 2002-08-15 15:45:46 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.125 2003-01-02 13:04:45 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -774,7 +774,8 @@ BOOL WIN32API SystemParametersInfoA(UINT uiAction, UINT uiParam, PVOID pvParam, 
                         // AH 2001-12-26 use the font size returned by the graphics
                         // driver as the font height. This will take font size settings
                         // such as small, medium and large fonts into account
-                        lpLogFont->lfHeight = CapsCharHeight;
+                        //SvL: Must be negative
+                        lpLogFont->lfHeight = -CapsCharHeight;
                     }
                     else fFound = FALSE;
                 }
