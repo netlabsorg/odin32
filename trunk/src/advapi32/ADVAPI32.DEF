@@ -1,7 +1,10 @@
-; $Id: ADVAPI32.DEF,v 1.9 1999-12-19 12:24:51 sandervl Exp $
+; $Id: ADVAPI32.DEF,v 1.10 1999-12-27 18:44:32 sandervl Exp $
 
-;Created by BLAST for IBM's compiler
+;
+; Based on NT 4.0 SP6: ADVAPI32.DLL 
+;
 LIBRARY ADVAPI32 INITINSTANCE
+DESCRIPTION 'Odin ADVAPI32.DLL'
 DATA MULTIPLE NONSHARED
 
 IMPORTS
@@ -27,85 +30,116 @@ EXPORTS
 ; LSA
 ; ----------------------------------------------------------------------------
 
-     LsaAddAccountRights                   = _LsaAddAccountRights@16
-     LsaClose                              = _LsaClose@4                              @243
-     LsaCreateTrustedDomainEx              = _LsaCreateTrustedDomainEx@20
-     LsaDeleteTrustedDomain                = _LsaDeleteTrustedDomain@8                @280
-     LsaEnumerateAccountRights             = _LsaEnumerateAccountRights@16
-     LsaEnumerateAccountsWithUserRight     = _LsaEnumerateAccountsWithUserRight@16
-     LsaEnumerateTrustedDomains            = _LsaEnumerateTrustedDomains@20
-     LsaEnumerateTrustedDomainsEx          = _LsaEnumerateTrustedDomainsEx@20
-     LsaFreeMemory                         = _LsaFreeMemory@4                         @241
-     LsaLookupNames                        = _LsaLookupNames@20                       @245
-     LsaLookupSids                         = _LsaLookupSids@20                        @240
-     LsaNtStatusToWinError                 = _LsaNtStatusToWinError@4
-     LsaOpenPolicy                         = _LsaOpenPolicy@16                        @239
-     LsaOpenTrustedDomainByName            = _LsaOpenTrustedDomainByName@16
-     LsaQueryInformationPolicy             = _LsaQueryInformationPolicy@12            @242
-     LsaQueryTrustedDomainInfo             = _LsaQueryTrustedDomainInfo@16
-     LsaQueryTrustedDomainInfoByName       = _LsaQueryTrustedDomainInfoByName@16
-     LsaRegisterPolicyChangeNotification   = _LsaRegisterPolicyChangeNotification@8
-     LsaRemoveAccountRights                = _LsaRemoveAccountRights@20
-     LsaRetrievePrivateData                = _LsaRetrievePrivateData@12
-     LsaSetInformationPolicy               = _LsaSetInformationPolicy@12              @244
-     LsaSetTrustedDomainInfo               = _LsaSetTrustedDomainInfo@16
-     LsaSetTrustedDomainInfoByName         = _LsaSetTrustedDomainInfoByName@16
-     LsaStorePrivateData                   = _LsaStorePrivateData@12
-     LsaUnregisterPolicyChangeNotification = _LsaUnregisterPolicyChangeNotification@8
+     LsaAddAccountRights                   = _LsaAddAccountRights@16		      @196
+;    LsaAddPrivilegesToAccount							      @197
+;    LsaClearAuditLog								      @198
+     LsaClose                              = _LsaClose@4                              @199
+;    LsaCreateAccount								      @200
+;    LsaCreateSecret								      @201
+;    LsaCreateTrustedDomain                					      @202
+;    LsaDelete									      @203
+     LsaDeleteTrustedDomain                = _LsaDeleteTrustedDomain@8                @204
+     LsaEnumerateAccountRights             = _LsaEnumerateAccountRights@16	      @205
+;    LsaEnumerateAccounts							      @206
+     LsaEnumerateAccountsWithUserRight     = _LsaEnumerateAccountsWithUserRight@16    @207
+;    LsaEnumeratePrivileges							      @208
+;    LsaEnumeratePrivilegesOfAccount						      @209
+     LsaEnumerateTrustedDomains            = _LsaEnumerateTrustedDomains@20	      @210
+     LsaFreeMemory                         = _LsaFreeMemory@4                         @211
+;    LsaGetQuotasForAccount							      @212
+;    LsaGetRemoteUserName							      @213
+;    LsaGetSystemAccessAccount							      @214
+;    LsaGetUserName								      @215
+;    LsaICLookupNames    							      @216
+;    LsaICLookupSids								      @217
+     LsaLookupNames                        = _LsaLookupNames@20                       @218
+;    LsaLookupPrivilegeDisplayName						      @219
+;    LsaLookupPrivilegeName							      @220
+;    LsaLookupPrivilegeValue							      @221
+     LsaLookupSids                         = _LsaLookupSids@20                        @222
+     LsaNtStatusToWinError                 = _LsaNtStatusToWinError@4		      @223
+;    LsaOpenAccount								      @224
+     LsaOpenPolicy                         = _LsaOpenPolicy@16                        @225
+;    LsaOpenSecret								      @226
+;    LsaOpenTrustedDomain							      @227
+;    LsaQueryInfoTrustedDomain							      @228
+     LsaQueryInformationPolicy             = _LsaQueryInformationPolicy@12            @229
+;    LsaQuerySecret								      @230
+;    LsaQuerySecurityObject							      @231
+     LsaQueryTrustedDomainInfo             = _LsaQueryTrustedDomainInfo@16	      @232
+     LsaRemoveAccountRights                = _LsaRemoveAccountRights@20		      @233
+;    LsaRemovePrivilegesFromAccount						      @234
+     LsaRetrievePrivateData                = _LsaRetrievePrivateData@12		      @235
+     LsaSetInformationPolicy               = _LsaSetInformationPolicy@12              @236
+;    LsaSetInformationTrustedDomain						      @237
+;    LsaSetQuotasForAccount							      @238
+;    LsaSetSecret								      @239
+;    LsaSetSecurityObject						              @240
+;    LsaSetSystemAccessAccount							      @241
+;    LsaSetTrustedDomainInformation						      @242
+     LsaStorePrivateData                   = _LsaStorePrivateData@12		      @243
+
+; REMOVE     LsaCreateTrustedDomainEx              = _LsaCreateTrustedDomainEx@20
+; REMOVE     LsaEnumerateTrustedDomainsEx          = _LsaEnumerateTrustedDomainsEx@20
+; REMOVE     LsaOpenTrustedDomainByName            = _LsaOpenTrustedDomainByName@16
+; REMOVE     LsaQueryTrustedDomainInfoByName       = _LsaQueryTrustedDomainInfoByName@16
+; REMOVE     LsaRegisterPolicyChangeNotification   = _LsaRegisterPolicyChangeNotification@8
+; REMOVE     LsaSetTrustedDomainInfo               = _LsaSetTrustedDomainInfo@16
+; REMOVE     LsaSetTrustedDomainInfoByName         = _LsaSetTrustedDomainInfoByName@16
+; REMOVE     LsaUnregisterPolicyChangeNotification = _LsaUnregisterPolicyChangeNotification@8
 
 ; ----------------------------------------------------------------------------
 ; Registry
 ; ----------------------------------------------------------------------------
 
-     RegCloseKey                           = _RegCloseKey@4                     @127
-     RegConnectRegistryA                   = _RegConnectRegistryA@12            @128
-     RegConnectRegistryW                   = _RegConnectRegistryW@12            @129
-     RegCreateKeyA                         = _RegCreateKeyA@12                  @130
-     RegCreateKeyExA                       = _RegCreateKeyExA@36                @131
-     RegCreateKeyExW                       = _RegCreateKeyExW@36                @132
-     RegCreateKeyW                         = _RegCreateKeyW@12                  @133
-     RegDeleteKeyA                         = _RegDeleteKeyA@8                   @134
-     RegDeleteKeyW                         = _RegDeleteKeyW@8                   @135
-     RegDeleteValueA                       = _RegDeleteValueA@8                 @136
-     RegDeleteValueW                       = _RegDeleteValueW@8                 @137
-     RegEnumKeyA                           = _RegEnumKeyA@16                    @138
-     RegEnumKeyExA                         = _RegEnumKeyExA@32                  @139
-     RegEnumKeyExW                         = _RegEnumKeyExW@32                  @140
-     RegEnumKeyW                           = _RegEnumKeyW@16                    @141
-     RegEnumValueA                         = _RegEnumValueA@32                  @142
-     RegEnumValueW                         = _RegEnumValueW@32                  @143
-     RegFlushKey                           = _RegFlushKey@4                     @144
-     RegGetKeySecurity                     = _RegGetKeySecurity@16              @145
-     RegLoadKeyA                           = _RegLoadKeyA@12                    @146
-     RegLoadKeyW                           = _RegLoadKeyW@12                    @147
-     RegNotifyChangeKeyValue               = _RegNotifyChangeKeyValue@20        @148
-     RegOpenKeyA                           = _RegOpenKeyA@12                    @149
-     RegOpenKeyExA                         = _RegOpenKeyExA@20                  @150
-     RegOpenKeyExW                         = _RegOpenKeyExW@20                  @151
-     RegOpenKeyW                           = _RegOpenKeyW@12                    @152
-     RegQueryInfoKeyA                      = _RegQueryInfoKeyA@48               @153
-     RegQueryInfoKeyW                      = _RegQueryInfoKeyW@48               @154
-     RegQueryMultipleValuesA               = _RegQueryMultipleValuesA@20        @155
-     RegQueryMultipleValuesW               = _RegQueryMultipleValuesW@20        @156
-     RegQueryValueA                        = _RegQueryValueA@16                 @157
-     RegQueryValueExA                      = _RegQueryValueExA@24               @158
-     RegQueryValueExW                      = _RegQueryValueExW@24               @159
-     RegQueryValueW                        = _RegQueryValueW@16                 @160
-;    RegRemapPreDefKey                     = _RegRemapPreDefKey@4               @161
-     RegReplaceKeyA                        = _RegReplaceKeyA@16                 @162
-     RegReplaceKeyW                        = _RegReplaceKeyW@16                 @163
-     RegRestoreKeyA                        = _RegRestoreKeyA@12                 @164
-     RegRestoreKeyW                        = _RegRestoreKeyW@12                 @165
-     RegSaveKeyA                           = _RegSaveKeyA@12                    @166
-     RegSaveKeyW                           = _RegSaveKeyW@12                    @167
-     RegSetKeySecurity                     = _RegSetKeySecurity@12              @168
-     RegSetValueA                          = _RegSetValueA@20                   @169
-     RegSetValueExA                        = _RegSetValueExA@24                 @170
-     RegSetValueExW                        = _RegSetValueExW@24                 @171
-     RegSetValueW                          = _RegSetValueW@20                   @172
-     RegUnLoadKeyA                         = _RegUnLoadKeyA@8                   @173
-     RegUnLoadKeyW                         = _RegUnLoadKeyW@8                   @174
-
+     RegCloseKey                           = _RegCloseKey@4                     @280
+     RegConnectRegistryA                   = _RegConnectRegistryA@12            @281
+     RegConnectRegistryW                   = _RegConnectRegistryW@12            @282
+     RegCreateKeyA                         = _RegCreateKeyA@12                  @283
+     RegCreateKeyExA                       = _RegCreateKeyExA@36                @284
+     RegCreateKeyExW                       = _RegCreateKeyExW@36                @285
+     RegCreateKeyW                         = _RegCreateKeyW@12                  @286
+     RegDeleteKeyA                         = _RegDeleteKeyA@8                   @287
+     RegDeleteKeyW                         = _RegDeleteKeyW@8                   @288
+     RegDeleteValueA                       = _RegDeleteValueA@8                 @289
+     RegDeleteValueW                       = _RegDeleteValueW@8                 @290
+     RegEnumKeyA                           = _RegEnumKeyA@16                    @291
+     RegEnumKeyExA                         = _RegEnumKeyExA@32                  @292
+     RegEnumKeyExW                         = _RegEnumKeyExW@32                  @293
+     RegEnumKeyW                           = _RegEnumKeyW@16                    @294
+     RegEnumValueA                         = _RegEnumValueA@32                  @295
+     RegEnumValueW                         = _RegEnumValueW@32                  @296
+     RegFlushKey                           = _RegFlushKey@4                     @297
+     RegGetKeySecurity                     = _RegGetKeySecurity@16              @298
+     RegLoadKeyA                           = _RegLoadKeyA@12                    @299
+     RegLoadKeyW                           = _RegLoadKeyW@12                    @300
+     RegNotifyChangeKeyValue               = _RegNotifyChangeKeyValue@20        @301
+     RegOpenKeyA                           = _RegOpenKeyA@12                    @302
+     RegOpenKeyExA                         = _RegOpenKeyExA@20                  @303
+     RegOpenKeyExW                         = _RegOpenKeyExW@20                  @304
+     RegOpenKeyW                           = _RegOpenKeyW@12                    @305
+     RegQueryInfoKeyA                      = _RegQueryInfoKeyA@48               @306
+     RegQueryInfoKeyW                      = _RegQueryInfoKeyW@48               @307
+     RegQueryMultipleValuesA               = _RegQueryMultipleValuesA@20        @308
+     RegQueryMultipleValuesW               = _RegQueryMultipleValuesW@20        @309
+     RegQueryValueA                        = _RegQueryValueA@16                 @310
+     RegQueryValueExA                      = _RegQueryValueExA@24               @311
+     RegQueryValueExW                      = _RegQueryValueExW@24               @312
+     RegQueryValueW                        = _RegQueryValueW@16                 @313
+     RegReplaceKeyA                        = _RegReplaceKeyA@16                 @314
+     RegReplaceKeyW                        = _RegReplaceKeyW@16                 @315
+     RegRestoreKeyA                        = _RegRestoreKeyA@12                 @316
+     RegRestoreKeyW                        = _RegRestoreKeyW@12                 @317
+     RegSaveKeyA                           = _RegSaveKeyA@12                    @318
+     RegSaveKeyW                           = _RegSaveKeyW@12                    @319
+     RegSetKeySecurity                     = _RegSetKeySecurity@12              @320
+     RegSetValueA                          = _RegSetValueA@20                   @321
+     RegSetValueExA                        = _RegSetValueExA@24                 @322
+     RegSetValueExW                        = _RegSetValueExW@24                 @323
+     RegSetValueW                          = _RegSetValueW@20                   @324
+     RegUnLoadKeyA                         = _RegUnLoadKeyA@8                   @325
+     RegUnLoadKeyW                         = _RegUnLoadKeyW@8                   @326
+; WIN9X    RegRemapPreDefKey                     = _RegRemapPreDefKey@4               @xxx
 
 ; ----------------------------------------------------------------------------
 ; Rest
@@ -127,139 +161,297 @@ EXPORTS
      AreAnyAccessesGranted      = _AreAnyAccessesGranted@8           @15
      BackupEventLogA            = _BackupEventLogA@8                 @16
      BackupEventLogW            = _BackupEventLogW@8                 @17
-     ChangeServiceConfigA       = _ChangeServiceConfigA@44           @18
-     ChangeServiceConfigW       = _ChangeServiceConfigW@44           @19
-     ClearEventLogA             = _ClearEventLogA@8                  @20
-     ClearEventLogW             = _ClearEventLogW@8                  @21
-     CloseEventLog              = _CloseEventLog@4                   @22
-     CloseServiceHandle         = _CloseServiceHandle@4              @23
-     ControlService             = _ControlService@12                 @24
-     CopySid                    = _CopySid@12                        @25
-     CreatePrivateObjectSecurity  = _CreatePrivateObjectSecurity@24  @26
-     CreateProcessAsUserA       = _CreateProcessAsUserA@44           @27
-     CreateProcessAsUserW       = _CreateProcessAsUserW@44           @28
-     CreateServiceA             = _CreateServiceA@52                 @29
-     CreateServiceW             = _CreateServiceW@52                 @30
-     DeleteAce                  = _DeleteAce@8                       @31
-     DeleteService              = _DeleteService@4                   @32
-     DeregisterEventSource      = _DeregisterEventSource@4           @33
-     DestroyPrivateObjectSecurity  = _DestroyPrivateObjectSecurity@4 @34
-     DuplicateToken             = _DuplicateToken@12                 @35
-     EnumDependentServicesA     = _EnumDependentServicesA@24         @36
-     EnumDependentServicesW     = _EnumDependentServicesW@24         @37
-     EnumServicesStatusA        = _EnumServicesStatusA@32            @38
-     EnumServicesStatusW        = _EnumServicesStatusW@32            @39
-     EqualPrefixSid             = _EqualPrefixSid@8                  @40
-     EqualSid                   = _EqualSid@8                        @41
-     FindFirstFreeAce           = _FindFirstFreeAce@8                @42
-     FreeSid                    = _RtlFreeSid@4                      @43
-     GetAce                     = _GetAce@12                         @44
-     GetAclInformation          = _GetAclInformation@16              @45
-     GetFileSecurityA           = _GetFileSecurityA@20               @46
-     GetFileSecurityW           = _GetFileSecurityW@20               @47
-     GetKernelObjectSecurity    = _GetKernelObjectSecurity@20        @48
-     GetLengthSid               = _RtlLengthSid@4                    @49
-     GetNumberOfEventLogRecords  = _GetNumberOfEventLogRecords@8     @50
-     GetOldestEventLogRecord    = _GetOldestEventLogRecord@8         @51
-     GetPrivateObjectSecurity   = _GetPrivateObjectSecurity@20       @52
-     GetSecurityDescriptorControl  = _GetSecurityDescriptorControl@12 @53
-     GetSecurityDescriptorDacl  = _GetSecurityDescriptorDacl@16      @54
-     GetSecurityDescriptorGroup  = _GetSecurityDescriptorGroup@12    @55
-     GetSecurityDescriptorLength  = _GetSecurityDescriptorLength@4   @56
-     GetSecurityDescriptorOwner  = _GetSecurityDescriptorOwner@12    @57
-     GetSecurityDescriptorSacl  = _GetSecurityDescriptorSacl@16      @58
-     GetServiceDisplayNameA     = _GetServiceDisplayNameA@16         @59
-     GetServiceDisplayNameW     = _GetServiceDisplayNameW@16         @60
-     GetServiceKeyNameA         = _GetServiceKeyNameA@16             @61
-     GetServiceKeyNameW         = _GetServiceKeyNameW@16             @62
-     GetSidIdentifierAuthority  = _RtlIdentifierAuthoritySid@4       @63
-     GetSidLengthRequired       = _RtlLengthRequiredSid@4            @64
-     GetSidSubAuthority         = _RtlSubAuthoritySid@8              @65
-     GetSidSubAuthorityCount    = _RtlSubAuthorityCountSid@4         @66
-     GetTokenInformation        = _GetTokenInformation@20            @67
-     GetUserNameA               = _GetUserNameA@8                    @68
-     GetUserNameW               = _GetUserNameW@8                    @69
-     ImpersonateLoggedOnUser    = _ImpersonateLoggedOnUser@4         @70
-     ImpersonateNamedPipeClient  = _ImpersonateNamedPipeClient@4     @71
-     ImpersonateSelf            = _ImpersonateSelf@4                 @72
-     InitializeAcl              = _InitializeAcl@12                  @73
-     InitializeSecurityDescriptor  = _InitializeSecurityDescriptor@8  @74
-     InitializeSid              = _InitializeSid@12                  @75
-     InitiateSystemShutdownA    = _InitiateSystemShutdownA@20        @76
-     InitiateSystemShutdownW    = _InitiateSystemShutdownW@20        @77
-     IsTextUnicode              = _IsTextUnicode@12                  @78
-     IsValidAcl                 = _IsValidAcl@4                      @79
-     IsValidSecurityDescriptor  = _IsValidSecurityDescriptor@4       @80
-     IsValidSid                 = _IsValidSid@4                      @81
-     LockServiceDatabase        = _LockServiceDatabase@4             @82
-     LogonUserA                 = _LogonUserA@24                     @83
-     LogonUserW                 = _LogonUserW@24                     @84
-     LookupAccountNameA         = _LookupAccountNameA@28             @85
-     LookupAccountNameW         = _LookupAccountNameW@28             @86
-     LookupAccountSidA          = _LookupAccountSidA@28              @87
-     LookupAccountSidW          = _LookupAccountSidW@28              @88
-     LookupPrivilegeDisplayNameA  = _LookupPrivilegeDisplayNameA@20  @89
-     LookupPrivilegeDisplayNameW  = _LookupPrivilegeDisplayNameW@20  @90
-     LookupPrivilegeNameA       = _LookupPrivilegeNameA@16           @91
-     LookupPrivilegeNameW       = _LookupPrivilegeNameW@16           @92
-     LookupPrivilegeValueA      = _LookupPrivilegeValueA@12          @93
-     LookupPrivilegeValueW      = _LookupPrivilegeValueW@12          @94
-     MakeAbsoluteSD             = _MakeAbsoluteSD@44                 @95
-     MakeSelfRelativeSD         = _MakeSelfRelativeSD@12             @96
-     MapGenericMask             = _MapGenericMask@8                  @97
-     NotifyBootConfigStatus     = _NotifyBootConfigStatus@4          @98
-     NotifyChangeEventLog       = _NotifyChangeEventLog@8            @99
-     ObjectCloseAuditAlarmA     = _ObjectCloseAuditAlarmA@12         @100
-     ObjectCloseAuditAlarmW     = _ObjectCloseAuditAlarmW@12         @101
-     ObjectOpenAuditAlarmA      = _ObjectOpenAuditAlarmA@48          @102
-     ObjectOpenAuditAlarmW      = _ObjectOpenAuditAlarmW@48          @103
-     ObjectPrivilegeAuditAlarmA  = _ObjectPrivilegeAuditAlarmA@24    @104
-     ObjectPrivilegeAuditAlarmW  = _ObjectPrivilegeAuditAlarmW@24    @105
-     OpenBackupEventLogA        = _OpenBackupEventLogA@8             @106
-     OpenBackupEventLogW        = _OpenBackupEventLogW@8             @107
-     OpenEventLogA              = _OpenEventLogA@8                   @108
-     OpenEventLogW              = _OpenEventLogW@8                   @109
-     OpenProcessToken           = _OpenProcessToken@12               @110
-     OpenSCManagerA             = _OpenSCManagerA@12                 @111
-     OpenSCManagerW             = _OpenSCManagerW@12                 @112
-     OpenServiceA               = _OpenServiceA@12                   @113
-     OpenServiceW               = _OpenServiceW@12                   @114
-     OpenThreadToken            = _OpenThreadToken@16                @115
-     PrivilegeCheck             = _PrivilegeCheck@12                 @116
-     PrivilegedServiceAuditAlarmA  = _PrivilegedServiceAuditAlarmA@20 @117
-     PrivilegedServiceAuditAlarmW  = _PrivilegedServiceAuditAlarmW@20 @118
-     QueryServiceConfigA        = _QueryServiceConfigA@16            @119
-     QueryServiceConfigW        = _QueryServiceConfigW@16            @120
-     QueryServiceLockStatusA    = _QueryServiceLockStatusA@16        @121
-     QueryServiceLockStatusW    = _QueryServiceLockStatusW@16        @122
-     QueryServiceObjectSecurity  = _QueryServiceObjectSecurity@20    @123
-     QueryServiceStatus         = _QueryServiceStatus@8              @124
-     ReadEventLogA              = _ReadEventLogA@28                  @125
-     ReadEventLogW              = _ReadEventLogW@28                  @126
-     RegisterEventSourceA       = _RegisterEventSourceA@8            @175
-     RegisterEventSourceW       = _RegisterEventSourceW@8            @176
-     RegisterServiceCtrlHandlerA  = _RegisterServiceCtrlHandlerA@8   @177
-     RegisterServiceCtrlHandlerW  = _RegisterServiceCtrlHandlerW@8   @178
-     ReportEventA               = _ReportEventA@36                   @179
-     ReportEventW               = _ReportEventW@36                   @180
-     RevertToSelf               = _RevertToSelf@0                    @181
-     SetAclInformation          = _SetAclInformation@16              @182
-     SetFileSecurityA           = _SetFileSecurityA@12               @183
-     SetFileSecurityW           = _SetFileSecurityW@12               @184
-     SetKernelObjectSecurity    = _SetKernelObjectSecurity@12        @185
-     SetPrivateObjectSecurity   = _SetPrivateObjectSecurity@20       @186
-     SetSecurityDescriptorDacl  = _SetSecurityDescriptorDacl@16      @187
-     SetSecurityDescriptorGroup  = _SetSecurityDescriptorGroup@12    @188
-     SetSecurityDescriptorOwner  = _SetSecurityDescriptorOwner@12    @189
-     SetSecurityDescriptorSacl  = _SetSecurityDescriptorSacl@16      @190
-     SetServiceBits             = _SetServiceBits@16                 @191
-     SetServiceObjectSecurity   = _SetServiceObjectSecurity@12       @192
-     SetServiceStatus           = _SetServiceStatus@8                @193
-     SetThreadToken             = _SetThreadToken@8                  @194
-     SetTokenInformation        = _SetTokenInformation@16            @195
-     StartServiceA              = _StartServiceA@12                  @196
-     StartServiceCtrlDispatcherA  = _StartServiceCtrlDispatcherA@4   @197
-     StartServiceCtrlDispatcherW  = _StartServiceCtrlDispatcherW@4   @198
-     StartServiceW              = _StartServiceW@12                  @199
-     UnlockServiceDatabase      = _UnlockServiceDatabase@4           @200
+;    BuildExplicitAccessWithNameA				@18
+;    BuildExplicitAccessWithNameW				@19
+;    BuildImpersonateExplicitAccessWithNameA			@20
+;    BuildImpersonateExplicitAccessWithNameW			@21
+;    BuildImpersonateTrusteeA					@22
+;    BuildImpersonateTrusteeW					@23
+;    BuildSecurityDescriptorA					@24
+;    BuildSecurityDescriptorW					@25
+;    BuildTrusteeWithNameA					@26
+;    BuildTrusteeWithNameW					@27
+;    BuildTrusteeWithSidA					@28
+;    BuildTrusteeWithSidW					@29
+;    CancelOverlappedAccess					@30
+     ChangeServiceConfigA       = _ChangeServiceConfigA@44           @31
+     ChangeServiceConfigW       = _ChangeServiceConfigW@44           @32
+     ClearEventLogA             = _ClearEventLogA@8                  @33
+     ClearEventLogW             = _ClearEventLogW@8                  @34
+     CloseEventLog              = _CloseEventLog@4                   @35
+     CloseServiceHandle         = _CloseServiceHandle@4              @36
+     ControlService             = _ControlService@12                 @37
+;    ConvertAccessToSecurityDescriptorA				@38
+;    ConvertAccessToSecurityDescriptorW				@39
+;    ConvertSecurityDescriptorToAccessA				@40
+;    ConvertSecurityDescriptorToAccessNamedA			@41
+;    ConvertSecurityDescriptorToAccessNamedW			@42
+;    ConvertSecurityDescriptorToAccessW				@43
+     CopySid                    = _CopySid@12                        @44
+     CreatePrivateObjectSecurity  = _CreatePrivateObjectSecurity@24  @45
+     CreateProcessAsUserA       = _CreateProcessAsUserA@44           @46
+     CreateProcessAsUserW       = _CreateProcessAsUserW@44           @47
+     CreateServiceA             = _CreateServiceA@52                 @48
+     CreateServiceW             = _CreateServiceW@52                 @49
+;    CryptAcquireContextA					@50
+;    CryptAcquireContextW					@51
+;    CryptCreateHash						@52
+;    CryptDecrypt						@53
+;    CryptDeriveKey						@54
+;    CryptDestroyHash						@55
+;    CryptDestroyKey						@56
+;    CryptEncrypt						@57
+;    CryptExportKey						@58
+;    CryptGenKey						@59
+;    CryptGenRandom						@60
+;    CryptGetHashParam						@61
+;    CryptGetKeyParam						@62
+;    CryptGetProvParam						@63
+;    CryptGetUserKey						@64
+;    CryptHashData						@65
+;    CryptHashSessionKey					@66
+;    CryptImportKey						@67
+;    CryptReleaseContext					@68
+;    CryptSetHashParam						@69
+;    CryptSetKeyParam						@70
+;    CryptSetProvParam						@71
+;    CryptSetProviderA						@72
+;    CryptSetProviderW						@73
+;    CryptSignHashA						@74
+;    CryptSignHashW						@75
+;    CryptVerifySignatureA					@76
+;    CryptVerifySignatureW					@77
+     DeleteAce                  = _DeleteAce@8                       @78
+     DeleteService              = _DeleteService@4                   @79
+     DeregisterEventSource      = _DeregisterEventSource@4           @80
+     DestroyPrivateObjectSecurity  = _DestroyPrivateObjectSecurity@4 @81
+     DuplicateToken             = _DuplicateToken@12                 @82
+;    DuplicateTokenEx           		                @83
+;    ElfBackupEventLogFileA					@84
+;    ElfBackupEventLogFileW					@85
+;    ElfChangeNotify						@86
+;    ElfClearEventLogFileA					@87
+;    ElfClearEventLogFileW					@88
+;    ElfCloseEventLog						@89
+;    ElfDeregisterEventSource					@90
+;    ElfNumberOfRecords						@91
+;    ElfOldestRecord						@92
+;    ElfOpenBackupEventLogA					@93
+;    ElfOpenBackupEventLogW					@94
+;    ElfOpenEventLogA						@95
+;    ElfOpenEventLogW						@96
+;    ElfReadEventLogA						@97
+;    ElfReadEventLogW						@98
+;    ElfRegisterEventSourceA					@99
+;    ElfRegisterEventSourceW					@100
+
+;    ElfReportEventA						@101
+;    ElfReportEventW						@102
+     EnumDependentServicesA     = _EnumDependentServicesA@24         @103
+     EnumDependentServicesW     = _EnumDependentServicesW@24         @104
+;    EnumServiceGroupW						@105
+     EnumServicesStatusA        = _EnumServicesStatusA@32            @106
+;    EnumServicesStatusExA					@107
+;    EnumServicesStatusExW					@108
+     EnumServicesStatusW        = _EnumServicesStatusW@32            @109
+     EqualPrefixSid             = _EqualPrefixSid@8                  @110
+     EqualSid                   = _EqualSid@8                        @111
+     FindFirstFreeAce           = _FindFirstFreeAce@8                @112
+     FreeSid                    = _RtlFreeSid@4                      @113
+;    GetAccessPermissionsForObjectA				@114
+;    GetAccessPermissionsForObjectW				@115
+     GetAce                     = _GetAce@12                         @116
+     GetAclInformation          = _GetAclInformation@16              @117
+;    GetAuditedPermissionsFromAclA				@118
+;    GetAuditedPermissionsFromAclW				@119
+;    GetCurrentHwProfileA					@120
+;    GetCurrentHwProfileW					@121
+;    GetEffectiveRightsFromAclA					@122
+;    GetEffectiveRightsFromAclW					@123
+;    GetExplicitEntriesFromAclA					@124
+;    GetExplicitEntriesFromAclW					@125
+     GetFileSecurityA           = _GetFileSecurityA@20               @126
+     GetFileSecurityW           = _GetFileSecurityW@20               @127
+     GetKernelObjectSecurity    = _GetKernelObjectSecurity@20        @128
+     GetLengthSid               = _RtlLengthSid@4                    @129
+;    GetMultipleTrusteeA					@130
+;    GetMultipleTrusteeOperationA				@131
+;    GetMultipleTrusteeOperationW				@132
+;    GetMultipleTrusteeW					@133
+;    GetNamedSecurityInfoA					@134
+;    GetNamedSecurityInfoExA					@135
+;    GetNamedSecurityInfoExW					@136
+;    GetNamedSecurityInfoW					@137
+     GetNumberOfEventLogRecords  = _GetNumberOfEventLogRecords@8     @138
+     GetOldestEventLogRecord    = _GetOldestEventLogRecord@8         @139
+;    GetOverlappedAccessResults					@140
+     GetPrivateObjectSecurity   = _GetPrivateObjectSecurity@20       @141
+     GetSecurityDescriptorControl  = _GetSecurityDescriptorControl@12 @142
+     GetSecurityDescriptorDacl  = _GetSecurityDescriptorDacl@16      @143
+     GetSecurityDescriptorGroup  = _GetSecurityDescriptorGroup@12    @144
+     GetSecurityDescriptorLength  = _GetSecurityDescriptorLength@4   @145
+     GetSecurityDescriptorOwner  = _GetSecurityDescriptorOwner@12    @146
+     GetSecurityDescriptorSacl  = _GetSecurityDescriptorSacl@16      @147
+;    GetSecurityInfo						@148
+;    GetSecurityInfoExA						@149
+;    GetSecurityInfoExW						@150
+     GetServiceDisplayNameA     = _GetServiceDisplayNameA@16         @151
+     GetServiceDisplayNameW     = _GetServiceDisplayNameW@16         @152
+     GetServiceKeyNameA         = _GetServiceKeyNameA@16             @153
+     GetServiceKeyNameW         = _GetServiceKeyNameW@16             @154
+     GetSidIdentifierAuthority  = _RtlIdentifierAuthoritySid@4       @155
+     GetSidLengthRequired       = _RtlLengthRequiredSid@4            @156
+     GetSidSubAuthority         = _RtlSubAuthoritySid@8              @157
+     GetSidSubAuthorityCount    = _RtlSubAuthorityCountSid@4         @158
+     GetTokenInformation        = _GetTokenInformation@20            @159
+;    GetTrusteeNameA						@160
+;    GetTrusteeNameW						@161
+;    GetTrusteeTypeA						@162
+;    GetTrusteeTypeW						@163
+     GetUserNameA               = _GetUserNameA@8                    @164
+     GetUserNameW               = _GetUserNameW@8                    @165
+;    I_ScGetCurrentGroupStateW					@166
+;    I_ScSetServiceBitsA					@167
+;    I_ScSetServiceBitsW					@168
+     ImpersonateLoggedOnUser    = _ImpersonateLoggedOnUser@4         @169
+     ImpersonateNamedPipeClient  = _ImpersonateNamedPipeClient@4     @170
+     ImpersonateSelf            = _ImpersonateSelf@4                 @171
+     InitializeAcl              = _InitializeAcl@12                  @172
+     InitializeSecurityDescriptor  = _InitializeSecurityDescriptor@8 @173
+     InitializeSid              = _InitializeSid@12                  @174
+     InitiateSystemShutdownA    = _InitiateSystemShutdownA@20        @175
+     InitiateSystemShutdownW    = _InitiateSystemShutdownW@20        @176
+     IsTextUnicode              = _IsTextUnicode@12                  @177
+     IsValidAcl                 = _IsValidAcl@4                      @178
+     IsValidSecurityDescriptor  = _IsValidSecurityDescriptor@4       @179
+     IsValidSid                 = _IsValidSid@4                      @180
+     LockServiceDatabase        = _LockServiceDatabase@4             @181
+     LogonUserA                 = _LogonUserA@24                     @182
+     LogonUserW                 = _LogonUserW@24                     @183
+     LookupAccountNameA         = _LookupAccountNameA@28             @184
+     LookupAccountNameW         = _LookupAccountNameW@28             @185
+     LookupAccountSidA          = _LookupAccountSidA@28              @186
+     LookupAccountSidW          = _LookupAccountSidW@28              @187
+     LookupPrivilegeDisplayNameA  = _LookupPrivilegeDisplayNameA@20  @188
+     LookupPrivilegeDisplayNameW  = _LookupPrivilegeDisplayNameW@20  @189
+     LookupPrivilegeNameA       = _LookupPrivilegeNameA@16           @190
+     LookupPrivilegeNameW       = _LookupPrivilegeNameW@16           @191
+     LookupPrivilegeValueA      = _LookupPrivilegeValueA@12          @192
+     LookupPrivilegeValueW      = _LookupPrivilegeValueW@12          @193
+;    LookupSecurityDescriptorPartsA				@194
+;    LookupSecurityDescriptorPartsW				@195
+
+     MakeAbsoluteSD             = _MakeAbsoluteSD@44                 @244
+     MakeSelfRelativeSD         = _MakeSelfRelativeSD@12             @245
+     MapGenericMask             = _MapGenericMask@8                  @246
+     NotifyBootConfigStatus     = _NotifyBootConfigStatus@4          @247
+     NotifyChangeEventLog       = _NotifyChangeEventLog@8            @248
+     ObjectCloseAuditAlarmA     = _ObjectCloseAuditAlarmA@12         @249
+     ObjectCloseAuditAlarmW     = _ObjectCloseAuditAlarmW@12         @250
+;    ObjectDeleteAuditAlarmA					     @251
+;    ObjectDeleteAuditAlarmW					     @252
+     ObjectOpenAuditAlarmA      = _ObjectOpenAuditAlarmA@48          @253
+     ObjectOpenAuditAlarmW      = _ObjectOpenAuditAlarmW@48          @254
+     ObjectPrivilegeAuditAlarmA  = _ObjectPrivilegeAuditAlarmA@24    @255
+     ObjectPrivilegeAuditAlarmW  = _ObjectPrivilegeAuditAlarmW@24    @256
+     OpenBackupEventLogA        = _OpenBackupEventLogA@8             @257
+     OpenBackupEventLogW        = _OpenBackupEventLogW@8             @258
+     OpenEventLogA              = _OpenEventLogA@8                   @259
+     OpenEventLogW              = _OpenEventLogW@8                   @260
+     OpenProcessToken           = _OpenProcessToken@12               @261
+     OpenSCManagerA             = _OpenSCManagerA@12                 @262
+     OpenSCManagerW             = _OpenSCManagerW@12                 @263
+     OpenServiceA               = _OpenServiceA@12                   @264
+     OpenServiceW               = _OpenServiceW@12                   @265
+     OpenThreadToken            = _OpenThreadToken@16                @266
+     PrivilegeCheck             = _PrivilegeCheck@12                 @267
+     PrivilegedServiceAuditAlarmA  = _PrivilegedServiceAuditAlarmA@20 @268
+     PrivilegedServiceAuditAlarmW  = _PrivilegedServiceAuditAlarmW@20 @269
+     QueryServiceConfigA        = _QueryServiceConfigA@16            @270
+     QueryServiceConfigW        = _QueryServiceConfigW@16            @271
+     QueryServiceLockStatusA    = _QueryServiceLockStatusA@16        @272
+     QueryServiceLockStatusW    = _QueryServiceLockStatusW@16        @273
+     QueryServiceObjectSecurity  = _QueryServiceObjectSecurity@20    @274
+     QueryServiceStatus         = _QueryServiceStatus@8              @275
+;    QueryServiceStatusEx					     @276
+;    QueryWindows31FilesMigration				     @277
+     ReadEventLogA              = _ReadEventLogA@28                  @278
+     ReadEventLogW              = _ReadEventLogW@28                  @279
+
+     RegisterEventSourceA       = _RegisterEventSourceA@8            @327
+     RegisterEventSourceW       = _RegisterEventSourceW@8            @328
+     RegisterServiceCtrlHandlerA  = _RegisterServiceCtrlHandlerA@8   @329
+     RegisterServiceCtrlHandlerW  = _RegisterServiceCtrlHandlerW@8   @330
+     ReportEventA               = _ReportEventA@36                   @331
+     ReportEventW               = _ReportEventW@36                   @332
+     RevertToSelf               = _RevertToSelf@0                    @333
+     SetAclInformation          = _SetAclInformation@16              @334
+;    SetEntriesInAccessListA					     @335
+;    SetEntriesInAccessListW					     @336
+;    SetEntriesInAclA						     @337
+;    SetEntriesInAclW    					     @338
+;    SetEntriesInAuditListA					     @339
+;    SetEntriesInAuditListW					     @340
+     SetFileSecurityA           = _SetFileSecurityA@12               @341
+     SetFileSecurityW           = _SetFileSecurityW@12               @342
+     SetKernelObjectSecurity    = _SetKernelObjectSecurity@12        @343
+;    SetNamedSecurityInfoA					     @344
+;    SetNamedSecurityInfoExA 					     @345
+;    SetNamedSecurityInfoExW					     @346
+;    SetNamedSecurityInfoW					     @347
+     SetPrivateObjectSecurity   = _SetPrivateObjectSecurity@20       @348
+     SetSecurityDescriptorDacl  = _SetSecurityDescriptorDacl@16      @349
+     SetSecurityDescriptorGroup  = _SetSecurityDescriptorGroup@12    @350
+     SetSecurityDescriptorOwner  = _SetSecurityDescriptorOwner@12    @351
+     SetSecurityDescriptorSacl  = _SetSecurityDescriptorSacl@16      @352
+;    SetSecurityInfo						     @353
+;    SetSecurityInfoExA						     @354
+;    SetSecurityInfoExW						     @355
+     SetServiceBits             = _SetServiceBits@16                 @356
+     SetServiceObjectSecurity   = _SetServiceObjectSecurity@12       @357
+     SetServiceStatus           = _SetServiceStatus@8                @358
+     SetThreadToken             = _SetThreadToken@8                  @359
+     SetTokenInformation        = _SetTokenInformation@16            @360
+     StartServiceA              = _StartServiceA@12                  @361
+     StartServiceCtrlDispatcherA  = _StartServiceCtrlDispatcherA@4   @362
+     StartServiceCtrlDispatcherW  = _StartServiceCtrlDispatcherW@4   @363
+     StartServiceW              = _StartServiceW@12                  @364
+;    SynchronizeWindows31FilesAndWindowsNTRegistry		@365
+;    SystemFunction001						@366
+;    SystemFunction002						@367
+;    SystemFunction003						@368
+;    SystemFunction004						@369
+;    SystemFunction005						@370
+;    SystemFunction006						@371
+;    SystemFunction007						@372
+;    SystemFunction008						@373
+;    SystemFunction009						@374
+;    SystemFunction010						@375
+;    SystemFunction011						@376
+;    SystemFunction012						@377
+;    SystemFunction013						@378
+;    SystemFunction014						@379
+;    SystemFunction015						@380
+;    SystemFunction016						@381
+;    SystemFunction017						@382
+;    SystemFunction018						@383
+;    SystemFunction019						@384
+;    SystemFunction020						@385
+;    SystemFunction021						@386
+;    SystemFunction022						@387
+;    SystemFunction023						@388
+;    SystemFunction024						@389
+;    SystemFunction025						@390
+;    SystemFunction026						@391
+;    SystemFunction027						@392
+;    SystemFunction028						@393
+;    SystemFunction029						@394
+;    SystemFunction030						@395
+;    SystemFunction031						@396
+;    SystemFunction032						@397
+;    SystemFunction033						@398
+;    TrusteeAccessToObjectA					@399
+;    TrusteeAccessToObjectW					@400
+
+     UnlockServiceDatabase      = _UnlockServiceDatabase@4           @401
 
