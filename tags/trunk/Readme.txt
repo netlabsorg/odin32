@@ -1,12 +1,15 @@
-/* $Id: Readme.txt,v 1.5 1999-06-24 19:19:46 sandervl Exp $ */
+/* $Id: Readme.txt,v 1.6 1999-06-30 17:27:58 sandervl Exp $ */
 
-21/06/99: Project Odin Source Code Notes
+39/06/99: Project Odin Source Code Notes
 ========================================
 
 Required compilers/tools:
 	- IBM VisualAge 3.0 (CTx8 fixpack applied)
 	  (version 3.6 might also work, but version 4 is not
  	   recommended)
+	- OS/2 Warp 4 Toolkit (project apparently doesn't compile with 
+	  VAC's OS/2 headers)
+	  Might also work with EMX headers. (haven't tried this!)
 	- ALP 4.0 (IBM Assembly Language Processor)
           Download the tools zipfile from http://service.boulder.ibm.com/ddk/
 	  (you need to register, but it's free)
