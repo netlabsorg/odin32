@@ -1,4 +1,4 @@
-# $Id: minihll.mak,v 1.1.2.2 2001-08-15 01:50:14 bird Exp $
+# $Id: minihll.mak,v 1.1.2.3 2001-08-15 03:12:25 bird Exp $
 
 #
 # Odin32 API
@@ -26,8 +26,15 @@ EXETARGET=1
 !ifndef WAT
 LD2FLAGS = $(LD2FLAGS) /BASE:0x10000 /Stack:0x1000
 !endif
+
 !ifdef WAT
-CFLAGS += /Os -s /NTSTACK32
+CFLAGS  = -bt=os2v2 -e60 -5r -omlinears -s -w4 -ze -zl -zq -nt=CODEANDDATA
+!if "$(%LIBC)" != ""
+LIBC=1
+!endif
+!ifdef LIBC
+CFLAGS += -dLIBC=1
+!endif
 !endif
 
 
@@ -35,7 +42,13 @@ CFLAGS += /Os -s /NTSTACK32
 # Object files. Prefix with OBJDIR and one space before the '\'.
 #
 OBJS = \
-$(OBJDIR)\minihll.obj
+!ifndef LIBC
+$(OBJDIR)\minihll2.obj \
+$(OBJDIR)\minihll.obj \
+!else
+$(OBJDIR)\minihll2.obj \
+$(OBJDIR)\minihll.obj \
+!endif
 
 
 #
@@ -60,15 +73,18 @@ $(OBJDIR)\$(TARGET).exe: $(OBJS)  $(DEFFILE) $(OBJDIR)\$(TARGET).lrf
         /ALIGNMENT:1 @$(OBJDIR)\$(TARGET).lrf
 !else
     wlink system os2v2 file {$(OBJS)} name $(OBJDIR)\.exe \
-    import printf LIBCN.1082 \
-    import DosPutMessage MSG.5   \
-#        segment{'STACK32' READWRITE} \
-#        segment{'MYSTACK' CLASS 'STACK' READWRITE} \
-        option offset=0x10000 option alignment=1 option stack=4060 option start=minihll \
-        option map=$(OBJDIR)\$(TARGET).map
+        option offset=0x10000 option alignment=1 option stack=4060 \
+        option map=$(OBJDIR)\$(TARGET).map \
+!ifndef LIBC
+        import DosPutMessage MSG.5 \
+        option start=minihll
+!else
+        import _printf_ansi_ LIBCN.83 \
+        option start=minihll_
+!endif
     mv $(OBJDIR)\.exe $@
 !endif
-    $(LXLITE) /AN:1 /ZS:1024 /ZX:1024 /MF3 /YXD /YND $@
+    $(LXLITE) /AN:1 /ZS:1024 /ZX:1024 /MF3 /YXD /YND /ML1  $@
 
 #    -8 ilink /NOFREE /FORCE /ALIGNMENT:1 /Map /BASE:0x10000 /PACKCODE /PACKDATA /EXEPACK:1 \
 #        $(OBJS), $(OBJDIR)\$(TARGET).exe, $(OBJDIR)\$(TARGET).map, os2386.lib, mini.def;
