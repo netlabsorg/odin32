@@ -1,4 +1,4 @@
-/* $Id: setwindow.cpp,v 1.2 1999-06-27 16:23:23 sandervl Exp $ */
+/* $Id: setwindow.cpp,v 1.3 1999-06-27 16:49:52 sandervl Exp $ */
 
 /*
  * Win32 Get/SetWindowLong/Word user32 API functions for OS/2
@@ -73,16 +73,19 @@ LONG WIN32API GetWindowLongA(HWND hwnd, int nIndex)
 {
  LONG rc;
 
+    dprintf(("USER32:  GetWindowLong %X %d\n", hwnd, nIndex));
+
     if(nIndex == GWL_WNDPROC || nIndex == DWL_DLGPROC) {
-#ifdef DEBUG
-	WriteLog("USER32:  GetWindowLong %X %d\n", hwnd, nIndex);
-#endif
      	Win32WindowProc *window = Win32WindowProc::FindProc(hwnd);
      	if(window && !(nIndex == DWL_DLGPROC && window->IsWindow() == TRUE)) {
         	return (LONG)window->GetWin32Callback();
      	}
     }
     rc = O32_GetWindowLong(hwnd, nIndex);
+    //SvL: We must return longs here, not shorts!
+    //     (fixed Winhlp32 buttons)
+    if(rc == 0xffff)
+	rc = 0xffffffff;
     return(rc);
 }
 //******************************************************************************
