@@ -1,10 +1,12 @@
- /* $Id: changelog,v 1.876 2000-04-08 18:30:41 cbratschi Exp $ */
+ /* $Id: changelog,v 1.877 2000-04-08 20:13:23 sandervl Exp $ */
 
  2000-04-08: Christoph Bratschi <cbratschi@datacomm.ch>
 	- COMCTL32: added new styles and functionality, bug fixes
 
  2000-04-08: Sander van Leeuwen <sandervl@xs4all.nl>
-        - WINMM: Restart, pause & underrun fixes
+        - WINMM:    Restart, pause & underrun fixes
+	- KERNEL32: Fixed bug in CompareStringW. Unicode conversion was
+                    causing heap corruption. (RealPlayer 7 crashes)
 
  2000-04-07: Michal Necasek <mike@mendelu.cz>
         - DDRAW\NEW: Experimental fullscreen DDraw, VIDEOPMI based.
