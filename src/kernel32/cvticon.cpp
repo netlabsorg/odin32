@@ -1,4 +1,4 @@
-/* $Id: cvticon.cpp,v 1.6 1999-10-27 10:35:41 sandervl Exp $ */
+/* $Id: cvticon.cpp,v 1.7 1999-12-29 12:39:09 sandervl Exp $ */
 
 /*
  * PE2LX icons
@@ -115,12 +115,12 @@ void *ConvertIcon(WINBITMAPINFOHEADER *bmpHdr, int size, int *os2size, int offse
   if(bmpHdr->biSizeImage == 0 && bmpHdr->biCompression == 0) {
         bmpHdr->biSizeImage = bwsize + colorsize;
   }
-  dprintf(("Icon size    : %d", bmpHdr->biSizeImage));
-  dprintf(("Icon Width   : %d", bmpHdr->biWidth));
+  dprintf2(("Icon size    : %d", bmpHdr->biSizeImage));
+  dprintf2(("Icon Width   : %d", bmpHdr->biWidth));
   //height for both the XOR and AND bitmap (color & BW)
-  dprintf(("Height       : %d", bmpHdr->biHeight));
-  dprintf(("Icon Bitcount: %d", bmpHdr->biBitCount));
-  dprintf(("Icon Compress: %d", bmpHdr->biCompression));
+  dprintf2(("Height       : %d", bmpHdr->biHeight));
+  dprintf2(("Icon Bitcount: %d", bmpHdr->biBitCount));
+  dprintf2(("Icon Compress: %d", bmpHdr->biCompression));
 
   //SvL: 28-09-'98: cllngenu.dll has an incorrect size in the header
   if(bmpHdr->biSizeImage < colorsize) {

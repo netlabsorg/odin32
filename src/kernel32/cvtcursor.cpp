@@ -1,4 +1,4 @@
-/* $Id: cvtcursor.cpp,v 1.8 1999-10-27 10:35:41 sandervl Exp $ */
+/* $Id: cvtcursor.cpp,v 1.9 1999-12-29 12:39:09 sandervl Exp $ */
 
 /*
  * PE2LX cursor conversion code
@@ -147,8 +147,8 @@ void *ConvertCursor(CursorComponent *curHdr, int size, int *os2size, int offsetB
   cursorhdr->yHotspot      = (bmpHdr->biHeight >> 1)       /* height div 2 */
                              - curHdr->yHotspot;         /* subtract hot.y */
 
-  dprintf(("Cursor Hot.x   : %d", curHdr->xHotspot));
-  dprintf(("Cursor Hot.y   : %d", curHdr->yHotspot));
+  dprintf2(("Cursor Hot.x   : %d", curHdr->xHotspot));
+  dprintf2(("Cursor Hot.y   : %d", curHdr->yHotspot));
 
   if(bmpHdr->biBitCount == 1) {
   	cursorhdr->offBits = sizeof(BITMAPFILEHEADER2) +
@@ -166,12 +166,12 @@ void *ConvertCursor(CursorComponent *curHdr, int size, int *os2size, int offsetB
   cursorhdr->bmp2.cBitCount = 1;
   cursorhdr->bmp2.ulCompression   = BCA_UNCOMP;
   cursorhdr->bmp2.ulColorEncoding = BCE_RGB;
-  dprintf(("Cursor size    : %d", bmpHdr->biSizeImage));
-  dprintf(("Cursor Width   : %d", bmpHdr->biWidth));
+  dprintf2(("Cursor size    : %d", bmpHdr->biSizeImage));
+  dprintf2(("Cursor Width   : %d", bmpHdr->biWidth));
   //height for both the XOR and AND bitmap (color & BW)
-  dprintf(("Height         : %d", bmpHdr->biHeight));
-  dprintf(("Cursor Bitcount: %d", bmpHdr->biBitCount));
-  dprintf(("Cursor Compress: %d", bmpHdr->biCompression));
+  dprintf2(("Height         : %d", bmpHdr->biHeight));
+  dprintf2(("Cursor Bitcount: %d", bmpHdr->biBitCount));
+  dprintf2(("Cursor Compress: %d", bmpHdr->biCompression));
 
   os2rgb                   = (RGB2 *)(cursorhdr+1);
   rgb                      = (RGBQUAD *)(bmpHdr+1);
