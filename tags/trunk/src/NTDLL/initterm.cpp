@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.7 1999-09-15 23:26:05 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.8 1999-12-18 20:01:13 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -49,6 +49,8 @@ void CDECL _ctordtorTerm( void );
 static void APIENTRY cleanup(ULONG reason);
 
 
+BOOL WINAPI NTDLL_LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved);
+
 /****************************************************************************/
 /* _DLL_InitTerm is the function that gets called by the operating system   */
 /* loader when it loads and frees this DLL for each process that accesses   */
@@ -80,7 +82,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          /* are required and the runtime is dynamically linked.             */
          /*******************************************************************/
 
-	 if(RegisterLxDll(hModule, 0, 0) == FALSE) 
+	 if(RegisterLxDll(hModule, NTDLL_LibMain, 0) == FALSE) 
 		return 0UL;
 
          rc = DosExitList(0x0000F000|EXLST_ADD, cleanup);
