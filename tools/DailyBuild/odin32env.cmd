@@ -1,4 +1,4 @@
-/* $Id: odin32env.cmd,v 1.3 2000-05-27 02:13:37 bird Exp $
+/* $Id: odin32env.cmd,v 1.4 2000-05-27 14:23:36 bird Exp $
  *
  * Sets the build environment.
  *
@@ -23,6 +23,7 @@
      * Call the procedures which configure each tool.
      * (The order this is done is _very_ important!)
      */
+    call EMX 0;
     call CVS 0;
     call DDKBase 0;
     call MSC60 0;
@@ -102,7 +103,7 @@ DDKBase: procedure
     /*
      * Device Driver Kit (DDK) (v4.0+) base (important not main) directory.
      */
-    sDDKBase    = 'f:\knut\ddk\base';
+    sDDKBase    = 'd:\knut\ddk\base';
     call EnvVar_Set      fRM, 'ddkbase', sDDKBase;
     call EnvVar_AddFront fRM, 'path',        sDDKBase'\tools;'
     call EnvVar_AddFront fRM, 'include',     sDDKBase'\h;'
@@ -122,7 +123,7 @@ MSC60: procedure
     /*
      * Microsoft C v6.0a main directory.
      */
-    sMSCMain    = 'f:\knut\ddk\ddktools\toolkits\msc60';
+    sMSCMain    = 'd:\knut\ddk\ddktools\toolkits\msc60';
     call EnvVar_Set      fRM, 'mscmain',    sMSCMain;
     call EnvVar_AddFront fRM, 'path',       sMSCMain'\binp;'
     call EnvVar_AddFront fRM, 'include',    sMSCMain'\include;'
