@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.17 2001-04-17 00:24:09 bird Exp $
+# $Id: Makefile,v 1.17.2.1 2001-09-07 10:26:39 bird Exp $
 
 #
 # Odin32 Api Database Utilities.
@@ -34,8 +34,9 @@ Odin32: CreateTables.sql States.sql Authors.sql
    -mysqladmin refresh
    mysqladmin DROP Odin32
    mysql < CreateTables.sql
-   mysql < States.sql
-   mysql < Authors.sql
+   mysql $@ < States.sql
+   mysql $@ < Authors.sql
+   mysql $@ < Codes.sql
    -mysqladmin refresh
 
 Authors: Authors.sql

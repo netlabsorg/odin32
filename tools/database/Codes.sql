@@ -1,4 +1,4 @@
--- $Id: Codes.sql,v 1.1 2000-07-29 21:19:33 bird Exp $
+-- $Id: Codes.sql,v 1.1.2.1 2001-09-07 10:26:39 bird Exp $
 --
 -- Codes.
 --
@@ -27,6 +27,14 @@ INSERT INTO code
 INSERT INTO code
     VALUES ('FTYP', 'I   ', 'Internal Odin32 API');
 INSERT INTO code
-    VALUES ('FTYP', 'O   ', 'Other function');
+    VALUES ('FTYP', 'F   ', 'Some Function');
 
+INSERT INTO code
+    VALUES ('FTYP', 'M   ', 'Class public method');
+INSERT INTO code
+    VALUES ('FTYP', 'O   ', 'Class operator');
+INSERT INTO code
+    VALUES ('FTYP', 'C   ', 'Class constructor');
+INSERT INTO code
+    VALUES ('FTYP', 'D   ', 'Class donstructor');
 
