@@ -1,4 +1,4 @@
-/* $Id: dbglocal.h,v 1.3 2000-04-29 18:28:35 sandervl Exp $ */
+/* $Id: dbglocal.h,v 1.4 2000-05-05 11:32:36 sandervl Exp $ */
 
 /*
  * debug logging functions for OS/2
@@ -69,23 +69,23 @@ void ParseLogStatus();
 #define DBG_dib                  47
 #define DBG_oslibdos             48
 #define DBG_win32wmdichild       49
-#define DBG_winprop              50
-#define DBG_wingdi               51
-#define DBG_oslibgdi             52
-#define DBG_winaccel             53
-#define DBG_win32wbasepos        54
-#define DBG_oslibres             55
-#define DBG_dc                   56
-#define DBG_timer                57
-#define DBG_caret                58
-#define DBG_resource             59
-#define DBG_winproc              60
-#define DBG_text                 61
-#define DBG_oslibmsgtranslate    62
-#define DBG_windlgmsg            63
-#define DBG_windlg               64
-#define DBG_win32wdesktop        65
-#define DBG_win32wbasenonclient  66
+#define DBG_wingdi               50
+#define DBG_oslibgdi             51
+#define DBG_winaccel             52
+#define DBG_win32wbasepos        53
+#define DBG_oslibres             54
+#define DBG_dc                   55
+#define DBG_timer                56
+#define DBG_caret                57
+#define DBG_resource             58
+#define DBG_winproc              59
+#define DBG_text                 60
+#define DBG_oslibmsgtranslate    61
+#define DBG_windlgmsg            62
+#define DBG_windlg               63
+#define DBG_win32wdesktop        64
+#define DBG_win32wbasenonclient  65
+#define DBG_win32wbaseprop       66
 #define DBG_MAXFILES             67
 
 extern USHORT DbgEnabled[DBG_MAXFILES];

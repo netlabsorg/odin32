@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.69 2000-03-23 23:06:50 sandervl Exp $
+# $Id: Makefile,v 1.70 2000-05-05 11:32:35 sandervl Exp $
 
 #
 # Odin32 API
@@ -73,10 +73,10 @@ $(OBJDIR)\oslibmsg.obj \
 $(OBJDIR)\dib.obj \
 $(OBJDIR)\oslibdos.obj \
 $(OBJDIR)\win32wmdichild.obj \
-$(OBJDIR)\winprop.obj \
 $(OBJDIR)\oslibgdi.obj \
 $(OBJDIR)\winaccel.obj \
 $(OBJDIR)\win32wbasepos.obj \
+$(OBJDIR)\win32wbaseprop.obj \
 $(OBJDIR)\oslibres.obj \
 $(OBJDIR)\dc.obj \
 $(OBJDIR)\timer.obj \
