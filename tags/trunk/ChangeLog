@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.571 1999-12-22 18:08:28 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.572 1999-12-24 01:34:54 hugh Exp $ */
+
+ 99-12-24: Markus Montkowski <mmontkowski@gmx.de>
+        - dplayx: compiles and links now 
 
  99-12-22: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: fixed WinGetKeyState in WM_MOUSEMOVE (WinAmp's equalizer works now fine)
