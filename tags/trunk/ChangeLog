@@ -1,4 +1,13 @@
- /* $Id: ChangeLog,v 1.577 1999-12-27 17:06:23 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.578 1999-12-27 18:47:40 sandervl Exp $ */
+
+ 99-12-27: Jens Wiessner <wiessnej@rfi.de>
+	- WINSPOOL: Added stubs
+	- ADVAPI32: Added crypto stubs
+
+ 99-12-27: Vit Timchishin <tvv@sbs.kiev.ua>
+	- KERNEL32: Implemented preliminary codepage support
+	- USER32: Added code to init for codepage support
+	          Fixed combo box bugs (COMBO_Command; use lParam for hwnd compares)
 
  99-12-27: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: fixed SetWindowPos
