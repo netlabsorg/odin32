@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.36 1999-11-14 16:35:58 sandervl Exp $ */
+/* $Id: window.cpp,v 1.37 1999-11-21 16:22:14 achimha Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -859,8 +859,9 @@ BOOL WIN32API ScreenToClient (HWND hwnd, LPPOINT pt)
 //******************************************************************************
 HWND WIN32API GetDesktopWindow(void)
 {
-    dprintf(("USER32:  GetDesktopWindow\n"));
-    return windowDesktop->getWindowHandle();
+    HWND DesktopWindow = windowDesktop->getWindowHandle();
+    dprintf(("USER32: GetDesktopWindow, return %d\n", DesktopWindow));
+    return DesktopWindow;
 }
 //******************************************************************************
 //******************************************************************************
