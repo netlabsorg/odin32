@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.27 1999-12-10 14:06:12 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.28 1999-12-13 19:28:14 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -653,7 +653,7 @@ Win32MemMap *Win32MemMapView::findMapByView(ULONG address, ULONG *offset,
 	view = NULL;
   }
 success:
-  if(view)
+  if(view && !view->getParentMap()->isImageMap())
   	dprintf(("findMapByView %x %x -> %x off %x", address, accessType, view->getViewAddr(), *offset));
 
   globalviewMutex.leave();
