@@ -1,4 +1,8 @@
- /* $Id: changelog,v 1.65 1999-08-03 21:21:54 sandervl Exp $ */
+ /* $Id: changelog,v 1.66 1999-08-04 00:51:08 phaller Exp $ */
+ 99-08-04: Patrick Haller <phaller@gmx.net>
+	- KERNEL32: Heap modification
+	- KERNEL32: Windows 3 style profile support ported from WINE (removes Open32)
+
  99-08-03: Rene Pronk <R.Pronk@twi.tudelft.nl>
 	- USER32: Ported DrawTextExA/W & DrawStateA/W
 
