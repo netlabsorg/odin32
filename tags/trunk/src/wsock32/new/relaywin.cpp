@@ -1,4 +1,4 @@
-/* $Id: relaywin.cpp,v 1.5 1999-12-02 16:01:45 achimha Exp $ */
+/* $Id: relaywin.cpp,v 1.6 1999-12-02 16:12:23 achimha Exp $ */
 
 /*
  *
@@ -215,17 +215,13 @@ MRESULT EXPENTRY RelayWindowProc(HWND   hwnd,
                  "WSAAyncGetHostByName\n"));
         /* we need to convert the hostent structure here */
         Whostent *WinHostent = (Whostent*)pHM->pvUserData1;
-        hostent *OS2Hostent = (hostent*)pHM->pvUserData2;
-        WinHostent->h_name = OS2Hostent->h_name;
-        WinHostent->h_aliases = OS2Hostent->h_aliases;
-        WinHostent->h_addrtype = (short)OS2Hostent->h_addrtype;
-        WinHostent->h_length = (short)OS2Hostent->h_length;
-        WinHostent->h_addr_list = OS2Hostent->h_addr_list;
-        /* free our temporary OS2 hostent buffer */
-  //TODO: how can we free this? we will end up with a memory leak :(
-  // this memory block not only contains the hostent structure but also the strings it points to
-  // I think we should copy the strings after the Whostent into the Win32 buffer
-  //      free(pHM->pvUserData2);
+        hostent *OS2Hostent = (hostent*)pHM->pvUserData1;
+        short h_addrtype = (short)OS2Hostent->h_addrtype;
+        WinHostent->h_addrtype = h_addrtype;
+        short h_length = (short)OS2Hostent->h_length;
+        WinHostent->h_length = h_length;
+        char **h_addr_list = OS2Hostent->h_addr_list;
+        WinHostent->h_addr_list = h_addr_list;
   //TODO: the size of OS/2 hostent is 4 bytes bigger so the original buffer *might* be too small
 
       }

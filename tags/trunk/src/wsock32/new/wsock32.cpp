@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.9 1999-12-02 15:22:05 achimha Exp $ */
+/* $Id: wsock32.cpp,v 1.10 1999-12-02 16:12:24 achimha Exp $ */
 
 /*
  *
@@ -1271,7 +1271,6 @@ ODINFUNCTION5(LHANDLE,OS2WSAAsyncGetHostByName,
   int   rc;
   HWND  hwndOS2 = Win32ToOS2Handle(hWnd);
   ULONG ulNewID;
-  char *OS2Hostent = (char*)malloc(MAXGETHOSTSTRUCT);
 
   if (hwndRelay == NULL) // already initialized ?
     hwndRelay = RelayInitialize(hwndOS2);
@@ -1284,13 +1283,13 @@ ODINFUNCTION5(LHANDLE,OS2WSAAsyncGetHostByName,
   }
   else
     // add entry to list, we need to store both our temp buffer and the apps buffer
-    ulNewID = RelayAlloc(hWnd, wMsg, ASYNCREQUEST_GETHOSTBYNAME, buf, OS2Hostent);
+    ulNewID = RelayAlloc(hWnd, wMsg, ASYNCREQUEST_GETHOSTBYNAME, buf);
 
   // call pmwsock function, will fill our temp buffer
   rc = WSAAsyncGetHostByName(hwndRelay,
                              ulNewID,
                              name,
-                             OS2Hostent,
+                             buf,
                              buflen);
 
   return rc;
