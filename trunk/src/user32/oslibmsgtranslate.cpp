@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.100 2003-02-13 10:12:25 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.101 2003-02-13 10:34:48 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -284,12 +284,20 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         else    hwndFocus = OS2ToWin32Handle(hwndFocus);
 
         if((ULONG)os2Msg->mp2 == TRUE) {
-                winMsg->message = WINWM_SETFOCUS;
-                winMsg->wParam  = (WPARAM)hwndFocus;
+            winMsg->message = WINWM_SETFOCUS;
+            winMsg->wParam  = (WPARAM)hwndFocus;
         }
         else {
+            //If SetFocus(0) was called, then the window has already received
+            //a WM_KILLFOCUS; don't send another one
+            if(!fIgnoreKeystrokes) {
                 winMsg->message = WINWM_KILLFOCUS;
                 winMsg->wParam  = (WPARAM)hwndFocus;
+            }
+            else {
+                dprintf(("Window has already received a WM_KILLFOCUS (SetFocus(0)); ignore"));
+                goto dummymessage;
+            }
         }
         break;
     }
