@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.76 2002-02-05 17:59:00 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.77 2002-06-28 12:38:00 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -264,29 +264,21 @@ ULONG Win32Dialog::MsgCreate(HWND hwndOS2)
         HWND hwndPreInitFocus = GetFocus();
         if(SendMessageA(getWindowHandle(), WM_INITDIALOG, (WPARAM)hwndFocus, param)) 
         {
-            //SvL: Experiments in NT4 show that dialogs that are children don't
-            //     receive focus. Not sure if this is always true. (couldn't
-            //     find any remarks about this in the SDK docs)
-            if(!(getStyle() & WS_CHILD)) 
-            {
-                /* check where the focus is again,
-                 * some controls status might have changed in WM_INITDIALOG */
-                hwndFocus = GetNextDlgTabItem( getWindowHandle(), 0, FALSE );
-                if(GetFocus() != hwndFocus) {
-                    SetFocus(hwndFocus);
-                }
+            /* check where the focus is again,
+             * some controls status might have changed in WM_INITDIALOG */
+            hwndFocus = GetNextDlgTabItem( getWindowHandle(), 0, FALSE );
+            if(hwndFocus) {
+                SetFocus(hwndFocus);
             }
         }
         else
         {
-            //SvL: Experiments in NT4 show that dialogs that are children don't
-            //     receive focus. Not sure if this is always true. (couldn't
-            //     find any remarks about this in the SDK docs)
-            if(!(getStyle() & WS_CHILD)) 
+            /* If the dlgproc has returned FALSE (indicating handling of keyboard focus)
+               but the focus has not changed, set the focus where we expect it. */
+            if ( (getStyle() & WS_VISIBLE) && ( GetFocus() == hwndPreInitFocus ) )
             {
-                /* If the dlgproc has returned FALSE (indicating handling of keyboard focus)
-                   but the focus has not changed, set the focus where we expect it. */
-                if ( (getStyle() & WS_VISIBLE) && ( GetFocus() == hwndPreInitFocus ) )
+                hwndFocus = GetNextDlgTabItem( getWindowHandle(), 0, FALSE); 
+                if( hwndFocus )
                     SetFocus( hwndFocus );
             }
         }
