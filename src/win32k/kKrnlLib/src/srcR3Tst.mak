@@ -1,4 +1,4 @@
-# $Id: srcR3Tst.mak,v 1.1 2002-03-31 19:30:41 bird Exp $
+# $Id: srcR3Tst.mak,v 1.2 2002-04-01 12:49:19 bird Exp $
 
 #
 # kKrnlLib/srcR3Tst makefile.
@@ -39,6 +39,7 @@ $(PATH_TARGET)\krnlLockedWrite.$(EXT_OBJ)\
 $(PATH_TARGET)\krnlOverloading.$(EXT_OBJ)\
 $(PATH_TARGET)\krnlPrologs.$(EXT_OBJ)\
 $(PATH_TARGET)\krnlStubs.$(EXT_OBJ)\
+$(PATH_TARGET)\krnlWrappers.$(EXT_OBJ)\
 $(PATH_TARGET)\OS2KPTDA.$(EXT_OBJ)\
 $(PATH_TARGET)\OS2KTCB.$(EXT_OBJ)\
 \
