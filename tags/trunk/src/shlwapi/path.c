@@ -1,4 +1,4 @@
-/* $Id: path.c,v 1.5 2000-07-21 18:30:29 sandervl Exp $ */
+/* $Id: path.c,v 1.6 2000-08-20 10:09:20 sandervl Exp $ */
 
 /*
  * Path Functions
@@ -47,7 +47,9 @@
 #include <win\winversion.h>
 #include <winuser.h>
 
-#include "shlwapi.h"
+#include <win\shlwapi.h>
+#include <win\shlobj.h>
+#include <win\wine\undocshell.h>
 
 #define strncasecmp	lstrncmpA
 #define strcasecmp	lstrcmpA
@@ -899,7 +901,7 @@ LPVOID WINAPI PathRemoveBlanksAW(LPVOID str)
  * 
  * NOTES
  */
-LPSTR WINAPI PathQuoteSpacesA(LPCSTR lpszPath)
+LPSTR WINAPI PathQuoteSpacesA(LPSTR lpszPath)
 {
 	FIXME("%s\n",lpszPath);
 	return 0;
@@ -908,7 +910,7 @@ LPSTR WINAPI PathQuoteSpacesA(LPCSTR lpszPath)
 /*************************************************************************
  * PathQuoteSpacesW [SHLWAPI.@]
  */
-LPWSTR WINAPI PathQuoteSpacesW(LPCWSTR lpszPath)
+LPWSTR WINAPI PathQuoteSpacesW(LPWSTR lpszPath)
 {
 	FIXME("%s\n",debugstr_w(lpszPath));
 	return 0;	
@@ -917,7 +919,7 @@ LPWSTR WINAPI PathQuoteSpacesW(LPCWSTR lpszPath)
 /*************************************************************************
  * PathQuoteSpacesAW [SHELL32.55]
  */
-LPVOID WINAPI PathQuoteSpacesAW (LPCVOID lpszPath)
+LPVOID WINAPI PathQuoteSpacesAW (LPVOID lpszPath)
 {
 	if(VERSION_OsIsUnicode())
 	  return PathQuoteSpacesW(lpszPath);
