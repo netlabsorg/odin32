@@ -1,4 +1,4 @@
-/* $Id: odin32clean.cmd,v 1.4 2002-09-05 01:05:47 bird Exp $
+/* $Id: odin32clean.cmd,v 1.5 2003-02-06 21:03:43 bird Exp $
  *
  * Removes trees. WARNING!!!!! All tree<date> directories are removed
  * if .nodelete is not found in the root of them.
@@ -31,7 +31,7 @@
             if (stream(asTrees.i||'\.nodelete', 'c', 'query exists') = '') then
             do
                 parse source . . sSrc
-                filespec('drive', sSrc)||filespec('path', sSrc)||'rm -rF "'asTrees.i'"';
+                filespec('drive', sSrc)||filespec('path', sSrc)||'\bin\rm -rF "'asTrees.i'"';
             end
             say asTrees.i
         end
