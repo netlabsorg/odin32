@@ -1,8 +1,14 @@
- /* $Id: ChangeLog,v 1.1118 2000-09-10 21:55:24 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1119 2000-09-12 04:32:59 bird Exp $ */
+
+ 2000-09-12: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - KERNEL32: Rewrote GetCommandLineA/W. Don't depend on Open32 any longer.
+                The commandline strings are moved to global variables in
+                wprocess.cpp.
+                Added/extended some OSLib calls.
 
  2000-09-09: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: Don't dispatch exceptions after application has called
-                ExitProcess. (fixes endless loop of exception handler calls 
+                ExitProcess. (fixes endless loop of exception handler calls
                 in RealPlayer 7)
                 Create more registry keys during installation:
                 HKEY_LOCAL_MACHINE\CurrentVersion\RunOnce
@@ -29,7 +35,7 @@
                 Splitted extract.c from Probkrnl.c. Removed old debug
                 code from Probkrnl.c (Probkrnl.exe) - use win32ktst.exe
                 for Ring-3 testing now.
-                Added filehandle fix for MSC60a compiler.
+                Added filehandle fix for MSC60a compiler. (fix don't work!)
 
  2000-09-07: Patrick Haller <phaller@gmx.net>
     - KERNEL32: Fixed some FS: bugs in time.cpp, environ.cpp, heap.cpp
