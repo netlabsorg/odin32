@@ -320,17 +320,7 @@ BOOL HMDuplicateHandle(HANDLE  srcprocess,
                        PHANDLE desthandle,
                        DWORD   fdwAccess,
                        BOOL    fInherit,
-                       DWORD   fdwOptions,
-                       DWORD   fdwOdinOptions = 0);
-
-#define DUPLICATE_SHARE_DENYNONE  1
-#define DUPLICATE_SHARE_READ    2
-#define DUPLICATE_ACCESS_READ     4
-#define DUPLICATE_ACCESS_WRITE    8
-#define DUPLICATE_ACCESS_READWRITE    (DUPLICATE_ACCESS_WRITE|DUPLICATE_ACCESS_READ)
-
-//SvL: Used internally by memory mapped class
-#define HMDuplicateHandleOdin HMDuplicateHandle
+                       DWORD   fdwOptions);
 
 DWORD HMOpenThreadToken(HANDLE  ThreadHandle,
                         DWORD   DesiredAccess,
