@@ -1,4 +1,4 @@
-/* $Id: disk.cpp,v 1.29 2002-01-04 14:11:22 sandervl Exp $ */
+/* $Id: disk.cpp,v 1.30 2002-01-07 14:44:03 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -254,7 +254,7 @@ UINT WIN32API GetDriveTypeW(LPCWSTR lpszDrive)
     }
     astring = UnicodeToAsciiString((LPWSTR)lpszDrive);
     dprintf(("KERNEL32:  OS2GetDriveTypeW %s", astring));
-    rc = O32_GetDriveType(astring);
+    rc = GetDriveTypeA(astring);
     FreeAsciiString(astring);
     return(rc);
 }
