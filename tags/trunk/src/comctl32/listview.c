@@ -1,7 +1,7 @@
 /*
  * Listview control
  *
- * Copyright 1998 Eric Kohl
+ * Copyright 1998, 1999 Eric Kohl
  * Copyright 1999 Luc Tourangeau
  * Copyright 1999 Achim Hasenmueller
  * Copyright 1999 Christoph Bratschi
@@ -12,6 +12,7 @@
  * TODO:
  *   1. No horizontal scrolling when header is larger than the client area.
  *   2. Drawing optimizations.
+ *   3. Hot item handling.
  *
  * Notifications:
  *   LISTVIEW_Notify : most notifications from children (editbox and header)
@@ -20,20 +21,21 @@
  *   LISTVIEW_SetItemCount : empty stub
  *
  * Unicode:
- *   LISTVIEW_SetItem32W : no unicode support
- *   LISTVIEW_InsertItem32W : no unicode support
- *   LISTVIEW_InsertColumn32W : no unicode support
+ *   LISTVIEW_SetItemW : no unicode support
+ *   LISTVIEW_InsertItemW : no unicode support
+ *   LISTVIEW_InsertColumnW : no unicode support
  *   LISTVIEW_GetColumnW : no unicode support
+ *   LISTVIEW_SetColumnW : no unicode support
  *
  * Advanced functionality:
  *   LISTVIEW_GetNumberOfWorkAreas : not implemented
  *   LISTVIEW_GetHotCursor : not implemented
- *   LISTVIEW_GetHotItem : not implemented
  *   LISTVIEW_GetHoverTime : not implemented
  *   LISTVIEW_GetISearchString : not implemented
  *   LISTVIEW_GetBkImage : not implemented
  *   LISTVIEW_EditLabel : REPORT (need to implement a timer)
  *   LISTVIEW_GetColumnOrderArray : not implemented
+ *   LISTVIEW_SetColumnOrderArray : not implemented
  *   LISTVIEW_Arrange : empty stub
  *   LISTVIEW_ApproximateViewRect : incomplete
  *   LISTVIEW_Scroll : not implemented
@@ -3156,7 +3158,26 @@ static LRESULT LISTVIEW_GetCountPerPage(HWND hwnd)
 }
 
 /* LISTVIEW_GetEditControl */
-/* LISTVIEW_GetExtendedListViewStyle */
+
+/***
+ * DESCRIPTION:
+ * Retrieves the extended listview style.
+ *
+ * PARAMETERS:
+ * [I] HWND  : window handle
+ *
+ * RETURN:
+ *   SUCCESS : previous style
+ *   FAILURE : 0
+ */
+static LRESULT LISTVIEW_GetExtendedListViewStyle(HWND hwnd)
+{
+    LISTVIEW_INFO *infoPtr;
+    /* make sure we can get the listview info */
+    if (!(infoPtr = (LISTVIEW_INFO *)GetWindowLongA(hwnd, 0)))
+	return (0);
+    return (infoPtr->dwExStyle);
+}
 
 /***
  * DESCRIPTION:
@@ -3411,8 +3432,28 @@ static LRESULT LISTVIEW_GetItemA(HWND hwnd, LPLVITEMA lpLVItem)
 
 /* LISTVIEW_GetItemW */
 /* LISTVIEW_GetHotCursor */
-/* LISTVIEW_GetHotItem */
-/* LISTVIEW_GetHoverTime> */
+
+/***
+ * DESCRIPTION:
+ * Retrieves the index of the hot item.
+ *
+ * PARAMETERS:
+ * [I] HWND  : window handle
+ *
+ * RETURN:
+ *   SUCCESS : hot item index
+ *   FAILURE : -1 (no hot item)
+ */
+static LRESULT LISTVIEW_GetHotItem(HWND hwnd)
+{
+    LISTVIEW_INFO *infoPtr;
+    /* make sure we can get the listview info */
+    if (!(infoPtr = (LISTVIEW_INFO *)GetWindowLongA(hwnd, 0)))
+	return (-1);
+    return (infoPtr->nHotItem);
+}
+
+/* LISTVIEW_GetHoverTime */
 
 /***
  * DESCRIPTION:
@@ -4627,6 +4668,8 @@ static LRESULT LISTVIEW_SetBkColor(HWND hwnd, COLORREF clrBk)
   return TRUE;
 }
 
+/* LISTVIEW_SetBkImage */
+
 /***
  * DESCRIPTION:
  * Sets the callback mask. This mask will be used when the parent
@@ -4757,6 +4800,9 @@ static LRESULT LISTVIEW_SetColumnA(HWND hwnd, INT nColumn,
   return bResult;
 }
 
+/* LISTVIEW_SetColumnW */
+/* LISTVIEW_SetColumnOrderArray */
+
 /***
  * DESCRIPTION:
  * Sets the width of a column
@@ -4805,6 +4851,63 @@ static LRESULT LISTVIEW_SetColumnWidth(HWND hwnd, INT iCol, INT cx)
 
     return lret;
 }
+
+/***
+ * DESCRIPTION:
+ * Sets the extended listview style.
+ *
+ * PARAMETERS:
+ * [I] HWND  : window handle
+ * [I] DWORD : mask
+ * [I] DWORD : style
+ *
+ * RETURN:
+ *   SUCCESS : previous style
+ *   FAILURE : 0
+ */
+static LRESULT LISTVIEW_SetExtendedListViewStyle(HWND hwnd, DWORD dwMask, DWORD dwStyle)
+{
+    LISTVIEW_INFO *infoPtr;
+    DWORD dwOldStyle;
+    /* make sure we can get the listview info */
+    if (!(infoPtr = (LISTVIEW_INFO *)GetWindowLongA(hwnd, 0)))
+	return (0);
+    /* store previous style */
+    dwOldStyle = infoPtr->dwExStyle;
+    /* set new style */
+    infoPtr->dwExStyle = (dwOldStyle & ~dwMask) | (dwStyle & dwMask);
+    return (dwOldStyle);
+}
+
+/* LISTVIEW_SetHotCursor */
+
+/***
+ * DESCRIPTION:
+ * Sets the hot item index.
+ *
+ * PARAMETERS:
+ * [I] HWND  : window handle
+ * [I] INT   : index
+ *
+ * RETURN:
+ *   SUCCESS : previous hot item index
+ *   FAILURE : -1 (no hot item)
+ */
+static LRESULT LISTVIEW_SetHotItem(HWND hwnd, INT iIndex)
+{
+    LISTVIEW_INFO *infoPtr;
+    INT iOldIndex;
+    /* make sure we can get the listview info */
+    if (!(infoPtr = (LISTVIEW_INFO *)GetWindowLongA(hwnd, 0)))
+	return (-1);
+    /* store previous index */
+    iOldIndex = infoPtr->nHotItem;
+    /* set new style */
+    infoPtr->nHotItem = iIndex;
+    return (iOldIndex);
+}
+
+/* LISTVIEW_SetIconSpacing */
 
 /***
  * DESCRIPTION:
@@ -4892,13 +4995,29 @@ static LRESULT LISTVIEW_SetItemA(HWND hwnd, LPLVITEMA lpLVItem)
  * PARAMETER(S):
  * [I] HWND : window handle
  * [I] INT : item count (prjected number of items)
+ * [I] DWORD : update flags
  *
  * RETURN:
- * None
+ *   SUCCESS : TRUE
+ *   FAILURE : FALSE
  */
-static VOID LISTVIEW_SetItemCount(HWND hwnd, INT nItemCount)
+static BOOL LISTVIEW_SetItemCount(HWND hwnd, INT nItems, DWORD dwFlags)
 {
-  FIXME("empty stub!\n");
+  LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO*)GetWindowLongA(hwnd, 0);
+  FIXME("(%d %08lx)empty stub!\n", nItems, dwFlags);
+  if (nItems == 0)
+    return LISTVIEW_DeleteAllItems (hwnd);
+  if (nItems > GETITEMCOUNT(infoPtr))
+{
+    /* append items */
+    FIXME("append items\n");
+  }
+  else if (nItems < GETITEMCOUNT(infoPtr))
+  {
+    /* remove items */
+    FIXME("remove items\n");
+  }
+  return TRUE;
 }
 
 /***
@@ -4946,6 +5065,8 @@ static BOOL LISTVIEW_SetItemPosition(HWND hwnd, INT nItem,
 
   return bResult;
 }
+
+/* LISTVIEW_SetItemPosition32 */
 
 /***
  * DESCRIPTION:
@@ -5030,6 +5151,27 @@ static BOOL LISTVIEW_SetItemTextA(HWND hwnd, INT nItem, LPLVITEMA lpLVItem)
   return bResult;
 }
 
+/* LISTVIEW_SetItemTextW */
+
+/***
+ * DESCRIPTION:
+ * Set item index that marks the start of a multiple selection.
+ *
+ * PARAMETER(S):
+ * [I] HWND : window handle
+ * [I] INT  : index
+ *
+ * RETURN:
+ * Index number or -1 if there is no selection mark.
+ */
+static LRESULT LISTVIEW_SetSelectionMark(HWND hwnd, INT nIndex)
+{
+  LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO *)GetWindowLongA(hwnd, 0);
+  INT nOldIndex = infoPtr->nSelectionMark;
+  infoPtr->nSelectionMark = nIndex;
+  return nOldIndex;
+}
+
 /***
  * DESCRIPTION:
  * Sets the text background color.
@@ -5074,6 +5216,9 @@ static LRESULT LISTVIEW_SetTextColor (HWND hwnd, COLORREF clrText)
   return TRUE;
 }
 
+/* LISTVIEW_SetToolTips */
+/* LISTVIEW_SetUnicodeFormat */
+/* LISTVIEW_SetWorkAreas */
 
 /***
  * DESCRIPTION:
@@ -5162,6 +5307,8 @@ static LRESULT LISTVIEW_SortItems(HWND hwnd, WPARAM wParam, LPARAM lParam)
     return TRUE;
 }
 
+/* LISTVIEW_SubItemHitTest */
+
 /***
  * DESCRIPTION:
  * Updates an items or rearranges the listview control.
@@ -5240,6 +5387,7 @@ static LRESULT LISTVIEW_Create(HWND hwnd, WPARAM wParam, LPARAM lParam)
   infoPtr->uCallbackMask = 0;
   infoPtr->nFocusedItem = -1;
   infoPtr->nSelectionMark = -1;
+  infoPtr->nHotItem = -1;
   infoPtr->iconSpacing.cx = GetSystemMetrics(SM_CXICONSPACING);
   infoPtr->iconSpacing.cy = GetSystemMetrics(SM_CYICONSPACING);
   ZeroMemory(&infoPtr->rcList, sizeof(RECT));
@@ -6432,7 +6580,7 @@ static INT LISTVIEW_StyleChanged(HWND hwnd, WPARAM wStyleType,
  * Window procedure of the listview control.
  *
  */
-LRESULT WINAPI LISTVIEW_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
+static LRESULT WINAPI LISTVIEW_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
                                    LPARAM lParam)
 {
   switch (uMsg)
@@ -6474,7 +6622,11 @@ LRESULT WINAPI LISTVIEW_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
     return LISTVIEW_GetColumnA(hwnd, (INT)wParam, (LPLVCOLUMNA)lParam);
 
 /*      case LVM_GETCOLUMNW: */
-/*      case LVM_GETCOLUMNORDERARRAY: */
+
+  case LVM_GETCOLUMNORDERARRAY:
+    //FIXME("Unimplemented msg LVM_GETCOLUMNORDERARRAY\n");
+    return 0;
+
 
   case LVM_GETCOLUMNWIDTH:
     return LISTVIEW_GetColumnWidth(hwnd, (INT)wParam);
@@ -6483,13 +6635,17 @@ LRESULT WINAPI LISTVIEW_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
     return LISTVIEW_GetCountPerPage(hwnd);
 
 /*      case LVM_GETEDITCONTROL: */
-/*      case LVM_GETEXTENDEDLISTVIEWSTYLE: */
+  case LVM_GETEXTENDEDLISTVIEWSTYLE:
+    return LISTVIEW_GetExtendedListViewStyle(hwnd);
 
   case LVM_GETHEADER:
     return LISTVIEW_GetHeader(hwnd);
 
 /*      case LVM_GETHOTCURSOR: */
-/*      case LVM_GETHOTITEM: */
+
+  case LVM_GETHOTITEM:
+    return LISTVIEW_GetHotItem(hwnd);
+
 /*      case LVM_GETHOVERTIME: */
 
   case LVM_GETIMAGELIST:
@@ -6592,15 +6748,25 @@ LRESULT WINAPI LISTVIEW_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
   case LVM_SETCOLUMNA:
     return LISTVIEW_SetColumnA(hwnd, (INT)wParam, (LPLVCOLUMNA)lParam);
 
-/*      case LVM_SETCOLUMNW: */
-/*      case LVM_SETCOLUMNORDERARRAY: */
+  case LVM_SETCOLUMNW:
+    //FIXME("Unimplemented msg LVM_SETCOLUMNW\n");
+    return 0;
+
+  case LVM_SETCOLUMNORDERARRAY:
+    //FIXME("Unimplemented msg LVM_SETCOLUMNORDERARRAY\n");
+    return 0;
 
   case LVM_SETCOLUMNWIDTH:
     return LISTVIEW_SetColumnWidth(hwnd, (INT)wParam, (INT)lParam);
 
-/*      case LVM_SETEXTENDEDLISTVIEWSTYLE: */
+  case LVM_SETEXTENDEDLISTVIEWSTYLE:
+    return LISTVIEW_SetExtendedListViewStyle(hwnd, (DWORD)wParam, (DWORD)lParam);
+
 /*      case LVM_SETHOTCURSOR: */
-/*      case LVM_SETHOTITEM: */
+
+  case LVM_SETHOTITEM:
+    return LISTVIEW_SetHotItem(hwnd, (INT)wParam);
+
 /*      case LVM_SETHOVERTIME: */
 /*      case LVM_SETICONSPACING: */
 
@@ -6613,14 +6779,13 @@ LRESULT WINAPI LISTVIEW_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
 /*      case LVM_SETITEMW: */
 
   case LVM_SETITEMCOUNT:
-    LISTVIEW_SetItemCount(hwnd, (INT)wParam);
-    break;
+    return LISTVIEW_SetItemCount(hwnd, (INT)wParam, (DWORD)lParam);
 
   case LVM_SETITEMPOSITION:
     return LISTVIEW_SetItemPosition(hwnd, (INT)wParam, (INT)LOWORD(lParam),
                                     (INT)HIWORD(lParam));
 
-/*      case LVM_SETITEMPOSITION: */
+/*      case LVM_SETITEMPOSITION32: */
 
   case LVM_SETITEMSTATE:
     return LISTVIEW_SetItemState(hwnd, (INT)wParam, (LPLVITEMA)lParam);
@@ -6628,7 +6793,10 @@ LRESULT WINAPI LISTVIEW_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
   case LVM_SETITEMTEXTA:
     return LISTVIEW_SetItemTextA(hwnd, (INT)wParam, (LPLVITEMA)lParam);
 
-/*      case LVM_SETSELECTIONMARK: */
+/*	case LVM_SETITEMTEXTW: */
+
+  case LVM_SETSELECTIONMARK:
+    return LISTVIEW_SetSelectionMark(hwnd, (INT)lParam);
 
   case LVM_SETTEXTBKCOLOR:
     return LISTVIEW_SetTextBkColor(hwnd, (COLORREF)lParam);

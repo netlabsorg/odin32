@@ -1,4 +1,4 @@
-/* $Id: ipaddress.c,v 1.6 1999-07-12 15:58:47 cbratschi Exp $ */
+/* $Id: ipaddress.c,v 1.7 1999-08-14 16:13:11 cbratschi Exp $ */
 /*
  * IP Address control
  *
@@ -596,7 +596,7 @@ IPADDRESS_SubclassProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
   return CallWindowProcA (lpipsi->wpOrigProc[index], hwnd, uMsg, wParam, lParam);
 }
 
-LRESULT WINAPI
+static LRESULT WINAPI
 IPADDRESS_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg)

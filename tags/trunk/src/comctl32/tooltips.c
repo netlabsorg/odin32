@@ -1,4 +1,4 @@
-/* $Id: tooltips.c,v 1.12 1999-07-12 15:58:49 cbratschi Exp $ */
+/* $Id: tooltips.c,v 1.13 1999-08-14 16:13:15 cbratschi Exp $ */
 /*
  * Tool tip control
  *
@@ -2174,7 +2174,7 @@ TOOLTIPS_SubclassProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 }
 
 
-LRESULT CALLBACK
+static LRESULT CALLBACK
 TOOLTIPS_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg)

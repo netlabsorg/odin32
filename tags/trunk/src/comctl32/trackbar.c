@@ -1,4 +1,4 @@
-/* $Id: trackbar.c,v 1.11 1999-07-04 21:06:00 cbratschi Exp $ */
+/* $Id: trackbar.c,v 1.12 1999-08-14 16:13:15 cbratschi Exp $ */
 /*
  * Trackbar control
  *
@@ -73,7 +73,7 @@
 
 static BOOL TRACKBAR_SendNotify (HWND hwnd, UINT code);
 
-void TRACKBAR_RecalculateTics (HWND hwnd,TRACKBAR_INFO *infoPtr,BOOL restoreOld)
+static void TRACKBAR_RecalculateTics (HWND hwnd,TRACKBAR_INFO *infoPtr,BOOL restoreOld)
 {
     INT i,tic,nrTics;
     DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
@@ -2031,7 +2031,7 @@ TRACKBAR_KeyUp (HWND hwnd, WPARAM wParam)
 }
 
 
-LRESULT WINAPI
+static LRESULT WINAPI
 TRACKBAR_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg)
