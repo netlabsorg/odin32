@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.15 1999-12-12 14:32:38 sandervl Exp $ */
+/* $Id: misc.cpp,v 1.16 2000-01-02 22:09:01 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -28,6 +28,7 @@
 #include <misc.h>
 #include "initterm.h"
 #include "logging.h"
+#include <wprocess.h>
 
 /*****************************************************************************
  * PMPRINTF Version                                                          *
@@ -272,14 +273,18 @@ int SYSTEM EXPORT WriteLog(char *tekst, ...)
 
   if(fLogging && flog)
   {
+    THDB *thdb = GetThreadTHDB();
+
     va_start(argptr, tekst);
+    if(thdb) thdb->logfile = (DWORD)flog;
     vfprintf(flog, tekst, argptr);
+    if(thdb) thdb->logfile = 0;
     va_end(argptr);
 
     if(tekst[strlen(tekst)-1] != '\n')
       fprintf(flog, "\n");
   }
-
+  fflush(flog);
   SetFS(sel);
   return 1;
 }
@@ -292,8 +297,12 @@ int SYSTEM EXPORT WritePrivateLog(void *logfile, char *tekst, ...)
 
   if(fLogging && logfile)
   {
+    THDB *thdb = GetThreadTHDB();
+
     va_start(argptr, tekst);
+    if(thdb) thdb->logfile = (DWORD)logfile;
     vfprintf((FILE *)logfile, tekst, argptr);
+    if(thdb) thdb->logfile = 0;
     va_end(argptr);
 
     if(tekst[strlen(tekst)-1] != '\n')
@@ -302,6 +311,28 @@ int SYSTEM EXPORT WritePrivateLog(void *logfile, char *tekst, ...)
 
   SetFS(sel);
   return 1;
+}
+//******************************************************************************
+//Check if the exception occurred inside a fprintf (logging THDB member set)
+//If true, decrease the lock count for that file stream 
+//NOTE: HACK: DEPENDS ON COMPILER VERSION!!!!
+//******************************************************************************
+void CheckLogException()
+{
+  THDB *thdb = GetThreadTHDB();
+  USHORT *lock;
+
+  if(!thdb) return;
+
+  if(thdb->logfile) {
+	//oops, exception in vfprintf; let's clear the lock count
+#if (__IBMCPP__ == 300) || (__IBMC__ == 300)
+	lock = (USHORT *)(thdb->logfile+0x1C);
+#else
+#error Check the offset of the lock count word in the file stream structure for this compiler revision!!!!!
+#endif
+	(*lock)--;
+  }
 }
 //******************************************************************************
 //NOTE: No need to save/restore FS, as our FS selectors have already been

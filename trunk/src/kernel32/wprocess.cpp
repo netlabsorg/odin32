@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.63 1999-12-31 10:47:12 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.64 2000-01-02 22:09:02 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -244,11 +244,12 @@ void DestroyTIB()
 
         //And free our own
         OSLibFreeSel(thdb->teb_sel);
+
+	*TIBFlatPtr = 0;
    }
    else dprintf(("Already destroyed TIB"));
 
    dprintf(("DestroyTIB: FS(%x):[0] = %x", GetFS(), QueryExceptionChain()));
-   *TIBFlatPtr = 0;
    return;
 }
 /******************************************************************************/
