@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.15 1999-10-13 14:24:25 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.16 1999-10-14 18:27:57 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -33,10 +33,12 @@ typedef struct _SWP    /* swp */
 #define OSLIB_HWND_OBJECT       2
 
 BOOL  OSLibWinSetParent(HWND hwnd, HWND hwndParent, ULONG fRedraw = TRUE);
+BOOL  OSLibWinSetOwner(HWND hwnd, HWND hwndOwner);
 
 
 HWND  OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
-                           char *pszName, HWND Owner, ULONG fHWND_BOTTOM, HWND *hwndFrame);
+                           char *pszName, HWND Owner, ULONG fHWND_BOTTOM, 
+                           HWND *hwndFrame, ULONG id);
 
 BOOL  OSLibWinConvertStyle(ULONG dwStyle, ULONG *dwExStyle, ULONG *OSWinStyle, ULONG *OSFrameStyle, ULONG *borderWidth, ULONG *borderHeight);
 void  OSLibSetWindowStyle(HWND hwnd, ULONG dwStyle);

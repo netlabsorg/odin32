@@ -1,4 +1,4 @@
-/* $Id: oslibgdi.cpp,v 1.2 1999-09-26 10:09:59 sandervl Exp $ */
+/* $Id: oslibgdi.cpp,v 1.3 1999-10-14 18:27:57 sandervl Exp $ */
 /*
  * Window GDI wrapper functions for OS/2
  *
@@ -73,6 +73,8 @@ BOOL MapOS2ToWin32Point(HWND hwndParent, HWND hwndChild, OSLIBPOINT *point)
 BOOL MapOS2ToWin32Rectl(HWND hwndParent, HWND hwndChild, PRECTLOS2 rectOS2, PRECT rectWin32)
 {
  RECTLOS2 rectParent = {0};
+ Win32BaseWindow *window;
+ LONG height;
 
     if(hwndParent == OSLIB_HWND_DESKTOP) {
         hwndParent = HWND_DESKTOP;
@@ -82,10 +84,17 @@ BOOL MapOS2ToWin32Rectl(HWND hwndParent, HWND hwndChild, PRECTLOS2 rectOS2, PREC
         return FALSE;
     }
 
-    ULONG length = rectOS2->yTop - rectOS2->yBottom;
+    if(hwndParent != HWND_DESKTOP) 
+    {
+	 window = Win32BaseWindow::GetWindowFromOS2FrameHandle(hwndParent);
+	 if(window == NULL)
+		return FALSE;
+	 height = window->getWindowHeight();
+    }
+    else height = OSLibQueryScreenHeight();
 
-    rectWin32->bottom = length - rectOS2->yBottom;
-    rectWin32->top    = length - rectOS2->yTop;
+    rectWin32->bottom = height - rectOS2->yBottom;
+    rectWin32->top    = height - rectOS2->yTop;
     rectWin32->left   = rectOS2->xLeft;
     rectWin32->right  = rectOS2->xRight;
 
