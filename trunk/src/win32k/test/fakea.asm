@@ -1,4 +1,4 @@
-; $Id: fakea.asm,v 1.5 2001-02-23 02:57:55 bird Exp $
+; $Id: fakea.asm,v 1.6 2001-07-10 05:26:52 bird Exp $
 ;
 ; Fake assembly imports.
 ;
@@ -45,6 +45,7 @@
     public fakeKMExitKmodeSEF8
     public fakeRASRST
     public fakedh_SendEvent
+    public fakeh_POST_SIGNAL
 
 
 ;
@@ -284,6 +285,18 @@ fakedh_SendEvent proc near
     mov     ax, ds
     int     3
 fakedh_SendEvent endp
+
+
+;;
+; POST_SIGNAL faker
+fakeh_POST_SIGNAL proc near
+    ; dummy prolog.
+    mov     ax, ds
+    mov     ax, ds
+    mov     ax, ds
+    mov     ax, ds
+    int     3
+fakeh_POST_SIGNAL endp
 
 
 CODE16 ENDS
