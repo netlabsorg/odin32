@@ -1,4 +1,4 @@
-/* $Id: Win32kCC.rc,v 1.5 2001-02-02 08:41:31 bird Exp $
+/* $Id: Win32kCC.rc,v 1.6 2001-02-17 20:25:44 bird Exp $
  *
  * Resource File for Win32k Control Center.
  *
@@ -7,7 +7,7 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
-
+#define INCL_WINSTDBOOK
 #include <os2.h>
 #include "Win32kCC.h"
 
@@ -21,7 +21,10 @@ BEGIN
      */
     IDS_ERR_DIALOGLOAD,         "Failed to load dialog.\rdialogid = %d\rlasterr = 0x%x\rmsg = %s"
     IDS_ERR_MALLOC_FAILED,      "Malloc failed. (file %s; line %d; function %s)"
-    IDS_ERR_SET_INSTACEDATA,    "Call to WinSetWindowPtr failed.\rlasterror = %d\rmsg = %s"
+    IDS_ERR_SET_INSTANCEDATA,   "Call to WinSetWindowPtr failed.\rlasterror = %d\rmsg = %s"
+    IDS_ERR_ADD_NTBK_PAGE_LOAD, "Error! Failed to Load page dialog, id = %d.\rlasterror = %d\rmsg = %s"
+    IDS_ERR_ADD_NTBK_PAGE_INSERT,"Error! Failed to insert page notebook page, id = %d.\rlasterror = %d\rmsg = %s"
+    IDS_ERR_ADD_NTBK_PAGE_SET,  "Error! Failed to set page hwnd, id = %d.\rlasterror = %d\rmsg = %s"
     IDS_ERR_WIN32K_NOT_LOADED,  "Win32k.sys is not loaded.\rTo fix it you'll have to add it to your config.sys. (see the Odin32 readme.txt for more details.)"
     IDS_ERR_WIN32K_OPEN_FAILED, "Failed to open Win32k.sys. (rc=0x%x)"
     IDS_ERR_QUERYOPTIONSTATUS,  "Failed to get option and status data from Win32k.sys. (rc=0x%x)"
@@ -35,6 +38,10 @@ BEGIN
     IDS_FSIZE_FAILED,           "Failed to determin size of file %s."
     IDS_MALLOC_FAILED,          "Error! malloc or calloc failed to allocate %d bytes of memory."
     IDS_FWRITE_FAILED,          "Error! failed to write to file %s."
+    IDS_ERR_FAILED_TO_LOAD_DLGT,"Error! Failed to load dialog template id=%d, rc=%d"
+    IDS_ERR_FAILED_NTBK_BUTTONS, "Error! Failed to add notebook buttons.\rlasterr = %d\rmsg = %s"
+    IDS_ERR_ASSERT,             "Assertion Failed. %s(%d), %s"
+    IDS_ERR_TIMER_START,        "Failed to start mem info refresh timer.\rlasserror =%d\rmsg = %s"
 END
 
 MESSAGETABLE
@@ -47,4 +54,65 @@ BEGIN
 END
 
 
+/*
+ * Put these here as DlgEdit messes up the flags.
+ */
+DLGTEMPLATE DL_WIN32KCC
+BEGIN
+    DIALOG  "Win32k Control Center", DL_WIN32KCC, 40, 30, 322, 220, WS_VISIBLE,
+            FCF_SYSMENU | FCF_TITLEBAR | FCF_TASKLIST | FCF_HIDEBUTTON | FCF_CLOSEBUTTON
+    BEGIN
+        NOTEBOOK        DL_WIN32KCC_NTBK, 6, 24, 310, 196,
+                        BKS_BACKPAGESTR |
+                        BKS_TABTEXTCENTER |
+                        BKS_TABBEDDIALOG |
+                        WS_GROUP
+        DEFPUSHBUTTON   "~Refresh", PB_REFRESH, 6, 4, 40, 14
+        PUSHBUTTON      "~Apply", PB_APPLY, 49, 4, 40, 14
+        PUSHBUTTON      "Update Config.sys", PB_UPD_CONFIGSYS, 92, 4, 100,
+                        14
+        PUSHBUTTON      "~Close", DID_OK, 195, 4, 40, 14
+    END
+END
+
+DLGTEMPLATE DL_WIN32KCC_OLD
+BEGIN
+    DIALOG  "Win32k Control Center", DL_WIN32KCC_OLD, 40, 30, 322, 220, WS_VISIBLE,
+            FCF_SYSMENU | FCF_TITLEBAR | FCF_TASKLIST | FCF_HIDEBUTTON | FCF_CLOSEBUTTON
+    BEGIN
+        NOTEBOOK        DL_WIN32KCC_NTBK, 6, 24, 310, 196, BKS_BACKPAGESTR |
+                        BKS_TABTEXTCENTER | BKS_SOLIDBIND |
+                        WS_GROUP
+        DEFPUSHBUTTON   "~Refresh", PB_REFRESH, 6, 4, 40, 14
+        PUSHBUTTON      "~Apply", PB_APPLY, 49, 4, 40, 14
+        PUSHBUTTON      "Update Config.sys", PB_UPD_CONFIGSYS, 92, 4, 100,
+                        14
+        PUSHBUTTON      "~Close", DID_OK, 195, 4, 40, 14
+    END
+END
+
+
+/*
+ * Accelerator table.
+ */
+ACCELTABLE DL_WIN32KCC
+BEGIN
+    "a", PB_APPLY,      ALT
+    "A", PB_APPLY,      ALT
+    "c", DID_OK,        ALT
+    "C", DID_OK,        ALT
+    "r", PB_REFRESH,    ALT
+    "R", PB_REFRESH,    ALT
+END
+
+
+/*
+ * Redefine ID to prevent duplicate IDs.
+ */
+#undef DL_WIN32KCC
+#undef DL_WIN32KCC_OLD
+#define DL_WIN32KCC             61010
+#define DL_WIN32KCC_OLD         61011
+
 RCINCLUDE "Win32kCC.dlg"
+

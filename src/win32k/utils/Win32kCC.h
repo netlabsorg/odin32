@@ -1,4 +1,4 @@
-/* $Id: Win32kCC.h,v 1.6 2001-02-02 08:41:31 bird Exp $
+/* $Id: Win32kCC.h,v 1.7 2001-02-17 20:25:44 bird Exp $
  *
  *
  *
@@ -25,20 +25,27 @@
  */
 #define  IDS_ERR_DIALOGLOAD             1
 #define  IDS_ERR_MALLOC_FAILED          2
-#define  IDS_ERR_SET_INSTACEDATA        3
-#define  IDS_ERR_WIN32K_NOT_LOADED      4
-#define  IDS_ERR_WIN32K_OPEN_FAILED     5
-#define  IDS_ERR_QUERYOPTIONSTATUS      6
-#define  IDS_ERR_NO_COM_RADIOBUTTON     7
-#define  IDS_ERR_NO_PE_RADIOBUTTON      8
-#define  IDS_ERR_NO_PE_ONEOBJECT        9
-#define  IDS_ERR_INVALID_INFOLEVEL      10
-#define  IDS_ERR_INVALID_MAXHEAPSIZE    11
-#define  IDS_ERR_SETPOPTIONS            12
-#define  IDS_ERR_FOPEN_FAILED           13
-#define  IDS_FSIZE_FAILED               14
-#define  IDS_MALLOC_FAILED              15
-#define  IDS_FWRITE_FAILED              16
+#define  IDS_ERR_SET_INSTANCEDATA       3
+#define  IDS_ERR_ADD_NTBK_PAGE_LOAD     4
+#define  IDS_ERR_ADD_NTBK_PAGE_INSERT   5
+#define  IDS_ERR_ADD_NTBK_PAGE_SET      6
+#define  IDS_ERR_WIN32K_NOT_LOADED      7
+#define  IDS_ERR_WIN32K_OPEN_FAILED     8
+#define  IDS_ERR_QUERYOPTIONSTATUS      9
+#define  IDS_ERR_NO_COM_RADIOBUTTON     10
+#define  IDS_ERR_NO_PE_RADIOBUTTON      11
+#define  IDS_ERR_NO_PE_ONEOBJECT        12
+#define  IDS_ERR_INVALID_INFOLEVEL      13
+#define  IDS_ERR_INVALID_MAXHEAPSIZE    14
+#define  IDS_ERR_SETPOPTIONS            15
+#define  IDS_ERR_FOPEN_FAILED           16
+#define  IDS_FSIZE_FAILED               17
+#define  IDS_MALLOC_FAILED              18
+#define  IDS_FWRITE_FAILED              19
+#define  IDS_ERR_FAILED_TO_LOAD_DLGT    20
+#define  IDS_ERR_FAILED_NTBK_BUTTONS    21
+#define  IDS_ERR_ASSERT                 22
+#define  IDS_ERR_TIMER_START            23
 
 
 /*
