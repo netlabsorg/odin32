@@ -1,4 +1,4 @@
-/* $Id: asyncthread.cpp,v 1.2 2000-03-23 19:21:53 sandervl Exp $ */
+/* $Id: asyncthread.cpp,v 1.3 2000-03-24 19:22:51 sandervl Exp $ */
 
 /*
  * Async thread help functions
@@ -35,12 +35,10 @@ static void APIENTRY AsyncThread(ULONG arg)
 
   pThreadParm->asyncProc((PVOID)arg);
 
-//only for blocking hooks (currently not implemented
+//only for blocking hooks (currently not implemented)
 ////  if(pThreadParm->request == ASYNC_BLOCKHOOK)
 ////	WSASetBlocking(FALSE, pThreadParm->hThread);
 
-  pThreadParm->fActive = FALSE;
-  RemoveFromQueue(pThreadParm); 
   free((PVOID)pThreadParm);
 
   DosExit(EXIT_THREAD, 0);
@@ -215,11 +213,11 @@ void EnableAsyncEvent(SOCKET s, ULONG flags)
    pThreadInfo = FindAsyncEvent(s);
    if(pThreadInfo) {
 	pThreadInfo->u.asyncselect.lEventsPending |= (pThreadInfo->u.asyncselect.lEvents & flags);
-	//cancel pending select in async select thread (if any)
-	so_cancel(s);
-
 	//unblock async thread if it was waiting
 	pThreadInfo->u.asyncselect.asyncSem->post();
+
+	//cancel pending select in async select thread (if any)
+	so_cancel(s);
    }
    asyncThreadMutex.leave();
 }
