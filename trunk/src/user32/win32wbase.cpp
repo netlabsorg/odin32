@@ -1,8 +1,8 @@
-/* $Id: win32wbase.cpp,v 1.309 2002-01-07 11:18:10 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.310 2002-01-12 09:55:51 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
- * Copyright 1998-2001 Sander van Leeuwen (sandervl@xs4all.nl)
+ * Copyright 1998-2002 Sander van Leeuwen (sandervl@xs4all.nl)
  * Copyright 1999      Daniela Engert (dani@ngrt.de)
  * Copyright 1999-2000 Christoph Bratschi (cbratschi@datacomm.ch)
  *
@@ -114,11 +114,34 @@ Win32BaseWindow::Win32BaseWindow()
 }
 //******************************************************************************
 //******************************************************************************
-Win32BaseWindow::Win32BaseWindow(HWND hwndOS2, ULONG reserved)
+Win32BaseWindow::Win32BaseWindow(HWND hwndOS2, ATOM classAtom)
                      : GenericObject(&windows, &critsect), ChildWindow(&critsect)
 {
-  Init();
-  OS2Hwnd = hwndOS2;
+    Init();
+    OS2Hwnd = OS2HwndFrame = hwndOS2;
+
+    /* Find the window class */
+    windowClass = Win32WndClass::FindClass(NULL, (LPSTR)classAtom);
+    if (!windowClass)
+    {
+        char buffer[32];
+        GlobalGetAtomNameA( classAtom, buffer, sizeof(buffer) );
+        dprintf(("Bad class '%s'", buffer ));
+        DebugInt3();
+    }
+
+    //Allocate window words
+    nrUserWindowBytes = windowClass->getExtraWndBytes();
+    if(nrUserWindowBytes) {
+        userWindowBytes = (char *)_smalloc(nrUserWindowBytes);
+        memset(userWindowBytes, 0, nrUserWindowBytes);
+    }
+
+    WINPROC_SetProc((HWINDOWPROC *)&win32wndproc, windowClass->getWindowProc(), WINPROC_GetProcType(windowClass->getWindowProc()), WIN_PROC_WINDOW);
+    hInstance  = NULL;
+    dwStyle    = WS_VISIBLE;
+    dwOldStyle = dwStyle;
+    dwExStyle  = 0;
 }
 //******************************************************************************
 //******************************************************************************

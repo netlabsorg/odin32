@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.136 2002-01-07 11:18:11 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.137 2002-01-12 09:55:52 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -135,7 +135,7 @@ class Win32BaseWindow : public GenericObject, public ChildWindow
 public:
                 Win32BaseWindow();
                 Win32BaseWindow(CREATESTRUCTA *lpCreateStructA, ATOM classAtom, BOOL isUnicode);
-                Win32BaseWindow(HWND hwndOS2, ULONG reserved);
+                Win32BaseWindow(HWND hwndOS2, ATOM classAtom);
 
 virtual        ~Win32BaseWindow();
 
