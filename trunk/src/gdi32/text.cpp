@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.5 1999-12-16 16:52:33 cbratschi Exp $ */
+/* $Id: text.cpp,v 1.6 1999-12-27 22:52:39 cbratschi Exp $ */
 
 /*
  * GDI32 text apis
@@ -98,7 +98,7 @@ INT SYSTEM EXPORT InternalDrawTextExA(HDC hdc,LPCSTR lpchText,INT cchText,LPRECT
   PRECT rectPtr;
   LONG lTabs,xLeft,yTop;
 
-  if (!lpchText || cchText == 0 || cchText < -1 || !lprc == NULL)
+  if ((!lpchText) || (cchText == 0) || (cchText < -1) || (!lprc == NULL))
   {
     SetLastError(ERROR_INVALID_PARAMETER);
     return 0;
@@ -137,7 +137,7 @@ INT SYSTEM EXPORT InternalDrawTextExA(HDC hdc,LPCSTR lpchText,INT cchText,LPRECT
     else
       bTopBottomIsOkay = TRUE;
 
-    if (lprc->left >= lprc->right || !bTopBottomIsOkay)
+    if ((lprc->left >= lprc->right) || !bTopBottomIsOkay)
     {
       TEXTMETRICA txtMetrics;
       BOOL result;
@@ -259,7 +259,7 @@ INT SYSTEM EXPORT InternalDrawTextExA(HDC hdc,LPCSTR lpchText,INT cchText,LPRECT
 
   BOOL done = FALSE;
 
-  if (dwDTFormat & DT_END_ELLIPSIS && cchText > 1)
+  if ((dwDTFormat & DT_END_ELLIPSIS) && (cchText > 1))
   {
     int textWidth,width;
     RECT rect;
@@ -268,7 +268,7 @@ INT SYSTEM EXPORT InternalDrawTextExA(HDC hdc,LPCSTR lpchText,INT cchText,LPRECT
     OSLibWinDrawTabbedText(pHps,cchText,lTabs,lpchText,&rect,0,0,flCmd | DTOS_QUERYEXTENT);
     width = rectPtr->right-rectPtr->left;
     textWidth = rect.right-rect.left;
-    if (textWidth > width && width > 0)
+    if ((textWidth > width) && (width > 0))
     {
       char* newText;
       int newTextLen = cchText-1+ELLIPSISLEN;
@@ -291,7 +291,7 @@ INT SYSTEM EXPORT InternalDrawTextExA(HDC hdc,LPCSTR lpchText,INT cchText,LPRECT
 
       done = TRUE;
     }
-  } else if (dwDTFormat & DT_PATH_ELLIPSIS && cchText > 1)
+  } else if ((dwDTFormat & DT_PATH_ELLIPSIS) && (cchText > 1))
   {
     int textWidth,width;
     RECT rect;
@@ -302,7 +302,7 @@ INT SYSTEM EXPORT InternalDrawTextExA(HDC hdc,LPCSTR lpchText,INT cchText,LPRECT
     OSLibWinDrawTabbedText(pHps,cchText,lTabs,lpchText,&rect,0,0,flCmd | DTOS_QUERYEXTENT);
     width = rectPtr->right-rectPtr->left;
     textWidth = rect.right-rect.left;
-    if (textWidth > width && width > 0)
+    if ((textWidth > width) && (width > 0))
     {
       char *newText,*slashPos;
       int newTextLen = cchText+ELLIPSISLEN;
@@ -345,7 +345,7 @@ INT SYSTEM EXPORT InternalDrawTextExA(HDC hdc,LPCSTR lpchText,INT cchText,LPRECT
             strncpy(&newText[ELLIPSISLEN],endPtr,endLen);
             OSLibWinDrawTabbedText(pHps,newTextLen,lTabs,newText,&rect,0,0,flCmd | DTOS_QUERYEXTENT);
             textWidth = rect.right-rect.left;
-            if (textWidth <= width || endLen == 0) break;
+            if ((textWidth <= width) || (endLen == 0)) break;
           } while (TRUE);
         }
       } else
@@ -362,7 +362,7 @@ INT SYSTEM EXPORT InternalDrawTextExA(HDC hdc,LPCSTR lpchText,INT cchText,LPRECT
           strncpy(&newText[preLen+ELLIPSISLEN],endPtr,endLen);
           OSLibWinDrawTabbedText(pHps,newTextLen,lTabs,newText,&rect,0,0,flCmd | DTOS_QUERYEXTENT);
           textWidth = rect.right-rect.left;
-          if (textWidth <= width || preLen+endLen == 0) break;
+          if ((textWidth <= width) || (preLen+endLen == 0)) break;
           if (endLen > preLen)
           {
             endLen--;
@@ -432,7 +432,7 @@ DWORD SYSTEM EXPORT InternalGetTabbedTextExtentA(HDC hDC,LPCSTR lpString,INT nCo
   POINTLOS2 pts[TXTBOXOS_COUNT];
   POINTLOS2 widthHeight = {0,0};
 
-  if (!pHps || nCount == 0 || nTabPositions < 0)
+  if (!pHps || (nCount == 0) || (nTabPositions < 0))
     return 0;
 
   if (nCount < 0)
@@ -440,7 +440,7 @@ DWORD SYSTEM EXPORT InternalGetTabbedTextExtentA(HDC hDC,LPCSTR lpString,INT nCo
     SetLastError(ERROR_STACK_OVERFLOW);
     return 0;
   }
-  if (lpString == NULL || nCount >  512 || (nTabPositions > 0 && lpnTabStopPositions == NULL))
+  if ((lpString == NULL) || (nCount >  512) || ((nTabPositions > 0) && (lpnTabStopPositions == NULL)))
   {
     SetLastError(ERROR_INVALID_PARAMETER);
     return 0;
@@ -487,7 +487,7 @@ LONG SYSTEM EXPORT InternalTabbedTextOutA(HDC hdc,INT x,INT y,LPCSTR lpString,IN
   POINTLOS2 ptl;
   DWORD dimensions;
 
-  if (pHps == NULL || lpString == NULL)
+  if ((pHps == NULL) || (lpString == NULL))
   {
     SetLastError(ERROR_INVALID_HANDLE);
     return 0;
@@ -562,7 +562,7 @@ BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR
   POINTLOS2 ptl;
   LONG hits;
 
-  if (!pHps || cbCount < 0 || (lpszString == NULL && cbCount != 0))
+  if (!pHps || (cbCount < 0) || ((lpszString == NULL) && (cbCount != 0)))
   {
     SetLastError(ERROR_INVALID_HANDLE);
     return FALSE;
@@ -636,7 +636,7 @@ BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR
     free(pts);
   }
 
-  if (lprc && (align & 0x18) == TA_BASELINE)
+  if (lprc && ((align & 0x18) == TA_BASELINE))
   {
     //CB: if TA_BASELINE is set, GPI doesn't fill rect
     //    TA_BOTTOM fills rect
@@ -648,7 +648,7 @@ BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR
 
   hits = OSLibGpiCharStringPosAt(pHps,&ptl,&pmRect,flOptions,cbCount,lpszString,lpDx);
 
-  if (lprc && (align & 0x18) == TA_BASELINE)
+  if (lprc && ((align & 0x18) == TA_BASELINE))
     OSLibGpiSetTextAlignment(pHps,pmHAlign,pmVAlign);
 
   if (hits == GPIOS_ERROR)

@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.53 1999-12-27 17:08:08 cbratschi Exp $ */
+/* $Id: oslibwin.cpp,v 1.54 1999-12-27 22:53:53 cbratschi Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -108,7 +108,7 @@ HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
         dwClientStyle = dwWinStyle & ~(WS_TABSTOP | WS_GROUP);
 
         dwFrameStyle |= FCF_NOBYTEALIGN;
-        if (hwndParent == HWND_DESKTOP && dwFrameStyle & FCF_TITLEBAR)
+        if ((hwndParent == HWND_DESKTOP) && (dwFrameStyle & FCF_TITLEBAR))
                 dwFrameStyle |= FCF_TASKLIST | FCF_NOMOVEWITHOWNER;
 
         dwWinStyle   &= ~WS_CLIPCHILDREN;

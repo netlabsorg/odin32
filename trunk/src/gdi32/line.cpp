@@ -1,4 +1,4 @@
-/* $Id: line.cpp,v 1.2 1999-12-16 16:52:32 cbratschi Exp $ */
+/* $Id: line.cpp,v 1.3 1999-12-27 22:52:39 cbratschi Exp $ */
 /*
  * Line API's
  *
@@ -18,7 +18,7 @@
 
 VOID toWin32LineEnd(PPOINTLOS2 startPt,INT nXEnd,INT nYEnd,PPOINTLOS2 pt)
 {
-  if (startPt->x != nXEnd || startPt->y != nYEnd)
+  if ((startPt->x != nXEnd) || (startPt->y != nYEnd))
   {
     if (nXEnd == startPt->x)
     {
@@ -50,9 +50,9 @@ BOOL drawSingleLinePoint(HDC hdc,PVOID pHps,PPOINTLOS2 pt)
 
   if (!GetObjectA(GetCurrentObject(hdc,OBJ_PEN),sizeof(penInfo),(LPVOID)&penInfo)) return FALSE;
 
-  if (penInfo.lopnWidth.x > 1 || penInfo.lopnWidth.y > 1)
+  if ((penInfo.lopnWidth.x > 1) || (penInfo.lopnWidth.y > 1))
   {
-    if (penInfo.lopnStyle != PS_INSIDEFRAME && penInfo.lopnStyle != PS_SOLID)
+    if ((penInfo.lopnStyle != PS_INSIDEFRAME) && (penInfo.lopnStyle != PS_SOLID))
       return FALSE;
 
     LONG color = GetBValue(penInfo.lopnColor) | (GetGValue(penInfo.lopnColor)<<8) | (GetRValue(penInfo.lopnColor)<<16);
@@ -116,7 +116,7 @@ BOOL WIN32API LineTo( HDC hdc, int nXEnd, int  nYEnd)
     OSLibGpiQueryCurrentPosition(pHps,&oldPoint);
     toWin32LineEnd(&oldPoint,nXEnd,nYEnd,&newPoint);
 
-    if (oldPoint.x == newPoint.x && oldPoint.y == newPoint.y)
+    if ((oldPoint.x == newPoint.x) && (oldPoint.y == newPoint.y))
     {
       rc = drawSingleLinePoint(hdc,pHps,&newPoint);
     } else

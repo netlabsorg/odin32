@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.25 1999-12-26 17:30:14 cbratschi Exp $ */
+/* $Id: button.cpp,v 1.26 1999-12-27 22:53:51 cbratschi Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
@@ -465,13 +465,13 @@ static LRESULT BUTTON_SetStyle(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE),newStyle;
 
-  if ((wParam & 0x0f) >= MAX_BTN_TYPE) return 0;
-  newStyle = (dwStyle & 0xfffffff0) | (wParam & 0x0000000f);
+  if ((wParam & 0x0F) >= MAX_BTN_TYPE) return 0;
+  newStyle = (dwStyle & 0xFFFFFFF0) | (wParam & 0x0000000F);
 
   if (newStyle != dwStyle)
   {
     SetWindowLongA(hwnd,GWL_STYLE,newStyle);
-    PAINT_BUTTON(hwnd,newStyle & 0x0f,ODA_DRAWENTIRE);
+    PAINT_BUTTON(hwnd,newStyle & 0x0F,ODA_DRAWENTIRE);
   }
 
   return 0;

@@ -1,4 +1,4 @@
-/* $Id: oslibgdi.cpp,v 1.4 1999-11-26 17:06:07 cbratschi Exp $ */
+/* $Id: oslibgdi.cpp,v 1.5 1999-12-27 22:53:52 cbratschi Exp $ */
 /*
  * Window GDI wrapper functions for OS/2
  *
@@ -15,10 +15,44 @@
 #include <os2wrap.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include <misc.h>
 #include <oslibgdi.h>
 #include <oslibwin.h>
+
+//CB: new mapping infrastructure to avoid transformation bugs -> available soon
+
+/*
+All functions can be used to transform from Win32 to OS/2 and vice versa
+First letter is lower case to avoid conflicts with Win32 API names
+
+Single y mapping:
+ mapScreenY()
+ mapWindowY()
+
+Single point mapping:
+ mapScreenPoint()
+ mapWindowPoint()
+
+Single rect mapping:
+ mapScreenRect()
+ mapWindowRect()
+
+Rect transformation:
+ copyOS2Rect()
+ copyWin32Rect()
+*/
+
+INT mapScreenY(INT y)
+{
+  return WinQuerySysValue(HWND_DESKTOP,SV_CYSCREEN)-1-y;
+}
+//******************************************************************************
+//******************************************************************************
+INT mapScreenY(INT screenH,INT y)
+{
+  return screenH-1-y;
+}
+
 
 //******************************************************************************
 //******************************************************************************
