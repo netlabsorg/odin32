@@ -1,4 +1,4 @@
-# $Id: setup.os2relwat11-16.mk,v 1.3 2002-08-20 07:20:56 bird Exp $
+# $Id: setup.os2relwat11-16.mk,v 1.4 2002-08-20 08:03:00 bird Exp $
 
 # ---OS2, RELEASE, WAT11-------------------------
 ENV_NAME="OS/2, Release, Watcom C/C++ v11.0c 16-bit"
@@ -125,10 +125,13 @@ _LIB_MT =
 !if "$(_OBJ_MODEL)" == "m"
 _LIB_MT = mt # this is the only one there is a MT edition of, don't know why.
 !endif
+!if "$(TARGET_MODE)" == "DLL" # quirk! TODO/FIXME
+_LIB_DLL= dl
+!endif
 !if "$(_CXX_XCPT)" != "-xs"
-LIB_C_OBJ   = clib$(_LIB_MT)$(_OBJ_MODEL).lib plib$(_LIB_MT)$(_OBJ_MODEL).lib math87$(_LIB_MT)$(_OBJ_MODEL).lib emu87.lib
+LIB_C_OBJ   = clib$(_LIB_DLL)$(_LIB_MT)$(_OBJ_MODEL).lib plib$(_LIB_MT)$(_OBJ_MODEL).lib math87$(_LIB_MT)$(_OBJ_MODEL).lib emu87.lib
 !else
-LIB_C_OBJ   = clib$(_LIB_MT)$(_OBJ_MODEL).lib plbx$(_LIB_MT)$(_OBJ_MODEL).lib math87$(_LIB_MT)$(_OBJ_MODEL).lib emu87.lib
+LIB_C_OBJ   = clib$(_LIB_DLL)$(_LIB_MT)$(_OBJ_MODEL).lib plbx$(_LIB_MT)$(_OBJ_MODEL).lib math87$(_LIB_MT)$(_OBJ_MODEL).lib emu87.lib
 !endif
 LIB_C_DLL   = $(LIB_C_OBJ)  # clibdll.lib
 LIB_C_RTDLL = $(LIB_C_OBJ)  # clibdll.lib
