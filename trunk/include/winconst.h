@@ -1,4 +1,4 @@
-/* $Id: winconst.h,v 1.31 2000-03-29 15:16:09 cbratschi Exp $ */
+/* $Id: winconst.h,v 1.32 2000-04-18 11:09:53 sandervl Exp $ */
 
 /*
  * Win32 constants
@@ -1322,3 +1322,10 @@
 /* FindFirstFile */
 
 #define INVALID_HANDLE_VALUE_W  ((HANDLE) -1)
+
+  /* StretchBlt() modes */
+#define BLACKONWHITE_W         1
+#define WHITEONBLACK_W         2
+#define COLORONCOLOR_W	       3
+#define HALFTONE_W             4
+#define MAXSTRETCHBLTMODE_W    4
