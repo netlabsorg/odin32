@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.1670 2001-09-02 02:52:46 bird Exp $ */
+/* $Id: ChangeLog,v 1.1671 2001-09-04 13:53:28 bird Exp $ */
+
+ 2001-09-04: knut st. osmundsen <kosmunds@csc.com>
+    - FastDep:  o Synced FastDep with OS2Tools.
 
  2001-09-01: knut st. osmundsen <kosmunds@csc.com>
     - Tools\CmdQd:
@@ -68,7 +71,7 @@
 
  2001-08-16: Patrick Haller <patrick.haller@innotek.de>
     - GDI32:    o Optimization for dibsect::findSection()
-    		  (helps DeleteObject)
+                  (helps DeleteObject)
 
  2001-08-16: Sander van Leeuwen <sandervl@xs4all.nl>
     - INSTALL:  o Add date when odininst was last run to odin.ini
