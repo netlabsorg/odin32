@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.23 1999-08-18 21:54:27 phaller Exp $
+; $Id: KERNEL32.DEF,v 1.24 1999-08-18 22:00:57 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -793,7 +793,7 @@ EXPORTS
 ;   SetThreadIdealProcessor    = _SetThreadIdealProcessor@??            ;NT
     SetThreadLocale            = _SetThreadLocale@4         @671
     SetThreadPriority          = _SetThreadPriority@8       @672
-;   SetThreadPriorityBoost     = _SetThreadPriorityBoost@?              ;NT
+    SetThreadPriorityBoost     = _SetThreadPriorityBoost@8  @787        ;NT
     SetTimeZoneInformation     = _SetTimeZoneInformation@4  @673
     SetUnhandledExceptionFilter  = _SetUnhandledExceptionFilter@4 @674
 ;   SetVDMCurrentDirectories   = _SetVDMCurrentDirectories@??           ;NT
