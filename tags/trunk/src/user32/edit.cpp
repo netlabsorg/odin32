@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.39 2000-05-22 17:21:07 cbratschi Exp $ */
+/* $Id: edit.cpp,v 1.40 2000-09-29 22:28:10 sandervl Exp $ */
 /*
  *      Edit control
  *
@@ -4024,6 +4024,16 @@ static void EDIT_WM_SetFont(HWND hwnd, EDITSTATE *es, HFONT font, BOOL redraw)
  */
 static void EDIT_WM_SetText(HWND hwnd, EDITSTATE *es, LPCSTR text)
 {
+#ifdef __WIN32OS2__
+        //SvL: Acrobat Distiller keeps on sending WM_SETTEXT with the same
+        //     string in responds to a WM_COMMAND with EN_UPDATE -> stack
+        //     overflow (TODO: Need to check if this behaviour is correct compared to NT)
+        if(text && es->text) {
+		if(!strcmp(es->text, text)) {
+			return;
+		}
+        }
+#endif
         es->selection_start = 0;
         es->selection_end = lstrlenA(es->text);
         if (es->flags & EF_FOCUSED)
