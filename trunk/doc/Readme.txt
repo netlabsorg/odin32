@@ -82,11 +82,20 @@ run well and to make much more visible progress.
 2.0 Installing Odin (UPDATED)
 -----------------------------
 
+Daily builds of Odin are available at ftp://ftp.os2.org/odin/daily.
+For people that do not have a suitable development setup for ODIN, 
+we provide the latest binary code that way.
+
 Odin daily builds are now also distributed as WarpIn archives.
 WarpIn is a generic OS/2 installation application that can be
 downloaded from warpin.netlabs.org.
 
-To install Odin run warpin.exe with the name of the daily build archive
+Manual installation without WarpIn is not recommended. If you don't use WarpIn,
+then you *must* execute odininst.exe in the Odin system32 directory. (the first 
+time Odin is installed or when the ChangeLog mentions fixes/changes in the 
+installer)
+
+To install Odin, run warpin.exe with the name of the daily build archive
 as parameter.
 Follow the instructions to complete the installation.
 The Odin installation consists of:
@@ -517,7 +526,7 @@ another file format thus changing the original Win32 files.
 (It's only future use will be to convert Win32 executable with
 debuginfo to LX with HLL (IPMD/ICSDEBUG) debuginfo for
 sourcelevel debugging of Win32 executables under Odin32. This
-is not yet implemented but are being worked on.)
+is not yet implemented but is being worked on.)
 
 
 
@@ -535,6 +544,9 @@ is not yet implemented but are being worked on.)
 - Red Alert
 - Professional Minesweeper
 - Windiff (part of Win32 SDK)
+- RealPlayer 7/8
+- Lotus Notes 5.0 (partly anyway)
+- Acrobat Distiller 3.0
 
 Note that many other applications load and/or partly work.
 
@@ -542,35 +554,38 @@ Note that many other applications load and/or partly work.
 4.0 Reporting Problems and Successes
 ------------------------------------
 
-In this early stage it is not required that you report every
-bug to the developers as we still have huge lists of to do items.
-However, an application compatibility database has been created
-at Netlabs where you can share your experiences with Odin.
+Bug reports can be sent to the Odin users mailinglist (odinusers@egroups.com;
+visit www.egroups.com for information about joining). 
+The file ReportingBugs.txt explains how to send in a proper bug report.
+
+An application compatibility database has been created at Netlabs 
+where you can share your experiences with Odin.
 The application compatibility database can be found at
 
 http://www.netlabs.org/odin/appdatabase
 
+NOTE: The application database is not meant for bug reports.
 
-Project Odin Source Code Notes
-==============================
 
-1.0 Introduction
-----------------
+5.0 Project Odin Source Code Notes
+----------------------------------
 
-This readme is intended for making people more familiar with ODIN and to
-describe various aspects of the project such as accessing latest sources via
+5.1.0 Introduction
+------------------
+
+This chapter is intended for people more familiar with ODIN. It describes
+the various aspects of the project such as accessing the latest sources via
 cvs, building the binaries, running win32 applications, how to identify and
 report problems and bugs, as well as how to participate in this very
 promising project.
 
 
-1.1 Prerequisites:
-------------------
+5.1.1 Prerequisites:
+--------------------
 
 Required compilers/tools:
         - IBM VisualAge 3.0 (CTx8 fixpack applied)
-          (version 3.6 might also work, but version 4 is not
-           recommended)
+          (version 3.6 might also work; version 4 is not recommended)
         - OS/2 Warp 4 Toolkit (project apparently doesn't compile with
           VAC's OS/2 headers)
           Might also work with EMX headers. (haven't tried this!)
@@ -612,18 +627,22 @@ Coding conventions:
         - Source code style will be decided on in the near future.
 
 
-2.0 Accessing ODIN source code via CVS
---------------------------------------
+5.2.0 Accessing ODIN source code via CVS
+----------------------------------------
 
 Please check out http://www.netlabs.org/ and http://www.netlabs.org/odin.
 
 
-3.0 Building the binaries
--------------------------
+5.3.0 Building the binaries
+---------------------------
 
-Basically, if your system setup meets above stated requirements, everything you
-need to do for a binary build is:
+The first time you want to build Odin, you must first run configure.cmd.
+This REXX script creates the file makefile.inc, which contains the absolute
+paths of important build directories.
 
+If your system setup meets above stated requirements, everything you
+need to do next for a binary build is:
+  
   nmake DEBUG=1
 
 or alternatively
@@ -648,8 +667,8 @@ To enable logging again, clear this environment variable by typing:
 Logging is enabled by default in the debug build, but disabled by default
 in the nodebuginfo build and not present in the release build.
 
-3.1 Build problems
-------------------
+5.3.1 Build problems
+--------------------
 
 ODIN is moving at a fast pace. Sometimes side effects of source dependencies may
 require you to do a full rebuild of the binaries instead of an incremental build.
@@ -663,25 +682,36 @@ module to further test win32 applications on ODIN.
 Please report such build problems through the appropriate channel.
 
 
-3.2 Downloading daily built binaries
-------------------------------------
+5.3.2 Downloading daily built binaries
+--------------------------------------
 
 http://www.os2.org/ has setup an ftp server that hosts the automatically
 built binaries on daily basis. For people that do not have a suitable
 development setup for ODIN, we provide the latest binary code that way.
 
 
-4.0 Project participation
--------------------------
+5.4.0 Project participation
+---------------------------
 
 As ODIN became an open source project, everybody is kindly invited to
 contribute his/her share to the progress of the project. May it be
 active coding, fixing bugs or just providing detailed information about
 examined problems.
 
-We suggest you subscribe to win32os2-wai and the corresponsing mailing lists
+We suggest you subscribe to win32os2-wai and the corresponding mailing lists
 on http://www.egroups.com.
 In case you are interested in participating, every member of the project will
 be happy to give you direction to the right places and to give a personal
 introduction to further development of the particular modules.
 
+
+6.0 Warranty
+------------
+
+EXCEPT AS OTHERWISE RESTRICTED BY LAW, THIS WORK IS PROVIDED
+WITHOUT ANY EXPRESSED OR IMPLIED WARRANTIES OF ANY KIND, INCLUDING
+BUT NOT LIMITED TO, ANY IMPLIED WARRANTIES OF FITNESS FOR A
+PARTICULAR PURPOSE, MERCHANTABILITY OR TITLE.  EXCEPT AS
+OTHERWISE PROVIDED BY LAW, NO AUTHOR, COPYRIGHT HOLDER OR
+LICENSOR SHALL BE LIABLE TO YOU FOR DAMAGES OF ANY KIND, EVEN IF 
+THEY HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
