@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.36 2003-04-02 14:27:32 bird Exp $
+/* $Id: pe2lx.cpp,v 1.37 2004-01-15 10:14:58 sandervl Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -499,6 +499,15 @@ ULONG Pe2Lx::init(PCSZ pszFilename)
         for (j = 0; j < (sizeof(paSecChars2Flags)/sizeof(paSecChars2Flags[0])); j++)
             if ((paSections[i].Characteristics & paSecChars2Flags[j].Characteristics) == paSecChars2Flags[j].Characteristics)
                 flFlags |= paSecChars2Flags[j].flFlags;
+        /* make sure the import table is writable */
+        if (    !(flFlags & OBJWRITE)
+            &&  pNtHdrs->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].Size
+            &&  paSections[i].VirtualAddress <= pNtHdrs->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress
+            &&  paSections[i].VirtualAddress + paSections[i].Misc.VirtualSize > pNtHdrs->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress)
+        {
+            printInf(("Forcing section read/write since it contains import directory\n"));
+            flFlags |= OBJWRITE | OBJREAD;
+        }
         if ((flFlags & (OBJEXEC | OBJWRITE)) == (OBJEXEC | OBJWRITE))
             flFlags &= (ULONG)~OBJEXEC;
 
@@ -2717,12 +2726,8 @@ ULONG Pe2Lx::makeObjectPageTable()
  * @sketch    If valid pointers to fixups exist then return successfully without processing.
  *            Validate pNtHdrs.
  *            IF forwarders present and exports not made THEN makeExports!
- *            Check and read directories for imports and relocations.
  *            Create necessary Buffered RVA Readers.
- *            Make sure kernel32 is the first imported module.
- *            Initiate the import variables (if any imports):
- *                Loop thru the import descriptiors looking for the lowest FirstThunk RVA. (ulRVAOrgFirstThunk and ulRVAFirstThunk)
- *                When found read the module name and add it. (ulModuleOrdinal)
+ *            Make sure kernel32/custombuild is the first imported module.
  *            Initiate base relocations by reading the first Base Relocation.
  *            Initiate iObj to 0UL, ulRVAPage to the RVA for the first object (which is allways 0UL!).
  *
@@ -2780,20 +2785,6 @@ ULONG Pe2Lx::makeObjectPageTable()
  */
 ULONG Pe2Lx::makeFixups()
 {
-    BOOL                        fImports;           /* fImport is set when a valid import directory is present. */
-    ULONG                       ulRVAImportDesc;    /* RVA of the first import descriptor. */
-    IMAGE_IMPORT_DESCRIPTOR     ImportDesc;         /* Import descriptor struct used while reading. */
-    BufferedRVARead            *pImportReader;      /* Buffered reader import descriptors reads. */
-    BufferedRVARead            *pImpNameReader;     /* Buffered reader for names reads; ie. function and module names. */
-    BufferedRVARead            *pImpThunkReader;    /* Buffered reader for thunk reads; ie. reading from the OrgiginalFirstThunk array. */
-    ULONG                       ulModuleOrdinal;    /* Module ordinal. Valid as long as fImport is set. */
-    #ifndef RING0
-    ULONG                       ulCustomModOrdinal; /* Module ordinal of custom Odin dll. Valid as long as fImport is set. */
-    char                        szModuleName[128];
-    #endif
-    char *                      pszModuleName;      /* Pointer to the current modulename or NULL. Only used with Custombuild. */
-    ULONG                       ulRVAFirstThunk;    /* Current first thunk array RVA. Points at current entry. */
-    ULONG                       ulRVAOrgFirstThunk; /* Current original first thunk array RVA. Points at current entry. */
     #ifndef RING0
     BOOL                        fBaseRelocs;        /* fBaseReloc is set when a valid base reloc directory is present. */
     ULONG                       ulRVABaseReloc;     /* RVA of the current base relocation chunk. (Not the first!) */
@@ -2804,7 +2795,6 @@ ULONG Pe2Lx::makeFixups()
     #endif
     ULONG                       ulRVAPage;          /* RVA for the current page. */
     ULONG                       ul;                 /* temporary unsigned long variable. Many uses. */
-    PSZ                         psz;                /* temporary string pointer. Used for modulenames and functionnames. */
     ULONG                       iObj;               /* Object iterator. (Index into paObjects) */
     APIRET                      rc;                 /* return code. */
 
@@ -2830,13 +2820,6 @@ ULONG Pe2Lx::makeFixups()
             return rc;
     }
 
-    /* Check if empty import directory. */
-    fImports = pNtHdrs->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].Size > 0UL
-        &&
-        (ulRVAImportDesc = pNtHdrs->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress) > 0UL
-        &&
-        ulRVAImportDesc < pNtHdrs->OptionalHeader.SizeOfImage;
-
     /* Check if empty base relocation directory. */
     #ifndef RING0
     fBaseRelocs = (cbBaseRelocs = pNtHdrs->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].Size) > 0UL
@@ -2849,11 +2832,8 @@ ULONG Pe2Lx::makeFixups()
     #endif
     printInf(("\n"));
     #ifndef RING0
-    printInf(("Make fixups, fBaseReloc=%s, fImports=%s\n",
-              fBaseRelocs ? "true" : "false",
-              fImports ? "true" : "false"));
-    #else
-    printInf(("Make fixups, fImports=%s\n", fImports ? "true" : "false"));
+    printInf(("Make fixups, fBaseReloc=%s\n",
+              fBaseRelocs ? "true" : "false"));
     #endif
     printInf(("\n"));
 
@@ -2869,16 +2849,6 @@ ULONG Pe2Lx::makeFixups()
     else
         pRelocReader = pPageReader = NULL;
     #endif
-    if (fImports)
-    {
-        pImportReader = new BufferedRVARead(hFile, cObjects, paObjects);
-        pImpNameReader = new BufferedRVARead(hFile, cObjects, paObjects);
-        pImpThunkReader = new BufferedRVARead(hFile, cObjects, paObjects);
-        if (pImportReader == NULL || pImpNameReader == NULL || pImpThunkReader == NULL)
-            rc = ERROR_NOT_ENOUGH_MEMORY;
-    }
-    else
-        pImpThunkReader = pImpNameReader = pImportReader = NULL;
 
     /* check for errors */
     if (rc != NO_ERROR)
@@ -2889,83 +2859,16 @@ ULONG Pe2Lx::makeFixups()
         if (pRelocReader != NULL)
             delete pRelocReader;
         #endif
-        if (pImportReader != NULL)
-            delete pImportReader;
-        if (pImpNameReader  != NULL)
-            delete pImpNameReader;
-        if (pImpThunkReader != NULL)
-            delete pImpThunkReader;
         return rc;
     }
 
     /* Make sure kernel32/customdll is the first imported module */
     #ifndef RING0
     if (hasCustomDll())
-    {
         rc = addModule(options.pszCustomDll, (PULONG)SSToDS(&ul));
-        ulCustomModOrdinal = ul;
-    }
     else
     #endif
         rc = addModule("KERNEL32.DLL", (PULONG)SSToDS(&ul));
-
-    /* initiate the import variables */
-    if (fImports && rc == NO_ERROR)
-    {
-        rc = pImportReader->readAtRVA(ulRVAImportDesc, SSToDS(&ImportDesc), sizeof(ImportDesc));
-        if (rc == NO_ERROR)
-        {
-            ul = 0;
-            ulRVAFirstThunk = ~0UL;
-            while (rc == NO_ERROR && ImportDesc.Name != 0UL && ImportDesc.FirstThunk != 0UL)
-            {
-                if ((ULONG)ImportDesc.FirstThunk < ulRVAFirstThunk || ulRVAFirstThunk == 0UL) /* 0 test: just in case... */
-                {
-                    ulRVAFirstThunk = (ULONG)ImportDesc.FirstThunk;
-                    ulRVAOrgFirstThunk = (ULONG)ImportDesc.u.OriginalFirstThunk != 0UL ?
-                        (ULONG)ImportDesc.u.OriginalFirstThunk : (ULONG)ImportDesc.FirstThunk;
-                    ulModuleOrdinal = ImportDesc.Name;
-                }
-
-                /* next */
-                ul++;
-                rc = pImportReader->readAtRVA(ulRVAImportDesc + ul * sizeof(ImportDesc), SSToDS(&ImportDesc), sizeof(ImportDesc));
-            }
-
-            if (ulRVAFirstThunk != ~0UL)
-            {
-                rc = pImpNameReader->dupString(ulModuleOrdinal, (PSZ*)SSToDS(&psz));
-                if (rc == NO_ERROR)
-                {
-                    pszModuleName = NULL;
-                    #ifdef RING0
-                    rc = addModule(psz, (PULONG)SSToDS(&ulModuleOrdinal));
-
-                    #else
-                    /* Uppercase the module names, and skip the extension. */
-                    if (hasCustomDll())
-                    {
-                        strcpy((pszModuleName = (char*)SSToDS(szModuleName)), psz);
-                        ulModuleOrdinal = ulCustomModOrdinal;
-                        for (char *pszTmp = pszModuleName; *pszTmp !='\0' && *pszTmp != '.'; pszTmp++)
-                            if (*pszTmp >= 'a' && *pszTmp <= 'z')
-                                *pszTmp += ('A' - 'a');
-                        *pszTmp = '\0';
-                    }
-                    if (!hasCustomDll() || isCustomDllExcluded(pszModuleName))
-                    {
-                        rc = addModule(psz, (PULONG)SSToDS(&ulModuleOrdinal));
-                        szModuleName[0] = '\0';
-                        pszModuleName = NULL;
-                    }
-                    #endif
-                    free(psz);
-                }
-            }
-            else
-                fImports = FALSE;
-        }
-    }
 
 
     /* read start of the first basereloc chunk */
@@ -3012,104 +2915,6 @@ ULONG Pe2Lx::makeFixups()
                                          pNtHdrs->FileHeader.Characteristics & IMAGE_FILE_DLL ?
                                             ORD_REGISTERPE2LXDLL : ORD_REGISTERPE2LXEXE, pszTmp);
             }
-            if (rc != NO_ERROR)
-                break;
-        }
-
-
-        /* check for imports at this page */
-        if (fImports && ulRVAFirstThunk < ulRVAPage + PAGESIZE)
-        {
-            while (rc == NO_ERROR && ulRVAFirstThunk < ulRVAPage + PAGESIZE)
-            {
-                IMAGE_THUNK_DATA Thunk;
-                rc = pImpThunkReader->readAtRVA(ulRVAOrgFirstThunk, SSToDS(&Thunk), sizeof(Thunk));
-                if (rc != NO_ERROR)
-                    break;
-                if (Thunk.u1.Ordinal != 0UL)
-                {
-                    if (Thunk.u1.Ordinal & (ULONG)IMAGE_ORDINAL_FLAG)
-                        rc = add32OrdImportFixup((WORD)(ulRVAFirstThunk & (PAGESIZE-1)),
-                                                 ulModuleOrdinal, Thunk.u1.Ordinal & 0xffff, pszModuleName);
-                    else if (Thunk.u1.Ordinal > 0UL && Thunk.u1.Ordinal < pNtHdrs->OptionalHeader.SizeOfImage)
-                    {
-                        rc = pImpNameReader->dupString(Thunk.u1.Ordinal + offsetof(IMAGE_IMPORT_BY_NAME, Name),
-                                                       (PSZ*)SSToDS(&psz));
-                        if (rc != NO_ERROR)
-                            break;
-                        rc = add32NameImportFixup((WORD)(ulRVAFirstThunk & (PAGESIZE-1)),
-                                                  ulModuleOrdinal, psz, pszModuleName);
-                        free(psz);
-                    }
-                    else
-                    {
-                        printErr(("invalid value in thunk array, neither an ordinal value nor an valid RVA. 0x%08x\n", Thunk.u1.Ordinal));
-                        rc = ERROR_INVALID_ADDRESS;
-                        break;
-                    }
-
-                    /* next */
-                    ulRVAFirstThunk += sizeof(IMAGE_THUNK_DATA);
-                    ulRVAOrgFirstThunk += sizeof(IMAGE_THUNK_DATA);
-                }
-                else
-                {   /* next module */
-                    rc = pImportReader->readAtRVA(ulRVAImportDesc, SSToDS(&ImportDesc), sizeof(ImportDesc));
-                    if (rc == NO_ERROR)
-                    {
-                        ULONG ulRVAFirstThunkPrev = ulRVAFirstThunk;
-                        ul = 0;
-                        ulRVAFirstThunk = ~0UL;
-                        while (rc == NO_ERROR && ImportDesc.Name != 0UL && ImportDesc.FirstThunk != 0UL)
-                        {
-                            if ((ULONG)ImportDesc.FirstThunk < ulRVAFirstThunk
-                                && (ULONG)ImportDesc.FirstThunk > ulRVAFirstThunkPrev)
-                            {
-                                ulRVAFirstThunk = (ULONG)ImportDesc.FirstThunk;
-                                ulRVAOrgFirstThunk = (ULONG)ImportDesc.u.OriginalFirstThunk != 0UL ?
-                                    (ULONG)ImportDesc.u.OriginalFirstThunk : (ULONG)ImportDesc.FirstThunk;
-                                ulModuleOrdinal = ImportDesc.Name;
-                            }
-
-                            /* next */
-                            ul++;
-                            rc = pImportReader->readAtRVA(ulRVAImportDesc + ul * sizeof(ImportDesc), SSToDS(&ImportDesc), sizeof(ImportDesc));
-                        }
-
-                        if (ulRVAFirstThunk != ~0UL)
-                        {   /* modulename */
-                            rc = pImpNameReader->dupString(ulModuleOrdinal, (PSZ*)SSToDS(&psz));
-                            if (rc == NO_ERROR)
-                            {
-                                pszModuleName = NULL;
-                                #ifdef RING0
-                                rc = addModule(psz, (PULONG)SSToDS(&ulModuleOrdinal));
-
-                                #else
-                                if (hasCustomDll())
-                                {
-                                    strcpy((pszModuleName = (char*)SSToDS(szModuleName)), psz);
-                                    ulModuleOrdinal = ulCustomModOrdinal;
-                                    for (char *pszTmp = pszModuleName; *pszTmp !='\0' && *pszTmp != '.'; pszTmp++)
-                                        if (*pszTmp >= 'a' && *pszTmp <= 'z')
-                                            *pszTmp += ('A' - 'a');
-                                    *pszTmp = '\0';
-                                }
-                                if (!hasCustomDll() || isCustomDllExcluded(pszModuleName))
-                                {
-                                    rc = addModule(psz, (PULONG)SSToDS(&ulModuleOrdinal));
-                                    szModuleName[0] = '\0';
-                                    pszModuleName = NULL;
-                                }
-                                #endif
-                                free(psz);
-                            }
-                        }
-                        else
-                            fImports = FALSE;
-                    }
-                }
-            } /* while */
             if (rc != NO_ERROR)
                 break;
         }
@@ -3211,12 +3016,6 @@ ULONG Pe2Lx::makeFixups()
     if (pRelocReader != NULL)
         delete pRelocReader;
     #endif
-    if (pImportReader != NULL)
-        delete pImportReader;
-    if (pImpNameReader  != NULL)
-        delete pImpNameReader;
-    if (pImpThunkReader != NULL)
-        delete pImpThunkReader;
 
     /* Release unused memory in fixup and import structures. */
     if (rc == NO_ERROR)

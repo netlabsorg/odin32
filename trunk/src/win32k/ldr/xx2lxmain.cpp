@@ -1,4 +1,4 @@
-/* $Id: xx2lxmain.cpp,v 1.1 2001-03-11 16:37:17 bird Exp $
+/* $Id: xx2lxmain.cpp,v 1.2 2004-01-15 10:14:48 sandervl Exp $
  *
  * Xx2Lx main program. (Ring 3 only!)
  *
@@ -32,6 +32,9 @@
 #include <malloc.h>
 #include <string.h>
 #include <stdlib.h>
+#include <io.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 #include "OS2Krnl.h"
 #include "modulebase.h"
 #include "pe2lx.h"
@@ -127,6 +130,73 @@ int main(int argc, char **argv)
                         return 5;
                     }
                     break;
+
+
+                case 'f': /* ignore internal fixups */
+                case 'F':
+                    options.fSkipFixups = TRUE;
+                    break;
+
+                case 'r': /* all read-write objects */
+                case 'R':
+                    if (argv[argi][2] != 'w' && argv[argi][2] != 'W')
+                    {
+                        printf("Syntax error: Invalid argument, '%s'\n", argv[argi]);
+                        return 5;
+                    }
+                    options.fAllRWObjects = TRUE;
+                    break;
+
+                case 'c': /* custom odin dll name */
+                case 'C':
+                    if (!hasCustomExports())
+                    {
+                        printf("Syntax error: export table file not specified (-o:).\n\n");
+                        return 5;
+                    }
+                    options.pszCustomDll = &argv[argi][3];
+                    break;
+
+                case 'o': /* custom odin dll ordinal mapping */
+                case 'O':
+                {
+                    int fileIn = open(&argv[argi][3], O_RDONLY, S_IREAD);
+                    int sizein = (int)_filelength(fileIn);
+
+                    options.pszCustomExports = (PSZ)malloc(sizein+1);
+                    memset(options.pszCustomExports, 0, sizein+1);
+                    read(fileIn, options.pszCustomExports, sizein);
+                    close(fileIn);
+                    break;
+                }
+
+                case 'x': /* custombuild exclude dll */
+                case 'X':
+                {
+                    int cch = strlen(&argv[argi][3]);
+                    if (!cch)
+                    {
+                        printf("Syntax error: optino -x: requires a dll name!");
+                        return 5;
+                    }
+                    int cchNew = cch + 4;
+                    if (options.pszCustomDllExclude)
+                        cchNew += strlen(options.pszCustomDllExclude);
+                    options.pszCustomDllExclude = (char*)realloc(options.pszCustomDllExclude, cchNew);
+
+                    char *psz = options.pszCustomDllExclude;
+                    if (cchNew != cch + 4)
+                        psz = psz + strlen(psz);
+
+                    /* copy the name in uppercase with ';' at both ends. */
+                    *psz++ = ';';
+                    for (strcpy(psz, &argv[argi][3]); *psz; psz++)
+                        if (*psz >= 'a' && *psz <= 'z')
+                            *psz += ('A' - 'a');
+                    *psz++ =';';
+                    *psz = '\0';
+                    break;
+                }
 
                 default:
                     printf("Syntax error: Invalid argument, '%s'\n", argv[argi]);
@@ -298,6 +368,16 @@ static void syntax()
            "                     -: Disabled. Never applied.\n"
            "                     *: Forced. Applied every time.\n"
            "                Default: -1*\n"
+           "  -rw           Make all segments writable. For use with -1+. A trick to make\n"
+           "                it possible for OS/2 to load the objects following on another.\n"
+           "                This of course doesn't solve the alignment difference. So if\n"
+           "                you build the program pass /ALIGN:0x10000 to the linker.\n"
+           "  -f            Strip fixups forcing. Don't use with DLLs, may cause traps.\n"
+           "\n"
+           " Custombuild options:\n"
+           "  -o:<ordfile>  Ordinal file. form: <W32DLL>.<name/ord> @<CustDLLOrd>\n"
+           "  -c:<custdll>  Custombuild dll. After -o:!\n"
+           "  -x:<dll>      Exclude from custombuild. -x:MSVCRT for example.\n"
            "\n"
            "  XxFile        Input PE .\n"
            "  LxFile        Output Lx-file. If not specified the Xx-file is\n"
