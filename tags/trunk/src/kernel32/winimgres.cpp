@@ -1,4 +1,4 @@
-/* $Id: winimgres.cpp,v 1.10 1999-08-19 19:50:40 sandervl Exp $ */
+/* $Id: winimgres.cpp,v 1.11 1999-08-20 11:52:44 sandervl Exp $ */
 
 /*
  * Win32 PE Image class (resource methods)
@@ -8,20 +8,23 @@
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
+ * TODO: Check created resource objects before loading the resource!
+ *
  */
 #include <os2win.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "misc.h"
-#include "nameid.h"
-#include "winimage.h"
-#include "windll.h"
-#include "winexe.h"
-#include "winres.h"
+#include <misc.h>
+#include <nameid.h>
+#include <winimage.h>
+#include <windll.h>
+#include <winexe.h>
+#include <winres.h>
+#include <unicode.h>
+#include <heapstring.h>
 #include "pefile.h"
-#include "unicode.h"
 
 char *ResTypes[MAX_RES] =
       {"niks", "CURSOR", "BITMAP", "ICON", "MENU", "DIALOG", "STRING",
@@ -38,8 +41,9 @@ PIMAGE_RESOURCE_DATA_ENTRY
 {
  PIMAGE_RESOURCE_DIRECTORY       prdType;
  PIMAGE_RESOURCE_DIRECTORY_ENTRY prde;
+ PIMAGE_RESOURCE_DIR_STRING_U    pstring;
  PIMAGE_RESOURCE_DATA_ENTRY      pData = NULL;
- ULONG  nodeData[3], i, j;
+ ULONG  nodeData[3], i, j, nameOffset;
  BOOL  fFound = FALSE, fNumType;
 
   /* set pointer to first resource type entry */
@@ -72,9 +76,13 @@ PIMAGE_RESOURCE_DATA_ENTRY
     if(i < pResDir->NumberOfNamedEntries) 
     {//name or id entry?
         //SvL: 30-10-'97, high bit is set, so clear to get real offset
-        prde->u1.Name &= ~0x80000000;
-        char *typename = UnicodeToAsciiStringN((WCHAR *)((ULONG)pResDir + (ULONG)prde->u1.Name + sizeof(WCHAR)), *(WCHAR *)((ULONG)pResDir + (ULONG)prde->u1.Name));  // first word = string length
+	nameOffset = prde->u1.Name & ~0x80000000;
 
+       	pstring = (PIMAGE_RESOURCE_DIR_STRING_U)((ULONG)pResDir + nameOffset);
+	char *typename = (char *)malloc(pstring->Length+1);
+       	lstrcpynWtoA(typename, pstring->NameString, pstring->Length);
+	typename[pstring->Length] = 0;
+        
         if(!fNumType) {
             if(stricmp(typename, (char *)type) == 0) {
                 fFound = TRUE;
@@ -89,7 +97,7 @@ PIMAGE_RESOURCE_DATA_ENTRY
                 fFound = TRUE;
             }
         }
-	FreeAsciiString(typename);
+	free(typename);
     }
     else {
         if(prde->u1.Id == type) {
@@ -124,7 +132,7 @@ PIMAGE_RESOURCE_DATA_ENTRY
  PIMAGE_RESOURCE_DIR_STRING_U    pstring;
  PIMAGE_RESOURCE_DATA_ENTRY      pData;
  BOOL  fFound = FALSE, fNumId;
- ULONG nrres;
+ ULONG nrres, nameOffset;
  char *resname;
  int   i;
 
@@ -154,15 +162,19 @@ PIMAGE_RESOURCE_DATA_ENTRY
     	prdType2 = (PIMAGE_RESOURCE_DIRECTORY)((ULONG)pResDir + (ULONG)prde->u2.OffsetToData);
 
     	if(!fNumId) {//name or id entry?
+		nameOffset = prde->u1.Name;
         	if(prde->u1.s.NameIsString) //unicode directory string /*PLF Sat  97-06-21 22:30:35*/
-               		prde->u1.Name &= ~0x80000000;
+               		nameOffset &= ~0x80000000;
 
-           	pstring = (PIMAGE_RESOURCE_DIR_STRING_U)((ULONG)pResDir + (ULONG)prde->u1.Name);
-         	resname = UnicodeToAsciiStringN(pstring->NameString, pstring->Length);
+           	pstring = (PIMAGE_RESOURCE_DIR_STRING_U)((ULONG)pResDir + nameOffset);
+
+		resname = (char *)malloc(pstring->Length+1);
+         	lstrcpynWtoA(resname, pstring->NameString, pstring->Length);
+		resname[pstring->Length] = 0;
          	if(stricmp(resname, (char *)*nodeData) == 0) {
                   	fFound = TRUE;
          	}
-		FreeAsciiString(resname);
+		free(resname);
       	}
       	else {
          	if(*nodeData == prde->u1.Id)
@@ -228,13 +240,13 @@ Win32Resource *Win32Image::getPEResource(ULONG id, ULONG type, ULONG lang)
   if(fNumType) {
     if(type == NTRT_STRING) {
         stringid = id & 0xF;
-        id       = (id >> 4);
+        id       = (id >> 4)+1;
     }
   }
   else {
     if(stricmp((char *)type, ResTypes[NTRT_STRING]) == 0) {
         stringid = id & 0xF;
-        id       = (id >> 4);
+        id       = (id >> 4)+1;
     }
   }
 
@@ -249,9 +261,10 @@ Win32Resource *Win32Image::getPEResource(ULONG id, ULONG type, ULONG lang)
     	USHORT *unicodestr = (USHORT *)resdata;
 
     	for(i=0;i<stringid;i++) {
-        	unicodestr += *unicodestr;
+        	unicodestr += *unicodestr+1;
     	}
-    	res = new Win32Resource(this, id, NTRT_STRING, (ULONG)*unicodestr, (char *)unicodestr);
+    	res = new Win32Resource(this, id, NTRT_STRING, (*unicodestr+1)*sizeof(WCHAR),
+                                (char *)(unicodestr+1));
     	if(res == NULL) {
         	dprintf(("new Win32Resource failed!\n"));
         	return(NULL);
