@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.18 1999-11-03 18:00:25 cbratschi Exp $ */
+/* $Id: pmframe.cpp,v 1.19 1999-11-03 19:51:43 sandervl Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -256,7 +256,8 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
             goto RunDefFrameProc;
 
         if(!win32wnd->CanReceiveSizeMsgs()) {
-            goto RunDefFrameProc; //CB: must call def frame proc or frame control activation is broken
+//SvL: Doing this breaks button.exe, header4(a).exe & style.exe
+//            goto RunDefFrameProc; //CB: must call def frame proc or frame control activation is broken
             break;
         }
 
@@ -292,9 +293,9 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
             pswp->hwndInsertBehind = hwndAfter;
             pswp->hwnd = hwnd;
 
-            goto RunDefFrameProc; //CB: must call def frame proc or frame control activation is broken
-            //RestoreOS2TIB();
-            //return (MRESULT)0xf;
+//            goto RunDefFrameProc; //CB: must call def frame proc or frame control activation is broken
+            RestoreOS2TIB();
+            return (MRESULT)0xf;
         }
         goto RunDefFrameProc; //CB: must call def frame proc or frame control activation is broken
     }
@@ -421,7 +422,7 @@ PosChangedEnd:
         //CB: show owner behind the dialog
         if (win32wnd->IsModalDialog())
         {
-          Win32BaseWindow *topOwner = win32wnd->getOwner()->getTopParent();
+          Win32BaseWindow *topOwner = win32wnd->getOwner()->GetTopParent();
 
           if (topOwner) WinSetWindowPos(topOwner->getOS2FrameWindowHandle(),hwnd,0,0,0,0,SWP_ZORDER);
         }

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.39 1999-11-03 18:00:29 cbratschi Exp $ */
+/* $Id: win32wbase.h,v 1.40 1999-11-03 19:51:44 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -185,7 +185,6 @@ Win32WndClass  *getClass()  { return windowClass; };
         char   *getWindowNameA()              { return windowNameA; };
 Win32BaseWindow *getOwner()                   { return owner; };
 
-Win32BaseWindow *getTopParent();
  SCROLLBAR_INFO *getScrollInfo(int nBar);
        HWND      getVertScrollHandle()        { return hwndVertScroll; };
        HWND      getHorzScrollHandle()        { return hwndHorzScroll; };
