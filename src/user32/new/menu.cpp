@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.8 2000-01-12 12:40:43 sandervl Exp $*/
+/* $Id: menu.cpp,v 1.9 2000-01-13 20:11:36 sandervl Exp $*/
 /*
  * Menu functions
  *
@@ -3120,7 +3120,7 @@ DWORD WINAPI CheckMenuItem( HMENU hMenu, UINT id, UINT flags )
     MENUITEM *item;
     DWORD ret;
 
-    dprintf(("USER32: CheckMenuItem"));
+    dprintf(("USER32: CheckMenuItem %x %x %x", hMenu, id, flags));
 
     //TRACE("menu=%04x id=%04x flags=%04x\n", hMenu, id, flags );
     if (!(item = MENU_FindItem( &hMenu, &id, flags ))) return -1;
@@ -3140,7 +3140,7 @@ ULONG WINAPI EnableMenuItem( HMENU hMenu, UINT wItemID, UINT wFlags )
     MENUITEM *item;
     POPUPMENU *menu;
 
-    dprintf(("USER32: EnableMenuItem"));
+    dprintf(("USER32: EnableMenuItem %x %x %x", hMenu, wItemID, wFlags));
 
     //TRACE("(%04x, %04X, %04X) !\n",
     //             hMenu, wItemID, wFlags);
@@ -3309,13 +3309,13 @@ BOOL WINAPI InsertMenuA( HMENU hMenu, UINT pos, UINT flags,
 {
     MENUITEM *item;
 
-    dprintf(("USER32: InsertMenuA"));
-
-    //if (IS_STRING_ITEM(flags) && str)
+    if (IS_STRING_ITEM(flags) && str)
+    	dprintf(("USER32: InsertMenuA %x %d %x %d %s", hMenu, pos, flags, id, str));
     //    TRACE("hMenu %04x, pos %d, flags %08x, "
     //                  "id %04x, str '%s'\n",
     //                  hMenu, pos, flags, id, str );
-    //else TRACE("hMenu %04x, pos %d, flags %08x, "
+    else // TRACE("hMenu %04x, pos %d, flags %08x, "
+    	dprintf(("USER32: InsertMenuA %x %d %x %d %x", hMenu, pos, flags, id, str));
     //                   "id %04x, str %08lx (not a string)\n",
     //                   hMenu, pos, flags, id, (DWORD)str );
 
@@ -3342,8 +3342,6 @@ BOOL WINAPI InsertMenuW( HMENU hMenu, UINT pos, UINT flags,
                              UINT id, LPCWSTR str )
 {
     BOOL ret;
-
-    dprintf(("USER32: InsertMenuW"));
 
     if (IS_STRING_ITEM(flags) && str)
     {
@@ -3374,7 +3372,7 @@ BOOL WINAPI AppendMenuA( HMENU hMenu, UINT flags,
 BOOL WINAPI AppendMenuW( HMENU hMenu, UINT flags,
                              UINT id, LPCWSTR data )
 {
-    dprintf(("USER32: AppendMenuW"));
+    dprintf(("USER32: AppendMenuW %x %x %d %x", hMenu, flags, id, data));
 
     return InsertMenuW( hMenu, -1, flags | MF_BYPOSITION, id, data );
 }
@@ -3388,7 +3386,7 @@ BOOL WINAPI RemoveMenu( HMENU hMenu, UINT nPos, UINT wFlags )
     LPPOPUPMENU menu;
     MENUITEM *item;
 
-    dprintf(("USER32: RemoveMenu"));
+    dprintf(("USER32: RemoveMenu %x %d %x", hMenu, nPos, wFlags));
 
     //TRACE("(menu=%04x pos=%04x flags=%04x)\n",hMenu, nPos, wFlags);
     if (!(item = MENU_FindItem( &hMenu, &nPos, wFlags ))) return FALSE;
@@ -3425,7 +3423,7 @@ BOOL WINAPI DeleteMenu( HMENU hMenu, UINT nPos, UINT wFlags )
 {
     MENUITEM *item = MENU_FindItem( &hMenu, &nPos, wFlags );
 
-    dprintf(("USER32: DeleteMenu"));
+    dprintf(("USER32: DeleteMenu %x %d %x", hMenu, nPos, wFlags));
 
     if (!item) return FALSE;
     if (item->fType & MF_POPUP) DestroyMenu( item->hSubMenu );
@@ -3443,16 +3441,17 @@ BOOL WINAPI ModifyMenuA( HMENU hMenu, UINT pos, UINT flags,
 {
     MENUITEM *item;
 
-    dprintf(("USER32: ModifyMenuA"));
 
     if (IS_STRING_ITEM(flags))
     {
+    	dprintf(("USER32: ModifyMenuA, %x %d %x %d %s", hMenu, pos, flags, id, str));
         //TRACE("%04x %d %04x %04x '%s'\n",
         //              hMenu, pos, flags, id, str ? str : "#NULL#" );
         if (!str) return FALSE;
     }
     else
     {
+    	dprintf(("USER32: ModifyMenuA, %x %d %x %d %x", hMenu, pos, flags, id, str));
         //TRACE("%04x %d %04x %04x %08lx\n",
         //              hMenu, pos, flags, id, (DWORD)str );
     }
@@ -3469,8 +3468,6 @@ BOOL WINAPI ModifyMenuW( HMENU hMenu, UINT pos, UINT flags,
                              UINT id, LPCWSTR str )
 {
     BOOL ret;
-
-    dprintf(("USER32: ModifyMenuW"));
 
     if (IS_STRING_ITEM(flags) && str)
     {
@@ -3515,12 +3512,12 @@ DWORD WINAPI GetMenuCheckMarkDimensions(void)
 /**********************************************************************
  *         SetMenuItemBitmaps32    (USER32.490)
  */
-BOOL WINAPI SetMenuItemBitmaps( HMENU hMenu, UINT nPos, UINT wFlags,
-                                    HBITMAP hNewUnCheck, HBITMAP hNewCheck)
+BOOL WINAPI SetMenuItemBitmaps(HMENU hMenu, UINT nPos, UINT wFlags,
+                               HBITMAP hNewUnCheck, HBITMAP hNewCheck)
 {
     MENUITEM *item;
 
-    dprintf(("USER32: SetMenuItemBitmaps"));
+    dprintf(("USER32: SetMenuItemBitmaps %x %d %x %x %x", hMenu, nPos, wFlags, hNewCheck, hNewUnCheck));
 
     //TRACE("(%04x, %04x, %04x, %04x, %04x)\n",
     //             hMenu, nPos, wFlags, hNewCheck, hNewUnCheck);
@@ -3571,7 +3568,7 @@ BOOL WINAPI DestroyMenu( HMENU hMenu )
 {
     //TRACE("(%04x)\n", hMenu);
 
-    dprintf(("USER32: DestroyMenu"));
+    dprintf(("USER32: DestroyMenu %x", hMenu));
 
     /* Silently ignore attempts to destroy default system popup */
 
@@ -3700,7 +3697,7 @@ HMENU WINAPI GetMenu( HWND hWnd )
 {
     HMENU retvalue;
 
-    dprintf(("USER32: GetMenu"));
+    dprintf(("USER32: GetMenu %x", hWnd));
 
     if (GetWindowLongA(hWnd,GWL_STYLE) & WS_CHILD) return 0;
     else return getMenu(hWnd);
@@ -3713,7 +3710,7 @@ BOOL WINAPI SetMenu( HWND hWnd, HMENU hMenu )
 {
     //TRACE("(%04x, %04x);\n", hWnd, hMenu);
 
-    dprintf(("USER32: SetMenu"));
+    dprintf(("USER32: SetMenu %x %x", hWnd, hMenu));
 
     if (hMenu && !IsMenu(hMenu))
     {
@@ -3755,7 +3752,7 @@ HMENU WINAPI GetSubMenu( HMENU hMenu, INT nPos )
 {
     MENUITEM * lpmi;
 
-    dprintf(("USER32: GetSubMenu"));
+    dprintf(("USER32: GetSubMenu %x %d", nPos));
 
     if (!(lpmi = MENU_FindItem(&hMenu,(UINT*)&nPos,MF_BYPOSITION))) return 0;
     if (!(lpmi->fType & MF_POPUP)) return 0;
@@ -3770,7 +3767,7 @@ BOOL WINAPI DrawMenuBar( HWND hWnd )
 {
     LPPOPUPMENU lppop;
 
-    dprintf(("USER32: DrawMenuBar"));
+    dprintf(("USER32: DrawMenuBar %x", hWnd));
 
     if (!(GetWindowLongA(hWnd,GWL_STYLE) & WS_CHILD) && getMenu(hWnd))
     {
@@ -3811,7 +3808,7 @@ HMENU WINAPI LoadMenuA( HINSTANCE instance, LPCSTR name )
 {
     HRSRC hrsrc = FindResourceA( instance, name, RT_MENUA );
 
-    dprintf(("USER32: LoadMenuA"));
+    dprintf(("USER32: LoadMenuA %x %x", instance, name));
 
     if (!hrsrc) return 0;
     return LoadMenuIndirectA( (MENUITEMTEMPLATEHEADER*)LoadResource( instance, hrsrc ));
@@ -3825,7 +3822,7 @@ HMENU WINAPI LoadMenuW( HINSTANCE instance, LPCWSTR name )
 {
     HRSRC hrsrc = FindResourceW( instance, name, RT_MENUW );
 
-    dprintf(("USER32: LoadMenuW"));
+    dprintf(("USER32: LoadMenuW %x %x", instance, name));
 
     if (!hrsrc) return 0;
     return LoadMenuIndirectW( (MENUITEMTEMPLATEHEADER*)LoadResource( instance, hrsrc ));
