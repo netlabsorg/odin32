@@ -1,4 +1,4 @@
-/* $Id: elf.h,v 1.6 2000-12-11 06:53:51 bird Exp $
+/* $Id: ELFexe.h,v 1.1.2.1 2002-04-01 08:32:47 bird Exp $
  *
  * ELF stuff.
  *
