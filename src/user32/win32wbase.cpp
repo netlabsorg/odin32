@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.95 1999-11-25 19:22:02 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.96 1999-11-26 00:05:49 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2666,13 +2666,13 @@ HWND Win32BaseWindow::GetWindow(UINT uCmd)
         break;
 
     case GW_HWNDLAST:
-        if(getParent())
+        if(!getParent())
         {
             goto end;
         }
 
         window = this;
-        while(window)
+        while(window->getNextChild())
         {
             window = (Win32BaseWindow *)window->getNextChild();
         }
@@ -3318,7 +3318,7 @@ void PrintWindowStyle(DWORD dwStyle, DWORD dwExStyle)
         strcat(exstyle, "WS_EX_APPWINDOW ");
 
     dprintf(("Window style:   %x %s", dwStyle, style));
-    dprintf(("Window exStyle: %x %s", dwExStyle, exstyle));
+    dprintf(("Window exStyle: %x %s (FS = %x)", dwExStyle, exstyle, GetFS()));
 }
 #endif
 //******************************************************************************
