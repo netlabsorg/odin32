@@ -1,4 +1,4 @@
-/* $Id: dwaveout.cpp,v 1.20 2000-04-06 12:04:29 sandervl Exp $ */
+/* $Id: dwaveout.cpp,v 1.21 2000-04-06 21:11:10 sandervl Exp $ */
 
 /*
  * Wave playback class
@@ -499,13 +499,19 @@ MMRESULT DartWaveOut::reset()
 /******************************************************************************/
 MMRESULT DartWaveOut::restart()
 {
+ int i, curbuf;
+
     dprintf(("DartWaveOut::restart"));
     wmutex->enter(VMUTEX_WAIT_FOREVER);
     State = STATE_PLAYING;
     wmutex->leave();
-    MixSetupParms->pmixWrite(MixSetupParms->ulMixHandle,
-                             &MixBuffer[curPlayBuf],
-                             PREFILLBUF_DART);
+    curbuf = curPlayBuf;
+    for(i=0;i<PREFILLBUF_DART;i++) {
+  	MixSetupParms->pmixWrite(MixSetupParms->ulMixHandle, &MixBuffer[curbuf], 1);
+	if(++curbuf == PREFILLBUF_DART) {
+		curbuf = 0;
+	}
+    }
     return(MMSYSERR_NOERROR);
 }
 /******************************************************************************/
