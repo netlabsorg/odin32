@@ -1,4 +1,4 @@
-/* $Id: winimagelx.h,v 1.4 2001-06-16 20:22:47 sandervl Exp $ */
+/* $Id: winimagelx.h,v 1.5 2001-08-06 19:36:42 sandervl Exp $ */
 
 /*
  * Win32 LX Image base class
@@ -31,6 +31,7 @@ virtual ULONG     getApi(int ordinal);
 protected:
   LPVOID header;
   HINSTANCE hinstanceOS2;
+  DWORD  dwOrdinalBase;
 private:
 };
 

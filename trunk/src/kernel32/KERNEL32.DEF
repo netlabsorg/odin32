@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.118 2001-07-29 19:00:30 sandervl Exp $
+; $Id: KERNEL32.DEF,v 1.119 2001-08-06 19:36:41 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -1183,7 +1183,7 @@ EXPORTS
     _GetProcessTIBSel@0                                           @2012 NONAME
     
     _SetRegistryRootKey@8                                         @2013 NONAME
-    _SetCustomBuildName@4                                         @2014 NONAME
+    _SetCustomBuildName@8                                         @2014 NONAME
 
     strcmpiW                                                      @2020 NONAME
     strstrW                                                       @2021 NONAME

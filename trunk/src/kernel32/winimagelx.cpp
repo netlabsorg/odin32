@@ -1,4 +1,4 @@
-/* $Id: winimagelx.cpp,v 1.11 2001-07-30 12:01:25 sandervl Exp $ */
+/* $Id: winimagelx.cpp,v 1.12 2001-08-06 19:36:42 sandervl Exp $ */
 
 /*
  * Win32 LX Image base class
@@ -72,8 +72,12 @@ Win32LxImage::Win32LxImage(HINSTANCE hInstance, PVOID pResData)
 
   if(lpszCustomDllName) {
        name = lpszCustomDllName;
+       this->dwOrdinalBase = ::dwOrdinalBase;
   }
-  else name = OSLibGetDllName(hinstance);
+  else {
+       name = OSLibGetDllName(hinstance);
+       this->dwOrdinalBase = 0;
+  }
 
   strcpy(szFileName, name);
   strupr(szFileName);
@@ -118,7 +122,7 @@ ULONG Win32LxImage::getApi(int ordinal)
  APIRET      rc;
  ULONG       apiaddr;
 
-  rc = DosQueryProcAddr(hinstanceOS2, ordinal, NULL, (PFN *)&apiaddr);
+  rc = DosQueryProcAddr(hinstanceOS2, dwOrdinalBase+ordinal, NULL, (PFN *)&apiaddr);
   if(rc) {
 	dprintf(("Win32LxImage::getApi -> rc = %d", rc));
 	return(0);
