@@ -1,4 +1,4 @@
-/* $Id: win32wmdiclient.cpp,v 1.17 1999-12-21 17:03:45 cbratschi Exp $ */
+/* $Id: win32wmdiclient.cpp,v 1.18 1999-12-22 18:09:32 cbratschi Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -831,91 +831,79 @@ BOOL Win32MDIClientWindow::tile(UINT fuTile)
  */
 BOOL Win32MDIClientWindow::augmentFrameMenu(Win32MDIChildWindow *child)
 {
-/*
-    WND*    child = WIN_FindWndPtr(hChild);
-    HMENU   hSysPopup = 0;
-    HBITMAP hSysMenuBitmap = 0;
+  HMENU   hSysPopup = 0,hFrameMenu = ::GetMenu(getParent()->getWindowHandle()),hSysMenu = GetSystemMenu(child->getWindowHandle(),FALSE);
+  HBITMAP hSysMenuBitmap = 0;
 
-    if( !frame->wIDmenu || !child->hSysMenu )
-    {
-        WIN_ReleaseWndPtr(child);
-        return 0;
-    }
-    WIN_ReleaseWndPtr(child);
-
-    // create a copy of sysmenu popup and insert it into frame menu bar
-
-    if (!(hSysPopup = LoadMenuA(GetModuleHandleA("USER32"), "SYSMENU")))
+  if (!hFrameMenu || !hSysMenu)
     return 0;
 
-    //TRACE("\tgot popup %04x in sysmenu %04x\n",
-    //    hSysPopup, child->hSysMenu);
+  // create a copy of sysmenu popup and insert it into frame menu bar
 
-    AppendMenuA(frame->wIDmenu,MF_HELP | MF_BITMAP,
-                   SC_MINIMIZE, (LPSTR)(DWORD)HBMMENU_MBAR_MINIMIZE ) ;
-    AppendMenuA(frame->wIDmenu,MF_HELP | MF_BITMAP,
-                   SC_RESTORE, (LPSTR)(DWORD)HBMMENU_MBAR_RESTORE );
+  if (!(hSysPopup = LoadMenuA(GetModuleHandleA("USER32"), "SYSMENU")))
+    return 0;
+
+  //TRACE("\tgot popup %04x in sysmenu %04x\n",
+  //    hSysPopup, child->hSysMenu);
+
+  AppendMenuA(hFrameMenu,MF_HELP | MF_BITMAP,
+                 SC_MINIMIZE, (LPSTR)(DWORD)HBMMENU_MBAR_MINIMIZE ) ;
+  AppendMenuA(hFrameMenu,MF_HELP | MF_BITMAP,
+                 SC_RESTORE, (LPSTR)(DWORD)HBMMENU_MBAR_RESTORE );
 
   // In Win 95 look, the system menu is replaced by the child icon
 
-  if(TWEAK_WineLook > WIN31_LOOK)
+  HICON hIcon = GetClassLongA(child->getWindowHandle(), GCL_HICONSM);
+  if (!hIcon)
+    hIcon = GetClassLongA(child->getWindowHandle(), GCL_HICON);
+  if (hIcon)
   {
-    HICON hIcon = GetClassLongA(hChild, GCL_HICONSM);
-    if (!hIcon)
-      hIcon = GetClassLongA(hChild, GCL_HICON);
-    if (hIcon)
-    {
-      HDC hMemDC;
-      HBITMAP hBitmap, hOldBitmap;
-      HBRUSH hBrush;
-      HDC hdc = GetDC(hChild);
+    HDC hMemDC;
+    HBITMAP hBitmap, hOldBitmap;
+    HBRUSH hBrush;
+    HDC hdc = GetDC(child->getWindowHandle());
 
-      if (hdc)
-      {
-        int cx, cy;
-        cx = GetSystemMetrics(SM_CXSMICON);
-        cy = GetSystemMetrics(SM_CYSMICON);
-        hMemDC = CreateCompatibleDC(hdc);
-        hBitmap = CreateCompatibleBitmap(hdc, cx, cy);
-        hOldBitmap = SelectObject(hMemDC, hBitmap);
-        SetMapMode(hMemDC, MM_TEXT);
-        hBrush = CreateSolidBrush(GetSysColor(COLOR_MENU));
-        DrawIconEx(hMemDC, 0, 0, hIcon, cx, cy, 0, hBrush, DI_NORMAL);
-        SelectObject (hMemDC, hOldBitmap);
-        DeleteObject(hBrush);
-        DeleteDC(hMemDC);
-        ReleaseDC(hChild, hdc);
-        hSysMenuBitmap = hBitmap;
-      }
+    if (hdc)
+    {
+      int cx, cy;
+
+      cx = GetSystemMetrics(SM_CXSMICON);
+      cy = GetSystemMetrics(SM_CYSMICON);
+      hMemDC = CreateCompatibleDC(hdc);
+      hBitmap = CreateCompatibleBitmap(hdc, cx, cy);
+      hOldBitmap = SelectObject(hMemDC, hBitmap);
+      SetMapMode(hMemDC, MM_TEXT);
+      hBrush = CreateSolidBrush(GetSysColor(COLOR_MENU));
+      DrawIconEx(hMemDC, 0, 0, hIcon, cx, cy, 0, hBrush, DI_NORMAL);
+      SelectObject (hMemDC, hOldBitmap);
+      DeleteObject(hBrush);
+      DeleteDC(hMemDC);
+      ReleaseDC(child->getWindowHandle(), hdc);
+      hSysMenuBitmap = hBitmap;
     }
   }
-  else
-    hSysMenuBitmap = hBmpClose;
 
-    if( !InsertMenuA(frame->wIDmenu,0,MF_BYPOSITION | MF_BITMAP | MF_POPUP,
+  if( !InsertMenuA(hFrameMenu,0,MF_BYPOSITION | MF_BITMAP | MF_POPUP,
                     hSysPopup, (LPSTR)(DWORD)hSysMenuBitmap))
-    {
-        TRACE("not inserted\n");
+  {
+        //TRACE("not inserted\n");
     DestroyMenu(hSysPopup);
     return 0;
-    }
+  }
 
-    // The close button is only present in Win 95 look
-    if(TWEAK_WineLook > WIN31_LOOK)
-    {
-        AppendMenuA(frame->wIDmenu,MF_HELP | MF_BITMAP,
-                       SC_CLOSE, (LPSTR)(DWORD)HBMMENU_MBAR_CLOSE );
-    }
+  // The close button is only present in Win 95 look
 
-    EnableMenuItem(hSysPopup, SC_SIZE, MF_BYCOMMAND | MF_GRAYED);
-    EnableMenuItem(hSysPopup, SC_MOVE, MF_BYCOMMAND | MF_GRAYED);
-    EnableMenuItem(hSysPopup, SC_MAXIMIZE, MF_BYCOMMAND | MF_GRAYED);
-    SetMenuDefaultItem(hSysPopup, SC_CLOSE, FALSE);
+  AppendMenuA(hFrameMenu,MF_HELP | MF_BITMAP,
+                 SC_CLOSE, (LPSTR)(DWORD)HBMMENU_MBAR_CLOSE );
 
-    // redraw menu
-    DrawMenuBar(frame->hwndSelf);
-*/
-    return 1;
+  EnableMenuItem(hSysPopup, SC_SIZE, MF_BYCOMMAND | MF_GRAYED);
+  EnableMenuItem(hSysPopup, SC_MOVE, MF_BYCOMMAND | MF_GRAYED);
+  EnableMenuItem(hSysPopup, SC_MAXIMIZE, MF_BYCOMMAND | MF_GRAYED);
+  SetMenuDefaultItem(hSysPopup, SC_CLOSE, FALSE);
+
+  // redraw menu
+  DrawMenuBar(getParent()->getWindowHandle());
+
+  return 1;
 }
 
 /**********************************************************************
@@ -923,12 +911,12 @@ BOOL Win32MDIClientWindow::augmentFrameMenu(Win32MDIChildWindow *child)
  */
 BOOL Win32MDIClientWindow::restoreFrameMenu(Win32MDIChildWindow *child)
 {
-/*
     MENUITEMINFOA menuInfo;
-    INT nItems = GetMenuItemCount(frameWnd->wIDmenu) - 1;
-    UINT iId = GetMenuItemID(frameWnd->wIDmenu,nItems) ;
+    HMENU hFrameMenu = ::GetMenu(getParent()->getWindowHandle());
+    INT nItems = GetMenuItemCount(hFrameMenu) - 1;
+    UINT iId = GetMenuItemID(hFrameMenu,nItems) ;
 
-    TRACE("frameWnd %p,child %04x\n",frameWnd,hChild);
+    //TRACE("frameWnd %p,child %04x\n",frameWnd,hChild);
 
     if(!(iId == SC_RESTORE || iId == SC_CLOSE) )
     return 0;
@@ -937,36 +925,36 @@ BOOL Win32MDIClientWindow::restoreFrameMenu(Win32MDIChildWindow *child)
      * Remove the system menu, If that menu is the icon of the window
      * as it is in win95, we have to delete the bitmap.
      */
-/*
+
     menuInfo.cbSize = sizeof(MENUITEMINFOA);
     menuInfo.fMask  = MIIM_DATA | MIIM_TYPE;
 
-    GetMenuItemInfoA(frameWnd->wIDmenu,
+    GetMenuItemInfoA(hFrameMenu,
              0,
              TRUE,
              &menuInfo);
 
-    RemoveMenu(frameWnd->wIDmenu,0,MF_BYPOSITION);
+    RemoveMenu(hFrameMenu,0,MF_BYPOSITION);
 
+#if 0  //CB: hBmpClose not (yet) defined
     if ( (menuInfo.fType & MFT_BITMAP)           &&
      (LOWORD(menuInfo.dwTypeData)!=0)        &&
      (LOWORD(menuInfo.dwTypeData)!=hBmpClose) )
     {
       DeleteObject((HBITMAP)LOWORD(menuInfo.dwTypeData));
     }
+#endif
 
-    if(TWEAK_WineLook > WIN31_LOOK)
-    {
-        // close
-        DeleteMenu(frameWnd->wIDmenu,GetMenuItemCount(frameWnd->wIDmenu) - 1,MF_BYPOSITION);
-    }
+    // close
+    DeleteMenu(hFrameMenu,GetMenuItemCount(hFrameMenu) - 1,MF_BYPOSITION);
+
     // restore
-    DeleteMenu(frameWnd->wIDmenu,GetMenuItemCount(frameWnd->wIDmenu) - 1,MF_BYPOSITION);
+    DeleteMenu(hFrameMenu,GetMenuItemCount(hFrameMenu) - 1,MF_BYPOSITION);
     // minimize
-    DeleteMenu(frameWnd->wIDmenu,GetMenuItemCount(frameWnd->wIDmenu) - 1,MF_BYPOSITION);
+    DeleteMenu(hFrameMenu,GetMenuItemCount(hFrameMenu) - 1,MF_BYPOSITION);
 
-    DrawMenuBar(frameWnd->hwndSelf);
-*/
+    DrawMenuBar(getParent()->getWindowHandle());
+
     return 1;
 }
 
