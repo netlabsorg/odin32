@@ -1,4 +1,4 @@
-/* $Id: hmnpipe.cpp,v 1.9 2002-02-15 20:15:55 sandervl Exp $ */
+/* $Id: hmnpipe.cpp,v 1.10 2003-01-10 15:19:53 sandervl Exp $ */
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -200,14 +200,16 @@ BOOL HMDeviceNamedPipeClass::CreatePipe(PHMHANDLEDATA pHMHandleDataRead,
                          &pHMHandleDataWrite->hHMHandle,
                          lpsa,
                          cbPipe))
-    return TRUE;
+  {
+     return TRUE;
+  }
   else
-    return(FALSE);
+     return FALSE;
 }
 //******************************************************************************
 //******************************************************************************
 BOOL HMDeviceNamedPipeClass::ConnectNamedPipe( PHMHANDLEDATA pHMHandleData, 
-                                          LPOVERLAPPED lpOverlapped)
+                                               LPOVERLAPPED lpOverlapped)
 {
   dprintfl(("KERNEL32: HMDeviceNamedPipeClass::ConnectNamedPipe %s(%08x) [%08x]\n",
            lpHMDeviceName, pHMHandleData,lpOverlapped));

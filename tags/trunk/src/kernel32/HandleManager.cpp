@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.92 2003-01-10 12:57:11 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.93 2003-01-10 15:19:53 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -1120,12 +1120,17 @@ HFILE HMCreateFile(LPCSTR lpFileName,
   }
   else
   {
-    SetLastError(ERROR_SUCCESS); //@@@PH 1999/10/27 rc5desg requires this?
-
-             /* copy data fields that might have been modified by CreateFile */
+    /* copy data fields that might have been modified by CreateFile */
     memcpy(&TabWin32Handles[iIndexNew].hmHandleData,
            &HMHandleTemp,
            sizeof(HMHANDLEDATA));
+
+    if(lpSecurityAttributes && lpSecurityAttributes->bInheritHandle) {
+        dprintf(("Set inheritance for child processes"));
+        HMSetHandleInformation(iIndexNew, HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
+    }
+
+    SetLastError(ERROR_SUCCESS); //@@@PH 1999/10/27 rc5desg requires this?
   }
 
   return (HFILE)iIndexNew;                             /* return valid handle */
@@ -4512,6 +4517,12 @@ DWORD HMCreateNamedPipe(LPCTSTR lpName,
       return 0;                                           /* signal error */
   }
 
+  dprintf(("Named pipe %x", iIndexNew));
+  if(lpSecurityAttributes && lpSecurityAttributes->bInheritHandle) {
+      dprintf(("Set inheritance for child processes"));
+      HMSetHandleInformation(iIndexNew, HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
+  }
+
   return iIndexNew;
 }
 
@@ -4759,9 +4770,9 @@ BOOL HMSetNamedPipeHandleState(HANDLE  hPipe,
  * Author    : Przemyslaw Dobrowolski
  *****************************************************************************/
 BOOL HMCreatePipe(PHANDLE phRead,
-                PHANDLE phWrite,
-                LPSECURITY_ATTRIBUTES lpsa,
-                DWORD                 cbPipe)
+                  PHANDLE phWrite,
+                  LPSECURITY_ATTRIBUTES lpsa,
+                  DWORD                 cbPipe)
 {
   int             iIndex;                     /* index into the handle table */
   int             iIndexNewRead;              /* index into the handle table */
@@ -4831,6 +4842,13 @@ BOOL HMCreatePipe(PHANDLE phRead,
       HMHandleFree(iIndexNewRead);
       HMHandleFree(iIndexNewWrite);
       return FALSE;                                           /* signal error */
+  }
+
+  dprintf(("Read pipe %x, Write pipe %x", iIndexNewRead, iIndexNewWrite));
+  if(lpsa && lpsa->bInheritHandle) {
+      dprintf(("Set inheritance for child processes"));
+      HMSetHandleInformation(iIndexNewRead, HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
+      HMSetHandleInformation(iIndexNewWrite, HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
   }
 
   *phRead  = iIndexNewRead;
