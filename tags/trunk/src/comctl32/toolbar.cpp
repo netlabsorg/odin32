@@ -1,4 +1,4 @@
-/* $Id: toolbar.cpp,v 1.5 2000-04-19 14:47:24 sandervl Exp $ */
+/* $Id: toolbar.cpp,v 1.6 2000-05-22 17:25:12 cbratschi Exp $ */
 /*
  * Toolbar control
  *
@@ -28,13 +28,8 @@
  */
 
 /*
- - Corel 20000317 level
- - WINE 991212 level
-*/
-
-/* CB: Odin32/WINE bugs
-  - IMAGELIST_Draw draws a line too at the bottom of the bitmap (toolbar.exe)
-    imagelist uses default size values instead of real bitmap values
+ - Corel 20000513 level
+ - (WINE 991212 level)
 */
 
 #include <string.h>
@@ -1599,16 +1594,17 @@ TOOLBAR_AddBitmap (HWND hwnd, WPARAM wParam, LPARAM lParam)
         if (nButtons <= 0)
             return -1;
 
-//        TRACE ("adding %d bitmaps!\n", nButtons);
+        //TRACE ("adding %d bitmaps!\n", nButtons);
     }
 
     if (!(infoPtr->himlDef)) {
         /* create new default image list */
-//        TRACE ("creating default image list!\n");
-
-        infoPtr->himlDef =
-            ImageList_Create (infoPtr->nBitmapWidth, infoPtr->nBitmapHeight,
-                              ILC_COLOR | ILC_MASK, nButtons, 2);
+        //TRACE ("creating default image list!\n");
+	/* It seems that the image list created is 1 pixel taller than the bitmap height */
+//CB: nope, it's otherwise	
+	infoPtr->himlDef =
+	    ImageList_Create (infoPtr->nBitmapWidth, infoPtr->nBitmapHeight-1,
+			      ILC_COLOR | ILC_MASK, nButtons, 2);
         infoPtr->himlInt = infoPtr->himlDef;
     }
 
@@ -3461,19 +3457,15 @@ TOOLBAR_Destroy (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
     TOOLBAR_INFO *infoPtr = TOOLBAR_GetInfoPtr (hwnd);
 
-    /* delete tooltip control */
-    if (infoPtr->hwndToolTip)
-        DestroyWindow (infoPtr->hwndToolTip);
-
     /* delete button data */
     if (infoPtr->buttons)
     {
       INT x;
 
       //SvL: Check pointers
-      for (x = 0;x < infoPtr->nNumButtons;x++) 
-	if(infoPtr->buttons[x].pszName)
-		COMCTL32_Free(infoPtr->buttons[x].pszName);
+      for (x = 0;x < infoPtr->nNumButtons;x++)
+        if(infoPtr->buttons[x].pszName)
+                COMCTL32_Free(infoPtr->buttons[x].pszName);
 
       COMCTL32_Free(infoPtr->buttons);
     }
