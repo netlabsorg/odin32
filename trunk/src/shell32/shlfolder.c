@@ -234,11 +234,65 @@ static HRESULT SHELL32_GetDisplayNameOfChild(
  *
  * This functions does not set flags!! It only resets flags when nessesary.
  */
+#include <dbglog.h>
 static HRESULT SHELL32_GetItemAttributes(
 	IShellFolder * psf,
 	LPITEMIDLIST pidl,
 	LPDWORD pdwAttributes)
 {
+#if 1
+    GUID const *clsid;
+    DWORD dwAttributes;
+    DWORD dwSupportedAttr=SFGAO_CANCOPY |           /*0x00000001 */
+                          SFGAO_CANMOVE |           /*0x00000002 */
+                          SFGAO_CANLINK |           /*0x00000004 */
+                          SFGAO_CANRENAME |         /*0x00000010 */
+                          SFGAO_CANDELETE |         /*0x00000020 */
+                          SFGAO_HASPROPSHEET |      /*0x00000040 */
+                          SFGAO_DROPTARGET |        /*0x00000100 */
+                          SFGAO_READONLY |          /*0x00040000 */
+                          SFGAO_HIDDEN |            /*0x00080000 */
+                          SFGAO_FILESYSANCESTOR |   /*0x10000000 */
+                          SFGAO_FOLDER |            /*0x20000000 */
+                          SFGAO_FILESYSTEM |        /*0x40000000 */
+                          SFGAO_HASSUBFOLDER;       /*0x80000000 */
+    
+    TRACE ("0x%08lx\n", *pdwAttributes);
+
+    dprintf(("_ILGetTextPointer returned %s", _ILGetTextPointer(pidl)));
+
+    if (*pdwAttributes & ~dwSupportedAttr)
+    {
+        WARN ("attributes 0x%08lx not implemented\n", (*pdwAttributes & ~dwSupportedAttr));
+        *pdwAttributes &= dwSupportedAttr;
+    }
+
+    if (_ILIsDrive (pidl)) {
+        *pdwAttributes &= SFGAO_HASSUBFOLDER|SFGAO_FILESYSTEM|SFGAO_FOLDER|SFGAO_FILESYSANCESTOR|SFGAO_DROPTARGET|SFGAO_HASPROPSHEET|SFGAO_CANLINK;
+    } else if ((clsid = _ILGetGUIDPointer (pidl))) {
+	if (HCR_GetFolderAttributes (clsid, &dwAttributes)) {
+	    *pdwAttributes &= dwAttributes;
+	} else {
+	    *pdwAttributes &= SFGAO_HASSUBFOLDER|SFGAO_FOLDER|SFGAO_FILESYSANCESTOR|SFGAO_DROPTARGET|SFGAO_HASPROPSHEET|SFGAO_CANRENAME|SFGAO_CANLINK;
+	}
+    } else if (_ILGetDataPointer (pidl)) {
+	dwAttributes = _ILGetFileAttributes (pidl, NULL, 0);
+	*pdwAttributes &= ~SFGAO_FILESYSANCESTOR;
+
+	if (((SFGAO_FOLDER|SFGAO_HASSUBFOLDER) & *pdwAttributes) && !(dwAttributes & FILE_ATTRIBUTE_DIRECTORY))
+	    *pdwAttributes &= ~(SFGAO_FOLDER | SFGAO_HASSUBFOLDER);
+
+	if ((SFGAO_HIDDEN & *pdwAttributes) && !(dwAttributes & FILE_ATTRIBUTE_HIDDEN))
+	    *pdwAttributes &= ~SFGAO_HIDDEN;
+
+	if ((SFGAO_READONLY & *pdwAttributes) && !(dwAttributes & FILE_ATTRIBUTE_READONLY))
+	    *pdwAttributes &= ~SFGAO_READONLY;
+    } else {
+	*pdwAttributes &= SFGAO_HASSUBFOLDER|SFGAO_FOLDER|SFGAO_FILESYSANCESTOR|SFGAO_DROPTARGET|SFGAO_HASPROPSHEET|SFGAO_CANRENAME|SFGAO_CANLINK;
+    }
+    TRACE ("-- 0x%08lx\n", *pdwAttributes);
+    return S_OK;
+#else
         GUID const * clsid;
 	DWORD dwAttributes;
 	
@@ -283,6 +337,7 @@ static HRESULT SHELL32_GetItemAttributes(
 	}
 	TRACE("-- 0x%08lx\n", *pdwAttributes);
 	return S_OK;
+#endif
 }
 
 /***********************************************************************
@@ -1808,7 +1863,14 @@ static HRESULT WINAPI ISF_Desktop_fnBindToObject( IShellFolder2 * iface, LPCITEM
 	     /* shell extension */
 	     if (!SUCCEEDED(SHELL32_CoCreateInitSF (This->absPidl, pidl, clsid, riid, (LPVOID*)&pShellFolder)))
 	     {
+#ifdef __WIN32OS2__
+               //SvL: no implementation present, so just copy 'my computer'
+               if ( IsEqualIID(clsid, &CLSID_NetworkPlaces)) {
+  	            pShellFolder = ISF_MyComputer_Constructor();
+               }
+#else
 	       return E_INVALIDARG;
+#endif
 	     }
 	  }
 	} 

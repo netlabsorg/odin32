@@ -1,4 +1,4 @@
-; $Id: odin36d.def,v 1.9 2003-01-23 12:33:05 sandervl Exp $
+; $Id: odin36d.def,v 1.10 2003-07-28 11:30:18 sandervl Exp $
 ; Odin VAC++ 3.6.5 shared multithreaded runtime
 LIBRARY ODINCRTD INITINSTANCE TERMINSTANCE
 DESCRIPTION 'Odin32 System DLL - VAC++ 3.6.5 Debug OdinCRT'
@@ -53,6 +53,8 @@ EXPORTS
     odin_fputws                                            @478 NONAME
 
     odin_fdopen                                           @605 NONAME
+
+    odin_tmpnam                                           @409 NONAME
 
     __nw__FUiPCcT1                                      @172  NONAME
     __dl__FPvPCcUi                                      @201  NONAME
@@ -449,7 +451,7 @@ EXPORTS
     setbuf                                            @406  NONAME
     stdout                                            @407  NONAME
     wcslen                                            @408  NONAME
-    tmpnam                                            @409  NONAME
+;;    tmpnam                                            @409  NONAME
     rewind                                            @410  NONAME
     wctype                                            @411  NONAME
     wcscat                                            @412  NONAME

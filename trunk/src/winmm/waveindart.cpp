@@ -1,4 +1,4 @@
-/* $Id: waveindart.cpp,v 1.6 2003-03-05 14:49:04 sandervl Exp $ */
+/* $Id: waveindart.cpp,v 1.7 2003-07-28 11:30:44 sandervl Exp $ */
 
 /*
  * Wave record class
@@ -261,9 +261,9 @@ MMRESULT DartWaveIn::start()
 
         //TODO: don't do this here. Select line or mic depending on aux settings
         //(until we really support the mixer extensions anyway)
-        /* Set the connector to 'line in' */
+        /* Set the connector to 'microphone' */
         memset( &ConnectorParms, '\0', sizeof( MCI_CONNECTOR_PARMS ) );
-        ConnectorParms.ulConnectorType = MCI_LINE_IN_CONNECTOR;
+        ConnectorParms.ulConnectorType = MCI_MICROPHONE_CONNECTOR;
         rc = mymciSendCommand(DeviceId, MCI_CONNECTOR, MCI_WAIT |
                               MCI_ENABLE_CONNECTOR | MCI_CONNECTOR_TYPE,
                               ( PVOID ) &ConnectorParms, 0 );
@@ -310,6 +310,7 @@ MMRESULT DartWaveIn::stop()
 
     wmutex.enter();
     if(State != STATE_RECORDING) {
+        dprintf(("Not recording!!"));
         State = STATE_STOPPED;
         wmutex.leave();
         return(MMSYSERR_NOERROR);
@@ -340,10 +341,6 @@ MMRESULT DartWaveIn::reset()
         State = STATE_STOPPED;
         wmutex.leave();
         return MMSYSERR_NOERROR;
-    }
-    if(State != STATE_RECORDING) {
-        wmutex.leave();
-        return(MMSYSERR_HANDLEBUSY);
     }
     wmutex.leave();
 
@@ -414,7 +411,7 @@ ULONG DartWaveIn::getPosition()
     mciStatus.ulItem = MCI_STATUS_POSITION;
     rc = mymciSendCommand(DeviceId, MCI_STATUS, MCI_STATUS_ITEM|MCI_WAIT, (PVOID)&mciStatus, 0);
     if((rc & 0xFFFF) == MCIERR_SUCCESS) {
-        nrbytes = (mciStatus.ulReturn * (getAvgBytesPerSecond()/1000));
+        nrbytes = (((double)mciStatus.ulReturn * (double)getAvgBytesPerSecond())/1000.0);
         return nrbytes;;
     }
     mciError(rc);

@@ -1,4 +1,4 @@
-/* $Id: dragdrop.cpp,v 1.3 2002-06-20 14:18:14 sandervl Exp $ */
+/* $Id: dragdrop.cpp,v 1.4 2003-07-28 11:27:45 sandervl Exp $ */
 
 /*
  * Win32 Drag 'n Drop functions for OS/2
@@ -30,7 +30,9 @@ ULONG DragDropFiles(HWND hwnd, POINT point, UINT cFiles, LPSTR pszFiles, UINT cb
     HGLOBAL    hDropFile;
     DWORD      dwExStyle;
     HWND       orghwnd = hwnd;
-   
+
+    dprintf(("DragDropFiles %x (%d,%d) %d %s %d %d", hwnd, point.x, point.y, cFiles, pszFiles, cbszFiles, fNonClient));
+
     dwExStyle = GetWindowLongA(hwnd, GWL_EXSTYLE);
 
     //TODO: Is it correct if the window or parent accepts files or must we check the top parent?
@@ -65,6 +67,7 @@ ULONG DragDropFiles(HWND hwnd, POINT point, UINT cFiles, LPSTR pszFiles, UINT cb
 //******************************************************************************
 BOOL DragDropDragOver(HWND hwnd, DWORD dwEffect)
 {
+    dprintf(("DragDropDragOver %x %x", hwnd, dwEffect));
     if(pfnDragOver) {
         return pfnDragOver(hwnd, dwEffect);
     }
@@ -77,6 +80,8 @@ BOOL DragDropDragEnter(HWND hwnd, POINT point, UINT cFiles, LPSTR pszFiles, UINT
 {
     DROPFILES *pDropFile;
     HGLOBAL    hDropFile;
+
+    dprintf(("DragDropDragEnter %x (%d,%d) %d %s %d %d", hwnd, point.x, point.y, cFiles, pszFiles, cbszFiles, fNonClient));
 
     if(pfnDragEnter) {
         cbszFiles++;    //extra terminating 0
@@ -102,6 +107,7 @@ BOOL DragDropDragEnter(HWND hwnd, POINT point, UINT cFiles, LPSTR pszFiles, UINT
 //******************************************************************************
 BOOL DragDropDragLeave(HWND hwnd)
 {
+    dprintf(("DragDropDragLeave %x", hwnd));
     if(pfnDragLeave) {
         return pfnDragLeave(hwnd);
     }
@@ -112,6 +118,8 @@ BOOL DragDropDragLeave(HWND hwnd)
 BOOL DragDropAccept(HWND hwnd)
 {
     DWORD      dwExStyle;
+
+    dprintf(("DragDropDragAccept %x", hwnd));
 
     dwExStyle = GetWindowLongA(hwnd, GWL_EXSTYLE);
     //Is it correct if the window or parent accepts files or must we check the topparent parent?

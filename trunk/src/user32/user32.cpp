@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.126 2003-01-03 17:20:04 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.127 2003-07-28 11:27:47 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -693,6 +693,10 @@ BOOL WIN32API SystemParametersInfoA(UINT uiAction, UINT uiParam, PVOID pvParam, 
     case SPI_SETMOUSE:
         // TODO make this for Win32 apps only, Open32 changes OS/2 settings!
         dprintf(("USER32: SPI_SETMOUSE is ignored, implement!\n"));
+        break;
+
+    case SPI_SETMOUSESPEED:
+        dprintf(("USER32: SPI_SETMOUSESPEED is ignored, implement!\n"));
         break;
 
     case SPI_SETMOUSEBUTTONSWAP:

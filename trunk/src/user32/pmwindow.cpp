@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.216 2003-06-03 11:58:37 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.217 2003-07-28 11:27:47 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -51,6 +51,7 @@
 #include <pmkbdhk.h>
 #include <pmscan.h>
 #include <winscan.h>
+#include <oslibdnd.h>
 #include <win\dbt.h>
 #include "dragdrop.h"
 #include "menu.h"
@@ -1058,6 +1059,38 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         else {
             rc = (MRFROM2SHORT (DOR_NEVERDROP, 0));
         }
+        break;
+    }
+
+    case DM_RENDER:
+    {
+        PDRAGTRANSFER pDragTransfer = (PDRAGTRANSFER)mp1;
+
+        dprintf(("OS2: DM_RENDER %x", pDragTransfer));
+
+        rc = (MRESULT)OSLibRenderFormat(pDragTransfer);
+        break;
+    }
+
+    case DM_RENDERPREPARE:
+    {
+        PDRAGTRANSFER pDragTransfer = (PDRAGTRANSFER)mp1;
+
+        dprintf(("OS2: DM_RENDERPREPARE %x", pDragTransfer));
+        break;
+    }
+
+    case DM_ENDCONVERSATION:
+    {
+        dprintf(("OS2: DM_ENDCONVERSATION"));
+        rc = (MRESULT)OSLibEndConversation();
+        break;
+    }
+
+    case DM_RENDERFILE:
+    {
+        dprintf(("OS2: DM_ENDCONVERSATION"));
+        rc = FALSE;
         break;
     }
 
@@ -2283,7 +2316,7 @@ static char *PMDragExtractFiles(PDRAGINFO pDragInfo, ULONG *pcItems, ULONG *pulB
 
     cItems = DrgQueryDragitemCount(pDragInfo);
 
-    //computer memory required to hold all filenames
+    //compute memory required to hold all filenames
     int bufsize = 0;
     for (i = 0; i < cItems; i++) {
         pDragItem = DrgQueryDragitemPtr(pDragInfo, i);

@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.70 2003-05-27 10:52:25 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.71 2003-07-28 11:27:45 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -745,7 +745,12 @@ ULONG OSLibSendMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam, BOOL fU
 
     return (ULONG)WinSendMsg(hwnd, WIN32APP_POSTMSG+msg, (MPARAM)((fUnicode) ? WIN32MSG_MAGICW : WIN32MSG_MAGICA), pvMsgPacket);
 }
-
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibSendWinMessage(HWND hwnd, ULONG winmsg)
+{
+    return (BOOL)WinSendMsg(Win32ToOS2Handle(hwnd), TranslateWinMsg(winmsg, TRUE), 0, 0);
+}
 //******************************************************************************
 //******************************************************************************
 ULONG OSLibWinBroadcastMsg(ULONG msg, ULONG wParam, ULONG lParam, BOOL fSend)

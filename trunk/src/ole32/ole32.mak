@@ -1,4 +1,4 @@
-# $Id: ole32.mak,v 1.21 2002-11-12 17:06:02 sandervl Exp $
+# $Id: ole32.mak,v 1.22 2003-07-28 11:32:05 sandervl Exp $
 
 #
 # Odin32 API
@@ -49,7 +49,9 @@ $(OBJDIR)\initialise.obj \
 $(OBJDIR)\itemmoniker.obj \
 $(OBJDIR)\imessagefilter.obj \
 $(OBJDIR)\memlockbytes.obj \
+!if "$(DEBUG)" == "1"
 $(OBJDIR)\oString.obj \
+!endif
 $(OBJDIR)\ole2impl.obj \
 $(OBJDIR)\ole2.obj \
 $(OBJDIR)\oleobj.obj \
