@@ -1,4 +1,4 @@
-/* $Id: dbglocal.cpp,v 1.4 2000-05-05 11:32:36 sandervl Exp $ */
+/* $Id: dbglocal.cpp,v 1.5 2000-05-05 13:14:07 sandervl Exp $ */
 
 /*
  * debug logging functions for OS/2
@@ -70,7 +70,6 @@ char  *DbgFileNames[DBG_MAXFILES] =
 "dib",
 "oslibdos",
 "win32wmdichild",
-"winprop",
 "wingdi",
 "oslibgdi",
 "winaccel",
