@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 1999-08-21 12:29:31 sandervl Exp $
+# $Id: makefile,v 1.8 1999-08-21 19:11:27 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -32,9 +32,10 @@ all: $(TARGETDLL).dll $(TARGETDLL).lib $(TARGET).exe
 $(TARGET).exe: $(OBJS)
         $(LD) $(LDFLAGSEXE) -Fe$@ $(OBJS)
         $(CP) $(TARGET).exe $(PDWIN32_BIN)
+	$(CP) $@ $(PDWIN32_BIN)
 
 $(TARGETDLL).dll: $(OBJSDLL) $(TARGETDLL).def 
-	$(LD) $(LDFLAGS) -Fe$@ $(OBJSDLL) $(TARGETDLL).def OS2386.LIB $(RTLLIB_O)
+	$(LD) $(LDFLAGS) -Fe$@ $(OBJSDLL) sbsstub.obj $(TARGETDLL).def OS2386.LIB $(RTLLIB)
 	$(CP) $@ $(PDWIN32_BIN)
 
 $(TARGETDLL).lib: $(TARGETDLL).dll
