@@ -1,4 +1,4 @@
-/* $Id: vprintf.c,v 1.3 1999-10-31 23:57:07 bird Exp $
+/* $Id: vprintf.c,v 1.4 1999-11-01 09:28:59 bird Exp $
  *
  * vprintf and printf
  *
@@ -35,8 +35,8 @@
 #ifdef RING0
     #include <builtin.h>
     #include "options.h"
-    #include "Yield.h"
 #endif
+#include "Yield.h"
 
 
 /*******************************************************************************
