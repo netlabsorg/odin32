@@ -57,7 +57,6 @@ static inline int mbstowcs_sbcs( const struct sbcs_table *table,
         ret = -1;
     }
 
-    #ifndef __WIN32OS2__
     for (;;)
     {
         switch(srclen)
@@ -86,15 +85,6 @@ static inline int mbstowcs_sbcs( const struct sbcs_table *table,
         src += 16;
         srclen -= 16;
     }
-    #else
-    /* kso: The above code isn't that cool when srclen is bad.
-     *      This might be a little bit slower but way safer!
-     */
-    ret = 1;                            /* seems to be 1 based, at least the code is... */
-    while (*src && srclen--)
-        *dst++ = cp2uni[*src++], ret++;
-    return ret - srclen;
-    #endif
 }
 
 /* mbstowcs for single-byte code page with char decomposition */
