@@ -1,4 +1,4 @@
-/* $Id: winexepe2lx.cpp,v 1.12 2002-12-20 10:38:58 sandervl Exp $ */
+/* $Id: winexepe2lx.cpp,v 1.13 2002-12-20 12:40:43 sandervl Exp $ */
 
 /*
  * Win32 PE2LX Exe class
@@ -30,6 +30,7 @@
 #include <cpuhlp.h>
 #include <wprocess.h>
 #include <win32api.h>
+#include <odinpe.h>
 
 #include "oslibmisc.h"      // OSLibGetDllName
 #include "conwin.h"         // Windows Header for console only
@@ -95,7 +96,7 @@ void WIN32API RegisterPe2LxExe(ULONG ulPe2LxVersion, HINSTANCE hinstance, ULONG 
             eprintf(("RegisterPe2LxExe: new returned a NULL-pointer\n"));
             return;
         }
-        if (!pWinPe2LxExe->init())
+        if (pWinPe2LxExe->init() != LDRERROR_SUCCESS)
         {
             eprintf(("RegisterPe2LxExe: init-method failed.\n"));
             delete pWinPe2LxExe;
@@ -189,7 +190,7 @@ BOOL Win32Pe2LxExe::earlyInit()
     Win32Pe2LxExe * pExe = new Win32Pe2LxExe((HINSTANCE)OSLibGetPIB(PIB_TASKHNDL), libWin32kInstalled());
     if (pExe)
     {
-        if (pExe->init())
+        if (pExe->init() == LDRERROR_SUCCESS)
         {
             WinExe = pExe;
             return fEarlyInit = TRUE;

@@ -1,4 +1,4 @@
-/* $Id: windllpe2lx.cpp,v 1.12 2002-12-20 10:38:57 sandervl Exp $ */
+/* $Id: windllpe2lx.cpp,v 1.13 2002-12-20 12:40:43 sandervl Exp $ */
 
 /*
  * Win32 PE2LX Dll class
@@ -29,6 +29,7 @@
 #include <windllpe2lx.h>
 #include <winexepe2lx.h>
 #include <wprocess.h>
+#include <odinpe.h>
 
 #include "oslibmisc.h"      // OSLibGetDllName
 #include "conwin.h"         // Windows Header for console only
@@ -99,7 +100,7 @@ ULONG WIN32API RegisterPe2LxDll(ULONG ulPe2LxVersion, HINSTANCE hinstance, ULONG
             eprintf(("RegisterPe2LxDll: new returned a NULL-pointer\n"));
             return 0;
         }
-        if (!pWinMod->init())
+        if (pWinMod->init() != LDRERROR_SUCCESS)
         {
             eprintf(("RegisterPe2LxDll: init-method failed.\n"));
             delete pWinMod;

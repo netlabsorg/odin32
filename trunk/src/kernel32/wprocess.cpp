@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.167 2002-12-20 10:38:58 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.168 2002-12-20 12:40:44 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -30,6 +30,7 @@
 #include "windlllx.h"
 #include <vmutex.h>
 #include <handlemanager.h>
+#include <odinpe.h>
 
 #include "odin32validate.h"
 #include "exceptutil.h"
@@ -1084,7 +1085,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
          *      delete Win32PeLdrDll instance.
          *  Endif.
          */
-        if (peldrDll->init(0))
+        if(peldrDll->init(0) == LDRERROR_SUCCESS)
         {
             peldrDll->AddRef();
             if (peldrDll->attachProcess())
