@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.335 1999-10-17 16:59:29 sandervl Exp $ */
+ /* $Id: changelog,v 1.336 1999-10-17 18:08:24 sandervl Exp $ */
 
  99-10-17: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Ported AdjustWindowRectEx from Wine (990815)
@@ -14,6 +14,10 @@
                   Don't change PM window style in WM_DESTROY handler -> crash in PMMERGE
                   Bugfixes for Enum(Thread/Child)Window (wrong call to get object ptr)
                   Fixed FindWindowEx method to map frame window to object ptr.
+                  Fixed WM_WINDOWPOSCHANGED handler for scrollbars (set window &
+                  client rectangle)
+                  Fixed WM_MOUSEMOVE handler for scrollbars (return 1 to let
+                  PM change the mouse cursor back to the default)
 
  99-10-17: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: replaced OS/2 scrollbars by WINE scrollbars
