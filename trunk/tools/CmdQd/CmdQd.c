@@ -1,4 +1,4 @@
-/* $Id: CmdQd.c,v 1.13 2002-01-09 00:29:57 bird Exp $
+/* $Id: CmdQd.c,v 1.14 2002-05-07 09:18:09 bird Exp $
  *
  * Command Queue Daemon / Client.
  *
@@ -533,6 +533,10 @@ int Init(const char *arg0, int cWorkers)
     int             rc;
     RESULTCODES     Res;                /* dummy, unused */
     char            szArg[CCHMAXPATH + 32];
+
+    DosSetFHState((HFILE)HF_STDIN, OPEN_FLAGS_NOINHERIT);
+    DosSetFHState((HFILE)HF_STDOUT, OPEN_FLAGS_NOINHERIT);
+    DosSetFHState((HFILE)HF_STDERR, OPEN_FLAGS_NOINHERIT);
 
     sprintf(&szArg[0], "%s\t!Daemon! %d", arg0, cWorkers);
     szArg[strlen(arg0)] = '\0';
