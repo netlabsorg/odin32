@@ -1,4 +1,4 @@
-/* $Id: ole2nls.cpp,v 1.9 2001-04-03 14:10:48 sandervl Exp $ */
+/* $Id: ole2nls.cpp,v 1.10 2001-04-03 17:47:11 sandervl Exp $ */
 
 /*
  *	National Language Support library
@@ -29,7 +29,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <locale.h>
-//#include <unicode.h>
+#include <heapstring.h>
 #include <ctype.h>
 #include <wcstr.h>
 

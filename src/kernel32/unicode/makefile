@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2001-04-03 14:09:53 sandervl Exp $
+# $Id: makefile,v 1.2 2001-04-03 17:47:13 sandervl Exp $
 
 #
 # Odin32 API
@@ -12,6 +12,7 @@
 #
 LIBTARGET = 1
 EXETARGET = 1
+PUBLICLIB = 1
 
 
 #
@@ -23,7 +24,7 @@ EXETARGET = 1
 #
 # Overrides.
 #
-CDEFINES = $(CDEFINES) /Tdp -DUSE_INLINE_UNICODEFUNCS
+CDEFINES = $(CDEFINES) /Tdp
 
 
 #
