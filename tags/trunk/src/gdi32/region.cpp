@@ -1,4 +1,4 @@
-/* $Id: region.cpp,v 1.21 2001-05-19 19:43:54 sandervl Exp $ */
+/* $Id: region.cpp,v 1.22 2001-09-30 22:22:53 sandervl Exp $ */
 
 /*
  * GDI32 region code
@@ -1164,6 +1164,7 @@ ODINFUNCTIONNODBG5(BOOL, SetRectRgn, HRGN, hrgn, int, left, int, top, int, right
     return FALSE;
 }
 //******************************************************************************
+//NOTE: depends on hps inversion
 //******************************************************************************
 ODINFUNCTIONNODBG3(ULONG, GetRegionData, HRGN, hrgn, ULONG, count, PRGNDATA, pData)
 {
@@ -1216,7 +1217,7 @@ ODINFUNCTIONNODBG3(ULONG, GetRegionData, HRGN, hrgn, ULONG, count, PRGNDATA, pDa
         pData->rdh.dwSize   = sizeof(pData->rdh);
         pData->rdh.iType    = RDH_RECTANGLES_W;    // one and only possible value
         pData->rdh.nCount   = rgnRect.crcReturned;
-        pData->rdh.nRgnSize = rgnRect.crcReturned * sizeof(RECTL);
+        pData->rdh.nRgnSize = rgnRect.crcReturned * sizeof(RECT);
 
         //flip top & bottom for bounding rectangle (not really necessary; but cleaner coding)
         LONG temp          = boundRect.yTop;
