@@ -1,4 +1,13 @@
- /* $Id: ChangeLog,v 1.505 1999-12-04 18:56:44 achimha Exp $ */
+ /* $Id: ChangeLog,v 1.506 1999-12-05 00:32:19 sandervl Exp $ */
+
+ 99-12-05: Sander van Leeuwen <sandervl@xs4all.nl>
+	- GDI32: Changed DEFAULT_GUI_FONT to WarpSans.9
+	- USER32:InSendMessage,GetMessagePos,GetMessageTime & ReplyMessage
+                 implemented using PM apis.
+                 Update client rectangle in WM_WINDOWPOSCHANGED handler in
+                 pmwindow.cpp. (client can change without affecting the
+                 frame window's size/position; previously we never sent an update)
+                 -> fixes wrong button position in RealPlayer
 
  99-12-04 Achim Hasenmueller <achimha@innotek.de>
         - WSOCK32\NEW: Fixed bugs with incorrect relay window invocation
