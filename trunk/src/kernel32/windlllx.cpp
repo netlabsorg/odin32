@@ -1,4 +1,4 @@
-/* $Id: windlllx.cpp,v 1.17 2001-02-09 18:31:05 sandervl Exp $ */
+/* $Id: windlllx.cpp,v 1.18 2001-02-24 12:59:44 sandervl Exp $ */
 
 /*
  * Win32 LX Dll class (compiled in OS/2 using Odin32 api)
@@ -68,16 +68,15 @@ DWORD WIN32API RegisterLxDll(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint,
 	dprintf(("ERROR: RegisterLxDll: OSLibGetDllName %x failed!!", hInstance));
 	return 0;
    }
-   //Make sure DosLoadModule is called at least 
-   //once for a dll (to make sure OS/2 doesn't unload the dll when it's
-   //still needed)
-//testestest
+   dprintf(("RegisterLxDll %x %s", hInstance, szFileName));
+   //Make sure DosLoadModule is called at least once for a dll (to make sure 
+   //OS/2 doesn't unload the dll when it's still needed)
    rc = DosLoadModule(szErrName, sizeof(szErrName), szFileName, &hInstance);
    if(rc != 0) { 
 	dprintf(("ERROR: RegisterLxDll: DosLoadModule %s failed (rc=%d)!!", szFileName, rc));
 	return 0;
    }
-//testestest
+
    windll = new Win32LxDll(hInstance, EntryPoint, pResData, MajorImageVersion,
                            MinorImageVersion, Subsystem);
    if(windll == NULL) {
