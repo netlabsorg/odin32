@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.1440 2001-05-23 17:01:19 sandervl Exp $ */
+/* $Id: changelog,v 1.1441 2001-05-24 08:18:22 sandervl Exp $ */
+
+ 2001-05-24: Sander van Leeuwen <sandervl@xs4all.nl>
+    - GDI32:    o Commented out recent changes (color conversion) in
+                  SetDIBitsToDevice. Breaks startup bitmap of Acrobat Reader 4
+    - KERNEL32: o OpenFile fix for OF_REOPEN flag (crashes when looking up
+                  handle)
 
  2001-05-23: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o RedrawWindow with desktop window handle no longer returns
