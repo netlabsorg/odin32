@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.40 2001-07-08 02:56:27 bird Exp $
+/* $Id: d32init.c,v 1.41 2001-07-10 05:18:04 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -17,6 +17,7 @@
 #define OVERLOAD16_ENTRY    0x18        /* This is intentionally 4 bytes larger than the one defined in calltaba.asm. */
 #define OVERLOAD32_ENTRY    0x14
 #define IMPORT16_ENTRY      0x08
+#define IMPORTH16_ENTRY     0x08
 #define IMPORT32_ENTRY      0x08
 #define VARIMPORT_ENTRY     0x10
 
@@ -513,7 +514,7 @@ USHORT _loadds _Far32 _Pascal GetKernelInfo32(PKRNLINFO pKrnlInfo)
     int     i;
     USHORT  usRc;
 
-    /* VerifyImporTab32 is called before the initroutine! */
+    /* VerifyImportTab32 is called before the initroutine! */
     pulTKSSBase32 = (PULONG)_TKSSBase16;
 
     /* Find the kernel OTE table */
@@ -833,7 +834,34 @@ int interpretFunctionProlog32(char *pach, BOOL fOverload)
         ||
         (pach[0] == 0x0f &&  pach[1] == 0xb7 && pach[2] == 0xe4 && !fOverload) /* the next prolog */
         ||
-        (pach[0] == 0xe8 &&  pach[5] == 0x9d && !fOverload) /* the last prolog */
+        (pach[0] == 0xe8 &&  pach[5] == 0x9d && !fOverload) /* the next prolog */
+        /*      push ebx
+         *      push edi
+         *      push imm32
+         */
+        || (pach[0] == 0x53 &&  pach[1] == 0x57 &&  pach[2] == 0x68 && !fOverload)
+        /*      push ebx
+         *      push edi
+         *      push esi
+         *      mov /r
+         */
+        || (pach[0] == 0x53 &&  pach[1] == 0xe8 && !fOverload)
+        /*      push ebx
+         *      push edi
+         *      push esi
+         *      mov /r
+         */
+        || (pach[0] == 0x53 &&  pach[1] == 0x57 &&  pach[2] == 0x56 &&  pach[3] == 0x8b  && !fOverload)
+        /*      pop  eax
+         *      push imm8
+         *      push eax
+         *      jmp  imm32
+         */
+        ||  (pach[0] == 0x58 &&  pach[1] == 0x6a &&  pach[3] == 0x50 &&  pach[4] == 0xe9  && !fOverload)
+        /*      push imm32
+         *      call imm32
+         */
+        || (pach[0] == 0x68 && pach[5] == 0xe8 && !fOverload)
         )
     {
         BOOL fForce = FALSE;
@@ -873,15 +901,19 @@ int interpretFunctionProlog32(char *pach, BOOL fOverload)
                     cbWord = 2;
                     break;
 
-                /* simple one byte instructions */
-                case 0x50:              /* push ax */
-                case 0x51:              /* push cx */
-                case 0x52:              /* push dx */
-                case 0x53:              /* push bx */
-                case 0x54:              /* push sp */
-                case 0x55:              /* push bp */
-                case 0x56:              /* push si */
-                case 0x57:              /* push di */
+                /* simple one byte instructions e*/
+                case 0x50:              /* push eax */
+                case 0x51:              /* push ecx */
+                case 0x52:              /* push edx */
+                case 0x53:              /* push ebx */
+                case 0x54:              /* push esp */
+                case 0x55:              /* push ebp */
+                case 0x56:              /* push esi */
+                case 0x57:              /* push edi */
+                case 0x58:              /* pop  eax */
+                case 0x59:              /* pop  ecx */
+                case 0x5a:              /* pop  edx */
+                case 0x5b:              /* pop  ebx */
                 case 0x06:              /* push es */
                 case 0x0e:              /* push cs */
                 case 0x1e:              /* push ds */
@@ -916,6 +948,7 @@ int interpretFunctionProlog32(char *pach, BOOL fOverload)
                 case 0xbd:              /* mov ebx, imm32 */
                 case 0xbe:              /* mov esi, imm32 */
                 case 0xbf:              /* mov edi, imm32 */
+                case 0xe9:              /* jmp rel32 */
                 case 0x2d:              /* sub eax, imm32 */
                 case 0x35:              /* xor eax, imm32 */
                 case 0x3d:              /* cmp eax, imm32 */
@@ -1012,8 +1045,8 @@ int interpretFunctionProlog32(char *pach, BOOL fOverload)
     }
     else
     {
-        kprintf(("interpretFunctionProlog32: unknown prolog start. 0x%x 0x%x 0x%x 0x%x 0x%x\n",
-                 pach[0], pach[1], pach[2], pach[3], pach[4]));
+        kprintf(("interpretFunctionProlog32: unknown prolog start. 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x\n",
+                 pach[0], pach[1], pach[2], pach[3], pach[4], pach[5]));
         cb = 0;
     }
     return cb;
@@ -1180,6 +1213,10 @@ int interpretFunctionProlog16(char *pach, BOOL fOverload)
                     }
                     break;
 
+                case 0x9a:              /* call ptr16:16 */
+                    cb += cb2 = 4;
+                    pach += cb2;
+                    break;
 
                 default:
                     kprintf(("interpretFunctionProlog16: unknown instruction 0x%x 0x%x 0x%x\n", pach[0], pach[1], pach[2]));
@@ -1272,7 +1309,7 @@ USHORT _loadds _Far32 _Pascal VerifyImportTab32(void)
         }
         #endif
 
-        switch (aImportTab[i].fType & ~(EPT_BIT_MASK | EPT_NOT_REQ | EPT_WRAPPED))
+        switch (aImportTab[i].fType & ~(EPT_BIT_MASK | EPT_NOT_REQ | EPT_WRAPPED | EPT_PROCIMPORTH))
         {
             case EPT_PROC:
             case EPT_PROCIMPORT:
@@ -1546,6 +1583,36 @@ int importTabInit(void)
                     return ERROR_D32_IPE | (i << ERROR_D32_PROC_SHIFT) | ERROR_D32_PROC_FLAG;
                 }
                 pchCTEntry += IMPORT16_ENTRY;
+                break;
+            }
+
+
+            /*
+             * 16-bit imported hybrid procedure.
+             * This is called by issuing a far call to the 16-bit calltab entry.
+             */
+            case EPT_PROCIMPORTH16:
+            {
+                cb = interpretFunctionProlog16((char*)aImportTab[i].ulAddress, FALSE);
+                aImportTab[i].cbProlog = (char)cb;
+                if (cb > 0) /* Since no prolog part is copied to the function table, it's ok as long as the prolog has been recognzied. */
+                {
+                    /*
+                     * Create far jump from calltab to original function.
+                     * 0xEA <four byte target address> <two byte target selector>
+                     */
+                    pchCTEntry16[0] = 0xEA; /* jmp far ptr */
+                    *(unsigned short*)(void*)&pchCTEntry16[1] = aImportTab[i].offObject;
+                    *(unsigned short*)(void*)&pchCTEntry16[3] = aImportTab[i].usSel;
+                }
+                else
+                {   /* !fatal! - this should never really happen... */
+                    kprintf(("ImportTabInit: FATAL verify failed for procedure no.%d when importing it!\n", i));
+                    Int3(); /* ipe - later! */
+                    x86RestoreWriteProtect(flWP);
+                    return ERROR_D32_IPE | (i << ERROR_D32_PROC_SHIFT) | ERROR_D32_PROC_FLAG;
+                }
+                pchCTEntry16 += IMPORTH16_ENTRY;
                 break;
             }
 
