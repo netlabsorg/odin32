@@ -1,4 +1,4 @@
-/* $Id: oslibprf.h,v 1.2 2001-07-14 08:36:18 sandervl Exp $ */
+/* $Id: oslibprf.h,v 1.3 2003-02-25 11:57:49 sandervl Exp $ */
 /*
  * Profile API wrappers for OS/2
  *
@@ -20,7 +20,11 @@ typedef ULONG                    OSLIB_HINI;
 #define OSLIB_HINI_USER          OSLIB_HINI_USERPROFILE
 #define OSLIB_HINI_SYSTEM        OSLIB_HINI_SYSTEMPROFILE
 
+extern "C" {
+
 LONG OSLibPrfQueryProfileInt(OSLIB_HINI hini, char *pszApp, char *pszKey, LONG sDefault);
 LONG OSLibPrfQueryProfileString(OSLIB_HINI hini, char *pszApp, char *pszKey, char *pszDefault, char *buffer, ULONG buflen);
+
+}
 
 #endif
