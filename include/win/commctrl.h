@@ -1,4 +1,4 @@
-/* $Id: commctrl.h,v 1.39 2001-03-31 13:23:33 sandervl Exp $ */
+/* $Id: commctrl.h,v 1.40 2001-04-29 15:06:15 sandervl Exp $ */
 /*
  * Common controls definitions
  */
@@ -1514,7 +1514,7 @@ typedef struct tagNMTTDISPINFOW
 #define RB_DELETEBAND           (WM_USER+2)
 #define RB_GETBARINFO           (WM_USER+3)
 #define RB_SETBARINFO           (WM_USER+4)
-//#define RB_GETBANDINFO          (WM_USER+5)   //deprecated (Win3.1)
+#define RB_GETBANDINFO          (WM_USER+5)   /* just for compatibility */
 #define RB_SETBANDINFOA         (WM_USER+6)
 #define RB_SETBANDINFOW         (WM_USER+11)
 #define RB_SETBANDINFO          WINELIB_NAME_AW(RB_SETBANDINFO)
@@ -1538,7 +1538,7 @@ typedef struct tagNMTTDISPINFOW
 #define RB_GETBARHEIGHT         (WM_USER+27)
 #define RB_GETBANDINFOW         (WM_USER+28)
 #define RB_GETBANDINFOA         (WM_USER+29)
-#define RB_GETBANDINFO          WINELIB_NAME_AW(RB_GETBANDINFO)
+#define RB_GETBANDINFO16          WINELIB_NAME_AW(RB_GETBANDINFO16)
 #define RB_MINIMIZEBAND         (WM_USER+30)
 #define RB_MAXIMIZEBAND         (WM_USER+31)
 #define RB_GETBANDBORDERS       (WM_USER+34)
@@ -3248,7 +3248,7 @@ typedef struct tagLVBKIMAGEW
 #define TCM_SETTOOLTIPS         (TCM_FIRST + 46)
 #define TCM_GETCURFOCUS         (TCM_FIRST + 47)
 #define TCM_SETCURFOCUS         (TCM_FIRST + 48)
-#define TCM_SETMINTTABWIDTH     (TCM_FIRST + 49)
+#define TCM_SETMINTABWIDTH      (TCM_FIRST + 49)
 #define TCM_DESELECTALL         (TCM_FIRST + 50)
 #define TCM_HIGHLIGHTITEM       (TCM_FIRST + 51)
 #define TCM_SETEXTENDEDSTYLE    (TCM_FIRST + 52)
