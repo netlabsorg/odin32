@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.103 2003-03-04 15:57:35 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.104 2003-03-19 10:29:48 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -633,7 +633,6 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
     {
         // special char message from the keyboard hook
         dprintf(("PM: WM_CHAR_SPECIAL_ALTGRCONTROL"));
-        
       // NO BREAK! FALLTHRU CASE!
     }
       
@@ -644,7 +643,6 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         if(os2Msg->msg == WM_CHAR_SPECIAL) {
             dprintf(("PM: WM_CHAR_SPECIAL"));
         }
-        
       // NO BREAK! FALLTHRU CASE!
     }
       
@@ -687,7 +685,8 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         if (fWinExtended)
             winMsg->lParam = winMsg->lParam | WIN_KEY_EXTENDED;
 
-        if (!numPressed && (scanCode >= PMSCAN_PAD7) && (scanCode <= PMSCAN_PADPERIOD))
+	//PF When we press shift we enable non-numeric functions of Numpad
+        if ((!numPressed || (flags & KC_SHIFT)) && (scanCode >= PMSCAN_PAD7) && (scanCode <= PMSCAN_PADPERIOD))
              winMsg->wParam = ConvertNumPadKey(scanCode);
 
         //@PF This looks ugly but this is just what we have in win32 both in win98/win2k
@@ -1034,14 +1033,14 @@ BOOL OSLibWinTranslateMessage(MSG *msg)
 {
   TEB *teb;
   MSG extramsg;
-
+  BOOL   numPressed = (BOOL)(WinGetKeyState(HWND_DESKTOP,VK_NUMLOCK) & 1);       
   teb = GetThreadTEB();
   if(!teb)
     return FALSE;
 
   UCHAR ucPMScanCode = CHAR4FROMMP(teb->o.odin.os2msg.mp1);
   ULONG fl = SHORT1FROMMP(teb->o.odin.os2msg.mp1);
- 
+    
   
     //NOTE: These actually need to be posted so that the next message retrieved by GetMessage contains
     //      the newly generated WM_CHAR message.
@@ -1063,6 +1062,13 @@ BOOL OSLibWinTranslateMessage(MSG *msg)
           fl |= KC_CHAR;
         break;
       }
+      
+      // PF With NumLock off do not generate any WM_CHAR messages at all
+      // PADMINUS,PADPLUS fall in range of PAD7..PADPERIOD but they should generate WM_CHAR
+      // other PAD(X) buttons miss that range at all and thus generate WM_CHAR
+      if (!numPressed && (ucPMScanCode != PMSCAN_PADMINUS) && (ucPMScanCode != PMSCAN_PADPLUS) &&
+         (ucPMScanCode >= PMSCAN_PAD7) && (ucPMScanCode <= PMSCAN_PADPERIOD))
+        return FALSE; 
 
       if(!(fl & KC_CHAR) && msg->message < WINWM_SYSKEYDOWN) 
       {
@@ -1080,7 +1086,12 @@ BOOL OSLibWinTranslateMessage(MSG *msg)
               (msg->wParam <= VK_NUMPAD9_W))
             extramsg.wParam = msg->wParam - 0x30;
           else
-            extramsg.wParam = msg->wParam;
+           if (msg->wParam == VK_DECIMAL_W)
+             extramsg.wParam = VK_DELETE_W;
+           else
+             /* PM Sends Bogus Things when pressing Shift+NUMAsterisk */
+             if (msg->wParam != VK_MULTIPLY_W)
+                extramsg.wParam = msg->wParam;
         }
         else    
           extramsg.wParam = SHORT2FROMMP(teb->o.odin.os2msg.mp2);
