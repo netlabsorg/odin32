@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.247 2001-03-30 11:14:36 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.248 2001-04-01 22:13:27 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -299,7 +299,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
     }
     else
     if ((cs->style & WS_CHILD) && !(cs->style & WS_POPUP)) {
-            dprintf(("No parent for child window\n" ));
+            dprintf(("No parent for child window" ));
             SetLastError(ERROR_INVALID_PARAMETER);
             return FALSE;  /* WS_CHILD needs a parent, but WS_POPUP doesn't */
     }
@@ -309,7 +309,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
     if (!windowClass)
     {
         GlobalGetAtomNameA( classAtom, buffer, sizeof(buffer) );
-        dprintf(("Bad class '%s'\n", buffer ));
+        dprintf(("Bad class '%s'", buffer ));
         SetLastError(ERROR_INVALID_PARAMETER);
         return 0;
     }
@@ -319,13 +319,8 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 #ifdef DEBUG
     if(HIWORD(cs->lpszClass))
     {
-        char *astring;
-
-        if(isUnicode) astring = UnicodeToAsciiString((LPWSTR)cs->lpszClass);
-        else          astring = (char *)cs->lpszClass;
-
-        dprintf(("Window class %s", astring));
-        if(isUnicode) FreeAsciiString(astring);
+         if(isUnicode) dprintf(("Window class %ls", cs->lpszClass));
+         else          dprintf(("Window class %s", cs->lpszClass));
     }
     else dprintf(("Window class %x", cs->lpszClass));
 #endif
@@ -489,6 +484,7 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndOS2)
  CREATESTRUCTA *cs = tmpcs;  //pointer to CREATESTRUCT used in CreateWindowExA method
  POINT          maxSize, maxPos, minTrack, maxTrack;
  HWND           hwnd = getWindowHandle();
+ LRESULT (* CALLBACK localSend32)(HWND, UINT, WPARAM, LPARAM);
 
     OS2Hwnd      = hwndOS2;
 
@@ -684,8 +680,9 @@ if (!cs->hMenu) cs->hMenu = LoadMenuA(windowClass->getInstance(),"MYAPP");
         hTaskList = OSLibWinAddToTaskList(OS2Hwnd, windowNameA, (cs->style & WS_VISIBLE) ? 1 : 0);
     }
 
-    //cs is ascii version of create structure. so use SendInternalMessageA
-    if(SendInternalMessageA(WM_NCCREATE,0,(LPARAM)cs))
+    localSend32 = (isUnicode) ? ::SendMessageW : ::SendMessageA;
+
+    if(localSend32(getWindowHandle(), WM_NCCREATE,0,(LPARAM)cs))
     {
         RECT tmpRect;
 
@@ -709,7 +706,7 @@ if (!cs->hMenu) cs->hMenu = LoadMenuA(windowClass->getInstance(),"MYAPP");
         SetWindowPos(hwndLinkAfter, tmpRect.left, tmpRect.top, tmpRect.right-tmpRect.left, tmpRect.bottom-tmpRect.top,SWP_NOACTIVATE | SWP_NOREDRAW | SWP_FRAMECHANGED);
         fNoSizeMsg = FALSE;
         if (cs->style & WS_VISIBLE) dwStyle |= WS_VISIBLE; //program could change position in WM_CREATE
-        if( (SendInternalMessageA(WM_CREATE, 0, (LPARAM)cs )) != -1 )
+        if( (localSend32(getWindowHandle(), WM_CREATE, 0, (LPARAM)cs )) != -1 )
         {
             if(!(flags & WIN_NEED_SIZE))
             {

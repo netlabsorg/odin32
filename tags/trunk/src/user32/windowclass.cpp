@@ -1,4 +1,4 @@
-/* $Id: windowclass.cpp,v 1.18 2001-04-01 19:38:51 sandervl Exp $ */
+/* $Id: windowclass.cpp,v 1.19 2001-04-01 22:13:28 sandervl Exp $ */
 /*
  * Win32 Window Class Code for OS/2
  *
@@ -45,7 +45,6 @@ ATOM WIN32API RegisterClassA(CONST WNDCLASSA *lpWndClass)
  WNDCLASSEXA wc;
  Win32WndClass *wclass;
 
-    dprintf(("RegisterClassA\n"));
     //CB: size new in ex structure
     wc.cbSize = sizeof(wc);
     memcpy(&wc.style, lpWndClass, sizeof(WNDCLASSA));
@@ -61,6 +60,7 @@ ATOM WIN32API RegisterClassA(CONST WNDCLASSA *lpWndClass)
     }
 
     //TODO: not destroyed when class is unregistered (neither does Wine, but that might be a bug)
+    dprintf(("RegisterClassA"));
     int iSmIconWidth  = GetSystemMetrics(SM_CXSMICON);
     int iSmIconHeight = GetSystemMetrics(SM_CYSMICON);
 
@@ -91,7 +91,7 @@ ATOM WIN32API RegisterClassExA(CONST WNDCLASSEXA *lpWndClass)
         return 0;
     }
 
-    dprintf(("RegisterClassExA\n"));
+    dprintf(("RegisterClassExA"));
     wclass = new Win32WndClass((WNDCLASSEXA *)lpWndClass,FALSE);
     if(wclass == NULL) {
         dprintf(("ERROR: RegisterClassExA winclass == NULL!"));
@@ -129,6 +129,7 @@ WORD WIN32API RegisterClassW(CONST WNDCLASSW *lpwc)
     wc.hIconSm = CopyImage(wc.hIcon, IMAGE_ICON, iSmIconWidth, iSmIconHeight,
                            LR_COPYFROMRESOURCE);
 
+    dprintf(("RegisterClassW"));
     winclass = new Win32WndClass((WNDCLASSEXA *)&wc, TRUE);
     if(winclass == NULL) {
         dprintf(("ERROR: RegisterClassW winclass == NULL!"));
@@ -148,7 +149,6 @@ ATOM WIN32API RegisterClassExW(CONST WNDCLASSEXW *lpwc)
  WNDCLASSEXA wc;
  Win32WndClass *winclass;
 
-    dprintf(("RegisterClassExW\n"));
     memcpy(&wc, lpwc, sizeof(WNDCLASSEXA));
 
     if(Win32WndClass::FindClass(wc.hInstance, (LPWSTR)wc.lpszClassName)) {
@@ -160,6 +160,7 @@ ATOM WIN32API RegisterClassExW(CONST WNDCLASSEXW *lpwc)
         return 0;
     }
 
+    dprintf(("RegisterClassExW"));
     winclass = new Win32WndClass((WNDCLASSEXA *)&wc, TRUE);
     if(winclass == NULL) {
         dprintf(("ERROR: RegisterClassExW winclass == NULL!"));
