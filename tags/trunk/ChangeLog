@@ -1,5 +1,13 @@
-/* $Id: ChangeLog,v 1.1739 2001-10-11 11:11:39 achimha Exp $ */
+/* $Id: ChangeLog,v 1.1740 2001-10-11 15:16:23 sandervl Exp $ */
 
+ 2001-10-11: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o SetScrollRange: return error if min > max or out of range
+                                  (ERROR_INVALID_SCROLLBAR_RANGE)
+                  (behaviour of NT4, SP6)
+                o Scrollbar control not disabled properly when using EnableWindow
+                  instead of EnableScrollbar. (handle WM_ENABLE and call
+                  EnableScrollbar)
+ 
  2001-10-11: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o added ODIN performance profiler 
                   (perf_0.log for PROFILE builds)
