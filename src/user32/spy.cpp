@@ -1,4 +1,4 @@
-/* $Id: spy.cpp,v 1.3 1999-06-27 16:23:23 sandervl Exp $ */
+/* $Id: spy.cpp,v 1.4 1999-07-23 17:52:02 sandervl Exp $ */
 
 /*
  * Queue procedures to send messages to the spy server
@@ -80,6 +80,7 @@ void CloseSpyQueue()
    	DosFreeMem(pvdQMemory);
 }
 
+#ifdef DEBUG
 BOOL PostSpyMessage(HWND hwnd, ULONG Msg, ULONG wParam, ULONG lParam)
 {
  APIRET rc;
@@ -109,3 +110,4 @@ BOOL PostSpyMessage(HWND hwnd, ULONG Msg, ULONG wParam, ULONG lParam)
    return TRUE;
 }
 
+#endif
