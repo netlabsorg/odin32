@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.1142 2000-09-25 00:06:41 hugh Exp $ */
+ /* $Id: ChangeLog,v 1.1143 2000-09-25 04:36:59 phaller Exp $ */
+
+ 2000-09-25: Patrick Haller <phaller@gmx.net>
+    - KERNEL32: GlobalMemoryStatus does no more rely on Open32 (experiment for AOE)
 
  2000-09-24: Markus Montkowski <mmontkowski@gmx.de>
     - DPLAYX
