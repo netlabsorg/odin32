@@ -1,7 +1,18 @@
-/* $Id: changelog,v 1.2176 2002-06-20 01:11:44 bird Exp $ */
+/* $Id: changelog,v 1.2177 2002-06-20 02:37:14 bird Exp $ */
 
  2002-06-20: knut st. osmundsen <bird@anduin.net>
     - INSTALL:  o Corrected quoting typos. ('User's Guide' -> 'User''s Guide')
+    - Tools:    o Added ExecTestcase.cmd for executing a testing and do
+                  result logging.
+    - Make:     o Added TS_EXEC* and TS_LOGFILE macros to testsuite.tools.mk.
+    - Testsuite:
+                o Use ExecTestcase.cmd for executing the testcases.
+                  Logging & execute all testcases nomatter return values.
+                o Added watcomc.mak which is pretty simple watcom tests.
+                  (currently noone of them really work 100%.)
+                o TODO: Make a timeout executer which kills the children when
+                  they've been executing too long. This is required in order to
+                  run the testsuite without human interaction.
 
  2002-06-19: Sander van Leeuwen <sandervl@innotek.de>
     - OLE32:    o Drag 'n drop fixes
