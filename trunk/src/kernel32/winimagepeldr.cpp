@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.26 1999-12-27 21:20:48 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.27 1999-12-29 12:39:09 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -627,7 +627,7 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
     		return FALSE;
   	}
 	if(ulRead != size) {
-		dprintf((LOG, "Win32PeLdrImage::commitPage: DosRead failed to read %x (%x) bytes for 0x%x!", size, ulRead, virtAddress));
+		dprintf((LOG, "Win32PeLdrImage::commitPage: DosRead failed to read %x (%x) bytes at %x for 0x%x!", size, ulRead, fileoffset, virtAddress));
     		return FALSE;
 	}
    	if(realBaseAddress != oh.ImageBase) {
