@@ -1,4 +1,4 @@
-/* $Id: dev32.h,v 1.8.4.1 2000-07-16 22:43:28 bird Exp $
+/* $Id: dev32.h,v 1.8.4.2 2000-08-14 08:57:06 bird Exp $
  *
  * dev32 - header file for 32-bit part of the driver.
  *
@@ -63,22 +63,6 @@ USHORT _loadds _Far32 _Pascal Win32kIOCtl(PRP32GENIOCTL pRpIOCtl);
 #ifdef _OS2Krnl_h_
 PMTE _System GetOS2KrnlMTE(void); /* (devfirst.asm) */
 #endif
-
-/*
- * D32init Errors
- */
-#define ERROR_D32_GETOS2KRNL_FAILED         0x01
-#define ERROR_D32_NO_SWAPMTE                0x02
-#define ERROR_D32_TOO_MANY_OBJECTS          0x03
-#define ERROR_D32_NO_OBJECT_TABLE           0x04
-#define ERROR_D32_BUILD_INFO_NOT_FOUND      0x05
-#define ERROR_D32_INVALID_BUILD             0x06
-#define ERROR_D32_PROC_NOT_FOUND            0x10
-#define ERROR_D32_INVALID_OBJ_OR_ADDR       0x11
-#define ERROR_D32_INVALID_ADDRESS           0x12
-#define ERROR_D32_TOO_INVALID_PROLOG        0x13
-#define ERROR_D32_NOT_IMPLEMENTED           0x14
-#define ERROR_D32_VERIFY_FAILED             0x20
 
 
 /*
