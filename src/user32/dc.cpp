@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.23 1999-11-26 17:06:06 cbratschi Exp $ */
+/* $Id: dc.cpp,v 1.24 1999-12-04 00:04:19 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -526,7 +526,7 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
    pHps->hdcType = TYPE_3;
    lpps->hdc = (HDC)hps;
 
-   if (wnd->isEraseBkgnd())
+//   if (wnd->isEraseBkgnd())
        wnd->setEraseBkgnd (FALSE, !wnd->MsgEraseBackGround(lpps->hdc));
    wnd->setSupressErase (FALSE);
    lpps->fErase = wnd->isPSErase();
@@ -840,8 +840,10 @@ BOOL WIN32API UpdateWindow (HWND hwnd)
 
    dprintf (("User32: UpdateWindow hwnd %x -> wnd %x", hwnd, wnd));
 
+#if 0
    if (WinQueryUpdateRect (wnd->getOS2WindowHandle(), NULL))
        sendEraseBkgnd (wnd);
+#endif
 
 #if 1
    WinUpdateWindow(wnd->getOS2FrameWindowHandle());
@@ -1271,7 +1273,7 @@ BOOL WIN32API ScrollWindow(HWND hwnd, int dx, int dy, const RECT *pScroll, const
         dprintf(("ScrollWindow, window %x not found", hwnd));
         return 0;
     }
-    dprintf(("ScrollWindow %x %d %d\n", hwnd, dx, dy));
+    dprintf(("ScrollWindow %x %d %d %x %x", hwnd, dx, dy, pScroll, pClip));
     MapWin32ToOS2Rectl(window->getOS2WindowHandle(),window->getClientRect(), (PRECTLOS2)&clientRect);
     //Rectangle could be relative to parent window, so fix this
     if(clientRect.yBottom != 0) {
@@ -1333,7 +1335,7 @@ INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, cons
         return 0;
     }
 
-    dprintf(("ScrollWindowEx %x %d %d\n", hwnd, dx, dy));
+    dprintf(("ScrollWindowEx %x %d %d %x %x", hwnd, dx, dy, pScroll, pClip));
 
     dy = revertDy (window, dy);
 
