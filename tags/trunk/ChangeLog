@@ -1,10 +1,13 @@
-/* $Id: ChangeLog,v 1.1661 2001-08-26 14:20:24 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1662 2001-08-26 19:05:47 sandervl Exp $ */
 
  2001-08-26: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Convert icon & cursor to OS/2 format in CreateIconIndirect,
                   CreateCursor & CreateIcon
                 o Convert RGB 555 to 565 for 16 bits icons and cursors 
                   (win to os/2 icon/cursor conversion)
+    - SHELL32:  o SHBrowseForFolderA fix: don't send dummy BFFM_SELCHANGED 
+                  during WM_INITDIALOG
+                  (breaks folder dialog in CVP)
 
  2001-08-25: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Set last error to ERROR_ALREADY_EXISTS when CreateMutex,
