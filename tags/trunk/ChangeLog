@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.464 1999-11-21 17:07:05 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.465 1999-11-22 08:22:58 phaller Exp $ */
+
+ 99-11-22: Patrick Haller <phaller@gmx.net>
+	- WSOCK32\NEW: Experimental rewrite using PMWSOCK, incomplete yet
 
  99-11-21: Christoph Bratschi <cbratschi@datacomm.ch>
         - KERNEL32: Fixed trailing newline bug in LoadMessageA/W,
