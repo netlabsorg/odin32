@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.51 2000-11-25 16:56:57 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.52 2000-11-26 15:10:06 bird Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -324,7 +324,7 @@ DWORD OSLibDosFreeMem(LPVOID lpMemAddr)
 }
 //******************************************************************************
 //NOTE: If name == NULL, allocated gettable unnamed shared memory
-//OS/2 returns error 123 (invalid name) if the shared memory name includes 
+//OS/2 returns error 123 (invalid name) if the shared memory name includes
 //colons. We need to replace them with underscores.
 //******************************************************************************
 DWORD OSLibDosAllocSharedMem(LPVOID *lplpMemAddr, DWORD size, DWORD flags, LPSTR name)
@@ -758,10 +758,19 @@ DWORD OSLibDosCreateFile(CHAR *lpszFile,
    switch(fuCreate)
    {
    case CREATE_NEW_W:
-  openFlag |= OPEN_ACTION_CREATE_IF_NEW | OPEN_ACTION_FAIL_IF_EXISTS;
+        openFlag |= OPEN_ACTION_CREATE_IF_NEW | OPEN_ACTION_FAIL_IF_EXISTS;
         break;
    case CREATE_ALWAYS_W:
-        openFlag |= OPEN_ACTION_CREATE_IF_NEW | OPEN_ACTION_REPLACE_IF_EXISTS;
+       /* kso 2000-11-26: Not sure if OPEN_ACTION_REPLACE_IF_EXISTS is correct here! It is correct according to
+        *   MSDN, but not according to "The Win32 API SuperBible". Anyway I haven't got time to check it out in
+        *   NT now.
+        *   The problem is that OPEN_ACTION_REPLACE_IF_EXISTS requires write access. It failes with
+        *   rc = ERROR_ACCESS_DENIED (5). Quick fix, use OPEN_IF_EXIST if readonly access.
+        */
+       if (fuAccess & GENERIC_WRITE_W)
+           openFlag |= OPEN_ACTION_CREATE_IF_NEW | OPEN_ACTION_REPLACE_IF_EXISTS;
+       else
+           openFlag |= OPEN_ACTION_CREATE_IF_NEW | OPEN_ACTION_OPEN_IF_EXISTS;
         break;
    case OPEN_EXISTING_W:
         openFlag |= OPEN_ACTION_FAIL_IF_NEW | OPEN_ACTION_OPEN_IF_EXISTS;
@@ -822,7 +831,7 @@ DWORD OSLibDosCreateFile(CHAR *lpszFile,
         openMode |= OPEN_FLAGS_DASD;
    }
    int retry = 0;
-   while(retry < 2)
+   while (retry < 3)
    {
         dprintf(("DosOpen %s openFlag=%x openMode=%x", lpszFile, openFlag, openMode));
         rc = DosOpen((PSZ)lpszFile,
@@ -833,7 +842,7 @@ DWORD OSLibDosCreateFile(CHAR *lpszFile,
                       openFlag,
                       openMode,
                       NULL);
-    if(rc == ERROR_TOO_MANY_OPEN_FILES)
+    if (rc == ERROR_TOO_MANY_OPEN_FILES)
     {
         ULONG CurMaxFH;
         LONG  ReqCount = 32;
@@ -846,7 +855,38 @@ DWORD OSLibDosCreateFile(CHAR *lpszFile,
         }
         dprintf(("DosOpen failed -> increased nr open files to %d", CurMaxFH));
     }
-    else  break;
+    #if 0
+    else if (rc == ERROR_ACCESS_DENIED && (openFlag & OPEN_ACTION_REPLACE_IF_EXISTS))
+    {   /* kso: I have great problems with the REPLACE not working
+         *      So, I guess this emulation may help...
+         *      This problem exist on WS4eB SMP FP1 and Warp4 FP14/Kernel 14059 at least.
+         */
+        rc = DosOpen((PSZ)lpszFile,
+                      &hFile,
+                      &actionTaken,
+                      fileSize,
+                      fileAttr,
+                      (openFlag & ~OPEN_ACTION_REPLACE_IF_EXISTS) | OPEN_ACTION_OPEN_IF_EXISTS,
+                      openMode,
+                      NULL);
+        if (rc == NO_ERROR)
+        {
+            rc = DosSetFileSize(hFile, 0);
+            if (!rc && fileSize > 0)
+                rc = DosSetFileSize(hFile, fileSize);
+            if (rc)
+            {
+                DosClose(hFile);
+                hFile = NULLHANDLE;
+
+                if (rc != ERROR_TOO_MANY_OPEN_FILES)
+                    break;
+            }
+            else break;
+        }
+    }
+    #endif
+    else break;
     retry++;
    }
 
@@ -2101,7 +2141,7 @@ ULONG OSLibDosQueryDir(DWORD length, LPSTR lpszCurDir)
         }
         len = strlen(lpszCurDriveAndDir) + 3;
 
-        // Dir returned by DosQueryCurDir doesn't include drive, so add it 
+        // Dir returned by DosQueryCurDir doesn't include drive, so add it
         DosQueryCurrentDisk(&currentdisk, &drivemap);
 
         if(isupper(lpszCurDir[3])) {
