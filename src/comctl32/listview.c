@@ -2211,6 +2211,12 @@ static UINT LISTVIEW_GetItemChanges(LISTVIEW_ITEM *lpItem, LPLVITEMA lpLVItem)
     {
       if (lpLVItem->pszText)
       {
+#ifdef __WIN32OS2__
+        //SvL: NT's COMCTL32 seems to always update the item, regardless of
+        //     whether the string is different or not.
+        //     Some apps depends on this (CVP)
+        uChanged |= LVIF_TEXT;
+#else
         if (lpItem->pszText)
         {
           if (strcmp(lpLVItem->pszText, lpItem->pszText) != 0)
@@ -2222,6 +2228,7 @@ static UINT LISTVIEW_GetItemChanges(LISTVIEW_ITEM *lpItem, LPLVITEMA lpLVItem)
         {
           uChanged |= LVIF_TEXT;
         }
+#endif
       }
       else
       {
