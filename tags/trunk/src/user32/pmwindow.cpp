@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.129 2001-05-12 08:25:56 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.130 2001-05-15 14:31:39 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -124,7 +124,7 @@ BOOL InitPM()
         (PSZ)WIN32_STDFRAMECLASS,          /* Window class name            */
         (PFNWP)Win32FrameWindowProc,       /* Address of window procedure  */
         CS_FRAME,
-        FrameClassInfo.cbWindowData+NROF_WIN32WNDBYTES))
+        FrameClassInfo.cbWindowData))
     {
         dprintf(("WinRegisterClass Win32BaseWindow failed %x", WinGetLastError(hab)));
         return(FALSE);
@@ -144,7 +144,7 @@ BOOL InitPM()
     DevQueryCaps(hdc, CAPS_COLOR_BITCOUNT, 1, (PLONG)&ScreenBitsPerPel);
     DevCloseDC(hdc);
 
-    dprintf(("InitPM: Desktop (%d,%d)", ScreenWidth, ScreenHeight));
+    dprintf(("InitPM: Desktop (%d,%d) bpp %d", ScreenWidth, ScreenHeight, ScreenBitsPerPel));
     return TRUE;
 } /* End of main */
 //******************************************************************************
@@ -309,12 +309,16 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         //PM doesn't allow SetFocus calls during WM_SETFOCUS message processing;
         //must delay this function call
         //mp1 = win32 window handle
-        //mp2 = activate flag
-        dprintf(("USER32: Delayed SetFocus %x %x call!", teb->o.odin.hwndFocus, mp1));
+        //mp2 = top parent if activation required
+        dprintf(("USER32: Delayed SetFocus %x %x %x call!", teb->o.odin.hwndFocus, mp1, mp2));
         if(teb->o.odin.hwndFocus) {
             win32wnd = Win32BaseWindow::GetWindowFromHandle(teb->o.odin.hwndFocus);
             if(win32wnd) {
-                 WinFocusChange(HWND_DESKTOP, win32wnd->getOS2WindowHandle(), (mp2) ? FC_NOLOSEACTIVE : 0);
+                 if(mp2) {
+                    SetActiveWindow((HWND)mp2);
+                 }
+                 if(!IsWindow(win32wnd->getWindowHandle())) break;       //abort if window destroyed
+                 WinFocusChange(HWND_DESKTOP, win32wnd->getOS2WindowHandle(), FC_NOSETACTIVE);
             }
             else DebugInt3();
         }
@@ -577,13 +581,13 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
     case WM_CREATE:
     {
         //WM_CREATE handled during client window creation
+        dprintf(("PMFRAME: WM_CREATE %x"));
         goto RunDefFrameWndProc;
     }
 
     case WM_PAINT:
     {
       RECTL rectl;
-
 
         HPS hps = WinBeginPaint(hwnd, NULL, &rectl);
         dprintf(("PMFRAME: WM_PAINT %x (%d,%d) (%d,%d)", win32wnd->getWindowHandle(), rectl.xLeft, rectl.yBottom, rectl.xRight, rectl.yTop));
@@ -1349,7 +1353,7 @@ RunDefFrameWndProc:
 
 RunDefWndProc:
     RestoreOS2TIB();
-    //calling WinDefWindowProc here break Opera hotlist window (WM_ADJUSTWINDOWPOS)
+    //calling WinDefWindowProc here breaks Opera hotlist window (WM_ADJUSTWINDOWPOS)
 //    return pfnFrameWndProc(hwnd, msg, mp1, mp2);
     return WinDefWindowProc( hwnd, msg, mp1, mp2 );
 }

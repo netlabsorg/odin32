@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.92 2001-05-11 08:39:43 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.93 2001-05-15 14:31:38 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -152,81 +152,81 @@ ULONG OSLibWinGetWindowULong(HWND hwnd, ULONG offset)
 //******************************************************************************
 BOOL OSLibWinAlarm(HWND hwndDeskTop,ULONG flStyle)
 {
-  return WinAlarm(hwndDeskTop,flStyle);
+    return WinAlarm(hwndDeskTop,flStyle);
 }
 //******************************************************************************
 //******************************************************************************
 APIRET OSLibDosBeep(ULONG freg,ULONG dur)
 {
-  return DosBeep(freg,dur);
+    return DosBeep(freg,dur);
 }
 //******************************************************************************
 //******************************************************************************
 HWND OSLibWinQueryFocus(HWND hwndDeskTop)
 {
-  return WinQueryFocus(hwndDeskTop);
+    return WinQueryFocus(hwndDeskTop);
 }
 //******************************************************************************
 //******************************************************************************
 HWND OSLibWinWindowFromID(HWND hwndParent,ULONG id)
 {
-  return WinWindowFromID(hwndParent,id);
+    return WinWindowFromID(hwndParent,id);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL OSLibWinSetFocus(HWND hwndDeskTop,HWND hwndNewFocus, BOOL activate)
 {
-  return WinFocusChange (hwndDeskTop, hwndNewFocus, activate ? FC_NOLOSEACTIVE : 0);
+    return WinFocusChange (hwndDeskTop, hwndNewFocus, activate ? 0 : FC_NOSETACTIVE);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL OSLibWinIsChild (HWND hwnd, HWND hwndOf)
 {
-  return WinIsChild (hwnd, hwndOf);
+    return WinIsChild (hwnd, hwndOf);
 }
 //******************************************************************************
 //******************************************************************************
 ULONG OSLibGetWindowHeight(HWND hwnd)
 {
-  RECTL rect;
+    RECTL rect;
 
-  return (WinQueryWindowRect(hwnd,&rect)) ? rect.yTop-rect.yBottom:0;
+    return (WinQueryWindowRect(hwnd,&rect)) ? rect.yTop-rect.yBottom:0;
 }
 //******************************************************************************
 //******************************************************************************
 LONG OSLibWinQuerySysValue(LONG iSysValue)
 {
-  return WinQuerySysValue(HWND_DESKTOP,iSysValue);
+    return WinQuerySysValue(HWND_DESKTOP,iSysValue);
 }
 //******************************************************************************
 //******************************************************************************
 ULONG OSLibWinQueryDlgItemText(HWND hwndDlg,ULONG idItem,LONG cchBufferMax,char* pchBuffer)
 {
-  return WinQueryDlgItemText(hwndDlg,idItem,cchBufferMax,pchBuffer);
+    return WinQueryDlgItemText(hwndDlg,idItem,cchBufferMax,pchBuffer);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL OSLibWinSetDlgItemText(HWND hwndDlg,ULONG idItem,char* pszText)
 {
-  return WinSetDlgItemText(hwndDlg,idItem,pszText);
+    return WinSetDlgItemText(hwndDlg,idItem,pszText);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL OSLibWinQueryPointerPos(PPOINT pptlPoint)
 {
-  return WinQueryPointerPos(HWND_DESKTOP,(PPOINTL)pptlPoint);
+    return WinQueryPointerPos(HWND_DESKTOP,(PPOINTL)pptlPoint);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL OSLibWinSetPointerPos(int x, int y)
 {
-  return WinSetPointerPos(HWND_DESKTOP, x, y);
+    return WinSetPointerPos(HWND_DESKTOP, x, y);
 }
 //******************************************************************************
 //******************************************************************************
 HWND OSLibWinQueryWindow(HWND hwnd, ULONG lCode)
 {
-  return WinQueryWindow(hwnd, lCode);
+    return WinQueryWindow(hwnd, lCode);
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.255 2001-05-11 08:39:45 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.256 2001-05-15 14:31:39 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -3137,21 +3137,21 @@ BOOL Win32BaseWindow::EnableWindow(BOOL fEnable)
 {
  BOOL rc;
 
-  dprintf(("Win32BaseWindow::EnableWindow %x %d", getWindowHandle(), fEnable));
-  //return true if previous state was disabled, else false (sdk docs)
-  rc = (getStyle() & WS_DISABLED) != 0;
-  if(rc && !fEnable) {
+    dprintf(("Win32BaseWindow::EnableWindow %x %d", getWindowHandle(), fEnable));
+    //return true if previous state was disabled, else false (sdk docs)
+    rc = (getStyle() & WS_DISABLED) != 0;
+    if(rc && !fEnable) {
         SendMessageA(WM_CANCELMODE, 0, 0);
-  }
-  OSLibWinEnableWindow(OS2HwndFrame, fEnable);
-  if(fEnable == FALSE) {
+    }
+    OSLibWinEnableWindow(OS2HwndFrame, fEnable);
+    if(fEnable == FALSE) {
         //SvL: No need to clear focus as PM already does this
         if(getWindowHandle() == GetCapture()) {
                 ReleaseCapture();  /* A disabled window can't capture the mouse */
                 dprintf(("Released capture for window %x that is being disabled", getWindowHandle()));
         }
-  }
-  return rc;
+    }
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
