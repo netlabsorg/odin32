@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1692 2001-09-24 07:19:27 sandervl Exp $ */
+/* $Id: changelog,v 1.1693 2001-09-24 16:25:28 phaller Exp $ */
+
+ 2001-09-24: Patrick Haller <patrick.haller@innotek.de>
+    - USER32:   o added ODINWRAP debug tracing support to WINKEYBOARD.CPP
 
  2001-09-22: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o MDI bugfix: set active child to 0 when last one is destroyed
