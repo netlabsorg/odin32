@@ -1,62 +1,62 @@
- /* $Id: changelog-oct99,v 1.1 1999-11-05 17:54:44 achimha Exp $ */
+ /* $Id: changelog-oct99,v 1.2 1999-12-31 10:48:52 sandervl Exp $ */
 
- 99-10-31: Christoph Bratschi <cbratschi@datacomm.ch>
+ 1999-10-31: Christoph Bratschi <cbratschi@datacomm.ch>
 	- KERNEL32: Ported Wine time apis
 
- 99-10-31: Daniela Engert <dani@ngrt.de>
+ 1999-10-31: Daniela Engert <dani@ngrt.de>
 	- USER32: add WS_CLIPSIBLINGS to BS_GROUPBOX style controls (fixes
 		  missing buttons in SOL)
 
- 99-10-31: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-10-31: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Remove CS_SYNCPAINT class flag -> fixes VPBuddy resize + paint
 		  Put back methods that belong in the Win32Dialog class.
 		  (MapDialogRect, DIALOG_Init, several x & y unit helpers)
 		  -> fixes calc window controls.
 
- 99-10-30: Christoph Bratschi <cbratschi@datacomm.ch>
+ 1999-10-30: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: added button control text justification
 		  GetNextDlgTabItem/GetNextDlgGroupItem must work with all windows
 		  -> radiobuttons
 		  fixed scrollbar timer handling
 		  pmframe: fixed WM_ACTIVATE bug
 
- 99-10-29  Markus Montkowski <mmontkowski@gmx.de>
+ 1999-10-29  Markus Montkowski <mmontkowski@gmx.de>
 	- GDI32:  Fixed bug in CreateDIBSection, only copy ptr when ptr. var not
 		  NULL.
 		  Added DIBSections to GetObject_A, so programms can query
 		  a DIBSECTION for the obj.
 
- 99-10-30: Daniela Engert <dani@ngrt.de>
+ 1999-10-30: Daniela Engert <dani@ngrt.de>
 	- USER32: Fixed missing repaints for transparent windows (VPBuddy!)
 
- 99-10-30: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-10-30: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Ported Wine MapDialogRect -> fixes Calc dialogs
 
- 99-10-30: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+ 1999-10-30: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- USER32: Port Wine ascii <-> unicode message conversion for user32 controls
 		  (Wine controls only support ascii msgs)
 
- 99-10-30: Jens Wiessner <wiessnej@rfi.de>
+ 1999-10-30: Jens Wiessner <wiessnej@rfi.de>
 	- MSVCRT: Fixed .def file
 
- 99-10-29: Christoph Bratschi <cbratschi@datacomm.ch>
+ 1999-10-29: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: rewrote scrollbar code
 		  added static styles
 
- 99-10-29: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-10-29: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Changed font size multiply factor, negated it and fixed
 		  default dialog unit bug.
 		  Fixed MDI destroy bug
 		  WM_SETICON bugfix.
 
- 99-10-29: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-10-29: Sander van Leeuwen <sandervl@xs4all.nl>
 	   Rene Pronk<R.Pronk@twi.tudelft.nl>
 	- USER32: Focus fixes. Activate a window when it receives a button click message.
 
- 99-10-29  Markus Montkowski <mmontkowski@gmx.de>
+ 1999-10-29  Markus Montkowski <mmontkowski@gmx.de>
 	- DDRAW: Changed logging, loginfo now in odin32_x.log for the first time...
 
- 99-10-28: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+ 1999-10-28: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- USER32: LoadBitmapW fix
 		  ModifyMenuW/InsertMenuW fixes.
 		  Call CallWindowProcA/W in Send(Internal)MessageA/W
@@ -65,7 +65,7 @@
 		  there are apps that return 0, but don't call BeginPaint.
 		  Added extra messages for msg translation.
 
- 99-10-28: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-10-28: Sander van Leeuwen <sandervl@xs4all.nl>
 	- ADVAPI32: Fixed dprintf bugs in OpenSCManagerA/W (%s instead of %d)
 
 	- makefiles: Added nodebuginfo build option to build debug binaries
@@ -91,18 +91,18 @@
 		  instead of GetMessage/DispatchMessage.
 		  Translation of extra messages.
 
- 99-10-28: Jens Wiessner <wiessnej@rfi.de>
+ 1999-10-28: Jens Wiessner <wiessnej@rfi.de>
 	- MSVCRT: Added stubs
 
- 99-10-27: Patrick Haller <phaller@gmx.net>
+ 1999-10-27: Patrick Haller <phaller@gmx.net>
 	- KERNEL32:	Fix: console (unicode) updates, NT4'S CMD.EXE works.
 			WARNING! lstrcpynAtoW has been modified, PLEASE VERIFY!
 
- 99-10-27: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
+ 1999-10-27: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
 	- WIN32K: It's working! At least on my testmachine running
 		  the WSeB astrict UNI kernel and the Warp 4 astrict kernel.
 
- 99-10-27: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-10-27: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: If dll can't be found, look in directory of kernel32 (PE loader)
 		    Fixed iLoadLibrary (added .dll if it couldn't find this string in
 		    the module name; now only does that if it can't find a '.')
@@ -115,7 +115,7 @@
 	- USER32: Added support for color cursors
 		  Fix for class lookup in CreateWindowExA/W
 
- 99-10-26: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-10-26: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Fixed bugs in menu apis (Append/InsertMenuA/W)
 		  Fixed InsertMenuItemA/W.
 		  Finished up Patrick's work -> regedit menus now correct
@@ -134,11 +134,11 @@
 		in the config.cfg file that crashes it the next time you run it.
 		(workaround: save original config.sys and restore it afterwards)
 
- 99-10-26: Patrick Haller <phaller@gmx.net>
+ 1999-10-26: Patrick Haller <phaller@gmx.net>
 	- USER32: Add: Ported Wine menu(ex) parser and integrated it into menu code
 	- WINMM:  Fix: invalid callback check in dwaveout.cpp (Q2 makes noise again)
 
- 99-10-25: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-10-25: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Removed SetFocus call in Edit control (WM_LBUTTONDOWN)
 		  Virtual key translation table change (VK_RETURN (PM) -> 0x0A
 		  VK_ENTER (PM_ -> 0x0A (VK_RETURN))
@@ -158,23 +158,23 @@
 		  Changed back calling convention of callback handlers to CALLBACK.
 		  -> fixes crashes in SHELL32 (DPASearch calls)
 
- 99-10-25: Achim Hasenmueller <achimha@innotek.de>
+ 1999-10-25: Achim Hasenmueller <achimha@innotek.de>
 	- KERNEL32: Added ReinitializeCriticalSection, ported WINE code
 		    for this function and UninitializeCriticalSection
 
- 99-10-25: Patrick Haller <phaller@gmx.net>
+ 1999-10-25: Patrick Haller <phaller@gmx.net>
 	- ODINWRAP: Fix: Bugfix + Heap Check embracing every wrapper function
 	- NTDLL:    Add: functions by Jens Wiesner
 	- KERNEL32: Fix: enable WIN32.DEBUGBREAK environment variable for DebugBreak() API
 	- WSOCK32:  Fix: invalid structure alignment for asynchronous operations
 
- 99-10-25: Markus Montkowski <mmontkowski@gmx.de>
+ 1999-10-25: Markus Montkowski <mmontkowski@gmx.de>
 	- DDRAW:  Fixed bug in Color conversion of surfaces DDEX1.EXE now works,
 		  Get/ReleaseDC functions are working, but problem
 		  with Bitmap orientation DDRAW surfaces are TopDown DCs Bmps are BottomUp
 		  this neeeds to be solved (any way to create a TopDown DC Bmp?)
 
- 99-10-24: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-10-24: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: MDI window fixes (mdi children correctly activated; menus inserted)
 		  Bugfix in WM_GETTEXT of Edit control (wrong string length)
 		  Only create global classes when CS_GLOBALCLASS flag specified
@@ -194,15 +194,15 @@
 		    more testing!)
 		    Added shared heap code for memory mapped objects
 
- 99-10-24: Daniela Engert <dani@ngrt.de>
+ 1999-10-24: Daniela Engert <dani@ngrt.de>
 	- KERNEL32: Fixed cursor in VPBuddy (invalid size)
 
- 99-10-23: Christoph Bratschi <cbratschi@datacomm.ch>
+ 1999-10-23: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: added more metrics for GetSystemMetrics
 		  added WM_SYSTIMER support
 		  several scrollbar bug fixes
 
- 99-10-23: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-10-23: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Put back WM_ADJUSTWINDOWPOS/WINDOWPOSCHANGED into pmwindow.cpp
 		  Put message logging procedure in wndmsg.cpp.
 		  Don't log WM_KICKIDLE & WM_NCHITTEST messages. (sent too often)
@@ -219,10 +219,10 @@
 	- DSOUND: Made it compile again. (always pretends there's no soundcard in the system)
 	- SHELL32/COMCTL32: Changed file description in version resource
 
- 99-10-22: Daniela Engert <dani@ngrt.de>
+ 1999-10-22: Daniela Engert <dani@ngrt.de>
 	- KERNEL32: fixed bad icon masks
 
- 99-10-22: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-10-22: Sander van Leeuwen <sandervl@xs4all.nl>
 	- WINMM: Fixes for waveout playback (don't use callback when there
 		 were errors when opening the device; return the correct
 		 number of devices present) (Pinball no longer crashes when
@@ -248,11 +248,11 @@
 		  Fixed MapWindowPoints.
 	- INCLUDE\os2wrap.h: Fixed infinite recursion in GpiDestroyPS
 
- 99-10-22: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+ 1999-10-22: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- USER32: TrackPopupMenu(Ex) fixes (window handle translation)
 	- KERNEL32: HeapReAlloc bugfix (copy min(oldsize, newsize) bytes)
 
- 99-10-21: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-10-21: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Increase reference count for LX dlls. (RegisterLxDll)
 		    Set memory protection flags to READONLY for PAGE_NOACCESS
 	- USER32: Added support for SWP_NOSIZECHANGING to SetWindowPos
@@ -262,10 +262,10 @@
 		  class lookup.
 	- GDI32: Fixed bug in DIBSection ctor (next ptr not initialized)
 
- 99-10-20: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+ 1999-10-20: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- GDI32: Implemented EnumFontFamiliesA/W
 
- 99-10-20: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-10-20: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Added support for WM_WINDOWPOSCHANGING in default window handler
 		  (ported from Wine 990815)
 		  Convert back windowpos structure in WM_ADJUSTWINDOWPOS (NOT DONE)
@@ -275,14 +275,14 @@
 		  Combobox bugfix (resizing listbox using old rectangle -> get current
 		  one)
 
- 99-10-20: Patrick Haller <phaller@gmx.net>
+ 1999-10-20: Patrick Haller <phaller@gmx.net>
 	- WSOCK32:  Partial rewrite of WSA async sockets completed.
 
- 99-10-20: Christoph Bratschi <cbratschi@datacomm.ch>
+ 1999-10-20: Christoph Bratschi <cbratschi@datacomm.ch>
 	- KERNEL32: Ini file for Odin settings (i.e. windows & system dir)
 		    Added Odin.ini.txt
 
- 99-10-19: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-10-19: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: FindResource bugfix: "DIB" type is the same as "BITMAP"
 		    (VPBuddy fix)
 		    NOTE: Currently disabled. VPBuddy expects something other
@@ -293,26 +293,26 @@
 		  Combobox bugfixes.
 		  GetWindowTextA/W bugfixes (return 0 if there's no window name)
 
- 99-10-19: Yuri Dario <mc6530@mclink.it>
+ 1999-10-19: Yuri Dario <mc6530@mclink.it>
 	- USER32: Initialize MDI client variables before calling Win32BaseWindow
 		  constructor
 
- 99-10-19: Jens Wiessner <wiessnej@rfi.de>
+ 1999-10-19: Jens Wiessner <wiessnej@rfi.de>
 	- RASAPI32: Added stubs
 
- 99-10-19: Daniela Engert <dani@ngrt.de>
+ 1999-10-19: Daniela Engert <dani@ngrt.de>
 	- USER32: excessive background erases tamed
 
- 99-10-18: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-10-18: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Set/clear WS_VISIBLE flag in ShowWindow
 		  Fix for scrollbar redraw
 		  Put back original Wine code for LISTBOX_UpdateScroll.
 		  Rewrote EnumChildWindows (winzip works quite well now!)
 
- 99-10-18: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+ 1999-10-18: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- COMDLG32: Disable comdlg hooks for now. They don't work anyway.
 
- 99-10-17: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-10-17: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Ported AdjustWindowRectEx from Wine (990815)
 		  Changed GetClientRect to return rectangle stored in
 		  window object.
@@ -334,7 +334,7 @@
 		  for any parent-child pair. (behaviour seen in VPBuddy)
 		  Added MFC message support for message printfs
 
- 99-10-17: Christoph Bratschi <cbratschi@datacomm.ch>
+ 1999-10-17: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: replaced OS/2 scrollbars by WINE scrollbars
 		  BUG: SCROLL_RefreshScrollBar doesn't work
 		       GetDC returns a wrong DC, BeginPaint works as it should
@@ -344,11 +344,11 @@
 		  fixed static icon size
 		  pmframe: added PSF_CLIPSIBLINGS
 
- 99-10-17: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
+ 1999-10-17: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
 	- KERNEL32: Removed exception throwing from Pe2Lx classes.
 		    Implemented TLS support in Pe2Lx classes.
 
- 99-10-16: Yuri Dario <mc6530@mclink.it>
+ 1999-10-16: Yuri Dario <mc6530@mclink.it>
 	- USER32: Button bugfix (BUTTON_CheckAutoRadioButton)
 		  Win32dlg.cpp: cosmetic changes
 	- include\os2wrap.h: define inline as _inline in C mode
@@ -358,14 +358,14 @@
 	- win32k/makefile: replaced full path with macros
 	- WSOCK32: Build export library (impdef to create correct .def)
 
- 99-10-16: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-10-16: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Don't process size messages before sending WM_NCCREATE
 		  message when creating a window. (can mess up our window
 		  and client rectangle)
 		  Erase background for buttons. (fixes groupbox redraw problems)
 		  isFrameWindow bugfix + MDI creation & WM_NCCALCSIZE bugfix
 
- 99-10-15: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-10-15: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: CBT Hook bugfix. Only respond to WM_NCCREATE msg to send
 		  HCBT_CREATEWND.
 		  Scrollbar bugfix. Pass all msgs we don't use to default
@@ -375,11 +375,11 @@
 		  Fixed window & child destruction process.
 	- KERNEL32: Fixed VirtualQuery bug.
 
- 99-10-15: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+ 1999-10-15: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- USER32: Basic message translation to fix problems in win apps
 		  that wait for a specific message. (NOT COMPLETE)
 
- 99-10-14: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-10-14: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Fixed WM_WINDOWPOSCHANGED (frame window rectangle)
 		  Partly implemented CopyImage (only simple copies of icons
 		  and cursors; FAR FROM COMPLETE!)
@@ -387,13 +387,13 @@
 		  (still some redraw problems with i.e. button.exe; a little
 		   worse than before)
 
- 99-10-14: Patrick Haller <phaller@gmx.net>
+ 1999-10-14: Patrick Haller <phaller@gmx.net>
 	- KERNEL32:	Fix: threads might need more memory in debug mode (thread.cpp)
 			Fix: a little cleanup (virtual.cpp)
 			Fix: lstrcpyAW taking NULL parameters (broken WINE controls?) (heapstring.cpp)
 	- ADVAPI32:	Fix: RegConnectRegistryA slightly improved
 
- 99-10-14: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
+ 1999-10-14: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
 	- PE2LX:    New implementation in src\win32k\pe2lx.
 		    No resource conversion. I have tested it, but do expect to
 		    find some bugs. And when you find, please give me a hint.
@@ -409,11 +409,11 @@
 		    permanent fix some other day.
 	- WIN32K:   Compiles and links. But Not Tested!
 
- 99-10-14: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+ 1999-10-14: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- USER32: lstrcmpW: check for null pointers
 		  RemovePropA SetPropA bugfixes (wrong wnd handle)
 
- 99-10-14: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-10-14: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Fixed shrinking listbox in shell about dialog.
 		  (add border size to size during window creation & SetWindowPos)
 		  Support for WM_NCCALCSIZE. Not completely working yet.
@@ -449,13 +449,13 @@
 		     and generic.exe still works fine now)
 	- SHELL32: use wrc from tools directory
 
- 99-10-13: Patrick Haller <phaller@gmx.net>
+ 1999-10-13: Patrick Haller <phaller@gmx.net>
 	- KERNEL32: Fix: XCPT_GUARD_PAGE_VIOLATION are now supported.
 			 (helps PROGMAN.EXE)
 	- USER32:   Fix: parameter checking in RedrawWindow
 		    Fix: temp fix for MsgWaitForMultipleObjects
 
- 99-10-12: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-10-12: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: DrawMenuBar & DrawCaptionTempA bugfix (window handle translation)
 		  Added Win32ToOS2FrameHandle method
 		  Set default mouse pointer back if app doesn't process WM_MOUSEMOVE
@@ -481,10 +481,10 @@
 		  find dialog control that hasn't been created yet)
 		  NOTE: EXPERIMENTAL FIX. NEEDS TO BE CHANGED.
 
- 99-10-11: Christoph Bratschi <cbratschi@datacomm.ch>
+ 1999-10-11: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: pmframe finished
 
- 99-10-11: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-10-11: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Disabling the desktop window is a very bad idea.
 		  (desktop no longer responds to mouse clicks)
 		  Enable method in desktop window class that does nothing.
@@ -500,20 +500,20 @@
 	- INCLUDE: Only include stdlib.h when wrc is not active
 		   Extra definitions for compiling win32 apps in OS/2
 
- 99-10-11: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+ 1999-10-11: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- GDI32: GetTextFaceW bugfix
 	- USER32: Init ownDC to 0
 		  Create empty dialog in CreateWindowExA/W if class == dialog
 		  Support for class atoms in CreateWindowExA/W
 		  Win32Dialog::getNextDlgGroupItem() bugfix
 
- 99-10-11: Christoph Bratschi <cbratschi@datacomm.ch>
+ 1999-10-11: Christoph Bratschi <cbratschi@datacomm.ch>
 	- GDI32: Bugfix for Pie Open32 api
 
- 99-10-10: Christoph Bratschi <cbratschi@datacomm.ch>
+ 1999-10-10: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: fixed radio buttons, disabled text output
 
- 99-10-10: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-10-10: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Ported GetNextDlgGroupItem & GetDlgItemInt from Wine
 		  Window handle translation fix for MessageBoxW
 		  Don't create frame windows for windows with a 3d border.
@@ -521,10 +521,10 @@
 	- COMDLG32: Fix for most unicode functions (window handle translation
 		    missing as reported by Edgar Buerkle)
 
- 99-10-10: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+ 1999-10-10: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- KERNEL32: Bugfix for GetFullPathNameW (NULL ptr check)
 
- 99-10-09: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-10-09: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Clipboard fixes (window handle translation)
 		  Fixed button redraw when receiving a WM_ENABLE msg
 		  Use the supported Open32 system colors and only use
@@ -542,17 +542,17 @@
 		    Set dummy desktop window handler;
 		    Mdi client bugfix (reported by Yuri Dario)
 
- 99-10-09: Jens Wiessner <wiessnej@rfi.de>
+ 1999-10-09: Jens Wiessner <wiessnej@rfi.de>
 	- CRTDLL: Implemented functions; only 62 stubs left
 
- 99-10-09: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+ 1999-10-09: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- USER32: Enabled accelerator WM_COMMANDs
 	- COMDLG32: Fix for GetOpenFileNameW (owner hwnd translation)
 
- 99-10-08: Daniela Engert <dani@ngrt.de>
+ 1999-10-08: Daniela Engert <dani@ngrt.de>
 	- USER32: fix: miscoloured bitmaps
 
- 99-10-08: Christoph Bratschi <cbratschi@datacomm.ch>
+ 1999-10-08: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: added WM_STYLECHANGING/WM_STYLECHANGED.
 		  button,combo: bitmap fix.
 		  added frame to children with WS_* border flags
@@ -561,10 +561,10 @@
 		  CheckRadioButton fixed
 		  merged controls with WINE 990923
 
- 99-10-08: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+ 1999-10-08: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- KERNEL32: Accelerator conversion fixes + changes
 
- 99-10-08: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-10-08: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Bugfix for SetWindowPos; take frame size into account
 		  Removed WM_MOVE notification class flag for Odin PM windows
 		  Removed SetWindowPos frame size bugfix
@@ -579,18 +579,18 @@
 	- KERNEL32: Bugfix for loading winspool
 		    Ported latest Wine exception code (RtlRaiseException/RtlUnwind)
 
- 99-10-07: Christoph Bratschi <cbratschi@datacomm.ch>
+ 1999-10-07: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: GetCaretPos() fix
 
- 99-10-07: Achim Hasenmueller <achimha@innotek.de>
+ 1999-10-07: Achim Hasenmueller <achimha@innotek.de>
 	- USER32: Corrected pageup/pagedown behavior
 
- 99-10-07: Rene Pronk <R.Pronk@twi.tudelft.nl>
+ 1999-10-07: Rene Pronk <R.Pronk@twi.tudelft.nl>
 	- USER32: Fixed WM_WINDOWPOSCHANGED behavior so that
 		  client windows are properly resized. This fixes
 		  the Winhlp32 history resize problem
 
- 99-10-07: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+ 1999-10-07: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- USER32: Set window PM id for Odin windows.
 		  Bugfix for WM_QUERYWINDOWPARAMS handler
 		  Case insensitive string compare in CreateWindowExA/W for
@@ -598,47 +598,47 @@
 		  Create ascii or unicode mdi child window based on mdi client
 		  window type.
 
- 99-10-07: Jens Wiessner <wiessnej@rfi.de>
+ 1999-10-07: Jens Wiessner <wiessnej@rfi.de>
 	- CRTDLL: Includes all functions (added stubs and fully implemented functions)
 
- 99-10-07: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-10-07: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Only display scrollbars when they need to be shown.
 		  (also fixes redraw problems with inactive scrollbars)
 		  Resize bugfix. Winhlp32 can now be resized without problems.
 		  Whether this fix is correct is another matter.
 
- 99-10-06: Daniela Engert <dani@ngrt.de>
+ 1999-10-06: Daniela Engert <dani@ngrt.de>
 	- USER32: fix: adjust caret position if window height changes.
 
- 99-10-06: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-10-06: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Fixed memory leaks in SetWindowTextA/W window class methods
 	- KERNEL32: Put back my changes (10/04/99) in winimgres.cpp
 
- 99-10-06: Patrick Haller <phaller@gmx.net>
+ 1999-10-06: Patrick Haller <phaller@gmx.net>
 	- KERNEL32: Fix: DLLs without Resource Segment (pResDir == NULL)
 		    Fix: VirtualFree not freeing memory fixed, WINHLP32 looks healthier :)
 
- 99-10-05: Christoph Bratschi <cbratschi@datacomm.ch>
+ 1999-10-05: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: rewrote color management
 
- 99-10-05: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-10-05: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Set fs:0 to -1 in OS2UnsetExceptionHandler.
 		    Prevents crash due to corrupted handler chain (see
 		    comments in that function)
 	- ODIN32API: Remove exception handler set & unset. Not necessary
 		     as it's also done in the start method of an exe image.
 
- 99-10-04: Patrick Haller <phaller@gmx.net>
+ 1999-10-04: Patrick Haller <phaller@gmx.net>
 	- SHELL32\NEW: Compilation fix (indirectly included win32type.h)
 	- KERNEL32:    Support for DisableThreadLibraryCalls
 
- 99-10-04: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+ 1999-10-04: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- USER32: Fixes for window style update, mouse button messages,
 		  WS_CAPTION style and apps with a dialog as their main window.
 		  (set owner to desktop)
 	- KERNEL32: Extra checks for valid heap pointers
 
- 99-10-04: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-10-04: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Deleted dialog.cpp
 		  Set last error to 0 if dialog creation succeeds.
 		  Added flag to distinguish between messages sent by PM and
@@ -660,11 +660,11 @@
 		    (version ids no longer hardcoded as id 1; just get the first one
 		     present)
 
- 99-10-04: Jens Wiessner <wiessnej@rfi.de>
+ 1999-10-04: Jens Wiessner <wiessnej@rfi.de>
 	- CRTDLL: Implemented functions + added stubs
 	- MSVCRT: More stubs + crtdll forwarders
 
- 99-10-04: Yuri Dario <mc6530@mclink.it>
+ 1999-10-04: Yuri Dario <mc6530@mclink.it>
 	- ddeml.h: new macros
 	- mmsystem.h: changed sndPlaySound and mciCommand prototypes (as in MS sdk)
 	- shlobh.h: added ifdef for direct inclusion
@@ -682,23 +682,23 @@
 	- win32k/makefile: corrected paths
 	- win32k/include/pe2lx.h: this section should be included for VA36
 
- 99-10-03: Daniela Engert <dani@ngrt.de>
+ 1999-10-03: Daniela Engert <dani@ngrt.de>
 	- USER32: WM_MOUSEMOVE bugfix (removed check for captured mouse)
 
- 99-10-03: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-10-03: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Updated window class with isMDIClient method
 		  Fixed DrawTextExA/W compile errors (different parameter types)
 
- 99-10-02: Christoph Bratschi <cbratschi@datacomm.ch>
+ 1999-10-02: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: DrawTextExA/W: implemented DT_END_ELLIPSIS
 		  added DrawTextExA/W to header files
 
- 99-10-02: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+ 1999-10-02: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- VERSION: Allocation bugfix in VerQueryValueA
 	- USER32: Added style changes for PM windows + don't clear WS_VISIBLE
 		  flag when converting window styles. (fixes buttons in winhlp32)
 
- 99-10-01: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-10-01: Sander van Leeuwen <sandervl@xs4all.nl>
 	- DDRAW: ifdef'ed out code that causes crash (OS2Surface destructor)
 		 Free original translation buffer, not the one aligned to qword
 		 boundary.
@@ -710,21 +710,21 @@
 		    a NULL memory pointer (WINE listbox control depends on this)
 	- AVIFIL32: Compilation fix
 
- 99-10-01: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+ 1999-10-01: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- KERNEL32: Skip spaces in command line string
 	- USER32: Fix for MessageBoxA (window handle conversion)
 		  Fixes for combobox (handles null pointers)
 	- GDI32: Added OSLibSetDIBitsToDevice
 
- 99-10-01: Jens Wiessner <wiessnej@rfi.de>
+ 1999-10-01: Jens Wiessner <wiessnej@rfi.de>
 	- CRTDLL: Implemented functions + added stubs
 	- MSVCRT: More stubs + crtdll forwarders
 
- 99-09-29: Daniela Engert <dani@ngrt.de>
+ 1999-09-29: Daniela Engert <dani@ngrt.de>
 	- USER32: improved timer handling for caret blinking.
 		  recreate carets on focus change if needed.
 
- 99-09-29: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-09-29: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Almost completed standard window scrollbars.
 		  Fixed WM_ACTIVATE message, generate WM_ACTIVATEAPP message
 		  when WM_ACTIVATE is received. (instead of WM_SETFOCUS)
@@ -732,42 +732,42 @@
 		  Always send Odin window handles from pmwindow.cpp to win32wbase.cpp.
 		  Send WM_CHILDACTIVATE msg to MDI child windows.
 
- 99-09-28: Christoph Bratschi <cbratschi@datacomm.ch>
+ 1999-09-28: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: Mouse input functions: SetCapture() fixed
 		  SystemParametersInfo(): fonts fixed
 		  GetSystemMetrics(): changed icon size to 32x32
 		  Sorting and fixing user32.cpp
 
- 99-09-28: David Raison <djr@lemur.co.uk>
+ 1999-09-28: David Raison <djr@lemur.co.uk>
 	- KERNEL32: Fixed GetComputerNameA
 
- 99-09-28: Jens Wiessner <wiessnej@rfi.de>
+ 1999-09-28: Jens Wiessner <wiessnej@rfi.de>
 	- CRTDLL: Updated _except_handler2 + added Wine source changes
 	- MSVCRT: Created. Forwards most apis to CRTDLL or NTDLL.
 
- 99-09-28: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-09-28: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Only generate WM_CHAR when TranslateMessage is called for
 		  WM_KEYDOWN. (TODO: WM_SYSCHAR)
 
- 99-09-28: Daniela Engert <dani@ngrt.de>
+ 1999-09-28: Daniela Engert <dani@ngrt.de>
 	- USER32: Caret functions implemented
 		  ScrollDC implemented
 		  ScrollWindowEx implemented
 
- 99-09-28: Patrick Haller <phaller@gmx.net>
+ 1999-09-28: Patrick Haller <phaller@gmx.net>
 	- KERNEL32:	Add: debug info for missing API imports (WinImagePeLdr)
 			Fix: source cleanup, introduction of WIN32.DIR.SYSTEM and WIN32.DIR.WINDOWS
 			     as overrides over the STUPID Open32 result. I don't want to have Win32 apps
 			     messing up x:\OS2 ....
 
- 99-09-26: Daniela Engert <dani@ngrt.de>
+ 1999-09-26: Daniela Engert <dani@ngrt.de>
 	- USER32: SetTimer/KillTimer work now.
 
- 99-09-26: Achim Hasenmueller <achimha@innotek.de>
+ 1999-09-26: Achim Hasenmueller <achimha@innotek.de>
 	- COMCTL32: Merged with WINE 990923 changes
 		    (propsheet.c not fully done)
 
- 99-09-26: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-09-26: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32:   Started with standard window scrollbar implementation
 		    Rewrote ScrollWindow (seems to work ok)
 		    Set text bugfix (crash in about dialog box of generic.exe)
@@ -778,11 +778,11 @@
 		    Generate WM_CHAR message when TranslateMessage is called for
 		    WM_CHAR (PM) message. (sent after WM_(SYS)KEYUP/DOWN)
 
- 99-09-25: Christoph Bratschi <cbratschi@datacomm.ch>
+ 1999-09-25: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: WS_EX_* 3D frame support for child windows
 	- USER32: Double click handling changed
 
- 99-09-25: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-09-25: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32:   Cursor fixes. Cursor shown correctly in winhlp32.
 		    Don't call WinDefWindowProc for WM_MOUSEMOVE (resets
 		    cursor to system default)
@@ -795,21 +795,21 @@
 	- USER32\OLD, KERNEL32\OLD: Fixed makefiles + changes to make them
 				    work with new dlls.
 
- 99-09-25: Daniela Engert <dani@ngrt.de>
+ 1999-09-25: Daniela Engert <dani@ngrt.de>
 	- USER32: ClientToScreen and ScreenToClient didn't work -> fixed.
 
- 99-09-24: David Raison <djr@lemur.co.uk>
+ 1999-09-24: David Raison <djr@lemur.co.uk>
 	- OLE32: Ported remaining files pertaining to OLE32 from WINE
 	- OLEAUT32: Patched OaBuildVersion to level 0x1E...
 
- 99-09-24: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-09-24: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Rewrote menu code to use Open32 (==PM) menu handles
 		  Note: Uses mostly Open32 apis; they work fine, but maybe
 			we should write our own someday.
 		  Cursor fixes. Not working in winhlp32 yet though.
 	- KERNEL32: Cursor & cursorgroup fixes
 
- 99-09-23: Patrick Haller <phaller@gmx.net>
+ 1999-09-23: Patrick Haller <phaller@gmx.net>
 	- KERNEL32:	Fix: WinImgRes:findResourceW erroneously tried to free
 			numerical resource IDs instead of translated Unicode
 			strings.
@@ -821,13 +821,13 @@
 				now returns Win32MenuRes object instead of PM handle
 			Fix: in USER32:Char:CharPrevW intermixed arguments
 
- 99-09-23: Jens Wiessner <wiessnej@rfi.de>
+ 1999-09-23: Jens Wiessner <wiessnej@rfi.de>
 	- CRTDLL: Added stubs, implemented some stubs
 	- IMAGEHLP, IMM32, MSACM32, MSVFW32, OLEDLG,
 	  OLECLI32, OLESVR32, PSAPI, RASPI32
 		  Added dprintfs.
 
- 99-09-23: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-09-23: Sander van Leeuwen <sandervl@xs4all.nl>
 	- WINMM: Changed WinPostMsg calls into PostMessageA as win32 window
 		 handles are not the same as PM handles anymore.
 	- USER32: Adding desktop window class. When user32 is loaded, a desktop
@@ -840,10 +840,10 @@
 		  up the Z-order of dialog controls (i.e. buttons in a group box)
 	- COMDLG32: Fixed all common dialogs. (translate our handle to real PM handle)
 
- 99-09-22: David Raison <djr@lemur.co.uk>
+ 1999-09-22: David Raison <djr@lemur.co.uk>
 	- KERNEL32: Return "Service Pack 3" as CSD string in GetVersionExA/W
 
- 99-09-22: Yuri Dario <mc6530@mclink.it>
+ 1999-09-22: Yuri Dario <mc6530@mclink.it>
 	- MISC: Fixed WINELIB macro's in wingdi.h, added fixes to headers
 		for VAC 3.6.5
 	- ODINCRT: Also link with SOMLIB (VAC 3.6.5)
@@ -852,45 +852,45 @@
 	- TOOLS\IMPDEF: Minor change to makefile
 	- TOOLS\WRC: Makefile fixes
 
- 99-09-22: Rene Pronk <R.Pronk@twi.tudelft.nl>
+ 1999-09-22: Rene Pronk <R.Pronk@twi.tudelft.nl>
 	- USER32: Changed WM_CHAR PM handling to generate WM_(SYS)KEYUP/DOWN
 		  messages.
 		  Note: Not complete as TranslateMessage doesn't translate
 			ascii keys to WM_CHAR messages.
 
- 99-09-22: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-09-22: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Removed GetDesktopWindow fix
 		  Ported getNextDlgTabItem & getDlgItem
 
- 99-09-21: Daniela Engert <dani@ngrt.de>
+ 1999-09-21: Daniela Engert <dani@ngrt.de>
 	- USER32:   background erasing/painting stuff hopefully finished.
 
- 99-09-21: Patrick Haller <phaller@gmx.net>
+ 1999-09-21: Patrick Haller <phaller@gmx.net>
 	- KERNEL32: Add: GetFileAttributesExA/W implemented (ugly)
 
- 99-09-21: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-09-21: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Fixed cursor group conversion
 	- PELDR:    Committed my latest sources. (rewrite for new kernel32 image classes)
 
- 99-09-21: Edgar Buerkle <100566.557@compuserve.com>
+ 1999-09-21: Edgar Buerkle <100566.557@compuserve.com>
 	- USER32:   Fixed GetDesktopWindow, added message handling for WM_TIMER
 		    added code to choose best icon from icon group. (in OSLibWinCreateIcon)
 	- KERNEL32: Fix for converting icons & icon groups
 
- 99-09-19: David Raison <djr@lemur.co.uk>
+ 1999-09-19: David Raison <djr@lemur.co.uk>
 	- OLE32: Added AntiMoniker,
 		 Updated regsvr32 to use RegisterLxExe
 
- 99-09-20: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-09-20: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Fix background of button, group & static text
 		  NOTE: Changed default behaviour of WM_CTLCOLOR* handling.
 			Don't know if this is correct, but it fixes problems
 			in dialogs (text with white instead of gray background)
 
- 99-09-20: Markus Montkowski
+ 1999-09-20: Markus Montkowski
 	- WNASPI32: full implementation via ASPIROUT$ device driver.
 
- 99-09-19: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-09-19: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Increased font pointsize for dialog (multiplied by two)
 		  (probably not the right way to do things, but it works for the
 		   dialogs in Solitaire)
@@ -898,10 +898,10 @@
 		  Dialogs don't receive those otherwise.
 		  (may need to be changed back again)
 
- 99-09-19: David Raison <djr@lemur.co.uk>
+ 1999-09-19: David Raison <djr@lemur.co.uk>
 	- USER32: Partially implemented MessageBoxIndirectA/W (forwarded to MessageBox)
 
- 99-09-18: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-09-18: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Added resource support for win32 apps compiled in OS/2
 	- INCLUDE: Header file changes for win32 apps compiled in OS/2
 	- VERSION: Create correct import lib
@@ -909,29 +909,29 @@
 	- MSACM32: Link with winmm.lib, don't import apis from .def file
 	- MSVFW32: Link with winmm.lib, don't import apis from .def file
 
- 99-09-18: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
+ 1999-09-18: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
 	- KERNEL32: Implemented lstrncmpiA
 
- 99-09-18: Jens Wiessner <wiessnej@rfi.de>
+ 1999-09-18: Jens Wiessner <wiessnej@rfi.de>
 	- CRTDLL: Added stubs
 	- SHELL32(NEW)/MSACM32/MSFW32: Link with kernel32 for lstrncmpiA
 
- 99-09-17: Daniela Engert <dani@ngrt.de>
+ 1999-09-17: Daniela Engert <dani@ngrt.de>
 	- USER32:   Fix: window focus management.
 		    OSLIBWIN.H: the definitions of OSLIB_HWND_DESKTOP and
 		    OSLIB_HWND_OBJECT were 1 off (with respect to the definition
 		    in PMWIN.H)! So OSLIB_HWND_DESKTOP was in effect NULLHANDLE,
 		    and OSLIB_HWND_OBJECT was HWND_DESKTOP.
 
- 99-09-16: Daniela Engert <dani@ngrt.de>
+ 1999-09-16: Daniela Engert <dani@ngrt.de>
 	- USER32:   Fix: UpdateWindow
 		    New: RedrawWindow (preliminary), InvalidateR*
 
- 99-09-16: Patrick Haller <phaller@gmx.net>
+ 1999-09-16: Patrick Haller <phaller@gmx.net>
 	- USER32:   Fix: DIB_FixColorsToLoadflags - incr was not initialized
 		    Fix: WINMENU::GetSystemMenu() was broken.
 
- 99-09-15: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-09-15: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Moved old kernel32 code to kernel32\old
 		    Rewritten win32 exe/dll classes.
 		    There are now classes for the following exes/dlls:
@@ -950,7 +950,7 @@
 	  IMPORTANT NOTE: Version increased from 3 to 4. Complete recompilation
 			  of everything is required!
 
- 99-09-14: Patrick Haller <phaller@gmx.net>
+ 1999-09-14: Patrick Haller <phaller@gmx.net>
 	- AVIFIL32:   ported AVIFIL32 from WINE
 	- DPLAY:      ported DPLAY from WINE
 		      Note: DPLAYX is required and NOT ported yet.
@@ -960,59 +960,59 @@
 	- WNASPI32:   ported WNASPI32 from WINE
 		      Note: someone should adapt it to OS/2's R3 ASPI router
 
- 99-09-14: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-09-14: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: Implemented Enum(Thread/Child)Windows based on Edgar
 		      Buerkle's code with modifications for new user32 and
 		      added some enhancements.
 
- 99-09-13: Jens Wiessner <wiessnej@rfi.de>
+ 1999-09-13: Jens Wiessner <wiessnej@rfi.de>
 	- NTDLL: Added CRT-functions.
 
- 99-09-13: Daniela Engert <dani@ngrt.de>
+ 1999-09-13: Daniela Engert <dani@ngrt.de>
 	- USER32\NEW: DC/related code: ReleaseDC, GetWindowDC, DC destruction,..
 
- 99-09-13: Patrick Haller <phaller@gmx.net>
+ 1999-09-13: Patrick Haller <phaller@gmx.net>
 	- SHELL32\NEW:	updated to current wine level
 
- 99-09-13: David Raison <djr@lemur.co.uk>
+ 1999-09-13: David Raison <djr@lemur.co.uk>
 	- KERNEL32: Fixed MultiByteToWideChar. Return size of string including
 		    0 terminator.
 
- 99-09-13: Jens Wiessner <wiessnej@rfi.de>
+ 1999-09-13: Jens Wiessner <wiessnej@rfi.de>
 	- CRTDLL: Added functions.
 
- 99-09-08: David Raison <djr@lemur.co.uk>
+ 1999-09-08: David Raison <djr@lemur.co.uk>
 	- OLEAUT32: Updated TypeLib code to find typelibs in EXE/DLL etc
 		    NB Still need to fix typelib translation.
 
- 99-09-12: Daniela Engert <dani@ngrt.de>
+ 1999-09-12: Daniela Engert <dani@ngrt.de>
 	- USER32\NEW: DC/related code: GetDCEx implemented. Slightly enhanced
 		      over Open32.
 
- 99-09-12: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
+ 1999-09-12: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
 	- WIN32K: An untested version is checked in. The new skeleton is
 	  partially tested. PE2LX is not updated and will probably not be updated
 	  before pe2lx is rewritten.
 
- 99-09-09: Daniela Engert <dani@ngrt.de>
+ 1999-09-09: Daniela Engert <dani@ngrt.de>
 	- USER32\NEW: begin new DC/related code. BeginPaint/EndPaint done.
 
- 99-09-09: Patrick Haller <phaller@gmx.net>
+ 1999-09-09: Patrick Haller <phaller@gmx.net>
 	- SHELL32\NEW:	shell32 done, it compiles + links, no testing yet
 	- USER32:	added stubs for GetMenuInfo + SetMenuInfo
 	- USER32\NEW:	added stubs for GetMenuInfo + SetMenuInfo
 
- 99-09-08: David Raison djr@lemur.co.uk
+ 1999-09-08: David Raison djr@lemur.co.uk
 	- Src\OleAut32 Added stubs for undefined exports in OLEAut32
 
- 99-09-08: Yuri Dario <mc6530@mclink.it>
+ 1999-09-08: Yuri Dario <mc6530@mclink.it>
 	- INCLUDE\WIN: Changes to wingdi.h (more WINELIB_NAME defs) & winuser.h (mssing definitions)
 		       Missing ';' in custcntl.h at line 106
 
- 99-09-08: David Raison djr@lemur.co.uk
+ 1999-09-08: David Raison djr@lemur.co.uk
 	- INCLUDE\WIN: Added DECIMAL definition to windef.h
 
- 99-09-08: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
+ 1999-09-08: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
 	- KERNEL32, USER32, USER32\NEW, GDI32, ADVAPI32: <dllname>exp.def is
 	  now generated by a util called ImpDef. (source in tools\impdef).
 	- INC: pdwin32.tools is updated with a IMPDEF macro. This requires
@@ -1029,65 +1029,65 @@
 	- TOOLS\DATABASE\MYSQL: mysql headers and libraries.
 	- TOOLS\DATABASE\GD: Gifdraw 1.2 - used to draw graphs.
 
- 99-09-08: Patrick Haller <phaller@gmx.net>
+ 1999-09-08: Patrick Haller <phaller@gmx.net>
 	- OLE32: CLSIDFromStringA is needed in other modules, too. (SHELL32)
 
- 99-09-08: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-09-08: Sander van Leeuwen <sandervl@xs4all.nl>
 	- Removed /DNONAMELESSUNION from some makefiles (now defined in odin.h)
 	- Minor changes to odin.h (nameless union allowed in VAC 3.6.5) & windowsx.h
 	- USER32\NEW: Use fixed user32exp.def. Doesn't work for GetOS2Callback__15Win32WindowProcFv
 		      (causes link failure for comdlg32)
 	- TOOLS\WRC: Ported Wine wrc. Needs EMX+GCC
 
- 99-09-07: Jens Wiessner <wiessnej@rfi.de>
+ 1999-09-07: Jens Wiessner <wiessnej@rfi.de>
 	- CRTDLL: Created dll (Wine port)
 
- 99-09-07: Patrick Haller <phaller@gmx.net>
+ 1999-09-07: Patrick Haller <phaller@gmx.net>
 	- OLE32: WINE_StringFromCLSID is needed in other modules, too. (SHELL32)
 	- SHELL32\NEW:	improvement of shell32
 	- KERNEL32: ToolHelp functions stubbed: Process32First, etc.
 
- 99-09-05: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-09-05: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: Dialog updates (not yet done)
 
- 99-09-04: Daniela Engert <dani@ngrt.de>
+ 1999-09-04: Daniela Engert <dani@ngrt.de>
 	- USER32\NEW: beginning with 'DAXifying' of our windows
 
- 99-09-04: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-09-04: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Fixed icon- & cursorgroup conversion (Solitaire icon now correct again)
 	- USER32\NEW: Started with Wine dialog code port. Dialog creation done,
 		      but not tested.
 
- 99-09-04: Jens Wiessner <wiessnej@rfi.de>
+ 1999-09-04: Jens Wiessner <wiessnej@rfi.de>
 	- MSVFW32: Created stub (partly) dll (Based on Wine 990815)
 	- PSAPI: Created stub dll (Based on Wine 990815)
 
- 99-09-03: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-09-03: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: MDI child/client improvement (not all wine code has
 		      been ported though)
 
- 99-09-01: Patrick Haller <phaller@gmx.net>
+ 1999-09-01: Patrick Haller <phaller@gmx.net>
 	- *:	Cleanup of include files, some ICOM issues in particular,
 		also fixes LONGLONG problem (now names LONGLONG_W)
 	- SHELL32\NEW:	introduction of a straight port of WINE's SHELL32 implementation
 		18 of 22 files are ported already
 
- 99-09-01: Patrick Haller <phaller@gmx.net>
+ 1999-09-01: Patrick Haller <phaller@gmx.net>
 	- *:	Cleanup of include files. Warning: OS/2's BOOL is ULONG, WIN32 is INT.
 		Causes C++ compilers to complain here and there. Plus many WINE prototypes
 		are just plain wrong.
 		This change should help porting shell32/new.
 
 
- 99-09-01: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-09-01: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: Fixed GetWindowDC (Freecell 'Cards Left' string drawn
 		      at the right place)
 
- 99-09-01: Jens Wiessner <wiessnej@rfi.de>
+ 1999-09-01: Jens Wiessner <wiessnej@rfi.de>
 	- RASAPI32: Created stub dll
 	- MSACM32: Created (partly) stub dll
 
- 99-08-31: Patrick Haller <phaller@gmx.net>
+ 1999-08-31: Patrick Haller <phaller@gmx.net>
 	- WINMM:	revision of timer services (C&C RA)
 	- KERNEL32:	temporary fix for DuplicateHandle for non-HandleManager handles
 			little improvement in console properties
@@ -1095,7 +1095,7 @@
 			fixed return codes for HMCreateFileMapping, HMOpenFileMapping
 			Fix: FILE_MAP_ALL_ACCESS access flags for memory mapped files
 
- 99-08-31: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-08-31: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: Finished MDI class, but it's not working yet.
 	- USER32\NEW: Fixed menu apis
 	- KERNEL32\NEW: Changed makefile to generate response file (linker
@@ -1104,19 +1104,19 @@
 	- INC:	      Changed debug makefiles to include /dbgpack linker option
 		      (compresses debug info)
 
- 99-08-31: Rene Pronk <R.Pronk@twi.tudelft.nl>
+ 1999-08-31: Rene Pronk <R.Pronk@twi.tudelft.nl>
 	- USER32,USER32\NEW: Implemented ChildWindowFromPointEx
 
- 99-08-30: Jens Wiessner <wiessnej@rfi.de>
+ 1999-08-30: Jens Wiessner <wiessnej@rfi.de>
 	- OLEDLG: Created stub dll
 	- INC\WIN: Update for ras.h
 
- 99-08-30: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-08-30: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: Redesign. Create base class for all window types
 		      Delete Open32 class atoms before recreating them.
 		      Added skeleton class for MDI client window.
 
- 99-08-29: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-08-29: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: Changed behaviour of mouse messages (send NC messages
 		      when in non-client area + send WM_SETCURSOR msgs)
 		      Don't send WM_MOUSEMOVE when mouse is captured.
@@ -1127,12 +1127,12 @@
 	- INC: Removed Masm compatible flag for ALP and enabled debugging
 	       info in debug build
 
- 99-08-29: Jens Wiessner <wiessnej@rfi.de>
+ 1999-08-29: Jens Wiessner <wiessnej@rfi.de>
 	- OLECLI32: Created stub dll
 	- IMM32: Created stub dll
 	- IMAGEHLP: Created (partly) stub dll
 
- 99-08-28: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-08-28: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: Use shared memory for window & class objects
 		      Implemented FindWindow(Ex). Not yet tested
 		      Fixed window names.
@@ -1144,23 +1144,23 @@
 		      shared mutex semaphores)
 		      NOTE: This requires a complete recompile!!
 
- 99-08-28: Daniela Engert <dani@ngrt.de>
+ 1999-08-28: Daniela Engert <dani@ngrt.de>
 	- USER32\NEW: client windows get repositioned now when
 		      the parent resizes
 
- 99-08-28: Achim Hasenmueller <achimha@innotek.de>
+ 1999-08-28: Achim Hasenmueller <achimha@innotek.de>
 	- COMCTL32: Merged with latest WINE updates (990815)
 
- 99-08-28: Yuri Dario <mc6530@mclink.it>
+ 1999-08-28: Yuri Dario <mc6530@mclink.it>
 	- INCLUDE\WIN: Added macros to windowsx.h
 
- 99-08-27: Daniela Engert <dani@ngrt.de>
+ 1999-08-27: Daniela Engert <dani@ngrt.de>
 	- USER32\NEW: window creation, window relationship, window sizing and
 		    positioning enhanced.
 	- USER32\NEW: window and client rectangles are in sync with the WINE
 		    structures now.
 
- 99-08-27: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-08-27: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Rewrote memory mapped files for multiple views
 		    Increased default nr of pages loaded so loading
 		    large apps doesn't take forever to start in IPMD.
@@ -1169,10 +1169,10 @@
 	- KERNEL32: Replaced fopen/fclose calls in windll.cpp; they mess up FS.
 		    Init full path of image during Init method.
 
- 99-08-27: Patrick Haller <phaller@gmx.net>
+ 1999-08-27: Patrick Haller <phaller@gmx.net>
 	- KERNEL32: removed logging page faults if mmapped i/o
 
- 99-08-26: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-08-26: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Cleaned up. (removed os2native.cpp & os2util.cpp and
 		    replaced them with oslibdos.* & oslibmisc.*; put
 		    Virtual* win32 apis in virtual.cpp)
@@ -1181,10 +1181,10 @@
 		    (see comments in kernel32\mmap.cpp)
 		    Bugfixes for VirtualProtect & VirtualQuery
 
- 99-08-25: Jens Wiessner <wiessnej@rfi.de>
+ 1999-08-25: Jens Wiessner <wiessnej@rfi.de>
 	- OLESVR32: Created stub dll
 
- 99-08-25: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-08-25: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Use memory mapped files for PE loader
 		    Readonly memory mapped files work. Read/Write has not
 		    been tested yet. Shared mmaps don't work at this time.
@@ -1205,14 +1205,14 @@
 			  The rest still needs to be implemented.
 	- USER32\NEW: Changed loadres.cpp call to VIRTUAL_MapFileA
 
- 99-08-24: Patrick Haller <phaller@gmx.net>
+ 1999-08-24: Patrick Haller <phaller@gmx.net>
 	- USER32:   added extended Open32 WinX control styles (OS2CTLWX)
 	- KERNEL32: HandleManager support for memory mapped files
 		    Added FindFirstFileW, FindNextFileW
 		    Bugfix in ExitProcess / iConsoleWaitClose
 		    Bugfix in OS2Heap::OS2Heap (Heap 0 always valid for NT programs?)
 
- 99-08-24: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-08-24: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: One mutex per type of generic object + mutex protection
 		      of linked list access in win32 classes
 	- KERNEL32: Implemented VirtualQuery (not yet tested)
@@ -1223,7 +1223,7 @@
 	- KERNEL32: Added memory mapped file class (not hooked up to apis or
 		    exception handler yet; just committing my preliminary code)
 
- 99-08-23: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-08-23: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Dll load order bugfix (PE loader)
 	- USER32\NEW: Added two dummy exports so comdlg32 will load
 	  NOTE: This is a temporary hack and needs to be changed.
@@ -1231,12 +1231,12 @@
 	- KERNEL32: Logging change, now creates a unique logfile for each
 		    process. (multiple win32 apps active -> multiple logfiles)
 
- 99-08-23: Patrick Haller <phaller@gmx.net>
+ 1999-08-23: Patrick Haller <phaller@gmx.net>
 	- USER32/NEW: partial (not compiling yet) port of DIALOG.C
 	- USER32:     fix: Win32Proc constructor crash (GetClassInfoA(of a Systemclass))
 
 
- 99-08-22: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-08-22: Sander van Leeuwen <sandervl@xs4all.nl>
 	- OLE32: Changes for updated WINE headers
 	- OLEAUT32: Created (Wine port: Based on 990815 code)
 	- KERNEL32: Export HEAP_* string functions in lib
@@ -1255,7 +1255,7 @@
 	- INCLUDE\WIN, WIN\WINE: Added several files, updated OLE headers
 	- NTDLL: Some changes to make it compile again
 
- 99-08-21: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-08-21: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: Fixed window class bug. Freecell menu now properly
 		      loaded.
 	- USER32\NEW: Changed LoadBitmapA/W to load bitmaps internally
@@ -1267,21 +1267,21 @@
 		      before crash now properly saved
 	- PELDR:      Corrected makefile
 
- 99-08-21: Yuri Dario <mc6530@mclink.it>
+ 1999-08-21: Yuri Dario <mc6530@mclink.it>
 	- Makefiles: Link with predefined VAC lib (RTLLIB(_O))
 		     Needed for VAC 3.6.5
 
- 99-08-20: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-08-20: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: PE resource loading fixes
 	- USER32/NEW: Changes to Load* resource apis
 	- USER32/NEW: Put back LoadBitmap for now
 		      Rewrote LoadIconA/W & LoadCursorA/W + added
 		      extra code to oslib.
 
- 99-08-20: Patrick Haller <phaller@gmx.net>
+ 1999-08-20: Patrick Haller <phaller@gmx.net>
 	- ODINWRAP: fixed invalid macros
 
- 99-08-19: Patrick Haller <phaller@gmx.net>
+ 1999-08-19: Patrick Haller <phaller@gmx.net>
 	- ODINWRAP: fixed invalid recursion in ODINFUNCTION0-Debug
 	- WINMM:    odinwrap macros
 	- TAPI32:   odinwrap macros
@@ -1290,7 +1290,7 @@
 	- WNETAP32: odinwrap macros
 	- WINSPOOL: odinwrap macros
 
- 99-08-19: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-08-19: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: PE loader resource fixes + ConvertNameId bugfix
 		    Added pe2lx conversion code for menus, accelerators,
 		    bitmaps, icons, cursors, icon & cursor groups.
@@ -1298,11 +1298,11 @@
 	- KERNEL32: Used Odin wrappers for profile apis (mess up FS)
 	- USER32 & USER32\NEW: Cleaned up icon code
 
- 99-08-18: Patrick Haller <phaller@gmx.net>
+ 1999-08-18: Patrick Haller <phaller@gmx.net>
 	- NTDLL:    tons of new stubs and crt functions
 	- WNETAP32: tons of new stubs
 
- 99-08-18: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-08-18: Sander van Leeuwen <sandervl@xs4all.nl>
 	- Put back version check in most dlls (except odincrt.dll & peldr.dll
 	  we don't want a kernel32 dependency there)
 	- PELDR/KERNEL32: Use reserved memory by peldr.dll to store win32 exe
@@ -1312,11 +1312,11 @@
 		    Store PE header at start of module in memory, module handle
 		    set to image base of module.
 
- 99-08-18: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
+ 1999-08-18: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
 	- KERNEL32: Profile bugfix (line 506) && removed redundant '\r'
 		    (except on line 199)
 
- 99-08-17: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-08-17: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32/LZ32: Fixed compilation problems introduced by changes below
 	- ODINCRT: Rewrote __threadid Clib function to get rid of crashes
 		   (restores OS/2 FS selector before accessing PIB ptr and
@@ -1326,10 +1326,10 @@
 		 Fixed bugs in divewrap.h. Incorrect wrappers called themselves
 		 instead of the original Dive apis.
 
- 99-08-17: Patrick Haller <phaller@gmx.net>
+ 1999-08-17: Patrick Haller <phaller@gmx.net>
 	- LZ32:    can't export LZCopy as ID0, changed to alphanumeric export
 
- 99-08-16: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-08-16: Sander van Leeuwen <sandervl@xs4all.nl>
 	- PE loader: Started with rewrite
 	- ODINCRT: Changed compile & link options
 	- ODINCRT: Don't export ctordtorInit/Term. These functions must exists
@@ -1338,140 +1338,140 @@
 	- ALL: Makefile changes & initterm.cpp no longer calls c/c++ library
 	       init & termination functions (should only be done in odincrt.dll)
 
- 99-08-16: Patrick Haller <phaller@gmx.net>
+ 1999-08-16: Patrick Haller <phaller@gmx.net>
 	- SHELL32: integrated Christoph Bratschis SHELL32 stubs
 	- WSOCK32: odinwrap macros
 
- 99-08-16: Christoph Bratschi <cbratschi@datacomm.ch>
+ 1999-08-16: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: uitools.cpp update
 
- 99-08-15: Christoph Bratschi <cbratschi@datacomm.ch>
+ 1999-08-15: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32\NEW: controls: wine-990731 update
 
- 99-08-14: Christoph Bratschi <cbratschi@datacomm.ch>
+ 1999-08-14: Christoph Bratschi <cbratschi@datacomm.ch>
 	- COMCTL32: wine-990731 update
 
- 99-08-14: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-08-14: Sander van Leeuwen <sandervl@xs4all.nl>
 	- INCLUDE\win\windows.h: Include odin.h if __WIN32OS2__ is defined
 
- 99-08-13: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-08-13: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Export heap functions by ordinal
 	- src\makefile: compile lz32 before version (dependency)
 
- 99-08-12: Patrick Haller <phaller@gmx.net>
+ 1999-08-12: Patrick Haller <phaller@gmx.net>
 	- VERSION: enhanced plus odinwrap macros
 
- 99-08-11: Patrick Haller <phaller@gmx.net>
+ 1999-08-11: Patrick Haller <phaller@gmx.net>
 	- ODINCRT: ordinal exports
 	- ADVAPI32:odinwrap macros (partially)
 	- LZ32:    odinwrap macros
 
- 99-08-10: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-08-10: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32/NEW: Fixed makefile (link with odincrt)
 
- 99-08-10: Patrick Haller <phaller@gmx.net>
+ 1999-08-10: Patrick Haller <phaller@gmx.net>
 	- LZ32: added preliminary support for independend LZ32 library
 
- 99-08-09: Patrick Haller <phaller@gmx.net>, Achim Hasenmueller <achimha@innotek.de>, Markus Montkowski
+ 1999-08-09: Patrick Haller <phaller@gmx.net>, Achim Hasenmueller <achimha@innotek.de>, Markus Montkowski
 	- ODINCRT: providing a extensible wrapping layer for VAC++ runtime functions
 		   change is non-intrusive for existing source.
 
- 99-08-06: Patrick Haller <phaller@gmx.net>
+ 1999-08-06: Patrick Haller <phaller@gmx.net>
 	- USER32:    added stubs so NT4's WINFILE can load
 	- SHELL32:   added stubs so NT4's WINFILE can load
 	- NTDLL:     added stubs so NT4's WINFILE can load
 
- 99-08-05: Patrick Haller <phaller@gmx.net>
+ 1999-08-05: Patrick Haller <phaller@gmx.net>
 	- KERNEL32:  interactive control over UnhandledExceptionFilter
 	- KERNEL32:  FormatMessageAW fixed. Do not mix ODIN's heap functions with VAC heap functions
 	- KERNEL32:  added WINE-style string functions in Heapstring.cpp
 	- SHELL3232: RestartDialog @59 stub added. IE2 can load now with NT4's URL.DLL.
 
- 99-08-05: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-08-05: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32:  Bitmap conversion bugfix; always recalculate bitmap size
 		     (bitmap in donut.exe (ddraw sample) contains wrong size)
 
- 99-08-04: Patrick Haller <phaller@gmx.net>
+ 1999-08-04: Patrick Haller <phaller@gmx.net>
 	- KERNEL32:  fix for filename handling in kernel32/profile
 	- KERNEL32:  fix for PROFILE_CopyEntry in kernel32/profile
 
- 99-08-04: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-08-04: Sander van Leeuwen <sandervl@xs4all.nl>
 	- PE2LX: Bugfix for icon conversion (heap corruption for ra95.exe; as
 		 reported by Patrick Haller)
 
- 99-08-04: Patrick Haller <phaller@gmx.net>
+ 1999-08-04: Patrick Haller <phaller@gmx.net>
 	- KERNEL32: Heap modification
 	- KERNEL32: Windows 3 style profile support ported from WINE (removes Open32)
 
- 99-08-03: Rene Pronk <R.Pronk@twi.tudelft.nl>
+ 1999-08-03: Rene Pronk <R.Pronk@twi.tudelft.nl>
 	- USER32: Ported DrawTextExA/W & DrawStateA/W
 
- 99-07-27: Przemysˆaw Dobrowolski <dobrawka@asua.org.pl>
+ 1999-07-27: Przemysˆaw Dobrowolski <dobrawka@asua.org.pl>
 	- KERNEL32: Implemented GetComputerNameA/W
 
- 99-07-25: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-07-25: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32/NEW: Lots of changes; Solitaire displays cards correctly
 		      Status bar correctly drawn
 		      Mouse msg translation still wrong.
 		      Paint not correct.
 
- 99-07-25: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-07-25: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: GetLocateInfoA bugfix
 	- USER32/NEW: Lots of changes; now Solitaire starts, but draws cards incorrectly
 
- 99-07-23: Yuri Dario <mc6530@mclink.it>
+ 1999-07-23: Yuri Dario <mc6530@mclink.it>
 	- misc: Changes for compilation with VAC 3.6.5
 
- 99-07-23: Edgar Buerkle <100566.557@compuserve.com>
+ 1999-07-23: Edgar Buerkle <100566.557@compuserve.com>
 	- VERSION:  VerQueryValueA/W Wine implementation ported
 
- 99-07-22: Przemysˆaw Dobrowolski <dobrawka@asua.org.pl>
+ 1999-07-22: Przemysˆaw Dobrowolski <dobrawka@asua.org.pl>
 	- KERNEL32: Complete implementation of GetLocaleInfoA/W
 
- 99-07-22: Edgar Buerkle <100566.557@compuserve.com>
+ 1999-07-22: Edgar Buerkle <100566.557@compuserve.com>
 	- KERNEL32: Fix for OS2GetResource (os2util.cpp)
 	- PE2LX: Use unique resource id for version resource.
 	- USER32: MapOEMToRealKey fix
 
- 99-07-22: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-07-22: Sander van Leeuwen <sandervl@xs4all.nl>
 	- DDRAW: Now compiles
 	- COMCTL32: Create library with correct api names
 
- 99-07-21: Edgar Buerkle <100566.557@compuserve.com>
+ 1999-07-21: Edgar Buerkle <100566.557@compuserve.com>
 	- KERNEL32: Fix for LoadResource; should return pointer to resource data
 		    LockResource just returns the pointer returned by LoadResource
 
- 99-07-20: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-07-20: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32/NEW: Added support for window icons and accelerators.
 		      Accelerators don't work yet.
 	- PE2LX: Save icons in different format (BITMAPINFOHEADER2)
 
- 99-07-19: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-07-19: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Added method for retrieving converted OS/2 resource
 		    (which will be changed later on)
 	- USER32/NEW: CreateWindowEx now works and menus are displayed
 
- 99-07-17: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-07-17: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Exports for getting TEB & THDB added
 
- 99-07-15: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-07-15: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32/NEW: Unicode & window handle translation bugfixes
 
- 99-07-14: Christoph Bratschi <cbratschi@datacomm.ch>
+ 1999-07-14: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32/NEW: several bugs fixed, compiles now
 		      CreateWindow doesn't work yet
 
- 99-07-13: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-07-13: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32/NEW: *VERY* preliminary/alpha code for Open32 replacement in user32
 		      Compiles, but not tested at all.
 
- 99-07-12: Patrick Haller <phaller@gmx.net>
+ 1999-07-12: Patrick Haller <phaller@gmx.net>
        - KERNEL32: various console fixes
 
- 99-07-10: Edgar Buerkle <100566.557@compuserve.com>
+ 1999-07-10: Edgar Buerkle <100566.557@compuserve.com>
 	- USER32: Fixes for CreateWindowExW and several unicode menu apis
 
- 99-07-07: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-07-07: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32/PE2LX: Added support for TLS sections
 	- KERNEL32: Added thread attach/detach messages for dlls
 		    Fixed some bugs, cleaned up code
@@ -1479,84 +1479,84 @@
 		RECOMPILE ALL DLLS AND CONVERT EVERYTHING AGAIN!!!!!!!!!
 		THIS CHANGE ALSO BREAKS WIN32K!
 
- 99-07-06: Patrick Haller <phaller@gmx.net>
+ 1999-07-06: Patrick Haller <phaller@gmx.net>
 	- KERNEL32: major enhancement of handlemanager
 
- 99-07-06: Edgar Buerkle <100566.557@compuserve.com>
+ 1999-07-06: Edgar Buerkle <100566.557@compuserve.com>
 	- PE2LX: Finished support for codepages
 
- 99-07-05: Patrick Haller <phaller@gmx.net>
+ 1999-07-05: Patrick Haller <phaller@gmx.net>
 	- SHELL32: SheSetCurDrive stub, ...
 
- 99-07-05: Sander van Leeuwen <sandervl@xs4all.nl>
+ 1999-07-05: Sander van Leeuwen <sandervl@xs4all.nl>
 	- LIB\libconv.def: Added name with '_' appended. (or else Watcom won't
 	  link pe2lx\misc.cpp properly)
 
- 99-07-05: Edgar Buerkle <100566.557@compuserve.com>
+ 1999-07-05: Edgar Buerkle <100566.557@compuserve.com>
 	- PE2LX: Preliminary support for codepages
 
- 99-07-05: Patrick Haller <phaller@gmx.net>
+ 1999-07-05: Patrick Haller <phaller@gmx.net>
 	- KERNEL32: HandleManager fixes as suggested by Edgar Buerkle
 
- 99-07-04: Christoph Bratschi <cbratschi@datacomm.ch>
+ 1999-07-04: Christoph Bratschi <cbratschi@datacomm.ch>
 	- PE2LX/USER32: Dialog default font set to WarpSans + fixes
 
- 99-07-02: Christoph Bratschi <cbratschi@datacomm.ch>
+ 1999-07-02: Christoph Bratschi <cbratschi@datacomm.ch>
 	- PE2LX/USER32: Dialog bugfix for entryfield strings
 
- 99-06-30: Christoph Bratschi <cbratschi@datacomm.ch>
+ 1999-06-30: Christoph Bratschi <cbratschi@datacomm.ch>
 	- KERNEL32: Unicode changes (unicode.cpp)
 		    lstrcpynA/W (kernel32.cpp
 	- USER32: LoadStringA unicode conversion bugfix
 	- USER32: Changed SystemParameterInfo for default font (now 9.WarpSans)
 
- 99-06-30: Przemysˆaw Dobrowolski <dobrawka@asua.org.pl>
+ 1999-06-30: Przemysˆaw Dobrowolski <dobrawka@asua.org.pl>
 	- WINMM: Implemented remaining joystick apis + bugfixes
 
- 99-06-29: Patrick Haller <phaller@gmx.net>
+ 1999-06-29: Patrick Haller <phaller@gmx.net>
 	- KERNEL32: GetLocaleInfoA bugfix (lang.cpp)
 
- 99-06-29: Przemysˆaw Dobrowolski <dobrawka@asua.org.pl>
+ 1999-06-29: Przemysˆaw Dobrowolski <dobrawka@asua.org.pl>
 	- WINMM: Implemented most of the joystick apis
 
- 99-06-28: Christoph Bratschi
+ 1999-06-28: Christoph Bratschi
 	- USER32: AsciiToUnicodeN bugfix (unicode.cpp)
 
- 99-06-28: Sander van Leeuwen
+ 1999-06-28: Sander van Leeuwen
 	- USER32: Get/SetWindowLongA bugfix for dialog controls
 
- 99-06-27: Sander van Leeuwen
+ 1999-06-27: Sander van Leeuwen
 	- USER32: Message handler updates & lots of bugfixes
 	- USER32: Fix for GetWindowLongA, if Open32 returns 0xffff it really
 	  means 0xffffffff -> fixes Winhlp32 buttons.
 	- USER32: Fixed bug when changing window procedures for dialog box
 		  controls
 
- 99-06-26: Sander van Leeuwen
+ 1999-06-26: Sander van Leeuwen
 	- USER32: Changes for message spy & several message handler changes
 	- USER32: Restore win32 tib in window msg callback
 	- KERNEL32/include: Restore OS/2 tib on entering Open32 or OS/2 apis
 	- KERNEL32/lang.cpp: Bugfix for GetLocaleInfoA (if buf ptr == null,
 	  only return size of memory block required to hold info)
 
- 99-06-25: Achim Hasenmueller
+ 1999-06-25: Achim Hasenmueller
 	- Finally fixed changelog date format to be compliant with
 	  the official EU date format :)
 
- 99-06-25: Christoph Bratschi
+ 1999-06-25: Christoph Bratschi
 	- USER32: GetSysColorPen bugfix (syscolor.cpp)
 
- 99-06-24: Patrick Haller
+ 1999-06-24: Patrick Haller
 	- SHELL32: partial port form WINE
 
- 99-06-24: Edgar Buerkle
+ 1999-06-24: Edgar Buerkle
 	- KERNEL32: Implemented GetLocaleInfoA/W
 
- 99-06-24: Sander van Leeuwen
+ 1999-06-24: Sander van Leeuwen
 	- include\winos2def.h: Changed OS/2 apis to use wrappers
 	  (FS save/restore) and added DosQueryCtryInfo
 
- 99-06-23: Patrick Haller
+ 1999-06-23: Patrick Haller
 	- Fixed date format in changlog .g.
 	- NTDLL:    a dozen c runtime functions added
 	- USER32:   IsHungAppWindow dummy added
@@ -1565,23 +1565,23 @@
 	- COMDLG32: basic unicode support added, thou broken somehow
 	- source code splitups and beautification ;-)
 
- 99-06-23: Achim Hasenmueller
+ 1999-06-23: Achim Hasenmueller
 	- ported latest WINE fixes and additions for comctl32. Changes
 	  involve better undoc. DSA APIs, right colors for the tab control,
 	  many improvements for the listview...
 
- 99-06-21: Achim Hasenmueller
+ 1999-06-21: Achim Hasenmueller
 	- ported latest WINE DrawEdge code and moved everything to the
 	  new file src/user32/uitools.cpp
 
- 99-06-21: Sander van Leeuwen
+ 1999-06-21: Sander van Leeuwen
 	- include\os2wrap.h, removed calling convention
 
- 99-06-21: Christoph Bratschi
+ 1999-06-21: Christoph Bratschi
 	- COMCTL32: Progress bar finished (progress.c, USER32 bugs to fix)
 	- COMCTL32: Trackbar finished (trackbar.c)
 
- 99-06-20: Sander van Leeuwen
+ 1999-06-20: Sander van Leeuwen
 	- KERNEL32: Call HMInitialize from initterm, not winexe object creation
 	- KERNEL32: Added comctl to list of system dlls (windll.cpp)
 	- KERNEL32: Fixed dll detach (windll.cpp) for converted win32 dlls
@@ -1595,11 +1595,11 @@
 	- USER32: Fixed bug in wndproc.cpp (release build only)
 	- USER32: Added preliminary support for parent notification
 
- 99-06-19: Sander van Leeuwen
+ 1999-06-19: Sander van Leeuwen
 	- ALL (except dsound/ddraw): Include <os2wrap.h> instead of <os2.h>
 	- KERNEL32: Changes for win32 TEB (not active)
 
- 99-06-07: Sander van Leeuwen
+ 1999-06-07: Sander van Leeuwen
 	- Removed unecessary files
 	- Modified os2win.h to save FS selector before calling Open32 api
 	  and restoring it afterwards.
@@ -1607,100 +1607,100 @@
 	- GDI32: Fixed SetDIBitsToDevice bugfix (palette size)
 	- USER32: Fixed RegisterSystemClasses
 
- 99-06-07: Achim Hasenmueller
+ 1999-06-07: Achim Hasenmueller
 	- Added comctl32, mostly untested includes all controls, some undocumented
 	  APIs missing
 	- Added internal GetSysColorPen() to user32 - handy API used in WINE
 	  Modified syscolor.cpp to support new Win98 colors and create pens
 
- 99-06-06: Sander van Leeuwen
+ 1999-06-06: Sander van Leeuwen
 	- Bugfixes in VirtualAlloc (KERNEL32), GetScrollPos & RegisterSystemClasses (USER32)
 	  as reported on mailinglist by Edgar Buerkle.
 	  Also FindResourceA/W.
 
- 99-06-01: David Raison
+ 1999-06-01: David Raison
 	- OLE32: Changed everything to make it compile with the new headers
 	- include/win/ole.2 - line 170
 	- include/wine/win/obj_oleview.h - line 32 & 36
 
- 99-05-23: Sander van Leeuwen
+ 1999-05-23: Sander van Leeuwen
 	- ADVAPI32: Fixed Open32 bugs in RegOpenKeyA (set return key to 0 when failed)
 		    Fixed key definition conflict in convertkey.
 	- KERNEL32: Fixed exception handler, don't continue after process termination
 		    exception! (fixes annoying exitlist hangs)
 
- 99-05-19: Sander van Leeuwen
+ 1999-05-19: Sander van Leeuwen
 	- KERNEL32: Corrected wrong export for HeapSize (reported by Vit Timchishin)
 
- 99-05-15: Sander van Leeuwen
+ 1999-05-15: Sander van Leeuwen
 	- Fixed a number of bugs introduced during the Wine header update
 	- KERNEL32: Added high/low fixup support for pe loader
 
- 99-05-13: Sander van Leeuwen
+ 1999-05-13: Sander van Leeuwen
 	- Updated USER32
 	- Fixed unicode apis in USER32
 	- Added .def files for ADVAPI32, COMDLG32, GDI32, KERNEL32 & USER32 that
 	  export all apis with the correct names. (_apiname@nrofparameterbytes)
 
- 99-05-12: Sander van Leeuwen
+ 1999-05-12: Sander van Leeuwen
 	- Finished KERNEL32
 	- Updated WINMM
 
- 99-05-10: Vince Vielhaber
+ 1999-05-10: Vince Vielhaber
 	- Rewrote WSOCK32 for Wine headers
 
- 99-05-08: Sander van Leeuwen
+ 1999-05-08: Sander van Leeuwen
 	- Updated CAPI32, COMDLG32 & GDI32, MPR, NTDLL, TAPI32, WINSPOOL, WNETAP32
 	  for new headers
 	- Started with KERNEL32 changes (75% done)
 	- Made basic changes to OLE32 for new headers, but still tons of errors
 	- Fixed some unicode apis in GDI32
 
- 99-05-04: Sander van Leeuwen
+ 1999-05-04: Sander van Leeuwen
 	- Stripped os2win.h and put it in include directory
 	- WINE header files in include\win
 	  (some modified for IBM VAC)
 	- All Open32 apis have 'O32_' as prefix, Open32 specific declarations
 	  are appended with _O32.
 
- 99-05-01: Sander van Leeuwen
+ 1999-05-01: Sander van Leeuwen
 	- Changed makefile structure:
 		nmake DEBUG=1	builds debug version
 		nmake		builds release version
 
- 99-04-11: Sander van Leeuwen
+ 1999-04-11: Sander van Leeuwen
 	- Everything except user32 & kernel32: copyrights added to most files
 	  Moved a few header files in \include
 	- Fixed import problem in peldr (include\winimage.h), SetFullPath must
 	  be a virtual method.
 
- 98-10-26: Sander van Leeuwen
+ 1998-10-26: Sander van Leeuwen
 	- OLE32: CoInitialize takes one parameter, not 0
 
- 98-10-11: Sander van Leeuwen
+ 1998-10-11: Sander van Leeuwen
 	- KERNEL32: except.asm Wrong calling convention for SetExceptionChain
 	- KERNEL32: exceptions.cpp/wprocess.cpp SetExceptionChain(-1) instead of SetExceptionChain(0)
 
- 98-09-28: Sander van Leeuwen
+ 1998-09-28: Sander van Leeuwen
 	- PE2LX: icon.cpp: palette only for <= 8 bpp
 	- PE2LX: icon.cpp: check if image size in bmp header is correct before using it
 
- 98-09-25: Sander van Leeuwen
+ 1998-09-25: Sander van Leeuwen
 	- PE2LX: Don't fail if an exe/dll doesn't contain any imports (pe.cpp:ProcessImports)
 
 ********************************************************************************
 ***** Release 0.03/4
 ********************************************************************************
- 98-09-15: KSO
+ 1998-09-15: KSO
 	- WIN32K: pe2lx\misc.cpp changes
 
- 98-09-13: Sander van Leeuwen
+ 1998-09-13: Sander van Leeuwen
 	- KERNEL32: windll.cpp: fixed bug with szModule not being initialized
 	- PE2LX: pe.cpp: Only read first 1 MB for huge files. (as they are most
 			 likely InstallShield archives; exe appended with
 			 installation data)
 
- 98-09-12: Sander van Leeuwen
+ 1998-09-12: Sander van Leeuwen
 	- WSOCK32: Changed fd_set to Wfd_set or else it won't compile over here
 	- KERNEL32: Winimage.cpp, extra checks added
 	- KERNEL32: OS2GetModuleFileName bugfix
@@ -1712,37 +1712,37 @@
 	- GDI32: DIBSection ctor: bug in BITMAPINFO2 malloc
 	- GDI32: BitBlt: (dibsection) HDC == HPS (thank you, IBM!)
 
- 98-09-02: Sander van Leeuwen
+ 1998-09-02: Sander van Leeuwen
 	- KERNEL32/USER32: Split up code
 	- USER32 (/new): Started with new class & window managment code
 			 (not compiled nor tested, so don't change it)
 
- 98-09-01: Patrick Haller
+ 1998-09-01: Patrick Haller
 	- WSOCK32: Circular linker dependency removed
 
- 98-08-31: kso
+ 1998-08-31: kso
 	- KERNEL32: changed lfile.c to use OS2CreateFile,OS2CloseHandle,.... as
 	  NT does. Notepad (W95) is now working better.
 	- KERNEL32: fixed a open32 bug (or win32 feature) - WriteFile with
 	  nrbytes = 0 is equal to a SetEndOfFile(..);
 
- 98-08-17: Sander van Leeuwen
+ 1998-08-17: Sander van Leeuwen
 	- KERNEL32: Changed LoadLibraryA(W/ExA/ExW) to try to load the dll
 		    directly first and if that fails, load it manually.
 
- 98-08-15: Sander van Leeuwen
+ 1998-08-15: Sander van Leeuwen
 	- DDRAW: LOTS of changes,additions and fixes
 		 (ddex1-ddex5 DirectX SDK samples work(ed) + Quake 2 in
 		  DirectDraw mode)
 	- DSOUND: Skeleton code extended
 
- 98-08-13: Sander van Leeuwen
+ 1998-08-13: Sander van Leeuwen
 	- PE2LX: Replaced stack page removal code; (adjusted GetNrPages instead)
 
- 98-08-13: KSO:
+ 1998-08-13: KSO:
 	- PE2LX: Borland bugfixes
 
- 98-08-08: Sander van Leeuwen
+ 1998-08-08: Sander van Leeuwen
 	- pe2lx (pe.cpp), call SetNrOfExports(0) for dlls without exports
 	  to set the module name in the resident name table
 	  (otherwise converted dll will not load)
@@ -1750,16 +1750,16 @@
 	- LocalReAlloc bugfix, notepad assumes it returns the same
 	  address when the new size is smaller than the old one.
 
- 98-08-03 KSO:
+ 1998-08-03 KSO:
 	- pe.cpp:	line 600 - added OS2Exe to the parameterlist
 	- bitmap.cpp: replace file - much.
 	- bitmap.h: replace file - typo (BitMap to Bitmap)
 	- icon.h: replace file	- #define BI_*
 
- 98-07-23: Knut Osmundsen
+ 1998-07-23: Knut Osmundsen
 	- PE2LX: Borland exe changes (import stuff)
 
- 98-07-18: Sander van Leeuwen
+ 1998-07-18: Sander van Leeuwen
 	- KERNEL32/PE2LX: Changed version checks; version nr is put into the
 			  converted exe/dll as a parameter to one of the kernel32
 			  entry points
@@ -1776,53 +1776,53 @@
 		    it twice corrupts the heap as our stuff allocates exactly
 		    enough for string + 0 terminator)
 
- 98-07-14: Sander van Leeuwen
+ 1998-07-14: Sander van Leeuwen
 	- KERNEL32: Changed OS2GetProcAddress to call the ordinal or name getApi
 		    method
 
- 98-07-13: Patrick Haller
+ 1998-07-13: Patrick Haller
 	- USER32:   Unicode fix for wvsprintfW "%s" -> "%ls"
 	- USER32:   fix in Win32WindowProc destructor when "window" becomes NULL
 	- ADVAPI32: RegConnectRegistry for connection to local machine
 
- 98-07-13: Patrick Haller
+ 1998-07-13: Patrick Haller
 	- KERNEL32: Unicode fix that garbled CommandLineToArgv and others
 
- 98-07-12: Patrick Haller
+ 1998-07-12: Patrick Haller
 	- NTDLL:   new functions in NTDLL (-> critical sections)
 	- SHELL32: few new stubs in SHELL32
 	- GDI32:   fix in GDI32\DIBSECT\CreateDIBSection for M$ Backup
 	- USER32:  experimental fix (CS_SYNCPAINT) for WinHlp32 to
 		   display navigation buttons, but crashes SOL.EXE :(
 
- 98-07-10: Patrick Haller
+ 1998-07-10: Patrick Haller
 	- stubs for NETAPI32 100%
 
- 98-07-09: Patrick Haller
+ 1998-07-09: Patrick Haller
 	- stubs for Winspool 100%
 
- 98-07-01 Joel Troster
+ 1998-07-01 Joel Troster
 	- KERNEL32: update to nameid.cpp
 
- 98-06-07 Joel Troster
+ 1998-06-07 Joel Troster
 	- WINMM: WaveOpen bugfix
 
- 98-06-07 Felix Maschek
+ 1998-06-07 Felix Maschek
 	- CAPI32: bugfix
 
- 98-06-15: Patrick Haller
+ 1998-06-15: Patrick Haller
 	- GDI32:    stubs for all missing functions
 	- ADVAPI32: stubs for all missing functions
 	- USER32:   implementation of some real functions
 		    some unknown functions stubbed (IDA/2)
 
- 98-06-14: KSO
+ 1998-06-14: KSO
 	- GDI32:    Stubs for Office 97
 	- PE2LX:    Formatted output
 	- ADVPI32:  Stubs for Office 97
 	- VERSION:  Stubs for Office 97
 
- 98-06-12: Patrick Haller
+ 1998-06-12: Patrick Haller
 	- NTDLL:    ported over the NTDLL code from WINE, subject to the GNU Copyleft
 		    some applications open this module explicitly
 	- KERNEL32: few fixes to Unicode handling
@@ -1837,14 +1837,14 @@
 				Experimental.
 	- KERNEL32: WINDLL.CPP: fixed endless loop in Win32DLL::StripPath()
 
- 98-05-25: Patrick Haller
+ 1998-05-25: Patrick Haller
 	- KERNEL32: Added few NTDLL stubs, mainly for support of MSACM32/NT
 	- KERNEL32: Resource fix
 
- 98-05-03: Joel Troster
+ 1998-05-03: Joel Troster
 	- WINMM:    Stubbed most of the remaining mmedia apis
 
- 98-04-28: Patrick Haller
+ 1998-04-28: Patrick Haller
 	- KERNEL32: Console fixes
 	- KERNEL32: Console properties (partially)
 	- KERNEL32: Handlemanager fixes
@@ -1854,16 +1854,16 @@
 ***** Release 0.02
 ********************************************************************************
 
- 98-04-05: Patrick Haller
+ 1998-04-05: Patrick Haller
 	- KERNEL32: Resource bugfix
 
- 98-03-30: Joel Troster
+ 1998-03-30: Joel Troster
 	- WINMM: midiStream* stubs added
 
- 98-03-30: Sander van Leeuwen
+ 1998-03-30: Sander van Leeuwen
 	- PE2LX: Set console flag when exe has no resources
 
- 98-03-27: Joel Troster
+ 1998-03-27: Joel Troster
 	- WINMM: Midi changes/bugfixes, mci* api stubs added
 	- GDI32: SetObjectOwner stub added
 
@@ -2096,7 +2096,7 @@
  11-02-98: Sander van Leeuwen
 	- MPR: Changed/Corrected ordinals
 
-Mon  98-02-09 Peter Fitzsimmons
+Mon  1998-02-09 Peter Fitzsimmons
 	- lx.cpp -- put in check for MAX_SECTIONS (was bombing out in one
 	  of "visio technical"'s dlls.
 	- lx.cpp increase MAX_SECTIONS (lx.h) from 16 to 32 (where'd the
