@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.18 1999-10-17 20:18:45 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.19 1999-10-21 12:19:27 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -19,6 +19,7 @@
 #include <win32dlg.h>
 #include "oslibmsg.h"
 #include "win32wdesktop.h"
+#include "controls.h"
 
 #define DEFAULT_DLGFONT "9.WarpSans"
 
@@ -769,20 +770,18 @@ LRESULT Win32Dialog::DefDlg_Proc(UINT msg, WPARAM wParam, LPARAM lParam)
         HWND hwndCurFocus = GetFocus();
         if (hwndCurFocus)
         {
-#if 0
-            WND *wnd = WIN_FindWndPtr( hwndFocus );
+            Win32BaseWindow *wndFocus = Win32BaseWindow::GetWindowFromHandle(hwndFocus);
 
-            if( wnd )
+            if(wndFocus)
             {
                 /* always make combo box hide its listbox control */
-                if( WIDGETS_IsControl( wnd, BIC32_COMBO ) )
-                    SendMessageA( hwndFocus, CB_SHOWDROPDOWN, FALSE, 0 );
+                if( WIDGETS_IsControl( wndFocus, COMBOBOX_CONTROL ) )
+                    wndFocus->SendMessageA(CB_SHOWDROPDOWN, FALSE, 0 );
                 else
-                if( WIDGETS_IsControl( wnd, BIC32_EDIT ) &&
-                    WIDGETS_IsControl( wnd->parent, BIC32_COMBO ))
-                    SendMessageA(CB_SHOWDROPDOWN, FALSE, 0 );
+                if( WIDGETS_IsControl( wndFocus, EDIT_CONTROL ) &&
+                    WIDGETS_IsControl( wndFocus->getParent(), COMBOBOX_CONTROL ))
+                    wndFocus->SendMessageA(CB_SHOWDROPDOWN, FALSE, 0 );
             }
-#endif
         }
         return DefWindowProcA( msg, wParam, lParam );
     }

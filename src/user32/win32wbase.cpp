@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.57 1999-10-20 13:46:27 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.58 1999-10-21 12:19:28 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -674,7 +674,6 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
         SendNCCalcSize(FALSE, &rectWindow, NULL, NULL, 0, &rectClient );
 
 //        OffsetRect(&rectWindow, maxPos.x - rectWindow.left, maxPos.y - rectWindow.top);
-        dprintf(("Sending WM_CREATE"));
         if( (SendMessageA(WM_CREATE, 0, (LPARAM)cs )) != -1 )
         {
             if(!(flags & WIN_NEED_SIZE)) {
