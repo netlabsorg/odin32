@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.290 2001-10-17 13:26:57 phaller Exp $ */
+/* $Id: win32wbase.cpp,v 1.291 2001-10-17 14:30:09 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -3298,6 +3298,7 @@ HWND Win32BaseWindow::GetWindow(UINT uCmd)
 
         break;
 
+    //for internal use only
     case GW_HWNDNEXTCHILD:
         lock();
         window = (Win32BaseWindow *)getNextChild();
@@ -3306,6 +3307,10 @@ HWND Win32BaseWindow::GetWindow(UINT uCmd)
         }
         else hwndRelated = 0;
         unlock();
+        break;
+
+    case GW_HWNDPREVCHILD:
+        DebugInt3();
         break;
 
     case GW_HWNDFIRSTCHILD:

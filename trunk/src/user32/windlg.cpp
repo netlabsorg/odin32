@@ -1,4 +1,4 @@
-/* $Id: windlg.cpp,v 1.26 2001-10-13 00:49:28 sandervl Exp $ */
+/* $Id: windlg.cpp,v 1.27 2001-10-17 14:30:10 sandervl Exp $ */
 /*
  * Win32 dialog apis for OS/2
  *
@@ -551,19 +551,11 @@ HWND WIN32API GetNextDlgGroupItem( HWND hwndDlg, HWND hwndCtrl, BOOL fPrevious)
     {
         /* No ctrl specified -> start from the beginning */
         if (!(hwndCtrl = GetWindow( hwndDlg, GW_CHILD ))) return 0;
-#ifdef __WIN32OS2__
-        if (fPrevious) hwndCtrl = GetWindow( hwndCtrl, GW_HWNDLASTCHILD );
-#else
         if (fPrevious) hwndCtrl = GetWindow( hwndCtrl, GW_HWNDLAST );
-#endif
     }
 
     retvalue = hwndCtrl;
-#ifdef __WIN32OS2__
-    hwnd = GetWindow( hwndCtrl, GW_HWNDNEXTCHILD );
-#else
     hwnd = GetWindow( hwndCtrl, GW_HWNDNEXT );
-#endif
     while (1)
     {
         if (!hwnd || (GetWindowLongW( hwnd, GWL_STYLE ) & WS_GROUP))
@@ -571,15 +563,11 @@ HWND WIN32API GetNextDlgGroupItem( HWND hwndDlg, HWND hwndCtrl, BOOL fPrevious)
             /* Wrap-around to the beginning of the group */
             HWND tmp;
 
-#ifdef __WIN32OS2__
-            hwnd = GetWindow( hwndDlg, GW_HWNDFIRSTCHILD );
-            if(!hwnd) break;
-
-            for (tmp = hwnd; tmp; tmp = GetWindow( tmp, GW_HWNDNEXTCHILD ) )
-#else
             hwnd = GetWindow( hwndDlg, GW_CHILD );
-            for (tmp = hwnd; tmp; tmp = GetWindow( tmp, GW_HWNDNEXT ) )
+#ifdef __WIN32OS2__
+            if(!hwnd) break;
 #endif
+            for (tmp = hwnd; tmp; tmp = GetWindow( tmp, GW_HWNDNEXT ) )
             {
                 if (GetWindowLongW( tmp, GWL_STYLE ) & WS_GROUP) hwnd = tmp;
                 if (tmp == hwndCtrl) break;
@@ -591,11 +579,7 @@ HWND WIN32API GetNextDlgGroupItem( HWND hwndDlg, HWND hwndCtrl, BOOL fPrevious)
             retvalue = hwnd;
 	    if (!fPrevious) break;
 	}
-#ifdef __WIN32OS2__
-        hwnd = GetWindow( hwnd, GW_HWNDNEXTCHILD );
-#else
         hwnd = GetWindow( hwnd, GW_HWNDNEXT );
-#endif
     }
     return retvalue;
 }
