@@ -346,6 +346,10 @@ static LRESULT CALLBACK dinput_mouse_hook( int code, WPARAM wparam, LPARAM lpara
         SetEvent(This->hEvent);
 
     if (wparam == WM_MOUSEMOVE) {
+#ifdef __WIN32OS2__
+      if(hook->flags != LLMHF_INJECTED)
+#endif
+      if(hook->dwExtraInfo != 666) 
 	if (This->absolute) {
 	  if (hook->pt.x != This->prevX)
 	    GEN_EVENT(This->offset_array[WINE_MOUSE_X_POSITION], hook->pt.x, hook->time, 0);
@@ -482,25 +486,25 @@ static HRESULT WINAPI SysMouseAImpl_Acquire(LPDIRECTINPUTDEVICE2A iface)
 
     /* Install our mouse hook */
 #ifdef __WIN32OS2__
-    //push ebp
+    /* push ebp */
     This->hookcode[0]  = 0x55;
-    //mov  ebp, esp
+    /* mov  ebp, esp */
     This->hookcode[1]  = 0x8B; This->hookcode[2]  = 0xEC;
-    //push [ebp+16]
+    /* push [ebp+16] */
     This->hookcode[3]  = 0xFF; This->hookcode[4]  = 0x75; This->hookcode[5]  = 0x10;
-    //push [ebp+12]
+    /* push [ebp+12] */
     This->hookcode[6]  = 0xFF; This->hookcode[7]  = 0x75; This->hookcode[8]  = 0x0C;
-    //push [ebp+8]
+    /* push [ebp+8] */
     This->hookcode[9]  = 0xFF; This->hookcode[10] = 0x75; This->hookcode[11] = 0x08;
-    //push This
+    /* push This */
     This->hookcode[12] = 0x68; *(DWORD *)&This->hookcode[13]  = (DWORD)This;
-    //mov  eax, dinput_mouse_hook
+    /* mov  eax, dinput_mouse_hook */
     This->hookcode[17] = 0xB8; *(DWORD *)&This->hookcode[18]  = (DWORD)&dinput_mouse_hook;
-    //call eax
+    /* call eax */
     This->hookcode[22] = 0xFF; This->hookcode[23]  = 0xD0;
-    //pop  ebp
+    /* pop  ebp */
     This->hookcode[24] = 0x5D;
-    //ret  12
+    /* ret  12 */
     This->hookcode[25] = 0xC2; *(WORD *)&This->hookcode[26]  = 0x000C;
 
     This->hook = SetWindowsHookExW( WH_MOUSE_LL, (HOOKPROC)This->hookcode, 0, 0 );
