@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.443 1999-11-13 15:42:51 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.444 1999-11-13 16:41:06 cbratschi Exp $ */
+
+ 99-11-13: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32: fixed more edit bugs
+		  merged controls with wine-991031
 
  99-11-13: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Fixed problem with ReadFile & aliased memory
