@@ -1,4 +1,4 @@
-/* $Id: pe.cpp,v 1.8 1999-08-28 07:38:15 sandervl Exp $ */
+/* $Id: pe.cpp,v 1.9 1999-09-21 18:35:01 sandervl Exp $ */
 
 /*
  * PELDR main exe loader code
@@ -24,12 +24,9 @@
 #include <assert.h>
 #include <win32type.h>
 #include <misc.h>
-#include <winexe.h>
-#include <windll.h>
+#include <winexepeldr.h>
 #include <wprocess.h>
 #include "pe.h"
-#include "exceptions.h"
-#include "..\kernel32\exceptutil.h"
 
 char INFO_BANNER[]      = "Usage: PE winexe commandline";
 char szErrorTitle[]     = "Odin";
@@ -68,14 +65,9 @@ int main(int argc, char *argv[])
 {
  HAB    hab = 0;                             /* PM anchor block handle       */
  HMQ    hmq = 0;                             /* Message queue handle         */
- char  *szCmdLine;
  char   exeName[CCHMAXPATH];
- PPIB   ppib;
- PTIB   ptib;
- Win32Exe *WinExe;
  APIRET  rc;
  HMODULE hmodPMWin = 0, hmodKernel32 = 0;
- WINEXCEPTION_FRAME exceptFrame;
 
   rc = DosLoadModule(exeName, sizeof(exeName), "PMWIN.DLL", &hmodPMWin);
   rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32INITIALIZE, NULL, (PFN *)&MyWinInitialize);
@@ -85,9 +77,7 @@ int main(int argc, char *argv[])
   rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32MESSAGEBOX, NULL, (PFN *)&MyWinMessageBox);
 
   rc = DosLoadModule(exeName, sizeof(exeName), "KERNEL32.DLL", &hmodKernel32);
-  rc = DosQueryProcAddr(hmodKernel32, 0, "CreateWin32Exe", (PFN *)&CreateWin32Exe);
-  rc = DosQueryProcAddr(hmodKernel32, 0, "OS2SetExceptionHandler", (PFN *)&Krnl32SetExceptionHandler);
-  rc = DosQueryProcAddr(hmodKernel32, 0, "OS2UnsetExceptionHandler", (PFN *)&Krnl32UnsetExceptionHandler);
+  rc = DosQueryProcAddr(hmodKernel32, 0, "_CreateWin32PeLdrExe@8", (PFN *)&CreateWin32Exe);
 
   if ((hab = MyWinInitialize(0)) == 0L) /* Initialize PM     */
 	goto fail;
@@ -104,36 +94,10 @@ int main(int argc, char *argv[])
   if(strstr(exeName, ".EXE") == NULL) {
         strcat(exeName, ".EXE");
   }
-  WinExe = CreateWin32Exe(exeName);
-  if(WinExe == NULL) {
+  if(CreateWin32Exe(exeName, ReserveMem()) == FALSE) {
         MyWinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szMemErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
         goto fail;
   }
-  rc = DosGetInfoBlocks(&ptib, &ppib);
-  if(rc) {
-        MyWinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szInteralErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
-        delete WinExe;
-        goto fail;
-  }
-  szCmdLine = ppib->pib_pchcmd;
-  while(*szCmdLine == ' ' && *szCmdLine )       //skip leading spaces
-        szCmdLine++;
-  while(*szCmdLine != ' ' && *szCmdLine )       //skip pe (.exe)
-        szCmdLine++;
-  while(*szCmdLine == ' ' && *szCmdLine )       //skip spaces
-        szCmdLine++;
-
-  WinExe->setCommandLine(szCmdLine);
-
-  Krnl32SetExceptionHandler(&exceptFrame);
-  if(WinExe->init(ReserveMem()) == FALSE) {
-        delete WinExe;
-        goto fail;
-  }
-  Krnl32UnsetExceptionHandler(&exceptFrame);
-  WinExe->start();
-
-  delete WinExe;
 
   if(hmq) MyWinDestroyMsgQueue( hmq );             /* Tidy up...                   */
   MyWinTerminate( hab );                   /* Terminate the application    */
