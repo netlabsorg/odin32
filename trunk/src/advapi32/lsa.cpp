@@ -1,4 +1,4 @@
-/* $Id: lsa.cpp,v 1.1 1999-11-04 12:44:47 phaller Exp $ */
+/* $Id: lsa.cpp,v 1.2 1999-11-09 19:37:44 phaller Exp $ */
 
 /*
  * Win32 Security Database API functions for OS/2
@@ -25,9 +25,33 @@ ODINDEBUGCHANNEL(ADVAPI32-LSA)
 
 
 // still unknown functions
+//ADVAPI32.SystemFunction007
+//ADVAPI32.SystemFunction028
+//ADVAPI32.SystemFunction022
 //ADVAPI32.SystemFunction006
-//ADVAPI32.SystemFunction016
+//ADVAPI32.SystemFunction014
+//ADVAPI32.SystemFunction020
 //ADVAPI32.SystemFunction012
+//ADVAPI32.LsaSetInformationTrustedDomain
+//ADVAPI32.LsaGetSystemAccessAccount
+//ADVAPI32.LsaEnumeratePrivilegesOfAccount
+//ADVAPI32.EnumServiceGroupW
+//ADVAPI32.LsaOpenAccount
+//ADVAPI32.LsaQueryInfoTrustedDomain
+//ADVAPI32.LsaCreateTrustedDomain
+//ADVAPI32.LsaOpenTrustedDomain
+//ADVAPI32.LsaSetSecret
+//ADVAPI32.LsaQuerySecret
+//ADVAPI32.LsaOpenSecret
+//ADVAPI32.LsaCreateSecret
+//ADVAPI32.LsaEnumerateAccounts
+//ADVAPI32.LsaEnumeratePrivileges
+//ADVAPI32.LsaLookupPrivilegeDisplayName
+//ADVAPI32.LsaRemovePrivilegesFromAccount
+//ADVAPI32.LsaSetSystemAccessAccount
+//ADVAPI32.LsaDelete
+//ADVAPI32.LsaCreateAccount
+//ADVAPI32.LsaAddPrivilegesToAccount
 
 
 /*****************************************************************************
