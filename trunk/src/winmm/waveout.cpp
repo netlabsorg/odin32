@@ -1,4 +1,4 @@
-/* $Id: waveout.cpp,v 1.7 1999-12-20 22:22:07 sandervl Exp $ */
+/* $Id: waveout.cpp,v 1.8 1999-12-29 08:33:56 phaller Exp $ */
 #undef DEBUG
 /*
  * Wave out MM apis
@@ -33,13 +33,17 @@ ODINDEBUGCHANNEL(WINMM-WAVEOUT)
 
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION6(MMRESULT, waveOutOpen,
-              LPHWAVEOUT, phwo,
-              UINT, uDeviceID,
-              const LPWAVEFORMATEX, pwfx,
-              DWORD, dwCallback,
-              DWORD, dwInstance,
-              DWORD, fdwOpen)
+
+//@@@PH 1999/12/28 this function needs the win32 tib FS selector for callback purposes
+//                 therefore, one cannot use ODINFUNCTION macro wrappers! The xxxFS
+//                 macro passes in USHORT selFS as first parameter.
+ODINFUNCTION6FS(MMRESULT, waveOutOpen,
+                LPHWAVEOUT, phwo,
+                UINT, uDeviceID,
+                const LPWAVEFORMATEX, pwfx,
+                DWORD, dwCallback,
+                DWORD, dwInstance,
+                DWORD, fdwOpen)
 {
   MMRESULT rc;
 
@@ -61,8 +65,10 @@ ODINFUNCTION6(MMRESULT, waveOutOpen,
         *phwo = (HWAVEOUT)new DartWaveOut(pwfx, (HWND)dwCallback);
   }
   else
-  if(fdwOpen == CALLBACK_FUNCTION) {
-        *phwo = (HWAVEOUT)new DartWaveOut(pwfx, dwCallback, dwInstance);
+  if(fdwOpen == CALLBACK_FUNCTION)
+  {
+    //@@@PH 1999/12/28 save valid FS: to win32 TIB
+        *phwo = (HWAVEOUT)new DartWaveOut(pwfx, dwCallback, dwInstance, selFS);
   }
   else  *phwo = (HWAVEOUT)new DartWaveOut(pwfx);
 

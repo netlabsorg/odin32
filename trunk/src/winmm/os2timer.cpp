@@ -1,4 +1,4 @@
-/* $Id: os2timer.cpp,v 1.12 1999-08-31 20:22:27 phaller Exp $ */
+/* $Id: os2timer.cpp,v 1.13 1999-12-29 08:33:56 phaller Exp $ */
 
 /*
  * OS/2 Timer class
@@ -78,6 +78,10 @@ static DWORD _System TimerHlpHandler(LPVOID timer);
 OS2TimerResolution::OS2TimerResolution(int dwPeriod)
   : next(NULL)
 {
+  dprintf(("WINMM:OS2Timer: OS2TimerResolution::OS2TimerResolution(%08xh,%08xh)\n",
+           this,
+           dwPeriod));
+
   // add to linked list
   OS2TimerResolution *timeRes = OS2TimerResolution::sTimerResolutions;
 
@@ -110,6 +114,10 @@ OS2TimerResolution::OS2TimerResolution(int dwPeriod)
 
 OS2TimerResolution::~OS2TimerResolution()
 {
+  dprintf(("WINMM:OS2Timer: OS2TimerResolution::~OS2TimerResolution(%08xh)\n",
+           this));
+
+
   // remove from linked list
   OS2TimerResolution *timeRes = OS2TimerResolution::sTimerResolutions;
 
@@ -142,6 +150,9 @@ OS2TimerResolution::~OS2TimerResolution()
 
 BOOL OS2TimerResolution::enterResolutionScope(int dwPeriod)
 {
+  dprintf(("WINMM:OS2Timer: OS2TimerResolution::enterResolutionScope(%08xh)\n",
+           dwPeriod));
+
   OS2TimerResolution* timeRes = new OS2TimerResolution(dwPeriod);
   if (timeRes != NULL)
     return TRUE;
@@ -164,6 +175,9 @@ BOOL OS2TimerResolution::enterResolutionScope(int dwPeriod)
 
 BOOL OS2TimerResolution::leaveResolutionScope(int dwPeriod)
 {
+  dprintf(("WINMM:OS2Timer: OS2TimerResolution::leaveResolutionScope(%08xh)\n",
+           dwPeriod));
+
   OS2TimerResolution* timeRes = OS2TimerResolution::sTimerResolutions;
 
   if (timeRes != NULL)
@@ -209,6 +223,9 @@ int OS2TimerResolution::queryCurrentResolution()
         iMin = timeRes->dwPeriod;
     }
 
+  dprintf(("WINMM:OS2Timer: OS2TimerResolution::queryCurrentResolution == %08xh\n",
+           iMin));
+
   return iMin;
 }
 
@@ -222,6 +239,9 @@ OS2Timer::OS2Timer() : TimerSem(0), TimerHandle(0), TimerThreadID(0),
                   clientCallback(NULL), TimerStatus(Stopped), fFatal(FALSE),
                   next(NULL)
 {
+  dprintf(("WINMM:OS2Timer: OS2Timer::OS2Timer(%08xh)\n",
+           this));
+
   OS2Timer *timer = OS2Timer::timers;
 
   if(timer != NULL)
@@ -237,7 +257,7 @@ OS2Timer::OS2Timer() : TimerSem(0), TimerHandle(0), TimerThreadID(0),
 
   //TimerThreadID = _beginthread(TimerHlpHandler, NULL, 0x4000, (void *)this);
   hTimerThread = CreateThread(NULL,
-                              0x1000,
+                              0x4000,
                               (LPTHREAD_START_ROUTINE)TimerHlpHandler,
                               (LPVOID)this,
                               0, // thread creation flags
@@ -252,6 +272,9 @@ OS2Timer::OS2Timer() : TimerSem(0), TimerHandle(0), TimerThreadID(0),
 /******************************************************************************/
 OS2Timer::~OS2Timer()
 {
+  dprintf(("WINMM:OS2Timer: OS2Timer::~OS2Timer(%08xh)\n",
+           this));
+
   OS2Timer *timer = OS2Timer::timers;
 
   KillTimer();
@@ -275,12 +298,18 @@ BOOL OS2Timer::StartTimer(int period,
                           int dwUser,
                           int fuEvent)
 {
+  dprintf(("WINMM:OS2Timer: OS2Timer::StartTimer(%08xh, %08xh, %08xh, %08xh, %08xh, %08xh)\n",
+           this,
+           period,
+           resolution,
+           lptc,
+           dwUser,
+           fuEvent));
+
   APIRET rc;
 
   if(TimerThreadID == -1)
-  {
     return(FALSE);
-  }
 
   if(TimerStatus == Stopped)
   {
@@ -316,6 +345,9 @@ BOOL OS2Timer::StartTimer(int period,
 /******************************************************************************/
 void OS2Timer::StopTimer()
 {
+  dprintf(("WINMM:OS2Timer: OS2Timer::StopTimer(%08xh)\n",
+           this));
+
   if(TimerStatus == Running)
   {
     DosStopTimer(TimerHandle);
@@ -326,6 +358,9 @@ void OS2Timer::StopTimer()
 /******************************************************************************/
 void OS2Timer::KillTimer()
 {
+  dprintf(("WINMM:OS2Timer: OS2Timer::KillTimer(%08xh)\n",
+           this));
+
   fFatal = TRUE;
   DosStopTimer(TimerHandle);
   if(DosPostEventSem(TimerSem))
@@ -343,7 +378,8 @@ void OS2Timer::TimerHandler()
   APIRET  rc = 0;       /* Return code  */
   USHORT  selTIB;
 
-  dprintf(("WINMM: TimerHandler thread created\n"));
+  dprintf(("WINMM: TimerHandler thread created (%08xh)\n",
+           this));
 
   rc = DosSetPriority (PRTYS_THREAD,        /* Change a single thread */
                        PRTYC_TIMECRITICAL,  /* Time critical class    */

@@ -1,4 +1,4 @@
-/* $Id: dwaveout.h,v 1.5 1999-10-22 18:09:16 sandervl Exp $ */
+/* $Id: dwaveout.h,v 1.6 1999-12-29 08:33:56 phaller Exp $ */
 
 /*
  * Wave playback class
@@ -31,7 +31,7 @@
 class DartWaveOut
 {
 public:
-              DartWaveOut(LPWAVEFORMATEX pwfx, ULONG nCallback, ULONG dwInstance);
+              DartWaveOut(LPWAVEFORMATEX pwfx, ULONG nCallback, ULONG dwInstance, USHORT usSel);
               DartWaveOut(LPWAVEFORMATEX pwfx, HWND hwndCallback);
               DartWaveOut(LPWAVEFORMATEX pwfx);
              ~DartWaveOut();
@@ -71,17 +71,19 @@ private:
     int curPlayBuf, curFillBuf;
     int curFillPos, curPlayPos; //fillpos == pos in os2 mix buffer, bufpos == pos in win buffer
 
-  // callback interface
-  LPDRVCALLBACK mthdCallback;
-  void          callback(HDRVR h, UINT uMessage, DWORD dwUser, DWORD dw1, DWORD dw2);
+    // callback interface
+    LPDRVCALLBACK mthdCallback; // pointer to win32 routine for the callback
+    USHORT        selCallback;  // the win32 tib selector for the callback (saved at waveOutOpen)
+    void          callback(HDRVR h, UINT uMessage, DWORD dwUser, DWORD dw1, DWORD dw2);
+    HWND          hwndCallback;
+    DWORD         dwInstance;
 
-         HWND hwndCallback;
-        DWORD dwInstance;
-    WAVEHDR  *wavehdr, *curhdr;
+    WAVEHDR  *wavehdr,
+             *curhdr;
 
-     BOOL fMixerSetup;
+    BOOL fMixerSetup;
 
-      VMutex *wmutex;
+    VMutex *wmutex;
                               // Linked list management
               DartWaveOut*    next;                   // Next Timer
     static    DartWaveOut*    waveout;                // List of Timer

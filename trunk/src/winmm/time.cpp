@@ -1,4 +1,4 @@
-/* $Id: time.cpp,v 1.7 1999-11-26 21:49:22 phaller Exp $ */
+/* $Id: time.cpp,v 1.8 1999-12-29 08:33:56 phaller Exp $ */
 
 /*
  * Timer MM apis
@@ -163,10 +163,18 @@ ODINFUNCTION5(MMRESULT,       timeSetEvent,
 
 // @@@PH 1999/10/26 hack for RA95
   if (wDelay      < OS2TIMER_RESOLUTION_MINIMUM)
+  {
+    dprintf(("WINMM:Time:timeSetEvent - Warning: requested delay too low (%08xh)\n",
+             wDelay));
     wDelay = OS2TIMER_RESOLUTION_MINIMUM;
+  }
 
   if (wResolution < OS2TIMER_RESOLUTION_MINIMUM)
+  {
+    dprintf(("WINMM:Time:timeSetEvent - Warning: requested resolution too low (%08xh)\n",
+             wResolution));
     wResolution = OS2TIMER_RESOLUTION_MINIMUM;
+  }
 
 
   // check parameters
