@@ -1,4 +1,4 @@
-/* $Id: overlappedio.h,v 1.7 2001-12-09 21:55:17 sandervl Exp $ */
+/* $Id: overlappedio.h,v 1.8 2001-12-10 12:55:13 sandervl Exp $ */
 
 /*
  * Win32 overlapped IO class
@@ -38,13 +38,6 @@ public:
     ASYNCIOREQUEST()
     {
         memset(this, 0, sizeof(ASYNCIOREQUEST));
-        hEventCancel = ::CreateEventA(NULL, TRUE, FALSE, NULL);
-        if(hEventCancel == 0) DebugInt3();
-    };
-
-    ~ASYNCIOREQUEST()
-    {
-        ::CloseHandle(hEventCancel);
     };
 
     DWORD               dwAsyncType;
@@ -58,7 +51,7 @@ public:
     DWORD               dwLastError;
     DWORD               dwEventMask;
     DWORD               dwUserData;
-    HANDLE              hEventCancel;
+    BOOL                fCancelled;
     ASYNCIOREQUEST     *next;
 };
 
@@ -123,6 +116,7 @@ private:
      HANDLE       hThreadRead;
      HANDLE       hThreadWrite;
      HANDLE       hEventExit;
+     HANDLE       hEventCancel;
      HANDLE       hEventPoll;
      HANDLE       hEventRead;
      HANDLE       hEventWrite;
