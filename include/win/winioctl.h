@@ -1,5 +1,3 @@
-/* $Id: winioctl.h,v 1.2 2000-09-13 20:58:29 sandervl Exp $ */
-
 #ifndef __WINE_WINIOCTL_H
 #define __WINE_WINIOCTL_H
 
@@ -154,6 +152,33 @@
 /* End: _WIN32_WINNT >= 0x0500 */
 
 
+
+//Storage/disk IOCTLs
+
+typedef enum _MEDIA_TYPE {
+    Unknown,
+    F5_1Pt2_512,
+    F3_1Pt44_512,
+    F3_2Pt88_512,
+    F3_20Pt8_512,
+    F3_720_512,
+    F5_360_512,
+    F5_320_512,
+    F5_320_1024,
+    F5_180_512,
+    F5_160_512,
+    RemovableMedia,
+    FixedMedia,
+    F3_120M_512
+} MEDIA_TYPE, *PMEDIA_TYPE;
+
+typedef struct _DISK_GEOMETRY {
+    LARGE_INTEGER Cylinders;
+    MEDIA_TYPE MediaType;
+    DWORD TracksPerCylinder;
+    DWORD SectorsPerTrack;
+    DWORD BytesPerSector;
+} DISK_GEOMETRY, *PDISK_GEOMETRY;
 
 #define IOCTL_STORAGE_BASE FILE_DEVICE_MASS_STORAGE
 #define IOCTL_STORAGE_CHECK_VERIFY       CTL_CODE(IOCTL_STORAGE_BASE, 0x0200, METHOD_BUFFERED, FILE_READ_ACCESS)
