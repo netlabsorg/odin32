@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.22 1999-10-14 15:15:22 phaller Exp $ */
+/* $Id: KERNEL32.CPP,v 1.23 1999-10-22 18:07:20 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -576,6 +576,9 @@ DWORD WIN32API LoadModule( LPCSTR arg1, PVOID  arg2)
 int WIN32API MulDiv(int arg1, int arg2, int  arg3)
 {
     dprintf(("KERNEL32:  OS2MulDiv %d*%d/%d\n", arg1, arg2, arg3));
+    if(arg3 == 0)
+	return 0;
+
     return O32_MulDiv(arg1, arg2, arg3);
 }
 //******************************************************************************
@@ -807,7 +810,7 @@ LONG WIN32API GetVersion()
 /*                structures that lead to crashes if we don't identify as NT */
 
 //  return(WIN32OS2_VERSION);
-  return (0x0);
+  return (0x00000400);
 }
 //******************************************************************************
 //SvL: 26-6-'97 - Added

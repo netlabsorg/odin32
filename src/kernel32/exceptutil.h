@@ -1,4 +1,4 @@
-/* $Id: exceptutil.h,v 1.2 1999-08-22 22:11:21 sandervl Exp $ */
+/* $Id: exceptutil.h,v 1.3 1999-10-22 18:07:19 sandervl Exp $ */
 
 /*
  * Exception + misc functions for OS/2
@@ -18,6 +18,8 @@ void  ReplaceExceptionHandler(void);
 void  ChangeTIBStack();
 #endif
 void  __cdecl SetExceptionChain(DWORD);
+
+extern "C" PVOID QueryExceptionChain();
 
 void  DisableFPUExceptions();
 ULONG GetDllEntryPoint();
