@@ -1,4 +1,4 @@
-/* $Id: uitools.cpp,v 1.10 1999-10-05 18:23:49 sandervl Exp $ */
+/* $Id: uitools.cpp,v 1.11 1999-10-09 16:28:25 cbratschi Exp $ */
 /*
  * User Interface Functions
  *
@@ -7,6 +7,8 @@
  * Copyright 1999 Achim Hasenmueller
  * Copyright 1999 Christoph Bratschi
  * Copyright 1999 Rene Pronk
+ *
+ * WINE version: 990923
  */
 
 #include "winuser.h"
@@ -616,6 +618,30 @@ static int UITOOLS_MakeSquareRect(LPRECT src, LPRECT dst)
 }
 
 
+static void UITOOLS_DrawCheckedRect( HDC dc, LPRECT rect )
+{
+    if(GetSysColor(COLOR_BTNHIGHLIGHT) == RGB(255, 255, 255))
+    {
+      HBITMAP hbm = CreateBitmap(8, 8, 1, 1, wPattern_AA55);
+      HBRUSH hbsave;
+      HBRUSH hb = CreatePatternBrush(hbm);
+      COLORREF bg;
+
+      FillRect(dc, rect, GetSysColorBrush(COLOR_BTNFACE));
+      bg = SetBkColor(dc, RGB(255, 255, 255));
+      hbsave = (HBRUSH)SelectObject(dc, hb);
+      PatBlt(dc, rect->left, rect->top, rect->right-rect->left, rect->bottom-rect->top, 0x00FA0089);
+      SelectObject(dc, hbsave);
+      SetBkColor(dc, bg);
+      DeleteObject(hb);
+      DeleteObject(hbm);
+    }
+    else
+    {
+        FillRect(dc, rect, GetSysColorBrush(COLOR_BTNHIGHLIGHT));
+    }
+}
+
 /************************************************************************
  *      UITOOLS_DFC_ButtonPush
  *
@@ -642,26 +668,10 @@ static BOOL UITOOLS95_DFC_ButtonPush(HDC dc, LPRECT r, UINT uFlags)
         else
             UITOOLS95_DrawRectEdge(dc, &myr, edge, (uFlags&DFCS_FLAT)|BF_RECT|BF_SOFT|BF_ADJUST);
 
-        if(GetSysColor(COLOR_BTNHIGHLIGHT) == RGB(255, 255, 255))
-        {
-            HBITMAP hbm = CreateBitmap(8, 8, 1, 1, wPattern_AA55);
-            HBRUSH hbsave;
-            HBRUSH hb = CreatePatternBrush(hbm);
-
-            FillRect(dc, &myr, GetSysColorBrush(COLOR_BTNFACE));
-            hbsave = (HBRUSH)SelectObject(dc, hb);
-            PatBlt(dc, myr.left, myr.top, myr.right-myr.left, myr.bottom-myr.top, 0x00FA0089);
-            SelectObject(dc, hbsave);
-            DeleteObject(hb);
-            DeleteObject(hbm);
+        UITOOLS_DrawCheckedRect( dc, &myr );
         }
         else
         {
-            FillRect(dc, &myr, GetSysColorBrush(COLOR_BTNHIGHLIGHT));
-        }
-    }
-    else
-    {
         if(uFlags & DFCS_MONO)
         {
             UITOOLS95_DrawRectEdge(dc, &myr, edge, BF_MONO|BF_RECT|BF_ADJUST);
@@ -687,7 +697,7 @@ static BOOL UITOOLS95_DFC_ButtonPush(HDC dc, LPRECT r, UINT uFlags)
 
 
 /************************************************************************
- *      UITOOLS_DFC_ButtonChcek
+ *      UITOOLS_DFC_ButtonCheck
  *
  * Draw a check/3state button coming from DrawFrameControl()
  *
@@ -701,61 +711,17 @@ static BOOL UITOOLS95_DFC_ButtonCheck(HDC dc, LPRECT r, UINT uFlags)
 {
     RECT myr;
     int SmallDiam = UITOOLS_MakeSquareRect(r, &myr);
-    int BorderShrink = SmallDiam / 16;
+    UINT flags = BF_RECT | BF_ADJUST;
 
-    if(BorderShrink < 1) BorderShrink = 1;
+    if(uFlags & DFCS_FLAT) flags |= BF_FLAT;
+    else if(uFlags & DFCS_MONO) flags |= BF_MONO;
 
-    /* FIXME: The FillRect() sequence doesn't work for sizes less than */
-    /* 4 pixels in diameter. Not really a problem but it isn't M$'s */
-    /* 100% equivalent. */
-    if(uFlags & (DFCS_FLAT|DFCS_MONO))
-    {
-        FillRect(dc, &myr, GetSysColorBrush(COLOR_WINDOWFRAME));
-        myr.left   += 2 * BorderShrink;
-        myr.right  -= 2 * BorderShrink;
-        myr.top    += 2 * BorderShrink;
-        myr.bottom -= 2 * BorderShrink;
-    }
-    else
-    {
-        FillRect(dc, &myr, GetSysColorBrush(COLOR_BTNHIGHLIGHT));
-        myr.right  -= BorderShrink;
-        myr.bottom -= BorderShrink;
-        FillRect(dc, &myr, GetSysColorBrush(COLOR_BTNSHADOW));
-        myr.left   += BorderShrink;
-        myr.top    += BorderShrink;
-        FillRect(dc, &myr, GetSysColorBrush(COLOR_3DLIGHT));
-        myr.right  -= BorderShrink;
-        myr.bottom -= BorderShrink;
-        FillRect(dc, &myr, GetSysColorBrush(COLOR_3DDKSHADOW));
-        myr.left   += BorderShrink;
-        myr.top    += BorderShrink;
-    }
+    UITOOLS95_DrawRectEdge( dc, &myr, EDGE_SUNKEN, flags );
 
     if(uFlags & (DFCS_INACTIVE|DFCS_PUSHED))
-    {
         FillRect(dc, &myr, GetSysColorBrush(COLOR_BTNFACE));
-    }
-    else if(uFlags & DFCS_CHECKED)
-    {
-        if(GetSysColor(COLOR_BTNHIGHLIGHT) == RGB(255, 255, 255))
-        {
-            HBITMAP hbm = CreateBitmap(8, 8, 1, 1, wPattern_AA55);
-            HBRUSH hbsave;
-            HBRUSH hb = CreatePatternBrush(hbm);
-
-            FillRect(dc, &myr, GetSysColorBrush(COLOR_BTNFACE));
-            hbsave = (HBRUSH)SelectObject(dc, hb);
-            PatBlt(dc, myr.left, myr.top, myr.right-myr.left, myr.bottom-myr.top, 0x00FA0089);
-            SelectObject(dc, hbsave);
-            DeleteObject(hb);
-            DeleteObject(hbm);
-        }
-        else
-        {
-            FillRect(dc, &myr, GetSysColorBrush(COLOR_BTNHIGHLIGHT));
-        }
-    }
+    else if( (uFlags & DFCS_BUTTON3STATE) && (uFlags & DFCS_CHECKED) )
+        UITOOLS_DrawCheckedRect( dc, &myr );
     else
     {
         FillRect(dc, &myr, GetSysColorBrush(COLOR_WINDOW));
@@ -1138,6 +1104,14 @@ static BOOL UITOOLS95_DrawFrameScroll(HDC dc, LPRECT r, UINT uFlags)
     HPEN hpsave, hp, hp2;
     int tri = 290*SmallDiam/1000 -1;
     int d46, d93;
+
+    /*
+     * This fixes a problem with really tiny "scroll" buttons. In particular
+     * with the updown control.
+     * Making sure that the arrow is as least 3 pixels wide (or high).
+     */
+    if (tri == 0)
+      tri = 1;
 
     switch(uFlags & 0xff)
     {
