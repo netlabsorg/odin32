@@ -1,4 +1,4 @@
-# $Id: setup.tools.mk,v 1.15 2002-08-29 10:01:46 bird Exp $
+# $Id: setup.tools.mk,v 1.16 2002-08-29 12:06:19 bird Exp $
 
 
 #
@@ -37,7 +37,7 @@ TOOL_BLDLEVEL   = $(PATH_TOOLS)\BldLevelInf.cmd
 TOOL_BUILDENV   = $(PATH_TOOLS)\BuildEnv.cmd
 TOOL_CMP        = $(PATH_TOOLS)\cmp.exe
 TOOL_CMDQD      = $(PATH_TOOLS)\cmdqd.exe
-!if "$(BUILD_SHELL)" != "4OS2"
+!if "$(COMSPEC:4OS2.EXE=x)" == "$(COMSPEC)"
 TOOL_COPY       = copy
 !else
 TOOL_COPY       = copy /Q

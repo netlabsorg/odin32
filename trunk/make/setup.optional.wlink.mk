@@ -1,4 +1,4 @@
-# $Id: setup.optional.wlink.mk,v 1.2 2002-08-29 10:01:41 bird Exp $
+# $Id: setup.optional.wlink.mk,v 1.3 2002-08-29 12:06:17 bird Exp $
 
 #
 #  Helper file for all the optional stuff which is common for
@@ -21,6 +21,7 @@ _LD_BASE        =
 _LD_PACKCODE    =
 _LD_PACKDATA    =
 _LD_IGNORECASE  = ,caseexact
+_LD_CACHE       = ,cache
 
 
 
@@ -86,8 +87,18 @@ _LD_IGNORECASE  = ,nocaseexact
 !if defined(LD_NO_IGNORECASE) || defined(ALL_NO_IGNORECASE)
 _LD_IGNORECASE  = ,caseexact
 !endif
+!if defined(LD_CACHE)
+_LD_CACHE   = ,cache
+!endif
+!if defined(LD_NO_CACHE)
+_LD_CACHE   = ,nocache
+!endif
+!if defined(LD_DEF_CACHE)
+_LD_CACHE   =
+!endif
 
-_LD_OPTIONAL = $(_LD_SORT) Option verbose $(_LD_QUIET) $(_LD_ALIGN) $(_LD_DOSSEG) $(_LD_BASE) $(_LD_PACKCODE) $(_LD_PACKDATA)
+
+_LD_OPTIONAL = $(_LD_SORT) Option verbose $(_LD_QUIET) $(_LD_ALIGN) $(_LD_DOSSEG) $(_LD_BASE) $(_LD_PACKCODE) $(_LD_PACKDATA) $(_LD_CACHE) $(_LD_DEFAULT_LIBS)
 
 
 # assert on nonsupported options.
