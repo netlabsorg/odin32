@@ -1,4 +1,4 @@
-/* $Id: winimgres.cpp,v 1.25 1999-10-26 11:15:33 sandervl Exp $ */
+/* $Id: winimgres.cpp,v 1.26 1999-11-05 12:54:50 sandervl Exp $ */
 
 /*
  * Win32 PE Image class (resource methods)
@@ -237,7 +237,7 @@ HRSRC Win32ImageBase::findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang)
  BOOL   fNumType;
  char  *winres = NULL;
  ULONG  id, type;
- int    i, stringid = -1, j;
+ int    i, j;
 
     fNumType = TRUE;    //assume numeric
     if(HIWORD(lpszType) != 0) {//string id?
@@ -259,23 +259,7 @@ HRSRC Win32ImageBase::findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang)
     }
     else  type = (ULONG)lpszType;
 
-    //String format: tables of 16 strings stored as one resource
-    //upper 12 bits of resource id passed by user determines block (res id)
-    //lower 4 bits are an index into the string table
-    if(fNumType) {
-        if(type == NTRT_STRING) {
-            stringid = (ULONG)lpszName & 0xF;
-            id       = (((ULONG)lpszName) >> 4)+1;
-        }
-        else id = (ULONG)lpszName;
-    }
-    else {
-        if(stricmp((char *)type, ResTypes[NTRT_STRING]) == 0) {
-            stringid = (ULONG)lpszName & 0xF;
-            id       = (((ULONG)lpszName) >> 4)+1;
-        }
-        else id = (ULONG)lpszName;
-    }
+    id = (ULONG)lpszName;
 
     pData = getPEResourceEntry(id, type, lang);
     if(pData == NULL) {
@@ -289,23 +273,7 @@ HRSRC Win32ImageBase::findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang)
     //for the resource section (images loaded by the pe.exe)
     //For LX images, this is 0 as OffsetToData contains a relative offset
     char *resdata = (char *)((char *)pResDir + pData->OffsetToData - pResourceSectionStart);
-    if(stringid != -1) {//search for string in table
-        USHORT *unicodestr = (USHORT *)resdata;
-
-        for(i=0;i<stringid;i++) {
-            unicodestr += *unicodestr+1;
-        }
-        res = new Win32Resource(this, id, NTRT_STRING, (*unicodestr+1)*sizeof(WCHAR),
-                                (char *)(unicodestr+1));
-        if(res == NULL) {
-            dprintf(("new Win32Resource failed!\n"));
-            return(NULL);
-        }
-    }
-    else
-    {
-       	res = new Win32Resource(this, id, type, pData->Size, resdata);
-    }
+    res = new Win32Resource(this, id, type, pData->Size, resdata);
 
     return (HRSRC) res;
 }
