@@ -1,9 +1,12 @@
-/* $Id: winmouse.cpp,v 1.15 2001-05-19 11:16:02 sandervl Exp $ */
+/* $Id: winmouse.cpp,v 1.16 2001-07-28 13:43:54 sandervl Exp $ */
 /*
  * Mouse handler for DINPUT
  *
- * Copyright 1999 Sander van Leeuwen
+ * Copyright 1999-2001 Sander van Leeuwen
  *
+ * TODO: SwapMouseButton: 
+ *       We shouldn't let win32 apps change this for the whole system
+ *       better to change mouse button message translation instead
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -159,21 +162,48 @@ BOOL WIN32API ReleaseCapture(void)
 UINT WIN32API GetDoubleClickTime(void)
 {
     dprintf(("USER32: GetDoubleClickTime"));
-    return O32_GetDoubleClickTime();
+    UINT result = OSLibWinQuerySysValue(SVOS_DBLCLKTIME);
+    if(result == 0)
+        SetLastError(ERROR_INVALID_PARAMETER); //TODO: ????
+
+    return result;
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetDoubleClickTime( UINT uInterval)
+BOOL WIN32API SetDoubleClickTime(UINT uInterval)
 {
+    BOOL ret = TRUE;
+
     dprintf(("USER32: SetDoubleClickTime %d", uInterval));
-    return O32_SetDoubleClickTime(uInterval);
+
+    ret = OSLibWinSetSysValue(SVOS_DBLCLKTIME, uInterval);
+    if(ret == FALSE )
+    {
+        SetLastError(ERROR_INVALID_PARAMETER); //TODO: ????
+    }
+    return (ret);
 }
 //******************************************************************************
+//TODO: we shouldn't let win32 apps change this for the whole system
+//      better to change mouse button message translation instead
+BOOL OPEN32API __SwapMouseButton(BOOL swapFlag);
+
+inline BOOL _SwapMouseButton(BOOL swapFlag)
+{
+ BOOL yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = __SwapMouseButton(swapFlag);
+    SetFS(sel);
+
+    return yyrc;
+}
+
 //******************************************************************************
-BOOL WIN32API SwapMouseButton( BOOL fSwap)
+BOOL WIN32API SwapMouseButton(BOOL fSwap)
 {
     dprintf(("USER32: SwapMouseButton %d", fSwap));
-    return O32_SwapMouseButton(fSwap);
+    return _SwapMouseButton(fSwap);
 }
 /*****************************************************************************
  * Name      : VOID WIN32API mouse_event

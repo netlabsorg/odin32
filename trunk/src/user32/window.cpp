@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.101 2001-07-23 19:16:41 sandervl Exp $ */
+/* $Id: window.cpp,v 1.102 2001-07-28 13:43:54 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -17,7 +17,6 @@
  * TODO: Decide what to do about commands for OS/2 windows (non-Win32 apps)
  * TODO: ShowOwnedPopups needs to be tested
  *       GetLastActivePopup needs to be rewritten
- *       ArrangeIconicWindows probably too
  *
  */
 
@@ -1744,10 +1743,47 @@ BOOL WIN32API EnumWindows(WNDENUMPROC lpfn, LPARAM lParam)
 }
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API ArrangeIconicWindows( HWND hwnd)
+UINT WIN32API ArrangeIconicWindows( HWND parent)
 {
-    dprintf(("USER32:  ArrangeIconicWindows %x", hwnd));
-    return O32_ArrangeIconicWindows(Win32ToOS2Handle(hwnd));
+    RECT rectParent;
+    HWND hwndChild;
+    INT x, y, xspacing, yspacing;
+
+    dprintf(("USER32: ArrangeIconicWindows %x", parent));
+    dprintf(("USER32: TODO: icon title!!"));
+
+    GetClientRect(parent, &rectParent);
+    x = rectParent.left;
+    y = rectParent.bottom;
+    xspacing = GetSystemMetrics(SM_CXICONSPACING);
+    yspacing = GetSystemMetrics(SM_CYICONSPACING);
+
+    hwndChild = GetWindow( parent, GW_CHILD );
+    while (hwndChild)
+    {
+        if( IsIconic( hwndChild ) )
+        {
+//            WND *wndPtr = WIN_FindWndPtr(hwndChild);
+            
+//            WINPOS_ShowIconTitle( wndPtr, FALSE );
+               
+            SetWindowPos( hwndChild, 0, x + (xspacing - GetSystemMetrics(SM_CXICON)) / 2,
+                            y - yspacing - GetSystemMetrics(SM_CYICON)/2, 0, 0,
+                            SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE );
+//	    if( IsWindow(hwndChild) )
+//                WINPOS_ShowIconTitle(wndPtr , TRUE );
+//            WIN_ReleaseWndPtr(wndPtr);
+
+            if (x <= rectParent.right - xspacing) x += xspacing;
+            else
+            {
+                x = rectParent.left;
+                y -= yspacing;
+            }
+        }
+        hwndChild = GetWindow( hwndChild, GW_HWNDNEXT );
+    }
+    return yspacing;
 }
 //******************************************************************************
 //restores iconized window to previous size/position
