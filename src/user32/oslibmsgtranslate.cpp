@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.108 2003-04-11 14:22:06 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.109 2003-04-11 17:26:11 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -656,6 +656,9 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             break;
         case SC_TASKMANAGER:
             win32sc = SC_TASKLIST_W;
+            break;
+        case SC_SYSMENU:
+            win32sc = SC_KEYMENU_W; //??
             break;
         default:
             dprintf(("Unknown/unsupported SC command %d", SHORT1FROMMP(os2Msg->mp1)));
