@@ -1,12 +1,15 @@
-/* $Id: static.cpp,v 1.7 1999-10-24 22:56:07 sandervl Exp $ */
+/* $Id: static.cpp,v 1.8 1999-10-30 18:40:46 cbratschi Exp $ */
 /*
  * Static control
  *
- * Copyright 1999 Christoph Bratschi (ported from WINE)
+ * Copyright 1999 Christoph Bratschi
  *
  * Copyright  David W. Metcalfe, 1993
  *
  * WINE version: 990923
+ *
+ * Status:  complete
+ * Version: 5.00
  */
 
 #include <stdlib.h>
@@ -20,6 +23,8 @@ static void STATIC_PaintTextfn( HWND hwnd, HDC hdc );
 static void STATIC_PaintRectfn( HWND hwnd, HDC hdc );
 static void STATIC_PaintIconfn( HWND hwnd, HDC hdc );
 static void STATIC_PaintBitmapfn( HWND hwnd, HDC hdc );
+static void STATIC_PaintMetafilefn(HWND hwnd,HDC hdc);
+static void STATIC_PaintOwnerDrawfn(HWND hwnd,HDC hdc);
 static void STATIC_PaintEtchedfn( HWND hwnd, HDC hdc );
 
 static COLORREF color_windowframe, color_background, color_window;
@@ -39,17 +44,27 @@ static pfPaint staticPaintFunc[SS_TYPEMASK+1] =
     STATIC_PaintRectfn,      /* SS_BLACKFRAME */
     STATIC_PaintRectfn,      /* SS_GRAYFRAME */
     STATIC_PaintRectfn,      /* SS_WHITEFRAME */
-    NULL,                    /* Not defined */
+    NULL,                    /* SS_USERITEM */
     STATIC_PaintTextfn,      /* SS_SIMPLE */
     STATIC_PaintTextfn,      /* SS_LEFTNOWORDWRAP */
-    NULL,                    /* SS_OWNERDRAW */
+    STATIC_PaintOwnerDrawfn, /* SS_OWNERDRAW */
     STATIC_PaintBitmapfn,    /* SS_BITMAP */
-    NULL,                    /* SS_ENHMETAFILE */
+    STATIC_PaintMetafilefn,  /* SS_ENHMETAFILE */
     STATIC_PaintEtchedfn,    /* SS_ETCHEDHORIZ */
     STATIC_PaintEtchedfn,    /* SS_ETCHEDVERT */
     STATIC_PaintEtchedfn,    /* SS_ETCHEDFRAME */
 };
 
+static void STATIC_ResizeWindow(HWND hwnd,DWORD dwStyle,INT w,INT h)
+{
+  if (dwStyle & SS_RIGHTJUST)
+  {
+    RECT rect;
+
+    GetWindowRect(hwnd,&rect);
+    SetWindowPos(hwnd,0,rect.right-w,rect.bottom-h,w,h,SWP_NOACTIVATE | SWP_NOZORDER);
+  } else SetWindowPos(hwnd,0,0,0,w,h,SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOZORDER);
+}
 
 /***********************************************************************
  *           STATIC_SetIcon
@@ -70,10 +85,10 @@ static HICON STATIC_SetIcon( HWND hwnd, HICON hicon )
     prevIcon = infoPtr->hIcon;
     infoPtr->hIcon = hicon;
 
-    GetIconInfo(hicon,&ii);
+    if (!GetIconInfo(hicon,&ii)) return prevIcon;
     GetObjectA(ii.hbmColor,sizeof(BITMAP),(LPVOID)&bmp);
 
-    SetWindowPos(hwnd,0,0,0,bmp.bmWidth,bmp.bmHeight,SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOZORDER );
+    if (!(dwStyle & (SS_CENTERIMAGE | SS_REALSIZEIMAGE))) STATIC_ResizeWindow(hwnd,dwStyle,bmp.bmWidth,bmp.bmHeight);
 
     return prevIcon;
 }
@@ -97,14 +112,30 @@ static HBITMAP STATIC_SetBitmap( HWND hwnd, HBITMAP hBitmap )
     }
     hOldBitmap = infoPtr->hIcon;
     infoPtr->hIcon = hBitmap;
-    if (hBitmap)
+    if (hBitmap && !(dwStyle & (SS_CENTERIMAGE | SS_REALSIZEIMAGE)))
     {
-        BITMAP bm;
-        GetObjectA(hBitmap, sizeof(bm), &bm);
-        SetWindowPos( hwnd, 0, 0, 0, bm.bmWidth, bm.bmHeight,
-                      SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOZORDER );
+      BITMAP bm;
+
+      GetObjectA(hBitmap,sizeof(bm),&bm);
+      STATIC_ResizeWindow(hwnd,dwStyle,bm.bmWidth,bm.bmHeight);
     }
+
     return hOldBitmap;
+}
+
+static HENHMETAFILE STATIC_SetMetafile(HWND hwnd,HENHMETAFILE hMetafile)
+{
+  HENHMETAFILE hOldMetafile;
+
+  STATICINFO *infoPtr = (STATICINFO *)GetInfoPtr(hwnd);
+  DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
+
+  if ((dwStyle & SS_TYPEMASK) != SS_ENHMETAFILE) return 0;
+
+  hOldMetafile = infoPtr->hIcon;
+  infoPtr->hIcon = hMetafile;
+
+  return hOldMetafile;
 }
 
 /***********************************************************************
@@ -141,11 +172,20 @@ static HBITMAP STATIC_LoadBitmap( HWND hwnd, LPCSTR name )
     return hbitmap;
 }
 
+static HBITMAP STATIC_LoadMetafile(HWND hwnd,LPCSTR name)
+{
+  HENHMETAFILE hMetafile;
+
+  hMetafile = GetEnhMetaFileA(name); //CB: right?
+
+  return hMetafile;
+}
+
 /* message handler */
 
 LRESULT STATIC_NCCreate(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
-  CREATESTRUCTA *cs = (CREATESTRUCTA *)lParam;
+  CREATESTRUCTA *cs = (CREATESTRUCTA*)lParam;
   STATICINFO* infoPtr;
   DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
   DWORD style = dwStyle & SS_TYPEMASK;
@@ -165,7 +205,7 @@ LRESULT STATIC_NCCreate(HWND hwnd,WPARAM wParam,LPARAM lParam)
 
   if (style == SS_ICON)
   {
-    if (cs->lpszName)
+    if (cs->lpszName) //CB: is 0 a valid icon id? winhlp32: lpszName = NULL
     {
       if (!HIWORD(cs->lpszName) || cs->lpszName[0])
         STATIC_SetIcon(hwnd,STATIC_LoadIcon(hwnd,cs->lpszName));
@@ -176,6 +216,11 @@ LRESULT STATIC_NCCreate(HWND hwnd,WPARAM wParam,LPARAM lParam)
   {
     if (cs->lpszName)
       STATIC_SetBitmap(hwnd,STATIC_LoadBitmap(hwnd,cs->lpszName));
+    return TRUE;
+  }
+  if (style == SS_ENHMETAFILE)
+  {
+    if (cs->lpszName) STATIC_SetMetafile(hwnd,STATIC_LoadMetafile(hwnd,cs->lpszName));
     return TRUE;
   }
   if (!HIWORD(cs->lpszName) && (cs->lpszName)) return TRUE;
@@ -212,6 +257,9 @@ LRESULT STATIC_NCDestroy(HWND hwnd,WPARAM wParam,LPARAM lParam)
   } else if (style == SS_BITMAP && infoPtr->hIcon)
   {
     DeleteObject(infoPtr->hIcon);
+  } else if (style == SS_ENHMETAFILE && infoPtr->hIcon)
+  {
+    DeleteEnhMetaFile((HENHMETAFILE)infoPtr->hIcon);
   }
 
   free(infoPtr);
@@ -233,6 +281,10 @@ LRESULT STATIC_Paint(HWND hwnd,WPARAM wParam,LPARAM lParam)
 
 LRESULT STATIC_Enable(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
+  DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
+
+  if (dwStyle & SS_NOTIFY) SendMessageA(GetParent(hwnd),WM_COMMAND,MAKEWPARAM(GetWindowLongA(hwnd,GWL_ID),wParam ? STN_ENABLE:STN_DISABLE),hwnd);
+
   InvalidateRect(hwnd,NULL,FALSE);
 
   return 0;
@@ -257,6 +309,8 @@ LRESULT STATIC_SetText(HWND hwnd,WPARAM wParam,LPARAM lParam)
     STATIC_SetIcon(hwnd,STATIC_LoadIcon(hwnd,(LPCSTR)lParam));
   else if (style == SS_BITMAP)
     STATIC_SetBitmap(hwnd,STATIC_LoadBitmap(hwnd,(LPCSTR)lParam));
+  else if (style == SS_ENHMETAFILE)
+    STATIC_SetMetafile(hwnd,STATIC_LoadMetafile(hwnd,(LPCSTR)lParam));
   else
     DefWindowProcA(hwnd,WM_SETTEXT,wParam,lParam);
 
@@ -273,6 +327,7 @@ LRESULT STATIC_SetFont(HWND hwnd,WPARAM wParam,LPARAM lParam)
 
   if (style == SS_ICON) return 0;
   if (style == SS_BITMAP) return 0;
+  if (style == SS_ENHMETAFILE) return 0;
 
   infoPtr->hFont = (HFONT)wParam;
 
@@ -309,9 +364,36 @@ LRESULT STATIC_GetIcon(HWND hwnd,WPARAM wParam,LPARAM lParam)
   return infoPtr->hIcon;
 }
 
+LRESULT STATIC_GetImage(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  STATICINFO* infoPtr = (STATICINFO*)GetInfoPtr(hwnd);
+  DWORD style = GetWindowLongA(hwnd,GWL_STYLE) & SS_TYPEMASK;
+
+  switch (wParam)
+  {
+    case IMAGE_BITMAP:
+      if (style & SS_BITMAP) return infoPtr->hIcon;
+      break;
+
+    case IMAGE_CURSOR:
+    case IMAGE_ICON:
+      if (style & SS_ICON) return infoPtr->hIcon;
+      break;
+
+    case IMAGE_ENHMETAFILE:
+      if (style & SS_ENHMETAFILE) return infoPtr->hIcon;
+      break;
+
+    default:
+      break;
+  }
+
+  return 0;
+}
+
 LRESULT STATIC_SetImage(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
-  LRESULT lResult;
+  LRESULT lResult = 0;
 
   switch (wParam)
   {
@@ -319,30 +401,51 @@ LRESULT STATIC_SetImage(HWND hwnd,WPARAM wParam,LPARAM lParam)
     case IMAGE_ICON:
       lResult = STATIC_SetIcon(hwnd,(HICON)lParam);
       break;
+
     case IMAGE_BITMAP:
       lResult = STATIC_SetBitmap(hwnd,(HBITMAP)lParam);
+      break;
+
     case IMAGE_ENHMETAFILE:
-      return 0; //CB: not supported!
+      lResult = STATIC_SetMetafile(hwnd,(HENHMETAFILE)lParam);
+      break;
+
     default:
       return 0;
   }
 
-  InvalidateRect(hwnd,NULL,FALSE);
-  UpdateWindow(hwnd);
+  if (lResult) InvalidateRect(hwnd,NULL,FALSE);
 
   return lResult;
 }
 
-LRESULT STATIC_SetIcon(HWND hwnd,WPARAM wParam,LPARAM lParam)
+LRESULT STATIC_SetIconMsg(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   LRESULT lResult;
 
   lResult = STATIC_SetIcon(hwnd,(HICON)wParam);
 
   InvalidateRect(hwnd,NULL,FALSE);
-  UpdateWindow(hwnd);
 
   return lResult;
+}
+
+LRESULT STATIC_Click(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
+{
+  DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
+
+  if (dwStyle & SS_NOTIFY) SendMessageA(GetParent(hwnd),WM_COMMAND,MAKEWPARAM(GetWindowLongA(hwnd,GWL_ID),STN_CLICKED),hwnd);
+
+  return DefWindowProcA(hwnd,uMsg,wParam,lParam);
+}
+
+LRESULT STATIC_DoubleClick(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
+{
+  DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
+
+  if (dwStyle & SS_NOTIFY) SendMessageA(GetParent(hwnd),WM_COMMAND,MAKEWPARAM(GetWindowLongA(hwnd,GWL_ID),STN_DBLCLK),hwnd);
+
+  return DefWindowProcA(hwnd,uMsg,wParam,lParam);
 }
 
 /***********************************************************************
@@ -385,7 +488,17 @@ LRESULT WINAPI StaticWndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
     case WM_GETDLGCODE:
       return STATIC_GetDlgCode(hwnd,wParam,lParam);
 
+    case WM_LBUTTONDOWN:
+    case WM_NCLBUTTONDOWN:
+      return STATIC_Click(hwnd,uMsg,wParam,lParam);
+
+    case WM_LBUTTONDBLCLK:
+    case WM_NCLBUTTONDBLCLK:
+      return STATIC_DoubleClick(hwnd,uMsg,wParam,lParam);
+
     case STM_GETIMAGE:
+      return STATIC_GetImage(hwnd,wParam,lParam);
+
     case STM_GETICON:
       return STATIC_GetIcon(hwnd,wParam,lParam);
 
@@ -393,7 +506,10 @@ LRESULT WINAPI StaticWndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
       return STATIC_SetImage(hwnd,wParam,lParam);
 
     case STM_SETICON:
-      return STATIC_SetIcon(hwnd,wParam,lParam);
+      return STATIC_SetIconMsg(hwnd,wParam,lParam);
+
+    case STM_MSGMAX:
+      return 0; //CB: undocumented!
 
     default:
       return DefWindowProcA(hwnd,uMsg,wParam,lParam);
@@ -410,40 +526,42 @@ static void STATIC_PaintTextfn(HWND hwnd, HDC hdc )
     HBRUSH hBrush;
     WORD wFormat;
     DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
-    LONG style = dwStyle;
     STATICINFO *infoPtr = (STATICINFO *)GetInfoPtr(hwnd);
     INT textLen;
 
     GetClientRect(hwnd,&rc);
 
-    switch (style & SS_TYPEMASK)
+    switch (dwStyle & SS_TYPEMASK)
     {
-    case SS_LEFT:
+      case SS_LEFT:
         wFormat = DT_LEFT | DT_EXPANDTABS | DT_WORDBREAK | DT_NOCLIP;
         break;
 
-    case SS_CENTER:
+      case SS_CENTER:
+      case SS_CENTERIMAGE:
         wFormat = DT_CENTER | DT_EXPANDTABS | DT_WORDBREAK | DT_NOCLIP;
         break;
 
-    case SS_RIGHT:
+      case SS_RIGHT:
         wFormat = DT_RIGHT | DT_EXPANDTABS | DT_WORDBREAK | DT_NOCLIP;
         break;
 
-    case SS_SIMPLE:
+      case SS_SIMPLE:
         wFormat = DT_LEFT | DT_SINGLELINE | DT_VCENTER | DT_NOCLIP;
         break;
 
-    case SS_LEFTNOWORDWRAP:
+      case SS_LEFTNOWORDWRAP:
         wFormat = DT_LEFT | DT_EXPANDTABS | DT_VCENTER;
         break;
 
-    default:
+      default:
         return;
     }
 
-    if (style & SS_NOPREFIX)
-        wFormat |= DT_NOPREFIX;
+    if (dwStyle & SS_NOPREFIX) wFormat |= DT_NOPREFIX;
+    if (dwStyle & SS_ENDELLIPSIS) wFormat |= DT_END_ELLIPSIS;
+    if (dwStyle & SS_PATHELLIPSIS) wFormat |= DT_PATH_ELLIPSIS;
+    if (dwStyle & SS_WORDELLIPSIS) wFormat |= DT_WORD_ELLIPSIS;
 
     if (infoPtr->hFont) SelectObject( hdc, infoPtr->hFont );
     hBrush = SendMessageA( GetParent(hwnd), WM_CTLCOLORSTATIC,
@@ -461,7 +579,7 @@ static void STATIC_PaintTextfn(HWND hwnd, HDC hdc )
       textLen++;
       text = (char*)malloc(textLen);
       GetWindowTextA(hwnd,text,textLen);
-      DrawTextA( hdc, text, -1, &rc, wFormat );
+      DrawTextExA(hdc,text,-1,&rc,wFormat,NULL);
       free(text);
     }
 }
@@ -512,12 +630,21 @@ static void STATIC_PaintIconfn( HWND hwnd, HDC hdc )
     RECT rc;
     HBRUSH hbrush;
     STATICINFO *infoPtr = (STATICINFO *)GetInfoPtr(hwnd);
+    DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
 
     GetClientRect( hwnd, &rc );
     hbrush = SendMessageA( GetParent(hwnd), WM_CTLCOLORSTATIC,
                              hdc, hwnd );
     FillRect( hdc, &rc, hbrush );
-    if (infoPtr->hIcon) DrawIcon( hdc, rc.left, rc.top, infoPtr->hIcon );
+    if (dwStyle & SS_CENTERIMAGE)
+    {
+      ICONINFO ii;
+      BITMAP bmp;
+
+      if (!GetIconInfo(infoPtr->hIcon,&ii)) return;
+      GetObjectA(ii.hbmColor,sizeof(BITMAP),(LPVOID)&bmp);
+      DrawIcon(hdc,(rc.right-bmp.bmWidth)/2,(rc.bottom-bmp.bmHeight)/2,infoPtr->hIcon);
+    } else if (infoPtr->hIcon) DrawIcon(hdc,rc.left,rc.top,infoPtr->hIcon);
 }
 
 static void STATIC_PaintBitmapfn(HWND hwnd, HDC hdc )
@@ -525,6 +652,7 @@ static void STATIC_PaintBitmapfn(HWND hwnd, HDC hdc )
     RECT rc;
     HBRUSH hbrush;
     STATICINFO *infoPtr = (STATICINFO *)GetInfoPtr(hwnd);
+    DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
     HDC hMemDC;
     HBITMAP oldbitmap;
 
@@ -543,13 +671,44 @@ static void STATIC_PaintBitmapfn(HWND hwnd, HDC hdc )
         GetObjectA(infoPtr->hIcon, sizeof(bm), &bm);
         GetBitmapDimensionEx(infoPtr->hIcon, &sz);
         oldbitmap = SelectObject(hMemDC, infoPtr->hIcon);
-        BitBlt(hdc, sz.cx, sz.cy, bm.bmWidth, bm.bmHeight, hMemDC, 0, 0,
-               SRCCOPY);
+        if (dwStyle & SS_CENTERIMAGE)
+          BitBlt(hdc,sz.cx,sz.cy,bm.bmWidth,bm.bmHeight,hMemDC,(rc.right-bm.bmWidth)/2,(rc.bottom-bm.bmHeight)/2,SRCCOPY);
+        else
+          BitBlt(hdc,sz.cx,sz.cy,bm.bmWidth,bm.bmHeight,hMemDC,0,0,SRCCOPY);
         SelectObject(hMemDC, oldbitmap);
         DeleteDC(hMemDC);
     }
 }
 
+static void STATIC_PaintMetafilefn(HWND hwnd,HDC hdc)
+{
+    RECT rect;
+    HBRUSH hbrush;
+    STATICINFO *infoPtr = (STATICINFO *)GetInfoPtr(hwnd);
+
+    GetClientRect(hwnd,&rect);
+    hbrush = SendMessageA(GetParent(hwnd),WM_CTLCOLORSTATIC,hdc,hwnd);
+    FillRect(hdc,&rect,hbrush);
+
+    if (infoPtr->hIcon) PlayEnhMetaFile(hdc,(HENHMETAFILE)infoPtr->hIcon,&rect);
+}
+
+static void STATIC_PaintOwnerDrawfn(HWND hwnd,HDC hdc)
+{
+  DRAWITEMSTRUCT di;
+
+  di.CtlType    = ODT_STATIC;
+  di.CtlID      = GetWindowLongA(hwnd,GWL_ID);
+  di.itemID     = 0;
+  di.itemAction = ODA_DRAWENTIRE;
+  di.itemState  = ODS_DEFAULT;
+  di.hwndItem   = hwnd;
+  di.hDC        = hdc;
+  GetClientRect(hwnd,&di.rcItem);
+  di.itemData   = 0;
+
+  SendMessageA(GetParent(hwnd),WM_DRAWITEM,GetWindowLongA(hwnd,GWL_ID),(LPARAM)&di);
+}
 
 static void STATIC_PaintEtchedfn( HWND hwnd, HDC hdc )
 {

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.35 1999-10-28 12:00:35 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.36 1999-10-30 18:40:48 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -147,7 +147,7 @@ Win32BaseWindow *getParent()                    { return (Win32BaseWindow *)Chil
 
          BOOL   ShowWindow(ULONG nCmdShow);
          BOOL   SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, int cy, UINT fuFlags);
-	 BOOL   SetWindowPlacement(WINDOWPLACEMENT *winpos);
+         BOOL   SetWindowPlacement(WINDOWPLACEMENT *winpos);
          BOOL   DestroyWindow();
          HWND   SetActiveWindow();
          HWND   GetParent();
@@ -217,9 +217,9 @@ static Win32BaseWindow *GetWindowFromOS2FrameHandle(HWND hwnd);
        ULONG getBorderWidth() { return borderWidth; };
        ULONG getBorderHeight() { return borderHeight; };
 
-static	void  NC_AdjustRectInner(LPRECT rect, DWORD style, DWORD exStyle);
-static	void  NC_AdjustRectOuter(LPRECT rect, DWORD style, BOOL menu, DWORD exStyle);
-static	BOOL  WindowNeedsWMBorder( DWORD style, DWORD exStyle );
+static  void  NC_AdjustRectInner(LPRECT rect, DWORD style, DWORD exStyle);
+static  void  NC_AdjustRectOuter(LPRECT rect, DWORD style, BOOL menu, DWORD exStyle);
+static  BOOL  WindowNeedsWMBorder( DWORD style, DWORD exStyle );
 
        PVOID getOldWndProc() { return pOldWndProc; }
        VOID  setOldWndProc(PVOID aOldWndProc) { pOldWndProc = aOldWndProc; }
@@ -302,7 +302,7 @@ static GenericObject *windows;
 private:
 #ifndef OS2_INCLUDED
         void  GetMinMaxInfo(POINT *maxSize, POINT *maxPos, POINT *minTrack, POINT *maxTrack );
-	LONG  HandleWindowPosChanging(WINDOWPOS *winpos);
+        LONG  HandleWindowPosChanging(WINDOWPOS *winpos);
         LONG  HandleSysCommand(WPARAM wParam, POINT *pt32);
 
         LONG  SendNCCalcSize(BOOL calcValidRect,
@@ -344,6 +344,26 @@ public:
          BOOL   isEraseBkgnd()   { return EraseBkgndFlag; }
          BOOL   isPSErase()      { return EraseBkgndFlag | PSEraseFlag; }
          BOOL   isSupressErase() { return SupressEraseFlag; }
+
+protected:
+        BOOL    DIALOG_Init(void);
+        BOOL    getCharSizeFromDC( HDC hDC, HFONT hFont, SIZE * pSize );
+        BOOL    getCharSize( HFONT hFont, SIZE * pSize);
+
+public:
+         HWND   getNextDlgTabItem(HWND hwndCtrl, BOOL fPrevious);
+         HWND   getNextDlgGroupItem(HWND hwndCtrl, BOOL fPrevious);
+
+         BOOL   MapDialogRect(LPRECT rect);
+
+static   ULONG  GetDialogBaseUnits()  { return MAKELONG(xBaseUnit, yBaseUnit); };
+static   int    getXBaseUnit() { return xBaseUnit; }
+static   int    getYBaseUnit() { return yBaseUnit; }
+
+private:
+ static BOOL    fInitialized;
+ static int     xBaseUnit;
+ static int     yBaseUnit;
 };
 
 
