@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.307 2001-12-30 10:48:08 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.308 2001-12-30 16:51:37 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -443,6 +443,26 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
     }
     if (fXDefault && !fCXDefault) fXDefault = FALSE; //CB: only x positioning doesn't work (calc.exe,cdrlabel.exe)
 
+
+    /* Correct the window style - stage 1
+     *
+     * These are patches that appear to affect both the style loaded into the
+     * WIN structure and passed in the CreateStruct to the WM_CREATE etc.
+     *
+     * WS_EX_WINDOWEDGE appears to be enforced based on the other styles, so
+     * why does the user get to set it?
+     */
+
+    /* This has been tested for WS_CHILD | WS_VISIBLE.  It has not been
+     * tested for WS_POPUP
+     */
+    if ((cs->dwExStyle & WS_EX_DLGMODALFRAME) ||
+        ((!(cs->dwExStyle & WS_EX_STATICEDGE)) &&
+          (cs->style & (WS_DLGFRAME | WS_THICKFRAME))))
+        cs->dwExStyle |= WS_EX_WINDOWEDGE;
+    else
+        cs->dwExStyle &= ~WS_EX_WINDOWEDGE;
+
     //Allocate window words
     nrUserWindowBytes = windowClass->getExtraWndBytes();
     if(nrUserWindowBytes) {
@@ -496,7 +516,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 
     hwndLinkAfter = ((cs->style & (WS_CHILD|WS_MAXIMIZE)) == WS_CHILD) ? HWND_BOTTOM : HWND_TOP;
 
-    /* Correct the window style */
+    /* Correct the window style phase 2 */
     if (!(cs->style & WS_CHILD))
     {
         dwStyle |= WS_CLIPSIBLINGS;
