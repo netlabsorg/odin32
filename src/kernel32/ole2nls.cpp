@@ -660,6 +660,11 @@ static char *GetLocaleSubkeyName( DWORD lctype )
         break;
     /* case LOCALE_ICALENDARTYPE: */
     /* case LOCALE_IFIRSTDAYOFWEEK: */
+#ifdef __WIN32OS2__
+    case LOCALE_IFIRSTDAYOFWEEK:
+        pacKey = "iFirstDayOfWeek";
+        break;
+#endif
     /* case LOCALE_IFIRSTWEEKOFYEAR: */
     /* case LOCALE_SYEARMONTH : */
     /* case LOCALE_SPOSITIVESIGN : */
