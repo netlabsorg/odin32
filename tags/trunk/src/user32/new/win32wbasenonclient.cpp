@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.1 2000-01-11 10:39:00 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.2 2000-01-11 13:06:27 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -1207,7 +1207,7 @@ LONG Win32BaseWindow::HandleSysCommand(WPARAM wParam,POINT *pt32)
         break;
 
     case SC_TASKLIST:
-        WinExec("taskman.exe",SW_SHOWNORMAL);
+        OSLibWinShowTaskList(getOS2FrameWindowHandle());
         break;
 
     case SC_SCREENSAVE:
