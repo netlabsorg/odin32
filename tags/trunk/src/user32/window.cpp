@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.26 1999-10-27 18:25:24 sandervl Exp $ */
+/* $Id: window.cpp,v 1.27 1999-10-30 09:19:47 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -46,6 +46,25 @@ HWND WIN32API CreateWindowExA(DWORD exStyle, LPCSTR className,
     if(exStyle & WS_EX_MDICHILD)
         return CreateMDIWindowA(className, windowName, style, x, y, width, height, parent, instance, (LPARAM)data);
 
+#if 1
+    /* Find the class atom */
+    if (!(classAtom = GlobalFindAtomA(className)))
+    {
+       if (!HIWORD(className))
+           dprintf(("CreateWindowEx32A: bad class name %04x\n",LOWORD(className)));
+       else
+           dprintf(("CreateWindowEx32A: bad class name '%s'\n", className));
+
+       SetLastError(ERROR_INVALID_PARAMETER);
+       return 0;
+    }
+
+    if (!HIWORD(className))
+    {
+      sprintf(tmpClass,"#%d", (int) className);
+      className = tmpClass;
+    }
+#else
     /* Find the class atom */
     if (!HIWORD(className) || !(classAtom = GlobalFindAtomA(className)))
     {
@@ -66,7 +85,7 @@ HWND WIN32API CreateWindowExA(DWORD exStyle, LPCSTR className,
           return 0;
         }
     }
-
+#endif
     /* Create the window */
     cs.lpCreateParams = data;
     cs.hInstance      = instance;

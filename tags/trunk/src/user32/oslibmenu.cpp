@@ -1,4 +1,4 @@
-/* $Id: oslibmenu.cpp,v 1.3 1999-10-25 20:17:18 sandervl Exp $ */
+/* $Id: oslibmenu.cpp,v 1.4 1999-10-30 09:19:44 sandervl Exp $ */
 /*
  * Window Menu wrapper functions for OS/2
  *
@@ -30,19 +30,24 @@ HWND OSLibWinSetMenu(HWND hwndParent, HMENU hMenu)
    HWND currMenu = WinWindowFromID( (HWND)hwndParent, FID_MENU );
    if (currMenu)
    {
+      dprintf(("OSLibWinSetMenu: old menu %x, new menu %x", currMenu, hMenu));
       WinSetOwner (currMenu, HWND_OBJECT);
       WinSetParent(currMenu, HWND_OBJECT, FALSE);
    }
 
    if (hMenu)
    {
-      if(WinIsWindow(GetThreadHAB(), hMenu) == TRUE) {
-         WinSetOwner (hMenu, hwndParent);
-         WinSetParent(hMenu, hwndParent, FALSE );
-         WinSetWindowUShort(hMenu, QWS_ID, FID_MENU);
-     WinSendMsg(hwndParent, WM_UPDATEFRAME, (MPARAM)FCF_MENU, 0);
-     return hMenu;
-      }
+      	if(WinIsWindow(GetThreadHAB(), hMenu) == TRUE) 
+	{
+         	WinSetOwner (hMenu, hwndParent);
+         	WinSetParent(hMenu, hwndParent, FALSE );
+         	WinSetWindowUShort(hMenu, QWS_ID, FID_MENU);
+     		WinSendMsg(hwndParent, WM_UPDATEFRAME, (MPARAM)FCF_MENU, 0);
+     		return hMenu;
+      	}
+	else {
+		dprintf(("OSLibWinSetMenu: %x = invalid menu handle", hMenu));
+	}
    }
    return 0;
 }
