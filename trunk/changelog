@@ -1,9 +1,12 @@
-/* $Id: changelog,v 1.2299 2002-09-06 12:30:13 sandervl Exp $ */
+/* $Id: changelog,v 1.2300 2002-09-06 12:42:34 sandervl Exp $ */
 
  2002-09-05: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Caret bug in edit control WM_ERASEBKGND handler (hidden, 
                   but not shown again)
                 o Removed obsolete hack in CreateCaret
+
+ 2002-09-05: Dietrich Teickner <Dietrich_Teickner@t-online   >
+    - COMDLG32: o Corrected translation of IDS_TODESKTOP resource string
 
  2002-09-04: knut st. osmundsen <bird@anduin   >
     - FASTDEP:  o Corrected bug in caching. Didn't force rescan of files when
