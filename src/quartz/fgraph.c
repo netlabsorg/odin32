@@ -1,3 +1,4 @@
+/* $Id: fgraph.c,v 1.3 2001-09-05 13:36:34 bird Exp $ */
 /*
  * Implementation of CLSID_FilterGraph.
  *
@@ -42,28 +43,28 @@ static QUARTZ_IFEntry IFEntries[] =
 
 HRESULT QUARTZ_CreateFilterGraph(IUnknown* punkOuter,void** ppobj)
 {
-	CFilterGraph*	pfg;
+    CFilterGraph*   pfg;
 
-	TRACE("(%p,%p)\n",punkOuter,ppobj);
+    TRACE("(%p,%p)\n",punkOuter,ppobj);
 
-	pfg = (CFilterGraph*)QUARTZ_AllocObj( sizeof(CFilterGraph) );
-	if ( pfg == NULL )
-		return E_OUTOFMEMORY;
+    pfg = (CFilterGraph*)QUARTZ_AllocObj( sizeof(CFilterGraph) );
+    if ( pfg == NULL )
+        return E_OUTOFMEMORY;
 
-	QUARTZ_IUnkInit( &pfg->unk, punkOuter );
-	CFilterGraph_InitIFilterGraph2( pfg );
-	CFilterGraph_InitIMediaControl( pfg );
-	CFilterGraph_InitIMediaEventEx( pfg );
-	CFilterGraph_InitIMediaPosition( pfg );
-	CFilterGraph_InitIMediaSeeking( pfg );
-	CFilterGraph_InitIBasicVideo2( pfg );
-	CFilterGraph_InitIBasicAudio( pfg );
-	CFilterGraph_InitIVideoWindow( pfg );
+    QUARTZ_IUnkInit( &pfg->unk, punkOuter );
+    CFilterGraph_InitIFilterGraph2( pfg );
+    CFilterGraph_InitIMediaControl( pfg );
+    CFilterGraph_InitIMediaEventEx( pfg );
+    CFilterGraph_InitIMediaPosition( pfg );
+    CFilterGraph_InitIMediaSeeking( pfg );
+    CFilterGraph_InitIBasicVideo2( pfg );
+    CFilterGraph_InitIBasicAudio( pfg );
+    CFilterGraph_InitIVideoWindow( pfg );
 
-	pfg->unk.pEntries = IFEntries;
-	pfg->unk.dwEntries = sizeof(IFEntries)/sizeof(IFEntries[0]);
+    pfg->unk.pEntries = IFEntries;
+    pfg->unk.dwEntries = sizeof(IFEntries)/sizeof(IFEntries[0]);
 
-	*ppobj = (void*)(&pfg->unk);
+    *ppobj = (void*)(&pfg->unk);
 
-	return S_OK;
+    return S_OK;
 }

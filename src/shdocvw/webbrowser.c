@@ -1,3 +1,4 @@
+/* $Id: webbrowser.c,v 1.2 2001-09-05 13:39:12 bird Exp $ */
 /*
  * Implementation of IWebBrowser interface for IE Web Browser control
  *
@@ -227,7 +228,7 @@ static HRESULT WINAPI WB_get_Busy(LPWEBBROWSER iface, VARIANT *pBool)
  * IWebBrowser virtual function table for IE Web Browser component
  */
 
-static ICOM_VTABLE(IWebBrowser) WB_Vtbl = 
+static ICOM_VTABLE(IWebBrowser) WB_Vtbl =
 {
     ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
     WB_QueryInterface,
