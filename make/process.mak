@@ -1,4 +1,4 @@
-# $Id: process.mak,v 1.28 2002-09-12 02:55:54 bird Exp $
+# $Id: process.mak,v 1.29 2002-09-12 03:11:34 bird Exp $
 
 #
 # Unix-like tools for OS/2
@@ -1220,7 +1220,7 @@ nothing:
 # The $(TARGET) rule - For EXE, DLL, SYS and IFS targets
 # -----------------------------------------------------------------------------
 !if "$(TARGET_MODE)" == "EXE" || "$(TARGET_MODE)" == "DLL" || "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "IFS" || "$(TARGET_MODE)" == "VDD"
-$(TARGET): $(TARGET_OBJS) $(TARGET_RES) $(TARGET_DEF_LINK) $(TARGET_LNK) $(TARGET_DEPS) $(TARGET_LIBS)
+$(TARGET): $(TARGET_OBJS) $(TARGET_RES) $(TARGET_DEF) $(TARGET_DEPS) $(TARGET_LIBS)
 !if "$(TOOL_JOB_WAIT)" != ""
 ! ifndef BUILD_QUIET
     @$(ECHO) Waiting for jobs to complete $(CLRRST)
@@ -1230,6 +1230,42 @@ $(TARGET): $(TARGET_OBJS) $(TARGET_RES) $(TARGET_DEF_LINK) $(TARGET_LNK) $(TARGE
     @ \
 ! endif
     $(TOOL_JOB_WAIT)
+!endif
+!if "$(TARGET_DEF_LINK)" != "$(TARGET_DEF)"
+! ifndef BUILD_QUIET
+    @$(ECHO) Stamping deffile with build level info.$(CLRRST)
+! endif
+    \
+! ifndef BUILD_VERBOSE
+    @ \
+! endif
+    $(TOOL_BLDLEVEL) $(BUILD_BLDLEVEL_FLAGS) $(TARGET_BLDLEVEL_FLAGS) -R$(TARGET_DEF) $(TARGET_DEF) $(TARGET_DEF_LINK)
+!endif
+!ifndef TOOL_DEFCONV
+    @$(TOOL_ECHOTXT) Creating Linker Input File $(CLRRST)<<$(TARGET_LNK)
+$(LINK_LNK1)
+$(LINK_LNK2)
+$(LINK_LNK3)
+$(LINK_LNK4)
+$(LINK_LNK5)
+<<KEEP
+!else
+    @$(ECHO) Creating Linker Input File $(CLRRST) $(TARGET_LNK)
+    @$(TOOL_RM) "$(TARGET_LNK)"
+    \
+! ifdef BUILD_VERBOSE
+    @ \
+! endif
+    $(TOOL_DEFCONV) $(TARGET_DEF_LINK) $(TARGET_LNK) <<$(TARGET_LNK)2
+$(LINK_LNK1)
+$(LINK_LNK2)
+$(LINK_LNK3)
+$(LINK_LNK4)
+$(LINK_LNK5)
+<<keep
+!endif
+!ifdef BUILD_VERBOSE
+    @type $(TARGET_LNK)
 !endif
     @$(ECHO) Linking $(TARGET_MODE) $(CLRFIL)$@ $(CLRRST)
     \
@@ -1290,57 +1326,6 @@ $(TARGET): $(TARGET_OBJS) $(TARGET_RES) $(TARGET_DEF_LINK) $(TARGET_LNK) $(TARGE
 !  endif
     $(TOOL_STRIP) $@
 ! endif
-!endif
-
-
-#
-# Linker parameter file.
-#
-$(TARGET_LNK): $(MAKE_INCLUDE_PROCESS) $(MAKE_INCLUDE_SETUP) $(PATH_MAKE)\setup.mak $(MAKEFILE)
-!ifndef TOOL_DEFCONV
-    @$(TOOL_ECHOTXT) Creating Linker Input File $(CLRRST)<<$@
-$(LINK_LNK1)
-$(LINK_LNK2)
-$(LINK_LNK3)
-$(LINK_LNK4)
-$(LINK_LNK5)
-<<KEEP
-!else
-    @$(ECHO) Creating Linker Input File $(CLRRST) $@
-    @$(TOOL_RM) "$@"
-    \
-! ifdef BUILD_VERBOSE
-    @ \
-! endif
-    $(TOOL_DEFCONV) $(TARGET_DEF_LINK) $@ <<$(TARGET_LNK)2
-#
-# LINK_LNK[1-5]:
-#
-$(LINK_LNK1)
-$(LINK_LNK2)
-$(LINK_LNK3)
-$(LINK_LNK4)
-$(LINK_LNK5)
-<<keep
-!endif
-!ifdef BUILD_VERBOSE
-    @type $@
-!endif
-
-
-#
-# Builddef modified definition file.
-#
-!if "$(TARGET_DEF_LINK)" != "$(TARGET_DEF)"
-$(TARGET_DEF_LINK): $(TARGET_DEF)
-! ifndef BUILD_QUIET
-    @$(ECHO) Stamping deffile with build level info.$(CLRRST)
-! endif
-    \
-! ifndef BUILD_VERBOSE
-    @ \
-! endif
-    $(TOOL_BLDLEVEL) $(BUILD_BLDLEVEL_FLAGS) $(TARGET_BLDLEVEL_FLAGS) -R$** $** $@
 !endif
 
 !endif
