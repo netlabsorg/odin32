@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.5 1999-08-18 08:58:22 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.6 1999-09-15 23:26:07 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -31,7 +31,14 @@
 #include <stdio.h>
 #include <string.h>
 #include <odin.h>
+#include <win32type.h>
+#include <odinlx.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
+
+extern "C" {
+void CDECL _ctordtorInit( void );
+void CDECL _ctordtorTerm( void );
+}
 
 /*-------------------------------------------------------------------*/
 /* A clean up routine registered with DosExitList must be used if    */
@@ -50,9 +57,10 @@ static void APIENTRY cleanup(ULONG reason);
 /* linkage convention MUST be used because the operating system loader is   */
 /* calling this function.                                                   */
 /****************************************************************************/
-unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule,
-                                   unsigned long ulFlag)
+unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
+                                   ulFlag)
 {
+   size_t i;
    APIRET rc;
 
    /*-------------------------------------------------------------------------*/
@@ -63,6 +71,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule,
 
    switch (ulFlag) {
       case 0 :
+         _ctordtorInit();
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
@@ -71,12 +80,16 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule,
          /* are required and the runtime is dynamically linked.             */
          /*******************************************************************/
 
+	 if(RegisterLxDll(hModule, 0, 0) == FALSE) 
+		return 0UL;
+
          rc = DosExitList(0x0000F000|EXLST_ADD, cleanup);
          if(rc)
                 return 0UL;
 
          break;
       case 1 :
+	 UnregisterLxDll(hModule);
          break;
       default  :
          return 0UL;
@@ -91,6 +104,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule,
 
 static void APIENTRY cleanup(ULONG ulReason)
 {
+   _ctordtorTerm();
    DosExitList(EXLST_EXIT, cleanup);
    return ;
 }

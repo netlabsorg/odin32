@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.11 1999-09-06 01:51:47 bird Exp $
+# $Id: makefile,v 1.12 1999-09-15 23:26:05 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -15,7 +15,7 @@ PDWIN32_TOOLS = ..\..\tools\bin
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 
 CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE)
-CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE) /Ls /Le
+CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 
 TARGET = advapi32

@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.1 1999-09-01 18:50:32 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.2 1999-09-15 23:26:07 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -32,7 +32,8 @@
 #include <string.h>
 #include <odin.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
-#include <winconst.h>
+#include <win32type.h>
+#include <odinlx.h>
 
 extern "C" {
 void CDECL _ctordtorInit( void );
@@ -76,6 +77,9 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
+	 if(RegisterLxDll(hModule, MSACM32_LibMain, 0) == FALSE) 
+		return 0UL;
+
          /*******************************************************************/
          /* A DosExitList routine must be used to clean up if runtime calls */
          /* are required and the runtime is dynamically linked.             */
@@ -85,11 +89,9 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          if(rc)
                 return 0UL;
 
-	 MSACM32_LibMain(hModule, DLL_PROCESS_ATTACH, 0);
-
          break;
       case 1 :
-	 MSACM32_LibMain(hModule, DLL_PROCESS_DETACH, 0);
+	 UnregisterLxDll(hModule);
          break;
 
       default  :

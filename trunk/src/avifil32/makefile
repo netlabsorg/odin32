@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 1999-09-15 10:38:50 phaller Exp $
+# $Id: makefile,v 1.3 1999-09-15 23:26:05 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -42,7 +42,7 @@ initterm.obj: initterm.cpp
 avifile.obj:  avifile.cpp
 
 clean:
-        $(RM) *.obj *.lib *.dll *~ *.map *.pch
+        $(RM) *.obj *.lib *.dll *.map *.pch
         $(RM) $(PDWIN32_BIN)\$(TARGET).dll
         $(RM) $(PDWIN32_LIB)\$(TARGET).lib
 

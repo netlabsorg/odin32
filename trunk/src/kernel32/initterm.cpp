@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.13 1999-08-23 13:54:42 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.14 1999-09-15 23:26:07 sandervl Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -36,6 +36,8 @@
 #include "handlemanager.h"
 #include "profile.h"
 #include "initterm.h"
+#include <win32type.h>
+#include <odinlx.h>
 
 /*-------------------------------------------------------------------*/
 /* A clean up routine registered with DosExitList must be used if    */
@@ -91,6 +93,10 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
             _ctordtorInit();
 
             CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
+
+	    if(RegisterLxDll(hModule, 0, 0) == FALSE) 
+		return 0UL;
+
             /*******************************************************************/
             /* A DosExitList routine must be used to clean up if runtime calls */
             /* are required and the runtime is dynamically linked.             */
@@ -113,6 +119,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
             HMInitialize();             /* store standard handles within HandleManager */
             break;
         case 1 :
+ 	    UnregisterLxDll(hModule);
             break;
         default  :
             return 0UL;
