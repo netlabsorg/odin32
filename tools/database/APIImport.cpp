@@ -1,4 +1,4 @@
-/* $Id: APIImport.cpp,v 1.13 2002-02-24 02:58:26 bird Exp $ */
+/* $Id: APIImport.cpp,v 1.14 2002-02-26 12:15:10 bird Exp $ */
 /*
  *
  * APIImport - imports a DLL or Dll-.def with functions into the Odin32 database.
@@ -268,9 +268,9 @@ static long processFile(const char *pszFilename, const POPTIONS pOptions, long &
                 pModuleFile = pFile;
                 pFileBase = pFile;
             }
-            catch (int i)
+            catch (kError err)
             {
-                i = i;
+                err = err;
                 kFileDef *pFile = new kFileDef(new kFile(pszFilename));
                 pExportFile = pFile;
                 pModuleFile = pFile;
@@ -375,14 +375,14 @@ static long processFile(const char *pszFilename, const POPTIONS pOptions, long &
             if (pFileBase)
                 delete(pFileBase);
         }
-        catch (int err)
+        catch (kError err)
         {
-            fprintf(phLog, "%s: error - could not map dll/def into memory, errorno=%d.\n", pszFilename, err);
+            fprintf(phLog, "%s: error - could not map dll/def into memory, errorno=%d.\n", pszFilename, err.getErrno());
         }
     }
-    catch (int err)
+    catch (kError err)
     {
-        fprintf(phLog, "%s: error - could not open file, errorno=%d.\n", pszFilename, err);
+        fprintf(phLog, "%s: error - could not open file, errorno=%d.\n", pszFilename, err.getErrno());
     }
 
     /* close db */
