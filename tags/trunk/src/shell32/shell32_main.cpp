@@ -1,4 +1,4 @@
-/* $Id: shell32_main.cpp,v 1.9 2000-03-26 16:34:49 cbratschi Exp $ */
+/* $Id: shell32_main.cpp,v 1.10 2000-03-27 15:09:21 cbratschi Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -419,7 +419,7 @@ typedef struct
 
 #define     IDC_STATIC_TEXT                 100
 #define     IDC_LISTBOX                     99
-#define     IDC_WINE_TEXT                   98
+#define     IDC_ODIN_TEXT                   98
 
 #define     DROP_FIELD_TOP                  (-15)
 #define     DROP_FIELD_HEIGHT            15
@@ -429,7 +429,7 @@ extern HICON hIconTitleFont;
 #endif
 
 static BOOL __get_dropline( HWND hWnd, LPRECT lprect )
-{ HWND hWndCtl = GetDlgItem(hWnd, IDC_WINE_TEXT);
+{ HWND hWndCtl = GetDlgItem(hWnd, IDC_ODIN_TEXT);
     if( hWndCtl )
   { GetWindowRect( hWndCtl, lprect );
    MapWindowPoints( 0, hWnd, (LPPOINT)lprect, 2 );
@@ -704,7 +704,7 @@ BOOL WINAPI AboutDlgProc( HWND hWnd, UINT msg, WPARAM wParam,
 
             hWndCtl = GetDlgItem(hWnd, IDC_LISTBOX);
             SendMessageA( hWndCtl, WM_SETREDRAW, 0, 0 );
-#if 0 //CB: not used
+#if 0 //CB: not used (hIconTitleFont not valid!!!), default font is ok
             SendMessageA( hWndCtl, WM_SETFONT, hIconTitleFont, 0 );
 #endif
             while (*pstr)
@@ -732,8 +732,6 @@ BOOL WINAPI AboutDlgProc( HWND hWnd, UINT msg, WPARAM wParam,
         break;
    }
 
-#if 0
-// @@@PH turned off
     case WM_LBTRACKPOINT:
    hWndCtl = GetDlgItem(hWnd, IDC_LISTBOX);
    if( (INT)GetKeyState( VK_CONTROL ) < 0 )
@@ -749,7 +747,7 @@ BOOL WINAPI AboutDlgProc( HWND hWnd, UINT msg, WPARAM wParam,
          SendMessageA( hWndCtl, LB_GETTEXT, (WPARAM)idx, (LPARAM)pstr );
          SendMessageA( hWndCtl, LB_DELETESTRING, (WPARAM)idx, 0 );
          UpdateWindow( hWndCtl );
-   //@@@PH DragObject16 experimentally replaced by DragObject
+
          if( !DragObject(hWnd, hWnd, DRAGOBJ_DATA, hMemObj, hCursor) )
              SendMessageA( hWndCtl, LB_ADDSTRING, (WPARAM)-1, (LPARAM)pstr );
           }
@@ -762,7 +760,7 @@ BOOL WINAPI AboutDlgProc( HWND hWnd, UINT msg, WPARAM wParam,
 
     case WM_QUERYDROPOBJECT:
    if( wParam == 0 )
-      { LPDRAGINFO lpDragInfo = (LPDRAGINFO)PTR_SEG_TO_LIN((SEGPTR)lParam);
+      { LPDRAGINFO lpDragInfo = (LPDRAGINFO)lParam;
        if( lpDragInfo && lpDragInfo->wFlags == DRAGOBJ_DATA )
         { RECT rect;
       if( __get_dropline( hWnd, &rect ) )
@@ -781,15 +779,15 @@ BOOL WINAPI AboutDlgProc( HWND hWnd, UINT msg, WPARAM wParam,
 
     case WM_DROPOBJECT:
    if( wParam == hWnd )
-      { LPDRAGINFO lpDragInfo = (LPDRAGINFO)PTR_SEG_TO_LIN((SEGPTR)lParam);
+      { LPDRAGINFO lpDragInfo = (LPDRAGINFO)lParam;
        if( lpDragInfo && lpDragInfo->wFlags == DRAGOBJ_DATA && lpDragInfo->hList )
         { char* pstr = (char*)GlobalLock( (HGLOBAL)(lpDragInfo->hList) );
       if( pstr )
           { static char __appendix_str[] = " with";
 
-          hWndCtl = GetDlgItem( hWnd, IDC_WINE_TEXT );
+          hWndCtl = GetDlgItem( hWnd, IDC_ODIN_TEXT );
           SendMessageA( hWndCtl, WM_GETTEXT, 512, (LPARAM)Template );
-          if( !strncmp( Template, "WINE", 4 ) )
+          if( !strncmp( Template, "ODIN", 4 ) )
          SetWindowTextA( GetDlgItem(hWnd, IDC_STATIC_TEXT), Template );
           else
           { char* pch = Template + strlen(Template) - strlen(__appendix_str);
@@ -807,8 +805,6 @@ BOOL WINAPI AboutDlgProc( HWND hWnd, UINT msg, WPARAM wParam,
        }
    }
    break;
-#endif
-
 
     case WM_COMMAND:
         if (wParam == IDOK)

@@ -1,4 +1,4 @@
-/*$Id: listview.cpp,v 1.8 2000-03-26 16:32:33 cbratschi Exp $*/
+/*$Id: listview.cpp,v 1.9 2000-03-27 15:08:07 cbratschi Exp $*/
 /*
  * Listview control
  *
@@ -7305,6 +7305,7 @@ static LRESULT LISTVIEW_SetRedraw(HWND hwnd,BOOL bRedraw)
 
   if (bRedraw)
   {
+    if (!(infoPtr->internalFlags & IF_NOREDRAW)) return 0;
     infoPtr->internalFlags &= ~IF_NOREDRAW;
     lResult = DefWindowProcA(hwnd, WM_SETREDRAW, bRedraw, 0);
 

@@ -1,4 +1,4 @@
-/* $Id: enumidlist.cpp,v 1.2 2000-03-26 16:34:40 cbratschi Exp $ */
+/* $Id: enumidlist.cpp,v 1.3 2000-03-27 15:09:19 cbratschi Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -59,6 +59,10 @@ typedef struct
         LPENUMLIST                      mpFirst;
         LPENUMLIST                      mpLast;
         LPENUMLIST                      mpCurrent;
+        LPENUMLIST                      mpFirst2;
+        LPENUMLIST                      mpLast2;
+        LPENUMLIST                      mpCurrent2;
+
 
 } IEnumIDListImpl;
 
@@ -105,6 +109,74 @@ static BOOL AddToEnumList(
 }
 
 /**************************************************************************
+ *  AddToEnumList()
+ */
+static BOOL AddToEnumList2(
+        IEnumIDList * iface,
+        LPITEMIDLIST pidl)
+{
+        ICOM_THIS(IEnumIDListImpl,iface);
+
+        LPENUMLIST  pNew;
+
+        TRACE("(%p)->(pidl=%p)\n",This,pidl);
+        pNew = (LPENUMLIST)SHAlloc(sizeof(ENUMLIST));
+        if(pNew)
+        {
+          /*set the next pointer */
+          pNew->pNext = NULL;
+          pNew->pidl = pidl;
+
+          /*is This the first item in the list? */
+          if(!This->mpFirst2)
+          {
+            This->mpFirst2 = pNew;
+            This->mpCurrent2 = pNew;
+          }
+
+          if(This->mpLast2)
+          {
+            /*add the new item to the end of the list */
+            This->mpLast2->pNext = pNew;
+          }
+
+          /*update the last item pointer */
+          This->mpLast2 = pNew;
+          TRACE("-- (%p)->(first=%p, last=%p)\n",This,This->mpFirst2,This->mpLast2);
+          return TRUE;
+        }
+        return FALSE;
+}
+
+static VOID UniteEnumLists(IEnumIDList * iface)
+{
+  ICOM_THIS(IEnumIDListImpl,iface);
+
+  if (This->mpFirst2)
+  {
+    /*is This the first item in the list? */
+    if(!This->mpFirst)
+    {
+      This->mpFirst = This->mpFirst2;
+      This->mpCurrent = This->mpFirst2;
+    }
+
+    if(This->mpLast)
+    {
+      /*add the new item to the end of the list */
+      This->mpLast->pNext = This->mpFirst2;
+    }
+
+    /*update the last item pointer */
+    This->mpLast = This->mpLast2;
+
+    This->mpFirst2 = NULL;
+    This->mpCurrent2 = NULL;
+    This->mpLast2 = NULL;
+  }
+}
+
+/**************************************************************************
  *  CreateFolderEnumList()
  */
 static BOOL CreateFolderEnumList(
@@ -136,10 +208,21 @@ static BOOL CreateFolderEnumList(
           {
             do
             {
-              if ( (stffile.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && strcmp (stffile.cFileName, ".") && strcmp (stffile.cFileName, ".."))
-              {
-                pidl = _ILCreateFolder (&stffile);
-                if(pidl && AddToEnumList((IEnumIDList*)This, pidl))
+              if (stffile.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+              { //directory
+                if (strcmp (stffile.cFileName, ".") && strcmp (stffile.cFileName, ".."))
+                {
+                  pidl = _ILCreateFolder (&stffile);
+                  if(pidl && AddToEnumList((IEnumIDList*)This, pidl))
+                  {
+                    continue;
+                  }
+                  return FALSE;
+                }
+              } else if (dwFlags & SHCONTF_NONFOLDERS)
+              { //file
+                pidl = _ILCreateValue(&stffile);
+                if(pidl && AddToEnumList2((IEnumIDList*)This, pidl))
                 {
                   continue;
                 }
@@ -147,11 +230,12 @@ static BOOL CreateFolderEnumList(
               }
             } while( FindNextFileA(hFile,&stffile));
             FindClose (hFile);
+            UniteEnumLists((IEnumIDList*)This);
           }
         }
 
         /*enumerate the non-folder items (values) */
-        if(dwFlags & SHCONTF_NONFOLDERS)
+        if((dwFlags & SHCONTF_NONFOLDERS) && !(dwFlags & SHCONTF_FOLDERS))
         {
           TRACE("-- (%p)-> enumerate SHCONTF_NONFOLDERS of %s\n",This,debugstr_a(szPath));
           hFile = FindFirstFileA(szPath,&stffile);

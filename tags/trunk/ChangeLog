@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.840 2000-03-26 16:28:56 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.841 2000-03-27 15:05:03 cbratschi Exp $ */
+
+ 2000-03-27: Christoph Bratschi <cbratschi@datacomm.ch>
+	- SHELL32: only scan dir once in CreateFolderEnumList
+		   floppy drives have a fixed name
 
  2000-03-26: Christoph Bratschi <cbratschi@datacomm.ch>
 	- COMDLG32:

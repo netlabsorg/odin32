@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.49 2000-02-24 19:19:07 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.50 2000-03-27 15:06:29 cbratschi Exp $ */
 
 /*
  * DC functions for USER32
@@ -500,6 +500,7 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
    if (!hPS_ownDC)
    {
       long height  = wnd->getClientHeight();
+
       rect.yTop    = height - rect.yTop;
       rect.yBottom = height - rect.yBottom;
    }

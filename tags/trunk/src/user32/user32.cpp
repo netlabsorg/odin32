@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.75 2000-03-23 23:06:52 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.76 2000-03-27 15:06:30 cbratschi Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -33,6 +33,7 @@
 #include <winicon.h>
 #include "syscolor.h"
 #include "pmwindow.h"
+#include "oslibgdi.h"
 
 #include <wchar.h>
 #include <stdlib.h>
@@ -85,17 +86,6 @@ ODINDEBUGCHANNEL(USER32-USER32)
 
 
 /* Coordinate Transformation */
-
-inline void OS2ToWin32ScreenPos(POINT *dest,POINT *source)
-{
-  dest->x = source->x;
-  dest->y = OSLibWinQuerySysValue(OSLIB_HWND_DESKTOP,SVOS_CYSCREEN)-1-source->y;
-}
-
-inline void Win32ToOS2ScreenPos(POINT *dest,POINT *source)
-{
-  OS2ToWin32ScreenPos(dest,source); //transform back
-}
 
 /* Rectangle Functions - parts from wine/windows/rect.c */
 
@@ -367,15 +357,12 @@ HCURSOR WIN32API GetCursor(void)
 //******************************************************************************
 BOOL WIN32API GetCursorPos( PPOINT lpPoint)
 {
-    BOOL rc;
-    POINT point;
-
     dprintf2(("USER32:  GetCursorPos\n"));
 
     if (!lpPoint) return FALSE;
-    if (OSLibWinQueryPointerPos(OSLIB_HWND_DESKTOP,&point)) //POINT == POINTL
+    if (OSLibWinQueryPointerPos(lpPoint)) //POINT == POINTL
     {
-      OS2ToWin32ScreenPos(lpPoint,&point);
+      mapScreenPoint((OSLIBPOINT*)lpPoint);
       return TRUE;
     } else return FALSE;
 }
@@ -686,16 +673,16 @@ int WIN32API GetSystemMetrics(int nIndex)
         break;
 
     case SM_CXVSCROLL:
-        rc = OSLibWinQuerySysValue(OSLIB_HWND_DESKTOP,SVOS_CXVSCROLL);
+        rc = OSLibWinQuerySysValue(SVOS_CXVSCROLL);
         break;
 
     case SM_CYHSCROLL:
-        rc = OSLibWinQuerySysValue(OSLIB_HWND_DESKTOP,SVOS_CYHSCROLL);
+        rc = OSLibWinQuerySysValue(SVOS_CYHSCROLL);
         break;
 
     case SM_CYCAPTION:
         rc = 19;
-        //rc = OSLibWinQuerySysValue(OSLIB_HWND_DESKTOP,SVOS_CYTITLEBAR);
+        //rc = OSLibWinQuerySysValue(SVOS_CYTITLEBAR);
         break;
 
     case SM_CXBORDER:
@@ -754,12 +741,12 @@ int WIN32API GetSystemMetrics(int nIndex)
 //CB: todo: add missing metrics
 
     case SM_CXICONSPACING: //TODO: size of grid cell for large icons
-        rc = OSLibWinQuerySysValue(OSLIB_HWND_DESKTOP,SVOS_CXICON);
+        rc = OSLibWinQuerySysValue(SVOS_CXICON);
         //CB: return standard windows icon size?
         //rc = 32;
         break;
     case SM_CYICONSPACING:
-        rc = OSLibWinQuerySysValue(OSLIB_HWND_DESKTOP,SVOS_CYICON);
+        rc = OSLibWinQuerySysValue(SVOS_CYICON);
         //read SM_CXICONSPACING comment
         //rc = 32;
         break;
@@ -794,12 +781,12 @@ int WIN32API GetSystemMetrics(int nIndex)
 
     case SM_CXMAXTRACK: //max window size
     case SM_CXMAXIMIZED:    //max toplevel window size
-        rc = OSLibWinQuerySysValue(OSLIB_HWND_DESKTOP,SVOS_CXSCREEN);
+        rc = OSLibWinQuerySysValue(SVOS_CXSCREEN);
         break;
 
     case SM_CYMAXTRACK:
     case SM_CYMAXIMIZED:
-        rc = OSLibWinQuerySysValue(OSLIB_HWND_DESKTOP,SVOS_CYSCREEN);
+        rc = OSLibWinQuerySysValue(SVOS_CYSCREEN);
         break;
 
     case SM_NETWORK:
@@ -821,7 +808,7 @@ int WIN32API GetSystemMetrics(int nIndex)
         rc = 4;     //TODO
         break;
     case SM_CYMENUCHECK:
-        rc = OSLibWinQuerySysValue(OSLIB_HWND_DESKTOP,SVOS_CYMENU);
+        rc = OSLibWinQuerySysValue(SVOS_CYMENU);
         break;
     case SM_SLOWMACHINE:
         rc = FALSE; //even a slow machine is fast with OS/2 :)
@@ -840,10 +827,10 @@ int WIN32API GetSystemMetrics(int nIndex)
         break;
 
     case SM_CXVIRTUALSCREEN:
-        rc = OSLibWinQuerySysValue(OSLIB_HWND_DESKTOP,SVOS_CXSCREEN);
+        rc = OSLibWinQuerySysValue(SVOS_CXSCREEN);
         break;
     case SM_CYVIRTUALSCREEN:
-        rc = OSLibWinQuerySysValue(OSLIB_HWND_DESKTOP,SVOS_CYSCREEN);
+        rc = OSLibWinQuerySysValue(SVOS_CYSCREEN);
         break;
     case SM_CMONITORS:
         rc = 1;

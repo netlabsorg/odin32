@@ -1,4 +1,4 @@
-/* $Id: filedlgbrowser.c,v 1.3 2000-03-26 16:31:42 cbratschi Exp $ */
+/* $Id: filedlgbrowser.c,v 1.4 2000-03-27 15:07:23 cbratschi Exp $ */
 /*
  *  Implementation of IShellBrowser for the File Open common dialog
  *
@@ -755,7 +755,7 @@ HRESULT WINAPI IShellBrowserImpl_ICommDlgBrowser_IncludeObject(ICommDlgBrowser *
     _ICOM_THIS_FromICommDlgBrowser(IShellBrowserImpl,iface);
 
     TRACE("(%p)\n", This);
-
+//CB: slow!!!
     fodInfos = (FileOpenDlgInfos *) GetPropA(This->hwndOwner,FileOpenDlgInfosStr);
 
     ulAttr = SFGAO_HIDDEN | SFGAO_FOLDER | SFGAO_FILESYSTEM | SFGAO_FILESYSANCESTOR | SFGAO_LINK;
@@ -781,7 +781,6 @@ HRESULT WINAPI IShellBrowserImpl_ICommDlgBrowser_IncludeObject(ICommDlgBrowser *
       }
     }
     return S_FALSE;
-
 }
 
 /**************************************************************************
