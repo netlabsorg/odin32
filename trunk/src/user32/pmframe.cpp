@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.21 1999-11-09 17:07:22 cbratschi Exp $ */
+/* $Id: pmframe.cpp,v 1.22 1999-11-10 17:11:29 cbratschi Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -590,3 +590,81 @@ UINT FrameGetDefSizeBorderSize(VOID)
 {
   return WinQuerySysValue(HWND_DESKTOP,SV_CXSIZEBORDER);
 }
+
+BOOL FrameCreateScrollBars(Win32BaseWindow *win32wnd,BOOL createHorz,BOOL createVert,BOOL updateFrame,DWORD *flags)
+{
+  HWND hwndHScroll = 0,hwndVScroll = 0;
+  ULONG updateFlags = 0;
+
+  if (createHorz)
+  {
+    hwndHScroll = WinCreateWindow(win32wnd->getOS2FrameWindowHandle(),WC_SCROLLBAR,"",WS_VISIBLE | WS_PARENTCLIP | WS_SYNCPAINT | SBS_HORZ,0,0,0,0,win32wnd->getOS2FrameWindowHandle(),HWND_TOP,FID_HORZSCROLL,NULL,NULL);
+    if (hwndHScroll) win32wnd->setHorzScrollHandle(hwndHScroll);
+    else return FALSE;
+    updateFlags = FCF_HORZSCROLL;
+  }
+
+  if (createVert)
+  {
+    hwndVScroll = WinCreateWindow(win32wnd->getOS2FrameWindowHandle(),WC_SCROLLBAR,"",WS_VISIBLE | WS_PARENTCLIP | WS_SYNCPAINT | SBS_VERT,0,0,0,0,win32wnd->getOS2FrameWindowHandle(),HWND_TOP,FID_VERTSCROLL,NULL,NULL);
+    if (hwndVScroll) win32wnd->setVertScrollHandle(hwndVScroll); else
+    {
+      if (hwndHScroll) WinDestroyWindow(hwndHScroll);
+
+      return FALSE;
+    }
+    updateFlags |= FCF_VERTSCROLL;
+  }
+
+  win32wnd->subclassScrollBars(hwndHScroll,hwndVScroll);
+
+  if (updateFrame && updateFlags) WinSendMsg(win32wnd->getOS2FrameWindowHandle(),WM_UPDATEFRAME,(MPARAM)0,(MPARAM)0);
+  if (flags) *flags = updateFlags;
+
+  return TRUE;
+}
+
+VOID FrameGetScrollBarHandles(Win32BaseWindow *win32wnd,BOOL getHorz,BOOL getVert)
+{
+  if (getHorz) win32wnd->setHorzScrollHandle(WinWindowFromID(win32wnd->getOS2FrameWindowHandle(),FID_HORZSCROLL));
+  if (getVert) win32wnd->setVertScrollHandle(WinWindowFromID(win32wnd->getOS2FrameWindowHandle(),FID_VERTSCROLL));
+}
+
+BOOL FrameShowScrollBars(Win32BaseWindow *win32wnd,BOOL changeHorz,BOOL changeVert,BOOL fShow,BOOL updateFrame,DWORD *flags)
+{
+  HWND hwndObj = WinQueryObjectWindow(HWND_DESKTOP);
+  ULONG updateFlags = 0;
+
+  if (changeHorz)
+  {
+    HWND hwndCurPar = WinQueryWindow(win32wnd->getHorzScrollHandle(),QW_PARENT);
+
+    if ((fShow && hwndCurPar == hwndObj) || (!fShow && hwndCurPar != hwndObj))
+    {
+      WinSetParent(win32wnd->getHorzScrollHandle(),fShow ? win32wnd->getOS2FrameWindowHandle():HWND_OBJECT,FALSE);
+      updateFlags = FCF_HORZSCROLL;
+    }
+  }
+
+  if (changeVert)
+  {
+    HWND hwndCurPar = WinQueryWindow(win32wnd->getVertScrollHandle(),QW_PARENT);
+
+    if ((fShow && hwndCurPar == hwndObj) || (!fShow && hwndCurPar != hwndObj))
+    {
+      WinSetParent(win32wnd->getVertScrollHandle(),fShow ? win32wnd->getOS2FrameWindowHandle():HWND_OBJECT,FALSE);
+      updateFlags |= FCF_VERTSCROLL;
+    }
+  }
+
+  if (updateFrame && updateFlags) WinSendMsg(win32wnd->getOS2FrameWindowHandle(),WM_UPDATEFRAME,(MPARAM)updateFlags,(MPARAM)0);
+  if (flags) *flags = updateFlags;
+
+  return TRUE;
+}
+
+VOID FrameUpdateFrame(Win32BaseWindow *win32wnd,DWORD flags)
+{
+  WinSendMsg(win32wnd->getOS2FrameWindowHandle(),WM_UPDATEFRAME,(MPARAM)flags,(MPARAM)0);
+}
+
