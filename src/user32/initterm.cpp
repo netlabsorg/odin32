@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.21 2000-02-16 14:34:20 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.22 2000-03-13 13:10:45 sandervl Exp $ */
 
 /*
  * USER32 DLL entry point
@@ -34,6 +34,7 @@
 #include <odin.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:29*/
 #include <win32type.h>
+#include <winconst.h>
 #include <odinlx.h>
 #include <spy.h>
 #include <monitor.h>

@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.44 2000-03-01 13:30:05 sandervl Exp $ */
+/* $Id: pmframe.cpp,v 1.45 2000-03-13 13:10:47 sandervl Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -15,7 +15,8 @@
 #include <os2wrap.h>
 #include <stdlib.h>
 #include <string.h>
-#include "win32type.h"
+#include <win32type.h>
+#include <winconst.h>
 #include <misc.h>
 #include <win32wbase.h>
 #include "wprocess.h"

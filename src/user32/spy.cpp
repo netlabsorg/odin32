@@ -1,4 +1,4 @@
-/* $Id: spy.cpp,v 1.10 2000-02-16 14:34:33 sandervl Exp $ */
+/* $Id: spy.cpp,v 1.11 2000-03-13 13:10:48 sandervl Exp $ */
 
 /*
  * Queue procedures to send messages to the spy server
@@ -15,7 +15,6 @@
 #define INCL_WINMESSAGEMGR
 #define INCL_DOSERRORS
 #define INCL_DOSSEMAPHORES
-#include <os2.h>
 #include <os2wrap.h>
 
 #include <stdlib.h>
