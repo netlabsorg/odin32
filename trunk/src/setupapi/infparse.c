@@ -28,7 +28,7 @@
 #include <string.h>
 #include "windef.h"
 #include "winbase.h"
-#include "ntddk.h"
+#include "winternl.h"
 #include "wine/winbase16.h"
 #include "setupapi.h"
 #include "setupx16.h"
@@ -178,8 +178,9 @@ RETERR16 WINAPI GenInstall16( HINF16 hinf16, LPCSTR section, WORD genflags )
     if (genflags & GENINSTALL_DO_REG) flags |= SPINST_REGISTRY;
     if (genflags & GENINSTALL_DO_INI2REG) flags |= SPINST_INI2REG;
     if (genflags & GENINSTALL_DO_LOGCONFIG) flags |= SPINST_LOGCONFIG;
-    if (genflags & (GENINSTALL_DO_REGSRCPATH|GENINSTALL_DO_CFGAUTO|GENINSTALL_DO_PERUSER))
-        FIXME( "unsupported flags %x\n", genflags );
+    if (genflags & GENINSTALL_DO_REGSRCPATH) FIXME( "unsupported flag: GENINSTALL_DO_REGSRCPATH\n" );
+    if (genflags & GENINSTALL_DO_CFGAUTO) FIXME( "unsupported flag: GENINSTALL_DO_CFGAUTO\n" );
+    if (genflags & GENINSTALL_DO_PERUSER) FIXME( "unsupported flag: GENINSTALL_DO_PERUSER\n" );
 
     context = SetupInitDefaultQueueCallback( 0 );
     if (!SetupInstallFromInfSectionA( 0, hinf, section, flags, 0, NULL, 0,
@@ -189,35 +190,3 @@ RETERR16 WINAPI GenInstall16( HINF16 hinf16, LPCSTR section, WORD genflags )
     SetupTermDefaultQueueCallback( context );
     return ret;
 }
-
-
-WORD InfNumEntries = 0;
-INF_FILE *InfList = NULL;
-HINF16 IP_curr_handle = 0;
-
-
-BOOL IP_FindInf(HINF16 hInf, WORD *ret)
-{
-    WORD n;
-
-    for (n=0; n < InfNumEntries; n++)
-	if (InfList[n].hInf == hInf)
-	{
-	    *ret = n;
-	    return TRUE;
-	}
-    return FALSE;
-}
-
-
-LPCSTR IP_GetFileName(HINF16 hInf)
-{
-    WORD n;
-    if (IP_FindInf(hInf, &n))
-    {
-	return InfList[n].lpInfFileName;
-    }
-    return NULL;
-}
-
-
