@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.2484 2003-02-14 10:05:14 sandervl Exp $ */
+/* $Id: changelog,v 1.2485 2003-02-16 15:30:38 sandervl Exp $ */
+
+ 2003-02-16: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o ToAscii: fixed wrong checks for VK_SHIFT/CONTROL/MENU
+                o Fixed broken implementation of GetKeyState, GetAsyncKeyState
+                  and GetKeyboardState
 
  2003-02-14: Dietrich Teickner <Dietrich_Teickner@t-online   >
     - SHELL32:  o Shell file operation updates
