@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.108 1999-08-19 18:46:54 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.109 1999-08-19 19:52:58 sandervl Exp $ */
 
  99-08-19: Patrick Haller <phaller@gmx.net>
         - WINMM:    odinwrap macros
@@ -10,6 +10,9 @@
 
  99-08-19: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: PE loader resource fixes + ConvertNameId bugfix
+                    Added pe2lx conversion code for menus, accelerators, 
+                    bitmaps & icons.
+                    Put back _CreateWin32Exe export in kernel32exp.def
 	- KERNEL32: Used Odin wrappers for profile apis (mess up FS)
 	- USER32 & USER32\NEW: Cleaned up icon code 
 
