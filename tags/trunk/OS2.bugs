@@ -6,3 +6,7 @@ OS/2 bugs:
   the size parameter has to be adjusted to take page boundary crossing
   into account. According to the Control Program Programming Guide, DosSetMem 
   should do this automatically.
+
+- DosSetMem does not alter the 16 bit selectors so if you change memory
+  attributes and then access the memory with a 16 bit API (such as DosRead),
+  it will have the old (alloc time) attributes
