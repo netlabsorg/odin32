@@ -36,6 +36,8 @@ select
         return pmsemCheck(sArgs);
     when (sCmd = 'pmsemdump') then
         return pmsemDump(sArgs);
+    when (sCmd = 'pmsemdumpall') then
+        return PmsemDumpAll(sArgs);
 
     /*
      * Windows Structures.
@@ -198,7 +200,7 @@ return -1;
 
 
 /**
- * Check if any of the PM sems are taken or have bogus state.
+ * Dump a number of pm/gre sems.
  * @returns 0 on success. -1 on error.
  */
 PmsemDump: procedure expose(sGlobals)
@@ -213,9 +215,26 @@ parse arg sAddr  cCount
     sMem = dfReadMem(sAddr, cCount * pmsemSize())
     if (sMem <> '') then
     do
-        /* loop thru them all listing the taken/bogus ones */
         do i = 0 to cCount - 1
             call pmsemDump1 memCopy(i * pmsemSize(), pmsemSize(), sMem);
+        end
+    end
+    else
+        say 'error: failed to read semaphore table.';
+return -1;
+
+
+/**
+ * Dumps all PM/GRE sems
+ * @returns 0 on success. -1 on error.
+ */
+PmsemDumpAll: procedure expose(sGlobals)
+    /* read memory and do the dump */
+    sMem = dfReadMem('pmsemaphores', 35 * pmsemSize())
+    if (sMem <> '') then
+    do
+        do i = 0 to 34
+            call pmsemDump1 memCopy(i * pmsemSize(), pmsemSize(), sMem),, i;
         end
     end
     else
@@ -316,6 +335,8 @@ wndOwner:           procedure expose(sGlobals); parse arg sMem;      return memD
 wndRecs:            procedure expose(sGlobals); parse arg iWord,sMem;return memWord( x2d('10') + iWord*2, sMem);
 wndStyle:           procedure expose(sGlobals); parse arg sMem;      return memDword(x2d('18'), sMem);
 wndId:              procedure expose(sGlobals); parse arg sMem;      return memDword(x2d('1c'), sMem);
+wndReserved0:       procedure expose(sGlobals); parse arg sMem;      return memDword(x2d('20'), sMem);
+wndReserved1:       procedure expose(sGlobals); parse arg sMem;      return memDword(x2d('24'), sMem);
 wndMsgQueue:        procedure expose(sGlobals); parse arg sMem;      return memDword(x2d('28'), sMem);
 wndHWND:            procedure expose(sGlobals); parse arg sMem;      return memDword(x2d('2c'), sMem);
 wndModel:           procedure expose(sGlobals); parse arg sMem;      return memDword(x2d('30'), sMem);
@@ -342,6 +363,8 @@ parse arg sMem, sMsg
                         'xr='wndRecs(2, sMem)',yr='wndRecs(3, sMem) '(decimal)'
     say '       ulStyle:' d2x(wndStyle(sMem),8);
     say '            id:' d2x(wndId(sMem),8);
+    say '     Reserved0:' d2x(wndReserved0(sMem),8);
+    say '     Reserved1:' d2x(wndReserved1(sMem),8);
     say '   pmqMsgQueue:' d2x(wndMsgQueue(sMem),8);
     say '          hwnd:' d2x(wndHWND(sMem),8);
     say '   fModel16bit:' d2x(wndModel(sMem),8);
@@ -352,7 +375,7 @@ parse arg sMem, sMsg
         say '  pfnThunkProc:' d2x(wndThunkProc(sMem),8) ' ('dfNear('%'d2x(wndThunkProc(sMem),8))')'
     say '   ppresParams:' d2x(wndPresParams(sMem),8);
     say '     pwndFocus:' d2x(wndFocus(sMem),8);
-    say '         ulWPS:' d2x(wndWPSULong(sMem),8);
+    say '         ulWPS:' d2x(wndWPSULong(sMem),8) '('dfNear('%'d2x(wndWPSULong(sMem),8))')'
     say '     pInstData:' d2x(wndInstData(sMem),8);
     say '            ??:' d2x(memDword(x2d('54'), sMem),8);
     say '       pOpen32:' d2x(wndOpen32(sMem),8);
@@ -1112,8 +1135,11 @@ parse arg sAddr
     Address df 'CMD' 'asOut' 'ln' sAddr
     if (rc = 0 & asOut.0 > 0) then
     do
-        parse var asOut.1 .' 'sRet;
-        return strip(sRet);
+        if (pos('symbols found', asOut.1) <= 0) then
+        do
+            parse var asOut.1 .' 'sRet;
+            return strip(sRet);
+        end
     end
 return '';
 
@@ -1201,6 +1227,7 @@ parse arg fBlockInfo
     end
 return -1;
 
+
 /**
  * Gets the blockId of a process from the dumpformatter.
  * @param   iSlot   The slot to query.
@@ -1213,13 +1240,38 @@ parse arg iSlot
     if (rc = 0 & asOut.0 > 0) then
     do
         /* *000b# blk fd436190 pmshell */
-        asOut.0 = strip(asOut.0);
-        parse var asOut.0 .' 'sState' 'sBlockId' 'sProcName
+        asOut.2 = strip(asOut.2);
+        parse var asOut.2 .' 'sState' 'sBlockId' 'sProcName
         sBlockId = strip(sBlockId)      /* needed??? */
-        if (strip(sBlockId) <> '') then
+        if (sBlockId <> '') then
             return sBlockId;
     end
 return '0';
+
+
+/**
+ * Gets the PTDA of a process.
+ * @param   sSlot   Slot or special chars '*' and '#'.
+ * @return  Hex pointer to the PTDA.
+ */
+dfProcPTDA: procedure expose(sGlobals)
+parse arg iSlot
+    Address df 'CMD' 'asOut' '.p' iSlot;
+    if (rc = 0 & asOut.0 > 0) then
+    do
+        /*  0074  0033 0000 0033 0002 blk 0500 f88e6000 fe62d220 f9a0b7e8 1e9c 12 muglrqst
+         *  000a  0001 0000 0000 000a blk 081e f8812000 ffdba880 f99f7840 1e94 00 *jitdaem
+         * *000b# 001d 0001 001d 0001 blk 0500 f8814000 fe6270a0 f99f7b44 1e9c 01 pmshell
+         */
+        i = 2;
+        asOut.i = translate(left(asOut.i, 10), '  ', '#*') || substr(asOut.i, 11);
+        parse var asOut.i . . . . . . . hxTSD hxPTDA hxPCB . . .;
+        hxPTDA = strip(hxPTDA)      /* needed??? */
+        if (hxPTDA <> '') then
+            return hxPTDA;
+    end
+return '0';
+
 
 /**
  * Gets a byte from the memory array aMem.
