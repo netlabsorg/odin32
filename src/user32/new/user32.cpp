@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.12 1999-07-25 17:47:25 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.13 1999-07-25 20:00:52 cbratschi Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -81,7 +81,7 @@
 inline void OS2ToWin32ScreenPos(POINT *dest,POINT *source)
 {
   dest->x = source->x;
-  dest->y = OSLibWinQuerySysValue(OSLIB_HWND_DESKTOP,SVOS_CYSCREEN)-source->y;
+  dest->y = OSLibWinQuerySysValue(OSLIB_HWND_DESKTOP,SVOS_CYSCREEN)-1-source->y;
 }
 
 inline void Win32ToOS2ScreenPos(POINT *dest,POINT *source)
@@ -258,8 +258,8 @@ BOOL WIN32API CopyRect( PRECT lprcDst, const RECT * lprcSrc)
 {
 //    ddprintf(("USER32:  CopyRect\n"));
     if (!lprcDst || !lprcSrc) {
-	SetLastError(ERROR_INVALID_PARAMETER);
-	return FALSE;
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return FALSE;
     }
 
     memcpy(lprcDst,lprcSrc,sizeof(RECT));
