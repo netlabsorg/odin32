@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.11 1999-10-04 09:55:59 sandervl Exp $
+# $Id: makefile,v 1.12 1999-10-09 11:13:19 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -21,8 +21,14 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 TARGET = shell32
 
-OBJS =  shell32.obj sh.obj she.obj drag.obj initterm.obj \
-        misc.obj ordinal.obj unknown.obj path.obj
+OBJS =  initterm.obj \
+        brsfolder.obj classes.obj contmenu.obj dataobject.obj \
+        enumidlist.obj folders.obj iconcache.obj memorystream.obj \
+        pidl.obj regstream.obj shell32_main.obj \
+        shellguid.obj shelllink.obj shlmenu.obj shellole.obj \
+        shellord.obj shellpath.obj shv_bg_cmenu.obj \
+        shlfolder.obj shlview.obj shell.obj unknown.obj misc.obj \
+        she.obj sh.obj
 
 all: $(TARGET).dll $(TARGET).lib
 
@@ -31,6 +37,8 @@ $(TARGET).dll: $(OBJS) $(TARGET).def
         $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
               $(PDWIN32_LIB)/pmwinx.lib $(PDWIN32_LIB)/kernel32.lib \
               $(PDWIN32_LIB)/user32.lib $(PDWIN32_LIB)/advapi32.lib \
+              $(PDWIN32_LIB)/gdi32.lib $(PDWIN32_LIB)/ole32.lib  \
+              $(PDWIN32_LIB)/version.lib $(PDWIN32_LIB)/comctl32.lib   \
               $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
         $(CP) $@ $(PDWIN32_BIN)
 
@@ -42,24 +50,34 @@ $(TARGET).lib: $(TARGET)exp.def
 $(TARGET)exp.def: $(TARGET).def
         $(IMPDEF) $** $@
 
-shell32.obj: shell32.cpp shell32.h
 
-drag.obj: drag.cpp shell32.h
 
-sh.obj: sh.cpp shell32.h
-
-she.obj: she.cpp shell32.h
-
-misc.obj: misc.cpp shell32.h
-
-ordinal.obj: ordinal.cpp shell32.h
-
-unknown.obj: unknown.cpp shell32.h
-
-path.obj: path.cpp shell32.h
-
-initterm.obj: initterm.cpp
-
+initterm.obj:     initterm.cpp
+brsfolder.obj:    brsfolder.cpp
+classes.obj:      classes.cpp
+contmenu.obj:     contmenu.cpp
+dataobject.obj:   dataobject.cpp
+enumidlist.obj:   enumidlist.cpp
+folders.obj:      folders.cpp
+iconcache.obj:    iconcache.cpp
+memorystream.obj: memorystream.cpp
+pidl.obj:         pidl.cpp
+regstream.obj:    regstream.cpp
+shell32_main.obj: shell32_main.cpp
+shell.obj:        shell.cpp
+shellguid.obj:    shellguid.cpp
+shelllink.obj:    shelllink.cpp
+shlmenu.obj:      shlmenu.cpp
+shellole.obj:     shellole.cpp
+shellord.obj:     shellord.cpp
+shellpath.obj:    shellpath.cpp
+shlfolder.obj:    shlfolder.cpp
+shlview.obj:      shlview.cpp
+shv_bg_cmenu.obj: shv_bg_cmenu.cpp
+unknown.obj:      unknown.cpp
+misc.obj:         misc.cpp
+she.obj:          she.cpp
+sh.obj:           sh.cpp
 
 clean:
         $(RM) *.obj *.lib *.dll *~ *.map *.pch
