@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.967 2000-06-01 11:25:32 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.968 2000-06-01 13:59:19 sandervl Exp $ */
 
  2000-06-01: Sander van Leeuwen <sandervl@xs4all.nl>
     - GDI32/USER32: Moved GetClipRgn & GetClipBox into user32 (dc.cpp)
@@ -14,4 +14,5 @@
                     io class. Fixed LockFileEx/UnlockFileEx
                     New file apis use OS/2 apis now; overlapped IO not yet
                     supported.
-
+    - SHELL32:      Added ISF_MyComputer_fnParseDisplayName from latest Wine
+                    Fixes open file dialog
