@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1588 2001-07-10 17:39:39 sandervl Exp $ */
+/* $Id: changelog,v 1.1589 2001-07-10 20:22:14 bird Exp $ */
 
  2001-07-10: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMDLG32: o Don't clear filename when selecting of switching
@@ -8,6 +8,8 @@
     - WIN32K:   o Made DosKillProcessEx framework.
                 o Tried to fix missing unlocks of environment block.
     - KERNEL32: o Tried to fix missing unlocks of environment block.
+                o Fixed module not found problem when a Pe2Lx is dynamically
+                  loaded several times.
 
  2001-07-09: knut st. osmundsen <kosmunds@csc.com>:
     - CRTDLL:   o When renaming dlls we still use the original importlibrary
