@@ -1,8 +1,11 @@
-/* $Id: changelog,v 1.2157 2002-06-13 14:00:56 sandervl Exp $ */
+/* $Id: changelog,v 1.2158 2002-06-13 14:10:18 sandervl Exp $ */
 
  2002-06-13: Sander van Leeuwen <sandervl@innotek.de>
     - USER32:   o SetCustomWndHandleSemName added to override shared semaphore
                   name used to synchronize global window handle array access 
+                  (to avoid name clash with Odin)
+    - KERNEL32: o SetCustomMMapSemName added to override shared semaphore
+                  name used to synchronize global memory map list access 
                   (to avoid name clash with Odin)
 
  2002-06-13: Platon Fomichev <platon@innotek.de>
