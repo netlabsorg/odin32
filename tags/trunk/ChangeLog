@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.480 1999-11-28 17:23:13 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.481 1999-11-29 00:07:58 bird Exp $ */
+
+ 99-11-29: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
+    - KERNEL32: Implemented EnumResourceNamesA/W. Added a test
+                skeleton for Kernel32 in the src\kernel32\test directory.
 
  99-11-28: Jens Wiessner <wiessnej@rfi.de>
 	- CRTDLL: Implemented several functions that used to be stubs.
@@ -11,7 +15,7 @@
 
  99-11-27: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: fixed edit bugs
-		  ported WINE monitor code and implemented PM driver		  
+		  ported WINE monitor code and implemented PM driver
 
  99-11-26: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Implemented GetInputState and GetQueueStatus
@@ -38,7 +42,7 @@
                   Changed broadcasting of messages. Check all valid window handles.
                   (TODO: Not efficient)
                   SetWindowLong (GWL_STYLE) fix; don't allow WS_VISIBLE or WS_CHILD
-                  bit changes. (Wine does this and Pinball & Wordpad crash 
+                  bit changes. (Wine does this and Pinball & Wordpad crash
                   if it is allowed)
                   Changed WM_SETREDRAW default handler to directly change
                   style (not call SetWindowLongA)
