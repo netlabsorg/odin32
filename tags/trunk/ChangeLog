@@ -1,7 +1,18 @@
-/* $Id: ChangeLog,v 1.1525 2001-06-17 13:58:59 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1526 2001-06-17 21:06:37 sandervl Exp $ */
 
  2001-06-17: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Implemented IOCTL_SCSI_PASS_THROUGH_DIRECT storage ioctl
+    - USER32:   o Fix for scrollbars with SBS_SIZEBOX or SBS_SIZEGRIP style
+                  (use size specified in CreateWindow only if SBS_SIZEBOXTOPLEFTALIGN 
+                   nor SBS_SIZEBOXBOTTOMRIGHTALIGN style flags set)
+                  (CPOV window now has the right size)
+                o Allow WS_VISIBLE changes in SetWindowLong (GWL_STYLE)
+                  (CPOV controls in bottom left corner now visible)
+
+ 2001-06-17: Dietrich Teickner <Dietrich_Teickner@t-online.de>
+    - COMCTL32: o Check for invalid lpItem in LISTVIEW_GetItemA
+                  (fixes crash in SpeedCommander 6)
+                o Datetime control update with latest Wine code
 
  2001-06-16: Sander van Leeuwen <sandervl@xs4all.nl>
     - DDRAW:    o Save & Restore FS when calling io_init2
