@@ -1,4 +1,4 @@
-/* $Id: font.cpp,v 1.7 1999-12-04 13:53:12 hugh Exp $ */
+/* $Id: font.cpp,v 1.8 1999-12-05 14:58:07 phaller Exp $ */
 
 /*
  * GDI32 font apis
@@ -125,21 +125,20 @@ static void iFontRename(LPCSTR lpstrFaceOriginal,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION14(HFONT,  CreateFontA,
-               int,    nHeight,
-               int,    nWidth,
-               int,    nEscapement,
-               int,    nOrientation,
-               int,    fnWeight,
-               DWORD,  fdwItalic,
-               DWORD,  fdwUnderline,
-               DWORD,  fdwStrikeOut,
-               DWORD,  fdwCharSet,
-               DWORD,  fdwOutputPrecision,
-               DWORD,  fdwClipPrecision,
-               DWORD,  fdwQuality,
-               DWORD,  fdwPitchAndFamily,
-               LPCSTR, lpszFace)
+ODINFUNCTIONNODBG14(HFONT,  CreateFontA, int,    nHeight,
+                                    int,    nWidth,
+                                    int,    nEscapement,
+                                    int,    nOrientation,
+                                    int,    fnWeight,
+                                    DWORD,  fdwItalic,
+                                    DWORD,  fdwUnderline,
+                                    DWORD,  fdwStrikeOut,
+                                    DWORD,  fdwCharSet,
+                                    DWORD,  fdwOutputPrecision,
+                                    DWORD,  fdwClipPrecision,
+                                    DWORD,  fdwQuality,
+                                    DWORD,  fdwPitchAndFamily,
+                                    LPCSTR, lpszFace)
 {
   CHAR  lpstrFaceNew[LF_FACESIZE];
   HFONT hFont;
@@ -166,7 +165,7 @@ ODINFUNCTION14(HFONT,  CreateFontA,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION14(HFONT,  CreateFontW,
+ODINFUNCTIONNODBG14(HFONT,  CreateFontW,
                int,    nHeight,
                int,    nWidth,
                int,    nEscapement,
