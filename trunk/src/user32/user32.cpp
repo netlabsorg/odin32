@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.99 2001-06-10 12:05:40 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.100 2001-06-12 17:02:36 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -1425,9 +1425,14 @@ BOOL WIN32API PaintDesktop(HDC hdc)
 
 /* Filled Shape Functions */
 
+  /* Last COLOR id */
+#define COLOR_MAX   COLOR_GRADIENTINACTIVECAPTION
 
 int WIN32API FillRect(HDC hDC, const RECT * lprc, HBRUSH hbr)
 {
+    if (hbr <= (HBRUSH) (COLOR_MAX + 1)) {
+	hbr = GetSysColorBrush( (INT) hbr - 1 );
+    }
     dprintf(("USER32:  FillRect %x (%d,%d)(%d,%d) brush %X", hDC, lprc->left, lprc->top, lprc->right, lprc->bottom, hbr));
     return O32_FillRect(hDC,lprc,hbr);
 }

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.264 2001-06-11 20:08:24 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.265 2001-06-12 17:02:41 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -652,7 +652,10 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndOS2)
     else
     if (windowClass->getStyle() & CS_CLASSDC)  {
         dprintf(("WARNING: Class with CS_CLASSDC style!"));
-        ownDC = 0;
+        //not a good solution, but it's a bit difficult to share a single
+        //DC among different windows... DevOpenDC apparently can't be used
+        //for window DCs and WinOpenWindowDC must be associated with a window
+        ownDC = GetDCEx(getWindowHandle(), NULL, DCX_USESTYLE);
     }
     /* Set the window menu */
     if ((dwStyle & (WS_CAPTION | WS_CHILD)) == WS_CAPTION )

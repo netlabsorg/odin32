@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.118 2001-06-09 14:50:21 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.119 2001-06-12 17:02:42 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -470,10 +470,11 @@ public:
          VOID  AdjustMaximizedRect(LPRECT rect);
          VOID  AdjustTrackInfo(PPOINT minTrackSize,PPOINT maxTrackSize);
 
+         //Temporary hack for CS_CLASSDC style (do the same as for CS_OWNDC)
 #ifndef OS2_INCLUDED
-         BOOL   isOwnDC() { return (windowClass && windowClass->getStyle() & CS_OWNDC); }
+         BOOL   isOwnDC() { return (windowClass && windowClass->getStyle() & (CS_OWNDC|CS_CLASSDC)); }
 #else
-         BOOL   isOwnDC() { return (windowClass && windowClass->getStyle() & CS_OWNDC_W); }
+         BOOL   isOwnDC() { return (windowClass && windowClass->getStyle() & (CS_OWNDC_W|CS_CLASSDC_W)); }
 #endif
 
          HDC    getOwnDC() { return ownDC; }
