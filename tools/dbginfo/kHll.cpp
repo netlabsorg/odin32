@@ -1,4 +1,4 @@
-/* $Id: kHll.cpp,v 1.15 2000-08-31 03:02:27 bird Exp $
+/* $Id: kHll.cpp,v 1.16 2000-09-16 15:17:07 bird Exp $
  *
  * kHll - Implementation of the class kHll.
  *        That class is used to create HLL debuginfo.
@@ -2233,7 +2233,8 @@ APIRET          kHll::writeToLX(
                             if (e32.e32_debuginfo != 0 && e32.e32_debuglen != 0)
                                 lPosDebug = e32.e32_debuginfo;
                             else
-                                lPosDebug = (cbLXFile + 0x400) & ~0x1FF; //try do some alignment.
+                                lPosDebug = cbLXFile;
+                                //lPosDebug = (cbLXFile + 0x400) & ~0x1FF; //try do some alignment.
 
                             /*
                              * Go to debug info position in the file and write debug info.
@@ -2247,20 +2248,39 @@ APIRET          kHll::writeToLX(
                                 if (cch > 0)
                                 {
                                     /*
-                                     * Update exeheader.
+                                     * Write dummy signature (_VerifySignature in the OS2KRNL checks this).
                                      */
-                                    e32.e32_debuglen = cch;
-                                    e32.e32_debuginfo = lPosDebug;
-                                    if (fseek(phFile, lPosLXHdr, SEEK_SET) == 0)
+                                    static char aFakeSig[0x200] = {0};
+                                    if (fseek(phFile, 0, SEEK_END) == 0)
                                     {
-                                        /*
-                                         * Write the updated header to disk.
-                                         */
-                                        cch = fwrite(&e32, 1, sizeof(e32), phFile);
-                                        if (cch == sizeof(e32))
-                                            rc = NO_ERROR;
+                                        if (fwrite(&aFakeSig[0], 1, sizeof(aFakeSig), phFile) == sizeof(aFakeSig))
+                                        {
+                                            cch += sizeof(aFakeSig);
+
+                                            /*
+                                             * Update exeheader.
+                                             */
+                                            e32.e32_debuglen = cch;
+                                            e32.e32_debuginfo = lPosDebug;
+                                            if (fseek(phFile, lPosLXHdr, SEEK_SET) == 0)
+                                            {
+                                                /*
+                                                 * Write the updated header to disk.
+                                                 */
+                                                cch = fwrite(&e32, 1, sizeof(e32), phFile);
+                                                if (cch == sizeof(e32))
+                                                    rc = NO_ERROR;
+                                                else
+                                                    rc = ERROR_WRITE_FAULT;
+                                            }
+                                            else
+                                                rc = ERROR_SEEK;
+                                        }
                                         else
+                                        {
+                                            fprintf(stderr, "warning - failed to write fake signature.\n");
                                             rc = ERROR_WRITE_FAULT;
+                                        }
                                     }
                                     else
                                         rc = ERROR_SEEK;
