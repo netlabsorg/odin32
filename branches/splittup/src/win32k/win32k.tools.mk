@@ -1,4 +1,4 @@
-# $Id: win32k.tools.mk,v 1.10.2.7 2002-01-09 00:52:37 bird Exp $
+# $Id: win32k.tools.mk,v 1.10.2.8 2002-03-31 20:08:45 bird Exp $
 
 #
 # Win32k common tools makefile.
@@ -181,9 +181,9 @@ SOURCEFILE  = $^.
 
 
 {dev32}.asm{$(WIN32KOBJ)}.obj:
-    @$(CMDQD_SUB) @$(ECHO) assembling dev32:       $(SOURCEFILE) & $(ASMCOMPILE)
+    $(CMDQD_SUB) $(ECHO) assembling dev32:       $(SOURCEFILE) & $(ASMCOMPILE)
 {dev32}.asm.obj:
-    @$(CMDQD_SUB) @$(ECHO) assembling dev32:       $(SOURCEFILE) & $(ASMCOMPILE)
+    $(CMDQD_SUB) $(ECHO) assembling dev32:       $(SOURCEFILE) & $(ASMCOMPILE)
 
 {dev32}.c{$(WIN32KOBJ)}.obj:
     @$(CMDQD_SUB) @$(ECHO) compiling 32bit dev32:  $(SOURCEFILE) & $(CCOMPILE)
