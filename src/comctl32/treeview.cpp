@@ -1,4 +1,4 @@
-/* $Id: treeview.cpp,v 1.11 2000-04-16 18:48:53 cbratschi Exp $ */
+/* $Id: treeview.cpp,v 1.12 2000-04-17 17:04:14 cbratschi Exp $ */
 /* Treeview control
  *
  * Copyright 1998 Eric Kohl <ekohl@abo.rhein-zeitung.de>
@@ -7,11 +7,6 @@
  * Copyright 1999 Achim Hasenmueller
  * Copyright 1999-2000 Christoph Bratschi (cbratschi@datacomm.ch)
  *
- *
- * TODO:
- *   Using DPA to store the item ptr would be good.
- *  -check custom draw
- *   use separate routine to get item text/image.
  *
  * FIXMEs  (for personal use)
     Expand:             -ctlmacro expands twice ->toggle.

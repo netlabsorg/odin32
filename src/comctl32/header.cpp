@@ -1,20 +1,21 @@
-/* $Id: header.cpp,v 1.8 2000-04-16 18:52:39 cbratschi Exp $ */
+/* $Id: header.cpp,v 1.9 2000-04-17 17:04:11 cbratschi Exp $ */
 /*
  *  Header control
  *
  *  Copyright 1998 Eric Kohl
  *  Copyright 1999 Achim Hasenmueller
- *  Copyright 1999 Christoph Bratschi
+ *  Copyright 1999-2000 Christoph Bratschi (cbratschi@datacomm.ch)
  *
  *  TODO:
- *   - HDS_FILTERBAR
+ *   - HDS_FILTERBAR (inconsistent parts in Microsoft SDK documentation)
  *   - HEADER_SetHotDivider()
  *
- * Status: ready (inconsistent parts in Microsoft SDK documentation)
+ * Status: complete
  * Version: 5.00
  */
 
 /*
+ Most identical with:
  - Corel 20000317 level
 */
 

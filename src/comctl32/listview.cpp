@@ -1,4 +1,4 @@
-/*$Id: listview.cpp,v 1.15 2000-04-16 18:52:39 cbratschi Exp $*/
+/*$Id: listview.cpp,v 1.16 2000-04-17 17:04:12 cbratschi Exp $*/
 /*
  * Listview control
  *
@@ -17,7 +17,7 @@
  *   - many position bugs
  *   - work area not used
  *   - custom draw
- *   - drag'n'drop (-> treeview)
+ *   - drag'n'drop (-> treeview (CCBase: need drag'n'dop framework))
  *   - edit timer
  *   - LISTVIEW_SetBkImage
  *   - LISTVIEW_GetBkImage
@@ -39,13 +39,14 @@
  *   - many things untested!
  *
  * Data structure:
- *   LISTVIEW_SetItemCount : not completed
+ *   LISTVIEW_SetItemCount : not implemented
  *
  * Status: all messages done, many styles not (yet) implemented
  * Version: 5.80
  */
 
 /*
+ Most identical with:
  - Corel 20000317 level
  - (WINE 20000130 level)
 */
@@ -59,95 +60,47 @@
 #include "header.h"
 #include "ctype.h"
 
-/*
- * constants
- */
+/* constants */
 
-/* maximum size of a label */
-#define DISP_TEXT_SIZE 128
+#define DISP_TEXT_SIZE 128 // maximum size of a label
 
-/* padding for items in list and small icon display modes */
-#define WIDTH_PADDING 12
-
-/* padding for items in list, report and small icon display modes */
-#define HEIGHT_PADDING 1
-
-/* offset of items in report display mode */
-#define REPORT_MARGINX 2
-
-/* padding for icon in large icon display mode */
-#define ICON_TOP_PADDING 2
+#define WIDTH_PADDING 12           // padding for items in list and small icon display modes
+#define HEIGHT_PADDING 1           // padding for items in list, report and small icon display modes
+#define REPORT_MARGINX 2           // offset of items in report display mode
+#define ICON_TOP_PADDING 2         // padding for icon in large icon display mode
 #define ICON_BOTTOM_PADDING 2
+#define LABEL_VERT_OFFSET 2        // padding for label in large icon display mode
+#define DEFAULT_LABEL_WIDTH 40     // default label width for items in list and small icon display modes
+#define DEFAULT_COLUMN_WIDTH 96    // default column width for items in list display mode
+#define LISTVIEW_SCROLL_DIV_SIZE 1 // Increment size of the horizontal scroll bar
+#define DEFAULT_HOVERTIME    500   // hover delay
+#define LV_ISEARCH_DELAY     1000  // documented in ListView_Message_Processing.htm
 
-/* padding for label in large icon display mode */
-#define LABEL_VERT_OFFSET 2
+/* macros */
 
-/* default label width for items in list and small icon display modes */
-#define DEFAULT_LABEL_WIDTH 40
-
-/* default column width for items in list display mode */
-#define DEFAULT_COLUMN_WIDTH 96
-
-/* Increment size of the horizontal scroll bar */
-#define LISTVIEW_SCROLL_DIV_SIZE 1
-
-#define DEFAULT_HOVERTIME    500
-#define LV_ISEARCH_DELAY     1000 //documented in ListView_Message_Processing.htm
-
-/*
- * macros
- */
-
-/* retrieve the number of items in the listview */
-#define GETITEMCOUNT(infoPtr) ((infoPtr)->hdpaItems->nItemCount)
-
-HWND CreateEditLabel(LPCSTR text, DWORD style, INT x, INT y,
-        INT width, INT height, HWND parent, HINSTANCE hinst,
-        EditlblCallback EditLblCb, DWORD param);
-
+#define GETITEMCOUNT(infoPtr) ((infoPtr)->hdpaItems->nItemCount) // retrieve the number of items in the listview
 #define LISTVIEW_GetInfoPtr(hwnd) ((LISTVIEW_INFO*)getInfoPtr(hwnd))
 
-/*
- * forward declarations
- */
+/* forward declarations */
+
+HWND CreateEditLabel(LPCSTR text,DWORD style,INT x,INT y,INT width,INT height,HWND parent,HINSTANCE hinst,EditlblCallback EditLblCb,DWORD param);
 
 static INT     LISTVIEW_HitTestItem(HWND, LPLVHITTESTINFO);
 static INT     LISTVIEW_GetColumnCount(HWND);
 static INT     LISTVIEW_GetCountPerRow(HWND);
 static INT     LISTVIEW_GetCountPerColumn(HWND);
-static VOID    LISTVIEW_AlignLeft(HWND);
-static VOID    LISTVIEW_AlignTop(HWND);
-static VOID    LISTVIEW_AddGroupSelection(HWND, INT);
-static VOID    LISTVIEW_AddSelection(HWND, INT);
 static LISTVIEW_ITEMDATA* LISTVIEW_GetItemData(HDPA hdpaSubItems,INT nSubItem);
-static INT     LISTVIEW_FindInsertPosition(HDPA, INT);
-static INT     LISTVIEW_GetItemHeight(HWND);
 static BOOL    LISTVIEW_GetItemPosition(HWND, INT, LPPOINT);
 static LRESULT LISTVIEW_GetItemRect(HWND hwnd,INT nItem,LPRECT lprc,INT code);
-static INT     LISTVIEW_GetItemWidth(HWND);
 static INT     LISTVIEW_GetLabelWidth(HWND,INT,INT);
 static LRESULT LISTVIEW_GetOrigin(HWND, LPPOINT);
-static INT     LISTVIEW_CalculateWidth(HWND hwnd, INT nItem);
 static LRESULT LISTVIEW_GetViewRect(HWND, LPRECT);
-static BOOL    LISTVIEW_InitItem(HWND, LISTVIEW_ITEM *, LPLVITEMW,BOOL);
-static LRESULT LISTVIEW_MouseSelection(HWND, POINT);
-static BOOL    LISTVIEW_RemoveColumn(HDPA, INT);
 static VOID    LISTVIEW_RemoveSelections(HWND, INT, INT);
 static BOOL    LISTVIEW_RemoveItemData(HDPA,INT);
-static VOID    LISTVIEW_SetGroupSelection(HWND, INT);
-static LRESULT LISTVIEW_SetItem(HWND, LPLVITEMW,BOOL);
 static BOOL    LISTVIEW_SetItemFocus(HWND, INT);
 static BOOL    LISTVIEW_SetItemPosition(HWND,INT,INT,INT,BOOL);
-static VOID    LISTVIEW_UpdateScroll(HWND);
-static VOID    LISTVIEW_SetSelection(HWND, INT);
 static VOID    LISTVIEW_UpdateSize(HWND);
-static BOOL    LISTVIEW_SetSubItem(HWND, LPLVITEMW,BOOL);
 static LRESULT LISTVIEW_SetViewRect(HWND, LPRECT);
-static BOOL    LISTVIEW_ToggleSelection(HWND, INT);
-static HWND    LISTVIEW_EditLabel(HWND hwnd,INT nItem,BOOL unicode);
-static BOOL    LISTVIEW_EndEditLabel(HWND hwnd,LPSTR pszText,DWORD nItem,BOOL cancel);
-static LRESULT LISTVIEW_Command(HWND hwnd, WPARAM wParam, LPARAM lParam);
-static LRESULT LISTVIEW_SortItems(HWND hwnd, WPARAM wParam, LPARAM lParam);
 static LRESULT LISTVIEW_GetItem(HWND hwnd,LPLVITEMW lpLVItem,BOOL unicode,BOOL internal);
 static INT     LISTVIEW_GetTopIndex(HWND hwnd);
 static LRESULT LISTVIEW_GetItemState(HWND hwnd, INT nItem, UINT uMask);
@@ -155,6 +108,8 @@ static LRESULT LISTVIEW_SetItemState(HWND hwnd,INT nItem,DWORD data,DWORD mask);
 static LRESULT LISTVIEW_GetStringWidth(HWND hwnd,HDC hdc,LPWSTR lpszText,BOOL unicode);
 static BOOL    LISTVIEW_EnsureVisible(HWND hwnd,INT nItem,BOOL bPartial);
 static VOID    LISTVIEW_UpdateHeaderSize(HWND hwnd,INT nNewScrollPos,INT xScroll);
+
+/* code */
 
 static VOID LISTVIEW_Refresh(HWND hwnd)
 {
