@@ -899,7 +899,7 @@ static HRESULT WINAPI OLEPictureImpl_Load(IPersistStream* iface,IStream*pStm) {
     HeapFree(GetProcessHeap(),0,samprow);
     jpeg_finish_decompress(&jd);
     jpeg_destroy_decompress(&jd);
-    hdcref = CreateCompatibleDC(0);
+    hdcref = GetDC(0);
     This->desc.u.bmp.hbitmap=CreateDIBitmap(
 	    hdcref,
 	    &bmi,
@@ -927,7 +927,7 @@ static HRESULT WINAPI OLEPictureImpl_Load(IPersistStream* iface,IStream*pStm) {
     /* Does not matter whether this is a coreheader or not, we only use
      * components which are in both
      */
-    hdcref = CreateCompatibleDC(0);
+    hdcref = GetDC(0);
     This->desc.u.bmp.hbitmap = CreateDIBitmap(
 	hdcref,
 	&(bi->bmiHeader),
@@ -1134,8 +1134,8 @@ static HRESULT WINAPI OLEPictureImpl_Invoke(
   FIXME("(dispid: %ld):Stub\n",dispIdMember);
 
   VariantInit(pVarResult);
-  pVarResult->vt = VT_BOOL;
-  pVarResult->u.boolVal = FALSE;
+  V_VT(pVarResult) = VT_BOOL;
+  V_UNION(pVarResult,boolVal) = FALSE;
   return S_OK;
 }
 
