@@ -1,4 +1,12 @@
- /* $Id: ChangeLog,v 1.883 2000-04-12 16:35:28 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.884 2000-04-13 18:51:43 sandervl Exp $ */
+
+ 2000-04-13: Sander van Leeuwen <sandervl@xs4all.nl>
+        - USER32: Zero thread message structure before dispatching it
+                  Prevents app from sending the same posted message twice
+                  (causing problems when freeing the postmsg struct)
+                  (fixes RealPlayer 7 Update service)
+	- CRTDLL: Fixed div (result must be returned in edx:eax)
+	- PE:     Check PATH for executable file
 
  2000-04-12: Christoph Bratschi <cbratschi@datacomm.ch>
 	- COMCTL32: listview: completed most version 4 features
