@@ -1,4 +1,4 @@
-/* $Id: CmdQd.c,v 1.5 2001-09-02 03:33:30 bird Exp $
+/* $Id: CmdQd.c,v 1.6 2001-09-04 13:29:49 bird Exp $
  *
  * Command Queue Daemon / Client.
  *
@@ -13,8 +13,9 @@
 
 
 /** @design Command Queue Daemon.
+ *
  * This command daemon orginated as tool to exploit SMP and UNI systems better
- * building large programs, but also when building one specific component of
+ * when building large programs, but also when building one specific component of
  * that program. It is gonna work just like the gnu make -j option.
  *
  * @subsection Work flow
@@ -36,8 +37,9 @@
  * to install.
  *
  * The communication between the client and the daemon will use shared memory
- * and an mutex semaphore which directs the conversation. The shared memory
- * block is allocated by the daemon and will have a quite simple layout:
+ * with an mutex semaphore and two event sems to direct the conversation. The
+ * shared memory block is allocated by the daemon and will have a quite simple
+ * layout:
  *      Mutex Semaphore.
  *      Message Type.
  *      Message specific data:
@@ -61,19 +63,26 @@
  *       - Kill response:
  *              Success/failure indicator.
  *
+ *       - Dies:
+ *              Nothing. This is a message to the client saying that the
+ *              daemon is dying or allready dead.
+ *
  * The shared memory block is 64KB.
  *
  *
  * @subsection The Workers
  *
  * The workers is individual threads which waits for a job to be submitted to
- * execution. Each worker is two threads. The job is executed thru a spawnvpe
- * call and all stdout is read by the 1st worker thread, stderr is read by the
- * 2nd thread. (Initially we've merged the two pipes and used one thread.)
- * The output will be buffered (up to 4 MB). When the job is completed we'll
- * put the output into either the success queue or the failure queue
- * depending on the result.
+ * execution. If the job only contains a single executable program to execute
+ * (no & or &&) it will be executed using DosExecPgm. If it's a multi program
+ * or command job it will be executed by CMD.EXE.
  *
+ * Output will be read using unamed pipe and buffered. When the job is
+ * completed we'll put the output into either the success queue or the failure
+ * queue depending on the result.
+ *
+ * Note. Process startup needs to be serialized in order to be able to redirect
+ * stdout. We're using a mutex for this.
  *
  */
 
