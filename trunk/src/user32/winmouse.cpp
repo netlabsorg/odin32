@@ -1,4 +1,4 @@
-/* $Id: winmouse.cpp,v 1.16 2001-07-28 13:43:54 sandervl Exp $ */
+/* $Id: winmouse.cpp,v 1.17 2001-09-27 10:02:38 phaller Exp $ */
 /*
  * Mouse handler for DINPUT
  *
@@ -11,10 +11,16 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+
+#include <odin.h>
+#include <odinwrap.h>
+#include <os2sel.h>
+
 #include <os2win.h>
 #include <misc.h>
 #include "win32wbase.h"
 #include <winuser32.h>
+#include <winuser.h>
 #include <win\mouse.h>
 #include "winmouse.h"
 #include "oslibmsg.h"
@@ -24,22 +30,32 @@
 #define DBG_LOCALLOG	DBG_winmouse
 #include "dbglocal.h"
 
+
+ODINDEBUGCHANNEL(USER32-WINMOUSE)
+
+
+/****************************************************************************
+ * local variables
+ ****************************************************************************/
+
 LPMOUSE_EVENT_PROC mouseHandler = NULL;
 WNDPROC            keyboardHandler = NULL;
 
+
 //******************************************************************************
 //******************************************************************************
-VOID WIN32API MOUSE_Enable(LPMOUSE_EVENT_PROC lpMouseEventProc)
+ODINPROCEDURE1(MOUSE_Enable,
+               LPMOUSE_EVENT_PROC, lpMouseEventProc)
 {
   if(lpMouseEventProc == (LPMOUSE_EVENT_PROC)-1)
-  {
-	mouseHandler = NULL;
-  }
-  else	mouseHandler = lpMouseEventProc;
+    mouseHandler = NULL;
+  else	
+    mouseHandler = lpMouseEventProc;
 }
 //******************************************************************************
 //******************************************************************************
-VOID WIN32API KEYBOARD_Enable(WNDPROC handler)
+ODINPROCEDURE1(KEYBOARD_Enable,
+               WNDPROC, handler)
 {
   keyboardHandler = handler;
 }
@@ -108,80 +124,82 @@ BOOL DInputMouseHandler(HWND hwnd, ULONG msg, ULONG x, ULONG y)
 }
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API GetCapture(void)
+ODINFUNCTION0(HWND, GetCapture)
 {
- HWND hwnd;
-
-    hwnd = OS2ToWin32Handle(OSLibWinQueryCapture());
-    dprintf(("USER32: GetCapture returned %x", hwnd));
-    return hwnd;
+  return OS2ToWin32Handle(OSLibWinQueryCapture());
 }
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API SetCapture(HWND hwnd)
+ODINFUNCTION1(HWND, SetCapture,
+              HWND, hwnd)
 {
- HWND hwndPrev = GetCapture();
- BOOL rc;
+  HWND hwndPrev = GetCapture();
+  BOOL rc;
 
-    if(hwnd == 0) {
-	ReleaseCapture();
-	return hwndPrev;
-    }
-    if(hwnd == hwndPrev) {
-        dprintf(("USER32: SetCapture %x; already set to that window; ignore", hwnd));
-        return hwndPrev;
-    }
-    if(hwndPrev != NULL) {
-	//SvL: WinSetCapture returns an error if mouse is already captured
-	OSLibWinSetCapture(0);
-    }
-    rc = OSLibWinSetCapture(Win32ToOS2Handle(hwnd));
-    dprintf(("USER32: SetCapture %x (prev %x) returned %d", hwnd, hwndPrev, rc));
-    if(hwndPrev) {
-    	SendMessageA(hwndPrev, WM_CAPTURECHANGED, 0L, hwnd);
-    }
+  if(hwnd == 0) 
+  {
+    ReleaseCapture();
     return hwndPrev;
+  }
+  
+  if(hwnd == hwndPrev) 
+  {
+    dprintf(("USER32: SetCapture %x; already set to that window; ignore", hwnd));
+    return hwndPrev;
+  }
+  
+  if(hwndPrev != NULL) 
+  {
+    //SvL: WinSetCapture returns an error if mouse is already captured
+    OSLibWinSetCapture(0);
+  }
+  
+  rc = OSLibWinSetCapture(Win32ToOS2Handle(hwnd));
+  dprintf(("USER32: SetCapture %x (prev %x) returned %d", hwnd, hwndPrev, rc));
+  if(hwndPrev) 
+  {
+    SendMessageA(hwndPrev, WM_CAPTURECHANGED, 0L, hwnd);
+  }
+  return hwndPrev;
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API ReleaseCapture(void)
+ODINFUNCTION0(BOOL, ReleaseCapture)
 {
- HWND hwndPrev;
- BOOL ret;
+  HWND hwndPrev;
+  BOOL ret;
 
-    dprintf(("USER32:  ReleaseCapture"));
-    hwndPrev = GetCapture();
-    ret = OSLibWinSetCapture(0);
-    if(hwndPrev) {
-    	SendMessageA(hwndPrev, WM_CAPTURECHANGED, 0L, 0L);
-    }
-    return ret;
+  hwndPrev = GetCapture();
+  ret = OSLibWinSetCapture(0);
+  if(hwndPrev) 
+  {
+    SendMessageA(hwndPrev, WM_CAPTURECHANGED, 0L, 0L);
+  }
+  return ret;
 }
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API GetDoubleClickTime(void)
+ODINFUNCTION0(UINT, GetDoubleClickTime)
 {
-    dprintf(("USER32: GetDoubleClickTime"));
-    UINT result = OSLibWinQuerySysValue(SVOS_DBLCLKTIME);
-    if(result == 0)
-        SetLastError(ERROR_INVALID_PARAMETER); //TODO: ????
+  UINT result = OSLibWinQuerySysValue(SVOS_DBLCLKTIME);
+  if(result == 0)
+    SetLastError(ERROR_INVALID_PARAMETER); //TODO: ????
 
-    return result;
+  return result;
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetDoubleClickTime(UINT uInterval)
+ODINFUNCTION1(BOOL, SetDoubleClickTime,
+              UINT, uInterval)
 {
-    BOOL ret = TRUE;
+  BOOL ret = TRUE;
 
-    dprintf(("USER32: SetDoubleClickTime %d", uInterval));
-
-    ret = OSLibWinSetSysValue(SVOS_DBLCLKTIME, uInterval);
-    if(ret == FALSE )
-    {
-        SetLastError(ERROR_INVALID_PARAMETER); //TODO: ????
-    }
-    return (ret);
+  ret = OSLibWinSetSysValue(SVOS_DBLCLKTIME, uInterval);
+  if(ret == FALSE )
+  {
+    SetLastError(ERROR_INVALID_PARAMETER); //TODO: ????
+  }
+  return (ret);
 }
 //******************************************************************************
 //TODO: we shouldn't let win32 apps change this for the whole system
@@ -200,11 +218,12 @@ inline BOOL _SwapMouseButton(BOOL swapFlag)
 }
 
 //******************************************************************************
-BOOL WIN32API SwapMouseButton(BOOL fSwap)
+ODINFUNCTION1(BOOL, SwapMouseButton,
+              BOOL, fSwap)
 {
-    dprintf(("USER32: SwapMouseButton %d", fSwap));
-    return _SwapMouseButton(fSwap);
+  return _SwapMouseButton(fSwap);
 }
+
 /*****************************************************************************
  * Name      : VOID WIN32API mouse_event
  * Purpose   : The mouse_event function synthesizes mouse motion and button clicks.
@@ -220,22 +239,146 @@ BOOL WIN32API SwapMouseButton(BOOL fSwap)
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-VOID WIN32API mouse_event(DWORD dwFlags, DWORD dx, DWORD dy, DWORD cButtons,
-                          DWORD dwExtraInfo)
+
+ODINPROCEDURE5(mouse_event,
+               DWORD, dwFlags, 
+               DWORD, dx,
+               DWORD, dy,
+               DWORD, cButtons,
+               DWORD, dwExtraInfo)
 {
-  dprintf(("USER32:mouse_event (%08xh,%u,%u,%u,%08x) not implemented",
-          dwFlags, dx, dy, cButtons, dwExtraInfo));
+  dprintf(("not implemented"));
 }
 
-DWORD WIN32API TrackMouseEvent(DWORD param1)
+
+ODINFUNCTION1(DWORD, TrackMouseEvent,
+              DWORD, param1)
 {
-  dprintf(("USER32: TrackMouseEvent %x not implemented", param1));
+  dprintf(("not implemented"));
   return 0;
 }
 
-DWORD WIN32API SendInput(DWORD param1, DWORD param2, DWORD param3)
+
+/*****************************************************************************
+ * Name      : UINT SendInput
+ * Purpose   : The SendInput function synthesizes keystrokes, mouse motions, 
+ *             and button clicks
+ * Parameters: UINT    nInputs // count if input events
+ *             LPINPUT pInputs // array of input structures
+ *             int     chSize  // size of structure
+ * Variables :
+ * Result    : number of events successfully inserted,
+ *             0 if the input was already blocked by another thread
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+
+ODINFUNCTION3(UINT,    SendInput,
+              UINT,    nInputs,
+              LPINPUT, pInputs,
+              int,     chSize)
 {
-  dprintf(("USER32: SendInput %x %x %x not implemented", param1, param2, param3));
+  dprintf(("not correctly implemented"));
+  
+  // The simulated input is sent to the
+  // foreground thread's message queue.
+  // (WM_KEYUP, WM_KEYDOWN)
+  // After GetMessage or PeekMessage,
+  // TranslateMessage posts an appropriate
+  // WM_CHAR message.
+  HWND hwnd = GetForegroundWindow();
+  
+  LPINPUT piBase = pInputs;
+  for (int i = 0;
+       i < nInputs;
+       i++,
+       piBase++)
+  {
+    switch(piBase->type)
+    {
+      case INPUT_MOUSE:
+      {
+        PMOUSEINPUT p = (PMOUSEINPUT)&piBase->mi;
+        MSG msg;
+        
+        // simulate mouse input message
+        // @@@PH
+      }  
+      break;
+      
+      // compose a keyboard input message
+      case INPUT_KEYBOARD:
+      {
+        PKEYBDINPUT p = (PKEYBDINPUT)&piBase->ki;
+        MSG msg;
+        BOOL fUnicode = (p->dwFlags & KEYEVENTF_UNICODE) == KEYEVENTF_UNICODE;
+        
+        // build keyboard message
+        msg.message = (p->dwFlags & KEYEVENTF_KEYUP) ? WM_KEYUP : WM_KEYDOWN;
+        
+        if (p->dwFlags & KEYEVENTF_SCANCODE)
+        {
+          // keystroke is identified by the scancode
+          if (fUnicode)
+            msg.wParam = MapVirtualKeyW(p->wScan, 1);
+          else
+            msg.wParam = MapVirtualKeyA(p->wScan, 1);
+        }
+        else
+          msg.wParam = p->wVk;
+        
+        msg.lParam = 0x0000001 |                    // repeat count
+                      ( (p->wScan & 0xff) << 16);   // scan code
+        
+        if (p->dwFlags & KEYEVENTF_EXTENDEDKEY)
+          msg.lParam |= (1 << 24);
+        
+        // set additional message flags
+        if (msg.message == WM_KEYDOWN)
+        {
+          // @@@PH
+          // bit 30 - previous key state cannot be set, how to determine?
+        }
+        else
+        {
+          // WM_KEYUP -> previous key is always 1, transistion state
+          // always 1
+          msg.lParam |= (1 << 30);
+          msg.lParam |= (1 << 31);
+        }
+        
+        msg.time   = p->time;
+        
+        // @@@PH
+        // unknown: do we have to post or to send the message?
+        
+        if (fUnicode)
+          SendMessageW(hwnd, msg.message, msg.wParam, msg.lParam);
+        else
+          SendMessageA(hwnd, msg.message, msg.wParam, msg.lParam);
+        
+        SetMessageExtraInfo( (LPARAM)p->dwExtraInfo );
+      }  
+      break;
+      
+      case INPUT_HARDWARE:
+      {
+        PHARDWAREINPUT p = (PHARDWAREINPUT)&piBase->hi;
+        
+        // @@@PH
+        // not supported for the time being
+      }  
+      break;
+      
+      default:
+        dprintf(("unsupported input packet type %d",
+                piBase->type));
+        break;
+    }
+  }
+  
   return 0;
 }
 
@@ -254,10 +397,11 @@ DWORD WIN32API SendInput(DWORD param1, DWORD param2, DWORD param3)
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-BOOL WIN32API DragDetect(HWND  hwnd,
-                            POINT pt)
+ODINFUNCTION2(BOOL,  DragDetect,
+              HWND,  hwnd,
+              POINT, pt)
 {
-  dprintf(("USER32:DragDetect(%08xh,...) not implemented", hwnd));
+  dprintf(("not implemented"));
 
   return (FALSE);
 }
