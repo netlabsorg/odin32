@@ -1,4 +1,4 @@
-/* $Id: region.cpp,v 1.3 2000-03-29 17:15:35 sandervl Exp $ */
+/* $Id: region.cpp,v 1.4 2000-06-01 11:27:06 sandervl Exp $ */
 
 /*
  * GDI32 region code
@@ -116,13 +116,6 @@ BOOL WIN32API FrameRgn( HDC arg1, HRGN arg2, HBRUSH arg3, int arg4, int  arg5)
 {
     dprintf(("GDI32: FrameRgn"));
     return O32_FrameRgn(arg1, arg2, arg3, arg4, arg5);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API GetClipRgn( HDC arg1, HRGN  arg2)
-{
-    dprintf(("GDI32: GetClipRgn"));
-    return O32_GetClipRgn(arg1, arg2);
 }
 //******************************************************************************
 //******************************************************************************

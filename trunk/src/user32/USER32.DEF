@@ -1,4 +1,4 @@
-; $Id: USER32.DEF,v 1.30 2000-04-18 11:12:59 sandervl Exp $
+; $Id: USER32.DEF,v 1.31 2000-06-01 11:27:55 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
@@ -643,3 +643,7 @@ EXPORTS
     _wvsnprintfA@16                                              @2010
 
     _KEYBOARD_Enable@4                                           @2011
+
+    ;SvL: Belongs in GDI32, but put in dc.cpp to group similar apis
+    _GetClipBox@8                                                @2014
+    _GetClipRgn@8                                                @2015

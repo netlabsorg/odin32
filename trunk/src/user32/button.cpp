@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.35 2000-05-22 17:21:06 cbratschi Exp $ */
+/* $Id: button.cpp,v 1.36 2000-06-01 11:27:56 sandervl Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
@@ -175,6 +175,13 @@ static LRESULT BUTTON_Destroy(HWND hwnd,WPARAM wParam,LPARAM lParam)
 
 static LRESULT BUTTON_EraseBkgnd(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
+  //SvL: This is wrong: should be 
+  //SvL: TODO: NT does something extra for ownerdrawn buttons; check this 
+//  if(style == BS_OWNERDRAW) {
+//        return DefWindowProcA(hwnd, WM_ERASEBKGND, wParam, lParam);
+//  }
+//  return 1;
+
   //SvL: Erase background for groupboxes as the paint function only draws
   //     a box
   DWORD style = GetWindowLongA(hwnd,GWL_STYLE) & 0x0f;
