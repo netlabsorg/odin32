@@ -1,4 +1,4 @@
-/* $Id: wsprintf.cpp,v 1.1 1999-11-04 18:35:41 phaller Exp $ */
+/* $Id: wsprintf.cpp,v 1.2 1999-11-22 20:33:25 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -317,7 +317,7 @@ INT WINAPI wvsnprintfA( LPSTR buffer, UINT maxlen, LPCSTR spec,
     CHAR number[20];
     WPRINTF_DATA argData;
 
-    while (*spec && (maxlen > 1))
+    while (spec && *spec && (maxlen > 1))
     {
         if (*spec != '%') { *p++ = *spec++; maxlen--; continue; }
         spec++;
@@ -395,7 +395,7 @@ INT WINAPI wvsnprintfW( LPWSTR buffer, UINT maxlen, LPCWSTR spec,
     UINT i, len;
     CHAR number[20];
 
-    while (*spec && (maxlen > 1))
+    while (spec && *spec && (maxlen > 1))
     {
         if (*spec != '%') { *p++ = *spec++; maxlen--; continue; }
         spec++;
