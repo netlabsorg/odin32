@@ -1,4 +1,9 @@
- /* $Id: changelog,v 1.427 1999-11-09 14:13:45 sandervl Exp $ */
+ /* $Id: changelog,v 1.428 1999-11-09 17:05:29 cbratschi Exp $ */
+
+ 99-11-09: Christoph Bratschi <cbratschi@datacomm.ch>
+	- GDI32: fixed line functions -> don't draw end pixel
+	- COMCTL32/USER32: removed some old workarounds
+	- USER32: fixed system resource handling
 
  99-11-09: Sander van Leeuwen <sandervl@xs4all.nl>
 	- OLE32: Renamed dll to OLE32OS2 to avoid conflicts with Lotus SmartSuite's
