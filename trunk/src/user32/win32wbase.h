@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.60 1999-12-29 22:54:03 cbratschi Exp $ */
+/* $Id: win32wbase.h,v 1.61 1999-12-30 09:31:03 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -144,9 +144,6 @@ Win32BaseWindow *getParent();
          void   setWindowRect(PRECT rect)       { rectWindow = *rect; };
          DWORD  getFlags()                      { return flags; };
          void   setFlags(DWORD newflags)        { flags = newflags; };
-
-         HACCEL GetAccelTable()                     { return (HACCEL) acceltableResource; };
-         BOOL   SetAccelTable(ULONG hAccel);
 
          HMENU  GetMenu()                           { return (HMENU) OS2HwndMenu; };
          BOOL   SetMenu(ULONG hMenu);
@@ -313,9 +310,7 @@ protected:
         BOOL    fIsSubclassedOS2Wnd;  //subclassed OS/2 window: Netscape plug-in/scrollbar
 
    Win32BaseWindow *owner;
-
- Win32Resource *acceltableResource;
- Win32Resource *iconResource;
+     Win32Resource *iconResource;
 
         char   *windowNameA;
         WCHAR  *windowNameW;
