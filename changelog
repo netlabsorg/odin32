@@ -1,4 +1,16 @@
-/* $Id: changelog,v 1.1566 2001-07-05 18:08:26 sandervl Exp $ */
+/* $Id: changelog,v 1.1567 2001-07-06 13:44:38 sandervl Exp $ */
+
+ 2001-07-06: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o HeapAlloc must return pointers aligned at 8 byte boundary
+                o GlobalAlloc must return pointers aligned at 8 byte boundary
+                  (SDK docs + verified in NT4, SP6)
+                o LocalReAlloc bugfix
+    - USER32:   o Must return 16 bits icon & cursor handles
+                  (fixes crash in Acrobat Reader 4)
+    - GDI32:    o GetDIBits must only return color information when lpvBits
+                  is not NULL.
+                  (fixes Opera crash (heap corruption) with new heap code)
+    - PELDR:    o Report error when file not found.
 
  2001-07-05: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o WM_WINDOWPOSCHANGED dispatch bugfix (introduced yesterday)
