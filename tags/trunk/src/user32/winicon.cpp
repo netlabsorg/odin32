@@ -1,4 +1,4 @@
-/* $Id: winicon.cpp,v 1.28 2001-08-08 10:07:19 sandervl Exp $ */
+/* $Id: winicon.cpp,v 1.29 2001-08-26 14:23:35 sandervl Exp $ */
 /*
  * Win32 Icon Code for OS/2
  *
@@ -100,6 +100,11 @@ static void CURSORICON_AddSharedIcon( HMODULE hModule, HRSRC hRsrc, HRSRC hGroup
 static HANDLE CURSORICON_FindSharedIcon( HMODULE hModule, HRSRC hRsrc );
 static ICONCACHE* CURSORICON_FindCache(HANDLE handle);
 
+static HGLOBAL CreateCursorIconIndirect( HINSTANCE hInstance,
+                                         CURSORICONINFO *info,
+                                         LPCVOID lpANDbits,
+                                         LPCVOID lpXORbits, BOOL fIcon);
+
 /***********************************************************************
  *           CreateIcon    (USER32.75)
  */
@@ -121,7 +126,7 @@ HICON WIN32API CreateIcon(HINSTANCE hInstance, INT nWidth,
     info.hInstance = hInstance;
     info.dwResGroupId = -1;
     info.hColorBmp = 0;
-    return CreateCursorIconIndirect(0, &info, lpANDbits, lpXORbits);
+    return CreateCursorIconIndirect(0, &info, lpANDbits, lpXORbits, TRUE);
 }
 /**********************************************************************
  *          CreateIconFromResource          (USER32.76)
@@ -148,14 +153,21 @@ HICON WINAPI CreateIconIndirect(ICONINFO *iconinfo)
 {
     BITMAP bmpXor,bmpAnd;
     HICON hObj;
-    int sizeXor,sizeAnd;
+    int sizeXor,sizeAnd,colortablesize;
 
     dprintf(("USER32: CreateIconIndirect %x", iconinfo));
 
     GetObjectA( iconinfo->hbmColor, sizeof(bmpXor), &bmpXor );
     GetObjectA( iconinfo->hbmMask, sizeof(bmpAnd), &bmpAnd );
 
-    sizeXor = bmpXor.bmHeight * bmpXor.bmWidthBytes;
+    colortablesize = 0;
+
+    if(bmpXor.bmBitsPixel <= 8) {
+         colortablesize = sizeof(RGBQUAD)*(1<<bmpXor.bmBitsPixel);
+         sizeXor = bmpXor.bmHeight * bmpXor.bmWidthBytes + colortablesize;
+    }
+    else sizeXor = bmpXor.bmHeight * bmpXor.bmWidthBytes;
+
     sizeAnd = bmpAnd.bmHeight * bmpAnd.bmWidthBytes;
 
     hObj = GlobalAlloc( GMEM_MOVEABLE, sizeof(CURSORICONINFO) + sizeXor + sizeAnd );
@@ -188,7 +200,34 @@ HICON WINAPI CreateIconIndirect(ICONINFO *iconinfo)
 
         /* Transfer the bitmap bits to the CURSORICONINFO structure */
         GetBitmapBits( iconinfo->hbmMask ,sizeAnd,(char*)(info + 1) );
-        GetBitmapBits( iconinfo->hbmColor,sizeXor,(char*)(info + 1) +sizeAnd);
+        if(bmpXor.bmBitsPixel > 1)
+        {
+            BITMAPINFO* pInfo = (BITMAPINFO *)malloc(sizeof(BITMAPINFO)+colortablesize+3*sizeof(DWORD)); //+ extra space for > 8bpp images
+            HBITMAP oldbmp;
+            HDC     hdc;
+
+            hdc = CreateCompatibleDC(0);
+
+            memset(pInfo, 0, sizeof(BITMAPINFO)+colortablesize+3*sizeof(DWORD));
+            pInfo->bmiHeader.biSize     = sizeof(BITMAPINFOHEADER);
+            pInfo->bmiHeader.biPlanes   = info->bPlanes;
+            pInfo->bmiHeader.biBitCount = info->bBitsPerPixel;
+
+            GetDIBits(hdc, iconinfo->hbmColor, 0, bmpXor.bmHeight, (char *)(info + 1) + sizeAnd + colortablesize, pInfo, DIB_RGB_COLORS);
+            if(colortablesize) {
+                memcpy((char *)(info + 1) + sizeAnd, (char *)&pInfo->bmiHeader + pInfo->bmiHeader.biSize, colortablesize);
+            }
+
+            DeleteDC(hdc);
+            free(pInfo);
+        }
+        else {
+            GetBitmapBits( iconinfo->hbmColor,sizeXor,(char*)(info + 1) +sizeAnd);
+        }
+
+#ifdef __WIN32OS2__
+        info->hColorBmp = OSLibWinCreatePointer(info, (char*)(info + 1), (LPBITMAP_W)&bmpAnd, (char*)(info + 1) + sizeAnd, (LPBITMAP_W)&bmpXor, FALSE);
+#endif
         GlobalUnlock(hObj);
 
 #ifdef __WIN32OS2__
@@ -199,6 +238,7 @@ HICON WINAPI CreateIconIndirect(ICONINFO *iconinfo)
             return 0;
         }
 #endif
+        dprintf(("USER32: CreateIconIndirect %x returned %x", iconinfo, hIcon));
         return hIcon;
     }
     else {
@@ -351,7 +391,7 @@ HCURSOR WIN32API CreateCursor(HINSTANCE hInst, int xHotSpot, int yHotSpot, int n
     info.dwResGroupId  = -1;
     info.hColorBmp     = 0;
 
-    return CreateCursorIconIndirect( 0, &info, lpANDbits, lpXORbits );
+    return CreateCursorIconIndirect( 0, &info, lpANDbits, lpXORbits, FALSE);
 }
 //******************************************************************************
 //******************************************************************************
@@ -519,14 +559,17 @@ int WIN32API ShowCursor(BOOL bShow)
 /***********************************************************************
  *           CreateCursorIconIndirect
  */
-HGLOBAL WIN32API CreateCursorIconIndirect( HINSTANCE hInstance,
-                                           CURSORICONINFO *info,
-                                           LPCVOID lpANDbits,
-                                           LPCVOID lpXORbits )
+static HGLOBAL CreateCursorIconIndirect( HINSTANCE hInstance,
+                                         CURSORICONINFO *info,
+                                         LPCVOID lpANDbits,
+                                         LPCVOID lpXORbits, BOOL fIcon)
 {
     HGLOBAL handle;
     char *ptr;
     int sizeAnd, sizeXor;
+#ifdef __WIN32OS2__
+    BITMAP bmpXor, bmpAnd;
+#endif
 
     if (!lpXORbits || !lpANDbits || info->bPlanes != 1) return 0;
     info->nWidthBytes = BITMAP_GetWidthBytes(info->nWidth,info->bBitsPerPixel);
@@ -539,6 +582,25 @@ HGLOBAL WIN32API CreateCursorIconIndirect( HINSTANCE hInstance,
     memcpy( ptr, info, sizeof(*info) );
     memcpy( ptr + sizeof(CURSORICONINFO), lpANDbits, sizeAnd );
     memcpy( ptr + sizeof(CURSORICONINFO) + sizeAnd, lpXORbits, sizeXor );
+#ifdef __WIN32OS2__
+    bmpAnd.bmType       = 0;
+    bmpAnd.bmWidth      = info->nWidth;
+    bmpAnd.bmHeight     = info->nHeight;
+    bmpAnd.bmWidthBytes = BITMAP_GetWidthBytes(info->nWidth, 1);
+    bmpAnd.bmPlanes     = info->bPlanes;
+    bmpAnd.bmBitsPixel  = 1;
+    bmpAnd.bmBits       = NULL;
+
+    bmpXor.bmType       = 0;
+    bmpXor.bmWidth      = info->nWidth;
+    bmpXor.bmHeight     = info->nHeight;
+    bmpXor.bmWidthBytes = info->nWidthBytes;
+    bmpXor.bmPlanes     = info->bPlanes;
+    bmpXor.bmBitsPixel  = info->bBitsPerPixel;
+    bmpXor.bmBits       = NULL;
+    ((CURSORICONINFO *)ptr)->hColorBmp = 
+          OSLibWinCreatePointer(info, (char *)lpANDbits, (LPBITMAP_W)&bmpAnd, (char *)lpXORbits, (LPBITMAP_W)&bmpXor, fIcon == FALSE);
+#endif
     GlobalUnlock( handle );
 
 #ifdef __WIN32OS2__
@@ -548,6 +610,7 @@ HGLOBAL WIN32API CreateCursorIconIndirect( HINSTANCE hInstance,
         dprintf(("ERROR: CreateCursorIconIndirect ObjAllocateHandle failed!!"));
         return 0;
     }
+    dprintf(("USER32: CreateCursorIconIndirect returned %x", hIcon));
     return hIcon;
 #else
     return handle;
