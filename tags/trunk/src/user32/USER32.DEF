@@ -1,4 +1,4 @@
-; $Id: USER32.DEF,v 1.25 2000-01-18 20:08:14 sandervl Exp $
+; $Id: USER32.DEF,v 1.26 2000-02-03 23:04:50 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
@@ -631,6 +631,7 @@ EXPORTS
     GetSysColorPen              = _GetSysColorPen@4              @2002
 
     Win32ToOS2Handle__FUl      = Win32ToOS2Handle__15Win32BaseWindowFUl @2006
+    OS2ToWin32Handle__FUl      = OS2ToWin32Handle__15Win32BaseWindowFUl @2012
 
     _MOUSE_Enable@4                                              @2007
     _KeyTranslatePMToWin@4                                       @2008
