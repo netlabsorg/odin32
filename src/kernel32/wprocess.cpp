@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.180 2003-02-13 17:16:50 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.181 2003-02-20 09:47:01 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -50,6 +50,8 @@
 
 #include <win\ntddk.h>
 
+#include <custombuild.h>
+
 #define DBG_LOCALLOG    DBG_wprocess
 #include "dbglocal.h"
 
@@ -87,6 +89,13 @@ DWORD       *TIBFlatPtr    = 0;
 //list of thread database structures
 static TEB      *threadList = 0;
 static VMutex    threadListMutex;
+
+/**
+ * LoadLibraryExA callback for LX Dlls, it's call only on the initial load.
+ * Maintained by ODIN_SetLxDllLoadCallback().
+ * Note! Because of some hacks it may also be called from Win32LxDll::Release().
+ */
+PFNLXDLLLOAD pfnLxDllLoadCallback = NULL;
 
 
 //******************************************************************************
@@ -450,7 +459,7 @@ USHORT WIN32API SetWin32TIB(BOOL fForceSwitch)
 }
 //******************************************************************************
 // ODIN_SetTIBSwitch: override TIB switching
-// 
+//
 // Parameters:
 //      BOOL fSwitchTIB
 //              FALSE  -> no TIB selector switching
@@ -743,6 +752,20 @@ void WIN32API ODIN_DisableLXDllLoading()
     fDisableLXDllLoading = TRUE;
 }
 
+
+/**
+ * Custombuild API for registering a callback for LX Dll loading thru LoadLibrary*().
+ * @returns Success indicator.
+ * @param   pfn     Pointer to callback.
+ *                  NULL if callback is deregistered.
+ */
+BOOL WIN32API ODIN_SetLxDllLoadCallback(PFNLXDLLLOAD pfn)
+{
+    pfnLxDllLoadCallback = pfn;
+    return TRUE;
+}
+
+
 /**
  * LoadLibraryExA can be used to map a DLL module into the calling process's
  * addressspace. It returns a handle that can be used with GetProcAddress to
@@ -941,12 +964,24 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
      *  IF (fDisableLXDllLoading && (!fPeLoader || fPE == failure)) THEN
      *      Try load the executable using LoadLibrary
      *      IF successfully loaded THEN
-     *          IF LX dll and is using the PE Loader THEN
-     *              Set Load library.
-     *              Inc reference count.
+     *          Try find registered/pe2lx object.
+     *          IF callback Then
+     *              If callback give green light Then
+     *                  Find registered lx object.
+     *              Else
+     *                  Unload it if loaded.
+     *              Endif
      *          Endif
-     *          Inc dynamic reference count.
-     *          RETURN successfully.
+     *          IF module object found Then
+     *              IF LX dll and is using the PE Loader THEN
+     *                  Set Load library.
+     *                  Inc reference count.
+     *              Endif
+     *              Inc dynamic reference count.
+     *              RETURN successfully.
+     *          Else
+     *              fail.
+     *          Endif
      *      Endif
      *  Endif
      */
@@ -958,6 +993,18 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
         {
             /* OS/2 dll, system dll, converted dll or win32k took care of it. */
             pModule = Win32DllBase::findModuleByOS2Handle(hDll);
+            /* Custombuild customizing may take care of it too. */
+            if (pfnLxDllLoadCallback)
+            {
+                /* If callback says yes, continue load it, else fail. */
+                if (pfnLxDllLoadCallback(hDll, pModule ? pModule->getInstanceHandle() : NULL))
+                    pModule = Win32DllBase::findModuleByOS2Handle(hDll);
+                else if (pModule)
+                {
+                    pModule->Release();
+                    pModule = NULL;
+                }
+            }
             if (pModule)
             {
                 if (pModule->isLxDll())
@@ -1834,7 +1881,7 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
     }
 #endif
 
-    if(bInheritHandles && lpStartupInfo->dwFlags & STARTF_USESTDHANDLES) 
+    if(bInheritHandles && lpStartupInfo->dwFlags & STARTF_USESTDHANDLES)
     {
         //Translate standard handles if the child needs to inherit them
         int retcode = 0;
@@ -1844,7 +1891,7 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
         retcode |= HMHandleTranslateToOS2(lpStartupInfo->hStdOutput, &startinfo.hStdOutput);
         retcode |= HMHandleTranslateToOS2(lpStartupInfo->hStdError, &startinfo.hStdError);
 
-        if(retcode) {  
+        if(retcode) {
             SetLastError(ERROR_INVALID_HANDLE);
             return FALSE;
         }
@@ -2320,7 +2367,7 @@ FARPROC WIN32API GetProcAddress(HMODULE hModule, LPCSTR lpszProc)
 }
 //******************************************************************************
 // ODIN_SetProcAddress: Override a dll export
-// 
+//
 // Parameters:
 //      HMODULE hModule		Module handle
 //      LPCSTR  lpszProc	Export name or ordinal
@@ -2330,7 +2377,7 @@ FARPROC WIN32API GetProcAddress(HMODULE hModule, LPCSTR lpszProc)
 //          Failure -> -1
 //
 //******************************************************************************
-FARPROC WIN32API ODIN_SetProcAddress(HMODULE hModule, LPCSTR lpszProc, 
+FARPROC WIN32API ODIN_SetProcAddress(HMODULE hModule, LPCSTR lpszProc,
                                      FARPROC pfnNewProc)
 {
  Win32ImageBase *winmod;
