@@ -1,4 +1,4 @@
-# $Id: pdwin32.vac3.dbg,v 1.4 1999-06-10 16:21:50 achimha Exp $
+# $Id: pdwin32.vac3.dbg,v 1.5 1999-08-09 18:12:08 achimha Exp $
 # ODIN / win32os2 Project
 # 
 # DEBUG makefile for the VAC3 compiler environment
@@ -19,9 +19,9 @@ IMPLIB=implib
 #
 # Tool Flags
 #
-CFLAGS = -Q -Fi -Si -Ti -Ge- -Ss+ -W3 -Gm+ -I$(PDWIN32_INCLUDE)\Win -D__WIN32OS2__  -D__WINE__ -DDEBUG
-CXXFLAGS = -Q -Fi -Si -Ti -Ge- -Ss+ -W3 -Gm+ -I$(PDWIN32_INCLUDE)\Win -D__WIN32OS2__ -D__WINE__ -DDEBUG
+CFLAGS = -Q -Fi -Si -Ti -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLUDE)\Win -D__WIN32OS2__  -D__WINE__ -DDEBUG
+CXXFLAGS = -Q -Fi -Si -Ti -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLUDE)\Win -D__WIN32OS2__ -D__WINE__ -DDEBUG
 ASFLAGS = -Sc -Sv:M510
-LDFLAGS = -Q -Fi -Si -Ti -Ge- -Ss+ -W3 -Gm+ /B"/noe"
+LDFLAGS = -Q -Fi -Si -Ti -Ge- -Ss+ -W3 -Gm+ /B"/noe /NOD"
 IMPLIBFLAGS = /nologo
 
