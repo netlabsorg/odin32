@@ -1,4 +1,4 @@
-/* $Id: hmmailslot.cpp,v 1.6 2001-12-05 14:16:01 sandervl Exp $
+/* $Id: hmmailslot.cpp,v 1.7 2001-12-05 18:06:01 sandervl Exp $
  *
  * Win32 mailslot APIs
  *
@@ -367,6 +367,10 @@ BOOL HMMailslotClass::ReadFile(PHMHANDLEDATA pHMHandleData,
              lpHMDeviceName,  pHMHandleData, lpBuffer, nNumberOfBytesToRead,
              lpNumberOfBytesRead, lpOverlapped));
 
+    if(lpCompletionRoutine) {
+        dprintf(("!WARNING!: lpCompletionRoutine not supported -> fall back to sync IO"));
+    }
+
     if(lpNumberOfBytesRead)
         *lpNumberOfBytesRead = 0;
 
@@ -415,6 +419,10 @@ BOOL HMMailslotClass::WriteFile(PHMHANDLEDATA pHMHandleData,
     dprintf(("KERNEL32: HMMailslotClass::WriteFile %s(%08x,%08x,%08x,%08x,%08x)",
              lpHMDeviceName, pHMHandleData, lpBuffer, nNumberOfBytesToWrite,
              lpNumberOfBytesWritten, lpOverlapped));
+
+    if(lpCompletionRoutine) {
+        dprintf(("!WARNING!: lpCompletionRoutine not supported -> fall back to sync IO"));
+    }
 
     if(lpNumberOfBytesWritten)
         *lpNumberOfBytesWritten = 0;

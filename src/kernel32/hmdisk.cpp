@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.34 2001-12-05 14:16:00 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.35 2001-12-05 18:06:00 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -1210,6 +1210,10 @@ BOOL HMDeviceDiskClass::ReadFile(PHMHANDLEDATA pHMHandleData,
     return FALSE;
   }
 
+  if(lpCompletionRoutine) {
+      dprintf(("!WARNING!: lpCompletionRoutine not supported -> fall back to sync IO"));
+  }
+
   //If we didn't get an OS/2 handle for the disk before, get one now
   if(!pHMHandleData->hHMHandle) {
       DRIVE_INFO *drvInfo = (DRIVE_INFO*)pHMHandleData->dwUserData;
@@ -1366,6 +1370,9 @@ BOOL HMDeviceDiskClass::WriteFile(PHMHANDLEDATA pHMHandleData,
   }
   if(!(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && lpOverlapped) {
     dprintf(("Warning: lpOverlapped != NULL & !FILE_FLAG_OVERLAPPED; sync operation"));
+  }
+  if(lpCompletionRoutine) {
+      dprintf(("!WARNING!: lpCompletionRoutine not supported -> fall back to sync IO"));
   }
 
   //If we didn't get an OS/2 handle for the disk before, get one now

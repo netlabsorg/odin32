@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.58 2001-12-05 14:15:55 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.59 2001-12-05 18:05:58 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -678,6 +678,17 @@ ODINFUNCTION5(BOOL,         ReadFileEx,
       //TODO: should we fail here instead?? (wine doesn't)
       return TRUE;
   }
+  if(!lpOverlapped || !lpCompletionRoutine) {
+      dprintf(("!WARNING!: !lpOverlapped || !lpCompletionRoutine"));
+      SetLastError(ERROR_INVALID_PARAMETER);
+      return FALSE;
+  }
+  //SDK docs say ReadFileEx will fail if this condition is true
+  if(GetFileType(hFile) == FILE_TYPE_PIPE && (lpOverlapped->Offset || lpOverlapped->OffsetHigh)) {
+      dprintf(("!WARNING!: lpOverlapped->Offset & lpOverlapped->OffsetHigh must be ZERO for named pipes"));
+      SetLastError(ERROR_INVALID_PARAMETER);
+      return FALSE;
+  }
   return (HMReadFile(hFile,
                      lpBuffer,
                      nNumberOfBytesToRead, NULL,
@@ -738,7 +749,17 @@ ODINFUNCTION5(BOOL,         WriteFileEx,
       //TODO: should we fail here instead?? (wine doesn't)
       return TRUE;
   }
-
+  if(!lpOverlapped || !lpCompletionRoutine) {
+      dprintf(("!WARNING!: !lpOverlapped || !lpCompletionRoutine"));
+      SetLastError(ERROR_INVALID_PARAMETER);
+      return FALSE;
+  }
+  //SDK docs say WriteFileEx will fail if this condition is true
+  if(GetFileType(hFile) == FILE_TYPE_PIPE && (lpOverlapped->Offset || lpOverlapped->OffsetHigh)) {
+      dprintf(("!WARNING!: lpOverlapped->Offset & lpOverlapped->OffsetHigh must be ZERO for named pipes"));
+      SetLastError(ERROR_INVALID_PARAMETER);
+      return FALSE;
+  }
   return (HMWriteFile(hFile,
                       (LPVOID)lpBuffer,
                       nNumberOfBytesToWrite, NULL,

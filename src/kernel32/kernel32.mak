@@ -1,4 +1,4 @@
-# $Id: kernel32.mak,v 1.19 2001-11-29 10:31:07 phaller Exp $
+# $Id: kernel32.mak,v 1.20 2001-12-05 18:06:02 sandervl Exp $
 
 #
 # Odin32 API
@@ -16,7 +16,6 @@ MAKEFILE=kernel32.mak
 #
 WRC_PREFIX_RESOURCE=1
 !include ../../makefile.inc
-
 
 #
 # Object files. Prefix with OBJDIR and one space before the '\'.
@@ -70,6 +69,7 @@ $(OBJDIR)\initsystem.obj \
 $(OBJDIR)\hmdevice.obj \
 $(OBJDIR)\hmopen32.obj \
 $(OBJDIR)\hmobjects.obj \
+$(OBJDIR)\overlappedio.obj \
 $(OBJDIR)\hmevent.obj \
 $(OBJDIR)\hmfile.obj \
 $(OBJDIR)\hmmutex.obj \
