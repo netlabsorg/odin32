@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.17 2002-08-28 21:40:34 bird Exp $
+/* $Id: buildenv.cmd,v 1.18 2002-08-28 21:50:26 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -901,7 +901,7 @@ PathSetDefault: procedure expose aCfg. aPath. sPathFile
         aPath.i.sPId = 'ddkvideo';                  aPath.i.sPath = 'd:\dev\ddk\june02\video';      i = i + 1;
         aPath.i.sPId = 'home';                      aPath.i.sPath = 'd:\home\bird';                 i = i + 1;
         aPath.i.sPId = 'mscv6-16';                  aPath.i.sPath = 'd:\dev\ddktools\toolkits\msc60'; i = i + 1;
-        aPath.i.sPId = 'mysql';                     aPath.i.sPath = 'd:\apps\mysql2';               i = i + 1;
+        aPath.i.sPId = 'mysql';                     aPath.i.sPath = 'd:\apps\mysql\v3.23.50b1';     i = i + 1;
       /*aPath.i.sPId = 'netqos2';                   aPath.i.sPath = 'e:\netqos2';                   i = i + 1;
         aPath.i.sPId = 'perl';                      aPath.i.sPath = 'e:\perllib';                   i = i + 1;
         aPath.i.sPId = 'python';                    aPath.i.sPath = 'e:\python';                    i = i + 1;*/
