@@ -1,4 +1,4 @@
-/* $Id: vfw.h,v 1.1 1999-05-24 20:19:21 ktk Exp $ */
+/* $Id: vfw.h,v 1.2 1999-09-04 09:07:07 sandervl Exp $ */
 
 #ifndef __WINE_VFW_H
 #define __WINE_VFW_H
@@ -39,17 +39,17 @@ typedef struct IGetFrame IGetFrame,*PGETFRAME;
 /* HIC struct (same layout as Win95 one) */
 typedef struct tagWINE_HIC {
 	DWORD		magic;		/* 00: 'Smag' */
-	HANDLE	curthread;	/* 04: */
+	HANDLE		curthread;	/* 04: */
 	DWORD		type;		/* 08: */
 	DWORD		handler;	/* 0C: */
 	HDRVR		hdrv;		/* 10: */
-	DWORD		private;	/* 14:(handled by SendDriverMessage)*/
-	FARPROC	driverproc;	/* 18:(handled by SendDriverMessage)*/
+	DWORD		privatevfw;	/* 14:(handled by SendDriverMessage)*/
+	FARPROC		driverproc;	/* 18:(handled by SendDriverMessage)*/
 	DWORD		x1;		/* 1c: name? */
 	WORD		x2;		/* 20: */
 	DWORD		x3;		/* 22: */
 					/* 26: */
-} WINE_HIC;
+} WINE_HIC, *PWINE_HIC;
 
 /* error return codes */
 #define	ICERR_OK		0
@@ -809,5 +809,38 @@ ICOM_DEFINE(IGetFrame,IUnknown)
 #define AVIERR_USERABORT	MAKE_AVIERR(198)
 #define AVIERR_ERROR		MAKE_AVIERR(199)
 
+
+/* DrawDibTime */
+typedef struct {
+    LONG    timeCount;
+    LONG    timeDraw;
+    LONG    timeDecompress;
+    LONG    timeDither;
+    LONG    timeStretch;
+    LONG    timeBlt;
+    LONG    timeSetDIBits;
+}   DRAWDIBTIME, *LPDRAWDIBTIME;
+
+/* ICCompressorChoose; ICCompressorFree */
+typedef struct {
+    LONG		cbSize;		// set to sizeof(COMPVARS) before
+					// calling ICCompressorChoose
+    DWORD		dwFlags;	// see below...
+    HIC			hic;		// HIC of chosen compressor
+    DWORD               fccType;	// basically ICTYPE_VIDEO
+    DWORD               fccHandler;	// handler of chosen compressor or
+					// "" or "DIB "
+    LPBITMAPINFO	lpbiIn;		// input format
+    LPBITMAPINFO	lpbiOut;	// output format - will compress to this
+    LPVOID		lpBitsOut;
+    LPVOID		lpBitsPrev;
+    LONG		lFrame;
+    LONG		lKey;		// key frames how often?
+    LONG		lDataRate;	// desired data rate KB/Sec
+    LONG		lQ;		// desired quality
+    LONG		lKeyCount;
+    LPVOID		lpState;	// state of compressor
+    LONG		cbState;	// size of the state
+} COMPVARS, *PCOMPVARS;
 
 #endif /* __WINE_VFW_H */
