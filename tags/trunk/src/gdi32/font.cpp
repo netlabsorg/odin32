@@ -1,4 +1,4 @@
-/* $Id: font.cpp,v 1.20 2001-07-16 20:17:39 sandervl Exp $ */
+/* $Id: font.cpp,v 1.21 2001-11-13 15:42:05 sandervl Exp $ */
 
 /*
  * GDI32 font apis
@@ -142,7 +142,17 @@ static void iFontRename(LPCSTR lpstrFaceOriginal,
                                   LF_FACESIZE);
 }
 
-
+//******************************************************************************
+HFONT hFntDefaultGui = NULL;
+//TODO: more??
+//******************************************************************************
+BOOL WIN32API IsSystemFont(HFONT hFont)
+{
+    if(hFont == hFntDefaultGui) {
+        return TRUE;
+    }
+    return FALSE;
+}
 //******************************************************************************
 //******************************************************************************
 ODINFUNCTIONNODBG14(HFONT,  CreateFontA, int,    nHeight,

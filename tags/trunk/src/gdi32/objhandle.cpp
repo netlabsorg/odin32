@@ -1,4 +1,4 @@
-/* $Id: objhandle.cpp,v 1.18 2001-09-19 15:38:42 sandervl Exp $ */
+/* $Id: objhandle.cpp,v 1.19 2001-11-13 15:42:06 sandervl Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
@@ -24,6 +24,7 @@
 #include "dibsect.h"
 #include "region.h"
 #include <unicode.h>
+#include "font.h"
 
 #define DBG_LOCALLOG    DBG_objhandle
 #include "dbglocal.h"
@@ -371,6 +372,15 @@ BOOL WIN32API DeleteObject(HANDLE hObj)
             else
                 break;
 
+        case OBJ_FONT:
+            if(IsSystemFont(hObj))
+            {
+                SetLastError(ERROR_SUCCESS);
+                return TRUE;
+            }
+            else
+                break;
+            
         // add more system-type objects as required ...
     }
 
