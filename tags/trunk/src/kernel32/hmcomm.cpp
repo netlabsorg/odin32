@@ -1,4 +1,4 @@
-/* $Id: hmcomm.cpp,v 1.15 2001-11-26 17:16:24 sandervl Exp $ */
+/* $Id: hmcomm.cpp,v 1.16 2001-11-27 12:33:23 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -103,8 +103,14 @@ HMDeviceCommClass::HMDeviceCommClass(LPCSTR lpDeviceName) : HMDeviceHandler(lpDe
  *****************************************************************************/
 BOOL HMDeviceCommClass::FindDevice(LPCSTR lpClassDevName, LPCSTR lpDeviceName, int namelength)
 {
-    if(namelength > 5)
-        return FALSE;  //can't be com name
+    dprintf(("HMDeviceCommClass::FindDevice %s %s", lpClassDevName, lpDeviceName));
+
+    if(namelength > 5) {
+        if(lstrncmpA(lpDeviceName, "\\\\.\\", 4) != 0) {
+            return FALSE;  //can't be com name
+        }
+        lpDeviceName += 4; //skip prefix
+    }
 
     //first 3 letters 'COM'?
     if(lstrncmpiA(lpDeviceName, lpClassDevName, 3) != 0) {
@@ -140,8 +146,9 @@ DWORD HMDeviceCommClass::CreateFile(HANDLE hComm,
   dprintf(("HMComm: Serial communication port %s open request\n", lpFileName));
 
   if(strlen(lpFileName) > 5) {
-    return ERROR_INVALID_PARAMETER;  //safety check (unnecessary..)
+      lpFileName += 4; //skip prefix
   }
+
   pHMHandleData->hHMHandle = 0;
 
   strcpy(comname, lpFileName);
@@ -1241,6 +1248,7 @@ BOOL HMDeviceCommClass::EscapeCommFunction( PHMHANDLEDATA pHMHandleData,
                              ASYNC_SETMODEMCTRL,
                              &mdm,ulPLen,&ulPLen,
                              &COMErr,ulDLen,&ulDLen);
+      dprintf(("CLRRTS: rc = %d, Comm error %x", rc, COMErr));
       break;
     case SETDTR:
       mdm.fbModemOn  = 0x01;
@@ -1250,6 +1258,7 @@ BOOL HMDeviceCommClass::EscapeCommFunction( PHMHANDLEDATA pHMHandleData,
                              ASYNC_SETMODEMCTRL,
                              &mdm,ulPLen,&ulPLen,
                              &COMErr,ulDLen,&ulDLen);
+      dprintf(("SETDTR: rc = %d, Comm error %x", rc, COMErr));
       break;
     case SETRTS:
       mdm.fbModemOn  = 0x02;
@@ -1259,6 +1268,7 @@ BOOL HMDeviceCommClass::EscapeCommFunction( PHMHANDLEDATA pHMHandleData,
                              ASYNC_SETMODEMCTRL,
                              &mdm,ulPLen,&ulPLen,
                              &COMErr,ulDLen,&ulDLen);
+      dprintf(("SETRTS: rc = %d, Comm error %x", rc, COMErr));
       break;
     case SETXOFF:
       rc = OSLibDosDevIOCtl( pHMHandleData->hHMHandle,
