@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.112 2001-03-25 21:56:36 sandervl Exp $
+# $Id: makefile,v 1.113 2001-03-27 16:18:26 sandervl Exp $
 
 #
 # Odin32 API
@@ -83,7 +83,6 @@ $(OBJDIR)\windllpeldr.obj \
 $(OBJDIR)\winexepe2lx.obj \
 $(OBJDIR)\winexelx.obj \
 $(OBJDIR)\winexepeldr.obj \
-$(OBJDIR)\winres.obj \
 $(OBJDIR)\critsection.obj \
 $(OBJDIR)\pefile.obj \
 $(OBJDIR)\winimgres.obj \
@@ -98,8 +97,6 @@ $(OBJDIR)\hmmmap.obj \
 $(OBJDIR)\oslibexcept.obj \
 $(OBJDIR)\cpu.obj \
 $(OBJDIR)\process.obj \
-$(OBJDIR)\cvtcursor.obj \
-$(OBJDIR)\cvtcursorgrp.obj \
 $(OBJDIR)\stubs.obj \
 $(OBJDIR)\ordinals.obj \
 $(OBJDIR)\interlock.obj \
