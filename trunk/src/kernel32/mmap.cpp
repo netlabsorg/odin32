@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.39 2000-04-15 10:00:45 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.40 2000-05-24 19:28:26 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -321,7 +321,7 @@ LPVOID Win32MemMap::mapViewOfFile(ULONG size, ULONG offset, ULONG fdwAccess)
     if((fdwAccess & FILE_MAP_COPY) && !(mProtFlags & PAGE_WRITECOPY))
       goto parmfail;
 
-  if(offset+size > mSize && (!(fdwAccess & FILE_MAP_WRITE) || !hMemFile))
+  if(offset+size > mSize && (!(fdwAccess & FILE_MAP_WRITE) || hMemFile == -1))
 	goto parmfail;
 
   //SvL: TODO: Doesn't work for multiple views
@@ -347,7 +347,7 @@ LPVOID Win32MemMap::mapViewOfFile(ULONG size, ULONG offset, ULONG fdwAccess)
 	//     This is most likely an OS/2 bug and doesn't happen in Aurora
         //     when allocating memory with the PAG_ANY bit set. (without this
         //     flag it will also crash)
-	if(!hMemFile && lpszMapName) {
+	if(hMemFile == -1 && lpszMapName) {
 		pMapping = VirtualAllocShared(mSize, fAlloc, PAGE_READWRITE, lpszMapName);
 	}
 	else {
@@ -361,7 +361,7 @@ LPVOID Win32MemMap::mapViewOfFile(ULONG size, ULONG offset, ULONG fdwAccess)
 	if((hMemFile == -1 && !image)) {//commit memory
 		VirtualAlloc(pMapping, mSize, MEM_COMMIT, PAGE_READWRITE);
 	}
-	if(hMemFile && (mProtFlags & SEC_COMMIT)) {
+	if(hMemFile != -1 && (mProtFlags & SEC_COMMIT)) {
 		DWORD nrPages = mSize >> PAGE_SHIFT;
 		if(mSize & 0xFFF)
 			nrPages++;
@@ -563,7 +563,7 @@ Win32MemMapView::Win32MemMapView(Win32MemMap *map, ULONG offset, ULONG size,
 	mfAccess   = MEMMAP_ACCESS_READ | MEMMAP_ACCESS_WRITE;
 	break;
   }
-  if(map->getMemName() != NULL && !map->getFileHandle()) {
+  if(map->getMemName() != NULL && map->getFileHandle() == -1) {
 	//shared memory map, so map it into our address space
 	if(OSLibDosGetNamedSharedMem((LPVOID *)&viewaddr, map->getMemName()) != OSLIB_NOERROR) {
 		dprintf(("new OSLibDosGetNamedSharedMem FAILED"));
