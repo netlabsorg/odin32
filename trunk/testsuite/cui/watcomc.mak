@@ -1,4 +1,4 @@
-# $Id: watcomc.mak,v 1.3 2002-06-25 00:48:00 bird Exp $
+# $Id: watcomc.mak,v 1.4 2002-06-25 01:21:19 bird Exp $
 
 #
 # This script contains the testcases for Doxygen version 1.2.16
@@ -236,8 +236,16 @@ argc=1 argv0=HelloWorld.ExE
 #
 # Clean rule
 #
+!if "$(MAKE_INCLUDE_PROCESS:process.forwarder=)" == "$(MAKE_INCLUDE_PROCESS)"
 clean:
     $(TOOL_RM) *.log $(PATH_TARGET)\* .\helloworld.exe
+!else
+! ifndef BUILD_VERBOSE
+    @ \
+! endif
+    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
+!endif
+
 
 !else
 

@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.4 2002-06-20 02:29:35 bird Exp $
+# $Id: Makefile,v 1.5 2002-06-25 01:21:19 bird Exp $
 
 #
 # Main script for the CUI part.
@@ -70,3 +70,13 @@ testcase:
     $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
 !endif
 
+
+#
+# Our own clean rule.
+#
+!if "$(MAKE_INCLUDE_PROCESS:process.forwarder=)" == "$(MAKE_INCLUDE_PROCESS)"
+clean:
+    $(TOOL_RM) *.log *.exe *.err
+    $(TOOL_DOMAKES) "$(TESTCASE_MAKEFILES)" $(TOOL_MAKE) clean
+    $(TOOL_DODIRS) "$(TESTCASE_SUBDIRS)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) clean
+!endif
