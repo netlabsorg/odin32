@@ -2,6 +2,8 @@
 Call RxFuncAdd 'SysLoadFuncs', 'REXXUTIL', 'SysLoadFuncs'
 Call SysLoadFuncs
 
+"del odininst.wis"
+
 /* create warpin installation script */
 instfile = 'odininst.wis'
 rc = lineout(instfile, '<WARPIN>', 1);
@@ -229,11 +231,15 @@ maindir = "..\..";
 
 "del "installarchive".wpi";
 
+"copy ..\..\ChangeLog"
+"wic.exe "curdir"\"installarchive" -a 1 ChangeLog";
+
 call directory maindir;
-"wic.exe "curdir"\"installarchive" -a 1 LICENSE.TXT ChangeLog Readme.txt";
+"wic.exe "curdir"\"installarchive" -a 1 LICENSE.TXT ChangeLog-1999 ChangeLog-2000 Readme.txt";
+rem "wic.exe "curdir"\"installarchive" -a 1 LICENSE.TXT Readme.txt";
 
 call directory dlldir;
-"wic.exe "curdir"\"installarchive" -a 2 *.dll pe.exe *.ini";
+"wic.exe "curdir"\"installarchive" -a 2 *.dll pe.exe regsvr32.exe *.ini";
 
 call directory "Glide"
 "wic.exe "curdir"\"installarchive" -a 3 *.dll";
