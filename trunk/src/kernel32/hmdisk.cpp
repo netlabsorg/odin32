@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.38 2001-12-30 10:45:22 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.39 2002-02-27 15:23:06 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -227,7 +227,7 @@ DWORD HMDeviceDiskClass::OpenDisk(PVOID pDrvInfo)
     DRIVE_INFO *drvInfo = (DRIVE_INFO*)pDrvInfo;
     HFILE hFile;
 
-    filename[0] = 'A' + drvInfo->driveLetter;
+    filename[0] = drvInfo->driveLetter;
     filename[1] = ':';
     filename[2] = 0;
 
