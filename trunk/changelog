@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1334 2001-03-31 13:51:22 sandervl Exp $ */
+/* $Id: changelog,v 1.1335 2001-04-01 10:31:34 sandervl Exp $ */
+
+ 2001-04-01: Sander van Leeuwen <sandervl@xs4all.nl>   
+    - WININET:  o Added missing exports to wininet.def
 
  2001-03-31: Sander van Leeuwen <sandervl@xs4all.nl>   
     - KERNEL32: o Fix for loading executable with sections not starting on
