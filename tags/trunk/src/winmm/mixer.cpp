@@ -1,4 +1,4 @@
-/* $Id: mixer.cpp,v 1.16 2002-05-25 08:07:59 sandervl Exp $ */
+/* $Id: mixer.cpp,v 1.17 2002-05-25 17:19:40 sandervl Exp $ */
 
 /*
  * Mixer functions
@@ -357,7 +357,7 @@ MMRESULT WINAPI mixerGetLineControlsA(HMIXEROBJ hmxobj, LPMIXERLINECONTROLSA lpM
         }
         pLine = pmixerLines[lpMlc->dwLineID];
         if(lpMlc->cControls != pLine->cControls || lpMlc->cbmxctrl < pLine->cControls*sizeof(MIXERCONTROLA)) {
-            dprintf(("ERROR: invalid nr of controls %d or structure size %d", lpMlc->cControls, lpMlc->cbmxctrl));
+            dprintf(("ERROR: invalid nr of controls %d or structure size %d (%d) (ptr %x)", lpMlc->cControls, lpMlc->cbmxctrl, pLine->cControls*sizeof(MIXERCONTROLA), lpMlc->pamxctrl));
             return MMSYSERR_INVALPARAM;
         }
         for(int i=0;i<lpMlc->cControls;i++) {
@@ -521,7 +521,7 @@ MMRESULT WINAPI mixerGetLineControlsA(HMIXEROBJ hmxobj, LPMIXERLINECONTROLSA lpM
             }
 
         }
-        return MIXERR_INVALVALUE;
+        return MIXERR_INVALLINE;    //returned by win2k when type not found
     }
     default:
 	    dprintf(("Unknown flag %08lx\n", fdwControls & MIXER_GETLINECONTROLSF_QUERYMASK));
@@ -648,7 +648,9 @@ MMRESULT WINAPI mixerGetLineInfoA(HMIXEROBJ hmxobj, LPMIXERLINEA lpMl, DWORD fdw
     	break;
 
     case MIXER_GETLINEINFOF_COMPONENTTYPE:
+    {
         dprintf(("MIXER_GETLINEINFOF_COMPONENTTYPE"));
+#ifdef DEBUG
 	    switch (lpMl->dwComponentType) 
 	    {
         case MIXERLINE_COMPONENTTYPE_DST_UNDEFINED:
@@ -678,17 +680,102 @@ MMRESULT WINAPI mixerGetLineInfoA(HMIXEROBJ hmxobj, LPMIXERLINEA lpMl, DWORD fdw
         case MIXERLINE_COMPONENTTYPE_DST_VOICEIN:
             dprintf(("MIXERLINE_COMPONENTTYPE_DST_VOICEIN"));
             break;
+        case MIXERLINE_COMPONENTTYPE_SRC_UNDEFINED:
+            dprintf(("MIXERLINE_COMPONENTTYPE_SRC_UNDEFINED"));
+            break;
+        case MIXERLINE_COMPONENTTYPE_SRC_DIGITAL:
+            dprintf(("MIXERLINE_COMPONENTTYPE_SRC_DIGITAL"));
+            break;
+        case MIXERLINE_COMPONENTTYPE_SRC_LINE:
+            dprintf(("MIXERLINE_COMPONENTTYPE_SRC_LINE"));
+            break;
+        case MIXERLINE_COMPONENTTYPE_SRC_MICROPHONE:
+            dprintf(("MIXERLINE_COMPONENTTYPE_SRC_MICROPHONE"));
+            break;
+        case MIXERLINE_COMPONENTTYPE_SRC_SYNTHESIZER:
+            dprintf(("MIXERLINE_COMPONENTTYPE_SRC_SYNTHESIZER"));
+            break;
+        case MIXERLINE_COMPONENTTYPE_SRC_COMPACTDISC:
+            dprintf(("MIXERLINE_COMPONENTTYPE_SRC_COMPACTDISC"));
+            break;
+        case MIXERLINE_COMPONENTTYPE_SRC_TELEPHONE:
+            dprintf(("MIXERLINE_COMPONENTTYPE_SRC_TELEPHONE"));
+            break;
+        case MIXERLINE_COMPONENTTYPE_SRC_PCSPEAKER:
+            dprintf(("MIXERLINE_COMPONENTTYPE_SRC_PCSPEAKER"));
+            break;
+        case MIXERLINE_COMPONENTTYPE_SRC_WAVEOUT:
+            dprintf(("MIXERLINE_COMPONENTTYPE_SRC_WAVEOUT"));
+            break;
+        case MIXERLINE_COMPONENTTYPE_SRC_AUXILIARY:
+            dprintf(("MIXERLINE_COMPONENTTYPE_SRC_AUXILIARY"));
+            break;
+        case MIXERLINE_COMPONENTTYPE_SRC_ANALOG:
+            dprintf(("MIXERLINE_COMPONENTTYPE_SRC_ANALOG"));
+            break;
     	default:
 	    	dprintf(("Unhandled component type (%08lx)\n", lpMl->dwComponentType));
 	    	return MMSYSERR_INVALPARAM;
 	    }
-        return MIXERR_INVALLINE;
+#endif
+        //search all lines (src & dest) for one with specified type
+        for(int i=0;i<nrLines;i++) {
+            if(pmixerLines[i]->dwComponentType == lpMl->dwComponentType) {
+                break;
+            }
+        }
+        if(i == nrLines) {
+            dprintf(("Component type %d not found!!", lpMl->dwComponentType));
+            return MIXERR_INVALLINE;
+        }
+        memcpy(lpMl, pmixerLines[i], sizeof(MIXERLINEA));
+        dprintf(("found line %s (%s) id %d connections %d controls %d", lpMl->szName, lpMl->szShortName, lpMl->dwLineID, lpMl->cConnections, lpMl->cControls));
 	    break;
-
+    }
     case MIXER_GETLINEINFOF_TARGETTYPE:
-	    dprintf(("_TARGETTYPE not implemented yet.\n"));
-        return MIXERR_INVALLINE;
-	    break;
+    {
+	    dprintf(("MIXER_GETLINEINFOF_TARGETTYPE %x", lpMl->Target.dwType));
+#ifdef DEBUG
+        switch(lpMl->Target.dwType) {
+        case MIXERLINE_TARGETTYPE_UNDEFINED:
+            dprintf(("MIXERLINE_TARGETTYPE_UNDEFINED"));
+            break;
+        case MIXERLINE_TARGETTYPE_WAVEOUT:
+            dprintf(("MIXERLINE_TARGETTYPE_WAVEOUT"));
+            break;
+        case MIXERLINE_TARGETTYPE_WAVEIN:
+            dprintf(("MIXERLINE_TARGETTYPE_WAVEIN"));
+            break;
+        case MIXERLINE_TARGETTYPE_MIDIOUT:
+            dprintf(("MIXERLINE_TARGETTYPE_MIDIOUT"));
+            break;
+        case MIXERLINE_TARGETTYPE_MIDIIN:
+            dprintf(("MIXERLINE_TARGETTYPE_MIDIIN"));
+            break;
+        case MIXERLINE_TARGETTYPE_AUX:
+            dprintf(("MIXERLINE_TARGETTYPE_AUX"));
+            break;
+        default:        
+	    	dprintf(("Unhandled target type (%08lx)\n", lpMl->Target.dwType));
+	    	return MMSYSERR_INVALPARAM;
+        }
+#endif
+        //search all lines (src & dest) for one with specified type
+        //TODO: Should we compare mid, pid & pddname too? (must be initialized according to MSDN)
+        //      (see below; unicode version doesn't copy pddname; change if these checks are required)
+        for(int i=0;i<nrLines;i++) {
+            if(pmixerLines[i]->Target.dwType == lpMl->Target.dwType) {
+                break;
+            }
+        }
+        if(i == nrLines) {
+            dprintf(("Component type %d not found!!", lpMl->Target.dwType));
+            return MIXERR_INVALLINE;
+        }
+        memcpy(lpMl, pmixerLines[i], sizeof(MIXERLINEA));
+        dprintf(("found line %s (%s) id %d connections %d controls %d", lpMl->szName, lpMl->szShortName, lpMl->dwLineID, lpMl->cConnections, lpMl->cControls));
+        break;
+    }
     default:
 	    dprintf(("Unknown flag (%08lx)\n", fdwInfo & MIXER_GETLINEINFOF_QUERYMASK));
 	    return MMSYSERR_INVALPARAM;
@@ -720,6 +807,7 @@ MMRESULT WINAPI mixerGetLineInfoW(HMIXEROBJ hmxobj, LPMIXERLINEW pmxl, DWORD fdw
     line.Target.vDriverVersion = pmxl->Target.vDriverVersion;
     line.Target.wMid           = pmxl->Target.wMid;
     line.Target.wPid           = pmxl->Target.wPid;
+    //TODO: need to copy this?? (MIXER_GETLINEINFOF_TARGETTYPE)
     line.Target.szPname[0]     = 0;
 
     result = mixerGetLineInfoA(hmxobj, &line, fdwInfo);
@@ -750,8 +838,8 @@ MMRESULT WINAPI mixerGetLineInfoW(HMIXEROBJ hmxobj, LPMIXERLINEW pmxl, DWORD fdw
 /******************************************************************************/
 MMRESULT WINAPI mixerMessage(HMIXER hmx, UINT uMsg, DWORD dwParam1, DWORD dwParam2)
 {
-    dprintf(("WINMM:mixerMessage - stub\n" ));
-    return MMSYSERR_INVALPARAM;
+    dprintf(("WINMM:mixerMessage - NOT IMPLEMENTED" ));
+    return MMSYSERR_NOTSUPPORTED;
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -777,10 +865,10 @@ MMRESULT WINAPI mixerGetDevCapsA(UINT uMxId, LPMIXERCAPSA pmxcaps, UINT cbmxcaps
     //According to MSDN, nothing is copied when cbmxcaps is zero
     if(cbmxcaps >= sizeof(MIXERCAPSA)) {
         // we have to fill in this thing
-        pmxcaps->wMid = 0;                  /* manufacturer ID */
-        pmxcaps->wPid = 0;                  /* product ID */
-        pmxcaps->vDriverVersion = 0x0001;        /* version of the driver */
-        strcpy( pmxcaps->szPname, WINMM_MIXERSTRING_A); /* product name */
+        pmxcaps->wMid = WINMM_MIXER_CAPS_WMID;                  /* manufacturer ID */
+        pmxcaps->wPid = WINMM_MIXER_CAPS_WPID;                  /* product ID */
+        pmxcaps->vDriverVersion = WINMM_MIXER_CAPS_VERSION;     /* version of the driver */
+        strncpy( pmxcaps->szPname, WINMM_MIXERSTRING_A, sizeof(pmxcaps->szPname)); /* product name */
 
         pmxcaps->fdwSupport    = 0;    //no mixer flags exist
         pmxcaps->cDestinations = nrDestinations;
@@ -804,10 +892,10 @@ MMRESULT WINAPI mixerGetDevCapsW(UINT uMxId, LPMIXERCAPSW pmxcaps, UINT cbmxcaps
     //According to MSDN, nothing is copied when cbmxcaps is zero
     if(cbmxcaps >= sizeof(MIXERCAPSW)) {
         // we have to fill in this thing
-        pmxcaps->wMid = 0;                  /* manufacturer ID */
-        pmxcaps->wPid = 0;                  /* product ID */
-        pmxcaps->vDriverVersion = 0x0001;        /* version of the driver */
-        lstrcpyW( pmxcaps->szPname, WINMM_MIXERSTRING_W ); /* product name */
+        pmxcaps->wMid = WINMM_MIXER_CAPS_WMID;                  /* manufacturer ID */
+        pmxcaps->wPid = WINMM_MIXER_CAPS_WPID;                  /* product ID */
+        pmxcaps->vDriverVersion = WINMM_MIXER_CAPS_VERSION;     /* version of the driver */
+        lstrcpyW( pmxcaps->szPname, WINMM_MIXERSTRING_W );      /* product name */
 
         pmxcaps->fdwSupport    = 0;    //no mixer flags exist
         pmxcaps->cDestinations = nrDestinations;
@@ -898,7 +986,6 @@ MMRESULT WINAPI mixerClose(HMIXER hmx)
 BOOL mixerInit() 
 {
     MIXERLINEA *pDestLine;
-    MIXERCONTROLA *pLineOutMix;
     MIXERCONTROLA *pWaveInMux;
 
     if(!fMMPMAvailable) return TRUE;
@@ -907,14 +994,11 @@ BOOL mixerInit()
     memset(mixerLineControls, -1, sizeof(mixerLineControls));
     memset(mixerDestInputs, -1, sizeof(mixerDestInputs));
 
-    if(OSLibMixerOpen() == TRUE) {
+    if(OSLibMixerOpen() == FALSE) {
         //Line out destination
         pDestLine = mixerAddDestination(MIXER_DEST_LINEOUT);
-
-        pLineOutMix = mixerAddControl(pDestLine, MIX_CTRL_MIX_OUT_LINE, pDestLine);
         mixerAddControl(pDestLine, MIX_CTRL_VOL_OUT_LINE, pDestLine);
         mixerAddControl(pDestLine, MIX_CTRL_MUTE_OUT_LINE, pDestLine);
-        pLineOutMix->cMultipleItems = pDestLine->cConnections;
 
         //WaveIn destination
         pDestLine  = mixerAddDestination(MIXER_DEST_WAVEIN);
@@ -924,10 +1008,9 @@ BOOL mixerInit()
         pWaveInMux->cMultipleItems = pDestLine->cConnections;
         return TRUE;
     }
+
     //Line out destination
     pDestLine = mixerAddDestination(MIXER_DEST_LINEOUT);
-
-    pLineOutMix = mixerAddControl(pDestLine, MIX_CTRL_MIX_OUT_LINE, pDestLine);
 
     mixerAddControl(pDestLine, MIX_CTRL_VOL_OUT_LINE, pDestLine);
     mixerAddControl(pDestLine, MIX_CTRL_MUTE_OUT_LINE, pDestLine);
@@ -1002,7 +1085,6 @@ BOOL mixerInit()
         mixerAddControl(pDestLine, MIX_CTRL_VOL_IN_L_VIDEO, pLine);
         mixerAddControl(pDestLine, MIX_CTRL_MUTE_IN_L_VIDEO, pLine);
     }
-    pLineOutMix->cMultipleItems = pDestLine->cConnections;
 
     //Wave In Destination
     if(OSLibMixIsControlPresent(MIX_CTRL_MUX_IN_W_SRC)) {
@@ -1064,7 +1146,7 @@ void mixerExit()
 /******************************************************************************/
 static MIXERLINEA *mixerAddSource(MIXERLINEA *pDestLine, DWORD dwSource)
 {
-    MIXERLINEA *pline  = &mixerSource[nrSources];
+    MIXERLINEA *pline = &mixerSource[nrSources];
 
     if(nrSources >= MAX_MIXER_SOURCES) {
         dprintf(("ERROR: mixerAddSource: out of room!!!"));
@@ -1072,14 +1154,17 @@ static MIXERLINEA *mixerAddSource(MIXERLINEA *pDestLine, DWORD dwSource)
         return NULL;
     }
 
-    pline->cbStruct = sizeof(MIXERLINEA);
     memset(pline, 0, sizeof(MIXERLINEA));
 
-    pline->cConnections    = 0;
-    pline->cControls       = 0;
-    pline->dwDestination   = 0;
-    pline->fdwLine         = MIXERLINE_LINEF_SOURCE;
-    pline->dwSource        = nrSources;
+    pline->cbStruct              = sizeof(MIXERLINEA);
+    pline->cConnections          = 0;
+    pline->cControls             = 0;
+    pline->dwDestination         = 0;
+    pline->fdwLine               = MIXERLINE_LINEF_SOURCE;
+    pline->dwSource              = nrSources;
+    pline->Target.dwDeviceID     = 0;
+    pline->Target.wMid           = WINMM_MIXER_CAPS_WMID;
+    pline->Target.vDriverVersion = WINMM_MIXER_CAPS_VERSION;
 
     switch(dwSource) {
     case MIXER_SRC_MONOIN:
@@ -1144,6 +1229,7 @@ static MIXERLINEA *mixerAddSource(MIXERLINEA *pDestLine, DWORD dwSource)
     }
     strncpy(pline->szShortName, szSourceName[dwSource][0], sizeof(pline->szShortName));
     strncpy(pline->szName,      szSourceName[dwSource][1], sizeof(pline->szName));
+    strncpy(pline->Target.szPname, WINMM_MIXERSTRING_A, sizeof(pline->Target.szPname));
 
     dprintf(("Adding Source %s (%s)", pline->szName, pline->szShortName));
     nrSources++;
@@ -1155,7 +1241,7 @@ static MIXERLINEA *mixerAddSource(MIXERLINEA *pDestLine, DWORD dwSource)
     pmixerLines[nrLines] = pline;
     nrLines++;
 
-    //increase nr of inputs at destinateion line
+    //increase nr of inputs at destination line
     pDestLine->cConnections++;
 
     //store line id in source to line mapping array
@@ -1174,41 +1260,33 @@ static MIXERLINEA *mixerAddDestination(DWORD dwDest)
         DebugInt3();
         return NULL;
     }
-    pline->cbStruct = sizeof(MIXERLINEA);
     memset(pline, 0, sizeof(MIXERLINEA));
+    pline->cbStruct        = sizeof(MIXERLINEA);
+    pline->cConnections    = 0;
+    pline->cControls       = 0;
+    pline->dwSource        = (DWORD)-1;
+    pline->dwDestination   = nrDestinations;
 
     switch(dwDest) {
     case MIXER_DEST_LINEOUT:
-        pline->dwDestination   = nrDestinations;
         pline->cChannels       = 2;
-        pline->cConnections    = 0;
-        pline->cControls       = 0;
         pline->dwComponentType = MIXERLINE_COMPONENTTYPE_DST_SPEAKERS;
-        pline->dwSource        = 0;
         pline->fdwLine         = MIXERLINE_LINEF_ACTIVE;
         pline->Target.dwType   = MIXERLINE_TARGETTYPE_UNDEFINED;
         break;
 
     case MIXER_DEST_SPDIFOUT:
-        pline->dwDestination   = nrDestinations;
         pline->cChannels       = 2;
-        pline->cConnections    = 0;
-        pline->cControls       = 0;
         pline->dwComponentType = MIXERLINE_COMPONENTTYPE_DST_DIGITAL;
-        pline->dwSource        = 0;
         pline->fdwLine         = MIXERLINE_LINEF_ACTIVE;
         pline->Target.dwType   = MIXERLINE_TARGETTYPE_UNDEFINED;
         break;
 
     case MIXER_DEST_WAVEIN:
-        pline->dwSource        = nrDestinations;
         pline->cChannels       = 2;
-        pline->cConnections    = 0;
-        pline->cControls       = 0;
         pline->dwComponentType = MIXERLINE_COMPONENTTYPE_DST_WAVEIN;
-        pline->dwDestination   = 0;
-        pline->fdwLine         = MIXERLINE_LINEF_SOURCE;
-        pline->Target.dwType   = MIXERLINE_TARGETTYPE_UNDEFINED;
+        pline->fdwLine         = MIXERLINE_LINEF_ACTIVE;
+        pline->Target.dwType   = MIXERLINE_TARGETTYPE_WAVEIN;
         break;
         
     default:
@@ -1217,6 +1295,12 @@ static MIXERLINEA *mixerAddDestination(DWORD dwDest)
     }
     strncpy(pline->szShortName, szDestName[dwDest][0], sizeof(pline->szShortName));
     strncpy(pline->szName,      szDestName[dwDest][1], sizeof(pline->szName));
+    strncpy(pline->Target.szPname, WINMM_MIXERSTRING_A, sizeof(pline->Target.szPname));
+    pline->Target.dwDeviceID     = 0;
+    pline->Target.wMid           = WINMM_MIXER_CAPS_WMID;
+    pline->Target.wPid           = WINMM_MIXER_CAPS_WPID;
+    pline->Target.vDriverVersion = WINMM_MIXER_CAPS_VERSION;
+    
     dprintf(("Adding destination %s (%s) connections %d controls %d", pline->szName, pline->szShortName, pline->cConnections, pline->cControls));
     nrDestinations++;
 
@@ -1269,22 +1353,12 @@ static MIXERCONTROLA * mixerAddControl(MIXERLINEA *pDestLine, DWORD dwControl, M
         return NULL;
     }
 
-    pctrl->cbStruct = sizeof(MIXERCONTROLA);
     memset(pctrl, 0, sizeof(MIXERCONTROLA));
-
+    pctrl->cbStruct = sizeof(MIXERCONTROLA);
     pctrl->cMultipleItems   = 0;
     pctrl->dwControlID      = nrControls;
     pctrl->fdwControl       = 0;
     switch(dwControl) {
-    case MIX_CTRL_MIX_OUT_LINE:
-        pctrl->fdwControl        = MIXERCONTROL_CONTROLF_MULTIPLE | MIXERCONTROL_CONTROLF_UNIFORM;
-        pctrl->dwControlType     = MIXERCONTROL_CONTROLTYPE_MIXER;
-        pctrl->Bounds.s.lMinimum = 0;
-        pctrl->Bounds.s.lMaximum = 1;
-        pctrl->Metrics.cSteps    = 1;
-        pctrl->cMultipleItems    = 0;   //to be filled in later (see caller)
-        break;
-
     case MIX_CTRL_MUX_IN_W_SRC:
         pctrl->fdwControl       = MIXERCONTROL_CONTROLF_MULTIPLE | MIXERCONTROL_CONTROLF_UNIFORM;
         pctrl->dwControlType    = MIXERCONTROL_CONTROLTYPE_MUX;
@@ -1307,9 +1381,7 @@ static MIXERCONTROLA * mixerAddControl(MIXERLINEA *pDestLine, DWORD dwControl, M
     case MIX_CTRL_VOL_IN_L_WAVETABLE:
     case MIX_CTRL_VOL_IN_L_MIDI:
         pctrl->dwControlType    = MIXERCONTROL_CONTROLTYPE_VOLUME;
-        pctrl->Bounds.s.lMinimum = 0;
-        pctrl->Bounds.s.lMaximum = 100;
-        pctrl->Metrics.cSteps    = 1;
+        OSLibMixGetCtrlCaps(dwControl, &pctrl->Bounds.s.lMinimum, &pctrl->Bounds.s.lMaximum, &pctrl->Metrics.cSteps);
         break;
 
     case MIX_CTRL_VOL_IN_W_MONO:
@@ -1324,9 +1396,7 @@ static MIXERCONTROLA * mixerAddControl(MIXERLINEA *pDestLine, DWORD dwControl, M
     case MIX_CTRL_VOL_IN_W_WAVETABLE:
     case MIX_CTRL_VOL_IN_W_MIDI:
         pctrl->dwControlType    = MIXERCONTROL_CONTROLTYPE_VOLUME;
-        pctrl->Bounds.s.lMinimum = 0;
-        pctrl->Bounds.s.lMaximum = 100;
-        pctrl->Metrics.cSteps    = 1;
+        OSLibMixGetCtrlCaps(dwControl, &pctrl->Bounds.s.lMinimum, &pctrl->Bounds.s.lMaximum, &pctrl->Metrics.cSteps);
         mixerDestInputs[MIXER_DEST_WAVEIN][nrWaveInInputs] = mixerSourceLineId[mixerWaveInVolToSource(dwControl)];
         nrWaveInInputs++;
         break;
@@ -1350,9 +1420,7 @@ static MIXERCONTROLA * mixerAddControl(MIXERLINEA *pDestLine, DWORD dwControl, M
 
     case MIX_CTRL_VOL_OUT_SPDIF:
         pctrl->dwControlType    = MIXERCONTROL_CONTROLTYPE_VOLUME;
-        pctrl->Bounds.s.lMinimum = 0;
-        pctrl->Bounds.s.lMaximum = 100;
-        pctrl->Metrics.cSteps    = 1;
+        OSLibMixGetCtrlCaps(dwControl, &pctrl->Bounds.s.lMinimum, &pctrl->Bounds.s.lMaximum, &pctrl->Metrics.cSteps);
         break;
 
     case MIX_CTRL_MUTE_OUT_SPDIF:
@@ -1374,39 +1442,29 @@ static MIXERCONTROLA * mixerAddControl(MIXERLINEA *pDestLine, DWORD dwControl, M
     case MIX_CTRL_OUT_L_3DDEPTH:
         pctrl->fdwControl       = MIXERCONTROL_CONTROLF_UNIFORM;
         pctrl->dwControlType    = MIXERCONTROL_CONTROLTYPE_FADER;
-        pctrl->Bounds.s.lMinimum = 0;
-        pctrl->Bounds.s.lMaximum = 100;
-        pctrl->Metrics.cSteps    = 1;
+        OSLibMixGetCtrlCaps(dwControl, &pctrl->Bounds.s.lMinimum, &pctrl->Bounds.s.lMaximum, &pctrl->Metrics.cSteps);
         break;
 
     case MIX_CTRL_OUT_L_3DCENTER:
         pctrl->fdwControl       = MIXERCONTROL_CONTROLF_UNIFORM;
         pctrl->dwControlType    = MIXERCONTROL_CONTROLTYPE_FADER;
-        pctrl->Bounds.s.lMinimum = 0;
-        pctrl->Bounds.s.lMaximum = 100;
-        pctrl->Metrics.cSteps    = 1;
+        OSLibMixGetCtrlCaps(dwControl, &pctrl->Bounds.s.lMinimum, &pctrl->Bounds.s.lMaximum, &pctrl->Metrics.cSteps);
         break;
 
     case MIX_CTRL_OUT_L_TREBLE:
         pctrl->dwControlType    = MIXERCONTROL_CONTROLTYPE_TREBLE;
-        pctrl->Bounds.s.lMinimum = 0;
-        pctrl->Bounds.s.lMaximum = 100;
-        pctrl->Metrics.cSteps    = 1;
+        OSLibMixGetCtrlCaps(dwControl, &pctrl->Bounds.s.lMinimum, &pctrl->Bounds.s.lMaximum, &pctrl->Metrics.cSteps);
         break;
 
     case MIX_CTRL_OUT_L_BASS:
         pctrl->dwControlType    = MIXERCONTROL_CONTROLTYPE_BASS;
-        pctrl->Bounds.s.lMinimum = 0;
-        pctrl->Bounds.s.lMaximum = 100;
-        pctrl->Metrics.cSteps    = 1;
+        OSLibMixGetCtrlCaps(dwControl, &pctrl->Bounds.s.lMinimum, &pctrl->Bounds.s.lMaximum, &pctrl->Metrics.cSteps);
         break;
 
     default:
         DebugInt3();
         return FALSE;
     }
-    //increase nr of controls of corresponding destinateion line
-    pDestLine->cControls++;
  
     //add control to list of controls associated with source line
     for(int i=0;i<MAX_SOURCE_CONTROLS;i++) {
@@ -1418,6 +1476,8 @@ static MIXERCONTROLA * mixerAddControl(MIXERLINEA *pDestLine, DWORD dwControl, M
     if(i == MAX_SOURCE_CONTROLS) {
         DebugInt3();
     }
+    //increase nr of controls of corresponding source line
+    pSrcLine->cControls++;
 
     strncpy(pctrl->szShortName, szCtrlName[dwControl][0], sizeof(pctrl->szShortName));
     strncpy(pctrl->szName,      szCtrlName[dwControl][1], sizeof(pctrl->szName));
