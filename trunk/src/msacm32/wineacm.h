@@ -2,7 +2,9 @@
 #ifndef __WINE_WINEACM_H
 #define __WINE_WINEACM_H
 
-#ifndef __WIN32OS2__
+#ifdef __WIN32OS2__
+#include "windef.h"
+#else
 #include "wine/windef16.h"
 #include "wine/mmsystem16.h"
 

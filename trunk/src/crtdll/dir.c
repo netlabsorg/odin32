@@ -1,7 +1,6 @@
-/* $Id: dir.c,v 1.5 2001-09-05 12:14:24 bird Exp $ */
 /*
  * CRTDLL drive/directory functions
- *
+ * 
  * Copyright 1996,1998 Marcus Meissner
  * Copyright 1996 Jukka Iivonen
  * Copyright 1997,2000 Uwe Bonnes
@@ -57,14 +56,14 @@ static void __CRTDLL__fttofd(LPWIN32_FIND_DATAA fd, find_t* ft)
  *
  * RETURNS
  * Sucess:  0
- *
+ * 
  * Failure: -1
  */
 INT CDECL CRTDLL__chdir(LPCSTR newdir)
 {
   dprintf(("CRTDLL: _chdir(%s)\n",
           newdir));
-
+  
   if (!SetCurrentDirectoryA(newdir))
   {
     __CRTDLL__set_errno(newdir?GetLastError():0);
@@ -84,17 +83,17 @@ INT CDECL CRTDLL__chdir(LPCSTR newdir)
  *
  * RETURNS
  * Sucess:  0
- *
- * Failure: 1
+ * 
+ * Failure: 1 
  */
 BOOL CDECL CRTDLL__chdrive(INT newdrive)
 {
   char buffer[3] = "A:";
   buffer[0] += newdrive - 1;
-
+  
   dprintf(("CRTDLL: _chdrive(%s)\n",
           buffer));
-
+  
   if (!SetCurrentDirectoryA( buffer ))
   {
     __CRTDLL__set_errno(GetLastError());
@@ -108,7 +107,7 @@ BOOL CDECL CRTDLL__chdrive(INT newdrive)
 
 /*********************************************************************
  *                  _findclose     (CRTDLL.098)
- *
+ * 
  * Free the resources from a search handle created from _findfirst.
  *
  * PARAMS
@@ -123,7 +122,7 @@ INT CDECL CRTDLL__findclose(DWORD hand)
 {
   dprintf(("CRTDLL: _findclose(%08xh)\n",
           hand));
-
+  
   if (!FindClose((HANDLE)hand))
   {
     __CRTDLL__set_errno(GetLastError());
@@ -141,7 +140,7 @@ INT CDECL CRTDLL__findclose(DWORD hand)
  *
  * PARAMS
  *   fspec [in]  File specification string for search, e.g "C:\*.BAT"
- *
+ * 
  *   ft [out]    A pointer to a find_t structure to populate.
  *
  * RETURNS
@@ -155,7 +154,7 @@ DWORD CDECL CRTDLL__findfirst(LPCSTR fspec, find_t* ft)
 {
   WIN32_FIND_DATAA find_data;
   HANDLE hfind;
-
+  
   dprintf(("CRTDLL: _findfirst(%s)\n",
           fspec));
 
@@ -173,12 +172,12 @@ DWORD CDECL CRTDLL__findfirst(LPCSTR fspec, find_t* ft)
 
 /*********************************************************************
  *                  _findnext     (CRTDLL.100)
- *
+ * 
  * Return the next matching file/directory from a search hadle.
  *
  * PARAMS
  *   hand [in] Search handle from a pervious call to _findfirst
- *
+ * 
  *   ft [out]  A pointer to a find_t structure to populate.
  *
  * RETURNS
@@ -190,10 +189,10 @@ DWORD CDECL CRTDLL__findfirst(LPCSTR fspec, find_t* ft)
 INT CDECL CRTDLL__findnext(DWORD hand, find_t * ft)
 {
   WIN32_FIND_DATAA find_data;
-
+  
   dprintf(("CRTDLL: _findnext(%08xh)\n",
           hand));
-
+  
   if (!FindNextFileA(hand, &find_data))
   {
     SetLastError(ERROR_INVALID_DRIVE);
@@ -224,12 +223,12 @@ INT CDECL CRTDLL__findnext(DWORD hand, find_t * ft)
 CHAR* CDECL CRTDLL__getcwd(LPSTR buf, INT size)
 {
   // return (_getcwd(buf, size));
-
+  
   char dir[_MAX_PATH];
   int dir_len = GetCurrentDirectoryA(_MAX_PATH,dir);
-
+  
   dprintf(("CRTDLL: _getcwd()\n"));
-
+  
   if (dir_len < 1)
     return NULL; /* FIXME: Real return value untested */
 
@@ -258,11 +257,11 @@ CHAR* CDECL CRTDLL__getcwd(LPSTR buf, INT size)
 CHAR* CDECL CRTDLL__getdcwd(INT drive,LPSTR buf, INT size)
 {
   // return (_getdcwd(drive, buffer, maxlen));
-
+  
   static CHAR* dummy;
-
+  
   dprintf(("CRTDLL: _getdcwd()\n"));
-
+  
   if (!drive || drive == CRTDLL__getdrive())
     return CRTDLL__getcwd(buf,size); /* current */
   else
@@ -305,9 +304,9 @@ UINT CDECL CRTDLL__getdiskfree(UINT disk, diskfree_t* d)
   char drivespec[4] = {'@', ':', '\\', 0};
   DWORD ret[4];
   UINT err;
-
+  
   dprintf(("CRTDLL: _getdiskfree(%08xh)\n", disk));
-
+  
   if (disk > 26)
     return ERROR_INVALID_PARAMETER; /* CRTDLL doesn't set errno here */
 
@@ -335,14 +334,14 @@ UINT CDECL CRTDLL__getdiskfree(UINT disk, diskfree_t* d)
 INT CDECL CRTDLL__getdrive(VOID)
 {
   // return DRIVE_GetCurrentDrive() + 1;
-
+  
   char buffer[MAX_PATH];
-
+  
   dprintf(("CRTDLL: _getdrive()\n"));
 
-  if (!GetCurrentDirectoryA( sizeof(buffer), buffer ))
+  if (!GetCurrentDirectoryA( sizeof(buffer), buffer )) 
     return 0;
-  if (buffer[1] != ':')
+  if (buffer[1] != ':') 
     return 0;
   return toupper(buffer[0]) - 'A' + 1;
 }
@@ -357,7 +356,7 @@ INT CDECL CRTDLL__mkdir(LPCSTR newdir)
 {
   dprintf(("CRTDLL: _mkdir(%s)\n",
           newdir));
-
+  
   if (CreateDirectoryA(newdir,NULL))
     return 0;
 
@@ -368,14 +367,14 @@ INT CDECL CRTDLL__mkdir(LPCSTR newdir)
 /*********************************************************************
  *                  _rmdir           (CRTDLL.255)
  *
- * Delete a directory
+ * Delete a directory 
  *
  */
 INT CDECL CRTDLL__rmdir(LPSTR dir)
 {
   dprintf(("CRTDLL: _rmdir(%s)\n",
           dir));
-
+  
   if (RemoveDirectoryA(dir))
     return 0;
 

@@ -1,4 +1,3 @@
-/* $Id: rtlstr.c,v 1.4 2001-09-05 13:14:08 bird Exp $ */
 /*
  * Rtl string functions
  *
@@ -23,7 +22,7 @@ DEFAULT_DEBUG_CHANNEL(ntdll);
 /* STRING CREATION FUNCTIONS */
 
 /**************************************************************************
- *  RtlInitAnsiString   (NTDLL.@)
+ *	RtlInitAnsiString   (NTDLL.@)
  */
 void WINAPI RtlInitAnsiString( PSTRING target, LPCSTR source)
 {
@@ -37,7 +36,7 @@ void WINAPI RtlInitAnsiString( PSTRING target, LPCSTR source)
 
 
 /**************************************************************************
- *  RtlInitString   (NTDLL.@)
+ *	RtlInitString   (NTDLL.@)
  */
 void WINAPI RtlInitString( PSTRING target, LPCSTR source )
 {
@@ -46,7 +45,7 @@ void WINAPI RtlInitString( PSTRING target, LPCSTR source )
 
 
 /**************************************************************************
- *  RtlFreeAnsiString   (NTDLL.@)
+ *	RtlFreeAnsiString   (NTDLL.@)
  */
 void WINAPI RtlFreeAnsiString( PSTRING str )
 {
@@ -55,7 +54,7 @@ void WINAPI RtlFreeAnsiString( PSTRING str )
 
 
 /**************************************************************************
- *  RtlFreeOemString   (NTDLL.@)
+ *	RtlFreeOemString   (NTDLL.@)
  */
 void WINAPI RtlFreeOemString( PSTRING str )
 {
@@ -64,7 +63,7 @@ void WINAPI RtlFreeOemString( PSTRING str )
 
 
 /**************************************************************************
- *  RtlCopyString   (NTDLL.@)
+ *	RtlCopyString   (NTDLL.@)
  */
 void WINAPI RtlCopyString( STRING *dst, const STRING *src )
 {
@@ -79,7 +78,7 @@ void WINAPI RtlCopyString( STRING *dst, const STRING *src )
 
 
 /**************************************************************************
- *  RtlInitUnicodeString   (NTDLL.@)
+ *	RtlInitUnicodeString   (NTDLL.@)
  */
 void WINAPI RtlInitUnicodeString( PUNICODE_STRING target, LPCWSTR source )
 {
@@ -93,7 +92,7 @@ void WINAPI RtlInitUnicodeString( PUNICODE_STRING target, LPCWSTR source )
 
 
 /**************************************************************************
- *  RtlCreateUnicodeString   (NTDLL.@)
+ *	RtlCreateUnicodeString   (NTDLL.@)
  */
 BOOLEAN WINAPI RtlCreateUnicodeString( PUNICODE_STRING target, LPCWSTR src )
 {
@@ -107,7 +106,7 @@ BOOLEAN WINAPI RtlCreateUnicodeString( PUNICODE_STRING target, LPCWSTR src )
 
 
 /**************************************************************************
- *  RtlCreateUnicodeStringFromAsciiz   (NTDLL.@)
+ *	RtlCreateUnicodeStringFromAsciiz   (NTDLL.@)
  */
 BOOLEAN WINAPI RtlCreateUnicodeStringFromAsciiz( PUNICODE_STRING target, LPCSTR src )
 {
@@ -118,7 +117,7 @@ BOOLEAN WINAPI RtlCreateUnicodeStringFromAsciiz( PUNICODE_STRING target, LPCSTR 
 
 
 /**************************************************************************
- *  RtlFreeUnicodeString   (NTDLL.@)
+ *	RtlFreeUnicodeString   (NTDLL.@)
  */
 void WINAPI RtlFreeUnicodeString( PUNICODE_STRING str )
 {
@@ -127,7 +126,7 @@ void WINAPI RtlFreeUnicodeString( PUNICODE_STRING str )
 
 
 /**************************************************************************
- *  RtlCopyUnicodeString   (NTDLL.@)
+ *	RtlCopyUnicodeString   (NTDLL.@)
  */
 void WINAPI RtlCopyUnicodeString( UNICODE_STRING *dst, const UNICODE_STRING *src )
 {
@@ -144,7 +143,7 @@ void WINAPI RtlCopyUnicodeString( UNICODE_STRING *dst, const UNICODE_STRING *src
 
 
 /**************************************************************************
- *  RtlEraseUnicodeString   (NTDLL.@)
+ *	RtlEraseUnicodeString   (NTDLL.@)
  */
 void WINAPI RtlEraseUnicodeString( UNICODE_STRING *str )
 {
@@ -160,7 +159,7 @@ void WINAPI RtlEraseUnicodeString( UNICODE_STRING *str )
 */
 
 /******************************************************************************
- *  RtlCompareString   (NTDLL.@)
+ *	RtlCompareString   (NTDLL.@)
  */
 LONG WINAPI RtlCompareString( const STRING *s1, const STRING *s2, BOOLEAN CaseInsensitive )
 {
@@ -186,7 +185,7 @@ LONG WINAPI RtlCompareString( const STRING *s1, const STRING *s2, BOOLEAN CaseIn
 
 
 /******************************************************************************
- *  RtlCompareUnicodeString   (NTDLL.@)
+ *	RtlCompareUnicodeString   (NTDLL.@)
  */
 LONG WINAPI RtlCompareUnicodeString( const UNICODE_STRING *s1, const UNICODE_STRING *s2,
                                      BOOLEAN CaseInsensitive )
@@ -213,7 +212,7 @@ LONG WINAPI RtlCompareUnicodeString( const UNICODE_STRING *s1, const UNICODE_STR
 
 
 /**************************************************************************
- *  RtlEqualString   (NTDLL.@)
+ *	RtlEqualString   (NTDLL.@)
  */
 BOOLEAN WINAPI RtlEqualString( const STRING *s1, const STRING *s2, BOOLEAN CaseInsensitive )
 {
@@ -223,7 +222,7 @@ BOOLEAN WINAPI RtlEqualString( const STRING *s1, const STRING *s2, BOOLEAN CaseI
 
 
 /**************************************************************************
- *  RtlEqualUnicodeString   (NTDLL.@)
+ *	RtlEqualUnicodeString   (NTDLL.@)
  */
 BOOLEAN WINAPI RtlEqualUnicodeString( const UNICODE_STRING *s1, const UNICODE_STRING *s2,
                                       BOOLEAN CaseInsensitive )
@@ -234,7 +233,7 @@ BOOLEAN WINAPI RtlEqualUnicodeString( const UNICODE_STRING *s1, const UNICODE_ST
 
 
 /**************************************************************************
- *  RtlPrefixString   (NTDLL.@)
+ *	RtlPrefixString   (NTDLL.@)
  *
  * Test if s1 is a prefix in s2
  */
@@ -258,7 +257,7 @@ BOOLEAN WINAPI RtlPrefixString( const STRING *s1, const STRING *s2, BOOLEAN igno
 
 
 /**************************************************************************
- *  RtlPrefixUnicodeString   (NTDLL.@)
+ *	RtlPrefixUnicodeString   (NTDLL.@)
  *
  * Test if s1 is a prefix in s2
  */
@@ -284,13 +283,13 @@ BOOLEAN WINAPI RtlPrefixUnicodeString( const UNICODE_STRING *s1,
 
 
 /*
-    COPY BETWEEN ANSI_STRING or UNICODE_STRING
-    there is no parameter checking, it just crashes
+	COPY BETWEEN ANSI_STRING or UNICODE_STRING
+	there is no parameter checking, it just crashes
 */
 
 
 /**************************************************************************
- *  RtlAnsiStringToUnicodeString   (NTDLL.@)
+ *	RtlAnsiStringToUnicodeString   (NTDLL.@)
  *
  * NOTES:
  *  writes terminating 0
@@ -318,7 +317,7 @@ NTSTATUS WINAPI RtlAnsiStringToUnicodeString( UNICODE_STRING *uni,
 
 
 /**************************************************************************
- *  RtlOemStringToUnicodeString   (NTDLL.@)
+ *	RtlOemStringToUnicodeString   (NTDLL.@)
  *
  * NOTES
  *  writes terminating 0
@@ -347,7 +346,7 @@ NTSTATUS WINAPI RtlOemStringToUnicodeString( UNICODE_STRING *uni,
 
 
 /**************************************************************************
- *  RtlUnicodeStringToAnsiString   (NTDLL.@)
+ *	RtlUnicodeStringToAnsiString   (NTDLL.@)
  *
  * NOTES
  *  writes terminating 0
@@ -381,7 +380,7 @@ NTSTATUS WINAPI RtlUnicodeStringToAnsiString( STRING *ansi,
 
 
 /**************************************************************************
- *  RtlUnicodeStringToOemString   (NTDLL.@)
+ *	RtlUnicodeStringToOemString   (NTDLL.@)
  *
  * NOTES
  *   allocates uni->Length+1
@@ -415,7 +414,7 @@ NTSTATUS WINAPI RtlUnicodeStringToOemString( STRING *oem,
 
 
 /**************************************************************************
- *  RtlMultiByteToUnicodeN   (NTDLL.@)
+ *	RtlMultiByteToUnicodeN   (NTDLL.@)
  *
  * NOTES
  *  if unistr is too small a part is copied
@@ -431,7 +430,7 @@ NTSTATUS WINAPI RtlMultiByteToUnicodeN( LPWSTR dst, DWORD dstlen, LPDWORD reslen
 
 
 /**************************************************************************
- *  RtlOemToUnicodeN   (NTDLL.@)
+ *	RtlOemToUnicodeN   (NTDLL.@)
  */
 NTSTATUS WINAPI RtlOemToUnicodeN( LPWSTR dst, DWORD dstlen, LPDWORD reslen,
                                   LPCSTR src, DWORD srclen )
@@ -444,7 +443,7 @@ NTSTATUS WINAPI RtlOemToUnicodeN( LPWSTR dst, DWORD dstlen, LPDWORD reslen,
 
 
 /**************************************************************************
- *  RtlUnicodeToMultiByteN   (NTDLL.@)
+ *	RtlUnicodeToMultiByteN   (NTDLL.@)
  */
 NTSTATUS WINAPI RtlUnicodeToMultiByteN( LPSTR dst, DWORD dstlen, LPDWORD reslen,
                                         LPCWSTR src, DWORD srclen )
@@ -458,7 +457,7 @@ NTSTATUS WINAPI RtlUnicodeToMultiByteN( LPSTR dst, DWORD dstlen, LPDWORD reslen,
 
 
 /**************************************************************************
- *  RtlUnicodeToOemN   (NTDLL.@)
+ *	RtlUnicodeToOemN   (NTDLL.@)
  */
 NTSTATUS WINAPI RtlUnicodeToOemN( LPSTR dst, DWORD dstlen, LPDWORD reslen,
                                   LPCWSTR src, DWORD srclen )
@@ -476,7 +475,7 @@ NTSTATUS WINAPI RtlUnicodeToOemN( LPSTR dst, DWORD dstlen, LPDWORD reslen,
 */
 
 /**************************************************************************
- *  RtlUpperString   (NTDLL.@)
+ *	RtlUpperString   (NTDLL.@)
  */
 void WINAPI RtlUpperString( STRING *dst, const STRING *src )
 {
@@ -488,7 +487,7 @@ void WINAPI RtlUpperString( STRING *dst, const STRING *src )
 
 
 /**************************************************************************
- *  RtlUpcaseUnicodeString   (NTDLL.@)
+ *	RtlUpcaseUnicodeString   (NTDLL.@)
  *
  * NOTES:
  *  destination string is never 0-terminated because dest can be equal to src
@@ -515,7 +514,7 @@ NTSTATUS WINAPI RtlUpcaseUnicodeString( UNICODE_STRING *dest,
 
 
 /**************************************************************************
- *  RtlUpcaseUnicodeStringToAnsiString   (NTDLL.@)
+ *	RtlUpcaseUnicodeStringToAnsiString   (NTDLL.@)
  *
  * NOTES
  *  writes terminating 0
@@ -537,7 +536,7 @@ NTSTATUS WINAPI RtlUpcaseUnicodeStringToAnsiString( STRING *dst,
 
 
 /**************************************************************************
- *  RtlUpcaseUnicodeStringToOemString   (NTDLL.@)
+ *	RtlUpcaseUnicodeStringToOemString   (NTDLL.@)
  *
  * NOTES
  *  writes terminating 0
@@ -559,7 +558,7 @@ NTSTATUS WINAPI RtlUpcaseUnicodeStringToOemString( STRING *dst,
 
 
 /**************************************************************************
- *  RtlUpcaseUnicodeToMultiByteN   (NTDLL.@)
+ *	RtlUpcaseUnicodeToMultiByteN   (NTDLL.@)
  */
 NTSTATUS WINAPI RtlUpcaseUnicodeToMultiByteN( LPSTR dst, DWORD dstlen, LPDWORD reslen,
                                               LPCWSTR src, DWORD srclen )
@@ -577,7 +576,7 @@ NTSTATUS WINAPI RtlUpcaseUnicodeToMultiByteN( LPSTR dst, DWORD dstlen, LPDWORD r
 
 
 /**************************************************************************
- *  RtlUpcaseUnicodeToOemN   (NTDLL.@)
+ *	RtlUpcaseUnicodeToOemN   (NTDLL.@)
  */
 NTSTATUS WINAPI RtlUpcaseUnicodeToOemN( LPSTR dst, DWORD dstlen, LPDWORD reslen,
                                         LPCWSTR src, DWORD srclen )
@@ -595,7 +594,7 @@ NTSTATUS WINAPI RtlUpcaseUnicodeToOemN( LPSTR dst, DWORD dstlen, LPDWORD reslen,
 
 
 /*
-    STRING SIZE
+	STRING SIZE
 */
 
 /**************************************************************************
@@ -741,51 +740,51 @@ NTSTATUS WINAPI RtlAppendUnicodeStringToString( UNICODE_STRING *dst, const UNICO
 
 
 /*
-    MISC
+	MISC
 */
 
 /**************************************************************************
- *  RtlIsTextUnicode
+ *	RtlIsTextUnicode
  *
- *  Apply various feeble heuristics to guess whether
- *  the text buffer contains Unicode.
- *  FIXME: should implement more tests.
+ *	Apply various feeble heuristics to guess whether
+ *	the text buffer contains Unicode.
+ *	FIXME: should implement more tests.
  */
 DWORD WINAPI RtlIsTextUnicode(
-    LPVOID buf,
-    DWORD len,
-    DWORD *pf)
+	LPVOID buf,
+	DWORD len,
+	DWORD *pf)
 {
-    LPWSTR s = buf;
-    DWORD flags = -1, out_flags = 0;
+	LPWSTR s = buf;
+	DWORD flags = -1, out_flags = 0;
 
-    if (!len)
-        goto out;
-    if (pf)
-        flags = *pf;
-    /*
-     * Apply various tests to the text string. According to the
-     * docs, each test "passed" sets the corresponding flag in
-     * the output flags. But some of the tests are mutually
-     * exclusive, so I don't see how you could pass all tests ...
-     */
+	if (!len)
+		goto out;
+	if (pf)
+		flags = *pf;
+	/*
+	 * Apply various tests to the text string. According to the
+	 * docs, each test "passed" sets the corresponding flag in
+	 * the output flags. But some of the tests are mutually
+	 * exclusive, so I don't see how you could pass all tests ...
+	 */
 
-    /* Check for an odd length ... pass if even. */
-    if (!(len & 1))
-        out_flags |= IS_TEXT_UNICODE_ODD_LENGTH;
+	/* Check for an odd length ... pass if even. */
+	if (!(len & 1))
+		out_flags |= IS_TEXT_UNICODE_ODD_LENGTH;
 
-    /* Check for the special unicode marker byte. */
-    if (*s == 0xFEFF)
-        out_flags |= IS_TEXT_UNICODE_SIGNATURE;
+	/* Check for the special unicode marker byte. */
+	if (*s == 0xFEFF)
+		out_flags |= IS_TEXT_UNICODE_SIGNATURE;
 
-    /*
-     * Check whether the string passed all of the tests.
-     */
-    flags &= ITU_IMPLEMENTED_TESTS;
-    if ((out_flags & flags) != flags)
-        len = 0;
+	/*
+	 * Check whether the string passed all of the tests.
+	 */
+	flags &= ITU_IMPLEMENTED_TESTS;
+	if ((out_flags & flags) != flags)
+		len = 0;
 out:
-    if (pf)
-        *pf = out_flags;
-    return len;
+	if (pf)
+		*pf = out_flags;
+	return len;
 }

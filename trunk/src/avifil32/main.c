@@ -1,4 +1,3 @@
-/* $Id: main.c,v 1.2 2001-09-05 14:16:45 bird Exp $ */
 /*
  * Copyright 2001 Hidenori TAKESHIMA <hidenori@a2.ctktv.ne.jp>
  */
@@ -21,70 +20,70 @@ WINE_AVIFILE_DATA AVIFILE_data;
 
 
 /***********************************************************************
- *      AVIFILE_InitProcess (internal)
+ *		AVIFILE_InitProcess (internal)
  */
 static BOOL AVIFILE_InitProcess( void )
 {
-    TRACE("()\n");
+	TRACE("()\n");
 
-    AVIFILE_data.dwAVIFileRef = 0;
-    AVIFILE_data.dwClassObjRef = 0;
-    AVIFILE_data.hHeap = (HANDLE)NULL;
+	AVIFILE_data.dwAVIFileRef = 0;
+	AVIFILE_data.dwClassObjRef = 0;
+	AVIFILE_data.hHeap = (HANDLE)NULL;
 
-    AVIFILE_data.hHeap = HeapCreate( 0, 0x10000, 0 );
-    if ( AVIFILE_data.hHeap  == (HANDLE)NULL )
-    {
-        ERR( "cannot allocate heap for AVIFILE.\n" );
-        return FALSE;
-    }
+	AVIFILE_data.hHeap = HeapCreate( 0, 0x10000, 0 );
+	if ( AVIFILE_data.hHeap  == (HANDLE)NULL )
+	{
+		ERR( "cannot allocate heap for AVIFILE.\n" );
+		return FALSE;
+	}
 
-    return TRUE;
+	return TRUE;
 }
 
 /***********************************************************************
- *      AVIFILE_UninitProcess (internal)
+ *		AVIFILE_UninitProcess (internal)
  */
 static void AVIFILE_UninitProcess( void )
 {
-    TRACE("()\n");
+	TRACE("()\n");
 
-    if ( AVIFILE_data.dwAVIFileRef != 0 )
-        ERR( "you must call AVIFileExit()\n" );
+	if ( AVIFILE_data.dwAVIFileRef != 0 )
+		ERR( "you must call AVIFileExit()\n" );
 
-    if ( AVIFILE_data.dwClassObjRef != 0 )
-        ERR( "you must release some objects allocated from AVIFile.\n" );
+	if ( AVIFILE_data.dwClassObjRef != 0 )
+		ERR( "you must release some objects allocated from AVIFile.\n" );
 
-    if ( AVIFILE_data.hHeap != (HANDLE)NULL )
-    {
-        HeapDestroy( AVIFILE_data.hHeap );
-        AVIFILE_data.hHeap = (HANDLE)NULL;
-    }
+	if ( AVIFILE_data.hHeap != (HANDLE)NULL )
+	{
+		HeapDestroy( AVIFILE_data.hHeap );
+		AVIFILE_data.hHeap = (HANDLE)NULL;
+	}
 }
 
 /***********************************************************************
- *      AVIFILE_DllMain
+ *		AVIFILE_DllMain
  */
 BOOL WINAPI AVIFILE_DllMain(
-    HINSTANCE hInstDLL,
-    DWORD fdwReason,
-    LPVOID lpvReserved )
+	HINSTANCE hInstDLL,
+	DWORD fdwReason,
+	LPVOID lpvReserved )
 {
-    switch ( fdwReason )
-    {
-    case DLL_PROCESS_ATTACH:
-        if ( !AVIFILE_InitProcess() )
-            return FALSE;
-        break;
-    case DLL_PROCESS_DETACH:
-        AVIFILE_UninitProcess();
-        break;
-    case DLL_THREAD_ATTACH:
-        break;
-    case DLL_THREAD_DETACH:
-        break;
-    }
+	switch ( fdwReason )
+	{
+	case DLL_PROCESS_ATTACH:
+		if ( !AVIFILE_InitProcess() )
+			return FALSE;
+		break;
+	case DLL_PROCESS_DETACH:
+		AVIFILE_UninitProcess();
+		break;
+	case DLL_THREAD_ATTACH:
+		break;
+	case DLL_THREAD_DETACH:
+		break;
+	}
 
-    return TRUE;
+	return TRUE;
 }
 
 

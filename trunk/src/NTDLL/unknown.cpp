@@ -1,4 +1,4 @@
-/* $Id: unknown.cpp,v 1.9 2001-09-05 13:14:30 bird Exp $ */
+/* $Id: unknown.cpp,v 1.10 2001-09-15 09:36:50 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -424,9 +424,9 @@ DWORD WIN32API RtlRandom(DWORD x1)
 /**
  * Opens a thread...
  * @returns Error code?
- * @param   phThreadHandle
+ * @param   pThreadHandle
  * @param   dwFlags
- * @param   pAttribs            Pointer to some attribute structure.
+ * @param   pvAttribs           Pointer to some attribute structure.
  * @param   padwOpenThreadParam Pointer to array of dword it seems. 2 entries?
  * @status  stub
  * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)

@@ -1,18 +1,18 @@
 /* -*- tab-width: 8; c-basic-offset: 4 -*- */
-/* $Id: pcmconverter.c,v 1.2 2001-09-05 13:11:26 bird Exp $ */
+
 /*
  *      MSACM32 library
  *
- *      Copyright 2000      Eric Pouech
+ *      Copyright 2000		Eric Pouech
  *
- *  FIXME / TODO list
- *  + most of the computation should be done in fixed point arithmetic
- *    instead of floating point (16 bits for integral part, and 16 bits
- *    for fractional part for example)
- *  + implement PCM_FormatSuggest function
- *  + get rid of hack for PCM_DriverProc (msacm32.dll shouldn't export
- *    a DriverProc, but this would require implementing a generic
- *    embedded driver handling scheme in msacm32.dll which isn't done yet
+ *	FIXME / TODO list
+ *	+ most of the computation should be done in fixed point arithmetic 
+ *	  instead of floating point (16 bits for integral part, and 16 bits
+ *	  for fractional part for example)
+ *	+ implement PCM_FormatSuggest function
+ *	+ get rid of hack for PCM_DriverProc (msacm32.dll shouldn't export
+ *	  a DriverProc, but this would require implementing a generic
+ *	  embedded driver handling scheme in msacm32.dll which isn't done yet
  */
 
 #include <assert.h>
@@ -34,7 +34,7 @@ DEFAULT_DEBUG_CHANNEL(msacm);
 /***********************************************************************
  *           PCM_drvOpen
  */
-static  DWORD   PCM_drvOpen(LPCSTR str)
+static	DWORD	PCM_drvOpen(LPCSTR str)
 {
     return 1;
 }
@@ -42,44 +42,44 @@ static  DWORD   PCM_drvOpen(LPCSTR str)
 /***********************************************************************
  *           PCM_drvClose
  */
-static  DWORD   PCM_drvClose(DWORD dwDevID)
+static	DWORD	PCM_drvClose(DWORD dwDevID)
 {
     return 1;
 }
 
-#define NUM_PCM_FORMATS (sizeof(PCM_Formats) / sizeof(PCM_Formats[0]))
-#define NUM_OF(a,b) (((a)+(b)-1)/(b))
+#define	NUM_PCM_FORMATS	(sizeof(PCM_Formats) / sizeof(PCM_Formats[0]))
+#define	NUM_OF(a,b)	(((a)+(b)-1)/(b))
 
 /* flags for fdwDriver */
-#define PCM_RESAMPLE    1
+#define PCM_RESAMPLE	1
 
 /* data used while converting */
 typedef struct tagAcmPcmData {
     /* conversion routine, depending if rate conversion is required */
     union {
-    void (*cvtKeepRate)(const unsigned char*, int, unsigned char*);
-    void (*cvtChangeRate)(struct tagAcmPcmData*, const unsigned char*,
-                  LPDWORD, unsigned char*, LPDWORD);
+	void (*cvtKeepRate)(const unsigned char*, int, unsigned char*);
+	void (*cvtChangeRate)(struct tagAcmPcmData*, const unsigned char*, 
+			      LPDWORD, unsigned char*, LPDWORD);
     } cvt;
     /* the following fields are used only with rate conversion) */
-    DWORD   srcPos;     /* position in source stream */
-    double  dstPos;     /* position in destination stream */
-    double  dstIncr;    /* value to increment dst stream when src stream
-                   is incremented by 1 */
+    DWORD	srcPos;		/* position in source stream */
+    double	dstPos;		/* position in destination stream */
+    double	dstIncr;	/* value to increment dst stream when src stream 
+				   is incremented by 1 */
     /* last source stream value read */
     union {
-    unsigned char   b;  /*  8 bit value */
-    short       s;  /* 16 bit value */
+	unsigned char	b;	/*  8 bit value */
+	short		s;	/* 16 bit value */
     } last[2]; /* two channels max (stereo) */
 } AcmPcmData;
 
 /* table to list all supported formats... those are the basic ones. this
  * also helps given a unique index to each of the supported formats
  */
-static  struct {
-    int     nChannels;
-    int     nBits;
-    int     rate;
+static	struct {
+    int		nChannels;
+    int		nBits;
+    int		rate;
 } PCM_Formats[] = {
     {1,  8,  8000}, {2,  8,  8000}, {1, 16,  8000}, {2, 16,  8000},
     {1,  8, 11025}, {2,  8, 11025}, {1, 16, 11025}, {2, 16, 11025},
@@ -90,15 +90,15 @@ static  struct {
 /***********************************************************************
  *           PCM_GetFormatIndex
  */
-static  DWORD   PCM_GetFormatIndex(LPWAVEFORMATEX wfx)
+static	DWORD	PCM_GetFormatIndex(LPWAVEFORMATEX wfx)
 {
     int i;
-
+    
     for (i = 0; i < NUM_PCM_FORMATS; i++) {
-    if (wfx->nChannels == PCM_Formats[i].nChannels &&
-        wfx->nSamplesPerSec == PCM_Formats[i].rate &&
-        wfx->wBitsPerSample == PCM_Formats[i].nBits)
-        return i;
+	if (wfx->nChannels == PCM_Formats[i].nChannels &&
+	    wfx->nSamplesPerSec == PCM_Formats[i].rate &&
+	    wfx->wBitsPerSample == PCM_Formats[i].nBits)
+	    return i;
     }
     return 0xFFFFFFFF;
 }
@@ -106,17 +106,17 @@ static  DWORD   PCM_GetFormatIndex(LPWAVEFORMATEX wfx)
 /* PCM Conversions:
  *
  * parameters:
- *  + 8 bit unsigned vs 16 bit signed
- *  + mono vs stereo (1 or 2 channels)
- *  + sampling rate (8.0, 11.025, 22.05, 44.1 kHz are defined, but algo shall work
- *    in all cases)
+ *	+ 8 bit unsigned vs 16 bit signed
+ *	+ mono vs stereo (1 or 2 channels)
+ *	+ sampling rate (8.0, 11.025, 22.05, 44.1 kHz are defined, but algo shall work
+ *	  in all cases)
  *
  * mono => stereo: copy the same sample on Left & Right channels
  * stereo =) mono: use the average value of samples from Left & Right channels
  * resampling; we lookup for each destination sample the two source adjacent samples
- *  were src <= dst < src+1 (dst is increased by a fractional value which is
- *  equivalent to the increment by one on src); then we use a linear
- *  interpolation between src and src+1
+ * 	were src <= dst < src+1 (dst is increased by a fractional value which is 
+ *	equivalent to the increment by one on src); then we use a linear
+ *	interpolation between src and src+1
  */
 
 /***********************************************************************
@@ -124,7 +124,7 @@ static  DWORD   PCM_GetFormatIndex(LPWAVEFORMATEX wfx)
  *
  * Converts a 8 bit sample to a 16 bit one
  */
-static inline short C816(unsigned char b)
+static inline short C816(unsigned char b) 
 {
     return (short)(b ^ 0x80) * 256;
 }
@@ -134,7 +134,7 @@ static inline short C816(unsigned char b)
  *
  * Converts a 16 bit sample to a 8 bit one (data loss !!)
  */
-static inline unsigned char C168(short s)
+static inline unsigned char C168(short s) 
 {
     return HIBYTE(s) ^ (unsigned char)0x80;
 }
@@ -163,7 +163,7 @@ static inline void  W16(unsigned char* dst, short s)
 /***********************************************************************
  *           M16
  *
- * Convert the (l,r) 16 bit stereo sample into a 16 bit mono
+ * Convert the (l,r) 16 bit stereo sample into a 16 bit mono 
  * (takes the mid-point of the two values)
  */
 static inline short M16(short l, short r)
@@ -174,7 +174,7 @@ static inline short M16(short l, short r)
 /***********************************************************************
  *           M8
  *
- * Convert the (l,r) 8 bit stereo sample into a 8 bit mono
+ * Convert the (l,r) 8 bit stereo sample into a 8 bit mono 
  * (takes the mid-point of the two values)
  */
 static inline unsigned char M8(unsigned char a, unsigned char b)
@@ -193,136 +193,136 @@ static inline unsigned char M8(unsigned char a, unsigned char b)
  * buffer (resp output buffer) is ns * (<X> == 'Mono' ? 1:2) * (<N> == 8 ? 1:2)
  */
 
-static  void cvtMM88K(const unsigned char* src, int ns, unsigned char* dst)
+static	void cvtMM88K(const unsigned char* src, int ns, unsigned char* dst)
 {
     memcpy(dst, src, ns);
 }
 
-static  void cvtSS88K(const unsigned char* src, int ns, unsigned char* dst)
+static	void cvtSS88K(const unsigned char* src, int ns, unsigned char* dst)
 {
     memcpy(dst, src, ns * 2);
 }
 
-static  void cvtMM1616K(const unsigned char* src, int ns, unsigned char* dst)
+static	void cvtMM1616K(const unsigned char* src, int ns, unsigned char* dst)
 {
     memcpy(dst, src, ns * 2);
 }
 
-static  void cvtSS1616K(const unsigned char* src, int ns, unsigned char* dst)
+static	void cvtSS1616K(const unsigned char* src, int ns, unsigned char* dst)
 {
     memcpy(dst, src, ns * 4);
 }
 
-static  void cvtMS88K(const unsigned char* src, int ns, unsigned char* dst)
+static	void cvtMS88K(const unsigned char* src, int ns, unsigned char* dst)
 {
     while (ns--) {
-    *dst++ = *src;
-    *dst++ = *src++;
+	*dst++ = *src;
+	*dst++ = *src++;
     }
 }
 
-static  void cvtMS816K(const unsigned char* src, int ns, unsigned char* dst)
+static	void cvtMS816K(const unsigned char* src, int ns, unsigned char* dst)
 {
-    short   v;
-
+    short	v;
+    
     while (ns--) {
-    v = C816(*src++);
-    W16(dst, v);        dst += 2;
-    W16(dst, v);        dst += 2;
+	v = C816(*src++);
+	W16(dst, v);		dst += 2;
+	W16(dst, v);		dst += 2;
     }
 }
 
-static  void cvtMS168K(const unsigned char* src, int ns, unsigned char* dst)
+static	void cvtMS168K(const unsigned char* src, int ns, unsigned char* dst)
 {
     unsigned char v;
-
+    
     while (ns--) {
-    v = C168(R16(src));     src += 2;
-    *dst++ = v;
-    *dst++ = v;
+	v = C168(R16(src));		src += 2;
+	*dst++ = v;
+	*dst++ = v;
     }
 }
 
-static  void cvtMS1616K(const unsigned char* src, int ns, unsigned char* dst)
+static	void cvtMS1616K(const unsigned char* src, int ns, unsigned char* dst)
 {
-    short   v;
+    short	v;
 
     while (ns--) {
-    v = R16(src);       src += 2;
-    W16(dst, v);        dst += 2;
-    W16(dst, v);        dst += 2;
+	v = R16(src);		src += 2;
+	W16(dst, v);		dst += 2;
+	W16(dst, v);		dst += 2;
     }
 }
 
-static  void cvtSM88K(const unsigned char* src, int ns, unsigned char* dst)
-{
-    while (ns--) {
-    *dst++ = M8(src[0], src[1]);
-    src += 2;
-    }
-}
-
-static  void cvtSM816K(const unsigned char* src, int ns, unsigned char* dst)
-{
-    short   v;
-
-    while (ns--) {
-    v = M16(C816(src[0]), C816(src[1]));
-    src += 2;
-    W16(dst, v);        dst += 2;
-    }
-}
-
-static  void cvtSM168K(const unsigned char* src, int ns, unsigned char* dst)
+static	void cvtSM88K(const unsigned char* src, int ns, unsigned char* dst)
 {
     while (ns--) {
-    *dst++ = C168(M16(R16(src), R16(src + 2)));
-    src += 4;
+	*dst++ = M8(src[0], src[1]);
+	src += 2;
     }
 }
 
-static  void cvtSM1616K(const unsigned char* src, int ns, unsigned char* dst)
+static	void cvtSM816K(const unsigned char* src, int ns, unsigned char* dst)
+{
+    short	v;
+    
+    while (ns--) {
+	v = M16(C816(src[0]), C816(src[1]));
+	src += 2;
+	W16(dst, v);		dst += 2;
+    }
+}
+
+static	void cvtSM168K(const unsigned char* src, int ns, unsigned char* dst)
 {
     while (ns--) {
-    W16(dst, M16(R16(src),R16(src+2))); dst += 2;
-    src += 4;
+	*dst++ = C168(M16(R16(src), R16(src + 2)));
+	src += 4;
     }
 }
 
-static  void cvtMM816K(const unsigned char* src, int ns, unsigned char* dst)
+static	void cvtSM1616K(const unsigned char* src, int ns, unsigned char* dst)
 {
     while (ns--) {
-    W16(dst, C816(*src++));     dst += 2;
+	W16(dst, M16(R16(src),R16(src+2)));	dst += 2;
+	src += 4;
     }
 }
 
-static  void cvtSS816K(const unsigned char* src, int ns, unsigned char* dst)
+static	void cvtMM816K(const unsigned char* src, int ns, unsigned char* dst)
 {
     while (ns--) {
-    W16(dst, C816(*src++)); dst += 2;
-    W16(dst, C816(*src++)); dst += 2;
+	W16(dst, C816(*src++));		dst += 2;
     }
 }
 
-static  void cvtMM168K(const unsigned char* src, int ns, unsigned char* dst)
+static	void cvtSS816K(const unsigned char* src, int ns, unsigned char* dst)
 {
     while (ns--) {
-    *dst++ = C168(R16(src));    src += 2;
+	W16(dst, C816(*src++));	dst += 2;
+	W16(dst, C816(*src++));	dst += 2;
     }
 }
 
-static  void cvtSS168K(const unsigned char* src, int ns, unsigned char* dst)
+static	void cvtMM168K(const unsigned char* src, int ns, unsigned char* dst)
 {
     while (ns--) {
-    *dst++ = C168(R16(src));    src += 2;
-    *dst++ = C168(R16(src));    src += 2;
+	*dst++ = C168(R16(src));	src += 2;
     }
 }
 
-static  void (*PCM_ConvertKeepRate[16])(const unsigned char*, int, unsigned char*) = {
-    cvtSS88K,   cvtSM88K,   cvtMS88K,   cvtMM88K,
-    cvtSS816K,  cvtSM816K,  cvtMS816K,  cvtMM816K,
-    cvtSS168K,  cvtSM168K,  cvtMS168K,  cvtMM168K,
+static	void cvtSS168K(const unsigned char* src, int ns, unsigned char* dst)
+{
+    while (ns--) {
+	*dst++ = C168(R16(src));	src += 2;
+	*dst++ = C168(R16(src));	src += 2;
+    }
+}
+
+static	void (*PCM_ConvertKeepRate[16])(const unsigned char*, int, unsigned char*) = {
+    cvtSS88K,	cvtSM88K,   cvtMS88K,   cvtMM88K,
+    cvtSS816K,	cvtSM816K,  cvtMS816K,  cvtMM816K,
+    cvtSS168K,	cvtSM168K,  cvtMS168K,  cvtMM168K,
     cvtSS1616K, cvtSM1616K, cvtMS1616K, cvtMM1616K,
 };
 
@@ -332,30 +332,30 @@ static  void (*PCM_ConvertKeepRate[16])(const unsigned char*, int, unsigned char
  * Interpolate the value at r (r in ]0, 1]) between the two points v1 and v2
  * Linear interpolation is used
  */
-static  inline double   I(double v1, double v2, double r)
+static	inline double	I(double v1, double v2, double r)
 {
     if (0.0 >= r || r > 1.0) FIXME("r!! %f\n", r);
     return (1.0 - r) * v1 + r * v2;
 }
 
-static  void cvtSS88C(AcmPcmData* apd, const unsigned char* src, LPDWORD nsrc,
-              unsigned char* dst, LPDWORD ndst)
+static	void cvtSS88C(AcmPcmData* apd, const unsigned char* src, LPDWORD nsrc, 
+		      unsigned char* dst, LPDWORD ndst)
 {
-    double          r;
+    double     		r;
 
     while (*nsrc != 0 && *ndst != 0) {
-    while ((r = (double)apd->srcPos - apd->dstPos) <= 0) {
-        if (*nsrc == 0) return;
-        apd->last[0].b = *src++;
-        apd->last[1].b = *src++;
-        apd->srcPos++;
-        (*nsrc)--;
-    }
-    /* now do the interpolation */
-    *dst++ = I(apd->last[0].b, src[0], r);
-    *dst++ = I(apd->last[1].b, src[1], r);
-    apd->dstPos += apd->dstIncr;
-    (*ndst)--;
+	while ((r = (double)apd->srcPos - apd->dstPos) <= 0) {
+	    if (*nsrc == 0) return;
+	    apd->last[0].b = *src++;
+	    apd->last[1].b = *src++;
+	    apd->srcPos++;
+	    (*nsrc)--;
+	}
+	/* now do the interpolation */
+	*dst++ = I(apd->last[0].b, src[0], r);
+	*dst++ = I(apd->last[1].b, src[1], r);
+	apd->dstPos += apd->dstIncr;
+	(*ndst)--;
     }
 }
 
@@ -367,322 +367,322 @@ static  void cvtSS88C(AcmPcmData* apd, const unsigned char* src, LPDWORD nsrc,
  * <M> is the number of bits of output channel (8 or 16)
  *
  */
-static  void cvtSM88C(AcmPcmData* apd, const unsigned char* src, LPDWORD nsrc,
-              unsigned char* dst, LPDWORD ndst)
+static	void cvtSM88C(AcmPcmData* apd, const unsigned char* src, LPDWORD nsrc, 
+		      unsigned char* dst, LPDWORD ndst)
 {
-    double      r;
+    double   	r;
 
     while (*nsrc != 0 && *ndst != 0) {
-    while ((r = (double)apd->srcPos - apd->dstPos) <= 0) {
-        if (*nsrc == 0) return;
-        apd->last[0].b = *src++;
-        apd->last[1].b = *src++;
-        apd->srcPos++;
-        (*nsrc)--;
-    }
-    /* now do the interpolation */
-    *dst++ = I(M8(apd->last[0].b, apd->last[1].b), M8(src[0], src[1]), r);
-    apd->dstPos += apd->dstIncr;
-    (*ndst)--;
+	while ((r = (double)apd->srcPos - apd->dstPos) <= 0) {
+	    if (*nsrc == 0) return;
+	    apd->last[0].b = *src++;
+	    apd->last[1].b = *src++;
+	    apd->srcPos++;
+	    (*nsrc)--;
+	}
+	/* now do the interpolation */
+	*dst++ = I(M8(apd->last[0].b, apd->last[1].b), M8(src[0], src[1]), r);
+	apd->dstPos += apd->dstIncr;
+	(*ndst)--;
     }
 }
 
-static  void cvtMS88C(AcmPcmData* apd, const unsigned char* src, LPDWORD nsrc,
-              unsigned char* dst, LPDWORD ndst)
+static	void cvtMS88C(AcmPcmData* apd, const unsigned char* src, LPDWORD nsrc, 
+		      unsigned char* dst, LPDWORD ndst)
 {
-    double  r;
+    double	r;
 
     while (*nsrc != 0 && *ndst != 0) {
-    while ((r = (double)apd->srcPos - apd->dstPos) <= 0) {
-        if (*nsrc == 0) return;
-        apd->last[0].b = *src++;
-        apd->srcPos++;
-        (*nsrc)--;
-    }
-    /* now do the interpolation */
-    dst[0] = dst[1] = I(apd->last[0].b, src[0], r);
-    dst += 2;
-    apd->dstPos += apd->dstIncr;
-    (*ndst)--;
+	while ((r = (double)apd->srcPos - apd->dstPos) <= 0) {
+	    if (*nsrc == 0) return;
+	    apd->last[0].b = *src++;
+	    apd->srcPos++;
+	    (*nsrc)--;
+	}
+	/* now do the interpolation */
+	dst[0] = dst[1] = I(apd->last[0].b, src[0], r);
+	dst += 2;
+	apd->dstPos += apd->dstIncr;
+	(*ndst)--;
     }
 }
 
-static  void cvtMM88C(AcmPcmData* apd, const unsigned char* src, LPDWORD nsrc,
-              unsigned char* dst, LPDWORD ndst)
+static	void cvtMM88C(AcmPcmData* apd, const unsigned char* src, LPDWORD nsrc, 
+		      unsigned char* dst, LPDWORD ndst)
 {
-    double      r;
+    double     	r;
 
     while (*nsrc != 0 && *ndst != 0) {
-    while ((r = (double)apd->srcPos - apd->dstPos) <= 0) {
-        if (*nsrc == 0) return;
-        apd->last[0].b = *src++;
-        apd->srcPos++;
-        (*nsrc)--;
-    }
-    /* now do the interpolation */
-    *dst++ = I(apd->last[0].b, src[0], r);
-    apd->dstPos += apd->dstIncr;
-    (*ndst)--;
+	while ((r = (double)apd->srcPos - apd->dstPos) <= 0) {
+	    if (*nsrc == 0) return;
+	    apd->last[0].b = *src++;
+	    apd->srcPos++;
+	    (*nsrc)--;
+	}
+	/* now do the interpolation */
+	*dst++ = I(apd->last[0].b, src[0], r);
+	apd->dstPos += apd->dstIncr;
+	(*ndst)--;
     }
 }
 
-static  void cvtSS816C(AcmPcmData* apd, const unsigned char* src, LPDWORD nsrc,
-               unsigned char* dst, LPDWORD ndst)
+static	void cvtSS816C(AcmPcmData* apd, const unsigned char* src, LPDWORD nsrc, 
+		       unsigned char* dst, LPDWORD ndst)
 {
-    double  r;
-
+    double	r;
+	
     while (*nsrc != 0 && *ndst != 0) {
-    while ((r = (double)apd->srcPos - apd->dstPos) <= 0) {
-        if (*nsrc == 0) return;
-        apd->last[0].b = *src++;
-        apd->last[1].b = *src++;
-        apd->srcPos++;
-        (*nsrc)--;
-    }
-    /* now do the interpolation */
-    W16(dst, I(C816(apd->last[0].b), C816(src[0]), r)); dst += 2;
-    W16(dst, I(C816(apd->last[1].b), C816(src[1]), r)); dst += 2;
-    apd->dstPos += apd->dstIncr;
-    (*ndst)--;
+	while ((r = (double)apd->srcPos - apd->dstPos) <= 0) {
+	    if (*nsrc == 0) return;
+	    apd->last[0].b = *src++;
+	    apd->last[1].b = *src++;
+	    apd->srcPos++;
+	    (*nsrc)--;
+	}
+	/* now do the interpolation */
+	W16(dst, I(C816(apd->last[0].b), C816(src[0]), r));	dst += 2;
+	W16(dst, I(C816(apd->last[1].b), C816(src[1]), r));	dst += 2;
+	apd->dstPos += apd->dstIncr;
+	(*ndst)--;
     }
 }
 
-static  void cvtSM816C(AcmPcmData* apd, const unsigned char* src, LPDWORD nsrc,
-            unsigned char* dst, LPDWORD ndst)
+static	void cvtSM816C(AcmPcmData* apd, const unsigned char* src, LPDWORD nsrc, 
+			unsigned char* dst, LPDWORD ndst)
 {
-    double      r;
+    double     	r;
 
     while (*nsrc != 0 && *ndst != 0) {
-    while ((r = (double)apd->srcPos - apd->dstPos) <= 0) {
-        if (*nsrc == 0) return;
-        apd->last[0].b = *src++;
-        apd->last[1].b = *src++;
-        apd->srcPos++;
-        (*nsrc)--;
-    }
-    /* now do the interpolation */
-    W16(dst, I(M16(C816(apd->last[0].b), C816(apd->last[1].b)),
-            M16(C816(src[0]), C816(src[1])), r));
-    dst += 2;
-    apd->dstPos += apd->dstIncr;
-    (*ndst)--;
+	while ((r = (double)apd->srcPos - apd->dstPos) <= 0) {
+	    if (*nsrc == 0) return;
+	    apd->last[0].b = *src++;
+	    apd->last[1].b = *src++;
+	    apd->srcPos++;
+	    (*nsrc)--;
+	}
+	/* now do the interpolation */
+	W16(dst, I(M16(C816(apd->last[0].b), C816(apd->last[1].b)),
+		    M16(C816(src[0]), C816(src[1])), r));
+	dst += 2;
+	apd->dstPos += apd->dstIncr;
+	(*ndst)--;
     }
 }
 
-static  void cvtMS816C(AcmPcmData* apd, const unsigned char* src, LPDWORD nsrc,
-            unsigned char* dst, LPDWORD ndst)
+static	void cvtMS816C(AcmPcmData* apd, const unsigned char* src, LPDWORD nsrc, 
+			unsigned char* dst, LPDWORD ndst)
 {
-    double      r;
-    short   v;
+    double     	r;
+    short	v;
 
     while (*nsrc != 0 && *ndst != 0) {
-    while ((r = (double)apd->srcPos - apd->dstPos) <= 0) {
-        if (*nsrc == 0) return;
-        apd->last[0].b = *src++;
-        apd->srcPos++;
-        (*nsrc)--;
-    }
-    /* now do the interpolation */
-    v = I(C816(apd->last[0].b), C816(src[0]), r);
-    W16(dst, v);        dst += 2;
-    W16(dst, v);        dst += 2;
-    apd->dstPos += apd->dstIncr;
-    (*ndst)--;
+	while ((r = (double)apd->srcPos - apd->dstPos) <= 0) {
+	    if (*nsrc == 0) return;
+	    apd->last[0].b = *src++;
+	    apd->srcPos++;
+	    (*nsrc)--;
+	}
+	/* now do the interpolation */
+	v = I(C816(apd->last[0].b), C816(src[0]), r);
+	W16(dst, v);		dst += 2;
+	W16(dst, v);		dst += 2;
+	apd->dstPos += apd->dstIncr;
+	(*ndst)--;
     }
 }
 
-static  void cvtMM816C(AcmPcmData* apd, const unsigned char* src, LPDWORD nsrc,
-            unsigned char* dst, LPDWORD ndst)
+static	void cvtMM816C(AcmPcmData* apd, const unsigned char* src, LPDWORD nsrc, 
+			unsigned char* dst, LPDWORD ndst)
 {
-    double      r;
+    double     	r;
 
     while (*nsrc != 0 && *ndst != 0) {
-    while ((r = (double)apd->srcPos - apd->dstPos) <= 0) {
-        if (*nsrc == 0) return;
-        apd->last[0].b = *src++;
-        apd->srcPos++;
-        (*nsrc)--;
-    }
-    /* now do the interpolation */
-    W16(dst, I(C816(apd->last[0].b), C816(src[0]), r));
-    dst += 2;
-    apd->dstPos += apd->dstIncr;
-    (*ndst)--;
+	while ((r = (double)apd->srcPos - apd->dstPos) <= 0) {
+	    if (*nsrc == 0) return;
+	    apd->last[0].b = *src++;
+	    apd->srcPos++;
+	    (*nsrc)--;
+	}
+	/* now do the interpolation */
+	W16(dst, I(C816(apd->last[0].b), C816(src[0]), r));
+	dst += 2;
+	apd->dstPos += apd->dstIncr;
+	(*ndst)--;
     }
 }
 
-static  void cvtSS168C(AcmPcmData* apd, const unsigned char* src, LPDWORD nsrc,
-            unsigned char* dst, LPDWORD ndst)
+static	void cvtSS168C(AcmPcmData* apd, const unsigned char* src, LPDWORD nsrc, 
+			unsigned char* dst, LPDWORD ndst)
 {
-    double      r;
+    double     	r;
 
     while (*nsrc != 0 && *ndst != 0) {
-    while ((r = (double)apd->srcPos - apd->dstPos) <= 0) {
-        if (*nsrc == 0) return;
-        apd->last[0].s = R16(src);  src += 2;
-        apd->last[1].s = R16(src);  src += 2;
-        apd->srcPos++;
-        (*nsrc)--;
-    }
-    /* now do the interpolation */
-    *dst++ = C168(I(apd->last[0].s, R16(src)  , r));
-    *dst++ = C168(I(apd->last[1].s, R16(src+2), r));
-    apd->dstPos += apd->dstIncr;
-    (*ndst)--;
+	while ((r = (double)apd->srcPos - apd->dstPos) <= 0) {
+	    if (*nsrc == 0) return;
+	    apd->last[0].s = R16(src);	src += 2;
+	    apd->last[1].s = R16(src);	src += 2;
+	    apd->srcPos++;
+	    (*nsrc)--;
+	}
+	/* now do the interpolation */
+	*dst++ = C168(I(apd->last[0].s, R16(src)  , r));
+	*dst++ = C168(I(apd->last[1].s, R16(src+2), r));
+	apd->dstPos += apd->dstIncr;
+	(*ndst)--;
     }
 }
 
-static  void cvtSM168C(AcmPcmData* apd, const unsigned char* src, LPDWORD nsrc,
-            unsigned char* dst, LPDWORD ndst)
+static	void cvtSM168C(AcmPcmData* apd, const unsigned char* src, LPDWORD nsrc, 
+			unsigned char* dst, LPDWORD ndst)
 {
-    double      r;
+    double     	r;
 
     while (*nsrc != 0 && *ndst != 0) {
-    while ((r = (double)apd->srcPos - apd->dstPos) <= 0) {
-        if (*nsrc == 0) return;
-        apd->last[0].s = R16(src);  src += 2;
-        apd->last[1].s = R16(src);  src += 2;
-        apd->srcPos++;
-        (*nsrc)--;
-    }
-    /* now do the interpolation */
-    *dst++ = C168(I(M16(apd->last[0].s, apd->last[1].s),
-            M16(R16(src), R16(src + 2)), r));
-    apd->dstPos += apd->dstIncr;
-    (*ndst)--;
-    }
-}
-
-
-static  void cvtMS168C(AcmPcmData* apd, const unsigned char* src, LPDWORD nsrc,
-            unsigned char* dst, LPDWORD ndst)
-{
-    double      r;
-
-    while (*nsrc != 0 && *ndst != 0) {
-    while ((r = (double)apd->srcPos - apd->dstPos) <= 0) {
-        if (*nsrc == 0) return;
-        apd->last[0].s = R16(src);  src += 2;
-        apd->srcPos++;
-        (*nsrc)--;
-    }
-    /* now do the interpolation */
-    dst[0] = dst[1] = C168(I(apd->last[0].s, R16(src), r)); dst += 2;
-    apd->dstPos += apd->dstIncr;
-    (*ndst)--;
+	while ((r = (double)apd->srcPos - apd->dstPos) <= 0) {
+	    if (*nsrc == 0) return;
+	    apd->last[0].s = R16(src);	src += 2;
+	    apd->last[1].s = R16(src);	src += 2;
+	    apd->srcPos++;
+	    (*nsrc)--;
+	}
+	/* now do the interpolation */
+	*dst++ = C168(I(M16(apd->last[0].s, apd->last[1].s), 
+			M16(R16(src), R16(src + 2)), r));
+	apd->dstPos += apd->dstIncr;
+	(*ndst)--;
     }
 }
 
 
-static  void cvtMM168C(AcmPcmData* apd, const unsigned char* src, LPDWORD nsrc,
-            unsigned char* dst, LPDWORD ndst)
+static	void cvtMS168C(AcmPcmData* apd, const unsigned char* src, LPDWORD nsrc, 
+			unsigned char* dst, LPDWORD ndst)
 {
-    double      r;
+    double     	r;
 
     while (*nsrc != 0 && *ndst != 0) {
-    while ((r = (double)apd->srcPos - apd->dstPos) <= 0) {
-        if (*nsrc == 0) return;
-        apd->last[0].s = R16(src);  src += 2;
-        apd->srcPos++;
-        (*nsrc)--;
-    }
-    /* now do the interpolation */
-    *dst++ = C168(I(apd->last[0].s, R16(src), r));
-    apd->dstPos += apd->dstIncr;
-    (*ndst)--;
+	while ((r = (double)apd->srcPos - apd->dstPos) <= 0) {
+	    if (*nsrc == 0) return;
+	    apd->last[0].s = R16(src);	src += 2;
+	    apd->srcPos++;
+	    (*nsrc)--;
+	}
+	/* now do the interpolation */
+	dst[0] = dst[1] = C168(I(apd->last[0].s, R16(src), r));	dst += 2;
+	apd->dstPos += apd->dstIncr;
+	(*ndst)--;
     }
 }
 
-static  void cvtSS1616C(AcmPcmData* apd, const unsigned char* src, LPDWORD nsrc,
-            unsigned char* dst, LPDWORD ndst)
+
+static	void cvtMM168C(AcmPcmData* apd, const unsigned char* src, LPDWORD nsrc, 
+			unsigned char* dst, LPDWORD ndst)
 {
-    double      r;
+    double     	r;
 
     while (*nsrc != 0 && *ndst != 0) {
-    while ((r = (double)apd->srcPos - apd->dstPos) <= 0) {
-        if (*nsrc == 0) return;
-        apd->last[0].s = R16(src);  src += 2;
-        apd->last[1].s = R16(src);  src += 2;
-        apd->srcPos++;
-        (*nsrc)--;
-    }
-    /* now do the interpolation */
-    W16(dst, I(apd->last[0].s, R16(src)  , r)); dst += 2;
-    W16(dst, I(apd->last[1].s, R16(src+2), r)); dst += 2;
-    apd->dstPos += apd->dstIncr;
-    (*ndst)--;
+	while ((r = (double)apd->srcPos - apd->dstPos) <= 0) {
+	    if (*nsrc == 0) return;
+	    apd->last[0].s = R16(src);	src += 2;
+	    apd->srcPos++;
+	    (*nsrc)--;
+	}
+	/* now do the interpolation */
+	*dst++ = C168(I(apd->last[0].s, R16(src), r));
+	apd->dstPos += apd->dstIncr;
+	(*ndst)--;
     }
 }
 
-static  void cvtSM1616C(AcmPcmData* apd, const unsigned char* src, LPDWORD nsrc,
-            unsigned char* dst, LPDWORD ndst)
+static	void cvtSS1616C(AcmPcmData* apd, const unsigned char* src, LPDWORD nsrc, 
+			unsigned char* dst, LPDWORD ndst)
 {
-    double      r;
+    double     	r;
 
     while (*nsrc != 0 && *ndst != 0) {
-    while ((r = (double)apd->srcPos - apd->dstPos) <= 0) {
-        if (*nsrc == 0) return;
-        apd->last[0].s = R16(src);  src += 2;
-        apd->last[1].s = R16(src);  src += 2;
-        apd->srcPos++;
-        (*nsrc)--;
-    }
-    /* now do the interpolation */
-    W16(dst, I(M16(apd->last[0].s, apd->last[1].s),
-           M16(R16(src), R16(src+2)), r));
-    dst += 2;
-    apd->dstPos += apd->dstIncr;
-    (*ndst)--;
+	while ((r = (double)apd->srcPos - apd->dstPos) <= 0) {
+	    if (*nsrc == 0) return;
+	    apd->last[0].s = R16(src);	src += 2;
+	    apd->last[1].s = R16(src);	src += 2;
+	    apd->srcPos++;
+	    (*nsrc)--;
+	}
+	/* now do the interpolation */
+	W16(dst, I(apd->last[0].s, R16(src)  , r));	dst += 2;
+	W16(dst, I(apd->last[1].s, R16(src+2), r));	dst += 2;
+	apd->dstPos += apd->dstIncr;
+	(*ndst)--;
     }
 }
 
-static  void cvtMS1616C(AcmPcmData* apd, const unsigned char* src, LPDWORD nsrc,
-            unsigned char* dst, LPDWORD ndst)
+static	void cvtSM1616C(AcmPcmData* apd, const unsigned char* src, LPDWORD nsrc, 
+			unsigned char* dst, LPDWORD ndst)
 {
-    double      r;
-    short   v;
+    double     	r;
 
     while (*nsrc != 0 && *ndst != 0) {
-    while ((r = (double)apd->srcPos - apd->dstPos) <= 0) {
-        if (*nsrc == 0) return;
-        apd->last[0].s = R16(src);  src += 2;
-        apd->srcPos++;
-        (*nsrc)--;
-    }
-    /* now do the interpolation */
-    v = I(apd->last[0].s, R16(src), r);
-    W16(dst, v);        dst += 2;
-    W16(dst, v);        dst += 2;
-    apd->dstPos += apd->dstIncr;
-    (*ndst)--;
+	while ((r = (double)apd->srcPos - apd->dstPos) <= 0) {
+	    if (*nsrc == 0) return;
+	    apd->last[0].s = R16(src);	src += 2;
+	    apd->last[1].s = R16(src);	src += 2;
+	    apd->srcPos++;
+	    (*nsrc)--;
+	}
+	/* now do the interpolation */
+ 	W16(dst, I(M16(apd->last[0].s, apd->last[1].s),
+ 		   M16(R16(src), R16(src+2)), r));
+ 	dst += 2;
+	apd->dstPos += apd->dstIncr;
+	(*ndst)--;
     }
 }
 
-static  void cvtMM1616C(AcmPcmData* apd, const unsigned char* src, LPDWORD nsrc,
-            unsigned char* dst, LPDWORD ndst)
+static	void cvtMS1616C(AcmPcmData* apd, const unsigned char* src, LPDWORD nsrc, 
+			unsigned char* dst, LPDWORD ndst)
 {
-    double      r;
+    double     	r;
+    short	v;
 
     while (*nsrc != 0 && *ndst != 0) {
-    while ((r = (double)apd->srcPos - apd->dstPos) <= 0) {
-        if (*nsrc == 0) return;
-        apd->last[0].s = R16(src);  src += 2;
-        apd->srcPos++;
-        (*nsrc)--;
-    }
-    /* now do the interpolation */
-    W16(dst, I(apd->last[0].s, R16(src), r));   dst += 2;
-    apd->dstPos += apd->dstIncr;
-    (*ndst)--;
+	while ((r = (double)apd->srcPos - apd->dstPos) <= 0) {
+	    if (*nsrc == 0) return;
+	    apd->last[0].s = R16(src);	src += 2;
+	    apd->srcPos++;
+	    (*nsrc)--;
+	}
+	/* now do the interpolation */
+	v = I(apd->last[0].s, R16(src), r);
+	W16(dst, v);		dst += 2;
+	W16(dst, v);		dst += 2;
+	apd->dstPos += apd->dstIncr;
+	(*ndst)--;
     }
 }
 
-static  void (*PCM_ConvertChangeRate[16])(AcmPcmData* apd,
-                      const unsigned char* src, LPDWORD nsrc,
-                      unsigned char* dst, LPDWORD ndst) = {
+static	void cvtMM1616C(AcmPcmData* apd, const unsigned char* src, LPDWORD nsrc, 
+			unsigned char* dst, LPDWORD ndst)
+{
+    double     	r;
+
+    while (*nsrc != 0 && *ndst != 0) {
+	while ((r = (double)apd->srcPos - apd->dstPos) <= 0) {
+	    if (*nsrc == 0) return;
+	    apd->last[0].s = R16(src);	src += 2;
+	    apd->srcPos++;
+	    (*nsrc)--;
+	}
+	/* now do the interpolation */
+	W16(dst, I(apd->last[0].s, R16(src), r));	dst += 2;
+	apd->dstPos += apd->dstIncr;
+	(*ndst)--;
+    }
+}
+
+static	void (*PCM_ConvertChangeRate[16])(AcmPcmData* apd, 
+					  const unsigned char* src, LPDWORD nsrc, 
+					  unsigned char* dst, LPDWORD ndst) = {
     cvtSS88C,   cvtSM88C,   cvtMS88C,   cvtMM88C,
-    cvtSS816C,  cvtSM816C,  cvtMS816C,  cvtMM816C,
-    cvtSS168C,  cvtSM168C,  cvtMS168C,  cvtMM168C,
+    cvtSS816C,	cvtSM816C,  cvtMS816C,  cvtMM816C,
+    cvtSS168C,	cvtSM168C,  cvtMS168C,  cvtMM168C,
     cvtSS1616C, cvtSM1616C, cvtMS1616C, cvtMM1616C,
 };
 
@@ -690,7 +690,7 @@ static  void (*PCM_ConvertChangeRate[16])(AcmPcmData* apd,
  *           PCM_DriverDetails
  *
  */
-static  LRESULT PCM_DriverDetails(PACMDRIVERDETAILSW add)
+static	LRESULT PCM_DriverDetails(PACMDRIVERDETAILSW add)
 {
     add->fccType = ACMDRIVERDETAILS_FCCTYPE_AUDIOCODEC;
     add->fccComp = ACMDRIVERDETAILS_FCCCOMP_UNDEFINED;
@@ -711,7 +711,7 @@ static  LRESULT PCM_DriverDetails(PACMDRIVERDETAILSW add)
     MultiByteToWideChar( CP_ACP, 0, "Refer to LICENSE file", -1,
                          add->szLicensing, sizeof(add->szLicensing)/sizeof(WCHAR) );
     add->szFeatures[0] = 0;
-
+    
     return MMSYSERR_NOERROR;
 }
 
@@ -719,32 +719,32 @@ static  LRESULT PCM_DriverDetails(PACMDRIVERDETAILSW add)
  *           PCM_FormatTagDetails
  *
  */
-static  LRESULT PCM_FormatTagDetails(PACMFORMATTAGDETAILSW aftd, DWORD dwQuery)
+static	LRESULT	PCM_FormatTagDetails(PACMFORMATTAGDETAILSW aftd, DWORD dwQuery)
 {
     switch (dwQuery) {
     case ACM_FORMATTAGDETAILSF_INDEX:
-    if (aftd->dwFormatTagIndex != 0) return ACMERR_NOTPOSSIBLE;
-    break;
-    case ACM_FORMATTAGDETAILSF_FORMATTAG:
-    if (aftd->dwFormatTag != WAVE_FORMAT_PCM) return ACMERR_NOTPOSSIBLE;
-    break;
+	if (aftd->dwFormatTagIndex != 0) return ACMERR_NOTPOSSIBLE;
+	break;
+    case ACM_FORMATTAGDETAILSF_FORMATTAG: 
+	if (aftd->dwFormatTag != WAVE_FORMAT_PCM) return ACMERR_NOTPOSSIBLE;
+	break;
     case ACM_FORMATTAGDETAILSF_LARGESTSIZE:
-    if (aftd->dwFormatTag != WAVE_FORMAT_UNKNOWN &&
-        aftd->dwFormatTag != WAVE_FORMAT_UNKNOWN)
-        return ACMERR_NOTPOSSIBLE;
-    break;
+	if (aftd->dwFormatTag != WAVE_FORMAT_UNKNOWN && 
+	    aftd->dwFormatTag != WAVE_FORMAT_UNKNOWN)
+	    return ACMERR_NOTPOSSIBLE;
+	break;
     default:
-    WARN("Unsupported query %08lx\n", dwQuery);
-    return MMSYSERR_NOTSUPPORTED;
+	WARN("Unsupported query %08lx\n", dwQuery);
+	return MMSYSERR_NOTSUPPORTED;
     }
-
+    
     aftd->dwFormatTagIndex = 0;
     aftd->dwFormatTag = WAVE_FORMAT_PCM;
     aftd->cbFormatSize = sizeof(PCMWAVEFORMAT);
     aftd->fdwSupport = ACMDRIVERDETAILS_SUPPORTF_CONVERTER;
     aftd->cStandardFormats = NUM_PCM_FORMATS;
     aftd->szFormatTag[0] = 0;
-
+    
     return MMSYSERR_NOERROR;
 }
 
@@ -752,36 +752,36 @@ static  LRESULT PCM_FormatTagDetails(PACMFORMATTAGDETAILSW aftd, DWORD dwQuery)
  *           PCM_FormatDetails
  *
  */
-static  LRESULT PCM_FormatDetails(PACMFORMATDETAILSW afd, DWORD dwQuery)
+static	LRESULT	PCM_FormatDetails(PACMFORMATDETAILSW afd, DWORD dwQuery)
 {
     switch (dwQuery) {
     case ACM_FORMATDETAILSF_FORMAT:
-    afd->dwFormatIndex = PCM_GetFormatIndex(afd->pwfx);
-    if (afd->dwFormatIndex == 0xFFFFFFFF) return ACMERR_NOTPOSSIBLE;
-    break;
+	afd->dwFormatIndex = PCM_GetFormatIndex(afd->pwfx);
+	if (afd->dwFormatIndex == 0xFFFFFFFF) return ACMERR_NOTPOSSIBLE;
+	break;
     case ACM_FORMATDETAILSF_INDEX:
-    assert(afd->dwFormatIndex < NUM_PCM_FORMATS);
-    afd->pwfx->wFormatTag = WAVE_FORMAT_PCM;
-    afd->pwfx->nChannels = PCM_Formats[afd->dwFormatIndex].nChannels;
-    afd->pwfx->nSamplesPerSec = PCM_Formats[afd->dwFormatIndex].rate;
-    afd->pwfx->wBitsPerSample = PCM_Formats[afd->dwFormatIndex].nBits;
-    /* native MSACM uses a PCMWAVEFORMAT structure, so cbSize is not accessible
-     * afd->pwfx->cbSize = 0;
-     */
-    afd->pwfx->nBlockAlign =
-        (afd->pwfx->nChannels * afd->pwfx->wBitsPerSample) / 8;
-    afd->pwfx->nAvgBytesPerSec =
-        afd->pwfx->nSamplesPerSec * afd->pwfx->nBlockAlign;
-    break;
+	assert(afd->dwFormatIndex < NUM_PCM_FORMATS);
+	afd->pwfx->wFormatTag = WAVE_FORMAT_PCM;
+	afd->pwfx->nChannels = PCM_Formats[afd->dwFormatIndex].nChannels;
+	afd->pwfx->nSamplesPerSec = PCM_Formats[afd->dwFormatIndex].rate;
+	afd->pwfx->wBitsPerSample = PCM_Formats[afd->dwFormatIndex].nBits;
+	/* native MSACM uses a PCMWAVEFORMAT structure, so cbSize is not accessible
+	 * afd->pwfx->cbSize = 0; 
+	 */
+	afd->pwfx->nBlockAlign = 
+	    (afd->pwfx->nChannels * afd->pwfx->wBitsPerSample) / 8;
+	afd->pwfx->nAvgBytesPerSec = 
+	    afd->pwfx->nSamplesPerSec * afd->pwfx->nBlockAlign;
+	break;
     default:
-    WARN("Unsupported query %08lx\n", dwQuery);
-    return MMSYSERR_NOTSUPPORTED;
+	WARN("Unsupported query %08lx\n", dwQuery);
+	return MMSYSERR_NOTSUPPORTED;	
     }
-
+    
     afd->dwFormatTag = WAVE_FORMAT_PCM;
     afd->fdwSupport = ACMDRIVERDETAILS_SUPPORTF_CONVERTER;
     afd->szFormat[0] = 0; /* let MSACM format this for us... */
-
+    
     return MMSYSERR_NOERROR;
 }
 
@@ -789,7 +789,7 @@ static  LRESULT PCM_FormatDetails(PACMFORMATDETAILSW afd, DWORD dwQuery)
  *           PCM_FormatSuggest
  *
  */
-static  LRESULT PCM_FormatSuggest(PACMDRVFORMATSUGGEST adfs)
+static	LRESULT	PCM_FormatSuggest(PACMDRVFORMATSUGGEST adfs)
 {
     FIXME("(%p);\n", adfs);
     return MMSYSERR_NOTSUPPORTED;
@@ -799,17 +799,17 @@ static  LRESULT PCM_FormatSuggest(PACMDRVFORMATSUGGEST adfs)
  *           PCM_Reset
  *
  */
-static  void    PCM_Reset(AcmPcmData* apd, int srcNumBits)
+static	void	PCM_Reset(AcmPcmData* apd, int srcNumBits)
 {
     apd->srcPos = 0;
     apd->dstPos = 0;
     /* initialize with neutral value */
     if (srcNumBits == 16) {
-    apd->last[0].s = 0;
-    apd->last[1].s = 0;
+	apd->last[0].s = 0;
+	apd->last[1].s = 0;
     } else {
-    apd->last[0].b = (BYTE)0x80;
-    apd->last[1].b = (BYTE)0x80;
+	apd->last[0].b = (BYTE)0x80;
+	apd->last[1].b = (BYTE)0x80;
     }
 }
 
@@ -817,36 +817,36 @@ static  void    PCM_Reset(AcmPcmData* apd, int srcNumBits)
  *           PCM_StreamOpen
  *
  */
-static  LRESULT PCM_StreamOpen(PACMDRVSTREAMINSTANCE adsi)
+static	LRESULT	PCM_StreamOpen(PACMDRVSTREAMINSTANCE adsi)
 {
-    AcmPcmData* apd;
-    int     idx = 0;
+    AcmPcmData*	apd;
+    int		idx = 0;
 
     assert(!(adsi->fdwOpen & ACM_STREAMOPENF_ASYNC));
-
+    
     if (PCM_GetFormatIndex(adsi->pwfxSrc) == 0xFFFFFFFF ||
-    PCM_GetFormatIndex(adsi->pwfxDst) == 0xFFFFFFFF)
-    return ACMERR_NOTPOSSIBLE;
+	PCM_GetFormatIndex(adsi->pwfxDst) == 0xFFFFFFFF)
+	return ACMERR_NOTPOSSIBLE;
 
     apd = HeapAlloc(GetProcessHeap(), 0, sizeof(AcmPcmData));
     if (apd == 0) return MMSYSERR_NOMEM;
 
     adsi->dwDriver = (DWORD)apd;
     adsi->fdwDriver = 0;
-
+    
     if (adsi->pwfxSrc->wBitsPerSample == 16) idx += 8;
     if (adsi->pwfxDst->wBitsPerSample == 16) idx += 4;
     if (adsi->pwfxSrc->nChannels      == 1)  idx += 2;
     if (adsi->pwfxDst->nChannels      == 1)  idx += 1;
 
     if (adsi->pwfxSrc->nSamplesPerSec == adsi->pwfxDst->nSamplesPerSec) {
-    apd->cvt.cvtKeepRate = PCM_ConvertKeepRate[idx];
+	apd->cvt.cvtKeepRate = PCM_ConvertKeepRate[idx];
     } else {
-    adsi->fdwDriver |= PCM_RESAMPLE;
-    apd->dstIncr = (double)(adsi->pwfxSrc->nSamplesPerSec) /
-        (double)(adsi->pwfxDst->nSamplesPerSec);
-    PCM_Reset(apd, adsi->pwfxSrc->wBitsPerSample);
-    apd->cvt.cvtChangeRate = PCM_ConvertChangeRate[idx];
+	adsi->fdwDriver |= PCM_RESAMPLE;
+	apd->dstIncr = (double)(adsi->pwfxSrc->nSamplesPerSec) /
+	    (double)(adsi->pwfxDst->nSamplesPerSec);
+	PCM_Reset(apd, adsi->pwfxSrc->wBitsPerSample);
+	apd->cvt.cvtChangeRate = PCM_ConvertChangeRate[idx];
     }
 
     return MMSYSERR_NOERROR;
@@ -856,7 +856,7 @@ static  LRESULT PCM_StreamOpen(PACMDRVSTREAMINSTANCE adsi)
  *           PCM_StreamClose
  *
  */
-static  LRESULT PCM_StreamClose(PACMDRVSTREAMINSTANCE adsi)
+static	LRESULT	PCM_StreamClose(PACMDRVSTREAMINSTANCE adsi)
 {
     HeapFree(GetProcessHeap(), 0, (void*)adsi->dwDriver);
     return MMSYSERR_NOERROR;
@@ -866,7 +866,7 @@ static  LRESULT PCM_StreamClose(PACMDRVSTREAMINSTANCE adsi)
  *           PCM_round
  *
  */
-static  inline DWORD    PCM_round(DWORD a, DWORD b, DWORD c)
+static	inline DWORD	PCM_round(DWORD a, DWORD b, DWORD c)
 {
     assert(a && b && c);
     /* to be sure, always return an entire number of c... */
@@ -877,24 +877,24 @@ static  inline DWORD    PCM_round(DWORD a, DWORD b, DWORD c)
  *           PCM_StreamSize
  *
  */
-static  LRESULT PCM_StreamSize(PACMDRVSTREAMINSTANCE adsi, PACMDRVSTREAMSIZE adss)
+static	LRESULT PCM_StreamSize(PACMDRVSTREAMINSTANCE adsi, PACMDRVSTREAMSIZE adss)
 {
     switch (adss->fdwSize) {
     case ACM_STREAMSIZEF_DESTINATION:
-    /* cbDstLength => cbSrcLength */
-    adss->cbSrcLength = PCM_round(adss->cbDstLength,
-                      adsi->pwfxSrc->nAvgBytesPerSec,
-                      adsi->pwfxDst->nAvgBytesPerSec);
-    break;
+	/* cbDstLength => cbSrcLength */
+	adss->cbSrcLength = PCM_round(adss->cbDstLength, 
+				      adsi->pwfxSrc->nAvgBytesPerSec, 
+				      adsi->pwfxDst->nAvgBytesPerSec);
+	break;
     case ACM_STREAMSIZEF_SOURCE:
-    /* cbSrcLength => cbDstLength */
-    adss->cbDstLength =  PCM_round(adss->cbSrcLength,
-                       adsi->pwfxDst->nAvgBytesPerSec,
-                       adsi->pwfxSrc->nAvgBytesPerSec);
-    break;
+	/* cbSrcLength => cbDstLength */
+	adss->cbDstLength =  PCM_round(adss->cbSrcLength, 
+				       adsi->pwfxDst->nAvgBytesPerSec, 
+				       adsi->pwfxSrc->nAvgBytesPerSec);
+	break;
     default:
-    WARN("Unsupported query %08lx\n", adss->fdwSize);
-    return MMSYSERR_NOTSUPPORTED;
+	WARN("Unsupported query %08lx\n", adss->fdwSize);
+	return MMSYSERR_NOTSUPPORTED;	
     }
     return MMSYSERR_NOERROR;
 }
@@ -905,39 +905,39 @@ static  LRESULT PCM_StreamSize(PACMDRVSTREAMINSTANCE adsi, PACMDRVSTREAMSIZE ads
  */
 static LRESULT PCM_StreamConvert(PACMDRVSTREAMINSTANCE adsi, PACMDRVSTREAMHEADER adsh)
 {
-    AcmPcmData* apd = (AcmPcmData*)adsi->dwDriver;
-    DWORD   nsrc = NUM_OF(adsh->cbSrcLength, adsi->pwfxSrc->nBlockAlign);
-    DWORD   ndst = NUM_OF(adsh->cbDstLength, adsi->pwfxDst->nBlockAlign);
+    AcmPcmData*	apd = (AcmPcmData*)adsi->dwDriver;
+    DWORD	nsrc = NUM_OF(adsh->cbSrcLength, adsi->pwfxSrc->nBlockAlign);
+    DWORD	ndst = NUM_OF(adsh->cbDstLength, adsi->pwfxDst->nBlockAlign);
 
-    if (adsh->fdwConvert &
-    ~(ACM_STREAMCONVERTF_BLOCKALIGN|
-      ACM_STREAMCONVERTF_END|
-      ACM_STREAMCONVERTF_START)) {
-    FIXME("Unsupported fdwConvert (%08lx), ignoring it\n", adsh->fdwConvert);
+    if (adsh->fdwConvert & 
+	~(ACM_STREAMCONVERTF_BLOCKALIGN|
+	  ACM_STREAMCONVERTF_END|
+	  ACM_STREAMCONVERTF_START)) {
+	FIXME("Unsupported fdwConvert (%08lx), ignoring it\n", adsh->fdwConvert);
     }
     /* ACM_STREAMCONVERTF_BLOCKALIGN
-     *  currently all conversions are block aligned, so do nothing for this flag
+     *	currently all conversions are block aligned, so do nothing for this flag
      * ACM_STREAMCONVERTF_END
-     *  no pending data, so do nothing for this flag
+     *	no pending data, so do nothing for this flag
      */
-    if ((adsh->fdwConvert & ACM_STREAMCONVERTF_START) &&
-    (adsi->fdwDriver & PCM_RESAMPLE)) {
-    PCM_Reset(apd, adsi->pwfxSrc->wBitsPerSample);
+    if ((adsh->fdwConvert & ACM_STREAMCONVERTF_START) && 
+	(adsi->fdwDriver & PCM_RESAMPLE)) {
+	PCM_Reset(apd, adsi->pwfxSrc->wBitsPerSample);
     }
 
     /* do the job */
     if (adsi->fdwDriver & PCM_RESAMPLE) {
-    DWORD   nsrc2 = nsrc;
-    DWORD   ndst2 = ndst;
+	DWORD	nsrc2 = nsrc;
+	DWORD	ndst2 = ndst;
 
-    apd->cvt.cvtChangeRate(apd, adsh->pbSrc, &nsrc2, adsh->pbDst, &ndst2);
-    nsrc -= nsrc2;
-    ndst -= ndst2;
+	apd->cvt.cvtChangeRate(apd, adsh->pbSrc, &nsrc2, adsh->pbDst, &ndst2);
+	nsrc -= nsrc2;
+	ndst -= ndst2;
     } else {
-    if (nsrc < ndst) ndst = nsrc; else nsrc = ndst;
+	if (nsrc < ndst) ndst = nsrc; else nsrc = ndst;
 
-    /* nsrc is now equal to ndst */
-    apd->cvt.cvtKeepRate(adsh->pbSrc, nsrc, adsh->pbDst);
+	/* nsrc is now equal to ndst */
+	apd->cvt.cvtKeepRate(adsh->pbSrc, nsrc, adsh->pbDst);
     }
 
     adsh->cbSrcLengthUsed = nsrc * adsi->pwfxSrc->nBlockAlign;
@@ -947,69 +947,69 @@ static LRESULT PCM_StreamConvert(PACMDRVSTREAMINSTANCE adsi, PACMDRVSTREAMHEADER
 }
 
 /**************************************************************************
- *          PCM_DriverProc          [exported]
+ * 			PCM_DriverProc			[exported]
  */
-LRESULT CALLBACK    PCM_DriverProc(DWORD dwDevID, HDRVR hDriv, UINT wMsg,
-                       LPARAM dwParam1, LPARAM dwParam2)
+LRESULT CALLBACK	PCM_DriverProc(DWORD dwDevID, HDRVR hDriv, UINT wMsg, 
+				       LPARAM dwParam1, LPARAM dwParam2)
 {
-    TRACE("(%08lx %08lx %u %08lx %08lx);\n",
-      dwDevID, (DWORD)hDriv, wMsg, dwParam1, dwParam2);
-
+    TRACE("(%08lx %08lx %u %08lx %08lx);\n", 
+	  dwDevID, (DWORD)hDriv, wMsg, dwParam1, dwParam2);
+    
     switch (wMsg) {
-    case DRV_LOAD:      return 1;
-    case DRV_FREE:      return 1;
-    case DRV_OPEN:      return PCM_drvOpen((LPSTR)dwParam1);
-    case DRV_CLOSE:     return PCM_drvClose(dwDevID);
-    case DRV_ENABLE:        return 1;
-    case DRV_DISABLE:       return 1;
-    case DRV_QUERYCONFIGURE:    return 1;
-    case DRV_CONFIGURE:     MessageBoxA(0, "MSACM PCM filter !", "Wine Driver", MB_OK); return 1;
-    case DRV_INSTALL:       return DRVCNF_RESTART;
-    case DRV_REMOVE:        return DRVCNF_RESTART;
-
+    case DRV_LOAD:		return 1;
+    case DRV_FREE:		return 1;
+    case DRV_OPEN:		return PCM_drvOpen((LPSTR)dwParam1);
+    case DRV_CLOSE:		return PCM_drvClose(dwDevID);
+    case DRV_ENABLE:		return 1;	
+    case DRV_DISABLE:		return 1;
+    case DRV_QUERYCONFIGURE:	return 1;
+    case DRV_CONFIGURE:		MessageBoxA(0, "MSACM PCM filter !", "Wine Driver", MB_OK); return 1;
+    case DRV_INSTALL:		return DRVCNF_RESTART;
+    case DRV_REMOVE:		return DRVCNF_RESTART;
+	
     case ACMDM_DRIVER_NOTIFY:
-    /* no caching from other ACM drivers is done so far */
-    return MMSYSERR_NOERROR;
-
+	/* no caching from other ACM drivers is done so far */
+	return MMSYSERR_NOERROR;
+	
     case ACMDM_DRIVER_DETAILS:
-    return PCM_DriverDetails((PACMDRIVERDETAILSW)dwParam1);
-
+	return PCM_DriverDetails((PACMDRIVERDETAILSW)dwParam1);
+	
     case ACMDM_FORMATTAG_DETAILS:
-    return PCM_FormatTagDetails((PACMFORMATTAGDETAILSW)dwParam1, dwParam2);
-
+	return PCM_FormatTagDetails((PACMFORMATTAGDETAILSW)dwParam1, dwParam2);
+	
     case ACMDM_FORMAT_DETAILS:
-    return PCM_FormatDetails((PACMFORMATDETAILSW)dwParam1, dwParam2);
-
+	return PCM_FormatDetails((PACMFORMATDETAILSW)dwParam1, dwParam2);
+	
     case ACMDM_FORMAT_SUGGEST:
-    return PCM_FormatSuggest((PACMDRVFORMATSUGGEST)dwParam1);
-
+	return PCM_FormatSuggest((PACMDRVFORMATSUGGEST)dwParam1);
+	
     case ACMDM_STREAM_OPEN:
-    return PCM_StreamOpen((PACMDRVSTREAMINSTANCE)dwParam1);
-
+	return PCM_StreamOpen((PACMDRVSTREAMINSTANCE)dwParam1);
+	
     case ACMDM_STREAM_CLOSE:
-    return PCM_StreamClose((PACMDRVSTREAMINSTANCE)dwParam1);
-
+	return PCM_StreamClose((PACMDRVSTREAMINSTANCE)dwParam1);
+	
     case ACMDM_STREAM_SIZE:
-    return PCM_StreamSize((PACMDRVSTREAMINSTANCE)dwParam1, (PACMDRVSTREAMSIZE)dwParam2);
-
+	return PCM_StreamSize((PACMDRVSTREAMINSTANCE)dwParam1, (PACMDRVSTREAMSIZE)dwParam2);
+	
     case ACMDM_STREAM_CONVERT:
-    return PCM_StreamConvert((PACMDRVSTREAMINSTANCE)dwParam1, (PACMDRVSTREAMHEADER)dwParam2);
-
+	return PCM_StreamConvert((PACMDRVSTREAMINSTANCE)dwParam1, (PACMDRVSTREAMHEADER)dwParam2);
+	
     case ACMDM_HARDWARE_WAVE_CAPS_INPUT:
     case ACMDM_HARDWARE_WAVE_CAPS_OUTPUT:
-    /* this converter is not a hardware driver */
+	/* this converter is not a hardware driver */
     case ACMDM_FILTERTAG_DETAILS:
     case ACMDM_FILTER_DETAILS:
-    /* this converter is not a filter */
+	/* this converter is not a filter */
     case ACMDM_STREAM_RESET:
-    /* only needed for asynchronous driver... we aren't, so just say it */
+	/* only needed for asynchronous driver... we aren't, so just say it */
     case ACMDM_STREAM_PREPARE:
     case ACMDM_STREAM_UNPREPARE:
-    /* nothing special to do here... so don't do anything */
-    return MMSYSERR_NOTSUPPORTED;
-
+	/* nothing special to do here... so don't do anything */
+	return MMSYSERR_NOTSUPPORTED;
+	
     default:
-    return DefDriverProc(dwDevID, hDriv, wMsg, dwParam1, dwParam2);
+	return DefDriverProc(dwDevID, hDriv, wMsg, dwParam1, dwParam2);
     }
     return 0;
 }

@@ -1,4 +1,3 @@
-/* $Id: persist.c,v 1.2 2001-09-05 13:39:12 bird Exp $ */
 /*
  * Implementation of IPersist interfaces for IE Web Browser control
  *
@@ -81,7 +80,7 @@ static HRESULT WINAPI WBPS_SaveCompleted(LPPERSISTSTORAGE iface, LPSTORAGE pStgN
  * IPersistStorage virtual function table for IE Web Browser component
  */
 
-static ICOM_VTABLE(IPersistStorage) WBPS_Vtbl =
+static ICOM_VTABLE(IPersistStorage) WBPS_Vtbl = 
 {
     ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
     WBPS_QueryInterface,
@@ -170,7 +169,7 @@ static HRESULT WINAPI WBPSI_InitNew(LPPERSISTSTREAMINIT iface)
  * IPersistStreamInit virtual function table for IE Web Browser component
  */
 
-static ICOM_VTABLE(IPersistStreamInit) WBPSI_Vtbl =
+static ICOM_VTABLE(IPersistStreamInit) WBPSI_Vtbl = 
 {
     ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
     WBPSI_QueryInterface,

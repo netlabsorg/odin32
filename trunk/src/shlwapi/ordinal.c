@@ -1,4 +1,3 @@
-/* $Id: ordinal.c,v 1.6 2001-09-05 13:48:37 bird Exp $ */
 /*
  * SHLWAPI ordinal functions
  *
@@ -65,84 +64,84 @@ extern HMODULE SHLWAPI_hmlang;
 */
 #ifndef __WIN32OS2__
 /*************************************************************************
- *      SHLWAPI_1   [SHLWAPI.1]
+ *      SHLWAPI_1	[SHLWAPI.1]
  */
 DWORD WINAPI SHLWAPI_1 (
-    LPSTR   lpURL,
-    LPDWORD lpdwFlags)
+	LPSTR   lpURL,
+	LPDWORD lpdwFlags)
 {
   if (lpURL == NULL)
     return E_INVALIDARG;
-
+  
   if (lpdwFlags == NULL)
     return E_INVALIDARG;
-
+  
   // verify flags
   if (*lpdwFlags != 0x18)   // some unknown flag
     return E_INVALIDARG;      // some unknown error condition
-
+  
   FIXME("(%p %s %p %s)\n",lpStr, debugstr_a(lpStr),x, debugstr_a(x));
   return 0;
 }
 
 /*************************************************************************
- *      SHLWAPI_2   [SHLWAPI.2]
+ *      SHLWAPI_2	[SHLWAPI.2]
  */
 DWORD WINAPI SHLWAPI_2 (LPCWSTR x,LPVOID y)
 {
-    FIXME("(%s,%p)\n",debugstr_w(x),y);
-    return 0;
+	FIXME("(%s,%p)\n",debugstr_w(x),y);
+	return 0;
 }
 
 /*************************************************************************
- *      SHLWAPI_16  [SHLWAPI.16]
+ *      SHLWAPI_16	[SHLWAPI.16]
  */
 HRESULT WINAPI SHLWAPI_16 (
-    LPVOID w,
-    LPVOID x,
-    LPVOID y,
-    LPWSTR z)
+	LPVOID w,
+	LPVOID x,
+	LPVOID y,
+	LPWSTR z)
 {
-    FIXME("(%p %p %p %p)stub\n",w,x,y,z);
-    return 0xabba1252;
+	FIXME("(%p %p %p %p)stub\n",w,x,y,z);
+	return 0xabba1252;
 }
 #endif
 
 /*************************************************************************
- *      SHLWAPI_23  [SHLWAPI.23]
+ *      SHLWAPI_23	[SHLWAPI.23]
  *
  * NOTES
- *  converts a guid to a string
- *  returns strlen(str)
+ *	converts a guid to a string
+ *	returns strlen(str)
  */
 DWORD WINAPI SHLWAPI_23 (
-    REFGUID guid,   /* [in]  clsid */
-    LPSTR str,  /* [out] buffer */
-    INT cmax)   /* [in]  size of buffer */
+	REFGUID guid,	/* [in]  clsid */
+	LPSTR str,	/* [out] buffer */
+	INT cmax)	/* [in]  size of buffer */
 {
-    char xguid[40];
+	char xguid[40];
 
         sprintf( xguid, "{%08lx-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x}",
                  guid->Data1, guid->Data2, guid->Data3,
                  guid->Data4[0], guid->Data4[1], guid->Data4[2], guid->Data4[3],
                  guid->Data4[4], guid->Data4[5], guid->Data4[6], guid->Data4[7] );
-    TRACE("(%s %p 0x%08x)stub\n", xguid, str, cmax);
-    if (strlen(xguid)>=cmax) return 0;
-    strcpy(str,xguid);
-    return strlen(xguid) + 1;
+	TRACE("(%s %p 0x%08x)stub\n", xguid, str, cmax);
+	if (strlen(xguid)>=cmax) return 0;
+	strcpy(str,xguid);
+	return strlen(xguid) + 1;
 }
 
 /*************************************************************************
- *      SHLWAPI_24  [SHLWAPI.24]
+ *      SHLWAPI_24	[SHLWAPI.24]
  *
  * NOTES
- *  converts a guid to a string
- *  returns strlen(str)
+ *	converts a guid to a string
+ *	returns strlen(str)
  */
 DWORD WINAPI SHLWAPI_24 (
-    REFGUID guid,   /* [in]  clsid */
-    LPWSTR str, /* [out] buffer */
-    INT cmax)   /* [in]  size of buffer */
+	REFGUID guid,	/* [in]  clsid */
+	LPWSTR str,	/* [out] buffer */
+	INT cmax)	/* [in]  size of buffer */
 {
     char xguid[40];
 
@@ -154,7 +153,7 @@ DWORD WINAPI SHLWAPI_24 (
 }
 
 /*************************************************************************
- *      SHLWAPI_30  [SHLWAPI.30]
+ *      SHLWAPI_30	[SHLWAPI.30]
  *
  * Seems to be an isspaceW.
  */
@@ -173,7 +172,7 @@ BOOL WINAPI SHLWAPI_30(LPWSTR lpcChar)
 }
 
 /*************************************************************************
- *      SHLWAPI_32  [SHLWAPI.32]
+ *      SHLWAPI_32	[SHLWAPI.32]
  */
 BOOL WINAPI SHLWAPI_32(LPCWSTR lpcChar)
 {
@@ -187,7 +186,7 @@ BOOL WINAPI SHLWAPI_32(LPCWSTR lpcChar)
 }
 
 /*************************************************************************
- *      SHLWAPI_40  [SHLWAPI.40]
+ *      SHLWAPI_40	[SHLWAPI.40]
  *
  * Get pointer to next Unicode character.
  */
@@ -197,7 +196,7 @@ LPCWSTR WINAPI SHLWAPI_40(LPCWSTR str)
 }
 
 /*************************************************************************
- *      SHLWAPI_74  [SHLWAPI.74]
+ *      SHLWAPI_74	[SHLWAPI.74]
  *
  * Get the text from a given dialog item.
  */
@@ -212,7 +211,7 @@ INT WINAPI SHLWAPI_74(HWND hWnd, INT nItem, LPWSTR lpsDest,INT nDestLen)
   return 0;
 }
 /*************************************************************************
- *      SHLWAPI_151 [SHLWAPI.151]
+ *      SHLWAPI_151	[SHLWAPI.151]
  */
 #ifdef __WIN32OS2__
 DWORD WINAPI SHLWAPI_151(LPSTR str1, LPSTR str2, INT len)
@@ -238,7 +237,7 @@ DWORD WINAPI SHLWAPI_151(void)
 #endif
 
 /*************************************************************************
- *      SHLWAPI_152 [SHLWAPI.152]
+ *      SHLWAPI_152	[SHLWAPI.152]
  */
 DWORD WINAPI SHLWAPI_152(LPWSTR str1, LPWSTR str2, INT len)
 {
@@ -254,7 +253,7 @@ DWORD WINAPI SHLWAPI_152(LPWSTR str1, LPWSTR str2, INT len)
 }
 
 /*************************************************************************
- *      SHLWAPI_153 [SHLWAPI.153]
+ *      SHLWAPI_153	[SHLWAPI.153]
  */
 #ifdef __WIN32OS2__
 //case insensitive string compare with length (ascii)
@@ -284,9 +283,9 @@ DWORD WINAPI SHLWAPI_153(DWORD dw1, DWORD dw2, DWORD dw3)
 #endif
 
 /*************************************************************************
- *      SHLWAPI_156 [SHLWAPI.156]
+ *      SHLWAPI_156	[SHLWAPI.156]
  *
- *  Case sensitive string compare. Does not SetLastError().
+ *	Case sensitive string compare. Does not SetLastError().
  */
 DWORD WINAPI SHLWAPI_156 ( LPWSTR str1, LPWSTR str2)
 {
@@ -295,7 +294,7 @@ DWORD WINAPI SHLWAPI_156 ( LPWSTR str1, LPWSTR str2)
 }
 
 /*************************************************************************
- *      SHLWAPI_162 [SHLWAPI.162]
+ *      SHLWAPI_162	[SHLWAPI.162]
  *
  * Ensure a multibyte character string doesn't end in a hanging lead byte.
  */
@@ -319,7 +318,7 @@ DWORD WINAPI SHLWAPI_162(LPSTR lpStr, DWORD size)
 }
 
 /*************************************************************************
- *      SHLWAPI_165 [SHLWAPI.165]
+ *      SHLWAPI_165	[SHLWAPI.165]
  *
  * SetWindowLongA with mask.
  */
@@ -334,20 +333,20 @@ LONG WINAPI SHLWAPI_165(HWND hwnd, INT offset, UINT wFlags, UINT wMask)
 }
 
 /*************************************************************************
- *      SHLWAPI_169 [SHLWAPI.169]
+ *      SHLWAPI_169	[SHLWAPI.169]
  */
 DWORD WINAPI SHLWAPI_169 (IUnknown * lpUnknown)
 {
-    TRACE("(%p)\n",lpUnknown);
+	TRACE("(%p)\n",lpUnknown);
 #if 0
-    if(!lpUnknown || !*((LPDWORD)lpUnknown)) return 0;
-    return IUnknown_Release(lpUnknown);
+	if(!lpUnknown || !*((LPDWORD)lpUnknown)) return 0;
+	return IUnknown_Release(lpUnknown);
 #endif
-    return 0;
+	return 0;
 }
 
 /*************************************************************************
- *      SHLWAPI_170 [SHLWAPI.170]
+ *      SHLWAPI_170	[SHLWAPI.170]
  *
  * Skip URL '//' sequence.
  */
@@ -359,9 +358,9 @@ LPCSTR WINAPI SHLWAPI_170(LPCSTR lpszSrc)
 }
 
 /*************************************************************************
- *      SHLWAPI_181 [SHLWAPI.181]
+ *      SHLWAPI_181	[SHLWAPI.181]
  *
- *  Enable or disable a menu item.
+ *	Enable or disable a menu item.
  */
 UINT WINAPI SHLWAPI_181(HMENU hMenu, UINT wItemID, BOOL bEnable)
 {
@@ -369,7 +368,7 @@ UINT WINAPI SHLWAPI_181(HMENU hMenu, UINT wItemID, BOOL bEnable)
 }
 
 /*************************************************************************
- *      SHLWAPI_183 [SHLWAPI.183]
+ *      SHLWAPI_183	[SHLWAPI.183]
  *
  * Register a window class if it isn't already.
  */
@@ -382,38 +381,38 @@ DWORD WINAPI SHLWAPI_183(WNDCLASSA *wndclass)
 }
 
 /*************************************************************************
- *      SHLWAPI_193 [SHLWAPI.193]
+ *      SHLWAPI_193	[SHLWAPI.193]
  */
 DWORD WINAPI SHLWAPI_193 ()
 {
-    HDC hdc;
-    DWORD ret;
+	HDC hdc;
+	DWORD ret;
 
-    TRACE("()\n");
+	TRACE("()\n");
 
-    hdc = GetDC(0);
-    ret = GetDeviceCaps(hdc, BITSPIXEL) * GetDeviceCaps(hdc, PLANES);
-    ReleaseDC(0, hdc);
-    return ret;
+	hdc = GetDC(0);
+	ret = GetDeviceCaps(hdc, BITSPIXEL) * GetDeviceCaps(hdc, PLANES);
+	ReleaseDC(0, hdc);
+	return ret;
 }
 
 /*************************************************************************
- *      SHLWAPI_215 [SHLWAPI.215]
+ *      SHLWAPI_215	[SHLWAPI.215]
  *
  * NOTES
  *  check me!
  */
 LPWSTR WINAPI SHLWAPI_215 (
-    LPWSTR lpStrSrc,
-    LPVOID lpwStrDest,
-    int len)
+	LPWSTR lpStrSrc,
+	LPVOID lpwStrDest,
+	int len)
 {
-    WARN("(%p %p %u)\n",lpStrSrc,lpwStrDest,len);
-    return strncpyW(lpwStrDest, lpStrSrc, len);
+	WARN("(%p %p %u)\n",lpStrSrc,lpwStrDest,len);
+	return strncpyW(lpwStrDest, lpStrSrc, len);
 }
 
 /*************************************************************************
- *      SHLWAPI_218 [SHLWAPI.218]
+ *      SHLWAPI_218	[SHLWAPI.218]
  *
  * WideCharToMultiByte with multi language support.
  */
@@ -507,7 +506,7 @@ INT WINAPI SHLWAPI_218(UINT CodePage, LPCWSTR lpSrcStr, LPSTR lpDstStr,
 }
 
 /*************************************************************************
- *      SHLWAPI_217 [SHLWAPI.217]
+ *      SHLWAPI_217	[SHLWAPI.217]
  *
  */
 INT WINAPI SHLWAPI_217(LPCWSTR lpSrcStr, LPSTR lpDstStr, LPINT lpnMultiCharCount)
@@ -517,186 +516,186 @@ INT WINAPI SHLWAPI_217(LPCWSTR lpSrcStr, LPSTR lpDstStr, LPINT lpnMultiCharCount
 
 #ifndef __WIN32OS2__
 /*************************************************************************
- *      SHLWAPI_219 [SHLWAPI.219]
+ *      SHLWAPI_219	[SHLWAPI.219]
  *
  * NOTES
  *  error codes: E_POINTER, E_NOINTERFACE
  */
 HRESULT WINAPI SHLWAPI_219 (
-    LPVOID w, /* [???] NOTE: returned by LocalAlloc, 0x450 bytes, iface */
-    LPVOID x,
-    REFIID riid,
-    LPWSTR z) /* [???] NOTE: OUT: path */
+	LPVOID w, /* [???] NOTE: returned by LocalAlloc, 0x450 bytes, iface */
+	LPVOID x,
+	REFIID riid,
+	LPWSTR z) /* [???] NOTE: OUT: path */
 {
-    FIXME("(%p %p %s %p)stub\n",w,x,debugstr_guid(riid),z);
-    return 0xabba1252;
+	FIXME("(%p %p %s %p)stub\n",w,x,debugstr_guid(riid),z);
+	return 0xabba1252;
 }
 #endif
 
 /*************************************************************************
- *      SHLWAPI_222 [SHLWAPI.222]
+ *      SHLWAPI_222	[SHLWAPI.222]
  *
  * NOTES
  *  securityattributes missing
  */
 HANDLE WINAPI SHLWAPI_222 (LPCLSID guid)
 {
-    char lpstrName[80];
+	char lpstrName[80];
 
         sprintf( lpstrName, "shell.{%08lx-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x}",
                  guid->Data1, guid->Data2, guid->Data3,
                  guid->Data4[0], guid->Data4[1], guid->Data4[2], guid->Data4[3],
                  guid->Data4[4], guid->Data4[5], guid->Data4[6], guid->Data4[7] );
-    FIXME("(%s) stub\n", lpstrName);
-    return CreateSemaphoreA(NULL,0, 0x7fffffff, lpstrName);
+	FIXME("(%s) stub\n", lpstrName);
+	return CreateSemaphoreA(NULL,0, 0x7fffffff, lpstrName);
 }
 
 /*************************************************************************
- *      SHLWAPI_223 [SHLWAPI.223]
+ *      SHLWAPI_223	[SHLWAPI.223]
  *
  * NOTES
  *  get the count of the semaphore
  */
 DWORD WINAPI SHLWAPI_223 (HANDLE handle)
 {
-    DWORD oldCount;
+	DWORD oldCount;
 
-    FIXME("(0x%08x) stub\n",handle);
+	FIXME("(0x%08x) stub\n",handle);
 
-    ReleaseSemaphore( handle, 1, &oldCount);    /* +1 */
-    WaitForSingleObject( handle, 0 );       /* -1 */
-    return oldCount;
+	ReleaseSemaphore( handle, 1, &oldCount);	/* +1 */
+	WaitForSingleObject( handle, 0 );		/* -1 */
+	return oldCount;
 }
 
 /*************************************************************************
- *      SHLWAPI_237 [SHLWAPI.237]
+ *      SHLWAPI_237	[SHLWAPI.237]
  *
  * Unicode version of SHLWAPI_183.
  */
 DWORD WINAPI SHLWAPI_237 (WNDCLASSW * lpWndClass)
 {
-    WNDCLASSW WndClass;
+	WNDCLASSW WndClass;
 
-    TRACE("(0x%08x %s)\n",lpWndClass->hInstance, debugstr_w(lpWndClass->lpszClassName));
+	TRACE("(0x%08x %s)\n",lpWndClass->hInstance, debugstr_w(lpWndClass->lpszClassName));
 
-    if (GetClassInfoW(lpWndClass->hInstance, lpWndClass->lpszClassName, &WndClass))
-        return TRUE;
-    return RegisterClassW(lpWndClass);
+	if (GetClassInfoW(lpWndClass->hInstance, lpWndClass->lpszClassName, &WndClass))
+		return TRUE;
+	return RegisterClassW(lpWndClass);
 }
 
 /*************************************************************************
- *      SHLWAPI_240 [SHLWAPI.240]
+ *      SHLWAPI_240	[SHLWAPI.240]
  *
- *  Calls ASCII or Unicode WindowProc for the given window.
+ *	Calls ASCII or Unicode WindowProc for the given window.
  */
 LRESULT CALLBACK SHLWAPI_240(HWND hWnd, UINT uMessage, WPARAM wParam, LPARAM lParam)
 {
-    if (IsWindowUnicode(hWnd))
-        return DefWindowProcW(hWnd, uMessage, wParam, lParam);
-    return DefWindowProcA(hWnd, uMessage, wParam, lParam);
+	if (IsWindowUnicode(hWnd))
+		return DefWindowProcW(hWnd, uMessage, wParam, lParam);
+	return DefWindowProcA(hWnd, uMessage, wParam, lParam);
 }
 #ifndef __WIN32OS2__
 /*************************************************************************
- *      SHLWAPI_241 [SHLWAPI.241]
+ *      SHLWAPI_241	[SHLWAPI.241]
  *
  */
 DWORD WINAPI SHLWAPI_241 ()
 {
-    FIXME("()stub\n");
-    return 0xabba1243;
+	FIXME("()stub\n");
+	return 0xabba1243;
 }
 
 /*************************************************************************
- *      SHLWAPI_266 [SHLWAPI.266]
+ *      SHLWAPI_266	[SHLWAPI.266]
  */
 DWORD WINAPI SHLWAPI_266 (
-    LPVOID w,
-    LPVOID x,
-    LPVOID y,
-    LPVOID z)
+	LPVOID w,
+	LPVOID x,
+	LPVOID y,
+	LPVOID z)
 {
-    FIXME("(%p %p %p %p)stub\n",w,x,y,z);
-    return 0xabba1248;
+	FIXME("(%p %p %p %p)stub\n",w,x,y,z);
+	return 0xabba1248;
 }
 
 /*************************************************************************
- *      SHLWAPI_267 [SHLWAPI.267]
+ *      SHLWAPI_267	[SHLWAPI.267]
  */
 HRESULT WINAPI SHLWAPI_267 (
-    LPVOID w, /* [???] NOTE: same as 1th parameter of SHLWAPI_219 */
-    LPVOID x, /* [???] NOTE: same as 2nd parameter of SHLWAPI_219 */
-    LPVOID y,
-    LPVOID z)
+	LPVOID w, /* [???] NOTE: same as 1th parameter of SHLWAPI_219 */
+	LPVOID x, /* [???] NOTE: same as 2nd parameter of SHLWAPI_219 */
+	LPVOID y,
+	LPVOID z)
 {
-    FIXME("(%p %p %p %p)stub\n",w,x,y,z);
-    *((LPDWORD)z) = 0xabba1200;
-    return 0xabba1254;
+	FIXME("(%p %p %p %p)stub\n",w,x,y,z);
+	*((LPDWORD)z) = 0xabba1200;
+	return 0xabba1254;
 }
 
 /*************************************************************************
- *      SHLWAPI_268 [SHLWAPI.268]
+ *      SHLWAPI_268	[SHLWAPI.268]
  */
 DWORD WINAPI SHLWAPI_268 (
-    LPVOID w,
-    LPVOID x)
+	LPVOID w,
+	LPVOID x)
 {
-    FIXME("(%p %p)\n",w,x);
-    return 0xabba1251; /* 0 = failure */
+	FIXME("(%p %p)\n",w,x);
+	return 0xabba1251; /* 0 = failure */
 }
 
 /*************************************************************************
- *      SHLWAPI_276 [SHLWAPI.276]
+ *      SHLWAPI_276	[SHLWAPI.276]
  *
  */
 DWORD WINAPI SHLWAPI_276 ()
 {
-    FIXME("()stub\n");
-    return 0xabba1244;
+	FIXME("()stub\n");
+	return 0xabba1244;
 }
 #endif
 /*************************************************************************
- *      SHLWAPI_278 [SHLWAPI.278]
+ *      SHLWAPI_278	[SHLWAPI.278]
  *
  */
 DWORD WINAPI SHLWAPI_278 (
-    LONG wndProc,
-    HWND hWndParent,
-    DWORD dwExStyle,
-    DWORD dwStyle,
-    HMENU hMenu,
-    LONG z)
+	LONG wndProc,
+	HWND hWndParent,
+	DWORD dwExStyle,
+	DWORD dwStyle,
+	HMENU hMenu,
+	LONG z)
 {
-    WNDCLASSA wndclass;
-    HWND hwnd;
-    HCURSOR hCursor;
-    char * clsname = "WorkerA";
+	WNDCLASSA wndclass;
+	HWND hwnd;
+	HCURSOR hCursor;
+	char * clsname = "WorkerA";
 
-    FIXME("(0x%08lx 0x%08x 0x%08lx 0x%08lx 0x%08x 0x%08lx)stub\n",
-      wndProc,hWndParent,dwExStyle,dwStyle,hMenu,z);
+	FIXME("(0x%08lx 0x%08x 0x%08lx 0x%08lx 0x%08x 0x%08lx)stub\n",
+	  wndProc,hWndParent,dwExStyle,dwStyle,hMenu,z);
 
-    hCursor = LoadCursorA(0x00000000,IDC_ARROWA);
+	hCursor = LoadCursorA(0x00000000,IDC_ARROWA);
 
-    if(!GetClassInfoA(shlwapi_hInstance, clsname, &wndclass))
-    {
-      RtlZeroMemory(&wndclass, sizeof(WNDCLASSA));
-      wndclass.lpfnWndProc = DefWindowProcW;
-      wndclass.cbWndExtra = 4;
-      wndclass.hInstance = shlwapi_hInstance;
-      wndclass.hCursor = hCursor;
-      wndclass.hbrBackground = COLOR_BTNSHADOW;
-      wndclass.lpszMenuName = NULL;
-      wndclass.lpszClassName = clsname;
-      RegisterClassA (&wndclass);
-    }
-    hwnd = CreateWindowExA(dwExStyle, clsname, 0,dwStyle,0,0,0,0,hWndParent,
-        hMenu,shlwapi_hInstance,0);
-    SetWindowLongA(hwnd, 0, z);
-    SetWindowLongA(hwnd, GWL_WNDPROC, wndProc);
-    return hwnd;
+	if(!GetClassInfoA(shlwapi_hInstance, clsname, &wndclass))
+	{
+	  RtlZeroMemory(&wndclass, sizeof(WNDCLASSA));
+	  wndclass.lpfnWndProc = DefWindowProcW;
+	  wndclass.cbWndExtra = 4;
+	  wndclass.hInstance = shlwapi_hInstance;
+	  wndclass.hCursor = hCursor;
+	  wndclass.hbrBackground = COLOR_BTNSHADOW;
+	  wndclass.lpszMenuName = NULL;
+	  wndclass.lpszClassName = clsname;
+	  RegisterClassA (&wndclass);
+	}
+	hwnd = CreateWindowExA(dwExStyle, clsname, 0,dwStyle,0,0,0,0,hWndParent,
+		hMenu,shlwapi_hInstance,0);
+	SetWindowLongA(hwnd, 0, z);
+	SetWindowLongA(hwnd, GWL_WNDPROC, wndProc);
+	return hwnd;
 }
 
 /*************************************************************************
- *      SHLWAPI_289 [SHLWAPI.289]
+ *      SHLWAPI_289	[SHLWAPI.289]
  *
  * Late bound call to winmm.PlaySoundW
  */
@@ -709,7 +708,7 @@ BOOL WINAPI SHLWAPI_289(LPCWSTR pszSound, HMODULE hmod, DWORD fdwSound)
 }
 
 /*************************************************************************
- *      SHLWAPI_313 [SHLWAPI.313]
+ *      SHLWAPI_313	[SHLWAPI.313]
  *
  * Late bound call to shell32.SHGetFileInfoW
  */
@@ -723,7 +722,7 @@ DWORD WINAPI SHLWAPI_313(LPCWSTR path, DWORD dwFileAttributes,
 }
 
 /*************************************************************************
- *      SHLWAPI_318 [SHLWAPI.318]
+ *      SHLWAPI_318	[SHLWAPI.318]
  *
  * Late bound call to shell32.DragQueryFileW
  */
@@ -736,7 +735,7 @@ UINT WINAPI SHLWAPI_318(HDROP hDrop, UINT lFile, LPWSTR lpszFile, UINT lLength)
 }
 
 /*************************************************************************
- *      SHLWAPI_333 [SHLWAPI.333]
+ *      SHLWAPI_333	[SHLWAPI.333]
  *
  * Late bound call to shell32.SHBrowseForFolderW
  */
@@ -749,7 +748,7 @@ LPITEMIDLIST WINAPI SHLWAPI_333(LPBROWSEINFOW lpBi)
 }
 
 /*************************************************************************
- *      SHLWAPI_334 [SHLWAPI.334]
+ *      SHLWAPI_334	[SHLWAPI.334]
  *
  * Late bound call to shell32.SHGetPathFromIDListW
  */
@@ -762,7 +761,7 @@ BOOL WINAPI SHLWAPI_334(LPCITEMIDLIST pidl,LPWSTR pszPath)
 }
 
 /*************************************************************************
- *      SHLWAPI_335 [SHLWAPI.335]
+ *      SHLWAPI_335	[SHLWAPI.335]
  *
  * Late bound call to shell32.ShellExecuteExW
  */
@@ -775,7 +774,7 @@ BOOL WINAPI SHLWAPI_335(LPSHELLEXECUTEINFOW lpExecInfo)
 }
 
 /*************************************************************************
- *      SHLWAPI_336 [SHLWAPI.336]
+ *      SHLWAPI_336	[SHLWAPI.336]
  *
  * Late bound call to shell32.SHFileOperationW.
  */
@@ -788,7 +787,7 @@ DWORD WINAPI SHLWAPI_336(LPSHFILEOPSTRUCTW lpFileOp)
 }
 
 /*************************************************************************
- *      SHLWAPI_337 [SHLWAPI.337]
+ *      SHLWAPI_337	[SHLWAPI.337]
  *
  * Late bound call to shell32.ExtractIconExW.
  */
@@ -803,34 +802,34 @@ HICON WINAPI SHLWAPI_337(LPCWSTR lpszFile, INT nIconIndex, HICON *phiconLarge,
 #ifndef __WIN32OS2__
 //Bugbug: is forwarder for InterlockedCompareExchange
 /*************************************************************************
- *      SHLWAPI_342 [SHLWAPI.342]
+ *      SHLWAPI_342	[SHLWAPI.342]
  *
  */
 DWORD WINAPI SHLWAPI_342 (
-    LPVOID w,
-    LPVOID x,
-    LPVOID y,
-    LPVOID z)
+	LPVOID w,
+	LPVOID x,
+	LPVOID y,
+	LPVOID z)
 {
-    FIXME("(%p %p %p %p)stub\n",w,x,y,z);
-    return 0xabba1249;
+	FIXME("(%p %p %p %p)stub\n",w,x,y,z);
+	return 0xabba1249;
 }
 #endif
 /*************************************************************************
- *      SHLWAPI_346 [SHLWAPI.346]
+ *      SHLWAPI_346	[SHLWAPI.346]
  */
 DWORD WINAPI SHLWAPI_346 (
-    LPCWSTR src,
-    LPWSTR dest,
-    int len)
+	LPCWSTR src,
+	LPWSTR dest,
+	int len)
 {
-    FIXME("(%s %p 0x%08x)stub\n",debugstr_w(src),dest,len);
-    lstrcpynW(dest, src, len);
-    return lstrlenW(dest)+1;
+	FIXME("(%s %p 0x%08x)stub\n",debugstr_w(src),dest,len);
+	lstrcpynW(dest, src, len);
+	return lstrlenW(dest)+1;
 }
 
 /*************************************************************************
- *      SHLWAPI_357 [SHLWAPI.357]
+ *      SHLWAPI_357	[SHLWAPI.357]
  *
  * Late bound call to shell32.SHGetNewLinkInfoW
  */
@@ -844,7 +843,7 @@ BOOL WINAPI SHLWAPI_357(LPCWSTR pszLinkTo, LPCWSTR pszDir, LPWSTR pszName,
 }
 
 /*************************************************************************
- *      SHLWAPI_358 [SHLWAPI.358]
+ *      SHLWAPI_358	[SHLWAPI.358]
  *
  * Late bound call to shell32.SHDefExtractIconW
  */
@@ -859,7 +858,7 @@ DWORD WINAPI SHLWAPI_358(LPVOID arg1, LPVOID arg2, LPVOID arg3, LPVOID arg4,
 }
 
 /*************************************************************************
- *      SHLWAPI_364 [SHLWAPI.364]
+ *      SHLWAPI_364	[SHLWAPI.364]
  *
  * Wrapper for lstrcpynA with src and dst swapped.
  */
@@ -870,7 +869,7 @@ DWORD WINAPI SHLWAPI_364(LPCSTR src, LPSTR dst, INT n)
 }
 
 /*************************************************************************
- *      SHLWAPI_370 [SHLWAPI.370]
+ *      SHLWAPI_370	[SHLWAPI.370]
  *
  * Late bound call to shell32.ExtractIconW
  */
@@ -884,11 +883,11 @@ HICON WINAPI SHLWAPI_370(HINSTANCE hInstance, LPCWSTR lpszExeFileName,
 }
 
 /*************************************************************************
- *      SHLWAPI_376 [SHLWAPI.376]
+ *      SHLWAPI_376	[SHLWAPI.376]
  */
 DWORD WINAPI SHLWAPI_376 (LONG x)
 {
-    FIXME("(0x%08lx)stub\n", x );
+	FIXME("(0x%08lx)stub\n", x );
   /* FIXME: This should be a forward in the .spec file to the win2k function
    * kernel32.GetUserDefaultUILanguage, however that function isn't there yet.
    */
@@ -896,28 +895,28 @@ DWORD WINAPI SHLWAPI_376 (LONG x)
 }
 #ifndef __WIN32OS2__
 /*************************************************************************
- *      SHLWAPI_377 [SHLWAPI.377]
+ *      SHLWAPI_377	[SHLWAPI.377]
  */
 DWORD WINAPI SHLWAPI_377 (LPVOID x, LPVOID y, LPVOID z)
 {
-    FIXME("(%p %p %p)stub\n", x,y,z);
-    return 0xabba1246;
+	FIXME("(%p %p %p)stub\n", x,y,z);
+	return 0xabba1246;
 }
 #endif
 /*************************************************************************
- *      SHLWAPI_378 [SHLWAPI.378]
+ *      SHLWAPI_378	[SHLWAPI.378]
  */
 DWORD WINAPI SHLWAPI_378 (
-    LPSTR x,
-    LPVOID y, /* [???] 0x50000000 */
-    LPVOID z) /* [???] 4 */
+	LPSTR x,
+	LPVOID y, /* [???] 0x50000000 */
+	LPVOID z) /* [???] 4 */
 {
-    FIXME("(%s %p %p)stub\n", x,y,z);
-    return LoadLibraryA(x);
+	FIXME("(%s %p %p)stub\n", x,y,z);
+	return LoadLibraryA(x);
 }
 
 /*************************************************************************
- *      SHLWAPI_389 [SHLWAPI.389]
+ *      SHLWAPI_389	[SHLWAPI.389]
  *
  * Late bound call to comdlg32.GetSaveFileNameW
  */
@@ -930,7 +929,7 @@ BOOL WINAPI SHLWAPI_389(LPOPENFILENAMEW ofn)
 }
 
 /*************************************************************************
- *      SHLWAPI_390 [SHLWAPI.390]
+ *      SHLWAPI_390	[SHLWAPI.390]
  *
  * Late bound call to mpr.WNetRestoreConnectionW
  */
@@ -944,7 +943,7 @@ DWORD WINAPI SHLWAPI_390(LPVOID arg1, LPVOID arg2)
 }
 
 /*************************************************************************
- *      SHLWAPI_391 [SHLWAPI.391]
+ *      SHLWAPI_391	[SHLWAPI.391]
  *
  * Late bound call to mpr.WNetGetLastErrorW
  */
@@ -959,7 +958,7 @@ DWORD WINAPI SHLWAPI_391(LPVOID arg1, LPVOID arg2, LPVOID arg3, LPVOID arg4,
 }
 
 /*************************************************************************
- *      SHLWAPI_401 [SHLWAPI.401]
+ *      SHLWAPI_401	[SHLWAPI.401]
  *
  * Late bound call to comdlg32.PageSetupDlgW
  */
@@ -972,7 +971,7 @@ BOOL WINAPI SHLWAPI_401(LPPAGESETUPDLGW pagedlg)
 }
 
 /*************************************************************************
- *      SHLWAPI_402 [SHLWAPI.402]
+ *      SHLWAPI_402	[SHLWAPI.402]
  *
  * Late bound call to comdlg32.PrintDlgW
  */
@@ -985,7 +984,7 @@ BOOL WINAPI SHLWAPI_402(LPPRINTDLGW printdlg)
 }
 
 /*************************************************************************
- *      SHLWAPI_403 [SHLWAPI.403]
+ *      SHLWAPI_403	[SHLWAPI.403]
  *
  * Late bound call to comdlg32.GetOpenFileNameW
  */
@@ -1016,7 +1015,7 @@ static WORD ConvertHue(int wHue, WORD wMid1, WORD wMid2)
 #define GET_RGB(h) (ConvertHue(h, wMid1, wMid2) * 255 + 120) / 240
 
 /*************************************************************************
- *      ColorHLSToRGB   [SHLWAPI.404]
+ *      ColorHLSToRGB	[SHLWAPI.404]
  *
  * Convert from HLS color space into an RGB COLORREF.
  *
@@ -1050,17 +1049,17 @@ COLORREF WINAPI ColorHLSToRGB(WORD wHue, WORD wLuminosity, WORD wSaturation)
 }
 
 /*************************************************************************
- *      SHLWAPI_431 [SHLWAPI.431]
+ *      SHLWAPI_431	[SHLWAPI.431]
  */
 DWORD WINAPI SHLWAPI_431 (DWORD x)
 {
-    FIXME("(0x%08lx)stub\n", x);
-    return 0xabba1247;
+	FIXME("(0x%08lx)stub\n", x);
+	return 0xabba1247;
 }
 
 #ifndef __WIN32OS2__
 /*************************************************************************
- *      SHLWAPI_437 [SHLWAPI.437]
+ *      SHLWAPI_437	[SHLWAPI.437]
  *
  * NOTES
  *  In the real shlwapi, One time initilisation calls GetVersionEx and reads
@@ -1073,41 +1072,41 @@ DWORD WINAPI SHLWAPI_431 (DWORD x)
  */
 DWORD WINAPI SHLWAPI_437 (DWORD functionToCall)
 {
-    FIXME("(0x%08lx)stub\n", functionToCall);
-    return 0xabba1247;
+	FIXME("(0x%08lx)stub\n", functionToCall);
+	return 0xabba1247;
 }
 #endif
 
 /*************************************************************************
- *      SHCreateShellPalette    [SHLWAPI.@]
+ *      SHCreateShellPalette	[SHLWAPI.@]
  */
 HPALETTE WINAPI SHCreateShellPalette(HDC hdc)
 {
-    FIXME("stub\n");
-    return CreateHalftonePalette(hdc);
+	FIXME("stub\n");
+	return CreateHalftonePalette(hdc);
 }
 
 /*************************************************************************
- *  SHGetInverseCMAP
+ *	SHGetInverseCMAP
  */
 DWORD WINAPI SHGetInverseCMAP (LPVOID x, DWORD why)
 {
-    FIXME("(%p, %#lx)stub\n", x, why);
-    return 0;
+	FIXME("(%p, %#lx)stub\n", x, why);
+	return 0;
 }
 #ifndef __WIN32OS2__
 /*************************************************************************
- *      SHIsLowMemoryMachine    [SHLWAPI.@]
+ *      SHIsLowMemoryMachine	[SHLWAPI.@]
  */
 DWORD WINAPI SHIsLowMemoryMachine (DWORD x)
 {
-    FIXME("0x%08lx\n", x);
-    return 0;
+	FIXME("0x%08lx\n", x);
+	return 0;
 }
 #endif
 
 /*************************************************************************
- *      GetMenuPosFromID    [SHLWAPI.@]
+ *      GetMenuPosFromID	[SHLWAPI.@]
  */
 INT WINAPI GetMenuPosFromID(HMENU hMenu, UINT wID)
 {
@@ -1125,7 +1124,7 @@ INT WINAPI GetMenuPosFromID(HMENU hMenu, UINT wID)
 }
 
 /*************************************************************************
- *      _SHGetInstanceExplorer  [SHLWAPI.@]
+ *      _SHGetInstanceExplorer	[SHLWAPI.@]
  *
  * Late bound call to shell32.SHGetInstanceExplorer.
  */

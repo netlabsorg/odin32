@@ -1,4 +1,3 @@
-/* $Id: factory.c,v 1.2 2001-09-05 13:39:11 bird Exp $ */
 /*
  * Implementation of class factory for IE Web Browser
  *
@@ -95,7 +94,7 @@ static HRESULT WINAPI WBCF_LockServer(LPCLASSFACTORY iface, BOOL dolock)
     return S_OK;
 }
 
-static ICOM_VTABLE(IClassFactory) WBCF_Vtbl =
+static ICOM_VTABLE(IClassFactory) WBCF_Vtbl = 
 {
     ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
     WBCF_QueryInterface,
