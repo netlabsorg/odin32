@@ -1,4 +1,4 @@
-/* $Id: oslibgpi.h,v 1.2 1999-12-16 16:52:33 cbratschi Exp $ */
+/* $Id: oslibgpi.h,v 1.3 2000-01-20 21:39:36 sandervl Exp $ */
 
 /*
  * GPI interface code
@@ -161,5 +161,8 @@ BOOL OSLibGpiEndPath(PVOID pHps);
 
 BOOL drawLinePointCircle(PVOID pHps,INT width,INT height,LONG color);
 BOOL drawLinePoint(PVOID pHps,PPOINTLOS2 pt,LONG color);
+
+ULONG OSLibGpiQueryCp(HDC hdc);
+BOOL  OSLibGpiSetCp(HDC hdc, ULONG codepage);
 
 #endif
