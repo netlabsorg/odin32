@@ -1,4 +1,4 @@
-/* $Id: winicon.cpp,v 1.22 2001-04-15 14:29:49 sandervl Exp $ */
+/* $Id: winicon.cpp,v 1.23 2001-05-17 11:25:49 sandervl Exp $ */
 /*
  * Win32 Icon Code for OS/2
  *
@@ -81,6 +81,7 @@ static ICONCACHE *IconAnchor = NULL;
 static CRITICAL_SECTION IconCrst = CRITICAL_SECTION_INIT;
 static WORD    ICON_HOTSPOT  = 0x4242;
 static HCURSOR hActiveCursor = 0;
+static HCURSOR hActiveCursorPM = 0;
 
 
 static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, DWORD dwResGroupId, HGLOBAL hObj, LPBYTE bits,
@@ -328,6 +329,10 @@ BOOL WIN32API DestroyCursor( HCURSOR hCursor)
 HCURSOR WIN32API GetCursor(void)
 {
     dprintf2(("USER32: GetCursor"));
+    if(hActiveCursorPM && hActiveCursorPM != OSLibWinQueryPointer()) {
+       dprintf(("Another app changed mouse cursor"));
+       hActiveCursorPM = hActiveCursor = 0; 
+    }
     return hActiveCursor;
 }
 //******************************************************************************
@@ -337,6 +342,7 @@ HCURSOR WIN32API SetCursor( HCURSOR hCursor)
   HCURSOR hOldCursor;
 
     dprintf(("USER32: SetCursor %x (prev %x)", hCursor, hActiveCursor));
+    GetCursor();
     if (hCursor == hActiveCursor) return hActiveCursor;  /* No change */
 
     hOldCursor = hActiveCursor;
@@ -354,6 +360,7 @@ HCURSOR WIN32API SetCursor( HCURSOR hCursor)
     if(OSLibWinSetPointer(iconinfo->hColorBmp) == FALSE) {
         dprintf(("OSLibWinSetPointer %x returned FALSE!!", iconinfo->hColorBmp));
     }
+    hActiveCursorPM = iconinfo->hColorBmp;
     GlobalUnlock(hCursor);
 
     return hOldCursor;
