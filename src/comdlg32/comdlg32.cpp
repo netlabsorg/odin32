@@ -1,4 +1,4 @@
-/* $Id: comdlg32.cpp,v 1.18 1999-11-09 22:38:57 phaller Exp $ */
+/* $Id: comdlg32.cpp,v 1.19 1999-11-10 12:18:28 phaller Exp $ */
 
 /*
  * COMDLG32 implementation
@@ -63,6 +63,97 @@ ODINDEBUGCHANNEL(COMDLG32-COMDLG32)
   } \
   a->hwndOwner = Win32ToOS2Handle(a->hwndOwner);
 #endif
+
+
+/*****************************************************************************
+ * Name      : iFileDlg_ScanFilterToken
+ * Purpose   : scan for valid / invalid filter tokens and
+ *             advance array pointer
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    :
+ *****************************************************************************/
+
+// scan filter tokens for validity
+static BOOL iFileDlg_ScanFilterToken( LPSTR *plpstrPair )
+{
+  LPSTR lpstrTemp;
+  LPSTR lpstrNext;
+  BOOL  fOK = TRUE;
+
+  lpstrTemp = *plpstrPair;
+  if (lpstrTemp[0] != 0)
+  {
+    // get filter description
+    lpstrTemp = lpstrTemp + strlen(lpstrTemp);
+    lpstrNext = lpstrTemp + 1;
+    if (lpstrNext[0] == 0)
+      fOK = FALSE;
+    else
+    {
+      // get filter mask
+      lpstrTemp = lpstrNext;
+      lpstrTemp = lpstrTemp + strlen(lpstrTemp);
+      lpstrTemp++;
+    }
+
+    if (fOK)
+      *plpstrPair = lpstrTemp;
+  }
+  return fOK;
+}
+
+
+/*****************************************************************************
+ * Name      : iFileDlg_CleanFilterArray
+ * Purpose   : remove erroneous array entries at the end to prevent
+ *             Open32 complain about them but open the file dialog
+ *             instead.
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    :
+ *****************************************************************************/
+
+static DWORD iFileDlg_CleanFilterArray( LPSTR lpstrFilters)
+{
+   DWORD  dwCount = 0;
+   LPSTR  lpstrTemp;
+
+   if (lpstrFilters && *lpstrFilters)
+   {
+     lpstrTemp = lpstrFilters;
+     while (lpstrTemp[0] != 0)
+     {
+        // if an invalid filter token is found, such as found
+        // in NT4's Regedit e. g., return number of proper
+        // filter tokens.
+        // Here however, as were calling Open32, we need
+        // to correct the filter array.
+        if (iFileDlg_ScanFilterToken(&lpstrTemp) == FALSE)
+        {
+          //@@@PH two alternative methods:
+          // - copy array to new, corrected array while scanning tokens
+          // - just overwrite bogus characters at the end of the array
+          *lpstrTemp++ = 0; // try string termination
+          *lpstrTemp   = 0;
+          return dwCount;
+        }
+
+        dwCount++;
+     }
+   }
+   return dwCount;
+}
+
+
 /*****************************************************************************
  * Name      :
  * Purpose   :
@@ -81,14 +172,18 @@ ODINFUNCTION1(BOOL, GetSaveFileNameA,
   Win32WindowProc *wndproc;
 
   if(lpofn->Flags & (OFN_ENABLETEMPLATE|OFN_ENABLETEMPLATEHANDLE)) {
-	return GetFileDialog95A(lpofn, SAVE_DIALOG);
+   return GetFileDialog95A(lpofn, SAVE_DIALOG);
   }
 
   COMDLG32_CHECKHOOK(lpofn, OFN_ENABLEHOOK, WNDPROC)
 
-  //@@@PH 1999/11/09 needs to be fixed
+  //Note: fix IBM's proper error checking for NT's lazy check
+  if (lpofn->lpstrFilter != NULL)
+    iFileDlg_CleanFilterArray((LPSTR)lpofn->lpstrFilter);
+
   return(O32_GetSaveFileName(lpofn));
 }
+
 
 /*****************************************************************************
  * Name      :
@@ -113,7 +208,7 @@ ODINFUNCTION1(BOOL, GetSaveFileNameW,
   BOOL            bResult;
 
   if(lpofn->Flags & (OFN_ENABLETEMPLATE|OFN_ENABLETEMPLATEHANDLE)) {
-	return GetFileDialog95W(lpofn, SAVE_DIALOG);
+   return GetFileDialog95W(lpofn, SAVE_DIALOG);
   }
 
   memcpy(&ofn,          // make binary copy first to save all the fields
@@ -236,7 +331,10 @@ ODINFUNCTION1(BOOL, GetOpenFileNameA,
   }
   COMDLG32_CHECKHOOK(lpofn, OFN_ENABLEHOOK, WNDPROC)
 
-  //@@@PH 1999/11/09 needs to be fixed
+  //Note: fix IBM's proper error checking for NT's lazy check
+  if (lpofn->lpstrFilter != NULL)
+    iFileDlg_CleanFilterArray((LPSTR)lpofn->lpstrFilter);
+
   return(O32_GetOpenFileName(lpofn));
 }
 
@@ -263,7 +361,7 @@ ODINFUNCTION1(BOOL, GetOpenFileNameW,
   BOOL            bResult;
 
   if(lpofn->Flags & (OFN_ENABLETEMPLATE|OFN_ENABLETEMPLATEHANDLE)) {
-	return GetFileDialog95W(lpofn, OPEN_DIALOG);
+   return GetFileDialog95W(lpofn, OPEN_DIALOG);
   }
 
   memcpy(&ofn,          // make binary copy first to save all the fields
