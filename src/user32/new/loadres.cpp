@@ -1,4 +1,4 @@
-/* $Id: loadres.cpp,v 1.6 1999-08-20 15:03:41 sandervl Exp $ */
+/* $Id: loadres.cpp,v 1.7 1999-08-20 20:09:50 sandervl Exp $ */
 
 /*
  * Win32 resource API functions for OS/2
@@ -13,6 +13,7 @@
 #include <user32.h>
 #include <winres.h>
 #include <heapstring.h>
+#include <oslibres.h>
 
 //******************************************************************************
 //******************************************************************************
@@ -71,38 +72,89 @@ int WIN32API LoadStringW(HINSTANCE hinst, UINT wID, LPWSTR lpBuffer, int cchBuff
 //******************************************************************************
 HICON WIN32API LoadIconA(HINSTANCE hinst, LPCSTR lpszIcon)
 {
- HICON rc;
+ Win32Resource *winres;
+ HICON          hIcon;
 
-    rc = (HICON)FindResourceA(hinst, lpszIcon, RT_ICONA);
-    dprintf(("LoadIconA (%X) returned %d\n", hinst, rc));
-    return(rc);
+    hIcon = OSLibWinQuerySysIcon((ULONG)lpszIcon);
+    if(hIcon == 0) {//not a system icon
+    	winres = (Win32Resource *)FindResourceA(hinst, lpszIcon, RT_ICONA);
+    	if(winres == 0) {
+    		winres = (Win32Resource *)FindResourceA(hinst, lpszIcon, RT_GROUP_ICONA);
+    	}
+    	if(winres) {
+		hIcon = OSLibWinCreateIcon(winres->lockOS2Resource());
+		delete winres;
+    	}
+    }
+    dprintf(("LoadIconA (%X) returned %x\n", hinst, hIcon));
+
+    return(hIcon);
 }
 //******************************************************************************
 //******************************************************************************
 HICON WIN32API LoadIconW(HINSTANCE hinst, LPCWSTR lpszIcon)
 {
- HICON rc;
+ Win32Resource *winres;
+ HICON          hIcon;
 
-    rc = (HICON)FindResourceW(hinst, lpszIcon, RT_ICONW);
-    dprintf(("LoadIconW (%X) returned %d\n", hinst, rc));
-    return(rc);
+    hIcon = OSLibWinQuerySysIcon((ULONG)lpszIcon);
+    if(hIcon == 0) {//not a system icon
+    	winres = (Win32Resource *)FindResourceW(hinst, lpszIcon, RT_ICONW);
+    	if(winres == 0) {
+    		winres = (Win32Resource *)FindResourceW(hinst, lpszIcon, RT_GROUP_ICONW);
+    	}
+    	if(winres) {
+		hIcon = OSLibWinCreateIcon(winres->lockOS2Resource());
+		delete winres;
+    	}
+    }
+    dprintf(("LoadIconW (%X) returned %x\n", hinst, hIcon));
+
+    return(hIcon);
 }
 //******************************************************************************
 //******************************************************************************
 HCURSOR WIN32API LoadCursorA(HINSTANCE hinst, LPCSTR lpszCursor)
 {
- HCURSOR rc;
+ Win32Resource *winres;
+ HCURSOR        hCursor;
 
-    if((int)lpszCursor >> 16 != 0) {//convert string name identifier to numeric id
-         dprintf(("LoadCursor %s\n", lpszCursor));
-	 lpszCursor = (LPCSTR)ConvertNameId(hinst, (char *)lpszCursor);
+    hCursor = OSLibWinQuerySysPointer((ULONG)lpszCursor);
+    if(hCursor == 0) {//not a system pointer
+    	winres = (Win32Resource *)FindResourceA(hinst, lpszCursor, RT_CURSORA);
+    	if(winres == 0) {
+    		winres = (Win32Resource *)FindResourceA(hinst, lpszCursor, RT_GROUP_CURSORA);
+    	}
+    	if(winres) {
+		hCursor = OSLibWinCreatePointer(winres->lockOS2Resource());
+		delete winres;
+    	}
     }
-    else dprintf(("LoadCursor %d\n", (int)lpszCursor));
+    dprintf(("LoadCursorA (%X) returned %x\n", hinst, hCursor));
 
-    rc = O32_LoadCursor(hinst, lpszCursor);
+    return(hCursor);
+}
+//******************************************************************************
+//******************************************************************************
+HCURSOR WIN32API LoadCursorW(HINSTANCE hinst, LPCWSTR lpszCursor)
+{
+ Win32Resource *winres;
+ HCURSOR        hCursor;
 
-    dprintf(("LoadCursor from %X returned %d\n", hinst, rc));
-    return(rc);
+    hCursor = OSLibWinQuerySysPointer((ULONG)lpszCursor);
+    if(hCursor == 0) {//not a system pointer
+    	winres = (Win32Resource *)FindResourceW(hinst, lpszCursor, RT_CURSORW);
+    	if(winres == 0) {
+    		winres = (Win32Resource *)FindResourceW(hinst, lpszCursor, RT_GROUP_CURSORW);
+    	}
+    	if(winres) {
+		hCursor = OSLibWinCreatePointer(winres->lockOS2Resource());
+		delete winres;
+    	}
+    }
+    dprintf(("LoadCursorW (%X) returned %x\n", hinst, hCursor));
+
+    return(hCursor);
 }
 //******************************************************************************
 //******************************************************************************
@@ -110,22 +162,17 @@ HBITMAP WIN32API LoadBitmapA(HINSTANCE hinst, LPCSTR lpszBitmap)
 {
  HBITMAP rc;
 
-  if((int)lpszBitmap >> 16 != 0) 
-  {  //convert string name identifier to numeric id
-    dprintf(("lpszBitmap [%s]\n",
-             lpszBitmap));
+  if(HIWORD(lpszBitmap) != 0) 
+  {  	//convert string name identifier to numeric id
+    	dprintf(("lpszBitmap [%s]\n", lpszBitmap));
     
-    lpszBitmap = (LPCSTR)ConvertNameId(hinst, 
-                                       (char *)lpszBitmap);
+    	lpszBitmap = (LPCSTR)ConvertNameId(hinst, (char *)lpszBitmap);
   }
-  else 
-    dprintf(("lpszBitmap %08xh\n",
-             (int)lpszBitmap));
+  else  dprintf(("lpszBitmap %08xh\n", (int)lpszBitmap));
 
   rc = O32_LoadBitmap(hinst, lpszBitmap);
 
-  dprintf(("LoadBitmapA returned %08xh\n",
-           rc));
+  dprintf(("LoadBitmapA returned %08xh\n", rc));
   
   return(rc);
 }
@@ -136,7 +183,7 @@ HBITMAP WIN32API LoadBitmapW(HINSTANCE hinst, LPCWSTR lpszBitmap)
  char   *astring = NULL;
  HBITMAP rc;
 
-    if((int)lpszBitmap >> 16 != 0) {//convert string name identifier to numeric id
+    if(HIWORD(lpszBitmap) != 0) {//convert string name identifier to numeric id
 	 astring = UnicodeToAsciiString((LPWSTR)lpszBitmap);
          dprintf(("lpszBitmap %s\n", astring));
 
@@ -152,27 +199,6 @@ HBITMAP WIN32API LoadBitmapW(HINSTANCE hinst, LPCWSTR lpszBitmap)
     return(rc);
 }
 //******************************************************************************
-//******************************************************************************
-HCURSOR WIN32API LoadCursorW(HINSTANCE hinst, LPCWSTR lpszCursor)
-{
- char   *astring = NULL;
- HCURSOR rc;
-
-    if((int)lpszCursor >> 16 != 0) {//convert string name identifier to numeric id
-	 astring = UnicodeToAsciiString((LPWSTR)lpszCursor);
-         dprintf(("lpszCursor %s\n", astring));
-	 lpszCursor = (LPWSTR)ConvertNameId(hinst, (char *)astring);
-    }
-    else dprintf(("lpszCursor %d\n", (int)lpszCursor));
-
-    rc = O32_LoadCursor(hinst, (char *)lpszCursor);
-    if(astring)
-	FreeAsciiString(astring);
-
-    dprintf(("LoadCursorW returned %d\n", rc));
-    return(rc);
-}
-//******************************************************************************
 //TODO: Far from complete, but works for loading resources from exe
 //fuLoad flag ignored
 //******************************************************************************
@@ -181,7 +207,7 @@ HANDLE WIN32API LoadImageA(HINSTANCE hinst, LPCSTR lpszName, UINT uType,
 {
  HANDLE hRet = 0;
 
-  dprintf(("OS2LoadImageA NOT COMPLETE (%d,%d)\n", cxDesired, cyDesired));
+  dprintf(("LoadImageA NOT COMPLETE (%d,%d)\n", cxDesired, cyDesired));
 
   switch(uType) {
 	case IMAGE_BITMAP:
@@ -193,8 +219,11 @@ HANDLE WIN32API LoadImageA(HINSTANCE hinst, LPCSTR lpszName, UINT uType,
 	case IMAGE_ICON:
 		hRet = (HANDLE)LoadIconA(hinst, lpszName);
 		break;
+	default:
+		dprintf(("LoadImageA: unsupported type %d!!", uType));
+		return 0;
   }
-  dprintf(("OS2LoadImageA returned %d\n", (int)hRet));
+  dprintf(("LoadImageA returned %d\n", (int)hRet));
 
   return(hRet);
 }
@@ -205,7 +234,7 @@ HANDLE WIN32API LoadImageW(HINSTANCE hinst, LPCWSTR lpszName, UINT uType,
 {
  HANDLE hRet = 0;
 
-  dprintf(("OS2LoadImageW NOT COMPLETE (%d,%d)\n", cxDesired, cyDesired));
+  dprintf(("LoadImageW NOT COMPLETE (%d,%d)\n", cxDesired, cyDesired));
 
   switch(uType) {
 	case IMAGE_BITMAP:
@@ -217,8 +246,11 @@ HANDLE WIN32API LoadImageW(HINSTANCE hinst, LPCWSTR lpszName, UINT uType,
 	case IMAGE_ICON:
 		hRet = (HANDLE)LoadIconW(hinst, lpszName);
 		break;
+	default:
+		dprintf(("LoadImageW: unsupported type %d!!", uType));
+		return 0;
   }
-  dprintf(("OS2LoadImageW returned %d\n", (int)hRet));
+  dprintf(("LoadImageW returned %d\n", (int)hRet));
 
   return(hRet);
 }

@@ -1,4 +1,4 @@
-/* $Id: oslibres.cpp,v 1.4 1999-07-26 09:01:33 sandervl Exp $ */
+/* $Id: oslibres.cpp,v 1.5 1999-08-20 20:09:51 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -17,8 +17,8 @@
 #include <string.h>
 
 #include <misc.h>
-#include <oslibwin.h>
-#include "oslibstyle.h"
+#include <winconst.h>
+#include "oslibwin.h"
 #include "oslibutil.h"
 #include "oslibmsg.h"
 #include "oslibgdi.h"
@@ -50,58 +50,178 @@ HANDLE OSLibWinSetAccelTable(HWND hwnd, HANDLE hAccel, PVOID acceltemplate)
     else    return 0;
 }
 //******************************************************************************
-//todo: save mask handle somewhere
+//TODO: handle single icons
 //******************************************************************************
-HANDLE OSLibWinSetIcon(HWND hwnd, HANDLE hIcon, PVOID iconbitmap)
+HANDLE OSLibWinCreateIcon(PVOID iconbitmap)
 {
  POINTERINFO pointerInfo = {0};
  HBITMAP     hbmColor, hbmMask;
  BITMAPARRAYFILEHEADER2 *bafh = (BITMAPARRAYFILEHEADER2 *)iconbitmap;
  BITMAPFILEHEADER2 *bfh;
  HPS         hps;
+ HANDLE      hIcon;
 
     if(iconbitmap == NULL) {
-	dprintf(("OSLibWinSetIcon %x %x: iconbitmap == NULL!!", hwnd, hIcon));
+	dprintf(("OSLibWinCreateIcon iconbitmap == NULL!!"));
 	return 0;
     }
-    if(hIcon == 0) {
-	    //skip xor/and mask
-	    bfh = (BITMAPFILEHEADER2 *)((char *)&bafh->bfh2 + sizeof(RGB2)*2 + sizeof(BITMAPFILEHEADER2));
-	    hps = WinGetPS(hwnd);
-	    hbmColor = GpiCreateBitmap(hps, &bfh->bmp2, CBM_INIT, 
-		     	               (char *)bafh + bfh->offBits,
-	                               (BITMAPINFO2 *)&bfh->bmp2);
-	    if(hbmColor == GPI_ERROR) {
-	        dprintf(("OSLibWinSetIcon: GpiCreateBitmap failed!"));
-	        WinReleasePS(hps);
-	        return 0;
-	    }
-	    hbmMask = GpiCreateBitmap(hps, &bafh->bfh2.bmp2, CBM_INIT, 
-		     	              (char *)bafh + bafh->bfh2.offBits,
-	                              (BITMAPINFO2 *)&bafh->bfh2.bmp2);
-	    if(hbmMask == GPI_ERROR) {
-	        dprintf(("OSLibWinSetIcon: GpiCreateBitmap hbmMask failed!"));
-	        WinReleasePS(hps);
-	        return 0;
-	    }
-	
-	    pointerInfo.fPointer   = FALSE; //icon
-	    pointerInfo.xHotspot   = bfh->xHotspot;
-	    pointerInfo.yHotspot   = bfh->yHotspot;
-	    pointerInfo.hbmColor   = hbmColor;
-	    pointerInfo.hbmPointer = hbmMask;
-	    hIcon = WinCreatePointerIndirect(HWND_DESKTOP, &pointerInfo);
-	    if(hIcon == NULL) {
-	        dprintf(("WinSetIcon: WinCreatePointerIndirect failed!"));
-		GpiDeleteBitmap(hbmMask);
-		GpiDeleteBitmap(hbmColor);
-		WinReleasePS(hps);
-	    }
+    //skip xor/and mask
+    bfh = (BITMAPFILEHEADER2 *)((char *)&bafh->bfh2 + sizeof(RGB2)*2 + sizeof(BITMAPFILEHEADER2));
+    hps = WinGetPS(HWND_DESKTOP);
+    hbmColor = GpiCreateBitmap(hps, &bfh->bmp2, CBM_INIT, 
+	     	               (char *)bafh + bfh->offBits,
+                               (BITMAPINFO2 *)&bfh->bmp2);
+    if(hbmColor == GPI_ERROR) {
+        dprintf(("OSLibWinCreateIcon: GpiCreateBitmap failed!"));
+        WinReleasePS(hps);
+        return 0;
     }
-    WinSendMsg(hwnd, WM_SETICON, (MPARAM)hIcon, 0);
+    hbmMask = GpiCreateBitmap(hps, &bafh->bfh2.bmp2, CBM_INIT, 
+	     	              (char *)bafh + bafh->bfh2.offBits,
+                              (BITMAPINFO2 *)&bafh->bfh2.bmp2);
+    if(hbmMask == GPI_ERROR) {
+        dprintf(("OSLibWinCreateIcon: GpiCreateBitmap hbmMask failed!"));
+        GpiDeleteBitmap(hbmColor);
+        WinReleasePS(hps);
+        return 0;
+    }
+
+    pointerInfo.fPointer   = FALSE; //icon
+    pointerInfo.xHotspot   = bfh->xHotspot;
+    pointerInfo.yHotspot   = bfh->yHotspot;
+    pointerInfo.hbmColor   = hbmColor;
+    pointerInfo.hbmPointer = hbmMask;
+    hIcon = WinCreatePointerIndirect(HWND_DESKTOP, &pointerInfo);
+    if(hIcon == NULL) {
+        dprintf(("OSLibWinCreateIcon: WinCreatePointerIndirect failed!"));
+    }
+    GpiDeleteBitmap(hbmMask);
+    GpiDeleteBitmap(hbmColor);
     WinReleasePS(hps);
     return hIcon;
 }
 //******************************************************************************
 //******************************************************************************
+HANDLE OSLibWinCreatePointer(PVOID cursorbitmap)
+{
+ POINTERINFO pointerInfo = {0};
+ HBITMAP     hbmColor;
+ BITMAPFILEHEADER2 *bfh = (BITMAPFILEHEADER2 *)cursorbitmap;
+ HPS         hps;
+ HANDLE      hPointer;
 
+    if(cursorbitmap == NULL) {
+	dprintf(("OSLibWinCreatePointer cursorbitmap == NULL!!"));
+	return 0;
+    }
+    //skip xor/and mask
+    hps = WinGetPS(HWND_DESKTOP);
+    hbmColor = GpiCreateBitmap(hps, &bfh->bmp2, CBM_INIT, 
+	     	               (char *)bfh + bfh->offBits,
+                               (BITMAPINFO2 *)&bfh->bmp2);
+    if(hbmColor == GPI_ERROR) {
+        dprintf(("OSLibWinCreatePointer: GpiCreateBitmap failed!"));
+        WinReleasePS(hps);
+        return 0;
+    }
+
+    pointerInfo.fPointer   = TRUE;
+    pointerInfo.xHotspot   = bfh->xHotspot;
+    pointerInfo.yHotspot   = bfh->yHotspot;
+    pointerInfo.hbmColor   = 0;
+    pointerInfo.hbmPointer = hbmColor;
+    hPointer = WinCreatePointerIndirect(HWND_DESKTOP, &pointerInfo);
+    if(hPointer == NULL) {
+        dprintf(("OSLibWinCreatePointer: WinCreatePointerIndirect failed!"));
+    }
+    GpiDeleteBitmap(hbmColor);
+    WinReleasePS(hps);
+    return hPointer;
+}
+//******************************************************************************
+//******************************************************************************
+HANDLE OSLibWinQuerySysIcon(ULONG type)
+{
+ ULONG os2type = 0;
+
+    switch(type) {
+    	case IDI_APPLICATION_W:
+		os2type = SPTR_PROGRAM;
+		break;
+	case IDI_HAND_W:
+		os2type = SPTR_ICONWARNING;
+		break;
+	case IDI_QUESTION_W:
+		os2type = SPTR_ICONQUESTION;
+		break;
+	case IDI_EXCLAMATION_W:
+		os2type = SPTR_ICONWARNING;
+		break;
+	case IDI_ASTERISK_W:
+		os2type = SPTR_ICONINFORMATION;
+		break;
+	default:
+		return 0;
+    }
+
+    return WinQuerySysPointer(HWND_DESKTOP, os2type, TRUE);
+}
+//******************************************************************************
+//******************************************************************************
+HANDLE OSLibWinQuerySysPointer(ULONG type)
+{
+ ULONG os2type = 0;
+
+    switch(type) {
+    	case IDC_ARROW_W:
+		os2type = SPTR_ARROW;
+		break;
+    	case IDC_UPARROW_W:
+		os2type = SPTR_ARROW;
+		break;
+    	case IDC_IBEAM_W:
+		os2type = SPTR_TEXT;
+		break;
+    	case IDC_ICON_W:
+		os2type = SPTR_PROGRAM;
+		break;
+    	case IDC_NO_W:
+		os2type = SPTR_ILLEGAL;
+		break;
+    	case IDC_CROSS_W:
+		os2type = SPTR_MOVE;
+		break;
+    	case IDC_SIZE_W:
+		os2type = SPTR_MOVE;
+		break;
+    	case IDC_SIZEALL_W:
+		os2type = SPTR_MOVE;
+		break;
+    	case IDC_SIZENESW_W:
+		os2type = SPTR_SIZENESW;
+		break;
+    	case IDC_SIZENS_W:
+		os2type = SPTR_SIZENS;
+		break;
+    	case IDC_SIZENWSE_W:
+		os2type = SPTR_SIZENWSE;
+		break;
+    	case IDC_SIZEWE_W:
+		os2type = SPTR_SIZEWE;
+		break;
+    	case IDC_WAIT_W:
+		os2type = SPTR_WAIT;
+		break;
+    	case IDC_APPSTARTING_W:
+		os2type = SPTR_WAIT;
+		break;
+	case IDC_HELP_W: //TODO: Create a cursor for this one
+		os2type = SPTR_WAIT;
+		break;
+	default:
+		return 0;
+    }
+    return WinQuerySysPointer(HWND_DESKTOP, os2type, TRUE);
+}
+//******************************************************************************
+//******************************************************************************
