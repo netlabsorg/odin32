@@ -128,5 +128,10 @@ BOOL WIN32API SetCustomHideCursorOnLock(BOOL state);
 //Call to enable access to physical disks or volumes (default is disabled)
 void WIN32API EnablePhysicalDiskAccess(BOOL fEnable);
 
+//Override a system color without forcing a desktop repaint (which 
+//SetSysColors does)
+BOOL WIN32API ODIN_SetSysColors(INT nChanges, const INT *lpSysColor,
+                                const COLORREF *lpColorValues);
+
 #endif  /*__CUSTOMBUILD_H__*/
 
