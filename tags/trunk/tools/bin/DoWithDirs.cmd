@@ -1,7 +1,11 @@
-/* $Id: DoWithDirs.cmd,v 1.1 2000-02-09 23:51:34 bird Exp $
+/* $Id: DoWithDirs.cmd,v 1.2 2000-02-11 15:04:26 bird Exp $
  *
- *  Syntax: dowithdirs.cmd [-e<list of excludes>] [-cd] <cmd with args...>
- *      <list of excludes> is a INCLUDE-path styled list of directories.
+ * Syntax: dowithdirs.cmd [-e<list of excludes>] [-cp] [-i] <cmd with args...>
+ *    -e      Exclude directories.
+ *    <list of excludes> is a INCLUDE-path styled list of directories.
+ *    -cp     CD into the directory and execute the command.
+ *            Default action is to pass the directory name as last argument.
+ *    -i      Ignore command failure (rc=0)
  *
  */
 
@@ -14,8 +18,8 @@
     fCD = 0;
 
     /* parse arguments */
-    parse arg sArg.1 sArg.2 sArg.3 sArg.4
-    sArg.0 = 4;
+    parse arg sArg.1 sArg.2 sArg.3 sArg.4 sArg.5 sArg.6
+    sArg.0 = 6;
     do i = 1 to sArg.0
         if (sArg.i <> '') then
         do
@@ -50,6 +54,11 @@
                     when ch = 'C' then
                     do
                         fCD = 1;
+                    end
+
+                    when ch = 'I' then
+                    do
+                        fIgnoreFailure = 1;
                     end
 
                     otherwise
@@ -121,5 +130,9 @@
 
 
 syntax:
-    say 'Syntax: dowithdirs.cmd [-e<list of excludes>] <cmd with args...>';
+    say 'Syntax: dowithdirs.cmd [-e<list of excludes>] [-cp] [-i] <cmd with args...>';
+    say '   -e      Exclude directories.';
     say '   <list of excludes> is a INCLUDE-path styled list of directories.';
+    say '   -cp     CD into the directory and execute the command.';
+    say '           Default action is to pass the directory name as last argument.';
+    say '   -i      Ignore command failure (rc=0)';
