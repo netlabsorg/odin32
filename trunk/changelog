@@ -1,5 +1,11 @@
- /* $Id: changelog,v 1.118 1999-08-21 19:48:04 sandervl Exp $ */
+ /* $Id: changelog,v 1.119 1999-08-22 08:33:37 sandervl Exp $ */
 
+ 99-08-22: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: Moved CloseLogFile call to after DestroyTIB (fixes crashes
+                    as WriteLog was still called in DestroyTIB & WriteOutProfiles)
+	- USER32/NEW: Changed WM_ERASEBKGND handling. Fixes FreeCell background.
+                      (but might not be completely correct)
+	
  99-08-21: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: Fixed window class bug. Freecell menu now properly
                       loaded.
