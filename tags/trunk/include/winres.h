@@ -1,4 +1,4 @@
-/* $Id: winres.h,v 1.1 1999-07-19 11:51:03 sandervl Exp $ */
+/* $Id: winres.h,v 1.2 1999-07-20 07:41:23 sandervl Exp $ */
 
 /*
  * Win32 resource class
@@ -67,7 +67,7 @@ public:
                    Win32Resource(Win32Image *module, HRSRC hRes, ULONG id, ULONG type);
                    Win32Resource(Win32Image *module, ULONG id, ULONG type,
 	                         ULONG size, char *resdata);
-                  ~Win32Resource();
+    virtual       ~Win32Resource();
 
     virtual  PVOID lockResource();	//get original win32 resource
     virtual  PVOID lockOS2Resource();	//get converted OS/2 resource
