@@ -1,4 +1,8 @@
- /* $Id: changelog,v 1.770 2000-03-02 23:07:30 sandervl Exp $ */
+ /* $Id: changelog,v 1.771 2000-03-03 09:07:26 sandervl Exp $ */
+
+ 2000-03-03: Jeroen van den Horn <J.vandenHorn@fibre.a2000.nl>
+	- KERNEL32: Fixed calling convention bug in conprop2.cpp
+                    (caused crashes with release build)
 
  2000-03-02: Sander van Leeuwen <sandervl@xs4all.nl>
 	- OPENGL\GLIDE: 	Use Odin OS/2 api wrappers in fxos2.cpp
