@@ -1,4 +1,4 @@
-/* $Id: iphlpapi.h,v 1.1 2001-10-10 16:22:20 phaller Exp $ */
+/* $Id: iphlpapi.h,v 1.2 2003-05-05 15:10:57 sandervl Exp $ */
 /*
  *	IPHLPAPI library
  *
@@ -24,6 +24,33 @@ typedef long time_t;
 typedef unsigned long   IPAddr;     // An IP address.
 typedef unsigned long   IPMask;     // An IP subnet mask.
 typedef unsigned long   IP_STATUS;  // Status code returned from IP APIs.
+
+
+#define MIB_IF_TYPE_OTHER               1
+#define MIB_IF_TYPE_ETHERNET            6
+#define MIB_IF_TYPE_TOKENRING           9
+#define MIB_IF_TYPE_FDDI                15
+#define MIB_IF_TYPE_PPP                 23
+#define MIB_IF_TYPE_LOOPBACK            24
+#define MIB_IF_TYPE_SLIP                28
+
+#define MIB_IF_ADMIN_STATUS_UP          1
+#define MIB_IF_ADMIN_STATUS_DOWN        2
+#define MIB_IF_ADMIN_STATUS_TESTING     3
+
+#define MIB_IF_OPER_STATUS_NON_OPERATIONAL      0
+#define MIB_IF_OPER_STATUS_UNREACHABLE          1
+#define MIB_IF_OPER_STATUS_DISCONNECTED         2
+#define MIB_IF_OPER_STATUS_CONNECTING           3
+#define MIB_IF_OPER_STATUS_CONNECTED            4
+#define MIB_IF_OPER_STATUS_OPERATIONAL          5
+
+// FROM: IPRTRMIB.h
+//
+#define ANY_SIZE 1
+#define MAXLEN_IFDESCR 256
+#define MAXLEN_PHYSADDR 8
+#define MAX_INTERFACE_NAME_LEN  256
 
 
 // FROM: iptypes.h
@@ -88,6 +115,54 @@ typedef struct {
   UINT EnableDns;
 } FIXED_INFO, *PFIXED_INFO;
 
+
+typedef struct _MIB_IPADDRROW {
+  DWORD dwAddr;
+  DWORD dwIndex;
+  DWORD dwMask;
+  DWORD dwBCastAddr;
+  DWORD dwReasmSize;
+  unsigned short unused1;
+  unsigned short unused2;
+} MIB_IPADDRROW, *PMIB_IPADDRROW;
+
+typedef struct _MIB_IFROW {
+  WCHAR wszName[MAX_INTERFACE_NAME_LEN];
+  DWORD dwIndex;
+  DWORD dwType;
+  DWORD dwMtu;
+  DWORD dwSpeed;
+  DWORD dwPhysAddrLen;
+  BYTE bPhysAddr[MAXLEN_PHYSADDR];
+  DWORD dwAdminStatus;
+  DWORD dwOperStatus;
+  DWORD dwLastChange;
+  DWORD dwInOctets;
+  DWORD dwInUcastPkts;
+  DWORD dwInNUcastPkts;
+  DWORD dwInDiscards;
+  DWORD dwInErrors;
+  DWORD dwInUnknownProtos;
+  DWORD dwOutOctets;
+  DWORD dwOutUcastPkts;
+  DWORD dwOutNUcastPkts;
+  DWORD dwOutDiscards;
+  DWORD dwOutErrors;
+  DWORD dwOutQLen;
+  DWORD dwDescrLen;
+  BYTE bDescr[MAXLEN_IFDESCR];
+} MIB_IFROW, *PMIB_IFROW;
+
+typedef struct _MIB_IFTABLE {
+  DWORD dwNumEntries;
+  MIB_IFROW table[ANY_SIZE];
+} MIB_IFTABLE, *PMIB_IFTABLE;
+
+
+typedef struct _MIB_IPADDRTABLE {
+  DWORD dwNumEntries;
+  MIB_IPADDRROW table[ANY_SIZE];
+} MIB_IPADDRTABLE, *PMIB_IPADDRTABLE;
 
 #pragma pack()
 
