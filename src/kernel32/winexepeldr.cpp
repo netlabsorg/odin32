@@ -1,4 +1,4 @@
-/* $Id: winexepeldr.cpp,v 1.1 1999-09-15 23:39:07 sandervl Exp $ */
+/* $Id: winexepeldr.cpp,v 1.2 1999-10-01 10:15:50 sandervl Exp $ */
 
 /*
  * Win32 PE loader Exe class
@@ -56,6 +56,8 @@ BOOL WIN32API CreateWin32PeLdrExe(char *szFileName, ULONG reservedMem)
   }
   //TODO: Create full path for executable?
   szCmdLine = ppib->pib_pchcmd + strlen(ppib->pib_pchcmd) + 1;
+  while(*szCmdLine != 0 && *szCmdLine == ' ')
+    szCmdLine++;
 
   WinExe->setCommandLine(szCmdLine);
 
