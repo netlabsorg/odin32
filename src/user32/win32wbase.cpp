@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.348 2002-12-31 16:52:00 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.349 2003-01-01 14:29:44 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1373,7 +1373,7 @@ ULONG Win32BaseWindow::MsgFormatFrame(WINDOWPOS *lpWndPos)
       OSLibChangeCloseButtonState(getOS2FrameWindowHandle(), fCloseButton);
       OSLibWinPositionFrameControls(getOS2FrameWindowHandle(), &rectOS2,
                                     dwStyle, dwExStyle, IconForWindow(ICON_SMALL),
-				    fCloseButton);
+				    fCloseButton, windowClass->getIcon() != NULL);
   }
   return rc;
 }
@@ -3711,7 +3711,8 @@ LONG Win32BaseWindow::SetWindowLong(int index, ULONG value, BOOL fUnicode)
                 SendMessageA(getWindowHandle(),WM_STYLECHANGING,GWL_STYLE,(LPARAM)&ss);
                 setStyle(ss.styleNew);
                 SendMessageA(getWindowHandle(),WM_STYLECHANGED,GWL_STYLE,(LPARAM)&ss);
-                OSLibSetWindowStyle(getOS2FrameWindowHandle(), getOS2WindowHandle(), getStyle(), getExStyle());
+                OSLibSetWindowStyle(getOS2FrameWindowHandle(), getOS2WindowHandle(), 
+                                    getStyle(), getExStyle());
 
                 //TODO: Might not be correct to use ShowWindow here
                 if((ss.styleOld & WS_VISIBLE) != (ss.styleNew & WS_VISIBLE)) {

@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.69 2002-10-15 09:18:10 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.70 2003-01-01 14:29:43 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -43,11 +43,16 @@ HWND  OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle, ULONG dwOSFrameStyl
                            ULONG id, BOOL fTaskList,BOOL fShellPosition, 
                            int classStyle, HWND *hwndFrame);
 
-BOOL  OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle, ULONG *OSFrameStyle);
-void  OSLibSetWindowStyle(HWND hwndFrame, HWND hwndClient, ULONG dwStyle, ULONG dwExStyle);
+BOOL  OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle, 
+                           ULONG *OSFrameStyle);
+void  OSLibSetWindowStyle(HWND hwndFrame, HWND hwndClient, ULONG dwStyle, 
+                          ULONG dwExStyle);
+
 DWORD OSLibQueryWindowStyle(HWND hwnd);
 
-BOOL  OSLibWinPositionFrameControls(HWND hwndFrame, RECTLOS2 *pRect, DWORD dwStyle, DWORD dwExStyle, HICON hSysMenuIcon, BOOL drawCloseButton);
+BOOL  OSLibWinPositionFrameControls(HWND hwndFrame, RECTLOS2 *pRect, DWORD dwStyle, 
+                                    DWORD dwExStyle, HICON hSysMenuIcon, 
+                                    BOOL drawCloseButton, BOOL fClassIcon);
 BOOL  OSLibChangeCloseButtonState(HWND hwndFrame, BOOL State);
 
 #define OSLIB_QWL_USER -4
