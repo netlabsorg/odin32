@@ -1,4 +1,4 @@
-/* $Id: pmkbdhk.cpp,v 1.8 2003-10-22 12:45:12 sandervl Exp $ */
+/* $Id: pmkbdhk.cpp,v 1.9 2003-10-22 15:56:07 sandervl Exp $ */
 /*
  * OS/2 native Presentation Manager hooks
  *
@@ -27,6 +27,7 @@
 
 #include <pmkbdhk.h>
 #include "pmkbdhkp.h"
+#include "dosqss.h"
 
 
 /*
@@ -67,20 +68,6 @@ BOOL EXPENTRY hookPreAccelHook(HAB hab, PQMSG pqmsg, ULONG option);
 
 HOOKDATA G_HookData = {0};
 
-
-/*
- *@@ InitializeVioWindow:
- *      this gets called from hookInit to initialize
- *      the global variables. We query the PM desktop,
- *      the window list, and other stuff we need all
- *      the time.
- */
-
-VOID InitializeVioWindow(VOID)
-{
-}
-
-
 unsigned long _System _DLL_InitTerm(unsigned long hModule,
                                     unsigned long ulFlag)
 {
@@ -115,9 +102,6 @@ BOOL WIN32API hookInit(HAB hab, PSZ pszWindowClassName)
    {
         BOOL fSuccess;
 
-        // initialize globals needed by the hook
-        InitializeVioWindow();
-
         // install hooks, for each app use its own hook
         // hooks automatically releases when process finishes
         // so we need to set hook for each vio app. The reason why
@@ -127,7 +111,7 @@ BOOL WIN32API hookInit(HAB hab, PSZ pszWindowClassName)
         G_HookData.habDaemonObject = hab;
         G_HookData.fPreAccelHooked = WinSetHook(hab, NULLHANDLE, // system hook
                                                 HK_PREACCEL,  // pre-accelerator table hook (undocumented)
-                                                (PFN)hookPreAccelHook,
+                                                (PFN)hookPreAccelHook, 
                                                 G_HookData.hmodDLL);
 
         strncpy(G_HookData.szWindowClass, pszWindowClassName, sizeof(G_HookData.szWindowClass));
