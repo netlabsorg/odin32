@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.152 2001-10-03 18:37:52 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.153 2001-10-07 11:48:28 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -1405,7 +1405,7 @@ PosChangedEnd:
         dprintf(("PMFRAME: WM_TRACKFRAME %x %x %x", win32wnd->getWindowHandle(), mp1, mp2));
         if(fOS2Look) {//sent by titlebar control
 #ifdef CUSTOM_TRACKFRAME
-            Frame_SysCommandSizeMove(win32wnd, SC_MOVE_W);
+            Frame_SysCommandSizeMove(win32wnd, SC_MOVE_W+HTCAPTION_W);
 #else
             FrameTrackFrame(win32wnd, TF_MOVE);
 #endif
