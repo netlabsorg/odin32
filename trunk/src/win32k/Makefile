@@ -1,12 +1,14 @@
 ################################################################################
+# $Id: Makefile,v 1.2 1999-09-12 00:26:27 bird Exp $
 #
-# Copyright 1998 knut st. osmundsen
+# Copyright 1998-1999 knut st. osmundsen
 #
 ################################################################################
 ################################################################################
 # Include path definitions
 ################################################################################
 !include makefile.inc
+!include $(PDWIN32_INCLUDE)\pdwin32.tools
 
 NAME = win32k
 
@@ -82,49 +84,49 @@ AINCLUDES  = -Fdi:$(WIN32KBASE)\include             \
 .SUFFIXES: .obj .cpp .c .asm
 
 {dev16}.c{object}.obj:
-    @echo compiling: $<
+    @$(ECHO) compiling: $<
     @$(CC16) $(CFLAGS16) $(CDEFINES16) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES16) $<
 
 {dev32}.asm{object}.obj:
-    @echo assembling: $<
+    @$(ECHO) assembling: $<
     @$(AS) $(ASFLAGS) $(ADEFINES) $(AINCLUDES) $< -Fo:$@ -Fl:$(WIN32KLIST)\$(*B).lst
 {dev32}.c{object}.obj:
-    @echo compiling: $<
+    @$(ECHO) compiling: $<
     @$(CC) -c $(CFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
 {dev32}.cpp{object}.obj:
-    @echo compiling: $<
+    @$(ECHO) compiling: $<
     @$(CC) -c $(CPPFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
 
 {ldr}.asm{object}.obj:
-    @echo assembling: $<
+    @$(ECHO) assembling: $<
     @$(AS) $(ASFLAGS) $(ADEFINES) $(AINCLUDES) $< -Fo:$@ -Fl:$(WIN32KLIST)\$(*B).lst
 {ldr}.c{object}.obj:
-    @echo compiling: $<
+    @$(ECHO) compiling: $<
     @$(CC) -c $(CFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
 {ldr}.cpp{object}.obj:
-    @echo compiling: $<
+    @$(ECHO) compiling: $<
     @$(CC) -c $(CPPFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
 
 {misc}.asm{object}.obj:
-    @echo assembling: $<
+    @$(ECHO) assembling: $<
     @$(AS) $(ASFLAGS) $(ADEFINES) $(AINCLUDES) $< -Fo:$@ -Fl:$(WIN32KLIST)\$(*B).lst
 {misc}.c{object}.obj:
-    @echo compiling: $<
+    @$(ECHO) compiling: $<
     @$(CC) -c $(CFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
 {misc}.cpp{object}.obj:
-    @echo compiling: $<
+    @$(ECHO) compiling: $<
     @$(CC) -c $(CPPFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
 
 {pe2lx}.c{object}.obj:
-    @echo compiling: $<
+    @$(ECHO) compiling: $<
     @$(CC) -c $(CFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
 {pe2lx}.cpp{object}.obj:
-    @echo compiling: $<
+    @$(ECHO) compiling: $<
     @$(CC) -c $(CPPFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
 
 {devhlpadd}.asm{object}.obj:
-    @echo assembling: $<
-    $(AS) $(ASFLAGS) $(ADEFINES) $(AINCLUDES) $< -Fo:$@ -Fl:$(WIN32KLIST)\$(*B).lst
+    @$(ECHO) assembling: $<
+    @$(AS) $(ASFLAGS) $(ADEFINES) $(AINCLUDES) $< -Fo:$@ -Fl:$(WIN32KLIST)\$(*B).lst
 
 
 
@@ -185,55 +187,6 @@ LIBSINIT = \
         devhelp.lib \
         clib.lib
 
-#
-# Old stuff
-#
-AOBJS = object\asmutils.obj                 \
-        object\devhlp32_vmsetmem.obj        \
-        object\devhlp32_PhysToVirt.obj      \
-        object\calltab.obj
-
-
-COBJS = object\dev32_idc.obj                \
-        object\dev32_open.obj               \
-        object\dev32_close.obj              \
-        object\dev32_ioctl.obj              \
-        object\dev32_init.obj               \
-        object\dev32_read.obj               \
-        object\dev32_strategy.obj           \
-        object\dev32_shutdown.obj           \
-        object\dev32_init_complete.obj      \
-        object\dev32_data.obj               \
-        object\dev32_invalid_command.obj    \
-        object\ioctl.obj                    \
-        object\ldrinit.obj                  \
-        object\kernels.obj                  \
-        object\myldrClose.obj               \
-        object\myldrOpen.obj                \
-        object\myldrRead.obj                \
-        object\myLDRQAppType.obj            \
-        object\pefilter.obj                 \
-        object\malloc.obj                   \
-        object\log.obj                      \
-        object\log2.obj                     \
-        object\new.obj                      \
-        object\Yield.obj                    \
-        object\lxSuper.obj                  \
-        object\lxFile.obj                   \
-        object\accelerator.obj              \
-        object\bitmap.obj                   \
-        object\cursor.obj                   \
-        object\cursorgrp.obj                \
-        object\dialog.obj                   \
-        object\icon.obj                     \
-        object\icongrp.obj                  \
-        object\menu.obj                     \
-        object\misc.obj                     \
-        object\pefile.obj                   \
-        object\rcdata.obj                   \
-        object\strings.obj                  \
-        object\vsprintf.obj
-
 
 ################################################################################
 # SPECIAL RULES - Testing
@@ -247,17 +200,16 @@ ProbKrnl.exe: dev16\ProbKrnl.c $(WIN32KBASE)\include\sym.h \
 
 
 
-
 ################################################################################
 # Win32k.sys rule. Don't mess with the order or objects and libraries!
 ################################################################################
 $(NAME).sys: $(OBJS) $(LIBS) last.lib $(OBJSINIT) $(LIBSINIT) $(NAME).def
-    -@echo linking: $@
+    -@$(ECHO) linking: $@
     $(LD) $(LFLAGS) @<<
 $(OBJS) $(LIBS) last.lib $(OBJSINIT) /IG $(LIBSINIT) $(NAME).def
 <<
     @mapsym $*.map > nul
-#    @copy $@ $(PDWIN32_BIN)
+#    $(CP) $@ $(PDWIN32_BIN)
 
 
 ################################################################################
@@ -302,23 +254,11 @@ win32k.vpj:
 # Cleanup
 ################################################################################
 clean:
-   -@echo cleaning....
-   -@echo #do nmake depend > .depend
-   -@rm -f $(NAME).sys
-   -@rm -f *.lib
-   -@rm -f $(WIN32KOBJ)\*
-   -@rm -f $(WIN32KLIST)\*
-   -@rm -f *.obj
-   -@rm -f *.exe
-   -@rm -f *.map
-#   @cd ..\pe2lx
-#   -@nmake /NOLOGO clean
-#   @cd ..\lib
-#   -@nmake /NOLOGO clean
-#   @cd ..\bin
-#   -@nmake /NOLOGO clean
-#   @cd ..
-#   -@del docsA\* >& nul
+   @$(ECHO) cleaning....
+   @$(ECHO) #do nmake depend > .depend
+   @$(RM) $(NAME).sys *.lib $(WIN32KOBJ)\* $(WIN32KLIST)\* *.obj *.exe
+   @$(RM) *.sym *.map
+#  @$(RM) $(PDWIN32_BIN)\$(NAME).sys
 
 
 ################################################################################
@@ -329,7 +269,7 @@ depend: fastdep.exe
     @fastdep -oObject $(CINCLUDES) misc\*.c* ldr\*.c* dev32\*.c* dev16\*.c* pe2lx\*.c* -o include\*.h pe2lx\*.h*
 
 fastdep.exe: fastdep.c
-    @icc fastdep.c
+    @icc -Q+ -O+ fastdep.c
 
 object\asmutils.obj:            misc\asmutils.asm     include\devsegdf.inc
 object\calltab.obj:             ldr\calltab.asm

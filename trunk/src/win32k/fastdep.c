@@ -1,5 +1,5 @@
 /*
- * Fast dependands.
+ * Fast dependands. (Fase = Quick and Dirty!)
  *
  * Copyright (c) 1999 knut st. osmundsen
  *
