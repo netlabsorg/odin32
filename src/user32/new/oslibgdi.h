@@ -1,4 +1,4 @@
-/* $Id: oslibgdi.h,v 1.2 1999-07-19 18:40:43 sandervl Exp $ */
+/* $Id: oslibgdi.h,v 1.3 1999-07-20 07:42:35 sandervl Exp $ */
 /*
  * Window GDI wrapper functions for OS/2
  *
@@ -42,7 +42,7 @@ BOOL  OSLibWinReleasePS(HDC hdc);
 //******************************************************************************
 inline ULONG MapOS2ToWin32Y(Win32Window *window, ULONG y)
 {
-    return window->getWindowHeight() - y;
+    return window->getWindowHeight() - y - 1;
 }
 
 ULONG MapOS2ToWin32Y(HWND hwndParent, ULONG cy, ULONG y);

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 1999-07-19 11:50:04 sandervl Exp $
+# $Id: makefile,v 1.13 1999-07-20 07:42:35 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -22,7 +22,7 @@ TARGET = user32
 
 OBJS =  user32.obj resstring.obj dialog.obj loadres.obj \
         dde.obj \
-        icon.obj hook.obj hooks.obj menu.obj \
+        icon.obj hook.obj hooks.obj winmenu.obj \
         usrcall.obj defwndproc.obj syscolor.obj char.obj initterm.obj \
         uitools.obj unknown.obj spy.obj wndmsg.obj \
         pmwindow.obj win32class.obj win32wnd.obj win32dlg.obj \
@@ -56,7 +56,7 @@ resstring.obj: resstring.cpp resstring.h
 char.obj: char.cpp user32.h
 loadres.obj: loadres.cpp user32.h
 icon.obj: icon.cpp icon.h
-menu.obj: menu.cpp user32.h
+winmenu.obj: winmenu.cpp user32.h $(PDWIN32_INCLUDE)\winres.h
 syscolor.obj: syscolor.cpp syscolor.h
 usrcall.obj: usrcall.cpp usrcall.h
 dialog.obj: dialog.cpp
@@ -85,12 +85,12 @@ wingdi.obj:    wingdi.cpp win32wnd.h oslibgdi.h
 windlgmsg.obj: windlgmsg.cpp win32class.h win32wnd.h win32dlg.h win32wndchild.h
 windowclass.obj: windowclass.cpp win32class.h win32wnd.h win32wndchild.h
 windowword.obj:  windowword.cpp win32class.h win32wnd.h win32dlg.h win32wndchild.h
-winaccel.obj:     winaccel.cpp
+winaccel.obj:     winaccel.cpp  $(PDWIN32_INCLUDE)\winres.h
 winscrollbar.obj: winscrollbar.cpp
 
 pmwindow.obj:   pmwindow.cpp win32class.h win32wnd.h win32dlg.h pmwindow.h win32wndchild.h $(PDWIN32_INCLUDE)\wprocess.h  oslibgdi.h
 win32class.obj: win32class.cpp win32class.h win32wnd.h win32dlg.h gen_object.h oslibwin.h win32wndchild.h
-win32wnd.obj:   win32wnd.cpp win32class.h win32wnd.h win32dlg.h gen_object.h oslibwin.h win32wndchild.h
+win32wnd.obj:   win32wnd.cpp win32class.h win32wnd.h win32dlg.h gen_object.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h
 win32dlg.obj:   win32dlg.cpp win32class.h win32wnd.h win32dlg.h gen_object.h oslibwin.h win32wndchild.h
 win32wndchild.obj: win32wndchild.cpp win32wndchild.h
 gen_object.obj: gen_object.cpp gen_object.h

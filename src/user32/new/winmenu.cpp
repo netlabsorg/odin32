@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.2 1999-07-14 21:05:58 cbratschi Exp $ */
+/* $Id: winmenu.cpp,v 1.1 1999-07-20 07:42:36 sandervl Exp $ */
 
 /*
  * Win32 menu API functions for OS/2
@@ -17,20 +17,95 @@
  */
 #include <os2win.h>
 #include <stdlib.h>
+#include <win32wnd.h>
 
 //******************************************************************************
 //******************************************************************************
-HMENU WIN32API GetMenu( HWND arg1)
+HMENU WIN32API LoadMenuA(HINSTANCE hinst, LPCSTR lpszMenu)
 {
-#ifdef DEBUG
  HMENU rc;
 
-    rc = O32_GetMenu(arg1);
-    WriteLog("USER32:  GetMenu %X returned %d\n", arg1, rc);
-    return rc;
-#else
-    return O32_GetMenu(arg1);
-#endif
+    rc = (HMENU)FindResourceA(hinst, lpszMenu, RT_MENUA);
+    dprintf(("LoadMenuA (%X) returned %d\n", hinst, rc));
+    return(rc);
+}
+//******************************************************************************
+//******************************************************************************
+HMENU WIN32API LoadMenuW(HINSTANCE hinst, LPCWSTR lpszMenu)
+{
+ HMENU rc;
+
+    rc = (HMENU)FindResourceW(hinst, lpszMenu, RT_MENUW);
+    dprintf(("LoadMenuW (%X) returned %d\n", hinst, rc));
+    return(rc);
+}
+//******************************************************************************
+//******************************************************************************
+HMENU WIN32API LoadMenuIndirectA( const MENUITEMTEMPLATEHEADER * arg1)
+{
+ char  *astring = NULL;
+ HMENU rc;
+
+    dprintf(("OS2LoadMenuIndirectA\n"));
+
+    rc = O32_LoadMenuIndirect(arg1);
+    if(astring)
+	FreeAsciiString(astring);
+    return(rc);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API DestroyMenu(HMENU hmenu)
+{
+ Win32Resource *winres;
+
+    dprintf(("OS2DestroyMenu\n"));
+    if(HIWORD(hmenu) == 0) {
+	SetLastError(ERROR_INVALID_PARAMETER);
+	return FALSE;
+    }    
+    winres = (Win32Resource *)hmenu;
+    delete winres;
+    return TRUE;
+}
+//******************************************************************************
+//Won't work...
+//******************************************************************************
+HMENU WIN32API LoadMenuIndirectW(const MENUITEMTEMPLATEHEADER * arg1)
+{
+    dprintf(("OS2LoadMenuIndirectW, improperly implemented!!\n"));
+
+    return 0;
+//    return O32_LoadMenuIndirect(arg1);
+}
+//******************************************************************************
+//******************************************************************************
+HMENU WIN32API GetMenu( HWND hwnd)
+{
+  Win32Window *window;
+
+    window = Win32Window::GetWindowFromHandle(hwnd);
+    if(!window) {
+    	dprintf(("GetMenu, window %x not found", hwnd));
+    	return 0;
+    }
+    dprintf(("GetMenu %x", hwnd));
+    return window->GetMenu();
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API SetMenu( HWND hwnd, HMENU hmenu)
+{
+  Win32Window *window;
+
+    window = Win32Window::GetWindowFromHandle(hwnd);
+    if(!window) {
+    	dprintf(("GetMenu, window %x not found", hwnd));
+    	return 0;
+    }
+    dprintf(("SetMenu %x %x\n", hwnd, hmenu));
+    window->SetMenu(hmenu);
+    return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
@@ -93,15 +168,6 @@ int WIN32API GetMenuStringW(HMENU hmenu, UINT idItem, LPWSTR lpsz, int cchMax, U
     }
     else        lpsz[0] = 0;
     return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SetMenu( HWND arg1, HMENU  arg2)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  OS2SetMenu\n");
-#endif
-    return O32_SetMenu(arg1, arg2);
 }
 //******************************************************************************
 //******************************************************************************
@@ -289,15 +355,6 @@ BOOL WIN32API DeleteMenu( HMENU arg1, UINT arg2, UINT  arg3)
     WriteLog("USER32:  OS2DeleteMenu\n");
 #endif
     return O32_DeleteMenu(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API DestroyMenu( HMENU arg1)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  OS2DestroyMenu\n");
-#endif
-    return O32_DestroyMenu(arg1);
 }
 //******************************************************************************
 //******************************************************************************
