@@ -1,4 +1,10 @@
-/* $Id: ChangeLog,v 1.2626 2003-09-30 13:30:33 bird Exp $ */
+/* $Id: ChangeLog,v 1.2627 2003-10-02 10:37:28 sandervl Exp $ */
+
+ 2003-10-01: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Clean up global critical section (window handles) during unload
+
+ 2003-10-01: Platon Fomichev <stauff@innotek   >
+    - USER32:   o CallWindowProcA/W: don't fail if window handle is invalid
 
  2003-09-30: knut st. osmundsen <bird-odinspam@anduin    >
     - CMDQD:    o Fixed code which messes with STD handles.
