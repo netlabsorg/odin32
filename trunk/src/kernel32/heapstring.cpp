@@ -606,8 +606,6 @@ LPVOID HEAP_xalloc( HANDLE heap, DWORD flags, DWORD size )
              heap,
              flags,
              size));
-
-    exit(1);
   }
   return p;
 }
@@ -635,10 +633,82 @@ LPVOID HEAP_xrealloc( HANDLE heap, DWORD flags, LPVOID lpMem, DWORD size )
              flags,
              lpMem,
              size));
-
-    exit(1);
   }
   return p;
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
+ *****************************************************************************/
+
+LPVOID HEAP_malloc(DWORD size )
+{
+  LPVOID p = HeapAlloc( GetProcessHeap(), 0, size );
+  if (!p)
+  {
+    dprintf(("KERNEL32: HEAP_malloc(%08xh,%08xh,%08xh) out of memory.\n",
+             heap,
+             flags,
+             size));
+  }
+  return p;
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
+ *****************************************************************************/
+
+LPVOID HEAP_realloc(LPVOID lpMem, DWORD size )
+{
+  LPVOID p = HeapReAlloc( GetProcessHeap(), 0, lpMem, size );
+  if (!p)
+  {
+    dprintf(("KERNEL32: HEAP_realloc(%08xh,%08xh,%08xh,%08xh) out of memory.\n",
+             heap,
+             flags,
+             lpMem,
+             size));
+  }
+  return p;
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
+ *****************************************************************************/
+
+VOID HEAP_free(LPVOID lpMem)
+{
+  dprintf(("KERNEL32: HEAP_free(%08xh)\n",
+           lpMem));
+
+  HeapFree( GetProcessHeap(), 0, lpMem);
 }
 
 
