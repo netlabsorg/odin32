@@ -1,4 +1,4 @@
-/* $Id: oslibres.cpp,v 1.38 2004-02-27 19:51:56 sandervl Exp $ */
+/* $Id: oslibres.cpp,v 1.39 2004-03-18 11:14:02 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -457,7 +457,10 @@ HANDLE OSLibWinCreatePointer(CURSORICONINFO *pInfo, char *pAndBits, BITMAP_W *pA
     //bird: We should reserve the amount required anythingelse is stupid.
     //      Looks like it's reading 3 bytes too much... Hopefully that's due to the
     //      &pBmpMask->argbColor[2] which it assumes is 16 colors long. But no proofs.
-    masksize = sizeof(BITMAPINFO2) + (pAndBmp->bmHeight * 2 * pAndBmp->bmWidthBytes) + (16+2)*sizeof(RGB2);
+    //bird: Acroabat 5.1 + Printer dialog -> caused 1 byte reading too much from this buffer.
+    //      At loss for the reason so I'm adding a safety catch of 256 extra bytes, I'm tired of this.
+    //      (Prolem occured for bitmap: cPlanes=1 bmWidth=76 bmHeight=24 bmWidthBytes=10)
+    masksize = sizeof(BITMAPINFO2) + (pAndBmp->bmHeight * 2 * pAndBmp->bmWidthBytes) + (16 + 2) * sizeof(RGB2) + 256;
     pBmpMask = (BITMAPINFO2 *)calloc(masksize, 1);
     if(pBmpMask == NULL) {
         DebugInt3();
@@ -474,9 +477,9 @@ HANDLE OSLibWinCreatePointer(CURSORICONINFO *pInfo, char *pAndBits, BITMAP_W *pA
     memset(&pBmpMask->argbColor[1], 0xff, sizeof(RGB)); //not the reserved byte
 
     // The mono XOR bitmap must be first in the pointer bitmap
-    if(pOS2XorBits || pXorBmp->bmBitsPixel == 1) 
+    if(pOS2XorBits || pXorBmp->bmBitsPixel == 1)
     {
-        if(pXorBmp->bmBitsPixel == 1) 
+        if(pXorBmp->bmBitsPixel == 1)
         {
             pOS2XorBits = (char *)calloc(pXorBmp->bmHeight, pXorBmp->bmWidthBytes);
 
