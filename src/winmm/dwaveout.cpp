@@ -1,4 +1,4 @@
-/* $Id: dwaveout.cpp,v 1.13 1999-12-31 13:55:51 sandervl Exp $ */
+/* $Id: dwaveout.cpp,v 1.14 2000-02-17 14:09:30 sandervl Exp $ */
 
 /*
  * Wave playback class
@@ -29,6 +29,9 @@
 
 #include "misc.h"
 #include "dwaveout.h"
+
+#define DBG_LOCALLOG	DBG_dwaveout
+#include "dbglocal.h"
 
 #ifndef min
 #define min(a, b) ((a > b) ? b : a)
@@ -587,9 +590,11 @@ BOOL DartWaveOut::queryFormat(ULONG formatTag, ULONG nChannels,
                       (PVOID) &mciAudioCaps,
                       0);
   if((rc & 0xFFFF) != MCIERR_SUCCESS) {
-    mciError(rc);
-    winrc = FALSE;
+    	mciError(rc);
+    	winrc = FALSE;
   }
+  else 	winrc = TRUE;
+
   // Close the device
   mciSendCommand(DeviceId,MCI_CLOSE,MCI_WAIT,(PVOID)&GenericParms,0);
   return(winrc);

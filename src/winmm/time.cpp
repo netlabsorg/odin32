@@ -1,4 +1,4 @@
-/* $Id: time.cpp,v 1.8 1999-12-29 08:33:56 phaller Exp $ */
+/* $Id: time.cpp,v 1.9 2000-02-17 14:09:32 sandervl Exp $ */
 
 /*
  * Timer MM apis
@@ -20,6 +20,9 @@
 
 #include "os2timer.h"
 #include "time.h"
+
+#define DBG_LOCALLOG	DBG_time
+#include "dbglocal.h"
 
 ODINDEBUGCHANNEL(WINMM-TIME)
 

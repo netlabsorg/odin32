@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.15 2000-02-09 23:47:05 bird Exp $
+# $Id: makefile,v 1.16 2000-02-17 14:09:30 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -24,7 +24,7 @@ TARGET = winmm
 OBJS =  os2timer.obj waveout.obj dwaveout.obj time.obj \
         wavein.obj auxiliary.obj auxos2.obj mixer.obj \
         midi.obj irtmidi.obj midistrm.obj initterm.obj mci.obj joy.obj \
-        mmio.obj driver.obj playsound.obj joyos2.obj resource.obj
+        mmio.obj driver.obj playsound.obj joyos2.obj resource.obj dbglocal.obj
 
 
 all: $(TARGET).dll $(TARGET).lib

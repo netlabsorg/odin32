@@ -1,4 +1,4 @@
-/* $Id: IRTMidi.cpp,v 1.5 1999-08-19 18:46:03 phaller Exp $ */
+/* $Id: IRTMidi.cpp,v 1.6 2000-02-17 14:09:29 sandervl Exp $ */
 
 /*******************************************************************************
 * FILE NAME: IRTMidi.cpp                                                       *
@@ -26,6 +26,9 @@
 #include <string.h>
 #include <stdio.h>
 #include <malloc.h>
+
+#define DBG_LOCALLOG	DBG_irtmidi
+#include "dbglocal.h"
 
 IRTMidi * IRTMidi::iTheIRTMidiSingleton = NULL;
 

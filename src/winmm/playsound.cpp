@@ -1,4 +1,4 @@
-/* $Id: playsound.cpp,v 1.4 1999-08-19 18:46:05 phaller Exp $ */
+/* $Id: playsound.cpp,v 1.5 2000-02-17 14:09:32 sandervl Exp $ */
 
 /*
  * Playsound stubs
@@ -15,10 +15,16 @@
  * Includes                                                                 *
  ****************************************************************************/
 
+#define  INCL_BASE
+#define  INCL_OS2MM
 #include <os2wrap.h>       //Odin32 OS/2 api wrappers
 #include <odinwrap.h>
-#include "win32type.h"
-#include "misc.h"
+#include <win32type.h>
+#include <winconst.h>
+#include <misc.h>
+
+#define DBG_LOCALLOG	DBG_playsound
+#include "dbglocal.h"
 
 ODINDEBUGCHANNEL(WINMM-PLAYSOUND)
 
@@ -43,6 +49,14 @@ ODINFUNCTION3(BOOL, PlaySoundA,
               DWORD, fdwSound)
 {
   dprintf(("WINMM:PlaySoundA not implemented\n"));
+  if((fdwSound & (SND_SYNC_W|SND_ASYNC_W)) == (SND_SYNC_W|SND_ASYNC_W)) {
+//	SetLastError(ERROR_INVALID_PARAMETER_W);
+	return FALSE;
+  }
+//  if(fdwSound & (SND_MEMORY_W|SND_ALIAS_W|SND_FILENAME_W|SND_RESOURCE_W) == (SND_SYNC_W|SND_ASYNC_W)) {
+//	SetLastError(ERROR_INVALID_PARAMETER_W);
+//	return FALSE;
+//  }
   return(FALSE);
 }
 

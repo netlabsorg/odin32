@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.8 2000-02-05 02:16:21 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.9 2000-02-17 14:09:30 sandervl Exp $ */
 
 /*
  * WINMM DLL entry point
@@ -38,6 +38,8 @@
 #include <odinlx.h>
 #include "auxiliary.h"
 
+#define DBG_LOCALLOG	DBG_initterm
+#include "dbglocal.h"
 
 extern "C" {
 void IRTMidiShutdown();  // IRTMidi shutdown routine
@@ -91,6 +93,8 @@ unsigned long _System _DLL_InitTerm(unsigned long hModule, unsigned long
    switch (ulFlag) {
       case 0 :
          _ctordtorInit();
+
+         ParseLogStatus();
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
