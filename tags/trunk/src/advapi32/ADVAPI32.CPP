@@ -1,4 +1,4 @@
-/* $Id: ADVAPI32.CPP,v 1.8 1999-10-28 18:24:24 sandervl Exp $ */
+/* $Id: ADVAPI32.CPP,v 1.9 1999-11-30 19:41:06 sandervl Exp $ */
 
 /*
  * Win32 advanced API functions for OS/2
@@ -41,55 +41,39 @@ ODINDEBUGCHANNEL(ADVAPI32-ADVAPI32)
 //#define DEBUG_LOCAL 1
 
 
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetFileSecurityA(LPCSTR               lpFileName,
-                               SECURITY_INFORMATION RequestedInformation,
-                               PSECURITY_DESCRIPTOR pSecurityDescriptor,
-                               DWORD                nLength,
-                               LPDWORD              lpnLengthNeeded)
+/*****************************************************************************
+ * Name      : SetTokenInformation
+ * Purpose   : The SetTokenInformation function sets various types of
+ *             information for a specified access token. The information it
+ *             sets replaces existing information. The calling process must
+ *             have appropriate access rights to set the information.
+ * Parameters: HANDLE                  hToken         handle of access token
+ *             TOKEN_INFORMATION_CLASS tic            type of information to set
+ *             LPVOID                  lpvInformation address of information to set
+ *             DWORD                   cbInformation  size of information buffer
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+#define TOKEN_INFORMATION_CLASS DWORD
+BOOL WIN32API SetTokenInformation(HANDLE                  hToken,
+                                     TOKEN_INFORMATION_CLASS tic,
+                                     LPVOID                  lpvInformation,
+                                     DWORD                   cbInformation)
 {
-#ifdef DEBUG
-  WriteLog("GetFileSecurityA %s, not implemented\n", lpFileName);
-#endif
-  return(FALSE);
+  dprintf(("ADVAPI32: SetTokenInformation(%08xh,%08xh,%08xh,%08xh) not implemented.\n",
+           hToken,
+           tic,
+           lpvInformation,
+           cbInformation));
+
+  return (FALSE); /* signal failure */
 }
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetFileSecurityW(LPCWSTR               lpFileName,
-                               SECURITY_INFORMATION  RequestedInformation,
-                               PSECURITY_DESCRIPTOR  pSecurityDescriptor,
-                               DWORD                 nLength,
-                               LPDWORD               lpnLengthNeeded)
-{
-#ifdef DEBUG
-  WriteLog("GetFileSecurityW %s, not implemented\n",
-           lpFileName);
-#endif
-  return(FALSE);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SetFileSecurityA(LPCSTR lpFileName,
-                     SECURITY_INFORMATION RequestedInformation,
-                         PSECURITY_DESCRIPTOR pSecurityDescriptor)
-{
-#ifdef DEBUG
-  WriteLog("SetFileSecurityA %s, not implemented\n", lpFileName);
-#endif
-  return(FALSE);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SetFileSecurityW(LPCWSTR lpFileName,
-                                         SECURITY_INFORMATION RequestedInformation,
-                                         PSECURITY_DESCRIPTOR pSecurityDescriptor)
-{
-#ifdef DEBUG
-  WriteLog("SetFileSecurityW %s, not implemented\n", lpFileName);
-#endif
-  return(FALSE);
-}
+
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API GetUserNameA(  /*PLF Wed  98-02-11 13:33:39*/
@@ -163,28 +147,6 @@ BOOL WIN32API ReportEventW(     /*PLF Sat  98-03-07 00:36:43*/
 }
 
 
-BOOL WIN32API SetSecurityDescriptorDacl( /*PLF Sat  98-03-07 02:48:45*/
-    PSECURITY_DESCRIPTOR pSecurityDescriptor,
-    BOOL bDaclPresent,
-    PACL pDacl,
-    BOOL bDaclDefaulted
-    )
-
-{
-    dprintf(("SetSecurityDescriptorDacl(): NIY - returning error\n"));
-    return FALSE;
-}
-
-
-
-/*PLF Sat  98-03-07 02:59:20*/
-BOOL WIN32API InitializeSecurityDescriptor(PSECURITY_DESCRIPTOR pSecurityDescriptor,
-                  DWORD dwRevision)
-{
-    dprintf(("InitializeSecurityDescriptor() NIY\n"));
-    return FALSE;
-}
-
 /*PLF Sat  98-03-07 02:59:20*/
 HANDLE WIN32API RegisterEventSourceA(LPCSTR lpUNCServerName, LPCSTR lpSourceName)
 {
@@ -209,77 +171,6 @@ BOOL WIN32API DeregisterEventSource(HANDLE hEventLog)
 
 
 /*PLF Sat  98-03-07 02:59:20*/
-BOOL WIN32API AdjustTokenPrivileges(
-            HANDLE TokenHandle,
-            BOOL DisableAllPrivileges,
-            PTOKEN_PRIVILEGES NewState,
-            DWORD BufferLength,
-            PTOKEN_PRIVILEGES PreviousState,
-            LPDWORD ReturnLength
-)
-{
-    dprintf(("AdjustTokenPrivileges() NIY\n"));
-    return FALSE;
-}
-
-/*PLF Sat  98-03-07 02:59:20*/
-BOOL WIN32API LookupPrivilegeValueA(LPCSTR lpSystemName,
-                                       LPCSTR lpName,
-                                       LPVOID lpLuid)
-{
-    dprintf(("LookupPrivilegeValueA() NIY\n"));
-    return FALSE;
-}
-
-BOOL WIN32API LookupPrivilegeValueW(LPCWSTR lpSystemName,
-                                       LPCWSTR lpName,
-                                       LPVOID lpLuid)
-{
-    dprintf(("LookupPrivilegeValueW() NIY\n"));
-    return FALSE;
-}
-
-
-/*PLF Sat  98-03-07 02:59:20*/
-BOOL WIN32API OpenProcessToken(HANDLE ProcessHandle,
-                DWORD DesiredAccess,
-                PHANDLE TokenHandle
-)
-{
-    dprintf(("OpenProcessToken() NIY\n"));
-    return FALSE;
-}
-
-
-//******************************************************************************
-//******************************************************************************
-/*KSO Thu 21.05.1998*/
-BOOL WIN32API SetThreadToken (
-   PHANDLE Thread,
-   HANDLE Token
-   )
-{
-   dprintf(("SetThreadToken() NIY\n"));
-   return FALSE;
-}
-
-//******************************************************************************
-//******************************************************************************
-/*KSO Thu 21.05.1998*/
-BOOL WIN32API OpenThreadToken (
-   HANDLE ThreadHandle,
-   DWORD DesiredAccess,
-   BOOL OpenAsSelf,
-   PHANDLE TokenHandle
-   )
-{
-   dprintf(("OpenThreadToken() NIY\n"));
-   return FALSE;
-}
-
-
-
-
 
 /*****************************************************************************
  * Name      : AbortSystemShutdownA
@@ -325,50 +216,6 @@ BOOL WIN32API AbortSystemShutdownW(LPWSTR lpMachineName)
 }
 
 
-/*****************************************************************************
- * Name      : AccessCheck
- * Purpose   : The AccessCheck function is used by a server application to
- *             check a client's access to an object against the access control
- *             associated with the object.
- * Parameters: PSECURITY_DESCRIPTOR pSecurityDescriptor address of security descriptor
- *             HANDLE               ClientToken         handle of client access token
- *             DWORD                DesiredAccess       access mask to request
- *             PGENERIC_MAPPING     GenericMapping      address of generic-mapping structure
- *             PPRIVILEGE_SET       PrivilegeSet        address of privilege-set structure
- *             LPDWORD              PrivilegeSetLength  size of privilege-set structure
- *             LPDWORD              GrantedAccess       address of granted access mask
- *             LPBOOL               AccessStatus        address of flag indicating whether access granted
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-#define PGENERIC_MAPPING LPVOID
-#define PPRIVILEGE_SET   LPVOID
-BOOL WIN32API AccessCheck(PSECURITY_DESCRIPTOR pSecurityDescriptor,
-                             HANDLE               ClientToken,
-                             DWORD                DesiredAccess,
-                             PGENERIC_MAPPING     GenericMapping,
-                             PPRIVILEGE_SET       PrivilegeSet,
-                             LPDWORD              PrivilegeSetLength,
-                             LPDWORD              GrantedAccess,
-                             LPBOOL               AccessStatus)
-{
-  dprintf(("ADVAPI32: AccessCheck(%08xh,%08xh,%08xh,%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
-           pSecurityDescriptor,
-           ClientToken,
-           DesiredAccess,
-           GenericMapping,
-           PrivilegeSet,
-           PrivilegeSetLength,
-           GrantedAccess,
-           AccessStatus));
-
-  return (TRUE); /* always grant access */
-}
 
 
 /*****************************************************************************
@@ -660,57 +507,6 @@ BOOL WIN32API AdjustTokenGroups(HANDLE         TokenHandle,
   return (FALSE); /* signal failure */
 }
 
-
-/*****************************************************************************
- * Name      : AllocateAndInitializeSid
- * Purpose   : The AllocateAndInitializeSid function allocates and initializes
- *             a security identifier (SID) with up to eight subauthorities.
- * Parameters: PSID_IDENTIFIER_AUTHORITY pIdentifierAuthority address of identifier authority
- *             BYTE   nSubAuthorityCount count of subauthorities
- *             DWORD  dwSubAuthority0    subauthority 0
- *             DWORD  dwSubAuthority1    subauthority 1
- *             DWORD  dwSubAuthority2    subauthority 2
- *             DWORD  dwSubAuthority3    subauthority 3
- *             DWORD  dwSubAuthority4    subauthority 4
- *             DWORD  dwSubAuthority5    subauthority 5
- *             DWORD  dwSubAuthority6    subauthority 6
- *             DWORD  dwSubAuthority7    subauthority 7
- *             PSID   *pSid              address of pointer to SID
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-BOOL WIN32API AllocateAndInitializeSid(PSID_IDENTIFIER_AUTHORITY  pIdentifierAuthority,
-                                          BYTE  nSubAuthorityCount,
-                                          DWORD  dwSubAuthority0,
-                                          DWORD  dwSubAuthority1,
-                                          DWORD  dwSubAuthority2,
-                                          DWORD  dwSubAuthority3,
-                                          DWORD  dwSubAuthority4,
-                                          DWORD  dwSubAuthority5,
-                                          DWORD  dwSubAuthority6,
-                                          DWORD  dwSubAuthority7,
-                                          PSID  *pSid)
-{
-  dprintf(("ADVAPI32: AllocateAndInitializeSid(%08xh,%08xh,%08xh,%08xh,%08xh,%08xh,%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
-           pIdentifierAuthority,
-           nSubAuthorityCount,
-           dwSubAuthority0,
-           dwSubAuthority1,
-           dwSubAuthority2,
-           dwSubAuthority3,
-           dwSubAuthority4,
-           dwSubAuthority5,
-           dwSubAuthority6,
-           dwSubAuthority7,
-           pSid));
-
-  return (FALSE); /* signal failure */
-}
 
 
 /*****************************************************************************
@@ -1063,36 +859,6 @@ BOOL WIN32API ControlService(SC_HANDLE        hService,
   return (FALSE); /* signal failure */
 }
 
-
-/*****************************************************************************
- * Name      : CopySid
- * Purpose   : The CopySid function copies a security identifier (SID) to a buffer.
- * Parameters: DWORD nDestinationSidLength  size of buffer for copied SID
- *             PSID  pDestinationSid        address of buffer for copied SID
- *             PSID  pSourceSid             address of source SID
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-BOOL WIN32API CopySid(DWORD nDestinationSidLength,
-                         PSID  pDestinationSid,
-                         PSID  pSourceSid)
-{
-  dprintf(("ADVAPI32: CopySid(%08xh,%08xh,%08xh)\n",
-           nDestinationSidLength,
-           pDestinationSid,
-           pSourceSid));
-
-  memcpy((LPVOID)pDestinationSid, /* that's all :) */
-         (LPVOID)pSourceSid,
-         nDestinationSidLength);
-
-  return (TRUE);
-}
 
 
 /*****************************************************************************
@@ -1626,58 +1392,6 @@ BOOL WIN32API EnumServicesStatusW(SC_HANDLE             hSCManager,
 }
 
 
-/*****************************************************************************
- * Name      : EqualPrefixSid
- * Purpose   : The EqualPrefixSid function tests two security-identifier (SID)
- *             prefix values for equality. An SID prefix is the entire SID except
- *             for the last subauthority value.
- * Parameters: PSID  pSid1  address of first SID to compare
- *             PSID  pSid2  address of second SID to compare
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-BOOL WIN32API EqualPrefixSid(PSID pSid1,
-                                PSID pSid2)
-{
-  dprintf(("ADVAPI32: EqualPrefixSid(%08xh,%08xh) not correctly implemented.\n",
-           pSid1,
-           pSid2));
-
-  return ( lstrcmpA( (LPCSTR)pSid1,
-                        (LPCSTR)pSid2) == 0 );       /* @@@PH roughly ... :) */
-}
-
-
-/*****************************************************************************
- * Name      : EqualSid
- * Purpose   : The EqualSid function tests two security identifier (SID) values
- *             for equality. Two SIDs must match exactly to be considered equal.
- * Parameters: PSID  pSid1  address of first SID to compare
- *             PSID  pSid2  address of second SID to compare
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-BOOL WIN32API EqualSid(PSID pSid1,
-                          PSID pSid2)
-{
-  dprintf(("ADVAPI32: EqualSid(%08xh, %08xh) not correctly implemented.\n",
-           pSid1,
-           pSid2));
-
-  return ( lstrcmpA( (LPCSTR)pSid1,
-                        (LPCSTR)pSid2) == 0 );       /* @@@PH roughly ... :) */
-}
-
 
 /*****************************************************************************
  * Name      : FindFirstFreeAce
@@ -1701,27 +1415,6 @@ BOOL WIN32API FindFirstFreeAce(PACL pAcl,
            pAce));
 
   return (FALSE); /* signal failure */
-}
-
-
-/*****************************************************************************
- * Name      : FreeSid
- * Purpose   : The FreeSid function frees a security identifier (SID) previously
- *             allocated by using the AllocateAndInitializeSid function.
- * Parameters: PSID  pSid   address of SID to free
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-PVOID WIN32API FreeSid(PSID pSid)
-{
-  dprintf(("ADVAPI32: FreeSid(%08xh) not implemented.\n",
-           pSid));
-  return NULL;
 }
 
 
@@ -1819,27 +1512,6 @@ BOOL WIN32API GetKernelObjectSecurity(HANDLE               Handle,
 }
 
 
-/*****************************************************************************
- * Name      : GetLengthSid
- * Purpose   : The GetLengthSid function returns the length, in bytes, of a
- *             valid SID structure. A SID is a security identifier.
- * Parameters: PSID  pSid  address of SID to query
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-DWORD WIN32API GetLengthSid(PSID pSid)
-{
-  dprintf(("ADVAPI32: GetLengthSid(%08xh) not correctly implemented.\n",
-           pSid));
-
-  return (lstrlenA( (LPCSTR)pSid)); /* @@@PH might not work */
-}
-
 
 /*****************************************************************************
  * Name      : GetNumberOfEventLogRecords
@@ -1920,178 +1592,6 @@ BOOL WIN32API GetPrivateObjectSecurity(PSECURITY_DESCRIPTOR ObjectDescriptor,
            ResultantDescriptor,
            DescriptorLength,
            ReturnLength));
-
-  return (FALSE); /* signal failure */
-}
-
-
-/*****************************************************************************
- * Name      : GetSecurityDescriptorControl
- * Purpose   : The GetSecurityDescriptorControl function retrieves a security
- *             descriptor's control and revision information.
- * Parameters: PSECURITY_DESCRIPTOR         pSecurityDescriptor address of security descriptor
- *             PSECURITY_DESCRIPTOR_CONTROL pControl            address of  control structure
- *             LPDWORD                      lpdwRevision        address of revision value
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-#define PSECURITY_DESCRIPTOR_CONTROL LPVOID
-BOOL WIN32API GetSecurityDescriptorControl(PSECURITY_DESCRIPTOR         pSecurityDescriptor,
-                                              PSECURITY_DESCRIPTOR_CONTROL pControl,
-                                              LPDWORD                      lpdwRevision)
-{
-  dprintf(("ADVAPI32: GetSecurityDescriptorControl(%08xh,%08xh,%08xh) not implemented.\n",
-           pSecurityDescriptor,
-           pControl,
-           lpdwRevision));
-
-  return (FALSE); /* signal failure */
-}
-
-
-/*****************************************************************************
- * Name      : GetSecurityDescriptorDacl
- * Purpose   : The GetSecurityDescriptorDacl function retrieves a pointer to the
- *             discretionary access-control list (ACL) in a specified security descriptor.
- * Parameters: PSECURITY_DESCRIPTOR pSecurityDescriptor address of security descriptor
- *             LPBOOL               lpbDaclPresent      address of flag for presence of disc. ACL
- *             PACL                 *pDacl              address of pointer to ACL
- *             LPBOOL               lpbDaclDefaulted    address of flag for default disc. ACL
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-BOOL WIN32API GetSecurityDescriptorDacl(PSECURITY_DESCRIPTOR pSecurityDescriptor,
-                                           LPBOOL               lpbDaclPresent,
-                                           PACL                 *pDacl,
-                                           LPBOOL               lpbDaclDefaulted)
-{
-  dprintf(("ADVAPI32: GetSecurityDescriptorDacl(%08xh,%08xh,%08xh,%08xh) not implemented.\n",
-           pSecurityDescriptor,
-           lpbDaclPresent,
-           pDacl,
-           lpbDaclDefaulted));
-
-  return (FALSE); /* signal failure */
-}
-
-
-/*****************************************************************************
- * Name      : GetSecurityDescriptorGroup
- * Purpose   : The GetSecurityDescriptorGroup function retrieves the primary
- *             group information from a security descriptor.
- * Parameters: PSECURITY_DESCRIPTOR pSecurityDescriptor  address of security descriptor
- *             PSID                 *pGroup              address of pointer to group security identifier (SID)
- *             LPBOOL               lpbGroupDefaulted    address of flag for default
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-BOOL WIN32API GetSecurityDescriptorGroup(PSECURITY_DESCRIPTOR  pSecurityDescriptor,
-                                            PSID                  *pGroup,
-                                            LPBOOL                lpbGroupDefaulted)
-{
-  dprintf(("ADVAPI32: GetSecurityDescriptorGroup(%08xh,%08xh,%08xh) not implemented.\n",
-           pSecurityDescriptor,
-           pGroup,
-           lpbGroupDefaulted));
-
-  return (FALSE); /* signal failure */
-}
-
-
-/*****************************************************************************
- * Name      : GetSecurityDescriptorLength
- * Purpose   : The GetSecurityDescriptorLength function returns the length, in
- *             bytes, of a structurally valid SECURITY_DESCRIPTOR structure. The
- *             length includes the length of all associated structures, such as
- *             SID and ACL structures.
- * Parameters: PSECURITY_DESCRIPTOR  pSecurityDescriptor address of security descriptor
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-#define SECURITY_DESCRIPTOR DWORD
-DWORD WIN32API GetSecurityDescriptorLength(PSECURITY_DESCRIPTOR pSecurityDescriptor)
-{
-  dprintf(("ADVAPI32: GetSecurityDescriptorLength(%08xh) not correctly implemented.\n",
-           pSecurityDescriptor));
-
-  return ( sizeof(SECURITY_DESCRIPTOR) );
-}
-
-
-/*****************************************************************************
- * Name      : GetSecurityDescriptorOwner
- * Purpose   : The GetSecurityDescriptorOwner function retrieves the owner
- *             information from a security descriptor.
- * Parameters: PSECURITY_DESCRIPTOR pSecurityDescriptor address of security descriptor
- *             PSID                 *pOwner             address of pointer to owner security identifier (SID)
- *             LPBOOL               lpbOwnerDefaulted   address of flag for default
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-BOOL WIN32API GetSecurityDescriptorOwner(PSECURITY_DESCRIPTOR pSecurityDescriptor,
-                                            PSID                 *pOwner,
-                                            LPBOOL               lpbOwnerDefaulted)
-{
-  dprintf(("ADVAPI32: GetSecurityDescriptorOwner(%08xh,%08xh,%08xh) not implemented.\n",
-           pSecurityDescriptor,
-           pOwner,
-           lpbOwnerDefaulted));
-
-  return (FALSE); /* signal failure */
-}
-
-
-/*****************************************************************************
- * Name      : GetSecurityDescriptorSacl
- * Purpose   : The GetSecurityDescriptorSacl function retrieves a pointer to
- *             the system access-control list (ACL) in a specified security descriptor.
- * Parameters: PSECURITY_DESCRIPTOR pSecurityDescriptor address of security descriptor
- *             LPBOOL               lpbSaclPresent      address of flag for presence of system ACL
- *             PACL                 *pSacl              address of pointer to ACL
- *             LPBOOL               lpbSaclDefaulted    address of flag for default system ACL
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-BOOL WIN32API GetSecurityDescriptorSacl(PSECURITY_DESCRIPTOR pSecurityDescriptor,
-                                           LPBOOL               lpbSaclPresent,
-                                           PACL                 *pSacl,
-                                           LPBOOL               lpbSaclDefaulted)
-{
-  dprintf(("ADVAPI32: GetSecurityDescriptorSacl(%08xh,%08xh,%08xh,%08xh) not implemented.\n",
-           pSecurityDescriptor,
-           lpbSaclPresent,
-           pSacl,
-           lpbSaclDefaulted));
 
   return (FALSE); /* signal failure */
 }
@@ -2224,139 +1724,6 @@ BOOL WIN32API GetServiceKeyNameW(SC_HANDLE hSCManager,
   return (FALSE); /* signal failure */
 }
 
-
-/*****************************************************************************
- * Name      : GetSidIdentifierAuthority
- * Purpose   : The GetSidIdentifierAuthority function returns the address of
- *             the SID_IDENTIFIER_AUTHORITY structure in a specified security identifier (SID).
- * Parameters: PSID  pSid   address of SID to query
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-PSID_IDENTIFIER_AUTHORITY WIN32API GetSidIdentifierAuthority(PSID pSid)
-{
-  dprintf(("ADVAPI32: GetSidIdentifierAuthority(%08xh) not implemented.\n",
-           pSid));
-
-  return (NULL); /* signal failure */
-}
-
-
-/*****************************************************************************
- * Name      : GetSidLengthRequired
- * Purpose   : The GetSidLengthRequired function returns the length, in bytes,
- *             of the buffer required to store a SID structure with a specified
- *             number of subauthorities.
- * Parameters: UCHAR  nSubAuthorityCount  count of subauthorities
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-#define SID DWORD
-DWORD WIN32API GetSidLengthRequired(UCHAR nSubAuthorityCount)
-{
-  dprintf(("ADVAPI32: GetSidLengthRequired(%u) not correctly implemented.\n",
-           nSubAuthorityCount));
-
-  return ( sizeof(SID) );
-}
-
-
-/*****************************************************************************
- * Name      : GetSidSubAuthority
- * Purpose   : The GetSidSubAuthority function returns the address of a
- *             specified subauthority in a SID structure. The subauthority
- *             value is a relative identifier (RID). A SID is a security identifier.
- * Parameters: PSID  pSid          address of security identifier to query
- *             DWORD nSubAuthority index of subauthority to retrieve
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-LPDWORD WIN32API GetSidSubAuthority(PSID  pSid,
-                                      DWORD nSubAuthority)
-{
-  dprintf(("ADVAPI32: GetSidSubAuthority(%08xh,%08xh) not implemented.\n",
-           pSid,
-           nSubAuthority));
-
-  return ( (LPDWORD)pSid ); /* signal failure */
-}
-
-
-/*****************************************************************************
- * Name      : GetSidSubAuthorityCount
- * Purpose   : The GetSidSubAuthorityCount function returns the address of the
- *             field in a SID structure containing the subauthority count. A
- *             SID is a security identifier.
- * Parameters: PSID  pSid  address of security identifier to query
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-PUCHAR  WIN32API GetSidSubAuthorityCount(PSID pSid)
-{
-  static UCHAR ucSubAuthorityCount = 1;
-
-  dprintf(("ADVAPI32: GetSidSubAuthorityCount(%08xh) not implemented.\n",
-           pSid));
-
-  return (&ucSubAuthorityCount);
-}
-
-
-/*****************************************************************************
- * Name      : GetTokenInformation
- * Purpose   : The GetTokenInformation function retrieves a specified type of
- *             information about an access token. The calling process must have
- *             appropriate access rights to obtain the information.
- * Parameters: HANDLE                   TokenHandle             handle of access token
- *             TOKEN_INFORMATION_CLASS  TokenInformationClass   type of information to retrieve
- *             LPVOID                   TokenInformation        address of retrieved information
- *             DWORD                    TokenInformationLength  size of information buffer
- *             LPDWORD                   ReturnLength            address of required buffer size
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-BOOL WIN32API GetTokenInformation(HANDLE                  TokenHandle,
-                                     TOKEN_INFORMATION_CLASS TokenInformationClass,
-                                     LPVOID                  TokenInformation,
-                                     DWORD                   TokenInformationLength,
-                                     LPDWORD                  ReturnLength)
-{
-  dprintf(("ADVAPI32: GetTokenInformation(%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
-           TokenHandle,
-           TokenInformationClass,
-           TokenInformation,
-           TokenInformationLength,
-           ReturnLength));
-
-  return (FALSE); /* signal failure */
-}
-
-
 /*****************************************************************************
  * Name      : ImpersonateLoggedOnUser
  * Purpose   : The ImpersonateLoggedOnUser function lets the calling thread
@@ -2402,28 +1769,6 @@ BOOL WIN32API ImpersonateNamedPipeClient(HANDLE hNamedPipe)
 }
 
 
-/*****************************************************************************
- * Name      : ImpersonateSelf
- * Purpose   : The ImpersonateSelf function obtains an access token that
- *             impersonates the security context of the calling process. The
- *             token is assigned to the calling thread.
- * Parameters: SECURITY_IMPERSONATION_LEVEL  ImpersonationLevel  impersonation level
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-BOOL WIN32API ImpersonateSelf(SECURITY_IMPERSONATION_LEVEL ImpersonationLevel)
-{
-  dprintf(("ADVAPI32: ImpersonateSelf(%08xh) not implemented.\n",
-           ImpersonationLevel));
-
-  return (TRUE); /* signal OK */
-}
-
 
 /*****************************************************************************
  * Name      : InitializeAcl
@@ -2452,33 +1797,6 @@ BOOL WIN32API InitializeAcl(PACL  pAcl,
   return (FALSE); /* signal failure */
 }
 
-
-/*****************************************************************************
- * Name      : InitializeSid
- * Purpose   : The InitializeSid function initializes a SID structure. An SID
- *             is a security identifier.
- * Parameters: PSID                      pSid                 address of SID to initialize
- *             PSID_IDENTIFIER_AUTHORITY pIdentifierAuthority address of identifier authority
- *             BYTE                      nSubAuthorityCount   count of subauthorities
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-BOOL WIN32API InitializeSid(PSID                      pSid,
-                               PSID_IDENTIFIER_AUTHORITY pIdentifierAuthority,
-                               BYTE                      nSubAuthorityCount)
-{
-  dprintf(("ADVAPI32: InitializeSid(%08xh,%08xh,%08xh) not implemented.\n",
-           pSid,
-           pIdentifierAuthority,
-           nSubAuthorityCount));
-
-  return (FALSE); /* signal failure */
-}
 
 
 /*****************************************************************************
@@ -2605,54 +1923,6 @@ BOOL WIN32API IsValidAcl(PACL pAcl)
 
   return (TRUE); /* signal OK */
 }
-
-
-/*****************************************************************************
- * Name      : IsValidSecurityDescriptor
- * Purpose   : The IsValidSecurityDescriptor function validates a
- *             SECURITY_DESCRIPTOR structure. Validation is performed by
- *             checking the revision level of each component in the security descriptor.
- * Parameters: PSECURITY_DESCRIPTOR pSecurityDescriptor
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-BOOL WIN32API IsValidSecurityDescriptor(PSECURITY_DESCRIPTOR pSecurityDescriptor)
-{
-  dprintf(("ADVAPI32: IsValidSecurityDescriptor(%08xh) not implemented.\n",
-           pSecurityDescriptor));
-
-  return (TRUE); /* signal OK */
-}
-
-
-/*****************************************************************************
- * Name      : IsValidSid
- * Purpose   : The IsValidSid function validates a SID structure by verifying
- *             that the revision number is within a known range and that the
- *             number of subauthorities is less than the maximum. A SID is a
- *             security identifier.
- * Parameters: PSID pSid  address of SID to query
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-BOOL WIN32API IsValidSid(PSID pSid)
-{
-  dprintf(("ADVAPI32: IsValidSid(%08xh) not implemented.\n",
-           pSid));
-
-  return (TRUE); /* signal OK */
-}
-
 
 /*****************************************************************************
  * Name      : LockServiceDatabase
@@ -2843,87 +2113,6 @@ BOOL WIN32API LookupAccountNameW(LPCWSTR       lpSystemName,
 }
 
 
-/*****************************************************************************
- * Name      : LookupAccountSidA
- * Purpose   : The LookupAccountSid function accepts a security identifier (SID)
- *             as input. It retrieves the name of the account for this SID and
- *             the name of the first domain on which this SID is found.
- * Parameters: LPCSTR       lpSystemName           address of string for system name
- *             PSID          Sid                    address of security identifier
- *             LPTSTR        Name                   address of string for account name
- *             LPDWORD       cbName                 address of size account string
- *             LPTSTR        ReferencedDomainName   address of string for referenced domain
- *             LPDWORD       cbReferencedDomainName address of size domain string
- *             PSID_NAME_USE peUse                  address of structure for SID type
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-BOOL WIN32API LookupAccountSidA(LPCSTR        lpSystemName,
-                                   PSID           Sid,
-                                   LPTSTR         Name,
-                                   LPDWORD        cbName,
-                                   LPTSTR         ReferencedDomainName,
-                                   LPDWORD        cbReferencedDomainName,
-                                   PSID_NAME_USE  peUse)
-{
-  dprintf(("ADVAPI32: LookupAccountSidA(%s,%08xh,%s,%08xh,%s,%08xh,%08xh) not implemented.\n",
-           lpSystemName,
-           Sid,
-           Name,
-           cbName,
-           ReferencedDomainName,
-           cbReferencedDomainName,
-           peUse));
-
-  return (FALSE); /* signal failure */
-}
-
-
-/*****************************************************************************
- * Name      : LookupAccountSidW
- * Purpose   : The LookupAccountSid function accepts a security identifier (SID)
- *             as input. It retrieves the name of the account for this SID and
- *             the name of the first domain on which this SID is found.
- * Parameters: LPCWSTR       lpSystemName           address of string for system name
- *             PSID          Sid                    address of security identifier
- *             LPWSTR        Name                   address of string for account name
- *             LPDWORD       cbName                 address of size account string
- *             LPWSTR        ReferencedDomainName   address of string for referenced domain
- *             LPDWORD       cbReferencedDomainName address of size domain string
- *             PSID_NAME_USE peUse                  address of structure for SID type
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-BOOL WIN32API LookupAccountSidW(LPCWSTR        lpSystemName,
-                                   PSID           Sid,
-                                   LPWSTR         Name,
-                                   LPDWORD        cbName,
-                                   LPWSTR         ReferencedDomainName,
-                                   LPDWORD        cbReferencedDomainName,
-                                   PSID_NAME_USE  peUse)
-{
-  dprintf(("ADVAPI32: LookupAccountSidW(%s,%08xh,%s,%08xh,%s,%08xh,%08xh) not implemented.\n",
-           lpSystemName,
-           Sid,
-           Name,
-           cbName,
-           ReferencedDomainName,
-           cbReferencedDomainName,
-           peUse));
-
-  return (FALSE); /* signal failure */
-}
-
 
 /*****************************************************************************
  * Name      : LookupPrivilegeDisplayNameA
@@ -3110,33 +2299,6 @@ BOOL WIN32API MakeAbsoluteSD(PSECURITY_DESCRIPTOR  pSelfRelativeSecurityDescript
 }
 
 
-/*****************************************************************************
- * Name      : MakeSelfRelativeSD
- * Purpose   : The MakeSelfRelativeSD function creates a security descriptor
- *             in self-relative format by using a security descriptor in absolute
- *             format as a template.
- * Parameters: PSECURITY_DESCRIPTOR pAbsoluteSecurityDescriptor     address of absolute SD
- *             PSECURITY_DESCRIPTOR pSelfRelativeSecurityDescriptor address self-relative SD
- *             LPDWORD              lpdwBufferLength                address of SD size
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-BOOL WIN32API MakeSelfRelativeSD(PSECURITY_DESCRIPTOR pAbsoluteSecurityDescriptor,
-                                    PSECURITY_DESCRIPTOR pSelfRelativeSecurityDescriptor,
-                                    LPDWORD              lpdwBufferLength)
-{
-  dprintf(("ADVAPI32: MakeSelfRelativeSD(%08xh,%08xh,%08xh) not implemented.\n",
-           pAbsoluteSecurityDescriptor,
-           pSelfRelativeSecurityDescriptor,
-           lpdwBufferLength));
-
-  return (FALSE); /* signal failure */
-}
 
 
 /*****************************************************************************
@@ -3163,29 +2325,6 @@ VOID WIN32API MapGenericMask(LPDWORD           AccessMask,
 }
 
 
-/*****************************************************************************
- * Name      : NotifyBootConfigStatus
- * Purpose   : The NotifyBootConfigStatus function notifies the service control
- *             manager as to the acceptability of the configuration that booted
- *             the system. An acceptable configuration triggers the storage of
- *             that configuration as the last-known good configuration; an
- *             unacceptable configuration triggers a system reboot.
- * Parameters: BOOL  BootAcceptable  indicates acceptability of boot configuration
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-BOOL WIN32API NotifyBootConfigStatus(BOOL BootAcceptable)
-{
-  dprintf(("ADVAPI32: NotifyBootConfigStatus(%08xh) not implemented.\n",
-           BootAcceptable));
-
-  return (TRUE); /* signal OK */
-}
 
 
 /*****************************************************************************
@@ -4098,26 +3237,6 @@ SERVICE_STATUS_HANDLE WIN32API RegisterServiceCtrlHandlerW(LPCWSTR            lp
 
 
 /*****************************************************************************
- * Name      : RevertToSelf
- * Purpose   : The RevertToSelf function terminates the impersonation of a client application.
- * Parameters:
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-BOOL WIN32API RevertToSelf(VOID)
-{
-  dprintf(("ADVAPI32: RevertToSelf() not implemented.\n"));
-
-  return (TRUE); /* signal OK */
-}
-
-
-/*****************************************************************************
  * Name      : SetAclInformation
  * Purpose   : The SetAclInformation function sets information about an access-control list (ACL).
  * Parameters: PACL                  pAcl       address of access-control list
@@ -4210,92 +3329,6 @@ BOOL WIN32API SetPrivateObjectSecurity(SECURITY_INFORMATION  si,
 }
 
 
-/*****************************************************************************
- * Name      : SetSecurityDescriptorGroup
- * Purpose   : The SetSecurityDescriptorGroup function sets the primary group
- *             information of an absolute-format security descriptor, replacing
- *             any primary group information already present in the security descriptor.
- * Parameters: PSECURITY_DESCRIPTOR psd             address of security descriptor
- *             PSID                 psidGroup       address of SID for group
- *             BOOL                 fGroupDefaulted flag for default
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-BOOL WIN32API SetSecurityDescriptorGroup(PSECURITY_DESCRIPTOR psd,
-                                            PSID                 psidGroup,
-                                            BOOL                 fGroupDefaulted)
-{
-  dprintf(("ADVAPI32: SetSecurityDescriptorGroup(%08xh,%08xh,%08xh) not implemented.\n",
-           psd,
-           psidGroup,
-           fGroupDefaulted));
-
-  return (FALSE); /* signal failure */
-}
-
-
-/*****************************************************************************
- * Name      : SetSecurityDescriptorOwner
- * Purpose   : The SetSecurityDescriptorOwner function sets the owner information
- *             of an absolute-format security descriptor. It replaces any owner
- *             information already present in the security descriptor.
- * Parameters: PSECURITY_DESCRIPTOR psd             address of security descriptor
- *             PSID                 psidOwner       address of SID for owner
- *             BOOL                 fOwnerDefaulted flag for default
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-BOOL WIN32API SetSecurityDescriptorOwner(PSECURITY_DESCRIPTOR psd,
-                                            PSID                 psidOwner,
-                                            BOOL                 fOwnerDefaulted)
-{
-  dprintf(("ADVAPI32: SetSecurityDescriptorOwner(%08xh,%08xh,%08xh) not implemented.\n",
-           psd,
-           psidOwner,
-           fOwnerDefaulted));
-
-  return (FALSE); /* signal failure */
-}
-
-
-/*****************************************************************************
- * Name      : SetSecurityDescriptorSacl
- * Purpose   : The SetSecurityDescriptorSacl function sets information in a
- *             system access-control list (ACL). If there is already a system
- *             ACL present in the security descriptor, it is replaced.
- * Parameters:
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-BOOL WIN32API SetSecurityDescriptorSacl(PSECURITY_DESCRIPTOR  psd,
-                                           BOOL                  fSaclPresent,
-                                           PACL                  pAcl,
-                                           BOOL                  fSaclDefaulted)
-{
-  dprintf(("ADVAPI32: SetSecurityDescriptorSacl(%08xh,%08xh,%08xh,%08xh) not implemented.\n",
-           psd,
-           fSaclPresent,
-           pAcl,
-           fSaclDefaulted));
-
-  return (FALSE); /* signal failure */
-}
-
 
 /*****************************************************************************
  * Name      : SetServiceBits
@@ -4382,40 +3415,6 @@ BOOL WIN32API SetServiceStatus(SERVICE_STATUS_HANDLE sshServiceStatus,
   dprintf(("ADVAPI32: SetServiceStatus(%08xh,%08xh) not implemented.\n",
            sshServiceStatus,
            lpssServiceStatus));
-
-  return (FALSE); /* signal failure */
-}
-
-
-/*****************************************************************************
- * Name      : SetTokenInformation
- * Purpose   : The SetTokenInformation function sets various types of
- *             information for a specified access token. The information it
- *             sets replaces existing information. The calling process must
- *             have appropriate access rights to set the information.
- * Parameters: HANDLE                  hToken         handle of access token
- *             TOKEN_INFORMATION_CLASS tic            type of information to set
- *             LPVOID                  lpvInformation address of information to set
- *             DWORD                   cbInformation  size of information buffer
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-#define TOKEN_INFORMATION_CLASS DWORD
-BOOL WIN32API SetTokenInformation(HANDLE                  hToken,
-                                     TOKEN_INFORMATION_CLASS tic,
-                                     LPVOID                  lpvInformation,
-                                     DWORD                   cbInformation)
-{
-  dprintf(("ADVAPI32: SetTokenInformation(%08xh,%08xh,%08xh,%08xh) not implemented.\n",
-           hToken,
-           tic,
-           lpvInformation,
-           cbInformation));
 
   return (FALSE); /* signal failure */
 }

@@ -1,4 +1,4 @@
-/* $Id: lsa.cpp,v 1.2 1999-11-09 19:37:44 phaller Exp $ */
+/* $Id: lsa.cpp,v 1.3 1999-11-30 19:41:06 sandervl Exp $ */
 
 /*
  * Win32 Security Database API functions for OS/2
@@ -727,30 +727,6 @@ ODINFUNCTION1(ULONG,    LsaNtStatusToWinError,
   return Status;
 }
 
-/*****************************************************************************
- * Name      : LsaOpenPolicy
- * Purpose   : The LsaOpenPolicy function opens a handle to the LSA policy
- *             object on a local or remote system.
- * Parameters: PLSA_UNICODE_STRING    SystemName,
- *             PLSA_OBJECT_ATTRIBUTES ObjectAttributes,
- *             ACCESS_MASK            DesiredAccess,
- *             PLSA_HANDLE            PolicyHandle
- * Variables :
- * Result    : NTSTATUS
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1999/11/04 23:00]
- *****************************************************************************/
-
-ODINFUNCTION4(NTSTATUS,LsaOpenPolicy,PLSA_UNICODE_STRING,    SystemName,
-                                     PLSA_OBJECT_ATTRIBUTES, ObjectAttributes,
-                                     ACCESS_MASK,            DesiredAccess,
-                                     PLSA_HANDLE,            PolicyHandle)
-{
-  dprintf(("ADVAPI32:Lsa: LsaOpenPolicy not implemented.\n"));
-  return 0;
-}
 
 
 /*****************************************************************************

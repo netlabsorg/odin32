@@ -1,4 +1,4 @@
-; $Id: ADVAPI32.DEF,v 1.7 1999-11-04 12:44:47 phaller Exp $
+; $Id: ADVAPI32.DEF,v 1.8 1999-11-30 19:41:06 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY ADVAPI32 INITINSTANCE
@@ -183,7 +183,7 @@ EXPORTS
      ImpersonateNamedPipeClient  = _ImpersonateNamedPipeClient@4     @71
      ImpersonateSelf            = _ImpersonateSelf@4                 @72
      InitializeAcl              = _InitializeAcl@12                  @73
-     InitializeSecurityDescriptor  = _InitializeSecurityDescriptor@8 @74
+     InitializeSecurityDescriptor  = _InitializeSecurityDescriptor@8  @74
      InitializeSid              = _InitializeSid@12                  @75
      InitiateSystemShutdownA    = _InitiateSystemShutdownA@20        @76
      InitiateSystemShutdownW    = _InitiateSystemShutdownW@20        @77
