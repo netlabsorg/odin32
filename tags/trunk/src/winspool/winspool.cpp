@@ -1,4 +1,4 @@
-/* $Id: winspool.cpp,v 1.3 1999-08-19 16:26:00 phaller Exp $ */
+/* $Id: winspool.cpp,v 1.4 1999-12-27 18:45:27 sandervl Exp $ */
 
 /*
  *
@@ -2828,3 +2828,107 @@ ODINFUNCTION4(BOOL, WritePrinter,
 }
 
 
+/*********************************************************************
+ *                  DeletePrinterDataA   (WINSPOOL.152)
+ */
+ODINFUNCTION2(DWORD, DeletePrinterDataA,
+	      HANDLE, hPrinter,
+	      LPSTR, pValueName)
+{
+  dprintf(("WINSPOOL: DeletePrinterDataA not implemented\n"));
+  return (FALSE);
+}
+
+
+/*********************************************************************
+ *                  DeletePrinterDataW   (WINSPOOL.153)
+ */
+ODINFUNCTION2(DWORD, DeletePrinterDataW,
+	      HANDLE, hPrinter,
+	      LPWSTR, pValueName)
+{
+  dprintf(("WINSPOOL: DeletePrinterDataW not implemented\n"));
+  return (FALSE);
+}
+
+
+/*********************************************************************
+ *                  DocumentPropertiesW   (WINSPOOL.166)
+ */
+ODINFUNCTION6(LONG, DocumentPropertiesW,
+	      HWND,      hWnd,
+	      HANDLE,    hPrinter,
+	      LPWSTR,    pDeviceName,
+	      PDEVMODEW, pDevModeOutput,
+	      PDEVMODEW, pDevModeInput,
+	      DWORD,     fMode)
+{
+  dprintf(("WINSPOOL: DocumentPropertiesW not implemented\n"));
+  return (FALSE);
+}
+
+
+/*********************************************************************
+ *                  EnumPrinterDataA   (WINSPOOL.183)
+ */
+ODINFUNCTION9(DWORD, EnumPrinterDataA,
+    HANDLE,   hPrinter,
+    DWORD,    dwIndex,
+    LPSTR,    pValueName,
+    DWORD,    cbValueName,
+    LPDWORD,  pcbValueName,
+    LPDWORD,  pType,
+    LPBYTE,   pData,
+    DWORD,    cbData,
+    LPDWORD,  pcbData)
+{
+  dprintf(("WINSPOOL: EnumPrinterDataA not implemented\n"));
+  return (FALSE);
+}
+
+
+/*********************************************************************
+ *                  EnumPrinterDataW   (WINSPOOL.184)
+ */
+ODINFUNCTION9(DWORD, EnumPrinterDataW,
+    HANDLE,   hPrinter,
+    DWORD,    dwIndex,
+    LPWSTR,   pValueName,
+    DWORD,    cbValueName,
+    LPDWORD,  pcbValueName,
+    LPDWORD,  pType,
+    LPBYTE,   pData,
+    DWORD,    cbData,
+    LPDWORD,  pcbData)
+{
+  dprintf(("WINSPOOL: EnumPrinterDataW not implemented\n"));
+  return (FALSE);
+}
+
+
+/*********************************************************************
+ *                  SetPortA   (WINSPOOL.226)
+ */
+ODINFUNCTION4(BOOL, SetPortA,
+    LPSTR,     pName,
+    LPSTR,     pPortName,
+    DWORD,     dwLevel,
+    LPBYTE,    pPortInfo)
+{
+  dprintf(("WINSPOOL: SetPortA not implemented\n"));
+  return (FALSE);
+}
+
+
+/*********************************************************************
+ *                  SetPortW   (WINSPOOL.227)
+ */
+ODINFUNCTION4(BOOL, SetPortW,
+    LPWSTR,     pName,
+    LPWSTR,     pPortName,
+    DWORD,      dwLevel,
+    LPBYTE,     pPortInfo)
+{
+  dprintf(("WINSPOOL: SetPortW not implemented\n"));
+  return (FALSE);
+}
