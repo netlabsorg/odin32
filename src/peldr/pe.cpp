@@ -1,4 +1,4 @@
-/* $Id: pe.cpp,v 1.16 2000-04-14 22:56:11 sandervl Exp $ */
+/* $Id: pe.cpp,v 1.17 2000-07-01 09:50:24 sandervl Exp $ */
 
 /*
  * PELDR main exe loader code
@@ -83,17 +83,29 @@ int main(int argc, char *argv[])
  PTIB   ptib;
  PPIB   ppib;
  char  *cmdline, *win32cmdline;
+ BOOL   fQuote = FALSE;
 
   if(argc >= 2) {
 	if(DosGetInfoBlocks(&ptib, &ppib) == 0) {
 		cmdline = ppib->pib_pchcmd;
 		cmdline += strlen(cmdline)+1; 	//skip pe.exe
 		while(*cmdline == ' ')	cmdline++; //skip leading space
-		if(*cmdline == '"')     cmdline++;
+		if(*cmdline == '"') {
+			cmdline++;
+			fQuote = TRUE;
+		}
 		win32cmdline = cmdline;
 
 		strncpy(exeName, cmdline, sizeof(exeName)-1);
 		exeName[sizeof(exeName)-1] = 0;
+		char *p = exeName;
+		if(fQuote) {
+			while(*p != '"' && *p != 0) p++;
+		}
+		else {
+			while(*p != ' ' && *p != 0) p++;
+		}
+		*p = 0;
 		strupr(exeName);
                 cmdline = strstr(exeName, ".EXE");
 		if(cmdline) {
@@ -101,14 +113,12 @@ int main(int argc, char *argv[])
 			win32cmdline += ((ULONG)cmdline - (ULONG)exeName) + 4;
 		}
 		else {
-			cmdline = exeName;
-			while(*cmdline && *cmdline != ' ')	cmdline++; //skip exe name
-			*cmdline = 0;
-			win32cmdline += ((ULONG)cmdline - (ULONG)exeName);
+			win32cmdline += strlen(exeName);
 			if(strstr(exeName, ".") == NULL) {
 				strcat(exeName, ".EXE");
 			}
  		}
+		if(fQuote) win32cmdline++;
 		while(*win32cmdline == ' ') win32cmdline++; //skip spaces
 
 		cmdline = exeName + strlen(exeName) - 1;
