@@ -1,4 +1,4 @@
-/* $Id: winres.cpp,v 1.3 1999-06-19 10:54:44 sandervl Exp $ */
+/* $Id: winres.cpp,v 1.4 1999-07-19 11:50:35 sandervl Exp $ */
 
 /*
  * Win32 resource class
@@ -23,11 +23,11 @@
 #include <stdlib.h>
 #include <string.h>
 #define INCL_WINRES
-#include "win32type.h"
-#include "winres.h"
-#include "misc.h"
-#include "nameid.h"
-#include "winexe.h"
+#include <win32type.h>
+#include <winres.h>
+#include <misc.h>
+#include <nameid.h>
+#include <winexe.h>
 
 static ULONG CalcBitmapSize(ULONG cBits, LONG cx, LONG cy)
 {
@@ -94,9 +94,42 @@ Win32Resource::Win32Resource(Win32Image *module, HRSRC hRes, ULONG id, ULONG typ
   this->type     = type;
   this->hres     = hRes;
 
+  switch(type) {
+    case NTRT_NEWBITMAP:
+    case NTRT_BITMAP:
+	orgos2type = RT_BITMAP;
+        break;
+    case NTRT_CURSOR:
+    case NTRT_GROUP_CURSOR:
+    case NTRT_GROUP_ICON:
+    case NTRT_ICON:
+	orgos2type = RT_POINTER;
+	break;
+    case NTRT_ACCELERATORS:
+	orgos2type = RT_ACCELTABLE;
+	break;
+    case NTRT_NEWMENU:
+    case NTRT_MENU:
+	orgos2type = RT_MENU;
+	break;
+    case NTRT_NEWDIALOG:
+    case NTRT_DIALOG:
+	orgos2type = RT_DIALOG;
+	break;
+    case NTRT_FONTDIR:
+    case NTRT_FONT:
+    case NTRT_MESSAGETABLE:
+    case NTRT_STRING:
+    case NTRT_RCDATA:
+    case NTRT_VERSION:
+    default:
+        orgos2type = RT_RCDATA;
+        break;
+  }
+
   rc = DosQueryResourceSize(module->hinstance, type, id, &ressize);
   if(rc) {
-    dprintf(("Win32Resource ctor: DosQueryResourceSize returned %X\n", rc));
+    dprintf(("Win32Resource ctor: DosQueryResourceSize %x %d %d returned %X\n", module->hinstance, type, id, rc));
     ressize = 0;
   }
 }
@@ -112,6 +145,7 @@ Win32Resource::Win32Resource(Win32Image *module, ULONG id, ULONG type,
   this->module   = module;
   this->id       = id;
   this->type     = type;
+  orgos2type     = -1;
   this->ressize  = size;
   winresdata     = (char *)malloc(size);
   if(winresdata == NULL) {
@@ -126,7 +160,10 @@ Win32Resource::~Win32Resource()
 {
  Win32Resource *res = module->winres;
 
+#if 0
+  //returned by DosGetResource, so we don't (and mustn't) free it
   if(os2resdata)    free(os2resdata);
+#endif
   if(winresdata)    free(winresdata);
 
   if(res == this) {
@@ -224,6 +261,21 @@ PVOID Win32Resource::lockResource()
   if(resdata)
     DosFreeResource(resdata);
   return winresdata;
+}
+//******************************************************************************
+//******************************************************************************
+PVOID Win32Resource::lockOS2Resource()
+{
+ APIRET rc;
+ PVOID  resdata;
+
+   dprintf(("Win32Resource::lockOS2Resource %d\n", id));
+   if(os2resdata == NULL) {
+	rc = DosGetResource((HMODULE)module->hinstance, orgos2type, id, (PPVOID)&resdata);
+	if(rc)  return(NULL);
+	os2resdata = resdata;
+   }
+   return os2resdata;
 }
 //******************************************************************************
 //******************************************************************************
