@@ -1,10 +1,20 @@
- /* $Id: ChangeLog,v 1.535 1999-12-14 12:53:11 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.536 1999-12-14 19:15:27 sandervl Exp $ */
+
+ 99-12-13: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+	- KERNEL32: Added null pointer checks in lstrcatA/W
+	- USER32:   Removed unicode to ascii translation during MDI child creation
+                    (message translation code already takes care of this)
 
  99-12-13: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Fixed performance problem in mmap.cpp
                     Report correct dll when exe loading fails
+                    Fixed command line bug in CreateProcess (if app & cmd line
+                    are specified, skip exe name in cmd line)
         - INCLUDE\WIN\winnt.h: Header fixes
 	- Porting.txt: Fixed sample makefile (you need to add -D__i386__ as compiler option)
+	- USER32:   NotifyParent bugfix (use id & handle of 1st child window)
+		    Added WM_INITMENU message support
+                    Experimental CS_PARENTDC support (disabled for now)
 
  99-12-12: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Fixes for on-demand page loader; currently disabled by
