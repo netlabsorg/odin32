@@ -1,4 +1,4 @@
-/* $Id: filedlg95.c,v 1.6 2000-03-28 15:26:42 cbratschi Exp $*/
+/* $Id: filedlg95.c,v 1.7 2000-03-29 15:19:36 cbratschi Exp $*/
 /*
  * COMMDLG - File Open Dialogs Win95 look and feel
  *
@@ -1392,9 +1392,9 @@ BOOL FILEDLG95_OnOpen(HWND hwnd)
       {
         HANDLE hFile;
         WIN32_FIND_DATAA stffile;
-//CB: FindFirstFileA bug!
+
         /* browse if the user specified a directory */
-        hFile = FindFirstFileA(lpstrFileSpec, &stffile);
+        hFile = FindFirstFileA(lpstrPathAndFile,&stffile);
         if ( hFile != INVALID_HANDLE_VALUE )
         {
           FindClose (hFile);
@@ -1405,11 +1405,11 @@ BOOL FILEDLG95_OnOpen(HWND hwnd)
           {
             // if there is an extention, then get the Pidl otherwise
             // we are going to need to add the extention
-           if(strrchr(lpstrFileSpec,'.'))
-             browsePidl = GetPidlFromName(fodInfos->Shell.FOIShellFolder,
+            if(strrchr(lpstrFileSpec,'.'))
+              browsePidl = GetPidlFromName(fodInfos->Shell.FOIShellFolder,
                                           lpstrFileSpec);
-           else
-             browsePidl=NULL;
+            else
+              browsePidl=NULL;
           }
         }
         else
@@ -1642,12 +1642,17 @@ BOOL FILEDLG95_OnOpen(HWND hwnd)
                   {
                         LPSTR lpstrFindFile;
                         WIN32_FIND_DATAA fd;
+                        HANDLE hFind;
 
                         lpstrFindFile = MemAlloc(strlen(lpstrPathAndFile)+strlen(lpstrExt));
                         strcpy(lpstrFindFile, lpstrPathAndFile);
                         strcat(lpstrFindFile, lpstrExt);
-                        if(FindFirstFileA(lpstrFindFile, &fd) != INVALID_HANDLE_VALUE)
-                                strcat(lpstrPathAndFile,lpstrExt);
+                        hFind = FindFirstFileA(lpstrFindFile,&fd);
+                        if(hFind != INVALID_HANDLE_VALUE)
+                        {
+                          strcat(lpstrPathAndFile,lpstrExt);
+                          FindClose(hFind);
+                        }
                         MemFree(lpstrFindFile);
                   }
                   else
@@ -1812,7 +1817,7 @@ static BOOL FILEDLG95_SHELL_NewFolder(HWND hwnd)
 
   /* Find a Unique directory name */
   hHandle = FindFirstFileA(lpstrNewDir,&FindData);
-  if(hHandle !=INVALID_HANDLE_VALUE)
+  if(hHandle != INVALID_HANDLE_VALUE)
   {
     int i;
     char lpstrDupNewDir[MAX_PATH];
@@ -1858,7 +1863,7 @@ static BOOL FILEDLG95_SHELL_NewFolder(HWND hwnd)
       sprintf(lpstrText,lpstrTempText, lpstrDirName);
       MessageBoxA(hwnd,lpstrText, lpstrCaption, MB_OK | MB_ICONEXCLAMATION);
     }
-  }
+  } else FindClose(hHandle);
   return bRes;
 }
 
