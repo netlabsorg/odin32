@@ -1,4 +1,4 @@
-/* $Id: oslibgpi.cpp,v 1.11 2001-05-10 17:03:18 sandervl Exp $ */
+/* $Id: oslibgpi.cpp,v 1.12 2002-11-29 13:46:04 sandervl Exp $ */
 
 /*
  * GPI interface code
@@ -429,8 +429,17 @@ void dprintfOrigin(HDC hdc)
     dprintf2(("HDC %x origin (%d,%d) org (%d,%d)", hdc, point.x, point.y, pHps->ptlOrigin.x, pHps->ptlOrigin.y));
 }
 #endif
-
+//******************************************************************************
+//******************************************************************************
 BOOL OSLibDevQueryCaps(pDCData pHps, LONG lStart, LONG lCount, LONG *alArray)
 {
    return DevQueryCaps(pHps->hdc, lStart, lCount, alArray);
 }
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibGpiLoadFonts(LPSTR lpszFontFile)
+{
+   return GpiLoadFonts(0, lpszFontFile);
+}
+//******************************************************************************
+//******************************************************************************

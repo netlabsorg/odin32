@@ -1,4 +1,4 @@
-/* $Id: font.cpp,v 1.27 2002-11-26 10:53:08 sandervl Exp $ */
+/* $Id: font.cpp,v 1.28 2002-11-29 13:46:03 sandervl Exp $ */
 
 /*
  * GDI32 font apis
@@ -38,6 +38,7 @@
 #include <wprocess.h>
 #include <odininst.h>
 #include <stats.h>
+#include "oslibgpi.h"
 
 #define DBG_LOCALLOG    DBG_font
 #include "dbglocal.h"
@@ -581,10 +582,10 @@ int WIN32API AddFontResourceW(LPCWSTR szFont)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API RemoveFontResourceA(LPCSTR arg1)
+BOOL WIN32API RemoveFontResourceA(LPCSTR lpszFont)
 {
-    dprintf(("GDI32: RemoveFontResourceA %s\n", arg1));
-    return O32_RemoveFontResource(arg1);
+    dprintf(("GDI32: RemoveFontResourceA %s", lpszFont));
+    return O32_RemoveFontResource(lpszFont);
 }
 //******************************************************************************
 //******************************************************************************
@@ -619,9 +620,10 @@ BOOL WIN32API CreateScalableFontResourceA(DWORD fdwHidden,
                                           LPCSTR lpszFontFile,
                                           LPCSTR lpszCurrentPath)
 {
-  dprintf(("GDI32: CreateScalableFontResourceA not implemented.\n"));
+  dprintf(("GDI32: CreateScalableFontResourceA %x %s %s %s not implemented", fdwHidden, lpszFontRes, lpszFontFile, lpszCurrentPath));
 
-  return (FALSE);
+//  return OSLibGpiLoadFonts((LPSTR)lpszFontFile);
+  return FALSE;
 }
 
 
@@ -646,9 +648,14 @@ BOOL WIN32API CreateScalableFontResourceW(DWORD fdwHidden,
                                           LPCWSTR lpszFontFile,
                                           LPCWSTR lpszCurrentPath)
 {
-  dprintf(("GDI32: CreateScalableFontResourceW not implemented.\n"));
+  LPSTR lpszFontFileA = NULL, lpszFontResA = NULL, lpszCurrentPathA = NULL;
 
-  return (FALSE);
+  dprintf(("GDI32: CreateScalableFontResourceW %x %ls %ls %ls not implemented", fdwHidden, lpszFontRes, lpszFontFile, lpszCurrentPath));
+
+  STACK_strdupWtoA(lpszFontFile, lpszFontFileA);
+  STACK_strdupWtoA(lpszFontRes, lpszFontResA);
+  STACK_strdupWtoA(lpszCurrentPath, lpszCurrentPathA);
+  return CreateScalableFontResourceA(fdwHidden, lpszFontResA, lpszFontFileA, lpszCurrentPathA);
 }
 
 

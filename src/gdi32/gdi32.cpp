@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.85 2002-11-26 10:53:08 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.86 2002-11-29 13:46:04 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -652,6 +652,14 @@ int WIN32API Escape( HDC hdc, int nEscape, int cbInput, LPCSTR lpvInData, PVOID 
 {
  int rc;
 
+#ifdef DEBUG
+  if(cbInput && lpvInData) {
+        ULONG *tmp = (ULONG *)lpvInData;
+        for(int i=0;i<cbInput/4;i++) {
+                dprintf(("GDI32: Escape par %d: %x", i, *tmp++));
+        }
+  }
+#endif
     rc = O32_Escape(hdc, nEscape, cbInput, lpvInData, lpvOutData);
     if(rc == 0) {
          dprintf(("GDI32: Escape %x %d %d %x %x returned %d (WARNING: might not be implemented!!) ", hdc, nEscape, cbInput, lpvInData, lpvOutData, rc));
