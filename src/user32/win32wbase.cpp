@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.209 2000-09-02 08:30:09 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.210 2000-09-04 18:23:56 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2077,9 +2077,6 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
  RECT  newPos = {0, 0, 0, 0};
 
     dprintf(("ShowWindow %x %x", getWindowHandle(), nCmdShow));
-    if(getWindowHandle() == 0x6800001d && nCmdShow == 1) {
-	rc = 0;
-    }
     wasVisible = (getStyle() & WS_VISIBLE) != 0;
 
     switch(nCmdShow)
@@ -2188,9 +2185,6 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
    HWND hParent = 0;
    RECT oldClientRect = rectClient;
 
-    if(getWindowHandle() == 0x6800000a) {
-	rc = FALSE;
-    }
     if (fuFlags &
        ~(SWP_NOSIZE     | SWP_NOMOVE     | SWP_NOZORDER     |
          SWP_NOREDRAW   | SWP_NOACTIVATE | SWP_FRAMECHANGED |
@@ -3059,10 +3053,19 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value, BOOL fUnicode)
                 return ss.styleOld;
         }
         case GWL_WNDPROC:
-                oldval = (LONG)WINPROC_GetProc(win32wndproc, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A);
-                WINPROC_SetProc((HWINDOWPROC *)&win32wndproc, (WNDPROC)value, WINPROC_GetProcType(win32wndproc), WIN_PROC_WINDOW);
+        {
+		//Note: Type of SetWindowLong determines new window proc type
+                //      UNLESS the new window proc has already been registered
+                //      (use the old type in that case)
+                //      (VERIFIED in NT 4, SP6)
+                WINDOWPROCTYPE type = WINPROC_GetProcType((HWINDOWPROC)value);
+		if(type == WIN_PROC_INVALID) {
+			type = (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A;
+		}
+	        oldval = (LONG)WINPROC_GetProc(win32wndproc, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A);
+                WINPROC_SetProc((HWINDOWPROC *)&win32wndproc, (WNDPROC)value, type, WIN_PROC_WINDOW);
                 return oldval;
-
+        }
         case GWL_HINSTANCE:
                 oldval = hInstance;
                 hInstance = value;
