@@ -1,0 +1,23 @@
+/* $Id: Odin.ini.txt,v 1.1 1999-10-20 16:35:14 cbratschi Exp $ */
+
+Odin initialization file documentation
+
+[COLORS]
+UseWinColors	Use Windows colors
+		values: 1/0
+		default: 0
+SaveColors	Save/restore colors to/from Odin.ini
+		values: 1/0
+		default: 0
+
+[DIRECTORIES]
+SYSTEM		Windows system directory
+		- This directory _must_ exist!
+		- Don't use backslashes as last character!
+		default: Open32 -> \os2\system
+		example: e:\win32\system
+WINDOWS		Windows directory
+		- This directory _must_ exist!
+		- Don't use backslashes as last character!
+		default: Open32 -> \os2
+		example: e:\win32
