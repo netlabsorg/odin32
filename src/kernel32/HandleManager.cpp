@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.76 2001-11-26 14:53:57 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.77 2001-11-27 17:31:15 phaller Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -452,6 +452,9 @@ DWORD HMInitialize(void)
     HMGlobals.pHMNamedPipe  = new HMDeviceNamedPipeClass("\\\\PIPE\\");
     HMGlobals.pHMMailslot   = new HMMailslotClass("\\MAILSLOT\\");
     HMGlobals.pHMParPort    = new HMDeviceParPortClass("\\\\LPT\\");
+    
+    /* add standard symbolic links */
+    HandleNamesAddSymbolicLink("\\\\.\\", "");
   }
   return (NO_ERROR);
 }
