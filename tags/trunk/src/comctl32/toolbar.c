@@ -1,4 +1,4 @@
-/* $Id: toolbar.c,v 1.14 1999-10-14 09:21:14 sandervl Exp $ */
+/* $Id: toolbar.c,v 1.15 1999-10-22 18:04:13 sandervl Exp $ */
 /*
  * Toolbar control
  *
@@ -29,7 +29,6 @@
 /* CB: Odin32/WINE bugs
   - IMAGELIST_Draw draws a line too at the bottom of the bitmap (toolbar.exe)
     imagelist uses default size values instead of real bitmap values
-  - LoadBitmapA -> use NativeLoadBitmap, is OS/2 bitmap resource
 */
 
 #include <string.h>
@@ -2110,18 +2109,6 @@ TOOLBAR_Customize (HWND hwnd)
 
     SendMessageA (infoPtr->hwndNotify,WM_NOTIFY,(WPARAM)nmhdr.idFrom,(LPARAM)&nmhdr);
 
-    //load OS/2 dialog
-
-    ret = NativeDlgBoxIP(COMCTL32_hModule,
-                         GetWindowLongA(hwnd,GWL_HINSTANCE),
-                         MAKEINTRESOURCEA(IDD_TBCUSTOMIZE),
-                         hwnd,
-                         (DLGPROC)TOOLBAR_CustomizeDialogProc,
-                         (LPARAM)infoPtr);
-
-    if (ret == (INT)-1) ret = 0;
-
-/* //original WINE code
     if (!(hRes = FindResourceA (COMCTL32_hModule,
                                 MAKEINTRESOURCEA(IDD_TBCUSTOMIZE),
                                 RT_DIALOGA)))
@@ -2135,7 +2122,6 @@ TOOLBAR_Customize (HWND hwnd)
                                    hwnd,
                                    (DLGPROC)TOOLBAR_CustomizeDialogProc,
                                    (LPARAM)infoPtr);
-*/
 
     /* send TBN_ENDADJUST notification */
     nmhdr.code = TBN_ENDADJUST;

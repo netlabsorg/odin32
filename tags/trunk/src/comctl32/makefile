@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.15 1999-09-23 17:26:29 cbratschi Exp $
+# $Id: makefile,v 1.16 1999-10-22 18:04:10 sandervl Exp $
 #
 # PD-Win32 API
 #
@@ -17,6 +17,8 @@ PDWIN32_TOOLS = ..\..\tools\bin
 CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE)
 CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
+RC = $(PDWIN32_TOOLS)\wrc
+RCFLAGS = -s -I. -I$(CPPMAIN)\include -I$(PDWIN32_INCLUDE) -I$(PDWIN32_INCLUDE)\win
 
 TARGET = comctl32
 
@@ -24,21 +26,22 @@ OBJS =  comctl32.obj initterm.obj progress.obj comctl32undoc.obj imagelist.obj \
         comboex.obj animate.obj datetime.obj flatsb.obj hotkey.obj monthcal.obj \
         nativefont.obj pager.obj tab.obj status.obj header.obj updown.obj \
         rebar.obj cache.obj trackbar.obj tooltips.obj toolbar.obj treeview.obj \
-        propsheet.obj listview.obj draglist.obj ipaddress.obj
+        propsheet.obj listview.obj draglist.obj ipaddress.obj resource.obj
 
 all: $(TARGET).dll $(TARGET).lib
 
-rsrc.res: rsrc.rc
-      rc -r rsrc.rc rsrc.res
+resource.asm: rsrc.rc 
+    $(RC) $(RCFLAGS) -o resource.asm rsrc.rc 
+
+resource.obj: resource.asm
 
 
-$(TARGET).dll: $(OBJS) $(TARGET).def rsrc.res
+$(TARGET).dll: $(OBJS) $(TARGET).def
         $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
               $(PDWIN32_LIB)/kernel32.lib \
               $(PDWIN32_LIB)/gdi32.lib \
               $(PDWIN32_LIB)/user32.lib  $(PDWIN32_LIB)/odincrt.lib \
               OS2386.LIB  $(RTLLIB_O)
-              rc rsrc.res $(TARGET).dll
         $(CP) $@ $(PDWIN32_BIN)
 
 
