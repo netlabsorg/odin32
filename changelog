@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2645 2003-11-11 14:01:46 bird Exp $ */
+/* $Id: changelog,v 1.2646 2003-11-12 14:06:29 sandervl Exp $ */
+
+ 2003-11-12: Dietrich Teickner <Dietrich_Teickner@t-online   >
+    - SHELL32:  o Resource updates
+                o Shell file operations updates
 
  2003-11-11: knut st. osmundsen <bird-changelog@innotek    >
     - MAKE:     o Added a set of custombuild rules to the root makefile.
