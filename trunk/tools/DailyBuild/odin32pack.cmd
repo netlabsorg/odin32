@@ -1,4 +1,4 @@
-/* $Id: odin32pack.cmd,v 1.21 2001-07-19 20:15:50 sandervl Exp $
+/* $Id: odin32pack.cmd,v 1.22 2002-01-06 16:53:23 bird Exp $
  *
  * Make the two zip files.
  *
@@ -105,7 +105,7 @@ parse arg sDir, sType;
     end
 
     call copy sRoot'\bin\wgss50.dll', 'system32\wgss50.dll';
-    call copy sRoot'\bin\odin.ini', 'system32\Odin.ini';
+    /*call copy sRoot'\bin\odin.ini', 'system32\Odin.ini';*/
     if (pos('debug', sType) > 0) then
     do
         call copy sRoot'\bin\release\odincrt.dll', 'system32\odincrt.dll'
