@@ -1,4 +1,4 @@
-# $Id: Xx2Lx.mak,v 1.1.2.2 2002-04-01 09:06:02 bird Exp $
+# $Id: Xx2Lx.mak,v 1.1.2.3 2002-04-07 22:40:37 bird Exp $
 
 #
 # xx2lx makefile.
@@ -10,7 +10,7 @@
 # Load the build setup.
 #
 PATH_ROOT = ..\..\..
-!include $(PATH_ROOT)\tools\make\setup.mak
+!include $(PATH_ROOT)\make\setup.mak
 
 
 #
