@@ -1,4 +1,4 @@
-/* $Id: shell32_main.c,v 1.12 2005-03-08 19:07:11 sao2l02 Exp $ */
+/* $Id: shell32_main.c,v 1.13 2005-03-12 15:34:01 sao2l02 Exp $ */
 /*
  * 				Shell basics
  *
@@ -237,8 +237,7 @@ LPWSTR* WINAPI CommandLineToArgvW(LPCWSTR lpCmdline, int* numargs)
  */
 
 DWORD WINAPI SHGetFileInfoA(LPCSTR path,DWORD dwFileAttributes,
-                              SHFILEINFOA *psfi, UINT sizeofpsfi,
-                              UINT flags )
+                            SHFILEINFOA *psfi, UINT sizeofpsfi, UINT flags )
 {
 	char szLocation[MAX_PATH];
     int iIndex;
@@ -252,7 +251,8 @@ DWORD WINAPI SHGetFileInfoA(LPCSTR path,DWORD dwFileAttributes,
 	TRACE("(%s fattr=0x%lx sfi=%p(attr=0x%08lx) size=0x%x flags=0x%x)\n", 
 	  (flags & SHGFI_PIDL)? "pidl" : debugstr_a(path), dwFileAttributes, psfi, psfi->dwAttributes, sizeofpsfi, flags);
 
-	if ((flags & SHGFI_USEFILEATTRIBUTES) && (flags & (SHGFI_ATTRIBUTES|SHGFI_EXETYPE|SHGFI_PIDL)))
+    if ( (flags & SHGFI_USEFILEATTRIBUTES) && 
+         (flags & (SHGFI_ATTRIBUTES|SHGFI_EXETYPE|SHGFI_PIDL)))
         return FALSE;
 
     /* windows initializes this values regardless of the flags */
@@ -392,8 +392,9 @@ DWORD WINAPI SHGetFileInfoA(LPCSTR path,DWORD dwFileAttributes,
         else
         {
             STRRET str;
-	    hr = IShellFolder_GetDisplayNameOf(psfParent, pidlLast, SHGDN_INFOLDER, &str);
-	    StrRetToStrNA (psfi->szDisplayName, MAX_PATH, &str, pidlLast);
+            hr = IShellFolder_GetDisplayNameOf( psfParent, pidlLast,
+                                                SHGDN_INFOLDER, &str);
+            StrRetToStrNA (psfi->szDisplayName, MAX_PATH, &str, pidlLast);
         }
     }
 
@@ -443,11 +444,14 @@ DWORD WINAPI SHGetFileInfoA(LPCSTR path,DWORD dwFileAttributes,
     {
         UINT uDummy,uFlags;
 
-	  hr = IShellFolder_GetUIObjectOf(psfParent, 0, 1, &pidlLast, &IID_IExtractIconA, &uDummy, (LPVOID*)&pei);
-
+        hr = IShellFolder_GetUIObjectOf(psfParent, 0, 1,
+               (LPCITEMIDLIST*)&pidlLast, &IID_IExtractIconA,
+               &uDummy, (LPVOID*)&pei);
         if (SUCCEEDED(hr))
         {
-	    hr = IExtractIconA_GetIconLocation(pei, (flags & SHGFI_OPENICON)? GIL_OPENICON : 0,szLocation, MAX_PATH, &iIndex, &uFlags);
+            hr = IExtractIconA_GetIconLocation(pei, 
+                    (flags & SHGFI_OPENICON)? GIL_OPENICON : 0,
+                    szLocation, MAX_PATH, &iIndex, &uFlags);
             psfi->iIcon = iIndex;
 
             if (uFlags != GIL_NOTFILENAME)
@@ -466,7 +470,7 @@ DWORD WINAPI SHGetFileInfoA(LPCSTR path,DWORD dwFileAttributes,
         {
 	    char sTemp [MAX_PATH];
 	    char * szExt;
-	    DWORD dwNr=0;
+            DWORD dwNr=0;
 
 	    lstrcpynA(sTemp, path, MAX_PATH);
 	    szExt = (LPSTR) PathFindExtensionA(sTemp);
@@ -538,9 +542,9 @@ DWORD WINAPI SHGetFileInfoW(LPCWSTR path,DWORD dwFileAttributes,
                               SHFILEINFOW *psfi, UINT sizeofpsfi,
                               UINT flags )
 {
-	INT len;
+    INT len;
 	LPSTR temppath;
-	DWORD ret;
+    DWORD ret;
 	SHFILEINFOA temppsfi;
 
 	len = WideCharToMultiByte(CP_ACP, 0, path, -1, NULL, 0, NULL, NULL);
