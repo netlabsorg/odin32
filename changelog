@@ -1,10 +1,14 @@
-/* $Id: changelog,v 1.1887 2001-12-07 11:27:39 sandervl Exp $ */
+/* $Id: changelog,v 1.1888 2001-12-07 14:12:25 sandervl Exp $ */
 
  2001-12-07: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o GetFileType for parallel port device returns FILE_TYPE_PIPE
                   (verified in NT4, SP6)
                 o Comm functions not valid for parallel port handles
-                o Overlapped IO & comm updates  
+                o Overlapped IO updates
+                o Com port now uses new overlapped class for overlapped IO
+                o Call ExitProcess when executable entrypoint returns (LX images)
+                o Be careful when cleaning up threads after ExitProcess has
+                  been called
 
  2001-12-06: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Added FindFirstFileExA/FindFirstFileExW
