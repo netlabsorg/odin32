@@ -1,4 +1,4 @@
-# $Id: setup.win32debwat11.mk,v 1.9 2002-08-27 03:58:03 bird Exp $
+# $Id: setup.win32debwat11.mk,v 1.10 2002-08-28 04:42:06 bird Exp $
 
 # ---WIN32, DEBUG, WAT11-------------------------
 ENV_NAME="Win32, Debug, Watcom C/C++ v11.0c"
@@ -17,6 +17,13 @@ AS_DEBUG_TYPE = Codeview
 !include $(PATH_MAKE)\setup.os2debalp.mk
 !include $(PATH_MAKE)\setup.os2debrc.mk
 !include $(PATH_MAKE)\setup.os2debwrc.mk
+!ifdef LD_USE_ILINK
+! error error: LD_USE_ILINK isn't supported by the win32 watcom setup.
+!else
+# TODO!
+_LD_LIBPATH     = $(PATH_WATCOM)\lib386\nt;$(PATH_WATCOM)\lib386;
+! include $(PATH_MAKE)\setup.os2relwlink.mk
+!endif
 !include $(PATH_MAKE)\setup.optional.watcom11x.mk
 
 
@@ -61,25 +68,6 @@ CXX_LST_OUT=
 CXX_PC_2_STDOUT=-pc
 
 IMPLIB_FLAGS=/NOI /Nologo
-
-# TODO?
-LINK_FLAGS=Sort global Debug codeview Option quiet, dosseg, eliminate, manglednames, caseexact
-LINK_FLAGS_EXE=$(LINK_FLAGS)
-LINK_FLAGS_DLL=$(LINK_FLAGS)
-LINK_FLAGS_SYS=$(LINK_FLAGS) Option oneautodata, internalrelocs, togglerelocs
-LINK_FLAGS_VDD=$(LINK_FLAGS_SYS)
-LINK_FLAGS_IFS=$(LINK_FLAGS_SYS)
-LINK_CMD_EXE=$(LINK) $(LINK_FLAGS_EXE) @$(TARGET_LNK)
-LINK_CMD_DLL=$(LINK) $(LINK_FLAGS_DLL) @$(TARGET_LNK)
-LINK_CMD_SYS=$(LINK) $(LINK_FLAGS_SYS) @$(TARGET_LNK)
-LINK_CMD_VDD=$(LINK) $(LINK_FLAGS_VDD) @$(TARGET_LNK)
-LINK_CMD_IFS=$(LINK) $(LINK_FLAGS_IFS) @$(TARGET_LNK)
-LINK_LNK1=file       $(TARGET_OBJS: =^
-file       )
-LINK_LNK2=libpath    $(WATCOM)\lib386\nt;$(WATCOM)\lib386;
-LINK_LNK3=option map=$(TARGET_MAP)
-LINK_LNK4=library    $(TARGET_LIBS: =^, )
-LINK_LNK5=name       $(PATH_TARGET)\$(TARGET_NAME).$(TARGET_EXT)
 
 
 #

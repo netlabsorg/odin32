@@ -1,27 +1,10 @@
-# $Id: setup.optional.watcom11x.mk,v 1.4 2002-08-27 03:03:13 bird Exp $
+# $Id: setup.optional.watcom11x.mk,v 1.5 2002-08-28 04:42:04 bird Exp $
 
 #
 #  Helper file for all the optional stuff which is common for
 #  all watcom11xx compilers.
 #  Concidering the size of this, it really make sense putting it here.
 #
-
-#
-# This is not optional (but I'm getting lazy)
-#
-_LD_FORMAT = $(BUILD_PLATFORM)
-!ifdef LD_FORMAT
-! if "$(LD_FORMAT)" == "NE"
-_LD_FORMAT = $(BUILD_PLATFORM)-16
-! else
-!  if "$(LD_FORMAT)" == "LX"
-_LD_FORMAT = os2
-!  else
-!   error LD_FORMAT other than NE and LXis not supported by this compiler ($(ENV_NAME)).
-!  endif
-! endif
-!endif
-TOOL_DEFCONV    = $(PATH_TOOLS)\kDef2Wat.exe $(_LD_FORMAT)
 
 
 #
@@ -243,44 +226,4 @@ _CXX_OPT_R = -r
 
 _CXX_OPTIONAL = $(_CXX_SEG_TEXT) $(_CXX_SEG_DATA) $(_CXX_SEG_XCPT) $(_CXX_DEFAULT_LIBS) $(_CXX_PACK) $(_CXX_XCPT) $(_CXX_MODEL) -d$(_CXX_DEF_MODEL) \
                 $(_CXX_OPT_R)
-
-
-#
-# Linker flags.
-#
-_LD_SORT            = Sort global
-# Option
-_LD_QUIET           =
-_LD_DEFAULT_LIBS    = ,nodefaultlibs
-_LD_ALIGN           =
-_LD_DOSSEG          = ,dosseg
-
-!if defined(LD_SORT_GLOBAL)
-_LD_SORT    = Sort global
-!endif
-!if defined(LD_SORT_ALPHABETICAL)
-_LD_SORT    = Sort alphabetical
-!endif
-!if defined(LD_SORT_BOTH)
-_LD_SORT    = Sort global alphabetical
-!endif
-
-# Option
-!if defined(BUILD_QUIET)
-_LD_QUIET   = ,quiet
-!endif
-!if defined(LD_ALIGN)
-_LD_ALIGN   = ,alignment=$(LD_ALIGN)
-!endif
-!if defined(LD_DEFAULT_LIBS) || defined(ALL_DEFAULT_LIBS)
-_LD_DEFAULT_LIBS =
-!endif
-!if defined(LD_DOSSEG_NO)
-_LD_DOSSEG  =
-!endif
-!if defined(LD_DOSSEG_YES)
-_LD_DOSSEG  = ,dosseg
-!endif
-
-_LD_OPTIONAL = $(_LD_SORT) Option verbose $(_LD_QUIET) $(_LD_ALIGN) $(_LD_DOSSEG)
 
