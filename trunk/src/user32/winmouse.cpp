@@ -1,4 +1,4 @@
-/* $Id: winmouse.cpp,v 1.23 2002-04-30 14:54:06 sandervl Exp $ */
+/* $Id: winmouse.cpp,v 1.24 2002-05-31 09:54:05 sandervl Exp $ */
 /*
  * Win32 mouse functions
  *
@@ -34,8 +34,10 @@
 #include <win\mouse.h>
 #include "winmouse.h"
 #include "oslibmsg.h"
+#include "oslibres.h"
 #include "pmwindow.h"
 #include "oslibwin.h"
+#include "hook.h"
 
 #define DBG_LOCALLOG	DBG_winmouse
 #include "dbglocal.h"
@@ -50,10 +52,63 @@ ODINDEBUGCHANNEL(USER32-WINMOUSE)
 
 //******************************************************************************
 //******************************************************************************
+BOOL WIN32API GetCursorPos( PPOINT lpPoint)
+{
+    if (!lpPoint) return FALSE;
 
+    if (OSLibWinQueryPointerPos(lpPoint)) //POINT == POINTL
+    {
+        mapScreenPoint((OSLIBPOINT*)lpPoint);
+        dprintf2(("USER32: GetCursorPos (%d,%d)", lpPoint->x, lpPoint->y));
+        return TRUE;
+    }
+    else return FALSE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API SetCursorPos( int X, int Y)
+{
+    BOOL ret;
+
+    dprintf(("USER32: SetCursorPos %d %d", X,Y));
+    ret = OSLibWinSetPointerPos(X, mapScreenY(Y));
+    if(ret == TRUE) {
+        MSLLHOOKSTRUCT hook;
+
+        hook.pt.x        = X;
+        hook.pt.y        = Y;
+        hook.mouseData   = 0;
+        //signal to dinput hook that it only needs to modify the last
+        //known position (not treat it as a new event)
+        hook.flags       = LLMHF_INJECTED;
+        hook.time        = GetCurrentTime();
+        hook.dwExtraInfo = 0;
+
+        HOOK_CallHooksW( WH_MOUSE_LL, HC_ACTION, WM_MOUSEMOVE, (LPARAM)&hook);
+    }
+    return ret;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API ClipCursor(const RECT * lpRect)
+{
+    if(lpRect) {
+         dprintf(("USER32: ClipCursor (%d,%d)(%d,%d)", lpRect->left, lpRect->top, lpRect->right, lpRect->bottom));
+    }
+    else dprintf(("USER32: ClipCursor NULL"));
+    return OSLibWinClipCursor(lpRect);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetClipCursor( LPRECT lpRect)
+{
+    dprintf(("USER32: GetClipCursor %x", lpRect));
+    return OSLibWinGetClipCursor(lpRect);
+}
+//******************************************************************************
 // capture handle "cache"
 static HWND hwndWin32Capture = 0;
-
+//******************************************************************************
 HWND WIN32API GetCapture()
 {
   if (0 == hwndWin32Capture)
