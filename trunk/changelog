@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1390 2001-04-29 16:24:00 sandervl Exp $ */
+/* $Id: changelog,v 1.1391 2001-04-29 18:47:49 sandervl Exp $ */
 
  2001-04-29: Dietrich Teickner <Dietrich_Teickner@t-online.de>
     - SHELL32:  o Update for SHFileOperationA (FO_COPY)
@@ -9,6 +9,7 @@
     - WINMM:    o Don't start playback if stream is paused (waveOutWrite)
                   (only affects DART playback; prevents out of sync
                    video & audio in RealPlayer)
+    - WSOCK32:  o Save FS before calling _beginthread
 
  2001-04-28: Dietrich Teickner <Dietrich_Teickner@t-online.de>
     - SHELL32:  o Updates and fixes for SHFileOperationA (FO_COPY)
