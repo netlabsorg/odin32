@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2000-01-04 22:19:01 sandervl Exp $
+# $Id: makefile,v 1.2 2000-01-26 23:48:54 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -37,9 +37,12 @@ $(TARGET).dll: $(OBJS) $(TARGET).def
 	$(CP) $@ $(PDWIN32_BIN)
 
 
-$(TARGET).lib: $(TARGET).def
-	$(IMPLIB) $(IMPLIBFLAGS) $@ $**
-	$(CP) $@ $(PDWIN32_LIB)
+$(TARGET).lib: $(TARGET)exp.def
+        $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
+        $(CP) $@ $(PDWIN32_LIB)
+
+$(TARGET)exp.def: $(TARGET).def
+        $(IMPDEF) $** $@
 
 
 
