@@ -1,8 +1,11 @@
-# $Id: MkCallTab.mak,v 1.6 2002-08-20 04:37:59 bird Exp $
+# $Id: MkCallTab.mak,v 1.7 2002-08-20 05:04:43 bird Exp $
 
 #
 # MkCallTab - 16-bit source generator.
 #
+# Copyright (c) 2000-2002 knut st. osmundsen (bird@anduin.net)
+#
+# GPL
 #
 
 
@@ -73,6 +76,4 @@ calltaba.asm:               $(PATH_TOOLS)\$(TARGET_NAME).$(TARGET_EXT)
 # Generate TstFakers.c
 TstFakers.c:                $(PATH_TOOLS)\$(TARGET_NAME).$(TARGET_EXT)
     $(PATH_TOOLS)\MkCallTab.exe tstfakers > $@
-
-
 

@@ -1,8 +1,11 @@
-# $Id: first.mak,v 1.4 2002-08-20 04:37:59 bird Exp $
+# $Id: first.mak,v 1.5 2002-08-20 05:04:42 bird Exp $
 
 #
-# kKrnlLib/dev32 makefile.
+# kKrnlLib_first.lib makefile.
 #
+# Copyright (c) 1998-2002 knut st. osmundsen (bird@anduin.net)
+#
+# GPL
 #
 
 #

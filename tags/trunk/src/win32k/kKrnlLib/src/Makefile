@@ -1,8 +1,11 @@
-# $Id: Makefile,v 1.7 2002-08-20 04:37:59 bird Exp $
+# $Id: Makefile,v 1.8 2002-08-20 05:04:44 bird Exp $
 
 #
 # kKrnlLib/dev32 makefile.
 #
+# Copyright (c) 1998-2002 knut st. osmundsen (bird@anduin.net)
+#
+# GPL
 #
 
 #
