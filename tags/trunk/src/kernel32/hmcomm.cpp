@@ -1,4 +1,4 @@
-/* $Id: hmcomm.cpp,v 1.12 2001-11-08 14:49:27 phaller Exp $ */
+/* $Id: hmcomm.cpp,v 1.13 2001-11-08 15:38:42 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -966,9 +966,6 @@ BOOL HMDeviceCommClass::GetCommConfig( PHMHANDLEDATA pHMHandleData,
 
   memcpy(lpCC,&pDevData->CommCfg,sizeof(COMMCONFIG));
   *lpdwSize = sizeof(COMMCONFIG);
-  return(TRUE);
-
-
   return(TRUE);
 }
 
