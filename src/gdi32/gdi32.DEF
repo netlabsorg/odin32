@@ -1,4 +1,4 @@
-; $Id: gdi32.DEF,v 1.5 1999-12-16 16:52:31 cbratschi Exp $
+; $Id: gdi32.DEF,v 1.6 2000-03-10 16:13:44 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY GDI32 INITINSTANCE
@@ -12,6 +12,12 @@ IMPORTS
     _GpiEnableYInversion       = PMGPI.723
 
 EXPORTS
+    _GDI_CallDevInstall16@20                                 @100
+    _GDI_CallExtDeviceModePropSheet16@16                     @101
+    _GDI_CallExtDeviceMode16@28                              @102
+    _GDI_CallAdvancedSetupDialog16@16                        @103
+    _GDI_CallDeviceCapabilities16@20                         @104
+
     AbortDoc                   = _AbortDoc@4                 @105
     AbortPath                  = _AbortPath@4                @106
     AddFontResourceA           = _AddFontResourceA@4         @107
