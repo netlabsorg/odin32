@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.19 1999-08-17 16:35:11 phaller Exp $ */
+/* $Id: wprocess.cpp,v 1.20 1999-08-17 17:04:52 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -13,7 +13,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <odinwrap.h>
 
 #include "unicode.h"
 #include "windll.h"
@@ -36,7 +35,7 @@ BOOL      fFreeLibrary = FALSE;
 
 //Process database
 PDB       ProcessPDB = {0};
-USHORT     ProcessTIBSel = 0;
+USHORT    ProcessTIBSel = 0;
 DWORD    *TIBFlatPtr    = 0;
 
 extern "C" ULONG QueryExceptionChain();
@@ -76,22 +75,22 @@ TEB *InitializeTIB(BOOL fMainThread)
    //Allocate one dword to store the flat address of our TEB
    TIBFlatPtr = (DWORD *)OS2AllocThreadLocalMemory(1);
    if(TIBFlatPtr == 0) {
-   dprintf(("InitializeTIB: local thread memory alloc failed!!"));
-   DebugInt3();
-   return NULL;
+   	dprintf(("InitializeTIB: local thread memory alloc failed!!"));
+   	DebugInt3();
+   	return NULL;
    }
    if(OS2AllocSel(PAGE_SIZE, &tibsel) == FALSE)
    {
-   dprintf(("InitializeTIB: selector alloc failed!!"));
-   DebugInt3();
-   return NULL;
+   	dprintf(("InitializeTIB: selector alloc failed!!"));
+   	DebugInt3();
+   	return NULL;
    }
    winteb = (TEB *)OS2SelToFlat(tibsel);
    if(winteb == NULL)
    {
-   dprintf(("InitializeTIB: DosSelToFlat failed!!"));
-   DebugInt3();
-   return NULL;
+   	dprintf(("InitializeTIB: DosSelToFlat failed!!"));
+   	DebugInt3();
+   	return NULL;
    }
    memset(winteb, 0, PAGE_SIZE);
    thdb       = (THDB *)(winteb+1);
@@ -116,16 +115,16 @@ TEB *InitializeTIB(BOOL fMainThread)
 
    if(OS2GetPIB(PIB_TASKTYPE) == TASKTYPE_PM)
    {
-   thdb->flags      = 0;  //todo gui
+   	thdb->flags      = 0;  //todo gui
    }
-   else  thdb->flags      = 0;  //todo textmode
+   else thdb->flags      = 0;  //todo textmode
 
    if(fMainThread)
    {
-   //todo initialize PDB during process creation
+   	//todo initialize PDB during process creation
         //todo: initialize TLS array if required
         //TLS in executable always TLS index 0?
-   ProcessTIBSel = tibsel;
+   	ProcessTIBSel = tibsel;
    }
    dprintf(("InitializeTIB setup TEB with selector %x", tibsel));
    dprintf(("InitializeTIB: FS(%x):[0] = %x", GetFS(), QueryExceptionChain()));
@@ -145,14 +144,14 @@ void DestroyTIB()
 
    winteb = (TEB *)*TIBFlatPtr;
    if(winteb) {
-   thdb = (THDB *)(winteb+1);
-   orgtibsel = thdb->OrgTIBSel;
+   	thdb = (THDB *)(winteb+1);
+   	orgtibsel = thdb->OrgTIBSel;
 
-   //Restore our original FS selector
-      SetFS(orgtibsel);
+   	//Restore our original FS selector
+      	SetFS(orgtibsel);
 
-      //And free our own
-      OS2FreeSel(thdb->teb_sel);
+      	//And free our own
+      	OS2FreeSel(thdb->teb_sel);
    }
    else dprintf(("Already destroyed TIB"));
 
@@ -170,11 +169,11 @@ void WIN32API RestoreOS2TIB()
 
    winteb = (TEB *)*TIBFlatPtr;
    if(winteb) {
-   thdb = (THDB *)(winteb+1);
-   orgtibsel = thdb->OrgTIBSel;
+   	thdb = (THDB *)(winteb+1);
+   	orgtibsel = thdb->OrgTIBSel;
 
-   //Restore our original FS selector
-      SetFS(orgtibsel);
+   	//Restore our original FS selector
+      	SetFS(orgtibsel);
    }
 }
 /******************************************************************************/
@@ -187,11 +186,11 @@ USHORT WIN32API SetWin32TIB()
 
    winteb = (TEB *)*TIBFlatPtr;
    if(winteb) {
-   thdb = (THDB *)(winteb+1);
-   win32tibsel = thdb->teb_sel;
+   	thdb = (THDB *)(winteb+1);
+   	win32tibsel = thdb->teb_sel;
 
-   //Restore our win32 FS selector
-      return SetReturnFS(win32tibsel);
+   	//Restore our win32 FS selector
+      	return SetReturnFS(win32tibsel);
    }
    // nested calls are OK, OS2ToWinCallback for instance
    //else DebugInt3();
@@ -201,14 +200,13 @@ USHORT WIN32API SetWin32TIB()
 /******************************************************************************/
 //******************************************************************************
 void WIN32API RegisterExe(WIN32EXEENTRY EntryPoint, PIMAGE_TLS_CALLBACK *TlsCallbackAddr,
-           LPDWORD TlsIndexAddr, ULONG TlsInitSize,
-           ULONG TlsTotalSize, LPVOID TlsAddress,
-                 LONG Win32TableId, LONG NameTableId, LONG VersionResId,
-                    LONG Pe2lxVersion, HINSTANCE hinstance, ULONG dwReserved)
+           		  LPDWORD TlsIndexAddr, ULONG TlsInitSize,
+           		  ULONG TlsTotalSize, LPVOID TlsAddress,
+                 	  LONG Win32TableId, LONG NameTableId, LONG VersionResId,
+                    	 LONG Pe2lxVersion, HINSTANCE hinstance, ULONG dwReserved)
 {
   if(WinExe != NULL) //should never happen
-    delete WinExe;
-
+    	delete(WinExe);
 
   CheckVersion(Pe2lxVersion, OS2GetDllName(hinstance));
 
@@ -222,94 +220,94 @@ void WIN32API RegisterExe(WIN32EXEENTRY EntryPoint, PIMAGE_TLS_CALLBACK *TlsCall
   winexe = new Win32Exe(0, NameTableId, Win32TableId);
 
   if(winexe) {
-   dprintf(("RegisterExe Win32TableId = %x", Win32TableId));
-   dprintf(("RegisterExe NameTableId  = %x", NameTableId));
-   dprintf(("RegisterExe VersionResId = %x", VersionResId));
-   dprintf(("RegisterExe Pe2lxVersion = %x", Pe2lxVersion));
+   	dprintf(("RegisterExe Win32TableId = %x", Win32TableId));
+   	dprintf(("RegisterExe NameTableId  = %x", NameTableId));
+   	dprintf(("RegisterExe VersionResId = %x", VersionResId));
+   	dprintf(("RegisterExe Pe2lxVersion = %x", Pe2lxVersion));
 
-      winexe->setVersionId(VersionResId);
-      winexe->setOS2InstanceHandle(hinstance);
-   winexe->setEntryPoint((ULONG)EntryPoint);
-   winexe->setTLSAddress(TlsAddress);
-   winexe->setTLSInitSize(TlsInitSize);
-   winexe->setTLSTotalSize(TlsTotalSize);
-   winexe->setTLSIndexAddr(TlsIndexAddr);
-   winexe->setTLSCallBackAddr(TlsCallbackAddr);
+      	winexe->setVersionId(VersionResId);
+      	winexe->setOS2InstanceHandle(hinstance);
+   	winexe->setEntryPoint((ULONG)EntryPoint);
+   	winexe->setTLSAddress(TlsAddress);
+   	winexe->setTLSInitSize(TlsInitSize);
+   	winexe->setTLSTotalSize(TlsTotalSize);
+   	winexe->setTLSIndexAddr(TlsIndexAddr);
+   	winexe->setTLSCallBackAddr(TlsCallbackAddr);
 
-   char *modname = getenv("WIN32MODULE");
+   	char *modname = getenv("WIN32MODULE");
 
-   if(modname != NULL)
-   {
-         dprintf(("Set full path for exe to %s", modname));
-         winexe->setFullPath(modname);
-   }
-   winexe->start();
+   	if(modname != NULL)
+   	{
+         	dprintf(("Set full path for exe to %s", modname));
+         	winexe->setFullPath(modname);
+   	}
+   	winexe->start();
   }
   else {
-      eprintf(("Win32Exe creation failed!\n"));
-      DebugInt3();
-   return;
+      	eprintf(("Win32Exe creation failed!\n"));
+      	DebugInt3();
+   	return;
   }
 }
 //******************************************************************************
 //******************************************************************************
 ULONG WIN32API RegisterDll(WIN32DLLENTRY pfnDllEntry, PIMAGE_TLS_CALLBACK *TlsCallbackAddr,
-            LPDWORD TlsIndexAddr, ULONG TlsInitSize,
-            ULONG TlsTotalSize, LPVOID TlsAddress,
-                  LONG Win32TableId, LONG NameTableId, LONG VersionResId,
-                     LONG Pe2lxVersion, HINSTANCE hinstance, ULONG dwAttachType)
+            		   LPDWORD TlsIndexAddr, ULONG TlsInitSize,
+            		   ULONG TlsTotalSize, LPVOID TlsAddress,
+                  	   LONG Win32TableId, LONG NameTableId, LONG VersionResId,
+                     	   LONG Pe2lxVersion, HINSTANCE hinstance, ULONG dwAttachType)
 {
  char *name;
 
   Win32Dll *winmod = Win32Dll::findModule(hinstance);
   if(dwAttachType == 0)
   { //Process attach
-   if(getenv("WIN32_IOPL2")) {
-         io_init1();
-   }
-   name = OS2GetDllName(hinstance);
-   CheckVersion(Pe2lxVersion, name);
+   	if(getenv("WIN32_IOPL2")) {
+         	io_init1();
+   	}
+   	name = OS2GetDllName(hinstance);
+   	CheckVersion(Pe2lxVersion, name);
 
-   dprintf(("RegisterDll %X %s reason %d\n", hinstance, name, dwAttachType));
-   dprintf(("RegisterDll Win32TableId = %x", Win32TableId));
-   dprintf(("RegisterDll NameTableId  = %x", NameTableId));
-   dprintf(("RegisterDll VersionResId = %x", VersionResId));
-   dprintf(("RegisterDll Pe2lxVersion = %x", Pe2lxVersion));
+   	dprintf(("RegisterDll %X %s reason %d\n", hinstance, name, dwAttachType));
+   	dprintf(("RegisterDll Win32TableId = %x", Win32TableId));
+   	dprintf(("RegisterDll NameTableId  = %x", NameTableId));
+   	dprintf(("RegisterDll VersionResId = %x", VersionResId));
+   	dprintf(("RegisterDll Pe2lxVersion = %x", Pe2lxVersion));
 
-   if(winmod != NULL) {
-         //dll manually loaded by PE loader (Win32Dll::init)
-         winmod->OS2DllInit(hinstance, NameTableId, Win32TableId, pfnDllEntry);
-   }
-   else {
-      //converted win32 dll loaded by OS/2 loader
-      winmod = new Win32Dll(hinstance, NameTableId, Win32TableId, pfnDllEntry);
-      if(winmod == NULL) {
-            eprintf(("Failed to allocate module object!\n"));
-            DebugInt3();
-            return 0;                    //fail dll load
-      }
-   }
-   winmod->setTLSAddress(TlsAddress);
-   winmod->setTLSInitSize(TlsInitSize);
-   winmod->setTLSTotalSize(TlsTotalSize);
-   winmod->setTLSIndexAddr(TlsIndexAddr);
-   winmod->setTLSCallBackAddr(TlsCallbackAddr);
+   	if(winmod != NULL) {
+         	//dll manually loaded by PE loader (Win32Dll::init)
+         	winmod->OS2DllInit(hinstance, NameTableId, Win32TableId, pfnDllEntry);
+   	}
+   	else {
+      		//converted win32 dll loaded by OS/2 loader
+      		winmod = new Win32Dll(hinstance, NameTableId, Win32TableId, pfnDllEntry);
+      		if(winmod == NULL) {
+            		eprintf(("Failed to allocate module object!\n"));
+            		DebugInt3();
+            		return 0;                    //fail dll load
+      		}
+   	}
+   	winmod->setTLSAddress(TlsAddress);
+   	winmod->setTLSInitSize(TlsInitSize);
+   	winmod->setTLSTotalSize(TlsTotalSize);
+   	winmod->setTLSIndexAddr(TlsIndexAddr);
+   	winmod->setTLSCallBackAddr(TlsCallbackAddr);
 
-   /* @@@PH 1998/03/17 console devices initialization */
-   iConsoleDevicesRegister();
+   	/* @@@PH 1998/03/17 console devices initialization */
+   	iConsoleDevicesRegister();
 
-   //SvL: 19-8-'98
-   winmod->AddRef();
-   winmod->setVersionId(VersionResId);
+   	//SvL: 19-8-'98
+   	winmod->AddRef();
+   	winmod->setVersionId(VersionResId);
 
-   winmod->attachProcess();
+   	winmod->attachProcess();
    }
    else {//process detach
-   if(winmod != NULL && !fFreeLibrary) {
-      return 0;   //don't unload (OS/2 dll unload bug)
-   }
-//Runtime environment could already be gone, so don't do this
-// dprintf(("KERNEL32: Dll Removed by FreeLibrary or ExitProcess\n"));
+   	if(winmod != NULL && !fFreeLibrary) {
+      		return 0;   //don't unload (OS/2 dll unload bug)
+   	}
+	//Runtime environment could already be gone, so don't do this
+	// dprintf(("KERNEL32: Dll Removed by FreeLibrary or ExitProcess\n"));
    }
    return 1;   //success
 }
@@ -320,7 +318,7 @@ void _System Win32DllExitList(ULONG reason)
   dprintf(("Win32DllExitList %d\n", reason));
 
   if(WinExe) {
-    delete WinExe;
+    delete(WinExe);
     WinExe = NULL;
   }
   return;
@@ -399,12 +397,12 @@ static HINSTANCE iLoadLibraryA(LPCTSTR lpszLibFile)
     module->init();
     if(module->getError() != NO_ERROR) {
         dprintf(("LoadLibary %s failed (::init)\n", lpszLibFile));
-        delete module;
+        delete(module);
         return(0);
     }
     if(module->attachProcess() == FALSE) {
         dprintf(("LoadLibary %s failed (::attachProcess)\n", lpszLibFile));
-        delete module;
+        delete(module);
         return(0);
     }
     module->AddRef();
@@ -464,13 +462,14 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
     }
 
     module = new Win32Dll((char *)lpszLibFile);
+
     if(module == NULL)
         return(0);
 
     module->init();
     if(module->getError() != NO_ERROR) {
         dprintf(("LoadLibary %s failed (::init)\n", lpszLibFile));
-        delete module;
+        delete(module);
         return(0);
     }
     if(dwFlags & DONT_RESOLVE_DLL_REFERENCES) {
@@ -478,7 +477,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
     }
     if(module->attachProcess() == FALSE) {
         dprintf(("LoadLibary %s failed (::attachProcess)\n", lpszLibFile));
-        delete module;
+        delete(module);
         return(0);
     }
     module->AddRef();

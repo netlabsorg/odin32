@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.9 1999-08-17 16:35:08 phaller Exp $ */
+/* $Id: HandleManager.cpp,v 1.10 1999-08-17 17:04:50 sandervl Exp $ */
 
 /*
  *

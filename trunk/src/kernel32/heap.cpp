@@ -1,4 +1,4 @@
-/* $Id: heap.cpp,v 1.12 1999-08-17 16:35:09 phaller Exp $ */
+/* $Id: heap.cpp,v 1.13 1999-08-17 17:04:51 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -69,7 +69,7 @@ HANDLE WIN32API HeapCreate(DWORD flOptions, DWORD dwInitialSize, DWORD dwMaximum
 
   if(curheap == NULL)
   {
-      O32_HeapDestroy(hHeap);
+      	O32_HeapDestroy(hHeap);
         return(NULL);
   }
 
@@ -91,7 +91,7 @@ BOOL WIN32API HeapDestroy(HANDLE hHeap)
         return(FALSE);
 
   O32_HeapDestroy(curheap->getHeapHandle());
-  delete curheap;
+  delete(curheap);
   return(TRUE);
 }
 //******************************************************************************
@@ -156,8 +156,8 @@ HANDLE WIN32API GetProcessHeap(VOID)
       OS2ProcessHeap = new OS2Heap(hHeap, HEAP_GENERATE_EXCEPTIONS, 0x4000, 0);
 
       if(OS2ProcessHeap == NULL) {
-         O32_HeapDestroy(hHeap);
-               return(NULL);
+         	O32_HeapDestroy(hHeap);
+               	return(NULL);
       }
       processheap = hHeap;
     }

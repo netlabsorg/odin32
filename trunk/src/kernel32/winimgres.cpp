@@ -1,14 +1,12 @@
-/* $Id: winimgres.cpp,v 1.6 1999-08-17 16:35:11 phaller Exp $ */
+/* $Id: winimgres.cpp,v 1.7 1999-08-17 17:04:52 sandervl Exp $ */
 
-/*
- *
- * Project Odin Software License can be found in LICENSE.TXT
- *
- */
 /*
  * Win32 PE Image class (resource methods)
  *
  * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
+ *
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #include <os2win.h>
@@ -159,15 +157,13 @@ Win32Resource *Win32Image::getPEResource(ULONG id, ULONG type, ULONG lang)
     for(i=0;i<stringid;i++) {
         unicodestr += *unicodestr;
     }
-
     res = new Win32Resource(this, id, NTRT_STRING, (ULONG)*unicodestr, (char *)unicodestr);
     if(res == NULL) {
         dprintf(("new Win32Resource failed!\n"));
         return(NULL);
     }
   }
-  else
-    res = new Win32Resource(this, id, type, pData->Size, resdata);
+  else  res = new Win32Resource(this, id, type, pData->Size, resdata);
 
   return res;
 }

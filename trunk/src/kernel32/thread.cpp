@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.9 1999-08-17 16:35:10 phaller Exp $ */
+/* $Id: thread.cpp,v 1.10 1999-08-17 17:04:52 sandervl Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -11,7 +11,6 @@
  */
 #include <os2win.h>
 #include <stdarg.h>
-//#include <odincrt.h>
 #include "thread.h"
 #include "except.h"
 #include <misc.h>
@@ -159,8 +158,7 @@ static DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
  LPVOID           userdata  = me->lpUserData;
  DWORD            rc;
 
- delete(me);    //only called once
-
+  delete(me);    //only called once
   dprintf(("Win32ThreadProc %d\n", GetCurrentThreadId()));
 
   TEB *winteb = (TEB *)InitializeTIB();
