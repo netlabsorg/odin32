@@ -46,6 +46,6 @@ lexyy.c: parser.l
 	$(LEX) -8 parser.l
 
 clean:
-	rm *.o *.exe
+	rm -f *.o *.exe
 #	$(RM) y.tab.c y.tab.h lexyy.c *.o *.exe
 
