@@ -1,3 +1,4 @@
+/* $Id: msacm32.cpp,v 1.6 2000-08-02 15:49:32 bird Exp $ */
 /* -*- tab-width: 8; c-basic-offset: 4 -*- */
 
 /*
@@ -18,13 +19,13 @@
 #include "winversion.h"
 
 DEFAULT_DEBUG_CHANNEL(msacm)
-	
+
 /**********************************************************************/
-	
+
 static DWORD MSACM_dwProcessesAttached = 0;
 
 /***********************************************************************
- *           MSACM_LibMain32 (MSACM32.init) 
+ *           MSACM_LibMain32 (MSACM32.init)
  */
 BOOL WINAPI MSACM32_LibMain(HINSTANCE hInstDLL, DWORD fdwReason, LPVOID lpvReserved)
 {
@@ -68,7 +69,7 @@ BOOL WINAPI MSACM32_LibMain(HINSTANCE hInstDLL, DWORD fdwReason, LPVOID lpvReser
 DWORD WINAPI acmGetVersion(void)
 {
     switch (GetVersion()) {
-    default: 
+    default:
 	dprintf(("Current OS not supported\n"));
     case WIN95:
 	return 0x04000000; /* 4.0.0 */
@@ -94,7 +95,7 @@ MMRESULT WINAPI acmMetrics(HACMOBJ hao, UINT uMetric, LPVOID  pMetric)
     DWORD		val = 0;
 
     dprintf(("(0x%08x, %d, %p): stub\n", hao, uMetric, pMetric));
-    
+
     switch (uMetric) {
     case ACM_METRIC_COUNT_DRIVERS:
 	bLocal = FALSE;
@@ -148,7 +149,7 @@ MMRESULT WINAPI acmMetrics(HACMOBJ hao, UINT uMetric, LPVOID  pMetric)
 	/* fall thru */
     case ACM_METRIC_COUNT_LOCAL_DISABLED:
 	if (!pao)
-	    return MMSYSERR_INVALHANDLE;  
+	    return MMSYSERR_INVALHANDLE;
 	for (padid = MSACM_pFirstACMDriverID; padid; padid = padid->pNextACMDriverID)
 	    if (!padid->bEnabled /* && (local(padid) || !bLocal) */)
 		val++;
