@@ -53,6 +53,8 @@ BOOL WIN32API ClearDialogHook();
 //Set the default language in kernel32
 void WIN32API SetDefaultLanguage(DWORD deflang);
 
+//Override pm keyboard hook dll name
+void WIN32API SetCustomPMHookDll(LPSTR pszKbdDllName);
 
 #endif  /*__CUSTOMBUILD_H__*/
 
