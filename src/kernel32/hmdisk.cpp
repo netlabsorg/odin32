@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.44 2002-05-10 14:55:11 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.45 2002-05-17 16:49:34 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -33,6 +33,9 @@
 #define BIT_2     (4)
 #define BIT_11    (1<<11)
 
+//Converts BCD to decimal; doesn't check for illegal BCD nrs
+#define BCDToDec(a) ((a >> 4) * 10 + (a & 0xF))
+
 typedef struct
 {
     HINSTANCE hInstAspi;
@@ -49,6 +52,7 @@ typedef struct
     LPSECURITY_ATTRIBUTES lpSecurityAttributes;
     HFILE     hTemplate;
     BOOL      fPhysicalDisk;
+    BOOL      fCDPlaying;
     LARGE_INTEGER StartingOffset;
     LARGE_INTEGER PartitionSize;
     LARGE_INTEGER CurrentFilePointer;
@@ -941,7 +945,7 @@ writecheckfail:
         {
             parsize = sizeof(parm);
             memcpy(parm.signature, drvInfo->signature, 4);
-            parm.ucTrack = i;
+            parm.ucTrack = pTOC->FirstTrack+i;
 
             datasize = sizeof(trackinfo);
 
@@ -962,6 +966,7 @@ writecheckfail:
             pTOC->TrackData[i].Address[1]  = LOBYTE(HIWORD(trackinfo.ulTrackAddr));
             pTOC->TrackData[i].Address[2]  = HIBYTE(LOWORD(trackinfo.ulTrackAddr));
             pTOC->TrackData[i].Address[3]  = LOBYTE(LOWORD(trackinfo.ulTrackAddr));
+            dprintf(("IOCTL_CDROM_READ_TOC track %d Control %d Adr %d address %x", pTOC->FirstTrack+i, pTOC->TrackData[i].Control, pTOC->TrackData[i].Adr, trackinfo.ulTrackAddr));
         }
 
         //Add a track at the end (presumably so the app can determine the size of the 1st track)
@@ -1000,16 +1005,21 @@ writecheckfail:
         DWORD ulEndingMSF;
       } ParameterBlock;
 #pragma pack()
-      dprintf(("Play CDROM audio playback"));
-
       PCDROM_PLAY_AUDIO_MSF pPlay = (PCDROM_PLAY_AUDIO_MSF)lpInBuffer;
 
-      // setup the parameter block
+      if(nInBufferSize < sizeof(CDROM_SEEK_AUDIO_MSF)) {
+          SetLastError(ERROR_INSUFFICIENT_BUFFER);
+          return FALSE;
+      }
+      if(lpBytesReturned)
+        *lpBytesReturned = 0;
 
+      dprintf(("Play CDROM audio playback %d:%d (%d) - %d:%d (%d)", pPlay->StartingM, pPlay->StartingS, pPlay->StartingF, pPlay->EndingM, pPlay->EndingS, pPlay->EndingF));
+
+      // setup the parameter block
       memcpy(&ParameterBlock.ucSignature, drvInfo->signature, 4);
       ParameterBlock.ucAddressingMode = 1;     // MSF format
 
-      // @@@PH unknown if this kind of MSF conversion is correct!
       ParameterBlock.ulStartingMSF    = pPlay->StartingM << 16 |
                                         pPlay->StartingS << 8  |
                                         pPlay->StartingF;
@@ -1021,9 +1031,6 @@ writecheckfail:
       DWORD dwDataSize      = 0;
       DWORD ret;
 
-      if(lpBytesReturned)
-        *lpBytesReturned = 0;
-
       ret = OSLibDosDevIOCtl(pHMHandleData->hHMHandle,
                              0x81,  // IOCTL_CDROMAUDIO
                              0x50,  // CDROMAUDIO_PLAYAUDIO
@@ -1033,11 +1040,60 @@ writecheckfail:
                              NULL,
                              0,
                              &dwDataSize);
+      if(ret != ERROR_SUCCESS) {
+          dprintf(("IOCTL_CDROMAUDIO, CDROMAUDIO_PLAYAUDIO failed!!"));
+      }
+      drvInfo->fCDPlaying = TRUE;
       return (ret == ERROR_SUCCESS);
     }
 
     case IOCTL_CDROM_SEEK_AUDIO_MSF:
-        break;
+    {
+#pragma pack(1)
+      struct
+      {
+        DWORD ucSignature;
+        BYTE  ucAddressingMode;
+        DWORD ulStartingMSF;
+      } ParameterBlock;
+#pragma pack()
+        CDROM_SEEK_AUDIO_MSF *pSeek = (CDROM_SEEK_AUDIO_MSF *)lpInBuffer;
+
+        if(nInBufferSize < sizeof(CDROM_SEEK_AUDIO_MSF)) {
+            SetLastError(ERROR_INSUFFICIENT_BUFFER);
+            return FALSE;
+        }
+        if(lpBytesReturned)
+          *lpBytesReturned = 0;
+
+        dprintf(("IOCTL_CDROMDISK, CDROMDISK_SEEK %d:%d (%d)", pSeek->M, pSeek->S, pSeek->F));
+
+        // setup the parameter block
+        memcpy(&ParameterBlock.ucSignature, drvInfo->signature, 4);
+        ParameterBlock.ucAddressingMode = 1;     // MSF format
+
+        ParameterBlock.ulStartingMSF    = pSeek->M << 16 |
+                                          pSeek->S << 8  |
+                                          pSeek->F;
+
+        DWORD dwParameterSize = sizeof( ParameterBlock );
+        DWORD dwDataSize      = 0;
+        DWORD ret;
+
+        ret = OSLibDosDevIOCtl(pHMHandleData->hHMHandle,
+                               0x80,  // IOCTL_CDROMDISK
+                               0x50,  // CDROMDISK_SEEK
+                               &ParameterBlock,
+                               sizeof( ParameterBlock ),
+                               &dwParameterSize,
+                               NULL,
+                               0,
+                               &dwDataSize);
+        if(ret != ERROR_SUCCESS) {
+            dprintf(("IOCTL_CDROMDISK, CDROMDISK_SEEK %x failed!!", ParameterBlock.ulStartingMSF));
+        }
+        return (ret == ERROR_SUCCESS);
+    }
 
     case IOCTL_CDROM_PAUSE_AUDIO:
       // NO BREAK CASE
@@ -1046,6 +1102,7 @@ writecheckfail:
     case IOCTL_CDROM_STOP_AUDIO:
     {
       dprintf(("Stop / pause CDROM audio playback"));
+      drvInfo->fCDPlaying = FALSE;
       return ioctlCDROMSimple(pHMHandleData,
                               0x81,   // IOCTL_CDROMAUDIO
                               0x51,   // CDROMAUDIO_STOPAUDIO
@@ -1055,6 +1112,7 @@ writecheckfail:
     case IOCTL_CDROM_RESUME_AUDIO:
     {
       dprintf(("Resume CDROM audio playback"));
+      drvInfo->fCDPlaying = TRUE;
       return ioctlCDROMSimple(pHMHandleData,
                               0x81,   // IOCTL_CDROMAUDIO
                               0x52,   // CDROMAUDIO_RESUMEAUDIO
@@ -1127,6 +1185,125 @@ writecheckfail:
         return TRUE;
     }
     case IOCTL_CDROM_READ_Q_CHANNEL:
+    {
+#pragma pack(1)
+      struct
+      {
+        BYTE  ucControlAddr;
+        BYTE  ucTrackNr;
+        BYTE  ucIndex;
+        BYTE  ucRuntimeTrackMin;
+        BYTE  ucRuntimeTrackSec;
+        BYTE  ucRuntimeTrackFrame;
+        BYTE  ucReserved;
+        BYTE  ucRuntimeDiscMin;
+        BYTE  ucRuntimeDiscSec;
+        BYTE  ucRuntimeDiscFrame;
+      } DataBlock;
+      struct {
+        WORD  usAudioStatus;
+        DWORD ulStartLoc;
+        DWORD ulEndLoc;
+      } DataBlockStatus;
+#pragma pack()
+        CDROM_SUB_Q_DATA_FORMAT *pFormat = (CDROM_SUB_Q_DATA_FORMAT*)lpInBuffer;
+        SUB_Q_CHANNEL_DATA      *pChannelData = (SUB_Q_CHANNEL_DATA *)lpOutBuffer;
+        char                     signature[8];
+
+        if(nInBufferSize < sizeof(CDROM_SUB_Q_DATA_FORMAT) || !pFormat) {
+            SetLastError(ERROR_INSUFFICIENT_BUFFER);
+            return FALSE;
+        }
+        if(nOutBufferSize < sizeof(SUB_Q_CHANNEL_DATA) || !pChannelData) {
+            SetLastError(ERROR_INSUFFICIENT_BUFFER);
+            return FALSE;
+        }
+        if(lpBytesReturned) {
+            *lpBytesReturned = 0;
+        }
+
+        DWORD dwParameterSize = 4;
+        DWORD dwDataSize      = sizeof(DataBlock);
+        DWORD ret;
+
+        memcpy(signature, drvInfo->signature, dwParameterSize);
+
+        ret = OSLibDosDevIOCtl(pHMHandleData->hHMHandle,
+                               0x81,  // IOCTL_CDROMAUDIO
+                               0x63,  // CDROMAUDIO_GETSUBCHANNELQ
+                               signature,
+                               dwParameterSize,
+                               &dwParameterSize,
+                               &DataBlock,
+                               sizeof(DataBlock),
+                               &dwDataSize);
+        if(ret != ERROR_SUCCESS) {
+            dprintf(("IOCTL_CDROMAUDIO, CDROMAUDIO_GETSUBCHANNELQ failed!!"));
+            return FALSE;
+        }
+
+        dwDataSize = sizeof(DataBlockStatus);
+        ret = OSLibDosDevIOCtl(pHMHandleData->hHMHandle,
+                               0x81,  // IOCTL_CDROMAUDIO
+                               0x65,  // CDROMAUDIO_GETAUDIOSTATUS
+                               signature,
+                               dwParameterSize,
+                               &dwParameterSize,
+                               &DataBlockStatus,
+                               sizeof(DataBlockStatus),
+                               &dwDataSize);
+        if(ret != ERROR_SUCCESS) {
+            dprintf(("IOCTL_CDROMAUDIO, CDROMAUDIO_GETAUDIOSTATUS failed!!"));
+            return FALSE;
+        }
+        dprintf(("CDROMAUDIO_GETAUDIOSTATUS returned %d %x %x", DataBlockStatus.usAudioStatus, DataBlockStatus.ulStartLoc, DataBlockStatus.ulEndLoc));
+
+        pChannelData->CurrentPosition.Header.Reserved = 0;
+        if(DataBlockStatus.usAudioStatus & 1) {
+            pChannelData->CurrentPosition.Header.AudioStatus = AUDIO_STATUS_PAUSED;
+        }
+        else {
+            if(DataBlockStatus.ulStartLoc == 0) {//no play command has been issued before
+                 pChannelData->CurrentPosition.Header.AudioStatus = AUDIO_STATUS_NO_STATUS;
+            }
+            else {//assume in progress, but could alse be finished playing
+                pChannelData->CurrentPosition.Header.AudioStatus = (drvInfo->fCDPlaying) ? AUDIO_STATUS_IN_PROGRESS : AUDIO_STATUS_PLAY_COMPLETE;
+            }
+        }
+
+        switch(pFormat->Format) {
+        case IOCTL_CDROM_SUB_Q_CHANNEL:
+            dprintf(("IOCTL_CDROM_SUB_Q_CHANNEL not supported"));
+            return FALSE;
+        case IOCTL_CDROM_CURRENT_POSITION:
+            pChannelData->CurrentPosition.Header.DataLength[0]    = sizeof(pChannelData->CurrentPosition);
+            pChannelData->CurrentPosition.Header.DataLength[1]    = 0;
+            pChannelData->CurrentPosition.Control                 = DataBlock.ucControlAddr >> 4;
+            pChannelData->CurrentPosition.ADR                     = DataBlock.ucControlAddr & 0xF;
+            pChannelData->CurrentPosition.IndexNumber             = BCDToDec(DataBlock.ucIndex);
+            pChannelData->CurrentPosition.TrackNumber             = BCDToDec(DataBlock.ucTrackNr);
+            pChannelData->CurrentPosition.TrackRelativeAddress[1] = DataBlock.ucRuntimeTrackMin;
+            pChannelData->CurrentPosition.TrackRelativeAddress[2] = DataBlock.ucRuntimeTrackSec;
+            pChannelData->CurrentPosition.TrackRelativeAddress[3] = DataBlock.ucRuntimeTrackFrame;
+            pChannelData->CurrentPosition.AbsoluteAddress[1]      = DataBlock.ucRuntimeDiscMin;
+            pChannelData->CurrentPosition.AbsoluteAddress[2]      = DataBlock.ucRuntimeDiscSec;
+            pChannelData->CurrentPosition.AbsoluteAddress[3]      = DataBlock.ucRuntimeDiscFrame;
+            pChannelData->CurrentPosition.FormatCode              = IOCTL_CDROM_CURRENT_POSITION;
+            dprintf(("IOCTL_CDROM_CURRENT_POSITION: Control %x ADR %x Index %d Track %d Track Rel %d:%d (%d) Absolute %d:%d (%d)", pChannelData->CurrentPosition.Control, pChannelData->CurrentPosition.ADR, pChannelData->CurrentPosition.IndexNumber, pChannelData->CurrentPosition.TrackNumber, pChannelData->CurrentPosition.TrackRelativeAddress[1], pChannelData->CurrentPosition.TrackRelativeAddress[2], pChannelData->CurrentPosition.TrackRelativeAddress[3], pChannelData->CurrentPosition.AbsoluteAddress[1], pChannelData->CurrentPosition.AbsoluteAddress[2], pChannelData->CurrentPosition.AbsoluteAddress[3]));
+            if(lpBytesReturned) {
+                *lpBytesReturned = sizeof(*pChannelData);
+            }
+            break;
+        case IOCTL_CDROM_MEDIA_CATALOG:
+            dprintf(("IOCTL_CDROM_MEDIA_CATALOG not supported"));
+            return FALSE;
+        case IOCTL_CDROM_TRACK_ISRC:
+            dprintf(("IOCTL_CDROM_TRACK_ISRC not supported"));
+            return FALSE;
+        }
+        return (ret == ERROR_SUCCESS);
+    }
+
     case IOCTL_CDROM_GET_LAST_SESSION:
     case IOCTL_CDROM_RAW_READ:
     case IOCTL_CDROM_DISK_TYPE:
