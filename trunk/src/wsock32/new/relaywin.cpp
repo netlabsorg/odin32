@@ -1,4 +1,4 @@
-/* $Id: relaywin.cpp,v 1.6 1999-12-02 16:12:23 achimha Exp $ */
+/* $Id: relaywin.cpp,v 1.7 1999-12-02 16:39:46 achimha Exp $ */
 
 /*
  *
@@ -208,6 +208,7 @@ MRESULT EXPENTRY RelayWindowProc(HWND   hwnd,
       case ASYNCREQUEST_SELECT:
       {
         dprintf(("WSOCK32:RelayWindowProc, AsyncSelect notification\n"));
+        break;
       }
       case ASYNCREQUEST_GETHOSTBYNAME:
       {
@@ -224,6 +225,7 @@ MRESULT EXPENTRY RelayWindowProc(HWND   hwnd,
         WinHostent->h_addr_list = h_addr_list;
   //TODO: the size of OS/2 hostent is 4 bytes bigger so the original buffer *might* be too small
 
+        break;
       }
     }
 
