@@ -1,4 +1,4 @@
-/* $Id: filemoniker.h,v 1.1 1999-09-24 21:49:43 davidr Exp $ */
+/* $Id: filemoniker.h,v 1.2 2000-03-19 15:35:14 davidr Exp $ */
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -21,6 +21,9 @@ typedef struct FileMonikerImpl{
     ULONG ref; /* reference counter for this object */
 
     LPOLESTR filePathName; /* path string identified by this filemoniker */
+    BOOL bIsLongFileName;  /* Is the path a valid dos 8.3 file */
+    BOOL bIsNetworkPath;   /* Is the path a network path */
+    WORD wNetworkDomainLenght;  /*Lenght of the \\Domain\share network name, otherwise 0xFFFF for regular file*/
 
 } FileMonikerImpl;
 
@@ -28,5 +31,6 @@ typedef struct FileMonikerImpl{
 HRESULT WINAPI FileMonikerImpl_Construct(FileMonikerImpl* iface, LPCOLESTR lpszPathName);
 HRESULT WINAPI FileMonikerImpl_Destroy(FileMonikerImpl* iface);
 int     WINAPI FileMonikerImpl_DecomposePath(LPOLESTR str, LPOLESTR** tabStr);
+void WINAPI FileMonikerImpl_CheckFileFormat(FileMonikerImpl* iface, LPCOLESTR lpszPathName);
 
 #endif /* FILEMONIKER_INCLUDED */
