@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.17 1999-08-27 16:50:59 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.18 1999-08-28 19:33:44 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -890,7 +890,7 @@ ULONG APIENTRY OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
 
   case XCPT_PROCESS_TERMINATE:
   case XCPT_ASYNC_PROCESS_TERMINATE:
-      	SetExceptionChain((ULONG)0);
+      	SetExceptionChain((ULONG)-1);
       	return (XCPT_CONTINUE_SEARCH);
 
   case XCPT_ACCESS_VIOLATION:
@@ -940,13 +940,21 @@ continueFail:
   case XCPT_GUARD_PAGE_VIOLATION:
   case XCPT_UNABLE_TO_GROW_STACK:
   case XCPT_IN_PAGE_ERROR:
-  case XCPT_SIGNAL:
+CrashAndBurn:
     	dprintf(("KERNEL32: OS2ExceptionHandler: Continue and kill\n"));
     	pCtxRec->ctx_RegEip = (ULONG)KillWin32Process;
     	pCtxRec->ctx_RegEsp = pCtxRec->ctx_RegEsp + 0x10;
     	pCtxRec->ctx_RegEax = pERepRec->ExceptionNum;
     	pCtxRec->ctx_RegEbx = pCtxRec->ctx_RegEip;
     	return (XCPT_CONTINUE_EXECUTION);
+
+  case XCPT_SIGNAL:
+      if(pERepRec->ExceptionInfo[0] == XCPT_SIGNAL_KILLPROC)          /* resolve signal information */
+      {
+      	SetExceptionChain((ULONG)-1);
+      	return (XCPT_CONTINUE_SEARCH);
+      }
+      goto CrashAndBurn;
 
   default: //non-continuable exceptions
         return (XCPT_CONTINUE_SEARCH);
