@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.126 2004-02-23 12:03:05 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.127 2004-02-23 12:40:29 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -1657,6 +1657,13 @@ INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, cons
         rc = setPMRgnIntoWinRgn(hpsScreen, hrgn, hrgnUpdate, window->getClientHeight());
         GpiDestroyRegion(hpsScreen, hrgn);
         WinReleasePS(hpsScreen);
+    }
+
+    // If the background is to be erased, then make it so
+    if ((scrollFlag & SW_ERASE_W)) 
+    {
+        dprintf(("Set erase background flag to TRUE"));
+        window->setEraseBkgnd(TRUE);
     }
 
 #if 0
