@@ -1,4 +1,4 @@
-/* $Id: disk.cpp,v 1.4 1999-06-10 20:47:58 phaller Exp $ */
+/* $Id: disk.cpp,v 1.5 1999-08-25 11:25:47 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -22,14 +22,14 @@ BOOL WIN32API SetVolumeLabelA( LPCSTR arg1, LPCSTR  arg2)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetVolumeLabelW(LPWSTR lpRootPathName, LPWSTR lpVolumeName)
+BOOL WIN32API SetVolumeLabelW(LPCWSTR lpRootPathName, LPCWSTR lpVolumeName)
 {
   char *asciiroot, *asciivolname;
   BOOL  rc;
 
     dprintf(("KERNEL32:  OS2SetVolumeLabelW\n"));
-    asciiroot    = UnicodeToAsciiString(lpRootPathName);
-    asciivolname = UnicodeToAsciiString(lpVolumeName);
+    asciiroot    = UnicodeToAsciiString((LPWSTR)lpRootPathName);
+    asciivolname = UnicodeToAsciiString((LPWSTR)lpVolumeName);
     rc = O32_SetVolumeLabel(asciiroot, asciivolname);
     FreeAsciiString(asciivolname);
     FreeAsciiString(asciiroot);
