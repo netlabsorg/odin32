@@ -1,4 +1,4 @@
-/* $Id: winkeyboard.cpp,v 1.34 2002-05-23 07:13:00 sandervl Exp $ */
+/* $Id: winkeyboard.cpp,v 1.35 2002-05-29 09:56:43 sandervl Exp $ */
 /*
  * Win32 <-> PM key translation
  *
@@ -25,11 +25,6 @@
 
 #define DBG_LOCALLOG    DBG_winkeyboard
 #include "dbglocal.h"
-
-
-
-
-ODINDEBUGCHANNEL(USER32-WINKBD)
 
 
 /****************************************************************************
@@ -1195,7 +1190,7 @@ int WIN32API ToAscii(UINT uVirtKey, UINT uScanCode, PBYTE lpbKeyState,
        }
        else ret = 1;
   }
-  dprintf2(("USER32:ToAscii returned %x, len %d", *lpwTransKey, ret));
+  dprintf(("USER32:ToAscii returned %x, len %d", *lpwTransKey, ret));
   return ret;
 }
 /*****************************************************************************
