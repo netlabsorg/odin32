@@ -1,4 +1,4 @@
-/* $Id: disk.cpp,v 1.17 2000-10-02 18:39:33 sandervl Exp $ */
+/* $Id: disk.cpp,v 1.18 2000-11-05 22:21:48 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -189,21 +189,25 @@ ODINFUNCTION4(BOOL,GetDiskFreeSpaceExW,
 
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API GetDriveTypeA( LPCSTR arg1)
+UINT WIN32API GetDriveTypeA(LPCSTR lpszDrive)
 {
     UINT rc;
-    rc = O32_GetDriveType(arg1);
-    dprintf(("KERNEL32:  GetDriveType %s = %d\n", arg1,rc));
+    //NOTE: Although GetDriveTypeW handles -1, GetDriveTypeA crashes in NT 4, SP6
+    rc = O32_GetDriveType(lpszDrive);
+    dprintf(("KERNEL32:  GetDriveType %s = %d", lpszDrive, rc));
     return rc;
 }
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API GetDriveTypeW(LPCWSTR arg1)
+UINT WIN32API GetDriveTypeW(LPCWSTR lpszDrive)
 {
  UINT  rc;
  char *astring;
 
-    astring = UnicodeToAsciiString((LPWSTR)arg1);
+    if(lpszDrive == (LPCWSTR)-1) {
+	return DRIVE_CANNOTDETERMINE;	//NT 4, SP6 returns this (VERIFIED)
+    }
+    astring = UnicodeToAsciiString((LPWSTR)lpszDrive);
     dprintf(("KERNEL32:  OS2GetDriveTypeW %s", astring));
     rc = O32_GetDriveType(astring);
     FreeAsciiString(astring);
