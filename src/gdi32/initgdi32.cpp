@@ -1,4 +1,4 @@
-/* $Id: initgdi32.cpp,v 1.7 2001-10-15 17:19:56 sandervl Exp $
+/* $Id: initgdi32.cpp,v 1.8 2001-10-16 11:40:17 sandervl Exp $
  *
  * DLL entry point
  *
@@ -102,6 +102,7 @@ ULONG APIENTRY inittermGdi32(ULONG hModule, ULONG ulFlag)
          break;
       case 1 :
          if(dllHandle) {
+             DestroyRegionSpace();
              UnregisterLxDll(dllHandle);
          }
          break;
