@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.152 2002-05-21 12:07:11 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.153 2002-06-11 16:36:54 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -136,28 +136,13 @@ TEB *WIN32API GetTEBFromThreadHandle(HANDLE hThread)
     return teb;
 }
 //******************************************************************************
-// Set up the TIB selector and memory for the current thread
+//Allocate TEB structure for new thread
 //******************************************************************************
-TEB * WIN32API InitializeTIB(BOOL fMainThread)
+TEB *WIN32API CreateTEB(HANDLE hThread, DWORD dwThreadId)
 {
-  TEB   *winteb;
-  ULONG  hThreadMain;
-  USHORT tibsel;
+    USHORT tibsel;
+    TEB   *winteb;
 
-    //Allocate one dword to store the flat address of our TEB
-    if(fMainThread) {
-        dprintf(("InitializeTIB Process handle %x, id %x", GetCurrentProcess(), GetCurrentProcessId()));
-
-        TIBFlatPtr = (DWORD *)OSLibAllocThreadLocalMemory(1);
-        if(TIBFlatPtr == 0) {
-            dprintf(("InitializeTIB: local thread memory alloc failed!!"));
-            DebugInt3();
-            return NULL;
-        }
-        //SvL: This doesn't really create a thread, but only sets up the
-        //     handle of thread 0
-        hThreadMain = HMCreateThread(NULL, 0, 0, 0, 0, 0, TRUE);
-    }
     if(OSLibAllocSel(sizeof(TEB), &tibsel) == FALSE)
     {
         dprintf(("InitializeTIB: selector alloc failed!!"));
@@ -172,53 +157,12 @@ TEB * WIN32API InitializeTIB(BOOL fMainThread)
         return NULL;
     }
     memset(winteb, 0, sizeof(TEB));
-    *TIBFlatPtr = (DWORD)winteb;
-
-    winteb->except      = (PVOID)-1;               /* 00 Head of exception handling chain */
-
-    winteb->stack_top   = (PVOID)OSLibGetTIB(TIB_STACKTOP); /* 04 Top of thread stack */
-    winteb->stack_top   = (PVOID)(((ULONG)winteb->stack_top + 0xFFF) & ~0xFFF);
-    //round to next page (OS/2 doesn't return a nice rounded value)
-    winteb->stack_low   = (PVOID)OSLibGetTIB(TIB_STACKLOW); /* 08 Stack low-water mark */
-    //round to page boundary (OS/2 doesn't return a nice rounded value)
-    winteb->stack_low   = (PVOID)((ULONG)winteb->stack_low & ~0xFFF);
-    winteb->htask16     = (USHORT)OSLibGetPIB(PIB_TASKHNDL); /* 0c Win16 task handle */
-    winteb->stack_sel   = getSS();                 /* 0e 16-bit stack selector */
-    winteb->self        = winteb;                  /* 18 Pointer to this structure */
-    winteb->flags       = TEBF_WIN32;              /* 1c Flags */
-    winteb->queue       = 0;                       /* 28 Message queue */
-    winteb->tls_ptr     = &winteb->tls_array[0];   /* 2c Pointer to TLS array */
-    winteb->process     = &ProcessPDB;             /* 30 owning process (used by NT3.51 applets)*/
-    
-    winteb->delta_priority  = THREAD_PRIORITY_NORMAL;
-    winteb->process         = &ProcessPDB;
-////    winteb->exit_code       = 0x103; /* STILL_ACTIVE */
-    winteb->teb_sel         = tibsel;
-    winteb->o.odin.OrgTIBSel       = GetFS();
-    winteb->o.odin.pWsockData      = NULL;
-    winteb->o.odin.threadId        = 0xFFFFFFFF;
-    winteb->o.odin.threadId        = GetCurrentThreadId();
-#ifdef DEBUG
-    winteb->o.odin.dbgCallDepth    = 0;
-#endif
-    winteb->o.odin.pMessageBuffer  = NULL;
-  
-    if(fMainThread) {
-         winteb->o.odin.hThread     = hThreadMain;
-//         ProcessPDB.startup_info    = &StartupInfo;
-         ProcessPDB.unknown10       = (PVOID)&unknownPDBData[0];
-         StartupInfo.cb             = sizeof(StartupInfo);
-         StartupInfo.hStdInput      = GetStdHandle(STD_INPUT_HANDLE);
-         StartupInfo.hStdOutput     = GetStdHandle(STD_OUTPUT_HANDLE);
-         StartupInfo.hStdError      = GetStdHandle(STD_ERROR_HANDLE);
-    }
-    else winteb->o.odin.hThread    = GetCurrentThread();
-    winteb->o.odin.lcid            = GetUserDefaultLCID();
 
     threadListMutex.enter();
-    TEB *teblast        = threadList;
+    TEB *teblast   = threadList;
     if(!teblast) {
         threadList = winteb;
+        winteb->o.odin.next = NULL;
     }
     else {
         while(teblast->o.odin.next) {
@@ -226,8 +170,113 @@ TEB * WIN32API InitializeTIB(BOOL fMainThread)
         }
         teblast->o.odin.next = winteb;
     }
-    winteb->o.odin.next        = NULL;
     threadListMutex.leave();
+
+    winteb->except      = (PVOID)-1;               /* 00 Head of exception handling chain */
+    winteb->htask16     = (USHORT)OSLibGetPIB(PIB_TASKHNDL); /* 0c Win16 task handle */
+    winteb->stack_sel   = getSS();                 /* 0e 16-bit stack selector */
+    winteb->self        = winteb;                  /* 18 Pointer to this structure */
+    winteb->flags       = TEBF_WIN32;              /* 1c Flags */
+    winteb->queue       = 0;                       /* 28 Message queue */
+    winteb->tls_ptr     = &winteb->tls_array[0];   /* 2c Pointer to TLS array */
+    winteb->process     = &ProcessPDB;             /* 30 owning process (used by NT3.51 applets)*/
+    winteb->delta_priority  = THREAD_PRIORITY_NORMAL;
+    winteb->process     = &ProcessPDB;
+
+    //store selector of new TEB
+    winteb->teb_sel = tibsel;
+
+    winteb->o.odin.hThread  = hThread;
+    winteb->o.odin.threadId = dwThreadId;
+
+    return winteb;
+}
+//******************************************************************************
+// Set up the TIB selector and memory for the main thread 
+//******************************************************************************
+TEB *WIN32API InitializeMainThread()
+{
+    HANDLE hThreadMain;
+    TEB   *teb;
+
+    //Allocate one dword to store the flat address of our TEB
+    dprintf(("InitializeMainThread Process handle %x, id %x", GetCurrentProcess(), GetCurrentProcessId()));
+
+    TIBFlatPtr = (DWORD *)OSLibAllocThreadLocalMemory(1);
+    if(TIBFlatPtr == 0) {
+        dprintf(("InitializeTIB: local thread memory alloc failed!!"));
+        DebugInt3();
+        return NULL;
+    }
+    //SvL: This doesn't really create a thread, but only sets up the
+    //     handle of thread 0
+    hThreadMain = HMCreateThread(NULL, 0, 0, 0, 0, 0, TRUE);
+
+    //create and initialize TEB
+    teb = CreateTEB(hThreadMain, GetCurrentThreadId());
+    if(teb == NULL || InitializeThread(teb, TRUE) == FALSE) {
+        DebugInt3();
+        return NULL;
+    }
+
+    ProcessTIBSel              = teb->teb_sel;
+
+    //todo initialize PDB during process creation
+    //todo: initialize TLS array if required
+    //TLS in executable always TLS index 0?
+////        ProcessPDB.exit_code       = 0x103; /* STILL_ACTIVE */
+    ProcessPDB.threads         = 1;
+    ProcessPDB.running_threads = 1;
+    ProcessPDB.ring0_threads   = 1;
+    ProcessPDB.system_heap     = GetProcessHeap();
+    ProcessPDB.parent          = 0;
+    ProcessPDB.group           = &ProcessPDB;
+    ProcessPDB.priority        = 8;  /* Normal */
+    ProcessPDB.heap            = ProcessPDB.system_heap;  /* will be changed later on */
+    ProcessPDB.next            = NULL;
+    ProcessPDB.winver          = 0xffff; /* to be determined */
+    ProcessPDB.server_pid      = (void *)GetCurrentProcessId();
+    ProcessPDB.tls_bits[0]     = 0; //all tls slots are free
+    ProcessPDB.tls_bits[1]     = 0;
+
+    GetSystemTime(&ProcessPDB.creationTime) ;
+
+    /* Initialize the critical section */
+    InitializeCriticalSection( &ProcessPDB.crit_section );
+
+//         ProcessPDB.startup_info    = &StartupInfo;
+    ProcessPDB.unknown10       = (PVOID)&unknownPDBData[0];
+    StartupInfo.cb             = sizeof(StartupInfo);
+    StartupInfo.hStdInput      = GetStdHandle(STD_INPUT_HANDLE);
+    StartupInfo.hStdOutput     = GetStdHandle(STD_OUTPUT_HANDLE);
+    StartupInfo.hStdError      = GetStdHandle(STD_ERROR_HANDLE);
+
+    return teb;
+}
+//******************************************************************************
+// Set up the TEB structure of the CURRENT (!) thread
+//******************************************************************************
+BOOL WIN32API InitializeThread(TEB *winteb, BOOL fMainThread)
+{
+    //store TEB address in thread locale memory for easy retrieval
+    *TIBFlatPtr = (DWORD)winteb;
+
+////    winteb->exit_code       = 0x103; /* STILL_ACTIVE */
+
+    winteb->stack_top              = (PVOID)OSLibGetTIB(TIB_STACKTOP); /* 04 Top of thread stack */
+    winteb->stack_top              = (PVOID)(((ULONG)winteb->stack_top + 0xFFF) & ~0xFFF);
+    //round to next page (OS/2 doesn't return a nice rounded value)
+    winteb->stack_low              = (PVOID)OSLibGetTIB(TIB_STACKLOW); /* 08 Stack low-water mark */
+    //round to page boundary (OS/2 doesn't return a nice rounded value)
+    winteb->stack_low              = (PVOID)((ULONG)winteb->stack_low & ~0xFFF);
+
+    winteb->o.odin.OrgTIBSel       = GetFS();
+    winteb->o.odin.pWsockData      = NULL;
+#ifdef DEBUG
+    winteb->o.odin.dbgCallDepth    = 0;
+#endif
+    winteb->o.odin.pMessageBuffer  = NULL;
+    winteb->o.odin.lcid            = GetUserDefaultLCID();
 
     if(OSLibGetPIB(PIB_TASKTYPE) == TASKTYPE_PM)
     {
@@ -240,7 +289,7 @@ TEB * WIN32API InitializeTIB(BOOL fMainThread)
         hInstNTDll = LoadLibraryA("NTDLL.DLL");
         *(ULONG *)&RtlAllocateAndInitializeSid = (ULONG)GetProcAddress(hInstNTDll, "RtlAllocateAndInitializeSid");
         if(RtlAllocateAndInitializeSid == NULL) {
-                DebugInt3();
+            DebugInt3();
         }
     }
     SID_IDENTIFIER_AUTHORITY sidIdAuth = {0};
@@ -257,7 +306,7 @@ TEB * WIN32API InitializeTIB(BOOL fMainThread)
     winteb->o.odin.threadinfo.pTokenGroups->GroupCount = 1;
   
     if (NULL != RtlAllocateAndInitializeSid) {
-        RtlAllocateAndInitializeSid(&sidIdAuth, 1, 0, 0, 0, 0, 0, 0, 0, 0, &winteb->o.odin.threadinfo.PrimaryGroup.PrimaryGroup);
+         RtlAllocateAndInitializeSid(&sidIdAuth, 1, 0, 0, 0, 0, 0, 0, 0, 0, &winteb->o.odin.threadinfo.PrimaryGroup.PrimaryGroup);
     }
     else DebugInt3();
   
@@ -270,35 +319,62 @@ TEB * WIN32API InitializeTIB(BOOL fMainThread)
 //        TokenSource     = {0};
     winteb->o.odin.threadinfo.TokenType = TokenPrimary;
 
-    if(fMainThread)
-    {
-        //todo initialize PDB during process creation
-        //todo: initialize TLS array if required
-        //TLS in executable always TLS index 0?
-        ProcessTIBSel = tibsel;
-////        ProcessPDB.exit_code       = 0x103; /* STILL_ACTIVE */
-        ProcessPDB.threads         = 1;
-        ProcessPDB.running_threads = 1;
-        ProcessPDB.ring0_threads   = 1;
-        ProcessPDB.system_heap     = GetProcessHeap();
-        ProcessPDB.parent          = 0;
-        ProcessPDB.group           = &ProcessPDB;
-        ProcessPDB.priority        = 8;  /* Normal */
-        ProcessPDB.heap            = ProcessPDB.system_heap;  /* will be changed later on */
-        ProcessPDB.next            = NULL;
-        ProcessPDB.winver          = 0xffff; /* to be determined */
-        ProcessPDB.server_pid      = (void *)GetCurrentProcessId();
-        ProcessPDB.tls_bits[0]     = 0; //all tls slots are free
-        ProcessPDB.tls_bits[1]     = 0;
-
-        GetSystemTime(&ProcessPDB.creationTime) ;
-
-        /* Initialize the critical section */
-        InitializeCriticalSection( &ProcessPDB.crit_section );
-    }
-    dprintf(("InitializeTIB setup TEB with selector %x", tibsel));
+    dprintf(("InitializeTIB setup TEB with selector %x", winteb->teb_sel));
     dprintf(("InitializeTIB: FS(%x):[0] = %x", GetFS(), QueryExceptionChain()));
-    return winteb;
+    return TRUE;
+}
+//******************************************************************************
+// Destroy the TIB selector and memory for the current thread
+//******************************************************************************
+void WIN32API DestroyTEB(TEB *winteb)
+{
+    SHORT orgtibsel;
+
+    dprintf(("DestroyTIB: FS     = %x", GetFS()));
+    dprintf(("DestroyTIB: FS:[0] = %x", QueryExceptionChain()));
+
+    orgtibsel = winteb->o.odin.OrgTIBSel;
+
+    dprintf(("DestroyTIB: OSLibFreeSel %x", winteb->teb_sel));
+
+    threadListMutex.enter();
+    TEB *curteb        = threadList;
+    if(curteb == winteb) {
+        threadList = winteb->o.odin.next;
+    }
+    else {
+        while(curteb->o.odin.next != winteb) {
+            curteb = curteb->o.odin.next;
+            if(curteb == NULL) {
+                dprintf(("DestroyTIB: couldn't find teb %x", winteb));
+                DebugInt3();
+                break;
+            }
+        }
+        if(curteb) {
+            curteb->o.odin.next = winteb->o.odin.next;
+        }
+    }
+    threadListMutex.leave();
+
+    // free allocated memory for security structures
+    free( winteb->o.odin.threadinfo.pTokenGroups );
+
+#ifdef DEBUG
+    if (winteb->o.odin.arrstrCallStack != NULL)
+        free( winteb->o.odin.arrstrCallStack );
+#endif
+
+    //Restore our original FS selector
+    SetFS(orgtibsel);
+
+    //And free our own
+    OSLibFreeSel(winteb->teb_sel);
+
+    *TIBFlatPtr = 0;
+
+    dprintf(("DestroyTIB: FS(%x):[0] = %x", GetFS(), QueryExceptionChain()));
+    return;
 }
 //******************************************************************************
 //******************************************************************************
@@ -308,65 +384,6 @@ ULONG WIN32API GetProcessTIBSel()
         return 0;
     }
     return ProcessTIBSel;
-}
-//******************************************************************************
-// Destroy the TIB selector and memory for the current thread
-//******************************************************************************
-void WIN32API DestroyTIB()
-{
- SHORT  orgtibsel;
- TEB   *winteb;
-
-    dprintf(("DestroyTIB: FS     = %x", GetFS()));
-    dprintf(("DestroyTIB: FS:[0] = %x", QueryExceptionChain()));
-
-    winteb = (TEB *)*TIBFlatPtr;
-    if(winteb) {
-        orgtibsel = winteb->o.odin.OrgTIBSel;
-
-        dprintf(("DestroyTIB: OSLibFreeSel %x", winteb->teb_sel));
-
-        threadListMutex.enter();
-        TEB *curteb        = threadList;
-        if(curteb == winteb) {
-            threadList = winteb->o.odin.next;
-        }
-        else {
-            while(curteb->o.odin.next != winteb) {
-                curteb = curteb->o.odin.next;
-                if(curteb == NULL) {
-                    dprintf(("DestroyTIB: couldn't find teb %x", winteb));
-                    DebugInt3();
-                    break;
-                }
-            }
-            if(curteb) {
-                curteb->o.odin.next = winteb->o.odin.next;
-            }
-        }
-        threadListMutex.leave();
-      
-        // PH 2002-04-11
-        // free allocated memory
-        free( winteb->o.odin.threadinfo.pTokenGroups );
-      
-#ifdef DEBUG
-        if (winteb->o.odin.arrstrCallStack != NULL)
-          free( winteb->o.odin.arrstrCallStack );
-#endif
-      
-        //Restore our original FS selector
-        SetFS(orgtibsel);
-
-        //And free our own
-        OSLibFreeSel(winteb->teb_sel);
-
-        *TIBFlatPtr = 0;
-   }
-   else dprintf(("Already destroyed TIB"));
-
-   dprintf(("DestroyTIB: FS(%x):[0] = %x", GetFS(), QueryExceptionChain()));
-   return;
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -402,8 +419,8 @@ void WIN32API RestoreOS2TIB()
 /******************************************************************************/
 USHORT WIN32API SetWin32TIB(BOOL fForceSwitch)
 {
- SHORT  win32tibsel;
- TEB   *winteb;
+    SHORT  win32tibsel;
+    TEB   *winteb;
 
     //If we're running an Odin32 OS/2 application (not converted!), then we
     //we don't switch FS selectors
@@ -419,17 +436,7 @@ USHORT WIN32API SetWin32TIB(BOOL fForceSwitch)
         return SetReturnFS(win32tibsel);
     }
     else {
-        //we didn't create this thread, so allocate a selector now
-        //NOTE: Possible memory leak (i.e. DART threads in WINMM)
-        winteb = InitializeTIB();
-        if(winteb == NULL) {
-            DebugInt3();
-            return GetFS();
-        }
-        win32tibsel = winteb->teb_sel;
-
-        //Restore our win32 FS selector
-        return SetReturnFS(win32tibsel);
+        return GetFS();
     }
     // nested calls are OK, OS2ToWinCallback for instance
     //else DebugInt3();
@@ -470,18 +477,17 @@ VOID WIN32API ExitProcess(DWORD exitcode)
   
   
 #ifdef PROFILE
-  // Note: after this point we do not expect any more Win32-API calls,
-  // so this is probably the best time to dump the gathered profiling
-  // information
-  PerfView_Write();
-  ProfilerWrite();
-  ProfilerTerminate();
+    // Note: after this point we do not expect any more Win32-API calls,
+    // so this is probably the best time to dump the gathered profiling
+    // information
+    PerfView_Write();
+    ProfilerWrite();
+    ProfilerTerminate();
 #endif /* PROFILE */
   
-
-  
     //Restore original OS/2 TIB selector
-    DestroyTIB();
+    teb = GetThreadTEB();
+    if(teb) DestroyTEB(teb);
     SetExceptionChain((ULONG)-1);
 
     //avoid crashes since win32 & OS/2 exception handler aren't identical

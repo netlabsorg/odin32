@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.45 2002-05-22 12:57:17 sandervl Exp $ */
+/* $Id: thread.cpp,v 1.46 2002-06-11 16:36:54 sandervl Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -44,27 +44,27 @@ static ULONG priorityclass = NORMAL_PRIORITY_CLASS;
 //******************************************************************************
 DWORD WIN32API GetCurrentThreadId()
 {
-  // check cached identifier
-  TEB *teb = GetThreadTEB();
-  if(teb != NULL && teb->o.odin.threadId != 0xFFFFFFFF) 
-  {
-    // this is set in InitializeTIB() already.
-    return teb->o.odin.threadId;
-  }
+    // check cached identifier
+    TEB *teb = GetThreadTEB();
+    if(teb != NULL && teb->o.odin.threadId != 0xFFFFFFFF) 
+    {
+        // this is set in InitializeTIB() already.
+        return teb->o.odin.threadId;
+    }
   
 ////  dprintf(("GetCurrentThreadId\n"));
-  return MAKE_THREADID(O32_GetCurrentProcessId(), O32_GetCurrentThreadId());
+    return MAKE_THREADID(O32_GetCurrentProcessId(), O32_GetCurrentThreadId());
 }
 //******************************************************************************
 //******************************************************************************
 HANDLE WIN32API GetCurrentThread()
 {
- TEB *teb;
+    TEB *teb;
 
     teb = GetThreadTEB();
     if(teb == 0) {
-	SetLastError(ERROR_INVALID_HANDLE); //todo 
-	return 0;
+    	SetLastError(ERROR_INVALID_HANDLE); //todo 
+    	return 0;
     }
     return teb->o.odin.hThread;
 }
@@ -187,26 +187,27 @@ char* WIN32API dbg_GetLastCallerName()
 //******************************************************************************
 VOID WIN32API ExitThread(DWORD exitcode)
 {
- EXCEPTION_FRAME *exceptFrame;
- TEB             *teb;
+    EXCEPTION_FRAME *exceptFrame;
+    TEB             *teb;
 
-  dprintf(("ExitThread %x (%x)", GetCurrentThread(), exitcode));
+    dprintf(("ExitThread %x (%x)", GetCurrentThread(), exitcode));
 
-  teb = GetThreadTEB();
-  if(teb != 0) {
-	exceptFrame = (EXCEPTION_FRAME *)teb->o.odin.exceptFrame;
-  }
-  else  DebugInt3();
+    teb = GetThreadTEB();
+    if(teb != 0) {
+	     exceptFrame = (EXCEPTION_FRAME *)teb->o.odin.exceptFrame;
+    }
+    else DebugInt3();
 
-  HMSetThreadTerminated(GetCurrentThread());
-  Win32DllBase::detachThreadFromAllDlls();    //send DLL_THREAD_DETACH message to all dlls
-  Win32DllBase::tlsDetachThreadFromAllDlls(); //destroy TLS structures of all dlls
-  if(WinExe)  WinExe->tlsDetachThread();      //destroy TLS structure of main exe
-  DestroyTIB();
+    HMSetThreadTerminated(GetCurrentThread());
+    Win32DllBase::detachThreadFromAllDlls();    //send DLL_THREAD_DETACH message to all dlls
+    Win32DllBase::tlsDetachThreadFromAllDlls(); //destroy TLS structures of all dlls
+    if(WinExe)  WinExe->tlsDetachThread();      //destroy TLS structure of main exe
 
-  if(exceptFrame) OS2UnsetExceptionHandler((void *)exceptFrame);
+    if(teb) DestroyTEB(teb);
 
-  O32_ExitThread(exitcode);
+    if(exceptFrame) OS2UnsetExceptionHandler((void *)exceptFrame);
+
+    O32_ExitThread(exitcode);
 }
 /*****************************************************************************
  * Name      : DWORD SetThreadAffinityMask
@@ -222,22 +223,21 @@ VOID WIN32API ExitThread(DWORD exitcode)
  * Variables :
  * Result    : TRUE / FALSE
  * Remark    :
- * Status    : UNTESTED STUB
+ * Status    : Fully functional
  *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
+ * Author    : SvL
  *****************************************************************************/
 
 DWORD WIN32API SetThreadAffinityMask(HANDLE hThread,
                                      DWORD  dwThreadAffinityMask)
 {
-  dprintf(("KERNEL32: SetThreadAffinityMask(%08xh,%08xh)",
-           hThread, dwThreadAffinityMask));
+    dprintf(("KERNEL32: SetThreadAffinityMask(%08xh,%08xh)", hThread, dwThreadAffinityMask));
 
-  if(hThread != GetCurrentThread()) {
-      dprintf(("WARNING: Setting the affinity mask for another thread than the current one is not supported!!"));
-      return FALSE;
-  }
-  return OSLibDosSetThreadAffinity(dwThreadAffinityMask);
+    if(hThread != GetCurrentThread()) {
+        dprintf(("WARNING: Setting the affinity mask for another thread than the current one is not supported!!"));
+        return FALSE;
+    }
+    return OSLibDosSetThreadAffinity(dwThreadAffinityMask);
 }
 //******************************************************************************
 //******************************************************************************
@@ -267,90 +267,91 @@ BOOL WIN32API SetPriorityClass(HANDLE hProcess, DWORD dwPriority)
 //******************************************************************************
 Win32Thread::Win32Thread(LPTHREAD_START_ROUTINE pUserCallback, LPVOID lpData, DWORD dwFlags, HANDLE hThread)
 {
-  lpUserData = lpData;
-  pCallback  = pUserCallback;
-  this->dwFlags = dwFlags;
-  this->hThread = hThread;
+    lpUserData = lpData;
+    pCallback  = pUserCallback;
+    this->dwFlags = dwFlags;
+    this->hThread = hThread;
+
+    teb = CreateTEB(hThread, 0xFFFFFFFF);
+    if(teb == NULL) {
+        DebugInt3();
+    }
 }
 //******************************************************************************
 //******************************************************************************
 DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
 {
- EXCEPTION_FRAME exceptFrame;
- Win32Thread     *me = (Win32Thread *)lpData;
- ULONG            threadCallback = (ULONG)me->pCallback;
- LPVOID           userdata  = me->lpUserData;
- HANDLE           hThread   = me->hThread;
- DWORD            rc;
+    EXCEPTION_FRAME  exceptFrame;
+    Win32Thread     *me = (Win32Thread *)lpData;
+    ULONG            threadCallback = (ULONG)me->pCallback;
+    LPVOID           userdata  = me->lpUserData;
+    DWORD            rc;
+    TEB             *winteb    = (TEB *)me->teb;
 
-  delete(me);    //only called once
-  dprintf(("Win32ThreadProc %x\n", GetCurrentThreadId()));
+    delete(me);    //only called once
 
-  TEB *winteb = (TEB *)InitializeTIB();
-  if(winteb == NULL) {
-	dprintf(("Win32ThreadProc: InitializeTIB failed!!"));
-	DebugInt3();
-	return 0;
-  }
-  winteb->flags = me->dwFlags;
+    if(InitializeThread(winteb) == FALSE) {
+	    dprintf(("Win32ThreadProc: InitializeTIB failed!!"));
+	    DebugInt3();
+	    return 0;
+    }
+    dprintf(("Win32ThreadProc %x\n", GetCurrentThreadId()));
 
-  winteb->entry_point = (void *)threadCallback;
-  winteb->entry_arg   = (void *)userdata;
-  winteb->o.odin.hThread = hThread;
+    winteb->flags = me->dwFlags;
 
-  winteb->o.odin.hab = OSLibWinInitialize();
-  winteb->o.odin.hmq = OSLibWinQueryMsgQueue(winteb->o.odin.hab);
-  dprintf(("Win32ThreadProc: hab %x hmq %x", winteb->o.odin.hab, winteb->o.odin.hmq));
-#ifdef DEBUG
-  TEB *teb = GetThreadTEB();
-  dprintf(("Stack top 0x%x, stack end 0x%x", teb->stack_top, teb->stack_low));
-#endif
+    winteb->entry_point = (void *)threadCallback;
+    winteb->entry_arg   = (void *)userdata;
 
-  //Note: The Win32 exception structure referenced by FS:[0] is the same
-  //      in OS/2
-  OS2SetExceptionHandler((void *)&exceptFrame);
-  winteb->o.odin.exceptFrame = (ULONG)&exceptFrame;
+    winteb->o.odin.hab = OSLibWinInitialize();
+    winteb->o.odin.hmq = OSLibWinQueryMsgQueue(winteb->o.odin.hab);
+    dprintf(("Win32ThreadProc: hab %x hmq %x", winteb->o.odin.hab, winteb->o.odin.hmq));
+    dprintf(("Stack top 0x%x, stack end 0x%x", winteb->stack_top, winteb->stack_low));
 
-  //Determine if thread callback is inside a PE dll; if true, then force
-  //switch to win32 TIB (FS selector)
-  //(necessary for Opera when loading win32 plugins that create threads)
-  Win32DllBase *dll;
-  dll = Win32DllBase::findModuleByAddr(threadCallback);
-  if(dll && dll->isPEImage()) {
-       dprintf(("Win32ThreadProc: Force win32 TIB switch"));
-       SetWin32TIB(TIB_SWITCH_FORCE_WIN32);
-  }
-  else SetWin32TIB(TIB_SWITCH_DEFAULT); //executable type determines whether or not FS is changed
+    //Note: The Win32 exception structure referenced by FS:[0] is the same
+    //      in OS/2
+    OS2SetExceptionHandler((void *)&exceptFrame);
+    winteb->o.odin.exceptFrame = (ULONG)&exceptFrame;
+    
+    //Determine if thread callback is inside a PE dll; if true, then force
+    //switch to win32 TIB (FS selector)
+    //(necessary for Opera when loading win32 plugins that create threads)
+    Win32DllBase *dll;
+    dll = Win32DllBase::findModuleByAddr(threadCallback);
+    if(dll && dll->isPEImage()) {
+         dprintf(("Win32ThreadProc: Force win32 TIB switch"));
+         SetWin32TIB(TIB_SWITCH_FORCE_WIN32);
+    }
+    else SetWin32TIB(TIB_SWITCH_DEFAULT); //executable type determines whether or not FS is changed
 
-  DWORD dwProcessAffinityMask, dwSystemAffinityMask;
+    DWORD dwProcessAffinityMask, dwSystemAffinityMask;
 
-  //Change the affinity mask of this thread to the mask for the whole process
-  if(GetProcessAffinityMask(GetCurrentProcess(), &dwProcessAffinityMask, &dwSystemAffinityMask) == TRUE) {
-      SetThreadAffinityMask(GetCurrentThread(), dwProcessAffinityMask);
-  }
+    //Change the affinity mask of this thread to the mask for the whole process
+    if(GetProcessAffinityMask(GetCurrentProcess(), &dwProcessAffinityMask, &dwSystemAffinityMask) == TRUE) {
+        SetThreadAffinityMask(GetCurrentThread(), dwProcessAffinityMask);
+    }
 
-  if(WinExe) WinExe->tlsAttachThread();	    //setup TLS structure of main exe
-  Win32DllBase::tlsAttachThreadToAllDlls(); //setup TLS structures of all dlls
-  Win32DllBase::attachThreadToAllDlls();    //send DLL_THREAD_ATTACH message to all dlls
+    if(WinExe) WinExe->tlsAttachThread();	    //setup TLS structure of main exe
+    Win32DllBase::tlsAttachThreadToAllDlls(); //setup TLS structures of all dlls
+    Win32DllBase::attachThreadToAllDlls();    //send DLL_THREAD_ATTACH message to all dlls
 
-  //Set FPU control word to 0x27F (same as in NT)
-  CONTROL87(0x27F, 0xFFF);
-  rc = AsmCallThreadHandler(threadCallback, userdata);
+    //Set FPU control word to 0x27F (same as in NT)
+    CONTROL87(0x27F, 0xFFF);
+    rc = AsmCallThreadHandler(threadCallback, userdata);
 
-  if(fExitProcess) {
-      OSLibDosExitThread(rc);
-  }
-  else {
-      HMSetThreadTerminated(GetCurrentThread());
-      winteb->o.odin.exceptFrame = 0;
-      Win32DllBase::detachThreadFromAllDlls();  //send DLL_THREAD_DETACH message to all dlls
-      Win32DllBase::tlsDetachThreadFromAllDlls(); //destroy TLS structures of all dlls
-      if(WinExe) WinExe->tlsDetachThread();		  //destroy TLS structure of main exe
-      DestroyTIB();  //destroys TIB and restores FS
-      OS2UnsetExceptionHandler((void *)&exceptFrame);
-  }
+    if(fExitProcess) {
+        OSLibDosExitThread(rc);
+    }
+    else {
+        HMSetThreadTerminated(GetCurrentThread());
+        winteb->o.odin.exceptFrame = 0;
+        Win32DllBase::detachThreadFromAllDlls();  //send DLL_THREAD_DETACH message to all dlls
+        Win32DllBase::tlsDetachThreadFromAllDlls(); //destroy TLS structures of all dlls
+        if(WinExe) WinExe->tlsDetachThread();		  //destroy TLS structure of main exe
+        DestroyTEB(winteb);  //destroys TIB and restores FS
+        OS2UnsetExceptionHandler((void *)&exceptFrame);
+    }
 
-  return rc;
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
