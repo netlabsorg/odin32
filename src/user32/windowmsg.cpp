@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.35 2002-07-31 16:51:00 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.36 2002-08-01 16:05:51 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -19,12 +19,14 @@
 #include <odinwrap.h>
 #include <os2sel.h>
 
+#include <string.h>
 #include <os2win.h>
 #include <misc.h>
 #include <win32wbase.h>
 #include <win.h>
 #include <heapstring.h>
 #include <handlemanager.h>
+#include <wprocess.h>
 #include "oslibutil.h"
 #include "oslibwin.h"
 #include "oslibmsg.h"
@@ -833,8 +835,15 @@ DWORD WIN32API MsgWaitForMultipleObjects(DWORD nCount, LPHANDLE pHandles, BOOL f
     //      We are not 100% correct with this implementation. GetQueueStatus checks all messages
     //      in the queue.
     //      Very obscure behaviour, so it's unlikely any application depends on it
+
+    //4 cases:
+    //1: Wait for all   -> check for message arrival, call WaitForMultipleObjects
+    //2: Timeout = 0 ms -> check for message arrival, call WaitForMultipleObjects with timeout 0
+    //3: nCount = 0     -> check for message arrival
+    //4: rest           -> check for either message arrival or signalled object
+
     dprintf(("MsgWaitForMultipleObjects %x %x %d %d %x", nCount, pHandles, fWaitAll, dwMilliseconds, dwWakeMask));
-    if(fWaitAll) 
+    if(fWaitAll) //case 1
     {   //wait for message arrival first
         curtime = GetCurrentTime();
         endtime = curtime + dwMilliseconds;
@@ -873,7 +882,7 @@ DWORD WIN32API MsgWaitForMultipleObjects(DWORD nCount, LPHANDLE pHandles, BOOL f
         }
         return ret;
     }
-    if(dwMilliseconds == 0) {
+    if(dwMilliseconds == 0) { //case 2
         //TODO: what has a higher priority; message presence or signalled object?
         if(GetQueueStatus(dwWakeMask) == 0) {
             if(nCount) {
@@ -883,6 +892,72 @@ DWORD WIN32API MsgWaitForMultipleObjects(DWORD nCount, LPHANDLE pHandles, BOOL f
         }
         return WAIT_OBJECT_0 + nCount;  //right message has arrived
     }
+    if(nCount == 0) //case 3
+    {
+        //SvL: Check time, wait for any message, check msg type and determine if
+        //     we have to return
+        //TODO: Timeout isn't handled correctly (can return too late)
+        curtime = GetCurrentTime();
+        endtime = curtime + dwMilliseconds;
+        while(curtime < endtime || dwMilliseconds == INFINITE) {
+                if(OSLibWinWaitMessage() == FALSE) {
+                        dprintf(("OSLibWinWaitMessage returned FALSE!"));
+                        return WAIT_ABANDONED;
+                }
+                if(GetQueueStatus(dwWakeMask) != 0) {
+                        return WAIT_OBJECT_0;
+                }
+                //TODO: Ignoring all messages could be dangerous. But processing them,
+                //while the app doesn't expect any, isn't safe either.
+                if(PeekMessageA(&msg, NULL, 0, 0, PM_REMOVE)) 
+                {
+                    if (msg.message == WM_QUIT) {
+                         dprintf(("ERROR: MsgWaitForMultipleObjects call abandoned because WM_QUIT msg was received!!"));
+                         return WAIT_ABANDONED;
+                    }
+   
+                    /* otherwise dispatch it */
+                    DispatchMessageA(&msg);
+                }
+                curtime = GetCurrentTime();
+        }
+        return WAIT_TIMEOUT;
+    }
+
+    //Case 4:
+#if 1
+    //Note: The WGSS implementation of this function is flawed. Returns
+    //      when a message is sent to the msg queue, regardless of dwWakeMask
+    TEB *teb = GetTEBFromThreadId(GetCurrentThreadId());
+    if(teb == NULL) {
+       DebugInt3();
+       return WAIT_ABANDONED;
+    }
+    if(dwWakeMask & QS_POSTMESSAGE) {
+        if(GetQueueStatus(dwWakeMask) != 0) {
+            return WAIT_OBJECT_0+nCount;
+        }
+
+        HANDLE *pHandlesTmp = (HANDLE *)alloca((nCount+1)*sizeof(HANDLE));
+        if(pHandlesTmp == NULL || !teb->o.odin.hPostMsgEvent) {
+            DebugInt3();
+            return WAIT_ABANDONED;
+        }
+        memcpy(pHandlesTmp, pHandles, nCount*sizeof(HANDLE));
+        pHandlesTmp[nCount] = teb->o.odin.hPostMsgEvent;
+        teb->o.odin.dwWakeMask = dwWakeMask;
+
+        ResetEvent(teb->o.odin.hPostMsgEvent);
+        ret = HMMsgWaitForMultipleObjects(nCount+1,pHandlesTmp,fWaitAll,dwMilliseconds,dwWakeMask);
+        //nCount + 2 -> message event -> return nCount + 1
+        teb->o.odin.dwWakeMask = 0;
+        return (ret == nCount + 2) ? (nCount + 1) : ret;
+    }
+    //Call handlemanager function as we need to translate handles (KERNEL32)
+    ret = HMMsgWaitForMultipleObjects(nCount,pHandles,fWaitAll,dwMilliseconds,dwWakeMask);
+    return ret;
+#else
+    //This method has a high latency (too high for some apps)
     //TODO: Timeout isn't handled correctly (can return too late)
     curtime = GetCurrentTime();
     endtime = curtime + dwMilliseconds;
@@ -905,7 +980,7 @@ DWORD WIN32API MsgWaitForMultipleObjects(DWORD nCount, LPHANDLE pHandles, BOOL f
             DispatchMessageA(&msg);
         }
         //check if any object is signalled (timeout 10ms)
-        ret = WaitForMultipleObjects(nCount, pHandles, fWaitAll, 10);
+        ret = WaitForMultipleObjects(nCount, pHandles, fWaitAll, 4);
         if(ret < WAIT_OBJECT_0 + nCount) {
             //an object was signalled, return immediately
             dprintf(("WaitForMultipleObjects success with %d", ret));
@@ -920,8 +995,5 @@ DWORD WIN32API MsgWaitForMultipleObjects(DWORD nCount, LPHANDLE pHandles, BOOL f
         curtime = GetCurrentTime();
     }
     return WAIT_TIMEOUT;
-
-//  //Call handlemanager function as we need to translate handles (KERNEL32)
-//  ret = HMMsgWaitForMultipleObjects(nCount,pHandles,fWaitAll,dwMilliseconds,dwWakeMask);
-//  return ret;
+#endif
 }
