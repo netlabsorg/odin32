@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.11 2002-06-14 23:24:49 bird Exp $
+/* $Id: buildenv.cmd,v 1.12 2002-06-21 15:02:51 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -2428,7 +2428,7 @@ Toolkit451: procedure expose aCfg. aPath. sPathFile
     call EnvAddFront fRM, 'nlspath',     sPathTK'\msg\%N;'
     call EnvAddEnd   fRM, 'ulspath',     sPathTK'\language;'
     call EnvAddFront fRM, 'include',     sPathTK'\H\ARPA;'sPathTK'\H\NET;'sPathTK'\H\NETINET;'sPathTK'\H\NETNB;'sPathTK'\H\RPC;'sPathTK'\SPEECH\H;'sPathTK'\H\GL;'sPathTK'\H;'sPathTK'\SOM\INCLUDE;'sPathTK'\INC;'
-    call EnvAddFront fRM, 'lib',         sPathTK'\lib;'
+    call EnvAddFront fRM, 'lib',         sPathTK'\lib;'sPathTK'\som\lib;'
     call EnvAddEnd   fRM, 'lib',         sPathTK'\SAMPLES\MM\LIB;'sPathTK'\SPEECH\LIB;'
     call EnvAddFront fRM, 'helpndx',     'EPMKWHLP.NDX+', '+'
     call EnvAddFront fRM, 'ipfc',        sPathTK'\ipfc;'
@@ -2520,7 +2520,7 @@ Toolkit452: procedure expose aCfg. aPath. sPathFile
     call EnvAddFront fRM, 'nlspath',     sPathTK'\msg\%N;'
     call EnvAddEnd   fRM, 'ulspath',     sPathTK'\language;'
     call EnvAddFront fRM, 'include',     sPathTK'\H\ARPA;'sPathTK'\H\NET;'sPathTK'\H\NETINET;'sPathTK'\H\NETNB;'sPathTK'\H\RPC;'sPathTK'\SPEECH\H;'sPathTK'\H\GL;'sPathTK'\H;'sPathTK'\SOM\INCLUDE;'sPathTK'\INC;'
-    call EnvAddFront fRM, 'lib',         sPathTK'\lib;'
+    call EnvAddFront fRM, 'lib',         sPathTK'\lib;'sPathTK'\som\lib;'
     call EnvAddEnd   fRM, 'lib',         sPathTK'\SAMPLES\MM\LIB;'sPathTK'\SPEECH\LIB;'
     call EnvAddFront fRM, 'helpndx',     'EPMKWHLP.NDX+', '+'
     call EnvAddFront fRM, 'ipfc',        sPathTK'\ipfc;'
