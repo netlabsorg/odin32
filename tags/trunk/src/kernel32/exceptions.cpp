@@ -1,8 +1,4 @@
-/* $Id: exceptions.cpp,v 1.51 2001-03-13 18:45:33 sandervl Exp $ */
-
-/* WARNING: Compiling this module with ICC with optimizations turned on   */
-/* currently breaks this module. To get correct code, it is not necessary */
-/* to turn all optimizations off, just use the -Op- flag.                 */
+/* $Id: exceptions.cpp,v 1.52 2001-04-21 09:10:13 sandervl Exp $ */
 
 /*
  * Win32 Exception functions for OS/2
@@ -125,6 +121,7 @@ UINT WIN32API SetErrorMode(UINT fuErrorMode)
   return(oldmode);
 }
 
+#if 0
 static inline WINEXCEPTION_FRAME * EXC_push_frame( WINEXCEPTION_FRAME *frame )
 {
     // TODO: rewrite in assembly
@@ -141,6 +138,7 @@ static inline WINEXCEPTION_FRAME * EXC_pop_frame( WINEXCEPTION_FRAME *frame )
     teb->except = frame->Prev;
     return frame->Prev;
 }
+#endif
 
 /*****************************************************************************
  * Name      : VOID _Pascal OS2RaiseException
@@ -269,6 +267,12 @@ static DWORD WIN32API EXC_UnwindHandler( WINEXCEPTION_RECORD *rec, WINEXCEPTION_
     return ExceptionCollidedUnwind;
 }
 
+#if 1
+DWORD EXC_CallHandler( WINEXCEPTION_RECORD *record, WINEXCEPTION_FRAME *frame,
+                       WINCONTEXT *context, WINEXCEPTION_FRAME **dispatcher,
+                       PEXCEPTION_HANDLER handler, PEXCEPTION_HANDLER nested_handler);
+
+#else
 /*******************************************************************
  *         EXC_CallHandler
  *
@@ -295,7 +299,7 @@ static DWORD EXC_CallHandler( WINEXCEPTION_RECORD *record, WINEXCEPTION_FRAME *f
     EXC_pop_frame( &newframe.frame );
     return ret;
 }
-
+#endif
 //******************************************************************************
 //******************************************************************************
 DWORD RtlDispatchException(WINEXCEPTION_RECORD *pRecord, WINCONTEXT *pContext)

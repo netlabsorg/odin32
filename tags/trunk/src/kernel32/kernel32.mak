@@ -1,4 +1,4 @@
-# $Id: kernel32.mak,v 1.2 2001-04-04 09:00:58 sandervl Exp $
+# $Id: kernel32.mak,v 1.3 2001-04-21 09:10:14 sandervl Exp $
 
 #
 # Odin32 API
@@ -148,19 +148,3 @@ TARGET = kernel32
 # Includes the common rules.
 #
 !include $(ODIN32_POST_INC)
-
-
-#
-# Override flags for exceptions.cpp
-#  Hmm. This is compiler depended!
-#
-$(OBJDIR)\exceptions.obj: exceptions.cpp
-!if "$(VAC3)" == "1"  ||  "$(VAC36)" == "1"
-    $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -O- \
-        -Fo$(OBJDIR)\$(@B).obj -c exceptions.cpp
-!else
-# Since this only turns off stack optimizations I take it's a VAC only fix.
-# -kso (2001-02-17)
-# !   error "Compiler is not supported yet."
-!endif
-
