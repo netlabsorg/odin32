@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.333 1999-10-17 15:28:44 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.334 1999-10-17 16:43:28 sandervl Exp $ */
 
  99-10-17: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Ported AdjustWindowRectEx from Wine (990815)
@@ -8,6 +8,11 @@
                   Ported GetWindow from Wine (990815)
                   Fixed dialog control creation bug (create ascii controls when
                   parent window is ascii)
+                  Implemented SetWindowPlacement (not complete done)
+                  Fixed GetWindowPlacement (handle translation), still
+                  needs to be implemented though.
+                  Don't change PM window style in WM_DESTROY handler -> crash in PMMERGE
+
  99-10-17: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: replaced OS/2 scrollbars by WINE scrollbars
 		  BUG: SCROLL_RefreshScrollBar doesn't work

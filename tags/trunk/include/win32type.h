@@ -1,4 +1,4 @@
-/* $Id: win32type.h,v 1.25 1999-10-08 16:02:51 sandervl Exp $ */
+/* $Id: win32type.h,v 1.26 1999-10-17 16:43:09 sandervl Exp $ */
 
 /*
  * Win32 type definitions for OS/2
@@ -647,6 +647,19 @@ typedef struct
     POINT   ptMinTrackSize;
     POINT   ptMaxTrackSize;
 } MINMAXINFO, *PMINMAXINFO, *LPMINMAXINFO;
+#endif
+
+
+#ifndef __INCLUDE_WINUSER_H
+typedef struct
+{
+    UINT   length;
+    UINT   flags;
+    UINT   showCmd;
+    POINT  ptMinPosition;
+    POINT  ptMaxPosition;
+    RECT   rcNormalPosition;
+} WINDOWPLACEMENT, *LPWINDOWPLACEMENT;
 #endif
 
 #pragma pack()
