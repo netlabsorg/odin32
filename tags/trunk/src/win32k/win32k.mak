@@ -1,4 +1,4 @@
-# $Id: win32k.mak,v 1.10 2001-04-29 20:43:07 bird Exp $
+# $Id: win32k.mak,v 1.11 2001-07-08 03:15:44 bird Exp $
 
 #
 # Win32k.sys makefile.
@@ -51,6 +51,7 @@ OBJS  =\
     $(WIN32KOBJ)\rmalloc_avl.obj \
     $(WIN32KOBJ)\new.obj \
     $(WIN32KOBJ)\env.obj \
+    $(WIN32KOBJ)\PerTaskW32kData.obj \
     $(WIN32KOBJ)\stricmp.obj \
     $(WIN32KOBJ)\yield.obj \
     $(WIN32KOBJ)\vsprintf.obj \
@@ -73,6 +74,7 @@ OBJS  =\
     $(WIN32KOBJ)\ModuleBase.obj \
     $(WIN32KOBJ)\d32ElfIOCtl.obj \
     $(WIN32KOBJ)\d32Win32kIOCtl.obj \
+    $(WIN32KOBJ)\d32Win32kOpenClose.obj \
     $(WIN32KOBJ)\k32AllocMemEx.obj \
     $(WIN32KOBJ)\k32HandleSystemEvent.obj \
     $(WIN32KOBJ)\k32ProcessReadWrite.obj \
@@ -80,6 +82,7 @@ OBJS  =\
     $(WIN32KOBJ)\k32QueryOTEs.obj \
     $(WIN32KOBJ)\k32QueryOptionsStatus.obj \
     $(WIN32KOBJ)\k32QuerySystemMemInfo.obj \
+    $(WIN32KOBJ)\k32SetEnvironment.obj \
     $(WIN32KOBJ)\k32SetOptions.obj \
     $(WIN32KOBJ)\mytkExecPgm.obj \
     $(WIN32KOBJ)\mytkStartProcess.obj \
@@ -184,6 +187,7 @@ TSTOBJS =\
     $(WIN32KOBJ)\rmalloc_avl.obj \
     $(WIN32KOBJ)\new.obj \
     $(WIN32KOBJ)\env.obj \
+    $(WIN32KOBJ)\PerTaskW32kData.obj \
     $(WIN32KOBJ)\stricmp.obj \
     $(WIN32KOBJ)\yield.obj \
     $(WIN32KOBJ)\vsprintf.obj \
@@ -206,6 +210,7 @@ TSTOBJS =\
     $(WIN32KOBJ)\ModuleBase.obj \
     $(WIN32KOBJ)\d32ElfIOCtl.obj \
     $(WIN32KOBJ)\d32Win32kIOCtl.obj \
+    $(WIN32KOBJ)\d32Win32kOpenClose.obj \
     $(WIN32KOBJ)\k32AllocMemEx.obj \
     $(WIN32KOBJ)\k32HandleSystemEvent.obj \
     $(WIN32KOBJ)\k32ProcessReadWrite.obj \
@@ -213,6 +218,7 @@ TSTOBJS =\
     $(WIN32KOBJ)\k32QueryOTEs.obj \
     $(WIN32KOBJ)\k32QueryOptionsStatus.obj \
     $(WIN32KOBJ)\k32QuerySystemMemInfo.obj \
+    $(WIN32KOBJ)\k32SetEnvironment.obj \
     $(WIN32KOBJ)\k32SetOptions.obj \
     $(WIN32KOBJ)\mytkExecPgm.obj \
     $(WIN32KOBJ)\mytkStartProcess.obj \
