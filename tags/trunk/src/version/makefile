@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 1999-08-21 12:29:32 sandervl Exp $
+# $Id: makefile,v 1.8 1999-09-18 15:56:27 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -9,6 +9,7 @@
 PDWIN32_INCLUDE = ..\..\include
 PDWIN32_LIB = ..\..\lib
 PDWIN32_BIN = ..\..\bin
+PDWIN32_TOOLS = ..\..\tools\bin
 
 
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
@@ -25,7 +26,7 @@ OBJS =  version.obj initterm.obj
 all: $(TARGET).dll $(TARGET).lib
 
 
-$(TARGET).dll: $(OBJS) $(TARGET).def
+$(TARGET).dll: $(OBJS) $(TARGET).def $(TARGET)exp.def
 	$(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
               $(PDWIN32_LIB)/pmwinx.lib $(PDWIN32_LIB)/kernel32.lib \
               $(PDWIN32_LIB)/user32.lib $(PDWIN32_LIB)/odincrt.lib \
@@ -33,8 +34,11 @@ $(TARGET).dll: $(OBJS) $(TARGET).def
 	$(CP) $@ $(PDWIN32_BIN)
 
 
-$(TARGET).lib: $(TARGET).dll
-	$(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET).dll
+$(TARGET)exp.def: $(TARGET).def
+        $(IMPDEF) $** $@
+
+$(TARGET).lib: $(TARGET)exp.def
+	$(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
 	$(CP) $@ $(PDWIN32_LIB)
 
 
