@@ -1,4 +1,4 @@
-/* $Id: defwndproc.cpp,v 1.3 1999-06-20 16:47:39 sandervl Exp $ */
+/* $Id: defwndproc.cpp,v 1.4 1999-06-21 00:48:57 buerkle Exp $ */
 
 /*
  * Win32 default window API functions for OS/2
@@ -22,14 +22,11 @@ LRESULT WIN32API DefWindowProcA(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPara
 #endif
     switch(Msg) {
         case WM_SETREDRAW: //Open32 does not set the visible flag
-        {
-         long dwStyle = GetWindowLongA (hwnd, GWL_STYLE);
-         if(wParam)
-          SetWindowLongA (hwnd, GWL_STYLE, dwStyle | WS_VISIBLE);
-         else
-          SetWindowLongA (hwnd, GWL_STYLE, dwStyle & ~WS_VISIBLE);
-         return O32_DefWindowProc(hwnd, Msg, wParam, lParam);
-        }
+                if(wParam)
+                  SetWindowLongA (hwnd, GWL_STYLE, GetWindowLongA (hwnd, GWL_STYLE) | WS_VISIBLE);
+                else
+                  SetWindowLongA (hwnd, GWL_STYLE, GetWindowLongA (hwnd, GWL_STYLE) & ~WS_VISIBLE);
+                return O32_DefWindowProc(hwnd, Msg, wParam, lParam);
         case WM_NCCREATE://SvL: YAFMO (yet another feature missing in Open32)
                 return(TRUE);
         case WM_CTLCOLORMSGBOX:
@@ -60,14 +57,11 @@ LRESULT WIN32API DefWindowProcW(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPara
 #endif
     switch(Msg) {
         case WM_SETREDRAW: //Open32 does not set the visible flag
-        {
-         long dwStyle = GetWindowLongA (hwnd, GWL_STYLE);
-         if(wParam)
-          SetWindowLongA (hwnd, GWL_STYLE, dwStyle | WS_VISIBLE);
-         else
-          SetWindowLongA (hwnd, GWL_STYLE, dwStyle & ~WS_VISIBLE);
-         return O32_DefWindowProc(hwnd, Msg, wParam, lParam);
-        }
+                if(wParam)
+                  SetWindowLongA (hwnd, GWL_STYLE, GetWindowLongA (hwnd, GWL_STYLE) | WS_VISIBLE);
+                else
+                  SetWindowLongA (hwnd, GWL_STYLE, GetWindowLongA (hwnd, GWL_STYLE) & ~WS_VISIBLE);
+                return O32_DefWindowProc(hwnd, Msg, wParam, lParam);
         case WM_NCCREATE://SvL: YAOFM (yet another open32 feature missing)
                 return(TRUE);
         case WM_CTLCOLORMSGBOX:
@@ -98,14 +92,11 @@ LRESULT WIN32API DefDlgProcA(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 #endif
     switch(Msg) {
         case WM_SETREDRAW: //Open32 does not set the visible flag
-        {
-         long dwStyle = GetWindowLongA (hwnd, GWL_STYLE);
-         if(wParam)
-          SetWindowLongA (hwnd, GWL_STYLE, dwStyle | WS_VISIBLE);
-         else
-          SetWindowLongA (hwnd, GWL_STYLE, dwStyle & ~WS_VISIBLE);
-         return O32_DefWindowProc(hwnd, Msg, wParam, lParam);
-        }
+                if(wParam)
+                  SetWindowLongA (hwnd, GWL_STYLE, GetWindowLongA (hwnd, GWL_STYLE) | WS_VISIBLE);
+                else
+                  SetWindowLongA (hwnd, GWL_STYLE, GetWindowLongA (hwnd, GWL_STYLE) & ~WS_VISIBLE);
+                return O32_DefDlgProc(hwnd, Msg, wParam, lParam);
         case WM_NCCREATE://SvL: YAOFM (yet another open32 feature missing)
                 return(TRUE);
         case WM_CTLCOLORMSGBOX:
@@ -137,14 +128,11 @@ LRESULT WIN32API DefDlgProcW(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 #endif
     switch(Msg) {
         case WM_SETREDRAW: //Open32 does not set the visible flag
-        {
-         long dwStyle = GetWindowLongA (hwnd, GWL_STYLE);
-         if(wParam)
-          SetWindowLongA (hwnd, GWL_STYLE, dwStyle | WS_VISIBLE);
-         else
-          SetWindowLongA (hwnd, GWL_STYLE, dwStyle & ~WS_VISIBLE);
-         return O32_DefWindowProc(hwnd, Msg, wParam, lParam);
-        }
+                if(wParam)
+                  SetWindowLongA (hwnd, GWL_STYLE, GetWindowLongA (hwnd, GWL_STYLE) | WS_VISIBLE);
+                else
+                  SetWindowLongA (hwnd, GWL_STYLE, GetWindowLongA (hwnd, GWL_STYLE) & ~WS_VISIBLE);
+                return O32_DefDlgProc(hwnd, Msg, wParam, lParam);
         case WM_NCCREATE://SvL: YAOFM (yet another open32 feature missing)
                 return(TRUE);
         case WM_CTLCOLORMSGBOX:
@@ -175,22 +163,11 @@ LRESULT WIN32API DefFrameProcA(HWND hwndFrame, HWND hwndClient, UINT Msg, WPARAM
 #endif
     switch(Msg) {
         case WM_SETREDRAW: //Open32 does not set the visible flag
-        {
-         //Frame
-         long dwStyle = GetWindowLongA (hwndFrame, GWL_STYLE);
-         if(wParam)
-          SetWindowLongA (hwndFrame, GWL_STYLE, dwStyle | WS_VISIBLE);
-         else
-          SetWindowLongA (hwndFrame, GWL_STYLE, dwStyle & ~WS_VISIBLE);
-         return O32_DefWindowProc(hwndFrame, Msg, wParam, lParam);
-         //Client
-         dwStyle = GetWindowLongA (hwndClient, GWL_STYLE);
-         if(wParam)
-          SetWindowLongA (hwndClient, GWL_STYLE, dwStyle | WS_VISIBLE);
-         else
-          SetWindowLongA (hwndClient, GWL_STYLE, dwStyle & ~WS_VISIBLE);
-         return O32_DefWindowProc(hwndClient, Msg, wParam, lParam);
-        }
+                if(wParam)
+                  SetWindowLongA (hwndClient, GWL_STYLE, GetWindowLongA (hwndClient, GWL_STYLE) | WS_VISIBLE);
+                else
+                  SetWindowLongA (hwndClient, GWL_STYLE, GetWindowLongA (hwndClient, GWL_STYLE) & ~WS_VISIBLE);
+                return O32_DefFrameProc(hwndFrame, hwndClient, Msg, wParam, lParam);
         case WM_NCCREATE://SvL: YAOFM (yet another open32 feature missing)
                 return(TRUE);
         case WM_CTLCOLORMSGBOX:
@@ -222,22 +199,11 @@ LRESULT WIN32API DefFrameProcW(HWND hwndFrame, HWND hwndClient, UINT Msg, WPARAM
 #endif
     switch(Msg) {
         case WM_SETREDRAW: //Open32 does not set the visible flag
-        {
-         //Frame
-         long dwStyle = GetWindowLongA (hwndFrame, GWL_STYLE);
-         if(wParam)
-          SetWindowLongA (hwndFrame, GWL_STYLE, dwStyle | WS_VISIBLE);
-         else
-          SetWindowLongA (hwndFrame, GWL_STYLE, dwStyle & ~WS_VISIBLE);
-         return O32_DefWindowProc(hwndFrame, Msg, wParam, lParam);
-         //Client
-         dwStyle = GetWindowLongA (hwndClient, GWL_STYLE);
-         if(wParam)
-          SetWindowLongA (hwndClient, GWL_STYLE, dwStyle | WS_VISIBLE);
-         else
-          SetWindowLongA (hwndClient, GWL_STYLE, dwStyle & ~WS_VISIBLE);
-         return O32_DefWindowProc(hwndClient, Msg, wParam, lParam);
-        }
+                if(wParam)
+                  SetWindowLongA (hwndClient, GWL_STYLE, GetWindowLongA (hwndClient, GWL_STYLE) | WS_VISIBLE);
+                else
+                  SetWindowLongA (hwndClient, GWL_STYLE, GetWindowLongA (hwndClient, GWL_STYLE) & ~WS_VISIBLE);
+                return O32_DefFrameProc(hwndFrame, hwndClient, Msg, wParam, lParam);
         case WM_NCCREATE://SvL: YAOFM (yet another open32 feature missing)
                 return(TRUE);
         case WM_CTLCOLORMSGBOX:
@@ -268,14 +234,11 @@ LRESULT WIN32API DefMDIChildProcA(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPa
 #endif
     switch(Msg) {
         case WM_SETREDRAW: //Open32 does not set the visible flag
-        {
-         long dwStyle = GetWindowLongA (hwnd, GWL_STYLE);
-         if(wParam)
-          SetWindowLongA (hwnd, GWL_STYLE, dwStyle | WS_VISIBLE);
-         else
-          SetWindowLongA (hwnd, GWL_STYLE, dwStyle & ~WS_VISIBLE);
-         return O32_DefWindowProc(hwnd, Msg, wParam, lParam);
-        }
+                if(wParam)
+                  SetWindowLongA (hwnd, GWL_STYLE, GetWindowLongA (hwnd, GWL_STYLE) | WS_VISIBLE);
+                else
+                  SetWindowLongA (hwnd, GWL_STYLE, GetWindowLongA (hwnd, GWL_STYLE) & ~WS_VISIBLE);
+                return O32_DefMDIChildProc(hwnd, Msg, wParam, lParam);
         case WM_NCCREATE://SvL: YAOFM (yet another open32 feature missing)
                 return(TRUE);
         case WM_CTLCOLORMSGBOX:
@@ -307,14 +270,11 @@ LRESULT WIN32API DefMDIChildProcW(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPa
 #endif
     switch(Msg) {
         case WM_SETREDRAW: //Open32 does not set the visible flag
-        {
-         long dwStyle = GetWindowLongA (hwnd, GWL_STYLE);
-         if(wParam)
-          SetWindowLongA (hwnd, GWL_STYLE, dwStyle | WS_VISIBLE);
-         else
-          SetWindowLongA (hwnd, GWL_STYLE, dwStyle & ~WS_VISIBLE);
-         return O32_DefWindowProc(hwnd, Msg, wParam, lParam);
-        }
+                if(wParam)
+                  SetWindowLongA (hwnd, GWL_STYLE, GetWindowLongA (hwnd, GWL_STYLE) | WS_VISIBLE);
+                else
+                  SetWindowLongA (hwnd, GWL_STYLE, GetWindowLongA (hwnd, GWL_STYLE) & ~WS_VISIBLE);
+                return O32_DefMDIChildProc(hwnd, Msg, wParam, lParam);
         case WM_NCCREATE://SvL: YAOFM (yet another open32 feature missing)
                 return(TRUE);
         case WM_CTLCOLORMSGBOX:
