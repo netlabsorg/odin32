@@ -1,4 +1,4 @@
-/* $Id: unicode.cpp,v 1.16 1999-11-28 23:23:46 bird Exp $ */
+/* $Id: unicode.cpp,v 1.17 1999-12-01 18:40:49 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -206,7 +206,7 @@ BOOL WIN32API GetCPInfo(UINT uCodePage, CPINFO *lpCPInfo)
 int WIN32API UnicodeToAsciiN(LPCWSTR ustring, char *astring, int unilen)
 {
   int i;
-  int rc;
+  int rc, length;
   size_t uni_chars_left;
   size_t out_bytes_left;
   size_t num_subs;
@@ -222,6 +222,10 @@ int WIN32API UnicodeToAsciiN(LPCWSTR ustring, char *astring, int unilen)
   if (astring == NULL || unilen <= 0) return 0;
 
 //  dprintf(("KERNEL32: UnicodeToAsciiN\n"));
+
+  length = UniStrlen(ustring)+1;
+  unilen = min(length, unilen);
+
   if (getUconvObject())
   {
     if (unilen == 1)
