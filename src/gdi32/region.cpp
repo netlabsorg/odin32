@@ -1,4 +1,4 @@
-/* $Id: region.cpp,v 1.28 2002-07-15 10:02:29 sandervl Exp $ */
+/* $Id: region.cpp,v 1.29 2002-11-05 14:33:32 sandervl Exp $ */
 
 /*
  * GDI32 region code
@@ -33,6 +33,7 @@
 #include <winuser32.h>
 #include "oslibgpi.h"
 #include <stats.h>
+#include "dibsect.h"
 
 #define DBG_LOCALLOG    DBG_region
 #include "dbglocal.h"
@@ -1449,6 +1450,7 @@ ODINFUNCTIONNODBG3(BOOL, FillRgn, HDC, hdc, HRGN, hrgn, HBRUSH, hBrush)
  HRGN   hrgn1 = hrgn;
 #endif
 
+
     pDCData  pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
 
     hrgn = ObjQueryHandleData(hrgn, HNDL_REGION);
@@ -1479,6 +1481,17 @@ ODINFUNCTIONNODBG3(BOOL, FillRgn, HDC, hdc, HRGN, hrgn, HBRUSH, hBrush)
     /* Restore the brush if necessary */
     if(hbrushRestore)
         SelectObject(hdc, hbrushRestore);
+
+    /* PF Sync DIBSection as well */
+    if(DIBSection::getSection() != NULL) 
+    {
+        DIBSection *dsect = DIBSection::findHDC(hdc);
+        if(dsect) 
+        {
+            dsect->sync(hdc, 0, dsect->GetHeight());
+        }
+    }
+
 
     return(success);
 }
