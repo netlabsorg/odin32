@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.104 2001-02-15 00:33:01 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.105 2001-02-17 14:49:26 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -26,7 +26,8 @@ class Win32BaseWindow;
 
 #define OFFSET_WIN32WNDPTR        0
 #define OFFSET_WIN32PM_MAGIC      4
-#define NROF_WIN32WNDBYTES        8
+#define OFFSET_WIN32FLAGS         8
+#define NROF_WIN32WNDBYTES        12
 
 #define WIN32PM_MAGIC           0x12345678
 #define CheckMagicDword(a)      (a==WIN32PM_MAGIC)
@@ -290,7 +291,6 @@ Win32BaseWindow *FindWindowById(int id);
            BOOL EnumThreadWindows(DWORD dwThreadId, WNDENUMPROC lpfn, LPARAM lParam);
            BOOL EnumWindows(WNDENUMPROC lpfn, LPARAM lParam);
 
-         HWND   getNextDlgTabItem(HWND hwndCtrl, BOOL fPrevious);
          HWND   getNextDlgGroupItem(HWND hwndCtrl, BOOL fPrevious);
 
 	 BOOL   isComingToTop()			{ return fComingToTop; };

@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.83 2001-02-01 18:02:20 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.84 2001-02-17 14:49:25 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -1373,10 +1373,17 @@ BOOL WIN32API InvalidateRect (HWND hwnd, const RECT *pRect, BOOL erase)
    	dprintf(("InvalidateRect %x (%d,%d)(%d,%d) erase=%d", hwnd, pRect->left, pRect->top, pRect->right, pRect->bottom, erase));
    }
    else dprintf(("InvalidateRect %x NULL erase=%d", hwnd, erase));
+#if 1
+   result = RedrawWindow (hwnd, pRect, NULLHANDLE,
+                          RDW_ALLCHILDREN_W | RDW_INVALIDATE_W |
+                          (erase ? RDW_ERASE_W : 0) |
+                          (hwnd == NULLHANDLE ? RDW_UPDATENOW_W : 0));
+#else
    result = RedrawWindow (hwnd, pRect, NULLHANDLE,
                           RDW_ALLCHILDREN_W | RDW_INVALIDATE_W |
                           (erase ? RDW_ERASE_W : RDW_NOERASE_W) |
                           (hwnd == NULLHANDLE ? RDW_UPDATENOW_W : 0));
+#endif
    return (result);
 }
 //******************************************************************************
@@ -1386,10 +1393,17 @@ BOOL WIN32API InvalidateRgn (HWND hwnd, HRGN hrgn, BOOL erase)
    BOOL result;
 
    dprintf(("InvalidateRgn %x %x erase=%d", hwnd, hrgn, erase));
+#if 1
+   result = RedrawWindow (hwnd, NULL, hrgn,
+                          RDW_ALLCHILDREN_W | RDW_INVALIDATE_W |
+                          (erase ? RDW_ERASE_W : 0) |
+                          (hwnd == NULLHANDLE ? RDW_UPDATENOW_W : 0));
+#else
    result = RedrawWindow (hwnd, NULL, hrgn,
                           RDW_ALLCHILDREN_W | RDW_INVALIDATE_W |
                           (erase ? RDW_ERASE_W : RDW_NOERASE_W) |
                           (hwnd == NULLHANDLE ? RDW_UPDATENOW_W : 0));
+#endif
    return (result);
 }
 //******************************************************************************

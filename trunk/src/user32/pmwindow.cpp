@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.113 2001-02-15 00:33:01 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.114 2001-02-17 14:49:26 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -221,7 +221,7 @@ MRESULT ProcessPMMessage(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2, Win32Base
   }
   else
   if(msg == WIN32APP_SETFOCUSMSG) {
-      //PM doesn't allow SetFocus calls during WM_SETFOCUS message processing; 
+      //PM doesn't allow SetFocus calls during WM_SETFOCUS message processing;
       //must delay this function call
       //mp1 = win32 window handle
       //mp2 = activate flag
@@ -378,15 +378,9 @@ MRESULT ProcessPMMessage(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2, Win32Base
             if(pswp->fl & SWP_ACTIVATE)
             {
                 //Only send PM WM_ACTIVATE to top-level windows (frame windows)
-                if(!(WinQueryWindowUShort(hwnd,QWS_FLAGS) & FF_ACTIVE))
+                if(!(WinQueryWindowULong(hwnd, OFFSET_WIN32FLAGS) & FF_ACTIVE))
                 {
-                    if(isFrame) {
                         WinSendMsg(hwnd, WM_ACTIVATE, (MPARAM)TRUE, (MPARAM)hwnd);
-                    }
-                    else
-                    if(win32wnd->IsWindowCreated()) {
-                        win32wnd->MsgActivate(1, 0, win32wnd->getWindowHandle(), hwnd);
-                    }
                 }
             }
             goto RunDefWndProc;
@@ -500,7 +494,7 @@ MRESULT ProcessPMMessage(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2, Win32Base
         if(pswp->fl & SWP_ACTIVATE)
         {
              //Only send PM WM_ACTIVATE to top-level windows (frame windows)
-             if(!(WinQueryWindowUShort(hwnd,QWS_FLAGS) & FF_ACTIVE))
+             if(!(WinQueryWindowULong(hwnd, OFFSET_WIN32FLAGS) & FF_ACTIVE))
              {
                 if(isFrame) {
                      WinSendMsg(hwnd, WM_ACTIVATE, (MPARAM)TRUE, (MPARAM)hwnd);
@@ -518,11 +512,11 @@ PosChangedEnd:
 
     case WM_ACTIVATE:
     {
-        USHORT flags = WinQueryWindowUShort(hwnd,QWS_FLAGS);
+        USHORT flags = WinQueryWindowULong(hwnd, OFFSET_WIN32FLAGS);
 
         dprintf(("OS2: WM_ACTIVATE %x %x %x", hwnd, mp1, mp2));
 
-        WinSetWindowUShort(hwnd,QWS_FLAGS, SHORT1FROMMP(mp1) ? (flags | FF_ACTIVE):(flags & ~FF_ACTIVE));
+        WinSetWindowULong(hwnd, OFFSET_WIN32FLAGS, SHORT1FROMMP(mp1) ? (flags | FF_ACTIVE):(flags & ~FF_ACTIVE));
         if(win32wnd->IsWindowCreated())
         {
             win32wnd->MsgActivate((LOWORD(pWinMsg->wParam) == WA_ACTIVE_W) ? 1 : 0, HIWORD(pWinMsg->wParam), pWinMsg->lParam, (HWND)mp2);
@@ -595,10 +589,10 @@ PosChangedEnd:
     case WM_SETFOCUS:
     {
       HWND hwndFocus = (HWND)mp1;
-       
+
         dprintf(("OS2: WM_SETFOCUS %x %x (%x) %d", win32wnd->getWindowHandle(), mp1, OS2ToWin32Handle(hwndFocus), mp2));
 
-        //PM doesn't allow SetFocus calls during WM_SETFOCUS message processing; 
+        //PM doesn't allow SetFocus calls during WM_SETFOCUS message processing;
         //must delay this function call
 
         teb->o.odin.fWM_SETFOCUS = TRUE;

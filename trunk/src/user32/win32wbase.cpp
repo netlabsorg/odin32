@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.234 2001-02-10 10:31:31 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.235 2001-02-17 14:49:26 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -493,6 +493,11 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndOS2)
         SetLastError(ERROR_OUTOFMEMORY); //TODO: Better error
         return FALSE;
     }
+    if(OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32FLAGS, 0) == FALSE) {
+        dprintf(("WM_CREATE: WinSetWindowULong2 %X failed!!", OS2Hwnd));
+        SetLastError(ERROR_OUTOFMEMORY); //TODO: Better error
+        return FALSE;
+    }
 
     if (HOOK_IsHooked( WH_CBT ))
     {
@@ -705,10 +710,10 @@ if (!cs->hMenu) cs->hMenu = LoadMenuA(windowClass->getInstance(),"MYAPP");
             }
             if (getStyle() & (WS_MINIMIZE | WS_MAXIMIZE))
             {
-		        RECT newPos;
-		        UINT swFlag = (getStyle() & WS_MINIMIZE) ? SW_MINIMIZE : SW_MAXIMIZE;
+                        RECT newPos;
+                        UINT swFlag = (getStyle() & WS_MINIMIZE) ? SW_MINIMIZE : SW_MAXIMIZE;
                 setStyle(getStyle() & ~(WS_MAXIMIZE | WS_MINIMIZE));
-		        MinMaximize(swFlag, &newPos);
+                        MinMaximize(swFlag, &newPos);
                 swFlag = ((getStyle() & WS_CHILD) || GetActiveWindow()) ? SWP_NOACTIVATE | SWP_NOZORDER | SWP_FRAMECHANGED
                                                                         : SWP_NOZORDER | SWP_FRAMECHANGED;
                 SetWindowPos(0, newPos.left, newPos.top,  newPos.right, newPos.bottom, swFlag);
@@ -2682,9 +2687,12 @@ HWND Win32BaseWindow::SetParent(HWND hwndNewParent)
 BOOL Win32BaseWindow::IsChild(HWND hwndParent)
 {
     if(getParent()) {
-          return getParent()->getWindowHandle() == hwndParent;
+         if(getParent()->getWindowHandle() == hwndParent)
+             return TRUE;
+
+         return getParent()->IsChild(hwndParent);
     }
-    else  return 0;
+    else return 0;
 }
 //******************************************************************************
 //******************************************************************************
@@ -3459,74 +3467,6 @@ Win32BaseWindow *Win32BaseWindow::GetWindowFromOS2Handle(HWND hwnd)
     }
 //  dprintf2(("Win32BaseWindow::GetWindowFromOS2Handle: not an Odin os2 window %x", hwnd));
     return 0;
-}
-//******************************************************************************
-//******************************************************************************
-HWND Win32BaseWindow::getNextDlgTabItem(HWND hwndCtrl, BOOL fPrevious)
-{
- Win32BaseWindow *child, *nextchild, *lastchild;
- HWND retvalue;
-
-    if (hwndCtrl)
-    {
-        child = GetWindowFromHandle(hwndCtrl);
-        if (!child)
-        {
-            retvalue = 0;
-            goto END;
-        }
-        /* Make sure hwndCtrl is a top-level child */
-        while ((child->getStyle() & WS_CHILD) && (child->getParent() != this))
-        {
-            child = child->getParent();
-            if(child == NULL) break;
-        }
-
-        if (!child || (child->getParent() != this))
-        {
-            retvalue = 0;
-            goto END;
-        }
-    }
-    else
-    {
-        /* No ctrl specified -> start from the beginning */
-        child = (Win32BaseWindow *)getFirstChild();
-        if (!child)
-        {
-            retvalue = 0;
-            goto END;
-        }
-
-        if (!fPrevious)
-        {
-            while (child->getNextChild())
-            {
-                child = (Win32BaseWindow *)child->getNextChild();
-            }
-        }
-    }
-
-    lastchild = child;
-    nextchild = (Win32BaseWindow *)child->getNextChild();
-    while (TRUE)
-    {
-        if (!nextchild) nextchild = (Win32BaseWindow *)getFirstChild();
-
-        if (child == nextchild) break;
-
-        if ((nextchild->getStyle() & WS_TABSTOP) && (nextchild->getStyle() & WS_VISIBLE) &&
-            !(nextchild->getStyle() & WS_DISABLED))
-        {
-            lastchild = nextchild;
-            if (!fPrevious) break;
-        }
-        nextchild = (Win32BaseWindow *)nextchild->getNextChild();
-    }
-    retvalue = lastchild->getWindowHandle();
-
-END:
-    return retvalue;
 }
 //******************************************************************************
 //******************************************************************************
