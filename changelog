@@ -1,8 +1,11 @@
-/* $Id: changelog,v 1.1388 2001-04-29 10:28:49 sandervl Exp $ */
+/* $Id: changelog,v 1.1389 2001-04-29 14:39:12 sandervl Exp $ */
 
  2001-04-29: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMCTL32: o Resync with latest Wine (20010418) (animate, comboex, rebar, 
                   status, tab)
+    - WINMM:    o Don't start playback if stream is paused (waveOutWrite)
+                  (only affects DART playback; prevents out of sync
+                   video & audio in RealPlayer)
 
  2001-04-28: Dietrich Teickner <Dietrich_Teickner@t-online.de>
     - SHELL32:  o Updates and fixes for SHFileOperationA (FO_COPY)
