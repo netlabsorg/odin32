@@ -1,4 +1,4 @@
-/* $Id: mthreads.c,v 1.1 2000-02-29 00:50:07 sandervl Exp $ */
+/* $Id: mthreads.c,v 1.2 2000-03-03 07:57:50 sandervl Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -157,9 +157,21 @@ void MesaInitTSD(MesaTSD * tsd) {
   }
 }
 
-void * MesaGetTSD(MesaTSD * tsd) {
+#ifdef __WIN32OS2__
+void *MesaGetTSD(MesaTSD * tsd, void (*initfunc)(void)) 
+{
+  if (tsd->initfuncCalled != INITFUNC_CALLED_MAGIC) {
+    initfunc();
+    tsd->initfuncCalled = INITFUNC_CALLED_MAGIC;
+  }
   return TlsGetValue(tsd->key);
 }
+#else
+void *MesaGetTSD(MesaTSD * tsd)
+{
+  return TlsGetValue(tsd->key);
+}
+#endif
 
 void MesaSetTSD(MesaTSD * tsd, void * ptr, void (*initfunc)(void)) {
   /* the following code assumes that the MesaTSD has been initialized
