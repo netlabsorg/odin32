@@ -1,0 +1,162 @@
+# $Id: makefile.icc,v 1.1 1999-09-05 02:56:39 bird Exp $
+
+#
+# Common makefile for database utils. ICC and GCC(DB.DLL only)
+#
+
+# include common definitions
+PDWIN32_INCLUDE = ..\..\include
+!include ..\..\include\pdwin32.mk
+
+# Addjust common definitions
+!ifdef DEBUG
+CFLAGS   = $(CFLAGS)   -Ge+ -Tx+ -I$(PDWIN32_INCLUDE)      -Igd -Imysql -I..\common -Wall+ppt-ppc-inl-cnv-gnr-vft-
+CXXFLAGS = $(CXXFLAGS) -Ge+ -Gx- -Tx+ -I$(PDWIN32_INCLUDE) -Igd -Imysql -I..\common -Wall+ppt-ppc-inl-cnv-gnr-vft-
+LDFLAGS  = $(LDFLAGS)  -Ge+ -Fe$@ /B"/MAP:full"
+!else
+CFLAGS   = $(CFLAGS)   -Ge+ -Tx+ -I$(PDWIN32_INCLUDE)      -Igd -Imysql -I..\common -Wall+ppt-ppc-inl-cnv-gnr-vft-
+CXXFLAGS = $(CXXFLAGS) -Ge+ -Gx- -Tx+ -I$(PDWIN32_INCLUDE) -Igd -Imysql -I..\common -Wall+ppt-ppc-inl-cnv-gnr-vft-
+LDFLAGS  = $(LDFLAGS)  -Ge+ -Fe$@ /B"/MAP:full"
+!endif
+
+#
+# gcc defines
+#
+GCC       = gcc
+# Note: old versions of GCC (< 2.8.x) may need the -fhandle-exceptions
+!ifdef DEBUG
+GCCFLAGS  = -Zmt -Zdll -Zomf -mprobe -Imysql -g
+!else
+GCCFLAGS  = -Zmt -Zdll -Zomf -mprobe -Imysql -s
+!endif
+
+
+
+#
+# All roule
+#
+all: db.dll db.lib APIImport.exe StateUpd.exe kHTMLPC.exe   \
+     ..\bin\db.dll ..\bin\APIImport.exe ..\bin\StateUpd.exe \
+     ..\bin\kHTMLPC.exe
+
+
+#
+# Database DLL
+#
+db.dll: db.obj db.def
+   $(GCC) $** $(GCCFLAGS) -lmysql\libmysqlclient -lsocket
+
+..\bin\db.dll: db.dll
+    $(CP) $** $@
+
+db.lib: db.def
+   $(IMPLIB) $(IMPLIBFLAGS) $@ $**
+
+db.o:   db.cpp
+   $(GCC) -c $(GCCFLAGS) $**
+
+db.obj: db.cpp
+    $(GCC) -c $(GCCFLAGS) $**
+
+
+
+#
+# APIImport
+#
+APIImport.exe: APIImport.obj ..\common\commonicc.lib db.lib
+   $(LD) $(LDFLAGS) $**
+
+APIImport.obj:    APIImport.cpp APIImport.h db.h ..\common\kFileFormatBase.h \
+                   ..\common\kFileDef.h  ..\common\kFilePe.h
+
+..\bin\APIImport.exe: APIImport.exe
+   $(CP) $** $@
+
+..\common\commonicc.lib:
+    cd ..\common
+    nmake /nologo commonicc.lib
+    cd ..\database
+
+
+
+#
+# StateUpd
+#
+StateUpd.exe: StateUpd.obj db.lib
+   $(LD) $(LDFLAGS) $**
+
+..\bin\StateUpd.exe: StateUpd.exe
+   $(CP) $** $@
+
+StateUpd.obj:     StateUpd.cpp db.h
+
+
+
+#
+# kHTMLPC - HTML/Sql PreCompiler.
+#
+kHTMLPC.exe: kHTMLPC.obj db.lib gd/gdicc.lib
+   $(LD) $(LDFLAGS) $**
+
+kHTMLPC.obj:      kHTMLPC.cpp kHTMLPC.h db.h ..\common\kLIFO.cpp \
+                  ..\common\kLIFO.h ..\common\kList.h ..\common\kList.cpp \
+                  gd/gd.h gd/gdfontg.h gd/gdfontl.h gd/gdfontmb.h \
+                  gd/gdfonts.h gd/gdfontt.h
+
+..\bin\kHTMLPC.exe: kHTMLPC.exe
+   $(CP) $** $@
+
+gd/gdicc.lib: NUL
+   @cd gd
+   @nmake /nologo gdicc.lib
+   @cd ..
+
+
+
+
+# kHTHMLPC - interference roules for preprocessing of kSqlHtml files.
+.SUFFIXES: .html .ksqlhtml .obj
+.kSqlHtml.html:
+    kHTMLPC $<
+.kSqlHtml.obj: # Visual SlickEdit thinks everything complies to .obj files...
+    kHTMLPC $<
+
+
+
+#
+# Odin32 - Creates the database. This will do a drop of any database named "Odin32"!
+#
+Odin32: CreateTables.sql States.sql Authors.sql
+   -mysqladmin refresh
+   mysqladmin DROP Odin32
+   mysql < CreateTables.sql
+   mysql < States.sql
+   mysql < Authors.sql
+   -mysqladmin refresh
+
+Authors: Authors.sql
+   mysql < Authors.sql
+   -mysqladmin refresh
+
+States: States.sql
+   mysql < States.sql
+   -mysqladmin refresh
+
+
+#
+# clean
+#
+clean:
+   -@$(RM) *.obj
+   -@$(RM) *.lib
+   -@$(RM) *.o
+   -@$(RM) *.a
+   -@$(RM) *.dll
+   -@$(RM) *.exe
+   -@$(RM) *.pch
+   -@$(RM) *.log
+   -@$(RM) *.map
+   @cd gd
+   @nmake /nologo clean
+
+
