@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.431 1999-11-10 02:43:05 bird Exp $ */
+ /* $Id: ChangeLog,v 1.432 1999-11-10 12:19:42 phaller Exp $ */
+
+ 99-11-10: Patrick Haller <phaller@gmx.net>
+	- COMDLG32:	Fix: erroneous filter data for GetOpenFileName now tolerated
+			Open32 keeps to close to the docs :)
 
  99-11-10: knut.st.osmundsen <knut.stange.osmundsen@pmsc.no>
     - PE2LX: Added OLE32 to the lie list. New Base class.
