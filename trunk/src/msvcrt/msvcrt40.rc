@@ -1,11 +1,11 @@
-/* $Id: msvcrt40.rc,v 1.1 1999-12-29 18:49:02 sandervl Exp $ */
+/* $Id: msvcrt40.rc,v 1.2 2000-01-03 10:26:49 sandervl Exp $ */
 
 #include "winuser.h"
 #include "odinrsrc.h"
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Version (MSVCRT40.DLL from NT 4, SP3)
+// Version (MSVCRT40.DLL from Win98SE)
 //
 
 1 VERSIONINFO
@@ -24,13 +24,13 @@ BEGIN
             VALUE "Comments", "Odin32 System Dll\0"
             VALUE "CompanyName", "Odin Team\0"
             VALUE "FileDescription", "C/C++ Runtime library\0"
-            VALUE "FileVersion", "4.20\0"
+            VALUE "FileVersion", "4.22\0"
             VALUE "InternalName", "MSVCRT40\0"
             VALUE "LegalCopyright", "Copyright (C) 1999\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "MSVCRT40.DLL\0"
             VALUE "ProductName", "Odin32 - MSVCRT40\0"
-            VALUE "ProductVersion", "4.20.6172\0"
+            VALUE "ProductVersion", "4.22.0000\0"
         END
     END
     BLOCK "VarFileInfo"

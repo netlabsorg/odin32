@@ -1,4 +1,4 @@
-; $Id: msvcrt20.def,v 1.4 1999-12-28 10:31:01 sandervl Exp $
+; $Id: msvcrt20.def,v 1.5 2000-01-03 10:26:49 sandervl Exp $
 
 ;
 ; Based on Windows 98 : MSVCRT20.DLL (v2.11.000)
@@ -200,7 +200,7 @@ EXPORTS
     _getpid			= _CRTDLL__getpid		@612
     _getsystime			= _CRTDLL__getsystime		@613
     _getw			= _CRTDLL__getw			@614
-;;;    _getws			= _CRTDLL__getws		@615
+    _getws			= _MSVCRT__getws		@615
     _global_unwind2		= _CRTDLL__global_unwind2	@616
     _heapadd			= _MSVCRT__heapadd		@617
     _heapchk			= _CRTDLL__heapchk		@618
