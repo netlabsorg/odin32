@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2560 2003-04-24 17:20:20 sandervl Exp $ */
+/* $Id: changelog,v 1.2561 2003-04-25 11:13:31 sandervl Exp $ */
+
+ 2003-04-25: knut st. osmundsen <bird-odin-spam@anduin   >
+    - USER32:   o Fake window subclass FS bugfix.
 
  2003-04-24: knut st. osmundsen <bird-odin-spam@anduin   >
     - USER32:   o Fake window init bugfixes
