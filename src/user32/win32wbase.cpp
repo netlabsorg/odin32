@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.114 1999-12-18 16:31:50 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.115 1999-12-19 17:46:25 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -145,6 +145,7 @@ void Win32BaseWindow::Init()
   OS2HwndModalDialog  = 0;
   fInternalMsg     = FALSE;
   fNoSizeMsg       = FALSE;
+  fMovingChildren  = FALSE;
   fIsDestroyed     = FALSE;
   fDestroyWindowCalled = FALSE;
   fCreated         = FALSE;
@@ -854,7 +855,7 @@ ULONG Win32BaseWindow::MsgShow(BOOL fShow)
 //******************************************************************************
 ULONG Win32BaseWindow::MsgPosChanging(LPARAM lp)
 {
-    if(fNoSizeMsg)
+    if(fNoSizeMsg || (getParent() && getParent()->InMovingChildren()))
         return 1;
 
     return SendInternalMessageA(WM_WINDOWPOSCHANGING, 0, lp);
@@ -863,7 +864,7 @@ ULONG Win32BaseWindow::MsgPosChanging(LPARAM lp)
 //******************************************************************************
 ULONG Win32BaseWindow::MsgPosChanged(LPARAM lp)
 {
-    if(fNoSizeMsg)
+    if(fNoSizeMsg || (getParent() && getParent()->InMovingChildren()))
         return 1;
 
     return SendInternalMessageA(WM_WINDOWPOSCHANGED, 0, lp);
@@ -873,7 +874,7 @@ ULONG Win32BaseWindow::MsgPosChanged(LPARAM lp)
 ULONG Win32BaseWindow::MsgMove(ULONG x, ULONG y)
 {
     dprintf(("MsgMove to (%d,%d)", x, y));
-    if(fNoSizeMsg)
+    if(fNoSizeMsg || (getParent() && getParent()->InMovingChildren()))
         return 1;
 
     return SendInternalMessageA(WM_MOVE, 0, MAKELONG((USHORT)x, (USHORT)y));
