@@ -1,4 +1,174 @@
- /* $Id: ChangeLog-2000,v 1.1 2000-07-09 22:27:51 phaller Exp $ */
+ /* $Id: ChangeLog-2000,v 1.2 2000-08-01 23:17:54 sandervl Exp $ */
+
+ 2000-07-26: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: Don't translate values returned by WaitForSingleObject.
+                Open32's WaitForSingleObject returns the correct values.
+                -> breaks a lot of things including RealPlayer 7
+                (removed bugfix 2000-07-17: fixed return codes for HMWaitForSingleObject)
+    - DOC\ToDo.txt:
+                Added:
+                USER32: Fix LoadImage to resize icons, cursors or bitmaps
+                        to the specified dimensions (if required)
+
+ 2000-07-25: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: Added environment setting for disabling wait on exit
+                for console applications (SET ODIN_AUTOEXITCONSOLE=1)
+    - DOC\ToDo.txt:
+                Added more unassigned tasks
+
+ 2000-07-22: Sander van Leeuwen <sandervl@xs4all.nl>
+    - DOC\ReportingBugs.txt
+                Added file that tells users how to report bugs
+    - TOOLS\install: 
+                Added ReportingBugs.txt to WarpIN script
+    - USER32:   Fixed BeginPaint; set clip region to update region; not update
+                rectangle -> fixes invisible buttons in winzip install
+    - KERNEL32: Include message in log entry if FS != 0x150b (doesn't always
+                means FS is trashed though)
+   
+ 2000-07-21: Sander van Leeuwen <sandervl@xs4all.nl>
+    - SHLWAPI:  SHGetSpecialFolderPathA: StartMenu changed in 'Start Menu'
+                (now identical to Windows 98/NT)
+    - TOOLS\install: 
+                Changed makefile for odininst; standard odin makefile now
+                Changed warpin script for new odininst location
+
+ 2000-07-20: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   SetWindowPlacement bugfix for Papyrus (do not change the
+                current window position)
+                Fixed FS corruption in CreateCaret
+                Fixed positioning of caret (needed due to client/frame -> frame window changes)
+                WM_ADJUSTWINDOWPOS & WM_WINDOWPOSCHANGED bugfixes (hwndInsertAfter
+                set to HWND_TOP if non-Odin window)
+    - KERNEL32/PELDR
+                Always try to allocate an executable image at it's preferred address 
+                (even if it has fixups)
+
+ 2000-07-19: Sander van Leeuwen <sandervl@xs4all.nl>
+    - INCLUDE\makefiles
+      SRC\*\makefile
+      ODINCRT
+                Build different odincrt for debug & release build (odincrtd & odincrt)
+                Odin dlls now link with correct version
+    - GDI32:    Wrapper rewrite for region apis
+                Changed export for user32 (uses stdcall calling convention now
+                to avoid problem when using debug user32 with retail gdi32)
+    - DOC\Readme.txt
+                Updated installation instructions
+    - TOOLS\INSTALL\odin.cmd
+                Updated script for new doc directory
+
+ 2000-07-18: Yuri Dario <mc6530@mclink.it>
+    - INCLUDE\win: 
+                Compilation fixes for Opera
+    - USER32:   Extra logging information
+                Fixed sending WM_PARENTNOTIFY in ::DestroyWindow
+
+ 2000-07-18: Sander van Leeuwen <sandervl@xs4all.nl>
+    - WINMM:    If waveOutSetVolume called with NULL waveout handle, use
+                that volume as the default for newly created streams.
+                (fixes volume in RealPlayer 7)
+    - KERNEL32: Fixed old unload order bug (causes a crash when quitting 
+                RealPlayer 7); increase dynamic library count after calling
+                dll entrypoint with DLL_PROCESS_ATTACH. (used to be before;
+                -> wrong unload order of RPAP3260 & PNRS3260)
+                Call dll entrypoint with DLL_PROCESS_DETACH even when
+                thread library calls disabled.
+
+ 2000-07-18: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - KERNEL32: APIs are to be placed should have ordinal less than 1200
+                - even if they don't belong in the dll but just happend to be
+                implemented there. The reason is for humans and for
+                documentation tools to be able to tell which exports are APIs
+                and which are internal Odin32 function/APIs.
+    - div:      Added some missing $Id keywords.
+    - database: Trying to make the database more useful. Extracting more
+                data from the source files.
+                According to the doc\ToDo file we're to write structured
+                and well documented code. This database is indetended to
+                make the documentation (++) browsable. (PHP)
+
+ 2000-07-17: Patrick Haller <phaller@gmx.net>
+    - KERNEL32: fixed ReadFile/WriteFile bugfix
+                fixed return codes for HMWaitForSingleObject
+
+ 2000-07-16: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - Win32k:   Created a development branch called "Grace" and checked my
+                current code in into it. (This is the reason why there are
+                some new files in the src/win32k tree.)
+
+ 2000-07-15: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   XWing vs Tie Fighter fix broke RealPlayer 7 setup (missing buttons)
+                -> rewrote RDW_INVALIDATE code in RedrawWindow to work for
+                both applications
+    - KERNEL32: Added extra check in isPEImage method
+                lpNumberOfBytesRead/Written can be NULL in Read/WriteFile
+    - PELDR:    Fix for arguments with quotes (first and last quote removed)
+                (i.e. pe rnuninst "RealNetworks|RealPlayer|6.0| -i -p")
+                Fix for exe name with dir containing spaces
+
+ 2000-07-12: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
+    - KERNEL32: Implemented handlemanager support for named and unnamed pipes
+
+ 2000-07-10: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: Don't try to search for resources if the module doesn't contain any
+
+ 2000-07-09: Patrick Haller <phaller@gmx.net>
+    - doc:      Moved several documents to the new doc directory and
+                created initial version of "ToDo.txt". We should place
+                our open tasks in there for better overview and to be able
+                to assign priorities and people to them.
+
+ 2000-07-07: Sander van Leeuwen <sandervl@xs4all.nl>
+    - NTDLL:    Bugfix for NtQueryInformationToken (TOKEN_USER); updated
+                with latest Wine code (TODO: NTDLL needs to be resynced)
+
+ 2000-07-06: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: Store user default language in thread database struct
+                Set/GetThreadLocale change/return this LCID value
+                Fixed EnumSystemLocalesA/W; now returns default user language id
+                (in text) (TODO: should return all supported locales)
+    - KERNEL32/GDI32/USER32: Changed/fixed calls to strncpy (for 0 termination)
+
+ 2000-07-06: Vitali E. Pelenyov <Vitali.Pelenyov@dpt.ustu.ru>
+    - ODINCRT:  Fixed wrong implementation of strncpy; do not 0 terminate
+                string unless length < length parameter
+                (this is correct behaviour according to C library manual)
+
+ 2000-07-04: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: Unstubbed CopyFileExA/W (calls CopyFileA/W; not properly implemented)
+                Unstubbed CreateDirectoryExA/W (calls CreateDirectoryA/W; not properly implemented)
+                Fixed GetShortPathNameA/W; don't touch short path parameter if
+                it's NULL; behaviour (as seen in NT 4, SP6):
+                - converts long filename to 8.3 short filname (TODO: not yet done here!)
+                - fails on volume that doesn't support 8.3 filenames
+                - if lpszShortPath 0 or cchBuffer too small -> return required length
+                  (INCLUDING 0 terminator)
+                - if lpszLongPath == NULL -> ERROR_INVALID_PARAMETER (return 0)
+                - if lpszLongPath empty -> proceed as if nothing is wrong
+                  (Wine claims it sets last error to ERROR_BAD_PATHNAME)
+                - does NOT clear the last error if successful!
+                - if successful -> return length of string (excluding 0 terminator)
+    - USER32:   Fixed adding windows to tasklist (done too late)
+    - GDI32/USER32:
+                - Rewrote Set/GetViewportExtEx, Set/GetMapMode & moved them
+                  from gdi32 to user32
+
+ 2000-07-03: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - KERNEL32: Added IsDebuggerPresent (debug.cpp). Returns FALSE, but by
+                SETing ODIN32.DEBUGGERPRESENT=1 it will return TRUE. (Some
+                application might issue calls to OutputDebugString if they
+                think they're being debugged.)
+                Moved OutputDebugString(A/W) to debug.cpp.
+
+ 2000-07-02: Sander van Leeuwen <sandervl@xs4all.nl>
+    - RICHED32: Fixed bug when creating edit window (needs to be WS_CHILD)
+    - USER32:   Fixed moving of child windows in MsgFormatFrame & move
+                child windows if only client rectangle changes
+                (fixes Acrobat Distiller window)
+    - SHELL32:  Put back check for registration of ShellView window class
+                -> RegisterClass now fails if already registered
+                (fixed openfile dialogs)
 
  2000-06-30: Sander van Leeuwen <sandervl@xs4all.nl>
     - PELDR:       Fixed bug in command line parser
@@ -13,7 +183,6 @@
                    Move children if client area changed (only if window
                    was previously smaller than client area) -> fixes
                    install window in AIM installer.
-                   TODO: Must do all the moving ourselves. (not let PM handle it at all)
 
  2000-06-30: Michal Necasek <mike@mendelu.cz>
     - KERNEL32:    Fixed lstrcpynA(toW) calls (wrong length)
