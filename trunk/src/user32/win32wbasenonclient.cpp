@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.51 2003-04-11 15:22:34 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.52 2003-04-11 15:45:13 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -529,7 +529,7 @@ LONG Win32BaseWindow::HandleNCHitTest(POINT pt)
     if (!PtInRect(&rect,pt))
     {
       /* Check system menu */
-      if(dwStyle & WS_SYSMENU)
+      if ((dwStyle & WS_SYSMENU) && !(dwExStyle & WS_EX_TOOLWINDOW))
       {
         /* Check if there is an user icon */
         if (IconForWindow(ICON_SMALL))
@@ -549,13 +549,17 @@ LONG Win32BaseWindow::HandleNCHitTest(POINT pt)
 
       /* Check maximize box */
       /* In win95 there is automatically a Maximize button when there is a minimize one*/
-      if ((dwStyle & WS_MAXIMIZEBOX)|| (dwStyle & WS_MINIMIZEBOX))
+      //Testing in NT4 shows that tool windows never have a minimize or maximize button!
+      if (((dwStyle & WS_MAXIMIZEBOX) || (dwStyle & WS_MINIMIZEBOX)) &&
+          !(dwExStyle & WS_EX_TOOLWINDOW))
           rect.right -= GetSystemMetrics(SM_CXSIZE) + 1;
       if (pt.x > rect.right) return HTMAXBUTTON;
 
       /* Check minimize box */
       /* In win95 there is automatically a Maximize button when there is a Maximize one*/
-      if ((dwStyle & WS_MINIMIZEBOX)||(dwStyle & WS_MAXIMIZEBOX))
+      //Testing in NT4 shows that tool windows never have a minimize or maximize button!
+      if (((dwStyle & WS_MINIMIZEBOX) || (dwStyle & WS_MAXIMIZEBOX)) &&
+          !(dwExStyle & WS_EX_TOOLWINDOW))
           rect.right -= GetSystemMetrics(SM_CXSIZE) + 1;
 
       if (pt.x > rect.right) return HTMINBUTTON;
