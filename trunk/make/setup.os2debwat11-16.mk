@@ -1,4 +1,4 @@
-# $Id: setup.os2debwat11-16.mk,v 1.10 2002-08-24 22:33:12 bird Exp $
+# $Id: setup.os2debwat11-16.mk,v 1.11 2002-08-27 03:03:13 bird Exp $
 
 # ---OS2, DEBUG, WAT11-------------------------
 ENV_NAME="OS/2, Debug, Watcom C/C++ v11.0c 16-bit"
@@ -14,6 +14,7 @@ ENV_16BIT = 16
 #
 # Include some shared standard stuff: ALP, VAC optional stuff.
 #
+AS_DEBUG_TYPE = Codeview
 !include $(PATH_MAKE)\setup.os2debalp.mk
 !include $(PATH_MAKE)\setup.os2prfwrc.mk
 !include $(PATH_MAKE)\setup.optional.watcom11x.mk
@@ -44,22 +45,22 @@ AR_LNK3= $(_AR_LNK3:+""&^
 =)
 AR_LNK4= "$(@R).lst";
 
-CC_FLAGS=-bt=os2 -dOS2 -dDEBUG -d__16BIT__ -5 -zq -bm -ze -w4 -d2 -hc -zc $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
-CC_FLAGS_EXE=$(CC_FLAGS)
-CC_FLAGS_DLL=$(CC_FLAGS) -bd
-CC_FLAGS_SYS=$(CC_FLAGS) -s -zfp -zgp -zu
+CC_FLAGS=-bt=os2 -dOS2 -d__16BIT__ -dDEBUG -5 -zq -bm -ze -w4 -zld -d2 -hc $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
+CC_FLAGS_EXE=$(CC_FLAGS) -zc
+CC_FLAGS_DLL=$(CC_FLAGS) -zc -bd
+CC_FLAGS_SYS=$(CC_FLAGS) -s -zff -zgf -zu
 CC_FLAGS_VDD=$(CC_FLAGS_SYS)
-CC_FLAGS_IFS=$(CC_FLAGS_SYS) -bd
+CC_FLAGS_IFS=$(CC_FLAGS) -s -zff -zgf -zu -bd
 CC_OBJ_OUT=-fo=
 CC_LST_OUT=
 CC_PC_2_STDOUT=-pc
 
-CXX_FLAGS=-bt=os2 -dOS2 -dDEBUG -d__16BIT__ -5 -zq -bm -ze -w4 -d2 -hc -zc $(_CXX_OPTIONAL)  $(CXX_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CXX_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
-CXX_FLAGS_EXE=$(CXX_FLAGS)
-CXX_FLAGS_DLL=$(CXX_FLAGS) -bd
-CXX_FLAGS_SYS=$(CXX_FLAGS) -s -zfp -zgp -zu
+CXX_FLAGS=-bt=os2 -dOS2 -d__16BIT__ -dDEBUG -5 -zq -bm -ze -w4 -zld -d2 -hc $(_CXX_OPTIONAL)  $(CXX_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CXX_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
+CXX_FLAGS_EXE=$(CXX_FLAGS) -zc
+CXX_FLAGS_DLL=$(CXX_FLAGS) -zc -bd
+CXX_FLAGS_SYS=$(CXX_FLAGS) -s -zff -zgf -zu
 CXX_FLAGS_VDD=$(CXX_FLAGS_SYS)
-CXX_FLAGS_IFS=$(CXX_FLAGS_SYS) -bd
+CXX_FLAGS_IFS=$(CXX_FLAGS) -s -zff -zgf -zdp -zu -bd
 CXX_OBJ_OUT=-fo=
 CXX_LST_OUT=
 CXX_PC_2_STDOUT=-pc
@@ -88,12 +89,12 @@ CXX_FLAGS_IFS=$(CC_FLAGS_IFS)
 
 IMPLIB_FLAGS=/NOI /Nologo
 
-LINK_FLAGS=Sort global Debug codeview Option quiet, dosseg, eliminate, manglednames, caseexact, MAXErrors=20
+LINK_FLAGS=Option eliminate, manglednames, caseexact, verbose, cache $(_LD_OPTIONAL) Debug codeview all
 LINK_FLAGS_EXE=$(LINK_FLAGS)
 LINK_FLAGS_DLL=$(LINK_FLAGS)
-LINK_FLAGS_SYS=$(LINK_FLAGS) Option oneautodata, internalrelocs, togglerelocs
+LINK_FLAGS_SYS=$(LINK_FLAGS) segment type code preload segment type data preload Option internalrelocs, togglerelocs
 LINK_FLAGS_VDD=$(LINK_FLAGS_SYS)
-LINK_FLAGS_IFS=$(LINK_FLAGS_SYS)
+LINK_FLAGS_IFS=$(LINK_FLAGS) segment type code preload segment type data preload
 LINK_CMD_EXE=$(LINK) $(LINK_FLAGS_EXE) @$(TARGET_LNK)
 LINK_CMD_DLL=$(LINK) $(LINK_FLAGS_DLL) @$(TARGET_LNK)
 LINK_CMD_SYS=$(LINK) $(LINK_FLAGS_SYS) @$(TARGET_LNK)
