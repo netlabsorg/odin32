@@ -1,4 +1,4 @@
-; $Id: mytkStartProcess.asm,v 1.1.2.2 2000-08-22 03:00:22 bird Exp $
+; $Id: mytkStartProcess.asm,v 1.1.2.3 2000-08-23 04:25:44 bird Exp $
 ;
 ; tkStartProcess overloader. Needed to clear the loader semaphore
 ; when a process is being started syncronously.
@@ -51,7 +51,7 @@
     ;
     ; Calltable entry for tkStartProcess
     ;
-    extrn _g_tkStartProcess:PROC
+    extrn _tkStartProcess:PROC
 
 ;
 ;   Exported symbols
@@ -104,7 +104,7 @@ mtksp_ret:
     pop     edx
     pop     ecx
     pop     eax
-    jmp    _g_tkStartProcess
+    jmp     _tkStartProcess
 mytkStartProcess ENDP
 
 CODE32 ENDS
