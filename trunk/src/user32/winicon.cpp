@@ -1,4 +1,4 @@
-/* $Id: winicon.cpp,v 1.39 2003-01-05 16:34:58 sandervl Exp $ */
+/* $Id: winicon.cpp,v 1.40 2003-01-07 10:26:01 sandervl Exp $ */
 /*
  * Win32 Icon Code for OS/2
  *
@@ -199,7 +199,41 @@ HICON WINAPI CreateIconIndirect(ICONINFO *iconinfo)
         info->hColorBmp     = 0;
 
         /* Transfer the bitmap bits to the CURSORICONINFO structure */
-        GetBitmapBits( iconinfo->hbmMask ,sizeAnd,(char*)(info + 1) );
+        if(bmpAnd.bmBitsPixel > 1) 
+        {//Our code expects b&w masks, so convert it first
+         //We could also use GetDIBits to do the conversion for us, but it returns
+         //scanlines aligned differently from what we want.
+            HBITMAP oldbmpSrc, oldbmpDest, hbmMask;
+            HDC     hdcSrc, hdcDest;
+
+            hdcSrc  = CreateCompatibleDC(0);
+            oldbmpSrc = SelectObject(hdcSrc, iconinfo->hbmMask);
+
+            hdcDest = CreateCompatibleDC(0);
+            hbmMask = CreateBitmap(bmpAnd.bmWidth, bmpAnd.bmHeight, 1,
+                                   1, NULL);
+            oldbmpDest = SelectObject(hdcDest, hbmMask);
+
+            //blit to the destination HDC & convert to 1bpp
+            BitBlt(hdcDest, 0, 0, bmpAnd.bmWidth, bmpAnd.bmHeight, 
+                   hdcSrc, 0, 0, SRCCOPY);
+
+            //recalculate the mask bitmap size
+            GetObjectA( hbmMask, sizeof(bmpAnd), &bmpAnd );
+            sizeAnd = bmpAnd.bmHeight * bmpAnd.bmWidthBytes;
+
+            //query the 1bpp bitmap data
+            GetBitmapBits( hbmMask ,sizeAnd,(char*)(info + 1) );
+
+            SelectObject(hdcSrc, oldbmpSrc);
+            SelectObject(hdcDest, oldbmpDest);
+            DeleteObject(hbmMask);
+            DeleteDC(hdcSrc);
+            DeleteDC(hdcDest);
+        }
+        else {
+            GetBitmapBits( iconinfo->hbmMask ,sizeAnd,(char*)(info + 1) );
+        }
         if(bmpXor.bmBitsPixel > 1)
         {
             BITMAPINFO* pInfo = (BITMAPINFO *)malloc(sizeof(BITMAPINFO)+colortablesize+3*sizeof(DWORD)); //+ extra space for > 8bpp images
