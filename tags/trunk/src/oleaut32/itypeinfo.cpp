@@ -1,4 +1,4 @@
-/* $Id: itypeinfo.cpp,v 1.4 2000-09-17 22:31:41 davidr Exp $ */
+/* $Id: itypeinfo.cpp,v 1.5 2001-01-18 18:12:20 sandervl Exp $ */
 /* 
  * ITypeInfo interface
  * 
@@ -24,7 +24,7 @@ HRESULT WINAPI LoadTypeLib( LPCOLESTR szFile, ITypeLib * * ppTLib);
 // Local Data
 // ======================================================================
 
-static ICOM_VTABLE(ITypeInfo) ITypeInfo_Vtable =
+static ICOM_VTABLE(ITypeInfo2) ITypeInfo_Vtable =
 {
     ITypeInfoImpl_QueryInterface,
     ITypeInfoImpl_AddRef,
@@ -102,7 +102,7 @@ void ITypeInfoImpl_Destructor(ITypeInfoImpl * This)
 // 
 // This object supports IUnknown, ITypeInfo, ITypeInfo2
 // ----------------------------------------------------------------------
-HRESULT WIN32API ITypeInfoImpl_QueryInterface(LPTYPEINFO iface,
+HRESULT WIN32API ITypeInfoImpl_QueryInterface(ITypeInfo2 * iface,
 				REFIID riid, VOID **ppvObject)
 {
     ICOM_THIS(ITypeInfoImpl, iface);
@@ -143,7 +143,7 @@ HRESULT WIN32API ITypeInfoImpl_QueryInterface(LPTYPEINFO iface,
     }
 
     // Query Interface always increases the reference count by one...
-    ITypeInfoImpl_AddRef((LPTYPEINFO)This);
+    ITypeInfoImpl_AddRef((ITypeInfo2 *)This);
 
     return S_OK;
 }
@@ -152,7 +152,7 @@ HRESULT WIN32API ITypeInfoImpl_QueryInterface(LPTYPEINFO iface,
 // ----------------------------------------------------------------------
 // ITypeInfoImpl_AddRef
 // ----------------------------------------------------------------------
-ULONG   WIN32API ITypeInfoImpl_AddRef(LPTYPEINFO iface)
+ULONG   WIN32API ITypeInfoImpl_AddRef(ITypeInfo2 * iface)
 {
     ICOM_THIS(ITypeInfoImpl, iface);
 
@@ -165,7 +165,7 @@ ULONG   WIN32API ITypeInfoImpl_AddRef(LPTYPEINFO iface)
 // ----------------------------------------------------------------------
 // ITypeInfoImpl_Release
 // ----------------------------------------------------------------------
-ULONG   WIN32API ITypeInfoImpl_Release(LPTYPEINFO iface)
+ULONG   WIN32API ITypeInfoImpl_Release(ITypeInfo2 * iface)
 {
     ICOM_THIS(ITypeInfoImpl, iface);
 
@@ -183,7 +183,7 @@ ULONG   WIN32API ITypeInfoImpl_Release(LPTYPEINFO iface)
 // ----------------------------------------------------------------------
 // ITypeInfoImpl_GetTypeAttr
 // ----------------------------------------------------------------------
-HRESULT WIN32API ITypeInfoImpl_GetTypeAttr(LPTYPEINFO iface,
+HRESULT WIN32API ITypeInfoImpl_GetTypeAttr(ITypeInfo2 * iface,
 				LPTYPEATTR  *ppTypeAttr)
 {
     ICOM_THIS(ITypeInfoImpl, iface);
@@ -202,7 +202,7 @@ HRESULT WIN32API ITypeInfoImpl_GetTypeAttr(LPTYPEINFO iface,
 // ----------------------------------------------------------------------
 // 
 // ----------------------------------------------------------------------
-HRESULT WIN32API ITypeInfoImpl_GetTypeComp(LPTYPEINFO iface,
+HRESULT WIN32API ITypeInfoImpl_GetTypeComp(ITypeInfo2 * iface,
 				ITypeComp  * *ppTComp)
 {
     ICOM_THIS(ITypeInfoImpl, iface);
@@ -216,7 +216,7 @@ HRESULT WIN32API ITypeInfoImpl_GetTypeComp(LPTYPEINFO iface,
 // ----------------------------------------------------------------------
 // ITypeInfoImpl_GetFuncDesc
 // ----------------------------------------------------------------------
-HRESULT WIN32API ITypeInfoImpl_GetFuncDesc(LPTYPEINFO iface,
+HRESULT WIN32API ITypeInfoImpl_GetFuncDesc(ITypeInfo2 * iface,
 				UINT index, LPFUNCDESC  *ppFuncDesc)
 {
     ICOM_THIS(ITypeInfoImpl, iface);
@@ -237,7 +237,7 @@ HRESULT WIN32API ITypeInfoImpl_GetFuncDesc(LPTYPEINFO iface,
 // ----------------------------------------------------------------------
 // ITypeInfoImpl_GetVarDesc
 // ----------------------------------------------------------------------
-HRESULT WIN32API ITypeInfoImpl_GetVarDesc(LPTYPEINFO iface,
+HRESULT WIN32API ITypeInfoImpl_GetVarDesc(ITypeInfo2 * iface,
 				UINT index, LPVARDESC  *ppVarDesc)
 {
     ICOM_THIS(ITypeInfoImpl, iface);
@@ -258,7 +258,7 @@ HRESULT WIN32API ITypeInfoImpl_GetVarDesc(LPTYPEINFO iface,
 // ----------------------------------------------------------------------
 // ITypeInfoImpl_GetNames
 // ----------------------------------------------------------------------
-HRESULT WIN32API ITypeInfoImpl_GetNames(LPTYPEINFO iface,
+HRESULT WIN32API ITypeInfoImpl_GetNames(ITypeInfo2 * iface,
 				MEMBERID memid, BSTR  *rgBstrNames,
 				UINT cMaxNames, UINT  *pcNames)
 {
@@ -312,10 +312,10 @@ HRESULT WIN32API ITypeInfoImpl_GetNames(LPTYPEINFO iface,
 	for (itrRef.MoveStart(); itrRef.IsValid(); itrRef.MoveNext())
 	{
 	    // recursive search
-	    ITypeInfo *	pTInfo;
+	    ITypeInfo2 *	pTInfo;
 	    HRESULT		result;
 
-	    result = This->lpvtbl->fnGetRefTypeInfo(iface, itrRef.Element()->reference, &pTInfo);
+	    result = This->lpvtbl->fnGetRefTypeInfo(iface, itrRef.Element()->reference, (ITypeInfo **)&pTInfo);
 	    if(SUCCEEDED(result))
 	    {
 		result = ICOM_VTBL(pTInfo)->fnGetNames(
@@ -337,7 +337,7 @@ HRESULT WIN32API ITypeInfoImpl_GetNames(LPTYPEINFO iface,
 // ----------------------------------------------------------------------
 // ITypeInfoImpl_GetRefTypeOfImplType
 // ----------------------------------------------------------------------
-HRESULT WIN32API ITypeInfoImpl_GetRefTypeOfImplType(LPTYPEINFO iface,
+HRESULT WIN32API ITypeInfoImpl_GetRefTypeOfImplType(ITypeInfo2 * iface,
 				UINT index, HREFTYPE  *pRefType)
 {
     ICOM_THIS(ITypeInfoImpl, iface);
@@ -355,7 +355,7 @@ HRESULT WIN32API ITypeInfoImpl_GetRefTypeOfImplType(LPTYPEINFO iface,
 // ----------------------------------------------------------------------
 //  ITypeInfoImpl_GetImplTypeFlags
 // ----------------------------------------------------------------------
-HRESULT WIN32API ITypeInfoImpl_GetImplTypeFlags(LPTYPEINFO iface,
+HRESULT WIN32API ITypeInfoImpl_GetImplTypeFlags(ITypeInfo2 * iface,
 				UINT index, INT  *pImplTypeFlags)
 {
     ICOM_THIS(ITypeInfoImpl, iface);
@@ -373,7 +373,7 @@ HRESULT WIN32API ITypeInfoImpl_GetImplTypeFlags(LPTYPEINFO iface,
 // ----------------------------------------------------------------------
 // ITypeInfoImpl_GetIDsOfNames
 // ----------------------------------------------------------------------
-HRESULT WIN32API ITypeInfoImpl_GetIDsOfNames(LPTYPEINFO iface,
+HRESULT WIN32API ITypeInfoImpl_GetIDsOfNames(ITypeInfo2 * iface,
 				LPOLESTR  *rgszNames, UINT cNames, MEMBERID  *pMemId)
 {
     ICOM_THIS(ITypeInfoImpl, iface);
@@ -462,7 +462,7 @@ HRESULT WIN32API ITypeInfoImpl_GetIDsOfNames(LPTYPEINFO iface,
 // ----------------------------------------------------------------------
 // 
 // ----------------------------------------------------------------------
-HRESULT WIN32API ITypeInfoImpl_Invoke(LPTYPEINFO iface,
+HRESULT WIN32API ITypeInfoImpl_Invoke(ITypeInfo2 * iface,
 				VOID  *pIUnk, MEMBERID memid, UINT16 dwFlags,
 				DISPPARAMS  *pDispParams, VARIANT *pVarResult,
 				EXCEPINFO  *pExcepInfo, UINT  *pArgErr)
@@ -478,7 +478,7 @@ HRESULT WIN32API ITypeInfoImpl_Invoke(LPTYPEINFO iface,
 // ----------------------------------------------------------------------
 // ITypeInfoImpl_GetDocumentation
 // ----------------------------------------------------------------------
-HRESULT WIN32API ITypeInfoImpl_GetDocumentation(LPTYPEINFO iface,
+HRESULT WIN32API ITypeInfoImpl_GetDocumentation(ITypeInfo2 * iface,
 				MEMBERID memid, BSTR  *pBstrName, BSTR  *pBstrDocString,
 				DWORD  *pdwHelpContext, BSTR  *pBstrHelpFile)
 {
@@ -544,7 +544,7 @@ HRESULT WIN32API ITypeInfoImpl_GetDocumentation(LPTYPEINFO iface,
 // ----------------------------------------------------------------------
 // 
 // ----------------------------------------------------------------------
-HRESULT WIN32API ITypeInfoImpl_GetDllEntry(LPTYPEINFO iface,
+HRESULT WIN32API ITypeInfoImpl_GetDllEntry(ITypeInfo2 * iface,
 				MEMBERID memid, INVOKEKIND invKind, BSTR  *pBstrDllName,
 				BSTR  *pBstrName, WORD  *pwOrdinal)
 {
@@ -559,7 +559,7 @@ HRESULT WIN32API ITypeInfoImpl_GetDllEntry(LPTYPEINFO iface,
 // ----------------------------------------------------------------------
 // 
 // ----------------------------------------------------------------------
-HRESULT WIN32API ITypeInfoImpl_GetRefTypeInfo(LPTYPEINFO iface,
+HRESULT WIN32API ITypeInfoImpl_GetRefTypeInfo(ITypeInfo2 * iface,
 				HREFTYPE hRefType, ITypeInfo  * *ppTInfo)
 {
     ICOM_THIS(ITypeInfoImpl, iface);
@@ -593,7 +593,7 @@ HRESULT WIN32API ITypeInfoImpl_GetRefTypeInfo(LPTYPEINFO iface,
 	    if (pTypeLib)
 	    {
 		return pTypeLib->lpvtbl->fnGetTypeInfoOfGuid(
-			(LPTYPELIB)pTypeLib, &itrRef.Element()->guid, ppTInfo);
+			(ITypeLib2 *)pTypeLib, &itrRef.Element()->guid, ppTInfo);
 	    }
 	    rc = LoadRegTypeLib( &itrRef.Element()->pImpTLInfo->guid,
 		    0,0,0, /* FIXME */
@@ -607,7 +607,7 @@ HRESULT WIN32API ITypeInfoImpl_GetRefTypeInfo(LPTYPEINFO iface,
 	    if (SUCCEEDED(rc))
 	    {
 		rc = pTypeLib->lpvtbl->fnGetTypeInfoOfGuid(
-			(LPTYPELIB)pTypeLib, &itrRef.Element()->guid, ppTInfo);
+			(ITypeLib2 *)pTypeLib, &itrRef.Element()->guid, ppTInfo);
 		itrRef.Element()->pImpTLInfo->pImpTypeLib = pTypeLib;
 	    }
 	    return rc;
@@ -621,7 +621,7 @@ HRESULT WIN32API ITypeInfoImpl_GetRefTypeInfo(LPTYPEINFO iface,
 // ----------------------------------------------------------------------
 // 
 // ----------------------------------------------------------------------
-HRESULT WIN32API ITypeInfoImpl_AddressOfMember(LPTYPEINFO iface,
+HRESULT WIN32API ITypeInfoImpl_AddressOfMember(ITypeInfo2 * iface,
 				MEMBERID memid, INVOKEKIND invKind, PVOID *ppv)
 {
     ICOM_THIS(ITypeInfoImpl, iface);
@@ -635,7 +635,7 @@ HRESULT WIN32API ITypeInfoImpl_AddressOfMember(LPTYPEINFO iface,
 // ----------------------------------------------------------------------
 // 
 // ----------------------------------------------------------------------
-HRESULT WIN32API ITypeInfoImpl_CreateInstance(LPTYPEINFO iface,
+HRESULT WIN32API ITypeInfoImpl_CreateInstance(ITypeInfo2 * iface,
 				IUnknown *pUnk, REFIID riid, VOID  * *ppvObj)
 {
     ICOM_THIS(ITypeInfoImpl, iface);
@@ -649,7 +649,7 @@ HRESULT WIN32API ITypeInfoImpl_CreateInstance(LPTYPEINFO iface,
 // ----------------------------------------------------------------------
 // 
 // ----------------------------------------------------------------------
-HRESULT WIN32API ITypeInfoImpl_GetMops(LPTYPEINFO iface,
+HRESULT WIN32API ITypeInfoImpl_GetMops(ITypeInfo2 * iface,
 				MEMBERID memid, BSTR  *pBstrMops)
 {
     ICOM_THIS(ITypeInfoImpl, iface);
@@ -663,7 +663,7 @@ HRESULT WIN32API ITypeInfoImpl_GetMops(LPTYPEINFO iface,
 // ----------------------------------------------------------------------
 // ITypeInfoImpl_GetContainingTypeLib
 // ----------------------------------------------------------------------
-HRESULT WIN32API ITypeInfoImpl_GetContainingTypeLib(LPTYPEINFO iface,
+HRESULT WIN32API ITypeInfoImpl_GetContainingTypeLib(ITypeInfo2 * iface,
 				ITypeLib  * *ppTLib, UINT  *pIndex)
 {
     ICOM_THIS(ITypeInfoImpl, iface);
@@ -682,7 +682,7 @@ HRESULT WIN32API ITypeInfoImpl_GetContainingTypeLib(LPTYPEINFO iface,
 // ----------------------------------------------------------------------
 // ITypeInfoImpl_ReleaseTypeAttr
 // ----------------------------------------------------------------------
-HRESULT WIN32API ITypeInfoImpl_ReleaseTypeAttr(LPTYPEINFO iface,
+HRESULT WIN32API ITypeInfoImpl_ReleaseTypeAttr(ITypeInfo2 * iface,
 				TYPEATTR *pTypeAttr)
 {
     ICOM_THIS(ITypeInfoImpl, iface);
@@ -698,7 +698,7 @@ HRESULT WIN32API ITypeInfoImpl_ReleaseTypeAttr(LPTYPEINFO iface,
 // ----------------------------------------------------------------------
 // ITypeInfoImpl_ReleaseFuncDesc
 // ----------------------------------------------------------------------
-HRESULT WIN32API ITypeInfoImpl_ReleaseFuncDesc(LPTYPEINFO iface,
+HRESULT WIN32API ITypeInfoImpl_ReleaseFuncDesc(ITypeInfo2 * iface,
 				FUNCDESC *pFuncDesc)
 {
     ICOM_THIS(ITypeInfoImpl, iface);
@@ -714,7 +714,7 @@ HRESULT WIN32API ITypeInfoImpl_ReleaseFuncDesc(LPTYPEINFO iface,
 // ----------------------------------------------------------------------
 // ITypeInfoImpl_ReleaseVarDesc
 // ----------------------------------------------------------------------
-HRESULT WIN32API ITypeInfoImpl_ReleaseVarDesc(LPTYPEINFO iface,
+HRESULT WIN32API ITypeInfoImpl_ReleaseVarDesc(ITypeInfo2 * iface,
 				VARDESC *pVarDesc)
 {
     ICOM_THIS(ITypeInfoImpl, iface);
@@ -730,7 +730,7 @@ HRESULT WIN32API ITypeInfoImpl_ReleaseVarDesc(LPTYPEINFO iface,
 // ----------------------------------------------------------------------
 // ITypeInfo2Impl_GetTypeKind
 // ----------------------------------------------------------------------
-HRESULT WIN32API ITypeInfo2Impl_GetTypeKind(LPTYPEINFO iface,
+HRESULT WIN32API ITypeInfo2Impl_GetTypeKind(ITypeInfo2 * iface,
 				TYPEKIND *pTypeKind)
 {
     ICOM_THIS(ITypeInfoImpl, iface);
@@ -745,7 +745,7 @@ HRESULT WIN32API ITypeInfo2Impl_GetTypeKind(LPTYPEINFO iface,
 // ----------------------------------------------------------------------
 // ITypeInfo2Impl_GetTypeFlags
 // ----------------------------------------------------------------------
-HRESULT WIN32API ITypeInfo2Impl_GetTypeFlags(LPTYPEINFO iface,
+HRESULT WIN32API ITypeInfo2Impl_GetTypeFlags(ITypeInfo2 * iface,
 				UINT *pTypeFlags)
 {
     ICOM_THIS(ITypeInfoImpl, iface);
@@ -761,7 +761,7 @@ HRESULT WIN32API ITypeInfo2Impl_GetTypeFlags(LPTYPEINFO iface,
 // ----------------------------------------------------------------------
 // ITypeInfo2Impl_GetFuncIndexOfMemId
 // ----------------------------------------------------------------------
-HRESULT WIN32API ITypeInfo2Impl_GetFuncIndexOfMemId(LPTYPEINFO iface,
+HRESULT WIN32API ITypeInfo2Impl_GetFuncIndexOfMemId(ITypeInfo2 * iface,
 				MEMBERID memid, INVOKEKIND invKind, UINT *pFuncIndex)
 {
     ICOM_THIS(ITypeInfoImpl, iface);
@@ -789,7 +789,7 @@ HRESULT WIN32API ITypeInfo2Impl_GetFuncIndexOfMemId(LPTYPEINFO iface,
 // ----------------------------------------------------------------------
 // ITypeInfo2Impl_GetVarIndexOfMemId
 // ----------------------------------------------------------------------
-HRESULT WIN32API ITypeInfo2Impl_GetVarIndexOfMemId(LPTYPEINFO iface,
+HRESULT WIN32API ITypeInfo2Impl_GetVarIndexOfMemId(ITypeInfo2 * iface,
 				MEMBERID memid, UINT *pVarIndex)
 {
     ICOM_THIS(ITypeInfoImpl, iface);
@@ -835,7 +835,7 @@ static HRESULT FindCustData(oList<TLBCustData *> & list, REFGUID guid, VARIANT *
 // ----------------------------------------------------------------------
 // ITypeInfo2Impl_GetCustData
 // ----------------------------------------------------------------------
-HRESULT WIN32API ITypeInfo2Impl_GetCustData(LPTYPEINFO iface,
+HRESULT WIN32API ITypeInfo2Impl_GetCustData(ITypeInfo2 * iface,
 				REFGUID guid, VARIANT *pVarVal)
 {
     ICOM_THIS(ITypeInfoImpl, iface);
@@ -849,7 +849,7 @@ HRESULT WIN32API ITypeInfo2Impl_GetCustData(LPTYPEINFO iface,
 // ----------------------------------------------------------------------
 // ITypeInfo2Impl_GetFuncCustData
 // ----------------------------------------------------------------------
-HRESULT WIN32API ITypeInfo2Impl_GetFuncCustData(LPTYPEINFO iface,
+HRESULT WIN32API ITypeInfo2Impl_GetFuncCustData(ITypeInfo2 * iface,
 				UINT index, REFGUID guid, VARIANT *pVarVal)
 {
     ICOM_THIS(ITypeInfoImpl, iface);
@@ -866,7 +866,7 @@ HRESULT WIN32API ITypeInfo2Impl_GetFuncCustData(LPTYPEINFO iface,
 // ----------------------------------------------------------------------
 //  ITypeInfo2Impl_GetParamCustData
 // ----------------------------------------------------------------------
-HRESULT WIN32API ITypeInfo2Impl_GetParamCustData(LPTYPEINFO iface,
+HRESULT WIN32API ITypeInfo2Impl_GetParamCustData(ITypeInfo2 * iface,
 				UINT indexFunc, UINT indexParam, REFGUID guid, VARIANT *pVarVal)
 {
     ICOM_THIS(ITypeInfoImpl, iface);
@@ -890,7 +890,7 @@ HRESULT WIN32API ITypeInfo2Impl_GetParamCustData(LPTYPEINFO iface,
 // ----------------------------------------------------------------------
 // ITypeInfo2Impl_GetVarCustData
 // ----------------------------------------------------------------------
-HRESULT WIN32API ITypeInfo2Impl_GetVarCustData(LPTYPEINFO iface,
+HRESULT WIN32API ITypeInfo2Impl_GetVarCustData(ITypeInfo2 * iface,
 				UINT index, REFGUID guid, VARIANT *pVarVal)
 {
     ICOM_THIS(ITypeInfoImpl, iface);
@@ -907,7 +907,7 @@ HRESULT WIN32API ITypeInfo2Impl_GetVarCustData(LPTYPEINFO iface,
 // ----------------------------------------------------------------------
 // ITypeInfo2Impl_GetImplTypeCustData
 // ----------------------------------------------------------------------
-HRESULT WIN32API ITypeInfo2Impl_GetImplTypeCustData(LPTYPEINFO iface,
+HRESULT WIN32API ITypeInfo2Impl_GetImplTypeCustData(ITypeInfo2 * iface,
 				UINT index, REFGUID guid, VARIANT *pVarVal)
 {
     ICOM_THIS(ITypeInfoImpl, iface);
@@ -924,9 +924,9 @@ HRESULT WIN32API ITypeInfo2Impl_GetImplTypeCustData(LPTYPEINFO iface,
 // ----------------------------------------------------------------------
 // ITypeInfo2Impl_GetDocumentation2
 // ----------------------------------------------------------------------
-HRESULT WIN32API ITypeInfo2Impl_GetDocumentation2(LPTYPEINFO iface,
+HRESULT WIN32API ITypeInfo2Impl_GetDocumentation2(ITypeInfo2 * iface,
 				MEMBERID memid, LCID lcid, BSTR *pbstrHelpString,
-				INT *pdwHelpStringContext, BSTR *pbstrHelpStringDll)
+				DWORD *pdwHelpStringContext, BSTR *pbstrHelpStringDll)
 {
     ICOM_THIS(ITypeInfoImpl, iface);
 
@@ -1014,7 +1014,7 @@ static HRESULT GetAllCustData(oList<TLBCustData *> & list, CUSTDATA *pCustData)
 // ----------------------------------------------------------------------
 // ITypeInfo2Impl_GetAllCustData
 // ----------------------------------------------------------------------
-HRESULT WIN32API ITypeInfo2Impl_GetAllCustData(LPTYPEINFO iface,
+HRESULT WIN32API ITypeInfo2Impl_GetAllCustData(ITypeInfo2 * iface,
 				CUSTDATA *pCustData)
 {
     ICOM_THIS(ITypeInfoImpl, iface);
@@ -1028,7 +1028,7 @@ HRESULT WIN32API ITypeInfo2Impl_GetAllCustData(LPTYPEINFO iface,
 // ----------------------------------------------------------------------
 // ITypeInfo2Impl_GetAllFuncCustData
 // ----------------------------------------------------------------------
-HRESULT WIN32API ITypeInfo2Impl_GetAllFuncCustData(LPTYPEINFO iface,
+HRESULT WIN32API ITypeInfo2Impl_GetAllFuncCustData(ITypeInfo2 * iface,
 				UINT index, CUSTDATA *pCustData)
 {
     ICOM_THIS(ITypeInfoImpl, iface);
@@ -1045,7 +1045,7 @@ HRESULT WIN32API ITypeInfo2Impl_GetAllFuncCustData(LPTYPEINFO iface,
 // ----------------------------------------------------------------------
 // ITypeInfo2Impl_GetAllParamCustData
 // ----------------------------------------------------------------------
-HRESULT WIN32API ITypeInfo2Impl_GetAllParamCustData(LPTYPEINFO iface,
+HRESULT WIN32API ITypeInfo2Impl_GetAllParamCustData(ITypeInfo2 * iface,
 				UINT indexFunc, UINT indexParam, CUSTDATA *pCustData)
 {
     ICOM_THIS(ITypeInfoImpl, iface);
@@ -1069,7 +1069,7 @@ HRESULT WIN32API ITypeInfo2Impl_GetAllParamCustData(LPTYPEINFO iface,
 // ----------------------------------------------------------------------
 // ITypeInfo2Impl_GetAllVarCustData
 // ----------------------------------------------------------------------
-HRESULT WIN32API ITypeInfo2Impl_GetAllVarCustData(LPTYPEINFO iface,
+HRESULT WIN32API ITypeInfo2Impl_GetAllVarCustData(ITypeInfo2 * iface,
 				UINT index, CUSTDATA *pCustData)
 {
     ICOM_THIS(ITypeInfoImpl, iface);
@@ -1086,7 +1086,7 @@ HRESULT WIN32API ITypeInfo2Impl_GetAllVarCustData(LPTYPEINFO iface,
 // ----------------------------------------------------------------------
 // ITypeInfo2Impl_GetAllImplTypeCustData
 // ----------------------------------------------------------------------
-HRESULT WIN32API ITypeInfo2Impl_GetAllImplTypeCustData(LPTYPEINFO iface,
+HRESULT WIN32API ITypeInfo2Impl_GetAllImplTypeCustData(ITypeInfo2 * iface,
 				UINT index, CUSTDATA *pCustData)
 {
     ICOM_THIS(ITypeInfoImpl, iface);
