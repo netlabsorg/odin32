@@ -1,4 +1,4 @@
-# $Id: makefile.icc,v 1.6 2000-03-27 10:18:42 bird Exp $
+# $Id: makefile.icc,v 1.7 2000-05-13 15:40:34 bird Exp $
 
 #
 # PD-Win32 API
@@ -8,36 +8,59 @@
 #
 
 
-
-# include common definitions
+#
+# Include common definitions
+#
+PDWIN32_TOOLS   = ..\bin
 PDWIN32_INCLUDE = ..\..\include
-!include ..\..\include\pdwin32.mk
+!include $(PDWIN32_INCLUDE)\pdwin32.mk
 
-# Addjust common definitions
-AR       = ilib /nofree /quiet /nobackup
+# Definitions for pdwin32.post
+LOCALCLEAN  = 1
+CLEANEXTRAS = commonicc.lib
+
+#
+# Addjust common definitions...
+#
 CFLAGS   = $(CFLAGS)   -Ge+ -Tx+ -Tm+ -I$(PDWIN32_INCLUDE)      -Wall+ppt-ppc-inl-cnv-gnr-vft-
 CXXFLAGS = $(CXXFLAGS) -Ge+ -Gx- -Tx+ -Tm+ -I$(PDWIN32_INCLUDE) -Wall+ppt-ppc-inl-cnv-gnr-vft-
 
 
-all: commonicc.lib
+#
+# Object files.
+# Important! No space after the filenames! The space will be converted
+#     to a '+' operator on the ILIB command line. NMAKE adds a space
+#     for each new line. This space is converted to a '+' which
+#     prefixes each filenames.
+#
+OBJS =\
+$(OBJDIR)\kFilePe.obj\
+$(OBJDIR)\kFileDef.obj\
+$(OBJDIR)\kFileLx.obj\
+$(OBJDIR)\kFileFormatBase.obj
 
 
-commonicc.lib: kFilePe.obj kFileDef.obj kFileLx.obj kFileFormatBase.obj
-    -$(RM) $@
-    $(AR) $@ -+kFilePe.obj -+kFileDef.obj -+kFileLx.obj -+kFileFormatBase.obj, NUL;
+#
+# All rule.
+#
+all:    $(OBJDIR) \
+        commonicc.lib
 
 
+commonicc.lib: $(OBJDIR)\commonicc.lib
+    $(CP) $@ $**
+
+$(OBJDIR)\commonicc.lib: $(OBJS)
+    $(RM) $@
+    $(ILIB) $@ $(OBJS: = +), NUL;
+
+#
+# dependent rule. forward to main makefile.
+#
 dep:
-    @nmake /nologo -f makefile NODEP=1 dep
-
-!ifndef NODEP
-!include .depend
-!endif
+    @$(MAKE) /nologo -f makefile NODEP=1 dep
 
 
-clean:
-   @$(RM) *.obj commonicc.lib cset*.pch
-
-
-
+# Includes the common rules.
+!include $(PDWIN32_INCLUDE)/pdwin32.post
 
