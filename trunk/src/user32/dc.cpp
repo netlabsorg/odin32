@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.78 2000-11-15 13:57:56 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.79 2000-11-22 13:44:49 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -1231,6 +1231,7 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
             }
         }
         else {
+            dprintf2(("WinInvalidateRect (%d,%d)(%d,%d)", rectl.xLeft, rectl.yBottom, rectl.xRight, rectl.yTop));
             success = WinInvalidateRect (hwnd, &rectl, IncludeChildren);
 //SvL: If all children are included, then WinInvalidateRect is called
 //     with fIncludeChildren=1 -> rect of hwnd isn't invalidated if child(ren)
