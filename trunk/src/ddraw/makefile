@@ -1,20 +1,16 @@
-# $Id: makefile,v 1.25 2000-11-19 09:20:50 bird Exp $
-#
-# ddraw.dll makefile
-#
-# Copyright 1998 Sander van Leeuwen
-#           1999 Markus Montkowski
-#
-# Project Odin Software License can be found in LICENSE.TXT
-#
-#
+# $Id: makefile,v 1.26 2000-12-02 23:38:54 bird Exp $
 
+#
+# Odin32 API
+#
+#       ddraw.dll makefile
+#
 
 
 #
 # Compiler, tools, and interference rules.
 #
-!include ../../include/pdwin32.mk
+!include ../../makefile.inc
 
 
 #
@@ -43,13 +39,13 @@ $(OBJDIR)\ddrawrsrc.obj
 # Libraries. One space before the '\'.
 #
 LIBS = \
-$(PDWIN32_LIB)/ole32.lib \
-$(PDWIN32_LIB)/advapi32.lib \
-$(PDWIN32_LIB)/gdi32.lib \
-$(PDWIN32_LIB)/comctl32.lib \
-$(PDWIN32_LIB)/kernel32.lib \
-$(PDWIN32_LIB)/$(ODINCRT).lib \
-$(PDWIN32_LIB)/user32.lib \
+$(ODIN32_LIB)/ole32.lib \
+$(ODIN32_LIB)/advapi32.lib \
+$(ODIN32_LIB)/gdi32.lib \
+$(ODIN32_LIB)/comctl32.lib \
+$(ODIN32_LIB)/kernel32.lib \
+$(ODIN32_LIB)/$(ODINCRT).lib \
+$(ODIN32_LIB)/user32.lib \
 mmpm2.lib \
 os2386.lib \
 $(RTLLIB_O)
@@ -64,5 +60,5 @@ TARGET = ddraw
 #
 # Includes the common rules.
 #
-!include $(PDWIN32_INCLUDE)/pdwin32.post
+!include $(ODIN32_POST_INC)
 

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.20 2000-11-19 09:16:55 bird Exp $
+# $Id: makefile,v 1.21 2000-12-02 23:39:26 bird Exp $
 
 #
 # Odin32 API
@@ -10,7 +10,7 @@
 #
 # Compiler, tools, and interference rules.
 #
-!include ../../include/pdwin32.mk
+!include ../../makefile.inc
 
 
 #
@@ -34,9 +34,9 @@ $(OBJDIR)\dsoundrsrc.obj
 # Libraries. One space before the '\'.
 #
 LIBS = \
-$(PDWIN32_LIB)/kernel32.lib \
-$(PDWIN32_LIB)/$(ODINCRT).lib \
-$(PDWIN32_LIB)/ole32.lib \
+$(ODIN32_LIB)/kernel32.lib \
+$(ODIN32_LIB)/$(ODINCRT).lib \
+$(ODIN32_LIB)/ole32.lib \
 pmwinx.lib \
 mmpm2.lib \
 OS2386.LIB \
@@ -52,5 +52,5 @@ TARGET = dsound
 #
 # Includes the common rules.
 #
-!include $(PDWIN32_INCLUDE)/pdwin32.post
+!include $(ODIN32_POST_INC)
 

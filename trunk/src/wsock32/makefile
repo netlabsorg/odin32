@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.28 2000-11-19 08:35:49 bird Exp $
+# $Id: makefile,v 1.29 2000-12-02 23:43:27 bird Exp $
 
 #
 # Odin32 API
@@ -10,7 +10,7 @@
 #
 # Compiler, tools, and interference rules.
 #
-!include ../../include/pdwin32.mk
+!include ../../makefile.inc
 
 
 #
@@ -38,9 +38,9 @@ $(OBJDIR)\dbglocal.obj
 # Libraries. One space before the '\'.
 #
 LIBS = \
-$(PDWIN32_LIB)/kernel32.lib \
-$(PDWIN32_LIB)/user32.lib \
-$(PDWIN32_LIB)/$(ODINCRT).lib \
+$(ODIN32_LIB)/kernel32.lib \
+$(ODIN32_LIB)/user32.lib \
+$(ODIN32_LIB)/$(ODINCRT).lib \
 so32dll.lib \
 tcp32dll.lib \
 OS2386.LIB \
@@ -56,5 +56,5 @@ TARGET = wsock32
 #
 # Includes the common rules.
 #
-!include $(PDWIN32_INCLUDE)/pdwin32.post
+!include $(ODIN32_POST_INC)
 

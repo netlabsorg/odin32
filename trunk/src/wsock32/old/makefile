@@ -1,21 +1,17 @@
-# $Id: makefile,v 1.2 1999-12-07 20:29:15 achimha Exp $
+# $Id: makefile,v 1.3 2000-12-02 23:43:28 bird Exp $
 
 #
-# PD-Win32 API
+# Odin32 API
 #
-#	wsock32.dll makefile
+#       wsock32.dll makefile
 #
 
-PDWIN32_INCLUDE = ..\..\..\include
-PDWIN32_LIB = ..\..\..\lib
-PDWIN32_BIN = ..\..\..\bin
-PDWIN32_TOOLS = ..\..\..\tools\bin
-
-!include $(PDWIN32_INCLUDE)/pdwin32.mk
+OLD_STYLE=1
+!include ../../../makefile.inc
 
 
-CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE)
-CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
+CFLAGS = $(CFLAGS) -I$(ODIN32_INCLUDE)
+CXXFLAGS = $(CXXFLAGS) -I$(ODIN32_INCLUDE)
 
 
 TARGET = wsock32
@@ -26,15 +22,15 @@ all: $(TARGET).dll $(TARGET).lib
 
 
 $(TARGET).dll: $(OBJS) $(TARGET).def
-	$(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
-              $(PDWIN32_LIB)\pmwinx.lib $(PDWIN32_LIB)\user32.lib \
-              tcp32dll.lib so32dll.lib  $(PDWIN32_LIB)\kernel32.lib \
-              $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
-	$(CP) $@ $(PDWIN32_BIN)
+    $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
+              $(ODIN32_LIB)\pmwinx.lib $(ODIN32_LIB)\user32.lib \
+              tcp32dll.lib so32dll.lib  $(ODIN32_LIB)\kernel32.lib \
+              $(ODIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
+    $(CP) $@ $(ODIN32_BIN)
 
 $(TARGET).lib: $(TARGET)exp.def
     $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
-    $(CP) $@ $(PDWIN32_LIB)
+    $(CP) $@ $(ODIN32_LIB)
 
 $(TARGET)exp.def: $(TARGET).def
     $(IMPDEF) $** $@
@@ -46,7 +42,7 @@ initterm.obj: initterm.cpp
 
 
 clean:
-	$(RM) *.obj *.lib *.dll *~ *.map *.pch
-	$(RM) $(PDWIN32_BIN)\$(TARGET).dll
-	$(RM) $(PDWIN32_LIB)\$(TARGET).lib
+    $(RM) *.obj *.lib *.dll *~ *.map *.pch
+    $(RM) $(ODIN32_BIN)\$(TARGET).dll
+    $(RM) $(ODIN32_LIB)\$(TARGET).lib
 

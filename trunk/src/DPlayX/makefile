@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2000-11-19 09:18:20 bird Exp $
+# $Id: makefile,v 1.13 2000-12-02 23:39:19 bird Exp $
 
 #
 # Odin32 API
@@ -10,7 +10,7 @@
 #
 # Compiler, tools, and interference rules.
 #
-!include ../../include/pdwin32.mk
+!include ../../makefile.inc
 
 
 #
@@ -33,16 +33,16 @@ $(OBJDIR)\dplayxrsrc.obj
 # Libraries. One space before the '\'.
 #
 LIBS = \
-$(PDWIN32_LIB)/kernel32.lib \
-$(PDWIN32_LIB)/$(ODINCRT).lib \
-$(PDWIN32_LIB)/advapi32.lib \
+$(ODIN32_LIB)/kernel32.lib \
+$(ODIN32_LIB)/$(ODINCRT).lib \
+$(ODIN32_LIB)/advapi32.lib \
 OS2386.LIB \
 $(RTLLIB_O) \
-$(PDWIN32_LIB)/user32.lib \
-$(PDWIN32_LIB)/ole32.lib \
-$(PDWIN32_LIB)/winmm.lib \
-$(PDWIN32_LIB)/ntdll.lib \
-$(PDWIN32_LIB)/msvfw32.lib
+$(ODIN32_LIB)/user32.lib \
+$(ODIN32_LIB)/ole32.lib \
+$(ODIN32_LIB)/winmm.lib \
+$(ODIN32_LIB)/ntdll.lib \
+$(ODIN32_LIB)/msvfw32.lib
 
 
 #
@@ -54,5 +54,5 @@ TARGET = dplayx
 #
 # Includes the common rules.
 #
-!include $(PDWIN32_INCLUDE)/pdwin32.post
+!include $(ODIN32_POST_INC)
 

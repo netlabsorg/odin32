@@ -1,10 +1,11 @@
-# $Id: makefile,v 1.19 2000-11-19 09:06:58 bird Exp $
+# $Id: makefile,v 1.20 2000-12-02 23:40:36 bird Exp $
 
 #
 # Odin32 API
 #
 #       odincrt.dll makefile
 #
+
 
 #
 # Tell the buildenvironment not to
@@ -15,7 +16,7 @@ NOTEXPDEF   = 1
 #
 # Compiler, tools, and interference rules.
 #
-!include ../../include/pdwin32.mk
+!include ../../makefile.inc
 
 
 #
@@ -68,5 +69,5 @@ TARGET = $(ODINCRT)
 #
 # Includes the common rules.
 #
-!include $(PDWIN32_INCLUDE)/pdwin32.post
+!include $(ODIN32_POST_INC)
 

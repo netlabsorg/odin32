@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2000-04-27 22:21:36 davidr Exp $
+# $Id: makefile,v 1.2 2000-12-02 23:40:43 bird Exp $
 
 #
 # Odin32 API
@@ -7,19 +7,14 @@
 #
 
 
-# Directory macros.
-PDWIN32_INCLUDE = ..\..\..\include
-PDWIN32_LIB     = ..\..\..\lib
-PDWIN32_BIN     = ..\..\..\$(OBJDIR)
-PDWIN32_TOOLS   = ..\..\..\tools\bin
-
 
 # Compiler, tools, and interference rules.
-!include $(PDWIN32_INCLUDE)/pdwin32.mk
+OLD_STYLE = 1
+!include ../../../makefile.inc
 
 
 # Flag overloads and local macros.
-CLEANEXTRAS = ole32rsrc.asm $(PDWIN32_BIN)\regsvr32.exe
+CLEANEXTRAS = ole32rsrc.asm $(ODIN32_BIN)\regsvr32.exe
 
 
 # Object files. All objects should be prefixed with $(OBJDIR)!
@@ -67,14 +62,14 @@ ORGTARGET   = ole32
 # All rule - build objs, target dll, copies dll to bin and makes libs.
 all:    $(OBJDIR) \
         $(OBJDIR)\$(TARGET).dll \
-        $(PDWIN32_BIN)\$(TARGET).dll \
+        $(ODIN32_BIN)\$(TARGET).dll \
         lib \
         $(OBJDIR)\regsvr32.exe \
-        $(PDWIN32_BIN)\regsvr32.exe
+        $(ODIN32_BIN)\regsvr32.exe
 
 
 # Lib rule - build importlibrary (and evt. other libs)
-lib: $(ORGTARGET).lib $(PDWIN32_LIB)\$(ORGTARGET).lib
+lib: $(ORGTARGET).lib $(ODIN32_LIB)\$(ORGTARGET).lib
 
 
 # Dll rule - builds the target dll.
@@ -88,14 +83,14 @@ $(OBJDIR)\$(TARGET).lrf: makefile
 /OUT:$(OBJDIR)\$(TARGET).dll
 /MAP:$(OBJDIR)\$(TARGET).map
 $(OBJS)
-$(PDWIN32_LIB)/rpcrt4.lib
-$(PDWIN32_LIB)/user32.lib
-$(PDWIN32_LIB)/gdi32.lib
-$(PDWIN32_LIB)/comctl32.lib
-$(PDWIN32_LIB)/advapi32.lib
-$(PDWIN32_LIB)/kernel32.lib
-$(PDWIN32_LIB)/oleaut32.lib
-$(PDWIN32_LIB)/odincrt.lib
+$(ODIN32_LIB)/rpcrt4.lib
+$(ODIN32_LIB)/user32.lib
+$(ODIN32_LIB)/gdi32.lib
+$(ODIN32_LIB)/comctl32.lib
+$(ODIN32_LIB)/advapi32.lib
+$(ODIN32_LIB)/kernel32.lib
+$(ODIN32_LIB)/oleaut32.lib
+$(ODIN32_LIB)/odincrt.lib
 OS2386.LIB
 $(RTLLIB_O)
 $(ORGTARGET).def
@@ -110,22 +105,22 @@ $(OBJDIR)\regsvr32.obj:   regsvr32.cpp
     $(CC) -C $(CXXFLAGS) -Ge+ -Tm+ -Fo$@ regsvr32.cpp
 
 $(OBJDIR)\regsvr32.exe:   $(OBJDIR)\regsvr32.obj regsvr32.def \
-                $(PDWIN32_LIB)/user32.lib \
-                $(PDWIN32_LIB)/kernel32.lib \
-                $(PDWIN32_LIB)/ole32.lib
+                $(ODIN32_LIB)/user32.lib \
+                $(ODIN32_LIB)/kernel32.lib \
+                $(ODIN32_LIB)/ole32.lib
     $(LD) $(LDFLAGS) -Ge+ -Fm -Fe$@ $** \
-        $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
+        $(ODIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
 
-$(PDWIN32_BIN)\regsvr32.exe: $(OBJDIR)\regsvr32.exe
+$(ODIN32_BIN)\regsvr32.exe: $(OBJDIR)\regsvr32.exe
     $(CP) $** $@
 
 
 # Dep rule - makes depenencies for C, C++ and Asm files.
 dep:
-    $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win;. \
-        *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
+    $(DEPEND) -I$(ODIN32_INCLUDE);$(ODIN32_INCLUDE)\win;. \
+        *.c *.cpp *.h *.asm *.inc $(ODIN32_INCLUDE)\*.h
 
 
 # Includes the common rules.
-!include $(PDWIN32_INCLUDE)/pdwin32.post
+!include $(ODIN32_POST_INC)
 

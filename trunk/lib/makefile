@@ -1,32 +1,63 @@
-# $Id: makefile,v 1.4 1999-06-09 13:07:41 sandervl Exp $ 
+# $Id: makefile,v 1.5 2000-12-02 23:37:36 bird Exp $
 
 #
-# PD-Win32 API
+# Odin32 API
 #
 #       support libraries makefile
 #
 
-PDWIN32_INCLUDE = ..\include
-PDWIN32_BIN = ..\bin
+
+#
+# Include makefile.
+#
+!include ../makefile.inc
 
 
-!include $(PDWIN32_INCLUDE)/pdwin32.mk
+#
+# All rule.
+#
+all:    $(ODIN32_LIB) \
+        $(ODIN32_LIB)\pmwinx.lib \
+        $(ODIN32_LIB)\libconv.lib \
+        $(ODIN32_LIB)\libuls.lib
 
 
-all: pmwinx.lib libconv.lib libuls.lib
+#
+# Make output director.
+#
+$(ODIN32_LIB):
+    if not exist $(ODIN32_LIB) mkdir $(ODIN32_LIB)
 
 
-pmwinx.lib: pmwinx.def
-	$(IMPLIB) pmwinx.lib pmwinx.def
+#
+# Make our own pmwinx (Open32) import library.
+#
+$(ODIN32_LIB)\pmwinx.lib: pmwinx.def
+    $(IMPLIB) $(IMPLIBFLAGS) $(ODIN32_LIB)\pmwinx.lib pmwinx.def
 
-libconv.lib: libconv.def
-	$(IMPLIB) libconv.lib libconv.def
+#
+# Make our own libconv (UNICODE) import library.
+#
+$(ODIN32_LIB)\libconv.lib: libconv.def
+    $(IMPLIB) $(IMPLIBFLAGS) $(ODIN32_LIB)\libconv.lib libconv.def
 
-libuls.lib: libuls.def
-	$(IMPLIB) libuls.lib libuls.def
+
+#
+# Make our own libuls (UNICODE) import library.
+#
+$(ODIN32_LIB)\libuls.lib: libuls.def
+    $(IMPLIB) $(IMPLIBFLAGS) $(ODIN32_LIB)\libuls.lib libuls.def
 
 
+#
+# Make our own libuls import library.
+#
 clean:
-        $(RM) *.LIB
+    $(RM) $(ODIN32_LIB)\*.lib
 
+
+#
+# Dummy rules.
+#
+dep lib:
 

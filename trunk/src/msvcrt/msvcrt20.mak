@@ -1,4 +1,4 @@
-# $Id: msvcrt20.mak,v 1.1 2000-11-19 09:09:12 bird Exp $
+# $Id: msvcrt20.mak,v 1.2 2000-12-02 23:40:15 bird Exp $
 
 #
 # Odin32 API
@@ -16,7 +16,7 @@ MAKEFILE = msvcrt20.mak
 #
 # Compiler, tools, and interference rules.
 #
-!include ../../include/pdwin32.mk
+!include ../../makefile.inc
 
 
 #
@@ -34,9 +34,9 @@ $(DLLENTRY)
 # Libraries. One space before the '\'.
 #
 LIBS = \
-$(PDWIN32_LIB)/kernel32.lib \
-$(PDWIN32_LIB)/crtdll.lib \
-$(PDWIN32_LIB)/$(ODINCRT).lib \
+$(ODIN32_LIB)/kernel32.lib \
+$(ODIN32_LIB)/crtdll.lib \
+$(ODIN32_LIB)/$(ODINCRT).lib \
 OS2386.LIB \
 $(RTLLIB_O)
 
@@ -50,5 +50,5 @@ TARGET = msvcrt20
 #
 # Includes the common rules.
 #
-!include $(PDWIN32_INCLUDE)/pdwin32.post
+!include $(ODIN32_POST_INC)
 

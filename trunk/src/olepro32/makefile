@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2000-11-19 09:01:18 bird Exp $
+# $Id: makefile,v 1.5 2000-12-02 23:41:11 bird Exp $
 
 #
 # Odin32 API
@@ -10,7 +10,7 @@
 #
 # Compiler, tools, and interference rules.
 #
-!include ../../include/pdwin32.mk
+!include ../../makefile.inc
 
 
 #
@@ -26,9 +26,9 @@ $(DLLENTRY)
 # Libraries. One space before the '\'.
 #
 LIBS = \
-$(PDWIN32_LIB)/kernel32.lib \
-$(PDWIN32_LIB)/oleaut32.lib \
-$(PDWIN32_LIB)/$(ODINCRT).lib \
+$(ODIN32_LIB)/kernel32.lib \
+$(ODIN32_LIB)/oleaut32.lib \
+$(ODIN32_LIB)/$(ODINCRT).lib \
 OS2386.LIB \
 $(RTLLIB_O)
 
@@ -42,5 +42,5 @@ TARGET = olepro32
 #
 # Includes the common rules.
 #
-!include $(PDWIN32_INCLUDE)/pdwin32.post
+!include $(ODIN32_POST_INC)
 
