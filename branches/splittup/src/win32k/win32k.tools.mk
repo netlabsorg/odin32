@@ -1,4 +1,4 @@
-# $Id: win32k.tools.mk,v 1.10.2.2 2001-09-27 03:27:43 bird Exp $
+# $Id: win32k.tools.mk,v 1.10.2.3 2001-10-14 22:58:12 bird Exp $
 
 #
 # Win32k common tools makefile.
@@ -30,7 +30,7 @@
 # IBM VisualAge for C++ v3.08 or IBM C/C++ Tools v3.6.5
 #
 CC16        = $(WIN32KBIN)\clfix.exe $(MSCPATH)\binp\cl.exe
-CC          = icc
+CC          = $(WIN32KBIN)\ignore.exe -EDC0506 icc
 CCPP        = icc
 LD          = ilink
 ILIB        = ilib /nobackup /nologo
