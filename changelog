@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2344 2002-10-28 12:22:53 sandervl Exp $ */
+/* $Id: changelog,v 1.2345 2002-10-28 13:24:17 sandervl Exp $ */
+
+ 2002-10-28: Sander van Leeuwen <sandervl@innotek   >
+    - GDI32:    o Workaround added for WGSS GetDIBits bug
 
  2002-10-28: Platon Fomichev <platon@innotek   >
     - USER32:   o Fix for WinPeekMsg bug (?); sometimes returns a message
