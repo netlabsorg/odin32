@@ -1,4 +1,4 @@
-/* $Id: hmopen32.cpp,v 1.17 2000-02-16 14:24:00 sandervl Exp $ */
+/* $Id: hmopen32.cpp,v 1.18 2000-03-02 19:17:21 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -845,12 +845,23 @@ DWORD HMDeviceOpen32Class::UnlockFileEx(PHMHANDLEDATA pHMHandleData,
 DWORD HMDeviceOpen32Class::WaitForSingleObject(PHMHANDLEDATA pHMHandleData,
                                                DWORD         dwTimeout)
 {
+ DWORD rc, starttime, endtime;
+
   dprintfl(("KERNEL32: HandleManager::Open32::WaitForSingleObject(%08xh,%08h)\n",
             pHMHandleData->hHMHandle,
             dwTimeout));
-
-  return (O32_WaitForSingleObject(pHMHandleData->hHMHandle,
-                                  dwTimeout));
+ 
+  if(dwTimeout) {
+  	starttime = O32_GetCurrentTime();
+  }
+  rc =  (O32_WaitForSingleObject(pHMHandleData->hHMHandle,
+                                 dwTimeout));
+  if(dwTimeout) {
+  	endtime = O32_GetCurrentTime();
+  	dprintf(("KERNEL32: HandleManager::WaitForSingleObject delta = %x (rc=%x)", endtime - starttime, rc));
+  }
+  else dprintf(("KERNEL32: HandleManager::WaitForSingleObject rc=%x", rc));
+  return rc;
 }
 
 

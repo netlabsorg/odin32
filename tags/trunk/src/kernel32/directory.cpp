@@ -1,4 +1,4 @@
-/* $Id: directory.cpp,v 1.15 2000-02-16 14:25:38 sandervl Exp $ */
+/* $Id: directory.cpp,v 1.16 2000-03-02 19:17:20 sandervl Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
@@ -130,7 +130,8 @@ ODINFUNCTION1(BOOL,SetCurrentDirectoryA,LPCSTR,lpPathName)
   char *tmp=(char *)alloca(len + 1);
 
   strcpy(tmp, lpPathName);
-  if(tmp[len -1] == '\\')
+  //SvL: Don't remove terminating backslash if it wants to chdir to root dir
+  if(tmp[len -1] == '\\' && len != 1)
     tmp[len -1] = 0;
 
   dprintf(("SetCurrentDirectoryA %s", tmp));
