@@ -1,4 +1,4 @@
-/* $Id: console.cpp,v 1.9 1999-07-12 17:20:03 phaller Exp $ */
+/* $Id: console.cpp,v 1.10 1999-07-12 17:45:51 phaller Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -196,8 +196,13 @@ static ICONSOLEINPUT   ConsoleInput;
 
 void static iConsoleInputQueueLock()
 {
-  DosRequestMutexSem(ConsoleInput.hmtxInputQueue,
-                     SEM_INDEFINITE_WAIT);
+  APIRET rc;
+
+  rc = DosRequestMutexSem(ConsoleInput.hmtxInputQueue,
+                          SEM_INDEFINITE_WAIT);
+  if (rc != NO_ERROR)
+     dprintf(("KERNEL32: Console:iConsoleInputQueueLock error %08xh\n",
+              rc));
 }
 
 
@@ -215,7 +220,12 @@ void static iConsoleInputQueueLock()
 
 void static iConsoleInputQueueUnlock()
 {
-  DosReleaseMutexSem(ConsoleInput.hmtxInputQueue);
+  APIRET rc;
+
+  rc = DosReleaseMutexSem(ConsoleInput.hmtxInputQueue);
+  if (rc != NO_ERROR)
+     dprintf(("KERNEL32: Console:iConsoleInputQueueUnlock error %08xh\n",
+              rc));
 }
 
 
@@ -596,6 +606,11 @@ void iConsoleWaitClose(void)
                                 /* Set new title: Win32 Console - Terminated */
   fResult = SetConsoleTitleA(szBuffer);
 
+  DosCloseEventSem(ConsoleGlobals.hevConsole);      /* close other semaphore */
+  DosCloseEventSem(ConsoleInput.hevInputQueue);     /* close other semaphore */
+  DosCloseMutexSem(ConsoleInput.hmtxInputQueue);          /* close semaphore */
+
+
                                           /* terminate console immediately ? */
   if (ConsoleGlobals.Options.fTerminateAutomatically == FALSE)
     DosWaitThread(&ConsoleGlobals.tidConsole,   /* wait until thd terminates */
@@ -717,8 +732,11 @@ VOID iConsoleMsgThread(PVOID pParameters)
                    /* destruction of semaphore indicates console is shutdown */
   DosCloseEventSem(ConsoleInput.hevInputQueue);     /* close other semaphore */
   DosCloseEventSem(ConsoleGlobals.hevConsole);
-  ConsoleGlobals.hevConsole  = NULLHANDLE;          /* for ConsoleIsActive() */
-  ConsoleInput.hevInputQueue = NULLHANDLE;
+  DosCloseMutexSem(ConsoleInput.hmtxInputQueue);          /* close semaphore */
+
+  ConsoleGlobals.hevConsole   = NULLHANDLE;         /* for ConsoleIsActive() */
+  ConsoleInput.hevInputQueue  = NULLHANDLE;
+  ConsoleInput.hmtxInputQueue = NULLHANDLE;
 
   /* @@@PH we've got to exit the process here ! */
   ExitProcess(1);
@@ -1334,6 +1352,7 @@ void iConsoleBufferScrollUp(PCONSOLEBUFFER pConsoleBuffer,
               ConsoleGlobals.coordWindowSize.X,
               0,
               ConsoleGlobals.hvpsConsole);
+
     ConsoleGlobals.fUpdateRequired = FALSE;          /* no more required ... */
   }
 }
