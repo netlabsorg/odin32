@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.117 2001-12-26 14:47:22 achimha Exp $ */
+/* $Id: user32.cpp,v 1.118 2001-12-26 19:05:35 achimha Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -745,11 +745,11 @@ BOOL WIN32API SystemParametersInfoA(UINT uiAction, UINT uiParam, PVOID pvParam, 
                         strncpy(lpLogFont->lfFaceName, pszFontName, sizeof(lpLogFont->lfFaceName));
                         lpLogFont->lfFaceName[sizeof(lpLogFont->lfFaceName)-1] = 0;
                         lpLogFont->lfWeight = FW_NORMAL;
-                        // AH 2001-12-26 special case for WarpSans
-                        if (strncmp(lpLogFont->lfFaceName, "WarpSans", 8) == 0)
-                            lpLogFont->lfHeight = 9;
-                        else
-                            lpLogFont->lfHeight = 16; //atoi(fontname);
+
+                        // AH 2001-12-26 use the font size returned by the graphics
+                        // driver as the font height. This will take font size settings
+                        // such as small, medium and large fonts into account
+                        lpLogFont->lfHeight = CapsCharHeight;
                     }
                     else fFound = FALSE;
                 }
@@ -757,7 +757,8 @@ BOOL WIN32API SystemParametersInfoA(UINT uiAction, UINT uiParam, PVOID pvParam, 
                     GetProfileStringA("Desktop", "MenuFont", "WarpSans",
                                       lpLogFont->lfFaceName, LF_FACESIZE);
                     lpLogFont->lfWeight = FW_BOLD;
-                    lpLogFont->lfHeight = -GetProfileIntA("Desktop","MenuFontSize", 16);
+                    // AH 2001-12-26 take graphics driver font size setting
+                    lpLogFont->lfHeight = -GetProfileIntA("Desktop","MenuFontSize", CapsCharHeight);
                 }
                 lpLogFont->lfWidth = 0;
                 lpLogFont->lfEscapement = lpLogFont->lfOrientation = 0;
