@@ -1,4 +1,4 @@
-/* $Id: OS2SNDBUFFER.CPP,v 1.7 2000-03-13 12:47:48 sandervl Exp $ */
+/* $Id: OS2SNDBUFFER.CPP,v 1.8 2000-05-18 20:37:09 mike Exp $ */
 
 /*
  * DirectSound SoundBuffer class
@@ -74,6 +74,10 @@ OS2IDirectSoundBuffer::OS2IDirectSoundBuffer(OS2IDirectSound *DSound, const DSBU
 
    dprintf(("DSOUND-OS2IDirectSoundBuffer::OS2IDirectSoundBuffer (buf=%X)", this));
 
+   // get the primary buffer from the DSound instance.
+   primary = DSound->primary;
+ 
+   // We can still to the below logic just in case!!  Should not be required thow!
    // If the primary SoundBuffer doesn't exist by now, we have to create it!
    if (primary == NULL) {
       OS2PrimBuff *primbuff;

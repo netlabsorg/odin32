@@ -11,24 +11,17 @@
 
 /*  NOTES:
 
-   1.  I have cheaped out and simply send a DSERR_INVALIDCALL return code
-       for many calls. I don't know if DSound does the same or not!!
-       TODO: See if windows returns this in some of the set* functions!!!
-
-   2. The Dart.cpp file is used rather then imbeding code here to avoid
-      problems with using some of the os2 multimedis headders
-      I guess I should use the ODIN version of the API's to avoid
-      the FS reset problem.. This is a TODO!
-
-   3. Here is how the buffers, GetPosition and Lock work:
-      Dart is allocated 16 buffer of 1kb each. These buffers are filled
-      when dart has finished playing one of the buffer, from a 16kb buffer
+      Here is how the buffers, GetPosition and Locking works:
+      Dart is allocated many little buffers. These buffers are filled
+      when dart has finished playing one of the buffer, from a 32kb buffer
       that the Win32 program can write to. The GetPosition function will
       determine what buffer is being played, and return the offset to the
-      end of this buffer. The Lock function will call the GetCurrentPosition
-      function to determine where the end of the currently playing buffer is
-      and allow the Win32 program to lock between that location and 15ms from
-      there (15ms should be past the next buffer).
+      end of this buffer. 
+
+      The Lock function will call the GetCurrentPosition function to determine
+      where the end of the currently playing buffer is and allow the Win32
+      program to lock between that location and 15ms from there 
+      (15ms should be past the next buffer).
 
 */
 
@@ -41,7 +34,7 @@
 #define INITGUID
 #include <dsound.h>
 
-#include "DSound.h"
+//#include "DSound.h"
 #include "OS2DSound.h"
 #include "OS2SndBuffer.h"
 #include "OS2PrimBuff.h"
@@ -158,6 +151,9 @@ HRESULT WIN32API PrimBufQueryInterface(THIS, REFIID riid, LPVOID * ppvObj)
       listener->Vtbl.AddRef((IDirectSound3DListener *)listener);
       return DS_OK;
    }
+
+   // I guess a Notify object should be creaed for the Primary Buffer also..
+   // Does windows DSound have a notify object for Primary buffer???
 
    return E_NOINTERFACE;
 }
@@ -527,7 +523,7 @@ HRESULT __stdcall PrimBufStop(THIS  )
 //******************************************************************************
 HRESULT __stdcall PrimBufUnlock(THIS_ LPVOID,DWORD,LPVOID,DWORD )
 {
-   // I don't think we really need any code here.. This may be a handly place to
+   // I don't think we really need any code here.. 
 
    dprintf(("DSOUND-PrimBuff: Unlock"));
 
@@ -538,6 +534,10 @@ HRESULT __stdcall PrimBufUnlock(THIS_ LPVOID,DWORD,LPVOID,DWORD )
 //******************************************************************************
 HRESULT __stdcall PrimBufRestore(THIS )
 {
+   // This maybe a good place to re-aquire the device if some other process
+   // has taken the audio focus, but before we do that we need to determine
+   // if we have lost the device and set the falg in the GetStatus method!
+
    dprintf(("DSOUND-PrimBuff: Restore"));
 
    return DS_OK;

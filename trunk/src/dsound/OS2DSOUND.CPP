@@ -1,4 +1,4 @@
-/* $Id: OS2DSOUND.CPP,v 1.6 2000-03-13 12:47:46 sandervl Exp $ */
+/* $Id: OS2DSOUND.CPP,v 1.7 2000-05-18 20:37:08 mike Exp $ */
 
 /*
  * DirectSound main class
@@ -16,6 +16,12 @@
 #include <os2win.h>
 #include <stdlib.h>
 #include <string.h>
+
+
+
+#include <stdio.h> /****** DEBUGGING ********/
+
+
 
 #define INITGUID
 #include <dsound.h>
@@ -59,6 +65,21 @@ OS2IDirectSound::OS2IDirectSound(const GUID *lpGUID) : Referenced(0),
    CoopLevel     = DSSCL_EXCLUSIVE;  //default
 
    OS2IDirectSound::fDSExists = TRUE;
+
+   // Create the primary buffer
+   primary = new OS2PrimBuff(this, /*lpDSBufferDesc*/NULL);
+   if (primary == NULL){
+      lastError = DSERR_OUTOFMEMORY;
+      return ;
+   }
+   if ( primary->GetLastError() != DS_OK ){
+      ULONG lastErr = primary->GetLastError();
+      dprintf(("LastErr = %d\n", lastErr));
+      delete primary;
+      lastError = lastErr;
+      return;
+   }
+   primary->Vtbl.AddRef(primary);
 
    dprintf(("Sound init OK\n"));
 }
@@ -149,6 +170,13 @@ HRESULT WIN32API SoundCreateSoundBuffer(THIS_
    }
 
    if (lpDSBufferDesc->dwFlags & DSBCAPS_PRIMARYBUFFER) {
+
+/*
+
+      // The Primary buffer is now created by the Constructor.. This only
+      // makes sence becuse you can really only have one primary buffer and
+      // you need it before you can to do anything.
+
       OS2PrimBuff *primbuff;
       primbuff = new OS2PrimBuff(me, lpDSBufferDesc);
 
@@ -165,7 +193,9 @@ HRESULT WIN32API SoundCreateSoundBuffer(THIS_
       *lplpDirectSoundBuffer = (LPDIRECTSOUNDBUFFER)primbuff;
       primbuff->Vtbl.AddRef(primbuff);
       dprintf(("Created PrimBuff... Exiting Create Buffer function\n"));
+*/
 
+      *lplpDirectSoundBuffer = (LPDIRECTSOUNDBUFFER)me->primary;
       return DS_OK;
    }
 

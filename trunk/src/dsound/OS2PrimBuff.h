@@ -1,7 +1,7 @@
 /*
- * Direct Sound Primary Buffer Implemetation ofr ODIN
+ * Direct Sound Primary Buffer Implemetation for ODIN
  *
- * Kevin Langman
+ * Kevin Langman (langman@earthling.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  */

@@ -1,8 +1,9 @@
 /*
+ *  Dart Interface..
+ *
  *  Kevin Langman
  *
- *  The Dart functions are here to avoid the conficts with the
- *  the OS/2 mcios2.h, meerror.h, os2medef.h and mmsystem.h
+ *  Project Odin Software License can be found in LICENSE.TXT
  *
  */
 
@@ -11,6 +12,7 @@
 #include <os2wrap.h>
 #include <os2mewrap.h>
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -42,13 +44,20 @@ LONG APIENTRY OS2_Dart_Update(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulF
 {
    ULONG           rc;
 
-   if ((ulFlags == MIX_WRITE_COMPLETE) ||
-       ((ulFlags == (MIX_WRITE_COMPLETE | MIX_STREAM_ERROR))&&
-       (ulStatus == ERROR_DEVICE_UNDERRUN)))
+   if( ( (ulFlags == MIX_WRITE_COMPLETE) ||
+         ((ulFlags == (MIX_WRITE_COMPLETE | MIX_STREAM_ERROR))&&
+         (ulStatus == ERROR_DEVICE_UNDERRUN)) )
+     )
    {
       lLastBuff++;
-      if (lLastBuff == ulNumDartBuffs)
+      if (lLastBuff == ulNumDartBuffs){
          lLastBuff = 0;
+      }
+
+      if( fIsPlaying == FALSE /*&& lLastBuff == 0*/ ){
+         mciSendCommand(usDeviceID, MCI_STOP, MCI_WAIT, NULL, 0);
+         return TRUE;
+      }
 
       /* Now mix sound from all playing secondary SoundBuffers into the primary buffer */
       MixCallback(BUFFER_SIZE/ulNumDartBuffs);
@@ -58,7 +67,6 @@ LONG APIENTRY OS2_Dart_Update(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulF
 
       /* Send the NEXT Buffer to Dart for playing! */
       rc = MixSetup_Global->pmixWrite(MixSetup_Global->ulMixHandle, &pMixBuffers[lLastBuff], 1 );
-      //dprintf(("DSOUND-DART: Playing Next Buffer %d", rc));
    }
 
    return TRUE;
@@ -103,7 +111,8 @@ long Dart_Open_Device(USHORT *pusDeviceID, void **vpMixBuffer, void **vpMixSetup
    /* Open the AmpMix Device and start processing the buffer! */
    memset(&AmpOpenParms, 0, sizeof(MCI_AMP_OPEN_PARMS));
    AmpOpenParms.usDeviceID    = 0;
-   AmpOpenParms.pszDeviceType = (PSZ)MCI_DEVTYPE_AUDIO_AMPMIX;
+   //AmpOpenParms.pszDeviceType = (PSZ)MCI_DEVTYPE_AUDIO_AMPMIX;
+   AmpOpenParms.pszDeviceType = (PSZ)MAKEULONG(MCI_DEVTYPE_AUDIO_AMPMIX, (USHORT)device);
 
    rc = mciSendCommand(0, MCI_OPEN, MCI_WAIT | MCI_OPEN_TYPE_ID, (PVOID)&AmpOpenParms, 0);
    if (rc != MCIERR_SUCCESS) {
@@ -132,10 +141,10 @@ long Dart_Open_Device(USHORT *pusDeviceID, void **vpMixBuffer, void **vpMixSetup
 
    /* Create the Audio Buffer */
    // OK... Since DSound only uses 1 buffer and uses the GetPosition API to
-   // figure out where it can and can't write, I have emulating this by
-   // using 16 1kb buffers and do locking by tracking what buffer is currently
-   // playing. This maybe less CPU friendly then other methods but it's the best
-   // my little brain could come up with!!
+   // figure out where it can and can't write. I have emulating this by
+   // using many smaller buffers and do locking by tracking what buffer that is
+   // currently playing. This maybe less CPU friendly then other methods but
+   // it's the best my little brain could come up with!!
 
    MixSetupParms.ulBufferSize = BUFFER_SIZE / ulNumDartBuffs;
 
@@ -152,13 +161,9 @@ long Dart_Open_Device(USHORT *pusDeviceID, void **vpMixBuffer, void **vpMixSetup
    }
 
    /* Clear the Buffer */
-   // Todo:  I don't know if Dart expects Signed or Unsigned data... This will
-   // ok until I look in to this... Also it may be that Dart uses signed for
-   // 8bit data and unsigned for 16it.. Anyhow the worst that can happen by setting
-   // the buffer to 0 is a click on Dart_Play and a Clink when real sound is written
-   // to the buffer!
+   // Set initial values to 32767 to avoid clicks on start of playback.
    for (device = 0; device < ulNumDartBuffs; device++) {
-      memset(pMixBuffers[device].pBuffer, 0, BUFFER_SIZE/ulNumDartBuffs);
+      memset(pMixBuffers[device].pBuffer, 32767, BUFFER_SIZE/ulNumDartBuffs);
    }
 
    // Allocate memory for the DSound "Holder" buffer.
@@ -307,14 +312,14 @@ long Dart_SetFormat(USHORT *pusDeviceID, void *vpMixSetup, void *vpBufferParms, 
    }
 
    /* Clear the Buffer */
-   // Todo:  I don't know if Dart expects Signed or Unsigned data... This will
-   // ok until I look in to this... Also it may be that Dart uses signed for
-   // 8bit data and unsigned for 16it.. Anyhow the worst that can happen by setting
-   // the buffer to 0 is a click on Dart_Play and a Clink when real sound is written
-   // to the buffer!
+   // If the data is 8bit  then set values to 127
+   // If the data is 16bit then set values to 32767
+   // Doing this will avoid the clicks at the beging of playback! :)
    for (int i=0; i<ulNumDartBuffs; i++) {
-      memset(pMixBuffers[i].pBuffer, 0, BUFFER_SIZE/ulNumDartBuffs);
+      memset(pMixBuffers[i].pBuffer, lBPS == 8 ? 127 : 32767, BUFFER_SIZE / ulNumDartBuffs);
    }
+
+   lLastBuff = 0; /* we have to reset this, the number of buffers probably changed! */
 
    /* If the primary buffer was playing, we have to restart it!! */
    if (fIsPlaying) {
@@ -346,12 +351,20 @@ long Dart_Stop(USHORT usDeviceID)
       return DS_OK;
 
    fIsPlaying = FALSE;
-//   rc = mciSendCommand(usDeviceID, MCI_PAUSE, MCI_WAIT, NULL, 0);
-   rc = mciSendCommand(usDeviceID, MCI_STOP, MCI_WAIT, NULL, 0);
-   if (rc != MCIERR_SUCCESS) {
-      dprintf(("DSOUND-DART: MCI_PAUSE %d", rc));
-      return DSERR_GENERIC;
-   }
+
+   // The OS2_Dart_Update function is now used to send the MCI_STOP!!
+   // Doing this fixes a bug where after a Dart_Stop call the sound would
+   // continue to loop because the OS2_Dart_Update would send the next
+   // buffer causing Dart to start again..
+
+   //rc = mciSendCommand(usDeviceID, MCI_STOP, MCI_WAIT, NULL, 0);
+   //if (rc != MCIERR_SUCCESS) {
+   //   { FILE *dbf; dbf=fopen("log.log", "a"); fprintf( dbf, "Error in MCI_STOP...\n"); fclose(dbf); }
+   //   dprintf(("DSOUND-DART: MCI_PAUSE %d", rc));
+   //   return DSERR_GENERIC;
+   //}
+
+
    return DS_OK;
 }
 
