@@ -1,12 +1,16 @@
- /* $Id: changelog,v 1.969 2000-06-03 04:07:34 bird Exp $ */
+ /* $Id: changelog,v 1.970 2000-06-03 07:23:53 sandervl Exp $ */
 
  2000-06-03: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Win32k/REXX:  Rewrote the REXX stub program in assembly.
                     (exe size: 688 bytes) Might be able to embedd it in
                     win32k.sys... (not priority)
 
+ 2000-06-02: Jeroen van den Horn <J.vandenHorn@fibre.a2000.nl>
+    - SHELL32:      Systray class registered with wrong name
+
  2000-06-01: Sander van Leeuwen <sandervl@xs4all.nl>
     - GDI32/USER32: Moved GetClipRgn & GetClipBox into user32 (dc.cpp)
+    - GDI32:        Added more logging
     - KERNEL32:     Rewrote CompareFileTime, DeleteFileA
                     Put file io apis in separate handlemanager object class
                     Rewrote most file io apis; includes support for 64 bits file
