@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2692 2004-03-09 10:03:11 sandervl Exp $ */
+/* $Id: changelog,v 1.2693 2004-03-09 14:25:03 sandervl Exp $ */
+
+ 2004-03-09: Sander van Leeuwen <sandervl@innotek   >
+    - GDI32:    o SetDIBitsToDevice: fixes for xSrc offset
 
  2004-03-09: Vitali Pelenyov <sunlover@innotek   >
     - GDI32:    o SetDIBitsToDevice: fixes for partial blits
