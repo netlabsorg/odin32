@@ -61,6 +61,11 @@ typedef GUID	FMTID,*LPFMTID;
 #define REFCLSID            const CLSID* const
 #define REFIID              const IID* const
 #define REFFMTID            const FMTID* const
+//#define REFGUID             const GUID* 
+//#define REFCLSID            const CLSID* 
+//#define REFIID              const IID* 
+//#define REFFMTID            const FMTID* 
+
 #endif /* !defined(__cplusplus) && !defined(CINTERFACE) */
 
 extern const IID GUID_NULL;
