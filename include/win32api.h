@@ -12,7 +12,7 @@
 #include <winconst.h>
 
 void   WIN32API SetLastError(DWORD dwError);
-int    WIN32API GetLastError(void);
+DWORD  WIN32API GetLastError(void);
 
 LONG   WIN32API RegCloseKey(HKEY);
 LONG   WIN32API RegFlushKey(HKEY);
