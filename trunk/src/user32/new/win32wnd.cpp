@@ -1,4 +1,4 @@
-/* $Id: win32wnd.cpp,v 1.10 1999-07-18 13:57:48 cbratschi Exp $ */
+/* $Id: win32wnd.cpp,v 1.11 1999-07-18 14:39:35 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -94,6 +94,7 @@ void Win32Window::Init()
   hwndLinkAfter    = HWND_BOTTOM;
   flags            = 0;
   isIcon           = FALSE;
+  lastHitTestVal   = 0;
   owner            = NULL;
   windowClass      = 0;
 }
@@ -127,7 +128,7 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         if(!window) {
                 dprintf(("Bad parent %04x\n", cs->hwndParent ));
                 SetLastError(ERROR_INVALID_PARAMETER);
-                return FALSE;
+        return FALSE;
         }
         /* Make sure parent is valid */
         if (!window->IsWindow() )
@@ -230,7 +231,7 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 
   if ((cs->style & WS_CHILD) && cs->hwndParent)
   {
-        SetParent(cs->hwndParent);
+    SetParent(cs->hwndParent);
   }
   else
   {
@@ -239,7 +240,7 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         }
         else
         {
-                owner = GetWindowFromHandle(cs->hwndParent);
+        owner = GetWindowFromHandle(cs->hwndParent);
                 if(owner == NULL)
                 {
                         dprintf(("HMHandleTranslateToOS2 couldn't find owner window %x!!!", cs->hwndParent));
@@ -262,20 +263,20 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 
     if (HOOK_IsHooked( WH_CBT ))
     {
-        CBT_CREATEWNDA cbtc;
+    CBT_CREATEWNDA cbtc;
         LRESULT ret;
 
-        cbtc.lpcs = cs;
-        cbtc.hwndInsertAfter = hwndLinkAfter;
+    cbtc.lpcs = cs;
+    cbtc.hwndInsertAfter = hwndLinkAfter;
         ret = unicode ? HOOK_CallHooksW(WH_CBT, HCBT_CREATEWND, Win32Hwnd, (LPARAM)&cbtc)
                       : HOOK_CallHooksA(WH_CBT, HCBT_CREATEWND, Win32Hwnd, (LPARAM)&cbtc);
         if (ret)
-        {
-            TRACE_(win)("CBT-hook returned 0\n");
-            wndPtr->pDriver->pFinalize(wndPtr);
+    {
+        TRACE_(win)("CBT-hook returned 0\n");
+        wndPtr->pDriver->pFinalize(wndPtr);
             retvalue =  0;
             goto end;
-        }
+    }
     }
 #endif
 
@@ -336,7 +337,7 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   OS2Hwnd = OSLibWinCreateWindow((getParent()) ? getParent()->getOS2WindowHandle() : 0,
                                  dwOSWinStyle, dwOSFrameStyle, (char *)cs->lpszName,
                                  (owner) ? owner->getOS2WindowHandle() : 0,
-                                 (hwndLinkAfter == HWND_BOTTOM) ? TRUE : FALSE,
+                 (hwndLinkAfter == HWND_BOTTOM) ? TRUE : FALSE,
                                  &OS2HwndFrame);
 
   if(OS2Hwnd == 0) {
@@ -353,14 +354,14 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   }
 #if 0
   if(OS2Hwnd != OS2HwndFrame) {
-        if(OSLibWinSetWindowULong(OS2HwndFrame, OFFSET_WIN32WNDPTR, (ULONG)this) == FALSE) {
-                dprintf(("WM_CREATE: WinSetWindowULong %X failed!!", OS2HwndFrame));
-                return FALSE;
-        }
-        if(OSLibWinSetWindowULong(OS2HwndFrame, OFFSET_WIN32PM_MAGIC, WIN32PM_MAGIC) == FALSE) {
-                dprintf(("WM_CREATE: WinSetWindowULong2 %X failed!!", OS2HwndFrame));
-                return FALSE;
-        }
+    if(OSLibWinSetWindowULong(OS2HwndFrame, OFFSET_WIN32WNDPTR, (ULONG)this) == FALSE) {
+            dprintf(("WM_CREATE: WinSetWindowULong %X failed!!", OS2HwndFrame));
+            return FALSE;
+    }
+    if(OSLibWinSetWindowULong(OS2HwndFrame, OFFSET_WIN32PM_MAGIC, WIN32PM_MAGIC) == FALSE) {
+            dprintf(("WM_CREATE: WinSetWindowULong2 %X failed!!", OS2HwndFrame));
+            return FALSE;
+    }
   }
 #endif
   /* Set the window menu */
@@ -388,13 +389,13 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         SendNCCalcSize(FALSE, &rectWindow, NULL, NULL, 0, &rectClient );
         OffsetRect(&rectWindow, maxPos.x - rectWindow.left,
                                           maxPos.y - rectWindow.top);
-        dprintf(("Sending WM_CREATE"));
+    dprintf(("Sending WM_CREATE"));
         if( (SendInternalMessage(WM_CREATE, 0, (LPARAM)cs )) != -1 )
         {
             SetWindowPos(HWND_TOP, rectClient.left, rectClient.top,
-                         rectClient.right-rectClient.left,
-                         rectClient.bottom-rectClient.top,
-                         SWP_NOACTIVATE);
+             rectClient.right-rectClient.left,
+             rectClient.bottom-rectClient.top,
+             SWP_NOACTIVATE);
 
             if (cs->style & WS_VISIBLE) ShowWindow( sw );
 
@@ -404,7 +405,7 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
             if (!(dwStyle & WS_CHILD) && !owner)
                 HOOK_CallHooks16( WH_SHELL, HSHELL_WINDOWCREATED, hwnd, 0 );
 #endif
-            return TRUE;
+        return TRUE;
         }
   }
   return FALSE;
@@ -428,90 +429,90 @@ UINT Win32Window::MinMaximize(UINT16 cmd, LPRECT16 lpRect )
 
     if (lpPos && !HOOK_CallHooks16(WH_CBT, HCBT_MINMAX, hwndSelf, cmd))
     {
-        if( dwStyle & WS_MINIMIZE )
-        {
-            if( !SendInternalMessageA(WM_QUERYOPEN, 0, 0L ) )
-                return (SWP_NOSIZE | SWP_NOMOVE);
-            swpFlags |= SWP_NOCOPYBITS;
-        }
-        switch( cmd )
-        {
-            case SW_MINIMIZE:
-                 if( dwStyle & WS_MAXIMIZE)
-                 {
-                     flags |= WIN_RESTORE_MAX;
-                     dwStyle &= ~WS_MAXIMIZE;
+    if( dwStyle & WS_MINIMIZE )
+    {
+        if( !SendInternalMessageA(WM_QUERYOPEN, 0, 0L ) )
+        return (SWP_NOSIZE | SWP_NOMOVE);
+        swpFlags |= SWP_NOCOPYBITS;
+    }
+    switch( cmd )
+    {
+        case SW_MINIMIZE:
+         if( dwStyle & WS_MAXIMIZE)
+         {
+             flags |= WIN_RESTORE_MAX;
+             dwStyle &= ~WS_MAXIMIZE;
                  }
                  else
-                     flags &= ~WIN_RESTORE_MAX;
-                 dwStyle |= WS_MINIMIZE;
+             flags &= ~WIN_RESTORE_MAX;
+         dwStyle |= WS_MINIMIZE;
 
 #if 0
-                 if( flags & WIN_NATIVE )
-                     if( pDriver->pSetHostAttr( wndPtr, HAK_ICONICSTATE, TRUE ) )
-                         swpFlags |= MINMAX_NOSWP;
+         if( flags & WIN_NATIVE )
+             if( pDriver->pSetHostAttr( wndPtr, HAK_ICONICSTATE, TRUE ) )
+             swpFlags |= MINMAX_NOSWP;
 #endif
 
-                 lpPos->ptIconPos = WINPOS_FindIconPos( wndPtr, lpPos->ptIconPos );
+         lpPos->ptIconPos = WINPOS_FindIconPos( wndPtr, lpPos->ptIconPos );
 
-                 SetRect(lpRect, lpPos->ptIconPos.x, lpPos->ptIconPos.y,
-                         GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON) );
-                 swpFlags |= SWP_NOCOPYBITS;
-                 break;
+         SetRect(lpRect, lpPos->ptIconPos.x, lpPos->ptIconPos.y,
+             GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON) );
+         swpFlags |= SWP_NOCOPYBITS;
+         break;
 
-            case SW_MAXIMIZE:
+        case SW_MAXIMIZE:
                 CONV_POINT16TO32( &lpPos->ptMaxPos, &pt );
                 WINPOS_GetMinMaxInfo( wndPtr, &size, &pt, NULL, NULL );
                 CONV_POINT32TO16( &pt, &lpPos->ptMaxPos );
 
-                 if( dwStyle & WS_MINIMIZE )
-                 {
-                     if( flags & WIN_NATIVE )
-                         if( pDriver->pSetHostAttr( wndPtr, HAK_ICONICSTATE, FALSE ) )
-                             swpFlags |= MINMAX_NOSWP;
+         if( dwStyle & WS_MINIMIZE )
+         {
+             if( flags & WIN_NATIVE )
+             if( pDriver->pSetHostAttr( wndPtr, HAK_ICONICSTATE, FALSE ) )
+                 swpFlags |= MINMAX_NOSWP;
 
-                     WINPOS_ShowIconTitle( wndPtr, FALSE );
-                     dwStyle &= ~WS_MINIMIZE;
-                 }
+             WINPOS_ShowIconTitle( wndPtr, FALSE );
+             dwStyle &= ~WS_MINIMIZE;
+         }
                  dwStyle |= WS_MAXIMIZE;
 
-                 SetRect16( lpRect, lpPos->ptMaxPos.x, lpPos->ptMaxPos.y,
-                                    size.x, size.y );
-                 break;
+         SetRect16( lpRect, lpPos->ptMaxPos.x, lpPos->ptMaxPos.y,
+                    size.x, size.y );
+         break;
 
-            case SW_RESTORE:
-                 if( dwStyle & WS_MINIMIZE )
-                 {
-                     if( flags & WIN_NATIVE )
-                         if( pDriver->pSetHostAttr( wndPtr, HAK_ICONICSTATE, FALSE ) )
-                             swpFlags |= MINMAX_NOSWP;
+        case SW_RESTORE:
+         if( dwStyle & WS_MINIMIZE )
+         {
+             if( flags & WIN_NATIVE )
+             if( pDriver->pSetHostAttr( wndPtr, HAK_ICONICSTATE, FALSE ) )
+                 swpFlags |= MINMAX_NOSWP;
 
-                     dwStyle &= ~WS_MINIMIZE;
-                     WINPOS_ShowIconTitle( wndPtr, FALSE );
+             dwStyle &= ~WS_MINIMIZE;
+             WINPOS_ShowIconTitle( wndPtr, FALSE );
 
-                     if( flags & WIN_RESTORE_MAX)
-                     {
-                         /* Restore to maximized position */
+             if( flags & WIN_RESTORE_MAX)
+             {
+             /* Restore to maximized position */
                          CONV_POINT16TO32( &lpPos->ptMaxPos, &pt );
                          WINPOS_GetMinMaxInfo( wndPtr, &size, &pt, NULL, NULL);
                          CONV_POINT32TO16( &pt, &lpPos->ptMaxPos );
-                         dwStyle |= WS_MAXIMIZE;
-                         SetRect16( lpRect, lpPos->ptMaxPos.x, lpPos->ptMaxPos.y, size.x, size.y );
-                         break;
-                     }
-                 }
-                 else
-                     if( !(dwStyle & WS_MAXIMIZE) ) return (UINT16)(-1);
-                     else dwStyle &= ~WS_MAXIMIZE;
+             dwStyle |= WS_MAXIMIZE;
+             SetRect16( lpRect, lpPos->ptMaxPos.x, lpPos->ptMaxPos.y, size.x, size.y );
+             break;
+             }
+         }
+         else
+             if( !(dwStyle & WS_MAXIMIZE) ) return (UINT16)(-1);
+             else dwStyle &= ~WS_MAXIMIZE;
 
-                 /* Restore to normal position */
+         /* Restore to normal position */
 
-                *lpRect = lpPos->rectNormal;
-                 lpRect->right -= lpRect->left;
-                 lpRect->bottom -= lpRect->top;
+        *lpRect = lpPos->rectNormal;
+         lpRect->right -= lpRect->left;
+         lpRect->bottom -= lpRect->top;
 
-                 break;
-        }
+         break;
+    }
     } else swpFlags |= SWP_NOSIZE | SWP_NOMOVE;
     return swpFlags;
 }
@@ -610,9 +611,9 @@ LONG Win32Window::SendNCCalcSize(BOOL calcValidRect,
    if (calcValidRect)
    {
         winposCopy = *winpos;
-        params.rgrc[1] = *oldWindowRect;
-        params.rgrc[2] = *oldClientRect;
-        params.lppos = &winposCopy;
+    params.rgrc[1] = *oldWindowRect;
+    params.rgrc[2] = *oldClientRect;
+    params.lppos = &winposCopy;
    }
    result = SendInternalMessageA(WM_NCCALCSIZE, calcValidRect,
                                  (LPARAM)&params );
@@ -664,8 +665,15 @@ ULONG Win32Window::MsgShow(BOOL fShow)
 //******************************************************************************
 //******************************************************************************
 ULONG Win32Window::MsgMove(ULONG xParent, ULONG yParent)
+{  	
+  return SendInternalMessageA(WM_MOVE, 0, MAKELONG((USHORT)xParent, (USHORT)yParent));
+}
+//******************************************************************************
+//******************************************************************************
+ULONG Win32Window::MsgHitTest(ULONG x, ULONG y)
 {
-  return 0;
+  lastHitTestVal = SendInternalMessageA(WM_NCHITTEST, 0, MAKELONG((USHORT)x, (USHORT)y));
+  return 1; //TODO: May need to change this
 }
 //******************************************************************************
 //TODO: Send WM_NCCALCSIZE message here and correct size if necessary
@@ -708,31 +716,70 @@ ULONG Win32Window::MsgKillFocus(HWND hwnd)
 ULONG Win32Window::MsgButton(ULONG msg, ULONG x, ULONG y)
 {
  ULONG win32msg;
+ ULONG win32ncmsg;
 
   switch(msg) {
         case BUTTON_LEFTDOWN:
                 win32msg = WM_LBUTTONDOWN;
+                win32ncmsg = WM_NCLBUTTONDOWN;
                 break;
         case BUTTON_LEFTUP:
                 win32msg = WM_LBUTTONUP;
+                win32ncmsg = WM_NCLBUTTONUP;
                 break;
         case BUTTON_LEFTDBLCLICK:
                 win32msg = WM_LBUTTONDBLCLK;
+                win32ncmsg = WM_NCLBUTTONDBLCLK;
                 break;
         case BUTTON_RIGHTUP:
                 win32msg = WM_RBUTTONUP;
+                win32ncmsg = WM_NCRBUTTONUP;
                 break;
         case BUTTON_RIGHTDOWN:
                 win32msg = WM_RBUTTONDOWN;
+                win32ncmsg = WM_NCRBUTTONDOWN;
                 break;
         case BUTTON_RIGHTDBLCLICK:
                 win32msg = WM_RBUTTONDBLCLK;
+                win32ncmsg = WM_NCRBUTTONDBLCLK;
+                break;
+        case BUTTON_MIDDLEUP:
+                win32msg = WM_MBUTTONUP;
+                win32ncmsg = WM_NCMBUTTONUP;
+                break;
+        case BUTTON_MIDDLEDOWN:
+                win32msg = WM_MBUTTONDOWN;
+                win32ncmsg = WM_NCMBUTTONDOWN;
+                break;
+        case BUTTON_MIDDLEDBLCLICK:
+                win32msg = WM_MBUTTONDBLCLK;
+                win32ncmsg = WM_NCMBUTTONDBLCLK;
                 break;
         default:
                 dprintf(("Win32Window::Button: invalid msg!!!!"));
                 return 1;
   }
-  return SendInternalMessageA(win32msg, 0, MAKELONG(x, MapOS2ToWin32Y(OS2Hwnd, y)));
+  SendInternalMessageA(win32ncmsg, lastHitTestVal, MAKELONG(x, y)); //TODO:
+  return SendInternalMessageA(win32msg, 0, MAKELONG(x, y));
+}
+//******************************************************************************
+//******************************************************************************
+ULONG Win32Window::MsgMouseMove(ULONG keystate, ULONG x, ULONG y)
+{
+ULONG winstate = 0;
+
+  if(keystate & WMMOVE_LBUTTON)
+  	winstate |= MK_LBUTTON;
+  if(keystate & WMMOVE_RBUTTON)
+  	winstate |= MK_RBUTTON;
+  if(keystate & WMMOVE_MBUTTON)
+  	winstate |= MK_MBUTTON;
+  if(keystate & WMMOVE_SHIFT)
+  	winstate |= MK_SHIFT;
+  if(keystate & WMMOVE_CTRL)
+  	winstate |= MK_CONTROL;
+  	
+   return SendInternalMessageA(WM_MOUSEMOVE, keystate, MAKELONG(x, y));
 }
 //******************************************************************************
 //******************************************************************************
@@ -744,14 +791,17 @@ ULONG Win32Window::MsgPaint(ULONG tmp1, ULONG tmp2)
 //******************************************************************************
 ULONG Win32Window::MsgEraseBackGround(ULONG hps)
 {
-  return SendInternalMessageA(WM_ERASEBKGND, hps, 0);
+ 	if(isIcon) {
+ 			return SendInternalMessageA(WM_ICONERASEBKGND, hps, 0);
+ 	}
+  	else	return SendInternalMessageA(WM_ERASEBKGND, hps, 0);
 }
 //******************************************************************************
 //******************************************************************************
 ULONG Win32Window::MsgSetText(LPSTR lpsz, LONG cch)
 {
   if(isUnicode) {
-        return SendInternalMessageW(WM_SETTEXT, 0, (LPARAM)lpsz);
+    	return SendInternalMessageW(WM_SETTEXT, 0, (LPARAM)lpsz);
   }
   else  return SendInternalMessageA(WM_SETTEXT, 0, (LPARAM)lpsz);
 }
@@ -842,7 +892,6 @@ LRESULT Win32Window::SendMessageW(ULONG Msg, WPARAM wParam, LPARAM lParam)
 LRESULT Win32Window::SendInternalMessageA(ULONG Msg, WPARAM wParam, LPARAM lParam)
 {
   if(PostSpyMessage(getWindowHandle(), Msg, wParam, lParam) == FALSE)
-
         dprintf(("SendInternalMessageA %s for %x %x %x", GetMsgText(Msg), getWindowHandle(), wParam, lParam));
 
   if(HkCBT::OS2HkCBTProc(getWindowHandle(), Msg, wParam, lParam) == TRUE) {//hook swallowed msg
@@ -928,8 +977,8 @@ BOOL Win32Window::PostMessageA(ULONG msg, WPARAM wParam, LPARAM lParam)
 
   postmsg = (POSTMSG_PACKET *)malloc(sizeof(POSTMSG_PACKET));
   if(postmsg == NULL) {
-        dprintf(("Win32Window::PostMessageA: malloc returned NULL!!"));
-        return 0;
+    dprintf(("Win32Window::PostMessageA: malloc returned NULL!!"));
+    return 0;
   }
   postmsg->Msg    = msg;
   postmsg->wParam = wParam;
@@ -944,8 +993,8 @@ BOOL Win32Window::PostMessageW(ULONG msg, WPARAM wParam, LPARAM lParam)
 
   postmsg = (POSTMSG_PACKET *)malloc(sizeof(POSTMSG_PACKET));
   if(postmsg == NULL) {
-        dprintf(("Win32Window::PostMessageW: malloc returned NULL!!"));
-        return 0;
+    dprintf(("Win32Window::PostMessageW: malloc returned NULL!!"));
+    return 0;
   }
   postmsg->Msg    = msg;
   postmsg->wParam = wParam;
@@ -986,11 +1035,11 @@ BOOL Win32Window::SetMenu(ULONG hMenu)
 
    if(HMHandleTranslateToOS2(hMenu, (PULONG)&menutemplate) == NO_ERROR)
    {
-        OS2HwndMenu = OSLibWinCreateMenu(OS2HwndFrame, menutemplate);
-        if(OS2HwndMenu == 0) {
-                dprintf(("Win32Window::SetMenu OS2HwndMenu == 0"));
-                return FALSE;
-        }
+    OS2HwndMenu = OSLibWinCreateMenu(OS2HwndFrame, menutemplate);
+    if(OS2HwndMenu == 0) {
+        dprintf(("Win32Window::SetMenu OS2HwndMenu == 0"));
+        return FALSE;
+    }
    }
    dprintf(("Win32Window::SetMenu unknown hMenu (%x)", hMenu));
    return FALSE;
@@ -1004,37 +1053,37 @@ BOOL Win32Window::ShowWindow(ULONG nCmdShow)
   dprintf(("ShowWindow %x", nCmdShow));
   switch(nCmdShow)
   {
-        case SW_SHOW:
-        case SW_SHOWDEFAULT: //todo
-                showstate = SWPOS_SHOW | SWPOS_ACTIVATE;
-                break;
-        case SW_HIDE:
-                showstate = SWPOS_HIDE;
-                break;
-        case SW_RESTORE:
-                showstate = SWPOS_RESTORE | SWPOS_SHOW | SWPOS_ACTIVATE;
-                break;
-        case SW_MINIMIZE:
-                showstate = SWPOS_MINIMIZE;
-                break;
-        case SW_SHOWMAXIMIZED:
-                showstate = SWPOS_MAXIMIZE | SWPOS_SHOW | SWPOS_ACTIVATE;
-                break;
-        case SW_SHOWMINIMIZED:
-                showstate = SWPOS_MINIMIZE | SWPOS_SHOW | SWPOS_ACTIVATE;
-                break;
-        case SW_SHOWMINNOACTIVE:
-                showstate = SWPOS_MINIMIZE | SWPOS_SHOW;
-                break;
-        case SW_SHOWNA:
-                showstate = SWPOS_SHOW;
-                break;
-        case SW_SHOWNOACTIVATE:
-                showstate = SWPOS_SHOW;
-                break;
-        case SW_SHOWNORMAL:
-                showstate = SWPOS_RESTORE | SWPOS_ACTIVATE | SWPOS_SHOW;
-                break;
+    case SW_SHOW:
+    case SW_SHOWDEFAULT: //todo
+        showstate = SWPOS_SHOW | SWPOS_ACTIVATE;
+        break;
+    case SW_HIDE:
+        showstate = SWPOS_HIDE;
+        break;
+    case SW_RESTORE:
+        showstate = SWPOS_RESTORE | SWPOS_SHOW | SWPOS_ACTIVATE;
+        break;
+    case SW_MINIMIZE:
+        showstate = SWPOS_MINIMIZE;
+        break;
+    case SW_SHOWMAXIMIZED:
+        showstate = SWPOS_MAXIMIZE | SWPOS_SHOW | SWPOS_ACTIVATE;
+        break;
+    case SW_SHOWMINIMIZED:
+        showstate = SWPOS_MINIMIZE | SWPOS_SHOW | SWPOS_ACTIVATE;
+        break;
+    case SW_SHOWMINNOACTIVE:
+        showstate = SWPOS_MINIMIZE | SWPOS_SHOW;
+        break;
+    case SW_SHOWNA:
+        showstate = SWPOS_SHOW;
+        break;
+    case SW_SHOWNOACTIVATE:
+        showstate = SWPOS_SHOW;
+        break;
+    case SW_SHOWNORMAL:
+        showstate = SWPOS_RESTORE | SWPOS_ACTIVATE | SWPOS_SHOW;
+        break;
   }
   return OSLibWinShowWindow(OS2HwndFrame, showstate);
 }
@@ -1046,47 +1095,47 @@ BOOL Win32Window::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, int c
  ULONG        setstate = 0;
 
   switch(hwndInsertAfter) {
-        case HWND_BOTTOM:
-                hwndInsertAfter = HWNDOS_BOTTOM;
-                break;
-        case HWND_TOPMOST: //TODO:
-        case HWND_NOTOPMOST: //TODO:
-        case HWND_TOP:
-                hwndInsertAfter = HWNDOS_TOP;
-                break;
-        default:
-                window = GetWindowFromHandle(hwndInsertAfter);
-                if(window) {
-                        hwndInsertAfter = window->getOS2WindowHandle();
-                }
-                else {
-                        dprintf(("Win32Window::SetWindowPos, unknown hwndInsertAfter %x", hwndInsertAfter));
-                        hwndInsertAfter = 0;
-                }
-                break;
+    case HWND_BOTTOM:
+        hwndInsertAfter = HWNDOS_BOTTOM;
+        break;
+    case HWND_TOPMOST: //TODO:
+    case HWND_NOTOPMOST: //TODO:
+    case HWND_TOP:
+        hwndInsertAfter = HWNDOS_TOP;
+        break;
+    default:
+        window = GetWindowFromHandle(hwndInsertAfter);
+        if(window) {
+            hwndInsertAfter = window->getOS2WindowHandle();
+        }
+        else {
+            dprintf(("Win32Window::SetWindowPos, unknown hwndInsertAfter %x", hwndInsertAfter));
+            hwndInsertAfter = 0;
+        }
+        break;
 
   }
   setstate = SWPOS_MOVE | SWPOS_SIZE | SWPOS_ACTIVATE | SWPOS_ZORDER;
   if(fuFlags & SWP_DRAWFRAME)
-        setstate |= 0; //TODO
+    setstate |= 0; //TODO
   if(fuFlags & SWP_FRAMECHANGED)
-        setstate |= 0; //TODO
+    setstate |= 0; //TODO
   if(fuFlags & SWP_HIDEWINDOW)
-        setstate &= ~SWPOS_ZORDER;
+    setstate &= ~SWPOS_ZORDER;
   if(fuFlags & SWP_NOACTIVATE)
-        setstate &= ~SWPOS_ACTIVATE;
+    setstate &= ~SWPOS_ACTIVATE;
   if(fuFlags & SWP_NOCOPYBITS)
-        setstate |= 0;          //TODO
+    setstate |= 0;      //TODO
   if(fuFlags & SWP_NOMOVE)
-        setstate &= ~SWPOS_MOVE;
+    setstate &= ~SWPOS_MOVE;
   if(fuFlags & SWP_NOSIZE)
-        setstate &= ~SWPOS_SIZE;
+    setstate &= ~SWPOS_SIZE;
   if(fuFlags & SWP_NOREDRAW)
-        setstate |= SWPOS_NOREDRAW;
+    setstate |= SWPOS_NOREDRAW;
   if(fuFlags & SWP_NOZORDER)
-        setstate &= ~SWPOS_ZORDER;
+    setstate &= ~SWPOS_ZORDER;
   if(fuFlags & SWP_SHOWWINDOW)
-        setstate |= SWPOS_SHOW;
+    setstate |= SWPOS_SHOW;
 
   return OSLibWinSetWindowPos(OS2HwndFrame, hwndInsertAfter, x, y, cx, cy, setstate);
 }
@@ -1102,7 +1151,7 @@ BOOL Win32Window::DestroyWindow()
 HWND Win32Window::GetParent()
 {
   if(getParent()) {
-        return getParent()->getWindowHandle();
+    return getParent()->getWindowHandle();
   }
   else  return 0;
 }
@@ -1119,7 +1168,7 @@ HWND Win32Window::SetParent(HWND hwndNewParent)
    else oldhwnd = 0;
 
    if(hwndNewParent == 0) {//desktop window = parent
-        setParent(NULL);
+    setParent(NULL);
         OSLibWinSetParent(getOS2WindowHandle(), OSLIB_HWND_DESKTOP);
         return oldhwnd;
    }
@@ -1138,7 +1187,7 @@ HWND Win32Window::SetParent(HWND hwndNewParent)
 BOOL Win32Window::IsChild(HWND hwndParent)
 {
   if(getParent()) {
-        return getParent()->getWindowHandle() == hwndParent;
+    return getParent()->getWindowHandle() == hwndParent;
   }
   else  return 0;
 }
@@ -1155,11 +1204,11 @@ HWND Win32Window::GetTopWindow()
 //******************************************************************************
 BOOL Win32Window::UpdateWindow()
 {
-   OSRECTL rect;
+ RECT rect;
 
   if(OSLibWinQueryUpdateRect(OS2Hwnd, &rect))
   {//update region not empty
-        SendInternalMessageA((isIcon) ? WM_PAINTICON : WM_PAINT, 0, 0);
+    SendInternalMessageA((isIcon) ? WM_PAINTICON : WM_PAINT, 0, 0);
   }
   return TRUE;
 }
@@ -1182,42 +1231,42 @@ HWND Win32Window::GetWindow(UINT uCmd)
   dprintf(("GetWindow %x %d NOT COMPLETE", getWindowHandle(), uCmd));
   switch(uCmd)
   {
-        case GW_CHILD:
-                getcmd = QWOS_TOP;
-                break;
-        case GW_HWNDFIRST:
-                if(getParent()) {
-                        getcmd = QWOS_TOP; //top of child windows
-                }
-                else    getcmd = QWOS_TOP; //TODO
-                break;
-        case GW_HWNDLAST:
-                if(getParent()) {
-                        getcmd = QWOS_BOTTOM; //bottom of child windows
-                }
-                else    getcmd = QWOS_BOTTOM; //TODO
-                break;
-        case GW_HWNDNEXT:
-                getcmd = QWOS_NEXT;
-                break;
-        case GW_HWNDPREV:
-                getcmd = QWOS_PREV;
-                break;
-        case GW_OWNER:
-                if(owner) {
-                        return owner->getWindowHandle();
-                }
-                else    return 0;
+    case GW_CHILD:
+        getcmd = QWOS_TOP;
+        break;
+    case GW_HWNDFIRST:
+        if(getParent()) {
+            getcmd = QWOS_TOP; //top of child windows
+        }
+        else    getcmd = QWOS_TOP; //TODO
+        break;
+    case GW_HWNDLAST:
+        if(getParent()) {
+            getcmd = QWOS_BOTTOM; //bottom of child windows
+        }
+        else    getcmd = QWOS_BOTTOM; //TODO
+        break;
+    case GW_HWNDNEXT:
+        getcmd = QWOS_NEXT;
+        break;
+    case GW_HWNDPREV:
+        getcmd = QWOS_PREV;
+        break;
+    case GW_OWNER:
+        if(owner) {
+            return owner->getWindowHandle();
+        }
+        else    return 0;
   }
   hwndRelated = OSLibWinQueryWindow(OS2Hwnd, getcmd);
   if(hwndRelated)
   {
-        win32wnd = (Win32Window *)OSLibWinGetWindowULong(hwndRelated, OFFSET_WIN32WNDPTR);
-        magic    = OSLibWinGetWindowULong(hwndRelated, OFFSET_WIN32PM_MAGIC);
-        if(CheckMagicDword(magic) && win32wnd)
-        {
-                return win32wnd->getWindowHandle();
-        }
+    win32wnd = (Win32Window *)OSLibWinGetWindowULong(hwndRelated, OFFSET_WIN32WNDPTR);
+    magic    = OSLibWinGetWindowULong(hwndRelated, OFFSET_WIN32PM_MAGIC);
+    if(CheckMagicDword(magic) && win32wnd)
+    {
+        return win32wnd->getWindowHandle();
+    }
   }
   return 0;
 }
@@ -1254,7 +1303,7 @@ HWND Win32Window::GetActiveWindow()
   magic    = OSLibWinGetWindowULong(hwndActive, OFFSET_WIN32PM_MAGIC);
   if(CheckMagicDword(magic) && win32wnd)
   {
-        return win32wnd->getWindowHandle();
+    return win32wnd->getWindowHandle();
   }
   return hwndActive;
 }
@@ -1324,7 +1373,7 @@ LONG Win32Window::SetWindowLongA(int index, ULONG value)
                 hInstance = value;
                 return oldval;
         case GWL_HWNDPARENT:
-                return SetParent((HWND)value);
+        return SetParent((HWND)value);
 
         case GWL_ID:
                 oldval = getWindowId();
@@ -1409,29 +1458,13 @@ Win32Window *Win32Window::GetWindowFromHandle(HWND hwnd)
  Win32Window *window;
 
    if(HIWORD(hwnd) != 0x6800) {
-        return NULL;
+    return NULL;
    }
 
    if(HMHandleTranslateToOS2(LOWORD(hwnd), (PULONG)&window) == NO_ERROR) {
-        return window;
+    return window;
    }
    else return NULL;
-}
-//******************************************************************************
-//******************************************************************************
-Win32Window *Win32Window::GetWindowFromOS2Handle(HWND hwnd)
-{
-   ULONG winHandle;
-   Win32Window *window;
-
-   //CB: returns index, not handle!
-   if(HMHandleTranslateToWin(hwnd,(PULONG)&winHandle) == NO_ERROR)
-   {
-     if (HMHandleTranslateToOS2(LOWORD(winHandle),(PULONG)&window) == NO_ERROR)
-     {
-       return window;
-     } else return NULL;
-   } else return NULL;
 }
 //******************************************************************************
 //******************************************************************************

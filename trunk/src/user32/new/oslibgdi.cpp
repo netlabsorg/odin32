@@ -1,4 +1,4 @@
-/* $Id: oslibgdi.cpp,v 1.1 1999-07-18 10:39:51 sandervl Exp $ */
+/* $Id: oslibgdi.cpp,v 1.2 1999-07-18 14:39:35 sandervl Exp $ */
 /*
  * Window GDI wrapper functions for OS/2
  *
@@ -25,7 +25,7 @@ inline PRECTL Win32ToOS2Rect(PVOID pRectl)
 {
  PRECTL pWinRect = (PRECTL)pRectl;
  ULONG  tmp;
-  
+
   tmp = pWinRect->yBottom;
   pWinRect->yBottom = pWinRect->yTop;
   pWinRect->yTop = tmp;
@@ -73,7 +73,7 @@ ULONG MapOS2ToWin32Y(HWND hwndChild, ULONG cy, ULONG y)
 {
  HWND     hwndParent;
  RECTLOS2 rectParent = {0};
-   
+
    hwndParent = WinQueryWindow(hwndChild, QW_PARENT);
    WinQueryWindowRect(hwndParent, (PRECTL)&rectParent);
    return MAPWIN32POINT(&rectParent, cy, y);
@@ -109,13 +109,13 @@ ULONG MapOS2ToWin32Y(HWND hwndChild, PRECTLOS2 rectChild, ULONG y)
 //   Convert OS/2 to Win32 RECTL structure
 //
 // Parameters:
-//   hwndChild:	Child window handle
+//   hwndChild: Child window handle
 //   rectChild: OS/2 child window RECTL
 //
 // Returns:
 //   rectChild: Converted OS/2 rectange stored in Win32 RECTL (yTop & yBottom reversed)
-//   TRUE:  	Success
-//   FALSE: 	Failures
+//   TRUE:      Success
+//   FALSE:     Failures
 //******************************************************************************
 BOOL MapOS2ToWin32Rectl(HWND hwndChild, PRECTLOS2 rectChild, PRECT rectWin32)
 {
@@ -141,8 +141,8 @@ BOOL MapOS2ToWin32Rectl(HWND hwndChild, PRECTLOS2 rectChild, PRECT rectWin32)
 //
 // Returns:
 //   rectChild:  Converted OS/2 rectange stored in Win32 RECTL (yTop & yBottom reversed)
-//   TRUE:  	 Success
-//   FALSE: 	 Failures
+//   TRUE:       Success
+//   FALSE:      Failures
 //******************************************************************************
 BOOL MapOS2ToWin32Rectl(PRECTLOS2 rectParent, PRECTLOS2 rectChild, PRECT rectWin32)
 {
@@ -161,8 +161,8 @@ BOOL MapOS2ToWin32Rectl(PRECTLOS2 rectParent, PRECTLOS2 rectChild, PRECT rectWin
 //   rectWin32:  Win32 Child window RECT   (IN)
 //   rectChild:  OS/2  Child window RECTL  (OUT)
 // Returns:
-//   TRUE:  	 Success
-//   FALSE: 	 Failures
+//   TRUE:       Success
+//   FALSE:      Failures
 //******************************************************************************
 BOOL MapWin32ToOS2Rectl(HWND hwndChild, PRECT rectWin32, PRECTLOS2 rectChild)
 {
@@ -187,8 +187,8 @@ BOOL MapWin32ToOS2Rectl(HWND hwndChild, PRECT rectWin32, PRECTLOS2 rectChild)
 //   rectWin32:  Win32 Child window RECT   (IN)
 //   rectChild:  OS/2  Child window RECTL  (OUT)
 // Returns:
-//   TRUE:  	 Success
-//   FALSE: 	 Failures
+//   TRUE:       Success
+//   FALSE:      Failures
 //******************************************************************************
 BOOL MapWin32ToOS2Rectl(PRECTLOS2 rectParent, PRECT rectWin32, PRECTLOS2 rectChild)
 {
