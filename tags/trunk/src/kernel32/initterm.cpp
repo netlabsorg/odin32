@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.31 1999-12-12 14:32:38 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.32 1999-12-29 18:49:50 sandervl Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -60,6 +60,9 @@ extern void APIENTRY Win32DllExitList(ULONG reason);
 extern "C" {
 void CDECL _ctordtorInit( void );
 void CDECL _ctordtorTerm( void );
+
+ //Win32 resource table (produced by wrc)
+ extern DWORD _Resource_PEResTab;
 }
 
 //Global DLL Data
@@ -117,7 +120,8 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
                 return 0UL;
 
             PROFILE_LoadOdinIni();
-            if(RegisterLxDll(hModule, 0, 0) == FALSE)
+//            if(RegisterLxDll(hModule, 0, 0) == FALSE)
+            if(RegisterLxDll(hModule, 0, (PVOID)&_Resource_PEResTab) == FALSE)
                 return 0UL;
 
             /*******************************************************************/

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.74 1999-12-28 19:16:34 sandervl Exp $
+# $Id: makefile,v 1.75 1999-12-29 18:49:50 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -28,6 +28,9 @@ CFLAGS = $(CFLAGS) -DDEBUG_ENABLELOG_LEVEL2
 CXXFLAGS = $(CXXFLAGS) -DDEBUG_ENABLELOG_LEVEL2
 !endif
 
+RC = $(PDWIN32_TOOLS)\wrc
+RCFLAGS = -s -I. -I$(CPPMAIN)\include -I$(PDWIN32_INCLUDE) -I$(PDWIN32_INCLUDE)\win
+
 OBJS = KERNEL32.OBJ KOBJECTS.OBJ CONSOLE.OBJ CONIN.OBJ \
 CONBUFFER.OBJ CONOUT.OBJ UNICODE.OBJ network.OBJ HMDEVIO.OBJ \
 profile.obj THREAD.OBJ virtual.obj THUNK.OBJ OBSOLETE.OBJ COMM.OBJ\
@@ -40,7 +43,7 @@ hmsemaphore.obj wprocess.OBJ conprop.OBJ conprop2.obj winimagelx.obj \
 winimagebase.OBJ windllbase.OBJ winexebase.OBJ time.obj mmap.obj \
 winimagepe2lx.obj winimagepeldr.obj windllpe2lx.obj windlllx.obj windllpeldr.obj \
 winexepe2lx.obj winexelx.obj winexepeldr.obj WINRES.OBJ critsection.obj \
-pefile.OBJ winimgres.OBJ wintls.obj async.OBJ fileio.obj hmtoken.obj \
+pefile.OBJ winimgres.OBJ wintls.obj async.OBJ fileio.obj hmtoken.obj kernelrsrc.obj \
 atom.obj disk.obj directory.obj cvtbitmap.obj hmmmap.obj winfakepeldr.obj \
 cvtaccel.obj cvticon.obj cvticongrp.obj oslibexcept.obj cpu.obj process.obj \
 cvtcursor.obj cvtcursorgrp.obj stubs.obj interlock.obj toolhelp.obj codepage.obj
@@ -87,6 +90,11 @@ $(TARGET)exp.def: $(TARGET).def
 
 $(PDWIN32_LIB)\pmwinx.lib:
         $(IMPLIB) $(IMPLIBFLAGS) $@ $(PDWIN32_LIB)\pmwinx.def
+
+kernelrsrc.asm: kernel32.rc
+    $(RC) $(RCFLAGS) -o kernelrsrc.asm kernel32.rc
+
+kernelrsrc.obj: kernelrsrc.asm
 
 kernel32.OBJ: kernel32.cpp \
     exceptutil.h \
@@ -405,7 +413,7 @@ environ.obj: environ.cpp $(PDWIN32_INCLUDE)\misc.h
 codepage.obj: codepage.cpp oslibdos.h profile.h $(PDWIN32_INCLUDE)\codepage.h
 
 clean:
-        $(RM) *.OBJ *.LIB *.dll *.lrf *.res *.map *.pch
+        $(RM) *.OBJ *.LIB *.dll *.lrf *.res *.map *.pch kernelrsrc.asm
         $(RM) $(PDWIN32_LIB)\$(TARGET).LIB
         $(RM) $(PDWIN32_BIN)\$(TARGET).dll
         $(RM) $(TARGET)exp.def
