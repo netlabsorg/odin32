@@ -1,4 +1,4 @@
-# $Id: pdwin32.vac3.post,v 1.2 2000-10-23 13:40:31 sandervl Exp $
+# $Id: pdwin32.vac3.post,v 1.3 2000-11-01 01:34:19 bird Exp $
 #
 # Odin32 API
 #
@@ -187,11 +187,9 @@ clean:  clean2
 !endif
 !ifndef LOCALCLEAN
         $(PDWIN32_LIB)\$(TARGET).LIB \
-!ifndef EXETARGET
-        $(PDWIN32_BIN)\$(TARGET).$(TARGET_EXTENSION) $(TARGET)exp.def *.$(TARGET_EXTENSION) \
-!else
+        $(TARGET)exp.def \
         $(PDWIN32_BIN)\$(TARGET).$(TARGET_EXTENSION) *.$(TARGET_EXTENSION) \
-!endif
+        $(PDWIN32_BIN)\$(TARGET).sym *.sym \
         $(CLEANEXTRAS)
 !else
         $(CLEANEXTRAS)
