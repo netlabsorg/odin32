@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.85 2000-03-03 11:15:58 sandervl Exp $
+# $Id: makefile,v 1.86 2000-03-04 19:17:27 bird Exp $
 
 #
 # PD-Win32 API
@@ -14,22 +14,13 @@ PDWIN32_TOOLS = ..\..\tools\bin
 
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 
-
 CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE)
-CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE) 
+CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 !ifdef NODEBUGINFO
 CFLAGS = $(CFLAGS) -DDEFAULT_LOGGING_OFF
 CXXFLAGS = $(CXXFLAGS) -DDEFAULT_LOGGING_OFF
 !endif
-
-!ifdef DEBUGALL
-CFLAGS = $(CFLAGS) -DDEBUG_ENABLELOG_LEVEL2
-CXXFLAGS = $(CXXFLAGS) -DDEBUG_ENABLELOG_LEVEL2
-!endif
-
-RC = $(PDWIN32_TOOLS)\wrc
-RCFLAGS = -s -I. -I$(CPPMAIN)\include -I$(PDWIN32_INCLUDE) -I$(PDWIN32_INCLUDE)\win
 
 OBJS = KERNEL32.OBJ KOBJECTS.OBJ CONSOLE.OBJ CONIN.OBJ \
 CONBUFFER.OBJ CONOUT.OBJ UNICODE.OBJ network.OBJ HMDEVIO.OBJ \
@@ -56,19 +47,23 @@ all: $(PDWIN32_LIB)\pmwinx.lib $(TARGET).dll $(TARGET).LIB
 
 
 $(TARGET).dll: $(OBJS) $(TARGET).def $(TARGET).lrf
-#   $(LD) $(LDFLAGS) /Fm /Fe$@ /B"/FREE" @$(TARGET).lrf
-!ifdef DEBUG
-!ifdef NODEBUGINFO
-    ilink /nodeb /map /noe /NOD /NoLogo /NOFREE @$(TARGET).lrf
-!else
-    ilink /de /map  /noe /NOD /dbgpack /NoLogo /NOFREE @$(TARGET).lrf
-!endif
-!else
-    ilink /map  /noe /NOD /NoLogo /NOFREE @$(TARGET).lrf
-!endif
+    $(LD2) $(LD2FLAGS) /NOFREE @$(TARGET).lrf
     rc -r console.rc console.res
     rc console.res $@
     $(CP) $@ $(PDWIN32_BIN)
+
+# old linker stuff
+#   $(LD) $(LDFLAGS) /Fm /Fe$@ /B"/FREE" @$(TARGET).lrf
+#!ifdef DEBUG
+#!ifdef NODEBUGINFO
+#    ilink /nodeb /map /noe /NOD /NoLogo /NOFREE @$(TARGET).lrf
+#!else
+#    ilink /de /map  /noe /NOD /dbgpack /NoLogo /NOFREE @$(TARGET).lrf
+#!endif
+#!else
+#    ilink /map  /noe /NOD /NoLogo /NOFREE @$(TARGET).lrf
+#!endif
+
 
 
 $(TARGET).lrf: makefile
@@ -102,6 +97,7 @@ $(PDWIN32_LIB)\pmwinx.lib:
 
 kernelrsrc.asm: kernel32.rc
     $(RC) $(RCFLAGS) -o kernelrsrc.asm kernel32.rc
+
 
 dep:
     $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
