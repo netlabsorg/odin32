@@ -1,4 +1,4 @@
-/* $Id: glu.h,v 1.3 2000-03-11 09:05:07 jeroen Exp $ */
+/* $Id: glu.h,v 1.4 2000-03-11 15:08:36 sandervl Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -65,8 +65,9 @@ extern "C" {
 #define GLAPIENTRY
 #endif
 
+#undef GLCALLBACK
 #ifndef GLCALLBACK
-#define GLCALLBACK
+#define GLCALLBACK __stdcall
 #endif
 
 
@@ -360,7 +361,7 @@ GLUAPI void GLAPIENTRY gluQuadricTexture( GLUquadricObj *quadObject,
 
 GLUAPI void GLAPIENTRY gluQuadricCallback( GLUquadricObj *qobj,
                                            GLenum which,
-                                           void (GLCALLBACK *fn)() );
+                                           void (* GLCALLBACK fn)() );
 
 GLUAPI void GLAPIENTRY gluCylinder( GLUquadricObj *qobj,
                                   GLdouble baseRadius,
@@ -432,7 +433,7 @@ GLUAPI void GLAPIENTRY gluPwlCurve( GLUnurbsObj *nobj, GLint count,
                                   GLfloat *array, GLint stride, GLenum type );
 
 GLUAPI void GLAPIENTRY gluNurbsCallback( GLUnurbsObj *nobj, GLenum which,
-                                       void (GLCALLBACK *fn)() );
+                                       void (* GLCALLBACK fn)() );
 
 GLUAPI GLboolean GLAPIENTRY gluCheckExtension(const GLubyte *extName,
                                               const GLubyte *extString);
@@ -467,7 +468,7 @@ GLUAPI void GLAPIENTRY gluTessNormal( GLUtesselator *tobj, GLdouble x,
                                       GLdouble y, GLdouble z );
 
 GLUAPI void GLAPIENTRY gluTessCallback( GLUtesselator *tobj, GLenum which,
-                                        void (GLCALLBACK *fn)() );
+                                        void (* GLCALLBACK fn)() );
 
 GLUAPI void GLAPIENTRY gluGetTessProperty( GLUtesselator *tobj, GLenum which,
                                            GLdouble *value );
