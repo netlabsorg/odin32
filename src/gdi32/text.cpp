@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.8 2000-02-16 14:18:12 sandervl Exp $ */
+/* $Id: text.cpp,v 1.9 2000-05-02 20:49:58 sandervl Exp $ */
 
 /*
  * GDI32 text apis
@@ -690,7 +690,7 @@ BOOL InternalTextOutW(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCWST
 //******************************************************************************
 BOOL WIN32API ExtTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR lpszString,UINT cbCount,CONST INT *lpDx)
 {
-  dprintf(("GDI32: ExtTextOutA\n"));
+  dprintf(("GDI32: ExtTextOutA %x %s", hdc, lpszString));
 
   return InternalTextOutA(hdc,X,Y,fuOptions,lprc,lpszString,cbCount,lpDx,TRUE);
 }
@@ -706,7 +706,7 @@ BOOL WIN32API ExtTextOutW(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LP
 //******************************************************************************
 BOOL WIN32API TextOutA(HDC hdc,int nXStart,int nYStart,LPCSTR lpszString,int cbString)
 {
-  dprintf(("GDI32: TextOutA"));
+  dprintf(("GDI32: TextOutA %x %s", hdc, lpszString));
 
   return InternalTextOutA(hdc,nXStart,nYStart,0,NULL,lpszString,cbString,NULL,FALSE);
 }
