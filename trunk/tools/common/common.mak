@@ -1,4 +1,4 @@
-# $Id: common.mak,v 1.4 2001-04-17 04:07:32 bird Exp $
+# $Id: common.mak,v 1.5 2002-02-23 23:27:18 bird Exp $
 
 #
 # Odin32 API
@@ -23,7 +23,7 @@ EXETARGET = 1
 #
 # We use exception, so we'll have to enable them.
 #
-!ifndef WAT
+!ifndef WMAKE
 CXXFLAGS = $(CXXFLAGS) $(CXXEXCEPTIONS)
 !else
 CXXFLAGS += $(CXXEXCEPTIONS)

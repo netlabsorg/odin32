@@ -1,4 +1,4 @@
-# $Id: common.mk,v 1.6 2001-09-30 00:18:10 bird Exp $
+# $Id: common.mk,v 1.7 2002-02-23 23:27:18 bird Exp $
 #
 # Common definitions for tools.
 #
@@ -15,7 +15,7 @@
 #
 # We use exception, so we'll have to enable them.
 #
-!ifndef WAT
+!ifndef WMAKE
 CXXFLAGS = $(CXXFLAGS) $(CXXEXCEPTIONS)
 !else
 CXXFLAGS += $(CXXEXCEPTIONS)

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2000-12-02 23:27:01 bird Exp $
+# $Id: makefile,v 1.10 2002-02-23 23:27:18 bird Exp $
 
 #
 # Odin32 API
@@ -40,10 +40,10 @@ NO_MAIN_BIN_COPY = 1
 CFLAGS   = $(CFLAGS)   -Wall+ppt-ppc-inl-cnv-gnr-vft-
 CXXFLAGS = $(CXXFLAGS) -Wall+ppt-ppc-inl-cnv-gnr-vft- $(CXXEXCEPTIONS)
 !else
-!if "$(WAT)" == "1"
-CXXFLAGS += $(CXXEXCEPTIONS)
-!else
+!ifndef WMAKE
 CXXFLAGS = $(CXXFLAGS) $(CXXEXCEPTIONS)
+!else
+CXXFLAGS += $(CXXEXCEPTIONS)
 !endif
 !endif
 
