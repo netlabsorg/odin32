@@ -1,4 +1,4 @@
-/* $Id: winimagelx.cpp,v 1.12 2001-08-06 19:36:42 sandervl Exp $ */
+/* $Id: winimagelx.cpp,v 1.13 2001-10-16 11:39:39 sandervl Exp $ */
 
 /*
  * Win32 LX Image base class
@@ -110,7 +110,7 @@ ULONG Win32LxImage::getApi(char *name)
   rc = DosQueryProcAddr(hinstanceOS2, 0, name, (PFN *)&apiaddr);
   if(rc)
   {
-	dprintf(("Win32LxImage::getApi -> rc = %d", rc));
+	dprintf(("Win32LxImage::getApi %x %s -> rc = %d", hinstanceOS2, name, rc));
 	return(0);
   }
   return(apiaddr);
@@ -124,7 +124,7 @@ ULONG Win32LxImage::getApi(int ordinal)
 
   rc = DosQueryProcAddr(hinstanceOS2, dwOrdinalBase+ordinal, NULL, (PFN *)&apiaddr);
   if(rc) {
-	dprintf(("Win32LxImage::getApi -> rc = %d", rc));
+	dprintf(("Win32LxImage::getApi %x %d -> rc = %d", hinstanceOS2, ordinal, rc));
 	return(0);
   }
   return(apiaddr);

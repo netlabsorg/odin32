@@ -250,9 +250,7 @@ ULONG APIENTRY InitializeKernel32()
     HMODULE hModule;
 
     DosQueryModuleHandle("WGSS50", &hModule);
-    O32__DLL_InitTerm(hModule, 0);
-    DosQueryModuleHandle("XXODIN32", &hModule);
-    return inittermKernel32(hModule, 0);
+    return O32__DLL_InitTerm(hModule, 0);
 }
 //******************************************************************************
 //******************************************************************************
