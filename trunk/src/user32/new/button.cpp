@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.10 1999-07-27 16:14:22 cbratschi Exp $ */
+/* $Id: button.cpp,v 1.11 1999-08-15 19:11:00 cbratschi Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
@@ -30,6 +30,7 @@ static void GB_Paint(HWND hwnd,HDC hDC,WORD action);
 static void UB_Paint(HWND hwnd,HDC hDC,WORD action);
 static void OB_Paint(HWND hwnd,HDC hDC,WORD action);
 static void BUTTON_CheckAutoRadioButton(HWND hwnd);
+static void BUTTON_DrawPushButton(HWND hwnd,HDC hDC,WORD action,BOOL pushedState);
 static LRESULT BUTTON_LButtonDown(HWND hwnd,WPARAM wParam,LPARAM lParam);
 
 #define MAX_BTN_TYPE  12
@@ -180,28 +181,21 @@ static LRESULT BUTTON_Paint(HWND hwnd,WPARAM wParam,LPARAM lParam)
 static LRESULT BUTTON_LButtonDblClk(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
+  DWORD style = dwStyle & 0x0f;
 
-  switch(dwStyle & 0x0f)
-  {
-    case BS_RADIOBUTTON:
-    case BS_AUTORADIOBUTTON:
-    case BS_OWNERDRAW:
-      SendMessageA(GetParent(hwnd),WM_COMMAND,MAKEWPARAM(GetWindowLongA(hwnd,GWL_ID),BN_DOUBLECLICKED),hwnd);
-      break;
-
-    default:
-      BUTTON_LButtonDown(hwnd,wParam,lParam);
-      break;
-  }
+  if(dwStyle & BS_NOTIFY || style == BS_RADIOBUTTON ||
+     style == BS_USERBUTTON || style == BS_OWNERDRAW)
+    SendMessageA(GetParent(hwnd),WM_COMMAND,MAKEWPARAM(GetWindowLongA(hwnd,GWL_ID),BN_DOUBLECLICKED),hwnd);
+  else BUTTON_LButtonDown(hwnd,wParam,lParam);
 
   return 0;
 }
 
 static LRESULT BUTTON_LButtonDown(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
-  SendMessageA(hwnd,BM_SETSTATE,TRUE,0);
-  SetFocus(hwnd);
   SetCapture(hwnd);
+  SetFocus(hwnd);
+  SendMessageA(hwnd,BM_SETSTATE,TRUE,0);
 
   return 0;
 }
@@ -354,16 +348,16 @@ static LRESULT BUTTON_SetFocus(HWND hwnd,WPARAM wParam,LPARAM lParam)
   BUTTONINFO* infoPtr = (BUTTONINFO*)GetInfoPtr(hwnd);
   DWORD style = GetWindowLongA(hwnd,GWL_STYLE) & 0x0f;
 
-  infoPtr->state |= BUTTON_HASFOCUS;
-  if (style == BS_AUTORADIOBUTTON)
+  if ((style == BS_AUTORADIOBUTTON || style == BS_RADIOBUTTON) &&
+      (GetCapture() != hwnd) && !(SendMessageA(hwnd,BM_GETCHECK,0,0) & BST_CHECKED))
   {
-    SendMessageA(hwnd,BM_SETCHECK,1,0);
-    SendMessageA(GetParent(hwnd),WM_COMMAND,MAKEWPARAM(GetWindowLongA(hwnd,GWL_ID),BN_CLICKED),hwnd);
-  } else if (style == BS_RADIOBUTTON)
-  {
+    /* The notification is sent when the button (BS_AUTORADIOBUTTON)
+       is unckecked and the focus was not given by a mouse click. */
+    if (style == BS_AUTORADIOBUTTON) SendMessageA(hwnd,BM_SETCHECK,TRUE,0);
     SendMessageA(GetParent(hwnd),WM_COMMAND,MAKEWPARAM(GetWindowLongA(hwnd,GWL_ID),BN_CLICKED),hwnd);
   }
 
+  infoPtr->state |= BUTTON_HASFOCUS;
   PAINT_BUTTON(hwnd,style,ODA_FOCUS);
 
   return 0;
@@ -423,7 +417,7 @@ static LRESULT BUTTON_SetImage(HWND hwnd,WPARAM wParam,LPARAM lParam)
   DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
   HANDLE oldHbitmap = infoPtr->hImage;
 
-  if (dwStyle & BS_BITMAP) infoPtr->hImage = (HANDLE)lParam;
+  if (dwStyle & BS_BITMAP || dwStyle & BS_ICON) infoPtr->hImage = (HANDLE)lParam;
 
   return oldHbitmap;
 }
@@ -432,7 +426,15 @@ static LRESULT BUTTON_GetImage(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   BUTTONINFO* infoPtr = (BUTTONINFO*)GetInfoPtr(hwnd);
 
-  return infoPtr->hImage;
+  switch(wParam)
+  {
+    case IMAGE_BITMAP:
+      return (HBITMAP)infoPtr->hImage;
+    case IMAGE_ICON:
+      return (HICON)infoPtr->hImage;
+    default:
+      return NULL;
+  }
 }
 
 static LRESULT BUTTON_GetCheck(HWND hwnd,WPARAM wParam,LPARAM lParam)
@@ -599,66 +601,86 @@ LRESULT WINAPI ButtonWndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 /**********************************************************************
  *       Push Button Functions
  */
-
-static void PB_Paint(HWND hwnd,HDC hDC,WORD action)
+static void PB_Paint( HWND hwnd, HDC hDC, WORD action )
 {
-    BUTTONINFO* infoPtr = (BUTTONINFO*)GetInfoPtr(hwnd);
-    DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
-    RECT rc;
+    BUTTONINFO *infoPtr      = (BUTTONINFO *)GetInfoPtr(hwnd);
+    BOOL        bHighLighted = (infoPtr->state & BUTTON_HIGHLIGHTED);
+
+    /*
+     * Delegate this to the more generic pushbutton painting
+     * method.
+     */
+    BUTTON_DrawPushButton(hwnd,
+			  hDC,
+			  action,
+			  bHighLighted);
+}
+
+/**********************************************************************
+ * This method will actually do the drawing of the pushbutton
+ * depending on it's state and the pushedState parameter.
+ */
+static void BUTTON_DrawPushButton(
+  HWND hwnd,
+  HDC  hDC,
+  WORD action,
+  BOOL pushedState )
+{
+    RECT rc, focus_rect;
     HPEN hOldPen;
     HBRUSH hOldBrush;
+    BUTTONINFO *infoPtr = (BUTTONINFO *)GetInfoPtr(hwnd);
+    DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
     int xBorderOffset, yBorderOffset;
     xBorderOffset = yBorderOffset = 0;
     INT textLen;
     char* text;
 
-    GetClientRect(hwnd,&rc );
+    GetClientRect( hwnd, &rc );
 
       /* Send WM_CTLCOLOR to allow changing the font (the colors are fixed) */
     if (infoPtr->hFont) SelectObject( hDC, infoPtr->hFont );
-    SendMessageA(GetParent(hwnd),WM_CTLCOLORBTN,hDC,hwnd);
-
+    BUTTON_SEND_CTLCOLOR( hwnd, hDC );
     hOldPen = (HPEN)SelectObject(hDC, GetSysColorPen(COLOR_WINDOWFRAME));
     hOldBrush =(HBRUSH)SelectObject(hDC,GetSysColorBrush(COLOR_BTNFACE));
     SetBkMode(hDC, TRANSPARENT);
-    Rectangle(hDC, rc.left, rc.top, rc.right, rc.bottom);
-/*    if (action == ODA_DRAWENTIRE)*/
-    {
-        SetPixel( hDC, rc.left, rc.top, GetSysColor(COLOR_WINDOW) );
-        SetPixel( hDC, rc.left, rc.bottom-1, GetSysColor(COLOR_WINDOW) );
-        SetPixel( hDC, rc.right-1, rc.top, GetSysColor(COLOR_WINDOW) );
-        SetPixel( hDC, rc.right-1, rc.bottom-1, GetSysColor(COLOR_WINDOW));
-    }
-    InflateRect( &rc, -1, -1 );
 
     if ((dwStyle & 0x000f) == BS_DEFPUSHBUTTON)
     {
         Rectangle(hDC, rc.left, rc.top, rc.right, rc.bottom);
-        InflateRect( &rc, -1, -1 );
+	InflateRect( &rc, -1, -1 );
     }
 
-    if (infoPtr->state & BUTTON_HIGHLIGHTED)
+    UINT uState = DFCS_BUTTONPUSH;
+
+    if (pushedState)
     {
-        /* draw button shadow: */
-        SelectObject(hDC, GetSysColorBrush(COLOR_BTNSHADOW));
-        PatBlt(hDC, rc.left, rc.top, 1, rc.bottom-rc.top, PATCOPY );
-        PatBlt(hDC, rc.left, rc.top, rc.right-rc.left, 1, PATCOPY );
-        rc.left += 2;  /* To position the text down and right */
-        rc.top  += 2;
-    } else {
-        rc.right++, rc.bottom++;
-        DrawEdge( hDC, &rc, EDGE_RAISED, BF_RECT );
-
-        /* To place de bitmap correctly */
-        xBorderOffset += GetSystemMetrics(SM_CXEDGE);
-        yBorderOffset += GetSystemMetrics(SM_CYEDGE);
-
-        rc.right--, rc.bottom--;
+      if ( (dwStyle & 0x000f) == BS_DEFPUSHBUTTON )
+        uState |= DFCS_FLAT;
+      else
+        uState |= DFCS_PUSHED;
     }
 
-    /* draw button label, if any: */
+    DrawFrameControl( hDC, &rc, DFC_BUTTON, uState );
+    InflateRect( &rc, -2, -2 );
+
+    focus_rect = rc;
+
+    if (pushedState)
+    {
+      rc.left += 2;  /* To position the text down and right */
+      rc.top  += 2;
+    }
+
+
+    /* draw button label, if any:
+     *
+     * In win9x we don't show text if there is a bitmap or icon.
+     * I don't know about win31 so I leave it as it was for win31.
+     * Dennis Björklund 12 Jul, 99
+     */
     textLen = GetWindowTextLengthA(hwnd);
-    if (textLen > 0)
+    if (textLen > 0 && (!(dwStyle & (BS_ICON|BS_BITMAP))))
     {
         LOGBRUSH lb;
 
@@ -667,10 +689,10 @@ static void PB_Paint(HWND hwnd,HDC hDC,WORD action)
         GetWindowTextA(hwnd,text,textLen);
         GetObjectA( GetSysColorBrush(COLOR_BTNFACE), sizeof(lb), &lb );
         if (dwStyle & WS_DISABLED &&
-            GetSysColor(COLOR_GRAYTEXT) == lb.lbColor)
+            GetSysColor(COLOR_GRAYTEXT)==lb.lbColor)
             /* don't write gray text on gray background */
             PaintGrayOnGray( hDC,infoPtr->hFont,&rc,text,
-                               DT_CENTER | DT_VCENTER );
+			       DT_CENTER | DT_VCENTER );
         else
         {
             SetTextColor( hDC, (dwStyle & WS_DISABLED) ?
@@ -678,70 +700,104 @@ static void PB_Paint(HWND hwnd,HDC hDC,WORD action)
                                  GetSysColor(COLOR_BTNTEXT) );
             DrawTextA( hDC, text, -1, &rc,
                          DT_SINGLELINE | DT_CENTER | DT_VCENTER );
-            /* do we have the focus? */
-            if (infoPtr->state & BUTTON_HASFOCUS)
-            {
-                RECT r = { 0, 0, 0, 0 };
-                INT xdelta, ydelta;
-
-                DrawTextA( hDC, text, -1, &r,
-                             DT_SINGLELINE | DT_CALCRECT );
-                xdelta = ((rc.right - rc.left) - (r.right - r.left) - 1) / 2;
-                ydelta = ((rc.bottom - rc.top) - (r.bottom - r.top) - 1) / 2;
-                if (xdelta < 0) xdelta = 0;
-                if (ydelta < 0) ydelta = 0;
-                InflateRect( &rc, -xdelta, -ydelta );
-                DrawFocusRect( hDC, &rc );
-            }
+            /* do we have the focus?
+	     * Win9x draws focus last with a size prop. to the button
+	     */
         }
         free(text);
     }
-
-    if((dwStyle & BS_BITMAP) && (infoPtr->hImage != NULL))
+    if ( ((dwStyle & BS_ICON) || (dwStyle & BS_BITMAP) ) &&
+	 (infoPtr->hImage != NULL) )
     {
-        BITMAP bm;
-        HDC hdcMem;
-        int yOffset, xOffset, imageWidth, imageHeight;
+	int yOffset, xOffset;
+	int imageWidth, imageHeight;
 
-        GetObjectA (infoPtr->hImage, sizeof(BITMAP), &bm);
+	/*
+	 * We extract the size of the image from the handle.
+	 */
+	if (dwStyle & BS_ICON)
+	{
+	    ICONINFO iconInfo;
+	    BITMAP   bm;
 
-        /* Center the bitmap */
-        xOffset = (((rc.right - rc.left) - 2*xBorderOffset) - bm.bmWidth ) / 2;
-        yOffset = (((rc.bottom - rc.top) - 2*yBorderOffset) - bm.bmHeight ) / 2;
+	    GetIconInfo((HICON)infoPtr->hImage, &iconInfo);
+	    GetObjectA (iconInfo.hbmColor, sizeof(BITMAP), &bm);
+	
+	    imageWidth  = bm.bmWidth;
+	    imageHeight = bm.bmHeight;
 
-        imageWidth = bm.bmWidth;
-        imageHeight = bm.bmHeight;
+            DeleteObject(iconInfo.hbmColor);
+            DeleteObject(iconInfo.hbmMask);
 
-        /* If the image is to big for the button */
-        if (xOffset < 0)
+	}
+	else
+	{
+	    BITMAP   bm;
+
+	    GetObjectA (infoPtr->hImage, sizeof(BITMAP), &bm);
+	
+	    imageWidth  = bm.bmWidth;
+	    imageHeight = bm.bmHeight;
+	}
+
+	/* Center the bitmap */
+	xOffset = (((rc.right - rc.left) - 2*xBorderOffset) - imageWidth ) / 2;
+	yOffset = (((rc.bottom - rc.top) - 2*yBorderOffset) - imageHeight) / 2;
+
+	/* If the image is too big for the button then create a region*/
+        if(xOffset < 0 || yOffset < 0)
+	{
+            HRGN hBitmapRgn = NULL;
+            hBitmapRgn = CreateRectRgn(
+                rc.left + xBorderOffset, rc.top +yBorderOffset,
+                rc.right - xBorderOffset, rc.bottom - yBorderOffset);
+            SelectClipRgn(hDC, hBitmapRgn);
+            DeleteObject(hBitmapRgn);
+	}
+
+	/* Let minimum 1 space from border */
+	xOffset++, yOffset++;
+
+	/*
+	 * Draw the image now.
+	 */
+	if (dwStyle & BS_ICON)
+	{
+  	    DrawIcon(hDC,
+                rc.left + xOffset, rc.top + yOffset,
+		     (HICON)infoPtr->hImage);
+	}
+	else
         {
-            imageWidth = rc.right - rc.left - 2*xBorderOffset -1;
-            xOffset = xBorderOffset;
-        }
+	    HDC hdcMem;
 
-        if (yOffset < 0)
+	    hdcMem = CreateCompatibleDC (hDC);
+	    SelectObject (hdcMem, (HBITMAP)infoPtr->hImage);
+	    BitBlt(hDC,
+		   rc.left + xOffset,
+		   rc.top + yOffset,
+		   imageWidth, imageHeight,
+		   hdcMem, 0, 0, SRCCOPY);
+	
+	    DeleteDC (hdcMem);
+	}
+
+        if(xOffset < 0 || yOffset < 0)
         {
-            imageHeight = rc.bottom - rc.top - 2*yBorderOffset -1;
-            yOffset = yBorderOffset;
+            SelectClipRgn(hDC, NULL);
         }
-
-        /* Let minimum 1 space from border */
-        xOffset++, yOffset++;
-
-        hdcMem = CreateCompatibleDC (hDC);
-        SelectObject (hdcMem, (HBITMAP)infoPtr->hImage);
-        BitBlt(hDC, rc.left + xOffset,
-               rc.top + yOffset,
-               imageWidth, imageHeight,
-               hdcMem, 0, 0, SRCCOPY);
-
-        DeleteDC (hdcMem);
     }
+
+    if (infoPtr->state & BUTTON_HASFOCUS)
+    {
+        InflateRect( &focus_rect, -1, -1 );
+        DrawFocusRect( hDC, &focus_rect );
+    }
+
 
     SelectObject( hDC, hOldPen );
     SelectObject( hDC, hOldBrush );
 }
-
 
 /**********************************************************************
  *   PB_Paint & CB_Paint sub function                        [internal]
@@ -810,6 +866,22 @@ static void CB_Paint(HWND hwnd,HDC hDC,WORD action)
     HBRUSH hBrush;
     int textLen, delta;
     char* text = NULL;
+
+    /*
+     * if the button has a bitmap/icon, draw a normal pushbutton
+     * instead of a radion button.
+     */
+    if (infoPtr->hImage!=NULL)
+    {
+        BOOL bHighLighted = ((infoPtr->state & BUTTON_HIGHLIGHTED) ||
+			     (infoPtr->state & BUTTON_CHECKED));
+
+        BUTTON_DrawPushButton(hwnd,
+			      hDC,
+			      action,
+			      bHighLighted);
+	return;
+    }
 
     textLen = 0;
     GetClientRect(hwnd, &client);
@@ -1018,6 +1090,10 @@ static void OB_Paint(HWND hwnd,HDC hDC,WORD action)
     dis.hDC        = hDC;
     dis.itemData   = 0;
     GetClientRect( hwnd, &dis.rcItem );
+
+    SetBkColor( hDC, GetSysColor( COLOR_BTNFACE ) );
+    FillRect( hDC,  &dis.rcItem, GetSysColorBrush( COLOR_BTNFACE ) );
+
     SendMessageA( GetParent(hwnd), WM_DRAWITEM,
                     GetWindowLongA(hwnd,GWL_ID), (LPARAM)&dis );
 }
