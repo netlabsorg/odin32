@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.281 1999-10-07 15:44:43 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.282 1999-10-07 19:39:36 sandervl Exp $ */
 
  99-10-07: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: GetCaretPos() fix
@@ -25,6 +25,8 @@
  99-10-07: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Only display scrollbars when they need to be shown.
                   (also fixes redraw problems with inactive scrollbars)
+                  Resize bugfix. Winhlp32 can now be resized without problems.
+                  Whether this fix is correct is another matter.
 
  99-10-06: Daniela Engert <dani@ngrt.de>
 	- USER32: fix: adjust caret position if window height changes.
