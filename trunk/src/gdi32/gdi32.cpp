@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.24 1999-12-05 00:30:57 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.25 1999-12-16 00:10:50 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -909,24 +909,29 @@ HDC WIN32API CreateMetaFileW( LPCWSTR arg1)
 }
 //******************************************************************************
 //******************************************************************************
-HRGN WIN32API CreateRectRgn( int arg1, int arg2, int arg3, int  arg4)
+HRGN WIN32API CreateRectRgn( int nLeftRect, int nTopRect, int nRightRect, int nBottomRect)
 {
-    dprintf(("GDI32: CreateRectRgn"));
-    return O32_CreateRectRgn(arg1, arg2, arg3, arg4);
+    dprintf(("GDI32: CreateRectRgn (%d,%d)(%d,%d)", nLeftRect, nTopRect, nRightRect, nBottomRect));
+    return O32_CreateRectRgn(nLeftRect, nTopRect, nRightRect, nBottomRect);
 }
 //******************************************************************************
 //******************************************************************************
-HRGN WIN32API CreateRectRgnIndirect( const RECT * arg1)
+HRGN WIN32API CreateRectRgnIndirect( const RECT * lpRect)
 {
-    dprintf(("GDI32: CreateRectRgnIndirect"));
-    return O32_CreateRectRgnIndirect(arg1);
+    if(lpRect == NULL) {
+	SetLastError(ERROR_INVALID_PARAMETER);
+	return 0;
+    }
+    dprintf(("GDI32: CreateRectRgnIndirect (%d,%d)(%d,%d)", lpRect->left, lpRect->top, lpRect->right, lpRect->bottom));
+    return O32_CreateRectRgnIndirect(lpRect);
 }
 //******************************************************************************
 //******************************************************************************
-HRGN WIN32API CreateRoundRectRgn( int arg1, int arg2, int arg3, int arg4, int arg5, int  arg6)
+HRGN WIN32API CreateRoundRectRgn(int nLeftRect, int nTopRect, int nRightRect, int nBottomRect, 
+                                 int nWidthEllipse, int nHeightEllipse)
 {
-    dprintf(("GDI32: CreateRoundRectRgn"));
-    return O32_CreateRoundRectRgn(arg1, arg2, arg3, arg4, arg5, arg6);
+    dprintf(("GDI32: CreateRoundRectRgn (%d,%d)(%d,%d) (%d,%d)", nLeftRect, nTopRect, nRightRect, nBottomRect, nWidthEllipse, nHeightEllipse));
+    return O32_CreateRoundRectRgn(nLeftRect, nTopRect, nRightRect, nBottomRect, nWidthEllipse, nHeightEllipse);
 }
 //******************************************************************************
 //******************************************************************************
