@@ -1,4 +1,3 @@
-/* $Id: odin.h,v 1.14 2000-04-09 11:09:07 sandervl Exp $ */
 /*
  * ODIN - Build Environment Definition
  *
