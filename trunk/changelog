@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1991 2002-02-19 13:27:52 sandervl Exp $ */
+/* $Id: changelog,v 1.1992 2002-02-20 09:45:19 sandervl Exp $ */
+
+ 2002-02-20: Dmitry Froloff <froloff@os2.ru>
+    - PELDR:    o Added support for WINDOWSPATH environment variable; PE
+                  searches for executables in directories listed in WINDOWSPATH
 
  2002-02-19: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Added support for Russian country code + other countries
