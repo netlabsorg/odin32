@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2362 2002-11-22 12:57:10 sandervl Exp $ */
+/* $Id: changelog,v 1.2363 2002-11-26 10:07:10 sandervl Exp $ */
+
+ 2002-11-26: Platon Fomichev <platon@innotek   >
+    - COMDLG32: o New collate icons
 
  2002-11-22: Platon Fomichev <platon@innotek   >
     - USER32:   o Static control fix: do not destroy old icon when it is replaced.
