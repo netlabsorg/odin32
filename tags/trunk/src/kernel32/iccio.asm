@@ -1,4 +1,4 @@
-; $Id: iccio.asm,v 1.4 1999-11-05 17:42:12 achimha Exp $
+; $Id: iccio.asm,v 1.5 1999-12-31 13:55:12 sandervl Exp $
 
 ; **********************************************************************
 ; Copyright (C) 1995 by Holger Veit (Holger.Veit@gmd.de)
@@ -331,7 +331,7 @@ _io_init    PROC
     PUSH    EAX
     LEA EAX, [EBP-8]    ; Address of 'fd' arg
     PUSH    EAX
-    PUSH    OFFSET devname
+    PUSH    OFFSET FLAT:devname
     CALL    DosOpen     ; call DosOpen
     ADD ESP, 32     ; cleanup stack frame
     CMP EAX, 0      ; is return code zero?
@@ -438,7 +438,7 @@ _io_init1   PROC
     PUSH    EAX
     LEA EAX, [EBP-8]    ; Address of 'fd' arg
     PUSH    EAX
-    PUSH    OFFSET devname
+    PUSH    OFFSET FLAT:devname
     CALL    DosOpen     ; call DosOpen
     ADD ESP, 32     ; cleanup stack frame
     CMP EAX, 0      ; is return code zero?
