@@ -7,9 +7,8 @@
 #If the ar command fails on your system, consult the ar manpage
 #for your system.
 
-PDWIN32_INCLUDE = ..\..\..\include
-PDWIN32_TOOLS = ..\..\bin
-!include $(PDWIN32_INCLUDE)\pdwin32.mk
+ODIN32_TOOLS    = ..\..\bin
+!include ../../../makefile.inc
 
 CC=gcc
 AR=ar

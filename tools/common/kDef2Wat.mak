@@ -1,4 +1,4 @@
-# $Id: kDef2Wat.mak,v 1.1 2000-11-21 04:37:22 bird Exp $
+# $Id: kDef2Wat.mak,v 1.2 2000-12-02 23:26:58 bird Exp $
 
 #
 # Odin32 API
@@ -10,8 +10,8 @@
 #
 # Macro which defines the tools common directory.
 #
-PDWIN32_TCOMMON = .
-PDWIN32_BIN = ..\bin
+ODIN32_TCOMMON = .
+ODIN32_BIN     = $(ODIN32_TOOLS)
 
 
 #
@@ -30,8 +30,8 @@ MAKEFILE = kDef2Wat.mak
 #
 # Compiler, tools, and interference rules.
 #
-!include ../../include/pdwin32.mk
-!include $(PDWIN32_TCOMMON)/common.mk
+!include ../../makefile.inc
+!include $(ODIN32_TCOMMON)/common.mk
 
 
 #
@@ -59,6 +59,6 @@ TARGET  = kDef2Wat
 #
 # Includes the common rules.
 #
-!include $(PDWIN32_INCLUDE)/pdwin32.post
-!include $(PDWIN32_TCOMMON)/common.mk.post
+!include $(ODIN32_POST_INC)
+!include $(ODIN32_TCOMMON_POST_INC)
 
