@@ -1,4 +1,4 @@
-/* $Id: listbox.cpp,v 1.29 2002-05-07 13:28:12 sandervl Exp $ */
+/* $Id: listbox.cpp,v 1.30 2002-08-07 17:12:40 sandervl Exp $ */
 /*
  * Listbox controls
  *
@@ -819,17 +819,19 @@ static INT LISTBOX_FindString( HWND hwnd, LB_DESCR *descr, INT start,
         if (((item)->str[1] == '-') && !lstrcmpiA(str,(item)->str+2)) \
         return i; \
     }
+            INT len = strlen(str);
 
             for (i = start + 1; i < descr->nb_items; i++, item++)
             {
-               if (!lstrcmpiA( str, item->str)) return i;
+               if (!lstrncmpiA( str, item->str, len )) return i;
                CHECK_DRIVE(item);
             }
             for (i = 0, item = descr->items; i <= start; i++, item++)
             {
-               if (!lstrcmpiA( str, item->str)) return i;
+               if (!lstrncmpiA( str, item->str, len )) return i;
                CHECK_DRIVE(item);
             }
+
 #undef CHECK_DRIVE
         }
     }
