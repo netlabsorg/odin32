@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.187 2000-05-12 18:09:42 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.188 2000-05-19 13:09:00 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -758,7 +758,7 @@ ULONG Win32BaseWindow::MsgDestroy()
      //so: send a WM_PARENTNOTIFY now as that hasn't happened yet
         if((getStyle() & WS_CHILD) && !(getExStyle() & WS_EX_NOPARENTNOTIFY))
         {
-            if(getParent())
+            if(getParent() && getParent()->IsWindowDestroyed() == FALSE)
             {
                     /* Notify the parent window only */
                     getParent()->SendMessageA(WM_PARENTNOTIFY, MAKEWPARAM(WM_DESTROY, getWindowId()), (LPARAM)getWindowHandle());
@@ -2040,9 +2040,6 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
 
     dprintf(("ShowWindow %x %x", getWindowHandle(), nCmdShow));
 
-    if(getWindowHandle() == 0x68000002) {
-//	DebugInt3();
-    }
     switch(nCmdShow)
     {
     case SW_SHOW:
