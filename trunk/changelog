@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1982 2002-02-15 20:17:11 sandervl Exp $ */
+/* $Id: changelog,v 1.1983 2002-02-18 10:13:56 sandervl Exp $ */
+
+ 2002-02-18: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Added function to force color to mono mouse cursor conversion
+                  (for mouse cursors with more than 2 colors)
 
  2002-02-14: Sander van Leeuwen <sandervl@xs4all.nl>
     - OLE32:    o Extended logging added
