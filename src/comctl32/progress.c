@@ -1,4 +1,4 @@
-/* $Id: progress.c,v 1.8 1999-08-14 16:13:12 cbratschi Exp $ */
+/* $Id: progress.c,v 1.9 1999-08-19 21:24:19 cbratschi Exp $ */
 /*
  * Progress control
  *
@@ -8,6 +8,7 @@
  * Copyright 1999 Christoph Bratschi
  *
  * Status: complete
+ * Version: 5.00
  */
 
 #include "winbase.h"
