@@ -197,77 +197,6 @@ BOOL DIALOG_Init(void)
 
 
 /***********************************************************************
- *           DIALOG_GetControl16
- *
- * Return the class and text of the control pointed to by ptr,
- * fill the header structure and return a pointer to the next control.
- */
-static LPCSTR DIALOG_GetControl16( LPCSTR p, DLG_CONTROL_INFO *info )
-{
-    static char buffer[10];
-    int int_id;
-
-    info->x       = GET_WORD(p);  p += sizeof(WORD);
-    info->y       = GET_WORD(p);  p += sizeof(WORD);
-    info->cx      = GET_WORD(p);  p += sizeof(WORD);
-    info->cy      = GET_WORD(p);  p += sizeof(WORD);
-    info->id      = GET_WORD(p);  p += sizeof(WORD);
-    info->style   = GET_DWORD(p); p += sizeof(DWORD);
-    info->exStyle = 0;
-
-    if (*p & 0x80)
-    {
-        switch((BYTE)*p)
-        {
-            case 0x80: strcpy( buffer, "BUTTON" ); break;
-            case 0x81: strcpy( buffer, "EDIT" ); break;
-            case 0x82: strcpy( buffer, "STATIC" ); break;
-            case 0x83: strcpy( buffer, "LISTBOX" ); break;
-            case 0x84: strcpy( buffer, "SCROLLBAR" ); break;
-            case 0x85: strcpy( buffer, "COMBOBOX" ); break;
-            default:   buffer[0] = '\0'; break;
-        }
-        info->className = buffer;
-        p++;
-    }
-    else
-    {
-   info->className = p;
-   p += strlen(p) + 1;
-    }
-
-    int_id = ((BYTE)*p == 0xff);
-    if (int_id)
-    {
-     /* Integer id, not documented (?). Only works for SS_ICON controls */
-   info->windowName = (LPCSTR)(UINT)GET_WORD(p+1);
-   p += 3;
-    }
-    else
-    {
-   info->windowName = p;
-   p += strlen(p) + 1;
-    }
-
-    info->data = (LPVOID)(*p ? p + 1 : NULL);  /* FIXME: should be a segptr */
-    p += *p + 1;
-
-    if(int_id)
-      dprintf(("USER32:   %s %04x %d, %d, %d, %d, %d, %08lx, %08lx\n",
-            info->className,  LOWORD(info->windowName),
-            info->id, info->x, info->y, info->cx, info->cy,
-            info->style, (DWORD)info->data));
-    else
-      dprintf(("USER32:   %s '%s' %d, %d, %d, %d, %d, %08lx, %08lx\n",
-            info->className,  info->windowName,
-            info->id, info->x, info->y, info->cx, info->cy,
-            info->style, (DWORD)info->data));
-
-    return p;
-}
-
-
-/***********************************************************************
  *           DIALOG_GetControl32
  *
  * Return the class and text of the control pointed to by ptr,
@@ -624,6 +553,7 @@ HWND DIALOG_CreateIndirect( HINSTANCE hInst,
    if (hMenu) DestroyMenu( hMenu );
    return 0;
     }
+
     wndPtr = WIN_FindWndPtr( hwnd );
     wndPtr->flags |= WIN_ISDIALOG;
     wndPtr->helpContext = strTemplate.helpId;
