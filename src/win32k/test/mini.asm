@@ -5,7 +5,7 @@ ifdef NORMAL  ;
 
     .386
     .model flat
-    .stack 1000h
+    .stack 1000h-35
 
     ;APIRET APIENTRY  DosPutMessage(HFILE hfile,
     ;                               ULONG cbMsg,
@@ -24,6 +24,7 @@ ImReallySmall   db  "I'm really small!",013
 
 public minilx
 minilx:
+    int 3
     push    10000h
     push    18
     push    eax
@@ -45,7 +46,6 @@ ifndef NORMAL
 ;
 ;
     .386
-    ;.model tiny
 
 
 ALL segment byte public
@@ -115,13 +115,16 @@ dd  0       ;    unsigned long       e32_preload;    /* Number of preload pages 
 dd  0       ;    unsigned long       e32_nrestab;    /* Offset of Non-resident Names Table */
 dd  0       ;    unsigned long       e32_cbnrestab;  /* Size of Non-resident Name Table */
 dd  0       ;    unsigned long       e32_nressum;    /* Non-resident Name Table Checksum */                             available?
-dd  0       ;    unsigned long       e32_autodata;   /* Object # for automatic data object */
-dd  0       ;    unsigned long       e32_debuginfo;  /* Offset of the debugging information */                          available?
-dd  0       ;    unsigned long       e32_debuglen;   /* The length of the debugging info. in bytes */                   available?
-dd  0       ;    unsigned long       e32_instpreload;/* Number of instance pages in preload section of .EXE file */     available?
-dd  0       ;    unsigned long       e32_instdemand; /* Number of instance pages in demand load section of .EXE file */ available?
-dd  0       ;    unsigned long       e32_heapsize;   /* Size of heap - for 16-bit apps */                               available?
-dd  1000h-32;    unsigned long       e32_stacksize;  /* Size of stack */
+
+; redefine these entries as obj tab stuff.
+;red dd  0       ;    unsigned long       e32_autodata;   /* Object # for automatic data object */                           available?
+;red dd  0       ;    unsigned long       e32_debuginfo;  /* Offset of the debugging information */                          available?
+;red dd  0       ;    unsigned long       e32_debuglen;   /* The length of the debugging info. in bytes */                   available?
+;red dd  0       ;    unsigned long       e32_instpreload;/* Number of instance pages in preload section of .EXE file */     available?
+;red dd  0       ;    unsigned long       e32_instdemand; /* Number of instance pages in demand load section of .EXE file */ available?
+;red dd  0       ;    unsigned long       e32_heapsize;   /* Size of heap - for 16-bit apps */                               available?
+
+;mv dd  1000h-32;    unsigned long       e32_stacksize;  /* Size of stack */
 ;dd  20 dup(0);   unsigned char       e32_res3[E32RESBYTES3];                                                            available!
             ;                                        /* Pad structure to 196 bytes */
             ;  };
@@ -142,14 +145,15 @@ objtab  dd 1000h    ;    unsigned long       o32_size;       /* Object virtual s
         dd 0        ;    unsigned long       o32_reserved;   /* Reserved */
                     ;};
 
+dd  1000h-32;    unsigned long       e32_stacksize;  /* Size of stack */
 
 ;
 ; Page entry for our one page.
 ;
 ;dbg1 db 'pagetab'
-pagetab     dd  0                               ; offset 0
-            dw  35                              ; data size, 32 bytes
-            dw  0                               ; flags. valid
+pagetab     dd  0                                   ; offset 0
+            dw  offset minilxret - offset data + 1  ; data size,
+;ntx            dw  0                                   ; flags. valid
 
 ;
 ; fixup table.
@@ -213,14 +217,14 @@ assume CS:ALL
 ImReallySmall   db  "I'm really small!",013
 
 minilx:
-    ;int 3
-    push    1000h
+    push    10000h
     push    18
-    push    1;eax                         ; 0 or 1 is just the same.
+    push    eax                         ; 0 or 1 is just the same.
     ;call    DosPutMessage
     db 0e8h
 fixup dd 0h
-    add     esp,12
+    add     esp, 12
+minilxret:
     ret
 
 ;lxdump db 'lxdumplxdumplxdumplxdump'
