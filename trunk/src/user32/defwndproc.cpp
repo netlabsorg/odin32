@@ -1,4 +1,4 @@
-/* $Id: defwndproc.cpp,v 1.5 1999-06-26 13:21:11 sandervl Exp $ */
+/* $Id: defwndproc.cpp,v 1.6 1999-06-27 16:23:23 sandervl Exp $ */
 
 /*
  * Win32 default window API functions for OS/2
@@ -52,8 +52,9 @@ LRESULT WIN32API DefWindowProcA(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPara
 	case WM_MOUSEACTIVATE:
 	{
 		DWORD dwStyle = GetWindowLongA(hwnd, GWL_STYLE);
+		DWORD dwExStyle = GetWindowLongA(hwnd, GWL_EXSTYLE);
 		dprintf(("DefWndProc: WM_MOUSEACTIVATE for %x Msg %s", hwnd, GetMsgText(HIWORD(lParam))));
-		if (dwStyle & WS_CHILD)
+		if(dwStyle & WS_CHILD && !(dwExStyle & WS_EX_NOPARENTNOTIFY) )
 		{
 			HWND hwndParent = GetParent(hwnd);
 			Win32WindowProc *parentwnd = Win32WindowProc::FindProc(hwndParent);
@@ -67,8 +68,9 @@ LRESULT WIN32API DefWindowProcA(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPara
 	case WM_SETCURSOR:
 	{
 		DWORD dwStyle = GetWindowLongA(hwnd, GWL_STYLE);
+		DWORD dwExStyle = GetWindowLongA(hwnd, GWL_EXSTYLE);
 		dprintf(("DefWndProc: WM_SETCURSOR for %x Msg %s", hwnd, GetMsgText(HIWORD(lParam))));
-		if (dwStyle & WS_CHILD)
+		if(dwStyle & WS_CHILD && !(dwExStyle & WS_EX_NOPARENTNOTIFY) )
 		{
 			HWND hwndParent = GetParent(hwnd);
 
