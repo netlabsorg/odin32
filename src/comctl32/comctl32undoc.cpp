@@ -1,4 +1,4 @@
-/* $Id: comctl32undoc.cpp,v 1.2 2000-03-18 16:17:22 cbratschi Exp $ */
+/* $Id: comctl32undoc.cpp,v 1.3 2000-04-15 14:22:11 cbratschi Exp $ */
 /*
  * Undocumented functions from COMCTL32.DLL
  *
@@ -1045,7 +1045,7 @@ DPA_Create (INT nGrow)
 {
     HDPA hdpa;
 
-    dprintf(("COMCTL32: DPA_Create"));
+    dprintf2(("COMCTL32: DPA_Create"));
 
     hdpa = (HDPA)COMCTL32_Alloc (sizeof(DPA));
     if (hdpa) {
@@ -1076,7 +1076,7 @@ DPA_Create (INT nGrow)
 BOOL WINAPI
 DPA_Destroy (const HDPA hdpa)
 {
-    dprintf(("COMCTL32: DPA_Destroy"));
+    dprintf2(("COMCTL32: DPA_Destroy"));
 
     if (!hdpa)
         return FALSE;
@@ -1105,7 +1105,7 @@ DPA_Destroy (const HDPA hdpa)
 BOOL WINAPI
 DPA_Grow (const HDPA hdpa, INT nGrow)
 {
-    dprintf(("COMCTL32: DPA_Grow"));
+    dprintf2(("COMCTL32: DPA_Grow"));
 
     if (!hdpa)
         return FALSE;
@@ -1142,7 +1142,7 @@ DPA_Clone (const HDPA hdpa, const HDPA hdpaNew)
     INT nNewItems, nSize;
     HDPA hdpaTemp;
 
-    dprintf(("COMCTL32: DPA_Clone"));
+    dprintf2(("COMCTL32: DPA_Clone"));
 
     if (!hdpa)
         return NULL;
@@ -1447,7 +1447,7 @@ DPA_DeletePtr (const HDPA hdpa, INT i)
 BOOL WINAPI
 DPA_DeleteAllPtrs (const HDPA hdpa)
 {
-    dprintf(("COMCTL32: DPA_DeleteAllPtrs"));
+    dprintf2(("COMCTL32: DPA_DeleteAllPtrs"));
 
     if (!hdpa)
         return FALSE;
@@ -1510,6 +1510,42 @@ DPA_QuickSort (LPVOID *lpPtrs, INT l, INT r,
     if (i < r) DPA_QuickSort (lpPtrs, i, r, pfnCompare, lParam);
 }
 
+//internal API
+INT DPA_InsertPtrSorted(const HDPA hdpa,LPVOID p,PFNDPACOMPARE pfnCompare,LPARAM lParam)
+{
+  INT pos,minPos,maxPos,res;
+
+  if (!hdpa || !pfnCompare) return -1;
+
+  if (hdpa->nItemCount == 0)
+    return DPA_InsertPtr(hdpa,0,p);
+
+  //check last
+  if ((pfnCompare)(p,hdpa->ptrs[hdpa->nItemCount-1],lParam) >= 0)
+  {
+    return DPA_InsertPtr(hdpa,hdpa->nItemCount,p);
+  }
+  //check first
+  if ((pfnCompare)(p,hdpa->ptrs[0],lParam) < 0)
+  {
+    return DPA_InsertPtr(hdpa,0,p);
+  }
+
+  minPos = 1;
+  maxPos = hdpa->nItemCount-1;
+
+  while (minPos != maxPos)
+  {
+    pos = (minPos+maxPos)/2;
+    res = (pfnCompare)(p,hdpa->ptrs[pos],lParam);
+    if (res < 0)
+      maxPos = pos;
+    else
+      minPos = pos+1;
+  }
+
+  return DPA_InsertPtr(hdpa,minPos,p);
+}
 
 /**************************************************************************
  * DPA_Sort [COMCTL32.338]
@@ -1529,7 +1565,7 @@ DPA_QuickSort (LPVOID *lpPtrs, INT l, INT r,
 BOOL WINAPI
 DPA_Sort (const HDPA hdpa, PFNDPACOMPARE pfnCompare, LPARAM lParam)
 {
-    dprintf(("COMCTL32: DPA_Sort"));
+    dprintf2(("COMCTL32: DPA_Sort"));
 
     if (!hdpa || !pfnCompare)
         return FALSE;
@@ -1569,7 +1605,7 @@ INT WINAPI
 DPA_Search (const HDPA hdpa, LPVOID pFind, INT nStart,
             PFNDPACOMPARE pfnCompare, LPARAM lParam, UINT uOptions)
 {
-    dprintf(("COMCTL32: DPA_Search"));
+    dprintf2(("COMCTL32: DPA_Search"));
 
     if (!hdpa || !pfnCompare || !pFind)
         return -1;
@@ -1648,7 +1684,7 @@ DPA_CreateEx (INT nGrow, HANDLE hHeap)
 {
     HDPA hdpa;
 
-    dprintf(("COMCTL32: DPA_CreateEx"));
+    dprintf2(("COMCTL32: DPA_CreateEx"));
 
     if (hHeap)
         hdpa = (HDPA)HeapAlloc (hHeap, HEAP_ZERO_MEMORY, sizeof(DPA));

@@ -1,4 +1,4 @@
-/* $Id: header.cpp,v 1.5 2000-04-08 18:32:53 cbratschi Exp $ */
+/* $Id: header.cpp,v 1.6 2000-04-15 14:22:15 cbratschi Exp $ */
 /*
  *  Header control
  *
@@ -1108,7 +1108,7 @@ HEADER_GetItemCount (HWND hwnd)
 
 LRESULT HEADER_GetItemRect (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
-    HEADER_INFO *infoPtr = HEADER_GetInfoPtr (hwnd);
+    HEADER_INFO *infoPtr = HEADER_GetInfoPtr(hwnd);
     INT iItem = (INT)wParam;
     LPRECT lpRect = (LPRECT)lParam;
 
@@ -1253,7 +1253,7 @@ HEADER_SetOrderArray(HWND hwnd,WPARAM wParam,LPARAM lParam)
   newItems = (HEADER_ITEM*)COMCTL32_Alloc(infoPtr->uNumItem*sizeof(HEADER_ITEM));
   for (x = 0;x < infoPtr->uNumItem;x++)
     for (y = 0;y < infoPtr->uNumItem;y++)
-      if (infoPtr->items[x].iOrder == lpiArray[x]) memcpy(&newItems[x],&infoPtr->items[y],sizeof(HEADER_ITEM));
+      if (infoPtr->items[y].iOrder == lpiArray[x]) memcpy(&newItems[x],&infoPtr->items[y],sizeof(HEADER_ITEM));
   COMCTL32_Free(infoPtr->items);
   infoPtr->items = newItems;
 
