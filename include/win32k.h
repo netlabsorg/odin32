@@ -1,4 +1,4 @@
-/* $Id: win32k.h,v 1.5 2001-02-11 15:31:08 bird Exp $
+/* $Id: win32k.h,v 1.6 2001-02-11 23:43:22 bird Exp $
  *
  * Top level make file for the Win32k library.
  * Contains library and 32-bit IOCtl definition.
@@ -129,6 +129,9 @@ typedef struct _K32Options
 
     /** @cat Options affecting the behaviour changes in the OS/2 loader */
     ULONG       fDllFixes;              /* Enables the long DLL name and non .DLL extention fixes. */
+    ULONG       fExeFixes;              /* Enables EXE files to export entry points. */
+    ULONG       fForcePreload;          /* Forces the loader to preload executable images. Handy for ICAT Ring-3 debugging. */
+    ULONG       fApiEnh;                /* Enables the API enhancements */
 
     /** @cat Options affecting the heap. */
     ULONG       cbSwpHeapMax;           /* Maximum heapsize. */
