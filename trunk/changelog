@@ -1,4 +1,14 @@
- /* $Id: changelog,v 1.500 1999-12-03 01:22:27 phaller Exp $ */
+ /* $Id: changelog,v 1.501 1999-12-03 12:01:06 sandervl Exp $ */
+
+ 99-12-03: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+	- GDI32: Fixes for CreateDCW & CreateICW
+	- COMCTL32: Fixed PROPSHEET_CollectSheetInfo
+
+ 99-12-03: Jens Wiessner <wiessnej@rfi.de>
+	- OLE32: Corrected CoSetState Stub.
+	- OLEAUT32: Changed return value (CreateDispTypeInfo) from S_OK to
+                    E_OUTOFMEMORY
+	- NTDLL: Changed dprintfs for strcpy/strcat
 
  99-12-02: Patrick Haller <phaller@gmx.net>
 	- WSOCK32\NEW:  Improvements.
