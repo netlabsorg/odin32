@@ -1,4 +1,4 @@
-/* $Id: k32AllocMemEx.cpp,v 1.2 2000-02-18 19:27:30 bird Exp $
+/* $Id: k32AllocMemEx.cpp,v 1.2.4.1 2000-08-29 19:47:02 bird Exp $
  *
  * k32AllocMemEx - Equivalent to DosAllocMem, but this one
  *                 uses the address in ppv.
@@ -17,6 +17,8 @@
 #define INCL_DOSERRORS
 #define INCL_OS2KRNL_VM
 
+#define NO_WIN32K_LIB_FUNCTIONS
+
 #ifndef OBJ_SELMAPALL
 #define OBJ_SELMAPALL   0x00000800UL
 #endif
@@ -27,10 +29,12 @@
 *******************************************************************************/
 #include <os2.h>
 #include "OS2Krnl.h"
+#include "win32k.h"
 #include "k32.h"
 #include "options.h"
 #include "dev32.h"
 #include "log.h"
+#include "macros.h"
 
 
 /* nasty! These should be imported from the kernel later! */
@@ -94,6 +98,7 @@ ULONG vmApiF1[] =
  */
 APIRET k32AllocMemEx(PPVOID ppv, ULONG cb, ULONG flag, ULONG ulCS, ULONG ulEIP)
 {
+    #if 0
     APIRET  rc;
     ULONG   flFlags2;
     VMAC    vmac = {0};
@@ -132,5 +137,13 @@ APIRET k32AllocMemEx(PPVOID ppv, ULONG cb, ULONG flag, ULONG ulCS, ULONG ulEIP)
                     (PVMAC)SSToDS(&vmac));
 
     return rc;
+    #else
+    NOREF(ppv);
+    NOREF(cb);
+    NOREF(flag);
+    NOREF(ulCS);
+    NOREF(ulEIP);
+    return ERROR_NOT_SUPPORTED;
+    #endif
 }
 

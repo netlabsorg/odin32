@@ -1,9 +1,9 @@
-/* $Id: libDosAllocMemEx.c,v 1.3.4.1 2000-08-29 19:47:03 bird Exp $
+/* $Id: libW32kQueryOTEs.c,v 1.1.2.1 2000-08-29 19:47:03 bird Exp $
  *
- * DosAllocMemEx - Extened Edition of DosAllocMem.
- *                 Allows you to suggest an address of the memory.
+ * libW32kQueryOTEs - Get's the object table entries (OTEs) for a given
+ *                    module (given by a module handle).
  *
- * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -32,34 +32,39 @@ extern BOOL     fInited;
 extern HFILE    hWin32k;
 
 
-
-
-APIRET APIENTRY  DosAllocMemEx(PPVOID ppv, ULONG cb, ULONG flag)
+/**
+ * Gets the object table entries for a module.
+ * @returns     OS2 returncode.
+ * @param       hMTE    Module handle (HMTE) of the module.
+ * @param       pQOte   Pointer to output buffer.
+ * @param       cbQOte  Size (in bytes) of the output buffer.
+ * @status      completely implelemented.
+ * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @remark
+ */
+APIRET APIENTRY  W32kQueryOTEs(HMODULE hMTE, PQOTEBUFFER pQOte, ULONG cbQOte)
 {
     APIRET rc;
 
     if (fInited)
     {
-        K32ALLOCMEMEX Param;
-        ULONG         cbParam = sizeof(Param);
-        ULONG         cbData = 0UL;
-        Param.pv = *ppv;
-        Param.cb = cb;
-        Param.flFlags = flag;
-        Param.rc = 0;
-        Param.ulCS = libHelperGetCS();
-        Param.ulEIP = *(PULONG)((int)(&ppv) - 4);
+        K32QUERYOTES    Param;
+        ULONG           cbParam = sizeof(Param);
+        ULONG           cbData = 0UL;
+
+        Param.hMTE = hMTE;
+        Param.pQOte = pQOte;
+        Param.cbQOte = cbQOte;
+        Param.rc = ERROR_INVALID_PARAMETER;
 
         rc = DosDevIOCtl(hWin32k,
                          IOCTL_W32K_K32,
-                         K32_ALLOCMEMEX,
+                         K32_QUERYOTES,
                          &Param, sizeof(Param), &cbParam,
                          "", 1, &cbData);
+
         if (rc == NO_ERROR)
-        {
-            ppv = Param.pv;
             rc = Param.rc;
-        }
     }
     else
         rc = ERROR_INIT_ROUTINE_FAILED;

@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.43.4.6 2000-08-23 04:25:39 bird Exp $
+# $Id: Makefile,v 1.43.4.7 2000-08-29 19:46:59 bird Exp $
 #
 # Win32k makefile.
 #
@@ -342,6 +342,7 @@ OBJS  =\
     $(WIN32KOBJ)\d32ElfIOCtl.obj \
     $(WIN32KOBJ)\d32Win32kIOCtl.obj \
     $(WIN32KOBJ)\k32AllocMemEx.obj \
+    $(WIN32KOBJ)\k32QueryOTEs.obj \
     $(WIN32KOBJ)\mytkExecPgm.obj\
     $(WIN32KOBJ)\mytkStartProcess.obj
 
@@ -359,10 +360,10 @@ LIBS =\
 !else
     $(VACPATH)\lib\cppon30.lib  \
 !endif
-    $(DDKPATH)\lib\os2386.lib
+    $(DDKPATH)\lib\os2386.lib \
+    $(WIN32KOBJ)\devhelp.lib
 
 LIBSINIT =\
-    $(WIN32KOBJ)\devhelp.lib \
     $(WIN32KOBJ)\clib.lib
 
 #
@@ -407,6 +408,7 @@ TSTOBJS =\
     $(WIN32KOBJ)\d32ElfIOCtl.obj \
     $(WIN32KOBJ)\d32Win32kIOCtl.obj \
     $(WIN32KOBJ)\k32AllocMemEx.obj \
+    $(WIN32KOBJ)\k32QueryOTEs.obj \
     $(WIN32KOBJ)\mytkExecPgm.obj\
     $(WIN32KOBJ)\mytkStartProcess.obj
 
@@ -481,12 +483,12 @@ $(WIN32KBIN)\$(NAME).sys: $(OBJS) $(LIBS) $(NAME).def \
 /MAP:$(WIN32KBIN)\$(@B).map
 $(OBJS:  =^
 )
+/IG
 $(LIBS:  =^
 )
-$(WIN32KOBJ)\anfalmul.obj
 $(WIN32KOBJ)\last.lib
 $(WIN32KOBJ)\init.lib
-/IG $(LIBSINIT)
+$(LIBSINIT)
 $(NAME).def
 <<
     cd $(WIN32KBIN)
@@ -521,7 +523,7 @@ $(TSTLIBS:  =^
 )
 $(WIN32KOBJ)\last.lib
 $(WIN32KOBJ)\tstinit.lib
-/IG $(TSTLIBSINIT)
+$(TSTLIBSINIT)
 $(NAME)tst.def
 <<
 
