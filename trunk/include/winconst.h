@@ -282,6 +282,15 @@
 #define WH_NB_HOOKS           (WH_MAXHOOK_W-WH_MINHOOK_W+1)
 #endif
 
+/* Hook action codes */
+#define HC_ACTION           0
+#define HC_GETNEXT          1
+#define HC_SKIP             2
+#define HC_NOREMOVE         3
+#define HC_NOREM            HC_NOREMOVE
+#define HC_SYSMODALON       4
+#define HC_SYSMODALOFF      5
+
 #define EXCEPTION_DEBUG_EVENT       1
 #define CREATE_THREAD_DEBUG_EVENT   2
 #define CREATE_PROCESS_DEBUG_EVENT  3
@@ -1902,5 +1911,41 @@
 #define PROFILE_USER_W                0x10000000
 #define PROFILE_KERNEL_W              0x20000000
 #define PROFILE_SERVER_W              0x40000000
+
+#define COLOR_SCROLLBAR_W		    0
+#define COLOR_BACKGROUND_W	    1
+#define COLOR_ACTIVECAPTION_W	    2
+#define COLOR_INACTIVECAPTION_W	    3
+#define COLOR_MENU_W		    4
+#define COLOR_WINDOW_W		    5
+#define COLOR_WINDOWFRAME_W	    6
+#define COLOR_MENUTEXT_W		    7
+#define COLOR_WINDOWTEXT_W	    8
+#define COLOR_CAPTIONTEXT_W  	    9
+#define COLOR_ACTIVEBORDER_W	   10
+#define COLOR_INACTIVEBORDER_W	   11
+#define COLOR_APPWORKSPACE_W	   12
+#define COLOR_HIGHLIGHT_W		   13
+#define COLOR_HIGHLIGHTTEXT_W	   14
+#define COLOR_BTNFACE_W              15
+#define COLOR_BTNSHADOW_W            16
+#define COLOR_GRAYTEXT_W             17
+#define COLOR_BTNTEXT_W		   18
+#define COLOR_INACTIVECAPTIONTEXT_W  19
+#define COLOR_BTNHIGHLIGHT_W         20
+#define COLOR_3DDKSHADOW_W           21
+#define COLOR_3DLIGHT_W              22
+#define COLOR_INFOTEXT_W             23
+#define COLOR_INFOBK_W               24
+#define COLOR_DESKTOP_W              COLOR_BACKGROUND_W
+#define COLOR_3DFACE_W               COLOR_BTNFACE_W
+#define COLOR_3DSHADOW_W             COLOR_BTNSHADOW_W
+#define COLOR_3DHIGHLIGHT_W          COLOR_BTNHIGHLIGHT_W
+#define COLOR_3DHILIGHT_W            COLOR_BTNHIGHLIGHT_W
+#define COLOR_BTNHILIGHT_W           COLOR_BTNHIGHLIGHT_W
+#define COLOR_ALTERNATEBTNFACE_W         25  /* undocumented, constant's name unknown */
+#define COLOR_HOTLIGHT_W                 26
+#define COLOR_GRADIENTACTIVECAPTION_W    27
+#define COLOR_GRADIENTINACTIVECAPTION_W  28
 
 #endif //__WINCONST_H__
