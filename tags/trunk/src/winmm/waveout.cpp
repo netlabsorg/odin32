@@ -1,4 +1,4 @@
-/* $Id: waveout.cpp,v 1.21 2001-03-24 15:40:04 sandervl Exp $ */
+/* $Id: waveout.cpp,v 1.22 2001-10-24 22:47:42 sandervl Exp $ */
 //#undef DEBUG
 /*
  * Wave out MM apis
@@ -30,6 +30,7 @@
 #include "waveoutdaud.h"
 #include "misc.h"
 #include "winmm.h"
+#include "initwinmm.h"
 
 #define DBG_LOCALLOG    DBG_waveout
 #include "dbglocal.h"
@@ -52,6 +53,8 @@ ODINFUNCTION6(MMRESULT, waveOutOpen,
               DWORD, fdwOpen)
 {
   MMRESULT rc;
+
+    if(fMMPMAvailable == FALSE) return MMSYSERR_NODRIVER;
 
     if(pwfx == NULL)
         return(WAVERR_BADFORMAT);
@@ -274,6 +277,8 @@ ODINFUNCTION3(MMRESULT, waveOutGetDevCapsA,
               LPWAVEOUTCAPSA, pwoc,
               UINT, cbwoc)
 {
+    if(fMMPMAvailable == FALSE) return MMSYSERR_NODRIVER;
+
     if(WaveOut::getNumDevices() == 0) {
         memset(pwoc, 0, sizeof(*pwoc));
         return MMSYSERR_NODRIVER;
@@ -304,6 +309,8 @@ ODINFUNCTION3(MMRESULT, waveOutGetDevCapsW,
               LPWAVEOUTCAPSW, pwoc,
               UINT, cbwoc)
 {
+    if(fMMPMAvailable == FALSE) return MMSYSERR_NODRIVER;
+
     if(WaveOut::getNumDevices() == 0) {
         memset(pwoc, 0, sizeof(*pwoc));
         return MMSYSERR_NODRIVER;
@@ -330,6 +337,8 @@ ODINFUNCTION3(MMRESULT, waveOutGetDevCapsW,
 /******************************************************************************/
 ODINFUNCTION0(UINT, waveOutGetNumDevs)
 {
+  if(fMMPMAvailable == FALSE) return 0;
+
   return WaveOut::getNumDevices();
 }
 /******************************************************************************/

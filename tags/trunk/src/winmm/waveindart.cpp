@@ -1,4 +1,4 @@
-/* $Id: waveindart.cpp,v 1.1 2001-03-23 16:23:44 sandervl Exp $ */
+/* $Id: waveindart.cpp,v 1.2 2001-10-24 22:47:42 sandervl Exp $ */
 
 /*
  * Wave record class
@@ -30,6 +30,7 @@
 
 #include "misc.h"
 #include "waveindart.h"
+#include "initwinmm.h"
 
 #define DBG_LOCALLOG    DBG_waveindart
 #include "dbglocal.h"
@@ -75,7 +76,7 @@ DartWaveIn::DartWaveIn(LPWAVEFORMATEX pwfx, ULONG fdwOpen, ULONG nCallback, ULON
     AmpOpenParms.usDeviceID = ( USHORT ) 0;
     AmpOpenParms.pszDeviceType = ( PSZ ) MCI_DEVTYPE_AUDIO_AMPMIX;
 
-    rc = mciSendCommand(0, MCI_OPEN,
+    rc = mymciSendCommand(0, MCI_OPEN,
                        MCI_WAIT | MCI_OPEN_TYPE_ID | MCI_OPEN_SHAREABLE,
                        (PVOID) &AmpOpenParms,
                        0);
@@ -88,7 +89,7 @@ DartWaveIn::DartWaveIn(LPWAVEFORMATEX pwfx, ULONG fdwOpen, ULONG nCallback, ULON
     if(rc == 0) {
         //Grab exclusive rights to device instance (NOT entire device)
         GenericParms.hwndCallback = 0;  //Not needed, so set to 0
-        rc = mciSendCommand(DeviceId, MCI_ACQUIREDEVICE, MCI_EXCLUSIVE_INSTANCE,
+        rc = mymciSendCommand(DeviceId, MCI_ACQUIREDEVICE, MCI_EXCLUSIVE_INSTANCE,
                             (PVOID)&GenericParms, 0);
         if(rc) {
             dprintf(("MCI_ACQUIREDEVICE failed\n"));
@@ -114,9 +115,9 @@ DartWaveIn::~DartWaveIn()
         GenericParms.hwndCallback = 0;   //hwndFrame
 
         // Stop recording.
-        mciSendCommand(DeviceId, MCI_STOP,MCI_WAIT, (PVOID)&GenericParms,0);
+        mymciSendCommand(DeviceId, MCI_STOP,MCI_WAIT, (PVOID)&GenericParms,0);
 
-        mciSendCommand(DeviceId,
+        mymciSendCommand(DeviceId,
                       MCI_BUFFER,
                       MCI_WAIT | MCI_DEALLOCATE_MEMORY,
                       (PVOID)&BufferParms,
@@ -126,7 +127,7 @@ DartWaveIn::~DartWaveIn()
         GenericParms.hwndCallback = 0;   //hwndFrame
 
         // Close the device
-        mciSendCommand(DeviceId, MCI_CLOSE, MCI_WAIT, (PVOID)&GenericParms, 0);
+        mymciSendCommand(DeviceId, MCI_CLOSE, MCI_WAIT, (PVOID)&GenericParms, 0);
     }
     if(!ulError)
     {
@@ -178,7 +179,7 @@ MMRESULT DartWaveIn::start()
         MixSetupParms->ulDeviceType = MCI_DEVTYPE_WAVEFORM_AUDIO;
         MixSetupParms->pmixEvent    = WaveInHandler;
 
-        rc = mciSendCommand(DeviceId,
+        rc = mymciSendCommand(DeviceId,
                             MCI_MIXSETUP,
                             MCI_WAIT | MCI_MIXSETUP_INIT,
                             (PVOID)MixSetupParms,
@@ -186,7 +187,7 @@ MMRESULT DartWaveIn::start()
 
         if ( rc != MCIERR_SUCCESS ) {
             mciError(rc);
-            mciSendCommand(DeviceId, MCI_RELEASEDEVICE, MCI_WAIT,
+            mymciSendCommand(DeviceId, MCI_RELEASEDEVICE, MCI_WAIT,
                            (PVOID)&GenericParms, 0);
             return(MMSYSERR_NOTSUPPORTED);
         }
@@ -223,7 +224,7 @@ MMRESULT DartWaveIn::start()
             MixBuffer[i].ulUserParm = (ULONG)this;
         }
 
-        rc = mciSendCommand(DeviceId,
+        rc = mymciSendCommand(DeviceId,
                             MCI_BUFFER,
                             MCI_WAIT | MCI_ALLOCATE_MEMORY,
                             (PVOID)BufferParms,
@@ -231,7 +232,7 @@ MMRESULT DartWaveIn::start()
 
         if(ULONG_LOWD(rc) != MCIERR_SUCCESS) {
             mciError(rc);
-            mciSendCommand(DeviceId, MCI_RELEASEDEVICE, MCI_WAIT,
+            mymciSendCommand(DeviceId, MCI_RELEASEDEVICE, MCI_WAIT,
                           (PVOID)&GenericParms, 0);
             return(MMSYSERR_NOTSUPPORTED);
         }
@@ -241,7 +242,7 @@ MMRESULT DartWaveIn::start()
         /* Set the connector to 'line in' */
         memset( &ConnectorParms, '\0', sizeof( MCI_CONNECTOR_PARMS ) );
         ConnectorParms.ulConnectorType = MCI_LINE_IN_CONNECTOR;
-        rc = mciSendCommand( DeviceId,
+        rc = mymciSendCommand( DeviceId,
                              MCI_CONNECTOR,
                              MCI_WAIT |
                              MCI_ENABLE_CONNECTOR |
@@ -254,7 +255,7 @@ MMRESULT DartWaveIn::start()
          */
         memset( &AmpSetParms, '\0', sizeof( MCI_AMP_SET_PARMS ) );
         AmpSetParms.ulItem = MCI_AMP_SET_MONITOR;
-        rc = mciSendCommand(DeviceId,
+        rc = mymciSendCommand(DeviceId,
                             MCI_SET,
                             MCI_WAIT | MCI_SET_ON | MCI_SET_ITEM,
                             ( PVOID ) &AmpSetParms,
@@ -304,7 +305,7 @@ MMRESULT DartWaveIn::stop()
     memset(&Params, 0, sizeof(Params));
 
     // Stop recording.
-    mciSendCommand(DeviceId, MCI_STOP, MCI_WAIT, (PVOID)&Params, 0);
+    mymciSendCommand(DeviceId, MCI_STOP, MCI_WAIT, (PVOID)&Params, 0);
 
     return(MMSYSERR_NOERROR);
 }
@@ -322,7 +323,7 @@ MMRESULT DartWaveIn::reset()
     memset(&Params, 0, sizeof(Params));
 
     // Stop recording
-    mciSendCommand(DeviceId, MCI_STOP, MCI_WAIT, (PVOID)&Params, 0);
+    mymciSendCommand(DeviceId, MCI_STOP, MCI_WAIT, (PVOID)&Params, 0);
 
     dprintf(("Nr of threads blocked on mutex = %d\n", wmutex.getNrBlocked()));
 
@@ -377,7 +378,7 @@ ULONG DartWaveIn::getPosition()
  ULONG rc, nrbytes;
 
     mciStatus.ulItem = MCI_STATUS_POSITION;
-    rc = mciSendCommand(DeviceId, MCI_STATUS, MCI_STATUS_ITEM|MCI_WAIT, (PVOID)&mciStatus, 0);
+    rc = mymciSendCommand(DeviceId, MCI_STATUS, MCI_STATUS_ITEM|MCI_WAIT, (PVOID)&mciStatus, 0);
     if((rc & 0xFFFF) == MCIERR_SUCCESS) {
         nrbytes = (mciStatus.ulReturn * (getAvgBytesPerSecond()/1000));
         return nrbytes;;
@@ -399,7 +400,7 @@ int DartWaveIn::getNumDevices()
    AmpOpenParms.usDeviceID = ( USHORT ) 0;
    AmpOpenParms.pszDeviceType = ( PSZ ) MCI_DEVTYPE_AUDIO_AMPMIX;
 
-   rc = mciSendCommand(0, MCI_OPEN,
+   rc = mymciSendCommand(0, MCI_OPEN,
                        MCI_WAIT | MCI_OPEN_TYPE_ID | MCI_OPEN_SHAREABLE,
                        (PVOID) &AmpOpenParms,
                        0);
@@ -412,7 +413,7 @@ int DartWaveIn::getNumDevices()
    GenericParms.hwndCallback = 0;   //hwndFrame
 
    // Close the device
-   mciSendCommand(AmpOpenParms.usDeviceID, MCI_CLOSE, MCI_WAIT, (PVOID)&GenericParms, 0);
+   mymciSendCommand(AmpOpenParms.usDeviceID, MCI_CLOSE, MCI_WAIT, (PVOID)&GenericParms, 0);
 
    return 1;
 }
@@ -436,7 +437,7 @@ BOOL DartWaveIn::queryFormat(ULONG formatTag, ULONG nChannels,
 
   mciOpenParms.pszDeviceType = (PSZ)MCI_DEVTYPE_WAVEFORM_AUDIO;
 
-  rc = mciSendCommand( (USHORT) 0,
+  rc = mymciSendCommand( (USHORT) 0,
                        MCI_OPEN,
                        MCI_WAIT | MCI_OPEN_TYPE_ID,
                        (PVOID) &mciOpenParms,
@@ -456,7 +457,7 @@ BOOL DartWaveIn::queryFormat(ULONG formatTag, ULONG nChannels,
   mciAudioCaps.ulFormatMode    = MCI_RECORD;
   mciAudioCaps.ulItem          = MCI_GETDEVCAPS_WAVE_FORMAT;
 
-  rc = mciSendCommand(DeviceId,   /* Device ID    */
+  rc = mymciSendCommand(DeviceId,   /* Device ID    */
                       MCI_GETDEVCAPS,
                       MCI_WAIT | MCI_GETDEVCAPS_EXTENDED | MCI_GETDEVCAPS_ITEM,
                       (PVOID) &mciAudioCaps,
@@ -468,7 +469,7 @@ BOOL DartWaveIn::queryFormat(ULONG formatTag, ULONG nChannels,
   else  winrc = TRUE;
 
   // Close the device
-  mciSendCommand(DeviceId,MCI_CLOSE,MCI_WAIT,(PVOID)&GenericParms,0);
+  mymciSendCommand(DeviceId,MCI_CLOSE,MCI_WAIT,(PVOID)&GenericParms,0);
   return(winrc);
 }
 /******************************************************************************/
@@ -478,7 +479,7 @@ void DartWaveIn::mciError(ULONG ulError)
 #ifdef DEBUG
     char szError[256] = "";
 
-    mciGetErrorString(ulError, szError, sizeof(szError));
+    mymciGetErrorString(ulError, szError, sizeof(szError));
     dprintf(("WINMM: DartWaveIn: %s\n", szError));
 #endif
 }
