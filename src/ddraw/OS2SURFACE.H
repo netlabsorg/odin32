@@ -1,4 +1,4 @@
-/* $Id: OS2SURFACE.H,v 1.15 2001-10-03 18:40:29 sandervl Exp $ */
+/* $Id: OS2SURFACE.H,v 1.16 2001-10-05 12:33:10 sandervl Exp $ */
 
 /*
  * Direct/X Surface class
@@ -150,6 +150,8 @@ class OS2IDirectDrawSurface
         BOOL                   fOverlayValid;
         LONG                   lOverlayX;
         LONG                   lOverlayY;
+
+        SETUP_BLITTER          sBlt;
 
         // surface management
 

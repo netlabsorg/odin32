@@ -1,4 +1,4 @@
-/* $Id: rectangle.cpp,v 1.6 2001-10-03 13:49:41 sandervl Exp $ */
+/* $Id: rectangle.cpp,v 1.7 2001-10-05 12:33:10 sandervl Exp $ */
 
 /*
  * Rectangle class Implementaion
@@ -50,26 +50,6 @@ DDRectangle::Coord DDRectangle::width (  ) const
 DDRectangle::Coord DDRectangle::height (  ) const
 {
   return ( lBottom - lTop);
-}
-
-DDRectangle::Coord DDRectangle::Top() const
-{
-  return lTop;
-}
-
-DDRectangle::Coord DDRectangle::Left() const
-{
-  return lLeft;
-}
-
-DDRectangle::Coord DDRectangle::Bottom() const
-{
-  return lBottom;
-}
-
-DDRectangle::Coord DDRectangle::Right() const
-{
-  return lRight;
 }
 
 void DDRectangle::SetMemPtr(void* NewMemPtr)

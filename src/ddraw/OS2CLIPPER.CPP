@@ -1,4 +1,4 @@
-/* $Id: OS2CLIPPER.CPP,v 1.14 2001-10-03 13:49:39 sandervl Exp $ */
+/* $Id: OS2CLIPPER.CPP,v 1.15 2001-10-05 12:33:08 sandervl Exp $ */
 
 /*
  * DX clipper class routines
@@ -30,7 +30,8 @@
 //******************************************************************************
 OS2IDirectDrawClipper::OS2IDirectDrawClipper(void) :
                  Referenced(0), lastError(DD_OK), fDrawingAllowed(TRUE),
-                 clipWindow(0), lpRgnData(NULL), fClipListChanged(FALSE)
+                 clipWindow(0), lpRgnData(NULL), fClipListChanged(FALSE),
+                 fClipListChangedInt(FALSE)
 {
   // this constructor creates an unassociated instance of the ddraw clipper,
   // no ddraw object is associated
@@ -56,7 +57,8 @@ OS2IDirectDrawClipper::OS2IDirectDrawClipper(void) :
 //******************************************************************************
 OS2IDirectDrawClipper::OS2IDirectDrawClipper(OS2IDirectDraw *lpDirectDraw) :
                  Referenced(0), lastError(DD_OK), fDrawingAllowed(TRUE),
-                 clipWindow(0), lpRgnData(NULL), fClipListChanged(FALSE)
+                 clipWindow(0), lpRgnData(NULL), fClipListChanged(FALSE),
+                 fClipListChangedInt(FALSE)
 {
   lpVtbl                  = &Vtbl;
   Vtbl.AddRef             = ClipAddRef;
@@ -281,7 +283,8 @@ BOOL WIN32API ClipVisRgnCallback(HWND hwnd, BOOL fDrawingAllowed, DWORD dwUserDa
 
   dprintf(("DDRAW: ClipVisRgnCallback %x %x %x", me, hwnd, fDrawingAllowed));
   if(me && me->clipWindow == hwnd) {
-      me->fClipListChanged = TRUE;
+      me->fClipListChanged    = TRUE;
+      me->fClipListChangedInt = TRUE; //internal flag
       lpRgnOld = me->lpRgnData;
       if(fDrawingAllowed == FALSE) {
           me->fDrawingAllowed = FALSE;
@@ -322,6 +325,8 @@ HRESULT WIN32API ClipSetHWnd(THIS This, DWORD reserved, HWND hwnd)
 
 #if 1
   me->lpRgnData = OSLibQueryVisibleRegion(hwnd, me->lpDraw->GetScreenHeight());
+  me->fClipListChanged    = TRUE;
+  me->fClipListChangedInt = TRUE; //internal flag
 #else
   me->lpRgnData = (LPRGNDATA)malloc(sizeof(RGNDATAHEADER) + sizeof(RECT));
   me->lpRgnData->rdh.dwSize = sizeof(RGNDATAHEADER);

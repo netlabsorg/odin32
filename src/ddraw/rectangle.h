@@ -1,4 +1,4 @@
-/* $Id: rectangle.h,v 1.6 2001-03-20 23:18:56 mike Exp $ */
+/* $Id: rectangle.h,v 1.7 2001-10-05 12:33:10 sandervl Exp $ */
 
 /*
  * Rectangle class used to keep track of locked rects in surfaces
@@ -38,11 +38,27 @@ BOOL
 
 Coord
   width() const,
-  height() const,
-  Top() const,
-  Left() const,
-  Bottom() const,
-  Right() const;
+  height() const;
+
+  Coord Top() const
+  {
+    return lTop;
+  }
+
+  Coord Left() const
+  {
+    return lLeft;
+  }
+  
+  Coord Bottom() const
+  {
+    return lBottom;
+  }
+  
+  Coord Right() const
+  {
+    return lRight;
+  }
 
   void* GetMemPtr();
   void SetMemPtr(void* NewMemPtr);
