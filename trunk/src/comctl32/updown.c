@@ -1,4 +1,4 @@
-/* $Id: updown.c,v 1.8 1999-09-15 16:31:49 cbratschi Exp $ */
+/* $Id: updown.c,v 1.9 1999-09-18 12:21:26 cbratschi Exp $ */
 /*
  * Updown control
  *
@@ -17,7 +17,6 @@
  *     - horizontal arrows
  *     - listbox as buddy window
  *     - acceleration
- *     - base 16 -> bug: 9->B (should be A)
  *     - UDS_ALIGNLEFT, ~UDS_WRAP
  *       (tested - they work)
  *     - integers with thousand separators.
@@ -896,8 +895,13 @@ static LRESULT UPDOWN_SetBase(HWND hwnd,WPARAM wParam,LPARAM lParam)
   if (!(wParam==10 || wParam==16) || lParam) UNKNOWN_PARAM(UDM_SETBASE,wParam,lParam);
   if (wParam==10 || wParam==16)
   {
+    UPDOWN_GetBuddyInt(hwnd);
+
     temp = infoPtr->Base;
     infoPtr->Base = wParam;
+
+    UPDOWN_SetBuddyInt(hwnd);
+
     return temp;       /* return the prev base */
   }
 

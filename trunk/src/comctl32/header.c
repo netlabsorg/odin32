@@ -1,4 +1,4 @@
-/* $Id: header.c,v 1.8 1999-08-14 16:13:10 cbratschi Exp $ */
+/* $Id: header.c,v 1.9 1999-09-18 12:21:25 cbratschi Exp $ */
 /*
  *  Header control
  *
@@ -421,12 +421,11 @@ HEADER_DrawTrackLine (HWND hwnd, HDC hdc, INT x)
     HPEN hOldPen;
     INT  oldRop;
 
-    GetClientRect (hwnd, &rect);
-
+    GetClientRect (hwnd, &rect); //CB: Odin bug!!!
     hOldPen = SelectObject (hdc, GetStockObject (BLACK_PEN));
     oldRop = SetROP2 (hdc, R2_XORPEN);
     MoveToEx (hdc, x, rect.top, NULL);
-    LineTo (hdc, x, rect.bottom);
+    LineTo (hdc, x, rect.bottom-1);
     SetROP2 (hdc, oldRop);
     SelectObject (hdc, hOldPen);
 }
@@ -1302,26 +1301,40 @@ HEADER_MouseMove (HWND hwnd, WPARAM wParam, LPARAM lParam)
     pt.y = (INT)HIWORD(lParam);
     HEADER_InternalHitTest (hwnd, &pt, &flags, &nItem);
 
-    if ((dwStyle & HDS_BUTTONS) && (dwStyle & HDS_HOTTRACK)) {
+    if ((dwStyle & HDS_BUTTONS) && (dwStyle & HDS_HOTTRACK))
+    {
+        INT newItem;
+
         if (flags & (HHT_ONHEADER | HHT_ONDIVIDER | HHT_ONDIVOPEN))
-            infoPtr->iHotItem = nItem;
+            newItem = nItem;
         else
-            infoPtr->iHotItem = -1;
-        hdc = GetDC (hwnd);
-        HEADER_Refresh (hwnd, hdc);
-        ReleaseDC (hwnd, hdc);
+            newItem = -1;
+        if (newItem != infoPtr->iHotItem)
+        {
+          infoPtr->iHotItem = newItem;
+          hdc = GetDC (hwnd);
+          HEADER_Refresh (hwnd, hdc);
+          ReleaseDC (hwnd, hdc);
+        }
     }
 
     if (infoPtr->bCaptured) {
-        if (infoPtr->bPressed) {
-            if ((nItem == infoPtr->iMoveItem) && (flags == HHT_ONHEADER))
-                infoPtr->items[infoPtr->iMoveItem].bDown = TRUE;
-            else
-                infoPtr->items[infoPtr->iMoveItem].bDown = FALSE;
-            hdc = GetDC (hwnd);
-            HEADER_RefreshItem (hwnd, hdc, infoPtr->iMoveItem);
-            ReleaseDC (hwnd, hdc);
+        if (infoPtr->bPressed)
+        {
+            BOOL newDown;
 
+            if ((nItem == infoPtr->iMoveItem) && (flags == HHT_ONHEADER))
+                newDown = TRUE;
+            else
+                newDown = FALSE;
+
+            if (newDown != infoPtr->items[infoPtr->iMoveItem].bDown)
+            {
+              infoPtr->items[infoPtr->iMoveItem].bDown = newDown;
+              hdc = GetDC (hwnd);
+              HEADER_RefreshItem (hwnd, hdc, infoPtr->iMoveItem);
+              ReleaseDC (hwnd, hdc);
+            }
 //          TRACE (header, "Moving pressed item %d!\n", infoPtr->iMoveItem);
         }
         else if (infoPtr->bTracking) {
