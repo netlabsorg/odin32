@@ -1,4 +1,4 @@
-; $Id: mytkExecPgm.asm,v 1.1 2000-02-18 19:28:17 bird Exp $
+; $Id: mytkExecPgm.asm,v 1.2 2000-02-18 19:54:19 bird Exp $
 ;
 ; mytkExecPgm - tkExecPgm overload
 ;
@@ -35,10 +35,6 @@ pszArguments    dd 0                    ; Pointer to the arguments (int the buff
 DATA32 ENDS
 
 
-DATA16 SEGMENT
-flatselector dw FLAT
-DATA16 ENDS
-
 CODE32 SEGMENT
 
 ;;
@@ -63,8 +59,10 @@ CODE32 SEGMENT
 ;
 mytkExecPgm PROC FAR
 pBuffer     = dword ptr -04h
-SegBuffer   = word  ptr -08h
-OffBuffer   = word  ptr -0Ch
+;SegBuffer   =  word ptr (dword ptr -08h)
+SegBuffer   = -08h
+;OffBuffer   =  word ptr (dword ptr -0Ch)
+OffBuffer   = -0Ch
 cchFilename = dword ptr -10h
 cchArgs     = dword ptr -14h
     ASSUME CS:CODE32, DS:NOTHING, SS:NOTHING
@@ -159,9 +157,7 @@ cchArgs     = dword ptr -14h
     ;
     ; Set Pointers, pszFilename and pszArguments
     ;
-    push    DATA16
-    pop     ds
-    mov     ax, ds:flatselector
+    mov     ax, seg FLAT:DATA32
     mov     ds, ax
     ASSUME  ds:FLAT
     mov     eax, ss:[ebp+pBuffer]
