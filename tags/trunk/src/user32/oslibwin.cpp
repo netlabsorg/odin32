@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.13 1999-10-07 09:28:00 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.14 1999-10-07 23:21:30 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -628,6 +628,12 @@ void OSLibMapWINDOWPOStoSWP(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, HWND hPar
    pswp->hwnd             = hWindow;
    pswp->ulReserved1      = 0;
    pswp->ulReserved2      = 0;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinCalcFrameRect(HWND hwndFrame, RECTLOS2 *pRect, BOOL fClient)
+{
+   return WinCalcFrameRect(hwndFrame, (PRECTL)pRect, fClient);
 }
 //******************************************************************************
 //******************************************************************************
