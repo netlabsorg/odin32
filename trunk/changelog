@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1589 2001-07-10 20:22:14 bird Exp $ */
+/* $Id: changelog,v 1.1590 2001-07-10 20:45:33 bird Exp $ */
 
  2001-07-10: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMDLG32: o Don't clear filename when selecting of switching
@@ -10,6 +10,10 @@
     - KERNEL32: o Tried to fix missing unlocks of environment block.
                 o Fixed module not found problem when a Pe2Lx is dynamically
                   loaded several times.
+                o Defined env.var. ODIN32.FAIL_IF_UNREGISTEREDLX to make
+                  LoadLibraryEx fail on unregistered LX dlls. This will fix
+                  the most annoying int 3's when starting Opera on debug Odin.
+                  (Two int 3 per netscape/2 plugin checked.)
 
  2001-07-09: knut st. osmundsen <kosmunds@csc.com>:
     - CRTDLL:   o When renaming dlls we still use the original importlibrary
