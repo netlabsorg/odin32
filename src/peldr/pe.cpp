@@ -1,4 +1,4 @@
-/* $Id: pe.cpp,v 1.20 2000-07-20 18:06:29 sandervl Exp $ */
+/* $Id: pe.cpp,v 1.21 2000-09-10 21:54:44 sandervl Exp $ */
 
 /*
  * PELDR main exe loader code
@@ -146,7 +146,7 @@ tryagain:
 		if(DosQueryPathInfo(exeName, FIL_STANDARD, (PVOID)&fstat3, sizeof(fstat3))) 
 		{
 			nrTries++;
-			if(*win32cmdline != NULL) {
+			if(*win32cmdline != NULL && !fQuote) {
 				goto tryagain;
 			}
 		}
