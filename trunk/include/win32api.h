@@ -157,5 +157,13 @@ HWND    WIN32API SetActiveWindow( HWND hwnd);
 HMODULE WIN32API LoadLibraryA(LPCSTR);
 BOOL    WIN32API FreeLibrary(HMODULE);
 FARPROC WIN32API GetProcAddress(HMODULE,LPCSTR);
+VOID    WIN32API DeleteCriticalSection(CRITICAL_SECTION *);
+VOID    WIN32API EnterCriticalSection(CRITICAL_SECTION *);
+VOID    WIN32API InitializeCriticalSection(CRITICAL_SECTION *);
+VOID    WIN32API LeaveCriticalSection(CRITICAL_SECTION *);
+VOID    WIN32API MakeCriticalSectionGlobal(CRITICAL_SECTION *);
+LONG    WIN32API InterlockedDecrement(LPLONG);
+LONG    WIN32API InterlockedExchange(LPLONG,LONG);
+LONG    WIN32API InterlockedIncrement(LPLONG);
 
 #endif
