@@ -1,15 +1,15 @@
-# $Id: makefile,v 1.6 2000-03-06 23:33:51 bird Exp $
+# $Id: makefile,v 1.7 2000-03-07 11:11:10 bird Exp $
 #
-# PD-Win32
+# Odin32 API
 #
 # Makefile for Mesa OpenGL
 #
 
 # Directory macros.
 PDWIN32_INCLUDE = ..\..\..\..\include
-PDWIN32_LIB = ..\..\..\..\lib
-PDWIN32_BIN = ..\..\..\..\bin
-PDWIN32_TOOLS = ..\..\..\..\tools\bin
+PDWIN32_LIB     = ..\..\..\..\lib
+PDWIN32_BIN     = ..\..\..\..\$(OBJDIR)
+PDWIN32_TOOLS   = ..\..\..\..\tools\bin
 
 
 # Compiler, tools, and interference rules.
@@ -128,7 +128,7 @@ TARGET = opengl32
 # All rule - build objs, target dll, copies dll to bin and makes libs.
 all:    $(OBJDIR) \
         $(OBJDIR)\$(TARGET).dll \
-        $(PDWIN32_BIN)\$(TARGET).dll \
+        $(PDWIN32_BIN)\Glide\$(TARGET).dll \
         lib
 
 
@@ -156,6 +156,11 @@ $(RTLLIB_O)
 OS2386.LIB
 $(TARGET).def
 <<keep
+
+
+# Copy rule.
+$(PDWIN32_BIN)\Glide\$(TARGET).dll: $(OBJDIR)\$(TARGET).dll
+    $(CP) $** $@
 
 
 # Dep rule - makes depenencies for C, C++ and Asm files.

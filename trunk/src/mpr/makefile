@@ -1,7 +1,7 @@
-# $Id: makefile,v 1.13 2000-03-06 23:38:41 bird Exp $
+# $Id: makefile,v 1.14 2000-03-07 11:08:28 bird Exp $
 
 #
-# PD-Win32 API
+# Odin32 API
 #
 #       mpr.dll makefile
 #
@@ -20,8 +20,8 @@ PDWIN32_TOOLS   = ..\..\tools\bin
 # Flag overloads and local macros.
 CLEANEXTRAS = mprrsrc.asm
 
-CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE)
-CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
+CFLAGS      = $(CFLAGS) -I$(PDWIN32_INCLUDE)
+CXXFLAGS    = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 
 # Object files. All objects should be prefixed with $(OBJDIR)!

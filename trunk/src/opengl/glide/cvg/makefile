@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2000-03-06 23:33:43 bird Exp $
+# $Id: makefile,v 1.8 2000-03-07 11:11:10 bird Exp $
 
 #
 # Odin32 API
@@ -37,7 +37,7 @@ TARGET = glide2x
 # All rule - build objs, target dll, copies dll to bin and makes libs.
 all:    $(OBJDIR) \
         $(OBJDIR)\$(TARGET).dll \
-        $(PDWIN32_BIN)\$(TARGET).dll \
+        $(PDWIN32_BIN)\Glide\Voodoo2\$(TARGET).dll \
         lib
 
 
@@ -85,6 +85,7 @@ $(TARGET).def
 # Copy rule - copies the dll.
 $(PDWIN32_BIN)\Glide\Voodoo2\$(TARGET).dll: $(OBJDIR)\$(TARGET).dll
     $(CP) $** $@
+    $(CP) $** ..\..\..\..\bin\Glide\Voodoo2\$(TARGET).dll
 
 
 # Dep rule - makes depenencies for C, C++ and Asm files.
