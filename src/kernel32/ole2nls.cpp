@@ -1,4 +1,4 @@
-/* $Id: ole2nls.cpp,v 1.4 2000-10-02 18:39:34 sandervl Exp $ */
+/* $Id: ole2nls.cpp,v 1.5 2000-10-08 14:01:01 sandervl Exp $ */
 
 /*
  *	National Language Support library
@@ -198,7 +198,7 @@ static BOOL CALLBACK NLS_FindLanguageID_ProcA(HMODULE hModule, LPCSTR type,
     char buf_country[128];
     char buf_en_language[128];
 
-    TRACE("%04X\n", (UINT)LangID);
+    dprintf2(("%04X\n", (UINT)LangID));
     if(PRIMARYLANGID(LangID) == LANG_NEUTRAL)
         return TRUE; /* continue search */
 
@@ -1907,8 +1907,8 @@ INT WINAPI LCMapStringA(
 {
   int i;
 
-  TRACE("(0x%04lx,0x%08lx,%s,%d,%p,%d)\n",
-	lcid,mapflags,srcstr,srclen,dststr,dstlen);
+  dprintf2(("LCMapStringA: (0x%04lx,0x%08lx,%s,%d,%p,%d)",
+	lcid,mapflags,srcstr,srclen,dststr,dstlen));
 
   if ( ((dstlen!=0) && (dststr==NULL)) || (srcstr==NULL) )
   {
@@ -2487,8 +2487,8 @@ UINT WINAPI CompareStringA(
   int len1,len2;
   int result;
   LPSTR sk1,sk2;
-  TRACE("%s and %s\n",
-	debugstr_a (s1), debugstr_a (s2));
+  dprintf2(("%s and %s\n",
+	debugstr_a (s1), debugstr_a (s2)));
 
   if ( (s1==NULL) || (s2==NULL) )
   {    
