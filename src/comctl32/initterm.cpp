@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.9 2000-02-05 01:53:54 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.10 2000-08-11 10:56:12 sandervl Exp $ */
 /*
  * COMCTL32 DLL entry point
  *
@@ -42,6 +42,8 @@ void CDECL _ctordtorTerm( void );
  //Win32 resource table (produced by wrc)
  extern DWORD _Resource_PEResTab;
 }
+
+static HMODULE dllHandle = 0;
 
 void CDECL RegisterCOMCTL32WindowClasses(unsigned long hinstDLL);
 void CDECL UnregisterCOMCTL32WindowClasses(void);
@@ -97,17 +99,22 @@ unsigned long _System _DLL_InitTerm(unsigned long hModule, unsigned long
          /* are required and the runtime is dynamically linked.             */
          /*******************************************************************/
 
-	 if(RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab) == FALSE) 
+	 dllHandle = RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab,
+                                   COMCTL32_MAJORIMAGE_VERSION, COMCTL32_MINORIMAGE_VERSION,
+                                   IMAGE_SUBSYSTEM_WINDOWS_GUI);
+         if(dllHandle == 0) 
 		return 0UL;
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
          /* register Win32 window classes implemented in this DLL */
-         RegisterCOMCTL32WindowClasses(hModule);
+         RegisterCOMCTL32WindowClasses(dllHandle);
 
          break;
       case 1 :
-	 UnregisterLxDll(hModule);
+         if(dllHandle) {
+	 	UnregisterLxDll(dllHandle);
+         }
          break;
       default  :
          return 0UL;

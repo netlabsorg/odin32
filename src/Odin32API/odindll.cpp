@@ -1,4 +1,4 @@
-/* $Id: odindll.cpp,v 1.1 1999-09-18 17:46:28 sandervl Exp $ */
+/* $Id: odindll.cpp,v 1.2 2000-08-11 10:56:12 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -42,6 +42,7 @@ void CDECL _ctordtorTerm( void );
 //Win32 resource table (produced by wrc)
 extern DWORD _Resource_PEResTab;
 }
+static HMODULE dllHandle = 0;
 
 BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved);
 
@@ -85,8 +86,9 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          /* are required and the runtime is dynamically linked.             */
          /*******************************************************************/
 
-	 if(RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab) == FALSE) 
-		return 0UL;
+         dllHandle = RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab);
+         if(dllHandle == 0)
+                return 0UL;
 
          rc = DosExitList(0x0000F000|EXLST_ADD, cleanup);
          if(rc)
@@ -94,7 +96,9 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
          break;
       case 1 :
-	 UnregisterLxDll(hModule);
+         if(dllHandle) {
+            	UnregisterLxDll(dllHandle);
+         }
          break;
       default  :
          return 0UL;

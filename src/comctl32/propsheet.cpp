@@ -1,4 +1,4 @@
-/* $Id: propsheet.cpp,v 1.5 2000-08-01 23:19:49 sandervl Exp $ */
+/* $Id: propsheet.cpp,v 1.6 2000-08-11 10:56:12 sandervl Exp $ */
 /*
  * Property Sheets
  *
@@ -1067,7 +1067,7 @@ static int PROPSHEET_CreatePage(HWND hwndParent,
   return TRUE;
 }
 
-#if 1
+#if 0
 /******************************************************************************
  *            PROPSHEET_ShowPage
  *

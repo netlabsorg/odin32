@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.43 2000-06-21 20:51:52 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.44 2000-08-11 10:56:16 sandervl Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -80,6 +80,7 @@ ULONG flAllocMem = 0;    /* flag to optimize DosAllocMem to use all the memory o
 ULONG ulMaxAddr = 0x20000000; /* end of user address space. */
 int   loadNr = 0;
 char  kernel32Path[CCHMAXPATH] = "";
+static HMODULE dllHandle = 0;
 
 /****************************************************************************/
 /* _DLL_InitTerm is the function that gets called by the operating system   */
@@ -127,12 +128,13 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
                 return 0UL;
 
             PROFILE_LoadOdinIni();
-            if(RegisterLxDll(hModule, 0, (PVOID)&_Resource_PEResTab) == FALSE)
+            dllHandle = RegisterLxDll(hModule, 0, (PVOID)&_Resource_PEResTab);
+            if(dllHandle == 0)
                 return 0UL;
 
 	    //SvL: Kernel32 is a special case; pe.exe loads it, so increase
             //     the reference count here
-  	    Win32DllBase *module = Win32DllBase::findModule(hModule);
+  	    Win32DllBase *module = Win32DllBase::findModule(dllHandle);
   	    if(module) {
 		module->AddRef();
 		module->DisableUnload();
@@ -177,7 +179,9 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
             break;
 	}
         case 1 :
-            UnregisterLxDll(hModule);
+            if(dllHandle) {
+            	UnregisterLxDll(dllHandle);
+            }
             break;
         default  :
             return 0UL;

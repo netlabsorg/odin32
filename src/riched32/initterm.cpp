@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.1 2000-05-10 13:17:27 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.2 2000-08-11 10:56:24 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -46,6 +46,8 @@ extern DWORD _Resource_PEResTab;
 
 BOOL WINAPI RICHED32_LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved);
 }
+static HMODULE dllHandle = 0;
+
 //******************************************************************************
 //******************************************************************************
 BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
@@ -92,13 +94,17 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
-	 if(RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab) == FALSE) 
+	 dllHandle = RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab);
+         if(dllHandle == 0) 
 		return 0UL;
 
          break;
       case 1 :
-	 UnregisterLxDll(hModule);
+         if(dllHandle) {
+	 	UnregisterLxDll(dllHandle);
+         }
          break;
+
       default  :
          return 0UL;
    }

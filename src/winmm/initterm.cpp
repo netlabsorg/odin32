@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.9 2000-02-17 14:09:30 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.10 2000-08-11 10:56:27 sandervl Exp $ */
 
 /*
  * WINMM DLL entry point
@@ -49,6 +49,8 @@ void CDECL _ctordtorTerm( void );
  //Win32 resource table (produced by wrc)
  extern DWORD _Resource_PEResTab;
 }
+static HMODULE dllHandle = 0;
+
 //******************************************************************************
 //******************************************************************************
 BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
@@ -98,13 +100,16 @@ unsigned long _System _DLL_InitTerm(unsigned long hModule, unsigned long
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
-	 if(RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab) == FALSE) 
+	 dllHandle = RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab);
+         if(dllHandle == 0) 
 		return 0UL;
 
          break;
       case 1 :
          auxOS2Close(); /* SvL: Close aux device if necessary */
-	 UnregisterLxDll(hModule);
+         if(dllHandle) {
+	   	UnregisterLxDll(dllHandle);
+         }
          break;
       default  :
          return 0UL;

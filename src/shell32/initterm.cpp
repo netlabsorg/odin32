@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.10 2000-02-05 02:10:15 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.11 2000-08-11 10:56:25 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -45,6 +45,7 @@ extern "C" {
  //Win32 resource table (produced by wrc)
  extern DWORD _Resource_PEResTab;
 }
+static HMODULE dllHandle = 0;
 
 BOOL WINAPI Shell32LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad);
 
@@ -92,12 +93,17 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
-	 if(RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab) == FALSE) 
+	 dllHandle = RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab, 
+                                   SHELL32_MAJORIMAGE_VERSION, SHELL32_MINORIMAGE_VERSION,
+                                   IMAGE_SUBSYSTEM_WINDOWS_GUI);
+         if(dllHandle == 0) 
 		return 0UL;
 
          break;
       case 1 :
-	 UnregisterLxDll(hModule);
+         if(dllHandle) {
+	 	UnregisterLxDll(dllHandle);
+         }
          break;
       default  :
          return 0UL;

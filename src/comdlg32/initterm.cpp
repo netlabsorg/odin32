@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.9 2000-02-05 01:54:33 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.10 2000-08-11 10:56:13 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -45,6 +45,9 @@ void CDECL _ctordtorTerm( void );
 
  BOOL WINAPI COMDLG32_DllEntryPoint(HINSTANCE hInstance, DWORD Reason, LPVOID Reserved);
 }
+
+static HMODULE dllHandle = 0;
+
 //******************************************************************************
 //******************************************************************************
 BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
@@ -94,12 +97,17 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          /* are required and the runtime is dynamically linked.             */
          /*******************************************************************/
 
-	 if(RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab) == FALSE) 
+	 dllHandle = RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab,
+                                   COMDLG32_MAJORIMAGE_VERSION, COMDLG32_MINORIMAGE_VERSION,
+                                   IMAGE_SUBSYSTEM_WINDOWS_GUI);
+         if(dllHandle == 0) 
 		return 0UL;
 
          break;
       case 1 :
-	 UnregisterLxDll(hModule);
+         if(dllHandle) {
+	 	UnregisterLxDll(dllHandle);
+         }
          break;
       default  :
          return 0UL;
