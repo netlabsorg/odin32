@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1709 2001-09-30 05:32:47 bird Exp $ */
+/* $Id: ChangeLog,v 1.1710 2001-09-30 10:02:54 bird Exp $ */
 
  2001-09-30: knut st. osmundsen <kosmunds@csc.com>
     - Makefiles:
@@ -14,11 +14,21 @@
                 o Made separate .depend file for the include files in the /include dir.
                   This will speedup the 'dep' rule somewhat.
                 o Autostart CmdQd with 7 workers if not started and MULTIJOBS are defined.
+                o Profile builds uses ./bin/Profile.* subdir for output, not ./bin/Debug.*.
     - Fastdep:  o Corrected processing of C/C++ #include "someheader.h" to
                   start the search in the source code directory.
                 o Corrected handling of deleted files.
                 o Increased some read and write buffers.
     - Win32k:   o Changed PSZ to char *, since H2INC doesn't understand PSZ.
+    - Custombulid:
+                o Can now build object libraries for custombuild without separate
+                  makefiles. Define CUSTOMBUILD=1 (=1 is important!) to build an
+                  DLL.
+                o To build all needed object libraries and the custom dll,
+                  go to /src and 'nmake custombuild'. There is currently no
+                  rule in the main makefile for this, so remember to make the
+                  libraries in /lib first.
+                o Removed all the obsolete *lib.mak files.
 
  2001-09-29: Sander van Leeuwen <sandervl@xs4all.nl>
     - WGSS50:   o WGSS update
