@@ -1,4 +1,4 @@
-/* $Id: OS2CLIPPER.CPP,v 1.17 2002-02-13 15:23:10 sandervl Exp $ */
+/* $Id: OS2CLIPPER.CPP,v 1.18 2002-02-17 20:40:04 sandervl Exp $ */
 
 /*
  * DX clipper class routines
@@ -12,14 +12,16 @@
  *
  */
 
+#define _OS2WIN_H
+#define FAR
+
 #include <odin.h>
+#include <winbase.h>
 #include <memory.h>
 
 #define INITGUID
 #include "os2ddraw.h"
 #include "os2clipper.h"
-#define _OS2WIN_H
-#define FAR
 #include <misc.h>
 #include <winerror.h>
 #include <winuser.h>
