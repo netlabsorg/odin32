@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1973 2002-02-12 18:06:38 sandervl Exp $ */
+/* $Id: changelog,v 1.1974 2002-02-12 18:36:16 sandervl Exp $ */
+
+ 2002-02-11: Platon Fomichev <platon@innotek.de>
+    - USER32:   o Fix for double enter keyboard messages
 
  2002-02-11: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32/USER32:
