@@ -1,9 +1,10 @@
- /* $Id: ChangeLog,v 1.783 2000-03-04 23:43:36 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.784 2000-03-04 23:56:34 bird Exp $ */
 
  2000-03-04: Jeroen van den Horn <J.vandenHorn@fibre.a2000.nl>
         - GLUT32: Added logic to escape from optimizer bug in VACPP
 
  2000-03-04: knut st. osmundsen <knut.stange.osmundse@pmsc.no>
+        - fastdep: Simple preprocessor. Commments and #if 0/1.
         - OPENGL: Corrected makefiles. using LD2 and LD2FLAGS. Many makefiles
                  Didn't concider the NODEBUGINFO macro causing daily builds
                  to become enormous. Daily build of 6MB is not good!.
@@ -25,7 +26,7 @@
         - INCLUDE\pdwin32.post
                    Common makefile rules to be included by all makefiles
 	- USER32\KERNEL32: Switched to new build rules
-	- WSOCK32: Fixed bug in setsockopt for SO_LINGER (options size wasn't 
+	- WSOCK32: Fixed bug in setsockopt for SO_LINGER (options size wasn't
                    adjusted)
 	- KERNEL32: Fixed shell dirs (now all created in odin\bin dir)
                     Partially fixed destruction of loaded dlls in ExitProcess
