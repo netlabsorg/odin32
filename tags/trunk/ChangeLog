@@ -1,7 +1,15 @@
-/* $Id: ChangeLog,v 1.2604 2003-07-16 11:03:29 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2605 2003-07-16 15:47:59 sandervl Exp $ */
 
  2003-07-16: KO Myung-Hun <komh@chollian    >
     - SHELL32:  o DragQueryFileW; allocate more for unicode conversion (DBCS)
+    - WINMM:    o Fixed mciGetErrorStringW() to prevent buffer overflow.
+                o Fixed midiInGetErrorText() and midiOutGetErrorText() 
+                  to prevent buffer overflow.
+                o Fixed waveInGetErrorTextW() to prevent buffer overflow.
+                o Fixed waveOutGetErrorTextW() to prevent buffer overflow.
+    - GDI32:    o Fixed GetTextFaceW() to support unicode correctly. (DBCS)
+                o Fixed calcDimensions(). The width is one point - other point + 1
+                  (code currently not active)
 
  2002-07-16: Yuri Dario <mc6530@mclink   >
     - INSTALL:  o Do not overwrite program files registry entry if it already
