@@ -1,4 +1,4 @@
-/* $Id: shres.orc,v 1.14 2002-06-08 07:26:59 sandervl Exp $ */
+/* $Id: shres.orc,v 1.15 2003-11-12 14:05:13 sandervl Exp $ */
 /*
  * Top level resource file for Common Dialogs
  *
@@ -133,7 +133,7 @@ STRINGTABLE DISCARDABLE
         IDS_SELECT              "Select"
         IDS_OPEN                "Open"
 }
-
+#if 1
 STRINGTABLE DISCARDABLE
 {
 	IDS_CREATEFOLDER_DENIED "Can not create new Folder: Permission denied."
@@ -145,8 +145,10 @@ STRINGTABLE DISCARDABLE
 #ifdef __WIN32OS2__
 	IDS_OVERWRITEFILE_TEXT "OverWrite File %1?"
 	IDS_OVERWRITEFILE_CAPTION "Confirm File OverWrite"
+	IDS_COPY_X_OF_TEXT "Copy%sof %s"
 #endif
 }
+#endif
 
 shv_accel ACCELERATORS
 BEGIN
@@ -271,22 +273,22 @@ SHLICON_MYCOMPUTER ICON LOADONCALL DISCARDABLE "ico/mycomputer.ico"
      do you want to translate them? just do it.
 */
 
-//#include "shell32_Ca.orc"
-//#include "shell32_Cs.orc"
-//#include "shell32_Da.orc"
-//#include "shell32_De.orc"
-//#include "shell32_Eo.orc"
-//#include "shell32_Es.orc"
-//#include "shell32_Fi.orc"
-//#include "shell32_Fr.orc"
-//#include "shell32_Hu.orc"
-//#include "shell32_It.orc"
-//#include "shell32_Ko.orc"
-//#include "shell32_Nl.orc"
-//#include "shell32_No.orc"
-//#include "shell32_Pl.orc"
-//#include "shell32_Pt.orc"
-//#include "shell32_Ru.orc"
-//#include "shell32_Sv.orc"
-//#include "shell32_Wa.orc"
+#include "resources\shell32_Ca.orc"
+#include "resources\shell32_Cs.orc"
+#include "resources\shell32_Da.orc"
+#include "resources\shell32_De.orc"
+#include "resources\shell32_Eo.orc"
+#include "resources\shell32_Es.orc"
+#include "resources\shell32_Fi.orc"
+#include "resources\shell32_Fr.orc"
+#include "resources\shell32_Hu.orc"
+#include "resources\shell32_It.orc"
+//#include "resources\shell32_Ko.orc"
+#include "resources\shell32_Nl.orc"
+#include "resources\shell32_No.orc"
+#include "resources\shell32_Pl.orc"
+#include "resources\shell32_Pt.orc"
+#include "resources\shell32_Ru.orc"
+#include "resources\shell32_Sv.orc"
+#include "resources\shell32_Wa.orc"
 
