@@ -1,14 +1,19 @@
-# $Id: pdwin32.wat.tools,v 1.6 2000-11-20 04:58:15 bird Exp $
+# $Id: pdwin32.wat.tools,v 1.7 2000-11-21 04:39:20 bird Exp $
 # ODIN / win32os2 Project
 #
 # makefile for the build system tools and standard rules
 # Note: this has to be included after the compiler environment
 #
+#
+#
+
 
 #
 # Watcom Specific tools
 #
+MAPSYM   = ..\..\$(PDWIN32_TOOLS)\mapsymWat.cmd
 KDEF2WAT = $(PDWIN32_TOOLS)\kDef2Wat.exe
+
 
 #
 # Make command definition.

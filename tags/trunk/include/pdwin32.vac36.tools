@@ -1,4 +1,4 @@
-# $Id: pdwin32.vac36.tools,v 1.2 2000-11-19 08:31:21 bird Exp $
+# $Id: pdwin32.vac36.tools,v 1.3 2000-11-21 04:39:19 bird Exp $
 # ODIN / win32os2 Project
 #
 # makefile for the build system tools and standard rules
@@ -6,6 +6,12 @@
 #
 # phaller@gmx.net, 1999/05/27
 #
+
+
+#
+# VAC36 Specific tools
+#
+MAPSYM      = mapsym
 
 
 #

@@ -1,4 +1,4 @@
-# $Id: pdwin32.vac3.dbg,v 1.33 2000-11-20 04:58:14 bird Exp $
+# $Id: pdwin32.vac3.dbg,v 1.34 2000-11-21 04:39:19 bird Exp $
 # ODIN / win32os2 Project
 #
 # DEBUG makefile for the VAC3 compiler environment
@@ -61,6 +61,7 @@ CXXTARGETFLAGS   = -Ge+
 CTARGETFLAGS     = -Ge-
 CXXTARGETFLAGS   = -Ge-
 !endif
+CXXEXCEPTIONS    = -Gx-
 CFLAGS           = -Q -Si -Ti -Tm+ -Ss+ -W3 -Gm+ /Gn+ $(CTARGETFLAGS)
 CXXFLAGS         = -Q -Si -Ti -Tm+ -Ss+ -W3 -Gm+ /Gn+ $(CXXTARGETFLAGS) /Gx+
 CXXFLAGS_ODINCRT = -Q -Si -Ti -Tm+ -Ss+ -W3 -Gm+ /Gn- $(CXXTARGETFLAGS) /Gx+
@@ -85,20 +86,25 @@ CDEFINES         = -DDEBUG -D__WIN32OS2__ -D__i386__ -D__WINE__ -DTCPV40HDRS -DC
 #   when we add new flags to for example LD2FLAGS too many times.
 #
 !ifdef EXETARGET
-LDTARGETFLAGS    = -Ge+
-LD2TARGETFLAGS   = /EXEC
+!   ifdef VIO
+LDTARGETFLAGS    = -Ge+ -B"/pmtype:vio"
+LD2TARGETFLAGS   = /EXEC /pmtype:vio
+!   else
+LDTARGETFLAGS    = -Ge+ -B"/pmtype:pm"
+LD2TARGETFLAGS   = /EXEC /pmtype:pm
+!   endif
 !else
 LDTARGETFLAGS    = -Ge-
 LD2TARGETFLAGS   = /DLL
 !endif
 !ifdef NODEBUGINFO
-LDFLAGS          = -Q   /B"/noe /map /packcode /packdata /exepack:2 /nodebug /nodbgpack /nod" -Si -W3 -Gm+ $(LDTARGETFLAGS)
-LDFLAGS_ODINCRT  = -Q   /B"/noe /map /packcode /packdata /exepack:2 /nodebug /nodbgpack"      -Si -W3 -Gm+ $(LDTARGETFLAGS)
+LDFLAGS          = -Q   -B"/noe /map /packcode /packdata /exepack:2 /nodebug /nodbgpack /nod" -Si -W3 -Gm+ $(LDTARGETFLAGS)
+LDFLAGS_ODINCRT  = -Q   -B"/noe /map /packcode /packdata /exepack:2 /nodebug /nodbgpack"      -Si -W3 -Gm+ $(LDTARGETFLAGS)
 LD2FLAGS         = /nologo /noe /map /packcode /packdata /exepack:2 /nodebug /nodbgpack /nod $(LD2TARGETFLAGS)
 LD2FLAGS_ODINCRT = /nologo /noe /map /packcode /packdata /exepack:2 /nodebug /nodbgpack      $(LD2TARGETFLAGS)
 !else
-LDFLAGS          = -Q   /B"/noe /map /packcode /packdata /exepack:2 /dbgpack /nod" -Ti -Si -W3 -Gm+ $(LDTARGETFLAGS)
-LDFLAGS_ODINCRT  = -Q   /B"/noe /map /packcode /packdata /exepack:2 /dbgpack "     -Ti -Si -W3 -Gm+ $(LDTARGETFLAGS)
+LDFLAGS          = -Q   -B"/noe /map /packcode /packdata /exepack:2 /dbgpack /nod" -Ti -Si -W3 -Gm+ $(LDTARGETFLAGS)
+LDFLAGS_ODINCRT  = -Q   -B"/noe /map /packcode /packdata /exepack:2 /dbgpack "     -Ti -Si -W3 -Gm+ $(LDTARGETFLAGS)
 LD2FLAGS         = /nologo /noe /map /packcode /packdata /exepack:2 /dbgpack /nod /debug $(LD2TARGETFLAGS)
 LD2FLAGS_ODINCRT = /nologo /noe /map /packcode /packdata /exepack:2 /dbgpack      /debug $(LD2TARGETFLAGS)
 !endif
