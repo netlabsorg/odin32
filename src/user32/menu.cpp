@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.19 2000-03-18 16:13:34 cbratschi Exp $*/
+/* $Id: menu.cpp,v 1.20 2000-03-24 19:20:33 sandervl Exp $*/
 /*
  * Menu functions
  *
@@ -835,6 +835,13 @@ static void MENU_CalcItemSize( HDC hdc, MENUITEM *lpitem, HWND hwndOwner,
         SendMessageA( hwndOwner, WM_MEASUREITEM, 0, (LPARAM)&mis );
         lpitem->rect.bottom += mis.itemHeight;
         lpitem->rect.right  += mis.itemWidth;
+
+	//SvL: Add size of space between two menu items (fixes RealPlayer 7 menu)
+        if(menuBar)
+        {
+             lpitem->rect.right += MENU_BAR_ITEMS_SPACE;
+        }
+
         //TRACE("id=%04x size=%dx%d\n",
         //             lpitem->wID, mis.itemWidth, mis.itemHeight);
         return;
@@ -905,6 +912,7 @@ static void MENU_CalcItemSize( HDC hdc, MENUITEM *lpitem, HWND hwndOwner,
                            - arrow_bitmap_width;
         }
     }
+    //dprintf(("MENU_CalcItemSize %x (%d,%d)-(%d,%d)", lpitem->wID, lpitem->rect.left, lpitem->rect.top, lpitem->rect.right, lpitem->rect.bottom));
     //TRACE("(%d,%d)-(%d,%d)\n", lpitem->rect.left, lpitem->rect.top, lpitem->rect.right, lpitem->rect.bottom);
 }
 
