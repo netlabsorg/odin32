@@ -52,6 +52,9 @@ ULONG APIENTRY inittermNTDLL(ULONG hModule, ULONG ulFlag)
    switch (ulFlag) {
       case 0 :
 
+         //Initialize kernel32 first (circular dependency between kernel32 & ntdll)
+         InitializeKernel32();
+
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
          dllHandle = RegisterLxDll(hModule, (WIN32DLLENTRY)NTDLL_LibMain, (PVOID)&ntdll_PEResTab,
                                    0, 0, 0);
