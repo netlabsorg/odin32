@@ -1,4 +1,4 @@
-/* $Id: Readme.txt,v 1.4 1999-06-22 08:27:54 sandervl Exp $ */
+/* $Id: Readme.txt,v 1.5 1999-06-24 19:19:46 sandervl Exp $ */
 
 21/06/99: Project Odin Source Code Notes
 ========================================
@@ -31,9 +31,6 @@ NOTE:	- It's not unlikely this rewrite contains extra bugs due to the huge
 Non-functional code:
 	- DDRAW & DSOUND: Markus Montkowski will take care of this and his
           changes will be included in a future release
-	- OLE32: David Raison is currently changing it to make it compile with
-          the Wine headers. His changes will also be included in a future 
-          release.
 
 Wine header notes:
 	- Several header files have been changed to make them usable for VAC
