@@ -88,10 +88,13 @@
   #define __inline__ inline
 
 #ifndef RC_INVOKED
-  #if (__IBMC__ == 300)
+  //Nameless unions or structures are not supported in C mode
+  //(nameless unions only in CPP mode and nameless unions only in VAC 3.6.5 CPP mode)
+  #ifdef __IBMC__
   #define NONAMELESSUNION
+  #define NONAMELESSSTRUCT
   #endif
-  #if (__IBMCPP__ == 300) | (__IBMC__ == 300)
+  #if (__IBMCPP__ == 300)
   #define NONAMELESSSTRUCT
   #endif
 #endif
