@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.47 2003-08-08 13:30:22 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.48 2004-01-30 22:10:07 bird Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -38,7 +38,6 @@
 #include "dbglocal.h"
 
 ODINDEBUGCHANNEL(USER32-WINDOWMSG)
-
 
 //******************************************************************************
 //******************************************************************************
@@ -120,10 +119,15 @@ BOOL WIN32API TranslateMessage(const MSG *msg)
 BOOL WIN32API GetMessageA( LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax)
 {
     BOOL ret;
+    TEB *pTeb = GetThreadTEB();
 
     dprintf2(("GetMessageA %x %x-%x", hwnd, uMsgFilterMin, uMsgFilterMax));
-    ret = OSLibWinGetMsg(pMsg, hwnd, uMsgFilterMin, uMsgFilterMax);
-    if(ret) dprintf2(("GetMessageA %x %x %x %x", hwnd, pMsg->message, pMsg->wParam, pMsg->lParam));
+    do
+    {
+        ret = OSLibWinGetMsg(pMsg, hwnd, uMsgFilterMin, uMsgFilterMax);
+        if(ret) dprintf2(("GetMessageA %x %x %x %x", hwnd, pMsg->message, pMsg->wParam, pMsg->lParam));
+    } while (   pTeb->o.odin.tidAttachedInputThread
+             && OSLibForwardMessageToAttachedThread(pTeb, pMsg, NULL));
     HOOK_CallHooksA(WH_GETMESSAGE, HC_ACTION, PM_REMOVE, (LPARAM)pMsg);
     return ret;
 }
@@ -132,9 +136,14 @@ BOOL WIN32API GetMessageA( LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgF
 BOOL WIN32API GetMessageW( LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax)
 {
     BOOL ret;
+    TEB *pTeb = GetThreadTEB();
 
     dprintf2(("GetMessageW %x %x-%x", hwnd, uMsgFilterMin, uMsgFilterMax));
-    ret = OSLibWinGetMsg(pMsg, hwnd, uMsgFilterMin, uMsgFilterMax, TRUE);
+    do
+    {
+        ret = OSLibWinGetMsg(pMsg, hwnd, uMsgFilterMin, uMsgFilterMax, TRUE);
+    } while (   pTeb->o.odin.tidAttachedInputThread
+             && OSLibForwardMessageToAttachedThread(pTeb, pMsg, NULL));
     HOOK_CallHooksW(WH_GETMESSAGE, HC_ACTION, PM_REMOVE, (LPARAM)pMsg);
     return ret;
 }
@@ -144,11 +153,23 @@ BOOL WIN32API PeekMessageA(LPMSG msg, HWND hwndOwner, UINT uMsgFilterMin,
                            UINT uMsgFilterMax, UINT fuRemoveMsg)
 {
     BOOL fFoundMsg;
+    TEB *pTeb = GetThreadTEB();
 
     dprintf2(("PeekMessageA %x %d-%d %d", hwndOwner, uMsgFilterMin, uMsgFilterMax, fuRemoveMsg));
-    fFoundMsg = OSLibWinPeekMsg(msg, hwndOwner, uMsgFilterMin, uMsgFilterMax,
-                                fuRemoveMsg, FALSE);
-    if(fFoundMsg) {
+    do
+    {
+        fFoundMsg = OSLibWinPeekMsg(msg, hwndOwner, uMsgFilterMin, uMsgFilterMax, fuRemoveMsg, FALSE);
+        if (   fFoundMsg
+            && pTeb->o.odin.tidAttachedInputThread
+            && OSLibForwardMessageToAttachedThread(pTeb, msg, NULL));
+        {
+            if (!fuRemoveMsg)
+                OSLibWinPeekMsg(msg, hwndOwner, uMsgFilterMin, uMsgFilterMax, TRUE, FALSE);
+            continue;
+        }
+    } while (0);
+
+    if (fFoundMsg) {
         dprintf2(("PeekMessageA %x %d-%d %d found message %x %d %x %x", hwndOwner, uMsgFilterMin, uMsgFilterMax, fuRemoveMsg, msg->hwnd, msg->message, msg->wParam, msg->lParam));
         HOOK_CallHooksA(WH_GETMESSAGE, HC_ACTION, fuRemoveMsg & PM_REMOVE, (LPARAM)msg );
         if (msg->message == WM_QUIT && (fuRemoveMsg & PM_REMOVE)) {
@@ -163,10 +184,22 @@ BOOL WIN32API PeekMessageW(LPMSG msg, HWND hwndOwner, UINT uMsgFilterMin,
                            UINT uMsgFilterMax, UINT fuRemoveMsg)
 {
     BOOL fFoundMsg;
+    TEB *pTeb = GetThreadTEB();
 
     dprintf2(("PeekMessageW %x %d-%d %d", hwndOwner, uMsgFilterMin, uMsgFilterMax, fuRemoveMsg));
-    fFoundMsg = OSLibWinPeekMsg(msg, hwndOwner, uMsgFilterMin, uMsgFilterMax,
-                                fuRemoveMsg, TRUE);
+    do
+    {
+        fFoundMsg = OSLibWinPeekMsg(msg, hwndOwner, uMsgFilterMin, uMsgFilterMax, fuRemoveMsg, TRUE);
+        if (   fFoundMsg
+            && pTeb->o.odin.tidAttachedInputThread
+            && OSLibForwardMessageToAttachedThread(pTeb, msg, NULL));
+        {
+            if (!fuRemoveMsg)
+                OSLibWinPeekMsg(msg, hwndOwner, uMsgFilterMin, uMsgFilterMax, TRUE, TRUE);
+            continue;
+        }
+    } while (0);
+
     if(fFoundMsg) {
         dprintf2(("PeekMessageW %x %d-%d %d found message %x %d %x %x", hwndOwner, uMsgFilterMin, uMsgFilterMax, fuRemoveMsg, msg->hwnd, msg->message, msg->wParam, msg->lParam));
         HOOK_CallHooksW(WH_GETMESSAGE, HC_ACTION, fuRemoveMsg & PM_REMOVE, (LPARAM)msg );
@@ -276,6 +309,79 @@ BOOL WIN32API SetMessageQueue(int cMessagesMax)
     return(TRUE);
 }
 //******************************************************************************
+
+/**
+ * Attach one threads input queue to another thread.
+ *
+ * @returns Success indicator.
+ * @param   idAttach    Thread ID of the thread to attach/detach the input
+ *                      of idAttachTo to.
+ * @param   idAttachTo  The Thread ID of the thread which input is to be taken
+ *                      over or reattached.
+ * @param   fAttach     If set attach the input queue of thread idAttachTo
+ *                      to idAttach.
+ *                      If clear detach the input queue of thread idAttach
+ *                      reattaching it to idAttachTo.
+ * @status  partially implemented.
+ * @author  knut st. osmundsen <bird-srcspam@anduin.net>
+ * @remark  One cannot attach a threads input queue to it self.
+ * @todo    Not sure if all this is 100% ok according to the windows reality.
+ *          I'm sure some error cases aren't caught.
+ */
+BOOL WIN32API AttachThreadInput(DWORD idAttach, DWORD idAttachTo, BOOL fAttach)
+{
+    dprintf(("USER32: AttachThreadInput\n"));
+    if (idAttach != idAttachTo)
+    {
+        /* pray noone frees the TEB while we're working on it... */
+        TEB *pTeb = GetTEBFromThreadId(idAttach);
+        if (pTeb)
+        {
+            TEB *pTebTo = GetTEBFromThreadId(idAttachTo);
+            if (pTebTo)
+            {
+                if (fAttach)
+                {   /* attach. */
+                    if (pTebTo->o.odin.tidAttachedInputThread)
+                    {
+                        dprintf(("USER32: AttachThreadInput: WARNING! %#x is already attached to %#x\n", idAttachTo, pTebTo->o.odin.tidAttachedInputThread));
+                        DebugInt3();
+                    }
+                    pTebTo->o.odin.tidAttachedInputThread = idAttach;
+                    dprintf(("USER32: AttachThreadInput: Attached input from %#x to %#x\n", idAttachTo, idAttach));
+                }
+                else
+                {   /* deattach - i.e. undo previous AttachThreadInput(,,TRUE). */
+                    if (pTebTo->o.odin.tidAttachedInputThread != idAttach)
+                    {
+                        dprintf(("USER32: AttachThreadInput: WARNING! %#x is not attached to %#x\n", idAttachTo, pTebTo->o.odin.tidAttachedInputThread));
+                        DebugInt3();
+                    }
+                    pTebTo->o.odin.tidAttachedInputThread = 0;
+                    dprintf(("USER32: AttachThreadInput: Detached input from %#x to %#x\n", idAttach, idAttachTo));
+                }
+                return TRUE;
+            }
+            else
+            {
+                dprintf(("USER32: AttachThreadInput: Invalid tid=%#x\n", idAttachTo));
+                SetLastError(ERROR_INVALID_PARAMETER);
+            }
+        }
+        else
+        {
+            dprintf(("USER32: AttachThreadInput: Invalid tid=%#x\n", idAttach));
+            SetLastError(ERROR_INVALID_PARAMETER);
+        }
+    }
+    else
+    {
+        dprintf(("USER32: AttachThreadInput idAttach == idAttachTo (== %#x)\n", idAttach));
+        SetLastError(ERROR_ACCESS_DENIED);
+    }
+    return FALSE;
+}
+
 //******************************************************************************
 /**********************************************************************
  *           WINPROC_TestCBForStr

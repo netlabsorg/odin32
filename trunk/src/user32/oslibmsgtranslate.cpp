@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.117 2003-10-22 15:56:38 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.118 2004-01-30 22:10:06 bird Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -66,6 +66,10 @@ static MSG  doubleClickMsg = {0};
 //******************************************************************************
 BOOL setThreadQueueExtraCharMessage(TEB* teb, MSG* pExtraMsg)
 {
+  if (   teb->o.odin.tidAttachedInputThread
+      && OSLibForwardMessageToAttachedThread(teb, pExtraMsg, NULL))
+      return TRUE;
+
   // check if the single slot is occupied already
   if (teb->o.odin.fTranslated == TRUE) {
       // there's still an already translated message to be processed
@@ -164,6 +168,21 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
   BOOL             fWasDisabled = FALSE;
   BOOL             fIsFrame = FALSE;
   int i;
+
+    /*
+     * Forwarded input (AttachThreadInput()).
+     */
+    if (    os2Msg->hwnd == NULLHANDLE
+        &&  os2Msg->msg == WIN32APP_FORWARDEDPOSTMSG
+        &&  os2Msg->mp2 == (MPARAM)WIN32APP_FORWARDEDPOSTMSG_MAGIC
+        &&  os2Msg->mp1 != NULL)
+    {
+        *winMsg = *(MSG*)os2Msg->mp1;
+        if (fMsgRemoved)
+            _sfree(os2Msg->mp1);
+        dprintf(("OS2ToWinMsgTranslate: Received forwarded messaged %x\n", os2Msg->msg));
+        return TRUE;
+    }
 
     memset(winMsg, 0, sizeof(MSG));
     win32wnd = Win32BaseWindow::GetWindowFromOS2Handle(os2Msg->hwnd);
@@ -1202,3 +1221,90 @@ BOOL OSLibWinTranslateMessage(MSG *msg)
 //******************************************************************************
 //******************************************************************************
 
+/**
+ * Checks if the message is one that should be forwarded.
+ *
+ * @returns True if the message should be forwarded.
+ * @returns False if the message doesn't fall in to that group.
+ * @param   pMsg    Message to examin.
+ */
+BOOL OSLibForwardableMessage(const MSG *pMsg)
+{
+    return (    (pMsg->message >= WINWM_KEYFIRST   && pMsg->message <= WINWM_KEYLAST)
+            ||  (pMsg->message >= WINWM_MOUSEFIRST && pMsg->message <= WINWM_MOUSELAST) );
+}
+
+/**
+ * Forwards this message to the attached thread if it's in the group of messages
+ * which is supposed to be forwarded.
+ *
+ * @returns True if forwarded.
+ * @returns False if not forwarded.
+ * @param   pTeb    Pointer to the TEB of the current thread.
+ * @param   pMsg    Message to forward.
+ * @author  knut st. osmundsen <bird-srcspam@anduin.net>
+ */
+BOOL OSLibForwardMessageToAttachedThread(void *pvTeb, MSG *pMsg, void *hmm)
+{
+    TEB *pTeb = (TEB *)pvTeb;
+    dprintf(("OSLibForwardMessageToAttachedThread: %p %p (msg=%x)\n", pvTeb, pMsg, pMsg->message));
+    if (!OSLibForwardableMessage(pMsg))
+        return FALSE;
+
+    /*
+     * Find the actual receiver thread.
+     */
+    int c = 100;
+    TEB *pTebTo = pTeb;
+    do
+    {
+        pTebTo = GetTEBFromThreadId(pTebTo->o.odin.tidAttachedInputThread);
+    } while (c-- > 0 && !pTebTo && pTebTo->o.odin.tidAttachedInputThread);
+    if (!c || !pTebTo)
+    {
+        if (c)  dprintf(("OSLibForwardMessageToAttachedThread: The receiver thread is dead or non existing.\n"));
+        else    dprintf(("OSLibForwardMessageToAttachedThread: threads are attached in looooop.\n"));
+        return FALSE; /* hmm.... */
+    }
+    dprintf(("OSLibForwardMessageToAttachedThread: Forwarding message %#x to %#x\n",
+             pMsg->message, pTeb->o.odin.tidAttachedInputThread));
+
+    /*
+     * Pack down the message into shared memory.
+     */
+    MSG *pMsgCopy = (MSG *)_smalloc(sizeof(MSG));
+    if (!pMsgCopy)
+        return FALSE;
+    *pMsgCopy = *pMsg;
+
+    /*
+     * Figure out how we should send the message.
+     */
+    if (WinInSendMsg(pTebTo->o.odin.hab))
+    {
+#if 0
+        /*
+         * Hmm what do we do here....
+         */
+        MRESULT rc = WinSendQueueMsg(pTebTo->o.odin.hmq, /*special! */, pMsgCopy, /*magic*/ );
+        /* if (hmmSendMsgResult)
+            *hmmSendMsgResult = (???)rc; */
+#else
+        dprintf(("OSLibForwardMessage: ERROR! %x in sendmsg!!!\n", pMsg->message));
+        DebugInt3();
+
+        _sfree(pMsgCopy);
+        return FALSE;
+#endif
+    }
+    else
+    {
+        if (!WinPostQueueMsg(pTebTo->o.odin.hmq, WIN32APP_FORWARDEDPOSTMSG, pMsgCopy, (MPARAM)WIN32APP_FORWARDEDPOSTMSG_MAGIC))
+        {
+            dprintf(("OSLibForwardMessage: Failed to post queue message to hmq=%#x\n", pTebTo->o.odin.hmq));
+            _sfree(pMsgCopy);
+        }
+    }
+
+    return TRUE;
+}
