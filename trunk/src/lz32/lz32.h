@@ -1,4 +1,4 @@
-/* $Id: lz32.h,v 1.3 1999-08-11 22:22:44 phaller Exp $ */
+/* $Id: lz32.h,v 1.4 1999-08-17 16:58:34 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -67,20 +67,6 @@ HFILE       WIN32API LZInit(HFILE);
 LONG        WIN32API LZSeek(HFILE,LONG,INT);
 INT         WIN32API GetExpandedNameA(LPCSTR,LPSTR);
 INT         WIN32API GetExpandedNameW(LPCWSTR,LPWSTR);
-
-// internal interface
-VOID        ODIN_INTERNAL ODIN_LZDone(void);
-LONG        ODIN_INTERNAL ODIN_CopyLZFile(HFILE,HFILE);
-HFILE       ODIN_INTERNAL ODIN_LZOpenFileA(LPCSTR,LPOFSTRUCT,UINT);
-HFILE       ODIN_INTERNAL ODIN_LZOpenFileW(LPCWSTR,LPOFSTRUCT,UINT);
-INT         ODIN_INTERNAL ODIN_LZRead(HFILE,LPVOID,UINT);
-INT         ODIN_INTERNAL ODIN_LZStart(void);
-void        ODIN_INTERNAL ODIN_LZClose(HFILE);
-LONG        ODIN_INTERNAL ODIN_LZCopy(HFILE,HFILE);
-HFILE       ODIN_INTERNAL ODIN_LZInit(HFILE);
-LONG        ODIN_INTERNAL ODIN_LZSeek(HFILE,LONG,INT);
-INT         ODIN_INTERNAL ODIN_GetExpandedNameA(LPCSTR,LPSTR);
-INT         ODIN_INTERNAL ODIN_GetExpandedNameW(LPCWSTR,LPWSTR);
 
 #ifdef __cplusplus
   } /* extern "C" */

@@ -1,4 +1,4 @@
-/* $Id: lz32.cpp,v 1.4 1999-08-11 22:22:44 phaller Exp $ */
+/* $Id: lz32.cpp,v 1.5 1999-08-17 16:58:34 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -14,14 +14,13 @@
 #include <string.h>
 #include <ctype.h>
 #include <odin.h>
-#include <odincrt.h>
-#include <odinwrap.h>
 #include <windef.h>
 #include <winbase.h>
 #include <heap.h>
 #include <heapstring.h>
 #include <lz32.h>
 #include "debugtools.h"
+#include <odinwrap.h>
 
 
 ODINDEBUGCHANNEL(LZ32)
