@@ -1,4 +1,4 @@
-/* $Id: cpuhlp.h,v 1.1 1999-11-23 19:31:35 sandervl Exp $ */
+/* $Id: cpuhlp.h,v 1.2 1999-11-23 20:01:18 sandervl Exp $ */
 
 #ifndef _CPUHLP_H_
 #define _CPUHLP_H_
@@ -29,7 +29,7 @@ void  GetCPUVendorString(char *vendor);
 DWORD GetCPUFeatures();
 DWORD GetCPUSignature();
 
-void  InitSystemInfo();
+void  InitSystemInfo(int nrcpus);
 
 #ifdef __cplusplus
 }

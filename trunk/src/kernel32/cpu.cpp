@@ -1,4 +1,4 @@
-/* $Id: cpu.cpp,v 1.1 1999-11-23 19:31:35 sandervl Exp $ */
+/* $Id: cpu.cpp,v 1.2 1999-11-23 20:01:17 sandervl Exp $ */
 /*
  * Odin win32 CPU apis
  *
@@ -24,13 +24,14 @@
 DEFAULT_DEBUG_CHANNEL(CPU)
 
 static BYTE PF[64] = {0,};
-
+static nrCPUs = 1;
 //******************************************************************************
 //******************************************************************************
-void InitSystemInfo()
+void InitSystemInfo(int nrcpus)
 {
   SYSTEM_INFO si;
 
+   nrCPUs = nrcpus;
    GetSystemInfo(&si);
 }
 /***********************************************************************
@@ -57,6 +58,7 @@ VOID WINAPI GetSystemInfo(LPSYSTEM_INFO si)	/* [out] system information */
  static int cache = 0;
  static SYSTEM_INFO cachedsi;
  HKEY	xhkey=0,hkey;
+ HKEY   fpukey=0, xhfpukey;
  char buf[20];
  DWORD features, signature;
 
@@ -82,7 +84,7 @@ VOID WINAPI GetSystemInfo(LPSYSTEM_INFO si)	/* [out] system information */
 	cachedsi.lpMinimumApplicationAddress	= (void *)0x40000000;
 	cachedsi.lpMaximumApplicationAddress	= (void *)0x7FFFFFFF;
 	cachedsi.dwActiveProcessorMask		= 1;
-	cachedsi.dwNumberOfProcessors		= 1;
+	cachedsi.dwNumberOfProcessors		= nrCPUs;
 	cachedsi.dwProcessorType		= PROCESSOR_INTEL_386;
 	cachedsi.dwAllocationGranularity	= 0x10000;
 	cachedsi.wProcessorLevel		= 3; /* 386 */
@@ -153,11 +155,15 @@ VOID WINAPI GetSystemInfo(LPSYSTEM_INFO si)	/* [out] system information */
 
 		//Create FPU key if one is present
 		if (features & CPUID_FPU_PRESENT) {
-		 HKEY fpukey;
-			if (RegCreateKeyA(HKEY_LOCAL_MACHINE,"HARDWARE\\DESCRIPTION\\System\\FloatingPointProcessor",&fpukey)!=ERROR_SUCCESS) {
-            			dprintf(("Unable to register FPU information\n"));
+			if (i == 0) {
+				if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"HARDWARE\\DESCRIPTION\\System\\FloatingPointProcessor",&fpukey)!=ERROR_SUCCESS) 
+            				dprintf(("Unable to register FPU information\n"));
         		}
-			else	RegCloseKey(fpukey);
+			// Create a new processor subkey
+			if(fpukey) {
+				sprintf(buf,"%d",i);
+				RegCreateKeyA(fpukey,buf,&xhfpukey);
+			}
 		}
 	
 	   } //for each cpu
@@ -168,6 +174,11 @@ VOID WINAPI GetSystemInfo(LPSYSTEM_INFO si)	/* [out] system information */
 		RegCloseKey(xhkey);
 	if (hkey)
 		RegCloseKey(hkey);
+	if (xhfpukey)
+		RegCloseKey(xhfpukey);
+	if (fpukey)
+		RegCloseKey(fpukey);
+
 }
 
 
