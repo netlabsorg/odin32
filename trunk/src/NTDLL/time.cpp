@@ -1,4 +1,4 @@
-/* $Id: time.cpp,v 1.2 1999-06-10 17:06:47 phaller Exp $ */
+/* $Id: time.cpp,v 1.3 1999-08-18 18:49:18 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -222,6 +222,21 @@ BOOLEAN WINAPI RtlTimeToSecondsSince1970(LPFILETIME ft,
            timeret));
 
   //*timeret = DOSFS_FileTimeToUnixTime(ft,NULL);
+  return 1;
+}
+
+
+/******************************************************************************
+ *  RtlSecondsSince1970ToTime             [NTDLL]
+ */
+BOOLEAN WINAPI RtlSecondsSince1970ToTime(LPSYSTEMTIME st,
+                                         LPDWORD      timeret)
+{
+  dprintf(("NTDLL: RtlSecondsSince1970ToTime(%08xh,%08xh) not implemented.\n",
+           st,
+           timeret));
+
+  //*timeret = DOSFS_UnixTimeToFileTime(st,NULL);
   return 1;
 }
 
