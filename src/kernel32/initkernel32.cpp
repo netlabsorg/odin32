@@ -1,4 +1,4 @@
-/* $Id: initkernel32.cpp,v 1.26 2003-02-28 11:32:27 sandervl Exp $
+/* $Id: initkernel32.cpp,v 1.27 2004-03-16 13:34:23 sandervl Exp $
  *
  * KERNEL32 DLL entry point
  *
@@ -58,6 +58,7 @@
 #include <codepage.h>
 #include <process.h>
 #include <stats.h>
+#include <heapshared.h>
 
 #define DBG_LOCALLOG    DBG_initterm
 #include "dbglocal.h"
@@ -130,6 +131,16 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
 
             CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
+            /* knut: check for high memory support */
+            rc = DosQuerySysInfo(QSV_VIRTUALADDRESSLIMIT, QSV_VIRTUALADDRESSLIMIT, &ulSysinfo, sizeof(ulSysinfo));
+            if (rc == 0 && ulSysinfo > 512)   //VirtualAddresslimit is in MB
+            {
+                flAllocMem = PAG_ANY;      // high memory support. Let's use it!
+                ulMaxAddr = ulSysinfo * (1024*1024);
+            }
+            else
+                flAllocMem = 0;        // no high memory support
+
             dprintf(("kernel32 init %s %s (%x) Win32k - %s", __DATE__, __TIME__, inittermKernel32,
                      libWin32kInstalled() ? "Installed" : "Not Installed"));
 
@@ -138,24 +149,25 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
             //SvL: Do it here instead of during the exe object creation
             //(std handles can be used in win32 dll initialization routines
             HMInitialize();             /* store standard handles within HandleManager */
+            
+            // VP: Shared heap should be initialized before call to PROFILE_*
+            // because they use a critical section which in turn uses smalloc
+            // in debug build
+            if (InitializeSharedHeap() == FALSE)
+                return 0UL;
 
-            /* knut: check for high memory support */
-            rc = DosQuerySysInfo(QSV_VIRTUALADDRESSLIMIT, QSV_VIRTUALADDRESSLIMIT, &ulSysinfo, sizeof(ulSysinfo));
-            if (rc == 0 && ulSysinfo > 512)   //VirtualAddresslimit is in MB
-            {
-                flAllocMem = PAG_ANY;      // high memory support. Let's use it!
-                ulMaxAddr = ulSysinfo * (1024*1024);
+            // VP: initialize profile internal data (critical section actually).
+            // This was done in PROFILE_LoadOdinIni but PROFILE_GetOdinIniInt
+            // is called earlier and this lead to a handle leak.
+            PROFILE_Initialize();
+
+            if(flAllocMem == PAG_ANY) {
                 OSLibInitWSeBFileIO();
                 if (PROFILE_GetOdinIniInt(ODINSYSTEM_SECTION, HIGHMEM_KEY, 1) == 0) {
                     dprintf(("WARNING: OS/2 kernel supports high memory, but support is DISABLED because of HIGHMEM odin.ini key"));
                     flAllocMem = 0;
                 }
             }
-            else
-                flAllocMem = 0;        // no high memory support
-
-            if (InitializeSharedHeap() == FALSE)
-                return 0UL;
 
             if (InitializeCodeHeap() == FALSE)
                 return 0UL;
@@ -177,6 +189,20 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
             }
 
             OSLibDosSetInitialMaxFileHandles(ODIN_DEFAULT_MAX_FILEHANDLES);
+
+
+#ifdef DEBUG
+            {
+            LPSTR WIN32API GetEnvironmentStringsA();
+
+            char *tmpenvnew = GetEnvironmentStringsA();
+            dprintf(("Environment:"));
+            while(*tmpenvnew) {
+                dprintf(("%s", tmpenvnew));
+                tmpenvnew += strlen(tmpenvnew)+1;
+            }
+            }
+#endif
 
             InitDirectories();          //Must be done before InitializeTIB (which loads NTDLL -> USER32)
             InitializeMainThread();     //Must be done after HMInitialize!
