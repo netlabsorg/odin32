@@ -1,4 +1,4 @@
-/* $Id: comdlg32.cpp,v 1.16 1999-11-02 19:09:42 sandervl Exp $ */
+/* $Id: comdlg32.cpp,v 1.17 1999-11-02 20:37:42 sandervl Exp $ */
 
 /*
  * COMDLG32 implementation
@@ -75,7 +75,7 @@ ODINDEBUGCHANNEL(COMDLG32)
  * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
  *****************************************************************************/
 
-ODINFUNCTION1(BOOL, GetSaveFileNameA32,
+ODINFUNCTION1(BOOL, GetSaveFileNameA,
               LPOPENFILENAMEA, lpofn)
 {
   Win32WindowProc *wndproc;
@@ -101,7 +101,7 @@ ODINFUNCTION1(BOOL, GetSaveFileNameA32,
  * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
  *****************************************************************************/
 
-ODINFUNCTION1(BOOL, GetSaveFileNameW32,
+ODINFUNCTION1(BOOL, GetSaveFileNameW,
               LPOPENFILENAMEW, lpofn)
 {
   Win32WindowProc *wndproc;
@@ -224,7 +224,7 @@ ODINFUNCTION1(BOOL, GetSaveFileNameW32,
  * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
  *****************************************************************************/
 
-ODINFUNCTION1(BOOL, GetOpenFileNameA32,
+ODINFUNCTION1(BOOL, GetOpenFileNameA,
               LPOPENFILENAMEA, lpofn)
 {
   Win32WindowProc *wndproc;
@@ -249,7 +249,7 @@ ODINFUNCTION1(BOOL, GetOpenFileNameA32,
  * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
  *****************************************************************************/
 
-ODINFUNCTION1(BOOL, GetOpenFileNameW32,
+ODINFUNCTION1(BOOL, GetOpenFileNameW,
               LPOPENFILENAMEW, lpofn)
 {
   Win32WindowProc *wndproc;
