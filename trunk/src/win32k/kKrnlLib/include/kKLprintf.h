@@ -1,4 +1,4 @@
-/* $Id: kKLprintf.h,v 1.2 2001-09-27 03:04:32 bird Exp $
+/* $Id: kKLprintf.h,v 1.3 2001-10-19 00:04:45 bird Exp $
  *
  * printf/vprintf header file.
  *
@@ -27,11 +27,7 @@ int printf(const char *pszFormat, ...);
 int vprintf(const char *pszFormat, va_list args);
 int vprintf2(const char *pszFormat, va_list args);
 
-/*
- * va_start have to be redeclared. Compiler don't accept SSToDS() as va_start argument.
- */
-#undef va_start
-#define va_start(ap, last) ap = ((va_list)SSToDS(&last)) + __nextword(last)
+#include <kKLstdarg.h>
 
 #ifdef __cplusplus
 }
