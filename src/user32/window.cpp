@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.115 2002-01-12 14:09:32 sandervl Exp $ */
+/* $Id: window.cpp,v 1.116 2002-02-06 16:31:48 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -1916,12 +1916,15 @@ ODINFUNCTION1(HWND, GetLastActivePopup,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(DWORD,   GetWindowThreadProcessId,
-              HWND,    hWnd,
-              PDWORD,  lpdwProcessId)
+DWORD WIN32API GetWindowThreadProcessId(HWND hwnd, PDWORD lpdwProcessId)
 {
-  hWnd = Win32ToOS2Handle(hWnd);
-  return O32_GetWindowThreadProcessId(hWnd,lpdwProcessId);
+    DWORD dwThreadId;
+
+    dwThreadId = O32_GetWindowThreadProcessId(Win32ToOS2Handle(hwnd), lpdwProcessId);
+    if(dwThreadId == 0) {
+        dprintf(("!WARNING! GetWindowThreadProcessId %x failed!!", hwnd));
+    }
+    return dwThreadId;
 }
 //******************************************************************************
 //******************************************************************************
