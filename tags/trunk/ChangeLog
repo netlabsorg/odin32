@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.1140 2000-09-22 10:47:21 bird Exp $ */
+ /* $Id: ChangeLog,v 1.1141 2000-09-22 20:51:27 jeroen Exp $ */
+
+ 2000-09-22: Jeroen van den Horn <J.vandenHorn@fibre.a2000.nl>
+    - GLU32:    - Changed sorter.cpp to eliminate compiler error
+    - OPENGL32: - Minor change to glthread.c
 
  2000-09-22: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Win32k/Pe2Lx:
