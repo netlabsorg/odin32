@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1983 2002-02-18 10:13:56 sandervl Exp $ */
+/* $Id: changelog,v 1.1984 2002-02-18 15:22:59 bird Exp $ */
+
+ 2002-02-18: knut st. osmundsen <bird@anduin.net>
+    - KERNEL32: o Tried to work around the 4.51 toolkit issue with the
+                  QS*/qs typedefs. Hope this wont cause any problems...
 
  2002-02-18: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Added function to force color to mono mouse cursor conversion
@@ -6,7 +10,7 @@
 
  2002-02-14: Sander van Leeuwen <sandervl@xs4all.nl>
     - OLE32:    o Extended logging added
-                o Resync with Wine (20020215) 
+                o Resync with Wine (20020215)
                   (Out of process COM objects; InstallShield 6)
     - OLEAUT32: o Partial resync with Wine (20020215)
                 o Extended logging added
@@ -30,7 +34,7 @@
     - KERNEL32/USER32:
                 o Moved Char*, IsChar*, Oem* functions to kernel32
                   (forwarders in user32)
-    - USER32:   o Fixed reference count leak in SetFocus, GetDlgCtrlID, 
+    - USER32:   o Fixed reference count leak in SetFocus, GetDlgCtrlID,
                   EndDialog & window dtor
 
  2002-02-10: Sander van Leeuwen <sandervl@xs4all.nl>
