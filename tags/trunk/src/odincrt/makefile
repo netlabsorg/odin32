@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 1999-08-16 16:28:03 sandervl Exp $
+# $Id: makefile,v 1.6 1999-08-17 12:46:04 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -18,7 +18,7 @@ IMPLIBFLAGS = $(IMPLIBFLAGS) /NOIgnoreCase
 
 TARGET = odincrt
 
-OBJS =  odincrt.obj odinfs.obj initterm.obj
+OBJS =  odincrt.obj initterm.obj
 
 all: $(TARGET).dll $(TARGET).lib
 
@@ -31,12 +31,9 @@ $(TARGET).lib: $(TARGET).dll
         $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET).dll
         $(CP) $@ $(PDWIN32_LIB)
 
-
-odincrt.obj: odincrt.cpp $(PDWIN32_INCLUDE)\odincrt.h
-
 initterm.obj: initterm.cpp
 
-odinfs.obj: odinfs.asm
+odincrt.obj: odincrt.asm
 
 clean:
         $(RM) *.obj *.lib *.dll *~ *.map *.pch

@@ -1,4 +1,4 @@
-; $Id: odincrt.def,v 1.15 1999-08-16 20:15:54 achimha Exp $
+; $Id: odincrt.def,v 1.16 1999-08-17 12:46:04 sandervl Exp $
 ; Odin VAC++ 3.08 shared multithreaded runtime
 LIBRARY ODINCRT INITINSTANCE TERMINSTANCE
 PROTMODE
@@ -17,45 +17,15 @@ EXPORTS
 ; -----------------
 ; memory management
 ; -----------------
-       ODIN_calloc
-       calloc                  = ODIN_calloc          @346
-
-       ODIN_realloc
-       realloc                 = ODIN_realloc         @583
-
-       ODIN_malloc
-       malloc                  = ODIN_malloc          @351
-
-       ODIN_free
-       free                    = ODIN_free            @219
-
-       ODIN_debug_calloc
-       _debug_calloc           = ODIN_debug_calloc    @117
-
-       ODIN_debug_realloc
-       _debug_realloc          = ODIN_debug_realloc   @182
-
-       ODIN_debug_malloc
-       _debug_malloc           = ODIN_debug_malloc    @119
-
-       ODIN_debug_free
-       _debug_free             = ODIN_debug_free      @59
-
-; -----------------
-; string management
-; -----------------
-
-       ODIN_strdup
-       strdup                  = ODIN_strdup          @472
-
-; -----------------
-; C++ wrappers
-; -----------------
-
-;      ODIN__nw__FUi
-;      __nw__FUi               = ODIN__nw__FUi   ; operator new()
-
-
+       calloc                            		@346
+       realloc                          		@583
+       malloc                            		@351
+       free                                		@219
+       _debug_calloc               			@117
+       _debug_realloc             			@182
+       _debug_malloc               			@119
+       _debug_free                   			@59
+       strdup                  			       	@472
 
 ; original exports
     __ct__8ifstreamFPCciT2                             @1
