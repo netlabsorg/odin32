@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.24 1999-08-22 11:11:11 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.25 1999-08-22 14:24:35 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -368,6 +368,7 @@ BOOL WIN32API FreeLibrary(HINSTANCE hinstance)
 /******************************************************************************/
 static HINSTANCE iLoadLibraryA(LPCTSTR lpszLibFile)
 {
+ char        modname[CCHMAXPATH];
  HINSTANCE   hDll;
  Win32Dll   *module;
 
@@ -381,14 +382,20 @@ static HINSTANCE iLoadLibraryA(LPCTSTR lpszLibFile)
     return hDll;    //converted dll or win32k took care of it
   }
 
-  if(Win32Image::isPEImage((char *)lpszLibFile)) {
-    module = Win32Dll::findModule((char *)lpszLibFile);
+  strcpy(modname, lpszLibFile);
+  strupr(modname);
+  if(!strstr(modname, ".DLL")) {
+	strcat(modname,".DLL");
+  }
+
+  if(Win32Image::isPEImage((char *)modname)) {
+    module = Win32Dll::findModule((char *)modname);
     if(module) {//don't load it again
         module->AddRef();
         return module->getInstanceHandle();
     }
 
-    module = new Win32Dll((char *)lpszLibFile);
+    module = new Win32Dll((char *)modname);
     if(module == NULL)
         return(0);
 
