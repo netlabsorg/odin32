@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.9 2000-03-04 19:55:35 bird Exp $
+# $Id: Makefile,v 1.10 2000-03-05 10:19:37 jeroen Exp $
 
 #
 # PD-Win32 API
@@ -17,8 +17,6 @@ PDWIN32_TOOLS = ..\..\..\tools\bin
 
 CFLAGS   = -Tdp -I..\mesa\GL -I..\glu $(CFLAGS) -I$(PDWIN32_INCLUDE) -I..\mesa
 CXXFLAGS = -Tdp -I..\mesa\GL -I..\glu $(CXXFLAGS) -I$(PDWIN32_INCLUDE) -I..\mesa
-
-CFLAGS=$(CFLAGS) -O-
 
 TARGET=GLUT32
 
