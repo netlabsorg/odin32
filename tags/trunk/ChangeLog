@@ -1,4 +1,10 @@
- /* $Id: ChangeLog,v 1.531 1999-12-12 14:31:49 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.532 1999-12-13 19:29:59 sandervl Exp $ */
+
+ 99-12-12: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: Fixes for on-demand page loader; currently disabled by
+                    default because it interferes with debugging (too many
+                    exceptions are generated)
+                    To enable it undefine COMMIT_ALL in kernel32\winimagepeldr.cpp.
 
  99-12-12: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Changed logging in winimagepeldr.cpp
