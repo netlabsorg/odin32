@@ -1,4 +1,4 @@
-/* $Id: Win32kCC.c,v 1.4 2000-11-26 13:36:51 bird Exp $
+/* $Id: Win32kCC.c,v 1.5 2000-11-29 04:36:27 bird Exp $
  *
  * Win32CC - Win32k Control Center.
  *
@@ -43,6 +43,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <errno.h>
 
 #include <Win32k.h>
 #include <devSegDf.h>                   /* Win32k segment definitions. */
@@ -332,6 +333,7 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                     FILE *  phConfigSys;
                     char *  pszConfigSys = "A:\\Config.sys";
                     char    szArgs[120];
+                    int     cchArgs;
 
                     if (!WinSendMsg(hwnd, WM_QUERYCONTROLS, (MPARAM)TRUE, NULL))
                         break;
@@ -363,11 +365,12 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                     if (pThis->NewOptions.cbResHeapMax != CB_RES_MAX)
                         sprintf(szArgs + strlen(szArgs), " -ResHeapMax:%d", pThis->NewOptions.cbResHeapMax); /* FIXME - to be changed */
                     strcat(szArgs, "\n");
+                    cchArgs = strlen(szArgs);
 
                     /*
                      * Update Config.sys.
                      */
-                    *pszConfigSys += ulBootDrv - 1;
+                    *pszConfigSys = ulBootDrv - 1 + 'A';
                     phConfigSys = fopen(pszConfigSys, "r+");
                     if (phConfigSys)
                     {
@@ -379,8 +382,7 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                         {
                             char *  pszConfigSys;
 
-                            cbConfigSys += 1024;
-                            pszConfigSys = (char*)calloc(1, cbConfigSys);
+                            pszConfigSys = (char*)calloc(1, 2 * (cbConfigSys + 256)); /* Paranoia... */
                             if (pszConfigSys)
                             {
                                 char *pszCurrent = pszConfigSys;
@@ -394,13 +396,28 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                                      */
                                     pszWin32k = stristr(pszCurrent, "win32k.sys");
                                     if (pszWin32k)
-                                        strcpy(pszWin32k + 10, szArgs);
+                                    {
+                                        int cch;
+                                        pszWin32k += 10;  /* skip "win32k.sys" */
+                                        cch = strlen(pszWin32k);
+                                        strcpy(pszWin32k, szArgs);
+                                        if (cchArgs < cch)
+                                        { /* fix which stops us from shrinking the file.. */
+                                            memset(pszWin32k + cchArgs - 1, ' ', cch - cchArgs);
+                                            pszWin32k[cch - 1] = '\n';
+                                            pszWin32k[cch]     = '\0';
+                                        }
+                                    }
 
                                     /* next */
                                     pszCurrent += strlen(pszCurrent);
                                 }
+                                if (pszCurrent[-1] != '\n')
+                                    *pszCurrent++ = '\n';
 
-                                /* Write it back */
+                                /* Write it back
+                                 * One big question, how do we shrink a file?
+                                 */
                                 if (    fseek(phConfigSys, 0, SEEK_SET) == 0
                                     &&  fwrite(pszConfigSys, 1, pszCurrent - pszConfigSys, phConfigSys))
                                 {
@@ -408,6 +425,7 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                                 }
                                 else
                                     Complain(hwnd, IDS_FWRITE_FAILED, pszConfigSys);
+                                free(pszConfigSys);
                             }
                             else
                                 Complain(hwnd, IDS_MALLOC_FAILED, cbConfigSys + 256);
