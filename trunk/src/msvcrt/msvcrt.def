@@ -1,4 +1,4 @@
-; $Id: msvcrt.def,v 1.7 1999-11-27 19:52:21 sandervl Exp $
+; $Id: msvcrt.def,v 1.8 1999-11-30 14:17:09 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY MSVCRT INITINSTANCE TERMINSTANCE
@@ -102,22 +102,15 @@ IMPORTS
 	NTDLL_wcstoul		= NTDLL.wcstoul
 
 ; Forwarded APIs - CRTDLL
-	CRTDLL___mb_cur_max_dll	= CRTDLL.__mb_cur_max_dll
 	CRTDLL___dllonexit	= CRTDLL.__dllonexit
 	CRTDLL___doserrno	= CRTDLL.__doserrno
 	CRTDLL___fpecode	= CRTDLL.__fpecode
-	CRTDLL___GetMainArgs	= CRTDLL.__GetMainArgs
 	CRTDLL___isascii	= CRTDLL.__isascii
 	CRTDLL___iscsym		= CRTDLL.__iscsym
 	CRTDLL___iscsymf	= CRTDLL.__iscsymf
 	CRTDLL___threadhandle	= CRTDLL.__threadhandle
 	CRTDLL___threadid	= CRTDLL.__threadid
 
-	CRTDLL__fmode_dll 	= CRTDLL._fmode_dll
-	CRTDLL__acmdln_dll	= CRTDLL._acmdln_dll
-	CRTDLL__aexit_rtn_dll	= CRTDLL._aexit_rtn_dll
-	CRTDLL__commode_dll	= CRTDLL._commode_dll
-	CRTDLL__pctype_dll	= CRTDLL._pctype_dll
 	CRTDLL__CIacos		= CRTDLL._CIacos
 	CRTDLL__CIasin		= CRTDLL._CIasin
 	CRTDLL__CIatan		= CRTDLL._CIatan
@@ -136,8 +129,6 @@ IMPORTS
 	CRTDLL__abnormal_termination = CRTDLL._abnormal_termination
 	CRTDLL__access		= CRTDLL._access
 	CRTDLL__amsg_exit	= CRTDLL._amsg_exit
-	CRTDLL__argc_dll  	= CRTDLL._argc_dll
-	CRTDLL__argv_dll  	= CRTDLL._argv_dll
 	CRTDLL__assert		= CRTDLL._assert
 	CRTDLL__beep		= CRTDLL._beep
 	CRTDLL__beginthread	= CRTDLL._beginthread
@@ -161,12 +152,10 @@ IMPORTS
 	CRTDLL__creat		= CRTDLL._creat
 	CRTDLL__cscanf		= CRTDLL._cscanf
 	CRTDLL__cwait		= CRTDLL._cwait
-	CRTDLL__daylight_dll	= CRTDLL._daylight_dll
 	CRTDLL__dup		= CRTDLL._dup
 	CRTDLL__dup2		= CRTDLL._dup2
 	CRTDLL__ecvt		= CRTDLL._ecvt
 	CRTDLL__endthread	= CRTDLL._endthread
-	CRTDLL__environ_dll	= CRTDLL._environ_dll
 	CRTDLL__eof		= CRTDLL._eof
 	CRTDLL__errno		= CRTDLL._errno
 	CRTDLL__except_handler2	= CRTDLL._except_handler2
@@ -186,7 +175,6 @@ IMPORTS
 	CRTDLL__fgetchar	= CRTDLL._fgetchar
 	CRTDLL__fgetwchar	= CRTDLL._fgetwchar
 	CRTDLL__filbuf		= CRTDLL._filbuf
-	CRTDLL__fileinfo_dll	= CRTDLL._fileinfo_dll
 	CRTDLL__filelength	= CRTDLL._filelength
 	CRTDLL__fileno		= CRTDLL._fileno 
 	CRTDLL__findclose	= CRTDLL._findclose
@@ -362,10 +350,8 @@ IMPORTS
 	CRTDLL__strtime		= CRTDLL._strtime
 	CRTDLL__swab		= CRTDLL._swab
 	CRTDLL__sys_errlist	= CRTDLL.sys_errlist
-	CRTDLL__sys_nerr_dll	= CRTDLL._sys_nerr_dll
 	CRTDLL__tell		= CRTDLL._tell
 	CRTDLL__tempnam		= CRTDLL._tempnam
-	CRTDLL__timezone_dll	= CRTDLL._timezone_dll
 	CRTDLL__tolower		= CRTDLL._tolower
 	CRTDLL__toupper		= CRTDLL._toupper
 	CRTDLL__tzset		= CRTDLL._tzset
@@ -380,9 +366,6 @@ IMPORTS
 	CRTDLL__wcsnset		= CRTDLL._wcsnset
 	CRTDLL__wcsrev		= CRTDLL._wcsrev
 	CRTDLL__wcsset		= CRTDLL._wcsset
-	CRTDLL__winmajor_dll	= CRTDLL._winmajor_dll
-	CRTDLL__winminor_dll	= CRTDLL._winminor_dll
-	CRTDLL__winver_dll	= CRTDLL._winver_dll
 	CRTDLL__write		= CRTDLL._write
 	CRTDLL__XcptFilter	= CRTDLL._XcptFilter
         CRTDLL__y0		= CRTDLL._y0
@@ -436,7 +419,6 @@ IMPORTS
 	CRTDLL_getenv		= CRTDLL.getenv
 	CRTDLL_gets		= CRTDLL.gets
 	CRTDLL_gmtime		= CRTDLL.gmtime
-	CRTDLL_HUGE_dll		= CRTDLL._HUGE_dll
 	CRTDLL_is_wctype	= CRTDLL.is_wctype
 	CRTDLL_isalnum		= CRTDLL.isalnum
 	CRTDLL_iscntrl		= CRTDLL.iscntrl
@@ -466,14 +448,11 @@ IMPORTS
 	CRTDLL_mbtowc		= CRTDLL.mbtowc
 	CRTDLL_mktime		= CRTDLL.mktime
 	CRTDLL_modf		= CRTDLL.modf
-	CRTDLL_osver_dll	= CRTDLL._osver_dll
 	CRTDLL_perror		= CRTDLL.perror
-	CRTDLL_pgmptr_dll	= CRTDLL._pgmptr_dll
 	CRTDLL_printf		= CRTDLL.printf
 	CRTDLL_putc		= CRTDLL.putc
 	CRTDLL_putchar		= CRTDLL.putchar
 	CRTDLL_puts		= CRTDLL.puts
-	CRTDLL_pwctype_dll	= CRTDLL._pwctype_dll
 	CRTDLL_raise		= CRTDLL.raise
 	CRTDLL_rand	  	= CRTDLL.rand
 	CRTDLL_realloc		= CRTDLL.realloc
@@ -516,14 +495,6 @@ IMPORTS
 	CRTDLL_wprintf		= CRTDLL.wprintf
 	CRTDLL_wscanf		= CRTDLL.wscanf
 
-; Imported APIs - CRTDLL
-	_fmode_dll  		= CRTDLL._fmode_dll
-	_acmdln_dll		= CRTDLL._acmdln_dll
-	_aexit_rtn_dll		= CRTDLL._aexit_rtn_dll
-	_commode_dll		= CRTDLL._commode_dll
-	_pctype_dll		= CRTDLL._pctype_dll
-	__mb_cur_max_dll 	= CRTDLL.__mb_cur_max_dll
-
 EXPORTS
     ??0__non_rtti_object@@QAE@ABV0@@Z = _MSVCRT_EXP1		@1
     ??0__non_rtti_object@@QAE@PBD@Z = _MSVCRT_EXP2		@2
@@ -539,8 +510,8 @@ EXPORTS
     ??1bad_typeid@@UAE@XZ	= _MSVCRT_EXP12			@12
     ??1exception@@UAE@XZ	= _MSVCRT_EXP13			@13
     ??1type_info@@UAE@XZ	= _MSVCRT_EXP14			@14
-    ??2@YAPAXI@Z		= _MSVCRT_EXP15			@15
-    ??3@YAXPAX@Z		= _MSVCRT_EXP16			@16
+    ??2@YAPAXI@Z		= _MSVCRT_new			@15
+    ??3@YAXPAX@Z		= _MSVCRT_delete		@16
     ??4__non_rtti_object@@QAEAAV0@ABV0@@Z = _MSVCRT_EXP17	@17
     ??4bad_cast@@QAEAAV0@ABV0@@Z = _MSVCRT_EXP18		@18
     ??4bad_typeid@@QAEAAV0@ABV0@@Z = _MSVCRT_EXP19		@19
@@ -561,7 +532,7 @@ EXPORTS
     ??_Gexception@@UAEPAXI@Z	= _MSVCRT_EXP34			@34
     ?_query_new_handler@@YAP6AHI@ZXZ = _MSVCRT_EXP35		@35
     ?_query_new_mode@@YAHXZ	= _MSVCRT_EXP36			@36
-    ?_set_new_handler@@YAP6AHI@ZP6AHI@Z@Z = _MSVCRT_EXP37	@37
+    ?_set_new_handler@@YAP6AHI@ZP6AHI@Z@Z = _MSVCRT_set_new_handler	@37
     ?_set_new_mode@@YAHH@Z	= _MSVCRT_EXP38			@38
     ?_set_se_translator@@YAP6AXIPAU_EXCEPTION_POINTERS@@@ZP6AXI0@Z@Z = _MSVCRT_EXP39	@39
     ?before@type_info@@QBEHABV1@@Z = _MSVCRT_EXP40		@40
@@ -595,7 +566,7 @@ EXPORTS
 ;   _Getdays							@68
 ;   _Getmonths							@69
 ;   _Gettnames							@70
-    _HUGE			= CRTDLL_HUGE_dll		@71
+    _HUGE			= MSVCRT__HUGE   		@71
 ;   _Strftime			= 				@72
     _XcptFilter			= CRTDLL__XcptFilter		@73
     __CxxFrameHandler		= _MSVCRT___CxxFrameHandler	@74
@@ -604,8 +575,8 @@ EXPORTS
 ;   __RTDynamicCast						@77
 ;   __RTtypeid							@78
 ;   __STRINGTOLD						@79
-    __argc			= CRTDLL__argc_dll		@80
-    __argv			= CRTDLL__argv_dll		@81
+    __argc			= MSVCRT___argc    		@80
+    __argv			= MSVCRT___argv    		@81
 ;   __badioinfo							@82
     __crtCompareStringA		= KERNEL32_CompareStringA	@83
     __crtGetLocaleInfoW		= KERNEL32_GetLocaleInfoW	@84
@@ -613,8 +584,8 @@ EXPORTS
     __dllonexit			= CRTDLL___dllonexit		@86
     __doserrno			= CRTDLL___doserrno		@87
     __fpecode			= CRTDLL___fpecode		@88
-    __getmainargs		= CRTDLL___GetMainArgs		@89
-;   __initenv							@90
+    __getmainargs		= _MSVCRT___GetMainArgs		@89
+    __initenv			= _MSVCRT___initenv		@90
     __isascii			= CRTDLL___isascii		@91
     __iscsym			= CRTDLL___iscsym		@92
     __iscsymf			= CRTDLL___iscsymf		@93
@@ -622,11 +593,11 @@ EXPORTS
 ;   __lc_collate_cp						@95
 ;   __lc_handle							@96
 ;   __lconv_init						@97
-    __mb_cur_max		= CRTDLL___mb_cur_max_dll	@98
-;   __p___argc							@99
+    __mb_cur_max		= MSVCRT___mb_cur_max		@98
+    __p___argc			= _MSVCRT___p___argc		@99
 
 
-;   __p___argv							@100
+    __p___argv			= _MSVCRT___p___argv		@100
     __p___initenv		= _MSVCRT___p__initenv		@101
     __p___mb_cur_max		= _MSVCRT___p___mb_cur_max	@102
 ;   __p___wargv							@103
@@ -634,25 +605,25 @@ EXPORTS
     __p__acmdln			= _MSVCRT___p__acmdln		@105
 ;   __p__amblksiz						@106
     __p__commode		= _MSVCRT___p__commode		@107
-;   __p__daylight						@108
+    __p__daylight		= _MSVCRT___p__daylight		@108
 ;   __p__dstbias						@109
-;   __p__environ						@110
-;   __p__fileinfo						@111
+    __p__environ		= _MSVCRT___p__environ		@110
+    __p__fileinfo		= _MSVCRT___p__fileinfo		@111
     __p__fmode			= _MSVCRT___p__fmode		@112
     __p__iob			= _MSVCRT___p__iob		@113
 ;   __p__mbcasemap						@114
 ;   __p__mbctype						@115
-;   __p__osver							@116
+    __p__osver			= _MSVCRT___p__osver		@116
     __p__pctype			= _MSVCRT___p__pctype		@117
-;   __p__pgmptr							@118
-;   __p__pwctype						@119
-;   __p__timezone						@120
-;   __p__tzname							@121
+    __p__pgmptr			= _MSVCRT___p__pgmptr		@118
+    __p__pwctype		= _MSVCRT___p__pwctype		@119
+    __p__timezone		= _MSVCRT___p__timezone		@120
+    __p__tzname			= _MSVCRT___p__tzname		@121
 ;   __p__wcmdln							@122
 ;   __p__wenviron						@123
-;   __p__winmajor						@124
-;   __p__winminor						@125
-;   __p__winver							@126
+    __p__winmajor		= _MSVCRT___p__winmajor		@124
+    __p__winminor		= _MSVCRT___p__winminor		@125
+    __p__winver			= _MSVCRT___p__winver		@126
 ;   __p__wpgmptr						@127
 ;   __pioinfo							@128
 ;   __pxcptinfoptrs						@129
@@ -670,7 +641,7 @@ EXPORTS
 ;   __winitenv							@141
     _abnormal_termination	= CRTDLL__abnormal_termination	@142
     _access			= CRTDLL__access		@143
-    _acmdln			= CRTDLL__acmdln_dll		@144
+    _acmdln			= MSVCRT__acmdln		@144
 ;   _adj_fdiv_m16i						@145
 ;   _adj_fdiv_m32						@146
 ;   _adj_fdiv_m32i						@147
@@ -685,7 +656,7 @@ EXPORTS
 ;   _adj_fprem1							@156
 ;   _adj_fptan							@157
     _adjust_fdiv		= _MSVCRT__adjust_fdiv		@158
-    _aexit_rtn			= CRTDLL__aexit_rtn_dll		@159
+    _aexit_rtn			= _MSVCRT__aexit_rtn		@159
     _amsg_exit     		= CRTDLL__amsg_exit		@160
     _assert			= CRTDLL__assert		@161
 ;   _atodbl							@162
@@ -707,7 +678,7 @@ EXPORTS
     _clearfp			= CRTDLL__clearfp		@179
     _close			= CRTDLL__close			@180
     _commit			= CRTDLL__commit		@181
-    _commode			= CRTDLL__commode_dll		@182
+    _commode			= MSVCRT__commode		@182
     _control87			= CRTDLL__control87		@183
     _controlfp			= CRTDLL__controlfp		@184
     _copysign			= CRTDLL__copysign		@185
@@ -717,14 +688,14 @@ EXPORTS
     _cscanf			= CRTDLL__cscanf		@189
     _ctype			= CRTDLL_ctype			@190
     _cwait			= CRTDLL__cwait			@191
-    _daylight_dll		= CRTDLL__daylight_dll		@192
+    _daylight    		= MSVCRT__daylight    		@192
 ;   _dstbias							@193
     _dup			= CRTDLL__dup			@194
     _dup2			= CRTDLL__dup2			@195
     _ecvt			= CRTDLL__ecvt			@196
     _endthread			= CRTDLL__endthread		@197
 ;   _endthreadex						@198
-    _environ			= CRTDLL__environ_dll		@199
+    _environ			= MSVCRT__environ    		@199
 
 
     _eof			= CRTDLL__eof			@200
@@ -747,7 +718,7 @@ EXPORTS
     _fgetchar			= CRTDLL__fgetchar		@217
     _fgetwchar			= CRTDLL__fgetwchar		@218
     _filbuf			= CRTDLL__filbuf		@219
-    _fileinfo			= CRTDLL__fileinfo_dll		@220
+    _fileinfo			= MSVCRT__fileinfo		@220
     _filelength			= CRTDLL__filelength		@221
 ;   _filelengthi64						@222
     _fileno			= CRTDLL__fileno		@223
@@ -759,7 +730,7 @@ EXPORTS
     _finite			= CRTDLL__finite		@229
     _flsbuf			= CRTDLL__flsbuf		@230
     _flushall			= CRTDLL__flushall		@231
-    _fmode			= CRTDLL__fmode_dll		@232
+    _fmode			= MSVCRT__fmode			@232
     _fpclass			= CRTDLL__fpclass		@233
     _fpieee_flt			= CRTDLL__fpieee_flt		@234
     _fpreset			= CRTDLL__fpreset		@235
@@ -922,15 +893,15 @@ EXPORTS
     _onexit			= CRTDLL__onexit		@391
     _open			= CRTDLL__open			@392
     _open_osfhandle		= CRTDLL__open_osfhandle	@393
-    _osver			= CRTDLL_osver_dll		@394
+    _osver			= MSVCRT__osver			@394
     _outp			= _MSVCRT__outp			@395
     _outpd			= _MSVCRT__outpd		@396
     _outpw			= _MSVCRT__outpw		@397
     _pclose			= CRTDLL__pclose		@398
-    _pctype			= CRTDLL__pctype_dll		@399
+    _pctype			= MSVCRT__pctype    		@399
 
 
-    _pgmptr			= CRTDLL_pgmptr_dll		@400
+    _pgmptr			= MSVCRT__pgmptr		@400
     _pipe			= CRTDLL__pipe			@401
     _popen			= CRTDLL__popen			@402
     _purecall			= CRTDLL__purecall		@403
@@ -938,7 +909,7 @@ EXPORTS
     _putenv			= CRTDLL__putenv		@405
     _putw			= CRTDLL__putw			@406
     _putws			= _MSVCRT__putws		@407
-    _pwctype			= CRTDLL_pwctype_dll		@408
+    _pwctype			= MSVCRT__pwctype    		@408
     _read			= CRTDLL__read			@409
     _rmdir			= CRTDLL__rmdir			@410
     _rmtmp			= CRTDLL__rmtmp			@411
@@ -993,11 +964,11 @@ EXPORTS
     _strupr			= NTDLL__strupr			@460
     _swab			= CRTDLL__swab			@461
     _sys_errlist		= CRTDLL__sys_errlist		@462
-    _sys_nerr			= CRTDLL__sys_nerr_dll		@463
+    _sys_nerr			= MSVCRT__sys_nerr		@463
     _tell			= CRTDLL__tell			@464
 ;   _telli64							@465
     _tempnam			= CRTDLL__tempnam		@466
-    _timezone			= CRTDLL__timezone_dll		@467
+    _timezone			= MSVCRT__timezone		@467
     _tolower			= CRTDLL__tolower		@468
     _toupper			= CRTDLL__toupper		@469
     _tzname			= CRTDLL__tzname    		@470
@@ -1055,9 +1026,9 @@ EXPORTS
     _wgetcwd			= _MSVCRT__wgetcwd		@520
     _wgetdcwd			= _MSVCRT__wgetdcwd		@521
     _wgetenv			= _MSVCRT__wgetenv		@522
-    _winmajor			= CRTDLL__winmajor_dll		@523
-    _winminor			= CRTDLL__winminor_dll		@524
-    _winver			= CRTDLL__winver_dll		@525
+    _winmajor			= MSVCRT__winmajor		@523
+    _winminor			= MSVCRT__winminor		@524
+    _winver			= MSVCRT__winver		@525
     _wmakepath			= _MSVCRT__wmakepath		@526
     _wmkdir			= _MSVCRT__wmkdir		@527
     _wmktemp			= _MSVCRT__wmktemp		@528

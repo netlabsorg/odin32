@@ -1,4 +1,4 @@
-/* $Id: msvcrt.cpp,v 1.6 1999-11-27 19:52:20 sandervl Exp $ */
+/* $Id: msvcrt.cpp,v 1.7 1999-11-30 14:17:08 sandervl Exp $ */
 
 /*
  * The Visual C RunTime DLL
@@ -13,28 +13,11 @@
 #include <odinwrap.h>
 #include <wchar.h>
 #include <except.h>
+#include <heapstring.h>
+#include <crtdll.h>
+#include "msvcrt.h"
 
 ODINDEBUGCHANNEL(msvcrt)
-
-int __app_type;
-int __usermatherr;
-
-typedef struct
-{
-    HANDLE handle;
-    int      pad[7];
-} CRTDLL_FILE, *PCRTDLL_FILE;
-
-extern LPSTR  	_acmdln_dll;     
-extern UINT 	_commode_dll;    
-extern UINT 	_fmode_dll;      
-extern INT	__mb_cur_max_dll;
-extern USHORT	_pctype_dll;
-extern CRTDLL_FILE _iob;
-wchar_t ** __wargv;
-wchar_t * _wpgmptr;
-wchar_t ** _wenviron;
-
 
 /*********************************************************************
  *                  ??3@YAXPAX@Z    (MSVCRT.1)
@@ -206,25 +189,24 @@ INT CDECL MSVCRT_EXP14(DWORD ret)
 
 /*********************************************************************
  *                  ??2@YAPAXI@Z    (MSVCRT.15)
- *	FIXME - Could not find anything about it
  */
-INT CDECL MSVCRT_EXP15(DWORD ret)
+VOID* CDECL MSVCRT_new(DWORD size)
 {
-  dprintf(("MSVCRT: MSVCRT_EXP15 not implemented.\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
+    dprintf(("MSVCRT: ??2@YAPAXI@Z\n"));
+    VOID* result;
+    if(!(result = HeapAlloc(GetProcessHeap(),0,size)) && new_handler)
+	(*new_handler)();
+    return result;
 }
 
 
 /*********************************************************************
  *                  ??3@YAXPAX@Z    (MSVCRT.16)
- *	FIXME - Could not find anything about it
  */
-INT CDECL MSVCRT_EXP16(DWORD ret)
+VOID CDECL MSVCRT_delete(VOID* ptr)
 {
-  dprintf(("MSVCRT: MSVCRT_EXP16 not implemented.\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
+    dprintf(("MSVCRT: ??3@YAXPAX@Z\n"));
+    HeapFree(GetProcessHeap(),0,ptr);
 }
 
 
@@ -469,14 +451,14 @@ INT CDECL MSVCRT_EXP36(DWORD ret)
 
 
 /*********************************************************************
- *                  ??3@YAXPAX@Z    (MSVCRT.37)
- *	FIXME - Could not find anything about it
+ *                  ?_set_new_handler@@YAP6AHI@ZP6AHI@Z@Z    (MSVCRT.37)
  */
-INT CDECL MSVCRT_EXP37(DWORD ret)
+new_handler_type CDECL MSVCRT_set_new_handler(new_handler_type func)
 {
-  dprintf(("MSVCRT: MSVCRT_EXP37 not implemented.\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
+    dprintf(("MSVCRT: ?_set_new_handler@@YAP6AHI@ZP6AHI@Z@Z\n"));
+    new_handler_type old_handler = new_handler;
+    new_handler = func;
+    return old_handler;
 }
 
 
@@ -661,12 +643,108 @@ INT CDECL MSVCRT___CxxFrameHandler(DWORD ret)
 
 
 /*********************************************************************
+ *                  __GetMainArgs  (MSVCRT.89)
+ */
+DWORD CDECL MSVCRT___GetMainArgs(LPDWORD argc,LPSTR **argv,
+                                LPSTR *environ,DWORD flag)
+{
+        char *cmdline;
+        char  **xargv;
+	int	xargc,i,afterlastspace;
+	DWORD	version;
+
+	dprintf(("MSVCRT: GetMainArgs\n"));
+
+	MSVCRT__acmdln = cmdline = HEAP_strdupA( GetProcessHeap(), 0,
+                                                    GetCommandLineA() );
+
+	version	= GetVersion();
+	MSVCRT__osver       = version >> 16;
+	MSVCRT__winminor    = version & 0xFF;
+	MSVCRT__winmajor    = (version>>8) & 0xFF;
+	MSVCRT__baseversion = version >> 16;
+	MSVCRT__winver      = ((version >> 8) & 0xFF) + ((version & 0xFF) << 8);
+	MSVCRT__baseminor   = (version >> 16) & 0xFF;
+	MSVCRT__basemajor   = (version >> 24) & 0xFF;
+	MSVCRT__osversion   = version & 0xFFFF;
+	MSVCRT__osminor     = version & 0xFF;
+	MSVCRT__osmajor     = (version>>8) & 0xFF;
+
+	/* missing threading init */
+
+	i=0;xargv=NULL;xargc=0;afterlastspace=0;
+	while (cmdline[i]) {
+		if (cmdline[i]==' ') {
+			xargv=(char**)HeapReAlloc( GetProcessHeap(), 0, xargv,
+                                                   sizeof(char*)*(++xargc));
+			cmdline[i]='\0';
+			xargv[xargc-1] = HEAP_strdupA( GetProcessHeap(), 0,
+                                                       cmdline+afterlastspace);
+			i++;
+			while (cmdline[i]==' ')
+				i++;
+			if (cmdline[i])
+				afterlastspace=i;
+
+		} else
+			i++;
+
+	}
+
+	xargv=(char**)HeapReAlloc( GetProcessHeap(), 0, xargv,
+                                   sizeof(char*)*(++xargc));
+	cmdline[i]='\0';
+	xargv[xargc-1] = HEAP_strdupA( GetProcessHeap(), 0,
+                                       cmdline+afterlastspace);
+	MSVCRT___argc  	= xargc;
+	*argc		= xargc;
+	MSVCRT___argv  	= xargv;
+	*argv		= xargv;
+	dprintf(("MSVCRT: GetMainArgs end\n"));
+	MSVCRT__environ = *environ = GetEnvironmentStringsA();
+	return 0;
+}
+
+
+/*********************************************************************
+ *                  __initenv    (MSVCRT.90)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT___initenv(DWORD ret)
+{
+  dprintf(("MSVCRT: __initenv not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  __p___argc  (MSVCRT.99)
+ */
+int * CDECL MSVCRT___p___argc()
+{
+  dprintf(("MSVCRT: __p___argc\n"));
+	return (int*)&MSVCRT___argc;
+}
+
+
+/*********************************************************************
+ *                  __p___argv  (MSVCRT.100)
+ */
+char ** CDECL MSVCRT___p___argv()
+{
+  dprintf(("MSVCRT: __p___argv\n"));
+	return (char**)&MSVCRT___argv;
+}
+
+
+/*********************************************************************
  *                  __p__initenv  (MSVCRT.101)
  */
 char ** CDECL MSVCRT___p__initenv()
 {
   dprintf(("MSVCRT: __p__initenv not implemented\n"));
-	return &_acmdln_dll;
+	return &MSVCRT__acmdln;
 }
 
 
@@ -676,7 +754,7 @@ char ** CDECL MSVCRT___p__initenv()
 int * CDECL MSVCRT___p___mb_cur_max()
 {
   dprintf(("MSVCRT: __p___mb_cur_max\n"));
-	return &__mb_cur_max_dll;
+	return &MSVCRT___mb_cur_max;
 }
 
 
@@ -686,8 +764,9 @@ int * CDECL MSVCRT___p___mb_cur_max()
 char ** CDECL MSVCRT___p__acmdln()
 {
   dprintf(("MSVCRT: __p__acmdln\n"));
-	return &_acmdln_dll;
+	return &MSVCRT__acmdln;
 }
+
 
 /*********************************************************************
  *                  __p__fmode  (MSVCRT.107)
@@ -695,7 +774,37 @@ char ** CDECL MSVCRT___p__acmdln()
 int * CDECL MSVCRT___p__fmode()
 {
   dprintf(("MSVCRT: __p__fmode\n"));
-	return (int*)&_fmode_dll;
+	return (int*)&MSVCRT__fmode;
+}
+
+
+/*********************************************************************
+ *                  __p__daylight  (MSVCRT.108)
+ */
+int * CDECL MSVCRT___p__daylight()
+{
+  dprintf(("MSVCRT: __p__daylight\n"));
+	return (int*)&MSVCRT__daylight;
+}
+
+
+/*********************************************************************
+ *                  __p__environ  (MSVCRT.110)
+ */
+char ** CDECL MSVCRT___p__environ()
+{
+  dprintf(("MSVCRT: __p__environ\n"));
+	return &MSVCRT__environ;
+}
+
+
+/*********************************************************************
+ *                  __p__fileinfo  (MSVCRT.111)
+ */
+char ** CDECL MSVCRT___p__fileinfo()
+{
+  dprintf(("MSVCRT: __p__fileinfo\n"));
+	return &MSVCRT__fileinfo;
 }
 
 
@@ -705,7 +814,7 @@ int * CDECL MSVCRT___p__fmode()
 int * CDECL MSVCRT___p__commode()
 {
   dprintf(("MSVCRT: __p__commode\n"));
-	return (int*)&_commode_dll;
+	return (int*)&MSVCRT__commode;
 }
 
 
@@ -720,12 +829,92 @@ CRTDLL_FILE * CDECL MSVCRT___p__iob()
 
 
 /*********************************************************************
+ *                  __p__osver  (MSVCRT.116)
+ */
+int * CDECL MSVCRT___p__osver()
+{
+  dprintf(("MSVCRT: __p__osver\n"));
+	return (int*)&MSVCRT__osver;
+}
+
+
+/*********************************************************************
  *                  __p__pctype  (MSVCRT.117)
  */
 USHORT * CDECL MSVCRT___p__pctype()
 {
   dprintf(("MSVCRT: __p__pctype\n"));
-	return &_pctype_dll;
+	return (USHORT*)&MSVCRT__pctype;
+}
+
+
+/*********************************************************************
+ *                  __p__pgmptr  (MSVCRT.118)
+ */
+char ** CDECL MSVCRT___p__pgmptr()
+{
+  dprintf(("MSVCRT: __p__pgmptr\n"));
+	return (char**)&MSVCRT__pgmptr;
+}
+
+
+/*********************************************************************
+ *                  __p__pwctype  (MSVCRT.119)
+ */
+USHORT * CDECL MSVCRT___p__pwctype()
+{
+  dprintf(("MSVCRT: __p__pwctype\n"));
+	return (USHORT*)&MSVCRT__pwctype;
+}
+
+
+/*********************************************************************
+ *                  __p__timezone  (MSVCRT.120)
+ */
+int * CDECL MSVCRT___p__timezone()
+{
+  dprintf(("MSVCRT: __p__timezone\n"));
+	return (int*)&MSVCRT__timezone;
+}
+
+
+/*********************************************************************
+ *                  __p__tzname  (MSVCRT.121)
+ */
+char ** CDECL MSVCRT___p__tzname()
+{
+  dprintf(("MSVCRT: __p__tzname\n"));
+	return (char**)&MSVCRT__tzname;
+}
+
+
+/*********************************************************************
+ *                  __p__winmajor  (MSVCRT.124)
+ */
+int * CDECL MSVCRT___p__winmajor()
+{
+  dprintf(("MSVCRT: __p__winmajor\n"));
+	return (int*)&MSVCRT__winmajor;
+}
+
+
+/*********************************************************************
+ *                  __p__winminor  (MSVCRT.125)
+ */
+int * CDECL MSVCRT___p__winminor()
+{
+  dprintf(("MSVCRT: __p__winminor\n"));
+	return (int*)&MSVCRT__winminor;
+}
+
+
+/*********************************************************************
+ *                  __p__winver  (MSVCRT.126)
+ */
+int * CDECL MSVCRT___p__winver()
+{
+  dprintf(("MSVCRT: __p__winver\n"));
+	return (int*)&MSVCRT__winver;
 }
 
 
@@ -758,6 +947,16 @@ INT CDECL MSVCRT__adjust_fdiv(DWORD ret)
   dprintf(("MSVCRT: _adjust_fdiv not implemented.\n"));
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _aexit_rtn    (MSVCRT.159)
+ */
+VOID CDECL MSVCRT__aexit_rtn(int exitcode)
+{
+  dprintf(("MSVCRT: _aexit_rtn\n"));
+  ExitProcess(exitcode);
 }
 
 
