@@ -1,4 +1,4 @@
-/* $Id: TestKernels.cmd,v 1.3 2001-01-19 02:28:33 bird Exp $
+/* $Id: TestKernels.cmd,v 1.4 2002-12-06 02:58:57 bird Exp $
  *
  * This script loops thru a set of different kernels running testcase 1.
  * Note: The kernels and symbols files are in a single directory
@@ -73,7 +73,7 @@
         if (j = -1) then
             iterate;
 
-        if (chBuildType <> 'A' & chBuildType <> 'H' & chBuildType <> 'R') then
+        if (chBuildType <> 'A' & chBuildType <> 'H' & chBuildType <> 'R' & chBuildType <> 'B') then
         do
             say 'invalid build type char:' chBuildType '('asFiles.i')';
             exit -4;
@@ -110,9 +110,14 @@
         say;
         say 'Processing' asFiles.i'....';
         if (chBuildType = 'R') then
+        do
             sCmd = 'win32ktst.exe 1' asFiles.i iVerMajor iVerMinor iBuild chKernelType chBuildType chRev ;
-        else
-            sCmd = 'win32ktst.exe 1' asFiles.i iVerMajor iVerMinor iBuild chKernelType chBuildType chRev asFiles.i||'.SYM';
+            say sCmd;
+            sCmd;
+            if (rc = 0) then
+                iterate;
+        end
+        sCmd = 'win32ktst.exe 1' asFiles.i iVerMajor iVerMinor iBuild chKernelType chBuildType chRev asFiles.i||'.SYM';
         say sCmd;
         sCmd;
         if (rc <> 0) then
