@@ -1,4 +1,4 @@
-/* $Id: shresdef.h,v 1.6 2000-08-18 02:01:27 phaller Exp $ */
+/* $Id: shresdef.h,v 1.7 2000-08-30 13:51:09 sandervl Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -26,6 +26,8 @@
 #define IDS_SHV_COLUMN3         9
 #define IDS_SHV_COLUMN4         10
 #define IDS_SHV_COLUMN5         11
+#define IDS_SHV_COLUMN6		12
+#define IDS_SHV_COLUMN7		13
 #define IDS_SHV_COLUMN3DV       12
 #define IDS_SHV_COLUMN4DV       13
 
@@ -46,8 +48,18 @@
 #define IDS_SHV_INVALID_MOVE_TITLE     30
 #define IDS_SHV_INVALID_MOVE           31
 
+#define IDS_CREATEFOLDER_DENIED 30
+#define IDS_CREATEFOLDER_CAPTION 31
+#define IDS_DELETEFOLDER_TEXT	32
+#define IDS_DELETEFOLDER_CAPTION 33
+
 #define ID_LISTVIEW     2000
 #define ID_NEWFOLDER    0x7053
+
+/* browse for folder dialog box */
+#define IDD_STATUS		97
+#define IDD_TITLE		98
+#define IDD_TREEVIEW		99
 
 #define IDS_ABOUTBOX                    101
 #define IDS_DOCUMENTFOLDERS             102

@@ -1,11 +1,5 @@
-/* $Id: shpolicy.cpp,v 1.3 2000-08-18 02:01:26 phaller Exp $ */
-
+/* $Id: shpolicy.c,v 1.1 2000-08-30 13:53:00 sandervl Exp $ */
 /*
- * Win32 SHELL32 for OS/2
- *
- * Copyright 1999 Patrick Haller (haller@zebra.fh-weingarten.de)
- * Project Odin Software License can be found in LICENSE.TXT
- *
  * shpolicy.c - Data for shell/system policies.
  *
  * Created 1999 by Ian Schmidt <ischmidt@cfl.rr.com>
@@ -14,22 +8,15 @@
  * Editor which came with the Win95 Migration Guide, although
  * there doesn't appear to be an updated Win98 version that
  * would handle the many new policies introduced since then.
- * You could easily write one with the information in
+ * You could easily write one with the information in 
  * this file...
- *
+ * 
  * Up to date as of SHELL32 v4.72 (Win98, Win95 with MSIE 5)
- *
- * Corel WINE 20000324 level
  */
-
-
-/*****************************************************************************
- * Includes                                                                  *
- *****************************************************************************/
-
+#ifdef __WIN32OS2__
+#define ICOM_CINTERFACE 1
 #include <odin.h>
-#include <odinwrap.h>
-#include <os2sel.h>
+#endif
 
 #include <stdlib.h>
 #include <string.h>
@@ -40,6 +27,8 @@
 #include "winreg.h"
 #include "debugtools.h"
 #include "wine/winuser16.h"
+
+DEFAULT_DEBUG_CHANNEL(shell);
 
 #define SHELL_MAX_POLICIES 57
 
@@ -53,7 +42,7 @@ typedef struct tagPOLICYDAT
   DWORD cache;           /* cached value or 0xffffffff for invalid */
 } POLICYDATA, *LPPOLICYDATA;
 
-// #include "shpolicy.h" PH: Strange ... ?
+//extern POLICYDATA sh32_policy_table[SHELL_MAX_POLICIES];
 
 /* application strings */
 
@@ -123,7 +112,7 @@ static char strNoRun[] = {"NoRun"};
 
 /* policy data array */
 
-POLICYDATA sh32_policy_table[] =
+POLICYDATA sh32_policy_table[] = 
 {
   {
     0x1,

@@ -1,3 +1,4 @@
+/* $Id: clipboard.c,v 1.1 2000-08-30 13:52:50 sandervl Exp $ */
 /*
  *	clipboard helper functions
  *
@@ -18,17 +19,10 @@
  *	OlePrivateData (ClipboardDataObjectInterface)
  *
  */
-/*****************************************************************************
- * Includes                                                                  *
- *****************************************************************************/
-
-#include <stdlib.h>
-#include <string.h>
-#include <odin.h>
-#include <odinwrap.h>
-#include <os2sel.h>
-
+#ifdef __WIN32OS2__
 #define ICOM_CINTERFACE 1
+#include <odin.h>
+#endif
 
 #include <string.h>
 
@@ -39,25 +33,10 @@
 #include "shell32_main.h"
 #include "shell.h" /* DROPFILESTRUCT */
 
-
-/*****************************************************************************
- * Local Variables                                                           *
- *****************************************************************************/
-
-ODINDEBUGCHANNEL(shell32-clipboard)
+DEFAULT_DEBUG_CHANNEL(shell)
 
 static int refClipCount = 0;
 static HINSTANCE hShellOle32 = 0;
-
-/* exported via shell32_main.h */
-HRESULT (WINAPI* pOleInitialize)(LPVOID reserved);
-void    (WINAPI* pOleUninitialize)(void);
-HRESULT (WINAPI* pRegisterDragDrop)(HWND hwnd, IDropTarget* pDropTarget);
-HRESULT (WINAPI* pRevokeDragDrop)(HWND hwnd);
-HRESULT (WINAPI* pDoDragDrop)(LPDATAOBJECT,LPDROPSOURCE,DWORD,DWORD*);
-void (WINAPI* pReleaseStgMedium)(STGMEDIUM* pmedium);
-HRESULT (WINAPI* pOleSetClipboard)(IDataObject* pDataObj);
-HRESULT (WINAPI* pOleGetClipboard)(IDataObject** ppDataObj);
 
 /**************************************************************************
  * InitShellOle
@@ -82,27 +61,6 @@ void FreeShellOle(void)
 	}
 }
 
-/*************************************************************************
- * SHELL32 LibMain
- *
- * NOTES
- *  calling oleinitialize here breaks sone apps.
- */
-
-static void Shell32ProcLoadHelper(LPVOID* pAddr,
-                                  HANDLE hModule,
-                                  LPCSTR lpstrName)
-{
-  *pAddr = (void*)GetProcAddress(hModule,lpstrName);
-
-  if (!pAddr)
-     dprintf(("Shell32-clipboard: Shell32ProcLoadHelper(%08xh,%08xh,%s) failed!\n",
-              pAddr,
-              hModule,
-              lpstrName));
-}
-
-
 /**************************************************************************
  * LoadShellOle
  *
@@ -114,15 +72,15 @@ BOOL GetShellOle(void)
 	{
 	  hShellOle32 = LoadLibraryA("ole32.dll");
 	  if(hShellOle32)
-          {
-            Shell32ProcLoadHelper((LPVOID*)&pOleInitialize,   hShellOle32,"OleInitialize");
-            Shell32ProcLoadHelper((LPVOID*)&pOleUninitialize, hShellOle32,"OleUninitialize");
-            Shell32ProcLoadHelper((LPVOID*)&pRegisterDragDrop,hShellOle32,"RegisterDragDrop");
-            Shell32ProcLoadHelper((LPVOID*)&pRevokeDragDrop,  hShellOle32,"RevokeDragDrop");
-            Shell32ProcLoadHelper((LPVOID*)&pDoDragDrop,      hShellOle32,"DoDragDrop");
-            Shell32ProcLoadHelper((LPVOID*)&pReleaseStgMedium,hShellOle32,"ReleaseStgMedium");
-            Shell32ProcLoadHelper((LPVOID*)&pOleSetClipboard, hShellOle32,"OleSetClipboard");
-            Shell32ProcLoadHelper((LPVOID*)&pOleGetClipboard, hShellOle32,"OleGetClipboard");
+	  {
+	    pOleInitialize=(void*)GetProcAddress(hShellOle32,"OleInitialize");
+	    pOleUninitialize=(void*)GetProcAddress(hShellOle32,"OleUninitialize");
+	    pRegisterDragDrop=(void*)GetProcAddress(hShellOle32,"RegisterDragDrop");
+	    pRevokeDragDrop=(void*)GetProcAddress(hShellOle32,"RevokeDragDrop");
+	    pDoDragDrop=(void*)GetProcAddress(hShellOle32,"DoDragDrop");
+	    pReleaseStgMedium=(void*)GetProcAddress(hShellOle32,"ReleaseStgMedium");
+	    pOleSetClipboard=(void*)GetProcAddress(hShellOle32,"OleSetClipboard");
+	    pOleGetClipboard=(void*)GetProcAddress(hShellOle32,"OleGetClipboard");
 
 	    pOleInitialize(NULL);
 	    refClipCount++;
@@ -208,7 +166,7 @@ HGLOBAL RenderSHELLIDLIST (LPITEMIDLIST pidlRoot, LPITEMIDLIST * apidl, UINT cid
 	/* fill the structure */
 	hGlobal = GlobalAlloc(GHND|GMEM_SHARE, size);		
 	if(!hGlobal) return hGlobal;
-	pcida = (CIDA*)GlobalLock (hGlobal);
+	pcida = GlobalLock (hGlobal);
 	pcida->cidl = cidl;
 
 	/* root pidl */

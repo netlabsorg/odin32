@@ -1,3 +1,4 @@
+/* $Id: shpolicy.h,v 1.3 2000-08-30 13:51:08 sandervl Exp $ */
 /*
  *  shpolicy.h - contains defs of policy data for SHRestricted
  *
