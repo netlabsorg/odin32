@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.41 2000-10-07 11:39:16 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.42 2000-11-09 18:16:56 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -394,6 +394,28 @@ int DIBSection::SetDIBColorTable(int startIdx, int cEntries, RGBQUAD *rgb)
 }
 //******************************************************************************
 //******************************************************************************
+int DIBSection::SetDIBColorTable(int startIdx, int cEntries, PALETTEENTRY *palentry)
+{
+ int i;
+
+  if(startIdx + cEntries > (1 << pOS2bmp->cBitCount))
+  {
+    dprintf(("DIBSection::SetDIBColorTable, invalid nr of entries %d %d\n", startIdx, cEntries));
+    return(0);
+  }
+
+  for(i=startIdx;i<cEntries;i++)
+  {
+    pOS2bmp->argbColor[i].fcOptions = 0;
+    pOS2bmp->argbColor[i].bBlue  = palentry[i].peBlue;
+    pOS2bmp->argbColor[i].bGreen = palentry[i].peGreen;
+    pOS2bmp->argbColor[i].bRed   = palentry[i].peRed;
+  }
+
+  return(cEntries);
+}
+//******************************************************************************
+//******************************************************************************
 BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
                         int nDestHeight, int nXsrc, int nYsrc,
                         int nSrcWidth, int nSrcHeight, DWORD Rop)
@@ -427,7 +449,7 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
         RECT rect;
 
         if(fFrameWindowDC) {
-            GetWindowRect(hwndDest, &rect);
+              GetWindowRect(hwndDest, &rect);
         }
         else  GetClientRect(hwndDest, &rect);
         hdcHeight = rect.bottom - rect.top;
@@ -487,11 +509,19 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
       hps = WinGetPS(hwndDest);
   }
 */
+#ifdef INVERT
   oldyinversion = GpiQueryYInversion(hps);
   if(oldyinversion != 0) {
         GpiEnableYInversion(hps, 0);
         fRestoryYInversion = TRUE;
   }
+#endif
+
+#ifdef DEBUG
+  RECTL rcltemp;
+  GreGetDCOrigin(hps, (PPOINTL)&rcltemp);
+  dprintf(("origin (%d,%d) yinv %d", rcltemp.xLeft, rcltemp.yBottom, oldyinversion));
+#endif
 
   if(fFlip & FLIP_HOR)
   {
@@ -571,13 +601,17 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
         if(destdib) {
             destdib->sync(hps, nYdest, nDestHeight);
         }
+#ifdef INVERT
         //restore old y inversion height
         if(fRestoryYInversion) GpiEnableYInversion(hps, oldyinversion);
+#endif
             SetLastError(ERROR_SUCCESS_W);
 
         return(TRUE);
   }
+#ifdef INVERT
   if(fRestoryYInversion) GpiEnableYInversion(hps, oldyinversion);
+#endif
 
   dprintf(("DIBSection::BitBlt %X (%d,%d) (%d,%d) to (%d,%d) (%d,%d) returned %d\n", hps, point[0].x, point[0].y, point[1].x, point[1].y, point[2].x, point[2].y, point[3].x, point[3].y, rc));
   dprintf(("WinGetLastError returned %X\n", WinGetLastError(WinQueryAnchorBlock(hwndDest)) & 0xFFFF));

@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.59 2000-11-05 18:48:21 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.60 2000-11-09 18:16:57 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -21,6 +21,8 @@
 #include <codepage.h>
 #include "oslibgpi.h"
 #include "oslibgdi.h"
+#include <dcdata.h>
+#include <win32wnd.h>
 
 #define DBG_LOCALLOG    DBG_gdi32
 #include "dbglocal.h"
@@ -84,12 +86,6 @@ HGDIOBJ WIN32API GetStockObject(int arg1)
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(BOOL, DeleteDC, HDC, hdc)
-{
-  return O32_DeleteDC(hdc);
-}
-//******************************************************************************
-//******************************************************************************
 HBRUSH WIN32API CreatePatternBrush(HBITMAP arg1)
 {
  HBRUSH brush;
@@ -136,6 +132,25 @@ HDC WIN32API CreateCompatibleDC( HDC hdc)
     OSLibGpiSetCp(newHdc, oldcp);
     dprintf(("CreateCompatibleDC %X returned %x", hdc, newHdc));
     return newHdc;
+}
+//******************************************************************************
+//******************************************************************************
+ODINFUNCTION1(BOOL, DeleteDC, HDC, hdc)
+{
+  pDCData  pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
+  if(!pHps)
+  {
+      dprintf(("WARNING: DeleteDC %x; invalid hdc!", hdc));
+      SetLastError(ERROR_INVALID_HANDLE);
+      return 0;
+  }
+  SetLastError(ERROR_SUCCESS);
+  //Must call ReleaseDC for window dcs
+  if(pHps->hdcType == TYPE_1) {
+      return ReleaseDC(OS2ToWin32Handle(pHps->hwnd), hdc);
+  }
+
+  return O32_DeleteDC(hdc);
 }
 //******************************************************************************
 //******************************************************************************
