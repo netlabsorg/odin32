@@ -1,4 +1,4 @@
-# $Id: odin32.post.vac3.mk,v 1.8 2000-12-16 23:40:54 bird Exp $
+# $Id: odin32.post.vac3.mk,v 1.9 2001-01-05 23:23:05 sandervl Exp $
 
 #
 # Odin32 API
@@ -75,9 +75,11 @@ MAKEFILE = makefile
 ORGTARGET=$(TARGET)
 !endif
 
-# Set default DEFFILE if needed. (Required for both DLLs and EXEs!)
+# Set default DEFFILE if needed. (Currently for dlls only.)
 !ifndef DEFFILE
+!   ifndef EXETARGET
 DEFFILE = $(ORGTARGET).def
+!   endif
 !endif
 
 # Set INTLIBS (interal) if SUBDIRS is defined and NO_INTERNAL_LIBS is undefined.
@@ -127,10 +129,13 @@ lib:    $(OBJDIR) \
 # Dll: Main target rule - builds the target dll.
 #
 !ifndef NO_MAIN_RULE
-$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS) $(OS2RES) $(DEFFILE) $(OBJDIR)\bldlevel.$(DEFFILE) $(OBJDIR)\$(TARGET).lrf
+$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS) $(OS2RES) $(DEFFILE) $(OBJDIR)\$(TARGET).lrf
     -4 $(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lrf
 !ifdef OS2RES
     $(OS2RC) $(OS2RCLFLAGS) $(OS2RES) $@
+!endif
+!ifndef DEBUG
+    $(LXLITE) $@
 !endif
 !endif
 
@@ -139,7 +144,7 @@ $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS) $(OS2RES) $(DEFFILE) $(OBJDIR)\
 # Dll: Linker file - creates the parameter file passed on to the linker.
 #
 !ifndef NO_LNKFILE_RULE
-$(OBJDIR)\$(TARGET).lrf: $(MAKEFILE) $(ODIN32_INCLUDE)\odin32.post.vac3.mk
+$(OBJDIR)\$(TARGET).lrf: $(MAKEFILE)
     @echo Creating file <<$@
 /OUT:$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
 /MAP:$(OBJDIR)\$(TARGET).map
@@ -147,7 +152,7 @@ $(OBJS:  =^
 )
 $(LIBS:  =^
 )
-$(OBJDIR)\bldlevel.$(DEFFILE)
+$(DEFFILE)
 <<keep
 !endif
 
@@ -183,10 +188,13 @@ lib:
 # Exe: Main target rule - builds the target exe.
 #
 !ifndef NO_MAIN_RULE
-$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS) $(OS2RES) $(DEFFILE) $(OBJDIR)\bldlevel.$(DEFFILE) $(OBJDIR)\$(TARGET).lrf
+$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS) $(OS2RES) $(DEFFILE) $(OBJDIR)\$(TARGET).lrf
     -4 $(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lrf
 !ifdef OS2RES
     $(OS2RC) $(OS2RCLFLAGS) $(OS2RES) $@
+!endif
+!ifndef DEBUG
+    $(LXLITE) $@
 !endif
 !endif
 
@@ -195,7 +203,7 @@ $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS) $(OS2RES) $(DEFFILE) $(OBJDIR)\
 # Exe: Linker file - creates the parameter file passed on to the linker.
 #
 !ifndef NO_LNKFILE_RULE
-$(OBJDIR)\$(TARGET).lrf: $(MAKEFILE) $(ODIN32_INCLUDE)\odin32.post.vac3.mk
+$(OBJDIR)\$(TARGET).lrf: $(MAKEFILE)
     @echo Creating file <<$@
 /OUT:$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
 /MAP:$(OBJDIR)\$(TARGET).map
@@ -203,7 +211,7 @@ $(OBJS:  =^
 )
 $(LIBS:  =^
 )
-$(OBJDIR)\bldlevel.$(DEFFILE)
+$(DEFFILE)
 <<keep
 !endif
 
@@ -380,31 +388,10 @@ $(OBJDIR)\$(ORGTARGET)exp.def: $(DEFFILE)
 
 
 #
-# Common: Make .def-file with buildlevel info.
-#
-$(OBJDIR)\bldlevel.$(DEFFILE): $(DEFFILE)
-    $(BLDLEVELINF) $(DEFFILE) $@ -R"$(DEFFILE)" \
-        -V"#define=ODIN32_VERSION,$(ODIN32_INCLUDE)\versionos2.h" \
-        -M"#define=ODIN32_BUILD_NR,$(ODIN32_INCLUDE)\versionos2.h"
-
-
-#
 # Common: Create the object directory.
 #
 $(OBJDIR):
     @if not exist $(OBJDIR) $(CREATEPATH) $(OBJDIR)
-
-
-#
-# Common: Generate Visual SlickEdit project.
-#
-!ifndef NO_VSLICKRULES
-!ifdef ORGTARGET
-vslick $(ORGTARGET).vpj:
-    $(RM) $(ORGTARGET).vtg
-    $(ODIN32_BASE)\tools\vslick\genproject.cmd $(CINCLUDES) $(ORGTARGET).vpj
-!endif
-!endif
 
 
 #
@@ -416,7 +403,8 @@ clean:
 !else
 clean:  clean2
 !endif
-    $(RM) *.lib *.res *.map *.pch \
+#    $(RM) *.lib *.res *.map *.pch \
+    $(RM)  \
 !if "$(OBJDIR)" != ""
      $(OBJDIR)\* \
 !endif
