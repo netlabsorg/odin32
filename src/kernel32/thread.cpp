@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.43 2002-02-26 11:11:17 sandervl Exp $ */
+/* $Id: thread.cpp,v 1.44 2002-05-21 14:42:40 sandervl Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -301,6 +301,10 @@ DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
   winteb->o.odin.hab = OSLibWinInitialize();
   winteb->o.odin.hmq = OSLibWinQueryMsgQueue(winteb->o.odin.hab);
   dprintf(("Win32ThreadProc: hab %x hmq %x", winteb->o.odin.hab, winteb->o.odin.hmq));
+#ifdef DEBUG
+  TEB *teb = GetThreadTEB();
+  dprintf(("Stack top 0x%x, stack end 0x%x", teb->stack_top, teb->stack_low));
+#endif
 
   //Note: The Win32 exception structure referenced by FS:[0] is the same
   //      in OS/2

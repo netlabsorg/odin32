@@ -1,4 +1,4 @@
-/* $Id: windlllx.h,v 1.6 2001-08-06 19:36:42 sandervl Exp $ */
+/* $Id: windlllx.h,v 1.7 2002-05-21 14:42:40 sandervl Exp $ */
 
 /*
  * Win32 LX Dll class (compiled in OS/2 using Odin32 api)
@@ -14,6 +14,8 @@
 
 #include <windllbase.h>
 #include <winimagelx.h>
+
+#define HACK_NEVER_UNLOAD_LX_DLLS
 
 class Win32LxDll : public Win32LxImage, public Win32DllBase
 {
