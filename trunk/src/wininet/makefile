@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2000-07-19 19:05:26 sandervl Exp $
+# $Id: makefile,v 1.9 2000-08-11 10:57:59 sandervl Exp $
 
 #
 # Odin32 API
@@ -26,9 +26,9 @@ OBJS = \
 $(OBJDIR)\wininet.obj \
 $(OBJDIR)\ftp.obj \
 $(OBJDIR)\utility.obj \
+$(OBJDIR)\initterm.obj \
 $(OBJDIR)\internet.obj \
-$(OBJDIR)\wininetrsrc.obj \
-$(PDWIN32_LIB)/dllentry.obj
+$(OBJDIR)\wininetrsrc.obj 
 
 
 # Target name - name of the dll without extention and path.
