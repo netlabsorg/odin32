@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.11 1999-07-19 13:58:38 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.12 1999-07-19 18:40:43 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -68,7 +68,7 @@ BOOL InitPM()
      hab,                               /* Anchor block handle          */
      (PSZ)WIN32_STDCLASS,               /* Window class name            */
      (PFNWP)Win32WindowProc,            /* Address of window procedure  */
-     CS_SIZEREDRAW | CS_MOVENOTIFY | CS_HITTEST,
+     CS_SIZEREDRAW | CS_HITTEST,
      8)) {
         dprintf(("WinRegisterClass Win32Window failed"));
         return(FALSE);
@@ -82,8 +82,9 @@ BOOL InitPM()
 MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 {
  POSTMSG_PACKET *postmsg;
- Win32Window  *win32wnd;
- APIRET        rc;
+ OSLIBPOINT      point;
+ Win32Window    *win32wnd;
+ APIRET          rc;
 
   //Restore our FS selector
   SetWin32TIB();
@@ -159,18 +160,18 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         }
         break;
 
-    case WM_MOVE:
+    case WM_ADJUSTWINDOWPOS:
     {
       RECTLOS2 rectChild;
       ULONG x, y;
 
-        dprintf(("OS2: WM_MOVE %x", hwnd));
+        dprintf(("OS2: WM_ADJUSTWINDOWPOS %x", hwnd));
 
         WinQueryWindowRect(hwnd, (PRECTL)&rectChild);
 
         //Calculate position relative to parent window (real window or desktop)
         x = rectChild.xLeft;
-        y = MapOS2ToWin32Y(hwnd, &rectChild, rectChild.yBottom);
+//        y = MapOS2ToWin32Y(hwnd, &rectChild, rectChild.yBottom);
 
         if(win32wnd->MsgMove(x, y)) {
             goto RunDefWndProc;
@@ -181,15 +182,6 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     case WM_WINDOWPOSCHANGED:
     {
         dprintf(("OS2: WM_WINDOWPOSCHANGED %x", hwnd));
-    }
-
-    case WM_ADJUSTWINDOWPOS:
-    {
-        dprintf(("OS2: WM_ADJUSTWINDOWPOS %x", hwnd));
-//          if(win32wnd->MsgWindowPosChanging(0, 0)) {
-                goto RunDefWndProc;
-//  }
-        break;
     }
 
     case WM_ERASEBACKGROUND:
@@ -268,52 +260,80 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         break;
     }
     //**************************************************************************
-    //Mouse messages
+    //Mouse messages (OS/2 Window coordinates -> Win32 coordinates relative to screen
     //**************************************************************************
     case WM_BUTTON1DOWN:
         dprintf(("OS2: WM_BUTTON1DOWN %x", hwnd));
-        if(win32wnd->MsgButton(BUTTON_LEFTDOWN, (*(POINTS *)&mp1).x, MapOS2ToWin32Y(hwnd, (*(POINTS *)&mp1).y))) {
+        point.x = (*(POINTS *)&mp1).x;
+        point.y = (*(POINTS *)&mp1).y;
+        MapOS2ToWin32Point(OSLIB_HWND_DESKTOP, hwnd, &point);
+        if(win32wnd->MsgButton(BUTTON_LEFTDOWN, point.x, point.y)) {
                 goto RunDefWndProc;
         }
         break;
+
     case WM_BUTTON1UP:
         dprintf(("OS2: WM_BUTTON1UP %x", hwnd));
-        if(win32wnd->MsgButton(BUTTON_LEFTUP, (*(POINTS *)&mp1).x, MapOS2ToWin32Y(hwnd, (*(POINTS *)&mp1).y))) {
+        point.x = (*(POINTS *)&mp1).x;
+        point.y = (*(POINTS *)&mp1).y;
+        MapOS2ToWin32Point(OSLIB_HWND_DESKTOP, hwnd, &point);
+        if(win32wnd->MsgButton(BUTTON_LEFTUP, point.x, point.y)) {
                 goto RunDefWndProc;
         }
         break;
     case WM_BUTTON1DBLCLK:
-        if(win32wnd->MsgButton(BUTTON_LEFTDBLCLICK, (*(POINTS *)&mp1).x, MapOS2ToWin32Y(hwnd, (*(POINTS *)&mp1).y))) {
+        point.x = (*(POINTS *)&mp1).x;
+        point.y = (*(POINTS *)&mp1).y;
+        MapOS2ToWin32Point(OSLIB_HWND_DESKTOP, hwnd, &point);
+        if(win32wnd->MsgButton(BUTTON_LEFTDBLCLICK, point.x, point.y)) {
                 goto RunDefWndProc;
         }
         break;
     case WM_BUTTON2DOWN:
-        if(win32wnd->MsgButton(BUTTON_RIGHTDOWN, (*(POINTS *)&mp1).x, MapOS2ToWin32Y(hwnd, (*(POINTS *)&mp1).y))) {
+        point.x = (*(POINTS *)&mp1).x;
+        point.y = (*(POINTS *)&mp1).y;
+        MapOS2ToWin32Point(OSLIB_HWND_DESKTOP, hwnd, &point);
+        if(win32wnd->MsgButton(BUTTON_RIGHTDOWN, point.x, point.y)) {
                 goto RunDefWndProc;
         }
         break;
     case WM_BUTTON2UP:
-        if(win32wnd->MsgButton(BUTTON_RIGHTUP, (*(POINTS *)&mp1).x,MapOS2ToWin32Y(hwnd, (*(POINTS *)&mp1).y))) {
+        point.x = (*(POINTS *)&mp1).x;
+        point.y = (*(POINTS *)&mp1).y;
+        MapOS2ToWin32Point(OSLIB_HWND_DESKTOP, hwnd, &point);
+        if(win32wnd->MsgButton(BUTTON_RIGHTUP, point.x, point.y)) {
                 goto RunDefWndProc;
         }
         break;
     case WM_BUTTON2DBLCLK:
-        if(win32wnd->MsgButton(BUTTON_RIGHTDBLCLICK, (*(POINTS *)&mp1).x,MapOS2ToWin32Y(hwnd, (*(POINTS *)&mp1).y))) {
+        point.x = (*(POINTS *)&mp1).x;
+        point.y = (*(POINTS *)&mp1).y;
+        MapOS2ToWin32Point(OSLIB_HWND_DESKTOP, hwnd, &point);
+        if(win32wnd->MsgButton(BUTTON_RIGHTDBLCLICK, point.x, point.y)) {
                 goto RunDefWndProc;
         }
         break;
     case WM_BUTTON3DOWN:
-        if(win32wnd->MsgButton(BUTTON_MIDDLEDOWN, (*(POINTS *)&mp1).x, MapOS2ToWin32Y(hwnd, (*(POINTS *)&mp1).y))) {
+        point.x = (*(POINTS *)&mp1).x;
+        point.y = (*(POINTS *)&mp1).y;
+        MapOS2ToWin32Point(OSLIB_HWND_DESKTOP, hwnd, &point);
+        if(win32wnd->MsgButton(BUTTON_MIDDLEDOWN, point.x, point.y)) {
                 goto RunDefWndProc;
         }
         break;
     case WM_BUTTON3UP:
-        if(win32wnd->MsgButton(BUTTON_MIDDLEUP, (*(POINTS *)&mp1).x,MapOS2ToWin32Y(hwnd, (*(POINTS *)&mp1).y))) {
+        point.x = (*(POINTS *)&mp1).x;
+        point.y = (*(POINTS *)&mp1).y;
+        MapOS2ToWin32Point(OSLIB_HWND_DESKTOP, hwnd, &point);
+        if(win32wnd->MsgButton(BUTTON_MIDDLEUP, point.x, point.y)) {
                 goto RunDefWndProc;
         }
         break;
     case WM_BUTTON3DBLCLK:
-        if(win32wnd->MsgButton(BUTTON_MIDDLEDBLCLICK, (*(POINTS *)&mp1).x,MapOS2ToWin32Y(hwnd, (*(POINTS *)&mp1).y))) {
+        point.x = (*(POINTS *)&mp1).x;
+        point.y = (*(POINTS *)&mp1).y;
+        MapOS2ToWin32Point(OSLIB_HWND_DESKTOP, hwnd, &point);
+        if(win32wnd->MsgButton(BUTTON_MIDDLEDBLCLICK, point.x, point.y)) {
                 goto RunDefWndProc;
         }
         break;
@@ -343,7 +363,8 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         if(WinGetKeyState(HWND_DESKTOP, VK_CTRL))
             keystate |= WMMOVE_CTRL;
 
-        if(!win32wnd->MsgMouseMove(keystate, (*(POINTS *)&mp1).x, MapOS2ToWin32Y(hwnd, (*(POINTS *)&mp1).y))) {
+        //OS/2 Window coordinates -> Win32 Window coordinates
+        if(!win32wnd->MsgMouseMove(keystate, SHORT1FROMMP(mp1), MapOS2ToWin32Y(win32wnd, SHORT2FROMMP(mp1)))) {
                 goto RunDefWndProc;
         }
         break;
@@ -397,7 +418,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         break;
 
     case WM_HITTEST:
-        if(win32wnd->MsgHitTest((*(POINTS *)&mp1).x, MapOS2ToWin32Y(hwnd, (*(POINTS *)&mp1).y))) {
+        if(win32wnd->MsgHitTest((*(POINTS *)&mp1).x, MapOS2ToWin32Y(OSLIB_HWND_DESKTOP, hwnd, (*(POINTS *)&mp1).y))) {
                 goto RunDefWndProc;
         }
         break;

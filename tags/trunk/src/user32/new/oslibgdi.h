@@ -1,4 +1,4 @@
-/* $Id: oslibgdi.h,v 1.1 1999-07-18 10:39:51 sandervl Exp $ */
+/* $Id: oslibgdi.h,v 1.2 1999-07-19 18:40:43 sandervl Exp $ */
 /*
  * Window GDI wrapper functions for OS/2
  *
@@ -15,6 +15,7 @@
 #ifdef OS2_INCLUDED
 #include "win32type.h"
 #endif
+#include <win32wnd.h>
 
 typedef struct
 {
@@ -24,21 +25,30 @@ typedef struct
     LONG  yTop;
 } RECTLOS2, *PRECTLOS2;
 
-HDC   OSLibWinBeginPaint(HWND hwnd, PVOID pRectl);
+typedef struct
+{
+    LONG  x;
+    LONG  y;
+} OSLIBPOINT;
+
+HDC   OSLibWinBeginPaint(HWND hwnd, RECT *pRectl);
 BOOL  OSLibWinEndPaint(HDC hdc);
 
 HDC   OSLibWinGetPS(HWND hwnd);
 BOOL  OSLibWinReleasePS(HDC hdc);
 
-ULONG MapOS2ToWin32Y(HWND hwndChild);
-ULONG MapOS2ToWin32Y(HWND hwndChild, ULONG y);
-ULONG MapOS2ToWin32Y(HWND hwndChild, ULONG cy, ULONG y);
-ULONG MapOS2ToWin32Y(PRECTLOS2 rectParent, PRECTLOS2 rectChild, ULONG y);
-ULONG MapOS2ToWin32Y(PRECTLOS2 rectParent, HWND hwndChild, ULONG y);
-ULONG MapOS2ToWin32Y(HWND hwndChild, PRECTLOS2 rectChild, ULONG y);
-BOOL  MapOS2ToWin32Rectl(HWND hwndChild, PRECTLOS2 rectChild, PRECT rectWin32);
-BOOL  MapOS2ToWin32Rectl(PRECTLOS2 rectParent, PRECTLOS2 rectChild, PRECT rectWin32);
-BOOL  MapWin32ToOS2Rectl(HWND hwndChild, PRECTLOS2 rectChild, PRECT rectWin32);
-BOOL  MapWin32ToOS2Rectl(PRECTLOS2 rectParent, PRECTLOS2 rectChild, PRECT rectWin32);
+//******************************************************************************
+//Map win32 y coordinate (in window coordinates) to OS/2 y coord. (in window coordinates)
+//******************************************************************************
+inline ULONG MapOS2ToWin32Y(Win32Window *window, ULONG y)
+{
+    return window->getWindowHeight() - y;
+}
+
+ULONG MapOS2ToWin32Y(HWND hwndParent, ULONG cy, ULONG y);
+BOOL  MapOS2ToWin32Point(HWND hwndParent, HWND hwndChild, OSLIBPOINT *point);
+
+BOOL  MapOS2ToWin32Rectl(PRECTLOS2 rectOS2, PRECT rectWin32);
+BOOL  MapWin32ToOS2Rectl(PRECT rectWin32, PRECTLOS2 rectOS2);
 
 #endif //__OSLIBGDI_H__
