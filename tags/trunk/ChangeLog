@@ -1,12 +1,10 @@
-/* $Id: ChangeLog,v 1.2664 2004-01-20 18:10:35 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2665 2004-01-20 18:10:59 sandervl Exp $ */
 
  2004-01-20: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Wrote wrapper for our exception handler to clear the direction
                   flag on entry (reported by Dietrich Teickner)
     - WINMM:    o MCIWAVE.DRV updates from Wine
-                  (OpenOffice Defect 849)
                 o mciSendCommandW update from Wine
-                  (OpenOffice Defect 849)
                 o Hardcoded MCI drivers (cdaudio & waveaudio)
                 o Added LGPL license file
 
