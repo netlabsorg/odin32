@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.10 1999-07-25 09:19:22 sandervl Exp $ */
+/* $Id: window.cpp,v 1.11 1999-07-25 15:51:57 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -647,6 +647,40 @@ HWND WIN32API FindWindowExA(HWND arg1, HWND arg2, LPCSTR arg3, LPCSTR arg4)
 #endif
     return O32_FindWindow(arg3, arg4);
 }
+/*****************************************************************************
+ * Name      : HWND WIN32API FindWindowExW
+ * Purpose   : The FindWindowEx function retrieves the handle of a window whose
+ *             class name and window name match the specified strings. The
+ *             function searches child windows, beginning with the one following
+ *             the given child window.
+ * Parameters: HWND    hwndParent     handle of parent window
+ *             HWND    hwndChildAfter handle of a child window
+ *             LPCTSTR lpszClass      address of class name
+ *             LPCTSTR lpszWindow     address of window name
+ * Variables :
+ * Result    : If the function succeeds, the return value is the handle of the
+ *               window that has the specified class and window names.
+ *             If the function fails, the return value is NULL. To get extended
+ *               error information, call GetLastError.
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+
+HWND WIN32API FindWindowExW(HWND    hwndParent,
+                               HWND    hwndChildAfter,
+                               LPCWSTR lpszClass,
+                               LPCWSTR lpszWindow)
+{
+  dprintf(("USER32:FindWindowExW (%08xh,%08xh,%s,%s) not implemented.\n",
+         hwndParent,
+         hwndChildAfter,
+         lpszClass,
+         lpszWindow));
+
+  return (NULL);
+}
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API FlashWindow(HWND hwnd, BOOL fFlash)
@@ -663,24 +697,6 @@ BOOL WIN32API MoveWindow(HWND arg1, int arg2, int arg3, int arg4, int arg5, BOOL
     rc = O32_MoveWindow(arg1, arg2, arg3, arg4, arg5, arg6);
     dprintf(("USER32:  MoveWindow %X to (%d,%d) size (%d,%d), repaint = %d returned %d\n", arg1, arg2, arg3, arg4, arg5, arg6, rc));
     return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API AdjustWindowRect( PRECT arg1, DWORD arg2, BOOL  arg3)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  AdjustWindowRect\n");
-#endif
-    return O32_AdjustWindowRect(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API AdjustWindowRectEx( PRECT arg1, DWORD arg2, BOOL arg3, DWORD  arg4)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  AdjustWindowRectEx\n");
-#endif
-    return O32_AdjustWindowRectEx(arg1, arg2, arg3, arg4);
 }
 //******************************************************************************
 //******************************************************************************
@@ -742,15 +758,6 @@ BOOL WIN32API CloseWindow(HWND hwnd)
     return window->CloseWindow();
 }
 //******************************************************************************
-//******************************************************************************
-HWND WIN32API WindowFromDC(HDC hdc)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  WindowFromDC\n");
-#endif
-    return O32_WindowFromDC(hdc);
-}
-//******************************************************************************
 //TODO: Does this return handles of hidden or disabled windows?
 //******************************************************************************
 HWND WIN32API WindowFromPoint( POINT point)
@@ -809,40 +816,6 @@ WORD WIN32API CascadeWindows(HWND       hwndParent,
          lpKids));
 
   return (0);
-}
-/*****************************************************************************
- * Name      : HWND WIN32API FindWindowExW
- * Purpose   : The FindWindowEx function retrieves the handle of a window whose
- *             class name and window name match the specified strings. The
- *             function searches child windows, beginning with the one following
- *             the given child window.
- * Parameters: HWND    hwndParent     handle of parent window
- *             HWND    hwndChildAfter handle of a child window
- *             LPCTSTR lpszClass      address of class name
- *             LPCTSTR lpszWindow     address of window name
- * Variables :
- * Result    : If the function succeeds, the return value is the handle of the
- *               window that has the specified class and window names.
- *             If the function fails, the return value is NULL. To get extended
- *               error information, call GetLastError.
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-HWND WIN32API FindWindowExW(HWND    hwndParent,
-                               HWND    hwndChildAfter,
-                               LPCWSTR lpszClass,
-                               LPCWSTR lpszWindow)
-{
-  dprintf(("USER32:FindWindowExW (%08xh,%08xh,%s,%s) not implemented.\n",
-         hwndParent,
-         hwndChildAfter,
-         lpszClass,
-         lpszWindow));
-
-  return (NULL);
 }
 /*****************************************************************************
  * Name      : BOOL WIN32API SwitchToThisWindow

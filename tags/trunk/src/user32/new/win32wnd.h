@@ -1,4 +1,4 @@
-/* $Id: win32wnd.h,v 1.18 1999-07-25 09:19:22 sandervl Exp $ */
+/* $Id: win32wnd.h,v 1.19 1999-07-25 15:51:56 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -43,6 +43,8 @@ typedef struct
 #define WM_WIN32_POSTMESSAGEA	0x4000
 #define WM_WIN32_POSTMESSAGEW	0x4001
 
+#define MAX_WINDOW_NAMELENGTH	256
+
 class Win32Window : private GenericObject, private ChildWindow
 {
 public:
@@ -72,6 +74,8 @@ virtual  ULONG  MsgCreate(HWND hwndOS2, ULONG initParam);
 	 ULONG  MsgPaint(ULONG tmp1, ULONG tmp2);
 	 ULONG  MsgEraseBackGround(ULONG hps);
 	 ULONG  MsgSetText(LPSTR lpsz, LONG cch);
+	 ULONG  MsgGetTextLength();
+	 char  *MsgGetText();
 
 virtual	 LONG   SetWindowLongA(int index, ULONG value);
 virtual	 ULONG  GetWindowLongA(int index);
@@ -133,8 +137,8 @@ virtual	 WORD   GetWindowWord(int index);
        LRESULT  SendMessageW(ULONG msg, WPARAM wParam, LPARAM lParam);
        BOOL     PostMessageA(ULONG msg, WPARAM wParam, LPARAM lParam);
        BOOL     PostMessageW(ULONG msg, WPARAM wParam, LPARAM lParam);
-       LRESULT  DefWindowProcA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
-       LRESULT  DefWindowProcW(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+       LRESULT  DefWindowProcA(UINT msg, WPARAM wParam, LPARAM lParam);
+       LRESULT  DefWindowProcW(UINT msg, WPARAM wParam, LPARAM lParam);
 
          void   NotifyParent(UINT Msg, WPARAM wParam, LPARAM lParam);
 
@@ -191,6 +195,7 @@ protected:
 	DWORD   lastHitTestVal;		//Last value returned by WM_NCHITTEST handler
 
 	BOOL    isIcon;
+	BOOL    fCreated;
 
    Win32Window *owner;			
 
@@ -198,12 +203,10 @@ protected:
  Win32Resource *menuResource;
  Win32Resource *iconResource;
 
-	char   *windowName;
+	char    windowNameA[MAX_WINDOW_NAMELENGTH];
+	WCHAR   windowNameW[MAX_WINDOW_NAMELENGTH];
 	ULONG   wndNameLength;
 
-	char   *windowText;
-	ULONG   wndTextLength;
-	
 	ULONG  *userWindowLong;
 	ULONG	nrUserWindowLong;
 
@@ -276,6 +279,7 @@ private:
 #define KEY_ALTDOWN		1
 #define KEY_PREVDOWN		2
 #define KEY_UP			4
+#define KEY_DEADKEY		8
 
 #endif //__cplusplus
 
