@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1873 2001-12-01 16:02:35 sandervl Exp $ */
+/* $Id: changelog,v 1.1874 2001-12-01 20:44:57 sandervl Exp $ */
+
+ 2001-12-01: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Fixed GetThreadTEB macro & GetCurrentThreadId
+                  (completely broke debug build among other things)
 
  2000-12-01: Yuri Dario <mc6530@mclink.it>
     - USER32:   o MENU_FindItem: extra check added for loops in menus
