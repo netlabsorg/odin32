@@ -1,4 +1,4 @@
-/* $Id: pmwindow.h,v 1.2 1999-10-17 12:17:44 cbratschi Exp $ */
+/* $Id: pmwindow.h,v 1.3 1999-10-30 15:16:57 dengert Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -8,7 +8,8 @@
 #ifndef __PMWINDOW_H__
 #define __PMWINDOW_H__
 
-#define WIN32_STDCLASS  "Win32WindowClass"
+#define WIN32_STDCLASS   "Win32WindowClass"
+#define WIN32_INNERFRAME "Win32InnerFrameClass"
 
 BOOL InitPM();
 
