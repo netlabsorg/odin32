@@ -1,4 +1,4 @@
-/* $Id: ordinal.cpp,v 1.3 2000-06-12 11:35:13 phaller Exp $ */
+/* $Id: ordinal.cpp,v 1.4 2000-08-02 20:18:23 bird Exp $ */
 
 /*
  * Win32 Lightweight SHELL32 for OS/2
@@ -122,12 +122,12 @@ ODINFUNCTION2(DWORD,SHLWAPI_2,
 
 /*****************************************************************************
  * Name      : SHLWAPI_3
- * Purpose   : 
- * Parameters: 
+ * Purpose   :
+ * Parameters:
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    :
- * Status    : UNTESTED
+ * Status    : STUB UNTESTED
  *
  * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
  *****************************************************************************/
@@ -140,11 +140,11 @@ ODINFUNCTION2(BOOL,  SHLWAPI_3,
 
   return TRUE;
 
-#if 0  
+#if 0
   if (lpPath == NULL)                return FALSE;
   if (PathIsUNCServerA(lpPath))      return FALSE;
   if (PathIsUNCServerShareA(lpPath)) return FALSE;
-  
+
   if (lpFile == NULL)
     return PathFileExistsA(lpPath);
   else
@@ -155,7 +155,7 @@ ODINFUNCTION2(BOOL,  SHLWAPI_3,
     // PathFileExistsA
     return FALSE;
   }
-  
+
   return FALSE;
 #endif
 }
@@ -163,12 +163,12 @@ ODINFUNCTION2(BOOL,  SHLWAPI_3,
 
 /*****************************************************************************
  * Name      : SHLWAPI_4
- * Purpose   : 
- * Parameters: 
+ * Purpose   :
+ * Parameters:
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    :
- * Status    : UNTESTED
+ * Status    : STUB UNTESTED
  *
  * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
  *****************************************************************************/
@@ -178,14 +178,14 @@ ODINFUNCTION2(BOOL,   SHLWAPI_4,
               LPWSTR, lpFile)
 {
   dprintf(("not properly implemented"));
-  
+
   return TRUE;
 
 #if 0
   if (lpPath == NULL)                return FALSE;
   if (PathIsUNCServerW(lpPath))      return FALSE;
   if (PathIsUNCServerShareW(lpPath)) return FALSE;
-  
+
   if (lpFile == NULL)
     return PathFileExtensionW(lpPath);
   else
@@ -196,7 +196,7 @@ ODINFUNCTION2(BOOL,   SHLWAPI_4,
     // PathFileExistsW
     return FALSE;
   }
-  
+
   return FALSE;
 #endif
 }
@@ -218,7 +218,7 @@ ODINFUNCTION3(DWORD, SHLWAPI_5,
               LPSTR, lpFile,
               LPSTR, lpDirectories,
               DWORD, dwUnknown)
-              
+
 {
   dprintf(("not implemented"));
 
@@ -242,7 +242,7 @@ ODINFUNCTION3(DWORD, SHLWAPI_6,
               DWORD, arg0,
               DWORD, arg1,
               DWORD, arg2)
-              
+
 {
   dprintf(("not implemented"));
 
@@ -269,9 +269,9 @@ ODINFUNCTION3(DWORD,SHLWAPI_7,
   HANDLE hMap;
   LPVOID lpMap;
   DWORD  dwResult;
-  
+
   dprintf(("not implemented"));
-  
+
   // create mapping
   hMap = CreateFileMappingA(-1,
                             NULL,
@@ -281,7 +281,7 @@ ODINFUNCTION3(DWORD,SHLWAPI_7,
                             0);
   if (hMap == NULL)
     return FALSE;
-  
+
   // now map the thing
   lpMap = MapViewOfFile(hMap,
                         FILE_MAP_READ | FILE_MAP_WRITE,
@@ -293,9 +293,9 @@ ODINFUNCTION3(DWORD,SHLWAPI_7,
     CloseHandle(hMap);
     return FALSE;
   }
-  
+
   /*  @@@PH copy someting into the shared segment */
-  
+
   UnmapViewOfFile(lpMap);
   dwResult = SHLWAPI_11(hMap,
                         GetCurrentProcessId(),
@@ -326,7 +326,7 @@ ODINFUNCTION2(DWORD,  SHLWAPI_8,
 {
   HANDLE hHandle;
   LPVOID lpBase;
-  
+
   hHandle = SHLWAPI_11(hMap,
                        arg1,
                        GetCurrentProcessId(),
@@ -338,7 +338,7 @@ ODINFUNCTION2(DWORD,  SHLWAPI_8,
                          0,
                          0);
   CloseHandle(hHandle);
-  
+
   if (lpBase == NULL)
     return NULL;
   else
@@ -347,13 +347,13 @@ ODINFUNCTION2(DWORD,  SHLWAPI_8,
 
 
 /*****************************************************************************
- * Name      : 
- * Purpose   : 
- * Parameters: 
+ * Name      :
+ * Purpose   :
+ * Parameters:
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    :
- * Status    : UNTESTED
+ * Status    : COMPLETELY IMPLEMENTED UNTESTED
  *
  * Author    : Patrick Haller [Sun, 2000/06/09 04:47]
  *****************************************************************************/
@@ -367,12 +367,12 @@ ODINFUNCTION1(DWORD,  SHLWAPI_9,
 
 /*****************************************************************************
  * Name      : ???
- * Purpose   : 
- * Parameters: 
+ * Purpose   :
+ * Parameters:
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    :
- * Status    : UNTESTED
+ * Status    : COMPLETELY IMPLEMENTED UNTESTED
  *
  * Author    : Patrick Haller [Sun, 2000/06/09 04:47]
  *****************************************************************************/
@@ -382,7 +382,7 @@ ODINFUNCTION2(DWORD,  SHLWAPI_10,
               DWORD,  arg1)
 {
   HANDLE hHandle;
-  
+
   hHandle = SHLWAPI_11(hMap,
                        arg1,
                        GetCurrentProcessId(),
@@ -393,11 +393,11 @@ ODINFUNCTION2(DWORD,  SHLWAPI_10,
 
 
 /*****************************************************************************
- * Name      : 
+ * Name      :
  * Purpose   : Duplicate the handle to the shell shared segment
- * Parameters: 
+ * Parameters:
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    : SHLWAPI.11 - wrong implementation, check again
  * Status    : UNTESTED STUB
  *
@@ -412,13 +412,13 @@ ODINFUNCTION5(HANDLE, SHLWAPI_11,
               DWORD,  dwFlag)
 {
   dprintf(("not implemented, explorer.exe will trap now"));
-  
+
   DWORD  dwMyPID = GetCurrentProcessId();
   HANDLE hProcess;
   HANDLE hTargetHandle;
   HANDLE hTargetProcessHandle = dwProcessDest;
   BOOL   fResult;
-  
+
   // open desired process
   if (dwMyPID == dwProcessDest)
     hProcess == GetCurrentProcess();
@@ -426,11 +426,11 @@ ODINFUNCTION5(HANDLE, SHLWAPI_11,
     hProcess == OpenProcess(PROCESS_DUP_HANDLE,
                             FALSE,
                             dwProcessDest);
-  
+
   // verify result
   if (hProcess == NULL)
     return 0;
-  
+
   // duplicate handle
   fResult = DuplicateHandle(hProcess,
                             hMap,
@@ -440,7 +440,7 @@ ODINFUNCTION5(HANDLE, SHLWAPI_11,
                             0,
                             dwFlag | 0x02);
   //CloseHandle()
-  
+
   return fResult;
 }
 
@@ -470,7 +470,7 @@ ODINFUNCTION2(DWORD,SHLWAPI_12,
 /*****************************************************************************
  * Name      : ???
  * Purpose   : Unknown (used by explorer.exe)
- * Parameters: 
+ * Parameters:
  * Variables :
  * Result    : Unknown
  * Remark    :
@@ -608,7 +608,7 @@ ODINFUNCTION2(DWORD,SHLWAPI_18,
  * Variables :
  * Result    :
  * Remark    : SHLWAPI.19
- * Status    : UNTESTED
+ * Status    : COMPLETELY IMPLEMENTED ? UNTESTED
  *
  * Author    : Patrick Haller [Sun, 2000/06/09 04:47]
  *****************************************************************************/
@@ -689,8 +689,8 @@ ODINFUNCTION2(DWORD,SHLWAPI_22,
 
 /*****************************************************************************
  * Name      : SHLWAPI_23
- * Purpose   : 
- * Parameters: 
+ * Purpose   :
+ * Parameters:
  * Variables :
  * Result    : returns strlen(str)
  * Remark    : converts a guid to a string
@@ -705,9 +705,9 @@ ODINFUNCTION3(DWORD,  SHLWAPI_23,
               INT,    cmax) /* [in]  size of buffer */
 {
     char xguid[80];
-    
+
     TRACE("(%s %p 0x%08x)stub\n", debugstr_guid(guid), str, cmax);
-    
+
     if (WINE_StringFromCLSID(guid,xguid)) return 0;
     if (strlen(xguid)>=cmax) return 0;
     strcpy(str,xguid);
@@ -734,10 +734,10 @@ ODINFUNCTION3(DWORD,   SHLWAPI_24,
 
 /*****************************************************************************
  * Name      : SHLWAPI_28
- * Purpose   : 
- * Parameters: 
+ * Purpose   :
+ * Parameters:
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    :
  * Status    : UNTESTED STUB
  *
@@ -756,11 +756,11 @@ ODINFUNCTION1(DWORD,SHLWAPI_28,
 /*****************************************************************************
  * Name      : SHLWAPI_30
  * Purpose   : Check for whitespace in ascii and unicode ?
- * Parameters: 
+ * Parameters:
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    :
- * Status    : UNTESTED
+ * Status    : COMPLETELY IMPLEMENTED ? UNTESTED
  *
  * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
  *****************************************************************************/
@@ -787,7 +787,7 @@ ODINFUNCTION1(DWORD,SHLWAPI_30,
  * Variables :
  * Result    : case-sensitive comparsion result between the two strings
  * Remark    : SHLWAPI.158
- * Status    : UNTESTED
+ * Status    : COMPLETELY IMPLEMENTED UNTESTED
  *
  * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
  *****************************************************************************/
@@ -808,7 +808,7 @@ ODINFUNCTION2(DWORD,  SHLWAPI_156,
  * Variables :
  * Result    : case-insensitive comparsion result between the two strings
  * Remark    : SHLWAPI.158
- * Status    : UNTESTED
+ * Status    : COMPLETELY IMPLEMENTED UNTESTED
  *
  * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
  *****************************************************************************/
@@ -820,27 +820,27 @@ ODINFUNCTION2(int,     SHLWAPI_158,
   WCHAR ch1;
   WCHAR ch2;
   int   res;
-  
+
   for (;
-       
+
        *lpStr1 != 0;
-       
+
        lpStr1++,
        lpStr2++)
   {
     ch1 = *lpStr1;
     ch2 = *lpStr2;
-    
+
     /* ignore case of characters */
     if ( (ch1 >= 'A') && (ch1 <= 'Z')) ch1 += 0x20;
     if ( (ch2 >= 'A') && (ch2 <= 'Z')) ch1 += 0x20;
-    
+
     /* compare characters */
     res = ch1 - ch2;
     if (res)
       return res;
   }
-  
+
   /* OK, strings compared til end of string1 */
   return 0;
 }
@@ -848,10 +848,10 @@ ODINFUNCTION2(int,     SHLWAPI_158,
 
 /*****************************************************************************
  * Name      : DWORD SHLWAPI_160
- * Purpose   : 
- * Parameters: 
+ * Purpose   :
+ * Parameters:
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    : SHLWAPI.160
  * Status    : UNTESTED STUB
  *
@@ -875,16 +875,16 @@ ODINFUNCTION1(DWORD,       SHLWAPI_169,
               IUnknown **, lplpUnknown)
 {
   IUnknown *lpUnknown;
-  
+
   if (lplpUnknown == NULL)
     return 0;
-  
+
   lpUnknown = *lplpUnknown;
   if (lpUnknown == NULL)
     return 0;
-  
+
   *lplpUnknown = NULL; // kill object pointer
-  
+
   // and still call the object's release method
   return IUnknown_Release(lpUnknown);
 }
@@ -898,7 +898,7 @@ ODINFUNCTION1(DWORD,       SHLWAPI_169,
  * Variables :
  * Result    : lpStr + 2 or NULL
  * Remark    : SHLWAPI.170
- * Status    : UNTESTED
+ * Status    : COMPLETELY IMPLEMENTED UNTESTED
  *
  * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
  *****************************************************************************/
@@ -918,11 +918,11 @@ ODINFUNCTION1(LPSTR, SHLWAPI_170,
 /*****************************************************************************
  * Name      : SHLWAPI_185
  * Purpose   : some M$ nag screen ?
- * Parameters: 
+ * Parameters:
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    : SHLWAPI.185
- * Status    : UNTESTED
+ * Status    : COMPLETELY IMPLEMENTED UNTESTED
  *
  * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
  *****************************************************************************/
@@ -937,7 +937,7 @@ ODINFUNCTION6(DWORD,   SHLWAPI_185,
 {
   BOOL  fDontShow;
   WCHAR szValueNameW[256];
-  
+
   fDontShow = SHRegGetBoolUSValueA("Software\\Microsoft\\Windows\\CurrentVersion\\"
                                    "Explorer\\DontShowMeThisDialogAgain",
                                    lpstrValueName,
@@ -945,13 +945,13 @@ ODINFUNCTION6(DWORD,   SHLWAPI_185,
                                    1);
   if (fDontShow == FALSE)
     return dwDefault;
-  
+
   int iLength1 = lstrlenA(lpStr1)+1;
   HLOCAL hLocal1 = LocalAlloc(LMEM_ZEROINIT,
                               iLength1 << 1);
   if (hLocal1 == NULL)
     return dwDefault;
-  
+
   int iLength2 = lstrlenA(lpStr2)+1;
   HLOCAL hLocal2 = LocalAlloc(LMEM_ZEROINIT,
                               iLength2 << 1);
@@ -960,13 +960,13 @@ ODINFUNCTION6(DWORD,   SHLWAPI_185,
     LocalFree(hLocal1);
     return dwDefault;
   }
-  
+
 #if 0
   // convert all ascii values to Unicode
   SHLWAPI_215(lpStr1, (LPWSTR)hLocal1, iLength1);
   SHLWAPI_215(lpStr2, (LPWSTR)hLocal2, iLength2);
   SHLWAPI_215(lpstrValueName,  szValueNameW, 256);
-  
+
   // do something
   dwDefault = SHLWAPI_191(arg0,
               (LPWSTR)hLocal1,
@@ -974,13 +974,13 @@ ODINFUNCTION6(DWORD,   SHLWAPI_185,
               dwDefault,
               szValueNameW);
 #endif
-  
+
   if (hLocal1)
     LocalFree(hLocal1);
-  
+
   if (hLocal2)
     LocalFree(hLocal2);
-  
+
   return dwDefault;
 }
 
@@ -988,11 +988,11 @@ ODINFUNCTION6(DWORD,   SHLWAPI_185,
 /*****************************************************************************
  * Name      : SHLWAPI_191
  * Purpose   : display some M$ nag screen if enabled
- * Parameters: 
+ * Parameters:
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    : SHLWAPI.191
- * Status    : UNTESTED
+ * Status    : COMPLETELY IMPLEMENTED ? UNTESTED
  *
  * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
  *****************************************************************************/
@@ -1012,9 +1012,9 @@ ODINFUNCTION6(DWORD,  SHLWAPI_191,
                                  1);
   if (rc == FALSE)
     return dwDefault;
-  
+
   static HINSTANCE hShellInstance; // @@@PH where to put / initialize?
-  
+
 #if 0
   struct
   {
@@ -1023,12 +1023,12 @@ ODINFUNCTION6(DWORD,  SHLWAPI_191,
     DWORD s3;
     DWORD s4;
   } sInit;
-  
+
   sInit.s1 = "software...";
   sInit.s2 = arg1;
   sInit.s3 = arg2;
   sInit.s4 = arg3;
-  
+
   return DialogBoxParamW(hShellInstance,
                          0x1200,          // some template
                          hwndParent,
@@ -1049,7 +1049,7 @@ ODINFUNCTION0(DWORD, SHLWAPI_193)
 {
   HDC hdc;
   DWORD ret;
-  
+
   hdc = GetDC(0);
   ret = GetDeviceCaps(hdc, BITSPIXEL) * GetDeviceCaps(hdc, PLANES);
   ReleaseDC(0, hdc);
@@ -1060,11 +1060,11 @@ ODINFUNCTION0(DWORD, SHLWAPI_193)
 /*****************************************************************************
  * Name      : BOOL SHLWAPI_197
  * Purpose   : Set text background?
- * Parameters: 
+ * Parameters:
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    : SHLWAPI.197
- * Status    : UNTESTED
+ * Status    : COMPLETELY IMPLEMENTED ? UNTESTED
  *
  * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
  *****************************************************************************/
@@ -1076,7 +1076,7 @@ ODINFUNCTION3(BOOL,         SHLWAPI_197,
 {
   COLORREF crOld;
   BOOL     res;
-  
+
   crOld = SetBkColor(hdc, crColor);
   res = ExtTextOutA(hdc,
                     0,
@@ -1087,7 +1087,7 @@ ODINFUNCTION3(BOOL,         SHLWAPI_197,
                     0,
                     0);
   SetBkColor(hdc, crOld);
-  
+
   return res;
 }
 
@@ -1118,7 +1118,7 @@ ODINFUNCTION1(HANDLE,  SHLWAPI_222,
   char lpstrName[80];
   strcpy( lpstrName,"shell.");
   WINE_StringFromCLSID(guid, lpstrName + strlen(lpstrName));
-  
+
   FIXME("(%s) stub\n", lpstrName);
   return CreateSemaphoreA(NULL,0, 0x7fffffff, lpstrName);
 }
@@ -1134,9 +1134,9 @@ ODINFUNCTION1(DWORD,  SHLWAPI_223,
               HANDLE, handle)
 {
   LONG oldCount;
-  
+
   FIXME("(0x%08x) stub\n",handle);
-  
+
   ReleaseSemaphore( handle, 1, &oldCount);
   WaitForSingleObject( handle, 0 );
   return 0;
@@ -1151,7 +1151,7 @@ ODINFUNCTION1(DWORD,       SHLWAPI_237,
               LPWNDCLASSW, lpWndClass)
 {
   WNDCLASSW wndClass;
-  
+
   if (GetClassInfoW(lpWndClass->hInstance,
                     (LPWSTR)lpWndClass->lpszClassName,
                     &wndClass) == TRUE)
@@ -1164,11 +1164,11 @@ ODINFUNCTION1(DWORD,       SHLWAPI_237,
 /*****************************************************************************
  * Name      : SHLWAPI_240
  * Purpose   : universal window procedure
- * Parameters: 
+ * Parameters:
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    : SHLWAPI.240
- * Status    : UNTESTED
+ * Status    : COMPLETELY IMPLEMENTED ? UNTESTED
  *
  * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
  *****************************************************************************/
@@ -1200,11 +1200,11 @@ ODINFUNCTION0(DWORD, SHLWAPI_241)
 /*****************************************************************************
  * Name      : SHLWAPI_243
  * Purpose   : does something critical, even with performance counters
- * Parameters: 
+ * Parameters:
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    : SHLWAPI.243
- * Status    : UNTESTED
+ * Status    : STUB UNTESTED
  *
  * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
  *****************************************************************************/
@@ -1261,6 +1261,7 @@ ODINFUNCTION2(DWORD,  SHLWAPI_268,
 
 /*************************************************************************
 *      SHLWAPI_276 [SHLWAPI]
+
 * dynamically load SHELL32.DllGetVersion
 *
 */
@@ -1313,13 +1314,13 @@ ODINFUNCTION3(DWORD,   SHLWAPI_346,
 /*****************************************************************************
  * Name      : SHLWAPI_364
  * Purpose   : call lstrcpynA
- * Parameters: 
+ * Parameters:
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    : SHLWAPI.364
- * Status    : UNTESTED
+ * Status    : COMPLETELY IMPLEMENTED ? UNTESTED
  *
- * Author    : 
+ * Author    :
  *****************************************************************************/
 
 ODINFUNCTION3(INT,   SHLWAPI_364,
@@ -1331,7 +1332,7 @@ ODINFUNCTION3(INT,   SHLWAPI_364,
   lstrcpynA(lpStr2,
             lpStr1,
             nLength);
-  
+
   return 1;
 }
 
@@ -1339,11 +1340,11 @@ ODINFUNCTION3(INT,   SHLWAPI_364,
 /*****************************************************************************
  * Name      : DWORD SHLWAPI_376
  * Purpose   : Try to determine user interface language
- * Parameters: 
+ * Parameters:
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    : SHLWAPI.366
- * Status    : UNTESTED
+ * Status    : PARTIALLY IMPLEMENTED UNTESTED
  *
  * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
  *****************************************************************************/
@@ -1357,7 +1358,7 @@ ODINFUNCTION0(DWORD, SHLWAPI_376)
    * - Resource Locales
    * - etc.
    */
-  
+
   return 0x0409; // @@@PH maybe this is 'nuf for now.
 }
 
@@ -1373,27 +1374,27 @@ ODINFUNCTION3(DWORD,   SHLWAPI_377,
 {
   static BOOL flagSHLWAPI_377Initialized       = FALSE;
   static BOOL flagInternetExplorerCheckVersion = FALSE;
-  
+
   dprintf(("not (properly) implemented.\n"));
-  
+
   char szModuleName[260]; // MAXPATHLEN
   HMODULE hModLanguage;
-  
+
   // initialize this subsystem
   if (flagSHLWAPI_377Initialized == FALSE)
   {
     flagSHLWAPI_377Initialized = TRUE;
-    
+
     flagInternetExplorerCheckVersion =
     SHRegGetBoolUSValueA("Software\\Microsoft\\Internet Explorer\\International",
                          "CheckVersion",
                          1,
                          1);
   }
-  
+
   if (lpstrModule == NULL) // Garbage in - garbage out
     return 0;
-  
+
   if (0 == GetModuleFileNameA(hModule,
                               szModuleName,
                               sizeof(szModuleName)))
@@ -1409,7 +1410,7 @@ ODINFUNCTION3(DWORD,   SHLWAPI_377,
     hModLanguage = LoadLibraryA(szModuleName);
   }
 
-  
+
   return hModLanguage;
 }
 
@@ -1417,9 +1418,9 @@ ODINFUNCTION3(DWORD,   SHLWAPI_377,
 /*****************************************************************************
  * Name      : DWORD SHLWAPI_437
  * Purpose   : Determine product version and options
- * Parameters: 
+ * Parameters:
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    : SHLWAPI.437
  * Status    : UNTESTED
  *
@@ -1438,19 +1439,19 @@ ODINFUNCTION1(DWORD,  SHLWAPI_437,
   static BOOL           flagIsProductEnterprise       = FALSE;
   static BOOL           flagIsProductDatacenter       = FALSE;
   static OSVERSIONINFOA osVersionInfo;
-  
+
   HKEY          hKeyOptions;
   DWORD         dwKeyType;
   char          szBuffer[260]; // MAX_PATH_LEN
   DWORD         dwDataLength;
-  
+
   dprintf(("not (properly) implemented.\n"));
-  
+
   if (flagProductOptionsInitialized == FALSE)
   {
     // set to TRUE regardless of subsequent errors
     flagProductOptionsInitialized = TRUE;
-    
+
     // initialize required structures
     osVersionInfo.dwOSVersionInfoSize = 0x9c;
     if (GetVersionExA(&osVersionInfo) == FALSE)
@@ -1458,7 +1459,7 @@ ODINFUNCTION1(DWORD,  SHLWAPI_437,
       osVersionInfo.dwOSVersionInfoSize = 0x94;
       GetVersionExA(&osVersionInfo);
     }
-    
+
     LONG rc = RegOpenKeyExA(HKEY_LOCAL_MACHINE,
                            REG_PRODUCTOPTIONS,
                            0,
@@ -1478,11 +1479,11 @@ ODINFUNCTION1(DWORD,  SHLWAPI_437,
       else
       if (StrStrIA(szBuffer, REG_OPTIONS_DATACENTER) != 0)
         flagIsProductDatacenter = TRUE;
-      
+
       RegCloseKey(hKeyOptions);
     }
   }
-  
+
   // OK, now to the usual work ...
   switch (nFunction)
   {
@@ -1492,14 +1493,14 @@ ODINFUNCTION1(DWORD,  SHLWAPI_437,
         return 1;
       else
         return 0;
-    
+
     // is platform NT
     case 1:
       if (osVersionInfo.dwPlatformId == VER_PLATFORM_WIN32_NT)
         return 1;
       else
         return 0;
-    
+
     // is  platform Windows 95/98/xx ?
     case 2:
       if (osVersionInfo.dwPlatformId != VER_PLATFORM_WIN32_WINDOWS)
@@ -1508,7 +1509,7 @@ ODINFUNCTION1(DWORD,  SHLWAPI_437,
         return 1;
       else
         return 0;
-    
+
     // is platform NT4 or better?
     case 3:
       if (osVersionInfo.dwPlatformId != VER_PLATFORM_WIN32_NT)
@@ -1517,7 +1518,7 @@ ODINFUNCTION1(DWORD,  SHLWAPI_437,
         return 1;
       else
         return 0;
-    
+
     // is platform Win2000 or better?
     case 4:
       if (osVersionInfo.dwPlatformId != VER_PLATFORM_WIN32_NT)
@@ -1526,7 +1527,7 @@ ODINFUNCTION1(DWORD,  SHLWAPI_437,
         return 1;
       else
         return 0;
-    
+
     // at least Windows 4.10 ?
     case 5:
       if (osVersionInfo.dwPlatformId != VER_PLATFORM_WIN32_WINDOWS)
@@ -1537,9 +1538,9 @@ ODINFUNCTION1(DWORD,  SHLWAPI_437,
         if (osVersionInfo.dwMajorVersion == 4)
           if (osVersionInfo.dwMinorVersion >= 10)
             return 1;
-    
+
       return 0;
-    
+
     // is platform Windows98 GA ?
     case 6:
       if ( (osVersionInfo.dwPlatformId   == VER_PLATFORM_WIN32_WINDOWS) &&
@@ -1549,7 +1550,7 @@ ODINFUNCTION1(DWORD,  SHLWAPI_437,
         return 1;
       else
         return 0;
-    
+
     // is platform some specific CSD ?
     case 7:
     case 8:
@@ -1558,7 +1559,7 @@ ODINFUNCTION1(DWORD,  SHLWAPI_437,
         return 1;
       else
         return 0;
-    
+
     case 9:
       //@@@PH incorrect
       if (osVersionInfo.dwMajorVersion >= 5 ||
@@ -1567,40 +1568,40 @@ ODINFUNCTION1(DWORD,  SHLWAPI_437,
         return 1;
       else
         return 0;
-  
+
     case 10:
       //@@@PH incorrect
       if (osVersionInfo.dwMajorVersion >= 5)
         return flagIsProductEnterprise;
       else
         return 0;
-    
+
     case 11:
       //@@@PH incorrect
       if (osVersionInfo.dwMajorVersion >= 5)
         return flagIsProductDatacenter;
       else
         return 0;
-          
+
     // @@@PH: Oops, wazzup there ?
     case 12:
       return GetSystemMetrics(4096);
   }
-  
+
   return 0;
 }
 
 
 /*****************************************************************************
  * Name      : SHIsLowMemoryMachine
- * Purpose   : 
+ * Purpose   :
  * Parameters: BOOL fRetest - TRUE if testing shall be repeated
  *                          - FALSE if cached result is to be used
  * Variables :
  * Result    : 0 - machine is not memory-constrained
  *             1 - machine is memory-constrained
  * Remark    : SHLWAPI.584
- * Status    : UNTESTED
+ * Status    : COMPLETELY IMPLEMENTED ? UNTESTED
  *
  * Author    : Patrick Haller [Mon, 2000/06/11 02:02]
  *****************************************************************************/
@@ -1611,7 +1612,7 @@ ODINFUNCTION1(int,     SHIsLowMemoryMachine,
          MEMORYSTATUS memBuffer;
   static int          flagIsLowMemoryMachine = -1;
          ULONG        ulMem;
-  
+
   // use cached result?
   if ( (fRetest == TRUE) ||
        (flagIsLowMemoryMachine == -1) )
@@ -1622,13 +1623,13 @@ ODINFUNCTION1(int,     SHIsLowMemoryMachine,
       ulMem = 0x1000000; // unicode operation mode
     else
       ulMem = 0x0800000; // ascii operation mode
-    
+
     // enough memory?
     if (memBuffer.dwTotalPhys <= ulMem)
       flagIsLowMemoryMachine = 1;
     else
       flagIsLowMemoryMachine = 0;
   }
-  
+
   return flagIsLowMemoryMachine;
 }

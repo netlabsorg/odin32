@@ -1,4 +1,4 @@
-/* $Id: reg.cpp,v 1.3 2000-06-12 11:35:14 phaller Exp $ */
+/* $Id: reg.cpp,v 1.4 2000-08-02 20:18:23 bird Exp $ */
 
 /*
  * Win32 URL-handling APIs for OS/2
@@ -40,12 +40,12 @@ ODINDEBUGCHANNEL(SHLWAPI-REG)
 
 /*****************************************************************************
  * Name      : DWORD SHRegCreateUSKeyA
- * Purpose   : 
- * Parameters: 
+ * Purpose   :
+ * Parameters:
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    : SHLWAPI.594 SHLWAPI.SHRegCreateUSKeyA
- * Status    : UNTESTED
+ * Status    : STUB UNTESTED
  *
  * Author    : Patrick Haller [Wed, 1999/12/29 23:02]
  *****************************************************************************/
@@ -64,12 +64,12 @@ ODINFUNCTION5(DWORD,  SHRegCreateUSKeyA,
 
 /*****************************************************************************
  * Name      : DWORD SHRegCreateUSKeyW
- * Purpose   : 
- * Parameters: 
+ * Purpose   :
+ * Parameters:
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    : SHLWAPI.595 SHLWAPI.SHRegCreateUSKeyW
- * Status    : UNTESTED
+ * Status    : STUB UNTESTED
  *
  * Author    : Patrick Haller [Wed, 1999/12/29 23:02]
  *****************************************************************************/
@@ -82,7 +82,7 @@ ODINFUNCTION5(DWORD,  SHRegCreateUSKeyW,
               DWORD,  arg4)
 {
   char szBuffer[256];
-  
+
   // convert unicode to ascii
   if (0 == WideCharToMultiByte(0,
                                0,
@@ -93,7 +93,7 @@ ODINFUNCTION5(DWORD,  SHRegCreateUSKeyW,
                                0,
                                0))
     return GetLastError();
-  
+
   return SHRegCreateUSKeyA(szBuffer,
                          arg1,
                          arg2,
@@ -174,7 +174,7 @@ ODINFUNCTION8(LONG,SHRegGetUSValueW,LPCWSTR, pSubKey,
  * Variables :
  * Result    : unknown
  * Remark    : SHLWAPI.SHRegGetBoolUSValueA
- * Status    : UNTESTED
+ * Status    : COMPLETELY IMPLEMENTED ? UNTESTED
  *
  * Author    : Patrick Haller [Wed, 1999/12/29 23:02]
  *****************************************************************************/
@@ -188,11 +188,11 @@ ODINFUNCTION4(BOOL,    SHRegGetBoolUSValueA,
   char  szBuffer[260];
   DWORD dwLength = sizeof(szBuffer);
   LONG  rc;
-  
+
   dprintf(("subkey=%s, value=%s\n",
            pszSubKey,
            pszValue));
-  
+
   rc = SHRegGetUSValueA(pszSubKey,
                         pszValue,
                         &fDefault,
@@ -203,7 +203,7 @@ ODINFUNCTION4(BOOL,    SHRegGetBoolUSValueA,
                         fDefault ? 4 : 3);
   if (rc != ERROR_SUCCESS)
     return rc;
-  
+
   if (lstrcmpiA("YES",
                 szBuffer) == 0)
     return 1;
@@ -219,8 +219,8 @@ ODINFUNCTION4(BOOL,    SHRegGetBoolUSValueA,
   if (lstrcmpiA("FALSE",
                 szBuffer) == 0)
     return 0;
-  
-  
+
+
   return ERROR_SUCCESS;  /* return success */
 }
 
@@ -232,7 +232,7 @@ ODINFUNCTION4(BOOL,    SHRegGetBoolUSValueA,
  * Variables :
  * Result    : unknown
  * Remark    : SHLWAPI.SHRegGetBoolUSValueW
- * Status    : UNTESTED
+ * Status    : STUB UNTESTED
  *
  * Author    : Patrick Haller [Wed, 1999/12/29 23:02]
  *****************************************************************************/
@@ -254,12 +254,12 @@ ODINFUNCTION4(BOOL,    SHRegGetBoolUSValueW,
 
 /*****************************************************************************
  * Name      : DWORD SHRegSetUSValueA
- * Purpose   : 
- * Parameters: 
+ * Purpose   :
+ * Parameters:
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    : SHLWAPI.SHRegSetUSValueA SHLWAPI.615
- * Status    : UNTESTED
+ * Status    : STUB UNTESTED
  *
  * Author    : Patrick Haller [Wed, 1999/12/29 23:02]
  *****************************************************************************/
@@ -273,7 +273,7 @@ ODINFUNCTION6(LONG,    SHRegSetUSValueA,
               DWORD,   arg6)
 {
   LONG rc;
-  
+
 #if 0
   rc = SHRegCreateUSKeyA(hKey,
                          3,
@@ -290,7 +290,7 @@ ODINFUNCTION6(LONG,    SHRegSetUSValueA,
     SHRegCloseUSKey(hKey);
   }
 #endif
-  
+
   return rc;
 }
 
@@ -299,12 +299,12 @@ ODINFUNCTION6(LONG,    SHRegSetUSValueA,
 
 /*****************************************************************************
  * Name      : DWORD SHRegSetUSValueW
- * Purpose   : 
- * Parameters: 
+ * Purpose   :
+ * Parameters:
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    : SHLWAPI.SHRegSetUSValueW SHLWAPI.616
- * Status    : UNTESTED
+ * Status    : STUB UNTESTED
  *
  * Author    : Patrick Haller [Wed, 1999/12/29 23:02]
  *****************************************************************************/
@@ -318,7 +318,7 @@ ODINFUNCTION6(LONG,    SHRegSetUSValueW,
               DWORD,   arg6)
 {
   LONG rc;
-  
+
 #if 0
   rc = SHRegCreateUSKeyW(hKey,
                          3,
@@ -335,7 +335,7 @@ ODINFUNCTION6(LONG,    SHRegSetUSValueW,
     SHRegCloseUSKey(hKey);
   }
 #endif
-  
+
   return rc;
 }
 

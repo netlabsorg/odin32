@@ -1,4 +1,4 @@
-/* $Id: url.cpp,v 1.4 2000-07-18 18:00:01 bird Exp $ */
+/* $Id: url.cpp,v 1.5 2000-08-02 20:18:24 bird Exp $ */
 
 /*
  * Win32 Lightweight SHELL32 API for OS/2
@@ -138,7 +138,7 @@ static URLSCHEME arrUrlSchemes[] =
  *             the function will not be able to determine a valid scheme. The
  *             second flag guarantees that, if no valid scheme can be
  *             determined, the function will apply the default scheme to the URL.
- * Status    : UNTESTED
+ * Status    : PARTIALLY IMPLEMENTED UNTESTED
  *
  * Author    : Patrick Haller [Thu, 2000/04/20 19:46]
  *****************************************************************************/
@@ -160,6 +160,9 @@ ODINFUNCTION4(HRESULT, UrlApplySchemeA,
 }
 
 
+/**
+ * @status      partially
+ */
 ODINFUNCTION4(HRESULT, UrlApplySchemeW,
               LPCWSTR, pszIn,
               LPWSTR,  pszOut,
@@ -253,6 +256,9 @@ ODINFUNCTION4(HRESULT, UrlCanonicalizeA,
 }
 
 
+/**
+ * @status      stub
+ */
 ODINFUNCTION4(HRESULT, UrlCanonicalizeW,
               LPCWSTR, pszUrl,
               LPWSTR,  pszCanonicalized,
@@ -320,7 +326,7 @@ ODINFUNCTION4(HRESULT, UrlCanonicalizeW,
  *                       terminating NULL character.
  *             Other errors A standard OLE error value is returned.
  * Remark    : SHLWAPI.
- * Status    : UNTESTED
+ * Status    : STUB UNTESTED
  *
  * Author    : Patrick Haller [Tue, 2000/04/25 02:02]
  *****************************************************************************/
@@ -338,6 +344,9 @@ ODINFUNCTION5(HRESULT,UrlCombineA,
 }
 
 
+/**
+ * @status      stub
+ */
 ODINFUNCTION5(HRESULT, UrlCombineW,
               LPCWSTR, pszBase,
               LPCWSTR, pszRelative,
@@ -369,7 +378,7 @@ ODINFUNCTION5(HRESULT, UrlCombineW,
  *             For the best results, you should first canonicalize the URLs
  *             with UrlCanonicalize. Then, compare the canonicalized URLs with
  *             UrlCompare.
- * Status    : UNTESTED
+ * Status    : PARTIALLY IMPLEMENTED UNTESTED
  *
  * Author    : Patrick Haller [Tue, 2000/04/25 02:02]
  *****************************************************************************/
@@ -385,6 +394,9 @@ ODINFUNCTION3(int,    UrlCompareA,
                 pszURL2);
 }
 
+/**
+ * @status      stub
+ */
 ODINFUNCTION3(int,     UrlCompareW,
               LPCWSTR, pszURL1,
               LPCWSTR, pszURL2,
@@ -409,7 +421,7 @@ ODINFUNCTION3(int,     UrlCompareW,
  *             case, pszPath will simply be copied to pszUrl. Otherwise, it
  *             returns S_OK if successful or a standard OLE error value if not.
  * Remark    : SHLWAPI.
- * Status    : UNTESTED
+ * Status    : STUB UNTESTED
  *
  * Author    : Patrick Haller [Tue, 2000/04/25 02:02]
  *****************************************************************************/
@@ -426,6 +438,9 @@ ODINFUNCTION4(HRESULT,UrlCreateFromPathA,
 }
 
 
+/**
+ * @status      stub
+ */
 ODINFUNCTION4(HRESULT,UrlCreateFromPathW,
               LPCWSTR,pszPath,
               LPWSTR, pszUrl,
@@ -489,7 +504,7 @@ ODINFUNCTION4(HRESULT,UrlCreateFromPathW,
  *             Unsafe characters are those characters that may be altered
  *             during transport across the internet. This functions converts
  *             unsafe characters into their equivalent "%xy" escape sequences.
- * Status    : UNTESTED
+ * Status    : STUB UNTESTED
  *
  * Author    : Patrick Haller [Tue, 2000/04/25 02:02]
  *****************************************************************************/
@@ -506,6 +521,9 @@ ODINFUNCTION4(HRESULT, UrlEscapeA,
 }
 
 
+/**
+ * @status      stub
+ */
 ODINFUNCTION4(HRESULT, UrlEscapeW,
               LPCWSTR, pszURL,
               LPWSTR,  pszEscaped,
@@ -530,7 +548,7 @@ ODINFUNCTION4(HRESULT, UrlEscapeW,
  *             The location is the segment of the URL starting with a ? or #
  *             character. If a file URL has a query string, the returned
  *             string includes the query string.
- * Status    : UNTESTED
+ * Status    : STUB UNTESTED
  *
  * Author    : Patrick Haller [Tue, 2000/04/25 02:02]
  *****************************************************************************/
@@ -544,6 +562,9 @@ ODINFUNCTION1(LPCSTR, UrlGetLocationA,
 }
 
 
+/**
+ * @status      stub
+ */
 ODINFUNCTION1(LPCWSTR, UrlGetLocationW,
               LPCWSTR, pszURL)
 {
@@ -589,7 +610,7 @@ ODINFUNCTION1(LPCWSTR, UrlGetLocationW,
  *             by pcchOut will be set to the minimum number of characters that
  *             the buffer must be able to contain, including the terminating
  *             NULL character. Otherwise, an OLE error value is returned.
- * Status    : UNTESTED
+ * Status    : STUB UNTESTED
  *
  * Author    : Patrick Haller [Tue, 2000/04/25 02:02]
  *****************************************************************************/
@@ -607,6 +628,9 @@ ODINFUNCTION5(HRESULT, UrlGetPartA,
 }
 
 
+/**
+ * @status      stub
+ */
 ODINFUNCTION5(HRESULT, UrlGetPartW,
               LPCWSTR, pszIn,
               LPWSTR,  pszOut,
@@ -637,7 +661,7 @@ ODINFUNCTION5(HRESULT, UrlGetPartW,
  *             cbHash = sizeof(DWORD) and
  *             pbHash = (LPBYTE)&dwHashedValue, where dwHashedValue is a
  *             DWORD buffer.
- * Status    : UNTESTED
+ * Status    : STUB UNTESTED
  *
  * Author    : Patrick Haller [Tue, 2000/04/25 02:02]
  *****************************************************************************/
@@ -653,6 +677,9 @@ ODINFUNCTION3(HRESULT,UrlHashA,
 }
 
 
+/**
+ * @status      stub
+ */
 ODINFUNCTION3(HRESULT,UrlHashW,
               LPCWSTR,pszURL,
               LPBYTE, pbHash,
@@ -684,7 +711,7 @@ ODINFUNCTION3(HRESULT,UrlHashW,
  *             If the function is able to determine a scheme, it returns TRUE,
  *             or FALSE otherwise.
  * Remark    : SHLWAPI.
- * Status    : UNTESTED
+ * Status    : STUB UNTESTED
  *
  * Author    : Patrick Haller [Tue, 2000/04/25 02:02]
  *****************************************************************************/
@@ -699,6 +726,9 @@ ODINFUNCTION2(BOOL,   UrlIsA,
 }
 
 
+/**
+ * @status      stub
+ */
 ODINFUNCTION2(BOOL,    UrlIsW,
               LPCWSTR, pszUrl,
               URLIS,   UrlIs)
@@ -717,7 +747,7 @@ ODINFUNCTION2(BOOL,    UrlIsW,
  * Remark    : SHLWAPI.
  *             A No History URL is a URL that browsers typically do not
  *             include in their navigation history.
- * Status    : UNTESTED
+ * Status    : STUB UNTESTED
  *
  * Author    : Patrick Haller [Tue, 2000/04/25 02:02]
  *****************************************************************************/
@@ -729,6 +759,9 @@ ODINFUNCTION1(BOOL,  UrlIsNoHistoryA,
 }
 
 
+/**
+ * @status      stub
+ */
 ODINFUNCTION1(BOOL,   UrlIsNoHistoryW,
               LPCWSTR,pszURL)
 {
@@ -748,7 +781,7 @@ ODINFUNCTION1(BOOL,   UrlIsNoHistoryW,
  *             is opaque. For example, mailto:xyz@somecompany.com is an opaque
  *             URL. Opaque URLs cannot be separated into the standard
  *             URL heirarchy.
- * Status    : UNTESTED
+ * Status    : STUB UNTESTED
  *
  * Author    : Patrick Haller [Tue, 2000/04/25 02:02]
  *****************************************************************************/
@@ -760,6 +793,9 @@ ODINFUNCTION1(BOOL,   UrlIsOpaqueA,
 }
 
 
+/**
+ * @status      stub
+ */
 ODINFUNCTION1(BOOL,   UrlIsOpaqueW,
               LPCWSTR,pszURL)
 {
@@ -813,7 +849,7 @@ ODINFUNCTION1(BOOL,   UrlIsOpaqueW,
  *             required buffer size. Otherwise, returns an OLE error value.
  * Remark    : SHLWAPI.UrlUnEscape
  *             An escape sequence has the form "%xy".
- * Status    : UNTESTED
+ * Status    : STUB UNTESTED
  *
  * Author    : Patrick Haller [Tue, 2000/04/25 02:02]
  *****************************************************************************/
@@ -830,6 +866,9 @@ ODINFUNCTION4(HRESULT,UrlUnescapeA,
 }
 
 
+/**
+ * @status      stub
+ */
 ODINFUNCTION4(HRESULT,UrlUnescapeW,
               LPWSTR, pszURL,
               LPWSTR, pszUnEscaped,

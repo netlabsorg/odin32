@@ -1,4 +1,4 @@
- /* $Id: string.cpp,v 1.5 2000-06-13 18:14:21 phaller Exp $ */
+ /* $Id: string.cpp,v 1.6 2000-08-02 20:18:24 bird Exp $ */
 
 /*
  * Win32 Lightweight SHELL32 for OS/2
@@ -70,12 +70,12 @@ ODINDEBUGCHANNEL(SHLWAPI-STRING)
 
 /*****************************************************************************
  * Name      : ChrCmpIA
- * Purpose   : 
- * Parameters: 
+ * Purpose   :
+ * Parameters:
  * Variables :
- * Result    : 
- * Remark    : 
- * Status    : UNTESTED
+ * Result    :
+ * Remark    :
+ * Status    : PARTIALLY IMPLEMENTED UNTESTED
  *
  * Author    : Patrick Haller [Wed, 1999/12/29 09:00]
  *****************************************************************************/
@@ -85,10 +85,10 @@ ODINFUNCTION2(INT,    ChrCmpIA,
               INT,    ch2)
 {
   // Note: IsDBCSLeadByte ignored !
-  
+
   if ( (ch1 >= 'A') && (ch1 <= 'Z') ) ch1 |= 0x20;
   if ( (ch2 >= 'A') && (ch2 <= 'Z') ) ch2 |= 0x20;
-  
+
   return ch1 - ch2;
 }
 
@@ -374,7 +374,7 @@ BOOL WINAPI StrToOleStrAW (LPWSTR lpWideCharStr, LPCVOID lpString)
  * Result    : Returns the address of the first occurrence of the character in
  *             the string if successful, or NULL otherwise.
  * Remark    : SHELL32.
- * Status    : UNTESTED UNKNOWN
+ * Status    : COMPLETELY IMPLEMENTED UNTESTED UNKNOWN
  *
  * Author    : Patrick Haller [Wed, 1999/12/29 09:00]
  *****************************************************************************/
@@ -407,7 +407,7 @@ ODINFUNCTION2(LPSTR,  StrChrIA,
  * Result    : Returns the address of the first occurrence of the character in
  *             the string if successful, or NULL otherwise.
  * Remark    : SHELL32.
- * Status    : UNTESTED UNKNOWN
+ * Status    : COMPLETELY IMPLEMENTED UNTESTED UNKNOWN
  *
  * Author    : Patrick Haller [Wed, 1999/12/29 09:00]
  *****************************************************************************/
@@ -440,7 +440,7 @@ ODINFUNCTION2(LPWSTR,   StrChrIW,
  * Result    : Returns the address of the first occurrence of the matching
  *             substring if successful, or NULL otherwise.
  * Remark    : SHELL32.
- * Status    : UNTESTED UNKNOWN
+ * Status    : COMPLETELY IMPLEMENTED UNTESTED UNKNOWN
  *
  * Author    : Patrick Haller [Wed, 1999/12/29 09:00]
  *****************************************************************************/
@@ -486,7 +486,7 @@ ODINFUNCTION2(LPSTR,  StrStrIA,
  * Result    : Returns the address of the first occurrence of the matching
  *             substring if successful, or NULL otherwise.
  * Remark    : SHELL32.
- * Status    : UNTESTED UNKNOWN
+ * Status    : COMPLETELY IMPLEMENTED UNTESTED UNKNOWN
  *
  * Author    : Patrick Haller [Wed, 1999/12/29 09:00]
  *****************************************************************************/
@@ -577,7 +577,7 @@ ODINFUNCTION3(LPSTR, StrFormatByteSizeA, DWORD, dw, LPSTR, pszBuf, UINT, cchBuf 
 	{ sprintf (buf,"%3.1f GB", (FLOAT)dw/1073741824L);
 	}
 	lstrcpynA (pszBuf, buf, cchBuf);
-	return pszBuf;	
+	return pszBuf;
 }
 
 /*************************************************************************
@@ -599,20 +599,20 @@ ODINFUNCTION3(LPWSTR, StrFormatByteSizeW, DWORD, dw, LPWSTR, pszBuf, UINT, cchBu
 	{ sprintf (buf,"%3.1f GB", (FLOAT)dw/1073741824L);
 	}
 	lstrcpynAtoW (pszBuf, buf, cchBuf);
-	return pszBuf;	
+	return pszBuf;
 }
 
 
 /*****************************************************************************
  * Name      : StrCpyA
  * Purpose   : copy a string
- * Parameters: 
+ * Parameters:
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    : not exported ?
- * Status    : UNTESTED 
+ * Status    : UNTESTED
  *
- * Author    : 
+ * Author    :
  *****************************************************************************/
 
 ODINFUNCTION2(LPSTR,  StrCpyA,
@@ -627,13 +627,13 @@ ODINFUNCTION2(LPSTR,  StrCpyA,
 /*****************************************************************************
  * Name      : StrCpyW
  * Purpose   : copy a wide-character string
- * Parameters: 
+ * Parameters:
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    : SHLWAPI.642
- * Status    : UNTESTED 
+ * Status    : COMPLETELY IMPLEMENTED UNTESTED
  *
- * Author    : 
+ * Author    :
  *****************************************************************************/
 
 ODINFUNCTION2(LPWSTR,  StrCpyW,
@@ -648,13 +648,13 @@ ODINFUNCTION2(LPWSTR,  StrCpyW,
 /*****************************************************************************
  * Name      : StrDupA
  * Purpose   : duplicate a string on the local heap
- * Parameters: 
+ * Parameters:
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    : SHLWAPI.644
- * Status    : UNTESTED 
+ * Status    : COMPLETELY IMPLEMENTED UNTESTED
  *
- * Author    : 
+ * Author    :
  *****************************************************************************/
 
 ODINFUNCTION1(LPSTR,  StrDupA,
@@ -666,7 +666,7 @@ ODINFUNCTION1(LPSTR,  StrDupA,
   if (hLocal != NULL)
     StrCpyA((LPSTR)hLocal,
             lpStr);
-  
+
   return (LPSTR)hLocal;
 }
 
@@ -674,13 +674,13 @@ ODINFUNCTION1(LPSTR,  StrDupA,
 /*****************************************************************************
  * Name      : StrDupW
  * Purpose   : duplicate a wide-characters string on the local heap
- * Parameters: 
+ * Parameters:
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    : SHLWAPI.645
- * Status    : UNTESTED 
+ * Status    : COMPLETELY IMPLEMENTED UNTESTED
  *
- * Author    : 
+ * Author    :
  *****************************************************************************/
 
 ODINFUNCTION1(LPWSTR,  StrDupW,
@@ -692,6 +692,6 @@ ODINFUNCTION1(LPWSTR,  StrDupW,
   if (hLocal != NULL)
     StrCpyW((LPWSTR)hLocal,
             lpStr);
-  
+
   return (LPWSTR)hLocal;
 }

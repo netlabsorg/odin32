@@ -1,4 +1,4 @@
-/* $Id: pathcpp.cpp,v 1.2 2000-05-19 12:10:04 sandervl Exp $ */
+/* $Id: pathcpp.cpp,v 1.3 2000-08-02 20:18:23 bird Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -50,7 +50,7 @@ ODINDEBUGCHANNEL(SHLWAPI-SHELLPATH)
  * Variables :
  * Result    : unknown
  * Remark    : SHLWAPI.PathSkipRootA
- * Status    : UNTESTED
+ * Status    : COMPLETELY IMPLEMENTED ? UNTESTED
  *
  * Author    : Patrick Haller [Mon, 2000/01/31 23:02]
  *****************************************************************************/
@@ -86,7 +86,7 @@ ODINFUNCTION1(LPSTR, PathSkipRootA, LPCSTR, pszPath)
  * Variables :
  * Result    : unknown
  * Remark    : SHLWAPI.PathSkipRootW
- * Status    : UNTESTED
+ * Status    : STUB UNTESTED
  *
  * Author    : Patrick Haller [Mon, 2000/01/31 23:02]
  *****************************************************************************/

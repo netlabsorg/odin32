@@ -1,14 +1,14 @@
-/* $Id: string.cpp,v 1.2 2000-04-04 19:49:03 davidr Exp $ */
+/* $Id: string.cpp,v 1.3 2000-08-02 20:18:23 bird Exp $ */
 /*
  * RPCRT4 library
  * RpcString manipulation
  *
  * 2000/02/05
- * 
+ *
  * Copyright 2000 David J. Raison
- * 
+ *
  * Project Odin Software License can be found in LICENSE.TXT
- * 
+ *
  */
 
 #include "rpcrt4.h"
@@ -18,13 +18,13 @@
 // ----------------------------------------------------------------------
 RPCRTAPI RPC_STATUS RPC_ENTRY
 RpcStringFreeA (
-    IN OUT unsigned char __RPC_FAR * __RPC_FAR * String
+    IN OUT unsigned char __RPC_FAR * __RPC_FAR * String OPTIONAL
     )
 {
     dprintf(("RPCRT4: %s", __FUNCTION__));
-    
+
     HeapFree(GetProcessHeap(), 0, *String);
-    
+
     return RPC_S_OK;
 }
 
@@ -38,9 +38,9 @@ RpcStringFreeW (
     )
 {
     dprintf(("RPCRT4: %s", __FUNCTION__));
-    
+
     HeapFree(GetProcessHeap(), 0, *String);
-    
+
     return RPC_S_OK;
 }
 
