@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.763 2000-03-01 14:25:41 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.764 2000-03-01 14:49:34 sandervl Exp $ */
 
  2000-03-01: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Fixes for FindWindow(ExA/W) - now more like Wine
@@ -13,6 +13,8 @@
                   Call Dinput handler when translating mouse & keyboard
                   messages (during Get/PeekMessage)
 	- OPENGL: Always build release version of glide, mesa, glu32 & glut
+                  Build mesa software & 3dfx dlls; don't build OS/2 opengl
+                  wrapper anymore
         - OPENGL\GLIDE\CVG\GLIDE: 
                   Disable instruction scheduling in release build -> messed up
                   colors when turned on (most likely VAC optimizer bug)
