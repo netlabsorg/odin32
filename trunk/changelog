@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1753 2001-10-15 17:21:27 sandervl Exp $ */
+/* $Id: changelog,v 1.1754 2001-10-16 07:26:51 phaller Exp $ */
+
+ 2001-10-16: Patrick Haller <patrick.haller@innotek.de>
+    - WSOCK32:  o enabled receive and send timeout socket options
+                  (SO_SNDTIMEO, SO_RCVTIMEO)
 
  2001-10-15: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32, USER32, WNASPI32, DDRAW:
