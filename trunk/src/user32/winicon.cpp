@@ -1,4 +1,4 @@
-/* $Id: winicon.cpp,v 1.37 2002-11-13 14:54:58 sandervl Exp $ */
+/* $Id: winicon.cpp,v 1.38 2002-11-26 14:41:07 sandervl Exp $ */
 /*
  * Win32 Icon Code for OS/2
  *
@@ -1050,7 +1050,19 @@ static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, DWORD dwResGr
                 else {
 //SvL: Must use CreateBitmap here as CreateDIBitmap converts data to 8bpp (GetObjectA info -> 8 bpp)
 #if 1
-                    int linewidth = BITMAP_GetWidthBytes(width, 1);
+                    int linewidth; 
+                    int orglinewidth;
+
+                    linewidth = BITMAP_GetWidthBytes(width, 1);
+
+                    //the lines in the image might be aligned differently
+                    //CreateBitmap expects them to be optimally aligned
+                    //(as calculated by BITMAP_GetWidthBytes)
+                    //(For now only applies when both masks (and/xor) aren't present)
+                    if(pInfo->bmiHeader.biSizeImage > colorsize + bwsize) {
+                         orglinewidth = (pInfo->bmiHeader.biSizeImage - colorsize)/height;
+                    }
+                    else orglinewidth = linewidth;
 
                     char *newpix = (char *)malloc(linewidth*height);
 
@@ -1068,7 +1080,7 @@ static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, DWORD dwResGr
                         for(int i=0;i<height;i++) {
                             memcpy(newpix, xbits, linewidth);
                             newpix -= linewidth;
-                            xbits  += linewidth;
+                            xbits  += orglinewidth;
                         }
                     }
                     newpix += linewidth;
