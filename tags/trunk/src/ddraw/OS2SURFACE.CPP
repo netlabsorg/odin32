@@ -1,4 +1,4 @@
-/* $Id: OS2SURFACE.CPP,v 1.44 2002-07-01 19:15:24 sandervl Exp $ */
+/* $Id: OS2SURFACE.CPP,v 1.45 2002-07-02 09:55:12 sandervl Exp $ */
 
 /*
  * DirectDraw Surface class implementaion
@@ -4966,16 +4966,6 @@ HRESULT WIN32API SurfReleaseDC(THIS This, HDC hdc)
       *((DWORD *) &(BitmapInfo.bmiCols[2])) = me->DDSurfaceDesc.ddpfPixelFormat.dwBBitMask;
       GetDIBits(hdc, me->hbmImage, 0, me->DDSurfaceDesc.dwHeight,
                 me->DDSurfaceDesc.lpSurface,(PBITMAPINFO)&BitmapInfo,DIB_RGB_COLORS);
-
-      //GetDIBits returns data in RGB555 format; convert if surface is in RGB565 format
-      if(me->DDSurfaceDesc.ddpfPixelFormat.dwGBitMask == 0x7E0) {
-        int imgsize = BitmapInfo.bmiHead.biWidth*BitmapInfo.bmiHead.biHeight*2;
-
-        if(CPUFeatures & CPUID_MMX) {
-             DDrawRGB555to565MMX((char *)me->DDSurfaceDesc.lpSurface, (char *)me->DDSurfaceDesc.lpSurface, imgsize/sizeof(WORD));
-        }
-        else DDrawRGB555to565((char *)me->DDSurfaceDesc.lpSurface, (char *)me->DDSurfaceDesc.lpSurface, imgsize/sizeof(WORD));
-      }
       break;
 
     case 32:
