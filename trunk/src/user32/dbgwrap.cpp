@@ -311,6 +311,7 @@ DEBUGWRAP28(TrackPopupMenu)
 DEBUGWRAP24(TrackPopupMenuEx)
 DEBUGWRAP8(GetMenuInfo)
 DEBUGWRAP8(SetMenuInfo)
+DEBUGWRAP_LVL2_12(TranslateAcceleratorA)
 
 #undef DBG_LOCALLOG
 #define DBG_LOCALLOG    DBG_windowclass
@@ -447,7 +448,7 @@ DEBUGWRAP12(UnionRect)
 
 
 #undef DBG_LOCALLOG
-#define DBG_LOCALLOG	DBG_display
+#define DBG_LOCALLOG    DBG_display
 DEBUGWRAP8(GetMonitorInfoW)
 DEBUGWRAP8(GetMonitorInfoA)
 DEBUGWRAP8(MonitorFromWindow)
@@ -478,7 +479,7 @@ DEBUGWRAP12(ShowScrollBar)
 
 
 #undef DBG_LOCALLOG
-#define DBG_LOCALLOG	DBG_hook
+#define DBG_LOCALLOG    DBG_hook
 DEBUGWRAP16(CallNextHookEx)
 DEBUGWRAP8(SetWindowsHookA)
 DEBUGWRAP16(SetWindowsHookExA)
@@ -488,7 +489,7 @@ DEBUGWRAP8(UnhookWindowsHook)
 DEBUGWRAP4(UnhookWindowsHookEx)
 
 #undef DBG_LOCALLOG
-#define DBG_LOCALLOG	DBG_windowmsg
+#define DBG_LOCALLOG    DBG_windowmsg
 DEBUGWRAP20(MsgWaitForMultipleObjects)
 DEBUGWRAP20(BroadcastSystemMessage)
 DEBUGWRAP8(CallMsgFilterA)
@@ -546,7 +547,7 @@ DEBUGWRAP16(MessageBoxW)
 
 
 #undef DBG_LOCALLOG
-#define DBG_LOCALLOG	DBG_defwndproc
+#define DBG_LOCALLOG    DBG_defwndproc
 
 DEBUGWRAP_LVL2_16(DefDlgProcA)
 DEBUGWRAP_LVL2_16(DefDlgProcW)
@@ -559,7 +560,7 @@ DEBUGWRAP_LVL2_16(DefWindowProcW)
 
 
 #undef DBG_LOCALLOG
-#define DBG_LOCALLOG	DBG_windlg
+#define DBG_LOCALLOG    DBG_windlg
 DEBUGWRAP16(SetDlgItemInt)
 DEBUGWRAP12(SetDlgItemTextA)
 DEBUGWRAP12(SetDlgItemTextW)
@@ -608,7 +609,7 @@ DEBUGWRAP16(LoadStringW)
 
 
 #undef DBG_LOCALLOG
-#define DBG_LOCALLOG	DBG_winmouse
+#define DBG_LOCALLOG    DBG_winmouse
 DEBUGWRAP4(GetCursorPos)
 DEBUGWRAP8(SetCursorPos)
 DEBUGWRAP4(SwapMouseButton)
@@ -622,7 +623,7 @@ DEBUGWRAP4(SetDoubleClickTime)
 
 
 #undef DBG_LOCALLOG
-#define DBG_LOCALLOG	DBG_caret
+#define DBG_LOCALLOG    DBG_caret
 DEBUGWRAP16(CreateCaret)
 DEBUGWRAP0(DestroyCaret)
 DEBUGWRAP0(GetCaretBlinkTime)
@@ -661,7 +662,7 @@ DEBUGWRAP36(GrayStringW)
 
 
 #undef DBG_LOCALLOG
-#define DBG_LOCALLOG	DBG_timer
+#define DBG_LOCALLOG    DBG_timer
 DEBUGWRAP8(KillTimer)
 DEBUGWRAP16(SetTimer)
 
@@ -783,7 +784,6 @@ DEBUGWRAP12(CopyAcceleratorTableW)
 DEBUGWRAP8(CreateAcceleratorTableA)
 DEBUGWRAP8(CreateAcceleratorTableW)
 DEBUGWRAP4(DestroyAcceleratorTable)
-DEBUGWRAP12(TranslateAcceleratorA)
 DEBUGWRAP8(TranslateMDISysAccel)
 DEBUGWRAP8(LoadAcceleratorsA)
 DEBUGWRAP8(LoadAcceleratorsW)

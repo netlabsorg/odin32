@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.154 2003-05-15 12:40:20 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.155 2003-07-31 15:56:47 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -30,15 +30,15 @@ class Win32BaseWindow;
 #define OFFSET_WIN32FLAGS         12
 #define NROF_WIN32WNDBYTES        16
 
-#define WINDOWFLAG_ACTIVE	  1
+#define WINDOWFLAG_ACTIVE     1
 
 #define WIN32PM_MAGIC             0x12345678
 #define CheckMagicDword(a)        (a==WIN32PM_MAGIC)
 
 #define MAX_OPENDCS               8
 
-#define TYPE_ASCII		  0
-#define TYPE_UNICODE		  1
+#define TYPE_ASCII        0
+#define TYPE_UNICODE          1
 
 #define GW_HWNDNEXTCHILD          (0x10000 | GW_HWNDNEXT)
 #define GW_HWNDPREVCHILD          (0x10000 | GW_HWNDPREV)
@@ -100,7 +100,7 @@ typedef struct tagPROPERTY
 
 #define HAS_MENU() (!(getStyle() & WS_CHILD) && (getWindowId() != 0))
 
-#define STATE_INIT	         0   //initial state
+#define STATE_INIT           0   //initial state
 #define STATE_PRE_WMNCCREATE     1   //before WM_NCCREATE
 #define STATE_POST_WMNCCREATE    2   //after WM_NCCREATE
 #define STATE_PRE_WMCREATE       3   //before WM_CREATE
@@ -233,7 +233,7 @@ virtual  PRECT  getWindowRect();
          void   SetClipRegion(HRGN hRegion)       { hClipRegion = hRegion; };
 
          void   saveAndValidateUpdateRegion();
-         void   checkForDirtyUpdateRegion();   
+         void   checkForDirtyUpdateRegion();
          BOOL   hasDirtUpdateRegion()             { return fDirtyUpdateRegion; };
 
          BOOL   ShowWindow(ULONG nCmdShow);
@@ -275,8 +275,8 @@ virtual  BOOL   DestroyWindow();
 
 //hack alert (see DestroyWindow)
          BOOL   IsChildDestructionInProgress() { return fChildDestructionInProgress; };
-         void   SetChildDestructionInProgress(BOOL fDestuctionInProgress) 
-         { 
+         void   SetChildDestructionInProgress(BOOL fDestuctionInProgress)
+         {
              fChildDestructionInProgress = fDestuctionInProgress;
          };
 //hack end
@@ -309,7 +309,8 @@ virtual  BOOL   DestroyWindow();
          VOID   freeWindowNamePtr(PVOID namePtr);
          CHAR  *getWindowNameA()              { return windowNameA; }; //only for MDI windows!
          WCHAR *getWindowNameW()              { return windowNameW; }; //only for MDI windows!
-         int    getWindowNameLength()         { return windowNameLength; };
+         int    getWindowNameLengthA()        { return windowNameLengthA; };
+         int    getWindowNameLengthW()        { return windowNameLengthW; };
          Win32WndClass  *getClass()  { return windowClass; };
          Win32BaseWindow *getOwner() { return owner; };
         void    setOwner(Win32BaseWindow *newOwner) { owner = newOwner; };
@@ -337,16 +338,16 @@ virtual  BOOL   DestroyWindow();
            BOOL EnumWindows(WNDENUMPROC lpfn, LPARAM lParam);
 
 
-	 BOOL   isComingToTop()			{ return fComingToTop; };
-	 void   setComingToTop(BOOL fTop) 	{ fComingToTop = fTop; };
+     BOOL   isComingToTop()         { return fComingToTop; };
+     void   setComingToTop(BOOL fTop)   { fComingToTop = fTop; };
          BOOL   isInTasklist()                  { return fTaskList; };
 
          //window property methods
          HANDLE getProp(LPCSTR str);
-	 BOOL   setProp(LPCSTR str, HANDLE handle);
-	 HANDLE removeProp(LPCSTR str);
-	 INT    enumPropsExA(PROPENUMPROCEXA func, LPARAM lParam);
-	 INT    enumPropsExW(PROPENUMPROCEXW func, LPARAM lParam);
+     BOOL   setProp(LPCSTR str, HANDLE handle);
+     HANDLE removeProp(LPCSTR str);
+     INT    enumPropsExA(PROPENUMPROCEXA func, LPARAM lParam);
+     INT    enumPropsExW(PROPENUMPROCEXW func, LPARAM lParam);
 
 #ifdef DEBUG
          LONG addRef();
@@ -390,7 +391,7 @@ protected:
         ULONG   dwIDMenu;               //GWL_ID
         ULONG   userData;               //GWL_USERDATA
         HWND    hwndLastActive;         // last active popup handle
-  
+
         ULONG   cbExtra;
         PVOID   pExtra;
 
@@ -413,7 +414,7 @@ protected:
                  fXDefault:1,
                  fCXDefault:1,
                  fParentDC:1,
-	         fComingToTop:1,
+             fComingToTop:1,
                  isUnicode:1,
                  fMinMaxChange:1,        //set when switching between min/max/restored state
                  fVisibleRegionChanged:1, //set when visible region has changed -> erase background must be sent during next BeginPaint
@@ -439,8 +440,9 @@ protected:
 
         char   *windowNameA;
         WCHAR  *windowNameW;
-        int     windowNameLength;
-  
+        int     windowNameLengthA;
+        int     windowNameLengthW;
+
         char   *userWindowBytes;
         ULONG   nrUserWindowBytes;
 
@@ -454,7 +456,7 @@ WINDOWPLACEMENT windowpos;
 
 VISRGN_NOTIFY_PROC lpVisRgnNotifyProc;
         DWORD   dwVisRgnNotifyParam;
-       
+
         HANDLE  hTaskList; //PM specific (switchentry handle)
 
 CREATESTRUCTA  *tmpcs; //temporary pointer to CREATESTRUCT used in CreateWindowEx

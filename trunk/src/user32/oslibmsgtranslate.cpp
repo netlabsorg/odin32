@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.112 2003-07-31 12:25:57 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.113 2003-07-31 15:56:44 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -37,6 +37,7 @@
 #include <winscan.h>
 #include <winkeyboard.h>
 #include <winnls.h>
+#include <heapstring.h>
 #include "hook.h"
 #include "user32api.h"
 
@@ -731,14 +732,56 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         BYTE  bWinVKey;
         WORD  wWinScan;
 
-        if (scanCode==0) goto dummymessage;
+        if ( (!IsDBCSEnv() && scanCode == 0) || 
+             (scanCode==0 ) && !( flags & KC_CHAR ) ) 
+        {
+            goto dummymessage;
+        }
 
-        KeyTranslatePMScanToWinVKey(usPMScanCode,
-                                    FALSE,
-                                    &bWinVKey,
-                                    &wWinScan,
-                                    &fWinExtended);
-        winMsg->wParam = bWinVKey;
+        if( scanCode != 0 )
+        {
+            KeyTranslatePMScanToWinVKey(usPMScanCode,
+                                        FALSE,
+                                        &bWinVKey,
+                                        &wWinScan,
+                                        &fWinExtended);
+            winMsg->wParam = bWinVKey;
+        }
+        else
+        {
+            dprintf(("PM: WM_CHAR: DBCS processing "));
+
+            winMsg->wParam = CHAR1FROMMP( os2Msg->mp2 );
+
+            wWinScan = 0;
+            fWinExtended = 0;
+
+            if( CHAR2FROMMP( os2Msg->mp2 ))     // DBCS character
+            {
+                if( isUnicode )
+                {
+                    char  dbcsCh[] = { CHAR1FROMMP( os2Msg->mp2 ), CHAR2FROMMP( os2Msg->mp2 ), 0 };
+                    WCHAR uniChar[ 2 ];
+
+                    lstrcpynAtoW(( LPWSTR )&uniChar, ( LPCSTR )&dbcsCh, 2 );
+                    winMsg->wParam = ( WPARAM )uniChar[ 0 ];
+                }
+                // insert DBCS trail byte for Non-Unicode window
+                else if(fMsgRemoved && !(teb->o.odin.fTranslated))
+                {
+                    MSG extramsg;
+                    memcpy(&extramsg, winMsg, sizeof(MSG));
+
+                    //After SetFocus(0), all keystrokes are converted in WM_SYS*
+                    extramsg.message = (fIgnoreKeystrokes) ? WINWM_SYSCHAR : WINWM_CHAR;
+
+                    extramsg.wParam = CHAR2FROMMP( os2Msg->mp2 );
+                    extramsg.lParam = 0;
+
+                    setThreadQueueExtraCharMessage(teb, &extramsg);
+                }
+            }
+        }
         winMsg->lParam  = repeatCount & 0x0FFFF;                 // bit 0-15, repeatcount
         winMsg->lParam |= (wWinScan & 0x1FF) << 16;  // bit 16-23, scancode + bit 15 extended
 
@@ -796,6 +839,11 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             }
             winMsg->lParam |= WIN_KEY_PREVSTATE;                    // bit 30, previous state, always 1 for a WM_KEYUP message
             winMsg->lParam |= 1 << 31;                              // bit 31, transition state, always 1 for WM_KEYUP
+          }
+          else if( scanCode == 0 )
+          {
+            //After SetFocus(0), all keystrokes are converted in WM_SYS*
+            winMsg->message = (fIgnoreKeystrokes) ? WINWM_SYSCHAR :  WINWM_CHAR;
           }
           else
           { // send WM_KEYDOWN message

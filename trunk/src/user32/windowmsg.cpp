@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.43 2003-07-28 11:27:50 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.44 2003-07-31 15:56:47 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -85,7 +85,7 @@ LONG WIN32API DispatchMessageW( const MSG * msg)
             if (!TIMER_IsTimerValid(msg->hwnd, (UINT) msg->wParam, msg->lParam))
                 return 0; /* invalid winproc */
 
-	    return CallWindowProcA( (WNDPROC)msg->lParam, msg->hwnd,
+	    return CallWindowProcW( (WNDPROC)msg->lParam, msg->hwnd,
                                    msg->message, msg->wParam, GetTickCount() );
         }
     }
@@ -318,6 +318,7 @@ INT WINPROC_MapMsg32ATo32W( HWND hwnd, UINT msg, WPARAM *pwparam, LPARAM *plpara
     switch(msg)
     {
     case WM_GETTEXT:
+    case WM_ASKCBFORMATNAME:
         {
             LPARAM *ptr = (LPARAM *)HeapAlloc( GetProcessHeap(), 0,
                                      *pwparam * sizeof(WCHAR) + sizeof(LPARAM) );
@@ -329,6 +330,7 @@ INT WINPROC_MapMsg32ATo32W( HWND hwnd, UINT msg, WPARAM *pwparam, LPARAM *plpara
     /* lparam is string (0-terminated) */
     case WM_SETTEXT:
     case WM_WININICHANGE:
+    case WM_DEVMODECHANGE:
     case CB_DIR:
     case LB_DIR:
     case LB_ADDFILE:
@@ -430,18 +432,21 @@ INT WINPROC_MapMsg32ATo32W( HWND hwnd, UINT msg, WPARAM *pwparam, LPARAM *plpara
         }
         return 1;
 
-    /* kso 2003-07-03: to make password field work, I took this from latest wine code. (winproc.c) */
+    case WM_CHARTOITEM:
+    case WM_MENUCHAR:
+    case WM_CHAR:
+    case WM_DEADCHAR:
+    case WM_SYSCHAR:
+    case WM_SYSDEADCHAR:
     case EM_SETPASSWORDCHAR:
         {
-            BYTE    ch = LOWORD(*pwparam);
-            WCHAR   wch = 0;
-            MultiByteToWideChar(CP_ACP, 0, (LPCSTR)&ch, 1, &wch, 1);
+            char ch = LOWORD(*pwparam);
+            WCHAR wch;
+            MultiByteToWideChar(CP_ACP, 0, &ch, 1, &wch, 1);
             *pwparam = MAKEWPARAM( wch, HIWORD(*pwparam) );
         }
         return 0;
 
-    case WM_ASKCBFORMATNAME:
-    case WM_DEVMODECHANGE:
     case WM_PAINTCLIPBOARD:
     case WM_SIZECLIPBOARD:
         // FIXME_(msg)("message %s (0x%x) needs translation, please report\n", SPY_GetMsgName(msg), msg );
@@ -462,6 +467,7 @@ void WINPROC_UnmapMsg32ATo32W( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
     switch(msg)
     {
     case WM_GETTEXT:
+    case WM_ASKCBFORMATNAME:
         {
             LPARAM *ptr = (LPARAM *)lParam - 1;
             lstrcpynWtoA( (LPSTR)*ptr, (LPWSTR)lParam, wParam );
@@ -494,6 +500,7 @@ void WINPROC_UnmapMsg32ATo32W( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
 
     case WM_SETTEXT:
     case WM_WININICHANGE:
+    case WM_DEVMODECHANGE:
     case CB_DIR:
     case LB_DIR:
     case LB_ADDFILE:
@@ -568,13 +575,17 @@ void WINPROC_UnmapMsg32ATo32W( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
  * Map a message from Unicode to Ansi.
  * Return value is -1 on error, 0 if OK, 1 if an UnmapMsg call is needed.
  */
-INT WINPROC_MapMsg32WTo32A( HWND hwnd, UINT msg, WPARAM wParam, LPARAM *plparam)
+INT WINPROC_MapMsg32WTo32A( HWND hwnd, UINT msg, WPARAM *pwparam, LPARAM *plparam)
 {   switch(msg)
     {
     case WM_GETTEXT:
+    case WM_ASKCBFORMATNAME:
         {
+#ifdef __WIN32OS2__
+            *pwparam = *pwparam * sizeof( WCHAR );  //DBCS
+#endif
             LPARAM *ptr = (LPARAM *)HeapAlloc( GetProcessHeap(), 0,
-                                               wParam + sizeof(LPARAM) );
+                                               *pwparam + sizeof(LPARAM) );
             if (!ptr) return -1;
             *ptr++ = *plparam;  /* Store previous lParam */
             *plparam = (LPARAM)ptr;
@@ -583,6 +594,7 @@ INT WINPROC_MapMsg32WTo32A( HWND hwnd, UINT msg, WPARAM wParam, LPARAM *plparam)
 
     case WM_SETTEXT:
     case WM_WININICHANGE:
+    case WM_DEVMODECHANGE:
     case CB_DIR:
     case LB_DIR:
     case LB_ADDFILE:
@@ -680,16 +692,32 @@ INT WINPROC_MapMsg32WTo32A( HWND hwnd, UINT msg, WPARAM wParam, LPARAM *plparam)
           LPARAM *ptr = (LPARAM *) HEAP_xalloc( GetProcessHeap(), 0, sizeof(LPARAM) + sizeof (WORD) + len*sizeof(CHAR) );
           if (!ptr) return -1;
           *ptr++ = *plparam;  /* Store previous lParam */
+#ifdef __WIN32OS2__
+          *((WORD *) ptr) = len * sizeof(WCHAR);   /* Store the length */
+#else
           *((WORD *) ptr) = len;   /* Store the length */
+#endif
           *plparam = (LPARAM)ptr;
         }
         return 1;
 
-    case WM_ASKCBFORMATNAME:
-    case WM_DEVMODECHANGE:
+    case WM_CHARTOITEM:
+    case WM_MENUCHAR:
+    case WM_CHAR:
+    case WM_DEADCHAR:
+    case WM_SYSCHAR:
+    case WM_SYSDEADCHAR:
+    case EM_SETPASSWORDCHAR:
+        {
+            WCHAR wch = LOWORD(*pwparam);
+            char ch;
+            WideCharToMultiByte( CP_ACP, 0, &wch, 1, &ch, 1, NULL, NULL );
+            *pwparam = MAKEWPARAM( ch, HIWORD(*pwparam) );
+        }
+        return 0;
+
     case WM_PAINTCLIPBOARD:
     case WM_SIZECLIPBOARD:
-    case EM_SETPASSWORDCHAR:
         // FIXME_(msg)("message %s (%04x) needs translation, please report\n",SPY_GetMsgName(msg),msg );
         return -1;
     default:  /* No translation needed */
@@ -708,8 +736,13 @@ void WINPROC_UnmapMsg32WTo32A( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
     switch(msg)
     {
     case WM_GETTEXT:
+    case WM_ASKCBFORMATNAME:
         {
             LPARAM *ptr = (LPARAM *)lParam - 1;
+
+#ifdef __WIN32OS2__
+            wParam = wParam / sizeof( WCHAR );
+#endif
             lstrcpynAtoW( (LPWSTR)*ptr, (LPSTR)lParam, wParam );
             HeapFree( GetProcessHeap(), 0, ptr );
         }
@@ -717,6 +750,7 @@ void WINPROC_UnmapMsg32WTo32A( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
 
     case WM_SETTEXT:
     case WM_WININICHANGE:
+    case WM_DEVMODECHANGE:
     case CB_DIR:
     case LB_DIR:
     case LB_ADDFILE:
@@ -799,7 +833,11 @@ void WINPROC_UnmapMsg32WTo32A( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
 /* Multiline edit */
     case EM_GETLINE:
         { LPARAM * ptr = (LPARAM *)lParam - 1;  /* get the old lparam */
+#ifdef __WIN32OS2__
+          WORD len = *(WORD *)ptr/sizeof(WCHAR);
+#else
           WORD len = *(WORD *)ptr;
+#endif
           lstrcpynAtoW( (LPWSTR) *ptr, (LPSTR)lParam, len );
           HeapFree( GetProcessHeap(), 0, ptr );
         }
@@ -818,9 +856,70 @@ LRESULT WINPROC_CallProc32ATo32W( WNDPROC func, HWND hwnd,
 {
     LRESULT result;
 
+#ifdef __WIN32OS2__
+    if( IsDBCSEnv() && msg == WM_CHAR )
+    {
+        static BYTE dbcsLead = 0;
+        WCHAR charA = wParam;
+        int size = dbcsLead ? 2 : 1;
+
+        if( dbcsLead )
+               charA = ( charA << 8 ) | dbcsLead;
+        else if( IsDBCSLeadByte( wParam ))
+        {
+            dbcsLead = wParam;
+            return 0;
+        }
+        MultiByteToWideChar( CP_ACP, 0, ( LPSTR )&charA, size, ( LPWSTR )&wParam, 1 );
+
+        dbcsLead = 0;
+    }
+    else
+#endif
     if (WINPROC_MapMsg32ATo32W( hwnd, msg, &wParam, &lParam ) == -1) return 0;
+
     result = func( hwnd, msg, wParam, lParam );
     WINPROC_UnmapMsg32ATo32W( hwnd, msg, wParam, lParam );
+
+#ifdef __WIN32OS2__
+    if(IsDBCSEnv()) 
+    {
+      switch( msg )
+      {
+        case WM_GETTEXTLENGTH :
+        {
+            LPWSTR ustr = ( LPWSTR )HeapAlloc( GetProcessHeap(), 0, ( result + 1 ) * sizeof( WCHAR ));
+            result = func( hwnd, WM_GETTEXT, ( WPARAM )( result + 1 ), ( LPARAM )ustr );
+            result = lstrlenWtoA( ustr, result );
+            HeapFree( GetProcessHeap(), 0, ustr );
+            break;
+        }
+
+        case LB_GETTEXTLEN :
+        {
+            LPWSTR ustr = ( LPWSTR )HeapAlloc( GetProcessHeap(), 0, ( result + 1 ) * sizeof( WCHAR ));
+            result = func( hwnd, LB_GETTEXT, wParam, ( LPARAM )ustr );
+            if( result != LB_ERR )
+                result = lstrlenWtoA( ustr, result );
+
+            HeapFree( GetProcessHeap(), 0, ustr );
+            break;
+        }
+
+
+        case CB_GETLBTEXTLEN :
+        {
+            LPWSTR ustr = ( LPWSTR )HeapAlloc( GetProcessHeap(), 0, ( result + 1 ) * sizeof( WCHAR ));
+            result = func( hwnd, CB_GETLBTEXT, wParam, ( LPARAM )ustr );
+            if( result != CB_ERR )
+                result = lstrlenWtoA( ustr, result );
+
+            HeapFree( GetProcessHeap(), 0, ustr );
+            break;
+        }
+      }
+    }
+#endif
     return result;
 }
 
@@ -835,10 +934,65 @@ LRESULT WINPROC_CallProc32WTo32A( WNDPROC func, HWND hwnd,
 {
     LRESULT result;
 
-    if (WINPROC_MapMsg32WTo32A( hwnd, msg, wParam, &lParam ) == -1) return 0;
+#ifdef __WIN32OS2__
+    if( IsDBCSEnv() && msg == WM_CHAR )
+    {
+        char charA[ 2 ];
+
+        if( WideCharToMultiByte( CP_ACP, 0, ( LPWSTR )&wParam, 1, ( LPSTR )charA, 2, 0, 0 ) > 1 )
+        {
+            func( hwnd, msg, ( WPARAM )charA[ 0 ], lParam );
+            wParam = charA[ 1 ];
+        }
+        else
+            wParam = charA[ 0 ];
+    }
+    else
+#endif
+    if (WINPROC_MapMsg32WTo32A( hwnd, msg, &wParam, &lParam ) == -1) return 0;
 
     result = func( hwnd, msg, wParam, lParam );
     WINPROC_UnmapMsg32WTo32A( hwnd, msg, wParam, lParam );
+
+#ifdef __WIN32OS2__
+    if( IsDBCSEnv() )
+    {
+      switch( msg )
+      {
+        case WM_GETTEXTLENGTH :
+        {
+            LPSTR astr = ( LPSTR )HeapAlloc( GetProcessHeap(), 0, result + 1 );
+            result = func( hwnd, WM_GETTEXT, ( WPARAM )( result + 1 ), ( LPARAM )astr );
+            result = lstrlenAtoW( astr, result );
+            HeapFree( GetProcessHeap(), 0, astr );
+            break;
+        }
+
+        case LB_GETTEXTLEN :
+        {
+            LPSTR astr = ( LPSTR )HeapAlloc( GetProcessHeap(), 0, result + 1 );
+            result = func( hwnd, LB_GETTEXT, wParam, ( LPARAM )astr );
+            if( result != LB_ERR )
+                result = lstrlenAtoW( astr, result );
+
+            HeapFree( GetProcessHeap(), 0, astr );
+            break;
+        }
+
+
+        case CB_GETLBTEXTLEN :
+        {
+            LPSTR astr = ( LPSTR )HeapAlloc( GetProcessHeap(), 0, result + 1 );
+            result = func( hwnd, CB_GETLBTEXT, wParam, ( LPARAM )astr );
+            if( result != CB_ERR )
+                result = lstrlenAtoW( astr, result );
+
+            HeapFree( GetProcessHeap(), 0, astr );
+            break;
+        }
+      }
+    }
+#endif
     return result;
 }
 //******************************************************************************
