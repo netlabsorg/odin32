@@ -25,13 +25,18 @@ LIBS =  $(PDWIN32_LIB)\user32.lib $(PDWIN32_LIB)\gdi32.lib $(PDWIN32_LIB)\kernel
 
 all: $(TARGET).dll $(TARGET).lib
 
-# Include common DLL make rules
-!include $(PDWIN32_INCLUDE)/pdwin32.incdll
-
 
 $(TARGET).dll: $(OBJS) $(TARGET).def
         $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def $(LIBS)
   $(CP) $@ $(PDWIN32_BIN)
+
+$(TARGET)exp.def: $(TARGET).def
+    $(IMPDEF) $** $@
+
+$(TARGET).lib: $(TARGET)exp.Def
+    $(IMPLIB) $(IMPLIBFLAGS) $@ $**
+    $(CP) $@ $(PDWIN32_LIB)\$@
+
 
 wing32.obj: wing32.cpp\
     wing32impl.h\
