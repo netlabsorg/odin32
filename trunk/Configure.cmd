@@ -1,4 +1,4 @@
-/* $Id: Configure.cmd,v 1.1 2000-12-02 23:39:42 bird Exp $
+/* $Id: Configure.cmd,v 1.2 2001-03-11 16:42:28 bird Exp $
  *
  * Configuration script.
  * Generates global makefile.inc.
@@ -20,6 +20,11 @@
 
     /* strings */
     sIncFile='Makefile.inc';
+
+    /* Status */
+    if (fInteractive) then
+        say 'Configuring Odin32...';
+
 
     /* delete old makefile.inc file */
     call SysFileDelete sIncFile;
@@ -51,8 +56,33 @@
 
         call stream sIncFile, 'c', 'close';
 
+
         /*
-         * Display output.
+         * Configure Win32k.
+         */
+        if (fInteractive) then
+            say 'Configuring Win32k...';
+
+        sOldDir = directory();
+        if (directory('.\src\win32k') <> '') then
+        do
+            '@call .\configure.cmd' fNonInteractive
+            if (rc <> 0) then
+            do
+                call directory(sOldDir);
+                exit(rc);
+            end
+        end
+        else
+        do
+            say 'oops! failed to change directory to .\src\win32k.';
+            exit(2);
+        end
+        call directory(sOldDir);
+
+
+        /*
+         * Display start info.
          */
         if (fInteractive = 1) then
         do
