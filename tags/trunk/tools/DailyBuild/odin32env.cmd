@@ -1,4 +1,4 @@
-/* $Id: odin32env.cmd,v 1.11 2000-11-21 18:28:02 bird Exp $
+/* $Id: odin32env.cmd,v 1.12 2000-11-22 13:07:59 bird Exp $
  *
  * Sets the build environment.
  *
@@ -417,6 +417,37 @@ VAC36: procedure
     call EnvVar_Set      fRM, 'LANG',        'en_us'
     call EnvVar_Set      fRM, 'CPP_DBG_LANG', 'CPP'
     return 0;
+
+
+/*
+ * Visual Age for C++ v4.0 for OS/2.
+ */
+VAC36: procedure
+    parse arg fRM
+
+    /*
+     * IBM VisualAge for C++ v4.0 main directory.
+     */
+    sVACppMain    = 'e:\apps\ibmcpp40';
+
+    call EnvVar_Set      fRM, 'vacppmain', sVACppMain;
+
+    call EnvVar_AddFront fRM, 'beginlibpath', sVACppMain'\dll;'sVACppMain'\runtime;'
+    call EnvVar_AddFront fRM, 'dpath',       sVACppMain'\etc;'sVACppMain'\help;'sVACppMain'\runtime;'
+    call EnvVar_AddFront fRM, 'path',        sVACppMain'\bin;'
+    call EnvVar_AddFront fRM, 'help',        sVACppMain'\help;'
+    call EnvVar_AddFront fRM, 'locpath',     sVACppMain'\runtime\locale;'
+    call EnvVar_AddFront fRM, 'nlspath',     sVACppMain'\msg\%N;'
+    call EnvVar_AddFront fRM, 'include',     sVACppMain'\ivb;'sVACppMain'\include;'
+    call EnvVar_AddFront fRM, 'lib',         sVACppMain'\lib;'
+    call EnvVar_AddFront fRM, 'ipfc',        sVACppMain'\bin;'
+    call EnvVar_Set      fRM, 'cpplpath4',   sVACppMain'\macros'
+    call EnvVar_Set      fRM, 'system_ice',  sVACppMain'\etc\system.ice'
+    call EnvVar_Set      fRM, 'vbpath',      sVACppMain'\ivb'
+    call EnvVar_Set      fRM, 'os2',         '1'
+    call EnvVar_Set      fRM, 'LANG',        'en_us'
+    return 0;
+
 
 /*
  * Watcom C/C++ 11.0
