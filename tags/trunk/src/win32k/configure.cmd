@@ -1,4 +1,4 @@
-/* $Id: configure.cmd,v 1.6 2000-02-26 16:21:13 bird Exp $
+/* $Id: configure.cmd,v 1.7 2000-02-26 17:52:09 bird Exp $
  *
  * Configuration script.
  * Generates makefile.inc and an empty .depend file.
@@ -41,8 +41,10 @@
         call lineout sIncFile, '################################################################################'
         sWin32kBase = directory();
         call lineout sIncFile, 'WIN32KBASE       =' sWin32kBase;
-        call lineout sIncFile, 'WIN32KOBJ        =' sWin32kBase'\object'
+        call lineout sIncFile, 'WIN32KINCLUDE    =' sWin32kBase'\include'
+        call lineout sIncFile, 'WIN32KLIB        =' sWin32kBase'\lib'
         call lineout sIncFile, 'WIN32KLIST       =' sWin32kBase'\list'
+        call lineout sIncFile, 'WIN32KOBJ        =' sWin32kBase'\object'
         sPDWin32Base = substr(sWin32kBase, 1, lastpos('\', sWin32kBase, lastpos('\', sWin32kBase)-1)-1);
         call lineout sIncFile, 'PDWIN32BASE      =' sPDWin32Base
         call lineout sIncFile, 'PDWIN32_INCLUDE  =' sPDWin32Base'\include'
