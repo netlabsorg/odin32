@@ -1,4 +1,4 @@
-/* $Id: treeview.c,v 1.4 1999-06-16 20:25:44 cbratschi Exp $ */
+/* $Id: treeview.c,v 1.5 1999-06-23 19:45:02 achimha Exp $ */
 /* Treeview control
  *
  * Copyright 1998 Eric Kohl <ekohl@abo.rhein-zeitung.de>
@@ -1147,9 +1147,9 @@ TREEVIEW_GetItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
 //              FIXME (treeview," TVIF_INTEGRAL not supported yet\n");
    }
 
-   if (tvItem->mask & TVIF_PARAM) {
-        tvItem->lParam=wineItem->lParam;
-   }
+   // undocumented: windows ignores TVIF_PARAM and
+   // always sets lParam
+   tvItem->lParam=wineItem->lParam;
 
    if (tvItem->mask & TVIF_SELECTEDIMAGE) {
         tvItem->iSelectedImage=wineItem->iSelectedImage;
@@ -1506,7 +1506,7 @@ TREEVIEW_InsertItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
     memcpy (&infoPtr->items[0], &oldItems[0],
                     infoPtr->uNumPtrsAlloced/2 * sizeof(TREEVIEW_ITEM));
     memcpy (&infoPtr->freeList[0], &oldfreeList[0],
-                    infoPtr->uNumPtrsAlloced>>6 * sizeof(INT));
+                    (infoPtr->uNumPtrsAlloced>>6) * sizeof(INT));
 
     COMCTL32_Free (oldItems);
     COMCTL32_Free (oldfreeList);

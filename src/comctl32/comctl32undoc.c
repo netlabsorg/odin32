@@ -1,4 +1,4 @@
-/* $Id: comctl32undoc.c,v 1.6 1999-06-10 16:21:58 achimha Exp $ */
+/* $Id: comctl32undoc.c,v 1.7 1999-06-23 19:45:00 achimha Exp $ */
 /*
  * Undocumented functions from COMCTL32.DLL
  *
@@ -617,7 +617,7 @@ DSA_SetItem (const HDSA hdsa, INT nIndex, LPVOID pSrc)
     INT  nSize, nNewItems;
     LPVOID pDest, lpTemp;
     
-//    TRACE (commctrl, "(%p %d %p)\n", hdsa, nIndex, pSrc);
+//    TRACE("(%p %d %p)\n", hdsa, nIndex, pSrc);
 
     if ((!hdsa) || nIndex < 0)
 	return FALSE;
@@ -626,7 +626,7 @@ DSA_SetItem (const HDSA hdsa, INT nIndex, LPVOID pSrc)
 	/* within the old array */
 	if (hdsa->nMaxCount > nIndex) {
 	    /* within the allocated space, set a new boundary */
-	    hdsa->nItemCount = nIndex;
+	    hdsa->nItemCount = nIndex + 1;
 	}
 	else {
 	    /* resize the block of memory */
@@ -639,13 +639,14 @@ DSA_SetItem (const HDSA hdsa, INT nIndex, LPVOID pSrc)
 		return FALSE;
 
 	    hdsa->nMaxCount = nNewItems;
+	    hdsa->nItemCount = nIndex + 1;
 	    hdsa->pData = lpTemp;
 	}    
     }
 
     /* put the new entry in */
     pDest = (char *) hdsa->pData + (hdsa->nItemSize * nIndex);
-//    TRACE (commctrl, "-- move dest=%p src=%p size=%d\n",
+//    TRACE("-- move dest=%p src=%p size=%d\n",
 //	   pDest, pSrc, hdsa->nItemSize);
     memmove (pDest, pSrc, hdsa->nItemSize);
 
@@ -673,7 +674,7 @@ DSA_InsertItem (const HDSA hdsa, INT nIndex, LPVOID pSrc)
     LPVOID  lpTemp, lpDest;
     LPDWORD p;
     
-//    TRACE(commctrl, "(%p %d %p)\n", hdsa, nIndex, pSrc);
+//    TRACE("(%p %d %p)\n", hdsa, nIndex, pSrc);
 
     if ((!hdsa) || nIndex < 0)
 	return -1;
@@ -681,9 +682,9 @@ DSA_InsertItem (const HDSA hdsa, INT nIndex, LPVOID pSrc)
     for (i = 0; i < hdsa->nItemSize; i += 4) {
 	p = *(DWORD**)((char *) pSrc + i);
 //	if (IsBadStringPtrA ((char*)p, 256))
-//	    TRACE (commctrl, "-- %d=%p\n", i, (DWORD*)p);
+//	    TRACE("-- %d=%p\n", i, (DWORD*)p);
 //	else
-//	    TRACE (commctrl, "-- %d=%p [%s]\n", i, p, debugstr_a((char*)p));
+//	    TRACE("-- %d=%p [%s]\n", i, p, debugstr_a((char*)p));
     }
    
     /* when nIndex > nItemCount then append */
@@ -708,7 +709,7 @@ DSA_InsertItem (const HDSA hdsa, INT nIndex, LPVOID pSrc)
 	lpTemp = (char *) hdsa->pData + (hdsa->nItemSize * nIndex);
 	lpDest = (char *) lpTemp + hdsa->nItemSize;
 	nSize = (hdsa->nItemCount - nIndex) * hdsa->nItemSize;
-//	TRACE (commctrl, "-- move dest=%p src=%p size=%d\n",
+//	TRACE("-- move dest=%p src=%p size=%d\n",
 //	       lpDest, lpTemp, nSize);
 	memmove (lpDest, lpTemp, nSize);
     }
@@ -716,7 +717,7 @@ DSA_InsertItem (const HDSA hdsa, INT nIndex, LPVOID pSrc)
     /* ok, we can put the new Item in */
     hdsa->nItemCount++;
     lpDest = (char *) hdsa->pData + (hdsa->nItemSize * nIndex);
-//    TRACE (commctrl, "-- move dest=%p src=%p size=%d\n",
+//    TRACE("-- move dest=%p src=%p size=%d\n",
 //	   lpDest, pSrc, hdsa->nItemSize);
     memmove (lpDest, pSrc, hdsa->nItemSize);
 

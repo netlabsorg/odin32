@@ -1,5 +1,3 @@
-/* $Id: listview.h,v 1.1 1999-05-24 20:19:13 ktk Exp $ */
-
 /*
  * Listview class extra info
  *
@@ -39,8 +37,6 @@ typedef struct tagLISTVIEW_INFO
     HIMAGELIST himlState;
     BOOL bLButtonDown;
     BOOL bRButtonDown;
-    INT nCountPerColumn;
-    INT nCountPerRow;
     INT nFocusedItem;
     INT nItemHeight;
     INT nItemWidth;
@@ -57,7 +53,9 @@ typedef struct tagLISTVIEW_INFO
     BOOL bFocus;
     DWORD dwExStyle;    /* extended listview style */
     HDPA hdpaItems;
-
+    PFNLVCOMPARE pfnCompare;
+    LPARAM lParamSort;
+    
 } LISTVIEW_INFO;
 
 
