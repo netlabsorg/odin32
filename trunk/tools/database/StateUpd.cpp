@@ -1,4 +1,4 @@
-/* $Id: StateUpd.cpp,v 1.18 2000-02-15 13:37:52 bird Exp $
+/* $Id: StateUpd.cpp,v 1.19 2000-02-18 12:42:06 bird Exp $
  *
  * StateUpd - Scans source files for API functions and imports data on them.
  *
@@ -14,9 +14,10 @@
 #define INCL_DOSMISC
 #define INCL_DOSPROCESS
 #include <os2.h>
+#include <malloc.h>
 #include <stdio.h>
 #include <string.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include <assert.h>
 
 #include "StateUpd.h"
@@ -29,6 +30,12 @@
 *******************************************************************************/
 static FILE  *phLog = NULL;
 static FILE  *phSignal = NULL;
+
+static const char *pszCommonKeywords[] =
+{
+    "* Author",     "* Status",     "* Remark",     "* Result",
+    "* Variable",   "* Parameters", "* Purpose",    NULL
+};
 
 
 /*******************************************************************************
@@ -43,18 +50,23 @@ static unsigned long processAPI(char **papszLines, int i, int &iRet, const char 
 static unsigned long analyseFnHdr(PFNDESC pFnDesc, char **papszLines, int i, const char *pszFilename, POPTIONS pOptions);
 static unsigned long analyseFnDcl(PFNDESC pFnDesc, char **papszLines, int i, int &iRet, const char *pszFilename, POPTIONS pOptions);
 static unsigned long analyseFnDcl2(PFNDESC pFnDesc, char **papszLines, int i, int &iRet, const char *pszFilename, POPTIONS pOptions);
+static char *SDSCopyTextUntilNextTag(char *pszTarget, BOOL fHTML, int iStart, int iEnd, char **papszLines, const char *pszStart = NULL);
+static char *CommonCopyTextUntilNextTag(char *pszTarget, BOOL fHTML, int iStart, int iEnd, char **papszLines, const char *pszStart = NULL);
 static BOOL  isFunction(char **papszLines, int i, POPTIONS pOptions);
 static long _System dbNotUpdatedCallBack(const char *pszValue, const char *pszFieldName, void *pvUser);
 static char *skipInsignificantChars(char **papszLines, int &i, char *psz);
 static char *readFileIntoMemory(const char *pszFilename);
 static char **createLineArray(char *pszFile);
-static char *findEndOfWord(char *psz);
-static char *findStartOfWord(char *psz, const char *pszStart);
-static char *trim(char *psz);
-static void copy(char *psz, int jFrom, int iFrom, int jTo, int iTo, char **papszLines);
-static void copy(char *psz, char *pszFrom, int iFrom, char *pszTo, int iTo, char **papszLines);
+static char *findEndOfWord(const char *psz);
+static char *findStartOfWord(const char *psz, const char *pszStart);
+inline char *trim(char *psz);
+inline char *trimR(char *psz);
+inline char *skip(const char *psz);
+static void  copy(char *psz, int jFrom, int iFrom, int jTo, int iTo, char **papszLines);
+static void  copy(char *psz, char *pszFrom, int iFrom, char *pszTo, int iTo, char **papszLines);
 static char *stristr(const char *pszStr, const char *pszSubStr);
 static char *skipBackwards(const char *pszStopAt, const char *pszFrom, int &iLine, char **papszLines);
+static int   findStrLine(const char *psz, int iStart, int iEnd, char **papszLines);
 
 
 /**
@@ -636,12 +648,21 @@ static unsigned long processAPI(char **papszLines, int i, int &iRet, const char 
         fprintf(phLog, "  Returns: '%s'\n", FnDesc.pszReturnType != NULL ? FnDesc.pszReturnType : "<missing>");
         fprintf(phLog, "  cParams: %2d\n", FnDesc.cParams);
         for (j = 0; j < FnDesc.cParams; j++)
-            fprintf(phLog, "  Param %2d: type '%s' %*s name '%s'\n", j, FnDesc.apszParamType[j],
-                    (int)(15 - strlen(FnDesc.apszParamType[j])), "", FnDesc.apszParamName[j]);
+            fprintf(phLog, "  Param %2d: type '%s' %*s name '%s' description: %s\n", j, FnDesc.apszParamType[j],
+                    max((int)(15 - strlen(FnDesc.apszParamType[j])), 0), "", FnDesc.apszParamName[j],
+                    FnDesc.apszParamDesc[j] != NULL ?  FnDesc.apszParamDesc[j] : "(null)");
         fprintf(phLog, "  Status:   %ld - '%s'\n", FnDesc.lStatus, FnDesc.pszStatus != NULL ? FnDesc.pszStatus : "<missing>");
         fprintf(phLog, "  cAuthors: %2d\n", FnDesc.cAuthors);
         for (j = 0; j < FnDesc.cAuthors; j++)
             fprintf(phLog, "  Author %d: '%s'  (refcode=%ld)\n", j, FnDesc.apszAuthor[j], FnDesc.alAuthorRefCode[j]);
+
+        fprintf(phLog, "  Description: %s\n", FnDesc.pszDescription != NULL ? FnDesc.pszDescription : "(null)");
+        fprintf(phLog, "  Remark:      %s\n", FnDesc.pszRemark != NULL ? FnDesc.pszRemark : "(null)");
+        fprintf(phLog, "  Return Desc: %s\n", FnDesc.pszReturnDesc != NULL ? FnDesc.pszReturnDesc : "(null)");
+        fprintf(phLog, "  Sketch:      %s\n", FnDesc.pszSketch != NULL ? FnDesc.pszSketch : "(null)");
+        fprintf(phLog, "  Equiv:       %s\n", FnDesc.pszEquiv != NULL ? FnDesc.pszEquiv : "(null)");
+        fprintf(phLog, "  Time:        %s\n", FnDesc.pszTime != NULL ? FnDesc.pszTime : "(null)");
+        fprintf(phLog, "------------\n");
 
         /* 4.*/
         ulRcTmp = dbUpdateFunction(&FnDesc, pOptions->lDllRefcode, pszErrorDesc);
@@ -1067,7 +1088,8 @@ static unsigned long analyseFnDcl2(PFNDESC pFnDesc, char **papszLines, int i, in
  * @param     i            Index into papszLines.
  * @param     pszFilename  Filename used in the signal log.
  * @param     pOptions     Pointer to options.
- * @sketch    1. Search backwards (start at i-1) for a comment or code.
+ * @sketch    0. initiate pFnDesc struct
+ *            1. Search backwards (start at i-1) for a comment or code.
  *            2. If comment: (else fail)
  *                2a. find start and end of comment.
  *                2b. check for function header characteristics
@@ -1087,7 +1109,7 @@ static unsigned long analyseFnHdr(PFNDESC pFnDesc, char **papszLines, int i, con
     int   fFound;
     int   fSDS = 0;
     char *psz, *pszB;
-    char *pszAuthor = NULL;
+    char *pszAuthors = NULL;
     unsigned long ulRc = 0x00000001;
 
     pOptions = pOptions;
@@ -1095,7 +1117,19 @@ static unsigned long analyseFnHdr(PFNDESC pFnDesc, char **papszLines, int i, con
     if (i < 0) /* parameter validation */
         return 0;
 
-    /* 1. + 2a.*/
+    /*
+     * 0. initiate pFnDesc struct
+     */
+    for (j = 0; j < pFnDesc->cParams; j++)
+        pFnDesc->apszParamDesc[j] = NULL;
+    pFnDesc->cAuthors = 0;
+    pFnDesc->pszDescription = pFnDesc->pszRemark = pFnDesc->pszReturnDesc = NULL;
+    pFnDesc->pszSketch = pFnDesc->pszEquiv = pFnDesc->pszTime = pFnDesc->pszStatus = NULL;
+    pFnDesc->lStatus = 99; /* unknown */
+
+    /*
+     * 1. + 2a.
+     */
     iEnd = i-1; /* find end */
     j = strlen(papszLines[iEnd]);
     j -= j > 0 ? 1 : 0;
@@ -1133,129 +1167,162 @@ static unsigned long analyseFnHdr(PFNDESC pFnDesc, char **papszLines, int i, con
         return 0;
     jStart = j;
 
-    /* 2b.*/
+    /*
+     * 2b.
+     */
     if (strncmp(&papszLines[iStart][jStart], "/**", 3) != 0) /* checks that there are more than one star at start of comment */
         return 0;
 
-    iName = iStart; /* Odin32 common */
-    while (iName <= iEnd &&
-           stristr(papszLines[iName], "* Name") == NULL)
-        iName++;
-    iStatus = iStart;
-    while (iStatus <= iEnd &&
-           stristr(papszLines[iStatus], "* Status") == NULL)
-        iStatus++;
-    iAuthor = iStart;
-    while (iAuthor <= iEnd &&
-           stristr(papszLines[iAuthor], "* Author") == NULL)
-        iAuthor++;
+    /* Odin32 common? */
+    iName   = findStrLine("* Name", iStart, iEnd, papszLines);
+    iStatus = findStrLine("* Status", iStart, iEnd, papszLines);
+    iAuthor = findStrLine("* Author", iStart, iEnd, papszLines);
 
-    if (!(iName <= iEnd || iStatus <= iEnd || iAuthor <= iEnd)) /* if not found try SDS */
+    if (!(iName <= iEnd || iStatus <= iEnd || iAuthor <= iEnd))
     {
-        iStatus = iStart;
-        while (iStatus <= iEnd &&
-               stristr(papszLines[iStatus], "@status") == NULL)
-            iStatus++;
-        iAuthor = iStart;
-        while (iAuthor <= iEnd &&
-               stristr(papszLines[iAuthor], "@author") == NULL)
-            iAuthor++;
+        /* SDS ? */
+        iStatus = findStrLine("@status", iStart, iEnd, papszLines);
+        iAuthor = findStrLine("@author", iStart, iEnd, papszLines);
+        iName   = iEnd + 1;
+
         if (!(iStatus <= iEnd || iAuthor <= iEnd))
             return 0;
-        fSDS = 1;
+        fSDS = TRUE;
     }
-
-    /* 2c.*/
-    if (iName <= iEnd && strstr(papszLines[iName], pFnDesc->pszName) == NULL)
-        fprintf(phLog, "Warning: a matching function name is not found in the name Field\n");
+    else
+    {
+        /* 2c.*/
+        if (iName <= iEnd && strstr(papszLines[iName], pFnDesc->pszName) == NULL)
+            fprintf(phLog, "Warning: a matching function name is not found in the name Field\n");
+    }
 
     /* 2d.*/
     pszB = &pFnDesc->szFnHdrBuffer[0];
     if (!fSDS)
-    {   /* Odin32 common */
-        if (iStatus <= iEnd) /* Status */
-        {
-            psz = stristr(papszLines[iStatus], "* Status") + sizeof("* Status") - 1;
-            while (*psz != '\0' && (*psz == ' ' || *psz == ':'))
-                psz++;
-            strcpy(pszB, psz);
-            trim(pszB);
-            if (*pszB != '\0' && pszB[strlen(pszB)-1] == '*') /* just in case some have an right hand '*' column */
-            {
-                pszB[strlen(pszB)-1] = '\0';
-                trim(pszB);
-            }
-            pFnDesc->pszStatus = pszB;
-            pszB += strlen(pszB) + 1;
-        }
+    {
+        /*
+         * Odin32 common styled header
+         */
 
-        if (iAuthor <= iEnd) /* Author(s) */
-        {
-            pszAuthor = pszB;
-            psz = stristr(papszLines[iAuthor], "* Author") + sizeof("* Author") - 1;
-            do
-            {
-                while (*psz != '\0' && (*psz == ' ' || *psz == ':'))
-                    psz++;
-                strcpy(pszB, psz);
-                trim(pszB);
-                if (*pszB != '\0' && pszB[strlen(pszB)-1] == '*') /* just in case some have an right hand '*' column */
-                {
-                    pszB[strlen(pszB)-1] = '\0';
-                    trim(pszB);
-                }
-                if (*pszB != '\0' && pszB[strlen(pszB)-1] != ',')
-                    strcat(pszB, ",");
-                pszB += strlen(pszB);
+        /* Author(s) */
+        pszAuthors              = CommonCopyTextUntilNextTag(pszB, FALSE, iAuthor, iEnd, papszLines);
+        pszB += strlen(pszB) + 1;
 
-                /* next */
-                psz = papszLines[++iAuthor] + 1;
-                j = 0;
-                while (*psz == ' ' && j++ < 5) psz++;
-                if (*psz == '*')
-                    psz++;
-            } while (iAuthor < iEnd && *psz == ' ');
-            pszB++;
-        }
+        /* Status */
+        pFnDesc->pszStatus      = CommonCopyTextUntilNextTag(pszB, FALSE, iStatus, iEnd, papszLines);
+        pszB += strlen(pszB) + 1;
+
+        /* Remark */
+        i = findStrLine("* Remark", iStart, iEnd, papszLines);
+        pFnDesc->pszRemark      = CommonCopyTextUntilNextTag(pszB, TRUE, i, iEnd, papszLines);
+        pszB += strlen(pszB) + 1;
+
+        /* Description */
+        i = findStrLine("* Purpose", iStart, iEnd, papszLines);
+        pFnDesc->pszDescription = CommonCopyTextUntilNextTag(pszB, TRUE, i, iEnd, papszLines);
+        pszB += strlen(pszB) + 1;
+
+        /* Return(result) description */
+        i = findStrLine("* Result", iStart, iEnd, papszLines);
+        pFnDesc->pszReturnDesc  = CommonCopyTextUntilNextTag(pszB, TRUE, i, iEnd, papszLines);
+        pszB += strlen(pszB) + 1;
+
+        /* FIXME parameters */
+
     }
     else
-    {   /* SDS */
-        if (iStatus <= iEnd)
-        {
-            psz = stristr(papszLines[iStatus], "@status") + sizeof("@status");
-            while (*psz == ' ')
-                psz++;
-            strcpy(pszB, psz);
-            trim(pszB);
-            pszB += strlen(pszB) + 1;
-        }
+    {
+        /*
+         * SDS styled header
+         */
 
-        if (iAuthor <= iEnd)
+        /* author */
+        pszAuthors              = SDSCopyTextUntilNextTag(pszB, FALSE, iAuthor, iEnd, papszLines);
+        pszB += strlen(pszB) + 1;
+
+        /* status */
+        pFnDesc->pszReturnDesc  = SDSCopyTextUntilNextTag(pszB, FALSE, iStatus, iEnd, papszLines);
+        pszB += strlen(pszB) + 1;
+
+        /* remark */
+        i = findStrLine("@remark", iStart, iEnd, papszLines);
+        pFnDesc->pszRemark      = SDSCopyTextUntilNextTag(pszB, TRUE, i, iEnd, papszLines);
+        pszB += strlen(pszB) + 1;
+
+        /* description */
+        i = findStrLine("@desc",   iStart, iEnd, papszLines);
+        pFnDesc->pszDescription = SDSCopyTextUntilNextTag(pszB, TRUE, i > iEnd ? iStart : i, iEnd, papszLines);
+        pszB += strlen(pszB) + 1;
+
+        /* sketch */
+        i = findStrLine("@sketch", iStart, iEnd, papszLines);
+        pFnDesc->pszSketch      = SDSCopyTextUntilNextTag(pszB, TRUE, i, iEnd, papszLines);
+        pszB += strlen(pszB) + 1;
+
+        /* return description */
+        i = findStrLine("@return", iStart, iEnd, papszLines);
+        pFnDesc->pszReturnDesc  = SDSCopyTextUntilNextTag(pszB, TRUE, i, iEnd, papszLines);
+        pszB += strlen(pszB) + 1;
+
+        /* time */
+        i = findStrLine("@time", iStart, iEnd, papszLines);
+        pFnDesc->pszReturnDesc  = SDSCopyTextUntilNextTag(pszB, TRUE, i, iEnd, papszLines);
+        pszB += strlen(pszB) + 1;
+
+        /* equiv */
+        i = findStrLine("@equiv", iStart, iEnd, papszLines);
+        pFnDesc->pszReturnDesc  = SDSCopyTextUntilNextTag(pszB, TRUE, i, iEnd, papszLines);
+        pszB += strlen(pszB) + 1;
+
+        /* Set parameter descriptions to NULL */
+        for (i = 0; i < pFnDesc->cParams; i++)
+            pFnDesc->apszParamDesc[i] = NULL;
+
+        /*
+         * parameters, new @param for each parameter!
+         */
+        do
         {
-            pszAuthor = pszB;
-            psz = stristr(papszLines[iAuthor], "@author") + sizeof("@author");
-            do
+            char *pszParam;
+
+            /* find first */
+            i = findStrLine("@param", iStart, iEnd, papszLines);
+            if (i >= iEnd)
+                break;
+
+            /* Get parameter name - first word */
+            pszParam = SDSCopyTextUntilNextTag(pszB, TRUE, i, iEnd, papszLines);
+            if (pszParam != NULL)
             {
-                while (*psz == ' ')
-                    psz++;
-                strcpy(pszB, psz);
-                trim(pszB);
-                if (*pszB != '\0' && pszB[strlen(pszB)-1] != ',')
-                    strcat(pszB, ",");
-                pszB += strlen(pszB) + 1;
+                /* first word in psz is the parameter name! */
+                psz = findEndOfWord(pszParam);
+                *psz++ = '\0';
 
-                /* next */
-                psz = papszLines[++iAuthor] + 1;
-                j = 0;
-                while (*psz == ' ' && j++ < 5) psz++;
-                if (*psz == '*')
-                    psz++;
-            } while (iAuthor <= iEnd && (*psz == ' ' || *psz == '@'));
-            pszB++;
-        }
+                /* find parameter */
+                for (j = 0; j < pFnDesc->cParams; j++)
+                    if (strcmp(pFnDesc->apszParamName[j], pszParam) != 0)
+                        break;
+                if (j < pFnDesc->cParams)
+                {
+                    /* find end of parameter name */
+                    psz = findEndOfWord(strstr(papszLines[i], pszParam));
+                    /* copy from end of parameter name */
+                    pFnDesc->apszParamDesc[j] = SDSCopyTextUntilNextTag(pszB, TRUE, i, iEnd, papszLines, psz);
+                    pszB += strlen(pszB) + 1;
+                }
+                else
+                {   /* signal that parameter name wasn't found! */
+                    fprintf(phSignal, "%s, %s: '%s' is not a valid parameter.\n",
+                            pszFilename, pFnDesc->pszName, pszParam);
+                    ulRc += 0x00010000;
+                }
+            }
+        } while (i > iEnd);
     }
 
-    /* Status - refcodes are hardcoded here! */
+    /*
+     * Status - refcodes are hardcoded here!
+     */
     if (pFnDesc->pszStatus != NULL && *pFnDesc->pszStatus != '\0')
     {
         if (strstr(pFnDesc->pszStatus, "STUB") != NULL || *pFnDesc->pszStatus == '1')
@@ -1288,17 +1355,20 @@ static unsigned long analyseFnHdr(PFNDESC pFnDesc, char **papszLines, int i, con
         }
     }
 
-    /* Author */
-    if (pszAuthor)
+    /*
+     * Author
+     */
+    if (pszAuthors != NULL)
     {   /* author1, author2, author3 */
         j = 0;
-        psz = trim(pszAuthor);
+        psz = trim(pszAuthors);
         pFnDesc->cAuthors = 0;
         while (*psz != '\0' && pFnDesc->cAuthors < (int)(sizeof(pFnDesc->apszAuthor) / sizeof(pFnDesc->apszAuthor[0])))
         {
             char *pszBr1 = strchr(psz, '[');
             char *pszBr2 = strchr(psz, ']');
-            char *pszComma;
+            char *pszEmail = NULL;
+            char *pszNext;
 
             /* remove '[text]' text - this is usualy used for time/date */
             if (pszBr1 != NULL && pszBr2 != NULL && pszBr1 < pszBr2)
@@ -1306,16 +1376,29 @@ static unsigned long analyseFnHdr(PFNDESC pFnDesc, char **papszLines, int i, con
                     *pszBr1++ = ' ';
 
             /* terminate string */
-            pszComma = strchr(psz, ',');
-            if (pszComma != NULL)
+            pszNext = strchr(psz, ',');
+            if (pszNext == NULL)
+                pszNext = strchr(psz, '\n');
+            if (pszNext != NULL)
+                *pszNext = '\0';
+
+            /* check for (email) test */
+            pszBr1 = strchr(psz, '(');
+            pszBr2 = strchr(psz, ')');
+            if (pszBr1 != NULL || pszBr2 != NULL)
             {
-                pszAuthor = pszComma + 1;
-                *pszComma = '\0';
+                if (pszBr1 != NULL)
+                    *pszBr1++ = '\0';
+                if (pszBr2 != NULL)
+                    *pszBr2++ = '\0';
+
+                if (pszBr1 != NULL && pszBr1 < pszBr2)
+                    pszEmail = trim(pszBr1 + 1);
             }
 
             pFnDesc->apszAuthor[pFnDesc->cAuthors]      = trim(psz);
             pFnDesc->alAuthorRefCode[pFnDesc->cAuthors] =
-                dbFindAuthor(pFnDesc->apszAuthor[pFnDesc->cAuthors]);
+                dbFindAuthor(pFnDesc->apszAuthor[pFnDesc->cAuthors], pszEmail);
 
             if (pFnDesc->alAuthorRefCode[pFnDesc->cAuthors] == -1)
             {
@@ -1326,12 +1409,244 @@ static unsigned long analyseFnHdr(PFNDESC pFnDesc, char **papszLines, int i, con
 
             /* next */
             pFnDesc->cAuthors++;
-            psz = trim(pszAuthor);
+            psz = pszNext ? skip(pszNext + 1) : "";
         }
     }
 
     return ulRc;
 }
+
+
+
+/**
+ * Copies a piece of tag/keyword text into an buffer. SDS.
+ * @returns   Pointer to buffer. If iStart > iEnd NULL is returned.
+ * @param     pszTarget  Pointer to buffer.
+ * @param     fHTML      Add HTML tags like <br> or not
+ * @param     iStart     Index of start line.
+ * @param     iEnd       Index of last line.
+ * @param     apszLines  Array lines.
+ * @param     pszStart   Pointer to char to start at (into papszLines[iStart] of course!)
+ * @status    completely impelmented.
+ * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @remark    Addes some HTML tags.
+ */
+static char *SDSCopyTextUntilNextTag(char *pszTarget, BOOL fHTML, int iStart, int iEnd, char **papszLines, const char *pszStart)
+{
+    char *pszRet = pszTarget;
+
+    if (iStart <= iEnd)
+    {
+        int         iStartColumn;
+        const char *psz = pszStart != NULL ? pszStart : papszLines[iStart];
+
+        /*
+         * skip dummy chars.
+         */
+        while (iStart <= iEnd && (*psz == ' ' || *psz == '/' || *psz == '*' || *psz == '\0' ))
+        {
+            if (*psz == '\0')
+                psz = papszLines[++iStart];
+            else
+                psz++;
+        }
+
+        /* Anything left of the area to copy? */
+        if (iStart <= iEnd)
+        {
+            /*
+             * if we stand at a tag, skip over the tag
+             */
+            if (*psz == '@')
+                psz = skip(findEndOfWord(psz+1));
+
+            /*
+             * save start columen
+             */
+            iStartColumn = psz - papszLines[iStart];
+
+            /*
+             * Copy loop.
+             */
+            do
+            {
+                int i;
+                for (i = psz - papszLines[iStart]; i < iStartColumn; i++)
+                    *pszTarget++ = ' '; /* FIXME HTML and indenting... */
+
+                strcpy(pszTarget, psz);
+                trimR(pszTarget);
+                pszTarget += strlen(pszTarget);
+                if (fHTML)
+                    strcpy(pszTarget, "<BR>\n");
+                else
+                    strcpy(pszTarget, "\n");
+                pszTarget += strlen(pszTarget);
+
+                /* Next */
+                psz = skip(papszLines[++iStart]);
+                if (iStart <= iEnd)
+                {
+                    while (psz != NULL && *psz == '*')
+                        ++psz;
+                    psz = skip(psz);
+                    /* end test comment */
+                    if (psz > papszLines[iStart] && psz[-1] == '*' && *psz == '/')
+                        break;
+                }
+            } while (iStart <= iEnd && *psz != '@');
+
+            /*
+             * remove empty lines at end.
+             */
+            if (fHTML)
+            {
+                pszTarget--;
+                while (pszTarget >= pszRet && (*pszTarget == '\n' || *pszTarget == ' '))
+                {
+                    if (*pszTarget == '\n')
+                        pszTarget -= 4;
+                    *pszTarget-- = '\0';
+                }
+            }
+            else
+            {
+                pszTarget--;
+                while (pszTarget >= pszRet && (*pszTarget == '\n' || *pszTarget == ' '))
+                    *pszTarget-- = '\0';
+            }
+        }
+        else
+            pszTarget = '\0';
+    }
+    else
+        pszRet = NULL;
+
+    return pszRet != NULL && *pszRet == '\0' ?  NULL : pszRet;
+}
+
+
+
+/**
+ * Copies a piece of tag/keyword text into an buffer. SDS.
+ * @returns   Pointer to buffer. If iStart > iEnd NULL is returned.
+ * @param     pszTarget  Pointer to buffer.
+ * @param     fHTML      Add HTML tags like <br> or not
+ * @param     iStart     Index of start line.
+ * @param     iEnd       Index of last line.
+ * @param     apszLines  Array lines.
+ * @param     pszStart   Pointer to char to start at (into papszLines[iStart] of course!)
+ * @status    completely impelmented.
+ * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @remark    Addes some HTML tags.
+ */
+static char *CommonCopyTextUntilNextTag(char *pszTarget, BOOL fHTML, int iStart, int iEnd, char **papszLines, const char *pszStart)
+{
+    char *pszRet = pszTarget;
+
+    if (iStart <= iEnd)
+    {
+        /* known keywords */
+        int         iStartColumn;
+        int         i;
+        const char *psz = pszStart != NULL ? pszStart : papszLines[iStart];
+
+        /*
+         * Skip evt. keyword
+         */
+        psz = skip(psz);
+        for (i = 0; pszCommonKeywords[i] != NULL; i++)
+            if (strnicmp(pszCommonKeywords[i], psz, strlen(pszCommonKeywords[i])) == 0)
+            {
+                psz = skip(psz + strlen(pszCommonKeywords[i]));
+                psz = skip(*psz == ':' ? psz + 1 : psz);
+                break;
+            }
+
+        /*
+         * save start columen
+         */
+        iStartColumn = psz - papszLines[iStart];
+
+        /*
+         * copy loop
+         */
+        do
+        {
+            /*
+             * Skip '*'s at start of the line.
+             */
+            while (*psz == '*')
+                psz++;
+
+            /* end comment check */
+            if (psz > papszLines[iStart] && psz[-1] == '*' && *psz == '/')
+                break;
+            psz = skip(psz);
+
+            /*
+             * Indent up to iStartColumn
+             */
+            for (i = psz - papszLines[iStart]; i < iStartColumn; i++)
+                *pszTarget++ = ' '; /* FIXME HTML and indenting... */
+
+            /*
+             * Copy the rest of the line and add HTML break.
+             */
+            strcpy(pszTarget, psz);
+            trimR(pszTarget);
+            pszTarget += strlen(pszTarget);
+            if (fHTML)
+                strcpy(pszTarget, "<BR>\n");
+            else
+                strcpy(pszTarget, "\n");
+            pszTarget += strlen(pszTarget);
+
+            /*
+             * Next
+             */
+            psz = skip(papszLines[++iStart]);
+
+            /*
+             * Check for keyword
+             */
+            if (iStart <= iEnd)
+            {
+                psz = skip(psz);
+                for (i = 0; pszCommonKeywords[i] != NULL; i++)
+                    if (strnicmp(pszCommonKeywords[i], psz, strlen(pszCommonKeywords[i])) == 0)
+                        break;
+                if (pszCommonKeywords[i] != NULL)
+                    break;
+            }
+        } while (iStart < iEnd);
+
+        /*
+         * remove empty lines at end.
+         */
+        if (fHTML)
+        {
+            pszTarget--;
+            while (pszTarget >= pszRet && (*pszTarget == '\n' || *pszTarget == ' '))
+            {
+                if (*pszTarget == '\n')
+                    pszTarget -= 4;
+                *pszTarget-- = '\0';
+            }
+        }
+        else
+        {
+            pszTarget--;
+            while (pszTarget >= pszRet && (*pszTarget == '\n' || *pszTarget == ' '))
+                *pszTarget-- = '\0';
+        }
+    }
+    else
+        pszRet = NULL;
+
+    return pszRet != NULL && *pszRet == '\0' ?  NULL : pszRet;
+}
+
 
 
 /**
@@ -1698,7 +2013,7 @@ static char **createLineArray(char *pszFile)
 
 
 /** first char after word */
-static char *findEndOfWord(char *psz)
+static char *findEndOfWord(const char *psz)
 {
 
     while (*psz != '\0' &&
@@ -1711,14 +2026,14 @@ static char *findEndOfWord(char *psz)
             )
           )
         ++psz;
-    return psz;
+    return (char *)psz;
 }
 
 
 /** starting char of word */
-static char *findStartOfWord(char *psz, const char *pszStart)
+static char *findStartOfWord(const char *psz, const char *pszStart)
 {
-    char *pszR = psz;
+    const char *pszR = psz;
     while (psz >= pszStart &&
             (
                  (*psz >= 'A' && *psz <= 'Z')
@@ -1728,7 +2043,7 @@ static char *findStartOfWord(char *psz, const char *pszStart)
              )
           )
         pszR = psz--;
-    return pszR;
+    return (char*)pszR;
 }
 
 
@@ -1739,7 +2054,7 @@ static char *findStartOfWord(char *psz, const char *pszStart)
  * @status    completely implmented.
  * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
  */
-static char *trim(char *psz)
+inline char *trim(char *psz)
 {
     int i;
     if (psz == NULL)
@@ -1751,6 +2066,44 @@ static char *trim(char *psz)
         i--;
     psz[i+1] = '\0';
     return psz;
+}
+
+
+/**
+ * Right trims a string, ie. removing spaces (and tabs) from the end of the string.
+ * @returns   Pointer to the string passed in.
+ * @param     psz   Pointer to the string which is to be right trimmed.
+ * @status    completely implmented.
+ * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ */
+inline char *trimR(char *psz)
+{
+    int i;
+    if (psz == NULL)
+        return NULL;
+    i = strlen(psz) - 1;
+    while (i >= 0 && (psz[i] == ' ' || *psz == '\t'))
+        i--;
+    psz[i+1] = '\0';
+    return psz;
+}
+
+
+/**
+ * skips blanks until first non-blank.
+ * @returns   Pointer to first not space or tab char in the string.
+ * @param     psz   Pointer to the string.
+ * @status    completely implmented.
+ * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ */
+inline char *skip(const char *psz)
+{
+    if (psz == NULL)
+        return NULL;
+
+    while (*psz == ' ' || *psz == '\t')
+        psz++;
+    return (char*)psz;
 }
 
 
@@ -1990,4 +2343,26 @@ static char *skipBackwards(const char *pszStopAt, const char *pszFrom, int &iLin
 
     return (char*)pszFrom;
 }
+
+
+/**
+ * Finds a string in a range of pages.
+ * @returns   Index of the line (into ppaszLines).
+ * @param     psz         String to search for.
+ * @param     iStart      Start line.
+ * @param     iEnd        Line to stop at
+ * @param     papszLines  Array of lines to search within.
+ * @status    completely implemented.
+ * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ */
+static int findStrLine(const char *psz, int iStart, int iEnd, char **papszLines)
+{
+    while (iStart <= iEnd &&
+           stristr(papszLines[iStart], psz) == NULL)
+        iStart++;
+    return iStart;
+}
+
+
+
 

@@ -1,4 +1,4 @@
-/* $Id: db.h,v 1.6 2000-02-12 23:54:29 bird Exp $ */
+/* $Id: db.h,v 1.7 2000-02-18 12:42:07 bird Exp $ */
 /*
  * DB - contains all database routines
  *
@@ -31,7 +31,7 @@ extern "C" {
     {
         /* buffers */
         char  szFnDclBuffer[2048];
-        char  szFnHdrBuffer[2048];
+        char  szFnHdrBuffer[10240];
 
         /* function name and type */
         char *pszName;
@@ -44,11 +44,20 @@ extern "C" {
         int   cParams;
         char *apszParamType[30];
         char *apszParamName[30];
+        char *apszParamDesc[30];
 
         /* authors */
         int   cAuthors;
         char *apszAuthor[NBR_AUTHORS];
         long  alAuthorRefCode[NBR_AUTHORS];
+
+        /* other description fields */
+        char *pszDescription;
+        char *pszRemark;
+        char *pszReturnDesc;
+        char *pszSketch;
+        char *pszEquiv;
+        char *pszTime;
 
         /* status */
         char *pszStatus;
@@ -92,7 +101,7 @@ extern "C" {
     BOOL            _System dbFindFunction(const char *pszFunctionName,
                                            PFNFINDBUF pFnFindBuf,
                                            signed long lDll);
-    signed long     _System dbFindAuthor(const char *pszAuthor);
+    signed long     _System dbFindAuthor(const char *pszAuthor, const char *pszEmail);
     signed long     _System dbGetFunctionState(signed long lRefCode);
     unsigned long   _System dbUpdateFunction(PFNDESC pFnDesc,
                                              signed long lDll,

@@ -1,4 +1,4 @@
-/* $Id: db.cpp,v 1.10 2000-02-14 17:18:31 bird Exp $ *
+/* $Id: db.cpp,v 1.11 2000-02-18 12:42:06 bird Exp $ *
  *
  * DB - contains all database routines.
  *
@@ -79,6 +79,8 @@ static MYSQL        *pmysql = NULL;
 static long getvalue(int iField, MYSQL_ROW pRow);
 static unsigned long CheckAuthorError(char * &pszError, const char *pszFieldName, const char *pszFieldValue, const char *pszQuery);
 static unsigned long logDbError(char * &pszError, const char *pszQuery);
+static char *sqlstrcat(char *pszQuery, const char *pszBefore, const char *pszStr, const char *pszAfter = NULL);
+
 #ifndef DLL
     extern "C" void      dbHandler(int sig);
 #endif
@@ -296,7 +298,7 @@ BOOL _System dbInsertUpdateFunction(unsigned short usDll,
 {
     int  rc;
     long lFunction = -1;
-    char szQuery[256];
+    char szQuery[512];
     MYSQL_RES *pres;
 
     /* when no internal name fail! */
@@ -595,13 +597,28 @@ BOOL _System dbFindFunction(const char *pszFunctionName, PFNFINDBUF pFnFindBuf, 
  * @param     pszAuthor  String which holds the identifier of an author.
  *                       This doesn't have to be the name. Initials, alias and email
  *                       is also searched.
+ * @param     pszEmail   Email address. Might be NULL!
  */
-signed long _System dbFindAuthor(const char *pszAuthor)
+signed long _System dbFindAuthor(const char *pszAuthor, const char *pszEmail)
 {
     signed long refcode = -1;
     MYSQL_RES *pres;
-    char szQuery[256];
+    char szQuery[512];
 
+    /*
+     * parameter validations
+     */
+    if (pszAuthor == NULL || strlen(pszAuthor) > 64)
+        return -1;
+    if (pszEmail != NULL && strlen(pszEmail) > 64)
+    {
+        fprintf(stderr, "email too long!");
+        return -1;
+    }
+
+    /*
+     * Query
+     */
     sprintf(&szQuery[0],
             "SELECT refcode FROM author "
             "WHERE name     = '%s' OR "
@@ -609,6 +626,10 @@ signed long _System dbFindAuthor(const char *pszAuthor)
             "      alias    = '%s' OR "
             "      email    = '%s'",
             pszAuthor, pszAuthor, pszAuthor, pszAuthor);
+
+    if (pszEmail != NULL)
+        sprintf(&szQuery[strlen(&szQuery[0])], " OR email = '%s'", pszEmail);
+
     if (mysql_query(pmysql, &szQuery[0]) >= 0)
     {
         pres = mysql_store_result(pmysql);
@@ -701,12 +722,23 @@ unsigned long _System dbUpdateFunction(PFNDESC pFnDesc, signed long lDll, char *
 {
     MYSQL_RES *     pres;
     MYSQL_ROW       row;
-    char            szQuery[512];
-    char *          pszQuery = &szQuery[0];
+    char *          pszQuery2 = (char*)malloc(65500);
+    char *          pszQuery = pszQuery2;
     long            lCurrentState;
     int             i,k,rc;
     unsigned long   ulRc = 0;
 
+    /* check if malloc have failed allocating memory for us. */
+    if (pszQuery2 == NULL)
+    {
+        strcpy(pszError, "internal dbUpdateFunction error - malloc failed!\n");
+        return 1;
+    }
+
+
+    /*
+     * Loop thru all functions in the array of refocodes.
+     */
     for (k = 0; k < pFnDesc->cRefCodes; k++)
     {
         BOOL    f = FALSE;
@@ -716,16 +748,17 @@ unsigned long _System dbUpdateFunction(PFNDESC pFnDesc, signed long lDll, char *
          */
         sprintf(pszQuery, "UPDATE function SET updated = updated + 1 WHERE refcode = %ld",
                 pFnDesc->alRefCode[k]);
-        rc = mysql_queryu1(pmysql, &szQuery[0]);
+        rc = mysql_queryu1(pmysql, pszQuery2);
 
 
         /*
          * Get current status
          */
         lCurrentState = dbGetFunctionState(pFnDesc->alRefCode[k]);
-        if (lCurrentState == -1)
+        if (lCurrentState == -1 && dbGetLastErrorDesc() != NULL && strlen(dbGetLastErrorDesc()) != 0)
         {
             strcpy(pszError, dbGetLastErrorDesc());
+            free(pszQuery2);
             return 1;
         }
 
@@ -735,39 +768,93 @@ unsigned long _System dbUpdateFunction(PFNDESC pFnDesc, signed long lDll, char *
          */
         strcpy(pszQuery, "UPDATE function SET ");
         pszQuery += strlen(pszQuery);
-        if (pFnDesc->lStatus != 99 || lCurrentState == 0)
+
+        /* Status */
+        if (lCurrentState != pFnDesc->lStatus
+            && pFnDesc->lStatus != 0
+            && (lCurrentState == 0 || pFnDesc->lStatus != 99))
         {
-            sprintf(pszQuery, "state = %ld ", pFnDesc->lStatus);
+            sprintf(pszQuery, "state = %ld", pFnDesc->lStatus);
             f = TRUE;
         }
         pszQuery += strlen(pszQuery);
 
+        /* return type */
         if (pFnDesc->pszReturnType != NULL)
         {
             if (f)  strcat(pszQuery, ", ");
-            sprintf(pszQuery + strlen(pszQuery),  "return = '%s' ", pFnDesc->pszReturnType);
-            pszQuery += strlen(pszQuery);
+            pszQuery = sqlstrcat(pszQuery, "return = ",  pFnDesc->pszReturnType);
             f = TRUE;
         }
 
+        /* Description */
+        if (pFnDesc->pszDescription != NULL)
+        {
+            if (f)  strcat(pszQuery, ", ");
+            pszQuery = sqlstrcat(pszQuery, "description  = ", pFnDesc->pszDescription);
+            f = TRUE;
+        }
+
+        /* Remark */
+        if (pFnDesc->pszRemark != NULL)
+        {
+            if (f)  strcat(pszQuery, ", ");
+            pszQuery = sqlstrcat(pszQuery,  "remark = ", pFnDesc->pszRemark);
+            f = TRUE;
+        }
+
+        /* Description */
+        if (pFnDesc->pszReturnDesc != NULL)
+        {
+            if (f)  strcat(pszQuery, ", ");
+            pszQuery = sqlstrcat(pszQuery,  "returndesc = ", pFnDesc->pszReturnDesc);
+            f = TRUE;
+        }
+
+        /* Sketch */
+        if (pFnDesc->pszSketch != NULL)
+        {
+            if (f)  strcat(pszQuery, ", ");
+            pszQuery = sqlstrcat(pszQuery,  "sketch = ", pFnDesc->pszSketch);
+            f = TRUE;
+        }
+
+        /* Equiv */
+        if (pFnDesc->pszEquiv != NULL)
+        {
+            if (f)  strcat(pszQuery, ", ");
+            pszQuery = sqlstrcat(pszQuery,  "equiv = ", pFnDesc->pszEquiv);
+            f = TRUE;
+        }
+
+        /* Equiv */
+        if (pFnDesc->pszTime != NULL)
+        {
+            if (f)  strcat(pszQuery, ", ");
+            pszQuery = sqlstrcat(pszQuery,  "time = ", pFnDesc->pszTime);
+            f = TRUE;
+        }
+
+        /* Execute update query? */
         if (f)
         {
-            sprintf(pszQuery + strlen(pszQuery), "WHERE refcode = %ld", pFnDesc->alRefCode[k]);
-            rc = mysql_queryu2(pmysql, &szQuery[0]);
+            sprintf(pszQuery + strlen(pszQuery), " WHERE refcode = %ld", pFnDesc->alRefCode[k]);
+            rc = mysql_queryu2(pmysql, pszQuery2);
             if (rc < 0)
             {
                 sprintf(pszError, "Updating functiontable failed with error: %s - (sql=%s) ",
-                        dbGetLastErrorDesc(), &szQuery[0]);
+                        dbGetLastErrorDesc(), pszQuery2);
                 pszError += strlen(pszError) - 1;
                 ulRc++;
             }
         }
 
 
+
         /*
          * Parameters
          */
-        pszQuery = &szQuery[0];
+        pszQuery = pszQuery2;
         sprintf(pszQuery, "SELECT count(*) FROM parameter WHERE function = %ld", pFnDesc->alRefCode[k]);
         rc = mysql_queryu3(pmysql, pszQuery);
         if (rc >= 0)
@@ -781,12 +868,13 @@ unsigned long _System dbUpdateFunction(PFNDESC pFnDesc, signed long lDll, char *
                 {   /* update parameters */
                     for (i = 0; i < pFnDesc->cParams; i++)
                     {
-                        sprintf(pszQuery, "UPDATE parameter SET type = '%s', name = '%s' "
-                                "WHERE function = (%ld) AND sequencenbr = (%ld)",
+                        sprintf(pszQuery, "UPDATE parameter SET type = '%s', name = '%s'",
                                 pFnDesc->apszParamType[i] != NULL ? pFnDesc->apszParamType[i] : "",
-                                pFnDesc->apszParamName[i] != NULL ? pFnDesc->apszParamName[i] : "",
-                                pFnDesc->alRefCode[k], i
-                                );
+                                pFnDesc->apszParamName[i] != NULL ? pFnDesc->apszParamName[i] : "");
+                        if (pFnDesc->apszParamDesc[i] != NULL)
+                            sqlstrcat(pszQuery, ", description = ", pFnDesc->apszParamDesc[i]);
+                        sprintf(pszQuery + strlen(pszQuery), " WHERE function = (%ld) AND sequencenbr = (%ld)",
+                                pFnDesc->alRefCode[k], i);
                         rc = mysql_queryu4(pmysql, pszQuery);
                         if (rc < 0)
                         {
@@ -819,13 +907,18 @@ unsigned long _System dbUpdateFunction(PFNDESC pFnDesc, signed long lDll, char *
                     /* insert parameters */
                     for (i = 0; i < pFnDesc->cParams; i++)
                     {
-                        sprintf(pszQuery, "INSERT INTO parameter(function, sequencenbr, type, name) "
-                                "VALUES (%ld, %d, '%s', '%s')",
+                        sprintf(pszQuery, "INSERT INTO parameter(function, sequencenbr, type, name, description) "
+                                "VALUES (%ld, %d, '%s', '%s'",
                                 pFnDesc->alRefCode[k], i,
                                 pFnDesc->apszParamType[i] != NULL ? pFnDesc->apszParamType[i] : "",
                                 pFnDesc->apszParamName[i] != NULL ? pFnDesc->apszParamName[i] : ""
                                 );
-                        rc = mysql_queryu6(pmysql, pszQuery);
+                        if (pFnDesc->apszParamDesc[i] != NULL)
+                            sqlstrcat(pszQuery, ", ", pFnDesc->apszParamDesc[i]);
+                        else
+                            strcat(pszQuery, ", NULL)");
+
+                        rc = mysql_queryu6(pmysql, pszQuery2);
                         if (rc < 0)
                         {
                             if (*pszError == ' ')
@@ -895,6 +988,7 @@ unsigned long _System dbUpdateFunction(PFNDESC pFnDesc, signed long lDll, char *
     } /* for */
 
     lDll = lDll;
+    free(pszQuery2);
     return ulRc;
 }
 
@@ -1547,6 +1641,59 @@ signed long _System dbGetNumberOfUpdatedFunction(signed long lDll)
         rc = -1;
     mysql_free_result(pres);
     return (signed long)rc;
+}
+
+
+/**
+ *
+ * @returns   Pointer to end of the string.
+ * @param     pszQuery   Outputbuffer
+ * @param     pszBefore  Text before string, might be NULL.
+ * @param     pszStr     String (NOT NULL)
+ * @param     pszAfter   Text after, might be NULL.
+ * @status    completely implemented
+ * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ */
+static char *sqlstrcat(char *pszQuery, const char *pszBefore, const char *pszStr, const char *pszAfter)
+{
+    register char ch;
+
+    pszQuery += strlen(pszQuery);
+
+    /*
+     * String before
+     */
+    if (pszBefore != NULL)
+    {
+        strcpy(pszQuery, pszBefore);
+        pszQuery += strlen(pszQuery);
+    }
+
+    /*
+     * THE String
+     */
+    *pszQuery++ = '\'';
+    while ((ch = *pszStr++) != '\0')
+    {
+        if (ch == '\'')
+            *pszQuery++ = '\\';
+        *pszQuery++ = ch;
+    }
+    *pszQuery++ = '\'';
+
+    /*
+     * String after
+     */
+    if (pszAfter != NULL)
+    {
+        strcpy(pszQuery, pszAfter);
+        pszQuery += strlen(pszQuery);
+    }
+    else
+        *pszQuery = '\0';
+
+
+    return pszQuery;
 }
 
 

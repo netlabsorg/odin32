@@ -1,4 +1,4 @@
--- $Id: CreateTables.sql,v 1.6 2000-02-15 13:31:06 bird Exp $
+-- $Id: CreateTables.sql,v 1.7 2000-02-18 12:42:05 bird Exp $
 --
 -- Create all tables.
 --
@@ -36,6 +36,12 @@ CREATE TABLE function (
     apigroup SMALLINT,
     return   VARCHAR(64),
     updated  TINYINT  NOT NULL DEFAULT 0,
+    description TEXT,
+    remark      TEXT,
+    returndesc  TEXT,
+    sketch      TEXT,
+    equiv       TEXT,
+    time        TEXT,
     UNIQUE i1(refcode, aliasfn),
     UNIQUE i1a(dll, aliasfn, refcode),
     UNIQUE i1b(aliasfn, name, dll),
@@ -111,8 +117,8 @@ CREATE TABLE parameter (
     sequencenbr TINYINT NOT NULL,
     name     VARCHAR(64) NOT NULL,
     type     VARCHAR(64) NOT NULL,
-    description VARCHAR(128),
-    INDEX  i1(function, name(10)),
+    description TEXT,
+    INDEX  i1(function, name),
     UNIQUE u1(function, name)
 );
 
