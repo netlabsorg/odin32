@@ -1,4 +1,4 @@
-/* $Id: auxos2.cpp,v 1.8 2000-02-17 14:09:30 sandervl Exp $ */
+/* $Id: auxos2.cpp,v 1.9 2001-10-24 22:47:41 sandervl Exp $ */
 
 /*
  * Auxilary multimedia OS/2 implementation
@@ -27,6 +27,7 @@
 #include "unicode.h"
 
 #include "auxiliary.h"
+#include "initwinmm.h"
 
 #define DBG_LOCALLOG	DBG_auxos2
 #include "dbglocal.h"
@@ -40,6 +41,8 @@ BOOL auxOS2Open()
  MCI_AMP_OPEN_PARMS AmpOpenParms;
  APIRET rc;
 
+  if(fMMPMAvailable == FALSE) return FALSE;
+
   if(auxDeviceId != -1) {
         return TRUE;
   }
@@ -49,7 +52,7 @@ BOOL auxOS2Open()
   AmpOpenParms.usDeviceID = ( USHORT ) 0;
   AmpOpenParms.pszDeviceType = ( PSZ ) MCI_DEVTYPE_AUDIO_AMPMIX;
 
-  rc = mciSendCommand(0, MCI_OPEN,
+  rc = mymciSendCommand(0, MCI_OPEN,
                       MCI_WAIT | MCI_OPEN_TYPE_ID | MCI_OPEN_SHAREABLE,
                       (PVOID) &AmpOpenParms,
                       0);
@@ -73,7 +76,7 @@ void auxOS2Close()
    GenericParms.hwndCallback = 0;       //hwndFrame
 
    // Close the device
-   mciSendCommand(auxDeviceId, MCI_CLOSE, MCI_WAIT, (PVOID)&GenericParms, 0);
+   mymciSendCommand(auxDeviceId, MCI_CLOSE, MCI_WAIT, (PVOID)&GenericParms, 0);
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -83,7 +86,7 @@ DWORD auxOS2SetVolume(DWORD dwVolume)
  APIRET rc;
 
   maudio.ulMasterVolume = (dwVolume*100)/65536;  //TODO: Not correct, should be logartihmic
-  rc = mciSendCommand(auxDeviceId, MCI_MASTERAUDIO, MCI_MASTERVOL |
+  rc = mymciSendCommand(auxDeviceId, MCI_MASTERAUDIO, MCI_MASTERVOL |
                       MCI_WAIT, (PVOID)&maudio,0);
   if(rc) {
         dprintf(("auxOS2SetVolume returned %X\n", rc));
@@ -97,7 +100,7 @@ DWORD auxOS2GetVolume(DWORD *dwVolume)
  MCI_MASTERAUDIO_PARMS maudio = {0};
  APIRET rc;
 
-  rc = mciSendCommand(auxDeviceId, MCI_MASTERAUDIO, MCI_QUERYCURRENTSETTING |
+  rc = mymciSendCommand(auxDeviceId, MCI_MASTERAUDIO, MCI_QUERYCURRENTSETTING |
                       MCI_MASTERVOL | MCI_WAIT, (PVOID)&maudio,0);
   if(rc) {
         dprintf(("auxOS2GetVolume returned %X\n", rc));

@@ -1,4 +1,4 @@
-/* $Id: wavein.cpp,v 1.9 2001-03-23 16:23:44 sandervl Exp $ */
+/* $Id: wavein.cpp,v 1.10 2001-10-24 22:47:42 sandervl Exp $ */
 
 /*
  * Wave in MM apis
@@ -28,6 +28,7 @@
 
 #include "winmm.h"
 #include "waveindart.h"
+#include "initwinmm.h"
 
 #define DBG_LOCALLOG    DBG_wavein
 #include "dbglocal.h"
@@ -46,6 +47,8 @@ ODINFUNCTION6(MMRESULT, waveInOpen,
               DWORD, fdwOpen)
 {
   MMRESULT rc;
+
+    if(fMMPMAvailable == FALSE) return MMSYSERR_NODRIVER;
 
     if(pwfx == NULL)
         return(WAVERR_BADFORMAT);
@@ -249,6 +252,8 @@ ODINFUNCTION3(MMRESULT, waveInGetDevCapsA,
               LPWAVEINCAPSA, pwic,
               UINT, cbwic)
 {
+    if(fMMPMAvailable == FALSE) return MMSYSERR_NODRIVER;
+
     if(DartWaveIn::getNumDevices() == 0) {
         memset(pwic, 0, sizeof(*pwic));
         return MMSYSERR_NODRIVER;
@@ -278,6 +283,8 @@ ODINFUNCTION3(MMRESULT, waveInGetDevCapsW,
               LPWAVEINCAPSW, pwic,
               UINT, cbwic)
 {
+    if(fMMPMAvailable == FALSE) return MMSYSERR_NODRIVER;
+
     if(DartWaveIn::getNumDevices() == 0) {
         memset(pwic, 0, sizeof(*pwic));
         return MMSYSERR_NODRIVER;

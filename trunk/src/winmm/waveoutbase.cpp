@@ -1,4 +1,4 @@
-/* $Id: waveoutbase.cpp,v 1.3 2001-06-16 11:35:22 sandervl Exp $ */
+/* $Id: waveoutbase.cpp,v 1.4 2001-10-24 22:47:42 sandervl Exp $ */
 
 /*
  * Wave playback class (DART)
@@ -32,6 +32,7 @@
 
 #include "misc.h"
 #include "waveoutbase.h"
+#include "initwinmm.h"
 
 #define DBG_LOCALLOG    DBG_waveoutbase
 #include "dbglocal.h"
@@ -75,7 +76,7 @@ int WaveOut::getNumDevices()
    AmpOpenParms.usDeviceID = ( USHORT ) 0;
    AmpOpenParms.pszDeviceType = ( PSZ ) MCI_DEVTYPE_AUDIO_AMPMIX;
 
-   rc = mciSendCommand(0, MCI_OPEN,
+   rc = mymciSendCommand(0, MCI_OPEN,
                        MCI_WAIT | MCI_OPEN_TYPE_ID | MCI_OPEN_SHAREABLE,
                        (PVOID) &AmpOpenParms,
                        0);
@@ -88,7 +89,7 @@ int WaveOut::getNumDevices()
    GenericParms.hwndCallback = 0;   //hwndFrame
 
    // Close the device
-   mciSendCommand(AmpOpenParms.usDeviceID, MCI_CLOSE, MCI_WAIT, (PVOID)&GenericParms, 0);
+   mymciSendCommand(AmpOpenParms.usDeviceID, MCI_CLOSE, MCI_WAIT, (PVOID)&GenericParms, 0);
 
    return 1;
 }
