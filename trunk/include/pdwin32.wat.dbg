@@ -1,4 +1,4 @@
-# $Id: pdwin32.wat.dbg,v 1.3 2000-09-01 16:01:20 bird Exp $
+# $Id: pdwin32.wat.dbg,v 1.4 2000-09-28 03:16:24 bird Exp $
 # ODIN / win32os2 Project
 #
 # DEBUG makefile for the Watcom C/C++ compiler environment
@@ -6,10 +6,11 @@
 #
 
 SOMLIB   = somtk.lib
-RTLLIB   = cppom30.lib
-RTLLIB_O = cppom30o.lib
+RTLLIB   = clib3r.lib
+RTLLIB_O = clib3r.lib
+DLLENTRY = $(PDWIN32_LIB)\dllentry_watcom.obj
 
-OBJDIR   = .\bin\debug
+OBJDIR   = .\bin\debug.wat
 
 #
 # Tools
@@ -18,6 +19,7 @@ CXX    = WPP386
 CC     = WCC386
 AS     = alp
 LD     = wlink
+LD2    = $(LD)
 IMPLIB = implib
 ILIB   = ilib
 RC     = $(PDWIN32_TOOLS)\wrc
@@ -51,13 +53,25 @@ CFLAGS_WIN32APP  = -w4 -wcd=726 -e25 -od -d2 -hw -bm -mf -5r -bt=os2 -zq -fp5 -f
 CXXFLAGS_WIN32APP= -w4 -wcd=726 -e25 -od -d2 -hw -bm -mf -5r -bt=os2 -zq -fp5 -fpi87 -i$(%WATCOM)\h -i$(PDWIN32_INCLUDE)\Win -i. -i$(PDWIN32_INCLUDE) -DDEBUG -D__WIN32OS2__ -D__i386__
 
 !ifdef DEBUGALL
-CFLAGS           = $(CFLAGS) -DDEBUG_ENABLELOG_LEVEL2
-CXXFLAGS         = $(CXXFLAGS) -DDEBUG_ENABLELOG_LEVEL2
+CFLAGS           += -DDEBUG_ENABLELOG_LEVEL2
+CXXFLAGS         += -DDEBUG_ENABLELOG_LEVEL2
 !endif
 
+!ifdef EXETARGET
+CFLAGS           += -bg
+CXXFLAGS         += -bg
+!else
+CFLAGS           += -bd
+CXXFLAGS         += -bd
+!endif
 
-LDFLAGS          = option map, nodefaultlibs, maxe=25, q, symf
-LDFLAGS_ODINCRT  = option map, maxe=25, q, symf
+!ifdef EXETARGET
+LDFLAGS          = system os2v2 nodefaultlibs, maxe=25, q, symf
+LDFLAGS_ODINCRT  = system os2v2 maxe=25, q, symf
+!else
+LDFLAGS          = system os2v2 dll initinstance terminstance option nodefaultlibs, maxe=25, q, symf
+LDFLAGS_ODINCRT  = system os2v2 dll initinstance terminstance option                maxe=25, q, symf
+!endif
 
 ASFLAGS          = -Mb -Sc -Sv:ALP +Od
 IMPLIBFLAGS      = /nologo
@@ -67,21 +81,13 @@ OS2RCFLAGS       = -r
 OS2RCLFLAGS      = -x2 -n
 
 !ifndef NODEBUGINFO
-LDFLAGS          = $(LDFLAGS) d all
-LDFLAGS_ODINCRT  = $(LDFLAGS_ODINCRT) d all
+LDFLAGS          += d all
+LDFLAGS_ODINCRT  += d all
 !else
-CFLAGS           = $(CFLAGS) -DDEFAULT_LOGGING_OFF
-CXXFLAGS         = $(CXXFLAGS) -DDEFAULT_LOGGING_OFF
+CFLAGS           += -DDEFAULT_LOGGING_OFF
+CXXFLAGS         += -DDEFAULT_LOGGING_OFF
 !endif
 
-!ifdef EXETARGET
-CFLAGS           = $(CFLAGS) -bg
-CXXFLAGS         = $(CXXFLAGS) bg
-LDFLAGS          = system os2v2 $(LDFLAGS)
-LDFLAGS_ODINCRT  = system os2v2 $(LDFLAGS_ODINCRT)
-!else
-CFLAGS           = $(CFLAGS) -bd
-CXXFLAGS         = $(CXXFLAGS) -bd
-LDFLAGS          = system os2v2 dll initinstance terminstance $(LDFLAGS)
-LDFLAGS_ODINCRT  = system os2v2 dll initinstance terminstance $(LDFLAGS_ODINCRT)
-!endif
+LD2FLAGS         = $(LDFLAGS)
+LD2FLAGS_ODINCRT = $(LDFLAGS_ODINCRT)
+

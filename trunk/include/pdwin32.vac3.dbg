@@ -1,4 +1,4 @@
-# $Id: pdwin32.vac3.dbg,v 1.28 2000-09-20 20:42:35 sandervl Exp $
+# $Id: pdwin32.vac3.dbg,v 1.29 2000-09-28 03:16:23 bird Exp $
 # ODIN / win32os2 Project
 #
 # DEBUG makefile for the VAC3 compiler environment
@@ -9,6 +9,7 @@
 SOMLIB   = somtk.lib
 RTLLIB   = cppom30.lib
 RTLLIB_O = cppom30o.lib
+DLLENTRY = $(PDWIN32_LIB)\dllentry.obj
 
 OBJDIR   = .\bin\debug
 

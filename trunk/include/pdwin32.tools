@@ -1,4 +1,4 @@
-# $Id: pdwin32.tools,v 1.13 2000-05-02 20:49:27 sandervl Exp $
+# $Id: pdwin32.tools,v 1.14 2000-09-28 03:16:23 bird Exp $
 # ODIN / win32os2 Project
 #
 # makefile for the build system tools and standard rules
@@ -6,6 +6,22 @@
 #
 # phaller@gmx.net, 1999/05/27
 #
+
+# Check that CCENV is set; set defaults if not set.
+!ifndef CCENV
+!   ifndef __VERSION__
+CCENV = VAC3
+VAC3 = 1
+!   else
+CCENV = WAT
+WAT = 1
+!   endif
+!endif
+
+# Check that PDWIN32_INCLUDE is set; set default if not set.
+!ifndef PDWIN32_INCLUDE
+PDWIN32_INCLUDE = ..\..\include
+!endif
 
 
 #
@@ -25,58 +41,8 @@ DEPEND      = $(PDWIN32_TOOLS)\fastdep.exe -o$$(OBJDIR) -cy+
 !ifdef OLDBUILD
 DEPEND      = $(PDWIN32_TOOLS)\fastdep.exe
 !endif
-MAKE_CMD    = nmake /nologo
-!ifdef DEBUG
-MAKE_CMD    = $(MAKE_CMD) DEBUG=1
-!endif
-!ifdef NODEBUGINFO
-MAKE_CMD    = $(MAKE_CMD) NODEBUGINFO=1
-!endif
-!ifdef NODEP
-MAKE_CMD    = $(MAKE_CMD) NODEP=1
-!endif
 
 
-#
-# Targets
-#
-.SUFFIXES: .orc
-
-.c{$(OBJDIR)}.obj:
-    $(CC) $(CFLAGS) -c -Fo$(OBJDIR)\$(@B).obj $<
-
-.cpp{$(OBJDIR)}.obj:
-    $(CXX) $(CXXFLAGS) -Fo$(OBJDIR)\$(@B).obj -c $<
-
-.asm{$(OBJDIR)}.obj:
-    $(AS) $(ASFLAGS) -Fdo:$(OBJDIR) $<
-
-.orc{$(OBJDIR)}.asm:
-    $(RC) $(RCFLAGS) -o $(OBJDIR)\$(@B).asm $<
-
-.orc{$(OBJDIR)}.obj:
-    $(RC) $(RCFLAGS) -o $(OBJDIR)\$(@B).asm $<
-    $(AS) $(ASFLAGS) -Fdo:$(OBJDIR) $(OBJDIR)\$(@B).asm
-
-.rc{$(OBJDIR)}.res:
-    $(OS2RC) $(OS2RCFLAGS) $< $@
-
-
-#
-# Old Targets
-#
-.c.obj:
-    $(CC) $(CFLAGS) -c $<
-
-.cpp.obj:
-    $(CXX) $(CXXFLAGS) -c $<
-
-.asm.obj:
-    $(AS) $(ASFLAGS) -Fdo:$(OBJDIR) $<
-
-.orc.asm:
-    $(RC) $(RCFLAGS) -o $@ $<
-
-.rc.res:
-    $(OS2RC) $(OS2RCFLAGS) $< $@
+# Include compiler dependent tools
+!include $(PDWIN32_INCLUDE)/pdwin32.$(CCENV).tools
 

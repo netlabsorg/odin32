@@ -1,4 +1,4 @@
-# $Id: pdwin32.wat.post,v 1.3 2000-09-28 03:16:24 bird Exp $
+# $Id: pdwin32.vac36.post,v 1.1 2000-09-28 03:16:24 bird Exp $
 #
 # Odin32 API
 #
@@ -45,23 +45,20 @@ lib:    $(TARGET).lib $(PDWIN32_LIB)\$(TARGET).lib
 # Dll rule - builds the target dll.
 !ifndef NO_DLL_RULE
 $(OBJDIR)\$(TARGET).dll: $(OBJS) $(TARGET).def $(OBJDIR)\$(TARGET).lrf
-    $(LD2) @$(OBJDIR)\$(TARGET).lrf
+    -4 $(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lrf
 !endif
 
 
 # Linker file - creates the parameter file passed on to the linker.
 !ifndef NO_LNKFILE_RULE
-$(OBJDIR)\$(TARGET).lrf: makefile  $(PDWIN32_INCLUDE)\pdwin32.wat.post
-    @$(RM) $@
+$(OBJDIR)\$(TARGET).lrf: makefile
     @echo Creating file <<$@
-$(LD2FLAGS)
-name $(OBJDIR)\$(TARGET).dll
-option map=$(OBJDIR)\$(TARGET).map
-file    {$(OBJS)}
-library {$(LIBS)}
+/OUT:$(OBJDIR)\$(TARGET).dll
+/MAP:$(OBJDIR)\$(TARGET).map
+$(OBJS)
+$(LIBS)
+$(TARGET).def
 <<keep
-# $(TARGET).def
-# $(TARGET).map
 !endif
 
 
@@ -91,14 +88,14 @@ lib:
 
 # Exe rule - builds the target exe.
 !ifndef NO_EXE_RULE
-$(OBJDIR)\$(TARGET).exe: $(OBJSNOOBJDIR) $(TARGET).def $(OBJDIR)\$(TARGET).lrf
-    $(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lrf
+$(OBJDIR)\$(TARGET).exe: $(OBJS) $(TARGET).def $(OBJDIR)\$(TARGET).lrf
+    -4 $(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lrf
 !endif
 
 
 # Linker file - creates the parameter file passed on to the linker.
 !ifndef NO_LNKFILE_RULE
-$(OBJDIR)\$(TARGET).lrf: makefile  $(PDWIN32_INCLUDE)\pdwin32.wat.post
+$(OBJDIR)\$(TARGET).lrf: makefile
     @echo Creating file <<$@
 /OUT:$(OBJDIR)\$(TARGET).exe
 /MAP:$(OBJDIR)\$(TARGET).map
@@ -119,8 +116,6 @@ dep:
 
 !endif # EXETARGET
 !endif # NEW_STYLE
-
-
 
 
 # Copy library rule.
@@ -169,7 +164,7 @@ $(ORGTARGET)exp.def: $(ORGTARGET).def
 
 
 # Create the object directory.
-$(OBJDIR): .SYMBOLIC
+$(OBJDIR):
     @if not exist bin $(MKDIR) bin
     @if not exist $(OBJDIR) $(MKDIR) $(OBJDIR)
 
@@ -178,13 +173,12 @@ $(OBJDIR): .SYMBOLIC
 # General clean rule. To clean more add it to CLEANEXTRAS!
 #
 !ifndef NOCLEAN
-!ifndef NO_CLEAN_RULE
 !ifndef CLEAN2
-clean: .SYMBOLIC
+clean:
 !else
 clean:  clean2
 !endif
-    $(RM) *.LIB *.res *.map *.pch *.orc_asm \
+    $(RM) *.LIB *.res *.map *.pch \
 !if "$(OBJDIR)" != ""
      $(OBJDIR)\* \
 !endif
@@ -200,6 +194,17 @@ clean:  clean2
         $(CLEANEXTRAS)
 !endif
 !endif
+
+
+#
+# Include the .depend file.
+#   If the depend file don't exists we'll complain about it.
+#
+!ifndef NODEP
+!   if [$(EXISTS) .depend] == 0
+!       include .depend
+!   else
+!       if [$(ECHO) .depend doesn't exist]
+!       endif
+!   endif
 !endif
-
-
