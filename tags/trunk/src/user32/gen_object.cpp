@@ -1,4 +1,4 @@
-/* $Id: gen_object.cpp,v 1.1 1999-09-15 23:18:50 sandervl Exp $ */
+/* $Id: gen_object.cpp,v 1.2 1999-11-01 19:11:39 sandervl Exp $ */
 /*
  * Generic Object Class for OS/2
  *
@@ -64,6 +64,19 @@ GenericObject::~GenericObject()
 	cur->next = next;
   }
   genMutex[objType].leave();
+}
+//******************************************************************************
+//******************************************************************************
+void GenericObject::DestroyAll(GenericObject *head)
+{
+ GenericObject *cur, *next;
+
+  cur = head;
+  while(cur) {
+	next = cur->next;
+	delete cur;
+	cur = next;
+  }
 }
 //******************************************************************************
 //******************************************************************************

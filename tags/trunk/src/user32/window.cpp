@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.31 1999-11-01 16:18:05 dengert Exp $ */
+/* $Id: window.cpp,v 1.32 1999-11-01 19:11:45 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -86,9 +86,6 @@ HWND WIN32API CreateWindowExA(DWORD exStyle, LPCSTR className,
         }
     }
 #endif
-    if ((!strcmpi(className, "BUTTON") && ((style & 0x0f) == BS_GROUPBOX)) ||
-       ((!strcmpi(className, "STATIC")) && !(style & WS_GROUP)))
-      style |= WS_CLIPSIBLINGS;
 
     /* Create the window */
     cs.lpCreateParams = data;
@@ -188,9 +185,6 @@ HWND WIN32API CreateWindowExW(DWORD exStyle, LPCWSTR className,
          dprintf(("CreateWindowExW: class %s parent %x (%d,%d) (%d,%d), %x %x", className, parent, x, y, width, height, style, exStyle));
     }
     else dprintf(("CreateWindowExW: class %d parent %x (%d,%d) (%d,%d), %x %x", className, parent, x, y, width, height, style, exStyle));
-
-    if (!lstrcmpiW(className,(LPCWSTR)L"BUTTON") && ((style & 0x0f) == BS_GROUPBOX))
-      style |= WS_CLIPSIBLINGS;
 
     /* Create the window */
     cs.lpCreateParams = data;
@@ -461,7 +455,7 @@ BOOL WIN32API ShowWindow(HWND hwnd, int nCmdShow)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("ShowWindow, window %x not found", hwnd));
-    SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+    	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("ShowWindow %x", hwnd));
