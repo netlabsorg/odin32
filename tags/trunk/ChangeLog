@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.442 1999-11-13 14:23:28 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.443 1999-11-13 15:42:51 sandervl Exp $ */
 
  99-11-13: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Fixed problem with ReadFile & aliased memory
@@ -6,6 +6,13 @@
                      returned by DosAliasMem -> search for original
                      memory mapped pointer and use that one)
                     -> fixes problems in Lotus Notes 5.0
+	- KERNEL32\PELDR:
+                    Better error reporting
+	- COMDLG32: Fixed bug in strlen: first check if pointer != NULL (FILEDLG95_InitUI)
+                    Bugfix: ofn->lpTemplateName can be string id, so 
+                            don't always treat it as a string
+		    Check pointer returned by CBGetItemDataPtr, if != -1, then
+                    it's a string. (FILEDLG95_OnOpen)
 
  99-11-12: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: fixed several edit bugs
