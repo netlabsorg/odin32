@@ -1,11 +1,23 @@
- /* $Id: ChangeLog,v 1.641 2000-01-12 22:06:45 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.642 2000-01-13 13:55:41 sandervl Exp $ */
+
+ 2000-01-13: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32\NEW: WM_ACTIVATEAPP should be sent when another process' window
+                      is activated or deactivated
+                      Send correct thread id for non-Odin windows in WM_ACTIVATEAPP
+                      Set window handle of non-Odin window to window desktop in WM_ACTIVATE
+                      Return window desktop handle for window handle returned by 
+                      SetActiveWindow if window is non-Odin.
+                      Fixed activation of windows. (send WM_ACTIVATE when receiving
+                      a WM_WINDOWPOSCHANGED message in pmframe.cpp)
+                      Fixed DrawFrame; bottom & right frame borders now drawn correctly
+                      Fixed scrollbar positioning (style.exe) (not completely right yet)
 
  2000-01-12: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32/NEW: fixed WM_CALCVALIDRECTS
 		      activated WM_NCPAINT clipping
 		      added improved frame redraw mechanism
 
- 2000-01-11: Sander van Leeuwen <sandervl@xs4all.nl>
+ 2000-01-12: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: Changed client rectangle positioning (not done by PM frame
                       handler anymore) -> fixes problems with Shell About dialog
                       and jumping controls when resizing (Winhlp32)
