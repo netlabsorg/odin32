@@ -33,3 +33,6 @@ SEGMENTS
     CALLTAB16           class 'CALLTAB16_DATA'
     LOGDATA_16BIT       class 'LOGDATA_16BIT'
 
+    SYMBOLDB32          class 'SYMBOLDB32'
+
+
