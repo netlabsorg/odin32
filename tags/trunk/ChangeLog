@@ -1,4 +1,13 @@
-/* $Id: ChangeLog,v 1.2671 2004-02-04 15:03:30 bird Exp $ */
+/* $Id: ChangeLog,v 1.2672 2004-02-10 15:38:24 sandervl Exp $ */
+
+ 2004-02-10: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Added ODIN_SetProcessDword function to change the startup
+                  information about size, position and state of the main
+                  application window.
+                o Rewrote keyboard hook handler to post messages and swallow
+                  the one it gets from PM.
+    - GDI32:    o Wrong GdiCopyClipRgn return value
+                o Implemented SelectClipPath
 
  2004-04-04: Platon Fomichev <pfomichev@alarity    >
     - USER32:   o Fixed typo in PeekMessageA/W.
