@@ -1,4 +1,11 @@
- /* $Id: ChangeLog,v 1.962 2000-05-28 11:43:39 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.963 2000-05-28 16:41:31 sandervl Exp $ */
+
+ 2000-05-28: Sander van Leeuwen <sandervl@xs4all.nl>
+    - SHELL32:  Merged ShellExecuteA/W of latest Wine release (old version
+                did not return process handle)
+    - KERNEL32/USER32: 
+                Rewrote and cleaned up resource handling. FindResource(Ex)
+                now returns IMAGE_RESOURCE_DATA_ENTRY pointer.
 
  2000-05-27: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: Don't call entrypoint when executable is loaded as dll (with
