@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1786 2001-10-24 13:26:38 phaller Exp $ */
+/* $Id: changelog,v 1.1787 2001-10-24 15:39:16 sandervl Exp $ */
 
  2001-10-24: Patrick Haller <patrick.haller@innotek.de>
     - USER32:   o added translation between PM Scancodes and
@@ -21,6 +21,8 @@
                   control key is not pressed (OS/2 look)
                   (fixes activation by clicking on title bar and you can now
                    track frame without activating it)
+                o Double mouse click sent two up messages
+                o Double click on system menu now closes window
 
  2001-10-23: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMCTL32: o ListView: WM_KEYDOWN -> if WM_NOTIFY returns TRUE, then
