@@ -1,4 +1,4 @@
-/* $Id: winexepeldr.cpp,v 1.5 1999-11-24 19:31:23 sandervl Exp $ */
+/* $Id: winexepeldr.cpp,v 1.6 1999-12-14 19:14:28 sandervl Exp $ */
 
 /*
  * Win32 PE loader Exe class
@@ -64,6 +64,7 @@ BOOL WIN32API CreateWin32PeLdrExe(char *szFileName, ULONG reservedMem)
     szCmdLine++;
 
   WinExe->setCommandLine(szCmdLine);
+  dprintf(("Cmd line: %s", szCmdLine));
 
   if(getenv("WIN32_IOPL2")) {
     io_init1();
