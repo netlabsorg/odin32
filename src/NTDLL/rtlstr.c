@@ -3,24 +3,67 @@
  *
  * Copyright (C) 1996-1998 Marcus Meissner
  * Copyright (C) 2000      Alexandre Julliard
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #include "config.h"
 
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include "wine/unicode.h"
-#include "heap.h"
-#include "winnls.h"
-#include "debugtools.h"
-#include "ntdll_misc.h"
+
 #include "ntddk.h"
-#include "unicode.h"
+#include "wine/unicode.h"
+#include "wine/debug.h"
 
-DEFAULT_DEBUG_CHANNEL(ntdll);
+WINE_DEFAULT_DEBUG_CHANNEL(ntdll);
 
-/* STRING CREATION FUNCTIONS */
+UINT NlsAnsiCodePage = 1252;
+BYTE NlsMbCodePageTag = 0;
+BYTE NlsMbOemCodePageTag = 0;
+
+static const union cptable *ansi_table;
+static const union cptable *oem_table;
+
+inline static const union cptable *get_ansi_table(void)
+{
+    if (!ansi_table) ansi_table = cp_get_table( 1252 );
+    return ansi_table;
+}
+
+inline static const union cptable *get_oem_table(void)
+{
+    if (!oem_table) oem_table = cp_get_table( 437 );
+    return oem_table;
+}
+
+
+/**************************************************************************
+ *	__wine_init_codepages   (NTDLL.@)
+ *
+ * Set the code page once kernel32 is loaded. Should be done differently.
+ */
+void __wine_init_codepages( const union cptable *ansi, const union cptable *oem )
+{
+    ansi_table = ansi;
+    oem_table = oem;
+    NlsAnsiCodePage = ansi->info.codepage;
+}
+
 
 /**************************************************************************
  *	RtlInitAnsiString   (NTDLL.@)
@@ -41,8 +84,7 @@ void WINAPI RtlInitAnsiString( PSTRING target, LPCSTR source)
  */
 void WINAPI RtlInitString( PSTRING target, LPCSTR source )
 {
-    //return RtlInitAnsiString( target, source ); /* WATCOM: can't return void */
-    RtlInitAnsiString( target, source );
+    return RtlInitAnsiString( target, source );
 }
 
 
@@ -51,7 +93,7 @@ void WINAPI RtlInitString( PSTRING target, LPCSTR source )
  */
 void WINAPI RtlFreeAnsiString( PSTRING str )
 {
-    if (str->Buffer) HeapFree( GetProcessHeap(), 0, str->Buffer );
+    if (str->Buffer) RtlFreeHeap( GetProcessHeap(), 0, str->Buffer );
 }
 
 
@@ -99,7 +141,7 @@ void WINAPI RtlInitUnicodeString( PUNICODE_STRING target, LPCWSTR source )
 BOOLEAN WINAPI RtlCreateUnicodeString( PUNICODE_STRING target, LPCWSTR src )
 {
     int len = (strlenW(src) + 1) * sizeof(WCHAR);
-    if (!(target->Buffer = HeapAlloc( GetProcessHeap(), 0, len ))) return FALSE;
+    if (!(target->Buffer = RtlAllocateHeap( GetProcessHeap(), 0, len ))) return FALSE;
     memcpy( target->Buffer, src, len );
     target->MaximumLength = len;
     target->Length = len - 2;
@@ -123,7 +165,7 @@ BOOLEAN WINAPI RtlCreateUnicodeStringFromAsciiz( PUNICODE_STRING target, LPCSTR 
  */
 void WINAPI RtlFreeUnicodeString( PUNICODE_STRING str )
 {
-    if (str->Buffer) HeapFree( GetProcessHeap(), 0, str->Buffer );
+    if (str->Buffer) RtlFreeHeap( GetProcessHeap(), 0, str->Buffer );
 }
 
 
@@ -300,20 +342,19 @@ NTSTATUS WINAPI RtlAnsiStringToUnicodeString( UNICODE_STRING *uni,
                                               const STRING *ansi,
                                               BOOLEAN doalloc )
 {
-    DWORD len = MultiByteToWideChar( CP_ACP, 0, ansi->Buffer, ansi->Length, NULL, 0 );
-    DWORD total = (len + 1) * sizeof(WCHAR);
+    DWORD total = RtlAnsiStringToUnicodeSize( ansi );
 
     if (total > 0xffff) return STATUS_INVALID_PARAMETER_2;
-    uni->Length = len * sizeof(WCHAR);
+    uni->Length = total - sizeof(WCHAR);
     if (doalloc)
     {
         uni->MaximumLength = total;
-        if (!(uni->Buffer = HeapAlloc( GetProcessHeap(), 0, total ))) return STATUS_NO_MEMORY;
+        if (!(uni->Buffer = RtlAllocateHeap( GetProcessHeap(), 0, total ))) return STATUS_NO_MEMORY;
     }
     else if (total > uni->MaximumLength) return STATUS_BUFFER_OVERFLOW;
 
-    MultiByteToWideChar( CP_ACP, 0, ansi->Buffer, ansi->Length, uni->Buffer, len );
-    uni->Buffer[len] = 0;
+    RtlMultiByteToUnicodeN( uni->Buffer, uni->Length, NULL, ansi->Buffer, ansi->Length );
+    uni->Buffer[uni->Length / sizeof(WCHAR)] = 0;
     return STATUS_SUCCESS;
 }
 
@@ -329,20 +370,19 @@ NTSTATUS WINAPI RtlOemStringToUnicodeString( UNICODE_STRING *uni,
                                              const STRING *oem,
                                              BOOLEAN doalloc )
 {
-    DWORD len = MultiByteToWideChar( CP_OEMCP, 0, oem->Buffer, oem->Length, NULL, 0 );
-    DWORD total = (len + 1) * sizeof(WCHAR);
+    DWORD total = RtlOemStringToUnicodeSize( oem );
 
     if (total > 0xffff) return STATUS_INVALID_PARAMETER_2;
-    uni->Length = len * sizeof(WCHAR);
+    uni->Length = total - sizeof(WCHAR);
     if (doalloc)
     {
         uni->MaximumLength = total;
-        if (!(uni->Buffer = HeapAlloc( GetProcessHeap(), 0, total ))) return STATUS_NO_MEMORY;
+        if (!(uni->Buffer = RtlAllocateHeap( GetProcessHeap(), 0, total ))) return STATUS_NO_MEMORY;
     }
     else if (total > uni->MaximumLength) return STATUS_BUFFER_OVERFLOW;
 
-    MultiByteToWideChar( CP_OEMCP, 0, oem->Buffer, oem->Length, uni->Buffer, len );
-    uni->Buffer[len] = 0;
+    RtlOemToUnicodeN( uni->Buffer, uni->Length, NULL, oem->Buffer, oem->Length );
+    uni->Buffer[uni->Length / sizeof(WCHAR)] = 0;
     return STATUS_SUCCESS;
 }
 
@@ -361,21 +401,20 @@ NTSTATUS WINAPI RtlUnicodeStringToAnsiString( STRING *ansi,
     NTSTATUS ret = STATUS_SUCCESS;
     DWORD len = RtlUnicodeStringToAnsiSize( uni );
 
-    ansi->Length = len;
+    ansi->Length = len - 1;
     if (doalloc)
     {
-        ansi->MaximumLength = len + 1;
-        if (!(ansi->Buffer = HeapAlloc( GetProcessHeap(), 0, len + 1 ))) return STATUS_NO_MEMORY;
+        ansi->MaximumLength = len;
+        if (!(ansi->Buffer = RtlAllocateHeap( GetProcessHeap(), 0, len ))) return STATUS_NO_MEMORY;
     }
-    else if (ansi->MaximumLength <= len)
+    else if (ansi->MaximumLength < len)
     {
         if (!ansi->MaximumLength) return STATUS_BUFFER_OVERFLOW;
         ansi->Length = ansi->MaximumLength - 1;
         ret = STATUS_BUFFER_OVERFLOW;
     }
 
-    WideCharToMultiByte( CP_ACP, 0, uni->Buffer, uni->Length / sizeof(WCHAR),
-                         ansi->Buffer, ansi->Length, NULL, NULL );
+    RtlUnicodeToMultiByteN( ansi->Buffer, ansi->Length, NULL, uni->Buffer, uni->Length );
     ansi->Buffer[ansi->Length] = 0;
     return ret;
 }
@@ -395,21 +434,20 @@ NTSTATUS WINAPI RtlUnicodeStringToOemString( STRING *oem,
     NTSTATUS ret = STATUS_SUCCESS;
     DWORD len = RtlUnicodeStringToOemSize( uni );
 
-    oem->Length = len;
+    oem->Length = len - 1;
     if (doalloc)
     {
-        oem->MaximumLength = len + 1;
-        if (!(oem->Buffer = HeapAlloc( GetProcessHeap(), 0, len + 1 ))) return STATUS_NO_MEMORY;
+        oem->MaximumLength = len;
+        if (!(oem->Buffer = RtlAllocateHeap( GetProcessHeap(), 0, len ))) return STATUS_NO_MEMORY;
     }
-    else if (oem->MaximumLength <= len)
+    else if (oem->MaximumLength < len)
     {
         if (!oem->MaximumLength) return STATUS_BUFFER_OVERFLOW;
         oem->Length = oem->MaximumLength - 1;
         ret = STATUS_BUFFER_OVERFLOW;
     }
 
-    WideCharToMultiByte( CP_OEMCP, 0, uni->Buffer, uni->Length / sizeof(WCHAR),
-                         oem->Buffer, oem->Length, NULL, NULL );
+    RtlUnicodeToOemN( oem->Buffer, oem->Length, NULL, uni->Buffer, uni->Length );
     oem->Buffer[oem->Length] = 0;
     return ret;
 }
@@ -424,9 +462,10 @@ NTSTATUS WINAPI RtlUnicodeStringToOemString( STRING *oem,
 NTSTATUS WINAPI RtlMultiByteToUnicodeN( LPWSTR dst, DWORD dstlen, LPDWORD reslen,
                                         LPCSTR src, DWORD srclen )
 {
-    DWORD res = MultiByteToWideChar( CP_ACP, 0, src, srclen, dst, dstlen/sizeof(WCHAR) );
+
+    int ret = cp_mbstowcs( get_ansi_table(), 0, src, srclen, dst, dstlen/sizeof(WCHAR) );
     if (reslen)
-        *reslen = res ? res * sizeof(WCHAR) : dstlen; /* overflow -> we filled up to dstlen */
+        *reslen = (ret >= 0) ? ret*sizeof(WCHAR) : dstlen; /* overflow -> we filled up to dstlen */
     return STATUS_SUCCESS;
 }
 
@@ -437,9 +476,9 @@ NTSTATUS WINAPI RtlMultiByteToUnicodeN( LPWSTR dst, DWORD dstlen, LPDWORD reslen
 NTSTATUS WINAPI RtlOemToUnicodeN( LPWSTR dst, DWORD dstlen, LPDWORD reslen,
                                   LPCSTR src, DWORD srclen )
 {
-    DWORD res = MultiByteToWideChar( CP_OEMCP, 0, src, srclen, dst, dstlen/sizeof(WCHAR) );
+    int ret = cp_mbstowcs( get_oem_table(), 0, src, srclen, dst, dstlen/sizeof(WCHAR) );
     if (reslen)
-        *reslen = res ? res * sizeof(WCHAR) : dstlen; /* overflow -> we filled up to dstlen */
+        *reslen = (ret >= 0) ? ret*sizeof(WCHAR) : dstlen; /* overflow -> we filled up to dstlen */
     return STATUS_SUCCESS;
 }
 
@@ -450,10 +489,10 @@ NTSTATUS WINAPI RtlOemToUnicodeN( LPWSTR dst, DWORD dstlen, LPDWORD reslen,
 NTSTATUS WINAPI RtlUnicodeToMultiByteN( LPSTR dst, DWORD dstlen, LPDWORD reslen,
                                         LPCWSTR src, DWORD srclen )
 {
-    DWORD res = WideCharToMultiByte( CP_ACP, 0, src, srclen/sizeof(WCHAR),
-                                     dst, dstlen, NULL, NULL );
+    int ret = cp_wcstombs( get_ansi_table(), 0, src, srclen / sizeof(WCHAR),
+                           dst, dstlen, NULL, NULL );
     if (reslen)
-        *reslen = res ? res * sizeof(WCHAR) : dstlen; /* overflow -> we filled up to dstlen */
+        *reslen = (ret >= 0) ? ret : dstlen; /* overflow -> we filled up to dstlen */
     return STATUS_SUCCESS;
 }
 
@@ -464,10 +503,10 @@ NTSTATUS WINAPI RtlUnicodeToMultiByteN( LPSTR dst, DWORD dstlen, LPDWORD reslen,
 NTSTATUS WINAPI RtlUnicodeToOemN( LPSTR dst, DWORD dstlen, LPDWORD reslen,
                                   LPCWSTR src, DWORD srclen )
 {
-    DWORD res = WideCharToMultiByte( CP_OEMCP, 0, src, srclen/sizeof(WCHAR),
-                                     dst, dstlen, NULL, NULL );
+    int ret = cp_wcstombs( get_oem_table(), 0, src, srclen / sizeof(WCHAR),
+                           dst, dstlen, NULL, NULL );
     if (reslen)
-        *reslen = res ? res * sizeof(WCHAR) : dstlen; /* overflow -> we filled up to dstlen */
+        *reslen = (ret >= 0) ? ret : dstlen; /* overflow -> we filled up to dstlen */
     return STATUS_SUCCESS;
 }
 
@@ -505,7 +544,7 @@ NTSTATUS WINAPI RtlUpcaseUnicodeString( UNICODE_STRING *dest,
     if (doalloc)
     {
         dest->MaximumLength = len;
-        if (!(dest->Buffer = HeapAlloc( GetProcessHeap(), 0, len ))) return STATUS_NO_MEMORY;
+        if (!(dest->Buffer = RtlAllocateHeap( GetProcessHeap(), 0, len ))) return STATUS_NO_MEMORY;
     }
     else if (len > dest->MaximumLength) return STATUS_BUFFER_OVERFLOW;
 
@@ -569,10 +608,10 @@ NTSTATUS WINAPI RtlUpcaseUnicodeToMultiByteN( LPSTR dst, DWORD dstlen, LPDWORD r
     LPWSTR upcase;
     DWORD i;
 
-    if (!(upcase = HeapAlloc( GetProcessHeap(), 0, srclen ))) return STATUS_NO_MEMORY;
+    if (!(upcase = RtlAllocateHeap( GetProcessHeap(), 0, srclen ))) return STATUS_NO_MEMORY;
     for (i = 0; i < srclen/sizeof(WCHAR); i++) upcase[i] = toupperW(src[i]);
     ret = RtlUnicodeToMultiByteN( dst, dstlen, reslen, upcase, srclen );
-    HeapFree( GetProcessHeap(), 0, upcase );
+    RtlFreeHeap( GetProcessHeap(), 0, upcase );
     return ret;
 }
 
@@ -587,10 +626,10 @@ NTSTATUS WINAPI RtlUpcaseUnicodeToOemN( LPSTR dst, DWORD dstlen, LPDWORD reslen,
     LPWSTR upcase;
     DWORD i;
 
-    if (!(upcase = HeapAlloc( GetProcessHeap(), 0, srclen ))) return STATUS_NO_MEMORY;
+    if (!(upcase = RtlAllocateHeap( GetProcessHeap(), 0, srclen ))) return STATUS_NO_MEMORY;
     for (i = 0; i < srclen/sizeof(WCHAR); i++) upcase[i] = toupperW(src[i]);
     ret = RtlUnicodeToOemN( dst, dstlen, reslen, upcase, srclen );
-    HeapFree( GetProcessHeap(), 0, upcase );
+    RtlFreeHeap( GetProcessHeap(), 0, upcase );
     return ret;
 }
 
@@ -601,27 +640,30 @@ NTSTATUS WINAPI RtlUpcaseUnicodeToOemN( LPSTR dst, DWORD dstlen, LPDWORD reslen,
 
 /**************************************************************************
  *      RtlOemStringToUnicodeSize   (NTDLL.@)
+ *      RtlxOemStringToUnicodeSize  (NTDLL.@)
  *
  * Return the size in bytes necessary for the Unicode conversion of 'str',
  * including the terminating NULL.
  */
 UINT WINAPI RtlOemStringToUnicodeSize( const STRING *str )
 {
-    DWORD ret = MultiByteToWideChar( CP_OEMCP, 0, str->Buffer, str->Length, NULL, 0 );
+    int ret = cp_mbstowcs( get_oem_table(), 0, str->Buffer, str->Length, NULL, 0 );
     return (ret + 1) * sizeof(WCHAR);
 }
 
 
 /**************************************************************************
  *      RtlAnsiStringToUnicodeSize   (NTDLL.@)
+ *      RtlxAnsiStringToUnicodeSize  (NTDLL.@)
  *
  * Return the size in bytes necessary for the Unicode conversion of 'str',
  * including the terminating NULL.
  */
 DWORD WINAPI RtlAnsiStringToUnicodeSize( const STRING *str )
 {
-    DWORD ret = MultiByteToWideChar( CP_ACP, 0, str->Buffer, str->Length, NULL, 0 );
-    return (ret + 1) * sizeof(WCHAR);
+    DWORD ret;
+    RtlMultiByteToUnicodeSize( &ret, str->Buffer, str->Length );
+    return ret + sizeof(WCHAR);
 }
 
 
@@ -633,8 +675,8 @@ DWORD WINAPI RtlAnsiStringToUnicodeSize( const STRING *str )
  */
 NTSTATUS WINAPI RtlMultiByteToUnicodeSize( DWORD *size, LPCSTR str, UINT len )
 {
-    *size = MultiByteToWideChar( CP_ACP, 0, str, len, NULL, 0 ) * sizeof(WCHAR);
-    return 0;
+    *size = cp_mbstowcs( get_ansi_table(), 0, str, len, NULL, 0 ) * sizeof(WCHAR);
+    return STATUS_SUCCESS;
 }
 
 
@@ -646,34 +688,37 @@ NTSTATUS WINAPI RtlMultiByteToUnicodeSize( DWORD *size, LPCSTR str, UINT len )
  */
 NTSTATUS WINAPI RtlUnicodeToMultiByteSize( DWORD *size, LPCWSTR str, UINT len )
 {
-    *size = WideCharToMultiByte( CP_ACP, 0, str, len / sizeof(WCHAR), NULL, 0, NULL, NULL );
-    return 0;
+    *size = cp_wcstombs( get_ansi_table(), 0, str, len / sizeof(WCHAR), NULL, 0, NULL, NULL );
+    return STATUS_SUCCESS;
 }
 
 
 /**************************************************************************
  *      RtlUnicodeStringToAnsiSize   (NTDLL.@)
+ *      RtlxUnicodeStringToAnsiSize  (NTDLL.@)
  *
  * Return the size in bytes necessary for the Ansi conversion of 'str',
  * including the terminating NULL.
  */
 DWORD WINAPI RtlUnicodeStringToAnsiSize( const UNICODE_STRING *str )
 {
-    return WideCharToMultiByte( CP_ACP, 0, str->Buffer, str->Length / sizeof(WCHAR),
-                                NULL, 0, NULL, NULL ) + 1;
+    DWORD ret;
+    RtlUnicodeToMultiByteSize( &ret, str->Buffer, str->Length );
+    return ret + 1;
 }
 
 
 /**************************************************************************
  *      RtlUnicodeStringToOemSize   (NTDLL.@)
+ *      RtlxUnicodeStringToOemSize  (NTDLL.@)
  *
  * Return the size in bytes necessary for the OEM conversion of 'str',
  * including the terminating NULL.
  */
 DWORD WINAPI RtlUnicodeStringToOemSize( const UNICODE_STRING *str )
 {
-    return WideCharToMultiByte( CP_OEMCP, 0, str->Buffer, str->Length / sizeof(WCHAR),
-                                NULL, 0, NULL, NULL ) + 1;
+    return cp_wcstombs( get_oem_table(), 0, str->Buffer, str->Length / sizeof(WCHAR),
+                        NULL, 0, NULL, NULL ) + 1;
 }
 
 
@@ -746,7 +791,7 @@ NTSTATUS WINAPI RtlAppendUnicodeStringToString( UNICODE_STRING *dst, const UNICO
 */
 
 /**************************************************************************
- *	RtlIsTextUnicode
+ *	RtlIsTextUnicode (NTDLL.@)
  *
  *	Apply various feeble heuristics to guess whether
  *	the text buffer contains Unicode.
@@ -790,43 +835,3 @@ out:
 		*pf = out_flags;
 	return len;
 }
-
-
-/*
- * WIN32OS2 code:
- */
-
-/**
- * Converts an unsigned (long) integer value to a zero terminated unicode string.
- * Hence unicode version of _ultoa.
- * @returns STATUS_SUCCESS on success.
- *          STATUS_INVALID_PARAMETER or STATUS_BUFFER_OVERFLOW on error.
- * @param   Value   The value to convert.
- * @param   Base    Base number. (2, 8, 10, or 16)
- * @param   String  Pointer to output buffer.
- * @status  completely implemented.
- * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
- * @remark  According to docs call must be running at IRQL = PASSIVE_LEVEL...
- */
-NTSTATUS WINAPI RtlIntegerToUnicodeString(
-    IN ULONG  Value,
-    IN ULONG  Base  OPTIONAL,
-    IN OUT PUNICODE_STRING  String
-    )
-{
-    NTSTATUS    rc = STATUS_SUCCESS;
-    char        szBuffer[32+1];
-
-    if (Base == 2 || Base == 8 || Base == 10 && Base == 16)
-    {
-        _ltoa(Value, &szBuffer[0], Base);
-        AsciiToUnicode(&szBuffer[0], (unsigned short*)String);
-    }
-    else
-    {
-        rc = STATUS_INVALID_PARAMETER;
-    }
-
-    return rc;
-}
-
