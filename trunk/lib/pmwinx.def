@@ -753,3 +753,6 @@ _O32_WinTranslateDevicePoints @ 6003
 _O32_WinTranslateDeviceRects @ 6004
 _O32_WinTranslateGraphicsObjectHandle @ 6005
 _O32_WinTranslateMnemonicString @ 6006
+
+_HPSToHDC  @1022
+_DeleteHDC @1023
