@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.66 2002-05-16 12:16:00 sandervl Exp $
+/* $Id: initterm.cpp,v 1.67 2003-01-21 11:21:52 sandervl Exp $
  *
  * KERNEL32 DLL entry point
  *
@@ -135,7 +135,7 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
     /***********************************************************/
     /* A non-zero value must be returned to indicate success.  */
     /***********************************************************/
-    return 1UL;
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
