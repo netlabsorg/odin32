@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.1415 2001-05-16 01:18:58 bird Exp $ */
+/* $Id: changelog,v 1.1416 2001-05-16 07:41:59 sandervl Exp $ */
+
+ 2001-05-16: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o WM_SETREDRAW fix; must call WinEnableWindowUpdate for
+                  both client and frame window.
+                  (winhlp32 buttons are now visible again)
 
  2001-05-15: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Tools\bin:o Synced with other projects using the same tools.
