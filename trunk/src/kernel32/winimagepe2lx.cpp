@@ -1,4 +1,4 @@
-/* $Id: winimagepe2lx.cpp,v 1.9 2000-04-19 20:19:13 bird Exp $ */
+/* $Id: winimagepe2lx.cpp,v 1.10 2000-04-19 22:16:49 bird Exp $ */
 
 /*
  * Win32 PE2LX Image base class
@@ -273,7 +273,20 @@ BOOL Win32Pe2LxImage::init()
         if (pTLSDir != NULL)
         {
             PVOID pv;
+            ULONG ulBorlandRVAFix = 0UL;
+
             pv = getPointerFromRVA(pTLSDir->StartAddressOfRawData);
+            /*
+             * Borland seems to have problems getting things right...
+             * Needs to subtract image base to make the TLSDir "RVA"s real
+             * RVAs before converting them to pointers.
+             */
+            if ((pv == NULL || pTLSDir->StartAddressOfRawData == 0UL)
+                && pTLSDir->StartAddressOfRawData > this->pNtHdrs->OptionalHeader.ImageBase)
+                {
+                ulBorlandRVAFix = this->pNtHdrs->OptionalHeader.ImageBase;
+                pv = getPointerFromRVA(pTLSDir->StartAddressOfRawData - ulBorlandRVAFix);
+                }
             if (pv == NULL || pTLSDir->StartAddressOfRawData == 0UL)
             {
                 eprintf(("Win32Pe2LxImage::init: invalid RVA to TLS StartAddressOfRawData - %#8x.\n",
@@ -283,7 +296,7 @@ BOOL Win32Pe2LxImage::init()
             setTLSAddress(pv);
             setTLSInitSize(pTLSDir->EndAddressOfRawData - pTLSDir->StartAddressOfRawData);
             setTLSTotalSize(pTLSDir->EndAddressOfRawData - pTLSDir->StartAddressOfRawData + pTLSDir->SizeOfZeroFill);
-            pv = getPointerFromRVA((ULONG)pTLSDir->AddressOfIndex);
+            pv = getPointerFromRVA((ULONG)pTLSDir->AddressOfIndex - ulBorlandRVAFix);
             if (pv == NULL)
             {
                 eprintf(("Win32Pe2LxImage::init: invalid RVA to TLS AddressOffIndex - %#8x.\n",
@@ -291,7 +304,7 @@ BOOL Win32Pe2LxImage::init()
                 return FALSE;
             }
             setTLSIndexAddr((LPDWORD)pv);
-            pv = getPointerFromRVA((ULONG)pTLSDir->AddressOfCallBacks);
+            pv = getPointerFromRVA((ULONG)pTLSDir->AddressOfCallBacks - ulBorlandRVAFix);
             if (pv == NULL)
             {
                 eprintf(("Win32Pe2LxImage::init: invalid RVA to TLS AddressOffIndex - %#8x.\n",
