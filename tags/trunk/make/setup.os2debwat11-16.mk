@@ -1,4 +1,4 @@
-# $Id: setup.os2debwat11-16.mk,v 1.6 2002-08-20 08:02:59 bird Exp $
+# $Id: setup.os2debwat11-16.mk,v 1.7 2002-08-20 19:14:32 bird Exp $
 
 # ---OS2, DEBUG, WAT11-------------------------
 ENV_NAME="OS/2, Debug, Watcom C/C++ v11.0c 16-bit"
@@ -42,7 +42,7 @@ _AR_LNK3= +"$(TARGET_OBJS: ="&^
  +")"
 AR_LNK3= $(_AR_LNK3:+""&^
 =)
-AR_LNK4= "$(@R).lst"
+AR_LNK4= "$(@R).lst";
 
 CC_FLAGS=-bt=os2 -dOS2 -dDEBUG -d__16BIT__ -5 -zq -bm -ze -w4 -d2 -hc -zc $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
 CC_FLAGS_EXE=$(CC_FLAGS)

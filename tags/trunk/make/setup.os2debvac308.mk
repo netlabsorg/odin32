@@ -1,4 +1,4 @@
-# $Id: setup.os2debvac308.mk,v 1.11 2002-08-20 05:52:04 bird Exp $
+# $Id: setup.os2debvac308.mk,v 1.12 2002-08-20 19:14:32 bird Exp $
 
 # ---OS2, DEBUG, VAC308-------------------------
 ENV_NAME="OS/2, Debug, IBM VisualAge for C++ 3.08"
@@ -35,11 +35,14 @@ EXEPACK=lxlite.exe
 # The flags
 #
 AR_FLAGS=/nologo /noignorecase
-AR_CMD=$(AR) $(AR_FLAGS) $@ @$(TARGET_LNK)
-_AR_LNK1= "$(TARGET_OBJS: ="&^
-")"
-AR_LNK1= $(_AR_LNK1:""=)
-AR_LNK2= $(@R).lst
+AR_CMD=$(AR) $(AR_FLAGS) @"$(TARGET_LNK)"
+AR_LNK1= "$(@R).$(EXT_LIB)"
+AR_LNK2=y
+_AR_LNK3= +"$(TARGET_OBJS: ="&^
+ +")"
+AR_LNK3= $(_AR_LNK3:+""&^
+=)
+AR_LNK4= "$(@R).lst";
 
 CC_FLAGS=/Q /DDEBUG /DOS2 /D__32BIT__ /D__i386__ /DMODEL=FLAT /Ti+ /O- /Ss+ /C+ $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES) $(ALL_INCLUDES) /I$(PATH_INCLUDES)
 CC_FLAGS_EXE=$(CC_FLAGS) /Gm+ /Ge+
