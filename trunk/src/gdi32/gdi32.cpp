@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.4 1999-06-17 23:12:50 phaller Exp $ */
+/* $Id: gdi32.cpp,v 1.5 1999-06-17 23:13:47 phaller Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -798,7 +798,7 @@ HBRUSH WIN32API CreateSolidBrush( COLORREF arg1)
 BOOL WIN32API DPtoLP( HDC arg1, PPOINT arg2, int  arg3)
 {
     dprintf(("GDI32: OS2DPtoLP\n"));
-    return OP32_DPtoLP(arg1, arg2, arg3);
+    return O32_DPtoLP(arg1, arg2, arg3);
 }
 //******************************************************************************
 //******************************************************************************
