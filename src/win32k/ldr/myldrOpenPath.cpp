@@ -1,4 +1,4 @@
-/* $Id: myldrOpenPath.cpp,v 1.2 2000-09-02 21:08:10 bird Exp $
+/* $Id: myldrOpenPath.cpp,v 1.3 2000-09-22 09:22:40 bird Exp $
  *
  * myldrOpenPath - ldrOpenPath used to open executables we'll override
  * this to altern the search path for DLLs.
@@ -40,6 +40,7 @@
 
 
 /**
+ * ldrOpenPath.
  * myldrOpenPath - opens file eventually searching loader specific paths
  *
  * @returns   OS2 return code.
@@ -48,27 +49,44 @@
  * @param     cchFilename   Modulename length.
  * @param     plv           Loader local variables? (Struct from KERNEL.SDF)
  * @param     pful          Pointer to flags which are passed on to ldrOpen.
+ * @param     lLibPath      New parameter in build 14053()
+ *                          ldrGetMte calls with 1
+ *                          ldrOpenNewExe calls with 3
+ *                          This is compared to the initial libpath index.
+ *                              The libpath index is:
+ *                                  BEGINLIBPATH    1
+ *                                  LIBPATH         2
+ *                                  ENDLIBPATH      3
+ *                              The initial libpath index is either 1 or 2.
+ *                          Currently we'll ignore it. (I don't know why ldrGetMte calls ldrOpenPath...)
+ *
  * @sketch
  * This is roughly what the original ldrOpenPath does:
  *      Save pTCBCur->TCBFailErr.
  *      if !CLASS_GLOBAL or miniifs then
  *          ldrOpen(pachFilename)
  *      else
+ *          if beglibpath != NULL then path = 1 else path = 2
+ *          if (lLibPath < path)
+ *              return ERROR_FILE_NOT_FOUND; (2)
+ *          Allocate buffer.
  *          loop until no more libpath elements
  *              get next libpath element and add it to the modname.
  *              try open the modname
  *              if successfull then break the loop.
  *          endloop
+ *          Free buffer.
  *      endif
  *      Restore pTCBCur->TCBFailErr.
  * @remark    This function will change the "Loader state".
  *
  */
-ULONG LDRCALL myldrOpenPath( /* retd  0x10 */
+ULONG LDRCALL myldrOpenPath(       /* retd  0x14 */
     PCHAR       pachFilename,       /* ebp + 0x08 */
     USHORT      cchFilename,        /* ebp + 0x0c */
     ldrlv_t *   plv,                /* ebp + 0x10 */
-    PULONG      pful                /* ebp + 0x14 */
+    PULONG      pful,               /* ebp + 0x14 */
+    ULONG       lLibPath            /* ebp + 0x18 */
     )
 {
 
@@ -88,7 +106,7 @@ ULONG LDRCALL myldrOpenPath( /* retd  0x10 */
                  "    pachFilename 0x%08x  cchFilename 0x%04x  plv 0x%08x  pful=0x%08x\n",
                  pachFilename, cchFilename, plv, pful
                  ));
-        return ldrOpenPath(pachFilename, cchFilename, plv, pful);
+        return ldrOpenPath(pachFilename, cchFilename, plv, pful, lLibPath);
     }
     #endif
 
@@ -155,14 +173,14 @@ ULONG LDRCALL myldrOpenPath( /* retd  0x10 */
              * Hard Errors while searching invalid paths, etc. (ldrOpenPath does this!)
              */
             USHORT  TCBFailErr_save = tcbGetTCBFailErr(tcbGetCur());
-            rc = pExe->Data.pModule->openPath(pachFilename, cchFilename, plv, pful);
+            rc = pExe->Data.pModule->openPath(pachFilename, cchFilename, plv, pful, lLibPath);
             tcbSetTCBFailErr(tcbGetCur(), TCBFailErr_save);
         }
         else
-            rc = ldrOpenPath(pachFilename, cchFilename, plv, pful);
+            rc = ldrOpenPath(pachFilename, cchFilename, plv, pful, lLibPath);
     }
     else
-        rc = ldrOpenPath(pachFilename, cchFilename, plv, pful);
+        rc = ldrOpenPath(pachFilename, cchFilename, plv, pful, lLibPath);
 
 
     /*
@@ -173,5 +191,20 @@ ULONG LDRCALL myldrOpenPath( /* retd  0x10 */
     return rc;
 }
 
+
+
+/**
+ * Wrapper for the old (pre 14053) versions.
+ * the new parameter is set to 3.
+ */
+ULONG LDRCALL myldrOpenPath_old( /* retd  0x10 */
+    PCHAR       pachFilename,    /* ebp + 0x08 */
+    USHORT      cchFilename,     /* ebp + 0x0c */
+    ldrlv_t *   plv,             /* ebp + 0x10 */
+    PULONG      pful             /* ebp + 0x14 */
+    )
+{
+    return myldrOpenPath(pachFilename, cchFilename, plv, pful, 3);
+}
 
 

@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.23 2000-09-08 21:34:10 bird Exp $
+/* $Id: d32init.c,v 1.24 2000-09-22 09:22:35 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -358,7 +358,7 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
 
     /* functionoverrides */
     if ((rc = importTabInit()) != NO_ERROR)
-        return rc;
+        return (USHORT)rc;
 
     /*
      * Lock the 32-bit objects/segments and 16-bit datasegment in memory
@@ -1196,7 +1196,7 @@ int importTabInit(void)
         0,                              /* 17 */
         0,                              /* 18 */
         0,                              /* 19 */
-        (unsigned)myldrOpenPath,        /* 20 */
+        (unsigned)myldrOpenPath_old,    /* 20 */
         0,                              /* 21 */
         0,                              /* 22 */
         0,                              /* 23 */
@@ -1219,12 +1219,29 @@ int importTabInit(void)
         0,                              /* 40 */
         (unsigned)nopSecPathFromSFN     /* 41 */
         #if 0 /* experimenting */
-        ,(unsigned)myldrSetVMflags,      /* 42 */
+        ,(unsigned)myldrSetVMflags,     /* 42 */
         #endif
     };
     int i;
     int cb;
     int cbmin;
+
+#ifndef R3TST //New function not currently not implemented by fake.c
+    /*
+     * Build specific changes to the auFuncs table
+     */
+    if (options.ulBuild >= 14053)
+    {
+        #ifdef DEBUG
+        if (auFuncs[20] != (unsigned)myldrOpenPath_old)
+        {
+            kprintf(("importTabInit: ASSERTION FAILED auFuncs don't point at myldrOpenPath\n"));
+            Int3();
+        }
+        #endif
+        auFuncs[20] = (unsigned)myldrOpenPath;
+    }
+#endif
 
 #ifdef R3TST
     R3TstFixImportTab();
