@@ -1,4 +1,4 @@
-# $Id: win32k.tools.mk,v 1.4 2000-12-16 23:21:37 bird Exp $
+# $Id: win32k.tools.mk,v 1.5 2001-01-20 15:48:20 bird Exp $
 
 #
 # Win32k common tools makefile.
@@ -264,6 +264,28 @@ SOURCEFILE  = $^.
     @$(CPPCOMPILE)
 {ldr}.cpp.obj:
     @$(ECHO) compiling 32bit ldr:    $(SOURCEFILE)
+    @$(CPPCOMPILE)
+
+
+{api}.asm{$(WIN32KOBJ)}.obj:
+    @$(ECHO) assembling api:         $(SOURCEFILE)
+    @$(ASMCOMPILE)
+{api}.asm.obj:
+    @$(ECHO) assembling api:         $(SOURCEFILE)
+    @$(ASMCOMPILE)
+
+{api}.c{$(WIN32KOBJ)}.obj:
+    @$(ECHO) compiling 32bit api:    $(SOURCEFILE)
+    @$(CCOMPILE)
+{api}.c.obj:
+    @$(ECHO) compiling 32bit api:    $(SOURCEFILE)
+    @$(CCOMPILE)
+
+{api}.cpp{$(WIN32KOBJ)}.obj:
+    @$(ECHO) compiling 32bit api:    $(SOURCEFILE)
+    @$(CPPCOMPILE)
+{api}.cpp.obj:
+    @$(ECHO) compiling 32bit api:    $(SOURCEFILE)
     @$(CPPCOMPILE)
 
 
