@@ -1,4 +1,4 @@
-# $Id: setup.mak,v 1.12 2002-08-24 04:51:09 bird Exp $
+# $Id: setup.mak,v 1.13 2002-08-24 22:31:24 bird Exp $
 
 #
 # Generic makefile system.
@@ -120,27 +120,30 @@ PATH_MAKE       = $(PATH_ROOT)\make
 # Where the bulid system and other tools are located
 PATH_TOOLS      = $(PATH_ROOT)\tools\bin
 # Where platform-specific files are located. (like the .def files)
-# (default) PATH_DEF        = $(SHT_TRGPLTFRM)
 PATH_DEF        = .
 # Where the include files are located.
 PATH_INCLUDES   = $(PATH_ROOT)\include\win;.;$(PATH_ROOT)\include
-
 # Where the temporary files goes.
-PATH_OBJ    = $(PATH_ROOT)\obj\$(SHT_TRGPLTFRM)$(SHT_BLDMD)$(SHT_BLDENV)
-# Where the executable binaries goes.
-PATH_BIN    = $(PATH_ROOT)\bin\$(BUILD_MODE)
-# Where the public libraries goes.
-PATH_LIB    = $(PATH_ROOT)\lib\$(BUILD_MODE)
-# Where the dynamic link libraries goes.
-PATH_DLL    = $(PATH_ROOT)\bin\$(BUILD_MODE)
-# Where the drivers goes. (common for IFS and SYS.)
-PATH_SYS    = $(PATH_ROOT)\bin\$(BUILD_MODE)
-# Where the virtual dos drivers goes.
-PATH_VDD    = $(PATH_ROOT)\bin\$(BUILD_MODE)
-# Where the documentation goes.
-PATH_DOC    = $(PATH_ROOT)\bin\$(BUILD_MODE)
-# Where the helpfiles goes.
-PATH_HLP    = $(PATH_ROOT)\bin\$(BUILD_MODE)
+PATH_OBJ        = $(PATH_ROOT)\obj\$(SHT_TRGPLTFRM)$(SHT_BLDMD)$(SHT_BLDENV)
+# Where the libraries goes.
+PATH_LIB        = $(PATH_ROOT)\lib\$(BUILD_MODE)
+# Base directory of the published files.
+PATH_PUB        = $(PATH_ROOT)\bin\$(BUILD_MODE)
+# Base directory of the unstripped published files. (release mode only)
+PATH_PUB_DEB    = $(PATH_ROOT)\bin\$(BUILD_MODE).unstripped
+# Sub dir where the executable binaries goes.
+PATH_SUB_BIN    = .
+# Sub dir where the dynamic link libraries goes.
+PATH_SUB_DLL    = .
+# Sub dir where the drivers goes. (common for IFS and SYS.)
+PATH_SUB_SYS    = .
+# Sub dir where the virtual dos drivers goes.
+PATH_SUB_VDD    = .
+# Sub dir where the documentation goes.
+PATH_SUB_DOC    = .
+# Sub dir where the helpfiles goes.
+PATH_SUB_HLP    = .
+
 
 
 # Note: Makefiles are supposed to set the correct *RELATIVE* path to the

@@ -1,4 +1,4 @@
-# $Id: process.forwarder.mak,v 1.10 2002-08-24 04:44:25 bird Exp $
+# $Id: process.forwarder.mak,v 1.11 2002-08-24 22:31:24 bird Exp $
 
 #
 # Generic makefile system.
@@ -194,13 +194,13 @@ all: build
 # -----------------------------------------------------------------------------
 # Generic forwarder
 # -----------------------------------------------------------------------------
-build rebuild clean dep needed lib executable miscellaneous \
+build rebuild needed lib executable miscellaneous \
 !if "$(TARGET_MODE)" == "DEPEND"
 $(TARGET) \
 !endif
 $(TARGET_ILIB) \
 $(RULES_FORWARD) \
-install testcase nothing target:
+testcase target:
     \
 !ifndef BUILD_VERBOSE
     @ \
@@ -208,6 +208,23 @@ install testcase nothing target:
 !ifndef _BUILD_PROJECT # workaround for buggy SET implementation in NMAKE.
     echo . && SET _BUILD_PROJECT=$(BUILD_PROJECT) && \
 !endif
+    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
+
+
+
+# -----------------------------------------------------------------------------
+# Generic forwarder - No dependencies.
+# -----------------------------------------------------------------------------
+clean dep publish publish_target nothing:
+    \
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
+    echo . && \
+!ifndef _BUILD_PROJECT # workarounds for buggy SET implementation in NMAKE.
+    SET _BUILD_PROJECT=$(BUILD_PROJECT) && \
+!endif
+    SET NODEP=1 && \
     $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
 
 
