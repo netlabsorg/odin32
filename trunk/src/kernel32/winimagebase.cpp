@@ -1,4 +1,4 @@
-/* $Id: winimagebase.cpp,v 1.30 2000-10-23 13:42:44 sandervl Exp $ */
+/* $Id: winimagebase.cpp,v 1.31 2001-04-02 22:51:58 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -203,12 +203,13 @@ BOOL Win32ImageBase::findDll(const char *szFileName, char *szFullName,
 //returns ERROR_SUCCESS or error code (Characteristics will contain
 //the Characteristics member of the file header structure)
 //******************************************************************************
-ULONG Win32ImageBase::isPEImage(char *szFileName, DWORD *Characteristics)
+ULONG Win32ImageBase::isPEImage(char *szFileName, DWORD *Characteristics, DWORD *subsystem)
 {
  char   filename[CCHMAXPATH];
  char  *syspath;
  HFILE  dllfile;
  IMAGE_FILE_HEADER     fh;
+ IMAGE_OPTIONAL_HEADER oh;
  HFILE  win32handle;
  ULONG  ulAction       = 0;      /* Action taken by DosOpen */
  ULONG  ulLocal        = 0;      /* File pointer position after DosSetFilePtr */
@@ -261,7 +262,7 @@ ULONG Win32ImageBase::isPEImage(char *szFileName, DWORD *Characteristics)
         DosClose(win32handle);                /* Close the file */
         return ERROR_INVALID_EXE_SIGNATURE_W;
   }
-  ULONG hdrsize = pdoshdr->e_lfanew + SIZE_OF_NT_SIGNATURE + sizeof(IMAGE_FILE_HEADER);
+  ULONG hdrsize = pdoshdr->e_lfanew + SIZE_OF_NT_SIGNATURE + sizeof(IMAGE_FILE_HEADER) + sizeof(IMAGE_OPTIONAL_HEADER);
   free(pdoshdr);
 
   /* Move the file pointer back to the beginning of the file */
@@ -280,6 +281,9 @@ ULONG Win32ImageBase::isPEImage(char *szFileName, DWORD *Characteristics)
   if(GetPEFileHeader (win32file, &fh) == FALSE) {
         goto failure;
   }
+  if(GetPEOptionalHeader (win32file, &oh) == FALSE) {
+        goto failure;
+  }
 
   if(!(fh.Characteristics & IMAGE_FILE_EXECUTABLE_IMAGE)) {//not valid
         goto failure;
@@ -293,6 +297,9 @@ ULONG Win32ImageBase::isPEImage(char *szFileName, DWORD *Characteristics)
   }
   if(Characteristics) {
         *Characteristics = fh.Characteristics;
+  }
+  if(subsystem) {
+        *subsystem = oh.Subsystem;
   }
   DosClose(win32handle);
   return ERROR_SUCCESS_W;
