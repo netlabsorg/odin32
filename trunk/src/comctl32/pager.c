@@ -3,6 +3,20 @@
  *
  * Copyright 1998, 1999 Eric Kohl
  *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
  * NOTES
  *    Tested primarily with the controlspy Pager application.
  *       Susan Farley (susan@codeweavers.com)
@@ -17,21 +31,12 @@
 #include <string.h>
 #include "winbase.h"
 #include "commctrl.h"
-#include "debugtools.h"
+#include "wine/debug.h"
 
-DEFAULT_DEBUG_CHANNEL(pager);
-
-#ifdef __WIN32OS2__
-#include "ccbase.h"
-#undef inline
-#define inline
-#endif
+WINE_DEFAULT_DEBUG_CHANNEL(pager);
 
 typedef struct
 {
-#ifdef __WIN32OS2__
-    COMCTL32_HEADER header;
-#endif
     HWND   hwndChild;  /* handle of the contained wnd */
     BOOL   bNoResize;  /* set when created with CCS_NORESIZE */
     COLORREF clrBk;    /* background color */
@@ -593,6 +598,18 @@ PAGER_SetFixedHeight(HWND hwnd, PAGER_INFO* infoPtr)
     return w;
 }
 
+/******************************************************************
+ * For the PGM_RECALCSIZE message (but not the other uses in      *
+ * this module), the native control does only the following:      *
+ *                                                                *
+ *    if (some condition)                                         *
+ *          PostMessageA(hwnd, EM_FMTLINES, 0, 0);                *
+ *    return DefWindowProcA(hwnd, PGM_RECALCSIZE, 0, 0);          *
+ *                                                                *
+ * When we figure out what the "some condition" is we will        *
+ * implement that for the message processing.                     *
+ ******************************************************************/
+
 static LRESULT
 PAGER_RecalcSize(HWND hwnd)
 {
@@ -629,8 +646,12 @@ PAGER_SetBkColor (HWND hwnd, WPARAM wParam, LPARAM lParam)
     infoPtr->clrBk = (COLORREF)lParam;
     TRACE("[%04x] %06lx\n", hwnd, infoPtr->clrBk);
 
-    PAGER_RecalcSize(hwnd);
-    SendMessageA(hwnd, WM_NCPAINT, (WPARAM)0, (LPARAM)0);
+    /* the native control seems to do things this way */
+    SetWindowPos(hwnd, 0,0,0,0,0, 
+		 SWP_FRAMECHANGED | SWP_NOSIZE | SWP_NOMOVE |
+		 SWP_NOZORDER | SWP_NOACTIVATE);
+
+    RedrawWindow(hwnd, 0, 0, RDW_ERASE | RDW_INVALIDATE);
 
     return (LRESULT)clrTemp;
 }
@@ -756,17 +777,30 @@ PAGER_Scroll(HWND hwnd, INT dir)
 }
 
 static LRESULT
+PAGER_FmtLines(HWND hwnd)
+{
+    PAGER_INFO *infoPtr = PAGER_GetInfoPtr (hwnd);
+
+    /* initiate NCCalcSize to resize client wnd and get size */
+    SetWindowPos(hwnd, 0, 0,0,0,0, 
+		 SWP_FRAMECHANGED | SWP_NOSIZE | SWP_NOMOVE |
+		 SWP_NOZORDER | SWP_NOACTIVATE);
+
+    SetWindowPos(infoPtr->hwndChild, 0, 
+		 0,0,infoPtr->nWidth,infoPtr->nHeight, 
+		 0);
+
+    return DefWindowProcA (hwnd, EM_FMTLINES, 0, 0);
+}
+
+static LRESULT
 PAGER_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
     PAGER_INFO *infoPtr;
     DWORD dwStyle = GetWindowLongA (hwnd, GWL_STYLE);
 
     /* allocate memory for info structure */
-#ifdef __WIN32OS2__
-    infoPtr =(PAGER_INFO*)initControl(hwnd,sizeof(PAGER_INFO));
-#else
     infoPtr = (PAGER_INFO *)COMCTL32_Alloc (sizeof(PAGER_INFO));
-#endif
     SetWindowLongA (hwnd, 0, (DWORD)infoPtr);
 
     /* set default settings */
@@ -819,6 +853,9 @@ PAGER_NCCalcSize(HWND hwnd, WPARAM wParam, LPARAM lParam)
     LPRECT lpRect = (LPRECT)lParam;
     RECT rcChildw, rcmyw, wnrc, lbrc, rbrc;
     POINT cursor;
+    BOOL resizeClient = FALSE;
+    BOOL repaintBtns = FALSE;
+    INT scrollRange;
 
     /*
      * lParam points to a RECT struct.  On entry, the struct
@@ -829,6 +866,9 @@ PAGER_NCCalcSize(HWND hwnd, WPARAM wParam, LPARAM lParam)
 	
     DefWindowProcA (hwnd, WM_NCCALCSIZE, wParam, lParam);
 
+    TRACE("orig rect=(%d,%d)-(%d,%d)\n",
+	  lpRect->left, lpRect->top, lpRect->right, lpRect->bottom);
+
     if (PAGER_IsHorizontal(hwnd))
     {
 	infoPtr->nWidth = lpRect->right - lpRect->left;
@@ -837,6 +877,16 @@ PAGER_NCCalcSize(HWND hwnd, WPARAM wParam, LPARAM lParam)
 	MapWindowPoints (0, hwnd, (LPPOINT)&rcChildw, 2);
 	GetCursorPos (&cursor);
 	GetWindowRect (hwnd, &rcmyw);
+
+	/* Reset buttons and hide any grey ones */
+	scrollRange = infoPtr->nWidth - (rcmyw.right - rcmyw.left);
+
+	TRACE("nPos=%d, scrollrange=%d, nWidth=%d, myw=(%d,%d)-(%d,%d)\n",
+	      infoPtr->nPos, scrollRange, infoPtr->nWidth,
+	      rcmyw.left, rcmyw.top, rcmyw.right, rcmyw.bottom);
+	PAGER_GrayAndRestoreBtns(infoPtr, scrollRange, &resizeClient, &repaintBtns);
+	PAGER_HideGrayBtns(infoPtr, &resizeClient);
+
 	if (PtInRect (&rcmyw, cursor)) {
 	    GetWindowRect (hwnd, &wnrc);
 	    lbrc = wnrc;
@@ -851,9 +901,9 @@ PAGER_NCCalcSize(HWND hwnd, WPARAM wParam, LPARAM lParam)
 	    if (PtInRect (&rbrc, cursor) && infoPtr->BRbtnState)
 		RedrawWindow (hwnd, 0, 0, RDW_INVALIDATE | RDW_ERASE);
 	}
-	if (infoPtr->TLbtnState) /* != PGF_INVISIBLE */
+	if (infoPtr->TLbtnState && (lpRect->left + infoPtr->nButtonSize < lpRect->right))
 	    lpRect->left += infoPtr->nButtonSize;
-	if (infoPtr->BRbtnState) 
+	if (infoPtr->BRbtnState && (lpRect->right - infoPtr->nButtonSize > lpRect->left))
 	    lpRect->right -= infoPtr->nButtonSize;
     }
     else
@@ -874,6 +924,17 @@ PAGER_NCCalcSize(HWND hwnd, WPARAM wParam, LPARAM lParam)
 	MapWindowPoints (0, hwnd, (LPPOINT)&rcChildw, 2);
 	GetCursorPos (&cursor);
 	GetWindowRect (hwnd, &rcmyw);
+
+	/* Reset buttons and hide any grey ones */
+	scrollRange = infoPtr->nHeight - (rcmyw.bottom - rcmyw.top);
+
+	TRACE("nPos=%d, scrollrange=%d, nHeigth=%d, myw=(%d,%d)-(%d,%d)\n",
+	      infoPtr->nPos, scrollRange, infoPtr->nHeight,
+	      rcmyw.left, rcmyw.top,
+	      rcmyw.right, rcmyw.bottom);
+	PAGER_GrayAndRestoreBtns(infoPtr, scrollRange, &resizeClient, &repaintBtns);
+	PAGER_HideGrayBtns(infoPtr, &resizeClient);
+
 	if (PtInRect (&rcmyw, cursor)) {
 
 	    /* native does:
@@ -899,19 +960,19 @@ PAGER_NCCalcSize(HWND hwnd, WPARAM wParam, LPARAM lParam)
 	    if (PtInRect (&rbrc, cursor) && infoPtr->BRbtnState)
 		RedrawWindow (hwnd, 0, 0, RDW_INVALIDATE | RDW_ERASE);
 	}
-	if (infoPtr->TLbtnState)
+	if (infoPtr->TLbtnState && (lpRect->top + infoPtr->nButtonSize < lpRect->bottom))
 	    lpRect->top += infoPtr->nButtonSize;
-	if (infoPtr->BRbtnState)
+	if (infoPtr->BRbtnState && (lpRect->bottom - infoPtr->nButtonSize > lpRect->top))
 	    lpRect->bottom -= infoPtr->nButtonSize;
 	/* ???? */
 	if ((lpRect->bottom < 0) || (lpRect->bottom > infoPtr->nHeight))
 	    lpRect->bottom = infoPtr->nHeight;
     }
 
-    TRACE("[%04x] client rect set to %dx%d at (%d,%d)\n", hwnd,
-                lpRect->right-lpRect->left,
-                lpRect->bottom-lpRect->top,
-                lpRect->left, lpRect->top);
+    TRACE("[%04x] client rect set to %dx%d at (%d,%d) BtnState[%d,%d]\n", 
+	  hwnd, lpRect->right-lpRect->left, lpRect->bottom-lpRect->top,
+	  lpRect->left, lpRect->top,
+	  infoPtr->TLbtnState, infoPtr->BRbtnState);
 
     return 0;
 }
@@ -1247,6 +1308,9 @@ PAGER_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
     switch (uMsg)
     {
+        case EM_FMTLINES:
+	    return PAGER_FmtLines(hwnd);
+
         case PGM_FORWARDMOUSE:
             return PAGER_ForwardMouse (hwnd, wParam);
 
@@ -1355,11 +1419,7 @@ PAGER_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             return SendMessageA (GetParent (hwnd), uMsg, wParam, lParam);
 
         default:
-#ifdef __WIN32OS2__
-            return defComCtl32ProcA(hwnd, uMsg, wParam, lParam);
-#else
             return DefWindowProcA (hwnd, uMsg, wParam, lParam);
-#endif
     }
 
     return 0;

@@ -4,6 +4,19 @@
  * Copyright 1997 Dimitrie O. Paun
  * Copyright 1998,2000 Eric Kohl
  *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #include <string.h>
@@ -16,9 +29,9 @@
 #define NO_SHLWAPI_STREAM
 #include "shlwapi.h"
 #include "comctl32.h"
-#include "debugtools.h"
+#include "wine/debug.h"
 
-DEFAULT_DEBUG_CHANNEL(commctrl);
+WINE_DEFAULT_DEBUG_CHANNEL(commctrl);
 
 extern void ANIMATE_Register(void);
 extern void ANIMATE_Unregister(void);
@@ -67,6 +80,7 @@ LPSTR    COMCTL32_aSubclass = (LPSTR)NULL;
 HMODULE COMCTL32_hModule = 0;
 LANGID  COMCTL32_uiLang = MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL);
 HBRUSH  COMCTL32_hPattern55AABrush = (HANDLE)NULL;
+COMCTL32_SysColor  comctl32_color;
 
 static HBITMAP COMCTL32_hPattern55AABitmap = (HANDLE)NULL;
 
@@ -110,6 +124,9 @@ COMCTL32_LibMain (HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
             /* create local pattern brush */
             COMCTL32_hPattern55AABitmap = CreateBitmap (8, 8, 1, 1, wPattern55AA);
             COMCTL32_hPattern55AABrush = CreatePatternBrush (COMCTL32_hPattern55AABitmap);
+
+	    /* Get all the colors at DLL load */
+	    COMCTL32_RefreshSysColors();
 
             /* register all Win95 common control classes */
             ANIMATE_Register ();
@@ -395,26 +412,34 @@ GetEffectiveClientRect (HWND hwnd, LPRECT lpRect, LPINT lpInfo)
  *     (will be written ...)
  */
 
-VOID WINAPI
-DrawStatusTextW (HDC hdc, LPRECT lprc, LPCWSTR text, UINT style)
+void WINAPI DrawStatusTextW (HDC hdc, LPRECT lprc, LPCWSTR text, UINT style)
 {
     RECT r = *lprc;
     UINT border = BDR_SUNKENOUTER;
 
     if (style & SBT_POPOUT)
-      border = BDR_RAISEDOUTER;
+        border = BDR_RAISEDOUTER;
     else if (style & SBT_NOBORDERS)
-      border = 0;
+        border = 0;
 
-    DrawEdge (hdc, &r, border, BF_RECT|BF_ADJUST|BF_MIDDLE);
+    DrawEdge (hdc, &r, border, BF_RECT|BF_ADJUST);
 
     /* now draw text */
     if (text) {
-      int oldbkmode = SetBkMode (hdc, TRANSPARENT);
-      r.left += 3;
-      DrawTextW (hdc, text, lstrlenW(text),
-		   &r, DT_LEFT|DT_VCENTER|DT_SINGLELINE);  
-      if (oldbkmode != TRANSPARENT)
+        int oldbkmode = SetBkMode (hdc, TRANSPARENT);
+        UINT align = DT_LEFT;
+        if (*text == L'\t') {
+	    text++;
+	    align = DT_CENTER;
+	    if (*text == L'\t') {
+	        text++;
+	        align = DT_RIGHT;
+	    }
+        }
+        r.left += 3;
+        if (style & SBT_RTLREADING)
+	    FIXME("Usupported RTL style!");
+        DrawTextW (hdc, text, -1, &r, align|DT_VCENTER|DT_SINGLELINE);
 	SetBkMode(hdc, oldbkmode);
     }
 }
@@ -436,8 +461,7 @@ DrawStatusTextW (HDC hdc, LPRECT lprc, LPCWSTR text, UINT style)
  *     No return value.
  */
 
-VOID WINAPI
-DrawStatusTextA (HDC hdc, LPRECT lprc, LPCSTR text, UINT style)
+void WINAPI DrawStatusTextA (HDC hdc, LPRECT lprc, LPCSTR text, UINT style)
 {
     INT len;
     LPWSTR textW = NULL;
@@ -1013,4 +1037,38 @@ COMCTL32_CreateToolTip(HWND hwndOwner)
     }
 
     return hwndToolTip;
+}
+
+
+/***********************************************************************
+ * COMCTL32_RefreshSysColors [NOT AN API]
+ *
+ * Invoked on any control recognizing a WM_SYSCOLORCHANGE message to
+ * refresh the color values in the color structure
+ *
+ * PARAMS
+ *     none
+ *
+ * RETURNS
+ *     none
+ */
+VOID
+COMCTL32_RefreshSysColors(void)
+{
+    comctl32_color.clrBtnHighlight = GetSysColor (COLOR_BTNHIGHLIGHT);
+    comctl32_color.clrBtnShadow = GetSysColor (COLOR_BTNSHADOW);
+    comctl32_color.clrBtnText = GetSysColor (COLOR_BTNTEXT);
+    comctl32_color.clrBtnFace = GetSysColor (COLOR_BTNFACE);
+    comctl32_color.clrHighlight = GetSysColor (COLOR_HIGHLIGHT);
+    comctl32_color.clrHighlightText = GetSysColor (COLOR_HIGHLIGHTTEXT);
+    comctl32_color.clr3dHilight = GetSysColor (COLOR_3DHILIGHT);
+    comctl32_color.clr3dShadow = GetSysColor (COLOR_3DSHADOW);
+    comctl32_color.clr3dDkShadow = GetSysColor (COLOR_3DDKSHADOW);
+    comctl32_color.clr3dFace = GetSysColor (COLOR_3DFACE);
+    comctl32_color.clrWindow = GetSysColor (COLOR_WINDOW);
+    comctl32_color.clrWindowText = GetSysColor (COLOR_WINDOWTEXT);
+    comctl32_color.clrGrayText = GetSysColor (COLOR_GRAYTEXT);
+    comctl32_color.clrActiveCaption = GetSysColor (COLOR_ACTIVECAPTION);
+    comctl32_color.clrInfoBk = GetSysColor (COLOR_INFOBK);
+    comctl32_color.clrInfoText = GetSysColor (COLOR_INFOTEXT);
 }

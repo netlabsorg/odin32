@@ -1,4 +1,4 @@
-; $Id: comctl32.def,v 1.25 2002-02-06 17:23:18 sandervl Exp $
+; $Id: comctl32.def,v 1.26 2002-05-08 11:24:59 sandervl Exp $
 LIBRARY COMCTL32 INITINSTANCE
 DESCRIPTION 'Odin32 System DLL - ComCtl32 - Common Controls Library'
 DATA MULTIPLE NONSHARED
@@ -14,7 +14,7 @@ EXPORTS
   DPA_LoadStream               = _DPA_LoadStream@16                  @9
   DPA_SaveStream               = _DPA_SaveStream@16                  @10
   DPA_Merge                    = _DPA_Merge@24                       @11
-  CreatePropertySheetPage      = _CreatePropertySheetPageA@4         @12
+;;12 stub Cctl1632_ThunkData32
   MakeDragList                 = _MakeDragList@4                     @13
   LBItemFromPt                 = _LBItemFromPt@16                    @14
   DrawInsert                   = _DrawInsert@12                      @15
@@ -105,6 +105,9 @@ EXPORTS
   FindMRUStringA      = _FindMRUStringA@12         @155
   DelMRUString        = _DelMRUString@8            @156
   CreateMRUListLazyA  = _CreateMRUListLazyA@16     @157
+
+;;163 stub CreatePage
+;;164 stub CreateProxyPage
 
   AddMRUData          = _AddMRUData@12             @167
   FindMRUData         = _FindMRUData@16            @169

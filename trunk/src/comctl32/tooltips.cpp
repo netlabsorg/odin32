@@ -26,6 +26,9 @@
 #include "commctrl.h"
 #include "ccbase.h"
 #include "comctl32.h"
+#ifdef __WIN32OS2__
+#include <dbglog.h>
+#endif
 
 #define ID_TIMERSHOW   1    /* show delay timer */
 #define ID_TIMERPOP    2    /* auto pop timer */

@@ -4,6 +4,20 @@
  * Copyright 1998, 1999 Eric Kohl
  * Copyright 1998 Alex Priem
  *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
  * NOTES
  *   This is just a dummy control. An author is needed! Any volunteers?
  *   I will only improve this control once in a while.
@@ -15,22 +29,16 @@
  *
  */
 
+#include <string.h>
 #include "winbase.h"
 #include "winerror.h"
 #include "commctrl.h"
-#include "debugtools.h"
+#include "wine/debug.h"
 
-#ifdef __WIN32OS2__
-#include "ccbase.h"
-#endif
-
-DEFAULT_DEBUG_CHANNEL(commctrl);
+WINE_DEFAULT_DEBUG_CHANNEL(commctrl);
 
 typedef struct
 {
-#ifdef __WIN32OS2__
-    COMCTL32_HEADER header;
-#endif
     DWORD dwDummy;  /* just to keep the compiler happy ;-) */
 } FLATSB_INFO, *LPFLATSB_INFO;
 
@@ -38,7 +46,7 @@ typedef struct
 
 
 /***********************************************************************
- *		InitializeFlatSB
+ *		InitializeFlatSB (COMCTL32.86)
  *
  *	returns nonzero if successful, zero otherwise
  *
@@ -51,7 +59,7 @@ BOOL WINAPI InitializeFlatSB(HWND hwnd)
 }
 
 /***********************************************************************
- *		UninitializeFlatSB
+ *		UninitializeFlatSB (COMCTL32.90)
  *
  *	returns:
  *	E_FAIL		if one of the scroll bars is currently in use
@@ -67,7 +75,7 @@ HRESULT WINAPI UninitializeFlatSB(HWND hwnd)
 }
 
 /***********************************************************************
- *		FlatSB_GetScrollProp
+ *		FlatSB_GetScrollProp (COMCTL32.32)
  *
  *	Returns nonzero if successful, or zero otherwise. If index is WSB_PROP_HSTYLE,
  *	the return is nonzero if InitializeFlatSB has been called for this window, or
@@ -83,7 +91,7 @@ FlatSB_GetScrollProp(HWND hwnd, INT propIndex, LPINT prop)
 }
 
 /***********************************************************************
- *		FlatSB_SetScrollProp
+ *		FlatSB_SetScrollProp (COMCTL32.36)
  */
 BOOL WINAPI 
 FlatSB_SetScrollProp(HWND hwnd, UINT index, INT newValue, BOOL flag)
@@ -110,7 +118,7 @@ FlatSB_SetScrollProp(HWND hwnd, UINT index, INT newValue, BOOL flag)
  */
 
 /***********************************************************************
- *		FlatSB_EnableScrollBar
+ *		FlatSB_EnableScrollBar (COMCTL32.29)
  */
 BOOL WINAPI 
 FlatSB_EnableScrollBar(HWND hwnd, int nBar, UINT flags)
@@ -119,7 +127,7 @@ FlatSB_EnableScrollBar(HWND hwnd, int nBar, UINT flags)
 }
 
 /***********************************************************************
- *		FlatSB_ShowScrollBar
+ *		FlatSB_ShowScrollBar (COMCTL32.38)
  */
 BOOL WINAPI 
 FlatSB_ShowScrollBar(HWND hwnd, int nBar, BOOL fShow)
@@ -128,7 +136,7 @@ FlatSB_ShowScrollBar(HWND hwnd, int nBar, BOOL fShow)
 }
 
 /***********************************************************************
- *		FlatSB_GetScrollRange
+ *		FlatSB_GetScrollRange (COMCTL32.33)
  */
 BOOL WINAPI 
 FlatSB_GetScrollRange(HWND hwnd, int nBar, LPINT min, LPINT max)
@@ -137,7 +145,7 @@ FlatSB_GetScrollRange(HWND hwnd, int nBar, LPINT min, LPINT max)
 }
 
 /***********************************************************************
- *		FlatSB_GetScrollInfo
+ *		FlatSB_GetScrollInfo (COMCTL32.30)
  */
 BOOL WINAPI 
 FlatSB_GetScrollInfo(HWND hwnd, int nBar, LPSCROLLINFO info)
@@ -146,7 +154,7 @@ FlatSB_GetScrollInfo(HWND hwnd, int nBar, LPSCROLLINFO info)
 }
 
 /***********************************************************************
- *		FlatSB_GetScrollPos
+ *		FlatSB_GetScrollPos (COMCTL32.31)
  */
 INT WINAPI 
 FlatSB_GetScrollPos(HWND hwnd, int nBar)
@@ -155,7 +163,7 @@ FlatSB_GetScrollPos(HWND hwnd, int nBar)
 }
 
 /***********************************************************************
- *		FlatSB_SetScrollPos
+ *		FlatSB_SetScrollPos (COMCTL32.35)
  */
 INT WINAPI 
 FlatSB_SetScrollPos(HWND hwnd, int nBar, INT pos, BOOL bRedraw)
@@ -164,7 +172,7 @@ FlatSB_SetScrollPos(HWND hwnd, int nBar, INT pos, BOOL bRedraw)
 }
 
 /***********************************************************************
- *		FlatSB_SetScrollInfo
+ *		FlatSB_SetScrollInfo (COMCTL32.34)
  */
 INT WINAPI 
 FlatSB_SetScrollInfo(HWND hwnd, int nBar, LPSCROLLINFO info, BOOL bRedraw)
@@ -173,7 +181,7 @@ FlatSB_SetScrollInfo(HWND hwnd, int nBar, LPSCROLLINFO info, BOOL bRedraw)
 }
 
 /***********************************************************************
- *		FlatSB_SetScrollRange
+ *		FlatSB_SetScrollRange (COMCTL32.37)
  */
 INT WINAPI 
 FlatSB_SetScrollRange(HWND hwnd, int nBar, INT min, INT max, BOOL bRedraw)
@@ -186,10 +194,6 @@ static LRESULT
 FlatSB_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
     TRACE("[%04x] wParam=%04x lParam=%08lx\n", hwnd, wParam, lParam);
-#ifdef __WIN32OS2__
-    initControl(hwnd,sizeof(FLATSB_INFO));
-#endif
-
     return 0;
 }
 
@@ -198,10 +202,6 @@ static LRESULT
 FlatSB_Destroy (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
     TRACE("[%04x] wParam=%04x lParam=%08lx\n", hwnd, wParam, lParam);
-#ifdef __WIN32OS2__
-    /* free pager info data */
-    doneControl(hwnd);
-#endif
     return 0;
 }
 
@@ -209,6 +209,9 @@ FlatSB_Destroy (HWND hwnd, WPARAM wParam, LPARAM lParam)
 static LRESULT WINAPI
 FlatSB_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+    if (!FlatSB_GetInfoPtr(hwnd) && (uMsg != WM_CREATE))
+	return DefWindowProcA( hwnd, uMsg, wParam, lParam );
+    
     switch (uMsg)
     {
 	case WM_CREATE:
@@ -221,11 +224,7 @@ FlatSB_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	    if (uMsg >= WM_USER)
 		ERR("unknown msg %04x wp=%08x lp=%08lx\n",
                     uMsg, wParam, lParam);
-#ifdef __WIN32OS2__
-            return defComCtl32ProcA (hwnd, uMsg, wParam, lParam);
-#else
 	    return DefWindowProcA (hwnd, uMsg, wParam, lParam);
-#endif
     }
     return 0;
 }

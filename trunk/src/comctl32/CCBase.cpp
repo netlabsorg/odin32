@@ -1,4 +1,4 @@
-/* $Id: CCBase.cpp,v 1.9 2000-04-16 18:52:38 cbratschi Exp $ */
+/* $Id: CCBase.cpp,v 1.10 2002-05-08 11:24:58 sandervl Exp $ */
 /*
  * COMCTL32 Base Functions and Macros for all Controls
  *
@@ -6,10 +6,12 @@
  *
  * parts from WINE code
  */
+#include <winuser.h>
 #include <string.h>
 #include <wcstr.h>
 #include "winbase.h"
 #include "comctl32.h"
+#include <commctrl.h>
 #include "ccbase.h"
 
 BOOL checkVersion(INT iVersion)

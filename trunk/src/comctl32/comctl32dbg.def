@@ -1,4 +1,4 @@
-; $Id: comctl32dbg.def,v 1.1 2002-02-15 15:39:29 sandervl Exp $
+; $Id: comctl32dbg.def,v 1.2 2002-05-08 11:24:59 sandervl Exp $
 LIBRARY COMCTL32 INITINSTANCE
 DESCRIPTION 'Odin32 System DLL - ComCtl32 - Common Controls Library'
 DATA MULTIPLE NONSHARED
@@ -14,7 +14,7 @@ EXPORTS
   DPA_LoadStream               = _DbgDPA_LoadStream@16                  @9
   DPA_SaveStream               = _DbgDPA_SaveStream@16                  @10
   DPA_Merge                    = _DbgDPA_Merge@24                       @11
-  CreatePropertySheetPage      = _DbgCreatePropertySheetPageA@4         @12
+;;12 stub Cctl1632_ThunkData32
   MakeDragList                 = _DbgMakeDragList@4                     @13
   LBItemFromPt                 = _DbgLBItemFromPt@16                    @14
   DrawInsert                   = _DbgDrawInsert@12                      @15

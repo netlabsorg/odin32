@@ -1,67 +1,30 @@
-/* $Id: comctl32.h,v 1.21 2002-02-06 17:23:18 sandervl Exp $ */
-/*
- * Win32 common controls implementation
+/******************************************************************************
+ * 
+ * Common definitions (resource ids and global variables)
  *
- * Copyright (C) 1999 Achim Hasenmueller
+ * Copyright 1999 Thuy Nguyen
+ * Copyright 1999 Eric Kohl
  *
- * Based on the work of the WINE group (www.winehq.com)
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
- * Project Odin Software License can be found in LICENSE.TXT
- *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-/* Status: Corel WINE 20000807 */
-
-#ifndef _H_COMCTL32
-#define _H_COMCTL32
-
-#include "winbase.h"
-#include "wingdi.h"
-#include "winuser.h"
-#include <win/commctrl.h>
-#include "unicode.h"
-
-#define _OS2WIN_H
-#define NO_ULONG
-#include <misc.h>
-
-#ifndef __cplusplus
-#undef inline
-#define inline
-#endif
-
-extern HBRUSH  COMCTL32_hPattern55AABrush;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/* registers window classes inside this DLL */
-void CDECL RegisterCOMCTL32WindowClasses(unsigned long hinstDLL);
-void CDECL UnregisterCOMCTL32WindowClasses(void);
-#ifdef __cplusplus
-}
-#endif
-
-// string functions from kernel32
-LPWSTR WIN32API HEAP_strdupAtoW( HANDLE heap, DWORD flags, LPCSTR str );
-LPSTR  WIN32API HEAP_strdupWtoA( HANDLE heap, DWORD flags, LPCWSTR str );
-
-
-/**************************************************************************
- *  UNDOCUMENTED functions
- */
-
-/* private heap memory functions */
-
-LPVOID WINAPI COMCTL32_Alloc (DWORD);
-LPVOID WINAPI COMCTL32_ReAlloc (LPVOID, DWORD);
-BOOL WINAPI COMCTL32_Free (LPVOID);
-DWORD  WINAPI COMCTL32_GetSize (LPVOID);
-
+#ifndef __WINE_COMCTL32_H
+#define __WINE_COMCTL32_H
 
 extern HMODULE COMCTL32_hModule;
+extern HBRUSH  COMCTL32_hPattern55AABrush;
 
 /* Property sheet / Wizard */
 #define IDD_PROPSHEET 1006
@@ -74,7 +37,7 @@ extern HMODULE COMCTL32_hModule;
 #define IDC_FINISH_BUTTON 12325
 #define IDC_SUNKEN_LINE   12326
 
-#define IDS_CLOSE 4160
+#define IDS_CLOSE	  4160
 
 /* Toolbar customization dialog */
 #define IDD_TBCUSTOMIZE     200
@@ -97,55 +60,22 @@ extern HMODULE COMCTL32_hModule;
 #define IDB_HIST_SMALL      130
 #define IDB_HIST_LARGE      131
 
-//direction bitmaps
-#define IDB_DIRECTION_ALL   132
-#define IDB_DIRECTION_NS    133
-#define IDB_DIRECTION WE    134
-
-//Header filter bitmap
-#define IDB_HEADER_FILTER   140
-
-//cursors
-#define IDC_COMCTL32_ERROR       20480
-#define IDC_COMCTL32_INFORMATION 20481
-#define IDC_COMCTL32_EXCLAMATION 20482
-
-#define IDC_COMCTL32_DRAGRECT      102
-#define IDC_COMCTL32_ARROW1        104
-#define IDC_COMCTL32_ARROW2        105
-#define IDC_COMCTL32_DRAGHLINE     106
-#define IDC_COMCTL32_SPLITHLINE    107
-#define IDC_COMCTL32_HAND          108
-#define IDC_COMCTL32_DIRECTION_NS  109
-#define IDC_COMCTL32_DIRECTION_WE  110
-#define IDC_COMCTL32_DIRECTION_ALL 111
-#define IDC_COMCTL32_DIRECTION_N   112
-#define IDC_COMCTL32_DIRECTION_S   113
-#define IDC_COMCTL32_DIRECTION_E   114
-#define IDC_COMCTL32_DIRECTION_W   115
-#define IDC_COMCTL32_DIRECTION_NE  116
-#define IDC_COMCTL32_DIRECTION_NW  117
-#define IDC_COMCTL32_DIRECTION_SE  118
-#define IDC_COMCTL32_DIRECTION_SW  119
-
-#define IDC_COMCTL32_SPLITVLINE    135
-#define IDC_COMCTL32_ENTER         150
 
 /* Month calendar month menu popup */
 #define IDD_MCMONTHMENU     300
 
-#define IDM_JAN                         301
-#define IDM_FEB                         302
-#define IDM_MAR                         303
-#define IDM_APR                         304
-#define IDM_MAY                         305
-#define IDM_JUN                         306
-#define IDM_JUL                         307
-#define IDM_AUG                         308
-#define IDM_SEP                         309
-#define IDM_OCT                         310
-#define IDM_NOV                         311
-#define IDM_DEC                         312
+#define IDM_JAN				301
+#define IDM_FEB				302
+#define IDM_MAR				303
+#define IDM_APR				304
+#define IDM_MAY				305
+#define IDM_JUN				306
+#define IDM_JUL				307
+#define IDM_AUG				308
+#define IDM_SEP				309
+#define IDM_OCT				310
+#define IDM_NOV				311
+#define IDM_DEC				312
 
 #define IDM_TODAY                      4163
 #define IDM_GOTODAY                    4164
@@ -159,16 +89,52 @@ extern HMODULE COMCTL32_hModule;
 #define IDC_DIVIDER                     106
 #define IDC_DIVIDEROPEN                 107
 
+#ifdef __WIN32OS2__
+/* Header filter bitmap */
+#define IDB_HEADER_FILTER   140
+
+#define IDC_COMCTL32_DRAGHLINE     106
+#define IDC_COMCTL32_SPLITHLINE    107
+
+#endif
 
 /* DragList icon */
 #define IDI_DRAGARROW                   150
+
+typedef struct 
+{
+    COLORREF clrBtnHighlight;       /* COLOR_BTNHIGHLIGHT                  */
+    COLORREF clrBtnShadow;          /* COLOR_BTNSHADOW                     */
+    COLORREF clrBtnText;            /* COLOR_BTNTEXT                       */
+    COLORREF clrBtnFace;            /* COLOR_BTNFACE                       */
+    COLORREF clrHighlight;          /* COLOR_HIGHLIGHT                     */
+    COLORREF clrHighlightText;      /* COLOR_HIGHLIGHTTEXT                 */
+    COLORREF clr3dHilight;          /* COLOR_3DHILIGHT                     */
+    COLORREF clr3dShadow;           /* COLOR_3DSHADOW                      */
+    COLORREF clr3dDkShadow;         /* COLOR_3DDKSHADOW                    */
+    COLORREF clr3dFace;             /* COLOR_3DFACE                        */
+    COLORREF clrWindow;             /* COLOR_WINDOW                        */
+    COLORREF clrWindowText;         /* COLOR_WINDOWTEXT                    */
+    COLORREF clrGrayText;           /* COLOR_GREYTEXT                      */
+    COLORREF clrActiveCaption;      /* COLOR_ACTIVECAPTION                 */
+    COLORREF clrInfoBk;             /* COLOR_INFOBK                        */
+    COLORREF clrInfoText;           /* COLOR_INFOTEXT                      */
+} COMCTL32_SysColor;
+
+extern COMCTL32_SysColor  comctl32_color;
+
+/* Internal function */
+HWND COMCTL32_CreateToolTip (HWND);
+VOID COMCTL32_RefreshSysColors(void);
+INT  Str_GetPtrWtoA (LPCWSTR lpSrc, LPSTR lpDest, INT nMaxLen);
+BOOL Str_SetPtrAtoW (LPWSTR *lppDest, LPCSTR lpSrc);
 
 #define COMCTL32_VERSION_MINOR 0 
 #define WINE_FILEVERSION 5, COMCTL32_VERSION_MINOR, 0, 0
 #define WINE_FILEVERSIONSTR "5.00"
 
-#define UINT_PTR DWORD
-
+#ifdef __WIN32OS2__
+#define swprintf   wsprintfW
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -215,11 +181,9 @@ void UPDOWN_Register(void);
 void UPDOWN_Unregister(void);
 
 
-INT  Str_GetPtrWtoA (LPCWSTR lpSrc, LPSTR lpDest, INT nMaxLen);
-BOOL Str_SetPtrAtoW (LPWSTR *lppDest, LPCSTR lpSrc);
-
 #ifdef __cplusplus
 }
 #endif
+#endif
 
-#endif /* _H_COMCTL32 */
+#endif  /* __WINE_COMCTL32_H */
