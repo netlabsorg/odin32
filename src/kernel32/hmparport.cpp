@@ -1,4 +1,4 @@
-/* $Id: hmparport.cpp,v 1.4 2001-11-08 16:00:17 phaller Exp $ */
+/* $Id: hmparport.cpp,v 1.5 2001-11-23 00:50:06 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -15,6 +15,7 @@
 #include <string.h>
 #include <handlemanager.h>
 #include <heapstring.h>
+#include <winioctl.h>
 #include "hmdevice.h"
 #include "hmparport.h"
 #include "oslibdos.h"
@@ -85,6 +86,31 @@ typedef MODEMSTATUS *PMODEMSTATUS;
 
 
 #endif
+
+
+#if 0
+
+typedef struct _PARALLEL_PNP_INFORMATION {
+  PHYSICAL_ADDRESS  OriginalEcpController;
+  PUCHAR  EcpController;
+  ULONG  SpanOfEcpController;
+  ULONG  PortNumber;
+  ULONG  HardwareCapabilities;
+  PPARALLEL_SET_CHIP_MODE  TrySetChipMode;
+  PPARALLEL_CLEAR_CHIP_MODE  ClearChipMode;
+  ULONG  FifoDepth;
+  ULONG  FifoWidth;
+  PHYSICAL_ADDRESS  EppControllerPhysicalAddress;
+  ULONG  SpanOfEppController;
+  ULONG  Ieee1284_3DeviceCount;
+  PPARALLEL_TRY_SELECT_ROUTINE  TrySelectDevice;
+  PPARALLEL_DESELECT_ROUTINE  DeselectDevice;
+  PVOID  Context;
+  ULONG  CurrentMode;
+  PWSTR  PortName;
+} PARALLEL_PNP_INFORMATION, *PPARALLEL_PNP_INFORMATION;
+#endif
+
 
 
 typedef struct _HMDEVPARPORTDATA
@@ -594,11 +620,13 @@ BOOL HMDeviceParPortClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData,
 
     switch(dwIoControlCode)
     {
-/**
-    case IOCTL_DISK_FORMAT_TRACKS:
-        msg = "IOCTL_DISK_FORMAT_TRACKS";
+      case IOCTL_INTERNAL_GET_PARALLEL_PORT_INFO:
+        msg = "IOCTL_INTERNAL_GET_PARALLEL_PORT_INFO";
         break;
-*/
+      
+      case IOCTL_INTERNAL_GET_PARALLEL_PNP_INFO:
+        msg = "IOCTL_INTERNAL_GET_PARALLEL_PNP_INFO";
+        break;
     }
   
     if(msg) {
@@ -609,9 +637,124 @@ BOOL HMDeviceParPortClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData,
 
     switch(dwIoControlCode)
     {
-//    case IOCTL_SCSI_RESCAN_BUS:
-//        break;
+      case IOCTL_INTERNAL_GET_PARALLEL_PORT_INFO:
+      {
+        PPARALLEL_PORT_INFORMATION pPPI = (PPARALLEL_PORT_INFORMATION)lpOutBuffer;
+        
+        if(nOutBufferSize < sizeof(PARALLEL_PORT_INFORMATION) || !pPPI) 
+        {
+          SetLastError(ERROR_INSUFFICIENT_BUFFER);
+          return FALSE;
+        }
+        
+        if(lpBytesReturned)
+          *lpBytesReturned = sizeof(PARALLEL_PORT_INFORMATION);
+        
+        // fill in the data values
+        
+        // Specifies the bus relative base I/O address of the parallel port registers.
+        pPPI->OriginalController.LowPart = 0;  // @@@PH
+        pPPI->OriginalController.HighPart = 0;  // @@@PH
+        
+        // Pointer to the system-mapped base I/O location of the parallel port registers.
+        pPPI->Controller = 0;          // @@@PH
+        
+        // Specifies the size, in bytes, of the I/O space, allocated to the parallel port.
+        pPPI->SpanOfController = 0;    // @@@PH
+        
+        // Pointer to a callback routine that a kernel-mode driver can use to try to allocate the parallel port.
+        pPPI->TryAllocatePort = NULL;
+        
+        // Pointer to a callback routine that a kernel-mode driver can use to free the parallel port.
+        pPPI->FreePort = NULL;
+        
+        // Pointer to a callback routine that a kernel-mode driver can use to determine the number of requests on the work queue of the parallel port.
+        pPPI->QueryNumWaiters = NULL;
+        
+        // Pointer to the device extension of parallel port.
+        pPPI->Context = NULL;
 
+        return TRUE;
+      }
+      
+      
+      case IOCTL_INTERNAL_GET_PARALLEL_PNP_INFO:
+      {
+        PPARALLEL_PNP_INFORMATION pPPI = (PPARALLEL_PNP_INFORMATION)lpOutBuffer;
+        
+        if(nOutBufferSize < sizeof(PARALLEL_PNP_INFORMATION) || !pPPI)
+        {
+          SetLastError(ERROR_INSUFFICIENT_BUFFER);
+          return FALSE;
+        }
+        
+        if(lpBytesReturned)
+          *lpBytesReturned = sizeof(PARALLEL_PNP_INFORMATION);
+        
+        // fill in the data values
+        
+        // Specifies the base physical address that the system-supplied function driver for parallel ports uses to control the ECP operation of the parallel port.
+        pPPI->OriginalEcpController.LowPart = 0;
+        pPPI->OriginalEcpController.HighPart = 0;
+        
+        // Pointer to the I/O port resource that is used to control the port in ECP mode.
+        pPPI->EcpController = 0;
+        
+        // Specifies the size, in bytes, of the I/O port resource.
+        pPPI->SpanOfEcpController = 0;
+        
+        // Not used.
+        pPPI->PortNumber = 0;
+        
+        // Specifies the hardware capabilities of the parallel port. The following capabilities can be set using a bitwise OR of the following constants:
+        pPPI->HardwareCapabilities = 0;
+        //  PPT_1284_3_PRESENT
+        //  PPT_BYTE_PRESENT
+        //  PPT_ECP_PRESENT
+        //  PPT_EPP_32_PRESENT
+        //  PPT_EPP_PRESENT
+        //  PT_NO_HARDWARE_PRESENT
+        
+        // Pointer to a callback routine that a kernel-mode driver can use to change the operating mode of the parallel port.
+        pPPI->TrySetChipMode = 0;
+        
+        // Pointer to a callback routine that a kernel-mode driver can use to clear the operating mode of the parallel port.
+        pPPI->ClearChipMode = 0;
+        
+        // Specifies the size, in words, of the hardware first in/first out (FIFO) buffer. The FIFO word size, in bits, is the value of FifoWidth.
+        pPPI->FifoDepth = 0;
+        
+        // Specifies the FIFO word size, in bits, which is the number of bits handled in parallel.
+        pPPI->FifoWidth = 0;
+        
+        // Not used.
+        pPPI->EppControllerPhysicalAddress.LowPart = 0;
+        pPPI->EppControllerPhysicalAddress.HighPart = 0;
+        
+        // Not used.
+        pPPI->SpanOfEppController = 0;
+        
+        // Specifies the number of daisy-chain devices currently attached to a parallel port. In Microsoftÿ Windowsÿ XP, from zero to two devices can be simultaneously connected to a
+        // parallel port. In Windows 2000, from zero to four devices can be simultaneously connected to a parallel port.
+        pPPI->Ieee1284_3DeviceCount = 0;
+        
+        // Pointer to a callback routine that a kernel-mode driver can use to try to select an IEEE 1284.3 device.
+        pPPI->TrySelectDevice = 0;
+        
+        // Pointer to a callback routine that a kernel-mode driver can use to deselect an IEEE 1284.3 device.
+        pPPI->DeselectDevice = 0;
+        
+        // Pointer to the device extension of a parallel port's function device object (FDO).
+        pPPI->Context = 0;
+        
+        // The current operating mode of the parallel port.
+        pPPI->CurrentMode = 0;
+        
+        // The symbolic link name of the parallel port.
+        pPPI->PortName = 0;
+        
+        return TRUE;
+      }
     }
     dprintf(("HMDeviceParPortClass::DeviceIoControl: unimplemented dwIoControlCode=%08lx\n", dwIoControlCode));
     SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
