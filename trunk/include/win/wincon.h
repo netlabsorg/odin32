@@ -162,12 +162,12 @@ typedef struct tagINPUT_RECORD
  * structures is different between Windows and gcc on i386. */
 DWORD WINAPI GetLargestConsoleWindowSize(HANDLE);
 
-inline static COORD __wine_GetLargestConsoleWindowSize_wrapper(HANDLE h)
-{
-    DWORD dw = GetLargestConsoleWindowSize(h);
-    return *(COORD *)&dw;
-}
-#define GetLargestConsoleWindowSize(h) __wine_GetLargestConsoleWindowSize_wrapper(h)
+//inline static COORD __wine_GetLargestConsoleWindowSize_wrapper(HANDLE h)
+//{
+//    DWORD dw = GetLargestConsoleWindowSize(h);
+//    return *(COORD *)&dw;
+//}
+//#define GetLargestConsoleWindowSize(h) __wine_GetLargestConsoleWindowSize_wrapper(h)
 
 #else  /* __i386__ */
 COORD WINAPI GetLargestConsoleWindowSize(HANDLE);
