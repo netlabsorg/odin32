@@ -1,4 +1,4 @@
-/* $Id: dbglocal.cpp,v 1.21 2002-02-08 16:47:10 sandervl Exp $ */
+/* $Id: dbglocal.cpp,v 1.22 2002-02-09 11:52:22 sandervl Exp $ */
 
 /*
  * debug logging functions for OS/2
@@ -131,7 +131,10 @@ static char  *DbgFileNames[DBG_MAXFILES] =
 "event",
 "mutex",
 "semaphore",
-"nls"
+"nls",
+"memory",
+"system",
+"string"
 };
 //******************************************************************************
 //******************************************************************************
