@@ -36,6 +36,18 @@
 #include "wine/obj_picture.h"
 #include "debugtools.h"
 
+#ifdef __WIN32OS2__
+#undef FIXME
+#undef TRACE
+#ifdef DEBUG
+#define TRACE WriteLog("%s", __FUNCTION__); WriteLog
+#define FIXME WriteLog("FIXME %s", __FUNCTION__); WriteLog
+#else
+#define TRACE 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
+#define FIXME 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
+#endif
+#endif
+
 DEFAULT_DEBUG_CHANNEL(ole);
 
 /*************************************************************************
@@ -740,6 +752,20 @@ HRESULT WINAPI OleCreatePictureIndirect(LPPICTDESC lpPictDesc, REFIID riid,
 }
 
 
+ 
+#ifdef __WIN32OS2__
+
+/***********************************************************************
+ * OleLoadPictureEx
+ */
+HRESULT WINAPI OleLoadPictureEx( LPSTREAM lpstream, LONG lSize, BOOL fRunmode,
+		            REFIID reed, DWORD xsiz, DWORD ysiz, DWORD flags, LPVOID *ppvObj )
+{
+  FIXME("(%p,%ld,%d,%p,%lx,%lx,%lx,%p), not implemented\n",
+	lpstream, lSize, fRunmode, reed, xsiz, ysiz, flags, ppvObj);
+  return E_NOTIMPL;
+}
+
 /***********************************************************************
  * OleLoadPicture
  */
@@ -748,10 +774,9 @@ HRESULT WINAPI OleLoadPicture( LPSTREAM lpstream, LONG lSize, BOOL fRunmode,
 {
   FIXME("(%p,%ld,%d,%p,%p), not implemented\n",
 	lpstream, lSize, fRunmode, reed, ppvObj);
-  return S_OK;
+  return OleLoadPictureEx(lpstream, lSize, fRunmode, reed, 0, 0, 0, ppvObj);
 }
- 
-#ifdef __WIN32OS2__
+
 // ----------------------------------------------------------------------
 // OleLoadPictureFile
 // ----------------------------------------------------------------------
