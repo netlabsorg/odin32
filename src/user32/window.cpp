@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.127 2002-07-30 17:46:58 achimha Exp $ */
+/* $Id: window.cpp,v 1.128 2002-08-09 11:19:56 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -856,6 +856,41 @@ HWND WIN32API GetFocus()
     hwnd = OS2ToWin32Handle(hwnd);
     dprintf(("USER32: GetFocus %x\n", hwnd));
     return hwnd;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetGUIThreadInfo(DWORD dwThreadId, GUITHREADINFO *lpThreadInfo)
+{
+    dprintf(("!WARNING!: GetGUIThreadInfo not completely implemented!!"));
+
+    if(!lpThreadInfo || lpThreadInfo->cbSize != sizeof(GUITHREADINFO)) {
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return FALSE;
+    }
+    //dwThreadId == 0 -> current thread
+    if(!dwThreadId) dwThreadId = GetCurrentThreadId();
+
+    lpThreadInfo->flags;
+    lpThreadInfo->hwndActive  = GetActiveWindow();
+    if(lpThreadInfo->hwndActive) {
+        if(dwThreadId != GetWindowThreadProcessId(lpThreadInfo->hwndActive, NULL)) 
+        {//this thread doesn't own the active window (TODO: correct??)
+            lpThreadInfo->hwndActive = 0;
+        }
+    }
+    lpThreadInfo->hwndFocus      = GetFocus();
+    lpThreadInfo->hwndCapture    = GetCapture();
+    lpThreadInfo->flags          = 0;  //TODO:
+    lpThreadInfo->hwndMenuOwner  = 0;  //TODO: Handle to the window that owns any active menus
+    lpThreadInfo->hwndMoveSize   = 0;  //TODO: Handle to the window in a move or size loop.
+    lpThreadInfo->hwndCaret      = 0;  //TODO: Handle to the window that is displaying the caret
+    lpThreadInfo->rcCaret.left   = 0;
+    lpThreadInfo->rcCaret.top    = 0;
+    lpThreadInfo->rcCaret.right  = 0;
+    lpThreadInfo->rcCaret.bottom = 0;
+
+    SetLastError(ERROR_SUCCESS);
+    return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
