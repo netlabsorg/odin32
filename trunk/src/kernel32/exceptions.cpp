@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.45 2000-09-15 13:24:29 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.46 2000-10-05 18:36:49 sandervl Exp $ */
 
 /* WARNING: Compiling this module with ICC with optimizations turned on   */
 /* currently breaks this module. To get correct code, it is not necessary */
@@ -73,6 +73,13 @@
 #define DBG_LOCALLOG    DBG_exceptions
 #include "dbglocal.h"
 
+/* Exception record for handling exceptions happening inside exception handlers */
+typedef struct
+{
+    WINEXCEPTION_FRAME frame;
+    WINEXCEPTION_FRAME *prevFrame;
+} EXC_NESTED_FRAME;
+
 //Global Process Unhandled exception filter
 static LPTOP_LEVEL_EXCEPTION_FILTER CurrentUnhExceptionFlt = NULL;
 static UINT                         CurrentErrorMode = SEM_FAILCRITICALERRORS;
@@ -117,6 +124,23 @@ UINT WIN32API SetErrorMode(UINT fuErrorMode)
   // SEM_NOGPFAULTERRORBOX  and SEM_NOALIGNMENTFAULTEXCEPT --> UnhandledExceptionFilter()
 
   return(oldmode);
+}
+
+static inline WINEXCEPTION_FRAME * EXC_push_frame( WINEXCEPTION_FRAME *frame )
+{
+    // TODO: rewrite in assembly
+    TEB *teb = GetThreadTEB();
+    frame->Prev = (PWINEXCEPTION_FRAME)teb->except;
+    teb->except = frame;
+    return frame->Prev;
+}
+
+static inline WINEXCEPTION_FRAME * EXC_pop_frame( WINEXCEPTION_FRAME *frame )
+{
+    // TODO: rewrite in assembly
+    TEB *teb = GetThreadTEB();
+    teb->except = frame->Prev;
+    return frame->Prev;
 }
 
 /*****************************************************************************
@@ -214,12 +238,54 @@ VOID _Pascal OS2RaiseException(DWORD dwExceptionCode,
   return;
 }
 
+/*******************************************************************
+ *         EXC_RaiseHandler
+ *
+ * Handler for exceptions happening inside a handler.
+ */
+static DWORD WIN32API EXC_RaiseHandler( WINEXCEPTION_RECORD *rec, WINEXCEPTION_FRAME *frame,
+//                             WINCONTEXT *context, WINEXCEPTION_FRAME **dispatcher )
+                               WINCONTEXT *context, LPVOID dispatcher )
+{
+    if (rec->ExceptionFlags & (EH_UNWINDING | EH_EXIT_UNWIND))
+        return ExceptionContinueSearch;
+    /* We shouldn't get here so we store faulty frame in dispatcher */
+    *(PWINEXCEPTION_FRAME*)dispatcher = ((EXC_NESTED_FRAME*)frame)->prevFrame;
+    return ExceptionNestedException;
+}
+
+/*******************************************************************
+ *         EXC_CallHandler
+ *
+ * Call an exception handler, setting up an exception frame to catch exceptions
+ * happening during the handler execution.
+ * WARNING:
+ * Please do not change the first 4 parameters order in any way - some exceptions handlers
+ * rely on Base Pointer (EBP) to have a fixed position related to the exception frame
+ */
+static DWORD EXC_CallHandler( WINEXCEPTION_RECORD *record, WINEXCEPTION_FRAME *frame,
+                              WINCONTEXT *context, WINEXCEPTION_FRAME **dispatcher,
+                              PEXCEPTION_HANDLER handler, PEXCEPTION_HANDLER nested_handler)
+{
+    EXC_NESTED_FRAME newframe;
+    DWORD ret;
+
+    newframe.frame.Handler = nested_handler;
+    newframe.prevFrame     = frame;
+    EXC_push_frame( &newframe.frame );
+    dprintf(("KERNEL32: Calling handler at %p code=%lx flags=%lx\n",
+           handler, record->ExceptionCode, record->ExceptionFlags));
+    ret = handler( record, frame, context, dispatcher );
+    dprintf(("KERNEL32: Handler returned %lx\n", ret));
+    EXC_pop_frame( &newframe.frame );
+    return ret;
+}
 
 //******************************************************************************
 //******************************************************************************
 DWORD RtlDispatchException(WINEXCEPTION_RECORD *pRecord, WINCONTEXT *pContext)
 {
-  PWINEXCEPTION_FRAME   pframe, dispatch, nested_frame;
+  PWINEXCEPTION_FRAME   pFrame, dispatch, nested_frame;
   int                   rc;
 
   // get chain of exception frames
@@ -227,17 +293,17 @@ DWORD RtlDispatchException(WINEXCEPTION_RECORD *pRecord, WINCONTEXT *pContext)
 
   nested_frame = NULL;
   TEB *winteb = GetThreadTEB();
-  pframe      = (PWINEXCEPTION_FRAME)winteb->except;
+  pFrame      = (PWINEXCEPTION_FRAME)winteb->except;
 
   dprintf(("KERNEL32: RtlDispatchException entered"));
 
-  PrintWin32ExceptionChain(pframe);
+  PrintWin32ExceptionChain(pFrame);
 
   // walk the exception chain
-  while( (pframe != NULL) && (pframe != ((void *)0xFFFFFFFF)) )
+  while( (pFrame != NULL) && (pFrame != ((void *)0xFFFFFFFF)) )
   {
-        dprintf(("KERNEL32: RtlDispatchException - pframe=%08X, pframe->Prev=%08X", pframe, pframe->Prev));
-        if (pframe == pframe->Prev) {
+        dprintf(("KERNEL32: RtlDispatchException - pframe=%08X, pframe->Prev=%08X", pFrame, pFrame->Prev));
+        if (pFrame == pFrame->Prev) {
             dprintf(("KERNEL32: RtlDispatchException - Invalid exception frame!!"));
             return 0;
         }
@@ -245,28 +311,24 @@ DWORD RtlDispatchException(WINEXCEPTION_RECORD *pRecord, WINCONTEXT *pContext)
         dispatch=0;
 
         /* Check frame address */
-        if (((void*)pframe < winteb->stack_low) ||
-            ((void*)(pframe+1) > winteb->stack_top) ||
-            (int)pframe & 3)
+        if (((void*)pFrame < winteb->stack_low) ||
+            ((void*)(pFrame+1) > winteb->stack_top) ||
+            (int)pFrame & 3)
         {
             dprintf(("Invalid stack! low=%08X, top=%08X, pframe = %08X",
-                    winteb->stack_low, winteb->stack_top, pframe));
+                    winteb->stack_low, winteb->stack_top, pFrame));
 
             pRecord->ExceptionFlags |= EH_STACK_INVALID;
             break;
         }
 
-        dprintf(("KERNEL32: RtlDispatchException - calling exception handler %08X", pframe->Handler));
 
-        rc = pframe->Handler(pRecord,
-                             pframe,
-                             pContext,
-                             dispatch);
+        /* call handler */
+        rc = EXC_CallHandler(pRecord, pFrame, pContext, &dispatch, pFrame->Handler, EXC_RaiseHandler );
 
-        dprintf(("KERNEL32: RtlDispatchException - exception handler returned %#x", rc));
-        PrintWin32ExceptionChain(pframe);
+        PrintWin32ExceptionChain(pFrame);
 
-        if (pframe == nested_frame)
+        if (pFrame == nested_frame)
         {
             /* no longer nested */
             nested_frame = NULL;
@@ -292,15 +354,15 @@ DWORD RtlDispatchException(WINEXCEPTION_RECORD *pRecord, WINCONTEXT *pContext)
             break;
         }
 
-        dprintf(("KERNEL32: RtlDispatchException - going from frame %08X to previous frame %08X", pframe, pframe->Prev));
-        if (pframe == pframe->Prev) {
+        dprintf(("KERNEL32: RtlDispatchException - going from frame %08X to previous frame %08X", pFrame, pFrame->Prev));
+        if (pFrame == pFrame->Prev) {
             dprintf(("KERNEL32: RtlDispatchException - Invalid exception frame!!"));
             break;
         }
-        pframe = pframe->Prev;
+        pFrame = pFrame->Prev;
   }
   dprintf(("KERNEL32: RtlDispatchException returns %#x", rc));
-  PrintWin32ExceptionChain(pframe);
+  PrintWin32ExceptionChain(pFrame);
   return rc;
 }
 /*****************************************************************************
@@ -374,65 +436,6 @@ int _Pascal OS2RtlUnwind(PWINEXCEPTION_FRAME  pEndFrame,
 
   while ((frame != (PWINEXCEPTION_FRAME)0xffffffff) && (frame != pEndFrame))
   {
-        /* Check frame address */
-        if (pEndFrame && (frame > pEndFrame))
-        {
-            newrec.ExceptionCode    = STATUS_INVALID_UNWIND_TARGET;
-            newrec.ExceptionFlags   = EH_NONCONTINUABLE;
-            newrec.ExceptionRecord  = pRecord;
-            newrec.NumberParameters = 0;
-            dprintf(("KERNEL32: RtlUnwind terminating thread.\n"));
-            DosExit(EXIT_THREAD, 0);
-        }
-        if (((void*)frame < winteb->stack_low) ||
-            ((void*)(frame+1) > winteb->stack_top) ||
-            (int)frame & 3)
-        {
-            newrec.ExceptionCode    = STATUS_BAD_STACK;
-            newrec.ExceptionFlags   = EH_NONCONTINUABLE;
-            newrec.ExceptionRecord  = pRecord;
-            newrec.NumberParameters = 0;
-            dprintf(("KERNEL32: RtlUnwind terminating thread.\n"));
-            DosExit(EXIT_THREAD, 0);
-        }
-
-        /* Call handler */
-        dprintf(("KERNEL32: RtlUnwind - calling exception handler %08X", frame->Handler));
-        rc = frame->Handler(pRecord, frame, &context, &dispatch);
-        dprintf(("KERNEL32: RtlUnwind - handler returned %#x", rc));
-        switch (rc)
-        {
-        case ExceptionContinueSearch:
-            break;
-        case ExceptionCollidedUnwind:
-            frame = dispatch;
-            break;
-        default:
-            newrec.ExceptionCode    = STATUS_INVALID_DISPOSITION;
-            newrec.ExceptionFlags   = EH_NONCONTINUABLE;
-            newrec.ExceptionRecord  = pRecord;
-            newrec.NumberParameters = 0;
-            dprintf(("KERNEL32: RtlUnwind terminating thread.\n"));
-            DosExit(EXIT_THREAD, 0);
-            break;
-        }
-        dprintf(("KERNEL32: RtlUnwind (before)- frame=%08X, frame->Prev=%08X", frame, frame->Prev));
-        SetExceptionChain((DWORD)frame->Prev);
-        frame = frame->Prev;
-        dprintf(("KERNEL32: RtlUnwind (after) - frame=%08X, frame->Prev=%08X", frame, frame->Prev));
-  }
-
-
-  /* Note: I _think_ that on Win32, RtlUnwind unwinds exception handlers up  */
-  /*  and _including_ the handler in pEndFrame argument. My reasons are:     */
-  /*   - MSVCRT sometimes calls RtlUnwind with the address of the very first */
-  /*     exception handler - could be just inefficient code                  */
-  /*   - after a call to RtlUnwind, MSVCRT in some cases tries to restore    */
-  /*     the original exception handler. If RtlUnwind didn't remove it,      */
-  /*     the exception chain gets looped, spelling very bad mojo!            */
-  if (frame == pEndFrame)
-  {
-        /* Just repeat what we did in the while loop above */
         /* Check frame address */
         if (pEndFrame && (frame > pEndFrame))
         {
@@ -1173,7 +1176,7 @@ CrashAndBurn:
         //    of this exception handler. We better bail out ASAP or we'll likely
         //    recurse infinitely until we run out of stack space!!
         if (pERepRec->fHandlerFlags & EH_NESTED_CALL)
-		return XCPT_CONTINUE_SEARCH;
+                return XCPT_CONTINUE_SEARCH;
 
 #ifdef DEBUG
         dprintfException(pERepRec, pERegRec, pCtxRec, p);

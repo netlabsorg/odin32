@@ -1,4 +1,4 @@
-/* $Id: windlllx.cpp,v 1.15 2000-10-03 17:28:31 sandervl Exp $ */
+/* $Id: windlllx.cpp,v 1.16 2000-10-05 18:36:49 sandervl Exp $ */
 
 /*
  * Win32 LX Dll class (compiled in OS/2 using Odin32 api)
@@ -171,6 +171,7 @@ Win32LxDll::Win32LxDll(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint, PVOID pRes
   //new win32 instance handle must be pointer to PE header
   hinstance = (HINSTANCE)buildHeader(MajorImageVersion, MinorImageVersion,
                                      Subsystem);
+  dprintf(("Fake PE header %x for dll %s", hinstance, getModuleName()));
 }
 //******************************************************************************
 //******************************************************************************
