@@ -9,18 +9,29 @@ CODE LOADONCALL
 ; we could provide corresponding macros for that purpose.
 
 EXPORTS
-       ODIN_calloc             = ODIN_calloc
+       ODIN_calloc
        calloc                  = ODIN_calloc
 
-       ODIN_realloc            = ODIN_realloc
+       ODIN_realloc
        realloc                 = ODIN_realloc
 
-       ODIN_malloc             = ODIN_malloc
+       ODIN_malloc
        malloc                  = ODIN_malloc
 
-       ODIN_free               = ODIN_free
+       ODIN_free
        free                    = ODIN_free
 
+       ODIN_debug_calloc
+       _debug_calloc           = ODIN_debug_calloc
+
+       ODIN_debug_realloc
+       _debug_realloc          = ODIN_debug_realloc
+
+       ODIN_debug_malloc
+       _debug_malloc           = ODIN_debug_malloc
+
+       ODIN_debug_free
+       _debug_free             = ODIN_debug_free
 
 
 ; EXPORTS
@@ -130,11 +141,7 @@ EXPORTS
    _control87
    __cputs                   ;  16 bit function
    _ddused
-   _debug_calloc
-   _debug_free
    _debug_heapmin
-   _debug_malloc
-   _debug_realloc
    _dposqnan
    _dump_allocated
    __dump_allocated
