@@ -1,4 +1,4 @@
-/* $Id: cvticon.cpp,v 1.1 1999-08-19 14:19:14 sandervl Exp $ */
+/* $Id: cvticon.cpp,v 1.2 1999-08-19 19:50:40 sandervl Exp $ */
 
 /*
  * PE2LX icons
@@ -26,8 +26,10 @@
 #include <misc.h>
 
 //******************************************************************************
+//NOTE: offsetBits is the value added to the offBits bitmap structure members
+//      (handy for converting icon groups)
 //******************************************************************************
-void *ConvertIcon(WINBITMAPINFOHEADER *bmpHdr, int size)
+void *ConvertIcon(WINBITMAPINFOHEADER *bmpHdr, int size, int offsetBits)
 {
  RGBQUAD *rgb;
  RGB2    *os2rgb;
@@ -91,7 +93,7 @@ void *ConvertIcon(WINBITMAPINFOHEADER *bmpHdr, int size)
   iconhdr->xHotspot      = 0;
   iconhdr->yHotspot      = 0;
   iconhdr->offBits       = 2*sizeof(BITMAPFILEHEADER2) +
-                           2*sizeof(RGB2) + rgbsize;
+                           2*sizeof(RGB2) + rgbsize + offsetBits;
   iconhdr->bmp2.cbFix    = sizeof(BITMAPINFOHEADER2);
   iconhdr->bmp2.cx       = (USHORT)bmpHdr->biWidth;
   iconhdr->bmp2.cy       = (USHORT)bmpHdr->biHeight;
@@ -108,7 +110,7 @@ void *ConvertIcon(WINBITMAPINFOHEADER *bmpHdr, int size)
   iconhdr2->xHotspot     = 0;
   iconhdr2->yHotspot     = 0;
   iconhdr2->offBits      = 2*sizeof(BITMAPFILEHEADER2) +
-                           2*sizeof(RGB2) + rgbsize + 2*bwsize;
+                           2*sizeof(RGB2) + rgbsize + 2*bwsize + offsetBits;
   iconhdr2->bmp2.cbFix   = sizeof(BITMAPINFOHEADER2);
   iconhdr2->bmp2.cx      = (USHORT)bmpHdr->biWidth;
   iconhdr2->bmp2.cy      = (USHORT)(bmpHdr->biHeight/2);

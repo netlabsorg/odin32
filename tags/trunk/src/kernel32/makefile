@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.20 1999-08-19 14:19:15 sandervl Exp $
+# $Id: makefile,v 1.21 1999-08-19 19:50:40 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -18,16 +18,8 @@ CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE) /Tm+
 CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE) /Tm+
 
 
-OBJS = KERNEL32.OBJ \
-       KOBJECTS.OBJ \
-       CONSOLE.OBJ \
-       CONIN.OBJ \
-       CONBUFFER.OBJ \
-       CONOUT.OBJ \
-       UNICODE.OBJ \
-       network.OBJ \
-       DEVIO.OBJ \
-       profile.obj \
+OBJS = KERNEL32.OBJ KOBJECTS.OBJ CONSOLE.OBJ CONIN.OBJ CONBUFFER.OBJ \
+       CONOUT.OBJ UNICODE.OBJ network.OBJ DEVIO.OBJ profile.obj \
        THREAD.OBJ \
        THUNK.OBJ \
        OBSOLETE.OBJ \
@@ -79,6 +71,9 @@ OBJS = KERNEL32.OBJ \
        cvtmenu.obj \
        cvtaccel.obj \
        cvticon.obj \
+       cvticongrp.obj \
+       cvtcursor.obj \
+       cvtcursorgrp.obj \
        stubs.obj
 
 
@@ -356,6 +351,9 @@ cvtbitmap.obj: cvtbitmap.cpp $(PDWIN32_INCLUDE)\winicon.h $(PDWIN32_INCLUDE)\mis
 cvtmenu.obj: cvtmenu.cpp $(PDWIN32_INCLUDE)\winmenu.h $(PDWIN32_INCLUDE)\misc.h cvtresource.h
 cvtaccel.obj: cvtaccel.cpp $(PDWIN32_INCLUDE)\winaccel.h $(PDWIN32_INCLUDE)\misc.h cvtresource.h
 cvticon.obj: cvticon.cpp $(PDWIN32_INCLUDE)\winicon.h $(PDWIN32_INCLUDE)\misc.h cvtresource.h
+cvticongrp.obj: cvticongrp.cpp $(PDWIN32_INCLUDE)\winicon.h $(PDWIN32_INCLUDE)\misc.h cvtresource.h
+cvtcursor.obj: cvtcursor.cpp $(PDWIN32_INCLUDE)\wincursor.h $(PDWIN32_INCLUDE)\winicon.h $(PDWIN32_INCLUDE)\misc.h cvtresource.h
+cvtcursorgrp.obj: cvtcursorgrp.cpp $(PDWIN32_INCLUDE)\wincursor.h $(PDWIN32_INCLUDE)\winicon.h $(PDWIN32_INCLUDE)\misc.h cvtresource.h
 
 clean:
         $(RM) *.OBJ *.LIB *.dll *~ *.map *.pch
