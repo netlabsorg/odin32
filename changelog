@@ -1,4 +1,9 @@
- /* $Id: changelog,v 1.730 2000-02-15 00:15:03 sandervl Exp $ */
+ /* $Id: changelog,v 1.731 2000-02-15 14:38:27 sandervl Exp $ */
+
+ 2000-02-15: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: SetWindowPos bugfix (returned before hiding or showing windows)
+                  Fixes Delphi apps
+	- KERNEL32: Fixed Release method of LX dlls (didn't delete object)
 
  2000-02-14: Sander van Leeuwen <sandervl@xs4all.nl>
 	- COMCTL32: Added Wine license
