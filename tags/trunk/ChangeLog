@@ -1,4 +1,10 @@
-/* $Id: ChangeLog,v 1.1643 2001-08-08 17:26:40 bird Exp $ */
+/* $Id: ChangeLog,v 1.1644 2001-08-09 08:43:48 sandervl Exp $ */
+
+ 2001-08-09: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Rewrote PostThreadMessage
+                  (fixes RealPlayer 8 install)
+                o Use WinQueueFromID to query message queue handle of first thread
+    - KERNEL32: o Use WinQueueFromID to query message queue handle of new thread
 
  2001-08-08: knut st. osmundsen <kosmunds@csc.com>
     - Win32k:   o Ignore ERROR_DRIVE_LOCKED (chkdsk/format) error in
