@@ -1,4 +1,4 @@
-;/* $Id: kKrnlLibTst.def,v 1.5 2001-11-15 04:20:15 bird Exp $
+;/* $Id: kKrnlLibTst.def,v 1.6 2001-11-19 02:57:54 bird Exp $
 ; *
 ; * Definition file for the Ring-3 test program.
 ; *
@@ -44,6 +44,8 @@ SEGMENTS
     CALLTAB16           class 'CALLTAB16_DATA'
 
     LOGDATA_16BIT       class 'LOGDATA_16BIT'
+
+    SYMBOLDB32          class 'SYMBOLDB32'
 
     STACK32             class 'STACK' STACK
 
