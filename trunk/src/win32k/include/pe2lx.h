@@ -1,10 +1,8 @@
-/* $Id: pe2lx.h,v 1.7 2000-01-22 18:21:01 bird Exp $
+/* $Id: pe2lx.h,v 1.8 2000-01-27 23:48:14 bird Exp $
  *
  * Pe2Lx class declarations. Ring 0 and Ring 3
  *
- * Copyright (c) 1998-1999 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
- * Copyright (c) 1998 Sander van Leeuwen (sandervl@xs4all.nl)
- * Copyright (c) 1998 Peter Fitzsimmons
+ * Copyright (c) 1998-2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -67,8 +65,8 @@ public:
     ULONG  read(ULONG offLXFile, PVOID pvBuffer, ULONG cbToRead, ULONG flFlags, PMTE pMTE);
     ULONG  applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID pvPage,
                        ULONG ulPageAddress, PVOID pvPTDA); /*(ldrEnum32bitRelRecs)*/
-
     #ifndef RING0
+    ULONG  testApplyFixups();
     ULONG  writeLxFile(PCSZ pszLXFilename);
     #endif
 
@@ -86,6 +84,7 @@ private:
     /** @cat conversion helper(s) */
     ULONG       loadNtHeaders();
     VOID        releaseNtHeaders();
+    ULONG       loadBaseRelocations();
 
     /** @cat init() helper methods - may only be called at init time! */
     ULONG       addObject(ULONG ulRVA, ULONG cbPhysical, ULONG cbVirtual, ULONG flFlags, ULONG offPEFile);
@@ -116,6 +115,7 @@ private:
     /** @cat Misc helpers */
     ULONG       getCountOfPages();
     ULONG       queryObjectAndOffset(ULONG ulRVA, PULONG pulObject, PULONG poffObject);
+    ULONG       readAtRVA(ULONG ulRVA, PVOID pvBuffer, ULONG cbBuffer);
 
     /** @cat static helpers */
     static PCSZ queryOdin32ModuleName(PCSZ pszWin32ModuleName);
@@ -175,6 +175,10 @@ private:
     ULONG                   offNtHeaders;   /* Fileoffset of the PE\0\0 signature. */
     PIMAGE_NT_HEADERS       pNtHdrs;        /* Pointer to NT-Headers. If null load it using loadNtHeaders. */
     ULONG                   ulImageBase;    /* Image base address. */
+    PIMAGE_BASE_RELOCATION  pBaseRelocs;    /* Baserelocations. */
+    ULONG                   cbBaseRelocs;   /* Size of baserelocations. */
+    ULONG                   fApplyFixups;   /* TRUE: apply fixups, FALSE: do not apply fixups, ~0=check if need to apply fixups */
+    ULONG                   fDeltaOnly;     /* TRUE: apply fixups only as deltas. FALSE: needs to calculate target address... */
 
     /**
      * @cat static data.
