@@ -1,4 +1,4 @@
-/* $Id: kList.cpp,v 1.2 2000-03-25 23:17:46 bird Exp $ */
+/* $Id: kList.cpp,v 1.3 2000-08-31 03:00:13 bird Exp $ */
 /*
  * Simple list and sorted list template class.
  * Note: simple list is not implemented yet, as it is not yet needed.
@@ -89,6 +89,8 @@ void kSortedList<kEntry>::insert(kEntry *pEntry)
             p = (kEntry*)p->getNext();
         }
 
+        assert(p != NULL);
+
         pEntry->setNext(p);
         if (pPrev != NULL)
             pPrev->setNext(pEntry);
@@ -125,6 +127,7 @@ kEntry *kSortedList<kEntry>::get(const kEntry &entry) const
 template <class kEntry>
 kEntry *kSortedList<kEntry>::getFirst(void) const
 {
+
     return pFirst;
 }
 
@@ -224,6 +227,35 @@ void kList<kEntry>::insert(kEntry *pEntry)
     }
     cEntries++;
 }
+
+#if 0
+/**
+ * Inserts an entry into the list in an ascending sorted fashion.
+ * @param   pEntry  Pointer to entry to insert.
+ */
+template <class kEntry>
+void kList<kEntry>::insertSorted(kEntry *pEntry)
+{
+    if (pEntry == NULL)
+        return;
+    if (pFirst == NULL)
+    {
+        pEntry->setNext(NULL);
+        pLast = pFirst = pEntry;
+    }
+    else
+    {   /* linear search */
+        kEntry *pCur = pFirst;
+
+        pCur->
+
+        pEntry->setNext(NULL);
+        pLast->setNext(pEntry);
+        pLast = pEntry;
+    }
+    cEntries++;
+}
+#endif
 
 
 /**
