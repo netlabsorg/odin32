@@ -1,4 +1,4 @@
-/* $Id: winexepe2lx.cpp,v 1.8 2000-10-20 11:46:48 sandervl Exp $ */
+/* $Id: winexepe2lx.cpp,v 1.9 2001-03-19 14:49:22 bird Exp $ */
 
 /*
  * Win32 PE2LX Exe class
@@ -145,7 +145,7 @@ BOOL Win32Pe2LxExe::init()
 
             dprintf(("Console application!\n"));
 
-            rc = iConsoleInit(FALSE);    /* initialize console subsystem */
+            rc = iConsoleInit(TRUE);    /* initialize console subsystem */
             if (rc != NO_ERROR)     /* check for errors */
                 dprintf(("KERNEL32:Win32Image:Init ConsoleInit failed with %u.\n", rc));
         }
