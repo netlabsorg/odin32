@@ -1,4 +1,4 @@
-/* $Id: hmmmap.cpp,v 1.13 2000-05-26 18:42:55 sandervl Exp $ */
+/* $Id: hmmmap.cpp,v 1.14 2000-08-04 21:12:07 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -109,6 +109,7 @@ DWORD HMDeviceMemMapClass::CreateFileMapping(PHMHANDLEDATA         pHMHandleData
   	} 
 
   	if(map->Init(pHMHandleData->hHMHandle) == FALSE) {
+		dprintf(("CreateFileMappingA: init failed!"));
 		delete map;
 		return ERROR_GEN_FAILURE;
 	}

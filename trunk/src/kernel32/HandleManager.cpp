@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.44 2000-07-26 18:06:21 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.45 2000-08-04 21:12:05 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -706,7 +706,8 @@ BOOL HMDuplicateHandle(HANDLE  srcprocess,
                        PHANDLE desthandle,
                        DWORD   fdwAccess,
                        BOOL    fInherit,
-                       DWORD   fdwOptions)
+                       DWORD   fdwOptions,
+                       DWORD   fdwOdinOptions)
 {
   int             iIndex;                     /* index into the handle table */
   int             iIndexNew;                  /* index into the handle table */
@@ -737,7 +738,23 @@ BOOL HMDuplicateHandle(HANDLE  srcprocess,
   else
     pHMHandleData->dwAccess    = fdwAccess;
 
-  pHMHandleData->dwShare       = TabWin32Handles[srchandle].hmHandleData.dwShare;
+  if(fdwOdinOptions & DUPLICATE_ACCESS_READWRITE) {
+	pHMHandleData->dwAccess = GENERIC_READ | GENERIC_WRITE;
+  }
+  else 
+  if(fdwOdinOptions & DUPLICATE_ACCESS_READ) {
+	pHMHandleData->dwAccess = GENERIC_READ;
+  }
+
+  if(fdwOdinOptions & DUPLICATE_SHARE_READ) {
+	pHMHandleData->dwShare = FILE_SHARE_READ;
+  } 
+  else
+  if(fdwOdinOptions & DUPLICATE_SHARE_DENYNONE) {
+	pHMHandleData->dwShare = FILE_SHARE_READ | FILE_SHARE_WRITE;
+  }
+  else  pHMHandleData->dwShare = TabWin32Handles[srchandle].hmHandleData.dwShare;
+
   pHMHandleData->dwCreation    = TabWin32Handles[srchandle].hmHandleData.dwCreation;
   pHMHandleData->dwFlags       = TabWin32Handles[srchandle].hmHandleData.dwFlags;
   pHMHandleData->lpHandlerData = TabWin32Handles[srchandle].hmHandleData.lpHandlerData;
@@ -758,7 +775,8 @@ BOOL HMDuplicateHandle(HANDLE  srcprocess,
                                        desthandle,
                                        fdwAccess,
                                        fInherit,
-                                       fdwOptions & ~DUPLICATE_CLOSE_SOURCE);
+                                       fdwOptions & ~DUPLICATE_CLOSE_SOURCE,
+                                       fdwOdinOptions);
 
   //Don't let Open32 close it for us, but do it manually (regardless of error; see SDK docs))
   if (fdwOptions & DUPLICATE_CLOSE_SOURCE)

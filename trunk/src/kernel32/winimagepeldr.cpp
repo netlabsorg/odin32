@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.50 2000-07-20 18:07:00 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.51 2000-08-04 21:12:10 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -217,7 +217,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
   imageSize = oh.SizeOfImage;
   //Allocate memory to hold the entire image
   if(allocSections(reservedMem) == FALSE) {
-    	dprintf((LOG, "Failed to allocate image memory, rc %d", errorState));;
+    	dprintf((LOG, "Failed to allocate image memory for %s at %x, rc %d", szFileName, oh.ImageBase, errorState));;
     	goto failure;
   }
 
