@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.48 2002-12-20 15:09:44 sandervl Exp $ */
+/* $Id: scroll.cpp,v 1.49 2003-04-08 13:45:04 sandervl Exp $ */
 /*
  * Scrollbar control
  *
@@ -1152,6 +1152,54 @@ LRESULT SCROLL_SetRange(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar,BOOL redr
   return (oldPos != infoPtr->CurVal) ? infoPtr->CurVal:0;
 }
 
+
+/***********************************************************************
+ *           SCROLL_TrackScrollBar
+ *
+ * Track a mouse button press on a scroll-bar.
+ * pt is in screen-coordinates for non-client scroll bars.
+ */
+void SCROLL_TrackScrollBar( HWND hwnd, WPARAM wparam, LPARAM lParam, INT scrollbar)
+{
+    MSG msg;
+    INT xoffset = 0, yoffset = 0;
+    POINT pt;
+    pt.x = SLOWORD(lParam);
+    pt.y = SHIWORD(lParam);
+
+    if (scrollbar != SB_CTL)
+    {
+      Beep(100,100);
+    }
+
+    SCROLL_HandleScrollEvent( hwnd, wparam, lParam, scrollbar, WM_LBUTTONDOWN);
+
+    do
+    {
+        if (!GetMessageW( &msg, 0, 0, 0 )) break;
+        if (CallMsgFilterW( &msg, MSGF_SCROLLBAR )) continue;
+        switch(msg.message)
+        {
+        case WM_LBUTTONUP:
+        case WM_MOUSEMOVE:
+        case WM_SYSTIMER:
+            pt.x = SLOWORD(msg.lParam) + xoffset;
+            pt.y = SHIWORD(msg.lParam) + yoffset;
+            SCROLL_HandleScrollEvent( hwnd, msg.wParam, MAKELONG(pt.x,pt.y), scrollbar, msg.message );
+            break;
+        default:
+            TranslateMessage( &msg );
+            DispatchMessageW( &msg );
+            break;
+        }
+        if (!IsWindow( hwnd ))
+        {
+            ReleaseCapture();
+            break;
+        }
+    } while (msg.message != WM_LBUTTONUP);
+}
+
 /* Window Procedures */
 
 /***********************************************************************
@@ -1172,6 +1220,9 @@ LRESULT WINAPI ScrollBarWndProc( HWND hwnd, UINT message, WPARAM wParam,
       return SCROLL_Destroy(hwnd,wParam,lParam);
 
     case WM_LBUTTONDOWN:
+            SCROLL_TrackScrollBar( hwnd, wParam, lParam, SB_CTL);
+            break;
+
     case WM_LBUTTONUP:
     case WM_NCHITTEST:
     case WM_CAPTURECHANGED:
@@ -1531,6 +1582,7 @@ BOOL WINAPI SetScrollRange(
     info.nMin   = MinVal;
     info.nMax   = MaxVal;
     info.fMask  = SIF_RANGE;
+#ifdef __WIN32OS2__
 //testestset
     static int nestlevel = 0;
     
@@ -1540,6 +1592,7 @@ BOOL WINAPI SetScrollRange(
         SetScrollInfo( hwnd, nBar, &info, bRedraw );
     nestlevel--;
 //testestset
+#endif
     return TRUE;
 }
 
