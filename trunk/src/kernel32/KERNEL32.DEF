@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.77 2000-03-29 17:17:17 sandervl Exp $
+; $Id: KERNEL32.DEF,v 1.78 2000-03-30 15:37:14 cbratschi Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -123,7 +123,7 @@ EXPORTS
 ;  Ordinal0096 = _OS2Ordinal0096@??           @96
 ;  Ordinal0097 = _OS2Ordinal0097@??           @97
 ;  Ordinal0098 = _OS2Ordinal0098@??           @98
-;  Ordinal0099 = _OS2Ordinal0099@??           @99
+   KERNEL32_99 = _KERNEL32_99@4               @99
 ;  Ordinal0100 = _OS2Ordinal0100@??           @100
 ;  Ordinal0101 = _OS2Ordinal0101@??           @101
 

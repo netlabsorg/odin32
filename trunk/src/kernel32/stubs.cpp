@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.20 2000-03-10 16:12:00 sandervl Exp $ */
+/* $Id: stubs.cpp,v 1.21 2000-03-30 15:37:14 cbratschi Exp $ */
 
 /*
  * Win32 KERNEL32 Subsystem for OS/2
@@ -23,7 +23,7 @@
 
 #include "stubs.h"
 
-#define DBG_LOCALLOG	DBG_stubs
+#define DBG_LOCALLOG    DBG_stubs
 #include "dbglocal.h"
 
 
@@ -1612,10 +1612,10 @@ int WIN32API GetCurrencyFormatA(LCID              Locale,
            lpFormat,
            lpCurrencyStr,
            cchCurrency));
- 
+
   if(lpValue && lpCurrencyStr) {
-	lstrcpyA(lpCurrencyStr, lpValue);
-	return lstrlenA(lpCurrencyStr);
+        lstrcpyA(lpCurrencyStr, lpValue);
+        return lstrlenA(lpCurrencyStr);
   }
   return (0);
 }
@@ -1655,8 +1655,8 @@ int WIN32API GetCurrencyFormatW(LCID              Locale,
            cchCurrency));
 
   if(lpValue && lpCurrencyStr) {
-	lstrcpyW(lpCurrencyStr, lpValue);
-	return lstrlenW(lpCurrencyStr);
+        lstrcpyW(lpCurrencyStr, lpValue);
+        return lstrlenW(lpCurrencyStr);
   }
 
   return (0);
@@ -2592,6 +2592,23 @@ DWORD WIN32API SetThreadPriorityBoost(DWORD x1,
            x2));
 
   return (0);
+}
+
+/*****************************************************************************
+ * Name      : ???
+ * Purpose   : Unknown (used by explorer.exe)
+ * Parameters: Unknown (wrong)
+ * Variables :
+ * Result    : Unknown
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Christoph Bratschi [Wed, 2000/03/29 19:47]
+ *****************************************************************************/
+
+VOID WIN32API KERNEL32_99(DWORD x)
+{
+  dprintf(("KERNEL32: Unknown API KERNEL32.99\n"));
 }
 
 
