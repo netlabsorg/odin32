@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.107 2001-05-19 09:12:46 sandervl Exp $
+; $Id: KERNEL32.DEF,v 1.108 2001-05-30 01:35:57 phaller Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -79,23 +79,23 @@ EXPORTS
 ;  Ordinal0051 = _OS2Ordinal0051@??           @51
 ;  Ordinal0052 = _OS2Ordinal0052@??           @52
 ;  Ordinal0053 = _OS2Ordinal0053@??           @53
-;  Ordinal0054 = _OS2Ordinal0054@??           @54
-;  Ordinal0055 = _OS2Ordinal0055@??           @55
-;  Ordinal0056 = _OS2Ordinal0056@??           @56
-;  Ordinal0057 = _OS2Ordinal0057@??           @57
-;  Ordinal0058 = _OS2Ordinal0058@??           @58
-;  Ordinal0059 = _OS2Ordinal0059@??           @59
-;  Ordinal0050 = _OS2Ordinal0060@??           @60
-;  Ordinal0061 = _OS2Ordinal0061@??           @61
-;  Ordinal0062 = _OS2Ordinal0062@??           @62
-;  Ordinal0063 = _OS2Ordinal0063@??           @63
-;  Ordinal0064 = _OS2Ordinal0064@??           @64
-;  Ordinal0065 = _OS2Ordinal0065@??           @65
-;  Ordinal0066 = _OS2Ordinal0066@??           @66
-;  Ordinal0067 = _OS2Ordinal0067@??           @67
-;  Ordinal0068 = _OS2Ordinal0068@??           @68
-;  Ordinal0069 = _OS2Ordinal0069@??           @69
-;  Ordinal0070 = _OS2Ordinal0070@??           @70
+;  Ordinal0054 = _OS2Ordinal0054@??           @54 ; forwarded from WOW32.WOWCallback16
+;  Ordinal0055 = _OS2Ordinal0055@??           @55 ; forwarded from WOW32.WOWCallback16Ex
+;  Ordinal0056 = _OS2Ordinal0056@??           @56 ; forwarded from WOW32.WOWGetVDMPointer
+;  Ordinal0057 = _OS2Ordinal0057@??           @57 ; forwarded from WOW32.WOWHandle32
+;  Ordinal0058 = _OS2Ordinal0058@??           @58 ; forwarded from WOW32.WOWHandle16
+;  Ordinal0059 = _OS2Ordinal0059@??           @59 ; forwarded from WOW32.WOWGlobalAlloc16
+;  Ordinal0050 = _OS2Ordinal0060@??           @60 ; forwarded from WOW32.WOWGlobalLock16
+;  Ordinal0061 = _OS2Ordinal0061@??           @61 ; forwarded from WOW32.WOWGlobalUnlock16
+;  Ordinal0062 = _OS2Ordinal0062@??           @62 ; forwarded from WOW32.WOWGlobalFree16
+;  Ordinal0063 = _OS2Ordinal0063@??           @63 ; forwarded from WOW32.WOWGlobalAllocLock16
+;  Ordinal0064 = _OS2Ordinal0064@??           @64 ; forwarded from WOW32.WOWGlobalUnlockFree16
+;  Ordinal0065 = _OS2Ordinal0065@??           @65 ; forwarded from WOW32.WOWGlobalLockSize16
+;  Ordinal0066 = _OS2Ordinal0066@??           @66 ; forwarded from WOW32.WOWYield16
+;  Ordinal0067 = _OS2Ordinal0067@??           @67 ; forwarded from WOW32.WOWDirectedYield16
+;  Ordinal0068 = _OS2Ordinal0068@??           @68 : forwarded from WOW32.WOWGetVDMPointerFix
+;  Ordinal0069 = _OS2Ordinal0069@??           @69 ; forwarded from WOW32.WOWGetVDMPointerUnfix
+;  Ordinal0070 = _OS2Ordinal0070@??           @70 ; forwarded from WOW32.WOW32_1
 ;  Ordinal0071 = _OS2Ordinal0071@??           @71
 ;  Ordinal0072 = _OS2Ordinal0072@??           @72
 ;  Ordinal0073 = _OS2Ordinal0073@??           @73
