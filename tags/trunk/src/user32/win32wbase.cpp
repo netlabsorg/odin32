@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.213 2000-10-05 13:47:06 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.214 2000-10-05 18:37:26 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -412,18 +412,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   dwStyle   = cs->style & ~WS_VISIBLE;
   dwExStyle = cs->dwExStyle;
 
-  hwndLinkAfter = HWND_TOP;
-#if 1
-  if(CONTROLS_IsControl(this, BUTTON_CONTROL) && ((dwStyle & 0x0f) == BS_GROUPBOX))
-  {
-        hwndLinkAfter = HWND_BOTTOM;
-        dwStyle |= WS_CLIPSIBLINGS;
-  }
-  else
-#endif
-  if(CONTROLS_IsControl(this, STATIC_CONTROL) && !(dwStyle & WS_GROUP)) {
-        dwStyle |= WS_CLIPSIBLINGS;
-  }
+  hwndLinkAfter = ((cs->style & (WS_CHILD|WS_MAXIMIZE)) == WS_CHILD) ? HWND_BOTTOM : HWND_TOP;
 
   /* Increment class window counter */
   windowClass->IncreaseWindowCount();

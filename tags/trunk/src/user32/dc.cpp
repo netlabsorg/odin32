@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.70 2000-09-02 08:30:09 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.71 2000-10-05 18:37:25 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -629,16 +629,8 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
 	rectlClip.yTop = rectlClip.xRight = 1;
 
 	//Query update region
-#if 1
-	HRGN hrgnClip = GpiCreateRegion(pHps->hps, 1, &rectl);
-#else
 	HRGN hrgnClip = GpiCreateRegion(pHps->hps, 1, &rectlClip);
 	WinQueryUpdateRegion(hwndClient, hrgnClip);
-        dprintfRegion(pHps->hps, hWnd, hrgnClip);
-        WinQueryVisibleRegion(hwndClient, hrgnClip);
-        dprintfRegion(pHps->hps, hWnd, hrgnClip);
-	WinQueryUpdateRegion(hwndClient, hrgnClip);
-#endif
         WinValidateRegion(hwndClient, hrgnClip, FALSE);
 
 	mapWin32ToOS2Rect(wnd->getWindowHeight(), wnd->getClientRectPtr(), (PRECTLOS2)&rectlClient);
