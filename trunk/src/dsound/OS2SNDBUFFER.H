@@ -1,4 +1,4 @@
-/* $Id: OS2SNDBUFFER.H,v 1.4 1999-10-23 23:00:50 sandervl Exp $ */
+/* $Id: OS2SNDBUFFER.H,v 1.5 1999-11-14 22:12:15 hugh Exp $ */
 
 /*
  * DirectSound SoundBuffer class
@@ -44,7 +44,12 @@ class OS2IDirectSoundBuffer
     ULONG status;
     ULONG fLocked;
     LONG  volume;
+    BOOL  fPlaying,fLoop;
     DSBUFFERDESC bufferdesc;
+    // for NIL Emulation
+    ULONG newWritePos;
+    DWORD LastTickCnt;
+
     char *lpBuffer;
 
               // Linked list management

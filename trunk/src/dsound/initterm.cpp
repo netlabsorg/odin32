@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.7 1999-10-26 17:53:42 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.8 1999-11-14 22:12:15 hugh Exp $ */
 
 /*
  * DLL entry point
@@ -77,7 +77,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
       {
          _ctordtorInit();
 
- 	 DosQueryModuleName(hModule, CCHMAXPATH, dsoundPath);
+   DosQueryModuleName(hModule, CCHMAXPATH, dsoundPath);
          char *endofpath = strrchr(dsoundPath, '\\');
          if(endofpath) *(endofpath+1) = 0;
 
@@ -88,8 +88,8 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          /* are required and the runtime is dynamically linked.             */
          /*******************************************************************/
 
-	 if(RegisterLxDll(hModule, 0, 0) == FALSE) 
-		return 0UL;
+   if(RegisterLxDll(hModule, 0, 0) == FALSE)
+    return 0UL;
 
          rc = DosExitList(0x0000F000|EXLST_ADD, cleanup);
          if(rc)
@@ -98,7 +98,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          break;
       }
       case 1 :
-	 UnregisterLxDll(hModule);
+   UnregisterLxDll(hModule);
          break;
       default  :
          return 0UL;
@@ -114,7 +114,6 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 static void APIENTRY cleanup(ULONG ulReason)
 {
    _ctordtorTerm();
-   CloseLogFile();
    DosExitList(EXLST_EXIT, cleanup);
    return ;
 }

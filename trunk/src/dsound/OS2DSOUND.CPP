@@ -1,4 +1,4 @@
-/* $Id: OS2DSOUND.CPP,v 1.4 1999-10-23 23:00:49 sandervl Exp $ */
+/* $Id: OS2DSOUND.CPP,v 1.5 1999-11-14 22:12:15 hugh Exp $ */
 
 /*
  * DirectSound main class
@@ -21,7 +21,7 @@
 
 #include "os2dsound.h"
 #include "os2sndbuffer.h"
-#include "misc.h"
+#include <misc.h>
 
 //******************************************************************************
 //******************************************************************************
@@ -56,7 +56,8 @@ OS2IDirectSound::~OS2IDirectSound()
 HRESULT WIN32API SoundQueryInterface(THIS, REFIID riid, LPVOID * ppvObj)
 {
   dprintf(("OS2IDirectSound::QueryInterface\n"));
-  if(This == NULL) {
+  if(This == NULL)
+  {
     return DSERR_INVALIDPARAM;
   }
   *ppvObj = NULL;
@@ -114,14 +115,18 @@ HRESULT WIN32API SoundCreateSoundBuffer(THIS_
  OS2IDirectSoundBuffer *sndbuf;
 
   dprintf(("OS2IDirectSound::CreateSoundBuffer\n"));
-  if(me == NULL || lpDSBufferDesc == NULL || lplpDirectSoundBuffer == NULL) {
+  if(me == NULL || lpDSBufferDesc == NULL || lplpDirectSoundBuffer == NULL)
+  {
     return(DSERR_INVALIDPARAM);
   }
+
   sndbuf = new OS2IDirectSoundBuffer(lpDSBufferDesc);
-  if(sndbuf == NULL) {
+  if(sndbuf == NULL)
+  {
     return(DSERR_OUTOFMEMORY);
   }
-  if(sndbuf->GetLastError() != DS_OK) {
+  if(sndbuf->GetLastError() != DS_OK)
+  {
     ULONG lastErr = sndbuf->GetLastError();
     delete sndbuf;
     return lastErr;
