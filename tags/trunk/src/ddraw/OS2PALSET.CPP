@@ -1,4 +1,4 @@
-/* $Id: OS2PALSET.CPP,v 1.7 1999-12-21 01:28:16 hugh Exp $ */
+/* $Id: OS2PALSET.CPP,v 1.8 2000-03-17 22:05:40 mike Exp $ */
 
 /*
  * Functions used to Set the Physical Palette in OS/2 when in 8 Bit mode
@@ -27,6 +27,9 @@ void OS2SetPhysPalette(void *pal)
  RGB2 os2rgb[256];
  int  i;
 
+ USHORT sel = RestoreOS2FS();
+
+
 
 
   hps = WinGetPS(HWND_DESKTOP);
@@ -54,15 +57,18 @@ void OS2SetPhysPalette(void *pal)
                      TRUE);
   WinReleasePS(hps);
 
-
+  SetFS(sel);
 
 }
+
 //******************************************************************************
 //******************************************************************************
 void OS2ResetPhysPalette()
 {
  HPS hps;
  HDC hdc;
+
+ USHORT sel = RestoreOS2FS();
 
 
 
@@ -80,7 +86,7 @@ void OS2ResetPhysPalette()
 
   WinReleasePS(hps);
 
-
+  SetFS(sel);
 
 }
 //******************************************************************************
