@@ -86,6 +86,7 @@ ULONG inittermGdi32(ULONG hModule, ULONG ulFlag)
          ParseLogStatusGDI32();
 
          InitializeKernel32();
+         CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 	 if(InitRegionSpace() == FALSE) {
 		return 0UL;
          }
