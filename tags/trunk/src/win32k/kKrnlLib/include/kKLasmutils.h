@@ -1,8 +1,8 @@
-/* $Id: kKLasmutils.h,v 1.1 2001-09-14 01:50:17 bird Exp $
+/* $Id: kKLasmutils.h,v 1.2 2001-10-14 22:51:07 bird Exp $
  *
  * Assembly utilities.
  *
- * Copyright (c) 1998-1999 knut st. osmundsen
+ * Copyright (c) 1998-2001 knut st. osmundsen (kosmunds@csc.com)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -14,15 +14,20 @@
 extern "C" {
 #endif
 
-extern unsigned short _System GetCS(void);
-extern unsigned short _System GetDS(void);
-extern unsigned short _System GetES(void);
-extern unsigned short _System GetFS(void);
-extern unsigned short _System GetGS(void);
-extern unsigned short _System GetSS(void);
+extern unsigned short _System   GetCS(void);
+extern unsigned short _System   GetDS(void);
+extern unsigned short _System   GetES(void);
+extern unsigned short _System   GetFS(void);
+extern unsigned short _System   GetGS(void);
+extern unsigned short _System   GetSS(void);
 
-extern void _System DisableInterrupts(void); /* uniprocessor only */
-extern void _System EnableInterrupts(void);  /* uniprocessor only */
+extern void _System             DisableInterrupts(void);
+extern void _System             EnableInterrupts(void);
+
+extern unsigned long _Optlink   AtomicInc(unsigned long *pul);
+extern unsigned long _Optlink   AtomicIncWrap(unsigned long *pul, unsigned long ulMax);
+extern unsigned long _Optlink   AtomicDec(unsigned long *pul);
+extern unsigned long _Optlink   AtomicSet(unsigned long *pul, unsigned long ul);
 
 #if 0
     //extern void _System Int3(void);
