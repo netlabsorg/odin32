@@ -1,4 +1,4 @@
-/* $Id: conin.cpp,v 1.12 2000-10-03 17:28:28 sandervl Exp $ */
+/* $Id: conin.cpp,v 1.13 2000-10-20 11:46:45 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -31,7 +31,7 @@
 #define  INCL_DOSMODULEMGR
 #define  INCL_VIO
 #define  INCL_AVIO
-#include <os2wrap.h>	//Odin32 OS/2 api wrappers
+#include <os2wrap.h>    //Odin32 OS/2 api wrappers
 
 #include <win32api.h>
 #include <misc.h>
@@ -44,7 +44,7 @@
 #include "Console2.h"
 #include <heapstring.h>
 
-#define DBG_LOCALLOG	DBG_conin
+#define DBG_LOCALLOG    DBG_conin
 #include "dbglocal.h"
 
 
@@ -127,13 +127,7 @@ BOOL HMDeviceConsoleInClass::ReadFile(PHMHANDLEDATA pHMHandleData,
                                   /* block if no key events are in the queue */
   for (;fLoop;)                       /* until we got some characters */
   {
-    if (iConsoleInputQueryEvents() == 0)      /* if queue is currently empty */
-    {
-      rc = DosWaitEventSem(pConsoleInput->hevInputQueue,    /* wait for input */
-                           SEM_INDEFINITE_WAIT);
-      DosResetEventSem(pConsoleInput->hevInputQueue,       /* reset semaphore */
-                       &ulPostCounter);            /* post counter - ignored */
-    }
+    iConsoleInputQueryEvents(pConsoleInput, QUERY_EVENT_WAIT);      /* if queue is currently empty */
 
     do
     {
@@ -157,7 +151,7 @@ BOOL HMDeviceConsoleInClass::ReadFile(PHMHANDLEDATA pHMHandleData,
             // fLoop = FALSE;
             // @@@PH 2000/08/10 changed behaviour to return ALL input events
             // recorded in the console.
-            fLoop = (iConsoleInputQueryEvents() != 0);
+            fLoop = (iConsoleInputQueryEvents(pConsoleInput, QUERY_EVENT_PEEK) != 0);
 
           // record key stroke
           if (pConsoleInput->dwConsoleMode & ENABLE_PROCESSED_INPUT)
@@ -169,11 +163,11 @@ BOOL HMDeviceConsoleInClass::ReadFile(PHMHANDLEDATA pHMHandleData,
                 // Ascii values of 0x00 are sent e.g. for SHIFT-DOWN
                 // key events, etc.
                 break;
-              
+
               case 0x03: // ctrl-c is filtered!
                 // @@@PH we're supposed to call a ctrl-c break handler here!
                 break;
-              
+
               case 0x0d: // CR
                 // CR is automatically expanded to CRLF if in line input mode!
                 if (pConsoleInput->dwConsoleMode & ENABLE_LINE_INPUT)
@@ -187,16 +181,16 @@ BOOL HMDeviceConsoleInClass::ReadFile(PHMHANDLEDATA pHMHandleData,
                     pszTarget++;
                     ulCounter++;
                   }
-                  
+
                   if (pConsoleInput->dwConsoleMode & ENABLE_ECHO_INPUT)
                     HMWriteFile(pConsoleGlobals->hConsoleBuffer,
                         pszTarget-2,
                         2,
                         &ulPostCounter,                      /* dummy result */
                         NULL);
-                  
+
                 }
-              
+
                 break;
 
               case 0x08: // backspace
@@ -442,6 +436,9 @@ BOOL HMDeviceConsoleInClass::FlushConsoleInputBuffer(PHMHANDLEDATA pHMHandleData
            pHMHandleData);
 #endif
 
+  //get all pending events
+  iConsoleInputQueryEvents(pConsoleInput, QUERY_EVENT_PEEK);
+
   pConsoleInput->ulIndexFree  = 0;
   pConsoleInput->ulIndexEvent = 0;
   pConsoleInput->ulEvents     = 0;
@@ -506,7 +503,8 @@ BOOL HMDeviceConsoleInClass::GetNumberOfConsoleInputEvents(PHMHANDLEDATA pHMHand
            lpNumberOfEvents);
 #endif
 
-  *lpNumberOfEvents = pConsoleInput->ulEvents;     /* return number of events */
+  //get all pending events and return number of events
+  *lpNumberOfEvents = iConsoleInputQueryEvents(pConsoleInput, QUERY_EVENT_PEEK);
 
   return (TRUE);
 }
@@ -547,7 +545,7 @@ DWORD HMDeviceConsoleInClass::PeekConsoleInputA(PHMHANDLEDATA pHMHandleData,
            lpcRead);
 #endif
 
-  if (iConsoleInputQueryEvents() == 0)        /* if queue is currently empty */
+  if (iConsoleInputQueryEvents(pConsoleInput, QUERY_EVENT_PEEK) == 0)        /* if queue is currently empty */
   {
     *lpcRead = 0;                               /* no events read from queue */
     return (TRUE);                                         /* OK, we're done */
@@ -619,7 +617,7 @@ DWORD HMDeviceConsoleInClass::PeekConsoleInputW(PHMHANDLEDATA pHMHandleData,
            lpcRead);
 #endif
 
-  if (iConsoleInputQueryEvents() == 0)        /* if queue is currently empty */
+  if (iConsoleInputQueryEvents(pConsoleInput, QUERY_EVENT_PEEK) == 0)        /* if queue is currently empty */
   {
     *lpcRead = 0;                               /* no events read from queue */
     return (TRUE);                                         /* OK, we're done */
@@ -785,14 +783,7 @@ DWORD HMDeviceConsoleInClass::ReadConsoleInputA(PHMHANDLEDATA pHMHandleData,
            lpcRead);
 #endif
 
-  if (iConsoleInputQueryEvents() == 0)        /* if queue is currently empty */
-  {
-    rc = DosWaitEventSem(pConsoleInput->hevInputQueue,     /* wait for input */
-                         SEM_INDEFINITE_WAIT);
-    DosResetEventSem(pConsoleInput->hevInputQueue,        /* reset semaphore */
-                     &ulPostCounter);              /* post counter - ignored */
-  }
-
+  iConsoleInputQueryEvents(pConsoleInput, QUERY_EVENT_WAIT);
 
   /* now read events into target buffer */
   for (ulPostCounter = 0;
@@ -841,14 +832,7 @@ DWORD HMDeviceConsoleInClass::ReadConsoleInputW(PHMHANDLEDATA pHMHandleData,
            lpcRead);
 #endif
 
-  if (iConsoleInputQueryEvents() == 0)        /* if queue is currently empty */
-  {
-    rc = DosWaitEventSem(pConsoleInput->hevInputQueue,      /* wait for input */
-                         SEM_INDEFINITE_WAIT);
-    DosResetEventSem(pConsoleInput->hevInputQueue,         /* reset semaphore */
-                     &ulPostCounter);              /* post counter - ignored */
-  }
-
+  iConsoleInputQueryEvents(pConsoleInput, QUERY_EVENT_WAIT);
 
   /* now read events into target buffer */
   for (ulPostCounter = 0;

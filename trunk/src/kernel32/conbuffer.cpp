@@ -1,4 +1,4 @@
-/* $Id: conbuffer.cpp,v 1.12 2000-10-09 17:47:21 sandervl Exp $ */
+/* $Id: conbuffer.cpp,v 1.13 2000-10-20 11:46:44 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -61,7 +61,7 @@
 #define  INCL_DOSMODULEMGR
 #define  INCL_VIO
 #define  INCL_AVIO
-#include <os2wrap.h>	//Odin32 OS/2 api wrappers
+#include <os2wrap.h>    //Odin32 OS/2 api wrappers
 
 #include <win32api.h>
 #include <misc.h>
@@ -72,10 +72,11 @@
 #include "HandleManager.h"
 #include "HMDevice.h"
 #include "ConBuffer.H"
+#include "console.h"
 #include "Console2.h"
 #include <heapstring.h>
 
-#define DBG_LOCALLOG	DBG_conbuffer
+#define DBG_LOCALLOG    DBG_conbuffer
 #include "dbglocal.h"
 
 
@@ -255,8 +256,8 @@ BOOL HMDeviceConsoleBufferClass::WriteFile(PHMHANDLEDATA pHMHandleData,
 
                       /* check if we're called with non-existing line buffer */
   if (pConsoleBuffer->ppszLine == NULL) {
-  	SetLastError(ERROR_OUTOFMEMORY_W);
-  	return FALSE;
+    SetLastError(ERROR_OUTOFMEMORY_W);
+    return FALSE;
   }
   for (ulCounter = 0;
        ulCounter < nNumberOfBytesToWrite;
@@ -2265,8 +2266,20 @@ DWORD HMDeviceConsoleBufferClass::SetConsoleScreenBufferSize (PHMHANDLEDATA pHMH
   pConsoleBuffer->ppszLine          = ppszNew;     /* poke in the new values */
   pConsoleBuffer->coordBufferSize.X = coordSize.X;
   pConsoleBuffer->coordBufferSize.Y = coordSize.Y;
-  pConsoleBuffer->coordCursorPosition.X = 0;
-  pConsoleBuffer->coordCursorPosition.Y = 0;
+  if (flVioConsole) {
+        USHORT Row = 0;
+        USHORT Column = 0;
+        APIRET rc;
+
+        rc = VioGetCurPos(&Row, &Column, 0);
+        dprintf(("Current cursor position (%d,%d)", Column, Row));
+        pConsoleBuffer->coordCursorPosition.Y = Row;
+        pConsoleBuffer->coordCursorPosition.X = Column;
+  }
+  else {
+        pConsoleBuffer->coordCursorPosition.X = 0;
+        pConsoleBuffer->coordCursorPosition.Y = 0;
+  }
 
   /* @@@PH to be changed ! */
   pConsoleBuffer->coordWindowSize.X = coordSize.X;                /* default */

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.103 2000-10-10 17:14:04 sandervl Exp $
+# $Id: makefile,v 1.104 2000-10-20 11:46:47 sandervl Exp $
 
 #
 # Odin32 API
@@ -32,6 +32,7 @@ $(OBJDIR)\KOBJECTS.OBJ \
 $(OBJDIR)\CONSOLE.OBJ \
 $(OBJDIR)\CONIN.OBJ \
 $(OBJDIR)\CONBUFFER.OBJ \
+$(OBJDIR)\CONBUFFERVIO.OBJ \
 $(OBJDIR)\CONOUT.OBJ \
 $(OBJDIR)\UNICODE.OBJ \
 $(OBJDIR)\network.OBJ \
