@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.h,v 1.9 1999-12-17 16:55:13 sandervl Exp $ */
+/* $Id: winimagepeldr.h,v 1.10 1999-12-27 21:21:33 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -53,6 +53,7 @@ typedef struct {
   ULONG  virtualsize;
   ULONG  type;
   ULONG  pageflags;
+  ULONG  flags;         //psh[i].Characteristics
 } Section;
 
 typedef struct {
@@ -94,7 +95,7 @@ protected:
         void  StoreImportByOrd(Win32DllBase *WinDll, ULONG ordinal, ULONG impaddr);
         void  StoreImportByName(Win32DllBase *WinDll, char *impname, ULONG impaddr);
 
-        void  addSection(ULONG type, ULONG rawoffset, ULONG rawsize, ULONG virtaddress, ULONG virtsize);
+        void  addSection(ULONG type, ULONG rawoffset, ULONG rawsize, ULONG virtaddress, ULONG virtsize, ULONG flags);
         BOOL  allocSections(ULONG reservedMem);
         BOOL  allocFixedMem(ULONG reservedMem);
      Section *findSection(ULONG type);

@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.25 1999-12-19 17:41:15 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.26 1999-12-27 21:20:48 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -8,6 +8,7 @@
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
+ * TODO: Check psh[i].Characteristics for more than only the code section
  *
  * NOTE: RSRC_LOAD is a special flag to only load the resource directory
  *       of a PE image. Processing imports, sections etc is not done.
@@ -312,21 +313,21 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
             dprintf((LOG, ".reloc" ));
             addSection(SECTION_RELOC, psh[i].PointerToRawData,
                    psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
-                   psh[i].Misc.VirtualSize);
+                   psh[i].Misc.VirtualSize, psh[i].Characteristics);
             continue;
         }
         if(strcmp(psh[i].Name, ".edata") == 0) {
             dprintf((LOG, ".edata" ));
             addSection(SECTION_EXPORT, psh[i].PointerToRawData,
                    psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
-                   psh[i].Misc.VirtualSize);
+                   psh[i].Misc.VirtualSize, psh[i].Characteristics);
             continue;
         }
         if(strcmp(psh[i].Name, ".rsrc") == 0) {
             dprintf((LOG, ".rsrc" ));
             addSection(SECTION_RESOURCE, psh[i].PointerToRawData,
                    psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
-                   psh[i].Misc.VirtualSize);
+                   psh[i].Misc.VirtualSize, psh[i].Characteristics);
             continue;
         }
  	if(strcmp(psh[i].Name, ".tls") == 0)
@@ -335,7 +336,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
 		if(tlsDir) {
 		        addSection(SECTION_TLS, psh[i].PointerToRawData,
                 		   psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
-                   		   psh[i].Misc.VirtualSize);
+                   		   psh[i].Misc.VirtualSize, psh[i].Characteristics);
 		}
 		continue;
 	}
@@ -344,7 +345,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
             dprintf((LOG, ".rdebug" ));
             addSection(SECTION_DEBUG,  psh[i].PointerToRawData,
                    psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
-                   psh[i].Misc.VirtualSize);
+                   psh[i].Misc.VirtualSize, psh[i].Characteristics);
             continue;
         }
 	if(IsImportSection(win32file, &psh[i]))
@@ -357,7 +358,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
             }
             addSection(type, psh[i].PointerToRawData,
                    psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
-                   psh[i].Misc.VirtualSize);
+                   psh[i].Misc.VirtualSize, psh[i].Characteristics);
             continue;
         }
 
@@ -370,35 +371,35 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
             dprintf((LOG, "Code Section"));
             addSection(SECTION_CODE, psh[i].PointerToRawData,
                    psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
-                   psh[i].Misc.VirtualSize);
+                   psh[i].Misc.VirtualSize, psh[i].Characteristics);
             continue;
         }
         if(!(psh[i].Characteristics & IMAGE_SCN_MEM_WRITE)) { //read only data section
             dprintf((LOG, "Read Only Data Section" ));
             addSection(SECTION_READONLYDATA, psh[i].PointerToRawData,
                    psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
-                   psh[i].Misc.VirtualSize);
+                   psh[i].Misc.VirtualSize, psh[i].Characteristics);
             continue;
         }
         if(psh[i].Characteristics & IMAGE_SCN_CNT_UNINITIALIZED_DATA) {
             dprintf((LOG, "Uninitialized Data Section" ));
             addSection(SECTION_UNINITDATA, psh[i].PointerToRawData,
                    psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
-                   psh[i].Misc.VirtualSize);
+                   psh[i].Misc.VirtualSize, psh[i].Characteristics);
             continue;
         }
         if(psh[i].Characteristics & IMAGE_SCN_CNT_INITIALIZED_DATA) {
             dprintf((LOG, "Initialized Data Section" ));
             addSection(SECTION_INITDATA, psh[i].PointerToRawData,
                    psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
-                   psh[i].Misc.VirtualSize);
+                   psh[i].Misc.VirtualSize, psh[i].Characteristics);
             continue;
         }
         if(psh[i].Characteristics & (IMAGE_SCN_MEM_WRITE | IMAGE_SCN_MEM_READ)) {
             dprintf((LOG, "Other Section, stored as read/write uninit data" ));
             addSection(SECTION_UNINITDATA, psh[i].PointerToRawData,
                    psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
-                   psh[i].Misc.VirtualSize);
+                   psh[i].Misc.VirtualSize, psh[i].Characteristics);
             continue;
         }
         dprintf((LOG, "Unknown section" ));
@@ -411,7 +412,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
         {
             addSection(SECTION_RESOURCE, sh.PointerToRawData,
                        sh.SizeOfRawData, sh.VirtualAddress + oh.ImageBase,
-                       sh.Misc.VirtualSize);
+                       sh.Misc.VirtualSize, sh.Characteristics);
   	}
   }
   dprintf((LOG, "*************************PE SECTIONS END **************************" ));
@@ -658,7 +659,7 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
 }
 //******************************************************************************
 //******************************************************************************
-void Win32PeLdrImage::addSection(ULONG type, ULONG rawoffset, ULONG rawsize, ULONG virtaddress, ULONG virtsize)
+void Win32PeLdrImage::addSection(ULONG type, ULONG rawoffset, ULONG rawsize, ULONG virtaddress, ULONG virtsize, ULONG flags)
 {
   virtsize = max(rawsize, virtsize);
 
@@ -666,6 +667,7 @@ void Win32PeLdrImage::addSection(ULONG type, ULONG rawoffset, ULONG rawsize, ULO
   section[nrsections].type           = type;
   section[nrsections].rawsize        = rawsize;
   section[nrsections].virtaddr       = virtaddress;
+  section[nrsections].flags          = flags;
 
   virtsize   = ((virtsize - 1) & ~0xFFF) + PAGE_SIZE;
   imageSize += virtsize;
@@ -845,6 +847,8 @@ BOOL Win32PeLdrImage::setMemFlags()
         case SECTION_CODE:
         case (SECTION_CODE | SECTION_IMPORT):
             	section[i].pageflags = PAG_EXECUTE | PAG_READ;
+		if(section[i].flags & IMAGE_SCN_MEM_WRITE) 
+			section[i].pageflags |= PAG_WRITE;
             	break;
         case SECTION_INITDATA:
         case SECTION_UNINITDATA:
