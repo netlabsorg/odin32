@@ -1,6 +1,6 @@
-/* $Id: myldrClose.cpp,v 1.4 1999-11-10 01:45:36 bird Exp $
+/* $Id: myldrClose.cpp,v 1.5 2000-01-22 18:21:02 bird Exp $
  *
- * myldrClose - _ldrClose
+ * myldrClose - ldrClose
  *
  * Copyright (c) 1998-1999 knut st. osmundsen
  *
@@ -40,26 +40,28 @@
  */
 ULONG LDRCALL myldrClose(SFN hFile)
 {
-    int rc;
-
     /* closes handle */
-    kprintf(("_ldrClose: hFile = %.4x\n", hFile));
+    kprintf(("ldrClose: hFile = %.4x\n", hFile));
     if (GetState(hFile) == HSTATE_OUR)
     {
+        APIRET rc;
+
         #ifdef DEBUG
         PMODULE pMod = getModuleBySFN(hFile);
         if (pMod != NULL)
             pMod->Data.pModule->dumpVirtualLxFile();
         else
-            kprintf(("_ldrClose: getModuleBySFN failed!!!"));
+            kprintf(("ldrClose: getModuleBySFN failed!!!"));
         #endif
 
         rc = removeModule(hFile);
         if (rc != NO_ERROR)
-            kprintf(("_ldrClose: removeModule retured rc=%d\n", rc));
+            kprintf(("ldrClose: removeModule retured rc=%d\n", rc));
 
+        #pragma info(notrd)
         SetState(hFile, HSTATE_UNUSED);
+        #pragma info(restore)
     }
 
-    return _ldrClose(hFile);
+    return ldrClose(hFile);
 }

@@ -1,4 +1,4 @@
-/* $Id: ldr.h,v 1.4 1999-11-10 01:45:32 bird Exp $
+/* $Id: ldr.h,v 1.5 2000-01-22 18:20:59 bird Exp $
  *
  * ldr - loader header file.
  *
@@ -62,12 +62,12 @@
             } Data;                     /* Pointer to data. Currently it's allways a Pe2Lx object! */
         } MODULE, *PMODULE;
 
-        #define MOD_FLAGS_IN_MTETREE    0x00000010 /* The node is present in the MTE-tree. */
-        #define MOD_TYPE_MASK           0x0000000F /* Type mask. */
-        #define MOD_TYPE_PE2LX          0x00000001 /* Pe2Lx module. */
-        #define MOD_TYPE_ELF2LX         0x00000002 /* Elf2Lx module. */
-        #define MOD_TYPE_SCRIPT         0x00000003 /* Script module. */
-        #define MOD_TYPE_PE             0x00000004 /* Pe module. */
+        #define MOD_FLAGS_IN_MTETREE    0x00000010UL /* The node is present in the MTE-tree. */
+        #define MOD_TYPE_MASK           0x0000000FUL /* Type mask. */
+        #define MOD_TYPE_PE2LX          0x00000001UL /* Pe2Lx module. */
+        #define MOD_TYPE_ELF2LX         0x00000002UL /* Elf2Lx module. */
+        #define MOD_TYPE_SCRIPT         0x00000003UL /* Script module. */
+        #define MOD_TYPE_PE             0x00000004UL /* Pe module. */
 
 
         /*

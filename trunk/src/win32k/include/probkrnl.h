@@ -1,8 +1,8 @@
-/* $Id: probkrnl.h,v 1.3 1999-11-10 01:45:33 bird Exp $
+/* $Id: probkrnl.h,v 1.4 2000-01-22 18:21:01 bird Exp $
  *
  * Include file for ProbKrnl.
  *
- * Copyright (c) 1998-1999 knut st. osmundsen
+ * Copyright (c) 1998-2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -15,19 +15,13 @@
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
 *******************************************************************************/
-#define NUMBER_OF_PROCS 4   /* remeber to sync this with ldr_functions.h and dev32_start.asm */
-
-/* indexes into the _ProcTab/ProcTab table */
-#define iLDRREAD              0
-#define iLDROPEN              1
-#define iLDRCLOSE             2
-#define iLDRQAPPTYPE          3
-
+#define NUMBER_OF_PROCS      10
 #define MAX_LENGTH_NAME      32
 
 /* entry-point type flag */
-#define EPT_PROC              0 /* procedure */
-#define EPT_VAR               1 /* variable/non-procedure */
+#define EPT_PROC              0 /* procedure - overload procedure*/
+#define EPT_PROCIMPORT        1 /* procedure - import only */
+#define EPT_VAR               2 /* variable/non-procedure - not implemented yet */
 
 
 /*******************************************************************************
@@ -53,10 +47,9 @@ typedef struct tagPROCS
 *   NOTE! These are only available at init time!                               *
 *******************************************************************************/
 extern PROCS _aProcTab[NUMBER_OF_PROCS];    /* 'aProcTab'        in PrbKrnl.c */
-extern unsigned long int _ulBuild;          /* 'ulBuild'         in PrbKrnl.c */
-extern unsigned long int _fInitSuccess;     /* 'fInitSuccess'    in PrbKrnl.c */
-extern unsigned long int _usVerMajor;       /* 'usVerMajor'      in PrbKrnl.c */
-extern unsigned long int _usVerMinor;       /* 'usVerMinor'      in PrbKrnl.c */
+extern unsigned long int  _ulBuild;         /* 'ulBuild'         in PrbKrnl.c */
+extern unsigned short int _usVerMajor;      /* 'usVerMajor'      in PrbKrnl.c */
+extern unsigned short int _usVerMinor;      /* 'usVerMinor'      in PrbKrnl.c */
 
 #ifdef INCL_16 /* 16-bit only */
 int ProbeKernel(PRPINITIN pReqPack);

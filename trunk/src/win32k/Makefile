@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.13 1999-11-10 02:51:43 bird Exp $
+# $Id: Makefile,v 1.14 2000-01-22 18:20:55 bird Exp $
 #
 # Copyright 1998-1999 knut st. osmundsen
 #
@@ -28,9 +28,9 @@ LD          = ilink
 AS          = alp
 
 
-CFLAGS      = -q -Ge -Gs- -Gr+ -Rn -Ss+ -Mp
+CFLAGS      = -q -Ge -Gs- -Gr+ -Rn -Ss+ -Mp -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext-
 CFLAGS16    = -c -W4 -Asfw /NTCODE16 /NDDATA16 -G2s -Zp -Zl -nologo -Fo$@ -Fa
-CPPFLAGS    = -q -Ge -Gs- -Gr+ -Rn -Ss+ -Mp -Gx
+CPPFLAGS    = -q -Ge -Gs- -Gr+ -Rn -Ss+ -Mp -Gx -Wall+ppt-ppc-inl-cnv-gnr-vft-
 ASFLAGS     = -Sv:ALP -Mb -Li
 LFLAGS      = /nologo /MAP /NOI /NOE /NOD /A:16 /MAP /O:$@
 CDEFINES    = -DWIN32K -DRING0 -D__WIN32OS2__ -D__WINE__
@@ -93,49 +93,45 @@ AINCLUDES  = -Fdi:$(WIN32KBASE)\include \
 .SUFFIXES: .obj .cpp .c .asm
 
 {dev16}.c{object}.obj:
-    @$(ECHO) compiling: $<
+    @$(ECHO) compiling 16bit: $<
     @$(CC16) $(CFLAGS16) $(CDEFINES16) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES16) $<
 
 {dev32}.asm{object}.obj:
-    @$(ECHO) assembling: $<
+    @$(ECHO) assembling:      $<
     @$(AS) $(ASFLAGS) $(ADEFINES) $(AINCLUDES) $< -Fo:$@ -Fl:$(WIN32KLIST)\$(*B).lst
 {dev32}.c{object}.obj:
-    @$(ECHO) compiling: $<
+    @$(ECHO) compiling 32bit: $<
     @$(CC) -c $(CFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
 {dev32}.cpp{object}.obj:
-    @$(ECHO) compiling: $<
+    @$(ECHO) compiling 32bit: $<
     @$(CC) -c $(CPPFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
 
 {ldr}.asm{object}.obj:
-    @$(ECHO) assembling: $<
+    @$(ECHO) assembling:      $<
     @$(AS) $(ASFLAGS) $(ADEFINES) $(AINCLUDES) $< -Fo:$@ -Fl:$(WIN32KLIST)\$(*B).lst
 {ldr}.c{object}.obj:
-    @$(ECHO) compiling: $<
+    @$(ECHO) compiling 32bit: $<
     @$(CC) -c $(CFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
 {ldr}.cpp{object}.obj:
-    @$(ECHO) compiling: $<
+    @$(ECHO) compiling 32bit: $<
     @$(CC) -c $(CPPFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
 
 {misc}.asm{object}.obj:
-    @$(ECHO) assembling: $<
+    @$(ECHO) assembling:      $<
     @$(AS) $(ASFLAGS) $(ADEFINES) $(AINCLUDES) $< -Fo:$@ -Fl:$(WIN32KLIST)\$(*B).lst
 {misc}.c{object}.obj:
-    @$(ECHO) compiling: $<
+    @$(ECHO) compiling 32bit: $<
     @$(CC) -c $(CFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
 {misc}.cpp{object}.obj:
-    @$(ECHO) compiling: $<
+    @$(ECHO) compiling 32bit: $<
     @$(CC) -c $(CPPFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
 
-{pe2lx}.c{object}.obj:
+{pe2lx}.c{object}.obj 32bit:
     @$(ECHO) compiling: $<
     @$(CC) -c $(CFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
 {pe2lx}.cpp{object}.obj:
-    @$(ECHO) compiling: $<
+    @$(ECHO) compiling 32bit: $<
     @$(CC) -c $(CPPFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
-
-{devhlpadd}.asm{object}.obj:
-    @$(ECHO) assembling: $<
-    @$(AS) $(ASFLAGS) $(ADEFINES) $(AINCLUDES) $< -Fo:$@ -Fl:$(WIN32KLIST)\$(*B).lst
 
 
 
@@ -168,6 +164,7 @@ OBJS  = object\devfirst.obj \
         object\myldrOpen.obj \
         object\myldrRead.obj \
         object\myLDRQAppType.obj \
+        object\myldrEnum32bitRelRecs.obj \
         object\pe2lx.obj \
         object\ModuleBase.obj
 
@@ -225,17 +222,14 @@ $(OBJS) $(LIBS) last.lib $(OBJSINIT) /IG $(LIBSINIT) $(NAME).def
 devhelp.lib: $(DDKPATH)\lib\dhcalls.lib libconv.exe
     libconv $(DDKPATH)\lib\dhcalls.lib $@
     $(ILIB) /nologo /nobackup /convformat $@;
-#   ilib /nologo /nobackup /convformat $@;
 
 clib.lib: $(MSCPATH)\lib\clibcep.lib libconv.exe
     libconv $(MSCPATH)\lib\clibcep.lib $@ > nul
     $(ILIB) /nologo /nobackup /convformat $@;
-#   ilib /nologo /nobackup /convformat $@;
 
 last.lib: object\devlast.obj
     -@del $@ > nul 2> nul
     $(ILIB) /nologo /nobackup $@ $**;
-#   ilib /nologo /nobackup $@ $**;
 
 libconv.exe: libconv.c
     icc -Q+ libconv.c

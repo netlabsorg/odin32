@@ -1,4 +1,4 @@
-/* $Id: ldr.cpp,v 1.6 1999-11-10 01:45:36 bird Exp $
+/* $Id: ldr.cpp,v 1.7 2000-01-22 18:21:01 bird Exp $
  *
  * ldr.cpp - Loader helpers.
  *
@@ -82,27 +82,43 @@ PMODULE     getModuleBySFN(SFN hFile)
  */
 PMODULE     getModuleByMTE(PMTE pMTE)
 {
-    PMODULE pMod = (PMODULE)AVLGet(&pMTERoot, (AVLKEY)pMTE);
-    if (pMod == NULL)
-    {
+    #if 0
+        /* Not 100% sure that this will work correctly! */
+        PMODULE pMod = (PMODULE)AVLGet(&pMTERoot, (AVLKEY)pMTE);
+        if (pMod == NULL)
+        {
+            #ifdef DEBUG
+                if (pMTE <= (PMTE)0x10000)
+                {
+                    kprintf(("getModuleByMTE: invalid pMTE pointer - %#8x\n", pMTE));
+                    return NULL;
+                }
+            #endif
+            pMod = (PMODULE)AVLGet(&pSFNRoot, (AVLKEY)pMTE->mte_sfn);
+            if (pMod != NULL)
+            {
+                pMod->coreMTE.Key = (AVLKEY)pMTE;
+                pMod->fFlags |= MOD_FLAGS_IN_MTETREE;
+                AVLInsert(&pMTERoot, (PAVLNODECORE)((unsigned)pMod + offsetof(MODULE, coreMTE)));
+            }
+        }
+        else
+            pMod = (PMODULE)((unsigned)pMod - offsetof(MODULE, coreMTE));
+        return pMod;
+    #else
+        /* Use this for the time being. */
         #ifdef DEBUG
-        if (pMTE <= (PMTE)0x10000)
-        {
-            kprintf(("getModuleByMTE: invalid pMTE pointer - %#8x\n", pMTE));
-            return NULL;
-        }
+            if (pMTE <= (PMTE)0x10000)
+            {
+                kprintf(("getModuleByMTE: invalid pMTE pointer - %#8x\n", pMTE));
+                return NULL;
+            }
         #endif
-        pMod = (PMODULE)AVLGet(&pSFNRoot, (AVLKEY)pMTE->mte_sfn);
-        if (pMod != NULL)
-        {
-            pMod->coreMTE.Key = (AVLKEY)pMTE;
-            pMod->fFlags |= MOD_FLAGS_IN_MTETREE;
-            AVLInsert(&pMTERoot, (PAVLNODECORE)((unsigned)pMod + offsetof(MODULE, coreMTE)));
-        }
-    }
-    else
-        pMod = (PMODULE)((unsigned)pMod - offsetof(MODULE, coreMTE));
-    return pMod;
+        if (GetState(pMTE->mte_sfn) == HSTATE_OUR)
+            return (PMODULE)AVLGet(&pSFNRoot, (AVLKEY)pMTE->mte_sfn);
+
+        return NULL;
+    #endif
 }
 
 
@@ -148,7 +164,7 @@ ULONG       addModule(SFN hFile, PMTE pMTE, ULONG fFlags, ModuleBase *pModObj)
             kprintf(("addModule: invalid parameter: hFile = 0\n"));
             return ERROR_INVALID_PARAMETER;
         }
-        if ((fFlags & MOD_TYPE_MASK) == 0 || (fFlags  & ~MOD_TYPE_MASK) != 0)
+        if ((fFlags & MOD_TYPE_MASK) == 0 || (fFlags  & ~MOD_TYPE_MASK) != 0UL)
         {
             kprintf(("addModule: invalid parameter: fFlags = 0x%#8x\n", fFlags));
             return ERROR_INVALID_PARAMETER;
@@ -241,7 +257,6 @@ ULONG      removeModule(SFN hFile)
 ULONG ldrInit(void)
 {
     int rc = NO_ERROR;
-    int i;
 
     /* init state table */
     memset(&achHandleStates[0], 0, sizeof(achHandleStates));

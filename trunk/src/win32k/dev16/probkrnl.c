@@ -1,4 +1,4 @@
-/* $Id: probkrnl.c,v 1.5 1999-12-06 16:18:25 bird Exp $
+/* $Id: probkrnl.c,v 1.6 2000-01-22 18:20:56 bird Exp $
  *
  * Description:   Autoprobes the os2krnl file and os2krnl[*].sym files.
  *                Another Hack!
@@ -19,7 +19,7 @@
  *                5. the entry points are verified. (elf$)
  *                6. finished.
  *
- * Copyright (c) 1998-1999 knut st. osmundsen
+ * Copyright (c) 1998-2000 knut st. osmundsen
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -79,29 +79,43 @@
 /*
  * kernel data - !only valid during init!
  */
+
+/*
+ * aProcTab defines the imported and overloaded OS/2 kernel functions.
+ * IMPORTANT: aProcTab has a sibling array in d32init.c, aulProc, which must
+ *            match entry by entry. Adding/removing/shuffling aProcTab, aulProc
+ *            has to be updated immediately!
+ */
 PROCS aProcTab[NUMBER_OF_PROCS] =
-{/* iFound     cchName          offObject     fType */
- /*      iObject      achName         ulAddress     */
-    {FALSE, -1,  8, "_ldrRead",     -1,  -1, EPT_PROC},
-    {FALSE, -1,  8, "_ldrOpen",     -1,  -1, EPT_PROC},
-    {FALSE, -1,  9, "_ldrClose",    -1,  -1, EPT_PROC},
-    {FALSE, -1, 12, "_LDRQAppType", -1,  -1, EPT_PROC},
+{/* iFound     cchName                  offObject     fType */
+ /*      iObject      achName                 ulAddress     */
+    {FALSE, -1,  8, "_ldrRead",             -1,  -1, EPT_PROC},        /* 0 */
+    {FALSE, -1,  8, "_ldrOpen",             -1,  -1, EPT_PROC},        /* 1 */
+    {FALSE, -1,  9, "_ldrClose",            -1,  -1, EPT_PROC},        /* 2 */
+    {FALSE, -1, 12, "_LDRQAppType",         -1,  -1, EPT_PROC},        /* 3 */
+    {FALSE, -1, 20, "_ldrEnum32bitRelRecs", -1,  -1, EPT_PROC},        /* 4 */
+
+    {FALSE, -1, 10, "_IOSftOpen",           -1,  -1, EPT_PROCIMPORT},  /* 5 */
+    {FALSE, -1, 11, "_IOSftClose",          -1,  -1, EPT_PROCIMPORT},  /* 6 */
+    {FALSE, -1, 15, "_IOSftTransPath",      -1,  -1, EPT_PROCIMPORT},  /* 7 */
+    {FALSE, -1, 12, "_IOSftReadAt",         -1,  -1, EPT_PROCIMPORT},  /* 8 */
+    {FALSE, -1, 13, "_IOSftWriteAt",        -1,  -1, EPT_PROCIMPORT}   /* 9 */
 };
 
-unsigned long int   ulBuild      = 0;
-unsigned short      usVerMajor   = 0;
-unsigned short      usVerMinor   = 0;
+unsigned long int   ulBuild          = 0;
+unsigned short      usVerMajor       = 0;
+unsigned short      usVerMinor       = 0;
 
 
 /*
  * privat data
  */
-static int      fQuiet = 0;
-static char     szUsrOS2Krnl[50] = {0};
-static char     szOS2Krnl[]      = {"c:\\os2krnl"};
+static int          fQuiet           = 0;
+static char         szUsrOS2Krnl[50] = {0};
+static char         szOS2Krnl[]      = {"c:\\os2krnl"};
 
-static char     szUsrSym[50]     = {0};
-static char    *apszSym[]        =
+static char         szUsrSym[50]     = {0};
+static char *       apszSym[]        =
 {
     {"c:\\os2krnl.sym"},                              /* usual for debugkernel */
     {"c:\\os2\\pdpsi\\pmdf\\warp4\\os2krnlr.sym"},    /* warp 4 */

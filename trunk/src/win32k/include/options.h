@@ -1,4 +1,4 @@
-/* $Id: options.h,v 1.4 1999-11-10 01:45:33 bird Exp $
+/* $Id: options.h,v 1.5 2000-01-22 18:21:01 bird Exp $
  *
  * Options.
  *
@@ -32,23 +32,23 @@
 #define INFOLEVEL_INFOALL    0x00000004UL
 
 /* Set defaults. */
-#define SET_OPTIONS_TO_DEFAULT(o)           \
-            o.fQuiet      = FALSE;          \
-            o.usCom       = OUTPUT_COM2;    \
-            o.fLogging    = FALSE;          \
-            o.fKernel     = KF_UNI;         \
-            o.ulBuild     = ~0UL;           \
-            o.usVerMajor  = ~0;             \
-            o.usVerMinor  = ~0;             \
-            o.fPE         = FLAGS_PE_PE2LX; \
-            o.ulInfoLevel = INFOLEVEL_QUIET;\
-            o.fElf        = FALSE;          \
-            o.fScript     = FALSE;          \
-            o.fNoLoader   = FALSE;          \
-            o.cbHeap      = 0x100000; /* 1MB */ \
-            o.cbHeapMax   = 0x100000; /* 1MB */ \
-            o.cbHeapResident    = 0x10000; /* 64KB */ \
-            o.cbHeapMaxResident = 0x1000;  /* 4KB */ \
+#define SET_OPTIONS_TO_DEFAULT(o)                       \
+            o.fQuiet      = FALSE;                      \
+            o.usCom       = OUTPUT_COM2;                \
+            o.fLogging    = FALSE;                      \
+            o.fKernel     = KF_UNI;                     \
+            o.ulBuild     = ~0UL;                       \
+            o.usVerMajor  = (unsigned short)~0;         \
+            o.usVerMinor  = (unsigned short)~0;         \
+            o.fPE         = FLAGS_PE_PE2LX;             \
+            o.ulInfoLevel = INFOLEVEL_QUIET;            \
+            o.fElf        = FALSE;                      \
+            o.fScript     = FALSE;                      \
+            o.fNoLoader   = FALSE;                      \
+            o.cbHeap      = 0x100000; /* 1MB */         \
+            o.cbHeapMax   = 0x100000; /* 1MB */         \
+            o.cbHeapResident    = 0x10000; /* 64KB */   \
+            o.cbHeapMaxResident = 0x1000;  /* 4KB */    \
 
 
 /*******************************************************************************

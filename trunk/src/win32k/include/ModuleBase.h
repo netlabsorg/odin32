@@ -1,4 +1,4 @@
-/* $Id: ModuleBase.h,v 1.1 1999-11-10 01:45:31 bird Exp $
+/* $Id: ModuleBase.h,v 1.2 2000-01-22 18:20:58 bird Exp $
  *
  * ModuleBase - Declaration of the Basic module class.
  *
@@ -21,6 +21,14 @@
 #define ERROR_INITMETHOD_NOT_INITTIME       0x42000001UL
 #define ERROR_INTERNAL_PROCESSING_ERROR     0x42000002UL
 
+
+/*
+ * Some useful macros.
+ */
+#define NOREF(a) (a=a)                      /* Not referenced parameter warning fix. */
+#define ALIGN(a, alignment) (((a) + (alignment - 1UL)) & ~(alignment - 1UL))
+                                            /* aligns something, a,  up to nearest alignment boundrary-
+                                             * Note: Aligment must be a 2**n number. */
 
 /*
  * Output macros.
@@ -73,6 +81,8 @@ public:
     /** @cat Public Main methods */
     virtual ULONG  init(PCSZ pszFilename);
     virtual ULONG  read(ULONG offLXFile, PVOID pvBuffer, ULONG cbToRead, ULONG flFlags, PMTE pMTE) = 0;
+    virtual ULONG  applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID pvPage,
+                               ULONG ulPageAddress, PVOID pvPTDA); /*(ldrEnum32bitRelRecs)*/
     #ifndef RING0
     virtual ULONG  writeFile(PCSZ pszLXFilename);
     #endif

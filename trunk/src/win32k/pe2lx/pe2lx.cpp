@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.14 1999-12-07 08:28:42 bird Exp $
+/* $Id: pe2lx.cpp,v 1.15 2000-01-22 18:21:03 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -36,14 +36,6 @@
 #define MIN_STACK_SIZE              0x20000 /* 128KB stack */
 #define CB2PAGES_SHIFT              12      /* count of bytes to count of pages. shift right value. Note. ALIGN!*/
 
-
-/*
- * useful macros.
- */
-#define NOREF(a) (a=a)                      /* Not referenced parameter warning fix. */
-#define ALIGN(a, alignment) (((a) + (alignment - 1UL)) & ~(alignment - 1UL))
-                                            /* aligns something, a,  up to nearest alignment boundrary-
-                                             * Note: Aligment must be a 2**n number. */
 
 /*
  * (macro)
@@ -84,18 +76,18 @@
  * Read macros.
  *  ReadAt:  Reads from a file, hFile, at a given offset, ulOffset, into a buffer, pvBuffer,
  *           an amount of bytes, cbToRead.
- *           RING0: Map this to _ldrRead with 0UL as flFlags.
+ *           RING0: Map this to ldrRead with 0UL as flFlags.
  *           RING3: Implementes this function as a static function, ReadAt.
  *  ReadAtF: Same as ReadAt but two extra parameters; an additional flag and a pointer to an MTE.
  *           Used in the read method.
- *           RING0: Map directly to _ldrRead.
+ *           RING0: Map directly to ldrRead.
  *           RING3: Map to ReadAt, ignoring the two extra parameters.
  */
 #ifdef RING0
     #define ReadAt(hFile, ulOffset, pvBuffer, cbToRead) \
-        _ldrRead(hFile, ulOffset, pvBuffer, 0UL, cbToRead, NULL)
+        ldrRead(hFile, ulOffset, pvBuffer, 0UL, cbToRead, NULL)
     #define ReadAtF(hFile, ulOffset, pvBuffer, cbToRead, flFlags, pMTE) \
-        _ldrRead(hFile, ulOffset, pvBuffer, flFlags, cbToRead, pMTE)
+        ldrRead(hFile, ulOffset, pvBuffer, flFlags, cbToRead, pMTE)
 #else
     #define ReadAtF(hFile, ulOffset, pvBuffer, cbToRead, flFlags, pMTE) \
         ReadAt(hFile, ulOffset, pvBuffer, cbToRead)
@@ -122,7 +114,7 @@
 #include "dev32.h"                          /* 32-Bit part of the device driver. (SSToDS) */
 #include "OS2Krnl.h"                        /* kernel structs.  (SFN) */
 #ifdef RING0
-    #include "ldrCalls.h"                   /* _ldr* calls. (_ldrRead) */
+    #include "ldrCalls.h"                   /* ldr* calls. (ldrRead) */
 #endif
 #include "modulebase.h"                     /* ModuleBase class definitions, ++. */
 #include "pe2lx.h"                          /* Pe2Lx class definitions, ++. */
@@ -722,8 +714,8 @@ ULONG Pe2Lx::init(PCSZ pszFilename)
  * @param     offLXFile  Offset (into the virtual lx file) of the data to read
  * @param     pvBuffer   Pointer to buffer where data is to be put.
  * @param     cbToRead   Bytes to be read.
- * @param     flFlag     Flags which was spesified to the _ldrRead call.
- * @parma     pMTE       Pointer to MTE which was specified to the _ldrRead call.
+ * @param     flFlag     Flags which was spesified to the ldrRead call.
+ * @parma     pMTE       Pointer to MTE which was specified to the ldrRead call.
  * @return    NO_ERROR if successful something else if not.
  * @status    completely implmented; tested.
  * @author    knut st. osmundsen
@@ -1015,6 +1007,38 @@ ULONG Pe2Lx::read(ULONG offLXFile, PVOID pvBuffer, ULONG cbToRead, ULONG flFlags
     NOREF(pMTE);
     return rc;
 }
+
+
+/**
+ * Applies relocation fixups to a page which is being loaded.
+ * @returns    NO_ERROR on success?
+ *             error code on error?
+ * @param      pMTE           Pointer Module Table Entry.
+ * @param      iObject        Index into the object table. (0-based)
+ * @param      iPageTable     Index into the page table. (0-based)
+ * @param      pvPage         Pointer to the page which is being loaded.
+ * @param      ulPageAddress  Address of page.
+ * @param      pvPTDA         Pointer to Per Task Data Aera
+ *
+ * @sketch     Find RVA.
+ */
+ULONG  Pe2Lx::applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID pvPage,
+                          ULONG ulPageAddress, PVOID pvPTDA)
+{
+    ULONG ulRVA;
+
+    NOREF(ulRVA);
+
+    NOREF(pMTE);
+    NOREF(iObject);
+    NOREF(iPageTable);
+    NOREF(pvPage);
+    NOREF(ulPageAddress);
+    NOREF(pvPTDA);
+
+    return NO_ERROR;
+}
+
 
 
 #ifndef RING0
