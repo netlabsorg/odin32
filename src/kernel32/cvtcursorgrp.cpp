@@ -1,4 +1,4 @@
-/* $Id: cvtcursorgrp.cpp,v 1.5 1999-09-24 22:47:00 sandervl Exp $ */
+/* $Id: cvtcursorgrp.cpp,v 1.6 1999-09-25 14:11:31 sandervl Exp $ */
 
 /*
  * PE2LX cursor group code
@@ -74,7 +74,7 @@ void *ConvertCursorGroup(CursorHeader *chdr, int size, Win32ImageBase *module)
         }
 
 	cursorhdr = (CursorComponent *)winres->lockResource();
-	os2cursor = ConvertCursor(cursorhdr, winres->getSize(), &os2cursorsize, (int)bafh - (int)orgbafh + sizeof(BITMAPARRAYFILEHEADER2)-sizeof(BITMAPFILEHEADER));
+	os2cursor = ConvertCursor(cursorhdr, winres->getSize(), &os2cursorsize, (int)bafh - (int)orgbafh + sizeof(BITMAPARRAYFILEHEADER2)-sizeof(BITMAPFILEHEADER2));
 
         if(os2cursor == NULL) {
                 dprintf(("Can't convert cursor!"));
