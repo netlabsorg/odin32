@@ -1,8 +1,8 @@
-/* $Id: fastdep.c,v 1.2 2000-02-23 09:26:58 bird Exp $
+/* $Id: fastdep.c,v 1.3 2000-02-29 10:48:10 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
- * Copyright (c) 1999 knut st. osmundsen
+ * Copyright (c) 1999-2000 knut st. osmundsen
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -34,6 +34,7 @@ typedef struct _Options
     BOOL            fExcludeAll;
     const char *    pszObjectExt;
     const char *    pszObjectDir;
+    const char *    pszRsrcExt;
     BOOL            fObjRule;
     BOOL            fNoObjectPath;
     BOOL            fSrcWhenObj;
@@ -41,17 +42,42 @@ typedef struct _Options
 } OPTIONS, *POPTIONS;
 
 
-/*******************************************************************************
-*   Global Variables                                                           *
-*******************************************************************************/
-static const char pszDefaultDepFile[] = ".depend";
+/*
+ * Language specific analysis functions type.
+ */
+typedef int ( _FNLANG)  (FILE *phDep, const char *pszFilename, FILE *phFile,
+                         BOOL fHeader, POPTIONS pOptions);
+typedef _FNLANG    *PFNLANG;
+
+
+/**
+ * This struct holds the static configuration of the util.
+ */
+typedef struct _ConfigEntry
+{
+    const char **papszExts;             /* Pointer to an array of pointer to extentions for this handler. */
+                                        /* If NULL this is the last entry. */
+    int          iFirstHdr;             /* Index into the papszExts array of the first headerfile/copybook. */
+                                        /* Set it to the NULL element of the array if no headers for this extention. */
+                                        /* A non-header file may get a object rule. */
+    PFNLANG      pfn;                   /* Pointer to handler function. */
+} CONFIGENTRY, *PCONFIGENTRY;
+
 
 /*******************************************************************************
 *   Internal Functions                                                         *
 *******************************************************************************/
 static void syntax(void);
 static int makeDependent(FILE *phDep, const char *pszFilename, POPTIONS pOptions);
-static int getFullIncludename(char *pszFilename, const char *pszInclude);
+
+int langC_CPP(FILE *phDep, const char *pszFilename, FILE *phFile, BOOL fHeader, POPTIONS pOptions);
+int langAsm(FILE *phDep, const char *pszFilename, FILE *phFile, BOOL fHeader, POPTIONS pOptions);
+int langRC(FILE *phDep, const char *pszFilename, FILE *phFile, BOOL fHeader, POPTIONS pOptions);
+int langCOBOL(FILE *phDep, const char *pszFilename, FILE *phFile, BOOL fHeader, POPTIONS pOptions);
+
+
+/* string operations */
+static int strnicmpwords(const char *pszS1, const char *pszS2, int cch);
 
 /* file operations */
 char *filePath(const char *pszFilename, char *pszBuffer);
@@ -60,7 +86,52 @@ char *fileName(const char *pszFilename, char *pszBuffer);
 char *fileNameNoExt(const char *pszFilename, char *pszBuffer);
 char *fileExt(const char *pszFilename, char *pszBuffer);
 
+/* pathlist operations */
 char *pathlistFindFile(const char *pszPathList, const char *pszFilename, char *pszBuffer);
+
+
+/*******************************************************************************
+*   Global Variables                                                           *
+*******************************************************************************/
+static const char pszDefaultDepFile[] = ".depend";
+static const char *apszExtC_CPP[] = {"c", "sqc", "cpp", "h", "hpp", NULL};
+static const char *apszExtAsm[]   = {"asm", "inc", NULL};
+static const char *apszExtRC[]    = {"rc", "dlg", NULL};
+static const char *apszExtCOBOL[] = {"cbl", "cob", "sqb", NULL};
+
+static CONFIGENTRY aConfig[] =
+{
+    {
+        apszExtC_CPP,
+        3,
+        langC_CPP,
+    },
+
+    {
+        apszExtAsm,
+        1,
+        langAsm,
+    },
+
+    {
+        apszExtRC,
+        1,
+        langRC,
+    },
+
+    {
+        apszExtCOBOL,
+        3,
+        langCOBOL,
+    },
+
+    /* terminating entry */
+    {
+        NULL,
+        -1,
+        NULL
+    }
+};
 
 
 /**
@@ -85,8 +156,9 @@ int main(int argc, char **argv)
     int         argi = 1;
     const char *pszDepFile = pszDefaultDepFile;
 
-    static char szObjectDir[CCHMAXPATH] = {0};
-    static char szObjectExt[64] = {"obj"};
+    static char szObjectDir[CCHMAXPATH];
+    static char szObjectExt[64] = "obj";
+    static char szRsrcExt[64]   = "res";
     static char szInclude[32768] = ";";
     static char szExclude[32768] = ";";
 
@@ -97,11 +169,14 @@ int main(int argc, char **argv)
         FALSE,           /* fExcludeAll */
         szObjectExt,     /* pszObjectExt */
         szObjectDir,     /* pszObjectDir */
+        szRsrcExt,       /* pszRsrcExt */
         TRUE,            /* fObjRule */
         FALSE,           /* fNoObjectPath */
         TRUE,            /* fSrcWhenObj */
         FALSE            /* fAppend */
     };
+
+    szObjectDir[0] = '\0';
 
     if (argc == 1)
     {
@@ -220,6 +295,17 @@ int main(int argc, char **argv)
                         strcat(szObjectDir, "\\");
                     break;
 
+                case 'r':
+                case 'R':
+                    if (strlen(argv[argi]) > 2)
+                        strcpy(szObjectExt, argv[argi]+2);
+                    else
+                    {
+                        strcpy(szObjectExt, argv[argi+1]);
+                        argi++;
+                    }
+                    break;
+
                 case 'h':
                 case 'H':
                 case '?':
@@ -235,9 +321,11 @@ int main(int argc, char **argv)
         else
         {   /* not a parameter! */
             ULONG        ulRc;
-            FILEFINDBUF3 filebuf = {0};
+            FILEFINDBUF3 filebuf;
             HDIR         hDir = HDIR_CREATE;
             ULONG        ulFound = 1;
+
+            memset(&filebuf, 0, sizeof(filebuf));
 
             /*
              * Open output file.
@@ -322,6 +410,8 @@ static void syntax(void)
         "                   entire filename path\n"
         "   -obr<[+]|->     -obr+: Object rule.\n"
         "                   -obr-: No object rule, rule for source filename is generated.\n"
+        "   -obj[ ]<objext> Object extention.           Default: obj\n"
+        "   -r[ ]<rsrcext>  Resource binary extention.  Default: res\n"
         "   <files>         Files to scan. Wildchars are allowed.\n"
         "\n",
         pszDefaultDepFile
@@ -340,222 +430,576 @@ static void syntax(void)
  */
 static int makeDependent(FILE *phDep, const char *pszFilename, POPTIONS pOptions)
 {
+    int    rc = -1;
     FILE  *phFile;
 
     phFile = fopen(pszFilename, "r");
     if (phFile != NULL)
     {
-        char szBuffer[4096]; /* max line lenght */
-        int  k = strlen(pszFilename) - 1;
-        int  l;
-        int  iLine;
+        char            szExt[CCHMAXPATH];
+        PCONFIGENTRY    pCfg = &aConfig[0];
+        BOOL            fHeader;
 
-        /**********************************/
-        /* print file name to depend file */
-        /**********************************/
-        if (pOptions->fObjRule)
+        /*
+         * Find which filetype this is...
+         */
+        fileExt(pszFilename, szExt);
+        while (pCfg->papszExts != NULL)
         {
-            char szExt[CCHMAXPATH];
-            char szObj[CCHMAXPATH];
-
-            if (pOptions->fNoObjectPath)
-                fileNameNoExt(pszFilename, szObj);
-            else if (*pOptions->pszObjectDir != '\0')
+            const char **ppsz = pCfg->papszExts;
+            while (*ppsz != NULL && stricmp(*ppsz, szExt) != 0)
+                ppsz++;
+            if (*ppsz != NULL)
             {
-                fileNameNoExt(pszFilename, szExt);
-                strcpy(szObj, pOptions->pszObjectDir);
-                strcat(szObj, szExt);
+                fHeader = &pCfg->papszExts[pCfg->iFirstHdr] <= ppsz;
+                break;
             }
-            else
-            {
-                filePathSlash(pszFilename, szObj);
-                fileNameNoExt(pszFilename, szObj + strlen(szObj));
-            }
-
-            fileExt(pszFilename, szExt);
-            if (!stricmp(szExt, "c") || !stricmp(szExt, "sqc")
-                || !stricmp(szExt, "cpp") || !stricmp(szExt, "asm")
-                || !stricmp(szExt, "rc"))
-            {
-                if (!stricmp(szExt, "rc"))
-                    strcat(szObj, ".res");
-                else
-                {
-                    strcat(szObj, ".");
-                    strcat(szObj, pOptions->pszObjectExt);
-                }
-                fprintf(phDep, "%s:", szObj);
-
-                if (pOptions->fSrcWhenObj)
-                    fprintf(phDep, " \\\n%6s %s", "", pszFilename);
-            }
-            else
-                fprintf(phDep, "%s:", pszFilename);
+            pCfg++;
         }
+
+        /* Found? */
+        if (pCfg->papszExts != NULL)
+            rc = (*pCfg->pfn)(phDep, pszFilename, phFile, fHeader, pOptions);
         else
-            fprintf(phDep, "%s:", pszFilename);
-
-        /*******************/
-        /* find dependants */
-        /*******************/
-        iLine = 0;
-        while (!feof(phFile)) /* line loop */
         {
-            if (fgets(szBuffer, sizeof(szBuffer), phFile) != NULL)
-            {
-                /* search for #include or RCINCLUDE */
-                int cbLen;
-                int i = 0;
-                iLine++;
+            if (*fileName(pszFilename, szExt) != '.') /* these are 'hidden' files, like .cvsignore, let's ignore them. */
+                fprintf(stderr, "warning: '%s' has an unknown file type.\n", pszFilename);
+            rc = 0;
+        }
 
-                cbLen = strlen(szBuffer);
-                while (i + 9 < cbLen && (szBuffer[i] == ' ' || szBuffer[i] == '\t'))
-                    i++;
-
-                /* Found include! */
-                if (strncmp(&szBuffer[i], "#include", 8) == 0 || strncmp(&szBuffer[i], "RCINCLUDE", 9) == 0)
-                {
-                    int f = 0;
-
-                    /* extract info between "" or <> */
-                    while (i < cbLen && !(f = (szBuffer[i] == '"' || szBuffer[i] == '<')))
-                        i++;
-                    i++; /* skip '"' or '<' */
-                    if (f)
-                    {
-                        int j;
-                        /* find end */
-                        j = f = 0;
-                        while (i + j < cbLen &&  j < CCHMAXPATH &&
-                               !(f = (szBuffer[i+j] == '"' || szBuffer[i+j] == '>')))
-                            j++;
-
-                        if (f)
-                        {
-                            char szFullname[CCHMAXPATH];
-                            char *psz;
-
-                            /* copy filename */
-                            strncpy(szFullname, &szBuffer[i], j);
-                            szFullname[j] = '\0'; /* ensure terminatition. */
-
-                            /* find include file! */
-                            psz = pathlistFindFile(pOptions->pszInclude, szFullname, szBuffer);
-                            if (psz == NULL)
-                                psz = pathlistFindFile(getenv("INCLUDE"), szFullname, szBuffer);
-
-                            if (psz != NULL)
-                            {
-                                char szBuffer2[CCHMAXPATH];
-                                if (pOptions->fExcludeAll ||
-                                    pathlistFindFile(pOptions->pszExclude, szFullname, szBuffer2) != NULL
-                                    )
-                                    strcpy(szBuffer, szFullname);
-                                fprintf(phDep, " \\\n%6.s %s", "", szBuffer);
-                            }
-                            else
-                                fprintf(stderr, "%s(%d): warning include file '%s' not found!\n",
-                                        pszFilename, iLine, szFullname);
-                        }
-                    }
-                }
-            }
-            /*
-            else
-               break;
-            */
-        } /*while*/
         fputs("\n", phDep);
         fclose(phFile);
     }
     else
-    {
         fprintf(stderr, "failed to open '%s'\n", pszFilename);
-        return -1;
+
+    return rc;
+}
+
+
+/**
+ * Generates depend info on this C or C++ file, and writes it to phDep.
+ * @returns   0 on success.
+ *            !0 on error.
+ * @param     phDep        Pointer to file struct for outfile.
+ * @param     pszFilename  Pointer to source filename.
+ * @param     phFile       Pointer to source file handle.
+ * @param     pOptions     Pointer to options struct.
+ * @status    completely implemented.
+ * @author    knut st. osmundsen
+ */
+int langC_CPP(FILE *phDep, const char *pszFilename, FILE *phFile, BOOL fHeader, POPTIONS pOptions)
+{
+    char szBuffer[4096]; /* max line length */
+    int  iLine;
+
+
+    /**********************************/
+    /* print file name to depend file */
+    /**********************************/
+    if (pOptions->fObjRule && !fHeader)
+    {
+        if (pOptions->fNoObjectPath)
+            fprintf(phDep, "%s.%s:", fileNameNoExt(pszFilename, szBuffer), pOptions->pszObjectExt);
+        else
+            fprintf(phDep, "%s%s.%s:",
+                    (*pOptions->pszObjectDir != '\0') ?
+                        pOptions->pszObjectDir : filePathSlash(pszFilename, szBuffer),
+                    fileNameNoExt(pszFilename, szBuffer + CCHMAXPATH),
+                    pOptions->pszObjectExt);
+
+        if (pOptions->fSrcWhenObj)
+            fprintf(phDep, " \\\n%4s %s", "", pszFilename);
     }
+    else
+        fprintf(phDep, "%s:", pszFilename);
+
+
+    /*******************/
+    /* find dependants */
+    /*******************/
+    iLine = 0;
+    while (!feof(phFile)) /* line loop */
+    {
+        if (fgets(szBuffer, sizeof(szBuffer), phFile) != NULL)
+        {
+            /* search for #include */
+            int cbLen;
+            int i = 0;
+            iLine++;
+
+            /* skip blank chars */
+            cbLen = strlen(szBuffer);
+            while (i + 9 < cbLen && (szBuffer[i] == ' ' || szBuffer[i] == '\t'))
+                i++;
+
+            /* is this an include? */
+            if (szBuffer[i] == '#' && strncmp(&szBuffer[i], "#include", 8) == 0)
+            {
+                char szFullname[CCHMAXPATH];
+                char *psz;
+                BOOL f = FALSE;
+                int  j;
+
+                /* extract info between "" or <> */
+                while (i < cbLen && !(f = (szBuffer[i] == '"' || szBuffer[i] == '<')))
+                    i++;
+                i++; /* skip '"' or '<' */
+
+                /* if invalid statement then continue with the next line! */
+                if (!f) continue;
+
+                /* find end */
+                j = f = 0;
+                while (i + j < cbLen &&  j < CCHMAXPATH &&
+                       !(f = (szBuffer[i+j] == '"' || szBuffer[i+j] == '>')))
+                    j++;
+
+                /* if invalid statement then continue with the next line! */
+                if (!f) continue;
+
+                /* copy filename */
+                strncpy(szFullname, &szBuffer[i], j);
+                szFullname[j] = '\0'; /* ensure terminatition. */
+
+                /* find include file! */
+                psz = pathlistFindFile(pOptions->pszInclude, szFullname, szBuffer);
+                if (psz == NULL)
+                    psz = pathlistFindFile(getenv("INCLUDE"), szFullname, szBuffer);
+
+                /* did we find the include? */
+                if (psz != NULL)
+                {
+                    char szBuffer2[CCHMAXPATH];
+                    if (pOptions->fExcludeAll ||
+                        pathlistFindFile(pOptions->pszExclude, szFullname, szBuffer2) != NULL
+                        )
+                        strcpy(szBuffer, szFullname);
+                    fprintf(phDep, " \\\n%4.s %s", "", szBuffer);
+                }
+                else
+                    fprintf(stderr, "%s(%d): warning include file '%s' not found!\n",
+                            pszFilename, iLine, szFullname);
+            }
+        }
+        else
+            break;
+    } /*while*/
+    fputs("\n", phDep);
 
     return 0;
 }
 
 
-
-
 /**
- * Gets the fullpath include-filename.
- * @returns   0  on success,  -1 on error.
- * @param     pszFilename  Input: Pointer to filename to be found, and buffer for output.
- *                         Ouput: Buffer now contains fullpath include-filename.
- * @param     pszInclude   Additional includepath.
+ * Generates depend info on this file, and fwrites it to phDep.
+ * @returns   0 on success.
+ *            !0 on error.
+ * @param     phDep        Pointer to file struct for outfile.
+ * @param     pszFilename  Pointer to source filename.
+ * @param     phFile       Pointer to source file handle.
+ * @param     pOptions     Pointer to options struct.
+ * @status    completely implemented.
+ * @author    knut st. osmundsen
  */
-static int getFullIncludename(char *pszFilename, const char *pszInclude)
+int langAsm(FILE *phDep, const char *pszFilename, FILE *phFile, BOOL fHeader, POPTIONS pOptions)
 {
-    const char *pszEnvInclude;
-    const char *psz;
+    char szBuffer[4096]; /* max line length */
+    int  iLine;
 
-    pszEnvInclude = getenv("INCLUDE");
-    if ((pszEnvInclude == NULL && (pszInclude == NULL || strlen(pszInclude) == 0)) || strlen(pszFilename) == 0)
-        return -1;
 
-    psz = "";
-    while (psz != NULL && psz != '\0')
+    /**********************************/
+    /* print file name to depend file */
+    /**********************************/
+    if (pOptions->fObjRule && !fHeader)
     {
-        const char    *pszNext;
-        int            cbLen;
-        char           szFileTmpIn[260];
-        FILEFINDBUF3   filebuf;
-        ULONG          ulRc;
-        HDIR           hDir = HDIR_CREATE;
-        ULONG          ulFound = 1;
-
-        /* get addr of next ';' or '\0' */
-        pszNext = strchr(psz, ';');
-        if (pszNext == NULL)
-            pszNext = psz + strlen(psz);
-
-        /* add a '\\' and the pszFilename string to the include path part. */
-        cbLen = (int)pszNext - (int)psz;
-        if (cbLen > 0)
-        {
-            strncpy(szFileTmpIn, psz, (int)pszNext - (int)psz);
-            if (szFileTmpIn[cbLen - 1] != '\\' && szFileTmpIn[cbLen - 1] != '/')
-                szFileTmpIn[cbLen++] = '\\';
-        }
-        strcpy(&szFileTmpIn[cbLen], pszFilename);
-
-
-        /**************************/
-        /* check if file is found */
-        /**************************/
-        ulRc = DosFindFirst(&szFileTmpIn[0], &hDir,
-                            FILE_READONLY |  FILE_HIDDEN | FILE_SYSTEM | FILE_ARCHIVED,
-                            &filebuf, sizeof(FILEFINDBUF3), &ulFound, FIL_STANDARD);
-        if (ulRc == NO_ERROR)
-        {
-            strcpy(pszFilename, szFileTmpIn);
-            DosFindClose(hDir);
-            return 0;
-        }
-
-        /* next */
-        if (*pszNext == ';' && pszNext[1] != '\0')
-            psz = pszNext + 1;
+        if (pOptions->fNoObjectPath)
+            fprintf(phDep, "%s.%s:", fileNameNoExt(pszFilename, szBuffer), pOptions->pszObjectExt);
         else
-        {
-            psz = pszInclude;
-            pszInclude = NULL;
+            fprintf(phDep, "%s%s.%s:",
+                    (*pOptions->pszObjectDir != '\0') ?
+                        pOptions->pszObjectDir : filePathSlash(pszFilename, szBuffer),
+                    fileNameNoExt(pszFilename, szBuffer + CCHMAXPATH),
+                    pOptions->pszObjectExt);
 
-            if (psz == NULL)
+        if (pOptions->fSrcWhenObj)
+            fprintf(phDep, " \\\n%4s %s", "", pszFilename);
+    }
+    else
+        fprintf(phDep, "%s:", pszFilename);
+
+
+    /*******************/
+    /* find dependants */
+    /*******************/
+    iLine = 0;
+    while (!feof(phFile)) /* line loop */
+    {
+        if (fgets(szBuffer, sizeof(szBuffer), phFile) != NULL)
+        {
+            /* search for include */
+            int cbLen;
+            int i = 0;
+            iLine++;
+
+            /* skip blank chars */
+            cbLen = strlen(szBuffer);
+            while (i + 9 < cbLen && (szBuffer[i] == ' ' || szBuffer[i] == '\t'))
+                i++;
+
+            /* is this an include? */
+            if (strnicmp(&szBuffer[i], "include", 7) == 0
+                && (szBuffer[i + 7] == '\t' || szBuffer[i + 7] == ' ')
+                )
             {
-                psz = pszEnvInclude;
-                pszEnvInclude = NULL;
+                char szFullname[CCHMAXPATH];
+                char *psz;
+                int  j;
+
+                /* skip to first no blank char  */
+                i += 7;
+                while (i < cbLen && (szBuffer[i] == ' ' || szBuffer[i] == '\t'))
+                    i++;
+
+                /* comment check - if comment found, no filename was given. continue. */
+                if (szBuffer[i] == ';') continue;
+
+                /* find end */
+                j = 0;
+                while (i + j < cbLen
+                       &&  j < CCHMAXPATH
+                       && szBuffer[i+j] != ' '  && szBuffer[i+j] != '\t' && szBuffer[i+j] != '\n'
+                       && szBuffer[i+j] != '\0' && szBuffer[i+j] != ';'  && szBuffer[i+j] != '\r'
+                       )
+                    j++;
+
+                /* copy filename */
+                strncpy(szFullname, &szBuffer[i], j);
+                szFullname[j] = '\0'; /* ensure terminatition. */
+
+                /* find include file! */
+                psz = pathlistFindFile(pOptions->pszInclude, szFullname, szBuffer);
+                if (psz == NULL)
+                    psz = pathlistFindFile(getenv("INCLUDE"), szFullname, szBuffer);
+
+                /* Did we find the include? */
+                if (psz != NULL)
+                {
+                    char szBuffer2[CCHMAXPATH];
+                    if (pOptions->fExcludeAll ||
+                        pathlistFindFile(pOptions->pszExclude, szFullname, szBuffer2) != NULL
+                        )
+                        strcpy(szBuffer, szFullname);
+                    fprintf(phDep, " \\\n%4.s %s", "", szBuffer);
+                }
+                else
+                    fprintf(stderr, "%s(%d): warning include file '%s' not found!\n",
+                            pszFilename, iLine, szFullname);
             }
         }
-    }
+        else
+            break;
+    } /*while*/
+    fputs("\n", phDep);
 
-    return -1;
+    return 0;
 }
 
 
+/**
+ * Generates depend info on this Resource file, and writes it to phDep.
+ * @returns   0 on success.
+ *            !0 on error.
+ * @param     phDep        Pointer to file struct for outfile.
+ * @param     pszFilename  Pointer to source filename.
+ * @param     phFile       Pointer to source file handle.
+ * @param     pOptions     Pointer to options struct.
+ * @status    completely implemented.
+ * @author    knut st. osmundsen
+ */
+int langRC(FILE *phDep, const char *pszFilename, FILE *phFile, BOOL fHeader, POPTIONS pOptions)
+{
+    char szBuffer[4096]; /* max line length */
+    int  iLine;
+
+    /**********************************/
+    /* print file name to depend file */
+    /**********************************/
+    if (pOptions->fObjRule && !fHeader)
+    {
+        if (pOptions->fNoObjectPath)
+            fprintf(phDep, "%s.%s:", fileNameNoExt(pszFilename, szBuffer), pOptions->pszRsrcExt);
+        else
+            fprintf(phDep, "%s%s.res:",
+                    (*pOptions->pszObjectDir != '\0') ?
+                        pOptions->pszObjectDir : filePathSlash(pszFilename, szBuffer),
+                    fileNameNoExt(pszFilename, szBuffer + CCHMAXPATH),
+                    pOptions->pszRsrcExt);
+
+        if (pOptions->fSrcWhenObj)
+            fprintf(phDep, " \\\n%4s %s", "", pszFilename);
+    }
+    else
+        fprintf(phDep, "%s:", pszFilename);
+
+
+    /*******************/
+    /* find dependants */
+    /*******************/
+    iLine = 0;
+    while (!feof(phFile)) /* line loop */
+    {
+        if (fgets(szBuffer, sizeof(szBuffer), phFile) != NULL)
+        {
+            /* search for #include */
+            int cbLen;
+            int i = 0;
+            iLine++;
+
+            /* skip blank chars */
+            cbLen = strlen(szBuffer);
+            while (i + 9 < cbLen && (szBuffer[i] == ' ' || szBuffer[i] == '\t'))
+                i++;
+
+            /* is this an include? */
+            if (   strncmp(&szBuffer[i], "#include", 8) == 0
+                || strncmp(&szBuffer[i], "RCINCLUDE", 9) == 0
+                || strncmp(&szBuffer[i], "DLGINCLUDE", 10) == 0
+                )
+            {
+                char szFullname[CCHMAXPATH];
+                char *psz;
+                BOOL f = FALSE;
+                int  j;
+
+                /* extract info between "" or <> */
+                while (i < cbLen && !(f = (szBuffer[i] == '"' || szBuffer[i] == '<')))
+                    i++;
+                i++; /* skip '"' or '<' */
+
+                /* if invalid statement then continue with the next line! */
+                if (!f) continue;
+
+                /* find end */
+                j = f = 0;
+                while (i + j < cbLen &&  j < CCHMAXPATH &&
+                       !(f = (szBuffer[i+j] == '"' || szBuffer[i+j] == '>')))
+                    j++;
+
+                /* if invalid statement then continue with the next line! */
+                if (!f) continue;
+
+                /* copy filename */
+                strncpy(szFullname, &szBuffer[i], j);
+                szFullname[j] = '\0'; /* ensure terminatition. */
+
+                /* find include file! */
+                psz = pathlistFindFile(pOptions->pszInclude, szFullname, szBuffer);
+                if (psz == NULL)
+                    psz = pathlistFindFile(getenv("INCLUDE"), szFullname, szBuffer);
+
+                /* did we find the include? */
+                if (psz != NULL)
+                {
+                    char szBuffer2[CCHMAXPATH];
+                    if (pOptions->fExcludeAll ||
+                        pathlistFindFile(pOptions->pszExclude, szFullname, szBuffer2) != NULL
+                        )
+                        strcpy(szBuffer, szFullname);
+                    fprintf(phDep, " \\\n%4.s %s", "", szBuffer);
+                }
+                else
+                    fprintf(stderr, "%s(%d): warning include file '%s' not found!\n",
+                            pszFilename, iLine, szFullname);
+            }
+        }
+        else
+            break;
+    } /*while*/
+    fputs("\n", phDep);
+
+    return 0;
+}
+
+
+/**
+ * Generates depend info on this COBOL file, and writes it to phDep.
+ * @returns   0 on success.
+ *            !0 on error.
+ * @param     phDep        Pointer to file struct for outfile.
+ * @param     pszFilename  Pointer to source filename.
+ * @param     phFile       Pointer to source file handle.
+ * @param     pOptions     Pointer to options struct.
+ * @status    completely implemented.
+ * @author    knut st. osmundsen
+ */
+int langCOBOL(FILE *phDep, const char *pszFilename, FILE *phFile, BOOL fHeader, POPTIONS pOptions)
+{
+    char szBuffer[4096]; /* max line length */
+    int  iLine;
+
+    /**********************************/
+    /* print file name to depend file */
+    /**********************************/
+    if (pOptions->fObjRule && !fHeader)
+    {
+        if (pOptions->fNoObjectPath)
+            fprintf(phDep, "%s.%s:", fileNameNoExt(pszFilename, szBuffer), pOptions->pszObjectExt);
+        else
+            fprintf(phDep, "%s%s.%s:",
+                    (*pOptions->pszObjectDir != '\0') ?
+                        pOptions->pszObjectDir : filePathSlash(pszFilename, szBuffer),
+                    fileNameNoExt(pszFilename, szBuffer + CCHMAXPATH),
+                    pOptions->pszObjectExt);
+
+        if (pOptions->fSrcWhenObj)
+            fprintf(phDep, " \\\n%4s %s", "", pszFilename);
+    }
+    else
+        fprintf(phDep, "%s:", pszFilename);
+
+
+    /*******************/
+    /* find dependants */
+    /*******************/
+    iLine = 0;
+    while (!feof(phFile)) /* line loop */
+    {
+        if (fgets(szBuffer, sizeof(szBuffer), phFile) != NULL)
+        {
+            /* search for #include */
+            int cbLen;
+            int i = 0;
+            int i1, i2;
+            iLine++;
+
+            /* check for comment mark (column 7) */
+            if (szBuffer[6] == '*')
+                continue;
+
+            /* skip blank chars */
+            cbLen = strlen(szBuffer);
+            while (i + 9 < cbLen && (szBuffer[i] == ' ' || szBuffer[i] == '\t'))
+                i++;
+
+            /* is this an include? */
+            if (   (i1 = strnicmp(&szBuffer[i], "COPY", 4)) == 0
+                || (i2 = strnicmpwords(&szBuffer[i], "EXEC SQL INCLUDE", 16)) == 0
+                )
+            {
+                char szFullname[CCHMAXPATH];
+                char *psz;
+                int  j;
+
+                /* skip statement */
+                i += 4;
+                if (i1 != 0)
+                {
+                    int y = 2; /* skip two words */
+                    do
+                    {
+                        /* skip blanks */
+                        while (szBuffer[i] == ' ' || szBuffer[i] == '\t')
+                            i++;
+                        /* skip word */
+                        while (szBuffer[i] != ' ' && szBuffer[i] != '\t'
+                               && szBuffer[i] != '\0' && szBuffer[i] != '\n')
+                            i++;
+                        y--;
+                    } while (y > 0);
+                }
+
+                /* check for blank */
+                if (szBuffer[i] != ' ' && szBuffer[i] != '\t') /* no copybook specified... */
+                    continue;
+
+                /* skip blanks */
+                while (szBuffer[i] == ' ' || szBuffer[i] == '\t')
+                    i++;
+
+                /* if invalid statement then continue with the next line! */
+                if (szBuffer[i] == '\0' || szBuffer[i] == '\n')
+                    continue;
+
+                /* find end */
+                j = 0;
+                while (i + j < cbLen && j < CCHMAXPATH
+                       && szBuffer[i+j] != '.'
+                       && szBuffer[i+j] != ' '  && szBuffer[i+j] != '\t'
+                       && szBuffer[i+j] != '\0' && szBuffer[i+j] != '\n'
+                       )
+                    j++;
+
+                /* if invalid statement then continue with the next line! */
+                if (szBuffer[i+j] != '.' && szBuffer[i+j] != ' ' && szBuffer[i] != '\t')
+                    continue;
+
+                /* copy filename */
+                strncpy(szFullname, &szBuffer[i], j);
+                szFullname[j] = '\0'; /* ensure terminatition. */
+
+                /* add extention .cpy - hardcoded for the moment. */
+                strcat(szFullname, ".cpy");
+
+                /* find include file! */
+                psz = pathlistFindFile(pOptions->pszInclude, szFullname, szBuffer);
+
+                /* did we find the include? */
+                if (psz != NULL)
+                {
+                    char szBuffer2[CCHMAXPATH];
+                    if (pOptions->fExcludeAll ||
+                        pathlistFindFile(pOptions->pszExclude, szFullname, szBuffer2) != NULL
+                        )
+                        strcpy(szBuffer, szFullname);
+                    fprintf(phDep, " \\\n%4.s %s", "", szBuffer);
+                }
+                else
+                    fprintf(stderr, "%s(%d): warning include file '%s' not found!\n",
+                            pszFilename, iLine, szFullname);
+            }
+        }
+        else
+            break;
+    } /*while*/
+    fputs("\n", phDep);
+
+    return 0;
+}
+
+#define upcase(ch)   \
+     (ch >= 'a' && ch <= 'z' ? ch - ('a' - 'A') : ch)
+
+/**
+ * Compares words. Multiple spaces are treates as on single blank i both string when comparing them.
+ * @returns   0 equal. (same as strnicmp)
+ * @param     pszS1  String 1
+ * @param     pszS2  String 2
+ * @param     cch    Length to compare (relative to string 1)
+ * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ */
+static int strnicmpwords(const char *pszS1, const char *pszS2, int cch)
+{
+    do
+    {
+        while (cch > 0 && upcase(*pszS1) == upcase(*pszS2) && *pszS1 != ' ')
+            pszS1++, pszS2++, cch--;
+
+        /* blank test and skipping */
+        if (cch > 0 && *pszS1 == ' ' && *pszS2 == ' ')
+        {
+            while (cch > 0 && *pszS1 == ' ')
+                pszS1++, cch--;
+
+            while (*pszS2 == ' ')
+                pszS2++;
+        }
+        else
+            break;
+    } while (cch > 0);
+
+    return cch == 0 ? 0 : *pszS1 - *pszS2;
+}
 
 /**
  * Copies the path part (excluding the slash) into pszBuffer and returns
