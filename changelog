@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1512 2001-06-13 17:26:51 sandervl Exp $ */
+/* $Id: changelog,v 1.1513 2001-06-14 01:17:58 bird Exp $ */
 
  2001-06-13: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Corrected position of PM titlebar control
@@ -21,6 +21,7 @@
                    in the NT sdk distributed with Watcom v11 - %WATCOM\sdk.)
     - Win32k/Pe2Lx:
                 o Allowed loading of images using the NATIVE subsystem.
+                o Added symbols for build 14.065F (2001-05-08) all kernels.
     - DailyBuild:
                 o Moved Odin.ini to system32 in daily .zips.
     - NTDLL:    o Stubbed NtOpenThread.
