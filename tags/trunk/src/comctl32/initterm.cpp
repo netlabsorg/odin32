@@ -29,25 +29,26 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <builtin.h>
-#include "misc.h"       /*PLF Wed  98-03-18 23:18:29*/
+#include <misc.h>       /*PLF Wed  98-03-18 23:18:29*/
 
+extern "C" {
 /*-------------------------------------------------------------------*/
 /* _CRT_init is the C run-time environment initialization function.  */
 /* It will return 0 to indicate success and -1 to indicate failure.  */
 /*-------------------------------------------------------------------*/
-int _CRT_init(void);
+int CDECL CRT_init(void);
 /*-------------------------------------------------------------------*/
 /* _CRT_term is the C run-time environment termination function.     */
 /* It only needs to be called when the C run-time functions are      */
 /* statically linked.                                                */
 /*-------------------------------------------------------------------*/
-void _CRT_term(void);
-void __ctordtorInit( void );
-void __ctordtorTerm( void );
+void CDECL CRT_term(void);
+void CDECL _ctordtorInit( void );
+void CDECL _ctordtorTerm( void );
+}
 
-void RegisterCOMCTL32WindowClasses(unsigned long hinstDLL);
-void UnregisterCOMCTL32WindowClasses(void);
+void CDECL RegisterCOMCTL32WindowClasses(unsigned long hinstDLL);
+void CDECL UnregisterCOMCTL32WindowClasses(void);
 
 /*-------------------------------------------------------------------*/
 /* A clean up routine registered with DosExitList must be used if    */
@@ -87,11 +88,11 @@ unsigned long _System _DLL_InitTerm(unsigned long hModule, unsigned long
          /* inlined.                                                        */
          /*******************************************************************/
 
-         if (_CRT_init() == -1)
+         if (CRT_init() == -1)
             return 0UL;
-     __ctordtorInit();
+     	 _ctordtorInit();
 
-//        CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
+         CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
          /*******************************************************************/
          /* A DosExitList routine must be used to clean up if runtime calls */
@@ -100,10 +101,10 @@ unsigned long _System _DLL_InitTerm(unsigned long hModule, unsigned long
 
          rc = DosExitList(0x0000FF00|EXLST_ADD, cleanup);
          if(rc)
-        return 0UL;
+        	return 0UL;
 
-        /* register Win32 window classes implemented in this DLL */
-        RegisterCOMCTL32WindowClasses(hModule);
+         /* register Win32 window classes implemented in this DLL */
+         RegisterCOMCTL32WindowClasses(hModule);
 
          break;
       case 1 :
@@ -123,8 +124,8 @@ unsigned long _System _DLL_InitTerm(unsigned long hModule, unsigned long
 
 static void APIENTRY cleanup(ULONG ulReason)
 {
-   __ctordtorTerm();
-   _CRT_term();
+   _ctordtorTerm();
+   CRT_term();
    DosExitList(EXLST_EXIT, cleanup);
    return ;
 }

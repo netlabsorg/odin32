@@ -1,15 +1,11 @@
-/* $Id: INITTERM.C,v 1.1 1999-05-24 20:20:08 ktk Exp $ */
-
 /*
- *
- * Project Odin Software License can be found in LICENSE.TXT
- *
- */
-/*
- * WNETAP32 DLL entry point
+ * DLL entry point
  *
  * Copyright 1998 Sander van Leeuwen
  * Copyright 1998 Peter Fitzsimmons
+ *
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 
@@ -32,22 +28,24 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <builtin.h>
-#include "misc.h"       /*PLF Wed  98-03-18 23:19:26*/
+#include <odin.h>
+#include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
 
+extern "C" {
 /*-------------------------------------------------------------------*/
 /* _CRT_init is the C run-time environment initialization function.  */
 /* It will return 0 to indicate success and -1 to indicate failure.  */
 /*-------------------------------------------------------------------*/
-int _CRT_init(void);
+int CDECL CRT_init(void);
 /*-------------------------------------------------------------------*/
 /* _CRT_term is the C run-time environment termination function.     */
 /* It only needs to be called when the C run-time functions are      */
 /* statically linked.                                                */
 /*-------------------------------------------------------------------*/
-void _CRT_term(void);
-void __ctordtorInit( void );
-void __ctordtorTerm( void );
+void CDECL CRT_term(void);
+void CDECL _ctordtorInit( void );
+void CDECL _ctordtorTerm( void );
+}
 
 /*-------------------------------------------------------------------*/
 /* A clean up routine registered with DosExitList must be used if    */
@@ -58,7 +56,6 @@ void __ctordtorTerm( void );
 static void APIENTRY cleanup(ULONG reason);
 
 
-
 /****************************************************************************/
 /* _DLL_InitTerm is the function that gets called by the operating system   */
 /* loader when it loads and frees this DLL for each process that accesses   */
@@ -67,8 +64,8 @@ static void APIENTRY cleanup(ULONG reason);
 /* linkage convention MUST be used because the operating system loader is   */
 /* calling this function.                                                   */
 /****************************************************************************/
-unsigned long _System _DLL_InitTerm(unsigned long hModule, unsigned long
-                                    ulFlag)
+unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
+                                   ulFlag)
 {
    size_t i;
    APIRET rc;
@@ -88,12 +85,11 @@ unsigned long _System _DLL_InitTerm(unsigned long hModule, unsigned long
          /* inlined.                                                        */
          /*******************************************************************/
 
-         if (_CRT_init() == -1)
+         if (CRT_init() == -1)
             return 0UL;
-     __ctordtorInit();
+  	 _ctordtorInit();
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
-
          /*******************************************************************/
          /* A DosExitList routine must be used to clean up if runtime calls */
          /* are required and the runtime is dynamically linked.             */
@@ -101,7 +97,7 @@ unsigned long _System _DLL_InitTerm(unsigned long hModule, unsigned long
 
          rc = DosExitList(0x0000FF00|EXLST_ADD, cleanup);
          if(rc)
-        return 0UL;
+		return 0UL;
 
          break;
       case 1 :
@@ -119,8 +115,8 @@ unsigned long _System _DLL_InitTerm(unsigned long hModule, unsigned long
 
 static void APIENTRY cleanup(ULONG ulReason)
 {
-   __ctordtorTerm();
-   _CRT_term();
+   _ctordtorTerm();  
+   CRT_term();
    DosExitList(EXLST_EXIT, cleanup);
    return ;
 }
