@@ -1,4 +1,4 @@
-/* $Id: odinwrap.h,v 1.8 1999-08-17 19:30:48 phaller Exp $ */
+/* $Id: odinwrap.h,v 1.9 1999-08-20 00:58:05 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -43,7 +43,7 @@
     unsigned short sel = RestoreOS2FS();      \
     dprintf(("%s: "#cRet" "#cName"() enter\n",  \
              pszOdinDebugChannel));           \
-    cRet   rc  = cName();                     \
+    cRet   rc  = ODIN_##cName();              \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
