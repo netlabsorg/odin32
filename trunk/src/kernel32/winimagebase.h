@@ -1,4 +1,4 @@
-/* $Id: winimagebase.h,v 1.23 2003-01-05 12:31:25 sandervl Exp $ */
+/* $Id: winimagebase.h,v 1.24 2004-01-15 10:39:11 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -109,8 +109,8 @@ static  BOOL  findDll(const char *pszFileName, char *pszFullName,
 virtual BOOL  insideModule(ULONG address);
 virtual BOOL  insideModuleCode(ULONG address);
 
-virtual ULONG getApi(char *name)  = 0;
-virtual ULONG getApi(int ordinal) = 0;
+virtual ULONG getApi(char *name);
+virtual ULONG getApi(int ordinal);
 
 virtual ULONG setApi(char *name, ULONG pfnNewProc);
 virtual ULONG setApi(int ordinal, ULONG pfnNewProc);
@@ -131,6 +131,12 @@ static Win32ImageBase * findModule(HMODULE hModule);
 protected:
     void tlsAlloc();        //Allocate TLS index for this module
     void tlsDelete();       //Destroy TLS index for this module
+
+    ULONG findApi(char *pszName, ULONG ulOrdinal, ULONG pfnNewProc = NULL);
+    ULONG findForwarder(ULONG virtaddr, char *apiname, ULONG ordinal);
+    virtual void *getPointerFromRVA(ULONG ulRVA, BOOL fOverride = FALSE);
+    void *        getPointerFromRVA(const void *pvRVA)  { return getPointerFromRVA((ULONG)pvRVA); }
+    virtual ULONG getRVAFromPointer(void *pv, BOOL fOverride = FALSE);
 
     ULONG                   errorState,
                             entryPoint;
@@ -159,6 +165,9 @@ protected:
                                                  DWORD lang);
 
     PIMAGE_RESOURCE_DIRECTORY   pResRootDir;
+
+    PIMAGE_EXPORT_DIRECTORY     pExportDir;
+    PIMAGE_OPTIONAL_HEADER      poh;
 
     //substracted from RVA data offsets
     ULONG                   ulRVAResourceSection;

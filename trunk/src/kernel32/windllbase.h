@@ -1,4 +1,4 @@
-/* $Id: windllbase.h,v 1.10 2002-07-26 10:48:40 sandervl Exp $ */
+/* $Id: windllbase.h,v 1.11 2004-01-15 10:39:06 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
@@ -85,6 +85,8 @@ static  void      tlsDetachThreadFromAllDlls();
     void      decDynamicLib();
     BOOL      isDynamicLib()   { return nrDynamicLibRef != 0; };
 
+    WIN32DLLENTRY getEntryPoint()  { return dllEntryPoint; };
+
     void      setUnloadOrder(Win32ImageBase *parent);
 
     void      updateDependencies();
@@ -113,6 +115,8 @@ static  Win32DllBase *findModule(HINSTANCE hinstance);
 static  Win32DllBase *findModule(WIN32DLLENTRY DllEntryPoint);
 static  Win32DllBase *findModuleByAddr(ULONG address);
 static  Win32DllBase *findModuleByOS2Handle(HINSTANCE hinstance);
+
+static  int           enumDlls(HMODULE *lphModule, int countMax);
 
 #ifdef DEBUG
     void          printListOfDlls();

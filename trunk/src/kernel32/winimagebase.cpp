@@ -1,10 +1,11 @@
-/* $Id: winimagebase.cpp,v 1.36 2003-01-05 12:31:25 sandervl Exp $ */
+/* $Id: winimagebase.cpp,v 1.37 2004-01-15 10:39:11 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
  *
  * Copyright 1998-1999 Sander van Leeuwen (sandervl@xs4all.nl)
  * Copyright 1998-2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright 2003 Innotek Systemberatung GmbH (sandervl@innotek.de)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -47,8 +48,8 @@
 Win32ImageBase::Win32ImageBase(HINSTANCE hInstance) :
     errorState(NO_ERROR), entryPoint(0), fullpath(NULL),
     tlsAddress(0), tlsIndexAddr(0), tlsInitSize(0), tlsTotalSize(0),
-    tlsCallBackAddr(0), tlsIndex(-1), pResRootDir(NULL),
-    ulRVAResourceSection(0), fIsPEImage(FALSE)
+    tlsCallBackAddr(0), tlsIndex(-1), pResRootDir(NULL), poh(NULL),
+    ulRVAResourceSection(0), fIsPEImage(FALSE), pExportDir(NULL)
 {
   char *name;
 
@@ -152,16 +153,182 @@ ULONG Win32ImageBase::getImageSize()
   return 0;
 }
 //******************************************************************************
+//
+//  Win32ImageBase::findApi: find function in export table and change if necessary
+//
+//  Parameters:
+//      char *name		- function name (NULL for ordinal search)
+//      int ordinal     	- function ordinal (only used if name == NULL)
+//      ULONG pfnNewProc	- new function address (ignored if 0)
+//
+//  Returns:
+//      0			- not found
+//      <>0			- function address
+//
+//******************************************************************************
+ULONG Win32ImageBase::findApi(char *pszName, ULONG ulOrdinal, ULONG pfnNewProc)
+{
+    PIMAGE_EXPORT_DIRECTORY ped = pExportDir;
+
+    /*
+     * Get ped if it's NULL.
+     */
+    if (!ped)
+    {
+        if (!poh->DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress)
+            return 0;
+        ped = (PIMAGE_EXPORT_DIRECTORY)getPointerFromRVA(poh->DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress);
+        pExportDir = ped;
+    }
+
+    int     iExpOrdinal = 0;            /* index into address table. */
+    if (pszName)
+    {
+        /*
+         * Find Named Export: Do binary search on the name table.
+         */
+        const char**paRVANames = (const char **)getPointerFromRVA(ped->AddressOfNames);
+        PUSHORT     paOrdinals = (PUSHORT)getPointerFromRVA(ped->AddressOfNameOrdinals);
+        int         iStart = 1;
+        int         iEnd = ped->NumberOfNames;
+
+        for (;;)
+        {
+            /* end of search? */
+            if (iStart > iEnd)
+            {
+            #ifdef DEBUG
+                /* do a linear search just to verify the correctness of the above algorithm */
+                for (int i = 0; i < ped->NumberOfNames; i++)
+                    if (!strcmp(paRVANames[i - 1] + (unsigned)hinstance, pszName))
+                    {
+                        dprintf(("bug in binary export search!!!\n"));
+                        DebugInt3();
+                    }
+            #endif
+                return 0;
+            }
+
+            int i  = (iEnd - iStart) / 2 + iStart;
+            const char *pszExpName  = (const char *)getPointerFromRVA(paRVANames[i - 1]);
+            int         diff        = strcmp(pszExpName, pszName);
+            if (diff > 0)       /* pszExpName > pszName: search chunck before i */
+                iEnd = i - 1;
+            else if (diff)      /* pszExpName < pszName: search chunk after i */
+                iStart = i + 1;
+            else                /* pszExpName == pszName */
+            {
+                iExpOrdinal = paOrdinals[i - 1];
+                break;
+            }
+        } /* binary search thru name table */
+    }
+    else
+    {
+        /*
+         * Find ordinal export: Simple table lookup.
+         */
+        if (    ulOrdinal >= ped->Base + max(ped->NumberOfNames, ped->NumberOfFunctions)
+            ||  ulOrdinal < ped->Base)
+            return NULL;
+        iExpOrdinal = ulOrdinal - ped->Base;
+    }
+
+    /*
+     * Found export (iExpOrdinal).
+     */
+    PULONG      paAddress = (PULONG)getPointerFromRVA(ped->AddressOfFunctions);
+    unsigned    uRVAExport  = paAddress[iExpOrdinal];
+    unsigned    uRet;
+
+    /* Install override for the export (if requested) */
+    if (pfnNewProc && uRet)
+        paAddress[iExpOrdinal] = getRVAFromPointer((void*)pfnNewProc, TRUE);
+
+    if (    uRVAExport > poh->DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress
+        &&  uRVAExport < poh->DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress
+            + poh->DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size)
+        /* Resolve forwarder. */
+        uRet = findForwarder(poh->ImageBase + uRVAExport, pszName, iExpOrdinal);
+    else
+        /* Get plain export address */
+        uRet = (ULONG)getPointerFromRVA(uRVAExport, TRUE);
+
+    return uRet;
+}
+//******************************************************************************
+//******************************************************************************
+ULONG Win32ImageBase::findForwarder(ULONG virtaddr, char *apiname, ULONG ordinal)
+{
+    char         *forward;
+    char         *forwarddll, *forwardapi;
+    Win32DllBase *WinDll;
+    DWORD         exportaddr;
+    int           forwardord;
+    int           iForwardDllLength;
+    int           iForwardApiLength;
+
+    forward = (char *)(hinstance + (virtaddr - poh->ImageBase));
+    iForwardDllLength = strlen(forward);
+
+    if(iForwardDllLength == 0)
+        return 0;
+
+    forwarddll = (char*)alloca(iForwardDllLength);
+    if(forwarddll == NULL) {
+        DebugInt3();
+        return 0;
+    }
+    memcpy(forwarddll, forward, iForwardDllLength + 1);
+
+    forwardapi = strchr(forwarddll, '.');
+    if(forwardapi == NULL) {
+        return 0;
+    }
+    *forwardapi++ = 0;
+    iForwardApiLength = strlen(forwardapi);
+    if(iForwardApiLength == 0) {
+        return FALSE;
+    }
+    WinDll = Win32DllBase::findModule(forwarddll);
+    if(WinDll == NULL) {
+        return 0;
+    }
+    //check if name or ordinal forwarder
+    forwardord = 0;
+    if(*forwardapi >= '0' && *forwardapi <= '9') {
+        forwardord = atoi(forwardapi);
+    }
+    if(forwardord != 0 || (iForwardApiLength == 1 && *forwardapi == '0')) {
+         exportaddr = WinDll->getApi(forwardord);
+    }
+    else exportaddr = WinDll->getApi(forwardapi);
+
+    return exportaddr;
+}
+//******************************************************************************
 //******************************************************************************
 ULONG Win32ImageBase::setApi(char *name, ULONG pfnNewProc)
 {
-    return -1; //only implemented for PE modules
+    return findApi(name, 0, pfnNewProc);
 }
 //******************************************************************************
 //******************************************************************************
 ULONG Win32ImageBase::setApi(int ordinal, ULONG pfnNewProc)
 {
-    return -1; //only implemented for PE modules
+    return findApi(NULL, ordinal, pfnNewProc);
+}
+//******************************************************************************
+//******************************************************************************
+ULONG Win32ImageBase::getApi(char *name)
+{
+    return findApi(name, 0);
+}
+//******************************************************************************
+//******************************************************************************
+ULONG Win32ImageBase::getApi(int ordinal)
+{
+    return findApi(NULL, ordinal);
 }
 //******************************************************************************
 //******************************************************************************
@@ -226,7 +393,7 @@ BOOL Win32ImageBase::findDll(const char *szFileName, char *szFullName,
 //returns ERROR_SUCCESS or error code (Characteristics will contain
 //the Characteristics member of the file header structure)
 //******************************************************************************
-ULONG Win32ImageBase::isPEImage(char *szFileName, DWORD *Characteristics, 
+ULONG Win32ImageBase::isPEImage(char *szFileName, DWORD *Characteristics,
                                 DWORD *subsystem, DWORD *fNEExe)
 {
  char   filename[CCHMAXPATH];
@@ -242,7 +409,7 @@ ULONG Win32ImageBase::isPEImage(char *szFileName, DWORD *Characteristics,
  ULONG  ulRead;
  int    nSections, i;
 
-  if(fNEExe) 
+  if(fNEExe)
       *fNEExe = FALSE;
 
   if (!findDll(szFileName, filename, sizeof(filename)))
@@ -305,10 +472,10 @@ ULONG Win32ImageBase::isPEImage(char *szFileName, DWORD *Characteristics,
         goto failure;
   }
 
-  if(GetPEFileHeader (win32file, &fh) == FALSE) 
+  if(GetPEFileHeader (win32file, &fh) == FALSE)
   {
         if(*(WORD *)PE_HEADER(win32file) == IMAGE_OS2_SIGNATURE) {
-            if(fNEExe) 
+            if(fNEExe)
                 *fNEExe = TRUE;
         }
         goto failure;
@@ -333,7 +500,7 @@ ULONG Win32ImageBase::isPEImage(char *szFileName, DWORD *Characteristics,
   if(subsystem) {
         *subsystem = oh.Subsystem;
   }
-  
+
   free(win32file);
   DosClose(win32handle);
   return ERROR_SUCCESS_W;
@@ -413,3 +580,24 @@ BOOL Win32ImageBase::matchModName(const char *pszFilename) const
      */
     return stricmp(pszModName, szModule) == 0;
 }
+
+/** Converts a RVA to an pointer into the loaded image.
+ * @returns Pointer corresponding to the RVA.
+ * @param   ulRVA       RVA to make a pointer.
+ * @param   fOverride   Flags if the RVA might be to an overridden address (export).
+ */
+void *Win32ImageBase::getPointerFromRVA(ULONG ulRVA, BOOL fOverride/* = FALSE*/)
+{
+    return (PVOID)((char*)hinstance + ulRVA);
+}
+
+/** Converts a pointer to an RVA for the loaded image.
+ * @returns Pointer corresponding to the RVA.
+ * @param   ulRVA       RVA to make a pointer.
+ * @param   fOverride   Flags if the pointer might be to an overridden address (export).
+ */
+ULONG Win32ImageBase::getRVAFromPointer(void *pv, BOOL fOverride/* = FALSE*/)
+{
+    return (ULONG)pv - (ULONG)hinstance;
+}
+

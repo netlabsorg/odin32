@@ -1,4 +1,4 @@
-/* $Id: windllpe2lx.h,v 1.3 2003-03-31 11:54:28 sandervl Exp $ */
+/* $Id: windllpe2lx.h,v 1.4 2004-01-15 10:39:08 sandervl Exp $ */
 
 /*
  * Win32 PE2LX Dll class

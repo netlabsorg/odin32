@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.h,v 1.20 2003-04-09 10:39:41 sandervl Exp $ */
+/* $Id: winimagepeldr.h,v 1.21 2004-01-15 10:39:15 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -84,11 +84,6 @@ virtual ~Win32PeLdrImage();
     virtual BOOL  insideModule(ULONG address);
     virtual BOOL  insideModuleCode(ULONG address);
 
-    virtual ULONG getApi(char *name);
-    virtual ULONG getApi(int ordinal);
-    virtual ULONG setApi(char *name, ULONG pfnNewProc);
-    virtual ULONG setApi(int ordinal, ULONG pfnNewProc);
-
     virtual ULONG getImageSize();
 
     //Returns required OS version for this image
@@ -113,9 +108,6 @@ protected:
      Section *findSectionByOS2Addr(ULONG addr);
      Section *findPreviousSectionByOS2Addr(ULONG addr);
 
-   OrdExport *findApi(int ordinal);
-  NameExport *findApi(char *name);
-
         BOOL  setMemFlags();
         BOOL  setFixups(PIMAGE_BASE_RELOCATION prel);
         BOOL  setFixups(ULONG virtAddress, ULONG size);
@@ -124,25 +116,16 @@ protected:
 
         BOOL  processImports();
         BOOL  processExports();
-        void  AddNameExport(ULONG virtaddr, char *apiname, ULONG ordinal, BOOL fAbsoluteAddress=FALSE);
-        void  AddOrdExport(ULONG virtaddr, ULONG ordinal, BOOL fAbsoluteAddress=FALSE);
-        BOOL  AddForwarder(ULONG virtaddr, char *apiname, ULONG ordinal);
+
+        BOOL  loadForwarder(ULONG virtaddr, char *apiname, ULONG ordinal);
 
 Win32DllBase *loadDll(char *pszCurModule);
 
- 	IMAGE_OPTIONAL_HEADER oh;
-	IMAGE_FILE_HEADER     fh;
-
-        ULONG                 nrNameExports, nameExportSize;
-        ULONG                 nrOrdExports;
-        ULONG                 nrOrdExportsRegistered;
-        NameExport           *nameexports, *curnameexport;
-        OrdExport            *ordexports, *curordexport;
-
         ULONG                 nrsections, imageSize, imageVirtBase, imageVirtEnd;
         //OS/2 virtual base address
-        ULONG                 realBaseAddress;
-        Section               *section;
+        ULONG                 realBaseAddress, originalBaseAddress;
+        Section              *section;
+        ULONG                 Characteristics;
 
         //offset in executable image where real PE file starts (default 0)
         ULONG                 ulPEOffset;

@@ -1,9 +1,10 @@
-/* $Id: windllpeldr.cpp,v 1.12 2003-04-02 12:58:31 sandervl Exp $ */
+/* $Id: windllpeldr.cpp,v 1.13 2004-01-15 10:39:08 sandervl Exp $ */
 
 /*
  * Win32 PE loader Dll class
  *
  * Copyright 1999 Sander van Leeuwen (sandervl@xs4all.nl)
+ * Copyright 2003 Innotek Systemberatung GmbH (sandervl@innotek.de)
  *
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -82,7 +83,7 @@ DWORD Win32PeLdrDll::init(ULONG reservedMem, ULONG ulPEOffset)
   dwRet = Win32PeLdrImage::init(0);
   dllEntryPoint = (WIN32DLLENTRY)entryPoint;
 
-  if(!(fh.Characteristics & IMAGE_FILE_DLL)) {
+  if(!(Characteristics & IMAGE_FILE_DLL)) {
     //executable loaded as dll; don't call entrypoint
     dprintf(("WARNING: Exe %s loaded as dll; entrypoint not called", szFileName));
     dllEntryPoint = NULL;
