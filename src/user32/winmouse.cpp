@@ -1,4 +1,4 @@
-/* $Id: winmouse.cpp,v 1.10 2000-05-05 18:23:07 sandervl Exp $ */
+/* $Id: winmouse.cpp,v 1.11 2000-11-25 13:53:54 sandervl Exp $ */
 /*
  * Mouse handler for DINPUT
  *
@@ -101,8 +101,7 @@ BOOL DInputMouseHandler(HWND hwnd, ULONG msg, ULONG x, ULONG y)
   x = (((long)x << 16) + ScreenWidth-1)  / ScreenWidth;
   y = (((long)y << 16) + ScreenHeight-1) / ScreenHeight;
 
-  mouseHandler(dwFlags, x, y, 0, (DWORD)&mouseEvent);
-  return TRUE;
+  return mouseHandler(dwFlags, x, y, 0, (DWORD)&mouseEvent);
 }
 //******************************************************************************
 //******************************************************************************
@@ -141,13 +140,15 @@ HWND WIN32API SetCapture(HWND hwnd)
 BOOL WIN32API ReleaseCapture(void)
 {
  HWND hwndPrev;
+ BOOL ret;
 
     dprintf(("USER32:  ReleaseCapture"));
     hwndPrev = GetCapture();
+    ret = OSLibWinSetCapture(0);
     if(hwndPrev) {
     	SendMessageA(hwndPrev, WM_CAPTURECHANGED, 0L, 0L);
     }
-    return OSLibWinSetCapture(0);
+    return ret;
 }
 //******************************************************************************
 //******************************************************************************
