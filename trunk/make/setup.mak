@@ -1,4 +1,4 @@
-# $Id: setup.mak,v 1.10 2002-06-19 02:16:41 bird Exp $
+# $Id: setup.mak,v 1.11 2002-08-20 07:05:24 bird Exp $
 
 #
 # Generic makefile system.
@@ -267,11 +267,38 @@ BUILD_ENVS_BASE_PRE_16  = buildsetup emx cvs toolkit40 ddkbase
 !if "$(_BUILD_PROJECT)" != "$(BUILD_PROJECT)" || "$(BUILD_ENV)" != "$(BUILD_ENV_FORCE)" || "$(BUILD_ENVS_PRE)" != "" || "$(BUILD_ENVS_POST)" != ""
 MAKE_INCLUDE_PROCESS = $(PATH_MAKE)\process.forwarder.mak
 
+# Debug - find the reason for forwarding.
+#! if 0
+#!  if "$(_BUILD_PROJECT)" != "$(BUILD_PROJECT)"
+#!   if [echo debug - _BUILD_PROJECT: "$(_BUILD_PROJECT)" != "$(BUILD_PROJECT)"]
+#!   endif
+#!  endif
+#!  if "$(BUILD_ENV)" != "$(BUILD_ENV_FORCE)"
+#!   if [echo debug - BUILD_ENV: "$(BUILD_ENV)" != "$(BUILD_ENV_FORCE)"]
+#!   endif
+#!  endif
+#!  if "$(BUILD_ENVS_PRE)" != ""
+#!   if [echo debug - BUILD_ENVS_PRE: "$(BUILD_ENVS_PRE)" != ""]
+#!   endif
+#!  endif
+#!  if "$(BUILD_ENVS_POST)" != ""
+#!   if [echo debug - BUILD_ENVS_POST: "$(BUILD_ENVS_POST)" != ""]
+#!   endif
+#!  endif
+#! endif
+
+# flag that we're forwarding.
+BUILD_FORWARDING = 1
+
 # set the secret _build_project env.var.
-!if "$(_BUILD_PROJECT)" != "$(BUILD_PROJECT)"
-! if [set _BUILD_PROJECT=$(BUILD_PROJECT)]
+# Note: This 'SET' operation doesn't allways work as designed.
+#       Therefore we have a workaround in the forwarder statement which makes
+#       sure that the internal variable is set. The problem seems to be to
+#       create new environment variables.
+! if "$(_BUILD_PROJECT)" != "$(BUILD_PROJECT)"
+!  if [SET _BUILD_PROJECT=$(BUILD_PROJECT)]
+!  endif
 ! endif
-!endif
 
 # Compiler change or just environment change.
 ! if "$(BUILD_ENV)" != "$(BUILD_ENV_FORCE)"
@@ -298,6 +325,9 @@ BUILD_ENVS_CHANGE = $(BUILD_ENVS_BASE_PRE) $(BUILD_ENVS_PRE) $(ENV_ENVS) $(BUILD
 !  endif
 ! endif
 
+!else
+# Flag that we're not forwarding
+BUILD_FORWARDING = 0
 !endif
 
 
