@@ -1,4 +1,4 @@
-/* $Id: fastdep.c,v 1.34 2001-11-14 15:26:13 bird Exp $
+/* $Id: fastdep.c,v 1.35 2002-02-22 23:48:52 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
@@ -911,6 +911,8 @@ void syntax(void)
         "   -obj[ ]<objext> Object extention.                     Default: obj\n"
         "   -s[ ][name]     Insert super-dependency on top of tree.\n"
         "                   If not specified name defaults to 'alltargets'.\n"
+        "                   You can specify a '=' at the end and a macro will\n"
+        "                   be created instead of a rule.\n"
         "                   Default: disabled\n"
         "   -r[ ]<rsrcext>  Resource binary extention.            Default: res\n"
         "   -x[ ]<f1[;f2]>  Files to exclude. Only exact filenames.\n"
@@ -3411,7 +3413,7 @@ BOOL  depWriteFile(const char *pszFilename, BOOL fWriteUpdatedOnly)
         if (options.pszSuperDependency != NULL)
         {
             iBuffer = sprintf(szBuffer,
-                              "%s:",
+                              strrchr(options.pszSuperDependency, '=') ? "%s" : "%s:",
                               options.pszSuperDependency);
 
             pdep = (PDEPRULE)(void*)AVLBeginEnumTree((PPAVLNODECORE)(void*)&pdepTree, &EnumData, TRUE);
