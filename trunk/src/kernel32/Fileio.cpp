@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.66 2002-06-15 11:27:03 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.67 2002-08-16 09:56:30 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -6,7 +6,8 @@
  * Copyright 1998-2000 Sander van Leeuwen
  * Copyright 1998 Patrick Haller
  *
- * Some parts copied from Wine (CopyFileExA/W, FindFirstFileExW)
+ * Some parts based on Wine code (CopyFileExA/W, FindFirstFileExW,
+ * GetShortPathNameA/W, GetLongPathNameA/W)
  *
  * Copyright 1993 John Burton
  * Copyright 1993 Erik Bos
@@ -41,23 +42,19 @@ ODINDEBUGCHANNEL(KERNEL32-FILEIO)
 
 #include <ctype.h>
 #include "fileio.h"
+#include <win/file.h>
 
-#if 0
-#define IS_END_OF_NAME(ch)  (!(ch) || ((ch) == '/') || ((ch) == '\\'))
-#define INVALID_DOS_CHARS  "*?<>|\"+=,;[] \345"
-#define FILE_toupper(a)		toupper(a)
-#define FILE_tolower(a)		tolower(a)
 
 /***********************************************************************
  *           DOSFS_ValidDOSName
  *
- * Return 1 if Unix file 'name' is also a valid MS-DOS name
+ * Return 1 if OS/2 file 'name' is also a valid MS-DOS name
  * (i.e. contains only valid DOS chars, lower-case only, fits in 8.3 format).
  * File name can be terminated by '\0', '\\' or '/'.
  */
 static int DOSFS_ValidDOSName( const char *name, int ignore_case )
 {
-    static const char invalid_chars[] = INVALID_DOS_CHARS;
+    static const char invalid_chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" INVALID_DOS_CHARS;
     const char *p = name;
     const char *invalid = ignore_case ? (invalid_chars + 26) : invalid_chars;
     int len = 0;
@@ -94,14 +91,15 @@ static int DOSFS_ValidDOSName( const char *name, int ignore_case )
 /***********************************************************************
  *           DOSFS_Hash
  *
- * Transform a Unix file name into a hashed DOS name. If the name is a valid
+ * Transform an OS/2 file name into a hashed DOS name. If the name is a valid
  * DOS name, it is converted to upper-case; otherwise it is replaced by a
  * hashed version that fits in 8.3 format.
  * File name can be terminated by '\0', '\\' or '/'.
  * 'buffer' must be at least 13 characters long.
  */
-void DOSFS_Hash( LPCSTR name, LPSTR buffer, BOOL dir_format,
-                 BOOL ignore_case )
+
+static void DOSFS_Hash( LPCSTR name, LPSTR buffer, BOOL dir_format,
+                        BOOL ignore_case )
 {
     static const char invalid_chars[] = INVALID_DOS_CHARS "~.";
     static const char hash_chars[33] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ012345";
@@ -184,7 +182,7 @@ void DOSFS_Hash( LPCSTR name, LPSTR buffer, BOOL dir_format,
     }
     if (!dir_format) *dst = '\0';
 }
-#endif
+
 //******************************************************************************
 //******************************************************************************
 HFILE WIN32API CreateFileA(LPCSTR lpszName, DWORD fdwAccess, DWORD fdwShareMode,
@@ -631,12 +629,17 @@ BOOL WIN32API DeleteFileA(LPCSTR lpszFile)
 {
  BOOL rc;
 
+#if 0
+  if((strstr(lpszFile, "odin32_") || strstr(lpszFile, "pe_")) && strstr(lpszFile, ".log")) {
+      return TRUE;
+  }
+#endif
   rc = OSLibDosDelete((LPSTR)lpszFile);
   if(!rc) {
     dprintf(("DeleteFileA %s returned FALSE; last error %x", lpszFile, GetLastError()));
-  if(GetLastError() == 20) {
-    return TRUE;
-  }
+    if(GetLastError() == ERROR_BAD_UNIT) {
+      return TRUE;
+    }
   }
   else  dprintf(("DeleteFileA %s", lpszFile));
 
@@ -1178,47 +1181,125 @@ DWORD WIN32API GetShortPathNameA(LPCTSTR lpszLongPath,
                                  LPTSTR lpszShortPath,
                                  DWORD cchBuffer)
 {
- int length;
-
-  dprintf(("KERNEL32:  GetShortPathNameA of %s, just copying it", lpszLongPath));
+  char  short_name[MAX_PATHNAME_LEN];  /* Long pathname in Unix format */
+  int length, marker = 0;
+  LPSTR tmpshortpath,tmplongpath;
+  DWORD attr, sp = 0, lp = 0;
+  int tmplen, drive;
+ 
+  dprintf(("KERNEL32:  GetShortPathNameA %s", lpszLongPath));
 
   if(!lpszLongPath) {
       SetLastError(ERROR_INVALID_PARAMETER);
       return 0;
   }
-
-  length = lstrlenA(lpszLongPath) + 1;
-  if(length > cchBuffer) {
-      if(lpszShortPath) {
-          *lpszShortPath = 0;
-      }
-      return(length); //return length required (including 0 terminator)
+  if (!lpszLongPath[0]) {
+      SetLastError(ERROR_BAD_PATHNAME);
+      return 0;
   }
-  lstrcpyA(lpszShortPath, lpszLongPath);
-  return(length-1);
+
+  if ( ( tmpshortpath = (char*) HeapAlloc ( GetProcessHeap(), 0, MAX_PATHNAME_LEN ) ) == NULL ) {
+      SetLastError ( ERROR_NOT_ENOUGH_MEMORY );
+      return 0;
+  }
+
+  if ( ( tmplongpath = (char*) HeapAlloc ( GetProcessHeap(), 0, MAX_PATHNAME_LEN ) ) == NULL ) {
+      SetLastError ( ERROR_NOT_ENOUGH_MEMORY );
+      return 0;
+  }
+  
+  lstrcpyA(tmplongpath,lpszLongPath);
+   
+  /* check for drive letter */
+  if ( lpszLongPath[1] == ':' ) {
+      tmpshortpath[0] = lpszLongPath[0];
+      tmpshortpath[1] = ':';
+      sp = 2;
+      lp = 2;
+    }
+
+   //todo: check drive validity!
+
+   while ( lpszLongPath[lp] ) {
+      marker = 0;
+      /* check for path delimiters and reproduce them */
+      if ( lpszLongPath[lp] == '\\' || lpszLongPath[lp] == '/' ) {
+	if (!sp || tmpshortpath[sp-1]!= '\\') 
+        {
+	    /* strip double "\\" */
+	    tmpshortpath[sp] = '\\';
+	    sp++;
+        }
+        tmpshortpath[sp]=0;/*terminate string*/
+	lp++;
+	continue;
+      }
+
+      tmplen = strcspn ( lpszLongPath + lp, "\\/" ); 
+      lstrcpynA ( tmpshortpath+sp, lpszLongPath + lp, tmplen+1 );
+
+      /* Check, if the current element is a valid dos name */
+      if ( DOSFS_ValidDOSName ( lpszLongPath + lp, TRUE ) ) {
+	sp += tmplen;
+	lp += tmplen;
+	continue;
+      }
+
+      if (tmplongpath[lp + tmplen] == '\\')
+      { 
+         tmplongpath[lp + tmplen] = 0;
+         marker = 1;
+      }
+
+      attr = GetFileAttributesA(tmplongpath);
+
+      if (attr == -1) 
+      {
+         SetLastError ( ERROR_FILE_NOT_FOUND );
+         HeapFree ( GetProcessHeap(), 0, tmpshortpath );
+         HeapFree ( GetProcessHeap(), 0, tmplongpath );
+         return 0;
+      }
+
+      DOSFS_Hash(tmpshortpath+sp, short_name, FALSE, TRUE );          
+       
+      strcpy( tmpshortpath+sp, short_name);
+      sp += strlen ( tmpshortpath+sp );
+      if (marker)
+         tmplongpath[lp + tmplen] = '\\';
+      lp += tmplen;
+      
+    }
+
+    tmpshortpath[sp] = 0;
+
+    lstrcpynA ( lpszShortPath, tmpshortpath, cchBuffer );
+    dprintf(("returning %s\n", lpszShortPath));
+    tmplen = strlen ( lpszShortPath  );
+
+    HeapFree ( GetProcessHeap(), 0, tmpshortpath );
+    HeapFree ( GetProcessHeap(), 0, tmplongpath );
+
+    return tmplen;
 }
 //******************************************************************************
 //******************************************************************************
 DWORD WIN32API GetShortPathNameW(LPCWSTR lpszLongPath, LPWSTR lpszShortPath,
                                  DWORD cchBuffer)
 {
- int length;
+    LPSTR longpathA, shortpathA;
+    DWORD ret = 0;
 
-  dprintf(("KERNEL32: GetShortPathNameW; just copying it"));
-  if(!lpszLongPath) {
-      SetLastError(ERROR_INVALID_PARAMETER);
-      return 0;
-  }
+    longpathA = HEAP_strdupWtoA( GetProcessHeap(), 0, lpszLongPath );
+    shortpathA = (LPSTR) HeapAlloc ( GetProcessHeap(), 0, cchBuffer );
 
-  length = lstrlenW(lpszLongPath) + 1;
-  if(length > cchBuffer) {
-      if(lpszShortPath) {
-          *lpszShortPath = 0;
-      }
-      return(length); //return length required (including 0 terminator)
-  }
-  lstrcpyW(lpszShortPath, lpszLongPath);
-  return(length-1);
+    ret = GetShortPathNameA ( longpathA, shortpathA, cchBuffer );
+    if (cchBuffer > 0 && !MultiByteToWideChar( CP_ACP, 0, shortpathA, -1, lpszShortPath, cchBuffer ))
+        lpszShortPath[cchBuffer-1] = 0;
+    HeapFree( GetProcessHeap(), 0, longpathA );
+    HeapFree( GetProcessHeap(), 0, shortpathA );
+
+    return ret;
 }
 //******************************************************************************
 //Behaviour in NT 4, SP6: (presumably the same as GetShortPathNameA; TODO check)
@@ -1233,25 +1314,140 @@ DWORD WIN32API GetShortPathNameW(LPCWSTR lpszLongPath, LPWSTR lpszShortPath,
 DWORD WINAPI GetLongPathNameA( LPCSTR lpszShortPath, LPSTR lpszLongPath,
                                DWORD cchBuffer )
 {
- int length;
+  int tmplen;
+  char  short_name[MAX_PATHNAME_LEN];  /* Long pathname in Unix format */
+  WIN32_FIND_DATAA FindFileData;
+  HANDLE hFind;
+  DWORD sp = 0, lp = 0,attr;
+  LPSTR tmpshortpath,tmplongpath;
 
-  dprintf(("GetLongPathNameA %x %s %d", lpszShortPath, lpszLongPath, cchBuffer));
-  dprintf(("WARNING: WIN98 ONLY!!"));
+   dprintf(("GetLongPathNameA %s %x %d", lpszShortPath, lpszLongPath, cchBuffer));
   
-  if(!lpszShortPath) {
-      SetLastError(ERROR_INVALID_PARAMETER);
-      return 0;
-  }
+   if(!lpszShortPath) {
+     SetLastError(ERROR_INVALID_PARAMETER);
+     return 0;
+   }
 
-  length = lstrlenA(lpszShortPath) + 1;
-  if(length > cchBuffer) {
-      if(lpszLongPath) {
-          *lpszLongPath = 0;
+   if ( ( tmpshortpath = (char*) HeapAlloc ( GetProcessHeap(), 0, MAX_PATHNAME_LEN ) ) == NULL ) {
+      SetLastError ( ERROR_NOT_ENOUGH_MEMORY );
+      return 0;
+   }
+
+   if ( ( tmplongpath = (char*) HeapAlloc ( GetProcessHeap(), 0, MAX_PATHNAME_LEN ) ) == NULL ) {
+      SetLastError ( ERROR_NOT_ENOUGH_MEMORY );
+      return 0;
+   }
+  
+   lstrcpyA(tmpshortpath,lpszShortPath);
+
+   /* check for drive letter */
+   if ( lpszShortPath[1] == ':' ) {
+      tmplongpath[0] = lpszShortPath[0];
+      tmplongpath[1] = ':';
+      sp = 2;
+      lp = 2;
+   }
+
+   //todo: check drive validity!
+
+   while ( lpszShortPath[lp] ) {
+
+      /* check for path delimiters and reproduce them */
+      if ( lpszShortPath[lp] == '\\' || lpszShortPath[lp] == '/' ) {
+	if (!sp || tmplongpath[sp-1]!= '\\') 
+        {
+	    /* strip double "\\" */
+	    tmplongpath[sp] = '\\';
+	    sp++;
+        }
+        tmplongpath[sp]=0;/*terminate string*/
+	lp++;
+	continue;
       }
-      return(length); //return length required (including 0 terminator)
-  }
-  lstrcpyA(lpszLongPath, lpszShortPath);
-  return(length-1);
+
+      tmplen = strcspn ( lpszShortPath + lp, "\\/" ); 
+      lstrcpynA ( tmplongpath+sp, lpszShortPath + lp, tmplen+1 );
+
+      attr = GetFileAttributesA(tmplongpath);
+      if (attr != -1) 
+      {
+	sp += tmplen;
+	lp += tmplen;
+	continue;
+      }
+      else
+        // it may be hashed name or name with weird characters!
+        if ((tmplongpath+sp)[4] == '~')
+        {
+          //hashed entry Wine does linear dir search.. incredible.. we will be
+          //better ;)
+          if (strchr(tmplongpath+sp,'_'))
+          {
+            (tmplongpath+sp)[0] = '*';
+            (tmplongpath+sp)[1] = 0;
+          }  
+          else
+          {
+            (tmplongpath+sp)[4] = '*';
+            (tmplongpath+sp)[5] = 0;
+          }
+          hFind = FindFirstFileExA(tmplongpath, FindExInfoStandard, &FindFileData,
+                                   FindExSearchNameMatch, NULL, 0 );
+           
+          if (hFind == INVALID_HANDLE_VALUE)
+          {
+            //no possible variants!
+            SetLastError ( ERROR_FILE_NOT_FOUND );
+            HeapFree ( GetProcessHeap(), 0, tmpshortpath );
+            HeapFree ( GetProcessHeap(), 0, tmplongpath );
+            return 0;
+          }
+          else
+           do
+           {
+             DOSFS_Hash(FindFileData.cFileName, short_name, FALSE, TRUE );          
+             //this happens on files like [hello world]
+             if (!lstrncmpA(short_name, lpszShortPath+lp, (lpszShortPath+lp+tmplen)[-1] == '.' ? tmplen-1 : tmplen )) 
+             {
+               strcpy( tmplongpath+sp, FindFileData.cFileName);
+               sp += strlen ( tmplongpath+sp );
+               lp += tmplen;
+               break;
+             }
+            }
+            while (FindNextFileA(hFind, &FindFileData));
+            
+          // no FindClose() here or else GetLastError() will not give its error   
+          if (GetLastError() == ERROR_NO_MORE_FILES)
+          {
+             FindClose(hFind);
+             SetLastError ( ERROR_FILE_NOT_FOUND );
+             HeapFree ( GetProcessHeap(), 0, tmpshortpath );
+             HeapFree ( GetProcessHeap(), 0, tmplongpath );
+             return 0;
+          }
+          FindClose(hFind);
+        }
+        else 
+        {
+            // if this file can't be found in common or hashed files
+            // it does not exist
+            SetLastError ( ERROR_FILE_NOT_FOUND );
+            HeapFree ( GetProcessHeap(), 0, tmpshortpath );
+            HeapFree ( GetProcessHeap(), 0, tmplongpath );
+            return 0;
+        }
+   }
+   tmplongpath[sp] = 0;
+
+   lstrcpynA ( lpszLongPath, tmplongpath, cchBuffer );
+   dprintf(("returning %s\n", lpszLongPath));
+   tmplen = strlen ( lpszLongPath  );
+
+   HeapFree ( GetProcessHeap(), 0, tmpshortpath );
+   HeapFree ( GetProcessHeap(), 0, tmplongpath );
+
+   return tmplen;
 }
 //******************************************************************************
 //******************************************************************************
