@@ -1,4 +1,4 @@
-:userdoc.:title.OdinBug Help 0.5.7
+:userdoc.:title.OdinBug Help 0.5.8
 :docprof toc=123.
 .***************************************************
 .*** IPF-Generator Version 0.82 for Framework IV ***
