@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.10 1999-10-27 02:02:52 bird Exp $
+# $Id: Makefile,v 1.11 1999-10-27 15:14:15 bird Exp $
 #
 # Copyright 1998-1999 knut st. osmundsen
 #
@@ -211,8 +211,10 @@ $(OBJS) $(LIBS) last.lib $(OBJSINIT) /IG $(LIBSINIT) $(NAME).def
 <<
     @mapsym $*.map > nul
     $(CP) $@ $(PDWIN32_BIN)
-    copy win32k.sym c:\temp
-    copy win32k.sys c:\temp
+    $(CP) $*.sym $(PDWIN32_BIN)
+
+#    copy win32k.sym c:\temp
+#    copy win32k.sys c:\temp
 
 
 ################################################################################
