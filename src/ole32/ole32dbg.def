@@ -68,7 +68,7 @@ EXPORTS
     CreatePointerMoniker       = _DbgCreatePointerMoniker@8     @60
     CreateStreamOnHGlobal      = _DbgCreateStreamOnHGlobal@12   @61
     DllDebugObjectRPCHook      = _DbgDllDebugObjectRPCHook@0    @62
-    DllGetClassObject          = _DbgDllGetClassObject@12       @63
+    DllGetClassObject          = _DbgOLE32_DllGetClassObject@12       @63
     DllGetClassObjectWOW       = _DbgDllGetClassObjectWOW@0     @64
     DoDragDrop                 = _DbgDoDragDrop@16              @65
     EnableHookObject           = _DbgEnableHookObject@0         @66
