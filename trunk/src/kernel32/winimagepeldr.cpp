@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.93 2001-12-20 15:08:56 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.94 2001-12-22 12:34:06 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -75,8 +75,8 @@ char szErrorModule[128] = "";
 static FILE *_privateLogFile = NULL;
 #endif
 
-ULONG WIN32API MissingApiOrd(char *dllname, int ordinal);
-ULONG WIN32API MissingApiName(char *dllname, char *functionname);
+ULONG WIN32API MissingApiOrd(char *parentimage, char *dllname, int ordinal);
+ULONG WIN32API MissingApiName(char *parentimage, char *dllname, char *functionname);
 ULONG WIN32API MissingApi(char *message);
 
 //******************************************************************************
@@ -1277,15 +1277,18 @@ void Win32PeLdrImage::AddOff16Fixup(ULONG fixupaddr, BOOL fHighFixup)
     }
 }
 //******************************************************************************
-#define MISSINGOFFSET_PUSHORDINAL    1
-#define MISSINGOFFSET_PUSHNAME       1
-#define MISSINGOFFSET_PUSHDLLNAME    6
-#define MISSINGOFFSET_FUNCTION       11
+#define MISSINGOFFSET_PUSHNAME        1
+#define MISSINGOFFSET_PUSHORDINAL     1
+#define MISSINGOFFSET_PUSHDLLNAME     6
+#define MISSINGOFFSET_PUSHIMPORTIMAGE 11
+#define MISSINGOFFSET_FUNCTION        16
 
-char missingapicode[18] = {
+char missingapicode[23] = {
+//push  ordinal/name
+        0x68, 0x00, 0x00, 0x00, 0x00,
 //push  dllname
         0x68, 0x00, 0x00, 0x00, 0x00,
-//push  ordinal/name
+//push  image loading api
         0x68, 0x00, 0x00, 0x00, 0x00,
 //mov   ecx, MissingApiOrd/Name
         0xB9, 0x99, 0x99, 0x99, 0x99,
@@ -1312,6 +1315,7 @@ void Win32PeLdrImage::StoreImportByOrd(Win32ImageBase *WinImage, ULONG ordinal, 
         char *code = (char *)_cmalloc(sizeof(missingapicode));
 
         memcpy(code, missingapicode, sizeof(missingapicode));
+        *(DWORD *)&code[MISSINGOFFSET_PUSHIMPORTIMAGE] = (DWORD)getModuleName();
         *(DWORD *)&code[MISSINGOFFSET_PUSHDLLNAME] = (DWORD)WinImage->getModuleName();
         *(DWORD *)&code[MISSINGOFFSET_PUSHORDINAL] = ordinal;
         *(DWORD *)&code[MISSINGOFFSET_FUNCTION]    = (DWORD)MissingApiOrd;
@@ -1339,6 +1343,7 @@ void Win32PeLdrImage::StoreImportByName(Win32ImageBase *WinImage, char *impname,
         char *code = (char *)_cmalloc(sizeof(missingapicode));
 
         memcpy(code, missingapicode, sizeof(missingapicode));
+        *(DWORD *)&code[MISSINGOFFSET_PUSHIMPORTIMAGE] = (DWORD)getModuleName();
         *(DWORD *)&code[MISSINGOFFSET_PUSHDLLNAME] = (DWORD)WinImage->getModuleName();
         *(DWORD *)&code[MISSINGOFFSET_PUSHNAME]    = (DWORD)impname;
         *(DWORD *)&code[MISSINGOFFSET_FUNCTION]    = (DWORD)MissingApiName;
@@ -2026,20 +2031,20 @@ ULONG Win32PeLdrImage::getVersion()
 }
 //******************************************************************************
 //******************************************************************************
-ULONG WIN32API MissingApiOrd(char *dllname, int ordinal)
+ULONG WIN32API MissingApiOrd(char *parentimage, char *dllname, int ordinal)
 {
-   char message[128];
+   char message[256];
 
-   sprintf(message, "The application has called the non-existing api %s->%d", dllname, ordinal);
+   sprintf(message, "The application has called the non-existing api %s->%d (loaded by %s)", dllname, ordinal, parentimage);
    return MissingApi(message);
 }
 //******************************************************************************
 //******************************************************************************
-ULONG WIN32API MissingApiName(char *dllname, char *functionname)
+ULONG WIN32API MissingApiName(char *parentimage, char *dllname, char *functionname)
 {
-   char message[128];
+   char message[256];
 
-   sprintf(message, "The application has called the non-existing api %s->%s", dllname, functionname);
+   sprintf(message, "The application has called the non-existing api %s->%s (loaded by %s)", dllname, functionname, parentimage);
    return MissingApi(message);
 }
 //******************************************************************************
