@@ -1,10 +1,19 @@
- /* $Id: changelog,v 1.1176 2000-10-06 11:02:49 sandervl Exp $ */
+ /* $Id: changelog,v 1.1177 2000-10-06 15:13:40 sandervl Exp $ */
 
  2000-10-06: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: PE loader: no longer rely on section names, but on image
                 directories instead
                 Init console earlier. (before exe is loaded; some dlls want
                 to send output to the console while they're being loaded)
+                EnumResourceNamesW/EnumResourceTypesW fixes (strings not terminated)
+                CreateProcessA/W fix for setting current directory of new process;
+                Open32 ignores lpCurrentDirectory parameter
+    - PELDR:    Special parameter for setting current directory added (/OPT[CURDIR=x])
+    - USER32:   Ignore class background brush in DefDlgProc for WM_ERASEBKGND
+                (always use GetSysColorBrush(COLOR_BTNFACE))
+                (Wine does this and it fixes the 1st dialog of the Netscape 6 install)
+                OemToCharBuffA fix; put back special characters that got translated
+                to 0xff (fixes Netscape 6 install license edit control)
 
  2000-10-05: Michal Necasek <mike@mendelu.cz>
     - KERNEL32: FormatMessageA/W fix; message ids can be larger than 65535
