@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.42 1999-10-14 19:31:31 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.43 1999-10-17 15:46:08 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -1372,8 +1372,9 @@ int WIN32API GetKeyNameTextW( LPARAM lParam, LPWSTR lpString, int  nSize)
 //******************************************************************************
 SHORT WIN32API GetKeyState( int nVirtKey)
 {
+//SvL: Hehe. 32 MB logfile for Opera after a minute.
 #ifdef DEBUG
-    WriteLog("USER32:  GetKeyState %d\n", nVirtKey);
+//    WriteLog("USER32:  GetKeyState %d\n", nVirtKey);
 #endif
     return O32_GetKeyState(nVirtKey);
 }
@@ -1869,31 +1870,6 @@ BOOL WIN32API AnyPopup(VOID)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API EndDeferWindowPos( HDWP hWinPosInfo)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  EndDeferWindowPos\n");
-#endif
-    return O32_EndDeferWindowPos(hWinPosInfo);
-}
-//******************************************************************************
-//******************************************************************************
-HWND WIN32API FindWindowW( LPCWSTR lpClassName, LPCWSTR lpWindowName)
-{
- char *astring1 = UnicodeToAsciiString((LPWSTR)lpClassName);
- char *astring2 = UnicodeToAsciiString((LPWSTR)lpWindowName);
- HWND rc;
-
-#ifdef DEBUG
-    WriteLog("USER32:  FindWindowW\n");
-#endif
-    rc = O32_FindWindow(astring1, astring2);
-    FreeAsciiString(astring1);
-    FreeAsciiString(astring2);
-    return rc;
-}
-//******************************************************************************
-//******************************************************************************
 HWND WIN32API GetForegroundWindow(void)
 {
 #ifdef DEBUG
@@ -1937,17 +1913,6 @@ INT WIN32API ExcludeUpdateRgn( HDC hDC, HWND  hWnd)
 }
 //******************************************************************************
 //******************************************************************************
-#if 0
-int WIN32API GetUpdateRgn( HWND hWnd, HRGN hRgn, BOOL bErase)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetUpdateRgn\n");
-#endif
-    hWnd = Win32Window::Win32ToOS2Handle(hWnd);
-
-    return O32_GetUpdateRgn(hWnd,hRgn,bErase);
-}
-#endif
 /*****************************************************************************
  * Name      : int WIN32API GetWindowRgn
  * Purpose   : The GetWindowRgn function obtains a copy of the window region of a window.
@@ -2287,11 +2252,10 @@ int WIN32API MapWindowPoints( HWND hWndFrom, HWND hWndTo, LPPOINT lpPoints, UINT
 //******************************************************************************
 BOOL WIN32API ScreenToClient (HWND hwnd, LPPOINT pt)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  ScreenToClient\n");
-#endif
     Win32BaseWindow *wnd;
     PRECT rcl;
+
+    dprintf(("ScreenToClient %x (%d,%d)\n", hwnd, pt->x, pt->y));
 
     if (!hwnd) return (TRUE);
     wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
@@ -2301,23 +2265,11 @@ BOOL WIN32API ScreenToClient (HWND hwnd, LPPOINT pt)
     pt->y = ScreenHeight - pt->y;
     OSLibWinMapWindowPoints (OSLIB_HWND_DESKTOP, wnd->getOS2WindowHandle(), (OSLIBPOINT *)pt, 1);
     pt->y = (rcl->bottom - rcl->top) - pt->y;
+    dprintf(("ScreenToClient %x returned (%d,%d)\n", hwnd, pt->x, pt->y));
     return (TRUE);
 }
 
-/* Scroll Bar Functions */
-
-#if 0
-BOOL WIN32API ScrollDC( HDC arg1, int arg2, int arg3, const RECT * arg4, const RECT * arg5, HRGN arg6, PRECT  arg7)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  ScrollDC\n");
-#endif
-    return O32_ScrollDC(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
-}
-#endif
-
 /* Icon Functions */
-
 int WIN32API LookupIconIdFromDirectory(PBYTE presbits, BOOL fIcon)
 {
 #ifdef DEBUG
