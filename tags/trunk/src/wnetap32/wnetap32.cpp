@@ -1,4 +1,4 @@
-/* $Id: wnetap32.cpp,v 1.13 2000-12-12 02:43:26 phaller Exp $ */
+/* $Id: wnetap32.cpp,v 1.14 2001-04-04 09:02:16 sandervl Exp $ */
 
 /*
  *
@@ -32,6 +32,7 @@
 #include <odinwrap.h>
 #include <os2win.h>
 #include <misc.h>
+#include <unicode.h>
 #include <heapstring.h>
 #include <string.h>
 

@@ -1,4 +1,4 @@
-/* $Id: mci.cpp,v 1.6 2000-12-03 22:18:17 sandervl Exp $ */
+/* $Id: mci.cpp,v 1.7 2001-04-04 09:02:16 sandervl Exp $ */
 
 /*
  * MCI functions
@@ -356,19 +356,6 @@ ODINFUNCTION3(BOOL, mciSetYieldProc,
 #define GET_EIP()    0
 #define SET_EIP(ptr) /* nothing */
 #endif  /* __GNUC__ */
-
-/***********************************************************************
- *           HEAP_strdupA
- */
-static LPSTR HEAP_strdupA( HANDLE heap, DWORD flags, LPCSTR str )
-{
-    LPSTR p = (LPSTR) HeapAlloc( heap, flags, strlen(str) + 1 );
-    if(p) {
-      //SET_EIP(p);
-      strcpy( p, str );
-    }
-    return p;
-}
 
 
 /**************************************************************************/

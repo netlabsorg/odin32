@@ -1,4 +1,4 @@
-/* $Id: fillfunc.cpp,v 1.3 2001-03-18 21:44:44 mike Exp $ */
+/* $Id: fillfunc.cpp,v 1.4 2001-04-04 09:02:15 sandervl Exp $ */
 
 /*
  * ColorFill functions
@@ -9,6 +9,9 @@
  *
  */
 
+#define INCL_BASE
+#include <os2wrap.h>
+#include <win32type.h>
 #include <memory.h>
 #include <misc.h>
 #include "fillfunc.h"

@@ -1,4 +1,4 @@
-/* $Id: joy.cpp,v 1.8 2000-08-02 17:30:05 bird Exp $ */
+/* $Id: joy.cpp,v 1.9 2001-04-04 09:02:16 sandervl Exp $ */
 /*
  * Odin Joystick apis
  *
@@ -144,7 +144,7 @@ ODINFUNCTION3(MMRESULT, joyGetDevCapsW,
     {
       lpCaps->wMid = MM_MICROSOFT;
       lpCaps->wPid = MM_PC_JOYSTICK;
-      AsciiToUnicode("OS/2 Joystick", lpCaps->szPname);
+      lstrcpyW(lpCaps->szPname, (LPWSTR)L"OS/2 Joystick");
       lpCaps->wXmin = 0;
       lpCaps->wXmax = 0xffff;
       lpCaps->wYmin = 0;
@@ -165,8 +165,8 @@ ODINFUNCTION3(MMRESULT, joyGetDevCapsW,
       lpCaps->wMaxAxes = 4;
       lpCaps->wNumAxes = 2;
       lpCaps->wMaxButtons = 2;
-      AsciiToUnicode("",lpCaps->szRegKey);
-      AsciiToUnicode("",lpCaps->szOEMVxD);
+      lpCaps->szRegKey[0] = 0;
+      lpCaps->szOEMVxD[0] = 0;
       dprintf(("OK!!!\n"));
       return JOYERR_NOERROR;
     }

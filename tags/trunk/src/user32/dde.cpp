@@ -1,4 +1,4 @@
-/* $Id: dde.cpp,v 1.11 2001-03-28 16:20:32 sandervl Exp $ */
+/* $Id: dde.cpp,v 1.12 2001-04-04 09:01:24 sandervl Exp $ */
 
 /*
  * Win32 default window API functions for OS/2
@@ -11,6 +11,8 @@
  */
 #include <os2win.h>
 #include <misc.h>
+#include <unicode.h>
+
 #define DBG_LOCALLOG	DBG_dde
 #include "dbglocal.h"
 

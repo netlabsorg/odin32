@@ -1,4 +1,4 @@
-/* $Id: ddraw.CPP,v 1.18 2001-03-20 23:18:55 mike Exp $ */
+/* $Id: ddraw.CPP,v 1.19 2001-04-04 09:02:15 sandervl Exp $ */
 
 /*
  * DXDraw DLL implementaion
@@ -13,6 +13,7 @@
  *
  */
 
+#include <odin.h>
 #include <memory.h>
 #include <stdio.h>
 #define INITGUID

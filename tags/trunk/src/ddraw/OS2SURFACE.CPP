@@ -1,4 +1,4 @@
-/* $Id: OS2SURFACE.CPP,v 1.31 2001-04-02 18:21:10 sandervl Exp $ */
+/* $Id: OS2SURFACE.CPP,v 1.32 2001-04-04 09:02:14 sandervl Exp $ */
 
 /*
  * DirectDraw Surface class implementaion
@@ -10,6 +10,7 @@
  *
  */
 
+#include <odin.h>
 #include <stdlib.h>
 #include <string.h>
 #include <memory.h>

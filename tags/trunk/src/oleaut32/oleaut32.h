@@ -1,4 +1,4 @@
-/* $Id: oleaut32.h,v 1.9 2000-12-24 14:39:54 sandervl Exp $ */
+/* $Id: oleaut32.h,v 1.10 2001-04-04 09:02:15 sandervl Exp $ */
 /*
  * Win32 OLE stubs for OS/2
  *
@@ -50,6 +50,7 @@
 
 #include <heapstring.h>
 #include <misc.h>
+#include <unicode.h>
 
 extern int 	loadNr;
 extern char 	oleaut32Path[];
