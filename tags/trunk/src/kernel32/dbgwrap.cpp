@@ -655,6 +655,21 @@ DEBUGWRAP8(GetLogicalDriveStringsW);
 DEBUGWRAP0(GetLogicalDrives);
 
 
+NODEF_DEBUGWRAP8(FindFirstVolumeA);
+NODEF_DEBUGWRAP8(FindFirstVolumeW);
+NODEF_DEBUGWRAP12(FindNextVolumeA);
+NODEF_DEBUGWRAP12(FindNextVolumeW);
+NODEF_DEBUGWRAP4(FindVolumeClose);
+
+NODEF_DEBUGWRAP12(FindFirstVolumeMountPointA);
+NODEF_DEBUGWRAP12(FindFirstVolumeMountPointW);
+NODEF_DEBUGWRAP12(FindNextVolumeMountPointA);
+NODEF_DEBUGWRAP12(FindNextVolumeMountPointW);
+NODEF_DEBUGWRAP4(FindVolumeMountPointClose);
+  
+NODEF_DEBUGWRAP12(GetVolumeNameForVolumeMountPointA);
+NODEF_DEBUGWRAP12(GetVolumeNameForVolumeMountPointW);
+
 #undef DBG_LOCALLOG
 #define DBG_LOCALLOG    DBG_mailslot
 DEBUGWRAP16(CreateMailslotA);
@@ -718,7 +733,7 @@ DEBUGWRAP4(GetPriorityClass);
 DEBUGWRAP8(FatalAppExitA);
 DEBUGWRAP8(FatalAppExitW);
 DEBUGWRAP4(FatalExit);
-DEBUGWRAP4(Sleep);
+DEBUGWRAP_LVL2_4(Sleep);
 DEBUGWRAP8(SleepEx);
 DEBUGWRAP8(WinExec);
 DEBUGWRAP4(GetStartupInfoA);
