@@ -1,4 +1,4 @@
-/* $Id: winconst.h,v 1.25 2000-02-10 00:34:15 sandervl Exp $ */
+/* $Id: winconst.h,v 1.26 2000-02-15 14:38:07 sandervl Exp $ */
 
 /*
  * Win32 constants
@@ -1042,3 +1042,18 @@
 #define FILE_MAP_WRITE_W                0x00000002
 #define FILE_MAP_READ_W                 0x00000004
 #define FILE_MAP_ALL_ACCESS_W           0x000f001f
+
+#define SND_SYNC_W            	0x0000  /* play synchronously (default) */
+#define SND_ASYNC_W           	0x0001  /* play asynchronously */
+#define SND_NODEFAULT_W       	0x0002  /* don't use default sound */
+#define SND_MEMORY_W          	0x0004  /* lpszSoundName points to a memory file */
+#define SND_LOOP_W            	0x0008  /* loop the sound until next sndPlaySound */
+#define SND_NOSTOP_W          	0x0010  /* don't stop any currently playing sound */
+
+#define SND_NOWAIT_W		0x00002000L /* don't wait if the driver is busy */
+#define SND_ALIAS_W       	0x00010000L /* name is a registry alias */
+#define SND_ALIAS_ID_W		0x00110000L /* alias is a predefined ID */
+#define SND_FILENAME_W    	0x00020000L /* name is file name */
+#define SND_RESOURCE_W    	0x00040004L /* name is resource name or atom */
+#define SND_PURGE_W		0x00000040L /* purge all sounds */
+#define SND_APPLICATION_W     	0x00000080L /* look for application specific association */
