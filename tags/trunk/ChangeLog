@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.1437 2001-05-22 14:24:52 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1438 2001-05-23 08:35:20 sandervl Exp $ */
+
+ 2001-05-23: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o RedrawWindow with desktop window handle no longer returns
+                  an error.
 
  2001-05-22: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMCTL32: o Partial merge of listview control with latest Wine
