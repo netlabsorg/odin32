@@ -1,4 +1,4 @@
-/* $Id: lang.cpp,v 1.31 2000-11-21 11:35:08 sandervl Exp $ */
+/* $Id: lang.cpp,v 1.32 2001-04-03 14:10:47 sandervl Exp $ */
 /*
  * Win32 language API functions for OS/2
  *
@@ -140,13 +140,6 @@ ULONG GetLanguageId()
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API IsValidCodePage(UINT CodePage)
-{
-  dprintf(("KERNEL32:  IsValidCodePage %d not implemented", CodePage));
-  return(TRUE);
-}
-//******************************************************************************
-//******************************************************************************
 LCID WIN32API GetUserDefaultLCID(void)
 {
   dprintf2(("KERNEL32: GetUserDefaultLCID: returns %x", MAKELCID(GetLanguageId(), SORT_DEFAULT)));
@@ -156,8 +149,8 @@ LCID WIN32API GetUserDefaultLCID(void)
 //******************************************************************************
 LCID WIN32API GetSystemDefaultLCID(void)
 {
-  dprintf2(("KERNEL32: GetSystemDefaultLCID: returns %x", MAKELCID(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US), SORT_DEFAULT)));
-  return(MAKELCID(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US), SORT_DEFAULT));        //US English
+  dprintf2(("KERNEL32: GetSystemDefaultLCID: returns %x", GetUserDefaultLCID()));
+  return GetUserDefaultLCID();
 }
 //******************************************************************************
 //******************************************************************************
@@ -170,8 +163,8 @@ LANGID WIN32API GetUserDefaultLangID()
 //******************************************************************************
 LANGID WIN32API GetSystemDefaultLangID(void)
 {
-  dprintf2(("KERNEL32: GetSystemDefaultLangID returns %x", MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US)));
-  return(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US));
+  dprintf2(("KERNEL32: GetSystemDefaultLangID returns %x", GetUserDefaultLangID()));
+  return GetUserDefaultLangID();
 }
 
 //******************************************************************************

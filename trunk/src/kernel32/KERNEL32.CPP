@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.62 2001-03-31 10:39:01 sandervl Exp $ */
+/* $Id: KERNEL32.CPP,v 1.63 2001-04-03 14:10:47 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -169,14 +169,6 @@ VOID WIN32API SetLastError( DWORD dwError)
 }
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API GetOEMCP(VOID)
-{
-  dprintf(("KERNEL32:  GetOEMCP\n"));
-  return(O32_GetOEMCP());
-}
-//******************************************************************************
-//******************************************************************************
-
 /*
  * PH 2000/09/25 This is an experiment to overcome some problems
  * with Open32's GMS variant.
@@ -275,13 +267,6 @@ BOOL WIN32API IsBadHugeWritePtr( PVOID arg1, UINT  arg2)
 {
     dprintf(("KERNEL32: IsBadHugeWritePtr\n"));
     return O32_IsBadHugeWritePtr(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API IsDBCSLeadByte(BYTE arg1)
-{
-    dprintf2(("KERNEL32:  IsDBCSLeadByte %x", arg1));
-    return O32_IsDBCSLeadByte(arg1);
 }
 //******************************************************************************
 //******************************************************************************
@@ -409,13 +394,6 @@ VOID WIN32API RtlZeroMemory(LPVOID ptr,
          len);
 }
 
-//******************************************************************************
-/*KSO Thu 21.05.1998*/
-BOOL WIN32API IsDBCSLeadByteEx(UINT CodePage, BYTE TestChar)
-{
-    dprintf(("KERNEL32:  OS2IsDBCSLeadByteEx - not correctly implemented\n"));
-    return O32_IsDBCSLeadByte(TestChar);
-}
 //******************************************************************************
 
 

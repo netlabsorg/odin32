@@ -51,6 +51,7 @@
 #include <cpuhlp.h>
 #include <Win32k.h>
 #include <initdll.h>
+#include <codepage.h>
 
 #define DBG_LOCALLOG    DBG_initterm
 #include "dbglocal.h"
@@ -177,6 +178,9 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
             rc = DosQuerySysInfo(QSV_NUMPROCESSORS, QSV_NUMPROCESSORS, &ulSysinfo, sizeof(ulSysinfo));
             if (rc != 0)
                 ulSysinfo = 1;
+
+            /* Setup codepage info */
+            CODEPAGE_Init();
 
             InitSystemInfo(ulSysinfo);
             //Set up environment as found in NT
