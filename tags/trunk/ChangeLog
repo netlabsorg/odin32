@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.943 2000-05-18 09:09:34 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.944 2000-05-18 18:05:09 sandervl Exp $ */
 
  2000-05-18: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: EnumResourceNamesA bugfix (wrong length in UnicodeToAsciiN call)
@@ -7,6 +7,13 @@
                 exceptions inside WriteLog.
     - WSOCK32:  Mark cancelled async select to avoid finding it before the
                 thread removes itself from the queue
+    - SHELL32:  Removed Path* functions; added forwarders to shlwapi.dll
+    - SHLWAPI:  Merged path function with Wine 20000430 (shellpath.cpp)
+                Added DllGetVersion export.
+                Added SHCreateStdEnumFmtEtc, CIDLData_CreateFromIDArray, SHFindFiles
+                SHFindComputer + other apis used by IE5 (stubs)
+    - COMCTL32: Added export 389 (return 0 as in NT 4) & 390 (stub); IE5 needs them
+                Added DPA_LoadStream & DPA_SaveStream (Wine port)
 
  2000-05-16: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMDLG32: Fixed shlwapi imports (GetProcAddress failed for PathFindFileNameA
