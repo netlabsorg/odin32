@@ -1,66 +1,76 @@
-##############################################################################
-# $Id: makefile,v 1.4 2000-11-19 09:02:05 bird Exp $
+# $Id: makefile,v 1.5 2000-12-02 23:32:41 bird Exp $
+
 #
-# PD-Win32 API
+# Odin32 API
 #
 #       Win32kCC.exe makefile
 #
-##############################################################################
 
-##############################################################################
-# Include
-##############################################################################
+
+#
+# Tell buildenvironment that we're making an exe and to invoke additional dep rule
+#
 EXETARGET=1
-NO_DEP_RULE=1
-!include ..\makefile.inc
-!include $(PDWIN32_INCLUDE)\pdwin32.mk
+ADDITIONAL_DEP = mydep
+WIN32KINCLUDE = ..\include
 
-##############################################################################
-# Object extention
-##############################################################################
-OBJEXT          = obj
 
-##############################################################################
+#
+# Compiler, tools, and interference rules thru the win32k makefile.inc file.
+#
+!include ..\..\..\makefile.inc
+
+
+#
 # Tools and Flags Addjustments
-##############################################################################
+#  (The author of this is kinda SM when it comes to warnings... ;-)
+#
 CINCLUDES  = -I$(WIN32KINCLUDE) $(CINCLUDES)
 CDEFINES   = $(CDEFINES) -DRING3
 !if "$(VAC3)" == "1" | "$(VAC36)" == "1"
 CFLAGS     = $(CFLAGS)   -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext-
 CXXFLAGS   = $(CXXFLAGS) -Wall+ppt-ppc-inl-cnv-gnr-vft-
 !endif
-LD2FLAGS   = $(LD2FLAGS) /pmtype:pm
 
 
-##############################################################################
-# Main targets.
-##############################################################################
-TARGET = Win32kCC
+#
+# Object files. Prefix with OBJDIR and one space before the '\'.
+#
+OBJS = \
+$(OBJDIR)\Win32kCC.obj
 
-OBJS   = \
-$(OBJDIR)\Win32kCC.$(OBJEXT)
 
-LIBS   = \
+#
+# Libraries. One space before the '\'.
+#
+LIBS = \
 $(RTLLIB) \
-$(PDWIN32_LIB)\win32k.lib \
+$(ODIN32_LIB)\win32k.lib \
 os2386.lib
 
+
+#
+# OS/2 resources.
+#
 OS2RES = \
 $(OBJDIR)\$(TARGET).res
 
 
-##############################################################################
+#
+# Target name - name of the exe without extention and path.
+#
+TARGET = Win32kCC
+
+
+#
 # Includes the common rules.
-##############################################################################
-!include $(PDWIN32_INCLUDE)\pdwin32.post
+#
+!include $(ODIN32_POST_INC)
 
 
-##############################################################################
+#
 # Dependencies.
-##############################################################################
-dep:
-    $(DEPEND) @<<
-        -obj$(OBJEXT) -o$$(OBJDIR) $(CINCLUDES) -I$(PDWIN32_INCLUDE)
-        *.cpp *.c *.h *.rc *.dlg ..\include\*.h
-<<
+#
+mydep:
+    $(DEPEND) -a -o$$(OBJDIR) $(CINCLUDES) $(WIN32KINCLUDE)\*.h
 

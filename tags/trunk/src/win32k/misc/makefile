@@ -1,18 +1,20 @@
 ##############################################################################
-# $Id: makefile,v 1.1 2000-01-24 18:19:00 bird Exp $
+# $Id: makefile,v 1.2 2000-12-02 23:32:40 bird Exp $
 #
-# PD-Win32 API
+# Odin32 API
 #
 #       heaptest.exe makefile
 #
 ##############################################################################
 
+!error "don't think this makefile is up-to-date any longer."
+
 ##############################################################################
 # Directories
 ##############################################################################
-PDWIN32_INCLUDE = ..\..\..\include
-PDWIN32_LIB     = ..\..\..\lib
-PDWIN32_BIN     = ..\..\..\bin
+ODIN32_INCLUDE = ..\..\..\include
+ODIN32_LIB     = ..\..\..\lib
+ODIN32_BIN     = ..\..\..\bin
 HEAPTESTOBJ     = ..\object
 HEAPTESTLIST    = ..\list
 WIN32KBASE      = ..
@@ -24,15 +26,16 @@ OBJEXT = t1_obj
 ##############################################################################
 # Include
 ##############################################################################
-!include $(PDWIN32_INCLUDE)\pdwin32.mk
+OLD_STYLE=1
+!include ../../../makefile.inc
 
 
 ##############################################################################
 # Tools and Flags Addjustments
 ##############################################################################
-CFLAGS     = $(CFLAGS)   -DRING3 -I$(PDWIN32_INCLUDE) -I$(WIN32K_INCLUDE) -DHEAPTEST \
+CFLAGS     = $(CFLAGS)   -DRING3 -I$(ODIN32_INCLUDE) -I$(WIN32K_INCLUDE) -DHEAPTEST \
              -Ge+ -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext-trd- -Gm- -Gn- -Ti+ -Rn
-CXXFLAGS   = $(CXXFLAGS) -DRING3 -I$(PDWIN32_INCLUDE) -I$(WIN32K_INCLUDE) -DHEAPTEST \
+CXXFLAGS   = $(CXXFLAGS) -DRING3 -I$(ODIN32_INCLUDE) -I$(WIN32K_INCLUDE) -DHEAPTEST \
              -Ge+ -Wall+ppt-ppc-inl-cnv-gnr-vft- -Gm- -Gn- -Ti+ -Gx -Rn
 
 LD         = ilink
@@ -103,7 +106,7 @@ all: $(TARGET).exe
 $(TARGET).exe: $(OBJS)
     @echo linking $@
     $(LD) $(LDFLAGS) $** $(RTLLIB)
-    $(CP) $@ $(PDWIN32_BIN)
+    $(CP) $@ $(ODIN32_BIN)
 
 
 ##############################################################################
