@@ -1,4 +1,4 @@
-/* $Id: hmparport.cpp,v 1.1 2001-11-08 14:49:27 phaller Exp $ */
+/* $Id: hmparport.cpp,v 1.2 2001-11-08 15:10:39 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -25,29 +25,28 @@
 
 #define MAGIC_PARPORT 0x4c505431
 
+#define IOCTL_PRINTER                      0x0005
+#define PRT_QUERYJOBHANDLE                 0x0021
+#define PRT_SETFRAMECTL                    0x0042
+#define PRT_SETINFINITERETRY               0x0044
+#define PRT_INITPRINTER                    0x0046
+#define PRT_ACTIVATEFONT                   0x0048
+#define PRT_SETPRINTJOBTITLE               0x004D
+#define PRT_SETIRQTIMEOUT                  0x004E
+#define PRT_SETCOMMMODE                    0x0052
+#define PRT_SETDATAXFERMODE                0x0053
+#define PRT_GETFRAMECTL                    0x0062
+#define PRT_GETINFINITERETRY               0x0064
+#define PRT_GETPRINTERSTATUS               0x0066
+#define PRT_QUERYACTIVEFONT                0x0069
+#define PRT_VERIFYFONT                     0x006A
+#define PRT_QUERYIRQTIMEOUT                0x006E
+#define PRT_QUERYCOMMMODE                  0x0072
+#define PRT_QUERYDATAXFERMODE              0x0073
+#define PRT_QUERDEVICEID                   0x0074
+
+
 #if 0
-
-#define IOCTL_ASYNC          0x01
-#define ASYNC_GETDCBINFO     0x73
-#define ASYNC_SETDCBINFO     0x53
-#define ASYNC_SETLINECTRL    0x42
-#define ASYNC_GETCOMMEVENT   0x72
-#define ASYNC_EXTGETBAUDRATE 0x63
-#define ASYNC_EXTSETBAUDRATE 0x43
-#define ASYNC_GETCOMMERROR   0x6D
-#define ASYNC_GETCOMMSTATUS  0x65
-#define ASYNC_GETINQUECOUNT  0x68
-#define ASYNC_GETOUTQUECOUNT 0x69
-#define ASYNC_GETMODEMINPUT  0x67
-#define ASYNC_TRANSMITIMM    0x44
-#define ASYNC_SETBREAKON     0x4B
-#define ASYNC_SETBREAKOFF    0x45
-#define ASYNC_SETMODEMCTRL   0x46
-#define ASYNC_STARTTRANSMIT  0x48
-#define ASYNC_STOPTRANSMIT   0x47
-#define ASYNC_GETMODEMOUTPUT 0x66
-
-
 #pragma pack(1)
 typedef struct _DCBINFO
 {
@@ -432,3 +431,125 @@ BOOL HMDeviceParPortClass::ReadFileEx(PHMHANDLEDATA pHMHandleData,
   return FALSE;
 }
 
+BOOL HMDeviceParPortClass::GetCommProperties( PHMHANDLEDATA pHMHandleData,
+                                           LPCOMMPROP lpcmmp)
+{
+  APIRET rc;
+  ULONG ulLen;
+  int i;
+  dprintf(("HMDeviceParPortClass::GetCommProperties"));
+  
+#if 0
+  USHORT COMErr;
+  EXTBAUDGET BaudInfo;
+  ulLen = sizeof(EXTBAUDGET);
+  rc = OSLibDosDevIOCtl( pHMHandleData->hHMHandle,
+                    IOCTL_ASYNC,
+                    ASYNC_EXTGETBAUDRATE,
+                    0,0,0,
+                        &BaudInfo,ulLen,&ulLen);
+#endif
+  rc = NO_ERROR;
+  
+  memset(lpcmmp,0,sizeof(COMMPROP));
+  lpcmmp->wPacketLength  = sizeof(COMMPROP);
+  lpcmmp->wPacketVersion = 1; //???
+  lpcmmp->dwProvSubType =  PST_PARALLELPORT;
+  
+#if 0
+  lpcmmp->dwServiceMask  = SP_SERIALCOMM;
+  for(i=0;i<BaudTableSize && BaudInfo.ulMaxBaud <= BaudTable[i].dwBaudRate;i++);
+  lpcmmp->dwMaxBaud      = BaudTable[i].dwBaudFlag;
+  lpcmmp->dwProvCapabilities = PCF_DTRDSR | PCF_PARITY_CHECK |
+                               PCF_RTSCTS | PCF_SETXCHAR |
+                               PCF_XONXOFF;
+  lpcmmp->dwSettableParams   = SP_BAUD | SP_DATABITS |
+                               SP_HANDSHAKEING | SP_PARITY |
+                               SP_PARITY_CHECK | SP_STOPBIT;
+  lpcmmp->dwSettableBaud = 0;
+  for(i=0;i<BaudTableSize;i++)
+  {
+    if ( (BaudTable[i].dwBaudRate>=BaudInfo.ulMinBaud) &&
+         (BaudTable[i].dwBaudRate<=BaudInfo.ulMaxBaud) )
+      lpcmmp->dwSettableBaud |= BaudTable[i].dwBaudFlag;
+  }
+  lpcmmp->dwSettableBaud |= BAUD_USER;
+  lpcmmp->wSettableData = DATABITS_5 | DATABITS_6 | DATABITS_7 | DATABITS_8;
+  lpcmmp->wSettableStopParity = STOPBITS_10 | STOPBITS_15 | STOPBITS_20 |
+                                PARITY_NONE | PARITY_ODD | PARITY_EVEN |
+    PARITY_MARK | PARITY_SPACE;
+#endif
+  
+  return(rc==0);
+}
+
+BOOL HMDeviceParPortClass::ClearCommError( PHMHANDLEDATA pHMHandleData,
+                                          LPDWORD lpdwErrors,
+                                          LPCOMSTAT lpcst)
+{
+  APIRET rc;
+  ULONG ulLen;
+  USHORT COMErr;
+
+  dprintf(("HMDeviceParPortClass::ClearCommError"));
+  ulLen = sizeof(USHORT);
+  
+  *lpdwErrors = 0;
+  rc = NO_ERROR;
+  
+#if 0
+  // ParPort: CE_DNS, CE_OOP CE_PTO
+  
+  rc = OSLibDosDevIOCtl( pHMHandleData->hHMHandle,
+                    IOCTL_ASYNC,
+                    ASYNC_GETCOMMERROR,
+                    0,0,0,
+                    &COMErr,2,&ulLen);
+  *lpdwErrors |= (COMErr & 0x0001)?CE_OVERRUN:0;
+  *lpdwErrors |= (COMErr & 0x0002)?CE_RXOVER:0;
+  *lpdwErrors |= (COMErr & 0x0004)?CE_RXPARITY:0;
+  *lpdwErrors |= (COMErr & 0x0008)?CE_FRAME:0;
+
+  if(lpcst)
+  {
+    UCHAR ucStatus;
+    RXQUEUE qInfo;
+    ulLen = 1;
+    rc = OSLibDosDevIOCtl( pHMHandleData->hHMHandle,
+                      IOCTL_ASYNC,
+                      ASYNC_GETCOMMSTATUS,
+                      0,0,0,
+                      &ucStatus,ulLen,&ulLen);
+    if(!rc)
+    {
+      lpcst->fCtsHold  = ((ucStatus & 0x01)>0);
+      lpcst->fDsrHold  = ((ucStatus & 0x02)>0);
+      lpcst->fRlsdHold = FALSE;//(ucStatus & 0x04)>0);
+      lpcst->fXoffHold = ((ucStatus & 0x08)>0);
+      lpcst->fXoffSend = ((ucStatus & 0x10)>0);
+      lpcst->fEof      = ((ucStatus & 0x20)>0);// Is break = Eof ??
+      lpcst->fTxim     = ((ucStatus & 0x40)>0);
+
+      ulLen = sizeof(qInfo);
+      rc = OSLibDosDevIOCtl( pHMHandleData->hHMHandle,
+                        IOCTL_ASYNC,
+                        ASYNC_GETINQUECOUNT,
+                        0,0,0,
+                        &qInfo,ulLen,&ulLen);
+      if(!rc)
+      {
+        lpcst->cbInQue   = qInfo.cch;
+        rc = OSLibDosDevIOCtl( pHMHandleData->hHMHandle,
+                          IOCTL_ASYNC,
+                          ASYNC_GETOUTQUECOUNT,
+                          0,0,0,
+                          &qInfo,ulLen,&ulLen);
+        if(!rc)
+          lpcst->cbOutQue = qInfo.cch;
+      }
+    }
+  }
+#endif
+  
+  return(rc==0);
+}
