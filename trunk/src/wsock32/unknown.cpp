@@ -1,4 +1,4 @@
-/* $Id: unknown.cpp,v 1.4 1999-12-07 20:25:48 achimha Exp $ */
+/* $Id: unknown.cpp,v 1.5 2000-03-22 18:46:18 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -14,19 +14,12 @@
 #include <os2wrap.h>
 #include <misc.h>
 #include <odinwrap.h>
+#include "wsock32.h"
 
+#define DBG_LOCALLOG	DBG_unknown
+#include "dbglocal.h"
 
 ODINDEBUGCHANNEL(WSOCK32-UNKNOWN)
-
-/*****************************************************************************
- * Prototypes & Types & Defines                                              *
- *****************************************************************************/
-
-typedef int SOCKET;
-
-int _System rexec(char **, int, char *, char *, char *, int *);
-int _System rcmd (char **, int, const char *, const char *, const char *, int *);
-
 
 /*****************************************************************************
  *
@@ -104,7 +97,7 @@ ODINFUNCTION6(int, OS2rcmd, LPSTR*,     lppArg1,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION4(int, OS2WSARecvEx, SOCKET,    s,
+ODINFUNCTION4(int, WSARecvEx, SOCKET,    s,
                                  char FAR*, buf,
                                  int,       len,
                                  int FAR *,flags)
