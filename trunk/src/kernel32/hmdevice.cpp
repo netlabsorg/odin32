@@ -1,4 +1,4 @@
-/* $Id: hmdevice.cpp,v 1.27 2001-06-19 10:50:23 sandervl Exp $ */
+/* $Id: hmdevice.cpp,v 1.28 2001-06-21 21:07:53 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -982,57 +982,6 @@ BOOL HMDeviceHandler::ResetEvent(PHMHANDLEDATA pHMHandleData)
 
 
 
-/*****************************************************************************
- * Name      : DWORD HMDeviceHandler::WaitForSingleObject
- * Purpose   : object synchronization
- * Parameters: PHMHANDLEDATA pHMHandleData
- *             DWORD dwTimeout
- * Variables :
- * Result    : API returncode
- * Remark    :
- * Status    :
- *
- * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
- *****************************************************************************/
-
-DWORD HMDeviceHandler::WaitForSingleObject(PHMHANDLEDATA pHMHandleData,
-                                               DWORD         dwTimeout)
-{
-  dprintf(("KERNEL32: HandleManager::DeviceHandler::WaitForSingleObject(%08xh,%08h)\n",
-           pHMHandleData->hHMHandle,
-           dwTimeout));
-
-  return(ERROR_INVALID_FUNCTION);
-}
-
-
-/*****************************************************************************
- * Name      : DWORD HMDeviceHandler::WaitForSingleObjectEx
- * Purpose   : object synchronization
- * Parameters: PHMHANDLEDATA pHMHandleData
- *             DWORD dwTimeout
- *             BOOL  fAlertable
- * Variables :
- * Result    : API returncode
- * Remark    :
- * Status    :
- *
- * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
- *****************************************************************************/
-
-DWORD HMDeviceHandler::WaitForSingleObjectEx(PHMHANDLEDATA pHMHandleData,
-                                                 DWORD         dwTimeout,
-                                                 BOOL          fAlertable)
-{
-  dprintf(("KERNEL32: HandleManager::DeviceHandler::WaitForSingleObjectEx(%08xh,%08h,%08xh) not implemented correctly.\n",
-           pHMHandleData->hHMHandle,
-           dwTimeout,
-           fAlertable));
-
-  //@@@PH: WARNING mapped to WaitForSingleObject simply. fAlertable missing!
-  return(ERROR_INVALID_FUNCTION);
-}
-
 
 /*****************************************************************************
  * Name      : DWORD HMDeviceHandler::FlushFileBuffers
@@ -1891,4 +1840,84 @@ BOOL HMDeviceHandler::SetMailslotInfo(PHMHANDLEDATA pHMHandleData,
               pHMHandleData->hHMHandle, dwReadTimeout));
 
     return(FALSE);
+}
+/*****************************************************************************
+ * Name      : BOOL HMDeviceHandler::WaitForSingleObject
+ * Purpose   :
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+DWORD HMDeviceHandler::WaitForSingleObject(PHMHANDLEDATA pHMHandleData,
+                                           DWORD  dwTimeout)
+{
+    dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::WaitForSingleObject %08x %x",
+              pHMHandleData->hHMHandle, dwTimeout));
+
+    return WAIT_FAILED;
+}
+/*****************************************************************************
+ * Name      : BOOL HMDeviceHandler::WaitForSingleObject
+ * Purpose   :
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+DWORD HMDeviceHandler::WaitForSingleObjectEx(PHMHANDLEDATA pHMHandleData,
+                                             DWORD  dwTimeout,
+                                             BOOL   fAlertable)
+{
+    dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::WaitForSingleObjectEx %08x %x %d",
+              pHMHandleData->hHMHandle, dwTimeout, fAlertable));
+
+    return WAIT_FAILED;
+}
+/*****************************************************************************
+ * Name      : BOOL HMDeviceHandler::MsgWaitForMultipleObjects
+ * Purpose   :
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+DWORD HMDeviceHandler::MsgWaitForMultipleObjects(PHMHANDLEDATA pHMHandleData,
+                                          DWORD      nCount,
+                                          LPHANDLE       pHandles,
+                                          BOOL       fWaitAll,
+                                          DWORD      dwMilliseconds,
+                                          DWORD      dwWakeMask)
+{
+    dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::MsgWaitForMultipleObjects %08x %d %x %d %d %x",
+              pHMHandleData->hHMHandle, nCount, pHandles, fWaitAll, dwMilliseconds, dwWakeMask));
+
+    return WAIT_FAILED;
+}
+/*****************************************************************************
+ * Name      : BOOL HMDeviceHandler::WaitForMultipleObjects
+ * Purpose   :
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+DWORD HMDeviceHandler::WaitForMultipleObjects (PHMHANDLEDATA pHMHandleData,
+                                               DWORD   cObjects,
+                                               PHANDLE lphObjects,
+                                               BOOL    fWaitAll,
+                                               DWORD   dwTimeout)
+{
+    dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::WaitForMultipleObjects %08x %d %x %d %x",
+              pHMHandleData->hHMHandle, cObjects, lphObjects, fWaitAll, dwTimeout));
+
+    return WAIT_FAILED;
 }

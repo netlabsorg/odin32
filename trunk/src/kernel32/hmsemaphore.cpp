@@ -1,4 +1,4 @@
-/* $Id: hmsemaphore.cpp,v 1.4 2001-06-19 10:50:25 sandervl Exp $ */
+/* $Id: hmsemaphore.cpp,v 1.5 2001-06-21 21:07:54 sandervl Exp $ */
 
 /*
  * Win32 Semaphore implementation
@@ -7,6 +7,7 @@
  * TODO: Does DCE_POSTONE work in Warp 3 or 4 with no FP applied?
  * TODO: No inheritance when CreateSemaphore is called for existing named event semaphore?
  *       (see HMCreateSemaphore in handlemanager.cpp)
+ * TODO: OpenSemaphore does not work right now! initialcount/maximumcount)
  * TODO: Name collisions with files & mutex not allowed. Check if this can happen in OS/2
  * TODO: Does NOT work for sharing semaphores between processes!!
  *
@@ -32,6 +33,7 @@
 
 #ifdef USE_OS2SEMAPHORES
 #define INCL_DOSSEMAPHORES
+#define INCL_DOSERRORS
 #include <os2wrap.h>
 #include <win32type.h>
 #include <win32api.h>
@@ -114,9 +116,6 @@ DWORD HMDeviceSemaphoreClass::CreateSemaphore(PHMHANDLEDATA         pHMHandleDat
       strcat(szSemName, lpszSemaphoreName);
       lpszSemaphoreName = szSemName;
   }
-  //Manual reset means all threads waiting on the event semaphore will be
-  //unblocked and the app must manually reset the event semaphore
-  //Automatic reset -> only one waiting thread unblocked & state reset
   rc = DosCreateEventSem(lpszSemaphoreName, &hev, DCE_POSTONE, lInitialCount);
 
   if(rc) {
@@ -126,6 +125,7 @@ DWORD HMDeviceSemaphoreClass::CreateSemaphore(PHMHANDLEDATA         pHMHandleDat
   }
   pHMHandleData->dwAccess  = SEMAPHORE_ALL_ACCESS_W;
   pHMHandleData->dwFlags   = lMaximumCount;
+  pHMHandleData->dwCreation= lInitialCount;
   pHMHandleData->hHMHandle = hev;
   return ERROR_SUCCESS_W;
 #else
@@ -175,6 +175,7 @@ DWORD HMDeviceSemaphoreClass::OpenSemaphore(PHMHANDLEDATA         pHMHandleData,
   APIRET rc;
   char szSemName[CCHMAXPATH];
 
+  //TODO: NOT WORKING (initialcount/maximumcount)
   dprintf(("KERNEL32: HandleManager::Semaphore::OpenSemaphore(%08xh,%08xh,%s)\n",
            pHMHandleData,
            fInheritHandle,
@@ -292,10 +293,154 @@ BOOL HMDeviceSemaphoreClass::DuplicateHandle(PHMHANDLEDATA pHMHandleData, HANDLE
       return FALSE;
   }
   pHMHandleData->dwAccess  = fdwAccess;
-  pHMHandleData->dwFlags   = pHMSrcHandle->dwFlags; //lMaximumCount;
+  pHMHandleData->dwFlags   = pHMSrcHandle->dwFlags;    //lMaximumCount;
+  pHMHandleData->dwCreation= pHMSrcHandle->dwCreation; //lInitialCount;
   pHMHandleData->hHMHandle = hev;
   SetLastError(ERROR_SUCCESS_W);
   return TRUE;
+}
+#endif
+
+#ifdef USE_OS2SEMAPHORES
+/*****************************************************************************
+ * Name      : DWORD HMDeviceSemaphoreClass::WaitForSingleObject
+ * Purpose   : object synchronization
+ * Parameters: PHMHANDLEDATA pHMHandleData
+ *             DWORD dwTimeout
+ * Variables :
+ * Result    : API returncode
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+
+DWORD HMDeviceSemaphoreClass::WaitForSingleObject(PHMHANDLEDATA pHMHandleData,
+                                               DWORD         dwTimeout)
+{
+ DWORD rc;
+
+  dprintf2(("KERNEL32: HMDeviceSemaphoreClass::WaitForSingleObject(%08xh %08xh)",
+            pHMHandleData->hHMHandle, dwTimeout));
+
+  if(!(pHMHandleData->dwAccess & SYNCHRONIZE_W) )
+  {
+      dprintf(("ERROR: Access denied!!"));
+      SetLastError(ERROR_ACCESS_DENIED_W);
+      return WAIT_FAILED_W;
+  }
+
+  rc = DosWaitEventSem(pHMHandleData->hHMHandle, dwTimeout);
+  if(rc && rc != ERROR_INTERRUPT && rc != ERROR_TIMEOUT && rc != ERROR_SEM_OWNER_DIED) {
+      dprintf(("DosWaitEventSem %x failed with rc %d", pHMHandleData->hHMHandle, rc));
+      SetLastError(error2WinError(rc));
+      return WAIT_FAILED_W;
+  }
+  SetLastError(ERROR_SUCCESS_W);
+  if(rc == ERROR_INTERRUPT || rc == ERROR_SEM_OWNER_DIED) {
+      return WAIT_ABANDONED_W;
+  }
+  else 
+  if(rc == ERROR_TIMEOUT) {
+      return WAIT_TIMEOUT_W;
+  }
+  return WAIT_OBJECT_0_W;
+}
+#endif
+
+#ifdef USE_OS2SEMAPHORES
+/*****************************************************************************
+ * Name      : DWORD HMDeviceSemaphoreClass::WaitForSingleObjectEx
+ * Purpose   : object synchronization
+ * Parameters: PHMHANDLEDATA pHMHandleData
+ *             DWORD dwTimeout
+ *             BOOL  fAlertable
+ * Variables :
+ * Result    : API returncode
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+
+DWORD HMDeviceSemaphoreClass::WaitForSingleObjectEx(PHMHANDLEDATA pHMHandleData,
+                                                 DWORD         dwTimeout,
+                                                 BOOL          fAlertable)
+{
+    dprintf2(("KERNEL32: HMDeviceSemaphoreClass::WaitForSingleObjectEx(%08xh,%08h,%08xh) not implemented correctly.\n",
+              pHMHandleData->hHMHandle, dwTimeout, fAlertable));
+
+    if(!(pHMHandleData->dwAccess & SYNCHRONIZE_W) )
+    {
+        dprintf(("ERROR: Access denied!!"));
+        SetLastError(ERROR_ACCESS_DENIED_W);
+        return WAIT_FAILED_W;
+    }
+
+    return WaitForSingleObject(pHMHandleData, dwTimeout);
+}
+#endif
+
+#ifdef USE_OS2SEMAPHORES
+/*****************************************************************************
+ * Name      : BOOL HMDeviceSemaphoreClass::MsgWaitForMultipleObjects
+ * Purpose   :
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+DWORD HMDeviceSemaphoreClass::MsgWaitForMultipleObjects(PHMHANDLEDATA pHMHandleData,
+                                                        DWORD      nCount,
+                                                        PHANDLE    pHandles,
+                                                        BOOL       fWaitAll,
+                                                        DWORD      dwMilliseconds,
+                                                        DWORD      dwWakeMask)
+{
+    dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::MsgWaitForMultipleObjects %08x %d %x %d %d %x",
+              pHMHandleData->hHMHandle, nCount, pHandles, fWaitAll, dwMilliseconds, dwWakeMask));
+
+    if(!(pHMHandleData->dwAccess & SYNCHRONIZE_W) )
+    {
+        dprintf(("ERROR: Access denied!!"));
+        SetLastError(ERROR_ACCESS_DENIED_W);
+        return WAIT_FAILED_W;
+    }
+
+    return WAIT_FAILED_W;
+}
+#endif
+
+#ifdef USE_OS2SEMAPHORES
+/*****************************************************************************
+ * Name      : BOOL HMDeviceSemaphoreClass::WaitForMultipleObjects
+ * Purpose   :
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+DWORD HMDeviceSemaphoreClass::WaitForMultipleObjects(PHMHANDLEDATA pHMHandleData,
+                                                 DWORD   cObjects,
+                                                 PHANDLE lphObjects,
+                                                 BOOL    fWaitAll,
+                                                 DWORD   dwTimeout)
+{
+    dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::WaitForMultipleObjects %08x %d %x %d %x",
+              pHMHandleData->hHMHandle, cObjects, lphObjects, fWaitAll, dwTimeout));
+
+    if(!(pHMHandleData->dwAccess & SYNCHRONIZE_W) )
+    {
+        dprintf(("ERROR: Access denied!!"));
+        SetLastError(ERROR_ACCESS_DENIED_W);
+        return WAIT_FAILED_W;
+    }
+
+    return WAIT_FAILED_W;
 }
 #endif
 

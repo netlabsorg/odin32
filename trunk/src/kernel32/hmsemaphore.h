@@ -1,4 +1,4 @@
-/* $Id: hmsemaphore.h,v 1.3 2001-06-19 10:50:25 sandervl Exp $ */
+/* $Id: hmsemaphore.h,v 1.4 2001-06-21 21:07:54 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -35,7 +35,11 @@ class HMDeviceSemaphoreClass : public HMDeviceOpen32Class
 #endif
 {
 public:
+#ifdef USE_OS2SEMAPHORES
+  HMDeviceSemaphoreClass(LPCSTR lpDeviceName) : HMDeviceHandler(lpDeviceName) {}
+#else
   HMDeviceSemaphoreClass(LPCSTR lpDeviceName) : HMDeviceOpen32Class(lpDeviceName) {}
+#endif
 
   /* this is a handler method for calls to CreateSemaphore() */
   virtual DWORD CreateSemaphore (PHMHANDLEDATA         pHMHandleData,
@@ -60,6 +64,29 @@ public:
                                BOOL    fInherit,
                                DWORD   fdwOptions,
                                DWORD   fdwOdinOptions);
+
+  /* this is a handler method for calls to WaitForSingleObject */
+  virtual DWORD WaitForSingleObject  (PHMHANDLEDATA pHMHandleData,
+                                      DWORD  dwTimeout);
+
+  /* this is a handler method for calls to WaitForSingleObjectEx */
+  virtual DWORD WaitForSingleObjectEx(PHMHANDLEDATA pHMHandleData,
+                                      DWORD  dwTimeout,
+                                      BOOL   fAlertable);
+
+  virtual DWORD MsgWaitForMultipleObjects(PHMHANDLEDATA pHMHandleData,
+                                          DWORD      nCount,
+                                          PHANDLE       pHandles,
+                                          BOOL       fWaitAll,
+                                          DWORD      dwMilliseconds,
+                                          DWORD      dwWakeMask);
+
+  virtual DWORD WaitForMultipleObjects (PHMHANDLEDATA pHMHandleData,
+                                        DWORD   cObjects,
+                                        PHANDLE lphObjects,
+                                        BOOL    fWaitAll,
+                                        DWORD   dwTimeout);
+
 #endif
 
   /* this is a handle method for calls to ReleaseSemaphore() */
