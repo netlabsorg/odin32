@@ -1,4 +1,4 @@
-/* $Id: font.cpp,v 1.22 2001-12-15 18:50:26 sandervl Exp $ */
+/* $Id: font.cpp,v 1.23 2002-01-02 18:36:00 sandervl Exp $ */
 
 /*
  * GDI32 font apis
@@ -286,7 +286,6 @@ ODINFUNCTION1(HFONT,CreateFontIndirectA,const LOGFONTA*, lplf)
   dprintf(("GDI32: lfFaceName      = %s\n", lplf->lfFaceName));
 
   hFont = O32_CreateFontIndirect(&afont);
-
   if(hFont) {
       STATS_CreateFontIndirect(hFont, &afont);
   }

@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.79 2001-12-31 12:08:22 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.80 2002-01-02 18:36:00 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -948,24 +948,24 @@ int WIN32API GetTextFaceW( HDC arg1, int arg2, LPWSTR  arg3)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GetTextMetricsA( HDC hdc, LPTEXTMETRICA  arg2)
+BOOL WIN32API GetTextMetricsA( HDC hdc, LPTEXTMETRICA  pwtm)
 {
  BOOL rc;
 
-    rc = O32_GetTextMetrics(hdc, arg2);
-    dprintf(("GDI32: GetTextMetricsA %x %x returned %d", hdc, arg2, rc));
+    rc = O32_GetTextMetrics(hdc, pwtm);
+    dprintf(("GDI32: GetTextMetricsA %x %x returned %d", hdc, pwtm, rc));
     return(rc);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GetTextMetricsW( HDC arg1, LPTEXTMETRICW pwtm)
+BOOL WIN32API GetTextMetricsW( HDC hdc, LPTEXTMETRICW pwtm)
 {
  BOOL rc;
  TEXTMETRICA atm;
 
     dprintf(("GDI32: GetTextMetricsW"));
 
-    rc = O32_GetTextMetrics(arg1, &atm);
+    rc = O32_GetTextMetrics(hdc, &atm);
     pwtm->tmHeight = atm.tmHeight;
     pwtm->tmAscent = atm.tmAscent;
     pwtm->tmDescent = atm.tmDescent;
@@ -986,6 +986,8 @@ BOOL WIN32API GetTextMetricsW( HDC arg1, LPTEXTMETRICW pwtm)
     pwtm->tmStruckOut = atm.tmStruckOut;
     pwtm->tmPitchAndFamily = atm.tmPitchAndFamily;
     pwtm->tmCharSet = atm.tmCharSet;
+
+    dprintf(("GDI32: GetTextMetricsW %x %x returned %d", hdc, pwtm, rc));
     return(rc);
 }
 //******************************************************************************
