@@ -140,6 +140,8 @@ typedef struct _TEB
               PROCESSTHREAD_SECURITYINFO threadinfo; //used to store security info for thread tokens
               DWORD          lcid;           // thread lcid
               BOOL           fIgnoreMsgs;    // set to true if waiting in WaitForSingleObject
+              BOOL           fWM_SETFOCUS;   // set during WM_SETFOCUS message processing
+              HWND           hwndFocus;      // set during WM_SETFOCUS message processing
           } odin;
 #endif
           /* the following are nt specific fields */
