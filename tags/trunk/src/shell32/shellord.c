@@ -1485,6 +1485,7 @@ HRESULT WINAPI CIDLData_CreateFromIDArray(
   HWND hwnd = 0;   /*FIXME: who should be hwnd of owner? set to desktop */
   BOOL boldpidl;
   
+#ifndef __WIN32OS2__
   if (TRACE_ON(shell)) {
     TRACE("(%p, %ld, %p, %p)\n", pidlFolder, cpidlFiles,
           lppidlFiles, ppdataObject);
@@ -1498,6 +1499,8 @@ HRESULT WINAPI CIDLData_CreateFromIDArray(
     __SET_DEBUGGING(__DBCL_TRACE, __wine_dbch_shell, TRUE);
     __SET_DEBUGGING(__DBCL_TRACE, __wine_dbch_pidl, boldpidl);
   }
+#endif
+
   *ppdataObject = IDataObject_Constructor( hwnd, pidlFolder,
                                           lppidlFiles, cpidlFiles);
   if (*ppdataObject) return S_OK;
