@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.4 2000-11-21 23:48:53 phaller Exp $ */
+/* $Id: stubs.cpp,v 1.1 2000-11-21 23:49:04 phaller Exp $ */
 
 /*
  * The C RunTime DLL
@@ -25,6 +25,16 @@
 
 
 /*********************************************************************
+ *	__dllonexit           			(CRTDLL.25)
+ */
+VOID CDECL CRTDLL___dllonexit ()
+{	
+  dprintf(("__dllonexit not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+}
+
+
+/*********************************************************************
  *                  __fpecode            (CRTDLL.27)
  */
 int * CDECL CRTDLL___fpecode ( void )
@@ -43,6 +53,127 @@ void ** CDECL CRTDLL___pxcptinfoptrs (void)
   dprintf(("CRTDLL: __pxcptinfoptrs not implemented.\n"));
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return NULL;
+}
+
+
+/*********************************************************************
+ *	_abnormal_termination			(CRTDLL.36)
+ */
+int CDECL CRTDLL__abnormal_termination(void)
+{
+  dprintf(("CRTDLL: _abnormal_termination  not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           _chgsign	 (CRTDLL.53)
+ */
+double CDECL CRTDLL__chgsign(double x)
+{
+  dprintf(("CRTDLL: _chgsign not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _commit    (CRTDLL.58)
+ */
+int CDECL CRTDLL__commit( int fd )
+{
+  dprintf(("CRTDLL: _commit not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _copysign    (CRTDLL.62)
+ */
+double CDECL CRTDLL__copysign( double d, double s )
+{
+  dprintf(("CRTDLL: _copysign not implemented\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *	_expand   				(CRTDLL.88)
+ */
+void * CDECL CRTDLL__expand( void *ptr, size_t size )
+{
+  dprintf(("CRTDLL: _expand not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *	_filbuf					(CRTDLL.94)
+ */
+int CDECL CRTDLL__filbuf(FILE * f)
+{
+  dprintf(("CRTDLL: _filbuf not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+*                  _findclose    (CRTDLL.098)
+*/
+int CDECL CRTDLL__findclose( long handle )
+{
+  dprintf(("CRTDLL: _findclose not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *	_findfirst				(CRTDLL.099)
+ */
+DWORD CDECL CRTDLL__findfirst(const char *_name, struct _finddata_t *result)
+{
+  dprintf(("CRTDLL: _findfirst not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *	_findnext				(CRTDLL.100)
+ */
+INT CDECL CRTDLL__findnext(DWORD hand, struct find_t * x2)
+{
+  dprintf(("CRTDLL: _findnext not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _finite     (CRTDLL.101)
+ */
+INT CDECL CRTDLL__finite(double x)
+{
+  dprintf(("CRTDLL: _finite not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *	_flsbuf					(CRTDLL.102)
+ */
+INT CDECL CRTDLL__flsbuf(int i, FILE * f)
+{
+  dprintf(("CRTDLL: _flsbuf not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
 }
 
 
@@ -80,6 +211,17 @@ wint_t CDECL CRTDLL__fputwchar( wint_t )
 
 
 /*********************************************************************
+ *	_fsopen					(CRTDLL.110)
+ */
+FILE * CDECL CRTDLL__fsopen( const char *file, const char *mode, int shflag )
+{
+  dprintf(("CRTDLL: _fsopen not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
  *	_futime					(CRTDLL.115)
  */
 int CDECL CRTDLL__futime( int handle, struct _utimbuf *filetime )
@@ -91,6 +233,28 @@ int CDECL CRTDLL__futime( int handle, struct _utimbuf *filetime )
 
 
 /*********************************************************************
+ *                  _get_osfhandle     (CRTDLL.117)
+ */
+void* CDECL CRTDLL__get_osfhandle( int fileno )
+{
+  dprintf(("CRTDLL: _get_osfhandle not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return 0;
+}
+
+
+/*********************************************************************
+ *                  _getdiskfree     (CRTDLL.122)
+ */
+unsigned int CDECL CRTDLL__getdiskfree( unsigned int drive, struct _diskfree_t *diskspace)
+{
+  dprintf(("CRTDLL: _getdiskfree not implemented\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return 0;
+}
+
+
+/*********************************************************************
  *                  _getdllprocaddr     (CRTDLL.123)
  */
 FARPROC CDECL  CRTDLL__getdllprocaddr(HMODULE hModule,char * lpProcName, int iOrdinal)
@@ -98,6 +262,28 @@ FARPROC CDECL  CRTDLL__getdllprocaddr(HMODULE hModule,char * lpProcName, int iOr
   dprintf(("CRTDLL: _getdllprocaddr not implemented.\n"));   
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return 0;
+}
+
+
+/*********************************************************************
+ *	_heapwalk				(CRTDLL.133)
+ */
+int CDECL CRTDLL__heapwalk( struct _heapinfo *entry )
+{
+  dprintf(("CRTDLL: _heapwalk not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return 0;
+}
+
+
+/*********************************************************************
+ *                  _isatty       (CRTDLL.137)
+ */
+BOOL CDECL CRTDLL__isatty(DWORD x)
+{
+   dprintf(("CRTDLL: _isatty(%ld) not implemented.\n",x));
+   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+   return TRUE;
 }
 
 
@@ -377,6 +563,17 @@ int CDECL CRTDLL__ismbstrail(const unsigned char *str, const unsigned char *t)
 
 
 /*********************************************************************
+ *                  _isnan     (CRTDLL.164)
+ */
+int CDECL CRTDLL__isnan( double x )
+{
+  dprintf(("CRTDLL: _isnan not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
  *                  _lfind     (CRTDLL.170)
  */
 void * CDECL CRTDLL__lfind(const void *key, const void *base, size_t *nelp,
@@ -411,6 +608,18 @@ double CDECL CRTDLL__logb( double x )
 
 
 /*********************************************************************
+ *	_lsearch				(CRTDLL.177)
+ */
+void * CDECL CRTDLL__lsearch(const void *key, void *base, size_t *nelp, size_t width,
+         int (*compar)(const void *, const void *))
+{
+  dprintf(("CRTDLL: _lsearch not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
  *                  _mbbtombc        (CRTDLL.182)
  */
 unsigned int CDECL CRTDLL__mbbtombc( unsigned int c )
@@ -429,6 +638,16 @@ int CDECL CRTDLL__mbbtype( unsigned char c, int type )
   dprintf(("CRTDLL: _mbbtype not implemented.\n"));
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _mbccpy        (CRTDLL.184)
+ */
+void CDECL CRTDLL__mbccpy( unsigned char *dst, const unsigned char *src )
+{
+  dprintf(("CRTDLL: _mbccpy not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
 }
 
 
