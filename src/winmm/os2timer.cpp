@@ -1,4 +1,4 @@
-/* $Id: os2timer.cpp,v 1.18 2001-03-23 16:23:44 sandervl Exp $ */
+/* $Id: os2timer.cpp,v 1.19 2001-10-03 13:47:58 sandervl Exp $ */
 
 /*
  * OS/2 Timer class
@@ -224,7 +224,7 @@ int OS2TimerResolution::queryCurrentResolution()
 /******************************************************************************/
 OS2Timer::OS2Timer() : TimerSem(0), TimerHandle(0), hTimerThread(0),
                   clientCallback(NULL), TimerStatus(Stopped), fFatal(FALSE),
-                  next(NULL)
+                  next(NULL), timerID(0)
 {
   dprintf(("WINMM:OS2Timer: OS2Timer::OS2Timer(%08xh)\n",
            this));
@@ -415,7 +415,7 @@ void OS2Timer::TimerHandler()
               if (clientCallback != NULL)
               {
                 selTIB = SetWin32TIB();
-                clientCallback((UINT)this, 0, userData, 0, 0);
+                clientCallback((UINT)timerID, 0, userData, 0, 0);
                 SetFS(selTIB);
               }
               break;
