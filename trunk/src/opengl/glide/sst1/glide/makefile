@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2000-12-03 00:26:13 bird Exp $
+# $Id: makefile,v 1.5 2001-04-19 10:03:52 sandervl Exp $
 
 #
 # Odin32 API
@@ -24,7 +24,7 @@ ADDITIONAL_DEP = mydep
 #
 # Flag overloads.
 #
-CINCLUDES   = $(CINCLUDES) -I..\incsrc;..\..\swlibs\fxmisc;..\init\initvg;..\init;..\texus;..\..\swlibs\pcilib;
+CINCLUDES   = $(CINCLUDES) -I..\incsrc -I..\..\swlibs\fxmisc -I..\init\initvg -I..\init -I..\texus -I..\..\swlibs\pcilib
 
 
 #
