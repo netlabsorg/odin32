@@ -1,4 +1,5 @@
-/*
+/* $Id: internet.c,v 1.2 2000-07-29 14:10:09 bird Exp $
+ *
  * Wininet
  *
  * Copyright 1999 Corel Corporation
@@ -69,7 +70,7 @@ WININET_LibMain (HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
  *    NULL on failure
  *
  */
-INTERNETAPI HINTERNET WINAPI InternetOpenA(LPCSTR lpszAgent, 
+INTERNETAPI HINTERNET WINAPI InternetOpenA(LPCSTR lpszAgent,
 	DWORD dwAccessType, LPCSTR lpszProxy,
     	LPCSTR lpszProxyBypass, DWORD dwFlags)
 {
@@ -198,7 +199,7 @@ BOOLAPI InternetFindNextFileA(HINTERNET hFind, LPVOID lpvFindData)
 
 	lpFindFileData = (LPWIN32_FIND_DATAA) lpvFindData;
 	access = mktime(&lpwh->lpafp[lpwh->index].tmLastModified);
-		
+
 	/* Not all fields are filled in */
 	lpFindFileData->ftLastAccessTime.dwHighDateTime = HIWORD(access);
 	lpFindFileData->ftLastAccessTime.dwLowDateTime  = LOWORD(access);
@@ -244,7 +245,7 @@ BOOLAPI InternetCloseHandle(HINTERNET hInternet)
 		case WH_HFINDNEXT:
 			retval = FTP_CloseFindNextHandle((LPWININETFINDNEXTA) lpwh);
 			break;
-		
+
 		default:
 			break;
 	}
@@ -263,7 +264,7 @@ BOOLAPI InternetCloseHandle(HINTERNET hInternet)
  *    FALSE on failure
  *
  */
-BOOLAPI InternetCrackUrlA(LPCSTR lpszUrl, DWORD dwUrlLength, DWORD dwFlags, 
+BOOLAPI InternetCrackUrlA(LPCSTR lpszUrl, DWORD dwUrlLength, DWORD dwFlags,
 		LPURL_COMPONENTSA lpUrlComponents)
 {
   /*
@@ -371,7 +372,7 @@ BOOLAPI InternetCrackUrlA(LPCSTR lpszUrl, DWORD dwUrlLength, DWORD dwFlags,
 	int   nPortLen;
 	// [<user>[<:password>]@]<host>[:<port>]
 	// First find the user and password if they exist...
-			
+
 	szHost = strchr( szNetLoc, '@' );
 	if( szHost == NULL )
 	{
@@ -457,7 +458,7 @@ INTERNETAPI DWORD WINAPI InternetAttemptConnect(DWORD dwReserved)
  *           InternetSetStatusCallback (WININET.133)
  *
  * Sets up a callback function which is called as progress is made
- * during an operation. 
+ * during an operation.
  *
  * RETURNS
  *    Previous callback or NULL 	on success
@@ -472,7 +473,7 @@ INTERNETAPI INTERNET_STATUS_CALLBACK WINAPI InternetSetStatusCallback(
 
 	TRACE("\n");
 	if (lpwai->hdr.htype != WH_HINIT)
-    		return INTERNET_INVALID_STATUS_CALLBACK; 
+    		return INTERNET_INVALID_STATUS_CALLBACK;
 
 	retVal = lpwai->lpfnStatusCB;
 	lpwai->lpfnStatusCB = lpfnIntCB;
@@ -484,7 +485,7 @@ INTERNETAPI INTERNET_STATUS_CALLBACK WINAPI InternetSetStatusCallback(
 /***********************************************************************
  *           InternetWriteFile (WININET.138)
  *
- * Write data to an open internet file 
+ * Write data to an open internet file
  *
  * RETURNS
  *    TRUE  on success
@@ -505,7 +506,7 @@ BOOLAPI InternetWriteFile(HINTERNET hFile, LPCVOID lpBuffer ,
 	switch (lpwh->htype)
 	{
 		case WH_HHTTPREQ:
-		    	nSocket = ((LPWININETHTTPREQA)hFile)->nSocketFD; 
+		    	nSocket = ((LPWININETHTTPREQA)hFile)->nSocketFD;
 			break;
 
 		case WH_HFILE:
@@ -532,14 +533,14 @@ BOOLAPI InternetWriteFile(HINTERNET hFile, LPCVOID lpBuffer ,
 /***********************************************************************
  *           InternetReadFile (WININET.121)
  *
- * Read data from an open internet file 
+ * Read data from an open internet file
  *
  * RETURNS
  *    TRUE  on success
  *    FALSE on failure
  *
  */
-BOOLAPI InternetReadFile(HINTERNET hFile, LPVOID lpBuffer, 
+BOOLAPI InternetReadFile(HINTERNET hFile, LPVOID lpBuffer,
 	DWORD dwNumOfBytesToRead, LPDWORD dwNumOfBytesRead)
 {
     	BOOL retval = FALSE;
@@ -553,7 +554,7 @@ BOOLAPI InternetReadFile(HINTERNET hFile, LPVOID lpBuffer,
 	switch (lpwh->htype)
 	{
 		case WH_HHTTPREQ:
-		    	nSocket = ((LPWININETHTTPREQA)hFile)->nSocketFD; 
+		    	nSocket = ((LPWININETHTTPREQA)hFile)->nSocketFD;
 			break;
 
 		case WH_HFILE:
