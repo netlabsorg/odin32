@@ -1,4 +1,10 @@
-/* $Id: ChangeLog,v 1.1488 2001-06-09 07:31:11 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1489 2001-06-09 14:53:51 sandervl Exp $ */
+
+ 2001-06-09: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Keep reference count for window and class objects. 
+                  Only delete the objects when nobody else is using them anymore.
+                  (fixes crashes due to premature destruction of objects;
+                   e.g. during Napster startup)
 
  2001-06-08: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o WinExec fixes
