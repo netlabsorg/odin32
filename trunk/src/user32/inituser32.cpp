@@ -1,4 +1,4 @@
-/* $Id: inituser32.cpp,v 1.17 2003-11-12 14:10:19 sandervl Exp $ */
+/* $Id: inituser32.cpp,v 1.18 2003-11-14 13:44:10 sandervl Exp $ */
 /*
  * USER32 DLL entry point
  *
@@ -29,6 +29,8 @@
 #define  INCL_DOSMISC
 #define  INCL_DOSERRORS
 #define  INCL_WINSHELLDATA
+#define  INCL_GPI
+#define  INCL_WINERRORS
 #include <os2wrap.h>    //Odin32 OS/2 api wrappers
 #include <stdlib.h>
 #include <stdio.h>
@@ -78,7 +80,7 @@ void MigrateWindowsFonts()
 {
   HKEY  hkFonts,hkOS2Fonts;
   char  buffer[512];
-  UINT  len = GetWindowsDirectoryA( NULL, 0 );
+  UINT  len;
   
   if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, REGPATH ,0, KEY_ALL_ACCESS, &hkFonts) == 0)
   {
@@ -91,30 +93,35 @@ void MigrateWindowsFonts()
            RegEnumValueA(hkFonts, dwIndex, subKeyName, &sizeOfSubKeyName, NULL, &dwType ,(LPBYTE)dataArray, &sizeOfDataArray) != ERROR_NO_MORE_ITEMS_W;
            ++dwIndex, sizeOfSubKeyName = 254, sizeOfDataArray = 511)
       {
-         //Check OS/2 INI profile for font entry
-         if (!PrfQueryProfileString(HINI_PROFILE, "PM_Fonts", dataArray,
-                            NULL, (PVOID)subKeyName, (LONG)sizeof(subKeyName)))
+         HDIR          hdirFindHandle = HDIR_CREATE;
+         FILEFINDBUF3  FindBuffer     = {0};      
+         ULONG         ulResultBufLen = sizeof(FILEFINDBUF3);
+         ULONG         ulFindCount    = 1, ret;       
+         APIRET        rc             = NO_ERROR; 
+
+         GetWindowsDirectoryA( buffer, sizeof(buffer) );
+         wsnprintfA( buffer, sizeof(buffer), "%s\\%s\\%s", buffer, FONTSDIRECTORY, dataArray );
+
+         rc = DosFindFirst( buffer, &hdirFindHandle, FILE_NORMAL,&FindBuffer, ulResultBufLen, &ulFindCount, FIL_STANDARD);
+         //Check that file actaully exist 
+         if ( rc == NO_ERROR  && !(FindBuffer.attrFile & FILE_DIRECTORY))
          {
-           HDIR          hdirFindHandle = HDIR_CREATE;
-           FILEFINDBUF3  FindBuffer     = {0};      
-           ULONG         ulResultBufLen = sizeof(FILEFINDBUF3);
-           ULONG         ulFindCount    = 1;       
-           APIRET        rc             = NO_ERROR; 
+            //Check OS/2 INI profile for font entry
+            len = PrfQueryProfileString(HINI_PROFILE, "PM_Fonts", dataArray,
+                                        NULL, (PVOID)subKeyName, (LONG)sizeof(subKeyName));
 
-           dprintf(("Migrating font %s to OS/2",dataArray));
+            //If it doesn't exist OR if it's outdated
+            if(len == 0 || strcmp(subKeyName, buffer))
+            {
+              dprintf(("Migrating font %s to OS/2",dataArray));
 
-           GetWindowsDirectoryA( buffer, len + 1 );
-           wsnprintfA( buffer, sizeof(buffer), "%s\\%s\\%s", buffer, FONTSDIRECTORY, dataArray );
-
-           rc = DosFindFirst( buffer, &hdirFindHandle, FILE_NORMAL,&FindBuffer, ulResultBufLen, &ulFindCount, FIL_STANDARD);
-
-           //Check that file actaully exist 
-  	   if ( rc == NO_ERROR  && !(FindBuffer.attrFile & FILE_DIRECTORY))
-  	   {
-              PrfWriteProfileString(HINI_PROFILE,"PM_Fonts",dataArray, buffer);   
-	      DosFindClose(hdirFindHandle);
-           }
-        } 
+              ret = GpiLoadFonts(0, buffer);
+              if(ret == FALSE) {
+                  dprintf(("GpiLoadFonts %s failed with %x", buffer, WinGetLastError(0)));
+              }
+            }
+         } 
+         DosFindClose(hdirFindHandle);
       }
       RegCloseKey(hkFonts);
   }
