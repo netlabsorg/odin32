@@ -1,13 +1,32 @@
- /* $Id: changelog,v 1.787 2000-03-06 22:39:31 sandervl Exp $ */
+ /* $Id: changelog,v 1.788 2000-03-06 23:56:50 bird Exp $ */
+
+ 2000-03-05: knut st. osmundsen <knut.stange.osmundse@pmsc.no>
+        - makefiles and include\pdwin32.*:
+            * Updated nearly all makefiles to the new makefile style.
+              Win32k, pe2lx and some subdirs of Winmm
+            * Odin32 resource files are now to have the extention .orc
+              All files have, save some under WinMM and in old/new dirs,
+              been renamed. There are now new interference rules in
+              pdwin32.tools which will create the resource assembly and
+              assemble it into an object file. So you simply have to
+              specify the output object file for Odin32 resources along
+              with the other object files.
+            * A little not on forwarders. ILINK returns a warning code of
+              4 when aliases are generated. An errorcode <> 0 stops NMAKE
+              normally. To workaround these problem we simply tell NMAKE to
+              accespt all error codes in the range 0-4. This is done by
+              putting '-4 ' in front of the $(LD2) statement.
+              I don't want to see _any_ '-$(LD2)'!!!
+
 
  2000-03-06: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Fixed bug in edit control
-		  If nyoff > nr lines in control -> bottom line in control 
+		  If nyoff > nr lines in control -> bottom line in control
              	  window should show last line of control
              	  Wine code shows last line at the top of the control
              	  (Quake 3 startup edit control shows the problem)
 
- 2000-03-04: knut st. osmundsen <knut.stange.osmundse@pmsc.no>
+ 2000-03-05: knut st. osmundsen <knut.stange.osmundse@pmsc.no>
         - include\pdwin32.vac*: Added OS2RC and OS2RCFLAGS. This defines the
                 OS/2 resource compiler and the flags used during compilation.
                 When it comes to linking we should assume NO flags and simply
