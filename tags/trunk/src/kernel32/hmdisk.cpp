@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.16 2001-10-10 14:49:48 phaller Exp $ */
+/* $Id: hmdisk.cpp,v 1.17 2001-10-10 15:06:06 phaller Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -551,8 +551,7 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
       
       // setup the parameter block
       
-      // @@@PH verify if endianness is correct here!
-      ParameterBlock.ucSignature = 0x43443031; // 'CD01'
+      ParameterBlock.ucSignature = 0x31304443; // 'CD01'
       ParameterBlock.ucAddressingMode = 1;     // MSF format
       
       // @@@PH unknown if this kind of MSF conversion is correct!
