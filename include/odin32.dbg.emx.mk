@@ -1,4 +1,4 @@
-# $Id: odin32.dbg.emx.mk,v 1.3 2001-04-02 09:54:45 sandervl Exp $
+# $Id: odin32.dbg.emx.mk,v 1.4 2001-06-25 23:17:16 bird Exp $
 
 #
 # Odin32 API
@@ -14,8 +14,17 @@
 # Library macros.
 #
 SOMLIB   = somtk.lib
-RTLLIB   =
-RTLLIB_O =
+RTLLIB   = \
+$(EMX)\lib\mt\c.lib \
+$(EMX)\lib\mt\c_app.lib \
+$(EMX)\lib\c_alias.lib \
+$(EMX)\lib\mt\emx.lib \
+$(EMX)\lib\emx2.lib \
+$(EMX)\lib\stdcpp.lib \
+$(EMX)\lib\gcc.lib \
+$(EMX)\lib\end.lib
+
+RTLLIB_O = $(EMX)\lib\mt\c_import.lib $(RTLIB)
 #RTLLIB_NRE =
 DLLENTRY = $(ODIN32_LIB)\dllentry.obj
 ODINCRT  = odincrtd
@@ -28,7 +37,7 @@ CC     = gcc
 CXX    = gcc
 AS     = alp
 LD     = gcc
-LD2    = ld
+LD2    = link386
 IMPLIB = emximp
 ILIB   = emxomfar
 RC     = $(ODIN32_TOOLS)\wrc
@@ -60,11 +69,11 @@ CTARGETFLAGS     = -Zdll
 CXXTARGETFLAGS   = -Zdll
 !endif
 CXXEXCEPTIONS    = -fhandle-exceptions
-CFLAGS           = -mprobe -pg -c -pipe -Wall -Zmt -g $(CTARGETFLAGS)
-CXXFLAGS         = -mprobe -pg -c -pipe -Wall -Zmt -g $(CXXTARGETFLAGS)
-CXXFLAGS_ODINCRT = -mprobe -pg -c -pipe -Wall -Zmt -g $(CXXTARGETFLAGS)
-CFLAGS_WIN32APP  = -mprobe -pg -c -pipe -Wall -Zmt -g $(CTARGETFLAGS)
-CXXFLAGS_WIN32APP= -mprobe -pg -c -pipe -Wall -Zmt -g $(CXXTARGETFLAGS) $(CXXEXCEPTIONS)
+CFLAGS           = -Zomf -mprobe -c -pipe -Wall -Zmt -g $(CTARGETFLAGS)
+CXXFLAGS         = -Zomf -mprobe -c -pipe -Wall -Zmt -g $(CXXTARGETFLAGS)
+CXXFLAGS_ODINCRT = -Zomf -mprobe -c -pipe -Wall -Zmt -g $(CXXTARGETFLAGS)
+CFLAGS_WIN32APP  = -Zomf -mprobe -c -pipe -Wall -Zmt -g $(CTARGETFLAGS)
+CXXFLAGS_WIN32APP= -Zomf -mprobe -c -pipe -Wall -Zmt -g $(CXXTARGETFLAGS) $(CXXEXCEPTIONS)
 CINCLUDES        = -I$(ODIN32_INCLUDE)\Win -I. -I$(ODIN32_INCLUDE)
 CDEFINES_WIN32APP= -DDEBUG -D__WIN32OS2__ -D__i386__
 CDEFINES_ODINCRT = -DDEBUG -D__WIN32OS2__ -D__i386__ -D__WINE__
@@ -84,27 +93,33 @@ CDEFINES         = -DDEBUG -D__WIN32OS2__ -D__i386__ -D__WINE__ -DTCPV40HDRS -DC
 #   when we add new flags to for example LD2FLAGS too many times.
 #
 !ifdef EXETARGET
-# STACKSIZE is not supported.
+
+!ifndef STACKSIZE
+STACKSIZE = 0x50000
+!endif
+
 !   ifdef VIO
-LDTARGETFLAGS    = -Zexe /Zstack 80
-LD2TARGETFLAGS   = -Zexe /Zstack 80
+LDTARGETFLAGS    = -Zexe -Zstack 80
+LD2TARGETFLAGS   = /pmtype:vio /stack:$(STACKSIZE)
 !   else
-LDTARGETFLAGS    = -Zexe /Zstack 80
-LD2TARGETFLAGS   = -Zexe /Zstack 80
+LDTARGETFLAGS    = -Zexe -Zstack 80
+LD2TARGETFLAGS   = /pmtype:pm  /stack:$(STACKSIZE)
 !   endif
 !else
 LDTARGETFLAGS    = -Zdll
-LD2TARGETFLAGS   = -Zdll
+LD2TARGETFLAGS   = /DLL
 !endif
 !ifdef NODEBUGINFO
 LDFLAGS          = -Zmt -Zomf -Zmap $(LDTARGETFLAGS)  -s -ZLinker /EXEPACK:2 -ZLinker /NOD
 LDFLAGS_ODINCRT  = -Zmt -Zomf -Zmap $(LDTARGETFLAGS)  -s -ZLinker /EXEPACK:2
-LD2FLAGS         = -Zmt -Zomf -Zmap $(LD2TARGETFLAGS) -s -O/EXEPACK:2        -O/NOD
-LD2FLAGS_ODINCRT = -Zmt -Zomf -Zmap $(LD2TARGETFLAGS) -s -O/EXEPACK:2
+LD2FLAGS         = $(LD2TARGETFLAGS) -s -O/EXEPACK:2        -O/NOD
+LD2FLAGS_ODINCRT = $(LD2TARGETFLAGS) -s -O/EXEPACK:2
+LD2FLAGS         = /nologo /noe /map /packcode /packdata /exepack:2 /nodebug /nod $(LD2TARGETFLAGS)
+LD2FLAGS_ODINCRT = /nologo /noe /map /packcode /packdata /exepack:2 /nodebug      $(LD2TARGETFLAGS)
 !else
 LDFLAGS          = -Zmt -Zomf -Zmap $(LDTARGETFLAGS)  -ZLinker /NOD
 LDFLAGS_ODINCRT  = -Zmt -Zomf -Zmap $(LDTARGETFLAGS)
-LD2FLAGS         = -Zmt -Zomf -Zmap $(LD2TARGETFLAGS) -O/NOD
-LD2FLAGS_ODINCRT = -Zmt -Zomf -Zmap $(LD2TARGETFLAGS)
+LD2FLAGS         = /nologo /noe /map /packcode /packdata /exepack:2 /nod /debug $(LD2TARGETFLAGS)
+LD2FLAGS_ODINCRT = /nologo /noe /map /packcode /packdata /exepack:2      /debug $(LD2TARGETFLAGS)
 !endif
 
