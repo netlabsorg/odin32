@@ -1,6 +1,6 @@
-/* $Id: env.c,v 1.1 2000-04-17 01:56:50 bird Exp $
+/* $Id: env.c,v 1.2 2000-04-17 02:26:04 bird Exp $
  *
- * Enviroment access functions
+ * Environment access functions
  *
  * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
  *
@@ -8,21 +8,30 @@
  *
  */
 
+/*******************************************************************************
+*   Defined Constants And Macros                                               *
+*******************************************************************************/
+#define INCL_DOSERRORS                  /* Error codes */
+#define INCL_OS2KRNL_VM                 /* OS2KRNL: Virtual Memory Management */
+
 
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>
+
 #include "dev32.h"
 #include "dev32hlp.h"
+#include "log.h"
+#include "ptda.h"
+#include "OS2Krnl.h"
 #include <string.h>
 
 #include "env.h"
-#include <infoseg.h>                    /* Infosegments definitions. */
 
 
 /**
- * Scans the given environment data for a given enviroment variable and returns
+ * Scans the given environment data for a given environment variable and returns
  * its value if found.
  * @returns   Pointer to environment variable value for the variable given in
  *            pszVar.
@@ -73,10 +82,11 @@ const char *ScanEnv(const char *paszEnv, const char *pszVar)
 
 /**
  * Get the linear pointer to the environment data.
+ *
  * @returns   Pointer to environment data.
  *            NULL on failure.
  */
-const char *GetEnv()
+const char *GetEnv(void)
 {
     /*  There is probably two ways of getting the environment data for a the
      *  current process: 1) get it from the PTDA->ptda_environ
@@ -90,9 +100,9 @@ const char *GetEnv()
      *  2), testing will show which one of them are most handy.
      */
 
-    #if 0
-    PPTDA   pPTDA;                      /* Current PTDA */
-    PPTDA   pPTDAExecChild;             /* Current PTDAs pPTDAExecChild */
+    #if 1
+    PPTDA   pPTDACur;                   /* Pointer to the current (system context) PTDA */
+    PPTDA   pPTDA;                      /* PTDA in question. */
     USHORT  hobEnviron;                 /* Object handle of the environ block */
     APIRET  rc;                         /* Return from VMObjHandleInfo. */
     USHORT  ushPTDA;                    /* Handle of the context PTDA. (VMObjH..) */
@@ -102,38 +112,43 @@ const char *GetEnv()
      *  Use PTDA (1):
      *  Get the current PTDA. (Fail if this call failes.)
      *  IF pPTDAExecChild isn't NULL THEN try get environment for that first.
-     *  IF failed or no pPTDAExecChild THEN try get enviroment from pPTDA.
+     *  IF failed or no pPTDAExecChild THEN try get environment from pPTDA.
      */
-    pPTDA = ptdaGetCur();
-    if (pPTDA == NULL)
+    pPTDACur = ptdaGetCur();
+    if (pPTDA != NULL)
+    {
+        pPTDA = ptdaGet_pPTDAExecChild(pPTDA);
+        if (pPTDA != NULL)
+        {
+            hobEnviron = ptdaGet_ptda_environ(pPTDA);
+            if (hobEnviron != 0)
+            {
+                rc = VMObjHandleInfo(hobEnviron, SSToDS(&ulAddr), SSToDS(&ushPTDA));
+                if (rc == NO_ERROR)
+                    return (const char *)ulAddr;
+                kprintf(("GetEnv: VMObjHandleInfo failed with rc=%d for hob=0x%04x\n", rc, hobEnviron));
+            }
+        }
+
+        hobEnviron = ptdaGet_ptda_environ(pPTDACur);
+        if (hobEnviron != 0)
+        {
+            rc = VMObjHandleInfo(hobEnviron, SSToDS(&ulAddr), SSToDS(&ushPTDA));
+            if (rc != NO_ERROR)
+            {
+                kprintf(("GetEnv: VMObjHandleInfo failed with rc=%d for hob=0x%04x\n", rc, hobEnviron));
+            }
+        }
+    }
+    else
     {
         kprintf(("GetEnv: Failed to get current PTDA.\n"));
     }
-    pPTDAExecChild = ptdaGetpPTDAExecChild(pPTDA);
-    if (pPTDAExecChild != NULL)
-    {
-        hobEnviron = ptdaGetptda_environ(pPTDAExecChild);
-        if (hobEnviron != 0)
-        {
-            rc = VMObjHandleInfo(hobEnviron, &ulAddr, &ushPTDA);
-            if (rc != NO_ERROR)
-                ulAddr = 0;
-        }
-    }
-
-    if (ulAddr == 0) /* failed or non pPTDAExecChild */
-    {
-        hobEnviron = ptdaGetptda_environ(pPTDA);
-        if (hobEnviron != 0)
-        {
-            rc = VMObjHandleInfo(hobEnviron, &ulAddr, &ushPTDA);
-            if (rc != NO_ERROR)
-                ulAddr = 0;
-        }
-    }
 
     return (const char *)ulAddr;
+
     #else
+
     struct InfoSegLDT * pLIS;           /* Pointer to local infosegment. */
     PVOID               pv;             /* Address to return. */
 
@@ -146,12 +161,12 @@ const char *GetEnv()
     if (pLIS == NULL)
     {
         kprintf(("GetEnv: Failed to get local info segment\n"));
-        return NULL
+        return NULL;
     }
 
     if (pLIS->LIS_AX <= 3)
     {
-        kprintf(("GetEnv: enviroment selector is %d, ie. NULL\n", pLIS->LIS_AX));
+        kprintf(("GetEnv: environment selector is %d, ie. NULL\n", pLIS->LIS_AX));
         return NULL;
     }
 
