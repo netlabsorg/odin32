@@ -1,4 +1,4 @@
-# $Id: kernel32.mak,v 1.16 2001-11-08 14:49:27 phaller Exp $
+# $Id: kernel32.mak,v 1.17 2001-11-23 18:07:37 phaller Exp $
 
 #
 # Odin32 API
@@ -64,6 +64,7 @@ $(OBJDIR)\vsemaphore.obj \
 $(OBJDIR)\initterm.obj \
 $(OBJDIR)\initkernel32.obj \
 $(OBJDIR)\handlemanager.obj \
+$(OBJDIR)\handlenames.obj \
 $(OBJDIR)\environ.obj \
 $(OBJDIR)\initsystem.obj \
 $(OBJDIR)\hmdevice.obj \

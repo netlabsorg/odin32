@@ -1,4 +1,4 @@
-/* $Id: ccollection.h,v 1.8 2001-11-21 19:08:22 phaller Exp $ */
+/* $Id: ccollection.h,v 1.9 2001-11-23 18:08:03 phaller Exp $ */
 
 /*
  * Collection class:
@@ -119,7 +119,7 @@ class CLinearList : public CCollection
         PLINEARLISTENTRY addBefore (PLINEARLISTENTRY pLLE, void *pObject);
         PLINEARLISTENTRY addAfter  (PLINEARLISTENTRY pLLE, void *pObject);
         void             removeElement(PLINEARLISTENTRY pLLE);
-        int              removeElement(void *pObject);
+        int              removeObject(void *pObject);
         PLINEARLISTENTRY findForward(void *pObject);
         PLINEARLISTENTRY findForward(PLINEARLISTENTRY pLLECurrent,
                                      void *pObject);
