@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2000-02-09 08:50:55 jeroen Exp $
+# $Id: makefile,v 1.2 2000-02-09 09:04:10 jeroen Exp $
 #
 # PD-Win32
 #
@@ -308,7 +308,7 @@ OBJS = \
   util\quad.obj \
   util\registry.obj
 
-$(TARGET).DLL: $(SOURCES) $(TARGET).lrf $(TARGET).def
+$(TARGET).DLL: $(SOURCES) initterm.obj $(TARGET).lrf $(TARGET).def
     cd util
     $(MAKE_CMD)
     cd ..\tess
