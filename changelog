@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2371 2002-11-29 15:46:57 sandervl Exp $ */
+/* $Id: changelog,v 1.2372 2002-12-02 09:34:03 sandervl Exp $ */
+
+ 2002-12-02: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Convert command line from OS/2 to Windows codepage
 
  2002-11-29: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Add ODIN_SetSyscolors to override system colors without
