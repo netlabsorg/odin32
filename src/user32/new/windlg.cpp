@@ -1,4 +1,4 @@
-/* $Id: windlg.cpp,v 1.3 1999-09-05 12:03:34 sandervl Exp $ */
+/* $Id: windlg.cpp,v 1.4 1999-09-05 15:53:10 sandervl Exp $ */
 /*
  * Win32 dialog apis for OS/2
  *
@@ -119,8 +119,17 @@ INT  WIN32API DialogBoxIndirectParamA(HINSTANCE hInst,
 {
     HWND hwnd = CreateDialogIndirectParamA(hInst, dlgtemplate, hwndParent, dlgproc,
                                            lParamInit);
-    //TODO:
-    if (hwnd) return 1; //return DIALOG_DoDialogBox( hwnd, owner );
+    if (hwnd)
+    {
+        Win32Dialog *dialog;
+
+        dialog = (Win32Dialog *)Win32BaseWindow::GetWindowFromHandle(hwnd);
+        if(!dialog || !dialog->IsDialog()) {
+            dprintf(("DialogBoxIndirectParamA, dialog %x not found", hwnd));
+            return 0;
+        }
+        return dialog->doDialogBox();
+    }
     return -1;
 }
 //******************************************************************************
@@ -131,8 +140,17 @@ INT  WIN32API DialogBoxIndirectParamW(HINSTANCE hInst, DLGTEMPLATE *dlgtemplate,
 {
     HWND hwnd = CreateDialogIndirectParamW(hInst, dlgtemplate, hwndParent, dlgproc,
                                            lParamInit);
-    //TODO:
-    if (hwnd) return 1; //return DIALOG_DoDialogBox( hwnd, owner );
+    if (hwnd)
+    {
+        Win32Dialog *dialog;
+
+        dialog = (Win32Dialog *)Win32BaseWindow::GetWindowFromHandle(hwnd);
+        if(!dialog || !dialog->IsDialog()) {
+            dprintf(("DialogBoxIndirectParamW, dialog %x not found", hwnd));
+            return 0;
+        }
+        return dialog->doDialogBox();
+    }
     return -1;
 }
 //******************************************************************************
@@ -141,8 +159,18 @@ int WIN32API DialogBoxParamA(HINSTANCE hInst, LPCSTR lpszTemplate, HWND hwndOwne
                      DLGPROC dlgproc, LPARAM  lParamInit)
 {
     HWND hwnd = CreateDialogParamA( hInst, lpszTemplate, hwndOwner, dlgproc, lParamInit);
-    //TODO:
-    if (hwnd) return 1; //return DIALOG_DoDialogBox( hwnd, owner );
+
+    if (hwnd)
+    {
+        Win32Dialog *dialog;
+
+        dialog = (Win32Dialog *)Win32BaseWindow::GetWindowFromHandle(hwnd);
+        if(!dialog || !dialog->IsDialog()) {
+            dprintf(("DialogBoxParamA, dialog %x not found", hwnd));
+            return 0;
+        }
+        return dialog->doDialogBox();
+    }
     return -1;
 }
 //******************************************************************************
@@ -151,8 +179,18 @@ int WIN32API DialogBoxParamW(HINSTANCE hInst, LPCWSTR lpszTemplate, HWND hwndOwn
                              DLGPROC dlgproc, LPARAM lParamInit)
 {
     HWND hwnd = CreateDialogParamW( hInst, lpszTemplate, hwndOwner, dlgproc, lParamInit);
-    //TODO:
-    if (hwnd) return 1; //return DIALOG_DoDialogBox( hwnd, owner );
+
+    if (hwnd)
+    {
+        Win32Dialog *dialog;
+
+        dialog = (Win32Dialog *)Win32BaseWindow::GetWindowFromHandle(hwnd);
+        if(!dialog || !dialog->IsDialog()) {
+            dprintf(("DialogBoxParamW, dialog %x not found", hwnd));
+            return 0;
+        }
+        return dialog->doDialogBox();
+    }
     return -1;
 }
 //******************************************************************************

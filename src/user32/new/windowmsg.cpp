@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.9 1999-08-30 11:59:54 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.10 1999-09-05 15:53:10 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -18,6 +18,7 @@
 #include <win.h>
 #include <hooks.h>
 #include "oslibwin.h"
+#include "oslibmsg.h"
 
 //******************************************************************************
 //******************************************************************************
@@ -59,6 +60,38 @@ BOOL WIN32API GetMessageW( LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgF
 }
 //******************************************************************************
 //******************************************************************************
+BOOL WIN32API PeekMessageA(LPMSG msg, HWND hwndOwner, UINT uMsgFilterMin,
+                           UINT uMsgFilterMax, UINT fuRemoveMsg)
+{
+ BOOL fFoundMsg;
+
+    fFoundMsg = OSLibWinPeekMsg(msg, 0, uMsgFilterMin, uMsgFilterMax,
+                                (fuRemoveMsg & PM_REMOVE) ? 1 : 0, FALSE);
+    if(fFoundMsg) {
+        if (msg->message == WM_QUIT && (fuRemoveMsg & (PM_REMOVE))) {
+            //TODO: Post WM_QUERYENDSESSION message when WM_QUIT received and system is shutting down
+        }
+    }
+    return fFoundMsg;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API PeekMessageW(LPMSG msg, HWND hwndOwner, UINT uMsgFilterMin,
+                           UINT uMsgFilterMax, UINT fuRemoveMsg)
+{
+ BOOL fFoundMsg;
+
+    fFoundMsg = OSLibWinPeekMsg(msg, 0, uMsgFilterMin, uMsgFilterMax,
+                                (fuRemoveMsg & PM_REMOVE) ? 1 : 0, FALSE);
+    if(fFoundMsg) {
+        if (msg->message == WM_QUIT && (fuRemoveMsg & (PM_REMOVE))) {
+            //TODO: Post WM_QUERYENDSESSION message when WM_QUIT received and system is shutting down
+        }
+    }
+    return fFoundMsg;
+}
+//******************************************************************************
+//******************************************************************************
 LONG WIN32API GetMessageExtraInfo(void)
 {
     dprintf(("USER32:  GetMessageExtraInfo\n"));
@@ -87,8 +120,8 @@ LRESULT WIN32API SendMessageA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
-    dprintf(("SendMessageA, window %x not found", hwnd));
-    return 0;
+        dprintf(("SendMessageA, window %x not found", hwnd));
+        return 0;
     }
     return window->SendMessageA(msg, wParam, lParam);
 }
@@ -101,8 +134,8 @@ LRESULT WIN32API SendMessageW(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
-    dprintf(("SendMessageW, window %x not found", hwnd));
-    return 0;
+        dprintf(("SendMessageW, window %x not found", hwnd));
+        return 0;
     }
     return window->SendMessageW(msg, wParam, lParam);
 }
@@ -114,12 +147,12 @@ BOOL WIN32API PostMessageA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
   Win32BaseWindow *window;
 
     if(hwnd == NULL)
-    return PostThreadMessageA(GetCurrentThreadId(), msg, wParam, lParam);
+        return PostThreadMessageA(GetCurrentThreadId(), msg, wParam, lParam);
 
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
-    dprintf(("PostMessageA, window %x not found", hwnd));
-    return 0;
+        dprintf(("PostMessageA, window %x not found", hwnd));
+        return 0;
     }
     dprintf(("PostMessageA, %x %x %x %x", hwnd, msg, wParam, lParam));
     return window->PostMessageA(msg, wParam, lParam);
@@ -132,12 +165,12 @@ BOOL WIN32API PostMessageW(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
   Win32BaseWindow *window;
 
     if(hwnd == NULL)
-    return PostThreadMessageW(GetCurrentThreadId(), msg, wParam, lParam);
+        return PostThreadMessageW(GetCurrentThreadId(), msg, wParam, lParam);
 
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
-    dprintf(("PostMessageW, window %x not found", hwnd));
-    return 0;
+        dprintf(("PostMessageW, window %x not found", hwnd));
+        return 0;
     }
     dprintf(("PostMessageW, %x %x %x %x", hwnd, msg, wParam, lParam));
     return window->PostMessageW(msg, wParam, lParam);
@@ -150,25 +183,6 @@ BOOL WIN32API WaitMessage(void)
     WriteLog("USER32:  WaitMessage\n");
 #endif
     return O32_WaitMessage();
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API PeekMessageA(LPMSG arg1, HWND arg2, UINT arg3, UINT arg4, UINT arg5)
-{
-#ifdef DEBUG
-//    WriteLog("USER32:  PeekMessage\n");
-#endif
-    return O32_PeekMessage(arg1, arg2, arg3, arg4, arg5);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API PeekMessageW( LPMSG arg1, HWND arg2, UINT arg3, UINT arg4, UINT  arg5)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  PeekMessageW\n");
-#endif
-    // NOTE: This will not work as is (needs UNICODE support)
-    return O32_PeekMessage(arg1, arg2, arg3, arg4, arg5);
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: win32dlg.h,v 1.5 1999-09-05 12:03:33 sandervl Exp $ */
+/* $Id: win32dlg.h,v 1.6 1999-09-05 15:53:09 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -77,6 +77,8 @@ virtual	 LONG   SetWindowLongA(int index, ULONG value);
 virtual	 ULONG  GetWindowLongA(int index);
 
 static	 ULONG  GetDialogBaseUnits()  { return MAKELONG(xBaseUnit, yBaseUnit); };
+
+	   INT  doDialogBox();
 
 protected:
 	BOOL    DIALOG_Init(void);

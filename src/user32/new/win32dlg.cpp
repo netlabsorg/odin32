@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.4 1999-09-05 12:03:33 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.5 1999-09-05 15:53:09 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -17,6 +17,7 @@
 #include <string.h>
 #include <misc.h>
 #include <win32dlg.h>
+#include "oslibmsg.h"
 
 //******************************************************************************
 //******************************************************************************
@@ -213,6 +214,49 @@ Win32Dialog::~Win32Dialog()
     if (hUserFont) DeleteObject( hUserFont );
     if (hMenu) DestroyMenu( hMenu );
 
+}
+/***********************************************************************
+ *           DIALOG_DoDialogBox
+ */
+INT Win32Dialog::doDialogBox()
+{
+  Win32BaseWindow *topOwner;
+  MSG msg;
+  INT retval;
+
+    /* Owner must be a top-level window */
+    if(getOwner() == NULL) {
+        dprintf(("Dialog box has no owner!!!"));
+        return -1;
+    }
+    topOwner = getOwner()->getTopParent();
+    if(topOwner == NULL) {
+        dprintf(("Dialog box has no top owner!!!"));
+        return -1;
+    }
+
+    if (!dialogFlags & DF_END) /* was EndDialog called in WM_INITDIALOG ? */
+    {
+        topOwner->EnableWindow( FALSE );
+        ShowWindow( SW_SHOW );
+
+        while (OSLibWinPeekMsg(&msg, getOS2FrameWindowHandle(), topOwner->getOS2FrameWindowHandle(),
+                               0, 0, MSG_REMOVE))
+//        while (OSLibWinPeekMsg(&msg, getWindowHandle(), owner, MSGF_DIALOGBOX,
+//                                       MSG_REMOVE, !(getStyle() & DS_NOIDLEMSG), NULL ))
+        {
+            if (!IsDialogMessageA( getWindowHandle(), &msg))
+            {
+                TranslateMessage( &msg );
+                DispatchMessageA( &msg );
+            }
+            if (dialogFlags & DF_END) break;
+        }
+        topOwner->EnableWindow( TRUE );
+    }
+    retval = idResult;
+    DestroyWindow();
+    return retval;
 }
 /***********************************************************************
  *           DIALOG_Init

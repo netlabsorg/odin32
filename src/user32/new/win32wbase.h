@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.7 1999-09-05 12:03:33 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.8 1999-09-05 15:53:10 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -164,6 +164,8 @@ Win32BaseWindow *getParent()                    { return (Win32BaseWindow *)Chil
 Win32WndClass  *getClass()  { return windowClass; };
         char   *getWindowNameA()              { return windowNameA; };
 Win32BaseWindow *getOwner()                   { return owner; };
+
+Win32BaseWindow *getTopParent();
 
        LRESULT  SendMessageA(ULONG msg, WPARAM wParam, LPARAM lParam);
        LRESULT  SendMessageW(ULONG msg, WPARAM wParam, LPARAM lParam);

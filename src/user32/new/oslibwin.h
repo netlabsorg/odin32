@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.23 1999-08-28 14:09:29 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.24 1999-09-05 15:53:09 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -215,12 +215,6 @@ BOOL  OSLibWinQueryWindowRect(HWND hwnd, PRECT pRect, int RelativeTo = RELATIVE_
 #define QWOS_FRAMEOWNER   8
 
 HWND  OSLibWinQueryWindow(HWND hwnd, ULONG lCode);
-
-
-void  OSLibWinPostQuitMessage(ULONG nExitCode);
-LONG  OSLibWinDispatchMsg(MSG *msg, BOOL isUnicode = FALSE);
-
-BOOL  OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax, BOOL isUnicode = FALSE);
 
 LONG  OSLibWinQueryWindowTextLength(HWND hwnd);
 LONG  OSLibWinQueryWindowText(HWND hwnd, LONG length, LPSTR lpsz);
