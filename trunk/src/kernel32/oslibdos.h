@@ -1,4 +1,4 @@
-/* $Id: oslibdos.h,v 1.43 2002-01-04 14:11:23 sandervl Exp $ */
+/* $Id: oslibdos.h,v 1.44 2002-02-28 19:27:48 sandervl Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -212,6 +212,31 @@ BOOL  OSLibDosFindClose(DWORD hFindFile);
 
 DWORD OSLibDosQueryVolumeFS(int drive, LPSTR lpFileSystemNameBuffer, DWORD nFileSystemNameSize);
 DWORD OSLibDosQueryVolumeSerialAndName(int drive, LPDWORD lpVolumeSerialNumber, LPSTR lpVolumeNameBuffer, DWORD nVolumeNameSize);
+
+/* Disk/Diskette Control */
+
+#ifndef __OS2_H__
+#define IOCTL_DISK 	                   8
+
+#define DSK_LOCKDRIVE                      0x0000
+#define DSK_UNLOCKDRIVE                    0x0001
+#define DSK_REDETERMINEMEDIA               0x0002
+#define DSK_SETLOGICALMAP                  0x0003
+#define DSK_BEGINFORMAT                    0X0004
+#define DSK_BLOCKREMOVABLE                 0x0020
+#define DSK_GETLOGICALMAP                  0x0021
+#define DSK_UNLOCKEJECTMEDIA               0X0040
+#define DSK_SETDEVICEPARAMS                0x0043
+#define DSK_WRITETRACK                     0x0044
+#define DSK_FORMATVERIFY                   0x0045
+#define DSK_DISKETTECONTROL                0X005D
+#define DSK_QUERYMEDIASENSE                0X0060
+#define DSK_GETDEVICEPARAMS                0x0063
+#define DSK_READTRACK                      0x0064
+#define DSK_VERIFYTRACK                    0x0065
+#define DSK_GETLOCKSTATUS                  0X0066
+#endif
+
 DWORD OSLibDosDevIOCtl( DWORD hFile, DWORD dwCat, DWORD dwFunc,
                         PVOID pParm, DWORD dwParmMaxLen, DWORD *pdwParmLen,
                         PVOID pData, DWORD dwDataMaxLen, DWORD *pdwDataLen);
