@@ -1,4 +1,11 @@
-/* $Id: changelog,v 1.1238 2001-02-02 08:54:17 bird Exp $ */
+/* $Id: changelog,v 1.1239 2001-02-02 19:00:21 sandervl Exp $ */
+
+ 2001-02-02: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o DrawEdge bugfixes (signed/unsigned char mismatches)
+                  (fixes lines in properties dialog of RealPlayer 8)
+                o Fixed incorrect rounding in dialog control size calculation
+                  (fixes wrong height of some dialog controls (rp8 pref. dialog lines))
+                o Don't unregister class if there are still windows that use it.
 
  2001-02-02: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Win32k:   o Added option for the All-In-One-Object fix to be able
