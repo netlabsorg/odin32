@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.50 2003-06-12 00:45:33 bird Exp $
+/* $Id: buildenv.cmd,v 1.51 2003-09-14 18:50:59 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -26,7 +26,7 @@
     /*
      * Version
      */
-    sVersion = '1.0.21 [2003-06-11]';
+    sVersion = '1.1.0 [2003-09-14]';
 
     /*
      * Create argument array with lowercase arguments.
@@ -98,8 +98,6 @@
     /*
      * Configuration - sorted please!
      */
-    parse source . . sPathFile .
-    sPathFile = sPathFile||'.paths';
     aPath.0 = 0;
 
     i = 1;
@@ -228,12 +226,20 @@
             when (sEnv.i = 'showall') then do
                 do j = 1 to aCfg.0
                     say left(aCfg.j.sId, 15) '-' left(aCfg.j.sGrp, 8) '-' aCfg.j.sDesc
+                    sPath = PathQuery(aCfg.j.sId, aCfg.j.sId, 'quietisconfig');
+                    if (sPath <> '') then
+                        say '    'sPath;
                 end
             end
             when (sEnv.i = 'showconfigured') then do
                 do j = 1 to aCfg.0
                     if (CfgIsConfigured(j)) then
+                    do
                         say left(aCfg.j.sId, 15) '-' left(aCfg.j.sGrp, 8) '-' aCfg.j.sDesc
+                        sPath = PathQuery(aCfg.j.sId, aCfg.j.sId, 'quietisconfig');
+                        if (sPath <> '') then
+                            say '    'sPath;
+                    end
                 end
             end
 
@@ -359,7 +365,7 @@ exit(16);
  *          '' if not found.
  * @param   sToolId      Tool id.
  */
-CfgDesc: procedure expose aCfg. aPath. sPathFile
+CfgDesc: procedure expose aCfg. aPath.
     parse arg sToolId
     do i = 1 to aCfg.0
         if (aCfg.i.sId = sToolId) then
@@ -374,7 +380,7 @@ return sToolId;
  *          aCfg.0+1 on error.
  * @param   sToolId      Tool id.
  */
-CfgLookup: procedure expose aCfg. aPath. sPathFile
+CfgLookup: procedure expose aCfg. aPath.
     parse arg sToolId
     iTool = 1;
     do while ((iTool <= aCfg.0) & (aCfg.iTool.sId <> sToolId))
@@ -391,7 +397,7 @@ return iTool;
  * @param   iTool   The tool index in aCfg.
  * @param   fRM     If set we'll uninstall the tool from the environment.
  */
-CfgInstallUninstall: procedure expose aCfg. aPath. sPathFile
+CfgInstallUninstall: procedure expose aCfg. aPath.
     parse arg iTool, fRM
 
     /* make rexx expression */
@@ -446,7 +452,7 @@ return iRc;
  * @param   iTool       The tool configuration to configure.
  * @param   fForced     If set, we'll force a reconfiguration of the tool.
  */
-CfgConfigure: procedure expose aCfg. aPath. sPathFile
+CfgConfigure: procedure expose aCfg. aPath.
     parse arg iTool, fForced
 
     /*
@@ -514,7 +520,7 @@ return 0;
  * @param   fQuiet      If set we'll to a quiet verify.
  * @param   fCleanup    If set we'll clean properly.
  */
-CfgVerify: procedure expose aCfg. aPath. sPathFile
+CfgVerify: procedure expose aCfg. aPath.
     parse arg iTool, fQuiet, fCleanup
 
     /* make rexx expression */
@@ -570,7 +576,7 @@ return iRc;
  * @param   iTool   The tool index in aCfg.
  * @param   fQuiet  If set we'll to a quiet verify.
  */
-CfgIsConfigured: procedure expose aCfg. aPath. sPathFile
+CfgIsConfigured: procedure expose aCfg. aPath.
     parse arg iTool
 
     /* make rexx expression */
@@ -592,7 +598,7 @@ return (iRc = 0);
  * @returns TRUE if file exists.
  *          FALSE if file doesn't exists.
  */
-CfgVerifyFile: procedure expose aCfg. aPath. sPathFile
+CfgVerifyFile: procedure expose aCfg. aPath.
     parse arg sFile, fQuiet, fOptional
     if (fOptional = '') then fOptional = 0;
     rc = stream(sFile, 'c', 'query exist');
@@ -613,7 +619,7 @@ return rc <> '' | fOptional;
  * @returns TRUE if file exists.
  *          FALSE if file doesn't exists.
  */
-CfgVerifyDir: procedure expose aCfg. aPath. sPathFile
+CfgVerifyDir: procedure expose aCfg. aPath.
     parse arg sDir, fQuiet
     rc = SysFileTree(sDir, 'sDirs', 'DO');
     if (rc = 0 & sDirs.0 = 1) then
@@ -632,7 +638,7 @@ return 0;
  * @returns Lower cased, absolute, backward slashed, path to program.
  * @param   sPathId     Program identifier. (lowercase!)
  */
-PathQuery: procedure expose aCfg. aPath. sPathFile
+PathQuery: procedure expose aCfg. aPath.
     parse arg sPathId, sToolId, sOperation, fOptional
 
     if (fOptional = '') then
@@ -697,12 +703,38 @@ return '';
 
 
 /**
+ * Determins the full name of the path file to use.
+ * @returns Path to the pathfile to use. The file may not exist.
+ */
+PathGetFile: procedure
+
+    /*
+     * Project Specific?
+     */
+    parse source . . sPathFile .
+    sPathFile = sPathFile||'.paths';
+    if (FileExists(sPathFile)) then
+        return sPathFile;
+
+    /*
+     * ETC?
+     */
+    sEtc = EnvGet('ETC');
+    if (sEtc <> '') then
+        return sEtc||'\BuildEnv.cfg';
+return sPathFile;
+
+
+/**
  * Reads the path file into the 'aPath.' stem.
  */
-PathRead: procedure expose aCfg. aPath. sPathFile
+PathRead: procedure expose aCfg. aPath.
 
     i = 1;                              /* Path index */
     iLine = 0;                          /* Line # in file */
+
+
+    sPathFile = PathGetFile();
 
     /*
      * Read loop.
@@ -744,7 +776,9 @@ return 0;
 /**
  * Writes the path file from what's in the 'aPath.' stem.
  */
-PathWrite: procedure expose aCfg. aPath. sPathFile
+PathWrite: procedure expose aCfg. aPath.
+
+    sPathFile = PathGetFile();
     call SysFileDelete(sPathFile);
     do i = 1 to aPath.0
         /* skip if already written */
@@ -764,7 +798,7 @@ return 0;
  * @returns 0
  * @param   sPathId     The id of the path to remove.
  */
-PathRemove: procedure expose aCfg. aPath. sPathFile
+PathRemove: procedure expose aCfg. aPath.
     parse arg sPathId
 
     /*
@@ -799,7 +833,7 @@ return 0;
  * @param   sPathId     Path id.
  * @param   sNewPath    Path.
  */
-PathSet: procedure expose aCfg. aPath. sPathFile
+PathSet: procedure expose aCfg. aPath.
 parse arg sPathId, sNewPath
 
     /*
@@ -827,7 +861,7 @@ return 0;
 /**
  * Fills 'aPath.' with default settings overwriting anything in the table.
  */
-PathSetDefault: procedure expose aCfg. aPath. sPathFile
+PathSetDefault: procedure expose aCfg. aPath.
     i = 1;
 
     /*
@@ -848,7 +882,7 @@ PathSetDefault: procedure expose aCfg. aPath. sPathFile
         aPath.i.sPId = 'gcc302';                    aPath.i.sPath = 'f:\GCC\v3.0.2beta_os2\emx';    i = i + 1;
         aPath.i.sPId = 'gcc303';                    aPath.i.sPath = 'f:\GCC\v3.0.3beta_os2\emx';    i = i + 1;
         aPath.i.sPId = 'gcc321';                    aPath.i.sPath = 'f:\GCC\v3.2.1beta_os2\emx';    i = i + 1;
-        aPath.i.sPId = 'gcc322';                    aPath.i.sPath = 'f:\GCC\v3.2.2alpha1_os2\usr';  i = i + 1;
+        aPath.i.sPId = 'gcc322';                    aPath.i.sPath = 'f:\GCC\v3.2.2beta2_os2\usr';   i = i + 1;
         aPath.i.sPId = 'home';                      aPath.i.sPath = 'e:\user\kso';                  i = i + 1;
         aPath.i.sPId = 'icatgam';                   aPath.i.sPath = 'f:\Icat\v4.0.6rc1_os2';        i = i + 1;
         aPath.i.sPId = 'icatgam406rc1';             aPath.i.sPath = 'f:\Icat\v4.0.6rc1_os2';        i = i + 1;
@@ -1006,7 +1040,7 @@ return 0;
  * @param   sPathId     The path to configure.
  * @param   sToolId     The tool Id.
  */
-PathConfig: procedure expose aCfg. aPath. sPathFile
+PathConfig: procedure expose aCfg. aPath.
     parse arg sOperation, sPathId, sToolId
 
     /*
@@ -1523,7 +1557,7 @@ return iRc;
 /*
  * Concurrent Versions System (CVS)
  */
-CVS: procedure expose aCfg. aPath. sPathFile
+CVS: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet
 
 
@@ -1571,7 +1605,7 @@ return CheckCmdOutput('cvs --version', 0, fQuiet, 'Concurrent Versions System (C
 /*
  * EMX
  */
-EMX: procedure expose aCfg. aPath. sPathFile
+EMX: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet
 
     /*
@@ -1649,7 +1683,7 @@ return 0;
 /*
  * EMX PGCC - must be installed on to the ordinar EMX.
  */
-EMXPGCC: procedure expose aCfg. aPath. sPathFile
+EMXPGCC: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet
 
     /*
@@ -1715,7 +1749,7 @@ return rc;
 /*
  * FreeType v1.3.1 EMX release.
  */
-FreeTypeEMX: procedure expose aCfg. aPath. sPathFile
+FreeTypeEMX: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet
     sPathFreeType = PathQuery('freetypeemx', sToolId, sOperation);
     if (sPathFreeType = '') then
@@ -1747,7 +1781,7 @@ return 0;
 /*
  * IBM DB2 v5.2
  */
-db2v52: procedure expose aCfg. aPath. sPathFile
+db2v52: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet
     sPathDB2   = PathQuery('db2v52', sToolId, sOperation);
     if (sPathDB2 = '') then
@@ -1795,7 +1829,7 @@ return rc;
 /*
  *  Device Driver Kit (DDK) base.
  */
-DDK: procedure expose aCfg. aPath. sPathFile
+DDK: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet
 
     /*
@@ -1826,7 +1860,7 @@ return rc;
 /*
  *  Device Driver Kit (DDK) base.
  */
-DDKBase: procedure expose aCfg. aPath. sPathFile
+DDKBase: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet
 
     /*
@@ -1892,7 +1926,7 @@ return rc;
 /*
  *  Device Driver Kit (DDK) Video.
  */
-DDKVideo: procedure expose aCfg. aPath. sPathFile
+DDKVideo: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet
 
     /*
@@ -1955,7 +1989,7 @@ return rc;
 /*
  * Doxygen v1.2.11.1 for OS/2.
  */
-DoxyGen: procedure expose aCfg. aPath. sPathFile
+DoxyGen: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet
 
     /*
@@ -1988,7 +2022,7 @@ return rc;
  * Note! bin.new has been renamed to bin!
  * Note! make .lib of every .a! in 4OS2: for /R %i in (*.a) do if not exist %@NAME[%i].lib emxomf %i
  */
-GCC3xx: procedure expose aCfg. aPath. sPathFile
+GCC3xx: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet,sPathId
 
     /*
@@ -2081,7 +2115,7 @@ return rc;
  * Innotek GCC 3.2.x and higher - this environment is EMX RT free.
  * Note! make .lib of every .a! in 4OS2: for /R %i in (*.a) do if not exist %@NAME[%i].lib emxomf %i
  */
-GCC322plus: procedure expose aCfg. aPath. sPathFile
+GCC322plus: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet,sPathId
 
     /*
@@ -2118,8 +2152,8 @@ GCC322plus: procedure expose aCfg. aPath. sPathFile
     call EnvAddFront fRM, 'HELP',               sGCCBack'\help;' */
     call EnvAddFront fRM, 'C_INCLUDE_PATH',     sGCCForw'/include;'
     call EnvAddFront fRM, 'C_INCLUDE_PATH',     sGCCForw'/lib/gcc-lib/'sTrgt'/'sVer'/include;'
-    call EnvAddFront fRM, 'CPLUS_INCLUDE_PATH', sGCCForw'/include;'
     call EnvAddFront fRM, 'C_INCLUDE_PATH',     sGCCForw'/lib/gcc-lib/'sTrgt'/'sVer'/include;'
+    call EnvAddFront fRM, 'CPLUS_INCLUDE_PATH', sGCCForw'/include;'
     call EnvAddFront fRM, 'CPLUS_INCLUDE_PATH', sGCCForw'/include/c++/'sVer'/backward;'
     call EnvAddFront fRM, 'CPLUS_INCLUDE_PATH', sGCCForw'/include/c++/'sVer'/'sTrgt';'
     call EnvAddFront fRM, 'CPLUS_INCLUDE_PATH', sGCCForw'/include/c++/'sVer'/;'
@@ -2128,7 +2162,6 @@ GCC322plus: procedure expose aCfg. aPath. sPathFile
     call EnvAddFront fRM, 'INFOPATH',           sGCCForw'/info'
     /* is this used? */
     call EnvSet      fRM, 'PROTODIR',           sGCCForw'/include/c++/gen'
-    call EnvSet      fRM, 'EMXOMFLD_LINKER',    'ILINK -nofree -STUB:'sGCCBack'\bin\os2stub.bin '
 
     /*
      * Verify.
@@ -2175,7 +2208,7 @@ return rc;
 /*
  * ICAT Debugger
  */
-ICATGam: procedure expose aCfg. aPath. sPathFile
+ICATGam: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet
     sPathICAT   = PathQuery('icatgam', sToolId, sOperation);
     if (sPathICAT = '') then
@@ -2210,7 +2243,7 @@ return 0;
 /*
  * ICAT Debugger
  */
-ICATGam406RC1: procedure expose aCfg. aPath. sPathFile
+ICATGam406RC1: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet
     sPathICAT   = PathQuery('icatgam406rc1', sToolId, sOperation);
     if (sPathICAT = '') then
@@ -2246,7 +2279,7 @@ return 0;
 /*
  * ICAT Debugger for PE images.
  */
-ICATPe: procedure expose aCfg. aPath. sPathFile
+ICATPe: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet
     sPathICAT   = PathQuery('icatgam', sToolId, sOperation);
     if (sPathICAT = '') then
@@ -2290,7 +2323,7 @@ return 0;
 /*
  * Interactive Disassembler (IDA) v3.80a
  */
-IDA38: procedure expose aCfg. aPath. sPathFile
+IDA38: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet
     /*
      * IDA main directory.
@@ -2326,7 +2359,7 @@ return 0;
 /*
  * Interactive Disassembler (IDA) v4.01
  */
-IDA40: procedure expose aCfg. aPath. sPathFile
+IDA40: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet
     /*
      * IDA main directory.
@@ -2362,7 +2395,7 @@ return 0;
 /*
  * Interactive Disassembler (IDA) v4.14
  */
-IDA414: procedure expose aCfg. aPath. sPathFile
+IDA414: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet
     /*
      * IDA main directory.
@@ -2398,7 +2431,7 @@ return 0;
 /*
  * Interactive Disassembler (IDA) Plugin SDK (v5.0?)
  */
-IDASDK: procedure expose aCfg. aPath. sPathFile
+IDASDK: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet
     /*
      * IDA main directory.
@@ -2441,7 +2474,7 @@ return 0;
 /*
  * Interactive Disassembler (IDA) Plugin SDK (v5.0?)
  */
-IDASDK: procedure expose aCfg. aPath. sPathFile
+IDASDK: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet
     /*
      * IDA main directory.
@@ -2484,7 +2517,7 @@ return 0;
 /*
  * JAVA v1.3.1 (latest)
  */
-Java131: procedure expose aCfg. aPath. sPathFile
+Java131: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet
     /*
      * JAVA main directory.
@@ -2539,7 +2572,7 @@ return 0;
 /*
  * (lib) JPEG v6b port.
  */
-JPEG: procedure expose aCfg. aPath. sPathFile
+JPEG: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet
     sPathJPEG = PathQuery('jpeg', sToolId, sOperation);
     if (sPathJPEG = '') then
@@ -2575,7 +2608,7 @@ return 0;
 /*
  * Mode commandline.
  */
-Mode: procedure expose aCfg. aPath. sPathFile
+Mode: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet,cols,rows
 
     if (pos('install', sOperation) > 0 & pos('uninstall', sOperation) <= 0) then
@@ -2597,7 +2630,7 @@ return 0;
 /*
  * Microsoft C v6.0a 16-bit
  */
-MSCV6_16: procedure expose aCfg. aPath. sPathFile
+MSCV6_16: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet
 
     /*
@@ -2647,7 +2680,7 @@ return rc;
 /*
  * Microsoft C v6.0a 32-bit
  */
-MSCV6_32: procedure expose aCfg. aPath. sPathFile
+MSCV6_32: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet
 
     /*
@@ -2691,7 +2724,7 @@ return rc;
 /*
  * Microsoft C v7.0 16-bit with OS/2 support.
  */
-MSCV7_16: procedure expose aCfg. aPath. sPathFile
+MSCV7_16: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet
 
     /*
@@ -2747,7 +2780,7 @@ return rc;
 /*
  * mySQL Database system
  */
-mySQL: procedure expose aCfg. aPath. sPathFile
+mySQL: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet
 
     /*
@@ -2792,7 +2825,7 @@ return rc;
 /*
  * NASM - NetWide Assembler (all versions)
  */
-NASM: procedure expose aCfg. aPath. sPathFile
+NASM: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet,sPathId
 
     /*
@@ -2834,7 +2867,7 @@ return rc;
 /*
  * NetQOS2 - help subsystem++ for VAC 3.6.5 and VAC 4.0
  */
-NetQOS2: procedure expose aCfg. aPath. sPathFile
+NetQOS2: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet
     sPathNetQOS2 = PathQuery('netqos2', sToolId, sOperation);
     if (sPathNetQOS2 = '') then
@@ -2876,7 +2909,7 @@ return rc;
 /*
  * Odin32 testcase setup.
  */
-Odin32Testcase: procedure expose aCfg. aPath. sPathFile
+Odin32Testcase: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet
     if (  PathQuery('testcase_drive_unused', sToolId, sOperation) = '',
         | PathQuery('testcase_drive_fixed', sToolId, sOperation) = '',
@@ -2909,7 +2942,7 @@ return 0;
 /*
  * PERL 5005_53 or 5.004_55
  */
-Perl50xxx: procedure expose aCfg. aPath. sPathFile
+Perl50xxx: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet
 
     /*
@@ -2961,7 +2994,7 @@ return rc;
 /*
  * PERL v5.8.0
  */
-Perl580: procedure expose aCfg. aPath. sPathFile
+Perl580: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet
 
     /*
@@ -3006,7 +3039,7 @@ return rc;
 /*
  * Python/2 v1.5.2
  */
-Python: procedure expose aCfg. aPath. sPathFile
+Python: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet
 
     /*
@@ -3045,7 +3078,7 @@ return rc;
 /*
  * OS/2 Programmers Toolkit v4.0 (CSD1/4)
  */
-Toolkit40: procedure expose aCfg. aPath. sPathFile
+Toolkit40: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet
 
     /*
@@ -3143,7 +3176,7 @@ return rc;
 /*
  * OS/2 Programmers Toolkit v4.5
  */
-Toolkit45: procedure expose aCfg. aPath. sPathFile
+Toolkit45: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet
 
     /*
@@ -3231,7 +3264,7 @@ return rc;
 /*
  * OS/2 Programmers Toolkit v4.5.1
  */
-Toolkit451: procedure expose aCfg. aPath. sPathFile
+Toolkit451: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet
 
     /*
@@ -3328,7 +3361,7 @@ return rc;
 /*
  * OS/2 Programmers Toolkit v4.5.2
  */
-Toolkit452: procedure expose aCfg. aPath. sPathFile
+Toolkit452: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet
 
     /*
@@ -3429,7 +3462,7 @@ return rc;
 /**
  * This will envolve into an full UNIX like environment some day perhaps...
  */
-Unix: procedure expose aCfg. aPath. sPathFile
+Unix: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet
 
     /*
@@ -3487,7 +3520,7 @@ return 0;
 /*
  * IBM Visual Age for C++ v3.08 for OS/2
  */
-VAC308: procedure expose aCfg. aPath. sPathFile
+VAC308: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet
 
     /*
@@ -3606,7 +3639,7 @@ return rc;
 /*
  * Visual Age / C and C++ tools v3.6.5 for OS/2
  */
-VAC365: procedure expose aCfg. aPath. sPathFile
+VAC365: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet
 
     /*
@@ -3682,7 +3715,7 @@ return rc;
 /*
  * Visual Age for C++ v4.0 for OS/2
  */
-VAC40: procedure expose aCfg. aPath. sPathFile
+VAC40: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet
 
     /*
@@ -3758,7 +3791,7 @@ return rc;
 /*
  * WarpIn
  */
-WarpIn: procedure expose aCfg. aPath. sPathFile
+WarpIn: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet
 
     /*
@@ -3797,7 +3830,7 @@ return rc;
 /*
  * WatCom C/C++ v11.0
  */
-WatComC11: procedure expose aCfg. aPath. sPathFile
+WatComC11: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet, iBits
 
     /*
@@ -3866,7 +3899,7 @@ return rc;
 /*
  * WatCom C/C++ v11.0c
  */
-WatComC11c: procedure expose aCfg. aPath. sPathFile
+WatComC11c: procedure expose aCfg. aPath.
     parse arg sToolId,sOperation,fRM,fQuiet, iBits
 
     /*
