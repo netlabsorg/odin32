@@ -1,15 +1,16 @@
-/* $Id: changelog,v 1.1896 2001-12-08 16:06:13 sandervl Exp $ */
+/* $Id: changelog,v 1.1897 2001-12-08 16:17:50 sandervl Exp $ */
 
  2001-12-08: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Added read & write functions to custom driver interface
                 o OdinSetVersion added to override windows version reported by
                   Odin (Win98, WinME, NT4, Win2000, WinXP)
+                o NEW DEFAULT WINDOWS VERSION IS WINDOWS 2000 SP2 (!)
                 o New versions available for odin.ini version override
                   [WinVersion]
                   Version=Win98        -> Windows 98
                   Version=WinME        -> Windows ME
-                  Version=NT4          -> Windows NT4  SP6 (default)
-                  Version=Win2000      -> Windows 2000 SP2
+                  Version=NT4          -> Windows NT4  SP6 
+                  Version=Win2000      -> Windows 2000 SP2 (default)
                   Version=WinXP        -> Windows XP
                 o IOCTL_STORAGE_GET_MEDIA_TYPES is identical to 
                   IOCTL_DISK_GET_MEDIA_TYPES
