@@ -1,4 +1,9 @@
- /* $Id: ChangeLog,v 1.1172 2000-10-05 07:30:19 bird Exp $ */
+ /* $Id: ChangeLog,v 1.1173 2000-10-05 13:46:37 sandervl Exp $ */
+
+ 2000-10-05: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: Don't print FS warnings for OS/2 Odin applications
+    - USER32:   GetWindow GW_CHILD & GW_HWNDFIRST fixes
+                EnumDisplaySettingsA; always set refresh rate to 70hz
 
  2000-10-05: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - tools\common: Implemented read and write buffering for class kFile
