@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 1999-11-09 09:30:20 phaller Exp $
+# $Id: makefile,v 1.13 1999-11-10 14:14:50 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -42,7 +42,7 @@ all: $(TARGET).dll $(TARGET).lib
 
 
 $(TARGET).dll: $(OBJS) $(TARGET).def
-        $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) sbsstub.obj $(TARGET).def $(PDWIN32_LIB)\kernel32.lib $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
+        $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) sbsstub.obj $(TARGET).def $(PDWIN32_LIB)\kernel32.lib $(PDWIN32_LIB)\user32.lib $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
 # PMWINX.LIB LIBULS.LIB LIBCONV.LIB
         $(CP) $@ $(PDWIN32_BIN)
 
@@ -85,7 +85,7 @@ arith64.obj: .\arith64.asm
 regfunc.obj: .\regfunc.asm
 
 clean:
-        $(RM) *.obj *.lib *.dll *~ *.map *.pch
+        $(RM) *.obj *.lib *.dll *.map *.pch
         $(RM) $(PDWIN32_LIB)\$(TARGET).lib
         $(RM) $(PDWIN32_BIN)\$(TARGET).dll
 
