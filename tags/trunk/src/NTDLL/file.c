@@ -18,6 +18,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+
 #include "wine/debug.h"
 #include "ntdll_misc.h"
 
