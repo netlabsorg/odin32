@@ -16,6 +16,7 @@
 #include "debugtools.h"
 #include "ntdll_misc.h"
 #include "ntddk.h"
+#include "unicode.h"
 
 DEFAULT_DEBUG_CHANNEL(ntdll);
 
@@ -40,7 +41,8 @@ void WINAPI RtlInitAnsiString( PSTRING target, LPCSTR source)
  */
 void WINAPI RtlInitString( PSTRING target, LPCSTR source )
 {
-    return RtlInitAnsiString( target, source );
+    //return RtlInitAnsiString( target, source ); /* WATCOM: can't return void */
+    RtlInitAnsiString( target, source );
 }
 
 
@@ -788,3 +790,43 @@ out:
 		*pf = out_flags;
 	return len;
 }
+
+
+/*
+ * WIN32OS2 code:
+ */
+
+/**
+ * Converts an unsigned (long) integer value to a zero terminated unicode string.
+ * Hence unicode version of _ultoa.
+ * @returns STATUS_SUCCESS on success.
+ *          STATUS_INVALID_PARAMETER or STATUS_BUFFER_OVERFLOW on error.
+ * @param   Value   The value to convert.
+ * @param   Base    Base number. (2, 8, 10, or 16)
+ * @param   String  Pointer to output buffer.
+ * @status  completely implemented.
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @remark  According to docs call must be running at IRQL = PASSIVE_LEVEL...
+ */
+NTSTATUS WINAPI RtlIntegerToUnicodeString(
+    IN ULONG  Value,
+    IN ULONG  Base  OPTIONAL,
+    IN OUT PUNICODE_STRING  String
+    )
+{
+    NTSTATUS    rc = STATUS_SUCCESS;
+    char        szBuffer[32+1];
+
+    if (Base == 2 || Base == 8 || Base == 10 && Base == 16)
+    {
+        _ltoa(Value, &szBuffer[0], Base);
+        AsciiToUnicode(&szBuffer[0], (unsigned short*)String);
+    }
+    else
+    {
+        rc = STATUS_INVALID_PARAMETER;
+    }
+
+    return rc;
+}
+
