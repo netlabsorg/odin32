@@ -1,4 +1,4 @@
-/* $Id: krnlPrivate.h,v 1.1 2001-09-17 00:12:09 bird Exp $
+/* $Id: krnlPrivate.h,v 1.2 2001-09-23 06:47:51 bird Exp $
  *
  * Private header file for the krnl*.c* files.
  *
@@ -23,13 +23,17 @@
 *******************************************************************************/
 extern KSEMMTX                  kmtxImports;
 
-extern struct OTE               KKL_ObjTab[4];                  /* calltaba.asm */
-extern struct OTE               KKL_ObjTab_DosCalls[20];        /* calltaba.asm */
 extern char                     KKL_EntryTab[1];                /* calltaba.asm */
+extern char                     KKL_EntryTabEND[1];             /* calltaba.asm */
 extern char DATA16_INIT         KKL_EntryTabFixups[1];          /* calltaba.asm */
 #ifdef _OS2KLDR_H_
 extern MTE                      kKrnlLibMTE;                    /* calltaba.asm */
+extern SMTE                     KKL_SwapMTE;                    /* calltaba.asm */
+extern OTE                      KKL_ObjTab[4];                  /* calltaba.asm */
+extern OTE                      KKL_ObjTab_DosCalls[20];        /* calltaba.asm */
 #endif
+extern char                     KKL_ResNameTab[1];              /* calltaba.asm */
+extern char                     KKL_ResNameTabEND[1];           /* calltaba.asm */
 extern char                     callTab[1];                     /* calltaba.asm */
 extern char                     callTab16[1];                   /* calltaba.asm */
 extern unsigned                 auNopFuncs[NBR_OF_KRNLIMPORTS]; /* calltaba.asm */
