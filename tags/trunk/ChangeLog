@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.2728 2004-05-03 12:08:27 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2729 2004-05-06 12:40:40 sandervl Exp $ */
+
+ 2004-05-07: Sander van Leeuwen <sandervl@innotek   >
+    - COMDLG32: o Update the hDevNames member of the printer dialog structure
+                  whenever the user chooses another printer
 
  2004-05-03: knut st. osmundsen <bird-changelog@innotek    >
     - USER32:   o Missing clipboard updates
