@@ -1,4 +1,4 @@
-/* $Id: filedlg95.c,v 1.9 2000-05-10 13:12:46 sandervl Exp $*/
+/* $Id: filedlg95.c,v 1.10 2000-05-12 18:07:43 sandervl Exp $*/
 /*
  * COMMDLG - File Open Dialogs Win95 look and feel
  *
@@ -288,7 +288,7 @@ BOOL  WINAPI GetFileDialog95A(LPOPENFILENAMEA ofn,UINT iDlgType)
 
   /* Replace the NULL lpstrInitialDir by the current folder */
   lpstrInitialDir = ofn->lpstrInitialDir;
-  if(!lpstrInitialDir)
+  if(!lpstrInitialDir || *lpstrInitialDir == 0)
   {
     fodInfos->ofnInfos->lpstrInitialDir = MemAlloc(MAX_PATH);
     GetCurrentDirectoryA(MAX_PATH,(LPSTR)fodInfos->ofnInfos->lpstrInitialDir);
@@ -428,10 +428,18 @@ BOOL  WINAPI GetFileDialog95W(LPOPENFILENAMEW ofn,UINT iDlgType)
 
   // convert initial dir & title (if necessary)
   lpstrInitialDir = (LPWSTR)ofn->lpstrInitialDir;
-  if(lpstrInitialDir) {
+  if(lpstrInitialDir && *lpstrInitialDir != 0) {
 	ofn->lpstrInitialDir = MemAlloc(lstrlenW(ofn->lpstrInitialDir)+1);
 	lstrcpyWtoA((LPSTR)ofn->lpstrInitialDir, lpstrInitialDir);
   }
+  else
+  /* Replace the NULL lpstrInitialDir by the current folder */
+  if(!lpstrInitialDir || *lpstrInitialDir == 0)
+  {
+    	ofn->lpstrInitialDir = MemAlloc(MAX_PATH);
+    	GetCurrentDirectoryA(MAX_PATH,(LPSTR)ofn->lpstrInitialDir);
+  }
+
   lpstrTitle = (LPWSTR)ofn->lpstrTitle;
   if(lpstrTitle) {
 	ofn->lpstrTitle = MemAlloc(lstrlenW(ofn->lpstrTitle)+1);
