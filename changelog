@@ -1,4 +1,13 @@
-/* $Id: changelog,v 1.1216 2001-01-10 20:37:32 sandervl Exp $ */
+/* $Id: changelog,v 1.1217 2001-01-11 18:03:13 sandervl Exp $ */
+
+ 2001-01-11: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o DrawIconEx bugfix (fixes bitmap menu item when maximizing
+                  MDI window)
+    - COMDLG32: o Added/Ported 16 bits common dialog Wine code.
+                  (GetOpen/SaveFileName with hook and without OFN_EXPLORER
+                   flag implies old Windows 3.1 style dialog)
+                  (not completely working yet, but better than the mess we
+                   saw before (InstallShield -> browse dir))
 
  2001-01-10: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Fix for WriteFile & ReadFile (wrong return code was expected)
