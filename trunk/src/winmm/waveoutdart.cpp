@@ -1,4 +1,4 @@
-/* $Id: waveoutdart.cpp,v 1.23 2003-10-13 09:18:38 sandervl Exp $ */
+/* $Id: waveoutdart.cpp,v 1.24 2004-03-16 11:20:40 sandervl Exp $ */
 
 /*
  * Wave playback class (DART)
@@ -701,6 +701,12 @@ void DartWaveOut::writeBuffer()
 
     if(curhdr == NULL) {
         return;     //no unprocessed buffers left
+    }
+
+    if(State == STATE_PLAYING && curFillBuf == curPlayBuf)
+    {
+        dprintf(("curFillBuf == curPlayBuf; no more room (%d,%d)", curFillBuf, curPlayBuf));
+        return;  //no more room left
     }
 
     dprintf2(("WINMM: handler cur (%d,%d), fill (%d,%d)\n", curPlayBuf, curPlayPos, curFillBuf, curFillPos));
