@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.1 1999-05-24 20:19:39 ktk Exp $ */
+/* $Id: gdi32.cpp,v 1.2 1999-06-06 12:25:48 cbratschi Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -42,6 +42,56 @@ typedef struct _POLYTEXTW
     int     *pdx;
 } POLYTEXTW;
 
+
+static ULONG CalcBitmapSize(ULONG cBits, LONG cx, LONG cy)
+{
+        ULONG alignment;
+        ULONG factor;
+        BOOL flag = TRUE;       //true: '*'     false: '/'
+
+        cy = cy < 0 ? -cy : cy;
+
+        switch(cBits)
+        {
+                case 1:
+                        factor = 8;
+                        flag = FALSE;
+                        break;
+
+                case 4:
+                        factor = 2;
+                        flag = FALSE;
+                        break;
+
+                case 8:
+                        factor = 1;
+                        break;
+
+                case 16:
+                        factor = 2;
+                        break;
+
+                case 24:
+                        factor = 3;
+                        break;
+
+                case 32:
+                        return cx*cy;
+
+                default:
+                        return 0;
+        }
+
+        if (flag)
+                alignment = (cx = (cx*factor)) % 4;
+        else
+                alignment = (cx = ((cx+factor-1)/factor)) % 4;
+
+        if (alignment != 0)
+                cx += 4 - alignment;
+
+        return cx*cy;
+}
 
 //******************************************************************************
 //******************************************************************************
@@ -1814,10 +1864,31 @@ int WIN32API SetDIBits( HDC arg1, HBITMAP arg2, UINT arg3, UINT arg4, const VOID
 }
 //******************************************************************************
 //******************************************************************************
-INT WIN32API SetDIBitsToDevice( HDC arg1, INT arg2, INT arg3, DWORD arg4, DWORD arg5, INT arg6, INT arg7, UINT arg8, UINT arg9, LPCVOID arg10, const BITMAPINFO *arg11, UINT  arg12)
+INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,	DWORD cy, INT xSrc, INT ySrc, UINT startscan, UINT lines, LPCVOID bits, const BITMAPINFO *info, UINT coloruse)
 {
-    dprintf(("GDI32: OS2SetDIBitsToDevice"));
-    return O32_SetDIBitsToDevice(arg1, arg2, arg3, (int)arg4, (int)arg5, arg6, arg7, arg8, arg9, (PVOID)arg10, (PBITMAPINFO)arg11, arg12);
+    INT result, imgsize, palsize;
+    char *ptr;
+
+    dprintf(("GDI32: OS2SetDIBitsToDevice hdc:%X xDest:%d yDest:%d, cx:%d, cy:%d, xSrc:%d, ySrc:%d, startscan:%d, lines:%d, bits:%X, info%X, coloruse:%d",
+                 hdc, xDest, yDest, cx, cy, xSrc, ySrc, startscan, lines, (LPVOID) bits, (PBITMAPINFO)info, coloruse));
+
+    // EB: ->>> Crazy. Nobody seen this Open32 bug ?
+    // Dont't like dirty pointers, but Open32 needs a bit help.
+    // Only tested with winmine.
+    palsize = (1 << info->bmiHeader.biBitCount) * sizeof(RGBQUAD);
+    imgsize = CalcBitmapSize(info->bmiHeader.biBitCount,
+                             info->bmiHeader.biWidth, info->bmiHeader.biHeight);
+    ptr = ((char *)info) + palsize + sizeof(BITMAPINFOHEADER);
+    if(bits >= ptr && bits < ptr + imgsize)
+    {
+        bits = (char *)bits - imgsize +
+                   CalcBitmapSize(info->bmiHeader.biBitCount,
+                                  info->bmiHeader.biWidth, lines);
+    }
+    // EB: <<<-
+
+    result = O32_SetDIBitsToDevice(hdc, xDest, yDest, cx, cy, xSrc, ySrc, startscan, lines, (PVOID) bits, (PBITMAPINFO)info, coloruse);
+    return result;
 }
 //******************************************************************************
 //******************************************************************************

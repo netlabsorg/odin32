@@ -1,4 +1,4 @@
-/* $Id: winres.cpp,v 1.1 1999-05-24 20:19:50 ktk Exp $ */
+/* $Id: winres.cpp,v 1.2 1999-06-06 12:25:49 cbratschi Exp $ */
 
 /*
  *
@@ -30,6 +30,56 @@
 #include "misc.h"
 #include "nameid.h"
 #include "winexe.h"
+
+static ULONG CalcBitmapSize(ULONG cBits, LONG cx, LONG cy)
+{
+        ULONG alignment;
+        ULONG factor;
+        BOOL flag = TRUE;       //true: '*'     false: '/'
+
+        cy = cy < 0 ? -cy : cy;
+
+        switch(cBits)
+        {
+                case 1:
+                        factor = 8;
+                        flag = FALSE;
+                        break;
+
+                case 4:
+                        factor = 2;
+                        flag = FALSE;
+                        break;
+
+                case 8:
+                        factor = 1;
+                        break;
+
+                case 16:
+                        factor = 2;
+                        break;
+
+                case 24:
+                        factor = 3;
+                        break;
+
+                case 32:
+                        return cx*cy;
+
+                default:
+                        return 0;
+        }
+
+        if (flag)
+                alignment = (cx = (cx*factor)) % 4;
+        else
+                alignment = (cx = ((cx+factor-1)/factor)) % 4;
+
+        if (alignment != 0)
+                cx += 4 - alignment;
+
+        return cx*cy;
+}
 
 //******************************************************************************
 //******************************************************************************
@@ -186,6 +236,7 @@ PVOID Win32Resource::ConvertBitmap(void *bmpdata)
  RGBQUAD             *rgb;
  RGB2                *os2rgb;
  int                  palsize = 0;
+ int                  imgsize;
 
   if(bmphdr->cbSize != sizeof(BITMAPFILEHEADER2))
     return(bmpdata);    //don't convert OS/2 1.x bitmap
@@ -193,10 +244,18 @@ PVOID Win32Resource::ConvertBitmap(void *bmpdata)
   if(bmphdr->bmp2.cBitCount < 16) {
     palsize = (1 << bmphdr->bmp2.cBitCount) * sizeof(RGBQUAD);
   }
+
+  // EB: ->>> added imgsize
+  if(bmphdr->bmp2.cbImage == 0)
+    imgsize =  CalcBitmapSize(bmphdr->bmp2.cBitCount,
+                              bmphdr->bmp2.cx,
+                              bmphdr->bmp2.cy);
+  else
+    imgsize = bmphdr->bmp2.cbImage;
+
   winbmphdr = (WINBITMAPINFOHEADER *)malloc(sizeof(WINBITMAPINFOHEADER) +
-                        bmphdr->bmp2.cbImage + palsize);
-  memset((char *)winbmphdr, 0, sizeof(WINBITMAPINFOHEADER) + bmphdr->bmp2.cbImage +
-                   palsize);
+                        imgsize + palsize);
+  memset((char *)winbmphdr, 0, sizeof(WINBITMAPINFOHEADER) + imgsize + palsize);
 
   winbmphdr->biSize          = sizeof(WINBITMAPINFOHEADER);
   winbmphdr->biWidth         = bmphdr->bmp2.cx;
@@ -205,7 +264,7 @@ PVOID Win32Resource::ConvertBitmap(void *bmpdata)
   winbmphdr->biBitCount      = bmphdr->bmp2.cBitCount;
   //TODO: Identical except for BI_BITFIELDS (3L) type!
   winbmphdr->biCompression   = bmphdr->bmp2.ulCompression;
-  winbmphdr->biSizeImage     = bmphdr->bmp2.cbImage;
+  winbmphdr->biSizeImage     = bmphdr->bmp2.cbImage; //imgsize;
   //TODO: Doesn't seem to be completely identical..
   winbmphdr->biClrUsed       = bmphdr->bmp2.cclrUsed;
   winbmphdr->biClrImportant  = bmphdr->bmp2.cclrImportant;
@@ -220,7 +279,7 @@ PVOID Win32Resource::ConvertBitmap(void *bmpdata)
     os2rgb = (RGB2    *)((int)os2rgb + palsize);
     rgb    = (RGBQUAD *)((int)rgb    + palsize);
   }
-  memcpy((char *)rgb, (char *)os2rgb, winbmphdr->biSizeImage);
+  memcpy((char *)rgb, (char *)os2rgb, imgsize);
   return((PVOID)winbmphdr);
 }
 //******************************************************************************
