@@ -22,9 +22,9 @@ rc = lineout(instfile, '     TARGET="C:\ODIN\SYSTEM32"');
 rc = lineout(instfile, '     FIXED SELECT NODESELECT');
 title = "     TITLE=""Odin Daily Build System Files ("date()")""";
 rc = lineout(instfile, title);
+rc = lineout(instfile, '     EXECUTE="odininst.exe"');
 rc = lineout(instfile, '     CONFIGSYS="LIBPATH=$(1)\SYSTEM32 | ADDRIGHT"');
 rc = lineout(instfile, '     CONFIGSYS="SET PATH=$(1)\SYSTEM32 | ADDRIGHT"');
-rc = lineout(instfile, '     EXECUTE="CONFIGSYS|odininst.exe"');
 rc = lineout(instfile, '     >Installation of Odin System files .</PCK>');
 rc = lineout(instfile, '');
 rc = lineout(instfile, '<PCK INDEX=3');
@@ -240,12 +240,19 @@ call directory maindir;
 "wic.exe "curdir"\"installarchive" -a 1 LICENSE.TXT";
 
 call directory doc
-"wic.exe "curdir"\"installarchive" -a 1 ChangeLog-1999 ChangeLog-2000 Readme.txt ReportingBugs.txt";
+"wic.exe "curdir"\"installarchive" -a 1 ChangeLog-1999 ChangeLog-2000 Readme.txt ReportingBugs.txt Logging.txt";
 call directory ".."
 
 call directory dlldir;
+if cmdline = "debug"
+then
+do
+"wic.exe "curdir"\"installarchive" -a 2 *.dll *.sym pe.exe odininst.exe regsvr32.exe *.ini win32k.sys win32k.ddp";
+end
+else
+do
 "wic.exe "curdir"\"installarchive" -a 2 *.dll pe.exe odininst.exe regsvr32.exe *.ini win32k.sys win32k.ddp";
-rem "wic.exe "curdir"\"installarchive" -a 2 *.dll pe.exe odininst.exe regsvr32.exe odin.ini";
+end
 
 call directory "Glide"
 "wic.exe "curdir"\"installarchive" -a 3 *.dll";
