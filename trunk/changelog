@@ -1,9 +1,13 @@
- /* $Id: changelog,v 1.900 2000-04-18 11:11:13 sandervl Exp $ */
+ /* $Id: changelog,v 1.901 2000-04-18 20:07:59 sandervl Exp $ */
 
  2000-04-18: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32:   Added LR_LOADFROMFILE support for icon & cursor loading
 	- GDI32:    Dib section fixes (use height/width of window when
                     dc belongs to a window; use correct stretchblit mode)
+	- TOOLS\REGEDIT: Added regedit command line tool (ported this from
+                         Wine with some modifications & bug fixes)
+	- KERNEL32: Also set FPU control word to 0x27f before calling thread
+                    functions (just to be sure)
 
  2000-04-16: Christoph Bratschi <cbratschi@datacomm.ch>
 	- COMCTL32: added new resources: i.e. header cursors
@@ -77,7 +81,7 @@
         - ODIN.INI.TXT: Removed DIRECTORIES section
 
  2000-04-13: Sander van Leeuwen <sandervl@xs4all.nl>
-        - USER32: Zero thread message structure before dispatching it
+        - USER32: Set thread message structure to 0 before dispatching it
                   Prevents app from sending the same posted message twice
                   (causing problems when freeing the postmsg struct)
                   (fixes RealPlayer 7 Update service)
