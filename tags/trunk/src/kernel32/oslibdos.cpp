@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.49 2000-10-10 17:14:04 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.50 2000-11-05 13:40:45 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -2035,6 +2035,21 @@ ULONG OSLibDosQueryModuleName(ULONG hModule, int cchName, char *pszName)
     return DosQueryModuleName(hModule, cchName, pszName);
 }
 
+
+HINSTANCE OSLibDosLoadModule(LPSTR szModName)
+{
+ APIRET  rc;
+ HMODULE hModule = NULLHANDLE;
+ char    name[ CCHMAXPATH ];
+
+  rc = DosLoadModule(name, CCHMAXPATH, szModName, &hModule);
+  if(rc) {
+      SetLastError(error2WinError(rc,ERROR_FILE_NOT_FOUND));
+      return 0;
+  }
+  SetLastError(ERROR_SUCCESS_W);
+  return hModule;
+}
 
 ULONG OSLibDosQuerySysInfo(ULONG iStart, ULONG iLast, PVOID pBuf, ULONG cbBuf)
 {

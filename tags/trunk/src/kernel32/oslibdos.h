@@ -1,4 +1,4 @@
-/* $Id: oslibdos.h,v 1.25 2000-10-09 22:51:19 sandervl Exp $ */
+/* $Id: oslibdos.h,v 1.26 2000-11-05 13:40:46 sandervl Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -284,3 +284,5 @@ ULONG OSLibDosQuerySysInfo(ULONG iStart, ULONG iLast, PVOID pBuf, ULONG cbBuf);
 
 ULONG OSLibDosQueryModuleName(ULONG hModule, int cchName, char *pszName);
 ULONG OSLibDosQueryDir(DWORD length, LPSTR lpszCurDir);
+
+HINSTANCE OSLibDosLoadModule(LPSTR szModName);
