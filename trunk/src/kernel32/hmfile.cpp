@@ -1,4 +1,4 @@
-/* $Id: hmfile.cpp,v 1.8 2000-07-01 09:50:54 sandervl Exp $ */
+/* $Id: hmfile.cpp,v 1.9 2000-07-01 12:51:51 sandervl Exp $ */
 
 /*
  * File IO win32 apis
@@ -144,7 +144,9 @@ DWORD HMDeviceFileClass::OpenFile (LPCSTR        lpszFileName,
            fuMode));
 
   //Re-open using name in OFSTRUCT
-  if(fuMode & OF_REOPEN) lpFileName = (LPSTR)pOFStruct->szPathName;
+  if(fuMode & OF_REOPEN) 
+	lpFileName = (LPSTR)pOFStruct->szPathName;
+  else  memset(pOFStruct, 0, sizeof(OFSTRUCT));
 
   if(strcmp(lpFileName,       // "support" for local unc names
              "\\\\.\\") == 0)
@@ -173,7 +175,6 @@ DWORD HMDeviceFileClass::OpenFile (LPCSTR        lpszFileName,
 	lpFileName = filepath;
   }
   // filling OFSTRUCT
-  memset(pOFStruct, 0, sizeof(OFSTRUCT));
   pOFStruct->cBytes = sizeof(OFSTRUCT);
   pOFStruct->nErrCode = 0;
   strncpy((char *)pOFStruct->szPathName, lpFileName, OFS_MAXPATHNAME - 1);
