@@ -11,6 +11,10 @@
 #include "shlwapi.h"
 #include "debugtools.h"
 
+#ifdef __WIN32OS2__
+#include <ctype.h>
+#endif
+
 DEFAULT_DEBUG_CHANNEL(shell);
 
 static const unsigned char HashDataLookup[256] = {
