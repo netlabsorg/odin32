@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2556 2003-04-14 23:09:39 bird Exp $ */
+/* $Id: changelog,v 1.2557 2003-04-23 17:59:32 sandervl Exp $ */
+
+ 2003-04-15: knut st. osmundsen <bird-odin-spam@anduin   >
+    - USER32:   o Properties allocated from shared memory.
+                o Fake window updates.
 
  2003-04-15: knut st. osmundsen <bird-odin-spam@anduin   >
     - src/makefile:
