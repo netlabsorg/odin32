@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.72 2003-03-06 10:22:26 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.73 2004-01-11 11:57:52 sandervl Exp $ */
 
 /*
  * Win32 Exception functions for OS/2
@@ -1242,6 +1242,14 @@ ULONG APIENTRY OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
 
         map = Win32MemMapView::findMapByView(pERepRec->ExceptionInfo[1], &offset, accessflag);
         if(map == NULL) {
+            Win32MemMapNotify *map;
+
+            map = Win32MemMapNotify::findMapByView(pERepRec->ExceptionInfo[1], &offset, accessflag);
+            if(!map) 
+                goto continueFail;
+
+            BOOL ret = map->notify(pERepRec->ExceptionInfo[1], offset, fWriteAccess);
+            if(ret == TRUE) goto continueexecution;
             goto continueFail;
         }
         BOOL ret = map->commitPage(pERepRec->ExceptionInfo[1], offset, fWriteAccess);
@@ -1448,6 +1456,44 @@ void OS2SetExceptionHandler(void *exceptframe)
 #ifdef DEBUG_ENABLELOG_LEVEL2
   PrintExceptionChain();
 #endif
+}
+//*****************************************************************************
+// Set exception handler if our handler has not yet been registered
+//*****************************************************************************
+void WIN32API ODIN_SetExceptionHandler(void *pExceptionRegRec)
+{
+  BOOL   fFound = FALSE;
+  USHORT sel = RestoreOS2FS();
+  PEXCEPTIONREGISTRATIONRECORD pExceptRec = (PEXCEPTIONREGISTRATIONRECORD)QueryExceptionChain();
+
+  while(pExceptRec != 0 && (ULONG)pExceptRec != -1) 
+  {
+        if(pExceptRec->ExceptionHandler == OS2ExceptionHandler) 
+        {
+            fFound = TRUE;
+            break;
+        }
+        pExceptRec = pExceptRec->prev_structure;
+  }
+  if(!fFound) 
+  {
+      OS2SetExceptionHandler(pExceptionRegRec);
+  }
+  SetFS(sel);
+}
+//*****************************************************************************
+// Remove exception handler if it was registered previously
+// 
+//*****************************************************************************
+void WIN32API ODIN_UnsetExceptionHandler(void *pExceptionRegRec)
+{
+  USHORT sel = RestoreOS2FS();
+  PEXCEPTIONREGISTRATIONRECORD pExceptRec = (PEXCEPTIONREGISTRATIONRECORD)QueryExceptionChain();
+
+  if(pExceptRec == (PEXCEPTIONREGISTRATIONRECORD)pExceptionRegRec) {
+      OS2UnsetExceptionHandler(pExceptionRegRec);
+  }
+  SetFS(sel);
 }
 //*****************************************************************************
 //*****************************************************************************
