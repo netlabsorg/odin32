@@ -1,8 +1,9 @@
-/* $Id: ChangeLog,v 1.2648 2003-11-17 13:14:42 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2649 2003-11-17 19:29:22 sandervl Exp $ */
 
  2003-11-17: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Destroy switch entry before hiding window in DestroyWindow.
                   (workaround for XCenter problems)
+    - SHELL32:  o Destroy icon cache imagelists in SIC_Destroy
 
  2003-11-14: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Updates
