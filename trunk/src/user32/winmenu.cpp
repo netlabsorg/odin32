@@ -1,4 +1,4 @@
-/* $Id: winmenu.cpp,v 1.21 2000-01-07 00:24:34 sandervl Exp $ */
+/* $Id: winmenu.cpp,v 1.22 2000-01-08 12:05:57 sandervl Exp $ */
 
 /*
  * Win32 menu API functions for OS/2
@@ -40,6 +40,7 @@ BOOL  ODIN_INTERNAL ODIN_AppendMenuW(HMENU,UINT,UINT,LPCWSTR);
 HMENU ODIN_INTERNAL ODIN_CreateMenu(void);
 HMENU ODIN_INTERNAL ODIN_CreatePopupMenu(void);
 BOOL  ODIN_INTERNAL ODIN_DestroyMenu(HMENU);
+BOOL  ODIN_INTERNAL ODIN_DeleteMenu(HMENU, UINT, UINT);
 
 //@@@PH: experiment with WINE LoadMenuIndirect code
 #include <heapstring.h>
@@ -632,18 +633,26 @@ ODINFUNCTION3(BOOL,EnableMenuItem,HMENU,hMenu,
 //******************************************************************************
 ODINFUNCTION5(BOOL, ModifyMenuA,
               HMENU, hMenu,
-              UINT, arg2,
-              UINT, arg3,
-              UINT, arg4,
-              LPCSTR, arg5)
+              UINT, uItem,
+              UINT, fuFlags,
+              UINT, idNewItem,
+              LPCSTR, lpszNewItem)
 {
-    dprintf(("USER32:  OS2ModifyMenuA\n"));
     if(hMenu == 0)
     {
         SetLastError(ERROR_INVALID_PARAMETER);
         return 0;
     }
-    return O32_ModifyMenu(hMenu, arg2, arg3, arg4, arg5);
+    if(IS_STRING_ITEM(fuFlags) && HIWORD(lpszNewItem) != 0) {
+	dprintf(("ModifyMenuA %s", lpszNewItem));
+    }
+
+    if(((fuFlags & (MF_BYCOMMAND|MF_BYPOSITION|MF_POPUP)) == MF_BYCOMMAND) && uItem != idNewItem) {
+	DWORD pos = OSLibGetMenuItemPos(hMenu, uItem);
+	ODIN_DeleteMenu(hMenu, uItem, MF_BYCOMMAND);
+	return ODIN_InsertMenuA(hMenu, pos, fuFlags | MF_BYPOSITION, idNewItem, lpszNewItem);
+    }
+    return O32_ModifyMenu(hMenu, uItem, fuFlags, idNewItem, lpszNewItem);
 }
 //******************************************************************************
 //******************************************************************************
@@ -681,7 +690,6 @@ ODINFUNCTION3(BOOL, RemoveMenu,
               UINT, arg2,
               UINT, arg3)
 {
-    dprintf(("USER32:  OS2RemoveMenu\n"));
     if(hMenu == 0)
     {
         SetLastError(ERROR_INVALID_PARAMETER);
@@ -697,7 +705,6 @@ ODINFUNCTION3(BOOL, DeleteMenu,
               UINT, arg2,
               UINT, arg3)
 {
-    dprintf(("USER32:  OS2DeleteMenu\n"));
     if(hMenu == 0)
     {
         SetLastError(ERROR_INVALID_PARAMETER);
