@@ -1,4 +1,4 @@
-/* $Id: crtdll.cpp,v 1.3 1999-09-18 10:36:34 sandervl Exp $ */
+/* $Id: crtdll.cpp,v 1.4 1999-09-18 15:58:34 sandervl Exp $ */
 
 /*
  * The C RunTime DLL
@@ -1096,180 +1096,8 @@ double CDECL CRTDLL__matherr( struct exception * excep )
   return (_matherr(excep));
 }
 
-
-/*********************************************************************
- *                  _mbbtombc        (CRTDLL.182)
- */
-unsigned int CDECL CRTDLL__mbbtombc( unsigned int ch )
-{
-  dprintf(("CRTDLL: _mbbtombc\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
-}
-
-
-/*********************************************************************
- *                  _mbbtype        (CRTDLL.183)
- */
-int CDECL CRTDLL__mbbtype( unsigned char s, int i )
-{
-  dprintf(("CRTDLL: _mbbtype\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
-}
-
-
-/*********************************************************************
- *                  _mbccpy        (CRTDLL.184)
- */
-void CDECL CRTDLL__mbccpy( unsigned char *dest, const unsigned char *ch )
-{
-  dprintf(("CRTDLL: _mbccpy\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-}
-
-
-/*********************************************************************
- *                  _mbcjistojms     (CRTDLL.185)
- */
-int CDECL CRTDLL__mbcjistojms( unsigned int ch )
-{
-  dprintf(("CRTDLL: _mbcjistojms\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
-}
-
-
-/*********************************************************************
- *                  _mbcjmstojis     (CRTDLL.186)
- */
-int CDECL CRTDLL__mbcjmstojis( unsigned int ch )
-{
-  dprintf(("CRTDLL: _mbcjmstojis\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
-}
-
-
-/*********************************************************************
- *                  _mbclen    (CRTDLL.187)
- */
-size_t CDECL CRTDLL__mbclen( const unsigned char *ch )
-{
-  dprintf(("CRTDLL: _mbclen\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
-}
-
-
-/*********************************************************************
- *                  _mbctohira     (CRTDLL.188)
- */
-int CDECL CRTDLL__mbctohira( unsigned int ch )
-{
-  dprintf(("CRTDLL: _mbctohira\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
-}
-
-
-/*********************************************************************
- *                  _mbctokata     (CRTDLL.189)
- */
-int CDECL CRTDLL__mbctokata( unsigned int ch )
-{
-  dprintf(("CRTDLL: _mbctokata\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
-}
-
-
-/*********************************************************************
- *                  _mbctolower     (CRTDLL.190)
- */
-unsigned int CDECL CRTDLL__mbctolower( unsigned int ch )
-{
-  dprintf(("CRTDLL: _mbctolower\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
-}
-
-
-/*********************************************************************
- *                  _mbctombb        (CRTDLL.191)
- */
-unsigned int CDECL CRTDLL__mbctombb( unsigned int ch )
-{
-  dprintf(("CRTDLL: _mbctombb\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
-}
-
-
-/*********************************************************************
- *                  _mbctoupper     (CRTDLL.192)
- */
-unsigned int CDECL CRTDLL__mbctoupper( unsigned int ch )
-{
-  dprintf(("CRTDLL: _mbctoupper\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
-}
-
-
-/*********************************************************************
- *                  _mbsbtype     (CRTDLL.194)
- */
-int CDECL CRTDLL__mbsbtype( const unsigned char *s1, int ch )
-{
-  dprintf(("CRTDLL: _mbsbtype\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
-}
-
-
-/*********************************************************************
- *                  _mbscat       (CRTDLL.195)
- */
-unsigned char * CDECL CRTDLL__mbscat( unsigned char *s1, const unsigned char *s2 )
-{
-  dprintf(("CRTDLL: _mbscat\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
-}
-
-
-/*********************************************************************
- *                  _mbschr       (CRTDLL.196)
- */
-unsigned char * CDECL CRTDLL__mbschr( const unsigned char *s, unsigned int ch )
-{
-  dprintf(("CRTDLL: _mbschr\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
-}
-
-
-/*********************************************************************
- *                  _mbscmp       (CRTDLL.197)
- */
-int CDECL CRTDLL__mbscmp( const unsigned char *s1, const unsigned char *s2 )
-{
-  dprintf(("CRTDLL: _mbscmp\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
-}
-
-
-/*********************************************************************
- *                  _mbscpy       (CRTDLL.198)
- */
-unsigned char * CDECL CRTDLL__mbscpy( unsigned char *s1, const unsigned char *s2 )
-{
-  dprintf(("CRTDLL: _mbscpy\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
-}
+// unsigned int	_mbbtombc( unsigned int __ch );
+// unsigned int	_mbctombb( unsigned int __ch );
 
 
 /*********************************************************************
@@ -1281,6 +1109,7 @@ size_t CDECL CRTDLL__mbscspn( const unsigned char *s, const unsigned char *chars
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
+
 
 
 /*********************************************************************
@@ -3171,9 +3000,3 @@ int CDECL CRTDLL_wscanf( const wchar_t *s, ... )
 }
 
 
-INT WINAPI lstrncmpiA( LPCSTR str1, LPCSTR str2, INT n )
-{
-  dprintf(("CRTDLL: lstrncmpiA\n"));
-  //CB: implement!
-  return 0;
-}

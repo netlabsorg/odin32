@@ -1,4 +1,4 @@
-; $Id: crtdll.def,v 1.3 1999-09-18 10:36:35 sandervl Exp $
+; $Id: crtdll.def,v 1.4 1999-09-18 15:58:35 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY CRTDLL INITINSTANCE TERMINSTANCE
@@ -283,23 +283,7 @@ EXPORTS
     _ltoa			= NTDLL__ltoa			@179
     _makepath			= _CRTDLL__makepath		@180
     _matherr			= _CRTDLL__matherr		@181
-    _mbbtombc			= _CRTDLL__mbbtombc		@182
-    _mbbtype			= _CRTDLL__mbbtype		@183
-    _mbccpy			= _CRTDLL__mbccpy		@184
-    _mbcjistojms		= _CRTDLL__mbcjistojms		@185
-    _mbcjmstojis		= _CRTDLL__mbcjmstojis		@186
-    _mbclen			= _CRTDLL__mbclen		@187
-    _mbctohira			= _CRTDLL__mbctohira		@188
-    _mbctokata			= _CRTDLL__mbctokata		@189
-    _mbctolower			= _CRTDLL__mbctolower		@190
-    _mbctombb			= _CRTDLL__mbctombb		@191
-    _mbctoupper			= _CRTDLL__mbctoupper		@192
-;   _mbctype							@193
-    _mbsbtype			= _CRTDLL__mbsbtype		@194
-    _mbscat			= _CRTDLL__mbscat		@195
-    _mbschr			= _CRTDLL__mbschr		@196
-    _mbscmp			= _CRTDLL__mbscmp		@197
-    _mbscpy			= _CRTDLL__mbscpy		@198
+
     _mbscspn			= _CRTDLL__mbscspn		@199
 
     _mbsdec			= _CRTDLL__mbsdec		@200
