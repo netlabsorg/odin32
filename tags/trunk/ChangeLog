@@ -1,4 +1,10 @@
- /* $Id: ChangeLog,v 1.534 1999-12-13 23:06:59 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.535 1999-12-14 12:53:11 sandervl Exp $ */
+
+ 99-12-13: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: Fixed performance problem in mmap.cpp
+                    Report correct dll when exe loading fails
+        - INCLUDE\WIN\winnt.h: Header fixes
+	- Porting.txt: Fixed sample makefile (you need to add -D__i386__ as compiler option)
 
  99-12-12: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Fixes for on-demand page loader; currently disabled by
