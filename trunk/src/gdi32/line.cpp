@@ -1,4 +1,4 @@
-/* $Id: line.cpp,v 1.4 2000-01-31 22:30:08 sandervl Exp $ */
+/* $Id: line.cpp,v 1.5 2000-02-12 18:08:57 cbratschi Exp $ */
 /*
  * Line API's
  *
@@ -151,12 +151,15 @@ BOOL WIN32API LineDDA( int nXStart, int nYStart, int nXEnd, int nYEnd, LINEDDAPR
   POINTLOS2 startPt,endPt;
 
   dprintf(("GDI32: LineDDA\n"));
-
+#if 0 //CB: the Open32 function is ok -> to check
   startPt.x = nXStart;
   startPt.y = nYStart;
   toWin32LineEnd(&startPt,nXEnd,nYEnd,&endPt);
 
   rc = O32_LineDDA(startPt.x,startPt.y,endPt.x,endPt.y,callback->GetOS2Callback(),(LPARAM)callback);
+#else
+  rc = O32_LineDDA(nXStart,nYStart,nXEnd,nYEnd,callback->GetOS2Callback(),(LPARAM)callback);
+#endif
   if(callback)
         delete callback;
   return(rc);
