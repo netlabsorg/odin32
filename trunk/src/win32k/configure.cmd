@@ -1,4 +1,4 @@
-/* $Id: configure.cmd,v 1.15 2000-12-15 15:04:05 bird Exp $
+/* $Id: configure.cmd,v 1.16 2001-02-21 07:57:09 bird Exp $
  *
  * Configuration script.
  * Generates makefile.inc and an empty .depend file.
@@ -22,12 +22,15 @@
     sIncFile='Makefile.inc';
 
     /* delete old target files */
-    call SysFileDelete '.depend';
+/* This keeps spoiling things!
+    call SysFileDelete '.depend'; */
     call SysFileDelete sIncFile;
 
     /* create empty .depend file */
+/* This keeps spoiling things!
     call lineout '.depend', '# Run nmake dep'
     call lineout '.depend'
+*/
 
     /* open target file */
     if (stream(sIncFile, 'c', 'open write' ) <> '') then
