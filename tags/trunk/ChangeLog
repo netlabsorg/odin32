@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.1455 2001-05-29 20:25:04 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1456 2001-05-30 01:28:18 phaller Exp $ */
+
+ 2001-05-30: Patrick Haller <patrick.haller@innotek.de>
+    - KERNEL32: o replaced linear lists in PE loader with faster hashtables
+                  (ccollection.cpp, experimental)
 
  2001-05-29: Sander van Leeuwen <sandervl@xs4all.nl>
     - GDI32:    o Set/GetDIBColorTable fixes for DIB sections with bpp > 8
