@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.27 2001-06-14 14:49:19 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.28 2001-07-30 20:48:52 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -61,8 +61,9 @@ BOOL WIN32API GetMessageA( LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgF
 {
   BOOL ret;
 
-    dprintf2(("GetMessageA %x %d-%d %d", hwnd, uMsgFilterMin, uMsgFilterMax));
+    dprintf2(("GetMessageA %x %x-%x", hwnd, uMsgFilterMin, uMsgFilterMax));
     ret = OSLibWinGetMsg(pMsg, hwnd, uMsgFilterMin, uMsgFilterMax);
+    if(ret) dprintf2(("GetMessageA %x %x %x %x", hwnd, pMsg->message, pMsg->wParam, pMsg->lParam));
     HOOK_CallHooksA(WH_GETMESSAGE, HC_ACTION, PM_REMOVE, (LPARAM)pMsg);
     return ret;
 }
@@ -72,7 +73,7 @@ BOOL WIN32API GetMessageW( LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgF
 {
   BOOL ret;
 
-    dprintf2(("GetMessageW %x %d-%d %d", hwnd, uMsgFilterMin, uMsgFilterMax));
+    dprintf2(("GetMessageW %x %x-%x", hwnd, uMsgFilterMin, uMsgFilterMax));
     ret = OSLibWinGetMsg(pMsg, hwnd, uMsgFilterMin, uMsgFilterMax, TRUE);
     HOOK_CallHooksW(WH_GETMESSAGE, HC_ACTION, PM_REMOVE, (LPARAM)pMsg);
     return ret;
