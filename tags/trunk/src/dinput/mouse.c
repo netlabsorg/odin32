@@ -116,6 +116,10 @@ struct SysMouseAImpl
         HANDLE				hEvent;
 	CRITICAL_SECTION		crit;
 
+#ifdef __WIN32OS2__
+        char                            hookcode[32];
+#endif
+
 	/* This is for mouse reporting. */
 	Wine_InternalMouseData          m_state;
 };
@@ -217,6 +221,10 @@ static ULONG WINAPI SysMouseAImpl_Release(LPDIRECTINPUTDEVICE2A iface)
 {
 	ICOM_THIS(SysMouseAImpl,iface);
 
+#ifdef __WIN32OS2__
+        dprintf(("SysMouseAImpl_Release %x", This));
+#endif
+
 	This->ref--;
 	if (This->ref)
 		return This->ref;
@@ -315,11 +323,17 @@ static HRESULT WINAPI SysMouseAImpl_SetDataFormat(
 }
   
 /* low-level mouse hook */
+#ifdef __WIN32OS2__
+static LRESULT CALLBACK dinput_mouse_hook(SysMouseAImpl* This, int code, WPARAM wparam, LPARAM lparam )
+#else
 static LRESULT CALLBACK dinput_mouse_hook( int code, WPARAM wparam, LPARAM lparam )
+#endif
 {
     LRESULT ret;
     MSLLHOOKSTRUCT *hook = (MSLLHOOKSTRUCT *)lparam;
+#ifndef __WIN32OS2__
     SysMouseAImpl* This = (SysMouseAImpl*) current_lock;
+#endif
 
 //testestest
     dprintf(("dinput_mouse_hook %d %x %x", code, wparam, lparam));
@@ -439,9 +453,12 @@ static HRESULT WINAPI SysMouseAImpl_Acquire(LPDIRECTINPUTDEVICE2A iface)
 {
   ICOM_THIS(SysMouseAImpl,iface);
   RECT	rect;
-  
-  TRACE("(this=%p)\n",This);
 
+#ifdef __WIN32OS2__
+  dprintf(("SysMouseAImpl_Acquire %x", This));
+#else  
+  TRACE("(this=%p)\n",This);
+#endif
   if (This->acquired == 0) {
     POINT point;
 
@@ -464,13 +481,39 @@ static HRESULT WINAPI SysMouseAImpl_Acquire(LPDIRECTINPUTDEVICE2A iface)
     This->m_state.rgbButtons[2] = (GetKeyState(VK_RBUTTON) ? 0xFF : 0x00);
 
     /* Install our mouse hook */
+#ifdef __WIN32OS2__
+    //push ebp
+    This->hookcode[0]  = 0x55;
+    //mov  ebp, esp
+    This->hookcode[1]  = 0x8B; This->hookcode[2]  = 0xEC;
+    //push [ebp+16]
+    This->hookcode[3]  = 0xFF; This->hookcode[4]  = 0x75; This->hookcode[5]  = 0x10;
+    //push [ebp+12]
+    This->hookcode[6]  = 0xFF; This->hookcode[7]  = 0x75; This->hookcode[8]  = 0x0C;
+    //push [ebp+8]
+    This->hookcode[9]  = 0xFF; This->hookcode[10] = 0x75; This->hookcode[11] = 0x08;
+    //push This
+    This->hookcode[12] = 0x68; *(DWORD *)&This->hookcode[13]  = (DWORD)This;
+    //mov  eax, dinput_mouse_hook
+    This->hookcode[17] = 0xB8; *(DWORD *)&This->hookcode[18]  = (DWORD)&dinput_mouse_hook;
+    //call eax
+    This->hookcode[22] = 0xFF; This->hookcode[23]  = 0xD0;
+    //pop  ebp
+    This->hookcode[24] = 0x5D;
+    //ret  12
+    This->hookcode[25] = 0xC2; *(WORD *)&This->hookcode[26]  = 0x000C;
+
+    This->hook = SetWindowsHookExW( WH_MOUSE_LL, (HOOKPROC)This->hookcode, 0, 0 );
+#else
     This->hook = SetWindowsHookExW( WH_MOUSE_LL, dinput_mouse_hook, 0, 0 );
+#endif
 
     /* Get the window dimension and find the center */
     GetWindowRect(This->win, &rect);
     This->win_centerX = (rect.right  - rect.left) / 2;
     This->win_centerY = (rect.bottom - rect.top ) / 2;
 
+#ifndef __WIN32OS2__
     /* Warp the mouse to the center of the window */
     if (This->absolute == 0) {
       This->mapped_center.x = This->win_centerX;
@@ -484,7 +527,7 @@ static HRESULT WINAPI SysMouseAImpl_Acquire(LPDIRECTINPUTDEVICE2A iface)
       This->need_warp = WARP_STARTED;
 #endif
     }
-
+#endif
     This->acquired = 1;
   }
   return DI_OK;
@@ -497,7 +540,11 @@ static HRESULT WINAPI SysMouseAImpl_Unacquire(LPDIRECTINPUTDEVICE2A iface)
 {
     ICOM_THIS(SysMouseAImpl,iface);
 
+#ifdef __WIN32OS2__
+    dprintf(("SysMouseAImpl_Unacquire %x", This));
+#else
     TRACE("(this=%p)\n",This);
+#endif
 
     if (This->acquired)
     {
