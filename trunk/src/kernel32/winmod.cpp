@@ -1,4 +1,4 @@
-/* $Id: winmod.cpp,v 1.3 1999-06-10 19:09:05 phaller Exp $ */
+/* $Id: winmod.cpp,v 1.4 1999-06-16 20:25:45 cbratschi Exp $ */
 
 /*
  *
@@ -66,9 +66,11 @@ int Win32Image::convertNameId(char *lpszName)
     }
     curnid = (NameId *)((char *)curnid + sizeof(NameId) + strlen(curnid->name));
   }
+
   //try upper case search
   //SvL: Copy it, since string might be located in readonly object
-  upname = (char *)malloc(strlen(lpszName)+1);
+
+  upname = (char *)malloc(strlen(lpszName)+1); //CB: Trap with MFC Toolbar/UpDown samples
   strcpy(upname, lpszName);
   UpCase(upname);
   dprintf(("Convert %s to id\n", upname));
