@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.169 2003-01-05 12:31:26 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.170 2003-01-06 14:43:51 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -498,7 +498,7 @@ VOID WIN32API ExitProcess(DWORD exitcode)
     HANDLE hThread = GetCurrentThread();
     TEB   *teb;
 
-    dprintf(("KERNEL32:  ExitProcess %d\n", exitcode));
+    dprintf(("KERNEL32:  ExitProcess %d (time %x)", exitcode, GetCurrentTime()));
     dprintf(("KERNEL32:  ExitProcess FS = %x\n", GetFS()));
 
     fExitProcess = TRUE;
@@ -567,6 +567,7 @@ VOID WIN32API ExitProcess(DWORD exitcode)
     if (iConsoleIsActive())
         iConsoleWaitClose();
 
+    dprintf(("KERNEL32:  ExitProcess done (time %x)", GetCurrentTime()));
     O32_ExitProcess(exitcode);
 }
 //******************************************************************************
