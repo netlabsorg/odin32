@@ -93,6 +93,11 @@ inline static int isxdigitW( WCHAR wc )
     return get_char_typeW(wc) & C1_XDIGIT;
 }
 
+inline static int isspaceW( WCHAR wc )
+{
+    return get_char_typeW(wc) & C1_SPACE;
+}
+
 #define  islowerW(a)    IsCharLowerW(a)
 #define  isupperW(a)    IsCharUpperW(a)
 #define  isalnumW(a)    IsCharAlphaNumericW(a)

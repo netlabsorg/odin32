@@ -1,4 +1,4 @@
-/* $Id: prsht.h,v 1.6 2000-12-24 12:28:20 sandervl Exp $ */
+/* $Id: prsht.h,v 1.7 2002-05-15 12:37:28 sandervl Exp $ */
 
 #ifndef _WINE_PRSHT_H
 #define _WINE_PRSHT_H
@@ -46,7 +46,7 @@ typedef struct _PROPSHEETPAGEA
     {
         LPCSTR           pszTemplate;
         LPCDLGTEMPLATEA  pResource;
-    }DUMMYUNIONNAME1;
+    }DUMMYUNIONNAME;
     union
     {
         HICON          hIcon;
@@ -57,8 +57,8 @@ typedef struct _PROPSHEETPAGEA
     LPARAM             lParam;
     LPFNPSPCALLBACKA pfnCallback;
     UINT*            pcRefParent;
-    LPCWSTR            pszHeaderTitle;
-    LPCWSTR            pszHeaderSubTitle;
+    LPCSTR            pszHeaderTitle;
+    LPCSTR            pszHeaderSubTitle;
 } PROPSHEETPAGEA, *LPPROPSHEETPAGEA;
 
 typedef const PROPSHEETPAGEA *LPCPROPSHEETPAGEA;
@@ -72,7 +72,7 @@ typedef struct _PROPSHEETPAGEW
     {
         LPCWSTR          pszTemplate;
         LPCDLGTEMPLATEW  pResource;
-    }DUMMYUNIONNAME1;
+    }DUMMYUNIONNAME;
     union
     {
         HICON          hIcon;
@@ -100,7 +100,7 @@ typedef struct _PROPSHEETHEADERA
     {
       HICON                  hIcon;
       LPCSTR                   pszIcon;
-    }DUMMYUNIONNAME1;
+    }DUMMYUNIONNAME;
     LPCSTR                   pszCaption;
     UINT                   nPages;
     union
@@ -138,8 +138,8 @@ typedef struct _PROPSHEETHEADERW
     union
     {
       HICON                  hIcon;
-      LPCSTR                   pszIcon;
-    }DUMMYUNIONNAME1;
+      LPCWSTR                   pszIcon;
+    }DUMMYUNIONNAME;
     LPCWSTR                  pszCaption;
     UINT                   nPages;
     union
@@ -220,6 +220,7 @@ DECL_WINELIB_TYPE_AW(LPFNPSPCALLBACK)
 #define PSH_USEHICON            0x0002
 #define PSH_USEICONID           0x0004
 #define PSH_PROPSHEETPAGE       0x0008
+#define PSH_WIZARDHASFINISH     0x0010
 #define PSH_WIZARD              0x0020
 #define PSH_USEPSTARTPAGE       0x0040
 #define PSH_NOAPPLYNOW          0x0080
@@ -237,6 +238,8 @@ DECL_WINELIB_TYPE_AW(LPFNPSPCALLBACK)
 #define PSH_HEADER              0x00080000
 #define PSH_USEHBMHEADER        0x00100000
 #define PSH_USEPAGELANG         0x00200000
+#define PSH_WIZARD_LITE         0x00400000
+#define PSH_NOCONTEXTHELP       0x02000000
 
 #define PSCB_INITIALIZED  1
 #define PSCB_PRECREATE    2

@@ -1659,6 +1659,14 @@ LONG        WINAPI InterlockedDecrement(LPLONG);
 LONG        WINAPI InterlockedExchange(LPLONG,LONG);
 LONG        WINAPI InterlockedExchangeAdd( PLONG dest, LONG incr );
 LONG        WINAPI InterlockedIncrement(LPLONG);
+
+/* FIXME: should handle platforms where sizeof(void*) != sizeof(long) */
+#define InterlockedCompareExchangePointer(dest, xchg, compare) \
+    (PVOID)InterlockedCompareExchange( (PLONG)dest, (LONG)xchg, (LONG)compare )
+
+#define InterlockedExchangePointer(dest, val) \
+    (PVOID)InterlockedExchange( (PLONG)dest, (LONG)val )
+
 BOOL      WINAPI IsDBCSLeadByteEx(UINT,BYTE);
 BOOL      WINAPI IsProcessorFeaturePresent(DWORD);
 BOOL      WINAPI IsValidLocale(DWORD,DWORD);
