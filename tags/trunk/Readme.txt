@@ -1,4 +1,8 @@
-/* $Id: Readme.txt,v 1.9 1999-11-14 13:14:16 achimha Exp $ */
+/* $Id: Readme.txt,v 1.10 1999-11-14 15:52:02 achimha Exp $ */
+
+NOTE: We are still looking for talented developers that want to
+      contribute! Please take a look at the last section!
+
 
 Project Odin Information
 ========================
@@ -115,10 +119,23 @@ another file format thus changing the original Win32 files.
 - Windows NT Freecell (not the one from Windows 95)
 - Windows 95/NT Calculator
 - Windows NT Pinball
+- Windows NT Minesweeper
 - Quake II
 - Red Alert
 - Professional Minesweeper
 - Windiff (part of Win32 SDK)
+
+
+4.0 Reporting Problems and Successes
+------------------------------------
+
+In this early stage it is not required that you report every
+bug to the developers as we still have huge lists of to do items.
+However, an application compatibility database has been created
+at Netlabs where you can share your experiences with Odin.
+The application compatibility database can be found at
+
+http://www.netlabs.org/odin/appdatabase
 
 
 Project Odin Source Code Notes
@@ -132,10 +149,6 @@ describe various aspects of the project such as accessing latest sources via
 cvs, building the binaries, running win32 applications, how to identify and 
 report problems and bugs, as well as how to acticely participate in this very 
 promising project.
-
-99/11/05: Sander van Leeuwen <sandervl@xs4all.nl>
-99/11/05: Patrick Haller <phaller@gmx.net>
-99/11/14: Achim Hasenmueller <achimha@innotek.de>
 
 
 1.1 Prerequisites:
@@ -198,11 +211,11 @@ Please check out http://www.netlabs.org/ and http://www.netlabs.org/odin.
 Basically, if your system setup meets above stated requirements, everything you 
 need to do for a binary build is:
 
-  make debug
+  nmake DEBUG=1
 
 or alternatively
 
-  make release
+  nmake release (not working right now!)
 
 As the current state of the project is still known to be alpha level, one should 
 expect some functions not to work properly. Therefore, we recommend the use of 
@@ -243,23 +256,7 @@ built binaries on daily basis. For people that do not have a suitable
 development setup for ODIN, we provide the latest binary code that way.
 
 
-4.0 Running Win32 applications on ODIN
---------------------------------------
-
-
-5.0 How to identify and report problems
----------------------------------------
-
-
-5.1 Understanding the logfiles
-------------------------------
-
-
-5.2 Reporting a problem
------------------------
-
-
-6.0 Project participation
+4.0 Project participation
 -------------------------
 
 As ODIN became an open source project, everybody is kindly invited to 
