@@ -1,4 +1,4 @@
-/* $Id: oleaut32.cpp,v 1.8 2001-07-12 17:16:12 sandervl Exp $ */
+/* $Id: oleaut32.cpp,v 1.9 2001-08-10 19:22:23 sandervl Exp $ */
 /* 
  * OLEAUT32 
  * 
@@ -29,7 +29,7 @@
 void OpenPrivateLogFiles()
 {
 #ifdef DEBUG
-    OpenPrivateLogFileTypelib();
+//    OpenPrivateLogFileTypelib();
 #endif
 }
 //******************************************************************************
@@ -38,7 +38,7 @@ void OpenPrivateLogFiles()
 void ClosePrivateLogFiles()
 {
 #ifdef DEBUG
-    ClosePrivateLogFileTypelib();
+//    ClosePrivateLogFileTypelib();
 #endif
 }
 
