@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.2531 2003-03-27 14:13:38 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2532 2003-03-28 13:57:41 sandervl Exp $ */
+
+ 2003-03-28: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Removed changes for window tracking (move/size) with full 
+                  window dragging enabled (2003-03-27)
 
  2003-03-27: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Don't change focus when processing mouse button message if
