@@ -1,7 +1,10 @@
-/* $Id: changelog,v 1.2364 2002-11-26 10:51:44 sandervl Exp $ */
+/* $Id: changelog,v 1.2365 2002-11-26 14:39:58 sandervl Exp $ */
 
  2002-11-26: Sander van Leeuwen <sandervl@innotek   >
     - GDI32:    o Added debug wrappers for all exports
+    - USER32:   o Handle icon masks with different line alignment. CreateBitmap
+                  assumes the optimal alignment, so we must convert them properly.
+                  (no collate icon in printer dialog)
 
  2002-11-26: Platon Fomichev <platon@innotek   >
     - COMDLG32: o New collate icons
