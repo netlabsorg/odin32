@@ -86,7 +86,6 @@ LPVOID WIN32API HeapAlloc(HANDLE hHeap,
         return(NULL);
 
   rc = curheap->Alloc(dwFlags, dwBytes);
-  dprintf2(("HeapAlloc %d bytes -> %x", dwBytes, rc));
   return rc;
 }
 //******************************************************************************
@@ -99,7 +98,6 @@ LPVOID HeapReAlloc(HANDLE hHeap,
   OS2Heap *curheap;
   FINDHEAP(curheap,hHeap)
 
-  dprintf2(("HeapReAlloc %x %x %x %X bytes", hHeap, dwFlags, lpMem, dwBytes));
   if(curheap == NULL)
         return(NULL);
 
@@ -118,7 +116,6 @@ BOOL WIN32API HeapFree(HANDLE hHeap,
   OS2Heap *curheap;
   FINDHEAP(curheap,hHeap)
 
-  dprintf2(("HeapFree %X", lpMem));
   if(curheap == NULL)
     return(FALSE);
 
@@ -135,9 +132,7 @@ HANDLE WIN32API HeapCreate(DWORD flOptions, DWORD dwInitialSize,
 {
  OS2Heap *curheap;
 
-  //Create Open32 heap for it's handle
-  dprintf2(("HeapCreate dwInitialSize %X", dwInitialSize));
-
+  //Create Open32 heap for its handle
   curheap = new OS2Heap(flOptions, dwInitialSize, dwMaximumSize);
 
   if(curheap == NULL)
@@ -159,7 +154,6 @@ BOOL WIN32API HeapDestroy(HANDLE hHeap)
   OS2Heap *curheap;
   FINDHEAP(curheap,hHeap)
 
-  dprintf2(("HeapDestroy %X", hHeap));
   if(curheap == NULL)
         return(FALSE);
 
@@ -173,7 +167,6 @@ DWORD WIN32API HeapSize(HANDLE hHeap, DWORD arg2, PVOID lpMem)
   OS2Heap *curheap;
   FINDHEAP(curheap,hHeap)
 
-  dprintf2(("HeapSize %X %x %x", hHeap, arg2, lpMem));
   if(curheap == NULL)
         return(0);
   return curheap->Size(arg2, lpMem);
@@ -193,7 +186,6 @@ BOOL WIN32API HeapValidate(HANDLE hHeap, DWORD dwFlags, LPCVOID lpMem)
   OS2Heap *curheap;
   FINDHEAP(curheap,hHeap)
 
-  dprintf2(("KERNEL32: HeapValidate %x %x %x", hHeap, dwFlags, lpMem));
   if(curheap == NULL)
         return FALSE;
 
@@ -355,7 +347,6 @@ LPVOID WIN32API GlobalLock(HGLOBAL hmem)
    }
    /* HeapUnlock(GETPROCESSHEAP); */;
 
-   dprintf(("KERNEL32: GlobalLock %x returned %x", hmem, palloc));
    return palloc;
 }
 
