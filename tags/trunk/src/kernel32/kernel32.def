@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.100 2001-04-01 14:33:49 sandervl Exp $
+; $Id: kernel32.def,v 1.101 2001-04-03 18:27:25 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -1144,6 +1144,9 @@ EXPORTS
     _SupportsCPUID                                                @2003 NONAME
     _GetCPUFeatures                                               @2004 NONAME
     CPUFeatures                                                   @2005 NONAME
+
+    _toupperW@4                                                   @2006 NONAME
+    _tolowerW@4                                                   @2007 NONAME
 
     _InitializeTIB@4                                              @2010 NONAME
     _DestroyTIB@0                                                 @2011 NONAME
