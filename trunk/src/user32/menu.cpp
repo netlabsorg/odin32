@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.12 2000-01-20 16:48:54 cbratschi Exp $*/
+/* $Id: menu.cpp,v 1.13 2000-01-30 18:48:27 sandervl Exp $*/
 /*
  * Menu functions
  *
@@ -3215,19 +3215,19 @@ ULONG WINAPI EnableMenuItem( HMENU hMenu, UINT wItemID, UINT wFlags )
 /*******************************************************************
  *         GetMenuString32A    (USER32.268)
  */
-INT WINAPI GetMenuStringA( HMENU hMenu, UINT wItemID,
-                               LPSTR str, INT nMaxSiz, UINT wFlags )
+INT WINAPI GetMenuStringA(HMENU hMenu, UINT wItemID,
+                          LPSTR str, INT nMaxSiz, UINT wFlags )
 {
     MENUITEM *item;
 
-    dprintf(("USER32: GetMenuStringA"));
+    dprintf(("USER32: GetMenuStringA %x %d %d %x", hMenu, wItemID, nMaxSiz, wFlags));
 
     //TRACE("menu=%04x item=%04x ptr=%p len=%d flags=%04x\n",
     //             hMenu, wItemID, str, nMaxSiz, wFlags );
-    if (!str || !nMaxSiz) return 0;
-    str[0] = '\0';
     if (!(item = MENU_FindItem( &hMenu, &wItemID, wFlags ))) return 0;
     if (!IS_STRING_ITEM(item->fType)) return 0;
+    if (!str || !nMaxSiz) return strlen(item->text);
+    str[0] = '\0';
     lstrcpynA( str, item->text, nMaxSiz );
     //TRACE("returning '%s'\n", str );
     return strlen(str);
@@ -3246,10 +3246,10 @@ INT WINAPI GetMenuStringW( HMENU hMenu, UINT wItemID,
 
     //TRACE("menu=%04x item=%04x ptr=%p len=%d flags=%04x\n",
     //             hMenu, wItemID, str, nMaxSiz, wFlags );
-    if (!str || !nMaxSiz) return 0;
-    str[0] = '\0';
     if (!(item = MENU_FindItem( &hMenu, &wItemID, wFlags ))) return 0;
     if (!IS_STRING_ITEM(item->fType)) return 0;
+    if (!str || !nMaxSiz) return strlen(item->text);
+    str[0] = '\0';
     lstrcpynAtoW( str, item->text, nMaxSiz );
     return lstrlenW(str);
 }
@@ -3772,7 +3772,9 @@ BOOL WINAPI SetMenu( HWND hWnd, HMENU hMenu )
             lpmenu->wFlags &= ~MF_POPUP;  /* Can't be a popup */
             lpmenu->Height = 0;  /* Make sure we recalculate the size */
         }
-        if (IsWindowVisible(hWnd))
+//SvL: This fixes the menu in standard mine sweeper (window isn't visible
+//     when SetMenu is called)
+//        if (IsWindowVisible(hWnd))
             SetWindowPos( hWnd, 0, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE |
                         SWP_NOACTIVATE | SWP_NOZORDER | SWP_FRAMECHANGED );
         return TRUE;
@@ -4315,7 +4317,6 @@ BOOL WINAPI GetMenuItemRect (HWND hwnd, HMENU hMenu, UINT uItem,
      MENUITEM *item;
      HWND referenceHwnd;
 
-     dprintf(("USER32: GetMenuItemRect"));
      //TRACE("(0x%x,0x%x,%d,%p)\n", hwnd, hMenu, uItem, rect);
 
      item = MENU_FindItem (&hMenu, &uItem, MF_BYPOSITION);
@@ -4324,20 +4325,24 @@ BOOL WINAPI GetMenuItemRect (HWND hwnd, HMENU hMenu, UINT uItem,
      if(!hwnd)
      {
          itemMenu = (POPUPMENU*)hMenu;
-         if (itemMenu == NULL)
-             return FALSE;
+         if (itemMenu == NULL) {
+		SetLastError(ERROR_INVALID_PARAMETER);
+             	return FALSE;
+	 }
 
          if(itemMenu->hWnd == 0)
              return FALSE;
          referenceHwnd = itemMenu->hWnd;
      }
 
-     if ((rect == NULL) || (item == NULL))
-         return FALSE;
-
+     if ((rect == NULL) || (item == NULL)) {
+	SetLastError(ERROR_INVALID_PARAMETER);
+        return FALSE;
+     }
      *rect = item->rect;
 
      MapWindowPoints(referenceHwnd, 0, (LPPOINT)rect, 2);
+     dprintf(("USER32: GetMenuItemRect %x %x %d (%d,%d)(%d,%d)", hwnd, hMenu, uItem, rect->left, rect->top, rect->right, rect->bottom));
 
      return TRUE;
 }
