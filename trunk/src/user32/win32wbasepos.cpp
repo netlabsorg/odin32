@@ -1,4 +1,4 @@
-/* $Id: win32wbasepos.cpp,v 1.6 1999-10-28 12:00:35 sandervl Exp $ */
+/* $Id: win32wbasepos.cpp,v 1.7 1999-12-16 00:11:47 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (nonclient/position methods)
  *
@@ -27,7 +27,6 @@
 #include <winres.h>
 #include <spy.h>
 #include "wndmsg.h"
-#include "hooks.h"
 #include "oslibwin.h"
 #include "oslibutil.h"
 #include "oslibgdi.h"
@@ -93,7 +92,7 @@ UINT Win32BaseWindow::MinMaximize(UINT cmd, LPRECT lpRect )
     {
     if( dwStyle & WS_MINIMIZE )
     {
-        if( !SendMessageA(WM_QUERYOPEN, 0, 0L ) )
+        if( !SendInternalMessageA(WM_QUERYOPEN, 0, 0L ) )
         return (SWP_NOSIZE | SWP_NOMOVE);
         swpFlags |= SWP_NOCOPYBITS;
     }
@@ -231,7 +230,7 @@ void Win32BaseWindow::GetMinMaxInfo(POINT *maxSize, POINT *maxPos,
         MinMax.ptMaxPosition.y = -yinc;
 //    }
 
-    SendMessageA(WM_GETMINMAXINFO, 0, (LPARAM)&MinMax );
+    SendInternalMessageA(WM_GETMINMAXINFO, 0, (LPARAM)&MinMax );
 
       /* Some sanity checks */
 
@@ -275,7 +274,7 @@ LONG Win32BaseWindow::SendNCCalcSize(BOOL calcValidRect, RECT *newWindowRect,
         params.rgrc[2] = *oldClientRect;
         params.lppos = &winposCopy;
    }
-   result = SendMessageA(WM_NCCALCSIZE, calcValidRect,
+   result = SendInternalMessageA(WM_NCCALCSIZE, calcValidRect,
                          (LPARAM)&params );
    *newClientRect = params.rgrc[0];
    return result;

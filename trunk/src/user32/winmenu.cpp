@@ -1,4 +1,4 @@
-/* $Id: winmenu.cpp,v 1.17 1999-11-14 12:00:01 sandervl Exp $ */
+/* $Id: winmenu.cpp,v 1.18 1999-12-16 00:11:49 sandervl Exp $ */
 
 /*
  * Win32 menu API functions for OS/2
@@ -596,7 +596,6 @@ ODINFUNCTION3(DWORD, CheckMenuItem,
               UINT, arg2,
               UINT, arg3)
 {
-    dprintf(("USER32:  OS2CheckMenuItem\n"));
     if(hMenu == 0)
     {
         SetLastError(ERROR_INVALID_PARAMETER);

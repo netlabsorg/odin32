@@ -1,4 +1,4 @@
-/* $Id: win32wmdiclient.cpp,v 1.13 1999-12-09 10:59:05 sandervl Exp $ */
+/* $Id: win32wmdiclient.cpp,v 1.14 1999-12-16 00:11:48 sandervl Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -25,7 +25,6 @@
 #include <win32wmdiclient.h>
 #include <spy.h>
 #include "wndmsg.h"
-#include "hooks.h"
 #include <oslibwin.h>
 #include <oslibutil.h>
 #include <oslibgdi.h>
@@ -222,7 +221,7 @@ LRESULT Win32MDIClientWindow::MDIClientWndProc(UINT message, WPARAM wParam, LPAR
 
     case WM_NCACTIVATE:
         if( activeChild )
-            activeChild->SendMessageA(message, wParam, lParam);
+            activeChild->SendInternalMessageA(message, wParam, lParam);
         break;
 
     case WM_PARENTNOTIFY:
@@ -343,8 +342,8 @@ LONG Win32MDIClientWindow::childActivate(Win32MDIChildWindow *child)
     if( prevActive )
     {
         prevActive->setStyle(prevActive->getStyle() | WS_SYSMENU);
-        prevActive->SendMessageA( WM_NCACTIVATE, FALSE, 0L );
-        prevActive->SendMessageA( WM_MDIACTIVATE, (WPARAM)prevActive->getWindowHandle(), (LPARAM)(child) ? child->getWindowHandle() : 0);
+        prevActive->SendInternalMessageA( WM_NCACTIVATE, FALSE, 0L );
+        prevActive->SendInternalMessageA( WM_MDIACTIVATE, (WPARAM)prevActive->getWindowHandle(), (LPARAM)(child) ? child->getWindowHandle() : 0);
 
         /* uncheck menu item */
         if( getMDIMenu() )
@@ -385,15 +384,15 @@ LONG Win32MDIClientWindow::childActivate(Win32MDIChildWindow *child)
 
     if( isActiveFrameWnd )
     {
-        child->SendMessageA( WM_NCACTIVATE, TRUE, 0L);
+        child->SendInternalMessageA( WM_NCACTIVATE, TRUE, 0L);
         if( GetFocus() == getWindowHandle())
-            SendMessageA( WM_SETFOCUS, (WPARAM)getWindowHandle(), 0L );
+            SendInternalMessageA( WM_SETFOCUS, (WPARAM)getWindowHandle(), 0L );
         else
             SetFocus( getWindowHandle() );
     }
 
     /* @@@PH prevActive may be NULL actually ?! */
-    child->SendMessageA( WM_MDIACTIVATE,
+    child->SendInternalMessageA( WM_MDIACTIVATE,
                          prevActive ? (WPARAM)prevActive->getWindowHandle() : 0,
                          child->getWindowHandle());
     return TRUE;
@@ -601,7 +600,7 @@ LRESULT Win32MDIClientWindow::refreshMDIMenu(HMENU hmenuFrame, HMENU hmenuWindow
     return oldFrameMenu;
 }
 /**********************************************************************
- *					MDI_RestoreFrameMenu
+ *                  MDI_RestoreFrameMenu
  */
 BOOL Win32MDIClientWindow::restoreFrameMenu(Win32BaseWindow *child)
 {
@@ -610,7 +609,7 @@ BOOL Win32MDIClientWindow::restoreFrameMenu(Win32BaseWindow *child)
     UINT iId = GetMenuItemID(getParent()->GetMenu(),nItems) ;
 
     if(!(iId == SC_RESTORE || iId == SC_CLOSE) )
-	    return 0;
+        return 0;
 
     /*
      * Remove the system menu, If that menu is the icon of the window
@@ -620,17 +619,17 @@ BOOL Win32MDIClientWindow::restoreFrameMenu(Win32BaseWindow *child)
     menuInfo.fMask  = MIIM_DATA | MIIM_TYPE;
 
     GetMenuItemInfoA(getParent()->GetMenu(),
-        		     0,
-		             TRUE,
-		             &menuInfo);
+                     0,
+                     TRUE,
+                     &menuInfo);
 
     RemoveMenu(getParent()->GetMenu(),0,MF_BYPOSITION);
 
 //TODO: See augmentframemenu
 #if 0
     if ((menuInfo.fType & MFT_BITMAP)           &&
-	    (LOWORD(menuInfo.dwTypeData)!=0)        &&
-	    (LOWORD(menuInfo.dwTypeData)!=hBmpClose) )
+        (LOWORD(menuInfo.dwTypeData)!=0)        &&
+        (LOWORD(menuInfo.dwTypeData)!=hBmpClose) )
     {
         DeleteObject((HBITMAP)LOWORD(menuInfo.dwTypeData));
     }
@@ -659,7 +658,7 @@ LONG Win32MDIClientWindow::cascade()
     UINT    total;
 
     if (getMaximizedChild())
-        SendMessageA(WM_MDIRESTORE, (WPARAM)getMaximizedChild()->getWindowHandle(), 0);
+        SendInternalMessageA(WM_MDIRESTORE, (WPARAM)getMaximizedChild()->getWindowHandle(), 0);
 
     if (nActiveChildren == 0) return 0;
 
@@ -705,7 +704,7 @@ void Win32MDIClientWindow::MDITile(WPARAM wParam )
     UINT    total = 0;
 
     if (getMaximizedChild())
-        SendMessageA(WM_MDIRESTORE, (WPARAM)getMaximizedChild()->getWindowHandle(), 0);
+        SendInternalMessageA(WM_MDIRESTORE, (WPARAM)getMaximizedChild()->getWindowHandle(), 0);
 
     if (nActiveChildren == 0) return;
 

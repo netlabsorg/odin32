@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.41 1999-12-09 00:53:38 sandervl Exp $ */
+/* $Id: window.cpp,v 1.42 1999-12-16 00:11:48 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -393,6 +393,7 @@ HWND WIN32API GetTopWindow( HWND hwnd)
 BOOL WIN32API IsIconic( HWND hwnd)
 {
   Win32BaseWindow *window;
+  BOOL rc;
 
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
@@ -400,8 +401,9 @@ BOOL WIN32API IsIconic( HWND hwnd)
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
-    dprintf(("IsIconic %x", hwnd));
-    return window->IsIconic();
+    rc = window->IsIconic();
+    dprintf(("IsIconic %x returned %d", hwnd, rc));
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -460,6 +462,29 @@ BOOL WIN32API ShowWindow(HWND hwnd, int nCmdShow)
     }
     dprintf(("ShowWindow %x", hwnd));
     return window->ShowWindow(nCmdShow);
+}
+/*****************************************************************************
+ * Name      : BOOL WIN32API ShowWindowAsync
+ * Purpose   : The ShowWindowAsync function sets the show state of a window
+ *             created by a different thread.
+ * Parameters: HWND hwnd     handle of window
+ *             int  nCmdShow show state of window
+ * Variables :
+ * Result    : If the window was previously visible, the return value is TRUE.
+ *             If the window was previously hidden, the return value is FALSE.
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+BOOL WIN32API ShowWindowAsync (HWND hwnd,
+                               int  nCmdShow)
+{
+  dprintf(("USER32:ShowWindowAsync (%08xh,%08x) not correctly implemented.\n",
+         hwnd,
+         nCmdShow));
+
+  return ShowWindow(hwnd, nCmdShow);
 }
 //******************************************************************************
 //******************************************************************************

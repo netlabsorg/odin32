@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.9 1999-12-09 00:53:38 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.10 1999-12-16 00:11:49 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -19,7 +19,6 @@
 #include <misc.h>
 #include <win32wbase.h>
 #include <win.h>
-#include <hooks.h>
 #include <heapstring.h>
 #include "oslibwin.h"
 #include "oslibmsg.h"
