@@ -1,4 +1,4 @@
-/* $Id: cvticon.cpp,v 1.5 1999-10-23 10:21:00 sandervl Exp $ */
+/* $Id: cvticon.cpp,v 1.6 1999-10-27 10:35:41 sandervl Exp $ */
 
 /*
  * PE2LX icons
@@ -166,7 +166,7 @@ void *ConvertIcon(WINBITMAPINFOHEADER *bmpHdr, int size, int *os2size, int offse
   iconhdr2->bmp2.ulColorEncoding = BCE_RGB;
   os2rgb                 = (RGB2 *)(iconhdr2+1);
   rgb                    = (RGBQUAD *)(bmpHdr+1);
-  if(bmpHdr->biBitCount < 24) {
+  if(bmpHdr->biBitCount <= 8) {
         for(i=0;i<(1<<bmpHdr->biBitCount);i++) {
                 os2rgb->bRed   = rgb->red;
                 os2rgb->bBlue  = rgb->blue;
@@ -176,25 +176,6 @@ void *ConvertIcon(WINBITMAPINFOHEADER *bmpHdr, int size, int *os2size, int offse
         }
   }
 
-#if 0
-  //write 2*mono pixels + color pixels
-  //There are icons without an AND mask, so check for it
-  if(bmpHdr->biSizeImage == colorsize)
-  {
-        memset((char *)os2rgb, 0, bwsize);
-        memset((char *)os2rgb+bwsize, 0, bwsize);
-        memcpy((char *)os2rgb+2*bwsize, (char *)rgb, colorsize);
-  }
-  else {
-        memset((char *)os2rgb, 0, bwsize); // windows has no xor mask
-        memcpy((char *)os2rgb+bwsize, (char *)rgb+colorsize, bwsize); // and-mask
-        memcpy((char *)os2rgb+2*bwsize, (char *)rgb, colorsize); // color(xor-mask)
-
-//        memcpy((char *)os2rgb, (char *)rgb+colorsize, bwsize);
-//        memcpy((char *)os2rgb+bwsize, (char *)rgb+colorsize, bwsize);
-//        memcpy((char *)os2rgb+2*bwsize, (char *)rgb, colorsize);
-  }
-#else
   pXor = (char *)os2rgb;
   pAnd = (char *)os2rgb + bwsize;
 
@@ -218,7 +199,6 @@ void *ConvertIcon(WINBITMAPINFOHEADER *bmpHdr, int size, int *os2size, int offse
     memset (pXor, 0, bwsize);
   }
   memcpy((char *)os2rgb+2*bwsize, (char *)rgb, colorsize);
-#endif
 
   *os2size = iconsize;
   return (void *)iconhdr;

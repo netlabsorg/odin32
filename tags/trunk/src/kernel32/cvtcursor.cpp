@@ -1,4 +1,4 @@
-/* $Id: cvtcursor.cpp,v 1.7 1999-10-24 09:43:02 sandervl Exp $ */
+/* $Id: cvtcursor.cpp,v 1.8 1999-10-27 10:35:41 sandervl Exp $ */
 
 /*
  * PE2LX cursor conversion code
@@ -31,11 +31,52 @@
 //******************************************************************************
 ULONG QueryConvertedCursorSize(CursorComponent *curHdr, int size)
 {
- WINBITMAPINFOHEADER *bhdr = (WINBITMAPINFOHEADER *)(curHdr+1);
- int                  bmpsize, cursorsize;
+ WINBITMAPINFOHEADER *bmpHdr = (WINBITMAPINFOHEADER *)(curHdr+1);
+ int bwsize, colorsize, rgbsize, cursorsize;
 
-  bmpsize = size - sizeof(CursorComponent) - (1<<bhdr->biBitCount)*sizeof(RGBQUAD);
-  cursorsize = sizeof(BITMAPFILEHEADER2) + bmpsize + (1<<bhdr->biBitCount)*sizeof(RGB2);
+  bwsize   = (bmpHdr->biWidth*(bmpHdr->biHeight/2))/8;
+  colorsize = bmpHdr->biWidth*(bmpHdr->biHeight/2);
+
+  if(bmpHdr->biBitCount <= 8)
+        rgbsize = (1<<bmpHdr->biBitCount)*sizeof(RGB2);
+  else  rgbsize = 0;
+
+  switch(bmpHdr->biBitCount) {
+        case 1:
+                colorsize /= 8;
+                break;
+        case 4:
+                colorsize /= 2;
+                break;
+        case 8:
+                break;
+        case 16:
+                colorsize *= 2;
+                break;
+        case 24:
+                colorsize *= 3;
+                break;
+        case 32:
+                colorsize *= 4;
+                break;
+  }
+  if(bmpHdr->biSizeImage == 0 && bmpHdr->biCompression == 0) {
+        bmpHdr->biSizeImage = bwsize + colorsize;
+  }
+
+  //SvL: 28-09-'98: cllngenu.dll has an incorrect size in the header
+  if(bmpHdr->biSizeImage < colorsize) {
+        bmpHdr->biSizeImage = colorsize;
+  }
+  if(bmpHdr->biBitCount > 1) {
+	//And mask, xor mask (0) + color image
+  	cursorsize = 2*sizeof(BITMAPFILEHEADER2) + 2*sizeof(RGB2) +
+             	     rgbsize + 2*bwsize + bmpHdr->biSizeImage;
+  }
+  else {
+	//And + xor mask
+	cursorsize = sizeof(BITMAPFILEHEADER2) + 2*sizeof(RGB2) + 2*bwsize;
+  }
 
   return cursorsize;
 }
@@ -47,13 +88,54 @@ void *ConvertCursor(CursorComponent *curHdr, int size, int *os2size, int offsetB
 {
  RGBQUAD   *rgb;
  RGB2      *os2rgb;
- WINBITMAPINFOHEADER *bhdr = (WINBITMAPINFOHEADER *)(curHdr+1);
- BITMAPFILEHEADER2   *cursorhdr;
- int        i, bwsize, bmpsize, cursorsize;
+ WINBITMAPINFOHEADER *bmpHdr = (WINBITMAPINFOHEADER *)(curHdr+1);
+ BITMAPFILEHEADER2   *cursorhdr, *cursorhdr2;
+ int        i, bwsize, bmpsize, cursorsize, rgbsize, colorsize;
 
   dprintf(("ConvertCursor: Cursor size %d", size));
-  bmpsize = size - sizeof(CursorComponent) - (1<<bhdr->biBitCount)*sizeof(RGBQUAD);
-  cursorsize = sizeof(BITMAPFILEHEADER2) + bmpsize + (1<<bhdr->biBitCount)*sizeof(RGB2);
+  bwsize   = (bmpHdr->biWidth*(bmpHdr->biHeight/2))/8;
+  colorsize = bmpHdr->biWidth*(bmpHdr->biHeight/2);
+
+  if(bmpHdr->biBitCount <= 8)
+        rgbsize = (1<<bmpHdr->biBitCount)*sizeof(RGB2);
+  else  rgbsize = 0;
+
+  switch(bmpHdr->biBitCount) {
+        case 1:
+                colorsize /= 8;
+                break;
+        case 4:
+                colorsize /= 2;
+                break;
+        case 8:
+                break;
+        case 16:
+                colorsize *= 2;
+                break;
+        case 24:
+                colorsize *= 3;
+                break;
+        case 32:
+                colorsize *= 4;
+                break;
+  }
+  if(bmpHdr->biSizeImage == 0 && bmpHdr->biCompression == 0) {
+        bmpHdr->biSizeImage = bwsize + colorsize;
+  }
+
+  //SvL: 28-09-'98: cllngenu.dll has an incorrect size in the header
+  if(bmpHdr->biSizeImage < colorsize) {
+        bmpHdr->biSizeImage = colorsize;
+  }
+  if(bmpHdr->biBitCount == 1) {
+	//And + xor mask 
+	cursorsize = sizeof(BITMAPFILEHEADER2) + 2*sizeof(RGB2) + 2*bwsize;
+  }
+  else {
+	//And mask, xor mask (0) + color image
+  	cursorsize = 2*sizeof(BITMAPFILEHEADER2) + 2*sizeof(RGB2) +
+             	     rgbsize + 2*bwsize + bmpHdr->biSizeImage;
+  }
 
   cursorhdr  = (BITMAPFILEHEADER2 *)malloc(cursorsize);
   memset(cursorhdr, 0, cursorsize);
@@ -62,66 +144,85 @@ void *ConvertCursor(CursorComponent *curHdr, int size, int *os2size, int offsetB
   cursorhdr->xHotspot      = curHdr->xHotspot;
 
   /* @@@PH y-hotspot is upside down ! */
-  cursorhdr->yHotspot      = (bhdr->biHeight >> 1)       /* height div 2 */
+  cursorhdr->yHotspot      = (bmpHdr->biHeight >> 1)       /* height div 2 */
                              - curHdr->yHotspot;         /* subtract hot.y */
 
   dprintf(("Cursor Hot.x   : %d", curHdr->xHotspot));
   dprintf(("Cursor Hot.y   : %d", curHdr->yHotspot));
 
-  cursorhdr->offBits       = sizeof(BITMAPFILEHEADER2) + 2*sizeof(RGB2) + offsetBits;
+  if(bmpHdr->biBitCount == 1) {
+  	cursorhdr->offBits = sizeof(BITMAPFILEHEADER2) +
+        	             2*sizeof(RGB2) + offsetBits;
+  }
+  else {
+  	cursorhdr->offBits = 2*sizeof(BITMAPFILEHEADER2) +
+        	             2*sizeof(RGB2) + rgbsize + offsetBits;
+  }
+
   cursorhdr->bmp2.cbFix     = sizeof(BITMAPINFOHEADER2);
-  cursorhdr->bmp2.cx        = (USHORT)bhdr->biWidth;
-  cursorhdr->bmp2.cy        = (USHORT)(bhdr->biHeight);
-  cursorhdr->bmp2.cPlanes   = bhdr->biPlanes;
-  cursorhdr->bmp2.cBitCount = bhdr->biBitCount;
+  cursorhdr->bmp2.cx        = (USHORT)bmpHdr->biWidth;
+  cursorhdr->bmp2.cy        = (USHORT)(bmpHdr->biHeight);
+  cursorhdr->bmp2.cPlanes   = bmpHdr->biPlanes;
+  cursorhdr->bmp2.cBitCount = 1;
   cursorhdr->bmp2.ulCompression   = BCA_UNCOMP;
   cursorhdr->bmp2.ulColorEncoding = BCE_RGB;
-  dprintf(("Cursor size    : %d", bhdr->biSizeImage));
-  dprintf(("Cursor Width   : %d", bhdr->biWidth));
+  dprintf(("Cursor size    : %d", bmpHdr->biSizeImage));
+  dprintf(("Cursor Width   : %d", bmpHdr->biWidth));
   //height for both the XOR and AND bitmap (color & BW)
-  dprintf(("Height         : %d", bhdr->biHeight));
-  dprintf(("Cursor Bitcount: %d", bhdr->biBitCount));
-  dprintf(("Cursor Compress: %d", bhdr->biCompression));
+  dprintf(("Height         : %d", bmpHdr->biHeight));
+  dprintf(("Cursor Bitcount: %d", bmpHdr->biBitCount));
+  dprintf(("Cursor Compress: %d", bmpHdr->biCompression));
 
   os2rgb                   = (RGB2 *)(cursorhdr+1);
-  rgb                      = (RGBQUAD *)(bhdr+1);
-  for(i=0;i<(1<<bhdr->biBitCount);i++) {
-        os2rgb->bRed   = rgb->red;
-        os2rgb->bBlue  = rgb->blue;
-        os2rgb->bGreen = rgb->green;
-        os2rgb++;
-        rgb++;
+  rgb                      = (RGBQUAD *)(bmpHdr+1);
+  if(bmpHdr->biBitCount == 1) {
+  	for(i=0;i<2;i++) {
+        	os2rgb->bRed   = rgb->red;
+	        os2rgb->bBlue  = rgb->blue;
+	        os2rgb->bGreen = rgb->green;
+	        os2rgb++;
+	        rgb++;
+	}
+  	//write XOR and AND mask
+  	memcpy((char *)os2rgb, (char *)rgb, bwsize*2);
   }
+  else {
+  	memset(os2rgb, 0, sizeof(RGB2));
+	memset(os2rgb+1, 0xff, sizeof(RGB)); //not reserved byte!
+  	cursorhdr2               = (BITMAPFILEHEADER2 *)(os2rgb+2);
+  	cursorhdr2->usType       = BFT_COLORICON;
+  	cursorhdr2->cbSize       = sizeof(BITMAPFILEHEADER2);
+  	cursorhdr2->xHotspot     = curHdr->xHotspot;
+  	cursorhdr2->yHotspot     = (bmpHdr->biHeight >> 1)       /* height div 2 */
+                                   - curHdr->yHotspot;         /* subtract hot.y */
+  	cursorhdr2->offBits      = 2*sizeof(BITMAPFILEHEADER2) +
+                           	   2*sizeof(RGB2) + rgbsize + 2*bwsize + offsetBits;
+  	cursorhdr2->bmp2.cbFix   = sizeof(BITMAPINFOHEADER2);
+  	cursorhdr2->bmp2.cx      = (USHORT)bmpHdr->biWidth;
+  	cursorhdr2->bmp2.cy      = (USHORT)(bmpHdr->biHeight/2);
+  	cursorhdr2->bmp2.cPlanes = bmpHdr->biPlanes;
+  	cursorhdr2->bmp2.cBitCount= bmpHdr->biBitCount;
+  	cursorhdr2->bmp2.ulCompression   = BCA_UNCOMP;
+  	cursorhdr2->bmp2.ulColorEncoding = BCE_RGB;
+  	os2rgb                 = (RGB2 *)(cursorhdr2+1);
+  	rgb                    = (RGBQUAD *)(bmpHdr+1);
+  	if(bmpHdr->biBitCount <= 8) {
+	        for(i=0;i<(1<<bmpHdr->biBitCount);i++) {
+	                os2rgb->bRed   = rgb->red;
+	                os2rgb->bBlue  = rgb->blue;
+	                os2rgb->bGreen = rgb->green;
+	                os2rgb++;
+	                rgb++;
+	        }
+	}
+  	//write XOR and AND mask
+  	char *pXor = (char *)os2rgb;
+  	char *pAnd = (char *)os2rgb + bwsize;
 
-  bhdr->biSizeImage *= 2;       // we have 2 bitmaps !
-
-  if(bhdr->biSizeImage > bmpsize || bhdr->biSizeImage == 0) {
-        bwsize = bhdr->biWidth*(bhdr->biHeight);
-
-        switch(bhdr->biBitCount) {
-                case 1:
-                        bwsize /= 8;
-                        break;
-                case 4:
-                        bwsize /= 2;
-                        break;
-                case 8:
-                        break;
-                case 16:
-                        bwsize *= 2;
-                        break;
-                case 24:
-                        bwsize *= 3;
-                        break;
-                case 32:
-                        bwsize *= 4;
-                        break;
-          }
+  	memcpy (pAnd, (char *)rgb + colorsize, bwsize);
+  	memset (pXor, 0, bwsize);
+  	memcpy((char *)os2rgb+2*bwsize, (char *)rgb, colorsize);
   }
-  else    bwsize = bhdr->biSizeImage;
-
-  //write XOR and AND mask
-  memcpy((char *)os2rgb, (char *)rgb, bwsize);
 
   *os2size = cursorsize;
   return cursorhdr;
