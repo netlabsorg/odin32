@@ -83,8 +83,6 @@ ULONG APIENTRY inittermShell32(ULONG hModule, ULONG ulFlag)
 
    switch (ulFlag) {
       case 0 :
-         ctordtorInit();
-
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
 	 dllHandle = RegisterLxDll(hModule, OdinLibMain, (PVOID)&shell32_PEResTab, 
