@@ -14,7 +14,6 @@
 #include <os2win.h>
 #include <winnls.h>
 #include "unicode.h"
-#include <builtin.h>
 #include "handlemanager.h"
 #include <string.h>
 
