@@ -1,4 +1,4 @@
-# $Id: pdwin32.vac3.rel,v 1.25 2000-09-01 16:01:20 bird Exp $
+# $Id: pdwin32.vac3.rel,v 1.26 2000-09-19 18:34:13 sandervl Exp $
 # ODIN / win32os2 Project
 #
 # RELEASE makefile for the VAC3 compiler environment
@@ -30,9 +30,9 @@ ODINCRT = odincrt
 #
 # Tool Flags
 #
-CFLAGS           = -Q -Si -G5 -O+ -Oi+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLUDE)\Win -I. -I$(PDWIN32_INCLUDE) -D__WIN32OS2__ -D__WINE__ -D__i386__  -DTCPV40HDRS -DCOMCTL32UNDOC
-CXXFLAGS         = -Q -Si -G5 -O+ -Oi+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLUDE)\Win -I. -I$(PDWIN32_INCLUDE) -D__WIN32OS2__ -D__WINE__ -D__i386__  -DTCPV40HDRS -DCOMCTL32UNDOC
-CXXFLAGS_ODINCRT = -Q -Si -G5 -O+ -Oi+ -Ge- -Ss+ -W3 -Gm+ /Gn- -I$(PDWIN32_INCLUDE)\Win -I. -I$(PDWIN32_INCLUDE) -D__WIN32OS2__ -D__WINE__ -D__i386__
+CFLAGS           = -Q -Si -G5 -O+ -Oi+ -Ge- -Ss+ -W3 -Gm+ /Gn+ /Gx+ -I$(PDWIN32_INCLUDE)\Win -I. -I$(PDWIN32_INCLUDE) -D__WIN32OS2__ -D__WINE__ -D__i386__  -DTCPV40HDRS -DCOMCTL32UNDOC
+CXXFLAGS         = -Q -Si -G5 -O+ -Oi+ -Ge- -Ss+ -W3 -Gm+ /Gn+ /Gx+ -I$(PDWIN32_INCLUDE)\Win -I. -I$(PDWIN32_INCLUDE) -D__WIN32OS2__ -D__WINE__ -D__i386__  -DTCPV40HDRS -DCOMCTL32UNDOC
+CXXFLAGS_ODINCRT = -Q -Si -G5 -O+ -Oi+ -Ge- -Ss+ -W3 -Gm+ /Gn- /Gx+ -I$(PDWIN32_INCLUDE)\Win -I. -I$(PDWIN32_INCLUDE) -D__WIN32OS2__ -D__WINE__ -D__i386__
 CFLAGS_WIN32APP  = -Q -Si -G5 -O+ -Oi+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLUDE)\Win -I. -I$(PDWIN32_INCLUDE) -D__WIN32OS2__ -D__i386__
 CXXFLAGS_WIN32APP= -Q -Si -G5 -O+ -Oi+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLUDE)\Win -I. -I$(PDWIN32_INCLUDE) -D__WIN32OS2__ -D__i386__
 ASFLAGS          = -Mb -Sc -Sv:ALP
