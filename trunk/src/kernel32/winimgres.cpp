@@ -1,4 +1,4 @@
-/* $Id: winimgres.cpp,v 1.31 2000-02-16 14:22:12 sandervl Exp $ */
+/* $Id: winimgres.cpp,v 1.32 2000-02-23 00:57:40 sandervl Exp $ */
 
 /*
  * Win32 PE Image class (resource methods)
@@ -335,29 +335,6 @@ ULONG Win32ImageBase::getResourceSizeW(LPCWSTR lpszName, LPWSTR lpszType, ULONG 
 
     return(ressize);
 }
-//******************************************************************************
-//******************************************************************************
-#if 0
-ULONG Win32Pe2LxImage::getVersionSize()
-{
-    if(getVersionId() == -1) {
-        dprintf(("GetVersionSize: %s has no version resource!\n", szModule));
-        return(0);
-    }
-    return OSLibGetResourceSize(hinstance, getVersionId());
-}
-//******************************************************************************
-//******************************************************************************
-BOOL Win32Pe2LxImage::getVersionStruct(char *verstruct, ULONG bufLength)
-{
-    if(getVersionId() == -1) {
-        dprintf(("GetVersionStruct: %s has no version resource!\n", szModule));
-        SetLastError(ERROR_RESOURCE_DATA_NOT_FOUND);
-        return(FALSE);
-    }
-    return OSLibGetResource(hinstance, getVersionId(), verstruct, bufLength);
-}
-#endif
 //******************************************************************************
 //******************************************************************************
 ULONG Win32ImageBase::getVersionSize()

@@ -1,4 +1,4 @@
-/* $Id: oslibmisc.h,v 1.2 2000-01-03 21:36:11 sandervl Exp $ */
+/* $Id: oslibmisc.h,v 1.3 2000-02-23 00:57:40 sandervl Exp $ */
 /*
  * Misc util. procedures
  *
@@ -10,19 +10,12 @@
 #ifndef __OSLIBMISC_H__
 #define __OSLIBMISC_H__
 
-void OSLibSetExitList(unsigned long handler);
-void OSLibClearExitList();
-void OSLibRemoveExitList(unsigned long handler);
-
 char *OSLibGetDllName(ULONG hModule);
 
 char *OSLibStripPath(char *path);
 
 ULONG OSLibiGetModuleHandleA(char *pszModule);
 ULONG OSLibQueryModuleHandle(char *modname);
-
-ULONG OSLibGetResourceSize(HMODULE hinstance, int id);
-ULONG OSLibGetResource(HMODULE hinstance, int id, char *destbuf, int bufLength);
 
 void  OSLibWait(ULONG msec);
 

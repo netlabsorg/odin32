@@ -1,5 +1,5 @@
-/* $Id: oslibmisc.cpp,v 1.6 2000-02-16 14:25:45 sandervl Exp $ */
-
+/* $Id: oslibmisc.cpp,v 1.7 2000-02-23 00:57:39 sandervl Exp $ */
+//#define DEBUG
 /*
  * Misc OS/2 util. procedures
  *
@@ -26,35 +26,6 @@
 #define DBG_LOCALLOG	DBG_oslibmisc
 #include "dbglocal.h"
 
-/***********************************
- * PH: fixups for missing os2win.h *
- ***********************************/
-
-void _System SetLastError(ULONG ulError);
-
-//******************************************************************************
-//******************************************************************************
-void OSLibSetExitList(unsigned long handler)
-{
- APIRET rc;
-
-  rc = DosExitList(EXLST_ADD | 0x00002A00, (PFNEXITLIST)handler);
-  if(rc) {
-    dprintf(("DosExitList returned %d\n", rc));
-  }
-}
-//******************************************************************************
-//******************************************************************************
-void OSLibClearExitList()
-{
-  DosExitList(EXLST_EXIT, NULL);
-}
-//******************************************************************************
-//******************************************************************************
-void OSLibRemoveExitList(unsigned long handler)
-{
-  DosExitList(EXLST_REMOVE, (PFNEXITLIST)handler);
-}
 //******************************************************************************
 //TODO: not reentrant!
 //******************************************************************************
@@ -84,11 +55,12 @@ ULONG OSLibiGetModuleHandleA(char * pszModule)
 {
   HMODULE hModule;                                          /* module handle */
   APIRET  rc;                                              /* API returncode */
-  static HMODULE hModuleExe;                          /* "cached" hModuleExe */
+  static HMODULE hModuleExe = 0;                        /* "cached" hModuleExe */
   PTIB pTIB;                              /* parameters for DosGetInfoBlocks */
   PPIB pPIB;
 
-  dprintf(("KERNEL32:GetModuleHandle(%s)\n",
+  _interrupt(3);
+  dprintf(("KERNEL32:GetModuleHandle(%x)\n",
            pszModule));
 
   /* @@@PH 98/04/04
@@ -113,7 +85,6 @@ ULONG OSLibiGetModuleHandleA(char * pszModule)
                           &pPIB);
     if (rc != NO_ERROR)                                  /* check for errors */
     {
-      SetLastError(rc);                                    /* set error code */
       return (NULLHANDLE);                                 /* signal failure */
     }
 
@@ -127,7 +98,6 @@ ULONG OSLibiGetModuleHandleA(char * pszModule)
 
     if (rc != NO_ERROR)                                  /* check for errors */
     {
-      SetLastError(rc);                                    /* set error code */
       return (NULLHANDLE);                                 /* signal failure */
     }
   }
@@ -149,45 +119,7 @@ ULONG OSLibQueryModuleHandle(char *modname)
   return(hModule);
 }
 
-//SvL: only for RT_RCDATA!
-ULONG OSLibGetResourceSize(HMODULE hinstance, int id)
-{
- APIRET rc;
- ULONG  size;
-
-  rc = DosQueryResourceSize(hinstance, RT_RCDATA, id, &size);
-  if(rc) {
-    dprintf(("DosQueryResourceSize returned %d, %X id = %d\n", rc, hinstance, id));
-    return(0);
-  }
-  return(size);
-}
-
-ULONG OSLibGetResource(HMODULE hinstance, int id, char *destbuf, int bufLength)
-{
- APIRET rc;
- char  *resdata;
- ULONG  size;
-
-   rc = DosQueryResourceSize(hinstance, RT_RCDATA, id, &size);
-   if(rc) {
-    dprintf(("OSLibGetResource: Can't get resource size of %d!!!\n", id));
-    return(FALSE);
-   }
-   rc = DosGetResource(hinstance, RT_RCDATA, id, (PPVOID)&resdata);
-   if(rc) {
-    dprintf(("OSLibGetResource: Can't find resource %d!!!\n", id));
-    return(FALSE);
-   }
-   dprintf(("OSLibGetResoure: bufLength %d, size %d, id %d", bufLength, size, id));
-   size = min(size, bufLength);
-   memcpy(destbuf, resdata, size);
-   DosFreeResource(resdata);
-
-   return(TRUE);
-}
-
-void  OSLibWait(ULONG msec)
+void OSLibWait(ULONG msec)
 {
    DosSleep(msec);
 }
