@@ -1,4 +1,4 @@
-/* $Id: winicon.cpp,v 1.26 2001-07-06 13:47:00 sandervl Exp $ */
+/* $Id: winicon.cpp,v 1.27 2001-07-08 07:15:10 sandervl Exp $ */
 /*
  * Win32 Icon Code for OS/2
  *
@@ -612,7 +612,7 @@ HGLOBAL CURSORICON_Load( HINSTANCE hInstance, LPCWSTR name,
             }
 
             if (loadflags & LR_SHARED )
-                CURSORICON_AddSharedIcon( -1, hIcon, -1, hObj );
+                CURSORICON_AddSharedIcon( -1, hCursor, -1, hIcon );
 
             GlobalUnlock( hObj );
 
@@ -1189,11 +1189,7 @@ WORD WIN32API CURSORICON_Destroy( HGLOBAL handle, UINT flags )
     /* Try shared cursor/icon first */
     if ( !(flags & CID_NONSHARED) )
     {
-#ifdef __WIN32OS2__
-        INT count = CURSORICON_DelSharedIcon( hIcon );
-#else
         INT count = CURSORICON_DelSharedIcon( handle );
-#endif
 
         if ( count != -1 )
             return (flags & CID_WIN32)? TRUE : (count == 0);

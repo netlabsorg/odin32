@@ -1,4 +1,4 @@
-/* $Id: win32wdesktop.cpp,v 1.17 2001-06-09 14:50:22 sandervl Exp $ */
+/* $Id: win32wdesktop.cpp,v 1.18 2001-07-08 07:15:09 sandervl Exp $ */
 /*
  * Win32 Desktop Window for OS/2
  *
@@ -127,7 +127,7 @@ BOOL DESKTOP_Register()
     wndClass.lpfnWndProc   = (WNDPROC)DesktopWndProc;
     wndClass.cbClsExtra    = 0;
     wndClass.cbWndExtra    = 0;
-    wndClass.hCursor       = (HCURSOR)IDC_ARROWA;
+    wndClass.hCursor       = LoadCursorA(0, IDC_ARROWA);
     wndClass.hbrBackground = 0;
     wndClass.lpszClassName = DESKTOP_CLASS_NAMEA;
 
