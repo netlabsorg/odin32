@@ -1,4 +1,4 @@
-; $Id: kernel32dbg.def,v 1.34 2004-01-11 11:57:52 sandervl Exp $
+; $Id: kernel32dbg.def,v 1.35 2004-01-11 11:59:03 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -1092,10 +1092,6 @@ EXPORTS
 ;;   leave__6VMutexFPUl                                             @1205 NONAME
    __ct__6VMutexFv                                                @1206 NONAME
    __dt__6VMutexFv                                                @1207 NONAME
-
-;Get version resource
-   GetVersionStruct     = GetVersionStruct                        @1221 NONAME
-   GetVersionSize       = GetVersionSize                          @1222 NONAME
 
 ;version functions
    CheckVersionFromHMOD = CheckVersionFromHMOD                    @1223 NONAME
