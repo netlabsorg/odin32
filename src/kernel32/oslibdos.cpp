@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.33 2000-06-28 21:05:56 phaller Exp $ */
+/* $Id: oslibdos.cpp,v 1.34 2000-07-06 21:18:44 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -658,6 +658,7 @@ DWORD OSLibDosSearchPath(DWORD cmd, char *path, char *name, char *full_name,
                 return 0;
         }
         strncpy(full_name, name, length_fullname);
+	full_name[length_fullname-1] = 0;
         return strlen(full_name);
   }
 
