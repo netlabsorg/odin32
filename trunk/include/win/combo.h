@@ -1,4 +1,4 @@
-/* $Id: combo.h,v 1.2 1999-07-24 12:37:53 sandervl Exp $ */
+/* $Id: combo.h,v 1.3 1999-07-24 17:55:08 sandervl Exp $ */
 
 /*
  * Combo box definitions
@@ -10,6 +10,7 @@
 #define LISTBOXCLASSNAME  "LISTBOX"
 #define COMBOLBOXCLASSNAME "COMBOLBOX"
 #define COMBOBOXCLASSNAME "COMBOBOX"
+#define EDITCLASSNAME "EDIT"
 
 #define ID_CB_LISTBOX           1000
 #define ID_CB_EDIT              1001
@@ -71,6 +72,9 @@ BOOL COMBOLBOX_Unregister();
 
 BOOL COMBOBOX_Register();
 BOOL COMBOBOX_Unregister();
+
+BOOL EDIT_Register();
+BOOL EDIT_Unregister();
 
 #endif /* __WINE_COMBO_H */
 
