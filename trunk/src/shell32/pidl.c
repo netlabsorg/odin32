@@ -42,18 +42,8 @@ DECLARE_DEBUG_CHANNEL(shell);
 #endif
 
 
-/****************************************************************************
- * local prototypes
- ****************************************************************************/
-
-LPITEMIDLIST _Optlink ODIN_ILGetNext(LPITEMIDLIST pidl);
-LPITEMIDLIST _Optlink ODIN_ILClone  (LPCITEMIDLIST pidl);
-DWORD        _Optlink ODIN_ILGetSize(LPITEMIDLIST pidl);
-
-void         _Optlink ODIN_SHFree   (LPVOID x);
-LPVOID       _Optlink ODIN_SHAlloc  (DWORD len);
-
-
+#define ODIN_ILGETNEXT(pidl) \
+  (pidl ? ( pidl->mkid.cb ? (LPITEMIDLIST) (((LPBYTE)pidl)+pidl->mkid.cb) : NULL) : NULL)
 
 #if defined( __WIN32OS2__) && defined(DEBUG)
 void pdump (LPCITEMIDLIST pidl)
@@ -96,7 +86,7 @@ void pdump (LPCITEMIDLIST pidl)
 	      MESSAGE ("PIDL: -- pidl=%p size=%u type=%lx attr=0x%08lx name=%s (%s,%s)\n",
 	               pidltemp, pidltemp->mkid.cb,type,dwAttrib,szName,debugstr_a(szLongName), debugstr_a(szShortName));
 
-	      pidltemp = ODIN_ILGetNext(pidltemp);
+	      pidltemp = ODIN_ILGETNEXT(pidltemp);
 
 	    } while (pidltemp->mkid.cb);
 	  }
@@ -164,7 +154,7 @@ BOOL pcheck (LPCITEMIDLIST pidl)
 		ret = FALSE;
 	      }
 	    }
-	    pidltemp = ODIN_ILGetNext(pidltemp);
+	    pidltemp = ODIN_ILGETNEXT(pidltemp);
 	  } while (pidltemp->mkid.cb);
 	}
 	__SET_DEBUGGING(__DBCL_TRACE, __wine_dbch_pidl, bIsPidlDebug);
@@ -197,7 +187,7 @@ ODINFUNCTION1(LPITEMIDLIST, ILFindLastID,
 	while (pidl->mkid.cb)
 	{
 	  pidlLast = pidl;
-	  pidl = ODIN_ILGetNext(pidl);
+	  pidl = ODIN_ILGETNEXT(pidl);
 	}
 	return pidlLast;		
 }
@@ -232,8 +222,8 @@ ODINFUNCTION1(LPITEMIDLIST, ILClone,
   if (!pidl)
     return NULL;
     
-  len = ODIN_ILGetSize(pidl);
-  newpidl = (LPITEMIDLIST)ODIN_SHAlloc(len);
+  len = ILGetSize(pidl);
+  newpidl = (LPITEMIDLIST)SHAlloc(len);
   if (newpidl)
     memcpy(newpidl,pidl,len);
 
@@ -259,13 +249,13 @@ ODINFUNCTION1(LPITEMIDLIST, ILCloneFirst,
 	if (pidl)
 	{
 	  len = pidl->mkid.cb;	
-	  pidlNew = (LPITEMIDLIST) ODIN_SHAlloc (len+2);
+	  pidlNew = (LPITEMIDLIST) SHAlloc (len+2);
 	  if (pidlNew)
 	  {
 	    memcpy(pidlNew,pidl,len+2);		/* 2 -> mind a desktop pidl */
 
 	    if (len)
-	      ODIN_ILGetNext(pidlNew)->mkid.cb = 0x00;
+	      ODIN_ILGETNEXT(pidlNew)->mkid.cb = 0x00;
 	  }
 	}
 	TRACE("-- newpidl=%p\n",pidlNew);
@@ -290,26 +280,26 @@ ODINFUNCTION2(HRESULT, ILLoadFromStream,
 	TRACE_(shell)("%p %p\n", pStream ,  ppPidl);
 
 	if (*ppPidl)
-	{ ODIN_SHFree(*ppPidl);
+	{ SHFree(*ppPidl);
 	  *ppPidl = NULL;
 	}
 	
 	IStream_AddRef (pStream);
 
 	if (SUCCEEDED(IStream_Read(pStream, (LPVOID)&wLen, 2, &dwBytesRead)))
-	{ *ppPidl = ODIN_SHAlloc (wLen);
+	{ *ppPidl = SHAlloc (wLen);
 	  if (SUCCEEDED(IStream_Read(pStream, *ppPidl , wLen, &dwBytesRead)))
 	  { ret = S_OK;
 	  }
 	  else
-	  { ODIN_SHFree(*ppPidl);
+	  { SHFree(*ppPidl);
 	    *ppPidl = NULL;
 	  }
 	}
 	
 	/* we are not yet fully compatible */
 	if (!pcheck(*ppPidl))
-	{ ODIN_SHFree(*ppPidl);
+	{ SHFree(*ppPidl);
 	  *ppPidl = NULL;
 	}
 	
@@ -341,7 +331,7 @@ ODINFUNCTION2(HRESULT, ILSaveToStream,
         while (pidl->mkid.cb)
         {
           wLen += sizeof(WORD) + pidl->mkid.cb;
-          pidl = ODIN_ILGetNext(pidl);
+          pidl = ODIN_ILGETNEXT(pidl);
         }
 
 	if (SUCCEEDED(IStream_Write(pStream, (LPVOID)&wLen, 2, NULL)))
@@ -447,7 +437,7 @@ ODINFUNCTION1(LPITEMIDLIST, ILGlobalClone,
 	if (!pidl)
 	  return NULL;
     
-	len = ODIN_ILGetSize(pidl);
+	len = ILGetSize(pidl);
 	newpidl = (LPITEMIDLIST)pCOMCTL32_Alloc(len);
 	if (newpidl)
 	  memcpy(newpidl,pidl,len);
@@ -496,8 +486,8 @@ ODINFUNCTION2(BOOL, ILIsEqual,
             if (_ILSimpleCompareText(pidl1, pidl2) != 0)
 	      return FALSE;
 
-	    pidl1 = ODIN_ILGetNext(pidl1);
-	    pidl2 = ODIN_ILGetNext(pidl2);
+	    pidl1 = ODIN_ILGETNEXT(pidl1);
+	    pidl2 = ODIN_ILGETNEXT(pidl2);
 	}
   
         if (!pidl1->mkid.cb && !pidl2->mkid.cb)
@@ -536,14 +526,14 @@ ODINFUNCTION3(BOOL, ILIsParent,
           if ( _ILSimpleCompareText(pParent, pChild) != 0)
             return FALSE;
 
-	  pParent = ODIN_ILGetNext(pParent);
-	  pChild = ODIN_ILGetNext(pChild);
+	  pParent = ODIN_ILGETNEXT(pParent);
+	  pChild = ODIN_ILGETNEXT(pChild);
 	}	
 	
 	if ( pParent->mkid.cb || ! pChild->mkid.cb)	/* child shorter or has equal length to parent */
 	  return FALSE;
 	
-	if ( ODIN_ILGetNext(pChild)->mkid.cb && bImmediate)	/* not immediate descent */
+	if ( ODIN_ILGETNEXT(pChild)->mkid.cb && bImmediate)	/* not immediate descent */
 	  return FALSE;
 	
 	return TRUE;
@@ -597,8 +587,8 @@ ODINFUNCTION2(LPITEMIDLIST, ILFindChild,
             if ( _ILSimpleCompareText( pidltemp1, pidltemp2 ) )
 	      break;
 
-	    pidltemp1 = ODIN_ILGetNext(pidltemp1);
-	    pidltemp2 = ODIN_ILGetNext(pidltemp2);
+	    pidltemp1 = ODIN_ILGETNEXT(pidltemp1);
+	    pidltemp2 = ODIN_ILGETNEXT(pidltemp2);
 	    ret = pidltemp2;	
 	  }
 
@@ -634,19 +624,19 @@ ODINFUNCTION2(LPITEMIDLIST, ILCombine,
 
 	if(!pidl1)
 	{
-	  pidlNew = ODIN_ILClone(pidl2);
+	  pidlNew = ILClone(pidl2);
 	  return pidlNew;
 	}
 
 	if(!pidl2)
 	{
-	  pidlNew = ODIN_ILClone(pidl1);
+	  pidlNew = ILClone(pidl1);
 	  return pidlNew;
 	}
 
-	len1  = ODIN_ILGetSize(pidl1)-2;
-	len2  = ODIN_ILGetSize(pidl2);
-	pidlNew  = ODIN_SHAlloc(len1+len2);
+	len1  = ILGetSize(pidl1)-2;
+	len2  = ILGetSize(pidl2);
+	pidlNew  = SHAlloc(len1+len2);
 
 	if (pidlNew)
 	{
@@ -728,7 +718,7 @@ ODINFUNCTION1(DWORD, ILGetSize,
 }
 
 /*************************************************************************
- * ODIN_ILGetNext [SHELL32.153]
+ * ODIN_ILGETNEXT [SHELL32.153]
  *  gets the next simple pidl of a complex pidl
  *
  * observed return values:
@@ -740,6 +730,9 @@ ODINFUNCTION1(DWORD, ILGetSize,
 ODINFUNCTION1(LPITEMIDLIST, ILGetNext,
               LPITEMIDLIST, pidl)
 {
+#ifdef __WIN32OS2__
+  return ODIN_ILGETNEXT(pidl);
+#else
   WORD len;
 
   if(pidl)
@@ -749,6 +742,7 @@ ODINFUNCTION1(LPITEMIDLIST, ILGetNext,
       return (LPITEMIDLIST) (((LPBYTE)pidl)+len);
   }
   return NULL;
+#endif
 }
 /*************************************************************************
  * ILAppend [SHELL32.154]
@@ -773,9 +767,9 @@ ODINFUNCTION3(LPITEMIDLIST, ILAppend,
 	
 	if (_ILIsDesktop(pidl))
 	{
-	   idlRet = ODIN_ILClone(item);
+	   idlRet = ILClone(item);
 	   if (pidl)
-	     ODIN_SHFree (pidl);
+	     SHFree (pidl);
 	   return idlRet;
 	}
 
@@ -788,7 +782,7 @@ ODINFUNCTION3(LPITEMIDLIST, ILAppend,
 	  idlRet=ILCombine(item,pidl);
 	}
 
-	ODIN_SHFree(pidl);
+	SHFree(pidl);
 	return idlRet;
 }
 /*************************************************************************
@@ -804,7 +798,7 @@ ODINFUNCTION1(DWORD, ILFree,
 {
   if(!pidl) 
     return FALSE;
-  ODIN_SHFree(pidl);
+  SHFree(pidl);
   return TRUE;
 }
 /*************************************************************************
@@ -1180,13 +1174,13 @@ ODINFUNCTION4(HRESULT, SHBindToParent,
 	{
 	  /* we are on desktop level */
 	  if (ppidlLast) 
-	    *ppidlLast = ODIN_ILClone(pidl);
+	    *ppidlLast = ILClone(pidl);
 	  hr = SHGetDesktopFolder((IShellFolder**)ppv);
 	}
 	else
 	{
-	  pidlChild =  ODIN_ILClone(ILFindLastID(pidl));
-	  pidlParent = ODIN_ILClone(pidl);
+	  pidlChild =  ILClone(ILFindLastID(pidl));
+	  pidlParent = ILClone(pidl);
 	  ILRemoveLastID(pidlParent);
 
 	  hr = SHGetDesktopFolder(&psf);
@@ -1199,7 +1193,7 @@ ODINFUNCTION4(HRESULT, SHBindToParent,
 	  else
 	    ILFree (pidlChild);
 
-	  ODIN_SHFree (pidlParent);
+	  SHFree (pidlParent);
 	  if (psf) IShellFolder_Release(psf);
 	}
 
@@ -1409,7 +1403,7 @@ LPITEMIDLIST _ILCreate(PIDLTYPE type, LPCVOID pIn, UINT uInSize)
 	    return NULL;
 	}
 
-	if(!(pidlOut = ODIN_SHAlloc(uSize + 2))) return NULL;
+	if(!(pidlOut = SHAlloc(uSize + 2))) return NULL;
 	ZeroMemory(pidlOut, uSize + 2);
 	pidlOut->mkid.cb = uSize;
 
@@ -1445,7 +1439,7 @@ LPITEMIDLIST _ILCreate(PIDLTYPE type, LPCVOID pIn, UINT uInSize)
 	    break;
 	}
 	
-	pidlTemp = ODIN_ILGetNext(pidlOut);
+	pidlTemp = ODIN_ILGETNEXT(pidlOut);
 	if (pidlTemp)
 	  pidlTemp->mkid.cb = 0x00;
 
@@ -1465,7 +1459,7 @@ DWORD _ILGetDrive(LPCITEMIDLIST pidl,LPSTR pOut, UINT uSize)
 {	TRACE("(%p,%p,%u)\n",pidl,pOut,uSize);
 
 	if(_ILIsMyComputer(pidl))
-	  pidl = ODIN_ILGetNext(pidl);
+	  pidl = ODIN_ILGETNEXT(pidl);
 
 	if (pidl && _ILIsDrive(pidl))
 	  return _ILSimpleGetText(pidl, pOut, uSize);
@@ -2021,8 +2015,8 @@ void _ILFreeaPidl(LPITEMIDLIST * apidl, UINT cidl)
 
 	if(apidl)
 	{
-	  for(i = 0; i < cidl; i++) ODIN_SHFree(apidl[i]);
-	  ODIN_SHFree(apidl);
+	  for(i = 0; i < cidl; i++) SHFree(apidl[i]);
+	  SHFree(apidl);
 	}
 }
 
@@ -2034,11 +2028,11 @@ void _ILFreeaPidl(LPITEMIDLIST * apidl, UINT cidl)
 LPITEMIDLIST *  _ILCopyaPidl(LPITEMIDLIST * apidlsrc, UINT cidl)
 {
 	int i;
-	LPITEMIDLIST * apidldest = (LPITEMIDLIST*)ODIN_SHAlloc(cidl * sizeof(LPITEMIDLIST));
+	LPITEMIDLIST * apidldest = (LPITEMIDLIST*)SHAlloc(cidl * sizeof(LPITEMIDLIST));
 	if(!apidlsrc) return NULL;
 
 	for(i = 0; i < cidl; i++)
-	  apidldest[i] = ODIN_ILClone(apidlsrc[i]);
+	  apidldest[i] = ILClone(apidlsrc[i]);
 
 	return apidldest;
 }
@@ -2051,15 +2045,15 @@ LPITEMIDLIST *  _ILCopyaPidl(LPITEMIDLIST * apidlsrc, UINT cidl)
 LPITEMIDLIST * _ILCopyCidaToaPidl(LPITEMIDLIST* pidl, LPCIDA cida)
 {
 	int i;
-	LPITEMIDLIST * dst = (LPITEMIDLIST*)ODIN_SHAlloc(cida->cidl * sizeof(LPITEMIDLIST));
+	LPITEMIDLIST * dst = (LPITEMIDLIST*)SHAlloc(cida->cidl * sizeof(LPITEMIDLIST));
 
 	if(!dst) return NULL;
 
 	if (pidl)
-	  *pidl = ODIN_ILClone((LPITEMIDLIST)(&((LPBYTE)cida)[cida->aoffset[0]]));
+	  *pidl = ILClone((LPITEMIDLIST)(&((LPBYTE)cida)[cida->aoffset[0]]));
 
 	for(i = 0; i < cida->cidl; i++)
-	  dst[i] = ODIN_ILClone((LPITEMIDLIST)(&((LPBYTE)cida)[cida->aoffset[i + 1]]));
+	  dst[i] = ILClone((LPITEMIDLIST)(&((LPBYTE)cida)[cida->aoffset[i + 1]]));
 
 	return dst;
 }
