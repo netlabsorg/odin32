@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.2 1999-09-19 18:33:31 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.3 1999-09-21 08:24:04 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -557,6 +557,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     case WM_NEXTMENU:
 
     case WM_TIMER:
+	win32wnd->MsgTimer((ULONG)mp1);
         goto RunDefWndProc;
 
     case WM_SETWINDOWPARAMS:

@@ -1,4 +1,4 @@
-/* $Id: oslibres.cpp,v 1.1 1999-09-15 23:18:54 sandervl Exp $ */
+/* $Id: oslibres.cpp,v 1.2 1999-09-21 08:24:04 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -56,30 +56,60 @@ HANDLE OSLibWinCreateIcon(PVOID iconbitmap)
  HANDLE      hIcon;
 
     if(iconbitmap == NULL) {
-	dprintf(("OSLibWinCreateIcon iconbitmap == NULL!!"));
-	return 0;
+        dprintf(("OSLibWinCreateIcon iconbitmap == NULL!!"));
+        return 0;
     }
     if(bafh->usType == BFT_BITMAPARRAY && bafh->cbSize == sizeof(BITMAPARRAYFILEHEADER2)) {
-    	bfhBW    = &bafh->bfh2;
-    	bfhColor = (BITMAPFILEHEADER2 *)((char *)&bafh->bfh2 + sizeof(RGB2)*2 + sizeof(BITMAPFILEHEADER2));
+        // search best icon for the current screen,
+        // TODO: maybe compare icon size with screen size.
+        // Some bugs with black/white Icons ?
+        BITMAPARRAYFILEHEADER2 *next, *found;
+        LONG bitcountScreen, bitcountIcon=-1, cxIcon=-1, cyIcon=-1;
+
+        HPS hps = WinGetPS(HWND_DESKTOP);
+        HDC hdc = GpiQueryDevice(hps);
+        DevQueryCaps(hdc, CAPS_COLOR_BITCOUNT, 1, &bitcountScreen);
+        WinReleasePS(hps);
+
+        next = found = bafh;
+        while(TRUE)
+        {
+            bfhColor = (BITMAPFILEHEADER2 *)((char *)&next->bfh2 + sizeof(RGB2)*2 + sizeof(BITMAPFILEHEADER2));
+            if(bfhColor->bmp2.cBitCount <= bitcountScreen &&
+               bfhColor->bmp2.cBitCount > bitcountIcon ||
+               (bfhColor->bmp2.cBitCount == bitcountIcon &&
+               (cxIcon < bfhColor->bmp2.cx || cyIcon < bfhColor->bmp2.cy)))
+            {
+                found = next;
+                bitcountIcon = bfhColor->bmp2.cBitCount;
+                cxIcon = bfhColor->bmp2.cx;
+                cyIcon = bfhColor->bmp2.cy;
+            }
+            if(next->offNext != 0)
+                next = (BITMAPARRAYFILEHEADER2 *) ((char *)bafh + next->offNext);
+            else
+                break;
+        }
+        bfhBW    = &found->bfh2;
+        bfhColor = (BITMAPFILEHEADER2 *)((char *)bfhBW + sizeof(RGB2)*2 + sizeof(BITMAPFILEHEADER2));
     }
     else {//single icon
-    	bfhBW    = (BITMAPFILEHEADER2 *)iconbitmap;
-    	bfhColor = (BITMAPFILEHEADER2 *)((char *)bfhBW + sizeof(RGB2)*2 + sizeof(BITMAPFILEHEADER2));
-	bafh     = (BITMAPARRAYFILEHEADER2 *)bfhBW; //for calculation bitmap offset
+        bfhBW    = (BITMAPFILEHEADER2 *)iconbitmap;
+        bfhColor = (BITMAPFILEHEADER2 *)((char *)bfhBW + sizeof(RGB2)*2 + sizeof(BITMAPFILEHEADER2));
+        bafh     = (BITMAPARRAYFILEHEADER2 *)bfhBW; //for calculation bitmap offset
     }
     hps = WinGetScreenPS(HWND_DESKTOP);
 
-    hbmColor = GpiCreateBitmap(hps, &bfhColor->bmp2, CBM_INIT, 
-	     	               (char *)bafh + bfhColor->offBits,
+    hbmColor = GpiCreateBitmap(hps, &bfhColor->bmp2, CBM_INIT,
+                               (char *)bafh + bfhColor->offBits,
                                (BITMAPINFO2 *)&bfhColor->bmp2);
     if(hbmColor == GPI_ERROR) {
         dprintf(("OSLibWinCreateIcon: GpiCreateBitmap failed!"));
         WinReleasePS(hps);
         return 0;
     }
-    hbmMask = GpiCreateBitmap(hps, &bfhBW->bmp2, CBM_INIT, 
-	     	              (char *)bafh + bfhBW->offBits,
+    hbmMask = GpiCreateBitmap(hps, &bfhBW->bmp2, CBM_INIT,
+                              (char *)bafh + bfhBW->offBits,
                               (BITMAPINFO2 *)&bfhBW->bmp2);
     if(hbmMask == GPI_ERROR) {
         dprintf(("OSLibWinCreateIcon: GpiCreateBitmap hbmMask failed!"));
@@ -113,13 +143,13 @@ HANDLE OSLibWinCreatePointer(PVOID cursorbitmap)
  HANDLE      hPointer;
 
     if(cursorbitmap == NULL) {
-	dprintf(("OSLibWinCreatePointer cursorbitmap == NULL!!"));
-	return 0;
+    	dprintf(("OSLibWinCreatePointer cursorbitmap == NULL!!"));
+    	return 0;
     }
     //skip xor/and mask
     hps = WinGetScreenPS(HWND_DESKTOP);
-    hbmColor = GpiCreateBitmap(hps, &bfh->bmp2, CBM_INIT, 
-	     	               (char *)bfh + bfh->offBits,
+    hbmColor = GpiCreateBitmap(hps, &bfh->bmp2, CBM_INIT,
+                           (char *)bfh + bfh->offBits,
                                (BITMAPINFO2 *)&bfh->bmp2);
     if(hbmColor == GPI_ERROR) {
         dprintf(("OSLibWinCreatePointer: GpiCreateBitmap failed!"));
@@ -147,23 +177,23 @@ HANDLE OSLibWinQuerySysIcon(ULONG type)
  ULONG os2type = 0;
 
     switch(type) {
-    	case IDI_APPLICATION_W:
-		os2type = SPTR_PROGRAM;
-		break;
-	case IDI_HAND_W:
-		os2type = SPTR_ICONWARNING;
-		break;
-	case IDI_QUESTION_W:
-		os2type = SPTR_ICONQUESTION;
-		break;
-	case IDI_EXCLAMATION_W:
-		os2type = SPTR_ICONWARNING;
-		break;
-	case IDI_ASTERISK_W:
-		os2type = SPTR_ICONINFORMATION;
-		break;
-	default:
-		return 0;
+        case IDI_APPLICATION_W:
+        os2type = SPTR_PROGRAM;
+        break;
+    case IDI_HAND_W:
+        os2type = SPTR_ICONWARNING;
+        break;
+    case IDI_QUESTION_W:
+        os2type = SPTR_ICONQUESTION;
+        break;
+    case IDI_EXCLAMATION_W:
+        os2type = SPTR_ICONWARNING;
+        break;
+    case IDI_ASTERISK_W:
+        os2type = SPTR_ICONINFORMATION;
+        break;
+    default:
+        return 0;
     }
 
     return WinQuerySysPointer(HWND_DESKTOP, os2type, TRUE);
@@ -175,53 +205,53 @@ HANDLE OSLibWinQuerySysPointer(ULONG type)
  ULONG os2type = 0;
 
     switch(type) {
-    	case IDC_ARROW_W:
-		os2type = SPTR_ARROW;
-		break;
-    	case IDC_UPARROW_W:
-		os2type = SPTR_ARROW;
-		break;
-    	case IDC_IBEAM_W:
-		os2type = SPTR_TEXT;
-		break;
-    	case IDC_ICON_W:
-		os2type = SPTR_PROGRAM;
-		break;
-    	case IDC_NO_W:
-		os2type = SPTR_ILLEGAL;
-		break;
-    	case IDC_CROSS_W:
-		os2type = SPTR_MOVE;
-		break;
-    	case IDC_SIZE_W:
-		os2type = SPTR_MOVE;
-		break;
-    	case IDC_SIZEALL_W:
-		os2type = SPTR_MOVE;
-		break;
-    	case IDC_SIZENESW_W:
-		os2type = SPTR_SIZENESW;
-		break;
-    	case IDC_SIZENS_W:
-		os2type = SPTR_SIZENS;
-		break;
-    	case IDC_SIZENWSE_W:
-		os2type = SPTR_SIZENWSE;
-		break;
-    	case IDC_SIZEWE_W:
-		os2type = SPTR_SIZEWE;
-		break;
-    	case IDC_WAIT_W:
-		os2type = SPTR_WAIT;
-		break;
-    	case IDC_APPSTARTING_W:
-		os2type = SPTR_WAIT;
-		break;
-	case IDC_HELP_W: //TODO: Create a cursor for this one
-		os2type = SPTR_WAIT;
-		break;
-	default:
-		return 0;
+        case IDC_ARROW_W:
+        os2type = SPTR_ARROW;
+        break;
+        case IDC_UPARROW_W:
+        os2type = SPTR_ARROW;
+        break;
+        case IDC_IBEAM_W:
+        os2type = SPTR_TEXT;
+        break;
+        case IDC_ICON_W:
+        os2type = SPTR_PROGRAM;
+        break;
+        case IDC_NO_W:
+        os2type = SPTR_ILLEGAL;
+        break;
+        case IDC_CROSS_W:
+        os2type = SPTR_MOVE;
+        break;
+        case IDC_SIZE_W:
+        os2type = SPTR_MOVE;
+        break;
+        case IDC_SIZEALL_W:
+        os2type = SPTR_MOVE;
+        break;
+        case IDC_SIZENESW_W:
+        os2type = SPTR_SIZENESW;
+        break;
+        case IDC_SIZENS_W:
+        os2type = SPTR_SIZENS;
+        break;
+        case IDC_SIZENWSE_W:
+        os2type = SPTR_SIZENWSE;
+        break;
+        case IDC_SIZEWE_W:
+        os2type = SPTR_SIZEWE;
+        break;
+        case IDC_WAIT_W:
+        os2type = SPTR_WAIT;
+        break;
+        case IDC_APPSTARTING_W:
+        os2type = SPTR_WAIT;
+        break;
+    case IDC_HELP_W: //TODO: Create a cursor for this one
+        os2type = SPTR_WAIT;
+        break;
+    default:
+        return 0;
     }
     return WinQuerySysPointer(HWND_DESKTOP, os2type, TRUE);
 }

@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.18 1999-09-15 23:18:52 sandervl Exp $
+# $Id: Makefile,v 1.19 1999-09-21 08:24:04 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -126,7 +126,7 @@ dib.obj:        dib.cpp dib.h
 heapshared.obj: heapshared.cpp heapshared.h
 
 clean:
-        $(RM) *.obj *.lib *.dll *~ *.map *.pch
+        $(RM) *.obj *.lib *.dll *.map *.pch *.res
         $(RM) $(PDWIN32_BIN)\$(TARGET).dll
         $(RM) $(PDWIN32_LIB)\$(TARGET).lib
 #        $(RM) $(TARGET)exp.def
