@@ -1,4 +1,4 @@
-/* $Id: oslibmenu.h,v 1.1 1999-09-15 23:18:54 sandervl Exp $ */
+/* $Id: oslibmenu.h,v 1.2 1999-09-24 12:47:50 sandervl Exp $ */
 /*
  * Window Menu wrapper functions for OS/2
  *
@@ -16,7 +16,7 @@
 #include "win32type.h"
 #endif
 
-HWND  OSLibWinCreateMenu(HWND hwndParent, PVOID menutemplate);
+HWND  OSLibWinSetMenu(HWND hwndParent, HMENU hMenu);
 int   OSLibGetMenuItemCount(HWND hMenu);
  
 #endif //__OSLIBGDI_H__

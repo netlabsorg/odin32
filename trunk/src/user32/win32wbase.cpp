@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.8 1999-09-23 16:44:33 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.9 1999-09-24 12:47:50 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -113,7 +113,6 @@ void Win32BaseWindow::Init()
   windowClass      = 0;
 
   acceltableResource = NULL;
-  menuResource       = NULL;
   iconResource       = NULL;
 
   EraseBkgndFlag     = TRUE;
@@ -1519,28 +1518,13 @@ Win32BaseWindow *Win32BaseWindow::getTopParent()
 //******************************************************************************
 BOOL Win32BaseWindow::SetMenu(HMENU hMenu)
 {
- PVOID          menutemplate;
- Win32Resource *winres = (Win32Resource *)hMenu;
 
     dprintf(("SetMenu %x", hMenu));
-    if(HIWORD(winres) == 0) {
-        dprintf(("Win32BaseWindow:: Win32Resource *winres == 0"));
-        SetLastError(ERROR_INVALID_PARAMETER);
-        return FALSE;
-    }
-    menutemplate = winres->lockOS2Resource();
-    if(menutemplate == NULL)
-    {
-        dprintf(("Win32BaseWindow::SetMenu menutemplate == 0"));
-        return FALSE;
-    }
-    OS2HwndMenu = OSLibWinCreateMenu(OS2HwndFrame, menutemplate);
+    OS2HwndMenu = OSLibWinSetMenu(OS2HwndFrame, hMenu);
     if(OS2HwndMenu == 0) {
         dprintf(("Win32BaseWindow::SetMenu OS2HwndMenu == 0"));
         return FALSE;
     }
-    winres->setOS2Handle(OS2HwndMenu);
-    menuResource = winres;
     return TRUE;
 }
 //******************************************************************************
