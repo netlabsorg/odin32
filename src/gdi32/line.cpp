@@ -1,4 +1,4 @@
-/* $Id: line.cpp,v 1.16 2004-03-25 15:06:37 sandervl Exp $ */
+/* $Id: line.cpp,v 1.17 2004-04-30 13:27:18 sandervl Exp $ */
 /*
  * Line API's
  *
@@ -84,13 +84,17 @@ BOOL drawSingleLinePoint(HDC hdc,pDCData pHps,PPOINTLOS2 pt)
 
   if ((penInfo.lopnWidth.x > 1) || (penInfo.lopnWidth.y > 1))
   {
-    if ((penInfo.lopnStyle != PS_INSIDEFRAME) && (penInfo.lopnStyle != PS_SOLID))
-      return FALSE;
+    if (((penInfo.lopnStyle & PS_STYLE_MASK) != PS_INSIDEFRAME) && ((penInfo.lopnStyle & PS_STYLE_MASK) != PS_SOLID))
+    {
+        dprintf(("drawSingleLinePoint -> not PS_INSIDEFRAME nor PS_SOLID"));
+        return TRUE; //TODO: ??
+    }
 
     LONG color = GetBValue(penInfo.lopnColor) | (GetGValue(penInfo.lopnColor)<<8) | (GetRValue(penInfo.lopnColor)<<16);
 
     return drawLinePointCircle(pHps,penInfo.lopnWidth.x,penInfo.lopnWidth.y,color);
-  } else
+  } 
+  else
   {
     LONG color = GetBValue(penInfo.lopnColor) | (GetGValue(penInfo.lopnColor)<<8) | (GetRValue(penInfo.lopnColor)<<16);
 
@@ -158,7 +162,6 @@ BOOL WIN32API LineTo( HDC hdc, int nXEnd, int  nYEnd)
        nYEnd = pHps->yInvert - nYEnd;
     }
 #endif
-
     //CB: add metafile info
 
     OSLibGpiQueryCurrentPosition(pHps,&oldPoint);
