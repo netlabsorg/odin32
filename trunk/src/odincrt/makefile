@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.26 2002-04-07 14:35:24 sandervl Exp $
+# $Id: makefile,v 1.27 2002-04-29 13:19:31 bird Exp $
 
 #
 # Odin32 API
@@ -63,6 +63,9 @@ $(OBJDIR)\initterm.obj \
 !ifdef VAC3
 $(OBJDIR)\math64.obj \
 !endif
+!ifdef WITH_KLIB
+$(ODIN32_LIB)\kHeapDbgVACWrappersR3.lib \
+!endif
 $(OBJDIR)\malloc.obj \
 $(OBJDIR)\string.obj \
 $(OBJDIR)\file.obj \
@@ -81,6 +84,9 @@ $(%WATCOM)\lib386\os2\$(RTLLIB_O)
 # Libraries. One space before the '\'.
 #
 LIBS = \
+!ifdef WITH_KLIB
+$(ODIN32_LIB)\kLibR3.lib \
+!endif
 !ifdef WAT
 $(RTLLIB_O)
 !endif
