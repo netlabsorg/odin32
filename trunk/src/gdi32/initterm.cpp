@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.9 2000-02-05 01:59:24 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.10 2000-02-16 14:18:10 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -35,6 +35,8 @@
 #include <winconst.h>
 #include <odinlx.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
+#define DBG_LOCALLOG	DBG_initterm
+#include "dbglocal.h"
 
 extern "C" {
 void CDECL _ctordtorInit( void );
@@ -86,6 +88,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
       case 0 :
          _ctordtorInit();
 
+         ParseLogStatus();
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
          /*******************************************************************/

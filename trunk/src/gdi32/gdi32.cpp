@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.42 2000-02-14 17:28:45 cbratschi Exp $ */
+/* $Id: gdi32.cpp,v 1.43 2000-02-16 14:18:09 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -20,6 +20,9 @@
 #include <codepage.h>
 #include "oslibgpi.h"
 #include "oslibgdi.h"
+
+#define DBG_LOCALLOG	DBG_gdi32
+#include "dbglocal.h"
 
 //******************************************************************************
 //******************************************************************************

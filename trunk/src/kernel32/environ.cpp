@@ -1,4 +1,4 @@
-/* $Id: environ.cpp,v 1.1 1999-12-09 11:01:09 sandervl Exp $ */
+/* $Id: environ.cpp,v 1.2 2000-02-16 14:25:39 sandervl Exp $ */
 
 /*
  * Win32 environment file functions for OS/2
@@ -28,6 +28,9 @@
 #include <heapstring.h>
 
 #include <misc.h>
+
+#define DBG_LOCALLOG	DBG_environ
+#include "dbglocal.h"
 
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: hmdevio.cpp,v 1.1 1999-11-12 14:57:14 sandervl Exp $ */
+/* $Id: hmdevio.cpp,v 1.2 2000-02-16 14:23:59 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -26,6 +26,9 @@
 #include "cio.h"
 #include "map.h"
 #include "exceptutil.h"
+
+#define DBG_LOCALLOG	DBG_hmdevio
+#include "dbglocal.h"
 
 static fX86Init  = FALSE;
 //SvL: Used in iccio.asm (how can you put these in the .asm data segment without messing things up?)
@@ -296,7 +299,7 @@ BOOL WIN32API QueryPerformanceFrequency(LARGE_INTEGER *lpFrequency)
   }
   lpFrequency->u.LowPart  = freq;
   lpFrequency->u.HighPart = 0;
-  dprintf(("OS2QueryPerformanceFrequency returned 0x%X%X\n", lpFrequency->u.HighPart, lpFrequency->u.LowPart));
+  dprintf2(("QueryPerformanceFrequency returned 0x%X%X\n", lpFrequency->u.HighPart, lpFrequency->u.LowPart));
   return(TRUE);
 }
 //******************************************************************************

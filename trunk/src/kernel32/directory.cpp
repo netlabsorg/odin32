@@ -1,4 +1,4 @@
-/* $Id: directory.cpp,v 1.14 1999-12-28 22:08:56 sandervl Exp $ */
+/* $Id: directory.cpp,v 1.15 2000-02-16 14:25:38 sandervl Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
@@ -32,6 +32,9 @@
 #include <string.h>
 #include "oslibdos.h"
 #include "profile.h"
+
+#define DBG_LOCALLOG	DBG_directory
+#include "dbglocal.h"
 
 ODINDEBUGCHANNEL(KERNEL32-DIRECTORY)
 

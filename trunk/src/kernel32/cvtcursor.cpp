@@ -1,4 +1,4 @@
-/* $Id: cvtcursor.cpp,v 1.9 1999-12-29 12:39:09 sandervl Exp $ */
+/* $Id: cvtcursor.cpp,v 1.10 2000-02-16 14:25:37 sandervl Exp $ */
 
 /*
  * PE2LX cursor conversion code
@@ -26,6 +26,9 @@
 #include <winicon.h>
 #include <wincursor.h>
 #include <misc.h>
+
+#define DBG_LOCALLOG	DBG_cvtcursor
+#include "dbglocal.h"
 
 //******************************************************************************
 //******************************************************************************

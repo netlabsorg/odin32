@@ -1,4 +1,4 @@
-/* $Id: winres.cpp,v 1.25 1999-12-09 19:08:29 sandervl Exp $ */
+/* $Id: winres.cpp,v 1.26 2000-02-16 14:22:12 sandervl Exp $ */
 
 /*
  * Win32 resource class
@@ -31,6 +31,9 @@
 #include <windllpe2lx.h>
 #include "cvtresource.h"
 #include <vmutex.h>
+
+#define DBG_LOCALLOG	DBG_winres
+#include "dbglocal.h"
 
 VMutex resmutex;
 

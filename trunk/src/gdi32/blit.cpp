@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.4 2000-02-03 18:59:04 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.5 2000-02-16 14:18:09 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -17,6 +17,9 @@
 #include "misc.h"
 #include "dibsect.h"
 #include "rgbcvt.h"
+
+#define DBG_LOCALLOG	DBG_blit
+#include "dbglocal.h"
 
 static ULONG QueryPaletteSize(BITMAPINFOHEADER *pBHdr);
 static ULONG CalcBitmapSize(ULONG cBits, LONG cx, LONG cy);
@@ -133,11 +136,12 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
     if(info->bmiHeader.biCompression == BI_BITFIELDS) {
         DWORD *bitfields = (DWORD *)info->bmiColors;
 
-        dprintf(("BI_BITFIELDS compression %x %x %x", *bitfields, *(bitfields+1), *(bitfields+2)));
         ((BITMAPINFO *)info)->bmiHeader.biCompression = 0;
         compression = BI_BITFIELDS;
         if(*(bitfields+1) == 0x3E0) 
 	{//RGB 555?
+        	dprintf(("BI_BITFIELDS compression %x %x %x", *bitfields, *(bitfields+1), *(bitfields+2)));
+
                 newbits = (WORD *)malloc(imgsize);
 		if(CPUFeatures & CPUID_MMX) {
 			RGB555to565MMX(newbits, (WORD *)bits, imgsize/sizeof(WORD));

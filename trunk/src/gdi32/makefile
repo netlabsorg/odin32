@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.21 2000-02-09 23:46:56 bird Exp $
+# $Id: makefile,v 1.22 2000-02-16 14:18:10 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -22,7 +22,7 @@ TARGET = gdi32
 
 OBJS =  gdi32.obj opengl.obj callback.obj dibsect.obj initterm.obj resource.obj \
         oslibgdi.obj font.obj text.obj palette.obj line.obj oslibgpi.obj region.obj \
-        metafile.obj dibitmap.obj blit.obj rgbcvt.obj
+        metafile.obj dibitmap.obj blit.obj rgbcvt.obj dbglocal.obj
 
 
 all: $(TARGET).dll $(TARGET).lib

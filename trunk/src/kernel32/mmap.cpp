@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.32 2000-02-05 14:09:31 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.33 2000-02-16 14:25:42 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -30,6 +30,9 @@
 #include "mmap.h"
 #include "oslibdos.h"
 #include <winimagepeldr.h>
+
+#define DBG_LOCALLOG	DBG_mmap
+#include "dbglocal.h"
 
 //Global DLL Data
 #pragma data_seg(_GLOBALDATA)

@@ -1,4 +1,4 @@
-/* $Id: winimgres.cpp,v 1.30 1999-12-19 19:54:31 sandervl Exp $ */
+/* $Id: winimgres.cpp,v 1.31 2000-02-16 14:22:12 sandervl Exp $ */
 
 /*
  * Win32 PE Image class (resource methods)
@@ -26,6 +26,9 @@
 #include <heapstring.h>
 #include "pefile.h"
 #include "oslibmisc.h"
+
+#define DBG_LOCALLOG	DBG_winimgres
+#include "dbglocal.h"
 
 //SvL: VPBuddy bugfix, seems to load bitmaps with type name 'DIB'
 #define BITMAP_TYPENAME2    "DIB"

@@ -1,4 +1,4 @@
-/* $Id: winimagebase.cpp,v 1.7 2000-02-15 00:14:27 sandervl Exp $ */
+/* $Id: winimagebase.cpp,v 1.8 2000-02-16 14:22:12 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -36,6 +36,9 @@
 #include "oslibdos.h"
 #include "initterm.h"
 #include <win\virtual.h>
+
+#define DBG_LOCALLOG	DBG_winimagebase
+#include "dbglocal.h"
 
 //******************************************************************************
 //******************************************************************************

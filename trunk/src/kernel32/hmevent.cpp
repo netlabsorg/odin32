@@ -1,4 +1,4 @@
-/* $Id: hmevent.cpp,v 1.2 1999-10-26 22:35:24 phaller Exp $ */
+/* $Id: hmevent.cpp,v 1.3 2000-02-16 14:23:59 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -30,6 +30,8 @@
 #include "HandleManager.H"
 #include "HMEvent.h"
 
+#define DBG_LOCALLOG	DBG_hmevent
+#include "dbglocal.h"
 
 /*****************************************************************************
  * Defines                                                                   *

@@ -1,4 +1,4 @@
-/* $Id: async.cpp,v 1.6 1999-06-19 10:54:39 sandervl Exp $ */
+/* $Id: async.cpp,v 1.7 2000-02-16 14:25:30 sandervl Exp $ */
 
 /*
  * Win32 Asynchronous I/O Subsystem for OS/2
@@ -48,6 +48,9 @@
 
 #include "conwin.h"          // Windows Header for console only
 #include "handlemanager.h"
+
+#define DBG_LOCALLOG	DBG_async
+#include "dbglocal.h"
 
 
 /*****************************************************************************

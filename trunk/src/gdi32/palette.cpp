@@ -1,4 +1,4 @@
-/* $Id: palette.cpp,v 1.2 2000-02-01 12:53:31 sandervl Exp $ */
+/* $Id: palette.cpp,v 1.3 2000-02-16 14:18:12 sandervl Exp $ */
 
 /*
  * GDI32 palette apis
@@ -16,6 +16,9 @@
 #include <misc.h>
 #include <string.h>
 #include "dibsect.h"
+
+#define DBG_LOCALLOG	DBG_palette
+#include "dbglocal.h"
 
 static UINT SystemPaletteUse = SYSPAL_STATIC;  /* currently not considered */
 

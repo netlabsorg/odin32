@@ -1,4 +1,4 @@
-/* $Id: region.cpp,v 1.1 2000-02-01 12:53:31 sandervl Exp $ */
+/* $Id: region.cpp,v 1.2 2000-02-16 14:18:12 sandervl Exp $ */
 
 /*
  * GDI32 region code
@@ -14,6 +14,9 @@
 #include <stdarg.h>
 #include <string.h>
 #include "misc.h"
+
+#define DBG_LOCALLOG	DBG_region
+#include "dbglocal.h"
 
 //******************************************************************************
 //******************************************************************************

@@ -19,6 +19,9 @@
 #include <winos2def.h>
 #include "unicode.h"
 
+#define DBG_LOCALLOG	DBG_lang
+#include "dbglocal.h"
+
 ODINDEBUGCHANNEL(KERNEL32-LANG)
 
 

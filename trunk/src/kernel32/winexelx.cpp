@@ -1,4 +1,4 @@
-/* $Id: winexelx.cpp,v 1.4 2000-01-06 20:07:10 sandervl Exp $ */
+/* $Id: winexelx.cpp,v 1.5 2000-02-16 14:22:11 sandervl Exp $ */
 
 /*
  * Win32 LX Exe class (compiled in OS/2 using Odin32 api)
@@ -30,6 +30,9 @@
 #include "exceptions.h"
 #include "exceptutil.h"
 #include "cio.h"
+
+#define DBG_LOCALLOG	DBG_winexelx
+#include "dbglocal.h"
 
 //******************************************************************************
 //Create LX Exe object and call entrypoint

@@ -1,4 +1,4 @@
-/* $Id: cvtbitmap.cpp,v 1.2 1999-09-04 12:41:45 sandervl Exp $ */
+/* $Id: cvtbitmap.cpp,v 1.3 2000-02-16 14:25:36 sandervl Exp $ */
 
 /*
  * PE2LX bitmap conversion code
@@ -27,6 +27,9 @@
 #include <winicon.h>
 #include <misc.h>
 #include "cvtresource.h"
+
+#define DBG_LOCALLOG	DBG_cvtbitmap
+#include "dbglocal.h"
 
 #define __StackToFlat(a) a
 #define ltassert(a)

@@ -1,4 +1,4 @@
-/* $Id: cvtaccel.cpp,v 1.2 1999-10-08 09:52:34 sandervl Exp $ */
+/* $Id: cvtaccel.cpp,v 1.3 2000-02-16 14:25:36 sandervl Exp $ */
 
 /*
  * PE2LX accelerator resource support code
@@ -26,6 +26,9 @@
 #include <winaccel.h>
 #include <misc.h>
 #include "console.h"
+
+#define DBG_LOCALLOG	DBG_cvtaccel
+#include "dbglocal.h"
 
 //******************************************************************************
 //******************************************************************************

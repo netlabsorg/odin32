@@ -1,4 +1,4 @@
-; $Id: exceptutil.asm,v 1.4 1999-12-19 17:49:38 sandervl Exp $
+; $Id: exceptutil.asm,v 1.5 2000-02-16 14:25:40 sandervl Exp $
 
 ;/*
 ; * Project Odin Software License can be found in LICENSE.TXT
@@ -131,23 +131,6 @@ _SetExceptionChain proc near
         mov fs:[0], eax
         ret
 _SetExceptionChain endp
-
-                PUBLIC DisableFPUExceptions
-DisableFPUExceptions proc near
-        push  eax
-        push  67Fh
-        fldcw word ptr [esp]
-        pop   eax
-        pop   eax
-        ret
-DisableFPUExceptions endp
-
-        PUBLIC GetDllEntryPoint
-
-GetDllEntryPoint proc near
-        mov   eax, [ebp + 4]    ; return address in win32 dll
-        ret
-GetDllEntryPoint endp
 
         PUBLIC getEAX
         PUBLIC getEBX

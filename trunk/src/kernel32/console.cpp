@@ -1,4 +1,4 @@
-/* $Id: console.cpp,v 1.17 1999-10-27 19:47:39 phaller Exp $ */
+/* $Id: console.cpp,v 1.18 2000-02-16 14:25:34 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -82,6 +82,9 @@
 
 #include "conprop.h"
 #include "unicode.h"
+
+#define DBG_LOCALLOG	DBG_console
+#include "dbglocal.h"
 
 
 /***********************************

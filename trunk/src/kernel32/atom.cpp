@@ -1,4 +1,4 @@
-/* $Id: atom.cpp,v 1.6 1999-11-05 09:16:57 sandervl Exp $ */
+/* $Id: atom.cpp,v 1.7 2000-02-16 14:25:30 sandervl Exp $ */
 
 /*
  * Win32 ATOM api functions
@@ -11,6 +11,9 @@
  */
 #include <os2win.h>
 #include "unicode.h"
+
+#define DBG_LOCALLOG	DBG_atom
+#include "dbglocal.h"
 
 //******************************************************************************
 //******************************************************************************

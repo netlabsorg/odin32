@@ -1,4 +1,4 @@
-/* $Id: winexepeldr.cpp,v 1.6 1999-12-14 19:14:28 sandervl Exp $ */
+/* $Id: winexepeldr.cpp,v 1.7 2000-02-16 14:22:11 sandervl Exp $ */
 
 /*
  * Win32 PE loader Exe class
@@ -34,6 +34,9 @@
 
 #include "cio.h"
 #include "oslibmisc.h"
+
+#define DBG_LOCALLOG	DBG_winexepeldr
+#include "dbglocal.h"
 
 extern char szErrorTitle[];
 extern char szErrorModule[];

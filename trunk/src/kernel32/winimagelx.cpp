@@ -1,4 +1,4 @@
-/* $Id: winimagelx.cpp,v 1.5 1999-11-29 00:04:06 bird Exp $ */
+/* $Id: winimagelx.cpp,v 1.6 2000-02-16 14:22:12 sandervl Exp $ */
 
 /*
  * Win32 LX Image base class
@@ -36,6 +36,9 @@
 #include "oslibmisc.h"
 #include "initterm.h"
 #include <win\virtual.h>
+
+#define DBG_LOCALLOG	DBG_winimagelx
+#include "dbglocal.h"
 
 //******************************************************************************
 //******************************************************************************

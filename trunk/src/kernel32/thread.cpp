@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.22 2000-01-05 19:39:56 sandervl Exp $ */
+/* $Id: thread.cpp,v 1.23 2000-02-16 14:23:12 sandervl Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -30,6 +30,9 @@
 #include <winexebase.h>
 #include "exceptutil.h"
 #include "oslibmisc.h"
+
+#define DBG_LOCALLOG	DBG_thread
+#include "dbglocal.h"
 
 ODINDEBUGCHANNEL(KERNEL32-THREAD)
 

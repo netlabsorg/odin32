@@ -1,4 +1,4 @@
-/* $Id: cvticon.cpp,v 1.7 1999-12-29 12:39:09 sandervl Exp $ */
+/* $Id: cvticon.cpp,v 1.8 2000-02-16 14:25:37 sandervl Exp $ */
 
 /*
  * PE2LX icons
@@ -24,6 +24,9 @@
 #include <win32type.h>
 #include <winicon.h>
 #include <misc.h>
+
+#define DBG_LOCALLOG	DBG_cvticon
+#include "dbglocal.h"
 
 //******************************************************************************
 //******************************************************************************

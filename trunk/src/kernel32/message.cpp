@@ -1,4 +1,4 @@
-/* $Id: message.cpp,v 1.9 1999-12-19 20:17:17 sandervl Exp $ */
+/* $Id: message.cpp,v 1.10 2000-02-16 14:25:42 sandervl Exp $ */
 
 /*
  * Win32 message API functions for OS/2
@@ -24,6 +24,9 @@
 #include "unicode.h"
 #include "heap.h"
 #include "heapstring.h"
+
+#define DBG_LOCALLOG	DBG_message
+#include "dbglocal.h"
 
 typedef VOID (* WIN32API WVSPRINTFAPROC)(LPSTR,LPCSTR,va_list);
 WVSPRINTFAPROC wvsprintfAProc = NULL;

@@ -1,4 +1,4 @@
-/* $Id: font.cpp,v 1.8 1999-12-05 14:58:07 phaller Exp $ */
+/* $Id: font.cpp,v 1.9 2000-02-16 14:18:09 sandervl Exp $ */
 
 /*
  * GDI32 font apis
@@ -31,6 +31,8 @@
 #include <heapstring.h>
 #include <win\options.h>
 
+#define DBG_LOCALLOG	DBG_font
+#include "dbglocal.h"
 
 ODINDEBUGCHANNEL(GDI32-FONT)
 

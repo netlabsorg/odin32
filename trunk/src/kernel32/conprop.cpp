@@ -1,4 +1,4 @@
-/* $Id: conprop.cpp,v 1.9 1999-10-27 12:38:45 phaller Exp $ */
+/* $Id: conprop.cpp,v 1.10 2000-02-16 14:25:32 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -47,6 +47,9 @@
 #include "console.h"
 #include "console2.h"
 #include "conprop.h"
+
+#define DBG_LOCALLOG	DBG_conprop
+#include "dbglocal.h"
 
 
 /*****************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: winfakepeldr.cpp,v 1.3 1999-11-26 00:05:19 sandervl Exp $ */
+/* $Id: winfakepeldr.cpp,v 1.4 2000-02-16 14:22:12 sandervl Exp $ */
 
 /*
  * Win32 PE loader fake image class (RSRC_LOAD)
@@ -27,6 +27,9 @@
 #include <misc.h>
 #include <win32type.h>
 #include <winfakepeldr.h>
+
+#define DBG_LOCALLOG	DBG_winfakepeldr
+#include "dbglocal.h"
 
 //******************************************************************************
 //******************************************************************************

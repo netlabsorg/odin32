@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.27 2000-01-26 23:19:06 sandervl Exp $ */
+/* $Id: virtual.cpp,v 1.28 2000-02-16 14:22:46 sandervl Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -27,6 +27,8 @@
 #include "mmap.h"
 #include "oslibdos.h"
 
+#define DBG_LOCALLOG	DBG_virtual
+#include "dbglocal.h"
 
 ODINDEBUGCHANNEL(KERNEL32-VIRTUAL)
 

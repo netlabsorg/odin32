@@ -1,4 +1,4 @@
-/* $Id: hmmutex.cpp,v 1.2 1999-10-26 22:35:25 phaller Exp $ */
+/* $Id: hmmutex.cpp,v 1.3 2000-02-16 14:24:00 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -30,6 +30,8 @@
 #include "HandleManager.H"
 #include "HMMutex.h"
 
+#define DBG_LOCALLOG	DBG_hmmutex
+#include "dbglocal.h"
 
 /*****************************************************************************
  * Defines                                                                   *

@@ -1,4 +1,4 @@
-/* $Id: line.cpp,v 1.5 2000-02-12 18:08:57 cbratschi Exp $ */
+/* $Id: line.cpp,v 1.6 2000-02-16 14:18:10 sandervl Exp $ */
 /*
  * Line API's
  *
@@ -13,6 +13,9 @@
 #include "misc.h"
 #include "callback.h"
 #include "oslibgpi.h"
+
+#define DBG_LOCALLOG	DBG_line
+#include "dbglocal.h"
 
 #define ROUND_FLOAT(x) ((INT)((x < 0) ? x-0.5:x+0.5))
 

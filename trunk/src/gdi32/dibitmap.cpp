@@ -1,4 +1,4 @@
-/* $Id: dibitmap.cpp,v 1.3 2000-02-10 00:36:10 sandervl Exp $ */
+/* $Id: dibitmap.cpp,v 1.4 2000-02-16 14:18:09 sandervl Exp $ */
 
 /*
  * GDI32 dib & bitmap code
@@ -16,6 +16,9 @@
 #include "misc.h"
 #include "dibsect.h"
 
+#define DBG_LOCALLOG	DBG_dibitmap
+#include "dbglocal.h"
+
 //******************************************************************************
 //******************************************************************************
 HBITMAP WIN32API CreateDIBitmap(HDC hdc, const BITMAPINFOHEADER *lpbmih, 
@@ -30,7 +33,8 @@ HBITMAP WIN32API CreateDIBitmap(HDC hdc, const BITMAPINFOHEADER *lpbmih,
     iHeight = lpbmih->biHeight;
     if(lpbmih->biHeight < 0)
     {
-      ((BITMAPINFOHEADER *)lpbmih)->biHeight = -lpbmih->biHeight;
+	dprintf(("GDI32: CreateDIBitmap negative height! (%d,%d)", lpbmih->biWidth, lpbmih->biHeight));
+      	((BITMAPINFOHEADER *)lpbmih)->biHeight = -lpbmih->biHeight;
     }
 
     rc = O32_CreateDIBitmap(hdc, lpbmih, fdwInit, lpbInit, lpbmi, fuUsage);

@@ -1,4 +1,4 @@
-/* $Id: heapstring.cpp,v 1.25 2000-01-20 21:40:26 sandervl Exp $ */
+/* $Id: heapstring.cpp,v 1.26 2000-02-16 14:23:58 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -27,6 +27,9 @@
 #include <heapstring.h>
 #include "misc.h"
 #include "codepage.h"
+
+#define DBG_LOCALLOG	DBG_heapstring
+#include "dbglocal.h"
 
 /*****************************************************************************
  * Defines                                                                   *

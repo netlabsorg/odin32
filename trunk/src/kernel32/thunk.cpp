@@ -1,4 +1,4 @@
-/* $Id: thunk.cpp,v 1.3 2000-02-07 22:36:16 sandervl Exp $ */
+/* $Id: thunk.cpp,v 1.4 2000-02-16 14:23:12 sandervl Exp $ */
 
 /*
  * Win32 thunking API functions (mostly stubs)
@@ -20,6 +20,9 @@
 #include <string.h>
 #include <builtin.h>
 #include "thunk.h"
+
+#define DBG_LOCALLOG	DBG_thunk
+#include "dbglocal.h"
 
 //******************************************************************************
 //******************************************************************************

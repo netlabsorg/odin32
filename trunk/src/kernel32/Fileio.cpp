@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.23 2000-01-06 20:07:09 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.24 2000-02-16 14:25:29 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -27,6 +27,9 @@
 #include <heapstring.h>
 #include "handlemanager.h"
 #include "oslibdos.h"
+
+#define DBG_LOCALLOG	DBG_fileio
+#include "dbglocal.h"
 
 ODINDEBUGCHANNEL(KERNEL32-FILEIO)
 

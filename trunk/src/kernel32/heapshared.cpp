@@ -1,4 +1,4 @@
-/* $Id: heapshared.cpp,v 1.3 2000-01-18 20:46:40 sandervl Exp $ */
+/* $Id: heapshared.cpp,v 1.4 2000-02-16 14:23:58 sandervl Exp $ */
 /*
  * Shared heap functions for OS/2
  *
@@ -19,6 +19,9 @@
 #include <os2wrap.h>
 #include <misc.h>
 #include <heapshared.h>
+
+#define DBG_LOCALLOG	DBG_heapshared
+#include "dbglocal.h"
 
 //Global DLL Data
 #pragma data_seg(_GLOBALDATA)
