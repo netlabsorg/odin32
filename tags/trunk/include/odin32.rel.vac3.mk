@@ -1,4 +1,4 @@
-# $Id: odin32.rel.vac3.mk,v 1.5 2001-10-01 01:23:14 bird Exp $
+# $Id: odin32.rel.vac3.mk,v 1.6 2001-10-19 01:36:23 bird Exp $
 
 #
 # Odin32 API
@@ -43,7 +43,7 @@ OS2RC  = rc
 #
 ASFLAGS          = -Mb -Sc -Sv:ALP
 IMPLIBFLAGS      = /nologo
-ILIBFLAGS        = /quiet /nologo
+ILIBFLAGS        = /quiet /nologo /noignorecase
 RCFLAGS          = -s -I. -I$(CPPMAIN)\include -D__WIN32OS2__
 !ifdef WRC_PREFIX_RESOURCE
 RCFLAGS          = $(RCFLAGS) -p $(TARGET)
