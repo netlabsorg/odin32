@@ -1,4 +1,4 @@
-/* $Id: winconst.h,v 1.10 1999-09-26 22:24:51 sandervl Exp $ */
+/* $Id: winconst.h,v 1.11 1999-10-17 19:30:51 cbratschi Exp $ */
 
 /*
  * Win32 constants
@@ -89,6 +89,13 @@
 #define WS_TABSTOP_W       0x00010000L
 #define WS_MINIMIZEBOX_W   0x00020000L
 #define WS_MAXIMIZEBOX_W   0x00010000L
+#define WS_TILED_W         WS_OVERLAPPED_W
+#define WS_ICONIC_W        WS_MINIMIZE_W
+#define WS_SIZEBOX_W       WS_THICKFRAME_W
+#define WS_OVERLAPPEDWINDOW_W (WS_OVERLAPPED_W | WS_CAPTION_W | WS_SYSMENU_W | WS_THICKFRAME_W| WS_MINIMIZEBOX_W | WS_MAXIMIZEBOX_W)
+#define WS_POPUPWINDOW_W (WS_POPUP_W | WS_BORDER_W | WS_SYSMENU_W)
+#define WS_CHILDWINDOW_W (WS_CHILD_W)
+#define WS_TILEDWINDOW_W (WS_OVERLAPPEDWINDOW_W)
 
 /* Window extended styles */
 #define WS_EX_DLGMODALFRAME_W    0x00000001L
