@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.6 1999-06-20 18:17:31 buerkle Exp $ */
+/* $Id: gdi32.cpp,v 1.7 1999-06-21 18:59:21 phaller Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -2420,7 +2420,9 @@ BOOL WIN32API GetTextExtentExPointA(/*KSO Thu 21.05.1998*/
       else break;
     }
     size->cx = extent;
-    *lpnFit = nFit;
+
+    if (lpnFit != NULL)  // check if result is desired
+      *lpnFit = nFit;
 
     dprintf(("GDI32: GetTextExtendExPointA(%08x '%.*s' %d) returning %d %d %d\n",
              hdc,count,str,maxExt,nFit, size->cx,size->cy));
