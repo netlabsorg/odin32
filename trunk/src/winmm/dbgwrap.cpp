@@ -155,7 +155,7 @@ DEBUGWRAP4(timeBeginPeriod)
 DEBUGWRAP4(timeEndPeriod)
 DEBUGWRAP8(timeGetDevCaps)
 DEBUGWRAP8(timeGetSystemTime)
-DEBUGWRAP0(timeGetTime)
+DEBUGWRAP_LVL2_0(timeGetTime)
 DEBUGWRAP4(timeKillEvent)
 DEBUGWRAP20(timeSetEvent)
 

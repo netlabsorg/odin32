@@ -1,4 +1,4 @@
-/* $Id: initwinmm.cpp,v 1.10 2002-07-12 08:59:24 sandervl Exp $
+/* $Id: initwinmm.cpp,v 1.11 2003-01-14 19:38:37 sandervl Exp $
  *
  * WINMM DLL entry point
  *
@@ -182,6 +182,7 @@ BOOL WINAPI LibMainWinmm(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
         return TRUE;
 
    case DLL_PROCESS_DETACH:
+        WaveInOut::shutdown();
         MULTIMEDIA_DeleteIData();
         auxOS2Close();    /* Close aux device if necessary */
         IRTMidiShutdown;  /* Shutdown RT Midi subsystem, if running. */
