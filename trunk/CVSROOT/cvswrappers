@@ -24,6 +24,7 @@
 
 # binaries (should normally not be added to the archive )
 *.exe -k 'b'
+*.dll -k 'b'
 *.sys -k 'b'
 *.obj -k 'b'
 *.res -l 'b'
