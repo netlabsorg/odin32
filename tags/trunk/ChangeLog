@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.1038 2000-07-19 18:58:46 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1039 2000-07-19 23:46:51 sandervl Exp $ */
 
  2000-07-19: Sander van Leeuwen <sandervl@xs4all.nl>
     - INCLUDE\makefiles
@@ -9,6 +9,10 @@
     - GDI32:    Wrapper rewrite for region apis
                 Changed export for user32 (uses stdcall calling convention now
                 to avoid problem when using debug user32 with retail gdi32)
+    - DOC\Readme.txt
+                Updated installation instructions
+    - TOOLS\INSTALL\odin.cmd
+                Updated script for new doc directory
 
  2000-07-18: Yuri Dario <mc6530@mclink.it>
     - INCLUDE\win: 
