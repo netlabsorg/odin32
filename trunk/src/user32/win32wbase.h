@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.44 1999-11-21 17:07:52 cbratschi Exp $ */
+/* $Id: win32wbase.h,v 1.45 1999-11-24 19:32:23 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -32,23 +32,28 @@ class Win32BaseWindow;
 #define WIN32PM_MAGIC           0x12345678
 #define CheckMagicDword(a)      (a==WIN32PM_MAGIC)
 
-#define WIN32APP_USERMSGBASE            0x1000
-
 typedef struct {
         USHORT           cb;
         Win32BaseWindow *win32wnd;
         ULONG            win32CreateStruct;      //or dialog create dword
 } CUSTOMWNDDATA;
 
+#define WIN32APP_USERMSGBASE      0x1000
+#define WIN32APP_POSTMSG          0x6666
+
 typedef struct
 {
         ULONG           Msg;
         ULONG           wParam;
         ULONG           lParam;
+	ULONG           fUnicode;
 } POSTMSG_PACKET;
 
 #define WM_WIN32_POSTMESSAGEA   0x4000
 #define WM_WIN32_POSTMESSAGEW   0x4001
+
+#define BROADCAST_SEND		0
+#define BROADCAST_POST		1
 
 class Win32BaseWindow : public GenericObject, public ChildWindow
 {
@@ -203,6 +208,12 @@ Win32BaseWindow *getOwner()                   { return owner; };
        LRESULT  SendMessageW(ULONG msg, WPARAM wParam, LPARAM lParam);
        BOOL     PostMessageA(ULONG msg, WPARAM wParam, LPARAM lParam);
        BOOL     PostMessageW(ULONG msg, WPARAM wParam, LPARAM lParam);
+       void     PostMessage(POSTMSG_PACKET *packet);
+static BOOL     PostThreadMessageA(ULONG threadid, UINT msg, WPARAM wParam, LPARAM lParam);
+static BOOL     PostThreadMessageW(ULONG threadid, UINT msg, WPARAM wParam, LPARAM lParam);
+static LRESULT  BroadcastMessageA(int type, UINT msg, WPARAM wParam, LPARAM lParam);
+static LRESULT  BroadcastMessageW(int type, UINT msg, WPARAM wParam, LPARAM lParam);
+
        LRESULT  DefWindowProcA(UINT msg, WPARAM wParam, LPARAM lParam);
        LRESULT  DefWindowProcW(UINT msg, WPARAM wParam, LPARAM lParam);
 

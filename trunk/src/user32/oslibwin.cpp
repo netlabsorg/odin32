@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.46 1999-11-21 17:07:50 cbratschi Exp $ */
+/* $Id: oslibwin.cpp,v 1.47 1999-11-24 19:32:21 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -258,6 +258,11 @@ ULONG OSLibSendMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam)
 }
 //******************************************************************************
 //******************************************************************************
+ULONG OSLibWinBroadcastMsg(ULONG msg, ULONG wParam, ULONG lParam, BOOL fSend)
+{
+  return WinBroadcastMsg(HWND_DESKTOP, msg, (MPARAM)wParam, (MPARAM)lParam, 
+                         (fSend) ? BMSG_SEND : BMSG_POST);
+}
 //******************************************************************************
 //******************************************************************************
 BOOL OSLibWinAlarm(HWND hwndDeskTop,ULONG flStyle)

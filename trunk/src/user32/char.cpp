@@ -1,4 +1,4 @@
-/* $Id: char.cpp,v 1.8 1999-10-15 11:28:28 phaller Exp $ */
+/* $Id: char.cpp,v 1.9 1999-11-24 19:32:21 sandervl Exp $ */
 
 /*
  * Win32 character API functions for OS/2
@@ -28,14 +28,14 @@ ODINDEBUGCHANNEL(USER32-CHAR)
 //******************************************************************************
 LPSTR WIN32API CharLowerA( LPSTR arg1)
 {
-    dprintf(("USER32:  OS2CharLowerA\n"));
+    dprintf2(("USER32:  OS2CharLowerA\n"));
     return O32_CharLower(arg1);
 }
 //******************************************************************************
 //******************************************************************************
 DWORD WIN32API CharLowerBuffA( LPSTR arg1, DWORD  arg2)
 {
-    dprintf(("USER32:  OS2CharLowerBuffA\n"));
+    dprintf2(("USER32:  OS2CharLowerBuffA\n"));
     return O32_CharLowerBuff(arg1, arg2);
 }
 //******************************************************************************
@@ -44,7 +44,7 @@ DWORD WIN32API CharLowerBuffW(LPWSTR x,DWORD buflen)
 {
   DWORD done=0;
 
-  dprintf(("USER32: CharLowerBuffW(%08xh,%08xh)\n",
+  dprintf2(("USER32: CharLowerBuffW(%08xh,%08xh)\n",
            x,
            buflen));
 
@@ -64,7 +64,7 @@ DWORD WIN32API CharLowerBuffW(LPWSTR x,DWORD buflen)
 //******************************************************************************
 LPWSTR WIN32API CharLowerW( LPWSTR x)
 {
-  dprintf(("USER32: CharLowerW(%08xh)\n",
+  dprintf2(("USER32: CharLowerW(%08xh)\n",
            x));
 
   if (HIWORD(x))
@@ -84,7 +84,7 @@ LPWSTR WIN32API CharLowerW( LPWSTR x)
 //******************************************************************************
 LPSTR WIN32API CharNextA( LPCSTR arg1)
 {
-    dprintf(("USER32: OS2CharNextA(%08xh)\n",
+    dprintf2(("USER32: OS2CharNextA(%08xh)\n",
              arg1));
 
     return O32_CharNext(arg1);
@@ -93,7 +93,7 @@ LPSTR WIN32API CharNextA( LPCSTR arg1)
 //******************************************************************************
 LPWSTR WIN32API CharNextW(LPCWSTR x)
 {
-  dprintf(("USER32: OS2CharNextW(%08xh)\n",
+  dprintf2(("USER32: OS2CharNextW(%08xh)\n",
            x));
 
   if (*x)
@@ -105,7 +105,7 @@ LPWSTR WIN32API CharNextW(LPCWSTR x)
 //******************************************************************************
 LPSTR WIN32API CharPrevA( LPCSTR arg1, LPCSTR  arg2)
 {
-    dprintf(("USER32:  OS2CharPrevA\n"));
+    dprintf2(("USER32:  OS2CharPrevA\n"));
     return O32_CharPrev(arg1, arg2);
 }
 //******************************************************************************
@@ -113,7 +113,7 @@ LPSTR WIN32API CharPrevA( LPCSTR arg1, LPCSTR  arg2)
 LPWSTR WIN32API CharPrevW(LPCWSTR start,
                           LPCWSTR x)
 {
-    dprintf(("USER32: OS2CharPrevW(%08xh,%08xh)\n",
+    dprintf2(("USER32: OS2CharPrevW(%08xh,%08xh)\n",
              start,
              x));
 
@@ -127,21 +127,21 @@ LPWSTR WIN32API CharPrevW(LPCWSTR start,
 //******************************************************************************
 BOOL WIN32API CharToOemA( LPCSTR arg1, LPSTR  arg2)
 {
-    dprintf(("USER32:  OS2CharToOemA\n"));
+    dprintf2(("USER32:  OS2CharToOemA\n"));
     return O32_CharToOem(arg1, arg2);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API CharToOemBuffA( LPCSTR arg1, LPSTR arg2, DWORD  arg3)
 {
-    dprintf(("USER32:  OS2CharToOemBuffA\n"));
+    dprintf2(("USER32:  OS2CharToOemBuffA\n"));
     return O32_CharToOemBuff(arg1, arg2, arg3);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API CharToOemBuffW( LPCWSTR arg1, LPSTR arg2, DWORD  arg3)
 {
-    dprintf(("USER32:  OS2CharToOemBuffW DOESN'T WORK\n"));
+    dprintf2(("USER32:  OS2CharToOemBuffW DOESN'T WORK\n"));
     // NOTE: This will not work as is (needs UNICODE support)
     return 0;
 //    return O32_CharToOemBuff(arg1, arg2, arg3);
@@ -150,7 +150,7 @@ BOOL WIN32API CharToOemBuffW( LPCWSTR arg1, LPSTR arg2, DWORD  arg3)
 //******************************************************************************
 BOOL WIN32API CharToOemW( LPCWSTR arg1, LPSTR  arg2)
 {
-    dprintf(("USER32:  OS2CharToOemW DOESN'T WORK\n"));
+    dprintf2(("USER32:  OS2CharToOemW DOESN'T WORK\n"));
     // NOTE: This will not work as is (needs UNICODE support)
     return 0;
 //    return O32_CharToOem(arg1, arg2);
@@ -162,19 +162,19 @@ LPSTR WIN32API CharUpperA( LPSTR arg1)
  LPSTR rc;
 
     if((int)arg1 >> 16 != 0) {
-       dprintf(("USER32:  OS2CharUpperA %s\n", arg1));
+       dprintf2(("USER32:  OS2CharUpperA %s\n", arg1));
     }
     else {
-   dprintf(("USER32:  OS2CharUpperA %X\n", arg1));
+   dprintf2(("USER32:  OS2CharUpperA %X\n", arg1));
     }
 
     rc = O32_CharUpper(arg1);
 
     if((int)rc >> 16 != 0) {
-       dprintf(("USER32:  OS2CharUpperA %s\n", rc));
+       dprintf2(("USER32:  OS2CharUpperA %s\n", rc));
     }
     else {
-    dprintf(("USER32:  OS2CharUpperA %X\n", rc));
+    dprintf2(("USER32:  OS2CharUpperA %X\n", rc));
     }
 
     return(rc);
@@ -183,7 +183,7 @@ LPSTR WIN32API CharUpperA( LPSTR arg1)
 //******************************************************************************
 DWORD WIN32API CharUpperBuffA( LPSTR arg1, DWORD  arg2)
 {
-    dprintf(("USER32:  OS2CharUpperBuffA\n"));
+    dprintf2(("USER32:  OS2CharUpperBuffA\n"));
     return O32_CharUpperBuff(arg1, arg2);
 }
 //******************************************************************************
@@ -192,7 +192,7 @@ DWORD WIN32API CharUpperBuffW(LPWSTR x, DWORD buflen)
 {
   DWORD done=0;
 
-  dprintf(("USER32: OS2CharUpperBuffW(%08xh,%08xh)\n",
+  dprintf2(("USER32: OS2CharUpperBuffW(%08xh,%08xh)\n",
            x,
            buflen));
 
@@ -268,7 +268,7 @@ LPWSTR WIN32API CharNextExW(WORD   CodePage,
                             LPCWSTR lpCurrentChar,
                             DWORD  dwFlags)
 {
-  dprintf(("USER32:CharNextExW(%u,%08xh,%08x) not implemented.\n",
+  dprintf2(("USER32:CharNextExW(%u,%08xh,%08x) not implemented.\n",
           CodePage,
           lpCurrentChar,
           dwFlags));
@@ -298,7 +298,7 @@ LPWSTR WIN32API CharPrevExW(WORD CodePage,
                             LPCWSTR lpCurrentChar,
                             DWORD  dwFlags)
 {
-  dprintf(("USER32:CharPrevExW(%u,%08xh,%08xh,%08x) not implemented.\n",
+  dprintf2(("USER32:CharPrevExW(%u,%08xh,%08xh,%08x) not implemented.\n",
           CodePage,
           lpStart,
           lpCurrentChar,
