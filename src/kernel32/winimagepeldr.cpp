@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.62 2000-10-16 19:15:16 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.63 2000-10-23 13:42:45 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -110,38 +110,30 @@ Win32PeLdrImage::Win32PeLdrImage(char *pszFileName, BOOL isExe) :
 {
  HFILE  dllfile;
 
-  strcpy(szFileName, pszFileName);
-  strupr(szFileName);
-  if(isExe) {
-    if(!strchr(szFileName, '.')) {
-        strcat(szFileName,".EXE");
-    }
-    dllfile = OSLibDosOpen(szFileName, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
-    if(dllfile == NULL) {
-        if(!strstr(szFileName, ".EXE")) {
+    strcpy(szFileName, pszFileName);
+    strupr(szFileName);
+    if(isExe) {
+        if(!strchr(szFileName, '.')) {
             strcat(szFileName,".EXE");
         }
         dllfile = OSLibDosOpen(szFileName, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
         if(dllfile == NULL) {
-            OSLibDosSearchPath(OSLIB_SEARCHENV, "PATH", szFileName, szFileName, sizeof(szFileName));
+            if(!strstr(szFileName, ".EXE")) {
+                strcat(szFileName,".EXE");
+            }
+            dllfile = OSLibDosOpen(szFileName, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
+            if(dllfile == NULL) {
+                OSLibDosSearchPath(OSLIB_SEARCHENV, "PATH", szFileName, szFileName, sizeof(szFileName));
+            }
         }
+        else    OSLibDosClose(dllfile);
     }
-    else    OSLibDosClose(dllfile);
-  }
-  else {
-    findDll(szFileName, szModule, sizeof(szModule));
-    strcpy(szFileName, szModule);
-  }
-  strcpy(szModule, OSLibStripPath(szFileName));
-  strupr(szModule);
-  char *dot = strstr(szModule, ".");
-  while(dot) {
-    char *newdot = strstr(dot+1, ".");
-    if(newdot == NULL)  break;
-    dot = newdot;
-  }
-  if(dot)
-    *dot = 0;
+    else {
+        findDll(szFileName, szModule, sizeof(szModule));
+        strcpy(szFileName, szModule);
+    }
+    strcpy(szModule, OSLibStripPath(szFileName));
+    strupr(szModule);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1324,46 +1316,46 @@ BOOL Win32PeLdrImage::AddForwarder(ULONG virtaddr, char *apiname, ULONG ordinal)
  DWORD         exportaddr;
  int           forwardord;
 
-  forwarddll = strdup(forward);
-  if(forwarddll == NULL) {
-    return FALSE;
-  }
-  forwardapi = strchr(forwarddll, '.');
-  if(forwardapi == NULL) {
-    goto fail;
-  }
-  *forwardapi++ = 0;
-  if(strlen(forwarddll) == 0 || strlen(forwardapi) == 0) {
-    goto fail;
-  }
-  WinDll = Win32DllBase::findModule(forwarddll);
-  if(WinDll == NULL) {
-    WinDll = loadDll(forwarddll);
-    if(WinDll == NULL) {
-        dprintf((LOG, "ERROR: couldn't find forwarder %s.%s", forwarddll, forwardapi));
+    forwarddll = strdup(forward);
+    if(forwarddll == NULL) {
+        return FALSE;
+    }
+    forwardapi = strchr(forwarddll, '.');
+    if(forwardapi == NULL) {
         goto fail;
     }
-  }
-  //check if name or ordinal forwarder
-  forwardord = 0;
-  if(*forwardapi >= '0' && *forwardapi <= '9') {
-    forwardord = atoi(forwardapi);
-  }
-  if(forwardord != 0 || (strlen(forwardapi) == 1 && *forwardapi == '0')) {
-    exportaddr = WinDll->getApi(forwardord);
-  }
-  else  exportaddr = WinDll->getApi(forwardapi);
+    *forwardapi++ = 0;
+    if(strlen(forwarddll) == 0 || strlen(forwardapi) == 0) {
+        goto fail;
+    }
+    WinDll = Win32DllBase::findModule(forwarddll);
+    if(WinDll == NULL) {
+        WinDll = loadDll(forwarddll);
+        if(WinDll == NULL) {
+            dprintf((LOG, "ERROR: couldn't find forwarder %s.%s", forwarddll, forwardapi));
+            goto fail;
+        }
+    }
+    //check if name or ordinal forwarder
+    forwardord = 0;
+    if(*forwardapi >= '0' && *forwardapi <= '9') {
+        forwardord = atoi(forwardapi);
+    }
+    if(forwardord != 0 || (strlen(forwardapi) == 1 && *forwardapi == '0')) {
+        exportaddr = WinDll->getApi(forwardord);
+    }
+    else  exportaddr = WinDll->getApi(forwardapi);
 
-  if(apiname) {
+    if(apiname) {
         dprintf((LOG, "address 0x%x %s @%d (0x%08x) forwarder %s.%s", virtaddr - oh.ImageBase, apiname, ordinal, virtaddr, forwarddll, forwardapi));
-    AddNameExport(exportaddr, apiname, ordinal, TRUE);
-  }
-  else {
+        AddNameExport(exportaddr, apiname, ordinal, TRUE);
+    }
+    else {
         dprintf((LOG, "address 0x%x @%d (0x%08x) forwarder %s.%s", virtaddr - oh.ImageBase, ordinal, virtaddr, forwarddll, forwardapi));
-        AddOrdExport(exportaddr, ordinal, TRUE);
-  }
-  free(forwarddll);
-  return TRUE;
+         AddOrdExport(exportaddr, ordinal, TRUE);
+    }
+    free(forwarddll);
+    return TRUE;
 
 fail:
   free(forwarddll);
@@ -1377,25 +1369,35 @@ Win32DllBase *Win32PeLdrImage::loadDll(char *pszCurModule)
  char modname[CCHMAXPATH];
 
     strcpy(modname, pszCurModule);
+
     //rename dll if necessary (i.e. OLE32 -> OLE32OS2)
     Win32DllBase::renameDll(modname);
+
+    char szModName2[CCHMAXPATH];
+    strcpy(szModName2, modname);
+    if (!Win32ImageBase::findDll(szModName2, modname, sizeof(modname)))
+    {
+            dprintf((LOG, "Module %s not found!", modname));
+            sprintf(szErrorModule, "%s", modname);
+            errorState = 2;
+            return NULL;
+    }
 
     if(isPEImage(modname) != ERROR_SUCCESS_W)
     {//LX image, so let OS/2 do all the work for us
         APIRET rc;
         char   szModuleFailure[CCHMAXPATH] = "";
         ULONG  hInstanceNewDll;
-                Win32LxDll *lxdll;
+        Win32LxDll *lxdll;
 
         char *dot = strchr(modname, '.');
-        if(dot) {
-            *dot = 0;
+        if(dot == NULL) {
+            strcat(modname, DLL_EXTENSION);
         }
-        strcat(modname, ".DLL");
         rc = DosLoadModule(szModuleFailure, sizeof(szModuleFailure), modname, (HMODULE *)&hInstanceNewDll);
         if(rc) {
-            dprintf((LOG, "DosLoadModule returned %X for %s\n", rc, szModuleFailure));
-            sprintf(szErrorModule, "%s.DLL", szModuleFailure);
+            dprintf((LOG, "DosLoadModule returned %X for %s", rc, szModuleFailure));
+            sprintf(szErrorModule, "%s", szModuleFailure);
             errorState = rc;
             return NULL;
         }
@@ -1412,7 +1414,7 @@ Win32DllBase *Win32PeLdrImage::loadDll(char *pszCurModule)
             errorState = ERROR_INTERNAL;
             return NULL;
         }
-                WinDll = (Win32DllBase*)lxdll;
+        WinDll = (Win32DllBase*)lxdll;
     }
     else {
          Win32PeLdrDll *pedll;
@@ -1422,15 +1424,15 @@ Win32DllBase *Win32PeLdrImage::loadDll(char *pszCurModule)
                 dprintf((LOG, "pedll: Error allocating memory" ));
                 WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szMemErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
                 errorState = ERROR_INTERNAL;
-            return NULL;
+                return NULL;
             }
             dprintf((LOG, "**********************************************************************" ));
             dprintf((LOG, "**********************     Loading Module        *********************" ));
             dprintf((LOG, "**********************************************************************" ));
             if(pedll->init(0) == FALSE) {
                 dprintf((LOG, "Internal WinDll error ", pedll->getError() ));
-            delete pedll;
-            return NULL;
+                delete pedll;
+                return NULL;
             }
 #ifdef DEBUG
             pedll->AddRef(getModuleName());
@@ -1439,16 +1441,16 @@ Win32DllBase *Win32PeLdrImage::loadDll(char *pszCurModule)
 #endif
             if(pedll->attachProcess() == FALSE) {
                 dprintf((LOG, "attachProcess failed!" ));
-            delete pedll;
+                delete pedll;
                 errorState = ERROR_INTERNAL;
-            return NULL;
+                return NULL;
             }
         WinDll = (Win32DllBase*)pedll;
     }
 
     dprintf((LOG, "**********************************************************************" ));
     dprintf((LOG, "**********************  Finished Loading Module %s ", modname ));
-        dprintf((LOG, "**********************************************************************" ));
+    dprintf((LOG, "**********************************************************************" ));
 
     return WinDll;
 }
@@ -1599,15 +1601,14 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
 
     if(WinDll == NULL)
     {  //not found, so load it
-    WinDll = loadDll(pszCurModule);
-    if(WinDll == NULL) {
-        return FALSE;
-    }
+        WinDll = loadDll(pszCurModule);
+        if(WinDll == NULL) {
+            return FALSE;
+        }
     }
     else {
-    WinDll->AddRef();
-
-    dprintf((LOG, "Already found ", pszCurModule));
+        WinDll->AddRef();
+        dprintf((LOG, "Already found ", pszCurModule));
     }
     //add the dll we just loaded to dependency list for this image
     addDependency(WinDll);

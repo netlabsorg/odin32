@@ -1,4 +1,4 @@
-/* $Id: conbuffervio.cpp,v 1.1 2000-10-20 11:46:45 sandervl Exp $ */
+/* $Id: conbuffervio.cpp,v 1.2 2000-10-23 13:42:40 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -99,7 +99,7 @@ BOOL HMDeviceConsoleVioBufferClass::WriteFile(PHMHANDLEDATA pHMHandleData,
 {
   PCONSOLEBUFFER pConsoleBuffer = (PCONSOLEBUFFER)pHMHandleData->lpHandlerData;
            ULONG ulCounter;                 /* counter for the byte transfer */
-           PSZ   pszBuffer = (PSZ)lpBuffer;
+           PSZ   pszBuffer;
            char  filler[4] = {' ', 0x07, ' ', 0x07};
   register UCHAR ucChar;
           APIRET rc;
@@ -124,6 +124,32 @@ BOOL HMDeviceConsoleVioBufferClass::WriteFile(PHMHANDLEDATA pHMHandleData,
   }
 
   dprintf(("Current cursor position (%d,%d)", pConsoleBuffer->coordCursorPosition.X, pConsoleBuffer->coordCursorPosition.Y));
+
+  if(nNumberOfBytesToWrite > 1024)
+  {
+    int  tmp = 0;
+    BOOL retcode;
+
+    while(nNumberOfBytesToWrite) {
+        *lpNumberOfBytesWritten = 0;
+        retcode = WriteFile(pHMHandleData, lpBuffer,
+                            min(nNumberOfBytesToWrite, 512), lpNumberOfBytesWritten,
+                            lpOverlapped);
+        if(retcode != TRUE)     break;
+
+        tmp                   += *lpNumberOfBytesWritten;
+        nNumberOfBytesToWrite -= *lpNumberOfBytesWritten;
+        lpBuffer               = (LPCVOID)((char *)lpBuffer + *lpNumberOfBytesWritten);
+    }
+    *lpNumberOfBytesWritten = tmp;
+    return retcode;
+  }
+  pszBuffer = (PSZ)alloca(nNumberOfBytesToWrite);
+  if(pszBuffer == NULL) {
+    DebugInt3();
+    return FALSE;
+  }
+  memcpy(pszBuffer, lpBuffer, nNumberOfBytesToWrite);
 
   ulCounter = 0;
   while(ulCounter < nNumberOfBytesToWrite)

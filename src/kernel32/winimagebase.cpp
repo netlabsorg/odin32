@@ -1,4 +1,4 @@
-/* $Id: winimagebase.cpp,v 1.29 2000-10-10 17:14:07 sandervl Exp $ */
+/* $Id: winimagebase.cpp,v 1.30 2000-10-23 13:42:44 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -63,10 +63,6 @@ Win32ImageBase::Win32ImageBase(HINSTANCE hInstance) :
 
     name = strrchr(szFileName, '\\')+1;
     strcpy(szModule, name);
-
-    char *dot = strrchr(szModule, '.');
-    if(dot)
-        *dot = 0;
   }
   else {
     szModule[0] = 0;
@@ -153,51 +149,54 @@ BOOL Win32ImageBase::findDll(const char *szFileName, char *szFullName,
  HFILE  dllfile = NULL;
  char  *imagepath;
 
-  strcpy(szFullName, szFileName);
-  strupr(szFullName);
-  if(!strchr(szFullName, (int)'.')) {
-        strcat(szFullName,".DLL");
-  }
+    strcpy(szFullName, szFileName);
+    strupr(szFullName);
+    if(!strchr(szFullName, (int)'.')) {
+        strcat(szFullName, DLL_EXTENSION);
+    }
 
-  //search order:
-  //1) exe dir
-  //2) current dir
-  //3) windows system dir (kernel32 path)
-  //4) windows dir
-  //5) path
-  if(WinExe) {
-    strcpy(modname, WinExe->getFullPath());
-    //remove file name from full path
-    imagepath = modname + strlen(modname) - 1;
-    while(*imagepath != '\\') imagepath--;
-    imagepath[1] = 0;
-    strcat(modname, szFullName);
-    dllfile = OSLibDosOpen(modname, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
-  }
-  if(dllfile == NULL) {
-    strcpy(modname, szFullName);
-    dllfile = OSLibDosOpen(szFullName, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
-    if(dllfile == NULL) {
-            strcpy(modname, InternalGetSystemDirectoryA());
-        strcat(modname, "\\");
-            strcat(modname, szFullName);
+    //search order:
+    //1) exe dir
+    //2) current dir
+    //3) windows system dir (kernel32 path)
+    //4) windows dir
+    //5) path
+    if(WinExe) {
+        strcpy(modname, WinExe->getFullPath());
+        //remove file name from full path
+        imagepath = modname + strlen(modname) - 1;
+        while(*imagepath != '\\')
+            imagepath--;
+        imagepath[1] = 0;
+        strcat(modname, szFullName);
         dllfile = OSLibDosOpen(modname, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
-        if(dllfile == NULL) {
-            strcpy(modname, InternalGetWindowsDirectoryA());
+    }
+    if(dllfile == NULL)
+    {
+        strcpy(modname, szFullName);
+        dllfile = OSLibDosOpen(szFullName, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
+        if(dllfile == NULL)
+        {
+            strcpy(modname, InternalGetSystemDirectoryA());
             strcat(modname, "\\");
-                strcat(modname, szFullName);
+            strcat(modname, szFullName);
             dllfile = OSLibDosOpen(modname, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
-            if(dllfile == NULL) {
-                if(OSLibDosSearchPath(OSLIB_SEARCHENV, "PATH", szFullName, modname, sizeof(modname)) == 0) {
-                    return FALSE;
+            if(dllfile == NULL)
+            {
+                strcpy(modname, InternalGetWindowsDirectoryA());
+                strcat(modname, "\\");
+                strcat(modname, szFullName);
+                dllfile = OSLibDosOpen(modname, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
+                if(dllfile == NULL) {
+                    if(OSLibDosSearchPath(OSLIB_SEARCHENV, "PATH", szFullName, modname, sizeof(modname)) == 0)
+                        return FALSE;
                 }
             }
         }
     }
-  }
-  strcpy(szFullName, modname);
-  if(dllfile) OSLibDosClose(dllfile);
-  return TRUE;
+    strcpy(szFullName, modname);
+    if(dllfile) OSLibDosClose(dllfile);
+    return TRUE;
 }
 
 //******************************************************************************
@@ -253,12 +252,12 @@ ULONG Win32ImageBase::isPEImage(char *szFileName, DWORD *Characteristics)
   }
   rc = DosRead(win32handle, pdoshdr, sizeof(IMAGE_DOS_HEADER), &ulRead);
   if(rc != NO_ERROR || ulRead != sizeof(IMAGE_DOS_HEADER)) {
-    free(pdoshdr);
+        free(pdoshdr);
         DosClose(win32handle);                /* Close the file */
         return ERROR_INVALID_EXE_SIGNATURE_W;
   }
   if(pdoshdr->e_magic != IMAGE_DOS_SIGNATURE) {
-    free(pdoshdr);
+        free(pdoshdr);
         DosClose(win32handle);                /* Close the file */
         return ERROR_INVALID_EXE_SIGNATURE_W;
   }
@@ -293,7 +292,7 @@ ULONG Win32ImageBase::isPEImage(char *szFileName, DWORD *Characteristics)
         goto failure;
   }
   if(Characteristics) {
-	*Characteristics = fh.Characteristics;
+        *Characteristics = fh.Characteristics;
   }
   DosClose(win32handle);
   return ERROR_SUCCESS_W;
@@ -345,7 +344,7 @@ Win32ImageBase * Win32ImageBase::findModule(HMODULE hModule)
  * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  * @remark      Just a clarification:
  *              A module name is the filename of a executable image without
- *              path and without extention.
+ *              path, but *with* extention.
  */
 BOOL Win32ImageBase::matchModName(const char *pszFilename) const
 {
@@ -364,16 +363,12 @@ BOOL Win32ImageBase::matchModName(const char *pszFilename) const
            && ch != ':'
            )
     {
-        if (ch == '.' && pszModNameEnd == NULL)
-            pszModNameEnd = pszModName;
         pszModName--;
     }
     pszModName++;
-   
+
     /** @sketch
      * Compare the names caseinsensitivly.
      */
-    if (pszModNameEnd)
-        return strnicmp(pszModName, szModule, pszModNameEnd - pszModName) == 0;
     return stricmp(pszModName, szModule) == 0;
 }
