@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.95 2002-02-06 16:33:39 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.96 2002-07-15 14:28:53 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -52,6 +52,7 @@
 #include "initterm.h"
 #include <win\virtual.h>
 #include "oslibdos.h"
+#include "oslibmem.h"
 #include "mmap.h"
 #include <wprocess.h>
 
@@ -158,7 +159,7 @@ Win32PeLdrImage::~Win32PeLdrImage()
     }
 
     if(realBaseAddress)
-        DosFreeMem((PVOID)realBaseAddress);
+        OSLibDosFreeMem((PVOID)realBaseAddress);
 
     if(nameexports)
         free(nameexports);
@@ -923,7 +924,7 @@ BOOL Win32PeLdrImage::allocSections(ULONG reservedMem)
     if(fh.Characteristics & IMAGE_FILE_RELOCS_STRIPPED && !(dwFlags & FLAG_PELDR_LOADASDATAFILE)) {
         return allocFixedMem(reservedMem);
     }
-    rc = DosAllocMem((PPVOID)&baseAddress, imageSize, PAG_READ | PAG_WRITE | flAllocMem);
+    rc = OSLibDosAllocMem((PPVOID)&baseAddress, imageSize, PAG_READ | PAG_WRITE);
     if(rc) {
         dprintf((LOG, "Win32PeLdrImage::allocSections, DosAllocMem returned %d", rc));
         errorState = rc;
@@ -1010,27 +1011,27 @@ BOOL Win32PeLdrImage::allocFixedMem(ULONG reservedMem)
         allocFlags = 0;
     }
     while(TRUE) {
-        rc = DosAllocMem((PPVOID)&address, FALLOC_SIZE, PAG_READ | allocFlags);
+        rc = OSLibDosAllocMem((PPVOID)&address, FALLOC_SIZE, PAG_READ | allocFlags);
         if(rc) break;
 
         dprintf((LOG, "DosAllocMem returned %x", address ));
         if(address + FALLOC_SIZE >= oh.ImageBase) {
             if(address > oh.ImageBase) {//we've passed it!
-                DosFreeMem((PVOID)address);
+                OSLibDosFreeMem((PVOID)address);
                 break;
             }
             //found the right address
-            DosFreeMem((PVOID)address);
+            OSLibDosFreeMem((PVOID)address);
 
             diff = oh.ImageBase - address;
             if(diff) {
-                rc = DosAllocMem((PPVOID)&address, diff, PAG_READ | allocFlags);
+                rc = OSLibDosAllocMem((PPVOID)&address, diff, PAG_READ | allocFlags);
                 if(rc) break;
             }
-            rc = DosAllocMem((PPVOID)&baseAddress, imageSize, PAG_READ | PAG_WRITE | allocFlags);
+            rc = OSLibDosAllocMem((PPVOID)&baseAddress, imageSize, PAG_READ | PAG_WRITE | allocFlags);
             if(rc) break;
 
-            if(diff) DosFreeMem((PVOID)address);
+            if(diff) OSLibDosFreeMem((PVOID)address);
 
             realBaseAddress = baseAddress;
             break;
@@ -1038,7 +1039,7 @@ BOOL Win32PeLdrImage::allocFixedMem(ULONG reservedMem)
         memallocs[alloccnt++] = address;
     }
     for(i=0;i<alloccnt;i++) {
-        DosFreeMem((PVOID)memallocs[i]);
+        OSLibDosFreeMem((PVOID)memallocs[i]);
     }
     free(memallocs);
 

@@ -1,4 +1,4 @@
-/* $Id: hmthread.cpp,v 1.13 2002-06-11 16:36:53 sandervl Exp $ */
+/* $Id: hmthread.cpp,v 1.14 2002-07-15 14:28:51 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -12,6 +12,11 @@
  *       WaitForMultipleObjects can still fail!
  *       WaitForSingle/MultipleObjects needs to be rewritten! (not using
  *       Open32)
+ *
+ ************************************************************************************
+ * NOTE: If we ever decide to allocate our own stack, then we MUST use VirtualAlloc!!!!
+ *       (alignment reasons)
+ ************************************************************************************
  *
  * Copyright 2000 Sander van Leeuwen (sandervl@xs4all.nl)
  *
@@ -76,6 +81,10 @@ HANDLE HMDeviceThreadClass::CreateThread(PHMHANDLEDATA          pHMHandleData,
     else
         cbStack = 1048576; // per default 1MB stack per thread
 
+    //************************************************************************************
+    //NOTE: If we ever decide to allocate our own stack, then we MUST use VirtualAlloc!!!!
+    //      (alignment reasons)
+    //************************************************************************************
     pHMHandleData->hHMHandle = O32_CreateThread(lpsa, cbStack, winthread->GetOS2Callback(),
                                                 (LPVOID)winthread, fdwCreate, lpIDThread);
 

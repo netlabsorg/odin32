@@ -1,4 +1,4 @@
-/* $Id: oslibmem.cpp,v 1.2 2002-07-13 16:30:40 sandervl Exp $ */
+/* $Id: oslibmem.cpp,v 1.3 2002-07-15 14:28:52 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -34,6 +34,7 @@
 #include <misc.h>
 #include "initterm.h"
 #include "oslibdos.h"
+#include "oslibmem.h"
 #include "dosqss.h"
 #include "win32k.h"
 
@@ -55,13 +56,13 @@ DWORD OSLibDosAliasMem(LPVOID pb, ULONG cb, LPVOID *ppbAlias, ULONG fl)
 
     rc = DosQueryMem(pb, &size, &attr);
     if(rc) {
-        dprintf(("OSLibDosAliasMem: DosQueryMem %x %x return %d", pb, size, rc));
+        dprintf(("!ERROR!: OSLibDosAliasMem: DosQueryMem %x %x return %d", pb, size, rc));
         return rc;
     }
     size = (size-1) & ~0xfff;
     size+= PAGE_SIZE;
     if(size != cb) {
-        dprintf(("ERROR: OSLibDosAliasMem: size != cb (%x!=%x)!!!!!!!!", size, cb));
+        dprintf(("!WARNING!: OSLibDosAliasMem: size != cb (%x!=%x)!!!!!!!!", size, cb));
         //ignore this and continue return 5;
         attr = fl; //just use original protection flags (NOT CORRECT)
     }
@@ -69,7 +70,7 @@ DWORD OSLibDosAliasMem(LPVOID pb, ULONG cb, LPVOID *ppbAlias, ULONG fl)
     if(attr != fl) {
         rc = DosSetMem(pb, size, fl);
         if(rc) {
-                dprintf(("OSLibDosAliasMem: DosSetMem %x %x return %d", pb, size, rc));
+                dprintf(("!ERROR!: OSLibDosAliasMem: DosSetMem %x %x return %d", pb, size, rc));
                 attr = fl;
                 //just continue for now
                 //return rc;
@@ -77,19 +78,20 @@ DWORD OSLibDosAliasMem(LPVOID pb, ULONG cb, LPVOID *ppbAlias, ULONG fl)
     }
     rc = DosAliasMem(pb, cb, ppbAlias, 2);
     if(rc) {
-        dprintf(("OSLibDosAliasMem: DosAliasMem %x %x returned %d", pb, cb, rc));
+        dprintf(("!ERROR!: OSLibDosAliasMem: DosAliasMem %x %x returned %d", pb, cb, rc));
         return rc;
     }
     if(attr != fl) {
         rc = DosSetMem(pb, size, attr);
         if(rc) {
-            dprintf(("OSLibDosAliasMem: DosSetMem (2) %x %x return %d", pb, size, rc));
+            dprintf(("!ERROR!: OSLibDosAliasMem: DosSetMem (2) %x %x return %d", pb, size, rc));
             return rc;
         }
     }
     return 0;
 }
 //******************************************************************************
+//Allocate memory aligned at 64kb boundary
 //******************************************************************************
 DWORD OSLibDosAllocMem(LPVOID *lplpMemAddr, DWORD cbSize, DWORD flFlags)
 {
@@ -113,40 +115,120 @@ DWORD OSLibDosAllocMem(LPVOID *lplpMemAddr, DWORD cbSize, DWORD flFlags)
 
     rc = DosAllocMem(&pvMemAddr, cbSize, flFlags | flAllocMem);
     if(rc) {
-        dprintf(("DosAllocMem failed with rc %d", rc));
+        dprintf(("!ERROR!: DosAllocMem failed with rc %d", rc));
         return rc;
     }
-    //TODO!!!!!!!!!!!!
-#if 0
     // already 64k aligned ?
-    if((DWORD) pvMemAddr & 0xFFFF) 
+    if((ULONG) pvMemAddr & 0xFFFF) 
     {
-        DWORD addr64kb;
+        ULONG addr64kb;
+
+        //free misaligned allocated memory
+        DosFreeMem(pvMemAddr);
 
         //Allocate 64kb more so we can round the address to a 64kb aligned value
-        rc = DosAllocMem((PPVOID)&addr64kb, cbSize + 64*1024,  PAG_READ | flAllocMem);
+        rc = DosAllocMem((PPVOID)&addr64kb, cbSize + 64*1024,  (flFlags & ~PAG_COMMIT) | flAllocMem);
         if(rc) {
-            dprintf(("DosAllocMem failed with rc %d", rc));
+            dprintf(("!ERROR!: DosAllocMem failed with rc %d", rc));
             return rc;
         }
+        dprintf(("Allocate aligned memory %x -> %x", addr64kb, (addr64kb + 0xFFFF) & ~0xFFFF));
+
         if(addr64kb & 0xFFFF) {
-            addr64kb = (addr64kb + 0xFFFF) & 0xFFFF;
+            addr64kb         = (addr64kb + 0xFFFF) & ~0xFFFF;
         }
         pvMemAddr = (PVOID)addr64kb;
 
         //and set the correct page flags for the request range
-        rc = DosSetMem(pvMemAddr, cbSize, flFlags | flAllocMem);
+        if((flFlags & ~PAG_COMMIT) != flFlags) {
+            rc = DosSetMem(pvMemAddr, cbSize, flFlags);
+            if(rc) {
+                dprintf(("!ERROR!: DosSetMem failed with rc %d", rc));
+                return rc;
+            }
+        }
     }
-#endif
+
     if(!rc)
         *lplpMemAddr = pvMemAddr;
 
     return rc;
 }
 //******************************************************************************
+//Locate the base page of a memory allocation (the page with the PAG_BASE attribute)
+//******************************************************************************
+PVOID OSLibDosFindMemBase(LPVOID lpMemAddr)
+{
+    ULONG  ulAttr, ulSize, ulAddr;
+    APIRET rc;
+    
+    rc = DosQueryMem(lpMemAddr, &ulSize, &ulAttr);
+    if(rc != NO_ERROR) {
+        dprintf(("!ERROR!: OSLibDosFindMemBase: DosQueryMem %x failed with rc %d", lpMemAddr, rc));
+        return lpMemAddr;
+    }
+    if(!(ulAttr & PAG_BASE)) {
+        //Not the base of the initial allocation (can happen due to alignment) or app
+        //passing address inside memory allocation range
+        ulAddr  = (DWORD)lpMemAddr & ~0xFFF;
+        ulAddr -= PAGE_SIZE;
+
+        while(ulAddr > 0)
+        {
+            rc = DosQueryMem((PVOID)ulAddr, &ulSize, &ulAttr);
+            if(rc) {
+                dprintf(("!ERROR!: OSLibDosFindMemBase: DosQueryMem %x failed with rc %d", lpMemAddr, rc));
+                DebugInt3();
+                return NULL;
+            }
+            if(ulAttr & PAG_BASE) {
+                //Memory below the 512 MB boundary is always aligned at 64kb and VirtualAlloc only
+                //returns high memory (if OS/2 version supports it)
+                //If it is above the 512 MB boundary, then we must make sure the right base address
+                //is returned. VirtualAlloc allocates extra memory to make sure it can return addresses
+                //aligned at 64kb. If extra pages are needed, then the allocation base is inside
+                //the filler region. In that case we must return the next 64kb address as base.
+                if(ulAddr > MEM_TILED_CEILING) {
+                    ulAddr = (ulAddr + 0xFFFF) & ~0xFFFF;
+                }
+                lpMemAddr = (PVOID)ulAddr;
+                break;
+            }
+            ulAddr -= PAGE_SIZE;
+        }
+    }
+    return lpMemAddr;
+}
+//******************************************************************************
 //******************************************************************************
 DWORD OSLibDosFreeMem(LPVOID lpMemAddr)
 {
+    ULONG  ulAttr, ulSize, ulAddr;
+    APIRET rc;
+
+    ulAddr  = (DWORD)lpMemAddr & ~0xFFF;
+
+    //Find base within previous 64kb (alignment can add filler pages)
+    for(int i=0;i<16;i++) {
+        rc = DosQueryMem((PVOID)ulAddr, &ulSize, &ulAttr);
+        if(rc != NO_ERROR) {
+            dprintf(("!ERROR!: OSLibDosFreeMem: DosQueryMem %x failed with rc %d", lpMemAddr, rc));
+            i = 16; //fail
+            break;
+        }
+        if(ulAttr & PAG_BASE) {
+            break;
+        }
+        ulAddr -= PAGE_SIZE;
+    }
+    if(i == 16) {
+        //oh, oh. didn't find base; shouldn't happen!!
+        dprintf(("!ERROR!: OSLibDosFreeMem: Unable to find base of %x", lpMemAddr));
+        DebugInt3();
+    }
+    else {
+        lpMemAddr = (PVOID)ulAddr;
+    }
     return DosFreeMem(lpMemAddr);
 }
 //******************************************************************************
