@@ -1,4 +1,4 @@
-/* $Id: HOOK.CPP,v 1.12 2000-02-29 19:16:11 sandervl Exp $ */
+/* $Id: HOOK.CPP,v 1.13 2000-03-23 19:24:25 sandervl Exp $ */
 
 /*
  * Windows hook functions
@@ -61,10 +61,15 @@ typedef struct
 
 #define CHECK_MAGIC(a) ((a != 0) && (((HOOKDATA *)a)->magic == HOOK_MAGIC))
 
+//NOTE: This must be in the local data segment -> if a shared semaphore was
+//      created by a different process, the handle returned by DosOpenMutexSem
+//      will be returned in hGlobalHookMutex
+static HMTX hGlobalHookMutex = 0;
+
 //Global DLL Data
 #pragma data_seg(_GLOBALDATA)
 static HANDLE HOOK_systemHooks[WH_NB_HOOKS] = { 0 };
-static VMutex systemHookMutex(TRUE);
+static VMutex systemHookMutex(VMUTEX_SHARED, &hGlobalHookMutex);
 #pragma data_seg()
 static HANDLE HOOK_threadHooks[WH_NB_HOOKS] = { 0 };
 static VMutex threadHookMutex;
@@ -308,10 +313,10 @@ static HHOOK HOOK_SetHook( INT id, LPVOID proc, INT type,
     }
     else
     {
-        systemHookMutex.enter();
+        systemHookMutex.enter(VMUTEX_WAIT_FOREVER, &hGlobalHookMutex);
         data->next = HOOK_systemHooks[id - WH_MINHOOK];
         HOOK_systemHooks[id - WH_MINHOOK] = (HANDLE)data;
-        systemHookMutex.leave();
+        systemHookMutex.leave(&hGlobalHookMutex);
     }
 
     return (HHOOK)data;

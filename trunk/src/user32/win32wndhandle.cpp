@@ -1,4 +1,4 @@
-/* $Id: win32wndhandle.cpp,v 1.6 2000-03-16 19:19:11 sandervl Exp $ */
+/* $Id: win32wndhandle.cpp,v 1.7 2000-03-23 19:24:26 sandervl Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
@@ -24,10 +24,15 @@
 
 //******************************************************************************
 
+//NOTE: This must be in the local data segment -> if a shared semaphore was
+//      created by a different process, the handle returned by DosOpenMutexSem
+//      will be returned in hGlobalTableMutex
+HMTX hGlobalTableMutex = 0;
+
 //Global DLL Data
 #pragma data_seg(_GLOBALDATA)
 ULONG  WindowHandleTable[MAX_WINDOW_HANDLES] = {0};
-VMutex tableMutex(TRUE);
+VMutex tableMutex(VMUTEX_SHARED, &hGlobalTableMutex);
 ULONG  lowestFreeIndex = 0;
 #pragma data_seg()
 
@@ -35,11 +40,11 @@ ULONG  lowestFreeIndex = 0;
 //******************************************************************************
 BOOL HwAllocateWindowHandle(HWND *hwnd, DWORD dwUserData)
 {
-  tableMutex.enter();
+  tableMutex.enter(VMUTEX_WAIT_FOREVER, &hGlobalTableMutex);
   if(lowestFreeIndex == -1) {
 	//oops, out of handles
 	dprintf(("USER32: HwAllocateWindowHandle OUT OF WINDOW HANDLES!!"));
-	tableMutex.leave();
+	tableMutex.leave(&hGlobalTableMutex);
 	DebugInt3();
 	return FALSE;
   }
@@ -56,7 +61,7 @@ BOOL HwAllocateWindowHandle(HWND *hwnd, DWORD dwUserData)
 		break;
 	}
   }
-  tableMutex.leave();
+  tableMutex.leave(&hGlobalTableMutex);
   return TRUE;
 }
 //******************************************************************************
@@ -65,12 +70,12 @@ void HwFreeWindowHandle(HWND hwnd)
 {
   hwnd &= WNDHANDLE_MAGIC_MASK;
   if(hwnd < MAX_WINDOW_HANDLES) {
-	tableMutex.enter();
+	tableMutex.enter(VMUTEX_WAIT_FOREVER, &hGlobalTableMutex);
 	WindowHandleTable[hwnd] = 0;
 	if(lowestFreeIndex == -1 || hwnd < lowestFreeIndex) 
 		lowestFreeIndex = hwnd;
 
-	tableMutex.leave();
+	tableMutex.leave(&hGlobalTableMutex);
   }
 }
 //******************************************************************************
