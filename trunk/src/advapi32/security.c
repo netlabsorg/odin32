@@ -185,11 +185,11 @@ AllocateAndInitializeSid( PSID_IDENTIFIER_AUTHORITY pIdentifierAuthority,
                           DWORD nSubAuthority6, DWORD nSubAuthority7,
                           PSID *pSid )
 {
-	CallWin32ToNt (RtlAllocateAndInitializeSid(
+	return RtlAllocateAndInitializeSid(
 		pIdentifierAuthority, nSubAuthorityCount, 
 		nSubAuthority0, nSubAuthority1,	nSubAuthority2, nSubAuthority3,
 		nSubAuthority4, nSubAuthority5, nSubAuthority6, nSubAuthority7,
-		pSid ));
+		pSid );
 }
 
 /******************************************************************************
