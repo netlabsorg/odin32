@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.13 1999-11-29 21:28:00 bird Exp $
+/* $Id: pe2lx.cpp,v 1.14 1999-12-07 08:28:42 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -192,6 +192,8 @@ struct Pe2Lx::LieListEntry Pe2Lx::paLieList[] =
     {"NETAPI32.DLL",                       "WNETAP32"},
     {"OLE32",                              "OLE32OS2"},
     {"OLE32.DLL",                          "OLE32OS2"},
+    {"OLEAUT32.DLL",                       "OLAUTOS2"},
+    {"OLEAUT32",                           "OLAUTOS2"},
     {"WINSPOOL.DRV",                       "WINSPOOL.DLL"},
     {NULL,                                 NULL} /* end-of-list entry */
 };
