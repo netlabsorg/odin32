@@ -1,4 +1,4 @@
-/* $Id: versionos2.h,v 1.4 1999-09-15 23:29:08 sandervl Exp $ */
+/* $Id: versionos2.h,v 1.5 1999-12-28 19:17:09 sandervl Exp $ */
 
 #ifndef __VERSIONOS2__H__
 #define __VERSIONOS2__H__
@@ -29,8 +29,18 @@ BOOL  SYSTEM GetVersionStruct(char *modname, char *verstruct, ULONG bufLength);
 ULONG SYSTEM GetVersionSize(char *modname);
 
 //Used by GetVersion and GetProcessVersion
-//Pretend we're win95
-//#define WIN32OS2_VERSION  ((1<<32)|4)
 #define WIN32OS2_VERSION  (4)
+
+#define ODINNT_VERSION          4	//returned by GetVersion
+
+//Used by GetVersionEx:
+#define ODINNT_MAJOR_VERSION	4
+#define ODINNT_MINOR_VERSION	0
+#define ODINNT_BUILD_NR		1381
+#define ODINNT_CSDVERSION	"Service Pack 3"
+#define ODINNT_CSDVERSION_W	(LPWSTR)L"Service Pack 3"
+#define ODINNT_SOFTWARE_TYPE    "SYSTEM"
+#define ODINNT_OSTYPE_UNI       "Uniprocessor Free"
+#define ODINNT_OSTYPE_SMP       "SMPprocessor Free" //??
 
 #endif
