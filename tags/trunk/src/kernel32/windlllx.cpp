@@ -1,4 +1,4 @@
-/* $Id: windlllx.cpp,v 1.26 2002-11-18 13:53:54 sandervl Exp $ */
+/* $Id: windlllx.cpp,v 1.27 2003-02-20 09:47:01 sandervl Exp $ */
 
 /*
  * Win32 LX Dll class (compiled in OS/2 using Odin32 api)
@@ -33,20 +33,31 @@
 #include <odinlx.h>
 #include <wprocess.h>
 #include "oslibmisc.h"
+#include <custombuild.h>
 
 #include <exe386.h>
 
 #define DBG_LOCALLOG    DBG_windlllx
 #include "dbglocal.h"
 
+/*******************************************************************************
+*   Global Variables                                                           *
+*******************************************************************************/
 char *lpszCustomDllName      = NULL;
 char *lpszCustomExportPrefix = NULL;
 ULONG dwOrdinalBase          = 0;
 
+/**
+ * FreeLibrary callback for LX Dlls, it's call only when the library is actually
+ * being unloaded.
+ * Maintained by ODIN_SetLxDllUnLoadCallback().
+ */
+PFNLXDLLUNLOAD pfnLxDllUnLoadCallback = NULL;
+
 //******************************************************************************
 //******************************************************************************
 void WIN32API SetCustomBuildName(char *lpszName, DWORD ordinalbase,
-                                 char *lpszExportPrefix) 
+                                 char *lpszExportPrefix)
 {
     lpszCustomDllName      = lpszName;
     dwOrdinalBase          = ordinalbase;
@@ -260,27 +271,52 @@ ULONG Win32LxDll::AddRef()
 //******************************************************************************
 ULONG Win32LxDll::Release()
 {
- HINSTANCE     hinst;
+ HINSTANCE     hinst                = hinstanceOS2;
+ HINSTANCE     hinstOdin            = hinstance;
  WIN32DLLENTRY EntryPointTmp        = dllEntryPoint;
  PVOID         pResDataTmp          = (PVOID)pResRootDir;
  DWORD         MajorImageVersionTmp = MajorImageVersion;
  DWORD         MinorImageVersionTmp = MinorImageVersion;
  DWORD         SubsystemTmp         = Subsystem;
+ BOOL          fNoUnload            = fDisableUnload; //only set for kernel32.dll
+ BOOL          fDynLoaded           = isDynamicLib();
  ULONG         ret;
  APIRET        rc;
- BOOL          fNoUnload = fDisableUnload; //only set for kernel32.dll
- Win32LxDll   *pModule;
 
-  hinst = hinstanceOS2;
   ret = Win32DllBase::Release();
-  if(ret == 0 && !fNoUnload) {//only set for kernel32.dll (fDisableUnload)
+
+  /** @sketch
+   * If this module is not unreference and it was loaded using LoadLibrary() then
+   *    call the custombuild callback if present.
+   *    The callback should call UnRegisterLxDll().
+   * Endif
+   *
+   * @remark
+   * #ifdef HACK_NEVER_UNLOAD_LX_DLLS
+   * This will never be called!
+   * #endif
+   *
+   * @todo: call pfnLxDllLoadCallback if DosFreeModule failes.
+   *        It's not implemented because it's complex and at the moment we will
+   *        never actually get here.
+   *        So, this callback is here just as a reminder eventhough it's working..
+   */
+  if (!ret && fDynLoaded && pfnLxDllUnLoadCallback)
+  {
+    pfnLxDllUnLoadCallback(hinstanceOS2, hinstance);
+  }
+
+  if (ret == 0 && !fNoUnload) {//only set for kernel32.dll (fDisableUnload)
     //DosFreeModule sends a termination message to the dll.
     //The LX dll informs us when it's removed (UnregisterDll call)
     rc = DosFreeModule(hinst);
     if(rc) {
             dprintf(("Win32LxDll::Release: DosFreeModule %x returned %d", hinst, rc));
-            if(rc == ERROR_INVALID_ACCESS && !fExitProcess) 
+            if(rc == ERROR_INVALID_ACCESS && !fExitProcess)
             {
+                #ifndef HACK_NEVER_UNLOAD_LX_DLLS
+                #error  @todo: call pfnLxDllLoadCallback and let it do the registering if it did that on the initial load..
+                #endif
                 //Dll refused to unload because it has an active exitlist handler
                 //or depends on a dll that registered an exitlist handler
                 //In this case the handle remains valid and the entrypoint of
@@ -294,7 +330,7 @@ ULONG Win32LxDll::Release()
                               SubsystemTmp);
 
                 /* OS/2 dll, system dll, converted dll or win32k took care of it. */
-                pModule = Win32LxDll::findModuleByOS2Handle(hinst);
+                Win32LxDll *pModule = Win32LxDll::findModuleByOS2Handle(hinst);
                 if(pModule)
                 {
                         pModule->setDllHandleOS2(hinst);
@@ -364,3 +400,16 @@ Win32LxDll *Win32LxDll::findModuleByOS2Handle(HINSTANCE hinstance)
 }
 //******************************************************************************
 //******************************************************************************
+
+/**
+ * Custombuild API for registering a callback for LX Dll loading thru LoadLibrary*().
+ * @returns Success indicator.
+ * @param   pfn     Pointer to callback.
+ *                  NULL if callback is deregistered.
+ */
+BOOL WIN32API ODIN_SetLxDllUnLoadCallback(PFNLXDLLUNLOAD pfn)
+{
+    pfnLxDllUnLoadCallback = pfn;
+    return TRUE;
+}
+
