@@ -1,4 +1,4 @@
-/* $Id: DoDirs.cmd,v 1.1 2000-11-19 08:22:06 bird Exp $
+/* $Id: DoDirs.cmd,v 1.2 2000-11-21 04:34:25 bird Exp $
  *
  * Rexx script which executes a given command in each of the given
  * directories. It will fail when a command failes in one of the
@@ -25,9 +25,9 @@ sCurrentDir = directory();
  */
 iRc = 0;                                /* Returncode */
 iStart = 1;                             /* Subdirectory Index */
-do while (iStart < length(sDirs))
+do while (iStart <= length(sDirs))
     iEnd = pos(' ', sDirs, iStart);
-    if (iEnd <= 0 & iStart < length(sDirs)) then
+    if (iEnd <= 0 & iStart <= length(sDirs)) then
         iEnd = length(sDirs) + 1;
 
     if (iEnd > 0) then
