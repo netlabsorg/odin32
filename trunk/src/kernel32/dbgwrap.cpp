@@ -301,6 +301,8 @@ DEBUGWRAP_LVL2_12(lstrncmpA);
 DEBUGWRAP_LVL2_12(lstrncmpW);
 DEBUGWRAP_LVL2_12(lstrncmpiA);
 DEBUGWRAP_LVL2_12(lstrncmpiW);
+DEBUGWRAP_LVL2_8(lstrlenAtoW);
+DEBUGWRAP_LVL2_8(lstrlenWtoA);
 
 #undef DBG_LOCALLOG
 #define DBG_LOCALLOG    DBG_console
@@ -876,7 +878,7 @@ DEBUGWRAP4(SetComputerNameA);
 DEBUGWRAP4(SetComputerNameW);
 DEBUGWRAP_LVL2_0(GetTickCount);
 DEBUGWRAP4(GetVDMCurrentDirectories);
-DEBUGWRAP4(QueryPerformanceCounter);
+DEBUGWRAP_LVL2_4(QueryPerformanceCounter);
 DEBUGWRAP4(QueryPerformanceFrequency);
 DEBUGWRAP4(IsProcessorFeaturePresent);
 DEBUGWRAP28(FormatMessageA);
