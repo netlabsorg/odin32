@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.41 2000-01-27 21:52:53 sandervl Exp $
+# $Id: makefile,v 1.42 2000-02-05 01:50:15 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -35,13 +35,15 @@ LIBS = advapi32\advapi32.lib  avifil32\avifil32.lib  capi2032\capi2032.lib    \
        psapi\psapi.lib        rasapi32\rasapi32.lib  shell32\shell32.lib      \
        shlwapi\shlwapi.lib    tapi32\tapi32.lib      user32\user32.lib        \
        version\version.lib    winmm\winmm.lib        winspool\winspool.lib    \
-       wnaspi32\wnaspi32.lib  wnetap32\wnetap32.lib  wsock32\wsock32.lib      \
+       wnaspi32\wnaspi32.lib  wnetap32\netapi32.lib  wsock32\wsock32.lib      \
        wing32\wing32.lib      dplayx\dplayx.lib      wininet\wininet.lib      \
        opengl\opengl32.lib
 
 
 all: libs
-        cd odincrt
+	cd dllentry
+        $(MAKE_CMD)
+        cd ..\odincrt
         $(MAKE_CMD)
         cd ..\kernel32
         $(MAKE_CMD)
