@@ -1,7 +1,9 @@
-/* $Id: ChangeLog,v 1.1647 2001-08-11 09:33:36 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1648 2001-08-11 12:02:38 sandervl Exp $ */
 
  2001-08-10: Sander van Leeuwen <sandervl@xs4all.nl>
     - INSTALL:  o Add COM registry keys for OLE32 & OLEAUT32
+                o Add OdinBug report generator made by Herwig Bauernfeind
+    - USER32:   o Work dir change for object creation
 
  2001-08-09: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Rewrote PostThreadMessage
