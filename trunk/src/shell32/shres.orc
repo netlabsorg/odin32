@@ -1,4 +1,4 @@
-/* $Id: shres.orc,v 1.13 2001-04-28 13:33:48 sandervl Exp $ */
+/* $Id: shres.orc,v 1.14 2002-06-08 07:26:59 sandervl Exp $ */
 /*
  * Top level resource file for Common Dialogs
  *
@@ -252,7 +252,7 @@ SHLICON_MYCOMPUTER ICON LOADONCALL DISCARDABLE "ico/mycomputer.ico"
  * neutral language. This will prevent them from
  * being duplicated for each language.
  */
-#include "shell32_xx.orc"
+#include "resources\shell32_xx.orc"
 
 /*
  * Everything specific to any language goes
@@ -261,7 +261,7 @@ SHLICON_MYCOMPUTER ICON LOADONCALL DISCARDABLE "ico/mycomputer.ico"
  * which also have a neutral version. This is to
  * get localized bitmaps for example.
  */
-#include "shell32_En.orc"
+#include "resources\shell32_En.orc"
 
 /*
  CB: the new about dialog isn't implemented for these languages

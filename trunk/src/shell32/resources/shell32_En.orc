@@ -1,4 +1,4 @@
-/* $Id: shell32_En.orc,v 1.4 2000-10-28 14:36:45 sandervl Exp $ */
+/* $Id: shell32_En.orc,v 1.1 2002-06-08 07:27:00 sandervl Exp $ */
 LANGUAGE LANG_ENGLISH, SUBLANG_DEFAULT
 
 #if 1
