@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.335 2002-08-14 10:37:44 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.336 2002-08-23 15:06:01 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -148,6 +148,7 @@ void Win32BaseWindow::Init()
   OS2HwndModalDialog  = 0;
   fParentChange    = FALSE;
   fDestroyWindowCalled = FALSE;
+  fChildDestructionInProgress = FALSE;
   fTaskList        = FALSE;
   fParentDC        = FALSE;
   fComingToTop     = FALSE;
@@ -923,7 +924,7 @@ ULONG Win32BaseWindow::MsgDestroy()
     state = STATE_DESTROYED;
 
     if(fDestroyWindowCalled == FALSE)
-    {//this window was destroyed because DestroyWindow was called for it's parent
+    {//this window was destroyed because DestroyWindow was called for its parent
      //so: send a WM_PARENTNOTIFY now as that hasn't happened yet
         if((getStyle() & WS_CHILD) && !(getExStyle() & WS_EX_NOPARENTNOTIFY))
         {
@@ -2682,6 +2683,8 @@ BOOL Win32BaseWindow::GetWindowPlacement(LPWINDOWPLACEMENT wndpl)
 }
 //******************************************************************************
 //Also destroys all the child windows (destroy children first, parent last)
+//TODO: Don't rely on PM to do the right thing. Send WM_(NC)DESTROY &
+//      destroy children ourselves (see Wine)
 //******************************************************************************
 BOOL Win32BaseWindow::DestroyWindow()
 {
@@ -2759,7 +2762,39 @@ BOOL Win32BaseWindow::DestroyWindow()
     }
   
     fDestroyWindowCalled = TRUE;
-    return OSLibWinDestroyWindow(OS2HwndFrame);
+
+//hack alert; PM crashes if child calls DestroyWindow for parent/owner in WM_DESTROY
+//            handler; must postpone it
+    if(fChildDestructionInProgress) {
+        dprintf(("Postponing parent destruction because of dying child"));
+        OSLibPostMessageDirect(OS2HwndFrame, WIN32APP_POSTPONEDESTROY, 0, 0);
+        return TRUE;
+    }
+
+    BOOL fOldChildDestructionInProgress = FALSE;
+    if(GetParent()) {
+        Win32BaseWindow *window = Win32BaseWindow::GetWindowFromHandle(GetParent());
+        if(window) {
+            fOldChildDestructionInProgress = window->IsChildDestructionInProgress();
+            window->SetChildDestructionInProgress(TRUE);
+            RELEASE_WNDOBJ(window);
+        }
+    }
+//hack end
+
+    BOOL ret = OSLibWinDestroyWindow(OS2HwndFrame);
+
+//hack alert; PM crashes if child calls DestroyWindow for parent/owner in WM_DESTROY
+//            handler; must postpone it
+    if(GetParent()) {
+        Win32BaseWindow *window = Win32BaseWindow::GetWindowFromHandle(GetParent());
+        if(window) {
+            window->SetChildDestructionInProgress(fOldChildDestructionInProgress);
+            RELEASE_WNDOBJ(window);
+        }
+    }
+//hack end
+    return ret;
 }
 //******************************************************************************
 //******************************************************************************
