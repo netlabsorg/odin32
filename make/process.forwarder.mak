@@ -1,4 +1,4 @@
-# $Id: process.forwarder.mak,v 1.11 2002-08-24 22:31:24 bird Exp $
+# $Id: process.forwarder.mak,v 1.12 2002-08-27 02:59:42 bird Exp $
 
 #
 # Generic makefile system.
@@ -64,7 +64,7 @@ $(ECHO) Forwarding to another (shell) environment setup...$(CLRRST)
 # -----------------------------------------------------------------------------
 
 .SUFFIXES:
-.SUFFIXES: .c .cpp .orc .asm .$(EXT_OBJ) .rc .$(EXT_RES) .ii .s
+.SUFFIXES: .c .cpp .asm .$(EXT_OBJ) .rc .$(EXT_RES) .ii .s
 
 
 # Assembling assembly source.
@@ -167,20 +167,6 @@ $(ECHO) Forwarding to another (shell) environment setup...$(CLRRST)
     $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
 
 
-# Compiling Odin32 resources.
-.orc{$(PATH_TARGET)}.obj:
-    \
-!ifndef BUILD_VERBOSE
-    @ \
-!endif
-    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
-
-.orc.obj:
-    \
-!ifndef BUILD_VERBOSE
-    @ \
-!endif
-    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
 
 
 
@@ -194,13 +180,13 @@ all: build
 # -----------------------------------------------------------------------------
 # Generic forwarder
 # -----------------------------------------------------------------------------
-build rebuild needed lib executable miscellaneous \
+build rebuild clean dep needed lib executable miscellaneous \
 !if "$(TARGET_MODE)" == "DEPEND"
 $(TARGET) \
 !endif
 $(TARGET_ILIB) \
 $(RULES_FORWARD) \
-testcase target:
+install testcase nothing target:
     \
 !ifndef BUILD_VERBOSE
     @ \
@@ -208,23 +194,6 @@ testcase target:
 !ifndef _BUILD_PROJECT # workaround for buggy SET implementation in NMAKE.
     echo . && SET _BUILD_PROJECT=$(BUILD_PROJECT) && \
 !endif
-    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
-
-
-
-# -----------------------------------------------------------------------------
-# Generic forwarder - No dependencies.
-# -----------------------------------------------------------------------------
-clean dep publish publish_target nothing:
-    \
-!ifndef BUILD_VERBOSE
-    @ \
-!endif
-    echo . && \
-!ifndef _BUILD_PROJECT # workarounds for buggy SET implementation in NMAKE.
-    SET _BUILD_PROJECT=$(BUILD_PROJECT) && \
-!endif
-    SET NODEP=1 && \
     $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
 
 
