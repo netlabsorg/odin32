@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.133 2000-01-08 14:15:08 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.134 2000-01-08 14:41:27 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -644,7 +644,7 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
   FrameGetScrollBarHandles(this,dwStyle & WS_HSCROLL,dwStyle & WS_VSCROLL);
   subclassScrollBars(dwStyle & WS_HSCROLL,dwStyle & WS_VSCROLL);
 
-  FrameSubclassTitleBar(this);
+//  FrameSubclassTitleBar(this);
 
   fakeWinBase.hwndThis     = OS2Hwnd;
   fakeWinBase.pWindowClass = windowClass;
