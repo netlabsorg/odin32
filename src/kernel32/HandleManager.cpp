@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.68 2001-06-23 16:59:26 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.69 2001-06-23 19:43:49 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -3097,6 +3097,7 @@ DWORD  HMMsgWaitForMultipleObjects  (DWORD      cObjects,
                                      fWaitAll, dwTimeout,
                                      dwWakeMask);
 
+  dprintf2(("MsgWaitForMultipleObjects returned %d", rc));
   return (rc);                            // OK, done
 #endif
 }
