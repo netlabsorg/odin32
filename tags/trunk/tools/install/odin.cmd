@@ -1,4 +1,4 @@
-/* $Id: odin.cmd,v 1.43 2002-06-20 01:09:12 bird Exp $
+/* $Id: odin.cmd,v 1.44 2005-01-26 18:29:40 abwillis Exp $
  *
  * Odin32 API WarpIn installation script generator.
  *
@@ -508,7 +508,7 @@ rc = stream(sWICFile, 'c', 'open write');
 if (pos('READY', rc) <> 1) then
 do
     say 'Failed to open '''sWICFile'''. (rc='rc')';
-    parse rc .':'irc
+    parse VAR rc .':'irc
     return irc;
 end
 
@@ -521,8 +521,11 @@ call lineout sWICFile, sInstallArchive '-s' sInstFile '-a'
  * Packet 1
  */
 call lineout sWICFile, '1 -c'||sMainDir 'ChangeLog LICENSE.TXT WGSS50.lic';
-call lineout sWICFile, '1 -c'||sDocDir 'ChangeLog-1999 ChangeLog-2000 ChangeLog-2001 ChangeLog-2002 Readme.txt ReportingBugs.txt Logging.txt Odin.ini.txt Readme.Odinbug OdinBug.HLP OdinUser.INF';
+call lineout sWICFile, '1 -c'||sDocDir 'ChangeLog-1999 ChangeLog-2000 ChangeLog-2001 ChangeLog-2002 ChangeLog-2003 Readme.txt ReportingBugs.txt Logging.txt Odin.ini.txt Readme.Odinbug OdinBug.HLP OdinUser.INF';
 call lineout sWICFile, '1 -c'||sBinDir||' Odinbug.exe';
+call lineout sWICFile, '1 -c'||sBinDir||' rexxweb.dll';
+call lineout sWICFile, '1 -c'||sBinDir||' OdinTool.exe';
+call lineout sWICFile, '1 -c'||sBinDir||' REXXINI.dll';
 
 /*
  * Packet 2
