@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.302 1999-10-10 08:58:20 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.303 1999-10-10 11:27:41 cbratschi Exp $ */
+
+ 99-10-10: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32: fixed radio buttons, disabled text output
 
  99-10-10: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Ported GetNextDlgGroupItem & GetDlgItemInt from Wine
