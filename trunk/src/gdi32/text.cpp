@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.10 2000-06-01 19:00:05 sandervl Exp $ */
+/* $Id: text.cpp,v 1.11 2000-08-14 15:51:20 cbratschi Exp $ */
 
 /*
  * GDI32 text apis
@@ -6,7 +6,7 @@
  * Based on Wine code (991031) (objects\text.c)
  *
  * Copyright 1993, 1994 Alexandre Julliard
- * Copyright 1999 Christoph Bratschi
+ * Copyright 1999-2000 Christoph Bratschi
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -18,7 +18,7 @@
 #include <float.h>
 #include "oslibgpi.h"
 
-#define DBG_LOCALLOG	DBG_text
+#define DBG_LOCALLOG    DBG_text
 #include "dbglocal.h"
 
 #define ELLIPSIS    "..."
@@ -94,19 +94,24 @@ UINT WINAPI GetTextCharset(HDC hdc) /* [in] Handle to device context */
 //******************************************************************************
 INT SYSTEM EXPORT InternalDrawTextExA(HDC hdc,LPCSTR lpchText,INT cchText,LPRECT lprc,UINT dwDTFormat,LPDRAWTEXTPARAMS lpDTParams,BOOL isDrawTextEx)
 {
-/*
-  PVOID pHps = OSLibGpiQueryDCData(hdc);
   INT rc;
   ULONG flCmd;
   RECT localRectangle;
   PRECT rectPtr;
   LONG lTabs,xLeft,yTop;
+  UINT fpuctrlword;
 
-  if ((!lpchText) || (cchText == 0) || (cchText < -1) || (!lprc == NULL))
+  //SvL: Open32's DrawText messes up the fpu control word! (@#$@#$@#$)
+  //CB: don't know if this is still the case with WinDrawTabbedText (-> testcase)
+  fpuctrlword = _control87(0, 0);
+
+  if ((!lpchText) || (cchText == 0) || (cchText < -1) || (lprc == NULL))
   {
     SetLastError(ERROR_INVALID_PARAMETER);
     return 0;
   }
+
+  PVOID pHps = OSLibGpiQueryDCData(hdc);
 
   if (!pHps)
   {
@@ -198,7 +203,7 @@ INT SYSTEM EXPORT InternalDrawTextExA(HDC hdc,LPCSTR lpchText,INT cchText,LPRECT
   {
     rectPtr = &localRectangle;
 
-    if (getMapMode(pHps) == MMOS_ANISOTROPIC || getMapMode(pHps) == MMOS_ISOTROPIC)
+    if ((getMapMode(pHps) == MMOS_ANISOTROPIC) || (getMapMode(pHps) == MMOS_ISOTROPIC))
     {
       if (doesYAxisGrowNorth(pHps))
       {
@@ -231,7 +236,7 @@ INT SYSTEM EXPORT InternalDrawTextExA(HDC hdc,LPCSTR lpchText,INT cchText,LPRECT
   {
     if (isDrawTextEx)
     {
-      lTabs = (lpDTParams && dwDTFormat & DT_TABSTOP) ? lpDTParams->iTabLength:8;
+      lTabs = (lpDTParams && (dwDTFormat & DT_TABSTOP)) ? lpDTParams->iTabLength:8;
     } else
     {
       lTabs = 8;
@@ -384,7 +389,9 @@ INT SYSTEM EXPORT InternalDrawTextExA(HDC hdc,LPCSTR lpchText,INT cchText,LPRECT
   }
 
   if (!done)
+  {
     rc = OSLibWinDrawTabbedText(pHps,cchText,lTabs,lpchText,rectPtr,0,0,flCmd);
+  }
 
   if (dwDTFormat & DT_CALCRECT)
   {
@@ -407,17 +414,8 @@ INT SYSTEM EXPORT InternalDrawTextExA(HDC hdc,LPCSTR lpchText,INT cchText,LPRECT
     lprc->right += lpDTParams->iRightMargin;
   }
 
-  return rc;
-*/
-  UINT fpuctrlword;
-  INT rc;
-
-  //SvL: Open32's DrawText messes up the fpu control word! (@#$@#$@#$)
-  fpuctrlword = _control87(0, 0);
-  dwDTFormat &= ~(DT_END_ELLIPSIS | DT_PATH_ELLIPSIS);
-
-  rc = O32_DrawText(hdc,lpchText,cchText,lprc,dwDTFormat);
   _control87(fpuctrlword, 0xFFFF);
+
   return rc;
 }
 //******************************************************************************
@@ -575,22 +573,22 @@ BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR
 
   if (!pHps || (cbCount < 0) || ((lpszString == NULL) && (cbCount != 0)))
   {
-	dprintf(("InternalTextOutA: invalid parameter"));
-    	SetLastError(ERROR_INVALID_HANDLE);
-    	return FALSE;
+        dprintf(("InternalTextOutA: invalid parameter"));
+        SetLastError(ERROR_INVALID_HANDLE);
+        return FALSE;
   }
 
   if (cbCount > 512)
   {
-	dprintf(("InternalTextOutA: invalid parameter cbCount"));
-    	SetLastError(ERROR_INVALID_PARAMETER);
-    	return FALSE;
+        dprintf(("InternalTextOutA: invalid parameter cbCount"));
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return FALSE;
   }
   if (fuOptions & ~((UINT)(ETO_CLIPPED | ETO_OPAQUE)))
   {
-	dprintf(("InternalTextOutA: invalid fuOptions"));
-    	//ETO_GLYPH_INDEX, ETO_RTLLEADING, ETO_NUMERICSLOCAL, ETO_NUMERICSLATIN, ETO_IGNORELANGUAGE, ETO_PDY  are ignored
-    	return TRUE;
+        dprintf(("InternalTextOutA: invalid fuOptions"));
+        //ETO_GLYPH_INDEX, ETO_RTLLEADING, ETO_NUMERICSLOCAL, ETO_NUMERICSLATIN, ETO_IGNORELANGUAGE, ETO_PDY  are ignored
+        return TRUE;
   }
 
   //CB: add metafile info
@@ -602,21 +600,21 @@ BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR
       MapWin32ToOS2Rect(*lprc,pmRect);
       if (excludeBottomRightPoint(pHps,(PPOINTLOS2)&pmRect) == 0)
       {
-	dprintf(("InternalTextOutA: excludeBottomRightPoint returned 0"));
+        dprintf(("InternalTextOutA: excludeBottomRightPoint returned 0"));
         return TRUE;
       }
 
       if (fuOptions & ETO_CLIPPED) flOptions |= CHSOS_CLIP;
       if (fuOptions & ETO_OPAQUE)  flOptions |= CHSOS_OPAQUE;
     }
-  } 
+  }
   else
   {
     if (fuOptions)
     {
-	dprintf(("InternalTextOutA: ERROR_INVALID_HANDLE"));
-      	SetLastError(ERROR_INVALID_HANDLE);
-      	return FALSE;
+        dprintf(("InternalTextOutA: ERROR_INVALID_HANDLE"));
+        SetLastError(ERROR_INVALID_HANDLE);
+        return FALSE;
     }
   }
 
@@ -624,13 +622,13 @@ BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR
   {
     if (fuOptions & ETO_OPAQUE)
     {
-      	lpszString = " ";
-      	cbCount = 1;
-      	flOptions |= CHSOS_CLIP;
-    } 
+        lpszString = " ";
+        cbCount = 1;
+        flOptions |= CHSOS_CLIP;
+    }
     else {
-	dprintf(("InternalTextOutA: cbCount == 0"));
-	return TRUE;
+        dprintf(("InternalTextOutA: cbCount == 0"));
+        return TRUE;
     }
   }
   if (lpDx)
@@ -642,7 +640,7 @@ BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR
     ptl.y = Y;
 
     flOptions |= CHSOS_LEAVEPOS;
-  } 
+  }
   else OSLibGpiQueryCurrentPosition(pHps,&ptl);
 
   UINT align = GetTextAlign(hdc);
@@ -674,8 +672,8 @@ BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR
     OSLibGpiSetTextAlignment(pHps,pmHAlign,pmVAlign);
 
   if(hits == GPIOS_ERROR) {
-	dprintf(("InternalTextOutA: OSLibGpiCharStringPosAt returned GPIOS_ERROR"));
-    	return FALSE;
+        dprintf(("InternalTextOutA: OSLibGpiCharStringPosAt returned GPIOS_ERROR"));
+        return FALSE;
   }
 
   if (getAlignUpdateCP(pHps))

@@ -1,4 +1,4 @@
-/* $Id: oslibgpi.cpp,v 1.5 2000-06-14 13:17:51 sandervl Exp $ */
+/* $Id: oslibgpi.cpp,v 1.6 2000-08-14 15:51:20 cbratschi Exp $ */
 
 /*
  * GPI interface code
@@ -20,7 +20,7 @@
 #include "oslibgpi.h"
 #include "dcdata.h"
 
-#define DBG_LOCALLOG	DBG_oslibgpi
+#define DBG_LOCALLOG    DBG_oslibgpi
 #include "dbglocal.h"
 
 #define GetDCData(a) ((pDCData)a)
@@ -291,11 +291,11 @@ BOOL doesYAxisGrowNorth(PVOID pHps)
   return FALSE;
 }
 
+LONG APIENTRY WinDrawTabbedText(HPS hps,LONG cchText,LONG lTabWidth,PCH lpchText,PRECTL prcl,LONG clrFore,LONG clrBack,ULONG flCmd);
+
 LONG OSLibWinDrawTabbedText(PVOID pHps,LONG cchText,LONG lTabs,LPCSTR lpchText,PVOID prcl,LONG clrFore,LONG clrBack,ULONG flCmd)
 {
-  //return WinDraw
-  //undocumented
-  return 0;
+  return WinDrawTabbedText(GetDCData(pHps)->hps,cchText,lTabs,(PCH)lpchText,(PRECTL)prcl,clrFore,clrBack,flCmd);
 }
 
 BOOL OSLibGpiMove(PVOID pHps,PPOINTLOS2 pptlPoint)
