@@ -87,8 +87,23 @@ else if (isset($authorrefcode))
 }
 else if (isset($dlls))
 {   /* All dlls */
-    $sCategory      = "dlls";
+    $sCategory      = "dll";
     $sCategoryName  = "Dlls";
+}
+else if (isset($internal))
+{   /* All Internal Dlls */
+    $sCategory      = "dll";
+    $sCategoryName  = "Internal Dlls";
+}
+else if (isset($support))
+{   /* All dlls */
+    $sCategory      = "dll";
+    $sCategoryName  = "Support Stuff";
+}
+else if (isset($tools))
+{   /* All dlls */
+    $sCategory      = "dll";
+    $sCategoryName  = "Tools";
 }
 else if (isset($apigroups))
 {   /* All API Groups */
@@ -193,7 +208,13 @@ if (!$fNoData)
             Odin32DBNaslov("Root Menu", "menu", "");
             echo "<font size=3>".
                  "<ul>\n".
-                 "  <li><b><a href=\"Odin32DB.phtml?dlls=1\">Dlls</a></b>\n".
+                 "  <li><b>Module<\n>\n".
+                 "      <ul>\n".
+                 "         <li><b><a href=\"Odin32DB.phtml?dlls=1\">Odin32 API DLLs</a></b>\n".
+                 "         <li><b><a href=\"Odin32DB.phtml?internal=1\">Internal Odin32 DLLs</a></b>\n".
+                 "         <li><b><a href=\"Odin32DB.phtml?support=1\">Support Stuff(like win32k)</a></b>\n".
+                 "         <li><b><a href=\"Odin32DB.phtml?tools=1\">Tools</a></b>\n".
+                 "      </ul>\n".
                  "  <li><b><a href=\"Odin32DB.phtml?apigroups=1\">API Groups</a></b>\n".
                  "  <li><b><a href=\"Odin32DB.phtml?authors=1\">Authors</a></b>\n".
                  "  <li><i><a href=\"Odin32DB.phtml?searchapi=1\">Search API (not implemeted)</a></i>\n".
