@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.6 1999-07-17 11:52:24 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.7 1999-07-18 17:12:03 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -412,6 +412,42 @@ BOOL WIN32API SendMessageCallbackW(HWND          hWnd,
          dwData));
 
   return (FALSE);
+}
+/*****************************************************************************
+ * Name      : long WIN32API BroadcastSystemMessage
+ * Purpose   : The BroadcastSystemMessage function sends a message to the given
+ *             recipients. The recipients can be applications, installable
+ *             drivers, Windows-based network drivers, system-level device
+ *             drivers, or any combination of these system components.
+ * Parameters: DWORD   dwFlags,
+               LPDWORD lpdwRecipients,
+               UINT    uiMessage,
+               WPARAM  wParam,
+               LPARAM  lParam
+ * Variables :
+ * Result    : If the function succeeds, the return value is a positive value.
+ *             If the function is unable to broadcast the message, the return value is -1.
+ *             If the dwFlags parameter is BSF_QUERY and at least one recipient returned FALSE to the corresponding message, the return value is zero.
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+
+long WIN32API BroadcastSystemMessage(DWORD   dwFlags,
+                                        LPDWORD lpdwRecipients,
+                                        UINT    uiMessage,
+                                        WPARAM  wParam,
+                                        LPARAM  lParam)
+{
+  dprintf(("USER32:BroadcastSystemMessage(%08xh,%08xh,%08xh,%08xh,%08x) not implemented.\n",
+        dwFlags,
+        lpdwRecipients,
+        uiMessage,
+        wParam,
+        lParam));
+
+  return (-1);
 }
 //******************************************************************************
 //******************************************************************************

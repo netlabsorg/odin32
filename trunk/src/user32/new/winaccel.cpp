@@ -1,4 +1,4 @@
-/* $Id: winacc.cpp,v 1.1 1999-07-18 17:12:03 sandervl Exp $ */
+/* $Id: winaccel.cpp,v 1.1 1999-07-18 17:12:52 sandervl Exp $ */
 /*
  * Win32 accelartor key functions for OS/2
  *
