@@ -1,4 +1,4 @@
-/* $Id: heap.cpp,v 1.11 1999-08-10 12:43:22 phaller Exp $ */
+/* $Id: heap.cpp,v 1.12 1999-08-17 16:35:09 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -15,7 +15,6 @@
 #include <misc.h>
 #define  _WIN32
 #include "os2heap.h"
-#include <odincrt.h>
 #include <heap.h>
 
 static HANDLE processheap = NULL;
@@ -66,9 +65,7 @@ HANDLE WIN32API HeapCreate(DWORD flOptions, DWORD dwInitialSize, DWORD dwMaximum
   if(hHeap == NULL)
     return(NULL);
 
-  ODIN_FS_BEGIN
   curheap = new OS2Heap(hHeap, flOptions, dwInitialSize, dwMaximumSize);
-  ODIN_FS_END
 
   if(curheap == NULL)
   {
@@ -79,7 +76,7 @@ HANDLE WIN32API HeapCreate(DWORD flOptions, DWORD dwInitialSize, DWORD dwMaximum
   if(curheap->getHeapHandle() == NULL)
   {
     O32_HeapDestroy(hHeap);
-    ODIN_delete(curheap);
+    delete(curheap);
     return(NULL);
   }
   return(curheap->getHeapHandle());
@@ -94,7 +91,7 @@ BOOL WIN32API HeapDestroy(HANDLE hHeap)
         return(FALSE);
 
   O32_HeapDestroy(curheap->getHeapHandle());
-  ODIN_delete(curheap);
+  delete curheap;
   return(TRUE);
 }
 //******************************************************************************
@@ -156,9 +153,7 @@ HANDLE WIN32API GetProcessHeap(VOID)
       //TODO: I haven't thought real hard about this.  I added it just to make "hdr.exe" happy.
       hHeap = O32_HeapCreate(HEAP_GENERATE_EXCEPTIONS, 1, 0x4000);
 
-      ODIN_FS_BEGIN
       OS2ProcessHeap = new OS2Heap(hHeap, HEAP_GENERATE_EXCEPTIONS, 0x4000, 0);
-      ODIN_FS_END
 
       if(OS2ProcessHeap == NULL) {
          O32_HeapDestroy(hHeap);
