@@ -1,9 +1,19 @@
-/* $Id: ChangeLog,v 1.1286 2001-02-23 13:47:02 bird Exp $ */
+/* $Id: ChangeLog,v 1.1287 2001-02-23 14:51:26 sandervl Exp $ */
 
  2001-02-23: Sander van Leeuwen <sandervl@xs4all.nl>
     - GDI32:    o Removed old workaround for SetDIBitsToDevice. Incorrect for
                   new implementation of this function with StretchDIBits.
                   (fixes bitmaps in Minesweeper)
+    - USER32:   o WM_SETCURSOR change; don't check WS_EX_NOPARENTNOTIFY style
+                  when sending this message to the parent of a child window.
+                o Redraw entire window when switching between minimized, maximized
+                  and restored windows state.
+                o Added missing cursor to MDI client class
+                  (cursor now changes when moving cursor from mdi child to
+                   client window)
+    - USER32, include\win\drive.h:
+                o DRIVE_GetDosCwd bugfix
+                  (fixes crash in Cool Edit old-style file open dialog)
 
  2000-02-22: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Win32k:   o Support for the 14062e kernels.
