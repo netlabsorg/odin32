@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.90 2001-04-05 09:31:27 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.91 2001-04-15 17:05:29 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -92,16 +92,17 @@ HWND OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle,
                           id, NULL, NULL);
 }
 //******************************************************************************
+//Note: Also check OSLibSetWindowStyle when changing this!!
 //******************************************************************************
 BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle)
 {
   *OSWinStyle   = 0;
 
   /* Window styles */
+#if 0
+  //Done explicitely in CreateWindowExA
   if(dwStyle & WS_MINIMIZE_W)
         *OSWinStyle |= WS_MINIMIZED;
-//Done explicitely in CreateWindowExA
-#if 0
   if(dwStyle & WS_VISIBLE_W)
         *OSWinStyle |= WS_VISIBLE;
 #endif
@@ -111,12 +112,14 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle)
         *OSWinStyle |= WS_CLIPSIBLINGS;
   if(dwStyle & WS_CLIPCHILDREN_W)
         *OSWinStyle |= WS_CLIPCHILDREN;
+#if 0
   if(dwStyle & WS_MAXIMIZE_W)
         *OSWinStyle |= WS_MAXIMIZED;
   if(dwStyle & WS_GROUP_W)
         *OSWinStyle |= WS_GROUP;
   if(dwStyle & WS_TABSTOP_W)
         *OSWinStyle |= WS_TABSTOP;
+#endif
 
   return TRUE;
 }
@@ -712,20 +715,29 @@ void OSLibWinShowTaskList(HWND hwndFrame)
 }
 //******************************************************************************
 //******************************************************************************
-void OSLibSetWindowStyle(HWND hwnd, ULONG dwStyle, ULONG dwExStyle, BOOL saveBits)
+void OSLibSetWindowStyle(HWND hwnd, ULONG dwStyle, ULONG dwExStyle)
 {
-  ULONG dwWinStyle;
+  ULONG dwWinStyle = WinQueryWindowULong(hwnd, QWL_STYLE);
+  ULONG dwOldWinStyle = dwWinStyle;
 
-  OSLibWinConvertStyle(dwStyle, dwExStyle, &dwWinStyle);
+  if(dwStyle & WS_DISABLED_W) {
+        dwWinStyle |= WS_DISABLED;
+  }
+  else  dwWinStyle &= ~WS_DISABLED;
 
-  dwWinStyle = dwWinStyle & ~(WS_TABSTOP | WS_GROUP | WS_CLIPCHILDREN);
-  if(saveBits) dwWinStyle |= WS_SAVEBITS;
-  if(dwStyle & WS_VISIBLE_W)
-        dwWinStyle |= WS_VISIBLE;
+  if(dwStyle & WS_CLIPSIBLINGS_W) {
+        dwWinStyle |= WS_CLIPSIBLINGS;
+  }
+  else  dwWinStyle &= ~WS_CLIPSIBLINGS;
 
-  WinSetWindowULong(hwnd, QWL_STYLE,
-                    (WinQueryWindowULong(hwnd, QWL_STYLE) & ~0xffff0000) |
-                     dwWinStyle);
+  if(dwStyle & WS_CLIPCHILDREN_W) {
+        dwWinStyle |= WS_CLIPCHILDREN;
+  }
+  else  dwWinStyle &= ~WS_CLIPCHILDREN;
+
+  if(dwWinStyle != dwOldWinStyle) {
+      WinSetWindowULong(hwnd, QWL_STYLE, dwWinStyle);
+  }
 }
 //******************************************************************************
 //******************************************************************************

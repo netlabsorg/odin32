@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.250 2001-04-12 14:04:32 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.251 2001-04-15 17:05:29 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1580,6 +1580,12 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
       RECT rect;
       int rc;
 
+        if(getWindowHandle() == 0x68000044) {
+          rc = GetClipBox( (HDC)wParam, &rect );
+          FillRect( (HDC)wParam, &rect, GetSysColorBrush(COLOR_WINDOWTEXT));
+          return 1;
+        }
+       
         if (!windowClass || !windowClass->getBackgroundBrush()) return 0;
 
         rc = GetClipBox( (HDC)wParam, &rect );
@@ -3442,8 +3448,7 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value, BOOL fUnicode)
                 SendInternalMessageA(WM_STYLECHANGING,GWL_STYLE,(LPARAM)&ss);
                 setStyle(ss.styleNew);
                 SendInternalMessageA(WM_STYLECHANGED,GWL_STYLE,(LPARAM)&ss);
-////                OSLibSetWindowStyle(getOS2WindowHandle(), getStyle(), getExStyle(),
-////                                    windowClass->getStyle() & CS_SAVEBITS);
+                OSLibSetWindowStyle(getOS2WindowHandle(), getStyle(), getExStyle());
 #ifdef DEBUG
                 PrintWindowStyle(ss.styleNew, 0);
 #endif
