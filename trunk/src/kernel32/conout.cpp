@@ -1,4 +1,4 @@
-/* $Id: conout.cpp,v 1.13 2001-12-05 14:15:58 sandervl Exp $ */
+/* $Id: conout.cpp,v 1.14 2001-12-05 18:06:00 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -248,8 +248,12 @@ BOOL HMDeviceConsoleOutClass::WriteFile(PHMHANDLEDATA pHMHandleData,
            lpOverlapped);
 #endif
 
-        /* just prevent an endless loop, although this condition might never */
-                                                                /* be true ! */
+  if(lpCompletionRoutine) {
+      dprintf(("!WARNING!: lpCompletionRoutine not supported -> fall back to sync IO"));
+  }
+
+  /* just prevent an endless loop, although this condition might never */
+  /* be true ! */
   if (pHMHandleData->hHMHandle != pConsoleGlobals->hConsoleBuffer)
   {
     dwResult = HMWriteFile(pConsoleGlobals->hConsoleBuffer,

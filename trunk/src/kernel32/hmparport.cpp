@@ -1,4 +1,4 @@
-/* $Id: hmparport.cpp,v 1.16 2001-12-05 14:16:04 sandervl Exp $ */
+/* $Id: hmparport.cpp,v 1.17 2001-12-05 18:06:02 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -351,6 +351,9 @@ BOOL HMDeviceParPortClass::WriteFile(PHMHANDLEDATA pHMHandleData,
   if(!(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && lpOverlapped) {
     dprintf(("Warning: lpOverlapped != NULL & !FILE_FLAG_OVERLAPPED; sync operation"));
   }
+  if(lpCompletionRoutine) {
+      dprintf(("!WARNING!: lpCompletionRoutine not supported -> fall back to sync IO"));
+  }
 
   ret = OSLibDosWrite(pHMHandleData->hHMHandle, (LPVOID)lpBuffer, nNumberOfBytesToWrite,
                       &ulBytesWritten);
@@ -406,6 +409,9 @@ BOOL HMDeviceParPortClass::ReadFile(PHMHANDLEDATA pHMHandleData,
   }
   if(!(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && lpOverlapped) {
     dprintf(("Warning: lpOverlapped != NULL & !FILE_FLAG_OVERLAPPED; sync operation"));
+  }
+  if(lpCompletionRoutine) {
+      dprintf(("!WARNING!: lpCompletionRoutine not supported -> fall back to sync IO"));
   }
 
   ret = OSLibDosRead(pHMHandleData->hHMHandle, (LPVOID)lpBuffer, nNumberOfBytesToRead,

@@ -1,4 +1,4 @@
-/* $Id: mmap.h,v 1.19 2001-01-22 18:26:51 sandervl Exp $ */
+/* $Id: mmap.h,v 1.20 2001-12-05 18:06:02 sandervl Exp $ */
 
 /*
  * Memory mapped class
@@ -106,7 +106,7 @@ protected:
 
 private:
    static Win32MemMap *memmaps;
-      Win32MemMap *next;
+          Win32MemMap *next;
 };
 //******************************************************************************
 //Memory mapped file View Class

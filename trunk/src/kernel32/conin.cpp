@@ -1,4 +1,4 @@
-/* $Id: conin.cpp,v 1.16 2001-12-05 14:15:58 sandervl Exp $ */
+/* $Id: conin.cpp,v 1.17 2001-12-05 18:05:59 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -140,6 +140,10 @@ BOOL HMDeviceConsoleInClass::ReadFile(PHMHANDLEDATA pHMHandleData,
            lpNumberOfBytesRead,
            lpOverlapped);
 #endif
+
+  if(lpCompletionRoutine) {
+      dprintf(("!WARNING!: lpCompletionRoutine not supported -> fall back to sync IO"));
+  }
 
   ulCounter = 0;                              /* read ascii chars from queue */
   pszTarget = (PSZ)lpBuffer;

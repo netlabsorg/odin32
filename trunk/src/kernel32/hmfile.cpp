@@ -1,4 +1,4 @@
-/* $Id: hmfile.cpp,v 1.32 2001-12-05 14:16:01 sandervl Exp $ */
+/* $Id: hmfile.cpp,v 1.33 2001-12-05 18:06:01 sandervl Exp $ */
 
 /*
  * File IO win32 apis
@@ -462,6 +462,9 @@ BOOL HMDeviceFileClass::ReadFile(PHMHANDLEDATA pHMHandleData,
   }
   if(!(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && lpOverlapped) {
     dprintf(("Warning: lpOverlapped != NULL & !FILE_FLAG_OVERLAPPED; sync operation"));
+  }
+  if(lpCompletionRoutine) {
+      dprintf(("!WARNING!: lpCompletionRoutine not supported -> fall back to sync IO"));
   }
 
   //SvL: DosRead doesn't like writing to memory addresses returned by
