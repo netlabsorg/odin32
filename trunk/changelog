@@ -1,7 +1,7 @@
-/* $Id: changelog,v 1.2247 2002-08-07 17:11:39 sandervl Exp $ */
+/* $Id: changelog,v 1.2248 2002-08-07 17:15:32 sandervl Exp $ */
 
  2002-08-07: Platon Fomichev <platon@innotek.de>
-    - USER32:   o Listbox fix for keyboard search (Wine)
+    - USER32:   o Listbox fix for keyboard search (Rewind (Wine/X11))
 
  2002-08-05: Sander van Leeuwen <sandervl@innotek.de> 
     - USER32:   o MsgWaitForMultipleObjects changes; check objects before
