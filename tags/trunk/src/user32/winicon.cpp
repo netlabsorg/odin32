@@ -1,4 +1,4 @@
-/* $Id: winicon.cpp,v 1.15 2000-11-20 20:28:16 sandervl Exp $ */
+/* $Id: winicon.cpp,v 1.16 2000-11-21 15:17:14 sandervl Exp $ */
 /*
  * Win32 Icon Code for OS/2
  *
@@ -856,6 +856,7 @@ HGLOBAL CURSORICON_ExtCopy(HGLOBAL Handle, UINT nType,
             if(dwResGroupId == -1) {
                 dprintf(("WARNING: no resource associated with icon/cursor -> copy without scaling!"));
                 hNew = CURSORICON_Copy(Handle);
+                return hNew;
             }
 
             /* Completing iDesiredCX CY for Monochrome Bitmaps if needed
