@@ -1,4 +1,9 @@
- /* $Id: ChangeLog,v 1.51 1999-07-17 09:20:10 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.52 1999-07-20 11:16:32 sandervl Exp $ */
+ 99-07-19: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: Added method for retrieving converted OS/2 resource
+                    (which will be changed later on)
+	- USER32: CreateWindowEx now works and menus are displayed
+
  99-07-17: Sander van Leeuwen <sandervl@xs4all.nl>
         - KERNEL32: Exports for getting TEB & THDB added
 	
