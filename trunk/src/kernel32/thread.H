@@ -1,4 +1,4 @@
-/* $Id: thread.H,v 1.6 2000-03-16 19:20:40 sandervl Exp $ */
+/* $Id: thread.H,v 1.7 2001-02-11 10:34:44 sandervl Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -11,8 +11,6 @@
  */
 #ifndef __THREAD_H__
 #define __THREAD_H__
-
-//Why the @#%@#$ didn't IBM use _stdcall??
 
 typedef DWORD (* WIN32API WIN32THREADPROC)(LPVOID);
 

@@ -1,4 +1,4 @@
-# $Id: odin32.post.vac3.mk,v 1.11 2001-01-20 18:18:56 bird Exp $
+# $Id: odin32.post.vac3.mk,v 1.12 2001-02-11 10:35:29 sandervl Exp $
 
 #
 # Odin32 API
@@ -132,7 +132,7 @@ $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS) $(OS2RES) $(DEFFILE) $(OBJDIR)\
 !ifdef OS2RES
     $(OS2RC) $(OS2RCLFLAGS) $(OS2RES) $@
 !endif
-!ifndef DEBUG
+!if !defined(DEBUG) && !defined(NO_LXLITE)
     $(LXLITE) $@
 !endif
 !endif
@@ -191,7 +191,7 @@ $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS) $(OS2RES) $(DEFFILE) $(OBJDIR)\
 !ifdef OS2RES
     $(OS2RC) $(OS2RCLFLAGS) $(OS2RES) $@
 !endif
-!ifndef DEBUG
+!if !defined(DEBUG) && !defined(NO_LXLITE)
     $(LXLITE) $@
 !endif
 !endif

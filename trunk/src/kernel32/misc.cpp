@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.29 2001-01-29 01:21:28 bird Exp $ */
+/* $Id: misc.cpp,v 1.30 2001-02-11 10:34:44 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -409,7 +409,12 @@ void LogException(int state)
 #if (__IBMCPP__ == 300) || (__IBMC__ == 300)
         PUSHORT lock = (USHORT *)(teb->o.odin.logfile+0x1C);
 #else
+#if __IBMC__ >= 360 || __IBMCPP__ >= 360
+//TODO: test this!!!!!!!
+        PUSHORT lock = (USHORT *)(teb->o.odin.logfile+0x1C);
+#else
 #error Check the offset of the lock count word in the file stream structure for this compiler revision!!!!!
+#endif
 #endif
         if (state == ENTER_EXCEPTION)
         {
@@ -444,7 +449,12 @@ void CheckLogException()
 #if (__IBMCPP__ == 300) || (__IBMC__ == 300)
     lock = (PUSHORT)(teb->o.odin.logfile+0x1C);
 #else
+#if __IBMC__ >= 360 || __IBMCPP__ >= 360
+//TODO: test this!!!!!!!
+        PUSHORT lock = (USHORT *)(teb->o.odin.logfile+0x1C);
+#else
 #error Check the offset of the lock count word in the file stream structure for this compiler revision!!!!!
+#endif
 #endif
     (*lock)--;
   }

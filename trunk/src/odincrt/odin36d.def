@@ -1,4 +1,4 @@
-; $Id: odin36d.def,v 1.2 2000-12-16 22:53:27 bird Exp $
+; $Id: odin36d.def,v 1.3 2001-02-11 10:32:51 sandervl Exp $
 ; Odin VAC++ 3.6.5 shared multithreaded runtime
 LIBRARY ODINCRTD INITINSTANCE TERMINSTANCE
 DESCRIPTION 'Odin32 System DLL - VAC++ 3.6.5 Debug OdinCRT'
@@ -12,1212 +12,967 @@ SEGMENTS
 ; NOT employ _CrtGetLocalData in any way. Alternatively,
 ; we could provide corresponding macros for that purpose.
 
-
 EXPORTS
-    ;Module Name: D:\bin\ibmc36\runtime\cpprmi36.dll
-     ; Exported Symbols:
 
-    ; Non Exported Symbols
-    ; Other file exported symbols
-     freopen @856
-     __vft13strstreambase @1090
-     _heapdbg @855
-     _debug_heapmin @270
-     __vft10bad_typeid9exception @646
-     stderr @570
-     getline__7istreamFPcic @29
-     strerror @1055
-     _getpid @835
-     __vtt8iostream @264
-     _uaddmem @893
-     __NulledVirtualFunction @289
-     detach__11fstreambaseFv @180
-     _debug_ucalloc @253
-     _debug_tmalloc @257
-     freeze__12strstreambufFi @245
-     attach__11fstreambaseFi @162
-     __vft13strstreambase3ios @143
-     seekp__7ostreamFlQ2_3ios8seek_dir @38
-     _LHUGE_VAL @1189
-     _ltoa @459
-     _itoa @455
-     __ct__11fstreambaseFPCciT2 @266
-     _debug_tcalloc @252
-     __vft7istream3ios_10istrstream @951
-     wcswcs @602
-     _debug_umalloc @258
-     wctob @441
-     btowc @437
-     xsputn__9streambufFPCci @291
-     __vtt13strstreambase @1095
-     __compute_embedded @833
-     _heapmin @914
-     _SemSharedCreate @520
-     _IEEE_LDBL_SIGN_NEG_MASK @357
-     _debug_memset @200
-     _ctype_lower @149
-     atoi @348
-     strupr @663
-     _cprintf @1026
-     asctime @829
-     powl @371
-     atol @350
-     _debug_realloc @254
-     _SysWriteFile @189
-     _atexit @976
-     __dt__7fstreamFv @504
-     fseek @394
-     mbsrtowcs @1121
-     _ucalloc @966
-     _uheap_walk @108
-     localeconv @1144
-     _tmalloc @1011
-     _freemod @1000
-     __vft8iostream3ios_9strstream @909
-     __vft7ostream3ios_19iostream_withassign8iostream @626
-     __vft7istream3ios_19iostream_withassign8iostream @592
-     _SysGetEHChainPointer @34
-     _tcalloc @957
-     powf @370
-     atof @347
-     _debug_strset @216
-     catopen @884
-     fflush @540
-     clog @331
-     nextword__3ios @226
-     _DosFlatToSel @156
-     _IEEE_DBL_ALL_EXP_MASK @67
-     wcsftime @991
-     _fzero @669
-     cout @360
-     _umalloc @1013
-     log @268
-     chr__FiT1 @1042
-     isupper @975
-     isblank @836
-     seekoff__8stdiobufFlQ2_3ios8seek_diri @485
-     acosl @407
-     __SomDynamicRefCast @1
-     __vtt8ifstream @260
-     __SomDynamicPtrCast @14
-     __extended_type_infoXTSc_ @487
-     wcscspn @936
-     __deleteSomObject @748
-     _ProfileHook16 @215
-     hex__Fli @1016
-     __ct__19iostream_withassignFv @844
-     __dt__19iostream_withassignFv @851
-     ungetc @532
-     _CRT_init @1112
-     strncpy @1015
-     _NAN_LEN @912
-     _CRT_term @1097
-     _execvp @992
-     allocObject__13eti_cplusplusCFv @18
-     isxdigit @1003
-     acosf @398
-     lldiv @395
-     iconv_open @1184
-     _execvpe @1053
-     _mb_cur_max @95
-     _eh_add @827
-     iswcntrl @1070
-     iswdigit @999
-     __vft7ostream3ios_8ofstream @720
-     _LC_INF_STR @84
-     localdtconv @80
-     dbp__9streambufFv @647
-     dec__FR3ios @64
-     __as__18istream_withassignFP9streambuf @753
-     _ctype_loweridx @730
-     abort @414
-     _SysDeleteFile @259
-     _ProfileHook32 @212
-     get__7istreamFPUcic @1127
-     get__7istreamFPScic @1126
-     __vft10ostrstream3ios @1111
-     qsort @460
-     _cputs @617
-     _cgets @559
-     cosh @353
-     wcsncpy @989
-     _INF_LEN @978
-     getwchar @899
-     getchar @888
-     doallocate__12strstreambufFv @798
-     stdin @412
-     ccsidtocs @1085
-     _infinity @1086
-     wmemcpy @932
-     _getcwd @837
-     __ct__10istrstreamFPUci @202
-     cosl @354
-     _LC_NAN_STR @88
-     __vtt19iostream_withassign @471
-     _SysWaitProcess @729
-     fread @384
-     _y0 @190
-     underflow__7filebufFv @20
-     _read @411
-     _y1 @197
-     _spawnl_ansi @140
-     __threadid @1174
-     iswpunct @1008
-     _execve @924
-     _SysExitProcess @741
-     cosf @352
-     ldiv @305
-     _debug_strcat @168
-     str__FPCci @1191
-     _loadmod @995
-     isprint @974
-     div @301
-     strcspn @980
-     __vtt11fstreambase @716
-     __vft11fstreambase @708
-     _beginthreadex @239
-     _MAKE_LDBL_POSITIVE @1199
-     tmpnam @584
-     modff @387
-     set_unexpected__FPFv_v @82
-     __vtt9strstream @679
-     signal @522
-     tmpfile @870
-     __dt__13Iostream_initFv @207
-     __ct__13Iostream_initFv @204
-     __ls__7ostreamFPCSc @1133
-     _urealloc @1096
-     __vft3ios @1071
-     fgetpos @880
-     __set_frame_ptr @724
-     _spawnve @1072
-     isspace @860
-     detach__7filebufFv @843
-     modfl @392
-     __ct__7fstreamFiPcT1 @1141
-     wctrans @948
-     _SysGetFileSize @678
-     iswlower @1032
-     __eof @450
-     _SysFindFirst @219
-     fsetpos @907
-     _SysSetFileSize @688
-     _set_crt_msg_handle @1179
-     __ct__3iosFR3ios @476
-     open__7fstreamFPCciT2 @1140
-     _spawnlpe_ansi @286
-     __dt__10ostrstreamFv @1151
-     _udefault @1082
-     _SysSetDefaultDisk @874
-     get_complicated__7istreamFRUc @852
-     resetiosflags__Fl @780
-     _spawnvp @1075
-     mblen @396
-     _uheapmin @1083
-     _searchenv @1167
-     __rs__7istreamFPFR3ios_R3ios @759
-     __ls__7ostreamFPFR3ios_R3ios @750
-     xalloc__3iosFv @262
-     __dt__13strstreambaseFv @174
-     __ct__13strstreambaseFv @173
-     strnicmp @1002
-     setvbuf @898
-     regexec @819
-     __DynamicPtrCast @705
-     ftell @399
-     _heap_walk @1188
-     __vft11fstreambase3ios_7fstream @1161
-     memccpy @934
-     __DynamicRefCast @633
-     _tell @429
-     towupper @1024
-     toupper @981
-     isalpha @815
-     _SysGetCurrentDir @797
-     __vft13strstreambase3ios_9strstream @309
-     difftime @900
-     __ct__7istreamFiT1P7ostream @744
-     feof @320
-     __dt__10istrstreamFv @1147
-     fmod @338
-     _set_mt_new_handler__FPFv_v @1084
-     str__9strstreamFv @757
-     get_complicated__7istreamFRSc @849
-     __vft13strstreambase3ios_10ostrstream @243
-     __vft13strstreambase3ios_10istrstream @240
-     __run_exit_list @767
-     __ct__7filebufFi @477
-     atan @293
-     _debug_memmove @282
-     pcount__10ostrstreamFv @43
-     __SOMEnv @1062
-     _atold @577
-     _trealloc @1093
-     _rpmatch @984
-     _SysGetCommandLine @918
-     __ct__9type_infoFRC9type_info @886
-     fgetws @539
-     _yn @329
-     ceil @295
-     tan @276
-     putchar @945
-     fputws @662
-     _run_exit_list @397
-     __ftime @890
-     __ctime @876
-     bitalloc__3iosFv @496
-     __ct__10ostrstreamFv @1149
-     __utime @982
-     __NoDefaultCopy__FPvPCvUi @498
-     _stat @473
-     strpbrk @943
-     regerror @961
-     _tzname @956
-     strlwr @667
-     log10 @339
-     __CatchMatch @78
-     attach__7filebufFi @845
-     _fdopen @847
-     wctomb @571
-     __dt__11fstreambaseFv @1166
-     _SysOpenFile @125
-     _tolowtbl @1128
-     wcspbrk @905
-     colltostr @1105
-     __ct__8ofstreamFPCciT2 @5
-     __ct__8ifstreamFPCciT2 @3
-     _spawnlpe @1110
-     _theapmin @1081
-     __dt__8iostreamFv @683
-     __ct__8iostreamFv @680
-     doallocate__9streambufFv @255
-     _upool @648
-     eatwhite__FR7istream @1182
-     __ls__7ostreamFPCUc @1136
-     _ungetch @983
-     seekg__7istreamFl @764
-     last_op__7filebufFv @1142
-     fgetwc @507
-     fputwc @610
-     iswxdigit @1091
-     _unlink @937
-     _toupptbl @1123
-     _cscanf @873
-     _SysQueryFHState @733
-     __ct__7filebufFv @479
-     _fullDump @1117
-     strdup @655
-     __EDC3216 @745
-     _SysFindNext @157
-     _fwscanfansi @121
-     putc @369
-     getc @342
-     _spawnlp @1038
-     ls_complicated__7ostreamFUc @858
-     _SysFileExist @209
-     modf @302
-     _SysAllocMem @118
-     _swscanfansi @130
-     setbuf__9streambufFPci @65
-     __dftdt__13eti_cplusplusFv @475
-     __vtt10ostrstream @515
-     __vtt10istrstream @513
-     fputs @463
-     fgets @389
-     __vec__new__som @806
-     __ct__7ostreamFi @500
-     __dynamicCast__17__DynaCastDesc_siFP20__APolymorphicObjectPCcUsT3 @290
-     _sprintfieee @112
-     _SysFreeMem @92
-     _wprintfieee @116
-     _vprintfieee @114
-     init__12strstreambufFPciT1 @308
-     wcsnicmp @972
-     flush__7ostreamFv @805
-     __vft7istream3ios_18istream_withassign @681
-     nan_special_in__7istreamFP9streambuf @445
-     __vft24__DynaCastDesc_si_public14__DynaCastDesc @732
-     __vft24__DynaCastDesc_mi_public14__DynaCastDesc @721
-     getmccoll @1076
-     strnset @988
-     __SomObjectTypeid @761
-     __dynamicCast__17__DynaCastDesc_viFP20__APolymorphicObjectPCcUsT3 @292
-     _fprintfieee @99
-     _execv @656
-     wmemset @894
-     fclose @521
-     floorl @576
-     puts @372
-     gets @349
-     fmodf @421
-     _wscanfieee @61
-     _sscanfieee @56
-     _fscanfieee @48
-     __ReThrow @1134
-     putwchar @960
-     iswalnum @1066
-     _execl @615
-     __ct__7istreamFP9streambuf @451
-     rdbuf__13strstreambaseFv @287
-     _SysRemoveDir @183
-     logl @316
-     __dynamicCast__17__DynaCastDesc_miFP20__APolymorphicObjectPCcUsT3 @284
-     __vft7filebuf9streambuf @153
-     _dposqnan @1098
-     _spawnle @1033
-     __ct__7ostreamFv @505
-     __ct__7istreamFv @503
-     fputc @454
-     fgetc @373
-     __ct__10istrstreamFPCSci @221
-     _SysScanEnv @103
-     tellp__7ostreamFv @792
-     _SysRawGetMessage @774
-     fmodl @427
-     _SysLoadModule @256
-     _mheap @558
-     _rmdir @612
-     _mkdir @591
-     floorf @566
-     _chdir @546
-     _vfwprintfieee @248
-     _setmode @927
-     _close @554
-     wchar_out__7ostreamFiPcT1 @453
-     logf @313
-     putback__7istreamFc @1125
-     underflow__12strstreambufFv @940
-     _SysGetDateTime @650
-     _creat @598
-     _exception_dllinit @1040
-     _makepath @1012
-     __dt__9strstreamFv @790
-     __ct__9strstreamFv @788
-     _printfansi @89
-     _IEEE_DBL_INF_MASK @872
-     cerr @337
-     _j0 @169
-     _heap_check @50
-     _j1 @171
-     sync__9streambufFv @795
-     _lseek @609
-     __cppstore @1193
-     _SysSleep @1118
-     _execlpe_ansi @185
-     _ddused @824
-     _fcloseall @1153
-     sync__8stdiobufFv @607
-     _INFINITY_LEN @187
-     bsearch @831
-     clock @419
-     __dt__18ostream_withassignFv @818
-     __ct__18ostream_withassignFv @816
-     __dt__18istream_withassignFv @813
-     __ct__18istream_withassignFv @812
-     ends__FR7ostream @562
-     getwmccoll @1156
-     __rs__7istreamFP9streambuf @478
-     get__7istreamFR9streambufc @466
-     __DynamicPtrCast_Complete @422
-     __Throw @1064
-     _execlpe @1029
-     _SemRelease @54
-     __vft19iostream_withassign3ios @892
-     _scanfansi @1145
-     __multi64 @1073
-     strncat @949
-     wcsrtombs @1099
-     _execle_ansi @115
-     __powi @682
-     wcstol @599
-     _vswprintfieee @274
-     getline__7istreamFPUcic @196
-     getline__7istreamFPScic @195
-     _ustats @1021
-     __vec__new__place @864
-     ls_complicated__7ostreamFSc @854
-     strtol @643
-     remove @548
-     _SysKbdPeek @79
-     mbtowc @572
-     malloc @516
-     sinhf @423
-     tanhf @405
-     calloc @510
-     _erf @355
-     tie__3iosFP7ostream @1135
-     close__7filebufFv @762
-     strtok @637
-     unexpected__Fv @261
-     wcsncat @908
-     wcstok @597
-     _spawnlp_ansi @191
-     _debug_memcpy @160
-     memicmp @882
-     _rmtmp @629
-     _lltoa @569
-     __ct__7istreamFiPcT1 @1143
-     overflow__7filebufFi @1115
-     strtocoll @1104
-     _ultoa @590
-     wcstod @575
-     sinhl @430
-     tanhl @415
-     _debug_strcpy @179
-     open__7filebufFPCciT2 @1113
-     strtod @611
-     stdout @583
-     _execlp_ansi @138
-     __vft7ostream3ios_18ostream_withassign @702
-     flags__3iosFl @193
-     mbstowcs @970
-     rs_complicated__7istreamFRc @839
-     _SysExitThread @324
-     _spawnle_ansi @188
-     _swab @468
-     __udump_allocated_delta @321
-     __tdump_allocated_delta @315
-     _timezone @1107
-     _fone @435
-     __RestoreRegsAndJump @11
-     strftime @1019
-     strptime @1028
-     __dt__11logic_errorFv @1178
-     __dt__9streambufFv @791
-     __ct__9streambufFv @789
-     adjustfield__3ios @574
-     _wcstodieee @46
-     __heap_check @124
-     strncmp @965
-     stricmp @955
-     __vft7ostream3ios_8iostream @726
-     __vft7istream3ios_8iostream @703
-     _debug_urealloc @527
-     __vft7ostream3ios_9strstream8iostream @440
-     __vft7istream3ios_9strstream8iostream @417
-     _ProfileThrow32 @375
-     __as__19iostream_withassignFR3ios @32
-     _tzTab @659
-     __ct__12strstreambufFPciT1 @344
-     _SysKbdCharIn @165
-     _uheap_check @111
-     _theap_check @109
-     _daylight @1031
-     _lzTab @631
-     __ct__9strstreamFPciT2 @7
-     _getche @828
-     _atofieee @1065
-     __nw__FUiPCcT1Pv @622
-     __vft7ostream3ios_10ostrstream @996
-     putwc @465
-     _LC_INFINITY_STR @727
-     getwc @432
-     __vtt7istream @141
-     __vft7istream @137
-     _p6memcpy @834
-     _ipmd_heap_check @712
-     _putch @634
-     _scanfieee @1148
-     regfree @821
-     _getch @518
-     wcsncmp @922
-     iconv @424
-     isgraph @850
-     atan2l @494
-     _terminate @1172
-     wmemcmp @875
-     pcount__12strstreambufFv @265
-     __vft11stdiostream3ios @1146
-     __CreateTypeinfo__18SomTypeinfoManagerFP8SOMClass @766
-     _fposqnan @1102
-     __dl__FP9SOMObjectPCcUi @269
-     _uheapmin_ptr @206
-     __vtt7ostream @154
-     __vft7ostream @150
-     oct__Fli @1001
-     atoll @442
-     __vft8bad_cast9exception @159
-     _reg_heap @1067
-     atan2f @488
-     __nw__FUiPv @146
-     _dup @364
-     __vft9exception @549
-     __dynamicCast__24__DynaCastDesc_mi_publicFP20__APolymorphicObjectPCcUsT3 @93
-     __stat @695
-     _debug_uheapmin @564
-     _dump_allocated @524
-     _SysDupHandle @192
-     _is_fd_open__Fi @711
-     _fstat @620
-     _chsize @861
-     floor @436
-     strlen @618
-     _tempnam @913
-     _set_mt_unexpected__FPFv_v @665
-     printf @565
-     __vtt8ofstream @283
-     do_osfx__7ostreamFv @1201
-     do_opfx__7ostreamFv @1198
-     __dl__FP9SOMObject @840
-     initcount__13Iostream_init @658
-     xget__7istreamFPc @555
-     __ct__10ostrstreamFPUciT2 @246
-     __ct__10ostrstreamFPSciT2 @244
-     strrchr @964
-     system @654
-     wcslen @585
-     _printfieee @69
-     frexp @409
-     ldexp @388
-     __DynamicRefCast_NON_COM @332
-     __ct__8ifstreamFiPcT1 @1159
-     deallocArray__7eti_SOMCFPvUi @785
-     __vft8ofstream3ios @760
-     _SysQueryMem @129
-     _Exception @1202
-     __dump_allocated @734
-     _udump_allocated @725
-     _tdump_allocated @722
-     setbuf__9streambufFPciT2 @328
-     ignore__7istreamFiT1 @1183
-     overflow__12strstreambufFi @448
-     _dup2 @402
-     _fposinfi @1088
-     __modu64 @800
-     _gamma @501
-     __BuiltinDefaultCtor__FPv @462
-     overflow__9streambufFi @23
-     _osminor @1047
-     __vft8ifstream3ios @749
-     _debug_trealloc @526
-     __ls__7ostreamFP9streambuf @470
-     __vft8iostream3ios @752
-     getenv @603
-     __ct__11fstreambaseFiPcT1 @218
-     terminate__Fv @210
-     _execle @896
-     __divu64 @794
-     pword__3iosFi @227
-     __vft7istream3ios_8ifstream @696
-     _debug_ufree @107
-     _debug_tfree @106
-     mbrlen @567
-     setbuf__12strstreambufFPci @497
-     _wscanfansi @86
-     _sscanfansi @83
-     _fscanfansi @70
-     setbuf__7filebufFPci @1190
-     exp @307
-     __nw__FP8SOMClassUiPCcT2 @314
-     _fprintfansi @132
-     _spawnvpe @1124
-     _umalloc_ptr @148
-     __vtt7fstream @136
-     _ucalloc_ptr @128
-     __ct__10ostrstreamFPciT2 @229
-     _sprintfansi @147
-     str__12strstreambufFv @1132
-     __ct__13eti_cplusplusFRC13eti_cplusplus @1035
-     _wprintfansi @152
-     deallocObject__13eti_cplusplusCFPv @233
-     __dt__8bad_castFv @723
-     _SemClose @1078
-     wcsrchr @921
-     __stackprobe2 @135
-     _execlp @962
-     longjmp @916
-     _swscanfieee @96
-     open__8ofstreamFPCciT2 @1200
-     open__8ifstreamFPCciT2 @1197
-     _fpninit @985
-     __stackprobe1 @134
-     _debug_theapmin @561
-     _fwscanfieee @87
-     do_ipfx__7istreamFi @1169
-     _unsignedBitsShift @846
-     __vft18istream_withassign3ios @807
-     _chmod @523
-     wmemchr @871
-     __vft18ostream_withassign3ios @809
-     __dt__9type_infoFv @778
-     __fac @446
-     _jn @297
-     _flushall @1054
-     wctype @587
-     fprintf @902
-     _splitpath @1195
-     unsetf__3iosFl @296
-     _strerror @1129
-     setlocale @1045
-     _ctype @601
-     cclass @544
-     log10l @489
-     seekpos__9streambufFli @31
-     seekp__7ostreamFl @770
-     __dt__11stdiostreamFv @1175
-     _p6cnttz8 @848
-     _p5cnttz4 @838
-     _p6cntlz8 @832
-     _p5cntlz4 @822
-     __get_frame_ptr @685
-     iostream_cleanup @676
-     __vft9streambuf @525
-     realloc @814
-     __Invoke__Delete @735
-     basefield__3ios @666
-     __compareCRC_common_vi @59
-     _p5cnttz8 @842
-     _p6cnttz4 @841
-     _p5cntlz8 @826
-     _p6cntlz4 @825
-     _SysSearchPath @272
-     __ct__12strstreambufFPUciT1 @675
-     __ct__12strstreambufFPSciT1 @661
-     inf_special_in__7istreamFP9streambuf @428
-     _fwprintfieee @158
-     __vec__debug__delete2 @45
-     ws__FR7istream @232
-     WS__FR7istream @231
-     wcstoul @942
-     log10f @484
-     underflow__8stdiobufFv @90
-     pow @330
-     __compareCRC_private_si @311
-     __ct__10istrstreamFPCUc @199
-     __ct__10istrstreamFPUc @28
-     get__7istreamFPcic @787
-     getsyntx @1050
-     complicated_put__7ostreamFc @772
-     _IEEE_LDBL_ALL_EXP_MASK @456
-     fwide @418
-     _gcvt @404
-     _fcvt @403
-     _ecvt @400
-     _fgetchar @1043
-     size__7eti_SOMCFv @719
-     _umask @614
-     _runtime_heap @181
-     Iostream_irtllock_dummy_variable @119
-     strtoul @986
-     __ct__7ostreamFP9streambuf @452
-     localtime @1049
-     __rs__7istreamFPSc @801
-     atan2 @345
-     __CurrentException @946
-     __dt__7ostreamFv @508
-     __dt__7istreamFv @506
-     __extended_type_infoXTs_ @413
-     __ct__10istrstreamFPCUci @223
-     _SysGetMessageEx @736
-     wcscat @588
-     _SysSetCurrentDir @799
-     strcat @628
-     underflow__9streambufFv @335
-     _SysFindClose @203
-     __dynamicCast__24__DynaCastDesc_si_publicFP20__APolymorphicObjectPCcUsT3 @98
-     _SysFreeModule @263
-     _uclose @867
-     __ct__7fstreamFPCciT2 @1154
-     wcstoull @1017
-     collequiv @1100
-     __extended_type_infoXTr_ @408
-     vfprintf @1020
-     __udump_allocated @784
-     __tdump_allocated @781
-     labs @279
-     fabs @273
-     _swprintfieee @172
-     __extended_type_infoXTUs_ @495
-     abs @280
-     __nw__FUi @1131
-     __dt__18extended_type_infoFv @820
-     __DynamicPtrCast_NON_COM @376
-     _write @649
-     __rs__7istreamFPUc @803
-     get__7istreamFRw @551
-     _execl_ansi @127
-     ferror @589
-     __compareCRC_private_vi @318
-     _debug_free @76
-     fwrite @606
-     __dt__8stdiobufFv @595
-     _exit @467
-     _vsprintfieee @166
-     _clear87 @769
-     _vwprintfieee @177
-     setbase__Fi @72
-     perror @604
-     _ctype_mask @123
-     hex__FR3ios @104
-     _wcstok_xpg @85
-     rdbuf__11stdiostreamFv @53
-     oct__FR3ios @94
-     __NoNewOperator__FPv @25
-     _vfprintfieee @139
-     __compareCRC_common_si @58
-     __dftbdt__7eti_SOMFv @1152
-     __as__18ostream_withassignFP9streambuf @754
-     __vft10istrstream3ios @1108
-     uresize__3iosFi @486
-     __ct__3iosFP9streambuf @16
-     __ct__11stdiostreamFP6__file @768
-     memset @568
-     __vft7ostream3ios_7fstream8iostream @238
-     nextbit__3ios @131
-     __dl__FPv @1119
-     _cabs @379
-     __vft17__DynaCastDesc_mi14__DynaCastDesc @1034
-     __extended_type_infoXTw_ @431
-     llabs @378
-     size__13eti_cplusplusCFv @222
-     _ulltoa @889
-     __vft12strstreambuf9streambuf @776
-     _debug_strncpy @336
-     __ct__9strstreamFPUciT2 @110
-     __ct__9strstreamFPSciT2 @105
-     init__3iosFP9streambuf @12
-     strset @653
-     collorder @1068
-     __ct__18extended_type_infoFRC18extended_type_info @710
-     _ctype_cmask @151
-     __AssertTypeinfo__18SomTypeinfoManagerFP8SOMClass @773
-     _tzset @698
-     floatfield__3ios @660
-     __as__3iosFR3ios @474
-     isalnum @868
-     _errno @613
-     setjmp @608
-     __extended_type_infoXTv_ @426
-     __ct__10istrstreamFPCSc @194
-     __ct__10istrstreamFPSc @27
-     frexpl @543
-     vprintf @926
-     __ls__7ostreamFUl @694
-     __ls__7ostreamFUL @693
-     srand @390
-     _SysGetMessage @346
-     xsgetn__9streambufFPci @62
-     _SysCreateProcess @756
-     asinf @406
-     atanf @377
-     _SysGetProcAddr @684
-     scanf @368
-     __ls__7ostreamFUi @691
-     ldexpl @517
-     _fputchar @1077
-     clearerr @920
-     strfmon @969
-     flush__FR7ostream @758
-     setf__3iosFlT1 @126
-     __NoDefaultCtor__FPv @15
-     towctrans @1094
-     asinl @416
-     atanl @381
-     __nw__FP8SOMClassUi @1186
-     _endthread @1173
-     _SysRawGetMessageEx @9
-     frexpf @528
-     _wcsid @545
-     __ct__7ostreamFiPc @771
-     rs_complicated__7istreamFRUc @1006
-     _unsignedBitMask @673
-     ldexpf @511
-     __ct__9streambufFPciT2 @8
-     time @334
-     __vft13eti_cplusplus9type_info @1139
-     setw__Fi @1039
-     fopen @438
-     ceilf @380
-     _SysCreateDir @163
-     _exception_procinit @13
-     _SysCreateThread @689
-     _open @458
-     sqrtf @457
-     iconv_close @68
-     strchr @635
-     _msize @627
-     _IEEE_DBL_SIGN_NEG_MASK @393
-     sinf @340
-     tanf @323
-     __vft7istream3ios_7fstream8iostream @228
-     __difftime @1177
-     _getdcwd @952
-     sprintf @923
-     ismccollel @1171
-     rand @319
-     _urealloc_ptr @217
-     __ct__12strstreambufFPFl_PvPFPv_v @122
-     wcschr @593
-     allocArray__7eti_SOMCFUi @385
-     __vtt18ostream_withassign @303
-     endl__FR7ostream @556
-     ceill @386
-     _debug_strdup @175
-     __fstat @954
-     sqrtl @461
-     ctime @410
-     __ct__8stdiobufFP6__file @208
-     memchr @550
-     sinh @341
-     tanh @325
-     pbackfail__9streambufFi @234
-     _pfmemmove @1170
-     _p6memmove @1087
-     _strtime @1048
-     __Invoke__Destructor @19
-     _swprintfansi @198
-     __localtime @74
-     _SemOpen @938
-     set_new_handler__FPFv_v @401
-     sinl @343
-     tanl @327
-     __completeCast__17__DynaCastDesc_viFP20__APolymorphicObject @928
-     __completeCast__17__DynaCastDesc_siFP20__APolymorphicObject @919
-     __completeCast__17__DynaCastDesc_miFP20__APolymorphicObject @901
-     fabsl @365
-     deallocArray__13eti_cplusplusCFPvUi @310
-     __mktime @1041
-     openprot__7filebuf @755
-     __rs__7istreamFRw @718
-     __ls__7ostreamFr @538
-     vfwprintf @1106
-     __gmtime @1009
-     __vft7fstream3ios @581
-     vwprintf @1057
-     _putenv @1023
-     __vft8iostream3ios_7fstream @782
-     __rs__7istreamFRs @714
-     __rs__7istreamFPc @697
-     __vft7ostream3ios @641
-     __ls__7ostreamFw @541
-     _filelength @52
-     _INF_STR @1060
-     __rs__7istreamFRr @713
-     __vft7istream3ios @600
-     __as__18ostream_withassignFR7ostream @472
-     __vtt18istream_withassign @299
-     __vec__copy @211
-     __vft11fstreambase3ios_8ifstream @1162
-     _wait @425
-     __EDCThunkProlog @709
-     fabsf @361
-     __completeCast__24__DynaCastDesc_vi_publicFP20__APolymorphicObject @439
-     cstoccsid @1089
-     strxfrm @973
-     _eh_del @853
-     __ct__8ofstreamFi @652
-     __ct__8ifstreamFi @645
-     _IEEE_LDBL_INF_MASK @10
-     _ufree @552
-     _tfree @547
-     _chk_if_heap @57
-     set_terminate__FPFv_v @41
-     __completeCast__24__DynaCastDesc_si_publicFP20__APolymorphicObject @433
-     _ctype_upperidx @728
-     _f2to63 @481
-     __Remember__18SomClassDictionaryFP8SOMClassPC10__typeinfo @281
-     memcmp @553
-     __completeCast__24__DynaCastDesc_mi_publicFP20__APolymorphicObject @420
-     wcstombs @947
-     __rs__7istreamFRd @699
-     _CrtGetLocalData @616
-     __SomClassTypeid @739
-     __rs__7istreamFPw @717
-     allocObject__7eti_SOMCFv @236
-     _freeThreadStorage @823
-     __rs__7istreamFRf @700
-     __dt__8ofstreamFv @677
-     __dt__8ifstreamFv @672
-     __ct__8ofstreamFv @670
-     __ct__8ifstreamFv @664
-     __as__18istream_withassignFR7istream @464
-     iswctype @1074
-     vsprintf @1052
-     wmemmove @998
-     memmove @863
-     __ls__7ostreamFd @529
-     _fileno @887
-     _wcsftime_xpg @205
-     wcsxfrm @933
-     __setup_embedded @692
-     __ls__7ostreamFf @530
-     _fwprintfansi @176
-     __vft11fstreambase3ios @1137
-     strrev @657
-     __ls__7ostreamFi @531
-     iswgraph @1027
-     mbrtowc @879
-     __rs__7istreamFRL @707
-     __rs__7istreamFRl @706
-     __ct__10istrstreamFPc @1180
-     __vec__copy__som @830
-     __uheap_check @170
-     __theap_check @167
-     __dump_allocated_delta @77
-     _udump_allocated_delta @66
-     _tdump_allocated_delta @63
-     seekg__7istreamFlQ2_3ios8seek_dir @37
-     _NAN_STR @1022
-     __rs__7istreamFRi @704
-     iword__3iosFi @225
-     _SysGetStdHandle @715
-     wcscmp @596
-     __ls__7ostreamFL @535
-     __ls__7ostreamFl @534
-     linkageInfo__7eti_SOMCFv @235
-     rs_complicated__7istreamFRSc @997
-     strcmp @636
-     __ls__7ostreamFPCw @804
-     __PureVirtualCalled @1192
-     _access @869
-     __ls__7ostreamFPCv @802
-     _SysGetTickCount @742
-     __vft8iostream3ios_19iostream_withassign @1116
-     precision__3iosFi @777
-     _SysGetPathAttr @731
-     _SysKbdStringIn @642
-     __ct__9streambufFPci @1138
-     __dt__7eti_SOMFv @563
-     setfill__Fi @81
-     _udestroy @1114
-     fill__3iosFc @35
-     _SysReadFile @102
-     _dump_allocated_delta @4
-     _ucreate @967
-     isdigit @881
-     iscntrl @878
-     _SysSetPathAttr @737
-     _SysCopyFile @142
-     _SysGetCurrentDrive @6
-     __dt__9exceptionFv @775
-     strspn @651
-     __ct__7fstreamFi @499
-     __vft7eti_SOM9type_info @285
-     __dt__12strstreambufFv @33
-     __ct__12strstreambufFv @30
-     iswupper @1018
-     iswblank @1004
-     __dt__13eti_cplusplusFv @220
-     wcsspn @605
-     __vft24__DynaCastDesc_vi_public14__DynaCastDesc @740
-     sync__7filebufFv @482
-     __wDestructSOMBase @990
-     _assert @979
-     _pfmemcpy @1061
-     _uflush @904
-     memcpy @580
-     __vft11logic_error9exception @557
-     _debug_calloc @161
-     iswprint @1046
-     _strdate @1044
-     __ls__7ostreamFPCc @786
-     _ProfileUnwind32 @483
-     form__FPCce @75
-     __vec__new2 @60
-     __doserrno @1187
-     _debug_malloc @164
-     ispunct @944
-     __ct__7fstreamFv @502
-     __extended_type_infoXTc_ @359
-     __vec__new__place__som @237
-     verify__11fstreambaseFi @178
-     __ct__12strstreambufFi @24
-     wcswidth @1007
-     _control87 @1130
-     towlower @1037
-     tolower @931
-     wcscpy @623
-     _debug_strnset @322
-     _kbhit @542
-     __dl__FPvPCcUi @278
-     _ldposqnan @1176
-     _lsearch @971
-     _heapchk @885
-     strcpy @671
-     _ldposinfi @1164
-     __vft8stdiobuf9streambuf @213
-     __Find__18SomClassDictionaryCFP8SOMClass @1155
-     eatwhite__7istreamFv @1150
-     setiosflags__Fl @632
-     __ThrowBadTypeid @747
-     __extended_type_infoXTUc_ @490
-     _debug_mem_ptr @362
-     setf__3iosFl @39
-     open__11fstreambaseFPCciT2 @250
-     nl_langinfo @91
-     _SysSetFilePtr @333
-     skip__3iosFi @36
-     sqrt @366
-     __nw__FP8SOMClassUiPv @21
-     __dt__3iosFv @42
-     __ct__3iosFv @40
-     __vft11fstreambase3ios_8ofstream @1165
-     raise @391
-     _uheapset @1103
-     _osmode @897
-     __rs__7istreamFRUL @811
-     __rs__7istreamFRUl @810
-     __nw__FP8SOMClassUiPCcT2Pv @573
-     _SysQueryHType @351
-     dec__Fli @895
-     __rs__7istreamFRUi @808
-     __ct__13strstreambaseFPciT1 @514
-     __vft9strstream3ios @1196
-     _fullpath @1079
-     _MAKE_DBL_POSITIVE @891
-     setprecision__Fi @690
-     _hypot @686
-     stdstatus__13Iostream_init @638
-     _SysForceDelete @624
-     __vec__assign @247
-     _PGLOBAL_PTR @100
-     _beginthread @71
-     _SemCreate @1157
-     __ct__11fstreambaseFi @1158
-     maxcoll @910
-     __extended_type_infoXTd_ @363
-     __ct__11fstreambaseFv @1163
-     _status87 @1092
-     _SysQueryDBCSEnv @701
-     strstr @668
-     __ct__10istrstreamFPSci @201
-     __ct__10istrstreamFPCci @186
-     __ct__10istrstreamFPci @26
-     __rs__7istreamFRUs @817
-     _SysErrorMode @224
-     wcsstr @621
-     setbuf__9streambufFPUci @271
-     strcmpi @935
-     _set_mt_terminate__FPFv_v @509
-     _ProfileHookVAOptlink32 @113
-     seekoff__12strstreambufFlQ2_3ios8seek_diri @883
-     deallocObject__7eti_SOMCFPv @857
-     _ctype_ctypeidx @746
-     __ct__8iostreamFP9streambuf @738
-     _PrintErrMsg @133
-     __dynamicCast__24__DynaCastDesc_vi_publicFP20__APolymorphicObjectPCcUsT3 @101
-     _SemRequest @97
-     _debug_strncat @306
-     collrange @1063
-     _SysWaitThread @294
-     __extended_type_infoXTf_ @367
-     __ct__10istrstreamFPCc @22
-     __powil @993
-     wcrtomb @862
-     get_complicated__7istreamFRc @796
-     __DynamicPtrCast_Complete_NON_COM @182
-     strtoull @1051
-     wcwidth @915
-     _signedBitsShift @625
-     vswprintf @1122
-     regcomp @866
-     seekoff__9streambufFlQ2_3ios8seek_diri @469
-     __nw__FUiPCcT1 @241
-     _fltused @963
-     wcstoll @917
-     wcscoll @903
-     _erfc @444
-     __vft17__DynaCastDesc_si14__DynaCastDesc @1056
-     __extended_type_infoXTi_ @374
-     catgets @930
-     _SysGetFullPathname @1194
-     acos @317
-     __powif @959
-     ls_complicated__7ostreamFc @536
-     close__11fstreambaseFv @51
-     allocArray__13eti_cplusplusCFUi @47
-     _chdrive @987
-     cos @300
-     _SysCloseFile @184
-     wcstold @877
-     _MemoryFileUsed @560
-     linkageInfo__13eti_cplusplusCFv @17
-     sync_with_stdio__3iosFv @312
-     free @304
-     _environ @1010
-     _ctype_upper @145
-     str__10ostrstreamFv @1080
-     strtold @906
-     seekoff__7filebufFlQ2_3ios8seek_diri @144
-     __ct__7filebufFiPcT1 @1120
-     stdioflush__3ios @687
-     __vec__delete2 @277
-     __dt__10bad_typeidFv @1109
-     pbackfail__8stdiobufFi @44
-     __BuiltinCopyCtor__FPvPCvUi @1101
-     _fpreset @977
-     __extended_type_infoXTUl_ @493
-     __extended_type_infoXTUL_ @492
-     _getdrive @1058
-     strtoll @953
-     strcoll @941
-     _cwait @640
-     _uheapchk @1059
-     mbsinit @929
-     ungetwc @859
-     __compareCRC_common_mi @55
-     _SysSetMem @2
-     gmtime @578
-     __ct__7istreamFP9streambufiP7ostream @434
-     _abort_in_progress @1025
-     __ms_ld @950
-     islower @925
-     __dftbdt__13eti_cplusplusFv @763
-     _spawnv @1014
-     expf @356
-     asin @326
-     __ct__8ofstreamFiPcT1 @1160
-     catclose @994
-     mktime @579
-     _uopen @630
-     _sopen @619
-     sin @288
-     cin @275
-     _strtodieee @73
-     _ufree_ptr @1203
-     _SysResetBuffers @751
-     _get_handle_flags @639
-     _heapset @911
-     __modi64 @793
-     tellg__7istreamFv @783
-     overflow__8stdiobufFi @1168
-     _osmajor @1030
-     setbuf @582
-     rename @537
-     __dftdt__7eti_SOMFv @1181
-     __divi64 @779
-     read__7istreamFPci @743
-     _ftime @594
-     iswspace @958
-     __time @674
-     _utime @644
-     __ct__7eti_SOMFRC7eti_SOM @267
-     expl @358
-     __vft17__DynaCastDesc_vi14__DynaCastDesc @1069
-     __extended_type_infoXTl_ @383
-     __extended_type_infoXTL_ @382
-     iswalpha @1005
-     sscanf @519
-     _signedBitMask @249
-     _DosSelToFlat @155
-     _INFINITY_STR @214
-     coshf @443
-     _SysVioWrtTTY @242
-     rewind @586
-     __extended_type_infoXTUi_ @491
-     x_snextc__9streambufFv @49
-     __CleanupCatch @230
-     _lfind @533
-     _isatty @1036
-     __u64toflt @1185
-     coshl @449
-     _csid @447
-     fscanf @512
-     _SysQueryCp @117
-     __as__19iostream_withassignFP9streambuf @939
-     __dt__7filebufFv @480
-     setbuf__11fstreambaseFPci @251
-     _spawnl @968
-     gcount__7istreamFv @865
-     _SysQueryPathInfo @765
-     __compareCRC_private_mi @298
+; -----------------
+; memory management
+; -----------------
+       calloc = os2calloc                           @346    NONAME
+       realloc = os2realloc                         @583    NONAME
+       malloc = os2malloc                           @351    NONAME
+       free = os2free                               @219    NONAME
+       _debug_calloc = os2_debug_calloc                 @117    NONAME
+       _debug_realloc = os2_debug_realloc           @182    NONAME
+       _debug_malloc = os2_debug_malloc         @119    NONAME
+       _debug_free = os2_debug_free             @59 NONAME
+       _umalloc = os2_umalloc                           @749    NONAME
+       _debug_umalloc =os2_debug_umalloc                @185    NONAME
+       _ucalloc = os2_ucalloc                           @704    NONAME
+       _debug_ucalloc = os2_debug_ucalloc               @181    NONAME
+    __nw__FUiPCcT1 = os2__nw__FUiPCcT1                  @172    NONAME
+    __dl__FPvPCcUi = os2__dl__FPvPCcUi                  @201    NONAME
+
+    fread = os2_fread                                             @265  NONAME
+    fwrite = os2_fwrite                                            @430 NONAME
+    fopen = os2_fopen                                             @293  NONAME
+    fputc = os2_fputc                                             @305  NONAME
+    fputs = os2_fputs                                             @311  NONAME
+    fsetpos = os2_fsetpos                                           @652    NONAME
+    fclose = os2_fclose                                            @354 NONAME
+    fflush = os2_fflush                                            @370 NONAME
+    freopen = os2_freopen                                           @612    NONAME
+    fgetpos = os2_fgetpos                                           @630    NONAME
+    vfprintf = os2_vfprintf                                          @755   NONAME
+    feof = os2_feof                                              @230   NONAME
+    ferror = os2_ferror                                            @414 NONAME
+    fseek = os2_fseek                                             @271  NONAME
+    ftell = os2_ftell                                             @273  NONAME
+    fgetc = os2_fgetc                                             @262  NONAME
+    fgets = os2_fgets                                            @267   NONAME
+    fgetwc = os2_fgetwc                                            @343 NONAME
+    fgetws = os2_fgetws                                            @369 NONAME
+    fputwc = os2_fputwc                                            @435 NONAME
+    fputws = os2_fputws                                            @478 NONAME
+
+    _fdopen = os2_fdopen                                           @605 NONAME
+
+;;TODO!
+    fprintf                                           @647  NONAME
+
+     strdup                                     @472    NONAME
+    ;strncpy doesn't stop at 0 terminator!
+    strncpy = __strncpy                                 @751    NONAME
+    __strncpy                                           @919    NONAME
+
+; original exports
+    __ct__8ifstreamFPCciT2                             @1   NONAME
+    _dump_allocated_delta                              @2   NONAME
+    __ct__8ofstreamFPCciT2                             @3   NONAME
+    __ct__9streambufFPciT2                             @4   NONAME
+    __ct__9strstreamFPciT2                             @5   NONAME
+    _IEEE_LDBL_INF_MASK                                @6   NONAME
+    __RestoreRegsAndJump                               @7   NONAME
+    init__3iosFP9streambuf                             @8   NONAME
+    _exception_procinit                                @9   NONAME
+    __ct__3iosFP9streambuf                             @10  NONAME
+    __Invoke__Destructor                               @11  NONAME
+    underflow__7filebufFv                              @12  NONAME
+    __nw__FP8SOMClassUiPv                              @13  NONAME
+    __ct__10istrstreamFPCc                             @14  NONAME
+    overflow__9streambufFi                             @15  NONAME
+    __ct__12strstreambufFi                             @16  NONAME
+    __ct__10istrstreamFPci                             @17  NONAME
+    __ct__10istrstreamFPSc                             @18  NONAME
+    __ct__10istrstreamFPUc                             @19  NONAME
+    getline__7istreamFPcic                             @20  NONAME
+    __ct__12strstreambufFv                             @21  NONAME
+    seekpos__9streambufFli                             @22  NONAME
+    __as__19iostream_withassignFR3ios                  @23  NONAME
+    __dt__12strstreambufFv                             @24  NONAME
+    fill__3iosFc                                       @25  NONAME
+    skip__3iosFi                                       @26  NONAME
+    seekg__7istreamFlQ2_3ios8seek_dir                  @27  NONAME
+    seekp__7ostreamFlQ2_3ios8seek_dir                  @28  NONAME
+    setf__3iosFl                                       @29  NONAME
+    __ct__3iosFv                                       @30  NONAME
+    _getcheused                                        @31  NONAME
+    set_terminate__FPFv_v                              @32  NONAME
+    __dt__3iosFv                                       @33  NONAME
+    pcount__10ostrstreamFv                             @34  NONAME
+    pbackfail__8stdiobufFi                             @35  NONAME
+    __vec__debug__delete2                              @36  NONAME
+    _CheckIfMem                                        @37  NONAME
+    _fscanfieee                                        @38  NONAME
+    x_snextc__9streambufFv                             @39  NONAME
+    _heap_check                                        @40  NONAME
+    close__11fstreambaseFv                             @41  NONAME
+    _filelength                                        @42  NONAME
+    rdbuf__11stdiostreamFv                             @43  NONAME
+    _sscanfieee                                        @44  NONAME
+    __vec__new2                                        @45  NONAME
+    xsgetn__9streambufFPci                             @46  NONAME
+    _tdump_allocated_delta                             @47  NONAME
+    dec__FR3ios                                        @48  NONAME
+    setbuf__9streambufFPci                             @49  NONAME
+    _udump_allocated_delta                             @50  NONAME
+    _IEEE_DBL_ALL_EXP_MASK                             @51  NONAME
+    iconv_close                                        @52  NONAME
+    _printfieee                                        @53  NONAME
+    _SemRelease                                        @54  NONAME
+    _beginthread                                       @55  NONAME
+    setbase__Fi                                        @56  NONAME
+    _strtodieee                                        @57  NONAME
+    form__FPCce                                        @58  NONAME
+    __dump_allocated_delta                             @60  NONAME
+    __CatchMatch                                       @61  NONAME
+    localdtconv                                        @62  NONAME
+    setfill__Fi                                        @63  NONAME
+    set_unexpected__FPFv_v                             @64  NONAME
+    _LC_INF_STR                                        @65  NONAME
+    _SemRequest                                        @66  NONAME
+    _LC_NAN_STR                                        @67  NONAME
+    underflow__8stdiobufFv                             @68  NONAME
+    nl_langinfo                                        @69  NONAME
+    _threadstore                                       @70  NONAME
+    _scanf_ansi                                        @71  NONAME
+    _ungetchused                                       @72  NONAME
+    oct__FR3ios                                        @73  NONAME
+    _mb_cur_max                                        @74  NONAME
+    _swscanfieee                                       @75  NONAME
+    _fprintfieee                                       @76  NONAME
+    _PGLOBAL_PTR                                       @77  NONAME
+    _test_handle                                       @78  NONAME
+    hex__FR3ios                                        @79  NONAME
+    __ct__9strstreamFPSciT2                            @80  NONAME
+    _debug_tfree                                       @81  NONAME
+    _uheap_walk                                        @82  NONAME
+    _fscanf_ansi                                       @83  NONAME
+    _theap_check                                       @84  NONAME
+    __ct__9strstreamFPUciT2                            @85  NONAME
+    _uheap_check                                       @86  NONAME
+    _sprintfieee                                       @87  NONAME
+    _ProfileHookVAOptlink32                            @88  NONAME
+    _vprintfieee                                       @89  NONAME
+    _execle_ansi                                       @90  NONAME
+    __ct__12strstreambufFPFl_PvPFPv_v                  @91  NONAME
+    _ctype_mask                                        @92  NONAME
+    __heap_check                                       @93  NONAME
+    _sscanf_ansi                                       @94  NONAME
+    setf__3iosFlT1                                     @95  NONAME
+    _execl_ansi                                        @96  NONAME
+    _printf_ansi                                       @97  NONAME
+    nextbit__3ios                                      @98  NONAME
+    _PrintErrMsg                                       @99  NONAME
+    __vtt7fstream                                     @100  NONAME
+    __vft7istream                                     @101  NONAME
+    _execlp_ansi                                      @102  NONAME
+    _vfprintfieee                                     @103  NONAME
+    _spawnl_ansi                                      @104  NONAME
+    __vtt7istream                                     @105  NONAME
+    __vft13strstreambase3ios                          @106  NONAME
+    seekoff__7filebufFlQ2_3ios8seek_diri              @107  NONAME
+    _ctype_upper                                      @108  NONAME
+    __nw__FUiPv                                       @109  NONAME
+    _ctype_lower                                      @110  NONAME
+    __vft7ostream                                     @111  NONAME
+    _ctype_cmask                                      @112  NONAME
+    __vft7filebuf9streambuf                           @113  NONAME
+    __vtt7ostream                                     @114  NONAME
+    _DosSelToFlat                                     @115  NONAME
+    _DosFlatToSel                                     @116  NONAME
+    attach__11fstreambaseFi                           @118  NONAME
+    _vsprintfieee                                     @120  NONAME
+    __theap_check                                     @121  NONAME
+    _j0                                               @122  NONAME
+    __uheap_check                                     @123  NONAME
+    _j1                                               @124  NONAME
+    _swprintfieee                                     @125  NONAME
+    __ct__13strstreambaseFv                           @126  NONAME
+    __dt__13strstreambaseFv                           @127  NONAME
+    verify__11fstreambaseFi                           @128  NONAME
+    detach__11fstreambaseFv                           @129  NONAME
+    _internal_err                                     @130  NONAME
+    _execlpe_ansi                                     @131  NONAME
+    _swscanfansi                                      @132  NONAME
+    _INFINITY_LEN                                     @133  NONAME
+    __ct__10istrstreamFPCci                           @134  NONAME
+    _spawnle_ansi                                     @135  NONAME
+    _fprintfansi                                      @136  NONAME
+    _spawnlp_ansi                                     @137  NONAME
+    _y0                                               @138  NONAME
+    flags__3iosFl                                     @139  NONAME
+    __ct__10istrstreamFPCSc                           @140  NONAME
+    getline__7istreamFPScic                           @141  NONAME
+    getline__7istreamFPUcic                           @142  NONAME
+    _y1                                               @143  NONAME
+    __ct__10istrstreamFPCUc                           @144  NONAME
+    __ct__10istrstreamFPSci                           @145  NONAME
+    __ct__10istrstreamFPUci                           @146  NONAME
+    __ct__13Iostream_initFv                           @147  NONAME
+    __ct__8stdiobufFP6__file                          @148  NONAME
+    __dt__13Iostream_initFv                           @149  NONAME
+    _sprintf_ansi                                     @150  NONAME
+    terminate__Fv                                     @151  NONAME
+    __vec__copy                                       @152  NONAME
+    _ProfileHook32                                    @153  NONAME
+    __vft8stdiobuf9streambuf                          @154  NONAME
+    _INFINITY_STR                                     @155  NONAME
+    _ProfileHook16                                    @156  NONAME
+    __ct__11fstreambaseFiPcT1                         @157  NONAME
+    __ct__10istrstreamFPCSci                          @158  NONAME
+    __ct__10istrstreamFPCUci                          @159  NONAME
+    iword__3iosFi                                     @160  NONAME
+    nextword__3ios                                    @161  NONAME
+    pword__3iosFi                                     @162  NONAME
+    __vft7istream3ios_7fstream8iostream               @163  NONAME
+    __ct__10ostrstreamFPciT2                          @164  NONAME
+    __CleanupCatch                                    @165  NONAME
+    WS__FR7istream                                    @166  NONAME
+    ws__FR7istream                                    @167  NONAME
+    pbackfail__9streambufFi                           @168  NONAME
+    __vec__new__place__som                            @169  NONAME
+    __vft7ostream3ios_7fstream8iostream               @170  NONAME
+    __vft13strstreambase3ios_10istrstream             @171  NONAME
+    __vft13strstreambase3ios_10ostrstream             @173  NONAME
+    __ct__10ostrstreamFPSciT2                         @174  NONAME
+    freeze__12strstreambufFi                          @175  NONAME
+    __ct__10ostrstreamFPUciT2                         @176  NONAME
+    __vec__assign                                     @177  NONAME
+    open__11fstreambaseFPCciT2                        @178  NONAME
+    setbuf__11fstreambaseFPci                         @179  NONAME
+    _debug_tcalloc                                    @180  NONAME
+    doallocate__9streambufFv                          @183  NONAME
+    _debug_tmalloc                                    @184  NONAME
+    __vtt8ifstream                                    @186  NONAME
+    unexpected__Fv                                    @187  NONAME
+    xalloc__3iosFv                                    @188  NONAME
+    __vtt8iostream                                    @189  NONAME
+    pcount__12strstreambufFv                          @190  NONAME
+    __ct__11fstreambaseFPCciT2                        @191  NONAME
+    log                                               @192  NONAME
+    __dl__FP9SOMObjectPCcUi                           @193  NONAME
+    _debug_heapmin                                    @194  NONAME
+    setbuf__9streambufFPUci                           @195  NONAME
+    fabs                                              @196  NONAME
+    _vswprintfieee                                    @197  NONAME
+    cin                                               @198  NONAME
+    tan                                               @199  NONAME
+    __vec__delete2                                    @200  NONAME
+    labs                                              @202  NONAME
+    abs                                               @203  NONAME
+    __vtt8ofstream                                    @204  NONAME
+    _spawnlpe_ansi                                    @205  NONAME
+    rdbuf__13strstreambaseFv                          @206  NONAME
+;;;;    _mig_eib_store                                    @207  NONAME
+    sin                                               @208  NONAME
+    xsputn__9streambufFPCci                           @209  NONAME
+    atan                                              @210  NONAME
+    ceil                                              @211  NONAME
+    unsetf__3iosFl                                    @212  NONAME
+    _jn                                               @213  NONAME
+    __vtt18istream_withassign                         @214  NONAME
+    cos                                               @215  NONAME
+    div                                               @216  NONAME
+    modf                                              @217  NONAME
+    __vtt18ostream_withassign                         @218  NONAME
+    ldiv                                              @220  NONAME
+    exp                                               @221  NONAME
+    init__12strstreambufFPciT1                        @222  NONAME
+    __vft13strstreambase3ios_9strstream               @223  NONAME
+    sync_with_stdio__3iosFv                           @224  NONAME
+    _swprintfansi                                     @225  NONAME
+    __nw__FP8SOMClassUiPCcT2                          @226  NONAME
+    __tdump_allocated_delta                           @227  NONAME
+    acos                                              @228  NONAME
+    rand                                              @229  NONAME
+    __udump_allocated_delta                           @231  NONAME
+    tanh                                              @232  NONAME
+    asin                                              @233  NONAME
+    setbuf__9streambufFPciT2                          @234  NONAME
+    _yn                                               @235  NONAME
+    pow                                               @236  NONAME
+    clog                                              @237  NONAME
+    time                                              @238  NONAME
+    underflow__9streambufFv                           @239  NONAME
+    cerr                                              @240  NONAME
+    fmod                                              @241  NONAME
+    log10                                             @242  NONAME
+    sinh                                              @243  NONAME
+    getc                                              @244  NONAME
+    exit                                              @245  NONAME
+    __ct__12strstreambufFPciT1                        @246  NONAME
+    atan2                                             @247  NONAME
+    atof                                              @248  NONAME
+    atoi                                              @249  NONAME
+    gets                                              @250  NONAME
+    atol                                              @251  NONAME
+    cosh                                              @252  NONAME
+    _erf                                              @253  NONAME
+    _IEEE_LDBL_SIGN_NEG_MASK                          @254  NONAME
+    cout                                              @255  NONAME
+;;;;    _EXE_Exception                                    @256  NONAME
+    _dup                                              @257  NONAME
+    sqrt                                              @258  NONAME
+    scanf                                             @259  NONAME
+    putc                                              @260  NONAME
+    puts                                              @261  NONAME
+    _ProfileThrow32                                   @263  NONAME
+    _cabs                                             @264  NONAME
+    ldexp                                             @266  NONAME
+    srand                                             @268  NONAME
+    raise                                             @269  NONAME
+    _IEEE_DBL_SIGN_NEG_MASK                           @270  NONAME
+    mblen                                             @272  NONAME
+    _ecvt                                             @274  NONAME
+    set_new_handler__FPFv_v                           @275  NONAME
+    _dup2                                             @276  NONAME
+    _fcvt                                             @277  NONAME
+    _gcvt                                             @278  NONAME
+    frexp                                             @279  NONAME
+    ctime                                             @280  NONAME
+    _read                                             @281  NONAME
+    stdin                                             @282  NONAME
+    abort                                             @283  NONAME
+    __vft7istream3ios_9strstream8iostream             @284  NONAME
+    clock                                             @285  NONAME
+    iconv                                             @286  NONAME
+    _wait                                             @287  NONAME
+    inf_special_in__7istreamFP9streambuf              @288  NONAME
+    _tell                                             @289  NONAME
+    getwc                                             @290  NONAME
+    __ct__7istreamFP9streambufiP7ostream              @291  NONAME
+    floor                                             @292  NONAME
+    __vft7ostream3ios_9strstream8iostream             @294  NONAME
+    wctob                                             @295  NONAME
+    _erfc                                             @296  NONAME
+    nan_special_in__7istreamFP9streambuf              @297  NONAME
+    __fac                                             @298  NONAME
+    _csid                                             @299  NONAME
+    overflow__12strstreambufFi                        @300  NONAME
+    __eof                                             @301  NONAME
+    __ct__7istreamFP9streambuf                        @302  NONAME
+    __ct__7ostreamFP9streambuf                        @303  NONAME
+    wchar_out__7ostreamFiPcT1                         @304  NONAME
+    _itoa                                             @306  NONAME
+    _IEEE_LDBL_ALL_EXP_MASK                           @307  NONAME
+    _open                                             @308  NONAME
+    _ltoa                                             @309  NONAME
+    qsort                                             @310  NONAME
+    __as__18istream_withassignFR7istream              @312  NONAME
+    putwc                                             @313  NONAME
+    get__7istreamFR9streambufc                        @314  NONAME
+    _exit                                             @315  NONAME
+    _swab                                             @316  NONAME
+    seekoff__9streambufFlQ2_3ios8seek_diri            @317  NONAME
+    __ls__7ostreamFP9streambuf                        @318  NONAME
+    __vtt19iostream_withassign                        @319  NONAME
+    __as__18ostream_withassignFR7ostream              @320  NONAME
+    _stat                                             @321  NONAME
+    __as__3iosFR3ios                                  @322  NONAME
+    __ct__3iosFR3ios                                  @323  NONAME
+    __ct__7filebufFi                                  @324  NONAME
+    __rs__7istreamFP9streambuf                        @325  NONAME
+    __ct__7filebufFv                                  @326  NONAME
+    __dt__7filebufFv                                  @327  NONAME
+    sync__7filebufFv                                  @328  NONAME
+    _ProfileUnwind32                                  @329  NONAME
+    seekoff__8stdiobufFlQ2_3ios8seek_diri             @330  NONAME
+    uresize__3iosFi                                   @331  NONAME
+;;;;    _ilog2                                            @332  NONAME
+    bitalloc__3iosFv                                  @333  NONAME
+    setbuf__12strstreambufFPci                        @334  NONAME
+    __ct__7fstreamFi                                  @335  NONAME
+    __ct__7ostreamFi                                  @336  NONAME
+    _gamma                                            @337  NONAME
+    __ct__7fstreamFv                                  @338  NONAME
+    __ct__7istreamFv                                  @339  NONAME
+    __dt__7fstreamFv                                  @340  NONAME
+    __ct__7ostreamFv                                  @341  NONAME
+    __dt__7istreamFv                                  @342  NONAME
+    __dt__7ostreamFv                                  @344  NONAME
+    _set_mt_terminate__FPFv_v                         @345  NONAME
+    fscanf                                            @347  NONAME
+    __vtt10istrstream                                 @348  NONAME
+    __ct__13strstreambaseFPciT1                       @349  NONAME
+    __vtt10ostrstream                                 @350  NONAME
+    _getch                                            @352  NONAME
+    sscanf                                            @353  NONAME
+    signal                                            @355  NONAME
+    _chmod                                            @356  NONAME
+    _dump_allocated                                   @357  NONAME
+    __vft9streambuf                                   @358  NONAME
+    _debug_trealloc                                   @359  NONAME
+    __ls__7ostreamFd                                  @360  NONAME
+    __ls__7ostreamFf                                  @361  NONAME
+    __ls__7ostreamFi                                  @362  NONAME
+    _lfind                                            @363  NONAME
+    ungetc                                            @364  NONAME
+    __ls__7ostreamFl                                  @365  NONAME
+    ls_complicated__7ostreamFc                        @366  NONAME
+    rename                                            @367  NONAME
+    __ls__7ostreamFr                                  @368  NONAME
+    __ls__7ostreamFw                                  @371  NONAME
+    _kbhit                                            @372  NONAME
+    cclass                                            @373  NONAME
+    _wcsid                                            @374  NONAME
+    _chdir                                            @375  NONAME
+    _tfree                                            @376  NONAME
+    remove                                            @377  NONAME
+    memchr                                            @378  NONAME
+    get__7istreamFRw                                  @379  NONAME
+    _close                                            @380  NONAME
+    memcmp                                            @381  NONAME
+    atexit                                            @382  NONAME
+    xget__7istreamFPc                                 @383  NONAME
+    endl__FR7ostream                                  @384  NONAME
+    _mheap                                            @385  NONAME
+    _cgets                                            @386  NONAME
+    _MemoryFileUsed                                   @387  NONAME
+    _debug_theapmin                                   @388  NONAME
+    ends__FR7ostream                                  @389  NONAME
+    printf                                            @390  NONAME
+    _debug_uheapmin                                   @391  NONAME
+    mbrlen                                            @392  NONAME
+    memset                                            @393  NONAME
+    stderr                                            @394  NONAME
+    wctomb                                            @395  NONAME
+    mbtowc                                            @396  NONAME
+    __nw__FP8SOMClassUiPCcT2Pv                        @397  NONAME
+    adjustfield__3ios                                 @398  NONAME
+    _Flush                                            @399  NONAME
+    wcstod                                            @400  NONAME
+    gmtime                                            @401  NONAME
+    _atold                                            @402  NONAME
+    mktime                                            @403  NONAME
+    memcpy                                            @404  NONAME
+    __vft7fstream3ios                                 @405  NONAME
+    setbuf                                            @406  NONAME
+    stdout                                            @407  NONAME
+    wcslen                                            @408  NONAME
+    tmpnam                                            @409  NONAME
+    rewind                                            @410  NONAME
+    wctype                                            @411  NONAME
+    wcscat                                            @412  NONAME
+    _mkdir                                            @413  NONAME
+    _ultoa                                            @415  NONAME
+    __vft7istream3ios_19iostream_withassign8iostream  @416  NONAME
+    _ftime                                            @417  NONAME
+    wcschr                                            @418  NONAME
+    __dt__8stdiobufFv                                 @419  NONAME
+    wcscmp                                            @420  NONAME
+    wcstok                                            @421  NONAME
+    _creat                                            @422  NONAME
+    wcstol                                            @423  NONAME
+    __vft7istream3ios                                 @424  NONAME
+    _ctype                                            @425  NONAME
+    wcswcs                                            @426  NONAME
+    getenv                                            @427  NONAME
+    perror                                            @428  NONAME
+    wcsspn                                            @429  NONAME
+    sync__8stdiobufFv                                 @431  NONAME
+    setjmp                                            @432  NONAME
+    _Fmprs                                            @433  NONAME
+    _lseek                                            @434  NONAME
+    _Fnprs                                            @436  NONAME
+    strtod                                            @437  NONAME
+    _rmdir                                            @438  NONAME
+    _errno                                            @439  NONAME
+    _umask                                            @440  NONAME
+    _execl                                            @441  NONAME
+    _cputs                                            @442  NONAME
+    _sopen                                            @443  NONAME
+    _fstat                                            @444  NONAME
+    strlen                                            @445  NONAME
+    wcsstr                                            @446  NONAME
+    __nw__FUiPCcT1Pv                                  @447  NONAME
+    wcscpy                                            @448  NONAME
+    __vft7ostream3ios_19iostream_withassign8iostream  @449  NONAME
+    strcat                                            @450  NONAME
+    _msize                                            @451  NONAME
+    _rmtmp                                            @452  NONAME
+    _uopen                                            @453  NONAME
+    setiosflags__Fl                                   @454  NONAME
+    _putch                                            @455  NONAME
+    strchr                                            @456  NONAME
+    strcmp                                            @457  NONAME
+    strtok                                            @458  NONAME
+    stdstatus__13Iostream_init                        @459  NONAME
+    _cwait                                            @460  NONAME
+    __vft7ostream3ios                                 @461  NONAME
+    strtol                                            @462  NONAME
+    _utime                                            @463  NONAME
+    __ct__8ifstreamFi                                 @464  NONAME
+    dbp__9streambufFv                                 @465  NONAME
+    _write                                            @466  NONAME
+    _upool                                            @467  NONAME
+    strspn                                            @468  NONAME
+    __ct__8ofstreamFi                                 @469  NONAME
+    strset                                            @470  NONAME
+    system                                            @471  NONAME
+    _execv                                            @473  NONAME
+    strrev                                            @474  NONAME
+    initcount__13Iostream_init                        @475  NONAME
+    floatfield__3ios                                  @476  NONAME
+    __ct__12strstreambufFPSciT1                       @477  NONAME
+    strupr                                            @479  NONAME
+    __ct__8ifstreamFv                                 @480  NONAME
+    _set_mt_unexpected__FPFv_v                        @481  NONAME
+    basefield__3ios                                   @482  NONAME
+    strlwr                                            @483  NONAME
+    strstr                                            @484  NONAME
+    __ct__8ofstreamFv                                 @485  NONAME
+    strcpy                                            @486  NONAME
+    __dt__8ifstreamFv                                 @487  NONAME
+    __ct__12strstreambufFPUciT1                       @488  NONAME
+    __dt__8ofstreamFv                                 @489  NONAME
+    __vtt9strstream                                   @490  NONAME
+    __ct__8iostreamFv                                 @491  NONAME
+    __vft7istream3ios_18istream_withassign            @492  NONAME
+    __dt__8iostreamFv                                 @493  NONAME
+    __get_frame_ptr                                   @494  NONAME
+    _hypot                                            @495  NONAME
+    stdioflush__3ios                                  @496  NONAME
+    setprecision__Fi                                  @497  NONAME
+    __ls__7ostreamFUi                                 @498  NONAME
+    __setup_embedded                                  @499  NONAME
+    __ls__7ostreamFUl                                 @500  NONAME
+    __vft7istream3ios_8ifstream                       @501  NONAME
+    __rs__7istreamFPc                                 @502  NONAME
+    _tzset                                            @503  NONAME
+    _critlib_except                                   @504  NONAME
+    __rs__7istreamFRd                                 @505  NONAME
+    __rs__7istreamFRf                                 @506  NONAME
+    __vft7ostream3ios_18ostream_withassign            @507  NONAME
+    __vft7istream3ios_8iostream                       @508  NONAME
+    __rs__7istreamFRi                                 @509  NONAME
+    __rs__7istreamFRl                                 @510  NONAME
+    __vft11fstreambase                                @511  NONAME
+    __EDCThunkProlog                                  @512  NONAME
+    _is_fd_open__Fi                                   @513  NONAME
+    _ipmd_heap_check                                  @514  NONAME
+    __rs__7istreamFRr                                 @515  NONAME
+    __rs__7istreamFRs                                 @516  NONAME
+    __vtt11fstreambase                                @517  NONAME
+    __rs__7istreamFPw                                 @518  NONAME
+    __rs__7istreamFRw                                 @519  NONAME
+    __vft7ostream3ios_8ofstream                       @520  NONAME
+    _tdump_allocated                                  @521  NONAME
+    __set_frame_ptr                                   @522  NONAME
+    _udump_allocated                                  @523  NONAME
+    __vft7ostream3ios_8iostream                       @524  NONAME
+    _LC_INFINITY_STR                                  @525  NONAME
+    _ctype_upperidx                                   @526  NONAME
+    _ctype_loweridx                                   @527  NONAME
+    __dump_allocated                                  @528  NONAME
+    __Invoke__Delete                                  @529  NONAME
+    __ct__8iostreamFP9streambuf                       @530  NONAME
+    read__7istreamFPci                                @531  NONAME
+    __ct__7istreamFiT1P7ostream                       @532  NONAME
+    __EDC3216                                         @533  NONAME
+    _ctype_ctypeidx                                   @534  NONAME
+    __deleteSomObject                                 @535  NONAME
+    __vft8ifstream3ios                                @536  NONAME
+    __ls__7ostreamFPFR3ios_R3ios                      @537  NONAME
+    __vft8iostream3ios                                @538  NONAME
+    _callback_opt_sys                                 @539  NONAME
+    __as__18istream_withassignFP9streambuf            @540  NONAME
+    __as__18ostream_withassignFP9streambuf            @541  NONAME
+    openprot__7filebuf                                @542  NONAME
+    str__9strstreamFv                                 @543  NONAME
+    flush__FR7ostream                                 @544  NONAME
+    __rs__7istreamFPFR3ios_R3ios                      @545  NONAME
+    __vft8ofstream3ios                                @546  NONAME
+    close__7filebufFv                                 @547  NONAME
+    seekg__7istreamFl                                 @548  NONAME
+    __ct__11stdiostreamFP6__file                      @549  NONAME
+    _clear87                                          @550  NONAME
+    seekp__7ostreamFl                                 @551  NONAME
+    __ct__7ostreamFiPc                                @552  NONAME
+    complicated_put__7ostreamFc                       @553  NONAME
+    __vft12strstreambuf9streambuf                     @554  NONAME
+    precision__3iosFi                                 @555  NONAME
+    resetiosflags__Fl                                 @556  NONAME
+    __tdump_allocated                                 @557  NONAME
+    __vft8iostream3ios_7fstream                       @558  NONAME
+    tellg__7istreamFv                                 @559  NONAME
+    __udump_allocated                                 @560  NONAME
+    __ls__7ostreamFPCc                                @561  NONAME
+    get__7istreamFPcic                                @562  NONAME
+    __ct__9streambufFv                                @563  NONAME
+    __ct__9strstreamFv                                @564  NONAME
+    __dt__9streambufFv                                @565  NONAME
+    __dt__9strstreamFv                                @566  NONAME
+    tellp__7ostreamFv                                 @567  NONAME
+    sync__9streambufFv                                @568  NONAME
+    get_complicated__7istreamFRc                      @569  NONAME
+    doallocate__12strstreambufFv                      @570  NONAME
+    __rs__7istreamFPSc                                @571  NONAME
+    __ls__7ostreamFPCv                                @572  NONAME
+    __rs__7istreamFPUc                                @573  NONAME
+    __ls__7ostreamFPCw                                @574  NONAME
+    flush__7ostreamFv                                 @575  NONAME
+    __vec__new__som                                   @576  NONAME
+    __vft18istream_withassign3ios                     @577  NONAME
+    __rs__7istreamFRUi                                @578  NONAME
+    __vft18ostream_withassign3ios                     @579  NONAME
+    __rs__7istreamFRUl                                @580  NONAME
+    __ct__18istream_withassignFv                      @581  NONAME
+    __dt__18istream_withassignFv                      @582  NONAME
+    isalpha                                           @584  NONAME
+    __ct__18ostream_withassignFv                      @585  NONAME
+    __rs__7istreamFRUs                                @586  NONAME
+    __dt__18ostream_withassignFv                      @587  NONAME
+    regexec                                           @588  NONAME
+    regfree                                           @589  NONAME
+    _ddused                                           @590  NONAME
+    _eh_add                                           @591  NONAME
+    _getche                                           @592  NONAME
+    asctime                                           @593  NONAME
+    __vec__copy__som                                  @594  NONAME
+    bsearch                                           @595  NONAME
+    __compute_embedded                                @596  NONAME
+    _getpid                                           @597  NONAME
+    isblank                                           @598  NONAME
+    _getcwd                                           @599  NONAME
+    rs_complicated__7istreamFRc                       @600  NONAME
+    __dl__FP9SOMObject                                @601  NONAME
+    __ct__19iostream_withassignFv                     @602  NONAME
+    detach__7filebufFv                                @603  NONAME
+    attach__7filebufFi                                @604  NONAME
+    get_complicated__7istreamFRSc                     @606  NONAME
+    isgraph                                           @607  NONAME
+    __dt__19iostream_withassignFv                     @608  NONAME
+    get_complicated__7istreamFRUc                     @609  NONAME
+    _eh_del                                           @610  NONAME
+    ls_complicated__7ostreamFSc                       @611  NONAME
+    ls_complicated__7ostreamFUc                       @613  NONAME
+    ungetwc                                           @614  NONAME
+    isspace                                           @615  NONAME
+    _chsize                                           @616  NONAME
+    wcrtomb                                           @617  NONAME
+    memmove                                           @618  NONAME
+    __vec__new__place                                 @619  NONAME
+    gcount__7istreamFv                                @620  NONAME
+    regcomp                                           @621  NONAME
+    _uclose                                           @622  NONAME
+    isalnum                                           @623  NONAME
+    _access                                           @624  NONAME
+    tmpfile                                           @625  NONAME
+    _IEEE_DBL_INF_MASK                                @626  NONAME
+    _cscanf                                           @627  NONAME
+    iscntrl                                           @628  NONAME
+    mbrtowc                                           @629  NONAME
+    memicmp                                           @631  NONAME
+    isdigit                                           @632  NONAME
+    seekoff__12strstreambufFlQ2_3ios8seek_diri        @633  NONAME
+    catopen                                           @634  NONAME
+    _heapchk                                          @635  NONAME
+    _fileno                                           @636  NONAME
+    getchar                                           @637  NONAME
+    _MAKE_DBL_POSITIVE                                @638  NONAME
+    __vft19iostream_withassign3ios                    @639  NONAME
+    _uaddmem                                          @640  NONAME
+    dec__Fli                                          @641  NONAME
+    _execle                                           @642  NONAME
+    _osmode                                           @643  NONAME
+    setvbuf                                           @644  NONAME
+    getwchar                                          @645  NONAME
+    difftime                                          @646  NONAME
+    wcscoll                                           @648  NONAME
+    _uflush                                           @649  NONAME
+    wcspbrk                                           @650  NONAME
+    strtold                                           @651  NONAME
+    _FreeFCB                                          @653  NONAME
+    wcsncat                                           @654  NONAME
+    __vft8iostream3ios_9strstream                     @655  NONAME
+    maxcoll                                           @656  NONAME
+    _heapset                                          @657  NONAME
+    _NAN_LEN                                          @658  NONAME
+    _tempnam                                          @659  NONAME
+    _heapmin                                          @660  NONAME
+    wcwidth                                           @661  NONAME
+    longjmp                                           @662  NONAME
+    _InitFCB                                          @663  NONAME
+    wcsrchr                                           @664  NONAME
+    wcsncmp                                           @665  NONAME
+    clearerr                                          @666  NONAME
+    sprintf                                           @667  NONAME
+    _execve                                           @668  NONAME
+    islower                                           @669  NONAME
+    vprintf                                           @670  NONAME
+    _setmode                                          @671  NONAME
+    mbsinit                                           @672  NONAME
+    catgets                                           @673  NONAME
+    tolower                                           @674  NONAME
+    wcsxfrm                                           @675  NONAME
+    memccpy                                           @676  NONAME
+    __goscan                                          @677  NONAME
+    strcmpi                                           @678  NONAME
+    wcscspn                                           @679  NONAME
+    _unlink                                           @680  NONAME
+    __as__19iostream_withassignFP9streambuf           @681  NONAME
+    underflow__12strstreambufFv                       @682  NONAME
+    _matherr                                          @683  NONAME
+    strcoll                                           @684  NONAME
+    wcstoul                                           @685  NONAME
+    strpbrk                                           @686  NONAME
+    putchar                                           @687  NONAME
+    ispunct                                           @688  NONAME
+    __CurrentException                                @689  NONAME
+    wcstombs                                          @690  NONAME
+    strncat                                           @691  NONAME
+    __vft7istream3ios_10istrstream                    @692  NONAME
+    _getdcwd                                          @693  NONAME
+    stricmp                                           @694  NONAME
+    _tzname                                           @695  NONAME
+    iswspace                                          @696  NONAME
+    _tcalloc                                          @697  NONAME
+    putwchar                                          @698  NONAME
+    regerror                                          @699  NONAME
+    _execlp                                           @700  NONAME
+    _fltused                                          @701  NONAME
+    strrchr                                           @702  NONAME
+    strncmp                                           @703  NONAME
+    _ucreate                                          @705  NONAME
+    _spawnl                                           @706  NONAME
+    __getche                                          @707  NONAME
+    strfmon                                           @708  NONAME
+    mbstowcs                                          @709  NONAME
+    _lsearch                                          @710  NONAME
+    strxfrm                                           @711  NONAME
+    isupper                                           @712  NONAME
+    isprint                                           @713  NONAME
+    _fpreset                                          @714  NONAME
+    _INF_LEN                                          @715  NONAME
+    strcspn                                           @716  NONAME
+    _assert                                           @717  NONAME
+    toupper                                           @718  NONAME
+    _onexit                                           @719  NONAME
+    _ungetch                                          @720  NONAME
+    _rpmatch                                          @721  NONAME
+    _fpninit                                          @722  NONAME
+    _chdrive                                          @723  NONAME
+    strtoul                                           @724  NONAME
+    strnset                                           @725  NONAME
+    wcsncpy                                           @726  NONAME
+    __wDestructSOMBase                                @727  NONAME
+    wcsftime                                          @728  NONAME
+    __cputs                                           @729  NONAME
+    _execvp                                           @730  NONAME
+    catclose                                          @731  NONAME
+    _loadmod                                          @732  NONAME
+    __vft7ostream3ios_10ostrstream                    @733  NONAME
+    rs_complicated__7istreamFRSc                      @734  NONAME
+    iswdigit                                          @735  NONAME
+    _freemod                                          @736  NONAME
+    oct__Fli                                          @737  NONAME
+    strnicmp                                          @738  NONAME
+    isxdigit                                          @739  NONAME
+    iswblank                                          @740  NONAME
+    iswalpha                                          @741  NONAME
+    rs_complicated__7istreamFRUc                      @742  NONAME
+    wcswidth                                          @743  NONAME
+    iswpunct                                          @744  NONAME
+    _environ                                          @745  NONAME
+    _InitBuf                                          @746  NONAME
+    _tmalloc                                          @747  NONAME
+    _makepath                                         @748  NONAME
+    _spawnv                                           @750  NONAME
+    hex__Fli                                          @752  NONAME
+    iswupper                                          @753  NONAME
+    strftime                                          @754  NONAME
+    _ustats                                           @756  NONAME
+    _NAN_STR                                          @757  NONAME
+    towupper                                          @758  NONAME
+    _putenv                                           @759  NONAME
+    _cprintf                                          @760  NONAME
+    iswgraph                                          @761  NONAME
+    strptime                                          @762  NONAME
+    _execlpe                                          @763  NONAME
+    _osmajor                                          @764  NONAME
+    _daylight                                         @765  NONAME
+    iswlower                                          @766  NONAME
+    _spawnle                                          @767  NONAME
+    __dofmto                                          @768  NONAME
+    _isatty                                           @769  NONAME
+    towlower                                          @770  NONAME
+    _spawnlp                                          @771  NONAME
+    setw__Fi                                          @772  NONAME
+    _exception_dllinit                                @773  NONAME
+    chr__FiT1                                         @774  NONAME
+    _fgetchar                                         @775  NONAME
+    _strdate                                          @776  NONAME
+    setlocale                                         @777  NONAME
+    iswprint                                          @778  NONAME
+    _osminor                                          @779  NONAME
+    _strtime                                          @780  NONAME
+    localtime                                         @781  NONAME
+    getsyntx                                          @782  NONAME
+    _execvpe                                          @783  NONAME
+    vsprintf                                          @784  NONAME
+    _flushall                                         @785  NONAME
+    strerror                                          @786  NONAME
+    _getdrive                                         @787  NONAME
+    _uheapchk                                         @788  NONAME
+    _INF_STR                                          @789  NONAME
+    __SOMEnv                                          @790  NONAME
+    collrange                                         @791  NONAME
+    __Throw                                           @792  NONAME
+    _atofieee                                         @793  NONAME
+    iswalnum                                          @794  NONAME
+    _reg_heap                                         @795  NONAME
+    collorder                                         @796  NONAME
+    iswcntrl                                          @797  NONAME
+    __vft3ios                                         @798  NONAME
+    _spawnve                                          @799  NONAME
+    iswctype                                          @800  NONAME
+    _spawnvp                                          @801  NONAME
+    _floatfmt                                         @802  NONAME
+    getmccoll                                         @803  NONAME
+    _fputchar                                         @804  NONAME
+    _fullpath                                         @805  NONAME
+    _setupenv                                         @806  NONAME
+    str__10ostrstreamFv                               @807  NONAME
+    _theapmin                                         @808  NONAME
+    _udefault                                         @809  NONAME
+    _uheapmin                                         @810  NONAME
+    _set_mt_new_handler__FPFv_v                       @811  NONAME
+    ccsidtocs                                         @812  NONAME
+    _infinity                                         @813  NONAME
+    _fposinfi                                         @814  NONAME
+    cstoccsid                                         @815  NONAME
+    __vft13strstreambase                              @816  NONAME
+    iswxdigit                                         @817  NONAME
+    _status87                                         @818  NONAME
+    _trealloc                                         @819  NONAME
+    __vtt13strstreambase                              @820  NONAME
+    _CRT_term                                         @821  NONAME
+    _dposqnan                                         @822  NONAME
+    wcsrtombs                                         @823  NONAME
+    collequiv                                         @824  NONAME
+    _fposqnan                                         @825  NONAME
+    _uheapset                                         @826  NONAME
+    strtocoll                                         @827  NONAME
+    colltostr                                         @828  NONAME
+    _timezone                                         @829  NONAME
+    __vft10istrstream3ios                             @830  NONAME
+    _spawnlpe                                         @831  NONAME
+    __vft10ostrstream3ios                             @832  NONAME
+    _CRT_init                                         @833  NONAME
+    open__7filebufFPCciT2                             @834  NONAME
+    _udestroy                                         @835  NONAME
+    overflow__7filebufFi                              @836  NONAME
+    __vft8iostream3ios_19iostream_withassign          @837  NONAME
+    _fullDump                                         @838  NONAME
+    __dl__FPv                                         @839  NONAME
+    __ct__7filebufFiPcT1                              @840  NONAME
+    mbsrtowcs                                         @841  NONAME
+    vswprintf                                         @842  NONAME
+    _spawnvpe                                         @843  NONAME
+    putback__7istreamFc                               @844  NONAME
+    get__7istreamFPScic                               @845  NONAME
+    get__7istreamFPUcic                               @846  NONAME
+    __ungetch                                         @847  NONAME
+    _strerror                                         @848  NONAME
+    _control87                                        @849  NONAME
+    __nw__FUi                                         @850  NONAME
+    str__12strstreambufFv                             @851  NONAME
+    __ls__7ostreamFPCSc                               @852  NONAME
+    __ReThrow                                         @853  NONAME
+    tie__3iosFP7ostream                               @854  NONAME
+    __ls__7ostreamFPCUc                               @855  NONAME
+    __vft11fstreambase3ios                            @856  NONAME
+    __ct__9streambufFPci                              @857  NONAME
+    open__7fstreamFPCciT2                             @858  NONAME
+    __ct__7fstreamFiPcT1                              @859  NONAME
+    __ct__7istreamFiPcT1                              @860  NONAME
+    last_op__7filebufFv                               @861  NONAME
+    localeconv                                        @862  NONAME
+    __vft11stdiostream3ios                            @863  NONAME
+    __dt__10istrstreamFv                              @864  NONAME
+    _scanfieee                                        @865  NONAME
+    __ct__10ostrstreamFv                              @866  NONAME
+    eatwhite__7istreamFv                              @867  NONAME
+    __dt__10ostrstreamFv                              @868  NONAME
+    _fcloseall                                        @869  NONAME
+    __ct__7fstreamFPCciT2                             @870  NONAME
+    getwmccoll                                        @871  NONAME
+    __ct__11fstreambaseFi                             @872  NONAME
+    __ct__8ifstreamFiPcT1                             @873  NONAME
+    __ct__8ofstreamFiPcT1                             @874  NONAME
+    __vft11fstreambase3ios_7fstream                   @875  NONAME
+    __vft11fstreambase3ios_8ifstream                  @876  NONAME
+    __ct__11fstreambaseFv                             @877  NONAME
+    _ldposinfi                                        @878  NONAME
+    __dt__11fstreambaseFv                             @879  NONAME
+    __vft11fstreambase3ios_8ofstream                  @880  NONAME
+    _searchenv                                        @881  NONAME
+    overflow__8stdiobufFi                             @882  NONAME
+    do_ipfx__7istreamFi                               @883  NONAME
+    ismccollel                                        @884  NONAME
+    _terminate                                        @885  NONAME
+    _endthread                                        @886  NONAME
+    _GetErrMsg                                        @887  NONAME
+    __threadid                                        @888  NONAME
+    __dt__11stdiostreamFv                             @889  NONAME
+    _ldposqnan                                        @890  NONAME
+    _set_crt_msg_handle                               @891  NONAME
+    _fopenused                                        @892  NONAME
+    __ct__10istrstreamFPc                             @893  NONAME
+    eatwhite__FR7istream                              @894  NONAME
+    ignore__7istreamFiT1                              @895  NONAME
+    iconv_open                                        @896  NONAME
+    __nw__FP8SOMClassUi                               @897  NONAME
+    __doserrno                                        @898  NONAME
+    _heap_walk                                        @899  NONAME
+    _LHUGE_VAL                                        @900  NONAME
+    setbuf__7filebufFPci                              @901  NONAME
+    str__FPCci                                        @902  NONAME
+    _cputsused                                        @903  NONAME
+    __PureVirtualCalled                               @904  NONAME
+    __cppstore                                        @905  NONAME
+;;;;    _Lib_excpt                                        @906  NONAME
+    _splitpath                                        @907  NONAME
+    __vft9strstream3ios                               @908  NONAME
+    open__8ifstreamFPCciT2                            @909  NONAME
+    do_opfx__7ostreamFv                               @910  NONAME
+    open__8ofstreamFPCciT2                            @911  NONAME
+    _MAKE_LDBL_POSITIVE                               @912  NONAME
+    do_osfx__7ostreamFv                               @913  NONAME
+    _Exception                                        @914  NONAME
+;SvL: These shouldn't be here. Must be local for each dll or exe or
+;     else static/global objects don't get initialized
+;    __ctordtorInit                                    @915
+;    __ctordtorTerm                                    @916
+    _Exception_CPP                                    @917  NONAME
+;    __ctdtused                                        @918
+
+;VAC 3.6.5 additions
+    _SemClose                                          @1000 NONAME
+    _SemCreate                                         @1001 NONAME
+    _SysGetStdHandle                                   @1002 NONAME
+
+    _debug_memcpy                                      @1003 NONAME
+    __stackprobe1                                      @1004 NONAME
+    __stackprobe2                                      @1005 NONAME
+    _debug_strcat                                      @1006 NONAME
+    _debug_strdup                                      @1007 NONAME
+    _debug_strcpy                                      @1008 NONAME
+    _debug_memset                                      @1009 NONAME
+    _debug_memmove                                     @1010 NONAME
+    _debug_strncpy                                     @1011 NONAME
+    __time                                             @1012 NONAME
+    __stat                                             @1013 NONAME
+    _pfmemcpy                                          @1014 NONAME
+    _debug_strncat                                     @1015 NONAME
+    _toupptbl                                          @1016 NONAME
+    _tolowtbl                                          @1017 NONAME
+    _abort_in_progress                                 @1018 NONAME
+    _pfmemmove                                         @1019 NONAME
+    __localtime                                        @1020 NONAME
+    __gmtime                                           @1021 NONAME
+    __mktime                                           @1022 NONAME
+    _runtime_heap                                      @1023 NONAME
+    __run_exit_list                                    @1024 NONAME
+    _run_exit_list                                     @1025 NONAME
+    __ftime                                            @1026 NONAME

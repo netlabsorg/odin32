@@ -1,4 +1,4 @@
-/* $Id: malloc.cpp,v 1.4 1999-12-06 18:09:13 dengert Exp $ */
+/* $Id: malloc.cpp,v 1.5 2001-02-11 10:32:51 sandervl Exp $ */
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  * Memory RTL function wrappers
@@ -7,7 +7,7 @@
  *
  */
 
-#undef __DEBUG_ALLOC__
+//#undef __DEBUG_ALLOC__
 #include <malloc.h>
 #include <umalloc.h>
 #include <os2sel.h>

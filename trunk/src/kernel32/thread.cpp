@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.26 2000-11-21 11:35:09 sandervl Exp $ */
+/* $Id: thread.cpp,v 1.27 2001-02-11 10:34:45 sandervl Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -24,6 +24,7 @@
 #include <string.h>
 #include "thread.h"
 #include <misc.h>
+#include <cpuhlp.h>
 #include <wprocess.h>
 #include <windllbase.h>
 #include <winexebase.h>
@@ -131,7 +132,7 @@ DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
   Win32DllBase::attachThreadToAllDlls();	  //send DLL_THREAD_ATTACH message to all dlls
 
   //Set default FPU control word (no exceptions); same as in NT
-  _control87(0x27F, 0xFFF);
+  CONTROL87(0x27F, 0xFFF);
   rc = winthread(userdata);
 
   HMSetThreadTerminated(GetCurrentThread());
