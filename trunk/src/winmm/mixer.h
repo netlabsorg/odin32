@@ -1,4 +1,4 @@
-/* $Id: mixer.h,v 1.2 2002-05-23 13:50:15 sandervl Exp $ */
+/* $Id: mixer.h,v 1.3 2002-05-25 17:19:41 sandervl Exp $ */
 
 /*
  * Mixer multimedia
@@ -18,10 +18,9 @@
 #define WINMM_MIXERSTRING_A    		"OS/2 WINMM Mixer"
 #define WINMM_MIXERSTRING_W		(LPWSTR)L"OS/2 WINMM Mixer"
 
-#define WINMM_SHORTNAME_WAVEOUT_A	"Wave Out"
-#define WINMM_SHORTNAME_WAVEOUT_W	(LPWSTR)L"Wave Out"
-#define WINMM_SHORTNAME_LINEOUT_A	"Line Out"
-#define WINMM_SHORTNAME_LINEOUT_W	(LPWSTR)L"Line Out"
+#define WINMM_MIXER_CAPS_WMID           1
+#define WINMM_MIXER_CAPS_WPID           0x60
+#define WINMM_MIXER_CAPS_VERSION	0x100
 
 #define MAX_MIXER_DESTINATIONS      8
 #define MAX_MIXER_SOURCES           16

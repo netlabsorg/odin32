@@ -1,4 +1,4 @@
-/* $Id: mixeros2.cpp,v 1.3 2002-05-24 18:02:48 sandervl Exp $ */
+/* $Id: mixeros2.cpp,v 1.4 2002-05-25 17:19:41 sandervl Exp $ */
 
 /*
  * OS/2 Mixer multimedia
@@ -115,6 +115,17 @@ static DWORD OSLibMixGetIndex(DWORD dwControl)
     case MIX_CTRL_MUX_IN_W_SRC:
         idx = RECORDSRCSET;
         break;
+    case MIX_CTRL_VOL_IN_W_MONO:
+    case MIX_CTRL_VOL_IN_W_PHONE:
+    case MIX_CTRL_VOL_IN_W_MIC:
+    case MIX_CTRL_VOL_IN_W_LINE:
+    case MIX_CTRL_VOL_IN_W_CD:
+    case MIX_CTRL_VOL_IN_W_VIDEO:
+    case MIX_CTRL_VOL_IN_W_AUX:
+    case MIX_CTRL_VOL_IN_W_PCM:
+        idx = RECORDGAINSET;
+        break;
+
     default:
         return -1;
     }
@@ -140,19 +151,24 @@ BOOL OSLibMixSetVolume(DWORD dwControl, BOOL fMute, DWORD dwVolLeft, DWORD dwVol
     DWORD     dwFunc;
     MIXSTRUCT mixstruct;
 
+    //TODO: implement master volume with MMPM2
+    if(dwControl == MIX_CTRL_VOL_OUT_LINE || dwControl == MIX_CTRL_MUTE_OUT_LINE) {
+        return TRUE;
+    }
+
     dwFunc = OSLibMixGetIndex(dwControl);
     if(dwFunc == -1) {
         return FALSE;
     }
     dwFunc += MONOINSET;
 
-    if(dwVolLeft > MIXER_MAX_VOLUME || dwVolRight > MIXER_MAX_VOLUME) {
+    if(dwVolLeft > MIXER_IOCTL90_MAX_VOLUME || dwVolRight > MIXER_IOCTL90_MAX_VOLUME) {
         dprintf(("OSLibMixSetVolume: Volume (%d,%d) out of RANGE!!", dwVolLeft, dwVolRight));
         return FALSE;
     }
     mixstruct.Mute    = fMute;
-    mixstruct.VolumeL = dwVolLeft;
-    mixstruct.VolumeR = dwVolRight;
+    mixstruct.VolumeL = WIN32_TO_IOCTL90_VOLUME(dwVolLeft);
+    mixstruct.VolumeR = WIN32_TO_IOCTL90_VOLUME(dwVolRight);
 
     if(mixerapiIOCTL90(hPDDMix, dwFunc, &mixstruct, sizeof(mixstruct)) == TRUE) {
         return TRUE;
@@ -167,6 +183,14 @@ BOOL OSLibMixGetVolume(DWORD dwControl, BOOL *pfMute, DWORD *pdwVolLeft, DWORD *
     DWORD     dwFunc;
     MIXSTRUCT mixstruct;
 
+    //TODO: implement master volume with MMPM2
+    if(dwControl == MIX_CTRL_VOL_OUT_LINE || dwControl == MIX_CTRL_MUTE_OUT_LINE) {
+        if(pfMute)      *pfMute      = 0;
+        if(pdwVolLeft)  *pdwVolLeft  = 50000;
+        if(pdwVolRight) *pdwVolRight = 50000;
+        return TRUE;
+    }
+
     dwFunc = OSLibMixGetIndex(dwControl);
     if(dwFunc == -1) {
         return FALSE;
@@ -176,12 +200,70 @@ BOOL OSLibMixGetVolume(DWORD dwControl, BOOL *pfMute, DWORD *pdwVolLeft, DWORD *
     if(mixerapiIOCTL90(hPDDMix, dwFunc, &mixstruct, sizeof(mixstruct)) == FALSE) {
         return FALSE;
     }
-    if(pfMute)      *pfMute      = mixstruct.Mute;
-    if(pdwVolLeft)  *pdwVolLeft  = mixstruct.VolumeL;
-    if(pdwVolRight) *pdwVolRight = mixstruct.VolumeR;
-
-    if(mixstruct.VolumeL > MIXER_MAX_VOLUME || mixstruct.VolumeR > MIXER_MAX_VOLUME) {
+    if(mixstruct.VolumeL > MIXER_IOCTL90_MAX_VOLUME || mixstruct.VolumeR > MIXER_IOCTL90_MAX_VOLUME) {
         dprintf(("OSLibMixGetVolume: Volume (%d,%d) out of RANGE!!", mixstruct.VolumeL, mixstruct.VolumeR));
+    }
+    mixstruct.VolumeL = min(MIXER_IOCTL90_MAX_VOLUME, mixstruct.VolumeL);
+    mixstruct.VolumeR = min(MIXER_IOCTL90_MAX_VOLUME, mixstruct.VolumeR);
+
+    if(pfMute)      *pfMute      = mixstruct.Mute;
+    if(pdwVolLeft)  *pdwVolLeft  = IOCTL90_TO_WIN32_VOLUME(mixstruct.VolumeL);
+    if(pdwVolRight) *pdwVolRight = IOCTL90_TO_WIN32_VOLUME(mixstruct.VolumeR);
+
+    return TRUE;
+}
+/******************************************************************************/
+/******************************************************************************/
+BOOL OSLibMixGetCtrlCaps(DWORD dwControl, LONG *plMinimum, LONG *plMaximum, DWORD *pcSteps)
+{
+    switch(dwControl) {
+    case MIX_CTRL_VOL_OUT_LINE:
+        *plMinimum = MIXER_WIN32_MIN_VOLUME;
+        *plMaximum = MIXER_WIN32_MAX_VOLUME;
+        *pcSteps   = MIXER_WIN32_CSTEP_VOLUME;
+        break;
+
+    case MIX_CTRL_VOL_IN_L_MONO:
+    case MIX_CTRL_VOL_IN_L_PHONE:
+    case MIX_CTRL_VOL_IN_L_MIC:
+    case MIX_CTRL_VOL_IN_L_LINE:
+    case MIX_CTRL_VOL_IN_L_CD:
+    case MIX_CTRL_VOL_IN_L_VIDEO:
+    case MIX_CTRL_VOL_IN_L_AUX:
+    case MIX_CTRL_VOL_IN_L_PCM:
+        *plMinimum = MIXER_WIN32_MIN_VOLUME;
+        *plMaximum = MIXER_WIN32_MAX_VOLUME;
+        *pcSteps   = MIXER_WIN32_CSTEP_VOLUME;
+        break;
+
+    case MIX_CTRL_VOL_IN_W_MONO:
+    case MIX_CTRL_VOL_IN_W_PHONE:
+    case MIX_CTRL_VOL_IN_W_MIC:
+    case MIX_CTRL_VOL_IN_W_LINE:
+    case MIX_CTRL_VOL_IN_W_CD:
+    case MIX_CTRL_VOL_IN_W_VIDEO:
+    case MIX_CTRL_VOL_IN_W_AUX:
+    case MIX_CTRL_VOL_IN_W_PCM:
+        *plMinimum = MIXER_WIN32_MIN_VOLUME;
+        *plMaximum = MIXER_WIN32_MAX_VOLUME;
+        *pcSteps   = MIXER_WIN32_CSTEP_VOLUME;
+        break;
+
+    case MIX_CTRL_OUT_L_BASS:
+    case MIX_CTRL_OUT_L_TREBLE:
+        *plMinimum = MIXER_WIN32_MIN_VOLUME;
+        *plMaximum = MIXER_WIN32_MAX_VOLUME;
+        *pcSteps   = MIXER_WIN32_CSTEP_VOLUME;
+        break;
+
+    case MIX_CTRL_OUT_L_3DCENTER:
+    case MIX_CTRL_OUT_L_3DDEPTH:
+        *plMinimum = MIXER_WIN32_MIN_VOLUME;
+        *plMaximum = MIXER_WIN32_MAX_VOLUME;
+        *pcSteps   = MIXER_WIN32_CSTEP_VOLUME;
+        break;
+    default:
+        DebugInt3();
         return FALSE;
     }
     return TRUE;
@@ -239,8 +321,8 @@ BOOL OSLibMixSetRecSource(DWORD dwRecSrc, DWORD dwVolL, DWORD dwVolR)
     }
 
     mixstruct.Mute    = 0;
-    mixstruct.VolumeL = dwVolL;
-    mixstruct.VolumeR = dwVolR;
+    mixstruct.VolumeL = WIN32_TO_IOCTL90_VOLUME(dwVolL);
+    mixstruct.VolumeR = WIN32_TO_IOCTL90_VOLUME(dwVolR);
     if(mixerapiIOCTL90(hPDDMix, RECORDGAINSET, &mixstruct, sizeof(mixstruct)) == FALSE) {
         dprintf(("OSLibMixSetRecSource: mixerapiIOCTL90 RECORDGAINSET failed!!"));
         return FALSE;
@@ -289,10 +371,10 @@ BOOL OSLibMixGetRecSource(DWORD *pdwRecSrc, DWORD *pdwVolL, DWORD *pdwVolR)
         return FALSE;
     }
     if(pdwVolL) {
-        *pdwVolL = mixstruct.VolumeL;
+        *pdwVolL = IOCTL90_TO_WIN32_VOLUME(mixstruct.VolumeL);
     }
     if(pdwVolR) {
-        *pdwVolR = mixstruct.VolumeR;
+        *pdwVolR = IOCTL90_TO_WIN32_VOLUME(mixstruct.VolumeR);
     }
     return TRUE;
 }
