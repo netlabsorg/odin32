@@ -1,5 +1,5 @@
 ##############################################################################
-# $Id: makefile,v 1.15 2000-01-31 08:56:22 bird Exp $
+# $Id: makefile,v 1.16 2000-02-01 07:26:50 bird Exp $
 #
 # PD-Win32 API
 #
@@ -118,10 +118,10 @@ $(TARGET).exe: $(OBJS)
 
 
 ..\fastdep.exe:
-    cd ..
-    IF NOT EXIST .depend echo # dummy > .depend
-    nmake fastdep.exe
-    cd pe2lx
+    @cd ..
+    @$(ECHO) making fastdep.exe
+    @icc -Q+ -Ti+ fastdep.c
+    @cd pe2lx
 
 depend: ..\fastdep.exe
     ..\fastdep.exe -obj$(OBJEXT) -o..\Object $(CINCLUDES) ..\misc\*.c* ..\include\*.h
