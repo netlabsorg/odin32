@@ -1,4 +1,4 @@
-/* $Id: log.h,v 1.4.4.1 2000-07-16 22:43:30 bird Exp $
+/* $Id: log.h,v 1.4.4.2 2000-09-02 20:49:15 bird Exp $
  *
  * log - C-style logging - kprintf.
  * Dual mode, RING0 and RING3.
@@ -24,6 +24,8 @@ extern "C" {
  */
 #define OUTPUT_COM1 0x3f8
 #define OUTPUT_COM2 0x2f8
+#define OUTPUT_COM3 0x3e8
+#define OUTPUT_COM4 0x2e8
 
 
 /*

@@ -1,4 +1,4 @@
-/* $Id: myLDRQAppType.cpp,v 1.3.4.3 2000-08-28 22:44:24 bird Exp $
+/* $Id: myLDRQAppType.cpp,v 1.3.4.4 2000-09-02 20:49:18 bird Exp $
  *
  * _myLDRQAppType - _LDRQAppType overload.
  *
@@ -22,6 +22,7 @@
 *******************************************************************************/
 #include <os2.h>
 
+#include "devSegDf.h"                   /* Win32k segment definitions. */
 #include "OS2Krnl.h"
 #include "avl.h"
 #include "ldr.h"

@@ -1,4 +1,4 @@
-/* $Id: cout.cpp,v 1.2 1999-10-27 02:02:59 bird Exp $
+/* $Id: cout.cpp,v 1.2.4.1 2000-09-02 20:49:21 bird Exp $
  *
  * cout - cout replacement.
  *
@@ -24,6 +24,7 @@
 #include <builtin.h>
 #include <stdarg.h>
 
+#include "devSegDf.h"                   /* Win32k segment definitions. */
 #include "cout.h"
 #include "options.h"
 #include "sprintf.h"

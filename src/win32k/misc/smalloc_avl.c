@@ -1,4 +1,4 @@
-/* $Id: smalloc_avl.c,v 1.3 2000-01-24 18:19:00 bird Exp $
+/* $Id: smalloc_avl.c,v 1.3.4.1 2000-09-02 20:49:24 bird Exp $
  *
  * Swappable Heap - AVL.
  *
@@ -58,6 +58,7 @@
 *  Headerfiles
 ******************************************************************************/
 #include <os2.h>
+#include "devSegDf.h"                   /* Win32k segment definitions. */
 #ifdef RING0
     #include "dev32hlp.h"
 #endif
@@ -139,8 +140,8 @@ typedef struct _Allocated_Callback_param
 ******************************************************************************/
 static PHEAPANCHOR  phaFirst;           /* Pointer to the first anchor block.*/
 static PHEAPANCHOR  phaLast;            /* Pointer to the last anchor block.*/
-static unsigned     cbSwpHeapMax;       /* Maximum amount of memory used by the heap. */
-static PMEMBLOCKCHUNK pmcFirst;          /* Pointer to the first memblock chunk. */
+unsigned            cbSwpHeapMax;       /* Maximum amount of memory used by the heap. */
+static PMEMBLOCKCHUNK pmcFirst;         /* Pointer to the first memblock chunk. */
 
 #ifndef RING0
 char                fSwpInited;         /* init flag */
@@ -1065,6 +1066,86 @@ unsigned _swp_memfree(void)
         cb += pha->cbFree;
 
     return cb;
+}
+
+
+/**
+ * Get amount of used memory (in bytes)
+ * @returns  Amount of used memory (in bytes).
+ */
+unsigned    _swp_memused(void)
+{
+    PHEAPANCHOR pha = phaFirst;
+    unsigned    cb;
+
+    #ifdef ALLWAYS_HEAPCHECK
+    if (!_swp_heap_check())
+        kprintf(("_swp_memused: _swp_heap_check failed!\n"));
+    #endif
+
+    for (cb = 0; pha != NULL; pha = pha->pNext)
+        cb += pha->cbUsed;
+
+    return cb;
+}
+
+
+/**
+ * Collects the heap state.
+ * @returns     0 on success.
+ *              -1 on error.
+ * @param       pState  Pointer to a HEAPSTATE structure which is
+ *                      filled upon successful return.
+ */
+int         _swp_state(PHEAPSTATE pState)
+{
+    PHEAPANCHOR pha;
+
+    #ifdef ALLWAYS_HEAPCHECK
+    if (!_res_heap_check())
+    {
+        kprintf(("_res_state: _res_heap_check failed!\n"));
+        return -1;
+    }
+    #endif
+
+    if (pState == NULL)
+        return -1;
+
+    /*
+     * Loop thru all the anchor blocks and all memory blocks
+     * building the stats.
+     */
+    memset(pState, 0, sizeof(HEAPSTATE));
+    for (pha = phaFirst; pha != NULL; pha = pha->pNext)
+    {
+        AVLENUMDATA     EnumData;
+        PAVLENUMDATA    pEnumData = SSToDS(&EnumData);
+        PMEMBLOCK       pmb;
+
+        /* count of free blocks */
+        pmb = (PMEMBLOCK)AVLBeginEnumTree((PPAVLNODECORE)&pha->pcoreFree, pEnumData, TRUE);
+        while (pmb)
+        {
+            pState->cBlocksFree++;
+            pmb = (PMEMBLOCK)AVLGetNextNode(pEnumData);
+        }
+
+        /* count of used blocks */
+        pmb = (PMEMBLOCK)AVLBeginEnumTree((PPAVLNODECORE)&pha->pcoreUsed, pEnumData, TRUE);
+        while (pmb)
+        {
+            pState->cBlocksUsed++;
+            pmb = (PMEMBLOCK)AVLGetNextNode(pEnumData);
+        }
+
+        /* sizes */
+        pState->cbHeapSize  += pha->cbSize;
+        pState->cbHeapFree  += pha->cbFree;
+        pState->cbHeapUsed  += pha->cbUsed;
+    }
+
+    return 0;
 }
 
 

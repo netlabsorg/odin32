@@ -1,4 +1,4 @@
-/* $Id: dev1632.h,v 1.5.4.1 2000-07-16 22:43:28 bird Exp $
+/* $Id: dev1632.h,v 1.5.4.2 2000-09-02 20:49:14 bird Exp $
  * dev1632.h - Common header file for 16-bit and 32-bit C
  *
  * Copyright (c) 1999 knut st. osmundsen
@@ -63,4 +63,16 @@ typedef struct _KRNLINFO
 #endif
 
 #pragma pack()
+
+
+/*
+ * Global data...
+ */
+extern CHAR DATA16_GLOBAL   szBuildDate[];
+extern CHAR DATA16_GLOBAL   szBuildTime[];
+#if defined(__IBMC__) || defined(__IBMCPP__)
+    #pragma map( szBuildDate , "_szBuildDate" )
+    #pragma map( szBuildTime , "_szBuildTime" )
+#endif
+
 #endif

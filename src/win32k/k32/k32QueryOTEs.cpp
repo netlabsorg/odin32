@@ -1,4 +1,4 @@
-/* $Id: k32QueryOTEs.cpp,v 1.1.2.1 2000-08-29 19:47:02 bird Exp $
+/* $Id: k32QueryOTEs.cpp,v 1.1.2.2 2000-09-02 20:49:17 bird Exp $
  *
  * k32QueryOTEs  -  Get's the object table entries (OTEs) for a given
  *                  module (given by a module handle).
@@ -25,6 +25,7 @@
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>
+#include "devSegDf.h"                   /* Win32k segment definitions. */
 #include "OS2Krnl.h"
 #include "ldrCalls.h"
 #include "win32k.h"
