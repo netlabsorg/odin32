@@ -1,4 +1,4 @@
-; $Id: kernel32dbg.def,v 1.27 2003-02-24 17:02:16 sandervl Exp $
+; $Id: kernel32dbg.def,v 1.28 2003-03-03 16:37:27 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -1232,6 +1232,8 @@ EXPORTS
 
     _ODIN_QueryLoaders@24                                         @3109 NONAME
     _ODIN_IsWin32App@4                                            @3110 NONAME
+
+    _OSLibWinCreateObject@32                                      @3111 NONAME
 
 ; Char functions (forwarders from user32)
     _DbgCharLowerA@4                                                 @3127 NONAME
