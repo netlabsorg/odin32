@@ -1,4 +1,4 @@
-; $Id: user32.def,v 1.3 1999-07-20 07:42:35 sandervl Exp $
+; $Id: user32.def,v 1.4 1999-08-05 23:40:16 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY USER32 INITINSTANCE
@@ -484,7 +484,7 @@ EXPORTS
     SetDoubleClickTime         = _SetDoubleClickTime@4       @474
     SetFocus                   = _SetFocus@4                 @475
     SetForegroundWindow        = _SetForegroundWindow@4      @476
-;    SetInternalWindowPos       = _SetInternalWindowPos@??    @477
+    SetInternalWindowPos       = _SetInternalWindowPos@16    @477
     SetKeyboardState           = _SetKeyboardState@4         @478
     SetLastErrorEx             = _SetLastErrorEx@8           @479
 ;    SetLogonNotifyWindow       = _SetLogonNotifyWindow@??    @480
