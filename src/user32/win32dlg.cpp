@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.12 1999-10-12 20:16:23 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.13 1999-10-13 14:24:26 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -1169,5 +1169,5 @@ BOOL DIALOG_Unregister()
 //******************************************************************************
 //******************************************************************************
 BOOL Win32Dialog::fInitialized = FALSE;
-int  Win32Dialog::xBaseUnit    = 0;
-int  Win32Dialog::yBaseUnit    = 0;
+int  Win32Dialog::xBaseUnit    = 10;
+int  Win32Dialog::yBaseUnit    = 20;

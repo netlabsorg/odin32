@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.20 1999-10-12 14:47:24 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.21 1999-10-13 14:24:28 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -284,6 +284,8 @@ private:
                              RECT *newWindowRect, RECT *oldWindowRect,
                              RECT *oldClientRect, WINDOWPOS *winpos,
                              RECT *newClientRect );
+
+ 	LONG  NCHandleCalcSize(WPARAM wParam, NCCALCSIZE_PARAMS *ncsize);
 
      LRESULT  SendInternalMessage(ULONG msg, WPARAM wParam, LPARAM lParam)
      {

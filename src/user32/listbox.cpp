@@ -1,4 +1,4 @@
-/* $Id: listbox.cpp,v 1.3 1999-10-12 18:14:55 sandervl Exp $ */
+/* $Id: listbox.cpp,v 1.4 1999-10-13 14:24:24 sandervl Exp $ */
 /*
  * Listbox controls
  *
@@ -16,6 +16,7 @@
 #include "controls.h"
 #include "winerror.h"
 #include "combo.h"
+#include <misc.h>
 
 /* Unimplemented yet:
  * - LBS_NOSEL
@@ -327,9 +328,9 @@ static void LISTBOX_UpdateSize( HWND hwnd, LB_DESCR *descr )
         if ((descr->height > descr->item_height) &&
             (descr->height % descr->item_height))
         {
-            //TRACE("[%04x]: changing height %d -> %d\n",
-            //             wnd->hwndSelf, descr->height,
-            //             descr->height - descr->height%descr->item_height );
+            dprintf(("LISTBOX: [%04x]: changing height %d -> %d\n",
+                    hwnd, descr->height,
+                    descr->height - descr->height%descr->item_height));
             SetWindowPos( hwnd, 0, 0, 0,
                             descr->width,
                             descr->height -
