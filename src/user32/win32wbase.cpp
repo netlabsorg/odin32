@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.172 2000-03-16 19:19:10 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.173 2000-03-17 17:12:08 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -638,13 +638,22 @@ if (!cs->hMenu) cs->hMenu = LoadMenuA(windowClass->getInstance(),"MYAPP");
   maxPos.x = rectWindow.left; maxPos.y = rectWindow.top;
 
   //Note: Solitaire crashes when receiving WM_SIZE messages before WM_CREATE
-  //fNoSizeMsg = FALSE;
   fCreated = TRUE;
 
   if (SendInternalMessageA(WM_NCCREATE,0,(LPARAM)cs))
   {
         RECT tmpRect;
 
+        //CB: recheck flags
+        if (cs->style & (WS_POPUP | WS_CHILD))
+        {
+          fXDefault = FALSE;
+          if (fCXDefault)
+          {
+            fCXDefault = FALSE;
+            cs->cx = cs->cy = 0;
+          }
+        }
         //update rect
         rectWindow.left = cs->x;
         rectWindow.right = cs->x+cs->cx;
@@ -2040,31 +2049,13 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
     }
     WINDOWPOS wpos;
     SWP swp, swpOld;
-
-#if 0 //CB: test: MSIE 2.0 displays the tool-/addressbar this way -> to check
-      //CB: -> comctl32: toolbar (WM_SIZE), same bug: statusbar height
-  //CB: cx or cy are 0
-
-if (cx == 0)
-{
-  dprintf(("CB: cx is 0! %d",fuFlags));
-  if (fuFlags & SWP_NOSIZE) dprintf(("CB: nosize"));
-  cx = 50;
-}
-if (cy == 0)
-{
-  dprintf(("CB: cy is 0! %d",fuFlags));
-  if (fuFlags & SWP_NOSIZE) dprintf(("CB: nosize"));
-  cy = 50;
-}
-
-#endif
-
+#if 0 //CB: breaks trackbar tooltip: must call SetWindowPos twice to change the size
     if(fuFlags & SWP_SHOWWINDOW) {
         fShow = TRUE;
         fuFlags &= ~SWP_SHOWWINDOW;
     }
     else
+#endif
     if(fuFlags & SWP_HIDEWINDOW) {
         fHide = TRUE;
         fuFlags &= ~SWP_HIDEWINDOW;
@@ -2135,7 +2126,7 @@ if (cy == 0)
         dprintf(("OSLibWinSetMultWindowPos failed! Error %x",OSLibWinGetLastError()));
     }
 
-    if(fuFlags & SWP_FRAMECHANGED && (fuFlags & (SWP_NOMOVE | SWP_NOSIZE) == (SWP_NOMOVE | SWP_NOSIZE)))
+    if((fuFlags & SWP_FRAMECHANGED) && (fuFlags & (SWP_NOMOVE | SWP_NOSIZE) == (SWP_NOMOVE | SWP_NOSIZE)))
     {
         FrameUpdateClient(this);
     }

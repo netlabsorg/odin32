@@ -1,4 +1,4 @@
-/* $Id: listbox.cpp,v 1.22 2000-03-14 18:27:25 cbratschi Exp $ */
+/* $Id: listbox.cpp,v 1.23 2000-03-17 17:12:07 cbratschi Exp $ */
 /*
  * Listbox controls
  *
@@ -7,6 +7,9 @@
  *
  * Corel version: 20000212
  * WINE version: 991212
+ *
+ * Status: ???
+ * Version: ???
  */
 
 #include <string.h>
@@ -23,10 +26,13 @@
 #include "dbglocal.h"
 
 /* Unimplemented yet:
- * - LBS_NOSEL
- * - LBS_USETABSTOPS
- * - Unicode
- * - Locale handling
+ - LBS_NOSEL
+ - LBS_USETABSTOPS
+ - Locale handling
+ - OS/2 default font bug: Odin about dialog -> LISTBOX_UpdateSize
+ - WS_EX_NOPARENTNOTIFY
+ - VK_LINEDOWN -> bottom most item not always visible
+ - performance not optimized
  */
 
 //CB: drive funtions (… la wine drive.c)
@@ -457,11 +463,11 @@ static INT LISTBOX_GetItemFromPoint( HWND hwnd, LB_DESCR *descr,
 
 
 /***********************************************************************
- *           LISTBOX_PaintItem
+ *           LISTBOX_DrawItem
  *
- * Paint an item.
+ * Draw an item.
  */
-static void LISTBOX_PaintItem( HWND hwnd, LB_DESCR *descr, HDC hdc,
+static void LISTBOX_DrawItem( HWND hwnd, LB_DESCR *descr, HDC hdc,
                                const RECT *rect, INT index, UINT action )
 {
     LB_ITEMDATA *item = NULL;
@@ -555,15 +561,17 @@ static void LISTBOX_PaintItem( HWND hwnd, LB_DESCR *descr, HDC hdc,
  *
  * Change the redraw flag.
  */
-static void LISTBOX_SetRedraw( HWND hwnd, LB_DESCR *descr, BOOL on )
+static LRESULT LISTBOX_SetRedraw( HWND hwnd, LB_DESCR *descr, BOOL on )
 {
     if (on)
     {
-        if (!(descr->style & LBS_NOREDRAW)) return;
+        if (!(descr->style & LBS_NOREDRAW)) return 0;
         descr->style &= ~LBS_NOREDRAW;
         LISTBOX_UpdateScroll( hwnd, descr );
     }
     else descr->style |= LBS_NOREDRAW;
+
+    return 0;
 }
 
 
@@ -593,7 +601,7 @@ static void LISTBOX_RepaintItem( HWND hwnd, LB_DESCR *descr, INT index,
     if (dwStyle & WS_DISABLED)
         SetTextColor( hdc, GetSysColor( COLOR_GRAYTEXT ) );
     SetWindowOrgEx( hdc, descr->horz_pos, 0, NULL );
-    LISTBOX_PaintItem( hwnd, descr, hdc, &rect, index, action );
+    LISTBOX_DrawItem( hwnd, descr, hdc, &rect, index, action );
     if (oldFont) SelectObject( hdc, oldFont );
     if (oldBrush) SelectObject( hdc, oldBrush );
     ReleaseDC( hwnd, hdc );
@@ -863,9 +871,9 @@ static LRESULT LISTBOX_GetSelItems( HWND hwnd, LB_DESCR *descr, INT max,
 
 
 /***********************************************************************
- *           LISTBOX_Paint
+ *           LISTBOX_Draw
  */
-static LRESULT LISTBOX_Paint( HWND hwnd, LB_DESCR *descr, HDC hdc )
+static LRESULT LISTBOX_Draw( HWND hwnd, LB_DESCR *descr, HDC hdc )
 {
     INT i, col_pos = descr->page_size - 1;
     RECT rect;
@@ -895,7 +903,7 @@ static LRESULT LISTBOX_Paint( HWND hwnd, LB_DESCR *descr, HDC hdc )
     {
         /* Special case for empty listbox: paint focus rect */
         rect.bottom = rect.top + descr->item_height;
-        LISTBOX_PaintItem( hwnd, descr, hdc, &rect, descr->focus_item,
+        LISTBOX_DrawItem( hwnd, descr, hdc, &rect, descr->focus_item,
                            ODA_FOCUS );
         rect.top = rect.bottom;
     }
@@ -907,7 +915,7 @@ static LRESULT LISTBOX_Paint( HWND hwnd, LB_DESCR *descr, HDC hdc )
         else
             rect.bottom = rect.top + descr->items[i].height;
 
-        LISTBOX_PaintItem( hwnd, descr, hdc, &rect, i, ODA_DRAWENTIRE );
+        LISTBOX_DrawItem( hwnd, descr, hdc, &rect, i, ODA_DRAWENTIRE );
         rect.top = rect.bottom;
 
         if ((descr->style & LBS_MULTICOLUMN) && !col_pos)
@@ -1098,26 +1106,32 @@ static LRESULT LISTBOX_SetColumnWidth( HWND hwnd, LB_DESCR *descr, UINT width)
  *
  * Returns the item height.
  */
-static INT LISTBOX_SetFont( HWND hwnd, LB_DESCR *descr, HFONT font )
+static LRESULT LISTBOX_SetFont(HWND hwnd,LB_DESCR *descr,WPARAM wParam,LPARAM lParam)
 {
     HDC hdc;
     HFONT oldFont = 0;
     TEXTMETRICA tm;
 
-    descr->font = font;
+    descr->font = (HFONT)wParam;
 
     if (!(hdc = GetDCEx( hwnd, 0, DCX_CACHE )))
     {
-        //ERR("unable to get DC.\n" );
-        return 16;
+      //ERR("unable to get DC.\n" );
+      descr->item_height =  16;
+      return 0;
     }
-    if (font) oldFont = SelectObject( hdc, font );
+    if (descr->font) oldFont = SelectObject(hdc,descr->font);
     GetTextMetricsA( hdc, &tm );
     if (oldFont) SelectObject( hdc, oldFont );
     ReleaseDC( hwnd, hdc );
     if (!IS_OWNERDRAW(descr))
         LISTBOX_SetItemHeight( hwnd, descr, 0, tm.tmHeight );
-    return tm.tmHeight ;
+
+    descr->item_height =  tm.tmHeight;
+
+    if (lParam) InvalidateRect( hwnd, 0, TRUE );
+
+    return 0;
 }
 
 
@@ -1243,7 +1257,7 @@ static LRESULT LISTBOX_SetSelection( HWND hwnd, LB_DESCR *descr, INT index,
     else
     {
         INT oldsel = descr->selected_item;
-	//SvL: Why was this commented out??? (enabled in latest wine code)
+        //SvL: Why was this commented out??? (enabled in latest wine code)
         if (index == oldsel) return LB_OKAY;
 
         if (oldsel != -1) descr->items[oldsel].selected = FALSE;
@@ -1401,6 +1415,17 @@ static LRESULT LISTBOX_InsertString( HWND hwnd, LB_DESCR *descr, INT index,
     return index;
 }
 
+static LRESULT LISTBOX_AddString(HWND hwnd,LB_DESCR *descr,WPARAM wParam,LPARAM lParam)
+{
+  wParam = LISTBOX_FindStringPos( hwnd, descr, (LPCSTR)lParam, FALSE );
+  return LISTBOX_InsertString( hwnd, descr, wParam, (LPCSTR)lParam );
+}
+
+static LRESULT LISTBOX_AddFile(HWND hwnd,LB_DESCR *descr,WPARAM wParam,LPARAM lParam)
+{
+  wParam = LISTBOX_FindFileStrPos( hwnd, descr, (LPCSTR)lParam );
+  return LISTBOX_InsertString( hwnd, descr, wParam, (LPCSTR)lParam );
+}
 
 /***********************************************************************
  *           LISTBOX_DeleteItem
@@ -1496,11 +1521,18 @@ static LRESULT LISTBOX_RemoveItem( HWND hwnd, LB_DESCR *descr, INT index )
     return LB_OKAY;
 }
 
+static LRESULT LISTBOX_DeleteString(HWND hwnd,LB_DESCR *descr,WPARAM wParam,LPARAM lParam)
+{
+  if (LISTBOX_RemoveItem( hwnd, descr, wParam) != LB_ERR)
+    return descr->nb_items;
+  else
+    return LB_ERR;
+}
 
 /***********************************************************************
  *           LISTBOX_ResetContent
  */
-static void LISTBOX_ResetContent( HWND hwnd, LB_DESCR *descr )
+static LRESULT LISTBOX_ResetContent( HWND hwnd, LB_DESCR *descr,BOOL refresh)
 {
     INT i;
 
@@ -1512,8 +1544,13 @@ static void LISTBOX_ResetContent( HWND hwnd, LB_DESCR *descr )
     descr->focus_item    = 0;
     descr->anchor_item   = -1;
     descr->items         = NULL;
-    LISTBOX_UpdateScroll( hwnd, descr );
-    InvalidateRect( hwnd, NULL, TRUE );
+    if (refresh)
+    {
+      LISTBOX_UpdateScroll( hwnd, descr );
+      InvalidateRect( hwnd, NULL, TRUE );
+    }
+
+    return 0;
 }
 
 
@@ -1523,6 +1560,7 @@ static void LISTBOX_ResetContent( HWND hwnd, LB_DESCR *descr )
 static LRESULT LISTBOX_SetCount( HWND hwnd, LB_DESCR *descr, INT count )
 {
     LRESULT ret;
+    INT oldcount = descr->nb_items;
 
     if (HAS_STRINGS(descr) || !HAS_NODATA(descr)) return LB_ERR;
 
@@ -1579,6 +1617,11 @@ static LRESULT LISTBOX_SetCount( HWND hwnd, LB_DESCR *descr, INT count )
 
     LISTBOX_UpdateScroll( hwnd, descr );
     InvalidateRect(hwnd,NULL,TRUE);
+
+    /* Move selection and focused item */
+    /* If listbox was empty, set focus to the first item */
+    if (oldcount == 0)
+      LISTBOX_SetCaretIndex( hwnd, descr, 0, FALSE );
 
     return LB_OKAY;
 }
@@ -1786,6 +1829,9 @@ static LRESULT LISTBOX_HandleMouseWheel(HWND hwnd, LB_DESCR *descr,WPARAM wParam
 {
     short gcWheelDelta = 0;
     UINT pulScrollLines = 3;
+
+    if (wParam & (MK_SHIFT | MK_CONTROL))
+      return DefWindowProcA(hwnd,WM_MOUSEWHEEL,wParam,lParam);
 
     SystemParametersInfoW(SPI_GETWHEELSCROLLLINES,0, &pulScrollLines, 0);
 
@@ -2037,13 +2083,14 @@ static LRESULT LISTBOX_HandleSystemTimer( HWND hwnd, LB_DESCR *descr )
  *
  * WM_MOUSEMOVE handler.
  */
-static void LISTBOX_HandleMouseMove( HWND hwnd, LB_DESCR *descr,
+static LRESULT LISTBOX_HandleMouseMove( HWND hwnd, LB_DESCR *descr,
                                      INT x, INT y )
 {
     INT index;
     TIMER_DIRECTION dir;
 
-    if (!descr->captured) return;
+    if (GetCapture() != hwnd) return 0;
+    if (!descr->captured) return 0;
 
     if (descr->style & LBS_MULTICOLUMN)
     {
@@ -2082,6 +2129,8 @@ static void LISTBOX_HandleMouseMove( HWND hwnd, LB_DESCR *descr,
         KillSystemTimer( hwnd, LB_TIMER_ID );
 
     LISTBOX_Timer = dir;
+
+    return 0;
 }
 
 
@@ -2228,18 +2277,18 @@ static LRESULT LISTBOX_HandleChar( HWND hwnd, LB_DESCR *descr,
 /***********************************************************************
  *           LISTBOX_Create
  */
-static BOOL LISTBOX_Create( HWND hwnd, LPHEADCOMBO lphc )
+static LRESULT LISTBOX_Create( HWND hwnd, LPHEADCOMBO lphc )
 {
     LB_DESCR *descr;
     MEASUREITEMSTRUCT mis;
     RECT rect;
 
     if (!(descr = (LB_DESCR*)HeapAlloc( GetProcessHeap(), 0, sizeof(*descr) )))
-        return FALSE;
+        return -1;
     if (!(descr->heap = HeapCreate( 0, 0x10000, 0 )))
     {
         HeapFree( GetProcessHeap(), 0, descr );
-        return FALSE;
+        return -1;
     }
     GetClientRect( hwnd, &rect );
     descr->owner         = GetParent( hwnd );
@@ -2280,7 +2329,7 @@ static BOOL LISTBOX_Create( HWND hwnd, LPHEADCOMBO lphc )
     if (descr->style & LBS_EXTENDEDSEL) descr->style |= LBS_MULTIPLESEL;
     if (descr->style & LBS_MULTICOLUMN) descr->style &= ~LBS_OWNERDRAWVARIABLE;
     if (descr->style & LBS_OWNERDRAWVARIABLE) descr->style |= LBS_NOINTEGRALHEIGHT;
-    descr->item_height = LISTBOX_SetFont( hwnd, descr, 0 );
+    LISTBOX_SetFont(hwnd,descr,0,(LPARAM)FALSE);
 
     if (descr->style & LBS_OWNERDRAWFIXED)
     {
@@ -2304,22 +2353,308 @@ static BOOL LISTBOX_Create( HWND hwnd, LPHEADCOMBO lphc )
         }
     }
 
-    return TRUE;
+    return 0;
 }
 
+static LRESULT LISTBOX_NCCreate(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
+
+  /*
+   * When a listbox is not in a combobox and the look
+   * is win95,  the WS_BORDER style is replaced with
+   * the WS_EX_CLIENTEDGE style.
+   */
+  if (dwStyle & WS_BORDER)
+  {
+    SetWindowLongA(hwnd,GWL_EXSTYLE,GetWindowLongA(hwnd,GWL_EXSTYLE) | WS_EX_CLIENTEDGE);
+    SetWindowLongA(hwnd,GWL_STYLE,GetWindowLongA(hwnd,GWL_STYLE)  & ~ WS_BORDER);
+  }
+
+  return DefWindowProcA(hwnd,WM_NCCREATE,wParam,lParam);
+}
 
 /***********************************************************************
  *           LISTBOX_Destroy
  */
 static BOOL LISTBOX_Destroy( HWND hwnd, LB_DESCR *descr )
 {
-    LISTBOX_ResetContent( hwnd, descr );
+    LISTBOX_ResetContent(hwnd,descr,FALSE);
     HeapDestroy( descr->heap );
     HeapFree( GetProcessHeap(), 0, descr );
     SetInfoPtr(hwnd,0);
     return TRUE;
 }
 
+static LRESULT LISTBOX_GetItemData(HWND hwnd,LB_DESCR *descr,WPARAM wParam,LPARAM lParam)
+{
+  if (((INT)wParam < 0) || ((INT)wParam >= descr->nb_items))
+    return LB_ERR;
+  return descr->items[wParam].data;
+}
+
+static LRESULT LISTBOX_SetItemData(HWND hwnd,LB_DESCR *descr,WPARAM wParam,LPARAM lParam)
+{
+  if (((INT)wParam < 0) || ((INT)wParam >= descr->nb_items))
+    return LB_ERR;
+  descr->items[wParam].data = (DWORD)lParam;
+  return LB_OKAY;
+}
+
+static LRESULT LISTBOX_GetCount(HWND hwnd,LB_DESCR *descr,WPARAM wParam,LPARAM lParam)
+{
+  return descr->nb_items;
+}
+
+static LRESULT LISTBOX_GetTextLen(HWND hwnd,LB_DESCR *descr,WPARAM wParam,LPARAM lParam)
+{
+  if (wParam >= descr->nb_items)
+    return LB_ERR;
+  return (HAS_STRINGS(descr) ? strlen(descr->items[wParam].str)
+                               : sizeof(DWORD));
+}
+
+static LRESULT LISTBOX_GetCurSel(HWND hwnd,LB_DESCR *descr,WPARAM wParam,LPARAM lParam)
+{
+  if (descr->nb_items==0)
+    return LB_ERR;
+  if (!IS_MULTISELECT(descr))
+    return descr->selected_item;
+  /* else */
+  if (descr->selected_item!=-1)
+    return descr->selected_item;
+  /* else */
+  return descr->focus_item;
+  /* otherwise, if the user tries to move the selection with the    */
+  /* arrow keys, we will give the application something to choke on */
+}
+
+static LRESULT LISTBOX_GetTopIndex(HWND hwnd,LB_DESCR *descr,WPARAM wParam,LPARAM lParam)
+{
+  return descr->top_item;
+}
+
+static LRESULT LISTBOX_ItemFromPoint(HWND hwnd,LB_DESCR *descr,WPARAM wParam,LPARAM lParam)
+{
+  POINT pt;
+  RECT rect;
+
+  pt.x = LOWORD(lParam);
+  pt.y = HIWORD(lParam);
+  rect.left = 0;
+  rect.top = 0;
+  rect.right = descr->width;
+  rect.bottom = descr->height;
+
+  return MAKELONG( LISTBOX_GetItemFromPoint(hwnd, descr, pt.x, pt.y),
+                   !PtInRect( &rect, pt ) );
+}
+
+static LRESULT LISTBOX_HandleSetCaretIndex(HWND hwnd,LB_DESCR *descr,WPARAM wParam,LPARAM lParam)
+{
+  if ((!IS_MULTISELECT(descr)) && (descr->selected_item != -1)) return LB_ERR;
+  if (LISTBOX_SetCaretIndex( hwnd, descr, wParam, !lParam ) == LB_ERR)
+    return LB_ERR;
+  else
+    return LB_OKAY;
+}
+
+static LRESULT LISTBOX_GetCaretIndex(HWND hwnd,LB_DESCR *descr,WPARAM wParam,LPARAM lParam)
+{
+  return descr->focus_item;
+}
+
+static LRESULT LISTBOX_SelectString(HWND hwnd,LB_DESCR *descr,WPARAM wParam,LPARAM lParam)
+{
+  INT index = LISTBOX_FindString( hwnd, descr, wParam,
+                                 (LPCSTR)lParam, FALSE );
+  if (index == LB_ERR)
+    return LB_ERR;
+  LISTBOX_SetSelection( hwnd, descr, index, TRUE, FALSE );
+  return index;
+}
+
+static LRESULT LISTBOX_GetSel(HWND hwnd,LB_DESCR *descr,WPARAM wParam,LPARAM lParam)
+{
+  if (((INT)wParam < 0) || ((INT)wParam >= descr->nb_items))
+    return LB_ERR;
+  return descr->items[wParam].selected;
+}
+
+static LRESULT LISTBOX_SetCurSel(HWND hwnd,LB_DESCR *descr,WPARAM wParam,LPARAM lParam)
+{
+  if (IS_MULTISELECT(descr)) return LB_ERR;
+  LISTBOX_SetCaretIndex( hwnd, descr, wParam, TRUE );
+  return LISTBOX_SetSelection( hwnd, descr, wParam, TRUE, FALSE );
+}
+
+static LRESULT LISTBOX_SelItemRange(HWND hwnd,LB_DESCR *descr,WPARAM wParam,LPARAM lParam)
+{
+  if (LOWORD(lParam) <= HIWORD(lParam))
+    return LISTBOX_SelectItemRange( hwnd, descr, LOWORD(lParam),
+                                    HIWORD(lParam), wParam );
+  else
+    return LISTBOX_SelectItemRange( hwnd, descr, HIWORD(lParam),
+                                    LOWORD(lParam), wParam );
+}
+
+static LRESULT LISTBOX_SelItemRangeEx(HWND hwnd,LB_DESCR *descr,WPARAM wParam,LPARAM lParam)
+{
+  if ((INT)lParam >= (INT)wParam)
+    return LISTBOX_SelectItemRange( hwnd, descr, wParam, lParam, TRUE );
+  else
+    return LISTBOX_SelectItemRange( hwnd, descr, lParam, wParam, FALSE);
+}
+
+static LRESULT LISTBOX_GetHorizontalExtent(HWND hwnd,LB_DESCR *descr,WPARAM wParam,LPARAM lParam)
+{
+  return descr->horz_extent;
+}
+
+static LRESULT LISTBOX_GetAnchorIndex(HWND hwnd,LB_DESCR *descr,WPARAM wParam,LPARAM lParam)
+{
+  return descr->anchor_item;
+}
+
+static LRESULT LISTBOX_SetAnchorIndex(HWND hwnd,LB_DESCR *descr,WPARAM wParam,LPARAM lParam)
+{
+  if (((INT)wParam < -1) || ((INT)wParam >= descr->nb_items))
+    return LB_ERR;
+  descr->anchor_item = (INT)wParam;
+  return LB_OKAY;
+}
+
+static LRESULT LISTBOX_GetLocale(HWND hwnd,LB_DESCR *descr,WPARAM wParam,LPARAM lParam)
+{
+  return descr->locale;
+}
+
+static LRESULT LISTBOX_SetLocale(HWND hwnd,LB_DESCR *descr,WPARAM wParam,LPARAM lParam)
+{
+  descr->locale = (LCID)wParam;  /* FIXME: should check for valid lcid */
+  return LB_OKAY;
+}
+
+static LRESULT LISTBOX_CaretOn(HWND hwnd,LB_DESCR *descr,WPARAM wParam,LPARAM lParam)
+{
+  if (descr->caret_on)
+    return LB_OKAY;
+  descr->caret_on = TRUE;
+  if ((descr->focus_item != -1) && (descr->in_focus))
+    LISTBOX_RepaintItem( hwnd, descr, descr->focus_item, ODA_FOCUS );
+  return LB_OKAY;
+}
+
+static LRESULT LISTBOX_CaretOff(HWND hwnd,LB_DESCR *descr,WPARAM wParam,LPARAM lParam)
+{
+  if (!descr->caret_on)
+    return LB_OKAY;
+  descr->caret_on = FALSE;
+  if ((descr->focus_item != -1) && (descr->in_focus))
+    LISTBOX_RepaintItem( hwnd, descr, descr->focus_item, ODA_FOCUS );
+  return LB_OKAY;
+}
+
+static LRESULT LISTBOX_Enable(HWND hwnd,LB_DESCR *descr,WPARAM wParam,LPARAM lParam)
+{
+  InvalidateRect( hwnd, NULL, TRUE );
+  return 0;
+}
+
+static LRESULT LISTBOX_GetDlgCode(HWND hwnd,LB_DESCR *descr,WPARAM wParam,LPARAM lParam)
+{
+  return DLGC_WANTARROWS | DLGC_WANTCHARS;
+}
+
+static LRESULT LISTBOX_Paint(HWND hwnd,LB_DESCR *descr,WPARAM wParam,LPARAM lParam)
+{
+  PAINTSTRUCT ps;
+  HDC hdc = ( wParam ) ? ((HDC)wParam) :  BeginPaint( hwnd, &ps );
+  LRESULT ret;
+
+  ret = LISTBOX_Draw( hwnd, descr, hdc );
+  if( !wParam ) EndPaint( hwnd, &ps );
+
+  return ret;
+}
+
+static LRESULT LISTBOX_Size(HWND hwnd,LB_DESCR *descr,WPARAM wParam,LPARAM lParam)
+{
+  LISTBOX_UpdateSize( hwnd, descr );
+  return 0;
+}
+
+static LRESULT LISTBOX_GetFont(HWND hwnd,LB_DESCR *descr,WPARAM wParam,LPARAM lParam)
+{
+  return descr->font;
+}
+
+static LRESULT LISTBOX_SetFocus(HWND hwnd,LB_DESCR *descr,WPARAM wParam,LPARAM lParam)
+{
+  descr->in_focus = TRUE;
+  descr->caret_on = TRUE;
+  if (descr->focus_item != -1)
+    LISTBOX_RepaintItem( hwnd, descr, descr->focus_item, ODA_FOCUS );
+  SEND_NOTIFICATION( hwnd, descr, LBN_SETFOCUS );
+  return 0;
+}
+
+static LRESULT LISTBOX_KillFocus(HWND hwnd,LB_DESCR *descr,WPARAM wParam,LPARAM lParam)
+{
+  descr->in_focus = FALSE;
+  if ((descr->focus_item != -1) && descr->caret_on)
+    LISTBOX_RepaintItem( hwnd, descr, descr->focus_item, ODA_FOCUS );
+  SEND_NOTIFICATION( hwnd, descr, LBN_KILLFOCUS );
+  return 0;
+}
+
+static LRESULT LISTBOX_MouseActivate(HWND hwnd,LB_DESCR *descr,WPARAM wParam,LPARAM lParam)
+{
+  return MA_NOACTIVATE;
+}
+
+static LRESULT LISTBOX_LButtonDblClk(HWND hwnd,LB_DESCR *descr,WPARAM wParam,LPARAM lParam)
+{
+  if (descr->style & LBS_NOTIFY)
+    SEND_NOTIFICATION( hwnd, descr, LBN_DBLCLK );
+  return 0;
+}
+
+static LRESULT LISTBOX_EraseBackground(HWND hwnd,LB_DESCR *descr,WPARAM wParam,LPARAM lParam)
+{
+  if (IS_OWNERDRAW(descr))
+  {
+    RECT rect;
+    HBRUSH hbrush = SendMessageA( descr->owner, WM_CTLCOLORLISTBOX, wParam, (LPARAM)hwnd );
+
+    GetClientRect(hwnd, &rect);
+    if (hbrush) FillRect( (HDC)wParam, &rect, hbrush );
+  }
+
+  return 1;
+}
+
+static LRESULT LISTBOX_DropFiles(HWND hwnd,LB_DESCR *descr,WPARAM wParam,LPARAM lParam)
+{
+  if ( !descr->lphc )
+    return SendMessageA( descr->owner, WM_DROPFILES, wParam, lParam );
+
+  return 0;
+}
+
+static LRESULT LISTBOX_HandleDragDrop(HWND hwnd,LB_DESCR *descr,UINT msg,WPARAM wParam,LPARAM lParam)
+{
+  if( !descr->lphc )
+  {
+    LPDRAGINFO dragInfo = (LPDRAGINFO)lParam;
+
+    dragInfo->l = LISTBOX_GetItemFromPoint( hwnd, descr, dragInfo->pt.x,
+                                                dragInfo->pt.y );
+    return SendMessageA( descr->owner, msg, wParam, lParam );
+  }
+
+  return 0;
+}
 
 /***********************************************************************
  *           ListBoxWndProc
@@ -2327,348 +2662,226 @@ static BOOL LISTBOX_Destroy( HWND hwnd, LB_DESCR *descr )
 LRESULT WINAPI ListBoxWndProc( HWND hwnd, UINT msg,
                                       WPARAM wParam, LPARAM lParam )
 {
-    LRESULT ret;
     LB_DESCR *descr;
 
     if (!(descr = (LB_DESCR*)GetInfoPtr(hwnd)))
     {
-        switch (msg)
-        {
-            case WM_CREATE:
-            {
-                if (!LISTBOX_Create( hwnd, NULL ))
-                     return -1;
-                //TRACE("creating wnd=%04x descr=%p\n",
-                //      hwnd, *(LB_DESCR **)wnd->wExtra );
-                return 0;
-            }
-            case WM_NCCREATE:
-            {
-                DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
+      switch (msg)
+      {
+        case WM_CREATE:
+          return LISTBOX_Create(hwnd,NULL);
 
-                /*
-                 * When a listbox is not in a combobox and the look
-                 * is win95,  the WS_BORDER style is replaced with
-                 * the WS_EX_CLIENTEDGE style.
-                 */
-                if (dwStyle & WS_BORDER)
-                {
-                    SetWindowLongA(hwnd,GWL_EXSTYLE,GetWindowLongA(hwnd,GWL_EXSTYLE) | WS_EX_CLIENTEDGE);
-                    SetWindowLongA(hwnd,GWL_STYLE,GetWindowLongA(hwnd,GWL_STYLE)  & ~ WS_BORDER);
-                }
-            }
-        }
-        /* Ignore all other messages before we get a WM_CREATE */
-        return DefWindowProcA( hwnd, msg, wParam, lParam );
+        case WM_NCCREATE:
+          return LISTBOX_NCCreate(hwnd,wParam,lParam);
+      }
+      /* Ignore all other messages before we get a WM_CREATE */
+      return DefWindowProcA( hwnd, msg, wParam, lParam );
     }
 
-    //TRACE("[%04x]: msg %s wp %08x lp %08lx\n",
-    //             wnd->hwndSelf, SPY_GetMsgName(msg), wParam, lParam );
     switch(msg)
     {
-    case LB_RESETCONTENT:
-        LISTBOX_ResetContent( hwnd, descr );
-        return 0;
+      case LB_RESETCONTENT:
+        return LISTBOX_ResetContent(hwnd,descr,TRUE);
 
-    case LB_ADDSTRING:
-        wParam = LISTBOX_FindStringPos( hwnd, descr, (LPCSTR)lParam, FALSE );
+      case LB_ADDSTRING:
+        return LISTBOX_AddString(hwnd,descr,wParam,lParam);
+
+      case LB_INSERTSTRING:
         return LISTBOX_InsertString( hwnd, descr, wParam, (LPCSTR)lParam );
 
-    case LB_INSERTSTRING:
-        return LISTBOX_InsertString( hwnd, descr, wParam, (LPCSTR)lParam );
+      case LB_ADDFILE:
+        return LISTBOX_AddFile(hwnd,descr,wParam,lParam);
 
-    case LB_ADDFILE:
-        wParam = LISTBOX_FindFileStrPos( hwnd, descr, (LPCSTR)lParam );
-        return LISTBOX_InsertString( hwnd, descr, wParam, (LPCSTR)lParam );
+      case LB_DELETESTRING:
+        return LISTBOX_DeleteString(hwnd,descr,wParam,lParam);
 
-    case LB_DELETESTRING:
-        if (LISTBOX_RemoveItem( hwnd, descr, wParam) != LB_ERR)
-           return descr->nb_items;
-        else
-           return LB_ERR;
+      case LB_GETITEMDATA:
+        return LISTBOX_GetItemData(hwnd,descr,wParam,lParam);
 
-    case LB_GETITEMDATA:
-        if (((INT)wParam < 0) || ((INT)wParam >= descr->nb_items))
-            return LB_ERR;
-        return descr->items[wParam].data;
+      case LB_SETITEMDATA:
+        return LISTBOX_SetItemData(hwnd,descr,wParam,lParam);
 
-    case LB_SETITEMDATA:
-        if (((INT)wParam < 0) || ((INT)wParam >= descr->nb_items))
-            return LB_ERR;
-        descr->items[wParam].data = (DWORD)lParam;
-        return LB_OKAY;
+      case LB_GETCOUNT:
+        return LISTBOX_GetCount(hwnd,descr,wParam,lParam);
 
-    case LB_GETCOUNT:
-        return descr->nb_items;
-
-    case LB_GETTEXT:
+      case LB_GETTEXT:
         return LISTBOX_GetText( hwnd, descr, wParam, (LPSTR)lParam );
 
-    case LB_GETTEXTLEN:
-        if (wParam >= descr->nb_items)
-            return LB_ERR;
-        return (HAS_STRINGS(descr) ? strlen(descr->items[wParam].str)
-                                   : sizeof(DWORD));
+      case LB_GETTEXTLEN:
+        return LISTBOX_GetTextLen(hwnd,descr,wParam,lParam);
 
-    case LB_GETCURSEL:
-        if (descr->nb_items==0)
-          return LB_ERR;
-        if (!IS_MULTISELECT(descr))
-          return descr->selected_item;
-        /* else */
-        if (descr->selected_item!=-1)
-          return descr->selected_item;
-        /* else */
-        return descr->focus_item;
-        /* otherwise, if the user tries to move the selection with the    */
-        /* arrow keys, we will give the application something to choke on */
-    case LB_GETTOPINDEX:
-        return descr->top_item;
+      case LB_GETCURSEL:
+        return LISTBOX_GetCurSel(hwnd,descr,wParam,lParam);
 
-    case LB_GETITEMHEIGHT:
+      case LB_GETTOPINDEX:
+        return LISTBOX_GetTopIndex(hwnd,descr,wParam,lParam);
+
+      case LB_GETITEMHEIGHT:
         return LISTBOX_GetItemHeight( hwnd, descr, wParam );
 
-    case LB_SETITEMHEIGHT:
+      case LB_SETITEMHEIGHT:
         return LISTBOX_SetItemHeight( hwnd, descr, wParam, lParam );
 
-    case LB_ITEMFROMPOINT:
-        {
-            POINT pt;
-            RECT rect;
+      case LB_ITEMFROMPOINT:
+        return LISTBOX_ItemFromPoint(hwnd,descr,wParam,lParam);
 
-            pt.x = LOWORD(lParam);
-            pt.y = HIWORD(lParam);
-            rect.left = 0;
-            rect.top = 0;
-            rect.right = descr->width;
-            rect.bottom = descr->height;
+      case LB_SETCARETINDEX:
+        return LISTBOX_HandleSetCaretIndex(hwnd,descr,wParam,lParam);
 
-            return MAKELONG( LISTBOX_GetItemFromPoint(hwnd, descr, pt.x, pt.y),
-                             !PtInRect( &rect, pt ) );
-        }
+      case LB_GETCARETINDEX:
+        return LISTBOX_GetCaretIndex(hwnd,descr,wParam,lParam);
 
-    case LB_SETCARETINDEX:
-        if ((!IS_MULTISELECT(descr)) && (descr->selected_item != -1)) return LB_ERR;
-        if (LISTBOX_SetCaretIndex( hwnd, descr, wParam, !lParam ) == LB_ERR)
-            return LB_ERR;
-        else
-             return LB_OKAY;
-
-    case LB_GETCARETINDEX:
-        return descr->focus_item;
-
-    case LB_SETTOPINDEX:
+      case LB_SETTOPINDEX:
         return LISTBOX_SetTopItem( hwnd, descr, wParam, TRUE );
 
-    case LB_SETCOLUMNWIDTH:
+      case LB_SETCOLUMNWIDTH:
         return LISTBOX_SetColumnWidth( hwnd, descr, wParam );
 
-    case LB_GETITEMRECT:
+      case LB_GETITEMRECT:
         return LISTBOX_GetItemRect( hwnd, descr, wParam, (RECT *)lParam );
 
-    case LB_FINDSTRING:
+      case LB_FINDSTRING:
         return LISTBOX_FindString( hwnd, descr, wParam, (LPCSTR)lParam, FALSE );
 
-    case LB_FINDSTRINGEXACT:
+      case LB_FINDSTRINGEXACT:
         return LISTBOX_FindString( hwnd, descr, wParam, (LPCSTR)lParam, TRUE );
 
-    case LB_SELECTSTRING:
-        {
-            INT index = LISTBOX_FindString( hwnd, descr, wParam,
-                                              (LPCSTR)lParam, FALSE );
-            if (index == LB_ERR)
-                return LB_ERR;
-            LISTBOX_SetSelection( hwnd, descr, index, TRUE, FALSE );
-            return index;
-        }
+      case LB_SELECTSTRING:
+        return LISTBOX_SelectString(hwnd,descr,wParam,lParam);
 
-    case LB_GETSEL:
-        if (((INT)wParam < 0) || ((INT)wParam >= descr->nb_items))
-            return LB_ERR;
-        return descr->items[wParam].selected;
+      case LB_GETSEL:
+        return LISTBOX_GetSel(hwnd,descr,wParam,lParam);
 
-    case LB_SETSEL:
+      case LB_SETSEL:
         return LISTBOX_SetSelection( hwnd, descr, lParam, wParam, FALSE );
 
-    case LB_SETCURSEL:
-        if (IS_MULTISELECT(descr)) return LB_ERR;
-        LISTBOX_SetCaretIndex( hwnd, descr, wParam, TRUE );
-        return LISTBOX_SetSelection( hwnd, descr, wParam, TRUE, FALSE );
+      case LB_SETCURSEL:
+        return LISTBOX_SetCurSel(hwnd,descr,wParam,lParam);
 
-    case LB_GETSELCOUNT:
+      case LB_GETSELCOUNT:
         return LISTBOX_GetSelCount( hwnd, descr );
 
-    case LB_GETSELITEMS:
+      case LB_GETSELITEMS:
         return LISTBOX_GetSelItems( hwnd, descr, wParam, (LPINT)lParam );
 
-    case LB_SELITEMRANGE:
-        if (LOWORD(lParam) <= HIWORD(lParam))
-            return LISTBOX_SelectItemRange( hwnd, descr, LOWORD(lParam),
-                                            HIWORD(lParam), wParam );
-        else
-            return LISTBOX_SelectItemRange( hwnd, descr, HIWORD(lParam),
-                                            LOWORD(lParam), wParam );
+      case LB_SELITEMRANGE:
+        return LISTBOX_SelItemRange(hwnd,descr,wParam,lParam);
 
-    case LB_SELITEMRANGEEX:
-        if ((INT)lParam >= (INT)wParam)
-            return LISTBOX_SelectItemRange( hwnd, descr, wParam, lParam, TRUE );
-        else
-            return LISTBOX_SelectItemRange( hwnd, descr, lParam, wParam, FALSE);
+      case LB_SELITEMRANGEEX:
+        return LISTBOX_SelItemRangeEx(hwnd,descr,wParam,lParam);
 
-    case LB_GETHORIZONTALEXTENT:
-        return descr->horz_extent;
+      case LB_GETHORIZONTALEXTENT:
+        return LISTBOX_GetHorizontalExtent(hwnd,descr,wParam,lParam);
 
-    case LB_SETHORIZONTALEXTENT:
+      case LB_SETHORIZONTALEXTENT:
         return LISTBOX_SetHorizontalExtent( hwnd, descr, wParam );
 
-    case LB_GETANCHORINDEX:
-        return descr->anchor_item;
+      case LB_GETANCHORINDEX:
+        return LISTBOX_GetAnchorIndex(hwnd,descr,wParam,lParam);
 
-    case LB_SETANCHORINDEX:
-        if (((INT)wParam < -1) || ((INT)wParam >= descr->nb_items))
-            return LB_ERR;
-        descr->anchor_item = (INT)wParam;
-        return LB_OKAY;
+      case LB_SETANCHORINDEX:
+        return LISTBOX_SetAnchorIndex(hwnd,descr,wParam,lParam);
 
-    case LB_DIR:
+      case LB_DIR:
         return LISTBOX_Directory( hwnd, descr, wParam, (LPCSTR)lParam, TRUE );
 
-    case LB_GETLOCALE:
-        return descr->locale;
+      case LB_GETLOCALE:
+        return LISTBOX_GetLocale(hwnd,descr,wParam,lParam);
 
-    case LB_SETLOCALE:
-        descr->locale = (LCID)wParam;  /* FIXME: should check for valid lcid */
-        return LB_OKAY;
+      case LB_SETLOCALE:
+        return LISTBOX_SetLocale(hwnd,descr,wParam,lParam);
 
-    case LB_INITSTORAGE:
+      case LB_INITSTORAGE:
         return LISTBOX_InitStorage( hwnd, descr, wParam, (DWORD)lParam );
 
-    case LB_SETCOUNT:
+      case LB_SETCOUNT:
         return LISTBOX_SetCount( hwnd, descr, (INT)wParam );
 
-    case LB_SETTABSTOPS:
+      case LB_SETTABSTOPS:
         return LISTBOX_SetTabStops( hwnd, descr, wParam, (LPINT)lParam, FALSE );
 
-    case LB_CARETON:
-        if (descr->caret_on)
-            return LB_OKAY;
-        descr->caret_on = TRUE;
-        if ((descr->focus_item != -1) && (descr->in_focus))
-            LISTBOX_RepaintItem( hwnd, descr, descr->focus_item, ODA_FOCUS );
-        return LB_OKAY;
+      case LB_CARETON:
+        return LISTBOX_CaretOn(hwnd,descr,wParam,lParam);
 
-    case LB_CARETOFF:
-        if (!descr->caret_on)
-            return LB_OKAY;
-        descr->caret_on = FALSE;
-        if ((descr->focus_item != -1) && (descr->in_focus))
-            LISTBOX_RepaintItem( hwnd, descr, descr->focus_item, ODA_FOCUS );
-        return LB_OKAY;
+      case LB_CARETOFF:
+        return LISTBOX_CaretOff(hwnd,descr,wParam,lParam);
 
-    case WM_DESTROY:
+      case WM_DESTROY:
         return LISTBOX_Destroy( hwnd, descr );
 
-    case WM_ENABLE:
-        InvalidateRect( hwnd, NULL, TRUE );
-        return 0;
+      case WM_ENABLE:
+        return LISTBOX_Enable(hwnd,descr,wParam,lParam);
 
-    case WM_SETREDRAW:
-        LISTBOX_SetRedraw( hwnd, descr, wParam != 0 );
-        return 0;
+      case WM_SETREDRAW:
+        return LISTBOX_SetRedraw( hwnd, descr, wParam != 0 );
 
-    case WM_GETDLGCODE:
-        return DLGC_WANTARROWS | DLGC_WANTCHARS;
+      case WM_GETDLGCODE:
+        return LISTBOX_GetDlgCode(hwnd,descr,wParam,lParam);
 
-    case WM_PAINT:
-        {
-            PAINTSTRUCT ps;
-            HDC hdc = ( wParam ) ? ((HDC)wParam)
-                                   :  BeginPaint( hwnd, &ps );
-            ret = LISTBOX_Paint( hwnd, descr, hdc );
-            if( !wParam ) EndPaint( hwnd, &ps );
-        }
-        return ret;
-    case WM_SIZE:
-        LISTBOX_UpdateSize( hwnd, descr );
-        return 0;
-    case WM_GETFONT:
-        return descr->font;
-    case WM_SETFONT:
-        LISTBOX_SetFont( hwnd, descr, (HFONT)wParam );
-        if (lParam) InvalidateRect( hwnd, 0, TRUE );
-        return 0;
-    case WM_SETFOCUS:
-        descr->in_focus = TRUE;
-        descr->caret_on = TRUE;
-        if (descr->focus_item != -1)
-            LISTBOX_RepaintItem( hwnd, descr, descr->focus_item, ODA_FOCUS );
-        SEND_NOTIFICATION( hwnd, descr, LBN_SETFOCUS );
-        return 0;
-    case WM_KILLFOCUS:
-        descr->in_focus = FALSE;
-        if ((descr->focus_item != -1) && descr->caret_on)
-            LISTBOX_RepaintItem( hwnd, descr, descr->focus_item, ODA_FOCUS );
-        SEND_NOTIFICATION( hwnd, descr, LBN_KILLFOCUS );
-        return 0;
-    case WM_HSCROLL:
+      case WM_PAINT:
+        return LISTBOX_Paint(hwnd,descr,wParam,lParam);
+
+      case WM_SIZE:
+        return LISTBOX_Size(hwnd,descr,wParam,lParam);
+
+      case WM_GETFONT:
+        return LISTBOX_GetFont(hwnd,descr,wParam,lParam);
+
+      case WM_SETFONT:
+        return LISTBOX_SetFont(hwnd,descr,wParam,lParam);
+
+      case WM_SETFOCUS:
+        return LISTBOX_SetFocus(hwnd,descr,wParam,lParam);
+
+      case WM_KILLFOCUS:
+        return LISTBOX_KillFocus(hwnd,descr,wParam,lParam);
+
+      case WM_HSCROLL:
         return LISTBOX_HandleHScroll( hwnd, descr, wParam, lParam );
-    case WM_VSCROLL:
+
+      case WM_VSCROLL:
         return LISTBOX_HandleVScroll( hwnd, descr, wParam, lParam );
-    case WM_MOUSEACTIVATE:
-        return MA_NOACTIVATE;
-    case WM_MOUSEWHEEL:
-        if (wParam & (MK_SHIFT | MK_CONTROL))
-            return DefWindowProcA( hwnd, msg, wParam, lParam );
+
+      case WM_MOUSEACTIVATE:
+        return LISTBOX_MouseActivate(hwnd,descr,wParam,lParam);
+
+      case WM_MOUSEWHEEL:
         return LISTBOX_HandleMouseWheel( hwnd, descr, wParam, lParam );
-    case WM_LBUTTONDOWN:
+
+      case WM_LBUTTONDOWN:
         return LISTBOX_HandleLButtonDown( hwnd, descr, wParam,
                                           (INT16)LOWORD(lParam),
                                           (INT16)HIWORD(lParam) );
-    case WM_LBUTTONDBLCLK:
-        if (descr->style & LBS_NOTIFY)
-            SEND_NOTIFICATION( hwnd, descr, LBN_DBLCLK );
-        return 0;
-    case WM_MOUSEMOVE:
-        if (GetCapture() == hwnd)
-            LISTBOX_HandleMouseMove( hwnd, descr, (INT16)LOWORD(lParam),
-                                     (INT16)HIWORD(lParam) );
-        return 0;
+      case WM_LBUTTONDBLCLK:
+        return LISTBOX_LButtonDblClk(hwnd,descr,wParam,lParam);
 
-    case WM_LBUTTONUP:
+      case WM_MOUSEMOVE:
+        return LISTBOX_HandleMouseMove( hwnd, descr, (INT16)LOWORD(lParam),
+                                        (INT16)HIWORD(lParam) );
+
+      case WM_LBUTTONUP:
         return LISTBOX_HandleLButtonUp( hwnd, descr );
-    case WM_KEYDOWN:
-        return LISTBOX_HandleKeyDown( hwnd, descr, wParam );
-    case WM_CHAR:
-        return LISTBOX_HandleChar( hwnd, descr, wParam );
-    case WM_SYSTIMER:
-        return LISTBOX_HandleSystemTimer( hwnd, descr );
-    case WM_ERASEBKGND:
-        if (IS_OWNERDRAW(descr))
-        {
-            RECT rect;
-            HBRUSH hbrush = SendMessageA( descr->owner, WM_CTLCOLORLISTBOX,
-                                              wParam, (LPARAM)hwnd );
-            GetClientRect(hwnd, &rect);
-            if (hbrush) FillRect( (HDC)wParam, &rect, hbrush );
-        }
-        return 1;
-    case WM_DROPFILES:
-        if( !descr->lphc )
-            return SendMessageA( descr->owner, msg, wParam, lParam );
-        break;
 
-    case WM_DROPOBJECT:
-    case WM_QUERYDROPOBJECT:
-    case WM_DRAGSELECT:
-    case WM_DRAGMOVE:
-        if( !descr->lphc )
-        {
-            LPDRAGINFO dragInfo = (LPDRAGINFO)lParam;
-            dragInfo->l = LISTBOX_GetItemFromPoint( hwnd, descr, dragInfo->pt.x,
-                                                dragInfo->pt.y );
-            return SendMessageA( descr->owner, msg, wParam, lParam );
-        }
-        break;
+      case WM_KEYDOWN:
+        return LISTBOX_HandleKeyDown( hwnd, descr, wParam );
+
+      case WM_CHAR:
+        return LISTBOX_HandleChar( hwnd, descr, wParam );
+
+      case WM_SYSTIMER:
+        return LISTBOX_HandleSystemTimer( hwnd, descr );
+
+      case WM_ERASEBKGND:
+        return LISTBOX_EraseBackground(hwnd,descr,wParam,lParam);
+
+      case WM_DROPFILES:
+        return LISTBOX_DropFiles(hwnd,descr,wParam,lParam);
+
+      case WM_DROPOBJECT:
+      case WM_QUERYDROPOBJECT:
+      case WM_DRAGSELECT:
+      case WM_DRAGMOVE:
+        return LISTBOX_HandleDragDrop(hwnd,descr,msg,wParam,lParam);
 
     default:
         //if ((msg >= WM_USER) && (msg < 0xc000))

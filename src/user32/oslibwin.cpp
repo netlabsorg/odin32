@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.70 2000-03-13 13:10:47 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.71 2000-03-17 17:12:08 cbratschi Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -25,7 +25,7 @@
 #include "oslibgdi.h"
 #include "pmwindow.h"
 
-#define DBG_LOCALLOG	DBG_oslibwin
+#define DBG_LOCALLOG    DBG_oslibwin
 #include "dbglocal.h"
 
 //******************************************************************************
