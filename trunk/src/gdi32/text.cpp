@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.32 2003-01-28 16:21:49 sandervl Exp $ */
+/* $Id: text.cpp,v 1.33 2003-03-03 16:33:35 sandervl Exp $ */
 
 /*
  * GDI32 text apis
@@ -297,12 +297,30 @@ BOOL InternalTextOutW(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCWST
 //******************************************************************************
 BOOL WIN32API ExtTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR lpszString,UINT cbCount,CONST INT *lpDx)
 {
-  if(lprc) {
-        dprintf(("GDI32: ExtTextOutA %x %s (%d,%d) %x %d %x rect (%d,%d)(%d,%d)", hdc, lpszString, X, Y, fuOptions, cbCount, lpDx, lprc->left, lprc->top, lprc->right, lprc->bottom));
-  }
-  else  dprintf(("GDI32: ExtTextOutA %x %s (%d,%d) %x %d %x", hdc, lpszString, X, Y, fuOptions, cbCount, lpDx));
+  LPSTR astring = NULL;
+  LPCSTR aCstring = lpszString;
+  BOOL  rc;
 
-  return InternalTextOutA(hdc, X, Y, fuOptions, lprc, lpszString, cbCount, lpDx, TRUE);
+  /* no guarantee for zeroterminated text in lpszString, found in "PuTTY A Free Win32 Telnet SSH Client" */
+  if (cbCount >= 0)
+  {
+     astring = (char *)malloc(cbCount+1);
+     memcpy(astring, lpszString, cbCount);
+     astring[cbCount] = '\0';
+     aCstring = astring;
+  }
+  if(lprc)
+  {
+        dprintf(("GDI32: ExtTextOutA %x %s (%d,%d) %x %d %x rect (%d,%d)(%d,%d)", hdc, /*lpszString*/ aCstring, X, Y, fuOptions, cbCount, lpDx, lprc->left, lprc->top, lprc->right, lprc->bottom));
+  }
+  else  dprintf(("GDI32: ExtTextOutA %x %s (%d,%d) %x %d %x", hdc, /*lpszString*/ aCstring, X, Y, fuOptions, cbCount, lpDx));
+
+  rc = InternalTextOutA(hdc, X, Y, fuOptions, lprc, aCstring, cbCount, lpDx, TRUE);
+
+  if(astring)
+      free(astring);
+ 
+  return(rc);
 }
 //******************************************************************************
 //******************************************************************************
@@ -381,7 +399,7 @@ BOOL WIN32API GetTextExtentPointA(HDC hdc, LPCTSTR lpsz, int cbString,
    // Verified with NT4, SP6
    if(cbString == 0)
    {
-      dprintf(("GDI32: GetTextExtentPointW cbString == 0"));
+      dprintf(("GDI32: GetTextExtentPointA cbString == 0"));
       SetLastError(ERROR_SUCCESS);
       return TRUE;
    }
