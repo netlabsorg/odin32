@@ -1,8 +1,15 @@
-/* $Id: changelog,v 1.2118 2002-06-01 11:06:41 sandervl Exp $ */
+/* $Id: changelog,v 1.2119 2002-06-01 17:24:22 sandervl Exp $ */
 
  2002-06-01: Sander van Leeuwen <sandervl@innotek.de>
     - SHELL32:  o IShellFolder_fnCompareIDs shortcut added to improve
                   performance
+                o DragQueryFileW fix
+    - WINMM:    o Implemented minimal control change notification
+    - COMCTL32: o Added LVN_BEGINDRAG/LVN_BEGINRDRAG notification to listview
+                  control (probably not 100% correct)
+    - USER32:   o Implemented support for simple drag & drop (WM_DROPFILES)
+                  (works in notepad; drag file object from WPS into notepad 
+                   window)
 
  2002-05-31: Sander van Leeuwen <sandervl@innotek.de>
     - DINPUT:   o Ignore injected mouse messages (hook; LLMHF_INJECTED flag)
