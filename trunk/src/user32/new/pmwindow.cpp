@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.23 1999-08-28 17:24:45 dengert Exp $ */
+/* $Id: pmwindow.cpp,v 1.24 1999-08-28 19:32:46 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -76,7 +76,7 @@ BOOL InitPM()
      (PSZ)WIN32_STDCLASS,               /* Window class name            */
      (PFNWP)Win32WindowProc,            /* Address of window procedure  */
      CS_SIZEREDRAW | CS_HITTEST,
-     8)) {
+     NROF_WIN32WNDBYTES)) {
         dprintf(("WinRegisterClass Win32Window failed"));
         return(FALSE);
    }
@@ -107,29 +107,13 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         dprintf(("Invalid win32wnd pointer for window %x!!", hwnd));
         goto RunDefWndProc;
   }
+  if(msg > WIN32APP_USERMSGBASE) {
+	//win32 app user message
+	dprintf(("PMWINDOW: Message %x (%x,%x) posted to window %x", (ULONG)msg-WIN32APP_USERMSGBASE, mp1, mp2, hwnd));
+        win32wnd->SendMessageA((ULONG)msg-WIN32APP_USERMSGBASE, (ULONG)mp1, (ULONG)mp2);
+  }
   switch( msg )
   {
-    //internal messages
-    case WM_WIN32_POSTMESSAGEA:
-        postmsg = (POSTMSG_PACKET *)mp1;
-        if(postmsg == NULL) {
-            dprintf(("WM_WIN32_POSTMESSAGEA, postmsg NULL!!"));
-            break;
-        }
-        win32wnd->SendMessageA(postmsg->Msg, postmsg->wParam, postmsg->lParam);
-        free(postmsg);
-        break;
-
-    case WM_WIN32_POSTMESSAGEW:
-        postmsg = (POSTMSG_PACKET *)mp1;
-        if(postmsg == NULL) {
-            dprintf(("WM_WIN32_POSTMESSAGEW, postmsg NULL!!"));
-            break;
-        }
-        win32wnd->SendMessageW(postmsg->Msg, postmsg->wParam, postmsg->lParam);
-        free(postmsg);
-        break;
-
     //OS/2 msgs
     case WM_CREATE:
         //Processing is done in after WinCreateWindow returns
@@ -198,7 +182,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         if ((pswp->fl & SWP_ZORDER) && (pswp->hwndInsertBehind > HWND_BOTTOM))
         {
            Win32Window *wndAfter = Win32Window::GetWindowFromOS2Handle(pswp->hwndInsertBehind);
-           wp.hwndInsertAfter = wndAfter->getWindowHandle();
+           if(wndAfter) wp.hwndInsertAfter = wndAfter->getWindowHandle();
         }
         win32wnd->MsgPosChanging((LPARAM)&wp);
         break;
