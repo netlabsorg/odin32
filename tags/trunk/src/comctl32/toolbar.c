@@ -1,4 +1,4 @@
-/* $Id: toolbar.c,v 1.19 1999-12-18 20:57:01 achimha Exp $ */
+/* $Id: toolbar.c,v 1.20 1999-12-20 17:54:26 achimha Exp $ */
 /*
  * Toolbar control
  *
@@ -1686,7 +1686,10 @@ TOOLBAR_CustomizeDialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		    ImageList_Draw (infoPtr->himlDef, btnPtr.iBitmap, lpdis->hDC,
 				    rcButton.left+1, rcButton.top+1, ILD_NORMAL);
-
+//AH: TODO: Find out why this happens!!!
+if ((infoPtr->strings == NULL) || (infoPtr->strings[btnPtr.iString] == NULL))
+  dprintf(("COMCTL32:TOOLBAR:CustomizeDialog - Error drawing string - pointer not found!\n"));
+else
 		    DrawTextW (lpdis->hDC,  infoPtr->strings[btnPtr.iString], -1, &rcText,
 			       DT_LEFT | DT_VCENTER | DT_SINGLELINE);
 
