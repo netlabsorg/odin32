@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.13 2000-01-01 14:57:08 cbratschi Exp $ */
+/* $Id: button.cpp,v 1.14 2000-01-08 16:47:45 cbratschi Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
@@ -238,7 +238,6 @@ static LRESULT BUTTON_LButtonUp(HWND hwnd,WPARAM wParam,LPARAM lParam)
   RECT rect;
   POINT pt;
 
-  if (style == BS_GROUPBOX) return 0;
   pt.x = LOWORD(lParam);
   pt.y = HIWORD(lParam);
 
@@ -314,7 +313,7 @@ static LRESULT BUTTON_NCHitTest(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   DWORD style = GetWindowLongA(hwnd,GWL_STYLE) & 0x0f;
 
-  if (style == BS_GROUPBOX) return HTTRANSPARENT;
+  //if (style == BS_GROUPBOX) return HTTRANSPARENT;
 
   return DefWindowProcA(hwnd,WM_NCHITTEST,wParam,lParam);
 }

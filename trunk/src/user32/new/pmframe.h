@@ -1,4 +1,4 @@
-/* $Id: pmframe.h,v 1.1 2000-01-01 14:54:53 cbratschi Exp $ */
+/* $Id: pmframe.h,v 1.2 2000-01-08 16:47:48 cbratschi Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -57,5 +57,8 @@ DWORD FrameHitTest(Win32BaseWindow *win32wnd,INT x,INT y);
 #define TFOS_MOVE                    0x000F
 
 VOID FrameTrackFrame(Win32BaseWindow *win32wnd,DWORD flags);
+
+#define WS_MINIMIZE_W      0x20000000L
+#define WS_MAXIMIZE_W      0x01000000L
 
 #endif
