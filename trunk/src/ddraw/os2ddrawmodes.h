@@ -1,4 +1,4 @@
-/* $Id: os2ddrawmodes.h,v 1.2 1999-12-21 01:28:19 hugh Exp $ */
+/* $Id: os2ddrawmodes.h,v 1.3 2000-02-04 19:31:25 hugh Exp $ */
 
 /*
  * Defintions of common videomodes we report back
@@ -21,7 +21,7 @@ typedef struct _OS2_DXMODES
   int iRatio;   // Flag 1 if you must take care of aspect ratio, else 0
 } OS2_DXMODES, *POS2_DXMODES;
 
-#define NUM_MODES_DIVE 22
+#define NUM_MODES_DIVE 30
 OS2_DXMODES ModesDive[NUM_MODES_DIVE] =
 {
   {320,200,8,1},
@@ -31,21 +31,29 @@ OS2_DXMODES ModesDive[NUM_MODES_DIVE] =
   {640,480,8,0},
   {800,600,8,0},
   {1024,768,8,0},
+  {1280,1024,8,1},
+  {1600,1200,8,0},
   {512,384,16,0},
   {640,400,16,1},
   {640,480,16,0},
   {800,600,16,0},
   {1024,768,16,0},
+  {1280,1024,16,1},
+  {1600,1200,16,0},
   {512,384,24,0},
   {640,400,24,1},
   {640,480,24,0},
   {800,600,24,0},
   {1024,768,24,0},
+  {1280,1024,24,1},
+  {1600,1200,24,0},
   {512,384,32,0},
   {640,400,32,1},
   {640,480,32,0},
   {800,600,32,0},
-  {1024,768,32,0}
+  {1024,768,32,0},
+  {1280,1024,32,1},
+  {1600,1200,32,0}
 };
 
 // Voodoo modes (640x400,640x480,800x600 all only 16 Bit)

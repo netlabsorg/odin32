@@ -1,4 +1,4 @@
-; $Id: asmutil.asm,v 1.5 1999-12-21 01:28:19 hugh Exp $
+; $Id: asmutil.asm,v 1.6 2000-02-04 19:31:26 hugh Exp $
 
 ;
 ; asmutil.asm Color key bit blitting for DirectDraw
@@ -13,8 +13,25 @@
 .586p
 .MMX
 
-CODE32          SEGMENT DWORD PUBLIC USE32 'CODE'
-                ASSUME  CS:FLAT ,DS:FLAT,SS:FLAT
+CODE32  SEGMENT DWORD USE32 PUBLIC 'CODE'
+CODE32  ENDS
+DATA32  SEGMENT DWORD USE32 PUBLIC 'DATA'
+DATA32  ENDS
+CONST32  SEGMENT DWORD USE32 PUBLIC 'CONST'
+CONST32  ENDS
+BSS32  SEGMENT DWORD USE32 PUBLIC 'BSS'
+BSS32  ENDS
+DGROUP  GROUP CONST32, BSS32, DATA32
+  ASSUME  CS:FLAT, DS:FLAT, SS:FLAT, ES:FLAT
+  DATA32  SEGMENT
+  DATA32  ENDS
+  BSS32  SEGMENT
+  BSS32  ENDS
+  CONST32  SEGMENT
+  CONST32  ENDS
+
+
+CODE32  SEGMENT
 
     PUBLIC  _BlitColorKey8
 
@@ -294,14 +311,14 @@ BltRemain8:
 align 4
 
 JmpTable:
-  dd offset bltEndMMX8
-  dd offset blt1MMX8
-  dd offset blt2MMX8
-  dd offset blt3MMX8
-  dd offset blt4MMX8
-  dd offset blt5MMX8
-  dd offset blt6MMX8
-  dd offset blt7MMX8
+  dd offset cs:bltEndMMX8
+  dd offset cs:blt1MMX8
+  dd offset cs:blt2MMX8
+  dd offset cs:blt3MMX8
+  dd offset cs:blt4MMX8
+  dd offset cs:blt5MMX8
+  dd offset cs:blt6MMX8
+  dd offset cs:blt7MMX8
 align 2
 ;
 ; Maybe it would be faster for 7-5 to load a qword into mm0/mm1
@@ -478,10 +495,10 @@ BltRemain16:
 align 4
 
 JumpTable:
-  dd offset bltEndMMX16
-  dd offset blt1MMX16
-  dd offset blt2MMX16
-  dd offset blt3MMX16
+  dd offset cs:bltEndMMX16
+  dd offset cs:blt1MMX16
+  dd offset cs:blt2MMX16
+  dd offset cs:blt3MMX16
 align 2
 
 blt3MMX16:
@@ -610,22 +627,22 @@ SmallBlt:
   mov  ecx, dword ptr [ebp+24]    ; ulDestPitch
   jmp  ds:SmallJmpTable[ebx*4]
 SmallJmpTable:
- dd offset BltRecEnd ; BlitWidth is 0 done
- dd offset Rec1
- dd offset Rec2
- dd offset Rec3
- dd offset Rec4
- dd offset Rec5
- dd offset Rec6
- dd offset Rec7
- dd offset Rec8
- dd offset Rec9
- dd offset Rec10
- dd offset Rec11
- dd offset Rec12
- dd offset Rec13
- dd offset Rec14
- dd offset Rec15
+ dd cs:offset BltRecEnd ; BlitWidth is 0 done
+ dd cs:offset Rec1
+ dd cs:offset Rec2
+ dd cs:offset Rec3
+ dd cs:offset Rec4
+ dd cs:offset Rec5
+ dd cs:offset Rec6
+ dd cs:offset Rec7
+ dd cs:offset Rec8
+ dd cs:offset Rec9
+ dd cs:offset Rec10
+ dd cs:offset Rec11
+ dd cs:offset Rec12
+ dd cs:offset Rec13
+ dd cs:offset Rec14
+ dd cs:offset Rec15
 
 ;One Pixel wide
 

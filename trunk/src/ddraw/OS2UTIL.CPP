@@ -1,4 +1,4 @@
-/* $Id: OS2UTIL.CPP,v 1.8 1999-11-14 22:16:32 hugh Exp $ */
+/* $Id: OS2UTIL.CPP,v 1.9 2000-02-04 19:31:25 hugh Exp $ */
 
 /*
  * OS/2 Utility functions
@@ -47,6 +47,19 @@ void OS2MaximizeWindow(HWND hwndClient)
 }
 //******************************************************************************
 //******************************************************************************
+
+HWND WIN32API WindowFromDC(HDC hdc);
+HWND Win32ToOS2Handle(HWND hwnd);
+BOOL    APIENTRY _GpiEnableYInversion (HPS hps, LONG lHeight);
+
+void InverseDC(HDC hdc, LONG lHeight)
+{
+ USHORT sel = RestoreOS2FS();
+
+ _GpiEnableYInversion( WinGetPS( Win32ToOS2Handle( WindowFromDC(hdc) ) ), lHeight);
+ SetFS(sel);
+
+}
 
 int InitIO()
 {

@@ -1,4 +1,4 @@
-/* $Id: fillfunc.cpp,v 1.1 1999-12-21 01:28:15 hugh Exp $ */
+/* $Id: fillfunc.cpp,v 1.2 2000-02-04 19:31:23 hugh Exp $ */
 
 /*
  * ColorFill functions
@@ -286,10 +286,10 @@ void __cdecl Fill32( char* pDst,
   dwCol = (dwColor&0xFF)+(dwColor&0xFF<<8);
   dwCol += (dwCol<<16);
 
-  Fill8( pFB+(dwTop*dwPitchDB)+dwLeft,
+  Fill8( pFB+(dwTop*dwPitchFB)+dwLeft,
          dwWidth,
          dwHeight,
-         dwPitchDB,
+         dwPitchFB,
          dwCol);
 
   dwCol = ((WORD*)pPalette)[dwColor];
@@ -318,10 +318,10 @@ void __cdecl Fill32( char* pDst,
   dwCol = (dwColor&0xFF)+(dwColor&0xFF<<8);
   dwCol += (dwCol<<16);
 
-  Fill8( pFB+(dwTop*dwPitchDB)+dwLeft,
+  Fill8( pFB+(dwTop*dwPitchFB)+dwLeft,
          dwWidth,
          dwHeight,
-         dwPitchDB,
+         dwPitchFB,
          dwCol);
 
   dwCol = ((DWORD*)pPalette)[dwColor];
@@ -349,10 +349,10 @@ void __cdecl Fill32( char* pDst,
   dwCol = (dwColor&0xFF)+(dwColor&0xFF<<8);
   dwCol += (dwCol<<16);
 
-  Fill8( pFB+(dwTop*dwPitchDB)+dwLeft,
+  Fill8( pFB+(dwTop*dwPitchFB)+dwLeft,
          dwWidth,
          dwHeight,
-         dwPitchDB,
+         dwPitchFB,
          dwCol);
 
   dwCol = ((DWORD*)pPalette)[dwColor];
@@ -392,10 +392,10 @@ void __cdecl Fill32( char* pDst,
   dprintf(("Fill16on24\n"));
   dwCol = dwColor + (dwColor<<16);
 
-  Fill16( pFB+(dwTop*dwPitchDB)+(dwLeft*2),
+  Fill16( pFB+(dwTop*dwPitchFB)+(dwLeft*2),
           dwWidth,
           dwHeight,
-          dwPitchDB,
+          dwPitchFB,
           dwCol);
 
   dwCol = ((dwColor & 0xF800)<< 16) +
@@ -423,10 +423,10 @@ void __cdecl Fill32( char* pDst,
   dprintf(("Fill16on32\n"));
   dwCol = dwColor + (dwColor<<16);
 
-  Fill16( pFB+(dwTop*dwPitchDB)+(dwLeft*2),
+  Fill16( pFB+(dwTop*dwPitchFB)+(dwLeft*2),
           dwWidth,
           dwHeight,
-          dwPitchDB,
+          dwPitchFB,
           dwCol);
 
   dwCol = ((dwColor & 0xF800)<< 16) +
@@ -469,10 +469,10 @@ void __cdecl Fill32( char* pDst,
   dprintf(("Fill24on16\n"));
   //dwColor <<=8;
 
-  Fill24( pFB+(dwTop*dwPitchDB)+(dwLeft*3),
+  Fill24( pFB+(dwTop*dwPitchFB)+(dwLeft*3),
           dwWidth,
           dwHeight,
-          dwPitchDB,
+          dwPitchFB,
           dwColor);
 
   dwCol = ((dwColor & 0xF8000000) >>16) +
@@ -501,10 +501,10 @@ void __cdecl Fill32( char* pDst,
   dprintf(("Fill24on32\n"));
   //dwColor <<=8;
 
-  Fill24( pFB+(dwTop*dwPitchDB)+(dwLeft*3),
+  Fill24( pFB+(dwTop*dwPitchFB)+(dwLeft*3),
           dwWidth,
           dwHeight,
-          dwPitchDB,
+          dwPitchFB,
           dwColor);
   Fill32( pDB+(dwTop*dwPitchDB)+(dwLeft*4),
           dwWidth,
@@ -541,10 +541,10 @@ void __cdecl Fill32( char* pDst,
   DWORD dwCol;
   dprintf(("Fill32on16\n"));
 
-  Fill32( pFB+(dwTop*dwPitchDB)+(dwLeft*4),
+  Fill32( pFB+(dwTop*dwPitchFB)+(dwLeft*4),
           dwWidth,
           dwHeight,
-          dwPitchDB,
+          dwPitchFB,
           dwColor);
 
   dwCol = ((dwColor & 0xF8000000) >>16) +
@@ -571,10 +571,10 @@ void __cdecl Fill32( char* pDst,
                          )
 {
   dprintf(("Fill32on24\n"));
-  Fill32( pFB+(dwTop*dwPitchDB)+(dwLeft*4),
+  Fill32( pFB+(dwTop*dwPitchFB)+(dwLeft*4),
           dwWidth,
           dwHeight,
-          dwPitchDB,
+          dwPitchFB,
           dwColor);
 
   Fill24( pDB+(dwTop*dwPitchDB)+(dwLeft*3),

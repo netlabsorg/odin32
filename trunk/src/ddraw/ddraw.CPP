@@ -1,4 +1,4 @@
-/* $Id: ddraw.CPP,v 1.10 1999-12-21 01:28:15 hugh Exp $ */
+/* $Id: ddraw.CPP,v 1.11 2000-02-04 19:31:23 hugh Exp $ */
 
 /*
  * DXDraw DLL implementaion
@@ -11,10 +11,14 @@
  */
 
 #include <memory.h>
-
+#include <stdio.h>
 #include <builtin.h>
 #define INITGUID
+#define ICOM_CINTERFACE 1
+#define CINTERFACE
+
 #include "os2ddraw.h"
+#include "winerror.h"
 // define the following as we include winnt.h
 #define _OS2WIN_H
 #define FAR
@@ -40,7 +44,7 @@ HRESULT WIN32API OS2DirectDrawCreate( GUID FAR *lpGUID,
   }
   else
   {
-    //  newdraw->Vtbl.AddRef((IDirectDraw *)newdraw);
+    newdraw->Vtbl.AddRef((IDirectDraw *)newdraw);
     rc = newdraw->GetLastError();
     if(rc != DD_OK)
     {
@@ -141,4 +145,126 @@ DWORD WIN32API DDHAL32_VidMemAlloc(DWORD size)
   return(0);
 }
 //******************************************************************************
-//******************************************************************************
+
+/*******************************************************************************
+ * DirectDraw ClassFactory
+ *
+ */
+
+typedef struct
+{
+    /* IUnknown fields */
+    ICOM_VTABLE(IClassFactory) *lpvtbl;
+    DWORD                       ref;
+} IClassFactoryImpl;
+
+static HRESULT WINAPI
+DDCF_QueryInterface(LPCLASSFACTORY iface,REFIID riid,LPVOID *ppobj)
+{
+  ICOM_THIS(IClassFactoryImpl,iface);
+  char buf[80];
+
+  if (HIWORD(riid))
+    WINE_StringFromCLSID(riid,buf);
+  else
+    sprintf(buf,"<guid-0x%04x>",LOWORD(riid));
+  dprintf(("DDRAW:(%p)->(%s,%p),stub!\n",This,buf,ppobj));
+  return E_NOINTERFACE;
+}
+
+static ULONG WINAPI
+DDCF_AddRef(LPCLASSFACTORY iface)
+{
+  ICOM_THIS(IClassFactoryImpl,iface);
+  return ++(This->ref);
+}
+
+static ULONG WINAPI DDCF_Release(LPCLASSFACTORY iface)
+{
+  ICOM_THIS(IClassFactoryImpl,iface);
+  /* static class, won't be  freed */
+  return --(This->ref);
+}
+
+static HRESULT WINAPI DDCF_CreateInstance( LPCLASSFACTORY iface,
+                                           LPUNKNOWN pOuter,
+                                           REFIID riid,
+                                           LPVOID *ppobj)
+{
+  ICOM_THIS(IClassFactoryImpl,iface);
+  LPGUID lpGUID;
+  lpGUID = (LPGUID) riid;
+
+  dprintf(("DDRAW:DDCF_CreateInstance\n"));
+  if( lpGUID &&
+      ( (*lpGUID == IID_IDirectDraw ) ||
+        (*lpGUID == IID_IDirectDraw2) ||
+        (*lpGUID == IID_IDirectDraw4))
+    )
+  {
+    /* FIXME: reuse already created DirectDraw if present? */
+    return OS2DirectDrawCreate(lpGUID,(LPDIRECTDRAW*)ppobj,pOuter);
+  }
+  return E_NOINTERFACE;
+}
+
+static HRESULT WINAPI DDCF_LockServer(LPCLASSFACTORY iface,BOOL dolock)
+{
+  ICOM_THIS(IClassFactoryImpl,iface);
+  dprintf(("DDRAW:(%p)->(%d),stub!\n",This,dolock));
+  return S_OK;
+}
+
+static ICOM_VTABLE(IClassFactory) DDCF_Vtbl =
+{
+  DDCF_QueryInterface,
+  DDCF_AddRef,
+  DDCF_Release,
+  DDCF_CreateInstance,
+  DDCF_LockServer
+};
+
+static IClassFactoryImpl DDRAW_CF = {&DDCF_Vtbl, 1 };
+
+
+HRESULT WINAPI DllGetClassObject( REFCLSID rclsid,
+                                  REFIID riid,
+                                  LPVOID *ppv)
+{
+  char buf[80],xbuf[80];
+
+  if (HIWORD(rclsid))
+    WINE_StringFromCLSID(rclsid,xbuf);
+  else
+    sprintf(xbuf,"<guid-0x%04x>",LOWORD(rclsid));
+  if (HIWORD(riid))
+    WINE_StringFromCLSID(riid,buf);
+  else
+    sprintf(buf,"<guid-0x%04x>",LOWORD(riid));
+  WINE_StringFromCLSID(riid,xbuf);
+
+  dprintf(("DDRAW:(%p,%p,%p)\n", xbuf, buf, ppv));
+  if (!memcmp(riid,&IID_IClassFactory,sizeof(IID_IClassFactory)))
+  {
+    *ppv = (LPVOID)&DDRAW_CF;
+    DDRAW_CF.lpvtbl->AddRef((IClassFactory*)&DDRAW_CF);
+    return S_OK;
+  }
+  dprintf(("DDRAW: (%p,%p,%p): no interface found.\n", xbuf, buf, ppv));
+  return E_NOINTERFACE;
+}
+
+
+/*******************************************************************************
+ * DllCanUnloadNow [DDRAW.12]  Determines whether the DLL is in use.
+ *
+ * RETURNS
+ *    Success: S_OK
+ *    Failure: S_FALSE
+ */
+HRESULT WINAPI DllCanUnloadNow(void)
+{
+  dprintf(("DllCanUnloadNow(void) stub\n"));
+  return S_FALSE;
+}//******************************************************************************
+
