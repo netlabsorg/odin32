@@ -12,8 +12,8 @@ PDWIN32_BIN = ..\..\bin
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 ASFLAGS = -Sc -Sv:ALP
 
-CFLAGS = $(CFLAGS) /Gn+-I$(PDWIN32_INCLUDE);
-CXXFLAGS = $(CXXFLAGS) /Gn+ -I$(PDWIN32_INCLUDE);
+CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE);
+CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE);
 
 TARGET = ddraw
 
@@ -21,13 +21,13 @@ OBJS =  ddraw.obj os2ddraw.obj os2clipper.obj os2d3d.obj iccio1.obj asmutil.obj\
         os2surface.obj os2palette.obj os2palset.obj misc.obj rectangle.obj initterm.obj
         
 
-LIBS =  ..\..\lib\pmwinx.lib mmpm2.lib ..\..\lib\comctl32.lib $(PDWIN32_LIB)\advapi32.lib $(PDWIN32_LIB)\kernel32.lib $(PDWIN32_LIB)\gdi32.lib $(PDWIN32_LIB)\comctl32.lib $(PDWIN32_LIB)/odincrt.lib OS2386.LIB
+LIBS =  ..\..\lib\pmwinx.lib mmpm2.lib ..\..\lib\comctl32.lib $(PDWIN32_LIB)\advapi32.lib $(PDWIN32_LIB)\kernel32.lib $(PDWIN32_LIB)\gdi32.lib $(PDWIN32_LIB)\comctl32.lib $(PDWIN32_LIB)/odincrt.lib OS2386.LIB cppom30O.lib
 
 all: $(TARGET).dll $(TARGET).lib
 
 
 $(TARGET).dll: $(OBJS) $(TARGET).def
-        $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) sbsstub.obj $(TARGET).def $(LIBS)
+        $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def $(LIBS)
   $(CP) $@ $(PDWIN32_BIN)
 
 

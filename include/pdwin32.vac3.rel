@@ -1,4 +1,4 @@
-# $Id: pdwin32.vac3.rel,v 1.5 1999-08-09 18:12:08 achimha Exp $
+# $Id: pdwin32.vac3.rel,v 1.6 1999-08-16 16:28:01 sandervl Exp $
 # ODIN / win32os2 Project
 # 
 # RELEASE makefile for the VAC3 compiler environment
@@ -19,9 +19,11 @@ IMPLIB=implib
 #
 # Tool Flags
 #
-CFLAGS = -Q -Fi -Si -G5 -O+ -Oi+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLUDE)\Win -D__WIN32OS2__ -D__WINE__
-CXXFLAGS = -Q -Fi -Si -G5 -O+ -Oi+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLUDE)\Win -D__WIN32OS2__ -D__WINE__
-ASFLAGS = -Sc -Sv:M510
-LDFLAGS = -Q -Fi -Si -G5 -O+ -Ge- -Ss+ -W3 -Gm+ /B"/noe /NOD"
+CFLAGS           = -Q -Fi -Si -G5 -O+ -Oi+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLUDE)\Win -D__WIN32OS2__ -D__WINE__
+CXXFLAGS         = -Q -Fi -Si -G5 -O+ -Oi+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLUDE)\Win -D__WIN32OS2__ -D__WINE__
+CXXFLAGS_ODINCRT = -Q -Fi -Si -G5 -O+ -Oi+ -Ge- -Ss+ -W3 -Gm+ /Gn- -I$(PDWIN32_INCLUDE)\Win -D__WIN32OS2__ -D__WINE__
+ASFLAGS          = -Sc -Sv:M510
+LDFLAGS          = -Q -Fi -Si -G5 -O+ -Ge- -Ss+ -W3 -Gm+ /B"/noe /NOD"
+LDFLAGS_ODINCRT  = -Q -Fi -Si -G5 -O+ -Ge- -Ss+ -W3 -Gm+ /B"/noe"
 IMPLIBFLAGS = /nologo
 

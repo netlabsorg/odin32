@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.3 1999-06-19 10:54:46 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.4 1999-08-16 16:28:03 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -33,31 +33,6 @@
 #include <odin.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
 
-extern "C" {
-/*-------------------------------------------------------------------*/
-/* _CRT_init is the C run-time environment initialization function.  */
-/* It will return 0 to indicate success and -1 to indicate failure.  */
-/*-------------------------------------------------------------------*/
-int CDECL CRT_init(void);
-/*-------------------------------------------------------------------*/
-/* _CRT_term is the C run-time environment termination function.     */
-/* It only needs to be called when the C run-time functions are      */
-/* statically linked.                                                */
-/*-------------------------------------------------------------------*/
-void CDECL CRT_term(void);
-void CDECL _ctordtorInit( void );
-void CDECL _ctordtorTerm( void );
-}
-
-/*-------------------------------------------------------------------*/
-/* A clean up routine registered with DosExitList must be used if    */
-/* runtime calls are required and the runtime is dynamically linked. */
-/* This will guarantee that this clean up routine is run before the  */
-/* library DLL is terminated.                                        */
-/*-------------------------------------------------------------------*/
-static void APIENTRY cleanup(ULONG reason);
-
-
 /****************************************************************************/
 /* _DLL_InitTerm is the function that gets called by the operating system   */
 /* loader when it loads and frees this DLL for each process that accesses   */
@@ -80,27 +55,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
    switch (ulFlag) {
       case 0 :
-
-         /*******************************************************************/
-         /* The C run-time environment initialization function must be      */
-         /* called before any calls to C run-time functions that are not    */
-         /* inlined.                                                        */
-         /*******************************************************************/
-
-         if (CRT_init() == -1)
-            return 0UL;
-  	 _ctordtorInit();
-
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
-         /*******************************************************************/
-         /* A DosExitList routine must be used to clean up if runtime calls */
-         /* are required and the runtime is dynamically linked.             */
-         /*******************************************************************/
-
-         rc = DosExitList(0x0000FF00|EXLST_ADD, cleanup);
-         if(rc)
-		return 0UL;
-
          break;
       case 1 :
          break;
@@ -112,13 +67,4 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
    /* A non-zero value must be returned to indicate success.  */
    /***********************************************************/
    return 1UL;
-}
-
-
-static void APIENTRY cleanup(ULONG ulReason)
-{
-   _ctordtorTerm();  
-   CRT_term();
-   DosExitList(EXLST_EXIT, cleanup);
-   return ;
 }
