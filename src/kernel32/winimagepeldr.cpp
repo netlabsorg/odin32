@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.64 2000-11-05 13:40:46 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.65 2000-12-05 20:41:43 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -601,10 +601,11 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
 
   //PH: get pResRootDir pointer correct first, since processImports may
   //    implicitly call functions depending on it.
-  if(GetSectionHdrByImageDir(win32file, IMAGE_DIRECTORY_ENTRY_RESOURCE, &sh)) {
+  if(oh.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress && oh.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].Size) 
+  {
     //get offset in resource object of directory entry
-    pResRootDir = (PIMAGE_RESOURCE_DIRECTORY)(sh.VirtualAddress + realBaseAddress);
-    ulRVAResourceSection = sh.VirtualAddress;
+    pResRootDir = (PIMAGE_RESOURCE_DIRECTORY)(oh.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress + realBaseAddress);
+    ulRVAResourceSection = oh.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress;
   }
 
   if(!(dwFlags & (FLAG_PELDR_LOADASDATAFILE | FLAG_PELDR_SKIPIMPORTS)))
