@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.16 1999-12-07 20:25:48 achimha Exp $ */
+/* $Id: wsock32.cpp,v 1.17 2000-03-04 12:30:22 sandervl Exp $ */
 
 /*
  *
@@ -728,7 +728,7 @@ ODINFUNCTION5(int,OS2setsockopt,
     xx.l_onoff = (int)yy->l_onoff;
     xx.l_linger = (int)yy->l_linger;
 
-    rc = setsockopt(s,level,optname,(char *)&xx,optlen);
+    rc = setsockopt(s,level,optname,(char *)&xx, sizeof(xx));
   }
   else
     rc = setsockopt(s,level,optname,(char *)optval,optlen);
