@@ -1,8 +1,21 @@
-/* $Id: changelog,v 1.1278 2001-02-20 17:21:35 sandervl Exp $ */
+/* $Id: changelog,v 1.1279 2001-02-21 18:13:41 bird Exp $ */
+
+ 2000-02-20: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - Win32k:   o Moved calltabs to the code segments. Clears the
+                  WriteProtect(WP) flag in CR0 to be able to do this. The flags
+                  is of course restored when the calltabs are written.
+                o Completed callgate code. Though is not activated for SMP
+                  kernels yet as I haven't tested that yet.
+                  The callgate works just as any other callgate in OS2, it
+                  calls kernel routines for entry and exit housekeeping.
+                o Updated the win32k library and header to accomodate this.
+                  All IOCtl structures are changed.
+                  So, Install the new the new Odin32 and reboot before using
+                  it so the new win32k.sys is installed.
 
  2001-02-20: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Fix for position of system menu in (mdi) child windows
-                o Use WinScrollWindow to scroll children again and manually 
+                o Use WinScrollWindow to scroll children again and manually
                   notify children that they have moved. (PM only does this
                   for windows with CS_MOVENOTIFY class)
                   (much smoother scroll in Opera)
