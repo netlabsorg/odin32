@@ -1,4 +1,4 @@
-/* $Id: waveoutdart.cpp,v 1.15 2002-08-16 10:09:49 sandervl Exp $ */
+/* $Id: waveoutdart.cpp,v 1.16 2003-03-05 14:49:04 sandervl Exp $ */
 
 /*
  * Wave playback class (DART)
@@ -52,13 +52,17 @@ LONG APIENTRY WaveOutHandler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFl
 
 static BOOL fFixedWaveBufferSize = FALSE;
 
-/******************************************************************************/
-//Call to tell winmm to expect simple fixed size buffers, so
-//it doesn't have to use very small DART buffers; this will
-//only work in very specific cases; it is not a good general
-//purpose solution)
-/******************************************************************************/
-void WIN32API SetFixedWaveBufferSize()
+//******************************************************************************
+// ODIN_waveOutSetFixedBuffers
+//
+// Tell WINMM to use DART buffers of the same size as the first buffer delivered
+// by waveOutWrite
+//
+// NOTE: This will only work in very specific cases; it is not a good general
+//       purpose solution.
+// 
+//******************************************************************************
+void WIN32API ODIN_waveOutSetFixedBuffers();
 {
     fFixedWaveBufferSize = TRUE;
 }
@@ -223,7 +227,6 @@ MMRESULT DartWaveOut::write(LPWAVEHDR pwh, UINT cbwh)
                 ulBufSize = pwh->dwBufferLength;
         else    ulBufSize = 1024;
 #endif
-
         MixSetupParms->ulBufferSize = ulBufSize;
 
         BufferParms->ulNumBuffers = PREFILLBUF_DART;
@@ -465,6 +468,11 @@ ULONG DartWaveOut::getPosition()
 {
  MCI_STATUS_PARMS mciStatus = {0};
  ULONG rc, nrbytes;
+
+    if(State == STATE_STOPPED) {
+        dprintf(("Not playing; return 0 position"));
+        return 0;
+    }
 
     mciStatus.ulItem = MCI_STATUS_POSITION;
     rc = mymciSendCommand(DeviceId, MCI_STATUS, MCI_STATUS_ITEM|MCI_WAIT, (PVOID)&mciStatus, 0);

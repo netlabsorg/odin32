@@ -1,4 +1,4 @@
-/* $Id: waveinoutbase.cpp,v 1.5 2003-01-14 19:38:38 sandervl Exp $ */
+/* $Id: waveinoutbase.cpp,v 1.6 2003-03-05 14:49:04 sandervl Exp $ */
 
 /*
  * Wave playback class (DART)
@@ -138,6 +138,9 @@ void WaveInOut::callback(UINT uMessage, DWORD dw1, DWORD dw2)
     case CALLBACK_EVENT:
         SetEvent((HANDLE)dwCallback);
         break;
+
+    case CALLBACK_NULL:
+        break; //no callback
 
     default:
         dprintf(("WARNING: Unknown callback type %x %x", fdwOpen, dwCallback));
