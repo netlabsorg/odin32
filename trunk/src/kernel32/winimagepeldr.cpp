@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.32 2000-02-22 19:12:53 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.33 2000-02-22 23:53:03 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -18,7 +18,6 @@
  *       So an instance of this type can't be used for anything but resource lookup!
  *
  */
-#define DEBUG
 #define INCL_DOSFILEMGR          /* File Manager values      */
 #define INCL_DOSMODULEMGR
 #define INCL_DOSERRORS           /* DOS Error values         */
@@ -569,16 +568,6 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
  ULONG    ulNewPos, ulRead;
  APIRET   rc;
 
-  rc = DosQueryMem((PVOID)virtAddress, &range, &attr);
-  if(rc) {
-	dprintf((LOG, "Win32PeLdrImage::commitPage: DosQueryMem for %x returned %d", virtAddress, rc));
-	return FALSE;
-  }
-  if(attr & PAG_COMMIT) {
-	dprintf((LOG, "Win32PeLdrImage::commitPage: Memory at 0x%x already committed!", virtAddress));
-	return FALSE;
-  }
-
   section = findSectionByOS2Addr(virtAddress);
   if(section == NULL) {
 	size        = 4096;
@@ -586,10 +575,11 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
 	protflags   = PAG_READ|PAG_WRITE; //readonly?
 	section = findPreviousSectionByOS2Addr(virtAddress);
   	if(section == NULL) {//access to header
+		offset     = 0;
 		fileoffset = virtAddress - realBaseAddress;
 	}
 	else {
-		offset = virtAddress - (section->realvirtaddr + section->virtualsize);
+		offset     = virtAddress - (section->realvirtaddr + section->virtualsize);
 		fileoffset = section->rawoffset + section->rawsize + offset;
 	}
   }
@@ -597,6 +587,7 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
   	protflags   = section->pageflags;
   	offset      = virtAddress - section->realvirtaddr;
   	sectionsize = section->virtualsize - offset;
+
   	if(offset > section->rawsize || section->type == SECTION_UNINITDATA) {
 		//unintialized data (set to 0)
 		size = 0;
@@ -611,6 +602,19 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
 		return FALSE;
 	}
   }
+  //Check range of pages with the same attributes starting at virtAddress
+  //(some pages might already have been loaded)
+  range = sectionsize;
+  rc = DosQueryMem((PVOID)virtAddress, &range, &attr);
+  if(rc) {
+	dprintf((LOG, "Win32PeLdrImage::commitPage: DosQueryMem for %x returned %d", virtAddress, rc));
+	return FALSE;
+  }
+  if(attr & PAG_COMMIT) {
+	dprintf((LOG, "Win32PeLdrImage::commitPage: Memory at 0x%x already committed!", virtAddress));
+	return FALSE;
+  }
+
   if(fPageCmd == SINGLE_PAGE) {
 	size = min(size, PAGE_SIZE);
 	sectionsize = min(sectionsize, PAGE_SIZE);
@@ -781,22 +785,11 @@ BOOL Win32PeLdrImage::allocFixedMem(ULONG reservedMem)
 
   realBaseAddress = 0;
 
-#if 1
   //Allocated in peldr.dll
   if(reservedMem && reservedMem == oh.ImageBase) {
 	realBaseAddress = oh.ImageBase;
 	return TRUE;
   }
-#else
-  if(reservedMem && reservedMem <= oh.ImageBase &&
-     ((oh.ImageBase - reservedMem) + imageSize < PELDR_RESERVEDMEMSIZE))
-  {
-	//ok, it fits perfectly; free it now and allocate it below
-	DosFreeMem((PVOID)reservedMem);
-//       	realBaseAddress = oh.ImageBase;
-//	return TRUE;
-  }
-#endif
 
   //Reserve enough space to store 4096 pointers to 1MB memory chunks
   memallocs = (ULONG *)malloc(4096*sizeof(ULONG *));
@@ -902,7 +895,10 @@ BOOL Win32PeLdrImage::setFixups(ULONG virtAddress, ULONG size)
   }
 
   virtAddress -= realBaseAddress;
-
+  //round size to next page boundary
+  size  = (size-1) & ~0xFFF;
+  size += PAGE_SIZE;
+ 
   if(prel) {
  	j = 1;
 	while(prel->VirtualAddress && prel->VirtualAddress < virtAddress) {
@@ -970,7 +966,6 @@ BOOL Win32PeLdrImage::setFixups(ULONG virtAddress, ULONG size)
     				//SvL: Restore original page protection flags
     				DosSetMem((PVOID)newpage, PAGE_SIZE, section->pageflags);
 			}
-
       		}
       		prel = (PIMAGE_BASE_RELOCATION)((char*)prel + prel->SizeOfBlock);
     	}//while
