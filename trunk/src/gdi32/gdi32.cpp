@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.91 2004-01-11 11:42:15 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.92 2004-01-30 22:19:59 bird Exp $ */
 
 /*
  * GDI32 apis
@@ -170,7 +170,7 @@ HPEN WIN32API CreatePenIndirect(const LOGPEN * lplgpn)
 }
 //******************************************************************************
 //******************************************************************************
-HPEN WIN32API ExtCreatePen(DWORD dwPenStyle, DWORD dwWidth, const LOGBRUSH *lplb, 
+HPEN WIN32API ExtCreatePen(DWORD dwPenStyle, DWORD dwWidth, const LOGBRUSH *lplb,
                            DWORD dwStyleCount, const DWORD *lpStyle)
 {
  HPEN hPen;
@@ -215,7 +215,7 @@ HBRUSH WIN32API CreateBrushIndirect( const LOGBRUSH *pLogBrush)
 HBRUSH WIN32API CreateHatchBrush(int fnStyle, COLORREF clrref)
 {
  HBRUSH hBrush;
- 
+
     hBrush = O32_CreateHatchBrush(fnStyle, clrref);
     if(hBrush) STATS_CreateHatchBrush(hBrush, fnStyle, clrref);
     return hBrush;
@@ -264,7 +264,7 @@ HBRUSH WIN32API CreateDIBPatternBrush( HGLOBAL hglbDIBPacked,
   if(NULL!=lpMem)
   {
       dprintf(("GDI32: CreateDIBPatternBrush (%08xh, %08xh) %x (%d,%d) bpp %d",
-                hglbDIBPacked, fuColorSpec, lpMem, lpMem->bmiHeader.biWidth, 
+                hglbDIBPacked, fuColorSpec, lpMem, lpMem->bmiHeader.biWidth,
                 lpMem->bmiHeader.biHeight, lpMem->bmiHeader.biBitCount));
 
       ret = CreateDIBPatternBrushPt( lpMem,
@@ -540,7 +540,7 @@ BOOL WIN32API GetCurrentPositionEx( HDC hdc, PPOINT lpPoint)
     dprintf(("GDI32: GetCurrentPositionEx returned %d (%d,%d)", rc, lpPoint->x, lpPoint->y));
     return rc;
 }
-#ifdef DEBUG
+#ifdef DEBUG_LOGGING
 //******************************************************************************
 //******************************************************************************
 char *GetDeviceCapsString(int nIndex)
@@ -759,7 +759,7 @@ BOOL WIN32API RectVisible( HDC hdc, const RECT *lpRect)
     if(lpRect == NULL) {
        dprintf(("WARNING: GDI32: RectVisible %x lpRect == NULL!"));
        return FALSE;
-    }    
+    }
     dprintf(("GDI32: RectVisible %x (%d,%d)(%d,%d)", hdc, lpRect->left, lpRect->top, lpRect->right, lpRect->bottom));
     return O32_RectVisible(hdc, lpRect);
 }
