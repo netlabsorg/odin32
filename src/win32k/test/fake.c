@@ -1,4 +1,4 @@
-/* $Id: fake.c,v 1.8 2001-02-11 15:27:25 bird Exp $
+/* $Id: fake.c,v 1.9 2001-07-10 05:26:51 bird Exp $
  *
  * Fake stubs for the ldr and kernel functions we imports or overloads.
  *
@@ -722,6 +722,41 @@ APIRET KRNLCALL fakeVMMapDebugAlias(
     return ERROR_NOT_SUPPORTED;
 }
 
+
+/**
+ * Creates a pseudo handle for a given memory address.
+ * @returns OS/2 return code. NO_ERROR on success.
+ * @param   pvData      Pointer to the data which the handle should represent.
+ * @param   hobOwner    Owner of the pseudo handle.
+ * @param   phob        Pointer to object handle variable. Upon successful return
+ *                      this will hold the handle value of the crated pseudo handle.
+ * @remark  Used for many types of handles within the kernel.
+ *          Among them are the loader HMTEs. The loader uses usOwner = 0xffa6 (ldrmte).
+ */
+APIRET KRNLCALL fakeVMCreatePseudoHandle(
+    PVOID   pvData,
+    VMHOB   usOwner,
+    PVMHOB  phob)
+{
+    DUMMY();
+    printf("fakeVMCreatePseudoHandle:              - not implemented\n");
+    return ERROR_NOT_SUPPORTED;
+}
+
+
+/**
+ * This call frees a pseudo handle pointer previously allocated by
+ * VMCreatePseudoHandle.
+ * @returns OS/2 return code.
+ * @param   hob     Handle to be freed.
+ */
+APIRET KRNLCALL fakeVMFreePseudoHandle(
+    VMHOB   hob)
+{
+    DUMMY();
+    printf("fakeVMFreePseudoHandle:                - not implemented\n");
+    return ERROR_NOT_SUPPORTED;
+}
 
 
 /**
@@ -2064,6 +2099,104 @@ ULONG KRNLCALL  fakeTKPidToPTDA(PID pid, PPPTDA ppPTDA)
     return ERROR_NOT_SUPPORTED;
 }
 
+/**
+ * Force a thread to be made ready.
+ * @param   flFlag  Which flag(s?) to set.
+ * @param   pTCB    Pointer to the thread control block of the thread to be forced.
+ */
+void KRNLCALL fakeTKForceThread(ULONG flFlag, PTCB pTCB)
+{
+    DUMMY();
+    printf("fakeTKForceThread:                     - not implemented\n");
+}
+
+/**
+ * Set force flag on a task.
+ * @param   flFlag  Which flag(s?) to set.
+ * @param   pPTDA   Pointer to the PTDA of the task to be processed.
+ * @param   fForce  FALSE   Just set the flag on all threads.
+ *                  TRUE    Force all threads ready by calling TKForceThread.
+ */
+void KRNLCALL  fakeTKForceTask(ULONG flFlag, PPTDA pPTDA, BOOL fForce)
+{
+    DUMMY();
+    printf("fakeTKForceTask:                       - not implemented\n");
+}
+
+/**
+ * Get priotity of a thread.
+ * @returns Thread priority.
+ * @param   pTCB    pointer to the TCB of the thread in question.
+ */
+ULONG KRNLCALL fakeTKGetPriority(PTCB pTCB)
+{
+    DUMMY();
+    printf("fakeTKGetPriority:                     - not implemented\n");
+    return -1;
+}
+
+/**
+ * Make current thread sleep.
+ * @returns NO_ERROR on success.
+ *          ERROR_INTERRUPT if a signal is forced on the thread.
+ *          ERROR_TIMEOUT if we timeout.
+ * @param   ulSleepId   32-bit sleep id which TKWakeup will be called with.
+ * @param   ulTimeout   Number of milliseconds to sleep. (0 is not yield)
+ *                      -1 means forever or till wakeup.
+ * @param   fUnint      TRUE:  may not interrupt sleep.
+ *                      FALSE: may interrupt sleep.
+ * @param   flSleepType ???
+ */
+ULONG KRNLCALL fakeTKSleep(ULONG ulSleepId, ULONG ulTimeout, ULONG fUnInterruptable, ULONG flWakeupType)
+{
+    DUMMY();
+    printf("fakeTKSleep:                           - not implemented\n");
+    return ERROR_NOT_SUPPORTED;
+}
+
+/**
+ * Wakeup sleeping thread(s).
+ * @returns NO_ERROR on succes.
+ *          Appropriate error code on failure.
+ * @param   ulSleepId       32-bit sleep id which threads are sleeping on.
+ * @param   flWakeUpType    How/what to wakeup.
+ * @param   pcWakedUp       Pointer to variable which is to hold the count of
+ *                          thread waked up.
+ */
+ULONG KRNLCALL fakeTKWakeup(ULONG ulSleepId, ULONG flWakeupType, PULONG cWakedUp)
+{
+    DUMMY();
+    printf("fakeTKWakeup:                          - not implemented\n");
+    return ERROR_NOT_SUPPORTED;
+}
+
+
+/**
+ * Wake up a single thread.
+ * @returns NO_ERROR on succes.
+ *          Appropriate error code on failure.
+ * @param   pTCB    Pointer to the TCB of the thread to be waken.
+ */
+ULONG KRNLCALL fakeTKWakeThread(PTCB pTCB)
+{
+    DUMMY();
+    printf("fakeTKWakeThread:                      - not implemented\n");
+    return ERROR_NOT_SUPPORTED;
+}
+
+/**
+ * See which thread will be Wakeup.
+ * @returns Pointer to TCB of the thread on success.
+ *          NULL on failure or no threads.
+ * @param   ulSleepId       32-bit sleep id which threads are sleeping on.
+ * @param   flWakeUpType    How/what to wakeup.
+ */
+PTCB  KRNLCALL fakeTKQueryWakeup(ULONG ulSleepId, ULONG flWakeupType)
+{
+    DUMMY();
+    printf("fakeTKQueryWakeup:                     - not implemented\n");
+    return ERROR_NOT_SUPPORTED;
+}
 
 /**
  * Returns the number of bytes of physical memory available.
