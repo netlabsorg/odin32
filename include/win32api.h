@@ -1,4 +1,4 @@
-/* $Id: win32api.h,v 1.7 2000-03-29 15:16:09 cbratschi Exp $ */
+/* $Id: win32api.h,v 1.8 2000-04-02 10:25:56 sandervl Exp $ */
 
 /*
  *
@@ -79,5 +79,14 @@ BOOL   WIN32API HeapUnlock(HANDLE);
 BOOL   WIN32API HeapValidate(HANDLE,DWORD,LPCVOID);
 
 BOOL   WIN32API DosDateTimeToFileTime(WORD,WORD,LPFILETIME);
+
+
+HWND   WIN32API GetDesktopWindow(void);
+INT    WIN32API GetUpdateRgn(HWND, HRGN, BOOL);
+BOOL   WIN32API HideCaret(HWND hwnd);
+BOOL   WIN32API ShowCaret(HWND hwnd);
+HDC    WIN32API GetDCEx(HWND hwnd, HRGN hrgn, ULONG flags);
+int    WIN32API ReleaseDC(HWND hwnd, HDC hdc);
+int    WIN32API ExtSelectClipRgn(HDC hdc, HRGN hrgn, int fnMode);
 
 #endif
