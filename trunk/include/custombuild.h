@@ -104,5 +104,12 @@ void WIN32API CustForceMonoCursor();
 //force GetVolumeInformation to tell the app all partitions are FAT
 void WIN32API CustForce2GBFileSize();
 
+//Logging of exceptions:
+//Override filename of exception log (expects full path)
+void WIN32API SetCustomExceptionLog(LPSTR lpszLogName);
+//Enable/disable exception logging
+void WIN32API SetExceptionLogging(BOOL fEnable);
+
+
 #endif  /*__CUSTOMBUILD_H__*/
 
