@@ -1,4 +1,4 @@
-# $Id: win32k.tools.mk,v 1.3 2000-12-11 06:53:47 bird Exp $
+# $Id: win32k.tools.mk,v 1.4 2000-12-16 23:21:37 bird Exp $
 
 #
 # Win32k common tools makefile.
@@ -168,13 +168,13 @@ SOURCEFILE  = $^.
     @$(CP) $@ $@.obj
 
 {dev16}.c.obj_tst:
-    @$(ECHO) compiling 16bit dev16:  $(SOURCEFILE)
+    @$(ECHO) compiling 16bit dev16 tst:  $(SOURCEFILE)
     @$(C16COMPILE_TST)
-    @$(CP) $@ $@.obj
+#    @$(CP) $@ $@.obj
 {dev16}.c.obj_tst_init:
-    @$(ECHO) compiling 16bit dev16:  $(SOURCEFILE)
+    @$(ECHO) compiling 16bit dev16 tst:  $(SOURCEFILE)
     @$(C16COMPILE_TST_INIT)
-    @$(CP) $@ $@.obj
+#    @$(CP) $@ $@.obj
 
 
 {dev32}.asm{$(WIN32KOBJ)}.obj:
@@ -192,12 +192,12 @@ SOURCEFILE  = $^.
     @$(CCOMPILE)
 
 {dev32}.c{$(WIN32KOBJ)}.obj_tst:
-    @$(ECHO) compiling 32bit dev32:  $(SOURCEFILE)
-    @$(CCOMPILE)
+    @$(ECHO) compiling 32bit dev32 tst: $(SOURCEFILE)
+    @$(CCOMPILE_TST)
     @$(CP) $@ $@.obj
 {dev32}.c.obj_tst:
-    @$(ECHO) compiling 32bit dev32:  $(SOURCEFILE)
-    @$(CCOMPILE)
+    @$(ECHO) compiling 32bit dev32 tst: $(SOURCEFILE)
+    @$(CCOMPILE_TST)
     @$(CP) $@ $@.obj
 
 {dev32}.cpp{$(WIN32KOBJ)}.obj:
@@ -282,13 +282,13 @@ SOURCEFILE  = $^.
     @$(CCOMPILE)
 
 {misc}.c{$(WIN32KOBJ)}.obj_tst:
-    @$(ECHO) compiling 32bit misc:   $(SOURCEFILE)
+    @$(ECHO) compiling 32bit misc tst: $(SOURCEFILE)
     @$(CCOMPILE_TST)
-    @$(CP) $@ $@.obj
+#    @$(CP) $@ $@.obj
 {misc}.c.obj_tst:
-    @$(ECHO) compiling 32bit misc:   $(SOURCEFILE)
+    @$(ECHO) compiling 32bit misc tst: $(SOURCEFILE)
     @$(CCOMPILE_TST)
-    @$(CP) $@ $@.obj
+#    @$(CP) $@ $@.obj
 
 {misc}.cpp{$(WIN32KOBJ)}.obj:
     @$(ECHO) compiling 32bit misc:   $(SOURCEFILE)
