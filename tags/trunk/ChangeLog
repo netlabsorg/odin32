@@ -1,9 +1,10 @@
- /* $Id: ChangeLog,v 1.1057 2000-08-10 02:18:40 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.1058 2000-08-10 02:26:01 phaller Exp $ */
 
  2000-08-10: Patrick Haller <phaller@gmx.net>
     - KERNEL32: OSLibDosQueryVolumeFS does no more return an error if
                 the caller is not interested in the volume name.
                 Console Input handling improved, some correction.
+                SetConsoleTitleW fixed.
           NOTE! lstrcpynAtoW and lstrcpynWtoA do no more enforce (erroneous)
                 string termination.
                 NT4's CMD.EXE is quite working now.
