@@ -1,4 +1,4 @@
-/* $Id: win32type.h,v 1.34 2000-03-01 13:31:36 sandervl Exp $ */
+/* $Id: win32type.h,v 1.35 2000-03-03 11:14:24 sandervl Exp $ */
 
 /*
  * Win32 type definitions for OS/2
@@ -361,6 +361,10 @@ typedef HANDLE  HHOOK;
 #define HDRV16   WORD
 #define HINSTANCE16 WORD
 #define HQUEUE16 WORD
+
+typedef unsigned long HKEY;
+typedef HKEY* LPHKEY;
+typedef DWORD REGSAM;
 
 // other
 #ifndef HWND
