@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.19 1999-12-02 13:37:04 achimha Exp $ */
+/* $Id: gdi32.cpp,v 1.20 1999-12-02 18:46:21 achimha Exp $ */
 
 /*
  * GDI32 apis
@@ -770,10 +770,58 @@ HDC WIN32API CreateICA( LPCSTR arg1, LPCSTR arg2, LPCSTR arg3, const DEVMODEA * 
 //******************************************************************************
 HDC WIN32API CreateICW( LPCWSTR arg1, LPCWSTR arg2, LPCWSTR arg3, const DEVMODEW * arg4)
 {
-    dprintf(("GDI32: CreateICW STUB"));
-    // NOTE: This will not work as is (needs UNICODE support)
-//    return O32_CreateIC(arg1, arg2, arg3, arg4);
-    return 0;
+    char *astring1 = UnicodeToAsciiString((LPWSTR)arg1);
+    char *astring2 = UnicodeToAsciiString((LPWSTR)arg2);
+    char *astring3 = UnicodeToAsciiString((LPWSTR)arg3);
+    char *astring4 = UnicodeToAsciiString((LPWSTR)(arg4->dmDeviceName));
+    char *astring5 = UnicodeToAsciiString((LPWSTR)(arg4->dmFormName));
+
+    HDC   rc;
+    DEVMODEA devmode;
+
+    dprintf(("GDI32: CreateICW"));
+
+    strcpy((char*)devmode.dmDeviceName, astring4);
+    strcpy((char*)devmode.dmFormName, astring5);
+
+    devmode.dmSpecVersion      = arg4->dmSpecVersion;
+    devmode.dmDriverVersion    = arg4->dmDriverVersion;
+    devmode.dmSize             = arg4->dmSize;
+    devmode.dmDriverExtra      = arg4->dmDriverExtra;
+    devmode.dmFields           = arg4->dmFields;
+    devmode.dmOrientation      = arg4->dmOrientation;
+    devmode.dmPaperSize        = arg4->dmPaperSize;
+    devmode.dmPaperLength      = arg4->dmPaperLength;
+    devmode.dmPaperWidth       = arg4->dmPaperWidth;
+    devmode.dmScale            = arg4->dmScale;
+    devmode.dmCopies           = arg4->dmCopies;
+    devmode.dmDefaultSource    = arg4->dmDefaultSource;
+    devmode.dmPrintQuality     = arg4->dmPrintQuality;
+    devmode.dmColor            = arg4->dmColor;
+    devmode.dmDuplex           = arg4->dmDuplex;
+    devmode.dmYResolution      = arg4->dmYResolution;
+    devmode.dmTTOption         = arg4->dmTTOption;
+    devmode.dmCollate          = arg4->dmCollate;
+    devmode.dmLogPixels        = arg4->dmLogPixels;
+    devmode.dmBitsPerPel       = arg4->dmBitsPerPel;
+    devmode.dmPelsWidth        = arg4->dmPelsWidth;
+    devmode.dmPelsHeight       = arg4->dmPelsHeight;
+    devmode.dmDisplayFlags     = arg4->dmDisplayFlags;
+    devmode.dmDisplayFrequency = arg4->dmDisplayFrequency;
+    devmode.dmICMMethod        = arg4->dmICMMethod;
+    devmode.dmICMIntent        = arg4->dmICMIntent;
+    devmode.dmMediaType        = arg4->dmMediaType;
+    devmode.dmDitherType       = arg4->dmDitherType;
+    devmode.dmReserved1        = arg4->dmReserved1;
+    devmode.dmReserved2        = arg4->dmReserved2;
+
+    rc = O32_CreateIC(astring1,astring2,astring3,&devmode);
+    FreeAsciiString(astring1);
+    FreeAsciiString(astring2);
+    FreeAsciiString(astring3);
+    FreeAsciiString(astring4);
+    FreeAsciiString(astring5);
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
