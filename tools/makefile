@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 1999-09-13 14:29:48 sandervl Exp $
+# $Id: makefile,v 1.4 1999-11-08 21:13:21 achimha Exp $
 
 #
 # PD-Win32 API
@@ -51,7 +51,7 @@ clean:
         $(MAKE_CMD) clean
         cd ..\wrc
         $(MAKE_CMD) -f makefile.os2 clean
-        cd ..\bin
-        -$(RM) *.exe *.dll
+#        cd ..\bin
+#        -$(RM) *.exe *.dll
         cd ..\..
 
