@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.9 1999-10-25 20:17:17 sandervl Exp $ */
+/* $Id: edit.cpp,v 1.10 1999-11-02 19:13:00 sandervl Exp $ */
 /*
  *      Edit control
  *
@@ -3173,9 +3173,6 @@ static LRESULT EDIT_WM_LButtonDown(HWND hwnd, EDITSTATE *es, DWORD keys, INT x, 
         INT e;
         BOOL after_wrap;
 
-        //SvL: Set focus
-//        SetFocus(hwnd);
-
         if (!(es->flags & EF_FOCUSED))
                 return 0;
 
@@ -3461,8 +3458,7 @@ static void EDIT_WM_SetFocus(HWND hwnd, EDITSTATE *es, HWND window_losing_focus)
         if(!(es->style & ES_NOHIDESEL))
                 EDIT_InvalidateText(hwnd, es, es->selection_start, es->selection_end);
         ShowCaret(hwnd);
-//SvL: TEST
-//        EDIT_NOTIFY_PARENT(hwnd, EN_SETFOCUS, "EN_SETFOCUS");
+        EDIT_NOTIFY_PARENT(hwnd, EN_SETFOCUS, "EN_SETFOCUS");
 }
 
 

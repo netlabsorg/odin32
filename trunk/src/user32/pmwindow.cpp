@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.49 1999-10-31 01:23:15 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.50 1999-11-02 19:13:01 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -876,10 +876,10 @@ VirtualKeyFound:
     case WM_HITTEST:
     // Only send this message if the window is enabled
         if (WinIsWindowEnabled(hwnd))
-    {
+    	{
             if(win32wnd->MsgHitTest((*(POINTS *)&mp1).x, MapOS2ToWin32Y(OSLIB_HWND_DESKTOP, hwnd, (*(POINTS *)&mp1).y))) {
                     goto RunDefWndProc;
-        }
+            }
         }
         else    goto RunDefWndProc;
         break;
