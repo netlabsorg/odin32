@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.45 2001-10-09 05:18:02 phaller Exp $ */
+/* $Id: oslibmsg.cpp,v 1.46 2001-10-25 15:35:53 phaller Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -367,7 +367,10 @@ continuepeekmsg:
   if(rc == FALSE) {
       return FALSE;
   }
-
+  
+  // @@@PH
+  // warning - OS2ToWinMsgTranslate might insert additional messages
+  // into the queue
   if(OS2ToWinMsgTranslate((PVOID)teb, &os2msg, pMsg, isUnicode, (fRemove & PM_REMOVE_W) ? MSG_REMOVE : MSG_NOREMOVE) == FALSE) 
   {
      //unused PM message; dispatch immediately and grab next one
