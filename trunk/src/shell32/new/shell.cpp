@@ -32,6 +32,7 @@
 #include "syslevel.h"
 #include "imagelist.h"
 
+#include <heapstring.h>
 #include <misc.h>
 
 DECLARE_DEBUG_CHANNEL(exec)

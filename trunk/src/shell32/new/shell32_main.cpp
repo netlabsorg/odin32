@@ -31,6 +31,7 @@
 #include "shlguid.h"
 #include "wine/undocshell.h"
 
+#include <heapstring.h>
 #include <misc.h>
 
 DECLARE_DEBUG_CHANNEL(exec)

@@ -23,6 +23,7 @@
 #include "shell32_main.h"
 #include "wine/undocshell.h"
 
+#include <heapstring.h>
 #include <misc.h>
 
 DEFAULT_DEBUG_CHANNEL(shell)
@@ -226,8 +227,8 @@ BOOL WINAPI OleStrToStrNW (LPWSTR lpwStr, INT nwStr, LPCWSTR lpOle, INT nOle)
 BOOL WINAPI OleStrToStrNAW (LPVOID lpOut, INT nOut, LPCVOID lpIn, INT nIn)
 {
 	if (VERSION_OsIsUnicode())
-	  return OleStrToStrNW (lpOut, nOut, lpIn, nIn);
-	return OleStrToStrNA (lpOut, nOut, lpIn, nIn);
+	  return OleStrToStrNW ((LPWSTR)lpOut, nOut, (LPCWSTR)lpIn, nIn);
+	return OleStrToStrNA ((LPSTR)lpOut, nOut, (LPCWSTR)lpIn, nIn);
 }
 
 /*************************************************************************
@@ -253,8 +254,8 @@ BOOL WINAPI StrToOleStrNW (LPWSTR lpWide, INT nWide, LPCWSTR lpStrW, INT nStr)
 BOOL WINAPI StrToOleStrNAW (LPWSTR lpWide, INT nWide, LPCVOID lpStr, INT nStr)
 {
 	if (VERSION_OsIsUnicode())
-	  return StrToOleStrNW (lpWide, nWide, lpStr, nStr);
-	return StrToOleStrNA (lpWide, nWide, lpStr, nStr);
+	  return StrToOleStrNW (lpWide, nWide, (LPWSTR)lpStr, nStr);
+	return StrToOleStrNA (lpWide, nWide, (LPSTR)lpStr, nStr);
 }
 
 /*************************************************************************
@@ -299,7 +300,13 @@ ShellMessageBoxW(HMODULE hmod,HWND hwnd,DWORD idText,DWORD idTitle,DWORD uType,L
 	else
 	  pszText = (LPWSTR)idText;
 
-	FormatMessageW(FORMAT_MESSAGE_FROM_STRING | FORMAT_MESSAGE_ARGUMENT_ARRAY ,szText,0,0,szTemp,256,args);
+	FormatMessageW(FORMAT_MESSAGE_FROM_STRING | FORMAT_MESSAGE_ARGUMENT_ARRAY,
+                szText,
+                0,
+                0,
+                szTemp,
+                256,
+                (LPDWORD)args);
 	return MessageBoxW(hwnd,szTemp,szTitle,uType);
 }
 
@@ -324,7 +331,7 @@ ShellMessageBoxA(HMODULE hmod,HWND hwnd,DWORD idText,DWORD idTitle,DWORD uType,L
 	else
 	  pszText = (LPSTR)idText;
 
-	FormatMessageA(FORMAT_MESSAGE_FROM_STRING | FORMAT_MESSAGE_ARGUMENT_ARRAY ,pszText,0,0,szTemp,256,args);
+	FormatMessageA(FORMAT_MESSAGE_FROM_STRING | FORMAT_MESSAGE_ARGUMENT_ARRAY ,pszText,0,0,szTemp,256,(LPDWORD)args);
 	return MessageBoxA(hwnd,szTemp,pszTitle,uType);
 }
 
@@ -431,9 +438,9 @@ LPVOID WINAPI SHAlloc(DWORD len)
 	LPBYTE ret;
 
 #ifdef MEM_DEBUG
-	ret = (LPVOID) HeapAlloc(GetProcessHeap(),0,len+6);
+	ret = (LPBYTE) HeapAlloc(GetProcessHeap(),0,len+6);
 #else
-	ret = (LPVOID) HeapAlloc(GetProcessHeap(),0,len);
+	ret = (LPBYTE) HeapAlloc(GetProcessHeap(),0,len);
 #endif
 
 #ifdef MEM_DEBUG
@@ -650,8 +657,8 @@ HRESULT WINAPI SHRunControlPanel (DWORD x, DWORD z)
  */
 BOOL WINAPI ShellExecuteExAW (LPVOID sei)
 {	if (VERSION_OsIsUnicode())
-	  return ShellExecuteExW (sei);
-	return ShellExecuteExA (sei);
+	  return ShellExecuteExW ((LPSHELLEXECUTEINFOW)sei);
+	return ShellExecuteExA ((LPSHELLEXECUTEINFOA)sei);
 }
 /*************************************************************************
  * ShellExecuteExA				[SHELL32.292]
@@ -690,7 +697,7 @@ BOOL WINAPI ShellExecuteExA (LPSHELLEXECUTEINFOA sei)
 
 	/* process the IDList */
 	if ( (sei->fMask & SEE_MASK_INVOKEIDLIST) == SEE_MASK_INVOKEIDLIST) /*0x0c*/
-	{ SHGetPathFromIDListA (sei->lpIDList,szApplicationName);
+	{ SHGetPathFromIDListA ((LPCITEMIDLIST)sei->lpIDList,szApplicationName);
 	  TRACE("-- idlist=%p (%s)\n", sei->lpIDList, szApplicationName);
 	}
 	else
@@ -698,7 +705,7 @@ BOOL WINAPI ShellExecuteExA (LPSHELLEXECUTEINFOA sei)
 	  { /* %I is the adress of a global item ID*/
 	    pos = strstr(szCommandline, "%I");
 	    if (pos)
-	    { HGLOBAL hmem = SHAllocShared ( sei->lpIDList, ILGetSize(sei->lpIDList), 0);
+	    { HGLOBAL hmem = SHAllocShared ( sei->lpIDList, ILGetSize((LPCITEMIDLIST)sei->lpIDList), 0);
 	      sprintf(szPidl,":%li",(DWORD)SHLockShared(hmem,0) );
 	      SHUnlockShared(hmem);
 	
@@ -878,7 +885,7 @@ HRESULT WINAPI SHRegQueryValueW (HKEY hkey, LPWSTR lpszSubKey,
 				 LPWSTR lpszData, LPDWORD lpcbData )
 {	WARN("0x%04x %s %p %p semi-stub\n",
 		hkey, debugstr_w(lpszSubKey), lpszData, lpcbData);
-	return RegQueryValueW( hkey, lpszSubKey, lpszData, lpcbData );
+	return RegQueryValueW( hkey, lpszSubKey, lpszData, (LPLONG)lpcbData );
 }
 
 /*************************************************************************
@@ -893,7 +900,7 @@ HRESULT WINAPI SHRegQueryValueExW (HKEY hkey, LPWSTR pszValue, LPDWORD pdwReserv
 {	DWORD ret;
 	WARN("0x%04x %s %p %p %p %p semi-stub\n",
 		hkey, debugstr_w(pszValue), pdwReserved, pdwType, pvData, pcbData);
-	ret = RegQueryValueExW ( hkey, pszValue, pdwReserved, pdwType, pvData, pcbData);
+	ret = RegQueryValueExW ( hkey, pszValue, pdwReserved, pdwType, (LPBYTE)pvData, pcbData);
 	return ret;
 }
 
@@ -995,7 +1002,7 @@ HRESULT WINAPI StrRetToStrNW (LPVOID dest, DWORD len, LPSTRRET src, LPITEMIDLIST
 	  case STRRET_OFFSETA:
 	    if (pidl)
 	    {
-	      lstrcpynAtoW((LPWSTR)dest, ((LPCSTR)&pidl->mkid)+src->u.uOffset, len);
+	      lstrcpynAtoW((LPWSTR)dest, ((LPSTR)&pidl->mkid)+src->u.uOffset, len);
 	    }
 	    break;
 
@@ -1289,8 +1296,8 @@ int WINAPI StrToOleStrW (LPWSTR lpWideCharStr, LPCWSTR lpWString)
 BOOL WINAPI StrToOleStrAW (LPWSTR lpWideCharStr, LPCVOID lpString)
 {
 	if (VERSION_OsIsUnicode())
-	  return StrToOleStrW (lpWideCharStr, lpString);
-	return StrToOleStrA (lpWideCharStr, lpString);
+	  return StrToOleStrW (lpWideCharStr, (LPCWSTR)lpString);
+	return StrToOleStrA (lpWideCharStr, (LPCSTR)lpString);
 }
 
 /************************************************************************
@@ -1322,7 +1329,7 @@ HRESULT WINAPI DoEnvironmentSubstW(LPWSTR x, LPWSTR y)
 HRESULT WINAPI DoEnvironmentSubstAW(LPVOID x, LPVOID y)
 {
 	if (VERSION_OsIsUnicode())
-	  return DoEnvironmentSubstW(x, y);
-	return DoEnvironmentSubstA(x, y);
+	  return DoEnvironmentSubstW((LPWSTR)x, (LPWSTR)y);
+	return DoEnvironmentSubstA((LPSTR)x, (LPSTR)y);
 }
 
