@@ -1,9 +1,10 @@
- /* $Id: ChangeLog,v 1.659 2000-01-18 22:28:47 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.660 2000-01-19 01:41:21 sandervl Exp $ */
 
  2000-01-18: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Removed 'old' user32 and replaced it with the new one
                   Call default window proc when DefMDIChildProcA/W is called
                   for a non-MDI window.
+                  Fixed menu check & submenu marks painting
 	- KERNEL32: Increased shared heap reserve size to 512 kb
 	- SHELL32:  Display Odin logo in Shell about dialog box
 
