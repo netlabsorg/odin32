@@ -1,4 +1,4 @@
-; $Id: user32.def,v 1.7 1999-09-04 17:56:40 dengert Exp $
+; $Id: user32.def,v 1.8 1999-09-09 18:08:19 dengert Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
@@ -9,8 +9,11 @@ SEGMENTS
    _GLOBALDATA CLASS 'DATA'       SHARED LOADONCALL READWRITE
 
 IMPORTS
-    WinQueryDAXData	       = PMMERGE.5447
     WinSetDAXData	       = PMMERGE.5448
+    GpiQueryDCData	       = PMGPI.665
+    GpiEnableYInversion        = PMGPI.723
+    HPSToHDC		       = PMWINX.1022
+    DeleteHDC		       = PMWINX.1023
 
 EXPORTS
     ActivateKeyboardLayout     = _ActivateKeyboardLayout@8    @1
