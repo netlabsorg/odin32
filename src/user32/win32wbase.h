@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.141 2002-06-01 17:26:32 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.142 2002-06-02 10:07:59 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -158,9 +158,6 @@ virtual  ULONG  MsgEnable(BOOL fEnable);
          ULONG  MsgFormatFrame(WINDOWPOS *lpWndPos);
          ULONG  DispatchMsgA(MSG *msg);
          ULONG  DispatchMsgW(MSG *msg);
-
-         ULONG  MsgDropFiles(UINT cFiles, POINT point, LPSTR pszFiles, UINT cbszFiles, BOOL fNonClient = FALSE);
-         BOOL   AcceptsDropFiles();
 
          ULONG  MsgSetText(LPSTR lpsz, LONG cch);
          ULONG  MsgGetTextLength();
