@@ -1,15 +1,13 @@
-/* $Id: Fileio.cpp,v 1.9 1999-09-21 11:00:23 phaller Exp $ */
+/* $Id: Fileio.cpp,v 1.10 1999-10-10 09:00:57 sandervl Exp $ */
 
-/*
- *
- * Project Odin Software License can be found in LICENSE.TXT
- *
- */
 /*
  * Win32 File IO API functions for OS/2
  *
  * Copyright 1998 Sander van Leeuwen
  * Copyright 1998 Patrick Haller
+ *
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #include <os2win.h>
@@ -488,11 +486,12 @@ DWORD WIN32API GetFullPathNameW(LPCWSTR lpFileName, DWORD nBufferLength,
     AsciiToUnicode(asciibuffer,
                    lpBuffer);
 
+  if(lpFilePart)
     *lpFilePart = lpBuffer + ((int)asciipart - (int)asciibuffer);
 
-    FreeAsciiString(astring);
-    free(asciibuffer);
-    return(rc);
+  FreeAsciiString(astring);
+  free(asciibuffer);
+  return(rc);
 }
 //******************************************************************************
 //******************************************************************************

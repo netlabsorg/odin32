@@ -1,10 +1,5 @@
-/* $Id: message.cpp,v 1.6 1999-08-05 19:45:25 phaller Exp $ */
+/* $Id: message.cpp,v 1.7 1999-10-10 09:00:58 sandervl Exp $ */
 
-/*
- *
- * Project Odin Software License can be found in LICENSE.TXT
- *
- */
 /*
  * Win32 message API functions for OS/2
  *
@@ -16,6 +11,9 @@
  *
  * Copyright 1993 Robert J. Amstadt
  * Copyright 1995 Alexandre Julliard
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
  */
 #include <os2win.h>
 #include <stdlib.h>
