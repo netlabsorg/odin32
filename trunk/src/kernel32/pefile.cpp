@@ -1,4 +1,4 @@
-/* $Id: pefile.cpp,v 1.5 1999-09-15 23:38:01 sandervl Exp $ */
+/* $Id: pefile.cpp,v 1.6 1999-11-22 20:35:51 sandervl Exp $ */
 
 /*
  * PE2LX PE utility functions
@@ -11,9 +11,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#ifdef __WATCOMC__
-#include <mem.h>
-#endif
 #include <win32type.h>
 #include <pefile.h>
 #include <misc.h>
@@ -72,8 +69,7 @@ LPVOID ImageDirectoryOffset (LPVOID lpFile, DWORD dwIMAGE_DIRECTORY)
 	return NULL;
     }
 
-    return (LPVOID)(((ULONG)lpFile + (ULONG)(poh->DataDirectory[dwIMAGE_DIRECTORY].VirtualAddress - 
-                    sh.VirtualAddress) + (ULONG)sh.PointerToRawData));
+    return (LPVOID)((ULONG)lpFile + poh->DataDirectory[dwIMAGE_DIRECTORY].VirtualAddress); 
 }
 //******************************************************************************
 //******************************************************************************
@@ -147,58 +143,6 @@ BOOL GetSectionHdrByType (LPVOID lpFile, IMAGE_SECTION_HEADER *sh, int type)
         }
     }
     return FALSE;
-}
-//******************************************************************************
-//******************************************************************************
-int GetNumberOfResources(LPVOID lpFile)
-{
-  PIMAGE_RESOURCE_DIRECTORY	     prdRoot, prdType;
-  PIMAGE_RESOURCE_DIRECTORY_ENTRY    prde;
-  int 			             nCnt=0, i, j, id;
-  char                              *resname;
-
-    if ((prdRoot = (PIMAGE_RESOURCE_DIRECTORY)ImageDirectoryOffset
-		    (lpFile, IMAGE_DIRECTORY_ENTRY_RESOURCE)) == NULL)
-	return 0;
-
-    prde = (PIMAGE_RESOURCE_DIRECTORY_ENTRY)((DWORD)prdRoot + sizeof (IMAGE_RESOURCE_DIRECTORY));
-
-    for (i=0; i<prdRoot->NumberOfNamedEntries+prdRoot->NumberOfIdEntries; i++) 
-    {
-	prdType = (PIMAGE_RESOURCE_DIRECTORY)((ULONG)prdRoot + (ULONG)prde->u2.OffsetToData);
-
-	if(i<prdRoot->NumberOfNamedEntries) {
-		//SvL: 30-10-'97, high bit is set, so clear to get real offset
-	 	prde->u1.Name &= ~0x80000000;
-		for(j=0;j<MAX_RES;j++) {
-			resname = UnicodeToFixedAsciiString(*(WCHAR *)((ULONG)prdRoot + (ULONG)prde->u1.Name), (WCHAR *)((ULONG)prdRoot + (ULONG)prde->u1.Name + sizeof(WCHAR)));  // first word = string length
-			if(strcmp(resname, ResTypes[j]) == 0)
-				break;
-		}
-		if(j == MAX_RES) {
-			//SvL: 30-10-'97, not found = custom resource type (correct?)
-			id = NTRT_RCDATA;
-		}
-		else    id = j;
-	}
-	else    id = prde->u1.Id;
-
-	prdType = (PIMAGE_RESOURCE_DIRECTORY)((DWORD)prdType ^ 0x80000000);
-
-  	if(id == NTRT_STRING) {
-		//String tables can contain up to 16 individual resources!
-		nCnt += prdType->NumberOfNamedEntries*16 + prdType->NumberOfIdEntries*16;
-	}
-	else {
-		//Only icon groups are stored as resources in the LX file
-		//Icon groups contain one or more icons
-		if(id != NTRT_ICON)
-			nCnt += prdType->NumberOfNamedEntries + prdType->NumberOfIdEntries;
-	}	
-	prde++;
-    }
-
-    return nCnt;
 }
 /** Get Section Header for the given RVA - returns boolean according to the result
  *

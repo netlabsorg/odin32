@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.22 1999-11-10 14:16:01 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.23 1999-11-22 20:35:50 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -28,6 +28,7 @@
 #include <handlemanager.h>
 #include "mmap.h"
 #include "oslibdos.h"
+#include <winimagepeldr.h>
 
 //Global DLL Data
 #pragma data_seg(_GLOBALDATA)
@@ -41,7 +42,7 @@ Win32MemMapView *Win32MemMapView::mapviews = NULL;
 //TODO: sharing between processes
 //******************************************************************************
 Win32MemMap::Win32MemMap(HFILE hfile, ULONG size, ULONG fdwProtect, LPSTR lpszName)
-               : nrMappings(0), pMapping(NULL), mMapAccess(0), referenced(0)
+               : nrMappings(0), pMapping(NULL), mMapAccess(0), referenced(0), image(0)
 {
   globalmapMutex.enter();
   next    = memmaps;
@@ -59,6 +60,28 @@ Win32MemMap::Win32MemMap(HFILE hfile, ULONG size, ULONG fdwProtect, LPSTR lpszNa
 	strcpy(lpszMapName, lpszName);
   }
   else	lpszMapName = NULL;
+}
+//******************************************************************************
+//Map constructor used for executable image maps (only used internally)
+//******************************************************************************
+Win32MemMap::Win32MemMap(Win32PeLdrImage *pImage, ULONG baseAddress, ULONG size)
+               : nrMappings(0), pMapping(NULL), mMapAccess(0), referenced(0)
+{
+  globalmapMutex.enter();
+  next    = memmaps;
+  memmaps = this;
+  globalmapMutex.leave();
+
+  hMemFile   = -1;
+
+  mSize      = size;
+  mProtFlags = PAGE_READWRITE;
+  mProcessId = GetCurrentProcess();
+
+  pMapping   = (LPVOID)baseAddress;
+
+  image      = pImage;
+  lpszMapName= NULL;
 }
 //******************************************************************************
 //******************************************************************************
@@ -106,7 +129,7 @@ Win32MemMap::~Win32MemMap()
   if(lpszMapName) {
 	free(lpszMapName);
   }
-  if(pMapping) {
+  if(pMapping && !image) {
 	if(lpszMapName) {
 		OSLibDosFreeMem(pMapping);
 	}
@@ -153,6 +176,9 @@ BOOL Win32MemMap::commitPage(ULONG offset, BOOL fWriteAccess, int nrpages)
 
 //  mapMutex.enter();
 
+  if(image) {
+	return image->commitPage(pageAddr, fWriteAccess);
+  }
   newProt  = mProtFlags & (PAGE_READONLY | PAGE_READWRITE | PAGE_WRITECOPY);
 
   dprintf(("Win32MemMap::commitPage %x (faultaddr %x)", pageAddr, lpPageFaultAddr));
@@ -198,7 +224,7 @@ BOOL Win32MemMap::commitPage(ULONG offset, BOOL fWriteAccess, int nrpages)
 			dprintf(("Win32MemMap::commitPage: ReadFile didn't read all bytes for %x", pageAddr));
 			goto fail;
 		}
-		if(mProtFlags & PAGE_READONLY) {
+		if(mProtFlags != PAGE_READWRITE) {
   			if(VirtualProtect((LPVOID)pageAddr, memInfo.RegionSize, newProt, &oldProt) == FALSE) {
 				goto fail;
 			}
@@ -210,8 +236,10 @@ BOOL Win32MemMap::commitPage(ULONG offset, BOOL fWriteAccess, int nrpages)
 		dprintf(("Win32MemMap::commitPage: VirtualQuery (%x,%x) failed for %x", pageAddr, nrpages*PAGE_SIZE));
 		goto fail;
 	}
-  	if(VirtualAlloc((LPVOID)pageAddr, memInfo.RegionSize, MEM_COMMIT, newProt) == FALSE) {
-		goto fail;
+	if(!(memInfo.State & MEM_COMMIT))
+        {//if it's already committed, then the app tried to write to it
+	  	if(VirtualAlloc((LPVOID)pageAddr, memInfo.RegionSize, MEM_COMMIT, newProt) == FALSE) 
+			goto fail;
   	}
   }
 
@@ -281,7 +309,8 @@ LPVOID Win32MemMap::mapViewOfFile(ULONG size, ULONG offset, ULONG fdwAccess)
   fAlloc = MEM_RESERVE;
 #endif
 
-  if(nrMappings == 0) {//if not mapped, reserve/commit entire view
+  //Memory has already been allocated for executable image maps (only used internally)
+  if(!pMapping && nrMappings == 0) {//if not mapped, reserve/commit entire view
 	//SvL: Always read/write access or else ReadFile will crash once we
  	//     start committing pages.
 	//     This is most likely an OS/2 bug and doesn't happen in Aurora
@@ -331,6 +360,9 @@ BOOL Win32MemMap::flushView(ULONG offset, ULONG cbFlush)
  MEMORY_BASIC_INFORMATION memInfo;
  ULONG nrBytesWritten, size;
  int   i;
+
+  if(image) //no flushing for image maps
+	return TRUE;
 
   dprintf(("Win32MemMap::flushView: %x %x", lpvBase, cbFlush));
   if(nrMappings == 0)
@@ -446,7 +478,11 @@ void Win32MemMap::deleteAll()
   while(map) {
 	nextmap = map->next;
 	if(map->getProcessId() == processId) {
-		CloseHandle(memmaps->hMemMap);
+		//Delete map directly for executable images (only used internally)
+		if(map->getImage()) {
+			delete map;
+		}
+		else	CloseHandle(memmaps->hMemMap);
 	}
 	else {
   		//delete all views created by this process for this map
@@ -491,11 +527,17 @@ Win32MemMapView::Win32MemMapView(Win32MemMap *map, ULONG offset, ULONG size,
 	}
   }
   
-  if(OSLibDosAliasMem(viewaddr, size, &pMapView, accessAttr) != OSLIB_NOERROR) {
-	dprintf(("new OSLibDosAliasMem FAILED"));
-	SetLastError(ERROR_NOT_ENOUGH_MEMORY);
-	errorState = 1;
-  	return;
+  //view == memory mapping for executable images (only used internally)
+  if(map->getImage()) {
+	pMapView = map->getMappingAddr();
+  }
+  else {
+  	if(OSLibDosAliasMem(viewaddr, size, &pMapView, accessAttr) != OSLIB_NOERROR) {
+		dprintf(("new OSLibDosAliasMem FAILED"));
+		SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+		errorState = 1;
+	  	return;
+	}
   }
 
   dprintf(("Win32MemMapView::Win32MemMapView: created %x (alias for %x), size %d", pMapView, viewaddr, size));
@@ -529,7 +571,9 @@ Win32MemMapView::~Win32MemMapView()
   if(mfAccess != MEMMAP_ACCESS_READ)
   	mParentMap->flushView(mOffset, mSize);
 
-  OSLibDosFreeMem(pMapView);
+  //Don't free memory for executable image map views (only used internally)
+  if(!mParentMap->getImage())
+  	OSLibDosFreeMem(pMapView);
 
   globalviewMutex.enter();
   Win32MemMapView *view = mapviews;

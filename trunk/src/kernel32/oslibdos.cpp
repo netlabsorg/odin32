@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.8 1999-11-12 11:38:40 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.9 1999-11-22 20:35:50 sandervl Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -25,10 +25,52 @@
 APIRET APIENTRY DosAliasMem(PVOID pb, ULONG cb, PPVOID ppbAlias, ULONG fl);
 
 //******************************************************************************
+//TODO: Assumes entire memory range has the same protection flags!
+//TODO: Check if this works for code aliases...
 //******************************************************************************
 DWORD OSLibDosAliasMem(LPVOID pb, ULONG cb, LPVOID *ppbAlias, ULONG fl)
 {
-  return DosAliasMem(pb, cb, ppbAlias, fl);
+ DWORD rc;
+ DWORD attr;
+ DWORD size = cb;
+
+  cb = (cb-1) & ~0xfff;
+  cb+= PAGE_SIZE;
+
+  rc = DosQueryMem(pb, &size, &attr);
+  if(rc) {
+	dprintf(("OSLibDosAliasMem: DosQueryMem %x %x return %d", pb, size, rc));
+	return rc;
+  }
+  size = (size-1) & ~0xfff;
+  size+= PAGE_SIZE;
+  if(size != cb) {
+	dprintf(("ERROR: OSLibDosAliasMem: size != cb (%x!=%x)!!!!!!!!", size, cb));
+	return 5;
+  }
+  attr &= (PAG_READ|PAG_WRITE|PAG_EXECUTE|PAG_GUARD|PAG_DEFAULT);
+  if(attr != fl) {
+  	rc = DosSetMem(pb, size, fl);
+  	if(rc) {
+		dprintf(("OSLibDosAliasMem: DosSetMem %x %x return %d", pb, size, rc));
+		attr = fl;
+		//just continue for now
+		//return rc;
+	}
+  }
+  rc = DosAliasMem(pb, cb, ppbAlias, 2);
+  if(rc) {
+	dprintf(("OSLibDosAliasMem: DosAliasMem %x %x return %d", pb, cb, rc));
+	return rc;
+  }
+  if(attr != fl) {
+  	rc = DosSetMem(pb, size, attr);
+  	if(rc) {
+		dprintf(("OSLibDosAliasMem: DosSetMem (2) %x %x return %d", pb, size, rc));
+		return rc;
+	}
+  }
+  return 0;
 }
 //******************************************************************************
 //NT returns addresses aligned at 64k, so we do too.
