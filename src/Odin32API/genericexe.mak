@@ -1,4 +1,4 @@
-# $Id: genericexe.mak,v 1.1 2001-03-20 22:44:32 bird Exp $
+# $Id: genericexe.mak,v 1.2 2001-03-20 22:49:24 bird Exp $
 
 #
 # Odin32 API
@@ -6,7 +6,7 @@
 #       Sample makefile for Odin32 Exe files.
 #
 
-                                        
+
 #
 # Build environment configuration.
 #
@@ -18,7 +18,7 @@ EXETARGET = 1
 #
 # Compiler, tools, and interference rules.
 #
-!include d:/odin32/worktree/makefile.inc
+!include ../../makefile.inc
 
 
 #
@@ -57,19 +57,19 @@ $(ODIN32_LIB)/shell32.lib \
 $(RTLLIB_O) \
 os2386.lib
 
-        
+
 #
 # Target name - name of the dll without extention and path.
 #
 TARGET  = generic
 
-                   
+
 #
 # Our own All rule which doesn't copy stuff to global bin directories.
 #
 all:    $(OBJDIR) \
         $(OBJDIR)\$(TARGET).exe \
-        $(OBJDIR)\$(TARGET).sym 
+        $(OBJDIR)\$(TARGET).sym
 
 
 #
