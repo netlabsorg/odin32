@@ -1,4 +1,4 @@
-/* $Id: wininet.cpp,v 1.3 2000-12-27 23:06:17 sandervl Exp $ */
+/* $Id: wininet.cpp,v 1.4 2002-11-27 14:28:17 sandervl Exp $ */
 /*
  * WININET stubs
  *
@@ -83,22 +83,6 @@ HINTERNET WINAPI InternetConnectW(HINTERNET hInternet, LPCWSTR lpszServerName,
                                   INTERNET_PORT nServerPort, LPCWSTR lpszUserName,
                                   LPCWSTR lpszPassword, DWORD dwService,
                                   DWORD dwFlags, DWORD dwContext)
-{dprintf(("ERROR:"__FUNCTION__" not implemented"));
-        SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-        return 0;
-}
-//******************************************************************************
-//******************************************************************************
-HINTERNET WINAPI InternetOpenUrlA(HINTERNET hInternet, LPCSTR lpszUrl, LPCSTR lpszHeaders,
-                                  DWORD dwHeadersLength, DWORD dwFlags, DWORD dwContext)
-{dprintf(("ERROR:"__FUNCTION__" not implemented"));
-        SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-        return 0;
-}
-//******************************************************************************
-//******************************************************************************
-HINTERNET WINAPI InternetOpenUrlW(HINTERNET hInternet, LPCWSTR lpszUrl, LPCWSTR lpszHeaders,
-                                  DWORD dwHeadersLength, DWORD dwFlags, DWORD dwContext)
 {dprintf(("ERROR:"__FUNCTION__" not implemented"));
         SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
         return 0;
