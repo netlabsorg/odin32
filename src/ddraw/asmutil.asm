@@ -1,4 +1,4 @@
-; $Id: asmutil.asm,v 1.6 2000-02-04 19:31:26 hugh Exp $
+; $Id: asmutil.asm,v 1.7 2000-09-25 18:53:45 mike Exp $
 
 ;
 ; asmutil.asm Color key bit blitting for DirectDraw
@@ -56,7 +56,7 @@ _BlitColorKey8   PROC NEAR
   push  ecx
   push  edx
 
-  mov  edi, dword ptr [ebp+8]    ;dest
+  mov  edi, dword ptr [ebp+8]     ;dest
   mov  esi, dword ptr [ebp+12]    ;src
   mov  ecx, dword ptr [ebp+20]    ;linesize
   mov  edx, dword ptr [ebp+16]    ;colorkey
@@ -70,7 +70,7 @@ _BlitColorKey8   PROC NEAR
   mov  ecx, dword ptr [ebp+20]    ;linesize
   or   edx, eax      ; edx now contains the colorkey in each byte
   shr  ecx, 2        ;linesize in dwords
-  jz  blitremain    ; less then 4 bytes
+  jz  blitremain     ; less then 4 bytes
   jmp blitStart
 blitloop:
   add  esi, 4
@@ -78,11 +78,11 @@ blitloop:
 blitStart:
   mov  ebx, dword ptr [esi]
   mov  eax, dword ptr [edi]
-  cmp  ebx, edx  ; All 4 bytes transparent?
+  cmp  ebx, edx   ; All 4 bytes transparent?
   jz TTTT
-  cmp   bx, dx     ; lower 2 bytes transparent ?
+  cmp   bx, dx    ; lower 2 bytes transparent?
   jz XXTT
-  cmp   bl, dl    ; lower byte trans
+  cmp   bl, dl    ; lower byte transparent?
   jz XXOT
   mov   al, bl
   cmp   bh, dh    ; upper Byte transparent then skip copy
@@ -92,13 +92,13 @@ XXOT:
 XXTT:   ; handle upper 2 pixel
   ror  eax, 16
   ror  ebx, 16
-  cmp   bx,dx
+  cmp   bx, dx
   jz   skipbyte4
   cmp   bl, dl
   je  skipbyte3
   mov   al, bl
 skipbyte3:
-  cmp  bh, dl
+  cmp  bh, dh
   je  skipbyte4
   mov  ah, bh
 skipbyte4:
@@ -106,65 +106,58 @@ skipbyte4:
   mov  dword ptr [edi], eax
 TTTT:
   dec  ecx
-  jz   blitloop
+  jnz  blitloop
 blitremain:
   pop  ecx
   cmp  ecx, 2
   ja   blit3
   jz   blit2
   test ecx,ecx
-  jz endofblit
-  mov  eax, dword ptr[esi]
+  jz   endofblit
+  mov  eax, dword ptr [esi]
   mov  ebx, dword ptr [edi]
-  rol  eax, 8
-  rol  ebx, 8
   cmp  al,dl
-  jz  endofblit
+  jz   endofblit
   mov  bl,al
-  ror  ebx, 8
   mov  dword ptr[edi],ebx
   jmp endofblit
 
 blit3:
-  mov  eax, dword ptr[esi]
+  mov  eax, dword ptr [esi]
   mov  ebx, dword ptr [edi]
-  ror  eax, 16
-  ror  ebx, 16
   cmp  ax, dx
-  jz TTX
-  cmp  ah,dh
-  jz TXX
-  mov bh,ah
+  jz   TTX
+  cmp  ah, dh
+  jz   TXX
+  mov  bh, ah
 TXX:
-  cmp al,dl
-  jz TTX
-  mov bl,al
+  cmp  al, dl
+  jz   TTX
+  mov  bl, al
 TTX:
   ror  eax, 16
   ror  ebx, 16
-  cmp  ah,dh
-  jz Cpyback
-  mov  dh,ah
+  cmp  al, dl
+  jz   Cpyback
+  mov  bl, al
 Cpyback:
+  ror  ebx, 16
   mov  dword ptr [edi], ebx
-  jmp endofblit
+  jmp  endofblit
 
 blit2:
-  mov  eax, dword ptr[esi]
+  mov  eax, dword ptr [esi]
   mov  ebx, dword ptr [edi]
-  ror  eax, 16
-  ror  ebx, 16
   cmp  ax, dx  ; both bytes transparent ?
-  jz endofblit
-  cmp  ah,dh
-  jz TX
-  mov bh,ah
+  jz   endofblit
+  cmp  ah, dh
+  jz   TX
+  mov  bh, ah
 TX:
-  cmp al,dl
-  jz OT
-  mov bl,al
+  cmp  al, dl
+  jz   OT
+  mov  bl, al
 OT:
-  ror  ebx, 16
   mov dword ptr[edi], ebx
 
 endofblit:
@@ -201,7 +194,7 @@ _BlitColorKey16   PROC NEAR
   push  ecx
   push  edx
 
-  mov  edi, dword ptr [ebp+8]    ;dest
+  mov  edi, dword ptr [ebp+8]     ;dest
   mov  esi, dword ptr [ebp+12]    ;src
   mov  ecx, dword ptr [ebp+20]    ;linesize
   mov  edx, dword ptr [ebp+16]    ;colorkey
@@ -211,43 +204,39 @@ _BlitColorKey16   PROC NEAR
   and  eax, 0000FFFFh
   or   edx,eax       ; create dwColorKey
   shr  ecx, 1        ; linesize in dwords
-  jz   OnePixel
+  jz   OnePixel      ; FIXME: BUG if ecx was really 1!
 
 blitloop16:
   mov  eax, dword ptr [esi]
   mov  ebx, dword ptr [edi]
-  add esi , 4
-  cmp  eax, edx ; are both pixel transparent?
-  je  LoopUp    ; Yes, then Jump to loopend
-  cmp  ax,dx    ; Is lower pixel transparent
-  je  DrawOT    ; Yes So We got OT (OPAQUE/Transparent
-  mov  bx,ax    ; No so copy the lower pixel
-  ror  eax,16   ;
-  cmp  ax,dx    ; Is higher pixel transparent
-  je  CopyBack  ;
+  add  esi, 4
+  cmp  eax, edx  ; are both pixel transparent?
+  je   LoopUp    ; Yes, then Jump to loopend
+  cmp  ax, dx    ; Is lower pixel transparent
+  je   DrawOT    ; Yes So We got OT (OPAQUE/Transparent
+  mov  bx, ax    ; No so copy the lower pixel
 DrawOT:
-  ror ebx,16
-  mov  bx,ax
-  ror ebx,16
+  ror  eax, 16   ;
+  cmp  ax, dx    ; Is higher pixel transparent
+  je   CopyBack  ;
+  mov  bx, ax
 CopyBack:
+  ror ebx,16
   mov dword ptr[edi], ebx ; copy back the result in ebx
 LoopUp:
   mov ebx, dword ptr [ebp+20] ; V load this this in case we are done
-  add edi , 4                 ; U
+  add edi, 4                  ; U
 OnePixel:
   dec  ecx
-  jnz blitloop16
+  jnz  blitloop16
   test ebx, 1                 ; Do we have an odd linesize
-  jz endofblit16
+  jz   endofblit16
   mov  eax, dword ptr [esi]
   mov  ebx, dword ptr [edi]
-  ror  eax,16
-  ror  ebx,16
   cmp  ax, dx
-  je endofblit16              ; last pixel is transparent
-  mov  bx,ax    ; No so copy the lower pixel
-  ror ebx,16
-  mov dword ptr[edi], ebx ; copy back the result in ebx
+  je   endofblit16            ; last pixel is transparent
+  mov  bx,ax                  ; No so copy the lower pixel
+  mov  dword ptr [edi], ebx   ; copy back the result in ebx
 
 endofblit16:
   pop  edx
@@ -275,29 +264,29 @@ _BlitColorKey8MMX PROC NEAR
   push  ecx
   push  edx
 
-  mov  edx,  [ebp+16]    ;colorkey
-  mov  edi,  [ebp+8]    ;dest
-  mov  dh,dl
-  mov  esi,  [ebp+12]    ;src
-  mov  ax,dx
-  mov  ecx, dword ptr [ebp+20]    ;linesize
-  shr  edx,16
-  mov  dx,ax
-  movd mm4,edx
-  movd mm5,edx
+  mov   edx,  [ebp+16]    ;colorkey (in dl)
+  mov   edi,  [ebp+8]     ;dest
+  mov   esi,  [ebp+12]    ;src
+  mov   ecx, dword ptr [ebp+20]    ;linesize
+  mov   dh,dl
+  mov   eax,edx
+  shl   edx,16
+  mov   dx,ax
+  movd  mm4,edx
+  movd  mm5,edx
   psllq mm4,32
-  por  mm4,mm5
-  shr ecx,3
+  por   mm4,mm5
+  shr   ecx,3
   jz BltRemain8
 
 bltLoopMMX8:
-  movq mm0, [esi] ; get source qword
-  movq mm1, [edi] ; get dest   qword
-  movq mm2,mm0   ; copy source
-  PCMPEQB mm0,mm4 ; create mask
-  pand  mm1,mm0  ; mask dest
-  pandn mm2,mm0  ; mask source
-  por   mm1,mm2  ; or them
+  movq mm0, [esi]  ; get source qword
+  movq mm1, [edi]  ; get dest   qword
+  movq mm2, mm0    ; copy source
+  pcmpeqb mm0, mm4 ; create mask
+  pand  mm1, mm0   ; mask dest
+  pandn mm0, mm2   ; NOT mask AND source
+  por   mm1, mm0   ; or them
   movq qword ptr [edi], mm1 ; write back result
   add esi, 8
   add edi, 8
@@ -325,80 +314,84 @@ align 2
 ; but we might cross a page and so I guess this is saver
 ;
 blt7MMX8:
-  movd mm0, dword ptr[esi]
-  mov  ax,  word ptr[esi+4]
-  mov  bx,  word ptr[edi+4]
-  movd mm1, dword ptr[edi]
-  psllq mm0,32
-  shl  eax,8
-  shl  ebx,8
-  mov  al, byte ptr[esi+6]
-  mov  bl, byte ptr[edi+6]
-  movd mm0,eax
-  psllq mm1,32
-  movd mm1,ebx
-  movq mm2,mm0    ; copy source
-  PCMPEQB mm0,mm4 ; create mask
-  pand  mm1,mm0   ; mask dest
-  pandn mm2,mm0             ; mask source
-  por   mm1,mm2 ; or them
+  movd  mm0, dword ptr[esi]
+  mov   ax, word ptr[esi+4]
+  mov   bx, word ptr[edi+4]
+  movd  mm1, dword ptr[edi]
+  psllq mm0, 32
+  shl   eax, 8
+  shl   ebx, 8
+  mov   al, byte ptr[esi+6]
+  mov   bl, byte ptr[edi+6]
+  movd  mm5, eax
+  por   mm0, mm5
+  psllq mm1, 32
+  movd  mm6, ebx
+  por   mm1, mm6
+  movq  mm2, mm0   ; copy source
+  pcmpeqb mm0, mm4 ; create mask
+  pand  mm1, mm0   ; mask dest
+  pandn mm0, mm2   ; mask source
+  por   mm1, mm0   ; or them
   movd  eax, mm1
   psrlq mm1,32
-  mov  byte ptr[edi+6], al
+  mov   byte ptr[edi+6], al
   movd  dword ptr[edi], mm1
-  shr  eax,8
-  mov  word ptr[edi+4],ax
-  jmp bltEndMMX8
+  shr   eax,8
+  mov   word ptr[edi+4], ax
+  jmp   bltEndMMX8
 
 blt6MMX8:
-  movd mm0, dword ptr[esi]
-  mov  ax,  word ptr[esi+4]
-  mov  bx,  word ptr[edi+4]
-  movd mm1, dword ptr[edi]
-  psllq mm0,32
-  psllq mm1,32
-  movd mm0,eax
-  movd mm1,ebx
-  movq mm2,mm0   ; copy source
-  pcmpeqb mm0,mm4 ; create mask
-  pand  mm1,mm0 ; mask dest
-  pandn mm2,mm0             ; mask source
-  por   mm1,mm2 ; or them
+  movd  mm0, dword ptr[esi]
+  mov   ax, word ptr[esi+4]
+  mov   bx, word ptr[edi+4]
+  movd  mm1, dword ptr[edi]
+  psllq mm0, 32
+  psllq mm1, 32
+  movd  mm5, eax
+  por   mm0, mm5
+  movd  mm6, ebx
+  por   mm1, mm6
+  movq  mm2, mm0   ; copy source
+  pcmpeqb mm0, mm4 ; create mask
+  pand  mm1, mm0   ; mask dest
+  pandn mm0, mm2   ; mask source
+  por   mm1, mm0   ; or them
   movd  eax, mm1
   psrlq mm1,32
-  mov  word ptr[edi+4],ax
+  mov   word ptr[edi+4], ax
   movd  dword ptr[edi], mm1
-  jmp bltEndMMX8
+  jmp   bltEndMMX8
 
 blt5MMX8:
   movd mm0, dword ptr[esi]
   movd mm1, dword ptr[edi]
-  movq mm2,mm0   ; copy source
-  pcmpeqb mm0,mm4 ; create mask
-  pand  mm1,mm0 ; mask dest
-  add esi, 4;
-  pandn mm2,mm0 ; mask source
-  por   mm1,mm2 ; or them
+  movq mm2, mm0    ; copy source
+  pcmpeqb mm0, mm4 ; create mask
+  pand  mm1, mm0   ; mask dest
+  add   esi, 4
+  pandn mm0, mm2   ; mask source
+  por   mm1, mm0   ; or them
   movd  dword ptr[edi], mm1
-  add edi,4
-  jmp blt1MMX8
+  add   edi,4
+  jmp   blt1MMX8
 
 blt4MMX8:
   movd mm0, dword ptr[esi]
   movd mm1, dword ptr[edi]
-  movq mm2,mm0   ; copy source
+  movq mm2,mm0    ; copy source
   pcmpeqb mm0,mm4 ; create mask
-  pand  mm1,mm0 ; mask dest
-  pandn mm2,mm0             ; mask source
-  por   mm1,mm2 ; or them
-  movd dword ptr [edi], mm1 ; write back result
-  jmp bltEndMMX8
+  pand  mm1,mm0   ; mask dest
+  pandn mm0,mm2   ; mask source
+  por   mm1,mm0   ; or them
+  movd  dword ptr [edi], mm1 ; write back result
+  jmp   bltEndMMX8
 ;
 ; loading a dword into mm0/mm1 might be faster for 3-2...
 ;
 blt3MMX8:
-  mov  ax , word ptr [esi]
-  mov  bx , word ptr [edi]
+  mov  ax, word ptr [esi]
+  mov  bx, word ptr [edi]
   shl  eax,8  ; 3 Pixel left to blit
   shl  ebx,8  ; so shift the buffers
   mov  al,byte ptr[esi+2]
@@ -407,32 +400,32 @@ blt3MMX8:
   movd mm1,ebx
   movq mm2,mm0
   pcmpeqb mm0,mm4 ; create mask
-  pand  mm1,mm0 ; mask dest
-  pandn mm2,mm0 ; mask source
-  por   mm1,mm2 ; or them
-  movd eax, mm1 ; write back result
-  mov  byte ptr[edi+2],al
-  shr eax,8
-  mov  word ptr[edi],ax
+  pand  mm1,mm0   ; mask dest
+  pandn mm0,mm2   ; mask source
+  por   mm1,mm0   ; or them
+  movd  eax, mm1  ; write back result
+  mov   byte ptr[edi+2], al
+  shr   eax, 8
+  mov   word ptr[edi], ax
   jmp bltEndMMX8
 
 blt2MMX8:
   mov  al, byte ptr [esi]
-  cmp al,dl
-  je  blt1aMMX8
+  cmp  al, dl
+  je   blt1aMMX8
   mov  byte ptr [edi], al
-  mov  bl , byte ptr [esi+1]
-  cmp bl,dl
-  je  bltEndMMX8
-  mov  byte ptr [edi+1], bl
-  jmp bltEndMMX8
+;  mov  bl, byte ptr [esi+1]
+;  cmp  bl, dl
+;  je   bltEndMMX8
+;  mov  byte ptr [edi+1], bl
+;  jmp  bltEndMMX8
 blt1aMMX8:
-  add esi,1
-  add edi,1
+  add esi, 1
+  add edi, 1
 blt1MMX8:
   mov  al, byte ptr [esi]
-  cmp al,dl
-  je  bltEndMMX8
+  cmp  al, dl
+  je   bltEndMMX8
   mov  byte ptr [edi], al
 
 bltEndMMX8:
@@ -460,10 +453,12 @@ _BlitColorKey16MMX PROC NEAR
 
   mov  edx, dword ptr [ebp+16]    ; colorkey
   mov  edi, dword ptr [ebp+8]     ; dest
-  mov  eax, dword ptr [ebp+16]    ; colorkey
-  shr  edx,16;
   mov  ecx, dword ptr [ebp+20]    ; linesize in pixel!
-  mov  dx,ax                      ; extend colorkey to 32 Bit
+
+  mov  eax, edx
+  shl  edx, 16;
+  mov  dx, ax                     ; extend colorKey to 32 bit
+
   mov  esi, dword ptr [ebp+12]    ; src
   mov  eax, ecx                   ; copy of linesize
   shr  ecx,2
@@ -475,14 +470,14 @@ _BlitColorKey16MMX PROC NEAR
   por mm4,mm5
 
 bltLoopMMX16:
-  movq mm0,qword ptr [esi] ; get source dword
-  movq mm1,qword ptr [edi] ; get destination
-  movq mm2,mm0   ; copy source
-  pcmpeqw mm0,mm4 ; create mask
-  pand  mm1,mm0  ; mask dest
-  add esi, 8
-  pandn mm2,mm0  ; mask source
-  por   mm1,mm2  ; or them
+  movq mm0,qword ptr [esi]  ; get source dword
+  movq mm1,qword ptr [edi]  ; get destination
+  movq mm2,mm0              ; copy source
+  pcmpeqw mm0,mm4           ; create mask in mm0
+  pand  mm1,mm0             ; mask dest
+  add   esi, 8              ; point to next source qword
+  pandn mm0,mm2             ; NOT mask AND source
+  por   mm1,mm0             ; or them
   movq qword ptr [edi], mm1 ; write back result
   add edi, 8
   dec ecx
@@ -504,13 +499,13 @@ align 2
 blt3MMX16:
   movd mm0, dword ptr[esi]
   movd mm1, dword ptr[edi]
-  movq mm2,mm0   ; copy source
+  movq mm2,mm0    ; copy source
   add esi,4
   pcmpeqw mm0,mm4 ; create mask 16 bit
-  pand  mm1,mm0 ; mask dest
-  pandn mm2,mm0             ; mask source
+  pand    mm1,mm0 ; mask dest
+  pandn   mm0,mm2 ; mask source
   add edi,4
-  por   mm1,mm2 ; or them
+  por   mm1,mm0 ; or them
   movd  dword ptr[edi-4], mm1
   jmp blt1MMX16
 
@@ -520,8 +515,8 @@ blt2MMX16:
   movq mm2,mm0   ; copy source
   pcmpeqw mm0,mm4 ; create mask 16 bit
   pand  mm1,mm0 ; mask dest
-  pandn mm2,mm0             ; mask source
-  por   mm1,mm2 ; or them
+  pandn mm0,mm2             ; mask source
+  por   mm1,mm0 ; or them
   movd dword ptr [edi], mm1 ; write back result
   jmp bltEndMMX16
 
@@ -1941,6 +1936,7 @@ _CPUHasMMX PROC NEAR
   jz Return
   inc eax
 Return:
+;  mov  eax, 0 ; pretend no MMX is available
   pop  edx
   pop  ecx
   pop  ebx

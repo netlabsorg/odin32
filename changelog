@@ -1,4 +1,11 @@
- /* $Id: changelog,v 1.1144 2000-09-25 04:38:25 phaller Exp $ */
+ /* $Id: changelog,v 1.1145 2000-09-25 18:53:42 mike Exp $ */
+
+ 2000-09-25: Michal Necasek <michalnec@volny.cz>
+    - DDRAW, DDRAW\new: Fixed way too many bugs in asmutil.cpp. Both
+             the MMX and non-MMX transparent blitting functions were
+             incredibly buggy. They probably still are, but _much_ less
+             so. This fixed mouse pointer in Master of Orion II among other
+             things (but the Win95 version of MOO2 is simply buggy anyway).
 
  2000-09-25: Patrick Haller <phaller@gmx.net>
     - KERNEL32: GlobalMemoryStatus does no more rely on Open32 (experiment for AOE)
