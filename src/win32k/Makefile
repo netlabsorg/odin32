@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.71 2001-09-05 09:29:06 bird Exp $
+# $Id: Makefile,v 1.72 2002-04-29 11:53:21 bird Exp $
 
 #
 # Win32k makefile.
@@ -93,7 +93,7 @@ win32kcc.exe win32kcc:
 # Lib rule - make the win32k.lib object library.
 #
 lib:
-    $(DODIRS) ".\lib" $(MAKE_CMD) lib
+    $(DODIRS) ".\lib kKrnlLib" $(MAKE_CMD) lib
 
 
 #
