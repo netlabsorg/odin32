@@ -35,6 +35,35 @@
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
 #include <initdll.h>
 
+extern "C" {
+ //Win32 resource table (produced by wrc)
+extern DWORD _Resource_PEResTab;
+
+BOOL WINAPI RICHED32_LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved);
+}
+static HMODULE dllHandle = 0;
+//******************************************************************************
+//******************************************************************************
+static BOOL WINAPI OdinLibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
+{
+   BOOL ret;
+
+   switch (fdwReason)
+   {
+   case DLL_PROCESS_ATTACH:
+	return RICHED32_LibMain(hinstDLL, fdwReason, fImpLoad);
+
+   case DLL_THREAD_ATTACH:
+   case DLL_THREAD_DETACH:
+	return RICHED32_LibMain(hinstDLL, fdwReason, fImpLoad);
+
+   case DLL_PROCESS_DETACH:
+	ret = RICHED32_LibMain(hinstDLL, fdwReason, fImpLoad);
+	ctordtorTerm();
+        return ret;
+   }
+   return FALSE;
+}
 /****************************************************************************/
 /* _DLL_InitTerm is the function that gets called by the operating system   */
 /* loader when it loads and frees this DLL for each process that accesses   */
@@ -43,8 +72,9 @@
 /* linkage convention MUST be used because the operating system loader is   */
 /* calling this function.                                                   */
 /****************************************************************************/
-ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
+ULONG APIENTRY inittermRiched32(ULONG hModule, ULONG ulFlag)
 {
+   size_t i;
    APIRET rc;
 
    /*-------------------------------------------------------------------------*/
@@ -55,15 +85,17 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
 
    switch (ulFlag) {
       case 0 :
-         ctordtorInit();
-
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
+	 dllHandle = RegisterLxDll(hModule, OdinLibMain, (PVOID)&_Resource_PEResTab);
+         if(dllHandle == 0) 
+		return 0UL;
 
-         return inittermRiched32(hModule, ulFlag);
-
+         break;
       case 1 :
-         return inittermRiched32(hModule, ulFlag);
-
+         if(dllHandle) {
+	 	UnregisterLxDll(dllHandle);
+         }
+         break;
       default  :
          return 0UL;
    }
