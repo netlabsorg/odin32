@@ -1,4 +1,4 @@
-/* $Id: time.cpp,v 1.17 2002-02-09 17:27:32 sandervl Exp $ */
+/* $Id: time.cpp,v 1.18 2002-04-30 09:21:33 sandervl Exp $ */
 
 /*
  * Win32 time/date API functions
@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <time.h>
 #include "unicode.h"
 
 #define DBG_LOCALLOG	DBG_time
@@ -103,12 +104,12 @@ BOOL WIN32API FileTimeToDosDateTime(const FILETIME * arg1,  LPWORD arg2,
 {
     return O32_FileTimeToDosDateTime(arg1, arg2, arg3);
 }
+
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API FileTimeToLocalFileTime(const FILETIME * arg1, LPFILETIME arg2)
+BOOL WIN32API FileTimeToLocalFileTime(const FILETIME * utcft, LPFILETIME localft)
 {
-    dprintf(("KERNEL32:  FileTimeToLocalFileTime\n"));
-    return O32_FileTimeToLocalFileTime(arg1, arg2);
+   return O32_FileTimeToLocalFileTime(utcft,localft); 
 }
 //******************************************************************************
 //******************************************************************************
@@ -121,13 +122,27 @@ BOOL WIN32API LocalFileTimeToFileTime(const FILETIME * arg1, LPFILETIME arg2)
 //******************************************************************************
 BOOL WIN32API FileTimeToSystemTime(const FILETIME * arg1, LPSYSTEMTIME arg2)
 {
-  return O32_FileTimeToSystemTime(arg1, arg2);
+   /* Another WGSS bug it expects not UCT on input but LocalTime! */
+   FILETIME dummy;
+   FileTimeToLocalFileTime(arg1,&dummy);
+   return O32_FileTimeToSystemTime(&dummy, arg2);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API DosDateTimeToFileTime(WORD arg1, WORD arg2, LPFILETIME arg3)
 {
-    return O32_DosDateTimeToFileTime(arg1, arg2, arg3);
+    BOOL rc; 
+    rc = O32_DosDateTimeToFileTime(arg1, arg2, arg3);
+    /* Bug in WGSS after that we must have UCT file time on return,
+       instead we have local! */
+    if (rc)
+    {
+      FILETIME dummy;
+      /* Convert it to UCT */ 
+      rc = LocalFileTimeToFileTime(arg3,&dummy);
+      memcpy(arg3,&dummy,sizeof(FILETIME));
+    }
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -153,7 +168,18 @@ void WIN32API GetSystemTime(LPSYSTEMTIME arg1)
 BOOL WIN32API SystemTimeToFileTime(const SYSTEMTIME * arg1, 
                                    LPFILETIME arg2)
 {
-  return O32_SystemTimeToFileTime(arg1, arg2);
+    BOOL rc; 
+    rc = O32_SystemTimeToFileTime(arg1, arg2);
+    /* Bug in WGSS after that we must have UCT file time on return,
+       instead we have local! */
+    if (rc)
+    {
+      FILETIME dummy;
+      /* Convert it to local */ 
+      rc = LocalFileTimeToFileTime(arg2,&dummy);
+      memcpy(arg2,&dummy,sizeof(FILETIME));
+    }
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
