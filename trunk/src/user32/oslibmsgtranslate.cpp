@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.102 2003-02-16 18:29:26 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.103 2003-03-04 15:57:35 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -66,6 +66,33 @@ BOOL setThreadQueueExtraCharMessage(TEB* teb, MSG* pExtraMsg)
   return TRUE;
 }
 
+//******************************************************************************
+//******************************************************************************
+ULONG ConvertNumPadKey(ULONG pmScan)
+{
+ ULONG ret;
+ BYTE winKey;
+
+  switch (pmScan)
+  {
+   case PMSCAN_PAD7: ret = PMSCAN_HOME; break;
+   case PMSCAN_PAD8: ret = PMSCAN_UP; break;
+   case PMSCAN_PAD9: ret = PMSCAN_PAGEUP; break;
+   case PMSCAN_PAD4: ret = PMSCAN_LEFT; break;
+   case PMSCAN_PAD6: ret = PMSCAN_RIGHT; break;
+   case PMSCAN_PAD1: ret = PMSCAN_END; break;
+   case PMSCAN_PAD2: ret = PMSCAN_DOWN; break;
+   case PMSCAN_PAD3: ret = PMSCAN_PAGEDOWN; break;
+   case PMSCAN_PAD0: ret = PMSCAN_INSERT; break;
+   case PMSCAN_PADPERIOD: ret = PMSCAN_DELETE; break;
+   default:
+           ret = pmScan;
+  }
+ 
+  KeyTranslatePMScanToWinVKey(ret, FALSE, (PBYTE)&winKey, NULL, NULL);
+  return winKey;
+
+}
 //******************************************************************************
 //******************************************************************************
 ULONG GetMouseKeyState()
@@ -629,6 +656,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
       USHORT scanCode=0;
       ULONG  flags = SHORT1FROMMP(os2Msg->mp1);
       BOOL   keyWasPressed;
+      BOOL   numPressed = (BOOL)(WinGetKeyState(HWND_DESKTOP,VK_NUMLOCK) & 1);       
       char   c;
       USHORT usPMScanCode = CHAR4FROMMP(os2Msg->mp1);
 
@@ -637,16 +665,15 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         scanCode = CHAR4FROMMP(os2Msg->mp1);
         keyWasPressed = ((SHORT1FROMMP (os2Msg->mp1) & KC_PREVDOWN) == KC_PREVDOWN);
 
-        dprintf(("PM: WM_CHAR: %x %x rep=%d scancode=%x", SHORT1FROMMP(os2Msg->mp2), SHORT2FROMMP(os2Msg->mp2), repeatCount, scanCode));
+        dprintf(("PM: WM_CHAR: %x %x rep=%d scancode=%x num=%d", SHORT1FROMMP(os2Msg->mp2), SHORT2FROMMP(os2Msg->mp2), repeatCount, scanCode, numPressed));
         dprintf(("PM: WM_CHAR: hwnd %x flags %x mp1 %x, mp2 %x, time=%08xh", win32wnd->getWindowHandle(), flags, os2Msg->mp1, os2Msg->mp2, os2Msg->time));
-       
+
         BOOL  fWinExtended;
         BYTE  bWinVKey;
         WORD  wWinScan;
 
         if (scanCode==0) goto dummymessage;
 
-        // Note: Numlock-state currently ignored, see below
         KeyTranslatePMScanToWinVKey(usPMScanCode,
                                     FALSE, 
                                     &bWinVKey,
@@ -660,14 +687,8 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         if (fWinExtended)
             winMsg->lParam = winMsg->lParam | WIN_KEY_EXTENDED;
 
-#if 0
-//TODO
-        // Adjust VKEY value for pad digits if NumLock is on
-        if ((scanCode >= 0x47) && (scanCode <= 0x53) &&
-            (virtualKey >= 0x30) && (virtualKey >= 39))
-            winMsg->wParam = virtualKey + 0x30;
-#endif
-
+        if (!numPressed && (scanCode >= PMSCAN_PAD7) && (scanCode <= PMSCAN_PADPERIOD))
+             winMsg->wParam = ConvertNumPadKey(scanCode);
 
         //@PF This looks ugly but this is just what we have in win32 both in win98/win2k
         //what happens is that lParam is tweaked in win32 to contain some illegal codes
@@ -1051,7 +1072,7 @@ BOOL OSLibWinTranslateMessage(MSG *msg)
       //the KC_COMPOSITE flag might be set; in that case this key will
       //be combined with the previous dead key, so we must use the scancode
       //(e.g. ^ on german keyboards)
-      if(fl & (KC_VIRTUALKEY|KC_COMPOSITE) == KC_VIRTUALKEY)
+      if((fl & (KC_VIRTUALKEY|KC_COMPOSITE)) == KC_VIRTUALKEY)
       {
         if(msg->wParam)
         {
