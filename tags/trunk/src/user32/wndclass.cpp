@@ -1,4 +1,4 @@
-/* $Id: wndclass.cpp,v 1.6 1999-06-21 00:21:26 buerkle Exp $ */
+/* $Id: wndclass.cpp,v 1.7 1999-06-25 21:35:27 sandervl Exp $ */
 
 /*
  * Win32 Window Class Managment Code for OS/2
@@ -21,6 +21,7 @@
 #include "wndproc.h"
 #include "wndclass.h"
 #include "hooks.h"
+#include <spy.h>
 
 //default window handlers that are registered by RegisterClass are called
 //in this callback handler
@@ -800,7 +801,8 @@ LRESULT EXPENTRY_O32 OS2ToWinCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM
  Win32WindowProc      *window;
 
 #ifdef DEBUG
-  dprintf(("OS2ToWinCallback for message %s", GetMsgText(Msg)));
+  dprintf(("OS2ToWinCallback %s for %x %x %x", GetMsgText(Msg), hwnd, wParam, lParam));
+  PostSpyMessage(hwnd, Msg, wParam, lParam);
 #endif
 
   if(HkCBT::OS2HkCBTProc(hwnd, Msg, wParam, lParam) == TRUE) {//hook swallowed msg

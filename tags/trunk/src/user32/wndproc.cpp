@@ -1,4 +1,4 @@
-/* $Id: wndproc.cpp,v 1.6 1999-06-20 16:47:39 sandervl Exp $ */
+/* $Id: wndproc.cpp,v 1.7 1999-06-25 21:35:27 sandervl Exp $ */
 
 /*
  * Win32 window procedure class for OS/2
@@ -22,6 +22,7 @@
 #include "wndclass.h"
 #include "dlgconvert.h"
 #include "hooks.h"
+#include <spy.h>
 
 #ifdef DEBUG
 char *GetMsgText(int Msg);
@@ -287,7 +288,8 @@ LRESULT EXPENTRY_O32 WndCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPar
   }
   if(curwnd != NULL) {
 #ifdef DEBUG
-        WriteLog("***************Message %s for window/dialog %X\n", GetMsgText(Msg), hwnd);
+        WriteLog("Message %s for %X %x %x\n", GetMsgText(Msg), hwnd, wParam, lParam);
+	PostSpyMessage(hwnd, Msg, wParam, lParam);
 #endif
 	switch(Msg) 
 	{
