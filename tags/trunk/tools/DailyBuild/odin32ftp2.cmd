@@ -1,4 +1,4 @@
-/* $Id: odin32ftp2.cmd,v 1.15 2001-05-07 08:46:32 bird Exp $
+/* $Id: odin32ftp2.cmd,v 1.16 2001-05-13 20:35:54 bird Exp $
  *
  * Uploads the relase and debug builds to the FTP sites.
  *
@@ -95,7 +95,7 @@ cleanSF: procedure
     sLockFile = 'SF-delete';
     if (stream(sLockFile,'c','query exists') = '') then
     do
-        sSFDir = '/home/groups/ftp/pub/kTaskMgr/daily/';
+        sSFDir = '/home/groups/ftp/pub/ktaskmgr/daily/';
         'ssh -f -n -l stknut kTaskMgr.sourceforge.net rm -f' sSFDir||'*';
         if (rc <> 0) then
         do
@@ -114,7 +114,7 @@ cleanSF: procedure
 putSF: procedure
     parse arg sFile, sLockFile
 
-    sSFDir = '/home/groups/ftp/pub/kTaskMgr/daily/';
+    sSFDir = '/home/groups/ftp/pub/ktaskmgr/daily/';
 
     if (stream(sLockFile,'c','query exists') = '') then
     do
@@ -137,7 +137,7 @@ putSF: procedure
 forwardSF: procedure
     parse arg sFile, sLockFile, sRemoteDir, sSite
 
-    sSFDir = '/home/groups/ftp/pub/kTaskMgr/daily/';
+    sSFDir = '/home/groups/ftp/pub/ktaskmgr/daily/';
 
     if (stream(sLockFile,'c','query exists') = '') then
     do
