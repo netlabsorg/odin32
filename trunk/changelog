@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1824 2001-11-12 18:00:18 sandervl Exp $ */
+/* $Id: changelog,v 1.1825 2001-11-12 23:06:03 phaller Exp $ */
+
+ 2001-11-12: Patrick Haller <patrick.haller@innotek.de>
+    - ODINWRAP: o improved thread call path tracking
+                  (now collects i. e. HEAP_malloc->HeapAlloc paths)
 
  2001-11-12: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Fix for calculating font size for a dialog box

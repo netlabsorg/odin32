@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.125 2001-10-11 00:59:42 phaller Exp $
+; $Id: KERNEL32.DEF,v 1.126 2001-11-12 23:04:56 phaller Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -1201,3 +1201,7 @@ EXPORTS
     PerfView_RegisterCall                                         @3103 NONAME
     PerfView_DumpProfile                                          @3104 NONAME
     PerfView_Write                                                @3105 NONAME
+    _dbg_GetLastCallerName@0                                      @3106 NONAME
+    _dbg_ThreadPushCall@4                                         @3107 NONAME
+    _dbg_ThreadPopCall@0                                          @3108 NONAME
+

@@ -1,4 +1,4 @@
-/* $Id: perfview.h,v 1.2 2001-10-12 00:49:51 phaller Exp $ */
+/* $Id: perfview.h,v 1.3 2001-11-12 23:05:06 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -23,7 +23,8 @@ extern "C" {
 void _Optlink PerfView_Initialize(void);
 
 // register a call to a function
-void _Optlink PerfView_RegisterCall(char* pszFunctionName, 
+void _Optlink PerfView_RegisterCall(char* pszCallerName,
+                                    char* pszFunctionName, 
                                     unsigned long int nTicks);
 
 // dump the collected profile to the specified file

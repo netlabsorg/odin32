@@ -65,6 +65,11 @@ extern unsigned long int WIN32API GetCurrentThreadId(void);     // kernel32
 extern unsigned long int WIN32API dbg_GetThreadCallDepth(void); // kernel32
 extern void              WIN32API dbg_IncThreadCallDepth(void); // kernel32
 extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
+extern void              WIN32API dbg_ThreadPushCall(char *pszCaller);
+extern void              WIN32API dbg_ThreadPopCall();
+extern char*             WIN32API dbg_GetLastCallerName();
+
+
 
 // ---------------------------------------------------------------------------
 //SvL: Only check the heap very frequently when there are problems
@@ -100,7 +105,7 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
      else                                           \
        ulElapsed = liEnd.LowPart - liStart.LowPart; \
                                   \
-     PerfView_RegisterCall(a, ulElapsed); \
+     PerfView_RegisterCall(dbg_GetLastCallerName(), a, ulElapsed); \
                                   \
      dprintf(("%s: %s %u ticks\n",\
               pszOdinDebugChannel,\
@@ -122,14 +127,14 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
 
 #define FNPROLOGUE(a)   \
   sel = GetFS(); \
-  dbg_IncThreadCallDepth(); \
+  dbg_ThreadPushCall(a); \
   ODIN_HEAPCHECK();     \
   PROFILE_START(a)
 
 #define FNEPILOGUE(a)   \
   PROFILE_STOP(a)       \
   ODIN_HEAPCHECK();     \
-  dbg_DecThreadCallDepth(); \
+  dbg_ThreadPopCall(); \
   if (sel != GetFS()) { \
     SetFS(sel); \
     dprintf(("WARNING: FS: for thread %08xh corrupted by "a, GetCurrentThreadId())); \
