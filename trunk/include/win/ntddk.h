@@ -1,4 +1,4 @@
-/* $Id: ntddk.h,v 1.6 2000-08-29 21:20:49 sandervl Exp $ */
+/* $Id: ntddk.h,v 1.7 2001-04-22 10:37:27 sandervl Exp $ */
 /*
 	this file defines interfaces mainly exposed to device drivers and
 	native nt dll's
@@ -453,31 +453,70 @@ NTSTATUS WINAPI RtlAddAce(
 	PACE_HEADER acestart,
 	DWORD acelen);
 	
-DWORD WINAPI RtlAddAccessAllowedAce(DWORD x1,DWORD x2,DWORD x3,DWORD x4);
-DWORD WINAPI RtlGetAce(PACL pAcl,DWORD dwAceIndex,LPVOID *pAce );
+NTSTATUS WINAPI RtlAddAccessAllowedAce(IN OUT PACL pAcl, IN DWORD dwAceRevision, 
+                                       IN DWORD AccessMask, IN PSID pSid);
+NTSTATUS WINAPI RtlGetAce(PACL pAcl,DWORD dwAceIndex,LPVOID *pAce );
 
 /*
  *	string functions
  */
 
-DWORD WINAPI RtlAnsiStringToUnicodeString(PUNICODE_STRING uni,PANSI_STRING ansi,BOOLEAN doalloc);
-DWORD WINAPI RtlOemStringToUnicodeString(PUNICODE_STRING uni,PSTRING ansi,BOOLEAN doalloc);
-DWORD WINAPI RtlMultiByteToUnicodeN(LPWSTR unistr,DWORD unilen,LPDWORD reslen,LPSTR oemstr,DWORD oemlen);
-DWORD WINAPI RtlOemToUnicodeN(LPWSTR unistr,DWORD unilen,LPDWORD reslen,LPSTR oemstr,DWORD oemlen);
+NTSTATUS WINAPI RtlAnsiStringToUnicodeString( UNICODE_STRING *uni,
+                                              const STRING *ansi,
+                                              BOOLEAN doalloc );
+NTSTATUS WINAPI RtlOemStringToUnicodeString( UNICODE_STRING *uni,
+                                             const STRING *oem,
+                                             BOOLEAN doalloc );
+NTSTATUS WINAPI RtlMultiByteToUnicodeN( LPWSTR dst, DWORD dstlen, LPDWORD reslen,
+                                        LPCSTR src, DWORD srclen );
+NTSTATUS WINAPI RtlOemToUnicodeN( LPWSTR dst, DWORD dstlen, LPDWORD reslen,
+                                  LPCSTR src, DWORD srclen );
 VOID WINAPI RtlInitAnsiString(PANSI_STRING target,LPCSTR source);
 VOID WINAPI RtlInitString(PSTRING target,LPCSTR source);
 VOID WINAPI RtlInitUnicodeString(PUNICODE_STRING target,LPCWSTR source);
 VOID WINAPI RtlFreeUnicodeString(PUNICODE_STRING str);
 VOID WINAPI RtlFreeAnsiString(PANSI_STRING AnsiString);
-DWORD WINAPI RtlUnicodeToOemN(LPSTR oemstr,DWORD oemlen,LPDWORD reslen,LPWSTR unistr,DWORD unilen);
-DWORD WINAPI RtlUnicodeStringToOemString(PANSI_STRING oem,PUNICODE_STRING uni,BOOLEAN alloc);
-DWORD WINAPI RtlUnicodeStringToAnsiString(PANSI_STRING oem,PUNICODE_STRING uni,BOOLEAN alloc);
-DWORD WINAPI RtlEqualUnicodeString(PUNICODE_STRING s1,PUNICODE_STRING s2,DWORD x);
-DWORD WINAPI RtlUpcaseUnicodeString(PUNICODE_STRING dest,PUNICODE_STRING src,BOOLEAN doalloc);
+NTSTATUS WINAPI RtlUnicodeToOemN( LPSTR dst, DWORD dstlen, LPDWORD reslen,
+                                  LPCWSTR src, DWORD srclen );
+NTSTATUS WINAPI RtlUnicodeToMultiByteN( LPSTR dst, DWORD dstlen, LPDWORD reslen,
+                                        LPCWSTR src, DWORD srclen );
+NTSTATUS WINAPI RtlUnicodeStringToOemString( STRING *oem,
+                                             const UNICODE_STRING *uni,
+                                             BOOLEAN doalloc );
+NTSTATUS WINAPI RtlUnicodeStringToAnsiString( STRING *ansi,
+                                              const UNICODE_STRING *uni,
+                                              BOOLEAN doalloc );
+BOOLEAN WINAPI RtlEqualUnicodeString( const UNICODE_STRING *s1, const UNICODE_STRING *s2,
+                                      BOOLEAN CaseInsensitive );
+NTSTATUS WINAPI RtlUpcaseUnicodeString( UNICODE_STRING *dest,
+                                        const UNICODE_STRING *src,
+                                        BOOLEAN doalloc );
+NTSTATUS WINAPI RtlUpcaseUnicodeStringToAnsiString( STRING *dst,
+                                                    const UNICODE_STRING *src,
+                                                    BOOLEAN doalloc );
+NTSTATUS WINAPI RtlUpcaseUnicodeStringToOemString( STRING *dst,
+                                                   const UNICODE_STRING *src,
+                                                   BOOLEAN doalloc );
+NTSTATUS WINAPI RtlUpcaseUnicodeToMultiByteN( LPSTR dst, DWORD dstlen, LPDWORD reslen,
+                                              LPCWSTR src, DWORD srclen );
+NTSTATUS WINAPI RtlUpcaseUnicodeToOemN( LPSTR dst, DWORD dstlen, LPDWORD reslen,
+                                        LPCWSTR src, DWORD srclen );
+NTSTATUS WINAPI RtlMultiByteToUnicodeSize( DWORD *size, LPCSTR str, UINT len );
+NTSTATUS WINAPI RtlUnicodeToMultiByteSize( DWORD *size, LPCWSTR str, UINT len );
+
 UINT WINAPI RtlxOemStringToUnicodeSize(PSTRING str);
+DWORD WINAPI RtlUnicodeStringToOemSize( const UNICODE_STRING *str );
+DWORD WINAPI RtlUnicodeStringToAnsiSize( const UNICODE_STRING *str );
 UINT WINAPI RtlxAnsiStringToUnicodeSize(PANSI_STRING str);
 DWORD WINAPI RtlIsTextUnicode(LPVOID buf, DWORD len, DWORD *pf);
-NTSTATUS WINAPI RtlCompareUnicodeString(PUNICODE_STRING String1, PUNICODE_STRING String2, BOOLEAN CaseInSensitive);
+LONG WINAPI RtlCompareUnicodeString( const UNICODE_STRING *s1, const UNICODE_STRING *s2,
+                                     BOOLEAN CaseInsensitive );
+
+NTSTATUS WINAPI RtlAppendStringToString( STRING *dst, const STRING *src );
+NTSTATUS WINAPI RtlAppendAsciizToString( STRING *dst, LPCSTR src );
+NTSTATUS WINAPI RtlAppendUnicodeToString( UNICODE_STRING *dst, LPCWSTR src );
+NTSTATUS WINAPI RtlAppendUnicodeStringToString( UNICODE_STRING *dst, const UNICODE_STRING *src );
+
 
 /*
  *	resource functions
