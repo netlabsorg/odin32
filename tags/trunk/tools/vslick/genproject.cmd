@@ -1,4 +1,4 @@
-/* $Id: genproject.cmd,v 1.3 2000-05-19 21:22:49 bird Exp $
+/* $Id: genproject.cmd,v 1.4 2000-10-02 04:08:49 bird Exp $
  *
  * This script generates a Visual Slick project of the source and include
  * files found in the directory tree starting at the current directory.
@@ -86,7 +86,7 @@
     /* open target file */
     if (stream(sProjFile, 'c', 'open write' ) <> '') then do
         call lineout sProjFile, '[COMPILER]'
-        call lineout sProjFile, 'MACRO=odin32_maketagfile();\n odin32_setcurrentdir();\n'
+        call lineout sProjFile, 'MACRO=odin32_setcurrentdir();\nodin32_maketagfile();\n'
         call lineout sProjFile, 'FILTEREXPANSION=1 1 0 0 1'
         call lineout sProjFile, 'compile=concur|capture|clear|:Compile:&Compile,nmake %n.obj'
         call lineout sProjFile, 'make=concur|capture|clear|:Build:&Build,nmake'
@@ -103,7 +103,7 @@
         call lineout sProjFile, 'reffile='
 
         call lineout sProjFile, '[FILES]'
-        call processDirTree sProjFile, directory();
+        call processDirTree sProjFile, directory(), directory();
         call lineout sProjFile, '[ASSOCIATION]'
         call lineout sProjFile, '[STATE]'
         call lineout sProjFile, 'FILEHIST: 0'
@@ -135,13 +135,13 @@ syntax: procedure
 
 /* processes an directory tree */
 processDirTree: procedure
-    parse arg sProjFile, sDirectory
+    parse arg sProjFile, sDirectory, sRoot
 
     rc = SysFileTree(sDirectory'\*', sFiles, 'FO');
     if rc == 0  then do
         do i = 1 to sFiles.0
             if filterFile(sFiles.i) then
-                call lineout sProjFile, sFiles.i
+                call lineout sProjFile, substr(sFiles.i, length(sRoot)+2)
         end
     end
 
@@ -149,7 +149,7 @@ processDirTree: procedure
     if rc == 0  then do
         do i = 1 to sDirs.0
             if filterDirectory(sDirs.i) then
-                call processDirTree sProjFile, sDirs.i
+                call processDirTree sProjFile, sDirs.i, sRoot
         end
     end
 
@@ -162,7 +162,7 @@ filterFile: procedure
     parse arg sFile
 
     if lastpos('\', sFile) < lastpos('.', sFile) then do
-        sIncludeExt = 'c;cpp;h;hpp;inc;asm;rc;mak;cmd;mk;def;txt;'
+        sIncludeExt = 'c;cpp;h;hpp;inc;asm;rc;mak;cmd;mk;def;txt;orc;dlg;doc;ipf;'
         sExt = substr(sFile, lastpos('.', sFile)+1);
 
         /* look for sExt in sIncludeExt */
