@@ -1,7 +1,9 @@
-/* $Id: ChangeLog,v 1.1565 2001-07-05 18:07:47 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1566 2001-07-05 18:08:26 sandervl Exp $ */
 
  2001-07-05: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o WM_WINDOWPOSCHANGED dispatch bugfix (introduced yesterday)
+                o WinHelpA fixes (use shared memory for sending information
+                  to winhlp32)
     - KERNEL32: o Added GlobalFix and GlobalUnfix
                 o Local memory functions now use Global memory functions
                 o Ported Wine Global memory functions (we no longer depend
