@@ -1,4 +1,4 @@
-/* $Id: odin.cmd,v 1.36 2001-08-08 12:05:21 sandervl Exp $
+/* $Id: odin.cmd,v 1.37 2001-08-11 12:04:24 sandervl Exp $
  *
  * Odin32 API WarpIn installation script generator.
  *
@@ -139,6 +139,8 @@ rc = lineout(sInstFile, '     CREATEOBJECT="WPProgram|ChangeLog|<ODINFOLDER>|EXE
 rc = lineout(sInstFile, '     CREATEOBJECT="WPProgram|License|<ODINFOLDER>|EXENAME=E.EXE;PARAMETERS=$(1)\LICENSE.TXT;"');
 rc = lineout(sInstFile, '     CREATEOBJECT="WPProgram|WGSS50 License|<ODINFOLDER>|EXENAME=E.EXE;PARAMETERS=$(1)\WGSS50.lic;"');
 rc = lineout(sInstFile, '     CREATEOBJECT="WPProgram|Registry Editor|<ODINFOLDER>|EXENAME=REGEDIT2.EXE;"');
+rc = lineout(sInstFile, '     CREATEOBJECT="WPProgram|Report Odin Bugs|<ODINFOLDER>|EXENAME=$(1)\ODINBUG.EXE;"');
+rc = lineout(sInstFile, '     CREATEOBJECT="WPProgram|Report Odin Bugs Help|<ODINFOLDER>|EXENAME=E.EXE;PARAMETERS=$(1)\README.ODINBUG;"');
 rc = lineout(sInstFile, '     TARGET="C:\ODIN" BASE');
 title = "     TITLE=""Odin "sType" ("date()")""";
 rc = lineout(sInstFile, title);
@@ -200,6 +202,7 @@ rc = lineout(sInstFile, 'of the Win32 binary emulator.');
 rc = lineout(sInstFile, '');
 rc = lineout(sInstFile, 'Odin is available thanks to the work of the following people:');
 rc = lineout(sInstFile, '');
+rc = lineout(sInstFile, '     Herwig Bauernfeind');
 rc = lineout(sInstFile, '     Christoph Bratschi');
 rc = lineout(sInstFile, '     Oliver Braun');
 rc = lineout(sInstFile, '     Edgar Buerkle');
@@ -503,7 +506,9 @@ call SysFileDelete sInstallArchive
  */
 sWICCmd '1 -c'||sMainDir 'ChangeLog LICENSE.TXT WGSS50.lic';
 if (rc <> 0) then return rc;
-sWICCmd '1 -c'||sDocDir 'ChangeLog-1999 ChangeLog-2000 ChangeLog-2001 Readme.txt ReportingBugs.txt Logging.txt Odin.ini.txt';
+sWICCmd '1 -c'||sDocDir 'ChangeLog-1999 ChangeLog-2000 ChangeLog-2001 Readme.txt ReportingBugs.txt Logging.txt Odin.ini.txt Readme.Odinbug';
+if (rc <> 0) then return rc;
+sWICCmd '1 -c'||sBinDir||' Odinbug.exe';
 if (rc <> 0) then return rc;
 
 /*
