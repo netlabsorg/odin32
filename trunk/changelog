@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1967 2002-02-09 17:26:12 sandervl Exp $ */
+/* $Id: changelog,v 1.1968 2002-02-09 22:58:21 bird Exp $ */
+
+ 2002-02-09: knut st. osmundsen <bird@anduin.net>
+    - WRC:      o Corrected lstrcmpiA declaration missmatch.
 
  2002-02-09: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Logging updates
