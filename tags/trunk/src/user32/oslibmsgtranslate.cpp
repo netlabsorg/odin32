@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.30 2000-05-12 18:09:40 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.31 2000-05-24 19:30:05 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -188,6 +188,11 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
       case WM_BUTTON3DBLCLK:
         //WM_NC*BUTTON* is posted when the cursor is in a non-client area of the window
 
+#ifdef ODIN_HITTEST
+	//Send WM_HITTEST message
+        win32wnd->sendHitTest(MAKELONG(winMsg->pt.x,winMsg->pt.y));
+#endif
+
 	//if a window is disabled, it's parent receives the mouse messages
 	if(!win32wnd->IsWindowEnabled()) {
 		if(win32wnd->getParent()) {
@@ -241,6 +246,10 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
       {
         //WM_NCMOUSEMOVE is posted when the cursor moves into a non-client area of the window
 
+#ifdef ODIN_HITTEST
+	//Send WM_HITTEST message
+        win32wnd->sendHitTest(MAKELONG(winMsg->pt.x,winMsg->pt.y));
+#endif
 	//if a window is disabled, it's parent receives the mouse messages
 	if(!win32wnd->IsWindowEnabled()) {
 		if(win32wnd->getParent()) {
@@ -287,6 +296,7 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
       {
         winMsg->message = WINWM_NCACTIVATE;
         winMsg->wParam  = SHORT1FROMMP(os2Msg->mp1);
+
         return TRUE;
       }
       case WM_WINDOWPOSCHANGED:
@@ -416,12 +426,12 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
       HWND hwndActivate = (HWND)os2Msg->mp2;
       BOOL fMinimized = FALSE;
 
-        if(WinQueryWindowULong(hwndActivate, OFFSET_WIN32PM_MAGIC) != WIN32PM_MAGIC) {
+        hwndActivate = Win32BaseWindow::OS2ToWin32Handle(hwndActivate);
+	if(hwndActivate == 0) {
                 //another (non-win32) application's window
                 //set to desktop window handle
-                hwndActivate = windowDesktop->getWindowHandle();
-        }
-        else    hwndActivate = Win32BaseWindow::OS2ToWin32Handle(hwndActivate);
+		hwndActivate = windowDesktop->getWindowHandle();
+	}
 
         if(WinQueryWindowULong(os2Msg->hwnd, QWL_STYLE) & WS_MINIMIZED)
         {
@@ -482,6 +492,11 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
     case WM_BUTTON3DBLCLK:
         //WM_NC*BUTTON* is posted when the cursor is in a non-client area of the window
 
+#ifdef ODIN_HITTEST
+	//Send WM_HITTEST message
+        win32wnd->sendHitTest(MAKELONG(winMsg->pt.x,winMsg->pt.y));
+#endif
+
 	//if a window is disabled, it's parent receives the mouse messages
 	if(!win32wnd->IsWindowEnabled()) {
 		if(win32wnd->getParent()) {
@@ -534,6 +549,11 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
     case WM_MOUSEMOVE:
     {
         //WM_NCMOUSEMOVE is posted when the cursor moves into a non-client area of the window
+
+#ifdef ODIN_HITTEST
+	//Send WM_HITTEST message
+        win32wnd->sendHitTest(MAKELONG(winMsg->pt.x,winMsg->pt.y));
+#endif
 
 	//if a window is disabled, it's parent receives the mouse messages
 	if(!win32wnd->IsWindowEnabled()) {

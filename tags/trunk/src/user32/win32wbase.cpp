@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.193 2000-05-22 19:05:58 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.194 2000-05-24 19:30:06 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1141,6 +1141,13 @@ void Win32BaseWindow::MsgGetText(char *wndtext, ULONG textlength)
 }
 //******************************************************************************
 //******************************************************************************
+LONG Win32BaseWindow::sendHitTest(ULONG lParam)
+{
+    lastHitTestVal = SendInternalMessageA(WM_NCHITTEST, 0, lParam);
+    return lastHitTestVal;
+}
+//******************************************************************************
+//******************************************************************************
 BOOL Win32BaseWindow::isMDIClient()
 {
     return FALSE;
@@ -1386,7 +1393,13 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
     }
 
     case WM_ACTIVATE:
-      return 0;
+	/* The default action in Windows is to set the keyboard focus to
+	 * the window, if it's being activated and not minimized */
+      	if (LOWORD(wParam) != WA_INACTIVE) {
+		if(!(getStyle() & WS_MINIMIZE))
+			SetFocus(getWindowHandle());
+      	}
+      	return 0;
 
     case WM_SETCURSOR:
     {
@@ -2130,7 +2143,6 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
    BOOL rc = FALSE;
    Win32BaseWindow *window;
    HWND hParent = 0;
-   BOOL fShow = FALSE;
 
     if (fuFlags &
        ~(SWP_NOSIZE     | SWP_NOMOVE     | SWP_NOZORDER     |
@@ -2244,15 +2256,12 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
     }
     rc = OSLibWinSetMultWindowPos(&swp, 1);
 
-#ifdef DEBUG
-    if(fShow) {
-        dprintf(("Frame style 0x%08x, client style 0x%08x", OSLibQueryWindowStyle(OS2HwndFrame), OSLibQueryWindowStyle(OS2Hwnd)));
-    }
-#endif
-    if (rc == FALSE)
+    if(rc == FALSE)
     {
         dprintf(("OSLibWinSetMultWindowPos failed! Error %x",OSLibWinGetLastError()));
+	return 0;
     }
+
     if((fuFlags & SWP_FRAMECHANGED) && (fuFlags & (SWP_NOMOVE | SWP_NOSIZE) == (SWP_NOMOVE | SWP_NOSIZE)))
     {
         FrameUpdateClient(this);

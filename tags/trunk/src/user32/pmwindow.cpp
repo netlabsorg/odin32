@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.90 2000-05-12 18:09:41 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.91 2000-05-24 19:30:06 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -95,7 +95,11 @@ BOOL InitPM()
      hab,                               /* Anchor block handle          */
      (PSZ)WIN32_STDCLASS,               /* Window class name            */
      (PFNWP)Win32WindowProc,            /* Address of window procedure  */
+#ifdef ODIN_HITTEST
+     0,
+#else
      CS_HITTEST,
+#endif
      NROF_WIN32WNDBYTES)) {
         dprintf(("WinRegisterClass Win32BaseWindow failed"));
         return(FALSE);
@@ -104,7 +108,11 @@ BOOL InitPM()
      hab,                               /* Anchor block handle          */
      (PSZ)WIN32_STDCLASS2,              /* Window class name            */
      (PFNWP)Win32WindowProc,            /* Address of window procedure  */
+#ifdef ODIN_HITTEST
+     CS_SAVEBITS,
+#else
      CS_SAVEBITS | CS_HITTEST,
+#endif
      NROF_WIN32WNDBYTES)) {
         dprintf(("WinRegisterClass Win32BaseWindow failed"));
         return(FALSE);
@@ -117,7 +125,11 @@ BOOL InitPM()
    if (!WinRegisterClass (hab,
                           WIN32_INNERFRAME,
                           FrameClassInfo.pfnWindowProc,
+#ifdef ODIN_HITTEST
+                          FrameClassInfo.flClassStyle,
+#else
                           FrameClassInfo.flClassStyle | CS_HITTEST,
+#endif
                           FrameClassInfo.cbWindowData)) {
      dprintf (("WinRegisterClass Win32InnerFrame failed"));
      return (FALSE);
@@ -262,7 +274,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
     case WM_ACTIVATE:
     {
-        dprintf(("OS2: WM_ACTIVATE %x %x", hwnd, mp2));
+        dprintf(("OS2: WM_ACTIVATE %x %x %x", hwnd, mp1, mp2));
 
         if(win32wnd->IsWindowCreated())
           win32wnd->MsgActivate((LOWORD(pWinMsg->wParam) == WA_ACTIVE_W) ? 1 : 0, HIWORD(pWinMsg->wParam), pWinMsg->lParam, (HWND)mp2);
