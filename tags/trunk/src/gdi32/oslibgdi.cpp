@@ -1,4 +1,4 @@
-/* $Id: oslibgdi.cpp,v 1.2 1999-12-09 16:49:45 cbratschi Exp $ */
+/* $Id: oslibgdi.cpp,v 1.3 2000-01-28 22:24:58 sandervl Exp $ */
 
 /*
  * GDI32 support code
@@ -26,43 +26,13 @@ INT OSLibSetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx, DWORD cy,
                            LPCVOID bits, WINBITMAPINFOHEADER *info,
                            UINT coloruse)
 {
-  INT result;
+  INT result, rc;
   POINTL  points[4];
+  BITMAPINFO2 os2bmpinfo;
 
   // This is a quick hack. Only tested with winmine. Need much more testing.
   // TODO: check parameter and info structure
   lines = (int)lines >= 0 ? (int)lines : (int)-lines;
-
-#if 0     // WINE990508
-    tmpheight = height = info->bmiHeader.biHeight;
-    width = info->bmiHeader.biWidth;
-    if (height < 0) height = -height;
-    if (!lines || (startscan >= height)) return 0;
-    if (startscan + lines > height) lines = height - startscan;
-    if (ySrc < startscan) ySrc = startscan;
-    else if (ySrc >= startscan + lines) return 0;
-    if (xSrc >= width) return 0;
-    if (ySrc + cy >= startscan + lines) cy = startscan + lines - ySrc;
-    if (xSrc + cx >= width) cx = width - xSrc;
-    if (!cx || !cy) return 0;
-
-    descr.dc        = dc;
-    descr.bits      = bits;
-    descr.image     = NULL;
-    descr.lines     = tmpheight >= 0 ? lines : -lines;
-    descr.infoWidth = width;
-    descr.depth     = dc->w.bitsPerPixel;
-    descr.drawable  = physDev->drawable;
-    descr.gc        = physDev->gc;
-    descr.xSrc      = xSrc;
-    descr.ySrc      = tmpheight >= 0 ? lines-(ySrc-startscan)-cy+(oldcy-cy)
-                                     : ySrc - startscan;
-    descr.xDest     = dc->w.DCOrgX + XLPTODP( dc, xDest );
-    descr.yDest     = dc->w.DCOrgY + YLPTODP( dc, yDest ) +
-                                     (tmpheight >= 0 ? oldcy-cy : 0);
-    descr.width     = cx;
-    descr.height    = cy;
-#endif
 
   points[0].x = xDest;
   points[0].y = yDest + cy - 1;        // Y-inverted
@@ -73,12 +43,26 @@ INT OSLibSetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx, DWORD cy,
   points[3].x = xSrc + cx;
   points[3].y = ySrc + lines;
 
-  // WINBITMAPINFOHEADER and BITMAPINFO2 are identical
-  GpiDrawBits((HPS)hdc, (VOID *)bits, (BITMAPINFO2 *)info, 4,
-              points, ROP_SRCCOPY, BBO_IGNORE);
+  memset(&os2bmpinfo, 0, sizeof(os2bmpinfo));  
+  os2bmpinfo.cbFix         = sizeof(BITMAPINFO2) - sizeof(RGB2);
+  os2bmpinfo.cx            = info->biWidth;
+  os2bmpinfo.cy            = info->biHeight;
+  os2bmpinfo.cPlanes       = info->biPlanes;
+  os2bmpinfo.cBitCount     = info->biBitCount;
+  os2bmpinfo.ulCompression = info->biCompression;
+  os2bmpinfo.cbImage       = info->biSizeImage;
+  os2bmpinfo.cxResolution  = info->biXPelsPerMeter;
+  os2bmpinfo.cyResolution  = info->biYPelsPerMeter;
+  os2bmpinfo.cclrUsed      = info->biClrUsed;
+  os2bmpinfo.cclrImportant = info->biClrImportant;
 
+//  rc = GpiDrawBits((HPS)hdc, (VOID *)bits, &os2bmpinfo, 4,
+//                   points, ROP_SRCCOPY, BBO_IGNORE);
+
+//  if(rc != GPI_OK) {
+//	dprintf(("GpiDrawBits returned %d", rc));
+//  }
   return lines;
 }
 //******************************************************************************
 //******************************************************************************
-
