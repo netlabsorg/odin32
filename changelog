@@ -1,4 +1,17 @@
- /* $Id: changelog,v 1.491 1999-12-01 01:13:57 phaller Exp $ */
+ /* $Id: changelog,v 1.492 1999-12-01 10:53:40 sandervl Exp $ */
+
+ 99-12-01: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+	- KERNEL32: Removed check in CreateFileMapping (hFile == -1 && (protect & SEC_COMMIT))
+	- USER32: Added check for valid parent if window is child in ::SetWindowPos
+	- SHELL32: SHGetFileInfoA: set pidlLast to NULL)
+
+ 99-12-01: Sander van Leeuwen <sandervl@xs4all.nl>
+	- ODINCRT: Wrappers for allocation/free functions to prevent them
+                   from trashing FS. (happens when called from a thread (
+                   that is not the main thread))
+	- KERNEL32: Increase max nr of open files when DosOpen fails with ERROR_TOO_MANY_OPEN_FILES
+                    (OSLibDosOpen)
+	- ADVAPI32: Fix for RegQueryInfoKeyW (return size = 0)
 
  99-11-30: Patrick Haller <phaller@gmx.net>
 	- WSOCK32\NEW: Experimental rewrite using PMWSOCK successful.
@@ -6,29 +19,24 @@
 			TELNET works fine under debugger.
 
  99-11-30: Sander van Leeuwen <sandervl@xs4all.nl>
-	- ODINCRT: Wrappers for allocation/free functions to prevent them
-                   from trashing FS. (happens when called from a thread (
-                   that is not the main thread))
-
- 99-11-29: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Ported Wine process apis (not done) (kernel32\process.cpp)
                     Unitialized data section bugfix. 
 	- NTDLL: Fixed exports (missing ordinals) and created correct library
 	- ADVAPI32: Call security apis in ntdll (security.cpp; Wine 991031)
 
- 99-11-29: Jens Wiessner <wiessnej@rfi.de>
+ 99-11-30: Jens Wiessner <wiessnej@rfi.de>
 	- CRTDLL: Completed GetMainArgs
                   Implemented several functions.
     	- MSVCRT: Made some changes and implemented new functions.
                   Now builds msvcrt, msvcrt20 & msvcrt40 dlls.
 
- 99-11-29: Vitali E. Pelenyov <Vitali.Pelenyov@dpt.ustu.ru>
+ 99-11-30: Vitali E. Pelenyov <Vitali.Pelenyov@dpt.ustu.ru>
 	- KERNEL32: Another VirtualProtect bugfix
 
  99-11-30: Daniela Engert <dani@ngrt.de>
 	- USER32: eliminate superfluous background erases (part 1)
 
- 99-11-28: Sander van Leeuwen <sandervl@xs4all.nl>
+ 99-11-29: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Added EnumResourceTypesA/W (not tested)
 	- USER32: Get/SetActiveWindow bugfixes (don't return OS/2 wnd handles)
 
