@@ -1,4 +1,4 @@
-/* $Id: win32wmdichild.cpp,v 1.4 1999-10-12 14:47:24 sandervl Exp $ */
+/* $Id: win32wmdichild.cpp,v 1.5 1999-10-16 14:51:43 sandervl Exp $ */
 /*
  * Win32 MDI Child Window Class for OS/2
  *
@@ -44,7 +44,7 @@
 //******************************************************************************
 //******************************************************************************
 Win32MDIChildWindow::Win32MDIChildWindow(CREATESTRUCTA *lpCreateStructA, ATOM classAtom, BOOL isUnicode)
-                : Win32BaseWindow(lpCreateStructA, classAtom, isUnicode)
+                    : Win32BaseWindow(lpCreateStructA, classAtom, isUnicode)
 {
 }
 //******************************************************************************
@@ -79,6 +79,12 @@ ULONG Win32MDIChildWindow::MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwn
          return rc;
     }
     else return 1;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32MDIChildWindow::isMDIChild()
+{
+    return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
@@ -276,12 +282,16 @@ LRESULT Win32MDIChildWindow::DefMDIChildProcW(UINT Msg, WPARAM wParam, LPARAM lP
  */
 HWND Win32MDIChildWindow::createChild(Win32MDIClientWindow *client, LPMDICREATESTRUCTA cs )
 {
-    POINT        pos[2];
-    DWORD        style = cs->style | (WS_CHILD | WS_CLIPSIBLINGS);
-    HWND         hwnd;
-    WORD         wIDmenu = client->getFirstChildId() + client->getNrOfChildren();
-    char         lpstrDef[]="junk!";
-    Win32MDIChildWindow *maximizedChild, *newchild;
+  POINT        pos[2];
+  DWORD        style = cs->style | (WS_CHILD | WS_CLIPSIBLINGS);
+  WORD         wIDmenu = client->getFirstChildId() + client->getNrOfChildren();
+  char         lpstrDef[]="junk!";
+  Win32MDIChildWindow *maximizedChild, *newchild;
+  CREATESTRUCTA createstruct;
+  ATOM         classAtom;
+  char         tmpClassA[20] = "";
+  WCHAR        tmpClassW[20];
+  LPSTR        className;
 
     dprintf(("Win32MDIChildWindow::createChild %i,%i - dim %i,%i, style %08x\n",
              cs->x, cs->y, cs->cx, cs->cy, (unsigned)cs->style));
@@ -325,18 +335,55 @@ HWND Win32MDIChildWindow::createChild(Win32MDIClientWindow *client, LPMDICREATES
         style |= (WS_VISIBLE | WS_OVERLAPPEDWINDOW);
     }
 
-    if(!client->IsUnicode())
-    	hwnd = ::CreateWindowA(cs->szClass, cs->szTitle, style,
-                               cs->x, cs->y, cs->cx, cs->cy, client->getWindowHandle(),
-                               (HMENU)wIDmenu, cs->hOwner, cs );
-    else
-        hwnd = ::CreateWindowW((LPWSTR)cs->szClass, (LPWSTR)cs->szTitle, style,
-                               cs->x, cs->y, cs->cx, cs->cy, client->getWindowHandle(),
-                               (HMENU)wIDmenu, cs->hOwner, cs );
+    createstruct.lpszName  = cs->szTitle;
+    createstruct.style     = style;
+    createstruct.dwExStyle = 0;
+    createstruct.x         = cs->x;
+    createstruct.y         = cs->y;
+    createstruct.cx        = cs->cx;
+    createstruct.cy        = cs->cy;
+    createstruct.hInstance = cs->hOwner;
+    createstruct.hMenu     = wIDmenu;
+    createstruct.hwndParent= client->getWindowHandle();
+    createstruct.lpCreateParams = (LPVOID)cs;
 
-    /* MDI windows are WS_CHILD so they won't be activated by CreateWindow */
-    newchild = (Win32MDIChildWindow *)GetWindowFromHandle(hwnd);
-    if (hwnd && newchild)
+    className = (LPSTR)cs->szClass;
+    /* Find the class atom */
+    if (!(classAtom = (client->IsUnicode() ? GlobalFindAtomW((LPWSTR)cs->szClass) :
+                                             GlobalFindAtomA(cs->szClass))))
+    {
+        if (!HIWORD(cs->szClass))
+        {
+            if(!client->IsUnicode())
+            {
+                sprintf(tmpClassA,"#%d", (int) className);
+                classAtom = GlobalFindAtomA(tmpClassA);
+                className = tmpClassA;
+            }
+            else
+            {
+              sprintf(tmpClassA,"#%d", (int) className);
+              AsciiToUnicode(tmpClassA, tmpClassW);
+              classAtom = GlobalFindAtomW(tmpClassW);
+              className = (LPSTR)tmpClassW;
+            }
+        }
+        if (!classAtom)
+        {
+          if (!HIWORD(cs->szClass)) {
+                  dprintf(("createChild: bad class name %04x\n", LOWORD(className)));
+          }
+          else    dprintf(("createChild: bad class name '%s'\n", tmpClassA ));
+
+          SetLastError(ERROR_INVALID_PARAMETER);
+          return 0;
+        }
+    }
+    createstruct.lpszClass = className;
+
+    newchild = new Win32MDIChildWindow(&createstruct, classAtom, client->IsUnicode());
+
+    if(newchild && GetLastError() == 0)
     {
         newchild->menuModifyItem();
 
@@ -367,7 +414,7 @@ HWND Win32MDIChildWindow::createChild(Win32MDIClientWindow *client, LPMDICREATES
                 {
                     client->setMaximizedChild(newchild);
 #if 0
-                    MDI_AugmentFrameMenu( ci, w->parent, hwnd );
+                    MDI_AugmentFrameMenu( ci, w->parent, newchild->getWindowHandle() );
 #endif
                     client->updateFrameText(MDI_REPAINTFRAME, NULL );
                 }
@@ -386,8 +433,11 @@ HWND Win32MDIChildWindow::createChild(Win32MDIClientWindow *client, LPMDICREATES
         maximizedChild = client->getMaximizedChild();
         if( maximizedChild && maximizedChild->IsWindow() )
             maximizedChild->ShowWindow(SW_SHOWMAXIMIZED);
+
+        dprintf(("MDI child creation failed!!"));
+        return 0;
     }
-    return hwnd;
+    return newchild->getWindowHandle();
 }
 /**********************************************************************
  *          MDI_MenuModifyItem

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.46 1999-10-16 10:28:31 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.47 1999-10-16 14:51:42 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1162,9 +1162,17 @@ BOOL Win32BaseWindow::isMDIClient()
 }
 //******************************************************************************
 //******************************************************************************
+BOOL Win32BaseWindow::isMDIChild()
+{
+    return FALSE;
+}
+//******************************************************************************
+//TODO: Not complete
+//******************************************************************************
 BOOL Win32BaseWindow::isFrameWindow()
 {
-    if((getParent() == NULL || getParent() == windowDesktop) && ((dwStyle & WS_CAPTION) == WS_CAPTION))
+//    if(isMDIChild() || IsDialog() || (getParent() == NULL || getParent() == windowDesktop) && ((dwStyle & WS_CAPTION) == WS_CAPTION))
+    if((dwStyle & WS_CAPTION) == WS_CAPTION || dwStyle & (WS_VSCROLL|WS_HSCROLL))
         return TRUE;
 
     return FALSE;

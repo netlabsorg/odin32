@@ -1,4 +1,4 @@
-/* $Id: win32wmdichild.h,v 1.2 1999-09-29 09:16:32 sandervl Exp $ */
+/* $Id: win32wmdichild.h,v 1.3 1999-10-16 14:51:43 sandervl Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -30,6 +30,8 @@ virtual  ULONG  MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd);
 
            BOOL menuModifyItem();
 	   BOOL menuDeleteItem();
+
+virtual  BOOL   isMDIChild();
 
         LRESULT DefMDIChildProcA(UINT Msg, WPARAM wParam, LPARAM lParam);
         LRESULT DefMDIChildProcW(UINT Msg, WPARAM wParam, LPARAM lParam);
