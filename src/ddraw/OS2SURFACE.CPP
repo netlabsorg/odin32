@@ -4495,13 +4495,15 @@ HRESULT __stdcall SurfReleaseDC(THIS This, HDC hdc)
                 BitmapInfo.bmiHead.biPlanes,
                 BitmapInfo.bmiHead.biBitCount,
                 GetLastError());
-      /*
-      rc = GetDIBits(hdc, me->hbmImage, 0, me->DDSurfaceDesc.dwHeight,
-                me->DDSurfaceDesc.lpSurface,(PBITMAPINFO)&BitmapInfo,DIB_PAL_COLORS);
+      rc = GetDIBits( hdc,
+                      me->hbmImage, 0,
+                      me->DDSurfaceDesc.dwHeight,
+                      me->DDSurfaceDesc.lpSurface,
+                      (PBITMAPINFO)&BitmapInfo,
+                      DIB_PAL_COLORS);
       WriteLog( "GetDIBits rc=%d\n LastEror = %d\n",
                 rc,
                 GetLastError());
-      */
       break;
     case 16:
     case 32:
