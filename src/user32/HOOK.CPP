@@ -1,4 +1,4 @@
-/* $Id: HOOK.CPP,v 1.30 2001-10-26 09:10:12 phaller Exp $ */
+/* $Id: HOOK.CPP,v 1.31 2001-10-26 10:03:33 phaller Exp $ */
 
 /*
  * Windows hook functions
@@ -790,8 +790,13 @@ BOOL ProcessKbdHook(LPMSG msg, BOOL remove )
       break;
     
     case VK_LCONTROL:
-    case VK_CONTROL:
-    msg->wParam = VK_CONTROL; // 0x11
+    case VK_RCONTROL:
+      msg->wParam = VK_CONTROL; // 0x11
+      break;
+    
+    case VK_LSHIFT:
+    case VK_RSHIFT:
+      msg->wParam = VK_SHIFT; // 0x10
       break;
   }
   
