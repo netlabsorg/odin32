@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.31 1999-12-29 22:54:01 cbratschi Exp $ */
+/* $Id: oslibwin.h,v 1.32 2000-01-08 14:15:06 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -287,4 +287,6 @@ BOOL  OSLibWinSetKeyboardStateTable(unsigned char * PMKeyState);
 BOOL  OSLibWinEnableWindowUpdate(HWND hwnd,BOOL fEnable);
 ULONG OSLibWinGetLastError();
 
+HWND  OSLibWinIsFrameControl(HWND hwnd);
+ 
 #endif //__OSLIBWIN_H__
