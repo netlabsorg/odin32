@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.74 2003-08-06 11:00:44 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.75 2003-08-08 13:30:19 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -235,7 +235,7 @@ LONG OSLibWinDispatchMsg(MSG *msg, BOOL isUnicode)
 //
 // Check for a queued WM_CHAR message (e.g. inserted by TranslateMessage)
 //******************************************************************************
-BOOL ReturnQueuedWMCHAR(LPMSG pMsg, TEB *teb, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax, 
+BOOL ReturnQueuedWMCHAR(LPMSG pMsg, TEB *teb, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax,
                         BOOL isUnicode, BOOL fRemove)
 {
     if(teb->o.odin.fTranslated && (!hwnd || hwnd == teb->o.odin.msgWCHAR.hwnd))
@@ -250,7 +250,7 @@ BOOL ReturnQueuedWMCHAR(LPMSG pMsg, TEB *teb, HWND hwnd, UINT uMsgFilterMin, UIN
             if(teb->o.odin.msgWCHAR.message > uMsgFilterMax)
                 return FALSE;
         }
-    
+
         if(fRemove & PM_REMOVE_W) {
             teb->o.odin.fTranslated = FALSE;
             teb->o.odin.os2msg.msg  = 0;
@@ -275,7 +275,7 @@ BOOL ReturnQueuedWMCHAR(LPMSG pMsg, TEB *teb, HWND hwnd, UINT uMsgFilterMin, UIN
         // if this is a keyup or keydown message, we've got to
         // call the keyboard hook here
         // send keyboard messages to the registered hooks
-        if(fRemove & PM_REMOVE_W) 
+        if(fRemove & PM_REMOVE_W)
         {
             switch (pMsg->message)
             {
@@ -290,14 +290,14 @@ BOOL ReturnQueuedWMCHAR(LPMSG pMsg, TEB *teb, HWND hwnd, UINT uMsgFilterMin, UIN
                 break;
             }
         }
-    
+
         //GetMessageW and PeekMessageW expect the character code in UTF-16
         //(we save it in ascii format)
         if(isUnicode && (pMsg->message == WINWM_CHAR ||  pMsg->message == WINWM_SYSCHAR))
         {
             CHAR  charA;
             WCHAR charW;
-    
+
             charA = pMsg->wParam;
             MultiByteToWideChar(CP_ACP, 0, &charA, 1, &charW, 1);
             pMsg->wParam= charW;
@@ -399,8 +399,7 @@ continuegetmsg:
         if(ProcessKbdHook(pMsg, TRUE))
             goto continuegetmsg;
         break;
-    case WINWM_CHAR:
-    case WINWM_SYSCHAR:
+    case WINWM_IME_CHAR:
         // prevent from calling wrong DispatchMsg() (DBCS generated WM_CHAR)
         memset( &teb->o.odin.winmsg, 0, sizeof( MSG ));
         break;
@@ -463,7 +462,7 @@ continuepeekmsg:
         //to do so, we will translate each win32 message in the filter range and call WinPeekMsg
         ULONG ulPMFilter;
 
-        for(int i=0;i<uMsgFilterMax-uMsgFilterMin+1;i++) 
+        for(int i=0;i<uMsgFilterMax-uMsgFilterMin+1;i++)
         {
             rc = 0;
 
@@ -522,8 +521,7 @@ continuepeekmsg:
             if(ProcessKbdHook(pMsg, fRemove))
                 goto continuepeekmsg;
             break;
-        case WINWM_CHAR:
-        case WINWM_SYSCHAR:
+        case WINWM_IME_CHAR:
             // prevent from calling wrong DispatchMsg() (DBCS generated WM_CHAR)
             memset( &teb->o.odin.winmsg, 0, sizeof( MSG ));
             break;

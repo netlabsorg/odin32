@@ -887,10 +887,6 @@ static LRESULT WINAPI EditWndProc_common( HWND hwnd, UINT msg,
 
     case WM_CHAR:
     {
-#ifdef __WIN32OS2__
-        static BOOL bDbcsLead = FALSE;
-        static CHAR cDbcsLead = 0;
-
         WCHAR charW;
         DPRINTF_EDIT_MSG32("WM_CHAR");
 
@@ -898,15 +894,8 @@ static LRESULT WINAPI EditWndProc_common( HWND hwnd, UINT msg,
             charW = wParam;
         else
         {
-            WCHAR charA = bDbcsLead ? (( wParam << 8 ) | cDbcsLead ) : wParam;
-            int   size = bDbcsLead ? 2 : 1;
-
-            bDbcsLead = !bDbcsLead && IsDBCSLeadByte( wParam );
-
-            if( bDbcsLead )
-                cDbcsLead = wParam;
-            else
-                MultiByteToWideChar(CP_ACP, 0, (LPSTR)&charA, size, &charW, 1);
+            CHAR charA = wParam;
+            MultiByteToWideChar(CP_ACP, 0, &charA, 1, &charW, 1);
         }
 
         if ((charW == VK_RETURN || charW == VK_ESCAPE) && es->hwndListBox)
@@ -915,28 +904,7 @@ static LRESULT WINAPI EditWndProc_common( HWND hwnd, UINT msg,
               SendMessageW(GetParent(hwnd), WM_KEYDOWN, charW, 0);
            break;
         }
-        if( !bDbcsLead )
-            EDIT_WM_Char(hwnd, es, charW);
-#else
-		WCHAR charW;
-		DPRINTF_EDIT_MSG32("WM_CHAR");
-
-		if(unicode)
-		    charW = wParam;
-		else
-		{
-		    CHAR charA = wParam;
-		    MultiByteToWideChar(CP_ACP, 0, &charA, 1, &charW, 1);
-		}
-
-		if ((charW == VK_RETURN || charW == VK_ESCAPE) && es->hwndListBox)
-		{
-		   if (SendMessageW(GetParent(hwnd), CB_GETDROPPEDSTATE, 0, 0))
-		      SendMessageW(GetParent(hwnd), WM_KEYDOWN, charW, 0);
-		   break;
-		}
-		EDIT_WM_Char(hwnd, es, charW);
-#endif
+        EDIT_WM_Char(hwnd, es, charW);
         break;
     }
 
@@ -1015,6 +983,30 @@ static LRESULT WINAPI EditWndProc_common( HWND hwnd, UINT msg,
         DPRINTF_EDIT_MSG32("WM_HSCROLL");
         result = EDIT_WM_HScroll(hwnd, es, LOWORD(wParam), SHIWORD(wParam));
         break;
+
+#ifdef __WIN32OS2__
+    case WM_IME_CHAR:
+    {
+        WCHAR charW;
+        DPRINTF_EDIT_MSG32("WM_IME_CHAR");
+
+        if(unicode)
+            charW = wParam;
+        else
+        {
+            // always DBCS char
+            CHAR charA[ 2 ];
+
+            charA[ 0 ] = ( CHAR )( wParam >> 8 );
+            charA[ 1 ] = ( CHAR )wParam;
+
+            MultiByteToWideChar( CP_ACP, 0, ( LPSTR )charA, 2, ( LPWSTR )&charW, 1);
+        }
+
+        EDIT_WM_Char(hwnd, es, charW);
+        break;
+    }
+#endif
 
     case WM_KEYDOWN:
         DPRINTF_EDIT_MSG32("WM_KEYDOWN");

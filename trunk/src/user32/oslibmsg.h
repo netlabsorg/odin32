@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.h,v 1.21 2003-07-28 11:27:45 sandervl Exp $ */
+/* $Id: oslibmsg.h,v 1.22 2003-08-08 13:30:19 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -146,6 +146,10 @@ BOOL OSLibPostMessageDirect(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam);
 #define WINWM_SYSCHAR               0x0106
 #define WINWM_SYSDEADCHAR           0x0107
 #define WINWM_KEYLAST               0x0108
+#define WINWM_IME_STARTCOMPOSITION  0x010D
+#define WINWM_IME_ENDCOMPOSITION    0x010E
+#define WINWM_IME_COMPOSITION       0x010F
+#define WINWM_IME_KEYLAST           0x010F
 #define WINWM_INITDIALOG            0x0110
 #define WINWM_COMMAND               0x0111
 #define WINWM_SYSCOMMAND            0x0112
@@ -194,6 +198,15 @@ BOOL OSLibPostMessageDirect(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam);
 #define WINWM_MDISETMENU            0x0230
 #define WINWM_DROPFILES             0x0233
 #define WINWM_MDIREFRESHMENU        0x0234
+#define WINWM_IME_SETCONTEXT        0x0281
+#define WINWM_IME_NOTIFY            0x0282
+#define WINWM_IME_CONTROL           0x0283
+#define WINWM_IME_COMPOSITIONFULL   0x0284
+#define WINWM_IME_SELECT            0x0285
+#define WINWM_IME_CHAR              0x0286
+#define WINWM_IME_REQUEST           0x0288
+#define WINWM_IME_KEYDOWN           0x0290
+#define WINWM_IME_KEYUP             0x0291
 #define WINWM_CUT                   0x0300
 #define WINWM_COPY                  0x0301
 #define WINWM_PASTE                 0x0302

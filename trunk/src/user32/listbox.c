@@ -2991,27 +2991,6 @@ static LRESULT WINAPI ListBoxWndProc_common( HWND hwnd, UINT msg,
         return LISTBOX_HandleKeyDown( hwnd, descr, wParam );
     case WM_CHAR:
     {
-#ifdef __WIN32OS2__
-        static BOOL bDbcsLead = FALSE;
-        static CHAR cDbcsLead = 0;
-
-        WCHAR charW;
-        if(unicode)
-            charW = (WCHAR)wParam;
-        else
-        {
-            WCHAR charA = bDbcsLead ? (( wParam << 8 ) | cDbcsLead ) : wParam;
-            int   size = bDbcsLead ? 2 : 1;
-
-            bDbcsLead = !bDbcsLead && IsDBCSLeadByte( wParam );
-
-            if( bDbcsLead )
-                cDbcsLead = wParam;
-            else
-                MultiByteToWideChar(CP_ACP, 0, (LPSTR)&charA, size, &charW, 1);
-        }
-        return bDbcsLead ? 0 : LISTBOX_HandleChar( hwnd, descr, charW );
-#else
         WCHAR charW;
         if(unicode)
             charW = (WCHAR)wParam;
@@ -3021,8 +3000,28 @@ static LRESULT WINAPI ListBoxWndProc_common( HWND hwnd, UINT msg,
             MultiByteToWideChar(CP_ACP, 0, &charA, 1, &charW, 1);
         }
         return LISTBOX_HandleChar( hwnd, descr, charW );
-#endif
     }
+
+#ifdef __WIN32OS2__
+    case WM_IME_CHAR:
+    {
+        WCHAR charW;
+
+        if(unicode)
+            charW = (WCHAR)wParam;
+        else
+        {
+            // always DBCS char
+            CHAR charA[ 2 ];
+
+            charA[ 0 ] = ( CHAR )( wParam >> 8 );
+            charA[ 1 ] = ( CHAR )wParam;
+
+            MultiByteToWideChar( CP_ACP, 0, ( LPSTR )charA, 2, ( LPWSTR )&charW, 1);
+        }
+        return LISTBOX_HandleChar( hwnd, descr, charW );
+    }
+#endif
 
     case WM_SYSTIMER:
         return LISTBOX_HandleSystemTimer( hwnd, descr );
