@@ -796,10 +796,14 @@ ODINFUNCTION3(LPITEMIDLIST, ILAppend,
 ODINFUNCTION1(DWORD, ILFree,
               LPITEMIDLIST, pidl)
 {
+#ifdef __WIN32OS2__
+  return HEAP_free(pidl);
+#else
   if(!pidl) 
     return FALSE;
   SHFree(pidl);
   return TRUE;
+#endif
 }
 /*************************************************************************
  * ILGlobalFree [SHELL32.156]
