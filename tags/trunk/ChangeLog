@@ -1,4 +1,25 @@
- /* $Id: ChangeLog,v 1.1148 2000-09-27 22:27:38 bird Exp $ */
+ /* $Id: ChangeLog,v 1.1149 2000-09-28 03:31:56 bird Exp $ */
+
+ 2000-09-29: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - INCLUDE\pdwin32.*:
+                -First attempt on new makefile style.
+                 (See advapi32 or dllentry for an example.)
+                -Made .tools and .post compiler specific (Watcom adoptions).
+                -Watcom WMAKE likes the new makefile style, but only in UNIX
+                 mode. So, you'll have to specify "-u" at the commandline.
+                 Nothing links yet.
+                 Anyone know if wlink would except .DEF-files? If not I'll
+                 have to write a .DEF -> wlink options converter (trivial
+                 since we has a class for parsing .DEF-files).
+                -Changed object directories for VAC36 and Watcom:
+                    debug.vac36, release.vac36, debug.wat, release.wat.
+                 But before you are able to compile much, you'll have to
+                 manually create the global directories
+                 bin\debug.vac36 and bin\release.vac36  or
+                 bin\debug.wat and bin\release.wat.
+    - ADVAPI32: New makefile style example.
+    - DLLENTRY: New makefile style. Watcom object file (but not very useful).
+      (don't hope I've broken anything)
 
  2000-09-28: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - INCLUDE\pdwin32.wat.tools:
