@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.81 2000-05-28 16:45:11 sandervl Exp $
+; $Id: kernel32.def,v 1.82 2000-06-23 19:02:36 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -141,7 +141,6 @@ EXPORTS
      RestoreThunkLock           = _RestoreThunkLock@4             @49
      _ConfirmWin16Lock          = __ConfirmWin16Lock@0            @96
 
-;;     WrongComctl32@0 @36
      AddAtomA                   = _AddAtomA@4                      @50
      AddAtomW                   = _AddAtomW@4                      @102
 ;    AddConsoleAliasA           = _AddConsoleAliasA@??             @2    ;NT
