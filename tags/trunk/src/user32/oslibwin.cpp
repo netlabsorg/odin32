@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.142 2003-04-11 15:22:33 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.143 2003-04-23 18:00:58 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -126,7 +126,7 @@ HWND OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle, ULONG dwOSFrameStyle
 //******************************************************************************
 //Note: Also check OSLibSetWindowStyle when changing this!!
 //******************************************************************************
-BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle, 
+BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle,
                           ULONG *OSFrameStyle)
 {
   *OSWinStyle   = 0;
@@ -143,7 +143,7 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle,
         *OSWinStyle |= WS_TOPMOST;
 
   //WS_EX_TOOLWINDOW is incompatible with the OS2Look (titlebar thinner + smaller font)
-  if(fOS2Look && !(dwExStyle & WS_EX_TOOLWINDOW_W)) 
+  if(fOS2Look && !(dwExStyle & WS_EX_TOOLWINDOW_W))
   {
       if((dwStyle & WS_CAPTION_W) == WS_CAPTION_W) {
           *OSFrameStyle = FCF_TITLEBAR;
@@ -167,8 +167,8 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibWinPositionFrameControls(HWND hwndFrame, RECTLOS2 *pRect, DWORD dwStyle, 
-                                   DWORD dwExStyle, HICON hSysMenuIcon, 
+BOOL OSLibWinPositionFrameControls(HWND hwndFrame, RECTLOS2 *pRect, DWORD dwStyle,
+                                   DWORD dwExStyle, HICON hSysMenuIcon,
                                    BOOL drawCloseButton, BOOL fClassIcon)
 {
   SWP  swp[3];
@@ -189,7 +189,7 @@ BOOL OSLibWinPositionFrameControls(HWND hwndFrame, RECTLOS2 *pRect, DWORD dwStyl
       minmaxwidth  = WinQuerySysValue(HWND_DESKTOP, SV_CXMINMAXBUTTON);
       minmaxheight = WinQuerySysValue(HWND_DESKTOP, SV_CYMINMAXBUTTON);
   }
-  
+
   if(fOS2Look == OS2_APPEARANCE_SYSMENU) {
       //Note: If no class icon *and* WS_EX_DLGMODALFRAME -> no system menu!!
       //      --> TODO
@@ -235,7 +235,7 @@ BOOL OSLibWinPositionFrameControls(HWND hwndFrame, RECTLOS2 *pRect, DWORD dwStyl
           if((dwStyle & WS_MAXIMIZEBOX_W)) {
               swp[i].cx -= minmaxwidth/2;
           }
-          //there is no close button in warp 3 and sometimes we do not 
+          //there is no close button in warp 3 and sometimes we do not
           //have close button as well
           if((dwStyle & WS_SYSMENU_W) && !fVersionWarp3 && drawCloseButton) {
               swp[i].cx -= minmaxwidth/2;
@@ -577,7 +577,7 @@ HWND OSLibWinWindowFromPoint(HWND hwnd, PVOID ppoint)
 }
 
 //******************************************************************************
-//@PF This is exactly that weird message PM sends when we maximize window from 
+//@PF This is exactly that weird message PM sends when we maximize window from
 //icon - this coordinates NEVER surface later and this combination of SWP
 //commands is useless, yet it starts the correct reaction of maximiztion from
 //icon state
@@ -594,7 +594,7 @@ BOOL OSLibWinMinimizeWindow(HWND hwnd)
 {
  /* @@PF The reason for this weird minimize algorithm is that we are not fully
     using PM for minimization. I.e. we respect all PM messages yet we do mess
-    so much with some messages that minimization is based partly on vodoo. 
+    so much with some messages that minimization is based partly on vodoo.
     That is if you try minimize and deactivate in one call it will fail.
     Here we deactivate yourselves and give focus to next window that is
     on desktop, this func also works with MDI */
@@ -634,7 +634,7 @@ BOOL OSLibWinGetBorderSize(HWND hwnd, OSLIBPOINT *pointl)
 BOOL OSLibWinSetIcon(HWND hwnd, HANDLE hIcon)
 {
     ULONG hIconOS2 = GetOS2Icon(hIcon);
-    if(hIconOS2) 
+    if(hIconOS2)
        return (BOOL) WinSendMsg(hwnd, WM_SETICON, (MPARAM)hIconOS2, 0);
     return FALSE;
 }
@@ -995,7 +995,7 @@ void OSLibWinShowTaskList(HWND hwndFrame)
 //******************************************************************************
 //PF: PM Logic approved by numerous testcases shows this:
 //There is no other way to tweak FID_MINMAX without deleting it
-//Controls are created with size 0,0, invisible and should be immediately 
+//Controls are created with size 0,0, invisible and should be immediately
 //positioned. MINMAX control can't function properly without FID_SYSMENU
 //control if it is present, so we need to recreate BOTH controls.
 //Currently OSLibSetWindowStyle checks for changes and actually do the job
@@ -1005,13 +1005,13 @@ void OSLibWinShowTaskList(HWND hwndFrame)
 //first delete old then create new - all other variants create new and
 //leave old, WinCreateFrameControls can't tweak anything.
 
-void OSLibSetWindowStyle(HWND hwndFrame, HWND hwndClient, ULONG dwStyle, 
+void OSLibSetWindowStyle(HWND hwndFrame, HWND hwndClient, ULONG dwStyle,
                          ULONG dwExStyle, ULONG dwOldWindowsStyle)
 {
     ULONG dwWinStyle;
     ULONG dwOldWinStyle;
 
-    int checksum, checksum2; 
+    int checksum, checksum2;
     DWORD dest_tid, dest_pid;
 
     static int minmaxwidth  = 0;
@@ -1023,7 +1023,7 @@ void OSLibSetWindowStyle(HWND hwndFrame, HWND hwndClient, ULONG dwStyle,
 
     dest_tid = GetWindowThreadProcessId(OS2ToWin32Handle(hwndClient) , &dest_pid );
 
-    if (dest_tid != GetCurrentThreadId()) 
+    if (dest_tid != GetCurrentThreadId())
     {
         dprintf(("OSLibSetWindowStyle: Redirecting Change Frame controls to another thread"));
         WinSendMsg(hwndFrame, WIN32APP_CHNGEFRAMECTRLS, (MPARAM)dwStyle, (MPARAM)dwOldWindowsStyle);
@@ -1033,7 +1033,7 @@ void OSLibSetWindowStyle(HWND hwndFrame, HWND hwndClient, ULONG dwStyle,
         minmaxwidth  = WinQuerySysValue(HWND_DESKTOP, SV_CXMINMAXBUTTON);
         minmaxheight = WinQuerySysValue(HWND_DESKTOP, SV_CYMINMAXBUTTON);
     }
-  
+
     if (hwndClient)
     {
       //client window:
@@ -1080,7 +1080,7 @@ void OSLibSetWindowStyle(HWND hwndFrame, HWND hwndClient, ULONG dwStyle,
     if(dwStyle & WS_MAXIMIZE_W) {
          dwWinStyle |= WS_MAXIMIZED;
     }
-    else 
+    else
       dwWinStyle &= ~WS_MAXIMIZED;
 
     //WS_EX_TOOLWINDOW is incompatible with the OS2Look (titlebar thinner + smaller font)
@@ -1095,7 +1095,7 @@ void OSLibSetWindowStyle(HWND hwndFrame, HWND hwndClient, ULONG dwStyle,
                 OSFrameStyle = FCF_TITLEBAR;
             }
             else
-              WinQueryWindowPos(WinWindowFromID(hwndFrame, FID_TITLEBAR), &rc1);            
+              WinQueryWindowPos(WinWindowFromID(hwndFrame, FID_TITLEBAR), &rc1);
 
             if((dwStyle & WS_SYSMENU_W) && !(dwExStyle & WS_EX_TOOLWINDOW_W))
             {
@@ -1125,23 +1125,23 @@ void OSLibSetWindowStyle(HWND hwndFrame, HWND hwndClient, ULONG dwStyle,
               if(dwStyle & WS_SYSMENU_W)
               {
                   OSFrameStyle |= FCF_CLOSEBUTTON;
-                  OSFrameStyle |= FCF_SYSMENU;                   
+                  OSFrameStyle |= FCF_SYSMENU;
                   totalwidth += minmaxwidth/2;
                   dprintf(("close button"));
               }
             }
        }
-       else 
+       else
        {
-          if (WinWindowFromID(hwndFrame, FID_TITLEBAR)) 
+          if (WinWindowFromID(hwndFrame, FID_TITLEBAR))
               WinDestroyWindow(WinWindowFromID(hwndFrame, FID_TITLEBAR));
        }
 
        if (checksum != checksum2)
        {
-         if (WinWindowFromID(hwndFrame, FID_SYSMENU)) 
+         if (WinWindowFromID(hwndFrame, FID_SYSMENU))
              WinDestroyWindow(WinWindowFromID(hwndFrame, FID_SYSMENU));
-         if (WinWindowFromID(hwndFrame, FID_MINMAX)) 
+         if (WinWindowFromID(hwndFrame, FID_MINMAX))
              WinDestroyWindow(WinWindowFromID(hwndFrame, FID_MINMAX));
        }
 
@@ -1153,7 +1153,7 @@ void OSLibSetWindowStyle(HWND hwndFrame, HWND hwndClient, ULONG dwStyle,
 
             GetWindowTextA(OS2ToWin32Handle(hwndClient), buffer, sizeof(buffer));
             WinCreateFrameControls(hwndFrame, &FCData, buffer );
- 
+
             if (totalwidth != rc3.cx)
             {
               rc3.cx =  totalwidth;
@@ -1161,10 +1161,10 @@ void OSLibSetWindowStyle(HWND hwndFrame, HWND hwndClient, ULONG dwStyle,
               rc1.cx = rc1.cx + totalwidth;
               rc3.x = rc3.x + totalwidth;
             }
-             
-            WinSetWindowPos(WinWindowFromID(hwndFrame, FID_MINMAX),0,rc3.x,rc3.y,rc3.cx,rc3.cy, SWP_MOVE | SWP_SIZE | SWP_SHOW);     
-            WinSetWindowPos(WinWindowFromID(hwndFrame, FID_SYSMENU),0,rc2.x,rc2.y,rc2.cx,rc2.cy, SWP_MOVE | SWP_SIZE | SWP_SHOW);     
-            WinSetWindowPos(WinWindowFromID(hwndFrame, FID_TITLEBAR),0,rc1.x,rc1.y,rc1.cx,rc1.cy, SWP_MOVE | SWP_SIZE | SWP_SHOW);     
+
+            WinSetWindowPos(WinWindowFromID(hwndFrame, FID_MINMAX),0,rc3.x,rc3.y,rc3.cx,rc3.cy, SWP_MOVE | SWP_SIZE | SWP_SHOW);
+            WinSetWindowPos(WinWindowFromID(hwndFrame, FID_SYSMENU),0,rc2.x,rc2.y,rc2.cx,rc2.cy, SWP_MOVE | SWP_SIZE | SWP_SHOW);
+            WinSetWindowPos(WinWindowFromID(hwndFrame, FID_TITLEBAR),0,rc1.x,rc1.y,rc1.cx,rc1.cy, SWP_MOVE | SWP_SIZE | SWP_SHOW);
 
             if (WinQueryActiveWindow(HWND_DESKTOP) == hwndFrame)
               WinSendMsg(WinWindowFromID(hwndFrame, FID_TITLEBAR), TBM_SETHILITE, (MPARAM)1, 0);
@@ -1344,3 +1344,53 @@ void OSLibWinLockVisibleRegions(BOOL fLock)
 }
 //******************************************************************************
 //******************************************************************************
+
+/* 'Private' PM property stuff. */
+PVOID APIENTRY WinQueryProperty(HWND hwnd, PCSZ pszNameOrAtom);
+PVOID APIENTRY WinRemoveProperty(HWND hwnd, PCSZ pszNameOrAtom);
+BOOL  APIENTRY WinSetProperty(HWND hwnd, PCSZ pszNameOrAtom, PVOID pvData, ULONG ulFlags);
+
+/**
+ * Set Property.
+ * @returns Success indicator.
+ * @param   hwnd    Window the property is associated with.
+ * @param   psz     The property atom or name.
+ * @param   pv      Property value.
+ * @param   fFlags  Flags. Use 0.
+ */
+BOOL    OSLibSetProperty(HWND hwnd, const char *psz, void *pv, unsigned fFlags)
+{
+    USHORT selFS = RestoreOS2FS();
+    BOOL fRet = WinSetProperty(hwnd, psz, pv, fFlags);
+    SetFS(selFS);
+    return fRet;
+}
+
+/**
+ * Get Property.
+ * @returns Property value.
+ * @param   hwnd    Window the property is associated with.
+ * @param   psz     The property atom or name.
+ */
+void *  OSLibQueryProperty(HWND hwnd, const char *psz)
+{
+    USHORT selFS = RestoreOS2FS();
+    void *pvRet = WinQueryProperty(hwnd, psz);
+    SetFS(selFS);
+    return pvRet;
+}
+
+/**
+ * Remove Property.
+ * @returns Property value.
+ * @param   hwnd    Window the property is associated with.
+ * @param   psz     The property atom or name.
+ */
+void *  OSLibRemoveProperty(HWND hwnd, const char *psz)
+{
+    USHORT selFS = RestoreOS2FS();
+    void *pvRet = WinRemoveProperty(hwnd, psz);
+    SetFS(selFS);
+    return pvRet;
+}
+

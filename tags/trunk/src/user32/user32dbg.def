@@ -1,4 +1,4 @@
-; $Id: user32dbg.def,v 1.11 2003-03-03 16:36:26 sandervl Exp $
+; $Id: user32dbg.def,v 1.12 2003-04-23 18:00:59 sandervl Exp $
 
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
 DESCRIPTION 'Odin32 System Dll - User32'
@@ -35,6 +35,10 @@ IMPORTS
 
 ;;;; Present in WGSS50
 ;;;;    _GpiQueryDCData             = PMGPI.665
+
+    WinQueryProperty  = PMMERGE.5450
+    WinRemoveProperty = PMMERGE.5451
+    WinSetProperty    = PMMERGE.5452
 
 EXPORTS
     ActivateKeyboardLayout     = _DbgActivateKeyboardLayout@8   @1
