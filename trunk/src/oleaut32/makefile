@@ -1,4 +1,4 @@
-#/* $Id: makefile,v 1.3 1999-09-02 16:23:18 sandervl Exp $ */
+#/* $Id: makefile,v 1.4 1999-09-08 15:23:22 davidr Exp $ */
 #
 # PD-Win32 API 
 #
@@ -8,6 +8,7 @@
 PDWIN32_INCLUDE = ..\..\include
 PDWIN32_LIB = ..\..\lib
 PDWIN32_BIN = ..\..\bin
+PDWIN32_TOOLS = ..\..\tools\bin
 
 
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
@@ -20,7 +21,10 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 TARGET = oleaut32
 
 OBJS =  oleaut32.obj guid.obj \
-	initterm.obj olefont.obj typelib.obj variant.obj ole2disp.obj parsedt.obj safearray.obj
+	initterm.obj olefont.obj \
+	typelib.obj variant.obj \
+	ole2disp.obj parsedt.obj \
+	safearray.obj stubs.obj
 
 all: $(TARGET).dll $(TARGET).lib
 
@@ -31,15 +35,18 @@ $(TARGET).dll: $(OBJS) $(TARGET).def
               $(PDWIN32_LIB)\advapi32.lib \
               $(PDWIN32_LIB)\kernel32.lib \
               $(PDWIN32_LIB)\user32.lib \
+              $(PDWIN32_LIB)\ole32.lib \
               $(PDWIN32_LIB)\gdi32.lib \
                $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
 	$(CP) $@ $(PDWIN32_BIN)
 
 
-$(TARGET).lib: $(TARGET).dll
-	$(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET).dll
-	$(CP) $@ $(PDWIN32_LIB)
+$(TARGET).lib: $(TARGET)exp.def
+        $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
+        $(CP) $@ $(PDWIN32_LIB)
 
+$(TARGET)exp.def: $(TARGET).def
+        $(IMPDEF) $** $@
 
 oleaut32.obj:	oleaut32.cpp oleaut32.h
 initterm.obj:	initterm.cpp
@@ -50,6 +57,7 @@ olefont.obj:    olefont.cpp oleaut32.h
 parsedt.obj:    parsedt.cpp parsedt.h
 safearray.obj:  safearray.cpp oleaut32.h
 guid.obj:       guid.cpp
+stubs.obj:      stubs.cpp
 
 clean:
 	$(RM) *.obj *.lib *.dll *~ *.map *.pch	
