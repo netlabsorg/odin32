@@ -1,4 +1,21 @@
- /* $Id: ChangeLog,v 1.1164 2000-10-03 05:50:34 bird Exp $ */
+ /* $Id: ChangeLog,v 1.1165 2000-10-03 17:30:19 sandervl Exp $ */
+
+ 2000-10-03: Sander van Leeuwen <sandervl@xs4all.nl>
+    - Include\uniconv.h
+                FS wrappers for Unicode api
+    - KERNEL32: Calculate cpu speed and set HARDWARE\DESCRIPTION\System\CentralProcessor\x\~Mhz key
+                Added GetFileType method to conin/out which return FILE_TYPE_CHAR
+                Create new keys during installation:
+                [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Cdfs]
+                [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Cdrom]
+                Fix for failure during DLL_PROCESS_ATTACH for LX system
+                dlls (pe loader). Didn't fail properly before.
+    - USER32:   Fix for EDIT_WM_Char (couldn't type in numbers anymore)
+                EnumDisplaySettingsA accepts negative indices
+
+ 2000-10-03: Michal Necasek <mike@mendelu.cz>
+    - KERNEL32: Fix for HMGetFileType. Must return FILE_TYPE_CHAR for standard
+                handles (in/out/error)
 
  2000-10-03: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Watcom makefiles:
@@ -16,8 +33,8 @@
                 incomplete. It's better to use the native windows version.
     - KERNEL32: Ported Wine's LoadModule (previously used Open32)
                 Changed version apis
-                You can now tell Odin to tell applications it's either
-                Windows 98 or Windows NT 4.0 (default = NT40)
+                You can now tell Odin to pretend to be Windows 98 or 
+                Windows NT 4.0 (default = NT40)
                 Odin.ini:
                 [WinVersion]
                 Version=Win98
