@@ -126,6 +126,35 @@ typedef DWORD DPID, *LPDPID;
 #define DPID_SERVERPLAYER       1           /* DPID of the server player */
 #define DPID_UNKNOWN            0xFFFFFFFF  /* Player ID is unknown */
 
+#define DPOPEN_OPENSESSION          0x00000001
+#define DPOPEN_CREATESESSION        0x00000002
+
+#define DPSEND_GUARANTEE            0x00000001
+#define DPSEND_HIGHPRIORITY         0x00000002
+#define DPSEND_TRYONCE              0x00000004
+
+#define DPRECEIVE_ALL               0x00000001
+#define DPRECEIVE_TOPLAYER          0x00000002
+#define DPRECEIVE_FROMPLAYER        0x00000004
+#define DPRECEIVE_PEEK              0x00000008
+
+#define DPCAPS_NAMESERVICE          0x00000001
+#define DPCAPS_NAMESERVER           0x00000002
+#define DPCAPS_GUARANTEED           0x00000004
+
+#define DPENUMSESSIONS_AVAILABLE    0x00000001
+#define DPENUMSESSIONS_ALL          0x00000002
+#define DPENUMSESSIONS_PREVIOUS     0x00000004
+
+#define DPENUMPLAYERS_ALL           0x00000000
+#define DPENUMPLAYERS_PREVIOUS      0x00000004
+#define DPENUMPLAYERS_LOCAL         0x00000008
+#define DPENUMPLAYERS_REMOTE        0x00000010
+#define DPENUMPLAYERS_GROUP         0x00000020
+#define DPENUMPLAYERS_SESSION       0x00000080
+
+#define DPESC_TIMEDOUT              0x00000001
+
 /*  DPCAPS -  Used to obtain the capabilities of a DirectPlay object */
 typedef struct tagDPCAPS
 {
@@ -310,14 +339,14 @@ typedef const DPCREDENTIALS *LPCDPCREDENTIALS;
 
 
 
-typedef BOOL (CALLBACK* LPDPENUMDPCALLBACKW)(
+typedef BOOL (* CALLBACK  LPDPENUMDPCALLBACKW)(
     LPGUID      lpguidSP,
     LPWSTR      lpSPName,
     DWORD       dwMajorVersion,
     DWORD       dwMinorVersion,
     LPVOID      lpContext);
 
-typedef BOOL (CALLBACK* LPDPENUMDPCALLBACKA)(
+typedef BOOL (* CALLBACK  LPDPENUMDPCALLBACKA)(
     LPGUID      lpguidSP,
     LPSTR       lpSPName,       /* ptr to str w/ driver description */
     DWORD       dwMajorVersion, /* Major # of driver spec in lpguidSP */
@@ -327,7 +356,7 @@ typedef BOOL (CALLBACK* LPDPENUMDPCALLBACKA)(
 typedef const GUID   *LPCGUID;
 typedef const DPNAME *LPCDPNAME;
 
-typedef BOOL (CALLBACK* LPDPENUMCONNECTIONSCALLBACK)(
+typedef BOOL (* CALLBACK  LPDPENUMCONNECTIONSCALLBACK)(
     LPCGUID     lpguidSP,
     LPVOID      lpConnection,
     DWORD       dwConnectionSize,
@@ -335,7 +364,7 @@ typedef BOOL (CALLBACK* LPDPENUMCONNECTIONSCALLBACK)(
     DWORD       dwFlags,
     LPVOID      lpContext);
 
-typedef BOOL (CALLBACK* LPDPENUMSESSIONSCALLBACK)(
+typedef BOOL (* CALLBACK  LPDPENUMSESSIONSCALLBACK)(
     LPDPSESSIONDESC lpDPSessionDesc,
     LPVOID      lpContext,
     LPDWORD     lpdwTimeOut,
@@ -344,23 +373,25 @@ typedef BOOL (CALLBACK* LPDPENUMSESSIONSCALLBACK)(
 
 extern HRESULT WINAPI DirectPlayEnumerateA( LPDPENUMDPCALLBACKA, LPVOID );
 extern HRESULT WINAPI DirectPlayEnumerateW( LPDPENUMDPCALLBACKW, LPVOID );
+#define DirectPlayEnumerate WINELIB_NAME_AW(DirectPlayEnumerate)
+
 extern HRESULT WINAPI DirectPlayCreate( LPGUID lpGUID, LPDIRECTPLAY2 *lplpDP, IUnknown *pUnk);
 
-typedef BOOL (CALLBACK* LPDPENUMPLAYERSCALLBACK)(
+typedef BOOL (* CALLBACK  LPDPENUMPLAYERSCALLBACK)(
     DPID   dpId,
     LPSTR  lpFriendlyName,
     LPSTR  lpFormalName,
     DWORD  dwFlags,
     LPVOID          lpContext );
 
-typedef BOOL (CALLBACK* LPDPENUMPLAYERSCALLBACK2)(
+typedef BOOL (* CALLBACK  LPDPENUMPLAYERSCALLBACK2)(
     DPID            dpId,
     DWORD           dwPlayerType,
     LPCDPNAME       lpName,
     DWORD           dwFlags,
     LPVOID          lpContext );
 
-typedef BOOL (CALLBACK* LPDPENUMSESSIONSCALLBACK2)(
+typedef BOOL (* CALLBACK  LPDPENUMSESSIONSCALLBACK2)(
     LPCDPSESSIONDESC2   lpThisSD,
     LPDWORD             lpdwTimeOut,
     DWORD               dwFlags,

@@ -1,4 +1,4 @@
-/* $Id: commctrl.h,v 1.34 2000-08-06 09:30:47 sandervl Exp $ */
+/* $Id: commctrl.h,v 1.35 2000-08-31 12:46:02 sandervl Exp $ */
 /*
  * Common controls definitions
  */
@@ -2263,10 +2263,14 @@ typedef struct tagNMTVGETINFOTIPW
 #define TreeView_GetItemW(hwnd, pitem) \
  (BOOL)SendMessageW((hwnd), TVM_GETITEMA, 0, (LPARAM) (TVITEMA *)(pitem))
 
+#define TreeView_GetItem   WINELIB_NAME_AW(TreeView_GetItem)
+
 #define TreeView_SetItemA(hwnd, pitem) \
  (BOOL)SendMessageA((hwnd), TVM_SETITEMA, 0, (LPARAM)(const TVITEMA *)(pitem))
 #define TreeView_SetItemW(hwnd, pitem) \
  (BOOL)SendMessageW((hwnd), TVM_SETITEMA, 0, (LPARAM)(const TVITEMA *)(pitem))
+
+#define TreeView_SetItem   WINELIB_NAME_AW(TreeView_SetItem)
 
 #define TreeView_EditLabel(hwnd, hitem) \
     (HWND)SendMessageA((hwnd), TVM_EDITLABEL, 0, (LPARAM)(HTREEITEM)(hitem))
