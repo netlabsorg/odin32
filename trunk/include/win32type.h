@@ -41,9 +41,9 @@ typedef       unsigned long   ULONG;
 typedef       unsigned long*  PULONG;
 typedef const unsigned long*  PCULONG;
 
-typedef       unsigned int    INT32;
-typedef       unsigned int *  PINT32;
-typedef const unsigned int *  PCINT32;
+typedef         signed int    INT32;
+typedef         signed int *  PINT32;
+typedef const   signed int *  PCINT32;
 
 typedef       unsigned int    UINT32;
 typedef       unsigned int *  PUINT32;
@@ -184,7 +184,13 @@ typedef DWORDLONG_W     *PDWORDLONG_W;
 // boolean
 typedef unsigned long   BOOL32;
 typedef unsigned short  BOOL16;
+
+#ifdef __FORCE_BOOL_AS_INT__
+typedef int             BOOL;
+#else
 typedef unsigned long   BOOL;
+#endif
+
 
 #ifndef FALSE
 #define FALSE 0

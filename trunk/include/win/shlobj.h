@@ -311,6 +311,9 @@ HRESULT WINAPI SHGetDataFromIDListA(LPSHELLFOLDER psf, LPCITEMIDLIST pidl, int n
 HRESULT WINAPI SHGetDataFromIDListW(LPSHELLFOLDER psf, LPCITEMIDLIST pidl, int nFormat, LPVOID pv, int cb);
 #define  SHGetDataFromIDList WINELIB_NAME_AW(SHGetDataFromIDList)
 
+
+#define REGSTR_PATH_SPECIAL_FOLDERS    REGSTR_PATH_EXPLORER TEXT("\\Shell Folders")
+
 BOOL WINAPI SHGetSpecialFolderPathA (HWND hwndOwner,LPSTR szPath,DWORD csidl,BOOL bCreate);
 BOOL WINAPI SHGetSpecialFolderPathW (HWND hwndOwner,LPWSTR szPath,DWORD csidl,BOOL bCreate);
 #define  SHGetSpecialFolderPath WINELIB_NAME_AW(SHGetSpecialFolderPath)
