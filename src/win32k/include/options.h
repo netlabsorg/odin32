@@ -1,4 +1,4 @@
-/* $Id: options.h,v 1.10.4.2 2000-08-15 06:16:04 bird Exp $
+/* $Id: options.h,v 1.10.4.3 2000-08-28 22:42:38 bird Exp $
  *
  * Options.
  *
@@ -46,7 +46,7 @@
 #define DEFAULT_OPTION_ASSIGMENTS                           \
             {FALSE,                 /* fQuiet        */     \
             OUTPUT_COM2,            /* usCom         */     \
-            TRUE,                   /* fLogging      */     \
+            FALSE,                  /* fLogging      */     \
             KF_UNI,                 /* fKernel       */     \
             ~0UL,                   /* ulBuild       */     \
             (unsigned short)~0,     /* usVerMajor    */     \
