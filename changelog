@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2366 2002-11-26 14:49:25 sandervl Exp $ */
+/* $Id: changelog,v 1.2367 2002-11-27 13:54:18 sandervl Exp $ */
+
+ 2002-11-27: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Fixed CopyBitmap (CopyImage, IMAGE_BITMAP)
 
  2002-11-26: Sander van Leeuwen <sandervl@innotek   >
     - GDI32:    o Added debug wrappers for all exports
