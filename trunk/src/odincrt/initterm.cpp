@@ -67,7 +67,15 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
    switch (ulFlag) {
       case 0 :
-
+         {
+         #ifdef WITH_KLIB
+         /*
+          * We need to reserve memory for the executable image
+          * before initiating any heaps. Lets do reserve 32MBs
+          */
+         PVOID pvReserved = NULL;
+         DosAllocMem(&pvReserved, 32*1024*1024, PAG_READ);
+         #endif
          /*******************************************************************/
          /* The C run-time environment initialization function must be      */
          /* called before any calls to C run-time functions that are not    */
@@ -98,7 +106,13 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
                 return 0UL;
             pPIB->pib_ultype = 3;
          #endif
+
+         #ifdef WITH_KLIB
+         /* cleanup - hacking is done */
+         DosFreeMem(pvReserved);
+         #endif
          break;
+         }
       case 1 :
          break;
       default  :
