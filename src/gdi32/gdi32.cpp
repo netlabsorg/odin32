@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.27 1999-12-30 11:21:30 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.28 1999-12-30 18:51:48 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -196,23 +196,23 @@ int WIN32API GetObjectW( HGDIOBJ arg1, int arg2, void *  arg3)
 //******************************************************************************
 DWORD WIN32API GetObjectType( HGDIOBJ arg1)
 {
-    dprintf(("GDI32: GetObjectType\n"));
+    dprintf2(("GDI32: GetObjectType\n"));
     return O32_GetObjectType(arg1);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API DeleteObject(HANDLE hObj)
 {
-    dprintf(("GDI32: DeleteObject\n"));
+    dprintf(("GDI32: DeleteObject %x", hObj));
     DIBSection::deleteSection((DWORD)hObj);
     return O32_DeleteObject(hObj);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API DeleteDC( HDC arg1)
+BOOL WIN32API DeleteDC( HDC hdc)
 {
-    dprintf(("GDI32: DeleteDC\n"));
-    return O32_DeleteDC(arg1);
+    dprintf(("GDI32: DeleteDC %x", hdc));
+    return O32_DeleteDC(hdc);
 }
 //******************************************************************************
 //******************************************************************************
@@ -2189,7 +2189,6 @@ HBITMAP WIN32API CreateDIBSection( HDC hdc, BITMAPINFO *pbmi, UINT iUsage,
     LOGPALETTE tmpPal = { 0x300,1,{0,0,0,0}};
     HPALETTE hpalCur, hpalTmp;
     DIBSection *dsect = new DIBSection((WINBITMAPINFOHEADER *)&pbmi->bmiHeader, (DWORD)res, fFlip);
-    dprintf(("Constructor returned\n"));
 
     if(NULL!=dsect)
     {
