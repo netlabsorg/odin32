@@ -1,3 +1,4 @@
+/* $Id: winaspi32.cpp,v 1.5 2000-07-18 17:12:04 bird Exp $ */
 /*
  * WNASPI routines
  *
@@ -266,10 +267,10 @@ DWORD WINAPI GetASPI32SupportInfo()
 
   if( fGainDrvAccess( FALSE, &hmtxDriver) ) // Do nonblocking call for info
   {
-    
+
     if(aspi->init(65535)==TRUE)
     {
-        
+
         bNumDrv = aspi->getNumHosts();
         brc = SS_COMP;
         rc = RegOpenKeyA ( HKEY_LOCAL_MACHINE,
@@ -367,7 +368,7 @@ DWORD __cdecl SendASPI32Command(LPSRB lpSRB)
             memset(lpSRB,0,sizeof(SRB_HaInquiry));
             memcpy( lpSRB,
                     &aspi->SRBlock,
-                    sizeof(SRB_HaInquiry)-4 ); 
+                    sizeof(SRB_HaInquiry)-4 );
             // FIXME: I'dont know why in OS/2->ha_unique are filled with 0
             // Hackmode ON ======
             lpSRB->inquiry.HA_Unique[6]  = 0x01; // transfer only 64KB
@@ -379,7 +380,7 @@ DWORD __cdecl SendASPI32Command(LPSRB lpSRB)
           case SC_GET_DEV_TYPE:
             rc=aspi->getDeviceType(lpSRB->devtype.SRB_HaId,lpSRB->devtype.SRB_Target, lpSRB->devtype.SRB_Lun);
             dwRC = lpSRB->devtype.SRB_Status = aspi->SRBlock.status;
-            lpSRB->devtype.SRB_DeviceType = aspi->SRBlock.u.dev.devtype;            
+            lpSRB->devtype.SRB_DeviceType = aspi->SRBlock.u.dev.devtype;
             break;
 
           case SC_EXEC_SCSI_CMD:
