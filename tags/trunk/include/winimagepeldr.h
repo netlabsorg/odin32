@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.h,v 1.4 1999-11-11 19:08:50 sandervl Exp $ */
+/* $Id: winimagepeldr.h,v 1.5 1999-11-22 20:36:53 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -13,6 +13,12 @@
 #define __WINIMAGEPELDR_H__
 
 #include <winimagebase.h>
+
+#define SINGLE_PAGE 		0  //commit single page
+#define COMPLETE_SECTION 	1  //commit entire section
+#define SECTION_PAGES		2  //commit default nr of pages
+
+#define DEFAULT_NR_PAGES        16 //default nr of pages to commit during exception
 
 //SvL: To load a dll/exe for i.e. getting a single resource (GetVersionSize/Resource)
 #define REAL_LOAD		0
@@ -40,12 +46,13 @@
 #define MAX_SECTION             64  /*PLF Mon  98-02-09 23:47:16*/
 
 typedef struct {
-  char  *rawdata;
+  ULONG  rawoffset;
   ULONG  rawsize;
   ULONG  virtaddr;
   ULONG  realvirtaddr;  //as allocated in OS/2
   ULONG  virtualsize;
   ULONG  type;
+  ULONG  pageflags;
 } Section;
 
 typedef struct {
@@ -61,6 +68,7 @@ typedef struct {
 } OrdExport;
 
 class Win32DllBase;
+class Win32MemMap;
 
 class Win32PeLdrImage : public virtual Win32ImageBase
 {
@@ -73,19 +81,24 @@ virtual ~Win32PeLdrImage();
         //address)
 virtual BOOL  init(ULONG reservedMem);
 
-protected:
-        void StoreImportByOrd(Win32DllBase *WinDll, ULONG ordinal, ULONG impaddr);
-        void StoreImportByName(Win32DllBase *WinDll, char *impname, ULONG impaddr);
+        //commits image page(s) when an access violation exception is dispatched
+	BOOL  commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPageCmd = SECTION_PAGES);
 
-        void  addSection(ULONG type, char *rawdata, ULONG rawsize, ULONG virtaddress, ULONG virtsize);
+protected:
+        void  StoreImportByOrd(Win32DllBase *WinDll, ULONG ordinal, ULONG impaddr);
+        void  StoreImportByName(Win32DllBase *WinDll, char *impname, ULONG impaddr);
+
+        void  addSection(ULONG type, ULONG rawoffset, ULONG rawsize, ULONG virtaddress, ULONG virtsize);
         BOOL  allocSections(ULONG reservedMem);
         BOOL  allocFixedMem(ULONG reservedMem);
      Section *findSection(ULONG type);
      Section *findSectionByAddr(ULONG addr);
+     Section *findSectionByOS2Addr(ULONG addr);
+     Section *findPreviousSectionByOS2Addr(ULONG addr);
 
-        BOOL  storeSections(char *win32file);
         BOOL  setMemFlags();
         BOOL  setFixups(PIMAGE_BASE_RELOCATION prel);
+        BOOL  setFixups(ULONG virtAddress, ULONG size);
         void  AddOff32Fixup(ULONG fixupaddr);
         void  AddOff16Fixup(ULONG fixupaddr, BOOL fHighFixup);
 
@@ -109,8 +122,12 @@ protected:
         Section               section[MAX_SECTION];
 
 	ULONG                 loadType;
-        HANDLE                fImgMapping;
 
+	HFILE                 hFile;
+
+        PIMAGE_BASE_RELOCATION pFixups;
+
+        Win32MemMap          *memmap;
 private:
 };
 

@@ -1,4 +1,4 @@
-/* $Id: winimagebase.h,v 1.3 1999-10-05 13:48:40 sandervl Exp $ */
+/* $Id: winimagebase.h,v 1.4 1999-11-22 20:36:53 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -14,9 +14,7 @@
 
 #include <peexe.h>
 
-#ifdef DEBUG
 #define MAGIC_WINIMAGE          0x11223344
-#endif
 
 #ifndef CCHMAXPATH
 #define CCHMAXPATH 260
@@ -124,8 +122,9 @@ private:
 //     (which is actually the address of the win32 module)
 typedef struct 
 {
+  ULONG           magic1; 
   Win32ImageBase *image;
-  ULONG           magic; 
+  ULONG           magic2; 
 } WINIMAGE_LOOKUP;
 
 #define WINIMAGE_LOOKUPADDR(a)	(WINIMAGE_LOOKUP *)((ULONG)a + PAGE_SIZE - sizeof(WINIMAGE_LOOKUP))
