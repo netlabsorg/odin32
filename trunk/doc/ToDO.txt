@@ -1,4 +1,4 @@
-/* $Id: ToDO.txt,v 1.11 2001-01-22 18:26:08 sandervl Exp $ */
+/* $Id: ToDO.txt,v 1.12 2001-02-04 13:54:25 sandervl Exp $ */
 
 To Do list for ODIN:
 
@@ -28,6 +28,11 @@ JW              Improve CRTDLL and MSVCRT as this is one major show stopper
 SvL             Remove GPI32 calls from the original FS: macros and replace
                 them with ODINFUNCTION wrappers. Internally call to ODIN_xxx
                 GPI functions to get much better performance.
+
+NOONE           long2ShortName in kernel32\oslibdos.cpp
+NOONE           FindFirstFileA -> use 64 bits OS/2 api
+NOONE           Out of process COM objects (OLE). Important because new
+                InstallShield installers use this feature!
 
 NOONE           WINSPOOL: Implement remaining apis and complete existing
                           The Win32 printer api resembles the PM spool API quite a lot!
