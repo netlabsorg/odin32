@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.4 1999-06-02 16:00:38 cbratschi Exp $ */
+/* $Id: thread.cpp,v 1.5 1999-06-19 17:58:33 sandervl Exp $ */
 
 /*
  *
@@ -16,6 +16,7 @@
 #include "thread.h"
 #include "except.h"
 #include "misc.h"
+#include <wprocess.h>
 
 static DWORD OPEN32API Win32ThreadProc(LPVOID lpData);
 
@@ -23,11 +24,11 @@ static DWORD OPEN32API Win32ThreadProc(LPVOID lpData);
 //******************************************************************************
 //******************************************************************************
 HANDLE WIN32API CreateThread(LPSECURITY_ATTRIBUTES lpsa, DWORD cbStack,
-                   LPTHREAD_START_ROUTINE lpStartAddr,
-                   LPVOID lpvThreadParm, DWORD fdwCreate,
-                   LPDWORD lpIDThread)
+                             LPTHREAD_START_ROUTINE lpStartAddr,
+                             LPVOID lpvThreadParm, DWORD fdwCreate,
+                             LPDWORD lpIDThread)
 {
- Win32Thread *winthread = new Win32Thread(lpStartAddr, lpvThreadParm);
+ Win32Thread *winthread = new Win32Thread(lpStartAddr, lpvThreadParm, fdwCreate);
 
   if(winthread == 0)
     return(0);
@@ -121,14 +122,18 @@ VOID WIN32API ExitThread(DWORD exitcode)
   dprintf(("ExitThread (%08xu)\n",
            exitcode));
 
+#ifdef WIN32_TIBSEL
+  DestroyTIB();
+#endif
   O32_ExitThread(exitcode);
 }
 //******************************************************************************
 //******************************************************************************
-Win32Thread::Win32Thread(LPTHREAD_START_ROUTINE pUserCallback, LPVOID lpData)
+Win32Thread::Win32Thread(LPTHREAD_START_ROUTINE pUserCallback, LPVOID lpData, DWORD dwFlags)
 {
   lpUserData = lpData;
   pCallback  = pUserCallback;
+  this->dwFlags = dwFlags;
 }
 //******************************************************************************
 //******************************************************************************
@@ -152,10 +157,12 @@ static DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
 
   delete me;    //only called once
 
-  dprintf(("Win32ThreadProc %d\n",
-           GetCurrentThreadId()));
+  dprintf(("Win32ThreadProc %d\n", GetCurrentThreadId()));
 
+#ifdef WIN32_TIBSEL
+#else
   ReplaceExceptionHandler();
+#endif
   return(winthread(userdata));
 }
 //******************************************************************************

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 1999-06-17 21:52:01 phaller Exp $
+# $Id: makefile,v 1.7 1999-06-19 17:58:32 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -124,6 +124,7 @@ fileio.obj: fileio.cpp \
 
 thread.OBJ: \
     .\thread.cpp \
+    $(PDWIN32_INCLUDE)\wprocess.h \
     thread.h
 
 heap.OBJ: \
@@ -171,6 +172,7 @@ wprocess.OBJ: \
     $(PDWIN32_INCLUDE)\windll.h \
     $(PDWIN32_INCLUDE)\winimage.h \
     $(PDWIN32_INCLUDE)\versionos2.h \
+    $(PDWIN32_INCLUDE)\wprocess.h \
     console2.h \
     cio.h \
     os2util.h
