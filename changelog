@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1820 2001-11-08 14:51:14 phaller Exp $ */
+/* $Id: changelog,v 1.1821 2001-11-08 18:31:17 sandervl Exp $ */
+
+ 2001-11-08: Sander van Leeuwen <sandervl@xs4all.nl>
+    - COMCTL32: o Ported latest Wine property sheet control
+                  (fixes some, but not all problems in CVP)
 
  2001-11-08: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o first shot at parport support
