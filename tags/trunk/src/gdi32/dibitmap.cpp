@@ -1,4 +1,4 @@
-/* $Id: dibitmap.cpp,v 1.37 2003-01-03 21:42:55 sandervl Exp $ */
+/* $Id: dibitmap.cpp,v 1.38 2003-01-04 18:18:05 sandervl Exp $ */
 
 /*
  * GDI32 dib & bitmap code
@@ -365,6 +365,7 @@ int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLine
     int nrlines;
     pDCData pHps;  
     HDC hdcMem;
+    DWORD biCompression;
 
     dprintf(("GDI32: GetDIBits %x %x %d %d %x %x (biBitCount %d) %d", hdc, hBitmap, uStartScan, cScanLines, lpvBits, lpbi, lpbi->bmiHeader.biBitCount, uUsage));
 
@@ -381,23 +382,55 @@ int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLine
     }
     else  hdcMem = hdc;
 
-    if(lpbi->bmiHeader.biHeight < 0) {
-        //NOTE: workaround for WGSS bug; remove when fixed
+    if(lpvBits) {
+        biCompression = lpbi->bmiHeader.biCompression;
+    }
+
+    //If the app wants bitmap data and upside down, then flip image
+    if(lpvBits && lpbi->bmiHeader.biHeight < 0 && (lpbi->bmiHeader.biCompression == BI_RGB ||
+       lpbi->bmiHeader.biCompression == BI_BITFIELDS)) 
+    {
+        INT rc = -1;
+        long lLineByte;
         LONG height = lpbi->bmiHeader.biHeight;
 
-        nrlines = O32_GetDIBits(hdcMem, hBitmap, uStartScan, cScanLines, lpvBits, lpbi, uUsage);
+        lpbi->bmiHeader.biHeight = -lpbi->bmiHeader.biHeight;
 
-        //NOTE: workaround for WGSS bug; remove when fixed
+        lLineByte = DIB_GetDIBWidthBytes(lpbi->bmiHeader.biWidth, lpbi->bmiHeader.biBitCount);
+
+        dprintf(("flip bitmap (negative height)"));
+        char *pNewBits = (char *)malloc( lLineByte * cScanLines );
+        if(pNewBits) {
+            nrlines = O32_GetDIBits(hdcMem, hBitmap, uStartScan, cScanLines, pNewBits, lpbi, uUsage);
+
+            unsigned char *pbSrc = (unsigned char *)pNewBits + lLineByte * (cScanLines - 1);
+            unsigned char *pbDst = (unsigned char *)lpvBits;
+            for(int y = 0; y < cScanLines; y++) {
+                memcpy( pbDst, pbSrc, lLineByte );
+                pbDst += lLineByte;
+                pbSrc -= lLineByte;
+            }
+            free(pNewBits);
+        }
+        else DebugInt3();
+ 
+        //restore height
         lpbi->bmiHeader.biHeight = height;
     }
     else {
         nrlines = O32_GetDIBits(hdcMem, hBitmap, uStartScan, cScanLines, lpvBits, lpbi, uUsage);
     }
 
+    if(lpvBits) {
+        //WGSS always sets it to BI_RGB
+        lpbi->bmiHeader.biCompression = biCompression;
+    }
+
     if(pHps->isMemoryPS)
         DeleteDC(hdcMem);
 
-    if(lpvBits) {
+    //Only return bitfields info if the app wants it
+    if(lpvBits && lpbi->bmiHeader.biCompression == BI_BITFIELDS) {
         // set proper color masks (only if lpvBits not NULL)
         switch(lpbi->bmiHeader.biBitCount) {
         case 15:
@@ -425,10 +458,7 @@ int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLine
             ((DWORD*)(lpbi->bmiColors))[2] = DEFAULT_24BPP_BLUE_MASK;
             break;
         }
-        if(lpbi->bmiHeader.biCompression == BI_RGB && lpbi->bmiHeader.biBitCount > 8) {
-            lpbi->bmiHeader.biCompression = BI_BITFIELDS;
-            dprintf(("BI_BITFIELDS: %x %x %x", ((DWORD*)(lpbi->bmiColors))[0], ((DWORD*)(lpbi->bmiColors))[1], ((DWORD*)(lpbi->bmiColors))[2]));
-        }
+        dprintf(("BI_BITFIELDS: %x %x %x", ((DWORD*)(lpbi->bmiColors))[0], ((DWORD*)(lpbi->bmiColors))[1], ((DWORD*)(lpbi->bmiColors))[2]));
     }
     if(nrlines && lpvBits && lpbi->bmiHeader.biBitCount == 16 && ((DWORD*)(lpbi->bmiColors))[1] == RGB555_GREEN_MASK)
     {//RGB 555?
