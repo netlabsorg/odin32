@@ -1,10 +1,13 @@
-/* $Id: changelog,v 1.2422 2003-01-04 13:59:34 sandervl Exp $ */
+/* $Id: changelog,v 1.2423 2003-01-04 18:17:47 sandervl Exp $ */
 
  2003-01-04: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Corrected drawing of menubar in OS/2 L&F mode (when highlighted)
                 o Fixed handling of single ALT to select menu
                 o Use different color for highlighted menus (OS/2 L&F)
     - GDI32:    o Removed broken handling of TA_RIGHT in TextOut
+                o Flip bitmap in GetDIBits if height is negative
+                o Only return bitfield data in GetDIBits if compression set
+                  to BI_BITFIELDS (and lpvBits is not NULL)
 
  2003-01-03: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Merged Rewind menu control
