@@ -1,4 +1,4 @@
-/* $Id: BldLevelInf.cmd,v 1.1 2000-12-16 23:33:15 bird Exp $
+/* $Id: BldLevelInf.cmd,v 1.2 2001-01-08 20:15:51 bird Exp $
  *
  * Adds a Description string to the given .def-file.
  * Fills in default values; like build time and host.
@@ -117,7 +117,7 @@ do while (sArgs <> '')
                 sVersion        = sValue;
 
             /* Otherwise it's an illegal option */
-            otherwise:
+            otherwise
                 say 'invalid option:' substr(sArgs, 1, 2);
                 call syntax;
                 exit(2);
