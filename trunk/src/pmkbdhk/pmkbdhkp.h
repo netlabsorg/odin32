@@ -1,4 +1,4 @@
-/* $Id: pmkbdhkp.h,v 1.1 2001-10-22 23:13:39 phaller Exp $ */
+/* $Id: pmkbdhkp.h,v 1.2 2001-10-23 13:56:27 achimha Exp $ */
 /*
  * Window Menu wrapper functions for OS/2
  *
@@ -7,14 +7,6 @@
  *
  *
  *      Copyright (C) 1999-2000 Ulrich M”ller.
- *      This program is free software; you can redistribute it and/or modify
- *      it under the terms of the GNU General Public License as published by
- *      the Free Software Foundation, in version 2 as it comes in the COPYING
- *      file of the XWorkplace main distribution.
- *      This program is distributed in the hope that it will be useful,
- *      but WITHOUT ANY WARRANTY; without even the implied warranty of
- *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *      GNU General Public License for more details.
  */
  
 #ifndef __PMKBDHK_PRIVATE_H__
