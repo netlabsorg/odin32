@@ -1,4 +1,4 @@
-/* $Id: win32wnd.cpp,v 1.1 1999-09-15 23:19:01 sandervl Exp $ */
+/* $Id: win32wnd.cpp,v 1.2 1999-10-28 12:00:37 sandervl Exp $ */
 /*
  * Win32 Window Class for OS/2
  *
@@ -20,8 +20,8 @@
 #include <stdarg.h>
 #include <assert.h>
 #include <misc.h>
-#include <heapstring.h>
 #include <win32wnd.h>
+#include <heapstring.h>
 #include <spy.h>
 #include "wndmsg.h"
 #include "hooks.h"
@@ -33,7 +33,6 @@
 #include <winres.h>
 #include "syscolor.h"
 #include "win32wndhandle.h"
-#include "heapshared.h"
 
 
 //******************************************************************************

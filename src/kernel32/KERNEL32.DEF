@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.46 1999-10-27 12:38:44 phaller Exp $
+; $Id: KERNEL32.DEF,v 1.47 1999-10-28 12:01:11 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -1039,3 +1039,6 @@ EXPORTS
     PROFILE_GetOdinIniBool     = _PROFILE_GetOdinIniBool@12       @1268
     PROFILE_SetOdinIniBool     = _PROFILE_SetOdinIniBool@12       @1269
     PROFILE_SaveOdinIni        = _PROFILE_SaveOdinIni@0           @1270
+
+;shared memory allocation
+    _smalloc__FUi                                                 @1271

@@ -1,4 +1,4 @@
-/* $Id: gen_object.h,v 1.1 1999-09-15 23:18:50 sandervl Exp $ */
+/* $Id: gen_object.h,v 1.2 1999-10-28 12:00:33 sandervl Exp $ */
 /*
  * Generic Object Class for OS/2
  *
@@ -8,7 +8,7 @@
 #ifndef __GEN_OBJECT_H__
 #define __GEN_OBJECT_H__
 
-#include "heapshared.h"
+#include <heapshared.h>
 
 #define OBJTYPE_WINDOW 		0
 #define OBJTYPE_DIALOG		1
@@ -42,7 +42,7 @@ static	 void  leaveMutex(DWORD objType);
 #ifdef __DEBUG_ALLOC__
 	void *operator new(size_t size, const char *filename, size_t lineno)
 	{
-		return _umalloc(sharedHeap, size);
+		return _smalloc(size);
 	}
 	void operator delete(void *location, const char *filename, size_t lineno)
 	{
@@ -51,7 +51,7 @@ static	 void  leaveMutex(DWORD objType);
 #else
 	void *operator new(size_t size)
 	{
-		return _umalloc(sharedHeap, size);
+		return _smalloc(size);
 	}
 	void operator delete(void *location)
 	{
