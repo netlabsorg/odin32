@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.108 2001-10-09 05:18:04 phaller Exp $ */
+/* $Id: window.cpp,v 1.109 2001-10-10 14:39:58 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -329,8 +329,7 @@ ODINFUNCTION1(HWND, SetActiveWindow,
 //******************************************************************************
 //Note: does not set last error if no parent (verified in NT4, SP6)
 //******************************************************************************
-ODINFUNCTION1(HWND, GetParent,
-              HWND, hwnd)
+HWND WIN32API GetParent(HWND hwnd)
 {
   Win32BaseWindow *window;
   HWND             hwndParent;
@@ -669,8 +668,7 @@ ODINFUNCTION2(BOOL, GetWindowPlacement,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(BOOL, IsWindow,
-              HWND, hwnd)
+BOOL WIN32API IsWindow(HWND hwnd)
 {
   Win32BaseWindow *window;
 
@@ -706,8 +704,7 @@ ODINFUNCTION1(BOOL, IsWindowEnabled,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(BOOL, IsWindowVisible,
-              HWND, hwnd)
+BOOL WIN32API IsWindowVisible(HWND hwnd)
 {
   BOOL             ret;
   HWND             hwndParent;
