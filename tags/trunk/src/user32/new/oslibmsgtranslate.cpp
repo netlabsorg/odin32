@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.6 2000-01-07 17:38:47 cbratschi Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.7 2000-01-08 16:47:46 cbratschi Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -101,6 +101,31 @@ USHORT virtualKeyTable [66] = {
 
 //******************************************************************************
 //******************************************************************************
+ULONG GetMouseKeyState()
+{
+  ULONG keystate;
+
+  if(WinGetKeyState(HWND_DESKTOP, VK_BUTTON1) & 0x8000)
+    keystate |= MK_LBUTTON_W;
+  if(WinGetKeyState(HWND_DESKTOP, VK_BUTTON2) & 0x8000)
+    keystate |= MK_RBUTTON_W;
+  if(WinGetKeyState(HWND_DESKTOP, VK_BUTTON3) & 0x8000)
+    keystate |= MK_MBUTTON_W;
+  if(WinGetKeyState(HWND_DESKTOP, VK_SHIFT) & 0x8000)
+    keystate |= MK_SHIFT_W;
+  if(WinGetKeyState(HWND_DESKTOP, VK_CTRL) & 0x8000)
+    keystate |= MK_CONTROL_W;
+
+  return keystate;
+}
+//******************************************************************************
+//******************************************************************************
+LONG IsNCMouseMsg(Win32BaseWindow *win32wnd)
+{
+  return ((win32wnd->getLastHitTestVal() != HTCLIENT_W) && (WinQueryCapture(HWND_DESKTOP) != win32wnd->getOS2WindowHandle()));
+}
+//******************************************************************************
+//******************************************************************************
 BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode, BOOL fMsgRemoved)
 {
   Win32BaseWindow *win32wnd = 0;
@@ -140,7 +165,7 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
       case WM_BUTTON3UP:
       case WM_BUTTON3DBLCLK:
         //WM_NC*BUTTON* is posted when the cursor is in a non-client area of the window
-        if(win32wnd->lastHitTestVal != HTCLIENT_W) {
+        if (IsNCMouseMsg(win32wnd)) {
             winMsg->message = WINWM_NCLBUTTONDOWN + (os2Msg->msg - WM_BUTTON1DOWN);
             winMsg->wParam  = win32wnd->lastHitTestVal;
             winMsg->lParam  = MAKELONG(winMsg->pt.x, winMsg->pt.y); //screen coordinates
@@ -152,6 +177,7 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
             ClientPoint.y   = mapOS2ToWin32Y(os2Msg->hwnd,win32wnd->getOS2WindowHandle(),point.y);
 
             winMsg->message = WINWM_LBUTTONDOWN + (os2Msg->msg - WM_BUTTON1DOWN);
+            winMsg->wParam  = GetMouseKeyState();
             winMsg->lParam  = MAKELONG(ClientPoint.x, ClientPoint.y); //client coordinates
         }
 
@@ -170,32 +196,19 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
 
       case WM_MOUSEMOVE:
       {
-        ULONG keystate = 0, setcursormsg = WINWM_MOUSEMOVE;
-
-        if(WinGetKeyState(HWND_DESKTOP, VK_BUTTON1) & 0x8000)
-            keystate |= MK_LBUTTON_W;
-        if(WinGetKeyState(HWND_DESKTOP, VK_BUTTON2) & 0x8000)
-            keystate |= MK_RBUTTON_W;
-        if(WinGetKeyState(HWND_DESKTOP, VK_BUTTON3) & 0x8000)
-            keystate |= MK_MBUTTON_W;
-        if(WinGetKeyState(HWND_DESKTOP, VK_SHIFT) & 0x8000)
-            keystate |= MK_SHIFT_W;
-        if(WinGetKeyState(HWND_DESKTOP, VK_CTRL) & 0x8000)
-            keystate |= MK_CONTROL_W;
-
         //WM_NCMOUSEMOVE is posted when the cursor moves into a non-client area of the window
-        if(win32wnd->lastHitTestVal != HTCLIENT_W)
+        if(IsNCMouseMsg(win32wnd))
         {
-          setcursormsg   = WINWM_NCMOUSEMOVE;
-          winMsg->wParam = (WPARAM)win32wnd->lastHitTestVal;
-          winMsg->lParam = MAKELONG(winMsg->pt.x,winMsg->pt.y);
+          winMsg->message = WINWM_NCMOUSEMOVE;
+          winMsg->wParam  = (WPARAM)win32wnd->lastHitTestVal;
+          winMsg->lParam  = MAKELONG(winMsg->pt.x,winMsg->pt.y);
         } else
         {
-          winMsg->wParam = (WPARAM)keystate;
+          winMsg->message = WINWM_MOUSEMOVE;
+          winMsg->wParam  = GetMouseKeyState();
           winMsg->lParam  = MAKELONG(SHORT1FROMMP(os2Msg->mp1),mapOS2ToWin32Y(win32wnd->getOS2FrameWindowHandle(),win32wnd->getOS2WindowHandle(),SHORT2FROMMP(os2Msg->mp1)));
         }
         //OS/2 Window coordinates -> Win32 Window coordinates
-        winMsg->message = setcursormsg;
         return TRUE;
       }
 
@@ -331,7 +344,7 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
     case WM_BUTTON3UP:
     case WM_BUTTON3DBLCLK:
         //WM_NC*BUTTON* is posted when the cursor is in a non-client area of the window
-        if(win32wnd->lastHitTestVal != HTCLIENT_W) {
+        if(IsNCMouseMsg(win32wnd)) {
             winMsg->message = WINWM_NCLBUTTONDOWN + (os2Msg->msg - WM_BUTTON1DOWN);
             winMsg->wParam  = win32wnd->lastHitTestVal;
             winMsg->lParam  = MAKELONG(winMsg->pt.x, winMsg->pt.y); //screen coordinates
@@ -343,6 +356,7 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
             ClientPoint.y   = mapY(os2Msg->hwnd,point.y);
 
             winMsg->message = WINWM_LBUTTONDOWN + (os2Msg->msg - WM_BUTTON1DOWN);
+            winMsg->wParam  = GetMouseKeyState();
             winMsg->lParam  = MAKELONG(ClientPoint.x, ClientPoint.y); //client coordinates
         }
 
@@ -361,32 +375,19 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
 
     case WM_MOUSEMOVE:
     {
-        ULONG keystate = 0, setcursormsg = WINWM_MOUSEMOVE;
-
-        if(WinGetKeyState(HWND_DESKTOP, VK_BUTTON1) & 0x8000)
-            keystate |= MK_LBUTTON_W;
-        if(WinGetKeyState(HWND_DESKTOP, VK_BUTTON2) & 0x8000)
-            keystate |= MK_RBUTTON_W;
-        if(WinGetKeyState(HWND_DESKTOP, VK_BUTTON3) & 0x8000)
-            keystate |= MK_MBUTTON_W;
-        if(WinGetKeyState(HWND_DESKTOP, VK_SHIFT) & 0x8000)
-            keystate |= MK_SHIFT_W;
-        if(WinGetKeyState(HWND_DESKTOP, VK_CTRL) & 0x8000)
-            keystate |= MK_CONTROL_W;
-
         //WM_NCMOUSEMOVE is posted when the cursor moves into a non-client area of the window
-        if(win32wnd->lastHitTestVal != HTCLIENT_W)
+        if(IsNCMouseMsg(win32wnd))
         {
-          setcursormsg   = WINWM_NCMOUSEMOVE;
-          winMsg->wParam = (WPARAM)win32wnd->lastHitTestVal;
-          winMsg->lParam = MAKELONG(winMsg->pt.x,winMsg->pt.y);
+          winMsg->message = WINWM_NCMOUSEMOVE;
+          winMsg->wParam  = (WPARAM)win32wnd->lastHitTestVal;
+          winMsg->lParam  = MAKELONG(winMsg->pt.x,winMsg->pt.y);
         } else
         {
-          winMsg->wParam = (WPARAM)keystate;
+          winMsg->message = WINWM_MOUSEMOVE;
+          winMsg->wParam  = GetMouseKeyState();
           winMsg->lParam  = MAKELONG(SHORT1FROMMP(os2Msg->mp1),mapY(win32wnd,SHORT2FROMMP(os2Msg->mp1)));
         }
         //OS/2 Window coordinates -> Win32 Window coordinates
-        winMsg->message = setcursormsg;
         break;
     }
 

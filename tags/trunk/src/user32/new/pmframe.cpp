@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.7 2000-01-07 17:38:47 cbratschi Exp $ */
+/* $Id: pmframe.cpp,v 1.8 2000-01-08 16:47:47 cbratschi Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -209,6 +209,28 @@ VOID FrameTrackFrame(Win32BaseWindow *win32wnd,DWORD flags)
   WinSendMsg(win32wnd->getOS2FrameWindowHandle(),WM_TRACKFRAME,(MPARAM)flags,(MPARAM)0);
 }
 //******************************************************************************
+//******************************************************************************
+VOID FrameUpdateChildPositions(HWND hwnd)
+{
+  HENUM henum;
+  HWND hchild;
+  RECTL rectl;
+
+  henum = WinBeginEnumWindows(hwnd);
+  while ((hchild = WinGetNextWindow(henum)) != NULLHANDLE)
+  {
+    Win32BaseWindow *child = Win32BaseWindow::GetWindowFromOS2FrameHandle(hchild);
+
+    if (child)
+    {
+      WinQueryWindowRect(child->getOS2FrameWindowHandle(),&rectl);
+      mapOS2ToWin32Rect(child->getOS2FrameWindowHandle(),OSLIB_HWND_DESKTOP,(PRECTLOS2)&rectl,child->getWindowRect());
+      FrameUpdateChildPositions(child->getOS2WindowHandle());
+    }
+  }
+  WinEndEnumWindows(henum);
+}
+//******************************************************************************
 //Win32 frame message handler
 //******************************************************************************
 MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
@@ -272,22 +294,35 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
       dprintf(("Frame size: %d %d",win32wnd->getWindowWidth(),win32wnd->getWindowHeight()));
       win32wnd->MsgFormatFrame();
       //CB: todo: use result for WM_CALCVALIDRECTS
-      mapWin32ToOS2Rect(WinQueryWindow(hwnd,QW_PARENT),win32wnd->getClientRectPtr(),(PRECTLOS2)&rect);
-      WinMapWindowPoints(WinQueryWindow(hwnd,QW_PARENT),hwnd,(PPOINTL)&rect,2);
-      dprintf(("New client position: %d %d %d %d",rect.xLeft,rect.yBottom,rect.xRight,rect.yTop));
+      mapWin32ToOS2Rect(WinQueryWindow(hwnd,QW_PARENT),hwnd,win32wnd->getClientRectPtr(),(PRECTLOS2)&rect);
       swpClient = &pswp[ccount-1];
       swpClient->x = rect.xLeft;
       swpClient->y = rect.yBottom;
       swpClient->cx = rect.xRight-rect.xLeft;
       swpClient->cy = rect.yTop-rect.yBottom;
+      dprintf(("New client position: x=%d y=%d w=%d h=%d",swpClient->x,swpClient->y,swpClient->cx,swpClient->cy));
       RestoreOS2TIB();
       return (MRESULT)ccount;
     }
 
     case WM_MINMAXFRAME:
+    {
+      PSWP swp = (PSWP)mp1;
+
+      if (!win32wnd->IsWindowCreated()) goto RunDefFrameProc;
       dprintf(("PMFRAME: WM_MINMAXFRAME %x",hwnd));
-      //CB: todo
+      if ((swp->fl & SWP_MAXIMIZE) == SWP_MAXIMIZE)
+      {
+        win32wnd->setStyle((win32wnd->getStyle() & ~WS_MINIMIZE_W) | WS_MAXIMIZE_W);
+      } else if ((swp->fl & SWP_MINIMIZE) == SWP_MINIMIZE)
+      {
+        win32wnd->setStyle((win32wnd->getStyle() & ~WS_MAXIMIZE_W) | WS_MINIMIZE_W);
+      } else if ((swp->fl & SWP_RESTORE) == SWP_RESTORE)
+      {
+        win32wnd->setStyle(win32wnd->getStyle() & ~(WS_MINIMIZE_W | WS_MAXIMIZE_W));
+      }
       goto RunDefFrameProc;
+    }
 
     case WM_QUERYBORDERSIZE:
       goto RunDefFrameProc;
@@ -302,11 +337,6 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
     case WM_BUTTON3UP:
     case WM_BUTTON3DBLCLK:
     {
-        SWP swp;
-
-        WinQueryWindowPos(hwnd,&swp);
-        if ((swp.fl & SWP_MINIMIZE) == SWP_MINIMIZE)
-          goto RunDefFrameProc;
         if (win32wnd->IsWindowCreated())
         {
           win32wnd->MsgButton(pWinMsg);
@@ -329,11 +359,6 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
 
     case WM_MOUSEMOVE:
     {
-        SWP swp;
-
-        WinQueryWindowPos(hwnd,&swp);
-        if ((swp.fl & SWP_MINIMIZE) == SWP_MINIMIZE)
-          goto RunDefFrameProc;
         //OS/2 Window coordinates -> Win32 Window coordinates
         if (win32wnd->IsWindowCreated())
           win32wnd->MsgMouseMove(pWinMsg);
@@ -344,11 +369,6 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
     case WM_HITTEST:
     {
       DWORD res;
-      SWP swp;
-
-      WinQueryWindowPos(hwnd,&swp);
-      if ((swp.fl & SWP_MINIMIZE) == SWP_MINIMIZE)
-        goto RunDefFrameProc;
 
       // Only send this message if the window is enabled
       if (!win32wnd->IsWindowCreated())
@@ -372,12 +392,9 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
 
     case WM_PAINT:
     {
-        SWP swp;
-
-        WinQueryWindowPos(hwnd,&swp);
-        if ((swp.fl & SWP_MINIMIZE) == SWP_MINIMIZE)
-          goto RunDefFrameProc;
         dprintf(("PMFRAME: WM_PAINT"));
+        if (win32wnd->getStyle() & WS_MINIMIZE_W)
+         goto RunDefFrameProc;
         if (win32wnd->IsWindowCreated())
           win32wnd->MsgNCPaint();
         goto RunDefWndProc;
@@ -415,7 +432,6 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
            break;
 
         WinQueryWindowPos(hwnd, &swpOld);
-
         if(pswp->fl & (SWP_MOVE | SWP_SIZE)) {
             if (win32wnd->isChild()) {
                 if(win32wnd->getParent()) {
@@ -483,12 +499,18 @@ PosChangedEnd:
         //update the client rect
         RECTL rectl;
 
+        WinQueryWindowRect(win32wnd->getOS2FrameWindowHandle(),&rectl);
+        mapOS2ToWin32Rect(win32wnd->getOS2FrameWindowHandle(),OSLIB_HWND_DESKTOP,(PRECTLOS2)&rectl,win32wnd->getWindowRect());
         WinQueryWindowRect(win32wnd->getOS2WindowHandle(),&rectl);
         mapOS2ToWin32Rect(win32wnd->getOS2WindowHandle(),WinQueryWindow(hwnd,QW_PARENT),(PRECTLOS2)&rectl,win32wnd->getClientRectPtr());
 
         //calls WM_FORMATFRAME if SWP_SIZE is set
         RestoreOS2TIB();
         rc = OldFrameProc(hwnd,msg,mp1,mp2);
+        SetWin32TIB();
+        //update child positions: rectWindow is in window coordinates
+        FrameUpdateChildPositions(win32wnd->getOS2WindowHandle());
+        RestoreOS2TIB();
         return rc;
     }
 

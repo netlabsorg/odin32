@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.24 2000-01-07 17:38:47 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.25 2000-01-08 16:47:48 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -699,7 +699,7 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
   rectWindow.top = cs->y;
   rectWindow.bottom = cs->y+cs->cy;
   rectClient = rectWindow; //dummy client rect
-  if (getParent()) MapWindowPoints(getParent()->getWindowHandle(),0,(PPOINT)&rectWindow,2);
+  if (getParent()) mapWin32Rect(getParent()->getOS2WindowHandle(),OSLIB_HWND_DESKTOP,&rectWindow);
   /* Send the WM_CREATE message
    * Perhaps we shouldn't allow width/height changes as well.
    * See p327 in "Internals".
@@ -717,13 +717,14 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
         rectWindow.right = cs->x+cs->cx;
         rectWindow.top = cs->y;
         rectWindow.bottom = cs->y+cs->cy;
-        if (getParent()) MapWindowPoints(getParent()->getWindowHandle(),0,(PPOINT)&rectWindow,2);
+        if (getParent()) mapWin32Rect(getParent()->getOS2WindowHandle(),OSLIB_HWND_DESKTOP,&rectWindow);
         OffsetRect(&rectWindow, maxPos.x - rectWindow.left, maxPos.y - rectWindow.top);
         rectClient = rectWindow;
-        if (getParent()) MapWindowPoints(0,getParent()->getWindowHandle(),(PPOINT)&rectClient,2);
+        if (getParent()) mapWin32Rect(OSLIB_HWND_DESKTOP,getParent()->getOS2WindowHandle(),&rectClient);
         //set the window size and update the client
         SetWindowPos(hwndLinkAfter,rectClient.left,rectClient.top,rectClient.right-rectClient.left,rectClient.bottom-rectClient.top,SWP_NOACTIVATE | SWP_NOREDRAW | SWP_FRAMECHANGED);
         fNoSizeMsg = FALSE;
+        if (cs->style & WS_VISIBLE) dwStyle |= WS_VISIBLE; //program could change position in WM_CREATE
         if( (SendInternalMessageA(WM_CREATE, 0, (LPARAM)cs )) != -1 )
         {
             if(!(flags & WIN_NEED_SIZE)) {
@@ -744,7 +745,7 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
                 }
             }
 
-            if (cs->style & WS_VISIBLE) ShowWindow( sw );
+            if (cs->style & WS_VISIBLE) ShowWindow(sw);
 
             /* Call WH_SHELL hook */
             if (!(getStyle() & WS_CHILD) && !owner)
@@ -802,9 +803,6 @@ ULONG Win32BaseWindow::MsgDestroy()
         return 1;
     }
     SendInternalMessageA(WM_NCDESTROY, 0, 0);
-
-    if (hwndHorzScroll && (OSLibWinQueryWindow(hwndHorzScroll,QWOS_PARENT) == OSLibWinQueryObjectWindow())) OSLibWinDestroyWindow(hwndHorzScroll);
-    if (hwndVertScroll && (OSLibWinQueryWindow(hwndVertScroll,QWOS_PARENT) == OSLibWinQueryObjectWindow())) OSLibWinDestroyWindow(hwndVertScroll);
 
     TIMER_KillTimerFromWindow(OS2Hwnd);
 
@@ -981,7 +979,7 @@ ULONG Win32BaseWindow::MsgButton(MSG *msg)
         case WM_NCLBUTTONDBLCLK:
         case WM_NCRBUTTONDBLCLK:
         case WM_NCMBUTTONDBLCLK:
-                if (!(windowClass && windowClass->getClassLongA(GCL_STYLE) & CS_DBLCLKS))
+                if (!(windowClass && windowClass->getClassLongA(GCL_STYLE) & CS_DBLCLKS) && (msg->message != WM_NCLBUTTONDBLCLK))
                 {
                     msg->message = msg->message - (WM_LBUTTONDBLCLK - WM_LBUTTONDOWN); //dblclick -> down
                     MsgButton(msg);
@@ -1119,7 +1117,7 @@ ULONG Win32BaseWindow::MsgNCPaint()
     if (!hrgn) return 0;
 //CB: bug in GetDCEx with region!!!
     rc = SendInternalMessageA(WM_NCPAINT,/*hrgn*/0,0);
-dprintf(("CB: %d %d %d %d",rect.left,rect.top,rect.bottom,rect.right));
+//dprintf(("CB: %d %d %d %d",rect.left,rect.top,rect.bottom,rect.right));
     DeleteObject(hrgn);
     //CB: todo: check if intersection with client
 
@@ -1136,12 +1134,12 @@ ULONG  Win32BaseWindow::MsgFormatFrame()
   wndPos.hwnd = Win32Hwnd;
   wndPos.hwndInsertAfter = 0;
   rect = rectWindow;
-  if (getParent()) MapWindowPoints(0,getParent()->getWindowHandle(),(PPOINT)&rect,2);
+  if (getParent()) mapWin32Rect(OSLIB_HWND_DESKTOP,getParent()->getOS2WindowHandle(),&rect);
   wndPos.x = rect.left;
   wndPos.y = rect.top;
   wndPos.cx = rect.right-rect.left;
   wndPos.cy = rect.bottom-rect.top;
-  wndPos.flags = 0;
+  wndPos.flags = 0; //dummy
 
   return SendNCCalcSize(TRUE,&window,&window,&client,&wndPos,&rectClient);
 }
@@ -1200,9 +1198,23 @@ SCROLLBAR_INFO *Win32BaseWindow::getScrollInfo(int nBar)
   switch(nBar)
   {
     case SB_HORZ:
+      if (!horzScrollInfo)
+      {
+        horzScrollInfo = (SCROLLBAR_INFO*)malloc(sizeof(SCROLLBAR_INFO));
+        horzScrollInfo->MinVal = horzScrollInfo->CurVal = horzScrollInfo->Page = 0;
+        horzScrollInfo->MaxVal = 100;
+        horzScrollInfo->flags  = ESB_ENABLE_BOTH;
+      }
       return horzScrollInfo;
 
     case SB_VERT:
+      if (!vertScrollInfo)
+      {
+        vertScrollInfo = (SCROLLBAR_INFO*)malloc(sizeof(SCROLLBAR_INFO));
+        vertScrollInfo->MinVal = vertScrollInfo->CurVal = vertScrollInfo->Page = 0;
+        vertScrollInfo->MaxVal = 100;
+        vertScrollInfo->flags  = ESB_ENABLE_BOTH;
+      }
       return vertScrollInfo;
   }
 
@@ -1361,7 +1373,7 @@ VOID Win32BaseWindow::TrackMinMaxBox(WORD wParam)
       else
         DrawMaxButton(hdc,pressed,FALSE);
     }
-  } while ((msg.message != WM_LBUTTONUP) && (msg.message != WM_NCLBUTTONUP));
+  } while (msg.message != WM_LBUTTONUP);
   if (wParam == HTMINBUTTON)
     DrawMinButton(hdc,FALSE,FALSE);
   else
@@ -1407,7 +1419,7 @@ state = 0;
     pressed = (HandleNCHitTest(msg.pt) == wParam);
     if (pressed != oldstate)
       DrawCloseButton(hdc, pressed, FALSE);
-  } while ((msg.message != WM_LBUTTONUP) && (msg.message != WM_NCLBUTTONUP));
+  } while (msg.message != WM_LBUTTONUP);
   DrawCloseButton(hdc,FALSE,FALSE);
   ReleaseCapture();
   ReleaseDC(Win32Hwnd,hdc);
@@ -1553,7 +1565,7 @@ LONG Win32BaseWindow::HandleNCCalcSize(BOOL calcValidRects,RECT *winRect)
 
   clientRect = &((NCCALCSIZE_PARAMS*)winRect)->rgrc[2];
   *clientRect = rectWindow;
-  if (getParent()) MapWindowPoints(0,getParent()->getOS2WindowHandle(),(PPOINT)clientRect,2);
+  if (getParent()) mapWin32Rect(OSLIB_HWND_DESKTOP,getParent()->getOS2WindowHandle(),clientRect);
 
   if(!(dwStyle & WS_MINIMIZE))
   {
@@ -1711,7 +1723,7 @@ LONG Win32BaseWindow::HandleNCHitTest(POINT pt)
       /* Check size box */
       if ((dwStyle & WS_VSCROLL) &&
           (pt.x >= rect.right - GetSystemMetrics(SM_CXVSCROLL)))
-        return HTSIZE;
+        return (dwStyle & WS_CHILD) ? HTSIZE:HTBOTTOMRIGHT;
       return HTHSCROLL;
     }
   }
@@ -1961,7 +1973,7 @@ VOID Win32BaseWindow::DrawMinButton(HDC hdc,BOOL down,BOOL bGrayed)
 VOID Win32BaseWindow::DrawCaption(HDC hdc,RECT *rect,BOOL active)
 {
   RECT  r = *rect;
-  char    buffer[256];
+  char  buffer[256];
   HPEN  hPrevPen;
   HMENU hSysMenu;
 
@@ -2058,7 +2070,6 @@ VOID Win32BaseWindow::DoNCPaint(HRGN clip,BOOL suppress_menupaint)
   if (!(hdc = GetDCEx( Win32Hwnd, (clip > 1) ? clip : 0, DCX_USESTYLE | DCX_WINDOW |
                       ((clip > 1) ?(DCX_INTERSECTRGN /*| DCX_KEEPCLIPRGN*/) : 0) ))) return;
 
-
   rect.top = rect.left = 0;
   rect.right  = rectWindow.right - rectWindow.left;
   rect.bottom = rectWindow.bottom - rectWindow.top;
@@ -2125,9 +2136,9 @@ VOID Win32BaseWindow::DoNCPaint(HRGN clip,BOOL suppress_menupaint)
   /* Draw the scroll-bars */
 #if 0 //CB: todo
   if (dwStyle & WS_VSCROLL)
-    SCROLL_DrawScrollBar( hwnd, hdc, SB_VERT, TRUE, TRUE );
+    SCROLL_DrawScrollBar(hwnd,hdc,SB_VERT,TRUE,TRUE);
   if (wndPtr->dwStyle & WS_HSCROLL)
-    SCROLL_DrawScrollBar( hwnd, hdc, SB_HORZ, TRUE, TRUE );
+    SCROLL_DrawScrollBar(hwnd,hdc,SB_HORZ,TRUE,TRUE);
 #endif
   /* Draw the "size-box" */
   if ((dwStyle & WS_VSCROLL) && (dwStyle & WS_HSCROLL))
@@ -2136,7 +2147,38 @@ VOID Win32BaseWindow::DoNCPaint(HRGN clip,BOOL suppress_menupaint)
     r.left = r.right - GetSystemMetrics(SM_CXVSCROLL) + 1;
     r.top  = r.bottom - GetSystemMetrics(SM_CYHSCROLL) + 1;
     FillRect( hdc, &r,  GetSysColorBrush(COLOR_SCROLLBAR) );
-    //CB: todo: use scroll code for size grip
+    if (!(dwStyle & WS_CHILD))
+    {
+      POINT p1,p2;
+      HPEN penDark = GetSysColorPen(COLOR_3DSHADOW);
+      HPEN penWhite = GetSysColorPen(COLOR_3DHILIGHT);
+      HPEN oldPen = SelectObject(hdc,penDark);
+      INT x;
+
+      p1.x = r.right-1;
+      p1.y = r.bottom;
+      p2.x = r.right;
+      p2.y = r.bottom-1;
+      for (x = 0;x < 3;x++)
+      {
+        SelectObject(hdc,penDark);
+        MoveToEx(hdc,p1.x,p1.y,NULL);
+        LineTo(hdc,p2.x,p2.y);
+        p1.x--;
+        p2.y--;
+        MoveToEx(hdc,p1.x,p1.y,NULL);
+        LineTo(hdc,p2.x,p2.y);
+        SelectObject(hdc,penWhite);
+        p1.x--;
+        p2.y--;
+        MoveToEx(hdc,p1.x,p1.y,NULL);
+        LineTo(hdc,p2.x,p2.y);
+        p1.x -= 2;
+        p2.y -= 2;
+      }
+
+      SelectObject(hdc,oldPen);
+    }
   }
 
   ReleaseDC(Win32Hwnd,hdc);
@@ -2145,9 +2187,10 @@ VOID Win32BaseWindow::DoNCPaint(HRGN clip,BOOL suppress_menupaint)
 //******************************************************************************
 LONG Win32BaseWindow::HandleNCPaint(HRGN clip)
 {
-  if (!(dwStyle & WS_VISIBLE)) return 0;
+//CB: ignore it for now (SetWindowPos in WM_CREATE)
+//  if (!(dwStyle & WS_VISIBLE)) return 0;
 
-  if (dwStyle & WS_MINIMIZE) return 0;  //CB: to check
+  if (dwStyle & WS_MINIMIZE) return 0;
 
   DoNCPaint(clip,FALSE);
 
@@ -2403,7 +2446,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
     switch(Msg)
     {
     case WM_CLOSE:
-    dprintf(("DefWindowProcA: WM_CLOSE %x", getWindowHandle()));
+        dprintf(("DefWindowProcA: WM_CLOSE %x", getWindowHandle()));
         DestroyWindow();
         return 0;
 
@@ -2438,10 +2481,15 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
           wndNameLength = 0;
         }
         dprintf(("WM_SETTEXT of %x to %s\n", Win32Hwnd, lParam));
-
+        if (dwStyle & WS_CAPTION)
+        {
+          //CB: optimize!
+          HandleNCPaint(0);
+        }
+/* //CB: endless loop in trackbar.exe -> to fix
         if(OS2HwndFrame && (dwStyle & WS_CAPTION) == WS_CAPTION)
           return OSLibWinSetWindowText(OS2HwndFrame,(LPSTR)windowNameA);
-
+*/
         return TRUE;
     }
 
@@ -2891,7 +2939,7 @@ LRESULT Win32BaseWindow::SendInternalMessageA(ULONG Msg, WPARAM wParam, LPARAM l
 
                   point.x = pt.x;
                   point.y = pt.y;
-                  MapWindowPoints(Win32Hwnd,getParent()->getWindowHandle(),&point,1);
+                  mapWin32Point(OS2Hwnd,getParent()->getOS2WindowHandle(),(OSLIBPOINT*)&point);
                   NotifyParent(Msg,wParam,MAKELPARAM(point.x,point.y));
                 }
                 rc = win32wndproc(getWindowHandle(), Msg, wParam, lParam);
@@ -3215,7 +3263,8 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
             swp.hwndInsertBehind = 0;
         }
     }
-#if 0
+//CB: todo
+ #if 0
     if (isFrameWindow())
     {
       if (!isChild())
@@ -3244,7 +3293,11 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
         dprintf(("OSLibWinSetMultWindowPos failed! Error %x",OSLibWinGetLastError()));
     }
 
-    //SWP_FRAMECHANGED is ignored, not necessary for OS/2
+    if (fuFlags == SWP_FRAMECHANGED)
+    {
+      //CB: optimize: if frame size has changed not necessary!
+      FrameUpdateFrame(this,0);
+    }
 
     return (rc);
 }
