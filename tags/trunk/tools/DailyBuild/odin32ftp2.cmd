@@ -1,4 +1,4 @@
-/* $Id: odin32ftp2.cmd,v 1.16 2001-05-13 20:35:54 bird Exp $
+/* $Id: odin32ftp2.cmd,v 1.17 2001-06-27 08:57:57 bird Exp $
  *
  * Uploads the relase and debug builds to the FTP sites.
  *
@@ -62,10 +62,9 @@ do i = 1 to 5 /* (Retries 5 times) */
     do
         rc = cleanFtp('os2-delete', '/daily', 'www.os2.org');
         do j = 1 to asUploads.0
-            if (1) then
-                rc = putFtp(asUploads.j, 'os2-'||asUploads.j, '/'||sDirectory, 'www.os2.org');
-            else
-                rc = forwardSF(asUploads.j, 'os2-'||asUploads.j, '/'||sDirectory, 'www.os2.org');
+            rc = putFtp(asUploads.j, 'os2-'||asUploads.j, '/'||sDirectory, 'www.os2.org');
+            /*rc = putRexxFtp(asUploads.j, 'os2-'||asUploads.j, '/'||sDirectory, 'www.os2.org');*/
+            /*rc = forwardSF(asUploads.j, 'os2-'||asUploads.j, '/'||sDirectory, 'www.os2.org');*/
         end
     end
 
@@ -76,10 +75,9 @@ do i = 1 to 5 /* (Retries 5 times) */
     do
         rc = cleanFtp('netlabs-delete', '/daily', 'ftp.netlabs.org');
         do j = 1 to asUploads.0
-            if (1) then
-                rc = putFtp(asUploads.j, 'netlabs-'||asUploads.j, '/'||sDirectory, 'ftp.netlabs.org');
-            else
-                rc = forwardSF(asUploads.j, 'netlabs-'||asUploads.j, '/'||sDirectory, 'ftp.netlabs.org');
+            /*rc = putFtp(asUploads.j, 'netlabs-'||asUploads.j, '/'||sDirectory, 'ftp.netlabs.org'); */
+            rc = putRexxFtp(asUploads.j, 'netlabs-'||asUploads.j, '/'||sDirectory, 'ftp.netlabs.org');
+            /*rc = forwardSF(asUploads.j, 'netlabs-'||asUploads.j, '/'||sDirectory, 'ftp.netlabs.org');*/
         end
     end
 end
@@ -266,8 +264,59 @@ cleanFtp: procedure expose asDelete.;
     return rc;
 
 
+/*
+ * REXX FTP put function.
+ */
+putRexxFtp: procedure
+    parse arg sFile, sLockFile, sRemoteDir, sSite
 
+    /* check for done-lock */
+    if stream(sLockFile,'c','query exists') = '' then
+    do
+        say '--- put' sFile '->' sRemoteDir'/'sFile '---';
 
+        /* get password */
+        sPasswdString = GetPassword(sSite);
+        if (sPasswdString = '') then
+        do
+            call failure rc, 'Can''t find userid/password for' sSite'.', -1;
+            return -1;
+        end
+        parse var sPasswdString sUser':'sPasswd;
+
+        /* log on the ftp site */
+        rc = FtpSetUser(sSite, sUser, sPasswd);
+        if (rc = 1) then
+        do
+            /* put file, delete it if we fail */
+            say sSite  sUser  sPasswd  sFile  sRemoteDir'/'sFile  'Binary'
+            rcPut = FtpPut(sFile, sRemoteDir'/'sFile, 'Binary');
+            /*
+            if (rcPut <> 0) then
+                rc = FtpDelete(sRemoteDir'/'sFile);
+            */
+
+            /* Logoff and make lock file. */
+            rc = FtpLogoff();
+            if (rcPut = 0) then
+                'echo ok > ' || sLockFile;
+            else
+                call failure rc, 'FtpPut failed -' sSite , FTPERRNO;
+            rc = rcPut;
+        end
+        else
+        do
+            call failure rc, 'Logon failed -' sSite, FTPERRNO;
+            if rc = 0 then rc = -1;
+        end
+    end
+    else
+        rc = 0;
+    return 0;
+
+/*
+ * Report error. (non-fatal)
+ */
 failure: procedure
 parse arg rc, sText, iftperrno;
     say 'rc='rc sText
