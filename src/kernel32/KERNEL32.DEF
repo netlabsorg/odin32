@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.25 1999-08-19 02:10:16 phaller Exp $
+; $Id: KERNEL32.DEF,v 1.26 1999-08-21 16:29:27 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -998,4 +998,7 @@ EXPORTS
     HEAP_strdupA               = _HEAP_strdupA@12                 @1247
     HEAP_strdupW               = _HEAP_strdupW@12                 @1248
 
+
+    VIRTUAL_MapFileA           = _VIRTUAL_MapFileA@4              @1249
+    VIRTUAL_MapFileW           = _VIRTUAL_MapFileW@4              @1250
 

@@ -1,4 +1,4 @@
-/* $Id: heap.cpp,v 1.13 1999-08-17 17:04:51 sandervl Exp $ */
+/* $Id: heap.cpp,v 1.14 1999-08-21 16:29:26 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -147,7 +147,7 @@ HANDLE WIN32API GetProcessHeap(VOID)
 {
  HANDLE hHeap;
 
-    dprintf(("KERNEL32:  OS2GetProcessHeap\n"));
+//    dprintf(("KERNEL32:  OS2GetProcessHeap\n"));
     //SvL: Only one process heap per process
     if(processheap == NULL) {
       //TODO: I haven't thought real hard about this.  I added it just to make "hdr.exe" happy.
