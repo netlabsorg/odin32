@@ -1532,7 +1532,7 @@ static HRESULT WINAPI ISFHelper_fnDeleteItems(
 	{
           char tmp[8]; 
           snprintf(tmp, sizeof(tmp), "%d", cidl);
-	  if(!SHELL_WarnItemDelete(ASK_DELETE_MULTIPLE_ITEM, tmp))
+	  if(!SHELL_ConfirmDialog(ASK_DELETE_MULTIPLE_ITEM, tmp))
             return E_FAIL;
           bConfirm = FALSE;
 	}
