@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2000-02-29 00:50:06 sandervl Exp $
+# $Id: makefile,v 1.2 2000-03-01 14:50:16 sandervl Exp $
 #
 # PD-Win32
 #
@@ -136,7 +136,12 @@ dep:
 !endif
 
 clean:
-        $(RM) *.obj *.dll *.lib *.lrf
+        $(RM) *.obj 
+        $(RM) *.dll 
+        $(RM) *.lib 
+        $(RM) *.lrf
+        $(RM) resource.asm
+        $(RM) $(TARGET)exp.def
         $(RM) $(PDWIN32_BIN)\$(TARGET).dll
         $(RM) $(PDWIN32_LIB)\$(TARGET).lib
 
