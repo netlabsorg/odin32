@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1999 2002-02-21 23:11:04 sandervl Exp $ */
+/* $Id: changelog,v 1.2000 2002-02-23 16:39:31 sandervl Exp $ */
+
+ 2002-02-23: Sander van Leeuwen <sandervl@xs4all.nl>
+    - WSOCK32:  o Don't send FD_CONNECT is socket was already connected 
+                  (accept returns connected socket)
 
  2002-02-21: Sander van Leeuwen <sandervl@xs4all.nl>
     - NTDLL/ADVAPI32:
