@@ -1,3 +1,5 @@
+# $Id: makefile,v 1.4 1999-06-10 16:56:09 phaller Exp $
+
 #
 # PD-Win32 API
 #

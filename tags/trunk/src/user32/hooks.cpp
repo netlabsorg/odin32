@@ -1,3 +1,5 @@
+/* $Id: hooks.cpp,v 1.3 1999-06-10 16:50:38 phaller Exp $ */
+
 /*
  * Win32 hook class for OS/2
  *

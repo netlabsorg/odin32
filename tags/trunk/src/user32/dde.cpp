@@ -1,3 +1,5 @@
+/* $Id: dde.cpp,v 1.3 1999-06-10 16:50:38 phaller Exp $ */
+
 /*
  * Win32 default window API functions for OS/2
  *

@@ -1,3 +1,5 @@
+; $Id: user32exp.def,v 1.4 1999-06-10 16:50:36 phaller Exp $
+
 ;Created by BLAST for IBM's compiler
 LIBRARY USER32 INITINSTANCE
 DATA MULTIPLE NONSHARED

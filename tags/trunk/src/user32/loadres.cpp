@@ -1,3 +1,5 @@
+/* $Id: loadres.cpp,v 1.4 1999-06-10 16:50:39 phaller Exp $ */
+
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT

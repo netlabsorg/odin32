@@ -1,3 +1,5 @@
+/* $Id: IMAGE.H,v 1.3 1999-06-10 16:50:35 phaller Exp $ */
+
 #ifndef __IMAGE_H__
 #define __IMAGE_H__
 
@@ -17,7 +19,7 @@
 #define LR_DEFAULTSIZE      0x0040
 #define LR_LOADMAP3DCOLORS  0x1000
 #define LR_CREATEDIBSECTION 0x2000
-#define LR_COPYFROMRESOURCE 0x4000      
-#define LR_SHARED           0x8000      
+#define LR_COPYFROMRESOURCE 0x4000
+#define LR_SHARED           0x8000
 
 #endif

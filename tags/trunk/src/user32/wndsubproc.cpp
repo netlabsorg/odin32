@@ -1,3 +1,5 @@
+/* $Id: wndsubproc.cpp,v 1.3 1999-06-10 16:50:38 phaller Exp $ */
+
 /*
  * Win32 window subproc class for OS/2
  *

@@ -1,3 +1,5 @@
+/* $Id: icon.cpp,v 1.3 1999-06-10 16:50:39 phaller Exp $ */
+
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT

@@ -1,3 +1,5 @@
+/* $Id: char.cpp,v 1.3 1999-06-10 16:50:38 phaller Exp $ */
+
 /*
  * Win32 character API functions for OS/2
  *

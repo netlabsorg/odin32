@@ -1,3 +1,5 @@
+/* $Id: icon.h,v 1.3 1999-06-10 16:50:39 phaller Exp $ */
+
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -42,7 +44,7 @@ typedef struct tagWINBITMAPINFOHEADER{
         DWORD      biClrImportant;
 } WINBITMAPINFOHEADER;
 
-typedef struct 
+typedef struct
 {
    BYTE                      blue;
    BYTE                      green;
