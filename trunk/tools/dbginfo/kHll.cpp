@@ -1,4 +1,4 @@
-/* $Id: kHll.cpp,v 1.17 2000-09-16 17:30:25 bird Exp $
+/* $Id: kHll.cpp,v 1.18 2002-04-12 01:40:20 bird Exp $
  *
  * kHll - Implementation of the class kHll.
  *        That class is used to create HLL debuginfo.
@@ -35,6 +35,9 @@
 #include <stddef.h>
 #include <stdlib.h>
 
+#include <kTypes.h>
+#include <kError.h>
+#include <kFileInterfaces.h>
 #include <kList.h>
 #include <kFile.h>
 #include <kFileFormatBase.h>
@@ -1846,7 +1849,7 @@ kHll *          kHll::readLX(
          * Is there any debug info in this LX header?
          */
         if (e32.e32_debuginfo != 0UL && e32.e32_debuglen != 0UL
-            && file.set(e32.e32_debuginfo))
+            && !file.set(e32.e32_debuginfo))
             return new kHll(&file);
         else
             return new kHll();
@@ -1878,7 +1881,7 @@ kHll *              kHll::readLXExports(
     /*
      * Set modulename.
      */
-    if (!pFileLX->queryModuleName(szBuffer))
+    if (!pFileLX->moduleGetName(szBuffer))
         strcpy(szBuffer, "HMM");
     pHll->setModName(szBuffer);
 
@@ -1915,16 +1918,17 @@ kHll *              kHll::readLXExports(
     /*
      * Exports
      */
-    EXPORTENTRY export;
-    if (pFileLX->findFirstExport(&export))
+    kExportEntry export;
+    if (pFileLX->exportFindFirst(&export))
     {
         do
         {
             if (export.achName[0] == '\0')
                 sprintf(export.achName, "Ordinal%03d", export.ulOrdinal);
-            pModule->addPublicSymbol(export.achName, export.offset,
+            pModule->addPublicSymbol(export.achName, export.ulOffset,
                                      (unsigned short)export.iObject, NULL);
-        } while (pFileLX->findNextExport(&export));
+        } while (pFileLX->exportFindNext(&export));
+        pFileLX->exportFindClose(&export);
     }
 
     return pHll;
@@ -1947,7 +1951,7 @@ kHll *          kHll::readSym(
     /*
      * Start conversion.
      */
-    PBYTE pbSym = (PBYTE)pFile->readFile();
+    PBYTE pbSym = (PBYTE)pFile->mapFile();
     if (pbSym != NULL)
     {
         kHllModuleEntry *   pModule;
