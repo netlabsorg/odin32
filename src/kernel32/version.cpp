@@ -1,4 +1,4 @@
-/* $Id: version.cpp,v 1.3 2001-03-13 18:45:34 sandervl Exp $ */
+/* $Id: version.cpp,v 1.4 2001-10-15 17:10:55 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -109,7 +109,7 @@ BOOL WIN32API GetVersionExA(OSVERSIONINFOA *lpVersionInformation)
    }
    if(lpVersionInformation->dwOSVersionInfoSize != sizeof(OSVERSIONINFOA))
    {
-	dprintf(("ERROR: buffer too small"));
+	dprintf(("ERROR: buffer too small (%d != %d)", lpVersionInformation->dwOSVersionInfoSize, sizeof(OSVERSIONINFOA)));
 	SetLastError(ERROR_INSUFFICIENT_BUFFER);
         return(FALSE);
    }

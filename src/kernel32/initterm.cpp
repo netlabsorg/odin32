@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.63 2001-09-05 12:57:58 bird Exp $
+/* $Id: initterm.cpp,v 1.64 2001-10-15 17:10:54 sandervl Exp $
  *
  * KERNEL32 DLL entry point
  *
@@ -59,6 +59,7 @@
 #include "dbglocal.h"
 
 BOOL  fVersionWarp3 = FALSE;
+BOOL  fCustomBuild  = FALSE;
 
 //Global DLL Data
 #pragma data_seg(_GLOBALDATA)

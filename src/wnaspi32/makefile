@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 2000-12-02 23:45:07 bird Exp $
+# $Id: makefile,v 1.14 2001-10-15 17:06:19 sandervl Exp $
 
 #
 # Odin32 API
@@ -6,6 +6,7 @@
 #       wnaspi32.dll makefile
 #
 
+WRC_PREFIX_RESOURCE=1
 
 #
 # Compiler, tools, and interference rules.
@@ -20,6 +21,7 @@ OBJS = \
 $(OBJDIR)\aspilib.obj \
 $(OBJDIR)\winaspi32.obj \
 $(OBJDIR)\wnaspi32rsrc.obj \
+$(OBJDIR)\initwnaspi32.obj \
 $(OBJDIR)\initterm.obj
 
 
