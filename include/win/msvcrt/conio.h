@@ -14,15 +14,15 @@
 extern "C" {
 #endif
 
-char*       _cgets(char*);
-int         _cprintf(const char*,...);
-int         _cputs(const char*);
-int         _cscanf(const char*,...);
-int         _getch(void);
-int         _getche(void);
+char*       MSVCRT__cgets(char*);
+int         MSVCRT__cprintf(const char*,...);
+int         MSVCRT__cputs(const char*);
+int         MSVCRT__cscanf(const char*,...);
+int         MSVCRT__getch(void);
+int         MSVCRT__getche(void);
 int         _kbhit(void);
 int         _putch(int);
-int         _ungetch(int);
+int         MSVCRT__ungetch(int);
 
 #ifdef _M_IX86
 int         _inp(unsigned short);

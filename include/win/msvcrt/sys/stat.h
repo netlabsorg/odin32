@@ -84,18 +84,19 @@ struct _stat {
 };
 
 struct _stati64 {
-  _dev_t         st_dev;
-  _ino_t         st_ino;
+  unsigned int   st_dev;
+  unsigned short st_ino; 
   unsigned short st_mode;
-  short          st_nlink;
-  short          st_uid;
-  short          st_gid;
-  _dev_t         st_rdev;
-  __int64        st_size;
-  MSVCRT(time_t) st_atime;
-  MSVCRT(time_t) st_mtime;
-  MSVCRT(time_t) st_ctime;
+  short          st_nlink; short dummy1;
+  short          st_uid; short dummy2;
+  short          st_gid; short dummy3;
+  unsigned int   st_rdev;
+  long long  st_size;
+  long st_atime;
+  long st_mtime;
+  long st_ctime;
 };
+
 #endif /* MSVCRT_STAT_DEFINED */
 
 #ifdef __cplusplus

@@ -17,13 +17,13 @@
 extern "C" {
 #endif
 
-int         _chdir(const char*);
-int         _chdrive(int);
-char*       _getcwd(char*,int);
+int         MSVCRT(_chdir)(const char*);
+int         MSVCRT(_chdrive)(int);
+char*       MSVCRT(_getcwd)(char*,int);
 char*       _getdcwd(int,char*,int);
-int         _getdrive(void);
+int         MSVCRT(_getdrive)(void);
 unsigned long _getdrives(void);
-int         _mkdir(const char*);
+int         MSVCRT(_mkdir)(const char*);
 int         _rmdir(const char*);
 
 int         _wchdir(const WCHAR*);

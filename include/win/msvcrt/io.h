@@ -66,10 +66,10 @@ struct _wfinddatai64_t {
 extern "C" {
 #endif
 
-int         _access(const char*,int);
-int         _chmod(const char*,int);
+int         MSVCRT(_access)(const char*,int);
+int         MSVCRT(_chmod)(const char*,int);
 int         _chsize(int,long);
-int         _close(int);
+int         MSVCRT(_close)(int);
 int         _commit(int);
 int         _creat(const char*,int);
 int         _dup(int);
@@ -90,18 +90,18 @@ __int64     _lseeki64(int,__int64,int);
 char*       _mktemp(char*);
 int         _open(const char*,int,...);
 int         _open_osfhandle(long,int);
-int         _pipe(int*,unsigned int,int);
-int         _read(int,void*,unsigned int);
+int         MSVCRT(_pipe)(int*,unsigned int,int);
+int         MSVCRT(_read)(int,void*,unsigned int);
 int         _setmode(int,int);
 int         _sopen(const char*,int,int,...);
 long        _tell(int);
 __int64     _telli64(int);
 int         _umask(int);
 int         _unlink(const char*);
-int         _write(int,const void*,unsigned int);
+int         MSVCRT(_write)(int,const void*,unsigned int);
 
-int         MSVCRT(remove)(const char*);
-int         MSVCRT(rename)(const char*,const char*);
+int         MSVCRT(_remove)(const char*);
+int         MSVCRT(_rename)(const char*,const char*);
 
 int         _waccess(const WCHAR*,int);
 int         _wchmod(const WCHAR*,int);
