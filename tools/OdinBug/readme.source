@@ -1,4 +1,4 @@
-Sourcecode for OdinBug 0.5.7
+Sourcecode for OdinBug 0.5.8
 ============================
 
 
@@ -7,7 +7,7 @@ A. How to compile OdinBug
    1. Create a project folder named OdinBug in your
       VX-REXX projects folder.
    
-   2. Unzip this OdinBugSrc057.ZIP in this folder.
+   2. Unzip this OdinBugSrc058.ZIP in this folder.
 
    3. Open OdinBug.VRP using VRXedit.
 
@@ -41,7 +41,9 @@ B. Conventions that are used by me in this project:
 
    3. User defined subroutines should start with an underscore.
       Note: The VX-REXX IDE has a bug, which makes it crash
-      if a routine beginning with underscore is deleted.
+      if a routine beginning with underscore is deleted. So
+      you have to rename it before deleteing it.
+      
       Sorry, I did not know that before I introduced this 
       convention.
    
@@ -58,7 +60,7 @@ C. Please, share any changes you make, with me, because OdinBug
    is still under development and I do not want different branches
    with different bugs/features.
    
-D. AUTHOR:
+D. Author:
 
-Herwig Bauernfeind, 11-08-2002
+Herwig Bauernfeind, 10-01-2003
 EMail: herwig.bauernfeind@aon.at

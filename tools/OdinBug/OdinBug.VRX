@@ -114,6 +114,8 @@ _AnalyseConfigSys:
                     Driver = "Scitech Display Doctor"
                     FoundScitech = 1
                 end
+                when Pos('SDDHELP.SYS',ConfigLine) > 0 then  SDDHelpSys=strip(substr(ConfigLine,8))
+
                 when Pos('MGAX64', ConfigLine) > 0 then      Driver = "Matrox Driver"
                 when Pos('GENGRADD', ConfigLine) > 0 then    Driver = "Generic GRADD"
                 when Pos('ATIGRADD', ConfigLine) > 0 then    Driver = "ATI GRADD"
@@ -300,25 +302,45 @@ _AnalyseScitechDD:
        now lets determine which one. We analyse
        SDDHELP.SYS and GRAPHICS.LOG */
        
-    SDDHelpSys = SysBootDrive()'\OS2\SDDHELP.SYS'
+    /* we get SDDHelpSys from Config.Sys now
+       SDDHelpSys = SysBootDrive()'\OS2\SDDHELP.SYS' */
 
-    LogLine = ''
-    do until lines(SDDHelpSys) = 0
-        LogLine = translate(linein(SDDHelpSys),' ', d2c(0))
-        if pos('build',logline) > 0 then do
-            SddBuildNr = substr(LogLine,pos('build',logline),10)
-            IsSNAP = sign(Pos('SNAP',LogLine))
+    /* our new PREXX30 compliant SNAP detector */
+    isSNAP = 0
+    do until chars(SDDHelpSYS) = 0
+        C = charin(SDDHELPSYS)
+        select 
+            when C = 'b' then do
+                SddBuildNr = C||charin(SDDHELPSYS,,8)
+                if translate(word(SDDBuildNr,1)) <> 'BUILD' then iterate
+                    else leave
+            end
+            when C = 'S' then do
+                SciTechType = C||charin(SDDHELPSYS,,3)
+                if translate(SciTechType) <> 'SNAP' then iterate
+                else isSNAP = 1
+            end
+            when C = 'D' then do
+                SciTechType = C||charin(SDDHELPSYS,,5)
+                if translate(ScitechType) <> 'DOCTOR' then iterate
+                    else isSNAP = 0
+            end
+            otherwise iterate
         end
     end
-    ok = stream(SDDHelpSys,'c','CLOSE')
+    
+    ok = stream(SDDHelpsys,'c','close')
 
-    GraphicsLog = SysBootDrive()'\OS2\DRIVERS\NUCLEUS\CONFIG\GRAPHICS.LOG'
+    NUCLEUS_PATH = value('NUCLEUS_PATH',,'OS2ENVIRONMENT')
+    if Nucleus_Path = '' then Nucleus_Path = SysBootDrive()'\OS2\DRIVERS\NUCLEUS\CONFIG'
+    GraphicsLog = Nucleus_Path'\GRAPHICS.LOG'
+
     License = linein(GraphicsLog)
     select 
-        when word(License,1)= 'Valid' & word(License,2) = 'IHV' & \IsSNAP then Driver = 'Scitech Display Doctor/SE'
-        when word(License,1)= 'Valid' & word(License,2) = 'IHV' & IsSNAP  then Driver = 'Scitech SNAP/OEM'
-        when word(License,1)= 'Registered' & word(License,2) = 'end' & \IsSNAP then Driver = 'Scitech Display Doctor/Pro'
-        when word(License,1)= 'Registered' & word(License,2) = 'end' & IsSNAP  then Driver = 'Scitech SNAP'
+        when (word(License,1)= 'Valid') & (word(License,2) = 'IHV') & (\IsSNAP) then Driver = 'Scitech Display Doctor/SE'
+        when (word(License,1)= 'Valid') & (word(License,2) = 'IHV') & (IsSNAP)  then Driver = 'Scitech SNAP/OEM'
+        when (word(License,1)= 'Registered') & (word(License,2) = 'end') & (\IsSNAP) then Driver = 'Scitech Display Doctor/Pro'
+        when (word(License,1)= 'Registered') & (word(License,2) = 'end') & (IsSNAP)  then Driver = 'Scitech SNAP'
         otherwise if IsSNAP then Driver = 'Scitech SNAP/Demo'
             else Driver = 'Scitech Display Doctor/Demo'
     end
@@ -335,6 +357,23 @@ _AnalyseScitechDD:
     ok = stream(GraphicsLog,'c','CLOSE')
 return
 
+/* old SDD 
+
+    LogLine = ''
+    IsSNAP  = 0
+    LC = 0
+    do until lines(SDDHelpSys) = 0
+        LogLine = translate(linein(SDDHelpSys),' ', d2c(0))
+        LC = LC + 1
+        if pos('build',logline) > 0 then do
+            SddBuildNr = substr(LogLine,pos('build',logline),10)
+            IsSNAP = sign(Pos('SNAP',LogLine))
+            leave
+        end
+    end
+    ok = stream(SDDHelpSys,'c','CLOSE')
+    do until chars(SDDHELPSYS)=0
+ */
 /*:VRX         _AnalyseSyslevelFPK
 */
 _AnalyseSyslevelFPK: 
@@ -537,6 +576,7 @@ return
 /*:VRX         _CheckForExpiredBuild
 */
 _CheckForExpiredBuild: 
+    if UsingPrivateBuilds then return 1
     if BuildFile = '' then return 0
     AllowReport = 0
     buildYear  = substr(BuildFile,11,4)
@@ -713,7 +753,7 @@ _CreateReport:
     call charout RptFileName, '  Is xf86sup.sys loaded?  '
     if Foundxf86supsys then call lineout RptFileName, 'Yes, version 'XF86SupVersion
                        else call lineout RptFileName, 'No'
-    call lineout RptFileName, '  Display driver:         'VRGet("DDCB_DD","value")' 'VRGet("DDCB_DDVer","Value")
+    call lineout RptFileName, '  Display driver:         'VRGet("DDCB_DD","value")' 'VRGet("DDCB_DDVer","Value")' ('LC')'
     call lineout RptFileName, '  Video Chipset:          'VRGet("DDCB_chipset","Value")
     call lineout RptFileName, '  '
     call lineout RptFileName, 'Win32 program information:'
@@ -1035,6 +1075,7 @@ _GUIInit:
     ok = VRSet( "EF_LogFileBrowser", "Value", LogFileBrowser )
     ok = VRSet( "SPIN_BufferSize",   "Value", BufferSize     )
     ok = VRSet( "CB_AddException",   "set",   AddException   )
+    ok = VRSet( "CB_UsingPrivateBuilds",   "set", UsingPrivateBuilds)
     ok = VRSet( "CB_DontSaveAppDir", "set",   DontSaveAppDir )
     ok = VRSet( "CB_AskDeleteLog",   "set",   AskDeleteLog   )
     ok = VRset( "CB_xf86supsys",     "set",   0)
@@ -1207,6 +1248,7 @@ _INIRead:
     Account                 = VRGetIni( "OdinBug", "Account", our_ini, 'NoClose' )
     BufferSize              = VRGetIni( "OdinBug", "BufferSize", our_ini, 'NoClose' )
     AddException            = VRGetIni( "OdinBug", "AddException", our_ini, 'NoClose' )
+    UsingPrivateBuilds      = VRGetIni( "OdinBug", "UsingPrivateBuilds", our_ini )
     OdinBugVersion          = VRGetIni( "OdinBug", "Version", our_ini )
 
     /* we need this in order to determine the email client directory */
@@ -1236,7 +1278,7 @@ _INIRead:
     /* LogFileBrowser stays empty if empty */
     if BufferSize     = '' then BufferSize = 10
     if AddException   = '' then AddException = 1
-
+    if UsingPrivateBuilds = '' then UsingPrivateBuilds = 0
     /* Now let us process the commandline */    
     call _CommandLineParse
 return
@@ -1263,6 +1305,7 @@ _INIWrite:
     ok = VRSetIni( "OdinBug", "Account", Account, our_ini, 'NoClose' )
     ok = VRSetIni( "OdinBug", "BufferSize", BufferSize, our_ini, 'NoClose' )
     ok = VRSetIni( "OdinBug", "AddException", AddException, our_ini, 'NoClose' )
+    ok = VRSetIni( "OdinBug", "UsingPrivateBuilds", UsingPrivateBuilds, our_ini, 'NoClose' )
     ok = VRSetIni( "OdinBug", "Version", OdinBugVersion , our_ini )
 return
 
@@ -1562,6 +1605,7 @@ Activate:
     ok = VRSet("TAB_"Nr,"Top", TabTop-8)
     ok = VRSet("TAB_"Nr,"Left",TabWidth*(Nr-1)+PageLeft)
     ok = VRSet("TAB_"Nr,"PicturePath", "#1"||Nr)
+    ok = VRSet("TAB_"Nr,"AutoSize",1)
     ok = VRset("DT_PageName", "Caption", VRGet("Page_"Nr, "Caption"))
     ok = VRSet("Page_"Nr,"Visible", 1)
     ok = VRSet("Page_"Nr,"BorderType", 'None')
@@ -1609,6 +1653,12 @@ return
 */
 CB_ReplaceObjects_Click: 
     ReplaceObjects = VRget("CB_replaceObjects","set")
+return
+
+/*:VRX         CB_UsingPrivateBuilds_Click
+*/
+CB_UsingPrivateBuilds_Click: 
+    UsingPrivateBuilds = VRGet("CB_UsingPrivateBuilds","set")
 return
 
 /*:VRX         CB_WIN32LOG_ENABLED_Click
@@ -2050,8 +2100,15 @@ return
 PB_SearchBuild_Click: 
     ok = SysFileTree(BuildDir"odin32bin-"Kernel32Date"*",Builds.,"FO")
     if Builds.0 = 1 & isStartup
-        then Filename = Builds.1
-        else FileName = VRFileDialog( VRWindow(), "Step 2: Search Odin Build file", "Open", BuildDir"odin32bin-"Kernel32Date"*", , ,  )
+    then Filename = Builds.1
+    else do
+        if \UsingPrivateBuilds then do
+            FileName = VRFileDialog( VRWindow(), "Step 2: Search Odin Build file", "Open", BuildDir"odin32bin-"Kernel32Date"*", , ,  )
+        end
+        else do
+            FileName = VRFileDialog( VRWindow(), "Step 2: Search Odin Build file", "Open", BuildDir"*", , ,  )
+        end
+    end
 
     if Filename <> '' then do
         BuildFile = filespec('N',Filename)
@@ -2149,27 +2206,30 @@ return
 */
 PushbackAll: 
     Pages = 6
-    /* Tab distance from top */
-    TabTop = 25
-    TabWidth = 1180
-    TabHeight= 360
+    Delta = 400 /* This is the base distance between menubar an Page */
+
+    /* Tab Position */
+    TabWidth = VRget("TAB_1","Width")
+    TabHeight= VRget("TAB_1","Height")
+    TabTop = Delta - TabHeight
 
     /* Page Position */
     PageLeft = 120
-    PageTop = PageLeft + TabTop + 330
+    PageTop = PageLeft + Delta
 
     /* Page size */
     PageHeight = 4500
-    PageWidth = 7000
+    PageWidth  = 7000
     ok = VRset("DT_PageName", "Caption", "")
     ok = VRSet("GB_Main","Left", 0)
-    ok = VRSet("GB_Main","Top", TabTop+290)
+    ok = VRSet("GB_Main","Top", Delta - 60)
+
     do I = 1 to Pages
         ok = VRSet("TAB_"I,"Top", TabTop)
         ok = VRSet("TAB_"I,"PicturePath","#2"||I)
         ok = VRSet("TAB_"I,"Left",TabWidth*(I-1)+PageLeft)
-        ok = VRSet("TAB_"I,"Width",TabWidth)
-        ok = VRSet("TAB_"I,"Height",TabHeight)
+     /* ok = VRSet("TAB_"I,"Width",TabWidth)
+        ok = VRSet("TAB_"I,"Height",TabHeight) */
         ok = VRSet("Page_"I,"Height", PageHeight)
         ok = VRSet("Page_"I,"Width", PageWidth)
         ok = VRSet("Page_"I,"Left", PageLeft)
@@ -2397,4 +2457,3 @@ return
 TM_CheckValid_Trigger: 
     ok = VRSet("PB_CreateReport","Enabled",\_CheckInvalidReport())
 return
-
