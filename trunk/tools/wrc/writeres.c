@@ -681,8 +681,9 @@ void write_pe_segment(FILE *fp, resource_t *top)
             else
             {
                 char *label = prep_nid_for_label(rsc->name);
-                fprintf(fp, "\t"DIRECTIVE_LONG"\t(%s_%s_name - %s%s) "OR" "HEXBIT31"\n",
+                fprintf(fp, "\t"DIRECTIVE_LONG"\t(%s_%d_%s_name - %s%s) "OR" "HEXBIT31"\n",
                     prefix,
+                    rsc->type,
                     label,
                     prefix,
                     _PEResTab);
@@ -920,9 +921,10 @@ void write_rsc_names(FILE *fp, resource_t *top)
                 if(rsc->name->type == name_str)
                 {
                     char *name = prep_nid_for_label(rsc->name);
-                    fprintf(fp, "%s_%s_name:\n",
-                        prefix,
-                        name);
+
+                    fprintf(fp, "%s_%d_%s_name:\n",
+       	                prefix, rsc->type,
+               	        name);
                     write_name_str(fp, rsc->name);
                 }
             }
