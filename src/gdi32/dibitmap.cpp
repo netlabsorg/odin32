@@ -1,4 +1,4 @@
-/* $Id: dibitmap.cpp,v 1.10 2000-10-16 11:01:47 sandervl Exp $ */
+/* $Id: dibitmap.cpp,v 1.11 2000-11-09 18:16:56 sandervl Exp $ */
 
 /*
  * GDI32 dib & bitmap code
@@ -28,6 +28,12 @@ HBITMAP WIN32API CreateDIBitmap(HDC hdc, const BITMAPINFOHEADER *lpbmih,
   int iHeight;
   HBITMAP rc;
 
+  //SvL: Completely wrong result when creating a 1bpp bitmap here (converted
+  //     to 8bpp by Open32)
+  if(lpbmih->biBitCount == 1) {
+	dprintf(("WARNING: CreateDIBitmap doesn't handle 1bpp bitmaps very well!!!!!"));
+  }
+  
   //TEMPORARY HACK TO PREVENT CRASH IN OPEN32 (WSeB GA)
 
   iHeight = lpbmih->biHeight;
@@ -77,7 +83,7 @@ HBITMAP WIN32API CreateCompatibleBitmap( HDC hdc, int nWidth, int nHeight)
 HBITMAP WIN32API CreateDiscardableBitmap(HDC hDC, int nWidth, int nHeight)
 {
     dprintf(("GDI32: CreateDisardableBitmap\n"));
-    return O32_CreateCompatibleBitmap(hDC, nWidth, nHeight);
+    return CreateCompatibleBitmap(hDC, nWidth, nHeight);
 }
 //******************************************************************************
 //******************************************************************************
@@ -153,7 +159,7 @@ HBITMAP WIN32API CreateDIBSection( HDC hdc, BITMAPINFO *pbmi, UINT iUsage,
 
         // and use it to set the DIBColorTable
         nrcolors = GetPaletteEntries( hpalCur, 0, 1<<PalSize, (LPPALETTEENTRY)&Pal);
-        dsect->SetDIBColorTable(0, nrcolors, (RGBQUAD*)&Pal);
+        dsect->SetDIBColorTable(0, nrcolors, (LPPALETTEENTRY)&Pal);
 
         // Restore the DC Palette
         SelectPalette(hdc,hpalCur,FALSE);
