@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.69 2003-02-17 11:31:42 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.70 2003-02-24 11:40:45 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -867,16 +867,24 @@ BOOL WIN32API SetFileAttributesW(LPCWSTR lpFileName, DWORD dwFileAttributes)
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API GetFullPathNameA(LPCSTR arg1, DWORD arg2, LPSTR  arg3,
-                                LPSTR * arg4)
+DWORD WIN32API GetFullPathNameA(LPCSTR lpFileName, DWORD nBufferLength, LPSTR lpBuffer,
+                                LPSTR *lpFilePart)
 {
-    char *ptr;
+    char *ptr, *lpszFileName;
     DWORD rc;
-    dprintf(("KERNEL32:  GetFullPathName called with %s %d %x", arg1, arg2, arg3));
-    while((ptr = strchr(arg1, '/')) != NULL)
+
+    dprintf(("KERNEL32:  GetFullPathName called with %s %d %x", lpFileName, nBufferLength, lpBuffer));
+
+    lpszFileName = strdup(lpFileName);
+
+    while((ptr = strchr(lpszFileName, '/')) != NULL)
         *ptr = '\\';
 
-    return O32_GetFullPathName(arg1, arg2, arg3, arg4);
+    rc = O32_GetFullPathName(lpszFileName, nBufferLength, lpBuffer, lpFilePart);
+
+    free(lpszFileName);
+
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
