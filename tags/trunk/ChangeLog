@@ -1,15 +1,16 @@
- /* $Id: ChangeLog,v 1.896 2000-04-16 07:12:01 bird Exp $ */
+ /* $Id: ChangeLog,v 1.897 2000-04-16 10:46:18 sandervl Exp $ */
 
- 2000-04-17: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
+ 2000-04-16: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: Put back dll search method, fixed bug in LoadLibraryEx
+                    (no return after error detection)
+
+ 2000-04-16: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
         - KERNEL32: Reorganized/reworte LoadLibrary/LoadLibraryEx code.
                     isPEImage was changed to return 1 if DLL and 2 if EXE.
                     (It still returns FALSE if not valid PE image.)
 
         - include\odin32validate.h:
                     New header file. Parameter validation macros.
-
-
- 2000-04-16: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
         - KERNEL32: Before reading Sanders last message I had rewritten most of
                     the findDll function. So, as my implementation seems a bit
                     more flexible I decided to commit it.
