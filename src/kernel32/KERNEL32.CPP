@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.23 1999-10-22 18:07:20 sandervl Exp $ */
+/* $Id: KERNEL32.CPP,v 1.24 1999-10-25 18:20:52 achimha Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -337,9 +337,45 @@ VOID WIN32API InitializeCriticalSection(CRITICAL_SECTION * arg1)
 }
 //******************************************************************************
 //******************************************************************************
-void WINAPI MakeCriticalSectionGlobal( CRITICAL_SECTION *arg1 )
+void WIN32API MakeCriticalSectionGlobal( CRITICAL_SECTION *arg1 )
 {
     dprintf(("KERNEL32:  MakeCriticalSectionGlobal not implemented correctly\n"));
+}
+//******************************************************************************
+//******************************************************************************
+/***********************************************************************
+ *           ReinitializeCriticalSection   (KERNEL32.581)
+ */
+void WIN32API ReinitializeCriticalSection( CRITICAL_SECTION *crit )
+{
+    dprintf(("KERNEL32: ReinitializeCriticalSection\n"));
+    if ( !crit->LockSemaphore )
+        InitializeCriticalSection( crit );
+
+    else if ( crit->Reserved && crit->Reserved != GetCurrentProcessId() )
+    {
+//        FIXME_(win32)("(%p) called for %08lx first, %08lx now: making global\n", 
+//               crit, crit->Reserved, GetCurrentProcessId() );
+
+        MakeCriticalSectionGlobal( crit );
+    }
+}
+//******************************************************************************
+//******************************************************************************
+/***********************************************************************
+ *           UninitializeCriticalSection   (KERNEL32.703)
+ */
+void WIN32API UninitializeCriticalSection( CRITICAL_SECTION *crit )
+{
+    dprintf(("KERNEL32: UninitializeCriticalSection\n"));
+    if ( crit->LockSemaphore )
+    {
+        if ( crit->Reserved )  /* not global */
+            DeleteCriticalSection( crit );
+//        else
+//            FIXME_(win32)("(%p) for %08lx: Crst is global, don't know whether to delete\n", 
+//                   crit, GetCurrentProcessId() );
+    }
 }
 //******************************************************************************
 //******************************************************************************
@@ -867,12 +903,6 @@ BOOL WIN32API FlushInstructionCache(     /*PLF Mon  98-02-09 23:56:49 : STUB STU
         return TRUE;
 }
 
-
-//******************************************************************************
-VOID WIN32API UninitializeCriticalSection(CRITICAL_SECTION * lpcsCriticalSection)
-{
-  dprintf(("KERNEL32:  UninitializeCriticalSection NOT IMPLEMENTED\n"));
-}
 
 int WIN32API GetNumberFormatA(LCID     Locale,
                                  DWORD    dwFlags,
