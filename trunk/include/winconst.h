@@ -1,4 +1,4 @@
-/* $Id: winconst.h,v 1.18 1999-12-31 10:47:45 sandervl Exp $ */
+/* $Id: winconst.h,v 1.19 2000-01-02 22:10:19 sandervl Exp $ */
 
 /*
  * Win32 constants
@@ -393,3 +393,16 @@
 #define UNLOAD_DLL_DEBUG_EVENT_W      7
 #define OUTPUT_DEBUG_STRING_EVENT_W   8
 #define RIP_EVENT_W                   9
+
+//Region return values
+#define ERROR_W             0
+#define NULLREGION_W        1
+#define SIMPLEREGION_W      2
+#define COMPLEXREGION_W     3
+
+//Parameters for CombineRgn
+#define RGN_AND_W           1
+#define RGN_OR_W            2
+#define RGN_XOR_W           3
+#define RGN_DIFF_W          4
+#define RGN_COPY_W          5
