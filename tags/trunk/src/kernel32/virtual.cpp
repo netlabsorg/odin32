@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.12 1999-09-01 19:12:18 phaller Exp $ */
+/* $Id: virtual.cpp,v 1.13 1999-10-06 09:58:24 phaller Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -15,6 +15,9 @@
  *
  */
 
+#include <odin.h>
+#include <odinwrap.h>
+
 #include <os2win.h>
 #include <stdlib.h>
 #include <string.h>
@@ -23,6 +26,10 @@
 #include <handlemanager.h>
 #include "mmap.h"
 #include "oslibdos.h"
+
+
+ODINDEBUGCHANNEL(KERNEL32-VIRTUAL)
+
 
 /***********************************************************************
  *             CreateFileMapping32A   (KERNEL32.46)
@@ -357,25 +364,33 @@ LPVOID WIN32API VirtualAlloc(LPVOID lpvAddress, DWORD cbSize, DWORD fdwAllocatio
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API VirtualFree(LPVOID lpvAddress, DWORD cbSize, DWORD FreeType)
+ODINFUNCTION3(BOOL, VirtualFree, LPVOID, lpvAddress,
+                                 DWORD,  cbSize,
+                                 DWORD,  FreeType)
 {
- DWORD rc;
+  DWORD rc;
 
-  dprintf(("VirtualFree at %d; %d bytes, freetype %d\n", (int)lpvAddress, cbSize, FreeType));
+  // verify parameters
+  if ( (lpvAddress == NULL) ||
+       ( (FreeType & MEM_RELEASE) &&
+         (cbSize   != 0) )
+     )
+  {
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return(FALSE);
+  }
 
-  if(lpvAddress == NULL || cbSize == 0) {
-	SetLastError(ERROR_INVALID_PARAMETER);
-    	return(FALSE);
-  }
-  if(FreeType & MEM_DECOMMIT) {
-        rc = OSLibDosSetMem(lpvAddress, cbSize, PAG_DECOMMIT);
-  }
-  else  rc = OSLibDosFreeMem(lpvAddress);    //MEM_RELEASE, cbSize == 0 (or should be)
+  if(FreeType & MEM_DECOMMIT)
+    rc = OSLibDosSetMem(lpvAddress, cbSize, PAG_DECOMMIT);
+  else
+    rc = OSLibDosFreeMem(lpvAddress);    //MEM_RELEASE, cbSize == 0 (or should be)
 
-  if(rc) {
-	SetLastError(ERROR_GEN_FAILURE);
-    	return(FALSE);
+  if(rc)
+  {
+    SetLastError(ERROR_GEN_FAILURE);
+    return(FALSE);
   }
+
   return(TRUE);
 }
 //******************************************************************************
