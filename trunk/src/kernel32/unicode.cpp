@@ -1,4 +1,4 @@
-/* $Id: unicode.cpp,v 1.22 2000-02-16 14:25:45 sandervl Exp $ */
+/* $Id: unicode.cpp,v 1.23 2000-04-29 18:26:59 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -76,25 +76,26 @@ BOOL getUconvObject( void )
  *
  */
 INT WINAPI MultiByteToWideChar(UINT page, DWORD flags,
-                     LPCSTR src, INT srclen,
-                                 LPWSTR dst, INT dstlen)
+                     	       LPCSTR src, INT srclen,
+                               LPWSTR dst, INT dstlen)
 {
     int ret;
 
+    dprintf2(("MultiByteToWideChar: %d %x (%s %d) (%x %d)", page, flags, src, srclen, dst, dstlen));
     if (srclen == -1)
-    srclen = lstrlenA(src)+1;
+    	srclen = lstrlenA(src)+1;
     if (!dstlen || !dst)
-    return srclen;
+    	return srclen;
 
     ret = srclen;
     while (srclen && dstlen) {
-    *dst = (WCHAR)(unsigned char)*src;
-    dst++;    src++;
-    dstlen--; srclen--;
+    	*dst = (WCHAR)(unsigned char)*src;
+    	dst++;    src++;
+    	dstlen--; srclen--;
     }
     if (!dstlen && srclen) {
-    SetLastError(ERROR_INSUFFICIENT_BUFFER);
-    return 0;
+    	SetLastError(ERROR_INSUFFICIENT_BUFFER);
+    	return 0;
     }
     return ret;
 }
@@ -140,9 +141,12 @@ INT WIN32API WideCharToMultiByte(UINT page, DWORD flags, LPCWSTR src,
     int care_for_eos=0;
     int dont_copy= (dstlen==0);
 
+    dprintf2(("WideCharToMultiByte: %d %x (%x %d) (%x %d)", page, flags, src, srclen, dst, dstlen));
+
     if ((!src) || ((!dst) && (!dont_copy)) )
-    {   SetLastError(ERROR_INVALID_PARAMETER);
-    return 0;
+    {   
+	SetLastError(ERROR_INVALID_PARAMETER);
+    	return 0;
     }
 
     if (page!=GetACP() && page!=CP_OEMCP && page!=CP_ACP)
@@ -160,36 +164,36 @@ INT WIN32API WideCharToMultiByte(UINT page, DWORD flags, LPCWSTR src,
       }
     while(srclen && (dont_copy || dstlen))
     {
-    if(!dont_copy){
-        if(*src<256)
-        *dst = *src;
-        else
-        {
-        /* ??? The WC_DEFAULTCHAR flag only gets used in
-         * combination with the WC_COMPOSITECHECK flag or at
-         * least this is what it seems from using the function
-         * on NT4.0 in combination with reading the documentation.
-         */
-        *dst = defchar ? *defchar : '?';
-        if(used)*used=1;
-        }
-        dstlen--;
-        dst++;
-    }
-    count++;
-    srclen--;
-    if((!*src) && care_for_eos) {
-        eos = 1;
-        break;
-    }
-    src++;
+    	if(!dont_copy){
+        	if(*src<256)
+        		*dst = *src;
+        	else
+        	{
+	        /* ??? The WC_DEFAULTCHAR flag only gets used in
+        	 * combination with the WC_COMPOSITECHECK flag or at
+	         * least this is what it seems from using the function
+	         * on NT4.0 in combination with reading the documentation.
+	         */
+		        *dst = defchar ? *defchar : '?';
+		        if(used)*used=1;
+	        }
+	        dstlen--;
+	        dst++;
+	}
+    	count++;
+    	srclen--;
+    	if((!*src) && care_for_eos) {
+        	eos = 1;
+        	break;
+    	}
+    	src++;
     }
     if (dont_copy)
-    return count;
+    	return count;
 
     if (!eos && srclen > 0) {
-    SetLastError(ERROR_INSUFFICIENT_BUFFER);
-    return 0;
+    	SetLastError(ERROR_INSUFFICIENT_BUFFER);
+    	return 0;
     }
     return count;
 }

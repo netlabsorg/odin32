@@ -1,4 +1,4 @@
-/* $Id: directory.cpp,v 1.19 2000-04-14 22:35:26 sandervl Exp $ */
+/* $Id: directory.cpp,v 1.20 2000-04-29 18:26:58 sandervl Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
@@ -62,10 +62,34 @@ char *InternalGetSystemDirectoryA()
 //******************************************************************************
 void InitDirectories()
 {
-   	GetWindowsDirectoryA((LPSTR)&DIR_Windows, sizeof(DIR_Windows));
-   	GetSystemDirectoryA((LPSTR)&DIR_System, sizeof(DIR_System));
-}
+ char *endofwinpath, *tmp;
+ int   len;
 
+   strcpy(DIR_System, kernel32Path);
+   len = strlen(DIR_System);
+   if(DIR_System[len-1] == '\\') {
+	DIR_System[len-1] = 0; 
+   }
+   len = ODIN_PROFILE_GetOdinIniString(ODINDIRECTORIES,"WINDOWS","",DIR_Windows,sizeof(DIR_Windows));
+   if (len > 2) {
+	if(DIR_Windows[len-1] == '\\') {
+		DIR_Windows[len-1] = 0; 
+	}
+   }
+   else {
+   	strcpy(DIR_Windows, DIR_System);
+	endofwinpath = tmp = strchr(DIR_Windows, '\\');
+   	while(tmp) {
+		tmp = strchr(endofwinpath+1, '\\');
+		if(tmp)
+			endofwinpath = tmp;
+   	}
+   	if(endofwinpath) {
+		*endofwinpath = 0; //remove \SYSTEM32
+	}
+   	else DebugInt3();
+   }
+}
 /*****************************************************************************
  * Name      : GetCurrentDirectoryA
  * Purpose   : query the current directory
@@ -230,17 +254,13 @@ ODINFUNCTION2(BOOL,CreateDirectoryW,LPCWSTR,             arg1,
 ODINFUNCTION2(UINT,GetSystemDirectoryA,LPSTR,lpBuffer,
                                        UINT,uSize)
 {
-  char buf[255];
-  int  len;
+ int   len;
+ char *dir;
 
-     	lstrcpynA(buf, kernel32Path, sizeof(buf)-1);
-	len = lstrlenA(buf);;
-	if(buf[len-1] == '\\') {
-		buf[len-1] = 0; 
-		len--;
-	}
+	dir = InternalGetSystemDirectoryA();
+	len = lstrlenA(dir);
 	if(lpBuffer)
-		lstrcpynA(lpBuffer, buf, uSize);
+		lstrcpynA(lpBuffer, dir, uSize);
 	return len;
 }
 
@@ -264,14 +284,16 @@ ODINFUNCTION2(UINT,GetSystemDirectoryW,LPWSTR,lpBuffer,
   UINT  rc;
 
   if(lpBuffer)
-  	asciibuffer = (char *)malloc(uSize+1);
+  	asciibuffer = (char *)alloca(uSize+1);
+
+  if(lpBuffer && asciibuffer == NULL) {
+	DebugInt3();
+  }
 
   rc = GetSystemDirectoryA(asciibuffer, uSize);
   if(rc && asciibuffer)
     	AsciiToUnicode(asciibuffer, lpBuffer);
 
-  if(asciibuffer)
-	free(asciibuffer);
   return(rc);
 }
 
@@ -291,25 +313,13 @@ ODINFUNCTION2(UINT,GetSystemDirectoryW,LPWSTR,lpBuffer,
 ODINFUNCTION2(UINT,GetWindowsDirectoryA,LPSTR,lpBuffer,
                                         UINT,uSize)
 {
-  static int fWindirExists = FALSE;
-  CHAR  buf[255];
-  int   len;
-  
-	//SvL: Use path of kernel32.dll instead of calling Open32 api (which returns \OS2\SYSTEM)
-	lstrcpynA(buf, kernel32Path, sizeof(buf)-1);
-	strcat(buf, "WIN");
-	if(!fWindirExists) {
-		O32_CreateDirectory(buf, NULL);
-		fWindirExists = TRUE;
-	}
+ char *dir;
+ int   len;
 
-	len = lstrlenA(buf);;
-	if(buf[len-1] == '\\') {
-		buf[len-1] = 0; 
-		len--;
-	}
+	dir = InternalGetWindowsDirectoryA();
+	len = lstrlenA(dir);
 	if(lpBuffer)
-		lstrcpynA(lpBuffer, buf, uSize);
+		lstrcpynA(lpBuffer, dir, uSize);
 	return len;
 }
 
@@ -333,14 +343,16 @@ ODINFUNCTION2(UINT,GetWindowsDirectoryW,LPWSTR,lpBuffer,
   UINT  rc;
 
   if(lpBuffer)
-  	asciibuffer = (char *)malloc(uSize+1);
+  	asciibuffer = (char *)alloca(uSize+1);
+
+  if(lpBuffer && asciibuffer == NULL) {
+	DebugInt3();
+  }
 
   rc = GetWindowsDirectoryA(asciibuffer, uSize);
   if(rc && asciibuffer)
     	AsciiToUnicode(asciibuffer, lpBuffer);
 
-  if(asciibuffer)
-	free(asciibuffer);
   return(rc);
 }
 
