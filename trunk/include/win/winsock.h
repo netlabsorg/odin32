@@ -1,4 +1,4 @@
-/* $Id: winsock.h,v 1.1 1999-05-24 20:19:23 ktk Exp $ */
+/* $Id: winsock.h,v 1.2 1999-10-16 11:03:19 sandervl Exp $ */
 
 /* WINSOCK.H--definitions to be used with the WINSOCK.DLL
  *
@@ -370,6 +370,12 @@ typedef struct WSAData {
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+u_short PASCAL FAR htons (u_short hostshort);
+int PASCAL FAR closesocket (SOCKET s);
+ 
+/* Database function prototypes */
+int PASCAL FAR gethostname (char FAR * name, int namelen);
 
 /* Microsoft Windows Extension function prototypes */
 
