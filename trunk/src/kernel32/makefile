@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.25 1999-08-22 14:30:59 sandervl Exp $
+# $Id: makefile,v 1.26 1999-08-23 13:54:43 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -109,7 +109,7 @@ os2heap.OBJ: \
     $(PDWIN32_INCLUDE)\win32type.h \
     os2heap.h
 
-initterm.OBJ: .\initterm.cpp
+initterm.OBJ: .\initterm.cpp initterm.h
 
 thunk.OBJ: \
     .\thunk.cpp \
@@ -165,6 +165,7 @@ network.OBJ: \
 
 misc.OBJ: \
     .\misc.cpp \
+    initterm.h \
     $(PDWIN32_INCLUDE)\misc.h
 
 win32util.OBJ: \
@@ -297,7 +298,7 @@ async.OBJ: \
 virtual.obj:   virtual.cpp $(PDWIN32_INCLUDE)\win\virtual.h
 
 pefile.OBJ:    pefile.cpp $(PDWIN32_INCLUDE)\pefile.h
-winimage.OBJ:  winimage.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h $(PDWIN32_INCLUDE)\pefile.h $(PDWIN32_INCLUDE)\winres.h
+winimage.OBJ:  winimage.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h $(PDWIN32_INCLUDE)\pefile.h $(PDWIN32_INCLUDE)\winres.h initterm.h
 winimgres.OBJ: winimgres.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h $(PDWIN32_INCLUDE)\pefile.h $(PDWIN32_INCLUDE)\winexe.h $(PDWIN32_INCLUDE)\winres.h
 windll.OBJ:    windll.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h
 winexe.OBJ:    winexe.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h $(PDWIN32_INCLUDE)\winexe.h

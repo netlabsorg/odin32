@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.12 1999-08-22 08:33:14 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.13 1999-08-23 13:54:42 sandervl Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -35,6 +35,7 @@
 #include <wprocess.h>
 #include "handlemanager.h"
 #include "profile.h"
+#include "initterm.h"
 
 /*-------------------------------------------------------------------*/
 /* A clean up routine registered with DosExitList must be used if    */
@@ -50,19 +51,15 @@ void CDECL _ctordtorInit( void );
 void CDECL _ctordtorTerm( void );
 }
 
-void CloseLogFile(); //misc.cpp
+//Global DLL Data
+#pragma data_seg(_GLOBALDATA)
+int globLoadNr = 0;
+#pragma data_seg()
 
 /* Tue 03.03.1998: knut */
 /* flag to optimize DosAllocMem to use all the memory on SMP machines */
-ULONG flAllocMem;
-
-#ifndef PAG_ANY
-    #define PAG_ANY    0x00000400
-#endif
-
-#ifndef QSV_VIRTUALADDRESSLIMIT
-    #define QSV_VIRTUALADDRESSLIMIT 30
-#endif
+ULONG flAllocMem = 0;
+int   loadNr = 0;
 
 /****************************************************************************/
 /* _DLL_InitTerm is the function that gets called by the operating system   */
@@ -88,6 +85,8 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
     switch (ulFlag)
     {
         case 0 :
+	    loadNr = globLoadNr++;
+
             dprintf(("kernel32 init\n"));
             _ctordtorInit();
 
