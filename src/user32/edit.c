@@ -35,11 +35,15 @@ DEFAULT_DEBUG_CHANNEL(edit);
 DECLARE_DEBUG_CHANNEL(combo);
 #ifndef __WIN32OS2__
 DECLARE_DEBUG_CHANNEL(relay);
-#endif
 
+#define BUFLIMIT_MULTI		0x7FFFFFF	/* maximum buffer size (not including '\0')
+#define BUFLIMIT_SINGLE		0x7FFFFFF	/* maximum buffer size (not including '\0') */
+#else
 #define BUFLIMIT_MULTI		65534	/* maximum buffer size (not including '\0')
 					   FIXME: BTW, new specs say 65535 (do you dare ???) */
 #define BUFLIMIT_SINGLE		32766	/* maximum buffer size (not including '\0') */
+#endif
+
 #define GROWLENGTH		32	/* buffers granularity in bytes: must be power of 2 */
 #define ROUND_TO_GROW(size)	(((size) + (GROWLENGTH - 1)) & ~(GROWLENGTH - 1))
 #define HSCROLL_FRACTION	3	/* scroll window by 1/3 width */
@@ -1839,12 +1843,19 @@ static BOOL EDIT_MakeFit(HWND hwnd, EDITSTATE *es, UINT size)
 
 	if (size <= es->buffer_size)
 		return TRUE;
+#ifndef __WIN32OS2__
+//SvL: EM_SETTEXTLIMIT has no effect in 
+//     NT4, SP6 (EM_GETTEXTLIMIT only returns that value).
+//     Limits are simply ignored, no EN_MAXTEXT notification is ever sent.
+//     (fixes license edit control in Microsoft Visual C++ 4.2 install)
+
 	if (size > es->buffer_limit) {
 		EDIT_NOTIFY_PARENT(hwnd, es, EN_MAXTEXT, "EN_MAXTEXT");
 		return FALSE;
 	}
 	if (size > es->buffer_limit)
 		size = es->buffer_limit;
+#endif
 
 	TRACE("trying to ReAlloc to %d+1 characters\n", size);
 
