@@ -1,4 +1,4 @@
-/* $Id: StateUpd.cpp,v 1.27 2000-07-29 14:12:46 bird Exp $
+/* $Id: StateUpd.cpp,v 1.28 2000-08-02 02:18:03 bird Exp $
  *
  * StateUpd - Scans source files for API functions and imports data on them.
  *
@@ -824,18 +824,18 @@ static unsigned long processModuleHeader(char **papszLines, int i, int &iRet, co
  */
 static unsigned long processDesignNote(char **papszLines, int i, int &iRet, const char *pszFilename, POPTIONS pOptions)
 {
-    unsigned long   ulRc;
+    unsigned long   ulRc = 0;
     char            szBuffer[0x10000];
     char *          psz;
 
     /*
-     *  Find and parse the @designnote tag/keyword.
-     *      syntax:     @designnote [seqnbr] <title>
+     *  Find and parse the @design tag/keyword.
+     *      syntax:     @design [seqnbr] <title>
      *                  <text>
      *
      */
-    psz = stristr(papszLines[i], "@designnote ");
-    if (psz != NULL)
+    psz = stristr(papszLines[i], "@design");
+    if (psz != NULL && (psz[7] == '\0' || psz[7] == ' '))
     {
         signed long     lSeqNbr;
 
@@ -853,7 +853,7 @@ static unsigned long processDesignNote(char **papszLines, int i, int &iRet, cons
             copyComment(&szBuffer[0], 0, i+1, papszLines, TRUE, TRUE);
 
         /* Update database */
-        if (!dbAddDesignNote(pOptions->lDllRefcode, pOptions->lFileRefcode, psz, &szBuffer[0], lSeqNbr, pOptions->lSeqFile++))
+        if (!dbAddDesignNote(pOptions->lDllRefcode, pOptions->lFileRefcode, psz, &szBuffer[0], lSeqNbr, pOptions->lSeqFile++, i + 1))
         {
             ulRc = 0x00010000;
             fprintf(phSignal, "%s(%d): Failed to add designnote. %s\n", dbGetLastErrorDesc());
@@ -866,7 +866,7 @@ static unsigned long processDesignNote(char **papszLines, int i, int &iRet, cons
     }
     else
     {
-        fprintf(phSignal, "%s(%d): internal error @designnote \n", pszFilename, i);
+        fprintf(phSignal, "%s(%d): internal error @design\n", pszFilename, i);
         ulRc = 0x00010000;
     }
 
@@ -896,6 +896,7 @@ static unsigned long processAPI(char **papszLines, int i, int &iRet, const char 
     /* default value and file number. */
     FnDesc.lStatus = 99;
     FnDesc.lFile = pOptions->lFileRefcode;
+    FnDesc.lLine = i + 1;
 
     /* precondition: isFunction is true.
      * brief algorithm:
@@ -1520,7 +1521,7 @@ static unsigned long analyseFnHdr(PFNDESC pFnDesc, char **papszLines, int i, con
         pszB += strlen(pszB) + 1;
 
         /* status */
-        pFnDesc->pszReturnDesc  = SDSCopyTextUntilNextTag(pszB, FALSE, iStatus, iEnd, papszLines);
+        pFnDesc->pszStatus      = SDSCopyTextUntilNextTag(pszB, FALSE, iStatus, iEnd, papszLines);
         pszB += strlen(pszB) + 1;
 
         /* remark */
@@ -1545,12 +1546,12 @@ static unsigned long analyseFnHdr(PFNDESC pFnDesc, char **papszLines, int i, con
 
         /* time */
         i = findStrLine("@time", iStart, iEnd, papszLines);
-        pFnDesc->pszReturnDesc  = SDSCopyTextUntilNextTag(pszB, TRUE, i, iEnd, papszLines);
+        pFnDesc->pszTime        = SDSCopyTextUntilNextTag(pszB, TRUE, i, iEnd, papszLines);
         pszB += strlen(pszB) + 1;
 
         /* equiv */
         i = findStrLine("@equiv", iStart, iEnd, papszLines);
-        pFnDesc->pszReturnDesc  = SDSCopyTextUntilNextTag(pszB, TRUE, i, iEnd, papszLines);
+        pFnDesc->pszEquiv       = SDSCopyTextUntilNextTag(pszB, TRUE, i, iEnd, papszLines);
         pszB += strlen(pszB) + 1;
 
         /* Set parameter descriptions to NULL */
@@ -1560,12 +1561,13 @@ static unsigned long analyseFnHdr(PFNDESC pFnDesc, char **papszLines, int i, con
         /*
          * parameters, new @param for each parameter!
          */
+        i = iStart - 1;
         do
         {
             char *pszParam;
 
             /* find first */
-            i = findStrLine("@param", iStart, iEnd, papszLines);
+            i = findStrLine("@param", i + 1, iEnd, papszLines);
             if (i >= iEnd)
                 break;
 
@@ -1596,7 +1598,7 @@ static unsigned long analyseFnHdr(PFNDESC pFnDesc, char **papszLines, int i, con
                     ulRc += 0x00010000;
                 }
             }
-        } while (i > iEnd);
+        } while (i < iEnd);
     }
 
     /*
@@ -1604,7 +1606,7 @@ static unsigned long analyseFnHdr(PFNDESC pFnDesc, char **papszLines, int i, con
      */
     if (pFnDesc->pszStatus != NULL && *pFnDesc->pszStatus != '\0')
     {
-        if (strstr(pFnDesc->pszStatus, "STUB") != NULL || *pFnDesc->pszStatus == '1')
+        if (stristr(pFnDesc->pszStatus, "STUB") != NULL || *pFnDesc->pszStatus == '1')
             pFnDesc->lStatus = 1; /* STUB */
         else if (stristr(pFnDesc->pszStatus, "Partially") != NULL || *pFnDesc->pszStatus == '2' || *pFnDesc->pszStatus == '3')
         {
@@ -2099,7 +2101,7 @@ static BOOL isDesignNote(char **papszLines, int i, POPTIONS pOptions)
     if (psz == NULL)
         return FALSE;
 
-    // look for /**@designnote "
+    // look for /**@design
     while (*psz == ' ')
         psz++;
     if (strncmp(psz, "/**", 3) == 0)
@@ -2107,7 +2109,7 @@ static BOOL isDesignNote(char **papszLines, int i, POPTIONS pOptions)
         psz++;
         while (*psz == '*' || *psz == ' ')
             psz++;
-        return strnicmp(psz, "@designnote ", 12) == 0;
+        return strnicmp(psz, "@design", 7) == 0 && (psz[7] == '\0' || psz[7] == ' ');
     }
     pOptions = pOptions;
     return FALSE;
