@@ -1,4 +1,5 @@
-/*
+/* $Id: initterm.cpp,v 1.11 2001-09-05 13:17:10 bird Exp $
+ *
  * DLL entry point
  *
  * Copyright 1998 Sander van Leeuwen

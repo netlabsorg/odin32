@@ -1,3 +1,4 @@
+/* $Id: wcstring.c,v 1.2 2001-09-05 13:14:08 bird Exp $ */
 /*
  * NTDLL wide-char functions
  *
@@ -285,7 +286,7 @@ INT __cdecl NTDLL_mbstowcs( LPWSTR dst, LPCSTR src, INT n )
 INT __cdecl NTDLL_wcstol(LPWSTR s,LPWSTR *end,INT base)
 {
     LPSTR sA = HEAP_strdupWtoA(GetProcessHeap(),0,s),endA;
-    INT	ret = strtol(sA,&endA,base);
+    INT ret = strtol(sA,&endA,base);
 
     HeapFree(GetProcessHeap(),0,sA);
     if (end) *end = s+(endA-sA); /* pointer magic checked. */
@@ -324,21 +325,21 @@ LPWSTR __cdecl _ultow(ULONG value, LPWSTR string, INT radix)
     ULONG v = value;
 
     if (radix > 36 || radix <= 1)
-	return 0;
+    return 0;
 
     while (v || tp == tmp)
     {
-	i = v % radix;
-	v = v / radix;
-	if (i < 10)
-	    *tp++ = i + '0';
-	else
-	    *tp++ = i + 'a' - 10;
+    i = v % radix;
+    v = v / radix;
+    if (i < 10)
+        *tp++ = i + '0';
+    else
+        *tp++ = i + 'a' - 10;
     }
 
     sp = string;
     while (tp > tmp)
-	*sp++ = *--tp;
+    *sp++ = *--tp;
     *sp = 0;
     return string;
 }

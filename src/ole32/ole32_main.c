@@ -1,3 +1,4 @@
+/* $Id: ole32_main.c,v 1.2 2001-09-05 13:17:11 bird Exp $ */
 /*
  *  OLE32 Initialization
  *
@@ -15,7 +16,7 @@ DEFAULT_DEBUG_CHANNEL(ole);
 HINSTANCE OLE32_hInstance = 0;
 
 /***********************************************************************
- *		DllEntryPoint (OLE32.@)
+ *      DllEntryPoint (OLE32.@)
  */
 
 BOOL WINAPI OLE32_DllEntryPoint(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
@@ -25,17 +26,17 @@ BOOL WINAPI OLE32_DllEntryPoint(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImp
     switch(fdwReason) {
     case DLL_PROCESS_ATTACH:
         OLE32_hInstance = hinstDLL;
-	break;
+    break;
 
     case DLL_PROCESS_DETACH:
         OLE32_hInstance = 0;
-	break;
+    break;
     }
     return TRUE;
 }
 
 /***********************************************************************
- *		DllRegisterServer (OLE32.@)
+ *      DllRegisterServer (OLE32.@)
  */
 HRESULT WINAPI OLE32_DllRegisterServer() {
     /* FIXME: what Interfaces should we register ... */
