@@ -1,4 +1,4 @@
-/* $Id: Dialog.h,v 1.3 2001-02-17 20:25:44 bird Exp $
+/* $Id: Dialog.h,v 1.2.2.2 2001-02-17 08:57:50 bird Exp $
  *
  * Dialog IDs.
  *

@@ -1,4 +1,0 @@
-; $Id: regsvr32.def,v 1.2 2000-12-16 22:53:30 bird Exp $
-NAME RegSvr32 WINDOWAPI
-DESCRIPTION 'Odin32 Utility - RegSvr32'
-
