@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2000-02-05 02:01:38 sandervl Exp $
+# $Id: makefile,v 1.9 2000-02-09 23:40:46 bird Exp $
 
 #
 # PD-Win32 API
@@ -17,7 +17,6 @@ PDWIN32_TOOLS = ..\..\tools\bin
 
 CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE)
 CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
-IMPLIBFLAGS = $(IMPLIBFLAGS)
 
 TARGET = lz32
 
@@ -27,32 +26,43 @@ all: $(TARGET).dll $(TARGET).lib
 
 
 $(TARGET).dll: $(OBJS) $(TARGET)exp.def
-        $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) \
-        $(PDWIN32_LIB)\odincrt.lib \
-        $(PDWIN32_LIB)\kernel32.lib \
-        os2386.lib \
-        $(RTLLIB_O) \
-        $(TARGET).def
-        $(CP) $@ $(PDWIN32_BIN)
+    $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) \
+          $(PDWIN32_LIB)\odincrt.lib \
+          $(PDWIN32_LIB)\kernel32.lib \
+          os2386.lib \
+          $(RTLLIB_O) \
+          $(TARGET).def
+    $(CP) $@ $(PDWIN32_BIN)
 
 
-$(TARGET)exp.def: $(TARGET).def
-        $(IMPDEF) $** $@
+lib: $(TARGET).lib $(PDWIN32_LIB)\$(TARGET).lib
+
+$(PDWIN32_LIB)\$(TARGET).lib: $(TARGET).lib
+    $(CP) $** $@
 
 $(TARGET).lib: $(TARGET)exp.def
-	$(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
-	$(CP) $@ $(PDWIN32_LIB)
+    $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
+    $(CP) $@ $(PDWIN32_LIB)
+
+$(TARGET)exp.def: $(TARGET).def
+    $(IMPDEF) $** $@
 
 
 resource.asm: $(TARGET).rc
     $(RC) $(RCFLAGS) -o resource.asm $(TARGET).rc
 
-resource.obj: resource.asm
 
-lz32.obj: lz32.cpp lz32.h $(PDWIN32_INCLUDE)\win\debugtools.h
+dep:
+    $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
+    *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
+
+!ifndef NODEP
+!include .depend
+!endif
+
 
 clean:
-        $(RM) *exp.def *.obj *.lib *.dll *.map *.pch
-        $(RM) $(PDWIN32_BIN)\$(TARGET).dll
-        $(RM) $(PDWIN32_LIB)\$(TARGET).lib
+    $(RM) *exp.def *.obj *.lib *.dll *.map *.pch \
+        $(PDWIN32_BIN)\$(TARGET).dll $(PDWIN32_LIB)\$(TARGET).lib \
+        resource.asm $(TARGET)exp.def
 

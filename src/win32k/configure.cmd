@@ -1,4 +1,4 @@
-/* $Id: configure.cmd,v 1.3 1999-11-10 01:45:29 bird Exp $
+/* $Id: configure.cmd,v 1.4 2000-02-09 23:40:54 bird Exp $
  *
  * Configuration script.
  * Generates makefile.inc and an empty .depend file.
@@ -40,6 +40,7 @@
         call lineout sIncFile, 'PDWIN32_INCLUDE  =' sPDWin32Base'\include'
         call lineout sIncFile, 'PDWIN32_BIN      =' sPDWin32Base'\bin'
         call lineout sIncFile, 'PDWIN32_LIB      =' sPDWin32Base'\lib'
+        call lineout sIncFile, 'PDWIN32_TOOLS    =' sPDWin32Base'\tools\bin'
         call lineout sIncFile, ''
 
         call lineout sIncFile, '################################################################################'
