@@ -1,7 +1,7 @@
-/*
+/* $Id: kFilePE.h,v 1.4 2001-04-17 00:26:11 bird Exp $
  * kFilePE - PE files.
  *
- * Copyright (c) 1999 knut st. osmundsen
+ * Copyright (c) 1999-2001 knut st. osmundsen
  *
  */
 
@@ -13,7 +13,7 @@
 *******************************************************************************/
 
 #if !defined(__WINE_PEEXE_H) && !defined(_WINNT_)
-#if 0
+#if 1
     #define PIMAGE_DOS_HEADER           void*
     #define PIMAGE_FILE_HEADER          void*
     #define PIMAGE_OPTIONAL_HEADER      void*
@@ -46,7 +46,7 @@
  * TODO: error handling.
  * @author      knut st. osmundsen
  */
-class kFilePE : public kFileFormatBase
+class kFilePE : public kFileFormatBase, public kExecutableI
 {
     private:
         void                   *pvBase;
@@ -82,10 +82,18 @@ class kFilePE : public kFileFormatBase
         kFilePE(kFile *pFile) throw(int);
         virtual ~kFilePE();
 
-        /* operations */
-        BOOL  queryModuleName(char *pszBuffer);
-        BOOL  findFirstExport(PEXPORTENTRY pExport);
-        BOOL  findNextExport(PEXPORTENTRY pExport);
+        /** @cat Module information methods. */
+        BOOL        moduleGetName(char *pszBuffer, int cchSize = 260);
+
+        /** @cat Export enumeration methods. */
+        BOOL        exportFindFirst(kExportEntry *pExport);
+        BOOL        exportFindNext(kExportEntry *pExport);
+        void        exportFindClose(kExportEntry *pExport);
+
+        /** @cat Export Lookup methods */
+        BOOL        exportLookup(unsigned long ulOrdinal, kExportEntry *pExport);
+        BOOL        exportLookup(const char *  pszName, kExportEntry *pExport);
+
         BOOL  isPe() const   { return TRUE;}
 
         BOOL  dump(kFile *pOut);

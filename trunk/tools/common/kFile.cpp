@@ -1,4 +1,4 @@
-/* $Id: kFile.cpp,v 1.7 2000-10-05 07:27:56 bird Exp $
+/* $Id: kFile.cpp,v 1.8 2001-04-17 00:26:10 bird Exp $
  *
  * kFile - Simple (for the time being) file class.
  *
@@ -942,5 +942,21 @@ BOOL            kFile::setFailOnErrors()
 int            kFile::getLastError() const
 {
     return rc;
+}
+
+
+
+/**
+ * Reads the specified file in to a memory block and returns it.
+ * @returns Pointer to memory mapping on success.
+ *          NULL on error.
+ * @param   pszFilename     Name of the file.
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @remark  May throw errors.
+ */
+void *kFile::readFile(const char *pszFilename)
+{
+    kFile file(pszFilename);
+    return file.readFile();
 }
 

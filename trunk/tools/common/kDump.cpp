@@ -1,4 +1,4 @@
-/* $Id: kDump.cpp,v 1.2 2001-02-02 08:45:41 bird Exp $
+/* $Id: kDump.cpp,v 1.3 2001-04-17 00:26:10 bird Exp $
  *
  * Generic dumper...
  *
@@ -24,6 +24,7 @@
 
 #include "kFile.h"
 #include "kFileFormatBase.h"
+#include "kInterfaces.h"
 #include "kFileDef.h"
 #include "kFileLX.h"
 #include "kFilePE.h"

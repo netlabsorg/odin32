@@ -1,4 +1,4 @@
-/* $Id: kDef2Wat.cpp,v 1.1 2000-10-03 05:42:37 bird Exp $
+/* $Id: kDef2Wat.cpp,v 1.2 2001-04-17 00:26:10 bird Exp $
  *
  * Converter for IBM/MS linker definition files (.DEF) to Watcom linker directives and options.
  *
@@ -17,6 +17,7 @@
 
 #include "kFile.h"
 #include "kFileFormatBase.h"
+#include "kInterfaces.h"
 #include "kFileDef.h"
 
 /*******************************************************************************

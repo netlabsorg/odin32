@@ -1,4 +1,4 @@
-/* $Id: kFileLX.h,v 1.4 2001-02-02 08:45:41 bird Exp $
+/* $Id: kFileLX.h,v 1.5 2001-04-17 00:26:11 bird Exp $
  *
  * kFileLX - Linear Executable file reader.
  *
@@ -14,7 +14,7 @@
 
 
 
-class kFileLX : public kFileFormatBase/*, public kPageI*/
+class kFileLX : public kFileFormatBase, public kExecutableI /*, public kPageI*/
 {
 protected:
     PVOID               pvBase;         /* Pointer to filemapping. */
@@ -31,9 +31,18 @@ public:
     kFileLX(kFile *pFile) throw (int);
     ~kFileLX();
 
-    virtual BOOL        queryModuleName(char *pszBuffer);
-    virtual BOOL        findFirstExport(PEXPORTENTRY pExport);
-    virtual BOOL        findNextExport(PEXPORTENTRY pExport);
+    /** @cat Module information methods. */
+    BOOL        moduleGetName(char *pszBuffer, int cchSize = 260);
+
+    /** @cat Export enumeration methods. */
+    BOOL        exportFindFirst(kExportEntry *pExport);
+    BOOL        exportFindNext(kExportEntry *pExport);
+    void        exportFindClose(kExportEntry *pExport);
+
+    /** @cat Export Lookup methods */
+    BOOL        exportLookup(unsigned long ulOrdinal, kExportEntry *pExport);
+    BOOL        exportLookup(const char *  pszName, kExportEntry *pExport);
+
     virtual BOOL        isLx() const {return TRUE;};
 
     struct o32_obj *    getObject(int iObject);

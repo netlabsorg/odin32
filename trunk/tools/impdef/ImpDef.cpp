@@ -1,4 +1,4 @@
-/* $Id: ImpDef.cpp,v 1.6 2000-12-17 03:26:41 bird Exp $ */
+/* $Id: ImpDef.cpp,v 1.7 2001-04-17 00:26:28 bird Exp $ */
 /*
  * ImpDef - Create export file which use internal names and ordinals.
  *
@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include "ImpDef.h"
 #include "kFile.h"
+#include "kInterFaces.h"
 #include "kFileFormatBase.h"
 #include "kFileDef.h"
 
@@ -24,7 +25,7 @@
 *******************************************************************************/
 static void   syntax(void);
 static long   processFile(const char *pszInput, const char *pszOutput, const POPTIONS pOptions);
-static char  *generateExportName(const PEXPORTENTRY pExport, char *pszBuffer, const POPTIONS pOptions);
+static char  *generateExportName(const kExportEntry * pExport, char *pszBuffer, const POPTIONS pOptions);
 
 
 /**
@@ -190,7 +191,7 @@ static long processFile(const char *pszInput, const char *pszOutput, const POPTI
             kFileDef DefFile(&Input);
             try
             {
-                EXPORTENTRY export;
+                kExportEntry export;
                 kFile Output(pszOutput, FALSE);
 
                 /* generate LIBRARY line */
@@ -204,7 +205,7 @@ static long processFile(const char *pszInput, const char *pszOutput, const POPTI
                     Output.printf("DESCRIPTION '%s'\n", DefFile.queryDescription());
 
                 /* Exports */
-                if (DefFile.findFirstExport(&export))
+                if (DefFile.exportFindFirst(&export))
                 {
                     Output.printf("EXPORTS\n");
                     do
@@ -234,7 +235,7 @@ static long processFile(const char *pszInput, const char *pszOutput, const POPTI
                         pszName = generateExportName(&export, &szName[0], pOptions);
 
                         Output.printf("    %-*s  @%ld\n", 40, pszName, export.ulOrdinal);
-                    } while (DefFile.findNextExport(&export));
+                    } while (DefFile.exportFindNext(&export));
                 Output.setSize();
                 }
             }
@@ -274,7 +275,7 @@ static long processFile(const char *pszInput, const char *pszOutput, const POPTI
  * @sketch    write only code... but it works (I hope).
  * @remark
  */
-static char *generateExportName(const PEXPORTENTRY pExport, char *pszBuffer, const POPTIONS pOptions)
+static char *generateExportName(const kExportEntry * pExport, char *pszBuffer, const POPTIONS pOptions)
 {
     if (pExport->ulOrdinal < pOptions->ulOrdStartInternalFunctions)
     {

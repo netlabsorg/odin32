@@ -28,7 +28,15 @@
 
 #include "kFile.h"
 #include "kFileFormatBase.h"
+#include "kInterfaces.h"
 #include "kFileDef.h"
+
+/*******************************************************************************
+*   Global Variables                                                           *
+*******************************************************************************/
+#if 0
+static kFileDef tst((kFile*)NULL);
+#endif
 
 
 /*******************************************************************************
@@ -521,15 +529,20 @@ BOOL  kFileDef::setModuleName(void)
 
 /**
  * Query for the module name.
- * @returns   Success indicator. TRUE / FALSE.
- * @param     pszBuffer  Pointer to buffer which to put the name into.
+ * @returns Success indicator. TRUE / FALSE.
+ * @param   pszBuffer   Pointer to buffer which to put the name into.
+ * @param   cchBuffer   Size of the buffer (defaults to 260 chars).
  */
-BOOL  kFileDef::queryModuleName(char *pszBuffer)
+BOOL  kFileDef::moduleGetName(char *pszBuffer, int cchSize/* = 260*/)
 {
+    int cch;
     if (pszModName == NULL)
         return FALSE;
 
-    strcpy(pszBuffer, pszModName);
+    cch = strlen(pszModName) + 1;
+    if (cch > cchSize)
+        return FALSE;
+    memcpy(pszBuffer, pszModName, cch);
 
     return TRUE;
 }
@@ -539,21 +552,21 @@ BOOL  kFileDef::queryModuleName(char *pszBuffer)
  * Finds the first exports.
  * @returns   Success indicator. TRUE / FALSE.
  * @param     pExport  Pointer to export structure.
- * @remark
  */
-BOOL  kFileDef::findFirstExport(PEXPORTENTRY pExport)
+BOOL  kFileDef::exportFindFirst(kExportEntry *pExport)
 {
     if (pExports != NULL && pExport != NULL)
     {
         pExport->ulOrdinal = pExports->ulOrdinal;
+        pExport->achName[0] = '\0';
         if (pExports->pszName != NULL)
             strcpy(&pExport->achName[0], pExports->pszName);
-        else
-            pExport->achName[0] = '\0';
+
+        pExport->achIntName[0] = '\0';
         if (pExports->pszIntName)
             strcpy(&pExport->achIntName[0], pExports->pszIntName);
-        else
-            pExport->achIntName[0] = '\0';
+
+        pExport->ulAddress = pExport->iObject = pExport->ulOffset = ~0UL;
         pExport->pv = (void*)pExports->pNext;
     }
     else
@@ -566,28 +579,71 @@ BOOL  kFileDef::findFirstExport(PEXPORTENTRY pExport)
  * Finds the next export.
  * @returns   Success indicator. TRUE / FALSE.
  * @param     pExport  Pointer to export structure.
- * @remark
  */
-BOOL  kFileDef::findNextExport(PEXPORTENTRY pExport)
+BOOL  kFileDef::exportFindNext(kExportEntry *pExport)
 {
     if (pExport != NULL && pExport->pv != NULL)
     {
         PDEFEXPORT pExp = (PDEFEXPORT)pExport->pv;
 
         pExport->ulOrdinal = pExp->ulOrdinal;
+        pExport->achName[0] = '\0';
         if (pExp->pszName != NULL)
             strcpy(&pExport->achName[0], pExp->pszName);
-        else
-            pExport->achName[0] = '\0';
+        pExport->achIntName[0] = '\0';
         if (pExp->pszIntName)
             strcpy(&pExport->achIntName[0], pExp->pszIntName);
-        else
-            pExport->achIntName[0] = '\0';
+        pExport->ulAddress = pExport->iObject = pExport->ulOffset = ~0UL;
         pExport->pv = (void*)pExp->pNext;
     }
     else
         return FALSE;
     return TRUE;
+}
+
+
+/**
+ * Frees resources associated with the communicatin area.
+ * It's not necessary to call this when exportFindNext has return FALSE.
+ * (We don't allocate anything so it's not a problem ;-)
+ * @param   pExport     Communication area which has been successfully
+ *                      processed by findFirstExport.
+ */
+void kFileDef::exportFindClose(kExportEntry *pExport)
+{
+    pExport = pExport;
+    return;
+}
+
+
+/**
+ * Lookup information on a spesific export given by ordinal number.
+ * @returns Success indicator.
+ * @param   pExport     Communication area containing export information
+ *                      on successful return.
+ * @remark  stub
+ */
+BOOL kFileDef::exportLookup(unsigned long ulOrdinal, kExportEntry *pExport)
+{
+    assert(!"not implemented.");
+    ulOrdinal = ulOrdinal;
+    pExport = pExport;
+    return FALSE;
+}
+
+/**
+ * Lookup information on a spesific export given by name.
+ * @returns Success indicator.
+ * @param   pExport     Communication area containing export information
+ *                      on successful return.
+ * @remark  stub
+ */
+BOOL kFileDef::exportLookup(const char *  pszName, kExportEntry *pExport)
+{
+    assert(!"not implemented.");
+    pszName = pszName;
+    pExport = pExport;
+    return FALSE;
 }
 
 
