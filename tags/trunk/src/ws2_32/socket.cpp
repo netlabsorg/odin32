@@ -1,4 +1,4 @@
-/* $Id */
+/* $Id: socket.cpp,v 1.9 2001-07-07 14:29:22 achimha Exp $ */
 /*
  * based on Windows Sockets 1.1 specs
  * (ftp.microsoft.com:/Advsys/winsock/spec11/WINSOCK.TXT)
@@ -86,14 +86,3 @@ SOCKET WINAPI WSASocketW(int af, int type, int protocol,
 
    return ( socket (af, type, protocol) );
 }
-
-/***********************************************************************
- *		WSAEnumNetworkEvents
- */
-int WINAPI WSAEnumNetworkEvents(SOCKET s, WSAEVENT hEvent, LPWSANETWORKEVENTS lpEvent)
-{
-    dprintf(("WSAEnumNetworkEvents %x %x %x NOT IMPLEMENTED", s, hEvent, lpEvent));
-    SetLastError(WSAEINVAL);
-    return SOCKET_ERROR;
-}
-

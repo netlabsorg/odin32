@@ -1,4 +1,4 @@
-/* $Id: asyncthread.h,v 1.6 2001-07-07 10:44:09 achimha Exp $ */
+/* $Id: asyncthread.h,v 1.7 2001-07-07 14:29:40 achimha Exp $ */
 
 /*
  * Async thread help functions
@@ -76,6 +76,9 @@ typedef struct _ASYNCTHREADPARM
         } u;
         _ASYNCTHREADPARM *next;
 } ASYNCTHREADPARM, *PASYNCTHREADPARM;
+
+extern VMutex asyncThreadMutex;
+PASYNCTHREADPARM FindAsyncEvent(SOCKET s);
 
 ULONG QueueAsyncJob(ASYNCTHREADPROC asyncproc, PASYNCTHREADPARM pThreadParm, BOOL fSetBlocking = FALSE);
 void  RemoveFromQueue(PASYNCTHREADPARM pThreadParm);

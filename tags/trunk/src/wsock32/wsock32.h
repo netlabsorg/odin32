@@ -1,4 +1,4 @@
-/* $Id: wsock32.h,v 1.17 2001-07-07 10:44:11 achimha Exp $ */
+/* $Id: wsock32.h,v 1.18 2001-07-07 14:29:41 achimha Exp $ */
 
 /* WSOCK32.H--definitions & conversions for Odin's wsock32.dll.
  * Unused/unneeded Microsoft declarations removed.
@@ -51,6 +51,7 @@
 
 // WSAAsyncSelect flags
 // also apply to Winsock 2.0 WSAEventSelect
+#define FD_MAX_EVENTS               10
 #define FD_READ                     0x01
 #define FD_WRITE                    0x02
 #define FD_OOB                      0x04
@@ -247,6 +248,13 @@ typedef HANDLE WSAEVENT;
 #define WSA_SELECT_HEVENT 2
 // async select worker routine
 int WSAAsyncSelectWorker(SOCKET s, int mode, int notifyHandle, int notifyData, long lEventMask);
+
+typedef struct _WSANETWORKEVENTS 
+{
+  long lNetworkEvents;
+  int iErrorCode[FD_MAX_EVENTS];
+} WSANETWORKEVENTS, *LPWSANETWORKEVENTS;
+int WSAEnumNetworkEventsWorker(SOCKET s, WSAEVENT hEvent, LPWSANETWORKEVENTS lpEvent);
 
 #endif  /* _WINSOCK32CONST_ */
 
