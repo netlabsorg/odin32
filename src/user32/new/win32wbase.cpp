@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.23 2000-01-06 17:05:52 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.24 2000-01-07 17:38:47 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -712,20 +712,17 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
 
   if (SendInternalMessageA(WM_NCCREATE,0,(LPARAM)cs))
   {
-        RECT rect;
-
         //update rect
         rectWindow.left = cs->x;
         rectWindow.right = cs->x+cs->cx;
         rectWindow.top = cs->y;
         rectWindow.bottom = cs->y+cs->cy;
-        rectClient = rectWindow;
         if (getParent()) MapWindowPoints(getParent()->getWindowHandle(),0,(PPOINT)&rectWindow,2);
         OffsetRect(&rectWindow, maxPos.x - rectWindow.left, maxPos.y - rectWindow.top);
+        rectClient = rectWindow;
+        if (getParent()) MapWindowPoints(0,getParent()->getWindowHandle(),(PPOINT)&rectClient,2);
         //set the window size and update the client
-        rect = rectWindow;
-        if (getParent()) MapWindowPoints(0,getParent()->getWindowHandle(),(PPOINT)&rect,2);
-        SetWindowPos(hwndLinkAfter,rect.left,rect.top,rect.right-rect.left,rect.bottom-rect.top,SWP_NOACTIVATE | SWP_NOREDRAW | SWP_FRAMECHANGED);
+        SetWindowPos(hwndLinkAfter,rectClient.left,rectClient.top,rectClient.right-rectClient.left,rectClient.bottom-rectClient.top,SWP_NOACTIVATE | SWP_NOREDRAW | SWP_FRAMECHANGED);
         fNoSizeMsg = FALSE;
         if( (SendInternalMessageA(WM_CREATE, 0, (LPARAM)cs )) != -1 )
         {
@@ -1102,10 +1099,32 @@ ULONG Win32BaseWindow::MsgInitMenu(MSG *msg)
 //******************************************************************************
 ULONG Win32BaseWindow::MsgNCPaint()
 {
-  HRGN hrgn;
+  RECT rect;
 
-  hrgn = 0; //CB: todo: set to frame update region
-  return SendInternalMessageA(WM_NCPAINT,hrgn,0);
+  if (GetOS2UpdateRect(OS2HwndFrame,&rect))
+  {
+    HRGN hrgn;
+    ULONG rc;
+    RECT client = rectClient;
+
+//CB: bug in dc.cpp!!!
+    if ((rect.left == rect.right) || (rect.bottom == rect.top)) return 0;
+    mapWin32Rect(getParent() ? getParent()->getOS2WindowHandle():OSLIB_HWND_DESKTOP,OS2HwndFrame,&client);
+    if ((rect.left >= client.left) && (rect.left < client.right) &&
+        (rect.right >= client.left) && (rect.right < client.right) &&
+        (rect.top  >= client.top) && (rect.top < client.bottom) &&
+        (rect.bottom >= client.top) && (rect.bottom < client.bottom))
+      return 0;
+    hrgn = CreateRectRgnIndirect(&rect);
+    if (!hrgn) return 0;
+//CB: bug in GetDCEx with region!!!
+    rc = SendInternalMessageA(WM_NCPAINT,/*hrgn*/0,0);
+dprintf(("CB: %d %d %d %d",rect.left,rect.top,rect.bottom,rect.right));
+    DeleteObject(hrgn);
+    //CB: todo: check if intersection with client
+
+    return rc;
+  } else return 0;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1342,7 +1361,7 @@ VOID Win32BaseWindow::TrackMinMaxBox(WORD wParam)
       else
         DrawMaxButton(hdc,pressed,FALSE);
     }
-  } while (msg.message != WM_LBUTTONUP);
+  } while ((msg.message != WM_LBUTTONUP) && (msg.message != WM_NCLBUTTONUP));
   if (wParam == HTMINBUTTON)
     DrawMinButton(hdc,FALSE,FALSE);
   else
@@ -1371,6 +1390,8 @@ VOID Win32BaseWindow::TrackCloseButton(WORD wParam)
   if (hSysMenu == 0)
     return;
   state = GetMenuState(hSysMenu, SC_CLOSE, MF_BYCOMMAND);
+#else
+state = 0;
 #endif
   /* If the item close of the sysmenu is disabled or not there do nothing */
   if((state & MF_DISABLED) || (state & MF_GRAYED) || (state == 0xFFFFFFFF))
@@ -1386,10 +1407,10 @@ VOID Win32BaseWindow::TrackCloseButton(WORD wParam)
     pressed = (HandleNCHitTest(msg.pt) == wParam);
     if (pressed != oldstate)
       DrawCloseButton(hdc, pressed, FALSE);
-  } while (msg.message != WM_LBUTTONUP);
-  DrawCloseButton(hdc, FALSE, FALSE);
+  } while ((msg.message != WM_LBUTTONUP) && (msg.message != WM_NCLBUTTONUP));
+  DrawCloseButton(hdc,FALSE,FALSE);
   ReleaseCapture();
-  ReleaseDC(Win32Hwnd, hdc );
+  ReleaseDC(Win32Hwnd,hdc);
   if (!pressed) return;
   SendInternalMessageA(WM_SYSCOMMAND,SC_CLOSE,*(LPARAM*)&msg.pt);
 }
@@ -1452,27 +1473,6 @@ LONG Win32BaseWindow::HandleNCLButtonDown(WPARAM wParam,LPARAM lParam)
         break;
     case HTBORDER:
         break;
-  }
-
-  return 0;
-}
-//******************************************************************************
-//******************************************************************************
-LONG Win32BaseWindow::HandleNCLButtonUp(WPARAM wParam,LPARAM lParam)
-{
-  switch(wParam)  /* Hit test */
-  {
-    case HTMINBUTTON:
-      SendInternalMessageA(WM_SYSCOMMAND,SC_MINIMIZE,lParam);
-      break;
-
-    case HTMAXBUTTON:
-      SendInternalMessageA(WM_SYSCOMMAND,SC_MAXIMIZE,lParam);
-      break;
-
-    case HTCLOSE:
-      SendInternalMessageA(WM_SYSCOMMAND,SC_CLOSE,lParam);
-      break;
   }
 
   return 0;
@@ -1769,6 +1769,7 @@ VOID Win32BaseWindow::GetInsideRect(RECT *rect)
 VOID Win32BaseWindow::DrawFrame(HDC hdc,RECT *rect,BOOL dlgFrame,BOOL active)
 {
   INT width, height;
+  HBRUSH oldBrush;
 
   if (dlgFrame)
   {
@@ -1780,20 +1781,17 @@ VOID Win32BaseWindow::DrawFrame(HDC hdc,RECT *rect,BOOL dlgFrame,BOOL active)
     height = GetSystemMetrics(SM_CYFRAME) - GetSystemMetrics(SM_CYEDGE);
   }
 
-  SelectObject( hdc, GetSysColorBrush(active ? COLOR_ACTIVEBORDER :
-                COLOR_INACTIVEBORDER) );
+  oldBrush = SelectObject(hdc,GetSysColorBrush(active ? COLOR_ACTIVEBORDER:COLOR_INACTIVEBORDER));
 
   /* Draw frame */
-  PatBlt( hdc, rect->left, rect->top,
-            rect->right - rect->left, height, PATCOPY );
-  PatBlt( hdc, rect->left, rect->top,
-            width, rect->bottom - rect->top, PATCOPY );
-  PatBlt( hdc, rect->left, rect->bottom - 1,
-            rect->right - rect->left, -height, PATCOPY );
-  PatBlt( hdc, rect->right - 1, rect->top,
-            -width, rect->bottom - rect->top, PATCOPY );
 
-  InflateRect( rect, -width, -height );
+  PatBlt(hdc,rect->left,rect->top,rect->right-rect->left,height,PATCOPY);
+  PatBlt(hdc,rect->left,rect->top,width,rect->bottom-rect->top,PATCOPY);
+  PatBlt(hdc,rect->left,rect->bottom-1,rect->right-rect->left,-height,PATCOPY);
+  PatBlt(hdc,rect->right-1,rect->top,-width,rect->bottom-rect->top,PATCOPY);
+  SelectObject(hdc,oldBrush);
+
+  InflateRect(rect,-width,-height);
 }
 //******************************************************************************
 //******************************************************************************
@@ -2001,6 +1999,8 @@ VOID Win32BaseWindow::DrawCaption(HDC hdc,RECT *rect,BOOL active)
 #if 0 //CB: todo
     /* Go get the sysmenu */
     state = GetMenuState(hSysMenu, SC_CLOSE, MF_BYCOMMAND);
+#else
+state = 0;
 #endif
     /* Draw a grayed close button if disabled and a normal one if SC_CLOSE is not there */
     DrawCloseButton(hdc, FALSE,
@@ -2136,6 +2136,7 @@ VOID Win32BaseWindow::DoNCPaint(HRGN clip,BOOL suppress_menupaint)
     r.left = r.right - GetSystemMetrics(SM_CXVSCROLL) + 1;
     r.top  = r.bottom - GetSystemMetrics(SM_CYHSCROLL) + 1;
     FillRect( hdc, &r,  GetSysColorBrush(COLOR_SCROLLBAR) );
+    //CB: todo: use scroll code for size grip
   }
 
   ReleaseDC(Win32Hwnd,hdc);
@@ -2293,18 +2294,17 @@ LONG Win32BaseWindow::HandleSysCommand(WPARAM wParam, POINT *pt32)
 
     case SC_SCREENSAVE:
         if (wParam == SC_ABOUTWINE)
-            ShellAboutA(hwnd, "Odin", WINE_RELEASE_INFO, 0);
+            ShellAboutA(hwnd, "Odin", ODIN_RELEASE_INFO, 0);
         else
         if (wParam == SC_PUTMARK)
             dprintf(("Mark requested by user\n"));
         break;
-
+#endif
     case SC_HOTKEY:
     case SC_ARRANGE:
     case SC_NEXTWINDOW:
     case SC_PREVWINDOW:
         break;
-#endif
     }
     return 0;
 }
@@ -2467,7 +2467,6 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 
     case WM_NCACTIVATE:
         return HandleNCActivate(wParam);
-        return TRUE;
 
     case WM_NCCREATE:
         return(TRUE);
@@ -2511,7 +2510,6 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
     }
 
     case WM_ACTIVATE:
-      //CB: todo
       return 0;
 
     case WM_SETCURSOR:
@@ -2641,9 +2639,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
     case WM_NCLBUTTONDOWN:
         return HandleNCLButtonDown(wParam,lParam);
 
-    case WM_NCLBUTTONUP:
-        return HandleNCLButtonUp(wParam,lParam);
-
+    case WM_LBUTTONDBLCLK:
     case WM_NCLBUTTONDBLCLK:
         return HandleNCLButtonDblClk(wParam,lParam);
 

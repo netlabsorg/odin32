@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.5 2000-01-05 21:25:04 cbratschi Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.6 2000-01-07 17:38:47 cbratschi Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -140,7 +140,7 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
       case WM_BUTTON3UP:
       case WM_BUTTON3DBLCLK:
         //WM_NC*BUTTON* is posted when the cursor is in a non-client area of the window
-        if((win32wnd->lastHitTestVal != HTCLIENT_W) && (WinQueryCapture(HWND_DESKTOP) != win32wnd->getOS2WindowHandle())) {
+        if(win32wnd->lastHitTestVal != HTCLIENT_W) {
             winMsg->message = WINWM_NCLBUTTONDOWN + (os2Msg->msg - WM_BUTTON1DOWN);
             winMsg->wParam  = win32wnd->lastHitTestVal;
             winMsg->lParam  = MAKELONG(winMsg->pt.x, winMsg->pt.y); //screen coordinates
@@ -184,7 +184,7 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
             keystate |= MK_CONTROL_W;
 
         //WM_NCMOUSEMOVE is posted when the cursor moves into a non-client area of the window
-        if((win32wnd->lastHitTestVal != HTCLIENT_W) && (WinQueryCapture(HWND_DESKTOP) != win32wnd->getOS2WindowHandle()))
+        if(win32wnd->lastHitTestVal != HTCLIENT_W)
         {
           setcursormsg   = WINWM_NCMOUSEMOVE;
           winMsg->wParam = (WPARAM)win32wnd->lastHitTestVal;
@@ -331,7 +331,7 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
     case WM_BUTTON3UP:
     case WM_BUTTON3DBLCLK:
         //WM_NC*BUTTON* is posted when the cursor is in a non-client area of the window
-        if((win32wnd->lastHitTestVal != HTCLIENT_W) && (WinQueryCapture(HWND_DESKTOP) != win32wnd->getOS2WindowHandle())) {
+        if(win32wnd->lastHitTestVal != HTCLIENT_W) {
             winMsg->message = WINWM_NCLBUTTONDOWN + (os2Msg->msg - WM_BUTTON1DOWN);
             winMsg->wParam  = win32wnd->lastHitTestVal;
             winMsg->lParam  = MAKELONG(winMsg->pt.x, winMsg->pt.y); //screen coordinates
@@ -375,7 +375,7 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
             keystate |= MK_CONTROL_W;
 
         //WM_NCMOUSEMOVE is posted when the cursor moves into a non-client area of the window
-        if((win32wnd->lastHitTestVal != HTCLIENT_W) && (WinQueryCapture(HWND_DESKTOP) != win32wnd->getOS2WindowHandle()))
+        if(win32wnd->lastHitTestVal != HTCLIENT_W)
         {
           setcursormsg   = WINWM_NCMOUSEMOVE;
           winMsg->wParam = (WPARAM)win32wnd->lastHitTestVal;
