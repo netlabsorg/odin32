@@ -1,4 +1,11 @@
- /* $Id: ChangeLog,v 1.795 2000-03-10 15:19:45 mike Exp $ */
+ /* $Id: ChangeLog,v 1.796 2000-03-10 16:16:56 sandervl Exp $ */
+
+ 2000-03-09: Sander van Leeuwen <sandervl@xs4all.nl>
+        - KERNEL32: Set initial max nr of file handles to 256 during kernel32 init
+	            Create DDRAW & DSOUND registry keys in InitRegistry
+                    (NOTE: Must be done in install program!)
+                    Added some win95 stubs
+	- GDI32:    Added 16 bits device apis stubs
 
  2000-03-10: Michal Necasek <mike@mendelu.cz>
         - dsound\new: Changed DART buffer size calcualation, hopefully
@@ -32,7 +39,7 @@
         - KERNEL32: Major rewrite of PE loader classes to correctly support
                     dll dependencies
                     TODO: Circular dependencies only partly working
-                          (a->b->a works, but a->b->c->a won't)
+                          (a->b->a works, but a->b->c->a doesn't)
         - USER32: Fixed bug in dialog constructor (class name translation)
                   (only showed up in release build)
                   Dinput mouse changes/fixes
