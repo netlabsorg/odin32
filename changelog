@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.425 1999-11-09 00:44:47 phaller Exp $ */
+ /* $Id: changelog,v 1.426 1999-11-09 09:31:14 phaller Exp $ */
+
+ 99-11-09: Patrick Haller <phaller@gmx.net>
+	- NTDLL:	Add:	various new functions added (DbgXXX)
 
  99-11-08: Markus Montkowski <mmontkowski@gmx.de>
 	- WING32: Added first implementation of this old 32bit DLL.
