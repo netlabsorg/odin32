@@ -1,4 +1,4 @@
-/* $Id: metafile.cpp,v 1.2 2000-02-16 14:18:11 sandervl Exp $ */
+/* $Id: metafile.cpp,v 1.3 2000-11-04 16:29:24 sandervl Exp $ */
 
 /*
  * GDI32 metafile code
@@ -22,8 +22,9 @@
 //******************************************************************************
 HENHMETAFILE WIN32API CloseEnhMetaFile( HDC arg1)
 {
-    dprintf(("GDI32: CloseEnhMetaFile"));
-    return O32_CloseEnhMetaFile(arg1);
+    dprintf(("GDI32: CloseEnhMetaFile NOT IMPLEMENTED"));
+////    return O32_CloseEnhMetaFile(arg1);
+    return 0;
 }
 //******************************************************************************
 //******************************************************************************
@@ -36,8 +37,9 @@ HMETAFILE WIN32API CloseMetaFile( HDC arg1)
 //******************************************************************************
 HENHMETAFILE WIN32API CopyEnhMetaFileA( HENHMETAFILE arg1, LPCSTR  arg2)
 {
-    dprintf(("GDI32: CopyEnhMetaFileA"));
-    return O32_CopyEnhMetaFile(arg1, arg2);
+    dprintf(("GDI32: CopyEnhMetaFileA NOT IMPLEMENTED"));
+////    return O32_CopyEnhMetaFile(arg1, arg2);
+    return 0;
 }
 //******************************************************************************
 //******************************************************************************
@@ -47,7 +49,7 @@ HENHMETAFILE WIN32API CopyEnhMetaFileW( HENHMETAFILE arg1, LPCWSTR  arg2)
  HENHMETAFILE rc;
 
     dprintf(("GDI32: CopyEnhMetaFileW"));
-    rc = O32_CopyEnhMetaFile(arg1, astring);
+    rc = CopyEnhMetaFileA(arg1, astring);
     FreeAsciiString(astring);
     return rc;
 }
@@ -55,8 +57,9 @@ HENHMETAFILE WIN32API CopyEnhMetaFileW( HENHMETAFILE arg1, LPCWSTR  arg2)
 //******************************************************************************
 HENHMETAFILE WIN32API CreateEnhMetaFileA( HDC arg1, LPCSTR arg2, const RECT * arg3, LPCSTR  arg4)
 {
-    dprintf(("GDI32: CreateEnhMetaFileA"));
-    return O32_CreateEnhMetaFile(arg1, arg2, arg3, arg4);
+    dprintf(("GDI32: CreateEnhMetaFileA NOT IMPLEMENTED"));
+////    return O32_CreateEnhMetaFile(arg1, arg2, arg3, arg4);
+    return 0;
 }
 //******************************************************************************
 //******************************************************************************
@@ -67,7 +70,7 @@ HENHMETAFILE WIN32API CreateEnhMetaFileW( HDC arg1, LPCWSTR arg2, const RECT * a
     HENHMETAFILE   rc;
 
     dprintf(("GDI32: CreateMetaFileW"));
-    rc = O32_CreateEnhMetaFile(arg1,astring1,arg3,astring2);
+    rc = CreateEnhMetaFileA(arg1,astring1,arg3,astring2);
     FreeAsciiString(astring1);
     FreeAsciiString(astring2);
     return rc;
@@ -95,8 +98,9 @@ HDC WIN32API CreateMetaFileW( LPCWSTR arg1)
 //******************************************************************************
 BOOL WIN32API DeleteEnhMetaFile( HENHMETAFILE arg1)
 {
-    dprintf(("GDI32: DeleteEnhMetaFile\n"));
-    return O32_DeleteEnhMetaFile(arg1);
+    dprintf(("GDI32: DeleteEnhMetaFile NOT IMPLEMENTED"));
+////    return O32_DeleteEnhMetaFile(arg1);
+    return 0;
 }
 //******************************************************************************
 //******************************************************************************
@@ -127,18 +131,24 @@ HMETAFILE WIN32API CopyMetaFileW( HMETAFILE arg1, LPCWSTR  arg2)
 //******************************************************************************
 //TODO: Callback
 //******************************************************************************
-BOOL WIN32API EnumMetaFile( HDC arg1, HMETAFILE arg2, MFENUMPROC arg3, LPARAM  arg4)
+BOOL WIN32API EnumMetaFile( HDC hdc, HMETAFILE hMetafile, MFENUMPROC metaProc, LPARAM lParam)
 {
-    dprintf(("GDI32: EnumMetaFile STUB"));
+#ifdef STDCALL_ENUMPROCS
+    dprintf(("GDI32: EnumMetaFile %x %x %x %x", hdc, hMetafile, metaProc, lParam));
+    //should change os2win.h
+    return O32_EnumMetaFile(hdc, hMetafile, (MFENUMPROC_O32)metaProc, lParam);
+#else
+    dprintf(("GDI32: EnumMetaFile NOT IMPLEMENTED"));
     //calling convention differences
 //    return O32_EnumMetaFile(arg1, arg2, arg3, arg4);
     return 0;
+#endif
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API EnumEnhMetaFile( HDC arg1, HENHMETAFILE arg2, ENHMFENUMPROC arg3, PVOID arg4, const RECT *  arg5)
 {
-    dprintf(("GDI32: EnumEnhMetaFile DOESN'T WORK!"));
+    dprintf(("GDI32: EnumEnhMetaFile NOT IMPLEMENTED!"));
 //    return O32_EnumEnhMetaFile(arg1, arg2, arg3, arg4, arg5);
     return 0;
 }
@@ -166,8 +176,9 @@ HMETAFILE WIN32API GetMetaFileW( LPCWSTR arg1)
 //******************************************************************************
 HENHMETAFILE WIN32API GetEnhMetaFileA( LPCSTR arg1)
 {
-    dprintf(("GDI32: GetEnhMetaFileA"));
-    return O32_GetEnhMetaFile(arg1);
+    dprintf(("GDI32: GetEnhMetaFileA NOT IMPLEMENTED"));
+////    return O32_GetEnhMetaFile(arg1);
+    return 0;
 }
 //******************************************************************************
 //******************************************************************************
@@ -178,7 +189,7 @@ HENHMETAFILE WIN32API GetEnhMetaFileW( LPCWSTR arg1)
 
     dprintf(("GDI32: GetEnhMetaFileW"));
     // NOTE: This will not work as is (needs UNICODE support)
-    rc = O32_GetEnhMetaFile(astring);
+    rc = GetEnhMetaFileA(astring);
     FreeAsciiString(astring);
     return rc;
 }
@@ -186,8 +197,9 @@ HENHMETAFILE WIN32API GetEnhMetaFileW( LPCWSTR arg1)
 //******************************************************************************
 UINT WIN32API GetEnhMetaFileBits( HENHMETAFILE arg1, UINT arg2, PBYTE  arg3)
 {
-    dprintf(("GDI32: GetEnhMetaFileBits"));
-    return O32_GetEnhMetaFileBits(arg1, arg2, arg3);
+    dprintf(("GDI32: GetEnhMetaFileBits NOT IMPLEMENTED"));
+////    return O32_GetEnhMetaFileBits(arg1, arg2, arg3);
+    return 0;
 }
 //******************************************************************************
 //******************************************************************************
@@ -200,8 +212,9 @@ UINT WIN32API GetMetaFileBitsEx( HMETAFILE arg1, UINT arg2, LPVOID  arg3)
 //******************************************************************************
 HENHMETAFILE WIN32API SetEnhMetaFileBits( UINT arg1, const BYTE *  arg2)
 {
-    dprintf(("GDI32: SetEnhMetaFileBits"));
-    return O32_SetEnhMetaFileBits(arg1, arg2);
+    dprintf(("GDI32: SetEnhMetaFileBits NOT IMPLEMENTED"));
+////    return O32_SetEnhMetaFileBits(arg1, arg2);
+    return 0;
 }
 //******************************************************************************
 //******************************************************************************
@@ -214,36 +227,41 @@ HMETAFILE WIN32API SetMetaFileBitsEx( UINT arg1, const BYTE * arg2)
 //******************************************************************************
 HENHMETAFILE WIN32API SetWinMetaFileBits( UINT arg1, const BYTE * arg2, HDC arg3, const METAFILEPICT *  arg4)
 {
-    dprintf(("GDI32: SetWinMetaFileBits"));
-    return O32_SetWinMetaFileBits(arg1, arg2, arg3, arg4);
+    dprintf(("GDI32: SetWinMetaFileBits NOT IMPLEMENTED"));
+////    return O32_SetWinMetaFileBits(arg1, arg2, arg3, arg4);
+    return 0;
 }
 //******************************************************************************
 //******************************************************************************
 UINT WIN32API GetWinMetaFileBits( HENHMETAFILE arg1, UINT arg2, PBYTE arg3, int arg4, HDC arg5)
 {
-    dprintf(("GDI32: GetWinMetaFileBits"));
-    return O32_GetWinMetaFileBits(arg1, arg2, arg3, arg4, arg5);
+    dprintf(("GDI32: GetWinMetaFileBits NOT IMPLEMENTED"));
+////    return O32_GetWinMetaFileBits(arg1, arg2, arg3, arg4, arg5);
+    return 0;
 }
 //******************************************************************************
 //******************************************************************************
 UINT WIN32API GetEnhMetaFileHeader( HENHMETAFILE arg1, UINT arg2, LPENHMETAHEADER  arg3)
 {
-    dprintf(("GDI32: GetEnhMetaFileHeader"));
-    return O32_GetEnhMetaFileHeader(arg1, arg2, arg3);
+    dprintf(("GDI32: GetEnhMetaFileHeader NOT IMPLEMENTED"));
+////    return O32_GetEnhMetaFileHeader(arg1, arg2, arg3);
+    return 0;
 }
 //******************************************************************************
 //******************************************************************************
 UINT WIN32API GetEnhMetaFilePaletteEntries( HENHMETAFILE arg1, UINT arg2, PPALETTEENTRY  arg3)
 {
-    dprintf(("GDI32: GetEnhMetaFilePaletteEntries"));
-    return O32_GetEnhMetaFilePaletteEntries(arg1, arg2, arg3);
+    dprintf(("GDI32: GetEnhMetaFilePaletteEntries NOT IMPLEMENTED"));
+////    return O32_GetEnhMetaFilePaletteEntries(arg1, arg2, arg3);
+    return 0;
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API PlayEnhMetaFile( HDC arg1, HENHMETAFILE arg2, const RECT *  arg3)
 {
-    dprintf(("GDI32: PlayEnhMetaFile"));
-    return O32_PlayEnhMetaFile(arg1, arg2, arg3);
+    dprintf(("GDI32: PlayEnhMetaFile NOT IMPLEMENTED"));
+////    return O32_PlayEnhMetaFile(arg1, arg2, arg3);
+    return 0;
 }
 //******************************************************************************
 //******************************************************************************
@@ -268,26 +286,22 @@ BOOL WIN32API PlayEnhMetaFileRecord(                                 /*KSO Thu 2
         UINT                            arg4
         )
 {
-        dprintf(("GDI32: PlayEnhMetaFileRecord - stub\n"));
+        dprintf(("GDI32: PlayEnhMetaFileRecord - NOT IMPLEMENTED"));
         return FALSE;
 }
 //******************************************************************************
-UINT WIN32API GetEnhMetaFileDescriptionA(                    /*KSO Thu 21.05.1998*/
-        HENHMETAFILE    arg1,
-        UINT                    arg2,
-        LPSTR                   arg3
-        )
+UINT WIN32API GetEnhMetaFileDescriptionA(HENHMETAFILE    arg1,
+                                         UINT            arg2,
+                                         LPSTR           arg3)
 {
-        dprintf(("GDI32: GetEnhMetaFileDescriptionA - stub\n"));
+        dprintf(("GDI32: GetEnhMetaFileDescriptionA - NOT IMPLEMENTED"));
         return FALSE;
 }
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API GetEnhMetaFileDescriptionW(                    /*KSO Thu 21.05.1998*/
-        HENHMETAFILE    arg1,
-        UINT                    arg2,
-        LPWSTR                  arg3
-        )
+UINT WIN32API GetEnhMetaFileDescriptionW(HENHMETAFILE    arg1,
+                                         UINT            arg2,
+                                         LPWSTR          arg3)
 {
         dprintf(("GDI32: GetEnhMetaFileDescriptionW - stub\n"));
         return FALSE;

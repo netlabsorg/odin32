@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.57 2000-10-26 17:20:29 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.58 2000-11-04 16:29:23 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -42,7 +42,7 @@ BOOL WIN32API GetTextExtentPointA(HDC hdc, LPCSTR lpsz, int cbString, LPSIZE lpS
 //******************************************************************************
 COLORREF WIN32API SetBkColor(HDC hdc, COLORREF crColor)
 {
-  dprintf(("GDI32: SetBkColor to %X\n", crColor));
+  dprintf(("GDI32: SetBkColor %x to %x", hdc, crColor));
   return(O32_SetBkColor(hdc, crColor));
 }
 //******************************************************************************
@@ -51,8 +51,8 @@ COLORREF WIN32API SetTextColor(HDC hdc, COLORREF crColor)
 {
  COLORREF clr;
 
+  dprintf(("GDI32: SetTextColor %x to %x", hdc, crColor));
   clr = O32_SetTextColor(hdc, crColor);
-  dprintf(("GDI32: SetTextColor from %X to %X\n", clr, crColor));
   return(clr);
 }
 //******************************************************************************
@@ -577,12 +577,18 @@ int WIN32API SetROP2( HDC hdc, int rop2)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API EnumObjects( HDC arg1, int arg2, GOBJENUMPROC arg3, LPARAM  arg4)
+int WIN32API EnumObjects( HDC hdc, int objType, GOBJENUMPROC objFunc, LPARAM lParam)
 {
-    dprintf(("GDI32: EnumObjects STUB"));
+#ifdef STDCALL_ENUMPROCS
+    dprintf(("GDI32: EnumObjects %x %d %x %x", hdc, objType, objFunc, lParam));
+    //should change os2win.h
+    return O32_EnumObjects(hdc, objType, (GOBJENUMPROC_O32)objFunc, lParam);
+#else
     //calling convention differences
+    dprintf(("GDI32: EnumObjects STUB"));
 //    return O32_EnumObjects(arg1, arg2, arg3, arg4);
     return 0;
+#endif
 }
 //******************************************************************************
 //******************************************************************************
@@ -1291,7 +1297,7 @@ BOOL WIN32API SetColorAdjustment(HDC hdc, CONST COLORADJUSTMENT *lpca)
 BOOL WIN32API UpdateColors(HDC hdc)
 {
   dprintf(("GDI32: UpdateColors\n"));
-  return O32_InvalidateRect(O32_WindowFromDC(hdc), NULL, FALSE);
+  return InvalidateRect(WindowFromDC(hdc), NULL, FALSE);
 }
 //******************************************************************************
 //******************************************************************************
