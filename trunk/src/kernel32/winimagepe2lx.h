@@ -1,10 +1,10 @@
-/* $Id: winimagepe2lx.h,v 1.3 2000-08-27 03:20:37 bird Exp $ */
+/* $Id: winimagepe2lx.h,v 1.4 2000-09-22 04:35:09 bird Exp $ */
 
 /*
  * Win32 PE2LX Image base class
  *
  * Copyright 1999 Sander van Leeuwen (sandervl@xs4all.nl)
- * Copyright 1999 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * Copyright 1999-2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -66,6 +66,7 @@ protected:
     PIMAGE_NT_HEADERS   pNtHdrs;    /* Pointer to NT headers. */
     BOOL                fWin32k;    /* flag which indicates wether this is a Win32k loaded
                                      * module (TRUE) or and Pe2Lx module (FALSE). */
+    HMODULE hmod;                   /* OS/2 handle of the module. */
 };
 
 

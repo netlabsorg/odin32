@@ -1,10 +1,10 @@
-/* $Id: winexepe2lx.h,v 1.2 2000-04-14 22:35:28 sandervl Exp $ */
+/* $Id: winexepe2lx.h,v 1.3 2000-09-22 04:35:08 bird Exp $ */
 
 /*
  * Win32 PE2LX Exe class
  *
  * Copyright 1999 Sander van Leeuwen (sandervl@xs4all.nl)
- * Copyright 1999 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * Copyright 1999-2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
