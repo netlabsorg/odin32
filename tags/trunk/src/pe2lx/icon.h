@@ -1,6 +1,6 @@
-/* $Id: icon.h,v 1.4 1999-07-20 17:50:19 sandervl Exp $ */
+/* $Id: icon.h,v 1.5 2002-01-05 11:15:29 sandervl Exp $ */
 
-/* $Header: /home/ktk/tmp/odin/odin32xp/src/pe2lx/icon.h,v 1.4 1999-07-20 17:50:19 sandervl Exp $
+/* $Header: /home/ktk/tmp/odin/odin32xp/src/pe2lx/icon.h,v 1.5 2002-01-05 11:15:29 sandervl Exp $
  *
  * Declarations, protypes and defintions for conversion of icons.
  *
