@@ -1,4 +1,4 @@
-/* $Id: tooltips.c,v 1.11 1999-07-07 17:08:43 cbratschi Exp $ */
+/* $Id: tooltips.c,v 1.12 1999-07-12 15:58:49 cbratschi Exp $ */
 /*
  * Tool tip control
  *
@@ -1132,7 +1132,7 @@ TOOLTIPS_GetTextA (HWND hwnd, WPARAM wParam, LPARAM lParam)
     nTool = TOOLTIPS_GetToolFromInfoA (infoPtr, lpToolInfo);
     if (nTool == -1) return 0;
 
-    TOOLTIPS_GetTipText(hwnd,infoPtr,nTool);
+    TOOLTIPS_GetTipText(hwnd,infoPtr,nTool); //CB: get text
 
     lstrcpyWtoA(lpToolInfo->lpszText,infoPtr->szTipText);
 
@@ -1155,7 +1155,7 @@ TOOLTIPS_GetTextW (HWND hwnd, WPARAM wParam, LPARAM lParam)
     nTool = TOOLTIPS_GetToolFromInfoW (infoPtr, lpToolInfo);
     if (nTool == -1) return 0;
 
-    TOOLTIPS_GetTipText(hwnd,infoPtr,nTool);
+    TOOLTIPS_GetTipText(hwnd,infoPtr,nTool); //CB: get text
 
     lstrcpyW(lpToolInfo->lpszText,infoPtr->szTipText);
 
@@ -1978,6 +1978,13 @@ TOOLTIPS_NCHitTest (HWND hwnd, WPARAM wParam, LPARAM lParam)
     return DefWindowProcA (hwnd, WM_NCHITTEST, wParam, lParam);
 }
 
+static LRESULT
+TOOLTIPS_NotifyFormat (HWND hwnd, WPARAM wParam, LPARAM lParam)
+{
+//    FIXME ("hwnd=%x wParam=%x lParam=%lx\n", hwnd, wParam, lParam);
+
+    return 0;
+}
 
 static LRESULT
 TOOLTIPS_Paint (HWND hwnd, WPARAM wParam, LPARAM lParam)
@@ -2019,6 +2026,7 @@ TOOLTIPS_SetFont (HWND hwnd, WPARAM wParam, LPARAM lParam)
  *
  * returns the length, in characters, of the tip text
  ******************************************************************/
+
 static LRESULT
 TOOLTIPS_OnWMGetTextLength(HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
@@ -2320,8 +2328,8 @@ TOOLTIPS_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         case WM_NCHITTEST:
             return TOOLTIPS_NCHitTest (hwnd, wParam, lParam);
 
-/*      case WM_NOTIFYFORMAT: */
-/*          return TOOLTIPS_NotifyFormat (hwnd, wParam, lParam); */
+        case WM_NOTIFYFORMAT:
+            return TOOLTIPS_NotifyFormat (hwnd, wParam, lParam);
 
         case WM_PAINT:
             return TOOLTIPS_Paint (hwnd, wParam, lParam);

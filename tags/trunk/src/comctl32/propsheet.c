@@ -1,4 +1,4 @@
-/* $Id: propsheet.c,v 1.5 1999-07-04 21:05:59 cbratschi Exp $ */
+/* $Id: propsheet.c,v 1.6 1999-07-12 15:58:48 cbratschi Exp $ */
 /*
  * Property Sheets
  *
@@ -790,7 +790,7 @@ static void PROPSHEET_Changed(HWND hwndDlg, HWND hwndDirtyPage)
   int i;
   PropSheetInfo* psInfo = (PropSheetInfo*) GetPropA(hwndDlg,
                                                     PropSheetInfoStr);
-
+  if (!psInfo) return;
   /*
    * Set the dirty flag of this page.
    */

@@ -1,4 +1,4 @@
-/* $Id: tab.c,v 1.8 1999-07-04 21:05:59 cbratschi Exp $ */
+/* $Id: tab.c,v 1.9 1999-07-12 15:58:48 cbratschi Exp $ */
 /*
  * Tab control
  *
@@ -397,7 +397,7 @@ TAB_LButtonUp (HWND hwnd, WPARAM wParam, LPARAM lParam)
   pt.x = (INT)LOWORD(lParam);
   pt.y = (INT)HIWORD(lParam);
 
-  newItem=TAB_InternalHitTest (hwnd, infoPtr,pt,(unsigned int*)&dummy);
+  newItem=TAB_InternalHitTest (hwnd, infoPtr,pt,&dummy);
 
 //  TRACE(tab, "On Tab, item %d\n", newItem);
 
