@@ -1,4 +1,4 @@
-/* $Id: caret.cpp,v 1.18 2001-06-09 14:50:16 sandervl Exp $ */
+/* $Id: caret.cpp,v 1.19 2002-09-06 12:31:40 sandervl Exp $ */
 
 /*
  * Caret functions for USER32
@@ -65,8 +65,6 @@ BOOL WIN32API CreateCaret (HWND hwnd, HBITMAP hBmp, int width, int height)
 
        if (!wnd) return (FALSE);
 
-       wnd->SetFakeOpen32();
-
        rc = O32_CreateCaret (wnd->getOS2WindowHandle(), hBmp, width, height);
        if (rc)
        {
@@ -77,7 +75,6 @@ BOOL WIN32API CreateCaret (HWND hwnd, HBITMAP hBmp, int width, int height)
            CaretIsVisible = 0;
        }
 
-       wnd->RemoveFakeOpen32();
        RELEASE_WNDOBJ(wnd);
        return (rc);
    }

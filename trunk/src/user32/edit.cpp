@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.46 2002-08-17 10:33:54 sandervl Exp $ */
+/* $Id: edit.cpp,v 1.47 2002-09-06 12:31:40 sandervl Exp $ */
 /*
  *      Edit control
  *
@@ -3272,6 +3272,7 @@ static LRESULT EDIT_WM_EraseBkGnd(HWND hwnd, EDITSTATE *es, HDC dc)
          *              DefWndProc() returns is ... a stock object.
          */
         FillRect(dc, &rc, brush);
+        ShowCaret(hwnd);
         return -1;
 }
 
