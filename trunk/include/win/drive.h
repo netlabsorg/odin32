@@ -48,11 +48,11 @@ inline int DRIVE_GetCurrentDrive()
 
 #define DRIVE_Chdir(a,b)             SetCurrentDirectoryA(b)
 
-inline char *DRIVE_GetDosCwd (char *buffer, int drive)
+inline char *DRIVE_GetDosCwd (char *buffer, int drive, int size)
 {
    char * ret;
    USHORT sel = GetFS();
-   ret = _getdcwd(drive, buffer, sizeof(int));
+   ret = _getdcwd(drive, buffer, size);
    SetFS(sel);
    return ret;
 }
