@@ -1,4 +1,4 @@
-/* $Id: avl.h,v 1.2 2000-03-16 23:51:25 bird Exp $
+/* $Id: avl.h,v 1.3 2001-06-07 00:35:42 bird Exp $
  *
  * AVL-Tree (lookalike) declaration.
  *
@@ -37,7 +37,7 @@ extern "C" {
 #define AVL_GE(key1, key2) (strcmp(key1, key2) >= 0)
 #define AVL_E(key1, key2)  (strcmp(key1, key2) == 0)
 #define AVL_NE(key1, key2) (strcmp(key1, key2) != 0)
-
+#define AVL_CMP(key1, key2) strcmp(key1, key2)
 
 /**
  * AVL key type
