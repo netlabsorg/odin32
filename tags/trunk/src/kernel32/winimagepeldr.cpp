@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.15 1999-11-24 19:31:23 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.16 1999-11-24 19:52:34 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -83,6 +83,9 @@ Win32PeLdrImage::Win32PeLdrImage(char *pszFileName, BOOL isExe, int loadtype) :
   strcpy(szFileName, pszFileName);
   strupr(szFileName);
   if(isExe) {
+	if(!strchr(szFileName, '.')) {
+		strcat(szFileName,".EXE");
+	}
   	dllfile = OSLibDosOpen(szFileName, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
   	if(dllfile == NULL) {
 		if(!strstr(szFileName, ".EXE")) {
@@ -92,6 +95,9 @@ Win32PeLdrImage::Win32PeLdrImage(char *pszFileName, BOOL isExe, int loadtype) :
   	else	OSLibDosClose(dllfile);
   }
   else {
+	if(!strchr(szFileName, '.')) {
+		strcat(szFileName,".DLL");
+	}
   	dllfile = OSLibDosOpen(szFileName, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
   	if(dllfile == NULL) {//search in libpath for dll
 		strcpy(szModule, kernel32Path);
