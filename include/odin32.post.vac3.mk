@@ -1,4 +1,4 @@
-# $Id: odin32.post.vac3.mk,v 1.19 2001-09-30 01:00:01 bird Exp $
+# $Id: odin32.post.vac3.mk,v 1.20 2001-09-30 05:30:36 bird Exp $
 
 #
 # Odin32 API
@@ -494,4 +494,20 @@ clean:  clean2
 !       endif
 !   endif
 !endif
+
+
+#
+# Common: If MULTIJOBS is defined make sure cmdqd is running.
+#
+!ifndef NO_MULTIJOBS
+!   ifdef MULTIJOBS
+!      if [$(CMDQD) queryrunning] != 0
+!          if [$(DODIRS) "$(ODIN32_BASE)\tools\cmdqd" $(MAKE_CMD) all] == 0
+!          endif
+!          if [$(CMDQD) init 7] == 0
+!          endif
+!      endif
+!   endif
+!endif
+
 
