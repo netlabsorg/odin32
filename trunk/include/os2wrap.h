@@ -1,4 +1,4 @@
-/* $Id: os2wrap.h,v 1.14 2000-03-03 11:14:22 sandervl Exp $ */
+/* $Id: os2wrap.h,v 1.15 2000-06-17 12:31:55 sandervl Exp $ */
 #ifndef __OS2WRAP_H__
 #define __OS2WRAP_H__
 
@@ -7510,6 +7510,48 @@ inline LONG _GpiPolygons(HPS a, ULONG b, PPOLYGON c, ULONG d, ULONG e)
 
     return yyrc;
 } 
+
+inline HRGN _GpiCreatePolygonRegion(HPS a, ULONG b, PPOLYGON c, ULONG d)
+{
+ HRGN yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = GpiCreatePolygonRegion(a, b, c, d);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  GpiCreatePolygonRegion
+#define GpiCreatePolygonRegion _GpiCreatePolygonRegion
+
+inline HRGN _GpiCreateEllipticRegion(HPS a, PRECTL b)
+{
+ HRGN yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = GpiCreateEllipticRegion(a, b);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  GpiCreateEllipticRegion
+#define GpiCreateEllipticRegion _GpiCreateEllipticRegion
+
+inline HRGN _GpiCreateRoundRectRegion(HPS a, PPOINTL b, LONG c, LONG d)
+{
+ HRGN yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = GpiCreateRoundRectRegion(a, b, c, d);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  GpiCreateRoundRectRegion
+#define GpiCreateRoundRectRegion _GpiCreateRoundRectRegion
 
 #undef  GpiPolygons
 #define GpiPolygons _GpiPolygons
