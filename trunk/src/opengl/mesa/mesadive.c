@@ -1,4 +1,4 @@
-/* $Id: mesadive.c,v 1.2 2000-05-23 20:40:41 jeroen Exp $ */
+/* $Id: mesadive.c,v 1.3 2000-12-30 13:55:43 sandervl Exp $ */
 /*****************************************************************************/
 /*                                                                           */
 /* DIVE code for OpenGL                                                      */
@@ -17,6 +17,7 @@
 #include <malloc.h>
 #include <fourcc.h>
 #include <misc.h>
+#include <winuser32.h>
 
 #define mmioFOURCC( ch0, ch1, ch2, ch3 )                         \
                   ( (DWORD)(BYTE)(ch0) | ( (DWORD)(BYTE)(ch1) << 8 ) |    \
@@ -37,7 +38,6 @@ typedef ULONG           COLORREF;
 
 extern BYTE DITHER_RGB_2_8BIT( int red, int green, int blue, int pixel, int scanline);
 extern void WMesaUpdateScreenPos(PWMC c,HWND hWnd);
-extern HWND Win32ToOS2Handle(HWND);
 extern INT WINAPI MessageBoxA(HWND,LPCSTR,LPCSTR,UINT);
 
 extern PWMC Current;
