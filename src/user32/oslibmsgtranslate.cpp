@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.116 2003-10-20 17:17:21 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.117 2003-10-22 15:56:38 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -660,24 +660,6 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         winMsg->wParam = (WPARAM)win32sc;
         winMsg->lParam = MAKELONG((USHORT)x, (USHORT)y);
         break;
-    }
-
-    case WM_CHAR_SPECIAL_CONSOLE_BREAK:
-    {
-      dprintf(("PM: WM_CHAR_SPECIAL_CONSOLE_BREAK for %x", winMsg->hwnd));
-      if(fMsgRemoved)
-      {
-         GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT_W,0);
-         // It is our internal message, do not work with it more, its function
-         // is over, otherwise it will return FALSE and will be dispatched,
-         // and retranslated once again.
-
-         winMsg->message = 0;
-         winMsg->wParam  = 0;
-         winMsg->lParam  = 0;
-         goto msgdone;
-      }
-      goto dummymessage;
     }
 
     case WM_CHAR_SPECIAL_ALTGRCONTROL:
