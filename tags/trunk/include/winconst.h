@@ -1,13 +1,6 @@
 #ifndef __WINCONST_H__
 #define __WINCONST_H__
 
-/*
- * Win32 constants
- *
- * Copyright (C) 1999 Sander van Leeuwen
- *
- */
-
 /* Predefined resources */
 #define IDI_APPLICATION_W     32512
 #define IDI_HAND_W            32513
