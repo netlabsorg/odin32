@@ -1,4 +1,4 @@
-/* $Id: hmcomm.h,v 1.10 2001-11-28 15:35:15 sandervl Exp $ */
+/* $Id: hmcomm.h,v 1.11 2001-11-30 13:52:32 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -39,6 +39,10 @@ typedef struct
 #define ASYNC_STARTTRANSMIT  0x48
 #define ASYNC_STOPTRANSMIT   0x47
 #define ASYNC_GETMODEMOUTPUT 0x66
+
+#define IOCTL_GENERAL        0x0B
+#define DEV_FLUSHINPUT       0x01
+#define DEV_FLUSHOUTPUT      0x02
 
 
 #pragma pack(1)
