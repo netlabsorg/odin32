@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2680 2004-02-16 16:54:05 sandervl Exp $ */
+/* $Id: changelog,v 1.2681 2004-02-18 14:06:05 sandervl Exp $ */
+
+ 2004-02-17: Sander van Leeuwen <sandervl@innotek   >
+    - GDI32:    o CreateDCA: special handling of FILE and FILE: ports
 
  2004-02-16: KO Myung-Hun <komh@chollian    >
     - USER32:   o Edit control: DBCS related fixes
