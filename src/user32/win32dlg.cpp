@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.73 2001-11-08 18:32:59 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.74 2001-11-12 18:01:05 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -450,12 +450,21 @@ BOOL Win32Dialog::getCharSizeFromDC( HDC hDC, HFONT hUserFont, SIZE * pSize )
                  * how Microsoft's dialog creation code calculates the size
                  * of the font
                  */
+#ifdef __WIN32OS2__
+                if (GetTextExtentPointA(hDC,szAvgChars,sizeof(szAvgChars)-1,&total))
+                {
+                   /* round up */
+                    pSize->cx = ((2*total.cx/(sizeof(szAvgChars)-1)) + 1)/2;
+                    Success = TRUE;
+                }
+#else
                 if (GetTextExtentPointA(hDC,szAvgChars,sizeof(szAvgChars),&total))
                 {
                    /* round up */
                     pSize->cx = ((2*total.cx/sizeof(szAvgChars)) + 1)/2;
                     Success = TRUE;
                 }
+#endif
             }
             else
             {
