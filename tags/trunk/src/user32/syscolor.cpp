@@ -1,4 +1,4 @@
-/* $Id: syscolor.cpp,v 1.32 2002-07-15 10:16:28 sandervl Exp $ */
+/* $Id: syscolor.cpp,v 1.33 2002-11-29 15:03:36 sandervl Exp $ */
 
 /*
  * Win32 system color API functions for OS/2
@@ -225,10 +225,10 @@ COLORREF WIN32API GetSysColor(INT nIndex)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetSysColors(INT nChanges, const INT *lpSysColor,
-                              const COLORREF *lpColorValues)
+BOOL WIN32API ODIN_SetSysColors(INT nChanges, const INT *lpSysColor,
+                                const COLORREF *lpColorValues)
 {
- int i;
+    int i;
 
     if(fColorInit == FALSE)
     {
@@ -236,16 +236,19 @@ BOOL WIN32API SetSysColors(INT nChanges, const INT *lpSysColor,
       fColorInit = TRUE;
     }
 
-    dprintf(("SetSysColors\n"));
-
-    O32_SetSysColors(nChanges, lpSysColor, lpColorValues);
-
     for(i=0;i<nChanges;i++) {
         SYSCOLOR_SetColor(lpSysColor[i], lpColorValues[i]);
     }
+    return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API SetSysColors(INT nChanges, const INT *lpSysColor,
+                              const COLORREF *lpColorValues)
+{
+    ODIN_SetSysColors(nChanges, lpSysColor, lpColorValues);
 
-//SvL: ???
-////////    return SetSysColors(nChanges, lpSysColor, lpColorValues);
+    O32_SetSysColors(nChanges, lpSysColor, lpColorValues);
 
     /* Send WM_SYSCOLORCHANGE message to all windows */
 
