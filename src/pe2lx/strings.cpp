@@ -1,4 +1,4 @@
-/* $Id: strings.cpp,v 1.3 1999-06-10 17:08:55 phaller Exp $ */
+/* $Id: strings.cpp,v 1.4 1999-07-06 08:50:12 sandervl Exp $ */
 
 /*
  * PE2LX String conversion
@@ -13,6 +13,7 @@
 #define INCL_DOSERRORS           /* DOS Error values         */
 #define INCL_DOSPROCESS          /* DOS Process values       */
 #define INCL_DOSMISC             /* DOS Miscellanous values  */
+#define INCL_DOSNLS
 #define INCL_WIN
 #include <os2.h>
 #include <stdio.h>
@@ -31,7 +32,7 @@
 //important difference that OS/2 strings can only be 256 bytes long
 //whereas windows strings can be up to 64k bytes long
 //******************************************************************************
-void ShowStrings(int id, char *data, int size)
+void ShowStrings(int id, char *data, int size, int cp)
 {
 USHORT *len;
 int i;

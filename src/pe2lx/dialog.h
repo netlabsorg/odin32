@@ -1,4 +1,4 @@
-/* $Id: dialog.h,v 1.3 1999-06-10 17:08:53 phaller Exp $ */
+/* $Id: dialog.h,v 1.4 1999-07-06 08:50:11 sandervl Exp $ */
 
 /*
  * PE2LX dialog conversion code
@@ -101,7 +101,7 @@ typedef struct {
 
 #pragma pack()
 
-void ShowDialog(int id, DialogBoxHeader *dhdr, int size);
+void ShowDialog(int id, DialogBoxHeader *dhdr, int size, int cp=0);
 
 
 #define WINWS_POPUP            0x80000000L

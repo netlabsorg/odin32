@@ -1,4 +1,4 @@
-/* $Id: dialog.cpp,v 1.6 1999-07-04 19:02:37 sandervl Exp $ */
+/* $Id: dialog.cpp,v 1.7 1999-07-06 08:50:11 sandervl Exp $ */
 
 /*
  * PE2LX dialog conversion code
@@ -15,6 +15,7 @@
 #define INCL_DOSERRORS           /* DOS Error values         */
 #define INCL_DOSPROCESS          /* DOS Process values       */
 #define INCL_DOSMISC             /* DOS Miscellanous values  */
+#define INCL_DOSNLS
 #define INCL_WIN
 #define INCL_WINMLE
 #include <os2.h>
@@ -39,7 +40,7 @@ static int  ConvertDlgStyle(int style);
 static int  ConvertDlgItemStyle(int style);
 static void ConvertCaption(ULONG style, char *caption);
 static int  ConvertFont(char *font, PRESPARAMS *dlgpparam, int fsize);
-static void ShowDialogEx(int id, WINDLGTEMPLATEEX *dhdr, int size);
+static void ShowDialogEx(int id, WINDLGTEMPLATEEX *dhdr, int size, int cp);
 
 //******************************************************************************
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -47,7 +48,7 @@ static void ShowDialogEx(int id, WINDLGTEMPLATEEX *dhdr, int size);
 //ShowDialogEx is identical except for the different dialog(item) structures
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //******************************************************************************
-void ShowDialog(int id, DialogBoxHeader *dhdr, int size)
+void ShowDialog(int id, DialogBoxHeader *dhdr, int size, int cp)
 {
  WINDLGTEMPLATEEX *windlgex = (WINDLGTEMPLATEEX *)dhdr;
  DLGTEMPLATE *dlgt;
@@ -62,12 +63,13 @@ void ShowDialog(int id, DialogBoxHeader *dhdr, int size)
  int          i;
  ULONG        ctrlflag, winclass;
  BOOL         fIconBmp;
+ ULONG        ulCpSize, ulCP;
 
   //First save original win32 resource
   OS2Exe.StoreWin32Resource(id, RT_DIALOG, size, (char *)dhdr);
 
   if(windlgex->wDlgVer == 1 && windlgex->wSignature == 0xFFFF) {
-        ShowDialogEx(id, windlgex, size);
+        ShowDialogEx(id, windlgex, size, cp);
         return;
   }
 
@@ -78,7 +80,14 @@ void ShowDialog(int id, DialogBoxHeader *dhdr, int size)
   memset((char *)dlgt, 0, sizeof(DLGTEMPLATE) + dhdr->NumberOfItems*sizeof(DLGTITEM) + size);
   dlgcurdata = dlgdata;
 
-  dlgt->codepage         = 437;
+  if(cp == 0) {
+	dlgt->codepage         = 437;
+  }
+  else
+  {
+     	DosQueryCp(sizeof(ulCP), &ulCP, &ulCpSize);
+     	dlgt->codepage = ulCP;
+  }
   dlgt->offadlgti        = 14;
   dlgt->fsTemplateStatus = 1;
   dlgt->iItemFocus       = 65535;
@@ -144,7 +153,7 @@ void ShowDialog(int id, DialogBoxHeader *dhdr, int size)
                 ptrArray = (WORD *)((int)dhdr + sizeof(DialogBoxHeader));
         }
         else {
-                cout << "Menu namestring    : " << UnicodeToAscii((WCHAR *)(&dhdr->fNameOrd)) << endl;
+                cout << "Menu namestring    : " << UnicodeToAscii((WCHAR *)(&dhdr->fNameOrd), cp) << endl;
                 ptrArray = (WORD *)((int)&dhdr->fNameOrd + UniStrlen((WCHAR *)(&dhdr->fNameOrd))*2 + sizeof(WCHAR));
         }
   }
@@ -158,7 +167,7 @@ void ShowDialog(int id, DialogBoxHeader *dhdr, int size)
                 ptrArray = (WORD *)((int)ptrArray + sizeof(WORD));
         }
         else {
-                szClass = UnicodeToAscii((WCHAR *)ptrArray);
+                szClass = UnicodeToAscii((WCHAR *)ptrArray, cp);
                 cout << "Class Name            : " << szClass << endl;
 
                 dlgitem->cchClassName = (USHORT)strlen(szClass);
@@ -180,7 +189,7 @@ void ShowDialog(int id, DialogBoxHeader *dhdr, int size)
         ctrldata = (ControlData *)((int)(int)ptrArray + sizeof(WORD));
   }
   else {
-        ctrltext = UnicodeToAscii((WCHAR *)(ptrArray));
+        ctrltext = UnicodeToAscii((WCHAR *)(ptrArray), cp);
         cout << "Title                : " << ctrltext << endl;
         ctrldata = (ControlData *)((int)(int)ptrArray + UniStrlen((WCHAR *)(ptrArray))*2 + sizeof(WORD));
 
@@ -198,7 +207,7 @@ void ShowDialog(int id, DialogBoxHeader *dhdr, int size)
 
   if(dhdr->lStyle & DS_SETFONT) {
         fhdr = (FontHeader *)ctrldata;
-        font = UnicodeToAscii(fhdr->szFontName);
+        font = UnicodeToAscii(fhdr->szFontName, cp);
         cout << "Font Point Size      : " << fhdr->wPointSize << endl;
         cout << "Font Name            : " << font << endl;
         ctrldata = (ControlData *)((int)fhdr + sizeof(FontHeader) - 2 + UniStrlen(fhdr->szFontName)*2 + sizeof(WORD));  /*PLF Sat  97-06-21 20:22:44*/
@@ -270,7 +279,7 @@ void ShowDialog(int id, DialogBoxHeader *dhdr, int size)
                 dlgitem->cchClassName = 0;
         }
         else {
-                szClass = UnicodeToAscii((WCHAR *)&ctrldata->fClassId);
+                szClass = UnicodeToAscii((WCHAR *)&ctrldata->fClassId, cp);
                 cout << "Class Name            : " << szClass << endl;
                 szCaption = (WCHAR *)((int)ctrldata + sizeof(ControlData) + strlen(szClass)*2);
                 dlgitem->cchClassName = (USHORT)strlen(szClass);
@@ -288,7 +297,7 @@ void ShowDialog(int id, DialogBoxHeader *dhdr, int size)
                 dlgcurdata += 1; //CB: offText == empty string
         }
         else {  //Handle Caption
-                ctrltext = UnicodeToAscii(szCaption);
+                ctrltext = UnicodeToAscii(szCaption, cp);
                 //SvL: (16-9-'97) Convert '&' chars to '~' (for some classes)
                 ConvertCaption(winclass, ctrltext);
                 if(fIconBmp == TRUE) {//control contains bitmap or icon
@@ -311,7 +320,7 @@ void ShowDialog(int id, DialogBoxHeader *dhdr, int size)
                           dlgcurdata++; //0 at offText
                         }
                 }
-                cout << "Text                  : " << UnicodeToAscii(szCaption) << endl;
+                cout << "Text                  : " << UnicodeToAscii(szCaption, cp) << endl;
                 szCaption = (WCHAR *)((int)szCaption + UniStrlen(szCaption)*2 + sizeof(WORD));
         }
 
@@ -327,7 +336,7 @@ void ShowDialog(int id, DialogBoxHeader *dhdr, int size)
 }
 //******************************************************************************
 //******************************************************************************
-void ShowDialogEx(int id, WINDLGTEMPLATEEX *dhdr, int size)
+void ShowDialogEx(int id, WINDLGTEMPLATEEX *dhdr, int size, int cp)
 {
  DLGTEMPLATE *dlgt;
  DLGTITEM    *dlgitem;
@@ -341,6 +350,7 @@ void ShowDialogEx(int id, WINDLGTEMPLATEEX *dhdr, int size)
  int          i;
  ULONG        ctrlflag, winclass;
  BOOL         fIconBmp;
+ ULONG        ulCpSize, ulCP;
 
   //should be enough
   dlgt    = (DLGTEMPLATE *)malloc(sizeof(DLGTEMPLATE) + dhdr->NumberOfItems*sizeof(DLGTITEM) + size);
@@ -349,7 +359,14 @@ void ShowDialogEx(int id, WINDLGTEMPLATEEX *dhdr, int size)
   memset((char *)dlgt, 0, sizeof(DLGTEMPLATE) + dhdr->NumberOfItems*sizeof(DLGTITEM) + size);
   dlgcurdata = dlgdata;
 
-  dlgt->codepage         = 437;
+  if(cp == 0) {
+	dlgt->codepage         = 437;
+  }
+  else
+  {
+     	DosQueryCp(sizeof(ulCP), &ulCP, &ulCpSize);
+     	dlgt->codepage = ulCP;
+  }
   dlgt->offadlgti        = 14;
   dlgt->fsTemplateStatus = 1;
   dlgt->iItemFocus       = 65535;
@@ -411,7 +428,7 @@ void ShowDialogEx(int id, WINDLGTEMPLATEEX *dhdr, int size)
                 ptrArray = (WORD *)((int)dhdr + sizeof(WINDLGTEMPLATEEX));
         }
         else {
-                cout << "Menu namestring    : " << UnicodeToAscii((WCHAR *)(&dhdr->fNameOrd)) << endl;
+                cout << "Menu namestring    : " << UnicodeToAscii((WCHAR *)(&dhdr->fNameOrd, cp)) << endl;
                 ptrArray = (WORD *)((int)&dhdr->fNameOrd + UniStrlen((WCHAR *)(&dhdr->fNameOrd))*2 + sizeof(WCHAR));
         }
   }
@@ -447,7 +464,7 @@ void ShowDialogEx(int id, WINDLGTEMPLATEEX *dhdr, int size)
         ctrldata = (WINDLGITEMTEMPLATEEX *)((int)(int)ptrArray + sizeof(WORD));
   }
   else {
-        ctrltext = UnicodeToAscii((WCHAR *)(ptrArray));
+        ctrltext = UnicodeToAscii((WCHAR *)(ptrArray), cp);
         cout << "Title                : " << ctrltext << endl;
         ctrldata = (WINDLGITEMTEMPLATEEX *)((int)(int)ptrArray + UniStrlen((WCHAR *)(ptrArray))*2 + sizeof(WORD));
 
@@ -466,7 +483,7 @@ void ShowDialogEx(int id, WINDLGTEMPLATEEX *dhdr, int size)
 
   if(dhdr->lStyle & DS_SETFONT) {
         fhdr = (FontHeaderEx *)ctrldata;
-        font = UnicodeToAscii(fhdr->szFontName);
+        font = UnicodeToAscii(fhdr->szFontName, cp);
         cout << "Font Point Size      : " << fhdr->wPointSize << endl;
         cout << "Font Name            : " << font << endl;
         ctrldata = (WINDLGITEMTEMPLATEEX *)((int)fhdr + sizeof(FontHeaderEx) - 2 + UniStrlen(fhdr->szFontName)*2 + sizeof(WORD));  /*PLF Sat  97-06-21 20:22:44*/
@@ -535,7 +552,7 @@ void ShowDialogEx(int id, WINDLGTEMPLATEEX *dhdr, int size)
                 dlgitem->cchClassName = 0;
         }
         else {
-                szClass = UnicodeToAscii((WCHAR *)&ctrldata->fClassId);
+                szClass = UnicodeToAscii((WCHAR *)&ctrldata->fClassId, cp);
                 cout << "Class Name            : " << szClass << endl;
                 szCaption = (WCHAR *)((int)ctrldata + sizeof(WINDLGITEMTEMPLATEEX) + strlen(szClass)*2);
                 dlgitem->cchClassName = (USHORT)strlen(szClass);
@@ -550,7 +567,7 @@ void ShowDialogEx(int id, WINDLGTEMPLATEEX *dhdr, int size)
                 szCaption += 2;
         }
         else {  //Handle Caption
-                ctrltext = UnicodeToAscii(szCaption);
+                ctrltext = UnicodeToAscii(szCaption, cp);
                 //SvL: (16-9-'97) Convert '&' chars to '~' (for some classes)
                 ConvertCaption(winclass, ctrltext);
                 if(fIconBmp == TRUE) {//control contains bitmap or icon
@@ -573,7 +590,7 @@ void ShowDialogEx(int id, WINDLGTEMPLATEEX *dhdr, int size)
                           dlgcurdata++; //0 at offText
                         }
                 }
-                cout << "Text                  : " << UnicodeToAscii(szCaption) << endl;
+                cout << "Text                  : " << UnicodeToAscii(szCaption, cp) << endl;
                 szCaption = (WCHAR *)((int)szCaption + UniStrlen(szCaption)*2 + sizeof(WORD));
         }
 
