@@ -1,4 +1,4 @@
-/* $Id: os2heap.cpp,v 1.20 2001-07-17 12:10:21 sandervl Exp $ */
+/* $Id: os2heap.cpp,v 1.21 2001-07-19 20:00:56 sandervl Exp $ */
 
 /*
  * Heap class for OS/2
@@ -56,8 +56,10 @@ OS2Heap::OS2Heap(HANDLE hHeap, DWORD flOptions, DWORD dwInitialSize, DWORD dwMax
   nrHeaps      = 0;
   heapelem     = NULL;
 
+  dwInitialSize       = (dwInitialSize >= 0x4000) ? dwInitialSize : 0x4000;
+
   this->dwMaximumSize = dwMaximumSize;
-  this->dwInitialSize = (dwInitialSize) ? dwInitialSize : 0x4000;
+  this->dwInitialSize = dwInitialSize;
   this->flOptions     = flOptions;
 
   dprintf(("KERNEL32:  HeapCreate: initial size %d, max size %d (flags %X) returned %X\n", dwInitialSize, dwMaximumSize, flOptions, hPrimaryHeap));
