@@ -1,4 +1,4 @@
-/* $Id: OS2DDRAW.CPP,v 1.18 1999-12-21 01:28:15 hugh Exp $ */
+/* $Id: OS2DDRAW.CPP,v 1.19 2000-02-04 19:31:23 hugh Exp $ */
 
 /*
  * DX Draw base class implementation
@@ -98,6 +98,7 @@ OS2IDirectDraw::OS2IDirectDraw(GUID *lpGUID) :
   Vtbl4.QueryInterface         = DrawQueryInterface;
   Vtbl4.Compact                = DrawCompact;
   Vtbl4.CreateClipper          = DrawCreateClipper;
+  Vtbl4.CreatePalette          = DrawCreatePalette;
   Vtbl4.CreateSurface          = DrawCreateSurface4;//
   Vtbl4.DuplicateSurface       = DrawDuplicateSurface4;//
   Vtbl4.EnumDisplayModes       = DrawEnumDisplayModes4;//
@@ -230,22 +231,30 @@ HRESULT __stdcall DrawQueryInterface(THIS This, REFIID riid, LPVOID FAR * ppvObj
   if(!IsEqualGUID(riid, CLSID_DirectDraw) &&
      !IsEqualGUID(riid, IID_IDirectDraw) &&
      !IsEqualGUID(riid, IID_IDirectDraw2) &&
-     !IsEqualGUID(riid, IID_IDirectDraw4))
+     !IsEqualGUID(riid, IID_IDirectDraw4) &&
+     !IsEqualGUID(riid, IID_IDirect3D))
 //&& !IsEqualGUID(riid, IID_IUnknown))
   return E_NOINTERFACE;
 
   // ToDo Better way of returning differnent intterfaces for same class
-
-  if(IsEqualGUID(riid, IID_IDirectDraw4))
+  if(IsEqualGUID(riid, IID_IDirect3D))
   {
-    dprintf(("DDRAW: IID_IDirectDraw4 Interface\n"));
-    me->lpVtbl = &me->Vtbl4;
+    me->lpVtbl = (IDirectDraw4Vtbl *) &me->Vtbl3D;
   }
   else
   {
-    dprintf(("DDRAW: No IID_IDirectDraw4 Interface\n"));
-    me->lpVtbl = (IDirectDraw4Vtbl *) &me->Vtbl;
+    if(IsEqualGUID(riid, IID_IDirectDraw4))
+    {
+      dprintf(("DDRAW: IID_IDirectDraw4 Interface\n"));
+      me->lpVtbl = &me->Vtbl4;
+    }
+    else
+    {
+      dprintf(("DDRAW: No IID_IDirectDraw4 Interface\n"));
+      me->lpVtbl = (IDirectDraw4Vtbl *) &me->Vtbl;
+    }
   }
+  me->lpVtbl2 = me->lpVtbl;
   *ppvObj = This;
   DrawAddRef(This);
 
@@ -1445,7 +1454,7 @@ HRESULT __stdcall DrawGetVerticalBlankStatus(THIS , LPBOOL lpbIsInVB)
   if(NULL==lpbIsInVB)
     return(DDERR_INVALIDPARAMS);
 
-
+  #if 0
     rc = io_init1();
 
 
@@ -1457,7 +1466,9 @@ HRESULT __stdcall DrawGetVerticalBlankStatus(THIS , LPBOOL lpbIsInVB)
 
     return(DD_OK);
   }
-
+  #else
+    *lpbIsInVB = ! (*lpbIsInVB);
+  #endif
   return(DDERR_UNSUPPORTED);
 }
 //******************************************************************************
@@ -1544,6 +1555,7 @@ HRESULT __stdcall DrawSetDisplayMode2(THIS This, DWORD dwWidth, DWORD dwHeight,
 
   rc = DiveSetupBlitter( me->hDive,
                          &sBlt);
+  dprintf(("       DiveSetupBlitter rc=%d",rc));
 
   return(DD_OK);
 }
@@ -1556,9 +1568,8 @@ HRESULT __stdcall DrawSetDisplayMode(THIS This, DWORD dwWidth, DWORD dwHeight,
  OS2IDirectDraw        *me = (OS2IDirectDraw *)This;
  SETUP_BLITTER sBlt;
 
-#ifdef DEBUG
   dprintf(("DDRAW: SetDisplayMode to %dx%d with %d bits colors\n", dwWidth, dwHeight, dwBPP));
-#endif
+
   me->screenwidth  = dwWidth;
   me->screenheight = dwHeight;
   me->screenbpp    = dwBPP;
@@ -1586,6 +1597,7 @@ HRESULT __stdcall DrawSetDisplayMode(THIS This, DWORD dwWidth, DWORD dwHeight,
 
   rc = DiveSetupBlitter( me->hDive,
                          &sBlt);
+  dprintf(("       DiveSetupBlitter rc=%d",rc));
 
   return(DD_OK);
 }
