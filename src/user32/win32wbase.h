@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.151 2003-03-27 10:42:42 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.152 2003-03-29 16:38:01 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -285,18 +285,9 @@ virtual  BOOL   DestroyWindow();
 
          void   SetVisibleRegionChanged(BOOL changed) { fVisibleRegionChanged = changed; };
          BOOL   IsVisibleRegionChanged()              { return fVisibleRegionChanged; };
-         BOOL   setVisibleRgnNotifyProc(VISRGN_NOTIFY_PROC lpNotifyProc, DWORD dwUserData)
-         {
-             lpVisRgnNotifyProc  = lpNotifyProc;
-             dwVisRgnNotifyParam = dwUserData;
-             return TRUE;
-         }
-         void   callVisibleRgnNotifyProc(BOOL fDrawingAllowed) 
-         {
-             if(lpVisRgnNotifyProc) {
-                 lpVisRgnNotifyProc(getWindowHandle(), fDrawingAllowed, dwVisRgnNotifyParam);
-             }
-         }
+         BOOL   setVisibleRgnNotifyProc(VISRGN_NOTIFY_PROC lpNotifyProc, DWORD dwUserData);
+         void   callVisibleRgnNotifyProc(BOOL fDrawingAllowed);
+
          int    GetWindowTextLength(BOOL fUnicode);
          int    GetWindowTextLengthA() { return GetWindowTextLength(FALSE); };
          int    GetWindowTextLengthW() { return GetWindowTextLength(TRUE);  };
@@ -421,7 +412,8 @@ protected:
                  fVisibleRegionChanged:1, //set when visible region has changed -> erase background must be sent during next BeginPaint
                  fEraseBkgndFlag:1,
                  fIsDragDropActive:1,
-                 fDirtyUpdateRegion:1;
+                 fDirtyUpdateRegion:1,
+                 fWindowLocked:1;
 
         ULONG   state;
         HRGN    hWindowRegion;
