@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.73 2003-02-27 14:22:43 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.74 2003-03-27 11:02:26 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -343,6 +343,8 @@ HWND   OSLibWinCreateInvisibleScroller(HWND parentHWND, int direction);
 
 ULONG  OSLibWinQuerySysColor(int index);
 
+void   OSLibWinLockVisibleRegions(BOOL fLock);
+
 #endif
 
    #define PMSYSCLR_SHADOWHILITEBGND         (-50L)
@@ -393,5 +395,6 @@ ULONG  OSLibWinQuerySysColor(int index);
 #define CONVERT_RGB(colorRef) ( ((colorRef) & 0x0000FF00     )   |   \
                                 (((colorRef) & 0x00FF0000)>>16)  |   \
                                 (((colorRef) & 0x000000FF)<<16)   )
+
 
 #endif //__OSLIBWIN_H__
