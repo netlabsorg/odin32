@@ -1,4 +1,4 @@
-/* $Id: mixer.cpp,v 1.24 2002-05-29 15:14:53 sandervl Exp $ */
+/* $Id: mixer.cpp,v 1.25 2002-05-30 14:31:07 sandervl Exp $ */
 
 /*
  * Mixer functions
@@ -125,7 +125,7 @@ MMRESULT WINAPI mixerGetControlDetailsA(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS 
             for(int i=0;i<nrDestinations;i++) {
                 if(mixerDest[i].id == MIXER_DEST_WAVEIN) {
                     for(int j=0;j<mixerDest[i].cConnections;j++) {
-                        dprintf(("wavein source %d (id %d)", pmixerLines[mixerDest[i].Connections[j]]->id, mixerDest[i].Connections[j]));
+                        dprintf(("wavein source %s %d (id %d)", pmixerLines[mixerDest[i].Connections[j]]->line.szName, pmixerLines[mixerDest[i].Connections[j]]->id, mixerDest[i].Connections[j]));
                         if(pmixerLines[mixerDest[i].Connections[j]]->id == dwRecSrc) {
                             pDetails[j].fValue = 1;
                             return MMSYSERR_NOERROR;
@@ -350,7 +350,7 @@ MMRESULT WINAPI mixerGetControlDetailsA(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS 
             for(int i=0;i<nrDestinations;i++) {
                 if(mixerDest[i].id == MIXER_DEST_WAVEIN) {
                     for(int j=0;j<mixerDest[i].cConnections;j++) {
-                        dprintf(("wavein source %d (%s)", pmixerLines[mixerDest[i].Connections[j]]->id, pmixerLines[mixerDest[i].Connections[j]]->line.szName));
+                        dprintf(("wavein source %s %d (%s)", pmixerLines[mixerDest[i].Connections[j]]->line.szName, pmixerLines[mixerDest[i].Connections[j]]->id, pmixerLines[mixerDest[i].Connections[j]]->line.szName));
                         pDetails->dwParam1 = pmixerLines[mixerDest[i].Connections[j]]->line.dwLineID;
                         pDetails->dwParam2 = 0;
                         strncpy(pDetails->szName, pmixerLines[mixerDest[i].Connections[j]]->line.szName, sizeof(pDetails->szName));
@@ -499,7 +499,7 @@ MMRESULT WINAPI mixerSetControlDetails(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS l
                 if(mixerDest[i].id == MIXER_DEST_WAVEIN) 
                 {
                     for(int j=0;j<mixerDest[i].cConnections;j++) {
-                        dprintf(("wavein source %d (id %d)", pmixerLines[mixerDest[i].Connections[j]]->id, mixerDest[i].Connections[j]));
+                        dprintf(("wavein source %s %d (id %d)", pmixerLines[mixerDest[i].Connections[j]]->line.szName, pmixerLines[mixerDest[i].Connections[j]]->id, mixerDest[i].Connections[j]));
                         if(pDetails[j].fValue) 
                         {
                             if(OSLibMixSetRecSource(pmixerLines[mixerDest[i].Connections[j]]->id) == FALSE) {
