@@ -1,4 +1,4 @@
-/* $Id: caret.cpp,v 1.4 1999-09-29 09:31:18 dengert Exp $ */
+/* $Id: caret.cpp,v 1.5 1999-10-07 15:44:15 cbratschi Exp $ */
 
 /*
  * Caret functions for USER32
@@ -204,6 +204,11 @@ BOOL WIN32API GetCaretPos (PPOINT pPoint)
 
          if (wnd && wnd->isOwnDC())
             hps = wnd->getOwnDC();
+         else
+         {
+           SetFS(sel);
+           return FALSE;
+         }
 
          POINTL caretPos = {cursorInfo.x,cursorInfo.y} ;
          if (hps) {
