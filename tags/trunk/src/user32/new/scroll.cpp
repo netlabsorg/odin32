@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.3 1999-07-23 16:46:29 cbratschi Exp $ */
+/* $Id: scroll.cpp,v 1.4 1999-07-24 17:10:25 cbratschi Exp $ */
 /*
  * Scrollbar control
  *
@@ -1502,7 +1502,7 @@ BOOL SCROLLBAR_Register()
     wndClass.cbClsExtra    = 0;
     wndClass.cbWndExtra    = sizeof(SCROLLBAR_INFO);
     wndClass.hCursor       = LoadCursorA(0,IDC_ARROWA);
-    wndClass.hbrBackground = (HBRUSH)(COLOR_3DFACE+1);
+    wndClass.hbrBackground = (HBRUSH)0;
     wndClass.lpszClassName = SCROLLBARCLASSNAME;
 
     return RegisterClassA(&wndClass);
