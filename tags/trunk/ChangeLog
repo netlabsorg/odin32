@@ -1,8 +1,10 @@
- /* $Id: ChangeLog,v 1.30 1999-06-27 18:12:48 achimha Exp $ */
+ /* $Id: ChangeLog,v 1.31 1999-06-27 21:57:47 sandervl Exp $ */
  99-06-27: Sander van Leeuwen
 	- USER32: Message handler updates & lots of bugfixes 
 	- USER32: Fix for GetWindowLongA, if Open32 returns 0xffff it really
 	  means 0xffffffff -> fixes Winhlp32 buttons.
+	- USER32: Fixed bug when changing window procedures for dialog box
+                  controls
 
  99-06-26: Sander van Leeuwen
 	- USER32: Changes for message spy & several message handler changes
