@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.10 2001-08-10 19:22:25 sandervl Exp $ */
+/* $Id: stubs.cpp,v 1.11 2001-08-23 18:11:21 sandervl Exp $ */
 /* 
  * Win32 COM/OLE stubs for OS/2
  * 
@@ -44,13 +44,6 @@ HRESULT WIN32API DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID * ppv)
     return S_OK;
 }
 
-//*****************************************************************************
-//*****************************************************************************
-INT WIN32API VariantTimeToDosDateTime(DOUBLE vtime, USHORT * pwDosDate, USHORT * pwDosTime)
-{
-    dprintf(("OLEAUT32: VariantTimeToDosDateTime - stub"));
-    return 0;
-}
 
 //*****************************************************************************
 //*****************************************************************************
@@ -60,39 +53,6 @@ HRESULT WIN32API OACreateTypeLib2()
     return S_OK;
 }
 
-//*****************************************************************************
-//*****************************************************************************
-typedef struct {
-    INT   cDig;
-    ULONG dwInFlags;
-    ULONG dwOutFlags;
-    INT   cchUsed;
-    INT   nBaseShift;
-    INT   nPwr10;
-} NUMPARSE;
-
-HRESULT WIN32API VarParseNumFromStr
-   (OLECHAR * strIn,
-   LCID lcid,
-   ULONG dwFlags,
-   NUMPARSE * pnumprs,
-   BYTE * rgbDig)
-{
-    dprintf(("OLEAUT32: VarParseNumFromStr - stub"));
-    return S_OK;
-}
-
-//*****************************************************************************
-//*****************************************************************************
-HRESULT WIN32API VarNumFromParseNum
-   (NUMPARSE * pnumprs,
-   BYTE * rgbDig,
-   ULONG dwVtBits,
-   VARIANT * pvar)
-{
-    dprintf(("OLEAUT32: VarNumFromParseNum - stub"));
-    return S_OK;
-}
 
 //*****************************************************************************
 //*****************************************************************************
@@ -192,22 +152,6 @@ HRESULT WIN32API CreateTypeLib2
 void WIN32API ClearCustData(LPCUSTDATA pCustData)
 {
     dprintf(("OLEAUT32: ClearCustData - stub"));
-}
-
-//*****************************************************************************
-//*****************************************************************************
-INT	WIN32API SystemTimeToVariantTime(LPSYSTEMTIME lpSystemTime, DOUBLE *pvtime)
-{
-    dprintf(("OLEAUT32: SystemTimeToVariantTime - stub"));
-    return 0;
-}
-
-//*****************************************************************************
-//*****************************************************************************
-INT	WIN32API VariantTimeToSystemTime(DOUBLE vtime, LPSYSTEMTIME lpSystemTime)
-{
-    dprintf(("OLEAUT32: VariantTimeToSystemTime - stub"));
-    return 0;
 }
 
 //*****************************************************************************
@@ -436,25 +380,6 @@ HRESULT WIN32API VarUI4FromDec(DECIMAL *pdecIn, ULONG *pulOut)
 
 //*****************************************************************************
 //*****************************************************************************
-typedef struct
-{
-    SYSTEMTIME st;
-    USHORT  wDayOfYear;
-} UDATE;
-
-HRESULT WIN32API VarDateFromUdate(UDATE *pudateIn, ULONG dwFlags, DATE *pdateOut)
-{
-    dprintf(("OLEAUT32: VarDateFromUdate - stub"));
-    return S_OK;
-}
-
-//*****************************************************************************
-//*****************************************************************************
-HRESULT WIN32API VarUdateFromDate(DATE dateIn, ULONG dwFlags, UDATE *pudateOut)
-{
-    dprintf(("OLEAUT32: VarUdateFromDate - stub"));
-    return S_OK;
-}
 
 //*****************************************************************************
 //*****************************************************************************
