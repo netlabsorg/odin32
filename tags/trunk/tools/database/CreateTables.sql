@@ -1,4 +1,4 @@
--- $Id: CreateTables.sql,v 1.14 2000-08-01 01:50:24 bird Exp $
+-- $Id: CreateTables.sql,v 1.15 2000-08-01 01:58:53 bird Exp $
 --
 -- Create all tables.
 --
@@ -146,7 +146,7 @@ CREATE TABLE function (
     UNIQUE i2(name, dll, refcode),
     UNIQUE i3(intname, dll, refcode),
     INDEX  i4(dll, file),
-    INDEX  i5(file. refcode),
+    INDEX  i5(file, refcode),
     INDEX  i6(state, file),
     UNIQUE i7(state, refcode),
     UNIQUE i8(refcode, state),
