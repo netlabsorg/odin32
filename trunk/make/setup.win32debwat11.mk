@@ -1,4 +1,4 @@
-# $Id: setup.win32debwat11.mk,v 1.1 2002-04-13 04:39:38 bird Exp $
+# $Id: setup.win32debwat11.mk,v 1.2 2002-04-22 00:30:10 bird Exp $
 
 # ---OS2, DEBUG, VAC308-------------------------
 ENV_NAME="OS/2, Debug, IBM VisualAge for C++ 3.08"
@@ -39,6 +39,7 @@ CC_FLAGS_EXE=$(CC_FLAGS)
 CC_FLAGS_DLL=$(CC_FLAGS) -bd
 CC_FLAGS_CRT=$(CC_FLAGS) -bd -br
 CC_FLAGS_SYS=$(CC_FLAGS)
+CC_FLAGS_VDD=$(CC_FLAGS_SYS)
 CC_FLAGS_IFS=$(CC_FLAGS_SYS)
 CC_OBJ_OUT=-fo=
 CC_LST_OUT=
@@ -49,48 +50,24 @@ CXX_FLAGS_EXE=$(CXX_FLAGS)
 CXX_FLAGS_DLL=$(CXX_FLAGS) -bd
 CXX_FLAGS_CRT=$(CXX_FLAGS) -bd -br
 CXX_FLAGS_SYS=$(CXX_FLAGS) -s -zdp -zff -zgf
-CC_FLAGS_IFS=$(CC_FLAGS_SYS)
+CXX_FLAGS_VDD=$(CXX_FLAGS_SYS)
+CXX_FLAGS_IFS=$(CXX_FLAGS_SYS)
 CXX_OBJ_OUT=-fo=
 CXX_PC_2_STDOUT=
 
 IMPLIB_FLAGS=/NOI /Nologo
-
-LINK_FLAGS=/nofree /nologo /de /map /NOE /NOD /Optfunc /PACKCODE /PACKDATA
-LINK_FLAGS_EXE=$(LINK_FLAGS) /EXECutable /STACK:$(TARGET_STACKSIZE)
-LINK_FLAGS_DLL=$(LINK_FLAGS) /DLL
-LINK_FLAGS_SYS=$(LINK_FLAGS) /PDD /Align:16 /NOIgnorecase
-LINK_FLAGS_IFS=$(LINK_FLAGS_DLL)
-LINK_CMD_EXE=$(LINK) $(LINK_FLAGS_EXE) @$(TARGET_LNK)
-LINK_CMD_DLL=$(LINK) $(LINK_FLAGS_DLL) @$(TARGET_LNK)
-LINK_CMD_SYS=$(LINK) $(LINK_FLAGS_SYS) @$(TARGET_LNK)
-LINK_CMD_IFS=$(LINK) $(LINK_FLAGS_IFS) @$(TARGET_LNK)
-!if 0 # nofree works better for me (kso) when working with my drivers...
-LINK_LNK1=$(TARGET_OBJS: =^
-)
-LINK_LNK2=/OUT:$(TARGET)
-LINK_LNK3=/MAP:$(TARGET_MAP)
-LINK_LNK4=$(TARGET_LIBS: =^
-)
-LINK_LNK5=$(TARGET_DEF)
-!else
-LINK_LNK1=$(TARGET_OBJS: =+^
-),
-LINK_LNK2=$(TARGET),
-LINK_LNK3=$(TARGET_MAP),
-LINK_LNK4=$(TARGET_LIBS: =+^
-),
-LINK_LNK5=$(TARGET_DEF)
-!endif
 
 #TODO
 LINK_FLAGS=format WIndows NT RUntime CONsole option quiet, map
 LINK_FLAGS_EXE=$(LINK_FLAGS)
 LINK_FLAGS_DLL=$(LINK_FLAGS)
 LINK_FLAGS_SYS=format os2 physdevice option int, dosseg, map, eliminate, mang, tog sort global d codeview
+LINK_FLAGS_VDD=format os2 virtdevice option int, dosseg, map, eliminate, mang, tog sort global d codeview
 LINK_FLAGS_IFS=$(LINK_FLAGS_DLL)
 LINK_CMD_EXE=$(LINK) $(LINK_FLAGS_EXE) @$(TARGET_LNK)
 LINK_CMD_DLL=$(LINK) $(LINK_FLAGS_DLL) @$(TARGET_LNK)
 LINK_CMD_SYS=$(LINK) $(LINK_FLAGS_SYS) @$(TARGET_LNK)
+LINK_CMD_VDD=$(LINK) $(LINK_FLAGS_VDD) @$(TARGET_LNK)
 LINK_CMD_IFS=$(LINK) $(LINK_FLAGS_IFS) @$(TARGET_LNK)
 TARGET_OBJS1 = $(TARGET_OBJS:  = )
 LINK_LNK1=file $(TARGET_OBJS1: =^
