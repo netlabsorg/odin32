@@ -717,7 +717,14 @@ STATUSBAR_SetTextA (STATUSWINDOWINFO *infoPtr, HWND hwnd, WPARAM wParam, LPARAM 
     nPart = ((INT) wParam) & 0x00ff;
     style = ((INT) wParam) & 0xff00;
 
+#ifdef __WIN32OS2__
+    if (style & SBT_OWNERDRAW) {    
+         TRACE("part %d, text %x\n",nPart,text);
+    }
+    else TRACE("part %d, text %s\n",nPart,debugstr_a(text));
+#else
     TRACE("part %d, text %s\n",nPart,debugstr_a(text));
+#endif
 
     if (nPart==255)
 	part = &infoPtr->part0;
