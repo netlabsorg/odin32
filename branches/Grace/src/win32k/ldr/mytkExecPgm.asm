@@ -1,4 +1,4 @@
-; $Id: mytkExecPgm.asm,v 1.10.4.1 2000-07-16 22:43:38 bird Exp $
+; $Id: mytkExecPgm.asm,v 1.10.4.2 2000-08-17 08:23:34 bird Exp $
 ;
 ; mytkExecPgm - tkExecPgm overload
 ;
@@ -198,7 +198,7 @@ tkepgm1:
     add     cx, [ebp + cchFilename]     ; filename length
     add     cx, 3 + 260                 ;  260 = additional arguments from a script file or something.
                                         ;    3 = two '\0's and a space after added argument.
-    cmp     ecx, CCHARGUMENTS           ; argument Buffersize.
+    cmp     cx, CCHARGUMENTS            ; argument Buffersize.
     jae     tkepgm_backout              ; jmp if argument + file + additional arguments >= buffer size
 
 
@@ -222,7 +222,7 @@ tkepgm1:
     je      tkepgm_backout              ; BACKOUT on NULL pointer. (paranoia)
 
     push    0ffffffffh                  ; Wait indefinitely.
-    push    dword ptr [eax]             ; LDRSem handle.
+    push    dword ptr eax               ; LDRSem handle.
     call    near ptr FLAT:_KSEMRequestMutex@8
     or      eax, eax                    ; Check if failed.
     jnz     tkepgm_backout              ; Backout on failure.
