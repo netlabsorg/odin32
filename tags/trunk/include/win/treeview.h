@@ -1,4 +1,4 @@
-/* $Id: treeview.h,v 1.11 2000-02-18 17:12:43 cbratschi Exp $ */
+/* $Id: treeview.h,v 1.12 2000-02-20 18:26:07 cbratschi Exp $ */
 /*
  * Treeview class extra info
  *
@@ -11,6 +11,7 @@
 #define __WINE_TREEVIEW_H
 
 #define MINIMUM_INDENT        10
+#define ITEM_VSPACE            2
 #define TV_REFRESH_DELAY     100     /* 100 ms delay between two refreshes */
 #define TV_DEFAULTITEMHEIGHT  16
 #define TVITEM_ALLOC          32      /* default nr of items to allocate at first try */
@@ -58,7 +59,8 @@ typedef struct tagTREEVIEW_INFO
   INT           cdmode;         /* last custom draw setting */
   UINT          uScrollTime;    /* max. time for scrolling in milliseconds*/
   UINT          uItemHeight;    /* item height, -1 for default item height */
-  UINT          uRealItemHeight;/* current item height in pixels */
+  UINT          uRealItemHeight;// current item height in pixels
+  UINT          uVScrollStep;   // scroll step in pixels
   UINT          uVisibleHeight; /* visible height of treeview in pixels */
   UINT          uTotalHeight;   /* total height of treeview in pixels */
   UINT          uVisibleWidth;
@@ -66,13 +68,14 @@ typedef struct tagTREEVIEW_INFO
   UINT          uIndent;        /* indentation in pixels */
   HTREEITEM     selectedItem;   /* handle to selected item or 0 if none */
   HTREEITEM     hotItem;        /* handle currently under cursor, 0 if none */
+  HTREEITEM     tipItem;        // item with tooltip
   HTREEITEM     editItem;       /* handle to item currently editted, 0 if none */
   HTREEITEM     firstVisible;   /* handle to first visible item */
   HTREEITEM     dropItem;       /* handle to item selected by drag cursor */
   HTREEITEM     insertMarkItem; /* item after which insertion mark is placed */
   BOOL          insertBeforeorAfter; /* flag used by TVM_SETINSERTMARK */
   HIMAGELIST    dragList;       /* Bitmap of dragged item */
-  INT           cx,cy;          /* current x/y place in list */
+  POINT         lefttop;        //in pixels
   COLORREF      clrBk;
   COLORREF      clrText;
   COLORREF      clrLine;
