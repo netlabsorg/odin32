@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.56 2002-05-20 13:47:59 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.57 2002-06-13 14:11:39 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -33,6 +33,7 @@
 #include "mmap.h"
 #include "oslibdos.h"
 #include <winimagepeldr.h>
+#include <custombuild.h> 
 
 #define DBG_LOCALLOG    DBG_mmap
 #include "dbglocal.h"
@@ -44,13 +45,22 @@ CRITICAL_SECTION_OS2       globalmapcritsect = {0};
 #pragma data_seg()
 Win32MemMapView *Win32MemMapView::mapviews = NULL;
 
+
+static char *pszMMapSemName = NULL;
+
+//******************************************************************************
+//******************************************************************************
+void WIN32API SetCustomMMapSemName(LPSTR pszSemName) 
+{
+    pszMMapSemName = pszSemName;
+}
 //******************************************************************************
 //******************************************************************************
 void InitializeMemMaps()
 {
     if(globalmapcritsect.hmtxLock == 0) {
          dprintf(("InitializeMemMaps -> create shared critical section"));
-         DosInitializeCriticalSection(&globalmapcritsect, MEMMAP_CRITSECTION_NAME);
+         DosInitializeCriticalSection(&globalmapcritsect, (pszMMapSemName) ? pszMMapSemName : MEMMAP_CRITSECTION_NAME);
     }
     else {
          dprintf(("InitializeMemMaps -> access shared critical section"));
