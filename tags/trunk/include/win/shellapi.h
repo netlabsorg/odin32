@@ -1,4 +1,4 @@
-/* $Id: shellapi.h,v 1.1 1999-05-24 20:19:19 ktk Exp $ */
+/* $Id: shellapi.h,v 1.2 1999-06-24 19:27:48 phaller Exp $ */
 
 #ifndef _WINE_SHELLAPI_H
 #define _WINE_SHELLAPI_H
@@ -128,11 +128,9 @@ typedef struct tagSHFILEINFOW
 	WCHAR	szTypeName[80];		/* type name */
 } SHFILEINFOW;
 
-DECL_WINELIB_TYPE_AW(SHFILEINFO)
-
 DWORD	WINAPI SHGetFileInfoA(LPCSTR,DWORD,SHFILEINFOA*,UINT,UINT);
 DWORD	WINAPI SHGetFileInfoW(LPCWSTR,DWORD,SHFILEINFOW*,UINT,UINT);
-#define  SHGetFileInfo WINELIB_NAME_AW(SHGetFileInfo)
+
 
 /******************************************
  * SHSetFileInfo
@@ -188,14 +186,9 @@ typedef struct _SHFILEOPSTRUCTW
   LPCWSTR         lpszProgressTitle;
 } SHFILEOPSTRUCTW, *LPSHFILEOPSTRUCTW;
 
-#define  SHFILEOPSTRUCT WINELIB_NAME_AW(SHFILEOPSTRUCT)
-#define  LPSHFILEOPSTRUCT WINELIB_NAME_AW(LPSHFILEOPSTRUCT)
+DWORD	WIN32API SHFileOperationA (LPSHFILEOPSTRUCTA lpFileOp);  
+DWORD	WIN32API SHFileOperationW (LPSHFILEOPSTRUCTW lpFileOp);
 
-DWORD	WINAPI SHFileOperationA (LPSHFILEOPSTRUCTA lpFileOp);  
-DWORD	WINAPI SHFileOperationW (LPSHFILEOPSTRUCTW lpFileOp);
-#define  SHFileOperation WINELIB_NAME_AW(SHFileOperation)
-
-DWORD WINAPI SHFileOperationAW(DWORD x);
 
 /******************************************
  * ShellExecute
@@ -207,10 +200,8 @@ DWORD WINAPI SHFileOperationAW(DWORD x);
 #define SE_ERR_DDEBUSY          30
 #define SE_ERR_NOASSOC          31
 
-HINSTANCE16	WINAPI ShellExecute16(HWND16,LPCSTR,LPCSTR,LPCSTR,LPCSTR,INT16);
 HINSTANCE	WINAPI ShellExecuteA(HWND,LPCSTR,LPCSTR,LPCSTR,LPCSTR,INT);
 HINSTANCE	WINAPI ShellExecuteW(HWND,LPCWSTR,LPCWSTR,LPCWSTR,LPCWSTR,INT);
-#define     ShellExecute WINELIB_NAME_AW(ShellExecute)
 
 /******************************************
  * Tray Notification
@@ -295,31 +286,21 @@ typedef struct _SHELLEXECUTEINFOW
  * Misc
  */
 
-HICON16	WINAPI ExtractIcon16(HINSTANCE16,LPCSTR,UINT16);
 HICON	WINAPI ExtractIconA(HINSTANCE,LPCSTR,UINT);
 HICON	WINAPI ExtractIconW(HINSTANCE,LPCWSTR,UINT);
-#define     ExtractIcon WINELIB_NAME_AW(ExtractIcon)
 
-HICON16     WINAPI ExtractAssociatedIcon16(HINSTANCE16,LPSTR,LPWORD);
 HICON     WINAPI ExtractAssociatedIconA(HINSTANCE,LPSTR,LPWORD);
 HICON     WINAPI ExtractAssociatedIconW(HINSTANCE,LPWSTR,LPWORD);
-#define     ExtractAssociatedIcon WINELIB_NAME_AW(ExtractAssociatedIcon)
 
-HICON16 WINAPI ExtractIconEx16 ( LPCSTR, INT16, HICON16 *, HICON16 *, UINT16 );
 HICON WINAPI ExtractIconExA( LPCSTR, INT, HICON *, HICON *, UINT );
 HICON WINAPI ExtractIconExW( LPCWSTR, INT, HICON *, HICON *, UINT );
-#define  ExtractIconEx WINELIB_NAME_AW(ExtractIconEx)
 HICON WINAPI ExtractIconExAW(LPCVOID, INT, HICON *, HICON *, UINT );
 
-HINSTANCE16 WINAPI FindExecutable16(LPCSTR,LPCSTR,LPSTR);
 HINSTANCE WINAPI FindExecutableA(LPCSTR,LPCSTR,LPSTR);
 HINSTANCE WINAPI FindExecutableW(LPCWSTR,LPCWSTR,LPWSTR);
-#define     FindExecutable WINELIB_NAME_AW(FindExecutable)
 
-BOOL16      WINAPI ShellAbout16(HWND16,LPCSTR,LPCSTR,HICON16);
 BOOL      WINAPI ShellAboutA(HWND,LPCSTR,LPCSTR,HICON);
 BOOL      WINAPI ShellAboutW(HWND,LPCWSTR,LPCWSTR,HICON);
-#define     ShellAbout WINELIB_NAME_AW(ShellAbout)
 
 #pragma pack(4)
 

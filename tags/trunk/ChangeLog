@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.20 1999-06-24 08:45:38 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.21 1999-06-24 19:27:48 phaller Exp $ */
+
+ 99-06-24: Patrick Haller
+        - SHELL32: partial port form WINE
 
  99-24-06: Edgar Buerkle
 	- KERNEL32: Implemented GetLocaleInfoA/W

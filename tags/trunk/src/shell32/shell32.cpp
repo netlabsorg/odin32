@@ -1,4 +1,4 @@
-/* $Id: shell32.cpp,v 1.7 1999-06-23 22:28:52 phaller Exp $ */
+/* $Id: shell32.cpp,v 1.8 1999-06-24 19:27:49 phaller Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -20,6 +20,7 @@
  * Includes                                                                  *
  *****************************************************************************/
 
+#include <odin.h>
 #include <os2win.h>
 #include <shellapi.h>
 #include <winreg.h>
@@ -64,7 +65,7 @@
  *             INT     nShowCmd
  * Variables :
  * Result    :
- * Remark    :
+ * Remark    : SHELL32.289
  * Status    : UNTESTED
  *
  * Author    : Patrick Haller [Tue, 1999/06/01 09:00]
@@ -100,7 +101,7 @@ HINSTANCE WIN32API ShellExecuteA(HWND    hwnd,
  *             INT     nShowCmd
  * Variables :
  * Result    :
- * Remark    :
+ * Remark    : SHELL32.293
  * Status    : UNTESTED
  *
  * Author    : Patrick Haller [Tue, 1999/06/01 09:00]
@@ -153,7 +154,7 @@ HINSTANCE WIN32API ShellExecuteW(HWND    hwnd,
  *             HICON  hIcon
  * Variables :
  * Result    :
- * Remark    :
+ * Remark    : SHELL32.287
  * Status    : UNTESTED
  *
  * Author    : Patrick Haller [Tue, 1999/06/01 09:00]
@@ -192,7 +193,7 @@ int WIN32API ShellAboutA(HWND    hwnd,
  *             HICON   hIcon
  * Variables :
  * Result    :
- * Remark    :
+ * Remark    : SHELL32.288
  * Status    : UNTESTED
  *
  * Author    : Patrick Haller [Tue, 1999/06/01 09:00]
@@ -238,14 +239,20 @@ int WIN32API ShellAboutW(HWND    hwnd,
 }
 
 
-/*************************************************************************
- *              Shell_NotifyIcon    [SHELL32.240]
- *  FIXME
- *  This function is supposed to deal with the systray.
- *  Any ideas on how this is to be implimented?
- */
-BOOL WIN32API Shell_NotifyIconA(DWORD dwMessage,
-                           PNOTIFYICONDATAA pnid )
+/*****************************************************************************
+ * Name      : BOOL Shell_NotifyIconA
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.296 .297
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
+ *****************************************************************************/
+
+BOOL WIN32API Shell_NotifyIconA(DWORD            dwMessage,
+                                PNOTIFYICONDATAA pnid)
 {
   dprintf(("SHELL32: Shell_NotifyIconA(%08xh,%08xh) not implemented.\n",
            dwMessage,
@@ -255,12 +262,18 @@ BOOL WIN32API Shell_NotifyIconA(DWORD dwMessage,
 }
 
 
-/*************************************************************************
- *              Shell_NotifyIcon    [SHELL32.240]
- *  FIXME
- *  This function is supposed to deal with the systray.
- *  Any ideas on how this is to be implimented?
- */
+/*****************************************************************************
+ * Name      : BOOL Shell_NotifyIconW
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.298
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
+ *****************************************************************************/
+
 BOOL WIN32API Shell_NotifyIconW(DWORD dwMessage,
                                          PNOTIFYICONDATAW pnid )
 {
@@ -300,7 +313,7 @@ BOOL WIN32API ShellExecuteEx(LPSHELLEXECUTEINFOA lpExecInfo)
  * Parameters:
  * Variables :
  * Result    :
- * Remark    :
+ * Remark    : SHELL32.290 .291
  * Status    : UNTESTED STUB
  *
  * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
@@ -321,7 +334,7 @@ BOOL WIN32API ShellExecuteExA(LPSHELLEXECUTEINFOA lpExecInfo)
  * Parameters:
  * Variables :
  * Result    :
- * Remark    :
+ * Remark    : SHELL32.292
  * Status    : UNTESTED STUB
  *
  * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
@@ -353,16 +366,16 @@ BOOL WIN32API ShellExecuteExW(LPSHELLEXECUTEINFOW lpExecInfo)
  * Author    : Patrick Haller [Tue, 1999/06/01 09:00]
  *****************************************************************************/
 
-DWORD WIN32API ShellMessageBoxW(HMODULE hmod,
-                                HWND    hwnd,
-                                DWORD   idText,
-                                DWORD   idTitle,
-                                DWORD   uType,
-                                LPCVOID arglist)
+DWORD CDECL ShellMessageBoxW(HMODULE hmod,
+                                      HWND    hwnd,
+                                      DWORD   idText,
+                                      DWORD   idTitle,
+                                      DWORD   uType,
+                                      LPCVOID arglist)
 {
   WCHAR   szText[100],
-         szTitle[100],
-         szTemp[256];
+          szTitle[100],
+          szTemp[256];
   LPWSTR pszText = &szText[0],
          pszTitle = &szTitle[0];
   LPVOID args = &arglist;
@@ -384,7 +397,10 @@ DWORD WIN32API ShellMessageBoxW(HMODULE hmod,
     pszTitle = (LPWSTR)idTitle;
 
   if (! HIWORD (idText))
-    LoadStringW(hmod,idText,pszText,100);
+    LoadStringW(hmod,
+                idText,
+                pszText,
+                100);
   else
     pszText = (LPWSTR)idText;
 
@@ -420,12 +436,12 @@ DWORD WIN32API ShellMessageBoxW(HMODULE hmod,
  * Author    : Patrick Haller [Tue, 1999/06/01 09:00]
  *****************************************************************************/
 
-DWORD WIN32API ShellMessageBoxA(HMODULE hmod,
-                                HWND    hwnd,
-                                DWORD   idText,
-                                DWORD   idTitle,
-                                DWORD   uType,
-                                LPCVOID arglist)
+DWORD CDECL ShellMessageBoxA(HMODULE hmod,
+                                      HWND    hwnd,
+                                      DWORD   idText,
+                                      DWORD   idTitle,
+                                      DWORD   uType,
+                                      LPCVOID arglist)
 {
   char   szText[100],
          szTitle[100],
@@ -443,12 +459,18 @@ DWORD WIN32API ShellMessageBoxA(HMODULE hmod,
            arglist));
 
   if (!HIWORD (idTitle))
-    LoadStringA(hmod,idTitle,pszTitle,100);
+    LoadStringA(hmod,
+                idTitle,
+                pszTitle,
+                100);
   else
     pszTitle = (LPSTR)idTitle;
 
   if (! HIWORD (idText))
-    LoadStringA(hmod,idText,pszText,100);
+    LoadStringA(hmod,
+                idText,
+                pszText,
+                100);
   else
     pszText = (LPSTR)idText;
 
@@ -465,5 +487,3 @@ DWORD WIN32API ShellMessageBoxA(HMODULE hmod,
                      pszTitle,
                      uType);
 }
-
-
