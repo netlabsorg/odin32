@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.7 1999-10-04 18:32:50 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.8 1999-10-08 18:39:34 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -194,6 +194,7 @@ Win32Dialog::Win32Dialog(HINSTANCE hInst, LPCSTR dlgTemplate, HWND owner,
     /* Create controls */
     if (createControls(dlgTemplate, hInst))
     {
+        dprintf(("********* DIALOG CONTROLS CREATED ************"));
         /* Send initialisation messages and set focus */
         hwndFocus = GetNextDlgTabItem( getWindowHandle(), 0, FALSE );
 
@@ -209,6 +210,7 @@ Win32Dialog::Win32Dialog(HINSTANCE hInst, LPCSTR dlgTemplate, HWND owner,
         dprintf(("********* DIALOG CREATED ************"));
         return;
     }
+    dprintf(("********* DIALOG CREATION FAILED! ************"));
     DestroyWindow();
 }
 //******************************************************************************
