@@ -1,10 +1,14 @@
-/* $Id: changelog,v 1.2456 2003-01-23 12:31:43 sandervl Exp $ */
+/* $Id: changelog,v 1.2457 2003-01-23 13:49:58 sandervl Exp $ */
 
  2003-01-23: Sander van Leeuwen <sandervl@innotek   >
     - INCLUDE\*.mk: 
                 o Don't use include\incl_vac for statically linked targets
                   (e.g. tools)
     - ODINCRT:  o Added wrappers for new & delete operators
+    - ODINPROF, IPLOG, OLE32\REGSVR32;
+                o Link with static CRT library
+    - MAKE\setup.mak:
+                o Only add include\incl_vac if not building an odin32 app
 
  2003-01-22: Sander van Leeuwen <sandervl@innotek   >
     - ODINCRT:  o Renamed wrapper functions
