@@ -1,4 +1,4 @@
-/* $Id: exceptutil.h,v 1.6 2000-02-16 14:25:40 sandervl Exp $ */
+/* $Id: exceptutil.h,v 1.7 2000-03-18 19:49:44 sandervl Exp $ */
 
 /*
  * Exception + misc functions for OS/2
@@ -24,6 +24,12 @@ extern "C" PVOID QueryExceptionChain();
 void  OS2SetExceptionHandler(void *exceptframe);
 void  OS2UnsetExceptionHandler(void *exceptframe);
 void  SetOS2ExceptionChain(ULONG val);
+
+#ifdef DEBUG
+void  PrintExceptionChain();
+#else
+#define PrintExceptionChain()
+#endif
 
 ULONG  getEAX();
 ULONG  getEBX();
