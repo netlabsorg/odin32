@@ -57,6 +57,7 @@
 /tools/database                            bird
 /tools/impdef                              sandervl phaller achimha bird
 /tools/omfdumper                           bird sandervl
+/tools/wrc                                 sandervl bird
 /tools                                     sandervl phaller achimha bird
 /src/advapi32/backup                       sandervl phaller achimha bird
 /src/advapi32/backups                      sandervl phaller achimha bird
