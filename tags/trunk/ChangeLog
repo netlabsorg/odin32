@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.400 1999-11-02 23:03:14 hugh Exp $ */
+ /* $Id: ChangeLog,v 1.401 1999-11-03 17:13:28 phaller Exp $ */
+
+ 99-11-03: Patrick Haller <phaller@gmx.net>
+	KERNEL32:	Fix: 	undocumented behaviour in SearchPathA 
+				and bugfix in SearchPathW
 
  99-11-02  Markus Montkowski <mmontkowski@gmx.de>
                  Changed debug output to DDRAW: ...
