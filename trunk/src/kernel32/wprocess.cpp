@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.128 2001-07-03 13:23:09 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.129 2001-07-10 20:41:50 bird Exp $ */
 
 /*
  * Win32 process functions
@@ -839,6 +839,21 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
                 return 0;
             }
             else {
+                /* bird 2001-07-10:
+                 *  let's fail right away instead of hitting DebugInt3s and fail other places.
+                 *  This is very annoying when running Opera on a debug build with netscape/2
+                 *  plugins present. We'll make this conditional for the time being.
+                 */
+                static BOOL fFailIfUnregisteredLX = -1;
+                if (fFailIfUnregisteredLX == -1)
+                    fFailIfUnregisteredLX = getenv("ODIN32.FAIL_IF_UNREGISTEREDLX") != NULL;
+                if (fExeStarted && fFailIfUnregisteredLX)
+                {
+                    dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): returns 0x%x. Loaded OS/2 dll %s using DosLoadModule. returns NULL.",
+                             lpszLibFile, hFile, dwFlags, hDll, szModname));
+                    SetLastError(ERROR_INVALID_EXE_SIGNATURE);
+                    return NULL;
+                }
                 dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): returns 0x%x. Loaded OS/2 dll %s using DosLoadModule.",
                          lpszLibFile, hFile, dwFlags, hDll, szModname));
                 return hDll; //happens when LoadLibrary is called in kernel32's initterm (nor harmful)
@@ -1677,7 +1692,7 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
         }
         exename++;
         if (SearchPathA( NULL, &buffer[1], ".exe", sizeof(szAppName), szAppName, NULL ) ||
-            SearchPathA( NULL, &buffer[1], NULL, sizeof(szAppName), szAppName, NULL )) 
+            SearchPathA( NULL, &buffer[1], NULL, sizeof(szAppName), szAppName, NULL ))
         {
             //
         }
