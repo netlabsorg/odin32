@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2000-12-02 23:27:00 bird Exp $
+# $Id: makefile,v 1.9 2001-03-14 20:15:59 bird Exp $
 
 #
 # Odin32 API
@@ -37,7 +37,7 @@ NO_MAIN_BIN_COPY = 1
 !if "$(VAC3)" == "1" || "$(VAC36)" == "1"
 CFLAGS   = $(CFLAGS) -W3 -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext- \
 !ifdef DEBUG
-        -O+ -Tm-
+#        -O+ -Tm-
 !endif
 !endif
 
@@ -75,3 +75,9 @@ TARGET = FastDep
 #
 needed: all
 
+
+#
+# NT version using Watcom C/C++.
+#
+fastdepnt.exe:
+    wcl386 -bt=nt -l=nt -d2 /"option map" -DOS2FAKE=1 -I$(WATCOM)\h\nt fastdep.c avl.c os2fake-win.c /Fe=$@ kernel32.lib
