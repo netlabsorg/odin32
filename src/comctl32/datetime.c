@@ -104,8 +104,12 @@ static BOOL DATETIME_SendSimpleNotify (HWND hwnd, UINT code);
 static BOOL DATETIME_SendDateTimeChangeNotify (HWND hwnd);
 extern void MONTHCAL_CopyTime(const SYSTEMTIME *from, SYSTEMTIME *to);
 static const char *allowedformatchars = {"dhHmMstyX'"};
+#ifdef __WIN32OS2__
+static const int maxrepetition [] = {4,2,2,2,4,2,2,4,-1,-1};
+//DT all wine xxx.nls contains yyyy for FULLYEAR
+#else
 static const int maxrepetition [] = {4,2,2,2,4,2,2,3,-1,-1};
-
+#endif
 
 static LRESULT
 DATETIME_GetSystemTime (HWND hwnd, WPARAM wParam, LPARAM lParam )
@@ -439,7 +443,12 @@ DATETIME_ReturnTxt (DATETIME_INFO *infoPtr, int count, char *result)
 		break;
 	case FULLMONTH:   
 		GetLocaleInfoA( GetSystemDefaultLCID(),LOCALE_SMONTHNAME1+date.wMonth -1,
+#ifdef __WIN32OS2__
+				buffer,sizeof(buffer));
+		strcpy  (result,buffer);
+#else
 		  result,sizeof(result));
+#endif
 		break;
 	case ONELETTERAMPM:   
 		if (date.wHour<12) 
