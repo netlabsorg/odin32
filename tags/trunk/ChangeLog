@@ -1,4 +1,9 @@
- /* $Id: ChangeLog,v 1.987 2000-06-13 21:27:44 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.988 2000-06-14 02:28:43 phaller Exp $ */
+
+ 2000-06-14: Patrick Haller <phaller@gmx.net>
+    - KERNEL32:     - altered calling of dllEntryPoint() depending on
+                      static or dynamic loading if library according
+                      to the Win32 documentation. (StarCraft)
 
  2000-06-13: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:       Check if class already exists in RegisterClass(Ex)A/W
