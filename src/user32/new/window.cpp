@@ -1,9 +1,10 @@
-/* $Id: window.cpp,v 1.29 2000-01-10 23:29:15 sandervl Exp $ */
+/* $Id: window.cpp,v 1.30 2000-01-11 17:34:44 cbratschi Exp $ */
 /*
  * Win32 window apis for OS/2
  *
  * Copyright 1999 Sander van Leeuwen
  * Copyright 1999 Daniela Engert (dani@ngrt.de)
+ * Copyright 2000 Christoph Bratschi (cbratschi@datacomm.ch)
  *
  * Parts based on Wine Windows code (windows\win.c)
  *
@@ -806,10 +807,42 @@ BOOL WIN32API AdjustWindowRectEx( PRECT rect, DWORD style, BOOL menu, DWORD exSt
     exStyle &= (WS_EX_DLGMODALFRAME | WS_EX_CLIENTEDGE |
         WS_EX_STATICEDGE | WS_EX_TOOLWINDOW);
     if (exStyle & WS_EX_DLGMODALFRAME) style &= ~WS_THICKFRAME;
-#if 0  //CB: todo
-    Win32BaseWindow::NC_AdjustRectOuter( rect, style, menu, exStyle );
-    Win32BaseWindow::NC_AdjustRectInner( rect, style, exStyle );
-#endif
+
+    //Adjust rect outer (Win32BaseWindow::AdjustRectOuter)
+    /* Decide if the window will be managed (see CreateWindowEx) */
+    //if (!WindowNeedsWMBorder()) //CB: check Options.managed
+    {
+      if (HAS_THICKFRAME(style,exStyle))
+        InflateRect( rect, GetSystemMetrics(SM_CXFRAME), GetSystemMetrics(SM_CYFRAME) );
+      else
+        if (HAS_DLGFRAME(style,exStyle))
+          InflateRect(rect, GetSystemMetrics(SM_CXDLGFRAME), GetSystemMetrics(SM_CYDLGFRAME) );
+        else
+          if (HAS_THINFRAME(style))
+            InflateRect( rect, GetSystemMetrics(SM_CXBORDER), GetSystemMetrics(SM_CYBORDER));
+
+      if ((style & WS_CAPTION) == WS_CAPTION)
+      {
+        if (exStyle & WS_EX_TOOLWINDOW)
+          rect->top -= GetSystemMetrics(SM_CYSMCAPTION);
+        else
+          rect->top -= GetSystemMetrics(SM_CYCAPTION);
+      }
+    }
+
+    if (menu)
+      rect->top -= GetSystemMetrics(SM_CYMENU);
+
+    //Adjust rect inner (Win32BaseWindow::AdjustRectInner)
+    if (exStyle & WS_EX_CLIENTEDGE)
+      InflateRect (rect, GetSystemMetrics(SM_CXEDGE), GetSystemMetrics(SM_CYEDGE));
+
+    if (exStyle & WS_EX_STATICEDGE)
+      InflateRect (rect, GetSystemMetrics(SM_CXBORDER), GetSystemMetrics(SM_CYBORDER));
+
+    if (style & WS_VSCROLL) rect->right  += GetSystemMetrics(SM_CXVSCROLL);
+    if (style & WS_HSCROLL) rect->bottom += GetSystemMetrics(SM_CYHSCROLL);
+
     dprintf(("AdjustWindowRectEx returned (%d,%d)(%d,%d)\n", rect->left, rect->top, rect->right, rect->bottom));
     return TRUE;
 }

@@ -1,10 +1,10 @@
-/* $Id: win32wbase.cpp,v 1.33 2000-01-11 13:52:19 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.34 2000-01-11 17:34:43 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
  * Copyright 1998-2000 Sander van Leeuwen (sandervl@xs4all.nl)
  * Copyright 1999      Daniela Engert (dani@ngrt.de)
- * Copyright 2000      Christoph Bratschi (cbratschi@datacomm.ch)
+ * Copyright 1999-2000 Christoph Bratschi (cbratschi@datacomm.ch)
  *
  * Parts based on Wine Windows code (windows\win.c)
  *
@@ -49,38 +49,6 @@
 
 #define SC_ABOUTWINE            (SC_SCREENSAVE+1)
 #define SC_PUTMARK              (SC_SCREENSAVE+2)
-
-#define HAS_DLGFRAME(style,exStyle) \
-    (((exStyle) & WS_EX_DLGMODALFRAME) || \
-     (((style) & WS_DLGFRAME) && !((style) & WS_THICKFRAME)))
-
-#define HAS_THICKFRAME(style,exStyle) \
-    (((style) & WS_THICKFRAME) && \
-     !((exStyle) & WS_EX_DLGMODALFRAME) && \
-     !((style) & WS_CHILD))
-
-#define HAS_THINFRAME(style) \
-    (((style) & WS_BORDER) || !((style) & (WS_CHILD | WS_POPUP)))
-
-#define HAS_BIGFRAME(style,exStyle) \
-    (((style) & (WS_THICKFRAME | WS_DLGFRAME)) || \
-     ((exStyle) & WS_EX_DLGMODALFRAME))
-
-#define HAS_ANYFRAME(style,exStyle) \
-    (((style) & (WS_THICKFRAME | WS_DLGFRAME | WS_BORDER)) || \
-     ((exStyle) & WS_EX_DLGMODALFRAME) || \
-     !((style) & (WS_CHILD | WS_POPUP)))
-
-#define HAS_3DFRAME(exStyle) \
-    ((exStyle & WS_EX_CLIENTEDGE) || (exStyle & WS_EX_STATICEDGE) || (exStyle & WS_EX_WINDOWEDGE))
-
-#define HAS_BORDER(style, exStyle) \
-    ((style & WS_BORDER) || HAS_THICKFRAME(style) || HAS_DLGFRAME(style,exStyle))
-
-#define IS_OVERLAPPED(style) \
-    !(style & (WS_CHILD | WS_POPUP))
-
-#define HAS_MENU() (!(getStyle() & WS_CHILD) && (GetMenu() != 0))
 
 /* bits in the dwKeyData */
 #define KEYDATA_ALT         0x2000
@@ -1089,7 +1057,7 @@ ULONG Win32BaseWindow::MsgNCPaint()
     rc = SendInternalMessageA(WM_NCPAINT,/*hrgn*/0,0);
 //dprintf(("CB: %d %d %d %d",rect.left,rect.top,rect.bottom,rect.right));
     DeleteObject(hrgn);
-    //CB: todo: check if intersection with client
+    //CB: todo: check if intersection with client, what does PM's frame???
 
     return rc;
   } else return 0;
@@ -1609,24 +1577,24 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 
     case WM_SYSCHAR:
     {
-	    int iMenuSysKey = 0;
-	    if (wParam == VK_RETURN && (getStyle() & WS_MINIMIZE))
+            int iMenuSysKey = 0;
+            if (wParam == VK_RETURN && (getStyle() & WS_MINIMIZE))
         {
-	        PostMessageA(getWindowHandle(), WM_SYSCOMMAND,
+                PostMessageA(getWindowHandle(), WM_SYSCOMMAND,
                          (WPARAM)SC_RESTORE, 0L );
-	        break;
+                break;
         }
-	    if ((HIWORD(lParam) & KEYDATA_ALT) && wParam)
+            if ((HIWORD(lParam) & KEYDATA_ALT) && wParam)
         {
-	        if (wParam == VK_TAB || wParam == VK_ESCAPE) break;
-	        if (wParam == VK_SPACE && (getStyle() & WS_CHILD))
+                if (wParam == VK_TAB || wParam == VK_ESCAPE) break;
+                if (wParam == VK_SPACE && (getStyle() & WS_CHILD))
                 getParent()->SendMessageA(Msg, wParam, lParam );
-	        else
+                else
                 SendMessageA(WM_SYSCOMMAND, (WPARAM)SC_KEYMENU, (LPARAM)(DWORD)wParam );
         }
-	    else /* check for Ctrl-Esc */
+            else /* check for Ctrl-Esc */
             if (wParam != VK_ESCAPE) MessageBeep(0);
-	    break;
+            break;
     }
 
     case WM_SHOWWINDOW:
@@ -2727,12 +2695,10 @@ VOID Win32BaseWindow::updateWindowStyle(DWORD oldExStyle,DWORD oldStyle)
 {
   if(IsWindowDestroyed()) return;
 
-  //CB: todo: dwExStyle, creating new frame controls, destroy not used controls, WS_VISIBLE, WS_CHILD, ...
-  //    write test cases
   if ((dwStyle & 0xFFFF0000) != (oldStyle & 0xFFFF0000))
   {
-    //dprintf(("updateWindowStyle: %x %x",oldStyle,dwStyle));
-    OSLibSetWindowStyle(OS2HwndFrame, dwStyle, fTaskList);
+    //CB: update
+    //OSLibSetWindowStyle(OS2HwndFrame, dwStyle, fTaskList);
   }
 }
 //******************************************************************************
