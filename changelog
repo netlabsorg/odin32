@@ -1,7 +1,17 @@
-/* $Id: changelog,v 1.1501 2001-06-12 08:03:05 sandervl Exp $ */
+/* $Id: changelog,v 1.1502 2001-06-12 17:00:28 sandervl Exp $ */
 
  2001-06-12: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Partly fixed position of PM frame controls
+                o FillRect fix for 0 brush
+                o Workaround for windows with CS_CLASSDC class. Use same
+                  mechanism as CS_OWNDC. (might not always work though)
+                  No (easy) way to share a single DC between windows in PM.
+                  (fixes paint problems in MED)
+                o Use critical sections for local hooks; faster than
+                  kernel mutex semaphore calls.
+    - GDI32:    o SetDIBColorTable bugfix
+    - KERNEL32: o Fail to load OS/2 (non-Odin) dlls in LoadLibrary
+                  (Winbench tries this)
 
  2001-06-11: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Reference count bugfixes
