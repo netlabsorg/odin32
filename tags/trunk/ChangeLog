@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1636 2001-08-06 15:59:33 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1637 2001-08-06 19:39:45 sandervl Exp $ */
 
  2001-08-06: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Check for ERROR_ACCESS_DENIED in CreateProcess 
@@ -6,6 +6,9 @@
                 o Memory map fixes (GetCurrentProcess returns handles
                   that are no unique)
                 o Init fix for logfile names of multiple processes
+                o Support different ordinal base for custom build
+    - CUSTOMBUILD:
+                o Add SHLWAPI exports + changes for ordinal exports
 
  2001-08-06: Dietrich Teickner <Dietrich_Teickner@t-online.de>
     - COMCTL32: o Datetime fixes
