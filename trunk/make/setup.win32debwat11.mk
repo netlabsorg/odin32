@@ -1,4 +1,4 @@
-# $Id: setup.win32debwat11.mk,v 1.4 2002-05-01 04:00:18 bird Exp $
+# $Id: setup.win32debwat11.mk,v 1.5 2002-06-25 01:23:06 bird Exp $
 
 # ---WIN32, DEBUG, WAT11-------------------------
 ENV_NAME="Win32, Debug, Watcom C/C++ v11.0c"
@@ -76,7 +76,7 @@ LINK_CMD_VDD=$(LINK) $(LINK_FLAGS_VDD) @$(TARGET_LNK)
 LINK_CMD_IFS=$(LINK) $(LINK_FLAGS_IFS) @$(TARGET_LNK)
 LINK_LNK1=file       $(TARGET_OBJS: =^
 file       )
-LINK_LNK2=libpath    $(WATCOM)\lib386\os2;$(WATCOM)\lib386;
+LINK_LNK2=libpath    $(WATCOM)\lib386\nt;$(WATCOM)\lib386;
 LINK_LNK3=option map=$(TARGET_MAP)
 LINK_LNK4=library    $(TARGET_LIBS: =^, )
 LINK_LNK5=name       $(PATH_TARGET)\$(TARGET_NAME).$(TARGET_EXT)
@@ -87,7 +87,7 @@ RL_FLAGS=-x2 -n
 #
 # Libraries and object files.
 #
-LIB_OS      = $(WATCOM)\lib386\nt\kernel32.lib $(WATCOM)\lib386\nt\user32.lib $(WATCOM)\lib386\nt\gdi32.lib
+LIB_OS      = $(WATCOM)\lib386\nt\kernel32.lib $(WATCOM)\lib386\nt\user32.lib $(WATCOM)\lib386\nt\gdi32.lib $(WATCOM)\lib386\nt\nt.lib
 LIB_C_OBJ   = clib3r.lib
 LIB_C_DLL   = clbrdll.lib
 LIB_C_RTDLL = clbrdll.lib
