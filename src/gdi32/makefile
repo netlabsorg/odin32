@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 1999-08-21 12:29:29 sandervl Exp $
+# $Id: makefile,v 1.7 1999-09-06 01:50:32 bird Exp $
 
 #
 # PD-Win32 API
@@ -9,6 +9,7 @@
 PDWIN32_INCLUDE = ..\..\include
 PDWIN32_LIB = ..\..\lib
 PDWIN32_BIN = ..\..\bin
+PDWIN32_TOOLS = ..\..\tools\bin
 
 
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
@@ -37,6 +38,9 @@ $(TARGET).lib: $(TARGET)exp.def
 	$(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
 	$(CP) $@ $(PDWIN32_LIB)
 
+$(TARGET)exp.def: $(TARGET).def
+    $(IMPDEF) $** $@
+
 
 
 gdi32.obj: gdi32.cpp \
@@ -59,8 +63,8 @@ initterm.obj: initterm.cpp
 
 
 clean:
-	$(RM) *.obj *.lib *.dll *~ *.map *.pch	
+	$(RM) *.obj *.lib *.dll *~ *.map *.pch
 	$(RM) $(PDWIN32_BIN)\$(TARGET).dll
 	$(RM) $(PDWIN32_LIB)\$(TARGET).lib
-
+    $(RM) $(TARGET)exp.def
 

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.38 1999-09-04 12:41:46 sandervl Exp $
+# $Id: makefile,v 1.39 1999-09-06 01:48:42 bird Exp $
 
 #
 # PD-Win32 API
@@ -9,6 +9,7 @@
 PDWIN32_INCLUDE = ..\..\include
 PDWIN32_LIB = ..\..\lib
 PDWIN32_BIN = ..\..\bin
+PDWIN32_TOOLS = ..\..\tools\bin
 
 
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
@@ -53,19 +54,22 @@ $(TARGET).dll: $(OBJS) $(TARGET).def $(TARGET).lrf
 
 $(TARGET).lrf: makefile
         @echo Creating file <<$(@B).lrf
-$(OBJS) 
-$(PDWIN32_LIB)\PMWINX.LIB 
-$(PDWIN32_LIB)\LIBULS.LIB 
-$(PDWIN32_LIB)\LIBCONV.LIB 
-$(PDWIN32_LIB)\odincrt.lib 
-OS2386.LIB 
-$(RTLLIB_O) 
+$(OBJS)
+$(PDWIN32_LIB)\PMWINX.LIB
+$(PDWIN32_LIB)\LIBULS.LIB
+$(PDWIN32_LIB)\LIBCONV.LIB
+$(PDWIN32_LIB)\odincrt.lib
+OS2386.LIB
+$(RTLLIB_O)
 $(TARGET).def
 <<keep
 
 $(TARGET).LIB: $(TARGET)exp.def
         $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
         $(CP) $@ $(PDWIN32_LIB)
+
+$(TARGET)exp.def: $(TARGET).def
+        $(IMPDEF) $** $@
 
 $(PDWIN32_LIB)\pmwinx.lib:
         $(IMPLIB) $(IMPLIBFLAGS) $@ $(PDWIN32_LIB)\pmwinx.def
@@ -220,7 +224,7 @@ conbuffer.OBJ: \
 
 lfile.OBJ: \
     .\lfile.cpp \
-    $(PDWIN32_INCLUDE)\wprocess.h 
+    $(PDWIN32_INCLUDE)\wprocess.h
 
 obsolete.OBJ: \
     .\obsolete.cpp
@@ -327,7 +331,7 @@ async.OBJ: \
         $(PDWIN32_INCLUDE)\unicode.h
 
 virtual.obj:   virtual.cpp $(PDWIN32_INCLUDE)\win\virtual.h $(PDWIN32_INCLUDE)\handlemanager.h mmap.h
-mmap.obj:      mmap.cpp mmap.h $(PDWIN32_INCLUDE)\vmutex.h oslibdos.h 
+mmap.obj:      mmap.cpp mmap.h $(PDWIN32_INCLUDE)\vmutex.h oslibdos.h
 
 pefile.OBJ:    pefile.cpp $(PDWIN32_INCLUDE)\pefile.h
 winimage.OBJ:  winimage.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h $(PDWIN32_INCLUDE)\pefile.h $(PDWIN32_INCLUDE)\winres.h initterm.h $(PDWIN32_INCLUDE)\win\virtual.h oslibmisc.h
@@ -352,5 +356,4 @@ clean:
         $(RM) *.OBJ *.LIB *.dll *.lrf *.res *.map *.pch
         $(RM) $(PDWIN32_LIB)\$(TARGET).LIB
         $(RM) $(PDWIN32_BIN)\$(TARGET).dll
-
-
+        $(RM) $(TARGET)exp.def
