@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.71 2000-02-10 18:49:51 cbratschi Exp $ */
+/* $Id: user32.cpp,v 1.72 2000-02-12 18:09:49 cbratschi Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -147,7 +147,7 @@ BOOL WIN32API InflateRect( PRECT lprc, int dx, int  dy)
 BOOL WIN32API IntersectRect( PRECT lprcDst, const RECT * lprcSrc1, const RECT * lprcSrc2)
 {
     dprintf2(("USER32:  IntersectRect\n"));
-    if (!lprcDst || !lprcSrc1 || !lprcSrc2)
+    if (!lprcSrc1 || !lprcSrc2)
     {
       SetLastError(ERROR_INVALID_PARAMETER);
       return FALSE;
@@ -158,13 +158,16 @@ BOOL WIN32API IntersectRect( PRECT lprcDst, const RECT * lprcSrc1, const RECT * 
        (lprcSrc1->top >= lprcSrc2->bottom) || (lprcSrc2->top >= lprcSrc1->bottom))
     {
       SetLastError(ERROR_INVALID_PARAMETER);
-      SetRectEmpty(lprcDst);
+      if (lprcDst) SetRectEmpty(lprcDst);
       return FALSE;
     }
-    lprcDst->left   = MAX(lprcSrc1->left,lprcSrc2->left);
-    lprcDst->right  = MIN(lprcSrc1->right,lprcSrc2->right);
-    lprcDst->top    = MAX(lprcSrc1->top,lprcSrc2->top);
-    lprcDst->bottom = MIN(lprcSrc1->bottom,lprcSrc2->bottom);
+    if (lprcDst)
+    {
+      lprcDst->left   = MAX(lprcSrc1->left,lprcSrc2->left);
+      lprcDst->right  = MIN(lprcSrc1->right,lprcSrc2->right);
+      lprcDst->top    = MAX(lprcSrc1->top,lprcSrc2->top);
+      lprcDst->bottom = MIN(lprcSrc1->bottom,lprcSrc2->bottom);
+    }
 
     return TRUE;
 }

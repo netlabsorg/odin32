@@ -1,4 +1,4 @@
-/* $Id: wndmsg.cpp,v 1.12 2000-01-28 22:26:01 sandervl Exp $ */
+/* $Id: wndmsg.cpp,v 1.13 2000-02-12 18:09:50 cbratschi Exp $ */
 /*
  * Win32 window message text function for OS/2
  *
@@ -144,7 +144,11 @@ MSGDESC gaMsgs[] =
         0},
     { "WM_COMPAREITEM", WM_COMPAREITEM,                     // 0x0039
         0},
+    { "WM_GETOBJECT", WM_GETOBJECT,                         // 0x003D
+        0},
     { "WM_COMPACTING", WM_COMPACTING,                       // 0x0041
+        0},
+    { "WM_COMMNOTIFY", WM_COMMNOTIFY,                       // 0x0044
         0},
     { "WM_WINDOWPOSCHANGING", WM_WINDOWPOSCHANGING,         // 0x0046
         0},
@@ -163,6 +167,7 @@ MSGDESC gaMsgs[] =
     { "WM_HELP", WM_HELP, 0},                               // 0x53
     { "WM_USERCHANGED", WM_USERCHANGED, 0},                 // 0x54
     { "WM_NOTIFYFORMAT", WM_NOTIFYFORMAT, 0},               // 0x55
+    { "WM_CONTEXTMENU" , WM_CONTEXTMENU, 0},                // 0x007B
     { "WM_STYLECHANGING", WM_STYLECHANGING, 0},             // 0x7C
     { "WM_STYLECHANGED", WM_STYLECHANGED, 0},               // 0x7D
     { "WM_DISPLAYCHANGE", WM_DISPLAYCHANGE, 0},             // 0x7E
@@ -181,6 +186,8 @@ MSGDESC gaMsgs[] =
     { "WM_NCACTIVATE", WM_NCACTIVATE,                       // 0x0086
         MTF_TYPE_NC},
     { "WM_GETDLGCODE", WM_GETDLGCODE,                       // 0x0087
+        0},
+    { "WM_SYNCPAINT", WM_SYNCPAINT,                         // 0x0088
         0},
     { "WM_NCMOUSEMOVE", WM_NCMOUSEMOVE,                     // 0x00A0
         MTF_TYPE_NC | MTF_TYPE_MOUSE},
@@ -344,6 +351,18 @@ MSGDESC gaMsgs[] =
     { "WM_MENUCHAR", WM_MENUCHAR,                           // 0x0120
         0},
     { "WM_ENTERIDLE", WM_ENTERIDLE,                         // 0x0121
+        0},
+    { "WM_MENURBUTTONUP", WM_MENURBUTTONUP,                 // 0x0122
+        0},
+    { "WM_MENUDRAG", WM_MENUDRAG,                           // 0x0123
+        0},
+    { "WM_MENUGETOBJECT", WM_MENUGETOBJECT,                 // 0x0124
+        0},
+    { "WM_UNINITMENUPOPUP", WM_UNINITMENUPOPUP,             // 0x0125
+        0},
+    { "WM_MENUCOMMAND", WM_MENUCOMMAND,                     // 0x0126
+        0},
+    { "WM_KEYBOARDCUES", WM_KEYBOARDCUES,                   // 0x0127
         0},
     { "WM_CTLCOLORMSGBOX", WM_CTLCOLORMSGBOX,               // 0x0132
         0},
@@ -513,11 +532,25 @@ MSGDESC gaMsgs[] =
         MTF_TYPE_MOUSE},
     { "WM_MBUTTONDBLCLK", WM_MBUTTONDBLCLK,                 // 0x0209
         MTF_TYPE_MOUSE},
+    { "WM_MOUSEWHEEL", WM_MOUSEWHEEL,                       // 0x020A
+        MTF_TYPE_MOUSE},
     { "WM_PARENTNOTIFY", WM_PARENTNOTIFY,                   // 0x0210
         MTF_TYPE_MOUSE},
     { "WM_ENTERMENULOOP", WM_ENTERMENULOOP,                 // 0x0211
         0},
     { "WM_EXITMENULOOP", WM_EXITMENULOOP,                   // 0x0212
+        0},
+    { "WM_NEXTMENU", WM_NEXTMENU,                           // 0x0213
+        0},
+    { "WM_SIZING", WM_SIZING,                               // 0x0214
+        0},
+    { "WM_CAPTURECHANGED", WM_CAPTURECHANGED,               // 0x0215
+        0},
+    { "WM_MOVING", WM_MOVING,                               // 0x0216
+        0},
+    { "WM_POWERBROADCAST", WM_POWERBROADCAST,               // 0x0218
+        0},
+    { "WM_DEVICECHANGE", WM_DEVICECHANGE,                   // 0x0219
         0},
     { "WM_MDICREATE", WM_MDICREATE,                         // 0x0220
         0},
@@ -565,12 +598,22 @@ MSGDESC gaMsgs[] =
         TMP_MTF_TYPE_IME},
     { "WM_IME_CHAR",            WM_IME_CHAR,                // 0x0286
         TMP_MTF_TYPE_IME},
+    { "WM_IME_REQUEST",         WM_IME_REQUEST,             // 0x0288
+        TMP_MTF_TYPE_IME},
 #ifdef  FE_IME
     { "WM_IMEKEYDOWN", WM_IMEKEYDOWN,                       // 0x0290
         MTF_TYPE_IME},
     { "WM_IMEKEYUP", WM_IMEKEYUP,                           // 0x0291
         MTF_TYPE_IME},
 #endif
+    { "WM_MOUSEHOVER", WM_MOUSEHOVER,                       // 0x02A1
+      MTF_TYPE_MOUSE},
+    { "WM_MOUSELEAVE", WM_MOUSELEAVE,                       // 0x02A3
+      MTF_TYPE_MOUSE},
+    { "WM_NCMOUSEHOVER", WM_NCMOUSEHOVER,                   // 0x02A0
+      MTF_TYPE_MOUSE},
+    { "WM_NCMOUSELEAVE", WM_NCMOUSELEAVE,                   // 0x02A2
+      MTF_TYPE_MOUSE},
     { "WM_CUT", WM_CUT,                                     // 0x0300
         MTF_TYPE_CLIP},
     { "WM_COPY", WM_COPY,                                   // 0x0301
@@ -609,55 +652,61 @@ MSGDESC gaMsgs[] =
         0},
     { "WM_HOTKEY", WM_HOTKEY,                               // 0x0312
         MTF_TYPE_KEYBD},
-    { "WM_QUERYAFXWNDPROC(MFC)", WM_QUERYAFXWNDPROC,             // 0x0360
+    { "WM_PRINT", WM_PRINT,                                 // 0x0317
+        0},
+    { "WM_PRINTCLIENT", WM_PRINTCLIENT,                     // 0x0318
+        0},
+    { "WM_QUERYAFXWNDPROC(MFC)", WM_QUERYAFXWNDPROC,        // 0x0360
         0},
     { "WM_SIZEPARENT(MFC)", WM_SIZEPARENT,                  // 0x0361
         0},
-    { "WM_SETMESSAGESTRING(MFC)", WM_SETMESSAGESTRING,              // 0x0362
+    { "WM_SETMESSAGESTRING(MFC)", WM_SETMESSAGESTRING,      // 0x0362
         0},
-    { "WM_IDLEUPDATECMDUI(MFC)", WM_IDLEUPDATECMDUI,                // 0x0363
+    { "WM_IDLEUPDATECMDUI(MFC)", WM_IDLEUPDATECMDUI,        // 0x0363
         0},
-    { "WM_INITIALUPDATE(MFC)", WM_INITIALUPDATE,                // 0x0364
+    { "WM_INITIALUPDATE(MFC)", WM_INITIALUPDATE,            // 0x0364
         0},
-    { "WM_COMMANDHELP(MFC)", WM_COMMANDHELP,                    // 0x0365
+    { "WM_COMMANDHELP(MFC)", WM_COMMANDHELP,                // 0x0365
         0},
-    { "WM_HELPHITTEST(MFC)", WM_HELPHITTEST,                    // 0x0366
+    { "WM_HELPHITTEST(MFC)", WM_HELPHITTEST,                // 0x0366
         0},
-    { "WM_EXITHELPMODE(MFC)", WM_EXITHELPMODE,                  // 0x0367
+    { "WM_EXITHELPMODE(MFC)", WM_EXITHELPMODE,              // 0x0367
         0},
-    { "WM_RECALCPARENT(MFC)", WM_RECALCPARENT,                  // 0x0368
+    { "WM_RECALCPARENT(MFC)", WM_RECALCPARENT,              // 0x0368
         0},
     { "WM_SIZECHILD(MFC)", WM_SIZECHILD,                    // 0x0369
         0},
     { "WM_KICKIDLE(MFC)", WM_KICKIDLE,                      // 0x036A
         0},
-    { "WM_QUERYCENTERWND(MFC)", WM_QUERYCENTERWND,                  // 0x036B
+    { "WM_QUERYCENTERWND(MFC)", WM_QUERYCENTERWND,          // 0x036B
         0},
-    { "WM_DISABLEMODAL(MFC)", WM_DISABLEMODAL,                  // 0x036C
+    { "WM_DISABLEMODAL(MFC)", WM_DISABLEMODAL,              // 0x036C
         0},
     { "WM_FLOATSTATUS(MFC)", WM_FLOATSTATUS,                // 0x036D
         0},
-    { "WM_ACTIVATETOPLEVEL(MFC)", WM_ACTIVATETOPLEVEL,              // 0x036E
+    { "WM_ACTIVATETOPLEVEL(MFC)", WM_ACTIVATETOPLEVEL,      // 0x036E
         0},
-    { "WM_QUERY3DCONTROLS(MFC)", WM_QUERY3DCONTROLS,                // 0x036F
+    { "WM_QUERY3DCONTROLS(MFC)", WM_QUERY3DCONTROLS,        // 0x036F
         0},
-    { "WM_SOCKET_NOTIFY(MFC)", WM_SOCKET_NOTIFY,                // 0x0373
+    { "WM_SOCKET_NOTIFY(MFC)", WM_SOCKET_NOTIFY,            // 0x0373
         0},
     { "WM_SOCKET_DEAD(MFC)", WM_SOCKET_DEAD,                // 0x0374
         0},
-    { "WM_POPMESSAGESTRING(MFC)", WM_POPMESSAGESTRING,              // 0x0375
+    { "WM_POPMESSAGESTRING(MFC)", WM_POPMESSAGESTRING,      // 0x0375
         0},
-    { "WM_OCC_LOADFROMSTREAM(MFC)", WM_OCC_LOADFROMSTREAM,          // 0x0376
+    { "WM_OCC_LOADFROMSTREAM(MFC)", WM_OCC_LOADFROMSTREAM,  // 0x0376
         0},
-    { "WM_OCC_LOADFROMSTORAGE(MFC)", WM_OCC_LOADFROMSTORAGE,     // 0x0377
+    { "WM_OCC_LOADFROMSTORAGE(MFC)", WM_OCC_LOADFROMSTORAGE, // 0x0377
         0},
     { "WM_OCC_INITNEW(MFC)", WM_OCC_INITNEW,                // 0x0378
         0},
-    { "WM_QUEUE_SENTINEL(MFC)", WM_QUEUE_SENTINEL,               // 0x0379
+    { "WM_QUEUE_SENTINEL(MFC)", WM_QUEUE_SENTINEL,          // 0x0379
         0},
     { "WM_OCC_LOADFROMSTREAM_EX(MFC)", WM_OCC_LOADFROMSTREAM_EX, // 0x037A
         0},
     { "WM_OCC_LOADFROMSTORAGE_EX(MFC)", WM_OCC_LOADFROMSTORAGE_EX, // 0x037B
+        0},
+    { "WM_FORWARDMSG", WM_FORWARDMSG,                       // 0x037F
         0},
     { "WM_DDE_INITIATE", WM_DDE_INITIATE,                   // 0x03E0
         MTF_TYPE_DDE},
@@ -676,7 +725,11 @@ MSGDESC gaMsgs[] =
     { "WM_DDE_POKE", WM_DDE_POKE,                           // 0x03E7
         MTF_TYPE_DDE},
     { "WM_DDE_EXECUTE", WM_DDE_EXECUTE,                     // 0x03E8
-        MTF_TYPE_DDE}
+        MTF_TYPE_DDE},
+    //WM_USER                         0x0400
+      //CB: some dialog message are WM_USER+x
+      //    shlobj.h, aclui.h, shellapi.h, prsht.h, commdlg.h, commctrl.h, tapi.h, cpl.h, ras.h, richedit.h, winwlx.h, wfext.h, scrmsave.h, olectl.h, ftsiface.h, dispdib.h, proppage.h, vfw.h, mapiwz.h
+    //WM_APP                          0x8000
 };
 
 INT gcMessages = sizeof(gaMsgs) / sizeof(MSGDESC);
