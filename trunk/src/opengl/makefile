@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2000-02-10 00:22:07 bird Exp $
+# $Id: makefile,v 1.9 2000-02-10 01:21:04 bird Exp $
 #
 # PD-Win32 API
 #
@@ -115,7 +115,7 @@ dep:
 
 clean:
     $(RM) *.obj *.lib *.dll *.map resource.asm *exp.def \
-        $(RM) $(PDWIN32_BIN)\$(TARGET1).dll $(PDWIN32_LIB)\$(TARGET1).lib \
+        $(RM) $(PDWIN32_BIN)\$(TARGET1).dll $(PDWIN32_LIB)\$(TARGET1).lib
     cd glut
     $(MAKE_CMD) clean
     cd ..\glu

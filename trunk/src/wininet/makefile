@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2000-02-09 23:47:05 bird Exp $
+# $Id: makefile,v 1.6 2000-02-10 01:24:34 bird Exp $
 
 #
 # PD-Win32 API
@@ -60,7 +60,7 @@ dep:
 
 
 clean:
-    $(RM) *.obj *.lib *.dll *exp.def *.map *.pch
+    $(RM) *.obj *.lib *.dll *exp.def *.map *.pch \
         $(PDWIN32_BIN)\$(TARGET).dll $(PDWIN32_LIB)\$(TARGET).lib \
         resource.asm $(TARGET)exp.def
 

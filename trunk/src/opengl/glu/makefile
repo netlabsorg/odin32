@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2000-02-09 23:40:50 bird Exp $
+# $Id: makefile,v 1.9 2000-02-10 01:19:17 bird Exp $
 
 #
 # PD-Win32
@@ -370,7 +370,7 @@ dep:
 
 clean:
     $(RM) *.obj *.dll *.lib *.lrf *exp.def resource.asm \
-      $(PDWIN32_BIN)\$(TARGET).dll $(PDWIN32_LIB)\$(TARGET).lib \
+      $(PDWIN32_BIN)\$(TARGET).dll $(PDWIN32_LIB)\$(TARGET).lib
     cd util
     $(MAKE_CMD) clean
     cd ..\tess
