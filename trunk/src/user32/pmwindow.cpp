@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.97 2000-07-01 09:51:52 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.98 2000-07-04 08:42:06 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -693,7 +693,7 @@ PosChangedEnd:
       BOOL  rc;
 
    	rc = WinQueryUpdateRect(hwnd, &rectl);
-        dprintf(("OS2: WM_PAINT %x (%d,%d) (%d,%d)", win32wnd->getWindowHandle(), rectl.xLeft, rectl.yBottom, rectl.xRight, rectl.yTop));
+        dprintf(("OS2: WM_PAINT %x (%d,%d) (%d,%d) rc=%d", win32wnd->getWindowHandle(), rectl.xLeft, rectl.yBottom, rectl.xRight, rectl.yTop, rc));
         if(rc && win32wnd->IsWindowCreated() && (rectl.xLeft != rectl.xRight &&
            rectl.yBottom != rectl.yTop)) 
 	{

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.205 2000-07-02 14:31:34 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.206 2000-07-04 08:42:07 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2290,12 +2290,10 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
     }
     swp.hwnd = OS2Hwnd;
 
-    dprintf (("WinSetWindowPos %x %x (%d,%d)(%d,%d) %x", swp.hwnd, swp.hwndInsertBehind, swp.x, swp.y, swp.cx, swp.cy, swp.fl));
-    rc = OSLibWinSetMultWindowPos(&swp, 1);
-
     if(fuFlags & SWP_SHOWWINDOW && !IsWindowVisible()) {
         setStyle(getStyle() | WS_VISIBLE);
 	if(hTaskList) {
+		dprintf(("Adding window %x to tasklist", getWindowHandle()));
 		OSLibWinChangeTaskList(hTaskList, OS2Hwnd, getWindowNameA(), (getStyle() & WS_VISIBLE) ? 1 : 0);
 	}
     }
@@ -2303,9 +2301,13 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
     if(fuFlags & SWP_HIDEWINDOW && IsWindowVisible()) {
         setStyle(getStyle() & ~WS_VISIBLE);
 	if(hTaskList) {
+		dprintf(("Removing window %x from tasklist", getWindowHandle()));
 		OSLibWinChangeTaskList(hTaskList, OS2Hwnd, getWindowNameA(), (getStyle() & WS_VISIBLE) ? 1 : 0);
 	}
     }
+    dprintf (("WinSetWindowPos %x %x (%d,%d)(%d,%d) %x", swp.hwnd, swp.hwndInsertBehind, swp.x, swp.y, swp.cx, swp.cy, swp.fl));
+    rc = OSLibWinSetMultWindowPos(&swp, 1);
+
     if(rc == FALSE)
     {
         dprintf(("OSLibWinSetMultWindowPos failed! Error %x",OSLibWinGetLastError()));
