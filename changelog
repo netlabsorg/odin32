@@ -1,5 +1,10 @@
- /* $Id: changelog,v 1.398 1999-11-02 21:20:40 hugh Exp $ */
- 99-11-02  Markus Montkowski <mmontkowski@gmx.de>
+ /* $Id: changelog,v 1.399 1999-11-02 22:04:57 achimha Exp $ */
+
+ 00-11-02: Achim Hasenmueller <achimha@innotek.de>
+        - COMCTL32: Incorporated latest WINE 991031 updates
+          Note: listview doesn't paint properly now. Will be fixed later.
+
+ 99-11-02: Markus Montkowski <mmontkowski@gmx.de>
 	- DDRAW: Changed interface handling of Surfaces=> Quake 2 runs again!
 
  99-11-02: Patrick Haller <phaller@gmx.net>
