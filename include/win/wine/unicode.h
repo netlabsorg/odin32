@@ -63,21 +63,12 @@ extern int cp_wcstombs( const union cptable *table, int flags,
 extern int utf8_wcstombs( const WCHAR *src, int srclen, char *dst, int dstlen );
 extern int utf8_mbstowcs( int flags, const char *src, int srclen, WCHAR *dst, int dstlen );
 
+extern WCHAR WINAPI tolowerW( WCHAR ch );
+extern WCHAR WINAPI toupperW( WCHAR ch );
+
 static inline int is_dbcs_leadbyte( const union cptable *table, unsigned char ch )
 {
     return (table->info.char_size == 2) && (table->dbcs.cp2uni_leadbytes[ch]);
-}
-
-static inline WCHAR tolowerW( WCHAR ch )
-{
-    extern const WCHAR casemap_lower[];
-    return ch + casemap_lower[casemap_lower[ch >> 8] + (ch & 0xff)];
-}
-
-static inline WCHAR toupperW( WCHAR ch )
-{
-    extern const WCHAR casemap_upper[];
-    return ch + casemap_upper[casemap_upper[ch >> 8] + (ch & 0xff)];
 }
 
 /* the character type contains the C1_* flags in the low 12 bits */
@@ -192,5 +183,6 @@ static inline WCHAR *struprW( WCHAR *str )
 extern int strcmpiW( const WCHAR *str1, const WCHAR *str2 );
 extern int strncmpiW( const WCHAR *str1, const WCHAR *str2, int n );
 extern WCHAR *strstrW( const WCHAR *str, const WCHAR *sub );
+
 
 #endif  /* __WINE_UNICODE_H */
