@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.56 2001-08-18 03:49:24 phaller Exp $ */
+/* $Id: dibsect.cpp,v 1.57 2001-09-23 20:14:08 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -191,7 +191,6 @@ DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DW
      DIBSection *dsect = section;
      dprintf2(("Increment section starting at %08X\n",dsect));
 
-     /* @@@PH 98/07/11 fix for dsect->next == NULL */
      while ( (dsect->next != this) &&
              (dsect->next != NULL) )
      {
@@ -670,6 +669,13 @@ void DIBSection::sync(HDC hdc, DWORD nYdest, DWORD nDestHeight, BOOL orgYInversi
   if(fFlip & FLIP_VERT) {
         destBuf = bmpBitsDblBuffer + nYdest*dibinfo.dsBm.bmWidthBytes;
 
+        //SvL: cbImage can be too small for compressed images; GpiQueryBitmapBits
+        //     will fail in that case (CoolEdit 2000). Perhaps because the returned
+        //     compressed image is larger than the original.
+        //     Use uncompressed size instead
+        //     NOTE: The correct size will be returned by GpiQueryBitmapBits
+        tmphdr->cbImage = dibinfo.dsBm.bmHeight*dibinfo.dsBm.bmWidthBytes;
+
         rc = GpiQueryBitmapBits(hdc, nYdest, nDestHeight, destBuf,
                                 tmphdr);
         //manually reverse bitmap data
@@ -682,10 +688,20 @@ void DIBSection::sync(HDC hdc, DWORD nYdest, DWORD nDestHeight, BOOL orgYInversi
         }
   }
   else {
+        //SvL: cbImage can be too small for compressed images; GpiQueryBitmapBits
+        //     will fail in that case (CoolEdit 2000). Perhaps because the returned
+        //     compressed image is larger than the original.
+        //     Use uncompressed size instead
+        //     NOTE: The correct size will be returned by GpiQueryBitmapBits
+        tmphdr->cbImage = dibinfo.dsBm.bmHeight*dibinfo.dsBm.bmWidthBytes;
+
         destBuf = GetDIBObject() + nYdest*dibinfo.dsBm.bmWidthBytes;
         rc = GpiQueryBitmapBits(hdc, nYdest, nDestHeight, destBuf,
                                 tmphdr);
 
+        if(rc) {
+            dprintf(("ERROR: GpiQueryBitmapBits failed with %x", WinGetLastError(0)));
+        }
 #ifdef DEBUG_PALETTE
         if(rc != GPI_ALTERROR && tmphdr->cBitCount <= 8) {
             for(int i=0;i<(1<<tmphdr->cBitCount);i++)
