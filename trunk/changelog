@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2123 2002-06-02 19:30:58 sandervl Exp $ */
+/* $Id: changelog,v 1.2124 2002-06-03 07:24:51 sandervl Exp $ */
+
+ 2002-06-03: Sander van Leeuwen <sandervl@innotek.de>
+    - USER32, OLE32:
+                o Drag and drop fixes
 
  2002-06-02: Sander van Leeuwen <sandervl@innotek.de>
     - USER32\CONTROLS:
