@@ -1,4 +1,4 @@
-/* $Id: hmcomm.h,v 1.6 2000-11-14 14:26:59 sandervl Exp $ */
+/* $Id: hmcomm.h,v 1.7 2000-12-31 12:28:54 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -82,6 +82,35 @@ class HMDeviceCommClass : public HMDeviceHandler
   virtual BOOL GetDefaultCommConfig( PHMHANDLEDATA pHMHandleData,
                                      LPCOMMCONFIG lpCC,
                                      LPDWORD lpdwSize);
+
+                           /* this is a handler method for calls to ReadFile() */
+  virtual BOOL   ReadFile   (PHMHANDLEDATA pHMHandleData,
+                             LPCVOID       lpBuffer,
+                             DWORD         nNumberOfBytesToRead,
+                             LPDWORD       lpNumberOfBytesRead,
+                             LPOVERLAPPED  lpOverlapped);
+
+                        /* this is a handler method for calls to ReadFileEx() */
+  virtual BOOL  ReadFileEx(PHMHANDLEDATA pHMHandleData,
+                           LPVOID       lpBuffer,
+                           DWORD        nNumberOfBytesToRead,
+                           LPOVERLAPPED lpOverlapped,
+                           LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine);
+
+                        /* this is a handler method for calls to WriteFile() */
+  virtual BOOL   WriteFile  (PHMHANDLEDATA pHMHandleData,
+                             LPCVOID       lpBuffer,
+                             DWORD         nNumberOfBytesToWrite,
+                             LPDWORD       lpNumberOfBytesWritten,
+                             LPOVERLAPPED  lpOverlapped);
+
+                        /* this is a handler method for calls to WriteFileEx() */
+  virtual BOOL  WriteFileEx(PHMHANDLEDATA pHMHandleData,
+                            LPVOID       lpBuffer,
+                            DWORD        nNumberOfBytesToWrite,
+                            LPOVERLAPPED lpOverlapped,
+                            LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine);
+
   private:
   APIRET SetLine( PHMHANDLEDATA pHMHandleData,
                   UCHAR ucSize,UCHAR Parity, UCHAR Stop);
