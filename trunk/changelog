@@ -1,6 +1,16 @@
- /* $Id: changelog,v 1.327 1999-10-16 10:29:29 sandervl Exp $ */
+ /* $Id: changelog,v 1.328 1999-10-16 11:02:37 sandervl Exp $ */
 
- 99-10-15: Sander van Leeuwen <sandervl@xs4all.nl>
+ 99-10-16: Yuri Dario <mc6530@mclink.it>
+	- USER32: Button bugfix (BUTTON_CheckAutoRadioButton)
+	          Win32dlg.cpp: cosmetic changes
+	- include\os2wrap.h: define inline as _inline in C mode
+	- include\win\winsock.h: Added prototypes
+	- src\makefile: shell32 depends on ole32 & version, build it after those two dlls
+	- SHELL32: Replaced full path with CPPMAIN for wrc parameters
+	- win32k/makefile: replaced full path with macros
+	- WSOCK32: Build export library (impdef to create correct .def)
+
+ 99-10-16: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Don't process size messages before sending WM_NCCREATE
                   message when creating a window. (can mess up our window
                   and client rectangle)
