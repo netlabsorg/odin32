@@ -1,4 +1,4 @@
-/* $Id: dbglog.cpp,v 1.6 2003-02-13 15:30:52 sandervl Exp $ */
+/* $Id: dbglog.cpp,v 1.7 2003-02-14 13:24:48 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -308,9 +308,7 @@ int SYSTEM WriteLog(char *tekst, ...)
 
 #ifdef WIN32_IP_LOGGING
         char *logserver = getenv("WIN32LOG_IPSERVER");
-//testestset
-        if(logserver && loadNr == 1) {
-//testestset
+        if(logserver) {
              sock_init();
 
              memset(&servername, 0, sizeof(servername));
