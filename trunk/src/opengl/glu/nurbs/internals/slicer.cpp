@@ -1,4 +1,4 @@
-/* $Id: slicer.cpp,v 1.1 2000-02-09 08:50:28 jeroen Exp $ */
+/* $Id: slicer.cpp,v 1.2 2000-03-11 09:05:03 jeroen Exp $ */
 /*
 ** License Applicability. Except to the extent portions of this file are
 ** made subject to an alternative license as permitted in the SGI Free
@@ -36,8 +36,8 @@
 /*
  * slicer.c++
  *
- * $Date: 2000-02-09 08:50:28 $ $Revision: 1.1 $
- * $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glu/nurbs/internals/slicer.cpp,v 1.1 2000-02-09 08:50:28 jeroen Exp $
+ * $Date: 2000-03-11 09:05:03 $ $Revision: 1.2 $
+ * $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glu/nurbs/internals/slicer.cpp,v 1.2 2000-03-11 09:05:03 jeroen Exp $
  */
 
 #include <stdlib.h>
@@ -54,7 +54,7 @@
 #include "trimvertex.h"
 #include "varray.h"
 
-#include "polyUtil.h" //for area()
+#include "polyUtil.h"                  /* for area()                       */
 
 //static int count=0;
 
@@ -110,7 +110,7 @@ static int is_U_monotone(Arc_ptr loop)
   cur_sign = compV2InX(loop->head(), loop->tail());
 
   n_changes  = (compV2InX(loop->prev->head(), loop->prev->tail())
-		!= cur_sign);
+                != cur_sign);
 
   for(temp=loop->next; temp != loop; temp = temp->next)
     {
@@ -119,9 +119,9 @@ static int is_U_monotone(Arc_ptr loop)
       if(cur_sign != prev_sign)
        {
 #ifdef DEBUG
-	 printf("***change signe\n");
+         printf("***change signe\n");
 #endif
-	 n_changes++;
+         n_changes++;
        }
     }
   if(n_changes == 2) return 1;
@@ -153,32 +153,32 @@ void monoTriangulationLoop(Arc_ptr loop, Backend& backend, primStream* pStream)
     {
       //first find bot
       for(temp = loop->next; temp != loop; temp = temp->next)
-	{
-	  if(compInY(temp->tail(), temp->prev->tail()) > 0)
-	    break;
-	}
+        {
+          if(compInY(temp->tail(), temp->prev->tail()) > 0)
+            break;
+        }
       bot = temp->prev;
       //then find top
       for(temp=loop->prev; temp != loop; temp = temp->prev)
-	{
-	  if(compInY(temp->tail(), temp->prev->tail()) > 0)
-	    break;
-	}
+        {
+          if(compInY(temp->tail(), temp->prev->tail()) > 0)
+            break;
+        }
       top = temp;
     }
   else //loop > loop->prev
     {
       for(temp=loop->next; temp != loop; temp = temp->next)
-	{
-	  if(compInY(temp->tail(), temp->prev->tail()) < 0)
-	    break;
-	}
+        {
+          if(compInY(temp->tail(), temp->prev->tail()) < 0)
+            break;
+        }
       top = temp->prev;
       for(temp=loop->prev; temp != loop; temp = temp->prev)
-	{
-	  if(compInY(temp->tail(), temp->prev->tail()) < 0)
-	    break;
-	}
+        {
+          if(compInY(temp->tail(), temp->prev->tail()) < 0)
+            break;
+        }
       bot = temp;
     }
   //creat increase and decrease chains
@@ -191,26 +191,26 @@ void monoTriangulationLoop(Arc_ptr loop, Backend& backend, primStream* pStream)
   for(jarc=top->next; jarc != bot; jarc = jarc->next)
     {
       for(i=0; i<=jarc->pwlArc->npts-2; i++)
-	{
-	  inc_chain.appendVertex(jarc->pwlArc->pts[i].param);
-	}
+        {
+          inc_chain.appendVertex(jarc->pwlArc->pts[i].param);
+        }
 
     }
   vertexArray dec_chain(50);
   for(jarc = top->prev; jarc != bot; jarc = jarc->prev)
     {
       for(i=jarc->pwlArc->npts-2; i>=0; i--)
-	{
-	  dec_chain.appendVertex(jarc->pwlArc->pts[i].param);
-	}
+        {
+          dec_chain.appendVertex(jarc->pwlArc->pts[i].param);
+        }
     }
   for(i=bot->pwlArc->npts-2; i>=1; i--)
     {
       dec_chain.appendVertex(jarc->pwlArc->pts[i].param);
-    }	
+    }
 
   monoTriangulationRec(top->tail(), bot->tail(), &inc_chain, 0,
-		       &dec_chain, 0, &backend);
+                       &dec_chain, 0, &backend);
 
 }
 
@@ -224,7 +224,7 @@ static Int is_rect(Arc_ptr loop)
     {
       nlines++;
       if(nlines == 5)
-	break;
+        break;
     }
   if(nlines != 4)
     return 0;
@@ -237,9 +237,9 @@ printf("loop->head=(%f,%f)\n", loop->head()[0], loop->head()[1]);
 printf("loop->next->tail=(%f,%f)\n", loop->next->tail()[0], loop->next->tail()[1]);
 printf("loop->next->head=(%f,%f)\n", loop->next->head()[0], loop->next->head()[1]);
 if(fabs(loop->tail()[0] - loop->head()[0])<0.000001)
-	printf("equal 1\n");
+        printf("equal 1\n");
 if(loop->next->tail()[1] == loop->next->head()[1])
-	printf("equal 2\n");
+        printf("equal 2\n");
 */
 
   if( (fabs(loop->tail()[0] - loop->head()[0])<=ZERO) &&
@@ -289,7 +289,7 @@ static void evalLineNOGE(TrimVertex *verts, int n, Backend& backend)
     {
       int i;
       for(i=0; i<n; i++)
-	backend.tmeshvertNOGE(&verts[i]);
+        backend.tmeshvertNOGE(&verts[i]);
     }
 }
 
@@ -318,28 +318,28 @@ static void triangulateRect(Arc_ptr loop, Backend& backend, int TB_or_LR, int ul
   if(loop->tail()[1] == loop->head()[1])
     {
       if(loop->tail()[1] > loop->prev->prev->tail()[1])
-	{
+        {
 
-	top = loop;
-	}
+        top = loop;
+        }
       else{
 
-	top = loop->prev->prev;
-	}
+        top = loop->prev->prev;
+        }
     }
   else
     {
       if(loop->tail()[0] > loop->prev->prev->tail()[0])
-	{
-	  //loop is the right arc
+        {
+          //loop is the right arc
 
-	  top = loop->next;
-	}
+          top = loop->next;
+        }
       else
-	{
+        {
 
-	  top = loop->prev;
-	}
+          top = loop->prev;
+        }
     }
   left = top->next;
   bot  = left->next;
@@ -352,16 +352,16 @@ static void triangulateRect(Arc_ptr loop, Backend& backend, int TB_or_LR, int ul
     {
       int nu = top->pwlArc->npts;
       if(nu < bot->pwlArc->npts)
-	nu = bot->pwlArc->npts;
+        nu = bot->pwlArc->npts;
       int nv = left->pwlArc->npts;
       if(nv < right->pwlArc->npts)
-	nv = right->pwlArc->npts;
+        nv = right->pwlArc->npts;
 /*
       if(nu > 2 && nv > 2)
-	{
-	  triangulateRectGen(top, nu-2,  nv-2, backend);
-	  return;
-	}
+        {
+          triangulateRectGen(top, nu-2,  nv-2, backend);
+          return;
+        }
 */
     }
 
@@ -375,9 +375,9 @@ static void triangulateRect(Arc_ptr loop, Backend& backend, int TB_or_LR, int ul
       Int maxPointsLR = left->pwlArc->npts + right->pwlArc->npts;
 
       if(maxPointsTB < maxPointsLR)
-	triangulateRectAux(left->pwlArc, right->pwlArc, bot->pwlArc, top->pwlArc, backend);
+        triangulateRectAux(left->pwlArc, right->pwlArc, bot->pwlArc, top->pwlArc, backend);
       else
-	triangulateRectAux(top->pwlArc, bot->pwlArc, left->pwlArc, right->pwlArc, backend);
+        triangulateRectAux(top->pwlArc, bot->pwlArc, left->pwlArc, right->pwlArc, backend);
     }
 }
 
@@ -396,190 +396,190 @@ static void triangulateRectAux(PwlArc* top, PwlArc* bot, PwlArc* left, PwlArc* r
 #endif
 
       if(top->npts == 2) {
-	backend.bgntfan();
-	OPT_OUTVERT(top->pts[0], backend);//the root
-	for(i=0; i<left->npts; i++){
-	  OPT_OUTVERT(left->pts[i], backend);
-	}
-	for(i=1; i<= bot->npts-2; i++){
-	  OPT_OUTVERT(bot->pts[i], backend);
-	}
-	backend.endtfan();
-	
-	backend.bgntfan();
-	OPT_OUTVERT(bot->pts[bot->npts-2], backend);
-	for(i=0; i<right->npts; i++){
-	  OPT_OUTVERT(right->pts[i], backend);
-	}
-	backend.endtfan();
+        backend.bgntfan();
+        OPT_OUTVERT(top->pts[0], backend);//the root
+        for(i=0; i<left->npts; i++){
+          OPT_OUTVERT(left->pts[i], backend);
+        }
+        for(i=1; i<= bot->npts-2; i++){
+          OPT_OUTVERT(bot->pts[i], backend);
+        }
+        backend.endtfan();
+
+        backend.bgntfan();
+        OPT_OUTVERT(bot->pts[bot->npts-2], backend);
+        for(i=0; i<right->npts; i++){
+          OPT_OUTVERT(right->pts[i], backend);
+        }
+        backend.endtfan();
       }
       else if(bot->npts == 2) {
-	backend.bgntfan();
-	OPT_OUTVERT(bot->pts[0], backend);//the root
-	for(i=0; i<right->npts; i++){
-	  OPT_OUTVERT(right->pts[i], backend);
-	}
-	for(i=1; i<= top->npts-2; i++){
-	  OPT_OUTVERT(top->pts[i], backend);
-	}
-	backend.endtfan();
-	
-	backend.bgntfan();
-	OPT_OUTVERT(top->pts[top->npts-2], backend);
-	for(i=0; i<left->npts; i++){
-	  OPT_OUTVERT(left->pts[i], backend);
-	}
-	backend.endtfan();
+        backend.bgntfan();
+        OPT_OUTVERT(bot->pts[0], backend);//the root
+        for(i=0; i<right->npts; i++){
+          OPT_OUTVERT(right->pts[i], backend);
+        }
+        for(i=1; i<= top->npts-2; i++){
+          OPT_OUTVERT(top->pts[i], backend);
+        }
+        backend.endtfan();
+
+        backend.bgntfan();
+        OPT_OUTVERT(top->pts[top->npts-2], backend);
+        for(i=0; i<left->npts; i++){
+          OPT_OUTVERT(left->pts[i], backend);
+        }
+        backend.endtfan();
       }
       else { //both top and bot have >=3 points
-	
-	backend.bgntfan();
-	
-	OPT_OUTVERT(top->pts[top->npts-2], backend);
-	
-	for(i=0; i<=d; i++)
-	  {
-	    OPT_OUTVERT(left->pts[i], backend);	
-	  }
-	backend.endtfan();
-	
-	backend.bgntfan();
-	
-	OPT_OUTVERT(bot->pts[1], backend);
-	
-	OPT_OUTVERT(top->pts[top->npts-2], backend);
-	
-	for(i=d; i< left->npts; i++)
-	  {
-	    OPT_OUTVERT(left->pts[i], backend);
-	  }
-	backend.endtfan();
 
-	d = right->npts/2;
-	//output only when d<right->npts-1 and
-	//
-	if(d<right->npts-1)
-	  {	
-	    backend.bgntfan();
-	    //      backend.tmeshvert(& top->pts[1]);
-	    OPT_OUTVERT(top->pts[1], backend);
-	    for(i=d; i< right->npts; i++)
-	      {
-		//	  backend.tmeshvert(& right->pts[i]);
-		
-		OPT_OUTVERT(right->pts[i], backend);
-		
-	      }
-	    backend.endtfan();
-	  }
-	
-	backend.bgntfan();
-	//      backend.tmeshvert(& bot->pts[bot->npts-2]);
-	OPT_OUTVERT( bot->pts[bot->npts-2], backend);
-	for(i=0; i<=d; i++)
-	  {
-	    //	  backend.tmeshvert(& right->pts[i]);
-	    OPT_OUTVERT(right->pts[i], backend);
-	
-	  }
-	
-	//      backend.tmeshvert(& top->pts[1]);
-	OPT_OUTVERT(top->pts[1], backend);
-	
-	backend.endtfan();
+        backend.bgntfan();
+
+        OPT_OUTVERT(top->pts[top->npts-2], backend);
+
+        for(i=0; i<=d; i++)
+          {
+            OPT_OUTVERT(left->pts[i], backend);
+          }
+        backend.endtfan();
+
+        backend.bgntfan();
+
+        OPT_OUTVERT(bot->pts[1], backend);
+
+        OPT_OUTVERT(top->pts[top->npts-2], backend);
+
+        for(i=d; i< left->npts; i++)
+          {
+            OPT_OUTVERT(left->pts[i], backend);
+          }
+        backend.endtfan();
+
+        d = right->npts/2;
+        //output only when d<right->npts-1 and
+        //
+        if(d<right->npts-1)
+          {
+            backend.bgntfan();
+            //      backend.tmeshvert(& top->pts[1]);
+            OPT_OUTVERT(top->pts[1], backend);
+            for(i=d; i< right->npts; i++)
+              {
+                //        backend.tmeshvert(& right->pts[i]);
+
+                OPT_OUTVERT(right->pts[i], backend);
+
+              }
+            backend.endtfan();
+          }
+
+        backend.bgntfan();
+        //      backend.tmeshvert(& bot->pts[bot->npts-2]);
+        OPT_OUTVERT( bot->pts[bot->npts-2], backend);
+        for(i=0; i<=d; i++)
+          {
+            //    backend.tmeshvert(& right->pts[i]);
+            OPT_OUTVERT(right->pts[i], backend);
+
+          }
+
+        //      backend.tmeshvert(& top->pts[1]);
+        OPT_OUTVERT(top->pts[1], backend);
+
+        backend.endtfan();
 
 
-	topd_left = top->npts-2;
-	topd_right = 1; //topd_left>= topd_right
+        topd_left = top->npts-2;
+        topd_right = 1; //topd_left>= topd_right
 
-	botd_left = 1;
-	botd_right = bot->npts-2; //botd_left<= bot_dright
+        botd_left = 1;
+        botd_right = bot->npts-2; //botd_left<= bot_dright
 
-	
-	if(top->npts < bot->npts)
-	  {
-	    int delta=bot->npts - top->npts;
-	    int u = delta/2;
-	    botd_left = 1+ u;
-	    botd_right = bot->npts-2-( delta-u);	
-	
-	    if(botd_left >1)
-	      {
-		backend.bgntfan();
-		//	  backend.tmeshvert(& top->pts[top->npts-2]);
-		OPT_OUTVERT(top->pts[top->npts-2], backend);
-		for(i=1; i<= botd_left; i++)
-		  {
-		    //	      backend.tmeshvert(& bot->pts[i]);
-		    OPT_OUTVERT(bot->pts[i] , backend);
-		  }
-		backend.endtfan();
-	      }
-	    if(botd_right < bot->npts-2)
-	      {
-		backend.bgntfan();
-		OPT_OUTVERT(top->pts[1], backend);
-		for(i=botd_right; i<= bot->npts-2; i++)
-		  OPT_OUTVERT(bot->pts[i], backend);
-		backend.endtfan();
-	      }
-	  }
-	else if(top->npts> bot->npts)
-	  {
-	    int delta=top->npts-bot->npts;
-	    int u = delta/2;
-	    topd_left = top->npts-2 - u;
-	    topd_right = 1+delta-u;
-	
-	    if(topd_left < top->npts-2)
-	      {
-		backend.bgntfan();
-		//	  backend.tmeshvert(& bot->pts[1]);
-		OPT_OUTVERT(bot->pts[1], backend);
-		for(i=topd_left; i<= top->npts-2; i++)
-		  {
-		    //	      backend.tmeshvert(& top->pts[i]);
-		    OPT_OUTVERT(top->pts[i], backend);
-		  }
-		backend.endtfan();
-	      }
-	    if(topd_right > 1)
-	      {
-		backend.bgntfan();
-		OPT_OUTVERT(bot->pts[bot->npts-2], backend);
-		for(i=1; i<= topd_right; i++)
-		  OPT_OUTVERT(top->pts[i], backend);
-		backend.endtfan();
-	      }
-	  }
-	
-	if(topd_left <= topd_right)
-	  return;
 
-	backend.bgnqstrip();
-	for(j=botd_left, i=topd_left; i>=topd_right; i--,j++)
-	  {
-	    //	  backend.tmeshvert(& top->pts[i]);
-	    //	  backend.tmeshvert(& bot->pts[j]);
-	    OPT_OUTVERT(top->pts[i], backend);
-	    OPT_OUTVERT(bot->pts[j], backend);
-	  }
-	backend.endqstrip();
-	
+        if(top->npts < bot->npts)
+          {
+            int delta=bot->npts - top->npts;
+            int u = delta/2;
+            botd_left = 1+ u;
+            botd_right = bot->npts-2-( delta-u);
+
+            if(botd_left >1)
+              {
+                backend.bgntfan();
+                //        backend.tmeshvert(& top->pts[top->npts-2]);
+                OPT_OUTVERT(top->pts[top->npts-2], backend);
+                for(i=1; i<= botd_left; i++)
+                  {
+                    //        backend.tmeshvert(& bot->pts[i]);
+                    OPT_OUTVERT(bot->pts[i] , backend);
+                  }
+                backend.endtfan();
+              }
+            if(botd_right < bot->npts-2)
+              {
+                backend.bgntfan();
+                OPT_OUTVERT(top->pts[1], backend);
+                for(i=botd_right; i<= bot->npts-2; i++)
+                  OPT_OUTVERT(bot->pts[i], backend);
+                backend.endtfan();
+              }
+          }
+        else if(top->npts> bot->npts)
+          {
+            int delta=top->npts-bot->npts;
+            int u = delta/2;
+            topd_left = top->npts-2 - u;
+            topd_right = 1+delta-u;
+
+            if(topd_left < top->npts-2)
+              {
+                backend.bgntfan();
+                //        backend.tmeshvert(& bot->pts[1]);
+                OPT_OUTVERT(bot->pts[1], backend);
+                for(i=topd_left; i<= top->npts-2; i++)
+                  {
+                    //        backend.tmeshvert(& top->pts[i]);
+                    OPT_OUTVERT(top->pts[i], backend);
+                  }
+                backend.endtfan();
+              }
+            if(topd_right > 1)
+              {
+                backend.bgntfan();
+                OPT_OUTVERT(bot->pts[bot->npts-2], backend);
+                for(i=1; i<= topd_right; i++)
+                  OPT_OUTVERT(top->pts[i], backend);
+                backend.endtfan();
+              }
+          }
+
+        if(topd_left <= topd_right)
+          return;
+
+        backend.bgnqstrip();
+        for(j=botd_left, i=topd_left; i>=topd_right; i--,j++)
+          {
+            //    backend.tmeshvert(& top->pts[i]);
+            //    backend.tmeshvert(& bot->pts[j]);
+            OPT_OUTVERT(top->pts[i], backend);
+            OPT_OUTVERT(bot->pts[j], backend);
+          }
+        backend.endqstrip();
+
       }
     }
 }
 
 
 static void triangulateRectCenter(int n_ulines, REAL* u_val,
-				  int n_vlines, REAL* v_val,
-				  Backend& backend)
+                                  int n_vlines, REAL* v_val,
+                                  Backend& backend)
 {
   TrimVertex trimVert;
   trimVert.nuid = 0;//????
 
   backend.surfgrid(u_val[0], u_val[n_ulines-1], n_ulines-1,
-		   v_val[n_vlines-1], v_val[0], n_vlines-1);
+                   v_val[n_vlines-1], v_val[0], n_vlines-1);
 
   if(n_ulines>1 && n_vlines>1)
     backend.surfmesh(0,0,n_ulines-1,n_vlines-1);
@@ -592,14 +592,14 @@ static void triangulateRectCenter(int n_ulines, REAL* u_val,
 
       backend.bgnqstrip();
       for(j=0; j<n_ulines; j++)
-	{
-	  trimVert.param[0] = u_val[j];
-	  trimVert.param[1] = v_val[i+1];
-	  backend.tmeshvert(& trimVert);	
+        {
+          trimVert.param[0] = u_val[j];
+          trimVert.param[1] = v_val[i+1];
+          backend.tmeshvert(& trimVert);
 
-	  trimVert.param[1] = v_val[i];
-	  backend.tmeshvert(& trimVert);	
-	}
+          trimVert.param[1] = v_val[i];
+          backend.tmeshvert(& trimVert);
+        }
       backend.endqstrip();
 
     }
@@ -616,28 +616,28 @@ static void triangulateRectTopGen(Arc_ptr arc, int n_ulines, REAL* u_val, Real v
       REAL* upper_val = (REAL*) malloc(sizeof(REAL) * arc->pwlArc->npts);
       assert(upper_val);
       if(dir)
-	{
-	  for(k=0,i=arc->pwlArc->npts-1; i>=0; i--,k++)
-	    {
-	      upper_val[k] = arc->pwlArc->pts[i].param[0];
-	    }	
-	  backend.evalUStrip(arc->pwlArc->npts, arc->pwlArc->pts[0].param[1],
-			     upper_val,
-			     n_ulines, v, u_val);
-	}
+        {
+          for(k=0,i=arc->pwlArc->npts-1; i>=0; i--,k++)
+            {
+              upper_val[k] = arc->pwlArc->pts[i].param[0];
+            }
+          backend.evalUStrip(arc->pwlArc->npts, arc->pwlArc->pts[0].param[1],
+                             upper_val,
+                             n_ulines, v, u_val);
+        }
       else
-	{
-	  for(k=0,i=0;  i<arc->pwlArc->npts; i++,k++)
-	    {
-	      upper_val[k] = arc->pwlArc->pts[i].param[0];
+        {
+          for(k=0,i=0;  i<arc->pwlArc->npts; i++,k++)
+            {
+              upper_val[k] = arc->pwlArc->pts[i].param[0];
 
-	    }		
+            }
 
-	  backend.evalUStrip(
-			     n_ulines, v, u_val,
-			     arc->pwlArc->npts, arc->pwlArc->pts[0].param[1], upper_val
-			     );	
-	}
+          backend.evalUStrip(
+                             n_ulines, v, u_val,
+                             arc->pwlArc->npts, arc->pwlArc->pts[0].param[1], upper_val
+                             );
+        }
 
       free(upper_val);
       return;
@@ -648,30 +648,30 @@ static void triangulateRectTopGen(Arc_ptr arc, int n_ulines, REAL* u_val, Real v
       REAL* left_val = (REAL*) malloc(sizeof(REAL) * arc->pwlArc->npts);
       assert(left_val);
       if(dir)
-	{
-	  for(k=0,i=arc->pwlArc->npts-1; i>=0; i--,k++)
-	    {
-	      left_val[k] = arc->pwlArc->pts[i].param[1];
-	    }
-	  backend.evalVStrip(arc->pwlArc->npts, arc->pwlArc->pts[0].param[0],
-			     left_val,
-			     n_ulines, v, u_val);
-	}
+        {
+          for(k=0,i=arc->pwlArc->npts-1; i>=0; i--,k++)
+            {
+              left_val[k] = arc->pwlArc->pts[i].param[1];
+            }
+          backend.evalVStrip(arc->pwlArc->npts, arc->pwlArc->pts[0].param[0],
+                             left_val,
+                             n_ulines, v, u_val);
+        }
       else
-	{
-	  for(k=0,i=0;  i<arc->pwlArc->npts; i++,k++)
-	    {
-	      left_val[k] = arc->pwlArc->pts[i].param[1];
-	    }
-	   backend.evalVStrip(
-			     n_ulines, v, u_val,
-			     arc->pwlArc->npts, arc->pwlArc->pts[0].param[0], left_val
-			     );	
-	}
+        {
+          for(k=0,i=0;  i<arc->pwlArc->npts; i++,k++)
+            {
+              left_val[k] = arc->pwlArc->pts[i].param[1];
+            }
+           backend.evalVStrip(
+                             n_ulines, v, u_val,
+                             arc->pwlArc->npts, arc->pwlArc->pts[0].param[0], left_val
+                             );
+        }
       free(left_val);
       return;
     }
-	
+
   //the following is a different version of the above code. If you comment
   //the above code, the following code will still work. The reason to leave
   //the folliwng code here is purely for testing purpose.
@@ -688,7 +688,7 @@ static void triangulateRectTopGen(Arc_ptr arc, int n_ulines, REAL* u_val, Real v
       temp_u_val = (REAL*) malloc(sizeof(REAL) * n_ulines);
       assert(temp_u_val);
       for(i=0; i<n_ulines; i++)
-	temp_u_val[i] = u_val[n_ulines-1-i];
+        temp_u_val[i] = u_val[n_ulines-1-i];
     }
   u_val = temp_u_val;
 
@@ -698,18 +698,18 @@ static void triangulateRectTopGen(Arc_ptr arc, int n_ulines, REAL* u_val, Real v
 
       backend.bgntfan();
       if(is_u){
-	trimVert.param[0] = u_val[0];
-	trimVert.param[1] = v;
+        trimVert.param[0] = u_val[0];
+        trimVert.param[1] = v;
       }
       else
-	{
-	trimVert.param[1] = u_val[0];
-	trimVert.param[0] = v;
+        {
+        trimVert.param[1] = u_val[0];
+        trimVert.param[0] = v;
       }
-	
+
       backend.tmeshvert(& trimVert);
       for(i=d1; i< parc->npts; i++)
-	backend.tmeshvert(& parc->pts[i]);
+        backend.tmeshvert(& parc->pts[i]);
       backend.endtfan();
 
 
@@ -722,18 +722,18 @@ static void triangulateRectTopGen(Arc_ptr arc, int n_ulines, REAL* u_val, Real v
       backend.bgntfan();
       backend.tmeshvert(& parc->pts[parc->npts-1]);
       for(i=0; i<= d2; i++)
-	{
-	  if(is_u){
-	    trimVert.param[0] = u_val[i];
-	    trimVert.param[1] = v;
-	  }
-	  else
-	    {
-	      trimVert.param[1] = u_val[i];
-	      trimVert.param[0] = v;
-	    }
-	  backend.tmeshvert(&trimVert);
-	}
+        {
+          if(is_u){
+            trimVert.param[0] = u_val[i];
+            trimVert.param[1] = v;
+          }
+          else
+            {
+              trimVert.param[1] = u_val[i];
+              trimVert.param[0] = v;
+            }
+          backend.tmeshvert(&trimVert);
+        }
       backend.endtfan();
 
     }
@@ -743,20 +743,20 @@ static void triangulateRectTopGen(Arc_ptr arc, int n_ulines, REAL* u_val, Real v
     backend.bgnqstrip();
     for(i=d1, j=d2; i>=0; i--, j++)
       {
-	backend.tmeshvert(& parc->pts[i]);
+        backend.tmeshvert(& parc->pts[i]);
 
-	if(is_u){
-	  trimVert.param[0] = u_val[j];
-	  trimVert.param[1] = v;
-	}
-	else{
-	  trimVert.param[1] = u_val[j];
-	  trimVert.param[0] = v;
-	}
-	backend.tmeshvert(&trimVert);
+        if(is_u){
+          trimVert.param[0] = u_val[j];
+          trimVert.param[1] = v;
+        }
+        else{
+          trimVert.param[1] = u_val[j];
+          trimVert.param[0] = v;
+        }
+        backend.tmeshvert(&trimVert);
 
 
-	
+
       }
     backend.endqstrip();
 
@@ -780,28 +780,28 @@ static void triangulateRectGen(Arc_ptr loop, int n_ulines, int n_vlines, Backend
     {
 
       if(loop->tail()[1] > loop->prev->prev->tail()[1])
-	{
+        {
 
-	top = loop;
-	}
+        top = loop;
+        }
       else{
 
-	top = loop->prev->prev;
-	}
+        top = loop->prev->prev;
+        }
     }
   else
     {
       if(loop->tail()[0] > loop->prev->prev->tail()[0])
-	{
-	  //loop is the right arc
+        {
+          //loop is the right arc
 
-	  top = loop->next;
-	}
+          top = loop->next;
+        }
       else
-	{
+        {
 
-	  top = loop->prev;
-	}
+          top = loop->prev;
+        }
     }
 
   left = top->next;
@@ -812,14 +812,14 @@ static void triangulateRectGen(Arc_ptr loop, int n_ulines, int n_vlines, Backend
   num_triangles += loop->pwlArc->npts +
                  left->pwlArc->npts +
                  bot->pwlArc->npts +
-		  right->pwlArc->npts
-		      + 2*n_ulines + 2*n_vlines
-			-8;
+                  right->pwlArc->npts
+                      + 2*n_ulines + 2*n_vlines
+                        -8;
   num_quads += (n_ulines-1)*(n_vlines-1);
 #endif
 /*
   backend.surfgrid(left->tail()[0], right->tail()[0], n_ulines+1,
-		   top->tail()[1], bot->tail()[1], n_vlines+1);
+                   top->tail()[1], bot->tail()[1], n_vlines+1);
 //  if(n_ulines>1 && n_vlines>1)
     backend.surfmesh(0,0,n_ulines+1,n_vlines+1);
 return;
@@ -910,34 +910,34 @@ directedLine* arcToMultDLines(directedLine* original, Arc_ptr arc)
     {
       directedLine *dline = arcToDLine(arc);
       if(ret == NULL)
-	ret = dline;
+        ret = dline;
       else
-	ret->insert(dline);
+        ret->insert(dline);
       return ret;
     }
   else /*not linear*/
     {
       for(Int i=0; i<arc->pwlArc->npts-1; i++)
-	{
-	  Real vert[2][2];
-	  vert[0][0] = arc->pwlArc->pts[i].param[0];
-	  vert[0][1] = arc->pwlArc->pts[i].param[1];
-	  vert[1][0] = arc->pwlArc->pts[i+1].param[0];
-	  vert[1][1] = arc->pwlArc->pts[i+1].param[1];
-	
-	  sampledLine *sline = new sampledLine(2, vert);
-	  directedLine *dline = new directedLine(INCREASING, sline);
-	  if(ret == NULL)
-	    ret = dline;
-	  else
-	    ret->insert(dline);
-	}
+        {
+          Real vert[2][2];
+          vert[0][0] = arc->pwlArc->pts[i].param[0];
+          vert[0][1] = arc->pwlArc->pts[i].param[1];
+          vert[1][0] = arc->pwlArc->pts[i+1].param[0];
+          vert[1][1] = arc->pwlArc->pts[i+1].param[1];
+
+          sampledLine *sline = new sampledLine(2, vert);
+          directedLine *dline = new directedLine(INCREASING, sline);
+          if(ret == NULL)
+            ret = dline;
+          else
+            ret->insert(dline);
+        }
       return ret;
     }
 }
 
 
-	
+
 directedLine* arcLoopToDLineLoop(Arc_ptr loop)
 {
   directedLine* ret;
@@ -969,22 +969,22 @@ void Slicer::evalRBArray(rectBlockArray* rbArray, gridWrap* grid)
     {
       rectBlock* block = rbArray->get_element(l);
       for(k=0, i=block->get_upGridLineIndex(); i>block->get_lowGridLineIndex(); i--, k++)
-	{
+        {
 
-	  backend.bgnqstrip();
-	  for(j=block->get_leftIndices()[k+1]; j<= block->get_rightIndices()[k+1]; j++)
-	    {
-	      trimVert->param[0] = u_values[j];
-	      trimVert->param[1] = v_values[i];
-	      backend.tmeshvert(trimVert);
+          backend.bgnqstrip();
+          for(j=block->get_leftIndices()[k+1]; j<= block->get_rightIndices()[k+1]; j++)
+            {
+              trimVert->param[0] = u_values[j];
+              trimVert->param[1] = v_values[i];
+              backend.tmeshvert(trimVert);
 
-	      trimVert->param[1] = v_values[i-1];
-	      backend.tmeshvert(trimVert);
+              trimVert->param[1] = v_values[i-1];
+              backend.tmeshvert(trimVert);
 
-	    }
-	  backend.endqstrip();
+            }
+          backend.endqstrip();
 
-	}
+        }
     }
 
   free(trimVert);
@@ -1000,7 +1000,7 @@ void Slicer::evalRBArray(rectBlockArray* rbArray, gridWrap* grid)
   //the orientation problem. glEvalMesh generates quad_strip clockwise, but
   //we need counter-clockwise.
   backend.surfgrid(grid->get_u_min(), grid->get_u_max(), grid->get_n_ulines()-1,
-		   grid->get_v_max(), grid->get_v_min(), n_vlines-1);
+                   grid->get_v_max(), grid->get_v_min(), n_vlines-1);
 
 
   for(j=0; j<rbArray->get_n_elements(); j++)
@@ -1010,9 +1010,9 @@ void Slicer::evalRBArray(rectBlockArray* rbArray, gridWrap* grid)
       Int high = block->get_upGridLineIndex();
 
       for(k=0, i=high; i>low; i--, k++)
-	{
-	  backend.surfmesh(block->get_leftIndices()[k+1], n_vlines-1-i, block->get_rightIndices()[k+1]-block->get_leftIndices()[k+1], 1);
-	}
+        {
+          backend.surfmesh(block->get_leftIndices()[k+1], n_vlines-1-i, block->get_rightIndices()[k+1]-block->get_leftIndices()[k+1], 1);
+        }
     }
 }
 
@@ -1032,31 +1032,31 @@ void Slicer::evalStream(primStream* pStream)
       switch(pStream->get_type(i)){
       case PRIMITIVE_STREAM_FAN:
 
-	backend.bgntfan();
+        backend.bgntfan();
 
-	for(j=0; j<pStream->get_length(i); j++)
-	  {	
-	    trimVert->param[0] = vertices[k];
-	    trimVert->param[1] = vertices[k+1];
-	    backend.tmeshvert(trimVert);	
-	
-//	    backend.tmeshvert(vertices[k], vertices[k+1]);
-	    k += 2;
-	  }
-	backend.endtfan();
-	break;
-	
+        for(j=0; j<pStream->get_length(i); j++)
+          {
+            trimVert->param[0] = vertices[k];
+            trimVert->param[1] = vertices[k+1];
+            backend.tmeshvert(trimVert);
+
+//          backend.tmeshvert(vertices[k], vertices[k+1]);
+            k += 2;
+          }
+        backend.endtfan();
+        break;
+
       default:
-	fprintf(stderr, "evalStream: not implemented yet\n");
-	exit(1);
+        fprintf(stderr, "evalStream: not implemented yet\n");
+        exit(1);
 
       }
     }
   free(trimVert);
 }
-	
-	
-	
+
+
+
 
 void Slicer::slice_new(Arc_ptr loop)
 {
@@ -1106,11 +1106,11 @@ void Slicer::slice_new(Arc_ptr loop)
   if(isRect && (num_ulines<=2 || num_vlines<=2))
     {
       if(vlinear)
-	triangulateRect(loop, backend, 1, ulinear, vlinear);
+        triangulateRect(loop, backend, 1, ulinear, vlinear);
       else if(ulinear)
-	triangulateRect(loop, backend, -1, ulinear, vlinear);	
+        triangulateRect(loop, backend, -1, ulinear, vlinear);
       else
-	triangulateRect(loop, backend, 0, ulinear, vlinear);		
+        triangulateRect(loop, backend, 0, ulinear, vlinear);
     }
 
    else if(isRect)
@@ -1150,6 +1150,7 @@ void Slicer::slice_new(Arc_ptr loop)
   printf("num_triangles=%i\n", num_triangles);
   printf("num_quads = %i\n", num_quads);
 #endif
+
 }
 
 void Slicer::slice(Arc_ptr loop)
@@ -1169,7 +1170,7 @@ void Slicer::slice(Arc_ptr loop)
 
 
 Slicer::Slicer( Backend &b )
-	: CoveAndTiler( b ), Mesher( b ), backend( b )
+        : CoveAndTiler( b ), Mesher( b ), backend( b )
 {
     ulinear = 0;
     vlinear = 0;
@@ -1218,31 +1219,31 @@ Slicer::slice_old( Arc_ptr loop )
     getGridExtent( &extrema[0]->pwlArc->pts[0], &extrema[0]->pwlArc->pts[0] );
 
     for( long quad=0; quad<varray.numquads; quad++ ) {
-	backend.surfgrid( uarray.uarray[0],
-		       uarray.uarray[ulines-1],
-	 	       ulines-1,
-		       varray.vval[quad],
-		       varray.vval[quad+1],
-		       varray.voffset[quad+1] - varray.voffset[quad] );
+        backend.surfgrid( uarray.uarray[0],
+                       uarray.uarray[ulines-1],
+                       ulines-1,
+                       varray.vval[quad],
+                       varray.vval[quad+1],
+                       varray.voffset[quad+1] - varray.voffset[quad] );
 
-	for( long i=varray.voffset[quad]+1; i <= varray.voffset[quad+1]; i++ ) {
-    	    topv = botv++;
-    	    advance( topv - varray.voffset[quad],
-		     botv - varray.voffset[quad],
-		     varray.varray[botv] );
-	    if( i == vlines )
-		getPts( extrema[2] );
-	    else
-		getPts( backend );
-	    getGridExtent();
+        for( long i=varray.voffset[quad]+1; i <= varray.voffset[quad+1]; i++ ) {
+            topv = botv++;
+            advance( topv - varray.voffset[quad],
+                     botv - varray.voffset[quad],
+                     varray.varray[botv] );
+            if( i == vlines )
+                getPts( extrema[2] );
+            else
+                getPts( backend );
+            getGridExtent();
             if( isolines ) {
-	        outline();
-	    } else {
-		if( canTile() )
-		    coveAndTile();
-		else
-		    mesh();
-	    }
+                outline();
+            } else {
+                if( canTile() )
+                    coveAndTile();
+                else
+                    mesh();
+            }
         }
    }
 }
@@ -1256,19 +1257,19 @@ Slicer::outline( void )
 
     backend.bgnoutline();
     while( (nextupper( &upper )) ) {
-	if( upper.isGridVert() )
-	    backend.linevert( upper.g );
-	else
-	    backend.linevert( upper.t );
+        if( upper.isGridVert() )
+            backend.linevert( upper.g );
+        else
+            backend.linevert( upper.t );
     }
     backend.endoutline();
 
     backend.bgnoutline();
     while( (nextlower( &lower )) ) {
-	if( lower.isGridVert() )
-	    backend.linevert( lower.g );
-	else
-	    backend.linevert( lower.t );
+        if( lower.isGridVert() )
+            backend.linevert( lower.g );
+        else
+            backend.linevert( lower.t );
     }
     backend.endoutline();
 }
@@ -1280,10 +1281,10 @@ Slicer::outline( Arc_ptr jarc )
     jarc->markverts();
 
     if( jarc->pwlArc->npts >= 2 ) {
-	backend.bgnoutline();
-	for( int j = jarc->pwlArc->npts-1; j >= 0; j--  )
-	    backend.linevert( &(jarc->pwlArc->pts[j]) );
-	backend.endoutline();
+        backend.bgnoutline();
+        for( int j = jarc->pwlArc->npts-1; j >= 0; j--  )
+            backend.linevert( &(jarc->pwlArc->pts[j]) );
+        backend.endoutline();
     }
 }
 

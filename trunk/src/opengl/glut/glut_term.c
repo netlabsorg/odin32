@@ -1,12 +1,12 @@
-/* $Id: glut_term.c,v 1.2 2000-03-04 19:10:15 jeroen Exp $ */
+/* $Id: glut_term.c,v 1.3 2000-03-11 09:05:05 jeroen Exp $ */
 /*
  * GLUT Termination - on exit cleanup any open windows
  *
 */
 
 #include <odinwrap.h>
-#include "glu.h"
 #include "glut.h"
+#include "glu.h"
 #include "glutint.h"
 
 
