@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.2599 2003-07-11 15:37:50 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2600 2003-07-14 13:44:02 sandervl Exp $ */
+
+ 2003-07-14: KO Myung-Hun <komh@chollian    >
+    - GDI32:    o Fixed InternalTextOutW() and GetTextExtentPointW() to support 
+                  unicode correctly. (DBCS)
 
  2003-07-11: Dietrich Teickner <Dietrich_Teickner@t-online   >
     - SHELL32:  o Shell folder updates
