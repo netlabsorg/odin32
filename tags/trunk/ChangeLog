@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.1028 2000-07-10 18:42:02 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1029 2000-07-12 18:20:12 sandervl Exp $ */
+
+ 2000-07-12: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
+    - KERNEL32: Implemented handlemanager support for named and unnamed pipes
 
  2000-07-10: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: Don't try to search for resources if the module doesn't contain any
