@@ -26,7 +26,7 @@
  *
  * FIXME: flags not implemented: OFN_CREATEPROMPT, OFN_DONTADDTORECENT,
  * OFN_ENABLEINCLUDENOTIFY, OFN_ENABLESIZING, OFN_EXTENSIONDIFFERENT,
- * OFN_NOCHANGEDIR, OFN_NODEREFERENCELINKS, OFN_NOREADONLYRETURN,
+ * OFN_NODEREFERENCELINKS, OFN_NOREADONLYRETURN,
  * OFN_NOTESTFILECREATE, OFN_OVERWRITEPROMPT, OFN_USEMONIKERS
  *
  * FIXME: lCustData for lpfnHook (WM_INITDIALOG)
@@ -74,7 +74,7 @@ DEFAULT_DEBUG_CHANNEL(commdlg);
 #define UNIMPLEMENTED_FLAGS \
 (OFN_CREATEPROMPT | OFN_DONTADDTORECENT |\
 OFN_ENABLEINCLUDENOTIFY | OFN_ENABLESIZING | OFN_EXTENSIONDIFFERENT |\
-OFN_NOCHANGEDIR | OFN_NODEREFERENCELINKS | OFN_NOREADONLYRETURN |\
+OFN_NODEREFERENCELINKS | OFN_NOREADONLYRETURN | \
 OFN_NOTESTFILECREATE | OFN_OVERWRITEPROMPT /*| OFN_USEMONIKERS*/)
 
 #define IsHooked(fodInfos) \
@@ -325,6 +325,10 @@ BOOL  WINAPI GetFileDialog95A(LPOPENFILENAMEA ofn,UINT iDlgType)
       break;
     case SAVE_DIALOG :
       fodInfos->DlgInfos.dwDlgProp |= FODPROP_SAVEDLG;
+#ifdef __WIN32OS2__
+      //NT4 seems to ignore this flag (fixes ElstarFormular save dialog)
+      ofn->Flags &= ~OFN_FILEMUSTEXIST;
+#endif
       ret = GetFileName95(fodInfos);
       break;
     default :
@@ -510,6 +514,10 @@ BOOL  WINAPI GetFileDialog95W(LPOPENFILENAMEW ofn,UINT iDlgType)
       break;
   case SAVE_DIALOG :
       fodInfos->DlgInfos.dwDlgProp |= FODPROP_SAVEDLG;
+#ifdef __WIN32OS2__
+      //NT4 seems to ignore this flag (fixes ElstarFormular save dialog)
+      ofn->Flags &= ~OFN_FILEMUSTEXIST;
+#endif
       ret = GetFileName95(fodInfos);
       break;
   default :
