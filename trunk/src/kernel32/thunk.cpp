@@ -1,4 +1,4 @@
-/* $Id: thunk.cpp,v 1.7 2002-02-08 15:09:30 sandervl Exp $ */
+/* $Id: thunk.cpp,v 1.8 2002-05-17 10:14:08 sandervl Exp $ */
 
 /*
  * Win32 thunking API functions (mostly stubs)
@@ -325,6 +325,13 @@ DWORD WIN32API MapSLFix(DWORD arg1)
 {
   dprintf(("MapSLFix %X not supported\n", arg1));
   return(0);
+}
+//******************************************************************************
+//******************************************************************************
+void *WIN32API MapSL(DWORD arg1)
+{
+  dprintf(("MapSL %X not supported\n", arg1));
+  return NULL;
 }
 /***********************************************************************
  *           UnMapSLFixArray   (KERNEL32.701)

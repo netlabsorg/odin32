@@ -1,4 +1,4 @@
-; $Id: kernel32dbg.def,v 1.12 2002-05-16 12:16:00 sandervl Exp $
+; $Id: kernel32dbg.def,v 1.13 2002-05-17 10:14:07 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -658,7 +658,7 @@ EXPORTS
 ;   MapHModuleLS               = _DbgMapHModuleLS@??            @520       ;W95
 ;   MapHModuleSL               = _DbgMapHModuleSL@??            @521       ;W95
     MapLS                      = _DbgMapLS@4                    @522       ;W95
-;   MapSL                      = _DbgMapSL@4                    @523       ;W95
+    MapSL                      = _DbgMapSL@4                    @523       ;W95
     MapSLFix                   = _DbgMapSLFix@4                 @524       ;W95
     MapViewOfFile              = _DbgMapViewOfFile@20           @525
     MapViewOfFileEx            = _DbgMapViewOfFileEx@24         @526
