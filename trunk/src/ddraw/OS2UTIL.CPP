@@ -1,4 +1,4 @@
-/* $Id: OS2UTIL.CPP,v 1.12 2001-06-16 09:24:24 sandervl Exp $ */
+/* $Id: OS2UTIL.CPP,v 1.13 2002-03-22 15:55:00 sandervl Exp $ */
 
 /*
  * OS/2 Utility functions
@@ -8,6 +8,7 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+#define INCL_DOS
 #define INCL_DOSMEMMGR
 #define INCL_DOSDEVICES
 #include <os2wrap.h>
