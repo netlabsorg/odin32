@@ -538,26 +538,29 @@ class CVSFile
             //build revision
             $sRev = $this->aasKeys["head"][0];
             $asText = $this->aasDeltas[$sRev];
-            $sBranch = substr($sRevision, 0, strrpos($sRevision, ".")+1);
-            //echo "<!-- \$sBranch=$sBranch -->";
             do
             {
                 /*
                  * determin revision.
                  * (hope this works ok...)
                  */
-                reset($this->aaasRevs[$sRev]["branches"]);
-                while (list($sIgnore, $sB) = each($this->aaasRevs[$sRev]["branches"]))
+                $sPrevRev = $sRev;
+                $asBranches = $this->aaasRevs[$sRev]["branches"];
+                for ($f = 0, $i = 0; $i < sizeof($asBranches); $i++)
                 {
-                    $sB = trim($sB);
-                    if ($f = (substr($sB, 0, strrpos($sB, ".")+1) == $sBranch))
+                    if (($sB = trim($asBranches[$i])) != "")
                     {
-                        $sRev = $sB;
-                        break;
+                        $sB2 = substr($sB, 0, strrpos($sB, ".") + 1);
+                        if ($f = ($sB2 == substr($sRevision, 0, strlen($sB2))))
+                        {
+                            $sRev = $sB;
+                            break;
+                        }
                     }
                 }
+
                 if (!$f)    $sRev = $this->aaasRevs[$sRev]["next"][0];
-                //echo "<!-- \$sRev=$sRev -->";
+                echo "<!-- \$sRev=$sRev -->";
 
 
                 /*
@@ -581,10 +584,10 @@ class CVSFile
 
                     //apply it
                     $c = (int)substr($this->aasDeltas[$sRev][$iDelta],
-                                     strpos($this->aasDeltas[$sRev][$iDelta], " ") + 1);
-                    $iDelta++;
+                                     (int)strpos($this->aasDeltas[$sRev][$iDelta], " ") + 1);
                     if ($this->aasDeltas[$sRev][$iDelta][0] == 'a')
                     {
+                        $iDelta++;
                         while ($iDelta < $cDelta && $c-- > 0)
                             $asText[$iText++] = $this->aasDeltas[$sRev][$iDelta++];
 
@@ -592,7 +595,10 @@ class CVSFile
                             $asText[$iText++] = "";
                     }
                     else
+                    {
+                        $iDelta++;
                         $iOrg += $c;
+                    }
                 }
 
                 //copy remaining
@@ -724,9 +730,27 @@ class CVSFile
      */
     function getBranch($sRev)
     {
-        if (strpos(strpos($sRev, "."), ".") <= 0)
+        $aiDots = array();
+
+        for ($i = strlen($sRev) - 1; $i >= 0; $i--)
+            if ($sRev[$i] == ".")
+                $aiDots[] = $i;
+
+        if (sizeof($aiDots) == 1)
             return "MAIN";
-        return "<i>not implemented</i>"; //TODO FIXME
+
+        $sBranch = substr($sRev, 0, $aiDots[1]).".0";
+        $cchBranch = strlen($sBranch);
+        reset($this->aasKeys["symbols"]);
+        while (list($sTag, $sTagRev) = each($this->aasKeys["symbols"]))
+        {
+            $j = strrpos($sTagRev, ".");
+            //echo "<!-- $j  $cchBranch ($sBranch, ".substr($sTagRev, 0, $j).")-->";
+            if ($cchBranch == $j && $sBranch == substr($sTagRev, 0, $j))
+                return $sTag;
+        }
+
+        return "";
     }
 
     /**
@@ -810,7 +834,8 @@ class CVSFile
 
         echo "<table>\n";
         //do we have to sort the array first? no...
-        while (list($sRevision, $aasRev) = each($this->aaasRevs))
+        $i = 0; //max is 256!!! (ChangeLog,v is _very_ big).
+        while ($i++ < 256 && list($sRevision, $aasRev) = each($this->aaasRevs))
         {
             echo "<tr><td bgcolor=#d0dce0>Rev. <a href=\"cvs.php?sFile=$this->sDir/$this->sName,v&sRevision=$sRevision\"",
                  "<a name=\"$sRevision\">$sRevision</a></a> by ",
@@ -857,6 +882,7 @@ class CVSFile
         }
 
         echo "</table>\n";
+        return 1;
     }
 }
 
