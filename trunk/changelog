@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2655 2003-12-29 10:56:02 sandervl Exp $ */
+/* $Id: changelog,v 1.2656 2003-12-29 11:55:05 sandervl Exp $ */
+
+ 2003-12-29: KO Myung-Hun <komh@chollian    >
+    - GDI32:    o GetTextExtentPointW fix
+                o GetTextExtentExPointA fix for DBCS leadbytes
 
  2003-12-29: Dietrich Teickner <Dietrich_Teickner@t-online   >
     - GDI32:    o GetTextExtentPointW fix
