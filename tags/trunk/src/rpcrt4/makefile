@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2000-04-03 07:53:26 sandervl Exp $
+# $Id: makefile,v 1.2 2000-04-04 19:49:03 davidr Exp $
 
 #
 # Odin32 API
@@ -23,11 +23,14 @@ CLEANEXTRAS = rpcrt4rsrc.asm
 
 # Object files. All objects should be prefixed with $(OBJDIR)!
 OBJS = \
+$(OBJDIR)\binding.obj \
 $(OBJDIR)\initterm.obj \
+$(OBJDIR)\mgmt.obj \
 $(OBJDIR)\rpcrt4rsrc.obj \
+$(OBJDIR)\server.obj \
+$(OBJDIR)\string.obj \
 $(OBJDIR)\stubs.obj\
 $(OBJDIR)\util.obj \
-$(OBJDIR)\string.obj \
 $(OBJDIR)\uuid.obj
 
 # Target name - name of the dll without extention and path.
@@ -67,7 +70,7 @@ $(TARGET).def
 
 # Dep rule - makes depenencies for C, C++ and Asm files.
 dep:
-    $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
+    $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win;. \
         *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
 
 
