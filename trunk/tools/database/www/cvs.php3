@@ -1,7 +1,8 @@
 <?php
 
 
-$sCVSROOT = "d:\\odin32\\cvs\\cvsroot";
+$sCVSROOT = "d:/odin32/cvs/cvsroot";
+$sCVSROOT = ".";
 
 /**
  * Quick and dirty CVS file parser.
@@ -27,6 +28,7 @@ class CVSFile
     {
         global $sCVSROOT;
 
+        $this->fOk = 0;
         /*
          * TODO: Security: Check that the path and filename is valid!
          *       We can't allow relative paths (ie. "..")
@@ -34,23 +36,23 @@ class CVSFile
         if (strlen($sFilename) < 3 || substr($sFilename, strlen($sFilename)-2) != ",v")
         {
             $this->sError = "filename is invalid";
-            return $this->fOk = 0;
+            return 1;
         }
 
         /*
          * Check filesize. Minimum size is 10 bytes!
          */
-        $this->sFullname = $sCVSROOT."\\".$sFilename;
+        $this->sFullname = $sCVSROOT."/".$sFilename;
         $cbFile = filesize($this->sFullname);
         if ($cbFile <= 10)
         {
             $this->sError = "too small file,  " . $this->sFullname . ", ". $cbFile ."\n";
-            return $this->fOk = 0;
+            return 1;
         }
-        if ($cbFile >= (2*1024*1024)) //currently max size of 2MB.
+        if (!$fNoDeltas && $cbFile >= (2*1024*1024)) //currently max size of 2MB.
         {
             $this->sError = "\ntoo large file,  ". $this->sFullname .", ". $cbFile ."\n";
-            return $this->fOk = 0;
+            return 1;
         }
 
 
@@ -81,7 +83,7 @@ class CVSFile
         {
             $this->sError = "\nfailed to open the file $this->sFullname\n";
             fclose($hFile);
-            return 0;
+            return 1;
         }
 
 
@@ -107,7 +109,7 @@ class CVSFile
             if (!$sLine || $sLine == "" || $sLine == "\n" || $sLine == "\r")
             {
                 $iLine++;
-                $sLine = fgets($hFile, 0x10000);
+                $sLine = fgets($hFile, 0x1000);
                 continue;
             }
 
@@ -144,7 +146,7 @@ class CVSFile
                         break;
                     /* Get next line and remove any EOF chars */
                     $iLine++;
-                    $sLine = str_replace("\x1a", "", fgets($hFile, 0x10000));
+                    $sLine = str_replace("\x1a", "", fgets($hFile, 0x1000));
                     continue;
                 }
 
@@ -205,6 +207,12 @@ class CVSFile
                 case "desc":
                     $fDesc = 1;
                     $sRev = "";
+                    break;
+
+                /*
+                 * Stop after the first log entry.
+                 */
+                case "log":
                     $fStop = $fNoDeltas;
                     break;
 
@@ -226,7 +234,7 @@ class CVSFile
                 {
                     $this->sError = "Invalid file format.";
                     fclose($hFile);
-                    return 0;
+                    return 1;
                 }
                 $this->aasKeys[$sKey] = $asValue;
             }
@@ -355,7 +363,7 @@ class CVSFile
         /*
          * Write it!
          */
-        echo "<table><tr><td bgcolor=\"#020286\"><pre><font size=-0 color=\"#02FEFE\">\n";
+        echo "<table><tr><td bgcolor=\"#020286\"><pre><font size=-0 face=\"System VIO, System Monospaced\" color=\"#02FEFE\">\n";
 
         $fComment = 0;
         $iLine = 0;
@@ -635,8 +643,7 @@ function C_ColorEncode($sLine, &$aVariables)
                         $j += ($sLine[$j] == '\\') ? 2 : 1;
                 else
                 {
-                    while ($j < $cchLine && $sLine[$j] != '&'
-                           && substr($sLine[$j], $i, 6) != "&quot;")
+                    while ($j < $cchLine && ($sLine[$j] != '&' || substr($sLine, $j, 6) != "&quot;"))
                         $j += ($sLine[$j] == '\\') ? 2 : 1;
                     if ($j < $cchLine)
                         $j += 5;
@@ -681,6 +688,12 @@ function C_ColorEncode($sLine, &$aVariables)
              */
             if ($cchWord > 0 && isset($aC_Keywords[substr($sLine, $i, $cchWord)]))
                 $sRet .= "<font color=\"#FF0202\">" . substr($sLine, $i, $cchWord) . "</font>";
+
+            /*
+             * Check for number
+             */
+            else if ($sLine[$i] >= '0' && $sLine[$i] <= '9')
+                $sRet .= "<font color=\"#FE0202\">" . substr($sLine, $i, $cchWord) . "</font>";
 
             /*
              * Skip word.
