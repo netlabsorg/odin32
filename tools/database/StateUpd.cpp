@@ -1,4 +1,4 @@
-/* $Id: StateUpd.cpp,v 1.32 2000-08-02 20:20:35 bird Exp $
+/* $Id: StateUpd.cpp,v 1.33 2001-09-05 11:57:57 bird Exp $
  *
  * StateUpd - Scans source files for API functions and imports data on them.
  *
@@ -1732,7 +1732,7 @@ static unsigned long analyseFnHdr(PFNDESC pFnDesc, char **papszLines, int i, con
  * @param     iStart     Index of start line.
  * @param     iEnd       Index of last line.
  * @param     apszLines  Array lines.
- * @param     pszStart   Pointer to char to start at (into papszLines[iStart] of course!)
+ * @param     pszStart   Pointer to char to start at (into papszLines[iStart] of course!). Defaults to start of line iStart.
  * @status    completely impelmented.
  * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
  * @remark    Addes some HTML tags.
@@ -1758,7 +1758,7 @@ static char *SDSCopyTextUntilNextTag(char *pszTarget, BOOL fHTML, int iStart, in
         }
 
         /* Anything left of the area to copy? */
-        if (iStart <= iEnd)
+        if (iStart <= iEnd && (!pszStart || *psz != '@')) /* last test is fix for parameters without description. */
         {
             /*
              * if we stand at a tag, skip over the tag
