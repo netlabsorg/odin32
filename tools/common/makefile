@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.11 2000-12-16 20:10:07 bird Exp $
+# $Id: makefile,v 1.12 2001-02-02 08:45:42 bird Exp $
 
 #
 # Odin32 API
@@ -31,8 +31,8 @@ all:    $(OBJDIR)\common.lib \
 !ifdef GCC
         $(OBJDIR)\common.a \
 !endif
-        $(ODIN32_TOOLS)\kDef2Wat.exe
-#        $(ODIN32_TOOLS)\kDump.exe
+        $(ODIN32_TOOLS)\kDef2Wat.exe \
+        $(ODIN32_TOOLS)\kDump.exe
 
 
 #

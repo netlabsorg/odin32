@@ -1,4 +1,4 @@
-/* $Id: kFileLX.h,v 1.3 2000-12-04 08:48:09 bird Exp $
+/* $Id: kFileLX.h,v 1.4 2001-02-02 08:45:41 bird Exp $
  *
  * kFileLX - Linear Executable file reader.
  *
@@ -27,7 +27,8 @@ protected:
     BOOL                queryExportName(int iOrdinal, char *pszBuffer);
 
 public:
-    kFileLX(const char *pszFilename);
+    kFileLX(const char *pszFilename) throw (int);
+    kFileLX(kFile *pFile) throw (int);
     ~kFileLX();
 
     virtual BOOL        queryModuleName(char *pszBuffer);
