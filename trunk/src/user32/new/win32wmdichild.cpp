@@ -1,4 +1,4 @@
-/* $Id: win32wmdichild.cpp,v 1.8 2000-01-13 13:54:55 sandervl Exp $ */
+/* $Id: win32wmdichild.cpp,v 1.9 2000-01-14 13:16:59 sandervl Exp $ */
 /*
  * Win32 MDI Child Window Class for OS/2
  *
@@ -533,7 +533,7 @@ void Win32MDIChildWindow::childGetMinMaxInfo(MINMAXINFO* lpMinMax )
     Win32MDIClientWindow *client = (Win32MDIClientWindow *)getParent();
     RECT rect;
 
-    getClientRect(&rect);
+    client->getClientRect(&rect);
     if(client->getParent() == NULL) {
         dprintf(("Win32MDIChildWindow::childGetMinMaxInfo:: client parent == NULL!!"));
         return;

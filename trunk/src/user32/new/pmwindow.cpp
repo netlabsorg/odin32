@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.40 2000-01-13 13:54:52 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.41 2000-01-14 13:16:57 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -252,7 +252,8 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
     case WM_WINDOWPOSCHANGED:
     {
-        win32wnd->MsgPosChanged((LPARAM)&thdb->wp);
+	if(pWinMsg->message != 0)
+        	win32wnd->MsgPosChanged((LPARAM)&thdb->wp);
         goto RunDefWndProc;
     }
 
