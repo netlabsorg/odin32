@@ -1,4 +1,4 @@
-; $Id: crtdll.def,v 1.15 2000-11-22 00:49:55 phaller Exp $
+; $Id: crtdll.def,v 1.16 2000-11-22 14:30:48 phaller Exp $
 
 ;
 ; Based on Windows 98 (Build 2222): CRTDLL.DLL 
@@ -112,7 +112,6 @@ EXPORTS
     _findclose			= _CRTDLL__findclose		@98
     _findfirst			= _CRTDLL__findfirst		@99
     _findnext			= _CRTDLL__findnext		@100
-
     _finite			= _CRTDLL__finite		@101
     _flsbuf			= _CRTDLL__flsbuf		@102
     _flushall			= _CRTDLL__flushall		@103
@@ -178,6 +177,7 @@ EXPORTS
     _ismbstrail			= _CRTDLL__ismbstrail		@163
     _isnan			= _CRTDLL__isnan		@164
     _itoa			= _CRTDLL__itoa			@165
+    _itow			= _CRTDLL__itow			@600 ; @@@PH fix ordinal
     _j0				= _CRTDLL__j0			@166
     _j1				= _CRTDLL__j1			@167
     _jn				= _CRTDLL__jn			@168
@@ -192,6 +192,7 @@ EXPORTS
     _lsearch			= _CRTDLL__lsearch		@177
     _lseek			= _CRTDLL__lseek		@178
     _ltoa			= _CRTDLL__ltoa			@179
+    _ltow			= _CRTDLL__ltow                 @601   ; @@@PH ordinal missing!
     _makepath			= _CRTDLL__makepath		@180
     _matherr			= _CRTDLL__matherr		@181
     _mbbtombc			= _CRTDLL__mbbtombc		@182
@@ -212,7 +213,6 @@ EXPORTS
     _mbscmp			= _CRTDLL__mbscmp		@197
     _mbscpy			= _CRTDLL__mbscpy		@198
     _mbscspn			= _CRTDLL__mbscspn		@199
-
     _mbsdec			= _CRTDLL__mbsdec		@200
     _mbsdup			= _CRTDLL__mbsdup		@201
     _mbsicmp			= _CRTDLL__mbsicmp		@202
@@ -313,7 +313,6 @@ EXPORTS
     _strtime			= _CRTDLL__strtime		@297
     _strupr			= _CRTDLL__strupr		@298
     _swab			= _CRTDLL__swab			@299
-
     _sys_errlist		= CRTDLL_sys_errlist		@300
     _sys_nerr_dll		= CRTDLL_sys_nerr_dll		@301
     _tell			= _CRTDLL__tell			@302
@@ -324,6 +323,7 @@ EXPORTS
     _tzname			= CRTDLL_tzname			@307
     _tzset			= _CRTDLL__tzset		@308
     _ultoa			= _CRTDLL__ultoa		@309
+    _ultow			= _CRTDLL__ultow                @602 ; @@@PH ordinal missing
     _umask			= _CRTDLL__umask		@310
     _ungetch			= _CRTDLL__ungetch		@311
     _unlink			= _CRTDLL__unlink		@312
@@ -414,7 +414,6 @@ EXPORTS
     islower			= _CRTDLL_islower		@397
     isprint			= _CRTDLL_isprint		@398
     ispunct			= _CRTDLL_ispunct		@399
-
     isspace			= _CRTDLL_isspace		@400
     isupper			= _CRTDLL_isupper		@401
     iswalnum			= _CRTDLL_iswalnum		@402
@@ -515,7 +514,6 @@ EXPORTS
     vsprintf			= _CRTDLL_vsprintf		@497
     vswprintf			= _CRTDLL_vswprintf		@498
     vwprintf		        = _CRTDLL_vwprintf		@499
-
     wcscat			= _CRTDLL_wcscat		@500
     wcschr			= _CRTDLL_wcschr		@501
     wcscmp			= _CRTDLL_wcscmp		@502
@@ -541,5 +539,4 @@ EXPORTS
     wprintf			= _CRTDLL_wprintf		@522
     wscanf			= _CRTDLL_wscanf		@523
 
-    _itow			= _CRTDLL__itow			@600
-    _setjmp3			= _CRTDLL__setjmp3		@601
+    _setjmp3			= _CRTDLL__setjmp3		@603
