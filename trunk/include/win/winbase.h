@@ -1901,7 +1901,8 @@ BOOL      WINAPI FindNextFileMultiA(HANDLE,LPWIN32_FIND_DATAA,DWORD*); //Odin on
 HRSRC     WINAPI FindResourceA(HMODULE,LPCSTR,LPCSTR);
 HRSRC     WINAPI FindResourceW(HMODULE,LPCWSTR,LPCWSTR);
 #define     FindResource WINELIB_NAME_AW(FindResource)
-VOID        WINAPI FreeLibrary16(HINSTANCE16);
+
+VOID      WINAPI FreeLibrary16(HINSTANCE16);
 BOOL      WINAPI FreeLibrary(HMODULE);
 #define     FreeModule(handle) FreeLibrary(handle)
 #define     FreeProcInstance(proc) /*nothing*/
@@ -2492,6 +2493,46 @@ DWORD       WINAPI _ConfirmWin16Lock(void);
 DWORD       WINAPI _ConfirmSysLevel(SYSLEVEL*);
 VOID        WINAPI _EnterSysLevel(SYSLEVEL*);
 VOID        WINAPI _LeaveSysLevel(SYSLEVEL*);
+
+#ifdef __WIN32OS2__
+HANDLE WINAPI FindFirstVolumeA(LPTSTR lpszVolumeName, DWORD cchBufferLength);
+HANDLE WINAPI FindFirstVolumeW(LPWSTR lpszVolumeName, DWORD cchBufferLength);
+#define     FindFirstVolume WINELIB_NAME_AW(FindFirstVolume)
+
+BOOL   WINAPI FindNextVolumeA(HANDLE hFindVolume, LPTSTR lpszVolumeName, 
+                              DWORD cchBufferLength);
+BOOL   WINAPI FindNextVolumeW(HANDLE hFindVolume, LPWSTR lpszVolumeName, 
+                              DWORD cchBufferLength);
+#define     FindNextVolume WINELIB_NAME_AW(FindNextVolume)
+
+BOOL   WINAPI FindVolumeClose(HANDLE hFindVolume);
+
+HANDLE WINAPI FindFirstVolumeMountPointA(LPTSTR lpszRootPathName, 
+                                         LPTSTR lpszVolumeMountPoint,
+                                         DWORD cchBufferLength);
+HANDLE WINAPI FindFirstVolumeMountPointW(LPWSTR lpszRootPathName, 
+                                         LPWSTR lpszVolumeMountPoint,
+                                         DWORD cchBufferLength);
+#define     FindFirstVolumeMountPoint WINELIB_NAME_AW(FindFirstVolumeMountPoint)
+
+BOOL WINAPI FindNextVolumeMountPointA(HANDLE hFindVolumeMountPoint,
+                                      LPTSTR lpszVolumeMountPoint,
+                                      DWORD cchBufferLength);
+BOOL WINAPI FindNextVolumeMountPointW(HANDLE hFindVolumeMountPoint,
+                                      LPWSTR lpszVolumeMountPoint,
+                                      DWORD cchBufferLength);
+#define     FindNextVolumeMountPoint WINELIB_NAME_AW(FindNextVolumeMountPoint)
+
+BOOL WINAPI FindVolumeMountPointClose(HANDLE hFindVolumeMountPoint);
+BOOL WINAPI GetVolumeNameForVolumeMountPointA(LPCSTR lpszVolumeMountPoint,
+                                              LPSTR lpszVolumeName,
+                                              DWORD cchBufferLength);
+BOOL WINAPI GetVolumeNameForVolumeMountPointW(LPCWSTR lpszVolumeMountPoint,
+                                              LPWSTR lpszVolumeName,
+                                              DWORD cchBufferLength);
+#define     GetVolumeNameForVolumeMountPoint WINELIB_NAME_AW(GetVolumeNameForVolumeMountPoint)
+
+#endif
 
 #ifdef __cplusplus
 }

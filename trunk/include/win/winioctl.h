@@ -373,6 +373,21 @@ typedef struct _RAW_READ_INFO {
 
 //Disk IOCTLs
 
+typedef struct _PARTITION_INFORMATION {
+    LARGE_INTEGER StartingOffset;
+    LARGE_INTEGER PartitionLength;
+    DWORD HiddenSectors;
+    DWORD PartitionNumber;
+    BYTE  PartitionType;
+    BOOL  BootIndicator;
+    BOOL  RecognizedPartition;
+    BOOL  RewritePartition;
+} PARTITION_INFORMATION, *PPARTITION_INFORMATION;
+
+typedef struct _SET_PARTITION_INFORMATION {
+    BYTE  PartitionType;
+} SET_PARTITION_INFORMATION, *PSET_PARTITION_INFORMATION;
+
 #define IOCTL_DISK_BASE                 FILE_DEVICE_DISK
 #define IOCTL_DISK_GET_DRIVE_GEOMETRY   CTL_CODE(IOCTL_DISK_BASE, 0x0000, METHOD_BUFFERED, FILE_ANY_ACCESS)
 #define IOCTL_DISK_GET_PARTITION_INFO   CTL_CODE(IOCTL_DISK_BASE, 0x0001, METHOD_BUFFERED, FILE_READ_ACCESS)
@@ -514,5 +529,34 @@ typedef struct _PARALLEL_PNP_INFORMATION {
 
 #define IOCTL_INTERNAL_GET_PARALLEL_PORT_INFO               CTL_CODE(FILE_DEVICE_PARALLEL_PORT, 12, METHOD_BUFFERED, FILE_ANY_ACCESS)
 #define IOCTL_INTERNAL_GET_PARALLEL_PNP_INFO                CTL_CODE(FILE_DEVICE_PARALLEL_PORT, 21, METHOD_BUFFERED, FILE_ANY_ACCESS)
+
+
+//
+// These IOCTLs are handled by hard disk volumes.
+//
+
+#define IOCTL_VOLUME_BASE   ((DWORD) 'V')
+
+#define IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS    CTL_CODE(IOCTL_VOLUME_BASE, 0, METHOD_BUFFERED, FILE_ANY_ACCESS)
+
+//
+// Disk extent definition.
+//
+
+typedef struct _DISK_EXTENT {
+    DWORD           DiskNumber;
+    LARGE_INTEGER   StartingOffset;
+    LARGE_INTEGER   ExtentLength;
+} DISK_EXTENT, *PDISK_EXTENT;
+
+//
+// Output structure for IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS.
+//
+
+typedef struct _VOLUME_DISK_EXTENTS {
+    DWORD       NumberOfDiskExtents;
+    DISK_EXTENT Extents[1];
+} VOLUME_DISK_EXTENTS, *PVOLUME_DISK_EXTENTS;
+
 
 #endif
