@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.106 2001-07-05 18:10:56 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.107 2001-07-14 08:36:19 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -729,10 +729,34 @@ BOOL WIN32API SystemParametersInfoA(UINT uiAction, UINT uiParam, PVOID pvParam, 
 
             LPLOGFONTA lpLogFont = &(lpnm->lfMenuFont);
             if(fOS2Look) {
-                GetProfileStringA("Desktop", "MenuFont", "WarpSans",
-                                  lpLogFont->lfFaceName, LF_FACESIZE);
-                lpLogFont->lfWeight = FW_BOLD;
-                lpLogFont->lfHeight = -GetProfileIntA("Desktop","MenuFontSize", 16);
+                char fontname[128];
+                char *pszFontName;
+                BOOL fFound = TRUE;
+
+                if(OSLibPrfQueryProfileString(OSLIB_HINI_USER, "PM_SystemFonts", "Menus", "", fontname, sizeof(fontname)) == 1) {
+                    if(OSLibPrfQueryProfileString(OSLIB_HINI_USER, "PM_SystemFonts", "DefaultFont", "", fontname, sizeof(fontname)) == 1) {
+                        fFound = FALSE;
+                    }
+                }
+                if(fFound) {
+                    pszFontName = fontname;
+                    while(*pszFontName != '.' && *pszFontName != 0) pszFontName++;
+                    if(*pszFontName) {
+                        *pszFontName++ = 0;
+
+                        strncpy(lpLogFont->lfFaceName, pszFontName, sizeof(lpLogFont->lfFaceName));
+                        lpLogFont->lfFaceName[sizeof(lpLogFont->lfFaceName)-1] = 0;
+                        lpLogFont->lfWeight = FW_NORMAL;
+                        lpLogFont->lfHeight = 16; //atoi(fontname);
+                    }
+                    else fFound = FALSE;
+                }
+                if(!fFound) {
+                    GetProfileStringA("Desktop", "MenuFont", "WarpSans",
+                                      lpLogFont->lfFaceName, LF_FACESIZE);
+                    lpLogFont->lfWeight = FW_BOLD;
+                    lpLogFont->lfHeight = -GetProfileIntA("Desktop","MenuFontSize", 16);
+                }
                 lpLogFont->lfWidth = 0;
                 lpLogFont->lfEscapement = lpLogFont->lfOrientation = 0;
             }
