@@ -1,4 +1,4 @@
-/* $Id: imm32.cpp,v 1.2 1999-09-23 09:38:04 sandervl Exp $ */
+/* $Id: imm32.cpp,v 1.3 1999-11-05 09:17:59 sandervl Exp $ */
 /*
  *	IMM32 library
  *
@@ -323,7 +323,7 @@ LONG WINAPI ImmGetCompositionStringA(HIMC hIMC, DWORD dwIndex, LPVOID lpBuf, DWO
   switch(GetVersion())
     {
     default:
-//      FIXME("%s not supported",GetVersionName());
+        dprintf(("OS not supported"));
     case WIN95:
       return 0xffffffff;
     case NT40:
@@ -343,7 +343,7 @@ LONG WINAPI ImmGetCompositionStringW( HIMC hIMC, DWORD dwIndex, LPVOID lpBuf, DW
   switch(GetVersion())
     {
     default:
-//      FIXME("%s not supported",GetVersionName());
+      dprintf(("OS not supported"));
     case WIN95:
       return 0xffffffff;
     case NT40:
@@ -650,7 +650,7 @@ UINT WINAPI ImmGetVirtualKey(HWND hWnd)
   switch(GetVersion())
     {
     default:
-//      FIXME("%s not supported", GetVersionName());
+      dprintf(("OS not supported"));
     case WIN95:
       return VK_PROCESSKEY;
     case NT40:
