@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.45 2000-02-24 19:17:15 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.46 2000-03-28 15:25:47 cbratschi Exp $ */
 
 /*
  * GDI32 apis
@@ -21,7 +21,7 @@
 #include "oslibgpi.h"
 #include "oslibgdi.h"
 
-#define DBG_LOCALLOG	DBG_gdi32
+#define DBG_LOCALLOG    DBG_gdi32
 #include "dbglocal.h"
 
 //******************************************************************************
@@ -498,7 +498,7 @@ HDC WIN32API CreateICA(LPCSTR lpszDriver, LPCSTR lpszDevice, LPCSTR lpszOutput,
     }
     //SvL: Open32 tests lpszDriver for NULL even though it's ignored
     if(lpszDriver == NULL) {
-	lpszDriver = lpszDevice;
+        lpszDriver = lpszDevice;
     }
     return O32_CreateIC(lpszDriver, lpszDevice, lpszOutput, lpdvmInit);
 }
@@ -625,9 +625,87 @@ BOOL WIN32API Rectangle( HDC arg1, int arg2, int arg3, int arg4, int  arg5)
 }
 //******************************************************************************
 //******************************************************************************
+VOID dumpROP2(INT rop2)
+{
+  CHAR *name;
+
+  switch (rop2)
+  {
+    case R2_BLACK:
+      name = "R2_BLACK";
+      break;
+
+    case R2_COPYPEN:
+      name = "R2_COPYPEN";
+      break;
+
+    case R2_MASKNOTPEN:
+      name = "R2_MASKNOTPEN";
+      break;
+
+    case R2_MASKPEN:
+      name = "R2_MASKPEN";
+      break;
+
+    case R2_MASKPENNOT:
+      name = "R2_MASKPENNOT";
+      break;
+
+    case R2_MERGENOTPEN:
+      name = "R2_MERGENOTPEN";
+      break;
+
+    case R2_MERGEPEN:
+      name = "R2_MERGEPEN";
+      break;
+
+    case R2_MERGEPENNOT:
+      name = "R2_MERGEPENNOT";
+      break;
+
+    case R2_NOP:
+      name = "R2_NOP";
+      break;
+
+    case R2_NOT:
+      name = "R2_NOT";
+      break;
+
+    case R2_NOTCOPYPEN:
+      name = "R2_NOTCOPYPEN";
+      break;
+
+    case R2_NOTMASKPEN:
+      name = "R2_NOTMASKPEN";
+      break;
+
+    case R2_NOTMERGEPEN:
+      name = "R2_NOTMERGEPEN";
+      break;
+
+    case R2_WHITE:
+      name = "R2_WHITE";
+      break;
+
+    case R2_XORPEN:
+      name = "R2_XORPEN";
+      break;
+
+    default:
+      name = "unknown mode!!!";
+      break;
+  }
+
+  dprintf(("  ROP2 mode = %s",name));
+}
+//******************************************************************************
+//******************************************************************************
 int WIN32API SetROP2( HDC hdc, int rop2)
 {
     dprintf(("GDI32: SetROP2 %x %x", hdc, rop2));
+    #ifdef DEBUG
+    dumpROP2(rop2);
+    #endif
     return O32_SetROP2(hdc, rop2);
 }
 //******************************************************************************
@@ -1441,10 +1519,10 @@ INT WIN32API ExtEscape(HDC hdc, INT nEscape, INT cbInput, LPCSTR lpszInData,
   dprintf(("GDI32: ExtEscape, %x %x %d %x %d %x not implemented", hdc, nEscape, cbInput, lpszInData, cbOutput, lpszOutData));
 #ifdef DEBUG
   if(cbInput && lpszInData) {
-	ULONG *tmp = (ULONG *)lpszInData;
-	for(int i=0;i<cbInput/4;i++) {
-		dprintf(("GDI32: ExtEscape par %d: %x", i, *tmp++));
-	}
+        ULONG *tmp = (ULONG *)lpszInData;
+        for(int i=0;i<cbInput/4;i++) {
+                dprintf(("GDI32: ExtEscape par %d: %x", i, *tmp++));
+        }
   }
 #endif
   return(0);
