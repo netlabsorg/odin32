@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.12 1999-12-03 01:19:56 phaller Exp $ */
+/* $Id: wsock32.cpp,v 1.13 1999-12-03 12:59:40 achimha Exp $ */
 
 /*
  *
@@ -1378,7 +1378,7 @@ ODINFUNCTION5(LHANDLE,OS2WSAAsyncGetHostByName,
                        wMsg,
                        FALSE,
                        ASYNCREQUEST_GETHOSTBYNAME,
-                       buf);
+                       (PVOID)buf, (PVOID)buflen);
 
   // call pmwsock function, will fill our temp buffer
   rc = WSAAsyncGetHostByName(hwndRelay,
