@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.15 1999-10-31 17:53:51 cbratschi Exp $ */
+/* $Id: pmframe.cpp,v 1.16 1999-11-01 19:11:41 sandervl Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -231,7 +231,6 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
 
   switch(msg)
   {
-#if 1
     case WM_ADJUSTWINDOWPOS:
     {
       PSWP     pswp = (PSWP)mp1;
@@ -389,43 +388,8 @@ PosChangedEnd:
         RestoreOS2TIB();
         return rc;
     }
-#if 0
-    case WM_ENABLE:
-        dprintf(("PMFRAME: WM_ENABLE %x", win32wnd->getWindowHandle()));
-        win32wnd->MsgEnable(SHORT1FROMMP(mp1));
-        goto RunDefFrameProc;
-
-    case WM_SHOW:
-        dprintf(("PMFRAME: WM_SHOW %x %d", win32wnd->getWindowHandle(), mp1));
-        win32wnd->MsgShow((ULONG)mp1);
-        goto RunDefFrameProc;
-
     case WM_ACTIVATE:
     {
-      HWND hwndActivate = (HWND)mp2;
-      BOOL fMinimized = FALSE;
-
-        dprintf(("PMFRAME: WM_ACTIVATE %x %x", hwnd, hwndActivate));
-        if(WinQueryWindowULong(hwndActivate, OFFSET_WIN32PM_MAGIC) != WIN32PM_MAGIC) {
-                //another (non-win32) application's window
-                //set to NULL (allowed according to win32 SDK) to avoid problems
-                hwndActivate = NULL;
-        }
-        if(WinQueryWindowULong(hwnd, QWL_STYLE) & WS_MINIMIZED)
-        {
-           fMinimized = TRUE;
-        }
-
-        win32wnd->MsgActivate(SHORT1FROMMP(mp1), fMinimized, Win32BaseWindow::OS2ToWin32Handle(hwndActivate));
-
-        RestoreOS2TIB();
-        MRESULT rc = OldFrameProc(hwnd,msg,mp1,mp2);
-        DrawActivate(win32wnd, hwnd);
-        return rc;
-    }
-#else
-    case WM_ACTIVATE:
-      {
         HWND hwndTitle;
         USHORT flags = WinQueryWindowUShort(hwnd,QWS_FLAGS);
 
@@ -439,37 +403,7 @@ PosChangedEnd:
 
         RestoreOS2TIB();
         return 0;
-      }
-
-#endif
-#else
-    case WM_ADJUSTWINDOWPOS:
-    {
-      PSWP     pswp = (PSWP)mp1;
-      Win32BaseWindow *wndchild;
-
-      wndchild = Win32BaseWindow::GetWindowFromOS2FrameHandle(pswp->hwnd);
-      if(wndchild && wndchild->isChild())
-      {
-#if 0
-       SWP swp = *pswp;
-
-        MRESULT rc = OldFrameProc(hwnd, msg, mp1, mp2);
-        pswp->x = swp.x;
-        pswp->y = swp.y;
-        pswp->fl = swp.fl;
-#endif
-        dprintf(("PMFRAME: WM_ADJUSTWINDOWPOS %x %x %x (%d,%d) (%d,%d)", hwnd, pswp->hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
-        RestoreOS2TIB();
-        return (MRESULT)0;
-      }
-      goto RunDefFrameProc;
     }
-
-    case WM_ACTIVATE:
-        DrawActivate(win32wnd, hwnd);
-        goto RunDefFrameProc;
-#endif
 
     case WM_DESTROY:
       #ifdef PMFRAMELOG

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.37 1999-10-31 01:14:43 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.38 1999-11-01 19:11:45 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -215,6 +215,8 @@ static Win32BaseWindow *GetWindowFromHandle(HWND hwnd);
 static Win32BaseWindow *GetWindowFromOS2Handle(HWND hwnd);
 static Win32BaseWindow *GetWindowFromOS2FrameHandle(HWND hwnd);
 
+    static void DestroyAll();
+
        PVOID getOldFrameProc() { return pOldFrameProc; };
        VOID  setOldFrameProc(PVOID aOldFrameProc) { pOldFrameProc = aOldFrameProc; };
        ULONG getBorderWidth() { return borderWidth; };
@@ -257,7 +259,7 @@ protected:
 
          HWND   hwndLinkAfter;
         DWORD   flags;
-        DWORD   lastHitTestVal;         //Last value returned by WM_NCHITTEST handler
+        LONG    lastHitTestVal;         //Last value returned by WM_NCHITTEST handler
 
         BOOL    isIcon;
         BOOL    fFirstShow;

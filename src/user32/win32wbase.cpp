@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.70 1999-10-31 01:14:42 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.71 1999-11-01 19:11:43 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -38,6 +38,7 @@
 #include "pmframe.h"
 #include "win32wdesktop.h"
 #include "pmwindow.h"
+#include "controls.h"
 #include <wprocess.h>
 
 #define HAS_DLGFRAME(style,exStyle) \
@@ -74,6 +75,8 @@
 #define KEYDATA_PREVSTATE   0x4000
 
 void PrintWindowStyle(DWORD dwStyle, DWORD dwExStyle);
+
+static fDestroyAll = FALSE;
 
 //******************************************************************************
 //******************************************************************************
@@ -198,7 +201,7 @@ Win32BaseWindow::~Win32BaseWindow()
     OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32WNDPTR, 0);
     OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32PM_MAGIC, 0);
 
-    if(getParent() && getParent()->getFirstChild() == this && getNextChild() == NULL)
+    if(!fDestroyAll && getParent() && getParent()->getFirstChild() == this && getNextChild() == NULL)
     {
         //if we're the last child that's being destroyed and our
         //parent window was also destroyed, then we delete the parent object
@@ -209,6 +212,12 @@ Win32BaseWindow::~Win32BaseWindow()
             setParent(NULL);  //or else we'll crash in the dtor of the ChildWindow class
         }
     }
+    else 
+    if(fDestroyAll) {
+	dprintf(("Destroying window %x %s", getWindowHandle(), windowNameA));
+        setParent(NULL);  //or else we'll crash in the dtor of the ChildWindow class
+    }
+
     if (isOwnDC())
         releaseOwnDC (ownDC);
 
@@ -233,6 +242,13 @@ Win32BaseWindow::~Win32BaseWindow()
         free(horzScrollInfo);
         horzScrollInfo = NULL;
     }
+}
+//******************************************************************************
+//******************************************************************************
+void Win32BaseWindow::DestroyAll()
+{
+    fDestroyAll = TRUE;
+    GenericObject::DestroyAll(windows);
 }
 //******************************************************************************
 //******************************************************************************
@@ -413,13 +429,16 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   dwStyle   = cs->style & ~WS_VISIBLE;
   dwExStyle = cs->dwExStyle;
 
-#if 1
-  //SvL: Messes up Z-order of dialog controls
   hwndLinkAfter = HWND_TOP;
-#else
-  hwndLinkAfter = ((cs->style & (WS_CHILD|WS_MAXIMIZE)) == WS_CHILD)
-                  ? HWND_BOTTOM : HWND_TOP;
-#endif
+  if(WIDGETS_IsControl(this, BUTTON_CONTROL) && ((dwStyle & 0x0f) == BS_GROUPBOX))
+  {
+	hwndLinkAfter = HWND_BOTTOM;
+	dwStyle |= WS_CLIPSIBLINGS;
+  }
+  else 
+  if(WIDGETS_IsControl(this, STATIC_CONTROL) && !(dwStyle & WS_GROUP)) {
+	dwStyle |= WS_CLIPSIBLINGS;
+  }
 
   /* Increment class window counter */
   windowClass->IncreaseWindowCount();
@@ -523,6 +542,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         SetLastError(ERROR_OUTOFMEMORY); //TODO: Better error
         return FALSE;
   }
+
   SetLastError(0);
   return TRUE;
 }
@@ -621,13 +641,13 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
   maxPos.x = rectWindow.left; maxPos.y = rectWindow.top;
 
   if(getParent()) {
-        SetWindowPos(getParent()->getWindowHandle(), rectClient.left, rectClient.top,
+        SetWindowPos(hwndLinkAfter, rectClient.left, rectClient.top,
                      rectClient.right-rectClient.left,
                      rectClient.bottom-rectClient.top,
-                     SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOREDRAW);
+                     SWP_NOACTIVATE | SWP_NOREDRAW);
   }
   else {
-        SetWindowPos(HWND_TOP, rectClient.left, rectClient.top,
+        SetWindowPos(hwndLinkAfter, rectClient.left, rectClient.top,
                      rectClient.right-rectClient.left,
                      rectClient.bottom-rectClient.top,
                      SWP_NOACTIVATE | SWP_NOREDRAW);
@@ -809,6 +829,7 @@ ULONG Win32BaseWindow::MsgCommand(ULONG cmd, ULONG Id, HWND hwnd)
 ULONG Win32BaseWindow::MsgHitTest(ULONG x, ULONG y)
 {
   lastHitTestVal = SendInternalMessageA(WM_NCHITTEST, 0, MAKELONG((USHORT)x, (USHORT)y));
+  dprintf(("MsgHitTest returned %x", lastHitTestVal));
   return 1; //TODO: May need to change this
 }
 //******************************************************************************
@@ -1094,7 +1115,7 @@ ULONG Win32BaseWindow::MsgButton(ULONG msg, ULONG ncx, ULONG ncy, ULONG clx, ULO
                 if(((ret == MA_ACTIVATE) || (ret == MA_ACTIVATEANDEAT))
                    && hwndTop != GetForegroundWindow() )
                 {
-                      SetActiveWindow();
+                      ::SetActiveWindow(hwndTop);
                 }
         }
     }
@@ -1420,10 +1441,8 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 
     case WM_MOUSEACTIVATE:
     {
-        DWORD dwStyle = GetWindowLongA(GWL_STYLE);
-        DWORD dwExStyle = GetWindowLongA(GWL_EXSTYLE);
         dprintf(("DefWndProc: WM_MOUSEACTIVATE for %x Msg %s", Win32Hwnd, GetMsgText(HIWORD(lParam))));
-        if(dwStyle & WS_CHILD && !(dwExStyle & WS_EX_NOPARENTNOTIFY) )
+        if(getStyle() & WS_CHILD && !(getExStyle() & WS_EX_NOPARENTNOTIFY) )
         {
             if(getParent()) {
                 LRESULT rc = getParent()->SendMessageA(WM_MOUSEACTIVATE, wParam, lParam );
@@ -1434,10 +1453,8 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
     }
     case WM_SETCURSOR:
     {
-        DWORD dwStyle = GetWindowLongA(GWL_STYLE);
-        DWORD dwExStyle = GetWindowLongA(GWL_EXSTYLE);
         dprintf(("DefWndProc: WM_SETCURSOR for %x Msg %s", Win32Hwnd, GetMsgText(HIWORD(lParam))));
-        if(dwStyle & WS_CHILD && !(dwExStyle & WS_EX_NOPARENTNOTIFY) )
+        if(getStyle() & WS_CHILD && !(getExStyle() & WS_EX_NOPARENTNOTIFY) )
         {
             if(getParent()) {
                 LRESULT rc = getParent()->SendMessageA(WM_SETCURSOR, wParam, lParam);
@@ -1904,6 +1921,7 @@ BOOL Win32BaseWindow::SetIcon(HICON hIcon)
 BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
 {
  ULONG showstate = 0;
+ HWND hWinAfter;
 
     dprintf(("ShowWindow %x %x", getWindowHandle(), nCmdShow));
 #if 1
@@ -1970,6 +1988,10 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
         showstate = SWPOS_RESTORE | SWPOS_ACTIVATE | SWPOS_SHOW;
         break;
     }
+
+    /* We can't activate a child window (WINE) */
+    if(getStyle() & WS_CHILD)
+	showstate &= ~SWPOS_ACTIVATE;
 
     if(showstate & SWPOS_SHOW) {
             setStyle(getStyle() | WS_VISIBLE);

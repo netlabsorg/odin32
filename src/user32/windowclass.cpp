@@ -1,4 +1,4 @@
-/* $Id: windowclass.cpp,v 1.3 1999-10-28 18:22:31 sandervl Exp $ */
+/* $Id: windowclass.cpp,v 1.4 1999-11-01 19:11:46 sandervl Exp $ */
 /*
  * Win32 Window Class Code for OS/2
  *
@@ -114,7 +114,6 @@ ATOM WIN32API RegisterClassExW(CONST WNDCLASSEXW *lpwc)
 //******************************************************************************
 BOOL WIN32API UnregisterClassA(LPCSTR lpszClassName, HINSTANCE hinst)
 {
-   dprintf(("USER32:  UnregisterClassA\n"));
    Win32WndClass::UnregisterClassA(hinst, (LPSTR)lpszClassName);
 
    //Spintest returns FALSE in dll termination, so pretend it succeeded

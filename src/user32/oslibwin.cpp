@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.40 1999-10-30 18:08:19 dengert Exp $ */
+/* $Id: oslibwin.cpp,v 1.41 1999-11-01 19:11:40 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -49,7 +49,7 @@ BOOL OSLibWinSetOwner(HWND hwnd, HWND hwndOwner)
 //******************************************************************************
 //******************************************************************************
 HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
-                          char *pszName, HWND Owner, ULONG fHWND_BOTTOM, HWND *hwndFrame,
+                          char *pszName, HWND Owner, ULONG fBottom, HWND *hwndFrame,
                           ULONG id)
 {
  HWND  hwndClient;
@@ -68,28 +68,6 @@ HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
 
   ULONG dwClientStyle;
 
-#if 0
-//  if(dwFrameStyle || hwndParent == HWND_DESKTOP) {
-        dwClientStyle = dwWinStyle & ~(WS_TABSTOP | WS_GROUP | WS_CLIPSIBLINGS);
-
-        dwFrameStyle |= FCF_NOBYTEALIGN;
-        if (hwndParent == HWND_DESKTOP && dwFrameStyle & FCF_TITLEBAR)
-                dwFrameStyle |= FCF_TASKLIST | FCF_NOMOVEWITHOWNER;
-
-        dwWinStyle &= ~(WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
-
-        *hwndFrame = WinCreateStdWindow(hwndParent, dwWinStyle,
-                                       &dwFrameStyle, WIN32_STDCLASS,
-                                       "", dwClientStyle, 0, id, &hwndClient);
-        if(*hwndFrame) {
-                if(pszName) {
-                        WinSetWindowText(*hwndFrame, pszName);
-                }
-                return hwndClient;
-        }
-        dprintf(("OSLibWinCreateWindow: (FRAME) WinCreateStdWindow failed (%x)", WinGetLastError(GetThreadHAB())));
-        return 0;
-#else
   BOOL TopLevel = hwndParent == HWND_DESKTOP;
   FRAMECDATA FCData = {sizeof (FRAMECDATA), 0, 0, 0};
 
@@ -106,27 +84,19 @@ HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
   *hwndFrame = WinCreateWindow (hwndParent,
                                 TopLevel ? WC_FRAME : WIN32_INNERFRAME,
                                 pszName, dwWinStyle, 0, 0, 50, 30,
-                                hwndParent, HWND_TOP, id, &FCData, NULL);
+                                hwndParent, HWND_TOP, 
+                                id, &FCData, NULL);
   if (*hwndFrame) {
     hwndClient = WinCreateWindow (*hwndFrame, WIN32_STDCLASS,
                                   NULL, dwClientStyle, 0, 0, 0, 0,
                                   *hwndFrame, HWND_TOP, FID_CLIENT, NULL, NULL);
     if (hwndClient != NULLHANDLE)
       WinSendMsg (*hwndFrame, WM_UPDATEFRAME, 0, 0);
+
     return hwndClient;
   }
   dprintf(("OSLibWinCreateWindow: (FRAME) WinCreateStdWindow failed (%x)", WinGetLastError(GetThreadHAB())));
   return 0;
-#endif
-
-#if 0
-  }
-  hwndClient = WinCreateWindow(hwndParent, WIN32_STDCLASS, pszName, dwWinStyle, 0, 0, 0, 0,
-                               Owner, (fHWND_BOTTOM) ? HWND_BOTTOM :HWND_TOP, 0, NULL,
-                               NULL);
-  *hwndFrame = hwndClient;
-  return hwndClient;
-#endif
 }
 //******************************************************************************
 //******************************************************************************
@@ -377,7 +347,7 @@ BOOL OSLibWinShowWindow(HWND hwnd, ULONG fl)
   }
   if(rc == 0)
         dprintf(("WinShowWindow %x failed %x", hwnd, WinGetLastError(GetThreadHAB())));
-  rc = WinSetWindowPos(hwnd, HWND_TOP, 0, 0, 0, 0, fl);
+  rc = WinSetWindowPos(hwnd, 0, 0, 0, 0, 0, fl);
   if(rc == 0)
         dprintf(("WinShowWindow %x failed %x", hwnd, WinGetLastError(GetThreadHAB())));
   return rc;

@@ -1,4 +1,4 @@
-/* $Id: win32class.h,v 1.3 1999-10-24 22:56:09 sandervl Exp $ */
+/* $Id: win32class.h,v 1.4 1999-11-01 19:11:43 sandervl Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -61,6 +61,7 @@ public:
  static  void   UnregisterClassA(HINSTANCE hinst, LPSTR id);
 
  static Win32WndClass *FindClass(HINSTANCE hinst, LPSTR id);
+ static  void   DestroyAll();
 
 private:
  BOOL           isUnicode;

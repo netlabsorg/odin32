@@ -1,4 +1,4 @@
-/* $Id: gen_object.h,v 1.2 1999-10-28 12:00:33 sandervl Exp $ */
+/* $Id: gen_object.h,v 1.3 1999-11-01 19:11:39 sandervl Exp $ */
 /*
  * Generic Object Class for OS/2
  *
@@ -38,6 +38,8 @@ GenericObject *GetNext()	{ return next;  };
 
 static	 void  enterMutex(DWORD objType);
 static	 void  leaveMutex(DWORD objType);
+
+static   void  DestroyAll(GenericObject *head);
 
 #ifdef __DEBUG_ALLOC__
 	void *operator new(size_t size, const char *filename, size_t lineno)
