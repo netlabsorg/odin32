@@ -1,10 +1,17 @@
- /* $Id: ChangeLog,v 1.753 2000-02-26 13:27:49 bird Exp $ */
+ /* $Id: ChangeLog,v 1.754 2000-02-26 19:00:33 bird Exp $ */
 
  2000-02-27: knut st. osmundsen <knut.stange.osmundse@pmsc.no>
         - pdwin32.tools: "New" tool, MAKE_CMD. Passes on the DEBUG and
                     NODEBUGINFO macros variables to the next make job.
                     (It's better to have it here than to have it in nearly
-                    all makefiles. And we keep forgetting it...)
+                    all makefiles, and forgetting to put it there...)
+        - WIN32K:  *The dep rule will make a makefile.inc if not present. It
+                    will also make dependencies for pe2lx and lib.
+                   *Have created a lib rule.
+                   *The all rule will now make Pe2Lx.
+        - src/makefile: win32k makes pe2lx, no need for special pe2lx stuff.
+
+              Sander, have a look the build and rebuild rules please.
 
  2000-02-26: knut st. osmundsen <knut.stange.osmundse@pmsc.no>
         - WIN32K: *Symbol Database is implemented. Contains symbols for most
