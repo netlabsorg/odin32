@@ -1,4 +1,4 @@
-/* $Id: avl.c,v 1.1 2000-03-16 21:10:10 bird Exp $
+/* $Id: avl.c,v 1.2 2000-03-24 01:40:52 bird Exp $
  *
  * AVL-Tree (lookalike) implementation.
  *
@@ -92,18 +92,18 @@ BOOL AVLInsert(PPAVLNODECORE ppTree, PAVLNODECORE pNode)
     while ((pCurNode = *ppCurNode) != NULL)
     {
         assert(AVLStack.cEntries < AVL_MAX_HEIGHT);
+        assert(pNode != pCurNode);
         AVLStack.aEntries[AVLStack.cEntries++] = ppCurNode;
+        #ifdef AVL_MAY_TRY_INSERT_EQUAL
+        /* check if equal */
+        if (AVL_E(pCurNode->Key, Key))
+            return FALSE;
+        #endif
         if (AVL_G(pCurNode->Key, Key))
             ppCurNode = &pCurNode->pLeft;
         else
             ppCurNode = &pCurNode->pRight;
     }
-
-#ifdef AVL_MAY_TRY_INSERT_EQUAL
-    /* check if equal */
-    if (AVLStack.cEntries > 0 && AVL_E((*AVLStack.aEntries[AVLStack.cEntries-1])->Key, pNode->Key))
-        return FALSE;
-#endif
 
     pNode->pLeft = pNode->pRight = NULL;
     pNode->uchHeight = 1;
