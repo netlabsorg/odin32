@@ -1,4 +1,4 @@
-/* $Id: atom.cpp,v 1.4 1999-06-10 20:47:54 phaller Exp $ */
+/* $Id: atom.cpp,v 1.5 1999-10-14 01:47:39 bird Exp $ */
 
 /*
  * Win32 ATOM api functions
@@ -27,9 +27,14 @@ ATOM WIN32API FindAtomW(LPCWSTR arg1)
  char *astring;
 
     dprintf(("KERNEL32:  OS2FindAtomW"));
-    astring = UnicodeToAsciiString((LPWSTR)arg1);
-    rc = O32_FindAtom(astring);
-    FreeAsciiString(astring);
+    if (arg1 < (LPCWSTR)0x10000)
+        rc = O32_FindAtom((char*)arg1);
+    else
+    {
+        astring = UnicodeToAsciiString((LPWSTR)arg1);
+        rc = O32_FindAtom(astring);
+        FreeAsciiString(astring);
+    }
     return(rc);
 }
 //******************************************************************************
@@ -47,9 +52,14 @@ ATOM WIN32API AddAtomW(LPCWSTR arg1)
  char *astring;
 
     dprintf(("KERNEL32:  OS2AddAtomW\n"));
-    astring = UnicodeToAsciiString((LPWSTR)arg1);
-    rc = O32_AddAtom(astring);
-    FreeAsciiString(astring);
+    if (arg1 < (LPCWSTR)0x10000)
+        rc = O32_AddAtom((char*)arg1);
+    else
+    {
+        astring = UnicodeToAsciiString((LPWSTR)arg1);
+        rc = O32_AddAtom(astring);
+        FreeAsciiString(astring);
+    }
     return(rc);
 }
 //******************************************************************************
@@ -69,7 +79,7 @@ UINT WIN32API GetAtomNameW(ATOM arg1, LPWSTR arg2, int arg3)
  char *astring;
 
     dprintf(("KERNEL32:  OS2GetAtomNameW\n"));
-    astring = UnicodeToAsciiString(arg2);
+    astring = UnicodeToAsciiString(arg2); /* FIXME! */
     rc = O32_GetAtomName(arg1, astring, arg3);
     FreeAsciiString(astring);
     return(rc);
@@ -109,10 +119,18 @@ ATOM WIN32API GlobalAddAtomW(LPCWSTR arg1)
  char *astring;
  ATOM  rc;
 
-    astring = UnicodeToAsciiString((LPWSTR)arg1);
-    dprintf(("KERNEL32:  OS2GlobalAddAtomW %s\n", astring));
-    rc = O32_GlobalAddAtom(astring);
-    FreeAsciiString(astring);
+    if (arg1 < (LPCWSTR)0x10000)
+    {
+        dprintf(("KERNEL32:  OS2GlobalAddAtomW %#4x\n", astring));
+        rc = O32_GlobalAddAtom((char*)arg1);
+    }
+    else
+    {
+        astring = UnicodeToAsciiString((LPWSTR)arg1);
+        dprintf(("KERNEL32:  OS2GlobalAddAtomW %s\n", astring));
+        rc = O32_GlobalAddAtom(astring);
+        FreeAsciiString(astring);
+    }
     return(rc);
 }
 //******************************************************************************
@@ -130,9 +148,14 @@ ATOM WIN32API GlobalFindAtomW( LPCWSTR arg1)
  ATOM  rc;
 
     dprintf(("KERNEL32:  OS2GlobalFindAtomW\n"));
-    astring = UnicodeToAsciiString((LPWSTR)arg1);
-    rc = O32_GlobalFindAtom(astring);
-    FreeAsciiString(astring);
+    if (arg1 < (LPCWSTR)0x10000)
+        rc = O32_GlobalFindAtom((char*)arg1);
+    else
+    {
+        astring = UnicodeToAsciiString((LPWSTR)arg1);
+        rc = O32_GlobalFindAtom(astring);
+        FreeAsciiString(astring);
+    }
     return(rc);
 }
 //******************************************************************************
@@ -150,7 +173,7 @@ UINT WIN32API GlobalGetAtomNameW( ATOM arg1, LPWSTR arg2, int  arg3)
  ATOM  rc;
 
     dprintf(("KERNEL32:  OS2GlobalGetAtomNameW\n"));
-    astring = UnicodeToAsciiString((LPWSTR)arg1);
+    astring = UnicodeToAsciiString((LPWSTR)arg1); /* FIXME! */
     rc = O32_GlobalGetAtomName(arg1, astring, arg3);
     FreeAsciiString(astring);
     return(rc);
