@@ -1,4 +1,4 @@
-/* $Id: pidl.cpp,v 1.4 1999-11-02 20:05:35 phaller Exp $ */
+/* $Id: pidl.cpp,v 1.5 2000-01-08 02:28:54 phaller Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -1660,6 +1660,7 @@ ODINFUNCTION3(BOOL,_ILGetFileSize,LPCITEMIDLIST, pidl,
        if (pOut) StrFormatByteSizeA(dwSize, pOut, uOutSize);
        return dwSize;
    }
+   if (pOut) *pOut = 0x00;
    return 0;
 }
 
