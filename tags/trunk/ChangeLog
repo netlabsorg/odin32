@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.1520 2001-06-15 18:57:26 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1521 2001-06-16 09:24:01 sandervl Exp $ */
+
+ 2001-06-16: Sander van Leeuwen <sandervl@xs4all.nl>
+    - DDRAW:    o Save & Restore FS when calling io_init2
 
  2001-06-15: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Removed yesterday's getControl dialog change. 
