@@ -1,4 +1,4 @@
-/* $Id: OS2DSOUND.H,v 1.4 1999-10-23 23:00:49 sandervl Exp $ */
+/* $Id: OS2DSOUND.H,v 1.5 2000-03-13 12:47:46 sandervl Exp $ */
 
 /*
  * DirectSound main class
@@ -25,19 +25,23 @@ class OS2IDirectSound
     IDirectSoundVtbl  Vtbl;
 
     OS2IDirectSound(const GUID *lpGUID);
-       ~OS2IDirectSound();
+    ~OS2IDirectSound();
 
-            int           Referenced;
-        inline  HRESULT       GetLastError()    { return lastError;    };
+    int           Referenced;
+
+    static  BOOL          fDSExists;
+    inline  HRESULT       GetLastError()    { return lastError;    };
+    inline  DWORD         GetCoopLevel()    { return CoopLevel;    };
 
  private:
 
  protected:
-              HRESULT lastError;
+          HRESULT lastError;
 
           DWORD   speakerConfig;
           DWORD   CoopLevel;
           HWND    hwndClient;
+
 
               // Linked list management
               OS2IDirectSound* next;                   // Next OS2IDirectSound
