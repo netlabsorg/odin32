@@ -1,4 +1,11 @@
- /* $Id: ChangeLog,v 1.649 2000-01-15 14:17:22 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.650 2000-01-15 15:43:26 sandervl Exp $ */
+
+ 2000-01-15: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32\NEW: Fixed scroll repaints (never use GetMessage with window
+                      handle as that can prevent WM_PAINTs from being dispatched)
+                      (may need reworking of Get/PeekMessage instead)
+                      ScrollWindow changes
+	- KERNEL32:   Check for null pointers in lstrcmpA
 
  2000-01-15: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32/NEW: cache menu and caption drawing
