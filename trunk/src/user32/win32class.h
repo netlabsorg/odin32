@@ -1,4 +1,4 @@
-/* $Id: win32class.h,v 1.11 2000-03-18 16:13:38 cbratschi Exp $ */
+/* $Id: win32class.h,v 1.12 2000-06-13 21:26:30 sandervl Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -67,6 +67,8 @@ public:
  static  void   UnregisterClassA(HINSTANCE hinst, LPSTR id);
 
  static Win32WndClass *FindClass(HINSTANCE hinst, LPSTR id);
+ static Win32WndClass *FindClass(HINSTANCE hinst, LPWSTR id);
+
  static  void   DestroyAll();
 
 private:

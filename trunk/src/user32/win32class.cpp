@@ -1,4 +1,4 @@
-/* $Id: win32class.cpp,v 1.16 2000-03-18 16:13:37 cbratschi Exp $ */
+/* $Id: win32class.cpp,v 1.17 2000-06-13 21:26:29 sandervl Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -239,6 +239,25 @@ Win32WndClass *Win32WndClass::FindClass(HINSTANCE hInstance, LPSTR id)
   leaveMutex(OBJTYPE_CLASS);
   dprintf(("Class %X (inst %X) not found!", id, hInstance));
   return(NULL);
+}
+//******************************************************************************
+//******************************************************************************
+Win32WndClass *Win32WndClass::FindClass(HINSTANCE hInstance, LPWSTR id)
+{
+ LPSTR          lpszClassName;
+ Win32WndClass *winclass;
+
+  if(HIWORD(id)) {
+	lpszClassName = UnicodeToAsciiString((LPWSTR)id);
+  }
+  else	lpszClassName = (LPSTR)id;
+
+  winclass = FindClass(hInstance, lpszClassName);
+
+  if(HIWORD(id)) {
+        FreeAsciiString((char *)lpszClassName);
+  }
+  return winclass;
 }
 //******************************************************************************
 //An app can only access another process' class if it's global
