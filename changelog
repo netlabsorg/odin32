@@ -1,4 +1,10 @@
- /* $Id: changelog,v 1.702 2000-02-06 17:29:54 cbratschi Exp $ */
+ /* $Id: changelog,v 1.703 2000-02-06 20:53:03 sandervl Exp $ */
+
+ 2000-02-06: Jens Wiessner <wiessnej@rfi.de>
+	- WINMM: Updated MCI dlls (added version info)
+
+ 2000-02-06: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: Changed GetProcessDword ordinal to 18
 
  2000-02-06: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: ported WinHelpA from WINE
