@@ -1,4 +1,4 @@
-/* $Id: win32wndchild.cpp,v 1.7 2001-06-09 14:50:24 sandervl Exp $ */
+/* $Id: win32wndchild.cpp,v 1.8 2004-04-20 10:11:44 sandervl Exp $ */
 /*
  * Win32 Child/Parent window class for OS/2
  *
@@ -18,7 +18,7 @@
 
 //******************************************************************************
 //******************************************************************************
-ChildWindow::ChildWindow(CRITICAL_SECTION *pLock) 
+ChildWindow::ChildWindow(VMutex *pLock)
 {
   parent     = 0;
   nextchild  = 0;

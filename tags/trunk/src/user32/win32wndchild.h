@@ -1,4 +1,4 @@
-/* $Id: win32wndchild.h,v 1.6 2001-06-09 14:50:24 sandervl Exp $ */
+/* $Id: win32wndchild.h,v 1.7 2004-04-20 10:11:44 sandervl Exp $ */
 /*
  * Win32 Child/Parent window class for OS/2
  *
@@ -15,13 +15,14 @@
 #ifdef OS2_INCLUDED
 #include <win32api.h>
 #endif
+#include <VMutex.h>
 
 #ifdef __cplusplus
 
 class ChildWindow
 {
 public:
- 	 ChildWindow(CRITICAL_SECTION *pLock);
+ 	 ChildWindow(VMutex *pLock);
 virtual ~ChildWindow();
 
 ChildWindow   *getFirstChild()                  { return children; };
@@ -36,7 +37,7 @@ protected:
 
 	parent = newParent;
 	return oldparent;
- }                   
+ }
 
 	BOOL   addChild(ChildWindow *child);
 	BOOL   removeChild(ChildWindow *child);
@@ -46,10 +47,10 @@ protected:
 	BOOL   destroyChildren();
 
 private:
-	 void  Lock()           { EnterCriticalSection(pLockChild); };
-	 void  Unlock()         { LeaveCriticalSection(pLockChild); };
- 
-   CRITICAL_SECTION *pLockChild;
+	 void  Lock()           { pLockChild->enter(); };
+	 void  Unlock()         { pLockChild->leave(); };
+
+   VMutex *pLockChild;
 
    ChildWindow *parent;		//GWL_HWNDPARENT
    ChildWindow *children;	//linked list of children of this window

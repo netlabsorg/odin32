@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.157 2004-01-11 12:03:20 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.158 2004-04-20 10:11:44 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -468,7 +468,7 @@ SCROLLBAR_INFO *horzScrollInfo;
 Win32WndClass  *windowClass;
 
 static GenericObject *windows;
-static CRITICAL_SECTION  critsect;
+static VMutex         critsect;
 
 private:
 #ifndef OS2_INCLUDED

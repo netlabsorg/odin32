@@ -1,4 +1,4 @@
-/* $Id: win32class.h,v 1.17 2002-12-30 15:49:00 sandervl Exp $ */
+/* $Id: win32class.h,v 1.18 2004-04-20 10:11:43 sandervl Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -111,7 +111,7 @@ private:
  ULONG          processId;
 
  static GenericObject *wndclasses;
- static CRITICAL_SECTION critsect;
+ static VMutex         critsect;
 };
 
 ATOM WIN32API InternalRegisterClass(LPSTR lpszClassName, DWORD dwStyle,
