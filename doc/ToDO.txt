@@ -1,4 +1,4 @@
-/* $Id: ToDO.txt,v 1.9 2000-10-01 21:25:49 phaller Exp $ */
+/* $Id: ToDO.txt,v 1.10 2000-11-15 20:33:24 sandervl Exp $ */
 
 To Do list for ODIN:
 
@@ -29,11 +29,16 @@ SvL             Remove GPI32 calls from the original FS: macros and replace
                 them with ODINFUNCTION wrappers. Internally call to ODIN_xxx
                 GPI functions to get much better performance.
 
+NOONE           WINSPOOL: Implement remaining apis and complete existing
+                          The Win32 printer api resembles the PM spool API quite a lot!
+
 NOONE           KERNEL32: Build fake PE headers for odin dlls (dll handle must be pointer to header)
                           (some applications use the handles as pointers)
-
+                        (partially done)
+                        
 NOONE           USER32: Fix LoadImage to resize icons, cursors or bitmaps
                         to the specified dimensions (if required)
+                        (partially done)
 
 NOONE           WINMM: wave recording
 
@@ -45,6 +50,7 @@ NOONE           WINMM: Fix and finish MIDI in/out (using RTMIDI)
 NOONE	        KERNEL32: Async file io
 
 NOONE           KERNEL32: Vio support for console applications
+                        (partially done)
 
 NOONE           WSOCK32: Winsock 2 implementation
 
