@@ -1,4 +1,4 @@
-/* $Id: ddraw2d.cpp,v 1.2 2002-12-04 15:21:41 sandervl Exp $ */
+/* $Id: ddraw2d.cpp,v 1.3 2002-12-04 16:45:06 sandervl Exp $ */
 
 /*
  * DX Draw base class implementation
@@ -1892,7 +1892,7 @@ HRESULT WIN32API DrawSetCooperativeLevel(THIS This, HWND hwndClient, DWORD dwFla
 	if(!(dwFlags & DDSCL_FULLSCREEN)) return DDERR_INVALIDPARAMS;
     }
     me->hwndClient = hwndClient;
-    if(hwndClient) {
+    if(hwndClient && (dwFlags & DDSCL_FULLSCREEN)) {
         //Changing the size of the win32 window in SetCooperativeLevel can
         //fail if this happens during WM_ADJUSTWINDOWPOS
         //NOTE: This is not a good solution, but a proper fix is more difficult
