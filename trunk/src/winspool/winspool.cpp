@@ -1,4 +1,4 @@
-/* $Id: winspool.cpp,v 1.6 2001-04-04 09:02:16 sandervl Exp $ */
+/* $Id: winspool.cpp,v 1.7 2001-07-15 14:35:51 sandervl Exp $ */
 
 /*
  *
@@ -2012,7 +2012,7 @@ ODINFUNCTION4(HANDLE, FindFirstPrinterChangeNotification,
               HANDLE, hPrinter,
               DWORD, fdwFlags,
               DWORD, fdwOptions,
-              LPVOID, pPrinterNotifyOptions)
+              LPPRINTER_NOTIFY_INFO, pPrinterNotifyOptions)
 {
   dprintf(("WINSPOOL: FindFirstPrinterChangeNotification not implemented\n"));
   return (NULL);
@@ -2040,7 +2040,7 @@ ODINFUNCTION4(BOOL, FindNextPrinterChangeNotification,
               HANDLE, hChange,
               PDWORD, pdwChange,
               LPVOID, pPrinterNotifyOptions,
-              LPPRINTER_NOTIFY_INFO, ppPrinterNotifyInfo)
+              LPPRINTER_NOTIFY_INFO *, ppPrinterNotifyInfo)
 {
   dprintf(("WINSPOOL: FindNextPrinterChangeNotification not implemented\n"));
   return (FALSE);
