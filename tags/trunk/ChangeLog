@@ -1,4 +1,11 @@
- /* $Id: ChangeLog,v 1.165 1999-09-01 18:51:01 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.166 1999-09-01 19:12:12 phaller Exp $ */
+
+ 99-09-01: Patrick Haller <phaller@gmx.net>
+	- *:	Cleanup of include files. Warning: OS/2's BOOL is ULONG, WIN32 is INT.
+		Causes C++ compilers to complain here and there. Plus many WINE prototypes
+		are just plain wrong.
+		This change should help porting shell32/new.
+
 
  99-09-01: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: Fixed GetWindowDC (Freecell 'Cards Left' string drawn

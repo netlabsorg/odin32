@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.15 1999-08-24 15:57:27 cbratschi Exp $ */
+/* $Id: user32.cpp,v 1.16 1999-09-01 19:12:21 phaller Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -865,7 +865,7 @@ BOOL WIN32API EnumWindows(WNDENUMPROC lpfn, LPARAM lParam)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API ExcludeUpdateRgn( HDC arg1, HWND  arg2)
+INT WIN32API ExcludeUpdateRgn( HDC arg1, HWND  arg2)
 {
 #ifdef DEBUG
     WriteLog("USER32:  ExcludeUpdateRgn\n");
@@ -2238,7 +2238,8 @@ UINT WIN32API GetKBCodePage(VOID)
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
 
-BOOL WIN32API GetKeyboardLayoutNameA(LPTSTR pwszKLID)
+// @@@PH Win32 BOOL's are casted to INTs
+INT WIN32API GetKeyboardLayoutNameA(LPTSTR pwszKLID)
 {
   dprintf(("USER32:GetKeyboardLayoutNameA (%08x) not implemented.",
          pwszKLID));
@@ -2262,7 +2263,8 @@ BOOL WIN32API GetKeyboardLayoutNameA(LPTSTR pwszKLID)
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
 
-BOOL WIN32API GetKeyboardLayoutNameW(LPWSTR pwszKLID)
+// @@@PH Win32 BOOL's are casted to INTs
+INT WIN32API GetKeyboardLayoutNameW(LPWSTR pwszKLID)
 {
   dprintf(("USER32:GetKeyboardLayoutNameW (%08x) not implemented.",
          pwszKLID));

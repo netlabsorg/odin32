@@ -1,4 +1,4 @@
-/* $Id: windef.h,v 1.7 1999-08-30 22:15:20 sandervl Exp $ */
+/* $Id: windef.h,v 1.8 1999-09-01 19:12:14 phaller Exp $ */
 
 /*
  * Basic types definitions
@@ -177,7 +177,7 @@ typedef unsigned char   UCHAR;
 /* Some systems might have wchar_t, but we really need 16 bit characters */
 typedef unsigned short  WCHAR;
 typedef unsigned short  BOOL16;
-typedef int             BOOL;
+typedef unsigned long   BOOL;
 typedef double          DATE;
 typedef long            LONG_PTR;
 typedef unsigned long   ULONG_PTR;

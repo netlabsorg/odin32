@@ -1,4 +1,4 @@
-/* $Id: shellapi.h,v 1.2 1999-06-24 19:27:48 phaller Exp $ */
+/* $Id: shellapi.h,v 1.3 1999-09-01 19:12:13 phaller Exp $ */
 
 #ifndef _WINE_SHELLAPI_H
 #define _WINE_SHELLAPI_H
@@ -11,7 +11,7 @@
  * DragObject
  */
 
-typedef struct _DRAGINFOA 
+typedef struct _DRAGINFOA
 {	UINT uSize;
 	POINT pt;
 	BOOL fNC;
@@ -19,7 +19,7 @@ typedef struct _DRAGINFOA
 	DWORD grfKeyState;
 } DRAGINFOA, * LPDRAGINFOA;
 
-typedef struct _DRAGINFOW 
+typedef struct _DRAGINFOW
 {	UINT uSize;
 	POINT pt;
 	BOOL fNC;
@@ -78,7 +78,7 @@ BOOL	WINAPI DragQueryPoint(HDROP hDrop, POINT *p);
 #define ABE_RIGHT		2
 #define ABE_BOTTOM		3
 
-typedef struct _AppBarData 
+typedef struct _AppBarData
 {	DWORD	cbSize;
 	HWND	hWnd;
 	UINT	uCallbackMessage;
@@ -112,7 +112,7 @@ typedef struct _AppBarData
 #define SHGFI_SELECTED          0x000010000     /* show icon in selected state */
 #define SHGFI_ATTR_SPECIFIED    0x000020000     /* get only specified attributes */
 
-typedef struct tagSHFILEINFOA 
+typedef struct tagSHFILEINFOA
 {	HICON	hIcon;			/* icon */
 	int	iIcon;			/* icon index */
 	DWORD	dwAttributes;		/* SFGAO_ flags */
@@ -120,7 +120,7 @@ typedef struct tagSHFILEINFOA
 	CHAR	szTypeName[80];		/* type name */
 } SHFILEINFOA;
 
-typedef struct tagSHFILEINFOW 
+typedef struct tagSHFILEINFOW
 {	HICON	hIcon;			/* icon */
 	int	iIcon;			/* icon index */
 	DWORD	dwAttributes;		/* SFGAO_ flags */
@@ -146,21 +146,21 @@ DWORD	WINAPI SHGetFileInfoW(LPCWSTR,DWORD,SHFILEINFOW*,UINT,UINT);
 
 #define FOF_MULTIDESTFILES         0x0001
 #define FOF_CONFIRMMOUSE           0x0002
-#define FOF_SILENT                 0x0004  
+#define FOF_SILENT                 0x0004
 #define FOF_RENAMEONCOLLISION      0x0008
-#define FOF_NOCONFIRMATION         0x0010  
-#define FOF_WANTMAPPINGHANDLE      0x0020  
+#define FOF_NOCONFIRMATION         0x0010
+#define FOF_WANTMAPPINGHANDLE      0x0020
 #define FOF_ALLOWUNDO              0x0040
-#define FOF_FILESONLY              0x0080  
-#define FOF_SIMPLEPROGRESS         0x0100  
-#define FOF_NOCONFIRMMKDIR         0x0200  
-#define FOF_NOERRORUI              0x0400  
+#define FOF_FILESONLY              0x0080
+#define FOF_SIMPLEPROGRESS         0x0100
+#define FOF_NOCONFIRMMKDIR         0x0200
+#define FOF_NOERRORUI              0x0400
 
 typedef WORD FILEOP_FLAGS;
 
-#define PO_DELETE       0x0013  
-#define PO_RENAME       0x0014  
-#define PO_PORTCHANGE   0x0020  
+#define PO_DELETE       0x0013
+#define PO_RENAME       0x0014
+#define PO_PORTCHANGE   0x0020
 
 typedef WORD PRINTEROP_FLAGS;
 
@@ -186,7 +186,7 @@ typedef struct _SHFILEOPSTRUCTW
   LPCWSTR         lpszProgressTitle;
 } SHFILEOPSTRUCTW, *LPSHFILEOPSTRUCTW;
 
-DWORD	WIN32API SHFileOperationA (LPSHFILEOPSTRUCTA lpFileOp);  
+DWORD	WIN32API SHFileOperationA (LPSHFILEOPSTRUCTA lpFileOp);
 DWORD	WIN32API SHFileOperationW (LPSHFILEOPSTRUCTW lpFileOp);
 
 
@@ -299,8 +299,8 @@ HICON WINAPI ExtractIconExAW(LPCVOID, INT, HICON *, HICON *, UINT );
 HINSTANCE WINAPI FindExecutableA(LPCSTR,LPCSTR,LPSTR);
 HINSTANCE WINAPI FindExecutableW(LPCWSTR,LPCWSTR,LPWSTR);
 
-BOOL      WINAPI ShellAboutA(HWND,LPCSTR,LPCSTR,HICON);
-BOOL      WINAPI ShellAboutW(HWND,LPCWSTR,LPCWSTR,HICON);
+INT WINAPI ShellAboutA(HWND,LPCSTR,LPCSTR,HICON);
+INT WINAPI ShellAboutW(HWND,LPCWSTR,LPCWSTR,HICON);
 
 #pragma pack(4)
 

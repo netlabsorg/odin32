@@ -1,4 +1,4 @@
-/* $Id: hmdevice.h,v 1.8 1999-08-25 14:27:06 sandervl Exp $ */
+/* $Id: hmdevice.h,v 1.9 1999-09-01 19:12:17 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -287,7 +287,7 @@ public:
  *****************************************************************************/
 
                             /* register a new device with the handle manager */
-DWORD  HMDeviceRegister(PSZ             pszDeviceName,
+DWORD  HMDeviceRegister(LPSTR           pszDeviceName,
                         HMDeviceHandler *pDeviceHandler);
 
 

@@ -1,4 +1,4 @@
-/* $Id: dialog.cpp,v 1.6 1999-07-04 19:02:38 sandervl Exp $ */
+/* $Id: dialog.cpp,v 1.7 1999-09-01 19:12:18 phaller Exp $ */
 
 /*
  * Win32 dialog API functions for OS/2
@@ -127,12 +127,12 @@ HWND WIN32API CreateDialogIndirectParamW(HINSTANCE hinst,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API DialogBoxIndirectParamA(HINSTANCE hinst,
+INT WIN32API DialogBoxIndirectParamA(HINSTANCE hinst,
                                       DLGTEMPLATE *dlgtemplate,
                                       HWND hwndParent, DLGPROC dlgproc,
                                       LPARAM lParamInit)
 {
- BOOL rc;
+ INT rc;
  DLGTEMPLATE *os2dlg;
 
     os2dlg = ConvertWin32DlgTemplate(dlgtemplate);
@@ -146,12 +146,12 @@ BOOL WIN32API DialogBoxIndirectParamA(HINSTANCE hinst,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API DialogBoxIndirectParamW(HINSTANCE hinst,
+INT WIN32API DialogBoxIndirectParamW(HINSTANCE hinst,
                                       DLGTEMPLATE *dlgtemplate,
                                       HWND hwndParent, DLGPROC dlgproc,
                                       LPARAM lParamInit)
 {
- BOOL rc;
+ INT rc;
  DLGTEMPLATE *os2dlg;
 
     os2dlg = ConvertWin32DlgTemplate(dlgtemplate);
