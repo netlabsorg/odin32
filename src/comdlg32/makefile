@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 1999-06-27 21:58:19 sandervl Exp $
+# $Id: makefile,v 1.5 1999-08-09 18:34:38 achimha Exp $
 
 #
 # PD-Win32 API
@@ -26,9 +26,10 @@ all: $(TARGET).dll $(TARGET).lib
 
 
 $(TARGET).dll: $(OBJS) $(TARGET).def
-	$(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
+	$(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) sbsstub.obj $(TARGET).def \
               $(PDWIN32_LIB)/pmwinx.lib $(PDWIN32_LIB)/kernel32.lib \
-              $(PDWIN32_LIB)/user32.lib
+              $(PDWIN32_LIB)/user32.lib $(PDWIN32_LIB)/odincrt.lib \
+              OS2386.LIB
         $(CP) $@ $(PDWIN32_BIN)
 
 

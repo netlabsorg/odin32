@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 1999-07-22 08:23:37 sandervl Exp $
+# $Id: makefile,v 1.10 1999-08-09 18:33:00 achimha Exp $
 #
 # PD-Win32 API
 #
@@ -27,13 +27,16 @@ OBJS =  comctl32.obj initterm.obj progress.obj comctl32undoc.obj imagelist.obj \
 
 all: $(TARGET).dll $(TARGET).lib
 
+rsrc.res: rsrc.rc
+      rc -r rsrc.rc rsrc.res
+
 
 $(TARGET).dll: $(OBJS) $(TARGET).def
-        $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
+        $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) sbsstub.obj $(TARGET).def \
               $(PDWIN32_LIB)/kernel32.lib \
               $(PDWIN32_LIB)/gdi32.lib \
-              $(PDWIN32_LIB)/user32.lib
-              rc -r rsrc.rc rsrc.res
+              $(PDWIN32_LIB)/user32.lib  $(PDWIN32_LIB)/odincrt.lib \
+              OS2386.LIB
               rc rsrc.res comctl32.dll
         $(CP) $@ $(PDWIN32_BIN)
 
