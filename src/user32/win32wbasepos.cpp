@@ -1,4 +1,4 @@
-/* $Id: win32wbasepos.cpp,v 1.1 1999-10-13 14:24:49 sandervl Exp $ */
+/* $Id: win32wbasepos.cpp,v 1.2 1999-10-16 14:51:43 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (nonclient/position methods)
  *
@@ -276,8 +276,6 @@ LONG Win32BaseWindow::NCHandleCalcSize(WPARAM wParam, NCCALCSIZE_PARAMS *ncsize)
         if (getStyle() & CS_VREDRAW) result |= WVR_VREDRAW;
         if (getStyle() & CS_HREDRAW) result |= WVR_HREDRAW;
 
-        if(!isFrameWindow())  return result;
-
 //TODO: Wine calculates new size of client area even when window is iconic (client edges)
         if(!(getStyle() & (WS_MINIMIZE | WS_ICONIC)))
         {
@@ -294,7 +292,7 @@ LONG Win32BaseWindow::NCHandleCalcSize(WPARAM wParam, NCCALCSIZE_PARAMS *ncsize)
 #endif
         }
 #if 0
-//TODO: Docs say app should return 0 when fCalcValidRects == 0, Wine doesn't do this
+//TODO: Docs say app should return 0 when fCalcValidRects == 0; Wine doesn't do this
         if(wParam == 0) //fCalcValidRects
             return 0;
 #endif
