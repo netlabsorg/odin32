@@ -1,4 +1,4 @@
-; $Id: msvcrt.def,v 1.14 2000-01-03 10:26:49 sandervl Exp $
+; $Id: msvcrt.def,v 1.15 2000-02-05 02:03:45 sandervl Exp $
 
 ;
 ; Based on Windows 98 : MSVCRT.DLL (v6.00.8397.0)
@@ -280,7 +280,7 @@ EXPORTS
     _hypot			= _CRTDLL__hypot		@269
     _i64toa			= _MSVCRT__i64toa		@270
     _i64tow			= _MSVCRT__i64tow		@271
-    _initterm			= _DLL_InitTerm			@272
+    _initterm                   = __initterm@12		        @272
     _inp			= _MSVCRT__inp			@273
     _inpd			= _MSVCRT__inpd			@274
     _inpw			= _MSVCRT__inpw			@275

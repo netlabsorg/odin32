@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 1999-12-29 18:49:01 sandervl Exp $
+# $Id: makefile,v 1.10 2000-02-05 02:03:45 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -25,9 +25,9 @@ TARGET = msvcrt
 TARGET20 = msvcrt20
 TARGET40 = msvcrt40
 
-OBJS   =  msvcrt.obj initterm.obj resource.obj
-OBJS20 =  msvcrt.obj initterm.obj resource20.obj
-OBJS40 =  msvcrt.obj initterm.obj resource40.obj
+OBJS   =  msvcrt.obj resource.obj $(PDWIN32_LIB)/dllentry.obj
+OBJS20 =  msvcrt.obj resource20.obj $(PDWIN32_LIB)/dllentry.obj
+OBJS40 =  msvcrt.obj resource40.obj $(PDWIN32_LIB)/dllentry.obj
 
 all: $(TARGET).dll $(TARGET).lib $(TARGET20).dll $(TARGET20).lib \
      $(TARGET40).dll $(TARGET40).lib
@@ -35,22 +35,22 @@ all: $(TARGET).dll $(TARGET).lib $(TARGET20).dll $(TARGET20).lib \
 
 $(TARGET).dll: $(OBJS) $(TARGET).def
 	$(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
-              $(PDWIN32_LIB)/pmwinx.lib $(PDWIN32_LIB)/kernel32.lib \
-              $(PDWIN32_LIB)/crtdll.lib \
+              $(PDWIN32_LIB)/kernel32.lib \
+              $(PDWIN32_LIB)/crtdll.lib  \
 	      $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
 	$(CP) $@ $(PDWIN32_BIN)
 
 $(TARGET20).dll: $(OBJS20) $(TARGET20).def
 	$(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS20) $(TARGET20).def \
-              $(PDWIN32_LIB)/pmwinx.lib $(PDWIN32_LIB)/kernel32.lib \
+              $(PDWIN32_LIB)/kernel32.lib \
               $(PDWIN32_LIB)/crtdll.lib \
 	      $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
 	$(CP) $@ $(PDWIN32_BIN)
 
 $(TARGET40).dll: $(OBJS40) $(TARGET40).def
 	$(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS40) $(TARGET40).def \
-              $(PDWIN32_LIB)/pmwinx.lib $(PDWIN32_LIB)/kernel32.lib \
-              $(PDWIN32_LIB)/crtdll.lib \
+              $(PDWIN32_LIB)/kernel32.lib \
+              $(PDWIN32_LIB)/crtdll.lib  \
 	      $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
 	$(CP) $@ $(PDWIN32_BIN)
 
@@ -82,7 +82,6 @@ resource40.asm: msvcrt40.rc
 
 resource40.obj: resource40.asm
 
-initterm.obj: initterm.cpp
 msvcrt.obj: msvcrt.cpp
 
 clean:
