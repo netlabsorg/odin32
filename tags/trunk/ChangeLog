@@ -1,4 +1,10 @@
-/* $Id: ChangeLog,v 1.1652 2001-08-18 03:51:47 phaller Exp $ */
+/* $Id: ChangeLog,v 1.1653 2001-08-19 01:32:00 bird Exp $ */
+
+ 2001-08-19: knut st. osmundsen <kosmunds@csc.com>
+    - Win32k.lib:
+                o OPEN_FLAGS_NOINHERIT when opening win32k. This is hopefully
+                  a temporary fix on the missing env. mem. lock cleaning for
+                  parent/child.
 
  2001-08-16: Patrick Haller <patrick.haller@innotek.de>
     - GDI32:    o Optimization for dibsect::findSection()
