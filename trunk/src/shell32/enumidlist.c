@@ -1,4 +1,4 @@
-/* $Id: enumidlist.c,v 1.5 2002-06-07 08:21:43 sandervl Exp $ */
+/* $Id: enumidlist.c,v 1.6 2002-08-22 14:20:44 sandervl Exp $ */
 /*
  *	IEnumIDList
  *
@@ -91,9 +91,12 @@ static BOOL AddToEnumList(
 /**************************************************************************
  *  CreateFolderEnumList()
  */
+#define __WIN32OS2__TEST_TURNED_OFF
+
 #ifdef __WIN32OS2__TEST_TURNED_OFF
 //CB: Special version to speed up retrieving files in a directory
-
+//SvL: Works well and is twice as fast. Quite important when called way too
+//     many times
 /**************************************************************************
  *  AddToEnumList()
  */
@@ -209,7 +212,9 @@ static BOOL CreateFolderEnumList(
                     FindClose(hFile);
                     return FALSE;
                   }
-                } else if (dwFlags & SHCONTF_NONFOLDERS)
+                } 
+                else 
+                if (dwFlags & SHCONTF_NONFOLDERS)
                 { //file
                   pidl = _ILCreateValue(&stffile[x]);
                   if (pidl && AddToEnumList2((IEnumIDList*)This, pidl))
@@ -220,7 +225,9 @@ static BOOL CreateFolderEnumList(
                 }
               }
               count = MULTICOUNT;
-            } while(FindNextFileMultiA(hFile,stffile,&count));
+            } 
+            while(FindNextFileMultiA(hFile,stffile,&count));
+
             FindClose(hFile);
             UniteEnumLists((IEnumIDList*)This);
           }
@@ -513,6 +520,7 @@ IEnumIDList * IEnumIDList_Constructor(
 	    if (lpeidl)
 	    {
 	      HeapFree(GetProcessHeap(),0,lpeidl);
+              lpeidl = NULL;
 	    }
 	  }
 	}
