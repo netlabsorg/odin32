@@ -1,4 +1,4 @@
-; $Id: ntdll.def,v 1.22 1999-11-09 09:54:46 phaller Exp $
+; $Id: ntdll.def,v 1.23 1999-11-10 14:14:51 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is NT4.0's NTDLL.DLL
@@ -21,8 +21,6 @@ IMPORTS
     _lstrncmpiW@12                   =  KERNEL32.lstrncmpiW
     HEAP_strdupW                     =  KERNEL32.HEAP_strdupW
     HEAP_strdupWtoA                  =  KERNEL32.HEAP_strdupWtoA
-
-    _wvsnprintfA@16                  =  USER32.wvsnprintfA
 
 EXPORTS
 
