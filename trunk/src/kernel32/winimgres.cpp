@@ -1,4 +1,4 @@
-/* $Id: winimgres.cpp,v 1.24 1999-10-19 12:51:25 sandervl Exp $ */
+/* $Id: winimgres.cpp,v 1.25 1999-10-26 11:15:33 sandervl Exp $ */
 
 /*
  * Win32 PE Image class (resource methods)
@@ -25,7 +25,6 @@
 #include <winimagepeldr.h>
 #include <winimagelx.h>
 #include <winres.h>
-#include <winresmenu.h>
 #include <unicode.h>
 #include <heapstring.h>
 #include "pefile.h"
@@ -305,15 +304,7 @@ HRSRC Win32ImageBase::findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang)
     }
     else
     {
-        switch(type) {
-        case NTRT_MENU:
-            res = new Win32MenuRes(this, id, type, pData->Size, resdata);
-            break;
-        default:
-            res = new Win32Resource(this, id, type, pData->Size, resdata);
-            break;
-        }
-
+       	res = new Win32Resource(this, id, type, pData->Size, resdata);
     }
 
     return (HRSRC) res;
