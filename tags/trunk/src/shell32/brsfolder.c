@@ -1,4 +1,4 @@
-/* $Id: brsfolder.c,v 1.6 2001-10-10 22:56:08 phaller Exp $ */
+/* $Id: brsfolder.c,v 1.7 2002-02-14 12:10:07 sandervl Exp $ */
 
 /*
  * Win32 compatibility SHELL32 BRSFOLDER for OS/2
@@ -337,8 +337,7 @@ static BOOL WINAPI BrsFolderDlgProc( HWND hWnd, UINT msg, WPARAM wParam,
  * SHBrowseForFolderA [SHELL32.209]
  *
  */
-ODINFUNCTION1(LPITEMIDLIST, SHBrowseForFolderA,
-              LPBROWSEINFOA, lpbi)
+LPITEMIDLIST WIN32API SHBrowseForFolderA(LPBROWSEINFOA lpbi)
 {
 	TRACE("(%p{lpszTitle=%s,owner=%i})\n", 
 	      lpbi, debugstr_a(lpbi->lpszTitle), lpbi->hwndOwner);

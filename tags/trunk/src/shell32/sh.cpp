@@ -1,4 +1,4 @@
-/* $Id: sh.cpp,v 1.12 2001-04-28 13:33:45 sandervl Exp $ */
+/* $Id: sh.cpp,v 1.13 2002-02-14 12:10:09 sandervl Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -60,8 +60,7 @@ static LPUNKNOWN SHELL32_IExplorerInterface=0;
  * Author    : Patrick Haller [Tue, 1999/06/09 20:02]
  *****************************************************************************/
 
-ODINFUNCTION1(LPITEMIDLIST, SHBrowseForFolder,
-              LPBROWSEINFOA, lpbi)
+LPITEMIDLIST WIN32API SHBrowseForFolder(LPBROWSEINFOA lpbi)
 {
   dprintf(("SHELL32: SHBrowseForFolder not implemented.\n"));
 
@@ -83,8 +82,7 @@ ODINFUNCTION1(LPITEMIDLIST, SHBrowseForFolder,
  * Author    : Patrick Haller [Tue, 1999/06/09 20:02]
  *****************************************************************************/
 
-ODINFUNCTION1(LPITEMIDLIST, SHBrowseForFolderW,
-              LPBROWSEINFOA, lpbi)
+LPITEMIDLIST WIN32API SHBrowseForFolderW(LPBROWSEINFOA lpbi)
 {
   dprintf(("SHELL32: SHBrowseForFolderW not implemented.\n"));
 
@@ -104,10 +102,7 @@ ODINFUNCTION1(LPITEMIDLIST, SHBrowseForFolderW,
  * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
  *****************************************************************************/
 
-ODINFUNCTION3(DWORD, SHEmptyRecycleBinA,
-              DWORD, x1,
-              DWORD, x2,
-              DWORD, x3)
+DWORD WIN32API SHEmptyRecycleBinA(DWORD x1, DWORD x2, DWORD x3)
 {
   dprintf(("SHELL32: SHEmptyRecycleBinA not implemented.\n"));
 
@@ -127,10 +122,7 @@ ODINFUNCTION3(DWORD, SHEmptyRecycleBinA,
  * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
  *****************************************************************************/
 
-ODINFUNCTION3(DWORD, SHEmptyRecycleBinW,
-              DWORD, x1,
-              DWORD, x2,
-              DWORD, x3)
+DWORD WIN32API SHEmptyRecycleBinW(DWORD x1, DWORD x2, DWORD x3)
 {
   dprintf(("SHELL32: SHEmptyRecycleBinW not implemented.\n"));
 
@@ -150,11 +142,7 @@ ODINFUNCTION3(DWORD, SHEmptyRecycleBinW,
  * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
  *****************************************************************************/
 
-ODINFUNCTION4(DWORD, SHFormatDrive,
-              DWORD, x1,
-              DWORD, x2,
-              DWORD, x3,
-              DWORD, x4)
+DWORD WIN32API SHFormatDrive(DWORD x1, DWORD x2, DWORD x3, DWORD x4)
 {
   dprintf(("SHELL32: SHFormatDrive not implemented.\n"));
 
@@ -174,8 +162,7 @@ ODINFUNCTION4(DWORD, SHFormatDrive,
  * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
  *****************************************************************************/
 
-ODINFUNCTION1(DWORD, SHFreeNameMappings,
-              DWORD, x1)
+DWORD WIN32API SHFreeNameMappings(DWORD x1)
 {
   dprintf(("SHELL32: SHFreeNameMappings not implemented.\n"));
 
@@ -195,12 +182,8 @@ ODINFUNCTION1(DWORD, SHFreeNameMappings,
  * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
  *****************************************************************************/
 
-ODINFUNCTION5(DWORD, SHGetNewLinkInfo,
-              DWORD, x1,
-              DWORD, x2,
-              DWORD, x3,
-              DWORD, x4,
-              DWORD, x5)
+DWORD WIN32API SHGetNewLinkInfo(DWORD x1, DWORD x2, DWORD x3, DWORD x4,
+                                DWORD x5)
 {
   dprintf(("SHELL32: SHGetNewLinkInfo not implemented.\n"));
 
@@ -220,11 +203,8 @@ ODINFUNCTION5(DWORD, SHGetNewLinkInfo,
  * Author    : Patrick Haller [Tue, 1999/06/09 20:02]
  *****************************************************************************/
 
-ODINFUNCTION4(DWORD, SHHelpShortcuts_RunDLLA,
-              DWORD, x1,
-              DWORD, x2,
-              DWORD, x3,
-              DWORD, x4)
+DWORD WIN32API SHHelpShortcuts_RunDLLA(DWORD x1, DWORD x2, DWORD x3,
+                                       DWORD x4)
 {
   dprintf(("SHELL32: SHHelpShortcuts_RunDLLA not implemented.\n"));
 
@@ -244,11 +224,8 @@ ODINFUNCTION4(DWORD, SHHelpShortcuts_RunDLLA,
  * Author    : Patrick Haller [Tue, 1999/06/09 20:02]
  *****************************************************************************/
 
-ODINFUNCTION4(DWORD, SHHelpShortcuts_RunDLLW,
-              DWORD, x1,
-              DWORD, x2,
-              DWORD, x3,
-              DWORD, x4)
+DWORD WIN32API SHHelpShortcuts_RunDLLW(DWORD x1, DWORD x2, DWORD x3,
+                                       DWORD x4)
 {
   dprintf(("SHELL32: SHHelpShortcuts_RunDLLW not implemented.\n"));
 
@@ -268,9 +245,7 @@ ODINFUNCTION4(DWORD, SHHelpShortcuts_RunDLLW,
  * Author    : Patrick Haller [Tue, 1999/06/09 20:02]
  *****************************************************************************/
 
-ODINFUNCTION2(DWORD, SHQueryRecycleBinA,
-              DWORD, x1,
-              DWORD, x2)
+DWORD WIN32API SHQueryRecycleBinA(DWORD x1, DWORD x2)
 {
   dprintf(("SHELL32: SHQueryRecycleBinA not implemented.\n"));
 
@@ -290,9 +265,7 @@ ODINFUNCTION2(DWORD, SHQueryRecycleBinA,
  * Author    : Patrick Haller [Tue, 1999/06/09 20:02]
  *****************************************************************************/
 
-ODINFUNCTION2(DWORD, SHQueryRecycleBinW,
-              DWORD, x1,
-              DWORD, x2)
+DWORD WIN32API SHQueryRecycleBinW(DWORD x1, DWORD x2)
 {
   dprintf(("SHELL32: SHQueryRecycleBinW not implemented.\n"));
 
@@ -312,7 +285,7 @@ ODINFUNCTION2(DWORD, SHQueryRecycleBinW,
  * Author    : Patrick Haller [Tue, 1999/06/09 20:02]
  *****************************************************************************/
 
-ODINFUNCTION0(DWORD, SHUpdateRecycleBinIcon)
+DWORD WIN32API SHUpdateRecycleBinIcon()
 {
   dprintf(("SHELL32: SHUpdateRecycleBinIcon() not implemented.\n"));
 
