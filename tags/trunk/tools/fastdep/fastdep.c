@@ -1,4 +1,4 @@
-/* $Id: fastdep.c,v 1.8 2000-03-16 15:27:08 bird Exp $
+/* $Id: fastdep.c,v 1.9 2000-03-16 21:10:11 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
@@ -22,6 +22,18 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+
+#include "avl.h"
+
+#ifndef INLINE
+#   if defined(__IBMC__)
+#       define INLINE _Inline
+#   elif defined(__IBMCPP__)
+#       define INLINE inline
+#   else
+#       error "unknown compiler - inline keyword unknown!"
+#   endif
+#endif
 
 /*
  * This following section is used while testing fastdep.
@@ -85,7 +97,7 @@ typedef struct _Options
 /*
  * Language specific analysis functions type.
  */
-typedef int ( _FNLANG)  (const char *pszFilename, FILE *phFile,
+typedef int ( _FNLANG)  (const char *pszFilename, void *pvFile,
                          BOOL fHeader, POPTIONS pOptions);
 typedef _FNLANG    *PFNLANG;
 
@@ -116,16 +128,23 @@ typedef struct _DepRule
 } DEPRULE, *PDEPRULE;
 
 
+/**
+ * Filename cache entry.
+ */
+#define FCACHEENTRY     AVLNODECORE
+#define PFCACHEENTRY    PAVLNODECORE
+
+
 /*******************************************************************************
 *   Internal Functions                                                         *
 *******************************************************************************/
 static void syntax(void);
 static int makeDependent(const char *pszFilename, POPTIONS pOptions);
 
-int langC_CPP(const char *pszFilename, FILE *phFile, BOOL fHeader, POPTIONS pOptions);
-int langAsm(const char *pszFilename, FILE *phFile, BOOL fHeader, POPTIONS pOptions);
-int langRC(const char *pszFilename, FILE *phFile, BOOL fHeader, POPTIONS pOptions);
-int langCOBOL(const char *pszFilename, FILE *phFile, BOOL fHeader, POPTIONS pOptions);
+int langC_CPP(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOptions);
+int langAsm(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOptions);
+int langRC(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOptions);
+int langCOBOL(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOptions);
 
 
 /* string operations */
@@ -138,8 +157,12 @@ char *fileName(const char *pszFilename, char *pszBuffer);
 char *fileNameNoExt(const char *pszFilename, char *pszBuffer);
 char *fileExt(const char *pszFilename, char *pszBuffer);
 
+/* filecache operations */
+static BOOL filecacheAdd(const char *pszFilename);
+static BOOL filecacheFind(const char *pszFilename);
+
 /* pathlist operations */
-char *pathlistFindFile(const char *pszPathList, const char *pszFilename, char *pszBuffer);
+static char *pathlistFindFile(const char *pszPathList, const char *pszFilename, char *pszBuffer);
 
 /* word operations */
 static char *findEndOfWord(char *psz);
@@ -151,13 +174,14 @@ static char *findStartOfWord(char *psz, const char *pszStart);
 static signed long fsize(FILE *phFile);
 
 /* text helpers */
-static char *trim(char *psz);
-static char *trimR(char *psz);
+INLINE char *trim(char *psz);
+INLINE char *trimR(char *psz);
 
 /* textbuffer */
 static void *textbufferCreate(const char *pszFilename);
 static void  textbufferDestroy(void *pvBuffer);
 static char *textbufferNextLine(void *pvBuffer, char *psz);
+static char *textbufferGetNextLine(void *pvBuffer, void **ppv, char *pszLineBuffer, int cchLineBuffer);
 
 /* depend workers */
 static BOOL  depReadFile(const char *pszFilename);
@@ -165,15 +189,29 @@ static BOOL  depWriteFile(const char *pszFilename);
 static void  depRemoveAll(void);
 static void *depAddRule(const char *pszRulePath, const char *pszName, const char *pszExt);
 static BOOL  depAddDepend(void *pvRule, const char *pszDep);
-
+#if 0  /* not used */
 static BOOL  depCleanFile(const char *pszFilename);
+#endif
 
 
 /*******************************************************************************
 *   Global Variables                                                           *
 *******************************************************************************/
+/*
+ * Pointer to the list of dependencies.
+ */
 static PDEPRULE pdepList = NULL;
 
+/*
+ * Filecache - tree starts here.
+ */
+static PFCACHEENTRY pfcTree = NULL;
+static unsigned     cfcNodes = 0;
+
+
+/*
+ * Configuration stuff.
+ */
 static const char pszDefaultDepFile[] = ".depend";
 static const char *apszExtC_CPP[] = {"c", "sqc", "cpp", "h", "hpp", NULL};
 static const char *apszExtAsm[]   = {"asm", "inc", NULL};
@@ -421,6 +459,13 @@ int main(int argc, char **argv)
             memset(&filebuf, 0, sizeof(filebuf));
 
             /*
+             * If append option is specified we'll have to read the existing dep file
+             * before starting adding new dependencies.
+             */
+            if (pdepList == NULL && options.fAppend)
+                depReadFile(pszDepFile);
+
+            /*
              * Search for the files specified.
              */
             ulRc = DosFindFirst(argv[argi], &hDir,
@@ -460,6 +505,9 @@ int main(int argc, char **argv)
     /* Write the depend file! */
     if (!depWriteFile(pszDepFile))
         fprintf(stderr, "error: failed to write dependencies file!\n");
+    #if 0
+    printf("cfcNodes=%d\n", cfcNodes);
+    #endif
 
     return rc;
 }
@@ -517,10 +565,10 @@ static void syntax(void)
 static int makeDependent(const char *pszFilename, POPTIONS pOptions)
 {
     int    rc = -1;
-    FILE  *phFile;
+    void * pvFile;
 
-    phFile = fopen(pszFilename, "r");
-    if (phFile != NULL)
+    pvFile = textbufferCreate(pszFilename);
+    if (pvFile != NULL)
     {
         char            szExt[CCHMAXPATH];
         PCONFIGENTRY    pCfg = &aConfig[0];
@@ -545,7 +593,7 @@ static int makeDependent(const char *pszFilename, POPTIONS pOptions)
 
         /* Found? */
         if (pCfg->papszExts != NULL)
-            rc = (*pCfg->pfn)(pszFilename, phFile, fHeader, pOptions);
+            rc = (*pCfg->pfn)(pszFilename, pvFile, fHeader, pOptions);
         else
         {
             if (*fileName(pszFilename, szExt) != '.') /* these are 'hidden' files, like .cvsignore, let's ignore them. */
@@ -553,7 +601,7 @@ static int makeDependent(const char *pszFilename, POPTIONS pOptions)
             rc = 0;
         }
 
-        fclose(phFile);
+        textbufferDestroy(pvFile);
     }
     else
         fprintf(stderr, "failed to open '%s'\n", pszFilename);
@@ -568,16 +616,17 @@ static int makeDependent(const char *pszFilename, POPTIONS pOptions)
  * @returns   0 on success.
  *            !0 on error.
  * @param     pszFilename  Pointer to source filename.
- * @param     phFile       Pointer to source file handle.
+ * @param     pvFile       Pointer to file textbuffer.
  * @param     pOptions     Pointer to options struct.
  * @status    completely implemented.
  * @author    knut st. osmundsen
  */
-int langC_CPP(const char *pszFilename, FILE *phFile, BOOL fHeader, POPTIONS pOptions)
+int langC_CPP(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOptions)
 {
     void *  pvRule;                     /* Handle to the current rule. */
-    int     iLine;                      /* Linenumber. */
     char    szBuffer[4096];             /* Max line length is 4096... should not be a problem. */
+    int     iLine;                      /* Linenumber. */
+    void *  pv = NULL;                  /* An index used by textbufferGetNextLine. */
     BOOL    fComment;                   /* TRUE when within a multiline comment. */
                                         /* FALSE when not within a multiline comment. */
     int     iIfStack;                   /* StackPointer. */
@@ -629,214 +678,209 @@ int langC_CPP(const char *pszFilename, FILE *phFile, BOOL fHeader, POPTIONS pOpt
     achIfStack[iIfStack].fSupported = TRUE;
     fComment = FALSE;
     iLine = 0;
-    while (!feof(phFile)) /* line loop */
+    while (textbufferGetNextLine(pvFile, &pv, szBuffer, sizeof(szBuffer)) != NULL) /* line loop */
     {
-        if (fgets(szBuffer, sizeof(szBuffer), phFile) != NULL)
+        /* search for #include */
+        register char *pszC;
+        int cbLen;
+        int i = 0;
+        iLine++;
+
+        /* skip blank chars */
+        cbLen = strlen(szBuffer);
+        while (i + 2 < cbLen && (szBuffer[i] == ' ' || szBuffer[i] == '\t'))
+            i++;
+
+        /* preprocessor statement? */
+        if (!fComment && szBuffer[i] == '#')
         {
-            /* search for #include */
-            register char *pszC;
-            int cbLen;
-            int i = 0;
-            iLine++;
-
-            /* skip blank chars */
-            cbLen = strlen(szBuffer);
-            while (i + 2 < cbLen && (szBuffer[i] == ' ' || szBuffer[i] == '\t'))
+            /*
+             * Preprocessor checks
+             * We known that we have a preprocessor statment (starting with an '#' * at szBuffer[i]).
+             * Depending on the word afterwards we'll take some different actions.
+             * So we'll start of by extracting that word and make a string swich on it.
+             * Note that there might be some blanks between the hash and the word.
+             */
+            int     cchWord;
+            char *  pszEndWord;
+            char *  pszArgument;
+            i++;                /* skip hash ('#') */
+            while (szBuffer[i] == '\t' || szBuffer[i] == ' ') /* skip blanks */
                 i++;
-
-            /* preprocessor statement? */
-            if (!fComment && szBuffer[i] == '#')
-            {
-                /*
-                 * Preprocessor checks
-                 * We known that we have a preprocessor statment (starting with an '#' * at szBuffer[i]).
-                 * Depending on the word afterwards we'll take some different actions.
-                 * So we'll start of by extracting that word and make a string swich on it.
-                 * Note that there might be some blanks between the hash and the word.
-                 */
-                int     cchWord;
-                char *  pszEndWord;
-                char *  pszArgument;
-                i++;                /* skip hash ('#') */
-                while (szBuffer[i] == '\t' || szBuffer[i] == ' ') /* skip blanks */
-                    i++;
-                pszArgument = pszEndWord = findEndOfWord(&szBuffer[i]);
-                cchWord = pszEndWord - &szBuffer[i];
-
-                /*
-                 * Find the argument by skipping the blanks.
-                 */
-                while (*pszArgument == '\t' || *pszArgument == ' ') /* skip blanks */
-                    pszArgument++;
-
-                /*
-                 * string switch.
-                 */
-                if (strncmp(&szBuffer[i], "include", cchWord) == 0)
-                {
-                    /*
-                     * #include
-                     *
-                     * Are we in a state where this file is to be included?
-                     */
-                    if (achIfStack[iIfStack].fIncluded)
-                    {
-                        char szFullname[CCHMAXPATH];
-                        char *psz;
-                        BOOL f = FALSE;
-                        int  j;
-
-                        /* extract info between "" or <> */
-                        while (i < cbLen && !(f = (szBuffer[i] == '"' || szBuffer[i] == '<')))
-                            i++;
-                        i++; /* skip '"' or '<' */
-
-                        /* if invalid statement then continue with the next line! */
-                        if (!f) continue;
-
-                        /* find end */
-                        j = f = 0;
-                        while (i + j < cbLen &&  j < CCHMAXPATH &&
-                               !(f = (szBuffer[i+j] == '"' || szBuffer[i+j] == '>')))
-                            j++;
-
-                        /* if invalid statement then continue with the next line! */
-                        if (!f) continue;
-
-                        /* copy filename */
-                        strncpy(szFullname, &szBuffer[i], j);
-                        szFullname[j] = '\0'; /* ensure terminatition. */
-
-                        /* find include file! */
-                        psz = pathlistFindFile(pOptions->pszInclude, szFullname, szBuffer);
-                        if (psz == NULL)
-                            psz = pathlistFindFile(getenv("INCLUDE"), szFullname, szBuffer);
-
-                        /* did we find the include? */
-                        if (psz != NULL)
-                        {
-                            char    szBuffer2[CCHMAXPATH];
-                            if (pOptions->fExcludeAll ||
-                                pathlistFindFile(pOptions->pszExclude, szFullname, szBuffer2) != NULL
-                                )
-                                depAddDepend(pvRule, szFullname);
-                            else
-                                depAddDepend(pvRule, szBuffer);
-                        }
-                        else
-                            fprintf(stderr, "%s(%d): warning include file '%s' not found!\n",
-                                    pszFilename, iLine, szFullname);
-                    }
-                }
-                else
-                    /*
-                     * #if
-                     */
-                    if (strncmp(&szBuffer[i], "if", cchWord) == 0)
-                {   /* #if 0 and #if <1-9> are supported */
-                    pszEndWord = findEndOfWord(pszArgument);
-                    iIfStack++;
-                    if ((pszEndWord - pszArgument) == 1
-                        && *pszArgument >= '0' && *pszArgument <= '9')
-                    {
-                        if (*pszArgument != '0')
-                            achIfStack[iIfStack].fIncluded =  TRUE;
-                        else
-                            achIfStack[iIfStack].fIncluded =  FALSE;
-                    }
-                    else
-                        achIfStack[iIfStack].fSupported = FALSE;
-                    achIfStack[iIfStack].fIncluded = TRUE;
-                    achIfStack[iIfStack].fIf = TRUE;
-                }
-                else
-                    /*
-                     * #else
-                     */
-                    if (strncmp(&szBuffer[i], "else", cchWord) == 0)
-                {
-                    if (achIfStack[iIfStack].fSupported)
-                    {
-                        if (achIfStack[iIfStack].fIncluded) /* ARG!! this'll prevent warning */
-                            achIfStack[iIfStack].fIncluded = FALSE;
-                        else
-                            achIfStack[iIfStack].fIncluded = TRUE;
-                    }
-                    achIfStack[iIfStack].fIf = FALSE;
-                }
-                else
-                    /*
-                     * #endif
-                     */
-                    if (strncmp(&szBuffer[i], "endif", cchWord) == 0)
-                {   /* Pop the if-stack. */
-                    if (iIfStack > 0)
-                        iIfStack--;
-                    else
-                        fprintf(stderr, "%s(%d): If-Stack underflow!\n", pszFilename, iLine);
-                }
-                /*
-                 * general if<something> and elseif<something> implementations
-                 */
-                else
-                    if (strncmp(&szBuffer[i], "elseif", 6) == 0)
-                {
-                    achIfStack[iIfStack].fSupported = FALSE;
-                    achIfStack[iIfStack].fIncluded = TRUE;
-                }
-                else
-                    if (strncmp(&szBuffer[i], "if", 2) == 0)
-                {
-                    iIfStack++;
-                    achIfStack[iIfStack].fIf = TRUE;
-                    achIfStack[iIfStack].fSupported = FALSE;
-                    achIfStack[iIfStack].fIncluded = TRUE;
-                }
-                /* The rest of them aren't implemented yet.
-                else if (strncmp(&szBuffer[i], "if") == 0)
-                {
-                }
-                */
-            }
+            pszArgument = pszEndWord = findEndOfWord(&szBuffer[i]);
+            cchWord = pszEndWord - &szBuffer[i];
 
             /*
-             * Comment checks.
-             *  -Start at first non-blank.
-             *  -Loop thru the line since we might have more than one
-             *   comment statement on a single line.
+             * Find the argument by skipping the blanks.
              */
-            pszC = &szBuffer[i];
-            while (pszC != NULL && *pszC != '\0')
+            while (*pszArgument == '\t' || *pszArgument == ' ') /* skip blanks */
+                pszArgument++;
+
+            /*
+             * string switch.
+             */
+            if (strncmp(&szBuffer[i], "include", cchWord) == 0)
             {
-                if (fComment)
-                    pszC = strstr(pszC, "*/");  /* look for end comment mark. */
-                else
+                /*
+                 * #include
+                 *
+                 * Are we in a state where this file is to be included?
+                 */
+                if (achIfStack[iIfStack].fIncluded)
                 {
-                    char *pszLC;
-                    pszLC= strstr(pszC, "//");  /* look for single line comment mark. */
-                    pszC = strstr(pszC, "/*");  /* look for start comment mark */
-                    if (pszLC && pszLC < pszC)  /* if there is an single line comment mark before the */
-                        break;                  /* muliline comment mark we'll ignore the multiline mark. */
-                }
+                    char szFullname[CCHMAXPATH];
+                    char *psz;
+                    BOOL f = FALSE;
+                    int  j;
 
-                /* Comment mark found? */
-                if (pszC != NULL)
-                {
-                    fComment = !fComment;
-                    pszC += 2;          /* skip comment mark */
+                    /* extract info between "" or <> */
+                    while (i < cbLen && !(f = (szBuffer[i] == '"' || szBuffer[i] == '<')))
+                        i++;
+                    i++; /* skip '"' or '<' */
 
-                    /* debug */
-                    /*
-                    if (fComment)
-                        fprintf(stderr, "starts at line %d\n", iLine);
+                    /* if invalid statement then continue with the next line! */
+                    if (!f) continue;
+
+                    /* find end */
+                    j = f = 0;
+                    while (i + j < cbLen &&  j < CCHMAXPATH &&
+                           !(f = (szBuffer[i+j] == '"' || szBuffer[i+j] == '>')))
+                        j++;
+
+                    /* if invalid statement then continue with the next line! */
+                    if (!f) continue;
+
+                    /* copy filename */
+                    strncpy(szFullname, &szBuffer[i], j);
+                    szFullname[j] = '\0'; /* ensure terminatition. */
+
+                    /* find include file! */
+                    psz = pathlistFindFile(pOptions->pszInclude, szFullname, szBuffer);
+                    if (psz == NULL)
+                        psz = pathlistFindFile(getenv("INCLUDE"), szFullname, szBuffer);
+
+                    /* did we find the include? */
+                    if (psz != NULL)
+                    {
+                        char    szBuffer2[CCHMAXPATH];
+                        if (pOptions->fExcludeAll ||
+                            pathlistFindFile(pOptions->pszExclude, szFullname, szBuffer2) != NULL
+                            )
+                            depAddDepend(pvRule, szFullname);
+                        else
+                            depAddDepend(pvRule, szBuffer);
+                    }
                     else
-                        fprintf(stderr, "ends   at line %d\n", iLine);
-                        */
+                        fprintf(stderr, "%s(%d): warning include file '%s' not found!\n",
+                                pszFilename, iLine, szFullname);
                 }
             }
+            else
+                /*
+                 * #if
+                 */
+                if (strncmp(&szBuffer[i], "if", cchWord) == 0)
+            {   /* #if 0 and #if <1-9> are supported */
+                pszEndWord = findEndOfWord(pszArgument);
+                iIfStack++;
+                if ((pszEndWord - pszArgument) == 1
+                    && *pszArgument >= '0' && *pszArgument <= '9')
+                {
+                    if (*pszArgument != '0')
+                        achIfStack[iIfStack].fIncluded =  TRUE;
+                    else
+                        achIfStack[iIfStack].fIncluded =  FALSE;
+                }
+                else
+                    achIfStack[iIfStack].fSupported = FALSE;
+                achIfStack[iIfStack].fIncluded = TRUE;
+                achIfStack[iIfStack].fIf = TRUE;
+            }
+            else
+                /*
+                 * #else
+                 */
+                if (strncmp(&szBuffer[i], "else", cchWord) == 0)
+            {
+                if (achIfStack[iIfStack].fSupported)
+                {
+                    if (achIfStack[iIfStack].fIncluded) /* ARG!! this'll prevent warning */
+                        achIfStack[iIfStack].fIncluded = FALSE;
+                    else
+                        achIfStack[iIfStack].fIncluded = TRUE;
+                }
+                achIfStack[iIfStack].fIf = FALSE;
+            }
+            else
+                /*
+                 * #endif
+                 */
+                if (strncmp(&szBuffer[i], "endif", cchWord) == 0)
+            {   /* Pop the if-stack. */
+                if (iIfStack > 0)
+                    iIfStack--;
+                else
+                    fprintf(stderr, "%s(%d): If-Stack underflow!\n", pszFilename, iLine);
+            }
+            /*
+             * general if<something> and elseif<something> implementations
+             */
+            else
+                if (strncmp(&szBuffer[i], "elseif", 6) == 0)
+            {
+                achIfStack[iIfStack].fSupported = FALSE;
+                achIfStack[iIfStack].fIncluded = TRUE;
+            }
+            else
+                if (strncmp(&szBuffer[i], "if", 2) == 0)
+            {
+                iIfStack++;
+                achIfStack[iIfStack].fIf = TRUE;
+                achIfStack[iIfStack].fSupported = FALSE;
+                achIfStack[iIfStack].fIncluded = TRUE;
+            }
+            /* The rest of them aren't implemented yet.
+            else if (strncmp(&szBuffer[i], "if") == 0)
+            {
+            }
+            */
         }
-        else
-            break;
+
+        /*
+         * Comment checks.
+         *  -Start at first non-blank.
+         *  -Loop thru the line since we might have more than one
+         *   comment statement on a single line.
+         */
+        pszC = &szBuffer[i];
+        while (pszC != NULL && *pszC != '\0')
+        {
+            if (fComment)
+                pszC = strstr(pszC, "*/");  /* look for end comment mark. */
+            else
+            {
+                char *pszLC;
+                pszLC= strstr(pszC, "//");  /* look for single line comment mark. */
+                pszC = strstr(pszC, "/*");  /* look for start comment mark */
+                if (pszLC && pszLC < pszC)  /* if there is an single line comment mark before the */
+                    break;                  /* muliline comment mark we'll ignore the multiline mark. */
+            }
+
+            /* Comment mark found? */
+            if (pszC != NULL)
+            {
+                fComment = !fComment;
+                pszC += 2;          /* skip comment mark */
+
+                /* debug */
+                /*
+                if (fComment)
+                    fprintf(stderr, "starts at line %d\n", iLine);
+                else
+                    fprintf(stderr, "ends   at line %d\n", iLine);
+                    */
+            }
+        }
     } /*while*/
 
     return 0;
@@ -849,16 +893,17 @@ int langC_CPP(const char *pszFilename, FILE *phFile, BOOL fHeader, POPTIONS pOpt
  * @returns   0 on success.
  *            !0 on error.
  * @param     pszFilename  Pointer to source filename.
- * @param     phFile       Pointer to source file handle.
+ * @param     pvFile       Pointer to file textbuffer.
  * @param     pOptions     Pointer to options struct.
  * @status    completely implemented.
  * @author    knut st. osmundsen
  */
-int langAsm(const char *pszFilename, FILE *phFile, BOOL fHeader, POPTIONS pOptions)
+int langAsm(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOptions)
 {
     void *  pvRule;                     /* Handle to the current rule. */
     char    szBuffer[4096];             /* Temporary buffer (max line lenght size...) */
     int     iLine;                      /* current line number */
+    void *  pv = NULL;                  /* An index used by textbufferGetNextLine. */
 
 
     /**********************************/
@@ -890,73 +935,68 @@ int langAsm(const char *pszFilename, FILE *phFile, BOOL fHeader, POPTIONS pOptio
     /* find dependants */
     /*******************/
     iLine = 0;
-    while (!feof(phFile)) /* line loop */
+    while (textbufferGetNextLine(pvFile, &pv, szBuffer, sizeof(szBuffer)) != NULL) /* line loop */
     {
-        if (fgets(szBuffer, sizeof(szBuffer), phFile) != NULL)
-        {
-            /* search for include */
-            int cbLen;
-            int i = 0;
-            iLine++;
+        /* search for include */
+        int cbLen;
+        int i = 0;
+        iLine++;
 
-            /* skip blank chars */
-            cbLen = strlen(szBuffer);
-            while (i + 9 < cbLen && (szBuffer[i] == ' ' || szBuffer[i] == '\t'))
+        /* skip blank chars */
+        cbLen = strlen(szBuffer);
+        while (i + 9 < cbLen && (szBuffer[i] == ' ' || szBuffer[i] == '\t'))
+            i++;
+
+        /* is this an include? */
+        if (strnicmp(&szBuffer[i], "include", 7) == 0
+            && (szBuffer[i + 7] == '\t' || szBuffer[i + 7] == ' ')
+            )
+        {
+            char szFullname[CCHMAXPATH];
+            char *psz;
+            int  j;
+
+            /* skip to first no blank char  */
+            i += 7;
+            while (i < cbLen && (szBuffer[i] == ' ' || szBuffer[i] == '\t'))
                 i++;
 
-            /* is this an include? */
-            if (strnicmp(&szBuffer[i], "include", 7) == 0
-                && (szBuffer[i + 7] == '\t' || szBuffer[i + 7] == ' ')
-                )
+            /* comment check - if comment found, no filename was given. continue. */
+            if (szBuffer[i] == ';') continue;
+
+            /* find end */
+            j = 0;
+            while (i + j < cbLen
+                   &&  j < CCHMAXPATH
+                   && szBuffer[i+j] != ' '  && szBuffer[i+j] != '\t' && szBuffer[i+j] != '\n'
+                   && szBuffer[i+j] != '\0' && szBuffer[i+j] != ';'  && szBuffer[i+j] != '\r'
+                   )
+                j++;
+
+            /* copy filename */
+            strncpy(szFullname, &szBuffer[i], j);
+            szFullname[j] = '\0'; /* ensure terminatition. */
+
+            /* find include file! */
+            psz = pathlistFindFile(pOptions->pszInclude, szFullname, szBuffer);
+            if (psz == NULL)
+                psz = pathlistFindFile(getenv("INCLUDE"), szFullname, szBuffer);
+
+            /* Did we find the include? */
+            if (psz != NULL)
             {
-                char szFullname[CCHMAXPATH];
-                char *psz;
-                int  j;
-
-                /* skip to first no blank char  */
-                i += 7;
-                while (i < cbLen && (szBuffer[i] == ' ' || szBuffer[i] == '\t'))
-                    i++;
-
-                /* comment check - if comment found, no filename was given. continue. */
-                if (szBuffer[i] == ';') continue;
-
-                /* find end */
-                j = 0;
-                while (i + j < cbLen
-                       &&  j < CCHMAXPATH
-                       && szBuffer[i+j] != ' '  && szBuffer[i+j] != '\t' && szBuffer[i+j] != '\n'
-                       && szBuffer[i+j] != '\0' && szBuffer[i+j] != ';'  && szBuffer[i+j] != '\r'
-                       )
-                    j++;
-
-                /* copy filename */
-                strncpy(szFullname, &szBuffer[i], j);
-                szFullname[j] = '\0'; /* ensure terminatition. */
-
-                /* find include file! */
-                psz = pathlistFindFile(pOptions->pszInclude, szFullname, szBuffer);
-                if (psz == NULL)
-                    psz = pathlistFindFile(getenv("INCLUDE"), szFullname, szBuffer);
-
-                /* Did we find the include? */
-                if (psz != NULL)
-                {
-                    char szBuffer2[CCHMAXPATH];
-                    if (pOptions->fExcludeAll ||
-                        pathlistFindFile(pOptions->pszExclude, szFullname, szBuffer2) != NULL
-                        )
-                        depAddDepend(pvRule, szFullname);
-                    else
-                        depAddDepend(pvRule, szBuffer);
-                }
+                char szBuffer2[CCHMAXPATH];
+                if (pOptions->fExcludeAll ||
+                    pathlistFindFile(pOptions->pszExclude, szFullname, szBuffer2) != NULL
+                    )
+                    depAddDepend(pvRule, szFullname);
                 else
-                    fprintf(stderr, "%s(%d): warning include file '%s' not found!\n",
-                            pszFilename, iLine, szFullname);
+                    depAddDepend(pvRule, szBuffer);
             }
+            else
+                fprintf(stderr, "%s(%d): warning include file '%s' not found!\n",
+                        pszFilename, iLine, szFullname);
         }
-        else
-            break;
     } /*while*/
 
     return 0;
@@ -969,16 +1009,17 @@ int langAsm(const char *pszFilename, FILE *phFile, BOOL fHeader, POPTIONS pOptio
  * @returns   0 on success.
  *            !0 on error.
  * @param     pszFilename  Pointer to source filename.
- * @param     phFile       Pointer to source file handle.
+ * @param     pvFile       Pointer to file textbuffer.
  * @param     pOptions     Pointer to options struct.
  * @status    completely implemented.
  * @author    knut st. osmundsen
  */
-int langRC(const char *pszFilename, FILE *phFile, BOOL fHeader, POPTIONS pOptions)
+int langRC(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOptions)
 {
     void *  pvRule;                     /* Handle to the current rule. */
     char    szBuffer[4096];             /* Temporary buffer (max line lenght size...) */
     int     iLine;                      /* current line number */
+    void *  pv = NULL;                  /* An index used by textbufferGetNextLine. */
 
 
     /**********************************/
@@ -1010,75 +1051,70 @@ int langRC(const char *pszFilename, FILE *phFile, BOOL fHeader, POPTIONS pOption
     /* find dependants */
     /*******************/
     iLine = 0;
-    while (!feof(phFile)) /* line loop */
+    while (textbufferGetNextLine(pvFile, &pv, szBuffer, sizeof(szBuffer)) != NULL) /* line loop */
     {
-        if (fgets(szBuffer, sizeof(szBuffer), phFile) != NULL)
+        /* search for #include */
+        int cbLen;
+        int i = 0;
+        iLine++;
+
+        /* skip blank chars */
+        cbLen = strlen(szBuffer);
+        while (i + 9 < cbLen && (szBuffer[i] == ' ' || szBuffer[i] == '\t'))
+            i++;
+
+        /* is this an include? */
+        if (   strncmp(&szBuffer[i], "#include", 8) == 0
+            || strncmp(&szBuffer[i], "RCINCLUDE", 9) == 0
+            || strncmp(&szBuffer[i], "DLGINCLUDE", 10) == 0
+            )
         {
-            /* search for #include */
-            int cbLen;
-            int i = 0;
-            iLine++;
+            char szFullname[CCHMAXPATH];
+            char *psz;
+            BOOL f = FALSE;
+            int  j;
 
-            /* skip blank chars */
-            cbLen = strlen(szBuffer);
-            while (i + 9 < cbLen && (szBuffer[i] == ' ' || szBuffer[i] == '\t'))
+            /* extract info between "" or <> */
+            while (i < cbLen && !(f = (szBuffer[i] == '"' || szBuffer[i] == '<')))
                 i++;
+            i++; /* skip '"' or '<' */
 
-            /* is this an include? */
-            if (   strncmp(&szBuffer[i], "#include", 8) == 0
-                || strncmp(&szBuffer[i], "RCINCLUDE", 9) == 0
-                || strncmp(&szBuffer[i], "DLGINCLUDE", 10) == 0
-                )
+            /* if invalid statement then continue with the next line! */
+            if (!f) continue;
+
+            /* find end */
+            j = f = 0;
+            while (i + j < cbLen &&  j < CCHMAXPATH &&
+                   !(f = (szBuffer[i+j] == '"' || szBuffer[i+j] == '>')))
+                j++;
+
+            /* if invalid statement then continue with the next line! */
+            if (!f) continue;
+
+            /* copy filename */
+            strncpy(szFullname, &szBuffer[i], j);
+            szFullname[j] = '\0'; /* ensure terminatition. */
+
+            /* find include file! */
+            psz = pathlistFindFile(pOptions->pszInclude, szFullname, szBuffer);
+            if (psz == NULL)
+                psz = pathlistFindFile(getenv("INCLUDE"), szFullname, szBuffer);
+
+            /* did we find the include? */
+            if (psz != NULL)
             {
-                char szFullname[CCHMAXPATH];
-                char *psz;
-                BOOL f = FALSE;
-                int  j;
-
-                /* extract info between "" or <> */
-                while (i < cbLen && !(f = (szBuffer[i] == '"' || szBuffer[i] == '<')))
-                    i++;
-                i++; /* skip '"' or '<' */
-
-                /* if invalid statement then continue with the next line! */
-                if (!f) continue;
-
-                /* find end */
-                j = f = 0;
-                while (i + j < cbLen &&  j < CCHMAXPATH &&
-                       !(f = (szBuffer[i+j] == '"' || szBuffer[i+j] == '>')))
-                    j++;
-
-                /* if invalid statement then continue with the next line! */
-                if (!f) continue;
-
-                /* copy filename */
-                strncpy(szFullname, &szBuffer[i], j);
-                szFullname[j] = '\0'; /* ensure terminatition. */
-
-                /* find include file! */
-                psz = pathlistFindFile(pOptions->pszInclude, szFullname, szBuffer);
-                if (psz == NULL)
-                    psz = pathlistFindFile(getenv("INCLUDE"), szFullname, szBuffer);
-
-                /* did we find the include? */
-                if (psz != NULL)
-                {
-                    char szBuffer2[CCHMAXPATH];
-                    if (pOptions->fExcludeAll ||
-                        pathlistFindFile(pOptions->pszExclude, szFullname, szBuffer2) != NULL
-                        )
-                        depAddDepend(pvRule, szFullname);
-                    else
-                        depAddDepend(pvRule, szBuffer);
-                }
+                char szBuffer2[CCHMAXPATH];
+                if (pOptions->fExcludeAll ||
+                    pathlistFindFile(pOptions->pszExclude, szFullname, szBuffer2) != NULL
+                    )
+                    depAddDepend(pvRule, szFullname);
                 else
-                    fprintf(stderr, "%s(%d): warning include file '%s' not found!\n",
-                            pszFilename, iLine, szFullname);
+                    depAddDepend(pvRule, szBuffer);
             }
+            else
+                fprintf(stderr, "%s(%d): warning include file '%s' not found!\n",
+                        pszFilename, iLine, szFullname);
         }
-        else
-            break;
     } /*while*/
 
     return 0;
@@ -1091,16 +1127,17 @@ int langRC(const char *pszFilename, FILE *phFile, BOOL fHeader, POPTIONS pOption
  * @returns   0 on success.
  *            !0 on error.
  * @param     pszFilename  Pointer to source filename.
- * @param     phFile       Pointer to source file handle.
+ * @param     pvFile       Pointer to file textbuffer.
  * @param     pOptions     Pointer to options struct.
  * @status    completely implemented.
  * @author    knut st. osmundsen
  */
-int langCOBOL(const char *pszFilename, FILE *phFile, BOOL fHeader, POPTIONS pOptions)
+int langCOBOL(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOptions)
 {
     void *  pvRule;                     /* Handle to the current rule. */
     char    szBuffer[4096];             /* Temporary buffer (max line lenght size...) */
     int     iLine;                      /* current line number */
+    void *  pv = NULL;                  /* An index used by textbufferGetNextLine. */
 
 
     /**********************************/
@@ -1132,105 +1169,100 @@ int langCOBOL(const char *pszFilename, FILE *phFile, BOOL fHeader, POPTIONS pOpt
     /* find dependants */
     /*******************/
     iLine = 0;
-    while (!feof(phFile)) /* line loop */
+    while (textbufferGetNextLine(pvFile, &pv, szBuffer, sizeof(szBuffer)) != NULL) /* line loop */
     {
-        if (fgets(szBuffer, sizeof(szBuffer), phFile) != NULL)
-        {
-            /* search for #include */
-            int cbLen;
-            int i = 0;
-            int i1, i2;
-            iLine++;
+        /* search for #include */
+        int cbLen;
+        int i = 0;
+        int i1, i2;
+        iLine++;
 
-            /* check for comment mark (column 7) */
-            if (szBuffer[6] == '*')
+        /* check for comment mark (column 7) */
+        if (szBuffer[6] == '*')
+            continue;
+
+        /* skip blank chars */
+        cbLen = strlen(szBuffer);
+        while (i + 9 < cbLen && (szBuffer[i] == ' ' || szBuffer[i] == '\t'))
+            i++;
+
+        /* is this an include? */
+        if (   (i1 = strnicmp(&szBuffer[i], "COPY", 4)) == 0
+            || (i2 = strnicmpwords(&szBuffer[i], "EXEC SQL INCLUDE", 16)) == 0
+            )
+        {
+            char szFullname[CCHMAXPATH];
+            char *psz;
+            int  j;
+
+            /* skip statement */
+            i += 4;
+            if (i1 != 0)
+            {
+                int y = 2; /* skip two words */
+                do
+                {
+                    /* skip blanks */
+                    while (szBuffer[i] == ' ' || szBuffer[i] == '\t')
+                        i++;
+                    /* skip word */
+                    while (szBuffer[i] != ' ' && szBuffer[i] != '\t'
+                           && szBuffer[i] != '\0' && szBuffer[i] != '\n')
+                        i++;
+                    y--;
+                } while (y > 0);
+            }
+
+            /* check for blank */
+            if (szBuffer[i] != ' ' && szBuffer[i] != '\t') /* no copybook specified... */
                 continue;
 
-            /* skip blank chars */
-            cbLen = strlen(szBuffer);
-            while (i + 9 < cbLen && (szBuffer[i] == ' ' || szBuffer[i] == '\t'))
+            /* skip blanks */
+            while (szBuffer[i] == ' ' || szBuffer[i] == '\t')
                 i++;
 
-            /* is this an include? */
-            if (   (i1 = strnicmp(&szBuffer[i], "COPY", 4)) == 0
-                || (i2 = strnicmpwords(&szBuffer[i], "EXEC SQL INCLUDE", 16)) == 0
-                )
+            /* if invalid statement then continue with the next line! */
+            if (szBuffer[i] == '\0' || szBuffer[i] == '\n')
+                continue;
+
+            /* find end */
+            j = 0;
+            while (i + j < cbLen && j < CCHMAXPATH
+                   && szBuffer[i+j] != '.'
+                   && szBuffer[i+j] != ' '  && szBuffer[i+j] != '\t'
+                   && szBuffer[i+j] != '\0' && szBuffer[i+j] != '\n'
+                   )
+                j++;
+
+            /* if invalid statement then continue with the next line! */
+            if (szBuffer[i+j] != '.' && szBuffer[i+j] != ' ' && szBuffer[i] != '\t')
+                continue;
+
+            /* copy filename */
+            strncpy(szFullname, &szBuffer[i], j);
+            szFullname[j] = '\0'; /* ensure terminatition. */
+
+            /* add extention .cpy - hardcoded for the moment. */
+            strcat(szFullname, ".cpy");
+
+            /* find include file! */
+            psz = pathlistFindFile(pOptions->pszInclude, szFullname, szBuffer);
+
+            /* did we find the include? */
+            if (psz != NULL)
             {
-                char szFullname[CCHMAXPATH];
-                char *psz;
-                int  j;
-
-                /* skip statement */
-                i += 4;
-                if (i1 != 0)
-                {
-                    int y = 2; /* skip two words */
-                    do
-                    {
-                        /* skip blanks */
-                        while (szBuffer[i] == ' ' || szBuffer[i] == '\t')
-                            i++;
-                        /* skip word */
-                        while (szBuffer[i] != ' ' && szBuffer[i] != '\t'
-                               && szBuffer[i] != '\0' && szBuffer[i] != '\n')
-                            i++;
-                        y--;
-                    } while (y > 0);
-                }
-
-                /* check for blank */
-                if (szBuffer[i] != ' ' && szBuffer[i] != '\t') /* no copybook specified... */
-                    continue;
-
-                /* skip blanks */
-                while (szBuffer[i] == ' ' || szBuffer[i] == '\t')
-                    i++;
-
-                /* if invalid statement then continue with the next line! */
-                if (szBuffer[i] == '\0' || szBuffer[i] == '\n')
-                    continue;
-
-                /* find end */
-                j = 0;
-                while (i + j < cbLen && j < CCHMAXPATH
-                       && szBuffer[i+j] != '.'
-                       && szBuffer[i+j] != ' '  && szBuffer[i+j] != '\t'
-                       && szBuffer[i+j] != '\0' && szBuffer[i+j] != '\n'
-                       )
-                    j++;
-
-                /* if invalid statement then continue with the next line! */
-                if (szBuffer[i+j] != '.' && szBuffer[i+j] != ' ' && szBuffer[i] != '\t')
-                    continue;
-
-                /* copy filename */
-                strncpy(szFullname, &szBuffer[i], j);
-                szFullname[j] = '\0'; /* ensure terminatition. */
-
-                /* add extention .cpy - hardcoded for the moment. */
-                strcat(szFullname, ".cpy");
-
-                /* find include file! */
-                psz = pathlistFindFile(pOptions->pszInclude, szFullname, szBuffer);
-
-                /* did we find the include? */
-                if (psz != NULL)
-                {
-                    char szBuffer2[CCHMAXPATH];
-                    if (pOptions->fExcludeAll ||
-                        pathlistFindFile(pOptions->pszExclude, szFullname, szBuffer2) != NULL
-                        )
-                        depAddDepend(pvRule, szFullname);
-                    else
-                        depAddDepend(pvRule, szBuffer);
-                }
+                char szBuffer2[CCHMAXPATH];
+                if (pOptions->fExcludeAll ||
+                    pathlistFindFile(pOptions->pszExclude, szFullname, szBuffer2) != NULL
+                    )
+                    depAddDepend(pvRule, szFullname);
                 else
-                    fprintf(stderr, "%s(%d): warning include file '%s' not found!\n",
-                            pszFilename, iLine, szFullname);
+                    depAddDepend(pvRule, szBuffer);
             }
+            else
+                fprintf(stderr, "%s(%d): warning include file '%s' not found!\n",
+                        pszFilename, iLine, szFullname);
         }
-        else
-            break;
     } /*while*/
 
     return 0;
@@ -1401,6 +1433,47 @@ char *fileExt(const char *pszFilename, char *pszBuffer)
 }
 
 
+/**
+ * Adds a file to the cache.
+ * @returns   Success indicator.
+ * @param     pszFilename   Name of the file which is to be added. (with path!)
+ */
+static BOOL filecacheAdd(const char *pszFilename)
+{
+    PFCACHEENTRY pfcNew;
+
+    /* allocate new block and fill in data */
+    pfcNew = malloc(sizeof(FCACHEENTRY) + strlen(pszFilename) + 1);
+    if (pfcNew == NULL)
+    {
+        fprintf(stderr, "error: out of memory! (line=%d)\n", __LINE__);
+        return FALSE;
+    }
+    pfcNew->Key = (char*)(void*)pfcNew + sizeof(FCACHEENTRY);
+    strcpy((char*)(unsigned)pfcNew->Key, pszFilename);
+    if (!AVLInsert(&pfcTree, pfcNew))
+    {
+        free(pfcNew);
+        return TRUE;
+    }
+
+    cfcNodes++;
+
+    return TRUE;
+}
+
+
+
+/**
+ * Checks if pszFile is exists in the cache.
+ * @return    TRUE if found. FALSE if not found.
+ * @param     pszFilename   Name of the file to be found. (with path!)
+ */
+static BOOL filecacheFind(const char *pszFilename)
+{
+    return AVLGet(&pfcTree, (AVLKEY)pszFilename) != NULL;
+}
+
 
 
 /**
@@ -1413,8 +1486,9 @@ char *fileExt(const char *pszFilename, char *pszBuffer)
  * @parma     pszBuffer    Ouput Buffer.
  * @status    completely implemented.
  * @author    knut st. osmundsen
+ * @remark    need substantial optimizations. 95% of execution is spend here.
  */
-char *pathlistFindFile(const char *pszPathList, const char *pszFilename, char *pszBuffer)
+static char *pathlistFindFile(const char *pszPathList, const char *pszFilename, char *pszBuffer)
 {
     const char *psz = pszPathList;
     const char *pszNext = NULL;
@@ -1433,9 +1507,6 @@ char *pathlistFindFile(const char *pszPathList, const char *pszFilename, char *p
 
         if (pszNext - psz > 0)
         {
-            HDIR            hDir = HDIR_CREATE;
-            ULONG           cFiles = 1UL;
-            FILEFINDBUF3    FileFindBuf;
             APIRET          rc;
             char            szFile[CCHMAXPATH];
 
@@ -1446,10 +1517,25 @@ char *pathlistFindFile(const char *pszPathList, const char *pszFilename, char *p
                 strcpy(&szFile[pszNext - psz], "\\");
             strcat(szFile, pszFilename);
 
-            /* search for file */
-            rc = DosFindFirst(szFile, &hDir, FILE_NORMAL, &FileFindBuf, sizeof(FileFindBuf),
-                              &cFiles, FIL_STANDARD);
-            DosFindClose(hDir);
+            /*
+             * Search for the file in this directory.
+             *   Search cache first
+             */
+            if (!filecacheFind(szFile))
+            {
+                FILESTATUS3 fsts3;
+
+                /* ask the OS */
+                rc = DosQueryPathInfo(szFile, FIL_STANDARD, &fsts3, sizeof(fsts3));
+                if (rc == NO_ERROR)
+                {   /* add file to cache. */
+                    filecacheAdd(szFile);
+                }
+            }
+            else
+                rc = NO_ERROR;
+
+            /* did we find it? */
             if (rc == NO_ERROR)
             {
                 strncpy(pszBuffer, psz, pszNext - psz);
@@ -1548,7 +1634,7 @@ static signed long fsize(FILE *phFile)
  * @status    completely implmented.
  * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
  */
-static char *trim(char *psz)
+INLINE char *trim(char *psz)
 {
     int i;
     if (psz == NULL)
@@ -1570,7 +1656,7 @@ static char *trim(char *psz)
  * @status    completely implmented.
  * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
  */
-static char *trimR(char *psz)
+INLINE char *trimR(char *psz)
 {
     int i;
     if (psz == NULL)
@@ -1597,7 +1683,7 @@ static void *textbufferCreate(const char *pszFilename)
     if (phFile != NULL)
     {
         signed long cbFile = fsize(phFile);
-        if (cbFile != -1)
+        if (cbFile > 0)
         {
             pvFile = malloc(cbFile + 1);
             if (pvFile != NULL)
@@ -1609,6 +1695,8 @@ static void *textbufferCreate(const char *pszFilename)
                     pvFile = NULL;
                 }
             }
+            else
+                fprintf(stderr, "warning/error: failed to open file %s\n", pszFilename);
         }
         fclose(phFile);
     }
@@ -1653,6 +1741,54 @@ static char *textbufferNextLine(void *pvBuffer, register char *psz)
         psz++;
 
     return psz;
+}
+
+
+/**
+ * Gets the next line from an textbuffer.
+ * (fgets for textbuffer)
+ * @returns   Pointer to pszOutBuffer. NULL when end of file.
+ * @param     pvBuffer  Buffer handle.
+ * @param     ppv       Pointer to a buffer index pointer. (holds the current buffer index)
+ *                      Pointer to a null pointer is passed in to get the first line.
+ * @param     pszLineBuffer  Output line buffer. (!= NULL)
+ * @param     cchLineBuffer  Size of the output line buffer. (> 0)
+ * @remark    '\n' and '\r' are removed!
+ */
+static char *textbufferGetNextLine(void *pvBuffer, void **ppv, char *pszLineBuffer, int cchLineBuffer)
+{
+    char *          pszLine = pszLineBuffer;
+    char *          psz = *(char**)(void*)ppv;
+    register char   ch;
+
+    /* first line? */
+    if (psz == NULL)
+        psz = pvBuffer;
+
+    /* Copy to end of the line or end of the linebuffer. */
+    ch = *psz;
+    cchLineBuffer--; /* reserve space for '\0' */
+    while (cchLineBuffer > 0 && ch != '\0' && ch != '\n' && ch != '\r')
+    {
+        *pszLine++ = ch;
+        ch = *++psz;
+    }
+    *pszLine = '\0';
+
+    /* skip line end */
+    if (ch == '\n')
+        ch = *++psz;
+    if (ch == '\r')
+        psz++;
+
+    /* check if position has changed - if unchanged it's the end of file! */
+    if (*ppv == (void*)psz)
+        pszLineBuffer = NULL;
+
+    /* store current position */
+    *ppv = (void*)psz;
+
+    return pszLineBuffer;
 }
 
 
@@ -1771,17 +1907,21 @@ static BOOL  depWriteFile(const char *pszFilename)
     {
         char     szBuffer[4096];
         int      iBuffer = 0;
+        int      cch;
         PDEPRULE pdep = pdepList;
 
         while (pdep != NULL)
         {
             /* Write rule. Flush the buffer first if necessary. */
-            if (iBuffer + 2 >= sizeof(szBuffer))
+            cch = strlen(pdep->pszRule);
+            if (iBuffer + cch + 2 >= sizeof(szBuffer))
             {
                 fwrite(szBuffer, iBuffer, 1, phFile);
                 iBuffer = 0;
             }
-            iBuffer += sprintf(szBuffer + iBuffer, "%s:", pdep->pszRule);
+            strcpy(szBuffer + iBuffer, pdep->pszRule);
+            iBuffer += cch;
+            strcpy(szBuffer + iBuffer++, ":");
 
             /* write rule dependants. */
             if (pdep->papszDep != NULL)
@@ -1913,6 +2053,7 @@ static void *depAddRule(const char *pszRulePath, const char *pszName, const char
     else
         pdepPrev->pNext = pNew;
 
+    _heap_check();
     return pNew;
 }
 
@@ -1929,9 +2070,9 @@ static BOOL  depAddDepend(void *pvRule, const char *pszDep)
     PDEPRULE pdep = (PDEPRULE)pvRule;
 
     /* allocate more array space */
-    if (pdep->cDeps == 0 || ((pdep->cDeps + 2) % 32) == 0)
+    if (((pdep->cDeps) % 48) == 0)
     {
-        pdep->papszDep = realloc(pdep->papszDep, sizeof(char*) * (pdep->cDeps + 32));
+        pdep->papszDep = realloc(pdep->papszDep, sizeof(char*) * (pdep->cDeps + 50));
         if (pdep->papszDep == NULL)
         {
             pdep->cDeps = 0;
@@ -1948,26 +2089,16 @@ static BOOL  depAddDepend(void *pvRule, const char *pszDep)
     pdep->papszDep[++pdep->cDeps] = NULL;
 
     /* successful! */
+    _heap_check();
     return TRUE;
 }
 
-
-
-/**
- * Removes double dependencies.
- * @returns   Success indicator.
- * @param     pszFilename  Depend filename.
- */
-static BOOL depCleanFile(const char *pszFilename)
-{
-    if (depReadFile(pszFilename))
-        return depWriteFile(pszFilename);
-    return FALSE;
-}
 
 
 /*
  * Testing purpose.
  */
 #include <os2.h>
+
+
 

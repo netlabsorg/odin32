@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2000-03-11 18:07:48 bird Exp $
+# $Id: makefile,v 1.4 2000-03-16 21:10:10 bird Exp $
 
 #
 # PD-Win32 API
@@ -14,11 +14,12 @@ PDWIN32_INCLUDE = ..\..\include
 
 # Addjust common definitions
 !ifdef DEBUG
-CFLAGS   = $(CFLAGS)  -Ge+ -Tx+ -I$(PDWIN32_INCLUDE) -I..\common  \
-           -W3 -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext- -O+
+CFLAGS   = $(CFLAGS)  -Ge+ -Tx+ -I..\common \
+           -W3 -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext- -O+ -Tm-
+#          -W3 -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext- -Gh+
 LDFLAGS  = $(LDFLAGS) -Ge+ -Fe$@ /B"/MAP:full"
 !else
-CFLAGS   = $(CFLAGS)  -Ge+ -Tx+ -I$(PDWIN32_INCLUDE) -I..\common      \
+CFLAGS   = $(CFLAGS)  -Ge+ -Tx+ -I..\common      \
            -W3 -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext-
 LDFLAGS  = $(LDFLAGS) -Ge+ -Fe$@ /B"/MAP:full"
 !endif
@@ -28,17 +29,16 @@ LDFLAGS  = $(LDFLAGS) -Ge+ -Fe$@ /B"/MAP:full"
 all: fastdep.exe ..\bin\fastdep.exe
 
 
-fastdep.exe: fastdep.obj
-   $(LD) $(LDFLAGS) $** $(RTLLIB) os2386.lib
+fastdep.exe: fastdep.obj avl.obj
+    $(LD) $(LDFLAGS) $** $(RTLLIB) os2386.lib
+#   $(LD) $(LDFLAGS) $** CPPOPA3.OBJ $(RTLLIB) os2386.lib
 
 ..\bin\fastdep.exe: fastdep.exe
    $(CP) $** $@
 
+
 dep: # dummy rule
 
+
 clean:
-   -@$(RM) *.obj
-   -@$(RM) *.exe
-   -@$(RM) *.map
-   -@$(RM) *.pch
-   -@$(RM) *.log
+   -@$(RM) *.obj *.exe *.map *.pch *.log ..\bin\fastdep.exe
