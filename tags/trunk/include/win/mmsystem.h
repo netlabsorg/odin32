@@ -1,4 +1,3 @@
-/* $Id: mmsystem.h,v 1.11 2002-05-22 15:49:21 sandervl Exp $ */
 /* 
  * MMSYSTEM - Multimedia Wine Extension ... :-)
  */
