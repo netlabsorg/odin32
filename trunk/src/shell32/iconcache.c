@@ -1,4 +1,4 @@
-/* $Id: iconcache.c,v 1.7 2002-06-09 12:41:21 sandervl Exp $ */
+/* $Id: iconcache.c,v 1.8 2002-11-13 14:42:27 sandervl Exp $ */
 /*
  *	shell icon cache (SIC)
  *
@@ -743,7 +743,7 @@ typedef struct
 } SIC_ENTRY, * LPSIC_ENTRY;
 
 static HDPA		sic_hdpa = 0;
-static CRITICAL_SECTION	SHELL32_SicCS = CRITICAL_SECTION_INIT;
+static CRITICAL_SECTION SHELL32_SicCS = CRITICAL_SECTION_INIT("SHELL32_SicCS");
 
 /*****************************************************************************
  * SIC_CompareEntrys			[called by comctl32.dll]
