@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.60 2000-11-19 09:02:05 bird Exp $
+# $Id: Makefile,v 1.61 2000-11-23 15:12:06 bird Exp $
 #
 # Win32k makefile.
 #
@@ -508,7 +508,7 @@ $(WIN32KBIN)\mkcalltab.exe: clfix.exe $(MKCALLTABOBJS)
 # Win32k.sys rule. (Don't mess with the order or objects and libraries!)
 ################################################################################
 $(NAME).sys: $(WIN32KBIN)\$(NAME).sys
-$(WIN32KBIN)\$(NAME).sys: clfix.exe $(OBJS) $(LIBS) $(NAME).def $(LASTOBJ) $(LIBSINIT) makefile
+$(WIN32KBIN)\$(NAME).sys: clfix.exe $(OBJS) $(LIBS) $(NAME)new.def $(LASTOBJ) $(LIBSINIT) makefile
     -@$(ECHO) recompiling d16globl to get correct build time and date:
     $(CC16) -c $(CFLAGS16) $(CDEFINES16) $(CINCLUDES16) -Fo$(WIN32KOBJ)\d16globl.obj \
         -Fa$(WIN32KLIST)\d16globl.s dev16\d16globl.c
@@ -522,7 +522,7 @@ $(OBJS:  =^
 $(LIBS:  =^
 )
 $(LASTOBJ)
-$(NAME).def
+$(NAME)new.def
 <<KEEP
     cd $(WIN32KBIN)
     @mapsym $(*B).map > nul
@@ -530,6 +530,11 @@ $(NAME).def
     $(CP) $@ $(PDWIN32_BIN)
     $(CP) $*.sym $(PDWIN32_BIN)
     $(CP) $(WIN32KBASE)\$(*B).ddp $(PDWIN32_BIN)
+
+$(NAME)new.def: $(NAME).def makefile MakeDesc.cmd
+    -$(ECHO) Creates $@ with bldlevel signature string.
+    @$(CP) $(NAME).def $@
+    @MakeDesc.cmd $@ "ODIN" "0.05" "Odin32 Ring-0 support driver - copyright (c) 1998-2000 knut st. osmundsen"
 
 
 ################################################################################
