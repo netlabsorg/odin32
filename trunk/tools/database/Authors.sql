@@ -1,4 +1,4 @@
--- $Id: Authors.sql,v 1.5 2000-07-18 22:13:45 bird Exp $
+-- $Id: Authors.sql,v 1.6 2000-07-18 22:18:55 bird Exp $
 --
 -- Insert authors.
 --
@@ -54,7 +54,7 @@ INSERT INTO author VALUES (40,  'Jens Wiessner',            'JW',   'jens',     
 INSERT INTO author VALUES (41,  'Christian Langanke',       'CL',   'cla',      'cbratschi@datacomm.ch',        NULL,               NULL);
 INSERT INTO author VALUES (42,  'Marco A. Morales',         'MAM',  NULL,       NULL,                           NULL,               NULL);
 INSERT INTO author VALUES (43,  'Richard P. Burke',         'RPB',  NULL,       NULL,                           NULL,               NULL);
-INSERT INTO author VALUES (44,  'TechnicalDirector@webwombat.com.au', 'TDi', NULL, 'TechnicalDirector@webwombat.com.au', NULL,      NULL);
+INSERT INTO author VALUES (44,  'TechnicalDirector@...',     'TDi', NULL, 'TechnicalDirector@webwombat.com.au', NULL,      NULL);
 INSERT INTO author VALUES (45,  'Charles Hunter',           'CH',   NULL,       NULL,                           NULL,               NULL);
 INSERT INTO author VALUES (46,  'Ahti Heinla',              'AHe',  NULL,       NULL,                           NULL,               NULL);
 INSERT INTO author VALUES (47,  'John P Baker',             'JPB',  NULL,       NULL,                           NULL,               NULL);
