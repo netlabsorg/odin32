@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1213 2001-01-09 20:53:43 sandervl Exp $ */
+/* $Id: changelog,v 1.1214 2001-01-09 20:54:11 sandervl Exp $ */
 
  2001-01-09: Sander van Leeuwen <sandervl@xs4all.nl>
     - INCLUDE\dcdata:
@@ -9,11 +9,6 @@
     - BIN\WGSS50.dll
                 o Binary distribution of WGSS50 added
 
- 2001-01-08: Sander van Leeuwen <sandervl@xs4all.nl>
-    - ReportingBugs.txt:
-                o Specify windows & system32 directory in bug reports
-                  (description included on how to determine this)
-
  2001-01-09: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - tools\dailybuild:
                 o Added wgss50.dll to the .ZIPs.
@@ -21,6 +16,11 @@
     - lib       o Added making of wgss50.lib.
                   (So, that it corresponds to the other libraries made there.)
                 o Converted wgss50.lib to a deffile.
+
+ 2001-01-08: Sander van Leeuwen <sandervl@xs4all.nl>
+    - ReportingBugs.txt:
+                o Specify windows & system32 directory in bug reports
+                  (description included on how to determine this)
 
  2001-01-08: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - tools\dailybuild:
