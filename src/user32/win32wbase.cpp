@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.289 2001-10-09 05:18:03 phaller Exp $ */
+/* $Id: win32wbase.cpp,v 1.290 2001-10-17 13:26:57 phaller Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2903,13 +2903,19 @@ HWND Win32BaseWindow::SetParent(HWND hwndNewParent)
 //******************************************************************************
 BOOL Win32BaseWindow::IsChild(HWND hwndParent)
 {
-    if(getParent()) {
-         if(getParent()->getWindowHandle() == hwndParent)
-             return TRUE;
+  // PH: Optimizer won't unroll calls to getParent() even
+  // in release build.
+  Win32BaseWindow *_parent = getParent();
+    
+  if(_parent) 
+  {
+    if(_parent->getWindowHandle() == hwndParent)
+      return TRUE;
 
-         return getParent()->IsChild(hwndParent);
-    }
-    else return 0;
+    return _parent->IsChild(hwndParent);
+  }
+  else 
+    return 0;
 }
 //******************************************************************************
 //******************************************************************************
@@ -3195,9 +3201,9 @@ HWND Win32BaseWindow::GetWindow(UINT uCmd)
     switch(uCmd)
     {
     case GW_HWNDFIRST:
-        if(getParent())
+        window = (Win32BaseWindow *)getParent();
+        if(window)
         {
-            window = (Win32BaseWindow *)getParent();
             hwndRelated = OSLibWinQueryWindow(window->getOS2WindowHandle(), QWOS_TOP);
             window = GetWindowFromOS2FrameHandle(hwndRelated);
             if(window) {
@@ -3213,8 +3219,8 @@ HWND Win32BaseWindow::GetWindow(UINT uCmd)
         break;
 
     case GW_HWNDLAST:
-        if(getParent()) {
-            window = (Win32BaseWindow *)getParent();
+        window = (Win32BaseWindow *)getParent();
+        if(window) {
             hwndRelated = OSLibWinQueryWindow(window->getOS2WindowHandle(), QWOS_BOTTOM);
             dprintf(("os2 handle %x", hwndRelated));
             window = GetWindowFromOS2FrameHandle(hwndRelated);
@@ -3263,10 +3269,13 @@ HWND Win32BaseWindow::GetWindow(UINT uCmd)
         break;
 
     case GW_OWNER:
-        if(getOwner()) {
-            hwndRelated = getOwner()->getWindowHandle();
+      {
+        Win32BaseWindow *owner = getOwner();
+        if(owner) {
+            hwndRelated = owner->getWindowHandle();
         }
         break;
+      }
 
     case GW_CHILD:
         hwndRelated = OSLibWinQueryWindow(getOS2WindowHandle(), QWOS_TOP);
