@@ -1,4 +1,4 @@
-/* $Id: setupapirsrc.orc,v 1.1 2001-01-20 18:06:12 sandervl Exp $ */
+/* $Id: setupapirsrc.orc,v 1.2 2002-06-15 10:44:06 sandervl Exp $ */
 
 #include "winuser.h"
 #include "odinrsrc.h"
@@ -39,3 +39,5 @@ BEGIN
 	VALUE "Translation", 0x409, 0x04E4
     END
 END
+
+#include "setupapi.orc"

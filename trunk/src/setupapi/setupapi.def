@@ -19,7 +19,7 @@ EXPORTS
   SetupCloseInfFile                = _SetupCloseInfFile@4           @57
 ; 58 stdcall SetupCommitFileQueue()                           SetupCommitFileQueue
   SetupCommitFileQueueA            = _SetupCommitFileQueueA@16      @59
-; 60 stdcall SetupCommitFileQueueW()                          SetupCommitFileQueueW
+  SetupCommitFileQueueW            = _SetupCommitFileQueueW@16      @60
 ; 61 stdcall SetupCopyErrorA()                                SetupCopyErrorA
 ; 62 stdcall SetupCopyErrorW()                                SetupCopyErrorW
 ; 63 stdcall SetupCreateDiskSpaceListA()                      SetupCreateDiskSpaceListA
@@ -28,7 +28,7 @@ EXPORTS
 ; 66 stdcall SetupDecompressOrCopyFileW()                     SetupDecompressOrCopyFileW
 ; 67 stdcall SetupDefaultQueueCallback()                      SetupDefaultQueueCallback
   SetupDefaultQueueCallbackA       = _SetupDefaultQueueCallbackA@16 @68
-; 69 stdcall SetupDefaultQueueCallbackW()                     SetupDefaultQueueCallbackW
+  SetupDefaultQueueCallbackW       = _SetupDefaultQueueCallbackW@16 @69
 ; 70 stdcall SetupDeleteErrorA()                              SetupDeleteErrorA
 ; 71 stdcall SetupDeleteErrorW()                              SetupDeleteErrorW
 ; 72 stdcall SetupDestroyDiskSpaceList()                      SetupDestroyDiskSpaceList
@@ -50,10 +50,11 @@ EXPORTS
 ; 88 stdcall SetupDiDeleteDevRegKey()                         SetupDiDeleteDevRegKey
 ; 89 stdcall SetupDiDeleteDeviceInfo()                        SetupDiDeleteDeviceInfo
 ; 90 stdcall SetupDiDestroyClassImageList()                   SetupDiDestroyClassImageList
-; 91 stdcall SetupDiDestroyDeviceInfoList()                   SetupDiDestroyDeviceInfoList
-; 92 stdcall SetupDiDestroyDriverInfoList()                   SetupDiDestroyDriverInfoList
+  SetupDiDestroyDeviceInfoList = _SetupDiDestroyDeviceInfoList@4         @91
+; 92 stdcall SetupDiDestroyDriverInfoList
 ; 93 stdcall SetupDiDrawMiniIcon()                            SetupDiDrawMiniIcon
-; 94 stdcall SetupDiEnumDeviceInfo()                          SetupDiEnumDeviceInfo
+  SetupDiEnumDeviceInfo        = _SetupDiEnumDeviceInfo@12               @94
+  SetupDiEnumDeviceInterfaces  = _SetupDiEnumDeviceInterfaces@20         @95
 ; 95 stdcall SetupDiEnumDriverInfoA()                         SetupDiEnumDriverInfoA
 ; 96 stdcall SetupDiEnumDriverInfoW()                         SetupDiEnumDriverInfoW
 ; 97 stdcall SetupDiGetActualSectionToInstallA()              SetupDiGetActualSectionToInstallA
@@ -63,7 +64,7 @@ EXPORTS
 ;101 stdcall SetupDiGetClassDescriptionW()                    SetupDiGetClassDescriptionW
 ;102 stdcall SetupDiGetClassDevPropertySheetsA()              SetupDiGetClassDevPropertySheetsA
 ;103 stdcall SetupDiGetClassDevPropertySheetsW()              SetupDiGetClassDevPropertySheetsW
-;104 stdcall SetupDiGetClassDevsA()                           SetupDiGetClassDevsA
+  SetupDiGetClassDevsA         = _SetupDiGetClassDevsA@16                @103
 ;105 stdcall SetupDiGetClassDevsW()                           SetupDiGetClassDevsW
 ;106 stdcall SetupDiGetClassImageIndex()                      SetupDiGetClassImageIndex
 ;107 stdcall SetupDiGetClassImageList()                       SetupDiGetClassImageList
@@ -74,12 +75,14 @@ EXPORTS
 ;112 stdcall SetupDiGetDeviceInstallParamsW()                 SetupDiGetDeviceInstallParamsW
 ;113 stdcall SetupDiGetDeviceInstanceIdA()                    SetupDiGetDeviceInstanceIdA
 ;114 stdcall SetupDiGetDeviceInstanceIdW()                    SetupDiGetDeviceInstanceIdW
-;115 stdcall SetupDiGetDeviceRegistryPropertyA()              SetupDiGetDeviceRegistryPropertyA
+  SetupDiGetDeviceRegistryPropertyA = _SetupDiGetDeviceRegistryPropertyA@28 @115
 ;116 stdcall SetupDiGetDeviceRegistryPropertyW()              SetupDiGetDeviceRegistryPropertyW
-;117 stdcall SetupDiGetDriverInfoDetailA()                    SetupDiGetDriverInfoDetailA
-;118 stdcall SetupDiGetDriverInfoDetailW()                    SetupDiGetDriverInfoDetailW
+;  SetupDiGetDriverInfoDetailA  = _SetupDiGetDriverInfoDetailA@24         @117
+;  SetupDiGetDriverInfoDetailW  = _SetupDiGetDriverInfoDetailW@24         @118
 ;119 stdcall SetupDiGetDriverInstallParamsA()                 SetupDiGetDriverInstallParamsA
 ;120 stdcall SetupDiGetDriverInstallParamsW()                 SetupDiGetDriverInstallParamsW
+  SetupDiGetDeviceInterfaceDetailA = _SetupDiGetDeviceInterfaceDetailA@24    @121
+  SetupDiGetDeviceInterfaceDetailW = _SetupDiGetDeviceInterfaceDetailW@24    @122
 ;121 stdcall SetupDiGetHwProfileFriendlyNameA()               SetupDiGetHwProfileFriendlyNameA
 ;122 stdcall SetupDiGetHwProfileFriendlyNameW()               SetupDiGetHwProfileFriendlyNameW
 ;123 stdcall SetupDiGetHwProfileList()                        SetupDiGetHwProfileList
@@ -117,29 +120,31 @@ EXPORTS
 ;155 stdcall SetupDuplicateDiskSpaceListA()                   SetupDuplicateDiskSpaceListA
 ;156 stdcall SetupDuplicateDiskSpaceListW()                   SetupDuplicateDiskSpaceListW
   SetupFindFirstLineA                      = _SetupFindFirstLineA@16       @157
-;158 stdcall SetupFindFirstLineW()                            SetupFindFirstLineW
+  SetupFindFirstLineW                      = _SetupFindFirstLineW@16       @158
   SetupFindNextLine                        = _SetupFindNextLine@8          @159
-;160 stdcall SetupFindNextMatchLineA()                        SetupFindNextMatchLineA
-;161 stdcall SetupFindNextMatchLineW()                        SetupFindNextMatchLineW
+  SetupFindNextMatchLineA                  = _SetupFindNextMatchLineA@12   @160
+  SetupFindNextMatchLineW                  = _SetupFindNextMatchLineW@12   @161
 ;162 stdcall SetupFreeSourceListA()                           SetupFreeSourceListA
 ;163 stdcall SetupFreeSourceListW()                           SetupFreeSourceListW
-;164 stdcall SetupGetBinaryField()                            SetupGetBinaryField
-;165 stdcall SetupGetFieldCount()                             SetupGetFieldCount
+  SetupGetBinaryField                      = _SetupGetBinaryField@20       @164
+  SetupGetFieldCount                       = _SetupGetFieldCount@4         @165
 ;166 stdcall SetupGetFileCompressionInfoA()                   SetupGetFileCompressionInfoA
 ;167 stdcall SetupGetFileCompressionInfoW()                   SetupGetFileCompressionInfoW
+  SetupGetFileQueueCount                   = _SetupGetFileQueueCount@12    @168
+  SetupGetFileQueueFlags                   = _SetupGetFileQueueFlags@8     @169
 ;168 stdcall SetupGetInfFileListA()                           SetupGetInfFileListA
 ;169 stdcall SetupGetInfFileListW()                           SetupGetInfFileListW
 ;170 stdcall SetupGetInfInformationA()                        SetupGetInfInformationA
 ;171 stdcall SetupGetInfInformationW()                        SetupGetInfInformationW
-;172 stdcall SetupGetIntField()                               SetupGetIntField
+  SetupGetIntField                         = _SetupGetIntField@12          @172
   SetupGetLineByIndexA                     = _SetupGetLineByIndexA@16      @173
-;174 stdcall SetupGetLineByIndexW()                           SetupGetLineByIndexW
-;175 stdcall SetupGetLineCountA()                             SetupGetLineCountA
-;176 stdcall SetupGetLineCountW()                             SetupGetLineCountW
+  SetupGetLineByIndexW                     = _SetupGetLineByIndexW@16      @174
+  SetupGetLineCountA                       = _SetupGetLineCountA@8         @175
+  SetupGetLineCountW                       = _SetupGetLineCountW@8         @176
   SetupGetLineTextA                        = _SetupGetLineTextA@28         @177
-;178 stdcall SetupGetLineTextW()                              SetupGetLineTextW
-;179 stdcall SetupGetMultiSzFieldA()                          SetupGetMultiSzFieldA
-;180 stdcall SetupGetMultiSzFieldW()                          SetupGetMultiSzFieldW
+  SetupGetLineTextW                        = _SetupGetLineTextW@28         @178
+  SetupGetMultiSzFieldA                    = _SetupGetMultiSzFieldA@20     @179
+  SetupGetMultiSzFieldW                    = _SetupGetMultiSzFieldW@20     @180
 ;181 stdcall SetupGetSourceFileLocationA()                    SetupGetSourceFileLocationA
 ;182 stdcall SetupGetSourceFileLocationW()                    SetupGetSourceFileLocationW
 ;183 stdcall SetupGetSourceFileSizeA()                        SetupGetSourceFileSizeA
@@ -147,10 +152,10 @@ EXPORTS
 ;185 stdcall SetupGetSourceInfoA()                            SetupGetSourceInfoA
 ;186 stdcall SetupGetSourceInfoW()                            SetupGetSourceInfoW
   SetupGetStringFieldA                     = _SetupGetStringFieldA@20      @187
-;188 stdcall SetupGetStringFieldW()                           SetupGetStringFieldW
+  SetupGetStringFieldW                     = _SetupGetStringFieldW@20      @188
 ;189 stdcall SetupGetTargetPathA()                            SetupGetTargetPathA
 ;190 stdcall SetupGetTargetPathW()                            SetupGetTargetPathW
-  SetupInitDefaultQueueCallback            = _SetupInitDefaultQueueCallback@4 @191
+  SetupInitDefaultQueueCallback            = _SetupInitDefaultQueueCallback@4    @191
   SetupInitDefaultQueueCallbackEx          = _SetupInitDefaultQueueCallbackEx@20 @192
 ;193 stdcall SetupInitializeFileLogA()                        SetupInitializeFileLogA
 ;194 stdcall SetupInitializeFileLogW()                        SetupInitializeFileLogW
@@ -158,10 +163,10 @@ EXPORTS
 ;196 stdcall SetupInstallFileExA()                            SetupInstallFileExA
 ;197 stdcall SetupInstallFileExW()                            SetupInstallFileExW
 ;198 stdcall SetupInstallFileW()                              SetupInstallFileW
-;199 stdcall SetupInstallFilesFromInfSectionA()               SetupInstallFilesFromInfSectionA
-;200 stdcall SetupInstallFilesFromInfSectionW()               SetupInstallFilesFromInfSectionW
-  SetupInstallFromInfSectionA               = _SetupInstallFromInfSectionA@44 @201
-;202 stdcall SetupInstallFromInfSectionW()                    SetupInstallFromInfSectionW
+  SetupInstallFilesFromInfSectionA          = _SetupInstallFilesFromInfSectionA@24  @199
+  SetupInstallFilesFromInfSectionW          = _SetupInstallFilesFromInfSectionW@24  @200
+  SetupInstallFromInfSectionA               = _SetupInstallFromInfSectionA@44       @201
+  SetupInstallFromInfSectionW               = _SetupInstallFromInfSectionW@44       @202
 ;203 stdcall SetupInstallServicesFromInfSectionA()            SetupInstallServicesFromInfSectionA
 ;204 stdcall SetupInstallServicesFromInfSectionW()            SetupInstallServicesFromInfSectionW
   SetupIterateCabinetA                      = _SetupIterateCabinetA@16    @203
@@ -169,10 +174,10 @@ EXPORTS
 ;207 stdcall SetupLogFileA()                                  SetupLogFileA
 ;208 stdcall SetupLogFileW()                                  SetupLogFileW
   SetupOpenAppendInfFileA                   = _SetupOpenAppendInfFileA@12 @209
-;210 stdcall SetupOpenAppendInfFileW()                        SetupOpenAppendInfFileW
+  SetupOpenAppendInfFileW                   = _SetupOpenAppendInfFileW@12 @210
   SetupOpenFileQueue                        = _SetupOpenFileQueue@0       @211
   SetupOpenInfFileA                         = _SetupOpenInfFileA@16       @212
-;213 stdcall SetupOpenInfFileW()                              SetupOpenInfFileW
+  SetupOpenInfFileW                         = _SetupOpenInfFileW@16       @213
 ;214 stdcall SetupOpenMasterInf()                             SetupOpenMasterInf
 ;215 stdcall SetupPromptForDiskA()                            SetupPromptForDiskA
 ;216 stdcall SetupPromptForDiskW()                            SetupPromptForDiskW
@@ -189,20 +194,22 @@ EXPORTS
 ;227 stdcall SetupQuerySourceListW()                          SetupQuerySourceListW
 ;228 stdcall SetupQuerySpaceRequiredOnDriveA()                SetupQuerySpaceRequiredOnDriveA
 ;229 stdcall SetupQuerySpaceRequiredOnDriveW()                SetupQuerySpaceRequiredOnDriveW
-  SetupQueueCopyA                            = _SetupQueueCopyA@36        @230
-;231 stdcall SetupQueueCopySectionA()                         SetupQueueCopySectionA
-;232 stdcall SetupQueueCopySectionW()                         SetupQueueCopySectionW
-;233 stdcall SetupQueueCopyW()                                SetupQueueCopyW
-;234 stdcall SetupQueueDefaultCopyA()                         SetupQueueDefaultCopyA
-;235 stdcall SetupQueueDefaultCopyW()                         SetupQueueDefaultCopyW
-;236 stdcall SetupQueueDeleteA()                              SetupQueueDeleteA
-;237 stdcall SetupQueueDeleteSectionA()                       SetupQueueDeleteSectionA
-;238 stdcall SetupQueueDeleteSectionW()                       SetupQueueDeleteSectionW
-;239 stdcall SetupQueueDeleteW()                              SetupQueueDeleteW
-;240 stdcall SetupQueueRenameA()                              SetupQueueRenameA
-;241 stdcall SetupQueueRenameSectionA()                       SetupQueueRenameSectionA
-;242 stdcall SetupQueueRenameSectionW()                       SetupQueueRenameSectionW
-;243 stdcall SetupQueueRenameW()                              SetupQueueRenameW
+  SetupQueueCopyA                            = _SetupQueueCopyA@36          @230
+  SetupQueueCopyIndirectA                    = _SetupQueueCopyIndirectA@4   @231
+  SetupQueueCopyIndirectW                    = _SetupQueueCopyIndirectW@4   @232
+  SetupQueueCopySectionA                     = _SetupQueueCopySectionA@24   @233
+  SetupQueueCopySectionW                     = _SetupQueueCopySectionW@24   @234
+  SetupQueueCopyW                            = _SetupQueueCopyW@36          @235
+  SetupQueueDefaultCopyA                     = _SetupQueueDefaultCopyA@24   @236
+  SetupQueueDefaultCopyW                     = _SetupQueueDefaultCopyW@24   @237
+  SetupQueueDeleteA                          = _SetupQueueDeleteA@12        @238
+  SetupQueueDeleteSectionA                   = _SetupQueueDeleteSectionA@16 @239
+  SetupQueueDeleteSectionW                   = _SetupQueueDeleteSectionW@16 @240
+  SetupQueueDeleteW                          = _SetupQueueDeleteW@12        @241
+  SetupQueueRenameA                          = _SetupQueueRenameA@20        @242
+  SetupQueueRenameSectionA                   = _SetupQueueRenameSectionA@16 @243
+  SetupQueueRenameSectionW                   = _SetupQueueRenameSectionW@16 @244
+  SetupQueueRenameW                          = _SetupQueueRenameW@20        @245
 ;244 stdcall SetupRemoveFileLogEntryA()                       SetupRemoveFileLogEntryA
 ;245 stdcall SetupRemoveFileLogEntryW()                       SetupRemoveFileLogEntryW
 ;246 stdcall SetupRemoveFromDiskSpaceListA()                  SetupRemoveFromDiskSpaceListA
@@ -216,15 +223,41 @@ EXPORTS
 ;254 stdcall SetupRenameErrorA()                              SetupRenameErrorA
 ;255 stdcall SetupRenameErrorW()                              SetupRenameErrorW
 ;256 stdcall SetupScanFileQueue()                             SetupScanFileQueue
-;257 stdcall SetupScanFileQueueA()                            SetupScanFileQueueA
-;258 stdcall SetupScanFileQueueW()                            SetupScanFileQueueW
+  SetupScanFileQueueA                        = _SetupScanFileQueueA@24    @257
+  SetupScanFileQueueW                        = _SetupScanFileQueueW@24    @258
   SetupSetDirectoryIdA                       = _SetupSetDirectoryIdA@12   @259
 ;260 stdcall SetupSetDirectoryIdExA(long long str long long ptr)  SetupSetDirectoryIdExA
 ;261 stdcall SetupSetDirectoryIdExW(long long wstr long long ptr) SetupSetDirectoryIdExW
-;262 stdcall SetupSetDirectoryIdW(long long wstr)             SetupSetDirectoryIdW
+  SetupSetDirectoryIdW                       = _SetupSetDirectoryIdW@12   @262
 ;263 stdcall SetupSetPlatformPathOverrideA(str)               SetupSetPlatformPathOverrideA
 ;264 stdcall SetupSetPlatformPathOverrideW(wstr)              SetupSetPlatformPathOverrideW
 ;265 stdcall SetupSetSourceListA(long str long)               SetupSetSourceListA
 ;266 stdcall SetupSetSourceListW(long wstr long)              SetupSetSourceListW
   SetupTermDefaultQueueCallback              = _SetupTermDefaultQueueCallback@4 @267
 ;268 stdcall SetupTerminateFileLog(ptr)                       SetupTerminateFileLog
+;@ stub ShouldDeviceBeExcluded
+;@ stub StampFileSecurity
+;@ stub StringTableAddString
+;@ stub StringTableAddStringEx
+;@ stub StringTableDestroy
+;@ stub StringTableDuplicate
+;@ stub StringTableEnum
+;@ stub StringTableGetExtraData
+;@ stub StringTableInitialize
+;@ stub StringTableInitializeEx
+;@ stub StringTableLookUpString
+;@ stub StringTableLookUpStringEx
+;@ stub StringTableSetExtraData
+;@ stub StringTableStringFromId
+;@ stub StringTableTrim
+;@ stub TakeOwnershipOfFile
+;@ stub UnicodeToMultiByte
+;@ stub UnmapAndCloseFile
+;@ stub pSetupDirectoryIdToPath
+;@ stub pSetupGetField
+;@ stub pSetupGetOsLoaderDriveAndPath
+;@ stub pSetupGetVersionDatum
+;@ stub pSetupGuidFromString
+;@ stub pSetupIsGuidNull
+;@ stub pSetupMakeSurePathExists
+;@ stub pSetupStringFromGuid
