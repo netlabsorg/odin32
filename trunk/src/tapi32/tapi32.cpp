@@ -1,14 +1,12 @@
-/* $Id: tapi32.cpp,v 1.4 1999-08-19 17:05:19 phaller Exp $ */
+/* $Id: tapi32.cpp,v 1.5 2001-09-09 13:33:38 sandervl Exp $ */
 
-/*
- *
- * Project Odin Software License can be found in LICENSE.TXT
- *
- */
 /*
  * TAPI2032 stubs
  *
  * Copyright 1998 Felix Maschek
+ * Copyright 2001 Sander van Leeuwen
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #include <os2win.h>
@@ -19,16 +17,238 @@
 #include <odinwrap.h>
 #include <memory.h>
 //#include <comtype.h>
-#include "misc.h"
-#include "tapi32.h"
-#include "unicode.h"
-
+#include <misc.h>
+#include <tapi.h>
+#include <unicode.h>
 
 ODINDEBUGCHANNEL(TAPI32)
 
+#define TAPI_MAGIC	0x12345678
+
+typedef struct {
+   DWORD        magic;
+   HINSTANCE    hInstance;
+   LINECALLBACK lpfnCallback;
+} TAPIINFO, *LPTAPIINFO;
+
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION4(LONG, tapiRequestMakeCall,
+ODINFUNCTION5(DWORD, lineInitialize,
+              LPHLINEAPP, lphLineApp,
+              HINSTANCE, hInstance,
+              LINECALLBACK, lpfnCallback,
+              LPCSTR, lpszAppName,
+              LPDWORD, lpdwNumDevs)
+{
+  LPTAPIINFO tapiinfo;
+
+  if(lphLineApp)  *lphLineApp = 0;
+  if(lpdwNumDevs) *lpdwNumDevs = 0;
+
+  if(lpszAppName && *lpszAppName) {
+      dprintf(("lineInitialize %s", lpszAppName));
+  }
+  if(!lphLineApp || !lpdwNumDevs) {
+      return LINEERR_INVALPARAM;
+  }
+
+  tapiinfo = (LPTAPIINFO)HeapAlloc(GetProcessHeap(), 0, sizeof(TAPIINFO));
+  if(tapiinfo == NULL) {
+      return LINEERR_NOMEM;
+  }
+  tapiinfo->magic        = TAPI_MAGIC;
+  tapiinfo->lpfnCallback = lpfnCallback;
+  tapiinfo->hInstance    = hInstance;
+  *lphLineApp  = (HLINEAPP)tapiinfo;
+  *lpdwNumDevs = 1;
+  return 0;
+}
+//******************************************************************************
+//******************************************************************************
+ODINFUNCTION1(DWORD, lineShutdown,
+              HLINEAPP, hLineApp)
+{
+  LPTAPIINFO tapiinfo = (LPTAPIINFO)hLineApp;
+
+  if(hLineApp == NULL || tapiinfo->magic != TAPI_MAGIC) {
+      return LINEERR_INVALAPPHANDLE;
+  }
+  HeapFree(GetProcessHeap(), 0, tapiinfo);
+  return LINEERR_OPERATIONFAILED;
+}
+//******************************************************************************
+//******************************************************************************
+ODINFUNCTION6(DWORD, lineNegotiateAPIVersion,
+              HLINEAPP, hLineApp,
+              DWORD, dwDeviceID,
+              DWORD, dwAPILowVersion,
+              DWORD, dwAPIHighVersion,
+              LPDWORD, lpdwAPIVersion,
+              LPLINEEXTENSIONID, lpExtensionID)
+{
+  LPTAPIINFO tapiinfo = (LPTAPIINFO)hLineApp;
+
+  if(hLineApp == NULL || tapiinfo->magic != TAPI_MAGIC) {
+      return LINEERR_INVALAPPHANDLE;
+  }
+  if(dwDeviceID > 0) {
+      return LINEERR_NODEVICE;
+  }
+  if(!lpdwAPIVersion) {
+      return LINEERR_INVALPARAM;
+  }
+  *lpdwAPIVersion = dwAPIHighVersion;
+  return 0;
+}
+//******************************************************************************
+//******************************************************************************
+ODINFUNCTION6(DWORD, lineNegotiateExtVersion,
+              HLINEAPP, hLineApp,
+              DWORD, dwDeviceID,
+              DWORD, dwAPIVersion,
+              DWORD, dwExtLowVersion,
+              DWORD, dwExtHighVersion,
+              LPDWORD, lpdwExtVersion)
+{
+  LPTAPIINFO tapiinfo = (LPTAPIINFO)hLineApp;
+
+  if(hLineApp == NULL || tapiinfo->magic != TAPI_MAGIC) {
+      return LINEERR_INVALAPPHANDLE;
+  }
+  if(dwDeviceID > 0) {
+      return LINEERR_NODEVICE;
+  }
+  if(!lpdwExtVersion) {
+      return LINEERR_INVALPARAM;
+  }
+  *lpdwExtVersion = dwExtHighVersion;
+  return 0;
+}
+//******************************************************************************
+//******************************************************************************
+ODINFUNCTION5(DWORD, lineGetDevCaps,
+              HLINEAPP, hLineApp,
+              DWORD, dwDeviceID,
+              DWORD, dwAPIVersion,
+              DWORD, dwExtVersion,
+              LPLINEDEVCAPS, lpLineDevCaps)
+{
+  LPTAPIINFO tapiinfo = (LPTAPIINFO)hLineApp;
+  DWORD totalsize;
+
+  if(hLineApp == NULL || tapiinfo->magic != TAPI_MAGIC) {
+      return LINEERR_INVALAPPHANDLE;
+  }
+  if(dwDeviceID > 0 && dwDeviceID != -1) {
+      return LINEERR_NODEVICE;
+  }
+  if(!lpLineDevCaps) {
+      return LINEERR_INVALPARAM;
+  }
+  totalsize = lpLineDevCaps->dwTotalSize;
+  if(lpLineDevCaps->dwTotalSize < sizeof(LINEDEVCAPS)) {
+      lpLineDevCaps->dwNeededSize = sizeof(LINEDEVCAPS);
+      return 0;
+  }
+  memset(lpLineDevCaps, 0, totalsize);
+  lpLineDevCaps->dwTotalSize   = totalsize;
+  lpLineDevCaps->dwNeededSize  = sizeof(LINEDEVCAPS);
+  lpLineDevCaps->dwBearerModes = LINEBEARERMODE_VOICE;
+  lpLineDevCaps->dwMediaModes  = LINEMEDIAMODE_DATAMODEM;
+  lpLineDevCaps->dwLineFeatures= LINEFEATURE_MAKECALL;
+
+  return 0;
+}
+//******************************************************************************
+//******************************************************************************
+ODINFUNCTION3(DWORD, lineGetTranslateCaps,
+              HLINEAPP, hLineApp,
+              DWORD, dwAPIVersion,
+              LPLINETRANSLATECAPS, lpTranslateCaps)
+{
+  LPTAPIINFO tapiinfo = (LPTAPIINFO)hLineApp;
+  LPLINELOCATIONENTRY lpLocationEntry;
+  DWORD totalsize;
+
+  if(hLineApp == NULL || tapiinfo->magic != TAPI_MAGIC) {
+      return LINEERR_INVALAPPHANDLE;
+  }
+  if(!lpTranslateCaps) {
+      return LINEERR_INVALPARAM;
+  }
+  totalsize = lpTranslateCaps->dwTotalSize;
+  if(lpTranslateCaps->dwTotalSize < sizeof(LINETRANSLATECAPS) /* + sizeof(LINELOCATIONENTRY) */) {
+      lpTranslateCaps->dwNeededSize = sizeof(LINETRANSLATECAPS); //+ sizeof(LINELOCATIONENTRY);
+      return 0;
+  }
+  memset(lpTranslateCaps, 0, totalsize);
+  lpTranslateCaps->dwTotalSize   = totalsize;
+  lpTranslateCaps->dwNeededSize  = sizeof(LINETRANSLATECAPS); // + sizeof(LINELOCATIONENTRY);
+//  lpTranslateCaps->dwLocationListOffset = sizeof(LINETRANSLATECAPS);
+//  lpLocationEntry = (LPLINELOCATIONENTRY)
+//        (((LPBYTE) lpTranslateCaps) + lpTranslateCaps->dwLocationListOffset);
+//  lpLocationEntry = 
+  return 0;
+}
+//******************************************************************************
+//******************************************************************************
+ODINFUNCTION3(DWORD, lineGetCountry,
+              DWORD, dwCountryID,
+              DWORD, dwAPIVersion,
+              LPLINECOUNTRYLIST, lpLineCountryList)
+{
+  DWORD totalsize;
+
+  if(!lpLineCountryList) {
+      return LINEERR_INVALPARAM;
+  }
+  totalsize = lpLineCountryList->dwTotalSize;
+  if(lpLineCountryList->dwTotalSize < sizeof(LINECOUNTRYLIST)) {
+      lpLineCountryList->dwNeededSize = sizeof(LINECOUNTRYLIST);
+      return 0;
+  }
+  memset(lpLineCountryList, 0, totalsize);
+  lpLineCountryList->dwTotalSize   = totalsize;
+  lpLineCountryList->dwNeededSize  = sizeof(LINECOUNTRYLIST);
+  return 0;
+}
+//******************************************************************************
+//******************************************************************************
+ODINFUNCTION7(DWORD, lineTranslateAddress,
+              HLINEAPP, hLineApp,
+              DWORD, dwDeviceID,
+              DWORD, dwAPIVersion,
+              LPCSTR, lpszAddressIn,
+              DWORD, dwCard,
+              DWORD, dwTranslateOptions,
+              LPLINETRANSLATEOUTPUT, lpTranslateOutput)
+{
+  LPTAPIINFO tapiinfo = (LPTAPIINFO)hLineApp;
+  DWORD totalsize;
+
+  if(hLineApp == NULL || tapiinfo->magic != TAPI_MAGIC) {
+      return LINEERR_INVALAPPHANDLE;
+  }
+  if(dwDeviceID > 0 && dwDeviceID != -1) {
+      return LINEERR_NODEVICE;
+  }
+  if(!lpszAddressIn || !lpTranslateOutput) {
+      return LINEERR_INVALPARAM;
+  }
+  dprintf(("lineTranslateAddress %s", lpszAddressIn));
+  totalsize = lpTranslateOutput->dwTotalSize;
+  if(lpTranslateOutput->dwTotalSize < sizeof(LINETRANSLATEOUTPUT)) {
+      lpTranslateOutput->dwNeededSize = sizeof(LINETRANSLATEOUTPUT);
+      return 0;
+  }
+  memset(lpTranslateOutput, 0, totalsize);
+  lpTranslateOutput->dwTotalSize   = totalsize;
+
+  return 0;
+}
+//******************************************************************************
+//******************************************************************************
+ODINFUNCTION4(DWORD, tapiRequestMakeCall,
               LPCSTR, lpszDestAddress,
               LPCSTR, lpszAppName,
               LPCSTR, lpszCalledParty,
@@ -36,10 +256,9 @@ ODINFUNCTION4(LONG, tapiRequestMakeCall,
 {
   return LINEERR_OPERATIONFAILED;
 }
-
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION10(LONG, tapiRequestMediaCall,
+ODINFUNCTION10(DWORD, tapiRequestMediaCall,
               HWND, hWnd,
               WPARAM, wRequestID,
               LPCSTR, lpszDeviceClass,
@@ -56,7 +275,7 @@ ODINFUNCTION10(LONG, tapiRequestMediaCall,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(LONG, tapiRequestDrop,
+ODINFUNCTION2(DWORD, tapiRequestDrop,
               HWND, hWnd,
               WPARAM, wRequestID)
 {
@@ -65,7 +284,7 @@ ODINFUNCTION2(LONG, tapiRequestDrop,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION4(LONG, lineRegisterRequestRecipient,
+ODINFUNCTION4(DWORD, lineRegisterRequestRecipient,
               HLINEAPP, hLineApp,
               DWORD, dwRegistrationInstance,
               DWORD, dwRequestMode,
@@ -76,7 +295,7 @@ ODINFUNCTION4(LONG, lineRegisterRequestRecipient,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(LONG, tapiGetLocationInfo,
+ODINFUNCTION2(DWORD, tapiGetLocationInfo,
               LPSTR, lpszCountryCode,
               LPSTR, lpszCityCode)
 {
@@ -85,7 +304,7 @@ ODINFUNCTION2(LONG, tapiGetLocationInfo,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(LONG, lineSetCurrentLocation,
+ODINFUNCTION2(DWORD, lineSetCurrentLocation,
               HLINEAPP, hLineApp,
               DWORD, dwLocation)
 {
@@ -94,7 +313,7 @@ ODINFUNCTION2(LONG, lineSetCurrentLocation,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION4(LONG, lineSetTollList,
+ODINFUNCTION4(DWORD, lineSetTollList,
               HLINEAPP, hLineApp,
               DWORD, dwDeviceID,
               LPCSTR, lpszAddressIn,
@@ -105,31 +324,7 @@ ODINFUNCTION4(LONG, lineSetTollList,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION7(LONG, lineTranslateAddress,
-              HLINEAPP, hLineApp,
-              DWORD, dwDeviceID,
-              DWORD, dwAPIVersion,
-              LPCSTR, lpszAddressIn,
-              DWORD, dwCard,
-              DWORD, dwTranslateOptions,
-              LPLINETRANSLATEOUTPUT, lpTranslateOutput)
-{
-  return LINEERR_OPERATIONFAILED;
-}
-
-//******************************************************************************
-//******************************************************************************
-ODINFUNCTION3(LONG, lineGetTranslateCaps,
-              HLINEAPP, hLineApp,
-              DWORD, dwAPIVersion,
-              LPLINETRANSLATECAPS, lpTranslateCaps)
-{
-  return LINEERR_OPERATIONFAILED;
-}
-
-//******************************************************************************
-//******************************************************************************
-ODINFUNCTION3(LONG, lineAccept,
+ODINFUNCTION3(DWORD, lineAccept,
               HCALL, hCall,
               LPCSTR, lpsUserUserInfo,
               DWORD, dwSize)
@@ -139,7 +334,7 @@ ODINFUNCTION3(LONG, lineAccept,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(LONG, lineAddToConference,
+ODINFUNCTION2(DWORD, lineAddToConference,
               HCALL, hConfCall,
               HCALL, hConsultCall)
 {
@@ -148,7 +343,7 @@ ODINFUNCTION2(LONG, lineAddToConference,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(LONG, lineAnswer,
+ODINFUNCTION3(DWORD, lineAnswer,
               HCALL, hCall,
               LPCSTR, lpsUserUserInfo,
               DWORD, dwSize)
@@ -158,7 +353,7 @@ ODINFUNCTION3(LONG, lineAnswer,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(LONG, lineBlindTransfer,
+ODINFUNCTION3(DWORD, lineBlindTransfer,
               HCALL, hCall,
               LPCSTR, lpszDestAddress,
               DWORD, dwCountryCode)
@@ -168,7 +363,7 @@ ODINFUNCTION3(LONG, lineBlindTransfer,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(LONG, lineClose,
+ODINFUNCTION1(DWORD, lineClose,
               HLINE, hLine)
 {
   return LINEERR_OPERATIONFAILED;
@@ -176,7 +371,7 @@ ODINFUNCTION1(LONG, lineClose,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION4(LONG, lineCompleteCall,
+ODINFUNCTION4(DWORD, lineCompleteCall,
               HCALL, hCall,
               LPDWORD, lpdwCompletionID,
               DWORD, dwCompletionMode,
@@ -187,7 +382,7 @@ ODINFUNCTION4(LONG, lineCompleteCall,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION4(LONG, lineCompleteTransfer,
+ODINFUNCTION4(DWORD, lineCompleteTransfer,
               HCALL, hCall,
               HCALL, hConsultCall,
               LPHCALL, lphConfCall,
@@ -198,7 +393,7 @@ ODINFUNCTION4(LONG, lineCompleteTransfer,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(LONG, lineConfigDialog,
+ODINFUNCTION3(DWORD, lineConfigDialog,
               DWORD, dwDeviceID,
               HWND, hwndOwner,
               LPCSTR, lpszDeviceClass)
@@ -208,7 +403,7 @@ ODINFUNCTION3(LONG, lineConfigDialog,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION6(LONG, lineConfigDialogEdit,
+ODINFUNCTION6(DWORD, lineConfigDialogEdit,
               DWORD, dwDeviceID,
               HWND, hwndOwner,
               LPCSTR, lpszDeviceClass,
@@ -221,7 +416,7 @@ ODINFUNCTION6(LONG, lineConfigDialogEdit,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(LONG, lineDeallocateCall,
+ODINFUNCTION1(DWORD, lineDeallocateCall,
               HCALL, hCall)
 {
   return LINEERR_OPERATIONFAILED;
@@ -229,7 +424,7 @@ ODINFUNCTION1(LONG, lineDeallocateCall,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION5(LONG, lineDevSpecific,
+ODINFUNCTION5(DWORD, lineDevSpecific,
               HLINE, hLine,
               DWORD, dwAddressID,
               HCALL, hCall,
@@ -241,7 +436,7 @@ ODINFUNCTION5(LONG, lineDevSpecific,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION4(LONG, lineDevSpecificFeature,
+ODINFUNCTION4(DWORD, lineDevSpecificFeature,
               HLINE, hLine,
               DWORD, dwFeature,
               LPVOID, lpParams,
@@ -252,7 +447,7 @@ ODINFUNCTION4(LONG, lineDevSpecificFeature,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(LONG, lineDial,
+ODINFUNCTION3(DWORD, lineDial,
               HCALL, hCall,
               LPCSTR, lpszDestAddress,
               DWORD, dwCountryCode)
@@ -262,7 +457,7 @@ ODINFUNCTION3(LONG, lineDial,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(LONG, lineDrop,
+ODINFUNCTION3(DWORD, lineDrop,
               HCALL, hCall,
               LPCSTR, lpsUserUserInfo,
               DWORD, dwSize)
@@ -272,7 +467,7 @@ ODINFUNCTION3(LONG, lineDrop,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION7(LONG, lineForward,
+ODINFUNCTION7(DWORD, lineForward,
               HLINE, hLine,
               DWORD, bAllAddresses,
               DWORD, dwAddressID,
@@ -286,7 +481,7 @@ ODINFUNCTION7(LONG, lineForward,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION7(LONG, lineGatherDigits,
+ODINFUNCTION7(DWORD, lineGatherDigits,
               HCALL, hCall,
               DWORD, dwDigitModes,
               LPSTR, lpsDigits,
@@ -300,7 +495,7 @@ ODINFUNCTION7(LONG, lineGatherDigits,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION4(LONG, lineGenerateDigits,
+ODINFUNCTION4(DWORD, lineGenerateDigits,
               HCALL, hCall,
               DWORD, dwDigitMode,
               LPCSTR, lpszDigits,
@@ -311,7 +506,7 @@ ODINFUNCTION4(LONG, lineGenerateDigits,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION5(LONG, lineGenerateTone,
+ODINFUNCTION5(DWORD, lineGenerateTone,
               HCALL, hCall,
               DWORD, dwToneMode,
               DWORD, dwDuration,
@@ -323,7 +518,7 @@ ODINFUNCTION5(LONG, lineGenerateTone,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION6(LONG, lineGetAddressCaps,
+ODINFUNCTION6(DWORD, lineGetAddressCaps,
               HLINEAPP, hLineApp,
               DWORD, dwDeviceID,
               DWORD, dwAddressID,
@@ -336,7 +531,7 @@ ODINFUNCTION6(LONG, lineGetAddressCaps,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION5(LONG, lineGetAddressID,
+ODINFUNCTION5(DWORD, lineGetAddressID,
               HLINE, hLine,
               LPDWORD, lpdwAddressID,
               DWORD, dwAddressMode,
@@ -348,7 +543,7 @@ ODINFUNCTION5(LONG, lineGetAddressID,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(LONG, lineGetAddressStatus,
+ODINFUNCTION3(DWORD, lineGetAddressStatus,
               HLINE, hLine,
               DWORD, dwAddressID,
               LPLINEADDRESSSTATUS, lpAddressStatus)
@@ -358,7 +553,7 @@ ODINFUNCTION3(LONG, lineGetAddressStatus,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(LONG, lineGetCallInfo,
+ODINFUNCTION2(DWORD, lineGetCallInfo,
               HCALL, hCall,
               LPLINECALLINFO, lpCallInfo)
 {
@@ -367,7 +562,7 @@ ODINFUNCTION2(LONG, lineGetCallInfo,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(LONG, lineGetCallStatus,
+ODINFUNCTION2(DWORD, lineGetCallStatus,
               HCALL, hCall,
               LPLINECALLSTATUS, lpCallStatus)
 {
@@ -376,7 +571,7 @@ ODINFUNCTION2(LONG, lineGetCallStatus,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(LONG, lineGetConfRelatedCalls,
+ODINFUNCTION2(DWORD, lineGetConfRelatedCalls,
               HCALL, hCall,
               LPLINECALLLIST, lpCallList)
 {
@@ -385,19 +580,7 @@ ODINFUNCTION2(LONG, lineGetConfRelatedCalls,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION5(LONG, lineGetDevCaps,
-              HLINEAPP, hLineApp,
-              DWORD, dwDeviceID,
-              DWORD, dwAPIVersion,
-              DWORD, dwExtVersion,
-              LPLINEDEVCAPS, lpLineDevCaps)
-{
-  return LINEERR_OPERATIONFAILED;
-}
-
-//******************************************************************************
-//******************************************************************************
-ODINFUNCTION3(LONG, lineGetDevConfig,
+ODINFUNCTION3(DWORD, lineGetDevConfig,
               DWORD, dwDeviceID,
               LPVARSTRING, lpDeviceConfig,
               LPCSTR, lpszDeviceClass)
@@ -407,7 +590,7 @@ ODINFUNCTION3(LONG, lineGetDevConfig,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION4(LONG, lineGetNewCalls,
+ODINFUNCTION4(DWORD, lineGetNewCalls,
               HLINE, hLine,
               DWORD, dwAddressID,
               DWORD, dwSelect,
@@ -418,7 +601,7 @@ ODINFUNCTION4(LONG, lineGetNewCalls,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(LONG, lineGetIcon,
+ODINFUNCTION3(DWORD, lineGetIcon,
               DWORD, dwDeviceID,
               LPCSTR, lpszDeviceClass,
               LPHICON, lphIcon)
@@ -428,7 +611,7 @@ ODINFUNCTION3(LONG, lineGetIcon,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION6(LONG, lineGetID,
+ODINFUNCTION6(DWORD, lineGetID,
               HLINE, hLine,
               DWORD, dwAddressID,
               HCALL, hCall,
@@ -441,7 +624,7 @@ ODINFUNCTION6(LONG, lineGetID,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(LONG, lineGetLineDevStatus,
+ODINFUNCTION2(DWORD, lineGetLineDevStatus,
               HLINE, hLine,
               LPLINEDEVSTATUS, lpLineDevStatus)
 {
@@ -450,7 +633,7 @@ ODINFUNCTION2(LONG, lineGetLineDevStatus,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(LONG, lineGetNumRings,
+ODINFUNCTION3(DWORD, lineGetNumRings,
               HLINE, hLine,
               DWORD, dwAddressID,
               LPDWORD, lpdwNumRings)
@@ -460,7 +643,7 @@ ODINFUNCTION3(LONG, lineGetNumRings,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(LONG, lineGetRequest,
+ODINFUNCTION3(DWORD, lineGetRequest,
               HLINEAPP, hLineApp,
               DWORD, dwRequestMode,
               LPVOID, lpRequestBuffer)
@@ -470,7 +653,7 @@ ODINFUNCTION3(LONG, lineGetRequest,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(LONG, lineGetStatusMessages,
+ODINFUNCTION3(DWORD, lineGetStatusMessages,
               HLINE, hLine,
               LPDWORD, lpdwLineStates,
               LPDWORD, lpdwAddressStates)
@@ -480,7 +663,7 @@ ODINFUNCTION3(LONG, lineGetStatusMessages,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(LONG, lineHandoff,
+ODINFUNCTION3(DWORD, lineHandoff,
               HCALL, hCall,
               LPCSTR, lpszFileName,
               DWORD, dwMediaMode)
@@ -490,27 +673,14 @@ ODINFUNCTION3(LONG, lineHandoff,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(LONG, lineHold,
+ODINFUNCTION1(DWORD, lineHold,
               HCALL, hCall)
 {
   return LINEERR_OPERATIONFAILED;
 }
-
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION5(LONG, lineInitialize,
-              LPHLINEAPP, lphLineApp,
-              HINSTANCE, hInstance,
-              LINECALLBACK, lpfnCallback,
-              LPCSTR, lpszAppName,
-              LPDWORD, lpdwNumDevs)
-{
-  return LINEERR_NODEVICE;
-}
-
-//******************************************************************************
-//******************************************************************************
-ODINFUNCTION5(LONG, lineMakeCall,
+ODINFUNCTION5(DWORD, lineMakeCall,
               HLINE, hLine,
               LPHCALL, lphCall,
               LPCSTR, lpszDestAddress,
@@ -522,7 +692,7 @@ ODINFUNCTION5(LONG, lineMakeCall,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(LONG, lineMonitorDigits,
+ODINFUNCTION2(DWORD, lineMonitorDigits,
               HCALL, hCall,
               DWORD, dwDigitModes)
 {
@@ -531,7 +701,7 @@ ODINFUNCTION2(LONG, lineMonitorDigits,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(LONG, lineMonitorMedia,
+ODINFUNCTION2(DWORD, lineMonitorMedia,
               HCALL, hCall,
               DWORD, dwMediaModes)
 {
@@ -540,43 +710,16 @@ ODINFUNCTION2(LONG, lineMonitorMedia,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(LONG, lineMonitorTones,
+ODINFUNCTION3(DWORD, lineMonitorTones,
               HCALL, hCall,
               LPLINEMONITORTONE, lpToneList,
               DWORD, dwNumEntries)
 {
   return LINEERR_OPERATIONFAILED;
 }
-
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION6(LONG, lineNegotiateAPIVersion,
-              HLINEAPP, hLineApp,
-              DWORD, dwDeviceID,
-              DWORD, dwAPILowVersion,
-              DWORD, dwAPIHighVersion,
-              LPDWORD, lpdwAPIVersion,
-              LPLINEEXTENSIONID, lpExtensionID)
-{
-  return LINEERR_OPERATIONFAILED;
-}
-
-//******************************************************************************
-//******************************************************************************
-ODINFUNCTION6(LONG, lineNegotiateExtVersion,
-              HLINEAPP, hLineApp,
-              DWORD, dwDeviceID,
-              DWORD, dwAPIVersion,
-              DWORD, dwExtLowVersion,
-              DWORD, dwExtHighVersion,
-              LPDWORD, lpdwExtVersion)
-{
-  return LINEERR_OPERATIONFAILED;
-}
-
-//******************************************************************************
-//******************************************************************************
-ODINFUNCTION9(LONG, lineOpen,
+ODINFUNCTION9(DWORD, lineOpen,
               HLINEAPP, hLineApp,
               DWORD, dwDeviceID,
               LPHLINE, lphLine,
@@ -592,7 +735,7 @@ ODINFUNCTION9(LONG, lineOpen,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION4(LONG, linePark,
+ODINFUNCTION4(DWORD, linePark,
               HCALL, hCall,
               DWORD, dwParkMode,
               LPCSTR, lpszDirAddress,
@@ -603,7 +746,7 @@ ODINFUNCTION4(LONG, linePark,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION5(LONG, linePickup,
+ODINFUNCTION5(DWORD, linePickup,
               HLINE, hLine,
               DWORD, dwAddressID,
               LPHCALL, lphCall,
@@ -615,7 +758,7 @@ ODINFUNCTION5(LONG, linePickup,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(LONG, linePrepareAddToConference,
+ODINFUNCTION3(DWORD, linePrepareAddToConference,
               HCALL, hConfCall,
               LPHCALL, lphConsultCall,
               LPLINECALLPARAMS, lpCallParams)
@@ -625,7 +768,7 @@ ODINFUNCTION3(LONG, linePrepareAddToConference,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(LONG, lineRedirect,
+ODINFUNCTION3(DWORD, lineRedirect,
               HCALL, hCall,
               LPCSTR, lpszDestAddress,
               DWORD, dwCountryCode)
@@ -635,7 +778,7 @@ ODINFUNCTION3(LONG, lineRedirect,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(LONG, lineRemoveFromConference,
+ODINFUNCTION1(DWORD, lineRemoveFromConference,
               HCALL, hCall)
 {
   return LINEERR_OPERATIONFAILED;
@@ -643,7 +786,7 @@ ODINFUNCTION1(LONG, lineRemoveFromConference,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(LONG, lineSecureCall,
+ODINFUNCTION1(DWORD, lineSecureCall,
               HCALL, hCall)
 {
   return LINEERR_OPERATIONFAILED;
@@ -651,7 +794,7 @@ ODINFUNCTION1(LONG, lineSecureCall,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(LONG, lineSendUserUserInfo,
+ODINFUNCTION3(DWORD, lineSendUserUserInfo,
               HCALL, hCall,
               LPCSTR, lpsUserUserInfo,
               DWORD, dwSize)
@@ -661,7 +804,7 @@ ODINFUNCTION3(LONG, lineSendUserUserInfo,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(LONG, lineSetAppSpecific,
+ODINFUNCTION2(DWORD, lineSetAppSpecific,
               HCALL, hCall,
               DWORD, dwAppSpecific)
 {
@@ -670,7 +813,7 @@ ODINFUNCTION2(LONG, lineSetAppSpecific,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION5(LONG, lineSetCallParams,
+ODINFUNCTION5(DWORD, lineSetCallParams,
               HCALL, hCall,
               DWORD, dwBearerMode,
               DWORD, dwMinRate,
@@ -682,7 +825,7 @@ ODINFUNCTION5(LONG, lineSetCallParams,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(LONG, lineSetCallPrivilege,
+ODINFUNCTION2(DWORD, lineSetCallPrivilege,
               HCALL, hCall,
               DWORD, dwCallPrivilege)
 {
@@ -691,7 +834,7 @@ ODINFUNCTION2(LONG, lineSetCallPrivilege,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION4(LONG, lineSetDevConfig,
+ODINFUNCTION4(DWORD, lineSetDevConfig,
               DWORD, dwDeviceID,
               LPVOID, lpDeviceConfig,
               DWORD,  dwSize,
@@ -702,7 +845,7 @@ ODINFUNCTION4(LONG, lineSetDevConfig,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION12(LONG, lineSetMediaControl,
+ODINFUNCTION12(DWORD, lineSetMediaControl,
                HLINE, hLine,
                DWORD, dwAddressID,
                HCALL, hCall,
@@ -721,7 +864,7 @@ ODINFUNCTION12(LONG, lineSetMediaControl,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(LONG, lineSetMediaMode,
+ODINFUNCTION2(DWORD, lineSetMediaMode,
               HCALL, hCall,
               DWORD, dwMediaModes)
 {
@@ -730,7 +873,7 @@ ODINFUNCTION2(LONG, lineSetMediaMode,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(LONG, lineSetNumRings,
+ODINFUNCTION3(DWORD, lineSetNumRings,
               HLINE, hLine,
               DWORD, dwAddressID,
               DWORD, dwNumRings)
@@ -740,7 +883,7 @@ ODINFUNCTION3(LONG, lineSetNumRings,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(LONG, lineSetStatusMessages,
+ODINFUNCTION3(DWORD, lineSetStatusMessages,
               HLINE, hLine,
               DWORD, dwLineStates,
               DWORD, dwAddressStates)
@@ -750,7 +893,7 @@ ODINFUNCTION3(LONG, lineSetStatusMessages,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION7(LONG, lineSetTerminal,
+ODINFUNCTION7(DWORD, lineSetTerminal,
               HLINE, hLine,
               DWORD, dwAddressID,
               HCALL, hCall,
@@ -764,7 +907,7 @@ ODINFUNCTION7(LONG, lineSetTerminal,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION6(LONG, lineSetupConference,
+ODINFUNCTION6(DWORD, lineSetupConference,
               HCALL, hCall,
               HLINE, hLine,
               LPHCALL, lphConfCall,
@@ -777,7 +920,7 @@ ODINFUNCTION6(LONG, lineSetupConference,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(LONG, lineSetupTransfer,
+ODINFUNCTION3(DWORD, lineSetupTransfer,
               HCALL, hCall,
               LPHCALL, lphConsultCall,
               LPLINECALLPARAMS, lpCallParams)
@@ -787,15 +930,7 @@ ODINFUNCTION3(LONG, lineSetupTransfer,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(LONG, lineShutdown,
-              HLINEAPP, hLineApp)
-{
-  return LINEERR_OPERATIONFAILED;
-}
-
-//******************************************************************************
-//******************************************************************************
-ODINFUNCTION2(LONG, lineSwapHold,
+ODINFUNCTION2(DWORD, lineSwapHold,
               HCALL, hActiveCall,
               HCALL, hHeldCall)
 {
@@ -804,7 +939,7 @@ ODINFUNCTION2(LONG, lineSwapHold,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(LONG, lineUncompleteCall,
+ODINFUNCTION2(DWORD, lineUncompleteCall,
               HLINE, hLine,
               DWORD, dwCompletionID)
 {
@@ -813,7 +948,7 @@ ODINFUNCTION2(LONG, lineUncompleteCall,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(LONG, lineUnhold,
+ODINFUNCTION1(DWORD, lineUnhold,
               HCALL, hCall)
 {
   return LINEERR_OPERATIONFAILED;
@@ -821,7 +956,7 @@ ODINFUNCTION1(LONG, lineUnhold,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION4(LONG, lineUnpark,
+ODINFUNCTION4(DWORD, lineUnpark,
               HLINE, hLine,
               DWORD, dwAddressID,
               LPHCALL, lphCall,
@@ -832,7 +967,7 @@ ODINFUNCTION4(LONG, lineUnpark,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(LONG, lineReleaseUserUserInfo,
+ODINFUNCTION1(DWORD, lineReleaseUserUserInfo,
               HCALL, hCall)
 {
   return LINEERR_OPERATIONFAILED;
@@ -840,7 +975,7 @@ ODINFUNCTION1(LONG, lineReleaseUserUserInfo,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(LONG, phoneClose,
+ODINFUNCTION1(DWORD, phoneClose,
               HPHONE, hPhone)
 {
   return PHONEERR_OPERATIONFAILED;
@@ -848,7 +983,7 @@ ODINFUNCTION1(LONG, phoneClose,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(LONG, phoneConfigDialog,
+ODINFUNCTION3(DWORD, phoneConfigDialog,
               DWORD, dwDeviceID,
               HWND, hwndOwner,
               LPCSTR, lpszDeviceClass)
@@ -858,7 +993,7 @@ ODINFUNCTION3(LONG, phoneConfigDialog,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(LONG, phoneDevSpecific,
+ODINFUNCTION3(DWORD, phoneDevSpecific,
               HPHONE, hPhone,
               LPVOID, lpParams,
               DWORD, dwSize)
@@ -868,7 +1003,7 @@ ODINFUNCTION3(LONG, phoneDevSpecific,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(LONG, phoneGetButtonInfo,
+ODINFUNCTION3(DWORD, phoneGetButtonInfo,
               HPHONE, hPhone,
               DWORD, dwButtonLampID,
               LPPHONEBUTTONINFO, lpButtonInfo)
@@ -878,7 +1013,7 @@ ODINFUNCTION3(LONG, phoneGetButtonInfo,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION4(LONG, phoneGetData,
+ODINFUNCTION4(DWORD, phoneGetData,
               HPHONE, hPhone,
               DWORD, dwDataID,
               LPVOID, lpData,
@@ -889,7 +1024,7 @@ ODINFUNCTION4(LONG, phoneGetData,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION5(LONG, phoneGetDevCaps,
+ODINFUNCTION5(DWORD, phoneGetDevCaps,
               HPHONEAPP, hPhoneApp,
               DWORD, dwDeviceID,
               DWORD, dwAPIVersion,
@@ -901,7 +1036,7 @@ ODINFUNCTION5(LONG, phoneGetDevCaps,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(LONG, phoneGetDisplay,
+ODINFUNCTION2(DWORD, phoneGetDisplay,
               HPHONE, hPhone,
               LPVARSTRING, lpDisplay)
 {
@@ -910,7 +1045,7 @@ ODINFUNCTION2(LONG, phoneGetDisplay,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(LONG, phoneGetGain,
+ODINFUNCTION3(DWORD, phoneGetGain,
               HPHONE, hPhone,
               DWORD, dwHookSwitchDev,
               LPDWORD, lpdwGain)
@@ -920,7 +1055,7 @@ ODINFUNCTION3(LONG, phoneGetGain,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(LONG, phoneGetHookSwitch,
+ODINFUNCTION2(DWORD, phoneGetHookSwitch,
               HPHONE, hPhone,
               LPDWORD, lpdwHookSwitchDevs)
 {
@@ -929,7 +1064,7 @@ ODINFUNCTION2(LONG, phoneGetHookSwitch,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(LONG, phoneGetIcon,
+ODINFUNCTION3(DWORD, phoneGetIcon,
               DWORD, dwDeviceID,
               LPCSTR, lpszDeviceClass,
               LPHICON, lphIcon)
@@ -939,7 +1074,7 @@ ODINFUNCTION3(LONG, phoneGetIcon,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(LONG, phoneGetID,
+ODINFUNCTION3(DWORD, phoneGetID,
               HPHONE, hPhone,
               LPVARSTRING, lpDeviceID,
               LPCSTR, lpszDeviceClass)
@@ -949,7 +1084,7 @@ ODINFUNCTION3(LONG, phoneGetID,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(LONG, phoneGetLamp,
+ODINFUNCTION3(DWORD, phoneGetLamp,
               HPHONE, hPhone,
               DWORD, dwButtonLampID,
               LPDWORD, lpdwLampMode)
@@ -959,7 +1094,7 @@ ODINFUNCTION3(LONG, phoneGetLamp,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(LONG, phoneGetRing,
+ODINFUNCTION3(DWORD, phoneGetRing,
               HPHONE, hPhone,
               LPDWORD, lpdwRingMode,
               LPDWORD, lpdwVolume)
@@ -969,7 +1104,7 @@ ODINFUNCTION3(LONG, phoneGetRing,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(LONG, phoneGetStatus,
+ODINFUNCTION2(DWORD, phoneGetStatus,
               HPHONE, hPhone,
               LPPHONESTATUS, lpPhoneStatus)
 {
@@ -978,7 +1113,7 @@ ODINFUNCTION2(LONG, phoneGetStatus,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION4(LONG, phoneGetStatusMessages,
+ODINFUNCTION4(DWORD, phoneGetStatusMessages,
               HPHONE, hPhone,
               LPDWORD, lpdwPhoneStates,
               LPDWORD, lpdwButtonModes,
@@ -989,7 +1124,7 @@ ODINFUNCTION4(LONG, phoneGetStatusMessages,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(LONG, phoneGetVolume,
+ODINFUNCTION3(DWORD, phoneGetVolume,
               HPHONE, hPhone,
               DWORD, dwHookSwitchDev,
               LPDWORD, lpdwVolume)
@@ -999,7 +1134,7 @@ ODINFUNCTION3(LONG, phoneGetVolume,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION5(LONG, phoneInitialize,
+ODINFUNCTION5(DWORD, phoneInitialize,
               LPHPHONEAPP, lphPhoneApp,
               HINSTANCE, hInstance,
               PHONECALLBACK, lpfnCallback,
@@ -1011,7 +1146,7 @@ ODINFUNCTION5(LONG, phoneInitialize,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION6(LONG, phoneNegotiateAPIVersion,
+ODINFUNCTION6(DWORD, phoneNegotiateAPIVersion,
               HPHONEAPP, hPhoneApp,
               DWORD, dwDeviceID,
               DWORD, dwAPILowVersion,
@@ -1024,7 +1159,7 @@ ODINFUNCTION6(LONG, phoneNegotiateAPIVersion,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION6(LONG, phoneNegotiateExtVersion,
+ODINFUNCTION6(DWORD, phoneNegotiateExtVersion,
               HPHONEAPP, hPhoneApp,
               DWORD, dwDeviceID,
               DWORD, dwAPIVersion,
@@ -1037,7 +1172,7 @@ ODINFUNCTION6(LONG, phoneNegotiateExtVersion,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION7(LONG, phoneOpen,
+ODINFUNCTION7(DWORD, phoneOpen,
               HPHONEAPP, hPhoneApp,
               DWORD, dwDeviceID,
               LPHPHONE, lphPhone,
@@ -1051,7 +1186,7 @@ ODINFUNCTION7(LONG, phoneOpen,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(LONG, phoneSetButtonInfo,
+ODINFUNCTION3(DWORD, phoneSetButtonInfo,
               HPHONE, hPhone,
               DWORD, dwButtonLampID,
               LPPHONEBUTTONINFO, lpButtonInfo)
@@ -1061,7 +1196,7 @@ ODINFUNCTION3(LONG, phoneSetButtonInfo,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION4(LONG, phoneSetData,
+ODINFUNCTION4(DWORD, phoneSetData,
               HPHONE, hPhone,
               DWORD, dwDataID,
               LPVOID, lpData,
@@ -1072,7 +1207,7 @@ ODINFUNCTION4(LONG, phoneSetData,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION5(LONG, phoneSetDisplay,
+ODINFUNCTION5(DWORD, phoneSetDisplay,
               HPHONE, hPhone,
               DWORD, dwRow,
               DWORD, dwColumn,
@@ -1084,7 +1219,7 @@ ODINFUNCTION5(LONG, phoneSetDisplay,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(LONG, phoneSetGain,
+ODINFUNCTION3(DWORD, phoneSetGain,
               HPHONE, hPhone,
               DWORD, dwHookSwitchDev,
               DWORD, dwGain)
@@ -1094,7 +1229,7 @@ ODINFUNCTION3(LONG, phoneSetGain,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(LONG, phoneSetHookSwitch,
+ODINFUNCTION3(DWORD, phoneSetHookSwitch,
               HPHONE, hPhone,
               DWORD, dwHookSwitchDevs,
               DWORD, dwHookSwitchMode)
@@ -1104,7 +1239,7 @@ ODINFUNCTION3(LONG, phoneSetHookSwitch,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(LONG, phoneSetLamp,
+ODINFUNCTION3(DWORD, phoneSetLamp,
               HPHONE, hPhone,
               DWORD, dwButtonLampID,
               DWORD, dwLampMode)
@@ -1114,7 +1249,7 @@ ODINFUNCTION3(LONG, phoneSetLamp,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(LONG, phoneSetRing,
+ODINFUNCTION3(DWORD, phoneSetRing,
               HPHONE, hPhone,
               DWORD, dwRingMode,
               DWORD, dwVolume)
@@ -1124,7 +1259,7 @@ ODINFUNCTION3(LONG, phoneSetRing,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION4(LONG, phoneSetStatusMessages,
+ODINFUNCTION4(DWORD, phoneSetStatusMessages,
               HPHONE, hPhone,
               DWORD, dwPhoneStates,
               DWORD, dwButtonModes,
@@ -1135,7 +1270,7 @@ ODINFUNCTION4(LONG, phoneSetStatusMessages,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(LONG, phoneSetVolume,
+ODINFUNCTION3(DWORD, phoneSetVolume,
               HPHONE, hPhone,
               DWORD, dwHookSwitchDev,
               DWORD, dwVolume)
@@ -1145,7 +1280,7 @@ ODINFUNCTION3(LONG, phoneSetVolume,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(LONG, phoneShutdown,
+ODINFUNCTION1(DWORD, phoneShutdown,
               HPHONEAPP, hPhoneApp)
 {
   return PHONEERR_OPERATIONFAILED;
@@ -1154,7 +1289,7 @@ ODINFUNCTION1(LONG, phoneShutdown,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION5(LONG, lineTranslateDialog,
+ODINFUNCTION5(DWORD, lineTranslateDialog,
               HLINEAPP, hLineApp,
               DWORD, dwDeviceID,
               DWORD, dwAPIVersion,
@@ -1166,17 +1301,7 @@ ODINFUNCTION5(LONG, lineTranslateDialog,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(LONG, lineGetCountry,
-              DWORD, dwCountryID,
-              DWORD, dwAPIVersion,
-              LPLINECOUNTRYLIST, lpLineCountryList)
-{
-  return LINEERR_OPERATIONFAILED;
-}
-
-//******************************************************************************
-//******************************************************************************
-ODINFUNCTION6(LONG, lineGetAppPriority,
+ODINFUNCTION6(DWORD, lineGetAppPriority,
               LPCSTR, lpszAppFilename,
               DWORD, dwMediaMode,
               LPLINEEXTENSIONID, lpExtensionID,
@@ -1189,7 +1314,7 @@ ODINFUNCTION6(LONG, lineGetAppPriority,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION6(LONG, lineSetAppPriority,
+ODINFUNCTION6(DWORD, lineSetAppPriority,
               LPCSTR, lpszAppFilename,
               DWORD, dwMediaMode,
               LPLINEEXTENSIONID, lpExtensionID,
@@ -1202,7 +1327,7 @@ ODINFUNCTION6(LONG, lineSetAppPriority,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(LONG, lineAddProvider,
+ODINFUNCTION3(DWORD, lineAddProvider,
               LPCSTR, lpszProviderFilename,
               HWND, hwndOwner,
               LPDWORD, lpdwPermanentProviderID)
@@ -1212,7 +1337,7 @@ ODINFUNCTION3(LONG, lineAddProvider,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(LONG, lineConfigProvider,
+ODINFUNCTION2(DWORD, lineConfigProvider,
               HWND, hwndOwner,
               DWORD, dwPermanentProviderID)
 {
@@ -1221,7 +1346,7 @@ ODINFUNCTION2(LONG, lineConfigProvider,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(LONG, lineRemoveProvider,
+ODINFUNCTION2(DWORD, lineRemoveProvider,
               DWORD, dwPermanentProviderID,
               HWND, hwndOwner)
 {
@@ -1230,7 +1355,7 @@ ODINFUNCTION2(LONG, lineRemoveProvider,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(LONG, lineGetProviderList,
+ODINFUNCTION2(DWORD, lineGetProviderList,
               DWORD, dwAPIVersion,
               LPLINEPROVIDERLIST, lpProviderList)
 {
