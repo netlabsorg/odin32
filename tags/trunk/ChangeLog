@@ -1,10 +1,10 @@
- /* $Id: ChangeLog,v 1.190 1999-09-09 21:02:28 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.191 1999-09-09 21:04:36 phaller Exp $ */
 
  99-09-09: Daniela Engert <dani@ngrt.de>
 	- USER32\NEW: begin new DC/related code. BeginPaint/EndPaint done.
 
  99-09-09: Patrick Haller <phaller@gmx.net>
-	- SHELL32\NEW:	improvement of shell32
+	- SHELL32\NEW:	shell32 done, it compiles + links, no testing yet
 	- USER32:	added stubs for GetMenuInfo + SetMenuInfo
 	- USER32\NEW:	added stubs for GetMenuInfo + SetMenuInfo
 
