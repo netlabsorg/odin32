@@ -1,4 +1,4 @@
-/* $Id: filetitle.cpp,v 1.1 1999-11-02 19:09:42 sandervl Exp $ */
+/* $Id: filetitle.cpp,v 1.2 1999-11-02 20:37:43 sandervl Exp $ */
 /*
  * COMMDLG - File Dialogs (990815)
  *
@@ -6,6 +6,8 @@
  * Copyright 1996 Albrecht Kleine
  */
 
+// ><DJR 17.05.99 Force to use C-interfaces for now to prevent CALLBACK definition compiler error
+#define CINTERFACE 1
 #include <string.h>
 
 #include <os2win.h>
