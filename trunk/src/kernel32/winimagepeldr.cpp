@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.106 2003-03-31 11:54:28 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.107 2003-04-09 10:39:40 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -111,7 +111,7 @@ Win32PeLdrImage::Win32PeLdrImage(char *pszFileName, BOOL isExe) :
     imageVirtBase(-1), realBaseAddress(0), imageVirtEnd(0),
     nrNameExports(0), nrOrdExports(0), nameexports(NULL), ordexports(NULL),
     memmap(NULL), pFixups(NULL), dwFixupSize(0), curnameexport(NULL), curordexport(NULL),
-    nrOrdExportsRegistered(0)
+    nrOrdExportsRegistered(0), peview(NULL)
 {
     HFILE  dllfile;
 
@@ -147,7 +147,14 @@ Win32PeLdrImage::Win32PeLdrImage(char *pszFileName, BOOL isExe) :
 Win32PeLdrImage::~Win32PeLdrImage()
 {
     if(memmap)
+    {
+        if(peview) {
+            memmap->unmapViewOfFile(peview);
+            peview = NULL;
+        }
         memmap->Release();
+        memmap = NULL;
+    }
 
     if(hFile) {
         OSLibDosClose(hFile);
@@ -170,7 +177,6 @@ Win32PeLdrImage::~Win32PeLdrImage()
 //******************************************************************************
 DWORD Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
 {
- LPVOID win32file = NULL;
  ULONG  filesize, ulRead, ulNewPos;
  PIMAGE_SECTION_HEADER psh;
  IMAGE_SECTION_HEADER sh;
@@ -251,7 +257,7 @@ DWORD Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
         lasterror = LDRERROR_MEMORY;
         goto failure;
     }
-    win32file = memmap->mapViewOfFile(0, 0, 2);
+    peview = memmap->mapViewOfFile(0, 0, 2);
 
     if(DosQueryPathInfo(szFileName, FIL_QUERYFULLNAME, szFullPath, sizeof(szFullPath)) == 0) {
         setFullPath(szFullPath);
@@ -302,7 +308,7 @@ DWORD Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
     //get header page
     commitPage(realBaseAddress, FALSE);
 
-    nSections = NR_SECTIONS(win32file);
+    nSections = NR_SECTIONS(peview);
     section = (Section *)malloc(nSections*sizeof(Section));
     if(section == NULL) {
         DebugInt3();
@@ -312,7 +318,7 @@ DWORD Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
     memset(section, 0, nSections*sizeof(Section));
 
     imageSize = 0;
-    if ((psh = (PIMAGE_SECTION_HEADER)SECTIONHDROFF (win32file)) != NULL)
+    if ((psh = (PIMAGE_SECTION_HEADER)SECTIONHDROFF (peview)) != NULL)
     {
         dprintf((LOG, "*************************PE SECTIONS START**************************" ));
         for (i=0; i<nSections; i++)
@@ -326,7 +332,7 @@ DWORD Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
             dprintf((LOG, "Pointer to raw data:  %x", psh[i].PointerToRawData ));
             dprintf((LOG, "Section flags:        %x\n\n", psh[i].Characteristics ));
 
-            if(IsSectionType(win32file, &psh[i], IMAGE_DIRECTORY_ENTRY_BASERELOC))
+            if(IsSectionType(peview, &psh[i], IMAGE_DIRECTORY_ENTRY_BASERELOC))
             {
                 dprintf((LOG, ".reloc" ));
                 addSection(SECTION_RELOC, psh[i].PointerToRawData,
@@ -334,7 +340,7 @@ DWORD Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
                            psh[i].Misc.VirtualSize, psh[i].Characteristics);
                 continue;
             }
-            if(IsSectionType(win32file, &psh[i], IMAGE_DIRECTORY_ENTRY_EXPORT))
+            if(IsSectionType(peview, &psh[i], IMAGE_DIRECTORY_ENTRY_EXPORT))
             {
                 //SvL: Angus.exe has empty export section that's really an
                 //     uninitialized data section
@@ -346,7 +352,7 @@ DWORD Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
                      continue;
                 }
             }
-            if(IsSectionType(win32file, &psh[i], IMAGE_DIRECTORY_ENTRY_RESOURCE))
+            if(IsSectionType(peview, &psh[i], IMAGE_DIRECTORY_ENTRY_RESOURCE))
             {
                 dprintf((LOG, ".rsrc" ));
                 addSection(SECTION_RESOURCE, psh[i].PointerToRawData,
@@ -354,10 +360,10 @@ DWORD Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
                            psh[i].Misc.VirtualSize, psh[i].Characteristics);
                 continue;
             }
-            if(IsSectionType(win32file, &psh[i], IMAGE_DIRECTORY_ENTRY_TLS))
+            if(IsSectionType(peview, &psh[i], IMAGE_DIRECTORY_ENTRY_TLS))
             {
                 dprintf((LOG, "TLS section"));
-                tlsDir = (IMAGE_TLS_DIRECTORY *)ImageDirectoryOffset(win32file, IMAGE_DIRECTORY_ENTRY_TLS);
+                tlsDir = (IMAGE_TLS_DIRECTORY *)ImageDirectoryOffset(peview, IMAGE_DIRECTORY_ENTRY_TLS);
                 if(tlsDir) {
                     addSection(SECTION_TLS, psh[i].PointerToRawData,
                                psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
@@ -365,7 +371,7 @@ DWORD Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
                 }
                 continue;
             }
-            if(IsSectionType(win32file, &psh[i], IMAGE_DIRECTORY_ENTRY_DEBUG))
+            if(IsSectionType(peview, &psh[i], IMAGE_DIRECTORY_ENTRY_DEBUG))
             {
                 dprintf((LOG, ".rdebug" ));
                 addSection(SECTION_DEBUG,  psh[i].PointerToRawData,
@@ -373,7 +379,7 @@ DWORD Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
                            psh[i].Misc.VirtualSize, psh[i].Characteristics);
                 continue;
             }
-            if(IsSectionType(win32file, &psh[i], IMAGE_DIRECTORY_ENTRY_IMPORT))
+            if(IsSectionType(peview, &psh[i], IMAGE_DIRECTORY_ENTRY_IMPORT))
             {
                 int type = SECTION_IMPORT;
                 dprintf((LOG, "Import Data Section" ));
@@ -464,8 +470,8 @@ DWORD Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
     }
 
     if(realBaseAddress != oh.ImageBase && !(dwFlags & FLAG_PELDR_LOADASDATAFILE)) {
-        pFixups     = (PIMAGE_BASE_RELOCATION)ImageDirectoryOffset(win32file, IMAGE_DIRECTORY_ENTRY_BASERELOC);
-        dwFixupSize = ImageDirectorySize(win32file, IMAGE_DIRECTORY_ENTRY_BASERELOC);
+        pFixups     = (PIMAGE_BASE_RELOCATION)ImageDirectoryOffset(peview, IMAGE_DIRECTORY_ENTRY_BASERELOC);
+        dwFixupSize = ImageDirectorySize(peview, IMAGE_DIRECTORY_ENTRY_BASERELOC);
         commitPage((ULONG)pFixups, FALSE);
     }
 
@@ -474,7 +480,7 @@ DWORD Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
 
     if(!(dwFlags & FLAG_PELDR_LOADASDATAFILE))
     {
-        if(tlsDir = (IMAGE_TLS_DIRECTORY *)ImageDirectoryOffset(win32file, IMAGE_DIRECTORY_ENTRY_TLS))
+        if(tlsDir = (IMAGE_TLS_DIRECTORY *)ImageDirectoryOffset(peview, IMAGE_DIRECTORY_ENTRY_TLS))
         {
             Section *sect;
             BOOL     fTLSFixups = FALSE;
@@ -619,7 +625,7 @@ DWORD Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
             }
         }
 #endif
-        if(processExports((char *)win32file) == FALSE) {
+        if(processExports() == FALSE) {
             dprintf((LOG, "Failed to process exported apis" ));
             lasterror = LDRERROR_EXPORTS;
             goto failure;
@@ -654,7 +660,7 @@ DWORD Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
 
     if(!(dwFlags & (FLAG_PELDR_LOADASDATAFILE | FLAG_PELDR_SKIPIMPORTS)))
     {
-        if(processImports((char *)win32file) == FALSE) {
+        if(processImports() == FALSE) {
             dprintf((LOG, "Failed to process imports!" ));
             lasterror = LDRERROR_IMPORTS;
             goto failure;
@@ -1380,7 +1386,7 @@ BOOL WIN32API ODIN_SetDllLoadCallback(ODINPROC_DLLLOAD pfnMyDllLoad)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL Win32PeLdrImage::processExports(char *win32file)
+BOOL Win32PeLdrImage::processExports()
 {
  IMAGE_SECTION_HEADER    sh;
  PIMAGE_EXPORT_DIRECTORY ped;
@@ -1391,16 +1397,17 @@ BOOL Win32PeLdrImage::processExports(char *win32file)
 
   /* get section header and pointer to data directory for .edata section */
   if((ped = (PIMAGE_EXPORT_DIRECTORY)ImageDirectoryOffset
-     (win32file, IMAGE_DIRECTORY_ENTRY_EXPORT)) != NULL &&
-     GetSectionHdrByImageDir(win32file, IMAGE_DIRECTORY_ENTRY_EXPORT, &sh) ) {
+     (peview, IMAGE_DIRECTORY_ENTRY_EXPORT)) != NULL &&
+     GetSectionHdrByImageDir(peview, IMAGE_DIRECTORY_ENTRY_EXPORT, &sh) ) 
+  {
 
-        dprintf((LOG, "Exported Functions: " ));
+    dprintf((LOG, "Exported Functions: " ));
     ptrOrd     = (USHORT *)((ULONG)ped->AddressOfNameOrdinals +
-                            (ULONG)win32file);
+                            (ULONG)peview);
     ptrNames   = (ULONG *)((ULONG)ped->AddressOfNames +
-                            (ULONG)win32file);
+                            (ULONG)peview);
     ptrAddress = (ULONG *)((ULONG)ped->AddressOfFunctions +
-                            (ULONG)win32file);
+                            (ULONG)peview);
     nrOrdExports  = ped->NumberOfFunctions;
     nrNameExports = ped->NumberOfNames;
 
@@ -1408,9 +1415,9 @@ BOOL Win32PeLdrImage::processExports(char *win32file)
     char *name;
     for(i=0;i<ped->NumberOfNames;i++)
     {
-    fForwarder = FALSE;
+        fForwarder = FALSE;
         ord        = ptrOrd[i] + ped->Base;
-        name       = (char *)((ULONG)ptrNames[i] + (ULONG)win32file);
+        name       = (char *)((ULONG)ptrNames[i] + (ULONG)peview);
         RVAExport  = ptrAddress[ptrOrd[i]];
 
         /* forwarder? ulRVA within export directory. */
@@ -1420,7 +1427,7 @@ BOOL Win32PeLdrImage::processExports(char *win32file)
         {
             fForwarder = AddForwarder(oh.ImageBase + RVAExport, name, ord);
         }
-    if(!fForwarder) {
+        if(!fForwarder) {
             //points to code (virtual address relative to oh.ImageBase
             AddNameExport(oh.ImageBase + RVAExport, name, ord);
             dprintf((LOG, "address 0x%x %s @%d (0x%08x)", RVAExport, name, ord, realBaseAddress + RVAExport));
@@ -1428,7 +1435,7 @@ BOOL Win32PeLdrImage::processExports(char *win32file)
     }
     for(i=0;i<max(ped->NumberOfNames,ped->NumberOfFunctions);i++)
     {
-    fForwarder = FALSE;
+        fForwarder = FALSE;
         ord = ped->Base + i;  //Correct??
         RVAExport = ptrAddress[i];
         /* forwarder? ulRVA within export directory. */
@@ -1438,7 +1445,7 @@ BOOL Win32PeLdrImage::processExports(char *win32file)
         {
             fForwarder = AddForwarder(oh.ImageBase + RVAExport, NULL, ord);
         }
-    if(!fForwarder && RVAExport) {
+        if(!fForwarder && RVAExport) {
             //points to code (virtual address relative to oh.ImageBase
             dprintf((LOG, "ord %d at 0x%08x (0x%08x)", ord, RVAExport, realBaseAddress + RVAExport));
             AddOrdExport(oh.ImageBase + RVAExport, ord);
@@ -1674,7 +1681,7 @@ Win32DllBase *Win32PeLdrImage::loadDll(char *pszCurModule)
  *  knut [Jul 22 1998 2:44am]
  **/
 //******************************************************************************
-BOOL Win32PeLdrImage::processImports(char *win32file)
+BOOL Win32PeLdrImage::processImports()
 {
     PIMAGE_IMPORT_DESCRIPTOR pID;
     IMAGE_SECTION_HEADER     shID;
@@ -1706,10 +1713,10 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
      */
 
     /* 1) get module names */
-    pID = (PIMAGE_IMPORT_DESCRIPTOR)ImageDirectoryOffset(win32file, IMAGE_DIRECTORY_ENTRY_IMPORT);
+    pID = (PIMAGE_IMPORT_DESCRIPTOR)ImageDirectoryOffset(peview, IMAGE_DIRECTORY_ENTRY_IMPORT);
     if (pID == NULL)
         return TRUE;
-    if (!GetSectionHdrByImageDir(win32file, IMAGE_DIRECTORY_ENTRY_IMPORT, &shID))
+    if (!GetSectionHdrByImageDir(peview, IMAGE_DIRECTORY_ENTRY_IMPORT, &shID))
         return TRUE;
 
     //calc size of module list
@@ -1718,15 +1725,15 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
     {
         //test RVA inside ID-Section
         if (pID[i].Name >= shID.VirtualAddress && pID[i].Name < shID.VirtualAddress + max(shID.Misc.VirtualSize, shID.SizeOfRawData)) {
-            pszTmp = (char*)(pID[i].Name + (ULONG)win32file);
+            pszTmp = (char*)(pID[i].Name + (ULONG)peview);
         }
         else {
             //is the "Extra"-section already found or do we have to find it?
             if (pID[i].Name < shExtra.VirtualAddress || pID[i].Name >= shExtra.VirtualAddress + max(shExtra.Misc.VirtualSize, shExtra.SizeOfRawData)) {
-                if (!GetSectionHdrByRVA(win32file, &shExtra, pID[i].Name))
+                if (!GetSectionHdrByRVA(peview, &shExtra, pID[i].Name))
                     return FALSE;
             }
-            pszTmp = (char*)(pID[i].Name + (ULONG)win32file);
+            pszTmp = (char*)(pID[i].Name + (ULONG)peview);
         }
         Size += strlen(pszTmp) + 1;
         i++;
@@ -1743,18 +1750,18 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
     {
         //test RVA inside ID-Section
         if (pID[i].Name >= shID.VirtualAddress && pID[i].Name < shID.VirtualAddress + max(shID.Misc.VirtualSize, shID.SizeOfRawData)) {
-            pszTmp = (char*)(pID[i].Name + (ULONG)win32file);
+            pszTmp = (char*)(pID[i].Name + (ULONG)peview);
         }
         else {
             fBorland = TRUE;
             //is the "Extra"-section already found or do we have to find it?
             if (pID[i].Name < shExtra.VirtualAddress || pID[i].Name >= shExtra.VirtualAddress + max(shExtra.Misc.VirtualSize, shExtra.SizeOfRawData))
             {
-                if (GetSectionHdrByRVA(win32file, &shExtra, pID[i].Name)) {
+                if (GetSectionHdrByRVA(peview, &shExtra, pID[i].Name)) {
                     return FALSE;
                 }
             }
-            pszTmp = (char*)(pID[i].Name + (ULONG)win32file);
+            pszTmp = (char*)(pID[i].Name + (ULONG)peview);
         }
 
         int iTmpLength = strlen(pszTmp) + 1;
@@ -1769,7 +1776,7 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
 
     /* 2) functions */
     pszCurModule = pszModules;
-    pOH = (PIMAGE_OPTIONAL_HEADER)OPTHEADEROFF(win32file);
+    pOH = (PIMAGE_OPTIONAL_HEADER)OPTHEADEROFF(peview);
     for (i = 0; i < cModules; i++)
     {
         dprintf((LOG, "Module %s", pszCurModule ));
@@ -1803,7 +1810,7 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
         // check section
         if ((ULONG)pulImport < shExtra.VirtualAddress || (ULONG)pulImport >= shExtra.VirtualAddress + max(shExtra.Misc.VirtualSize, shExtra.SizeOfRawData))
         {
-            if (!GetSectionHdrByRVA(win32file, &shExtra, (ULONG)pulImport))
+            if (!GetSectionHdrByRVA(peview, &shExtra, (ULONG)pulImport))
             {
                 dprintf((LOG, "warning: could not find section for Thunk RVA %x", pulImport ));
                 break;
@@ -1848,9 +1855,9 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
             return FALSE;
         }
 
-        pulImport  = (PULONG)((ULONG)pulImport + (ULONG)win32file);
+        pulImport  = (PULONG)((ULONG)pulImport + (ULONG)peview);
         j          = 0;
-        ulCurFixup = (ULONG)pID[i].FirstThunk + (ULONG)win32file;
+        ulCurFixup = (ULONG)pID[i].FirstThunk + (ULONG)peview;
 
         section    = findSectionByOS2Addr(ulCurFixup);
         if(section == NULL) {
@@ -1872,14 +1879,14 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
                 //check
                 if (pulImport[j] < shExtra.VirtualAddress || pulImport[j] >= shExtra.VirtualAddress + max(shExtra.Misc.VirtualSize, shExtra.SizeOfRawData))
                 {
-                    if (!GetSectionHdrByRVA(win32file, &shExtra, pulImport[j]))
+                    if (!GetSectionHdrByRVA(peview, &shExtra, pulImport[j]))
                     {
                         dprintf((LOG, "warning: could not find section for Import Name RVA ", pulImport[j] ));
                         break;
                     }
                 }
                 //KSO - Aug 6 1998 1:15am:this eases comparing...
-                char *pszFunctionName = (char*)(pulImport[j] + (ULONG)win32file + 2);
+                char *pszFunctionName = (char*)(pulImport[j] + (ULONG)peview + 2);
                 dprintf((LOG, "0x%08x Imported function %s (0x%08x)", ulCurFixup,  pszFunctionName, WinImage->getApi(pszFunctionName)));
                 StoreImportByName(WinImage, pszFunctionName, ulCurFixup);
             }

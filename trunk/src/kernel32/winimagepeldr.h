@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.h,v 1.19 2003-01-05 12:31:26 sandervl Exp $ */
+/* $Id: winimagepeldr.h,v 1.20 2003-04-09 10:39:41 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -122,9 +122,8 @@ protected:
         void  AddOff32Fixup(ULONG fixupaddr);
         void  AddOff16Fixup(ULONG fixupaddr, BOOL fHighFixup);
 
-        BOOL  processImports(char *win32file);
-
-        BOOL  processExports(char *win32file);
+        BOOL  processImports();
+        BOOL  processExports();
         void  AddNameExport(ULONG virtaddr, char *apiname, ULONG ordinal, BOOL fAbsoluteAddress=FALSE);
         void  AddOrdExport(ULONG virtaddr, ULONG ordinal, BOOL fAbsoluteAddress=FALSE);
         BOOL  AddForwarder(ULONG virtaddr, char *apiname, ULONG ordinal);
@@ -157,6 +156,7 @@ Win32DllBase *loadDll(char *pszCurModule);
         DWORD                  dwFixupSize;
 
         Win32MemMap          *memmap;
+        LPVOID                peview;
 private:
 };
 
