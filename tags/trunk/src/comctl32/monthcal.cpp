@@ -1,4 +1,4 @@
-/* $Id: monthcal.cpp,v 1.4 2000-07-18 16:17:29 bird Exp $ */
+/* $Id: monthcal.cpp,v 1.5 2000-08-08 17:05:00 cbratschi Exp $ */
 /* Month calendar control
  *
  * Copyright 1998, 1999 Eric Kohl (ekohl@abo.rhein-zeitung.de)
@@ -384,7 +384,7 @@ static void MONTHCAL_Refresh(HWND hwnd, HDC hdc)
   titlemonth->left   = title->left;
   titlemonth->right  = title->right;
 
-  thisMonthtxt = monthtxt[infoPtr->currentMonth - 1];
+  thisMonthtxt = (char*)monthtxt[infoPtr->currentMonth - 1];
   sprintf(buf, "%s %ld", thisMonthtxt, infoPtr->currentYear);
   DrawTextA(hdc, buf, strlen(buf), titlemonth,
                         DT_CENTER | DT_VCENTER | DT_SINGLELINE);

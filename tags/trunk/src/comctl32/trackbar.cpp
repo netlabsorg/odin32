@@ -1,4 +1,4 @@
-/* $Id: trackbar.cpp,v 1.4 2000-05-22 17:25:13 cbratschi Exp $ */
+/* $Id: trackbar.cpp,v 1.5 2000-08-08 17:05:01 cbratschi Exp $ */
 /*
  * Trackbar control
  *
@@ -1810,6 +1810,7 @@ TRACKBAR_LButtonDown(TRACKBAR_INFO *infoPtr,WPARAM wParam,LPARAM lParam)
 
            SendMessageA(infoPtr->hwndToolTip,TTM_TRACKACTIVATE,(WPARAM)TRUE,(LPARAM)&ti);
          }
+
          SetCapture(infoPtr->hwnd);
          TRACKBAR_UpdateThumbPosition(infoPtr,infoPtr->nPos,TRUE); //change arrow color
          return 0;
@@ -1960,7 +1961,7 @@ TRACKBAR_CaptureChanged(TRACKBAR_INFO *infoPtr,WPARAM wParam,LPARAM lParam)
       if (lastPos != infoPtr->nPos) TRACKBAR_UpdateThumbPosition(infoPtr,lastPos,TRUE);
     }
 
-    infoPtr->flags &= ~ TB_DRAGPOSVALID;
+    infoPtr->flags &= ~TB_DRAGPOSVALID;
 
     if (infoPtr->flags & TB_SCROLL_MODE)
     {
@@ -1968,7 +1969,13 @@ TRACKBAR_CaptureChanged(TRACKBAR_INFO *infoPtr,WPARAM wParam,LPARAM lParam)
       KillTimer(infoPtr->hwnd,SCROLL_TIMER_ID);
     }
 
-    TRACKBAR_SendNotify(infoPtr,TB_ENDTRACK);
+    if (infoPtr->flags & TB_DRAG_MODE)
+    {
+      TRACKBAR_SendNotify(infoPtr,TB_ENDTRACK);
+
+      infoPtr->flags &= ~TB_DRAG_MODE;
+    }
+
     return 0;
 }
 

@@ -1,4 +1,4 @@
-/* $Id: tooltips.cpp,v 1.10 2000-08-06 20:28:29 sandervl Exp $ */
+/* $Id: tooltips.cpp,v 1.11 2000-08-08 17:05:01 cbratschi Exp $ */
 /*
  * Tool tip control
  *
@@ -17,7 +17,7 @@
  */
 
 /*
- - Corel WINE 20000513 level
+ - Corel WINE 20000807 level
  - (WINE 20000130 level)
 */
 
@@ -340,7 +340,6 @@ TOOLTIPS_Show (HWND hwnd, TOOLTIPS_INFO *infoPtr)
     TTTOOL_INFO *toolPtr;
     RECT rect, wndrect;
     SIZE size;
-    HDC  hdc;
     NMHDR  hdr;
 
     if (infoPtr->nTool == -1) {
@@ -423,9 +422,8 @@ TOOLTIPS_Show (HWND hwnd, TOOLTIPS_INFO *infoPtr)
                     SWP_SHOWWINDOW | SWP_NOACTIVATE);
 
     /* repaint the tooltip */
-    hdc = GetDC (hwnd);
-    TOOLTIPS_Draw(hwnd, hdc);
-    ReleaseDC (hwnd, hdc);
+    InvalidateRect(hwnd,NULL,TRUE);
+    UpdateWindow(hwnd);
 
     SetTimer (hwnd, ID_TIMERPOP, infoPtr->nAutoPopTime, 0);
 }
@@ -462,7 +460,6 @@ TOOLTIPS_TrackShow (HWND hwnd, TOOLTIPS_INFO *infoPtr)
 {
     TTTOOL_INFO *toolPtr;
     RECT rect;
-    HDC  hdc;
     NMHDR hdr;
 
     if (infoPtr->nTrackTool == -1)
@@ -497,9 +494,8 @@ TOOLTIPS_TrackShow (HWND hwnd, TOOLTIPS_INFO *infoPtr)
                     rect.right-rect.left,rect.bottom-rect.top,
                     SWP_SHOWWINDOW | SWP_NOACTIVATE );
 
-    hdc = GetDC (hwnd);
-    TOOLTIPS_Draw(hwnd, hdc);
-    ReleaseDC (hwnd, hdc);
+    InvalidateRect(hwnd,NULL,TRUE);
+    UpdateWindow(hwnd);
 }
 
 
@@ -739,8 +735,8 @@ static VOID TOOLTIPS_Desubclass(TTTOOL_INFO *toolPtr)
           RemovePropA ((HWND)toolPtr->uId,COMCTL32_aSubclass);
           COMCTL32_Free(&lpttsi);
         }
-//          else
-//              ERR (tooltips, "Invalid data handle!\n");
+          //else
+          //    ERR (tooltips, "Invalid data handle!\n");
       } else
       {
         LPTT_SUBCLASS_INFO lpttsi =
@@ -749,8 +745,8 @@ static VOID TOOLTIPS_Desubclass(TTTOOL_INFO *toolPtr)
         {
           if (lpttsi->uRefCount == 1)
           {
-            SetWindowLongA((HWND)toolPtr->uId,GWL_WNDPROC,(LONG)lpttsi->wpOrigProc);
-            RemovePropA((HWND)toolPtr->uId,COMCTL32_aSubclass);
+            SetWindowLongA((HWND)toolPtr->hwnd,GWL_WNDPROC,(LONG)lpttsi->wpOrigProc);
+            RemovePropA((HWND)toolPtr->hwnd,COMCTL32_aSubclass);
             COMCTL32_Free(&lpttsi);
           } else lpttsi->uRefCount--;
         }
@@ -1574,14 +1570,14 @@ TOOLTIPS_RelayEvent (HWND hwnd, WPARAM wParam, LPARAM lParam)
                 //TRACE (tooltips, "timer 1 started!\n");
               } else
               {
-		/*
-		 * Need to set nCurrentTool to nOldTool so we hide the tool.
-		 *  nTool and nOldTool values change when the mouse leaves the window.
-		 * If using TTM_UPDATETIPTEXT we can end up with an nCurrentTool = -1 if the
-		 * text can't be found, thus the tooltip would never be hidden.
-		 */
-		if (infoPtr->nTool != infoPtr->nOldTool)
-            	  infoPtr->nCurrentTool = infoPtr->nOldTool;
+                /*
+                 * Need to set nCurrentTool to nOldTool so we hide the tool.
+                 *  nTool and nOldTool values change when the mouse leaves the window.
+                 * If using TTM_UPDATETIPTEXT we can end up with an nCurrentTool = -1 if the
+                 * text can't be found, thus the tooltip would never be hidden.
+                 */
+                if (infoPtr->nTool != infoPtr->nOldTool)
+                  infoPtr->nCurrentTool = infoPtr->nOldTool;
 
                 TOOLTIPS_Hide(hwnd,infoPtr);
                 SetTimer (hwnd,ID_TIMERSHOW,infoPtr->nReshowTime,0);
@@ -2042,19 +2038,26 @@ TOOLTIPS_Destroy (HWND hwnd, WPARAM wParam, LPARAM lParam)
             /* remove subclassing */
             if (toolPtr->uFlags & TTF_SUBCLASS) {
                 LPTT_SUBCLASS_INFO lpttsi;
-
-                if (toolPtr->uFlags & TTF_IDISHWND)
-                    lpttsi = (LPTT_SUBCLASS_INFO)GetPropA ((HWND)toolPtr->uId, COMCTL32_aSubclass);
-                else
-                    lpttsi = (LPTT_SUBCLASS_INFO)GetPropA (toolPtr->hwnd, COMCTL32_aSubclass);
-
+                if (toolPtr->uFlags & TTF_IDISHWND) {
+                lpttsi = (LPTT_SUBCLASS_INFO)GetPropA ((HWND)toolPtr->uId, COMCTL32_aSubclass);
                 if (lpttsi) {
                     SetWindowLongA ((HWND)toolPtr->uId, GWL_WNDPROC,
-                                      (LONG)lpttsi->wpOrigProc);
+                              (LONG)lpttsi->wpOrigProc);
                     RemovePropA ((HWND)toolPtr->uId, COMCTL32_aSubclass);
                     COMCTL32_Free (&lpttsi);
                 }
             }
+            else  {
+                    lpttsi = (LPTT_SUBCLASS_INFO)GetPropA (toolPtr->hwnd, COMCTL32_aSubclass);
+
+                    if (lpttsi) {
+                        SetWindowLongA ((HWND)toolPtr->hwnd, GWL_WNDPROC,
+                                          (LONG)lpttsi->wpOrigProc);
+                        RemovePropA ((HWND)toolPtr->hwnd, COMCTL32_aSubclass);
+                        COMCTL32_Free (&lpttsi);
+                    }
+            }
+         }
       }
       COMCTL32_Free (infoPtr->tools);
     }
