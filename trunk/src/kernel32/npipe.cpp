@@ -1,4 +1,4 @@
-/* $Id: npipe.cpp,v 1.6 2000-02-10 22:39:46 bird Exp $ */
+/* $Id: npipe.cpp,v 1.7 2000-02-16 14:25:43 sandervl Exp $ */
 /*
  * Win32 Named pipes API
  *
@@ -16,6 +16,9 @@
 #include <options.h>
 #include "debugtools.h"
 #include "oslibdos.h"
+
+#define DBG_LOCALLOG	DBG_npipe
+#include "dbglocal.h"
 
 ODINDEBUGCHANNEL(KERNEL32-NPIPE)
 

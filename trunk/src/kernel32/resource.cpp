@@ -1,4 +1,4 @@
-/* $Id: resource.cpp,v 1.14 2000-01-05 19:39:56 sandervl Exp $ */
+/* $Id: resource.cpp,v 1.15 2000-02-16 14:25:45 sandervl Exp $ */
 
 /*
  * Misc resource procedures
@@ -16,6 +16,9 @@
 #include <winimagebase.h>
 #include <winexebase.h>
 #include <windllbase.h>
+
+#define DBG_LOCALLOG	DBG_resource
+#include "dbglocal.h"
 
 //******************************************************************************
 //lpszName = integer id (high word 0), else string (name or "#237")

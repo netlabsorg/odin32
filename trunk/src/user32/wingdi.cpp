@@ -1,4 +1,4 @@
-/* $Id: wingdi.cpp,v 1.5 2000-01-18 20:11:12 sandervl Exp $ */
+/* $Id: wingdi.cpp,v 1.6 2000-02-16 14:28:27 sandervl Exp $ */
 /*
  * Win32 Window graphics apis for OS/2
  *
@@ -16,6 +16,9 @@
 #include <win32wbase.h>
 #include <oslibwin.h>
 #include <oslibgdi.h>
+
+#define DBG_LOCALLOG	DBG_wingdi
+#include "dbglocal.h"
 
 #define OPEN32_GDI
 

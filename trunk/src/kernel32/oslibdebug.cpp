@@ -1,4 +1,4 @@
-/* $Id: oslibdebug.cpp,v 1.1 1999-12-31 10:47:11 sandervl Exp $ */
+/* $Id: oslibdebug.cpp,v 1.2 2000-02-16 14:25:44 sandervl Exp $ */
 
 /*
  * OS/2 debug apis
@@ -25,6 +25,9 @@
 #include <windllbase.h>
 #include <winconst.h>
 #include "oslibdebug.h"
+
+#define DBG_LOCALLOG	DBG_oslibdebug
+#include "dbglocal.h"
 
 #define DEBUG_QUEUENAME "\\QUEUES\\ODINTRACE\\"
 #define DEBUG_QSEMNAME  "\\SEM32\\ODINTRACEQ\\"

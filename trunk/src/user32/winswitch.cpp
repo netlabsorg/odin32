@@ -1,4 +1,4 @@
-/* $Id: winswitch.cpp,v 1.3 2000-01-18 20:11:24 sandervl Exp $ */
+/* $Id: winswitch.cpp,v 1.4 2000-02-16 14:28:28 sandervl Exp $ */
 /*
  * WinSwitch control
  *
@@ -13,6 +13,9 @@
 #include <os2win.h>
 #include "controls.h"
 #include "winswitch.h"
+
+#define DBG_LOCALLOG	DBG_winswitch
+#include "dbglocal.h"
 
 LRESULT WINAPI WinSwitchWndProc(HWND hwnd,UINT message,WPARAM wParam,LPARAM lParam)
 {

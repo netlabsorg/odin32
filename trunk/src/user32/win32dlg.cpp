@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.43 2000-02-06 22:00:23 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.44 2000-02-16 14:28:22 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -23,6 +23,9 @@
 #include "win32wdesktop.h"
 #include "controls.h"
 #include "syscolor.h"
+
+#define DBG_LOCALLOG	DBG_win32dlg
+#include "dbglocal.h"
 
 #define DEFAULT_DLGFONT "9.WarpSans"
 

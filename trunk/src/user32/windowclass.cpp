@@ -1,4 +1,4 @@
-/* $Id: windowclass.cpp,v 1.8 2000-01-18 20:11:09 sandervl Exp $ */
+/* $Id: windowclass.cpp,v 1.9 2000-02-16 14:28:26 sandervl Exp $ */
 /*
  * Win32 Window Class Code for OS/2
  *
@@ -19,6 +19,9 @@
 #include <win32class.h>
 #include <win32wbase.h>
 #include <controls.h>
+
+#define DBG_LOCALLOG	DBG_windowclass
+#include "dbglocal.h"
 
 //******************************************************************************
 //******************************************************************************

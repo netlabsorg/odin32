@@ -1,4 +1,4 @@
-/* $Id: win32wndchild.cpp,v 1.4 2000-01-18 20:11:01 sandervl Exp $ */
+/* $Id: win32wndchild.cpp,v 1.5 2000-02-16 14:28:25 sandervl Exp $ */
 /*
  * Win32 Child/Parent window class for OS/2
  *
@@ -12,6 +12,9 @@
 #include <os2win.h>
 #include <win32wndchild.h>
 #include <misc.h>
+
+#define DBG_LOCALLOG	DBG_win32wndchild
+#include "dbglocal.h"
 
 //******************************************************************************
 //******************************************************************************

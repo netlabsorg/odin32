@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.18 2000-02-08 22:29:15 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.19 2000-02-16 14:25:45 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -25,6 +25,9 @@
 #include "initterm.h"
 #include "oslibdos.h"
 #include "dosqss.h"
+
+#define DBG_LOCALLOG	DBG_oslibdos
+#include "dbglocal.h"
 
 /***********************************
  * PH: fixups for missing os2win.h *
@@ -343,6 +346,7 @@ BOOL OSLibDosGetFileAttributesEx(PSZ   pszName,
   return TRUE;
 }
 //******************************************************************************
+DWORD WIN32API GetEnvironmentVariableA(LPCSTR, LPSTR, DWORD );
 //******************************************************************************
 DWORD OSLibDosSearchPath(DWORD cmd, char *path, char *name, char *full_name, 
                          DWORD length_fullname)
@@ -376,16 +380,19 @@ DWORD OSLibDosSearchPath(DWORD cmd, char *path, char *name, char *full_name,
 
   case OSLIB_SEARCHENV:
   {
-   PCSZ envstring;
-   CHAR szResult[CCHMAXPATH];
+   LPSTR envstring;
+   int   envsize;
+   CHAR  szResult[CCHMAXPATH];
 
-	if(DosScanEnv(path, &envstring) != 0) {
-		return 0;
-	}
+	envsize = GetEnvironmentVariableA(path, NULL, 0);
+	envstring = (LPSTR)malloc(envsize+1);
+	GetEnvironmentVariableA(path, envstring, envsize);
 	if(DosSearchPath(SEARCH_IGNORENETERRS, envstring,
                          name, szResult, sizeof(szResult)) != 0) {
+		free(envstring);
 		return 0;
 	}
+	free(envstring);
 	strcpy(full_name, szResult);
 	return strlen(full_name);
   }

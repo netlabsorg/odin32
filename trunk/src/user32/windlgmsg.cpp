@@ -1,4 +1,4 @@
-/* $Id: windlgmsg.cpp,v 1.5 2000-01-18 20:11:07 sandervl Exp $ */
+/* $Id: windlgmsg.cpp,v 1.6 2000-02-16 14:28:25 sandervl Exp $ */
 /*
  * Win32 dialog message APIs for OS/2
  *
@@ -19,6 +19,9 @@
 #include <ctype.h>
 #include "win32wbase.h"
 #include "win32dlg.h"
+
+#define DBG_LOCALLOG	DBG_windlgmsg
+#include "dbglocal.h"
 
 //******************************************************************************
 //******************************************************************************

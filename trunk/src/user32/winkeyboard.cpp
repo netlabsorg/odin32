@@ -1,4 +1,4 @@
-/* $Id: winkeyboard.cpp,v 1.4 2000-01-18 20:11:16 sandervl Exp $ */
+/* $Id: winkeyboard.cpp,v 1.5 2000-02-16 14:28:27 sandervl Exp $ */
 /*
  * Win32 <-> PM key translation
  *
@@ -13,6 +13,9 @@
 #include <winkeyboard.h>
 #include "oslibwin.h"
 #include <heapstring.h>
+
+#define DBG_LOCALLOG	DBG_winkeyboard
+#include "dbglocal.h"
 
 BYTE abPMScanToWinVKey[256] =
 /****************************************************************************/
