@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2567 2003-05-02 15:32:03 sandervl Exp $ */
+/* $Id: changelog,v 1.2568 2003-05-02 17:19:17 sandervl Exp $ */
 
  2003-05-02: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Keep track of all open window DCs
@@ -9,6 +9,12 @@
                   moving windows with full window drag enabled.
                   (without full window drag there is no such problem due
                    to the use of LockWindowUpdate)
+
+ 2003-04-30: Platon Fomichev <stauff@innotek   >
+    - USER32:   o In WM_PARENTNOTIFY correctly map window coordinates for each
+                  window we send this message to.
+                  Correctly finish PM minimize sequence.
+                  Correctly switch titlebar higlight on activate/deactivate.
 
  2003-04-30: Dietrich Teickner <Dietrich_Teickner@t-online   >
     - SHLWAPI:  o Fixed PathIsUrlA/W
