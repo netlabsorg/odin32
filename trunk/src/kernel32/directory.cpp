@@ -1,4 +1,4 @@
-/* $Id: directory.cpp,v 1.20 2000-04-29 18:26:58 sandervl Exp $ */
+/* $Id: directory.cpp,v 1.21 2000-05-26 18:53:18 sandervl Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
@@ -211,6 +211,7 @@ ODINFUNCTION2(BOOL,CreateDirectoryA,LPCSTR, arg1,PSECURITY_ATTRIBUTES,arg2)
   strcpy(tmp, arg1);
   if(tmp[len -1] == '\\')
     tmp[len -1] = 0;
+  dprintf(("CreateDirectoryA %s", tmp));
   return O32_CreateDirectory(tmp, arg2);
 }
 
