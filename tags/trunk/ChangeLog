@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.1007 2000-06-26 10:28:06 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1008 2000-06-26 12:24:31 sandervl Exp $ */
 
  2000-06-26: Sander van Leeuwen <sandervl@xs4all.nl>
     - GDI32:       Fixed inverse video in RealPlayer 7 with SDD video drivers
@@ -10,6 +10,8 @@
                    fIncludeChildren=1 -> invalidates only child (in xwing case
                    as it overlaps the invalid region completely; though parent
                    window doesn't have WS_CLIPCHILDREN style)
+    - KERNEL32:    Added check for crossing limit of relocation section when
+                   applying fixups. (fixes crash in IBM VisualAge Java setup)
 
  2000-06-24: Michal Necasek <mike@mendelu.cz>
     - KERNEL32:    When creating files and mode is readonly, change to
