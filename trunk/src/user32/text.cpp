@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.8 2000-02-22 17:07:40 cbratschi Exp $ */
+/* $Id: text.cpp,v 1.9 2000-02-23 17:05:17 cbratschi Exp $ */
 
 /*
  * Font and Text Functions
@@ -145,7 +145,7 @@ static BOOL InternalGrayString(HDC hdc,HBRUSH hBrush,GRAYSTRINGPROC lpOutputFunc
   if(retval || nCount != -1)
 #endif
   {
-    hbsave = (HBRUSH)SelectObject(memdc, CACHE_GetPattern55AABrush());
+    hbsave = (HBRUSH)SelectObject(memdc,GetPattern55AABrush());
     PatBlt(memdc,0,0,nWidth,nHeight,0x000A0329);
     SelectObject(memdc, hbsave);
   }

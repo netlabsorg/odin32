@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.167 2000-02-22 17:07:42 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.168 2000-02-23 17:05:17 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1207,7 +1207,7 @@ LRESULT Win32BaseWindow::DefWndControlColor(UINT ctlType, HDC hdc)
           * look different from the window background.
           */
         if (bk == GetSysColor(COLOR_WINDOW)) {
-             return CACHE_GetPattern55AABrush();
+             return GetPattern55AABrush();
         }
 
         UnrealizeObject( hb );

@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.14 2000-02-22 17:07:43 cbratschi Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.15 2000-02-23 17:05:19 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -1374,7 +1374,7 @@ BOOL WIN32API DrawCaptionTemp(HWND hwnd,HDC hdc,const RECT *rect,HFONT hFont,HIC
 
     if (uFlags & DC_ACTIVE)
     {
-      HBRUSH hbr = SelectObject (hdc, CACHE_GetPattern55AABrush ());
+      HBRUSH hbr = SelectObject (hdc, GetPattern55AABrush ());
       PatBlt (hdc, rc.left, rc.top,
               rc.right-rc.left, rc.bottom-rc.top, 0xFA0089);
       SelectObject (hdc, hbr);

@@ -1,4 +1,4 @@
-/* $Id: uitools.cpp,v 1.25 2000-02-22 17:07:40 cbratschi Exp $ */
+/* $Id: uitools.cpp,v 1.26 2000-02-23 17:05:17 cbratschi Exp $ */
 /*
  * User Interface Functions
  *
@@ -618,7 +618,7 @@ static void UITOOLS_DrawCheckedRect( HDC dc, LPRECT rect )
 
       FillRect(dc, rect, GetSysColorBrush(COLOR_BTNFACE));
       bg = SetBkColor(dc, RGB(255, 255, 255));
-      hbsave = (HBRUSH)SelectObject(dc,CACHE_GetPattern55AABrush());
+      hbsave = (HBRUSH)SelectObject(dc,GetPattern55AABrush());
       PatBlt(dc, rect->left, rect->top, rect->right-rect->left, rect->bottom-rect->top, 0x00FA0089);
       SelectObject(dc, hbsave);
       SetBkColor(dc, bg);
@@ -1522,7 +1522,7 @@ BOOL Paint_DrawState (HDC hdc, HBRUSH hbr, DRAWSTATEPROC func, LPARAM lp, WPARAM
     /* These states cause the image to be dithered */
     if(flags & (DSS_UNION|DSS_DISABLED))
     {
-        hbsave = (HBRUSH)SelectObject(memdc,CACHE_GetPattern55AABrush());
+        hbsave = (HBRUSH)SelectObject(memdc,GetPattern55AABrush());
         if(!hbsave) goto cleanup;
         tmp = PatBlt(memdc, 0, 0, cx, cy, 0x00FA0089);
         if(hbsave) SelectObject(memdc, hbsave);

@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.35 2000-02-21 17:25:26 cbratschi Exp $ */
+/* $Id: edit.cpp,v 1.36 2000-02-23 17:05:16 cbratschi Exp $ */
 /*
  *      Edit control
  *
@@ -290,9 +290,9 @@ static inline void EDIT_EM_EmptyUndoBuffer(HWND hwnd, EDITSTATE *es)
 static inline void EDIT_WM_Clear(HWND hwnd, EDITSTATE *es)
 {
         EDIT_EM_ReplaceSel(hwnd, es, TRUE, "");
-       	if (es->flags & EF_UPDATE) {
-          	es->flags &= ~EF_UPDATE;
-	        EDIT_NOTIFY_PARENT(hwnd, EN_CHANGE);
+        if (es->flags & EF_UPDATE) {
+                es->flags &= ~EF_UPDATE;
+                EDIT_NOTIFY_PARENT(hwnd, EN_CHANGE);
         }
 }
 
@@ -2882,10 +2882,10 @@ static BOOL EDIT_EM_Undo(HWND hwnd, EDITSTATE *es)
         //TRACE_(edit)("after UNDO:insertion length = %d, deletion buffer = %s\n",
         //                es->undo_insert_count, es->undo_text);
 
-	if (es->flags & EF_UPDATE) {
-		es->flags &= ~EF_UPDATE;
-		EDIT_NOTIFY_PARENT(hwnd, EN_CHANGE);
-	}
+        if (es->flags & EF_UPDATE) {
+                es->flags &= ~EF_UPDATE;
+                EDIT_NOTIFY_PARENT(hwnd, EN_CHANGE);
+        }
 
         return TRUE;
 }
@@ -2931,9 +2931,9 @@ static void EDIT_WM_Char(HWND hwnd, EDITSTATE *es, CHAR c, DWORD key_data)
                         } else
                         {
                                 EDIT_EM_ReplaceSel(hwnd, es, TRUE, "\r\n");
-				if (es->flags & EF_UPDATE) {
-					es->flags &= ~EF_UPDATE;
-   					EDIT_NOTIFY_PARENT(hwnd, EN_CHANGE);
+                                if (es->flags & EF_UPDATE) {
+                                        es->flags &= ~EF_UPDATE;
+                                        EDIT_NOTIFY_PARENT(hwnd, EN_CHANGE);
                                 }
                         }
                 }
@@ -2942,10 +2942,10 @@ static void EDIT_WM_Char(HWND hwnd, EDITSTATE *es, CHAR c, DWORD key_data)
                 if ((es->style & ES_MULTILINE) && !(es->style & ES_READONLY))
                 {
                         EDIT_EM_ReplaceSel(hwnd, es, TRUE, "\t");
-			if (es->flags & EF_UPDATE) {
-				es->flags &= ~EF_UPDATE;
-				EDIT_NOTIFY_PARENT(hwnd, EN_CHANGE);
-			}
+                        if (es->flags & EF_UPDATE) {
+                                es->flags &= ~EF_UPDATE;
+                                EDIT_NOTIFY_PARENT(hwnd, EN_CHANGE);
+                        }
                 }
                 break;
         case VK_BACK:
@@ -2961,15 +2961,15 @@ static void EDIT_WM_Char(HWND hwnd, EDITSTATE *es, CHAR c, DWORD key_data)
                 }
                 break;
 //CB: are these three keys documented or Linux style???
-	case 0x03: /* ^C */
-		SendMessageA(hwnd, WM_COPY, 0, 0);
-		break;
-	case 0x16: /* ^V */
-		SendMessageA(hwnd, WM_PASTE, 0, 0);
-		break;
-	case 0x18: /* ^X */
-		SendMessageA(hwnd, WM_CUT, 0, 0);
-		break;
+        case 0x03: /* ^C */
+                SendMessageA(hwnd, WM_COPY, 0, 0);
+                break;
+        case 0x16: /* ^V */
+                SendMessageA(hwnd, WM_PASTE, 0, 0);
+                break;
+        case 0x18: /* ^X */
+                SendMessageA(hwnd, WM_CUT, 0, 0);
+                break;
 
         default:
                 if (!(es->style & ES_READONLY) && ((BYTE)c >= ' ') && (c != 127))
@@ -3125,10 +3125,10 @@ static LRESULT EDIT_WM_Create(HWND hwnd, EDITSTATE *es, LPCREATESTRUCTA cs)
             */
            es->selection_start = es->selection_end = 0;
            EDIT_EM_ScrollCaret(hwnd, es);
-	   if (es->flags & EF_UPDATE) {
-		es->flags &= ~EF_UPDATE;
-		EDIT_NOTIFY_PARENT(hwnd, EN_CHANGE);
-	   }
+           if (es->flags & EF_UPDATE) {
+                es->flags &= ~EF_UPDATE;
+                EDIT_NOTIFY_PARENT(hwnd, EN_CHANGE);
+           }
        }
        return 0;
 }
@@ -3142,7 +3142,7 @@ static LRESULT EDIT_WM_Create(HWND hwnd, EDITSTATE *es, LPCREATESTRUCTA cs)
 static void EDIT_WM_Destroy(HWND hwnd, EDITSTATE *es)
 {
         if (!es) /* Protect against multiple destroy messages */
-	    return;
+            return;
 
         if (es->hloc) {
                 while (LocalUnlock(es->hloc)) ;
@@ -3358,24 +3358,24 @@ static BOOL EDIT_CheckCombo(HWND hwnd, UINT msg, INT key, DWORD key_data)
 {
         HWND hLBox;
 
-	/********************************************************************
-	 * This if statement used to check to see if the parent of the
-	 * edit control was a 'combobox' by comparing the ATOM of the parent
-	 * to a table of internal window control ATOMs.  However, this check
-	 * would fail if the parent was a superclassed combobox (Although
-	 * having the same basic functionality of a combobox, it has a
-	 * different name and ATOM, thus defeating this check.)
-	 *
-	 * The safe way to determine if the parent is a combobox is to send it
-	 * a message only a combo box would understand.  I send it a message
-	 * CB_GETCOUNT, if I get 0 then the parent is not a combobox -
+        /********************************************************************
+         * This if statement used to check to see if the parent of the
+         * edit control was a 'combobox' by comparing the ATOM of the parent
+         * to a table of internal window control ATOMs.  However, this check
+         * would fail if the parent was a superclassed combobox (Although
+         * having the same basic functionality of a combobox, it has a
+         * different name and ATOM, thus defeating this check.)
+         *
+         * The safe way to determine if the parent is a combobox is to send it
+         * a message only a combo box would understand.  I send it a message
+         * CB_GETCOUNT, if I get 0 then the parent is not a combobox -
          * return FALSE.  If I get > 0, then the parent IS a combobox
          * (or sub/super classed derrivative thereof)
-	 ********************************************************************/
+         ********************************************************************/
 #if 0 //CB: our code
         if (GetClassWord(GetParent(hwnd),GCW_ATOM) ==  GlobalFindAtomA(COMBOBOXCLASSNAME) &&
                         (hLBox = COMBO_GetLBWindow(GetParent(hwnd))))
-#else	
+#else
         if (
              ((SendMessageA(GetParent(hwnd), CB_GETCOUNT, 0, 0)) > 0) &&
              (hLBox = COMBO_GetLBWindow(GetParent(hwnd)))
@@ -3838,7 +3838,8 @@ static VOID EDIT_Refresh(HWND hwnd,EDITSTATE *es,BOOL useCache)
 
   if (es->flags & EF_UPDATE)
   {
-    es->flags &= ~EF_UPDATE;
+    //CB: don't reset flag or EN_CHANGE is lost!
+    //es->flags &= ~EF_UPDATE;
     EDIT_NOTIFY_PARENT(hwnd,EN_UPDATE);
   }
 
@@ -3903,10 +3904,10 @@ static void EDIT_WM_Paste(HWND hwnd, EDITSTATE *es)
                 EDIT_EM_ReplaceSel(hwnd, es, TRUE, src);
                 GlobalUnlock(hsrc);
 
-		if (es->flags & EF_UPDATE) {
-			es->flags &= ~EF_UPDATE;
-			EDIT_NOTIFY_PARENT(hwnd, EN_CHANGE);
-		}
+                if (es->flags & EF_UPDATE) {
+                        es->flags &= ~EF_UPDATE;
+                        EDIT_NOTIFY_PARENT(hwnd, EN_CHANGE);
+                }
         }
         CloseClipboard();
 }
