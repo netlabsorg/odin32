@@ -1,4 +1,4 @@
-/* $Id: user32.rc,v 1.7 2000-01-03 20:53:50 cbratschi Exp $ */
+/* $Id: user32.rc,v 1.8 2000-01-12 12:40:46 sandervl Exp $ */
 /* converted from WINE */
 
 #include "winuser.h"
@@ -805,6 +805,22 @@ EDITMENU MENU LOADONCALL MOVEABLE DISCARDABLE
 #define OCR_NO              32648
 #define OCR_APPSTARTING     32650
 #define OCR_HELP            32651  /* only defined in Odin */
+
+
+MSGBOX DIALOG 100, 80, 216, 168
+STYLE DS_SYSMODAL | DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+BEGIN
+        ICON "", 1088, 8, 20, 16, 16, WS_CHILD | WS_VISIBLE
+        LTEXT "", 100, 32, 4, 176, 48, WS_CHILD | WS_VISIBLE | WS_GROUP
+        PUSHBUTTON "&OK", 1, 16, 56, 40, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+        PUSHBUTTON "&Cancel", 2, 64, 56, 40, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+        PUSHBUTTON "&Abort", 3, 112, 56, 40, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+        PUSHBUTTON "&Retry", 4, 160, 56, 40, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+        PUSHBUTTON "&Ignore", 5, 208, 56, 40, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+        PUSHBUTTON "&Yes", 6, 256, 56, 40, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+        PUSHBUTTON "&No", 7, 304, 56, 40, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //

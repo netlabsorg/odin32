@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.56 2000-01-11 10:38:33 sandervl Exp $
+# $Id: makefile,v 1.57 2000-01-12 12:40:41 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -114,7 +114,7 @@ menu.obj: menu.cpp $(PDWIN32_INCLUDE)\win\menu.h
 winswitch.obj: winswitch.cpp $(PDWIN32_INCLUDE)\win\winswitch.h
 icontitle.obj: icontitle.cpp $(PDWIN32_INCLUDE)\win\icontitle.h
 
-msgbox.obj:    msgbox.cpp
+msgbox.obj:    msgbox.c
 window.obj:    window.cpp win32class.h win32wbase.h win32wndchild.h oslibwin.h win32wmdiclient.h win32wdesktop.h
 windowmsg.obj: windowmsg.cpp win32class.h win32wbase.h win32wndchild.h oslibmsg.h
 winprop.obj:   winprop.cpp win32wbase.h
