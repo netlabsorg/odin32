@@ -8,15 +8,23 @@ require "stilovi.php3";
  */
 if (isset($sFile))
 {
-    $sOperation = "viewfile";
-    if (!isset($sRevision))
-        $sRevision = "";
-    $sTitle = substr($sFile, 0, -2);
+    if (isset($sRevision))
+    {
+        $sOperation = "viewfile";
+        if ($sRevision == "HEAD")
+            $sRevision = "";
+        $sTitle = substr($sFile, 0, -2)."\nrev.: ". ($sRevision == "" ? "HEAD" : $sRevision);
+    }
+    else
+    {
+        $sOperation = "viewfileinfo";
+        $sTitle = substr($sFile, 0, -2);
+    }
 }
 else if (isset($sDir))
 {
     $sOperation = "viewdir";
-    $sTitle = ($sDir == "." || $sDir =="") ? "root" : $sDir;
+    $sTitle = ($sDir == "." || $sDir =="") ? "./" : $sDir."/";
     $iSortColumn = (!isset($iSortColumn) || $iSortColumn == "")  ?
                         0 : $iSortColumn = @(int)$iSortColumn;
 }
@@ -33,33 +41,38 @@ else
  * Odin32 look.
  */
 require "01-PreTitle.php3";
-echo "Odin32 CVS: ", $sTitle;
+echo "Odin32 CVS: ", str_replace("\n", " ", $sTitle);
 require "02-PostTitle.php3";
 
 require "03-MainTableBeg.php3";
 require "04-ColumnOne.php3";
 
 require "05-ColumnTwoHeader.php3";
-echo "Odin32 CVS: ", $sTitle;
+echo "Odin32 CVS: ", str_replace("\n", "<br>", $sTitle);
 require "06-ColumnTwoHeader2.php3";
 
 
 /*
  *
  */
+flush();
 
 /*
  * Do the requested operation...
  */
 switch ($sOperation)
 {
-    case "viewfile":
+
+    case "viewfileinfo":
     {
         $obj = new CVSFile($sFile, 0);
         if ($obj && $obj->fOk)
         {
-            $obj->PrintRevision($sRevision);
-            //$obj->DumpInfo();
+            if (!$obj->PrintAllInfo())
+            {
+                echo "<p><i>PrintRevision failed.</i>";
+                echo "<br><i>".$obj->sError."<br>";
+            }
         }
         else
         { //error - complain
@@ -69,6 +82,27 @@ switch ($sOperation)
         }
         break;
     }
+
+    case "viewfile":
+    {
+        $obj = new CVSFile($sFile, 0);
+        if ($obj && $obj->fOk)
+        {
+            if (!$obj->PrintRevision($sRevision))
+            {
+                echo "<p><i>PrintRevision failed.</i>";
+                echo "<br><i>".$obj->sError."<br>";
+            }
+        }
+        else
+        { //error - complain
+            echo "<p><i>An error occured while creating file object for $sFile.</i>";
+            if ($obj)
+                echo "<br><i>".$obj->sError."<br>";
+        }
+        break;
+    }
+
 
     case "viewdir":
     {

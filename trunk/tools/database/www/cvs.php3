@@ -6,8 +6,8 @@ require "Odin32DBhelpers.php3";
  * Configuration:
  */
 $sCVSROOT = ".";
-$sCVSROOT = "d:/odin32/cvs/cvsroot";
 $sCVSROOT = "g:/cvsroot";
+$sCVSROOT = "d:/odin32/cvs/cvsroot";
 
 
 /**
@@ -40,11 +40,26 @@ class CVSFile
          * TODO: Security: Check that the path and filename is valid!
          *       We can't allow relative paths (ie. "..")
          */
-        if (strlen($sFilename) < 3 || substr($sFilename, strlen($sFilename)-2) != ",v")
+        if (strlen($sFilename) < 3 || substr($sFilename, -2) != ",v")
         {
             $this->sError = "filename is invalid";
             return 1;
         }
+        $sFilename = str_replace("\\", "/", $sFilename);
+        if ((substr($sFilename, 0, 3) == "../")
+            ||
+            (substr($sFilename, -3) == "/..")
+            ||
+            (strpos($sFilename, "/../") > 0)
+            )
+            {
+            $this->sError = "Invalid parameter: \$sFilename $sFilename";
+            return 87;
+            }
+        if ($sFilename[0] == '/')
+            $sFilename = ".".$sFilename;
+        else if (substr($sFilename, 0, 2) != "./")
+            $sFilename = "./".$sFilename;
 
         /*
          * Check filesize. Minimum size is 10 bytes!
@@ -97,7 +112,7 @@ class CVSFile
          * Parse the file.
          */
         $Timer = Odin32DBTimerStart("CVS Parse");
-        $this->fOk = $this->ParseFile2($hFile, 0);// $fNoDeltas);
+        $this->fOk = $this->ParseFile($hFile, $fNoDeltas);
         Odin32DBTimerStop($Timer);
 
         fclose($hFile);
@@ -115,221 +130,6 @@ class CVSFile
      * (internal)
      */
     function ParseFile($hFile, $fNoDeltas)
-    {
-
-        /*
-         * Parse file.
-         */
-        $fAt    = 0;
-        $fNewKey= 1;
-        $sKey   = "";
-        $sRev   = "";
-        $fDesc  = 0;
-
-        $iLine  = -1;
-        $sLine  = "";
-        $fStop  = 0;
-        while (($sLine != "" || !feof($hFile)) && !$fStop)
-        {
-            /*
-             * Left trim.
-             * If empty line, get next and iterate.
-             */
-            $sLine = ltrim($sLine);
-            if (!$sLine || $sLine == "" || $sLine == "\n" || $sLine == "\r")
-            {
-                $iLine++;
-                $sLine = fgets($hFile, 0x1000);
-                continue;
-            }
-
-            /*
-             * Are we looking for a new key word?
-             */
-            if ($fNewKey)
-            {
-                //$sKey = CopyWord($sLine);
-                $cch = strlen($sLine);
-                for ($i = 0; $i < $cch; $i++)
-                {
-                    $c = $sLine[$i];
-                    if (!(
-                          ($c >= 'a'  && $c <= 'z')
-                          ||
-                          ($c >= 'A'  && $c <= 'Z')
-                          ||
-                          ($c >= '0'  && $c <= '9')
-                          ||
-                          $c == '.'
-                          ||
-                          $c == '_'
-                          )
-                        )
-                        break;
-                }
-                $sKey = substr($sLine, 0, $i);
-
-                $sLine = ltrim(SkipWord($sLine));
-                if ($sKey[0] >= "0" && $sKey[0] <= "9")
-                    /* Revision number: delta or revision info */
-                    $sRev = $sKey;
-                else
-                    $fNewKey = 0;
-                continue;
-            }
-
-
-            /*
-             * Extract value
-             */
-            $fNoSemicolon = ($sKey == "desc" || $sKey == "log" || $sKey == "desc");
-            if ($fAt = ($sLine[0] == "@")) //check if the value is enclosed in '@'s
-                $sLine = substr($sLine, 1);
-            $asValue = array();
-            $fEnd = 0;
-            while (!$fEnd)
-            {
-                /* get new line? */
-                if (!$sLine || $sLine == "" || $sLine == "\n" || $sLine == "\r")
-                {
-                    if (feof($hFile))
-                        break;
-                    /* Get next line and remove any EOF chars */
-                    $iLine++;
-                    $sLine = str_replace("\x1a", "", fgets($hFile, 0x1000));
-                    continue;
-                }
-
-                //echo "debug line $iLine: $sLine";
-
-                /*
-                 * Look for end char (either ; or @) and copy.
-                 * If end of value then $sLine <- rest of line.
-                 */
-                $fEnd = 0;
-                $cchLine = strlen($sLine);
-                if ($fAt)
-                {   /* terminated with @ */
-                    //$iAt = 0;
-                    //for ($iAt; $iAt+1 < $cchLine; $iAt++)
-                    //    if ($sLine[$iAt] == '@' && ($fEnd = ($sLine[++$iAt] != '@')))
-                    //        break;
-                    if ($sLine[0] == '@' && $sLine[1] != '@')
-                        $fEnd = $iAt = 1;
-                    else
-                    {
-                        $iAt = 0;
-                        while ($iAt = strpos($sLine, "@", $iAt+1))
-                           if ($fEnd = ($sLine[++$iAt] != '@'))
-                                break;
-                    }
-
-                    if ($fEnd)
-                    {
-                        $asValue[] = str_replace("@@", "@", substr($sLine, 0, $iAt - 1));
-                        /* if semicolon end, skip to it. ASSUMES: same line! */
-                        if (!$fNoSemicolon && ($iAt = strpos($sLine, ";", $iAt)) >= 0)
-                            $iAt++;
-                        $sLine = (strlen($sLine) > $iAt && $iAt >= 0) ? substr($sLine, $iAt) : "";
-                    }
-                    else
-                    {
-                        $asValue[] = str_replace("@@", "@", $sLine);
-                        $sLine = "";
-                    }
-                }
-                else
-                {   /* terminated with ';' */
-                    $i = strpos($sLine, ';');
-                    if ($fEnd = ($i > 0 || $sLine[0] == ';'))
-                    {
-                        //$asValue[] = str_replace("@@", "@", substr($sLine, 0, $i));
-                        $asValue[] = substr($sLine, 0, $i);
-                        $sLine = (strlen($sLine) > $i+1) ? substr($sLine, $i+1) : "";
-                    }
-                    else
-                    {
-                        //$asValue[] = str_replace("@@", "@", $sLine);
-                        $asValue[] = $sLine;
-                        $sLine = "";
-                    }
-                }
-            }
-
-
-            /*
-             * Process the key.
-             */
-            switch ($sKey)
-            {
-                /*
-                 * This is normally the keyword separating
-                 * revision info from log+text info.
-                 */
-                case "desc":
-                    $fDesc = 1;
-                    $sRev = "";
-                    break;
-
-                /*
-                 * Stop after the first log entry.
-                 */
-                case "log":
-                    $fStop = $fNoDeltas;
-                    break;
-
-                /*
-                 * Don'r read deltas for archives with the expand tag set
-                 */
-                case "expand":
-                    $fNoDeltas = 1;//= $asValue[0] != "";
-                    break;
-            }
-
-            /*
-             * Save key and value in the appopriate place.
-             */
-            if ($sRev == "")
-            {   /* Base keys */
-                if (sizeof($this->aasKeys) <= 0 //sanity check! head must come first and have a value!
-                    && ($sKey != "head" || sizeof($asValue) <= 0 || $asValue[0] == ""))
-                {
-                    $this->sError = "Invalid file format.";
-                    fclose($hFile);
-                    return 0;
-                }
-                $this->aasKeys[$sKey] = $asValue;
-            }
-            else if ($sKey != "text")
-            {   /* Revision information keys  */
-                if (!isset($this->aaasRevs[$sRev]))
-                    $this->aaasRevs[$sRev] = array($sKey => $asValue);
-                else
-                    $this->aaasRevs[$sRev][$sKey] = $asValue;
-            }
-            else
-            {   /* Delta (ie. 'text') key */
-                $this->aasDeltas[$sRev] = $asValue;
-            }
-
-            /*
-             * Completed reading of this key, so next one.
-             */
-            $fNewKey = 1;
-
-            /* debug */
-            //echo "debug key: $sKey  value(".sizeof($asValue)."):".$asValue[0]."\n";
-        }
-
-        return 1;
-    }
-
-
-    /**
-     * Parses the file.
-     * (internal)
-     */
-    function ParseFile2($hFile, $fNoDeltas)
     {
 
         /*
@@ -488,6 +288,24 @@ class CVSFile
                     break;
 
                 /*
+                 * Reparse the value.
+                 */
+                case "symbols":
+                    $asValue2 = $asValue;
+                    $asValue = array();
+                    while (list ($sIgnore, $sVal) = each ($asValue2))
+                    {
+                        if (($sVal = trim($sVal)) != "")
+                        {
+                            if ($iColon = strpos($sVal, ":"))
+                                $asValue[substr($sVal, 0, $iColon-1)] = substr($sVal, $iColon+1);
+                            else
+                                echo "\n<!-- error in symbols parsing -->\n";
+                        }
+                    }
+                    break;
+
+                /*
                  * Don'r read deltas for archives with the expand tag set
                  */
                 case "expand":
@@ -611,34 +429,73 @@ class CVSFile
         }
 
         /*
+         * Make header
+         */
+        echo "<table><tr><td bgcolor=#f0f0f0>\n<table>";
+        //file info
+        echo "<tr><td valign=top><font size=-1>File:</font></td>\n",
+             "<td><font size=-1>", $this->getDirUrls(), " / <a href=\"cvs.php?sFile=$this->sDir/$this->sName,v\">$this->sName</a></font></td></tr>\n";
+
+        //revision info
+        echo "<tr><td valign=top><font size=-1>Revision:</font></td>\n",
+             "<td><font size=-1>$sRevision, ",
+             CVSFormatDate($this->getDate($sRevision)),
+             " (",CVSGetAge($this->getDate($sRevision), 6), ")",
+             "<br>by ", $this->getAuthor($sRevision),
+             "</font></td></tr>\n";
+
+        //branch info
+        echo "<tr><td valign=top><font size=-1>Branch:</font></td>\n",
+             "<td><font size=-1>", $this->getBranch($sRevision),
+             "</font></td></tr>\n";
+
+        //tag info
+        echo "<tr><td valign=top><font size=-1>Tags:</font></td>\n",
+             "<td><font size=-1>", $this->getTags($sRevision),
+             "</font></td></tr>\n";
+
+        //log info
+        $asLog = $this->getLog($sRevision);
+        echo "<tr><td valign=top><font size=-1>Log:</font></td>",
+             "<td><font size=-1>\n";
+        if (isset($asLog))
+            while (list($sKey, $s) = each ($asLog))
+                echo $s; //this should be <pre> but, that will need some line wrapping...
+                //echo str_replace("\n", "<br>", $s), "\n"; //this should be <pre> but, that will need some line wrapping...
+        echo "</font></td><tr>\n";
+
+        echo "</table>\n";//<hr noshade>\n";
+
+
+        /*
          * Initiate the color encoder.
          */
         switch (strtolower($this->sExt))
         {
-            case 'c':
-            case 'cpp':
-            case 'cxx':
-            case 'h':
-            case 'hpp':
+            case "c":
+            case "cpp":
+            case "cxx":
+            case "h":
+            case "hpp":
                 C_ColorInit($aVariables);
                 $iColorEncoder = 1;
                 break;
 
-            case 'asm':
-            case 'inc':
-            case 's':
+            case "asm":
+            case "inc":
+            case "s":
                 ASM_ColorInit($aVariables);
                 $iColorEncoder = 2;
                 break;
 
-            case 'mk':
-            case 'mak':
+            case "mk":
+            case "mak":
                 Make_ColorInit($aVariables);
                 $iColorEncoder = 3;
                 break;
 
             default:
-                if (strtolower($this->sName) == "makefile");
+                if (strtolower($this->sName) == "makefile")
                 {
                     Make_ColorInit($aVariables);
                     $iColorEncoder = 3;
@@ -653,7 +510,7 @@ class CVSFile
          * Write it!
          */
         $Timer = Odin32DBTimerStart("Write timer");
-        echo "<table><tr><td bgcolor=#020286><pre><font size=-0 face=\"System VIO, System Monospaced\" color=#02FEFE>\n";
+        echo "<tr><td bgcolor=#020286><pre><font size=-0 face=\"System VIO, System Monospaced\" color=#02FEFE>\n";
 
         for ($cLines = sizeof($this->aasDeltas[$sRevision]), $iLine = 0;
              ($iLine < $cLines);
@@ -675,7 +532,7 @@ class CVSFile
                     echo  str_replace("\t", "    ", Make_ColorEncode(htmlspecialchars($this->aasDeltas[$sRevision][$iLine]), $aVariables));
                     break;
                 default:
-                    echo  htmlspecialchars($this->aasDeltas[$sRevision][$iLine]);
+                    echo  str_replace("\t", "    ", htmlspecialchars($this->aasDeltas[$sRevision][$iLine]));
             }
             echo "</a>";
         }
@@ -726,99 +583,11 @@ class CVSFile
      */
     function getDate($sRev)
     {
-        return @$this->aaasRevs[$sRev]["date"][0];
-    }
-
-    /**
-     * Get the age of the given revision.
-     * @returns     Age string. (human readable)
-     * @param       $sRev       Revision number to get age for.
-     */
-    function getAge($sRev)
-    {
-        if (!isset($this->aaasRevs[$sRev]["date"][0]))
-            return "<i>error</i>";
-
-        $sDate = $this->aaasRevs[$sRev]["date"][0];
-        $sCurDate = date("Y.m.d.H.i.s");
-        if ($sDate > $sCurDate)
-            return "0 seconds"; //fixme?
-
-        /* seconds */
-        $i1 = substr($sCurDate, 17, 2);
-        $i2 = substr($sDate, 17, 2);
-        if ($fBorrow = ($i1 < $i2))
-            $i1 += 60;
-        $iSeconds = $i1 - $i2;
-
-        /* minuttes */
-        $i1 = substr($sCurDate, 14, 2);
-        $i2 = substr($sDate, 14, 2);
-        if ($fBorrow)
-            $i1--;
-        if ($fBorrow = ($i1 < $i2))
-            $i1 += 60;
-        $iMinuttes = $i1 - $i2;
-
-        /* hours */
-        $i1 = substr($sCurDate, 11, 2);
-        $i2 = substr($sDate, 11, 2);
-        if ($fBorrow)
-            $i1--;
-        if ($fBorrow = ($i1 < $i2))
-            $i1 += 24;
-        $iHours = $i1 - $i2;
-
-        /* days */
-        $i1 = substr($sCurDate, 8, 2);
-        $i2 = substr($sDate, 8, 2);
-        if ($fBorrow)
-            $i1--;
-        if ($fBorrow = ($i1 < $i2))
-        {
-            $iM = substr($sCurDate, 5, 2);
-            $iY = substr($sCurDate, 0, 4);
-            if ($iM == 1 || $iM == 3 || $iM == 5 || $iM == 7 || $iM == 8 || $iM == 10 || $iM == 12)
-                $i1 += 31;
-            else if ($iM == 4 || $iM == 6 || $iM == 9 || $iM == 11)
-                $i1 += 30;
-            else if (($iY % 4) != 0 || (($iY % 100) == 0 && ($iY % 1000) != 0))
-                $i1 += 28;
-            else
-                $i1 += 29;
-        }
-        $iDays = $i1 - $i2;
-
-        /* months */
-        $i1 = substr($sCurDate, 5, 2);
-        $i2 = substr($sDate, 5, 2);
-        if ($fBorrow)
-            $i1--;
-        if ($fBorrow = ($i1 < $i2))
-            $i1 += 12;
-        $iMonths = $i1 - $i2;
-
-        /* years */
-        $i1 = substr($sCurDate, 0, 4);
-        $i2 = substr($sDate, 0, 4);
-        if ($fBorrow)
-            $i1--;
-        $iYears = $i1 - $i2;
-
-        //printf("<!-- $sCurDate - $sDate = %04d.%02d.%02d.%02d.%02d.%02d -->\n", $iYears, $iMonths, $iDays, $iHours, $iMinuttes, $iSeconds);
-
-        /* make output */
-        if ($iYears > 0)
-            return "$iYears year".($iYears > 1 ? "s" : "")." $iMonths month".($iMonths > 1 ? "s" : "");
-        if ($iMonths > 0)
-            return "$iMonths month".($iMonths > 1 ? "s" : "")." $iDays day".($iDays > 1 ? "s" : "");
-        if ($iDays > 0)
-            return "$iDays day".($iDays > 1 ? "s" : "")." $iHours hour".($iHours > 1 ? "s" : "");
-        if ($iHours > 0)
-            return "$iHours hour".($iHours > 1 ? "s" : "")." $iMinuttes min";
-        if ($iMinuttes > 0)
-            return "$iMinuttes min $iSeconds sec";
-       return "$iSeconds seconds";
+        if (($sDate = @$this->aaasRevs[$sRev]["date"][0]) != ""
+            && $sDate[2] == "." //check for two digit date
+            )
+            return "19".$sDate;
+        return $sDate;
     }
 
     /**
@@ -829,7 +598,6 @@ class CVSFile
     {
         return $this->sExt;
     }
-
 
     /**
      * Get the workfile extention.
@@ -848,6 +616,311 @@ class CVSFile
     {
         return isset($this->aasKeys["expand"]);
     }
+
+    /**
+     * Get loginfo for the given revision.
+     * @returns     Array of log info for the given revision.
+     * @param       $sRev       Revision number to get loginfo for.
+     */
+    function getLog($sRev)
+    {
+        return @$this->aaasRevs[$sRev]["log"];
+    }
+
+    /**
+     * Get the branch name for the given revision.
+     * @return      Branch name.
+     * @param       $sRev       Revision number to get branchname for.
+     */
+    function getBranch($sRev)
+    {
+        if (strpos(strpos($sRev, "."), ".") <= 0)
+            return "MAIN";
+        return "<i>not implemented</i>"; //TODO FIXME
+    }
+
+    /**
+     * Get the tag names associated with the given revision.
+     * @return      comma separated list of tag names.
+     * @param       $sRev       Revision number to get tag names for.
+     */
+    function getTags($sRev)
+    {
+        //didn't find a search function, so we'll do a linear search.
+        //thru the symbols. Correct this when/if a array search function
+        //is found.
+        $sTags = "";
+        if (isset($this->aasKeys["symbols"]))
+        {
+            $asSymbols = $this->aasKeys["symbols"];
+            while (list($sTag, $sTagRev) = each($asSymbols))
+                if ($sTagRev == $sRev)
+                    $sTags = ", $sTag";
+        }
+
+        //check for head revision
+        if ($sRev == $this->aasKeys["head"][0])
+            $sTags = ", HEAD";
+
+        return substr($sTags, 2); //remove ", "
+    }
+
+    /**
+     * Get a directory string (for this file) where every level
+     * is an URL to the page for it.
+     * @return      URL directory string.
+     */
+    function getDirUrls()
+    {
+        return CVSGetDirUrls($this->sDir);
+    }
+
+    /**
+     * Get changes string for this revision.
+     * (Won't work for the head revision!)
+     * @return      Changes string: "+x -y lines".
+     * @param       $sRev   Revision which we're to count changes for.
+     */
+    function getChanges($sRev)
+    {
+        if (!isset($this->aasDeltas[$sRev]))
+            return "<i>error</i>";
+        if ($sRev == $this->aasKeys["head"][0])
+            return "+0 -0 lines";
+        $cAdd = 0;
+        $cDelete = 0;
+
+        for ($i = 0, $c = sizeof($this->aasDeltas[$sRev]); $i < $c; $i++)
+        {
+            $sLine = $this->aasDeltas[$sRev][$i];
+            if ($sLine[0] == "d")
+                $cDelete += (int)substr($sLine, strpos($sLine, " ") + 1);
+            else if ($sLine[0] == "a")
+            {
+                $cAdd += (int)substr($sLine, strpos($sLine, " ") + 1);
+                $i += $cLines;
+            }
+            else
+                echo "<!-- hmm internal error in getChanges -->\n";
+        }
+
+        return "+$cDelete -$cAdd lines"; //note the deltas is for going the other way...
+    }
+
+    /**
+     *
+     * @return
+     */
+    function PrintAllInfo()
+    {
+
+        //file info
+        echo "<font size=-1>", $this->getDirUrls(), " / $this->sName</font><p>\n",
+             "\n";
+
+        echo "<table>\n";
+        //do we have to sort the array first? no...
+        while (list($sRevision, $aasRev) = each($this->aaasRevs))
+        {
+            echo "<tr><td bgcolor=#d0dce0>Rev. <a href=\"cvs.php?sFile=$this->sDir/$this->sName,v&sRevision=$sRevision\"",
+                 "<a name=\"$sRevision\">$sRevision</a></a> by ",
+                 $this->getAuthor($sRevision) ,"</td></tr>\n",
+                 "<tr><td bgcolor=#f0f0f0>";
+
+            echo "<table>";
+            //revision date info
+            echo "<tr><td valign=top><font size=-1>Date:</font></td>\n",
+                 "<td><font size=-1>",CVSFormatDate($this->getDate($sRevision)),
+                 "<br>(",CVSGetAge($this->getDate($sRevision), 6), ")",
+                 "</font></td></tr>\n";
+
+            //branch info
+            echo "<tr><td valign=top><font size=-1>Branch:</font></td>\n",
+                 "<td><font size=-1>", $this->getBranch($sRevision),
+                 "</font></td></tr>\n";
+
+            //tag info
+            echo "<tr><td valign=top><font size=-1>Tags:</font></td>\n",
+                 "<td><font size=-1>", $this->getTags($sRevision),
+                 "</font></td></tr>\n";
+
+            //Changes info
+            if (isset($aasRev["next"]) && ($sPrevRev = $aasRev["next"][0]) != "")
+            {
+                echo "<tr><td valign=top><font size=-1>Changes since $sPrevRev:</font></td>\n",
+                     "<td><font size=-1>", $this->getChanges($sPrevRev),
+                     "</font></td></tr>\n";
+            }
+
+            //log info
+            $asLog = $this->getLog($sRevision);
+            echo "<tr><td valign=top><font size=-1>Log:</font></td><td><font size=-1>\n";
+            if (isset($asLog))
+                while (list($sKey, $s) = each ($asLog))
+                    echo $s; //this should be <pre> but, that will need some line wrapping...
+                    //echo str_replace("\n", "<br>", $s), "\n"; //this should be <pre> but, that will need some line wrapping...
+            echo "</font></td></tr>\n";
+
+            echo "</table>\n";
+
+            echo "</td></tr>\n";
+        }
+
+        echo "</table>\n";
+    }
+}
+
+
+/**
+ * Get a directory string where every level
+ * is an URL to the page for it.
+ * @return      URL directory string.
+ * @param       Directory string to process.
+ */
+function CVSGetDirUrls($sDir)
+{
+    if ($sDir == "")
+        $sDir = "./";
+    else if (substr($sDir, -1) != "/")
+        $sDir .= "/";
+
+    $iPrev = 2;
+    $sRet = "<a href=\"cvs.php?sDir=.\">[root]</a>";
+    while ($i = @strpos($sDir, "/", $iPrev))
+    {
+        $sRet .= " / <a href=\"cvs.php?sDir=".substr($sDir, 0, $i)."\">".
+                    substr($sDir, $iPrev, $i - $iPrev)."</a>";
+        $iPrev = $i + 1;
+    }
+
+    return $sRet;
+}
+
+
+
+/**
+ * Get a understandable date string from a CVS date.
+ * @returns     Date string (human readable)
+ * @param       $sDate      CVS date string. (as returned by getDate())
+ */
+function CVSFormatDate($sDate)
+{
+    $Time = mktime( substr($sDate,11, 2), //hour
+                    substr($sDate,14, 2), //minute
+                    substr($sDate,17, 2), //second
+                    substr($sDate, 5, 2), //month
+                    substr($sDate, 8, 2), //day
+                    substr($sDate, 0, 4));//year
+    return date("D M d h:i:s Y", $Time);
+}
+
+
+/**
+ * Calculate the period between $sDate and the current date.
+ * @returns     Age string. (human readable)
+ * @param       $sDate      CVS date string. (as returned by getDate())
+ * @param       $cLevels    Number of levels to be specified.
+ */
+function CVSGetAge($sDate, $cLevels)
+{
+    $sCurDate = date("Y.m.d.H.i.s");
+    if ($sDate > $sCurDate)
+        return "0 seconds"; //fixme?
+
+    /* seconds */
+    $i1 = substr($sCurDate, 17, 2);
+    $i2 = substr($sDate, 17, 2);
+    if ($fBorrow = ($i1 < $i2))
+        $i1 += 60;
+    $iSeconds = $i1 - $i2;
+
+    /* minutes */
+    $i1 = substr($sCurDate, 14, 2);
+    $i2 = substr($sDate, 14, 2);
+    if ($fBorrow)
+        $i1--;
+    if ($fBorrow = ($i1 < $i2))
+        $i1 += 60;
+    $iMinutes = $i1 - $i2;
+
+    /* hours */
+    $i1 = substr($sCurDate, 11, 2);
+    $i2 = substr($sDate, 11, 2);
+    if ($fBorrow)
+        $i1--;
+    if ($fBorrow = ($i1 < $i2))
+        $i1 += 24;
+    $iHours = $i1 - $i2;
+
+    /* days */
+    $i1 = substr($sCurDate, 8, 2);
+    $i2 = substr($sDate, 8, 2);
+    if ($fBorrow)
+        $i1--;
+    if ($fBorrow = ($i1 < $i2))
+    {
+        $iM = substr($sCurDate, 5, 2);
+        $iY = substr($sCurDate, 0, 4);
+        if ($iM == 1 || $iM == 3 || $iM == 5 || $iM == 7 || $iM == 8 || $iM == 10 || $iM == 12)
+            $i1 += 31;
+        else if ($iM == 4 || $iM == 6 || $iM == 9 || $iM == 11)
+            $i1 += 30;
+        else if (($iY % 4) != 0 || (($iY % 100) == 0 && ($iY % 1000) != 0))
+            $i1 += 28;
+        else
+            $i1 += 29;
+    }
+    $iDays = $i1 - $i2;
+
+    /* months */
+    $i1 = substr($sCurDate, 5, 2);
+    $i2 = substr($sDate, 5, 2);
+    if ($fBorrow)
+        $i1--;
+    if ($fBorrow = ($i1 < $i2))
+        $i1 += 12;
+    $iMonths = $i1 - $i2;
+
+    /* years */
+    $i1 = substr($sCurDate, 0, 4);
+    $i2 = substr($sDate, 0, 4);
+    if ($fBorrow)
+        $i1--;
+    $iYears = $i1 - $i2;
+
+    //printf("<!-- $sCurDate - $sDate = %04d.%02d.%02d.%02d.%02d.%02d -->\n", $iYears, $iMonths, $iDays, $iHours, $iMinutes, $iSeconds);
+
+
+    /* make output */
+    $sRet = "";
+    if ($cLevels > 0 && $iYears > 0)
+    {
+        $cLevels--;
+        $sRet .= "$iYears year".($iYears > 1 ? "s" : "");
+    }
+    if ($cLevels > 0 && $iMonths > 0)
+    {
+        $cLevels--;
+        $sRet .= " $iMonths month".($iMonths > 1 ? "s" : "");
+    }
+    if ($cLevels > 0 && $iDays > 0)
+    {
+        $cLevels--;
+        $sRet .= " $iDays day".($iDays > 1 ? "s" : "");
+    }
+    if ($cLevels > 0 && $iHours > 0)
+    {
+        $cLevels--;
+        $sRet .= " $iHours hour".($iHours > 1 ? "s" : "");
+    }
+    if ($cLevels > 0 && $iMinutes > 0)
+    {
+        $cLevels--;
+        $sRet .= " $iMinutes minute".($iHours > 1 ? "s" : "");
+    }
+    if ($cLevels > 0)
+        $sRet .= " $iSeconds second".($iHours > 1 ? "s" : "");
+    return ltrim($sRet);
 }
 
 
@@ -868,13 +941,13 @@ function ListDirectory($sDir, $iSortColumn)
         $sDir = ".";
     if ($sDir[0] == '/')
         $sDir = substr($sDir, 1);
-    if ($sDir[strlen($sDir)-1] == '/')
-        $sDir = substr($sDir, 0, strlen($sDir) - 1);
+    if (substr($sDir, -1) == '/')
+        $sDir = substr($sDir, 0,  - 1);
     if ((strlen($sDir) == 2 && $sDir == "..")
         ||
         (substr($sDir, 0, 3) == "../")
         ||
-        (substr($sDir, strlen($sDir)-3) == "/..")
+        (substr($sDir, -3) == "/..")
         ||
         (strpos($sDir, "/../") > 0)
         )
@@ -964,7 +1037,7 @@ function ListDirectory($sDir, $iSortColumn)
         if ($obj->fOk)
         {
             $asRev[$sFile]    = $sRev = $obj->getHead();
-            $asAge[$sFile]    = $obj->getAge($sRev);
+            $asDate[$sFile]   = $obj->getDate($sRev);
             $asAuthor[$sFile] = $obj->getAuthor($sRev);
             $asTmpLog         = $obj->getLog($sRev);
             for ($sLog = "", $j = sizeof($asTmpLog) - 1; $j >= 0; $j--)
@@ -989,6 +1062,13 @@ function ListDirectory($sDir, $iSortColumn)
     Odin32DBTimerStop($cvstimer);
 
     /*
+     * Write header
+     */
+    echo "<font size=-1>", CVSGetDirUrls(dirname($sDir)),
+         ($sDir != "." ? " / ".substr($sDir, strrpos($sDir, "/") + 1) : ""),
+         " /</font><p>\n";
+
+    /*
      * Sort the stuff.
      */
     sort($asSubDirs);
@@ -996,7 +1076,7 @@ function ListDirectory($sDir, $iSortColumn)
     {
         case 0:     $asSorted = $asFiles; break;
         case 1:     $asSorted = $asRev; break;
-        case 2:     $asSorted = $asAge; break;
+        case 2:     $asSorted = $asDate; break;
         case 3:     $asSorted = $asAuthor; break;
         case 4:     $asSorted = $asLog; break;
         default:    $asSorted = $asFiles; break;
@@ -1009,13 +1089,13 @@ function ListDirectory($sDir, $iSortColumn)
      */
     $aColumnColors = array("#d0dce0","#d0dce0","#d0dce0","#d0dce0", "#d0dcff","#d0dce0","#d0dce0","#d0dce0","#d0dce0");
     echo "<table border=0 width=100% cellspacing=1 cellpadding=2>\n",
-         "  <hr NOSHADE>\n",
-         "    <th bgcolor=",$aColumnColors[4+0-$iSortColumn],"><font size=-1><b><a href=cvs.phtml?sDir=$sDir&iSortColumn=0>Filename</a></b></font></th>\n",
-         "    <th bgcolor=",$aColumnColors[4+1-$iSortColumn],"><font size=-1><b><a href=cvs.phtml?sDir=$sDir&iSortColumn=1>Rev</a></b></font></th>\n",
-         "    <th bgcolor=",$aColumnColors[4+2-$iSortColumn],"><font size=-1><b><a href=cvs.phtml?sDir=$sDir&iSortColumn=2>Age</a></b></font></th>\n",
-         "    <th bgcolor=",$aColumnColors[4+3-$iSortColumn],"><font size=-1><b><a href=cvs.phtml?sDir=$sDir&iSortColumn=3>Author</a></b></font></th>\n",
-         "    <th bgcolor=",$aColumnColors[4+4-$iSortColumn],"><font size=-1><b><a href=cvs.phtml?sDir=$sDir&iSortColumn=4>Last Log Entry</a></b></font></th>\n",
-         "  </hr>\n";
+         "  <tr>\n",
+         "    <th bgcolor=",$aColumnColors[4+0-$iSortColumn],"><font size=-1><b><a href=cvs.php?sDir=$sDir&iSortColumn=0>Filename</a></b></font></th>\n",
+         "    <th bgcolor=",$aColumnColors[4+1-$iSortColumn],"><font size=-1><b><a href=cvs.php?sDir=$sDir&iSortColumn=1>Rev</a></b></font></th>\n",
+         "    <th bgcolor=",$aColumnColors[4+2-$iSortColumn],"><font size=-1><b><a href=cvs.php?sDir=$sDir&iSortColumn=2>Age</a></b></font></th>\n",
+         "    <th bgcolor=",$aColumnColors[4+3-$iSortColumn],"><font size=-1><b><a href=cvs.php?sDir=$sDir&iSortColumn=3>Author</a></b></font></th>\n",
+         "    <th bgcolor=",$aColumnColors[4+4-$iSortColumn],"><font size=-1><b><a href=cvs.php?sDir=$sDir&iSortColumn=4>Last Log Entry</a></b></font></th>\n",
+         "  </tr>\n";
     $i = 0;
     /* directories */
     if ($sDir != "." && $sDir != "")
@@ -1027,7 +1107,7 @@ function ListDirectory($sDir, $iSortColumn)
         $sBgColor = ($i++ % 2) ? "" : " bgcolor=#f0f0f0";
         echo "<tr>\n",
              " <td", $sBgColor , ">",
-               "<font size=-1><a href=\"cvs.phtml?sDir=",$sParentDir,"\"><img src=\"/icons/back.gif\" border=0> Parent Directory</a></font></td>\n",
+               "<font size=-1><a href=\"cvs.php?sDir=",$sParentDir,"\"><img src=\"/icons/back.gif\" border=0> Parent Directory</a></font></td>\n",
              " <td$sBgColor>&nbsp;</td>\n",
              " <td$sBgColor>&nbsp;</td>\n",
              " <td$sBgColor>&nbsp;</td>\n",
@@ -1038,7 +1118,7 @@ function ListDirectory($sDir, $iSortColumn)
     {
         $sBgColor = ($i++ % 2) ? "" : " bgcolor=#f0f0f0";
         echo "<tr>\n",
-             " <td$sBgColor><font size=-1><a href=\"cvs.phtml?sDir=$sDir/$sVal\"><img src=\"/icons/dir.gif\" border=0> $sVal</a></font></td>\n",
+             " <td$sBgColor><font size=-1><a href=\"cvs.php?sDir=$sDir/$sVal\"><img src=\"/icons/dir.gif\" border=0> $sVal</a></font></td>\n",
              " <td$sBgColor>&nbsp;</td>\n",
              " <td$sBgColor>&nbsp;</td>\n",
              " <td$sBgColor>&nbsp;</td>\n",
@@ -1050,14 +1130,14 @@ function ListDirectory($sDir, $iSortColumn)
     while (list($sKey, $sVal) = each($asSorted))
     {
         $sBgColor = ($i++ % 2) ? "" : " bgcolor=#f0f0f0";
-        $sRev   = isset($asRev[$sKey])  ? $asRev[$sKey]     : "<i> error </i>";
-        $sAge   = isset($asAge[$sKey])  ? $asAge[$sKey]     : "<i> error </i>";
-        $sAuthor= isset($asAuthor[$sKey])?$asAuthor[$sKey]  : "<i> error </i>";
-        $sLog   = isset($asLog[$sKey])  ? $asLog[$sKey]     : "<i> error </i>";
-        $sIcon  = isset($asIcon[$sKey]) ? $asIcon[$sKey]    : "<i> error </i>";
+        $sRev   = isset($asRev[$sKey])  ? $asRev[$sKey]             : "<i> error </i>";
+        $sAge   = isset($asDate[$sKey]) ? CVSGetAge($asDate[$sKey], 1) : "<i> error </i>";
+        $sAuthor= isset($asAuthor[$sKey])?$asAuthor[$sKey]          : "<i> error </i>";
+        $sLog   = isset($asLog[$sKey])  ? $asLog[$sKey]             : "<i> error </i>";
+        $sIcon  = isset($asIcon[$sKey]) ? $asIcon[$sKey]            : "<i> error </i>";
         echo "<tr>\n",
-             " <td$sBgColor><font size=-1><a href=\"cvs.phtml?sFile=$sDir/$sKey\"><img src=\"/icons/$sIcon\" border=0>",substr($sKey, 0, -2),"</a></font></td>\n",
-             " <td$sBgColor><font size=-1><a href=\"cvs.phtml?sFile=$sDir/$sKey?sRev=$sRev\">$sRev</a></font></td>\n",
+             " <td$sBgColor><font size=-1><a href=\"cvs.php?sFile=$sDir/$sKey\"><img src=\"/icons/$sIcon\" border=0>",substr($sKey, 0, -2),"</a></font></td>\n",
+             " <td$sBgColor><font size=-1><a href=\"cvs.php?sFile=$sDir/$sKey&sRevision=$sRev\">$sRev</a></font></td>\n",
              " <td$sBgColor><font size=-1>$sAge</font></td>\n",
              " <td$sBgColor><font size=-1>$sAuthor</font></td>\n",
              " <td$sBgColor><font size=-2>$sLog</font></td>\n",
