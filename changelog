@@ -1,8 +1,11 @@
-/* $Id: changelog,v 1.2197 2002-06-30 09:54:22 sandervl Exp $ */
+/* $Id: changelog,v 1.2198 2002-06-30 13:46:15 sandervl Exp $ */
 
  2002-06-30: Sander van Leeuwen <sandervl@innotek.de>
     - KERNEL32: o WriteFile for standard out: convert line feed without 
                   carriage return into CR+LF
+                o VirtualFree; don't allow app to decommit stack pages
+                  (VAC runtime uses last stack page to store some internal
+                   data; if freed pe/pec will crash during exit)
 
  2002-06-28: Sander van Leeuwen <sandervl@innotek.de>
     - USER32:   o Removed focus fix from 2001-11-20; controls of child
