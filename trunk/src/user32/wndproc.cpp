@@ -1,4 +1,4 @@
-/* $Id: wndproc.cpp,v 1.14 1999-07-22 13:18:14 sandervl Exp $ */
+/* $Id: wndproc.cpp,v 1.15 1999-08-23 13:07:10 phaller Exp $ */
 
 /*
  * Win32 window procedure class for OS/2
@@ -115,19 +115,22 @@ Win32WindowProc::Win32WindowProc(WNDPROC pUserCallback, DLGTEMPLATE *os2dlg)
 Win32WindowProc::Win32WindowProc(HINSTANCE hinst, LPCSTR lpszClassName)
                         : hwnd(0), next(NULL), os2dlg(NULL), pOS2Callback(NULL)
 {
- WNDCLASSA wc;
- BOOL rc;
+  WNDCLASSA wc;
+  BOOL rc;
 
   rc = GetClassInfoA(hinst, lpszClassName, &wc);
-  assert(rc == TRUE);
-
-//  pCallback = Win32WindowClass::GetClassCallback(hinst, (LPSTR)wc.lpszClassName);
-  pCallback = Win32WindowClass::GetClassCallback((LPSTR)wc.lpszClassName);
-//test (8nov)
-  if(pCallback == NULL) {//system class
+  if (rc == FALSE)
+  {
+    dprintf (("USER32:WNDPROC: GetClassInfoA(%s) failed.",
+              lpszClassName));
+  }
+  else
+  {
+    //  pCallback = Win32WindowClass::GetClassCallback(hinst, (LPSTR)wc.lpszClassName);
+    pCallback = Win32WindowClass::GetClassCallback((LPSTR)wc.lpszClassName);
+    if(pCallback == NULL) //system class
         pCallback = (WNDPROC)wc.lpfnWndProc;
   }
-//  assert(pCallback != NULL);
 
   //Insert it in front of the rest
   next       = windows;
@@ -144,19 +147,19 @@ Win32WindowProc::Win32WindowProc(HINSTANCE hinst, LPCSTR lpszClassName)
 Win32WindowProc::~Win32WindowProc()
 {
   Win32WindowProc *window = Win32WindowProc::windows;
-  
+
   /* @@@PH 98/07/13 what's this whole code good for ? */
-  if(window == this) 
+  if(window == this)
   {
     windows = next;
   }
-  else 
+  else
   {
     /* @@@PH 98/07/13 window can be NULL */
     if (window != NULL)
-      while(window->next != NULL) 
+      while(window->next != NULL)
       {
-        if(window->next == this) 
+        if(window->next == this)
         {
           window->next = next;
           break;
@@ -164,8 +167,8 @@ Win32WindowProc::~Win32WindowProc()
         window = window->next;
       }
   }
-  
-  if(os2dlg) 
+
+  if(os2dlg)
   {
     DeleteWin32DlgTemplate(os2dlg);
     os2dlg = NULL;
@@ -250,7 +253,7 @@ void Win32WindowProc::DeleteWindow(HWND hwnd)
 LRESULT Win32WindowProc::SendMessageA(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
   PostSpyMessage(hwnd, Msg, wParam, lParam);
-  return pCallback(hwnd, Msg, wParam, lParam);  
+  return pCallback(hwnd, Msg, wParam, lParam);
 }
 //******************************************************************************
 //******************************************************************************
@@ -312,7 +315,7 @@ LRESULT EXPENTRY_O32 OS2ToWin32Callback(HWND hwnd, UINT Msg, WPARAM wParam, LPAR
   //Restore our FS selector
   SetWin32TIB();
 
-  if(Msg == WM_MOUSEACTIVATE) 
+  if(Msg == WM_MOUSEACTIVATE)
   {
 	//Open32 sends an OS/2 window message for a button click
 	if(HIWORD(lParam) == 0x71)  //WM_BUTTONCLICKFIRST
@@ -328,14 +331,14 @@ LRESULT EXPENTRY_O32 OS2ToWin32Callback(HWND hwnd, UINT Msg, WPARAM wParam, LPAR
 	RestoreOS2TIB();
         return(0);
   }
- 
+
   curwnd = Win32WindowProc::FindProc(hwnd);
   if(!curwnd) {
 	curwnd = Win32WindowProc::FindProc(0, GetCurrentThreadId());
 	if(curwnd)	curwnd->SetWindowHandle(hwnd);
   }
   if(curwnd != NULL) {
-	switch(Msg) 
+	switch(Msg)
 	{
 	case WM_KEYDOWN:
 	case WM_KEYUP:
