@@ -1,4 +1,4 @@
-/* $Id: status.c,v 1.7 1999-06-30 15:52:17 cbratschi Exp $ */
+/* $Id: status.c,v 1.8 1999-07-04 21:05:59 cbratschi Exp $ */
 /*
  * Interface code to StatusWindow widget/control
  *
@@ -26,12 +26,20 @@
  * 2) Tooltip support (almost done).
  */
 
+/* CB: Odin problems
+ - DrawText: DT_VCENTER doesn't work
+*/
+
 #define _MAX(a,b) (((a)>(b))?(a):(b))
 #define _MIN(a,b) (((a)>(b))?(b):(a))
 
 #define HORZ_BORDER 0
 #define VERT_BORDER 2
+#define VERT_SPACE  2 //space between boder and text
 #define HORZ_GAP    2
+#define TOP_MARGIN  2
+#define ICON_SPACE  2
+#define TEXT_SPACE  3
 
 #define STATUSBAR_GetInfoPtr(hwnd) ((STATUSWINDOWINFO *)GetWindowLongA (hwnd, 0))
 
@@ -86,11 +94,14 @@ STATUSBAR_DrawPart (HDC hdc, STATUSWINDOWPART *part)
 
     DrawEdge(hdc, &r, border, BF_RECT|BF_ADJUST);
 
+    r.bottom -= VERT_SPACE;
+    r.top += VERT_SPACE;
+
     /* draw the icon */
     if (part->hIcon) {
         INT cy = r.bottom - r.top;
 
-        r.left += 2;
+        r.left += ICON_SPACE;
         DrawIconEx (hdc, r.left, r.top, part->hIcon, cy, cy, 0, 0, DI_NORMAL);
         r.left += cy;
     }
@@ -109,7 +120,7 @@ STATUSBAR_DrawPart (HDC hdc, STATUSWINDOWPART *part)
           align = DT_RIGHT;
         }
       }
-      r.left += 3;
+      r.left += TEXT_SPACE;
       DrawTextW (hdc, p, lstrlenW (p), &r, align|DT_VCENTER|DT_SINGLELINE);
       if (oldbkmode != TRANSPARENT)
         SetBkMode(hdc, oldbkmode);
@@ -231,7 +242,7 @@ STATUSBAR_SetPartBounds (HWND hwnd)
     /* get our window size */
     GetClientRect (hwnd, &rect);
 
-    rect.top += VERT_BORDER;
+    rect.top += TOP_MARGIN;
 
     /* set bounds for simple rectangle */
     self->part0.bound = rect;
@@ -637,6 +648,7 @@ STATUSBAR_SetTextA (HWND hwnd, WPARAM wParam, LPARAM lParam)
     int part_num;
     int style;
     LPSTR text;
+    LPWSTR newText;
     int len;
     HDC hdc;
 
@@ -650,19 +662,31 @@ STATUSBAR_SetTextA (HWND hwnd, WPARAM wParam, LPARAM lParam)
         part = &self->parts[part_num];
     if (!part) return FALSE;
 
-    if (!(part->style & SBT_OWNERDRAW) && part->text)
-        COMCTL32_Free (part->text);
-    part->text = 0;
-
-    if (style & SBT_OWNERDRAW) {
-        part->text = (LPWSTR)text;
-    }
-    else {
-        /* duplicate string */
-        if (text && (len = lstrlenA(text))) {
-            part->text = COMCTL32_Alloc ((len+1)*sizeof(WCHAR));
-            lstrcpyAtoW (part->text, text);
+    if (style & SBT_OWNERDRAW)
+    {
+      part->text = (LPWSTR)text;
+    } else
+    {
+      //compare
+      if (text && (len = lstrlenA(text)))
+      {
+        newText = COMCTL32_Alloc((len+1)*sizeof(WCHAR));
+        lstrcpyAtoW (newText,text);
+      } else newText = NULL;
+      if (lstrcmpW(part->text,newText) == 0)
+      {
+        COMCTL32_Free(newText);
+        if (part->style != style)
+        {
+          hdc = GetDC(hwnd);
+          STATUSBAR_RefreshPart(hwnd,part,hdc);
+          ReleaseDC(hwnd, hdc);
         }
+        return TRUE;
+      }
+
+      COMCTL32_Free(part->text);
+      part->text = newText;
     }
     part->style = style;
 
@@ -693,19 +717,29 @@ STATUSBAR_SetTextW (HWND hwnd, WPARAM wParam, LPARAM lParam)
         part = &self->parts[part_num];
     if (!part) return FALSE;
 
-    if (!(part->style & SBT_OWNERDRAW) && part->text)
-        COMCTL32_Free (part->text);
-    part->text = 0;
-
-    if (style & SBT_OWNERDRAW) {
-        part->text = text;
-    }
-    else {
-        /* duplicate string */
-        if (text && (len = lstrlenW(text))) {
-            part->text = COMCTL32_Alloc ((len+1)*sizeof(WCHAR));
-            lstrcpyW(part->text, text);
+    if (style & SBT_OWNERDRAW)
+    {
+      part->text = text;
+    } else
+    {
+      if (lstrcmpW(part->text,text) == 0)
+      {
+        if (part->style != style)
+        {
+          hdc = GetDC(hwnd);
+          STATUSBAR_RefreshPart(hwnd,part,hdc);
+          ReleaseDC(hwnd, hdc);
         }
+        return TRUE;
+      }
+
+      /* duplicate string */
+      COMCTL32_Free(part->text);
+      if (text && (len = lstrlenW(text)))
+      {
+        part->text = COMCTL32_Alloc((len+1)*sizeof(WCHAR));
+        lstrcpyW(part->text,text);
+      }
     }
     part->style = style;
 
@@ -836,19 +870,22 @@ STATUSBAR_WMCreate (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     if (IsWindowUnicode (hwnd)) {
         self->bUnicode = TRUE;
-        if ((len = lstrlenW ((LPCWSTR)lpCreate->lpszName))) {
+        len = lstrlenW ((LPCWSTR)lpCreate->lpszName);
+        if (len) {
             self->parts[0].text = COMCTL32_Alloc ((len + 1)*sizeof(WCHAR));
             lstrcpyW (self->parts[0].text, (LPCWSTR)lpCreate->lpszName);
         }
     }
     else {
-        if ((len = lstrlenA ((LPCSTR)lpCreate->lpszName))) {
+        len = lstrlenA ((LPCSTR)lpCreate->lpszName);
+        if (len) {
             self->parts[0].text = COMCTL32_Alloc ((len + 1)*sizeof(WCHAR));
-            lstrcpyAtoW (self->parts[0].text, (LPCSTR)lpCreate->lpszName);
+            lstrcpyAtoW (self->parts[0].text, (char*)lpCreate->lpszName);
         }
     }
 
-    if ((hdc = GetDC (0))) {
+    hdc = GetDC(hwnd);
+    if (hdc) {
         TEXTMETRICA tm;
         HFONT hOldFont;
 
@@ -856,7 +893,7 @@ STATUSBAR_WMCreate (HWND hwnd, WPARAM wParam, LPARAM lParam)
         GetTextMetricsA(hdc, &tm);
         self->textHeight = tm.tmHeight;
         SelectObject (hdc, hOldFont);
-        ReleaseDC(0, hdc);
+        ReleaseDC(hwnd, hdc);
     }
 
     if (GetWindowLongA (hwnd, GWL_STYLE) & SBT_TOOLTIPS) {
@@ -882,7 +919,7 @@ STATUSBAR_WMCreate (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     GetClientRect (GetParent (hwnd), &rect);
     width = rect.right - rect.left;
-    self->height = self->textHeight + 4 + VERT_BORDER;
+    self->height = self->textHeight+2*VERT_BORDER+2*VERT_SPACE;
     MoveWindow (hwnd, lpCreate->x, lpCreate->y-1,
                   width, self->height, FALSE);
     STATUSBAR_SetPartBounds (hwnd);
@@ -1056,7 +1093,7 @@ STATUSBAR_WMSetText (HWND hwnd, WPARAM wParam, LPARAM lParam)
     else {
         if (lParam && (len = lstrlenA((LPCSTR)lParam))) {
             part->text = COMCTL32_Alloc ((len+1)*sizeof(WCHAR));
-            lstrcpyAtoW (part->text, (LPCSTR)lParam);
+            lstrcpyAtoW (part->text, (char*)lParam);
         }
     }
 

@@ -1,4 +1,4 @@
-/* $Id: tooltips.c,v 1.9 1999-06-30 15:52:18 cbratschi Exp $ */
+/* $Id: tooltips.c,v 1.10 1999-07-04 21:06:00 cbratschi Exp $ */
 /*
  * Tool tip control
  *
@@ -1996,8 +1996,11 @@ TOOLTIPS_SetFont (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     infoPtr->hFont = (HFONT)wParam;
 
-    if ((LOWORD(lParam)) & (infoPtr->nCurrentTool != -1)) {
-//      FIXME (tooltips, "full redraw needed!\n");
+    if ((LOWORD(lParam)) & (infoPtr->nCurrentTool != -1))
+    {
+      /* force repaint */
+      if (infoPtr->bActive) TOOLTIPS_Show(hwnd,infoPtr);
+      else if (infoPtr->bTrackActive) TOOLTIPS_TrackShow(hwnd,infoPtr);
     }
 
     return 0;

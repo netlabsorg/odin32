@@ -1,4 +1,4 @@
-/* $Id: propsheet.c,v 1.4 1999-06-24 16:37:44 cbratschi Exp $ */
+/* $Id: propsheet.c,v 1.5 1999-07-04 21:05:59 cbratschi Exp $ */
 /*
  * Property Sheets
  *
@@ -12,6 +12,11 @@
  *   - Wizard mode
  *   - Unicode property sheets
  */
+
+/* CB: Odin problems:
+ - trap in PROPSHEET_DialogProc (tab control creation)
+ - LockResource traps
+*/
 
 #include <string.h>
 #include "winbase.h"
@@ -200,7 +205,7 @@ BOOL PROPSHEET_CollectPageInfo(LPCPROPSHEETPAGEA lppsp,
                                     RT_DIALOGA);
     HGLOBAL hTemplate = LoadResource(lppsp->hInstance,
                                      hResource);
-    pTemplate = (LPDLGTEMPLATEA)LockResource(hTemplate);
+    //pTemplate = (LPDLGTEMPLATEA)LockResource(hTemplate); //CB: trap, fix it
   }
 
   /*
@@ -286,6 +291,29 @@ BOOL PROPSHEET_CreateDialog(PropSheetInfo* psInfo)
   LPCVOID template;
   HRSRC hRes;
 
+  if (psInfo->useCallback)
+    (*(psInfo->ppshheader->pfnCallback))(0, PSCB_PRECREATE, (LPARAM)template);
+
+  //load OS/2 dialog
+
+  if (psInfo->ppshheader->dwFlags & PSH_MODELESS)
+    ret = NativeCreateDlgIP(COMCTL32_hModule,
+                         psInfo->ppshheader->hInstance,
+                         MAKEINTRESOURCEA(IDD_PROPSHEET),
+                         psInfo->ppshheader->hwndParent,
+                         (DLGPROC)PROPSHEET_DialogProc,
+                         (LPARAM)psInfo);
+  else
+    ret = NativeDlgBoxIP(COMCTL32_hModule,
+                         psInfo->ppshheader->hInstance,
+                         MAKEINTRESOURCEA(IDD_PROPSHEET),
+                         psInfo->ppshheader->hwndParent,
+                         (DLGPROC)PROPSHEET_DialogProc,
+                         (LPARAM)psInfo);
+
+  if (ret == (INT)-1) return FALSE;
+
+/* //CB: original WINE code
   if (!(hRes = FindResourceA(COMCTL32_hModule,
                             MAKEINTRESOURCEA(IDD_PROPSHEET),
                             RT_DIALOGA)))
@@ -309,6 +337,7 @@ BOOL PROPSHEET_CreateDialog(PropSheetInfo* psInfo)
                                   psInfo->ppshheader->hwndParent,
                                   (DLGPROC) PROPSHEET_DialogProc,
                                   (LPARAM)psInfo);
+*/
 
   return ret;
 }
