@@ -1,4 +1,4 @@
-/* $Id: hmdevio.cpp,v 1.21 2001-12-09 15:18:42 sandervl Exp $ */
+/* $Id: hmdevio.cpp,v 1.22 2001-12-09 15:29:41 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -427,7 +427,7 @@ DWORD HMCustomDriver::CreateFile (LPCSTR lpFileName,
 {
    pHMHandleData->hHMHandle = pfnDriverOpen(pHMHandleData->dwAccess, pHMHandleData->dwShare);
    if(pHMHandleData->hHMHandle == INVALID_HANDLE_VALUE_W) {
-       return ERROR_FILE_NOT_FOUND_W;
+       return GetLastError();
    }
    return ERROR_SUCCESS_W;
 }
