@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.27 2001-07-19 20:00:22 sandervl Exp $
+# $Id: makefile,v 1.28 2001-07-20 15:36:49 sandervl Exp $
 
 #
 # Odin32 API
@@ -27,6 +27,7 @@ OBJS = \
 $(OBJDIR)\colordlg.obj \
 $(OBJDIR)\fontdlg.obj \
 $(OBJDIR)\initterm.obj \
+$(OBJDIR)\initcomdlg32.obj \
 $(OBJDIR)\cdlg32.obj \
 $(OBJDIR)\filetitle.obj \
 $(OBJDIR)\finddlg32.obj \

@@ -45,60 +45,6 @@
 #define DBG_LOCALLOG    DBG_initterm
 #include "dbglocal.h"
 
-BOOL MULTIMEDIA_MciInit(void);
-BOOL MULTIMEDIA_CreateIData(HINSTANCE hinstDLL);
-void MULTIMEDIA_DeleteIData(void);
-
-extern "C" {
-void IRTMidiShutdown();  // IRTMidi shutdown routine
-
- //Win32 resource table (produced by wrc)
- extern DWORD _Resource_PEResTab;
-}
-static HMODULE dllHandle = 0;
-
-//******************************************************************************
-//******************************************************************************
-BOOL WINAPI OdinLibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
-{
-  static BOOL           bInitDone = FALSE;
-
-  switch (fdwReason)
-    {
-    case DLL_PROCESS_ATTACH:
-    {
-        if (!MULTIMEDIA_CreateIData(hinstDLL))
-            return FALSE;
-
-        if (!bInitDone) { /* to be done only once */
-            if (!MULTIMEDIA_MciInit() /*|| !MMDRV_Init() */ ) {
-                MULTIMEDIA_DeleteIData();
-                return FALSE;
-            }
-            bInitDone = TRUE;
-        }
-        DWORD dwVolume;
-
-        dwVolume = PROFILE_GetOdinIniInt(WINMM_SECTION, DEFVOL_KEY, 100);
-        dwVolume = (dwVolume*0xFFFF)/100;
-        dwVolume = (dwVolume << 16) | dwVolume;
-        WaveOut::setDefaultVolume(dwVolume);
-        return TRUE;
-   }
-
-   case DLL_THREAD_ATTACH:
-   case DLL_THREAD_DETACH:
-        return TRUE;
-
-   case DLL_PROCESS_DETACH:
-        MULTIMEDIA_DeleteIData();
-        auxOS2Close(); /* SvL: Close aux device if necessary */
-        IRTMidiShutdown;  /* JT: Shutdown RT Midi subsystem, if running. */
-        ctordtorTerm();
-        return TRUE;
-   }
-   return FALSE;
-}
 /****************************************************************************/
 /* _DLL_InitTerm is the function that gets called by the operating system   */
 /* loader when it loads and frees this DLL for each process that accesses   */
@@ -120,20 +66,11 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
     case 0 :
         ctordtorInit();
 
-        ParseLogStatus();
-
         CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
-        dllHandle = RegisterLxDll(hModule, OdinLibMain, (PVOID)&_Resource_PEResTab);
-        if(dllHandle == 0)
-            return 0UL;/* Error */
-
-        dprintf(("winmm init %s %s (%x)", __DATE__, __TIME__, DLLENTRYPOINT_NAME));
-        break;
+        return inittermWinmm(hModule, ulFlag);
     case 1 :
-        auxOS2Close(); /* SvL: Close aux device if necessary */
-        if(dllHandle) {
-            UnregisterLxDll(dllHandle);
-        }
+        inittermWinmm(hModule, ulFlag);
+        ctordtorTerm();
         break;
     default  :
         return 0UL;

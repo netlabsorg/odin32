@@ -35,34 +35,6 @@
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
 #include <initdll.h>
 
-extern "C" {
- //Win32 resource table (produced by wrc)
- extern DWORD _Resource_PEResTab;
-}
-static HMODULE dllHandle = 0;
-
-BOOL WINAPI Shell32LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad);
-
-//******************************************************************************
-//******************************************************************************
-BOOL WINAPI OdinLibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
-{
- BOOL ret;
-
-   switch (fdwReason)
-   {
-   case DLL_PROCESS_ATTACH:
-   case DLL_THREAD_ATTACH:
-   case DLL_THREAD_DETACH:
-	return Shell32LibMain(hinstDLL, fdwReason, fImpLoad);
-
-   case DLL_PROCESS_DETACH:
-	ret = Shell32LibMain(hinstDLL, fdwReason, fImpLoad);
-	ctordtorTerm();
-	return ret;
-   }
-   return FALSE;
-}
 /****************************************************************************/
 /* _DLL_InitTerm is the function that gets called by the operating system   */
 /* loader when it loads and frees this DLL for each process that accesses   */
@@ -87,18 +59,11 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
          ctordtorInit();
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
+         return inittermShell32(hModule, ulFlag);
 
-	 dllHandle = RegisterLxDll(hModule, OdinLibMain, (PVOID)&_Resource_PEResTab, 
-                                   SHELL32_MAJORIMAGE_VERSION, SHELL32_MINORIMAGE_VERSION,
-                                   IMAGE_SUBSYSTEM_WINDOWS_GUI);
-         if(dllHandle == 0) 
-		return 0UL;
-
-         break;
       case 1 :
-         if(dllHandle) {
-	 	UnregisterLxDll(dllHandle);
-         }
+         inittermShell32(hModule, ulFlag);
+ 	 ctordtorTerm();
          break;
       default  :
          return 0UL;

@@ -1,4 +1,4 @@
-; $Id: comctl32.def,v 1.22 2001-04-29 10:30:56 sandervl Exp $
+; $Id: comctl32.def,v 1.23 2001-07-20 15:35:30 sandervl Exp $
 LIBRARY COMCTL32 INITINSTANCE
 DESCRIPTION 'Odin32 System DLL - ComCtl32 - Common Controls Library'
 DATA MULTIPLE NONSHARED
@@ -154,8 +154,8 @@ EXPORTS
   DPA_DestroyCallback = _DPA_DestroyCallback@12    @386
   DSA_EnumCallback    = _DSA_EnumCallback@12       @387
   DSA_DestroyCallback = _DSA_DestroyCallback@12    @388
-                        _COMCTL32_389@8            @389
-                        _COMCTL32_390@16           @390
+                        _COMCTL32_389@8            @389 NONAME
+                        _COMCTL32_390@16           @390 NONAME
 
   StrCSpnA            = _COMCTL32_StrCSpnA@8       @356
   StrChrW             = _COMCTL32_StrChrW@8        @358

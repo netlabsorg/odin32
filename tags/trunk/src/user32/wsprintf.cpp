@@ -644,3 +644,31 @@ INT WINAPIV wsprintfW( LPWSTR buffer, LPCWSTR spec, ... )
     va_end( valist );
     return ( res == -1 ) ? 1024 : res;
 }
+
+/***********************************************************************
+ *           wsnprintfA   (Not a Windows API)
+ */
+INT WINAPIV wsnprintfA( LPSTR buffer, UINT maxlen, LPCSTR spec, ... )
+{
+    va_list valist;
+    INT res;
+
+    va_start( valist, spec );
+    res = wvsnprintfA( buffer, maxlen, spec, valist );
+    va_end( valist );
+    return res;
+}
+
+/***********************************************************************
+ *           wsnprintfW   (Not a Windows API)
+ */
+INT WINAPIV wsnprintfW( LPWSTR buffer, UINT maxlen, LPCWSTR spec, ... )
+{
+    va_list valist;
+    INT res;
+
+    va_start( valist, spec );
+    res = wvsnprintfW( buffer, maxlen, spec, valist );
+    va_end( valist );
+    return res;
+}

@@ -35,35 +35,6 @@
 #include <odinlx.h>
 #include <initdll.h>
 
-extern "C" {
- //Win32 resource table (produced by wrc)
- extern DWORD _Resource_PEResTab;
-}
-
-static HMODULE dllHandle = 0;
-
-BOOL WINAPI COMCTL32_LibMain (HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved);
-
-//******************************************************************************
-//******************************************************************************
-BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
-{
-   switch (fdwReason)
-   {
-   case DLL_PROCESS_ATTACH:
-   case DLL_THREAD_ATTACH:
-   case DLL_THREAD_DETACH:
-        return COMCTL32_LibMain(hinstDLL, fdwReason, fImpLoad);
-
-   case DLL_PROCESS_DETACH:
-   {
-        BOOL ret = COMCTL32_LibMain(hinstDLL, fdwReason, fImpLoad);
-   	ctordtorTerm();
-	return ret;
-   }
-   }
-   return FALSE;
-}
 /****************************************************************************/
 /* _DLL_InitTerm is the function that gets called by the operating system   */
 /* loader when it loads and frees this DLL for each process that accesses   */
@@ -86,28 +57,16 @@ unsigned long _System _DLL_InitTerm(unsigned long hModule, unsigned long
 
    switch (ulFlag) {
       case 0 :
-
          ctordtorInit();
-
-         /*******************************************************************/
-         /* A DosExitList routine must be used to clean up if runtime calls */
-         /* are required and the runtime is dynamically linked.             */
-         /*******************************************************************/
-
-	 dllHandle = RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab,
-                                   COMCTL32_MAJORIMAGE_VERSION, COMCTL32_MINORIMAGE_VERSION,
-                                   IMAGE_SUBSYSTEM_WINDOWS_GUI);
-         if(dllHandle == 0) 
-		return 0UL;
-
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
-         break;
+         return inittermComctl32(hModule, ulFlag);
+
       case 1 :
-         if(dllHandle) {
-	 	UnregisterLxDll(dllHandle);
-         }
+         inittermComctl32(hModule, ulFlag);
+         ctordtorTerm();
          break;
+
       default  :
          return 0UL;
    }

@@ -38,31 +38,6 @@
 #define DBG_LOCALLOG	DBG_initterm
 #include "dbglocal.h"
 
-extern "C" {
- //Win32 resource table (produced by wrc)
- extern DWORD _Resource_PEResTab;
-}
-static HMODULE dllHandle = 0;
-
-//******************************************************************************
-//******************************************************************************
-BOOL WINAPI OdinLibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
-{
-   switch (fdwReason)
-   {
-   case DLL_PROCESS_ATTACH:
-	return TRUE;
-
-   case DLL_THREAD_ATTACH:
-   case DLL_THREAD_DETACH:
-	return TRUE;
-
-   case DLL_PROCESS_DETACH:
-	ctordtorTerm();
-	return TRUE;
-   }
-   return FALSE;
-}
 /****************************************************************************/
 /* _DLL_InitTerm is the function that gets called by the operating system   */
 /* loader when it loads and frees this DLL for each process that accesses   */
@@ -86,20 +61,15 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
       case 0 :
          ctordtorInit();
 
-         ParseLogStatus();
-
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
-	 dllHandle = RegisterLxDll(hModule, OdinLibMain, (PVOID)&_Resource_PEResTab);
-         if(dllHandle == 0) 
-		return 0UL;
+         return inittermWsock32(hModule, ulFlag);
 
-         break;
       case 1 :
-         if(dllHandle) {
-	   	UnregisterLxDll(dllHandle);
-         }
+         inittermWsock32(hModule, ulFlag);
+         ctordtorTerm();
          break;
+
       default  :
          return 0UL;
    }

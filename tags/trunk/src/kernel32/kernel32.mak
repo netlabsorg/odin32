@@ -1,4 +1,4 @@
-# $Id: kernel32.mak,v 1.7 2001-06-21 21:07:54 sandervl Exp $
+# $Id: kernel32.mak,v 1.8 2001-07-20 15:33:30 sandervl Exp $
 
 #
 # Odin32 API
@@ -19,7 +19,7 @@ MAKEFILE=kernel32.mak
 #
 # Overrides.
 #
-##CDEFINES    = $(CDEFINES) -DUSE_OS2SEMAPHORES
+##CDEFINES    = $(CDEFINES) -DTEST_BUILTIN
 
 
 #
@@ -65,6 +65,7 @@ $(OBJDIR)\os2heap.obj \
 $(OBJDIR)\vmutex.obj \
 $(OBJDIR)\vsemaphore.obj \
 $(OBJDIR)\initterm.obj \
+$(OBJDIR)\initkernel32.obj \
 $(OBJDIR)\handlemanager.obj \
 $(OBJDIR)\environ.obj \
 $(OBJDIR)\initsystem.obj \
@@ -137,6 +138,7 @@ $(OBJDIR)\kernelrsrc.obj
 #
 LIBS = \
 $(ODIN32_LIB)/$(ODINCRT).lib \
+##$(ODIN32_LIB)\wgss.lib \
 $(ODIN32_LIB)\PMWINX.LIB \
 $(ODIN32_LIB)\LIBULS.LIB \
 $(ODIN32_LIB)\LIBCONV.LIB \

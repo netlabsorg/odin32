@@ -1,4 +1,4 @@
- /* $Id: string_odin.cpp,v 1.2 2001-04-28 13:32:21 sandervl Exp $ */
+ /* $Id: string_odin.cpp,v 1.3 2001-07-20 15:37:53 sandervl Exp $ */
 
 /*
  * Win32 Lightweight SHELL32 for OS/2
@@ -94,6 +94,7 @@ ODINFUNCTION2(INT,    ChrCmpIA,
 }
 
 
+#if 0
 /*************************************************************************
  * OleStrToStrN                                 [SHELL32.78]
  */
@@ -179,7 +180,7 @@ BOOL WINAPI StrToOleStrAW (LPWSTR lpWideCharStr, LPCVOID lpString)
           return StrToOleStrW (lpWideCharStr, (LPCWSTR)lpString);
         return StrToOleStrA (lpWideCharStr, (LPCSTR)lpString);
 }
-
+#endif
 
 
 /*****************************************************************************

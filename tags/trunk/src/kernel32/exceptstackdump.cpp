@@ -1,4 +1,4 @@
-/* $Id: exceptstackdump.cpp,v 1.3 2000-11-05 13:40:45 sandervl Exp $ */
+/* $Id: exceptstackdump.cpp,v 1.4 2001-07-20 15:33:29 sandervl Exp $ */
 /*
  * Stack dump code
  *
@@ -29,7 +29,7 @@
 int SYSTEM EXPORT WriteLogNoEOL(char *tekst, ...);
 
 #undef dprintf
-#define dprintf(a)     if(DbgEnabled[DBG_LOCALLOG] == 1) WriteLogNoEOL a
+#define dprintf(a)     if(DbgEnabledKERNEL32[DBG_LOCALLOG] == 1) WriteLogNoEOL a
 
 /* ******************************************************************
  *                                                                  *
