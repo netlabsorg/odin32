@@ -1,9 +1,11 @@
-/* $Id: changelog,v 1.1930 2001-12-30 12:41:17 sandervl Exp $ */
+/* $Id: changelog,v 1.1931 2001-12-30 16:52:21 sandervl Exp $ */
 
  2001-12-30: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Fixed some wrong return values for disk functions (hmdisk)
                 o GetVolumeInformation: use original volume name to 
                   determine maximum file name length
+    - USER32:   o Enforce WS_EX_WINDOWEDGE style (Wine)
+                  (fixes Opera 6 menu)
 
  2001-12-28: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Do not send WM_SETCURSOR when mouse is captured (SDK docs)

@@ -1,4 +1,4 @@
-/* $Id: uitools.cpp,v 1.31 2001-12-16 11:30:04 sandervl Exp $ */
+/* $Id: uitools.cpp,v 1.32 2001-12-30 16:51:17 sandervl Exp $ */
 /*
  * User Interface Functions
  *
@@ -1616,7 +1616,7 @@ BOOL WIN32API DrawStateW(HDC hdc, HBRUSH hbc, DRAWSTATEPROC lpOutputFunc, LPARAM
 BOOL WIN32API DrawFocusRect( HDC hdc, const RECT *lpRect)
 {
 #if 0
-    //TODO: This doens't work. Find out why
+    //TODO: This doesn't work. Find out why (SetBkMode!)
 
     HBRUSH hOldBrush;
     HPEN hOldPen, hNewPen;
