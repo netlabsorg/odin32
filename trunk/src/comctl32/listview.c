@@ -4929,8 +4929,11 @@ static BOOL LISTVIEW_EnsureVisible(HWND hwnd,INT nItem,BOOL bPartialOk)
 
           ZeroMemory(&scrollInfo,sizeof(SCROLLINFO));
           scrollInfo.cbSize = sizeof(SCROLLINFO);
-          scrollInfo.fMask  = SIF_POS;
+          scrollInfo.fMask  = SIF_POS | SIF_RANGE;
           scrollInfo.nPos = infoPtr->lefttop.y;
+          //@@PF M$ always show entries when EnsureVisible is issued
+          //so we better change range also
+          scrollInfo.nMax   = GETITEMCOUNT(infoPtr)-1;
           SetScrollInfo(hwnd,SB_VERT,&scrollInfo,TRUE);
         }
       }
