@@ -1,9 +1,9 @@
-/* $Id: Fileio.cpp,v 1.43 2000-10-02 18:39:32 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.44 2000-10-26 17:21:38 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
  *
- * Copyright 1998 Sander van Leeuwen
+ * Copyright 1998-2000 Sander van Leeuwen
  * Copyright 1998 Patrick Haller
  *
  * Some parts copied from Wine (CopyFileExA/W)
@@ -88,20 +88,20 @@ ODINFUNCTION2(HANDLE, FindFirstFileA,
  char  *filename;
  int    namelen;
 
-  dprintf(("FindFirstFileA %s", lpFileName));
-  if(lpFileName == NULL || lpFindFileData == NULL) {
-  SetLastError(ERROR_INVALID_PARAMETER);
-  return -1;
-  }
-  namelen = strlen(lpFileName);
-  if(lpFileName[namelen-1] == '\\') {
-  filename = (char *)alloca(namelen+1);
-  strcpy(filename, lpFileName);
-  filename[namelen-1] = 0;
-  }
-  else  filename = (char *)lpFileName;
+    dprintf(("FindFirstFileA %s", lpFileName));
+    if(lpFileName == NULL || lpFindFileData == NULL) {
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return -1;
+    }
+    namelen = strlen(lpFileName);
+    if(lpFileName[namelen-1] == '\\') {
+        filename = (char *)alloca(namelen+1);
+        strcpy(filename, lpFileName);
+        filename[namelen-1] = 0;
+    }
+    else  filename = (char *)lpFileName;
 
-  return (HANDLE)OSLibDosFindFirst(filename,lpFindFileData);
+    return (HANDLE)OSLibDosFindFirst(filename,lpFindFileData);
 }
 //******************************************************************************
 // internal function for faster access (SHELL32)
@@ -111,7 +111,7 @@ ODINFUNCTION3(HANDLE, FindFirstFileMultiA,
               WIN32_FIND_DATAA *, lpFindFileData,
               DWORD *,count)
 {
-  return (HANDLE)OSLibDosFindFirstMulti(lpFileName,lpFindFileData,count);
+    return (HANDLE)OSLibDosFindFirstMulti(lpFileName,lpFindFileData,count);
 }
 //******************************************************************************
 //******************************************************************************
@@ -123,13 +123,14 @@ ODINFUNCTION2(HANDLE,  FindFirstFileW,
   char             *astring;
   WIN32_FIND_DATAA wfda;
 
-  astring = UnicodeToAsciiString((LPWSTR)lpFileName);
-  rc = (HANDLE)OSLibDosFindFirst(astring,&wfda);
+    astring = UnicodeToAsciiString((LPWSTR)lpFileName);
+    dprintf(("FindFirstFileW %s", astring));
+    rc = (HANDLE)OSLibDosFindFirst(astring,&wfda);
 
-  if(rc == -1) {
+    if(rc == -1) {
         memset(lpFindFileData, 0, sizeof(WIN32_FIND_DATAW));
-  }
-  else {
+    }
+    else {
         // convert back the result structure
         memcpy(lpFindFileData,
                  &wfda,
@@ -142,9 +143,9 @@ ODINFUNCTION2(HANDLE,  FindFirstFileW,
         lstrcpynAtoW (lpFindFileData->cAlternateFileName,
                       wfda.cAlternateFileName,
                       sizeof(wfda.cAlternateFileName));
-  }
-  FreeAsciiString(astring);
-  return(rc);
+    }
+    FreeAsciiString(astring);
+    return(rc);
 }
 //******************************************************************************
 //******************************************************************************
@@ -152,7 +153,7 @@ ODINFUNCTION2(BOOL,   FindNextFileA,
               HANDLE, hFindFile,
               WIN32_FIND_DATAA *, lpFindFileData)
 {
-  return OSLibDosFindNext(hFindFile,lpFindFileData);
+    return OSLibDosFindNext(hFindFile,lpFindFileData);
 }
 //******************************************************************************
 // internal function for faster access (SHELL32)
