@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.881 2000-04-10 17:46:50 cbratschi Exp $ */
+ /* $Id: changelog,v 1.882 2000-04-10 19:45:13 sandervl Exp $ */
+
+ 2000-04-10: Sander van Leeuwen <sandervl@xs4all.nl>
+        - USER32: Added support for topmost windows
 
  2000-04-10: David Raison <djr@lemur.co.uk>
 	- COMDLG32: fixed wrong lParam in file dialog
