@@ -1,4 +1,4 @@
-/* $Id: variant.cpp,v 1.2 1999-08-22 22:08:50 sandervl Exp $ */
+/* $Id: variant.cpp,v 1.3 2000-09-17 22:31:42 davidr Exp $ */
 /*
  * VARIANT
  *
@@ -232,11 +232,11 @@ static BOOL TmToDATE( struct tm* pTm, DATE *pDateOut )
 	{
 		int leapYear = 0;
 		
-		/* Start at 1. This is the way DATE is defined.
-		 * January 1, 1900 at Midnight is 1.00.
-		 * January 1, 1900 at 6AM is 1.25.
-		 * and so on.
-		 */
+               /* Start at 1. This is the way DATE is defined.
+                * January 1, 1900 at Midnight is 1.00.
+                * January 1, 1900 at 6AM is 1.25.
+                * and so on.
+                */
 		*pDateOut = 1;
 
 		/* Add the number of days corresponding to
@@ -270,34 +270,34 @@ static BOOL TmToDATE( struct tm* pTm, DATE *pDateOut )
 			*pDateOut += 31;
 			break;
 		case 3:
-			*pDateOut += ( 59 + leapYear );
+			*pDateOut += (59 + leapYear);
 			break;
 		case 4:
-			*pDateOut += ( 90 + leapYear );
+			*pDateOut += (90 + leapYear);
 			break;
 		case 5:
-			*pDateOut += ( 120 + leapYear );
+			*pDateOut += (120 + leapYear);
 			break;
 		case 6:
-			*pDateOut += ( 151 + leapYear );
+			*pDateOut += (151 + leapYear);
 			break;
 		case 7:
-			*pDateOut += ( 181 + leapYear );
+			*pDateOut += (181 + leapYear);
 			break;
 		case 8:
-			*pDateOut += ( 212 + leapYear );
+			*pDateOut += (212 + leapYear);
 			break;
 		case 9:
-			*pDateOut += ( 243 + leapYear );
+			*pDateOut += (243 + leapYear);
 			break;
 		case 10:
-			*pDateOut += ( 273 + leapYear );
+			*pDateOut += (273 + leapYear);
 			break;
 		case 11:
-			*pDateOut += ( 304 + leapYear );
+			*pDateOut += (304 + leapYear);
 			break;
 		case 12:
-			*pDateOut += ( 334 + leapYear );
+			*pDateOut += (334 + leapYear);
 			break;
 		}
 		/* Add the number of days in this month.
@@ -365,12 +365,16 @@ static BOOL DateToTm( DATE dateIn, LCID lcid, struct tm* pTm )
 			/* find in what year the day in the "wholePart" falls into.
 			 * add the value to the year field.
 			 */
-			yearsSince1900 = floor( wholePart / DAYS_IN_ONE_YEAR );
+			yearsSince1900 = floor( (wholePart / DAYS_IN_ONE_YEAR) + 0.001 );
 			pTm->tm_year += yearsSince1900;
 			/* determine if this is a leap year.
 			 */
 			if( isleap( pTm->tm_year ) )
+			{
 				leapYear = 1;
+				wholePart++;
+			}
+
 			/* find what day of that year does the "wholePart" corresponds to.
 			 * Note: nDay is in [1-366] format
 			 */
@@ -874,18 +878,27 @@ static HRESULT Coerce( VARIANTARG* pd, LCID lcid, ULONG dwFlags, VARIANTARG* ps,
 	unsigned short vtFrom = 0;
 	vtFrom = ps->vt & VT_TYPEMASK;
 	
-    /* Note: Since "long" and "int" values both have 4 bytes and are both signed integers
-     * "int" will be treated as "long" in the following code.
-     * The same goes for there unsigned versions.
+	/* Note: Since "long" and "int" values both have 4 bytes and are
+	 * both signed integers "int" will be treated as "long" in the
+	 * following code.
+	 * The same goes for their unsigned versions.
 	 */
 
+	/* Trivial Case: If the coercion is from two types that are 
+	 * identical then we can blindly copy from one argument to another.*/
+	if ((vt==vtFrom))
+	{
+	   return VariantCopy(pd,ps);
+	}
+
+	/* Cases requiring thought*/
 	switch( vt )
 	{
 
-    case( VT_EMPTY ):
+	case( VT_EMPTY ):
         res = VariantClear( pd );
         break;
-    case( VT_NULL ):
+	case( VT_NULL ):
         res = VariantClear( pd );
         if( res == S_OK )
         {
@@ -1692,10 +1705,15 @@ HRESULT WINAPI VariantClear(VARIANTARG* pvarg)
 	    SysFreeString( pvarg->u.bstrVal );
 	    break;
 	  case( VT_DISPATCH ):
+	    if(pvarg->u.pdispVal!=NULL)
+	      ICOM_CALL(Release,pvarg->u.pdispVal);
 	    break;
 	  case( VT_VARIANT ):
+	    VariantClear(pvarg->u.pvarVal);
 	    break;
 	  case( VT_UNKNOWN ):
+	    if(pvarg->u.punkVal!=NULL)
+	      ICOM_CALL(Release,pvarg->u.punkVal);
 	    break;
 	  case( VT_SAFEARRAY ):
 	    SafeArrayDestroy(pvarg->u.parray);
@@ -1769,10 +1787,17 @@ HRESULT WINAPI VariantCopy(VARIANTARG* pvargDest, VARIANTARG* pvargSrc)
 	      pvargDest->u.bstrVal = SysAllocString( pvargSrc->u.bstrVal );
 	      break;
 	    case( VT_DISPATCH ):
+	      pvargDest->u.pdispVal = pvargSrc->u.pdispVal;
+	      if (pvargDest->u.pdispVal!=NULL)
+		ICOM_CALL(AddRef,pvargDest->u.pdispVal);
 	      break;
 	    case( VT_VARIANT ):
+	      VariantCopy(pvargDest->u.pvarVal,pvargSrc->u.pvarVal);
 	      break;
 	    case( VT_UNKNOWN ):
+	      pvargDest->u.punkVal = pvargSrc->u.punkVal;
+	      if (pvargDest->u.pdispVal!=NULL)
+		ICOM_CALL(AddRef,pvargDest->u.punkVal);
 	      break;
 	    case( VT_SAFEARRAY ):
 	      SafeArrayCopy(pvargSrc->u.parray, &pvargDest->u.parray);
@@ -3245,12 +3270,12 @@ HRESULT WINAPI VarBstrFromDate(DATE dateIn, LCID lcid, ULONG dwFlags, BSTR* pbst
         return E_INVALIDARG;
 		}
 
-		if( lcid & VAR_DATEVALUEONLY )
-			strftime( pBuffer, BUFFER_MAX, "%x", &TM );
-		else if( lcid & VAR_TIMEVALUEONLY )
-			strftime( pBuffer, BUFFER_MAX, "%X", &TM );
+    if( dwFlags & VAR_DATEVALUEONLY )
+			strftime( pBuffer, BUFFER_MAX, "%lx", &TM );
+    else if( dwFlags & VAR_TIMEVALUEONLY )
+			strftime( pBuffer, BUFFER_MAX, "%lX", &TM );
 		else
-        strftime( pBuffer, BUFFER_MAX, "%x %X", &TM );
+        strftime( pBuffer, BUFFER_MAX, "%lx %lX", &TM );
 
 		*pbstrOut = StringDupAtoBstr( pBuffer );
 
@@ -3447,13 +3472,11 @@ HRESULT WINAPI VarBoolFromStr(OLECHAR* strIn, LCID lcid, ULONG dwFlags, VARIANT_
 
 	if( ret == S_OK )
 	{
-//		if( strncasecmp( pNewString, "True", strlen( pNewString ) ) == 0 )
-		if( stricmp( pNewString, "True" ) == 0 )
+		if( strncasecmp( pNewString, "True", strlen( pNewString ) ) == 0 )
 		{
 			*pboolOut = VARIANT_TRUE;
 		}
-//		else if( strncasecmp( pNewString, "False", strlen( pNewString ) ) == 0 )
-		if( stricmp( pNewString, "False" ) == 0 )
+		else if( strncasecmp( pNewString, "False", strlen( pNewString ) ) == 0 )
 		{
 			*pboolOut = VARIANT_FALSE;
 		}
@@ -4294,4 +4317,5 @@ INT WINAPI DosDateTimeToVariantTime(USHORT wDosDate, USHORT wDosTime,
 
     return TmToDATE( &t, pvtime );
 }
+
 

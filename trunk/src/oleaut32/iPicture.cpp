@@ -1,4 +1,4 @@
-/* $Id: iPicture.cpp,v 1.3 1999-11-23 20:45:23 davidr Exp $ */
+/* $Id: iPicture.cpp,v 1.4 2000-09-17 22:31:40 davidr Exp $ */
 /* 
  * OLE Picture functions
  *
@@ -229,7 +229,7 @@ static IPictureImpl *   IPictureImpl_Constructor(LPPICTDESC description, BOOL fO
 }
 
 // ----------------------------------------------------------------------
-// IPictureImpl_QueryInterface
+// IPictureImpl_Destructor
 // ----------------------------------------------------------------------
 static void             IPictureImpl_Destructor(IPictureImpl * This)
 {
@@ -577,7 +577,7 @@ static ULONG   WINAPI IPictureImpl_IDispatch_Release(LPDISPATCH iface)
 static HRESULT WINAPI IPictureImpl_IDispatch_GetTypeInfoCount(LPDISPATCH iface, 
 				unsigned int* pctinfo)
 {
-    dprintf(("Stub"));
+    dprintf(("%s: Stub", __FUNCTION__));
     return E_NOTIMPL;
 }
 
@@ -587,7 +587,7 @@ static HRESULT WINAPI IPictureImpl_IDispatch_GetTypeInfoCount(LPDISPATCH iface,
 static HRESULT WINAPI IPictureImpl_IDispatch_GetTypeInfo(LPDISPATCH  iface,
 				UINT iTInfo, LCID lcid, ITypeInfo** ppTInfo)
 {
-    dprintf(("Stub"));
+    dprintf(("%s: Stub", __FUNCTION__));
     return E_NOTIMPL;
 }
 
@@ -598,7 +598,7 @@ static HRESULT WINAPI IPictureImpl_IDispatch_GetIDsOfNames(LPDISPATCH iface,
 				REFIID riid, LPOLESTR* rgszNames, UINT cNames,
 				LCID lcid, DISPID* rgDispId)
 {
-    dprintf(("Stub"));
+    dprintf(("%s: Stub", __FUNCTION__));
     return E_NOTIMPL;
 }
 
@@ -611,7 +611,7 @@ static HRESULT WINAPI IPictureImpl_IDispatch_Invoke(LPDISPATCH iface,
 				DISPPARAMS* pDispParams, VARIANT* pVarResult,
 				EXCEPINFO* pExepInfo, UINT* puArgErr)
 {
-    dprintf(("Stub"));
+    dprintf(("%s: Stub", __FUNCTION__));
     return E_NOTIMPL;
 }
 
@@ -652,7 +652,7 @@ static ULONG   WINAPI IPictureImpl_IPersistStream_Release(LPPERSISTSTREAM iface)
 static HRESULT WINAPI IPictureImpl_IPersistStream_GetClassID(LPPERSISTSTREAM iface,
 				CLSID * pClassID)
 {
-    dprintf(("Stub"));
+    dprintf(("%s: Stub", __FUNCTION__));
     return E_NOTIMPL;
 }
 
@@ -661,7 +661,7 @@ static HRESULT WINAPI IPictureImpl_IPersistStream_GetClassID(LPPERSISTSTREAM ifa
 // ----------------------------------------------------------------------
 static HRESULT WINAPI IPictureImpl_IPersistStream_IsDirty(LPPERSISTSTREAM iface)
 {
-    dprintf(("Stub"));
+    dprintf(("%s: Stub", __FUNCTION__));
     return E_NOTIMPL;
 }
 
@@ -671,7 +671,7 @@ static HRESULT WINAPI IPictureImpl_IPersistStream_IsDirty(LPPERSISTSTREAM iface)
 static HRESULT WINAPI IPictureImpl_IPersistStream_Load(LPPERSISTSTREAM iface,
 				LPSTREAM pLoadStream)
 {
-    dprintf(("Stub"));
+    dprintf(("%s: Stub", __FUNCTION__));
     return E_NOTIMPL;
 }
 
@@ -681,7 +681,7 @@ static HRESULT WINAPI IPictureImpl_IPersistStream_Load(LPPERSISTSTREAM iface,
 static HRESULT WINAPI IPictureImpl_IPersistStream_Save(LPPERSISTSTREAM iface,
 				LPSTREAM pOutStream, BOOL fClearDirty)
 {
-    dprintf(("Stub"));
+    dprintf(("%s: Stub", __FUNCTION__));
     return E_NOTIMPL;
 }
 
@@ -691,7 +691,7 @@ static HRESULT WINAPI IPictureImpl_IPersistStream_Save(LPPERSISTSTREAM iface,
 static HRESULT WINAPI IPictureImpl_IPersistStream_GetSizeMax(LPPERSISTSTREAM iface,
 				ULARGE_INTEGER * pcbSize)
 {
-    dprintf(("Stub"));
+    dprintf(("%s: Stub", __FUNCTION__));
     return E_NOTIMPL;
 }
 
