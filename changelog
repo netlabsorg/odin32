@@ -1,7 +1,24 @@
- /* $Id: changelog,v 1.360 1999-10-24 12:29:50 sandervl Exp $ */
+ /* $Id: changelog,v 1.361 1999-10-24 22:47:51 sandervl Exp $ */
 
  99-10-24: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: MDI window fixes (mdi children correctly activated; menus inserted)
+                  Bugfix in WM_GETTEXT of Edit control (wrong string length)
+		  Only create global classes when CS_GLOBALCLASS flag specified
+	          Create system classes only every first time user32 is loaded
+                  and only unregister them when the last win32 app quits.
+                  Converted all OS/2 bitmaps to windows format and put them in user32.rc
+                  (deleted all bmp files)
+	- USER32,
+          COMCTL32,
+          SHELL32: Don't check if control atom already exists, always register
+                   control.
+             NOTE: Global classes have a global atom, but the class objects
+                   are NOT shared! (so you must recreate them for every app)
+
+	- KERNEL32: Implemented shared memory mapped files (SDK memory sample
+                    works for shared memory; haven't tested files and it requires
+                    more testing!)
+                    Added shared heap code for memory mapped objects
 
  99-10-24: Daniela Engert <dani@ngrt.de>
 	- KERNEL32: Fixed cursor in VPBuddy (invalid size)

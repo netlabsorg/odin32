@@ -1,4 +1,4 @@
-/* $Id: vmutex.h,v 1.3 1999-08-28 19:34:26 sandervl Exp $ */
+/* $Id: vmutex.h,v 1.4 1999-10-24 22:48:17 sandervl Exp $ */
 
 /*
  *
@@ -11,6 +11,9 @@
 #define VMUTEX_RETURN_IMM	 0
 #define VMUTEX_WAIT_FOREVER	-1
 
+#define VMUTEX_NONSHARED         0
+#define VMUTEX_SHARED		 1
+
 #ifdef _OS2WIN_H
 #define HMTX DWORD
 #endif
@@ -18,7 +21,7 @@
 class VMutex
 {
 public:
-	VMutex (int fShared = FALSE);
+	VMutex (int fShared = VMUTEX_NONSHARED);
        ~VMutex();
 
 public:
