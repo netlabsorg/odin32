@@ -1,4 +1,14 @@
- /* $Id: changelog,v 1.831 2000-03-23 17:12:24 cbratschi Exp $ */
+ /* $Id: changelog,v 1.832 2000-03-23 19:19:58 sandervl Exp $ */
+
+ 2000-03-23: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: Fixed shared global mutex
+                    Added VSemaphore class
+	- USER32:   Fixed shared global mutex
+          TODO:
+          ---->> Compiler bug: during __ctordtorInit it calls the constructor
+                               of global objects, even if the dll has already
+                               been loaded!
+	- WSOCK32\NEW: Added WSAAsyncSelect
 
  2000-03-23: Christoph Bratschi <cbratschi@datacomm.ch>
 	- COMDLG32: improved file dialog combobox
