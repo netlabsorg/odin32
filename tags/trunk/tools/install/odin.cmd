@@ -1,4 +1,4 @@
-/* $Id: odin.cmd,v 1.45 2005-01-26 19:06:58 abwillis Exp $
+/* $Id: odin.cmd,v 1.46 2005-01-26 21:05:21 abwillis Exp $
  *
  * Odin32 API WarpIn installation script generator.
  *
@@ -477,7 +477,7 @@ return rc;
 MakeArchiveName: procedure;
 parse arg sDllDir
 sDllDir = filespec('name', sDllDir);
-return directory()||'\odin32bin-'||date('S')||'-'||sDllDir||'.wpi';
+return directory()||'\odin32bin-'||date('S')||'-'||sDllDir||'-xp.wpi';
 
 
 
