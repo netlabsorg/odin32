@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.18.4.8 2000-08-25 04:47:26 bird Exp $
+/* $Id: pe2lx.cpp,v 1.18.4.9 2000-08-27 03:38:28 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -1545,7 +1545,7 @@ ULONG  Pe2Lx::openPath2(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *pLdrLv,
             rc = myldrOpen(&pLdrLv->lv_sfn, pVars->sz, pful);
             switch (rc)
             {
-                /* these errors are ignored */
+                /* these errors are ignored (not fatal) */
                 case ERROR_FILE_NOT_FOUND:          case ERROR_PATH_NOT_FOUND:          case ERROR_ACCESS_DENIED:           case ERROR_INVALID_ACCESS:
                 case ERROR_INVALID_DRIVE:           case ERROR_NOT_DOS_DISK:            case ERROR_REM_NOT_LIST:            case ERROR_BAD_NETPATH:
                 case ERROR_NETWORK_BUSY:            case ERROR_DEV_NOT_EXIST:           case ERROR_TOO_MANY_CMDS:           case ERROR_ADAP_HDW_ERR:
