@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.31 2003-01-04 13:45:10 sandervl Exp $ */
+/* $Id: text.cpp,v 1.32 2003-01-28 16:21:49 sandervl Exp $ */
 
 /*
  * GDI32 text apis
@@ -72,6 +72,8 @@ UINT WINAPI GetTextCharset(HDC hdc) /* [in] Handle to device context */
 }
 //******************************************************************************
 // todo: metafile support
+//#undef INVERT
+//#define INVERT_SETYINVERSION
 //******************************************************************************
 BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR lpszString,INT cbCount,CONST INT *lpDx,BOOL IsExtTextOut)
 {
@@ -101,6 +103,17 @@ BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR
         return TRUE;
   }
 
+#if defined(INVERT) && !defined(INVERT_SETYINVERSION)
+  if(pHps->yInvert > 0) {
+     Y = pHps->yInvert - Y;
+  } 
+#endif
+
+#ifdef INVERT_SETYINVERSION
+  int oldyinv = GpiQueryYInversion(pHps->hps);
+  Y = oldyinv - Y;
+#endif
+
   //CB: add metafile info
 
   if (lprc)
@@ -114,11 +127,19 @@ BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR
         return TRUE;
       }
 #ifndef INVERT
+#ifdef INVERT_SETYINVERSION
+      if (oldyinv) {
+          int temp       = oldyinv - pmRect.yTop;
+          pmRect.yTop    = oldyinv - pmRect.yBottom;
+          pmRect.yBottom = temp;
+      }
+#else
       if (pHps->yInvert > 0) {
           int temp       = pHps->yInvert - pmRect.yTop;
           pmRect.yTop    = pHps->yInvert - pmRect.yBottom;
           pmRect.yBottom = temp;
       }    
+#endif
 #endif
 
       if (fuOptions & ETO_CLIPPED) flOptions |= CHSOS_CLIP;
@@ -161,6 +182,11 @@ BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR
         return TRUE;
     }
   }
+
+#ifdef INVERT_SETYINVERSION
+  GpiEnableYInversion(pHps->hps, 0);
+#endif
+
   if (lpDx)
     flOptions |= CHSOS_VECTOR;
 
@@ -168,12 +194,6 @@ BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR
   {
     ptl.x = X;
     ptl.y = Y;
-
-#ifndef INVERT
-    if (pHps->yInvert > 0) {
-       ptl.y = pHps->yInvert - Y;
-    }
-#endif
 
     flOptions |= CHSOS_LEAVEPOS;
   }
@@ -209,11 +229,13 @@ BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR
     OSLibGpiSetTextAlignment(pHps,pmHAlign,(pmVAlign & ~TAOS_BASE) | TAOS_BOTTOM);
   }
 
+#ifdef INVERT
   ptl.y += getWorldYDeltaFor1Pixel(pHps);
+#else
+  ptl.y -= getWorldYDeltaFor1Pixel(pHps);
 
-#ifndef INVERT
   int vertAdjust = 0;
-  if ((pHps->taMode & 0x18) == TA_TOP) 
+  if ((pHps->taMode & 0x18) != TA_TOP) 
   {
       vertAdjust = OSLibGpiQueryFontMaxHeight(pHps->hps);
   }
@@ -227,6 +249,9 @@ BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR
 
   if(hits == GPIOS_ERROR) {
         dprintf(("InternalTextOutA: OSLibGpiCharStringPosAt returned GPIOS_ERROR"));
+#ifdef INVERT_SETYINVERSION
+        GpiEnableYInversion(pHps->hps, oldyinv);
+#endif
         return FALSE;
   }
 
@@ -240,6 +265,9 @@ BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR
     OSLibGpiSetCurrentPosition(pHps,&ptl);
   }
 
+#ifdef INVERT_SETYINVERSION
+  GpiEnableYInversion(pHps->hps, oldyinv);
+#endif
   return TRUE;
 }
 //******************************************************************************
