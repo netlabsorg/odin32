@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.193 2003-01-04 13:49:27 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.194 2003-01-29 13:07:30 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -237,12 +237,10 @@ BOOL InitPM()
     hdc = DevOpenDC(hab, OD_MEMORY, "*", 5L, (PDEVOPENDATA)&dop, NULLHANDLE);
 
     // check if we have the OS/2 Look and Feel enabled
-    fOS2Look = PROFILE_GetOdinIniBool(ODINSYSTEM_SECTION, "OS2Look", FALSE);
+    fOS2Look = PROFILE_GetOdinIniBool(ODINSYSTEM_SECTION, "OS2Look", TRUE);
     if(fOS2Look)
     {
-#if 0
         SYSCOLOR_Init(FALSE); //use OS/2 colors
-#endif
         QueryPMMenuBitmaps();
     }
 
@@ -321,9 +319,7 @@ void WIN32API SetWindowAppearance(int fLooks)
 {
     if(fLooks == OS2_APPEARANCE || fLooks == OS2_APPEARANCE_SYSMENU)
     {
-#if 0
         SYSCOLOR_Init(FALSE); //use OS/2 colors
-#endif
         QueryPMMenuBitmaps();
     }
     fOS2Look = fLooks;
