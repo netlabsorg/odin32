@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.2621 2003-08-20 15:46:50 sandervl Exp $ */
+/* $Id: changelog,v 1.2622 2003-08-22 13:15:48 sandervl Exp $ */
+
+ 2003-08-22: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Ignore messages sent or posted to the desktop window
+                o Post/SendMessage: use shared or local memory depending 
+                  on the target window.
 
  2003-08-20: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Do not create CD polling window by default. It can cause
