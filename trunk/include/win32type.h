@@ -1,4 +1,4 @@
-/* $Id: win32type.h,v 1.30 1999-12-17 17:25:28 sandervl Exp $ */
+/* $Id: win32type.h,v 1.31 2000-01-02 22:52:49 sandervl Exp $ */
 
 /*
  * Win32 type definitions for OS/2
@@ -620,6 +620,16 @@ typedef struct {
 	HANDLE LockSemaphore;
 	DWORD Reserved;
 }CRITICAL_SECTION;
+
+/* The 'overlapped' data structure used by async I/O functions.
+ */
+typedef struct {
+        DWORD Internal;
+        DWORD InternalHigh;
+        DWORD Offset;
+        DWORD OffsetHigh;
+        HANDLE hEvent;
+} OVERLAPPED, *LPOVERLAPPED;
 
 #endif
 
