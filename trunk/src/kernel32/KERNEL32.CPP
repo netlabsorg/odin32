@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.21 1999-10-04 22:25:01 phaller Exp $ */
+/* $Id: KERNEL32.CPP,v 1.22 1999-10-14 15:15:22 phaller Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -18,6 +18,11 @@
 /*****************************************************************************
  * Includes                                                                  *
  *****************************************************************************/
+
+#include <odin.h>
+#include <odinwrap.h>
+#include <os2sel.h>
+
 #include <os2win.h>
 #include <winnt.h>
 #include <winnls.h>
@@ -36,6 +41,8 @@
 /*****************************************************************************
  * Defines                                                                   *
  *****************************************************************************/
+
+ODINDEBUGCHANNEL(KERNEL32-KERNEL32)
 
                 /* this define enables certain less important debug messages */
 //#define DEBUG_LOCAL 1
@@ -674,45 +681,49 @@ VOID WIN32API GetSystemInfo(LPSYSTEM_INFO lpSystemInfo)
 //******************************************************************************
 //Borrowed from Wine
 //******************************************************************************
-VOID WIN32API GetStartupInfoA(LPSTARTUPINFOA lpStartupInfo)
+ODINPROCEDURE1(GetStartupInfoA,LPSTARTUPINFOA,lpStartupInfo)
 {
-  dprintf(("KERNEL32:  GetStartupInfo\n"));
-  lpStartupInfo->cb = sizeof(STARTUPINFOA);
-  lpStartupInfo->lpReserved = "<Reserved>";
-  lpStartupInfo->lpDesktop = "Desktop";
-  lpStartupInfo->lpTitle = "Title";
-
-  lpStartupInfo->cbReserved2 = 0;
-  lpStartupInfo->lpReserved2 = NULL; /* must be NULL for VC runtime */
-
+  lpStartupInfo->cb               = sizeof(STARTUPINFOA);
+  lpStartupInfo->lpReserved       = "<Reserved>";
+  lpStartupInfo->lpDesktop        = "Desktop";
+  lpStartupInfo->lpTitle          = "Title";
+  lpStartupInfo->dwX              = 0;
+  lpStartupInfo->dwY              = 0;
+  lpStartupInfo->dwXSize          = 640;
+  lpStartupInfo->dwYSize          = 480;
+  lpStartupInfo->dwXCountChars    = 80;      // for console
+  lpStartupInfo->dwYCountChars    = 25;
+  lpStartupInfo->dwFillAttribute  = 0x0720;
+  lpStartupInfo->dwFlags          = STARTF_USESHOWWINDOW   |
+                                    STARTF_USEPOSITION     |
+                                    STARTF_USESIZE         |
+                                    STARTF_USECOUNTCHARS   |
+                                    STARTF_USEFILLATTRIBUTE|
+                                    STARTF_USESTDHANDLES;
+  lpStartupInfo->wShowWindow      = SW_SHOWDEFAULT;
+  lpStartupInfo->cbReserved2      = 0;
+  lpStartupInfo->lpReserved2      = NULL; /* must be NULL for VC runtime */
   /* @@@PH 98/07/13 Handlemanager support */
-  lpStartupInfo->hStdInput   = GetStdHandle(STD_INPUT_HANDLE);
-  lpStartupInfo->hStdOutput  = GetStdHandle(STD_OUTPUT_HANDLE);
-  lpStartupInfo->hStdError   = GetStdHandle(STD_ERROR_HANDLE);
+  lpStartupInfo->hStdInput        = GetStdHandle(STD_INPUT_HANDLE);
+  lpStartupInfo->hStdOutput       = GetStdHandle(STD_OUTPUT_HANDLE);
+  lpStartupInfo->hStdError        = GetStdHandle(STD_ERROR_HANDLE);
   return;
 }
 //******************************************************************************
 //Borrowed from Wine
 //******************************************************************************
-VOID WIN32API GetStartupInfoW(LPSTARTUPINFOW lpStartupInfo)
+ODINPROCEDURE1(GetStartupInfoW,LPSTARTUPINFOW,lpStartupInfo)
 {
- static WCHAR lpReserved[] = {'<', 'R','e','s','e','r','v','e','d','>', 0};
- static WCHAR lpDesktop[]  = {'D', 'e','s','k','t','o','p', 0};
- static WCHAR lpTitle[]    = {'T', 'i','t','l','e', 0};
+  static WCHAR lpReserved[] = {'<', 'R','e','s','e','r','v','e','d','>', 0};
+  static WCHAR lpDesktop[]  = {'D', 'e','s','k','t','o','p', 0};
+  static WCHAR lpTitle[]    = {'T', 'i','t','l','e', 0};
 
-  dprintf(("KERNEL32: GetStartupInfoW\n"));
+  // forward call to ascii variant
+  GetStartupInfoA((LPSTARTUPINFOA)lpStartupInfo);
   lpStartupInfo->cb          = sizeof(STARTUPINFOW);
   lpStartupInfo->lpReserved  = lpReserved;
   lpStartupInfo->lpDesktop   = lpDesktop;
   lpStartupInfo->lpTitle     = lpTitle;
-
-  lpStartupInfo->cbReserved2 = 0;
-  lpStartupInfo->lpReserved2 = NULL; /* must be NULL for VC runtime */
-
-  /* @@@PH 98/07/13 Handlemanager support */
-  lpStartupInfo->hStdInput   = GetStdHandle(STD_INPUT_HANDLE);
-  lpStartupInfo->hStdOutput  = GetStdHandle(STD_OUTPUT_HANDLE);
-  lpStartupInfo->hStdError   = GetStdHandle(STD_ERROR_HANDLE);
   return;
 }
 //******************************************************************************
