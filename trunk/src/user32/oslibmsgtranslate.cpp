@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.36 2000-07-20 18:08:12 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.37 2000-10-08 18:45:35 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -242,7 +242,7 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
         if (!win32wnd->CanReceiveSizeMsgs())    goto dummymessage;
 
         if(pswp->fl & (SWP_MOVE | SWP_SIZE)) {
-                dprintf(("Set client rectangle to (%d,%d)(%d,%d)", swpOld.x, swpOld.y, swpOld.x + swpOld.cx, swpOld.y + swpOld.cy));
+/////                dprintf(("Set client rectangle to (%d,%d)(%d,%d)", swpOld.x, swpOld.y, swpOld.x + swpOld.cx, swpOld.y + swpOld.cy));
 /////                win32wnd->setClientRect(swpOld.x, swpOld.y, swpOld.x + swpOld.cx, swpOld.y + swpOld.cy);
 
                 thdb->wp.hwnd = win32wnd->getWindowHandle();
