@@ -1,4 +1,4 @@
-/* $Id: HOOK.CPP,v 1.6 1999-12-16 00:11:44 sandervl Exp $ */
+/* $Id: HOOK.CPP,v 1.7 1999-12-17 16:56:54 sandervl Exp $ */
 
 /*
  * Windows hook functions
@@ -323,7 +323,7 @@ static HHOOK HOOK_SetHook( INT id, LPVOID proc, INT type,
  */
 static BOOL HOOK_RemoveHook( HOOKDATA *data )
 {
-  HOOKDATA *prevHook;
+  HOOKDATA **prevHook;
   THDB     *thdb;
   VMutex   *hookMutex;
 
@@ -352,21 +352,21 @@ static BOOL HOOK_RemoveHook( HOOKDATA *data )
 	}
 	hookMutex = &threadHookMutex;
     	hookMutex->enter();
-        prevHook = (HOOKDATA *)thdb->hooks[data->id - WH_MINHOOK];
+        prevHook = (HOOKDATA **)&thdb->hooks[data->id - WH_MINHOOK];
     }
     else {
 	hookMutex = &systemHookMutex;
     	hookMutex->enter();
-	prevHook = (HOOKDATA *)HOOK_systemHooks[data->id - WH_MINHOOK];
+	prevHook = (HOOKDATA **)&HOOK_systemHooks[data->id - WH_MINHOOK];
     }
-    while (prevHook && prevHook != data)
-        prevHook = (HOOKDATA *)prevHook->next;
+    while (*prevHook && *prevHook != data)
+        prevHook = (HOOKDATA **)&(*prevHook)->next;
 
     if (!prevHook) {
     	hookMutex->leave();
 	return FALSE;
     }
-    prevHook = (HOOKDATA *)data->next;
+    *prevHook = (HOOKDATA *)data->next;
     hookMutex->leave();
 
     HeapFree(GetProcessHeap(), 0, (LPVOID)data );
