@@ -1,4 +1,4 @@
-/* $Id: mmap.h,v 1.12 1999-11-22 20:35:50 sandervl Exp $ */
+/* $Id: mmap.h,v 1.13 1999-12-14 12:50:46 sandervl Exp $ */
 
 /*
  * Memory mapped class
@@ -20,7 +20,7 @@
 #endif
 
 //commit 4 pages at once when the app accesses it
-#define NRPAGES_TOCOMMIT	200
+#define NRPAGES_TOCOMMIT	16
 
 #define MEMMAP_ACCESS_READ	1
 #define MEMMAP_ACCESS_WRITE	2

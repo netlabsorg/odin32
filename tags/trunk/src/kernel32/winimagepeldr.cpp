@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.23 1999-12-13 19:28:15 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.24 1999-12-14 12:50:46 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -240,7 +240,6 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
 
   memmap = new Win32MemMap(this, realBaseAddress, imageSize);
   if(memmap == NULL || !memmap->Init(0)) {
-        strcpy(szErrorModule, OSLibStripPath(szFileName));
     	goto failure;
   }
   win32file = memmap->mapViewOfFile(0, 0, 2);
@@ -1355,7 +1354,7 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
   		rc = DosLoadModule(szModuleFailure, sizeof(szModuleFailure), modname, (HMODULE *)&hInstanceNewDll);
   		if(rc) {
 			dprintf((LOG, "DosLoadModule returned %X for %s\n", rc, szModuleFailure));
-		    	sprintf(szErrorModule, "%s.DLL", szModuleFailure);
+			sprintf(szErrorModule, "%s.DLL", szModuleFailure);
 			errorState = rc;
 			return(FALSE);
   		}
@@ -1380,7 +1379,6 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
 	        dprintf((LOG, "**********************************************************************" ));
 	        if(WinDll->init(0) == FALSE) {
 	            dprintf((LOG, "Internal WinDll error ", WinDll->getError() ));
-		    strcpy(szErrorModule, OSLibStripPath(modname));
 	            return(FALSE);
 	        }
 	        if(WinDll->attachProcess() == FALSE) {
