@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.52 2000-09-22 09:22:32 bird Exp $
+# $Id: Makefile,v 1.53 2000-09-23 18:22:47 bird Exp $
 #
 # Win32k makefile.
 #
@@ -641,14 +641,17 @@ clean:
            $(PDWIN32_BIN)\$(NAME).sym \
            $(PDWIN32_BIN)\$(NAME).ddp
 !if "$(WIN32KBIN)" != ""
-    $(RM) $(WIN32KBIN)\*sy* $(WIN32KBIN)\*map $(WIN32KBIN)\*exe
+    $(RM) $(WIN32KBIN)\*.*
 !endif
 !if "$(WIN32KOBJ)" != ""
-    $(RM) $(WIN32KOBJ)\*obj $(WIN32KOBJ)\*lib $(WIN32KOBJ)\*pch \
-        $(WIN32KOBJ)\*.obj_tst
+    $(RM) $(WIN32KOBJ)\*obj* \
+        $(WIN32KOBJ)\*lnk* \
+        $(WIN32KOBJ)\*res*
 !endif
 !if "$(WIN32KLIST)" != ""
-    $(RM) $(WIN32KLIST)\*a* $(WIN32KLIST)\*lst $(WIN32KLIST)\*.s*
+    $(RM) $(WIN32KLIST)\*lst* \
+        $(WIN32KLIST)\*.s* \
+        $(WIN32KLIST)\*as*
 !endif
     cd pe2lx
     $(MAKE_CMD) clean
