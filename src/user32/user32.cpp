@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.3 1999-06-02 15:57:57 cbratschi Exp $ */
+/* $Id: user32.cpp,v 1.4 1999-06-06 12:25:49 cbratschi Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -2222,7 +2222,7 @@ int WIN32API GetScrollPos(HWND hwnd, int fnBar)
 {
  int pos;
 
-    pos = GetScrollPos(hwnd, fnBar);
+    pos = O32_GetScrollPos(hwnd, fnBar);
 #ifdef DEBUG
     WriteLog("USER32:  GetScrollPos of %X type %d returned %d\n", hwnd, fnBar, pos);
 #endif

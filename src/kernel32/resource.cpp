@@ -1,4 +1,4 @@
-/* $Id: resource.cpp,v 1.3 1999-06-01 15:47:38 phaller Exp $ */
+/* $Id: resource.cpp,v 1.4 1999-06-06 12:25:49 cbratschi Exp $ */
 
 /*
  *
@@ -30,9 +30,11 @@ HRSRC WIN32API FindResourceA(HINSTANCE hModule, LPCSTR lpszName, LPCSTR lpszType
  Win32Image *module;
 
     dprintf(("FindResourceA %X", hModule));
-    if(hModule == 0 || hModule == -1)
-        module = (Win32Image *)WinExe;
-    else    module = (Win32Image *)Win32Dll::findModule(hModule);
+    // EB: ->>> added real exe module handle
+    if(hModule == 0 || hModule == -1 || (WinExe != NULL && hModule == WinExe->getOS2InstanceHandle()))
+      module = (Win32Image *)WinExe;
+    else
+      module = (Win32Image *)Win32Dll::findModule(hModule);
 
     if(module == NULL)
     return(NULL);
@@ -42,7 +44,7 @@ HRSRC WIN32API FindResourceA(HINSTANCE hModule, LPCSTR lpszName, LPCSTR lpszType
 //******************************************************************************
 //******************************************************************************
 HRSRC WIN32API FindResourceW(HINSTANCE hModule, LPCWSTR lpszName,
-                    	     LPCWSTR lpszType)
+                             LPCWSTR lpszType)
 {
  Win32Image *module;
 
@@ -52,7 +54,7 @@ HRSRC WIN32API FindResourceW(HINSTANCE hModule, LPCWSTR lpszName,
     else module = (Win32Image *)Win32Dll::findModule(hModule);
 
     if(module == NULL)
-	return(NULL);
+        return(NULL);
 
     return module->findResourceW((LPWSTR)lpszName, (LPWSTR)lpszType);
 }
