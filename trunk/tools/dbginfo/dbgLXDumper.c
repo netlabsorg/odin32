@@ -1,4 +1,4 @@
-/* $Id: dbgLXDumper.c,v 1.5 2000-03-27 12:36:16 bird Exp $
+/* $Id: dbgLXDumper.c,v 1.6 2000-03-31 15:35:08 bird Exp $
  *
  * dbgLXDumper - reads and interprets the debuginfo found in an LX executable.
  *
@@ -15,6 +15,11 @@
 #define FOR_EXEHDR          1           /* exe386.h flag */
 #define DWORD               ULONG       /* Used by exe386.h / newexe.h */
 #define WORD                USHORT      /* Used by exe386.h / newexe.h */
+
+#define HLLVERSION100       0x0100
+#define HLLVERSION300       0x0300
+#define HLLVERSION400       0x0400
+#define HLLVERSION500       0x0500
 
 
 /*******************************************************************************
@@ -178,9 +183,10 @@ int dbgLXDump(void *pvFile)
  */
 int dumpHLL(FILE *phOut, PBYTE pb, int cb)
 {
-    PHLLDIR     pDir;
-    int         i;
-    PHLLHDR     pHdr = (PHLLHDR)pb;
+    int             i, j, k;            /* loop variables! */
+    unsigned long   ulHLLVersion = 0;   /* HLL version of the last module. */
+    PHLLDIR         pDir;
+    PHLLHDR         pHdr = (PHLLHDR)pb;
 
     /*
      * Dump header.
@@ -291,7 +297,7 @@ int dumpHLL(FILE *phOut, PBYTE pb, int cb)
             {
                 PHLLMODULE  pModule = (PHLLMODULE)(pDir->aEntries[i].off + pb);
                 PHLLSEGINFO paSegInfo;
-                int         j, c;
+                int         c;
 
                 /*
                  * Dump module entry data.
@@ -319,6 +325,8 @@ int dumpHLL(FILE *phOut, PBYTE pb, int cb)
                         pModule->chVerMinor,
                         pModule->cchName
                         );
+
+                ulHLLVersion = pModule->chVerMajor*0x100 + pModule->chVerMinor;
 
 
                 /*
@@ -388,8 +396,154 @@ int dumpHLL(FILE *phOut, PBYTE pb, int cb)
             case HLL_DE_SRCLNSEG:       /* Line numbers - (MSC 6.00) */
                 break;
 
-            case HLL_DE_IBMSRC:         /* Line numbers - (IBM HLL) */
+            /*
+             * Line numbers - (IBM HLL)
+             *
+             * HLL 04 have a FirstEntry before each table.
+             * HLL 03 don't seem to have... This is not implemented yet.
+             */
+            case HLL_DE_IBMSRC:
+            {
+                PHLLFIRSTENTRY      pFirstEntry = (PHLLFIRSTENTRY)(pb + pDir->aEntries[i].off);
+                int                 cbFirstEntry;
+                int                 cb;
+
+
+                /*
+                 * Set the size of an first entry struct based on the HLL version.
+                 */
+                if (ulHLLVersion == HLLVERSION100)
+                    cbFirstEntry = sizeof(pFirstEntry->hll01);
+                else
+                    cbFirstEntry = sizeof(pFirstEntry->hll04);
+
+
+                /*
+                 * Loop thru all the arrays in this data directory.
+                 * Each array starts with an HLLFIRSTENTRY structure.
+                 */
+                cb = pDir->aEntries[i].cb;
+                while (cb >= cbFirstEntry)
+                {
+                    int     cbEntries;
+
+                    /*
+                     * Dump the special first entry.
+                     */
+                    fprintf(phOut,
+                            "    First entry:\n"
+                            "      uchType          0x%02x\n"
+                            "      uchReserved      0x%02x\n"
+                            "      cEntries         0x%04x\n"
+                            "      iSeg             0x%04x\n"
+                            "      offBase/cb       0x%08x\n",
+                            pFirstEntry->hll04.uchType,
+                            pFirstEntry->hll04.uchReserved,
+                            pFirstEntry->hll04.cEntries,
+                            pFirstEntry->hll04.iSeg,
+                            pFirstEntry->hll04.u1.offBase
+                            );
+
+                    switch (pFirstEntry->hll03.uchType)
+                    {
+                        /*
+                         * Source File information and offset only.
+                         */
+                        case 0:
+                        {
+                            int                 cbLine;
+                            PHLLLINENUMBERENTRY pLines =
+                                (PHLLLINENUMBERENTRY)((char*)pFirstEntry + cbFirstEntry);
+
+                            /*
+                             * Determin size of a line entry.
+                             */
+                            if (ulHLLVersion == HLLVERSION100)
+                                cbLine = sizeof(pLines->hll01);
+                            else
+                                cbLine = sizeof(pLines->hll03);
+
+                            /*
+                             * Loop thru all the line info and dump it.
+                             */
+                            fprintf(phOut, "      Lineinfo:\n");
+                            for (k = 0; k < pFirstEntry->hll01.cEntries; k++) /* cEntries is similar for all formats. */
+                            {
+                                fprintf(phOut,
+                                        "          usLine=%4d (0x%02x)  iusSourceFile=0x%04x  off=0x%08x\n",
+                                        pLines->hll04.usLine,
+                                        pLines->hll04.usLine,
+                                        pLines->hll04.iusSourceFile,
+                                        pLines->hll04.off
+                                        );
+                                /* next */
+                                pLines = (PHLLLINENUMBERENTRY)((char*)pLines + cbLine);
+                            }
+
+                            cbEntries = cbLine * pFirstEntry->hll01.cEntries; /* cEntries is similar for all formats. */
+                            break;
+                        }
+
+
+                        /*
+                         * Filenames.
+                         */
+                        case 3:
+                        {
+                            PCHAR               pch;
+                            PHLLFILENAMEENTRY   pFilenameEntry =
+                                (PHLLFILENAMEENTRY)((char*)pFirstEntry + cbFirstEntry);
+
+                            fprintf(phOut,
+                                    "    FilenameEntry:\n"
+                                    "      offSource        0x%08x\n"
+                                    "      cSourceRecords   0x%08x\n"
+                                    "      cSourceFiles     0x%08x\n"
+                                    "      cchName          0x%02x\n",
+                                    pFilenameEntry->offSource,
+                                    pFilenameEntry->cSourceRecords,
+                                    pFilenameEntry->cSourceFiles,
+                                    pFilenameEntry->cchName
+                                    );
+
+                            fprintf(phOut,
+                                    "      Filenames:\n");
+                            pch = &pFilenameEntry->cchName;
+                            for (k = 0; k < pFilenameEntry->cSourceFiles; k++)
+                            {
+                                fprintf(phOut,
+                                        "        %.*s\n", *pch, pch+1);
+                                /* next */
+                                cbEntries += 1 + *pch;
+                                pch += 1 + *pch;
+                            }
+
+                            if (ulHLLVersion == HLLVERSION100)
+                                cbEntries = pFirstEntry->hll01.u1.cbFileNameTable;
+                            else
+                                cbEntries = pFirstEntry->hll03.u1.cbFileNameTable;
+                            break;
+                        }
+
+
+                        default:
+                            fprintf(phOut, "warning: unsupported entry type, %d\n", pFirstEntry->hll03.uchType);
+                            cbEntries = cb = 0;
+                    }
+
+
+                    /*
+                     * Next
+                     */
+                    cb -= cbEntries + sizeof(HLLFIRSTENTRY);
+                    pFirstEntry = (PHLLFIRSTENTRY)((char*)pFirstEntry + cbEntries + sizeof(HLLFIRSTENTRY));
+                }
+
+                dumpHex(phOut,
+                        pDir->aEntries[i].off + pb,
+                        pDir->aEntries[i].cb);
                 break;
+            }
 
             default:
                 fprintf(phOut, "    Error - unknown entry type. (%x)\n", pDir->aEntries[i].usType);
@@ -400,7 +554,7 @@ int dumpHLL(FILE *phOut, PBYTE pb, int cb)
 
     /* - temporary - */
     printf("\ndumps debug data\n");
-    dumpHex(stdout, pb, cb);
+    dumpHex(phOut, pb, cb);
 
     return NO_ERROR;
 }
