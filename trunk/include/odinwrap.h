@@ -1,4 +1,4 @@
-/* $Id: odinwrap.h,v 1.27 2000-10-02 18:40:12 sandervl Exp $ */
+/* $Id: odinwrap.h,v 1.28 2000-10-02 21:13:45 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -42,7 +42,6 @@
 
 
 //SvL: Define this to use the internal wrapper function of a specific api
-//SvL: Define this to use the internal wrapper function of a specific api
 #ifdef DEBUG
 #define ODIN_EXTERN(a)   ODIN_INTERNAL ODIN_##a
 #define CALL_ODINFUNC(a) ODIN_##a
@@ -52,17 +51,15 @@
 #endif
 
 
-
-
 #ifdef DEBUG
 
 //@@@PH 1999/10/25 IBM VAC++ debug memory support
 #include <malloc.h>
-
+#include <odin.h>
 
 // ---------------------------------------------------------------------------
 extern int IsExeStarted(); //kernel32
-
+extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
 
 // ---------------------------------------------------------------------------
 //SvL: Only check the heap very frequently when there are problems
@@ -111,7 +108,7 @@ extern int IsExeStarted(); //kernel32
   PROFILE_STOP(a)       \
   ODIN_HEAPCHECK();     \
   if (sel != GetFS() && IsExeStarted()) \
-    dprintf(("ERROR: FS: for thread %08xh corrupted!", GetCurrentThreadId()));
+    dprintf(("ERROR: FS: for thread %08xh corrupted by "a, GetCurrentThreadId()));
   
   
 /****************************************************************************
@@ -123,12 +120,14 @@ extern int IsExeStarted(); //kernel32
   cRet ODIN_INTERNAL ODIN_##cName (void);     \
   cRet WINAPI cName(void)                     \
   {                                           \
-    dprintfNoEOL(("%s: "#cRet" "#cName"()",   \
+    dprintf(("%s: "#cRet" "#cName"()",   \
              pszOdinDebugChannel));           \
     FNPROLOGUE(#cName)                        \
     cRet   rc  = ODIN_##cName();              \
     FNEPILOGUE(#cName)                        \
-    dprintf(("- rc = %08xh\n", rc));          \
+    dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
+             pszOdinDebugChannel,             \
+             rc));                            \
     return rc;                                \
   }                                           \
                                               \
@@ -139,7 +138,7 @@ extern int IsExeStarted(); //kernel32
   void ODIN_INTERNAL ODIN_##cName (void);     \
   void WINAPI cName(void)                     \
   {                                           \
-    dprintfNoEOL(("%s: void "#cName"()",   \
+    dprintf(("%s: void "#cName"()",   \
              pszOdinDebugChannel));           \
     FNPROLOGUE(#cName)                       \
     ODIN_##cName();                           \
@@ -156,7 +155,7 @@ extern int IsExeStarted(); //kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1);    \
   cRet WINAPI cName(t1 a1)                    \
   {                                           \
-    dprintfNoEOL(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh)", \
+    dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh)", \
              pszOdinDebugChannel,             \
              a1));                            \
     FNPROLOGUE(#cName)                       \
@@ -174,7 +173,7 @@ extern int IsExeStarted(); //kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1);    \
   void WINAPI cName(t1 a1)                    \
   {                                           \
-    dprintfNoEOL(("%s: void "#cName"("#t1" "#a1"=%08xh)", \
+    dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh)", \
              pszOdinDebugChannel,             \
              a1));                            \
     FNPROLOGUE(#cName)                       \
@@ -192,7 +191,7 @@ extern int IsExeStarted(); //kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2); \
   cRet WINAPI cName(t1 a1,t2 a2)               \
   {                                            \
-    dprintfNoEOL(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh)", \
+    dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh)", \
              pszOdinDebugChannel,              \
              a1,a2));                          \
     FNPROLOGUE(#cName)                        \
@@ -210,7 +209,7 @@ extern int IsExeStarted(); //kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2);     \
   void WINAPI cName(t1 a1,t2 a2)              \
   {                                           \
-    dprintfNoEOL(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh)", \
+    dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh)", \
              pszOdinDebugChannel,             \
              a1,a2));                         \
     FNPROLOGUE(#cName)                       \
@@ -228,7 +227,7 @@ extern int IsExeStarted(); //kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3);      \
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3)        \
   {                                           \
-    dprintfNoEOL(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)", \
+    dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)", \
              pszOdinDebugChannel,             \
              a1,a2,a3));                      \
     FNPROLOGUE(#cName)                       \
@@ -246,7 +245,7 @@ extern int IsExeStarted(); //kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3);  \
   void WINAPI cName(t1 a1,t2 a2,t3 a3)    \
   {                               \
-    dprintfNoEOL(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)", \
+    dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)", \
              pszOdinDebugChannel,             \
              a1,a2,a3));                      \
     FNPROLOGUE(#cName)                       \
@@ -263,7 +262,7 @@ extern int IsExeStarted(); //kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4);      \
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4)        \
   {                               \
-    dprintfNoEOL(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh, "#t4" "#a4"=%08xh)", \
+    dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh, "#t4" "#a4"=%08xh)", \
              pszOdinDebugChannel,             \
              a1,a2,a3,a4));                   \
     FNPROLOGUE(#cName)                       \
@@ -281,7 +280,7 @@ extern int IsExeStarted(); //kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4);  \
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4)    \
   {                               \
-    dprintfNoEOL(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh, "#t4" "#a4"=%08xh)", \
+    dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh, "#t4" "#a4"=%08xh)", \
              pszOdinDebugChannel,             \
              a1,a2,a3,a4));                    \
     FNPROLOGUE(#cName)                       \
@@ -299,7 +298,7 @@ extern int IsExeStarted(); //kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5);      \
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5)        \
   {                               \
-    dprintfNoEOL(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh" \
+    dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh)", \
              pszOdinDebugChannel,             \
              a1,a2,a3,a4,a5));                \
@@ -318,7 +317,7 @@ extern int IsExeStarted(); //kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5);  \
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5)    \
   {                               \
-    dprintfNoEOL(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
+    dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh)", \
              pszOdinDebugChannel,             \
              a1,a2,a3,a4,a5));                \
@@ -336,7 +335,7 @@ extern int IsExeStarted(); //kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6);      \
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6)        \
   {                               \
-    dprintfNoEOL(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
+    dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh)", \
              pszOdinDebugChannel,             \
              a1,a2,a3,a4,a5,a6));             \
@@ -351,34 +350,11 @@ extern int IsExeStarted(); //kernel32
                                   \
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6)
 
-// @@@PH 1999/12/28 the following macro is a workaround for WINMM:waveOutOpen
-// where the system needs to know about the win32 tib fs selector
-#define ODINFUNCTION6FS(cRet,cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6)  \
-  cRet ODIN_INTERNAL ODIN_##cName (unsigned short selFS, t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6);      \
-  cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6)        \
-  {                               \
-    dprintfNoEOL(("%s: "#cRet" "#cName"(selFS=%04xh, "#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
-             ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh)", \
-             pszOdinDebugChannel,             \
-             sel,                             \
-             a1,a2,a3,a4,a5,a6));             \
-    FNPROLOGUE(#cName)                       \
-    cRet   rc  = ODIN_##cName(sel,a1,a2,a3,a4,a5,a6); \
-    dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
-             pszOdinDebugChannel,             \
-             rc));                            \
-    FNEPILOGUE(#cName)            \
-    return rc;                    \
-  }                               \
-                                  \
-  cRet ODIN_INTERNAL ODIN_##cName (unsigned short selFS, t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6)
-
-
 #define ODINPROCEDURE6(cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6)  \
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6);  \
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6)    \
   {                               \
-    dprintfNoEOL(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
+    dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh)", \
              pszOdinDebugChannel,             \
              a1,a2,a3,a4,a5,a6));             \
@@ -397,7 +373,7 @@ extern int IsExeStarted(); //kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7);      \
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7)        \
   {                               \
-    dprintfNoEOL(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
+    dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh)", \
              pszOdinDebugChannel,             \
              a1,a2,a3,a4,a5,a6,a7));          \
@@ -416,7 +392,7 @@ extern int IsExeStarted(); //kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7);  \
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7)    \
   {                               \
-    dprintfNoEOL(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
+    dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh)", \
              pszOdinDebugChannel,             \
              a1,a2,a3,a4,a5,a6,a7));          \
@@ -435,7 +411,7 @@ extern int IsExeStarted(); //kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8);      \
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8)        \
   {                               \
-    dprintfNoEOL(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
+    dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh" \
              ", "#t8" "#a8"=%08xh)", \
              pszOdinDebugChannel,             \
@@ -455,7 +431,7 @@ extern int IsExeStarted(); //kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8);  \
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8)    \
   {                               \
-    dprintfNoEOL(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
+    dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh" \
              ", "#t8" "#a8"=%08xh)", \
              pszOdinDebugChannel,             \
@@ -475,7 +451,7 @@ extern int IsExeStarted(); //kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9);      \
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9)        \
   {                               \
-    dprintfNoEOL(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
+    dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh" \
              ", "#t8" "#a8"=%08xh, "#t9" "#a9"=%08xh)", \
              pszOdinDebugChannel,             \
@@ -495,7 +471,7 @@ extern int IsExeStarted(); //kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9);  \
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9)    \
   {                               \
-    dprintfNoEOL(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
+    dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh" \
              ", "#t8" "#a8"=%08xh, "#t9" "#a9"=%08xh)", \
              pszOdinDebugChannel,             \
@@ -515,7 +491,7 @@ extern int IsExeStarted(); //kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10);      \
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10)        \
   {                               \
-    dprintfNoEOL(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
+    dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh" \
              ", "#t8" "#a8"=%08xh, "#t9" "#a9"=%08xh, "#t10" "#a10"=%08xh)", \
              pszOdinDebugChannel,             \
@@ -535,7 +511,7 @@ extern int IsExeStarted(); //kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10);  \
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10)    \
   {                               \
-    dprintfNoEOL(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
+    dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh" \
              ", "#t8" "#a8"=%08xh, "#t9" "#a9"=%08xh, "#t10" "#a10"=%08xh)", \
              pszOdinDebugChannel,             \
@@ -555,7 +531,7 @@ extern int IsExeStarted(); //kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11);      \
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11)        \
   {                               \
-    dprintfNoEOL(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
+    dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh"  \
              ", "#t8" "#a8"=%08xh, "#t9" "#a9"=%08xh, "#t10" "#a10"=%08xh, "#t11" "#a11"=%08xh)", \
              pszOdinDebugChannel,             \
@@ -575,7 +551,7 @@ extern int IsExeStarted(); //kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11);  \
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11)    \
   {                               \
-    dprintfNoEOL(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
+    dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh"  \
              ", "#t8" "#a8"=%08xh, "#t9" "#a9"=%08xh, "#t10" "#a10"=%08xh, "#t11" "#a11"=%08xh)", \
              pszOdinDebugChannel,             \
@@ -595,7 +571,7 @@ extern int IsExeStarted(); //kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12);      \
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12)        \
   {                               \
-    dprintfNoEOL(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
+    dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh"     \
              ", "#t8" "#a8"=%08xh, "#t9" "#a9"=%08xh, "#t10" "#a10"=%08xh, "#t11" "#a11"=%08xh" \
              ", "#t12" "#a12"=%08xh)", \
@@ -616,7 +592,7 @@ extern int IsExeStarted(); //kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12);  \
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12)    \
   {                               \
-    dprintfNoEOL(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
+    dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh"     \
              ", "#t8" "#a8"=%08xh, "#t9" "#a9"=%08xh, "#t10" "#a10"=%08xh, "#t11" "#a11"=%08xh" \
              ", "#t12" "#a12"=%08xh)", \
@@ -637,7 +613,7 @@ extern int IsExeStarted(); //kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13);      \
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13)        \
   {                               \
-    dprintfNoEOL(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
+    dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh"     \
              ", "#t8" "#a8"=%08xh, "#t9" "#a9"=%08xh, "#t10" "#a10"=%08xh, "#t11" "#a11"=%08xh" \
              ", "#t12" "#a12"=%08xh, "#t13" "#a13"=%08xh)", \
@@ -658,7 +634,7 @@ extern int IsExeStarted(); //kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13);  \
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13)    \
   {                               \
-    dprintfNoEOL(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
+    dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh"     \
              ", "#t8" "#a8"=%08xh, "#t9" "#a9"=%08xh, "#t10" "#a10"=%08xh, "#t11" "#a11"=%08xh" \
              ", "#t12" "#a12"=%08xh, "#t13" "#a13"=%08xh, )", \
@@ -679,7 +655,7 @@ extern int IsExeStarted(); //kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13,t14 a14);      \
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13,t14 a14)        \
   {                               \
-    dprintfNoEOL(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
+    dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh"     \
              ", "#t8" "#a8"=%08xh, "#t9" "#a9"=%08xh, "#t10" "#a10"=%08xh, "#t11" "#a11"=%08xh" \
              ", "#t12" "#a12"=%08xh, "#t13" "#a13"=%08xh, "#t14" "#a14"=%08xh)", \
@@ -700,7 +676,7 @@ extern int IsExeStarted(); //kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13,t14 a14);  \
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13,t14 a14)    \
   {                               \
-    dprintfNoEOL(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
+    dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh"     \
              ", "#t8" "#a8"=%08xh, "#t9" "#a9"=%08xh, "#t10" "#a10"=%08xh, "#t11" "#a11"=%08xh" \
              ", "#t12" "#a12"=%08xh, "#t13" "#a13"=%08xh, "#t14" "#a14"=%08xh)", \
