@@ -1,4 +1,4 @@
-/* $Id: console.cpp,v 1.19 2000-07-06 21:18:39 sandervl Exp $ */
+/* $Id: console.cpp,v 1.20 2000-07-25 18:22:47 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -601,9 +601,12 @@ void iConsoleWaitClose(void)
 
 
                                           /* terminate console immediately ? */
-  if (ConsoleGlobals.Options.fTerminateAutomatically == FALSE)
-    DosWaitThread(&ConsoleGlobals.tidConsole,   /* wait until thd terminates */
-                  DCWW_WAIT);
+  if (ConsoleGlobals.Options.fTerminateAutomatically == FALSE) {
+	if(getenv("ODIN_AUTOEXITCONSOLE") == NULL) {
+	    DosWaitThread(&ConsoleGlobals.tidConsole,   /* wait until thd terminates */
+        	          DCWW_WAIT);
+	}
+  }
 }
 
 
