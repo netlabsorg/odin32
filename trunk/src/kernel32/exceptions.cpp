@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.36 2000-02-29 19:17:13 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.37 2000-03-18 19:49:43 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -1116,8 +1116,25 @@ void OS2SetExceptionHandler(void *exceptframe)
 //  DosError(FERR_DISABLEEXCEPTION | FERR_DISABLEHARDERR);
 
   DosSetExceptionHandler(pExceptRec);
-  dprintf(("OS2SetExceptionHandler: exception chain %x (old %x)", pExceptRec, pExceptRec->prev_structure));
+  dprintf(("OS2SetExceptionHandler: exception chain %x", pExceptRec));
+  PrintExceptionChain();
 }
+
+#ifdef DEBUG
+void PrintExceptionChain()
+{
+ USHORT sel = RestoreOS2FS();
+ PEXCEPTIONREGISTRATIONRECORD pExceptRec = (PEXCEPTIONREGISTRATIONRECORD)QueryExceptionChain();
+
+  dprintf(("Exception chain list:"));
+  while(pExceptRec != 0 && (ULONG)pExceptRec != -1) {
+	dprintf(("record %x", pExceptRec));
+	pExceptRec = pExceptRec->prev_structure;
+  }
+  SetFS(sel);
+}
+#endif
+
 
 /*****************************************************************************
  * Name      : void OS2UnsetExceptionHandler
@@ -1132,7 +1149,11 @@ void OS2SetExceptionHandler(void *exceptframe)
  *****************************************************************************/
 void OS2UnsetExceptionHandler(void *exceptframe)
 {
-  DosUnsetExceptionHandler((PEXCEPTIONREGISTRATIONRECORD)exceptframe);
+ PEXCEPTIONREGISTRATIONRECORD pExceptRec = (PEXCEPTIONREGISTRATIONRECORD)exceptframe;
+
+  DosUnsetExceptionHandler(pExceptRec);
+  dprintf(("OS2UnsetExceptionHandler: exception chain %x", pExceptRec));
+  PrintExceptionChain();
 }
 
 void SetOS2ExceptionChain(ULONG val)
