@@ -1,4 +1,4 @@
-/* $Id: vprintf.c,v 1.9 2000-12-11 06:20:48 bird Exp $
+/* $Id: vprintf.c,v 1.10 2001-03-11 16:47:45 bird Exp $
  *
  * vprintf and printf
  *
@@ -562,11 +562,8 @@ static char *strout(char *psz, signed cchMax)
                 DosWrite(1, (void*)&chReturn, 1, SSToDS(&ul));
                 DosWrite(1, (void*)&chNewLine, 1, SSToDS(&ul));
             #endif
-
             }
-
-            while (cchMax - cch > 0 && (psz[cch] == '\r' || psz[cch] == '\n'))
-                cch++;
+            cch++;
         }
 
         /* next */
