@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.74 2000-01-26 18:02:37 cbratschi Exp $ */
+/* $Id: win32wbase.h,v 1.75 2000-01-27 17:21:09 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -385,7 +385,6 @@ private:
         LONG  HandleNCLButtonDown(WPARAM wParam,LPARAM lParam);
         LONG  HandleNCLButtonDblClk(WPARAM wParam,LPARAM lParam);
         LONG  HandleNCRButtonUp(WPARAM wParam,LPARAM lParam);
-        BOOL  WindowNeedsWMBorder();
         VOID  AdjustRectOuter(LPRECT rect,BOOL menu);
         VOID  AdjustRectInner(LPRECT rect);
         LONG  HandleNCCalcSize(BOOL calcValidRects,RECT *winRect);
