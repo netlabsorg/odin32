@@ -1,4 +1,4 @@
-/* $Id: winaspi32.cpp,v 1.5 2000-07-18 17:12:04 bird Exp $ */
+/* $Id: winaspi32.cpp,v 1.6 2000-09-03 08:20:10 sandervl Exp $ */
 /*
  * WNASPI routines
  *
@@ -344,6 +344,8 @@ DWORD __cdecl SendASPI32Command(LPSRB lpSRB)
 
     if(NULL==lpSRB)
       return SS_INVALID_SRB;  // Not sure what to return here but that is an error
+
+    dprintf(("SendASPI32Command %x %d", lpSRB, lpSRB->common.SRB_Cmd));
 
     aspi = new scsiObj();
 
