@@ -1,5 +1,3 @@
-/* $Id: winconst.h,v 1.40 2001-02-22 18:13:00 sandervl Exp $ */
-
 /*
  * Win32 constants
  *
@@ -983,28 +981,32 @@
 
 /* Access rights */
 
-#define DELETE                     0x00010000
-#define READ_CONTROL               0x00020000
-#define WRITE_DAC                  0x00040000
-#define WRITE_OWNER                0x00080000
-#define SYNCHRONIZE                0x00100000
-#define STANDARD_RIGHTS_REQUIRED   0x000f0000
+#define DELETE_W                     0x00010000
+#define READ_CONTROL_W               0x00020000
+#define WRITE_DAC_W                  0x00040000
+#define WRITE_OWNER_W                0x00080000
+#define SYNCHRONIZE_W                0x00100000
+#define STANDARD_RIGHTS_REQUIRED_W   0x000f0000
 
-#define STANDARD_RIGHTS_READ       READ_CONTROL
-#define STANDARD_RIGHTS_WRITE      READ_CONTROL
-#define STANDARD_RIGHTS_EXECUTE    READ_CONTROL
+#define STANDARD_RIGHTS_READ_W       READ_CONTROL_W
+#define STANDARD_RIGHTS_WRITE_W      READ_CONTROL_W
+#define STANDARD_RIGHTS_EXECUTE_W    READ_CONTROL_W
 
-#define STANDARD_RIGHTS_ALL        0x001f0000
+#define STANDARD_RIGHTS_ALL_W        0x001f0000
 
-#define SPECIFIC_RIGHTS_ALL        0x0000ffff
+#define SPECIFIC_RIGHTS_ALL_W        0x0000ffff
 
-#define GENERIC_READ               0x80000000
-#define GENERIC_WRITE              0x40000000
-#define GENERIC_EXECUTE            0x20000000
-#define GENERIC_ALL                0x10000000
+#define EVENT_MODIFY_STATE_W         0x0002
+#define EVENT_ALL_ACCESS_W           (STANDARD_RIGHTS_REQUIRED_W|SYNCHRONIZE_W|0x3)
 
-#define MAXIMUM_ALLOWED            0x02000000
-#define ACCESS_SYSTEM_SECURITY     0x01000000
+#define SEMAPHORE_MODIFY_STATE_W     0x0002
+#define SEMAPHORE_ALL_ACCESS_W       (STANDARD_RIGHTS_REQUIRED_W|SYNCHRONIZE_W|0x3)
+
+#define MUTEX_MODIFY_STATE_W         0x0001
+#define MUTEX_ALL_ACCESS_W           (STANDARD_RIGHTS_REQUIRED_W|SYNCHRONIZE_W|0x1)
+
+#define MAXIMUM_ALLOWED_W            0x02000000
+#define ACCESS_SYSTEM_SECURITY_W     0x01000000
 
 #ifndef LOWORD
 #define LOWORD(l)              ((WORD)(DWORD)(l))
@@ -1103,17 +1105,17 @@
 #define KEY_NOTIFY              0x00000010
 #define KEY_CREATE_LINK         0x00000020
 
-#define KEY_READ                (STANDARD_RIGHTS_READ|  \
+#define KEY_READ                (STANDARD_RIGHTS_READ_W|  \
                                  KEY_QUERY_VALUE|       \
                                  KEY_ENUMERATE_SUB_KEYS|\
                                  KEY_NOTIFY             \
                                 )
-#define KEY_WRITE               (STANDARD_RIGHTS_WRITE| \
+#define KEY_WRITE               (STANDARD_RIGHTS_WRITE_W| \
                                  KEY_SET_VALUE|         \
                                  KEY_CREATE_SUB_KEY     \
                                 )
 #define KEY_EXECUTE             KEY_READ
-#define KEY_ALL_ACCESS          (STANDARD_RIGHTS_ALL|   \
+#define KEY_ALL_ACCESS          (STANDARD_RIGHTS_ALL_W|   \
                                  KEY_READ|KEY_WRITE|    \
                                  KEY_CREATE_LINK        \
                                 )
