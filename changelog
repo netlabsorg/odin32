@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2332 2002-10-03 12:49:25 sandervl Exp $ */
+/* $Id: changelog,v 1.2333 2002-10-04 04:34:13 bird Exp $ */
+
+ 2002-10-04: knut st. osmundsen <bird@anduin   >
+    - MAKE:     o Force no memory debugging for Ring-0 target modes. (VAC)
 
  2002-10-03: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Added IP logging (define WIN32_IP_LOGGING in dbglog.cpp)
