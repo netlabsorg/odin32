@@ -1,7 +1,17 @@
- /* $Id: ChangeLog,v 1.1109 2000-09-06 21:23:30 bird Exp $ */
+ /* $Id: ChangeLog,v 1.1110 2000-09-07 18:17:41 sandervl Exp $ */
 
- 2000-09-04: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
-    - install:  Added Win32kCC.exe and kRx.EXE to the .wpi distributions.
+ 2000-09-07: Sander van Leeuwen <sandervl@xs4all.nl>
+    - COMCTL32: TOOLBAR_SetBitmapSize & TOOLBAR_SetBitmapSize; do not return
+                FALSE when called after buttons have been created.
+                (failed assertions in MFC applications; this code is from
+                 the latest Wine source tree)
+    - SHELL32:  Merged more changes made by Christoph into new tree
+    - KERNEL32: InitDirectories must be called before InitializeTIB or else
+                a win.ini file is created in the root dir (InitializeTIB
+                loads ntdll which depends on user32)
+                (reported by Kai Sommerfeld)
+    - USER32:   GetWindow was completely wrong. Didn't take Z-order into account.
+                Fixes MFC applications (missing controls + redraw problems)
 
  2000-09-05: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   WM_PARENTNOTIFY during WM_CREATE was sent to the wrong window
@@ -25,7 +35,7 @@
                 otherwise window proc wrapper.
                 Fixes wrong strings in Notes 5.0. (new string problems, but they
                 are caused by something else)
-    - COMCTL32: CreateUpDownControl was not exported correctly
+    - COMCTL32: CreateUpDownControl was not exported correctly 
                 (reported by Reinhold Kopper)
 
  2000-09-04: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
