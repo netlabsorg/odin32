@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.25 2000-01-08 16:47:48 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.26 2000-01-09 14:14:24 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -43,8 +43,12 @@
 #include <wprocess.h>
 #include "winmouse.h"
 #include <win\hook.h>
+#include <shellapi.h>
 #define INCL_TIMERWIN32
 #include "timer.h"
+
+#define SC_ABOUTWINE            (SC_SCREENSAVE+1)
+#define SC_PUTMARK              (SC_SCREENSAVE+2)
 
 #define HAS_DLGFRAME(style,exStyle) \
     (((exStyle) & WS_EX_DLGMODALFRAME) || \
@@ -52,7 +56,8 @@
 
 #define HAS_THICKFRAME(style,exStyle) \
     (((style) & WS_THICKFRAME) && \
-     !((exStyle) & WS_EX_DLGMODALFRAME))
+     !((exStyle) & WS_EX_DLGMODALFRAME) && \
+     !((style) & WS_CHILD))
 
 #define HAS_THINFRAME(style) \
     (((style) & WS_BORDER) || !((style) & (WS_CHILD | WS_POPUP)))
@@ -182,7 +187,8 @@ void Win32BaseWindow::Init()
   magic            = WIN32PM_MAGIC;
   OS2Hwnd          = 0;
   OS2HwndFrame     = 0;
-  OS2HwndMenu      = 0;
+  hMenu            = 0;
+  hSysMenu         = 0;
   Win32Hwnd        = 0;
 
   if(HwAllocateWindowHandle(&Win32Hwnd, (ULONG)this) == FALSE)
@@ -222,8 +228,6 @@ void Win32BaseWindow::Init()
 
   horzScrollInfo     = NULL;
   vertScrollInfo     = NULL;
-  hwndHorzScroll     = 0;
-  hwndVertScroll     = 0;
 
   ownDC              = 0;
   hWindowRegion      = 0;
@@ -643,9 +647,6 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
   }
 
   OSLibWinSetOwner(OS2Hwnd, OS2HwndFrame);
-
-  //FrameGetScrollBarHandles(this,dwStyle & WS_HSCROLL,dwStyle & WS_VSCROLL);
-  //subclassScrollBars(dwStyle & WS_HSCROLL,dwStyle & WS_VSCROLL);
 
   fakeWinBase.hwndThis     = OS2Hwnd;
   fakeWinBase.pWindowClass = windowClass;
@@ -1222,92 +1223,6 @@ SCROLLBAR_INFO *Win32BaseWindow::getScrollInfo(int nBar)
 }
 //******************************************************************************
 //******************************************************************************
-VOID Win32BaseWindow::subclassScrollBars(BOOL subHorz,BOOL subVert)
-{
-  SCROLL_SubclassScrollBars(subHorz ? hwndHorzScroll:0,subVert ? hwndVertScroll:0);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL Win32BaseWindow::showScrollBars(BOOL changeHorz,BOOL changeVert,BOOL fShow)
-{
-  BOOL rc = TRUE;
-  DWORD flags = 0;
-
-  if (fShow)
-  {
-    BOOL createHorz = FALSE,createVert = FALSE;
-    BOOL showHorz = FALSE,showVert = FALSE;
-
-    if (changeHorz)
-    {
-      if (!hwndHorzScroll)
-        createHorz = TRUE;
-      else
-        showHorz = TRUE;
-    }
-
-    if (changeVert)
-    {
-      if (!hwndVertScroll)
-        createVert = TRUE;
-      else
-        showVert = TRUE;
-    }
-
-    if (createHorz || createVert)
-    {
-      if (createHorz && !horzScrollInfo)
-      {
-        horzScrollInfo = (SCROLLBAR_INFO*)malloc(sizeof(SCROLLBAR_INFO));
-        horzScrollInfo->MinVal = horzScrollInfo->CurVal = horzScrollInfo->Page = 0;
-        horzScrollInfo->MaxVal = 100;
-        horzScrollInfo->flags  = ESB_ENABLE_BOTH;
-      }
-
-      if (createVert && !vertScrollInfo)
-      {
-        vertScrollInfo = (SCROLLBAR_INFO*)malloc(sizeof(SCROLLBAR_INFO));
-        vertScrollInfo->MinVal = vertScrollInfo->CurVal = vertScrollInfo->Page = 0;
-        vertScrollInfo->MaxVal = 100;
-        vertScrollInfo->flags  = ESB_ENABLE_BOTH;
-      }
-
-      rc = FrameCreateScrollBars(this,createHorz,createVert,FALSE,&flags);
-
-      if (!rc) return FALSE;
-      if (createHorz) dwStyle |= WS_HSCROLL;
-      if (createVert) dwStyle |= WS_VSCROLL;
-    }
-
-    if (showVert || showHorz)
-    {
-      DWORD newFlags;
-
-      rc = FrameShowScrollBars(this,showHorz,showVert,fShow,FALSE,&newFlags);
-      flags |= newFlags;
-      if (rc)
-      {
-        if (showHorz) dwStyle |= WS_HSCROLL;
-        if (showVert) dwStyle |= WS_VSCROLL;
-      }
-    }
-
-    if (flags) FrameUpdateFrame(this,flags);
-  } else
-  {
-    rc = FrameShowScrollBars(this,changeHorz && hwndHorzScroll,changeVert && hwndVertScroll,fShow,TRUE);
-
-    if (rc)
-    {
-      if (changeHorz) dwStyle &= ~WS_HSCROLL;
-      if (changeVert) dwStyle &= ~WS_VSCROLL;
-    }
-  }
-
-  return rc;
-}
-//******************************************************************************
-//******************************************************************************
 LONG Win32BaseWindow::HandleNCActivate(WPARAM wParam)
 {
   WORD wStateChange;
@@ -1425,6 +1340,53 @@ state = 0;
   ReleaseDC(Win32Hwnd,hdc);
   if (!pressed) return;
   SendInternalMessageA(WM_SYSCOMMAND,SC_CLOSE,*(LPARAM*)&msg.pt);
+}
+//******************************************************************************
+//******************************************************************************
+VOID Win32BaseWindow::TrackScrollBar(WPARAM wParam,POINT pt)
+{
+  INT scrollbar;
+  MSG msg;
+
+  if ((wParam & 0xfff0) == SC_HSCROLL)
+  {
+    if ((wParam & 0x0f) != HTHSCROLL) return;
+    scrollbar = SB_HORZ;
+  } else  /* SC_VSCROLL */
+  {
+    if ((wParam & 0x0f) != HTVSCROLL) return;
+    scrollbar = SB_VERT;
+  }
+
+  pt.x -= rectWindow.left;
+  pt.y -= rectWindow.top;
+  SCROLL_HandleScrollEvent(Win32Hwnd,0,MAKELONG(pt.x,pt.y),scrollbar,WM_LBUTTONDOWN);
+  if (GetCapture() != Win32Hwnd) return;
+  do
+  {
+    GetMessageA(&msg,Win32Hwnd,0,0);
+    switch(msg.message)
+    {
+      case WM_LBUTTONUP:
+      case WM_MOUSEMOVE:
+        pt.x = msg.pt.x-rectWindow.left;
+        pt.y = msg.pt.y-rectWindow.top;
+        msg.lParam = MAKELONG(pt.x,pt.y);
+      case WM_SYSTIMER:
+        SCROLL_HandleScrollEvent(Win32Hwnd,msg.wParam,msg.lParam,scrollbar,msg.message);
+        break;
+
+      default:
+        TranslateMessage(&msg);
+        DispatchMessageA(&msg);
+        break;
+    }
+    if (!IsWindow())
+    {
+      ReleaseCapture();
+      break;
+    }
+  } while (msg.message != WM_LBUTTONUP);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1823,7 +1785,7 @@ BOOL Win32BaseWindow::DrawSysButton(HDC hdc,BOOL down)
     /* get the default one.                                          */
     if(hIcon == 0)
       if (!(dwStyle & DS_MODALFRAME))
-        hIcon = LoadImageA(0, MAKEINTRESOURCEA(OIC_WINEICON), IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
+        hIcon = LoadImageA(0, MAKEINTRESOURCEA(OIC_ODINICON), IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
 
     if (hIcon)
       DrawIconEx (hdc, rect.left + 2, rect.top + 2, hIcon,
@@ -1985,7 +1947,11 @@ VOID Win32BaseWindow::DrawCaption(HDC hdc,RECT *rect,BOOL active)
   SelectObject( hdc, hPrevPen );
   r.bottom--;
 
-  FillRect( hdc, &r, GetSysColorBrush(active ? COLOR_ACTIVECAPTION : COLOR_INACTIVECAPTION) );
+  //CB: todo:
+   //COLOR_GRADIENTACTIVECAPTION
+   //COLOR_GRADIENTINACTIVECAPTION
+
+  FillRect(hdc,&r,GetSysColorBrush(active ? COLOR_ACTIVECAPTION:COLOR_INACTIVECAPTION));
 
   if (!hbitmapClose)
   {
@@ -2134,12 +2100,11 @@ VOID Win32BaseWindow::DoNCPaint(HRGN clip,BOOL suppress_menupaint)
     DrawEdge (hdc, &rect, BDR_SUNKENOUTER, BF_RECT | BF_ADJUST);
 
   /* Draw the scroll-bars */
-#if 0 //CB: todo
   if (dwStyle & WS_VSCROLL)
-    SCROLL_DrawScrollBar(hwnd,hdc,SB_VERT,TRUE,TRUE);
-  if (wndPtr->dwStyle & WS_HSCROLL)
-    SCROLL_DrawScrollBar(hwnd,hdc,SB_HORZ,TRUE,TRUE);
-#endif
+    SCROLL_DrawScrollBar(Win32Hwnd,hdc,SB_VERT,TRUE,TRUE);
+  if (dwStyle & WS_HSCROLL)
+    SCROLL_DrawScrollBar(Win32Hwnd,hdc,SB_HORZ,TRUE,TRUE);
+
   /* Draw the "size-box" */
   if ((dwStyle & WS_VSCROLL) && (dwStyle & WS_HSCROLL))
   {
@@ -2246,13 +2211,14 @@ LONG Win32BaseWindow::HandleNCLButtonDblClk(WPARAM wParam,LPARAM lParam)
  *
  * TODO: Not done (see #if 0)
  */
-LONG Win32BaseWindow::HandleSysCommand(WPARAM wParam, POINT *pt32)
+LONG Win32BaseWindow::HandleSysCommand(WPARAM wParam,POINT *pt32)
 {
     UINT uCommand = wParam & 0xFFF0;
 
+/* //CB: don't need this, perhaps recycle for menus
     if ((getStyle() & WS_CHILD) && (uCommand != SC_KEYMENU))
         ScreenToClient(getParent()->getWindowHandle(), pt32 );
-
+*/
     switch (uCommand)
     {
 
@@ -2315,14 +2281,13 @@ LONG Win32BaseWindow::HandleSysCommand(WPARAM wParam, POINT *pt32)
         break;
 
     case SC_CLOSE:
-        return SendInternalMessageA(WM_CLOSE, 0, 0);
+        return SendInternalMessageA(WM_CLOSE,0,0);
 
-#if 0
     case SC_VSCROLL:
     case SC_HSCROLL:
-        NC_TrackScrollBar( hwnd, wParam, pt32 );
+        TrackScrollBar(wParam,*pt32);
         break;
-
+#if 0
     case SC_MOUSEMENU:
         MENU_TrackMouseMenuBar( wndPtr, wParam & 0x000F, pt32 );
         break;
@@ -2330,19 +2295,19 @@ LONG Win32BaseWindow::HandleSysCommand(WPARAM wParam, POINT *pt32)
     case SC_KEYMENU:
         MENU_TrackKbdMenuBar( wndPtr , wParam , pt.x );
         break;
-
+#endif
     case SC_TASKLIST:
-        WinExec( "taskman.exe", SW_SHOWNORMAL );
+        WinExec("taskman.exe",SW_SHOWNORMAL);
         break;
 
     case SC_SCREENSAVE:
         if (wParam == SC_ABOUTWINE)
-            ShellAboutA(hwnd, "Odin", ODIN_RELEASE_INFO, 0);
+            ShellAboutA(Win32Hwnd,"Odin","Odin alpha release compiled with IBM VAC++",0);
         else
         if (wParam == SC_PUTMARK)
             dprintf(("Mark requested by user\n"));
         break;
-#endif
+
     case SC_HOTKEY:
     case SC_ARRANGE:
     case SC_NEXTWINDOW:
@@ -2718,7 +2683,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 
         point.x = LOWORD(lParam);
         point.y = HIWORD(lParam);
-        return HandleSysCommand(wParam, &point);
+        return HandleSysCommand(wParam,&point);
     }
 
     case WM_SYSKEYDOWN:
@@ -3092,19 +3057,6 @@ void Win32BaseWindow::NotifyParent(UINT Msg, WPARAM wParam, LPARAM lParam)
 
         window = parentwindow;
    }
-}
-//******************************************************************************
-//******************************************************************************
-BOOL Win32BaseWindow::SetMenu(HMENU hMenu)
-{
-
-    dprintf(("SetMenu %x", hMenu));
-    OS2HwndMenu = OSLibWinSetMenu(OS2HwndFrame, hMenu);
-    if(OS2HwndMenu == 0) {
-        dprintf(("Win32BaseWindow::SetMenu OS2HwndMenu == 0"));
-        return FALSE;
-    }
-    return TRUE;
 }
 //******************************************************************************
 //******************************************************************************

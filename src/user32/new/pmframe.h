@@ -1,4 +1,4 @@
-/* $Id: pmframe.h,v 1.2 2000-01-08 16:47:48 cbratschi Exp $ */
+/* $Id: pmframe.h,v 1.3 2000-01-09 14:14:23 cbratschi Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -9,12 +9,6 @@
 #define __PMFRAME_H__
 
 PVOID FrameSubclassFrameWindow(Win32BaseWindow *win32wnd);
-VOID  FrameSetBorderSize(Win32BaseWindow *win32wnd,BOOL resize);
-UINT  FrameGetDefSizeBorderSize(VOID);
-VOID  FrameTrackFrame(Win32BaseWindow *win32wnd,BOOL lefttop);
-BOOL  FrameCreateScrollBars(Win32BaseWindow *win32wnd,BOOL createHorz,BOOL createVert,BOOL updateFrame,DWORD *flags = NULL);
-VOID  FrameGetScrollBarHandles(Win32BaseWindow *win32wnd,BOOL getHorz,BOOL getVert);
-BOOL  FrameShowScrollBars(Win32BaseWindow *win32wnd,BOOL changeHorz,BOOL changeVert,BOOL fShow,BOOL updateFrame,DWORD *flags = NULL);
 VOID  FrameUpdateFrame(Win32BaseWindow *win32wnd,DWORD flags);
 
 #define HTERROR_W             (-2)
@@ -46,8 +40,6 @@ VOID  FrameUpdateFrame(Win32BaseWindow *win32wnd,DWORD flags);
 #define HTHELP_W              21
 #define HTSIZEFIRST_W         HTLEFT_W
 #define HTSIZELAST_W          HTBOTTOMRIGHT_W
-
-DWORD FrameHitTest(Win32BaseWindow *win32wnd,INT x,INT y);
 
 #define TFOS_LEFT                    0x0001
 #define TFOS_TOP                     0x0002

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.53 2000-01-01 14:59:41 cbratschi Exp $
+# $Id: makefile,v 1.54 2000-01-09 14:14:22 cbratschi Exp $
 
 #
 # PD-Win32 API
@@ -68,6 +68,7 @@ $(PDWIN32_LIB)/gdi32.lib
 $(PDWIN32_LIB)/kernel32.lib
 $(PDWIN32_LIB)/libuls.lib
 $(PDWIN32_LIB)/odincrt.lib
+$(PDWIN32_LIB)/shell32.lib
 OS2386.LIB
 $(RTLLIB_O)
 $(TARGET).def
