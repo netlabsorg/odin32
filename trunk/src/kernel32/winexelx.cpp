@@ -1,4 +1,4 @@
-/* $Id: winexelx.cpp,v 1.8 2000-09-12 19:02:00 sandervl Exp $ */
+/* $Id: winexelx.cpp,v 1.9 2001-04-22 10:38:11 sandervl Exp $ */
 
 /*
  * Win32 LX Exe class (compiled in OS/2 using Odin32 api)
@@ -66,7 +66,7 @@ BOOL WIN32API RegisterLxExe(WINMAIN EntryPoint, PVOID pResData)
   winexe = new Win32LxExe(ppib->pib_hmte, pResData);
 
   if(winexe) {
-    InitCommandLine(FALSE);
+        InitCommandLine(FALSE);
    	winexe->setEntryPoint((ULONG)EntryPoint);
    	winexe->start();
   }
@@ -85,6 +85,7 @@ Win32LxExe::Win32LxExe(HINSTANCE hInstance, PVOID pResData)
 		   Win32ExeBase(hInstance)
 {
   dprintf(("Win32LxExe ctor: %s", szModule));
+  hinstance = (HINSTANCE)buildHeader(1, 0, IMAGE_SUBSYSTEM_WINDOWS_GUI);
 }
 //******************************************************************************
 //******************************************************************************
