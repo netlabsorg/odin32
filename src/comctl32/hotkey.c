@@ -1,4 +1,4 @@
-/* $Id: hotkey.c,v 1.6 1999-09-19 13:27:09 cbratschi Exp $ */
+/* $Id: hotkey.c,v 1.7 1999-09-20 15:59:27 cbratschi Exp $ */
 /*
  * Hotkey control
  *
@@ -21,7 +21,11 @@
 #define HOTKEY_GetInfoPtr(hwnd) ((HOTKEY_INFO*)GetWindowLongA(hwnd,0))
 
 static VOID
-HOTKEY_UpdateHotKey(HWND hwnd);
+HOTKEY_Refresh(HWND hwnd)
+{
+  InvalidateRect(hwnd,NULL,FALSE);
+}
+
 
 static BYTE
 HOTKEY_Check(HOTKEY_INFO *infoPtr,BYTE bfMods)
@@ -48,7 +52,7 @@ HOTKEY_SetHotKey(HWND hwnd,WPARAM wParam,LPARAM lParam)
   infoPtr->bVKHotKey = wParam & 0xFF;
   infoPtr->bfMods = HOTKEY_Check(infoPtr,(wParam & 0xFF00)>>8);
 
-  HOTKEY_UpdateHotKey(hwnd);
+  HOTKEY_Refresh(hwnd);
 
   return 0;
 }
@@ -73,7 +77,7 @@ HOTKEY_SetRules(HWND hwnd,WPARAM wParam,LPARAM lParam)
   infoPtr->fwModInv = lParam;
 
   infoPtr->bfMods = HOTKEY_Check(infoPtr,infoPtr->bfMods);
-  if (infoPtr->bfMods != oldMods) HOTKEY_UpdateHotKey(hwnd);
+  if (infoPtr->bfMods != oldMods) HOTKEY_Refresh(hwnd);
 
   return 0;
 }
@@ -183,7 +187,7 @@ HOTKEY_KeyDown (HWND hwnd, WPARAM wParam, LPARAM lParam,BOOL sysKey)
     }
 
     infoPtr->bfMods = newMods;
-    HOTKEY_UpdateHotKey(hwnd);
+    HOTKEY_Refresh(hwnd);
 
     return TRUE;
 }
@@ -273,7 +277,7 @@ HOTKEY_Draw(HWND hwnd,HDC hdc)
   DrawTextA(hdc,text,strlen(text),&newRect,DT_LEFT | DT_BOTTOM | DT_SINGLELINE);
   DrawTextA(hdc,text,strlen(text),&newRect,DT_LEFT | DT_BOTTOM | DT_SINGLELINE | DT_CALCRECT);
   if (infoPtr->hFont) SelectObject(hdc,oldFont);
-  infoPtr->cursorPos.x = (newRect.right >= rect.right)? -1:newRect.right;
+  infoPtr->cursorPos.x = (newRect.right >= rect.right)? 3:newRect.right;
   SetCaretPos(infoPtr->cursorPos.x,infoPtr->cursorPos.y);
   ShowCaret(hwnd);
 }
@@ -295,23 +299,6 @@ HOTKEY_Paint(HWND hwnd,WPARAM wParam,LPARAM lParam)
   return 0;
 }
 
-
-static VOID
-HOTKEY_UpdateHotKey(HWND hwnd)
-{
-  HDC hdc;
-  RECT rect;
-  HBRUSH hBrush;
-
-  GetClientRect(hwnd,&rect);
-  InflateRect(&rect,2,2);
-  hdc = GetDC(hwnd);
-  hBrush = (HBRUSH)SendMessageA(GetParent(hwnd),WM_CTLCOLOREDIT,hdc,(LPARAM)hwnd);
-  if (!hBrush) hBrush = (HBRUSH)GetStockObject(WHITE_BRUSH);
-  FillRect(hdc,&rect,hBrush);
-  HOTKEY_Draw(hwnd,hdc);
-  ReleaseDC(hwnd,hdc);
-}
 
 static LRESULT
 HOTKEY_SetFocus (HWND hwnd, WPARAM wParam, LPARAM lParam)
@@ -349,7 +336,7 @@ HOTKEY_SetFont (HWND hwnd, WPARAM wParam, LPARAM lParam)
         SelectObject (hdc, hOldFont);
     ReleaseDC (hwnd, hdc);
 
-    if (LOWORD(lParam)) HOTKEY_UpdateHotKey(hwnd);
+    if (LOWORD(lParam)) HOTKEY_Refresh(hwnd);
 
     return 0;
 }
