@@ -1,64 +1,75 @@
-# $Id: makefile,v 1.7 2000-12-02 23:26:59 bird Exp $
+# $Id: makefile,v 1.8 2001-04-14 09:09:23 bird Exp $
 
 #
 # Makefile for debug info convertes - experimental.
-#   Don't bother to cleanup this mess yet.
 #
-# Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+# Copyright (c) 2000-2001 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
 #
 # Project Odin Software License can be found in LICENSE.TXT
 #
 
 
+#
 # Directory macros.
+#
 ODIN32_TCOMMON = ..\common
+ODIN32_BIN     = $(ODIN32_TOOLS)
 
 
-# Compiler, tools, and interference rules.
-EXETARGET=1
-OLD_STYLE=1
+#
+# Tell buildenvironment that we're making an VIO .exe.
+# Tell buildenvironment that we like to use static linked CRT.
+# Tell buildenvironment that we should not copy this into /bin.
+#
+EXETARGET = 1
+VIO = 1
+STATIC_CRT = 1
+NO_MAIN_BIN_COPY = 1
+
+
+#
+# include common definitions
+#
 !include ../../makefile.inc
 !include $(ODIN32_TCOMMON)\common.mk
 
 
-# Flag overloads and local macros.
-CINCLUDES  = -I$(ODIN32_TCOMMON)
-CFLAGS     = $(CFLAGS)   -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext- -Gm- -Ti+ -Tm-
-CXXFLAGS   = $(CXXFLAGS) -Wall+ppt-ppc-inl-cnv-gnr-vft-             -Gm- -Ti+ -Tm- $(CXXEXCEPTIONS)
-
-
-# All rule - build objs, target dll, copies dll to bin and makes libs.
-all: kHll.exe # Sym2Hll.exe dbgLXDumper.exe
+#
+# Flag overrides.
+#
+!if "$(VAC3)" == "1" || "$(VAC36)" == "1"
+CFLAGS   = $(CFLAGS)   -Wall+ppt-ppc-inl-cnv-gnr-vft-
+CXXFLAGS = $(CXXFLAGS) -Wall+ppt-ppc-inl-cnv-gnr-vft- $(CXXEXCEPTIONS)
+!else
+!if "$(WAT)" == "1"
+CXXFLAGS += $(CXXEXCEPTIONS)
+!else
+CXXFLAGS = $(CXXFLAGS) $(CXXEXCEPTIONS)
+!endif
+!endif
 
 
 #
-# Sym2Hll executable rule.
+# Object files. Prefix with OBJDIR and one space before the '\'.
 #
-Sym2Hll:
-Sym2Hll.exe: Sym2Hll.obj kHll.obj $(COMMONLIB)
-    $(LD2) $(LD2FLAGS) /PMTYPE:vio /EXEC /OUT:$@ $** $(RTLLIB) os2386.lib
+OBJS = \
+$(OBJDIR)\kHll.obj \
+$(OBJDIR)\kHllMain.obj
+
 
 #
-# New LX debug info dumper.
+# Libraries. One space before the '\'.
 #
-kHll.exe: kHll.obj kHllMain.obj $(COMMONLIB)
-    $(LD2) $(LD2FLAGS) /PMTYPE:vio /EXEC /OUT:$@ $** $(RTLLIB) os2386.lib
+LIBS = \
+$(COMMONLIB) \
+$(RTLLIB) \
+os2386.lib
+
 
 #
-# LX debug info dumper (HLL only) executable rule.
+# Target name - name of the exe without extention and path.
 #
-dbgLXDumper.exe: dbgLXDumper.obj dummy.obj
-    $(LD2) $(LD2FLAGS) /PMTYPE:vio /EXEC /OUT:$@ $** $(RTLLIB) os2386.lib
-
-# Dummy source file rule
-dummy.c:
-    echo creating <<$@
-/* dummy.c */
-int idummy;
-<<keep
-
-dummy.obj: dummy.c
-    icc -c  $**
+TARGET = kHll
 
 
 #
