@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.66 1999-08-04 00:51:08 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.67 1999-08-04 13:09:50 sandervl Exp $ */
+ 99-08-04: Sander van Leeuwen <sandervl@xs4all.nl>
+	- PE2LX: Bugfix for icon conversion (heap corruption for ra95.exe; as
+                 reported by Patrick Haller)
+ 
  99-08-04: Patrick Haller <phaller@gmx.net>
 	- KERNEL32: Heap modification
 	- KERNEL32: Windows 3 style profile support ported from WINE (removes Open32)
