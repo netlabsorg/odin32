@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.2516 2003-03-06 10:21:11 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2517 2003-03-06 12:49:23 sandervl Exp $ */
+
+ 2003-03-06: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Don't change the stack alignment if the thread has less than
+                  128 kb stack.
 
  2003-03-06: knut st. osmundsen <Knut.Osmundsen@innotek   >
     - KERNEL32: o The WIN32LOG_FILEBASE env.var. can be used to point the logfile
