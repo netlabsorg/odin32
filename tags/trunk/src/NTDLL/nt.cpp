@@ -1,4 +1,4 @@
-/* $Id: nt.cpp,v 1.6 2000-02-09 23:35:12 sandervl Exp $ */
+/* $Id: nt.cpp,v 1.7 2000-05-26 18:51:55 sandervl Exp $ */
 
 
 /*
@@ -289,7 +289,7 @@ NTSTATUS WINAPI NtOpenThreadToken(HANDLE  ThreadHandle,
                                   BOOLEAN OpenAsSelf,
                                   PHANDLE TokenHandle)
 {
-  dprintf(("NTDLL: NtOpenThreadToken(%08xh,%08xh,%08xh,%08xh) not implemented.\n",
+  dprintf(("NTDLL: NtOpenThreadToken(%08xh,%08xh,%08xh,%08xh) partly implemented.\n",
            ThreadHandle,
            DesiredAccess,
            OpenAsSelf,
