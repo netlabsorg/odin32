@@ -1,7 +1,10 @@
- /* $Id: changelog,v 1.801 2000-03-11 21:52:15 sandervl Exp $ */
+ /* $Id: changelog,v 1.802 2000-03-12 21:33:22 mike Exp $ */
+
+ 2000-03-12: Michal Necasek <mike@mendelu.cz>
+        - dsound\new: Fixed sound in Heroes of M&M III
 
  2000-03-11: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
-	- OPENGL\GLIDE: Fix for Voodoo 1 glide (missing io ports)
+        - OPENGL\GLIDE: Fix for Voodoo 1 glide (missing io ports)
 
  2000-03-11: knut st. osmundsen <knut.stange.osmundse@pmsc.no>
         - OPENGL\GLUT: Fix for gettimeofday. This is defined conflicting in
@@ -10,12 +13,12 @@
                 dowithdirs.cmd. (Useful for SMP builds.)
 
  2000-03-11: Sander van Leeuwen <sandervl@xs4all.nl>
-	- OPENGL\GLUT: Fixed compile problems + cleanup
+        - OPENGL\GLUT: Fixed compile problems + cleanup
                        (use C(XX)FLAGS_WIN32APP so you don't have to
                         explicitely specify which api type you use (ascii or unicode)!)
 
-	- OPENGL\GLIDE: Fixed wrong binary path for voodoo1 glide
-	- include\win\debugtools.h: Disable TRACE, WARN etc when DEBUG is not defined
+        - OPENGL\GLIDE: Fixed wrong binary path for voodoo1 glide
+        - include\win\debugtools.h: Disable TRACE, WARN etc when DEBUG is not defined
 
  2000-03-11: Jeroen van den Horn <J.vandenHorn@fibre.a2000.nl>
         - OPENGL: Fixed error preventing build to complete
