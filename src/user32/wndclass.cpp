@@ -1,4 +1,4 @@
-/* $Id: wndclass.cpp,v 1.9 1999-06-26 13:21:11 sandervl Exp $ */
+/* $Id: wndclass.cpp,v 1.10 1999-06-26 13:45:20 sandervl Exp $ */
 
 /*
  * Win32 Window Class Managment Code for OS/2
@@ -66,7 +66,8 @@ Win32WindowClass *StaticClass = 0;
 //******************************************************************************
 LRESULT WIN32API ButtonCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
- DWORD dwStyle, dwExStyle;
+ DWORD   dwStyle, dwExStyle;
+ LRESULT rc;
 
   PostSpyMessage(hwnd, Msg, wParam, lParam);
   switch(Msg)
@@ -91,9 +92,27 @@ LRESULT WIN32API ButtonCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPara
 			}
 		}
 		break;
+	case WM_LBUTTONDOWN:
+		rc = ButtonHandler(hwnd, Msg, wParam, lParam);
+
+		NotifyParent(hwnd, Msg, wParam, lParam);
+		dwStyle   = GetWindowLongA(hwnd, GWL_STYLE);
+		dwExStyle = GetWindowLongA(hwnd, GWL_EXSTYLE);
+
+		if(dwStyle & WS_CHILD && !(dwExStyle & WS_EX_NOPARENTNOTIFY) )
+		{
+			HWND hwndParent = GetParent(hwnd);
+
+			//TODO: Mouse shouldn't be captured
+			Win32WindowProc *parentwnd = Win32WindowProc::FindProc(hwndParent);
+			if(parentwnd) {
+				//TODO: HTCLIENT isn't always accurate
+				parentwnd->SendMessageA(hwndParent, WM_SETCURSOR, hwnd, HTCLIENT | (WM_LBUTTONDOWN << 16));
+			}
+		}	
+		return rc;
 	case WM_CREATE:
 	case WM_DESTROY:
-	case WM_LBUTTONDOWN:
 	case WM_MBUTTONDOWN:
 	case WM_RBUTTONDOWN:
 		NotifyParent(hwnd, Msg, wParam, lParam);
