@@ -1,4 +1,4 @@
-/* $Id: mixer.h,v 1.4 2002-05-26 10:52:31 sandervl Exp $ */
+/* $Id: mixer.h,v 1.5 2002-05-27 15:49:55 sandervl Exp $ */
 
 /*
  * Mixer multimedia
@@ -25,15 +25,27 @@
 #define MAX_MIXER_DESTINATIONS      8
 #define MAX_MIXER_SOURCES           16
 #define MAX_MIXER_CONTROLS          64
-
+#define MAX_MIXER_CONTROL_VAL       16
 
 #ifdef __WINE_MMSYSTEM_H
 typedef struct {
-  MIXERLINEA line;
-  //number of connected source lines
-  int        cSources;
-  int        Sources[MAX_MIXER_SOURCES];
-} MIXERDEST;
+    MIXERLINEA line;
+    int        cControls;
+    //array of associated control (index in mixerControls)
+    int        Controls[MAX_SOURCE_CONTROLS];
+    int        cConnections;
+    //array of connected line (index in pmixerLines)
+    int        Connections[MAX_MIXER_SOURCES];
+    int        id;	//internal id
+} MIXLINE, *PMIXLINE;
+
+typedef struct {
+    MIXERCONTROLA                 ctrl;
+    //control value(s)
+    MIXERCONTROLDETAILS_UNSIGNED  val[MAX_MIXER_CONTROL_VAL];
+    int                           id;	//internal id
+} MIXCONTROL, *PMIXCONTROL;
+
 #endif
 
 #ifdef __cplusplus

@@ -1,4 +1,4 @@
-/* $Id: mixer.cpp,v 1.18 2002-05-26 10:52:30 sandervl Exp $ */
+/* $Id: mixer.cpp,v 1.19 2002-05-27 15:49:54 sandervl Exp $ */
 
 /*
  * Mixer functions
@@ -40,24 +40,18 @@
 #define DBG_LOCALLOG	DBG_mixer
 #include "dbglocal.h"
 
-static MIXERCONTROLA *mixerAddControl(DWORD dwControl, MIXERLINEA *pSrcLine);
-static MIXERLINEA    *mixerAddSource(MIXERDEST *pDestLine, DWORD dwSource);
-static MIXERDEST     *mixerAddDestination(DWORD dwDest);
+static MIXERCONTROLA *mixerAddControl(DWORD dwControl, MIXLINE *pSrcLine);
+static MIXLINE       *mixerAddSource(MIXLINE *pDestLine, DWORD dwSource);
+static MIXLINE       *mixerAddDestination(DWORD dwDest);
 
 //array of destination mixer lines
-static MIXERDEST     mixerDest[MAX_MIXER_DESTINATIONS];
+static MIXLINE       mixerDest[MAX_MIXER_DESTINATIONS] = {0};
 //array of source mixer lines
-static MIXERLINEA    mixerSource[MAX_MIXER_SOURCES]                             = {0};
-//array of controls connected to mixer lines
-static int           mixerLineControls[MAX_MIXER_LINES][MAX_SOURCE_CONTROLS]    = {-1};
+static MIXLINE       mixerSource[MAX_MIXER_SOURCES]    = {0};
 //array of all mixer lines
-static MIXERLINEA   *pmixerLines[MAX_MIXER_LINES]                               = {NULL};
-//mapping from src to line id
-static int           mixerSourceLineId[MAX_MIXER_SOURCES]                       = {-1};
-//array of all mixer controls
-static MIXERCONTROLA mixerControls[MAX_MIXER_CONTROLS]                          = {0};
-//mapping of mixer id to internal id
-static int           mixerControlId[MAX_MIXER_CONTROLS]                         = {0};
+static MIXLINE      *pmixerLines[MAX_MIXER_LINES]      = {NULL};
+//array of all mixer controls                         
+static MIXCONTROL    mixerControls[MAX_MIXER_CONTROLS] = {0};
 
 static int           nrDestinations    = 0;
 static int           nrSources         = 0;
@@ -87,31 +81,69 @@ MMRESULT WINAPI mixerGetControlDetailsA(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS 
         dprintf(("ERROR: invalid pointer or structure size %d (%d)", (lpmcd) ? lpmcd->cbStruct : 0, sizeof(MIXERCONTROLDETAILS)));
         return MMSYSERR_INVALPARAM;
     }
-
     switch (fdwDetails & MIXER_GETCONTROLDETAILSF_QUERYMASK) {
     case MIXER_GETCONTROLDETAILSF_VALUE:
-    	dprintf(("MIXER_GETCONTROLDETAILSF_VALUE %d (internal id %d)", lpmcd->dwControlID, mixerControlId[lpmcd->dwControlID]));
+    	dprintf(("MIXER_GETCONTROLDETAILSF_VALUE %d (internal id %d)", lpmcd->dwControlID, mixerControls[lpmcd->dwControlID].id));
         if(lpmcd->dwControlID >= nrControls) {
             dprintf(("invalid control %d", lpmcd->dwControlID));
             return MIXERR_INVALCONTROL;
         }
-        switch(mixerControls[lpmcd->dwControlID].dwControlType) {
+        if(lpmcd->cbDetails < sizeof(MIXERCONTROLDETAILS_UNSIGNED)) {
+            dprintf(("not enough room in buffer (%d)", lpmcd->cbDetails));
+            return MMSYSERR_INVALPARAM;
+        }
+        switch(mixerControls[lpmcd->dwControlID].ctrl.dwControlType) {
         case MIXERCONTROL_CONTROLTYPE_MUX:
+        {
+            MIXERCONTROLDETAILS_BOOLEAN *pDetails = (MIXERCONTROLDETAILS_BOOLEAN *)lpmcd->paDetails;
+            DWORD dwRecSrc;
+
             dprintf(("MIXERCONTROL_CONTROLTYPE_MUX"));
+            if(lpmcd->cChannels != 1) {//only accepts 1 in win2k
+                dprintf(("invalid number of channels %d", lpmcd->cChannels));
+                return MMSYSERR_INVALPARAM;
+            }
+            //this is also checked in win2k
+            if(lpmcd->u.cMultipleItems != mixerControls[lpmcd->dwControlID].ctrl.cMultipleItems) {
+                dprintf(("invalid cMultipleItems %d", lpmcd->u.cMultipleItems));
+                return MMSYSERR_INVALPARAM;
+            }
+
+            if(mixerControls[lpmcd->dwControlID].id != MIX_CTRL_MUX_IN_W_SRC) {
+                dprintf(("oh, oh. not wavein mux"));
+                DebugInt3();
+                return MMSYSERR_INVALPARAM;
+            }
+
+            if(OSLibMixGetRecSource(&dwRecSrc, NULL, NULL) == FALSE) {
+                dprintf(("OSLibMixGetRecSource failed!!"));
+                return MIXERR_INVALCONTROL;
+            }
+            //clear the array
+            memset(pDetails, 0, sizeof(MIXERCONTROLDETAILS_BOOLEAN)*lpmcd->u.cMultipleItems);
+            //mark recording source
+            for(int i=0;i<nrDestinations;i++) {
+                if(mixerDest[i].id == MIXER_DEST_WAVEIN) {
+                    for(int j=0;j<mixerDest[i].cConnections;j++) {
+                        dprintf(("wavein source %d (id %d)", pmixerLines[mixerDest[i].Connections[j]]->id, mixerDest[i].Connections[j]));
+                        if(pmixerLines[mixerDest[i].Connections[j]]->id == dwRecSrc) {
+                            pDetails[j].fValue = 1;
+                            return MMSYSERR_NOERROR;
+                        }
+                    }
+                }
+            }
+            dprintf(("recording source %d not found!!", dwRecSrc));
             break;
-        case MIXERCONTROL_CONTROLTYPE_MIXER:
-            dprintf(("MIXERCONTROL_CONTROLTYPE_MIXER"));
-            break;
-        case MIXERCONTROL_CONTROLTYPE_FADER:
-            dprintf(("MIXERCONTROL_CONTROLTYPE_FADER"));
-            break;
+        }
+
         case MIXERCONTROL_CONTROLTYPE_VOLUME: //unsigned
         {
             MIXERCONTROLDETAILS_UNSIGNED *pDetails = (MIXERCONTROLDETAILS_UNSIGNED *)lpmcd->paDetails;
             DWORD dwVolLeft, dwVolRight;
 
             dprintf(("MIXERCONTROL_CONTROLTYPE_VOLUME"));
-            if(OSLibMixGetVolume(mixerControlId[lpmcd->dwControlID], NULL, &dwVolLeft, &dwVolRight) == FALSE) {
+            if(OSLibMixGetVolume(mixerControls[lpmcd->dwControlID].id, NULL, &dwVolLeft, &dwVolRight) == FALSE) {
                 dprintf(("OSLibMixGetVolume failed!!"));
                 return MIXERR_INVALCONTROL;
             }
@@ -125,32 +157,97 @@ MMRESULT WINAPI mixerGetControlDetailsA(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS 
             //todo > 2 channels
             return MMSYSERR_NOERROR;
         }
-        case MIXERCONTROL_CONTROLTYPE_BASS:
-            dprintf(("MIXERCONTROL_CONTROLTYPE_BASS"));
-            break;
-        case MIXERCONTROL_CONTROLTYPE_TREBLE:
-            dprintf(("MIXERCONTROL_CONTROLTYPE_TREBLE"));
-            break;
-        case MIXERCONTROL_CONTROLTYPE_MUTE:
+
+        case MIXERCONTROL_CONTROLTYPE_MUTE: //assuming boolean
         {
-            MIXERCONTROLDETAILS_UNSIGNED *pDetails = (MIXERCONTROLDETAILS_UNSIGNED *)lpmcd->paDetails;
+            MIXERCONTROLDETAILS_BOOLEAN *pDetails = (MIXERCONTROLDETAILS_BOOLEAN *)lpmcd->paDetails;
             BOOL  fMute;
 
             dprintf(("MIXERCONTROL_CONTROLTYPE_MUTE"));
-            if(OSLibMixGetVolume(mixerControlId[lpmcd->dwControlID], &fMute, NULL, NULL) == FALSE) {
+            if(OSLibMixGetVolume(mixerControls[lpmcd->dwControlID].id, &fMute, NULL, NULL) == FALSE) {
                 dprintf(("OSLibMixGetVolume failed!!"));
                 return MIXERR_INVALCONTROL;
             }
-            pDetails->dwValue = fMute;
+            pDetails->fValue = fMute;
             dprintf(("Left mute %d", fMute));
             if(lpmcd->cChannels == 2) {
                 dprintf(("Right mute %d", fMute));
                 pDetails += 1;
-                pDetails->dwValue = fMute;
+                pDetails->fValue = fMute;
             }
-            //todo > 2 channels
+            //todo > 2 channels (usually only 1 channel is requested though)
             return MMSYSERR_NOERROR;
         }
+
+        case MIXERCONTROL_CONTROLTYPE_FADER:
+        {
+            MIXERCONTROLDETAILS_UNSIGNED *pDetails = (MIXERCONTROLDETAILS_UNSIGNED *)lpmcd->paDetails;
+            DWORD dwLevelL;
+
+            dprintf(("MIXERCONTROL_CONTROLTYPE_FADER"));
+
+            if(lpmcd->cChannels != 1) {
+                dprintf(("Invalid nr of channels %d!!", lpmcd->cChannels));
+                return MMSYSERR_INVALPARAM;
+            }
+            if(OSLibMixGetVolume(mixerControls[lpmcd->dwControlID].id, NULL, &dwLevelL, NULL) == FALSE) {
+                dprintf(("OSLibMixGetVolume failed!!"));
+                return MIXERR_INVALCONTROL;
+            }
+            pDetails->dwValue = dwLevelL;
+#ifdef DEBUG
+            if(mixerControls[lpmcd->dwControlID].id == MIX_CTRL_OUT_L_3DCENTER) {
+                 dprintf(("3D center %d", dwLevelL));
+            }
+            else dprintf(("3D depth %d", dwLevelL));
+#endif
+            return MMSYSERR_NOERROR;
+        }
+
+        case MIXERCONTROL_CONTROLTYPE_BASS:
+        {
+            MIXERCONTROLDETAILS_UNSIGNED *pDetails = (MIXERCONTROLDETAILS_UNSIGNED *)lpmcd->paDetails;
+            DWORD dwLevelL;
+
+            dprintf(("MIXERCONTROL_CONTROLTYPE_BASS"));
+
+            if(lpmcd->cChannels != 1) {
+                dprintf(("Invalid nr of channels %d!!", lpmcd->cChannels));
+                return MMSYSERR_INVALPARAM;
+            }
+            if(OSLibMixGetVolume(mixerControls[lpmcd->dwControlID].id, NULL, &dwLevelL, NULL) == FALSE) {
+                dprintf(("OSLibMixGetVolume failed!!"));
+                return MIXERR_INVALCONTROL;
+            }
+            pDetails->dwValue = dwLevelL;
+            dprintf(("Bass %d", dwLevelL));
+            return MMSYSERR_NOERROR;
+        }
+
+        case MIXERCONTROL_CONTROLTYPE_TREBLE:
+        {
+            MIXERCONTROLDETAILS_UNSIGNED *pDetails = (MIXERCONTROLDETAILS_UNSIGNED *)lpmcd->paDetails;
+            DWORD dwLevelL;
+
+            dprintf(("MIXERCONTROL_CONTROLTYPE_TREBLE"));
+
+            if(lpmcd->cChannels != 1) {
+                dprintf(("Invalid nr of channels %d!!", lpmcd->cChannels));
+                return MMSYSERR_INVALPARAM;
+            }
+            if(OSLibMixGetVolume(mixerControls[lpmcd->dwControlID].id, NULL, &dwLevelL, NULL) == FALSE) {
+                dprintf(("OSLibMixGetVolume failed!!"));
+                return MIXERR_INVALCONTROL;
+            }
+            pDetails->dwValue = dwLevelL;
+            dprintf(("Treble %d", dwLevelL));
+            return MMSYSERR_NOERROR;
+        }
+        
+#ifdef DEBUG
+        case MIXERCONTROL_CONTROLTYPE_MIXER:
+            dprintf(("MIXERCONTROL_CONTROLTYPE_MIXER"));
+            break;
         case MIXERCONTROL_CONTROLTYPE_CUSTOM:
             dprintf(("MIXERCONTROL_CONTROLTYPE_CUSTOM"));
             break;
@@ -220,6 +317,7 @@ MMRESULT WINAPI mixerGetControlDetailsA(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS 
         case MIXERCONTROL_CONTROLTYPE_MILLITIME:
             dprintf(("MIXERCONTROL_CONTROLTYPE_MILLITIME"));
             break;
+#endif
         default:
             DebugInt3();
             return MIXERR_INVALCONTROL;
@@ -232,7 +330,59 @@ MMRESULT WINAPI mixerGetControlDetailsA(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS 
             dprintf(("invalid control %d", lpmcd->dwControlID));
             return MIXERR_INVALCONTROL;
         }
-	    break;
+        switch(mixerControls[lpmcd->dwControlID].ctrl.dwControlType) {
+        case MIXERCONTROL_CONTROLTYPE_MUX:
+        {
+            MIXERCONTROLDETAILS_LISTTEXTA *pDetails = (MIXERCONTROLDETAILS_LISTTEXTA *)lpmcd->paDetails;
+            if(lpmcd->cChannels != 1) {//only accepts 1 in win2k
+                dprintf(("invalid number of channels %d", lpmcd->cChannels));
+                return MMSYSERR_INVALPARAM;
+            }
+            //this is also checked in win2k
+            if(lpmcd->u.cMultipleItems != mixerControls[lpmcd->dwControlID].ctrl.cMultipleItems) {
+                dprintf(("invalid cMultipleItems %d", lpmcd->u.cMultipleItems));
+                return MMSYSERR_INVALPARAM;
+            }
+            //fails otherwise in win2k
+            if(lpmcd->cbDetails != sizeof(MIXERCONTROLDETAILS_LISTTEXTA)) {
+                dprintf(("invalid buffer size %d; should be %d", lpmcd->cbDetails, sizeof(MIXERCONTROLDETAILS_LISTTEXTA)));
+                return MMSYSERR_INVALPARAM;
+            }
+            if(mixerControls[lpmcd->dwControlID].id != MIX_CTRL_MUX_IN_W_SRC) {
+                dprintf(("oh, oh. not wavein mux"));
+                DebugInt3();
+                return MMSYSERR_INVALPARAM;
+            }
+            //clear the array
+            memset(pDetails, 0, sizeof(MIXERCONTROLDETAILS_LISTTEXTA)*lpmcd->u.cMultipleItems);
+            //set mux source details
+            for(int i=0;i<nrDestinations;i++) {
+                if(mixerDest[i].id == MIXER_DEST_WAVEIN) {
+                    for(int j=0;j<mixerDest[i].cConnections;j++) {
+                        dprintf(("wavein source %d (%s)", pmixerLines[mixerDest[i].Connections[j]]->id, pmixerLines[mixerDest[i].Connections[j]]->line.szName));
+                        pDetails->dwParam1 = pmixerLines[mixerDest[i].Connections[j]]->line.dwLineID;
+                        pDetails->dwParam2 = 0;
+                        strncpy(pDetails->szName, pmixerLines[mixerDest[i].Connections[j]]->line.szName, sizeof(pDetails->szName));
+                        pDetails++;
+                    }
+                    return MMSYSERR_NOERROR;
+                }
+            }
+            DebugInt3();
+            return MMSYSERR_INVALPARAM;
+        }
+        case MIXERCONTROL_CONTROLTYPE_EQUALIZER:
+        case MIXERCONTROL_CONTROLTYPE_MIXER:
+        case MIXERCONTROL_CONTROLTYPE_MULTIPLESELECT:
+        case MIXERCONTROL_CONTROLTYPE_SINGLESELECT:
+            dprintf(("Only implemented for mux controls"));
+            return MIXERR_INVALCONTROL;
+            
+        default:
+            dprintf(("Only implemented for multiple item controls"));
+            return MIXERR_INVALCONTROL;
+        }
+
     default:
 	    dprintf(("Unknown flag (%08lx)\n", fdwDetails & MIXER_GETCONTROLDETAILSF_QUERYMASK));
         break;
@@ -256,18 +406,36 @@ MMRESULT WINAPI mixerGetControlDetailsW(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS 
 
     case MIXER_GETCONTROLDETAILSF_LISTTEXT:
 	{
-	    LPVOID	paDetailsW = lpmcd->paDetails;
-	    int		size = max(1, lpmcd->cChannels) * sizeof(MIXERCONTROLDETAILS_LISTTEXTA);
+        MIXERCONTROLDETAILS_LISTTEXTW *pDetailsW = (MIXERCONTROLDETAILS_LISTTEXTW *)lpmcd->paDetails;
+        MIXERCONTROLDETAILS_LISTTEXTA *pDetailsA;
+	    int size = max(1, lpmcd->cChannels) * sizeof(MIXERCONTROLDETAILS_LISTTEXTA);
+        int i;
 
-	    if (lpmcd->u.cMultipleItems != 0 && lpmcd->u.cMultipleItems != lpmcd->u.hwndOwner) {
+	    if (lpmcd->u.cMultipleItems != 0) {
 		    size *= lpmcd->u.cMultipleItems;
 	    }
-	    lpmcd->paDetails = HeapAlloc(GetProcessHeap(), 0, size);
+	    pDetailsA = (MIXERCONTROLDETAILS_LISTTEXTA *)HeapAlloc(GetProcessHeap(), 0, size);
+        lpmcd->paDetails = pDetailsA;
+        lpmcd->cbDetails = sizeof(MIXERCONTROLDETAILS_LISTTEXTA);
 	    /* set up lpmcd->paDetails */
 	    ret = mixerGetControlDetailsA(hmxobj, lpmcd, fdwDetails);
 	    /* copy from lpmcd->paDetails back to paDetailsW; */
-	    HeapFree(GetProcessHeap(), 0, lpmcd->paDetails);
-	    lpmcd->paDetails = paDetailsW;
+        if(ret == MMSYSERR_NOERROR) {
+            for(i=0;i<lpmcd->u.cMultipleItems*lpmcd->cChannels;i++) {
+                pDetailsW->dwParam1 = pDetailsA->dwParam1;
+                pDetailsW->dwParam2 = pDetailsA->dwParam2;
+                MultiByteToWideChar( CP_ACP, 0, pDetailsA->szName, -1,
+                                     pDetailsW->szName,
+                                     sizeof(pDetailsW->szName)/sizeof(WCHAR) );
+                pDetailsA++;
+                pDetailsW++;
+            }
+            pDetailsA -= lpmcd->u.cMultipleItems*lpmcd->cChannels;
+            pDetailsW -= lpmcd->u.cMultipleItems*lpmcd->cChannels;
+        }
+	    HeapFree(GetProcessHeap(), 0, pDetailsA);
+	    lpmcd->paDetails = pDetailsW;
+        lpmcd->cbDetails = sizeof(MIXERCONTROLDETAILS_LISTTEXTW);
 	    break;
 	}
     default:
@@ -304,8 +472,215 @@ MMRESULT WINAPI mixerSetControlDetails(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS l
     
     switch (fdwDetails & MIXER_GETCONTROLDETAILSF_QUERYMASK) {
     case MIXER_GETCONTROLDETAILSF_VALUE:
-        dprintf(("MIXER_GETCONTROLDETAILSF_VALUE"));
-    	break;
+    	dprintf(("MIXER_GETCONTROLDETAILSF_VALUE %d (internal id %d)", lpmcd->dwControlID, mixerControls[lpmcd->dwControlID].id));
+        if(lpmcd->dwControlID >= nrControls) {
+            dprintf(("invalid control %d", lpmcd->dwControlID));
+            return MIXERR_INVALCONTROL;
+        }
+        if(lpmcd->cbDetails < sizeof(MIXERCONTROLDETAILS_UNSIGNED)) {
+            dprintf(("not enough room in buffer (%d)", lpmcd->cbDetails));
+            return MMSYSERR_INVALPARAM;
+        }
+        switch(mixerControls[lpmcd->dwControlID].ctrl.dwControlType) {
+        case MIXERCONTROL_CONTROLTYPE_MUX:
+        {
+            MIXERCONTROLDETAILS_BOOLEAN *pDetails = (MIXERCONTROLDETAILS_BOOLEAN *)lpmcd->paDetails;
+            DWORD dwRecSrc;
+
+            dprintf(("MIXERCONTROL_CONTROLTYPE_MUX"));
+            if(lpmcd->cChannels != 1) {//only accepts 1 in win2k
+                dprintf(("invalid number of channels %d", lpmcd->cChannels));
+                return MMSYSERR_INVALPARAM;
+            }
+            //this is also checked in win2k
+            if(lpmcd->u.cMultipleItems != mixerControls[lpmcd->dwControlID].ctrl.cMultipleItems) {
+                dprintf(("invalid cMultipleItems %d", lpmcd->u.cMultipleItems));
+                return MMSYSERR_INVALPARAM;
+            }
+
+            if(mixerControls[lpmcd->dwControlID].id != MIX_CTRL_MUX_IN_W_SRC) {
+                dprintf(("oh, oh. not wavein mux"));
+                DebugInt3();
+                return MMSYSERR_INVALPARAM;
+            }
+#if 0
+            if(OSLibMixGetRecSource(&dwRecSrc, NULL, NULL) == FALSE) {
+                dprintf(("OSLibMixGetRecSource failed!!"));
+                return MIXERR_INVALCONTROL;
+            }
+            //clear the array
+            memset(pDetails, 0, sizeof(MIXERCONTROLDETAILS_BOOLEAN)*lpmcd->u.cMultipleItems);
+            //mark recording source
+            for(int i=0;i<nrDestinations;i++) {
+                if(mixerDest[i].id == MIXER_DEST_WAVEIN) {
+                    for(int j=0;j<mixerDest[i].cConnections;j++) {
+                        dprintf(("wavein source %d (id %d)", pmixerLines[mixerDest[i].Connections[j]]->id, mixerDest[i].Connections[j]));
+                        if(pmixerLines[mixerDest[i].Connections[j]]->id == dwRecSrc) {
+                            pDetails[j].fValue = 1;
+                            return MMSYSERR_NOERROR;
+                        }
+                    }
+                }
+            }
+            dprintf(("recording source %d not found!!", dwRecSrc));
+#endif
+            break;
+        }
+
+        case MIXERCONTROL_CONTROLTYPE_VOLUME: //unsigned
+        {
+            MIXERCONTROLDETAILS_UNSIGNED *pDetails = (MIXERCONTROLDETAILS_UNSIGNED *)lpmcd->paDetails;
+
+            dprintf(("MIXERCONTROL_CONTROLTYPE_VOLUME"));
+            dprintf(("Left volume %d", pDetails->dwValue));
+            if(lpmcd->cChannels == 2) {
+                pDetails += 1;
+                dprintf(("Right volume %d", pDetails->dwValue));
+            }
+            //todo > 2 channels
+            return MMSYSERR_NOERROR;
+        }
+
+        case MIXERCONTROL_CONTROLTYPE_MUTE: //assuming boolean
+        {
+            MIXERCONTROLDETAILS_BOOLEAN *pDetails = (MIXERCONTROLDETAILS_BOOLEAN *)lpmcd->paDetails;
+
+            dprintf(("MIXERCONTROL_CONTROLTYPE_MUTE"));
+            dprintf(("Left mute %d", pDetails->fValue));
+            if(lpmcd->cChannels == 2) {
+                pDetails += 1;
+                dprintf(("Right mute %d", pDetails->fValue));
+            }
+            //todo > 2 channels (usually only 1 channel is requested though)
+            return MMSYSERR_NOERROR;
+        }
+
+        case MIXERCONTROL_CONTROLTYPE_FADER:
+        {
+            MIXERCONTROLDETAILS_UNSIGNED *pDetails = (MIXERCONTROLDETAILS_UNSIGNED *)lpmcd->paDetails;
+
+            dprintf(("MIXERCONTROL_CONTROLTYPE_FADER"));
+
+            if(lpmcd->cChannels != 1) {
+                dprintf(("Invalid nr of channels %d!!", lpmcd->cChannels));
+                return MMSYSERR_INVALPARAM;
+            }
+#ifdef DEBUG
+            if(mixerControls[lpmcd->dwControlID].id == MIX_CTRL_OUT_L_3DCENTER) {
+                 dprintf(("3D center %d", pDetails->dwValue));
+            }
+            else dprintf(("3D depth %d", pDetails->dwValue));
+#endif
+            return MMSYSERR_NOERROR;
+        }
+
+        case MIXERCONTROL_CONTROLTYPE_BASS:
+        {
+            MIXERCONTROLDETAILS_UNSIGNED *pDetails = (MIXERCONTROLDETAILS_UNSIGNED *)lpmcd->paDetails;
+
+            dprintf(("MIXERCONTROL_CONTROLTYPE_BASS"));
+
+            if(lpmcd->cChannels != 1) {
+                dprintf(("Invalid nr of channels %d!!", lpmcd->cChannels));
+                return MMSYSERR_INVALPARAM;
+            }
+            dprintf(("Bass %d", pDetails->dwValue));
+            return MMSYSERR_NOERROR;
+        }
+
+        case MIXERCONTROL_CONTROLTYPE_TREBLE:
+        {
+            MIXERCONTROLDETAILS_UNSIGNED *pDetails = (MIXERCONTROLDETAILS_UNSIGNED *)lpmcd->paDetails;
+
+            dprintf(("MIXERCONTROL_CONTROLTYPE_TREBLE"));
+
+            if(lpmcd->cChannels != 1) {
+                dprintf(("Invalid nr of channels %d!!", lpmcd->cChannels));
+                return MMSYSERR_INVALPARAM;
+            }
+            dprintf(("Treble %d", pDetails->dwValue));
+            return MMSYSERR_NOERROR;
+        }
+        
+#ifdef DEBUG
+        case MIXERCONTROL_CONTROLTYPE_MIXER:
+            dprintf(("MIXERCONTROL_CONTROLTYPE_MIXER"));
+            break;
+        case MIXERCONTROL_CONTROLTYPE_CUSTOM:
+            dprintf(("MIXERCONTROL_CONTROLTYPE_CUSTOM"));
+            break;
+        case MIXERCONTROL_CONTROLTYPE_BOOLEANMETER:
+            dprintf(("MIXERCONTROL_CONTROLTYPE_BOOLEANMETER"));
+            break;
+        case MIXERCONTROL_CONTROLTYPE_SIGNEDMETER:
+            dprintf(("MIXERCONTROL_CONTROLTYPE_SIGNEDMETER"));
+            break;
+        case MIXERCONTROL_CONTROLTYPE_PEAKMETER:
+            dprintf(("MIXERCONTROL_CONTROLTYPE_PEAKMETER"));
+            break;
+        case MIXERCONTROL_CONTROLTYPE_UNSIGNEDMETER:
+            dprintf(("MIXERCONTROL_CONTROLTYPE_UNSIGNEDMETER"));
+            break;
+        case MIXERCONTROL_CONTROLTYPE_BOOLEAN:
+            dprintf(("MIXERCONTROL_CONTROLTYPE_BOOLEAN"));
+            break;
+        case MIXERCONTROL_CONTROLTYPE_ONOFF:
+            dprintf(("MIXERCONTROL_CONTROLTYPE_ONOFF"));
+            break;
+        case MIXERCONTROL_CONTROLTYPE_MONO:
+            dprintf(("MIXERCONTROL_CONTROLTYPE_MONO"));
+            break;
+        case MIXERCONTROL_CONTROLTYPE_LOUDNESS:
+            dprintf(("MIXERCONTROL_CONTROLTYPE_LOUDNESS"));
+            break;
+        case MIXERCONTROL_CONTROLTYPE_STEREOENH:
+            dprintf(("MIXERCONTROL_CONTROLTYPE_STEREOENH"));
+            break;
+        case MIXERCONTROL_CONTROLTYPE_BUTTON:
+            dprintf(("MIXERCONTROL_CONTROLTYPE_BUTTON"));
+            break;
+        case MIXERCONTROL_CONTROLTYPE_DECIBELS:
+            dprintf(("MIXERCONTROL_CONTROLTYPE_DECIBELS"));
+            break;
+        case MIXERCONTROL_CONTROLTYPE_SIGNED:
+            dprintf(("MIXERCONTROL_CONTROLTYPE_SIGNED"));
+            break;
+        case MIXERCONTROL_CONTROLTYPE_UNSIGNED:
+            dprintf(("MIXERCONTROL_CONTROLTYPE_UNSIGNED"));
+            break;
+        case MIXERCONTROL_CONTROLTYPE_PERCENT:
+            dprintf(("MIXERCONTROL_CONTROLTYPE_PERCENT"));
+            break;
+        case MIXERCONTROL_CONTROLTYPE_SLIDER:
+            dprintf(("MIXERCONTROL_CONTROLTYPE_SLIDER"));
+            break;
+        case MIXERCONTROL_CONTROLTYPE_PAN:
+            dprintf(("MIXERCONTROL_CONTROLTYPE_PAN"));
+            break;
+        case MIXERCONTROL_CONTROLTYPE_QSOUNDPAN:
+            dprintf(("MIXERCONTROL_CONTROLTYPE_QSOUNDPAN"));
+            break;
+        case MIXERCONTROL_CONTROLTYPE_EQUALIZER:
+            dprintf(("MIXERCONTROL_CONTROLTYPE_EQUALIZER"));
+            break;
+        case MIXERCONTROL_CONTROLTYPE_SINGLESELECT:
+            dprintf(("MIXERCONTROL_CONTROLTYPE_SINGLESELECT"));
+            break;
+        case MIXERCONTROL_CONTROLTYPE_MULTIPLESELECT:
+            dprintf(("MIXERCONTROL_CONTROLTYPE_MULTIPLESELECT"));
+            break;
+        case MIXERCONTROL_CONTROLTYPE_MICROTIME:
+            dprintf(("MIXERCONTROL_CONTROLTYPE_MICROTIME"));
+            break;
+        case MIXERCONTROL_CONTROLTYPE_MILLITIME:
+            dprintf(("MIXERCONTROL_CONTROLTYPE_MILLITIME"));
+            break;
+#endif
+        default:
+            DebugInt3();
+            return MIXERR_INVALCONTROL;
+        }
+        return MIXERR_INVALCONTROL;
     case MIXER_GETCONTROLDETAILSF_LISTTEXT:
     	dprintf(("MIXER_GETCONTROLDETAILSF_LISTTEXT"));
     	break;
@@ -352,14 +727,14 @@ MMRESULT WINAPI mixerGetLineControlsA(HMIXEROBJ hmxobj, LPMIXERLINECONTROLSA lpM
             dprintf(("ERROR: Invalid line %d", lpMlc->dwLineID));
             return MIXERR_INVALLINE;
         }
-        pLine = pmixerLines[lpMlc->dwLineID];
+        pLine = &pmixerLines[lpMlc->dwLineID]->line;
         if(lpMlc->cControls != pLine->cControls || lpMlc->cbmxctrl < pLine->cControls*sizeof(MIXERCONTROLA)) {
             dprintf(("ERROR: invalid nr of controls %d or structure size %d (%d) (ptr %x)", lpMlc->cControls, lpMlc->cbmxctrl, pLine->cControls*sizeof(MIXERCONTROLA), lpMlc->pamxctrl));
             return MMSYSERR_INVALPARAM;
         }
         for(int i=0;i<lpMlc->cControls;i++) {
             pCtrl = lpMlc->pamxctrl+i;
-            memcpy(pCtrl, &mixerControls[mixerLineControls[lpMlc->dwLineID][i]], sizeof(MIXERCONTROLA));
+            memcpy(pCtrl, &pmixerLines[lpMlc->dwLineID]->Controls[i], sizeof(MIXERCONTROLA));
             dprintf(("found control %s (%s) control id %d", pCtrl->szName, pCtrl->szShortName, pCtrl->dwControlID));
         }
 	    break;
@@ -378,14 +753,14 @@ MMRESULT WINAPI mixerGetLineControlsA(HMIXEROBJ hmxobj, LPMIXERLINECONTROLSA lpM
         }
         //find line associated with this control
         lpMlc->dwLineID = -1;
-        for(int i=0;i<MAX_MIXER_LINES;i++) {
-            for(int j=0;j<MAX_SOURCE_CONTROLS;j++) {
-                if(mixerLineControls[i][j] == lpMlc->u.dwControlID) {
+        for(int i=0;i<nrLines;i++) {
+            for(int j=0;j<pmixerLines[i]->cControls;j++) {
+                if(pmixerLines[i]->Controls[j] == lpMlc->u.dwControlID) {
                     lpMlc->dwLineID = i;
                     break;
                 }
                 else 
-                if(mixerLineControls[i][j] == -1) {
+                if(pmixerLines[i]->Controls[j] == -1) {
                     break;
                 }
             }
@@ -397,7 +772,7 @@ MMRESULT WINAPI mixerGetLineControlsA(HMIXEROBJ hmxobj, LPMIXERLINECONTROLSA lpM
             dprintf(("Associated line for control %d NOT FOUND", lpMlc->u.dwControlID));
             return MIXERR_INVALCONTROL;
         }
-        memcpy(lpMlc->pamxctrl, &mixerControls[lpMlc->u.dwControlID], sizeof(MIXERCONTROLA));
+        memcpy(lpMlc->pamxctrl, &mixerControls[lpMlc->u.dwControlID].ctrl, sizeof(MIXERCONTROLA));
 
         dprintf(("found control %s (%s) associated line %d", lpMlc->pamxctrl->szName, lpMlc->pamxctrl->szShortName, lpMlc->dwLineID));
 	    break;
@@ -508,11 +883,10 @@ MMRESULT WINAPI mixerGetLineControlsA(HMIXEROBJ hmxobj, LPMIXERLINECONTROLSA lpM
 #endif
         int idx;
 
-        for(int i=0;i<MAX_SOURCE_CONTROLS;i++) {
-            idx = mixerLineControls[lpMlc->dwLineID][i];
-            if(idx == -1) break;
-            if(mixerControls[idx].dwControlType == lpMlc->u.dwControlType) {
-                memcpy(lpMlc->pamxctrl, &mixerControls[idx], sizeof(MIXERCONTROLA));
+        for(int i=0;i<pmixerLines[lpMlc->dwLineID]->cControls;i++) {
+            idx = pmixerLines[lpMlc->dwLineID]->Controls[i];
+            if(mixerControls[idx].ctrl.dwControlType == lpMlc->u.dwControlType) {
+                memcpy(lpMlc->pamxctrl, &mixerControls[idx].ctrl, sizeof(MIXERCONTROLA));
                 dprintf(("found control %s (%s) control id %d", lpMlc->pamxctrl->szName, lpMlc->pamxctrl->szShortName, lpMlc->pamxctrl->dwControlID));
                 return MMSYSERR_NOERROR;
             }
@@ -622,7 +996,7 @@ MMRESULT WINAPI mixerGetLineInfoA(HMIXEROBJ hmxobj, LPMIXERLINEA lpMl, DWORD fdw
             dprintf(("ERROR: Invalid line %d", lpMl->dwLineID));
             return MIXERR_INVALLINE;
         }
-        memcpy(lpMl, pmixerLines[lpMl->dwLineID], sizeof(MIXERLINEA));
+        memcpy(lpMl, &pmixerLines[lpMl->dwLineID]->line, sizeof(MIXERLINEA));
         dprintf(("found line %s (%s) connections %d controls %d", lpMl->szName, lpMl->szShortName, lpMl->cConnections, lpMl->cControls));
     	break;
 
@@ -636,11 +1010,11 @@ MMRESULT WINAPI mixerGetLineInfoA(HMIXEROBJ hmxobj, LPMIXERLINEA lpMl, DWORD fdw
             dprintf(("ERROR: Invalid source %d", lpMl->dwSource));
             return MIXERR_INVALLINE;
         }
-        if(mixerDest[lpMl->dwDestination].Sources[lpMl->dwSource] == -1) {
+        if(mixerDest[lpMl->dwDestination].Connections[lpMl->dwSource] == -1) {
             dprintf(("ERROR: Invalid destination/source combo (%d,%d)", lpMl->dwDestination, lpMl->dwSource));
             return MIXERR_INVALLINE;
         }
-        memcpy(lpMl, &mixerSource[mixerDest[lpMl->dwDestination].Sources[lpMl->dwSource]], sizeof(MIXERLINEA));
+        memcpy(lpMl, &mixerSource[mixerDest[lpMl->dwDestination].Connections[lpMl->dwSource]], sizeof(MIXERLINEA));
         dprintf(("found line %s (%s) id %d connections %d controls %d", lpMl->szName, lpMl->szShortName, lpMl->dwLineID, lpMl->cConnections, lpMl->cControls));
     	break;
 
@@ -717,7 +1091,7 @@ MMRESULT WINAPI mixerGetLineInfoA(HMIXEROBJ hmxobj, LPMIXERLINEA lpMl, DWORD fdw
 #endif
         //search all lines (src & dest) for one with specified type
         for(int i=0;i<nrLines;i++) {
-            if(pmixerLines[i]->dwComponentType == lpMl->dwComponentType) {
+            if(pmixerLines[i]->line.dwComponentType == lpMl->dwComponentType) {
                 break;
             }
         }
@@ -725,7 +1099,7 @@ MMRESULT WINAPI mixerGetLineInfoA(HMIXEROBJ hmxobj, LPMIXERLINEA lpMl, DWORD fdw
             dprintf(("Component type %d not found!!", lpMl->dwComponentType));
             return MIXERR_INVALLINE;
         }
-        memcpy(lpMl, pmixerLines[i], sizeof(MIXERLINEA));
+        memcpy(lpMl, &pmixerLines[i]->line, sizeof(MIXERLINEA));
         dprintf(("found line %s (%s) id %d connections %d controls %d", lpMl->szName, lpMl->szShortName, lpMl->dwLineID, lpMl->cConnections, lpMl->cControls));
 	    break;
     }
@@ -761,7 +1135,7 @@ MMRESULT WINAPI mixerGetLineInfoA(HMIXEROBJ hmxobj, LPMIXERLINEA lpMl, DWORD fdw
         //TODO: Should we compare mid, pid & pddname too? (must be initialized according to MSDN)
         //      (see below; unicode version doesn't copy pddname; change if these checks are required)
         for(int i=0;i<nrLines;i++) {
-            if(pmixerLines[i]->Target.dwType == lpMl->Target.dwType) {
+            if(pmixerLines[i]->line.Target.dwType == lpMl->Target.dwType) {
                 break;
             }
         }
@@ -769,7 +1143,7 @@ MMRESULT WINAPI mixerGetLineInfoA(HMIXEROBJ hmxobj, LPMIXERLINEA lpMl, DWORD fdw
             dprintf(("Component type %d not found!!", lpMl->Target.dwType));
             return MIXERR_INVALLINE;
         }
-        memcpy(lpMl, pmixerLines[i], sizeof(MIXERLINEA));
+        memcpy(lpMl, &pmixerLines[i]->line, sizeof(MIXERLINEA));
         dprintf(("found line %s (%s) id %d connections %d controls %d", lpMl->szName, lpMl->szShortName, lpMl->dwLineID, lpMl->cConnections, lpMl->cControls));
         break;
     }
@@ -980,29 +1354,33 @@ MMRESULT WINAPI mixerClose(HMIXER hmx)
 /******************************************************************************/
 BOOL mixerInit() 
 {
-    MIXERDEST *pDestLine;
+    MIXLINE *pDestLine;
     MIXERCONTROLA *pWaveInMux;
 
     if(!fMMPMAvailable) return TRUE;
 
-    memset(mixerSourceLineId, -1, sizeof(mixerSourceLineId));
-    memset(mixerLineControls, -1, sizeof(mixerLineControls));
     memset(mixerDest, 0, sizeof(mixerDest));
     for(int i=0;i<MIXER_DEST_MAX;i++) {
-        memset(mixerDest[i].Sources, -1, sizeof(mixerDest[i].Sources));
+        memset(mixerDest[i].Connections, -1, sizeof(mixerDest[i].Connections));
+        memset(mixerDest[i].Controls, -1, sizeof(mixerDest[i].Controls));
     }
-
+    memset(mixerSource, 0, sizeof(mixerSource));
+    for(i=0;i<MIXER_SRC_MAX;i++) {
+        memset(mixerSource[i].Connections, -1, sizeof(mixerSource[i].Connections));
+        memset(mixerSource[i].Controls, -1, sizeof(mixerSource[i].Controls));
+        mixerSource[i].id = -1;
+    }
     if(OSLibMixerOpen() == FALSE) {
         //Line out destination
         pDestLine = mixerAddDestination(MIXER_DEST_LINEOUT);
-        mixerAddControl(MIX_CTRL_VOL_OUT_LINE, &pDestLine->line);
-        mixerAddControl(MIX_CTRL_MUTE_OUT_LINE, &pDestLine->line);
+        mixerAddControl(MIX_CTRL_VOL_OUT_LINE, pDestLine);
+        mixerAddControl(MIX_CTRL_MUTE_OUT_LINE, pDestLine);
 
         //WaveIn destination
         pDestLine  = mixerAddDestination(MIXER_DEST_WAVEIN);
-        pWaveInMux = mixerAddControl(MIX_CTRL_MUX_IN_W_SRC, &pDestLine->line);
-        mixerAddControl(MIX_CTRL_VOL_IN_W_MIC, &pDestLine->line);
-        mixerAddControl(MIX_CTRL_VOL_IN_W_LINE, &pDestLine->line);
+        pWaveInMux = mixerAddControl(MIX_CTRL_MUX_IN_W_SRC, pDestLine);
+        mixerAddControl(MIX_CTRL_VOL_IN_W_MIC, pDestLine);
+        mixerAddControl(MIX_CTRL_VOL_IN_W_LINE, pDestLine);
         pWaveInMux->cMultipleItems = pDestLine->line.cConnections;
         return TRUE;
     }
@@ -1010,38 +1388,38 @@ BOOL mixerInit()
     //Line out destination
     pDestLine = mixerAddDestination(MIXER_DEST_LINEOUT);
 
-    mixerAddControl(MIX_CTRL_VOL_OUT_LINE, &pDestLine->line);
-    mixerAddControl(MIX_CTRL_MUTE_OUT_LINE, &pDestLine->line);
+    mixerAddControl(MIX_CTRL_VOL_OUT_LINE, pDestLine);
+    mixerAddControl(MIX_CTRL_MUTE_OUT_LINE, pDestLine);
     if(OSLibMixIsControlPresent(MIX_CTRL_OUT_L_3DCENTER)) {
-        mixerAddControl(MIX_CTRL_OUT_L_3DCENTER, &pDestLine->line);
+        mixerAddControl(MIX_CTRL_OUT_L_3DCENTER, pDestLine);
     }
     if(OSLibMixIsControlPresent(MIX_CTRL_OUT_L_3DDEPTH)) {
-        mixerAddControl(MIX_CTRL_OUT_L_3DDEPTH, &pDestLine->line);
+        mixerAddControl(MIX_CTRL_OUT_L_3DDEPTH, pDestLine);
     }
     if(OSLibMixIsControlPresent(MIX_CTRL_OUT_L_TREBLE)) {
-        mixerAddControl(MIX_CTRL_OUT_L_TREBLE, &pDestLine->line);
+        mixerAddControl(MIX_CTRL_OUT_L_TREBLE, pDestLine);
     }
     if(OSLibMixIsControlPresent(MIX_CTRL_OUT_L_BASS)) {
-        mixerAddControl(MIX_CTRL_OUT_L_BASS, &pDestLine->line);
+        mixerAddControl(MIX_CTRL_OUT_L_BASS, pDestLine);
     }
 
     if(OSLibMixIsControlPresent(MIX_CTRL_VOL_IN_L_PCM)) {
-        MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_L_PCM);
+        MIXLINE *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_L_PCM);
         mixerAddControl(MIX_CTRL_VOL_IN_L_PCM, pLine);
         mixerAddControl(MIX_CTRL_MUTE_IN_L_PCM, pLine);
     }
     if(OSLibMixIsControlPresent(MIX_CTRL_VOL_IN_L_WAVETABLE)) {
-        MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_L_WAVETABLE);
+        MIXLINE *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_L_WAVETABLE);
         mixerAddControl(MIX_CTRL_VOL_IN_L_WAVETABLE, pLine);
         mixerAddControl(MIX_CTRL_MUTE_IN_L_WAVETABLE, pLine);
     }
     if(OSLibMixIsControlPresent(MIX_CTRL_VOL_IN_L_MIDI)) {
-        MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_L_MIDI);
+        MIXLINE *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_L_MIDI);
         mixerAddControl(MIX_CTRL_VOL_IN_L_MIDI, pLine);
         mixerAddControl(MIX_CTRL_MUTE_IN_L_MIDI, pLine);
     }
     if(OSLibMixIsControlPresent(MIX_CTRL_VOL_IN_L_MIC)) {
-        MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_L_MIC);
+        MIXLINE *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_L_MIC);
         mixerAddControl(MIX_CTRL_VOL_IN_L_MIC, pLine);
         mixerAddControl(MIX_CTRL_MUTE_IN_L_MIC, pLine);
         if(OSLibMixIsControlPresent(MIX_CTRL_BOOST_IN_L_MIC)) {
@@ -1049,37 +1427,37 @@ BOOL mixerInit()
         }
     }
     if(OSLibMixIsControlPresent(MIX_CTRL_VOL_IN_L_LINE)) {
-        MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_L_LINE);
+        MIXLINE *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_L_LINE);
         mixerAddControl(MIX_CTRL_VOL_IN_L_LINE, pLine);
         mixerAddControl(MIX_CTRL_MUTE_IN_L_LINE, pLine);
     }
     if(OSLibMixIsControlPresent(MIX_CTRL_VOL_IN_L_CD)) {
-        MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_L_CD);
+        MIXLINE *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_L_CD);
         mixerAddControl(MIX_CTRL_VOL_IN_L_CD, pLine);
         mixerAddControl(MIX_CTRL_MUTE_IN_L_CD, pLine);
     }
     if(OSLibMixIsControlPresent(MIX_CTRL_VOL_IN_L_AUX)) {
-        MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_L_AUX);
+        MIXLINE *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_L_AUX);
         mixerAddControl(MIX_CTRL_VOL_IN_L_AUX, pLine);
         mixerAddControl(MIX_CTRL_MUTE_IN_L_AUX, pLine);
     }
     if(OSLibMixIsControlPresent(MIX_CTRL_VOL_IN_L_SPDIF)) {
-        MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_L_SPDIF);
+        MIXLINE *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_L_SPDIF);
         mixerAddControl(MIX_CTRL_VOL_IN_L_SPDIF, pLine);
         mixerAddControl(MIX_CTRL_MUTE_IN_L_SPDIF, pLine);
     }
     if(OSLibMixIsControlPresent(MIX_CTRL_VOL_IN_L_MONO)) {
-        MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_L_MONOIN);
+        MIXLINE *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_L_MONOIN);
         mixerAddControl(MIX_CTRL_VOL_IN_L_MONO, pLine);
         mixerAddControl(MIX_CTRL_MUTE_IN_L_MONO, pLine);
     }
     if(OSLibMixIsControlPresent(MIX_CTRL_VOL_IN_L_PHONE)) {
-        MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_L_PHONE);
+        MIXLINE *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_L_PHONE);
         mixerAddControl(MIX_CTRL_VOL_IN_L_PHONE, pLine);
         mixerAddControl(MIX_CTRL_MUTE_IN_L_PHONE, pLine);
     }
     if(OSLibMixIsControlPresent(MIX_CTRL_VOL_IN_L_VIDEO)) {
-        MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_L_VIDEO);
+        MIXLINE *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_L_VIDEO);
         mixerAddControl(MIX_CTRL_VOL_IN_L_VIDEO, pLine);
         mixerAddControl(MIX_CTRL_MUTE_IN_L_VIDEO, pLine);
     }
@@ -1087,58 +1465,58 @@ BOOL mixerInit()
     //Wave In Destination
     if(OSLibMixIsControlPresent(MIX_CTRL_MUX_IN_W_SRC)) {
         pDestLine = mixerAddDestination(MIXER_DEST_WAVEIN);
-        pWaveInMux = mixerAddControl(MIX_CTRL_MUX_IN_W_SRC, &pDestLine->line);
+        pWaveInMux = mixerAddControl(MIX_CTRL_MUX_IN_W_SRC, pDestLine);
 
         if(OSLibMixIsRecSourcePresent(MIXER_SRC_IN_W_MIC)) {
-            MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_W_MIC);
+            MIXLINE *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_W_MIC);
             mixerAddControl(MIX_CTRL_VOL_IN_W_MIC, pLine);
         }
         if(OSLibMixIsRecSourcePresent(MIXER_SRC_IN_W_LINE)) {
-            MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_W_LINE);
+            MIXLINE *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_W_LINE);
             mixerAddControl(MIX_CTRL_VOL_IN_W_LINE, pLine);
         }
         if(OSLibMixIsRecSourcePresent(MIXER_SRC_IN_W_CD)) {
-            MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_W_CD);
+            MIXLINE *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_W_CD);
             mixerAddControl(MIX_CTRL_VOL_IN_W_CD, pLine);
         }
         if(OSLibMixIsRecSourcePresent(MIXER_SRC_IN_W_AUX)) {
-            MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_W_AUX);
+            MIXLINE *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_W_AUX);
             mixerAddControl(MIX_CTRL_VOL_IN_W_AUX, pLine);
         }
         if(OSLibMixIsRecSourcePresent(MIXER_SRC_IN_W_PCM)) {
-            MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_W_PCM);
+            MIXLINE *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_W_PCM);
             mixerAddControl(MIX_CTRL_VOL_IN_W_PCM, pLine);
         }
         if(OSLibMixIsRecSourcePresent(MIXER_SRC_IN_W_WAVETABLE)) {
-            MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_W_WAVETABLE);
+            MIXLINE *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_W_WAVETABLE);
             mixerAddControl(MIX_CTRL_VOL_IN_W_WAVETABLE, pLine);
         }
         if(OSLibMixIsRecSourcePresent(MIXER_SRC_IN_W_MIDI)) {
-            MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_W_MIDI);
+            MIXLINE *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_W_MIDI);
             mixerAddControl(MIX_CTRL_VOL_IN_W_MIDI, pLine);
         }
         if(OSLibMixIsRecSourcePresent(MIXER_SRC_IN_W_MONOIN)) {
-            MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_W_MONOIN);
+            MIXLINE *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_W_MONOIN);
             mixerAddControl(MIX_CTRL_VOL_IN_W_MONO, pLine);
         }
         if(OSLibMixIsRecSourcePresent(MIXER_SRC_IN_W_PHONE)) {
-            MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_W_PHONE);
+            MIXLINE *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_W_PHONE);
             mixerAddControl(MIX_CTRL_VOL_IN_W_PHONE, pLine);
         }
         if(OSLibMixIsRecSourcePresent(MIXER_SRC_IN_W_SPDIF)) {
-            MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_W_SPDIF);
+            MIXLINE *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_W_SPDIF);
             mixerAddControl(MIX_CTRL_VOL_IN_W_SPDIF, pLine);
         }
         if(OSLibMixIsRecSourcePresent(MIXER_SRC_IN_W_VIDEO)) {
-            MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_W_VIDEO);
+            MIXLINE *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_W_VIDEO);
             mixerAddControl(MIX_CTRL_VOL_IN_W_VIDEO, pLine);
         }
         if(OSLibMixIsRecSourcePresent(MIXER_SRC_IN_W_STEREOMIX)) {
-            MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_W_STEREOMIX);
+            MIXLINE *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_W_STEREOMIX);
             mixerAddControl(MIX_CTRL_VOL_IN_W_STEREOMIX, pLine);
         }
         if(OSLibMixIsRecSourcePresent(MIXER_SRC_IN_W_MONOMIX)) {
-            MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_W_MONOMIX);
+            MIXLINE *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_W_MONOMIX);
             mixerAddControl(MIX_CTRL_VOL_IN_W_MONOMIX, pLine);
         }
         pWaveInMux->cMultipleItems    = pDestLine->line.cConnections;
@@ -1150,8 +1528,8 @@ BOOL mixerInit()
     //SPDIF destination
     if(OSLibMixIsControlPresent(MIX_CTRL_VOL_OUT_SPDIF)) {
         pDestLine = mixerAddDestination(MIXER_DEST_SPDIFOUT);
-        mixerAddControl(MIX_CTRL_VOL_OUT_SPDIF, &pDestLine->line);
-        mixerAddControl(MIX_CTRL_MUTE_OUT_SPDIF, &pDestLine->line);
+        mixerAddControl(MIX_CTRL_VOL_OUT_SPDIF, pDestLine);
+        mixerAddControl(MIX_CTRL_MUTE_OUT_SPDIF, pDestLine);
     }
 
     return TRUE;
@@ -1164,9 +1542,10 @@ void mixerExit()
 }
 /******************************************************************************/
 /******************************************************************************/
-static MIXERLINEA *mixerAddSource(MIXERDEST *pDestLine, DWORD dwSource)
+static MIXLINE *mixerAddSource(MIXLINE *pDestLine, DWORD dwSource)
 {
-    MIXERLINEA *pline = &mixerSource[nrSources];
+    MIXLINE    *pSource = &mixerSource[nrSources]; 
+    MIXERLINEA *pline   = &pSource->line;
 
     if(nrSources >= MAX_MIXER_SOURCES) {
         dprintf(("ERROR: mixerAddSource: out of room!!!"));
@@ -1181,10 +1560,11 @@ static MIXERLINEA *mixerAddSource(MIXERDEST *pDestLine, DWORD dwSource)
     pline->cControls             = 0;
     pline->dwDestination         = 0;
     pline->fdwLine               = MIXERLINE_LINEF_SOURCE;
-    pline->dwSource              = nrSources;
     pline->Target.dwDeviceID     = 0;
     pline->Target.wMid           = WINMM_MIXER_CAPS_WMID;
     pline->Target.vDriverVersion = WINMM_MIXER_CAPS_VERSION;
+    pline->dwSource              = nrSources;
+    nrSources++;
 
     switch(dwSource) {
     case MIXER_SRC_IN_L_MONOIN:
@@ -1262,28 +1642,28 @@ static MIXERLINEA *mixerAddSource(MIXERDEST *pDestLine, DWORD dwSource)
     strncpy(pline->szName,      szSourceName[dwSource][1], sizeof(pline->szName));
     strncpy(pline->Target.szPname, WINMM_MIXERSTRING_A, sizeof(pline->Target.szPname));
 
-    dprintf(("Adding Source %s (%s)", pline->szName, pline->szShortName));
-    nrSources++;
-
+    //add to array of mixer line pointers
     pline->dwLineID      = nrLines;
-    pmixerLines[nrLines] = pline;
+    pmixerLines[nrLines] = pSource;
     nrLines++;
+
+    //store line id in source to line mapping array
+    pSource->id = dwSource;
 
     //increase nr of inputs at destination line
     pDestLine->line.cConnections++;
-    pDestLine->Sources[pDestLine->cSources] = pline->dwSource;
-    pDestLine->cSources++;
+    pDestLine->Connections[pDestLine->cConnections] = pline->dwLineID;
+    pDestLine->cConnections++;
 
-    //store line id in source to line mapping array
-    mixerSourceLineId[dwSource] = pline->dwLineID;
+    dprintf(("Adding Source %s (%s) with destination %s (%d -> %d)", pline->szName, pline->szShortName, pDestLine->line.szName, dwSource, pline->dwLineID));
 
-    return pline;
+    return pSource;
 }
 /******************************************************************************/
 /******************************************************************************/
-static MIXERDEST *mixerAddDestination(DWORD dwDest)
+static MIXLINE *mixerAddDestination(DWORD dwDest)
 {
-    MIXERDEST  *pDest  = &mixerDest[nrDestinations];
+    MIXLINE    *pDest  = &mixerDest[nrDestinations];
     MIXERLINEA *pline  = &pDest->line;
 
     if(nrDestinations >= MAX_MIXER_DESTINATIONS) {
@@ -1336,15 +1716,19 @@ static MIXERDEST *mixerAddDestination(DWORD dwDest)
     nrDestinations++;
 
     pline->dwLineID      = nrLines;
-    pmixerLines[nrLines] = pline;
+    pmixerLines[nrLines] = pDest;
     nrLines++;
+
+    //save internal id
+    pDest->id = dwDest;
     return pDest;
 }
 /******************************************************************************/
 /******************************************************************************/
-static MIXERCONTROLA * mixerAddControl(DWORD dwControl, MIXERLINEA *pSrcLine)
+static MIXERCONTROLA * mixerAddControl(DWORD dwControl, MIXLINE *pSrcLine)
 {
-    MIXERCONTROLA *pctrl  = &mixerControls[nrControls];
+    MIXCONTROL    *pmixctrl = &mixerControls[nrControls];
+    MIXERCONTROLA *pctrl    = &pmixctrl->ctrl;
 
     if(nrControls >= MAX_MIXER_CONTROLS) {
         dprintf(("ERROR: mixerAddControl: out of room!!!"));
@@ -1466,23 +1850,14 @@ static MIXERCONTROLA * mixerAddControl(DWORD dwControl, MIXERLINEA *pSrcLine)
     }
  
     //add control to list of controls associated with source line
-    for(int i=0;i<MAX_SOURCE_CONTROLS;i++) {
-        if(mixerLineControls[pSrcLine->dwLineID][i] == -1) {
-            mixerLineControls[pSrcLine->dwLineID][i] = pctrl->dwControlID;
-            break;
-        }
-    }
-    if(i == MAX_SOURCE_CONTROLS) {
-        DebugInt3();
-    }
-    //increase nr of controls of corresponding source line
+    pSrcLine->Controls[pSrcLine->cControls] = pctrl->dwControlID;
     pSrcLine->cControls++;
 
     strncpy(pctrl->szShortName, szCtrlName[dwControl][0], sizeof(pctrl->szShortName));
     strncpy(pctrl->szName,      szCtrlName[dwControl][1], sizeof(pctrl->szName));
 
     //save internal id
-    mixerControlId[nrControls] = dwControl;
+    pmixctrl->id = dwControl;
     nrControls++;
     dprintf(("Adding control %s (%s)", pctrl->szName, pctrl->szShortName));
     return pctrl;
