@@ -1,11 +1,13 @@
-/* $Id: char.cpp,v 1.14 2000-10-06 15:15:00 sandervl Exp $ */
+/* $Id: char.cpp,v 1.15 2001-04-03 20:55:46 sandervl Exp $ */
 
 /*
- * Win32 character API functions for OS/2
+ * USER string functions
  *
- * Copyright 1998 Sander van Leeuwen
- * Copyright 1998 Patrick Haller
- * Copyright 1998 Peter Fitzsimmons
+ * Based on WINE code (dlls\user\lstr.c)
+ *
+ * Copyright 1993 Yngvi Sigurjonsson (yngvi@hafro.is)
+ * Copyright 1996 Alexandre Julliard
+ * Copyright 1996 Marcus Meissner
  *
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -13,403 +15,436 @@
  */
 
 
-#include <odin.h>
-#include <odinwrap.h>
-#include <os2sel.h>
+#include <ctype.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <os2win.h>
 
-#include "user32.h"
+#include "winnls.h"
 
-#include <wctype.h> /* towupper, towlower support */
+#include <misc.h>
+#include <wine\unicode.h>
+
 
 #define DBG_LOCALLOG	DBG_char
 #include "dbglocal.h"
 
 
-ODINDEBUGCHANNEL(USER32-CHAR)
 
-//******************************************************************************
-//******************************************************************************
-LPSTR WIN32API CharLowerA( LPSTR arg1)
+/***********************************************************************
+ *           CharNextA   (USER32.@)
+ */
+LPSTR WINAPI CharNextA( LPCSTR ptr )
 {
-    dprintf2(("USER32:  OS2CharLowerA\n"));
-    return O32_CharLower(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API CharLowerBuffA( LPSTR arg1, DWORD  arg2)
-{
-    dprintf2(("USER32:  OS2CharLowerBuffA\n"));
-    return O32_CharLowerBuff(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API CharLowerBuffW(LPWSTR x,DWORD buflen)
-{
-  DWORD done=0;
-
-  dprintf2(("USER32: CharLowerBuffW(%08xh,%08xh)\n",
-           x,
-           buflen));
-
-  if (!x)
-    return 0; /* YES */
-
-  while (*x && (buflen--))
-  {
-    *x=towlower(*x);
-    x++;
-    done++;
-  }
-
-  return done;
-}
-//******************************************************************************
-//******************************************************************************
-LPWSTR WIN32API CharLowerW( LPWSTR x)
-{
-  dprintf2(("USER32: CharLowerW(%08xh)\n",
-           x));
-
-  if (HIWORD(x))
-  {
-      LPWSTR s = x;
-      while (*s)
-      {
-          *s=towlower(*s);
-          s++;
-      }
-      return x;
-  }
-  else
-    return (LPWSTR)((UINT)towlower(LOWORD(x)));
-}
-//******************************************************************************
-//******************************************************************************
-LPSTR WIN32API CharNextA( LPCSTR arg1)
-{
-    dprintf2(("USER32: OS2CharNextA(%08xh)\n",
-             arg1));
-
-    return O32_CharNext(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-LPWSTR WIN32API CharNextW(LPCWSTR x)
-{
-  dprintf2(("USER32: OS2CharNextW(%08xh)\n",
-           x));
-
-  if (*x)
-    return (LPWSTR)(x+1);
-  else
-    return (LPWSTR)x;
-}
-//******************************************************************************
-//******************************************************************************
-LPSTR WIN32API CharPrevA( LPCSTR arg1, LPCSTR  arg2)
-{
-    dprintf2(("USER32:  OS2CharPrevA\n"));
-    return O32_CharPrev(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-LPWSTR WIN32API CharPrevW(LPCWSTR start,
-                          LPCWSTR x)
-{
-    dprintf2(("USER32: OS2CharPrevW(%08xh,%08xh)\n",
-             start,
-             x));
-
-  /* FIXME: add DBCS / codepage stuff */
-  if (x>start)
-    return (LPWSTR)(x-1);
-  else
-    return (LPWSTR)x;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API CharToOemA( LPCSTR arg1, LPSTR  arg2)
-{
-    dprintf2(("USER32:  OS2CharToOemA\n"));
-    return O32_CharToOem(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API CharToOemBuffA( LPCSTR arg1, LPSTR arg2, DWORD  arg3)
-{
-    dprintf2(("USER32:  OS2CharToOemBuffA\n"));
-    return O32_CharToOemBuff(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API CharToOemBuffW( LPCWSTR arg1, LPSTR arg2, DWORD  arg3)
-{
-    dprintf2(("USER32:  OS2CharToOemBuffW DOESN'T WORK\n"));
-    // NOTE: This will not work as is (needs UNICODE support)
-    return 0;
-//    return O32_CharToOemBuff(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API CharToOemW( LPCWSTR arg1, LPSTR  arg2)
-{
-    dprintf2(("USER32:  OS2CharToOemW DOESN'T WORK\n"));
-    // NOTE: This will not work as is (needs UNICODE support)
-    return 0;
-//    return O32_CharToOem(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-LPSTR WIN32API CharUpperA( LPSTR arg1)
-{
- LPSTR rc;
-
-    if((int)arg1 >> 16 != 0) {
-       dprintf2(("USER32:  OS2CharUpperA %s\n", arg1));
-    }
-    else {
-   dprintf2(("USER32:  OS2CharUpperA %X\n", arg1));
-    }
-
-    rc = O32_CharUpper(arg1);
-
-    if((int)rc >> 16 != 0) {
-       dprintf2(("USER32:  OS2CharUpperA %s\n", rc));
-    }
-    else {
-    dprintf2(("USER32:  OS2CharUpperA %X\n", rc));
-    }
-
-    return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API CharUpperBuffA( LPSTR arg1, DWORD  arg2)
-{
-    dprintf2(("USER32:  OS2CharUpperBuffA\n"));
-    return O32_CharUpperBuff(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API CharUpperBuffW(LPWSTR x, DWORD buflen)
-{
-  DWORD done=0;
-
-  dprintf2(("USER32: OS2CharUpperBuffW(%08xh,%08xh)\n",
-           x,
-           buflen));
-
-  if (!x)
-    return 0; /* YES */
-
-  while (*x && (buflen--))
-  {
-    *x=towupper(*x);
-    x++;
-    done++;
-  }
-
-  return done;
-}
-//******************************************************************************
-//******************************************************************************
-ODINFUNCTION1(LPWSTR,CharUpperW,LPWSTR,x)
-{
-  if (HIWORD(x))
-  {
-    LPWSTR s = x;
-
-    while (*s)
-    {
-      *s=towupper(*s);
-      s++;
-    }
-    return x;
-  }
-  else
-    return (LPWSTR)((UINT)towupper(LOWORD(x)));
-}
-//******************************************************************************
-//******************************************************************************
-LPSTR WIN32API CharNextExA( WORD codepage, LPCSTR ptr, DWORD flags )
-{
+    dprintf2(("CharNextA %x", ptr));
     if (!*ptr) return (LPSTR)ptr;
-//    if (O32_IsDBCSLeadByteEx( codepage, *ptr )) return (LPSTR)(ptr + 2);
+    if (IsDBCSLeadByte( ptr[0] ) && ptr[1]) return (LPSTR)(ptr + 2);
     return (LPSTR)(ptr + 1);
 }
-//******************************************************************************
-//******************************************************************************
-LPSTR WIN32API CharPrevExA(WORD codepage, LPCSTR start, LPCSTR ptr, DWORD flags)
+
+
+/***********************************************************************
+ *           CharNextExA   (USER32.@)
+ */
+LPSTR WINAPI CharNextExA( WORD codepage, LPCSTR ptr, DWORD flags )
 {
+    dprintf2(("CharNextExA %d %x %x", codepage, ptr, flags));
+
+    if (!*ptr) return (LPSTR)ptr;
+    if (IsDBCSLeadByteEx( codepage, ptr[0] ) && ptr[1]) return (LPSTR)(ptr + 2);
+    return (LPSTR)(ptr + 1);
+}
+
+
+/***********************************************************************
+ *           CharNextExW   (USER32.@)
+ */
+LPWSTR WINAPI CharNextExW( WORD codepage, LPCWSTR ptr, DWORD flags )
+{
+    dprintf2(("CharNextExW %d %x %x", codepage, ptr, flags));
+    /* doesn't make sense, there are no codepages for Unicode */
+    return NULL;
+}
+
+
+/***********************************************************************
+ *           CharNextW   (USER32.@)
+ */
+LPWSTR WINAPI CharNextW(LPCWSTR x)
+{
+    dprintf2(("CharNextW %x", x));
+
+    if (*x) x++;
+
+    return (LPWSTR)x;
+}
+
+
+/***********************************************************************
+ *           CharPrevA   (USER32.@)
+ */
+LPSTR WINAPI CharPrevA( LPCSTR start, LPCSTR ptr )
+{
+    dprintf2(("CharPrevA %x %x", start, ptr));
+
     while (*start && (start < ptr))
     {
-        LPCSTR next = CharNextExA(codepage, start, flags);
+        LPCSTR next = CharNextA( start );
+        if (next >= ptr) break;
+        start = next;
+    }
+    return (LPSTR)start;
+}
+
+
+/***********************************************************************
+ *           CharPrevExA   (USER32.@)
+ */
+LPSTR WINAPI CharPrevExA( WORD codepage, LPCSTR start, LPCSTR ptr, DWORD flags )
+{
+    dprintf2(("CharPrevExA %d %x %x %x", codepage, start, ptr, flags));
+
+    while (*start && (start < ptr))
+    {
+        LPCSTR next = CharNextExA( codepage, start, flags );
         if (next > ptr) break;
         start = next;
     }
     return (LPSTR)start;
 }
-/*****************************************************************************
- * Name      : LPSTR WIN32API CharNextExW
- * Purpose   : The CharNextExA function retrieves the address of the next
- *             character in a string. This function can handle strings
- *             consisting of either single- or multi-byte characters.
- * Parameters:
- * Variables :
- * Result    : If the function succeeds, the return value is a pointer to the
- *             next character in the string, or to the terminating null character
- *             if at the end of the string.
- *             If lpCurrentChar points to the terminating null character, the
- *             return value is equal to lpCurrentChar.
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
 
-LPWSTR WIN32API CharNextExW(WORD   CodePage,
-                            LPCWSTR lpCurrentChar,
-                            DWORD  dwFlags)
+
+/***********************************************************************
+ *           CharPrevExW   (USER32.@)
+ */
+LPWSTR WINAPI CharPrevExW( WORD codepage, LPCWSTR start, LPCWSTR ptr, DWORD flags )
 {
-  dprintf2(("USER32:CharNextExW(%u,%08xh,%08x) not implemented.\n",
-          CodePage,
-          lpCurrentChar,
-          dwFlags));
-
-  return (NULL);
+    /* doesn't make sense, there are no codepages for Unicode */
+    dprintf2(("CharPrevExW %d %x %x %x", codepage, start, ptr, flags));
+    return NULL;
 }
 
 
-/*****************************************************************************
- * Name      : LPSTR WIN32API CharPrevExW
- * Purpose   : The CharPrevExA function retrieves the address of the preceding
- *             character in a string. This function can handle strings
- *             consisting of either single- or multi-byte characters.
- * Parameters:
- * Variables :
- * Result    : If the function succeeds, the return value is a pointer to the
- *             preceding character in the string, or to the first character in
- *             the string if the lpCurrentChar parameter equals the lpStart parameter.
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-LPWSTR WIN32API CharPrevExW(WORD CodePage,
-                            LPCWSTR lpStart,
-                            LPCWSTR lpCurrentChar,
-                            DWORD  dwFlags)
+/***********************************************************************
+ *           CharPrevW   (USER32.@)
+ */
+LPWSTR WINAPI CharPrevW(LPCWSTR start,LPCWSTR x)
 {
-  dprintf2(("USER32:CharPrevExW(%u,%08xh,%08xh,%08x) not implemented.\n",
-          CodePage,
-          lpStart,
-          lpCurrentChar,
-          dwFlags));
+    dprintf2(("CharPrevW %x %x", start, x));
 
-  return (NULL);
+    if (x>start) return (LPWSTR)(x-1);
+    else return (LPWSTR)x;
 }
+
+
+/***********************************************************************
+ *           CharToOemA   (USER32.@)
+ */
+BOOL WINAPI CharToOemA( LPCSTR s, LPSTR d )
+{
+    dprintf2(("CharToOemA %x %x", s, d));
+    if ( !s || !d ) return TRUE;
+    return CharToOemBuffA( s, d, strlen( s ) + 1 );
+}
+
+
+/***********************************************************************
+ *           CharToOemBuffA   (USER32.@)
+ */
+BOOL WINAPI CharToOemBuffA( LPCSTR s, LPSTR d, DWORD len )
+{
+    WCHAR *bufW;
+
+    dprintf2(("CharToOemBuffA %x %x %d", s, d, len));
+    bufW = (WCHAR *)HeapAlloc( GetProcessHeap(), 0, len * sizeof(WCHAR) );
+    if( bufW )
+    {
+	MultiByteToWideChar( CP_ACP, 0, s, len, bufW, len );
+	WideCharToMultiByte( CP_OEMCP, 0, bufW, len, d, len, NULL, NULL );
+	HeapFree( GetProcessHeap(), 0, bufW );
+    }
+    return TRUE;
+}
+
+
+/***********************************************************************
+ *           CharToOemBuffW   (USER32.@)
+ */
+BOOL WINAPI CharToOemBuffW( LPCWSTR s, LPSTR d, DWORD len )
+{
+   dprintf2(("CharToOemBuffW %x %x %d", s, d, len));
+
+   if ( !s || !d ) return TRUE;
+    WideCharToMultiByte( CP_OEMCP, 0, s, len, d, len, NULL, NULL );
+    return TRUE;
+}
+
+
+/***********************************************************************
+ *           CharToOemW   (USER32.@)
+ */
+BOOL WINAPI CharToOemW( LPCWSTR s, LPSTR d )
+{
+    return CharToOemBuffW( s, d, strlenW( s ) + 1 );
+}
+
+
+/***********************************************************************
+ *           OemToCharA   (USER32.@)
+ */
+BOOL WINAPI OemToCharA( LPCSTR s, LPSTR d )
+{
+    return OemToCharBuffA( s, d, strlen( s ) + 1 );
+}
+
+
+/***********************************************************************
+ *           OemToCharBuffA   (USER32.@)
+ */
+BOOL WINAPI OemToCharBuffA( LPCSTR s, LPSTR d, DWORD len )
+{
+    WCHAR *bufW;
+
+    dprintf2(("OemToCharBuffA %x %x %d", s, d, len));
+
+    bufW = (WCHAR *)HeapAlloc( GetProcessHeap(), 0, len * sizeof(WCHAR) );
+    if( bufW )
+    {
+	MultiByteToWideChar( CP_OEMCP, 0, s, len, bufW, len );
+	WideCharToMultiByte( CP_ACP, 0, bufW, len, d, len, NULL, NULL );
+	HeapFree( GetProcessHeap(), 0, bufW );
+    }
+    return TRUE;
+}
+
+
+/***********************************************************************
+ *           OemToCharBuffW   (USER32.@)
+ */
+BOOL WINAPI OemToCharBuffW( LPCSTR s, LPWSTR d, DWORD len )
+{
+    dprintf2(("OemToCharBuffW %x %x %d", s, d, len));
+
+    MultiByteToWideChar( CP_OEMCP, 0, s, len, d, len );
+    return TRUE;
+}
+
+
+/***********************************************************************
+ *           OemToCharW   (USER32.@)
+ */
+BOOL WINAPI OemToCharW( LPCSTR s, LPWSTR d )
+{
+    return OemToCharBuffW( s, d, strlen( s ) + 1 );
+}
+
+
+/***********************************************************************
+ *           CharLowerA   (USER32.@)
+ * FIXME: handle current locale
+ */
+LPSTR WINAPI CharLowerA(LPSTR x)
+{
+    LPSTR	s;
+
+    dprintf2(("CharLowerA %x", x));
+
+    if (HIWORD(x))
+    {
+        s=x;
+        while (*s)
+        {
+            *s=tolower(*s);
+            s++;
+        }
+        return x;
+    }
+    else return (LPSTR)tolower((char)(int)x);
+}
+
+
+/***********************************************************************
+ *           CharUpperA   (USER32.@)
+ * FIXME: handle current locale
+ */
+LPSTR WINAPI CharUpperA(LPSTR x)
+{
+    dprintf2(("CharUpperA %x", x));
+
+    if (HIWORD(x))
+    {
+        LPSTR s = x;
+        while (*s)
+        {
+            *s=toupper(*s);
+            s++;
+        }
+        return x;
+    }
+    return (LPSTR)toupper((char)(int)x);
+}
+
+
+/***********************************************************************
+ *           CharLowerW   (USER32.@)
+ */
+LPWSTR WINAPI CharLowerW(LPWSTR x)
+{
+    dprintf2(("CharLowerW %x", x));
+    if (HIWORD(x)) return strlwrW(x);
+    else return (LPWSTR)((UINT)tolowerW(LOWORD(x)));
+}
+
+
+/***********************************************************************
+ *           CharUpperW   (USER32.@)
+ * FIXME: handle current locale
+ */
+LPWSTR WINAPI CharUpperW(LPWSTR x)
+{
+    dprintf2(("CharUpperW %x", x));
+    if (HIWORD(x)) return struprW(x);
+    else return (LPWSTR)((UINT)toupperW(LOWORD(x)));
+}
+
+
+/***********************************************************************
+ *           CharLowerBuffA   (USER32.@)
+ * FIXME: handle current locale
+ */
+DWORD WINAPI CharLowerBuffA( LPSTR str, DWORD len )
+{
+    DWORD ret = len;
+
+    dprintf2(("CharLowerBuffA %x %d", str, len));
+
+    if (!str) return 0; /* YES */
+    for (; len; len--, str++) *str = tolower(*str);
+    return ret;
+}
+
+
+/***********************************************************************
+ *           CharLowerBuffW   (USER32.@)
+ */
+DWORD WINAPI CharLowerBuffW( LPWSTR str, DWORD len )
+{
+    DWORD ret = len;
+
+    dprintf2(("CharLowerBuffW %x %d", str, len));
+
+    if (!str) return 0; /* YES */
+    for (; len; len--, str++) *str = tolowerW(*str);
+    return ret;
+}
+
+
+/***********************************************************************
+ *           CharUpperBuffA   (USER32.@)
+ * FIXME: handle current locale
+ */
+DWORD WINAPI CharUpperBuffA( LPSTR str, DWORD len )
+{
+    DWORD ret = len;
+
+    dprintf2(("CharUpperBuffA %x %d", str, len));
+
+    if (!str) return 0; /* YES */
+    for (; len; len--, str++) *str = toupper(*str);
+    return ret;
+}
+
+
+/***********************************************************************
+ *           CharUpperBuffW   (USER32.@)
+ */
+DWORD WINAPI CharUpperBuffW( LPWSTR str, DWORD len )
+{
+    DWORD ret = len;
+
+    dprintf2(("CharUpperBuffW %x %d", str, len));
+
+    if (!str) return 0; /* YES */
+    for (; len; len--, str++) *str = toupperW(*str);
+    return ret;
+}
+
+
+/***********************************************************************
+ *           IsCharLowerA   (USER.436) (USER32.@)
+ * FIXME: handle current locale
+ */
+BOOL WINAPI IsCharLowerA(CHAR x)
+{
+    dprintf2(("IsCharLowerA %x", x));
+    return islower(x);
+}
+
+
+/***********************************************************************
+ *           IsCharLowerW   (USER32.@)
+ */
+BOOL WINAPI IsCharLowerW(WCHAR x)
+{
+    dprintf2(("IsCharLowerW %x", x));
+    return get_char_typeW(x) & C1_LOWER;
+}
+
+
+/***********************************************************************
+ *           IsCharUpperA   (USER.435) (USER32.@)
+ * FIXME: handle current locale
+ */
+BOOL WINAPI IsCharUpperA(CHAR x)
+{
+    dprintf2(("IsCharUpperA %x", x));
+    return isupper(x);
+}
+
+
+/***********************************************************************
+ *           IsCharUpperW   (USER32.@)
+ */
+BOOL WINAPI IsCharUpperW(WCHAR x)
+{
+    dprintf2(("IsCharUpperW %x", x));
+    return get_char_typeW(x) & C1_UPPER;
+}
+
+
+/***********************************************************************
+ *           IsCharAlphaNumericW   (USER32.@)
+ */
+BOOL WINAPI IsCharAlphaNumericW(WCHAR x)
+{
+    dprintf2(("IsCharAlphaNumericW %x", x));
+    return get_char_typeW(x) & (C1_ALPHA|C1_DIGIT|C1_LOWER|C1_UPPER);
+}
+
+
+/***********************************************************************
+ *           IsCharAlphaW   (USER32.@)
+ */
+BOOL WINAPI IsCharAlphaW(WCHAR x)
+{
+    dprintf2(("IsCharAlphaW %x", x));
+    return get_char_typeW(x) & (C1_ALPHA|C1_LOWER|C1_UPPER);
+}
+
 //******************************************************************************
+//TODO:
 //******************************************************************************
 BOOL WIN32API IsCharAlphaA( CHAR arg1)
 {
-    dprintf(("USER32:  OS2IsCharAlphaA\n"));
+    dprintf(("USER32: IsCharAlphaA %x", arg1));
     return O32_IsCharAlpha(arg1);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API IsCharAlphaNumericA( CHAR arg1)
 {
-    dprintf(("USER32:  OS2IsCharAlphaNumericA\n"));
+    dprintf(("USER32: IsCharAlphaNumericA %x", arg1));
     return O32_IsCharAlphaNumeric(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API IsCharAlphaNumericW( WCHAR arg1)
-{
-    dprintf(("USER32:  OS2IsCharAlphaNumericW\n"));
-    // NOTE: This will not work as is (needs UNICODE support)
-    return O32_IsCharAlphaNumeric((CHAR)arg1);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API IsCharAlphaW( WCHAR arg1)
-{
-    dprintf(("USER32:  OS2IsCharAlphaW\n"));
-    // NOTE: This will not work as is (needs UNICODE support)
-    return O32_IsCharAlpha((CHAR)arg1);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API IsCharLowerA( CHAR arg1)
-{
-    dprintf(("USER32:  OS2IsCharLowerA\n"));
-    return O32_IsCharLower(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API IsCharLowerW( WCHAR arg1)
-{
-    dprintf(("USER32:  OS2IsCharLowerW\n"));
-    // NOTE: This will not work as is (needs UNICODE support)
-    return O32_IsCharLower((CHAR)arg1);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API IsCharUpperA( CHAR arg1)
-{
-    dprintf(("USER32:  OS2IsCharUpperA\n"));
-    return O32_IsCharUpper(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API IsCharUpperW( WCHAR arg1)
-{
-    dprintf(("USER32:  OS2IsCharUpperW\n"));
-    // NOTE: This will not work as is (needs UNICODE support)
-    return O32_IsCharUpper((CHAR)arg1);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API OemToCharA( LPCSTR arg1, LPSTR  arg2)
-{
-    dprintf(("USER32:  OS2OemToCharA\n"));
-    return O32_OemToChar(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API OemToCharBuffA( LPCSTR src, LPSTR dest, DWORD count)
-{
- BOOL rc;
-
-    dprintf(("USER32:  OS2OemToCharBuffA\n"));
-    rc = O32_OemToCharBuff(src, dest, count);
-    if(rc) {
-        //SvL: Open32 replaces special character (i.e. /r & /n) with 0xff
-        //     -> break edit control (OEMCONVERT) (i.e. Netscape 6 install license control)
-	for(int i=0;i<count;i++) {
-		if(dest[i] == 0xFF) {
-			dest[i] = src[i];
-		}
-	}
-    }
-    return rc;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API OemToCharBuffW(LPCSTR arg1, LPWSTR arg2, DWORD  arg3)
-{
-    dprintf(("USER32: OemToCharBuffW DOESN'T WORK \n"));
-    // NOTE: This will not work as is (needs UNICODE support)
-    return 0;
-//    return O32_OemToCharBuff(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API OemToCharW( LPCSTR arg1, LPWSTR  arg2)
-{
-    dprintf(("USER32:  OS2OemToCharW DOESN'T WORK\n"));
-    // NOTE: This will not work as is (needs UNICODE support)
-    return 0;
-//    return O32_OemToChar(arg1, arg2);
 }
