@@ -1,4 +1,4 @@
-/* $Id: lsa.cpp,v 1.5 2000-02-05 01:51:39 sandervl Exp $ */
+/* $Id: lsa.cpp,v 1.6 2000-10-03 05:38:09 bird Exp $ */
 
 /*
  * Win32 Security Database API functions for OS/2
@@ -276,7 +276,8 @@ typedef DWORD POLICY_NOTIFICATION_INFORMATION_CLASS;
  * Prototypes                                                                *
  *****************************************************************************/
 
-
+extern "C"
+{
 NTSTATUS WIN32API LsaAddAccountRights(LSA_HANDLE           PolicyHandle,
                                       PSID                 AccountSid,
                                       PLSA_UNICODE_STRING  UserRights,
@@ -386,7 +387,7 @@ NTSTATUS WIN32API LsaUnregisterPolicyChangeNotification(
               POLICY_NOTIFICATION_INFORMATION_CLASS InformationClass,
               HANDLE   NotificationEventHandle);
 
-
+}
 
 
 /*****************************************************************************
