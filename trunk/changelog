@@ -1,7 +1,8 @@
-/* $Id: changelog,v 1.1899 2001-12-09 21:54:50 sandervl Exp $ */
+/* $Id: changelog,v 1.1900 2001-12-09 22:03:24 sandervl Exp $ */
 
  2001-12-09: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Overlapped IO fix (poll & half or full duplex support)
+    - MAKEFILES:o Delete dummy.c after copying custom library (CUSTOMBUILD=1)
 
  2001-12-08: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Added read & write functions to custom driver interface
