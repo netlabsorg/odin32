@@ -1,4 +1,4 @@
-/* $Id: commctrl.h,v 1.32 2000-06-29 11:10:54 sandervl Exp $ */
+/* $Id: commctrl.h,v 1.33 2000-07-18 18:30:29 sandervl Exp $ */
 /*
  * Common controls definitions
  */
@@ -2076,6 +2076,8 @@ typedef struct tagTVINSERTSTRUCTW {
 
 #define TV_INSERTSTRUCT   WINELIB_NAME_AW(TVINSERTSTRUCT)
 #define LPTV_INSERTSTRUCT WINELIB_NAME_AW(LPTVINSERTSTRUCT)
+#define TVINSERTSTRUCT    WINELIB_NAME_AW(TVINSERTSTRUCT)
+#define LPTVINSERTSTRUCT  WINELIB_NAME_AW(LPTVINSERTSTRUCT)
 
 #define TVINSERTSTRUCT_V1_SIZEA CCSIZEOF_STRUCT(TVINSERTSTRUCTA, item)
 #define TVINSERTSTRUCT_V1_SIZEW CCSIZEOF_STRUCT(TVINSERTSTRUCTW, item)
@@ -2181,6 +2183,7 @@ typedef struct tagNMTVGETINFOTIPW
 } NMTVGETINFOTIPW, *LPNMTVGETINFOTIPW;
 
 
+#define TreeView_InsertItem   WINELIB_NAME_AW(TreeView_InsertItem)
 #define TreeView_InsertItemA(hwnd, phdi) \
   (INT)SendMessageA((hwnd), TVM_INSERTITEMA, 0, \
                             (LPARAM)(LPTVINSERTSTRUCTA)(phdi))

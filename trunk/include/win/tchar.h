@@ -1,11 +1,9 @@
-/* $Id: tchar.h,v 1.3 1999-11-02 19:06:43 sandervl Exp $ */
+/* $Id: tchar.h,v 1.4 2000-07-18 18:30:37 sandervl Exp $ */
 
 #ifndef __WINE_TCHAR_H
 #define __WINE_TCHAR_H
 
 #include "windef.h"
-
-#ifndef __WIN32OS2__
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,6 +39,8 @@ extern "C" {
 /* FIXME: _searchenv is not implemented */
 /* FIXME: _splitpath is not implemented */
 
+#ifndef __WIN32OS2__
+
 /* FIXME: this should be in string.h but since it's a standard C library include... */
 #define _stricmp strcasecmp
 #define _strcmpi strcasecmp
@@ -74,6 +74,7 @@ char *_strupr(char *string);
 /* FIXME: this should be in utime.h but since it's a standard C library include... */
 #define _utime utime
 
+#endif //__WIN32OS2__
 
 /*****************************************************************************
  * tchar routines
@@ -155,7 +156,7 @@ char *_strupr(char *string);
 #define _tcsdec       WINE_tchar_routine(_strdec,         _mbsdec,     _wcsdec)
 #define _tcsdup       WINE_tchar_routine(_strdup,         _mbsdup,     _wcsdup)
 #define _tcsftime     WINE_tchar_routine(strftime,        strftime,    wcsftime)
-#define _tcsicmp      WINE_tchar_routine(_stricmp,        _mbsicmp,    _wcsicmp)
+#define _tcsicmp      WINE_tchar_routine(stricmp,         _mbsicmp,    _wcsicmp)
 #define _tcsicoll     WINE_tchar_routine(_stricoll,       _stricoll,   _wcsicoll)
 #define _tcsinc       WINE_tchar_routine(_strinc,         _mbsinc,     _wcsinc)
 #define _tcslen       WINE_tchar_routine(strlen,          strlen,      wcslen)
@@ -272,7 +273,5 @@ DECL_WINELIB_TYPE_AW (PTSTR)
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
-
-#endif //__WIN32OS2__
-				 
+		 
 #endif /* __WINE_TCHAR_H */

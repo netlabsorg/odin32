@@ -1,4 +1,4 @@
-/* $Id: wingdi.h,v 1.13 2000-04-09 11:09:11 sandervl Exp $ */
+/* $Id: wingdi.h,v 1.14 2000-07-18 18:30:45 sandervl Exp $ */
 
 #ifndef __WINE_WINGDI_H
 #define __WINE_WINGDI_H
@@ -2769,12 +2769,15 @@ HENHMETAFILE WINAPI CloseEnhMetaFile(HDC);
 HBRUSH    WINAPI CreateDIBPatternBrushPt(const void*,UINT);
 HDC       WINAPI CreateEnhMetaFileA(HDC,LPCSTR,const RECT*,LPCSTR);
 HDC       WINAPI CreateEnhMetaFileW(HDC,LPCWSTR,const RECT*,LPCWSTR);
+#define CreateEnhMetaFile WINELIB_NAME_AW(CreateEnhMetaFile)
 INT       WINAPI DrawEscape(HDC,INT,INT,LPCSTR);
 BOOL      WINAPI GdiComment(HDC,UINT,const BYTE *);
 BOOL      WINAPI GetCharABCWidthsFloatA(HDC,UINT,UINT,LPABCFLOAT);
 BOOL      WINAPI GetCharABCWidthsFloatW(HDC,UINT,UINT,LPABCFLOAT);
+#define GetCharABCWidthsFloat WINELIB_NAME_AW(GetCharABCWidthsFloat)
 BOOL      WINAPI GetCharWidthFloatA(HDC,UINT,UINT,PFLOAT);
 BOOL      WINAPI GetCharWidthFloatW(HDC,UINT,UINT,PFLOAT);
+#define GetCharWidthFloat WINELIB_NAME_AW(GetCharWidthFloat)
 BOOL      WINAPI GetColorAdjustment(HDC, LPCOLORADJUSTMENT);
 DWORD       WINAPI GetDCHook(HDC16,FARPROC16*);
 BOOL      WINAPI GetMiterLimit(HDC, PFLOAT);
@@ -2930,7 +2933,7 @@ INT       WINAPI GetBkMode(HDC);
 UINT      WINAPI GetBoundsRect(HDC,LPRECT,UINT);
 BOOL      WINAPI GetCharABCWidthsA(HDC,UINT,UINT,LPABC);
 BOOL      WINAPI GetCharABCWidthsW(HDC,UINT,UINT,LPABC);
-#define GetCharWidth WINELIB_NAME_AW(GetCharWidth)
+#define GetCharABCWidths WINELIB_NAME_AW(GetCharABCWidths)
 #define     GetCharWidthA GetCharWidth32A
 #define     GetCharWidthW GetCharWidth32W
 

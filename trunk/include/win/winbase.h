@@ -1,4 +1,4 @@
-/* $Id: winbase.h,v 1.13 2000-06-01 11:56:35 sandervl Exp $ */
+/* $Id: winbase.h,v 1.14 2000-07-18 18:30:38 sandervl Exp $ */
 
 #ifndef __WINE_WINBASE_H
 #define __WINE_WINBASE_H
@@ -1606,6 +1606,7 @@ BOOL      WINAPI TlsSetValue(DWORD,LPVOID);
 VOID        WINAPI UnMapLS(SEGPTR);
 BOOL      WINAPI UnlockFile(HFILE,DWORD,DWORD,DWORD,DWORD);
 BOOL      WINAPI UnmapViewOfFile(LPVOID);
+BOOL      WINAPI FlushInstructionCache(HANDLE,LPCVOID,DWORD);
 LPVOID      WINAPI VirtualAlloc(LPVOID,DWORD,DWORD,DWORD);
 BOOL      WINAPI VirtualFree(LPVOID,DWORD,DWORD);
 BOOL      WINAPI VirtualLock(LPVOID,DWORD);
