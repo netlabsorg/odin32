@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.405 1999-11-03 19:53:30 sandervl Exp $ */
+ /* $Id: changelog,v 1.406 1999-11-03 22:02:20 cbratschi Exp $ */
 
  99-11-03: Sander van Leeuwen <sandervl@xs4all.nl>
 	- COMDLG32: Import from shlwapi as the original Wine code does
@@ -15,6 +15,8 @@
 
  99-11-03: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: fixed modal dialogs
+		  added WM_CONTEXTMENU
+	- COMCTL32: implemented statusbar size grip
 
  99-11-03: Patrick Haller <phaller@gmx.net>
 	- KERNEL32:	Fix: 	undocumented behaviour in SearchPathA 
