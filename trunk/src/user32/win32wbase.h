@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.153 2003-05-02 15:33:17 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.154 2003-05-15 12:40:20 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -458,7 +458,7 @@ VISRGN_NOTIFY_PROC lpVisRgnNotifyProc;
         HANDLE  hTaskList; //PM specific (switchentry handle)
 
 CREATESTRUCTA  *tmpcs; //temporary pointer to CREATESTRUCT used in CreateWindowEx
-        ULONG   sw;    //set in CreateWindowExA, used in MsgCreate method
+        int     sw;    //set in CreateWindowExA, used in MsgCreate method
 
 SCROLLBAR_INFO *vertScrollInfo;
 SCROLLBAR_INFO *horzScrollInfo;
@@ -484,6 +484,7 @@ private:
         VOID  AdjustRectInner(LPRECT rect);
         LONG  HandleNCCalcSize(BOOL calcValidRects,RECT *winRect);
         VOID  DrawFrame(HDC hdc,RECT *rect,BOOL dlgFrame,BOOL active);
+        void  FixCoordinates( CREATESTRUCTA *cs, INT *sw);
 public:
         VOID  GetInsideRect(RECT *rect);
         LONG  HandleNCHitTest(POINT pt);
