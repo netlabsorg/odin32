@@ -1,4 +1,4 @@
-/* $Id: avifile.cpp,v 1.5 1999-12-18 16:01:52 sandervl Exp $ */
+/* $Id: avifile.cpp,v 1.6 2000-01-10 23:27:12 sandervl Exp $ */
 /*				   
  * Copyright 1999 Marcus Meissner
  */
@@ -23,8 +23,8 @@
 #include <misc.h>
 
 DECLARE_DEBUG_CHANNEL(avifile)
-DECLARE_DEBUG_CHANNEL(msvideo)
-DECLARE_DEBUG_CHANNEL(relay)
+//DECLARE_DEBUG_CHANNEL(msvideo)
+//DECLARE_DEBUG_CHANNEL(relay)
 
 static HRESULT WINAPI IAVIFile_fnQueryInterface(IAVIFile* iface,REFIID refiid,LPVOID *obj);
 static ULONG WINAPI IAVIFile_fnAddRef(IAVIFile* iface);
