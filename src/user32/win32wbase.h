@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.76 2000-01-27 21:50:02 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.77 2000-01-28 22:26:00 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -122,7 +122,7 @@ virtual  ULONG  MsgEnable(BOOL fEnable);
 
          ULONG  MsgSetText(LPSTR lpsz, LONG cch);
          ULONG  MsgGetTextLength();
-         char  *MsgGetText();
+         void   MsgGetText(char *wndtext, ULONG textlength);
          VOID   updateWindowStyle(DWORD oldExStyle,DWORD oldStyle);
 
 virtual  LONG   SetWindowLongA(int index, ULONG value, BOOL fUnicode = FALSE);

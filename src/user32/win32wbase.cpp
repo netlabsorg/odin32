@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.147 2000-01-27 21:50:01 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.148 2000-01-28 22:26:00 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -648,11 +648,28 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
         if (cs->style & WS_VISIBLE) dwStyle |= WS_VISIBLE; //program could change position in WM_CREATE
         if( (SendInternalMessageA(WM_CREATE, 0, (LPARAM)cs )) != -1 )
         {
-            if(!(flags & WIN_NEED_SIZE)) {
+            if(!(flags & WIN_NEED_SIZE))
+            {
+             LPARAM lParam;
+
                 SendInternalMessageA(WM_SIZE, SIZE_RESTORED,
                                 MAKELONG(rectClient.right-rectClient.left,
                                          rectClient.bottom-rectClient.top));
-                SendInternalMessageA(WM_MOVE,0,MAKELONG(rectClient.left,rectClient.top));
+
+                if(getParent()) {//in parent coordinates
+                    POINT point;
+
+                    point.x = rectClient.left;
+                    point.y = rectClient.top;
+                    MapWindowPoints(getWindowHandle(), getParent()->getWindowHandle(), &point, 1);
+
+                    lParam = MAKELONG(point.x, point.y);
+                }
+                else {//in screen coordinates
+                    lParam = MAKELONG(rectWindow.left+rectClient.left, rectWindow.top+rectClient.top);
+                }
+
+                SendInternalMessageA(WM_MOVE, 0, lParam);
             }
 
             if( (getStyle() & WS_CHILD) && !(getExStyle() & WS_EX_NOPARENTNOTIFY) )
@@ -1051,6 +1068,7 @@ ULONG Win32BaseWindow::MsgFormatFrame(WINDOWPOS *lpWndPos)
     point.x = lpWndPos->x;
     point.y = lpWndPos->y;
     if (getParent()) ClientToScreen(getParent()->getWindowHandle(),&point);
+
     setWindowRect(point.x,point.y,point.x+lpWndPos->cx,point.y+lpWndPos->cy);
     newWindowRect = rectWindow;
   }
@@ -1092,10 +1110,9 @@ ULONG Win32BaseWindow::MsgGetTextLength()
 }
 //******************************************************************************
 //******************************************************************************
-char *Win32BaseWindow::MsgGetText()
+void Win32BaseWindow::MsgGetText(char *wndtext, ULONG textlength)
 {
-    SendInternalMessageA(WM_GETTEXT, wndNameLength, (LPARAM)windowNameA);
-    return windowNameA;
+    SendInternalMessageA(WM_GETTEXT, textlength, (LPARAM)wndtext);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1394,8 +1411,10 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
           {
             SetCursor(hCursor);
             return 1;
-          } else return 0;
-        } else return 0;
+          }
+          else return 0;
+        }
+        else return 0;
     }
 
     case WM_MOUSEMOVE:
@@ -1408,12 +1427,13 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 
         if (!(wpos->flags & SWP_NOMOVE) && !(wpos->flags & SWP_NOCLIENTMOVE))
         {
-            SendInternalMessageA(WM_MOVE,0,MAKELONG(rectClient.left,rectClient.top));
+            SendInternalMessageA(WM_MOVE, 0, MAKELONG(wpos->x + rectClient.left, wpos->y + rectClient.top));
         }
         if (!(wpos->flags & SWP_NOSIZE) && !(wpos->flags & SWP_NOCLIENTSIZE))
         {
             if (dwStyle & WS_MAXIMIZE) wp = SIZE_MAXIMIZED;
-            else if (dwStyle & WS_MINIMIZE) wp = SIZE_MINIMIZED;
+            else
+            if (dwStyle & WS_MINIMIZE) wp = SIZE_MINIMIZED;
 
             SendInternalMessageA(WM_SIZE, wp, MAKELONG(rectClient.right  - rectClient.left,
                                                        rectClient.bottom - rectClient.top));
