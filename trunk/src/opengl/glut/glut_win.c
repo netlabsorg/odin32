@@ -1,4 +1,4 @@
-/* $Id: glut_win.c,v 1.7 2000-03-11 15:07:46 sandervl Exp $ */
+/* $Id: glut_win.c,v 1.8 2000-03-11 17:07:45 sandervl Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1994, 1997.  */
 
 /* This program is freely distributable without licensing fees
@@ -398,7 +398,7 @@ __glutDetermineVisual(
   return vis;
 }
 
-void GLCALLBACK
+void GLUTCALLBACK
 __glutDefaultDisplay(void)
 {
   /* XXX Remove the warning after GLUT 3.0. */
@@ -408,7 +408,7 @@ __glutDefaultDisplay(void)
     __glutCurrentWindow->num + 1);
 }
 
-void GLCALLBACK
+void GLUTCALLBACK
 __glutDefaultReshape(int width, int height)
 {
   GLUToverlay *overlay;
@@ -975,7 +975,7 @@ glutWindowStatusFunc(GLUTwindowStatusCB windowStatusFunc)
   }
 }
 
-static void GLCALLBACK
+static void GLUTCALLBACK
 visibilityHelper(int status)
 {
   if (status == GLUT_HIDDEN || status == GLUT_FULLY_COVERED)

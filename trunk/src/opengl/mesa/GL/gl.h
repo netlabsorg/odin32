@@ -1,4 +1,4 @@
-/* $Id: gl.h,v 1.4 2000-03-05 10:26:17 jeroen Exp $ */
+/* $Id: gl.h,v 1.5 2000-03-11 17:06:35 sandervl Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -78,7 +78,7 @@
 #elif defined(__WIN32OS2__)
 #       define GLAPI
 #       define GLAPIENTRY __stdcall
-#       define GLCALLBACK CDECL
+#       define GLCALLBACK __stdcall
 #       define GLWINAPI __stdcall
 #       define GLWINAPIV __cdecl
 #else
