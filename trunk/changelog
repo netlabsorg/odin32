@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.2297 2002-09-05 02:57:54 bird Exp $ */
+/* $Id: changelog,v 1.2298 2002-09-06 12:29:55 sandervl Exp $ */
+
+ 2002-09-05: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Caret bug in edit control WM_ERASEBKGND handler (hidden, 
+                  but not shown again)
+                o Removed obsolete hack in CreateCaret
 
  2002-09-04: knut st. osmundsen <bird@anduin   >
     - FASTDEP:  o Corrected bug in caching. Didn't force rescan of files when
@@ -11,7 +16,6 @@
                   desired build environment.
                 o Changed odin32clean.cmd to use tools\bin\rm.exe.
     - MAKE:     o Corrected CC_NO_DBGMEM check for vac3xx.
-    -
 
  2002-09-03: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Cleaned up clipboard code
