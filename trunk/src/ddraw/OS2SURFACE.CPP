@@ -1,4 +1,4 @@
-/* $Id: OS2SURFACE.CPP,v 1.21 1999-12-21 01:28:16 hugh Exp $ */
+/* $Id: OS2SURFACE.CPP,v 1.22 1999-12-23 00:50:11 hugh Exp $ */
 
 /*
  * Direct/X Surface class implementaion
@@ -1956,7 +1956,7 @@ OS2IDirectDrawSurface::~OS2IDirectDrawSurface()
     DeleteDC(hdcImage);
 
   if (NULL!=BackBuffer)
-    BackBuffer->Vtbl.Release(AttachedSurface);
+    BackBuffer->Vtbl.Release(BackBuffer);
 
   if (DPA_GetPtrCount(DPA_SurfaceMipMaps)>0)
   {
