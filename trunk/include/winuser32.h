@@ -82,7 +82,6 @@ BOOL WIN32API WinSetVisibleRgnNotifyProc(HWND hwnd, VISRGN_NOTIFY_PROC lpNotifyP
 //PM doesn't allow SetFocus during WM_SETFOCUS message processing; must delay
 //this by posting a message
 //NOTE Must be smaller than WIN32APP_POSTMSG!
-#define WIN32APP_SETFOCUSMSG      (WIN32APP_POSTMSG-1)
 #define WIN32APP_POSTPONEDESTROY  (WIN32APP_POSTMSG-2)
 #define WIN32APP_DDRAWFULLSCREEN  (WIN32APP_POSTMSG-3)
 #define WIN32APP_CHNGEFRAMECTRLS  (WIN32APP_POSTMSG-4)
