@@ -1,4 +1,4 @@
-/* $Id: ADVAPI32.CPP,v 1.12 1999-12-21 00:35:28 sandervl Exp $ */
+/* $Id: ADVAPI32.CPP,v 1.13 2000-01-06 20:04:59 sandervl Exp $ */
 
 /*
  * Win32 advanced API functions for OS/2
@@ -954,37 +954,6 @@ BOOL WIN32API ImpersonateNamedPipeClient(HANDLE hNamedPipe)
   return (TRUE); /* signal OK */
 }
 
-
-
-/*****************************************************************************
- * Name      : InitializeAcl
- * Purpose   : The InitializeAcl function creates a new ACL structure.
- *             An ACL is an access-control list.
- * Parameters: PACL  pAcl          address of access-control list
- *             DWORD nAclLength    size of access-control list
- *             DWORD dwAclRevision revision level of access-control list
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-BOOL WIN32API InitializeAcl(PACL  pAcl,
-                               DWORD nAclLength,
-                               DWORD dwAclRevision)
-{
-  dprintf(("ADVAPI32: InitializeAcl(%08xh,%08xh,%08xh) not implemented.\n",
-           pAcl,
-           nAclLength,
-           dwAclRevision));
-
-  return (FALSE); /* signal failure */
-}
-
-
-
 /*****************************************************************************
  * Name      : InitiateSystemShutdownA
  * Purpose   : The InitiateSystemShutdown function initiates a shutdown and
@@ -1842,62 +1811,6 @@ BOOL WIN32API PrivilegedServiceAuditAlarmW(LPCWSTR        lpszSubsystem,
   return (FALSE); /* signal failure */
 }
 
-
-
-
-/*****************************************************************************
- * Name      : RegisterServiceCtrlHandlerA
- * Purpose   : The RegisterServiceCtrlHandler function registers a function to
- *             handle service control requests for a service.
- * Parameters: LPCSTR            lpszServiceName address of name of service
- *             LPHANDLER_FUNCTION lpHandlerProc   address of handler function
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-#define SERVICE_STATUS_HANDLE DWORD
-#define LPHANDLER_FUNCTION    LPVOID
-SERVICE_STATUS_HANDLE WIN32API RegisterServiceCtrlHandlerA(LPCSTR            lpszServiceName,
-                                                              LPHANDLER_FUNCTION lpHandlerProc)
-{
-  dprintf(("ADVAPI32: RegisterServiceCtrlHandlerA(%s,%08xh) not implemented.\n",
-           lpszServiceName,
-           lpHandlerProc));
-
-  return (0); /* signal failure */
-}
-
-
-/*****************************************************************************
- * Name      : RegisterServiceCtrlHandlerW
- * Purpose   : The RegisterServiceCtrlHandler function registers a function to
- *             handle service control requests for a service.
- * Parameters: LPCWSTR            lpszServiceName address of name of service
- *             LPHANDLER_FUNCTION lpHandlerProc   address of handler function
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-SERVICE_STATUS_HANDLE WIN32API RegisterServiceCtrlHandlerW(LPCWSTR            lpszServiceName,
-                                                              LPHANDLER_FUNCTION lpHandlerProc)
-{
-  dprintf(("ADVAPI32: RegisterServiceCtrlHandlerW(%s,%08xh) not implemented.\n",
-           lpszServiceName,
-           lpHandlerProc));
-
-  return (0); /* signal failure */
-}
-
-
-
 /*****************************************************************************
  * Name      : SetAclInformation
  * Purpose   : The SetAclInformation function sets information about an access-control list (ACL).
@@ -1991,42 +1904,6 @@ BOOL WIN32API SetPrivateObjectSecurity(SECURITY_INFORMATION  si,
 }
 
 
-
-/*****************************************************************************
- * Name      : SetServiceBits
- * Purpose   : The SetServiceBits function registers a service's service type
- *             with the Service Control Manager and the Server service. The
- *             Server service can then announce the registered service type
- *             as one it currently supports. The LAN Manager functions
- *             NetServerGetInfo and NetServerEnum obtain a specified machine's
- *             supported service types.
- *             A service type is represented as a set of bit flags; the
- *             SetServiceBits function sets or clears combinations of those bit flags.
- * Parameters: SERVICE_STATUS_HANDLE hServiceStatus     service status handle
- *             DWORD                 dwServiceBits      service type bits to set or clear
- *             BOOL                  bSetBitsOn         flag to set or clear the service type bits
- *             BOOL                  bUpdateImmediately flag to announce server type immediately
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-BOOL WIN32API SetServiceBits(SERVICE_STATUS_HANDLE hServiceStatus,
-                                DWORD                 dwServiceBits,
-                                BOOL                  bSetBitsOn,
-                                BOOL                  bUpdateImmediately)
-{
-  dprintf(("ADVAPI32: SetServiceBits(%08xh,%08xh,%08xh,%08xh) not implemented.\n",
-           hServiceStatus,
-           dwServiceBits,
-           bSetBitsOn,
-           bUpdateImmediately));
-
-  return (FALSE); /* signal failure */
-}
 
 
 

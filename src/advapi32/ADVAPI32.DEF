@@ -1,4 +1,4 @@
-; $Id: ADVAPI32.DEF,v 1.10 1999-12-27 18:44:32 sandervl Exp $
+; $Id: ADVAPI32.DEF,v 1.11 2000-01-06 20:05:00 sandervl Exp $
 
 ;
 ; Based on NT 4.0 SP6: ADVAPI32.DLL 
@@ -6,23 +6,6 @@
 LIBRARY ADVAPI32 INITINSTANCE
 DESCRIPTION 'Odin ADVAPI32.DLL'
 DATA MULTIPLE NONSHARED
-
-IMPORTS
-    _O32_RegCloseKey     = PMWINX.541
-    _O32_RegCreateKey    = PMWINX.542
-    _O32_RegCreateKeyEx  = PMWINX.543
-    _O32_RegDeleteKey    = PMWINX.544
-    _O32_RegDeleteValue  = PMWINX.545
-    _O32_RegEnumKey      = PMWINX.546
-    _O32_RegEnumKeyEx    = PMWINX.547
-    _O32_RegEnumValue    = PMWINX.548
-    _O32_RegOpenKey      = PMWINX.549
-    _O32_RegOpenKeyEx    = PMWINX.550
-    _O32_RegQueryInfoKey = PMWINX.551
-    _O32_RegQueryValue   = PMWINX.552
-    _O32_RegQueryValueEx = PMWINX.553
-    _O32_RegSetValue     = PMWINX.554
-    _O32_RegSetValueEx   = PMWINX.555
 
 EXPORTS
 
