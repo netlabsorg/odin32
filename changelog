@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1232 2001-01-23 18:32:32 sandervl Exp $ */
+/* $Id: changelog,v 1.1233 2001-01-24 20:33:07 sandervl Exp $ */
+
+ 2001-01-24: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Default display and windows codepage set to 1252
 
  2001-01-23: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o long2ShortName completely broken. now properly detects 8.3
