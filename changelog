@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1691 2001-09-23 20:14:26 sandervl Exp $ */
+/* $Id: changelog,v 1.1692 2001-09-24 07:19:27 sandervl Exp $ */
 
  2001-09-22: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o MDI bugfix: set active child to 0 when last one is destroyed
@@ -7,6 +7,9 @@
                   when cbImage is too small (compressed images only)
                   This used to work. Maybe related to new SDD version.
                   (CoolEdit 2000 hits breakpoint in debug build)
+
+ 2001-09-22: Dietrich Teickner <Dietrich_Teickner@t-online.de>
+    - SHELL32:  o Small update for shfileop.c
 
  2001-09-21: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Focus changes
