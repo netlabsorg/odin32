@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.119 2004-02-11 15:38:11 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.120 2004-03-10 09:21:09 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -481,6 +481,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         if(fMsgRemoved == MSG_REMOVE)
         {
             MSLLHOOKSTRUCT hook;
+            MOUSEHOOKSTRUCT mousehk;
             ULONG          msg;
 
             if(winMsg->message >= WINWM_NCLBUTTONDOWN && winMsg->message <= WINWM_NCMBUTTONDBLCLK) {
@@ -500,6 +501,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
                 msg = WINWM_MBUTTONDOWN;
             }
 
+            // First the low-level mouse hook
             hook.pt.x        = os2Msg->ptl.x & 0xFFFF;
             hook.pt.y        = mapScreenY(os2Msg->ptl.y);
             hook.mouseData   = 0;  //todo: XBUTTON1/2 (XP feature) or wheel data
@@ -508,6 +510,16 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             hook.dwExtraInfo = 0;
 
             if(HOOK_CallHooksW( WH_MOUSE_LL, HC_ACTION, msg, (LPARAM)&hook)) {
+                goto dummymessage; //hook swallowed message
+            }
+
+            // Now inform the WH_MOUSE hook
+            mousehk.pt           = hook.pt;
+            mousehk.hwnd         = winMsg->hwnd;
+            mousehk.wHitTestCode = win32wnd->getLastHitTestVal();
+            mousehk.dwExtraInfo  = 0;
+
+            if(HOOK_CallHooksW( WH_MOUSE_W, HC_ACTION, msg, (LPARAM)&mousehk)) {
                 goto dummymessage; //hook swallowed message
             }
         }
