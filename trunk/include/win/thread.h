@@ -1,4 +1,4 @@
-/* $Id: thread.h,v 1.8 1999-11-10 16:36:30 phaller Exp $ */
+/* $Id: thread.h,v 1.9 1999-12-16 00:09:32 sandervl Exp $ */
 
 /*
  * Thread definitions
@@ -103,6 +103,8 @@ typedef struct _THDB
     DWORD          OrgTIBSel;	   // Original OS/2 TIB selector (always the same, but let's not assume too much for future compatibility)
     ULONG          hmq;		   // Thread message queue
     ULONG          hab;            // Thread Anchor block
+    ULONG          hooks[WH_NB_HOOKS]; //list of hooks for this thread queue
+    ULONG          threadId;       // Thread ID
     BOOL           fMsgTranslated; // TranslateMessage called for this message?
     ULONG          newWindow;      // Pointer to window object of window that was just created
     void*          pWsockData;     // Winsock data pointer (NULL if unused)

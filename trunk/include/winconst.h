@@ -1,4 +1,4 @@
-/* $Id: winconst.h,v 1.14 1999-12-14 19:15:05 sandervl Exp $ */
+/* $Id: winconst.h,v 1.15 1999-12-16 00:09:31 sandervl Exp $ */
 
 /*
  * Win32 constants
@@ -269,3 +269,27 @@
 
 
 #define ERROR_INVALID_WINDOW_HANDLE_W           1400L
+
+  /* Hook values */
+#define WH_MIN_W              (-1)
+#define WH_MSGFILTER_W        (-1)
+#define WH_JOURNALRECORD_W    0
+#define WH_JOURNALPLAYBACK_W  1
+#define WH_KEYBOARD_W         2
+#define WH_GETMESSAGE_W       3
+#define WH_CALLWNDPROC_W      4
+#define WH_CBT_W              5
+#define WH_SYSMSGFILTER_W     6
+#define WH_MOUSE_W            7
+#define WH_HARDWARE_W         8
+#define WH_DEBUG_W            9
+#define WH_SHELL_W            10
+#define WH_FOREGROUNDIDLE_W   11
+#define WH_CALLWNDPROCRET_W   12
+#define WH_MAX_W              12
+
+#define WH_MINHOOK_W          WH_MIN_W
+#define WH_MAXHOOK_W          WH_MAX_W
+#ifndef WH_NB_HOOKS
+#define WH_NB_HOOKS           (WH_MAXHOOK_W-WH_MINHOOK_W+1)
+#endif
