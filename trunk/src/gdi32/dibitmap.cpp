@@ -1,4 +1,4 @@
-/* $Id: dibitmap.cpp,v 1.18 2001-06-01 07:49:30 sandervl Exp $ */
+/* $Id: dibitmap.cpp,v 1.19 2001-06-01 12:29:25 sandervl Exp $ */
 
 /*
  * GDI32 dib & bitmap code
@@ -284,7 +284,17 @@ int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLine
  int rc;
 
     dprintf(("GDI32: GetDIBits %x %x %d %d %x %x (biBitCount %d) %d", hdc, hBitmap, uStartScan, cScanLines, lpvBits, lpbi, lpbi->bmiHeader.biBitCount, uUsage));
-    rc = O32_GetDIBits(hdc, hBitmap, uStartScan, cScanLines, lpvBits, lpbi, uUsage);
+
+#if 1 //def OPEN32
+    //SvL: WGSS screws up the DC if it's a memory DC
+    //     TODO: Fix in WGSS
+    HDC hdcMem = CreateCompatibleDC(0);
+#endif
+    rc = O32_GetDIBits(hdcMem, hBitmap, uStartScan, cScanLines, lpvBits, lpbi, uUsage);
+#if 1 //def OPEN32
+    DeleteDC(hdcMem);
+#endif
+
     // set proper color masks!
     switch(lpbi->bmiHeader.biBitCount) {
     case 16: //RGB 565
