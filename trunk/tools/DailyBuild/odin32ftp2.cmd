@@ -1,4 +1,4 @@
-/* $Id: odin32ftp2.cmd,v 1.20 2003-02-18 01:01:01 bird Exp $
+/* $Id: odin32ftp2.cmd,v 1.21 2003-04-14 22:08:04 bird Exp $
  *
  * Uploads the relase and debug builds to the FTP sites.
  *
@@ -85,8 +85,8 @@ do i = 1 to 5 /* (Retries 5 times) */
     do
         rc = cleanFtp('netlabs-delete', '/daily', 'ftp.netlabs.org');
         do j = 1 to asUploads.0
-            /*rc = putFtp(asUploads.j, 'netlabs-'||asUploads.j, '/'||sDirectory, 'ftp.netlabs.org'); */
-            rc = putRexxFtp(asUploads.j, 'netlabs-'||asUploads.j, '/'||sDirectory, 'ftp.netlabs.org');
+            rc = putFtp(asUploads.j, 'netlabs-'||asUploads.j, '/'||sDirectory, 'ftp.netlabs.org');
+            /*rc = putRexxFtp(asUploads.j, 'netlabs-'||asUploads.j, '/'||sDirectory, 'ftp.netlabs.org');*/
             /*rc = forwardSF(asUploads.j, 'netlabs-'||asUploads.j, '/'||sDirectory, 'ftp.netlabs.org');*/
         end
     end

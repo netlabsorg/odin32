@@ -1,4 +1,4 @@
-/* $Id: job.cmd,v 1.9 2003-02-06 21:05:37 bird Exp $
+/* $Id: job.cmd,v 1.10 2003-04-14 22:08:03 bird Exp $
  *
  * Main job for building OS/2.
  *
@@ -53,10 +53,12 @@
      */
     parse source sd1 sd2 sScript
     sScriptDir = filespec('drive', sScript) || filespec('path', sScript);
-    sLogFile = sScriptDir || '\logs\' || sDate || '.log';
+    sStateDir = sScriptDir||'State'||sType;
+    sLogFile = sScriptDir || 'Logs\' || sDate || '.log';
     sTree    = sScriptDir || '..\tree' || sDate;
-    'mkdir 'sScriptDir||'\logs'
-    'mkdir 'sScriptDir||'\DBBackup'
+    'call' sScriptDir||'bin\CreatePath.cmd 'sScriptDir||'Logs'
+    'call' sScriptDir||'bin\CreatePath.cmd 'sScriptDir||'DBBackup'
+    'call' sScriptDir||'bin\CreatePath.cmd 'sStateDir;
 
     /*
      * Clean tree, get it and build it.
@@ -64,47 +66,43 @@
     'mkdir' sTree
     filespec('drive', sScript);
     'cd' sTree;
-    if (rc <> 0) then call failure rc, 'cd ..\'sTree 'failed.';
+    if (rc <> 0) then call failure rc, '', 'cd 'sTree 'failed.';
     'call' sScriptDir || 'odin32env.cmd'
-    if (rc <> 0) then call failure rc, 'Env failed.';
+    if (rc <> 0) then call failure rc, '', 'Env failed.';
+    if (IsChangeLogModified(sStateDir)) then
+    do
+        say 'Nothing to do. ChangeLog unmodified.'
+        'echo ChangeLog unmodified >' sLogFile;
+        exit(0);
+    end
     'call' sScriptDir || 'odin32clean.cmd'
-    if (rc <> 0) then call failure rc, 'Clean failed.';
+    if (rc <> 0) then call failure rc, sStateDir, 'Clean failed.';
     'call' sScriptDir || 'odin32get.cmd'
-    if (rc <> 0) then call failure rc, 'Get failed.';
+    if (rc <> 0) then call failure rc, sStateDir, 'Get failed.';
     'call' sScriptDir || 'odin32bldnr.cmd inc'
-    if (rc <> 0) then call failure rc, 'Build Nr inc failed.';
+    if (rc <> 0) then call failure rc, sStateDir, 'Build Nr inc failed.';
     'call' sScriptDir || 'odin32build.cmd 2>&1 | tee /a ' || sLogFile; /* 4OS/2 tee command. */
-    if (rc <> 0) then call failure rc, 'Build failed.';
+    if (rc <> 0) then call failure rc, sStateDir, 'Build failed.';
     'call' sScriptDir || 'odin32bldnr.cmd commit'
-    if (rc <> 0) then call failure rc, 'Build Nr commit failed.';
+    if (rc <> 0) then call failure rc, sStateDir, 'Build Nr commit failed.';
 
     /*
      * Pack and upload it.
      */
     'call' sScriptDir || 'odin32pack.cmd  2>&1 | tee /a ' || sLogFile; /* 4OS/2 tee command. */
-    if (rc <> 0) then call failure rc, 'Packing failed.';
-    'start /BG "Uploading Odin..." nice -f cmd /C' sScriptDir || 'odin32ftp2.cmd';
-    if (rc <> 0) then say 'rc='rc' FTPing failed. i = ' || i;
+    if (rc <> 0) then call failure rc, sStateDir, 'Packing failed.';
+    'call' sScriptDir || 'odin32ftp2.cmd';
+    if (rc <> 0) then call failure rc, sStateDir, 'Upload failed!';
+
 
     /*
      * database update
      */
-    sScriptDir || 'odin32db.cmd  2>&1 | tee /a ' || sLogFile; /* 4OS/2 tee command. */
-    if (rc <> 0) then call failure rc, 'db failed.';
-
     /*
-     * Update local installation at d:\odin...
-     */
-/*
-    'd:';
-    if (rc <> 0) then call failure rc, 'd: failed.';
-    'cd d:\odin';
-    if (rc <> 0) then call failure rc, 'cd d:\odin failed.';
-    'unzip -o ' || sTree || '\odin*debug.zip';
-    if (rc <> 0) then call failure rc, 'unzip failed.';
-    'd:'
-    if (rc <> 0) then call failure rc, 'd: failed.';
-*/
+    sScriptDir || 'odin32db.cmd  2>&1 | tee /a ' || sLogFile; /* 4OS/2 tee command. */
+    if (rc <> 0) then call failure rc, '', 'db failed.';
+    */
+
     /* successfull exit */
     exit(0);
 
@@ -113,7 +111,57 @@
  * fatal failures terminates here!.
  */
 failure: procedure
-parse arg rc, sText;
+parse arg rc, sStateDir, sText;
     say 'rc='rc sText
+    if (sStateDir <> '') then
+        call ForceNextBuild sStateDir;
     exit(rc);
 
+
+/*
+ * Checks if the change log is up to date or not.
+ */
+IsChangeLogModified: procedure
+parse arg sStateDir;
+
+    sDir = directory();
+    'cd' sStateDir
+    if (rc <> 0) then call failure rc, 'cd 'sStateDir' failed!';
+
+    if (stream(sStateDir'\ChangeLog', 'c', 'query exist') == '') then
+    do
+        /* no such file: check it out. */
+        fUpToDate = 0;
+    end
+    else
+    do
+        /* check if up to date. */
+        'cvs status ChangeLog | grep -q "Status: Up-to-date"';
+        if (rc <> 0) then
+            fUpToDate = 0;
+        else
+            fUpToDate = 1;
+    end
+
+    /*
+     * Check out the latest ChangeLog.
+     */
+    if (\fUpToDate) then
+    do
+        /* check if up to date. */
+        'if exist ChangeLog del ChangeLog';
+        'call cvs checkout ChangeLog';
+    end
+
+    call directory sDir;
+return fUpToDate;
+
+
+/*
+ * Force build next time.
+ * Called when we fail.
+ */
+ForceNextBuild: procedure
+parse arg sStateDir;
+    'if exist 'sStateDir'\ChangeLog del 'sStateDir'\ChangeLog';
+return rc;
