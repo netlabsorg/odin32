@@ -1,4 +1,4 @@
-/* $Id: time.cpp,v 1.5 1999-10-31 18:15:13 sandervl Exp $ */
+/* $Id: time.cpp,v 1.6 1999-11-05 17:42:12 achimha Exp $ */
 
 /*
  * Win32 time/date API functions
@@ -657,12 +657,12 @@ static INT OLE_GetFormatA(LCID locale,
    /* alter the formatstring, while it works for all languages now in wine
    its possible that it fails when the time looks like ss:mm:hh as example*/
    if (tflags & (TIME_NOMINUTESORSECONDS))
-   { if ((pos = strstr ( format, ":mm")))
+   { if ((pos = strstr ( format, ":mm")) != 0)
      { memcpy ( pos, pos+3, strlen(format)-(pos-format)-2 );
      }
    }
    if (tflags & (TIME_NOSECONDS))
-   { if ((pos = strstr ( format, ":ss")))
+   { if ((pos = strstr ( format, ":ss")) != 0)
      { memcpy ( pos, pos+3, strlen(format)-(pos-format)-2 );
      }
    }
