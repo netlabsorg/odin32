@@ -1,4 +1,4 @@
-/* $Id: kFile.cpp,v 1.8 2001-04-17 00:26:10 bird Exp $
+/* $Id: kFile.cpp,v 1.9 2001-10-17 14:21:10 bird Exp $
  *
  * kFile - Simple (for the time being) file class.
  *
@@ -555,103 +555,105 @@ BOOL            kFile::readln(char *pszBuffer, long cchBuffer) throw (int)
  * @param       pvBuffer    Output buffer.
  * @param       cbBuffer    Amount of bytes to write.
  */
-BOOL            kFile::write(void *pvBuffer, long cbBuffer)
+BOOL            kFile::write(const void *pv, long cb)
 {
     if (fReadOnly)
         rc = ERROR_ACCESS_DENIED;
     else
     {
-        ULONG cbWrite;
-        ULONG cbAddPost = 0;
-
         /* buffered writes? */
         if (pachBuffer != NULL)
-        {   /* Buffered write!
-             *      Init buffer if necessary.
-             *      Check if all fits into current buffer.
-             *          Update buffer and return.
-             *      Check if some fits into the current buffer
-             *          Start - update valid part of the buffer. Commit buffer.
-             *          End   - update buffer. no write
-             *          Not   - commit buffer.
+        {
+            ULONG cbWrite;
+            ULONG cbAddPost = 0;
+
+            /*
+             * New buffer algorithm.
+             *  Init buffer if it's invalid.
+             *  Loop until no more to write
+             *      If All fits into current buffer Then
+             *          Insert it. COMPLETED.
+             *      If Start fits into the current buffer Then
+             *          Insert it.
+             *      Else If End fits into the current buffer Then
+             *          Insert it.
+             *      Else //nothing fit's into the buffer
+             *          Commit the buffer.
+             *          Initiate the buffer to the current offset.
+             *          Insert as much as possible.
+             *      Endif
+             *  EndLoop
              */
             if (offBuffer == ~0UL)
             {   /* Empty buffer at current virtual offset */
-                cbBufferValid = offVirtual;
-                offBuffer = 0;
+                fBufferDirty = 0;
+                cbBufferValid = 0;
+                offBuffer = offVirtual;
             }
 
-            if (    offBuffer <= offVirtual
-                &&  offBuffer + this->cbBuffer > offVirtual + cbBuffer
-                )
-            {   /* all fits into the buffer */
-                memcpy(&pachBuffer[offVirtual - offBuffer], pvBuffer, (size_t)cbBuffer);
-                fBufferDirty = TRUE;
-                if (cbBufferValid < offVirtual - offBuffer + cbBuffer)
-                    cbBufferValid = offVirtual - offBuffer + cbBuffer;
-                offVirtual += cbBuffer;
-                return TRUE;
-            }
-            else if (   offBuffer <= offVirtual
-                     && offBuffer + this->cbBufferValid > offVirtual
-                     )
-            {   /* start fits into the valid part of the buffer */
-                cbWrite = this->cbBuffer - (offVirtual - offBuffer);
-                memcpy(&pachBuffer[offVirtual - offBuffer], pvBuffer, (size_t)cbWrite);
-                fBufferDirty = TRUE;
-                if (cbBufferValid < offVirtual - offBuffer + cbWrite)
-                    cbBufferValid = offVirtual - offBuffer + cbWrite;
-                pvBuffer = (char*)pvBuffer + cbWrite;
-                cbBuffer -= cbWrite;
-                offVirtual += cbWrite;
-                if (!bufferCommit())
-                    return FALSE;
-            }
-            else if (   offBuffer < offVirtual + cbBuffer
-                     && offBuffer + this->cbBuffer >= offVirtual + cbBuffer
-                     )
-            {   /* end fits into the buffer */
-                cbWrite = offVirtual + cbBuffer - offBuffer;
-                memcpy(pachBuffer, &((char*)pvBuffer)[offBuffer - offVirtual], (size_t)cbWrite);
-                fBufferDirty = TRUE;
-                if (cbBufferValid < cbWrite)
-                    cbBufferValid = cbWrite;
-                cbBuffer -= cbWrite;
-                cbAddPost = cbWrite;
-            }
-            else if (   offVirtual + cbBuffer <= offBuffer
-                     || offVirtual >= offBuffer + this->cbBufferValid
-                     )
-            {   /* don't fit into the buffer at all */
-                if (!bufferCommit())
-                    return FALSE;
-            }
-
-            /* Set filepointer. */
-            if (!position())
-                return FALSE;
-
-            /* Write. */
-            rc = DosWrite(hFile, pvBuffer, cbBuffer, &cbWrite);
-            if (rc == NO_ERROR)
+            while (cb > 0)
             {
-                offVirtual = offReal += cbWrite;
-                if (cbAddPost == 0)
-                {   /* no post add; start empty buffer at current virtual offset .*/
-                    offBuffer = offVirtual;
-                    cbBufferValid = 0;
-                    fBufferDirty = FALSE;
+                if (    offBuffer <= offVirtual
+                    &&  offBuffer + cbBufferValid >= offVirtual
+                    &&  offBuffer + cbBuffer >= offVirtual + cb
+                    )
+                {   /* everything fits into the buffer */
+                    memcpy(&pachBuffer[offVirtual - offBuffer], pv, cb);
+                    if (cbBufferValid < cb + offVirtual - offBuffer)
+                        cbBufferValid = cb + offVirtual - offBuffer;
+                    offVirtual += cb + cbAddPost;
+                    fBufferDirty = TRUE;
+                    return TRUE;
+                }
+
+                if (    offBuffer <= offVirtual
+                    &&  offBuffer + cbBufferValid >= offVirtual
+                    &&  offBuffer + cbBuffer < offVirtual
+                    )
+                {   /* start fits into the buffer */
+                    cbWrite = cbBuffer - (offVirtual - offBuffer);
+                    memcpy(&pachBuffer[offVirtual - offBuffer], pv, cbWrite);
+                    cbBufferValid = cbBuffer;
+                    offVirtual += cbWrite;
+                    cb -= cbWrite;
+                    pv = (char*)pv + cbWrite;
+                }
+                else if (   offBuffer > offVirtual
+                         && offBuffer <= offVirtual + cb
+                         && offBuffer + cbBuffer >= offVirtual + cb
+                         )
+                {   /* end fits into the buffer */
+                    cbWrite = offVirtual + cb - offBuffer;
+                    memcpy(pachBuffer, pv, cbWrite);
+                    if (cbBufferValid <  cbWrite)
+                        cbBufferValid = cbWrite;
+                    cbAddPost += cbWrite;
+                    cb -= cbWrite;
                 }
                 else
-                    offVirtual += cbAddPost;
-                return TRUE;
-            }
+                {   /* don't fit anywhere... */
+                    if (!bufferCommit())
+                        return FALSE;
+                    offBuffer = offVirtual;
+                    cbWrite = cbBufferValid = cb > cbBuffer ? cbBuffer : cb;
+                    memcpy(pachBuffer, pv, cbWrite);
+                    cb -= cbWrite;
+                    pv = (char*)pv + cbWrite;
+                    offVirtual += cbWrite;
+                }
+                fBufferDirty = TRUE;
+
+
+            }   /* loop */
+            offVirtual += cbAddPost;
+
+            return TRUE;
         }
         else if (position())
         {   /* non-buffered write! */
             ULONG   cbWrote;
 
-            rc = DosWrite(hFile, pvBuffer, cbBuffer, &cbWrote);
+            rc = DosWrite(hFile, (PVOID)pv, cb, &cbWrote);
             if (rc == NO_ERROR)
             {
                 offVirtual = offReal += cbWrote;
