@@ -1,6 +1,6 @@
-/* $Id: ChangeLog,v 1.1698 2001-09-27 01:54:06 bird Exp $ */
+/* $Id: ChangeLog,v 1.1699 2001-09-27 01:56:18 bird Exp $ */
 
- 2001-09-11: knut st. osmundsen <kosmunds@csc.com>
+ 2001-09-26: knut st. osmundsen <kosmunds@csc.com>
     - Win32k:   o Create development branch 'splittup' which in the
                   splittup of win32k is being implemented.
                 o BTW. I think I've found the jfs/fat32 + win32k problem.
