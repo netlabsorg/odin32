@@ -954,3 +954,5 @@ EXPORTS
       _dllentry
       _Exception_CPP
       __ctdtused
+      _DLL_InitTerm
+;      _exeentry
