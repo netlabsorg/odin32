@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.48 2004-01-30 22:10:07 bird Exp $ */
+/* $Id: windowmsg.cpp,v 1.49 2004-02-04 14:59:57 bird Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -161,7 +161,7 @@ BOOL WIN32API PeekMessageA(LPMSG msg, HWND hwndOwner, UINT uMsgFilterMin,
         fFoundMsg = OSLibWinPeekMsg(msg, hwndOwner, uMsgFilterMin, uMsgFilterMax, fuRemoveMsg, FALSE);
         if (   fFoundMsg
             && pTeb->o.odin.tidAttachedInputThread
-            && OSLibForwardMessageToAttachedThread(pTeb, msg, NULL));
+            && OSLibForwardMessageToAttachedThread(pTeb, msg, NULL))
         {
             if (!fuRemoveMsg)
                 OSLibWinPeekMsg(msg, hwndOwner, uMsgFilterMin, uMsgFilterMax, TRUE, FALSE);
@@ -192,7 +192,7 @@ BOOL WIN32API PeekMessageW(LPMSG msg, HWND hwndOwner, UINT uMsgFilterMin,
         fFoundMsg = OSLibWinPeekMsg(msg, hwndOwner, uMsgFilterMin, uMsgFilterMax, fuRemoveMsg, TRUE);
         if (   fFoundMsg
             && pTeb->o.odin.tidAttachedInputThread
-            && OSLibForwardMessageToAttachedThread(pTeb, msg, NULL));
+            && OSLibForwardMessageToAttachedThread(pTeb, msg, NULL))
         {
             if (!fuRemoveMsg)
                 OSLibWinPeekMsg(msg, hwndOwner, uMsgFilterMin, uMsgFilterMax, TRUE, TRUE);
