@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.34 2001-07-06 13:46:59 sandervl Exp $*/
+/* $Id: menu.cpp,v 1.35 2001-07-08 08:06:14 sandervl Exp $*/
 /*
  * Menu functions
  *
@@ -32,6 +32,7 @@
 
 #ifdef __WIN32OS2__
 #include <objhandle.h>
+#include "pmwindow.h"
 
 #define DBG_LOCALLOG    DBG_menu
 #include "dbglocal.h"
@@ -2371,6 +2372,15 @@ static BOOL MENU_ButtonDown( MTRACKER* pmt, HMENU hPtMenu, UINT wFlags )
             if(!(item->fState & MF_MOUSESELECT ))
             {
                 pmt->hCurrentMenu = MENU_ShowSubPopup(pmt->hOwnerWnd,hPtMenu,FALSE,wFlags,&pmt->pt);
+
+#ifdef __WIN32OS2__
+		if(fOS2Look)
+		    ptmenu->bTimeToHide = FALSE;		    
+#else
+		/* In win31, a newly popped menu always remains opened for the next buttonup */
+		if(TWEAK_WineLook == WIN31_LOOK)
+		    ptmenu->bTimeToHide = FALSE;		    
+#endif
             }
 
             return TRUE;
@@ -2892,8 +2902,18 @@ static INT MENU_TrackMenu(HMENU hmenu,UINT wFlags,INT x,INT y,HWND hwnd,BOOL inM
                 case WM_MOUSEMOVE:
                     /* In win95 winelook, the selected menu item must be changed every time the
                        mouse moves. In Win31 winelook, the mouse button has to be held down */
+#ifdef __WIN32OS2__
+                    if ( !fOS2Look ||
+                         ( (msg.wParam & MK_LBUTTON) ||
+                           ((wFlags & TPM_RIGHTBUTTON) && (msg.wParam & MK_RBUTTON))) )
+                       fEndMenu |= !MENU_MouseMove( &mt, hmenu, wFlags );
+#else
+                    if ( (TWEAK_WineLook > WIN31_LOOK) ||
+                         ( (msg.wParam & MK_LBUTTON) ||
+                           ((wFlags & TPM_RIGHTBUTTON) && (msg.wParam & MK_RBUTTON))) )
+                       fEndMenu |= !MENU_MouseMove( &mt, hmenu, wFlags );
+#endif
 
-                    fEndMenu |= !MENU_MouseMove( &mt, hmenu, wFlags );
             } /* switch(msg.message) - mouse */
         }
         else if (msg.message == WM_TIMER)

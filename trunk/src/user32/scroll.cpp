@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.41 2001-06-18 09:00:50 sandervl Exp $ */
+/* $Id: scroll.cpp,v 1.42 2001-07-08 08:06:15 sandervl Exp $ */
 /*
  * Scrollbar control
  *
@@ -20,6 +20,7 @@
 #include "win32wbase.h"
 #include "oslibwin.h"
 #include "initterm.h"
+#include "pmwindow.h"
 
 #define DBG_LOCALLOG    DBG_scroll
 #include "dbglocal.h"
@@ -993,7 +994,11 @@ LRESULT SCROLL_HandleScrollEvent(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar,
         {
             UINT pos;
 
+#ifdef __WIN32OS2__
+            if (!SCROLL_PtInRectEx( &rect, pt, vertical ) && !fOS2Look) pos = lastClickPos;
+#else
             if (!SCROLL_PtInRectEx( &rect, pt, vertical )) pos = lastClickPos;
+#endif
             else
             {
                 pt = SCROLL_ClipPos( &rect, pt );
