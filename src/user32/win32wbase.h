@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.85 2000-02-22 17:07:43 cbratschi Exp $ */
+/* $Id: win32wbase.h,v 1.86 2000-02-24 19:19:10 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -211,10 +211,10 @@ Win32BaseWindow *getParent();
          HWND   SetParent(HWND hwndNewParent);
 
          BOOL   IsChild(HWND hwndParent);
+
          HWND   GetTopWindow();
 Win32BaseWindow *GetTopParent();
-         BOOL   UpdateWindow();
-         BOOL   IsIconic();
+
          HWND   GetWindow(UINT uCmd);
  virtual BOOL   EnableWindow(BOOL fEnable);
          BOOL   CloseWindow();
@@ -232,8 +232,7 @@ Win32BaseWindow *GetTopParent();
          BOOL   IsWindowDestroyed()           { return fIsDestroyed; };
          BOOL   IsWindowEnabled();
          BOOL   IsWindowVisible();
-         //Created with CreateWindowExA or ExW
-//         BOOL   IsUnicode()                   { return isUnicode; };
+         BOOL   IsWindowIconic();
          //Window procedure type
          BOOL   IsWindowUnicode();
 
@@ -329,7 +328,6 @@ protected:
         DWORD   hotkey;
         LONG    lastHitTestVal;         //Last value returned by WM_NCHITTEST handler
 
-        BOOL    isIcon;
         BOOL    fFirstShow;
         BOOL    fIsDialog;
         BOOL    fIsModalDialog;
@@ -440,17 +438,10 @@ protected:
          HDC    ownDC;
 
          ULONG  EraseBkgndFlag:1,
-                PSEraseFlag:1,
-                SuppressEraseFlag:1,
-                filler:29;
+                filler:31;
 public:
-         VOID   setEraseBkgnd (BOOL erase, BOOL PSErase = FALSE)
-                    { EraseBkgndFlag = erase; PSEraseFlag = PSErase; }
-         VOID   setSuppressErase (BOOL erase = FALSE)
-                    { SuppressEraseFlag = erase; }
-         BOOL   isEraseBkgnd()   { return EraseBkgndFlag; }
-         BOOL   isPSErase()      { return EraseBkgndFlag | PSEraseFlag; }
-         BOOL   isSuppressErase() { return SuppressEraseFlag; }
+         VOID   setEraseBkgnd (BOOL erase) 	{ EraseBkgndFlag = erase; }
+         BOOL   needsEraseBkgnd()   		{ return EraseBkgndFlag; }
 };
 
 #endif //__cplusplus
