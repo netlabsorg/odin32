@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.12 1999-07-25 17:47:25 sandervl Exp $ */
+/* $Id: window.cpp,v 1.13 1999-07-26 09:01:34 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -64,6 +64,7 @@ HWND WIN32API CreateWindowExA(DWORD exStyle, LPCSTR className,
     cs.lpszName       = windowName;
     cs.lpszClass      = className;
     cs.dwExStyle      = exStyle;
+    dprintf(("CreateWindowExA: (%d,%d) (%d,%d), %x %x", x, y, width, height, style, exStyle));
     window = new Win32Window( &cs, classAtom, FALSE );
     if(window == NULL)
     {
@@ -615,11 +616,12 @@ BOOL WIN32API SetForegroundWindow(HWND arg1)
 //******************************************************************************
 BOOL WIN32API GetClientRect( HWND hwnd, PRECT pRect)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  GetClientRect of %X\n", hwnd);
-#endif
+ BOOL rc;
+
     hwnd = Win32Window::Win32ToOS2Handle(hwnd);
-    return OSLibWinQueryWindowRect(hwnd, pRect);
+    rc = OSLibWinQueryWindowRect(hwnd, pRect);
+    dprintf(("USER32:  GetClientRect of %X returned (%d,%d) (%d,%d)\n", hwnd, pRect->left, pRect->top, pRect->right, pRect->bottom));
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
