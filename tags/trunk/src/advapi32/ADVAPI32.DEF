@@ -1,4 +1,4 @@
-; $Id: ADVAPI32.DEF,v 1.6 1999-08-13 00:30:34 phaller Exp $
+; $Id: ADVAPI32.DEF,v 1.7 1999-11-04 12:44:47 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY ADVAPI32 INITINSTANCE
@@ -22,6 +22,94 @@ IMPORTS
     _O32_RegSetValueEx   = PMWINX.555
 
 EXPORTS
+
+; ----------------------------------------------------------------------------
+; LSA
+; ----------------------------------------------------------------------------
+
+     LsaAddAccountRights                   = _LsaAddAccountRights@16
+     LsaClose                              = _LsaClose@4                              @243
+     LsaCreateTrustedDomainEx              = _LsaCreateTrustedDomainEx@20
+     LsaDeleteTrustedDomain                = _LsaDeleteTrustedDomain@8                @280
+     LsaEnumerateAccountRights             = _LsaEnumerateAccountRights@16
+     LsaEnumerateAccountsWithUserRight     = _LsaEnumerateAccountsWithUserRight@16
+     LsaEnumerateTrustedDomains            = _LsaEnumerateTrustedDomains@20
+     LsaEnumerateTrustedDomainsEx          = _LsaEnumerateTrustedDomainsEx@20
+     LsaFreeMemory                         = _LsaFreeMemory@4                         @241
+     LsaLookupNames                        = _LsaLookupNames@20                       @245
+     LsaLookupSids                         = _LsaLookupSids@20                        @240
+     LsaNtStatusToWinError                 = _LsaNtStatusToWinError@4
+     LsaOpenPolicy                         = _LsaOpenPolicy@16                        @239
+     LsaOpenTrustedDomainByName            = _LsaOpenTrustedDomainByName@16
+     LsaQueryInformationPolicy             = _LsaQueryInformationPolicy@12            @242
+     LsaQueryTrustedDomainInfo             = _LsaQueryTrustedDomainInfo@16
+     LsaQueryTrustedDomainInfoByName       = _LsaQueryTrustedDomainInfoByName@16
+     LsaRegisterPolicyChangeNotification   = _LsaRegisterPolicyChangeNotification@8
+     LsaRemoveAccountRights                = _LsaRemoveAccountRights@20
+     LsaRetrievePrivateData                = _LsaRetrievePrivateData@12
+     LsaSetInformationPolicy               = _LsaSetInformationPolicy@12              @244
+     LsaSetTrustedDomainInfo               = _LsaSetTrustedDomainInfo@16
+     LsaSetTrustedDomainInfoByName         = _LsaSetTrustedDomainInfoByName@16
+     LsaStorePrivateData                   = _LsaStorePrivateData@12
+     LsaUnregisterPolicyChangeNotification = _LsaUnregisterPolicyChangeNotification@8
+
+; ----------------------------------------------------------------------------
+; Registry
+; ----------------------------------------------------------------------------
+
+     RegCloseKey                           = _RegCloseKey@4                     @127
+     RegConnectRegistryA                   = _RegConnectRegistryA@12            @128
+     RegConnectRegistryW                   = _RegConnectRegistryW@12            @129
+     RegCreateKeyA                         = _RegCreateKeyA@12                  @130
+     RegCreateKeyExA                       = _RegCreateKeyExA@36                @131
+     RegCreateKeyExW                       = _RegCreateKeyExW@36                @132
+     RegCreateKeyW                         = _RegCreateKeyW@12                  @133
+     RegDeleteKeyA                         = _RegDeleteKeyA@8                   @134
+     RegDeleteKeyW                         = _RegDeleteKeyW@8                   @135
+     RegDeleteValueA                       = _RegDeleteValueA@8                 @136
+     RegDeleteValueW                       = _RegDeleteValueW@8                 @137
+     RegEnumKeyA                           = _RegEnumKeyA@16                    @138
+     RegEnumKeyExA                         = _RegEnumKeyExA@32                  @139
+     RegEnumKeyExW                         = _RegEnumKeyExW@32                  @140
+     RegEnumKeyW                           = _RegEnumKeyW@16                    @141
+     RegEnumValueA                         = _RegEnumValueA@32                  @142
+     RegEnumValueW                         = _RegEnumValueW@32                  @143
+     RegFlushKey                           = _RegFlushKey@4                     @144
+     RegGetKeySecurity                     = _RegGetKeySecurity@16              @145
+     RegLoadKeyA                           = _RegLoadKeyA@12                    @146
+     RegLoadKeyW                           = _RegLoadKeyW@12                    @147
+     RegNotifyChangeKeyValue               = _RegNotifyChangeKeyValue@20        @148
+     RegOpenKeyA                           = _RegOpenKeyA@12                    @149
+     RegOpenKeyExA                         = _RegOpenKeyExA@20                  @150
+     RegOpenKeyExW                         = _RegOpenKeyExW@20                  @151
+     RegOpenKeyW                           = _RegOpenKeyW@12                    @152
+     RegQueryInfoKeyA                      = _RegQueryInfoKeyA@48               @153
+     RegQueryInfoKeyW                      = _RegQueryInfoKeyW@48               @154
+     RegQueryMultipleValuesA               = _RegQueryMultipleValuesA@20        @155
+     RegQueryMultipleValuesW               = _RegQueryMultipleValuesW@20        @156
+     RegQueryValueA                        = _RegQueryValueA@16                 @157
+     RegQueryValueExA                      = _RegQueryValueExA@24               @158
+     RegQueryValueExW                      = _RegQueryValueExW@24               @159
+     RegQueryValueW                        = _RegQueryValueW@16                 @160
+;    RegRemapPreDefKey                     = _RegRemapPreDefKey@4               @161
+     RegReplaceKeyA                        = _RegReplaceKeyA@16                 @162
+     RegReplaceKeyW                        = _RegReplaceKeyW@16                 @163
+     RegRestoreKeyA                        = _RegRestoreKeyA@12                 @164
+     RegRestoreKeyW                        = _RegRestoreKeyW@12                 @165
+     RegSaveKeyA                           = _RegSaveKeyA@12                    @166
+     RegSaveKeyW                           = _RegSaveKeyW@12                    @167
+     RegSetKeySecurity                     = _RegSetKeySecurity@12              @168
+     RegSetValueA                          = _RegSetValueA@20                   @169
+     RegSetValueExA                        = _RegSetValueExA@24                 @170
+     RegSetValueExW                        = _RegSetValueExW@24                 @171
+     RegSetValueW                          = _RegSetValueW@20                   @172
+     RegUnLoadKeyA                         = _RegUnLoadKeyA@8                   @173
+     RegUnLoadKeyW                         = _RegUnLoadKeyW@8                   @174
+
+
+; ----------------------------------------------------------------------------
+; Rest
+; ----------------------------------------------------------------------------
      AbortSystemShutdownA       = _AbortSystemShutdownA@4            @1
      AbortSystemShutdownW       = _AbortSystemShutdownW@4            @2
      AccessCheck                = _AccessCheck@32                    @3
@@ -148,54 +236,6 @@ EXPORTS
      QueryServiceStatus         = _QueryServiceStatus@8              @124
      ReadEventLogA              = _ReadEventLogA@28                  @125
      ReadEventLogW              = _ReadEventLogW@28                  @126
-     RegCloseKey                = _RegCloseKey@4                     @127
-     RegConnectRegistryA        = _RegConnectRegistryA@12            @128
-     RegConnectRegistryW        = _RegConnectRegistryW@12            @129
-     RegCreateKeyA              = _RegCreateKeyA@12                  @130
-     RegCreateKeyExA            = _RegCreateKeyExA@36                @131
-     RegCreateKeyExW            = _RegCreateKeyExW@36                @132
-     RegCreateKeyW              = _RegCreateKeyW@12                  @133
-     RegDeleteKeyA              = _RegDeleteKeyA@8                   @134
-     RegDeleteKeyW              = _RegDeleteKeyW@8                   @135
-     RegDeleteValueA            = _RegDeleteValueA@8                 @136
-     RegDeleteValueW            = _RegDeleteValueW@8                 @137
-     RegEnumKeyA                = _RegEnumKeyA@16                    @138
-     RegEnumKeyExA              = _RegEnumKeyExA@32                  @139
-     RegEnumKeyExW              = _RegEnumKeyExW@32                  @140
-     RegEnumKeyW                = _RegEnumKeyW@16                    @141
-     RegEnumValueA              = _RegEnumValueA@32                  @142
-     RegEnumValueW              = _RegEnumValueW@32                  @143
-     RegFlushKey                = _RegFlushKey@4                     @144
-     RegGetKeySecurity          = _RegGetKeySecurity@16              @145
-     RegLoadKeyA                = _RegLoadKeyA@12                    @146
-     RegLoadKeyW                = _RegLoadKeyW@12                    @147
-     RegNotifyChangeKeyValue    = _RegNotifyChangeKeyValue@20        @148
-     RegOpenKeyA                = _RegOpenKeyA@12                    @149
-     RegOpenKeyExA              = _RegOpenKeyExA@20                  @150
-     RegOpenKeyExW              = _RegOpenKeyExW@20                  @151
-     RegOpenKeyW                = _RegOpenKeyW@12                    @152
-     RegQueryInfoKeyA           = _RegQueryInfoKeyA@48               @153
-     RegQueryInfoKeyW           = _RegQueryInfoKeyW@48               @154
-     RegQueryMultipleValuesA    = _RegQueryMultipleValuesA@20        @155
-     RegQueryMultipleValuesW    = _RegQueryMultipleValuesW@20        @156
-     RegQueryValueA             = _RegQueryValueA@16                 @157
-     RegQueryValueExA           = _RegQueryValueExA@24               @158
-     RegQueryValueExW           = _RegQueryValueExW@24               @159
-     RegQueryValueW             = _RegQueryValueW@16                 @160
-;    RegRemapPreDefKey          = _RegRemapPreDefKey@4               @161
-     RegReplaceKeyA             = _RegReplaceKeyA@16                 @162
-     RegReplaceKeyW             = _RegReplaceKeyW@16                 @163
-     RegRestoreKeyA             = _RegRestoreKeyA@12                 @164
-     RegRestoreKeyW             = _RegRestoreKeyW@12                 @165
-     RegSaveKeyA                = _RegSaveKeyA@12                    @166
-     RegSaveKeyW                = _RegSaveKeyW@12                    @167
-     RegSetKeySecurity          = _RegSetKeySecurity@12              @168
-     RegSetValueA               = _RegSetValueA@20                   @169
-     RegSetValueExA             = _RegSetValueExA@24                 @170
-     RegSetValueExW             = _RegSetValueExW@24                 @171
-     RegSetValueW               = _RegSetValueW@20                   @172
-     RegUnLoadKeyA              = _RegUnLoadKeyA@8                   @173
-     RegUnLoadKeyW              = _RegUnLoadKeyW@8                   @174
      RegisterEventSourceA       = _RegisterEventSourceA@8            @175
      RegisterEventSourceW       = _RegisterEventSourceW@8            @176
      RegisterServiceCtrlHandlerA  = _RegisterServiceCtrlHandlerA@8   @177

@@ -1,7 +1,8 @@
- /* $Id: ChangeLog,v 1.408 1999-11-04 10:56:26 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.409 1999-11-04 12:46:20 phaller Exp $ */
 
  99-11-04: Patrick Haller <phaller@gmx.net>
 	- WNETAP32:	Add:	numerous undocumented functions stubbed
+	- ADVAPI32:	Add:	LsaXXX-functions stubbed
 
  99-11-03: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
 	- Makefiles: Changes to build the libraries first
