@@ -1,5 +1,3 @@
-/* $Id: misc.h,v 1.18 2000-09-15 13:23:23 sandervl Exp $ */
-
 /*
  * Miscellaneous definitions
  * Debug prototypes and macros
@@ -16,25 +14,6 @@
 #ifdef __cplusplus
       extern "C" {
 #endif
-
-/* enable support for the _interrupt() statement */
-#if (defined(__IBMCPP__) || defined(__IBMC__))
-#  include <builtin.h>
-#ifdef DEBUG
-  #define DebugInt3()	_interrupt(3)
-#else
-  #define DebugInt3()
-#endif
-
-#else
-#ifdef DEBUG
-  #define DebugInt3()	_asm int 3;
-#else
-  #define DebugInt3()
-#endif
-
-#endif
-
 
 #ifdef DEBUG
 #ifdef PRIVATE_LOGGING
@@ -118,6 +97,34 @@ int  SYSTEM DebugErrorBox(ULONG  iErrorCode,
 //them when the dll is loaded (open) and the exitlist handler is called (close)
 void OpenPrivateLogFiles();
 void ClosePrivateLogFiles();
+
+/* enable support for the _interrupt() statement */
+#if (defined(__IBMCPP__) || defined(__IBMC__))
+#  include <builtin.h>
+#ifdef DEBUG
+#ifdef __cplusplus
+void inline BreakPoint(char *szFile, char *szFunction)
+{
+  dprintf(("BREAKPOINT %s %s", szFile, szFunction));
+  _interrupt(3);
+}
+  #define DebugInt3()	BreakPoint(__FILE__, __FUNCTION__)
+
+#else
+  #define DebugInt3()	_interrupt(3)
+#endif
+#else
+  #define DebugInt3()
+#endif
+
+#else
+#ifdef DEBUG
+  #define DebugInt3()	_asm int 3;
+#else
+  #define DebugInt3()
+#endif
+
+#endif
 
 #ifdef __cplusplus
         }
