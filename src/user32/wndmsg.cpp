@@ -1,4 +1,4 @@
-/* $Id: wndmsg.cpp,v 1.19 2002-12-18 12:28:08 sandervl Exp $ */
+/* $Id: wndmsg.cpp,v 1.20 2004-01-30 22:10:25 bird Exp $ */
 /*
  * Win32 window message text function for OS/2
  *
@@ -19,7 +19,7 @@
 #define DBG_LOCALLOG	DBG_wndmsg
 #include "dbglocal.h"
 
-#ifdef DEBUG
+#ifdef DEBUG_LOGGING
 typedef struct
 {
     LPSTR pszMsg;
