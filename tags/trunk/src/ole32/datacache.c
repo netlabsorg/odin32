@@ -1,13 +1,8 @@
-/* $Id: datacache.cpp,v 1.3 2000-09-17 10:31:02 davidr Exp $ */
-/* 
- *  OLE 2 Data cache
- * 
- * 21/9/99
- * 
- * Copyright 1999 David J. Raison
- * 
- * Direct port of Wine Implementation
- *   Copyright 1999  Francis Beaudet
+/*
+ *	OLE 2 Data cache
+ *
+ *      Copyright 1999  Francis Beaudet
+ *      Copyright 2000  Abey George
  *
  * NOTES:
  *    The OLE2 data cache supports a whole whack of
@@ -29,21 +24,30 @@
  *  -  I haven't found any good documentation on the real usage of
  *     the streams created by the data cache. In particular, How to
  *     determine what the XXX stands for in the stream name
- *     "\002OlePresXXX". I have an intuition that This is related to
- *     the cached aspect of the object but I'm not sure it could
- *     just be a counter.
+ *     "\002OlePresXXX". It appears to just be a counter.
  *  -  Also, I don't know the real content of the presentation stream
  *     header. I was able to figure-out where the extent of the object 
- *     was stored but that's about it.
+ *     was stored and the aspect, but that's about it.
  */
-
-#include "ole32.h"
-#include "heapstring.h"
+#include <assert.h>
+#include <string.h>
+#include "windef.h"
+#include "winbase.h"
+#include "wingdi.h"
+#include "winuser.h"
+#include "winerror.h"
+#include "wine/obj_base.h"
+#include "wine/obj_misc.h"
+#include "wine/obj_storage.h"
+#include "wine/obj_moniker.h"
+#include "wine/obj_dataobject.h"
+#include "wine/obj_oleview.h"
+#include "wine/obj_cache.h"
+#include "wine/unicode.h"
+#include "ole2.h"
 #include "debugtools.h"
 
-#include <assert.h>
-
-DEFAULT_DEBUG_CHANNEL(ole)
+DEFAULT_DEBUG_CHANNEL(ole);
 
 /****************************************************************************
  * PresentationDataHeader
@@ -55,14 +59,14 @@ DEFAULT_DEBUG_CHANNEL(ole)
  */
 typedef struct PresentationDataHeader
 {
-  DWORD unknown1;
-  DWORD unknown2;
-  DWORD unknown3;
-  DWORD unknown4;
-  DWORD unknown5;
+  DWORD unknown1;	/* -1 */
+  DWORD unknown2;	/* 3, possibly CF_METAFILEPICT */
+  DWORD unknown3;	/* 4, possibly TYMED_ISTREAM */
+  DVASPECT dvAspect;
+  DWORD unknown5;	/* -1 */
 
   DWORD unknown6;
-  DWORD unknown7;
+  DWORD unknown7;	/* 0 */
   DWORD dwObjectExtentX;
   DWORD dwObjectExtentY;
   DWORD dwSize;
@@ -84,7 +88,7 @@ struct DataCache
   ICOM_VTABLE(IOleCacheControl)* lpvtbl6;
 
   /*
-   * Reference count of This object
+   * Reference count of this object
    */
   ULONG ref;
 
@@ -101,7 +105,7 @@ struct DataCache
   IStorage* presentationStorage;
 
   /*
-   * The user of This object can setup ONE advise sink
+   * The user of this object can setup ONE advise sink
    * connection with the object. These parameters describe
    * that connection.
    */
@@ -115,16 +119,16 @@ typedef struct DataCache DataCache;
 
 /*
  * Here, I define utility macros to help with the casting of the 
- * "This" parameter.
+ * "this" parameter.
  * There is a version to accomodate all of the VTables implemented
- * by This object.
+ * by this object.
  */
-#define _ICOM_THIS_From_IDataObject(class,name)       class* This = (class*)name;
-#define _ICOM_THIS_From_NDIUnknown(class, name)       class* This = (class*)(((char*)name)-sizeof(void*)); 
-#define _ICOM_THIS_From_IPersistStorage(class, name)  class* This = (class*)(((char*)name)-2*sizeof(void*)); 
-#define _ICOM_THIS_From_IViewObject2(class, name)     class* This = (class*)(((char*)name)-3*sizeof(void*)); 
-#define _ICOM_THIS_From_IOleCache2(class, name)       class* This = (class*)(((char*)name)-4*sizeof(void*)); 
-#define _ICOM_THIS_From_IOleCacheControl(class, name) class* This = (class*)(((char*)name)-5*sizeof(void*)); 
+#define _ICOM_THIS_From_IDataObject(class,name)       class* this = (class*)name;
+#define _ICOM_THIS_From_NDIUnknown(class, name)       class* this = (class*)(((char*)name)-sizeof(void*)); 
+#define _ICOM_THIS_From_IPersistStorage(class, name)  class* this = (class*)(((char*)name)-2*sizeof(void*)); 
+#define _ICOM_THIS_From_IViewObject2(class, name)     class* this = (class*)(((char*)name)-3*sizeof(void*)); 
+#define _ICOM_THIS_From_IOleCache2(class, name)       class* this = (class*)(((char*)name)-4*sizeof(void*)); 
+#define _ICOM_THIS_From_IOleCacheControl(class, name) class* this = (class*)(((char*)name)-5*sizeof(void*)); 
 
 /*
  * Prototypes for the methods of the DataCache class.
@@ -132,15 +136,15 @@ typedef struct DataCache DataCache;
 static DataCache* DataCache_Construct(REFCLSID  clsid,
 				      LPUNKNOWN pUnkOuter);
 static void       DataCache_Destroy(DataCache* ptrToDestroy);
-static HRESULT    DataCache_ReadPresentationData(DataCache*              This,
+static HRESULT    DataCache_ReadPresentationData(DataCache*              this,
 						 DWORD                   drawAspect,
 						 PresentationDataHeader* header);
-static HRESULT    DataCache_FindPresStreamName(DataCache* This,
-					       DWORD      drawAspect,
-					       OLECHAR*   buffer);
-static HMETAFILE  DataCache_ReadPresMetafile(DataCache* This,
+static HRESULT    DataCache_OpenPresStream(DataCache *this,
+					   DWORD      drawAspect,
+					   IStream  **pStm);
+static HMETAFILE  DataCache_ReadPresMetafile(DataCache* this,
 					     DWORD      drawAspect);
-static void       DataCache_FireOnViewChange(DataCache* This,
+static void       DataCache_FireOnViewChange(DataCache* this,
 					     DWORD      aspect,
 					     LONG       lindex);
 
@@ -270,7 +274,7 @@ static HRESULT WINAPI DataCache_GetColorSet(
 	    void*           pvAspect, 
 	    DVTARGETDEVICE* ptd, 
 	    HDC             hicTargetDevice, 
-	    tagLOGPALETTE**    ppColorSet);
+	    LOGPALETTE**    ppColorSet);
 static HRESULT WINAPI DataCache_Freeze(
             IViewObject2*   iface,
 	    DWORD           dwDrawAspect,
@@ -449,13 +453,8 @@ HRESULT WINAPI CreateDataCache(
 {
   DataCache* newCache = NULL;
   HRESULT    hr       = S_OK;
-  char       xclsid[50];
-  char       xriid[50];
 
-  WINE_StringFromCLSID((LPCLSID)rclsid,xclsid);
-  WINE_StringFromCLSID((LPCLSID)riid,xriid);
-
-  TRACE("(%s, %p, %s, %p)\n", xclsid, pUnkOuter, xriid, ppvObj);
+  TRACE("(%s, %p, %s, %p)\n", debugstr_guid(rclsid), pUnkOuter, debugstr_guid(riid), ppvObj);
 
   /*
    * Sanity check
@@ -466,7 +465,7 @@ HRESULT WINAPI CreateDataCache(
   *ppvObj = 0;
 
   /*
-   * If This cache is constructed for aggregation, make sure
+   * If this cache is constructed for aggregation, make sure
    * the caller is requesting the IUnknown interface.
    * This is necessary because it's the only time the non-delegating
    * IUnknown pointer can be returned to the outside.
@@ -510,7 +509,7 @@ static DataCache* DataCache_Construct(
   /*
    * Allocate space for the object.
    */
-  newObject = (DataCache *)HeapAlloc(GetProcessHeap(), 0, sizeof(DataCache));
+  newObject = HeapAlloc(GetProcessHeap(), 0, sizeof(DataCache));
 
   if (newObject==0)
     return newObject;
@@ -526,7 +525,7 @@ static DataCache* DataCache_Construct(
   newObject->lpvtbl6 = &DataCache_IOleCacheControl_VTable;
   
   /*
-   * Start with one reference count. The caller of This function 
+   * Start with one reference count. The caller of this function 
    * must release the interface pointer when it is done.
    */
   newObject->ref = 1;
@@ -583,44 +582,33 @@ static void DataCache_Destroy(
  * into the given structure.
  *
  * Param:
- *   This       - Pointer to the DataCache object
+ *   this       - Pointer to the DataCache object
  *   drawAspect - The aspect of the object that we wish to draw.
- *   header     - The structure containing information about This
+ *   header     - The structure containing information about this
  *                aspect of the object.
  */
 static HRESULT DataCache_ReadPresentationData(
-  DataCache*              This,
+  DataCache*              this,
   DWORD                   drawAspect,
   PresentationDataHeader* header)
 {
   IStream* presStream = NULL;
-  OLECHAR  streamName[20];
   HRESULT  hres;
 
   /*
-   * Get the name for the presentation stream.
+   * Open the presentation stream.
    */
-  hres = DataCache_FindPresStreamName(
-           This,
+  hres = DataCache_OpenPresStream(
+           this,
 	   drawAspect,
-	   streamName);
-
-  if (FAILED(hres))
-    return hres;
-
-  /*
-   * Open the stream and read the header.
-   */
-  hres = IStorage_OpenStream(
-           This->presentationStorage,
-	   streamName,
-	   NULL,
-	   STGM_READ | STGM_SHARE_EXCLUSIVE,
-	   0,
 	   &presStream);
 
   if (FAILED(hres))
     return hres;
+
+  /*
+   * Read the header.
+   */
 
   hres = IStream_Read(
            presStream,
@@ -652,22 +640,22 @@ static HRESULT DataCache_ReadPresentationData(
  * See IAdviseSink::OnViewChange for more details.
  */
 static void DataCache_FireOnViewChange(
-  DataCache* This,
+  DataCache* this,
   DWORD      aspect,
   LONG       lindex)
 {
-  TRACE("(%p, %lx, %ld)\n", This, aspect, lindex);
+  TRACE("(%p, %lx, %ld)\n", this, aspect, lindex);
 
   /*
    * The sink supplies a filter when it registers
    * we make sure we only send the notifications when that
    * filter matches.
    */
-  if ((This->sinkAspects & aspect) != 0)
+  if ((this->sinkAspects & aspect) != 0)
   {
-    if (This->sinkInterface != NULL)
+    if (this->sinkInterface != NULL)
     {
-      IAdviseSink_OnViewChange(This->sinkInterface,
+      IAdviseSink_OnViewChange(this->sinkInterface,
 			       aspect,
 			       lindex);
 
@@ -675,46 +663,119 @@ static void DataCache_FireOnViewChange(
        * Some sinks want to be unregistered automatically when
        * the first notification goes out.
        */
-      if ( (This->sinkAdviseFlag & ADVF_ONLYONCE) != 0)
+      if ( (this->sinkAdviseFlag & ADVF_ONLYONCE) != 0)
       {
-	IAdviseSink_Release(This->sinkInterface);
+	IAdviseSink_Release(this->sinkInterface);
 
-	This->sinkInterface  = NULL;
-	This->sinkAspects    = 0;
-	This->sinkAdviseFlag = 0;
+	this->sinkInterface  = NULL;
+	this->sinkAspects    = 0;
+	this->sinkAdviseFlag = 0;
       }
     }
   }
 }
 
+/* Helper for DataCache_OpenPresStream */
+static BOOL DataCache_IsPresentationStream(const STATSTG *elem)
+{
+    /* The presentation streams have names of the form "\002OlePresXXX",
+     * where XXX goes from 000 to 999. */
+    static const WCHAR OlePres[] = { 2,'O','l','e','P','r','e','s' };
+
+    LPCWSTR name = elem->pwcsName;
+
+    return (elem->type == STGTY_STREAM)
+	&& (elem->cbSize.s.LowPart >= sizeof(PresentationDataHeader))
+	&& (strlenW(name) == 11)
+	&& (strncmpW(name, OlePres, 8) == 0)
+	&& (name[8] >= '0') && (name[8] <= '9')
+	&& (name[9] >= '0') && (name[9] <= '9')
+	&& (name[10] >= '0') && (name[10] <= '9');
+}
+
 /************************************************************************
- * DataCache_ReadPresentationData
+ * DataCache_OpenPresStream
  *
- * This method will read information for the requested presentation 
- * into the given structure.
+ * This method will find the stream for the given presentation. It makes
+ * no attempt at fallback.
  *
  * Param:
- *   This       - Pointer to the DataCache object
+ *   this       - Pointer to the DataCache object
  *   drawAspect - The aspect of the object that we wish to draw.
- *   header     - The structure containing information about This
- *                aspect of the object.
+ *   pStm       - A returned stream. It points to the beginning of the
+ *              - presentation data, including the header.
  *
- * NOTE:
- *   This method only supports the DVASPECT_CONTENT aspect.
+ * Errors:
+ *   S_OK		The requested stream has been opened.
+ *   OLE_E_BLANK	The requested stream could not be found.
+ *   Quite a few others I'm too lazy to map correctly.
+ *
+ * Notes:
+ *   Algorithm:	Scan the elements of the presentation storage, looking
+ *		for presentation streams. For each presentation stream,
+ *		load the header and check to see if the aspect maches.
+ *
+ *   If a fallback is desired, just opening the first presentation stream
+ *   is a possibility.
  */
-static HRESULT DataCache_FindPresStreamName(
-  DataCache* This,
+static HRESULT DataCache_OpenPresStream(
+  DataCache *this,
   DWORD      drawAspect,
-  OLECHAR*   buffer)
+  IStream  **ppStm)
 {
-  OLECHAR name[]={ 2, 'O', 'l', 'e', 'P', 'r', 'e', 's', '0', '0', '0', 0};
+    STATSTG elem;
+    IEnumSTATSTG *pEnum;
+    HRESULT hr;
 
-  if (drawAspect!=DVASPECT_CONTENT)
-    return E_FAIL;
+    if (!ppStm) return E_POINTER;
 
-  memcpy(buffer, name, sizeof(name));
+    hr = IStorage_EnumElements(this->presentationStorage, 0, NULL, 0, &pEnum);
+    if (FAILED(hr)) return hr;
 
-  return S_OK;
+    while ((hr = IEnumSTATSTG_Next(pEnum, 1, &elem, NULL)) == S_OK)
+    {
+	if (DataCache_IsPresentationStream(&elem))
+	{
+	    IStream *pStm;
+
+	    hr = IStorage_OpenStream(this->presentationStorage, elem.pwcsName,
+				     NULL, STGM_READ | STGM_SHARE_EXCLUSIVE, 0,
+				     &pStm);
+	    if (SUCCEEDED(hr))
+	    {
+		PresentationDataHeader header;
+		ULONG actual_read;
+
+		hr = IStream_Read(pStm, &header, sizeof(header), &actual_read);
+
+		/* can't use SUCCEEDED(hr): S_FALSE counts as an error */
+		if (hr == S_OK && actual_read == sizeof(header)
+		    && header.dvAspect == drawAspect)
+		{
+		    /* Rewind the stream before returning it. */
+		    LARGE_INTEGER offset;
+		    offset.s.LowPart = 0;
+		    offset.s.HighPart = 0;
+		    IStream_Seek(pStm, offset, STREAM_SEEK_SET, NULL);
+
+		    *ppStm = pStm;
+
+		    CoTaskMemFree(elem.pwcsName);
+		    IEnumSTATSTG_Release(pEnum);
+
+		    return S_OK;
+		}
+
+		IStream_Release(pStm);
+	    }
+	}
+
+	CoTaskMemFree(elem.pwcsName);
+    }
+
+    IEnumSTATSTG_Release(pEnum);
+
+    return (hr == S_FALSE ? OLE_E_BLANK : hr);
 }
 
 /************************************************************************
@@ -724,7 +785,7 @@ static HRESULT DataCache_FindPresStreamName(
  * into the given structure.
  *
  * Param:
- *   This       - Pointer to the DataCache object
+ *   this       - Pointer to the DataCache object
  *   drawAspect - The aspect of the object that we wish to draw.
  *
  * Returns:
@@ -732,37 +793,22 @@ static HRESULT DataCache_FindPresStreamName(
  *   it will return 0 if not.
  */
 static HMETAFILE DataCache_ReadPresMetafile(
-  DataCache* This,
+  DataCache* this,
   DWORD      drawAspect)
 {
   LARGE_INTEGER offset;
   IStream*      presStream = NULL;
-  OLECHAR       streamName[20];
   HRESULT       hres;
   void*         metafileBits;
   STATSTG       streamInfo;
   HMETAFILE     newMetafile = 0;
 
   /*
-   * Get the name for the presentation stream.
+   * Open the presentation stream.
    */
-  hres = DataCache_FindPresStreamName(
-           This, 
+  hres = DataCache_OpenPresStream(
+           this, 
 	   drawAspect,
-	   streamName);
-
-  if (FAILED(hres))
-    return hres;
-
-  /*
-   * Open the stream and read the header.
-   */
-  hres = IStorage_OpenStream(
-           This->presentationStorage,
-	   streamName,
-	   NULL,
-	   STGM_READ | STGM_SHARE_EXCLUSIVE,
-	   0,
 	   &presStream);
 
   if (FAILED(hres))
@@ -778,8 +824,8 @@ static HMETAFILE DataCache_ReadPresMetafile(
   /*
    * Skip the header
    */
-  offset.HighPart = 0;
-  offset.LowPart  = sizeof(PresentationDataHeader);
+  offset.s.HighPart = 0;
+  offset.s.LowPart  = sizeof(PresentationDataHeader);
 
   hres = IStream_Seek(
            presStream,
@@ -787,12 +833,14 @@ static HMETAFILE DataCache_ReadPresMetafile(
 	   STREAM_SEEK_SET,
 	   NULL);
 
+  streamInfo.cbSize.s.LowPart -= offset.s.LowPart;
+
   /*
    * Allocate a buffer for the metafile bits.
    */
   metafileBits = HeapAlloc(GetProcessHeap(), 
 			   0, 
-			   streamInfo.cbSize.LowPart);
+			   streamInfo.cbSize.s.LowPart);
 
   /*
    * Read the metafile bits.
@@ -800,7 +848,7 @@ static HMETAFILE DataCache_ReadPresMetafile(
   hres = IStream_Read(
 	   presStream,
 	   metafileBits,
-	   streamInfo.cbSize.LowPart,
+	   streamInfo.cbSize.s.LowPart,
 	   NULL);
 
   /*
@@ -808,7 +856,7 @@ static HMETAFILE DataCache_ReadPresMetafile(
    */
   if (SUCCEEDED(hres))
   {
-    newMetafile = SetMetaFileBitsEx(streamInfo.cbSize.LowPart, (const BYTE *)metafileBits);
+    newMetafile = SetMetaFileBitsEx(streamInfo.cbSize.s.LowPart, metafileBits);
   }
 
   /*
@@ -846,7 +894,7 @@ static HRESULT WINAPI DataCache_NDIUnknown_QueryInterface(
   /*
    * Perform a sanity check on the parameters.
    */
-  if ( (This==0) || (ppvObject==0) )
+  if ( (this==0) || (ppvObject==0) )
     return E_INVALIDARG;
   
   /*
@@ -855,7 +903,7 @@ static HRESULT WINAPI DataCache_NDIUnknown_QueryInterface(
   *ppvObject = 0;
 
   /*
-   * Compare the riid with the interface IDs implemented by This object.
+   * Compare the riid with the interface IDs implemented by this object.
    */
   if (memcmp(&IID_IUnknown, riid, sizeof(IID_IUnknown)) == 0) 
   {
@@ -863,26 +911,26 @@ static HRESULT WINAPI DataCache_NDIUnknown_QueryInterface(
   }
   else if (memcmp(&IID_IDataObject, riid, sizeof(IID_IDataObject)) == 0) 
   {
-    *ppvObject = (IDataObject*)&(This->lpvtbl1);
+    *ppvObject = (IDataObject*)&(this->lpvtbl1);
   }
   else if ( (memcmp(&IID_IPersistStorage, riid, sizeof(IID_IPersistStorage)) == 0)  ||
 	    (memcmp(&IID_IPersist, riid, sizeof(IID_IPersist)) == 0) )
   {
-    *ppvObject = (IPersistStorage*)&(This->lpvtbl3);
+    *ppvObject = (IPersistStorage*)&(this->lpvtbl3);
   }
   else if ( (memcmp(&IID_IViewObject, riid, sizeof(IID_IViewObject)) == 0) ||
 	    (memcmp(&IID_IViewObject2, riid, sizeof(IID_IViewObject2)) == 0) )
   {
-    *ppvObject = (IViewObject2*)&(This->lpvtbl4);
+    *ppvObject = (IViewObject2*)&(this->lpvtbl4);
   }
   else if ( (memcmp(&IID_IOleCache, riid, sizeof(IID_IOleCache)) == 0) ||
 	    (memcmp(&IID_IOleCache2, riid, sizeof(IID_IOleCache2)) == 0) )
   {
-    *ppvObject = (IOleCache2*)&(This->lpvtbl5);
+    *ppvObject = (IOleCache2*)&(this->lpvtbl5);
   }
   else if (memcmp(&IID_IOleCacheControl, riid, sizeof(IID_IOleCacheControl)) == 0) 
   {
-    *ppvObject = (IOleCacheControl*)&(This->lpvtbl6);
+    *ppvObject = (IOleCacheControl*)&(this->lpvtbl6);
   }
 
   /*
@@ -890,14 +938,7 @@ static HRESULT WINAPI DataCache_NDIUnknown_QueryInterface(
    */
   if ((*ppvObject)==0)
   {
-    char clsid[50];
-
-    WINE_StringFromCLSID((LPCLSID)riid,clsid);
-    
-    WARN(
-	 "() : asking for un supported interface %s\n", 
-	 clsid);
-
+    WARN( "() : asking for unsupported interface %s\n", debugstr_guid(riid));
     return E_NOINTERFACE;
   }
   
@@ -923,9 +964,9 @@ static ULONG WINAPI DataCache_NDIUnknown_AddRef(
 {
   _ICOM_THIS_From_NDIUnknown(DataCache, iface);
 
-  This->ref++;
+  this->ref++;
 
-  return This->ref;
+  return this->ref;
 }
 
 /************************************************************************
@@ -942,21 +983,21 @@ static ULONG WINAPI DataCache_NDIUnknown_Release(
   _ICOM_THIS_From_NDIUnknown(DataCache, iface);
 
   /*
-   * Decrease the reference count on This object.
+   * Decrease the reference count on this object.
    */
-  This->ref--;
+  this->ref--;
 
   /*
    * If the reference count goes down to 0, perform suicide.
    */
-  if (This->ref==0)
+  if (this->ref==0)
   {
-    DataCache_Destroy(This);
+    DataCache_Destroy(this);
 
     return 0;
   }
   
-  return This->ref;
+  return this->ref;
 }
 
 /*********************************************************
@@ -976,7 +1017,7 @@ static HRESULT WINAPI DataCache_IDataObject_QueryInterface(
 {
   _ICOM_THIS_From_IDataObject(DataCache, iface);
 
-  return IUnknown_QueryInterface(This->outerUnknown, riid, ppvObject);  
+  return IUnknown_QueryInterface(this->outerUnknown, riid, ppvObject);  
 }
 
 /************************************************************************
@@ -989,7 +1030,7 @@ static ULONG WINAPI DataCache_IDataObject_AddRef(
 {
   _ICOM_THIS_From_IDataObject(DataCache, iface);
 
-  return IUnknown_AddRef(This->outerUnknown);  
+  return IUnknown_AddRef(this->outerUnknown);  
 }
 
 /************************************************************************
@@ -1002,7 +1043,7 @@ static ULONG WINAPI DataCache_IDataObject_Release(
 {
   _ICOM_THIS_From_IDataObject(DataCache, iface);
 
-  return IUnknown_Release(This->outerUnknown);  
+  return IUnknown_Release(this->outerUnknown);  
 }
 
 /************************************************************************
@@ -1077,7 +1118,7 @@ static HRESULT WINAPI DataCache_GetData(
 
     /* Create the metafile and place it in the STGMEDIUM structure */
 
-    hMetaFile = SetMetaFileBitsEx(pdh.dwSize, (BYTE *)mfBits);
+    hMetaFile = SetMetaFileBitsEx(pdh.dwSize, mfBits);
 
     hGlobalMF = GlobalAlloc(GMEM_SHARE|GMEM_MOVEABLE, sizeof(METAFILEPICT));
     mfPict = (METAFILEPICT *)GlobalLock(hGlobalMF);
@@ -1131,7 +1172,7 @@ static HRESULT WINAPI DataCache_QueryGetData(
 /************************************************************************
  * DataCache_EnumFormatEtc (IDataObject)
  *
- * The data cache doesn't implement This method.
+ * The data cache doesn't implement this method.
  *
  * See Windows documentation for more details on IDataObject methods.
  */
@@ -1177,7 +1218,7 @@ static HRESULT WINAPI DataCache_IDataObject_SetData(
 /************************************************************************
  * DataCache_EnumFormatEtc (IDataObject)
  *
- * The data cache doesn't implement This method.
+ * The data cache doesn't implement this method.
  *
  * See Windows documentation for more details on IDataObject methods.
  */
@@ -1255,7 +1296,7 @@ static HRESULT WINAPI DataCache_IPersistStorage_QueryInterface(
 {
   _ICOM_THIS_From_IPersistStorage(DataCache, iface);
 
-  return IUnknown_QueryInterface(This->outerUnknown, riid, ppvObject);  
+  return IUnknown_QueryInterface(this->outerUnknown, riid, ppvObject);  
 }
 
 /************************************************************************
@@ -1268,7 +1309,7 @@ static ULONG WINAPI DataCache_IPersistStorage_AddRef(
 {
   _ICOM_THIS_From_IPersistStorage(DataCache, iface);
 
-  return IUnknown_AddRef(This->outerUnknown);  
+  return IUnknown_AddRef(this->outerUnknown);  
 }
 
 /************************************************************************
@@ -1281,13 +1322,13 @@ static ULONG WINAPI DataCache_IPersistStorage_Release(
 {
   _ICOM_THIS_From_IPersistStorage(DataCache, iface);
 
-  return IUnknown_Release(This->outerUnknown);  
+  return IUnknown_Release(this->outerUnknown);  
 }
 
 /************************************************************************
  * DataCache_GetClassID (IPersistStorage)
  *
- * The data cache doesn't implement This method.
+ * The data cache doesn't implement this method.
  *
  * See Windows documentation for more details on IPersistStorage methods.
  */
@@ -1350,18 +1391,17 @@ static HRESULT WINAPI DataCache_Load(
 
   TRACE("(%p, %p)\n", iface, pStg);
 
-  if (This->presentationStorage != NULL)
+  if (this->presentationStorage != NULL)
   {
-    IStorage_Release(This->presentationStorage);
+    IStorage_Release(this->presentationStorage);
   }
 
-  This->presentationStorage = pStg;
+  this->presentationStorage = pStg;
 
-  if (This->presentationStorage != NULL)
+  if (this->presentationStorage != NULL)
   {
-    IStorage_AddRef(This->presentationStorage);
+    IStorage_AddRef(this->presentationStorage);
   }
-
   return S_OK;
 }
 
@@ -1385,9 +1425,9 @@ static HRESULT WINAPI DataCache_Save(
   TRACE("(%p, %p, %d)\n", iface, pStg, fSameAsLoad);
 
   if ( (!fSameAsLoad) && 
-       (This->presentationStorage!=NULL) )
+       (this->presentationStorage!=NULL) )
   {
-    return IStorage_CopyTo(This->presentationStorage,
+    return IStorage_CopyTo(this->presentationStorage,
 			   0,
 			   NULL,
 			   NULL,
@@ -1413,15 +1453,17 @@ static HRESULT WINAPI DataCache_SaveCompleted(
 
   if (pStgNew)
   {
-      /*
-       * First, make sure we get our hands off any storage we have.
-       */
-      DataCache_HandsOffStorage(iface);
+  /*
+   * First, make sure we get our hands off any storage we have.
+   */
 
-      /*
-       * Then, attach to the new storage.
-       */
-      DataCache_Load(iface, pStgNew);
+  DataCache_HandsOffStorage(iface);
+
+  /*
+   * Then, attach to the new storage.
+   */
+
+  DataCache_Load(iface, pStgNew);
   }
 
   return S_OK;
@@ -1442,10 +1484,10 @@ static HRESULT WINAPI DataCache_HandsOffStorage(
 
   TRACE("(%p)\n", iface);
 
-  if (This->presentationStorage != NULL)
+  if (this->presentationStorage != NULL)
   {
-    IStorage_Release(This->presentationStorage);
-    This->presentationStorage = NULL;
+    IStorage_Release(this->presentationStorage);
+    this->presentationStorage = NULL;
   }
 
   return S_OK;
@@ -1468,7 +1510,7 @@ static HRESULT WINAPI DataCache_IViewObject2_QueryInterface(
 {
   _ICOM_THIS_From_IViewObject2(DataCache, iface);
 
-  return IUnknown_QueryInterface(This->outerUnknown, riid, ppvObject);  
+  return IUnknown_QueryInterface(this->outerUnknown, riid, ppvObject);  
 }
 
 /************************************************************************
@@ -1481,7 +1523,7 @@ static ULONG WINAPI DataCache_IViewObject2_AddRef(
 {
   _ICOM_THIS_From_IViewObject2(DataCache, iface);
 
-  return IUnknown_AddRef(This->outerUnknown);  
+  return IUnknown_AddRef(this->outerUnknown);  
 }
 
 /************************************************************************
@@ -1494,7 +1536,7 @@ static ULONG WINAPI DataCache_IViewObject2_Release(
 {
   _ICOM_THIS_From_IViewObject2(DataCache, iface);
 
-  return IUnknown_Release(This->outerUnknown);  
+  return IUnknown_Release(this->outerUnknown);  
 }
 
 /************************************************************************
@@ -1542,19 +1584,11 @@ static HRESULT WINAPI DataCache_Draw(
   if (lprcBounds==NULL)
     return E_INVALIDARG;
 
-/** Hack for WPO2000 release. */
-  if (dwDrawAspect != DVASPECT_CONTENT)
-  {
-      FIXME("only CONTENT aspect implemented\n");
-      dwDrawAspect = DVASPECT_CONTENT;
-  }
-/***/
-
   /*
    * First, we need to retrieve the dimensions of the
    * image in the metafile.
    */
-  hres = DataCache_ReadPresentationData(This,
+  hres = DataCache_ReadPresentationData(this,
 					dwDrawAspect,
 					&presData);
 
@@ -1564,8 +1598,11 @@ static HRESULT WINAPI DataCache_Draw(
   /*
    * Then, we can extract the metafile itself from the cached
    * data.
+   *
+   * FIXME Unless it isn't a metafile. I think it could be any CF_XXX type,
+   * particularly CF_DIB.
    */
-  presMetafile = DataCache_ReadPresMetafile(This,
+  presMetafile = DataCache_ReadPresMetafile(this,
 					    dwDrawAspect);
 
   /*
@@ -1627,7 +1664,7 @@ static HRESULT WINAPI DataCache_GetColorSet(
 	    void*           pvAspect, 
 	    DVTARGETDEVICE* ptd, 
 	    HDC             hicTargetDevice, 
-	    tagLOGPALETTE**    ppColorSet)
+	    LOGPALETTE**    ppColorSet)
 {
   FIXME("stub\n");
   return E_NOTIMPL;
@@ -1656,7 +1693,7 @@ static HRESULT WINAPI DataCache_Unfreeze(
  * DataCache_SetAdvise (IViewObject2)
  *
  * This sets-up an advisory sink with the data cache. When the object's
- * view changes, This sink is called.
+ * view changes, this sink is called.
  *
  * See Windows documentation for more details on IViewObject2 methods.
  */
@@ -1671,14 +1708,14 @@ static HRESULT WINAPI DataCache_SetAdvise(
   TRACE("(%p, %lx, %lx, %p)\n", iface, aspects, advf, pAdvSink);
 
   /*
-   * A call to This function removes the previous sink
+   * A call to this function removes the previous sink
    */
-  if (This->sinkInterface != NULL)
+  if (this->sinkInterface != NULL)
   {
-    IAdviseSink_Release(This->sinkInterface);
-    This->sinkInterface  = NULL;
-    This->sinkAspects    = 0; 
-    This->sinkAdviseFlag = 0;
+    IAdviseSink_Release(this->sinkInterface);
+    this->sinkInterface  = NULL;
+    this->sinkAspects    = 0; 
+    this->sinkAdviseFlag = 0;
   }
 
   /*
@@ -1686,11 +1723,11 @@ static HRESULT WINAPI DataCache_SetAdvise(
    */
   if (pAdvSink!=NULL)
   {
-    This->sinkInterface  = pAdvSink;
-    This->sinkAspects    = aspects; 
-    This->sinkAdviseFlag = advf;    
+    this->sinkInterface  = pAdvSink;
+    this->sinkAspects    = aspects; 
+    this->sinkAdviseFlag = advf;    
 
-    IAdviseSink_AddRef(This->sinkInterface);
+    IAdviseSink_AddRef(this->sinkInterface);
   }
 
   /*
@@ -1699,7 +1736,7 @@ static HRESULT WINAPI DataCache_SetAdvise(
    */
   if (advf & ADVF_PRIMEFIRST)
   {
-    DataCache_FireOnViewChange(This,
+    DataCache_FireOnViewChange(this,
 			       DVASPECT_CONTENT,
 			       -1);
   }
@@ -1729,14 +1766,14 @@ static HRESULT WINAPI DataCache_GetAdvise(
    * Just copy all the requested values.
    */
   if (pAspects!=NULL)
-    *pAspects = This->sinkAspects;
+    *pAspects = this->sinkAspects;
 
   if (pAdvf!=NULL)
-    *pAdvf = This->sinkAdviseFlag;
+    *pAdvf = this->sinkAdviseFlag;
 
   if (ppAdvSink!=NULL)
   {
-    IAdviseSink_QueryInterface(This->sinkInterface, 
+    IAdviseSink_QueryInterface(this->sinkInterface, 
 			       &IID_IAdviseSink, 
 			       (void**)ppAdvSink);
   }
@@ -1747,7 +1784,7 @@ static HRESULT WINAPI DataCache_GetAdvise(
 /************************************************************************
  * DataCache_GetExtent (IViewObject2)
  *
- * This method retrieves the "natural" size of This cached object.
+ * This method retrieves the "natural" size of this cached object.
  *
  * See Windows documentation for more details on IViewObject2 methods.
  */
@@ -1795,7 +1832,7 @@ static HRESULT WINAPI DataCache_GetExtent(
    * Get the presentation information from the 
    * cache.
    */
-  hres = DataCache_ReadPresentationData(This,
+  hres = DataCache_ReadPresentationData(this,
 					dwDrawAspect,
 					&presData);
 
@@ -1832,7 +1869,7 @@ static HRESULT WINAPI DataCache_IOleCache2_QueryInterface(
 {
   _ICOM_THIS_From_IOleCache2(DataCache, iface);
 
-  return IUnknown_QueryInterface(This->outerUnknown, riid, ppvObject);  
+  return IUnknown_QueryInterface(this->outerUnknown, riid, ppvObject);  
 }
 
 /************************************************************************
@@ -1845,7 +1882,7 @@ static ULONG WINAPI DataCache_IOleCache2_AddRef(
 {
   _ICOM_THIS_From_IOleCache2(DataCache, iface);
 
-  return IUnknown_AddRef(This->outerUnknown);  
+  return IUnknown_AddRef(this->outerUnknown);  
 }
 
 /************************************************************************
@@ -1858,7 +1895,7 @@ static ULONG WINAPI DataCache_IOleCache2_Release(
 {
   _ICOM_THIS_From_IOleCache2(DataCache, iface);
 
-  return IUnknown_Release(This->outerUnknown);  
+  return IUnknown_Release(this->outerUnknown);  
 }
 
 static HRESULT WINAPI DataCache_Cache(
@@ -1941,7 +1978,7 @@ static HRESULT WINAPI DataCache_IOleCacheControl_QueryInterface(
 {
   _ICOM_THIS_From_IOleCacheControl(DataCache, iface);
 
-  return IUnknown_QueryInterface(This->outerUnknown, riid, ppvObject);  
+  return IUnknown_QueryInterface(this->outerUnknown, riid, ppvObject);  
 }
 
 /************************************************************************
@@ -1954,7 +1991,7 @@ static ULONG WINAPI DataCache_IOleCacheControl_AddRef(
 {
   _ICOM_THIS_From_IOleCacheControl(DataCache, iface);
 
-  return IUnknown_AddRef(This->outerUnknown);  
+  return IUnknown_AddRef(this->outerUnknown);  
 }
 
 /************************************************************************
@@ -1967,7 +2004,7 @@ static ULONG WINAPI DataCache_IOleCacheControl_Release(
 {
   _ICOM_THIS_From_IOleCacheControl(DataCache, iface);
 
-  return IUnknown_Release(This->outerUnknown);  
+  return IUnknown_Release(this->outerUnknown);  
 }
 
 static HRESULT WINAPI DataCache_OnRun(

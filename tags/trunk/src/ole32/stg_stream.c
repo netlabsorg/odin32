@@ -9,7 +9,6 @@
  * Copyright 1999 Thuy Nguyen
  */
 #ifdef __WIN32OS2__
-#define WINE_LARGE_INTEGER
 
 #include <odin.h>
 #include "ole32.h"
