@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.65 1999-10-28 19:09:17 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.66 1999-10-28 23:51:05 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1038,12 +1038,14 @@ ULONG Win32BaseWindow::MsgButton(ULONG msg, ULONG ncx, ULONG ncy, ULONG clx, ULO
 {
  ULONG win32msg;
  ULONG win32ncmsg;
+ BOOL  fClick = FALSE;
 
     dprintf(("MsgButton to (%d,%d)", ncx, ncy));
     switch(msg) {
         case BUTTON_LEFTDOWN:
                 win32msg = WM_LBUTTONDOWN;
                 win32ncmsg = WM_NCLBUTTONDOWN;
+                fClick = TRUE;
                 break;
         case BUTTON_LEFTUP:
                 win32msg = WM_LBUTTONUP;
@@ -1067,6 +1069,7 @@ ULONG Win32BaseWindow::MsgButton(ULONG msg, ULONG ncx, ULONG ncy, ULONG clx, ULO
         case BUTTON_RIGHTDOWN:
                 win32msg = WM_RBUTTONDOWN;
                 win32ncmsg = WM_NCRBUTTONDOWN;
+                fClick = TRUE;
                 break;
         case BUTTON_RIGHTDBLCLICK:
                 if (windowClass && windowClass->getClassLongA(GCL_STYLE) & CS_DBLCLKS)
@@ -1086,6 +1089,7 @@ ULONG Win32BaseWindow::MsgButton(ULONG msg, ULONG ncx, ULONG ncy, ULONG clx, ULO
         case BUTTON_MIDDLEDOWN:
                 win32msg = WM_MBUTTONDOWN;
                 win32ncmsg = WM_NCMBUTTONDOWN;
+                fClick = TRUE;
                 break;
         case BUTTON_MIDDLEDBLCLICK:
                 if (windowClass && windowClass->getClassLongA(GCL_STYLE) & CS_DBLCLKS)
@@ -1101,6 +1105,27 @@ ULONG Win32BaseWindow::MsgButton(ULONG msg, ULONG ncx, ULONG ncy, ULONG clx, ULO
         default:
                 dprintf(("Win32BaseWindow::Button: invalid msg!!!!"));
                 return 1;
+    }
+
+    if(fClick) {
+        /* Activate the window if needed */
+        HWND hwndTop = (getTopParent()) ? getTopParent()->getWindowHandle() : 0;
+
+        if (getWindowHandle() != GetActiveWindow())
+        {
+                LONG ret = SendMessageA(WM_MOUSEACTIVATE, hwndTop,
+                                        MAKELONG( HTCLIENT, win32msg ) );
+
+#if 0
+                if ((ret == MA_ACTIVATEANDEAT) || (ret == MA_NOACTIVATEANDEAT))
+                         eatMsg = TRUE;
+#endif
+                if(((ret == MA_ACTIVATE) || (ret == MA_ACTIVATEANDEAT))
+                   && hwndTop != GetForegroundWindow() )
+                {
+                      SetActiveWindow();
+                }
+        }
     }
 
     SendInternalMessageA(WM_SETCURSOR, Win32Hwnd, MAKELONG(lastHitTestVal, win32ncmsg));

@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.20 1999-10-24 22:56:09 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.21 1999-10-28 23:51:05 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -71,7 +71,7 @@ Win32Dialog::Win32Dialog(HINSTANCE hInst, LPCSTR dlgTemplate, HWND owner,
     {
         /* The font height must be negative as it is a point size */
         /* (see CreateFont() documentation in the Windows SDK).   */
-        hUserFont = CreateFontW(dlgInfo.pointSize*2, 0, 0, 0,
+        hUserFont = CreateFontW(-(dlgInfo.pointSize*3)/2, 0, 0, 0,
                             dlgInfo.weight, dlgInfo.italic, FALSE,
                             FALSE, DEFAULT_CHARSET, 0, 0, PROOF_QUALITY,
                             FF_DONTCARE, (LPCWSTR)dlgInfo.faceName );
@@ -79,8 +79,8 @@ Win32Dialog::Win32Dialog(HINSTANCE hInst, LPCSTR dlgTemplate, HWND owner,
         {
             SIZE charSize;
             getCharSize(hUserFont,&charSize);
-            xBaseUnit = charSize.cx;
-            yBaseUnit = charSize.cy;
+            xUnit = charSize.cx;
+            yUnit = charSize.cy;
         }
     }
 
