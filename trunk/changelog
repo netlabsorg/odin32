@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1728 2001-10-08 23:25:10 phaller Exp $ */
+/* $Id: changelog,v 1.1729 2001-10-09 20:24:34 sandervl Exp $ */
+
+ 2001-10-09: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Image header page must be readonly
+                o Temporarily disabled high memory usage for heap
 
  2001-10-08: Patrick Haller <patrick.haller@innotek.de>
     - USER32:   o enabled WH_KEYBOARD_LL hook, seems to work
