@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.49 2000-06-28 18:08:36 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.50 2000-07-20 18:07:00 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -675,6 +675,14 @@ BOOL Win32PeLdrImage::allocSections(ULONG reservedMem)
  APIRET rc;
  ULONG  baseAddress;
 
+  realBaseAddress = 0;
+
+  //Allocated in peldr.dll
+  if(reservedMem && reservedMem == oh.ImageBase) {
+	realBaseAddress = oh.ImageBase;
+	return TRUE;
+  }
+
   //SvL: We don't care where the image is loaded for resource lookup
   if(fh.Characteristics & IMAGE_FILE_RELOCS_STRIPPED && loadType == REAL_LOAD) {
     	return allocFixedMem(reservedMem);
@@ -754,14 +762,6 @@ BOOL Win32PeLdrImage::allocFixedMem(ULONG reservedMem)
  ULONG  diff, i, baseAddress;
  APIRET rc;
  BOOL   allocFlags = flAllocMem;
-
-  realBaseAddress = 0;
-
-  //Allocated in peldr.dll
-  if(reservedMem && reservedMem == oh.ImageBase) {
-	realBaseAddress = oh.ImageBase;
-	return TRUE;
-  }
 
   //Reserve enough space to store 4096 pointers to 1MB memory chunks
   memallocs = (ULONG *)malloc(4096*sizeof(ULONG *));
