@@ -1,2 +1,2 @@
 nmake clean
-nmake /a /i
+nmake DEBUG=1 /a /i
