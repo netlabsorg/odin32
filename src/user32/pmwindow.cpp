@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.3 1999-09-21 08:24:04 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.4 1999-09-21 17:05:36 dengert Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -26,6 +26,7 @@
 #include "oslibutil.h"
 #include "oslibgdi.h"
 #include "oslibmsg.h"
+#include "dc.h"
 
 HMQ  hmq = 0;                             /* Message queue handle         */
 HAB  hab = 0;
@@ -221,7 +222,6 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
            wp.hwndInsertAfter = wndAfter->getWindowHandle();
         }
         classStyle = win32wnd->getClass()->getStyle();
-//        if (yDelta != 0)
         if ((yDelta != 0) && ((classStyle & CS_VREDRAW_W) ||
            ((classStyle & CS_HREDRAW_W) && (pswp->cx != pswpo->cx))))
         {
@@ -230,29 +230,15 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
             int i = 0;
             HWND hwnd;
 
-            dprintf(("move children"));
             while ((hwnd = WinGetNextWindow(henum)) != NULLHANDLE)
             {
 #if 0
-               /* Do not move MDI clients.  MDI clients are a special case,
-                * even though they are bottom aligned they are always supposed
-                * to be the same size as their parent.  This code is an
-                * optimization and will not work correctly if the this
-                * assumption is incorrect.
-                */
-               WinBase *pBase = (WinBase *)WinQueryDAXData( hwnd );
-               if ( pBase && pBase->typeOf() == mdiClient )
+               if (mdiClient )
                {
                   continue;
                }
 #endif
-               // We don't know how many children we have so we'll move ten
-               // at a time.  Not very nice, I know.
                WinQueryWindowPos(hwnd, &(swp[i]));
-
-               // The SWP flags are all set but PM will ignore any
-               // superflous ones, so keep them as they contain useful
-               // minimise and maximise flags.
                swp[i].y += yDelta;
 
                if (i == 9)
@@ -268,7 +254,6 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
             WinEndEnumWindows(henum);
 
-            // Any remaining windows?
             if (i)
                WinSetMultWindowPos(GetThreadHAB(), swp, i);
         }
@@ -279,8 +264,9 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
     case WM_ERASEBACKGROUND:
     {
-        if(win32wnd->MsgEraseBackGround(0)) {
-                goto RunDefWndProc;
+        if (!win32wnd->isSupressErase()) {
+            BOOL erased = sendEraseBkgnd (win32wnd);
+            win32wnd->setEraseBkgnd (!erased, !erased);
         }
         break;
     }
@@ -557,7 +543,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     case WM_NEXTMENU:
 
     case WM_TIMER:
-	win32wnd->MsgTimer((ULONG)mp1);
+        win32wnd->MsgTimer((ULONG)mp1);
         goto RunDefWndProc;
 
     case WM_SETWINDOWPARAMS:
@@ -591,6 +577,15 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
     case WM_PAINT:
         dprintf(("OS2: WM_PAINT %x", hwnd));
+
+        if (WinQueryUpdateRect (hwnd, NULL)) {
+            if (!win32wnd->isSupressErase()) {
+                BOOL erased = sendEraseBkgnd (win32wnd);
+                win32wnd->setEraseBkgnd (!erased, !erased);
+            }
+        }
+        win32wnd->setSupressErase (FALSE);
+
         if(win32wnd->MsgPaint(0, 0)) {
                 goto RunDefWndProc;
         }

@@ -1,4 +1,4 @@
-/* $Id: dc.h,v 1.1 1999-09-15 23:18:49 sandervl Exp $ */
+/* $Id: dc.h,v 1.2 1999-09-21 17:03:29 dengert Exp $ */
 /*
  * public dc functions
  *
@@ -12,6 +12,7 @@
 #ifndef __DC_H__
 #define __DC_H__
 
+extern HDC sendEraseBkgnd (Win32BaseWindow *wnd);
 extern void releaseOwnDC (HDC hps);
 
 #endif //__DC_H__

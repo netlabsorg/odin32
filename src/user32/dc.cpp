@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.2 1999-09-16 18:00:43 dengert Exp $ */
+/* $Id: dc.cpp,v 1.3 1999-09-21 17:03:29 dengert Exp $ */
 
 /*
  * DC functions for USER32
@@ -738,7 +738,11 @@ dprintf (("USER32: BeginPaint(%x)", hWnd));
 
    pHps->hdcType = TYPE_3;
    lpps->hdc = (HDC)hps;
-   lpps->fErase = !wnd->MsgEraseBackGround(lpps->hdc);
+
+   if (wnd->isEraseBkgnd())
+       wnd->setEraseBkgnd (FALSE, !wnd->MsgEraseBackGround(lpps->hdc));
+   wnd->setSupressErase (FALSE);
+   lpps->fErase = wnd->isPSErase();
 
    if (!hPS_ownDC)
    {
@@ -1118,23 +1122,23 @@ BOOL WIN32API RedrawWindow (HWND hwnd, const RECT *pRect, HRGN hrgn, DWORD redra
 
    if (redraw & RDW_UPDATENOW_W) redraw &= ~RDW_ERASENOW_W;
 
-#if 0
    if (redraw & RDW_NOERASE_W)
-      setEraseBkgnd (FALSE);
+      wnd->setEraseBkgnd (FALSE);
 
    if (redraw & RDW_UPDATENOW_W)
-      setSupressErase (TRUE, FALSE);
+      wnd->setSupressErase (FALSE);
    else if (redraw & RDW_ERASENOW_W)
-      setSupressErase (FALSE, FALSE);
+      wnd->setSupressErase (FALSE);
+#if 0
    else
    {
       QMSG qmsg;
-      BOOL bErase;
+      BOOL erase;
 
-      bErase = (WinPeekMsg (HABX, &qmsg, hwnd, WM_PAINT, WM_PAINT, PM_REMOVE)
+      erase = (WinPeekMsg (HABX, &qmsg, hwnd, WM_PAINT, WM_PAINT, PM_REMOVE)
                 && (redraw & RDW_NOERASE_W) == 0);
 
-      setSupressErase (FALSE, !bErase);
+      wnd->setSupressErase (!erase);
    }
 
    if (redraw & (RDW_NOINTERNALPAINT_W | RDW_INTERNALPAINT_W))
@@ -1185,8 +1189,8 @@ BOOL WIN32API RedrawWindow (HWND hwnd, const RECT *pRect, HRGN hrgn, DWORD redra
 
    if (redraw & RDW_INVALIDATE_W)
    {
-//      if (redraw & RDW_ERASE_W)
-//         setEraseBkgnd (TRUE, TRUE);
+      if (redraw & RDW_ERASE_W)
+         wnd->setEraseBkgnd (TRUE, TRUE);
 
       if (!pRect && !hrgn)
          success = WinInvalidateRect (hwnd, NULL, IncludeChildren);
@@ -1215,8 +1219,8 @@ BOOL WIN32API RedrawWindow (HWND hwnd, const RECT *pRect, HRGN hrgn, DWORD redra
       if (redraw & RDW_UPDATENOW_W)
          wnd->MsgPaint (0, FALSE);
 
-//      else if ((redraw & RDW_ERASE_W) && (redraw & RDW_ERASENOW_W))
-//         setEraseBkgnd (FALSE, !sendEraseBkgnd (wnd));
+      else if ((redraw & RDW_ERASE_W) && (redraw & RDW_ERASENOW_W))
+         wnd->setEraseBkgnd (FALSE, !sendEraseBkgnd (wnd));
    }
    else if ((redraw & RDW_INTERNALPAINT_W) && !(redraw & RDW_INVALIDATE_W))
    {
@@ -1234,10 +1238,10 @@ error:
    if (hpsTemp)
       WinReleasePS (hpsTemp);
 
-//   if ((redraw & RDW_INVALIDATE_W) == 0)
-//      setSupressErase (FALSE, FALSE);
-//   else if ((redraw & RDW_ERASENOW_W) == RDW_ERASENOW_W)
-//      setSupressErase (FALSE, TRUE);
+   if ((redraw & RDW_INVALIDATE_W) == 0)
+      wnd->setSupressErase (FALSE);
+   else if ((redraw & RDW_ERASENOW_W) == RDW_ERASENOW_W)
+      wnd->setSupressErase (TRUE);
 
 //   if (!success)
 //      SET_ERROR_LAST();
