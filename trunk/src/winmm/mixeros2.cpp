@@ -1,4 +1,4 @@
-/* $Id: mixeros2.cpp,v 1.4 2002-05-25 17:19:41 sandervl Exp $ */
+/* $Id: mixeros2.cpp,v 1.5 2002-05-26 10:52:31 sandervl Exp $ */
 
 /*
  * OS/2 Mixer multimedia
@@ -291,22 +291,22 @@ BOOL OSLibMixSetRecSource(DWORD dwRecSrc, DWORD dwVolL, DWORD dwVolR)
     MIXSTRUCT mixstruct;
 
     switch(dwRecSrc) {
-    case MIX_CTRL_VOL_IN_W_MIC:
+    case MIXER_SRC_IN_W_MIC:
         idx = I90SRC_MIC;
         break;
-    case MIX_CTRL_VOL_IN_W_CD:
+    case MIXER_SRC_IN_W_CD:
         idx = I90SRC_CD;
         break;
-    case MIX_CTRL_VOL_IN_W_VIDEO:
+    case MIXER_SRC_IN_W_VIDEO:
         idx = I90SRC_VIDEO;
         break;
-    case MIX_CTRL_VOL_IN_W_AUX:
+    case MIXER_SRC_IN_W_AUX:
         idx = I90SRC_AUX;
         break;
-    case MIX_CTRL_VOL_IN_W_LINE:
+    case MIXER_SRC_IN_W_LINE:
         idx = I90SRC_LINE;
         break;
-    case MIX_CTRL_VOL_IN_W_PHONE:
+    case MIXER_SRC_IN_W_PHONE:
         idx = I90SRC_PHONE;
         break;
     default:
@@ -342,22 +342,22 @@ BOOL OSLibMixGetRecSource(DWORD *pdwRecSrc, DWORD *pdwVolL, DWORD *pdwVolR)
     }
     switch(mixstruct.VolumeL) {
     case I90SRC_MIC:
-        idx = MIX_CTRL_VOL_IN_W_MIC;
+        idx = MIXER_SRC_IN_W_MIC;
         break;
     case I90SRC_CD:
-        idx = MIX_CTRL_VOL_IN_W_CD;
+        idx = MIXER_SRC_IN_W_CD;
         break;
     case I90SRC_VIDEO:
-        idx = MIX_CTRL_VOL_IN_W_VIDEO;
+        idx = MIXER_SRC_IN_W_VIDEO;
         break;
     case I90SRC_AUX:
-        idx = MIX_CTRL_VOL_IN_W_AUX;
+        idx = MIXER_SRC_IN_W_AUX;
         break;
     case I90SRC_LINE:
-        idx = MIX_CTRL_VOL_IN_W_LINE;
+        idx = MIXER_SRC_IN_W_LINE;
         break;
     case I90SRC_PHONE:
-        idx = MIX_CTRL_VOL_IN_W_PHONE;
+        idx = MIXER_SRC_IN_W_PHONE;
         break;
     default:
         DebugInt3();

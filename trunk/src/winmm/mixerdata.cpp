@@ -1,4 +1,4 @@
-/* $Id: mixerdata.cpp,v 1.3 2002-05-25 17:19:41 sandervl Exp $ */
+/* $Id: mixerdata.cpp,v 1.4 2002-05-26 10:52:31 sandervl Exp $ */
 
 /*
  * Mixer multimedia
@@ -189,6 +189,14 @@ char *szCtrlName[MIX_CTRL_MAX][2] = {
         "MIDIVol",
         "Volume Control for MIDI Recording"
     },
+    {
+        "StereoMixVol",
+        "Volume Control for Stereo Mixer Recording",
+    },
+    {
+        "MonoMixVol",
+        "Volume Control for Mono Mixer Recording",
+    },
 };
 /******************************************************************************/
 /******************************************************************************/
@@ -252,6 +260,58 @@ char *szSourceName[MIXER_SRC_MAX][2] = {
   {
       "MIDI",
       "MIDI Synthesizer",
+  },
+  {
+      "MonoIn",
+      "Mono In",
+  },
+  {
+      "Phone",
+      "Telephone",
+  },
+  {
+      "Mic",
+      "Microphone",
+  },
+  {
+      "Line",
+      "Line",
+  },
+  {
+      "CD",
+      "CD-ROM",
+  },
+  {
+      "SPDIF",
+      "SPDIF",
+  },
+  {
+      "Video",
+      "Video",
+  },
+  {
+      "Aux",
+      "Auxiliary",
+  },
+  {
+      "Wave",
+      "Wave Out",
+  },
+  {
+      "Wavetable",
+      "Wavetable Synthesizer",
+  },
+  {
+      "MIDI",
+      "MIDI Synthesizer",
+  },
+  {
+      "StereoMix",
+      "Stereo Mixer",
+  },
+  {
+      "MonoMix",
+      "Mono Mixer",
   }
 };
 /******************************************************************************/

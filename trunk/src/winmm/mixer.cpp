@@ -1,4 +1,4 @@
-/* $Id: mixer.cpp,v 1.17 2002-05-25 17:19:40 sandervl Exp $ */
+/* $Id: mixer.cpp,v 1.18 2002-05-26 10:52:30 sandervl Exp $ */
 
 /*
  * Mixer functions
@@ -40,14 +40,12 @@
 #define DBG_LOCALLOG	DBG_mixer
 #include "dbglocal.h"
 
-static MIXERCONTROLA *mixerAddControl(MIXERLINEA *pDestLine, DWORD dwControl, MIXERLINEA *pSrcLine);
-static MIXERLINEA    *mixerAddSource(MIXERLINEA *pDestLine, DWORD dwSource);
-static MIXERLINEA    *mixerAddDestination(DWORD dwDest);
+static MIXERCONTROLA *mixerAddControl(DWORD dwControl, MIXERLINEA *pSrcLine);
+static MIXERLINEA    *mixerAddSource(MIXERDEST *pDestLine, DWORD dwSource);
+static MIXERDEST     *mixerAddDestination(DWORD dwDest);
 
 //array of destination mixer lines
-static MIXERLINEA    mixerDest[MAX_MIXER_DESTINATIONS]                          = {0};
-//array of connected sources to destinations
-static int           mixerDestInputs[MAX_MIXER_DESTINATIONS][MAX_MIXER_SOURCES] = {-1};
+static MIXERDEST     mixerDest[MAX_MIXER_DESTINATIONS];
 //array of source mixer lines
 static MIXERLINEA    mixerSource[MAX_MIXER_SOURCES]                             = {0};
 //array of controls connected to mixer lines
@@ -65,8 +63,6 @@ static int           nrDestinations    = 0;
 static int           nrSources         = 0;
 static int           nrControls        = 0;
 static int           nrLines           = 0;
-static int           nrLineOutInputs   = 0;
-static int           nrWaveInInputs    = 0;
 
 /******************************************************************************/
 /******************************************************************************/
@@ -127,7 +123,7 @@ MMRESULT WINAPI mixerGetControlDetailsA(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS 
                 pDetails->dwValue = dwVolRight;
             }
             //todo > 2 channels
-            break;
+            return MMSYSERR_NOERROR;
         }
         case MIXERCONTROL_CONTROLTYPE_BASS:
             dprintf(("MIXERCONTROL_CONTROLTYPE_BASS"));
@@ -153,7 +149,7 @@ MMRESULT WINAPI mixerGetControlDetailsA(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS 
                 pDetails->dwValue = fMute;
             }
             //todo > 2 channels
-            break;
+            return MMSYSERR_NOERROR;
         }
         case MIXERCONTROL_CONTROLTYPE_CUSTOM:
             dprintf(("MIXERCONTROL_CONTROLTYPE_CUSTOM"));
@@ -228,7 +224,8 @@ MMRESULT WINAPI mixerGetControlDetailsA(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS 
             DebugInt3();
             return MIXERR_INVALCONTROL;
         }
-        break;
+        return MIXERR_INVALCONTROL;
+
     case MIXER_GETCONTROLDETAILSF_LISTTEXT:
     	dprintf(("MIXER_GETCONTROLDETAILSF_LISTTEXT %d", lpmcd->dwControlID));
         if(lpmcd->dwControlID >= nrControls) {
@@ -615,7 +612,7 @@ MMRESULT WINAPI mixerGetLineInfoA(HMIXEROBJ hmxobj, LPMIXERLINEA lpMl, DWORD fdw
             dprintf(("ERROR: Invalid destination %d", lpMl->dwDestination));
             return MMSYSERR_INVALPARAM;
         }
-        memcpy(lpMl, &mixerDest[lpMl->dwDestination], sizeof(MIXERLINEA));
+        memcpy(lpMl, &mixerDest[lpMl->dwDestination].line, sizeof(MIXERLINEA));
         dprintf(("found line %s (%s) id %d connections %d controls %d", lpMl->szName, lpMl->szShortName, lpMl->dwLineID, lpMl->cConnections, lpMl->cControls));
     	break;
 
@@ -636,14 +633,14 @@ MMRESULT WINAPI mixerGetLineInfoA(HMIXEROBJ hmxobj, LPMIXERLINEA lpMl, DWORD fdw
             return MIXERR_INVALLINE;
         }
         if(lpMl->dwSource >= MIXER_SRC_MAX) {
-            dprintf(("ERROR: Invalid destination %d", lpMl->dwDestination));
+            dprintf(("ERROR: Invalid source %d", lpMl->dwSource));
             return MIXERR_INVALLINE;
         }
-        if(mixerDestInputs[lpMl->dwDestination][lpMl->dwSource] == -1) {
-            dprintf(("ERROR: Invalid destination %d", lpMl->dwDestination));
+        if(mixerDest[lpMl->dwDestination].Sources[lpMl->dwSource] == -1) {
+            dprintf(("ERROR: Invalid destination/source combo (%d,%d)", lpMl->dwDestination, lpMl->dwSource));
             return MIXERR_INVALLINE;
         }
-        memcpy(lpMl, &mixerSource[mixerDestInputs[lpMl->dwDestination][lpMl->dwSource]], sizeof(MIXERLINEA));
+        memcpy(lpMl, &mixerSource[mixerDest[lpMl->dwDestination].Sources[lpMl->dwSource]], sizeof(MIXERLINEA));
         dprintf(("found line %s (%s) id %d connections %d controls %d", lpMl->szName, lpMl->szShortName, lpMl->dwLineID, lpMl->cConnections, lpMl->cControls));
     	break;
 
@@ -864,7 +861,6 @@ MMRESULT WINAPI mixerGetDevCapsA(UINT uMxId, LPMIXERCAPSA pmxcaps, UINT cbmxcaps
 
     //According to MSDN, nothing is copied when cbmxcaps is zero
     if(cbmxcaps >= sizeof(MIXERCAPSA)) {
-        // we have to fill in this thing
         pmxcaps->wMid = WINMM_MIXER_CAPS_WMID;                  /* manufacturer ID */
         pmxcaps->wPid = WINMM_MIXER_CAPS_WPID;                  /* product ID */
         pmxcaps->vDriverVersion = WINMM_MIXER_CAPS_VERSION;     /* version of the driver */
@@ -891,7 +887,6 @@ MMRESULT WINAPI mixerGetDevCapsW(UINT uMxId, LPMIXERCAPSW pmxcaps, UINT cbmxcaps
 
     //According to MSDN, nothing is copied when cbmxcaps is zero
     if(cbmxcaps >= sizeof(MIXERCAPSW)) {
-        // we have to fill in this thing
         pmxcaps->wMid = WINMM_MIXER_CAPS_WMID;                  /* manufacturer ID */
         pmxcaps->wPid = WINMM_MIXER_CAPS_WPID;                  /* product ID */
         pmxcaps->vDriverVersion = WINMM_MIXER_CAPS_VERSION;     /* version of the driver */
@@ -985,153 +980,178 @@ MMRESULT WINAPI mixerClose(HMIXER hmx)
 /******************************************************************************/
 BOOL mixerInit() 
 {
-    MIXERLINEA *pDestLine;
+    MIXERDEST *pDestLine;
     MIXERCONTROLA *pWaveInMux;
 
     if(!fMMPMAvailable) return TRUE;
 
     memset(mixerSourceLineId, -1, sizeof(mixerSourceLineId));
     memset(mixerLineControls, -1, sizeof(mixerLineControls));
-    memset(mixerDestInputs, -1, sizeof(mixerDestInputs));
+    memset(mixerDest, 0, sizeof(mixerDest));
+    for(int i=0;i<MIXER_DEST_MAX;i++) {
+        memset(mixerDest[i].Sources, -1, sizeof(mixerDest[i].Sources));
+    }
 
     if(OSLibMixerOpen() == FALSE) {
         //Line out destination
         pDestLine = mixerAddDestination(MIXER_DEST_LINEOUT);
-        mixerAddControl(pDestLine, MIX_CTRL_VOL_OUT_LINE, pDestLine);
-        mixerAddControl(pDestLine, MIX_CTRL_MUTE_OUT_LINE, pDestLine);
+        mixerAddControl(MIX_CTRL_VOL_OUT_LINE, &pDestLine->line);
+        mixerAddControl(MIX_CTRL_MUTE_OUT_LINE, &pDestLine->line);
 
         //WaveIn destination
         pDestLine  = mixerAddDestination(MIXER_DEST_WAVEIN);
-        pWaveInMux = mixerAddControl(pDestLine, MIX_CTRL_MUX_IN_W_SRC, pDestLine);
-        mixerAddControl(pDestLine, MIX_CTRL_VOL_IN_W_MIC, pDestLine);
-        mixerAddControl(pDestLine, MIX_CTRL_VOL_IN_W_LINE, pDestLine);
-        pWaveInMux->cMultipleItems = pDestLine->cConnections;
+        pWaveInMux = mixerAddControl(MIX_CTRL_MUX_IN_W_SRC, &pDestLine->line);
+        mixerAddControl(MIX_CTRL_VOL_IN_W_MIC, &pDestLine->line);
+        mixerAddControl(MIX_CTRL_VOL_IN_W_LINE, &pDestLine->line);
+        pWaveInMux->cMultipleItems = pDestLine->line.cConnections;
         return TRUE;
     }
 
     //Line out destination
     pDestLine = mixerAddDestination(MIXER_DEST_LINEOUT);
 
-    mixerAddControl(pDestLine, MIX_CTRL_VOL_OUT_LINE, pDestLine);
-    mixerAddControl(pDestLine, MIX_CTRL_MUTE_OUT_LINE, pDestLine);
+    mixerAddControl(MIX_CTRL_VOL_OUT_LINE, &pDestLine->line);
+    mixerAddControl(MIX_CTRL_MUTE_OUT_LINE, &pDestLine->line);
     if(OSLibMixIsControlPresent(MIX_CTRL_OUT_L_3DCENTER)) {
-        mixerAddControl(pDestLine, MIX_CTRL_OUT_L_3DCENTER, pDestLine);
+        mixerAddControl(MIX_CTRL_OUT_L_3DCENTER, &pDestLine->line);
     }
     if(OSLibMixIsControlPresent(MIX_CTRL_OUT_L_3DDEPTH)) {
-        mixerAddControl(pDestLine, MIX_CTRL_OUT_L_3DDEPTH, pDestLine);
+        mixerAddControl(MIX_CTRL_OUT_L_3DDEPTH, &pDestLine->line);
     }
     if(OSLibMixIsControlPresent(MIX_CTRL_OUT_L_TREBLE)) {
-        mixerAddControl(pDestLine, MIX_CTRL_OUT_L_TREBLE, pDestLine);
+        mixerAddControl(MIX_CTRL_OUT_L_TREBLE, &pDestLine->line);
     }
     if(OSLibMixIsControlPresent(MIX_CTRL_OUT_L_BASS)) {
-        mixerAddControl(pDestLine, MIX_CTRL_OUT_L_BASS, pDestLine);
+        mixerAddControl(MIX_CTRL_OUT_L_BASS, &pDestLine->line);
     }
 
     if(OSLibMixIsControlPresent(MIX_CTRL_VOL_IN_L_PCM)) {
-        MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_PCM);
-        mixerAddControl(pDestLine, MIX_CTRL_VOL_IN_L_PCM, pLine);
-        mixerAddControl(pDestLine, MIX_CTRL_MUTE_IN_L_PCM, pLine);
+        MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_L_PCM);
+        mixerAddControl(MIX_CTRL_VOL_IN_L_PCM, pLine);
+        mixerAddControl(MIX_CTRL_MUTE_IN_L_PCM, pLine);
     }
     if(OSLibMixIsControlPresent(MIX_CTRL_VOL_IN_L_WAVETABLE)) {
-        MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_WAVETABLE);
-        mixerAddControl(pDestLine, MIX_CTRL_VOL_IN_L_WAVETABLE, pLine);
-        mixerAddControl(pDestLine, MIX_CTRL_MUTE_IN_L_WAVETABLE, pLine);
+        MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_L_WAVETABLE);
+        mixerAddControl(MIX_CTRL_VOL_IN_L_WAVETABLE, pLine);
+        mixerAddControl(MIX_CTRL_MUTE_IN_L_WAVETABLE, pLine);
     }
     if(OSLibMixIsControlPresent(MIX_CTRL_VOL_IN_L_MIDI)) {
-        MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_MIDI);
-        mixerAddControl(pDestLine, MIX_CTRL_VOL_IN_L_MIDI, pLine);
-        mixerAddControl(pDestLine, MIX_CTRL_MUTE_IN_L_MIDI, pLine);
+        MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_L_MIDI);
+        mixerAddControl(MIX_CTRL_VOL_IN_L_MIDI, pLine);
+        mixerAddControl(MIX_CTRL_MUTE_IN_L_MIDI, pLine);
     }
     if(OSLibMixIsControlPresent(MIX_CTRL_VOL_IN_L_MIC)) {
-        MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_MIC);
-        mixerAddControl(pDestLine, MIX_CTRL_VOL_IN_L_MIC, pLine);
-        mixerAddControl(pDestLine, MIX_CTRL_MUTE_IN_L_MIC, pLine);
+        MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_L_MIC);
+        mixerAddControl(MIX_CTRL_VOL_IN_L_MIC, pLine);
+        mixerAddControl(MIX_CTRL_MUTE_IN_L_MIC, pLine);
         if(OSLibMixIsControlPresent(MIX_CTRL_BOOST_IN_L_MIC)) {
-            mixerAddControl(pDestLine, MIX_CTRL_BOOST_IN_L_MIC, pLine);
+            mixerAddControl(MIX_CTRL_BOOST_IN_L_MIC, pLine);
         }
     }
     if(OSLibMixIsControlPresent(MIX_CTRL_VOL_IN_L_LINE)) {
-        MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_LINE);
-        mixerAddControl(pDestLine, MIX_CTRL_VOL_IN_L_LINE, pLine);
-        mixerAddControl(pDestLine, MIX_CTRL_MUTE_IN_L_LINE, pLine);
+        MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_L_LINE);
+        mixerAddControl(MIX_CTRL_VOL_IN_L_LINE, pLine);
+        mixerAddControl(MIX_CTRL_MUTE_IN_L_LINE, pLine);
     }
     if(OSLibMixIsControlPresent(MIX_CTRL_VOL_IN_L_CD)) {
-        MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_CD);
-        mixerAddControl(pDestLine, MIX_CTRL_VOL_IN_L_CD, pLine);
-        mixerAddControl(pDestLine, MIX_CTRL_MUTE_IN_L_CD, pLine);
+        MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_L_CD);
+        mixerAddControl(MIX_CTRL_VOL_IN_L_CD, pLine);
+        mixerAddControl(MIX_CTRL_MUTE_IN_L_CD, pLine);
     }
     if(OSLibMixIsControlPresent(MIX_CTRL_VOL_IN_L_AUX)) {
-        MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_AUX);
-        mixerAddControl(pDestLine, MIX_CTRL_VOL_IN_L_AUX, pLine);
-        mixerAddControl(pDestLine, MIX_CTRL_MUTE_IN_L_AUX, pLine);
+        MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_L_AUX);
+        mixerAddControl(MIX_CTRL_VOL_IN_L_AUX, pLine);
+        mixerAddControl(MIX_CTRL_MUTE_IN_L_AUX, pLine);
     }
     if(OSLibMixIsControlPresent(MIX_CTRL_VOL_IN_L_SPDIF)) {
-        MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_SPDIF);
-        mixerAddControl(pDestLine, MIX_CTRL_VOL_IN_L_SPDIF, pLine);
-        mixerAddControl(pDestLine, MIX_CTRL_MUTE_IN_L_SPDIF, pLine);
+        MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_L_SPDIF);
+        mixerAddControl(MIX_CTRL_VOL_IN_L_SPDIF, pLine);
+        mixerAddControl(MIX_CTRL_MUTE_IN_L_SPDIF, pLine);
     }
     if(OSLibMixIsControlPresent(MIX_CTRL_VOL_IN_L_MONO)) {
-        MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_MONOIN);
-        mixerAddControl(pDestLine, MIX_CTRL_VOL_IN_L_MONO, pLine);
-        mixerAddControl(pDestLine, MIX_CTRL_MUTE_IN_L_MONO, pLine);
+        MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_L_MONOIN);
+        mixerAddControl(MIX_CTRL_VOL_IN_L_MONO, pLine);
+        mixerAddControl(MIX_CTRL_MUTE_IN_L_MONO, pLine);
     }
     if(OSLibMixIsControlPresent(MIX_CTRL_VOL_IN_L_PHONE)) {
-        MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_PHONE);
-        mixerAddControl(pDestLine, MIX_CTRL_VOL_IN_L_PHONE, pLine);
-        mixerAddControl(pDestLine, MIX_CTRL_MUTE_IN_L_PHONE, pLine);
+        MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_L_PHONE);
+        mixerAddControl(MIX_CTRL_VOL_IN_L_PHONE, pLine);
+        mixerAddControl(MIX_CTRL_MUTE_IN_L_PHONE, pLine);
     }
     if(OSLibMixIsControlPresent(MIX_CTRL_VOL_IN_L_VIDEO)) {
-        MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_VIDEO);
-        mixerAddControl(pDestLine, MIX_CTRL_VOL_IN_L_VIDEO, pLine);
-        mixerAddControl(pDestLine, MIX_CTRL_MUTE_IN_L_VIDEO, pLine);
+        MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_L_VIDEO);
+        mixerAddControl(MIX_CTRL_VOL_IN_L_VIDEO, pLine);
+        mixerAddControl(MIX_CTRL_MUTE_IN_L_VIDEO, pLine);
     }
 
     //Wave In Destination
     if(OSLibMixIsControlPresent(MIX_CTRL_MUX_IN_W_SRC)) {
         pDestLine = mixerAddDestination(MIXER_DEST_WAVEIN);
-        pWaveInMux = mixerAddControl(pDestLine, MIX_CTRL_MUX_IN_W_SRC, pDestLine);
+        pWaveInMux = mixerAddControl(MIX_CTRL_MUX_IN_W_SRC, &pDestLine->line);
 
-        if(OSLibMixIsRecSourcePresent(MIX_CTRL_VOL_IN_W_MIC)) {
-            mixerAddControl(pDestLine, MIX_CTRL_VOL_IN_W_MIC, pDestLine);
+        if(OSLibMixIsRecSourcePresent(MIXER_SRC_IN_W_MIC)) {
+            MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_W_MIC);
+            mixerAddControl(MIX_CTRL_VOL_IN_W_MIC, pLine);
         }
-        if(OSLibMixIsRecSourcePresent(MIX_CTRL_VOL_IN_W_LINE)) {
-            mixerAddControl(pDestLine, MIX_CTRL_VOL_IN_W_LINE, pDestLine);
+        if(OSLibMixIsRecSourcePresent(MIXER_SRC_IN_W_LINE)) {
+            MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_W_LINE);
+            mixerAddControl(MIX_CTRL_VOL_IN_W_LINE, pLine);
         }
-        if(OSLibMixIsRecSourcePresent(MIX_CTRL_VOL_IN_W_CD)) {
-            mixerAddControl(pDestLine, MIX_CTRL_VOL_IN_W_CD, pDestLine);
+        if(OSLibMixIsRecSourcePresent(MIXER_SRC_IN_W_CD)) {
+            MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_W_CD);
+            mixerAddControl(MIX_CTRL_VOL_IN_W_CD, pLine);
         }
-        if(OSLibMixIsRecSourcePresent(MIX_CTRL_VOL_IN_W_AUX)) {
-            mixerAddControl(pDestLine, MIX_CTRL_VOL_IN_W_AUX, pDestLine);
+        if(OSLibMixIsRecSourcePresent(MIXER_SRC_IN_W_AUX)) {
+            MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_W_AUX);
+            mixerAddControl(MIX_CTRL_VOL_IN_W_AUX, pLine);
         }
-        if(OSLibMixIsRecSourcePresent(MIX_CTRL_VOL_IN_W_PCM)) {
-            mixerAddControl(pDestLine, MIX_CTRL_VOL_IN_W_PCM, pDestLine);
+        if(OSLibMixIsRecSourcePresent(MIXER_SRC_IN_W_PCM)) {
+            MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_W_PCM);
+            mixerAddControl(MIX_CTRL_VOL_IN_W_PCM, pLine);
         }
-        if(OSLibMixIsRecSourcePresent(MIX_CTRL_VOL_IN_W_WAVETABLE)) {
-            mixerAddControl(pDestLine, MIX_CTRL_VOL_IN_W_WAVETABLE, pDestLine);
+        if(OSLibMixIsRecSourcePresent(MIXER_SRC_IN_W_WAVETABLE)) {
+            MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_W_WAVETABLE);
+            mixerAddControl(MIX_CTRL_VOL_IN_W_WAVETABLE, pLine);
         }
-        if(OSLibMixIsRecSourcePresent(MIX_CTRL_VOL_IN_W_MIDI)) {
-            mixerAddControl(pDestLine, MIX_CTRL_VOL_IN_W_MIDI, pDestLine);
+        if(OSLibMixIsRecSourcePresent(MIXER_SRC_IN_W_MIDI)) {
+            MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_W_MIDI);
+            mixerAddControl(MIX_CTRL_VOL_IN_W_MIDI, pLine);
         }
-        if(OSLibMixIsRecSourcePresent(MIX_CTRL_VOL_IN_W_MONO)) {
-            mixerAddControl(pDestLine, MIX_CTRL_VOL_IN_W_MONO, pDestLine);
+        if(OSLibMixIsRecSourcePresent(MIXER_SRC_IN_W_MONOIN)) {
+            MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_W_MONOIN);
+            mixerAddControl(MIX_CTRL_VOL_IN_W_MONO, pLine);
         }
-        if(OSLibMixIsRecSourcePresent(MIX_CTRL_VOL_IN_W_PHONE)) {
-            mixerAddControl(pDestLine, MIX_CTRL_VOL_IN_W_PHONE, pDestLine);
+        if(OSLibMixIsRecSourcePresent(MIXER_SRC_IN_W_PHONE)) {
+            MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_W_PHONE);
+            mixerAddControl(MIX_CTRL_VOL_IN_W_PHONE, pLine);
         }
-        if(OSLibMixIsRecSourcePresent(MIX_CTRL_VOL_IN_W_SPDIF)) {
-            mixerAddControl(pDestLine, MIX_CTRL_VOL_IN_W_SPDIF, pDestLine);
+        if(OSLibMixIsRecSourcePresent(MIXER_SRC_IN_W_SPDIF)) {
+            MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_W_SPDIF);
+            mixerAddControl(MIX_CTRL_VOL_IN_W_SPDIF, pLine);
         }
-        if(OSLibMixIsRecSourcePresent(MIX_CTRL_VOL_IN_W_VIDEO)) {
-            mixerAddControl(pDestLine, MIX_CTRL_VOL_IN_W_VIDEO, pDestLine);
+        if(OSLibMixIsRecSourcePresent(MIXER_SRC_IN_W_VIDEO)) {
+            MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_W_VIDEO);
+            mixerAddControl(MIX_CTRL_VOL_IN_W_VIDEO, pLine);
         }
-        pWaveInMux->cMultipleItems = pDestLine->cConnections;
+        if(OSLibMixIsRecSourcePresent(MIXER_SRC_IN_W_STEREOMIX)) {
+            MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_W_STEREOMIX);
+            mixerAddControl(MIX_CTRL_VOL_IN_W_STEREOMIX, pLine);
+        }
+        if(OSLibMixIsRecSourcePresent(MIXER_SRC_IN_W_MONOMIX)) {
+            MIXERLINEA *pLine = mixerAddSource(pDestLine, MIXER_SRC_IN_W_MONOMIX);
+            mixerAddControl(MIX_CTRL_VOL_IN_W_MONOMIX, pLine);
+        }
+        pWaveInMux->cMultipleItems    = pDestLine->line.cConnections;
+        pWaveInMux->Bounds.s.lMinimum = 0;
+        pWaveInMux->Bounds.s.lMaximum = pDestLine->line.cConnections;
+        pWaveInMux->Metrics.cSteps    = pDestLine->line.cConnections;
     }
 
     //SPDIF destination
     if(OSLibMixIsControlPresent(MIX_CTRL_VOL_OUT_SPDIF)) {
         pDestLine = mixerAddDestination(MIXER_DEST_SPDIFOUT);
-        mixerAddControl(pDestLine, MIX_CTRL_VOL_OUT_SPDIF, pDestLine);
-        mixerAddControl(pDestLine, MIX_CTRL_MUTE_OUT_SPDIF, pDestLine);
+        mixerAddControl(MIX_CTRL_VOL_OUT_SPDIF, &pDestLine->line);
+        mixerAddControl(MIX_CTRL_MUTE_OUT_SPDIF, &pDestLine->line);
     }
 
     return TRUE;
@@ -1144,7 +1164,7 @@ void mixerExit()
 }
 /******************************************************************************/
 /******************************************************************************/
-static MIXERLINEA *mixerAddSource(MIXERLINEA *pDestLine, DWORD dwSource)
+static MIXERLINEA *mixerAddSource(MIXERDEST *pDestLine, DWORD dwSource)
 {
     MIXERLINEA *pline = &mixerSource[nrSources];
 
@@ -1167,57 +1187,68 @@ static MIXERLINEA *mixerAddSource(MIXERLINEA *pDestLine, DWORD dwSource)
     pline->Target.vDriverVersion = WINMM_MIXER_CAPS_VERSION;
 
     switch(dwSource) {
-    case MIXER_SRC_MONOIN:
-    case MIXER_SRC_PHONE:
+    case MIXER_SRC_IN_L_MONOIN:
+    case MIXER_SRC_IN_W_MONOIN:
+    case MIXER_SRC_IN_L_PHONE:
+    case MIXER_SRC_IN_W_PHONE:
         pline->cChannels       = 1;
         pline->dwComponentType = MIXERLINE_COMPONENTTYPE_SRC_TELEPHONE;
         pline->Target.dwType   = MIXERLINE_TARGETTYPE_UNDEFINED;
         break;
 
-    case MIXER_SRC_MIC:
+    case MIXER_SRC_IN_L_MIC:
+    case MIXER_SRC_IN_W_MIC:
         pline->cChannels       = 1;
         pline->dwComponentType = MIXERLINE_COMPONENTTYPE_SRC_MICROPHONE;
         pline->Target.dwType   = MIXERLINE_TARGETTYPE_UNDEFINED;
         break;
 
-    case MIXER_SRC_LINE:
+    case MIXER_SRC_IN_L_LINE:
+    case MIXER_SRC_IN_W_LINE:
         pline->cChannels       = 2;
         pline->dwComponentType = MIXERLINE_COMPONENTTYPE_SRC_LINE;
         pline->Target.dwType   = MIXERLINE_TARGETTYPE_UNDEFINED;
         break;
 
-    case MIXER_SRC_CD:
+    case MIXER_SRC_IN_L_CD:
+    case MIXER_SRC_IN_W_CD:
         pline->cChannels       = 2;
         pline->dwComponentType = MIXERLINE_COMPONENTTYPE_SRC_COMPACTDISC;
         pline->Target.dwType   = MIXERLINE_TARGETTYPE_UNDEFINED;
         break;
 
-    case MIXER_SRC_SPDIF:
+    case MIXER_SRC_IN_L_SPDIF:
+    case MIXER_SRC_IN_W_SPDIF:
         pline->cChannels       = 2;
         pline->dwComponentType = MIXERLINE_COMPONENTTYPE_SRC_DIGITAL;
         pline->Target.dwType   = MIXERLINE_TARGETTYPE_UNDEFINED;
         break;
 
-    case MIXER_SRC_VIDEO:
+    case MIXER_SRC_IN_L_VIDEO:
+    case MIXER_SRC_IN_W_VIDEO:
         pline->cChannels       = 2;
         pline->dwComponentType = MIXERLINE_COMPONENTTYPE_SRC_UNDEFINED;
         pline->Target.dwType   = MIXERLINE_TARGETTYPE_UNDEFINED;
         break;
 
-    case MIXER_SRC_AUX:
+    case MIXER_SRC_IN_L_AUX:
+    case MIXER_SRC_IN_W_AUX:
         pline->cChannels       = 2;
         pline->dwComponentType = MIXERLINE_COMPONENTTYPE_SRC_AUXILIARY;
         pline->Target.dwType   = MIXERLINE_TARGETTYPE_AUX;
         break;
 
-    case MIXER_SRC_PCM:
+    case MIXER_SRC_IN_L_PCM:
+    case MIXER_SRC_IN_W_PCM:
         pline->cChannels       = 2;
         pline->dwComponentType = MIXERLINE_COMPONENTTYPE_SRC_WAVEOUT;
         pline->Target.dwType   = MIXERLINE_TARGETTYPE_WAVEOUT;
         break;
 
-    case MIXER_SRC_WAVETABLE:
-    case MIXER_SRC_MIDI:
+    case MIXER_SRC_IN_L_WAVETABLE:
+    case MIXER_SRC_IN_W_WAVETABLE:
+    case MIXER_SRC_IN_L_MIDI:
+    case MIXER_SRC_IN_W_MIDI:
         pline->cChannels       = 2;
         pline->dwComponentType = MIXERLINE_COMPONENTTYPE_SRC_SYNTHESIZER;
         pline->Target.dwType   = MIXERLINE_TARGETTYPE_MIDIOUT;
@@ -1234,15 +1265,14 @@ static MIXERLINEA *mixerAddSource(MIXERLINEA *pDestLine, DWORD dwSource)
     dprintf(("Adding Source %s (%s)", pline->szName, pline->szShortName));
     nrSources++;
 
-    mixerDestInputs[MIXER_DEST_LINEOUT][nrLineOutInputs] = pline->dwSource;
-    nrLineOutInputs++;
-
     pline->dwLineID      = nrLines;
     pmixerLines[nrLines] = pline;
     nrLines++;
 
     //increase nr of inputs at destination line
-    pDestLine->cConnections++;
+    pDestLine->line.cConnections++;
+    pDestLine->Sources[pDestLine->cSources] = pline->dwSource;
+    pDestLine->cSources++;
 
     //store line id in source to line mapping array
     mixerSourceLineId[dwSource] = pline->dwLineID;
@@ -1251,9 +1281,10 @@ static MIXERLINEA *mixerAddSource(MIXERLINEA *pDestLine, DWORD dwSource)
 }
 /******************************************************************************/
 /******************************************************************************/
-static MIXERLINEA *mixerAddDestination(DWORD dwDest)
+static MIXERDEST *mixerAddDestination(DWORD dwDest)
 {
-    MIXERLINEA *pline  = &mixerDest[nrDestinations];
+    MIXERDEST  *pDest  = &mixerDest[nrDestinations];
+    MIXERLINEA *pline  = &pDest->line;
 
     if(nrDestinations >= MAX_MIXER_DESTINATIONS) {
         dprintf(("ERROR: mixerAddDestination: out of room!!!"));
@@ -1307,43 +1338,11 @@ static MIXERLINEA *mixerAddDestination(DWORD dwDest)
     pline->dwLineID      = nrLines;
     pmixerLines[nrLines] = pline;
     nrLines++;
-    return pline;
+    return pDest;
 }
 /******************************************************************************/
 /******************************************************************************/
-static int mixerWaveInVolToSource(DWORD dwControl) 
-{
-    switch(dwControl) {
-    case MIX_CTRL_VOL_IN_W_MONO:
-        return MIXER_SRC_MONOIN;
-    case MIX_CTRL_VOL_IN_W_PHONE:
-        return MIXER_SRC_PHONE;
-    case MIX_CTRL_VOL_IN_W_MIC:
-        return MIXER_SRC_MIC;
-    case MIX_CTRL_VOL_IN_W_LINE:
-        return MIXER_SRC_LINE;
-    case MIX_CTRL_VOL_IN_W_CD:
-        return MIXER_SRC_CD;
-    case MIX_CTRL_VOL_IN_W_SPDIF:
-        return MIXER_SRC_SPDIF;
-    case MIX_CTRL_VOL_IN_W_VIDEO:
-        return MIXER_SRC_VIDEO;
-    case MIX_CTRL_VOL_IN_W_AUX:
-        return MIXER_SRC_AUX;
-    case MIX_CTRL_VOL_IN_W_PCM:
-        return MIXER_SRC_PCM;
-    case MIX_CTRL_VOL_IN_W_WAVETABLE:
-        return MIXER_SRC_WAVETABLE;
-    case MIX_CTRL_VOL_IN_W_MIDI:
-        return MIXER_SRC_MIDI;
-    default:
-        DebugInt3();
-        return 0;
-    }
-}
-/******************************************************************************/
-/******************************************************************************/
-static MIXERCONTROLA * mixerAddControl(MIXERLINEA *pDestLine, DWORD dwControl, MIXERLINEA *pSrcLine)
+static MIXERCONTROLA * mixerAddControl(DWORD dwControl, MIXERLINEA *pSrcLine)
 {
     MIXERCONTROLA *pctrl  = &mixerControls[nrControls];
 
@@ -1395,10 +1394,10 @@ static MIXERCONTROLA * mixerAddControl(MIXERLINEA *pDestLine, DWORD dwControl, M
     case MIX_CTRL_VOL_IN_W_PCM:
     case MIX_CTRL_VOL_IN_W_WAVETABLE:
     case MIX_CTRL_VOL_IN_W_MIDI:
+    case MIX_CTRL_VOL_IN_W_STEREOMIX:
+    case MIX_CTRL_VOL_IN_W_MONOMIX:
         pctrl->dwControlType    = MIXERCONTROL_CONTROLTYPE_VOLUME;
         OSLibMixGetCtrlCaps(dwControl, &pctrl->Bounds.s.lMinimum, &pctrl->Bounds.s.lMaximum, &pctrl->Metrics.cSteps);
-        mixerDestInputs[MIXER_DEST_WAVEIN][nrWaveInInputs] = mixerSourceLineId[mixerWaveInVolToSource(dwControl)];
-        nrWaveInInputs++;
         break;
 
     case MIX_CTRL_MUTE_OUT_LINE:

@@ -1,4 +1,4 @@
-/* $Id: mixer.h,v 1.3 2002-05-25 17:19:41 sandervl Exp $ */
+/* $Id: mixer.h,v 1.4 2002-05-26 10:52:31 sandervl Exp $ */
 
 /*
  * Mixer multimedia
@@ -26,6 +26,15 @@
 #define MAX_MIXER_SOURCES           16
 #define MAX_MIXER_CONTROLS          64
 
+
+#ifdef __WINE_MMSYSTEM_H
+typedef struct {
+  MIXERLINEA line;
+  //number of connected source lines
+  int        cSources;
+  int        Sources[MAX_MIXER_SOURCES];
+} MIXERDEST;
+#endif
 
 #ifdef __cplusplus
 extern "C" {
