@@ -126,7 +126,7 @@ extern const char * const debug_ch_name[];
 #define DECLARE_DEBUG_CHANNEL(ch) \
     extern const int dbch_##ch;
 #define DEFAULT_DEBUG_CHANNEL(ch) \
-    extern const int dbch_##ch; static const int *const DBCH_DEFAULT = &dbch_##ch;
+    static const int *const DBCH_DEFAULT = &dbch_##ch;
 
 #define DPRINTF dbg_printf
 #define MESSAGE dbg_printf
@@ -137,7 +137,7 @@ extern const char * const debug_ch_name[];
 #  undef DECLARE_DEBUG_CHANNEL
 #  define DECLARE_DEBUG_CHANNEL ODINDEBUGCHANNEL
 #  undef DEFAULT_DEBUG_CHANNEL
-#  define DEFAULT_DEBUG_CHANNEL ODINDEBUGCHANNEL
+#  define DEFAULT_DEBUG_CHANNEL ODINDEBUGCHANNEL1
 #  undef TRACE
 #  undef TRACE_
 #  undef TRACE_ON
@@ -185,5 +185,107 @@ extern const char * const debug_ch_name[];
 
 #endif
 
+#ifdef DEBUG
+#ifdef __cplusplus
+extern "C" {
+#endif
+LPCSTR debugstr_guid1( void *id );
+#define debugstr_guid(a) debugstr_guid1((void *)a)
+
+#ifdef __cplusplus
+}
+#endif
+
+static LPCSTR debugstr_an (LPCSTR src, int n)
+{
+  LPSTR dst;
+  static char res[128];
+
+  if (!src) return "(null)";
+  if (n > sizeof(res)) return "(null)";
+
+  if (n < 0) n = 0;
+  dst = res;
+  *dst++ = '"';
+  while (n-- > 0 && *src)
+    {
+      BYTE c = *src++;
+      switch (c)
+	{
+	case '\n': *dst++ = '\\'; *dst++ = 'n'; break;
+	case '\r': *dst++ = '\\'; *dst++ = 'r'; break;
+	case '\t': *dst++ = '\\'; *dst++ = 't'; break;
+	case '"': *dst++ = '\\'; *dst++ = '"'; break;
+	case '\\': *dst++ = '\\'; *dst++ = '\\'; break;
+	default:
+	  if (c >= ' ' && c <= 126)
+	    *dst++ = c;
+	  else
+	    {
+	      *dst++ = '\\';
+	      *dst++ = '0' + ((c >> 6) & 7);
+	      *dst++ = '0' + ((c >> 3) & 7);
+	      *dst++ = '0' + ((c >> 0) & 7);
+	    }
+	}
+    }
+  *dst++ = '"';
+  if (*src)
+    {
+      *dst++ = '.';
+      *dst++ = '.';
+      *dst++ = '.';
+    }
+  *dst++ = '\0';
+  return res;
+}
+
+/* ---------------------------------------------------------------------- */
+
+static LPCSTR debugstr_wn (LPCWSTR src, int n)
+{
+  LPSTR dst;
+  static char res[128];
+
+  if (!src) return "(null)";
+  if (n > sizeof(res)) return "(null)";
+  if (n < 0) n = 0;
+
+  dst = res;
+  *dst++ = 'L';
+  *dst++ = '"';
+  while (n-- > 0 && *src)
+    {
+      WORD c = *src++;
+      switch (c)
+	{
+	case '\n': *dst++ = '\\'; *dst++ = 'n'; break;
+	case '\r': *dst++ = '\\'; *dst++ = 'r'; break;
+	case '\t': *dst++ = '\\'; *dst++ = 't'; break;
+	case '"': *dst++ = '\\'; *dst++ = '"'; break;
+	case '\\': *dst++ = '\\'; *dst++ = '\\'; break;
+	default:
+	  if (c >= ' ' && c <= 126)
+	    *dst++ = c;
+	  else 
+	    {
+	      *dst++ = '\\';
+              sprintf(dst,"%04x",c);
+              dst+=4;
+	    }
+	}
+    }
+  *dst++ = '"';
+  if (*src)
+    {
+      *dst++ = '.';
+      *dst++ = '.';
+      *dst++ = '.';
+    }
+  *dst++ = '\0';
+  return res;
+}
+
+#endif
 
 #endif  /* __WINE_DEBUGTOOLS_H */

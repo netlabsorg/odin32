@@ -1,4 +1,4 @@
-/* $Id: debugstr.h,v 1.2 1999-08-22 22:47:17 sandervl Exp $ */
+/* $Id: debugstr.h,v 1.3 2000-08-30 13:56:37 sandervl Exp $ */
 #ifndef __WINE_DEBUGSTR_H
 #define __WINE_DEBUGSTR_H
 
@@ -11,9 +11,7 @@
 #define debugstr_a(a) a
 #define debugstr_w(a) a
 
-extern LPSTR debugstr_an (LPCSTR s, int n);
 //extern LPSTR debugstr_a (LPCSTR s);
-extern LPSTR debugstr_wn (LPCWSTR s, int n);
 //extern LPSTR debugstr_w (LPCWSTR s);
 extern LPSTR debugres_a (LPCSTR res);
 extern LPSTR debugres_w (LPCWSTR res);
