@@ -1,4 +1,4 @@
-/* $Id: os2heap.cpp,v 1.25 2001-10-06 19:08:03 sandervl Exp $ */
+/* $Id: os2heap.cpp,v 1.26 2001-10-09 20:25:20 sandervl Exp $ */
 
 /*
  * Heap class for OS/2
@@ -324,7 +324,8 @@ void * _LNK_CONV getmoreHeapMem(Heap_t pHeap, size_t *size, int *clean)
   //      memory space. (when allocating 4kb we actually get 4kb + 60k uncommited)
   *size = (*size / 65536) * 65536 + 65536;
 
-  rc = DosAllocMem(&newblock, *size, flAllocMem|PAG_READ|PAG_WRITE|PAG_COMMIT|PAG_EXECUTE);
+  rc = DosAllocMem(&newblock, *size, PAG_READ|PAG_WRITE|PAG_COMMIT|PAG_EXECUTE);
+////  rc = DosAllocMem(&newblock, *size, flAllocMem|PAG_READ|PAG_WRITE|PAG_COMMIT|PAG_EXECUTE);
   if(rc != 0) {
 	dprintf(("getmoreHeapMem: DosAllocMem failed with %d", rc));
 	return FALSE;

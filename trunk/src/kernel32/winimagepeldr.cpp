@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.89 2001-07-03 06:53:39 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.90 2001-10-09 20:25:21 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -292,6 +292,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
             dprintf((LOG, "*************************PE SECTIONS START**************************" ));
             for (i=0; i<nSections; i++)
             {
+                dprintf((LOG, "Section:              %-8s", psh[i].Name ));
                 dprintf((LOG, "Raw data size:        %x", psh[i].SizeOfRawData ));
                 dprintf((LOG, "Virtual Address:      %x", psh[i].VirtualAddress ));
                 dprintf((LOG, "Virtual Address Start:%x", psh[i].VirtualAddress+oh.ImageBase ));
@@ -748,7 +749,8 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
     if(section == NULL) {
         size        = 4096;
         sectionsize = 4096;
-        protflags   = PAG_READ|PAG_WRITE; //readonly?
+        //Header page must be readonly (same as in NT)
+        protflags   = PAG_READ;
         section = findPreviousSectionByOS2Addr(virtAddress);
         if(section == NULL) {//access to header
             offset     = 0;
@@ -778,7 +780,7 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
             return FALSE;
         }
     }
-    if(fPageCmd == COMPLETE_SECTION && section->type == SECTION_DEBUG) {//ignore
+    if(fPageCmd == COMPLETE_SECTION && (section && section->type == SECTION_DEBUG)) {//ignore
         return TRUE;
     }
     //Check range of pages with the same attributes starting at virtAddress
@@ -969,10 +971,10 @@ Section *Win32PeLdrImage::findSectionByOS2Addr(ULONG addr)
 Section *Win32PeLdrImage::findPreviousSectionByOS2Addr(ULONG addr)
 {
  ULONG lowestAddr = 0xffffffff;
- ULONG index = -1;
+ LONG  index = -1;
 
     for(int i=0;i<nrsections;i++) {
-        if(section[i].realvirtaddr > addr) {
+        if(section[i].realvirtaddr <= addr) {
             if(section[i].realvirtaddr < lowestAddr) {
                 lowestAddr = section[i].realvirtaddr;
                 index = i;
@@ -1051,12 +1053,6 @@ BOOL Win32PeLdrImage::allocFixedMem(ULONG reservedMem)
 BOOL Win32PeLdrImage::setMemFlags()
 {
  int i;
- WINIMAGE_LOOKUP *imgLookup;
-
-  imgLookup = WINIMAGE_LOOKUPADDR(realBaseAddress);
-  imgLookup->magic1 = MAGIC_WINIMAGE;
-  imgLookup->image  = this;
-  imgLookup->magic2 = MAGIC_WINIMAGE;
 
   // Process all the image sections
   for(i=0;i<nrsections;i++) {
