@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.71 2003-03-03 16:41:03 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.72 2003-03-06 10:22:26 sandervl Exp $ */
 
 /*
  * Win32 Exception functions for OS/2
@@ -609,7 +609,7 @@ LONG WIN32API UnhandledExceptionFilter(PWINEXCEPTION_POINTERS lpexpExceptionInfo
                 lpexpExceptionInfo->ExceptionRecord->ExceptionAddress,
                 szModName, iObj, offObj);
     }
-    
+
 /*  This is very dangerous. Can hang PM.
     rc = WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, message, "Application Error",
                        0, MB_ABORTRETRYIGNORE | MB_ERROR);
@@ -714,7 +714,7 @@ static void sprintfException(PEXCEPTIONREPORTRECORD       pERepRec,
     ULONG  ulOffset;             /* offset within the object within the module */
     char   szLineException[128];
     char   szLineExceptionType[128];
-    
+
     szLineException[0]  = 0;                                              /* initialize */
     szLineExceptionType[0] = 0;                                              /* initialize */
     switch(pERepRec->ExceptionNum)                    /* take according action */
@@ -812,7 +812,7 @@ static void sprintfException(PEXCEPTIONREPORTRECORD       pERepRec,
 
     case XCPT_DATATYPE_MISALIGNMENT:
         strcpy(szLineException, "Datatype Misalignment");
-        sprintf(szLineExceptionType, "R/W %08x alignment %08x at %08x.", pERepRec->ExceptionInfo[0], 
+        sprintf(szLineExceptionType, "R/W %08x alignment %08x at %08x.", pERepRec->ExceptionInfo[0],
                 pERepRec->ExceptionInfo[1], pERepRec->ExceptionInfo[2]);
         break;
 
@@ -913,9 +913,7 @@ static void sprintfException(PEXCEPTIONREPORTRECORD       pERepRec,
         break;
     }
 
-    sprintf(szTrapDump, "---[Exception Information]------------\n   %s", szLineException);
-
-    strcat(szTrapDump, " (");
+    sprintf(szTrapDump, "---[Exception Information]------------\n   %s (", szLineException);
 
     if (fExcptSoftware == TRUE)            /* software or hardware generated ? */
         strcat (szTrapDump, "software generated,");
@@ -934,6 +932,8 @@ static void sprintfException(PEXCEPTIONREPORTRECORD       pERepRec,
 
     strcat(szTrapDump, ")\n");                                    /* add trailing brace */
 
+    if (szLineExceptionType[0])
+        sprintf(szTrapDump + strlen(szTrapDump), "   %s\n", szLineExceptionType);
 
     rc = DosQueryModFromEIP(&ulModule, &ulObject, sizeof(szModule),
                             szModule, &ulOffset, (ULONG)pERepRec->ExceptionAddress);
@@ -946,7 +946,7 @@ static void sprintfException(PEXCEPTIONREPORTRECORD       pERepRec,
         sprintf(szLineException, "<%.*s> (#%u) obj #%u:%08x\n", 64, szModule, ulModule, ulObject, ulOffset);
         strcat(szTrapDump, szLineException);
     }
-    else 
+    else
     {   /* fault in DosAllocMem allocated memory, hence PE loader.. */
         Win32ImageBase * pMod;
         if (WinExe && WinExe->insideModule((ULONG)pERepRec->ExceptionAddress))
@@ -1006,7 +1006,7 @@ static void sprintfException(PEXCEPTIONREPORTRECORD       pERepRec,
         ULONG ulCounter;                 /* temporary local counter for fp stack */
 
         sprintf(szLineException, "   Env[0]=%08x Env[1]=%08x Env[2]=%08x Env[3]=%08x\n",
-                 pCtxRec->ctx_env[0], pCtxRec->ctx_env[1], 
+                 pCtxRec->ctx_env[0], pCtxRec->ctx_env[1],
                  pCtxRec->ctx_env[2], pCtxRec->ctx_env[3]);
         strcat(szTrapDump, szLineException);
 
@@ -1052,13 +1052,13 @@ static BOOL fExceptionLoggging = TRUE;
 //*****************************************************************************
 //Override filename of exception log (expects full path)
 //*****************************************************************************
-void WIN32API SetCustomExceptionLog(LPSTR lpszLogName) 
+void WIN32API SetCustomExceptionLog(LPSTR lpszLogName)
 {
     strcpy(szExceptionLogFileName, lpszLogName);
 }
 //*****************************************************************************
 //*****************************************************************************
-void WIN32API SetExceptionLogging(BOOL fEnable) 
+void WIN32API SetExceptionLogging(BOOL fEnable)
 {
     fExceptionLoggging = fEnable;
 }
@@ -1087,14 +1087,14 @@ static void logException()
                  OPEN_ACTION_OPEN_IF_EXISTS,     /* Open function type */
                  OPEN_ACCESS_READWRITE | OPEN_SHARE_DENYNONE,
                  0L);                            /* No extended attribute */
-    
+
     if(rc == NO_ERROR) {
         DosSetFilePtr(hFile, 0, FILE_END, &ulBytesWritten);
         if(WinExe) {
             LPSTR lpszExeName;
 
             lpszExeName = WinExe->getModuleName();
-            
+
             if(lpszExeName) {
                 DosWrite(hFile, "\n", 2, &ulBytesWritten);
                 DosWrite(hFile, lpszExeName, strlen(lpszExeName), &ulBytesWritten);
@@ -1339,7 +1339,7 @@ CrashAndBurn:
         logException();
 
         dprintf(("KERNEL32: OS2ExceptionHandler: Continue and kill\n"));
-        
+
         pCtxRec->ctx_RegEip = (ULONG)KillWin32Process;
         pCtxRec->ctx_RegEsp = pCtxRec->ctx_RegEsp + 0x10;
         pCtxRec->ctx_RegEax = pERepRec->ExceptionNum;
@@ -1350,10 +1350,36 @@ CrashAndBurn:
     case XCPT_GUARD_PAGE_VIOLATION:
     {
         //NOTE:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        //Don't print anything here -> fatal hang if exception occurred 
+        //Don't print anything here -> fatal hang if exception occurred
         //inside fprintf
         //NOTE:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+        Win32MemMap *map;
+        BOOL  fWriteAccess = FALSE, ret;
+        ULONG offset, accessflag;
+
+        switch(pERepRec->ExceptionInfo[0]) {
+        case XCPT_READ_ACCESS:
+                accessflag = MEMMAP_ACCESS_READ;
+                break;
+        case XCPT_WRITE_ACCESS:
+                accessflag = MEMMAP_ACCESS_WRITE;
+                fWriteAccess = TRUE;
+                break;
+        default:
+                goto continueGuardException;
+        }
+
+        map = Win32MemMapView::findMapByView(pERepRec->ExceptionInfo[1], &offset, accessflag);
+        if(map == NULL) {
+            goto continueGuardException;
+        }
+        ret = map->commitGuardPage(pERepRec->ExceptionInfo[1], offset, fWriteAccess);
+        map->Release();
+        if(ret == TRUE)
+            goto continueexecution;
+
+continueGuardException:
         goto continuesearch;
     }
 

@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.50 2003-02-04 11:29:03 sandervl Exp $ */
+/* $Id: thread.cpp,v 1.51 2003-03-06 10:22:27 sandervl Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -34,6 +34,8 @@
 #include <handlemanager.h>
 #include <codepage.h>
 
+#include <FastInfoBlocks.h>
+
 #define DBG_LOCALLOG	DBG_thread
 #include "dbglocal.h"
 
@@ -47,12 +49,12 @@ DWORD WIN32API GetCurrentThreadId()
 {
     // check cached identifier
     TEB *teb = GetThreadTEB();
-    if(teb != NULL && teb->o.odin.threadId != 0xFFFFFFFF) 
+    if(teb != NULL && teb->o.odin.threadId != 0xFFFFFFFF)
     {
         // this is set in InitializeTIB() already.
         return teb->o.odin.threadId;
     }
-  
+
 ////  dprintf(("GetCurrentThreadId\n"));
     return MAKE_THREADID(O32_GetCurrentProcessId(), O32_GetCurrentThreadId());
 }
@@ -65,7 +67,7 @@ HANDLE WIN32API GetCurrentThread()
     teb = GetThreadTEB();
     if(teb == 0) {
         DebugInt3();
-    	SetLastError(ERROR_INVALID_HANDLE); //todo 
+    	SetLastError(ERROR_INVALID_HANDLE); //todo
     	return 0;
     }
     return teb->o.odin.hThread;
@@ -110,19 +112,19 @@ void WIN32API dbg_ThreadPushCall(char *pszCaller)
 {
 #ifdef DEBUG
   TEB *teb;
-  
+
   // embedded dbg_IncThreadCallDepth
   teb = GetThreadTEB();
   if(teb == NULL)
     return;
-    
+
   // add caller name to call stack trace
   int iIndex = teb->o.odin.dbgCallDepth;
-  
+
   // allocate callstack on demand
   if (teb->o.odin.arrstrCallStack == NULL)
     teb->o.odin.arrstrCallStack = (PVOID*)malloc( sizeof(LPSTR) * MAX_CALLSTACK_SIZE);
-  
+
   // insert entry
   if (iIndex < MAX_CALLSTACK_SIZE)
     teb->o.odin.arrstrCallStack[iIndex] = (PVOID)pszCaller;
@@ -150,17 +152,17 @@ void WIN32API dbg_ThreadPopCall()
 {
 #ifdef DEBUG
   TEB *teb;
-  
+
   // embedded dbg_DecThreadCallDepth
   teb = GetThreadTEB();
   if(teb == NULL)
     return;
-  
+
   --(teb->o.odin.dbgCallDepth);
-  
+
   // add caller name to call stack trace
   int iIndex = teb->o.odin.dbgCallDepth;
-  
+
   // insert entry
   if (teb->o.odin.arrstrCallStack)
     if (iIndex < MAX_CALLSTACK_SIZE)
@@ -174,7 +176,7 @@ char* WIN32API dbg_GetLastCallerName()
 #ifdef DEBUG
   // retrieve last caller name from stack
   TEB *teb;
-  
+
   // embedded dbg_DecThreadCallDepth
   teb = GetThreadTEB();
   if(teb != NULL)
@@ -187,7 +189,7 @@ char* WIN32API dbg_GetLastCallerName()
     }
   }
 #endif
-  
+
   return NULL;
 }
 //******************************************************************************
@@ -322,7 +324,7 @@ DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
     //      in OS/2
     OS2SetExceptionHandler((void *)&exceptFrame);
     winteb->o.odin.exceptFrame = (ULONG)&exceptFrame;
-    
+
     //Determine if thread callback is inside a PE dll; if true, then force
     //switch to win32 TIB (FS selector)
     //(necessary for Opera when loading win32 plugins that create threads)
@@ -366,3 +368,179 @@ DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
 }
 //******************************************************************************
 //******************************************************************************
+
+/**
+ * Enter odin context with this thread.
+ *
+ * Is called when an OS/2 process is calling into an Odin32 DLL.
+ * This may be called also in a nested fashion and supports that.
+ * The conterpart of ODIN_ThreadLeaveOdinContext().
+ *
+ * @returns The old FS selector.
+ * @returns 0 if TEB creation failed.
+ * @param   pExceptionRegRec    OS/2 Exception Registration Record (2 ULONGs)
+ *                              must be located on the callers stack.
+ * @param   fForceFSSwitch      If set we will force switching to Odin32 FS selector.
+ *                              If clear it depends on defaults.
+ */
+USHORT WIN32API ODIN_ThreadEnterOdinContext(void *pExceptionRegRec, BOOL fForceFSSwitch)
+{
+    USHORT  selFSOld = 0;
+
+    /*
+     * Get TEB pointer, create it if necessary.
+     * @todo    Check if this really is the thread which the TEB was created
+     *          for. If not create the TEB.
+     */
+    TEB *pTeb = GetThreadTEB();
+    if (!pTeb)
+    {
+        BOOL fMainThread = fibGetTid() == 1;
+        HANDLE hThreadMain = HMCreateThread(NULL, 0, 0, 0, 0, 0, fMainThread);
+        pTeb = CreateTEB(hThreadMain, fibGetTid());
+        if (!pTeb || InitializeThread(pTeb, fMainThread) == FALSE)
+        {
+            dprintf(("ODIN_ThreadEnterOdinContext: Failed to create TEB!"));
+        }
+    }
+
+    /*
+     * Install the Odin32 exception handler.
+     * Note: The Win32 exception structure referenced by FS:[0] is the same in OS/2
+     */
+    if (pExceptionRegRec)
+        OS2SetExceptionHandler(pExceptionRegRec);
+    if (    pTeb
+        &&  !pTeb->o.odin.exceptFrame)  /* if allready present, we'll keep the first one. */
+        pTeb->o.odin.exceptFrame = (ULONG)pExceptionRegRec;
+
+    /*
+     * Switch Selector if TIB was created.
+     */
+    if (pTeb)
+        selFSOld = SetWin32TIB(fForceFSSwitch ? TIB_SWITCH_FORCE_WIN32 : TIB_SWITCH_DEFAULT);
+
+    return selFSOld;
+}
+
+
+/**
+ * Leave odin context with this thread.
+ *
+ * Is called when an OS/2 process is returning from an Odin32 DLL.
+ * This may be called also in a nested fashion and supports that.
+ * The conterpart of ODIN_ThreadEnterOdinContext().
+ *
+ * @returns The old FS selector.
+ * @returns 0 if TEB creation failed.
+ * @param   pExceptionRegRec    OS/2 Exception Registration Record (2 ULONGs)
+ *                              must be located on the callers stack.
+ * @param   fForceFSSwitch      If set we will force switching to Odin32 FS selector.
+ *                              If clear it depends on defaults.
+ */
+void   WIN32API ODIN_ThreadLeaveOdinContext(void *pExceptionRegRec, USHORT selFSOld)
+{
+    /*
+     * Install the Odin32 exception handler.
+     * Note: The Win32 exception structure referenced by FS:[0] is the same in OS/2
+     */
+    if (pExceptionRegRec)
+        OS2UnsetExceptionHandler(pExceptionRegRec);
+    TEB *pTeb = GetThreadTEB();
+    if (    pTeb
+        &&  pTeb->o.odin.exceptFrame == (ULONG)pExceptionRegRec)
+        pTeb->o.odin.exceptFrame = 0;
+
+    /*
+     * Switch Back FS Selector.
+     */
+    if (selFSOld)
+        SetFS(selFSOld);
+}
+
+
+/**
+ * Leave odin context to call back into OS/2 code.
+ *
+ * Is called when and Odin32 Dll/Exe calls back into the OS/2 code.
+ * The conterpart of ODIN_ThreadEnterOdinContextNested().
+ *
+ * @returns The old FS selector.
+ * @returns 0 on failure.
+ * @param   pExceptionRegRec    New OS/2 exception handler frame which are to be registered
+ *                              before the Odin handler in the chain.
+ *                              Must be located on the callers stack.
+ * @param   fRemoveOdinExcpt    Remove the odin exception handler.
+ */
+USHORT WIN32API ODIN_ThreadLeaveOdinContextNested(void *pExceptionRegRec, BOOL fRemoveOdinExcpt)
+{
+    /*
+     * Set OS/2 FS Selector.
+     */
+    USHORT  selFSOld = RestoreOS2FS();
+
+    /*
+     * Remove the Odin exception handler (if requested).
+     */
+    if (fRemoveOdinExcpt)
+    {
+        TEB *pTeb = GetThreadTEB();
+        if (pTeb)
+            OS2UnsetExceptionHandler((void*)pTeb->o.odin.exceptFrame);
+        /* else: no TEB created propbably no exception handler to remove. */
+    }
+
+    /*
+     * Change exception handler if required.
+     */
+    if (pExceptionRegRec)
+    {
+        extern unsigned long _System DosSetExceptionHandler(void *);
+        DosSetExceptionHandler(pExceptionRegRec);
+    }
+
+    return selFSOld;
+}
+
+
+/**
+ * Re-enter Odin context after being back in OS/2 code.
+ *
+ * Is called when returning to Odin from OS/2 code.
+ * The conterpart of ODIN_ThreadLeaveOdinContextNested().
+ *
+ * @param   pExceptionRegRec    The exception registration record for the OS/2
+ *                              exception handler used with Nested Leave. NULL
+ *                              if not used.
+ * @param   fRestoreOdinExcpt   Restore the Odin exception handler.
+ *                              This flag must not be set unless fRemoveOdinExcpt
+ *                              was set when leaving the Odin context!
+ * @param   selFSOld            The Odin FS selector returned by the Nested Leave api.
+ *
+ */
+void   WIN32API ODIN_ThreadEnterOdinContextNested(void *pExceptionRegRec, BOOL fRestoreOdinExcpt, USHORT selFSOld)
+{
+    /*
+     * Remove the exception handler registered in ODIN_ThreadLeaveOdinContextNested
+     */
+    if (pExceptionRegRec)
+        OS2UnsetExceptionHandler(pExceptionRegRec);
+
+    /*
+     * Restore Odin exception handler (if requested).
+     */
+    if (fRestoreOdinExcpt)
+    {
+        TEB *pTeb = GetThreadTEB();
+        if (pTeb)
+            OS2SetExceptionHandler((void*)pTeb->o.odin.exceptFrame);
+    }
+
+    /*
+     * Switch Back FS Selector.
+     */
+    if (selFSOld)
+        SetFS(selFSOld);
+}
+
+

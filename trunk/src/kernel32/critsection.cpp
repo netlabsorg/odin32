@@ -1,4 +1,4 @@
-/* $Id: critsection.cpp,v 1.8 2002-02-09 17:27:30 sandervl Exp $ */
+/* $Id: critsection.cpp,v 1.9 2003-03-06 10:22:26 sandervl Exp $ */
 /*
  * Win32 critical sections
  * 
@@ -13,14 +13,16 @@
 #include <os2win.h>
 #include <assert.h>
 #include <stdio.h>
-#include "debugtools.h"
-#include <misc.h>
+#include <dbglog.h>
+#include <debugtools.h>
 #include <odinwrap.h>
+#include <wprocess.h>
 
 #define DBG_LOCALLOG	DBG_critsection
 #include "dbglocal.h"
 
 DECLARE_DEBUG_CHANNEL(relay)
+
 
 
 /***********************************************************************
@@ -33,7 +35,7 @@ void WINAPI InitializeCriticalSection( CRITICAL_SECTION *crit )
     crit->RecursionCount = 0;
     crit->OwningThread   = 0;
     crit->LockSemaphore  = CreateSemaphoreA( NULL, 0, 1, NULL );
-    crit->Reserved       = GetCurrentProcessId();
+    crit->Reserved       = ODIN_GetCurrentProcessId();
 }
 
 
@@ -74,7 +76,7 @@ void WINAPI EnterCriticalSection( CRITICAL_SECTION *crit )
     }
     if (InterlockedIncrement( &crit->LockCount ))
     {
-        if (crit->OwningThread == GetCurrentThreadId())
+        if (crit->OwningThread == ODIN_GetCurrentThreadId())
         {
             crit->RecursionCount++;
             return;
@@ -111,7 +113,7 @@ void WINAPI EnterCriticalSection( CRITICAL_SECTION *crit )
             RaiseException(EXCEPTION_CRITICAL_SECTION_WAIT, 0, 1, (DWORD *)crit);
         }
     }
-    crit->OwningThread   = GetCurrentThreadId();
+    crit->OwningThread   = ODIN_GetCurrentThreadId();
     crit->RecursionCount = 1;
 }
 
@@ -124,7 +126,7 @@ BOOL WINAPI TryEnterCriticalSection( CRITICAL_SECTION *crit )
     dprintf2(("TryEnterCriticalSection %x", crit));
     if (InterlockedIncrement( &crit->LockCount ))
     {
-        if (crit->OwningThread == GetCurrentThreadId())
+        if (crit->OwningThread == ODIN_GetCurrentThreadId())
         {
             crit->RecursionCount++;
             return TRUE;
@@ -133,7 +135,7 @@ BOOL WINAPI TryEnterCriticalSection( CRITICAL_SECTION *crit )
         InterlockedDecrement( &crit->LockCount );
         return FALSE;
     }
-    crit->OwningThread   = GetCurrentThreadId();
+    crit->OwningThread   = ODIN_GetCurrentThreadId();
     crit->RecursionCount = 1;
     return TRUE;
 }
@@ -145,7 +147,7 @@ BOOL WINAPI TryEnterCriticalSection( CRITICAL_SECTION *crit )
 void WINAPI LeaveCriticalSection( CRITICAL_SECTION *crit )
 {
     dprintf2(("LeaveCriticalSection %x", crit));
-    if (crit->OwningThread != GetCurrentThreadId()) return;
+    if (crit->OwningThread != ODIN_GetCurrentThreadId()) return;
        
     if (--crit->RecursionCount)
     {
@@ -182,10 +184,10 @@ void WINAPI ReinitializeCriticalSection( CRITICAL_SECTION *crit )
     if ( !crit->LockSemaphore )
         InitializeCriticalSection( crit );
 
-    else if ( crit->Reserved && crit->Reserved != GetCurrentProcessId() )
+    else if ( crit->Reserved && crit->Reserved != ODIN_GetCurrentProcessId() )
     {
         dprintf(("(%p) called for %08lx first, %08lx now: making global\n", 
-               crit, crit->Reserved, GetCurrentProcessId() ));
+               crit, crit->Reserved, ODIN_GetCurrentProcessId() ));
 
         MakeCriticalSectionGlobal( crit );
     }
@@ -204,7 +206,7 @@ void WINAPI UninitializeCriticalSection( CRITICAL_SECTION *crit )
             DeleteCriticalSection( crit );
         else
             dprintf(("(%p) for %08lx: Crst is global, don't know whether to delete\n", 
-                     crit, GetCurrentProcessId() ));
+                     crit, ODIN_GetCurrentProcessId() ));
     }
 }
 
