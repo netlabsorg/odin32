@@ -1,4 +1,4 @@
-/* $Id: winimgres.cpp,v 1.12 1999-08-22 22:11:22 sandervl Exp $ */
+/* $Id: winimgres.cpp,v 1.13 1999-08-31 14:36:46 sandervl Exp $ */
 
 /*
  * Win32 PE Image class (resource methods)
@@ -22,6 +22,7 @@
 #include <windll.h>
 #include <winexe.h>
 #include <winres.h>
+#include <winresmenu.h>
 #include <unicode.h>
 #include <heapstring.h>
 #include "pefile.h"
@@ -273,7 +274,17 @@ Win32Resource *Win32Image::getPEResource(ULONG id, ULONG type, ULONG lang)
         	return(NULL);
     	}
   }
-  else  res = new Win32Resource(this, id, type, pData->Size, resdata);
+  else {
+	switch(type) {
+	case NTRT_MENU:
+      		res = new Win32MenuRes(this, id, type, pData->Size, resdata);
+		break;
+	default:
+      		res = new Win32Resource(this, id, type, pData->Size, resdata);
+		break;
+	}
+	
+  }
 
   return res;
 }
@@ -342,7 +353,14 @@ HRSRC Win32Image::findResourceA(LPCSTR lpszName, LPSTR lpszType)
     hres = O32_FindResource(hinstance, lpszName, szType);
     if(hres)
     {
-      	res = new Win32Resource(this, hres, (ULONG)lpszName, (ULONG)szType);
+	switch((ULONG)szType) {
+	case NTRT_MENU:
+      		res = new Win32MenuRes(this, hres, (ULONG)lpszName, (ULONG)szType);
+		break;
+	default:
+      		res = new Win32Resource(this, hres, (ULONG)lpszName, (ULONG)szType);
+		break;
+	}
     }
 
     if(hres == NULL && HIWORD(lpszName) == 0 && (int)szType == NTRT_STRING) {
@@ -439,7 +457,14 @@ HRSRC Win32Image::findResourceW(LPWSTR lpszName, LPWSTR lpszType)
     hres = O32_FindResource(hinstance, (LPCSTR)lpszName, (LPCSTR)szType);
     if(hres)
     {
-      	res = new Win32Resource(this, hres, (ULONG)lpszName, (ULONG)szType);
+	switch((ULONG)szType) {
+	case NTRT_MENU:
+      		res = new Win32MenuRes(this, hres, (ULONG)lpszName, (ULONG)szType);
+		break;
+	default:
+      		res = new Win32Resource(this, hres, (ULONG)lpszName, (ULONG)szType);
+		break;
+	}
     }
 
     if(hres == NULL && HIWORD(lpszName) == 0 && (int)szType == NTRT_STRING) {
