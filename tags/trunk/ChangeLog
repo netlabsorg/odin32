@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.1108 2000-09-05 20:34:53 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1109 2000-09-06 21:23:30 bird Exp $ */
+
+ 2000-09-04: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - install:  Added Win32kCC.exe and kRx.EXE to the .wpi distributions.
 
  2000-09-05: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   WM_PARENTNOTIFY during WM_CREATE was sent to the wrong window
@@ -22,7 +25,7 @@
                 otherwise window proc wrapper.
                 Fixes wrong strings in Notes 5.0. (new string problems, but they
                 are caused by something else)
-    - COMCTL32: CreateUpDownControl was not exported correctly 
+    - COMCTL32: CreateUpDownControl was not exported correctly
                 (reported by Reinhold Kopper)
 
  2000-09-04: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
