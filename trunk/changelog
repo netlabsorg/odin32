@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2554 2003-04-11 15:45:32 sandervl Exp $ */
+/* $Id: changelog,v 1.2555 2003-04-11 17:26:44 sandervl Exp $ */
 
  2003-04-11: knut st. osmundsen <bird-odin-spam@anduin   >
     - USER32, KERNEL32, include/win/thread.h:
@@ -10,6 +10,8 @@
                   buttons. (testing shows this in NT4)
                 o Changed default hittest handler to check for WS_EX_TOOLWINDOW
                   (system menu & min/max buttons)
+                o MENU_TrackKbdMenuBar: check for WS_EX_TOOLWINDOW before using
+                  the system menu.
                 o Display tool window titlebars in win32 style. They are supposed
                   to be thinner than standard PM titlebar controls.
 
