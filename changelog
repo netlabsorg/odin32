@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1911 2001-12-15 18:51:30 sandervl Exp $ */
+/* $Id: changelog,v 1.1912 2001-12-16 11:32:32 sandervl Exp $ */
+
+ 2001-12-16: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Fixed memory DC leak in DrawIcon & DrawIconEx
 
  2001-12-15: Sander van Leeuwen <sandervl@xs4all.nl>
     - GDI32:    o Added statistics for font, bitmap, pen, brush & region objects.
