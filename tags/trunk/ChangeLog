@@ -1,4 +1,10 @@
- /* $Id: ChangeLog,v 1.253 1999-09-28 13:29:51 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.254 1999-09-28 16:37:03 cbratschi Exp $ */
+
+ 99-09-28: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32: Mouse input functions: SetCapture() fixed
+		  SystemParametersInfo(): fonts fixed
+		  GetSystemMetrics(): changed icon size to 32x32
+		  Sorting and fixing user32.cpp
 
  99-09-28: David Raison <djr@lemur.co.uk>
 	- KERNEL32: Fixed GetComputerNameA
