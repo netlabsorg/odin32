@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.376 2003-07-31 15:56:45 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.377 2003-08-08 13:30:20 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2122,6 +2122,12 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
     case WM_NOTIFY:
         return 0; //comctl32 controls expect this
 
+    case WM_IME_CHAR:
+        if( wParam & 0xFF00 ) // DBCS ? 
+            SendMessageA( getWindowHandle(), WM_CHAR, ( WPARAM )( BYTE )( wParam >> 8 ), lParam ); 
+        SendMessageA( getWindowHandle(), WM_CHAR, ( WPARAM )( BYTE )( wParam & 0xFF ), lParam );
+        break;
+
     default:
         return 0;
     }
@@ -2204,6 +2210,10 @@ LRESULT Win32BaseWindow::DefWindowProcW(UINT Msg, WPARAM wParam, LPARAM lParam)
 
         return TRUE;
     }
+
+    case WM_IME_CHAR:
+        SendMessageW( getWindowHandle(), WM_CHAR, wParam, lParam );
+        return 0;
 
     default:
         return DefWindowProcA(Msg, wParam, lParam);
