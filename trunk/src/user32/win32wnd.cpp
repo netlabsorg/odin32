@@ -1,4 +1,4 @@
-/* $Id: win32wnd.cpp,v 1.4 1999-12-18 16:31:52 cbratschi Exp $ */
+/* $Id: win32wnd.cpp,v 1.5 2000-01-01 14:37:35 cbratschi Exp $ */
 /*
  * Win32 Window Class for OS/2
  *
@@ -68,7 +68,7 @@ LRESULT Win32Window::DefFrameProcA(HWND hwndMDIClient, UINT Msg, WPARAM wParam, 
 #if 0
         case WM_SETTEXT:
             //CB: infinite loop
-            //window->updateFrameText(MDI_REPAINTFRAME,(LPCSTR)lParam);
+            window->updateFrameText(MDI_REPAINTFRAME,(LPCSTR)lParam);
             return 0;
 #endif
 

@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.31 1999-12-29 22:54:01 cbratschi Exp $ */
+/* $Id: pmframe.cpp,v 1.32 2000-01-01 14:37:34 cbratschi Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -229,6 +229,18 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
 
   switch(msg)
   {
+    case WM_FORMATFRAME:
+      dprintf(("PMFRAME: WM_FORMATFRAME %x",hwnd));
+      //CB: call WM_NCCALCSIZE and set client pos
+      //    WM_PAINT -> WM_NCPAINT
+      //    WM_HITTEST -> MsgHitTest()
+      //    mouse messages -> MsgButton()
+      goto RunDefFrameProc;
+
+    case WM_QUERYBORDERSIZE:
+      //CB: todo: set to 0
+      goto RunDefFrameProc;
+
     case WM_ADJUSTWINDOWPOS:
     {
       PSWP     pswp = (PSWP)mp1;
@@ -428,7 +440,7 @@ PosChangedEnd:
 
     case WM_PAINT:
       #ifdef PMFRAMELOG
-       dprintf(("PMFRAME: WM_PAINT"));
+       dprintf(("PMFRAME: WM_PAINT %x",hwnd));
       #endif
       if (!win32wnd->isChild())
       {
