@@ -2739,6 +2739,11 @@ static BOOL LISTVIEW_SetItem(HWND hwnd, LPLVITEMA lpLVItem)
 
       rcItem.left = LVIR_BOUNDS;
       LISTVIEW_GetItemRect(hwnd, lpLVItem->iItem, &rcItem);
+#ifdef __WIN32OS2__
+          if(lStyle & LVS_OWNERDRAWFIXED && rcItem.left == REPORT_MARGINX) {
+              rcItem.left = 0;
+          }
+#endif
       InvalidateRect(hwnd, &rcItem, TRUE);
         }
       }
@@ -2849,6 +2854,11 @@ static BOOL LISTVIEW_SetItem(HWND hwnd, LPLVITEMA lpLVItem)
           {
             rcItem.left = LVIR_BOUNDS;
         LISTVIEW_GetItemRect(hwnd, lpLVItem->iItem, &rcItem);
+#ifdef __WIN32OS2__
+            if(lStyle & LVS_OWNERDRAWFIXED && rcItem.left == REPORT_MARGINX) {
+               rcItem.left = 0;
+            }
+#endif
             InvalidateRect(hwnd, &rcItem, TRUE);
           }
         }
@@ -3623,6 +3633,11 @@ static INT LISTVIEW_GetCountPerColumn(HWND hwnd)
   LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO *)GetWindowLongA(hwnd,0);
   INT nListHeight = infoPtr->rcList.bottom - infoPtr->rcList.top;
   INT nCountPerColumn = 1;
+
+#ifdef __WIN32OS2__
+  if(infoPtr->nItemHeight == 0) 
+      return 1;
+#endif
 
   if (nListHeight > 0)
   {
