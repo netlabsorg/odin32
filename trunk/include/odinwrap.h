@@ -26,6 +26,11 @@
 //#define PROFILE
 
 
+// check if release is really defined ...
+#if !defined(DEBUG) && !defined(PROFILE)
+#define RELEASE
+#endif
+
 
 #define ODIN_INTERNAL _Optlink
 
@@ -151,6 +156,7 @@ extern char*             WIN32API dbg_GetLastCallerName();
 
 #endif
 
+
 // check if all macros are defined
 #ifndef FNINIT
 #error FNINIT not defined: DEBUG, PROFILE, or RELEASE not specified
@@ -165,9 +171,14 @@ extern char*             WIN32API dbg_GetLastCallerName();
 #endif
 
 
+#endif /* DEBUG */
+
+
 /****************************************************************************
  * General Wrapper Macros (debug instrumented)                              *
  ****************************************************************************/
+#if defined(DEBUG) || defined(PROFILE)
+
 
 /* ---------- 0 parameters ---------- */
 #define ODINFUNCTION0(cRet,cName)             \
@@ -793,60 +804,6 @@ extern char*             WIN32API dbg_GetLastCallerName();
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13,t14 a14)
 
 
-#else
-
-/****************************************************************************
- * General Wrapper Macros                                                   *
- ****************************************************************************/
-
-#define FNINIT          \
-  unsigned short sel;
-
-#define FNPROLOGUE(a)   \
-  sel = GetFS();
-
-#define FNEPILOGUE(a)   \
-  SetFS(sel);
-
-#define ODINFUNCTION0   ODINFUNCTIONNODBG0
-#define ODINFUNCTION1   ODINFUNCTIONNODBG1
-#define ODINFUNCTION2   ODINFUNCTIONNODBG2
-#define ODINFUNCTION3   ODINFUNCTIONNODBG3
-#define ODINFUNCTION4   ODINFUNCTIONNODBG4
-#define ODINFUNCTION5   ODINFUNCTIONNODBG5
-#define ODINFUNCTION6   ODINFUNCTIONNODBG6
-#define ODINFUNCTION7   ODINFUNCTIONNODBG7
-#define ODINFUNCTION8   ODINFUNCTIONNODBG8
-#define ODINFUNCTION9   ODINFUNCTIONNODBG9
-#define ODINFUNCTION10  ODINFUNCTIONNODBG10
-#define ODINFUNCTION11  ODINFUNCTIONNODBG11
-#define ODINFUNCTION12  ODINFUNCTIONNODBG12
-#define ODINFUNCTION13  ODINFUNCTIONNODBG13
-#define ODINFUNCTION14  ODINFUNCTIONNODBG14
-
-#define ODINPROCEDURE0   ODINPROCEDURENODBG0
-#define ODINPROCEDURE1   ODINPROCEDURENODBG1
-#define ODINPROCEDURE2   ODINPROCEDURENODBG2
-#define ODINPROCEDURE3   ODINPROCEDURENODBG3
-#define ODINPROCEDURE4   ODINPROCEDURENODBG4
-#define ODINPROCEDURE5   ODINPROCEDURENODBG5
-#define ODINPROCEDURE6   ODINPROCEDURENODBG6
-#define ODINPROCEDURE7   ODINPROCEDURENODBG7
-#define ODINPROCEDURE8   ODINPROCEDURENODBG8
-#define ODINPROCEDURE9   ODINPROCEDURENODBG9
-#define ODINPROCEDURE10  ODINPROCEDURENODBG10
-#define ODINPROCEDURE11  ODINPROCEDURENODBG11
-#define ODINPROCEDURE12  ODINPROCEDURENODBG12
-#define ODINPROCEDURE13  ODINPROCEDURENODBG13
-#define ODINPROCEDURE14  ODINPROCEDURENODBG14
-
-#endif
-
-/****************************************************************************
- * General Wrapper Macros                                                   *
- ****************************************************************************/
-
-
 /* ---------- 0 parameters ---------- */
 #define ODINFUNCTIONNODBG0(cRet,cName)             \
   cRet ODIN_INTERNAL ODIN_##cName (void);     \
@@ -1266,5 +1223,161 @@ extern char*             WIN32API dbg_GetLastCallerName();
   }                               \
                                   \
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13,t14 a14)
+
+
+
+#endif
+
+
+
+/****************************************************************************
+ * Release Wrapper Macros (not instrumented)                                *
+ ****************************************************************************/
+#ifdef RELEASE
+
+ /* ---------- 0 parameters ---------- */
+#define ODINFUNCTION0(cRet,cName)             \
+  cRet WINAPI cName(void)
+
+#define ODINPROCEDURE0(cName)                 \
+  void WINAPI cName(void)
+
+
+/* ---------- 1 parameters ---------- */
+#define ODINFUNCTION1(cRet,cName,t1,a1)       \
+  cRet WINAPI cName(t1 a1)
+
+#define ODINPROCEDURE1(cName,t1,a1)           \
+  void WINAPI cName(t1 a1)
+
+/* ---------- 2 parameters ---------- */
+#define ODINFUNCTION2(cRet,cName,t1,a1,t2,a2)  \
+  cRet WINAPI cName(t1 a1,t2 a2)
+
+#define ODINPROCEDURE2(cName,t1,a1,t2,a2)     \
+  void WINAPI cName(t1 a1,t2 a2)
+
+
+/* ---------- 3 parameters ---------- */
+#define ODINFUNCTION3(cRet,cName,t1,a1,t2,a2,t3,a3)  \
+  cRet WINAPI cName(t1 a1,t2 a2,t3 a3)
+
+#define ODINPROCEDURE3(cName,t1,a1,t2,a2,t3,a3)  \
+  void WINAPI cName(t1 a1,t2 a2,t3 a3)
+
+
+/* ---------- 4 parameters ---------- */
+#define ODINFUNCTION4(cRet,cName,t1,a1,t2,a2,t3,a3,t4,a4)  \
+  cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4)
+
+#define ODINPROCEDURE4(cName,t1,a1,t2,a2,t3,a3,t4,a4)  \
+  void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4)
+
+
+/* ---------- 5 parameters ---------- */
+#define ODINFUNCTION5(cRet,cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5)  \
+  cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5)
+
+#define ODINPROCEDURE5(cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5)  \
+  void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5)
+
+
+/* ---------- 6 parameters ---------- */
+#define ODINFUNCTION6(cRet,cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6)  \
+  cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6)
+
+#define ODINPROCEDURE6(cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6)  \
+  void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6)
+
+/* ---------- 7 parameters ---------- */
+#define ODINFUNCTION7(cRet,cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7)  \
+  cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7)
+
+#define ODINPROCEDURE7(cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7)  \
+  void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7)
+
+/* ---------- 8 parameters ---------- */
+#define ODINFUNCTION8(cRet,cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8)  \
+  cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8)
+
+#define ODINPROCEDURE8(cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8)  \
+  void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8)
+
+/* ---------- 9 parameters ---------- */
+#define ODINFUNCTION9(cRet,cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8,t9,a9)  \
+  cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9)
+
+#define ODINPROCEDURE9(cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8,t9,a9)  \
+  void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9)
+
+/* ---------- 10 parameters ---------- */
+#define ODINFUNCTION10(cRet,cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8,t9,a9,t10,a10)  \
+  cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10)
+
+#define ODINPROCEDURE10(cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8,t9,a9,t10,a10)  \
+  void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10)
+
+/* ---------- 11 parameters ---------- */
+#define ODINFUNCTION11(cRet,cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8,t9,a9,t10,a10,t11,a11)  \
+  cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11)
+
+#define ODINPROCEDURE11(cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8,t9,a9,t10,a10,t11,a11)  \
+  void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11)
+
+/* ---------- 12 parameters ---------- */
+#define ODINFUNCTION12(cRet,cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8,t9,a9,t10,a10,t11,a11,t12,a12)  \
+  cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12)
+
+#define ODINPROCEDURE12(cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8,t9,a9,t10,a10,t11,a11,t12,a12)  \
+  void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12)
+
+/* ---------- 13 parameters ---------- */
+#define ODINFUNCTION13(cRet,cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8,t9,a9,t10,a10,t11,a11,t12,a12,t13,a13)  \
+  cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13)
+
+#define ODINPROCEDURE13(cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8,t9,a9,t10,a10,t11,a11,t12,a12,t13,a13)  \
+  void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13)
+
+/* ---------- 14 parameters ---------- */
+#define ODINFUNCTION14(cRet,cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8,t9,a9,t10,a10,t11,a11,t12,a12,t13,a13,t14,a14)  \
+  cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13,t14 a14)
+
+#define ODINPROCEDURE14(cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8,t9,a9,t10,a10,t11,a11,t12,a12,t13,a13,t14,a14)  \
+  void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13,t14 a14)    \
+  
+#define ODINFUNCTIONNODBG0   ODINFUNCTION0
+#define ODINFUNCTIONNODBG1   ODINFUNCTION1
+#define ODINFUNCTIONNODBG2   ODINFUNCTION2
+#define ODINFUNCTIONNODBG3   ODINFUNCTION3
+#define ODINFUNCTIONNODBG4   ODINFUNCTION4
+#define ODINFUNCTIONNODBG5   ODINFUNCTION5
+#define ODINFUNCTIONNODBG6   ODINFUNCTION6
+#define ODINFUNCTIONNODBG7   ODINFUNCTION7
+#define ODINFUNCTIONNODBG8   ODINFUNCTION8
+#define ODINFUNCTIONNODBG9   ODINFUNCTION9
+#define ODINFUNCTIONNODBG10  ODINFUNCTION10
+#define ODINFUNCTIONNODBG11  ODINFUNCTION11
+#define ODINFUNCTIONNODBG12  ODINFUNCTION12
+#define ODINFUNCTIONNODBG13  ODINFUNCTION13
+#define ODINFUNCTIONNODBG14  ODINFUNCTION14
+
+#define ODINPROCEDURENODBG0   ODINPROCEDURE0
+#define ODINPROCEDURENODBG1   ODINPROCEDURE1
+#define ODINPROCEDURENODBG2   ODINPROCEDURE2
+#define ODINPROCEDURENODBG3   ODINPROCEDURE3
+#define ODINPROCEDURENODBG4   ODINPROCEDURE4
+#define ODINPROCEDURENODBG5   ODINPROCEDURE5
+#define ODINPROCEDURENODBG6   ODINPROCEDURE6
+#define ODINPROCEDURENODBG7   ODINPROCEDURE7
+#define ODINPROCEDURENODBG8   ODINPROCEDURE8
+#define ODINPROCEDURENODBG9   ODINPROCEDURE9
+#define ODINPROCEDURENODBG10  ODINPROCEDURE10
+#define ODINPROCEDURENODBG11  ODINPROCEDURE11
+#define ODINPROCEDURENODBG12  ODINPROCEDURE12
+#define ODINPROCEDURENODBG13  ODINPROCEDURE13
+#define ODINPROCEDURENODBG14  ODINPROCEDURE14
+
+#endif /* RELEASE */
+
 
 #endif /* _ODINWRAP_H_ */
