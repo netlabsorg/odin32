@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.44 2004-04-30 13:27:19 sandervl Exp $ */
+/* $Id: text.cpp,v 1.45 2004-05-07 10:27:50 sandervl Exp $ */
 
 /*
  * GDI32 text apis
@@ -305,7 +305,35 @@ BOOL InternalTextOutAW(HDC hdc,int X,int Y,UINT fuOptions,
 
   if(fUnicode)
        hits = FT2Module.Ft2CharStringPosAtW(pHps->hps,&ptl,&pmRect,flOptions,cbCount,lpszStringW,lpDx, fuOptions & ETO_GLYPH_INDEX);
-  else hits = FT2Module.Ft2CharStringPosAtA(pHps->hps,&ptl,&pmRect,flOptions,cbCount,lpszStringA,lpDx, fuOptions & ETO_GLYPH_INDEX);
+  else
+  {
+       INT *lpDxNew = NULL;
+
+       // KOMH : OS/2 uses width of lead byte for whole DBCS width and is not concerned about
+       //        trail byte, while Win can apportion width between lead byte and trail byte
+       if( IsDBCSEnv() && lpDx  )
+       {
+            int i;
+
+            lpDxNew = ( INT * )malloc(( cbCount + 1 ) * sizeof( INT )); // 1 for broken DBCS char
+            for( i = 0; i < cbCount; i++ )
+            {
+                lpDxNew[ i ] = lpDx[ i ];
+                if( IsDBCSLeadByte( lpszStringA[ i ] ))
+                {
+                    lpDxNew[ i ] += lpDx[ i + 1 ];
+                    lpDxNew[ ++i ] = 0; // for the sake of possibility
+                }
+            }
+
+            lpDx = lpDxNew;
+       }
+
+       hits = FT2Module.Ft2CharStringPosAtA(pHps->hps,&ptl,&pmRect,flOptions,cbCount,lpszStringA,lpDx, fuOptions & ETO_GLYPH_INDEX);
+
+       if( lpDxNew )
+            free( lpDxNew );
+  }
 
   if (lprc && ((align & 0x18) == TA_BASELINE))
       OSLibGpiSetTextAlignment(pHps,pmHAlign,pmVAlign);
@@ -355,6 +383,7 @@ BOOL WIN32API ExtTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LP
           dprintf2(("Inc %d", lpDx[i]));
       }
   }
+
   rc = InternalTextOutAW(hdc, X, Y, fuOptions, lprc, lpszString, NULL, cbCount, lpDx, TRUE, FALSE);
 
   return(rc);

@@ -252,4 +252,6 @@ BOOL      WINAPI GetTextMetricsW(HDC,LPTEXTMETRICW);
 DWORD     WINAPI GetTimeZoneInformation(LPTIME_ZONE_INFORMATION);
 BOOL      WINAPI SetTimeZoneInformation(const LPTIME_ZONE_INFORMATION);
 
+BOOL      WINAPI IsDBCSLeadByte(BYTE);
+
 #endif
