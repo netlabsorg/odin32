@@ -539,9 +539,13 @@ BOOL  WINAPI GetFileDialog95W(LPOPENFILENAMEW ofn,UINT iDlgType)
   FreeInArg(ofn->lpstrTitle, lpstrTitle);
   FreeInArg(ofn->lpstrDefExt, lpstrDefExt);
 #ifdef __WIN32OS2__
-  if(HIWORD(lpTemplateName))
+  if(HIWORD(lpTemplateName)) {
+       FreeInArg(ofn->lpTemplateName, lpTemplateName);
+  }
+  else ofn->lpTemplateName = lpTemplateName;
+#else
+  FreeInArg(ofn->lpTemplateName, lpTemplateName);
 #endif
-      FreeInArg(ofn->lpTemplateName, lpTemplateName);
 
   MemFree((LPVOID)(fodInfos));
   return ret;
