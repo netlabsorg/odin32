@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.2756 2005-02-14 16:25:15 abwillis Exp $ */
+/* $Id: ChangeLog,v 1.2757 2005-02-15 20:04:53 sao2l02 Exp $ */
+2005-02-15: Dietrich Teickner <dietrich_teickner@arcor   >  
+    - kernel32: o src\kernel32\hmstd.cpp
+                  mppn.exe from "DSP Semiconductors Ltd. V7.2" writes 0xFFFFFFFF Bytes to stdout:
 2005-02-12: Dietrich Teickner <dietrich_teickner@arcor   >  
     - kernel32: o src\kernel32\wintls.cpp
                   small regression.

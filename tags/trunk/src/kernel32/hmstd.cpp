@@ -1,4 +1,4 @@
-/* $Id: hmstd.cpp,v 1.12 2002-06-30 09:57:13 sandervl Exp $ */
+/* $Id: hmstd.cpp,v 1.13 2005-02-15 20:05:02 sao2l02 Exp $ */
 
 /*
  * Handle Manager class for standard in, out & error handles
@@ -140,6 +140,10 @@ BOOL HMDeviceStandardClass::WriteFile(PHMHANDLEDATA pHMHandleData,
     int  i         = 0;
     int  missingCR = 0;
     char prevchar  = 0;
+
+// DT mppn.exe from "DSP Semiconductors Ltd. V7.2" writes 0xFFFFFFFF Bytes to stdout:
+    if (-1 == nNumberOfBytesToWrite)
+        return FALSE;
 
     src = (char *)lpBuffer;
     while(i < nNumberOfBytesToWrite) {
