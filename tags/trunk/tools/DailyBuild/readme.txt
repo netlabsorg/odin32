@@ -1,4 +1,4 @@
-/* $Id: readme.txt,v 1.1 2000-04-27 12:00:10 bird Exp $ */
+/* $Id: readme.txt,v 1.2 2000-09-05 17:36:22 bird Exp $ */
 
 This is a short readme for the daily builder scripts. These are all the
 scripts doing the daily odin builds.
@@ -6,15 +6,16 @@ scripts doing the daily odin builds.
 
 Directory structure
 -------------------
-The build scripts assumes that the scripts are found in ..\scripts and
-that the Odin32 CVS tree checkout is to be placed in ..\tree (relative to
-the starting directory). The job.cmd is normally started from the scripts
-directory, and starts out changing the to ..\tree.
+The build scripts assumes that the scripts are found in ..\DailyBuild and
+that the Odin32 CVS tree checkout is to be placed in ..\tree<date> (relative
+to the start directory). The job.cmd is normally started from the
+DailyBuild directory, and starts out changing the to ..\tree<date>.
 Logs are placed in ..\logs.
 
-    <basedir>\scripts   - All these scripts.
-    <basedir>\tree      - The CVS tree (don't work on this, tree it's delete every night...).
-    <basedir>\logs      - Logs.
+    <basedir>\DailyBuild        - All these scripts.
+    <basedir>\tree<date>        - The CVS tree (don't work on this, tree it's delete every night...).
+    <basedir>\DailyBuild\logs   - Logs.
+    <basedir>\DailyBuild\dbbackup   - Database backups.
 
 
 Modfications / Configuration
@@ -49,5 +50,5 @@ Requirements
     - scheduler program which will invoke the script at a specific time.
       (I have a very simple one if needed.)
 
-Thu 27.04.2000
+Tue 05.09.2000
   knut

@@ -1,4 +1,4 @@
-/* $Id: odin32db.cmd,v 1.1 2000-04-27 11:32:25 bird Exp $
+/* $Id: odin32db.cmd,v 1.2 2000-09-05 17:36:22 bird Exp $
  *
  * Updates the Odin32 API database.
  *
@@ -10,6 +10,12 @@
     /* load rexxutils functions */
     call RxFuncAdd 'SysLoadFuncs', 'RexxUtil', 'SysLoadFuncs';
     call SysloadFuncs;
+
+    /*
+     * Get source directory of this script
+     */
+    parse source sd1 sd2 sScript
+    sScriptDir = filespec('drive', sScript) || filespec('path', sScript);
 
     'cd tools\database';
     if rc <> 0 then call failure rc, 'cd db failed';
@@ -25,12 +31,12 @@
     if rc <> 0 then call failure rc, 'stateupd failed';
 
     /* create database backup */
-    'c:'
+    filespec('drive', getMySqlDataDir());
     if rc <> 0 then call failure rc, 'c: failed';
-    'cd c:\emx\mysql\data\odin32'
+    'cd' getMySqlDataDir()||'\odin32';
     if rc <> 0 then call failure rc, 'cd <> failed';
     'mysqladmin refresh';
-    'rar a -m5 d:\temp\db'||date(S)||'.rar *'
+    'rar a -m5 ' || sScriptDir || 'dbbackup\db'||date(S)||'.rar *'
     if rc <> 0 then call failure rc, 'rar db failed';
     'cd \';
     'd:';
@@ -41,4 +47,36 @@ failure: procedure
 parse arg rc, sText;
     say 'rc='rc sText
     exit(rc);
+
+
+/*
+ * Get the MySql data directory.
+ */
+getMySqlDataDir: procedure
+
+    /* Get mysql variables */
+    '@mysqladmin variables | rxqueue /lifo'
+
+    /* Get datadir */
+    sDataDir = '';
+    do queued()
+        pull s;
+        if (pos(' DATADIR ', s) > 0) then
+        do
+            sDataDir = strip( substr( s, pos('|',s,3) + 1 ) );
+            sDataDir = strip( substr(sDataDir, 1, length(sDataDir)-1) );
+            leave;
+        end
+    end
+
+    /* Drain queue */
+    do queued()
+        pull s
+    end
+    drop s;
+
+    /* If failure set default directory. */
+    if (sDataDir = '') then
+        sDataDir = 'd:\knut\Apps\MySql\data\';
+    return sDataDir;
 

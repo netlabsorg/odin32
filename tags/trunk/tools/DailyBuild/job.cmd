@@ -1,4 +1,4 @@
-/* $Id: job.cmd,v 1.2 2000-07-18 11:18:13 bird Exp $
+/* $Id: job.cmd,v 1.3 2000-09-05 17:36:21 bird Exp $
  *
  * Main job for building OS/2.
  *
@@ -12,36 +12,42 @@
     call RxFuncAdd 'SysLoadFuncs', 'RexxUtil', 'SysLoadFuncs';
     call SysloadFuncs;
 
-    sLogFile = '..\logs\' || Date(S) || '.log';
-    sTree    = 'tree' || Date(S);
+    /*
+     * Get source directory of this script
+     */
+    parse source sd1 sd2 sScript
+    sScriptDir = filespec('drive', sScript) || filespec('path', sScript);
+    sLogFile = sScriptDir || '\logs\' || Date('S') || '.log';
+    sTree    = sScriptDir || '..\tree' || Date('S');
 
     /*
      * Clean tree, get it and build it.
      */
-    'mkdir ..\'||sTree
-    'cd ..\'||sTree
+    'mkdir' sTree
+    filespec('drive', sScript);
+    'cd' sTree;
     if (rc <> 0) then call failure rc, 'cd ..\'sTree 'failed.';
-    'call ..\scripts\odin32env.cmd'
+    'call' sScriptDir || 'odin32env.cmd'
     if (rc <> 0) then call failure rc, 'Env failed.';
-    'call ..\scripts\odin32clean.cmd'
+    'call' sScriptDir || 'odin32clean.cmd'
     if (rc <> 0) then call failure rc, 'Clean failed.';
-    'call ..\scripts\odin32get.cmd'
+    'call' sScriptDir || 'odin32get.cmd'
     if (rc <> 0) then call failure rc, 'Get failed.';
-    'call ..\scripts\odin32build.cmd 2>&1 | tee /a ' || sLogFile; /* 4OS/2 tee command. */
+    'call' sScriptDir || 'odin32build.cmd 2>&1 | tee /a ' || sLogFile; /* 4OS/2 tee command. */
     if (rc <> 0) then call failure rc, 'Build failed.';
 
     /*
      * Pack and upload it.
      */
-    'call ..\scripts\odin32pack.cmd  2>&1 | tee /a ' || sLogFile; /* 4OS/2 tee command. */
+    'call' sScriptDir || 'odin32pack.cmd  2>&1 | tee /a ' || sLogFile; /* 4OS/2 tee command. */
     if (rc <> 0) then call failure rc, 'Packing failed.';
-    'start /BG "Uploading Odin..." nice -f cmd /C ..\scripts\odin32ftp2.cmd';
+    'start /BG "Uploading Odin..." nice -f cmd /C' sScriptDir || 'odin32ftp2.cmd';
     if (rc <> 0) then say 'rc='rc' FTPing failed. i = ' || i;
 
     /*
      * database update
      */
-    '..\scripts\odin32db.cmd  2>&1 | tee /a ' || sLogFile; /* 4OS/2 tee command. */
+    sScriptDir || 'odin32db.cmd  2>&1 | tee /a ' || sLogFile; /* 4OS/2 tee command. */
     if (rc <> 0) then call failure rc, 'db failed.';
 
     /*
@@ -51,7 +57,7 @@
     if (rc <> 0) then call failure rc, 'c: failed.';
     'cd c:\odin32';
     if (rc <> 0) then call failure rc, 'cd c:\odin32 failed.';
-    'unzip -o d:\odin32\tree\*debug.zip';
+    'unzip -o ' || sTree || '*debug.zip';
     if (rc <> 0) then call failure rc, 'unzip failed.';
     'd:'
     if (rc <> 0) then call failure rc, 'd: failed.';
@@ -67,3 +73,4 @@ failure: procedure
 parse arg rc, sText;
     say 'rc='rc sText
     exit(rc);
+
