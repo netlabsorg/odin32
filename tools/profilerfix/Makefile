@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.3 2002-04-19 05:58:57 bird Exp $
+# $Id: Makefile,v 1.4 2002-05-02 23:15:12 bird Exp $
 
 #
 # Odin32 API
@@ -50,6 +50,7 @@ cppopa3.obj $(ODIN32_LIB)\cppopa3.obj: $(CPPMAIN)\lib\cppopa3.obj
 # Assemble the cpppan40 module with FS fixes.
 #
 cpppan40.obj $(ODIN32_LIB)\cpppan40.obj: cppopa4.asm
+    @if not exist $(ODIN32_LIB) $(CREATEPATH) $(ODIN32_LIB)
     $(AS) $(ASFLAGS) +Scs cppopa4.asm -Fo:$(ODIN32_LIB)\cpppan40.obj -Fl:cpppan40.lst
 
 
