@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2000-03-22 20:01:06 sandervl Exp $
+# $Id: makefile,v 1.10 2000-12-02 23:43:27 bird Exp $
 
 #
 # Odin32 API
@@ -6,15 +6,10 @@
 #       wsock32.dll makefile
 #
 
-# Directory macros.
-PDWIN32_INCLUDE = ..\..\..\include
-PDWIN32_LIB     = ..\..\..\lib
-PDWIN32_BIN     = ..\..\..\$(OBJDIR)
-PDWIN32_TOOLS   = ..\..\..\tools\bin
-
 
 # Compiler, tools, and interference rules.
-!include $(PDWIN32_INCLUDE)/pdwin32.mk
+OLD_STYLE=1
+!include ../../../makefile.inc
 
 
 # Flag overloads and local macros.
@@ -43,12 +38,12 @@ CXXFLAGS = $(CXXFLAGS) -DNEW_ASYNC
 # All rule - build objs, target dll, copies dll to bin and makes libs.
 all:    $(OBJDIR) \
         $(OBJDIR)\$(TARGET).dll \
-        $(PDWIN32_BIN)\$(TARGET).dll \
+        $(ODIN32_BIN)\$(TARGET).dll \
         lib
 
 
 # Lib rule - build importlibrary (and evt. other libs)
-lib: $(TARGET).lib $(PDWIN32_LIB)\$(TARGET).lib
+lib: $(TARGET).lib $(ODIN32_LIB)\$(TARGET).lib
 
 
 # Dll rule - builds the target dll.
@@ -64,9 +59,9 @@ $(OBJDIR)\$(TARGET).lrf: makefile
 $(OBJS)
 $(TARGET).def
 tcp32dll.lib so32dll.lib
-$(PDWIN32_LIB)\kernel32.lib
-$(PDWIN32_LIB)/user32.lib
-$(PDWIN32_LIB)/odincrt.lib
+$(ODIN32_LIB)\kernel32.lib
+$(ODIN32_LIB)/user32.lib
+$(ODIN32_LIB)/odincrt.lib
 OS2386.LIB
 $(RTLLIB_O)
 <<keep
@@ -74,10 +69,10 @@ $(RTLLIB_O)
 
 # Dep rule - makes depenencies for C, C++ and Asm files.
 dep:
-    $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
-        *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
+    $(DEPEND) -I$(ODIN32_INCLUDE);$(ODIN32_INCLUDE)\win \
+        *.c *.cpp *.h *.asm *.inc $(ODIN32_INCLUDE)\*.h
 
 
 # Includes the common rules.
-!include $(PDWIN32_INCLUDE)/pdwin32.post
+!include $(ODIN32_POST_INC)
 
