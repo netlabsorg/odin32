@@ -1,7 +1,9 @@
 <?php
 $Naziv="Project Odin Sourcecode Documentation Guidelines";
 
-require "stilovi.php3";
+$sMainDir = "../";
+
+require $sMainDir."stilovi.php3";
 require "Odin32DBHelpers.php3";
 
 /* Profiling */
@@ -9,16 +11,16 @@ $sPageTimer = Odin32DBTimerStart("page timer");
 /* Profiling */
 
 
-require "01-PreTitle.php3";
+require $sMainDir."01-PreTitle.php3";
 echo $Naziv;
-require "02-PostTitle.php3";
+require $sMainDir."02-PostTitle.php3";
 
-require "03-MainTableBeg.php3";
-require "04-ColumnOne.php3";
+require $sMainDir."03-MainTableBeg.php3";
+require $sMainDir."04-ColumnOne.php3";
 
-require "05-ColumnTwoHeader.php3";
+require $sMainDir."05-ColumnTwoHeader.php3";
 echo $Naziv;
-require "06-ColumnTwoHeader2.php3";
+require $sMainDir."06-ColumnTwoHeader2.php3";
 
 /* I would like to number the sections and subsections */
 ODin32DBNumberSections();
@@ -65,7 +67,7 @@ echo "  Each and every source file should start with a header like this:
 TekstEnd();
 CodeBeg();
 echo "
-/* \$Id: Odin32GuidelineDocumentation.phtml,v 1.3 2000-08-02 02:19:10 bird Exp $
+/* \$Id: Odin32GuidelineDocumentation.phtml,v 1.4 2001-09-05 21:38:19 bird Exp $
  *
  * <i>&lt;insert file description here&gt;</i>
  *
@@ -251,7 +253,7 @@ echo "
         </tr>
         ";
 
-require "Odin32DBConnect.php3";
+require $sMainDir."Odin32DBConnect.php3";
 $sql = "SELECT\n".
        "    name,\n".
        "    description,\n".
@@ -551,19 +553,19 @@ echo "
 </table>
         ";
 
-require "07-ColumnTwoFooter.php3";
-require "08-News.php3";
-require "09-ContentsTitle.php3";
+require $sMainDir."07-ColumnTwoFooter.php3";
+require $sMainDir."08-News.php3";
+require $sMainDir."09-ContentsTitle.php3";
 
 Odin32DBWriteContents();
 
-require "10-EndOfContent.php3";
-require "11-NetlabsContact.php3";
+require $sMainDir."10-EndOfContent.php3";
+require $sMainDir."11-NetlabsContact.php3";
 
 $Kada=date ("j M Y", filemtime(__file__));
-require "12-OdinBanner.php3";
+require $sMainDir."12-OdinBanner.php3";
 
-require "13-Closing.php3";
+require $sMainDir."13-Closing.php3";
 
 /* Profiling */
 Odin32DBTimerStop($sPageTimer);
