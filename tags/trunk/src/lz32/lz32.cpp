@@ -1,4 +1,4 @@
-/* $Id: lz32.cpp,v 1.2 1999-08-11 12:49:21 phaller Exp $ */
+/* $Id: lz32.cpp,v 1.3 1999-08-11 16:46:27 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -24,6 +24,8 @@
 #include <lz32.h>
 #include "debugtools.h"
 
+
+ODINDEBUGCHANNEL(LZ32)
 
 // @@@PH WINE compatibility macros
 LPWSTR WINAPI lstrcpyAtoW    (LPWSTR unicode, LPSTR ascii);
