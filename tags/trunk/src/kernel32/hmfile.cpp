@@ -1,4 +1,4 @@
-/* $Id: hmfile.cpp,v 1.19 2000-09-03 09:32:19 sandervl Exp $ */
+/* $Id: hmfile.cpp,v 1.20 2000-09-10 21:54:06 sandervl Exp $ */
 
 /*
  * File IO win32 apis
@@ -313,14 +313,22 @@ BOOL HMDeviceFileClass::DuplicateHandle(PHMHANDLEDATA pHMHandleData,
     //     when an app tries to access the same file again
     if(fdwOdinOptions) 
     {
-    	if(CreateFile(srcfileinfo->lpszFileName, pHMHandleData,
+        HMHANDLEDATA duphdata;
+
+	memcpy(&duphdata, pHMHandleData, sizeof(duphdata));
+	duphdata.dwCreation = OPEN_EXISTING;
+
+    	if(CreateFile(srcfileinfo->lpszFileName, &duphdata,
                       srcfileinfo->lpSecurityAttributes, NULL) == NO_ERROR) 
         {
+		memcpy(pHMHandleData, &duphdata, sizeof(duphdata));
+		SetLastError(ERROR_SUCCESS);
       		return TRUE;
         }
-    	dprintf(("ERROR: DuplicateHandle; CreateFile %s failed!", 
+    	dprintf(("ERROR: DuplicateHandle; CreateFile %s failed -> trying DosDupHandle instead!", 
                   srcfileinfo->lpszFileName));
-        return FALSE;
+	//SvL: IE5 setup opens file with DENYREADWRITE, so CreateFile can't
+        //     be used for duplicating the handle; try DosDupHandle instead
     }
     
     if(!(fdwOptions & DUPLICATE_SAME_ACCESS) && fdwAccess != pHMSrcHandle->dwAccess) {
@@ -338,6 +346,7 @@ BOOL HMDeviceFileClass::DuplicateHandle(PHMHANDLEDATA pHMHandleData,
       return FALSE;   // ERROR
     }
     else {
+      SetLastError(ERROR_SUCCESS);
       pHMHandleData->hHMHandle = *desthandle;
       return TRUE;    // OK
     }
