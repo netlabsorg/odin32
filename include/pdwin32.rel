@@ -1,4 +1,4 @@
-# $Id: pdwin32.rel,v 1.3 1999-06-10 16:21:50 achimha Exp $
+# $Id: pdwin32.rel,v 1.4 1999-08-16 18:00:46 phaller Exp $
 #
 # PD-Win32 Project
 #
@@ -23,10 +23,10 @@ IMPLIB=implib
 #
 # Tool Flags
 #
-CFLAGS = -Q -Fi -Si -G5 -O+ -Ge- -Ss+ -W3 -Gm+ -I$(PDWIN32_INCLUDE)\Win -D__WIN32OS2__ -D__WINE__
-CXXFLAGS = -Q -Fi -Si -G5 -O+ -Ge- -Ss+ -W3 -Gm+ -I$(PDWIN32_INCLUDE)\Win -D__WIN32OS2__ -D__WINE__
+CFLAGS = -Q  -Si -G5 -O+ -Ge- -Ss+ -W3 -Gm+ -I$(PDWIN32_INCLUDE)\Win -D__WIN32OS2__ -D__WINE__
+CXXFLAGS = -Q  -Si -G5 -O+ -Ge- -Ss+ -W3 -Gm+ -I$(PDWIN32_INCLUDE)\Win -D__WIN32OS2__ -D__WINE__
 ASFLAGS = -Sc -Sv:M510
-LDFLAGS = -Q -Fi -Si -G5 -O+ -Ge- -Ss+ -W3 -Gm+ /B"/noe"
+LDFLAGS = -Q  -Si -G5 -O+ -Ge- -Ss+ -W3 -Gm+ /B"/noe"
 IMPLIBFLAGS = /nologo
 
 
