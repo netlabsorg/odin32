@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.81 2000-10-18 17:10:50 sandervl Exp $ */
+/* $Id: window.cpp,v 1.82 2000-11-04 16:28:26 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -726,8 +726,8 @@ BOOL WIN32API IsZoomed(HWND hwnd)
 //******************************************************************************
 BOOL WIN32API LockWindowUpdate(HWND hwnd)
 {
-    dprintf(("USER32:  LockWindowUpdate\n"));
-    return O32_LockWindowUpdate(Win32BaseWindow::Win32ToOS2Handle(hwnd));
+    dprintf(("USER32: LockWindowUpdate %x", hwnd));
+    return OSLibWinLockWindowUpdate(Win32BaseWindow::Win32ToOS2Handle(hwnd));
 }
 //******************************************************************************
 //******************************************************************************
