@@ -1,4 +1,4 @@
-/* $Id: wingdi.cpp,v 1.14 1999-09-09 18:08:19 dengert Exp $ */
+/* $Id: wingdi.cpp,v 1.15 1999-09-12 15:44:20 dengert Exp $ */
 /*
  * Win32 Window graphics apis for OS/2
  *
@@ -59,7 +59,6 @@ BOOL WIN32API EndPaint(HWND hwnd, const PAINTSTRUCT *lps)
     return OSLibWinEndPaint(lps->hdc);
 #endif
 }
-#endif
 
 //******************************************************************************
 //TODO: PARENT_DC flag
@@ -97,6 +96,8 @@ HDC WIN32API GetDCEx(HWND hwnd, HRGN arg2, DWORD arg3)
 #endif
     return GetDC(hwnd);
 }
+#endif
+
 //******************************************************************************
 //******************************************************************************
 int WIN32API ReleaseDC(HWND hwnd, HDC hdc)

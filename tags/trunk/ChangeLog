@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.192 1999-09-12 00:34:58 bird Exp $ */
+ /* $Id: ChangeLog,v 1.193 1999-09-12 15:44:19 dengert Exp $ */
+
+ 99-09-12: Daniela Engert <dani@ngrt.de>
+	- USER32\NEW: DC/related code: GetDCEx implemented. Slightly enhanced
+		      over Open32.
 
  99-09-12: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
     - WIN32K: An untested version is checked in. The new skeleton is
