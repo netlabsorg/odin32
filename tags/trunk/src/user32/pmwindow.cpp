@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.103 2000-09-05 19:20:34 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.104 2000-10-04 19:35:31 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -1061,6 +1061,7 @@ VOID FrameTrackFrame(Win32BaseWindow *win32wnd,DWORD flags)
 
      	/* if successful copy final position back */
 	if(!WinEqualRect(0, &rcl, &track.rclTrack)) {
+		dprintf(("FrameTrackFrame: new (os/2) window rect: (%d,%d)(%d,%d)", track.rclTrack.xLeft, track.rclTrack.yBottom, track.rclTrack.xRight - track.rclTrack.xLeft, track.rclTrack.yTop - track.rclTrack.yBottom));
 		if(flags == TF_MOVE) {
 			WinSetWindowPos(win32wnd->getOS2WindowHandle(), 
                                         0, track.rclTrack.xLeft, track.rclTrack.yBottom, 
