@@ -1,8 +1,13 @@
-/* $Id: ChangeLog,v 1.2600 2003-07-14 13:44:02 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2601 2003-07-14 14:00:22 sandervl Exp $ */
 
  2003-07-14: KO Myung-Hun <komh@chollian    >
     - GDI32:    o Fixed InternalTextOutW() and GetTextExtentPointW() to support 
                   unicode correctly. (DBCS)
+    - COMCTL32: o Fixed PROPSHEET_CollectSheetInfoA() and PROPSHEET_SetTitleA()
+                  to convert ascii to unicode correctly. (DBCS)
+                o Fixed TREEVIEW_TVItemFromItem() and TREEVIEW_BeginLabelEditNotify()
+                  to convert ascii to unicode correctly. (DBCS)
+                o Fixed TREEVIEW_SetItemW() to convert unicode to ascii correctly. (DBCS)
 
  2003-07-11: Dietrich Teickner <Dietrich_Teickner@t-online   >
     - SHELL32:  o Shell folder updates
