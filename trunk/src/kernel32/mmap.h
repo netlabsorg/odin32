@@ -1,4 +1,4 @@
-/* $Id: mmap.h,v 1.24 2002-07-23 13:51:48 sandervl Exp $ */
+/* $Id: mmap.h,v 1.25 2003-02-18 18:48:55 sandervl Exp $ */
 
 /*
  * Memory mapped class
@@ -25,10 +25,10 @@
 #define MEMMAP_CRITSECTION_NAME	"\\SEM32\\ODIN_MMAP.SEM"
 
 //commit 4 pages at once when the app accesses it
-#define NRPAGES_TOCOMMIT    16
+#define NRPAGES_TOCOMMIT        16
 
-#define MEMMAP_ACCESS_READ  1
-#define MEMMAP_ACCESS_WRITE 2
+#define MEMMAP_ACCESS_READ      1
+#define MEMMAP_ACCESS_WRITE     2
 #define MEMMAP_ACCESS_EXECUTE   4
 
 class Win32MemMapView;
@@ -47,11 +47,12 @@ public:
    BOOL   Init(DWORD aMSize=0);
    BOOL   flushView(ULONG offset, ULONG cbFlush);
    LPVOID mapViewOfFile(ULONG size, ULONG offset, ULONG fdwAccess);
-   BOOL   unmapViewOfFile(Win32MemMapView *view);
+   BOOL   unmapViewOfFile(LPVOID addr);
 
    HFILE  getFileHandle()                { return hMemFile; };
    LPSTR  getMemName()                   { return lpszMapName; };
    DWORD  getProtFlags()                 { return mProtFlags; };
+   BOOL   setProtFlags(DWORD dwNewProtect);
    LPVOID getMappingAddr()               { return pMapping; };
    DWORD  getProcessId()                 { return mProcessId;};
 Win32PeLdrImage *getImage()              { return image; };
@@ -64,6 +65,7 @@ Win32PeLdrImage *getImage()              { return image; };
    BOOL   commitPage(ULONG offset, BOOL fWriteAccess, int nrpages = NRPAGES_TOCOMMIT);
 
 static Win32MemMap *findMap(LPSTR lpszName);
+static Win32MemMap *findMapByFile(HANDLE hFile);
 static Win32MemMap *findMap(ULONG address);
 
 //Should only be called in ExitProcess
@@ -91,6 +93,7 @@ static void deleteAll();
 
 protected:
    HFILE  hMemFile;
+   HFILE  hOrgMemFile;
    ULONG  mSize;
    ULONG  mProtFlags;
    ULONG  mProcessId;
@@ -130,8 +133,9 @@ Win32MemMap *getParentMap()              { return mParentMap;};
    DWORD  getProcessId()                 { return mProcessId;};
 
 static void             deleteViews(Win32MemMap *map);
-static Win32MemMap     *findMapByView(ULONG address, ULONG *offset, ULONG accessType, Win32MemMapView **pView=NULL);
-static Win32MemMapView *findView(LPVOID address);
+static Win32MemMap     *findMapByView(ULONG address, ULONG *offset = NULL,
+                                      ULONG accessType = MEMMAP_ACCESS_READ);
+static Win32MemMapView *findView(ULONG address);
 
 #ifdef __DEBUG_ALLOC__
     void *operator new(size_t size, const char *filename, size_t lineno)

@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.60 2003-01-12 16:19:37 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.61 2003-02-18 18:48:54 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -1845,6 +1845,7 @@ BOOL HMDeviceDiskClass::ReadFile(PHMHANDLEDATA pHMHandleData,
             nrpages++;
     
         map->commitPage(offset & ~0xfff, TRUE, nrpages);
+        map->Release();
     }
     else  lpRealBuf = (LPVOID)lpBuffer;
 
@@ -2110,6 +2111,7 @@ BOOL HMDeviceDiskClass::WriteFile(PHMHANDLEDATA pHMHandleData,
             nrpages++;
     
         map->commitPage(offset & ~0xfff, TRUE, nrpages);
+        map->Release();
     }
     else  lpRealBuf = (LPVOID)lpBuffer;
 
