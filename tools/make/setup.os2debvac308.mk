@@ -1,4 +1,4 @@
-# $Id: setup.os2debvac308.mk,v 1.1.2.1 2002-03-06 02:15:11 bird Exp $
+# $Id: setup.os2debvac308.mk,v 1.1.2.2 2002-03-10 05:31:18 bird Exp $
 
 # ---OS2, DEBUG, VAC308-------------------------
 ENV_NAME="OS/2, Debug, IBM VisualAge for C++ 3.08"
@@ -40,19 +40,19 @@ _AR_LNK1= "$(TARGET_OBJS: ="&^
 AR_LNK1= $(_AR_LNK1:""=)
 AR_LNK2= $(@R).lst
 
-AS_FLAGS    = -Mb -Sv:ALP +Od -D:DEBUG -D:OS2 -i:$(PATH_INCLUDE) $(AS_DEFINES:-D=-D:) $(AS_INCLUDES:-I=-i:)
+AS_FLAGS    = -Mb -Sv:ALP +Od -D:DEBUG -D:OS2 $(AS_DEFINES:-D=-D:) $(ALL_INCLUDES:-I=-i:) $(AS_INCLUDES:-I=-i:) $(ALL_DEFINES:-D=-D:) -i:$(PATH_INCLUDE)
 AS_FLAGS_SYS= $(AS_FLAGS) -D:RING0 -i:$(PATH_DDK)\base\inc
 AS_OBJ_OUT= -Fo:
 
-CC_FLAGS=/Q /DDEBUG /DOS2 /Ti+ /O- /Ss+ /C+ /I$(PATH_INCLUDE) $(CC_DEFINES) $(C_INCLUDES)
+CC_FLAGS=/Q /DDEBUG /DOS2 /Ti+ /O- /Ss+ /C+ $(CC_SEGS) $(CC_DEFINES) $(ALL_DEFINES) $(CC_INCLUDES) $(ALL_INCLUDES) /I$(PATH_INCLUDE)
 CC_FLAGS_EXE=$(CC_FLAGS) /Gm+ /Ge+ /Gn+
 CC_FLAGS_DLL=$(CC_FLAGS) /Gm+ /Ge- /Gn-
 CC_FLAGS_CRT=$(CC_FLAGS) /Gm+ /Ge-
-CC_FLAGS_SYS=$(CC_FLAGS) /Rn  /Ge+ /Gn+ /DRING0 /Gr+ /Gs- -Wall+ppt-ppc-inl-cnv-gnr-vft-
+CC_FLAGS_SYS=$(CC_FLAGS) /Rn  /Ge+ /Gn+ /DRING0 /Gr+ /Gs- -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext-
 CC_OBJ_OUT=/Fo
 CC_PC_2_STDOUT=/Pd+ /P+
 
-CXX_FLAGS=/Q /DDEBUG /DOS2 /Ti+ /O- /Ss+ /C+ /I$(PATH_INCLUDE) $(CXX_DEFINES) $(C_INCLUDES)
+CXX_FLAGS=/Q /DDEBUG /DOS2 /Ti+ /O- /Ss+ /C+ $(CXX_SEGS)  $(CXX_DEFINES) $(ALL_DEFINES) $(CXX_INCLUDES) $(ALL_INCLUDES) /I$(PATH_INCLUDE)
 CXX_FLAGS_EXE=$(CXX_FLAGS) /Gm+ /Ge+ /Gn+
 CXX_FLAGS_DLL=$(CXX_FLAGS) /Gm+ /Ge- /Gn-
 CXX_FLAGS_CRT=$(CXX_FLAGS) /Gm+ /Ge-
@@ -62,10 +62,10 @@ CXX_PC_2_STDOUT=/Pd+ /P+
 
 IMPLIB_FLAGS=/NOI /Nologo
 
-LINK_FLAGS=/nologo /de /map /NOE /NOD /Optfunc
+LINK_FLAGS=/nologo /de /map /NOE /NOD /Optfunc /PACKCODE /PACKDATA
 LINK_FLAGS_EXE=$(LINK_FLAGS) /EXECutable /STACK:$(TARGET_STACKSIZE)
 LINK_FLAGS_DLL=$(LINK_FLAGS) /DLL
-LINK_FLAGS_SYS=$(LINK_FLAGS) /PDD /PackCode /PackData /Align:16 /NOIgnorecase
+LINK_FLAGS_SYS=$(LINK_FLAGS) /PDD /Align:16 /NOIgnorecase
 LINK_CMD_EXE=$(LINK) $(LINK_FLAGS_EXE) @$(TARGET_LNK)
 LINK_CMD_DLL=$(LINK) $(LINK_FLAGS_DLL) @$(TARGET_LNK)
 LINK_CMD_SYS=$(LINK) $(LINK_FLAGS_SYS) @$(TARGET_LNK)
