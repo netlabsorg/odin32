@@ -1,4 +1,4 @@
-/* $Id: dibsect.h,v 1.8 1999-12-04 13:53:14 hugh Exp $ */
+/* $Id: dibsect.h,v 1.9 1999-12-30 11:21:30 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -82,7 +82,7 @@ public:
                               lines, const VOID *bits, WINBITMAPINFOHEADER *pbmi,
                               UINT coloruse);
 
-               int  GetDIBSection(int iSize , DIBSECTION *pDIBSection);
+               int  GetDIBSection(int iSize , void *lpBuffer);
 
  static DIBSection *getSection() { return section; } ;
  static DIBSection *find(DWORD handle);
