@@ -1,7 +1,9 @@
-/* $Id: changelog,v 1.2447 2003-01-16 15:20:26 sandervl Exp $ */
+/* $Id: changelog,v 1.2448 2003-01-16 17:42:43 sandervl Exp $ */
 
  2003-01-16: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Fixed heap corruption in CreateProcess (with current dir)
+    - USER32:   o Only the combo bitmap header is wrong; the others are fine
+                  (regression from 2003-01-05)
 
  2003-01-16: Platon Fomichev <platon@innotek   >
     - NTDLL:    o Changes for building dll with GCC
