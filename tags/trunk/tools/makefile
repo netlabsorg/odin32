@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.18 2001-09-29 20:29:41 bird Exp $
+# $Id: makefile,v 1.19 2001-09-30 05:28:07 bird Exp $
 
 #
 # Odin32 API
@@ -27,6 +27,7 @@
 # The directories included in the usual makes; all, clean, dep rules.
 #
 ALL_DIRS = \
+.\cmdqd \
 .\common \
 .\fastdep \
 .\impdef \
