@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.10 1999-11-03 20:18:22 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.11 1999-11-09 14:19:47 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -1059,20 +1059,24 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
 
     if(WinDll == NULL)
     {  //not found, so load it
-	if(isPEImage(pszCurModule) == FALSE)
+	char modname[CCHMAXPATH];
+	
+	strcpy(modname, pszCurModule);
+  	//rename dll if necessary (i.e. OLE32 -> OLE32OS2)
+  	Win32DllBase::renameDll(modname);
+
+	if(isPEImage(modname) == FALSE)
 	{//LX image, so let OS/2 do all the work for us
 		APIRET rc;
   		char   szModuleFailure[CCHMAXPATH] = "";
-	        char   szModuleName[CCHMAXPATH];
 		ULONG  hInstanceNewDll;
 
-	        strcpy(szModuleName, pszCurModule);
-		char *dot = strchr(szModuleName, '.');
+		char *dot = strchr(modname, '.');
 		if(dot) {
 			*dot = 0;
 		}
-		strcat(szModuleName, ".DLL");
-  		rc = DosLoadModule(szModuleFailure, sizeof(szModuleFailure), szModuleName, (HMODULE *)&hInstanceNewDll);
+		strcat(modname, ".DLL");
+  		rc = DosLoadModule(szModuleFailure, sizeof(szModuleFailure), modname, (HMODULE *)&hInstanceNewDll);
   		if(rc) {
 			dprintf(("DosLoadModule returned %X for %s\n", rc, szModuleFailure));
 			errorState = rc;
@@ -1086,7 +1090,7 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
 		}
 	}
 	else {
-        	WinDll = new Win32PeLdrDll(pszCurModule, this);
+        	WinDll = new Win32PeLdrDll(modname, this);
 
         	if(WinDll == NULL) {
 	            fout << "WinDll: Error allocating memory" << endl;

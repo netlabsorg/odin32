@@ -1,4 +1,4 @@
-/* $Id: winimagebase.cpp,v 1.3 1999-10-27 10:35:42 sandervl Exp $ */
+/* $Id: winimagebase.cpp,v 1.4 1999-11-09 14:19:47 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -55,6 +55,9 @@ Win32ImageBase::Win32ImageBase(HINSTANCE hInstance) :
   	char *name = OSLibGetDllName(hinstance);
   	strcpy(szFileName, name);
   	strupr(szFileName);
+
+	//rename dll (os/2 -> win32) if necessary (i.e. OLE32OS2 -> OLE32)
+	Win32DllBase::renameDll(szFileName, FALSE);
 
 	name = strrchr(szFileName, '\\')+1;
 	strcpy(szModule, name);

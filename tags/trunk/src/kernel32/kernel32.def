@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.48 1999-11-05 09:16:56 sandervl Exp $
+; $Id: kernel32.def,v 1.49 1999-11-09 14:19:45 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -1024,21 +1024,21 @@ EXPORTS
     WideCharToLocal            = _WideCharToLocal@12              @1249
     LocalToWideChar            = _LocalToWideChar@12              @1250
 
-    VIRTUAL_MapFileA           = _VIRTUAL_MapFileA@8              @1251
-    VIRTUAL_MapFileW           = _VIRTUAL_MapFileW@8              @1252
+    _VIRTUAL_MapFileA@8              @1251
+    _VIRTUAL_MapFileW@8              @1252
 
     OS2SetExceptionHandler                                        @1253
     OS2UnsetExceptionHandler                                      @1254
 
 ; Odin ini management
 
-    PROFILE_GetOdinIniString   = _PROFILE_GetOdinIniString@20     @1264
-    PROFILE_SetOdinIniString   = _PROFILE_SetOdinIniString@12     @1265
-    PROFILE_GetOdinIniInt      = _PROFILE_GetOdinIniInt@12        @1266
-    PROFILE_SetOdinIniInt      = _PROFILE_SetOdinIniInt@12        @1267
-    PROFILE_GetOdinIniBool     = _PROFILE_GetOdinIniBool@12       @1268
-    PROFILE_SetOdinIniBool     = _PROFILE_SetOdinIniBool@12       @1269
-    PROFILE_SaveOdinIni        = _PROFILE_SaveOdinIni@0           @1270
+    _PROFILE_GetOdinIniString@20     @1264
+    _PROFILE_SetOdinIniString@12     @1265
+    _PROFILE_GetOdinIniInt@12        @1266
+    _PROFILE_SetOdinIniInt@12        @1267
+    _PROFILE_GetOdinIniBool@12       @1268
+    _PROFILE_SetOdinIniBool@12       @1269
+    _PROFILE_SaveOdinIni@0           @1270
 
 ;shared memory allocation
     _smalloc__FUi                                                 @1271
