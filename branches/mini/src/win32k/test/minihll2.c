@@ -1,4 +1,4 @@
-/* $Id: minihll2.c,v 1.1.2.1 2001-08-15 03:12:41 bird Exp $
+/* $Id: minihll2.c,v 1.1.2.2 2001-08-20 18:47:54 bird Exp $
  *
  * The data file.
  *
@@ -23,6 +23,9 @@
  */
 #ifdef __WATCOMC__
 #pragma data_seg("CODEANDDATA", "CODE")
+#endif
+#ifdef __IBMC__
+#pragma data_seg(CODEANDDATACODE32)
 #endif
 char szMsg[19] = {"I'm really small!\n"};
 
