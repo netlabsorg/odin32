@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.35 2000-01-30 15:04:40 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.36 2000-01-31 22:30:08 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -318,6 +318,7 @@ HDC WIN32API CreateCompatibleDC( HDC hdc)
         oldcp = GetDisplayCodepage();
 
     OSLibGpiSetCp(newHdc, oldcp);
+    dprintf(("CreateCompatibleDC %X returned %x", hdc, newHdc));
     return newHdc;
 }
 //******************************************************************************
@@ -328,7 +329,7 @@ INT WIN32API StretchDIBits(HDC hdc, INT xDst, INT yDst, INT widthDst,
                            const BITMAPINFO *info, UINT wUsage, DWORD dwRop )
 {
 #if 1
-    dprintf(("GDI32: StretchDIBits"));
+    dprintf(("GDI32: StretchDIBits %x to (%d,%d) (%d,%d) from (%d,%d) (%d,%d), %x %x %x %x", hdc, xDst, yDst, widthDst, heightDst, xSrc, ySrc, widthSrc, heightSrc, bits, info, wUsage, dwRop));
 
     if(wUsage == DIB_PAL_COLORS && info->bmiHeader.biSize == sizeof(BITMAPINFOHEADER))
     {
@@ -1245,10 +1246,10 @@ int WIN32API GetClipRgn( HDC arg1, HRGN  arg2)
 }
 //******************************************************************************
 //******************************************************************************
-HANDLE WIN32API GetCurrentObject( HDC arg1, UINT arg2)
+HANDLE WIN32API GetCurrentObject( HDC hdc, UINT arg2)
 {
-    dprintf(("GDI32: GetCurrentObject"));
-    return (HANDLE)O32_GetCurrentObject(arg1, arg2);
+    dprintf(("GDI32: GetCurrentObject %x %x", hdc, arg2));
+    return (HANDLE)O32_GetCurrentObject(hdc, arg2);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1514,11 +1515,14 @@ COLORREF WIN32API GetTextColor( HDC arg1)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GetTextExtentPoint32A( HDC arg1, LPCSTR arg2, int arg3, PSIZE  lpSize)
+BOOL WIN32API GetTextExtentPoint32A( HDC hdc, LPCSTR lpsz, int cbString, PSIZE  lpSize)
 {
-    dprintf(("GDI32: GetTextExtentPoint32A"));
+ BOOL rc;
+
     lpSize->cx = lpSize->cy = 0;
-    return O32_GetTextExtentPoint32(arg1, arg2, arg3, lpSize);
+    rc = O32_GetTextExtentPoint32(hdc, lpsz, cbString, lpSize);
+    dprintf(("GDI32: GetTextExtentPoint32A %x %s %d returned %d (%d,%d)", hdc, lpsz, cbString, rc, lpSize->cx, lpSize->cy));
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1895,10 +1899,10 @@ BOOL WIN32API ScaleWindowExtEx( HDC arg1, int arg2, int arg3, int arg4, int arg5
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API SelectClipRgn( HDC arg1, HRGN  arg2)
+int WIN32API SelectClipRgn( HDC hdc, HRGN hRgn)
 {
-    dprintf(("GDI32: SelectClipRgn"));
-    return O32_SelectClipRgn(arg1, arg2);
+    dprintf(("GDI32: SelectClipRgn %x %x", hdc, hRgn));
+    return O32_SelectClipRgn(hdc, hRgn);
 }
 //******************************************************************************
 //******************************************************************************
@@ -2005,6 +2009,7 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
 
 //    if(xDest == 0 && yDest == 0 && xSrc == 0 && ySrc == 0 && cx == width && cy == height) {
 //	result = OSLibSetDIBitsToDevice(hdc, xDest, yDest, cx, cy, xSrc, ySrc, startscan, lines, (PVOID) bits, (WINBITMAPINFOHEADER*)info, coloruse);
+//  	result = lines;
 //    }
 //    else {
     	result = O32_SetDIBitsToDevice(hdc, xDest, yDest, cx, cy, xSrc, ySrc, startscan, lines, (PVOID) bits, (PBITMAPINFO)info, coloruse);
@@ -2240,14 +2245,16 @@ HBITMAP WIN32API CreateDIBSection( HDC hdc, BITMAPINFO *pbmi, UINT iUsage,
   iWidth = pbmi->bmiHeader.biWidth;
   if(pbmi->bmiHeader.biWidth < 0)
   {
-    pbmi->bmiHeader.biWidth = -pbmi->bmiHeader.biWidth;
-    fFlip = FLIP_HOR;
+	dprintf(("CreateDIBSection: width %d", pbmi->bmiHeader.biWidth));
+    	pbmi->bmiHeader.biWidth = -pbmi->bmiHeader.biWidth;
+    	fFlip = FLIP_HOR;
   }
   iHeight = pbmi->bmiHeader.biHeight;
   if(pbmi->bmiHeader.biHeight < 0)
   {
-    pbmi->bmiHeader.biHeight = -pbmi->bmiHeader.biHeight;
-    fFlip |= FLIP_VERT;
+	dprintf(("CreateDIBSection: height %d", pbmi->bmiHeader.biHeight));
+    	pbmi->bmiHeader.biHeight = -pbmi->bmiHeader.biHeight;
+    	fFlip |= FLIP_VERT;
   }
 
   res = O32_CreateDIBitmap(hdc, &pbmi->bmiHeader, 0, NULL, pbmi, 0);
@@ -2287,7 +2294,6 @@ HBITMAP WIN32API CreateDIBSection( HDC hdc, BITMAPINFO *pbmi, UINT iUsage,
       pbmi->bmiHeader.biWidth = iWidth;
       pbmi->bmiHeader.biHeight = iHeight;
 
-      dprintf(("GDI32: return %08X\n",res));
       return(res);
     }
   }

@@ -1,4 +1,4 @@
-/* $Id: line.cpp,v 1.3 1999-12-27 22:52:39 cbratschi Exp $ */
+/* $Id: line.cpp,v 1.4 2000-01-31 22:30:08 sandervl Exp $ */
 /*
  * Line API's
  *
@@ -70,7 +70,7 @@ BOOL WIN32API MoveToEx( HDC hdc, int X, int Y, LPPOINT lpPoint)
 {
   PVOID pHps = OSLibGpiQueryDCData(hdc);
 
-  dprintf(("GDI32: MoveToEx\n"));
+  dprintf(("GDI32: MoveToEx %x (%d,%d)", hdc, X, Y));
 
   if (pHps)
   {
@@ -104,7 +104,7 @@ BOOL WIN32API LineTo( HDC hdc, int nXEnd, int  nYEnd)
   PVOID pHps = OSLibGpiQueryDCData(hdc);
   BOOL rc = TRUE;
 
-  dprintf(("GDI32: LineTo"));
+  dprintf(("GDI32: LineTo %x (%d,%d)", hdc, nXEnd, nYEnd));
 
   if (pHps)
   {
