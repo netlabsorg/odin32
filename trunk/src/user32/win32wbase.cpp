@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.166 2000-02-21 17:25:31 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.167 2000-02-22 17:07:42 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1202,8 +1202,6 @@ LRESULT Win32BaseWindow::DefWndControlColor(UINT ctlType, HDC hdc)
         SetTextColor( hdc, GetSysColor(COLOR_3DFACE));
         SetBkColor( hdc, bk);
 
-//TODO?
-#if 0
          /* if COLOR_WINDOW happens to be the same as COLOR_3DHILIGHT
           * we better use 0x55aa bitmap brush to make scrollbar's background
           * look different from the window background.
@@ -1211,7 +1209,7 @@ LRESULT Win32BaseWindow::DefWndControlColor(UINT ctlType, HDC hdc)
         if (bk == GetSysColor(COLOR_WINDOW)) {
              return CACHE_GetPattern55AABrush();
         }
-#endif
+
         UnrealizeObject( hb );
         return (LRESULT)hb;
     }
@@ -1706,8 +1704,8 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         }
 
     case WM_HELP:
-	if (getParent()) getParent()->SendInternalMessageA(Msg,wParam,lParam);
-	break;
+        if (getParent()) getParent()->SendInternalMessageA(Msg,wParam,lParam);
+        break;
 
     case WM_NOTIFY:
         return 0; //comctl32 controls expect this

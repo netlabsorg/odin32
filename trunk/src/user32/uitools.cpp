@@ -1,4 +1,4 @@
-/* $Id: uitools.cpp,v 1.24 2000-02-21 17:25:29 cbratschi Exp $ */
+/* $Id: uitools.cpp,v 1.25 2000-02-22 17:07:40 cbratschi Exp $ */
 /*
  * User Interface Functions
  *
@@ -14,12 +14,10 @@
 #include "winuser.h"
 #include "user32.h"
 #include "win32wbase.h"
+#include "syscolor.h"
 
 #define DBG_LOCALLOG    DBG_uitools
 #include "dbglocal.h"
-
-static const WORD wPattern_AA55[8] = { 0xaaaa, 0x5555, 0xaaaa, 0x5555,
-                                       0xaaaa, 0x5555, 0xaaaa, 0x5555 };
 
 /* These tables are used in:
  * UITOOLS_DrawDiagEdge()
@@ -615,19 +613,15 @@ static void UITOOLS_DrawCheckedRect( HDC dc, LPRECT rect )
 {
     if(GetSysColor(COLOR_BTNHIGHLIGHT) == RGB(255, 255, 255))
     {
-      HBITMAP hbm = CreateBitmap(8, 8, 1, 1, wPattern_AA55);
-      HBRUSH hbsave;
-      HBRUSH hb = CreatePatternBrush(hbm);
       COLORREF bg;
+      HBRUSH hbsave;
 
       FillRect(dc, rect, GetSysColorBrush(COLOR_BTNFACE));
       bg = SetBkColor(dc, RGB(255, 255, 255));
-      hbsave = (HBRUSH)SelectObject(dc, hb);
+      hbsave = (HBRUSH)SelectObject(dc,CACHE_GetPattern55AABrush());
       PatBlt(dc, rect->left, rect->top, rect->right-rect->left, rect->bottom-rect->top, 0x00FA0089);
       SelectObject(dc, hbsave);
       SetBkColor(dc, bg);
-      DeleteObject(hb);
-      DeleteObject(hbm);
     }
     else
     {
@@ -1528,11 +1522,7 @@ BOOL Paint_DrawState (HDC hdc, HBRUSH hbr, DRAWSTATEPROC func, LPARAM lp, WPARAM
     /* These states cause the image to be dithered */
     if(flags & (DSS_UNION|DSS_DISABLED))
     {
-        WORD wPattern55AA[] = { 0x5555, 0xaaaa, 0x5555, 0xaaaa, 0x5555, 0xaaaa, 0x5555, 0xaaaa };
-        HBITMAP hPattern55AABitmap = CreateBitmap( 8, 8, 1, 1, wPattern55AA );
-        HBRUSH hPattern55AABrush = CreatePatternBrush(hPattern55AABitmap);
-
-        hbsave = (HBRUSH)SelectObject(memdc, hPattern55AABrush);
+        hbsave = (HBRUSH)SelectObject(memdc,CACHE_GetPattern55AABrush());
         if(!hbsave) goto cleanup;
         tmp = PatBlt(memdc, 0, 0, cx, cy, 0x00FA0089);
         if(hbsave) SelectObject(memdc, hbsave);

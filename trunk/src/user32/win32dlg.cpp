@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.44 2000-02-16 14:28:22 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.45 2000-02-22 17:07:41 cbratschi Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -24,7 +24,7 @@
 #include "controls.h"
 #include "syscolor.h"
 
-#define DBG_LOCALLOG	DBG_win32dlg
+#define DBG_LOCALLOG    DBG_win32dlg
 #include "dbglocal.h"
 
 #define DEFAULT_DLGFONT "9.WarpSans"
@@ -161,6 +161,7 @@ Win32Dialog::Win32Dialog(HINSTANCE hInst, LPCSTR dlgTemplate, HWND owner,
     cs.cx             = rect.right;
     cs.cy             = rect.bottom;
     cs.style          = dlgInfo.style & ~WS_VISIBLE;
+
     if(!isUnicode) {
         if(dlgInfo.caption) {
                 cs.lpszName  = UnicodeToAsciiString((LPWSTR)dlgInfo.caption);
@@ -176,6 +177,7 @@ Win32Dialog::Win32Dialog(HINSTANCE hInst, LPCSTR dlgTemplate, HWND owner,
         cs.lpszClass      = dlgInfo.className;
     }
     cs.dwExStyle      = dlgInfo.exStyle;
+    if (dlgInfo.style & DS_CONTEXTHELP) cs.dwExStyle |= WS_EX_CONTEXTHELP;
 
     fIsDialog = TRUE;
     WINPROC_SetProc((HWINDOWPROC *)&Win32DlgProc, (WNDPROC)dlgProc, (isUnicode) ? WIN_PROC_32W : WIN_PROC_32A, WIN_PROC_WINDOW);

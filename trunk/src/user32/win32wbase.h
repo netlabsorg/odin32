@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.84 2000-02-21 17:25:31 cbratschi Exp $ */
+/* $Id: win32wbase.h,v 1.85 2000-02-22 17:07:43 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -383,7 +383,7 @@ private:
         void  GetMinMaxInfo(POINT *maxSize, POINT *maxPos, POINT *minTrack, POINT *maxTrack );
         LONG  HandleWindowPosChanging(WINDOWPOS *winpos);
         LONG  HandleNCActivate(WPARAM wParam);
-        VOID  TrackMinMaxBox(WORD wParam);
+        VOID  TrackMinMaxHelpBox(WORD wParam);
         VOID  TrackCloseButton(WORD wParam);
         VOID  TrackScrollBar(WPARAM wParam,POINT pt);
         LONG  HandleNCLButtonDown(WPARAM wParam,LPARAM lParam);
@@ -403,7 +403,7 @@ private:
         VOID  DrawCloseButton(HDC hdc,RECT *rect,BOOL down,BOOL bGrayed);
         VOID  DrawMaxButton(HDC hdc,RECT *rect,BOOL down,BOOL bGrayed);
         VOID  DrawMinButton(HDC hdc,RECT *rect,BOOL down,BOOL bGrayed);
-        VOID  DrawHelpButton(HDC hdc,RECT *rect,BOOL down,BOOL bGrayed);
+        VOID  DrawContextHelpButton(HDC hdc,RECT *rect,BOOL down,BOOL bGrayed);
         VOID  DrawCaption(HDC hdc,RECT *rect,BOOL active);
         VOID  DoNCPaint(HRGN clip,BOOL suppress_menupaint);
         LONG  HandleNCPaint(HRGN clip);
