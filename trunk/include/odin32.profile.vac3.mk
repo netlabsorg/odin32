@@ -1,4 +1,4 @@
-# $Id: odin32.profile.vac3.mk,v 1.12 2002-04-12 02:37:01 bird Exp $
+# $Id: odin32.profile.vac3.mk,v 1.13 2002-04-17 04:06:24 bird Exp $
 
 #
 # Odin32 API
@@ -18,7 +18,8 @@ DLLENTRY = $(ODIN32_LIB)\dllentry.obj
 ODINCRT  = odincrtp
 LIB_DEMANGLE = demangl.lib
 !ifndef DEBUG
-OBJ_PROFILE = $(ODIN32_LIB)\cppopa3.obj $(ODIN32_LIB)\cppopa3_fix2.obj
+#OBJ_PROFILE = $(ODIN32_LIB)\cppopa3.obj $(ODIN32_LIB)\cppopa3_fix2.obj
+OBJ_PROFILE = $(ODIN32_LIB)\cpppan40.obj
 NO_LXLITE = 1
 !endif
 
