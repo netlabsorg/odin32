@@ -1,4 +1,4 @@
-/* $Id: windllbase.cpp,v 1.27 2001-07-08 11:02:10 sandervl Exp $ */
+/* $Id: windllbase.cpp,v 1.28 2002-02-06 16:33:38 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
@@ -406,7 +406,7 @@ BOOL Win32DllBase::attachProcess()
     //      in OS/2
     if(fSetExceptionHandler) {
         OS2SetExceptionHandler((void *)&exceptFrame);
-        sel = SetWin32TIB();
+        sel = SetWin32TIB(isPEImage() ? TIB_SWITCH_FORCE_WIN32 : TIB_SWITCH_DEFAULT);
     }
 
     if(dllEntryPoint == NULL) {
@@ -481,7 +481,7 @@ BOOL Win32DllBase::detachProcess()
     OS2SetExceptionHandler((void *)&exceptFrame);
 
     fUnloaded = TRUE;
-    sel = SetWin32TIB();
+    sel = SetWin32TIB(isPEImage() ? TIB_SWITCH_FORCE_WIN32 : TIB_SWITCH_DEFAULT);
 
     // @@@PH 2000/06/13 lpvReserved, Starcraft STORM.DLL
     // if DLL_PROCESS_ATTACH, lpvReserved is NULL for dynamic loads
@@ -496,7 +496,7 @@ BOOL Win32DllBase::detachProcess()
 
     rc = dllEntryPoint(hinstance, DLL_PROCESS_DETACH, lpvReserved);
 
-    SetFS(sel);
+    SetFS(sel);           //restore FS
     tlsDetachThread();    //destroy TLS (main thread)
     tlsDelete();
 
