@@ -1,4 +1,4 @@
-/* $Id: clsid.cpp,v 1.11 2000-03-19 22:32:12 davidr Exp $ */
+/* $Id: clsid.cpp,v 1.12 2000-04-02 22:07:34 davidr Exp $ */
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -9,18 +9,42 @@
  *
  * 1/7/99
  *
- * Copyright 1999 David J. Raison
+ * Copyright 2000 David J. Raison 
  *
  * Some portions from Wine Implementation
+ *
  *   Copyright 1995  Martin von Loewis
- *   Copyright 1998  Justin Bradford
- *   Copyright 1999  Francis Beaudet
- *   Copyright 1999  Sylvain St-Germain
+ *             1998  Justin Bradford
+ *             1999  Francis Beaudet
+ *             1999  Sylvain St-Germain
  */
 
 #include "ole32.h"
+#include "rpcdce.h"
 
 #include "oString.h"
+
+
+// ----------------------------------------------------------------------
+// CoCreateGuid						[OLE32.6]
+//
+// Creates a 128bit GUID.
+// ----------------------------------------------------------------------
+HRESULT WINAPI CoCreateGuid(
+    GUID *	pguid)		/* [out] points to the GUID to initialize */
+{
+    HRESULT		hr;
+
+    dprintf(("OLE32: CoCreateGuid"));
+
+    hr = UuidCreate(pguid);
+
+#if defined(DEBUG)
+    oStringA		tGUID(pguid);
+    dprintf(("       guid = %s", (char *)tGUID));
+#endif
+    return hr;
+}
 
 // ----------------------------------------------------------------------
 // CLSIDFromProgID16()
@@ -201,16 +225,6 @@ HRESULT WIN32API CLSIDFromString(
     oStringA		tClsId(lpsz);
 
     return CLSIDFromString16(tClsId, pclsid);
-}
-
-// ----------------------------------------------------------------------
-// CoCreateGuid()
-// ----------------------------------------------------------------------
-HRESULT WIN32API CoCreateGuid(GUID *pguid)
-{
-   dprintf(("OLE32: CoCreateGuid"));
-   memset(pguid, 0, sizeof(GUID));      //TODO: should be random GUID
-   return S_OK;
 }
 
 // ----------------------------------------------------------------------
