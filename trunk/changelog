@@ -1,8 +1,10 @@
- /* $Id: changelog,v 1.25 1999-06-26 18:23:58 sandervl Exp $ */
+ /* $Id: changelog,v 1.26 1999-06-26 18:34:45 sandervl Exp $ */
  99-06-26: Sander van Leeuwen
 	- USER32: Changes for message spy & several message handler changes
 	- USER32: Restore win32 tib in window msg callback
 	- KERNEL32/include: Restore OS/2 tib on entering Open32 or OS/2 apis
+	- KERNEL32/lang.cpp: Bugfix for GetLocaleInfoA (if buf ptr == null, only 
+	  return size of memory block required to hold info)
 
  99-06-25: Achim Hasenmueller
         - Finally fixed changelog date format to be compliant with

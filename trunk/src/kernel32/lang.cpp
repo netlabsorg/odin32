@@ -1,4 +1,4 @@
-/* $Id: lang.cpp,v 1.5 1999-06-24 08:47:40 sandervl Exp $ */
+/* $Id: lang.cpp,v 1.6 1999-06-26 18:35:08 sandervl Exp $ */
 
 /*
  * Win32 language API functions for OS/2
@@ -75,16 +75,16 @@ int WIN32API GetLocaleInfoA(LCID lcid, LCTYPE LCType, LPSTR buf, int len)
   switch(LCType)
   {
     case LOCALE_SDECIMAL:
-      *buf = CtryInfo.szDecimal[0];
+      if(buf) *buf = CtryInfo.szDecimal[0];
       return 1;
     case LOCALE_SDATE:
-      *buf = CtryInfo.szDateSeparator[0];
+      if(buf) *buf = CtryInfo.szDateSeparator[0];
       return 1;
     case LOCALE_STIME:
-      *buf = CtryInfo.szTimeSeparator[0];
+      if(buf) *buf = CtryInfo.szTimeSeparator[0];
       return 1;
     case LOCALE_STHOUSAND:
-      *buf = CtryInfo.szThousandsSeparator[0];
+      if(buf) *buf = CtryInfo.szThousandsSeparator[0];
       return 1;
     case LOCALE_SCURRENCY:
       if(len > strlen(CtryInfo.szCurrency))
@@ -175,7 +175,7 @@ int WIN32API GetLocaleInfoA(LCID lcid, LCTYPE LCType, LPSTR buf, int len)
         else
           break;
       }
-      *buf = 0;
+      if(buf) *buf = 0;
       return 1;
 /***
     LOCALE_SABBREVMONTHNAME11:
@@ -195,7 +195,7 @@ int WIN32API GetLocaleInfoA(LCID lcid, LCTYPE LCType, LPSTR buf, int len)
 ***/
     default:
       dprintf(("KERNEL32:  OS2GetLocaleInfoA: LCType %d not yet supported\n", LCType));
-      *buf = '1';
+      if(buf) *buf = '1';
       return(1);
   }
 
