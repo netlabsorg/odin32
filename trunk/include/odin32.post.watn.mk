@@ -1,4 +1,4 @@
-# $Id: odin32.post.watn.mk,v 1.3 2002-02-09 17:26:36 sandervl Exp $
+# $Id: odin32.post.watn.mk,v 1.4 2002-06-09 15:07:00 bird Exp $
 
 #
 # Odin32 API
@@ -305,7 +305,7 @@ $(OBJDIR)\$(TARGET)$(CUST).$(TARGET_EXTENSION): $(OBJS) $(ODIN32_INCLUDE)\odin32
 !ifndef NO_DEP_RULE
 dep: dep_internal $(ADDITIONAL_DEP)
 dep_internal:
-    $(DEPEND) $(CINCLUDES) *.c *.cpp *.h *.asm *.inc *.rc *.dlg -robj *.orc
+    $(DEPEND) $(CINCLUDES) -xdummy.c *.c *.cpp *.h *.asm *.inc *.rc *.dlg -robj *.orc
 !ifdef SUBDIRS
     @$(DODIRS) "$(SUBDIRS)"  $(MAKE_CMD) dep
 !endif

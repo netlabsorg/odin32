@@ -1,4 +1,4 @@
-# $Id: odin32.post.vac3.mk,v 1.27 2002-04-11 21:23:57 bird Exp $
+# $Id: odin32.post.vac3.mk,v 1.28 2002-06-09 15:07:00 bird Exp $
 
 #
 # Odin32 API
@@ -337,7 +337,7 @@ $(OBJS:  =^
 !ifndef NO_DEP_RULE
 dep: dep_internal $(ADDITIONAL_DEP)
 dep_internal:
-    $(DEPEND) $(CINCLUDES) *.c *.cpp *.h *.asm *.inc *.rc *.dlg -robj *.orc
+    $(DEPEND) $(CINCLUDES) -xdummy.c *.c *.cpp *.h *.asm *.inc *.rc *.dlg -robj *.orc
 !ifdef SUBDIRS
     @$(DODIRS) "$(SUBDIRS)"  $(MAKE_CMD) dep
 !endif
