@@ -150,7 +150,11 @@ typedef struct _TEB
               PROCESSTHREAD_SECURITYINFO threadinfo; //used to store security info for thread tokens
               DWORD          lcid;           // thread lcid
               BOOL           fIgnoreMsgs;    // set to true if waiting in WaitForSingleObject
-            
+
+              CONTEXT        context;        // thread context 
+              char           savedopcode;    // saved instruction
+              LPVOID         lpAlias;        // alias
+              DWORD          dwAliasOffset;  // offset
 #ifdef DEBUG
               // used for call stack tracking
               ULONG          dbgCallDepth;     // is de-/incremented by ODINWRAP macros
