@@ -1,4 +1,4 @@
-/* $Id: clfix.c,v 1.1 2000-09-21 15:37:09 bird Exp $
+/* $Id: clfix.c,v 1.2 2000-11-09 20:42:43 bird Exp $
  *
  * A wrapper program for cl.exe fix will try fix some of the problems
  * we have seen.
@@ -21,7 +21,7 @@
 *******************************************************************************/
 #include <os2.h>
 #include <string.h>
-
+#include <stdio.h>
 
 
 int main(int argc, char **argv)
@@ -30,6 +30,9 @@ int main(int argc, char **argv)
     RESULTCODES     resc;
     int             argi;
     char *          psz;
+    HFILE           hFile;
+    APIRET          rc;
+
 
     /*
      * Check that we have cl.exe at least passed in.
@@ -72,9 +75,21 @@ int main(int argc, char **argv)
 
 
     /*
-     * Set max filehandles (is this inherited?)
+     * Set max filehandles
+     * ú Is this inherited?
+     * - Probably not. So we'll have exploit handle inheritance
+     *   to fix this.
      */
     DosSetMaxFH(100);
+
+    /*
+     * Let us open a high handle number which makes the
+     * child process to inherit the maximum number of open files.
+     */
+    hFile = 99; /* suggest handle number. */
+    rc = DosDupHandle(1, &hFile);
+    if (rc)
+        printf("clfix: DosDupHandle failed with rc=%d\n\n", rc);
 
 
     /*
