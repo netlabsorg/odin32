@@ -1,8 +1,9 @@
-/* $Id: changelog,v 1.2160 2002-06-15 10:55:24 sandervl Exp $ */
+/* $Id: changelog,v 1.2161 2002-06-15 11:16:27 sandervl Exp $ */
 
  2002-06-15: Sander van Leeuwen <sandervl@innotek.de>
     - SETUPAPI: o Wine resync + added debug wrappers
     - KERNEL32: o Added strtolW & strtoulW from Wine (for setupapi)
+    - NTDLL:    o Forward heap functions to kernel32
 
  2002-06-13: Sander van Leeuwen <sandervl@innotek.de>
     - USER32:   o SetCustomWndHandleSemName added to override shared semaphore
