@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.228 2000-12-29 18:39:59 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.229 2001-01-14 17:15:47 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2220,6 +2220,9 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
    HWND hParent = 0;
    RECT oldClientRect = rectClient;
 
+    if(getWindowHandle() == 0x68000010) {
+	hParent = 0;
+    }
     if (fuFlags &
        ~(SWP_NOSIZE     | SWP_NOMOVE     | SWP_NOZORDER     |
          SWP_NOREDRAW   | SWP_NOACTIVATE | SWP_FRAMECHANGED |
@@ -2384,10 +2387,21 @@ void Win32BaseWindow::NotifyFrameChanged(WINDOWPOS *wpos, RECT *oldClientRect)
  RECT rect;
 
     MsgFormatFrame(NULL);
+
     if(RECT_WIDTH(rectClient) != RECT_WIDTH(*oldClientRect) ||
        RECT_HEIGHT(rectClient) != RECT_HEIGHT(*oldClientRect))
     {
-         wpos->flags &= ~SWP_NOSIZE;
+         wpos->flags &= ~(SWP_NOSIZE|SWP_NOCLIENTSIZE);
+         wpos->cx     = RECT_WIDTH(rectWindow);
+         wpos->cy     = RECT_HEIGHT(rectWindow);
+    }
+
+    if(rectClient.left != oldClientRect->left || 
+       rectClient.top != oldClientRect->top)
+    {
+         wpos->flags &= ~(SWP_NOMOVE|SWP_NOCLIENTMOVE);
+         wpos->x      = rectWindow.left;
+         wpos->y      = rectWindow.top;
     }
 
     WINDOWPOS wpOld = *wpos;
