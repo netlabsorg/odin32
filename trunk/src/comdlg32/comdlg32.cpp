@@ -1,4 +1,4 @@
-/* $Id: comdlg32.cpp,v 1.7 1999-06-29 15:54:10 cbratschi Exp $ */
+/* $Id: comdlg32.cpp,v 1.8 1999-06-29 16:24:17 achimha Exp $ */
 
 /*
  * COMDLG32 implementation
