@@ -1,9 +1,13 @@
- /* $Id: ChangeLog,v 1.698 2000-02-05 14:10:06 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.699 2000-02-05 15:57:01 sandervl Exp $ */
 
  2000-02-05: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Memory map fixes (file maps)
 	- USER32: GWL_STYLE change + mdi child creation fix
                   (child still not activated when created)
+	- GDI32: Don't use Open32 apis to load opengl32 (nor for GetProcAddress)
+                 Import wgl* apis
+	- OPENGL: Removed OS2wgl apis (they had the wrong calling convention
+                  -> causes crashes in gdi32 when compiled with optimizations on)
 
  2000-02-04: Markus Montkowski <mmontkowski@gmx.de> 
         - DDRAW:  Many minor/major bugfixes at numerous places
