@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.111 2001-03-22 18:16:41 sandervl Exp $
+# $Id: makefile,v 1.112 2001-03-25 21:56:36 sandervl Exp $
 
 #
 # Odin32 API
@@ -160,7 +160,7 @@ TARGET = kernel32
 #
 $(OBJDIR)\exceptions.obj: exceptions.cpp
 !if "$(VAC3)" == "1"  ||  "$(VAC36)" == "1"
-    $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -Op- \
+    $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -O- \
         -Fo$(OBJDIR)\$(@B).obj -c exceptions.cpp
 !else
 # Since this only turns off stack optimizations I take it's a VAC only fix.
