@@ -1,8 +1,8 @@
-# $Id: setup.mak,v 1.24 2003-01-23 14:29:35 sandervl Exp $
+# $Id: setup.mak,v 1.25 2003-06-30 13:19:09 bird Exp $
 #
 #   The common build setup.
 #
-# Copyright (c) 2001-2002 knut st. osmundsen <bird@anduin.net>
+# Copyright (c) 2001-2003 knut st. osmundsen <bird@anduin.net>
 # Copyright (c) 2001 Patrick Haller
 #
 # This file is part of Generic Buildsystem.
@@ -124,6 +124,9 @@ SHT_BLDENVFRC=$(SHT_BLDENV)
 # Directories
 # -----------------------------------------------------------------------------
 
+# Postfix which we append for special builds.
+_PATH_EXTRA     =
+
 # current directory.
 PATH_CURRENT    = $(MAKEDIR)
 # Where build system files are located. (like this file)
@@ -139,13 +142,13 @@ PATH_INCLUDES   = $(PATH_ROOT)\include\win;.;$(PATH_ROOT)\include
 PATH_INCLUDES   = $(PATH_ROOT)\include\incl_vac;$(PATH_ROOT)\include\win;.;$(PATH_ROOT)\include
 !endif
 # Where the temporary files goes.
-PATH_OBJ        = $(PATH_ROOT)\obj\$(SHT_TRGPLTFRM)$(SHT_BLDMD)$(SHT_BLDENV:-=_)
+PATH_OBJ        = $(PATH_ROOT)\obj\$(SHT_TRGPLTFRM)$(SHT_BLDMD)$(SHT_BLDENV:-=_)$(_PATH_EXTRA)
 # Where the libraries goes.
-PATH_LIB        = $(PATH_ROOT)\lib\$(BUILD_MODE)
+PATH_LIB        = $(PATH_ROOT)\lib\$(BUILD_MODE)$(_PATH_EXTRA)
 # Base directory of the published files.
-PATH_PUB        = $(PATH_ROOT)\bin\$(BUILD_MODE)
+PATH_PUB        = $(PATH_ROOT)\bin\$(BUILD_MODE)$(_PATH_EXTRA)
 # Base directory of the unstripped published files. (release mode only)
-PATH_PUB_DEB    = $(PATH_ROOT)\bin\$(BUILD_MODE).unstripped
+PATH_PUB_DEB    = $(PATH_ROOT)\bin\$(BUILD_MODE)$(_PATH_EXTRA).unstripped
 # Sub dir where the executable binaries goes.
 PATH_SUB_BIN    = .
 # Sub dir where the dynamic link libraries goes.
@@ -213,6 +216,7 @@ OBJ_DLLENTRY            = $(PATH_LIB)\dllentry.$(EXT_OBJ)
 !else
 OBJ_DLLENTRY            =
 !endif
+PUBLISH_MAP             = 1
 
 # This is the process file to include at end of the makefile.
 MAKE_INCLUDE_PROCESS    = $(PATH_MAKE)\process.mak
