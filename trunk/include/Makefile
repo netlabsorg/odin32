@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.1 2001-09-30 00:27:12 bird Exp $
+# $Id: Makefile,v 1.2 2001-09-30 05:31:21 bird Exp $
 
 
 #
@@ -7,12 +7,9 @@
 !include ..\makefile.inc
 
 _all: all
-$(COMMONRULES:clean dep=):
+$(COMMONRULES:dep=):
     @echo Nothing to do for $@
 
 dep:
     $(DEPEND) $(CINCLUDES) *.h *.asm *.inc win\*.h win\*.asm win\*.inc
-
-clean:
-    $(RM) -f .depend
 
