@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.2742 2004-11-23 17:45:37 sao2l02 Exp $ */
+/* $Id: ChangeLog,v 1.2743 2004-11-28 11:48:29 sao2l02 Exp $ */
+2004-11-28: Dietrich Teickner <dietrich_teickner@arcor   >
+    - Kernel32: o src\kernel32\hmthread.cpp
+                  HMDeviceThreadClass::CreateThread - changes against invalid thread handle. 
+                  src\kernel32\asmutil.asm small optimizing.
 2004-11-23: Dietrich Teickner <dietrich_teickner@arcor   >
     - Kernel32: o src/kernel32/dbglog.cpp, *.def, include/debugtools.h
                   Multiple debugstr_a/w in one TRACE statement. 
