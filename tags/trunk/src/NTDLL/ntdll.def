@@ -1,4 +1,4 @@
-; $Id: ntdll.def,v 1.28 1999-12-01 18:39:49 sandervl Exp $
+; $Id: ntdll.def,v 1.29 1999-12-19 12:25:55 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is NT4.0's NTDLL.DLL
@@ -211,12 +211,15 @@ EXPORTS
     RtlAllocateAndInitializeSid   = _RtlAllocateAndInitializeSid@44   @265
     RtlConvertSidToUnicodeString  = _RtlConvertSidToUnicodeString@12  @296
     RtlEqualSid                   = _RtlEqualSid@8                    @352
+    RtlEqualPrefixSid             = _RtlEqualPrefixSid@8              @351
     RtlFreeSid                    = _RtlFreeSid@4                     @376
+    RtlValidSid                   = _RtlValidSid@4                    @523
     RtlLengthRequiredSid          = _RtlLengthRequiredSid@4           @427
     RtlLengthSid                  = _RtlLengthSid@4                   @429
     RtlInitializeSid              = _RtlInitializeSid@12              @410
     RtlSubAuthoritySid            = _RtlSubAuthoritySid@8             @497
     RtlSubAuthorityCountSid       = _RtlSubAuthorityCountSid@4        @496
+    RtlIdentifierAuthoritySid     = _RtlIdentifierAuthoritySid@4      @395
     RtlCopySid                    = _RtlCopySid@12                    @302
     RtlCreateSecurityDescriptor   = _RtlCreateSecurityDescriptor@8    @313
     RtlValidSecurityDescriptor    = _RtlValidSecurityDescriptor@4     @600

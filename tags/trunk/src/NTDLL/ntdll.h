@@ -1,4 +1,4 @@
-/* $Id: ntdll.h,v 1.9 1999-12-18 21:45:13 sandervl Exp $ */
+/* $Id: ntdll.h,v 1.10 1999-12-19 12:25:55 sandervl Exp $ */
 
 /*
    this file defines interfaces mainly exposed to device drivers and
@@ -383,12 +383,15 @@ BOOLEAN WINAPI RtlAllocateAndInitializeSid ( PSID_IDENTIFIER_AUTHORITY pIdentifi
 					     PSID *pSid);
 	
 BOOL WINAPI RtlEqualSid(PSID pSid1, PSID pSid2);
+BOOL WINAPI RtlEqualPrefixSid (PSID pSid1, PSID pSid2);
+BOOL WINAPI RtlValidSid( PSID pSid );
 VOID* WINAPI RtlFreeSid(PSID pSid);
 DWORD WINAPI RtlLengthRequiredSid(DWORD nrofsubauths);
 DWORD WINAPI RtlLengthSid(PSID sid);
 DWORD WINAPI RtlInitializeSid(PSID PSID,PSID_IDENTIFIER_AUTHORITY PSIDauth, DWORD c);
 LPDWORD WINAPI RtlSubAuthoritySid(PSID PSID,DWORD nr);
 LPBYTE WINAPI RtlSubAuthorityCountSid(PSID PSID);
+PSID_IDENTIFIER_AUTHORITY WINAPI RtlIdentifierAuthoritySid( PSID pSid );
 DWORD WINAPI RtlCopySid(DWORD len,PSID to,PSID from);
 
 /*

@@ -1,4 +1,4 @@
-/* $Id: sec.cpp,v 1.4 1999-12-18 20:01:14 sandervl Exp $ */
+/* $Id: sec.cpp,v 1.5 1999-12-19 12:25:55 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -20,20 +20,6 @@
 
 #include <os2win.h>
 #include "ntdll.h"
-
-/*
-#include "windef.h"
-#include "winbase.h"
-#include "winuser.h"
-#include "wine/winestring.h"
-#include "heap.h"
-#include "winnls.h"
-#include "winuser.h"
-#include "winerror.h"
-#include "stackframe.h"
-
-#include "winreg.h"
-*/
 
 /*
  * SID FUNCTIONS
@@ -76,15 +62,26 @@ BOOLEAN WINAPI RtlAllocateAndInitializeSid ( PSID_IDENTIFIER_AUTHORITY pIdentifi
   }
   (*pSid)->Revision          = SID_REVISION;
   (*pSid)->SubAuthorityCount = nSubAuthorityCount;
-  (*pSid)->SubAuthority[0]   = nSubAuthority0;
-  (*pSid)->SubAuthority[1]   = nSubAuthority1;
-  (*pSid)->SubAuthority[2]   = nSubAuthority2;
-  (*pSid)->SubAuthority[3]   = nSubAuthority3;
-  (*pSid)->SubAuthority[4]   = nSubAuthority4;
-  (*pSid)->SubAuthority[5]   = nSubAuthority5;
-  (*pSid)->SubAuthority[6]   = nSubAuthority6;
-  (*pSid)->SubAuthority[7]   = nSubAuthority7;
-  memcpy((PVOID)&(*pSid)->IdentifierAuthority, (PVOID)pIdentifierAuthority, sizeof(SID_IDENTIFIER_AUTHORITY));
+
+  if (nSubAuthorityCount > 0)
+        (*pSid)->SubAuthority[0] = nSubAuthority0;
+  if (nSubAuthorityCount > 1)
+        (*pSid)->SubAuthority[1] = nSubAuthority1;
+  if (nSubAuthorityCount > 2)
+        (*pSid)->SubAuthority[2] = nSubAuthority2;
+  if (nSubAuthorityCount > 3)
+        (*pSid)->SubAuthority[3] = nSubAuthority3;
+  if (nSubAuthorityCount > 4)
+        (*pSid)->SubAuthority[4] = nSubAuthority4;
+  if (nSubAuthorityCount > 5)
+        (*pSid)->SubAuthority[5] = nSubAuthority5;
+  if (nSubAuthorityCount > 6)
+        (*pSid)->SubAuthority[6] = nSubAuthority6;
+  if (nSubAuthorityCount > 7)
+        (*pSid)->SubAuthority[7] = nSubAuthority7;
+
+  if(pIdentifierAuthority) 
+  	memcpy((PVOID)&(*pSid)->IdentifierAuthority, (PVOID)pIdentifierAuthority, sizeof(SID_IDENTIFIER_AUTHORITY));
   return TRUE;
 }
 
@@ -95,24 +92,49 @@ BOOLEAN WINAPI RtlAllocateAndInitializeSid ( PSID_IDENTIFIER_AUTHORITY pIdentifi
  */
 BOOL WINAPI RtlEqualSid(PSID pSid1, PSID pSid2)
 {
-  dprintf(("NTDLL: RtlEqualSid(%08x, %08x) not implemented.\n",
-           pSid1,
-           pSid2));
+   dprintf(("NTDLL: RtlEqualSid(%08x, %08x)",
+            pSid1,
+            pSid2));
 
-  return TRUE;
+   if (!RtlValidSid(pSid1) || !RtlValidSid(pSid2))
+        return FALSE;
+
+   if (*RtlSubAuthorityCountSid(pSid1) != *RtlSubAuthorityCountSid(pSid2))
+        return FALSE;
+
+   if (memcmp(pSid1, pSid2, RtlLengthSid(pSid1)) != 0)
+        return FALSE;
+
+   return TRUE;
 }
 
+
+/******************************************************************************
+ * RtlEqualPrefixSid [NTDLL.351]
+ */
+BOOL WINAPI RtlEqualPrefixSid (PSID pSid1, PSID pSid2) 
+{
+    if (!RtlValidSid(pSid1) || !RtlValidSid(pSid2))
+        return FALSE;
+
+    if (*RtlSubAuthorityCountSid(pSid1) != *RtlSubAuthorityCountSid(pSid2))
+        return FALSE;
+
+    if (memcmp(pSid1, pSid2, RtlLengthRequiredSid(pSid1->SubAuthorityCount - 1)) != 0)
+        return FALSE;
+
+    return TRUE;
+}
 
 /******************************************************************************
  *  RtlFreeSid    [NTDLL.376]
  */
 VOID* WINAPI RtlFreeSid(PSID pSid)
 {
-  dprintf(("NTDLL: RtlFreeSid(%08xh) not implemented.\n",
-           pSid));
+  dprintf(("NTDLL: RtlFreeSid(%08xh)", pSid));
 
   Heap_Free(pSid);
-  return (VOID*)TRUE; //??????
+  return NULL;
 }
 
 
@@ -170,6 +192,17 @@ DWORD WINAPI RtlInitializeSid(PSID                      psid,
 }
 
 
+/******************************************************************************
+ * RtlIdentifierAuthoritySid [NTDLL.395]
+ *
+ * PARAMS
+ *   pSid []
+ */
+PSID_IDENTIFIER_AUTHORITY WINAPI RtlIdentifierAuthoritySid( PSID pSid )
+{
+    return &pSid->IdentifierAuthority;
+}
+
 /**************************************************************************
  *                 RtlSubAuthoritySid          [NTDLL.497]
  */
@@ -190,8 +223,8 @@ LPDWORD WINAPI RtlSubAuthoritySid(PSID  psid,
 
 LPBYTE WINAPI RtlSubAuthorityCountSid(PSID psid)
 {
-  dprintf(("NTDLL: RtlSubAUthorityCountSid(%08xh)\n",
-           psid));
+  dprintf2(("NTDLL: RtlSubAUthorityCountSid(%08xh)\n",
+            psid));
 
   return ((LPBYTE)psid)+1;
 }
@@ -200,28 +233,48 @@ LPBYTE WINAPI RtlSubAuthorityCountSid(PSID psid)
 /**************************************************************************
  *                 RtlCopySid                     [NTDLL.302]
  */
-DWORD WINAPI RtlCopySid(DWORD len,
-                        PSID  to,
-                        PSID  from)
+DWORD WINAPI RtlCopySid(DWORD nDestinationSidLength,
+                        PSID  pDestinationSid,
+                        PSID  pSourceSid)
 {
   dprintf(("NTDLL: RtlCopySid(%08xh,%08xh,%08xh)\n",
-           len,
-           to,
-           from));
+           nDestinationSidLength,
+           pDestinationSid,
+           pSourceSid));
 
-  if (!from)
-    return 0;
+  if (!RtlValidSid(pSourceSid))
+        return STATUS_INVALID_PARAMETER;
 
-  if (len<(from->SubAuthorityCount*4+8))
-     return STATUS_BUFFER_TOO_SMALL;
+  if (nDestinationSidLength < RtlLengthSid(pSourceSid))
+        return STATUS_BUFFER_TOO_SMALL;
 
-  memmove(to,
-          from,
-          from->SubAuthorityCount*4+8);
+  memcpy(pDestinationSid, pSourceSid, RtlLengthSid(pSourceSid));
 
   return STATUS_SUCCESS;
 }
 
+
+/******************************************************************************
+ * RtlValidSid [NTDLL.523]
+ *
+ * PARAMS
+ *   pSid []
+ */
+BOOL WINAPI RtlValidSid( PSID pSid )
+{
+    if (IsBadReadPtr(pSid, 4))
+    {
+        return FALSE;
+    }
+
+    if (pSid->SubAuthorityCount > SID_MAX_SUB_AUTHORITIES)
+        return FALSE;
+
+    if (!pSid || pSid->Revision != SID_REVISION)
+        return FALSE;
+
+    return TRUE;
+}
 
 /*
  * security descriptor functions
