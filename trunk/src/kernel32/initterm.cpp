@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.45 2000-09-02 21:14:50 bird Exp $ */
+/* $Id: initterm.cpp,v 1.46 2000-09-07 18:12:56 sandervl Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -170,8 +170,8 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
             //SvL: Do it here instead of during the exe object creation
             //(std handles can be used in win32 dll initialization routines
             HMInitialize();             /* store standard handles within HandleManager */
-            InitializeTIB(TRUE);    //MUST be done after HMInitialize!
-            InitDirectories();
+            InitDirectories();		//Must be done before InitializeTIB (which loads NTDLL -> USER32)
+            InitializeTIB(TRUE);        //Must be done after HMInitialize!
             RegisterDevices();
             Win32DllBase::setDefaultRenaming();
             rc = DosQuerySysInfo(QSV_NUMPROCESSORS, QSV_NUMPROCESSORS, &ulSysinfo, sizeof(ulSysinfo));
@@ -185,11 +185,11 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
         }
 
         case 1 :
-        if (dllHandle)
-        {
-            UnregisterLxDll(dllHandle);
-        }
-        break;
+            if (dllHandle)
+            {
+                UnregisterLxDll(dllHandle);
+            }
+            break;
 
         default  :
             return 0UL;
