@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.33 2001-09-05 13:53:50 bird Exp $ */
+/* $Id: initterm.cpp,v 1.34 2003-01-21 11:22:08 sandervl Exp $ */
 /*
  * USER32 DLL entry point
  *
@@ -106,7 +106,7 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
    /***********************************************************/
    /* A non-zero value must be returned to indicate success.  */
    /***********************************************************/
-   return 1UL;
+   return rc;
 }
 
 static void APIENTRY cleanup(ULONG ulReason)
