@@ -1,4 +1,4 @@
-/* $Id: OS2KSEM.h,v 1.2 2001-09-26 03:52:36 bird Exp $
+/* $Id: OS2KSEM.h,v 1.3 2001-10-14 22:50:21 bird Exp $
  *
  * OS/2 kernel Semaphore functions.
  *
@@ -162,14 +162,25 @@ extern ULONG KRNLCALL KSEMQueryMutex(HKSEMMTX hkmtx, PUSHORT pcusNest);
 extern ULONG KRNLCALL OrgKSEMQueryMutex(HKSEMMTX hkmtx, PUSHORT pcusNest);
 
 
-#if 0
 /*
  * Event semaphores.
  */
-extern VOID  KRNLCALL KSEMResetEvent(HKEV hkevent);
-extern VOID  KRNLCALL KSEMPostEvent(HKEV hkevent);
-extern ULONG KRNLCALL KSEMWaitEvent(HKEV hkevent);
-#endif
+extern VOID  KRNLCALL KSEMResetEvent(HKSEMEVT hkev);
+extern VOID  KRNLCALL OrgKSEMResetEvent(HKSEMEVT hkev);
+extern VOID  KRNLCALL KSEMPostEvent(HKSEMEVT hkev);
+extern VOID  KRNLCALL OrgKSEMPostEvent(HKSEMEVT hkev);
+extern ULONG KRNLCALL KSEMWaitEvent(HKSEMEVT hkev, ULONG ulTimeout);
+extern ULONG KRNLCALL OrgKSEMWaitEvent(HKSEMEVT hkev, ULONG ulTimeout);
+
+
+/*
+ * Shared semaphores.
+ */
+extern ULONG KRNLCALL KSEMRequestExclusive(HKSEMSHR hkshr, ULONG ulTimeout);
+extern ULONG KRNLCALL OrgKSEMRequestExclusive(HKSEMSHR hkshr, ULONG ulTimeout);
+extern ULONG KRNLCALL KSEMRequestShared(HKSEMSHR hkshr, ULONG ulTimeout);
+extern ULONG KRNLCALL OrgKSEMRequestShared(HKSEMSHR hkshr, ULONG ulTimeout);
+
 
 /*
  * Some other KSEM prefixed functions - parameters's not that obvious...
@@ -177,15 +188,14 @@ extern ULONG KRNLCALL KSEMWaitEvent(HKEV hkevent);
 #if 0
 extern ULONG KRNLCALL KSEMAlloc(PHKSEM phksem, ULONG p1, ULONG p2);
 extern ULONG KRNLCALL KSEMCreate(PHKSEM phksem, ULONG type);
-extern ULONG KRNLCALL KSEMRequestExclusive(HKSEM hksem, ULONG );
-extern ULONG KRNLCALL KSEMRequestShared(HKSEM hksem, ULONG);
 extern VOID  KRNLCALL KSEMDestroy(HKSEM hksem);
 #endif
 extern VOID  KRNLCALL KSEMInit(PKSEM pksem, ULONG fulType, ULONG fulFlags);
 extern VOID  KRNLCALL OrgKSEMInit(PKSEM pksem, ULONG fulType, ULONG fulFlags);
-#if 0
-extern VOID  KRNLCALL KSEMQuery(HKSEM hksem, ULONG p2)
 extern VOID  KRNLCALL KSEMRelease(HKSEM hksem);
-#endif
+extern VOID  KRNLCALL OrgKSEMRelease(HKSEM hksem);
+extern VOID  KRNLCALL KSEMQuery(HKSEM hksem, PULONG pul);
+extern VOID  KRNLCALL OrgKSEMQuery(HKSEM hksem, PULONG pul);
+
 #endif
 
