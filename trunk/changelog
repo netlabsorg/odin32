@@ -1,6 +1,9 @@
-/* $Id: changelog,v 1.2406 2002-12-30 19:04:34 sandervl Exp $ */
+/* $Id: changelog,v 1.2407 2002-12-31 16:52:28 sandervl Exp $ */
 
- 2000-12-20: Achim Hasenmueller <achimha@innotek   >
+ 2002-12-31: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Removed wrong cx & cy check during window creation
+
+ 2000-12-30: Achim Hasenmueller <achimha@innotek   >
     - COMDLG32: o Added string check to PRINTDLG_SetUpPrinterListComboA 
 
  2002-12-30: Yuri Dario <mc6530@mclink   >
