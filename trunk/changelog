@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1900 2001-12-09 22:03:24 sandervl Exp $ */
+/* $Id: changelog,v 1.1901 2001-12-10 11:28:07 sandervl Exp $ */
+
+ 2001-12-10: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Overlapped IO updates
 
  2001-12-09: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Overlapped IO fix (poll & half or full duplex support)
