@@ -1,4 +1,4 @@
-; $Id: user32dbg.def,v 1.5 2002-04-30 14:54:06 sandervl Exp $
+; $Id: user32dbg.def,v 1.6 2002-07-15 10:19:16 sandervl Exp $
 
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
 DESCRIPTION 'Odin32 System Dll - User32'
@@ -699,8 +699,6 @@ EXPORTS
     _DIB_GetDIBWidthBytes@8                                      @2023 NONAME
     _BITMAP_GetWidthBytes@8                                      @2024 NONAME
     _selectClientArea@4                                          @2025 NONAME
-    _IsSystemBrush@4                                             @2026 NONAME
-    _IsSystemPen@4                                               @2027 NONAME
 
     _CreateFakeWindowEx@8                                        @2028 NONAME
     _DestroyFakeWindow@4                                         @2035 NONAME

@@ -1,4 +1,4 @@
-/* $Id: syscolor.cpp,v 1.31 2001-11-30 13:53:50 sandervl Exp $ */
+/* $Id: syscolor.cpp,v 1.32 2002-07-15 10:16:28 sandervl Exp $ */
 
 /*
  * Win32 system color API functions for OS/2
@@ -24,6 +24,7 @@
 #include "syscolor.h"
 #include "options.h"
 #include "oslibwin.h"
+#include <objhandle.h>
 
 #define DBG_LOCALLOG    DBG_syscolor
 #include "dbglocal.h"
@@ -129,9 +130,16 @@ static void SYSCOLOR_SetColor( int index, COLORREF color )
     /* set pen */
     if (SysColorPens[index]) DeleteObject(SysColorPens[index]);
     SysColorPens[index] = CreatePen(PS_SOLID, 1, color);
+
+    // Application can't delete system pens
+    ObjSetHandleFlag(SysColorPens[index], OBJHANDLE_FLAG_NODELETE, TRUE);
+
     /* set brush */
     if (SysColorBrushes[index]) DeleteObject(SysColorBrushes[index]);
     SysColorBrushes[index] = CreateSolidBrush(color);
+
+    // Application can't delete system brushes
+    ObjSetHandleFlag(SysColorBrushes[index], OBJHANDLE_FLAG_NODELETE, TRUE);
 }
 //******************************************************************************
 //******************************************************************************
@@ -352,28 +360,6 @@ HBRUSH WIN32API GetControlBrush(HWND hwnd, HDC hdc, DWORD ctlType)
              bkgBrush = DefWindowProcA(hwnd, WM_CTLCOLORMSGBOX + ctlType, hdc, ctlType);
     }
     return bkgBrush;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API IsSystemPen(HPEN hPen)
-{
-    for(int i=0;i<NUM_SYS_COLORS;i++) {
-        if(SysColorPens[i] == hPen) {
-            return TRUE;
-        }
-    }
-    return FALSE;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API IsSystemBrush(HBRUSH hBrush)
-{
-    for(int i=0;i<NUM_SYS_COLORS;i++) {
-        if(SysColorBrushes[i] == hBrush) {
-            return TRUE;
-        }
-    }
-    return FALSE;
 }
 //******************************************************************************
 //******************************************************************************
