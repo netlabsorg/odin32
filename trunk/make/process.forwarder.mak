@@ -1,4 +1,4 @@
-# $Id: process.forwarder.mak,v 1.8 2002-08-20 07:16:57 bird Exp $
+# $Id: process.forwarder.mak,v 1.9 2002-08-22 03:21:31 bird Exp $
 
 #
 # Generic makefile system.
@@ -180,7 +180,7 @@ all: build
 # -----------------------------------------------------------------------------
 # Generic forwarder
 # -----------------------------------------------------------------------------
-build rebuild clean dep lib executable miscellaneous \
+build rebuild clean dep needed lib executable miscellaneous \
 !if "$(TARGET_MODE)" == "DEPEND"
 $(TARGET) \
 !endif
