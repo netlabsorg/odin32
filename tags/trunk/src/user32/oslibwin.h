@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.60 2001-07-14 09:21:42 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.61 2001-07-28 13:43:53 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -194,6 +194,7 @@ inline ULONG OSLibQueryScreenWidth(void)  { return (ScreenWidth); }
 #define SVOS_CSYSVALUES              108
 
 LONG OSLibWinQuerySysValue(LONG iSysValue);
+BOOL OSLibWinSetSysValue(LONG iSysValue, ULONG val);
 ULONG OSLibWinQueryDlgItemText(HWND hwndDlg,ULONG idItem,LONG cchBufferMax,char* pchBuffer);
 BOOL OSLibWinSetDlgItemText(HWND hwndDlg,ULONG idItem,char* pszText);
 BOOL OSLibWinQueryPointerPos(PPOINT pptlPoint); //pptlPoint == POINTL pointer!

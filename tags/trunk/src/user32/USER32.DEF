@@ -1,4 +1,4 @@
-; $Id: USER32.DEF,v 1.61 2001-07-20 15:34:15 sandervl Exp $
+; $Id: USER32.DEF,v 1.62 2001-07-28 13:43:53 sandervl Exp $
 
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
 DESCRIPTION 'Odin32 System Dll - User32'
@@ -16,6 +16,7 @@ IMPORTS
     __SetCaretBlinkTime         = PMMERGE.10005
     __ShowCaret                 = PMMERGE.10007
     __ShowCursor                = PMMERGE.10018
+    __SwapMouseButton           = PMMERGE.10019
     WinReplyMsg                 = PMMERGE.5325
     _GpiEnableYInversion        = PMGPI.723
     _GpiQueryYInversion         = PMGPI.726
