@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.53 2000-09-23 18:22:47 bird Exp $
+# $Id: Makefile,v 1.54 2000-09-26 09:07:05 bird Exp $
 #
 # Win32k makefile.
 #
@@ -45,7 +45,7 @@ ILIB        = ilib /nobackup /nologo
 !endif
 LD          = ilink
 AS          = alp
-H2INC       = $(DDKBASE)\tools\h2inc.exe
+H2INC       = $(DDKPATH)\tools\h2inc.exe
 
 CFLAGS      = -q -Ge -Gs- -Gr+ -Rn -Ss+ -Mp -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext-
 CFLAGS16    = -c -W3 -Asfw /NTCODE16 /NDDATA16 -G2s -Zp -Zl -nologo
