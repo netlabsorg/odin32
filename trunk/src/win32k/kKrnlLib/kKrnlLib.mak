@@ -1,4 +1,4 @@
-# $Id: kKrnlLib.mak,v 1.5 2002-08-20 05:49:14 bird Exp $
+# $Id: kKrnlLib.mak,v 1.6 2002-08-22 03:07:50 bird Exp $
 
 #
 # kKrnlLib.
@@ -8,11 +8,10 @@
 
 
 #
-# Setup.
+# Setup config.
 #
 PATH_ROOT = ..\..\..
 !include $(PATH_ROOT)\make\setup.mak
-
 
 #
 # kLib overrides variables.
@@ -20,23 +19,20 @@ PATH_ROOT = ..\..\..
 !if [SET KLIB_INC=$(MAKEDIR)\kLib.inc]
 !endif
 
+#
+# Target config.
+#
+TARGET_MODE     = SYS
+TARGET_NAME     = kKrnlLib
+TARGET_ILIB_YES = 1
+TARGET_IDEF     = $(TARGET_NAME)implib.$(EXT_DEF)
+ALL_INCLUDES    = -I../kLib/include -I../include
+ALL_DEFINES     = -DKKRNLLIB
+MAKEFILE        = $(TARGET_NAME).mak
+SUBDIRS         = src kLib\src
+#SUBDIRS_DEP    = $(SUBDIRS) include
+PREMAKEFILES    = clib16.mak devhelp16.mak
 
-#
-# Config.
-#
-TARGET_MODE = SYS
-TARGET_NAME = kKrnlLib
-TARGET_ILIB = kKrnlLib.lib
-TARGET_IDEF = kKrnlLibimplib.def
-MAKEFILE    = $(TARGET_NAME).mak
-C_INCLUDES  = -I../include/kLib -I../include
-AS_INCLUDES = -I../include/kLib -I../include
-AS_DEFINES  = -DKKRNLLIB
-
-
-#
-# Object files.
-#
 TARGET_OBJS =\
 $(PATH_OBJ)\kKrnlLib_first.$(EXT_LIB)\kKrnlLib_first.$(EXT_LIB)\
 $(PATH_OBJ)\kKrnlLib_src.$(EXT_LIB)\kKrnlLib_src.$(EXT_LIB)\
@@ -65,29 +61,21 @@ $(PATH_OBJ)\kKrnlLib_devhelp.$(EXT_LIB)\kKrnlLib_devhelp.$(EXT_LIB)\
 $(PATH_OBJ)\kKrnlLib_clib16.$(EXT_LIB)\kKrnlLib_clib16.$(EXT_LIB)\
 $(PATH_OBJ)\kKrnlLib_last.$(EXT_LIB)\kKrnlLib_last.$(EXT_LIB)
 
-SUBDIRS     = include src kLib\src
-PREMAKEFILES= clib16.mak devhelp16.mak
-
-
-
 #
-# Process
+# Rule config.
 #
+RULES_FORWARD = $(TARGET).$(EXT_ILIB) $(TARGET_IDEF) $(TARGET_ILIB)
 !include $(MAKE_INCLUDE_PROCESS)
 
-
-#
-# kKrnlLib Import library.
-#
-$(TARGET).lib: $(PATH_LIB)\$(TARGET).lib
-$(PATH_LIB)\$(TARGET).lib: $(PATH_TOOLS)\MkCallTab.exe
-    $(PATH_TOOLS)\MkCallTab.exe deffile > $(PATH_TARGET)\$(TARGET)implib.def
-    $(IMPLIB) $(IMPLIB_FLAGS) $@ $(PATH_TARGET)\$(TARGET)implib.def
-
+!if !$(BUILD_FORWARDING)
 
 #
 # Generate import definition file.
 #
-$(TARGET_IDEF): .force
-    $(TOOL_DODIRS) "src" $(TOOL_MAKE) -f MkCallTab.mak ..\$(TARGET_IDEF)
+$(TARGET_IDEF): $(PATH_TOOLS)\MkCallTab.$(EXT_EXE)
+    $** deffile > $@
 
+# alias for generating the import library.
+$(TARGET_NAME).$(EXT_ILIB): $(TARGET_ILIB)
+
+!endif #!BUILD_FORWARDING

@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.9 2002-08-20 05:47:53 bird Exp $
+# $Id: Makefile,v 1.10 2002-08-22 03:07:06 bird Exp $
 
 #
 # kKrnlLib/dev32 makefile.
@@ -9,27 +9,29 @@
 #
 
 #
-# Load the build setup.
+# Setup config
 #
 PATH_ROOT = ..\..\..\..
-!include $(PATH_ROOT)\make\setup.mak
-
+!include $(PATH_ROOT)\$(BUILD_SETUP_MAK)
 
 #
-# Config.
+# Target config
 #
 TARGET_MODE  = SYSLIB
 TARGET_NAME  = kKrnlLib_src
 ALL_INCLUDES = -I../include -I../kLib/include
 ALL_DEFINES  = -DKKRNLLIB
 
+PREMAKEFILES =\
+    MkCallTab.mak \
+    newdbg.mak \
+    newrel.mak \
+    Dev16.mak \
 
-#
-# Targets.
-#
-PREMAKEFILES = MkCallTab.mak newdbg.mak newrel.mak Dev16.mak
-
-POSTMAKEFILES = first.mak last.mak srcR3Tst.mak
+POSTMAKEFILES =\
+    first.mak \
+    last.mak \
+#    srcR3Tst.mak \
 
 TARGET_OBJS =\
 $(PATH_TARGET)\d32Globals.$(EXT_OBJ)\
@@ -63,23 +65,22 @@ $(PATH_ROOT)\obj\$(SHT_TRGPLTFRM)$(SHT_BLDMD)mscv6-16\kKrnlLib_dev16.$(EXT_LIB)\
 $(PATH_TARGET)\SymDB32.$(EXT_OBJ)\
 $(PATH_TARGET)\calltaba.$(EXT_OBJ)\
 
-
-TARGET_DEPS =\
-$(PATH_OBJ)\kKrnlLib_newdbg.$(EXT_LIB)\kKrnlLib_newdbg.$(EXT_LIB)\
-$(PATH_OBJ)\kKrnlLib_newrel.$(EXT_LIB)\kKrnlLib_newrel.$(EXT_LIB)\
-$(PATH_ROOT)\obj\$(SHT_TRGPLTFRM)$(SHT_BLDMD)mscv6-16\kKrnlLib_dev16.$(EXT_LIB)\kKrnlLib_dev16.$(EXT_LIB)\
-
 TARGET_NO_DEP=\
 calltaba.c
 
-
 #
-# Load the build process rules.
+# Rules config
 #
+RULES_FORWARD = calltaba.asm
 !include $(MAKE_INCLUDE_PROCESS)
 
+!if !$(BUILD_FORWARDING)
 
-# generated code.
-calltaba.asm: .force
-    $(TOOL_DOMAKES) "MkCallTab.mak" $(TOOL_MAKE) $@
+#
+# Generate calltaba.asm.
+#
+calltaba.asm: $(PATH_TOOLS)\MkCallTab.$(EXT_EXE)
+    $** calltab > $@
+
+!endif #!BUILD_FORWARDING
 
