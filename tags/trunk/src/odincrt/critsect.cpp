@@ -1,4 +1,4 @@
-/* $Id: critsect.cpp,v 1.6 2002-10-07 16:28:13 sandervl Exp $ */
+/* $Id: critsect.cpp,v 1.7 2002-10-08 09:49:06 sandervl Exp $ */
 /*
  * Critical sections in the Win32 sense
  * 
@@ -71,7 +71,8 @@ inline ULONG GetCurrentProcessId()
 /***********************************************************************
  *           DosInitializeCriticalSection
  */
-ULONG WIN32API DosInitializeCriticalSection(CRITICAL_SECTION_OS2 *crit, PSZ pszSemName)
+ULONG WIN32API DosInitializeCriticalSection(CRITICAL_SECTION_OS2 *crit, 
+                                            PSZ pszSemName, BOOL fShared)
 {
     APIRET rc;
 
@@ -80,12 +81,13 @@ ULONG WIN32API DosInitializeCriticalSection(CRITICAL_SECTION_OS2 *crit, PSZ pszS
     crit->RecursionCount = 0;
     crit->OwningThread   = 0;
 
-    rc = DosCreateEventSem(pszSemName, &crit->hmtxLock, (pszSemName) ? DC_SEM_SHARED : 0, 0);
+    rc = DosCreateEventSem(pszSemName, &crit->hmtxLock, (pszSemName || fShared) ? DC_SEM_SHARED : 0, 0);
     if(rc != NO_ERROR) {
         DebugInt3();
         crit->hmtxLock = 0;
         return rc;
     }
+    crit->CreationCount  = 1;
     crit->Reserved       = GetCurrentProcessId();
     return NO_ERROR;
 }
@@ -94,14 +96,17 @@ ULONG WIN32API DosInitializeCriticalSection(CRITICAL_SECTION_OS2 *crit, PSZ pszS
 /***********************************************************************
  *           DosAccessCriticalSection
  */
-ULONG WIN32API DosAccessCriticalSection(CRITICAL_SECTION_OS2 *, PSZ pszSemName)
+ULONG WIN32API DosAccessCriticalSection(CRITICAL_SECTION_OS2 *crit, PSZ pszSemName)
 {
     HMTX   hmtxLock = 0;
     APIRET rc;
 
-    if(pszSemName == NULL) {
+    if(pszSemName == NULL && crit->hmtxLock == 0) {
         DebugInt3();
         return ERROR_INVALID_PARAMETER;
+    }
+    if(pszSemName == NULL) {
+        hmtxLock = crit->hmtxLock;
     }
 
     rc = DosOpenEventSem(pszSemName, &hmtxLock);
@@ -109,6 +114,7 @@ ULONG WIN32API DosAccessCriticalSection(CRITICAL_SECTION_OS2 *, PSZ pszSemName)
         DebugInt3();
         return rc;
     }
+    DosInterlockedIncrement(&crit->CreationCount);
     return NO_ERROR;
 }
 /***********************************************************************
@@ -122,12 +128,15 @@ ULONG WIN32API DosDeleteCriticalSection( CRITICAL_SECTION_OS2 *crit )
         {
            DebugInt3();
         }
-        crit->LockCount      = -1;
-        crit->RecursionCount = 0;
-        crit->OwningThread   = 0;
         DosCloseEventSem(crit->hmtxLock);
-        crit->hmtxLock       = 0;
-        crit->Reserved       = (DWORD)-1;
+        if(DosInterlockedDecrement(&crit->CreationCount) == 0)
+        {
+            crit->LockCount      = -1;
+            crit->RecursionCount = 0;
+            crit->OwningThread   = 0;
+            crit->hmtxLock       = 0;
+            crit->Reserved       = (DWORD)-1;
+        }
     }
     return NO_ERROR;
 }
