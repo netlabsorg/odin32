@@ -1,4 +1,4 @@
-/* $Id: ToDO.txt,v 1.13 2001-05-30 03:31:48 phaller Exp $ */
+/* $Id: ToDO.txt,v 1.14 2001-06-01 08:11:15 sandervl Exp $ */
 
 To Do list for ODIN:
 
@@ -14,7 +14,7 @@ MM       DONE   Do COM (serial port) support for ODIN (requires
 
 PH       DONE   Sync SHELL32 with WINE
 
-SvL             Add HKLM\\SOFTWARE\Microsoft\WINDOWS\CurrentVersion
+SvL      DONE   Add HKLM\\SOFTWARE\Microsoft\WINDOWS\CurrentVersion
                 Key CommonFilesDir="?:\Program Files\Common Files" for
                 TogetherJ installation to the ODIN installer.
 
@@ -28,6 +28,10 @@ JW              Improve CRTDLL and MSVCRT as this is one major show stopper
 SvL             Remove GPI32 calls from the original FS: macros and replace
                 them with ODINFUNCTION wrappers. Internally call to ODIN_xxx
                 GPI functions to get much better performance.
+
+SvL             WINMM: wave recording (test & finish)
+
+SvL             USER32/GDI32: Use unicode codepages and update control code
 
 NOONE           long2ShortName in kernel32\oslibdos.cpp
 NOONE           FindFirstFileA -> use 64 bits OS/2 api
@@ -43,8 +47,6 @@ NOONE           KERNEL32: Build fake PE headers for odin dlls (dll handle must b
                         
 NOONE  DONE     USER32: Fix LoadImage to resize icons, cursors or bitmaps
                         to the specified dimensions (if required)
-
-NOONE           WINMM: wave recording
 
 NOONE           WINMM: Rewrite winmm to use driver architecture (port Wine's winmm
                        + integrate current Odin code)
