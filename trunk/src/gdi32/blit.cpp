@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.5 2000-02-16 14:18:09 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.6 2000-02-16 19:48:52 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -90,7 +90,7 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
 {
     INT result, imgsize, palsize, height, width;
     char *ptr;
-    ULONG compression = 0, iHeight;
+    ULONG compression = 0, iHeight, bmpsize;
     WORD *newbits = 0;
 
     SetLastError(0);
@@ -132,12 +132,21 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
     }
     // EB: <<<-
 
+    //SvL: RP7's bitmap size is not correct; fix it here or else
+    //     the blit is messed up in Open32
+    bmpsize = info->bmiHeader.biSizeImage;
+    if(info->bmiHeader.biSizeImage && info->bmiHeader.biSizeImage < imgsize)
+    {
+	((BITMAPINFO *)info)->bmiHeader.biSizeImage = imgsize;
+    }
+
     //SvL: Ignore BI_BITFIELDS type (SetDIBitsToDevice fails otherwise)
     if(info->bmiHeader.biCompression == BI_BITFIELDS) {
         DWORD *bitfields = (DWORD *)info->bmiColors;
 
         ((BITMAPINFO *)info)->bmiHeader.biCompression = 0;
         compression = BI_BITFIELDS;
+
         if(*(bitfields+1) == 0x3E0) 
 	{//RGB 555?
         	dprintf(("BI_BITFIELDS compression %x %x %x", *bitfields, *(bitfields+1), *(bitfields+2)));
@@ -159,7 +168,7 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
     //SvL: Wrong Open32 return value
     result = (result == TRUE) ? lines : 0;
 
-    dprintf(("GDI32: SetDIBitsToDevice hdc:%X xDest:%d yDest:%d, cx:%d, cy:%d, xSrc:%d, ySrc:%d, startscan:%d, lines:%d \nGDI32: bits:%X, info%X, coloruse:%d returned %d",
+    dprintf(("GDI32: SetDIBitsToDevice hdc:%X xDest:%d yDest:%d, cx:%d, cy:%d, xSrc:%d, ySrc:%d, startscan:%d, lines:%d \nGDI32: bits 0x%X, info 0x%X, coloruse %d returned %d",
                  hdc, xDest, yDest, cx, cy, xSrc, ySrc, startscan, lines, (LPVOID) bits, (PBITMAPINFO)info, coloruse, result));
     dprintf(("GDI32: SetDIBitsToDevice %d %d %d %d %x %d", info->bmiHeader.biWidth, info->bmiHeader.biHeight, info->bmiHeader.biPlanes, info->bmiHeader.biBitCount, info->bmiHeader.biCompression, info->bmiHeader.biSizeImage));
 
@@ -168,6 +177,7 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
         if(newbits) free(newbits);
     }
     ((BITMAPINFO *)info)->bmiHeader.biHeight = iHeight;
+    ((BITMAPINFO *)info)->bmiHeader.biSizeImage = bmpsize;
     return result;
 
 invalid_parameter:
