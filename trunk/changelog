@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2052 2002-04-29 13:25:53 bird Exp $ */
+/* $Id: changelog,v 1.2053 2002-04-29 16:29:18 sandervl Exp $ */
+
+ 2002-04-29: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Export RegisterCustomDriver
 
  2002-04-28: knut st. osmundsen <bird@anduin.net>
     - Configure.cmd, Odincrt:
