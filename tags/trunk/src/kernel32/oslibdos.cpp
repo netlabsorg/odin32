@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.36 2000-08-10 02:19:58 phaller Exp $ */
+/* $Id: oslibdos.cpp,v 1.37 2000-08-11 10:56:17 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -929,9 +929,16 @@ BOOL OSLibDosLockFile(DWORD hFile, DWORD dwFlags,
 
    	rc = OdinDosSetFileLocksL(hFile, NULL, &lockRangeL, 
                                   (dwFlags & LOCKFILE_FAIL_IMMEDIATELY_W) ? 0 : 5000, 0);
+        //SvL: 64 bits values are only supported by JFS
+        //     Try the 32 bits DosSetFileLocks if it fails
+        //     (TODO: should check the partition type instead)
+        if(rc == ERROR_INVALID_PARAMETER && (OffsetHigh || nNumberOfBytesToLockHigh)) {
+		goto oldlock;
+        }
    }
    else 
    {
+oldlock:
     FILELOCK lockRange = { OffsetLow, nNumberOfBytesToLockLow };
 
    	rc = DosSetFileLocks(hFile, NULL, &lockRange, 
@@ -968,9 +975,16 @@ BOOL OSLibDosUnlockFile(DWORD hFile, DWORD OffsetLow, DWORD OffsetHigh,
  	unlockRangeL.lRange.ulHi  = nNumberOfBytesToLockHigh;
 
    	rc = OdinDosSetFileLocksL(hFile, &unlockRangeL, NULL, 5000, 0);
+        //SvL: 64 bits values are only supported by JFS
+        //     Try the 32 bits DosSetFileLocks if it fails
+        //     (TODO: should check the partition type instead)
+        if(rc == ERROR_INVALID_PARAMETER && (OffsetHigh || nNumberOfBytesToLockHigh)) {
+		goto oldlock;
+        }
    }
    else 
    {
+oldlock:
     FILELOCK unlockRange = { OffsetLow, nNumberOfBytesToLockLow };
 
         rc = DosSetFileLocks(hFile, &unlockRange, NULL,  5000, 0);

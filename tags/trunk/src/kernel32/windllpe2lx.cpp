@@ -1,4 +1,4 @@
-/* $Id: windllpe2lx.cpp,v 1.7 2000-03-09 19:03:21 sandervl Exp $ */
+/* $Id: windllpe2lx.cpp,v 1.8 2000-08-11 10:56:19 sandervl Exp $ */
 
 /*
  * Win32 PE2LX Dll class
@@ -115,7 +115,7 @@ ULONG WIN32API RegisterPe2LxDll(ULONG ulPe2LxVersion, HINSTANCE hinstance, ULONG
     }
     else
     {   /* process detach */
-        if (pWinMod != NULL && !fFreeLibrary)
+        if (pWinMod != NULL)
             return 0;   /* don't unload (OS/2 dll unload bug) - see OS2.bugs in root dir. */
     }
 

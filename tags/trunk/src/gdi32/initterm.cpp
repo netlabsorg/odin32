@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.11 2000-06-14 13:17:50 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.12 2000-08-11 10:56:15 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -46,6 +46,7 @@ void CDECL _ctordtorTerm( void );
  //Win32 resource table (produced by wrc)
  extern DWORD _Resource_PEResTab;
 }
+static HMODULE dllHandle = 0;
 //******************************************************************************
 //******************************************************************************
 BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
@@ -99,13 +100,18 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
 	 if(InitRegionSpace() == FALSE) {
 		return 0UL;
-	 }
-	 if(RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab) == FALSE) 
+         }
+	 dllHandle = RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab,
+                                   GDI32_MAJORIMAGE_VERSION, GDI32_MINORIMAGE_VERSION,
+                                   IMAGE_SUBSYSTEM_NATIVE);
+         if(dllHandle == 0) 
 		return 0UL;
 
          break;
       case 1 :
-	 UnregisterLxDll(hModule);
+         if(dllHandle) {
+	 	UnregisterLxDll(dllHandle);
+         }
          break;
       default  :
          return 0UL;

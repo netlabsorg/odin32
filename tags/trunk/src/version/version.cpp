@@ -1,4 +1,4 @@
-/* $Id: version.cpp,v 1.9 2000-01-06 20:10:07 sandervl Exp $ */
+/* $Id: version.cpp,v 1.10 2000-08-11 10:56:26 sandervl Exp $ */
 
 /*
  * Win32 Version resource APIs for OS/2
@@ -21,6 +21,7 @@
 #include <unicode.h>
 #include <heapstring.h>
 #include <version.h>
+#include <versionos2.h>
 
 ODINDEBUGCHANNEL(VERSION)
 

@@ -1,4 +1,4 @@
-/* $Id: windllbase.h,v 1.4 2000-07-18 18:37:29 sandervl Exp $ */
+/* $Id: windllbase.h,v 1.5 2000-08-11 10:56:18 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
@@ -85,17 +85,6 @@ static  void      tlsDetachThreadFromAllDlls();
 
 	BOOL      RemoveCircularDependency(Win32DllBase *parent);
 
-	// Loaded by DosLoadModule
-virtual	void      setLoadLibrary() { fLoadLibrary = TRUE; };
-
-	// isLoaded returns TRUE when a dll has been loaded with DosLoadModule
-virtual BOOL      isLoaded()       { return fLoadLibrary; };
-
-	//Should only be called to make sure DosLoadModule is called at least 
-        //once for a dll (to make sure OS/2 doesn't unload the dll when it's
-        //still needed)
-virtual	void      loadLibrary();
-
 	//Only called for kernel32
 	void      DisableUnload()  { fDisableUnload = TRUE; };
 
@@ -137,13 +126,12 @@ protected:
 	BOOL          fInserted; //inserted in dll list
 
 	//This flag is set when a dll has been loaded with DosLoadModule
-        BOOL          fLoadLibrary;
 	BOOL	      fDisableUnload;
-  
-private:
-static  Queue         loadLibDlls;
+
 static  Win32DllBase *head;
 	Win32DllBase *next;
+private:
+static  Queue         loadLibDlls;
 };
 
 extern VMutex dlllistmutex;   //protects linked lists of heaps

@@ -1,4 +1,4 @@
-/* $Id: winimagelx.h,v 1.1 2000-03-10 16:12:03 sandervl Exp $ */
+/* $Id: winimagelx.h,v 1.2 2000-08-11 10:56:19 sandervl Exp $ */
 
 /*
  * Win32 LX Image base class
@@ -23,7 +23,12 @@ virtual ~Win32LxImage();
 virtual	ULONG     getApi(char *name);
 virtual ULONG     getApi(int ordinal);
 
+        LPVOID    buildHeader(DWORD MajorImageVersion, DWORD MinorImageVersion,
+                              DWORD Subsystem);
+
 protected:
+  LPVOID header;
+  HINSTANCE hinstanceOS2;
 private:
 };
 
