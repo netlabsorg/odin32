@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.75 2001-08-04 14:14:41 bird Exp $
+# $Id: makefile,v 1.76 2001-08-16 04:07:46 bird Exp $
 
 #
 # Odin32 API
@@ -81,11 +81,13 @@ lib libs:
 
 dep:
     $(DOWITHDIRS) -e$(NOTTOBEMADE) -c -ldep $(EXTRA) \
-        $(MAKE_CMD) NODEP=1 dep
+        $(CMDQD_SUB) $(MAKE_CMD) NODEP=1 dep
+    $(CMDQD_WAIT)
 
 clean:
     $(DOWITHDIRS) -e$(NOTTOBEMADE) -c -lcln$(CCENV)$(DEBUG) $(EXTRA) \
-        $(MAKE_CMD) NODEP=1 clean
+        $(CMDQD_SUB)  $(MAKE_CMD) NODEP=1 clean
+    $(CMDQD_WAIT)
 
 $(COMMONRULES:clean dep lib all=):
     $(DOWITHDIRS) -e$(NOTTOBEMADE) -c -l$@$(CCENV)$(DEBUG) $(EXTRA) \
