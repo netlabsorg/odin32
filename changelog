@@ -1,7 +1,27 @@
- /* $Id: changelog,v 1.465 1999-11-22 08:22:58 phaller Exp $ */
+ /* $Id: changelog,v 1.466 1999-11-22 20:37:49 sandervl Exp $ */
 
  99-11-22: Patrick Haller <phaller@gmx.net>
 	- WSOCK32\NEW: Experimental rewrite using PMWSOCK, incomplete yet
+
+ 99-11-22: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+	- KERNEL32: Workaround in HMWaitForSingleObject for Open32 handles
+                    (i.e. process handles)
+	- USER32: Extra checks in wvsnprintfA/W
+		  Check if InfoPtr == NULL in STATIC_SetBitmap
+ 	- GDI32: SetDIBits support for DIB sections
+
+ 99-11-22: Sander van Leeuwen <sandervl@xs4all.nl>
+ 	- KERNEL32: Add default renaming profile keys (ole32 & netapi32) to
+                    odin.ini if they're not already there. (during init)
+                    DosAliasMem fix; removed ReadFile hack.
+        - KERNEL32: Rewrote pe loader for on-demand loading of sections
+                    Currently all sections are preloaded because of problems
+                    with page faults in dprints.
+	- USER32: Removed GetIconInfo hack. Causes problems for other apps.
+                  TODO: Double height reported by Open32 for color icon masks!
+
+ 99-11-22: Vitali E. Pelenyov <Vitali.Pelenyov@dpt.ustu.ru>
+	- KERNEL32: VirtualProtect bugfix
 
  99-11-21: Christoph Bratschi <cbratschi@datacomm.ch>
         - KERNEL32: Fixed trailing newline bug in LoadMessageA/W,
@@ -25,11 +45,11 @@
         - COMCTL32: Merged with WINE 991114
 
  99-11-18: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
-    - KERNEL32:   Win32Pe2LxImage didn't issue the setFullPath(szFileName)
-                  call during construction.
-                  Added a invalid pointer test in OS2Heap::Free which checks
-                  that lpMem is within the user address space. (Fixes
-                  WinZip 7.0 crash.)
+    	- KERNEL32: Win32Pe2LxImage didn't issue the setFullPath(szFileName)
+                    call during construction.
+                    Added a invalid pointer test in OS2Heap::Free which checks
+                    that lpMem is within the user address space. (Fixes
+                    WinZip 7.0 crash.)
 
  99-11-17: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32/COMCTL32: Fixed cursor handling
