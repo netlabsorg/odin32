@@ -1,3 +1,4 @@
+/* $Id: rsrc.rc,v 1.4 1999-08-15 19:12:49 cbratschi Exp $ */
 #ifndef OS2_INCLUDED
    #include <os2.h>
 #endif
@@ -31,7 +32,7 @@ BEGIN
         PUSHBUTTON      "Move ~Up", IDC_MOVEUP_BTN, 308, 37, 44, 14
         PUSHBUTTON      "Move ~Down", IDC_MOVEDN_BTN, 308, 20, 44, 14
         LTEXT           "Available buttons:", -1, 4, 110, 84, 10
-        LISTBOX         IDC_AVAILBTN_LBOX, 4, 8, 120, 100, LS_OWNERDRAW | 
+        LISTBOX         IDC_AVAILBTN_LBOX, 4, 8, 120, 100, LS_OWNERDRAW |
                         LS_NOADJUSTPOS | LS_HORZSCROLL
         PUSHBUTTON      "~Add ->", DID_OK, 131, 69, 44, 14
         PUSHBUTTON      "<- ~Remove", IDC_REMOVE_BTN, 131, 49, 44, 14
@@ -51,8 +52,55 @@ BEGIN
         PUSHBUTTON      "~Cancel", DID_CANCEL, 127, 7, 50, 14
         PUSHBUTTON      "~Apply", IDC_APPLY_BUTTON, 181, 7, 50, 14
         PUSHBUTTON      "~Help", 9, 235, 7, 50, 14
-        CONTROL         "Tab", IDC_TABCONTROL, 7, 27, 278, 125, 
+        CONTROL         "Tab", IDC_TABCONTROL, 7, 27, 278, 125,
                         "SysTabControl32", WS_VISIBLE | WS_CLIPSIBLINGS
     END
 END
+
+/* Toolbar imagelist bitmaps */
+#define IDB_STD_SMALL       120
+#define IDB_STD_LARGE       121
+#define IDB_VIEW_SMALL      124
+#define IDB_VIEW_LARGE      125
+#define IDB_HIST_SMALL      130
+#define IDB_HIST_LARGE      131
+
+BITMAP IDB_STD_SMALL   "120.BMP"
+BITMAP IDB_STD_LARGE   "121.BMP"
+BITMAP IDB_VIEW_SMALL  "124.BMP"
+BITMAP IDB_VIEW_LARGE  "125.BMP"
+BITMAP IDB_HIST_SMALL  "130.BMP"
+BITMAP IDB_HIST_LARGE  "131.BMP"
+
+/* Month calendar month menu popup */
+#define IDD_MCMONTHMENU     300
+
+#define IDM_JAN                         301
+#define IDM_FEB                         302
+#define IDM_MAR                         303
+#define IDM_APR                         304
+#define IDM_MAY                         305
+#define IDM_JUN                         306
+#define IDM_JUL                         307
+#define IDM_AUG                         308
+#define IDM_SEP                         309
+#define IDM_OCT                         310
+#define IDM_NOV                         311
+#define IDM_DEC                         312
+
+MENU IDD_MCMONTHMENU LOADONCALL DISCARDABLE
+{
+  MENUITEM "&January", IDM_JAN
+  MENUITEM "&February", IDM_FEB
+  MENUITEM "&March", IDM_MAR
+  MENUITEM "&April", IDM_APR
+  MENUITEM "&May", IDM_MAY
+  MENUITEM "J&une", IDM_JUN
+  MENUITEM "Ju&ly", IDM_JUL
+  MENUITEM "Au&gust", IDM_AUG
+  MENUITEM "&September", IDM_SEP
+  MENUITEM "&October", IDM_OCT
+  MENUITEM "&November", IDM_NOV
+  MENUITEM "&December", IDM_DEC
+}
 
