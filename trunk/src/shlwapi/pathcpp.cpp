@@ -1,4 +1,4 @@
-/* $Id: pathcpp.cpp,v 1.3 2000-08-02 20:18:23 bird Exp $ */
+/* $Id: pathcpp.cpp,v 1.4 2000-08-24 09:32:42 sandervl Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -97,17 +97,3 @@ ODINFUNCTION1(LPWSTR, PathSkipRootW, LPCWSTR, pszPath)
 
   return (LPWSTR)pszPath;
 }
-
-//SvL: NT seems to concatenate both strings (not tested very well)
-ODINFUNCTION2(BOOL, PathAddExtensionA, LPSTR, pszPath, LPSTR, pszExtension)
-{
-  lstrcatA(pszPath, pszExtension);
-  return 1;
-}
-
-ODINFUNCTION2(BOOL, PathAddExtensionW, LPWSTR, pszPath, LPWSTR, pszExtension)
-{
-  lstrcatW(pszPath, pszExtension);
-  return 1;
-}
-

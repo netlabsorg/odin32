@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.17 2000-07-19 19:05:22 sandervl Exp $
+# $Id: makefile,v 1.18 2000-08-24 09:32:42 sandervl Exp $
 
 #
 # Odin32 API
@@ -26,9 +26,12 @@ OBJS = \
 $(OBJDIR)\shlwapi.obj \
 $(OBJDIR)\shlstub.obj \
 $(OBJDIR)\url.obj \
+$(OBJDIR)\reg_odin.obj \
 $(OBJDIR)\reg.obj \
+$(OBJDIR)\regstream.obj \
 $(OBJDIR)\pathcpp.obj \
 $(OBJDIR)\path.obj \
+$(OBJDIR)\string_odin.obj \
 $(OBJDIR)\string.obj \
 $(OBJDIR)\shlwapirsrc.obj \
 $(OBJDIR)\ordinal.obj \

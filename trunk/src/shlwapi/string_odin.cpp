@@ -1,4 +1,4 @@
- /* $Id: string.cpp,v 1.6 2000-08-02 20:18:24 bird Exp $ */
+ /* $Id: string_odin.cpp,v 1.1 2000-08-24 09:32:44 sandervl Exp $ */
 
 /*
  * Win32 Lightweight SHELL32 for OS/2
@@ -59,6 +59,7 @@
 #include "shlobj.h"
 #include "wine/undocshell.h"
 
+#include "shlwapi_odin.h"
 #include "shlwapi.h"
 
 /*****************************************************************************
@@ -147,190 +148,7 @@ BOOL WINAPI StrToOleStrNAW (LPWSTR lpWide, INT nWide, LPCVOID lpStr, INT nStr)
 }
 
 
-/*************************************************************************
- * StrRetToStrN                                 [SHELL32.96]
- *
- * converts a STRRET to a normal string
- *
- * NOTES
- *  the pidl is for STRRET OFFSET
- */
-HRESULT WINAPI StrRetToBufA (LPSTRRET src, LPITEMIDLIST pidl, LPSTR dest, DWORD len)
-{
-        return StrRetToStrNA(dest, len, src, pidl);
-}
 
-HRESULT WINAPI StrRetToStrNA (LPVOID dest, DWORD len, LPSTRRET src, LPITEMIDLIST pidl)
-{
-        TRACE("dest=0x%p len=0x%lx strret=0x%p pidl=%p stub\n",dest,len,src,pidl);
-
-        switch (src->uType)
-        {
-          case STRRET_WSTR:
-            WideCharToMultiByte(CP_ACP, 0, src->u.pOleStr, -1, (LPSTR)dest, len, NULL, NULL);
-            //SHFree(src->u.pOleStr);
-            HeapFree( GetProcessHeap(), 0, src->u.pOleStr);
-            break;
-
-          case STRRET_CSTRA:
-            lstrcpynA((LPSTR)dest, src->u.cStr, len);
-            break;
-
-          case STRRET_OFFSETA:
-            lstrcpynA((LPSTR)dest, ((LPCSTR)&pidl->mkid)+src->u.uOffset, len);
-            break;
-
-          default:
-            FIXME("unknown type!\n");
-            if (len)
-            {
-              *(LPSTR)dest = '\0';
-            }
-            return(FALSE);
-        }
-        return S_OK;
-}
-
-HRESULT WINAPI StrRetToBufW (LPSTRRET src, LPITEMIDLIST pidl, LPWSTR dest, DWORD len)
-{
-        return StrRetToStrNW(dest, len, src, pidl);
-}
-
-HRESULT WINAPI StrRetToStrNW (LPVOID dest, DWORD len, LPSTRRET src, LPITEMIDLIST pidl)
-{
-        TRACE("dest=0x%p len=0x%lx strret=0x%p pidl=%p stub\n",dest,len,src,pidl);
-
-        switch (src->uType)
-        {
-          case STRRET_WSTR:
-            lstrcpynW((LPWSTR)dest, src->u.pOleStr, len);
-            //SHFree(src->u.pOleStr);
-            HeapFree( GetProcessHeap(), 0, src->u.pOleStr);
-            break;
-
-          case STRRET_CSTRA:
-            lstrcpynAtoW((LPWSTR)dest, src->u.cStr, len);
-            break;
-
-          case STRRET_OFFSETA:
-            if (pidl)
-            {
-              lstrcpynAtoW((LPWSTR)dest, ((LPSTR)&pidl->mkid)+src->u.uOffset, len);
-            }
-            break;
-
-          default:
-            FIXME("unknown type!\n");
-            if (len)
-            { *(LPSTR)dest = '\0';
-            }
-            return(FALSE);
-        }
-        return S_OK;
-}
-HRESULT WINAPI StrRetToStrNAW (LPVOID dest, DWORD len, LPSTRRET src, LPITEMIDLIST pidl)
-{
-        if(VERSION_OsIsUnicode())
-          return StrRetToStrNW (dest, len, src, pidl);
-        return StrRetToStrNA (dest, len, src, pidl);
-}
-
-/*************************************************************************
- * StrChrA                                      [NT 4.0:SHELL32.651]
- *
- */
-LPSTR WINAPI StrChrA (LPSTR str, CHAR x )
-{       LPSTR ptr=str;
-
-        do
-        {  if (*ptr==x)
-           { return ptr;
-           }
-           ptr++;
-        } while (*ptr);
-        return NULL;
-}
-
-/*************************************************************************
- * StrChrW                                      [NT 4.0:SHELL32.651]
- *
- */
-LPWSTR WINAPI StrChrW (LPWSTR str, WCHAR x )
-{       LPWSTR ptr=str;
-
-        TRACE("%s 0x%04x\n",debugstr_w(str),x);
-        do
-        {  if (*ptr==x)
-           { return ptr;
-           }
-           ptr++;
-        } while (*ptr);
-        return NULL;
-}
-
-/*************************************************************************
- * StrCmpNIW                                    [NT 4.0:SHELL32.*]
- *
- */
-INT WINAPI StrCmpNIW ( LPWSTR wstr1, LPWSTR wstr2, INT len)
-{       FIXME("%s %s %i stub\n", debugstr_w(wstr1),debugstr_w(wstr2),len);
-        return 0;
-}
-
-/*************************************************************************
- * StrCmpNIA                                    [NT 4.0:SHELL32.*]
- *
- */
-INT WINAPI StrCmpNIA ( LPSTR wstr1, LPSTR wstr2, INT len)
-{       FIXME("%s %s %i stub\n", wstr1,wstr2,len);
-        return 0;
-}
-
-
-/*************************************************************************
- * StrRChrA                                     [SHELL32.346]
- *
- */
-LPSTR WINAPI StrRChrA(LPCSTR lpStart, LPCSTR lpEnd, DWORD wMatch)
-{
-        if (!lpStart)
-            return NULL;
-
-        /* if the end not given, search*/
-        if (!lpEnd)
-        { lpEnd=lpStart;
-          while (*lpEnd)
-            lpEnd++;
-        }
-
-        for (--lpEnd;lpStart <= lpEnd; lpEnd--)
-            if (*lpEnd==(char)wMatch)
-                return (LPSTR)lpEnd;
-
-        return NULL;
-}
-/*************************************************************************
- * StrRChrW                                     [SHELL32.320]
- *
- */
-LPWSTR WINAPI StrRChrW(LPWSTR lpStart, LPWSTR lpEnd, DWORD wMatch)
-{       LPWSTR wptr=NULL;
-        TRACE("%s %s 0x%04x\n",debugstr_w(lpStart),debugstr_w(lpEnd), (WCHAR)wMatch );
-
-        /* if the end not given, search*/
-        if (!lpEnd)
-        { lpEnd=lpStart;
-          while (*lpEnd)
-            lpEnd++;
-        }
-
-        do
-        { if (*lpStart==(WCHAR)wMatch)
-            wptr = lpStart;
-          lpStart++;
-        } while ( lpStart<=lpEnd );
-        return wptr;
-}
 
 /************************************************************************
  *      StrToOleStr                     [SHELL32.163]
@@ -522,85 +340,7 @@ ODINFUNCTION2(LPWSTR,  StrStrIW,
 
 
 
-/*****************************************************************************
- * Name      : StrToIntA
- * Purpose   : convert string to integer (used by explorer.exe)
- * Parameters: Unknown (wrong)
- * Variables :
- * Result    : Unknown
- * Remark    : SHLWAPI.675
- * Status    : UNTESTED STUB
- *
- * Author    : Christoph Bratschi [Wed, 2000/03/29 19:47]
- *****************************************************************************/
 
-ODINFUNCTION1(INT,StrToIntA,LPSTR,pszPath)
-{
-  dprintf(("not implemented"));
-
-  return NULL;
-}
-
-
-/*************************************************************************
-*      StrToIntW                       [SHLWAPI]ú
-*/
-int WINAPI StrToIntW(LPCWSTR lpSrc)
-{
-  int ret;
-  LPSTR lpStr =  HEAP_strdupWtoA(GetProcessHeap(),0,lpSrc);
-
-  TRACE("%s\n", debugstr_w(lpSrc));
-
-  ret = atol(lpStr);
-  HeapFree(GetProcessHeap(),0,lpStr);
-  return ret;
-}
-
-
-/*************************************************************************
- * StrFormatByteSizeA				[SHLWAPI]
- */
-ODINFUNCTION3(LPSTR, StrFormatByteSizeA, DWORD, dw, LPSTR, pszBuf, UINT, cchBuf )
-{	char buf[64];
-	TRACE("%lx %p %i\n", dw, pszBuf, cchBuf);
-	if ( dw<1024L )
-	{ sprintf (buf,"%3.1f bytes", (FLOAT)dw);
-	}
-	else if ( dw<1048576L)
-	{ sprintf (buf,"%3.1f KB", (FLOAT)dw/1024);
-	}
-	else if ( dw < 1073741824L)
-	{ sprintf (buf,"%3.1f MB", (FLOAT)dw/1048576L);
-	}
-	else
-	{ sprintf (buf,"%3.1f GB", (FLOAT)dw/1073741824L);
-	}
-	lstrcpynA (pszBuf, buf, cchBuf);
-	return pszBuf;
-}
-
-/*************************************************************************
- * StrFormatByteSizeW				[SHLWAPI]
- */
-ODINFUNCTION3(LPWSTR, StrFormatByteSizeW, DWORD, dw, LPWSTR, pszBuf, UINT, cchBuf)
-{	char buf[64];
-	TRACE("%lx %p %i\n", dw, pszBuf, cchBuf);
-	if ( dw<1024L )
-	{ sprintf (buf,"%3.1f bytes", (FLOAT)dw);
-	}
-	else if ( dw<1048576L)
-	{ sprintf (buf,"%3.1f KB", (FLOAT)dw/1024);
-	}
-	else if ( dw < 1073741824L)
-	{ sprintf (buf,"%3.1f MB", (FLOAT)dw/1048576L);
-	}
-	else
-	{ sprintf (buf,"%3.1f GB", (FLOAT)dw/1073741824L);
-	}
-	lstrcpynAtoW (pszBuf, buf, cchBuf);
-	return pszBuf;
-}
 
 
 /*****************************************************************************
@@ -615,7 +355,7 @@ ODINFUNCTION3(LPWSTR, StrFormatByteSizeW, DWORD, dw, LPWSTR, pszBuf, UINT, cchBu
  * Author    :
  *****************************************************************************/
 
-ODINFUNCTION2(LPSTR,  StrCpyA,
+ODINFUNCTIONNODBG2(LPSTR,  StrCpyA,
               LPSTR,  lpDest,
               LPCSTR, lpSource)
 {
@@ -624,74 +364,5 @@ ODINFUNCTION2(LPSTR,  StrCpyA,
 }
 
 
-/*****************************************************************************
- * Name      : StrCpyW
- * Purpose   : copy a wide-character string
- * Parameters:
- * Variables :
- * Result    :
- * Remark    : SHLWAPI.642
- * Status    : COMPLETELY IMPLEMENTED UNTESTED
- *
- * Author    :
- *****************************************************************************/
-
-ODINFUNCTION2(LPWSTR,  StrCpyW,
-              LPWSTR,  lpDest,
-              LPCWSTR, lpSource)
-{
-  return lstrcpyW(lpDest,
-                  lpSource);
-}
 
 
-/*****************************************************************************
- * Name      : StrDupA
- * Purpose   : duplicate a string on the local heap
- * Parameters:
- * Variables :
- * Result    :
- * Remark    : SHLWAPI.644
- * Status    : COMPLETELY IMPLEMENTED UNTESTED
- *
- * Author    :
- *****************************************************************************/
-
-ODINFUNCTION1(LPSTR,  StrDupA,
-              LPCSTR, lpStr)
-{
-  int    iLength = lstrlenA(lpStr) + 1;
-  HLOCAL hLocal  = LocalAlloc(LMEM_ZEROINIT,
-                              iLength);
-  if (hLocal != NULL)
-    StrCpyA((LPSTR)hLocal,
-            lpStr);
-
-  return (LPSTR)hLocal;
-}
-
-
-/*****************************************************************************
- * Name      : StrDupW
- * Purpose   : duplicate a wide-characters string on the local heap
- * Parameters:
- * Variables :
- * Result    :
- * Remark    : SHLWAPI.645
- * Status    : COMPLETELY IMPLEMENTED UNTESTED
- *
- * Author    :
- *****************************************************************************/
-
-ODINFUNCTION1(LPWSTR,  StrDupW,
-              LPCWSTR, lpStr)
-{
-  int    iLength = lstrlenW(lpStr) << 1 + 2;
-  HLOCAL hLocal  = LocalAlloc(LMEM_ZEROINIT,
-                              iLength);
-  if (hLocal != NULL)
-    StrCpyW((LPWSTR)hLocal,
-            lpStr);
-
-  return (LPWSTR)hLocal;
-}

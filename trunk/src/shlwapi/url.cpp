@@ -1,4 +1,4 @@
-/* $Id: url.cpp,v 1.5 2000-08-02 20:18:24 bird Exp $ */
+/* $Id: url.cpp,v 1.6 2000-08-24 09:32:45 sandervl Exp $ */
 
 /*
  * Win32 Lightweight SHELL32 API for OS/2
@@ -37,7 +37,7 @@
 #include <win\shell.h>
 #include <win\winerror.h>
 
-#include "shlwapi.h"
+#include "shlwapi_odin.h"
 
 ODINDEBUGCHANNEL(SHLWAPI-URL)
 

@@ -1,4 +1,4 @@
-/* $Id: ordinal.cpp,v 1.4 2000-08-02 20:18:23 bird Exp $ */
+/* $Id: ordinal.cpp,v 1.5 2000-08-24 09:32:42 sandervl Exp $ */
 
 /*
  * Win32 Lightweight SHELL32 for OS/2
@@ -57,6 +57,7 @@
 #include "wine/undocshell.h"
 
 #include "shlwapi.h"
+#include "shlwapi_odin.h"
 
 
 /*****************************************************************************
@@ -1632,4 +1633,13 @@ ODINFUNCTION1(int,     SHIsLowMemoryMachine,
   }
 
   return flagIsLowMemoryMachine;
+}
+
+/*************************************************************************
+ *      SHCreateShellPalette	[SHLWAPI.@]
+ */
+HPALETTE WINAPI SHCreateShellPalette(HDC hdc)
+{
+	FIXME("stub\n");
+	return CreateHalftonePalette(hdc);
 }

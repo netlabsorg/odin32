@@ -1,4 +1,4 @@
-/* $Id: shlwapi.h,v 1.4 2000-06-13 18:14:20 phaller Exp $ */
+/* $Id: shlwapi_odin.h,v 1.1 2000-08-24 09:32:44 sandervl Exp $ */
 
 /*
  * Win32 Lightweight SHELL32 for OS/2
@@ -50,13 +50,12 @@ LONG WIN32API SHRegGetUSValueA(LPCSTR   pSubKey,
                                LPVOID   pDefaultData,
                                DWORD    wDefaultDataSize);
     
-// PATH.CPP
-BOOL  WIN32API PathRemoveFileSpecA(LPSTR lpszPath);
-LPSTR WIN32API PathAppendA(LPSTR  lpstrPath,
-                           LPCSTR lpstrAppend);
-    
+   
 // STRING.CPP
 LPSTR WIN32API StrStrIA(LPCSTR lpFirst, LPCSTR lpSrch);
+
+int WINAPI StrCmpNIA ( LPCSTR str1, LPCSTR str2, int len);
+int WINAPI StrCmpNIW ( LPCWSTR wstr1, LPCWSTR wstr2, int len);
     
 
 #ifdef __cplusplus
