@@ -1,4 +1,4 @@
-/* $Id: tab.c,v 1.15 1999-10-24 22:49:47 sandervl Exp $ */
+/* $Id: tab.c,v 1.16 1999-11-02 21:44:03 achimha Exp $ */
 /*
  * Tab control
  *
@@ -14,7 +14,7 @@
  *  Unicode support
  */
 
-/* WINE 990823 level */
+/* WINE 991031 level */
 
 #include <string.h>
 
@@ -114,11 +114,13 @@ TAB_SetCurSel (HWND hwnd,WPARAM wParam)
     TAB_INFO *infoPtr = TAB_GetInfoPtr(hwnd);
   INT iItem=(INT) wParam;
   INT prevItem;
-
+ 
   prevItem=-1;
   if ((iItem >= 0) && (iItem < infoPtr->uNumItem)) {
     prevItem=infoPtr->iSelected;
       infoPtr->iSelected=iItem;
+      TAB_EnsureSelectionVisible(hwnd, infoPtr);
+      TAB_InvalidateTabArea(hwnd, infoPtr);
   }
   return prevItem;
 }
@@ -375,13 +377,41 @@ static LRESULT
 TAB_LButtonDown (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
   TAB_INFO *infoPtr = TAB_GetInfoPtr(hwnd);
+  POINT pt;
+  INT newItem,dummy;
 
   if (infoPtr->hwndToolTip)
     TAB_RelayEvent (infoPtr->hwndToolTip, hwnd,
-                    WM_LBUTTONDOWN, wParam, lParam);
+		    WM_LBUTTONDOWN, wParam, lParam);
 
   if (GetWindowLongA(hwnd, GWL_STYLE) & TCS_FOCUSONBUTTONDOWN ) {
     SetFocus (hwnd);
+  }
+
+  if (infoPtr->hwndToolTip)
+    TAB_RelayEvent (infoPtr->hwndToolTip, hwnd,
+		    WM_LBUTTONDOWN, wParam, lParam);
+  
+  pt.x = (INT)LOWORD(lParam);
+  pt.y = (INT)HIWORD(lParam);
+  
+  newItem=TAB_InternalHitTest (hwnd, infoPtr,pt,&dummy);
+  
+  TRACE("On Tab, item %d\n", newItem);
+    
+  if ( (newItem!=-1) &&
+       (infoPtr->iSelected != newItem) )
+  {
+    if (TAB_SendSimpleNotify(hwnd, TCN_SELCHANGING)!=TRUE)
+    {
+      infoPtr->iSelected = newItem;
+      infoPtr->uFocus    = newItem;
+      TAB_SendSimpleNotify(hwnd, TCN_SELCHANGE);
+
+      TAB_EnsureSelectionVisible(hwnd, infoPtr);
+
+      TAB_InvalidateTabArea(hwnd, infoPtr);
+    }
   }
   return 0;
 }

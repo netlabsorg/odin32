@@ -1,4 +1,4 @@
-/* $Id: propsheet.c,v 1.10 1999-10-22 18:04:11 sandervl Exp $ */
+/* $Id: propsheet.c,v 1.11 1999-11-02 21:44:02 achimha Exp $ */
 /*
  * Property Sheets
  *
@@ -12,7 +12,7 @@
  *   - Unicode property sheets
  */
 
-/* WINE 990923 level */
+/* WINE 991031 level */
 
 /* CB: Odin problems:
  - trap in PROPSHEET_DialogProc (tab control creation)
@@ -116,6 +116,7 @@ static void PROPSHEET_UnChanged(HWND hwndDlg, HWND hwndCleanPage);
 static void PROPSHEET_PressButton(HWND hwndDlg, int buttonID);
 static void PROPSHEET_SetFinishTextA(HWND hwndDlg, LPCSTR lpszText);
 static void PROPSHEET_SetTitleA(HWND hwndDlg, DWORD dwStyle, LPCSTR lpszText);
+static BOOL PROPSHEET_CanSetCurSel(HWND hwndDlg);
 static BOOL PROPSHEET_SetCurSel(HWND hwndDlg,
                                 int index,
                                 HPROPSHEETPAGE hpage);
@@ -213,7 +214,7 @@ BOOL PROPSHEET_CollectPageInfo(LPCPROPSHEETPAGEA lppsp,
                                     RT_DIALOGA);
     HGLOBAL hTemplate = LoadResource(lppsp->hInstance,
                                      hResource);
-     pTemplate = (LPDLGTEMPLATEA)LockResource(hTemplate);
+    pTemplate = (LPDLGTEMPLATEA)LockResource(hTemplate);
   }
 
   /*
@@ -264,7 +265,7 @@ BOOL PROPSHEET_CollectPageInfo(LPCPROPSHEETPAGEA lppsp,
     default:
       p += lstrlenW( (LPCWSTR)p ) + 1;
       break;
-  }
+  } 
 
   /* class */
   switch ((WORD)*p)
@@ -282,21 +283,33 @@ BOOL PROPSHEET_CollectPageInfo(LPCPROPSHEETPAGEA lppsp,
 
   /* Extract the caption */
   psInfo->proppage[index].pszText = (LPCWSTR)p;
-//  TRACE(propsheet, "Tab %d %s\n",index,debugstr_w((LPCWSTR)p));
+//  TRACE("Tab %d %s\n",index,debugstr_w((LPCWSTR)p));
   p += lstrlenW((LPCWSTR)p) + 1;
 
   if (dwFlags & PSP_USETITLE)
   {
-//AH: todo
-//    psInfo->proppage[index].pszText = HEAP_strdupAtoW(GetProcessHeap(),
-//                                                      0,
-//                                                      lppsp->pszTitle);
+    if ( !HIWORD( lppsp->pszTitle ) )
+    {
+      char szTitle[256];
+      
+      if ( !LoadStringA( lppsp->hInstance, (UINT) lppsp->pszTitle, szTitle, 256 ) )
+	return FALSE;
+
+//AH: TODO      
+//      psInfo->proppage[index].pszText = HEAP_strdupAtoW( GetProcessHeap(),
+//							 0, szTitle );
+    }
+//AH: TODO
+//    else
+//      psInfo->proppage[index].pszText = HEAP_strdupAtoW(GetProcessHeap(),
+//							0,
+//							lppsp->pszTitle);
   }
 
   /*
    * Build the image list for icons
    */
-  if ((dwFlags & PSP_USEHICON) || (dwFlags & PSP_USEICONID))
+  if ((dwFlags & PSP_USEHICON) || (dwFlags & PSP_USEICONID)) 
   {
     HICON hIcon;
     int icon_cx = GetSystemMetrics(SM_CXSMICON);
@@ -875,9 +888,8 @@ static int PROPSHEET_CreatePage(HWND hwndParent,
   RECT rc;
   PropPageInfo* ppInfo = psInfo->proppage;
   PADDING_INFO padding;
-  HWND hwndAfter;
 
-//  TRACE(propsheet, "index %d\n", index);
+  TRACE("index %d\n", index);
 
   if (ppshpage->dwFlags & PSP_DLGINDIRECT)
     pTemplate = (DLGTEMPLATE*)ppshpage->u1.pResource;
@@ -907,7 +919,6 @@ static int PROPSHEET_CreatePage(HWND hwndParent,
     pTemplate->style &= ~WS_SYSMENU;
     pTemplate->style &= ~WS_POPUP;
     pTemplate->style &= ~WS_DISABLED;
-
   }
 
   if (psInfo->proppage[index].useCallback)
@@ -916,10 +927,10 @@ static int PROPSHEET_CreatePage(HWND hwndParent,
                                (LPPROPSHEETPAGEA)ppshpage);
 
   hwndPage = CreateDialogIndirectParamA(ppshpage->hInstance,
-                                        pTemplate,
-                                        hwndParent,
-                                        ppshpage->pfnDlgProc,
-                                        (LPARAM)ppshpage);
+					pTemplate,
+					hwndParent,
+					ppshpage->pfnDlgProc,
+					(LPARAM)ppshpage);
 
   ppInfo[index].hwndPage = hwndPage;
 
@@ -931,11 +942,7 @@ static int PROPSHEET_CreatePage(HWND hwndParent,
   MapDialogRect(hwndParent, &rc);
 
   if (psInfo->ppshheader->dwFlags & PSH_WIZARD)
-  {
-    GetWindowRect(hwndParent, &rc);
     padding = PROPSHEET_GetPaddingInfoWizard(hwndParent);
-    hwndAfter = hwndParent;
-  }
   else
   {
     /*
@@ -945,10 +952,9 @@ static int PROPSHEET_CreatePage(HWND hwndParent,
     HWND hwndTabCtrl = GetDlgItem(hwndParent, IDC_TABCONTROL);
     SendMessageA(hwndTabCtrl, TCM_ADJUSTRECT, FALSE, (LPARAM)&rc);
     padding = PROPSHEET_GetPaddingInfo(hwndParent);
-    hwndAfter = HWND_TOP;
   }
 
-  SetWindowPos(hwndPage, hwndAfter,
+  SetWindowPos(hwndPage, HWND_TOP,
                rc.left + padding.x,
                rc.top + padding.y,
                0, 0, SWP_NOSIZE);
@@ -1037,18 +1043,22 @@ static BOOL PROPSHEET_Next(HWND hwndDlg)
   PropSheetInfo* psInfo = (PropSheetInfo*) GetPropA(hwndDlg,
                                                     PropSheetInfoStr);
 
+  hdr.hwndFrom = hwndDlg;
   hdr.code = PSN_WIZNEXT;
 
   hwndPage = psInfo->proppage[psInfo->active_page].hwndPage;
 
   msgResult = SendMessageA(hwndPage, WM_NOTIFY, 0, (LPARAM) &hdr);
 
-//  TRACE("msg result %ld\n", msgResult);
+  TRACE("msg result %ld\n", msgResult);
 
   if (msgResult == -1)
     return FALSE;
 
-  PROPSHEET_SetCurSel(hwndDlg, psInfo->active_page + 1, 0);
+  if(PROPSHEET_CanSetCurSel(hwndDlg) != FALSE)
+  {
+    PROPSHEET_SetCurSel(hwndDlg, psInfo->active_page + 1, 0);
+  }
 
   return TRUE;
 }
@@ -1064,13 +1074,14 @@ static BOOL PROPSHEET_Finish(HWND hwndDlg)
   PropSheetInfo* psInfo = (PropSheetInfo*) GetPropA(hwndDlg,
                                                     PropSheetInfoStr);
 
+  hdr.hwndFrom = hwndDlg;
   hdr.code = PSN_WIZFINISH;
 
   hwndPage = psInfo->proppage[psInfo->active_page].hwndPage;
 
   msgResult = SendMessageA(hwndPage, WM_NOTIFY, 0, (LPARAM) &hdr);
 
-//  TRACE("msg result %ld\n", msgResult);
+  TRACE("msg result %ld\n", msgResult);
 
   if (msgResult != 0)
     return FALSE;
@@ -1205,7 +1216,7 @@ static void PROPSHEET_UnChanged(HWND hwndDlg, HWND hwndCleanPage)
   HWND hwndApplyBtn = GetDlgItem(hwndDlg, IDC_APPLY_BUTTON);
   PropSheetInfo* psInfo = (PropSheetInfo*) GetPropA(hwndDlg,
                                                     PropSheetInfoStr);
-
+  if ( !psInfo ) return;
   for (i = 0; i < psInfo->nPages; i++)
   {
     /* set the specified page as clean */
@@ -1258,6 +1269,40 @@ static void PROPSHEET_PressButton(HWND hwndDlg, int buttonID)
   }
 }
 
+/*************************************************************************
+ * BOOL PROPSHEET_CanSetCurSel [Internal] 
+ *
+ * Test weither the current page can be changed by sending a PSN_KILLACTIVE
+ *
+ * PARAMS
+ *     hwndDlg        [I] handle to a Dialog hWnd
+ *
+ * RETURNS
+ *     TRUE if Current Selection can change
+ *
+ * NOTES
+ */
+static BOOL PROPSHEET_CanSetCurSel(HWND hwndDlg)
+{
+  PropSheetInfo* psInfo = (PropSheetInfo*) GetPropA(hwndDlg,
+                                                    PropSheetInfoStr);
+  HWND hwndPage;
+  NMHDR hdr;
+
+  if (!psInfo)
+    return FALSE;
+
+  /*
+   * Notify the current page.
+   */
+  hwndPage = psInfo->proppage[psInfo->active_page].hwndPage;
+
+  hdr.hwndFrom = hwndDlg;
+  hdr.code = PSN_KILLACTIVE;
+
+  return !SendMessageA(hwndPage, WM_NOTIFY, 0, (LPARAM) &hdr);
+}
+
 /******************************************************************************
  *            PROPSHEET_SetCurSel
  */
@@ -1271,17 +1316,9 @@ static BOOL PROPSHEET_SetCurSel(HWND hwndDlg,
   HWND hwndHelp  = GetDlgItem(hwndDlg, IDHELP);
   NMHDR hdr;
 
-  /*
-   * Notify the current page.
-   */
   hwndPage = psInfo->proppage[psInfo->active_page].hwndPage;
 
   hdr.hwndFrom = hwndDlg;
-  hdr.code = PSN_KILLACTIVE;
-
-  if (SendMessageA(hwndPage, WM_NOTIFY, 0, (LPARAM) &hdr))
-    return FALSE;
-
   /*
    * hpage takes precedence over index.
    */
@@ -1291,7 +1328,7 @@ static BOOL PROPSHEET_SetCurSel(HWND hwndDlg,
 
     if (index == -1)
     {
-      //TRACE("Could not find page to remove!\n");
+      TRACE("Could not find page to remove!\n");
       return FALSE;
     }
   }
@@ -1309,7 +1346,7 @@ static BOOL PROPSHEET_SetCurSel(HWND hwndDlg,
 
     result = SendMessageA(hwndPage, WM_NOTIFY, 0, (LPARAM) &hdr);
     /*
-     * TODO: check return value.
+     * TODO: check return value. 
      */
   }
 
@@ -1468,7 +1505,7 @@ static BOOL PROPSHEET_AddPage(HWND hwndDlg,
 
   psInfo->nPages++;
 
-  return FALSE;
+  return TRUE;
 }
 
 /******************************************************************************
@@ -1481,24 +1518,30 @@ static BOOL PROPSHEET_RemovePage(HWND hwndDlg,
   PropSheetInfo * psInfo = (PropSheetInfo*) GetPropA(hwndDlg,
                                                      PropSheetInfoStr);
   HWND hwndTabControl = GetDlgItem(hwndDlg, IDC_TABCONTROL);
-  PropPageInfo* oldPages = psInfo->proppage;
+  PropPageInfo* oldPages;
 
+  if (!psInfo) {
+    FIXME("No psInfo for propertysheet at windows 0x%04x, returning FALSE...\n", hwndDlg);
+    return FALSE;
+  }
+  oldPages = psInfo->proppage;
   /*
    * hpage takes precedence over index.
    */
   if (hpage != 0)
   {
     index = PROPSHEET_GetPageIndex(hpage, psInfo);
-
-    if (index == -1)
-    {
-//      TRACE(propsheet, "Could not find page to remove!\n");
-      return FALSE;
-    }
   }
 
-//  TRACE(propsheet, "total pages %d removing page %d active page %d\n",
-//        psInfo->nPages, index, psInfo->active_page);
+  /* Make shure that index is within range */
+  if (index < 0 || index >= psInfo->nPages)
+    {
+      TRACE("Could not find page to remove!\n");
+      return FALSE;
+    }
+
+  TRACE("total pages %d removing page %d active page %d\n",
+        psInfo->nPages, index, psInfo->active_page);
   /*
    * Check if we're removing the active page.
    */
@@ -1519,7 +1562,7 @@ static BOOL PROPSHEET_RemovePage(HWND hwndDlg,
     }
     else
     {
-//      TRACE(propsheet, "Removing the only page, close the dialog!\n");
+      TRACE("Removing the only page, close the dialog!\n");
 
       if (psInfo->isModeless)
         psInfo->active_page = -1;
@@ -1533,13 +1576,19 @@ static BOOL PROPSHEET_RemovePage(HWND hwndDlg,
   if (index < psInfo->active_page)
     psInfo->active_page--;
 
+  /* Destroy page dialog window.
+   * If it's last page in modal dialog, it has been destroyed by EndDialog
+   */
+  if (psInfo->isModeless || psInfo->nPages > 1)
+     DestroyWindow(psInfo->proppage[index].hwndPage);
+  
   /* Remove the tab */
   SendMessageA(hwndTabControl, TCM_DELETEITEM, index, 0);
 
   psInfo->nPages--;
   psInfo->proppage = COMCTL32_Alloc(sizeof(PropPageInfo) * psInfo->nPages);
 
-  if (index > 0)
+  if (index > 0)  
     memcpy(&psInfo->proppage[0], &oldPages[0], index * sizeof(PropPageInfo));
 
   if (index < psInfo->nPages)
@@ -1763,6 +1812,8 @@ PROPSHEET_DialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
       GetWindowTextA(hwnd, psInfo->strPropertiesFor, MAX_CAPTION_LENGTH);
 
+      PROPSHEET_CreateTabControl(hwnd, psInfo);
+
       if (psInfo->ppshheader->dwFlags & PSH_WIZARD)
       {
         HWND hwndBack = GetDlgItem(hwnd, IDC_BACK_BUTTON);
@@ -1779,14 +1830,16 @@ PROPSHEET_DialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
       }
       else
       {
-        PROPSHEET_CreateTabControl(hwnd, psInfo);
-
         if (PROPSHEET_IsTooSmall(hwnd, psInfo))
         {
           PROPSHEET_AdjustSize(hwnd, psInfo);
           PROPSHEET_AdjustButtons(hwnd, psInfo);
         }
       }
+
+      if (psInfo->useCallback) 
+             (*(psInfo->ppshheader->pfnCallback))(hwnd, 
+					      PSCB_INITIALIZED, (LPARAM)0); 
 
       ppshpage = PROPSHEET_GetPSPPage(psInfo, psInfo->active_page);      
       PROPSHEET_CreatePage(hwnd, psInfo->active_page, psInfo, ppshpage, TRUE);
@@ -1796,9 +1849,21 @@ PROPSHEET_DialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
       SetPropA(hwnd, PropSheetInfoStr, (HANDLE)psInfo);
 
-      PROPSHEET_SetTitleA(hwnd,
-                          psInfo->ppshheader->dwFlags,
-                          psInfo->ppshheader->pszCaption);
+
+      if (!HIWORD(psInfo->ppshheader->pszCaption) &&
+              psInfo->ppshheader->hInstance)
+      {
+         char szText[256];
+
+         if (LoadStringA(psInfo->ppshheader->hInstance, 
+                 (UINT)psInfo->ppshheader->pszCaption, szText, 255))
+            PROPSHEET_SetTitleA(hwnd, psInfo->ppshheader->dwFlags, szText);
+      }
+      else
+      {
+         PROPSHEET_SetTitleA(hwnd, psInfo->ppshheader->dwFlags,
+                         psInfo->ppshheader->pszCaption);
+      }
 
       return TRUE;
     }
@@ -1883,6 +1948,14 @@ PROPSHEET_DialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         PROPSHEET_SetCurSel(hwnd, index, 0);
       }
 
+      if(pnmh->code == TCN_SELCHANGING)
+      {
+        BOOL bRet = PROPSHEET_CanSetCurSel(hwnd);
+        SetWindowLongA(hwnd, DWL_MSGRESULT, !bRet);
+        return TRUE;
+      }
+
+
       return 0;
     }
 
@@ -1921,9 +1994,13 @@ PROPSHEET_DialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     {
       BOOL msgResult;
 
-      msgResult = PROPSHEET_SetCurSel(hwnd,
-                                      (int)wParam,
-                                      (HPROPSHEETPAGE)lParam);
+      msgResult = PROPSHEET_CanSetCurSel(hwnd);
+      if(msgResult != FALSE)
+      {
+        msgResult = PROPSHEET_SetCurSel(hwnd,
+                                       (int)wParam,
+                                       (HPROPSHEETPAGE)lParam);
+      }
 
       SetWindowLongA(hwnd, DWL_MSGRESULT, msgResult);
 
@@ -1982,8 +2059,21 @@ PROPSHEET_DialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     }
 
     case PSM_ADDPAGE:
-      PROPSHEET_AddPage(hwnd, (HPROPSHEETPAGE)lParam);
+    {
+      /*
+       * Note: MSVC++ 6.0 documentation says that PSM_ADDPAGE does not have
+       *       a return value. This is not true. PSM_ADDPAGE returns TRUE
+       *       on success or FALSE otherwise, as specified on MSDN Online.
+       *       Also see the MFC code for
+       *       CPropertySheet::AddPage(CPropertyPage* pPage).
+       */
+
+      BOOL msgResult = PROPSHEET_AddPage(hwnd, (HPROPSHEETPAGE)lParam);
+
+      SetWindowLongA(hwnd, DWL_MSGRESULT, msgResult);
+
       return TRUE;
+    }
 
     case PSM_REMOVEPAGE:
       PROPSHEET_RemovePage(hwnd, (int)wParam, (HPROPSHEETPAGE)lParam);
@@ -1991,7 +2081,7 @@ PROPSHEET_DialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
     case PSM_ISDIALOGMESSAGE:
     {
-//      FIXME("Unimplemented msg PSM_ISDIALOGMESSAGE\n");
+      FIXME("Unimplemented msg PSM_ISDIALOGMESSAGE\n");
       return 0;
     }
 
@@ -2008,13 +2098,13 @@ PROPSHEET_DialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
       return TRUE;
 
     case PSM_SETTITLEW:
-//        FIXME("Unimplemented msg PSM_SETTITLE32W\n");
+        FIXME("Unimplemented msg PSM_SETTITLE32W\n");
         return 0;
     case PSM_SETCURSELID:
-//        FIXME("Unimplemented msg PSM_SETCURSELID\n");
+        FIXME("Unimplemented msg PSM_SETCURSELID\n");
         return 0;
     case PSM_SETFINISHTEXTW:
-//        FIXME("Unimplemented msg PSM_SETFINISHTEXT32W\n");
+        FIXME("Unimplemented msg PSM_SETFINISHTEXT32W\n");
         return 0;
 
     default:

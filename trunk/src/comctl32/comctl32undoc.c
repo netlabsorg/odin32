@@ -1,4 +1,4 @@
-/* $Id: comctl32undoc.c,v 1.12 1999-09-26 11:01:08 achimha Exp $ */
+/* $Id: comctl32undoc.c,v 1.13 1999-11-02 21:44:01 achimha Exp $ */
 /*
  * Undocumented functions from COMCTL32.DLL
  *
@@ -11,7 +11,7 @@
  *
  */
 
-/* WINE 990923 level */
+/* WINE 991031 level */
 
 /* CB: todo
   - porting/implementing string functions
@@ -1333,8 +1333,8 @@ DPA_QuickSort (LPVOID *lpPtrs, INT l, INT r,
     j = r;
     v = lpPtrs[(int)(l+r)/2];
     do {
-        while ((pfnCompare)(lpPtrs[i], v, lParam) > 0) i++;
-        while ((pfnCompare)(lpPtrs[j], v, lParam) < 0) j--;
+	while ((pfnCompare)(lpPtrs[i], v, lParam) < 0) i++;
+	while ((pfnCompare)(lpPtrs[j], v, lParam) > 0) j--;
         if (i <= j)
         {
             t = lpPtrs[i];
@@ -1847,6 +1847,15 @@ INT WINAPI COMCTL32_StrCmpNA( LPCSTR lpStr1, LPCSTR lpStr2, int nChar) {
  */
 INT WINAPI COMCTL32_StrCmpNW( LPCWSTR lpStr1, LPCWSTR lpStr2, int nChar) {
 //  return lstrncmpW(lpStr1, lpStr2, nChar);
+}
+
+/**************************************************************************
+ * StrCmpNIW [COMCTL32.361]
+ *
+ */
+INT WINAPI COMCTL32_StrCmpNIW( LPCWSTR lpStr1, LPCWSTR lpStr2, int nChar) {
+//  FIXME("(%s, %s, %i): stub\n", debugstr_w(lpStr1), debugstr_w(lpStr2), nChar);
+  return 0;
 }
 
 /**************************************************************************

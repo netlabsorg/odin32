@@ -1,4 +1,4 @@
-/* $Id: tooltips.c,v 1.15 1999-10-24 22:49:49 sandervl Exp $ */
+/* $Id: tooltips.c,v 1.16 1999-11-02 21:44:03 achimha Exp $ */
 /*
  * Tool tip control
  *
@@ -21,7 +21,7 @@
  - CS_SAVEBITS: window movements are slow, bug in Open32?
 */
 
-/* WINE 990923 level */
+/* WINE 991031 level */
 
 #include <string.h>
 
@@ -252,55 +252,128 @@ TOOLTIPS_CalcTipRect (HWND hwnd,TOOLTIPS_INFO *infoPtr,TTTOOL_INFO *toolPtr,LPRE
 
 }
 
+static VOID
+TOOLTIPS_CalcTipSize (HWND hwnd, TOOLTIPS_INFO *infoPtr, LPSIZE lpSize)
+{
+    HDC hdc;
+    HFONT hOldFont;
+    UINT uFlags = DT_EXTERNALLEADING | DT_CALCRECT;
+    RECT rc = {0, 0, 0, 0};
+
+    if (infoPtr->nMaxTipWidth > -1) {
+	rc.right = infoPtr->nMaxTipWidth;
+	uFlags |= DT_WORDBREAK;
+    }
+    if (GetWindowLongA (hwnd, GWL_STYLE) & TTS_NOPREFIX)
+	uFlags |= DT_NOPREFIX;
+//    TRACE("\"%s\"\n", debugstr_w(infoPtr->szTipText));
+
+    hdc = GetDC (hwnd);
+    hOldFont = SelectObject (hdc, infoPtr->hFont);
+    DrawTextW (hdc, infoPtr->szTipText, -1, &rc, uFlags);
+    SelectObject (hdc, hOldFont);
+    ReleaseDC (hwnd, hdc);
+
+    lpSize->cx = rc.right - rc.left + 4 + 
+		 infoPtr->rcMargin.left + infoPtr->rcMargin.right;
+    lpSize->cy = rc.bottom - rc.top + 4 +
+		 infoPtr->rcMargin.bottom + infoPtr->rcMargin.top;
+}
 
 static VOID
 TOOLTIPS_Show (HWND hwnd, TOOLTIPS_INFO *infoPtr)
 {
     TTTOOL_INFO *toolPtr;
-    RECT rect;
+    RECT rect, wndrect;
+    SIZE size;
     HDC  hdc;
     NMHDR  hdr;
 
-    if (infoPtr->nTool == -1)
-    {
-//      TRACE (tooltips, "invalid tool (-1)!\n");
-        return;
+    if (infoPtr->nTool == -1) {
+	TRACE("invalid tool (-1)!\n");
+	return;
     }
 
     infoPtr->nCurrentTool = infoPtr->nTool;
 
-//    TRACE (tooltips, "Show tooltip pre %d!\n", infoPtr->nTool);
-    TOOLTIPS_GetTipText(hwnd,infoPtr,infoPtr->nCurrentTool);
+    TRACE("Show tooltip pre %d!\n", infoPtr->nTool);
 
-    if (infoPtr->szTipText[0] == '\0')
-    {
-        infoPtr->nCurrentTool = -1;
-        return;
+    TOOLTIPS_GetTipText (hwnd, infoPtr, infoPtr->nCurrentTool);
+
+    if (infoPtr->szTipText[0] == L'\0') {
+	infoPtr->nCurrentTool = -1;
+	return;
     }
 
-//    TRACE (tooltips, "Show tooltip %d!\n", infoPtr->nCurrentTool);
+    TRACE("Show tooltip %d!\n", infoPtr->nCurrentTool);
     toolPtr = &infoPtr->tools[infoPtr->nCurrentTool];
 
     hdr.hwndFrom = hwnd;
     hdr.idFrom = toolPtr->uId;
     hdr.code = TTN_SHOW;
-    SendMessageA(toolPtr->hwnd,WM_NOTIFY,
-                    (WPARAM)toolPtr->uId,(LPARAM)&hdr);
+    SendMessageA (toolPtr->hwnd, WM_NOTIFY,
+		    (WPARAM)toolPtr->uId, (LPARAM)&hdr);
 
-//    TRACE (tooltips, "\"%s\"\n", debugstr_w(infoPtr->szTipText));
+//    TRACE("\"%s\"\n", debugstr_w(infoPtr->szTipText));
 
-    TOOLTIPS_CalcTipRect(hwnd,infoPtr,toolPtr,&rect);
+    TOOLTIPS_CalcTipSize (hwnd, infoPtr, &size);
+    TRACE("size %d - %d\n", size.cx, size.cy);
 
-    SetWindowPos (hwnd,HWND_TOP,rect.left,rect.top,
-                    rect.right-rect.left,rect.bottom-rect.top,
-                    SWP_SHOWWINDOW | SWP_NOACTIVATE);
+    if (toolPtr->uFlags & TTF_CENTERTIP) {
+	RECT rc;
+
+	if (toolPtr->uFlags & TTF_IDISHWND)
+	    GetWindowRect ((HWND)toolPtr->uId, &rc);
+	else {
+	    rc = toolPtr->rect;
+	    MapWindowPoints (toolPtr->hwnd, (HWND)0, (LPPOINT)&rc, 2);
+	}
+	rect.left = (rc.left + rc.right - size.cx) / 2;
+	rect.top  = rc.bottom + 2;
+    }
+    else {
+	GetCursorPos ((LPPOINT)&rect);
+	rect.top += 20;
+    }
+
+    TRACE("pos %d - %d\n", rect.left, rect.top);
+
+    rect.right = rect.left + size.cx;
+    rect.bottom = rect.top + size.cy;
+
+    /* check position */
+    wndrect.right = GetSystemMetrics( SM_CXSCREEN );
+    if( rect.right > wndrect.right ) {
+	   rect.left -= rect.right - wndrect.right + 2;
+	   rect.right = wndrect.right - 2;
+    }
+    wndrect.bottom = GetSystemMetrics( SM_CYSCREEN );
+    if( rect.bottom > wndrect.bottom ) {
+        RECT rc;
+
+	if (toolPtr->uFlags & TTF_IDISHWND)
+	    GetWindowRect ((HWND)toolPtr->uId, &rc);
+	else {
+	    rc = toolPtr->rect;
+	    MapWindowPoints (toolPtr->hwnd, (HWND)0, (LPPOINT)&rc, 2);
+	}   
+	rect.bottom = rc.top - 2;
+    	rect.top = rect.bottom - size.cy;
+    }
+
+    AdjustWindowRectEx (&rect, GetWindowLongA (hwnd, GWL_STYLE),
+			FALSE, GetWindowLongA (hwnd, GWL_EXSTYLE));
+
+    SetWindowPos (hwnd, HWND_TOP, rect.left, rect.top,
+		    rect.right - rect.left, rect.bottom - rect.top,
+		    SWP_SHOWWINDOW | SWP_NOACTIVATE);
 
     /* repaint the tooltip */
-    hdc = GetDC(hwnd);
-    TOOLTIPS_Refresh(hwnd,hdc);
-    ReleaseDC(hwnd,hdc);
+    hdc = GetDC (hwnd);
+    TOOLTIPS_Refresh (hwnd, hdc);
+    ReleaseDC (hwnd, hdc);
 
-    SetTimer (hwnd,ID_TIMERPOP,infoPtr->nAutoPopTime,0);
+    SetTimer (hwnd, ID_TIMERPOP, infoPtr->nAutoPopTime, 0);
 }
 
 

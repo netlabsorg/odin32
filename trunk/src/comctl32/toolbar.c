@@ -1,4 +1,4 @@
-/* $Id: toolbar.c,v 1.16 1999-10-24 22:49:47 sandervl Exp $ */
+/* $Id: toolbar.c,v 1.17 1999-11-02 21:44:03 achimha Exp $ */
 /*
  * Toolbar control
  *
@@ -25,6 +25,8 @@
  *     setparnt.exe, setrows.exe, toolwnd.exe.
  *   - Microsofts controlspy examples.
  */
+
+/* WINE 991031 level */
 
 /* CB: Odin32/WINE bugs
   - IMAGELIST_Draw draws a line too at the bottom of the bitmap (toolbar.exe)
@@ -3460,6 +3462,13 @@ TOOLBAR_EraseBackground (HWND hwnd, WPARAM wParam, LPARAM lParam)
     return DefWindowProcA (hwnd, WM_ERASEBKGND, wParam, lParam);
 }
 
+static LRESULT
+TOOLBAR_GetFont (HWND hwnd, WPARAM wParam, LPARAM lParam)
+{
+    TOOLBAR_INFO *infoPtr = TOOLBAR_GetInfoPtr (hwnd);
+
+    return infoPtr->hFont;
+}
 
 static LRESULT
 TOOLBAR_LButtonDblClk (HWND hwnd, WPARAM wParam, LPARAM lParam)
@@ -4124,7 +4133,9 @@ ToolbarWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         case WM_ERASEBKGND:
             return TOOLBAR_EraseBackground (hwnd, wParam, lParam);
 
-/*      case WM_GETFONT: */
+	case WM_GETFONT:
+		return TOOLBAR_GetFont (hwnd, wParam, lParam);
+
 /*      case WM_KEYDOWN: */
 /*      case WM_KILLFOCUS: */
 
