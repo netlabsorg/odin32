@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2311 2002-09-16 16:16:31 sandervl Exp $ */
+/* $Id: changelog,v 1.2312 2002-09-17 10:23:39 sandervl Exp $ */
+
+ 2002-09-17: Platon Fomichev <platon@innotek   >
+    - USER32:   o Create invisible vertical scroller for all top-level windows
+                  so the IBM wheel driver sends us WM_VSCROLL messages
 
  2002-09-16: Sander van Leeuwen <sandervl@innotek   >
     - COMCTL32: o LISTVIEW_ProcessLetterKeys bugfix
