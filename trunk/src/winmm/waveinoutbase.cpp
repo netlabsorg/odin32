@@ -1,4 +1,4 @@
-/* $Id: waveinoutbase.cpp,v 1.2 2001-03-23 17:43:46 sandervl Exp $ */
+/* $Id: waveinoutbase.cpp,v 1.3 2002-01-29 20:13:52 sandervl Exp $ */
 
 /*
  * Wave playback class (DART)
@@ -131,6 +131,7 @@ void WaveInOut::callback(UINT uMessage, DWORD dw1, DWORD dw2)
         else {
             dprintf(("WARNING: no valid selector of main thread available (process exiting); skipping WaveInOut notify"));
         }
+        break;
     }
 
     case CALLBACK_EVENT:
