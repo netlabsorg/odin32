@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.18 2000-01-07 17:38:48 cbratschi Exp $ */
+/* $Id: win32wbase.h,v 1.19 2000-01-08 16:47:50 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -111,6 +111,7 @@ virtual  WORD   GetWindowWord(int index);
          HWND   getOS2FrameWindowHandle()       { return OS2HwndFrame; };
  Win32WndClass *getWindowClass()                { return windowClass; };
 
+         LONG   getLastHitTestVal()             { return lastHitTestVal; }
          BOOL   getIgnoreHitTest()              { return fIgnoreHitTest; }
          VOID   setIgnoreHitTest(BOOL ignore)   { fIgnoreHitTest = ignore; }
 

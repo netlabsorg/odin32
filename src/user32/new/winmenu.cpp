@@ -1,4 +1,4 @@
-/* $Id: winmenu.cpp,v 1.11 2000-01-08 12:06:53 sandervl Exp $ */
+/* $Id: winmenu.cpp,v 1.12 2000-01-08 16:47:50 cbratschi Exp $ */
 
 /*
  * Win32 menu API functions for OS/2
@@ -428,10 +428,10 @@ ODINFUNCTION5(int,   GetMenuStringA,
         return 0;
     }
     if(!lpsz || !cchMax) {//determine menu string length
-	char menustr[256];
-	rc = O32_GetMenuString(hMenu, idItem, menustr, sizeof(menustr), fuFlags);
+        char menustr[256];
+        rc = O32_GetMenuString(hMenu, idItem, menustr, sizeof(menustr), fuFlags);
         //SvL: Open32 returns the wrong error
-	return (rc == -1) ? 0 : rc;
+        return (rc == -1) ? 0 : rc;
     }
     rc = O32_GetMenuString(hMenu, idItem, lpsz, cchMax, fuFlags);
     //SvL: Open32 returns the wrong error
@@ -644,14 +644,15 @@ ODINFUNCTION5(BOOL, ModifyMenuA,
         return 0;
     }
     if(IS_STRING_ITEM(fuFlags) && HIWORD(lpszNewItem) != 0) {
-	dprintf(("ModifyMenuA %s", lpszNewItem));
+        dprintf(("ModifyMenuA %s", lpszNewItem));
     }
-
+/* //CB: doesn't compile, but don't need it anyway
     if(((fuFlags & (MF_BYCOMMAND|MF_BYPOSITION|MF_POPUP)) == MF_BYCOMMAND) && uItem != idNewItem) {
-	DWORD pos = OSLibGetMenuItemPos(hMenu, uItem);
-	ODIN_DeleteMenu(hMenu, uItem, MF_BYCOMMAND);
-	return ODIN_InsertMenuA(hMenu, pos, fuFlags | MF_BYPOSITION, idNewItem, lpszNewItem);
+        DWORD pos = OSLibGetMenuItemPos(hMenu, uItem);
+        ODIN_DeleteMenu(hMenu, uItem, MF_BYCOMMAND);
+        return ODIN_InsertMenuA(hMenu, pos, fuFlags | MF_BYPOSITION, idNewItem, lpszNewItem);
     }
+*/
     return O32_ModifyMenu(hMenu, uItem, fuFlags, idNewItem, lpszNewItem);
 }
 //******************************************************************************
@@ -755,7 +756,7 @@ ODINFUNCTION5(BOOL, InsertMenuA,
     }
     //SvL: RealPlayer calls InsertMenu with flag 0 & pos -1
     if((flags & (MF_BYCOMMAND|MF_BYPOSITION)) == 0 && (pos == 0xffffffff))
-    	flags |= MF_BYPOSITION;
+        flags |= MF_BYPOSITION;
 
     return O32_InsertMenu(hMenu, pos, flags, id, str);
 }
