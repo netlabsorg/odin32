@@ -36,7 +36,8 @@ BEGIN
         PUSHBUTTON      "~Add ->", DID_OK, 131, 69, 44, 14
         PUSHBUTTON      "<- ~Remove", IDC_REMOVE_BTN, 131, 49, 44, 14
         LTEXT           "Toolbar buttons:", -1, 182, 110, 78, 10
-        LISTBOX         IDC_TOOLBARBTN_LBOX, 182, 8, 120, 100
+        LISTBOX         IDC_TOOLBARBTN_LBOX, 182, 8, 120, 100, LS_OWNERDRAW |
+                        LS_NOADJUSTPOS | LS_HORZSCROLL
     END
 END
 
@@ -51,7 +52,7 @@ BEGIN
         PUSHBUTTON      "~Apply", IDC_APPLY_BUTTON, 181, 7, 50, 14
         PUSHBUTTON      "~Help", 9, 235, 7, 50, 14
         CONTROL         "Tab", IDC_TABCONTROL, 7, 27, 278, 125, 
-                        "SysTabControl32", WS_CLIPSIBLINGS
+                        "SysTabControl32", WS_VISIBLE | WS_CLIPSIBLINGS
     END
 END
 
