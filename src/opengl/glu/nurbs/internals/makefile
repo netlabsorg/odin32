@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2000-09-22 10:43:31 bird Exp $
+# $Id: makefile,v 1.6 2000-11-19 08:58:14 bird Exp $
 
 #
 # Odin32 API
@@ -6,32 +6,40 @@
 #       glu/nurbs/internals makefile
 #
 
+
+#
 # Directory macros.
+#
 PDWIN32_INCLUDE = ..\..\..\..\..\include
 PDWIN32_LIB     = ..\..\..\..\..\lib
 PDWIN32_BIN     = ..\..\..\..\..\$(OBJDIR)
 PDWIN32_TOOLS   = ..\..\..\..\..\tools\bin
 
 
-# Local cleanup only.
-LOCALCLEAN = 1
+#
+# Tell buildenvironmet to build an object library and to invoke additional dep rule.
+#
+LIBTARGET = 1
+ADDITIONAL_DEP = mydep
 
 
+#
 # Compiler, tools, and interference rules.
+#
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 
 
-# Flag overloads and local macros.
-CLEANEXTRAS =
-
-CINCLUDE    = -I..\internals -I..\nurbtess -I..\..\..\mesa\GL -I..\..\include
-CDEFS       = -DSTANDALONE -DLIBRARYBUILD -DNDEBUG
-
-CFLAGS      = $(CFLAGS) $(CINCLUDE) $(CDEFS) -O-
-CXXFLAGS    = $(CXXFLAGS) $(CINCLUDE) $(CDEFS)
+#
+# Flag overloads.
+#
+CINCLUDES   = $(CINCLUDES) -I..\internals -I..\nurbtess -I..\..\..\mesa\GL -I..\..\include
+CDEFINES    = $(CDEFINES)  -DSTANDALONE -DLIBRARYBUILD -DNDEBUG
+CFLAGS      = $(CFLAGS) -O-
 
 
-# Object files. All objects should be prefixed with $(OBJDIR)!
+#
+# Object files. Prefix with OBJDIR and one space before the '\'.
+#
 OBJS = \
 $(OBJDIR)\arc.obj \
 $(OBJDIR)\arcsorter.obj \
@@ -58,9 +66,7 @@ $(OBJDIR)\mapdescv.obj \
 $(OBJDIR)\maplist.obj \
 $(OBJDIR)\mesher.obj \
 $(OBJDIR)\monotonizer.obj \
-$(OBJDIR)\mycode.obj
-
-OBJS2 = \
+$(OBJDIR)\mycode.obj \
 $(OBJDIR)\nurbsinterfac.obj \
 $(OBJDIR)\nurbstess.obj \
 $(OBJDIR)\patch.obj \
@@ -82,32 +88,22 @@ $(OBJDIR)\dataTransform.obj \
 $(OBJDIR)\monoTriangulationBackend.obj
 
 
+#
 # Target name - name of the library without extention and path.
+#
 TARGET = internals
 
 
-# Create all libraries (not importlibraries)
-all:    $(OBJDIR) \
-        $(OBJDIR)\$(TARGET).lib
-
-
-# Create all libraries (not importlibraries)
-libs: all
-
-
-# Lib rule - build importlibrary (and evt. other libs)
-$(OBJDIR)\$(TARGET).lib: $(OBJS) $(OBJS2)
-    $(RM) $@
-    $(ILIB) $(ILIBFLAGS) $@ $(OBJS);
-    $(ILIB) $(ILIBFLAGS) $@ $(OBJS2);
-
-
-# Dep rule - makes depenencies for C, C++ and Asm files.
-dep:
-    $(DEPEND) $(CINCLUDE) *.c *.cpp *.h *.asm *.inc  \
-        ..\nurbtess\*.h ..\..\..\mesa\GL\*.h ..\..\include\*.h
-
-
+#
 # Includes the common rules.
+#
 !include $(PDWIN32_INCLUDE)/pdwin32.post
+
+
+#
+# Additional dep rule - adds dependencies for some additional headers.
+#
+mydep:
+    $(DEPEND) -a $(CINCLUDES) \
+        ..\nurbtess\*.h ..\..\..\mesa\GL\*.h ..\..\include\*.h
 

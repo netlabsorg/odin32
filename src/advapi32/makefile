@@ -1,14 +1,10 @@
-# $Id: makefile,v 1.25 2000-09-28 03:17:10 bird Exp $
+# $Id: makefile,v 1.26 2000-11-19 09:27:40 bird Exp $
 
 #
 # Odin32 API
 #
 #       advapi32.dll makefile
 #
-
-
-# For the time being
-NEW_STYLE = 1
 
 
 #
@@ -53,3 +49,4 @@ TARGET = advapi32
 # Includes the common rules.
 #
 !include $(PDWIN32_INCLUDE)/pdwin32.post
+

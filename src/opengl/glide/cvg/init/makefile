@@ -1,71 +1,73 @@
-# $Id: makefile,v 1.2 2000-03-06 23:33:44 bird Exp $
+# $Id: makefile,v 1.3 2000-11-19 08:58:11 bird Exp $
 #
-# PD-Win32 API
+# Odin32 API
 #
-#       Init makefile
+#       cvg\Init makefile
 #
 
+
+#
 # Directory macros.
+#
 PDWIN32_INCLUDE = ..\..\..\..\..\include
 PDWIN32_LIB = ..\..\..\..\..\lib
 PDWIN32_BIN = ..\..\..\..\..\$(OBJDIR)
 PDWIN32_TOOLS = ..\..\..\..\..\tools\bin
 
 
+#
+# Tell buildenvironmet to build an object library and to invoke additional dep rule.
+#
+LIBTARGET = 1
+ADDITIONAL_DEP = mydep
+
+
+#
 # Compiler, tools, and interference rules.
-LOCALCLEAN  = 1
+#
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 !include ..\3dfx.mak
 
-# Flag overloads and local macros.
-CLEANEXTRAS =
 
-CINCLUDE    = -I..\incsrc;..\..\swlibs\fxmisc;..\glide;..\texus;..\..\swlibs\pcilib
-CFLAGS      = $(CFLAGS) $(CINCLUDE)
-CXXFLAGS    = $(CXXFLAGS) $(CINCLUDE)
+#
+# Flag overloads.
+#
+CINCLUDES = $(CINCLUDES) -I..\incsrc;..\..\swlibs\fxmisc;..\glide;..\texus;..\..\swlibs\pcilib
 
 
-# Object files. All objects should be prefixed with $(OBJDIR)!
+#
+# Object files. Prefix with OBJDIR and one space before the '\'.
+#
 OBJS = \
-$(OBJDIR)\DAC.OBJ \
-$(OBJDIR)\GAMMA.OBJ \
-$(OBJDIR)\GDEBUG.OBJ \
-$(OBJDIR)\INFO.OBJ \
-$(OBJDIR)\PARSE.OBJ \
-$(OBJDIR)\PRINT.OBJ \
-$(OBJDIR)\SLI.OBJ \
-$(OBJDIR)\SST1INIT.OBJ \
-$(OBJDIR)\UTIL.OBJ \
-$(OBJDIR)\VIDEO.OBJ
+$(OBJDIR)\dac.obj \
+$(OBJDIR)\gamma.obj \
+$(OBJDIR)\gdebug.obj \
+$(OBJDIR)\info.obj \
+$(OBJDIR)\parse.obj \
+$(OBJDIR)\print.obj \
+$(OBJDIR)\sli.obj \
+$(OBJDIR)\sst1init.obj \
+$(OBJDIR)\util.obj \
+$(OBJDIR)\video.obj
 
 
-# Target name - name of the dll without extention and path.
+#
+# Target name - name of the library without extention and path.
+#
 TARGET  = init
 
 
-# All rule - build objs, target dll, copies dll to bin and makes libs.
-all:    $(OBJDIR) \
-        $(OBJDIR)\$(TARGET).lib
-
-
-# Create all libraries (not importlibraries)
-libs: all
-
-
-# Lib target rule - builds the library.
-$(OBJDIR)\$(TARGET).lib: $(OBJS)
-    $(RM) $@
-    $(ILIB) $(ILIBFLAGS) $@ $(OBJS);
-
-
-
-# Dep rule - makes depenencies for C, C++ and Asm files.
-dep:
-    $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win $(CINCLUDE) \
-        *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h \
-        ..\incsrc\*.h ..\..\swlibs\fxmisc\*.h ..\glide\*.h ..\texus\*.h ..\..\swlibs\pcilib\*.h
-
-
+#
 # Includes the common rules.
+#
 !include $(PDWIN32_INCLUDE)/pdwin32.post
+
+
+#
+# Additional dep rule - adds dependencies for some additional headers.
+#
+mydep:
+    $(DEPEND) -a $(CINCLUDES) \
+        ..\incsrc\*.h ..\..\swlibs\fxmisc\*.h ..\glide\*.h ..\texus\*.h \
+        ..\..\swlibs\pcilib\*.h
 
