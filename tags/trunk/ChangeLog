@@ -1,4 +1,10 @@
- /* $Id: ChangeLog,v 1.898 2000-04-16 18:06:17 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.899 2000-04-16 18:24:20 cbratschi Exp $ */
+
+ 2000-04-16: Christoph Bratschi <cbratschi@datacomm.ch>
+	- COMCTL32: added new resources: i.e. header cursors
+		    changed file version to 5.80 (IE5, Win2k)
+		    implemented missing listview messages, implemented some
+		    extended styles
 
  2000-04-16: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Put back dll search method, fixed bug in LoadLibraryEx
