@@ -1,19 +1,28 @@
- /* $Id: ChangeLog,v 1.872 2000-04-07 17:06:22 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.873 2000-04-07 18:21:01 mike Exp $ */
+
+ 2000-04-07: Michal Necasek <mike@mendelu.cz>
+        - DDRAW\NEW: Experimental fullscreen DDraw, VIDEOPMI based.
+             May not work with all video cards and may cause all
+             kinds of trouble. But works swell for eg. Fallout 1/2
+             or HMM3. Contains some extra bugs compared to the
+             windowed DDraw, ie. Moorhuhn and others don't work
+             with it at all. Please tell me about your experience
+             with this shameless hack.
 
  2000-04-07: Sander van Leeuwen <sandervl@xs4all.nl>
-	- WINMM:  Don't restart when already playing
+        - WINMM:  Don't restart when already playing
         - USER32: Print mark in debug log with WriteLog (#ifdef DEBUG), not dprintf
                   Workaround for paint problems in RealPlayer 7 Update 1.
                   (don't clip the dc with a region in DoNCPaint if the clip
                    region has the same size as the window; doing so creates
                    update problems for no obvious reason)
-	- GDI32:  Only change bitmap size in SetDIBitsToDevice if bitmap
+        - GDI32:  Only change bitmap size in SetDIBitsToDevice if bitmap
                   is not compressed. (fixes crash during startup in Excel)
                   NOTE: Open32 doesn't implement compression type conversion
                         correctly. (black splash screen for RLE8 bitmap)
 
  2000-04-07: David Raison <djr@lemur.co.uk>
-	- USER32: Set lfSmCaptionFont structure in NONCLIENTMETRICSA
+        - USER32: Set lfSmCaptionFont structure in NONCLIENTMETRICSA
                   (SystemParametersInfoA/SPI_GETNONCLIENTMETRICS)
 
  2000-04-07: Knut St. Osmundsen <knut.stange.osmundsen@pmsc.no>
@@ -26,7 +35,7 @@
                 recovery boot disks ready!
 
  2000-04-06: Sander van Leeuwen <sandervl@xs4all.nl>
-	- WINMM: Fixed message callback once more (previous fix broke rp7)
+        - WINMM: Fixed message callback once more (previous fix broke rp7)
                  Fixed restart
 
  2000-04-08: Michal Necasek <mike@mendelu.cz>
@@ -41,39 +50,39 @@
                   Using win32k.sys with fp13 works fine here.
 
  2000-04-05: Sander van Leeuwen <sandervl@xs4all.nl>
-	- WINMM: Smallest waveout buffer size = 128 bytes
+        - WINMM: Smallest waveout buffer size = 128 bytes
                  Fixed callback bugs (reported by Michal Necasek)
 
  2000-04-03: David Raison <djr@lemur.co.uk>
- 	- OLE32: Added CoCreateGUID (calls RPCRT4.UuidCreate)
- 	- RPCRT4: Beginning of new dll:
-	    RpcStringFreeA, RpcStringFreeW, UuidCompare
-	    UuidCreate, UuidCreateNil, UuidEqual
-	    UuidFromStringA, UuidFromStringW, UuidHash
-	    UuidIsNil, UuidToStringA, UuidToStringW
+        - OLE32: Added CoCreateGUID (calls RPCRT4.UuidCreate)
+        - RPCRT4: Beginning of new dll:
+            RpcStringFreeA, RpcStringFreeW, UuidCompare
+            UuidCreate, UuidCreateNil, UuidEqual
+            UuidFromStringA, UuidFromStringW, UuidHash
+            UuidIsNil, UuidToStringA, UuidToStringW
 
  2000-04-02: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
-	- SHELL32: don't sort files case sensitive
+        - SHELL32: don't sort files case sensitive
 
  2000-04-02: Christoph Bratschi <cbratschi@datacomm.ch>
-	- KERNEL32: FindFirst: don't return "." and ".." in root
-		    wrote long to short name conversion
-		    added error code converter
-	- USER32: removed 'What You See Is What You Get On First Of April'
+        - KERNEL32: FindFirst: don't return "." and ".." in root
+                    wrote long to short name conversion
+                    added error code converter
+        - USER32: removed 'What You See Is What You Get On First Of April'
 
  2000-04-02: Sander van Leeuwen <sandervl@xs4all.nl>
-	- USER32: dc.cpp cleanup
-	- GDI32:  Dib section sync bugfix (todo: rgb 565 to 555 conversion if bpp == 16)
+        - USER32: dc.cpp cleanup
+        - GDI32:  Dib section sync bugfix (todo: rgb 565 to 555 conversion if bpp == 16)
                   Set y inversion to 0 if dib section isn't flipped
                   (fixes upside down flash videos in RealPlayer 7)
-	- WINMM:  Faked mixer apis
+        - WINMM:  Faked mixer apis
 
  2000-04-01: Sander van Leeuwen <sandervl@xs4all.nl>
-	- GDI32: Fixed dibsection bitblits. (wrong updates of realplayer 7
+        - GDI32: Fixed dibsection bitblits. (wrong updates of realplayer 7
                  videos)
 
  2000-04-01: Christoph Bratschi <cbratschi@datacomm.ch>
-	- USER32: added WYSIWYGOFOA interface
+        - USER32: added WYSIWYGOFOA interface
 
  2000-04-01: Edgar Buerkle <Edgar.Buerkle@gmx.net>
         - USER32: Fixed track frame width & height (now you can actually
