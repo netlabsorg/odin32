@@ -1,4 +1,4 @@
-/* $Id: db.cpp,v 1.17 2000-07-29 14:12:47 bird Exp $ *
+/* $Id: db.cpp,v 1.18 2000-08-02 02:18:04 bird Exp $ *
  *
  * DB - contains all database routines.
  *
@@ -941,6 +941,12 @@ unsigned long _System dbUpdateFunction(PFNDESC pFnDesc, signed long lDll, char *
         else
             pszQuery += sprintf(pszQuery, ", file = -1");
 
+        /* Line */
+        if (pFnDesc->lLine >= 0)
+            pszQuery += sprintf(pszQuery, ", line = %ld", pFnDesc->lLine);
+        else
+            pszQuery += sprintf(pszQuery, ", line = -1");
+
         /* return type */
         if (pFnDesc->pszReturnType != NULL)
             pszQuery = sqlstrcat(pszQuery, ", return = ",  pFnDesc->pszReturnType);
@@ -1165,13 +1171,15 @@ BOOL            _System dbRemoveDesignNotes(signed long lFile)
  * @param       pszText         Design note text.
  * @param       lSeqNbr         Sequence number (in dll). If 0 the use next available number.
  * @param       lSeqNbrFile     Sequence number in file.
+ * @param       lLine           Line number (1 - based!).
  */
 BOOL            _System dbAddDesignNote(signed long lDll,
                                         signed long lFile,
                                         const char *pszTitle,
                                         const char *pszText,
                                         signed long lSeqNbr,
-                                        signed long lSeqNbrFile)
+                                        signed long lSeqNbrFile,
+                                        signed long lLine)
 {
     char        szQuery[0x10200];
     MYSQL_RES * pres;
@@ -1208,9 +1216,9 @@ BOOL            _System dbAddDesignNote(signed long lDll,
     /*
      * Create update query.
      */
-    sprintf(&szQuery[0], "INSERT INTO designnote(dll, file, seqnbrfile, seqnbr, title, note) "
-                         "VALUES (%ld, %ld, %ld, %ld, ",
-            lDll, lFile, lSeqNbrFile, lSeqNbr);
+    sprintf(&szQuery[0], "INSERT INTO designnote(dll, file, seqnbrfile, seqnbr, line, title, note) "
+                         "VALUES (%ld, %ld, %ld, %ld, %ld, ",
+            lDll, lFile, lSeqNbrFile, lSeqNbr, lLine);
     if (pszTitle != NULL && *pszTitle != '\0')
         sqlstrcat(&szQuery[0], NULL, pszTitle);
     else

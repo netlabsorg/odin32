@@ -1,4 +1,4 @@
-/* $Id: db.h,v 1.12 2000-07-29 14:12:47 bird Exp $ */
+/* $Id: db.h,v 1.13 2000-08-02 02:18:05 bird Exp $ */
 /*
  * DB - contains all database routines
  *
@@ -79,6 +79,8 @@ extern "C" {
         /* file */
         long        lFile;              /* File refcode which this function is implemented in. */
                                         /* -1 if not valid. */
+        /* line */
+        long        lLine;              /* Line number of the function start. */
     } FNDESC, *PFNDESC;
 
 
@@ -138,7 +140,8 @@ extern "C" {
                                              const char *pszTitle,
                                              const char *pszText,
                                              signed long lSeqNbr,
-                                             signed long lSeqNbrFile);
+                                             signed long lSeqNbrFile,
+                                             signed long lLine);
     unsigned long    _System dbCreateHistory(char *pszError);
     unsigned long    _System dbCheckIntegrity(char *pszError);
 
