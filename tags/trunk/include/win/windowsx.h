@@ -1,4 +1,4 @@
-/* $Id: windowsx.h,v 1.7 2000-01-26 23:17:50 sandervl Exp $ */
+/* $Id: windowsx.h,v 1.8 2000-02-09 13:40:23 sandervl Exp $ */
 
 /* Copyright (C) 1999 Corel Corporation (Paul Quinn) */
 
@@ -1052,6 +1052,9 @@ extern "C" {
 #define Edit_SetSel(hwndCtl, ichStart, ichEnd)   \
 	((void)SendMessage((hwndCtl), EM_SETSEL, (ichStart), (ichEnd)))
 
+#define Edit_GetSel(hwndCtl)                    ((DWORD)SendMessage((hwndCtl), EM_GETSEL, 0L, 0L))
+#define Edit_ReplaceSel(hwndCtl, lpszReplace)   ((void)SendMessage((hwndCtl), EM_REPLACESEL, 0L, (LPARAM)(LPCTSTR)(lpszReplace)))
+
 #define Edit_GetText(hwndCtl, lpch, cchMax)     GetWindowText((hwndCtl), (lpch), (cchMax))
 #define Edit_GetTextLength(hwndCtl)             GetWindowTextLength(hwndCtl)
 #define Edit_SetText(hwndCtl, lpsz)             SetWindowText((hwndCtl), (lpsz))
@@ -1063,6 +1066,8 @@ extern "C" {
 	((BOOL)(DWORD)SendMessage((hwndCtl), EM_GETMODIFY, 0L, 0L))
 #define Edit_SetModify(hwndCtl, fModified) \
 	((void)SendMessage((hwndCtl), EM_SETMODIFY, (WPARAM)(UINT)(fModified), 0L))
+
+#define Edit_ScrollCaret(hwndCtl)               ((BOOL)(DWORD)SendMessage((hwndCtl), EM_SCROLLCARET, 0, 0L))
 	
 /* void Cls_OnMeasureItem(HWND hwnd, MEASUREITEMSTRUCT * lpMeasureItem) */
 #define HANDLE_WM_MEASUREITEM(hwnd, wParam, lParam, fn) \

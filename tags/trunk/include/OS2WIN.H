@@ -1,4 +1,4 @@
-/* $Id: OS2WIN.H,v 1.7 1999-06-26 18:24:20 sandervl Exp $ */
+/* $Id: OS2WIN.H,v 1.8 2000-02-09 13:40:21 sandervl Exp $ */
 #ifndef _OS2WIN_H
 #define _OS2WIN_H
 
@@ -1522,6 +1522,8 @@ SHORT   OPEN32API _O32_VkKeyScan( char keyScan);
 DWORD   OPEN32API _O32_WaitForMultipleObjects( DWORD, const HANDLE *, BOOL, DWORD );
 
 DWORD   OPEN32API _O32_WaitForSingleObject( HANDLE, DWORD );
+
+DWORD   OPEN32API _O32_WaitForInputIdle(HANDLE hProcess, DWORD dwTimeOut);
 
 BOOL    OPEN32API _O32_WaitMessage( void);
 
@@ -9804,5 +9806,15 @@ inline BOOL O32_WinSetTranslateMode(DWORD a)
     return yyrc;
 } 
 
+inline DWORD O32_WaitForInputIdle(HANDLE hProcess, DWORD dwTimeOut)
+{
+ DWORD yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = _O32_WaitForInputIdle(hProcess, dwTimeOut);
+    SetFS(sel);
+
+    return yyrc;
+}
 
 #endif    /* ifdef _OS2WIN_H */
