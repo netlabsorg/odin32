@@ -1,4 +1,4 @@
-/* $Id: winuser16.h,v 1.6 2000-08-30 13:56:39 sandervl Exp $ */
+/* $Id: winuser16.h,v 1.7 2000-11-09 18:23:42 sandervl Exp $ */
 #ifndef __WINE_WINE_WINUSER16_H
 #define __WINE_WINE_WINUSER16_H
 
@@ -116,6 +116,7 @@ typedef struct
 
 /* Cursors / Icons */
 
+#if 0
 typedef struct tagCURSORICONINFO
 {
     POINT16 ptHotSpot;
@@ -125,6 +126,7 @@ typedef struct tagCURSORICONINFO
     BYTE    bPlanes;
     BYTE    bBitsPerPixel;
 } CURSORICONINFO;
+#endif
 
 typedef struct {
 	BOOL16		fIcon;
@@ -582,8 +584,8 @@ INT16       WINAPI wvsnprintf16(LPSTR,UINT16,LPCSTR,LPCVOID);
 VOID        WINAPI CalcChildScroll16(HWND16,WORD);
 VOID        WINAPI CascadeChildWindows16(HWND16,WORD);
 INT16       WINAPI CloseComm16(INT16);
-HGLOBAL16   WINAPI CreateCursorIconIndirect16(HINSTANCE16,CURSORICONINFO*,
-                                            LPCVOID,LPCVOID);
+//HGLOBAL16   WINAPI CreateCursorIconIndirect16(HINSTANCE16,CURSORICONINFO*,
+//                                            LPCVOID,LPCVOID);
 BOOL16      WINAPI DCHook16(HDC16,WORD,DWORD,LPARAM);
 BOOL16      WINAPI DlgDirSelect16(HWND16,LPSTR,INT16);
 BOOL16      WINAPI DlgDirSelectComboBox16(HWND16,LPSTR,INT16);

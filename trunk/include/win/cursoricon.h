@@ -1,4 +1,4 @@
-/* $Id: cursoricon.h,v 1.2 1999-11-28 12:33:11 sandervl Exp $ */
+/* $Id: cursoricon.h,v 1.3 2000-11-09 18:23:22 sandervl Exp $ */
 
 /*
  * Cursor and icon definitions
@@ -65,6 +65,17 @@ typedef struct
     CURSORICONFILEDIRENTRY  idEntries[1];
 } CURSORICONFILEDIR;
 
+typedef struct tagCURSORICONINFO
+{
+    POINT16 ptHotSpot;
+    WORD    nWidth;
+    WORD    nHeight;
+    WORD    nWidthBytes;
+    BYTE    bPlanes;
+    BYTE    bBitsPerPixel;
+    HBITMAP hColorBmp;
+} CURSORICONINFO;
+
 
 #include "poppack.h"
 
@@ -81,12 +92,21 @@ extern HGLOBAL CURSORICON_Load( HINSTANCE hInstance, LPCWSTR name,
                                 int width, int height, int colors,
                                 BOOL fCursor, UINT loadflags);
 
-extern WORD WINAPI CURSORICON_Destroy( HGLOBAL16 handle, UINT16 flags );
+extern WORD WIN32API CURSORICON_Destroy( HGLOBAL handle, UINT flags );
 
 extern void CURSORICON_FreeModuleIcons( HMODULE hModule );
 
 HGLOBAL CopyCursorIcon(HGLOBAL Handle, UINT nType, 
   	 	       INT iDesiredCX, INT iDesiredCY, 
 		       UINT nFlags);
+
+HGLOBAL WIN32API CreateCursorIconIndirect( HINSTANCE hInstance,
+                                           CURSORICONINFO *info,
+                                           LPCVOID lpANDbits,
+                                           LPCVOID lpXORbits );
+
+HGLOBAL CURSORICON_ExtCopy(HGLOBAL Handle, UINT nType,
+                           INT iDesiredCX, INT iDesiredCY,
+                           UINT nFlags);
 				    
 #endif /* __WINE_CURSORICON_H */
