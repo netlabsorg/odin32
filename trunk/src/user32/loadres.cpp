@@ -1,4 +1,4 @@
-/* $Id: loadres.cpp,v 1.39 2002-03-22 12:51:17 sandervl Exp $ */
+/* $Id: loadres.cpp,v 1.40 2002-11-27 13:56:26 sandervl Exp $ */
 
 /*
  * Win32 resource API functions for OS/2
@@ -165,6 +165,30 @@ HANDLE LoadBitmapW(HINSTANCE hinst, LPCWSTR lpszName, int cxDesired, int cyDesir
     HGLOBAL hFix;
     int size;
 
+    //if in OS/2 mode, then we must replace the standard button bitmaps
+    //(min, max, restore, close)
+#ifdef NEW_WGSS
+    if(fOS2Look && (hinst == hInstanceUser32 || !hinst)) {
+        switch((ULONG)lpszName) {
+        case OBM_CLOSE:
+            return CopyImage(hBmpCloseButton, IMAGE_BITMAP, 0, 0, 0);
+        case OBM_CLOSED:
+            return CopyImage(hBmpCloseButtonDown, IMAGE_BITMAP, 0, 0, 0);
+        case OBM_RESTORE:
+            return CopyImage(hBmpRestoreButton, IMAGE_BITMAP, 0, 0, 0);
+        case OBM_RESTORED:
+            return CopyImage(hBmpRestoreButtonDown, IMAGE_BITMAP, 0, 0, 0);
+        case OBM_REDUCE:
+            return CopyImage(hBmpMinButton, IMAGE_BITMAP, 0, 0, 0);
+        case OBM_REDUCED:
+            return CopyImage(hBmpMinButtonDown, IMAGE_BITMAP, 0, 0, 0);
+        case OBM_ZOOM:
+            return CopyImage(hBmpMaxButton, IMAGE_BITMAP, 0, 0, 0);
+        case OBM_ZOOMD:
+            return CopyImage(hBmpMaxButtonDown, IMAGE_BITMAP, 0, 0, 0);
+        }
+    }
+#endif
     if (!(fuLoad & LR_LOADFROMFILE))
     {
         handle = 0;
@@ -303,6 +327,45 @@ HANDLE CopyBitmap(HANDLE hBitmap, DWORD desiredx, DWORD desiredy)
         return 0;
     }
 
+#ifdef __WIN32OS2__
+    BITMAPINFO* pInfo;
+    HBITMAP oldbmp;
+    HDC     hdc;
+    int     colortablesize, bmpsize, headersize;
+    char   *pBitmapData;
+
+    colortablesize = 0;
+
+    if(bm.bmBitsPixel <= 8) {
+        colortablesize = sizeof(RGBQUAD)*(1<<bm.bmBitsPixel);
+    }
+    bmpsize = DIB_GetDIBImageBytes(bm.bmWidth, bm.bmHeight, bm.bmBitsPixel);
+    headersize = sizeof(BITMAPINFO)+colortablesize+3*sizeof(DWORD); //+ extra space for > 8bpp images
+
+    pInfo = (BITMAPINFO *)malloc(headersize+bmpsize); 
+    if(pInfo == NULL) {
+        DebugInt3();
+        return 0;
+    }
+    pBitmapData = (char*)((char *)pInfo + headersize);
+    memset(pInfo, 0, headersize+bmpsize);
+
+    hdc = CreateCompatibleDC(0);
+
+    pInfo->bmiHeader.biSize     = sizeof(BITMAPINFOHEADER);
+    pInfo->bmiHeader.biPlanes   = bm.bmPlanes;
+    pInfo->bmiHeader.biBitCount = bm.bmBitsPixel;
+    pInfo->bmiHeader.biWidth    = bm.bmWidth;
+    pInfo->bmiHeader.biHeight   = bm.bmHeight;
+
+    GetDIBits(hdc, hBitmap, 0, bm.bmHeight, pBitmapData, pInfo, DIB_RGB_COLORS);
+
+    res = CreateDIBitmap(hdc, &pInfo->bmiHeader, CBM_INIT, pBitmapData, 
+                         pInfo, DIB_RGB_COLORS );
+
+    DeleteDC(hdc);
+    free(pInfo);
+#else
     bm.bmBits = NULL;
     res = CreateBitmapIndirect(&bm);
 
@@ -314,6 +377,7 @@ HANDLE CopyBitmap(HANDLE hBitmap, DWORD desiredx, DWORD desiredy)
         SetBitmapBits (res, bm.bmWidthBytes * bm.bmHeight, buf);
         HeapFree( GetProcessHeap(), 0, buf );
     }
+#endif
     return res;
 }
 //******************************************************************************
