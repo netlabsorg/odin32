@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.31 2002-09-05 01:20:11 bird Exp $
+/* $Id: buildenv.cmd,v 1.32 2002-09-14 16:01:03 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -125,6 +125,7 @@
     aCfg.i.sId = 'mode8050';        aCfg.i.sGrp = 'misc';       aCfg.i.sSet = 'Mode,80,50';             aCfg.i.sDesc = 'mode 80,50';                i = i + 1;
     aCfg.i.sId = 'mscv6';           aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'MSCV6_32';               aCfg.i.sDesc = 'MicroSoft C v6.0 32-bit';   i = i + 1;
     aCfg.i.sId = 'mscv6-16';        aCfg.i.sGrp = 'comp16';     aCfg.i.sSet = 'MSCV6_16';               aCfg.i.sDesc = 'MicroSoft C v6.0a 16-bit';  i = i + 1;
+    aCfg.i.sId = 'mscv7-16';        aCfg.i.sGrp = 'comp16';     aCfg.i.sSet = 'MSCV7_16';               aCfg.i.sDesc = 'MicroSoft C v7.0 16-bit with OS/2 support';  i = i + 1;
     aCfg.i.sId = 'mysql';           aCfg.i.sGrp = 'database';   aCfg.i.sSet = 'mySQL';                  aCfg.i.sDesc = 'MySql any version (latest from Yuri is recommended)'; i = i + 1;
     aCfg.i.sId = 'nasm9833';        aCfg.i.sGrp = 'asm';        aCfg.i.sSet = 'NASM,''nasm9833''';      aCfg.i.sDesc = 'NASM version 0.98.33 compiled on May 28 2002'; i = i + 1;
     aCfg.i.sId = 'netqos2';         aCfg.i.sGrp = 'misc';       aCfg.i.sSet = 'NetQOS2';                aCfg.i.sDesc = 'NetQOS2 - help system for VAC40,VAC365,DB2 and more.'; i = i + 1;
@@ -845,6 +846,7 @@ PathSetDefault: procedure expose aCfg. aPath. sPathFile
         aPath.i.sPId = 'ddkvideo';                  aPath.i.sPath = 'f:\ddk\april02\video';         i = i + 1;
         aPath.i.sPId = 'home';                      aPath.i.sPath = 'e:\user\kso';                  i = i + 1;
         aPath.i.sPId = 'mscv6-16';                  aPath.i.sPath = 'f:\ddktools\toolkits\msc60';   i = i + 1;
+        aPath.i.sPId = 'mscv7-16';                  aPath.i.sPath = 'f:\msc\v7.0';                  i = i + 1;
         aPath.i.sPId = 'mysql';                     aPath.i.sPath = 'f:\mysql2';                    i = i + 1;
         aPath.i.sPId = 'nasm9833';                  aPath.i.sPath = 'f:\nasm\os2\0.98.33';          i = i + 1;
         aPath.i.sPId = 'netqos2';                   aPath.i.sPath = 'f:\netqos2';                   i = i + 1;
@@ -894,7 +896,8 @@ PathSetDefault: procedure expose aCfg. aPath. sPathFile
         aPath.i.sPId = 'ddkvideo';                  aPath.i.sPath = 'e:\ddk\video';                 i = i + 1;
         aPath.i.sPId = 'home';                      aPath.i.sPath = 'x:\home';                      i = i + 1;
         aPath.i.sPId = 'mscv6-16';                  aPath.i.sPath = 'e:\ddktools\toolkits\msc60';   i = i + 1;
-      /*aPath.i.sPId = 'mysql';                     aPath.i.sPath = 'e:\mysql2';                    i = i + 1;
+      /*aPath.i.sPId = 'mscv7-16';                  aPath.i.sPath = 'e:\msc\v7.0';                  i = i + 1;
+        aPath.i.sPId = 'mysql';                     aPath.i.sPath = 'e:\mysql2';                    i = i + 1;
         aPath.i.sPId = 'netqos2';                   aPath.i.sPath = 'e:\netqos2';                   i = i + 1;
         aPath.i.sPId = 'perl';                      aPath.i.sPath = 'e:\perllib';                   i = i + 1;
         aPath.i.sPId = 'python';                    aPath.i.sPath = 'e:\python';                    i = i + 1;
@@ -942,6 +945,7 @@ PathSetDefault: procedure expose aCfg. aPath. sPathFile
         aPath.i.sPId = 'ddkvideo';                  aPath.i.sPath = 'd:\dev\ddk\june02\video';      i = i + 1;
         aPath.i.sPId = 'home';                      aPath.i.sPath = 'd:\home\bird';                 i = i + 1;
         aPath.i.sPId = 'mscv6-16';                  aPath.i.sPath = 'd:\dev\ddktools\toolkits\msc60'; i = i + 1;
+        aPath.i.sPId = 'mscv7-16';                  aPath.i.sPath = 'd:\dev\msc\v7.0';              i = i + 1;
         aPath.i.sPId = 'mysql';                     aPath.i.sPath = 'd:\apps\mysql\v3.23.50b1';     i = i + 1;
       /*aPath.i.sPId = 'netqos2';                   aPath.i.sPath = 'e:\netqos2';                   i = i + 1;
         aPath.i.sPId = 'perl';                      aPath.i.sPath = 'e:\perllib';                   i = i + 1;
@@ -2341,6 +2345,60 @@ MSCV6_32: procedure expose aCfg. aPath. sPathFile
         return 2;
     rc = CheckCmdOutput('cl386', 0, fQuiet, 'Microsoft (R) Microsoft 386 C Compiler. Version 6.00.054');
 return rc;
+
+
+/*
+ * Microsoft C v7.0 16-bit with OS/2 support.
+ */
+MSCV7_16: procedure expose aCfg. aPath. sPathFile
+    parse arg sToolId,sOperation,fRM,fQuiet
+
+    /*
+     * Microsoft C v6.0a main directory.
+     */
+    sPathMSC    = PathQuery('mscv7-16', sToolId, sOperation);
+    if (sPathMSC = '') then
+        return 1;
+    /* If config operation we're done now. */
+    if (pos('config', sOperation) > 0) then
+        return 0;
+
+    /*
+     * Installing the environment variables.
+     */
+    call EnvSet      fRM, 'BUILD_ENV',  'MSCV7-16'
+    call EnvSet      fRM, 'BUILD_PLATFORM', 'OS2'
+    call EnvSet      fRM, 'PATH_MSC',   sPathMSC;
+    call EnvAddFront fRM, 'path',       sPathMSC'\binp;'
+    call EnvAddFront fRM, 'include',    sPathMSC'\include;'
+    call EnvAddFront fRM, 'include16',  sPathMSC'\include;'
+    call EnvAddFront fRM, 'lib',        sPathMSC'\lib;'
+
+    /*
+     * Verify.
+     */
+    if (pos('verify', sOperation) <= 0) then
+        return 0;
+    if (    \CfgVerifyFile(sPathMSC'\binp\cl.exe', fQuiet),
+        |   \CfgVerifyFile(sPathMSC'\binp\link.exe', fQuiet),
+        |   \CfgVerifyFile(sPathMSC'\binp\ilink.exe', fQuiet),
+       /* |   \CfgVerifyFile(sPathMSC'\lib\clibcep.lib', fQuiet),
+        |   \CfgVerifyFile(sPathMSC'\lib\llibcep.lib', fQuiet),
+        |   \CfgVerifyFile(sPathMSC'\lib\mlibcep.lib', fQuiet),
+        |   \CfgVerifyFile(sPathMSC'\lib\slibcep.lib', fQuiet)*/,
+        |   \CfgVerifyFile(sPathMSC'\include\dos.h', fQuiet),
+        |   \CfgVerifyFile(sPathMSC'\include\bios.h', fQuiet),
+        |   \CfgVerifyFile(sPathMSC'\include\locale.h', fQuiet),
+        |   \CfgVerifyFile(sPathMSC'\include\stdiostr.h', fQuiet),
+        |   \CfgVerifyFile(sPathMSC'\include\string.h', fQuiet),
+        |   \CfgVerifyFile(sPathMSC'\include\vmemory.h', fQuiet),
+        |   \CfgVerifyFile(sPathMSC'\include\stdio.h', fQuiet),
+        ) then
+        return 2;
+    rc = CheckCmdOutput('cl', 0, fQuiet, 'Microsoft (R) C/C++ Optimizing Compiler Version 7.00');
+return rc;
+
+
 
 
 /*
