@@ -394,7 +394,7 @@ TAB_LButtonUp (HWND hwnd, WPARAM wParam, LPARAM lParam)
   pt.x = (INT)LOWORD(lParam);
   pt.y = (INT)HIWORD(lParam);
   
-  newItem=TAB_InternalHitTest (hwnd, infoPtr,pt,&dummy);
+  newItem=TAB_InternalHitTest (hwnd, infoPtr,pt,(unsigned int*)&dummy);
   
 //  TRACE(tab, "On Tab, item %d\n", newItem);
     
@@ -1329,7 +1329,7 @@ TAB_SetItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
   iItem=(INT) wParam;
   tabItem=(LPTCITEMA ) lParam;
-  TRACE (tab,"%d %p\n",iItem, tabItem);
+//  TRACE (tab,"%d %p\n",iItem, tabItem);
   if ((iItem<0) || (iItem>infoPtr->uNumItem)) return FALSE;
 
   wineItem=& infoPtr->items[iItem];
@@ -1375,7 +1375,7 @@ TAB_GetItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
   iItem=(INT) wParam;
   tabItem=(LPTCITEMA) lParam;
-  TRACE (tab,"\n");
+//  TRACE (tab,"\n");
   if ((iItem<0) || (iItem>infoPtr->uNumItem)) return FALSE;
 
   wineItem=& infoPtr->items[iItem];
@@ -1459,7 +1459,7 @@ TAB_GetFont (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
   TAB_INFO *infoPtr = TAB_GetInfoPtr(hwnd);
 
-  TRACE (tab,"\n");
+//  TRACE (tab,"\n");
   return (LRESULT)infoPtr->hFont;
 }
 

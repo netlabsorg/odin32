@@ -18,7 +18,11 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 TARGET = comctl32
 
-OBJS =  comctl32.obj initterm.obj progress.obj comctl32undoc.obj imagelist.obj comboex.obj animate.obj datetime.obj flatsb.obj hotkey.obj monthcal.obj nativefont.obj pager.obj tab.obj
+OBJS =  comctl32.obj initterm.obj progress.obj comctl32undoc.obj imagelist.obj \
+        comboex.obj animate.obj datetime.obj flatsb.obj hotkey.obj monthcal.obj \
+        nativefont.obj pager.obj tab.obj status.obj header.obj updown.obj \
+        rebar.obj cache.obj trackbar.obj tooltips.obj toolbar.obj treeview.obj \
+        propsheet.obj listview.obj
 
 all: $(TARGET).dll $(TARGET).lib
 
@@ -50,7 +54,17 @@ monthcal.obj: monthcal.c
 nativefont.obj: nativefont.c
 pager.obj: pager.c
 tab.obj: tab.c
-#status.obj: status.c
+status.obj: status.c
+header.obj: header.c
+updown.obj: updown.c
+rebar:obj: rebar.c
+cache.obj: cache.c
+trackbar.obj: trackbar.c
+tooltips.obj: tooltips.c
+toolbar.obj: toolbar.c
+treeview.obj: treeview.c
+propsheet.obj: propsheet.c
+listview.obj: listview.c
 
 clean:
 	$(RM) *.obj *.lib *.dll *~ *.map *.pch	

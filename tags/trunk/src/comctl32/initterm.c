@@ -46,7 +46,7 @@ void _CRT_term(void);
 void __ctordtorInit( void );
 void __ctordtorTerm( void );
 
-void RegisterCOMCTL32WindowClasses(void);
+void RegisterCOMCTL32WindowClasses(unsigned long hinstDLL);
 void UnregisterCOMCTL32WindowClasses(void);
 
 /*-------------------------------------------------------------------*/
@@ -103,7 +103,7 @@ unsigned long _System _DLL_InitTerm(unsigned long hModule, unsigned long
         return 0UL;
 
         /* register Win32 window classes implemented in this DLL */
-        RegisterCOMCTL32WindowClasses();
+        RegisterCOMCTL32WindowClasses(hModule);
 
          break;
       case 1 :
