@@ -1,4 +1,4 @@
-/* $Id: heapshared.cpp,v 1.7 2001-02-09 18:31:05 sandervl Exp $ */
+/* $Id: heapshared.cpp,v 1.8 2001-04-22 09:00:19 sandervl Exp $ */
 /*
  * Shared heap functions for OS/2
  *
@@ -41,7 +41,6 @@ BOOL InitializeSharedHeap()
  APIRET rc;
 
   if(pSharedMem == NULL) {
-  	dprintf(("KERNEL32: InitializeSharedHeap %x", &sharedHeap));
   	rc = DosAllocSharedMem(&pSharedMem, NULL, MAX_HEAPSIZE, PAG_READ|PAG_WRITE|OBJ_GETTABLE);
   	if(rc != 0) {
 		dprintf(("InitializeSharedHeap: DosAllocSharedMem failed with %d", rc));
@@ -62,6 +61,7 @@ BOOL InitializeSharedHeap()
 		dprintf(("InitializeSharedHeap: _ucreate failed!"));
 		return FALSE;
 	}
+  	dprintf(("KERNEL32: First InitializeSharedHeap %x %x", pSharedMem, sharedHeap));
 	for(int i=0;i<INCR_HEAPSIZE/PAGE_SIZE;i++) {
 	  	pageBitmap[i] = 1; //mark as committed
 	}
@@ -71,6 +71,7 @@ BOOL InitializeSharedHeap()
 		dprintf(("InitializeSharedHeap: DosGetSharedMem failed!"));
 		return FALSE;
 	}
+  	dprintf(("KERNEL32: InitializeSharedHeap %x %x refcount %d", pSharedMem, sharedHeap, refCount));
 	if(_uopen(sharedHeap) != 0) {
 		dprintf(("InitializeSharedHeap: unable to open shared heap!"));
 		return FALSE;
