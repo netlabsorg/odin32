@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.46 2000-02-10 22:28:15 bird Exp $
+# $Id: makefile,v 1.47 2000-02-10 23:40:10 bird Exp $
 
 #
 # PD-Win32 API
@@ -159,7 +159,7 @@ clean:
 #
 # Odin32 API DB Management
 #
-apiimport:
+APIImport:
     $(DOWITHDIRS) -e$(NOTWIN32DLLS) -ewnetap32 -cp \
         ..\..\tools\bin\APIImport.cmd
     cd wnetap32
@@ -167,13 +167,26 @@ apiimport:
     grep -v "LIBRARY WNETAP32" netapi32.def >> APIImport.def
     ..\..\tools\bin\APIImport.exe APIImport.def
 
-stateupd:
+StateUpd:
     ..\..\tools\bin\StateUpd.exe -io+
     -$(DOWITHDIRS) -e$(NOTWIN32DLLS) -ewnetap32 -cp -i \
         ..\..\tools\bin\StateUpd.exe -ie- -ib-
     ..\..\tools\bin\StateUpd.exe -io+
 
-cleandblogs:
+ReadSignals:
+    -$(DOWITHDIRS) -e$(NOTWIN32DLLS) -ewnetap32 -cp -i \
+        IF EXIST signals.log list signals.log
+
+ReadStateUpdLogs:
+    -$(DOWITHDIRS) -e$(NOTWIN32DLLS) -ewnetap32 -cp -i \
+        IF EXIST signals.log list signals.log
+
+ReadAPIImportLogs:
+    -$(DOWITHDIRS) -e$(NOTWIN32DLLS) -ewnetap32 -cp -i \
+        IF EXIST apiimport.log list apiimport.log
+
+
+CleanDBLogs:
     $(DOWITHDIRS) -e$(NOTWIN32DLLS) -cp \
         $(RM) apiimport.log signals.log stateupd.log apiimport.def
     $(RM) signals.log statupd.log
