@@ -1,10 +1,21 @@
- /* $Id: changelog,v 1.484 1999-11-30 12:39:12 dengert Exp $ */
+ /* $Id: changelog,v 1.485 1999-11-30 14:20:47 sandervl Exp $ */
+
+ 99-11-29: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: Ported Wine process apis (not done) (kernel32\process.cpp)
+
+ 99-11-29: Jens Wiessner <wiessnej@rfi.de>
+	- CRTDLL: Completed GetMainArgs
+	- MSVCRT: Made some changes and implemented new functions.
+
+ 99-11-29: Vitali E. Pelenyov <Vitali.Pelenyov@dpt.ustu.ru>
+	- KERNEL32: Another VirtualProtect bugfix
 
  99-11-30: Daniela Engert <dani@ngrt.de>
 	- USER32: eliminate superfluous background erases (part 1)
 
  99-11-28: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Added EnumResourceTypesA/W (not tested)
+	- USER32: Get/SetActiveWindow bugfixes (don't return OS/2 wnd handles)
 
  99-11-29: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
 	- ODINCRT:  Added experimental console hack in initterm.cpp.
