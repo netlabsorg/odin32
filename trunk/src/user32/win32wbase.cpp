@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.285 2001-09-23 08:14:56 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.286 2001-09-30 22:24:41 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -191,6 +191,9 @@ void Win32BaseWindow::Init()
   windowpos.ptMinPosition.y = -1;
   windowpos.ptMaxPosition.x = -1;
   windowpos.ptMaxPosition.y = -1;
+
+  lpVisRgnNotifyProc  = NULL;
+  dwVisRgnNotifyParam = NULL;
 }
 //******************************************************************************
 //todo get rid of resources (menu, icon etc)
@@ -3287,7 +3290,8 @@ HWND Win32BaseWindow::SetActiveWindow()
  HWND hwndActive;
 
     dprintf(("SetActiveWindow %x", getWindowHandle()));
-    if(getStyle() & (WS_DISABLED | WS_CHILD)) {
+    if(getStyle() & WS_CHILD) {
+//    if(getStyle() & (WS_DISABLED | WS_CHILD)) {
         dprintf(("WARNING: Window is a child or disabled"));
         return 0;
     }
@@ -3897,6 +3901,22 @@ HWND WIN32API Win32ToOS2Handle(HWND hwnd)
 
     if(window) {
             hwndOS2 = window->getOS2WindowHandle();
+            RELEASE_WNDOBJ(window);
+            return hwndOS2;
+    }
+//    dprintf2(("Win32BaseWindow::Win32ToOS2Handle: not a win32 window %x", hwnd));
+    return hwnd;
+}
+//******************************************************************************
+//******************************************************************************
+HWND WIN32API Win32ToOS2FrameHandle(HWND hwnd)
+{
+    HWND hwndOS2;
+
+    Win32BaseWindow *window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+
+    if(window) {
+            hwndOS2 = window->getOS2FrameWindowHandle();
             RELEASE_WNDOBJ(window);
             return hwndOS2;
     }

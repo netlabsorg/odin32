@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.148 2001-09-22 18:20:59 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.149 2001-09-30 22:24:41 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -373,10 +373,16 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
             win32wnd->setComingToTop(FALSE);
             break;
         }
+        if(mp1) {//visible region has been altered
+            win32wnd->callVisibleRgnNotifyProc(TRUE);
+        }
         goto RunDefWndProc;
 
     case WM_VRNDISABLED:
         dprintf(("OS2: WM_VRNDISABLED %x %x %x", win32wnd->getWindowHandle(), mp1, mp2));
+        //visible region is about to change or WinLockWindowUpdate called
+        //suspend window drawing
+        win32wnd->callVisibleRgnNotifyProc(FALSE);
         goto RunDefWndProc;
 
     case WIN32APP_SETFOCUSMSG:
