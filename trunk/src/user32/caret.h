@@ -1,4 +1,4 @@
-/* $Id: caret.h,v 1.2 1999-10-06 10:36:39 dengert Exp $ */
+/* $Id: caret.h,v 1.3 1999-10-22 18:11:43 sandervl Exp $ */
 
 /*
  * Caret functions for USER32
@@ -10,4 +10,6 @@
 extern void recreateCaret (HWND hwndFocus);
 extern BOOL WIN32API SetCaretPos (int x, int y);
 extern BOOL WIN32API GetCaretPos (PPOINT pPoint);
+
+
 

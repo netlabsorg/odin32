@@ -1,4 +1,4 @@
-; $Id: USER32.DEF,v 1.14 1999-09-28 08:00:57 dengert Exp $
+; $Id: USER32.DEF,v 1.15 1999-10-22 18:11:41 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
@@ -9,16 +9,16 @@ SEGMENTS
    _GLOBALDATA CLASS 'DATA'       SHARED LOADONCALL READWRITE
 
 IMPORTS
-    WinSetDAXData              = PMMERGE.5448
-    GpiQueryDCData             = PMGPI.665
-    GpiEnableYInversion        = PMGPI.723
-    HPSToHDC                   = PMWINX.1022
-    DeleteHDC                  = PMWINX.1023
-    _DestroyCaret              = PMMERGE.10001
-    _GetCaretBlinkTime         = PMMERGE.10002
-    _HideCaret                 = PMMERGE.10004
-    _SetCaretBlinkTime         = PMMERGE.10005
-    _ShowCaret                 = PMMERGE.10007
+    _WinSetDAXData             = PMMERGE.5448
+    _GpiQueryDCData            = PMGPI.665
+    _GpiEnableYInversion       = PMGPI.723
+    _HPSToHDC                  = PMWINX.1022
+    _DeleteHDC                 = PMWINX.1023
+    __DestroyCaret              = PMMERGE.10001
+    __GetCaretBlinkTime         = PMMERGE.10002
+    __HideCaret                 = PMMERGE.10004
+    __SetCaretBlinkTime         = PMMERGE.10005
+    __ShowCaret                 = PMMERGE.10007
 
 EXPORTS
     ActivateKeyboardLayout     = _ActivateKeyboardLayout@8    @1
@@ -628,8 +628,6 @@ EXPORTS
 ; Wine helper function
     GetSysColorPen              = _GetSysColorPen@4              @2002
 ; COMCTL32 helper functions
-    NativeDlgBoxIP             = _NativeDlgBoxIP@24          @2003
-    NativeCreateDlgIP          = _NativeCreateDlgIP@24       @2004
     NativeLoadBitmap           = _NativeLoadBitmap@8         @2005
 
     Win32ToOS2Handle__FUl      = Win32ToOS2Handle__15Win32BaseWindowFUl @2006
