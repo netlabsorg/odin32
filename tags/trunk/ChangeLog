@@ -1,4 +1,9 @@
-/* $Id: ChangeLog,v 1.1745 2001-10-12 18:11:28 phaller Exp $ */
+/* $Id: ChangeLog,v 1.1746 2001-10-12 21:11:47 achimha Exp $ */
+
+ 2001-10-12: Achim Hasenmueller <achimha@innotek.de>
+    - KERNEL32: o use bounce buffers if end of buffer crosses
+                  tiled region barrier, not start of buffer
+                  (yeah, being nit-picking here...)
 
  2001-10-11: Patrick Haller <patrick.haller@innotek.de>
     - include:  o debugtools.h: memory corruption in debugstr_()
