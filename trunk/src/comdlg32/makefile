@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.25 2001-04-24 20:37:25 sandervl Exp $
+# $Id: makefile,v 1.26 2001-07-07 19:08:39 sandervl Exp $
 
 #
 # Odin32 API
@@ -19,6 +19,8 @@
 !if "$(CCENV)" == "VAC36"
 CDEFINES    = $(CDEFINES) -DNONAMELESSUNION
 !endif
+
+CDEFINES = $(CDEFINES) -DUSING_OPEN32
 
 #
 # Object files. Prefix with OBJDIR and one space before the '\'.
@@ -49,6 +51,7 @@ $(ODIN32_LIB)/shlwapi.lib \
 $(ODIN32_LIB)/shell32.lib \
 $(ODIN32_LIB)/comctl32.lib \
 $(ODIN32_LIB)/gdi32.lib \
+####$(ODIN32_LIB)/wgss50.lib \
 $(ODIN32_LIB)/pmwinx.lib \
 os2386.lib \
 $(RTLLIB_O)

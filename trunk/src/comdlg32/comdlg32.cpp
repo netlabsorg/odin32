@@ -1,4 +1,4 @@
-/* $Id: comdlg32.cpp,v 1.29 2001-04-05 05:55:07 sandervl Exp $ */
+/* $Id: comdlg32.cpp,v 1.30 2001-07-07 19:08:39 sandervl Exp $ */
 
 /*
  * COMDLG32 implementation
@@ -41,7 +41,48 @@ ODINDEBUGCHANNEL(COMDLG32-COMDLG32)
   } \
   a->hwndOwner = Win32ToOS2Handle(a->hwndOwner);
 
+#ifdef USING_OPEN32
 
+#define FLAG_TO_OPEN32	     0
+#define FLAG_FROM_OPEN32     1
+
+//******************************************************************************
+//******************************************************************************
+HGLOBAL GlobalCopy(HGLOBAL hDest, HGLOBAL hSource, BOOL fToOpen32)
+{
+ LPVOID src;
+ LPVOID dest;
+ ULONG  size;
+
+      if(fToOpen32 == FLAG_TO_OPEN32) {
+          src = GlobalLock(hSource);
+          if(src) {
+              size = GlobalSize(hSource);
+              if(hDest == NULL) {
+                  hDest = O32_GlobalAlloc(GHND, size);
+              }
+              dest  = O32_GlobalLock(hDest);
+              memcpy(dest, src, size);
+              O32_GlobalUnlock(hDest);
+          }
+          GlobalUnlock(hSource);
+      }
+      else {
+          src = O32_GlobalLock(hSource);
+          if(src) {
+              size = O32_GlobalSize(hSource);
+              if(hDest == NULL) {
+                  hDest = GlobalAlloc(GHND, size);
+              }
+              dest  = GlobalLock(hDest);
+              memcpy(dest, src, size);
+              GlobalUnlock(hDest);
+          }
+          O32_GlobalUnlock(hSource);
+      }
+      return hDest;
+}
+#endif
 /*****************************************************************************
  * Name      :
  * Purpose   :
@@ -57,11 +98,49 @@ ODINDEBUGCHANNEL(COMDLG32-COMDLG32)
 ODINFUNCTION1(BOOL, PrintDlgA,
               LPPRINTDLGA, lppd)
 {
+  BOOL      ret;
+#ifdef USING_OPEN32
+  HGLOBAL   hDevmode = 0, hDevNames = 0;
+  HGLOBAL   hOrgDevmode = 0, hOrgDevNames = 0;
+  DEVMODEA *devmode, *devmodeorg;
+  DEVNAMES *devnames, *devnamesorg;
+  ULONG     size;
+#endif
 
   COMDLG32_CHECKHOOK2(lppd, PD_ENABLEPRINTHOOK, LPPRINTHOOKPROC,lpfnPrintHook)
   COMDLG32_CHECKHOOK2(lppd, PD_ENABLESETUPHOOK, LPSETUPHOOKPROC,lpfnSetupHook)
 
-  return O32_PrintDlg(lppd);
+#ifdef USING_OPEN32
+  if(lppd->hDevMode) {
+      hOrgDevmode = lppd->hDevMode;
+      lppd->hDevMode = GlobalCopy(NULL, hOrgDevmode, FLAG_TO_OPEN32);
+  }
+  if(lppd->hDevNames) {
+      hOrgDevNames = lppd->hDevNames;
+      lppd->hDevNames = GlobalCopy(NULL, hOrgDevNames, FLAG_TO_OPEN32);
+  }
+#endif
+  HWND hwndOwner = lppd->hwndOwner;
+  if(lppd->hwndOwner) {
+      lppd->hwndOwner = Win32ToOS2Handle(lppd->hwndOwner);
+  }
+  ret = O32_PrintDlg(lppd);
+  lppd->hwndOwner = hwndOwner;
+#ifdef USING_OPEN32
+  if(ret == TRUE) {
+      if(lppd->hDevMode) {
+          hDevmode = lppd->hDevMode;
+          lppd->hDevMode = GlobalCopy(hOrgDevmode, lppd->hDevMode, FLAG_FROM_OPEN32);
+          O32_GlobalFree(hDevmode);
+      }
+      if(lppd->hDevNames) {
+          hDevNames = lppd->hDevNames;
+          lppd->hDevNames = GlobalCopy(hOrgDevNames, lppd->hDevNames, FLAG_FROM_OPEN32);
+          O32_GlobalFree(hDevNames);
+      }
+  }
+#endif
+  return ret;
 }
 
 
@@ -83,6 +162,9 @@ ODINFUNCTION1(BOOL, PrintDlgW,
 
   PRINTDLGA pd;
   BOOL      bResult;
+
+  //SvL: TODO: hDevMode & hDevNames
+  dprintf(("PrintDlgW: ERROR NOT COMPLETE (UNICODE TRANSLATION)!!"));
 
   memcpy(&pd,          // make binary copy first to save all the fields
          lppd,
