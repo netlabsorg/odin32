@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.7 1999-09-15 23:26:11 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.8 1999-12-07 20:25:47 achimha Exp $ */
 
 /*
  * DLL entry point

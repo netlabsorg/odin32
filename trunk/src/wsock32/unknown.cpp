@@ -1,4 +1,4 @@
-/* $Id: unknown.cpp,v 1.3 1999-10-20 01:18:30 phaller Exp $ */
+/* $Id: unknown.cpp,v 1.4 1999-12-07 20:25:48 achimha Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -21,6 +21,8 @@ ODINDEBUGCHANNEL(WSOCK32-UNKNOWN)
 /*****************************************************************************
  * Prototypes & Types & Defines                                              *
  *****************************************************************************/
+
+typedef int SOCKET;
 
 int _System rexec(char **, int, char *, char *, char *, int *);
 int _System rcmd (char **, int, const char *, const char *, const char *, int *);
@@ -87,6 +89,51 @@ ODINFUNCTION6(int, OS2rcmd, LPSTR*,     lppArg1,
               lpArg5,
               lpiArg6);
 */
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION4(int, OS2WSARecvEx, SOCKET,    s,
+                                 char FAR*, buf,
+                                 int,       len,
+                                 int FAR *,flags)
+{
+  dprintf(("WSOCK32: WSARecvEx not implemented.\n"));
+
+//    return WSARecvEx(s,buf,len,flags);
+  return 0;
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINPROCEDURE2(OS2s_perror, char*, pszMessage,
+                            void*, pUnknown)
+{
+  dprintf(("WSOCK32: s_perror not implemented.\n"));
+
+  //perror(pszMessage);
 }
 
 
