@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.567 1999-12-21 12:30:50 sandervl Exp $ */
+ /* $Id: changelog,v 1.568 1999-12-21 13:45:03 sandervl Exp $ */
 
  99-12-21: Markus Montkowski <mmontkowski@gmx.de>
         - ddraw: Some cleanup in surface handling 
@@ -16,6 +16,8 @@
                         to those present in the win32 version); this is more
                         consistent than putting half the rtl functions in NTDLL
                         and the rest in CRTDLL.
+	- CRTDLL: Fixed memory allocation bug (CRTDLL_calloc called calloc, while
+                  free calls HeapFree; everything uses private CRTDLL heap now)
 	- MSVCRT: Removed all forwarders from def file. Link with CRTDLL instead.
                   NOTE: Non-existant forwarders don't generate errors when loading
                         this dll!!!
