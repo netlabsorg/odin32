@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.134 2002-04-29 16:28:37 sandervl Exp $
+; $Id: KERNEL32.DEF,v 1.135 2002-05-08 15:02:58 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -990,6 +990,23 @@ EXPORTS
 ; Windows 2000, Terminal Server 4.0 SP4 functions
     GetSystemWindowsDirectoryA = _GetWindowsDirectoryA@8     @902
     GetSystemWindowsDirectoryW = _GetWindowsDirectoryW@8     @903
+
+; Windows 2000 (and up) volume functions
+    FindFirstVolumeA           = _FindFirstVolumeA@8            @904
+    FindFirstVolumeW           = _FindFirstVolumeW@8            @905
+    FindNextVolumeA            = _FindNextVolumeA@12            @906
+    FindNextVolumeW            = _FindNextVolumeW@12            @907
+    FindVolumeClose            = _FindVolumeClose@4             @908
+
+    FindFirstVolumeMountPointA = _FindFirstVolumeMountPointA@12 @909
+    FindFirstVolumeMountPointW = _FindFirstVolumeMountPointW@12 @910
+    FindNextVolumeMountPointA  = _FindNextVolumeMountPointA@12  @911
+    FindNextVolumeMountPointW  = _FindNextVolumeMountPointW@12  @912
+    FindVolumeMountPointClose  = _FindVolumeMountPointClose@4   @913
+  
+    GetVolumeNameForVolumeMountPointA = _GetVolumeNameForVolumeMountPointA@12 @914
+    GetVolumeNameForVolumeMountPointW = _GetVolumeNameForVolumeMountPointW@12 @915
+
 
 ;
 ; First free ordinal is 890

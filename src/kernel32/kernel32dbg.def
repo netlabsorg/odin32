@@ -1,4 +1,4 @@
-; $Id: kernel32dbg.def,v 1.10 2002-04-29 16:28:38 sandervl Exp $
+; $Id: kernel32dbg.def,v 1.11 2002-05-08 15:02:59 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -990,6 +990,23 @@ EXPORTS
 ; Windows 2000, Terminal Server 4.0 SP4 functions
     GetSystemWindowsDirectoryA = _DbgGetWindowsDirectoryA@8     @902
     GetSystemWindowsDirectoryW = _DbgGetWindowsDirectoryW@8     @903
+
+; Windows 2000 (and up) volume functions
+    FindFirstVolumeA           = _DbgFindFirstVolumeA@8            @904
+    FindFirstVolumeW           = _DbgFindFirstVolumeW@8            @905
+    FindNextVolumeA            = _DbgFindNextVolumeA@12            @906
+    FindNextVolumeW            = _DbgFindNextVolumeW@12            @907
+    FindVolumeClose            = _DbgFindVolumeClose@4             @908
+
+    FindFirstVolumeMountPointA = _DbgFindFirstVolumeMountPointA@12 @909
+    FindFirstVolumeMountPointW = _DbgFindFirstVolumeMountPointW@12 @910
+    FindNextVolumeMountPointA  = _DbgFindNextVolumeMountPointA@12  @911
+    FindNextVolumeMountPointW  = _DbgFindNextVolumeMountPointW@12  @912
+    FindVolumeMountPointClose  = _DbgFindVolumeMountPointClose@4   @913
+
+    GetVolumeNameForVolumeMountPointA = _DbgGetVolumeNameForVolumeMountPointA@12 @914
+    GetVolumeNameForVolumeMountPointW = _DbgGetVolumeNameForVolumeMountPointW@12 @915
+
 
 ;
 ; First free ordinal is 890
