@@ -1,4 +1,4 @@
-/* $Id: fastdep.c,v 1.43 2002-09-05 02:21:23 bird Exp $
+/* $Id: fastdep.c,v 1.44 2002-09-14 23:24:42 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
@@ -139,7 +139,7 @@ typedef struct _Options
  * Language specific analysis functions type.
  */
 typedef int ( _FNLANG)  (const char *pszFilename, const char *pszNormFilename,
-                         const char *pszTS, BOOL fHeader);
+                         const char *pszTS, BOOL fHeader, void **ppvRule);
 typedef _FNLANG    *PFNLANG;
 
 
@@ -148,12 +148,14 @@ typedef _FNLANG    *PFNLANG;
  */
 typedef struct _ConfigEntry
 {
+    char         szId[16];              /* Config ID. */
     const char **papszExts;             /* Pointer to an array of pointer to extentions for this handler. */
                                         /* If NULL this is the last entry. */
     int          iFirstHdr;             /* Index into the papszExts array of the first headerfile/copybook. */
                                         /* Set it to the NULL element of the array if no headers for this extention. */
                                         /* A non-header file may get a object rule. */
     PFNLANG      pfn;                   /* Pointer to handler function. */
+    char        *pszzAddDeps;           /* Pointer to an string of string of additional dependencies. */
 } CONFIGENTRY, *PCONFIGENTRY;
 
 
@@ -184,11 +186,11 @@ typedef struct _DepRule
 static void syntax(void);
 static int makeDependent(const char *pszFilename, const char *pszTS);
 
-static int langC_CPP(const char *pszFilename, const char *pszNormFilename, const char *pszTS, BOOL fHeader);
-static int langAsm(  const char *pszFilename, const char *pszNormFilename, const char *pszTS, BOOL fHeader);
-static int langRC(   const char *pszFilename, const char *pszNormFilename, const char *pszTS, BOOL fHeader);
-static int langCOBOL(const char *pszFilename, const char *pszNormFilename, const char *pszTS, BOOL fHeader);
-static int langIPF(  const char *pszFilename, const char *pszNormFilename, const char *pszTS, BOOL fHeader);
+static int langC_CPP(const char *pszFilename, const char *pszNormFilename, const char *pszTS, BOOL fHeader, void **ppvRule);
+static int langAsm(  const char *pszFilename, const char *pszNormFilename, const char *pszTS, BOOL fHeader, void **ppvRule);
+static int langRC(   const char *pszFilename, const char *pszNormFilename, const char *pszTS, BOOL fHeader, void **ppvRule);
+static int langCOBOL(const char *pszFilename, const char *pszNormFilename, const char *pszTS, BOOL fHeader, void **ppvRule);
+static int langIPF(  const char *pszFilename, const char *pszNormFilename, const char *pszTS, BOOL fHeader, void **ppvRule);
 
 
 /* string operations */
@@ -250,6 +252,7 @@ static void  depMarkNotFound(void *pvRule);
 static BOOL  depCheckCyclic(PDEPRULE pdepRule, const char *pszDep);
 static BOOL  depValidate(PDEPRULE pdepRule);
 INLINE char *depMakeTS(char *pszTS, PFILEFINDBUF3 pfindbuf3);
+static void  depAddSrcAddDeps(void *pvRule, const char *pszz);
 
 
 /*******************************************************************************
@@ -290,45 +293,66 @@ static char *   pszIncludeEnv;
 static const char pszDefaultDepFile[] = ".depend";
 static const char *apszExtC_CPP[] = {"c", "sqc", "cpp", "h", "hpp", NULL};
 static const char *apszExtAsm[]   = {"asm", "inc", NULL};
-static const char *apszExtRC[]    = {"rc", "orc", "dlg", NULL};
+static const char *apszExtRC[]    = {"rc",  "dlg", NULL};
+static const char *apszExtORC[]   = {"orc", "dlg", NULL};
 static const char *apszExtCOBOL[] = {"cbl", "cob", "sqb", "wbl", NULL};
-static const char *apszExtIPF[] = {"ipf", "man", NULL};
+static const char *apszExtIPF[]   = {"ipf", "man", NULL};
 static CONFIGENTRY aConfig[] =
 {
     {
+        "CX",
         apszExtC_CPP,
         3,
         langC_CPP,
+        NULL,
     },
 
     {
+        "AS",
         apszExtAsm,
         1,
         langAsm,
+        NULL,
     },
 
     {
+        "RC",
         apszExtRC,
-        2,
+        1,
         langRC,
+        NULL,
     },
 
     {
+        "ORC",
+        apszExtORC,
+        1,
+        langRC,
+        NULL,
+    },
+
+    {
+        "COB",
         apszExtCOBOL,
         -1,
         langCOBOL,
+        NULL,
     },
 
     {
+        "IPF",
         apszExtIPF,
         -1,
         langIPF,
+        NULL,
     },
 
     /* terminating entry */
     {
+        "",
         NULL,
         -1,
+        NULL,
         NULL
     }
 };
@@ -658,6 +682,75 @@ int main(int argc, char **argv)
                     }
                     break;
 
+                case 's':
+                case 'S':
+                    if (!strnicmp(argv[argi]+1, "srcadd", 6))
+                    {
+                        if (strlen(argv[argi]) > 7)
+                            psz = argv[argi]+2;
+                        else
+                        {
+                            if (++argi >= argc)
+                            {
+                                fprintf(stderr, "syntax error! Option -srcadd.\n");
+                                return 1;
+                            }
+                            psz = argv[argi];
+                        }
+                        if (!(psz2 = strchr(psz, ':')))
+                        {
+                            fprintf(stderr, "syntax error! Option -srcadd malformed!\n");
+                            return 1;
+                        }
+                        for (i = 0; aConfig[i].pfn; i++)
+                        {
+                            if (    !strnicmp(aConfig[i].szId, psz, psz2 - psz)
+                                &&  !aConfig[i].szId[psz2 - psz])
+                            {
+                                int cch, cch2;
+                                if (!*++psz2)
+                                {
+                                    fprintf(stderr, "error: Option -srcadd no additioanl dependancy!\n",
+                                            psz2 - psz, psz);
+                                    return 1;
+                                }
+                                cch = 0;
+                                psz = aConfig[i].pszzAddDeps;
+                                if (psz)
+                                {
+                                    do
+                                    {
+                                        cch += (cch2 = strlen(psz)) + 1;
+                                        psz += cch2 + 1;
+                                    } while (*psz);
+                                }
+                                cch2 = strlen(psz2);
+                                aConfig[i].pszzAddDeps = realloc(aConfig[i].pszzAddDeps, cch + cch2 + 2);
+                                if (!aConfig[i].pszzAddDeps)
+                                {
+                                    fprintf(stderr, "error: Out of memory!\n");
+                                    return 1;
+                                }
+                                strcpy(aConfig[i].pszzAddDeps + cch, psz2);
+                                aConfig[i].pszzAddDeps[cch + cch2 + 1] = '\0';
+                                psz = NULL;
+                                break;
+                            }
+                        }
+                        if (psz)
+                        {
+                            fprintf(stderr, "error: Option -srcadd, invalid language id '%.*s%'\n",
+                                    psz2 - psz, psz);
+                            return 1;
+                        }
+                    }
+                    else
+                    {
+                        fprintf(stderr, "syntax error! Invalid option %s\n", argv[argi]);
+                        return 1;
+                    }
+                    break;
+
                 case 'x':
                 case 'X': /* Exclude files */
                     psz = &achBuffer[CCHMAXPATH+8];
@@ -860,7 +953,7 @@ int main(int argc, char **argv)
 void syntax(void)
 {
     printf(
-        "FastDep v0.46 (build %d)\n"
+        "FastDep v0.47 (build %d)\n"
         "Dependency scanner. Creates a makefile readable depend file.\n"
         " - was quick and dirty, now it's just quick -\n"
         "\n"
@@ -894,6 +987,10 @@ void syntax(void)
         "   -obr<[+]|->     -obr+: Object rule.\n"
         "                   -obr-: No object rule, rule for source filename is generated.\n"
         "   -obj[ ]<objext> Object extention.                     Default: obj\n"
+        "   -srcadd[ ]<langid>:<dep>\n"
+        "                   Additional dependants for source file of the given language\n"
+        "                   type. langid: AS,CX,RC,ORC,COB,IPF\n"
+        "                   This is very usfull for compiler configuration files.\n"
         "   -r[ ]<rsrcext>  Resource binary extention.            Default: res\n"
         "   -x[ ]<f1[;f2]>  Files to exclude. Only exact filenames.\n"
         "   <files>         Files to scan. Wildchars are allowed.\n"
@@ -943,9 +1040,15 @@ int makeDependent(const char *pszFilename, const char *pszTS)
     /* Found? */
     if (pCfg->papszExts != NULL)
     {
-        char szNormFile[CCHMAXPATH];
+        void *  pvRule = NULL;
+        char    szNormFile[CCHMAXPATH];
         fileNormalize2(pszFilename, szNormFile);
-        rc = (*pCfg->pfn)(pszFilename, &szNormFile[0], pszTS, fHeader);
+        rc = (*pCfg->pfn)(pszFilename, &szNormFile[0], pszTS, fHeader, &pvRule);
+        if (!rc && pvRule)
+        {
+            if (!fHeader && pCfg->pszzAddDeps)
+                depAddSrcAddDeps(pvRule, pCfg->pszzAddDeps);
+        }
     }
     else
     {
@@ -968,11 +1071,12 @@ int makeDependent(const char *pszFilename, const char *pszTS)
  * @param   pszNormFilename     Pointer to normalized source filename.
  * @param   pszTS               File time stamp.
  * @parma   fHeader             True if header file is being scanned.
+ * @param   ppvRule             Variabel to return any new rule handle.
  * @status  completely implemented.
  * @author  knut st. osmundsen
  */
 int langC_CPP(const char *pszFilename, const char *pszNormFilename,
-              const char *pszTS, BOOL fHeader)
+              const char *pszTS, BOOL fHeader, void **ppvRule)
 {
     void *  pvFile;                     /* Text buffer pointer. */
     void *  pvRule;                     /* Handle to the current rule. */
@@ -1022,6 +1126,7 @@ int langC_CPP(const char *pszFilename, const char *pszNormFilename,
                             fileName(pszFilename, szBuffer) : pszNormFilename, NULL, NULL, pszTS, FALSE);
 
     /* duplicate rule? */
+    *ppvRule = pvRule;
     if (pvRule == NULL)
         return 0;
 
@@ -1278,11 +1383,12 @@ int langC_CPP(const char *pszFilename, const char *pszNormFilename,
  * @param   pszNormFilename     Pointer to normalized source filename.
  * @param   pszTS               File time stamp.
  * @parma   fHeader             True if header file is being scanned.
+ * @param   ppvRule             Variabel to return any new rule handle.
  * @status  completely implemented.
  * @author  knut st. osmundsen
  */
 int langAsm(const char *pszFilename, const char *pszNormFilename,
-            const char *pszTS, BOOL fHeader)
+            const char *pszTS, BOOL fHeader, void **ppvRule)
 {
     void *  pvFile;                     /* Text buffer pointer. */
     void *  pvRule;                     /* Handle to the current rule. */
@@ -1316,6 +1422,7 @@ int langAsm(const char *pszFilename, const char *pszNormFilename,
                             fileName(pszFilename, szBuffer) : pszNormFilename, NULL, NULL, pszTS, FALSE);
 
     /* duplicate rule? */
+    *ppvRule = pvRule;
     if (pvRule == NULL)
         return 0;
 
@@ -1460,6 +1567,7 @@ int langRC(const char *pszFilename, const char *pszNormFilename, void *pvFile, B
                             fileName(pszFilename, szBuffer) : pszNormFilename, NULL, NULL, pszTS, FALSE);
 
     /* duplicate rule? */
+    *ppvRule = pvRule;
     if (pvRule == NULL)
         return 0;
 
@@ -1584,7 +1692,7 @@ int langRC(const char *pszFilename, const char *pszNormFilename, void *pvFile, B
 }
 #else
 int langRC(const char *pszFilename, const char *pszNormFilename,
-           const char *pszTS, BOOL fHeader)
+           const char *pszTS, BOOL fHeader, void **ppvRule)
 {
     void *  pvFile;                     /* Text buffer pointer. */
     void *  pvRule;                     /* Handle to the current rule. */
@@ -1633,6 +1741,7 @@ int langRC(const char *pszFilename, const char *pszNormFilename,
                             fileName(pszFilename, szBuffer) : pszNormFilename, NULL, NULL, pszTS, FALSE);
 
     /* duplicate rule? */
+    *ppvRule = pvRule;
     if (pvRule == NULL)
         return 0;
 
@@ -1956,11 +2065,12 @@ int langRC(const char *pszFilename, const char *pszNormFilename,
  * @param   pszNormFilename     Pointer to normalized source filename.
  * @param   pszTS               File time stamp.
  * @parma   fHeader             True if header file is being scanned.
+ * @param   ppvRule             Variabel to return any new rule handle.
  * @status  completely implemented.
  * @author  knut st. osmundsen
  */
 int langCOBOL(const char *pszFilename, const char *pszNormFilename,
-              const char *pszTS, BOOL fHeader)
+              const char *pszTS, BOOL fHeader, void **ppvRule)
 {
     void *  pvFile;                     /* Text buffer pointer. */
     void *  pvRule;                     /* Handle to the current rule. */
@@ -1995,6 +2105,7 @@ int langCOBOL(const char *pszFilename, const char *pszNormFilename,
                             fileName(pszFilename, szBuffer) : pszNormFilename, NULL, NULL, pszTS, FALSE);
 
     /* duplicate rule? */
+    *ppvRule = pvRule;
     if (pvRule == NULL)
         return 0;
 
@@ -2131,12 +2242,13 @@ int langCOBOL(const char *pszFilename, const char *pszNormFilename,
  * @param   pszFilename         Pointer to source filename. Correct case is assumed!
  * @param   pszNormFilename     Pointer to normalized source filename.
  * @param   pszTS               File time stamp.
- * @parma   fHeader             True if header file is being scanned.
+ * @param   fHeader             True if header file is being scanned.
+ * @param   ppvRule             Variabel to return any new rule handle.
  * @status  completely implemented.
  * @author  knut st. osmundsen
  */
 int langIPF(  const char *pszFilename, const char *pszNormFilename,
-              const char *pszTS, BOOL fHeader)
+              const char *pszTS, BOOL fHeader, void **ppvRule)
 {
     void *  pvFile;                     /* Text buffer pointer. */
     void *  pvRule;                     /* Handle to the current rule. */
@@ -2171,6 +2283,7 @@ int langIPF(  const char *pszFilename, const char *pszNormFilename,
                             fileName(pszFilename, szBuffer) : pszNormFilename, NULL, NULL, pszTS, FALSE);
 
     /* duplicate rule? */
+    *ppvRule = pvRule;
     if (pvRule == NULL)
         return 0;
 
@@ -2258,8 +2371,8 @@ int langIPF(  const char *pszFilename, const char *pszNormFilename,
     } /*while*/
 
     textbufferDestroy(pvFile);
-
     fHeader = fHeader;
+
     return 0;
 }
 
@@ -3915,9 +4028,12 @@ BOOL depValidate(PDEPRULE pdepRule)
     for (i = 0; i < pdepRule->cDeps; i++)
     {
         char *psz = pdepRule->papszDep[i];
-        if (    psz[1] == ':'
+        if (    !strchr(psz, '$')
+            &&
+            (   psz[1] == ':'
             ||  strchr(psz, '\\')
             ||  strchr(psz, '/')
+                 )
             )
         {
             /*
@@ -3985,6 +4101,21 @@ INLINE char *depMakeTS(char *pszTS, PFILEFINDBUF3 pfindbuf3)
             (ULONG)*(PUSHORT)(void*)&pfindbuf3->ftimeCreation,
             pfindbuf3->cbFile);
     return pszTS;
+}
+
+
+/**
+ * Adds the src additioanl dependenies to a rule.
+ * @param   pvRule  Rule to add them to.
+ * @param   pszz    Pointer to the string of strings of extra dependencies.
+ */
+void depAddSrcAddDeps(void *pvRule, const char *pszz)
+{
+    while (*pszz)
+    {
+        depAddDepend(pvRule, pszz, FALSE, FALSE);
+        pszz += strlen(pszz) + 1;
+    }
 }
 
 
