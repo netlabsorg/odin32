@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.793 2000-03-09 21:49:06 sandervl Exp $ */
+ /* $Id: changelog,v 1.794 2000-03-09 21:49:38 sandervl Exp $ */
 
  2000-03-09: knut st. osmundsen <knut.stange.osmundse@pmsc.no>
         - include\pdwin32.tools: New tool, EXISTS --> \tools\bin\Exists.cmd
@@ -35,7 +35,6 @@
  2000-03-08: Michal Necasek <mike@mendelu.cz>
         - dsound\new: Fixed volume and panning calculation that
                       sometimes caused ugly noise
-
 
  2000-03-08: Michal Necasek <mike@mendelu.cz>
         - dsound\new: Completely new DART-based DirectSound. Works fine
