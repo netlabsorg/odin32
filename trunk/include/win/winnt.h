@@ -94,6 +94,7 @@ typedef LPCSTR LPCTSTR;
 
 typedef BYTE     BOOLEAN;
 typedef BOOLEAN *PBOOLEAN;
+typedef DWORD		EXECUTION_STATE;
 
 typedef struct _LIST_ENTRY {
   struct _LIST_ENTRY *Flink;
