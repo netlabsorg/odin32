@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.40 2000-09-18 19:26:15 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.41 2000-09-20 21:32:50 hugh Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -90,16 +90,16 @@ ODINFUNCTION2(HANDLE, FindFirstFileA,
 
   dprintf(("FindFirstFileA %s", lpFileName));
   if(lpFileName == NULL || lpFindFileData == NULL) {
-	SetLastError(ERROR_INVALID_PARAMETER);
-	return -1;
+  SetLastError(ERROR_INVALID_PARAMETER);
+  return -1;
   }
   namelen = strlen(lpFileName);
   if(lpFileName[namelen-1] == '\\') {
-	filename = (char *)alloca(namelen+1);
-	strcpy(filename, lpFileName);
-	filename[namelen-1] = 0;
+  filename = (char *)alloca(namelen+1);
+  strcpy(filename, lpFileName);
+  filename[namelen-1] = 0;
   }
-  else	filename = (char *)lpFileName;
+  else  filename = (char *)lpFileName;
 
   return (HANDLE)OSLibDosFindFirst(filename,lpFindFileData);
 }
@@ -243,21 +243,21 @@ ODINFUNCTION2(INT, CompareFileTime,
               FILETIME *, lpft2)
 {
    if (lpft1 == NULL || lpft2 == NULL) {
-	SetLastError(ERROR_INVALID_PARAMETER);
-	return -1;
-   }     
+  SetLastError(ERROR_INVALID_PARAMETER);
+  return -1;
+   }
 
    if(lpft1->dwHighDateTime > lpft2->dwHighDateTime)
-	return 1;
+  return 1;
 
    if(lpft1->dwHighDateTime < lpft2->dwHighDateTime)
-	return -1;
+  return -1;
 
    if(lpft1->dwLowDateTime > lpft2->dwLowDateTime)
- 	return 1;
+  return 1;
 
    if(lpft1->dwLowDateTime < lpft2->dwLowDateTime)
-	return -1;
+  return -1;
 
    return 0; //equal
 }
@@ -341,7 +341,7 @@ BOOL WIN32API CopyFileExA( LPCSTR             lpExistingFileName,
    */
   if((dwCopyFlags & COPY_FILE_FAIL_IF_EXISTS) != 0)
   {
-    	failIfExists = TRUE;
+      failIfExists = TRUE;
   }
 
   return CopyFileA(lpExistingFileName, lpNewFileName, failIfExists);
@@ -415,11 +415,11 @@ ODINFUNCTION1(BOOL, DeleteFileA,
 #else
   rc = OSLibDosDelete((LPSTR)lpszFile);
   if(!rc) {
-  	dprintf(("DeleteFileA %s returned FALSE; last error %x", lpszFile, GetLastError()));
-	if(GetLastError() == 20) {
-		return TRUE;
-	}
-  } 
+    dprintf(("DeleteFileA %s returned FALSE; last error %x", lpszFile, GetLastError()));
+  if(GetLastError() == 20) {
+    return TRUE;
+  }
+  }
   else  dprintf(("DeleteFileA %s", lpszFile));
 
   return rc;
@@ -508,7 +508,7 @@ ODINFUNCTION5(BOOL,         ReadFile,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION5(BOOL,         ReadFileEx, 
+ODINFUNCTION5(BOOL,         ReadFileEx,
               HANDLE,       hFile,
               LPVOID,       lpBuffer,
               DWORD,        nNumberOfBytesToRead,
@@ -556,7 +556,7 @@ ODINFUNCTION5(BOOL, WriteFile,
  * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
  *****************************************************************************/
 
-ODINFUNCTION5(BOOL,         WriteFileEx, 
+ODINFUNCTION5(BOOL,         WriteFileEx,
               HANDLE,       hFile,
               LPVOID,       lpBuffer,
               DWORD,        nNumberOfBytesToWrite,
@@ -598,18 +598,18 @@ ODINFUNCTION1(DWORD, GetFileAttributesA,
         rc = O32_GetFileAttributes((LPSTR)szDrive);
     }
     else {
-	rc = O32_GetFileAttributes((LPSTR)lpszFileName);
-	if(rc == -1 && lpszFileName[strlen(lpszFileName)-1] != '\\') {
-		char *filename = (char *)alloca(strlen(lpszFileName)+2); //+2!!!!!!
-		strcpy(filename, lpszFileName);
+  rc = O32_GetFileAttributes((LPSTR)lpszFileName);
+  if(rc == -1 && lpszFileName[strlen(lpszFileName)-1] != '\\') {
+    char *filename = (char *)alloca(strlen(lpszFileName)+2); //+2!!!!!!
+    strcpy(filename, lpszFileName);
                 strcat(filename, "\\");
-		rc = O32_GetFileAttributes((LPSTR)filename);
-	}
+    rc = O32_GetFileAttributes((LPSTR)filename);
+  }
     }
     //SvL: Open32 returns FILE_ATTRIBUTE_DIRECTORY|FILE_ATTRIBUTE_NORMAL for
     //     directories whereas NT 4 (SP6) only returns FILE_ATTRIBUTE_DIRECTORY
     if(rc != -1 && (rc & FILE_ATTRIBUTE_DIRECTORY)) {
-	rc = FILE_ATTRIBUTE_DIRECTORY;
+  rc = FILE_ATTRIBUTE_DIRECTORY;
     }
 
 #if 0 // need more tests, maybe there is also a better way to hide simulated b:
@@ -670,7 +670,8 @@ ODINFUNCTION4(DWORD, GetFullPathNameA,
               LPSTR *, arg4)
 {
     char *ptr;
-    dprintf(("KERNEL32:  GetFullPathName %s\n", arg1));
+    DWORD rc;
+    dprintf(("KERNEL32:  GetFullPathName called with %s %d %s \n", arg1, arg2, arg3));
       while((ptr = strchr(arg1, '/')) != NULL)
         *ptr = '\\';
 
@@ -912,9 +913,9 @@ ODINFUNCTION3(DWORD, GetShortPathNameA,
 
   length = lstrlenA(lpszLongPath) + 1;
   if(length > cchBuffer) {
-	if(lpszShortPath) {
-        	*lpszShortPath = 0;
-	}
+  if(lpszShortPath) {
+          *lpszShortPath = 0;
+  }
         return(length); //return length required (including 0 terminator)
   }
   lstrcpyA(lpszShortPath, lpszLongPath);
@@ -937,9 +938,9 @@ ODINFUNCTION3(DWORD, GetShortPathNameW,
 
   length = lstrlenW(lpszLongPath) + 1;
   if(length > cchBuffer) {
-	if(lpszShortPath) {
-        	*lpszShortPath = 0;
-	}
+  if(lpszShortPath) {
+          *lpszShortPath = 0;
+  }
         return(length); //return length required (including 0 terminator)
   }
   lstrcpyW(lpszShortPath, lpszLongPath);
@@ -1141,7 +1142,7 @@ ODINFUNCTION3(HANDLE, FindFirstChangeNotificationW, LPCWSTR, lpPathName,
   HANDLE hChange;
 
     lpAsciiPath = UnicodeToAsciiString( (LPWSTR) lpPathName);
-    hChange = FindFirstChangeNotificationA(lpAsciiPath, bWatchSubtree, 
+    hChange = FindFirstChangeNotificationA(lpAsciiPath, bWatchSubtree,
                                            dwNotifyFilter );
     if (lpAsciiPath) FreeAsciiString(lpAsciiPath);
     return hChange;
