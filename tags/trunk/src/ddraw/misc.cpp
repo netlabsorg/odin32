@@ -7,8 +7,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
-#include "misc.h"
-
+#include <misc.h>
+#include "initterm.h"
 
 //#define PMPRINTF
 #ifdef PMPRINTF
@@ -234,78 +234,56 @@ int printf_(struct perthread *tp)  /* pointer to per-thread data */
 #else
 
 
-#if 1   /*PLF Mon  97-09-08 20:04:28*/
+/*****************************************************************************
+ * Standard Version                                                          *
+ *****************************************************************************/
+
 static FILE *flog = NULL;   /*PLF Mon  97-09-08 20:00:15*/
 static BOOL init = FALSE;
+static BOOL fLogging = TRUE;
 
 int SYSTEM EXPORT WriteLog(char *tekst, ...)
 {
+  USHORT  sel = RestoreOS2FS();
   va_list argptr;
+
   if(!init)
   {
     init = TRUE;
-    if(!getenv("NODDRAWLOG"))
-      flog = fopen("DDRAW.log", "w");
+
+    if(!getenv("NODDRAWLOG")) {
+	char logname[CCHMAXPATH];
+
+        flog = fopen("DDRAW.log", "w");
+	if(flog == NULL) {//probably running exe on readonly device
+		sprintf(logname, "%sddraw.log", ddrawPath);
+	      	flog = fopen(logname, "w");
+	}
+    }
+    else
+      fLogging = FALSE;
   }
 
-  if(flog)
+  if(fLogging && flog)
   {
-     va_start(argptr, tekst);
-     vfprintf(flog, tekst, argptr);
-     va_end(argptr);
-     fflush(flog);
+    va_start(argptr, tekst);
+    vfprintf(flog, tekst, argptr);
+    va_end(argptr);
+
+    if(tekst[strlen(tekst)-1] != '\n')
+      fprintf(flog, "\n");
   }
+
+  SetFS(sel);
   return 1;
 }
-#else   /*PLF Mon  97-09-08 20:04:26*/
-/******************************************************************************/
-static BOOL init = FALSE;
-static BOOL fLog = TRUE;
-/******************************************************************************/
-int SYSTEM EXPORT WriteLog(char *tekst, ...)
+//******************************************************************************
+//NOTE: No need to save/restore FS, as our FS selectors have already been
+//      destroyed and FS == 0x150B.
+//******************************************************************************
+void CloseLogFile()
 {
-  ULONG Action, Wrote;
-  HFILE log;
-  APIRET rc;
-  char message[4096];
-  va_list argptr;
-  ULONG openFlags = OPEN_ACTION_CREATE_IF_NEW;
-
-  if(fLog == FALSE)
-    return(FALSE);
-
-  if(!init)
-  {
-    init = TRUE;
-    openFlags |= OPEN_ACTION_REPLACE_IF_EXISTS;
-    if(getenv("NOWIN32LOG"))
-      fLog = FALSE;
-  }
-  else
-    openFlags |= OPEN_ACTION_OPEN_IF_EXISTS;
-
-  rc = DosOpen( "win32os2.log",
-                &log,           /* file handle returned */
-                &Action,
-                0L,
-                FILE_NORMAL,
-                openFlags,
-                OPEN_ACCESS_READWRITE | OPEN_SHARE_DENYWRITE,
-                (PEAOP2)NULL);
-
-   rc = DosSetFilePtr(log, 0, FILE_END, &Wrote);
-   va_start(argptr, tekst);
-   vsprintf(message, tekst, argptr);
-   va_end(argptr);
-
-   rc = DosWrite(log, message, strlen(message), &Wrote);
-
-   DosClose(log);   /*PLF Mon  97-09-08 20:01:43*/
-   return(TRUE);
+  fclose(flog);
+  flog = 0;
 }
-#endif  /*PLF Mon  97-09-08 20:04:23*/
-/******************************************************************************/
-/******************************************************************************/
-
-
 #endif

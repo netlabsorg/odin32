@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 1999-10-23 23:00:50 sandervl Exp $
+# $Id: makefile,v 1.9 1999-10-26 17:53:43 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -54,9 +54,9 @@ os2sndbuffer.obj: os2sndbuffer.cpp \
     os2dsound.h 
 
 misc.obj: misc.cpp \
-          $(PDWIN32_INCLUDE)\misc.h
+          $(PDWIN32_INCLUDE)\misc.h initterm.h
 
-initterm.obj: initterm.cpp
+initterm.obj: initterm.cpp initterm.h
 
 
 clean:

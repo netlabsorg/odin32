@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.6 1999-09-15 23:26:06 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.7 1999-10-26 17:53:42 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -34,11 +34,14 @@
 #include <win32type.h>
 #include <odinlx.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
+#include "initterm.h"
 
 extern "C" {
 void CDECL _ctordtorInit( void );
 void CDECL _ctordtorTerm( void );
 }
+
+char  dsoundPath[CCHMAXPATH] = "";
 
 /*-------------------------------------------------------------------*/
 /* A clean up routine registered with DosExitList must be used if    */
@@ -71,7 +74,12 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
    switch (ulFlag) {
       case 0 :
+      {
          _ctordtorInit();
+
+ 	 DosQueryModuleName(hModule, CCHMAXPATH, dsoundPath);
+         char *endofpath = strrchr(dsoundPath, '\\');
+         if(endofpath) *(endofpath+1) = 0;
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
@@ -88,6 +96,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
                 return 0UL;
 
          break;
+      }
       case 1 :
 	 UnregisterLxDll(hModule);
          break;
@@ -105,6 +114,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 static void APIENTRY cleanup(ULONG ulReason)
 {
    _ctordtorTerm();
+   CloseLogFile();
    DosExitList(EXLST_EXIT, cleanup);
    return ;
 }
