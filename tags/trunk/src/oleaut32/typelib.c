@@ -122,8 +122,7 @@ QueryPathOfRegTypeLib16(
 	*path = SysAllocString16(pathname);
 	return S_OK;
 }
-#endif
- 
+#endif 
 /****************************************************************************
  *		QueryPathOfRegTypeLib	[OLEAUT32.164]
  * RETURNS
@@ -557,7 +556,7 @@ HRESULT WINAPI UnRegisterTypeLib(
     return S_OK;	/* FIXME: pretend everything is OK */
 }
 
-#ifdef __WIN32OS2__
+#ifndef __WIN32OS2__
 /****************************************************************************
  *	OaBuildVersion				(TYPELIB.15)
  *
@@ -595,6 +594,7 @@ DWORD WINAPI OaBuildVersion16(void)
     }
 }
 #endif
+
 /* for better debugging info leave the static out for the time being */
 #define static
 
@@ -779,6 +779,7 @@ static void MSFT_DoRefType(TLBContext *pcx, ITypeInfoImpl *pTI, int offset);
 
 //#define TYPELIBDEBUG
 #if defined(__WIN32OS2__) && defined(TYPELIBDEBUG)
+
 /*
  debug
 */
@@ -1882,12 +1883,10 @@ int TLB_ReadTypeLib(LPCWSTR pszFileName, INT index, ITypeLib2 **ppTypeLib)
           if ( dwSignature == MSFT_SIGNATURE)
           {
             *ppTypeLib = ITypeLib2_Constructor_MSFT(pBase, dwTLBLength);
-            ITypeLib2_AddRef(*ppTypeLib);
           }
 	  else if ( dwSignature == SLTG_SIGNATURE)
           {
             *ppTypeLib = ITypeLib2_Constructor_SLTG(pBase, dwTLBLength);
-            ITypeLib2_AddRef(*ppTypeLib);
 	  }
           UnmapViewOfFile(pBase);
         }
@@ -1920,12 +1919,10 @@ int TLB_ReadTypeLib(LPCWSTR pszFileName, INT index, ITypeLib2 **ppTypeLib)
               if ( dwSignature == MSFT_SIGNATURE)
               {
                   *ppTypeLib = ITypeLib2_Constructor_MSFT(pBase, dwTLBLength);
-                  ITypeLib2_AddRef(*ppTypeLib);
 	      }
 	      else if ( dwSignature == SLTG_SIGNATURE)
 	      {
                   *ppTypeLib = ITypeLib2_Constructor_SLTG(pBase, dwTLBLength);
-                  ITypeLib2_AddRef(*ppTypeLib);
 	      }
               else
               {
@@ -2414,11 +2411,19 @@ static void SLTG_DoRefs(SLTG_RefInfo *pRef, ITypeInfoImpl *pTI,
     dump_TLBRefType(pTI->reflist);
 }
 
-static char *SLTG_DoImpls(SLTG_ImplInfo *info, ITypeInfoImpl *pTI,
+static char *SLTG_DoImpls(char *pBlk, ITypeInfoImpl *pTI,
 			  BOOL OneOnly)
 {
+    SLTG_ImplInfo *info;
     TLBImplType **ppImplType = &pTI->impltypelist;
+    /* I don't really get this structure, usually it's 0x16 bytes
+       long, but iuser.tlb contains some that are 0x18 bytes long.
+       That's ok because we can use the next ptr to jump to the next
+       one. But how do we know the length of the last one?  The WORD
+       at offs 0x8 might be the clue.  For now I'm just assuming that
+       the last one is the regular 0x16 bytes. */
 
+    info = (SLTG_ImplInfo*)pBlk;
     while(1) {
 	*ppImplType = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY,
 				sizeof(**ppImplType));
@@ -2431,9 +2436,9 @@ static char *SLTG_DoImpls(SLTG_ImplInfo *info, ITypeInfoImpl *pTI,
 	    break;
 	if(OneOnly)
 	    FIXME("Interface inheriting more than one interface\n");
-	info++;
+	info = (SLTG_ImplInfo*)(pBlk + info->next);
     }
-    info++;
+    info++; /* see comment at top of function */
     return (char*)info;
 }
 
@@ -2455,7 +2460,7 @@ static SLTG_TypeInfoTail *SLTG_ProcessCoClass(char *pBlk, ITypeInfoImpl *pTI,
     pFirstItem = pNextItem = (char*)(pMemHeader + 1);
 
     if(*(WORD*)pFirstItem == SLTG_IMPL_MAGIC) {
-        pNextItem = SLTG_DoImpls((SLTG_ImplInfo*)pFirstItem, pTI, FALSE);
+        pNextItem = SLTG_DoImpls(pFirstItem, pTI, FALSE);
     }
 
     return (SLTG_TypeInfoTail*)(pFirstItem + pMemHeader->cbExtra);
@@ -2482,7 +2487,7 @@ static SLTG_TypeInfoTail *SLTG_ProcessInterface(char *pBlk, ITypeInfoImpl *pTI,
     pFirstItem = pNextItem = (char*)(pMemHeader + 1);
 
     if(*(WORD*)pFirstItem == SLTG_IMPL_MAGIC) {
-        pNextItem = SLTG_DoImpls((SLTG_ImplInfo*)pFirstItem, pTI, TRUE);
+        pNextItem = SLTG_DoImpls(pFirstItem, pTI, TRUE);
     }
 
     for(pFunc = (SLTG_Function*)pNextItem, num = 1; 1;
@@ -3846,18 +3851,16 @@ static HRESULT WINAPI ITypeInfo_fnGetIDsOfNames( ITypeInfo2 *iface,
     TLBFuncDesc * pFDesc; 
     TLBVarDesc * pVDesc; 
     HRESULT ret=S_OK;
-	UINT nNameLen = SysStringLen(*rgszNames);
-	
+
     TRACE("(%p) Name %s cNames %d\n", This, debugstr_w(*rgszNames),
             cNames);
     for(pFDesc=This->funclist; pFDesc; pFDesc=pFDesc->next) {
         int i, j;
-        if( !memcmp(*rgszNames, pFDesc->Name, nNameLen)) {
+        if(!lstrcmpiW(*rgszNames, pFDesc->Name)) {
             if(cNames) *pMemId=pFDesc->funcdesc.memid;
             for(i=1; i < cNames; i++){
-				UINT nParamLen = SysStringLen(rgszNames[i]);
                 for(j=0; j<pFDesc->funcdesc.cParams; j++)
-                    if(memcmp(rgszNames[i],pFDesc->pParamDesc[j].Name, nParamLen))
+                    if(!lstrcmpiW(rgszNames[i],pFDesc->pParamDesc[j].Name))
                             break;
                 if( j<pFDesc->funcdesc.cParams)
                     pMemId[i]=j;
@@ -3868,7 +3871,7 @@ static HRESULT WINAPI ITypeInfo_fnGetIDsOfNames( ITypeInfo2 *iface,
         }
     }   
     for(pVDesc=This->varlist; pVDesc; pVDesc=pVDesc->next) {
-        if( !memcmp(*rgszNames, pVDesc->Name, nNameLen)) {
+        if(!lstrcmpiW(*rgszNames, pVDesc->Name)) {
             if(cNames) *pMemId=pVDesc->vardesc.memid;
             return ret;
         }
@@ -3983,7 +3986,7 @@ static HRESULT WINAPI ITypeInfo_fnInvoke(
 
     for(pFDesc=This->funclist; pFDesc; pFDesc=pFDesc->next)
 	if (pFDesc->funcdesc.memid == memid) {
-	    if (pFDesc->funcdesc.invkind & (dwFlags & ~DISPATCH_METHOD))
+	    if (pFDesc->funcdesc.invkind & dwFlags)
 		break;
 	}
     if (pFDesc) {
@@ -3999,10 +4002,10 @@ static HRESULT WINAPI ITypeInfo_fnInvoke(
 	    for (i=0;i<pFDesc->funcdesc.cParams;i++) {
 		if (i<pDispParams->cArgs) {
 		    TRACE("set %d to disparg type %d vs %d\n",i,
-			    V_VT(pDispParams->rgvarg+i),
+			    V_VT(&pDispParams->rgvarg[pDispParams->cArgs-i-1]),
 			    pFDesc->funcdesc.lprgelemdescParam[i].tdesc.vt
 		    );
-		    args[i+1] = V_UNION(pDispParams->rgvarg+i,lVal);
+		    args[i+1] = V_UNION(&pDispParams->rgvarg[pDispParams->cArgs-i-1],lVal);
 		} else {
 		    TYPEDESC *tdesc = &(pFDesc->funcdesc.lprgelemdescParam[i].tdesc);
 		    TRACE("set %d to pointer for get (type is %d)\n",i,tdesc->vt);
@@ -4083,16 +4086,28 @@ static HRESULT WINAPI ITypeInfo_fnInvoke(
 	   return E_FAIL;
 	}
     } else {
-	FIXME("variable based invoking not supported yet.\n");
 	for(pVDesc=This->varlist; pVDesc; pVDesc=pVDesc->next) {
 	    if (pVDesc->vardesc.memid == memid) {
-		FIXME("varseek: Found memid name %s\n",debugstr_w(((LPWSTR)pVDesc->Name)));
+		FIXME("varseek: Found memid name %s, but variable-based invoking not supported\n",debugstr_w(((LPWSTR)pVDesc->Name)));
 		dump_TLBVarDesc(pVDesc);
 		break;
 	    }
 	}
     }
-    FIXME("Did not find member id %d!\n",(int)memid);
+    /* not found, look for it in inherited interfaces */
+    if (This->TypeAttr.typekind==TKIND_INTERFACE && This->TypeAttr.cImplTypes) {
+        /* recursive search */
+        ITypeInfo *pTInfo;
+        HRESULT hr;
+        hr=ITypeInfo_GetRefTypeInfo(iface, This->impltypelist->hRef, &pTInfo);
+        if(SUCCEEDED(hr)){
+            hr=ITypeInfo_Invoke(pTInfo,pIUnk,memid,dwFlags,pDispParams,pVarResult,pExcepInfo,pArgErr);
+            ITypeInfo_Release(pTInfo);
+            return hr;
+        }
+        WARN("Could not search inherited interface!\n");
+    }
+    ERR("did not find member id %d, flags %d!\n", (int)memid, dwFlags);
     return DISP_E_MEMBERNOTFOUND;
 }
 
