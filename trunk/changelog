@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.452 1999-11-14 22:25:15 hugh Exp $ */
+ /* $Id: changelog,v 1.453 1999-11-14 23:26:50 sandervl Exp $ */
 
  99-11-14  Markus Montkowski <mmontkowski@gmx.de>
         - DDRAW:  Code cleanup and some fixes in handling blts in the virtuel buffers.
@@ -19,6 +19,10 @@
                   Fixed createControls for dialogs (set windowname for ids)
                   Ported LookupIconIdFromDirectory(Ex) (Wine, 991031)
                   Fixed OSLibWinEnableWindow (need to enable/disable both frame and client)
+                  Partly ported Wine CopyImage for cursors & icons (disabled
+                  because it doesn't work correctly)
+                  Workaround for double height of icon masks -> doesn't work
+                  100% correctly and IS A DIRTY HACK. (Open32 bug)
 
  99-11-14: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- USER32: Fixed WindowFromPoint
