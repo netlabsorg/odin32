@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.304 2001-12-02 12:22:01 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.305 2001-12-12 16:40:44 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1811,7 +1811,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 
 	    if( wParam == VK_F4 )	/* try to close the window */
 	    {
-                HWND top = GetTopWindow();
+                HWND top = GetTopParent();
                 if (!(GetClassLongW( top, GCL_STYLE ) & CS_NOCLOSE))
                     PostMessageW( top, WM_SYSCOMMAND, SC_CLOSE, 0 );
 	    }
