@@ -1103,6 +1103,12 @@ typedef struct
 #define HTSIZEFIRST         HTLEFT
 #define HTSIZELAST          HTBOTTOMRIGHT
 
+/* SendMessageTimeout flags */
+#define SMTO_NORMAL              0x0000
+#define SMTO_BLOCK               0x0001
+#define SMTO_ABORTIFHUNG         0x0002
+#define SMTO_NOTIMEOUTIFNOTHUNG  0x0008
+
   /* WM_SYSCOMMAND parameters */
 #ifdef SC_SIZE /* at least HP-UX: already defined in /usr/include/sys/signal.h */
 #undef SC_SIZE

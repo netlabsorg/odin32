@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.98 2001-12-13 15:32:57 sandervl Exp $
+# $Id: Makefile,v 1.99 2002-02-05 17:58:58 sandervl Exp $
 
 #
 # Odin32 API
@@ -61,6 +61,7 @@ $(OBJDIR)\win32wndhandle.obj \
 $(OBJDIR)\win32wmisc.obj \
 $(OBJDIR)\windowword.obj \
 $(OBJDIR)\windowmsg.obj \
+$(OBJDIR)\message.obj \
 $(OBJDIR)\winproc.obj \
 $(OBJDIR)\oslibmsg.obj \
 $(OBJDIR)\hook.obj \

@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.75 2001-11-20 15:25:18 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.76 2002-02-05 17:59:00 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -77,6 +77,8 @@ Win32Dialog::Win32Dialog(HINSTANCE hInst, LPCSTR dlgTemplate, HWND owner,
     {
         hMenu = LoadMenuW( hInst, (LPCWSTR)dlgInfo.menuName );
     }
+
+    dprintf(("Dialog style %x", LOWORD(dlgInfo.style)));
 
     /* Create custom font if needed */
     if (dlgInfo.style & DS_SETFONT)
@@ -247,7 +249,7 @@ ULONG Win32Dialog::MsgCreate(HWND hwndOS2)
     }
 
     if (hUserFont)
-        SendInternalMessageA(WM_SETFONT, (WPARAM)hUserFont, 0 );
+        SendMessageA(getWindowHandle(), WM_SETFONT, (WPARAM)hUserFont, 0 );
 
     /* Create controls */
     if (createControls(dlgTemplate, hInstance))
@@ -260,7 +262,7 @@ ULONG Win32Dialog::MsgCreate(HWND hwndOS2)
         fDialogInit = TRUE; //WM_NCCALCSIZE can now be sent to dialog procedure
 
         HWND hwndPreInitFocus = GetFocus();
-        if(SendInternalMessageA(WM_INITDIALOG, (WPARAM)hwndFocus, param)) 
+        if(SendMessageA(getWindowHandle(), WM_INITDIALOG, (WPARAM)hwndFocus, param)) 
         {
             //SvL: Experiments in NT4 show that dialogs that are children don't
             //     receive focus. Not sure if this is always true. (couldn't
@@ -292,7 +294,8 @@ ULONG Win32Dialog::MsgCreate(HWND hwndOS2)
         if (dlgInfo.style & WS_VISIBLE && !(getStyle() & WS_VISIBLE))
         {
             ShowWindow( SW_SHOWNORMAL );    /* SW_SHOW doesn't always work */
-            UpdateWindow( getWindowHandle() );
+////Note: this was removed in Wine
+////            UpdateWindow( getWindowHandle() );
         }
         SetLastError(ERROR_SUCCESS);
         dprintf(("********* DIALOG CREATED ************"));
@@ -356,7 +359,7 @@ INT Win32Dialog::doDialogBox()
           if (!PeekMessageA(&msg,0,0,0,PM_NOREMOVE))
           {
                 if(!(getStyle() & DS_NOIDLEMSG))
-                    topOwner->SendMessageA(WM_ENTERIDLE,MSGF_DIALOGBOX,getWindowHandle());
+                    SendMessageA(topOwner->getWindowHandle(), WM_ENTERIDLE,MSGF_DIALOGBOX,getWindowHandle());
                 GetMessageA(&msg,0,0,0);
           }
           else  PeekMessageA(&msg,0,0,0,PM_REMOVE);
@@ -756,7 +759,7 @@ LRESULT Win32Dialog::DefDlg_Proc(UINT msg, WPARAM wParam, LPARAM lParam)
         rc = GetClipBox( (HDC)wParam, &rect );
         if ((rc == SIMPLEREGION) || (rc == COMPLEXREGION))
         {
-            HBRUSH hBrush = SendInternalMessageA(WM_CTLCOLORDLG, wParam, getWindowHandle());
+            HBRUSH hBrush = SendMessageA(getWindowHandle(), WM_CTLCOLORDLG, wParam, getWindowHandle());
             if(GetObjectType(hBrush) != OBJ_BRUSH) {
                 DefWndControlColor(CTLCOLOR_DLG, (HDC)wParam);
             }
@@ -854,11 +857,11 @@ LRESULT Win32Dialog::DefDlg_Proc(UINT msg, WPARAM wParam, LPARAM lParam)
             {
                 /* always make combo box hide its listbox control */
                 if( CONTROLS_IsControl( wndFocus, COMBOBOX_CONTROL ) )
-                    wndFocus->SendMessageA(CB_SHOWDROPDOWN, FALSE, 0 );
+                    SendMessageA(wndFocus->getWindowHandle(), CB_SHOWDROPDOWN, FALSE, 0 );
                 else
                 if( CONTROLS_IsControl( wndFocus, EDIT_CONTROL ) &&
                     CONTROLS_IsControl( wndFocus->getParent(), COMBOBOX_CONTROL ))
-                    wndFocus->SendMessageA(CB_SHOWDROPDOWN, FALSE, 0 );
+                    SendMessageA(wndFocus->getWindowHandle(), CB_SHOWDROPDOWN, FALSE, 0 );
                 RELEASE_WNDOBJ(wndFocus);
             }
         }

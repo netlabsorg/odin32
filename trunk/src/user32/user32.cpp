@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.118 2001-12-26 19:05:35 achimha Exp $ */
+/* $Id: user32.cpp,v 1.119 2002-02-05 17:58:59 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -1636,6 +1636,7 @@ HDESK WIN32API OpenDesktopA(LPCTSTR lpszDesktopName,
          fInherit,
          dwDesiredAccess));
 
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return (NULL);
 }
 /*****************************************************************************
@@ -1669,6 +1670,7 @@ HDESK WIN32API OpenDesktopW(LPCTSTR lpszDesktopName,
          fInherit,
          dwDesiredAccess));
 
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return (NULL);
 }
 /*****************************************************************************
@@ -1698,6 +1700,7 @@ HDESK WIN32API OpenInputDesktop(DWORD dwFlags,
          fInherit,
          dwDesiredAccess));
 
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return (NULL);
 }
 /*****************************************************************************
@@ -1726,6 +1729,7 @@ HWINSTA WIN32API OpenWindowStationA(LPCTSTR lpszWinStaName,
          fInherit,
          dwDesiredAccess));
 
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return (NULL);
 }
 /*****************************************************************************
@@ -1756,6 +1760,7 @@ HWINSTA WIN32API OpenWindowStationW(LPCTSTR lpszWinStaName,
          fInherit,
          dwDesiredAccess));
 
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return (NULL);
 }
 /*****************************************************************************
@@ -1780,6 +1785,7 @@ BOOL WIN32API SetProcessWindowStation(HWINSTA hWinSta)
   dprintf(("USER32:SetProcessWindowStation (%08x) not implemented.\n",
          hWinSta));
 
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return (FALSE);
 }
 /*****************************************************************************
@@ -1802,6 +1808,7 @@ BOOL WIN32API SetThreadDesktop(HDESK hDesktop)
   dprintf(("USER32:SetThreadDesktop (%08x) not implemented.\n",
          hDesktop));
 
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return (FALSE);
 }
 /*****************************************************************************
@@ -1832,6 +1839,7 @@ BOOL WIN32API SetUserObjectInformationA(HANDLE hObject,
            lpvInfo,
            cbInfo));
 
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return (FALSE);
 }
 /*****************************************************************************
@@ -1862,6 +1870,7 @@ BOOL WIN32API SetUserObjectInformationW(HANDLE hObject,
            lpvInfo,
            cbInfo));
 
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return (FALSE);
 }
 /*****************************************************************************
@@ -1889,6 +1898,7 @@ BOOL WIN32API SetUserObjectSecurity(HANDLE hObject,
            psi,
            psd));
 
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return (FALSE);
 }
 /*****************************************************************************
@@ -1912,6 +1922,7 @@ BOOL WIN32API SwitchDesktop(HDESK hDesktop)
   dprintf(("USER32:SwitchDesktop (%08x) not implemented.\n",
          hDesktop));
 
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return (FALSE);
 }
 
