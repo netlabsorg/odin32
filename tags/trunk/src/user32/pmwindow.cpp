@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.35 1999-10-17 18:09:22 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.36 1999-10-19 12:32:13 dengert Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -604,10 +604,10 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
         //OS/2 Window coordinates -> Win32 Window coordinates
         if(win32wnd->MsgMouseMove(keystate, SHORT1FROMMP(mp1), MapOS2ToWin32Y(win32wnd, SHORT2FROMMP(mp1))))
-    	{
-        	//Changes mouse cursor to default
-            	goto RunDefWndProc;
-    	}
+        {
+                //Changes mouse cursor to default
+                goto RunDefWndProc;
+        }
         break;
     }
 
@@ -848,7 +848,7 @@ VirtualKeyFound:
     case WM_ERASEBACKGROUND:
     {
         dprintf(("OS2: WM_ERASEBACKGROUND %x", win32wnd->getWindowHandle()));
-        if (!win32wnd->isSupressErase()) {
+        if (WinQueryUpdateRect (hwnd, NULL) && !win32wnd->isSupressErase()) {
             BOOL erased = sendEraseBkgnd (win32wnd);
             win32wnd->setEraseBkgnd (!erased, !erased);
         }
@@ -859,7 +859,7 @@ VirtualKeyFound:
         dprintf(("OS2: WM_PAINT %x", hwnd));
 
         if (WinQueryUpdateRect (hwnd, NULL)) {
-            if (!win32wnd->isSupressErase()) {
+            if (win32wnd->isEraseBkgnd() && !win32wnd->isSupressErase()) {
                 BOOL erased = sendEraseBkgnd (win32wnd);
                 win32wnd->setEraseBkgnd (!erased, !erased);
             }
