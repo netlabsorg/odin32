@@ -1,8 +1,13 @@
-/* $Id: win32class.cpp,v 1.29 2001-12-20 20:45:55 sandervl Exp $ */
+/* $Id: win32class.cpp,v 1.30 2002-12-18 12:28:06 sandervl Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
  * Copyright 1998-1999 Sander van Leeuwen (sandervl@xs4all.nl)
+ *
+ *
+ * Parts copied from ReWind (Get/SetClassLong for GCL_WNDPROC)
+ *     Copyright 1993, 1996 Alexandre Julliard
+ *               1998 Juergen Schmied (jsch)
  *
  *
  * TODO: Right now all class atoms are global. This must be changed.
@@ -39,14 +44,15 @@ static fDestroyAll = FALSE;
 //******************************************************************************
 //Win32WndClass methods:
 //******************************************************************************
-Win32WndClass::Win32WndClass(WNDCLASSEXA *wndclass, BOOL fUnicode) 
+Win32WndClass::Win32WndClass(WNDCLASSEXA *wndclass, WNDCLASS_TYPE fClassType) 
                   : GenericObject(&wndclasses, &critsect)
 {
-  isUnicode = fUnicode;
+  this->fClassType = fClassType;
   processId = 0;
 
-  if(HIWORD(wndclass->lpszClassName)) {
-        if(isUnicode) {
+  if(HIWORD(wndclass->lpszClassName)) 
+  {
+        if(fClassType == WNDCLASS_UNICODE) {
                 INT len = lstrlenW((LPWSTR)wndclass->lpszClassName)+1;
 
                 classNameA = (PCHAR)_smalloc(len);
@@ -62,7 +68,7 @@ Win32WndClass::Win32WndClass(WNDCLASSEXA *wndclass, BOOL fUnicode)
                 dprintf(("Win32Class ctr; classNameA/classNameW == NULL"));
                 exit(1);
         }
-        if(isUnicode) {
+        if(fClassType == WNDCLASS_UNICODE) {
                 lstrcpyW(classNameW, (LPWSTR)wndclass->lpszClassName);
                 UnicodeToAscii(classNameW, classNameA);
         }
@@ -125,9 +131,15 @@ Win32WndClass::Win32WndClass(WNDCLASSEXA *wndclass, BOOL fUnicode)
 
   windowStyle           = wndclass->style;
 
-  windowProc = 0;
-  WINPROC_SetProc((HWINDOWPROC *)&windowProc, wndclass->lpfnWndProc, (isUnicode) ? WIN_PROC_32W : WIN_PROC_32A, WIN_PROC_CLASS);
-  dprintf2(("Window class ptr %x", windowProc));
+  pfnWindowProcA = 0;
+  pfnWindowProcW = 0;
+  if(fClassType == WNDCLASS_UNICODE) {
+      WINPROC_SetProc((HWINDOWPROC *)&pfnWindowProcW, wndclass->lpfnWndProc,  WIN_PROC_32W, WIN_PROC_CLASS);
+  }
+  else {
+      WINPROC_SetProc((HWINDOWPROC *)&pfnWindowProcA, wndclass->lpfnWndProc, WIN_PROC_32A, WIN_PROC_CLASS);
+  }
+  dprintf2(("Window class ptr %x/%x", pfnWindowProcA, pfnWindowProcW));
 
   //User data class words/longs
   if(nrExtraClassBytes) {
@@ -155,7 +167,10 @@ Win32WndClass::~Win32WndClass()
       GlobalDeleteAtom(classAtom);
   }
 
-  WINPROC_FreeProc(windowProc, WIN_PROC_CLASS);
+  if(pfnWindowProcA)
+      WINPROC_FreeProc(pfnWindowProcA, WIN_PROC_CLASS);
+  if(pfnWindowProcW)
+      WINPROC_FreeProc(pfnWindowProcW, WIN_PROC_CLASS);
 
   if(userClassBytes)    free(userClassBytes);
   if(classNameA)        free(classNameA);
@@ -178,7 +193,7 @@ void Win32WndClass::DestroyAll()
 BOOL Win32WndClass::hasClassName(LPSTR classname, BOOL fUnicode)
 {
   if(HIWORD(classname) == 0) {
-    return classAtom == (DWORD)classname;
+      return classAtom == (DWORD)classname;
   }
   if(fUnicode) {
         if(classNameW)
@@ -348,6 +363,30 @@ ULONG Win32WndClass::getClassName(LPWSTR lpszClassName, ULONG cchClassName)
 }
 //******************************************************************************
 //******************************************************************************
+WNDPROC Win32WndClass::getWindowProc(WNDPROC_TYPE type)
+{
+    WNDPROC proc;
+
+    if(type == WNDPROC_UNICODE) {
+         proc = (pfnWindowProcW) ? pfnWindowProcW : pfnWindowProcA;
+    }
+    else proc = (pfnWindowProcA) ? pfnWindowProcA : pfnWindowProcW;
+
+    return proc; 
+};
+//******************************************************************************
+//NOTE: Only to be used when a class has both ascii & unicode window procedures!
+//      Otherwise use SetClassLong GCL_WNDPROC
+//******************************************************************************
+void Win32WndClass::setWindowProc(WNDPROC pfnWindowProc, WNDPROC_TYPE type)
+{
+    if(type == WNDPROC_UNICODE) {
+         WINPROC_SetProc((HWINDOWPROC *)&pfnWindowProcW, pfnWindowProc,  WIN_PROC_32W, WIN_PROC_CLASS);
+    }
+    else WINPROC_SetProc((HWINDOWPROC *)&pfnWindowProcA, pfnWindowProc,  WIN_PROC_32A, WIN_PROC_CLASS);
+}
+//******************************************************************************
+//******************************************************************************
 void Win32WndClass::setMenuName(LPSTR newMenuName)
 {
   if(HIWORD(menuNameA)) {
@@ -357,7 +396,7 @@ void Win32WndClass::setMenuName(LPSTR newMenuName)
         menuNameW = 0;
   }
   if(HIWORD(newMenuName)) {
-        if(isUnicode) {
+        if(fClassType == WNDCLASS_UNICODE) {
                 menuNameA = (PCHAR)_smalloc(lstrlenW((LPWSTR)newMenuName)+1);
                 menuNameW = (WCHAR *)_smalloc((lstrlenW((LPWSTR)newMenuName)+1)*sizeof(WCHAR));
         }
@@ -367,9 +406,10 @@ void Win32WndClass::setMenuName(LPSTR newMenuName)
         }
         if(menuNameA == NULL || menuNameW == NULL) {
                 dprintf(("Win32Class ctr; menuName/menuNameW == NULL"));
-                exit(1);
+                DebugInt3();
+                return;
         }
-        if(isUnicode) {
+        if(fClassType == WNDCLASS_UNICODE) {
                 lstrcpyW(menuNameW, (LPWSTR)newMenuName);
                 UnicodeToAscii(menuNameW, menuNameA);
         }
@@ -404,11 +444,20 @@ ULONG Win32WndClass::getClassLongA(int index, BOOL fUnicode)
         case GCL_HMODULE:
                 return hInstance;
         case GCL_MENUNAME:
-                return (isUnicode) ? (ULONG)menuNameW : (ULONG)menuNameA;
+                return (fUnicode) ? (ULONG)menuNameW : (ULONG)menuNameA;
         case GCL_STYLE:
                 return windowStyle;
         case GCL_WNDPROC:
-                return (ULONG) WINPROC_GetProc(windowProc, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A);
+        {
+                WNDPROC pfnWindowProc = pfnWindowProcA;
+
+                if(pfnWindowProcW) 
+                {
+                    if(!pfnWindowProc || fUnicode) 
+                        pfnWindowProc = pfnWindowProcW;
+                }
+                return (ULONG) WINPROC_GetProc(pfnWindowProc, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A);
+        }
         case GCW_ATOM: //TODO: does this really happen in windows?
                 SetLastError(ERROR_INVALID_PARAMETER);
                 return 0;
@@ -492,14 +541,39 @@ ULONG Win32WndClass::setClassLongA(int index, LONG lNewVal, BOOL fUnicode)
                 windowStyle = lNewVal;
                 break;
         case GCL_WNDPROC:
+        {
                 //Note: Type of SetWindowLong determines new window proc type
                 //      UNLESS the new window proc has already been registered
                 //      (use the old type in that case)
                 //      (VERIFIED in NT 4, SP6)
                 //TODO: Is that also true for GCL_WNDPROC???????????????
-                rc = (LONG)WINPROC_GetProc(windowProc, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A );
-                WINPROC_SetProc((HWINDOWPROC *)&windowProc, (WNDPROC)lNewVal, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A, WIN_PROC_CLASS );
+                WNDPROC *proc = &pfnWindowProcA;
+                WINDOWPROCTYPE type = (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A;
+
+                if(pfnWindowProcW) 
+                {
+                    if(!*proc || fUnicode) 
+                        proc = &pfnWindowProcW;
+                }
+                rc = (LONG)WINPROC_GetProc(*proc, type );
+                WINPROC_SetProc((HWINDOWPROC *)proc, (WNDPROC)lNewVal, type, WIN_PROC_CLASS);
+
+                /* now free the one that we didn't set */
+                if(pfnWindowProcA && pfnWindowProcW)
+                {
+                    if (proc == &pfnWindowProcA)
+                    {
+                        WINPROC_FreeProc( pfnWindowProcW, WIN_PROC_CLASS );
+                        pfnWindowProcW = 0;
+                    }
+                    else
+                    {
+                        WINPROC_FreeProc( pfnWindowProcA, WIN_PROC_CLASS );
+                        pfnWindowProcA = 0;
+                    }
+                }
                 break;
+        }
         case GCW_ATOM: //TODO: does this really happen in windows?
                 SetLastError(ERROR_INVALID_PARAMETER);
                 return 0;

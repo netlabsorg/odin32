@@ -1,4 +1,4 @@
-/* $Id: win32wmdiclient.cpp,v 1.40 2002-02-11 13:48:42 sandervl Exp $ */
+/* $Id: win32wmdiclient.cpp,v 1.41 2002-12-18 12:28:08 sandervl Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -125,35 +125,6 @@ BOOL WIN32API TileChildWindows(HWND x1, DWORD x2)
            x2));
 
   return (FALSE); /* default */
-}
-
-//******************************************************************************
-//******************************************************************************
-BOOL MDICLIENT_Register()
-{
-    WNDCLASSA wndClass;
-
-//SvL: Don't check this now
-//    if (GlobalFindAtomA(MDICLIENTCLASSNAMEA)) return FALSE;
-
-    ZeroMemory(&wndClass,sizeof(WNDCLASSA));
-    wndClass.style         = CS_GLOBALCLASS;
-    wndClass.lpfnWndProc   = (WNDPROC)MDIClientWndProcA;
-    wndClass.cbClsExtra    = 0;
-    wndClass.cbWndExtra    = 0;
-    wndClass.hCursor       = LoadCursorA(0,IDC_ARROWA);;
-    wndClass.hbrBackground = (HBRUSH)GetStockObject(GRAY_BRUSH);
-    wndClass.lpszClassName = MDICLIENTCLASSNAMEA;
-
-    return RegisterClassA(&wndClass);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL MDICLIENT_Unregister()
-{
-    if (GlobalFindAtomA(MDICLIENTCLASSNAMEA))
-            return UnregisterClassA(MDICLIENTCLASSNAMEA,(HINSTANCE)NULL);
-    else    return FALSE;
 }
 //******************************************************************************
 //******************************************************************************

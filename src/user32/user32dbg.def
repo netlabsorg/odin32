@@ -1,4 +1,4 @@
-; $Id: user32dbg.def,v 1.7 2002-09-03 12:34:01 sandervl Exp $
+; $Id: user32dbg.def,v 1.8 2002-12-18 12:28:05 sandervl Exp $
 
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
 DESCRIPTION 'Odin32 System Dll - User32'
@@ -202,7 +202,7 @@ EXPORTS
     DrawTextExA                = _DbgDrawTextExA@24             @166
     DrawTextExW                = _DbgDrawTextExW@24             @167
     DrawTextW                  = _DbgDrawTextW@20               @168
-    EditWndProc                = _DbgEditWndProc@16             @169
+    EditWndProc                = _DbgEditWndProcA@16            @169
     EmptyClipboard             = _DbgEmptyClipboard@0           @170
     EnableMenuItem             = _DbgEnableMenuItem@12          @171
     EnableScrollBar            = _DbgEnableScrollBar@12         @172

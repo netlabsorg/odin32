@@ -90,7 +90,8 @@
 #ifdef __WIN32OS2__
 #include "pmwindow.h"
 #include <heapstring.h>
-#define WIN_GetFullHandle(a)	a
+
+#include "ctrlconf.h"
 #endif
 
 DEFAULT_DEBUG_CHANNEL(mdi);
@@ -141,13 +142,8 @@ static LONG MDI_ChildActivate( HWND, HWND );
 
 static HWND MDI_MoreWindowsDialog(HWND);
 static void MDI_SwapMenuItems(HWND, UINT, UINT);
-#ifdef __WIN32OS2__
-       LRESULT WINAPI MDIClientWndProcA( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam );
-       LRESULT WINAPI MDIClientWndProcW( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam );
-#else
 static LRESULT WINAPI MDIClientWndProcA( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam );
 static LRESULT WINAPI MDIClientWndProcW( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam );
-#endif
 
 /* -------- Miscellaneous service functions ----------
  *
@@ -180,7 +176,6 @@ static void MDI_PostUpdate(HWND hwnd, MDICLIENTINFO* ci, WORD recalc)
 }
 
 
-#ifndef __WIN32OS2__
 /*********************************************************************
  * MDIClient class descriptor
  */
@@ -195,6 +190,7 @@ const struct builtin_class_descr MDICLIENT_builtin_class =
     COLOR_APPWORKSPACE+1    /* brush */
 };
 
+#ifndef __WIN32OS2__
 static MDICLIENTINFO *get_client_info( HWND client )
 {
     MDICLIENTINFO *ret = NULL;
@@ -2378,39 +2374,3 @@ static void MDI_SwapMenuItems(HWND parent, UINT pos1, UINT pos2)
     HeapFree( GetProcessHeap(), 0, list );
 }
 
-#ifdef __WIN32OS2__
-
-#define MDICLIENTCLASSNAMEA "MDICLIENT"
-#define MDICLIENTCLASSNAMEW L"MDICLIENT"
-
-//******************************************************************************
-//******************************************************************************
-BOOL MDICLIENT_Register()
-{
-    WNDCLASSA wndClass;
-
-//SvL: Don't check this now
-//    if (GlobalFindAtomA(MDICLIENTCLASSNAMEA)) return FALSE;
-
-    ZeroMemory(&wndClass,sizeof(WNDCLASSA));
-    wndClass.style         = CS_GLOBALCLASS;
-    wndClass.lpfnWndProc   = (WNDPROC)MDIClientWndProcA;
-    wndClass.cbClsExtra    = 0;
-    wndClass.cbWndExtra    = 0;
-    wndClass.hCursor       = LoadCursorA(0,IDC_ARROWA);;
-    wndClass.hbrBackground = (HBRUSH)GetStockObject(GRAY_BRUSH);
-    wndClass.lpszClassName = MDICLIENTCLASSNAMEA;
-
-    return RegisterClassA(&wndClass);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL MDICLIENT_Unregister()
-{
-    if (GlobalFindAtomA(MDICLIENTCLASSNAMEA))
-            return UnregisterClassA(MDICLIENTCLASSNAMEA,(HINSTANCE)NULL);
-    else    return FALSE;
-}
-//******************************************************************************
-//******************************************************************************
-#endif
