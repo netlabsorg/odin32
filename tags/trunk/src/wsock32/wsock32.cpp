@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.43 2001-10-13 19:04:39 achimha Exp $ */
+/* $Id: wsock32.cpp,v 1.44 2001-10-16 07:26:43 phaller Exp $ */
 
 /*
  *
@@ -77,6 +77,21 @@ ODINDEBUGCHANNEL(WSOCK32-WSOCK32)
  *****************************************************************************/
 
 static LPWSINFO lpFirstIData = NULL;
+
+
+//******************************************************************************
+//******************************************************************************
+
+// Note: for the TCP/IP 4.0 headers, SO_SNDTIMEO and SO_RCDTIMEO are
+// unfortunately not defined, so we do this here.
+#ifndef SO_SNDTIMEO
+#define SO_SNDTIMEO 0x1005
+#endif
+
+#ifndef SO_RCVTIMEO
+#define SO_RCVTIMEO 0x1006
+#endif
+
 
 //******************************************************************************
 //******************************************************************************
@@ -981,12 +996,21 @@ tryagain:
 			goto tryagain;
 		}
 		break;
+        
+        case SO_SNDTIMEO:
+        case SO_RCVTIMEO:
+          // convert "int" to "struct timeval"
+          struct timeval tv;
+          tv.tv_sec = *optval / 1000;
+          tv.tv_usec = (*optval % 1000) * 1000;
+          ret = setsockopt(s, level, optname, (char *)&tv, sizeof(tv) );
+          break;
 
 	case SO_BROADCAST:
 	case SO_DEBUG:
 	case SO_KEEPALIVE:
 	case SO_DONTROUTE:
-	case SO_OOBINLINE:
+        case SO_OOBINLINE:
 	case SO_REUSEADDR:
             	if(optlen < (int)sizeof(int)) {
                         dprintf(("SOL_SOCKET, SO_REUSEADDR, optlen too small"));
