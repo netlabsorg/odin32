@@ -1,7 +1,8 @@
-/* $Id: changelog,v 1.1854 2001-11-24 22:28:16 bird Exp $ */
+/* $Id: changelog,v 1.1855 2001-11-26 14:52:18 sandervl Exp $ */
 
- 2001-11-24: knut st. osmundsen <kosmunds@csc.com>
-    - CmdQd:    o Some enhancements to make it suitable for other usage.
+ 2001-11-26: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Implemented CancelIo & GetOverlappedResult for serial comm
+                o Preliminary work on overlapped IO for serial comm
 
  2001-11-24: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Custom build fix; check for double call for inittermKernel32
