@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.53 2000-02-27 12:31:23 bird Exp $
+# $Id: makefile,v 1.54 2000-02-27 13:16:52 bird Exp $
 
 #
 # PD-Win32 API
@@ -39,7 +39,7 @@ MAKE_CMD = $(MAKE_CMD) NODEBUGINFO=1
 NOTTOBEMADE = CVS;pe2lx;odin32api;odinwps;spy           # generally not made
 NOTDLLS     = $(NOTTOBEMADE);peldr;dllentry             # not dlls
 NOTHAVELIBS = $(NOTTOBEMADE);peldr                      # don't generate libs
-NOTWIN32DLLS= $(NOTDLLS);odincrt;dllentry               # not win32 dlls.
+NOTWIN32DLLS= $(NOTDLLS);win32k;odincrt;dllentry        # not win32 dlls.
 
 
 all: libs
