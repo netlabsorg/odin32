@@ -1,4 +1,4 @@
-# $Id: pdwin32.wat.post,v 1.7 2000-11-20 05:16:21 bird Exp $
+# $Id: pdwin32.wat.post,v 1.8 2000-11-21 04:39:20 bird Exp $
 #
 # Odin32 API
 #
@@ -39,12 +39,13 @@
 #    dependencies of the main target.
 #
 
+
 !ifndef TARGET_EXTENSION
-!   ifdef EXETARGET
-TARGET_EXTENSION=exe
-!   else
-!       ifdef LIBTARGET
+!   ifdef LIBTARGET
 TARGET_EXTENSION=lib
+!    else
+!       ifdef EXETARGET
+TARGET_EXTENSION=exe
 !       else
 TARGET_EXTENSION=dll
 !       endif
@@ -99,7 +100,8 @@ all:    $(OBJDIR) \
         $(OBJDIR)\$(TARGET).sym \
         $(PDWIN32_BIN)\$(TARGET).$(TARGET_EXTENSION) \
         $(PDWIN32_BIN)\$(TARGET).sym \
-        lib
+        lib \
+        .SYMBOLIC
 !endif
 
 #
@@ -152,14 +154,15 @@ all:    $(OBJDIR) \
         $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION) \
         $(OBJDIR)\$(TARGET).sym \
         $(PDWIN32_BIN)\$(TARGET).$(TARGET_EXTENSION) \
-        $(PDWIN32_BIN)\$(TARGET).sym
+        $(PDWIN32_BIN)\$(TARGET).sym \
+        .SYMBOLIC
 !endif
 
 #
 # Exe: Lib rule - dummy rule
 #
 !ifndef NO_LIB_RULE
-lib:
+lib: .SYMBOLIC
 !endif
 
 
@@ -212,7 +215,8 @@ LOCALCLEAN = 1
 !ifndef NO_ALL_RULE
 all:    $(OBJDIR) \
         $(INTLIBS) \
-        $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
+        $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION) \
+        .SYMBOLIC
 !endif
 
 
@@ -220,7 +224,7 @@ all:    $(OBJDIR) \
 # Lib: Lib rule - dummy rule
 #
 !ifndef NO_LIB_RULE
-lib:
+lib: .SYMBOLIC
 !endif
 
 
@@ -228,7 +232,7 @@ lib:
 # Lib: Internal library rule. Same as the all rule.
 #
 !ifndef NO_INTERNAL_LIBS
-libs: all
+libs: all .SYMBOLIC
 !endif
 
 
@@ -241,7 +245,7 @@ $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS)
     $(ILIB) $(ILIBFLAGS) $@ @<<
 $(OBJS:  =&^
 )
-$(OBJDIR)\$(@B).lst
+$(OBJDIR)\$^&.lst
 <<
 !endif
 
@@ -257,8 +261,8 @@ $(OBJDIR)\$(@B).lst
 # Common (new): Dep rule - makes depenencies for C, C++ and Asm files.
 #
 !ifndef NO_DEP_RULE
-dep: dep_internal $(ADDITIONAL_DEP)
-dep_internal:
+dep: dep_internal $(ADDITIONAL_DEP) .SYMBOLIC
+dep_internal: .SYMBOLIC
     $(DEPEND) $(CINCLUDES) *.c *.cpp *.h *.asm *.inc \
         *.rc *.dlg $(PDWIN32_INCLUDE)\*.h -robj *.orc
 !ifdef SUBDIRS
@@ -273,7 +277,7 @@ dep_internal:
 #
 !ifndef NO_INTERNAL_LIBS
 !ifdef INTLIBS
-$(INTLIBS):
+$(INTLIBS): .SYMBOLIC
     $(DODIRS) "$(SUBDIRS)"  $(MAKE_CMD) libs
 !endif
 !endif
@@ -288,18 +292,18 @@ $(INTLIBS):
 # Common: Copy library rule.
 #
 $(PDWIN32_LIB)\$(ORGTARGET).lib: $(ORGTARGET).lib
-    @if not exist $(@D) $(CREATEPATH) $(@D)
-    $(CP) $** $@
+    @if not exist $^: $(CREATEPATH) $^:
+    $(CP) $[@ $@
 
 
 #
 # Common: Copy dll/exe rule.
 #
 $(PDWIN32_BIN)\$(TARGET).$(TARGET_EXTENSION): $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
-    @if not exist $(@D) $(CREATEPATH) $(@D)
-    $(CP) $** $@
+    @if not exist $^: $(CREATEPATH) $^:
+    $(CP) $[@ $^@
 !ifndef NO_MAIN_BIN_COPY
-    -$(CP) $** $(@D)..\..\$(@F)
+    -$(CP) $[@ $^:..\..\$^.
 !endif
 
 
@@ -307,10 +311,10 @@ $(PDWIN32_BIN)\$(TARGET).$(TARGET_EXTENSION): $(OBJDIR)\$(TARGET).$(TARGET_EXTEN
 # Common: Copy sym rule.
 #
 $(PDWIN32_BIN)\$(TARGET).sym: $(OBJDIR)\$(TARGET).sym
-    @if not exist $(@D) $(CREATEPATH) $(@D)
-    $(CP) $** $@
+    @if not exist $^: $(CREATEPATH) $^:
+    $(CP) $[@ $@
 !ifndef NO_MAIN_BIN_COPY
-    -$(CP) $** $(@D)..\..\$(@F)
+    -$(CP) $[@ $^:..\..\$^.
 !endif
 
 
@@ -328,10 +332,10 @@ $(OBJDIR)\$(TARGET).sym: $(OBJDIR)\$(TARGET).map
 #
 !ifndef NOTEXPDEF
 $(ORGTARGET).lib: $(ORGTARGET)exp.def
-    $(IMPLIB) $(IMPLIBFLAGS) $@ $**
+    $(IMPLIB) $(IMPLIBFLAGS) $@ $[@
 !else
 $(TARGET).lib: $(DEFFILE)
-    $(IMPLIB) $(IMPLIBFLAGS) $@ $**
+    $(IMPLIB) $(IMPLIBFLAGS) $@ $[@
 !endif
 
 
@@ -340,7 +344,7 @@ $(TARGET).lib: $(DEFFILE)
 #
 !ifndef NOTEXPDEF
 $(ORGTARGET)exp.def: $(DEFFILE)
-    $(IMPDEF) $** $@
+    $(IMPDEF) $[@ $@
 !endif
 
 
@@ -356,9 +360,9 @@ $(OBJDIR): .SYMBOLIC
 #
 !ifndef NOCLEAN
 !ifndef CLEAN2
-clean:
+clean: .SYMBOLIC
 !else
-clean:  clean2
+clean:  clean2 .SYMBOLIC
 !endif
     $(RM) *.lib *.res *.map *.pch \
 !if "$(OBJDIR)" != ""

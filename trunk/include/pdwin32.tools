@@ -1,4 +1,4 @@
-# $Id: pdwin32.tools,v 1.17 2000-11-20 04:58:14 bird Exp $
+# $Id: pdwin32.tools,v 1.18 2000-11-21 04:39:18 bird Exp $
 # ODIN / win32os2 Project
 #
 # makefile for the build system tools and standard rules
@@ -32,7 +32,6 @@ RM          = rm -f
 CP          = copy
 MKDIR       = mkdir
 ECHO        = echo
-MAPSYM      = mapsym
 EXISTS      = $(PDWIN32_TOOLS)\Exists.cmd
 DODIRS      = $(PDWIN32_TOOLS)\DoDirs.cmd
 DOWITHDIRS  = $(PDWIN32_TOOLS)\dowithdirs.cmd

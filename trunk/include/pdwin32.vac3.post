@@ -1,4 +1,4 @@
-# $Id: pdwin32.vac3.post,v 1.5 2000-11-19 23:53:47 bird Exp $
+# $Id: pdwin32.vac3.post,v 1.6 2000-11-21 04:39:19 bird Exp $
 #
 # Odin32 API
 #
@@ -39,12 +39,13 @@
 #    dependencies of the main target.
 #
 
+
 !ifndef TARGET_EXTENSION
-!   ifdef EXETARGET
-TARGET_EXTENSION=exe
-!   else
-!       ifdef LIBTARGET
+!   ifdef LIBTARGET
 TARGET_EXTENSION=lib
+!    else
+!       ifdef EXETARGET
+TARGET_EXTENSION=exe
 !       else
 TARGET_EXTENSION=dll
 !       endif
