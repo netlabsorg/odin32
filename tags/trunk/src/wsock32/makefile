@@ -1,16 +1,16 @@
-# $Id: makefile,v 1.32 2001-07-29 19:01:56 sandervl Exp $
+# $Id: makefile,v 1.33 2001-09-30 09:12:17 bird Exp $
 
 #
 # Odin32 API
 #
 #       wsock32.dll makefile
 #
-WRC_PREFIX_RESOURCE=1
 
 
 #
 # Compiler, tools, and interference rules.
 #
+WRC_PREFIX_RESOURCE=1
 !include ../../makefile.inc
 
 
