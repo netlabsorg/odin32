@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2389 2002-12-18 12:23:56 sandervl Exp $ */
+/* $Id: changelog,v 1.2390 2002-12-18 14:04:01 sandervl Exp $ */
 
  2002-12-18: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Ported listbox, combo & edit controls from ReWind
@@ -8,6 +8,8 @@
                   when creating dialog controls. (as done in Wine/Rewind)
                   (corrects wrong borders with new edit control)
                 o Removed obsolete source files
+                o Don't send focus related dialog messages if control
+                  already has focus. (Win32Dialog::setFocus)
 
  2002-12-17: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o CreateProcess bugfix (heap corruption)
