@@ -1,4 +1,4 @@
-/* $Id: pe.cpp,v 1.21 2000-09-10 21:54:44 sandervl Exp $ */
+/* $Id: pe.cpp,v 1.22 2000-10-06 11:04:42 sandervl Exp $ */
 
 /*
  * PELDR main exe loader code
@@ -62,11 +62,11 @@ KRNL32EXCEPTPROC       Krnl32SetExceptionHandler = 0;
 KRNL32EXCEPTPROC       Krnl32UnsetExceptionHandler = 0;
 
 //should be the same as in ..\kernel32\winexepeldr.h
-typedef BOOL (* WIN32API WIN32CTOR)(char *, char *, ULONG);
+typedef BOOL (* WIN32API WIN32CTOR)(char *, char *, ULONG, BOOL);
 
-WIN32CTOR              CreateWin32Exe       = 0;
-
-ULONG                  reservedMemory       = 0;
+WIN32CTOR   CreateWin32Exe       = 0;
+ULONG       reservedMemory       = 0;
+BOOL        fConsoleApp          = FALSE;
 
 void AllocateExeMem(char *filename);
 
@@ -185,9 +185,9 @@ filenotfound:
 	MyWinMessageBox(HWND_DESKTOP, NULL, exeName, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
         goto fail;
   }
-  rc = DosQueryProcAddr(hmodKernel32, 0, "_CreateWin32PeLdrExe@12", (PFN *)&CreateWin32Exe);
+  rc = DosQueryProcAddr(hmodKernel32, 0, "_CreateWin32PeLdrExe@16", (PFN *)&CreateWin32Exe);
 
-  if(CreateWin32Exe(exeName, win32cmdline, reservedMemory) == FALSE) {
+  if(CreateWin32Exe(exeName, win32cmdline, reservedMemory, fConsoleApp) == FALSE) {
         goto fail;
   }
 
@@ -271,9 +271,7 @@ void AllocateExeMem(char *filename)
   if(doshdr.e_magic != IMAGE_DOS_SIGNATURE || signature != IMAGE_NT_SIGNATURE) {
     	goto end;
   }
-//  if(!(fh.Characteristics & IMAGE_FILE_RELOCS_STRIPPED)) {
-//	goto end; //no need to allocate anything now
-//  }
+  fConsoleApp = (oh.Subsystem == IMAGE_SUBSYSTEM_WINDOWS_CUI);
 
   // check for high memory support
   rc = DosQuerySysInfo(QSV_VIRTUALADDRESSLIMIT, QSV_VIRTUALADDRESSLIMIT, &ulSysinfo, sizeof(ulSysinfo));
