@@ -1,4 +1,4 @@
-# $Id: setup.mak,v 1.19 2002-09-14 16:03:37 bird Exp $
+# $Id: setup.mak,v 1.20 2002-09-20 03:37:37 bird Exp $
 
 #
 # Generic makefile system.
@@ -150,10 +150,12 @@ PATH_SUB_DLL    = .
 PATH_SUB_SYS    = .
 # Sub dir where the virtual dos drivers goes.
 PATH_SUB_VDD    = .
+# Sub dir where the book files goes. (aka .inf)
+PATH_SUB_BOOK   = book
+# Sub dir where the help files goes. (aka .hlp)
+PATH_SUB_HELP   = help
 # Sub dir where the documentation goes.
-PATH_SUB_DOC    = .
-# Sub dir where the helpfiles goes.
-PATH_SUB_HLP    = .
+PATH_SUB_DOC    = docs
 
 
 
