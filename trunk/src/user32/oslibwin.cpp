@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.143 2003-04-23 18:00:58 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.144 2003-10-20 17:17:22 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -91,6 +91,7 @@ HWND OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle, ULONG dwOSFrameStyle
     FCData.flCreateFlags = dwFrameStyle;
 
     dprintf(("WinCreateWindow %x %s %x task %d shell %d classstyle %x winstyle %x bottom %d", hwndParent, pszName, id, fTaskList, fShellPosition, classStyle, dwWinStyle, fHWND_BOTTOM));
+    dprintf(("WinCreateWindow parent %x, owner %x", hwndParent, Owner));
 
     //Must not use WS_CLIPCHILDREN style with frame window. Transparency won't work otherwise.
     //Eg: dialog parent, groupbox; invalidate part of groupbox -> painting algorithm stops when it finds

@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.115 2003-08-08 13:30:19 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.116 2003-10-20 17:17:21 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -67,9 +67,11 @@ static MSG  doubleClickMsg = {0};
 BOOL setThreadQueueExtraCharMessage(TEB* teb, MSG* pExtraMsg)
 {
   // check if the single slot is occupied already
-  if (teb->o.odin.fTranslated == TRUE)
-    // there's still an already translated message to be processed
-    return FALSE;
+  if (teb->o.odin.fTranslated == TRUE) {
+      // there's still an already translated message to be processed
+      dprintf(("WARNING: translated message already pending!"));
+      return FALSE;
+  }
 
   teb->o.odin.fTranslated = TRUE;
   memcpy(&teb->o.odin.msgWCHAR, pExtraMsg, sizeof(MSG));

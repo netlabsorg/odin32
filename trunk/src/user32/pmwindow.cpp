@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.219 2003-08-22 13:16:45 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.220 2003-10-20 17:17:22 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -18,6 +18,7 @@
 #define INCL_DOSDEVICES
 #define INCL_DOSDEVIOCTL
 #define INCL_WINTRACKRECT
+#define INCL_BASE
 
 #include <os2wrap.h>
 #include <odinwrap.h>
@@ -52,6 +53,7 @@
 #include <pmscan.h>
 #include <winscan.h>
 #include <oslibdnd.h>
+#include <custombuild.h>
 #include <win\dbt.h>
 #include "dragdrop.h"
 #include "menu.h"
@@ -503,7 +505,9 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
  MRESULT          rc = 0;
  POSTMSG_PACKET  *postmsg;
  OSLIBPOINT       point, ClientPoint;
+ EXCEPTIONREGISTRATIONRECORD exceptRegRec = {0,0};
 
+    ODIN_SetExceptionHandler(&exceptRegRec);
     // restore our FS selector
     SetWin32TIB();
 
@@ -580,6 +584,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         }
         RELEASE_WNDOBJ(win32wnd);
         RestoreOS2TIB();
+        ODIN_UnsetExceptionHandler(&exceptRegRec);
 
 #ifdef DEBUG
         dbg_ThreadPopCall();
@@ -748,12 +753,17 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         break;
     }
    
+#ifdef DEBUG
     case WM_SETFOCUS:
     {
         HWND hwndFocus = (HWND)mp1;
         dprintf(("OS2: WM_SETFOCUS %x %x (%x) %d cur focus %x", win32wnd->getWindowHandle(), mp1, OS2ToWin32Handle(hwndFocus), mp2, WinQueryFocus(HWND_DESKTOP)));
+        if(WinQueryFocus(HWND_DESKTOP) == win32wnd->getOS2FrameWindowHandle()) {
+            dprintf(("WARNING: Focus set to frame window"));
+        }
         break;
     }
+#endif
 
     //Handle all focus processed during WM_FOCUSCHANGED; PM doesn't like focus
     //changes during focus processing (WM_SETFOCUS). This message is sent
@@ -1147,6 +1157,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     }
     if(win32wnd) RELEASE_WNDOBJ(win32wnd);
     RestoreOS2TIB();
+    ODIN_UnsetExceptionHandler(&exceptRegRec);
 
 #ifdef DEBUG
     dbg_ThreadPopCall();
@@ -1156,7 +1167,9 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 RunDefWndProc:
 //  dprintf(("OS2: RunDefWndProc msg %x for %x", msg, hwnd));
     if(win32wnd) RELEASE_WNDOBJ(win32wnd);
+
     RestoreOS2TIB();
+    ODIN_UnsetExceptionHandler(&exceptRegRec);
 
 #ifdef DEBUG
     dbg_ThreadPopCall();
@@ -1173,11 +1186,13 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
  TEB             *teb;
  MRESULT          rc = 0;
  MSG              winMsg, *pWinMsg;
+ EXCEPTIONREGISTRATIONRECORD exceptRegRec = {0,0};
 
 #ifdef DEBUG
     dbg_ThreadPushCall("Win32FrameWindowProc");
 #endif
 
+    ODIN_SetExceptionHandler(&exceptRegRec);
     //Restore our FS selector
     SetWin32TIB();
 
@@ -1889,7 +1904,7 @@ PosChangedEnd:
         RestoreOS2TIB();
         rc = pfnFrameWndProc(hwnd, msg, mp1, mp2);
         SetWin32TIB();
-        dprintf2(("PMFRAME:WM_QUERYFOCUSCHAIN %x fsCmd %x parent %x returned %x", win32wnd->getWindowHandle(), SHORT1FROMMP(mp1), (mp2) ? OS2ToWin32Handle((DWORD)mp2) : 0, (rc) ? OS2ToWin32Handle((DWORD)rc) : 0));
+        dprintf2(("PMFRAME:WM_QUERYFOCUSCHAIN %x fsCmd %x parent %x returned %x (%x)", win32wnd->getWindowHandle(), SHORT1FROMMP(mp1), (mp2) ? OS2ToWin32Handle((DWORD)mp2) : 0, (rc) ? OS2ToWin32Handle((DWORD)rc) : 0, rc));
         break;
 //        goto RunDefFrameWndProc;
 #endif
@@ -2163,6 +2178,7 @@ PosChangedEnd:
     }
     if(win32wnd) RELEASE_WNDOBJ(win32wnd);
     RestoreOS2TIB();
+    ODIN_UnsetExceptionHandler(&exceptRegRec);
 
 #ifdef DEBUG
     dbg_ThreadPopCall();
@@ -2173,6 +2189,7 @@ RunDefFrameWndProc:
     dprintf2(("RunDefFrameWndProc"));
     if(win32wnd) RELEASE_WNDOBJ(win32wnd);
     RestoreOS2TIB();
+    ODIN_UnsetExceptionHandler(&exceptRegRec);
 
 #ifdef DEBUG
     dbg_ThreadPopCall();
@@ -2183,6 +2200,8 @@ RunDefWndProc:
     dprintf2(("RunDefWndProc"));
     if(win32wnd) RELEASE_WNDOBJ(win32wnd);
     RestoreOS2TIB();
+    ODIN_UnsetExceptionHandler(&exceptRegRec);
+
     //calling WinDefWindowProc here breaks Opera hotlist window (WM_ADJUSTWINDOWPOS)
 //    return pfnFrameWndProc(hwnd, msg, mp1, mp2);
 
@@ -2199,6 +2218,7 @@ MRESULT EXPENTRY Win32FakeWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp
     Win32BaseWindow *win32wnd, *win32wndchild;
     TEB             *teb;
     MRESULT          rc = 0;
+    EXCEPTIONREGISTRATIONRECORD exceptRegRec = {0,0};
 
     //Restore our FS selector
     SetWin32TIB();
@@ -2217,6 +2237,8 @@ MRESULT EXPENTRY Win32FakeWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp
 
     RestoreOS2TIB();
     rc = pfnOldWindowProc(hwnd, msg, mp1, mp2);
+
+    ODIN_SetExceptionHandler(&exceptRegRec);
     SetWin32TIB();
     switch(msg) {
     case WM_WINDOWPOSCHANGED:
@@ -2238,6 +2260,7 @@ MRESULT EXPENTRY Win32FakeWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp
     }
     if(win32wnd) RELEASE_WNDOBJ(win32wnd);
     RestoreOS2TIB();
+    ODIN_UnsetExceptionHandler(&exceptRegRec);
     return rc;
 
 RunDefWndProc:

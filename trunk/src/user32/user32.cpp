@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.128 2003-08-01 10:07:43 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.129 2003-10-20 17:17:23 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -116,7 +116,8 @@ BOOL WIN32API EqualRect( const RECT *lprc1, const RECT *lprc2)
       SetLastError(ERROR_INVALID_PARAMETER);
       return FALSE;
     }
-
+ 
+    dprintf2(("USER32:  EqualRect (%d,%d)(%d,%d) (%d,%d)(%d,%d)", lprc1->left, lprc1->top, lprc1->right, lprc1->bottom, lprc2->left, lprc2->top, lprc2->right, lprc2->bottom));
     return (lprc1->left == lprc2->left &&
             lprc1->right == lprc2->right &&
             lprc1->top == lprc2->top &&
@@ -166,6 +167,7 @@ BOOL WIN32API IntersectRect( PRECT lprcDst, const RECT * lprcSrc1, const RECT * 
       lprcDst->right  = MIN(lprcSrc1->right,lprcSrc2->right);
       lprcDst->top    = MAX(lprcSrc1->top,lprcSrc2->top);
       lprcDst->bottom = MIN(lprcSrc1->bottom,lprcSrc2->bottom);
+      dprintf2(("USER32: IntersectRect result: (%d,%d)(%d,%d)", lprcDst->left, lprcDst->top, lprcDst->right, lprcDst->bottom));
     }
 
     return TRUE;
