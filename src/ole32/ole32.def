@@ -169,6 +169,10 @@ EXPORTS
     WriteOleStg                = _WriteOleStg@0              @161
     WriteStringStream          = _WriteStringStream@0        @162
 
+    CreateErrorInfo            = _CreateErrorInfo@4          @192
+    GetErrorInfo               = _GetErrorInfo@8             @196
+    SetErrorInfo               = _SetErrorInfo@8             @255
+
     CoImpersonateClient        = _CoImpersonateClient@0	     @997	; suppress warning
     CoInitializeSecurity       = _CoInitializeSecurity@36    @998	; suppress warning
     CoRegisterSurrogate        = _CoRegisterSurrogate@4	     @999	; suppress warning
