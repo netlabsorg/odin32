@@ -24,13 +24,16 @@ typedef struct CMemoryAllocator
 	MA_IMemAllocatorImpl	memalloc;
 
 	/* IMemAllocator fields. */
+	CRITICAL_SECTION	csMem;
+	ALLOCATOR_PROPERTIES	prop;
 } CMemoryAllocator;
 
 #define	CMemoryAllocator_THIS(iface,member)		CMemoryAllocator*	This = ((CMemoryAllocator*)(((char*)iface)-offsetof(CMemoryAllocator,member)))
 
 HRESULT QUARTZ_CreateMemoryAllocator(IUnknown* punkOuter,void** ppobj);
 
-void CMemoryAllocator_InitIMemAllocator( CMemoryAllocator* pma );
+HRESULT CMemoryAllocator_InitIMemAllocator( CMemoryAllocator* pma );
+void CMemoryAllocator_UninitIMemAllocator( CMemoryAllocator* pma );
 
 
 #endif  /* WINE_DSHOW_MEMALLOC_H */
