@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.65 2002-02-09 12:45:11 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.66 2002-06-15 11:27:03 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -892,10 +892,12 @@ DWORD WIN32API GetFullPathNameA(LPCSTR arg1, DWORD arg2, LPSTR  arg3,
 DWORD WIN32API GetFullPathNameW(LPCWSTR lpFileName, DWORD nBufferLength,
                                 LPWSTR lpBuffer, LPWSTR *lpFilePart)
 {
- char *astring, *asciibuffer, *asciipart;
+ char *astring = NULL, *asciibuffer = NULL, *asciipart = NULL;
  DWORD rc;
 
-  asciibuffer = (char *)malloc(nBufferLength+1);
+  if(nBufferLength) {
+      asciibuffer = (char *)malloc(nBufferLength+1);
+  }
   astring     = UnicodeToAsciiString((LPWSTR)lpFileName);
 
   rc = GetFullPathNameA(astring, nBufferLength,
@@ -905,7 +907,7 @@ DWORD WIN32API GetFullPathNameW(LPCWSTR lpFileName, DWORD nBufferLength,
            astring,
            asciibuffer));
 
-  if(rc)
+  if(rc && asciibuffer)
     AsciiToUnicode(asciibuffer,
                    lpBuffer);
 
@@ -917,7 +919,7 @@ DWORD WIN32API GetFullPathNameW(LPCWSTR lpFileName, DWORD nBufferLength,
   }
 
   FreeAsciiString(astring);
-  free(asciibuffer);
+  if(asciibuffer) free(asciibuffer);
   return(rc);
 }
 //******************************************************************************
