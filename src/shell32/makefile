@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.17 1999-11-02 19:17:15 phaller Exp $
+# $Id: makefile,v 1.18 2000-01-18 22:27:55 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -53,7 +53,7 @@ $(TARGET).lib: $(TARGET)exp.def
 $(TARGET)exp.def: $(TARGET).def
         $(IMPDEF) $** $@
 
-resource.asm: shres.rc
+resource.asm: shres.rc shell32_en.rc
     $(RC) $(RCFLAGS) -o resource.asm shres.rc
 
 resource.obj: resource.asm
