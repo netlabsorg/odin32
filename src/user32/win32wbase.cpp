@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.26 1999-10-07 09:28:01 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.27 1999-10-07 23:21:31 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2002,6 +2002,29 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
       if (swp.cy > maxTrack.y) swp.cy = maxTrack.y;
       if (swp.cx < minTrack.x) swp.cx = minTrack.x;
       if (swp.cy < minTrack.y) swp.cy = minTrack.y;
+
+      RECTLOS2 rectFrame;
+
+      //Calculate correct frame rectangle from client rectangle
+      //NOTE: xLeft & yBottom can become too big
+      //Some programs use GetSystemMetrics 32/33 to determine offsets
+      rectFrame.xLeft   = swp.x;
+      rectFrame.yBottom = swp.y;
+      rectFrame.xRight  = swp.x + swp.cx;
+      rectFrame.yTop    = swp.y + swp.cy;
+
+      OSLibWinCalcFrameRect(OS2HwndFrame, &rectFrame, FALSE);     
+      swp.x  = rectFrame.xLeft;
+      swp.y  = rectFrame.yBottom;
+      swp.cx = rectFrame.xRight - rectFrame.xLeft;
+      swp.cy = rectFrame.yTop - rectFrame.yBottom;
+      if(swp.x < 0) {
+	swp.cx += -swp.x;
+	swp.x   = 0;
+      }
+      if(swp.y + swp.cy > ScreenHeight) {
+	swp.y = ScreenHeight - swp.cy;
+      }
       swp.hwnd = OS2HwndFrame;
    } else
       swp.hwnd = OS2Hwnd;
