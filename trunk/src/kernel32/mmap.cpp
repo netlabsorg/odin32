@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.28 1999-12-13 19:28:14 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.29 1999-12-14 12:50:45 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -236,9 +236,10 @@ BOOL Win32MemMap::commitPage(ULONG offset, BOOL fWriteAccess, int nrpages)
 //	}
   }
   else {
-	for(i=0;i<nrpages;i++) {
-		if(VirtualQuery((LPSTR)pageAddr, &memInfo, PAGE_SIZE) == 0) {
-			dprintf(("Win32MemMap::commitPage: VirtualQuery (%x,%x) failed for %x", pageAddr, PAGE_SIZE));
+	ULONG sizeleft = nrpages*PAGE_SIZE;
+	while(sizeleft) {
+		if(VirtualQuery((LPSTR)pageAddr, &memInfo, sizeleft) == 0) {
+			dprintf(("Win32MemMap::commitPage: VirtualQuery (%x,%x) failed", pageAddr, sizeleft));
 			goto fail;
 		}
 		if(!(memInfo.State & MEM_COMMIT))
@@ -246,7 +247,9 @@ BOOL Win32MemMap::commitPage(ULONG offset, BOOL fWriteAccess, int nrpages)
 		  	if(VirtualAlloc((LPVOID)pageAddr, memInfo.RegionSize, MEM_COMMIT, newProt) == FALSE) 
 				goto fail;
 	  	}
-		pageAddr += PAGE_SIZE;
+		memInfo.RegionSize = (memInfo.RegionSize+PAGE_SIZE-1) & ~0xfff;
+		pageAddr += memInfo.RegionSize;
+		sizeleft -= memInfo.RegionSize;
 	}
   }
 
