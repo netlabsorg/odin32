@@ -1,10 +1,13 @@
-/* $Id: ChangeLog,v 1.2627 2003-10-02 10:37:28 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2628 2003-10-02 10:38:36 sandervl Exp $ */
 
  2003-10-01: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Clean up global critical section (window handles) during unload
+    - SHELL32:  o Added stubs for SHGetNewLinkInfoA/W
 
  2003-10-01: Platon Fomichev <stauff@innotek   >
     - USER32:   o CallWindowProcA/W: don't fail if window handle is invalid
+    - SHELL32:  o Add support for Unicode adding of files to 'recent document'
+    - COMCTL32: o Fixed bug when calling function by pointer in MRU funcs
 
  2003-09-30: knut st. osmundsen <bird-odinspam@anduin    >
     - CMDQD:    o Fixed code which messes with STD handles.
