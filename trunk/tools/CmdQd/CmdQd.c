@@ -1,4 +1,4 @@
-/* $Id: CmdQd.c,v 1.11 2001-11-24 20:40:44 bird Exp $
+/* $Id: CmdQd.c,v 1.12 2001-12-09 16:11:13 bird Exp $
  *
  * Command Queue Daemon / Client.
  *
@@ -586,14 +586,11 @@ int Daemon(int cWorkers)
                 /*
                  * Make job entry.
                  */
-                _heap_check();
                 pJob = malloc((int)&((PJOB)0)->JobInfo.szzEnv[pShrMem->u1.Submit.cchEnv]);
                 if (pJob)
                 {
-                    _heap_check();
                     memcpy(&pJob->JobInfo, &pShrMem->u1.Submit,
                            (int)&((struct Submit *)0)->szzEnv[pShrMem->u1.Submit.cchEnv]);
-                    _heap_check();
                     pJob->rc = -1;
                     pJob->pNext = NULL;
                     pJob->pJobOutput = NULL;
@@ -1285,8 +1282,6 @@ int Daemon(int cWorkers)
     DosCloseMutexSem(hmtxExec);
     DosCloseEventSem(hevJobQueue);
 
-    _dump_allocated(16);
-
     return 0;
 }
 
@@ -1815,10 +1810,11 @@ char *WorkerArguments(char *pszArg, const char *pszzEnv, const char *pszCommand,
  * @param   pszFilename  Pointer to filename string. Not empty string!
  *                       Much space to play with.
  * @remark  (From fastdep.)
+ * @remark  BOGUS CODE! Recheck it please!
  */
 char *fileNormalize(char *pszFilename, char *pszCurDir)
 {
-    char *  psz;
+    char *  pszRet = pszFilename;
     int     aiSlashes[CCHMAXPATH/2];
     int     cSlashes;
     int     i;
@@ -1826,7 +1822,7 @@ char *fileNormalize(char *pszFilename, char *pszCurDir)
     /*
      * Init stuff.
      */
-    for (i = 1, cSlashes; pszCurDir[i] != '\0'; i++)
+    for (i = 1, cSlashes = 0; pszCurDir[i] != '\0'; i++)
     {
         if (pszCurDir[i] == '/')
             pszCurDir[i] = '\\';
@@ -1842,7 +1838,6 @@ char *fileNormalize(char *pszFilename, char *pszCurDir)
 
 
     /* expand path? */
-    pszFilename = psz;
     if (pszFilename[1] != ':')
     {   /* relative path */
         int     iSlash;
@@ -1873,7 +1868,7 @@ char *fileNormalize(char *pszFilename, char *pszCurDir)
     }
     /* else: assume full path */
 
-    return psz;
+    return pszRet;
 }
 
 /**
