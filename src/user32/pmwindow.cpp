@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.218 2003-07-31 15:56:44 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.219 2003-08-22 13:16:45 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -116,7 +116,7 @@ LONG CapsCharHeight = 0;
 // messages. If the key is pressed longer and starts to repeat,
 // WM_KEYDOWN messages come in properly.
 static BOOL fKeyAltGrDown = FALSE;
-
+static BOOL fEnableCDPolling = FALSE;
 
 static char *PMDragExtractFiles(PDRAGINFO pDragInfo, ULONG *pcItems, ULONG *pulBytes);
 static BOOL  PMDragValidate(PDRAGINFO pDragInfo);
@@ -342,6 +342,16 @@ void WIN32API CustForceMonoCursor()
 void WIN32API DisableDragDrop(BOOL fDisabled)
 {
     fDragDropDisabled = fDisabled;
+}
+//******************************************************************************
+// Turn on CD Polling (window with 2 second timer to check CD disk presence) 
+// 
+// NOTE: This can cause PM hangs when executing a program for a very long time
+//       (block in IOCtl)
+//******************************************************************************
+void WIN32API CustEnableCDPolling()
+{
+    fEnableCDPolling = TRUE;
 }
 //******************************************************************************
 //CD notification window class
@@ -597,7 +607,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         }
 
         //Create CD notification window
-        if(hwndCD == 0) {
+        if(hwndCD == 0 && fEnableCDPolling) {
             hwndCD = WinCreateWindow(HWND_DESKTOP, WIN32_CDCLASS,
                                      NULL, 0, 0, 0, 0, 0,
                                      HWND_DESKTOP, HWND_TOP, 0, NULL, NULL);
