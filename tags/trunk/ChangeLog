@@ -1,4 +1,13 @@
- /* $Id: ChangeLog,v 1.89 1999-08-16 20:21:09 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.90 1999-08-17 12:43:57 sandervl Exp $ */
+ 99-08-17: Sander van Leeuwen <sandervl@xs4all.nl>
+	- ODINCRT: Rewrote __threadid Clib function to get rid of crashes
+                   (restores OS/2 FS selector before accessing PIB ptr and
+                    puts back original FS selector afterwards)
+	  NOTE: No longer necessary to use ODIN_FS_BEGIN/ODIN_FS_END macros
+	- DDRAW: Removed ODIN_FS_BEGIN/ODIN_FS_END calls
+	         Fixed bugs in divewrap.h. Incorrect wrappers called themselves
+                 instead of the original Dive apis.
+
  99-08-16: Sander van Leeuwen <sandervl@xs4all.nl>
 	- PE loader: Started with rewrite
 	- ODINCRT: Changed compile & link options
