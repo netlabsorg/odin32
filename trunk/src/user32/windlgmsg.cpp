@@ -1,4 +1,4 @@
-/* $Id: windlgmsg.cpp,v 1.9 2001-06-09 14:50:25 sandervl Exp $ */
+/* $Id: windlgmsg.cpp,v 1.10 2001-09-19 09:10:13 sandervl Exp $ */
 /*
  * Win32 dialog message APIs for OS/2
  *
@@ -169,6 +169,12 @@ static BOOL DIALOG_IsAccelerator( HWND hwnd, HWND hwndDlg, WPARAM vKey )
                 }
                 else
                 {
+#ifdef __WIN32OS2__
+                    if(hwndControl == 0) {
+                        dprintf(("WARNING: DIALOG_IsAccelerator %x %x -> hwndControl == 0", hwnd, hwndDlg));
+                        return FALSE;
+                    }
+#endif
                     hwndNext = GetWindow( hwndControl, GW_HWNDNEXT );
                 }
             }
