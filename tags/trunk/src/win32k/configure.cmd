@@ -1,4 +1,4 @@
-/* $Id: configure.cmd,v 1.19 2001-05-19 20:53:04 bird Exp $
+/* $Id: configure.cmd,v 1.20 2001-06-02 17:50:36 bird Exp $
  *
  * Configuration script.
  * Generates makefile.inc and an empty .depend file.
@@ -36,7 +36,7 @@
                     fWin32k = 0;
                 when (ch = '?' | ch = 'H' | substr(sArg, 1, 2) = '-H') then
                 do
-                    say 'Odin32 Configure.cmd. $Revision: 1.19 $.'
+                    say 'Odin32 Configure.cmd. $Revision: 1.20 $.'
                     say 'syntax: Configure.cmd [-n] [-w]'
                     say '  -n   Noninteractive.'
                     say '  -w   Don''t build Win32k.'
@@ -113,7 +113,7 @@
         if (sVA <> '' & stream(sVA'\bin\icc.exe', 'c', 'query exists') = '') then
             sVA = ''
         if (sVA = '') then
-            sVA = SearchPaths('PATH', 'icc.exe', 'BOOKSHELF', '..\bin\icc.exe', 'Path to IBM VisualAge for C++ or IBM C and C++ Compilers, and set its environment you compile:');
+            sVA = SearchPaths('PATH', '..\bin\icc.exe', 'BOOKSHELF', '..\bin\icc.exe', 'Path to IBM VisualAge for C++ or IBM C and C++ Compilers, and set its environment you compile:');
         sVA = ValidatePath(sVA, 'bin\icc.exe', 'VisualAge Path');
         call lineout sIncFile, 'VACPATH          =' sVA
         call lineout sIncFile, ''
@@ -244,8 +244,11 @@ return sPath;
  * Validate if a file exists to ensure that the given path is valid.
  * @returns The path if valid. If invalid an empty string is returned.
  */
-ValidatePath: procedure
+ValidatePath: procedure expose fWin32k
     parse arg sPath, sFile, sDesc
+
+    if (strip(sPath) = "" & \fWin32k) then
+        return "";
 
     rc = stream(sPath'\'sFile, 'c', 'query exists')
     if (rc <> '') then
