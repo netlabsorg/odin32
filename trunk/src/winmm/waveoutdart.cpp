@@ -1,4 +1,4 @@
-/* $Id: waveoutdart.cpp,v 1.20 2003-03-06 18:18:56 sandervl Exp $ */
+/* $Id: waveoutdart.cpp,v 1.21 2003-04-03 13:07:03 sandervl Exp $ */
 
 /*
  * Wave playback class (DART)
@@ -508,7 +508,7 @@ ULONG DartWaveOut::getPosition()
     mciStatus.ulItem = MCI_STATUS_POSITION;
     rc = mymciSendCommand(DeviceId, MCI_STATUS, MCI_STATUS_ITEM|MCI_WAIT, (PVOID)&mciStatus, 0);
     if((rc & 0xFFFF) == MCIERR_SUCCESS) {
-        nrbytes = (ULONG)((double)mciStatus.ulReturn * ((double)getAvgBytesPerSecond()/1000.0));
+        nrbytes = (ULONG)(((double)mciStatus.ulReturn * (double)getAvgBytesPerSecond())/1000.0);
         return nrbytes;;
     }
     mciError(rc);
@@ -741,9 +741,11 @@ LONG APIENTRY WaveOutHandler(ULONG ulStatus,
     dprintf2(("WaveOutHandler %x %x %x", ulStatus, pBuffer, ulFlags));
 
     ptib2 = (PTIB2)_getTIBvalue(offsetof(TIB, tib_ptib2));
-    if(ptib2 && HIBYTE(ptib2->tib2_ulpri) != PRTYC_TIMECRITICAL) {
-        dprintf(("Setting priority of DART thread to PRTYC_TIMECRITICAL"));
-        DosSetPriority(PRTYS_THREAD, PRTYC_TIMECRITICAL, 0, 0);
+    if(ptib2 && HIBYTE(ptib2->tib2_ulpri) != PRTYC_TIMECRITICAL && 
+       LOBYTE(ptib2->tib2_ulpri) != PRTYD_MAXIMUM) 
+    {
+        dprintf(("Setting priority of DART thread to PRTYC_TIMECRITICAL/PRTYD_MAXIMUM"));
+        DosSetPriority(PRTYS_THREAD, PRTYC_TIMECRITICAL, PRTYD_MAXIMUM, 0);
     }
     if(pBuffer && pBuffer->ulUserParm)
     {
