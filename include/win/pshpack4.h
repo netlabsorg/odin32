@@ -1,9 +1,9 @@
-/* $Id: pshpack4.h,v 1.1 1999-05-24 20:19:18 ktk Exp $ */
+/* $Id: pshpack4.h,v 1.2 2000-08-23 18:05:56 sandervl Exp $ */
 
 #ifndef __WINE_PSHPACK_H
 #define __WINE_PSHPACK_H 4
 
-#if defined(__GNUC__) || defined(__SUNPRO_CC) || (defined(__IBMC__) || defined(__IBMCPP__))
+#if defined(__GNUC__) || defined(__SUNPRO_CC) || (defined(__IBMC__) || defined(__IBMCPP__)) || defined(__WATCOMC__)
 #pragma pack(4)
 #elif defined(__SUNPRO_C)
 #warning "Assumes default alignment is 4"

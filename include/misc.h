@@ -1,4 +1,4 @@
-/* $Id: misc.h,v 1.16 2000-08-11 09:57:49 sandervl Exp $ */
+/* $Id: misc.h,v 1.17 2000-08-23 18:05:54 sandervl Exp $ */
 
 /*
  * Miscellaneous definitions
@@ -20,12 +20,19 @@
 /* enable support for the _interrupt() statement */
 #if (defined(__IBMCPP__) || defined(__IBMC__))
 #  include <builtin.h>
-#endif
-
 #ifdef DEBUG
   #define DebugInt3()	_interrupt(3)
 #else
   #define DebugInt3()
+#endif
+
+#else
+#ifdef DEBUG
+  #define DebugInt3()	_asm int 3;
+#else
+  #define DebugInt3()
+#endif
+
 #endif
 
 
