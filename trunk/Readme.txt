@@ -1,4 +1,4 @@
-/* $Id: Readme.txt,v 1.10 1999-11-14 15:52:02 achimha Exp $ */
+/* $Id: Readme.txt,v 1.11 1999-11-14 16:37:59 sandervl Exp $ */
 
 NOTE: We are still looking for talented developers that want to
       contribute! Please take a look at the last section!
@@ -23,7 +23,7 @@ making it possible to run your favorite Windows programs under OS/2,
 as if they were native OS/2 programs. The second goal of Odin is to
 provide the full Win32 application programming interface (API) so
 that it is possible to build OS/2 programs using Windows source
-codes. This is also refered to as Odin32 whereas Odin is the name
+code. This is also refered to as Odin32 whereas Odin is the name
 of the Win32 binary emulator.
 
 1.2 Current Status
@@ -35,7 +35,7 @@ problems. Even though it is not usable for most programs, we have
 decided to do a public release in order to show how much progress
 the project has been made. A second goal is to attract more developers
 in order to speedup development. Our job includes rewriting most
-parts of Windows 95/NT without having the original source codes so
+parts of Windows 95/NT without having the original source code so
 the more developers we have the more progess will be seen. The
 last public release (Alpha 0.004) has been in 1997 and the project
 has changed much since then. Everything is free and Open Source now
