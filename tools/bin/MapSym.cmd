@@ -1,4 +1,4 @@
-/* $Id: MapSym.cmd,v 1.1 2002-04-30 03:26:07 bird Exp $
+/* $Id: MapSym.cmd,v 1.2 2002-04-30 03:55:02 bird Exp $
  *
  * Helper script for calling MAPSYM.EXE.
  *
@@ -11,7 +11,10 @@
 /*
  * Configuration.
  */
-sLinkers = ';watcom;vac3xx;vac40;link386;'
+sWatcom = ';wat11c;wat11;watcom;'
+sIBMOld = ';vac3xx;vac365;vac308;link386;emx;emxpgcc;mscv6;ibmold;'
+sVAC40  = ';vac40;'
+sLinkers = ';vac3xx;vac365;vac308;vac40;link386;mscv6;watcom;wat11;wat11c;emx;emxpgcc;ibmold;'
 
 /*
  * Parse arguments.
@@ -34,8 +37,18 @@ do
     call syntax;
     exit(16);
 end
-sLinker = translate(sLinker);           /* easier to compare */
 
+
+/*
+ * Convert linker input.
+ */
+sLinker = translate(sLinker);           /* easier to compare */
+if (pos(';'||sLinker||';', translate(sWatcom)) > 0) then
+    sLinker = 'WATCOM';
+if (pos(';'||sLinker||';', translate(sIBMOld)) > 0) then
+    sLinker = 'IBMOLD';
+if (pos(';'||sLinker||';', translate(sVAC40)) > 0) then
+    sLinker = 'VAC40';
 
 /*
  * Load rexxutil functions.
@@ -79,7 +92,7 @@ end
  * Do pre mapsym.exe processing of the sym file.
  */
 select
-    when ((sLinker = 'LINK386') | (sLinker = 'VAC3XX')) then
+    when (sLinker = 'IBMOLD') then
     do
         '@copy' sMapFile sTmpMapFile
         if (rc <> 0) then
@@ -156,10 +169,12 @@ exit(0);
 *******************************************************************************/
 
 
-
+/**
+ * Display usage info.
+ */
 syntax: procedure;
     say 'syntax: MapSym.cmd <linker> <mapfile> <symfile>';
-    say '   linker      watcom, vac3xx, link386 or vac40.';
+    say '   linker      watcom, vac3xx, link386 or vac40. All $(BUILD_ENV).';
     say '   mapfile     Name of the input map file.';
     say '   symfile     Name of the output sym file.';
 return 0;
