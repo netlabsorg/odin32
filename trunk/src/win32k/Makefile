@@ -1,9 +1,9 @@
-# $Id: Makefile,v 1.67 2001-02-23 02:57:50 bird Exp $
+# $Id: Makefile,v 1.68 2001-03-11 16:43:08 bird Exp $
 
 #
 # Win32k makefile.
 #
-# Copyright 1998-2000 knut st. osmundsen
+# Copyright 1998-2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
 #
 # Project Odin Software License can be found in LICENSE.TXT
 #
@@ -15,7 +15,7 @@
 #     If not newer this might be a fatal problem, so we'll fail.
 #
 !if [..\..\tools\bin\Exists.cmd makefile.inc] == 1
-!   if [configure.cmd noninteractive]
+!   if [echo No makefile.inc - Reconfiguring Win32k... & configure.cmd noninteractive]
 !   endif
 !endif
 !if [Check.cmd $(MAKE) -nologo -q -f Check.mk makefile.inc] != 0
@@ -25,11 +25,11 @@
 
 #
 # Include path definitions and check if they need updating.
-# Include win32k tools and settings.
+# Include Win32k tools and settings.
 #
 !include makefile.inc
-!if [..\..\tools\bin\Exists.cmd $(ODIN32_INCLUDE)\win32k.h] == 1
-!   if [configure.cmd noninteractive]
+!if [..\..\tools\bin\Exists.cmd $(WIN32KINCLUDE)\OS2Krnl.h] == 1
+!   if [echo Bad makefile.inc - Reconfiguring Win32k... & configure.cmd noninteractive]
 !   endif
 !   include makefile.inc
 !endif
@@ -42,7 +42,6 @@
 #
 SUBDIRS = \
 .\lib \
-.\pe2lx \
 .\rexx \
 .\utils
 
@@ -52,11 +51,42 @@ SUBDIRS = \
 #
 all:
 !if "$(DDKPATH)" == "" || "$(MSCPATH)" == ""  || "$(TOOLKIT)" == "" || "$(VACPATH)" == ""
-    $(DODIRS) "lib pe2lx" $(MAKE_CMD)
+    $(MAKE_CMD) -f xx2lx.mak
+    $(DODIRS) "lib" $(MAKE_CMD)
 !else
     $(MAKE_CMD) -f win32k.mak
+    $(MAKE_CMD) -f xx2lx.mak
     $(DODIRS) "$(SUBDIRS)" $(MAKE_CMD)
 !endif
+
+
+#
+# Individual Target Forwarder Rules.
+#
+$(WIN32KBIN)\win32k.sys win32k.sys win32k \
+$(WIN32KBIN)\xx2lx.exe  xx2lx.exe  xx2lx: .force
+    $(MAKE_CMD) -f $(@B).mak
+
+$(WIN32KBIN)\win32ktst.exe win32ktst.exe win32ktst \
+$(WIN32KBIN)\extact.exe    extract.exe   extract \
+$(WIN32KBIN)\mkcalltab.exe mkcalltab.exe mkcalltab \
+$(WIN32KBIN)\libconv.exe   libconv.exe   libconv \
+clfix.exe: .force
+    $(MAKE_CMD) -f win32k.mak $(@R).exe
+
+$(WIN32KINCLUDE)\win32k.inc     win32k.inc \
+$(WIN32KINCLUDE)\api.inc        api.inc \
+$(WIN32KINCLUDE)\options.inc    options.inc: .force
+    $(MAKE_CMD) -f win32k.mak $(WIN32KINCLUDE)\$(@B).inc
+
+$(WIN32KBASE)\ldr\calltaba.asm ldr\calltaba.asm: .force
+    $(MAKE_CMD) -f $(WIN32KBASE)\ldr\calltaba.asm
+
+$(WIN32KBASE)\test\TstFakers.c test\TstFakers.c: .force
+    $(MAKE_CMD) -f $(WIN32KBASE)\test\TstFakers.c
+
+win32kcc.exe win32kcc:
+    $(DODIRS) "utils" $(MAKE_CMD)
 
 
 #
@@ -137,8 +167,7 @@ win32k.vpj:
 #  (Old SDS 0.33 - don't work anylonger.)
 #
 lxdoc:
-    cpp2sds -o DocsA\ -i include\modulebase.h include\pe2lx.h ldr\modulebase.cpp \
-        pe2lx\pe2lx.cpp
+    cpp2sds -o DocsA\ -i include\modulebase.h include\pe2lx.h ldr\modulebase.cpp pe2lx\pe2lx.cpp
     cd DocsA
     exp sds2doc -ai *.sds
 
@@ -146,4 +175,10 @@ fulldoc:
     exp cpp2sds -o DocsA\ -i include\*.h *.cpp ldr\*.cpp misc\*.cpp pe2lx\*.cpp
     cd DocsA
     exp sds2doc -ai *.sds
+
+
+#
+# Dummy rule for force.
+#
+.force:
 
