@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.7 1999-09-26 15:25:55 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.8 1999-09-27 18:21:25 dengert Exp $ */
 
 /*
  * DC functions for USER32
@@ -23,22 +23,16 @@
 #include <math.h>
 #include <limits.h>
 #include "oslibwin.h"
+#include "dcdata.h"
+
+#undef SEVERITY_ERROR
+#include <winerror.h>
 
 #ifndef OPEN32API
 #define OPEN32API _System
 #endif
 
 /*********************/
-typedef struct _tagXFORM
-{
-    FLOAT eM11;
-    FLOAT eM12;
-    FLOAT eM21;
-    FLOAT eM22;
-    FLOAT eDx;
-    FLOAT eDy;
-} XFORM_W, *PXFORM_W, *LPXFORM_W;
-
 typedef struct
 {
     HDC   hdc;
@@ -158,116 +152,6 @@ typedef struct _RGNDATA_W {
 #define MM_ISOTROPIC_W        7
 #define MM_ANISOTROPIC_W      8
 
-enum PS_Type { MICRO_CACHED, MICRO, NORMAL };
-enum HDC_Type{ TYPE_0, TYPE_1, TYPE_2, TYPE_3, TYPE_4 };
-
-typedef struct _DCData
-{
-   HDC         hdc;
-   HWND        hwnd;
-   HPS         hps;
-
-   UINT        lastBrushHandle;
-   PVOID       lastBrushObject;
-   UINT        lastPenHandle;
-   pPenObject  lastPenObject;
-   UINT        lastFontHandle;
-   PVOID       lastFontObject;
-   UINT        lastBitmapHandle;
-   PVOID       lastBitmapObject;
-   UINT        lastPaletteHandle;
-   PVOID       lastPaletteObject;
-
-   UINT        nullBitmapHandle;
-
-   ULONG       BkColor;
-   ULONG       TextColor;
-   ULONG       BkColor_PM;
-   ULONG       TextColor_PM;
-
-   int         BkMode;
-   ULONG       BkMode_PM;
-
-   int         ROP2Mode;
-   int         ROP2Mode_PM;
-
-   unsigned    isMemoryPS:1;
-   unsigned    isMetaPS:1;
-   unsigned    isPrinter:1;
-   unsigned    isFrameWindow:1;
-   unsigned    isOD_QUEUED:1;
-   unsigned    isOD_INFO:1;
-   unsigned    isClient:1;
-   unsigned    isClientArea:1;
-   unsigned    isLeftLeft:1;
-   unsigned    isTopTop:1;
-   unsigned    isWideLine:1;
-   unsigned    alignUpdateCP:1;
-   unsigned    isCacheable:1;
-   unsigned    penIsExtPen:1;
-   unsigned    isValid:1;
-   unsigned    inPath:1;
-   unsigned    isStartDoc:1;
-   unsigned    resetStockFonts:1;
-   unsigned    unused:14;
-
-   ULONG       MapMode;
-   HBITMAP     bitmapHandle;
-   ULONG       bitmapHeight;
-   ULONG       bitmapWidth;
-   ULONG       hMeta;
-   PVOID       pMetaFileObject;
-   int         polyFillMode;
-   int         arcDirection;
-   int         stretchBltMode;
-   int         graphicsMode;
-   HRGN        hrgnHDC;
-
-   PS_Type     psType;
-
-   HDC_Type    hdcType;
-   USHORT      usFiller;
-   POINTL      viewportOrg;
-   double      viewportXExt;
-   double      viewportYExt;
-   POINTL      windowOrg;
-   SIZEL       windowExt;
-   HRGN        hrgnVis;
-   POINTL      ptlOrigin;
-   ULONG       printPageHeight;
-   PVOID       printerObject;
-
-   LONG        taMode;
-   XFORM_W     xform;
-
-   INT         worldYDeltaFor1Pixel;
-   INT         worldXDeltaFor1Pixel;
-   ULONG       colorMode;
-   PULONG      pLogColorTable;
-
-   ULONG       lcidBitfield;
-
-   HWND        hwndRealize;
-   ULONG       cpeMap;
-
-   LONG        lTechnology;
-
-   LONG        lWndXExtSave, lWndYExtSave,
-               lVwpXExtSave, lVwpYExtSave;
-
-   int         height;
-
-   POINTL      brushOrgPoint;
-
-   PVOID       pEnhMetaPalette;
-   PVOID       lpAbortProc;
-   ULONG       HPStoHDCInversionHeight;
-
-   int         saveLevel;
-
-   struct      _DCData *nextDCData;
-} tDCData, *pDCData;
-
 /*********************/
 
 BOOL    APIENTRY GpiEnableYInversion (HPS hps, LONG lHeight);
@@ -365,7 +249,7 @@ int setMapMode(Win32BaseWindow *wnd, pDCData pHps, int mode)
       case MM_ANISOTROPIC_W: flOptions = PU_PELS     ; break;
       case MM_ISOTROPIC_W  : flOptions = PU_LOMETRIC ; break;
       default:
-//         SET_ERROR_WIN(ERROR_INVALID_PARAMETER_W);
+         _O32_SetLastError (ERROR_INVALID_PARAMETER);
          return FALSE;
    }
 
@@ -390,7 +274,7 @@ int setMapMode(Win32BaseWindow *wnd, pDCData pHps, int mode)
 
       if (DevEscape(pHps->hdc ? pHps->hdc : pHps->hps, DEVESC_SETPS, 12, (PBYTE)data, 0, 0) == DEVESC_ERROR)
       {
-//         SET_ERROR_LAST();
+         _O32_SetLastError (ERROR_INVALID_PARAMETER);
          return 0;
       }
 
@@ -698,7 +582,7 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
 
    if ( !lpps )
    {
-//      SET_ERROR_WIN( ERROR_INVALID_PARAMETER_W );
+      _O32_SetLastError (ERROR_INVALID_PARAMETER);
       return (HDC)NULLHANDLE;
    }
 
@@ -711,7 +595,7 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
       pHps = (pDCData)GpiQueryDCData(hPS_ownDC);
       if (!pHps)
       {
-//         SET_ERROR_LAST();
+         _O32_SetLastError (ERROR_INVALID_PARAMETER);
          SetFS(sel);
          return (HDC)NULLHANDLE;
       }
@@ -801,7 +685,7 @@ BOOL WIN32API GetUpdateRect (HWND hwnd, LPRECT pRect, BOOL erase)
 {
    if (hwnd)
    {
-//      SET_ERROR_WIN( ERROR_INVALID_HANDLE_W );
+      _O32_SetLastError (ERROR_INVALID_HANDLE);
       return FALSE;
    }
 
@@ -823,7 +707,7 @@ BOOL WIN32API GetUpdateRect (HWND hwnd, LPRECT pRect, BOOL erase)
          pHps = (pDCData)GpiQueryDCData(wnd->getOwnDC());
          if (!pHps)
          {
-//            SET_ERROR_WIN(ERROR_INVALID_HANDLE_W);
+            _O32_SetLastError (ERROR_INVALID_HANDLE);
             SetFS(sel);
             return FALSE;
          }
@@ -1023,7 +907,7 @@ error:
 
       _O32_DeleteObject (pHps->nullBitmapHandle);
    }
-//   SET_ERROR_LAST();
+   _O32_SetLastError (ERROR_INVALID_PARAMETER);
    SetFS(sel);
    return NULL;
 }
@@ -1094,7 +978,7 @@ BOOL WIN32API RedrawWindow (HWND hwnd, const RECT *pRect, HRGN hrgn, DWORD redra
 
    if (redraw & (RDW_FRAME_W | RDW_NOFRAME_W))
    {
-//      SET_ERROR_WIN( ERROR_NOT_SUPPORTED_W );
+      _O32_SetLastError (ERROR_NOT_SUPPORTED);
       return FALSE;
    }
 
@@ -1111,7 +995,7 @@ BOOL WIN32API RedrawWindow (HWND hwnd, const RECT *pRect, HRGN hrgn, DWORD redra
 
       if (!wnd)
       {
-//         SET_ERROR_LAST();
+         _O32_SetLastError (ERROR_INVALID_PARAMETER);
          SetFS(sel);
          return FALSE;
       }
@@ -1247,8 +1131,8 @@ error:
    else if ((redraw & RDW_ERASENOW_W) == RDW_ERASENOW_W)
       wnd->setSupressErase (TRUE);
 
-//   if (!success)
-//      SET_ERROR_LAST();
+   if (!success)
+      _O32_SetLastError (ERROR_INVALID_PARAMETER);
 
    SetFS(sel);
    return (success);
@@ -1311,18 +1195,18 @@ BOOL WIN32API ScrollWindow(HWND hwnd, int dx, int dy, const RECT *pScroll, const
     MapWin32ToOS2Rectl(window->getClientRect(), (PRECTLOS2)&clientRect);
     //Rectangle could be relative to parent window, so fix this
     if(clientRect.yBottom != 0) {
-	clientRect.yTop   -= clientRect.yBottom;
-	clientRect.yBottom = 0;
+        clientRect.yTop   -= clientRect.yBottom;
+        clientRect.yBottom = 0;
     }
     if(clientRect.xLeft != 0) {
-	clientRect.xRight -= clientRect.xLeft;
-	clientRect.xLeft   = 0;
+        clientRect.xRight -= clientRect.xLeft;
+        clientRect.xLeft   = 0;
     }
     if(pScroll) {
-    	 MapWin32ToOS2Rectl((RECT *)pScroll, (PRECTLOS2)&scrollRect);
-	 pScrollRect = &scrollRect;
+         MapWin32ToOS2Rectl((RECT *)pScroll, (PRECTLOS2)&scrollRect);
+         pScrollRect = &scrollRect;
 
-	 //Scroll rectangle relative to client area
+         //Scroll rectangle relative to client area
          pScrollRect->xLeft   += clientRect.xLeft;
          pScrollRect->xRight  += clientRect.xLeft;
          pScrollRect->yTop    += clientRect.yBottom;
@@ -1332,10 +1216,10 @@ BOOL WIN32API ScrollWindow(HWND hwnd, int dx, int dy, const RECT *pScroll, const
     else scrollFlags |= SW_SCROLLCHILDREN;
 
     if(pClip) {
-    	 MapWin32ToOS2Rectl((RECT *)pClip, (PRECTLOS2)&clipRect);
-	 pClipRect = &clipRect;
+         MapWin32ToOS2Rectl((RECT *)pClip, (PRECTLOS2)&clipRect);
+         pClipRect = &clipRect;
 
-	 //Clip rectangle relative to client area
+         //Clip rectangle relative to client area
          pClipRect->xLeft     += clientRect.xLeft;
          pClipRect->xRight    += clientRect.xLeft;
          pClipRect->yTop      += clientRect.yBottom;
@@ -1354,7 +1238,7 @@ BOOL WIN32API ScrollWindow(HWND hwnd, int dx, int dy, const RECT *pScroll, const
 //******************************************************************************
 //TODO: Implement this one
 //******************************************************************************
-INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, const RECT *pClip, 
+INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, const RECT *pClip,
                             HRGN hrgnUpdate, PRECT pRectUpdate, UINT scrollFlag)
 {
     dprintf(("USER32:  ScrollWindowEx NOT CORRECTLY IMPLEMENTED\n"));
