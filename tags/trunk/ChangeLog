@@ -1,8 +1,9 @@
- /* $Id: ChangeLog,v 1.178 1999-09-07 19:47:02 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.179 1999-09-07 20:27:43 phaller Exp $ */
 
  99-09-07: Patrick Haller <phaller@gmx.net>
 	- OLE32: WINE_StringFromCLSID is needed in other modules, too. (SHELL32)
 	- SHELL32\NEW:	improvement of shell32
+	- KERNEL32: ToolHelp functions stubbed: Process32First, etc.
 
  99-09-05: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: Dialog updates (not yet done)
