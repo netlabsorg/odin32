@@ -1,4 +1,4 @@
-/* $Id: win32wmdiclient.h,v 1.3 1999-08-31 17:14:52 sandervl Exp $ */
+/* $Id: win32wmdiclient.h,v 1.4 1999-09-03 15:09:46 sandervl Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -16,6 +16,8 @@
 
 #define MDICLIENTCLASSNAMEA "MDICLIENT"
 #define MDICLIENTCLASSNAMEW L"MDICLIENT"
+
+#define MDIF_NEEDUPDATE		0x0001
 
 //******************************************************************************
 //******************************************************************************
@@ -36,11 +38,19 @@ Win32MDIChildWindow *getMaximizedChild()         { return maximizedChild;  };
 Win32MDIChildWindow *getActiveChild()            { return activeChild;     };
                void  setActiveChild(Win32MDIChildWindow *newchild) { activeChild = newchild; };
 
+Win32MDIChildWindow *getWindow(Win32MDIChildWindow *actchild, BOOL bNext, DWORD dwStyleMask);
+
 Win32MDIChildWindow *getChildByID(INT id);
+               void postUpdate(WORD recalc);
 
 	   int  getNrOfChildren()                { return nActiveChildren; };
 	   int  incNrActiveChildren()            { return ++nActiveChildren; };
 	   int  decNrActiveChildren()            { return --nActiveChildren; };
+
+	   int  getMdiFlags()                    { return mdiFlags; };
+           void setMdiFlags(int newflags)        { mdiFlags = newflags; };
+
+           void updateFrameText(BOOL repaint, LPCSTR lpTitle );
 
 	   LONG childActivate(Win32MDIChildWindow *child);
            void switchActiveChild(Win32MDIChildWindow *nextActiveChild, BOOL bNextWindow );
@@ -57,6 +67,7 @@ private:
 
         int 	nActiveChildren;
         int 	nTotalCreated;
+	int     sbRecalc;
         LPSTR 	frameTitle;
         DWORD 	mdiFlags;
 
