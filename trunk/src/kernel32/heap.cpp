@@ -1,4 +1,4 @@
-/* $Id: heap.cpp,v 1.38 2001-10-15 17:16:37 sandervl Exp $ */
+/* $Id: heap.cpp,v 1.39 2001-10-15 17:17:48 sandervl Exp $ */
 
 /*
  * Win32 heap API functions for OS/2
@@ -886,9 +886,7 @@ ODINPROCEDURE1(GlobalUnfix,
 #endif
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(HLOCAL, LocalAlloc,
-              UINT, fuFlags, 
-              DWORD, cbBytes)
+HLOCAL WIN32API LocalAlloc(UINT fuFlags, DWORD cbBytes)
 {
     HLOCAL hLocal;
 
@@ -907,10 +905,10 @@ ODINFUNCTION2(HLOCAL, LocalAlloc,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(UINT, LocalFlags,
-              HLOCAL, hMem)
+UINT WIN32API LocalFlags(HLOCAL hMem)
 {
     UINT ret, retG;
+    dprintf(("KERNEL32: LocalFlags %X\n", hMem));
 
     retG = GlobalFlags(hMem);
 
@@ -928,36 +926,38 @@ ODINFUNCTION1(UINT, LocalFlags,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(HLOCAL, LocalFree,
-              HLOCAL, hMem)
+HLOCAL WIN32API LocalFree(HLOCAL hMem)
 {
+  dprintf(("KERNEL32: LocalFree %X", hMem));
+
   return GlobalFree(hMem);
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(HLOCAL, LocalHandle,
-              PCVOID, lpMem)
+HLOCAL WIN32API LocalHandle(PCVOID lpMem)
 {
+    dprintf(("KERNEL32: LocalHandle %x", lpMem));
+
     return GlobalHandle(lpMem);
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(BOOL, LocalUnlock,
-              HLOCAL, hMem)
+BOOL WIN32API LocalUnlock(HLOCAL hMem)
 {
+    dprintf(("KERNEL32: LocalUnlock %X", hMem));
+
     return GlobalUnlock(hMem);
 }
 //******************************************************************************
 //TODO: cbBytes==0 && fuFlags & LMEM_MOVEABLE not handled!!
 //******************************************************************************
-ODINFUNCTION3(HLOCAL, LocalReAlloc,
-              HLOCAL, hMem,
-              DWORD, cbBytes,
-              UINT, fuFlags)
+HLOCAL WIN32API LocalReAlloc(HLOCAL hMem, DWORD cbBytes, UINT fuFlags)
 {
   HLOCAL hLocalNew, hLocalOld;
   LPVOID lpMem, lpMemOld;
   DWORD  cbOldSize;
+
+    dprintf(("KERNEL32: LocalReAlloc %X %d %X\n", hMem, cbBytes, fuFlags));
 
     // Check flags
     if(fuFlags & (~(LMEM_MOVEABLE | LMEM_DISCARDABLE | LMEM_NOCOMPACT |
@@ -977,33 +977,36 @@ ODINFUNCTION3(HLOCAL, LocalReAlloc,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(UINT, LocalSize,
-              HLOCAL, hMem)
+UINT WIN32API LocalSize(HLOCAL hMem)
 {
+    dprintf(("KERNEL32: LocalSize %X", hMem));
+
     return GlobalSize(hMem);
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(PVOID, LocalLock,
-              HLOCAL, hMem)
+PVOID WIN32API LocalLock(HLOCAL hMem)
 {
+    dprintf(("KERNEL32:  LocalLock %X\n", hMem));
+
     return GlobalLock(hMem);
 }
 //******************************************************************************
 //* this function is here for completeness, some stupid software requires it.
 //******************************************************************************
-ODINFUNCTION2(UINT, LocalShrink,
-              HLOCAL, hMem,
-              UINT, cbNewSize)
+UINT WIN32API LocalShrink(HLOCAL hMem, UINT cbNewSize)
 {
+    dprintf(("KERNEL32:  LocalShrink %X, %08xh - OBSOLETE", hMem, cbNewSize));
+
     return cbNewSize;
 }
 //******************************************************************************
 //* this function is here for completeness, mIRC/32 requires it.
 //******************************************************************************
-ODINFUNCTION1(UINT, LocalCompact,
-              UINT, cbNewSize)
+UINT WIN32API LocalCompact(UINT cbNewSize)
 {
+    dprintf(("KERNEL32:  LocalCompact %08xh - OBSOLETE", cbNewSize));
+
     return cbNewSize;
 }
 //******************************************************************************
