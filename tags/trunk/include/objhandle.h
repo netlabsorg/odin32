@@ -1,4 +1,4 @@
-/* $Id: objhandle.h,v 1.3 2000-12-09 14:43:35 sandervl Exp $ */
+/* $Id: objhandle.h,v 1.4 2000-12-09 15:00:06 sandervl Exp $ */
 /*
  * Win32 Handle Management Code for OS/2 (GDI32)
  *
@@ -12,9 +12,9 @@
 #ifndef __OBJHANDLE_H__
 #define __OBJHANDLE_H__
 
-#define MAX_OBJECT_HANDLES      1024
+#define MAX_OBJECT_HANDLES          1024
 #define OBJHANDLE_MAGIC_MASK        0x00FFFFFF
-#define HANDLE_OBJ_ERROR                -1
+#define HANDLE_OBJ_ERROR            -1
 
 typedef enum {
   GDIOBJ_NONE    = 0x00,
@@ -24,7 +24,8 @@ typedef enum {
   GDIOBJ_PALETTE = 0xD4,
   GDIOBJ_FONT    = 0xD5,
   USEROBJ_MENU   = 0xD6,
-  USEROBJ_ACCEL  = 0xD7
+  USEROBJ_ACCEL  = 0xD7,
+  GDIOBJ_OPEN32  = 0xD8
 //...
 } ObjectType;
 
