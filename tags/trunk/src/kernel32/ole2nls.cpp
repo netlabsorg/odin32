@@ -1,4 +1,4 @@
-/* $Id: ole2nls.cpp,v 1.5 2000-10-08 14:01:01 sandervl Exp $ */
+/* $Id: ole2nls.cpp,v 1.6 2000-10-09 17:47:22 sandervl Exp $ */
 
 /*
  *	National Language Support library
@@ -697,11 +697,17 @@ BOOL WIN32API SetLocaleInfoW(LCID    Locale,
  */
 BOOL WINAPI IsValidLocale(LCID lcid,DWORD flags)
 {
+#ifdef __WIN32OS2__
+    //SvL/MN: code below doesn't work -> winhlp32 complains about different language helpfiles
+    dprintf(("KERNEL32: IsValidLocale, always returns TRUE\n"));
+    return TRUE;
+#else
     /* check if language is registered in the kernel32 resources */
     if(!FindResourceExW(GetModuleHandleA("KERNEL32"), RT_STRINGW, (LPCWSTR)LOCALE_ILANGUAGE, LOWORD(lcid)))
 	return FALSE;
     else
 	return TRUE;
+#endif
 }
 
 static BOOL CALLBACK EnumResourceLanguagesProcW(HMODULE hModule, LPCWSTR type,

@@ -1,4 +1,4 @@
-/* $Id: conbuffer.cpp,v 1.11 2000-10-09 02:22:57 phaller Exp $ */
+/* $Id: conbuffer.cpp,v 1.12 2000-10-09 17:47:21 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -2623,7 +2623,7 @@ DWORD HMDeviceConsoleBufferClass::WriteConsoleOutputA(PHMHANDLEDATA pHMHandleDat
                             * coordSrcBufferSize.X;
 
                                 /* calculate pointer to start of screen line */
-    pszTarget = pConsoleBuffer->ppszLine[ulWriteY] + psrctDestRect->Left << 1;
+    pszTarget = pConsoleBuffer->ppszLine[ulWriteY] + ((int)psrctDestRect->Left << 1);
 
     for (ulX = 0,
          ulWriteX = psrctDestRect->Left;
@@ -2729,7 +2729,7 @@ DWORD HMDeviceConsoleBufferClass::WriteConsoleOutputW(PHMHANDLEDATA pHMHandleDat
                             * coordSrcBufferSize.X;
 
                                 /* calculate pointer to start of screen line */
-    pszTarget = pConsoleBuffer->ppszLine[ulWriteY] + psrctDestRect->Left << 1;
+    pszTarget = pConsoleBuffer->ppszLine[ulWriteY] + ((int)psrctDestRect->Left << 1);
 
     for (ulX = 0,
          ulWriteX = psrctDestRect->Left;
