@@ -1,4 +1,4 @@
-/* $Id: icontitle.cpp,v 1.7 2001-06-09 14:50:17 sandervl Exp $ */
+/* $Id: icontitle.cpp,v 1.8 2001-06-10 09:19:57 sandervl Exp $ */
 /*
  * Icontitle window class.
  *
@@ -56,9 +56,9 @@ HWND ICONTITLE_Create(Win32BaseWindow *parent)
     if (win32wnd)
     {
         win32wnd->setOwner(parent);     /* MDI depends on this */
+        //No RELEASE_WNDOBJ necessary. Done in dtor of window
         win32wnd->setStyle(win32wnd->getStyle() & ~(WS_CAPTION | WS_BORDER));
         if (parent->getStyle() & WS_DISABLED ) win32wnd->setStyle(win32wnd->getStyle() | WS_DISABLED);
-        RELEASE_WNDOBJ(win32wnd);
         return hWnd;
     }
     return 0;
