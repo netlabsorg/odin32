@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.62 2001-12-31 12:08:20 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.63 2002-04-30 13:11:44 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -608,8 +608,6 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
         {
             dprintf(("GDI32: DIBSect::BitBlt: WARNING! zero-length bitmap! %08xh", pOS2bmp));
         }
-
-
         rc = GpiDrawBits(hps, bmpBitsDblBuffer, pOS2bmp, 4, &point[0], Rop, os2mode);
   }
   else {
@@ -727,7 +725,7 @@ void DIBSection::sync(HDC hdc, DWORD nYdest, DWORD nDestHeight, BOOL orgYInversi
 
   free(tmphdr);
   if(rc != nDestHeight) {
-    DebugInt3();
+    dprintf(("!WARNING!: GpiQueryBitmapBits returned %d instead of %d scanlines", rc, nDestHeight));
   }
 
 #ifdef INVERT

@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.80 2002-01-02 18:36:00 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.81 2002-04-30 13:09:55 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -860,22 +860,6 @@ COLORREF WIN32API GetNearestColor( HDC arg1, COLORREF  arg2)
 }
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API GetOutlineTextMetricsA( HDC arg1, UINT arg2, LPOUTLINETEXTMETRICA  arg3)
-{
-    dprintf(("GDI32: GetOutlineTextMetricsA"));
-    return O32_GetOutlineTextMetrics(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-UINT WIN32API GetOutlineTextMetricsW( HDC arg1, UINT arg2, LPOUTLINETEXTMETRICW  arg3)
-{
-    dprintf(("GDI32: GetOutlineTextMetricsW STUB"));
-    // NOTE: This will not work as is (needs UNICODE support)
-//    return O32_GetOutlineTextMetrics(arg1, arg2, arg3);
-    return 0;
-}
-//******************************************************************************
-//******************************************************************************
 INT WIN32API GetPath( HDC hdc, PPOINT arg2, PBYTE arg3, int  arg4)
 {
     dprintf(("GDI32: GetPath %x", hdc));
@@ -925,70 +909,6 @@ COLORREF WIN32API GetTextColor( HDC hdc)
     color = O32_GetTextColor(hdc);
     dprintf(("GDI32: GetTextColor %x -> %x", hdc, color));
     return color;
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API GetTextFaceA( HDC hdc, int arg2, LPSTR  arg3)
-{
-    dprintf(("GDI32: GetTextFaceA %x %d %x", hdc, arg2, arg3));
-    return O32_GetTextFace(hdc, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API GetTextFaceW( HDC arg1, int arg2, LPWSTR  arg3)
-{
- char *astring = (char *)malloc(arg2+1);
- int   rc;
-
-    dprintf(("GDI32: GetTextFaceW"));
-    rc = GetTextFaceA(arg1, arg2, astring);
-    AsciiToUnicode(astring, arg3);
-    free(astring);
-    return rc;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetTextMetricsA( HDC hdc, LPTEXTMETRICA  pwtm)
-{
- BOOL rc;
-
-    rc = O32_GetTextMetrics(hdc, pwtm);
-    dprintf(("GDI32: GetTextMetricsA %x %x returned %d", hdc, pwtm, rc));
-    return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetTextMetricsW( HDC hdc, LPTEXTMETRICW pwtm)
-{
- BOOL rc;
- TEXTMETRICA atm;
-
-    dprintf(("GDI32: GetTextMetricsW"));
-
-    rc = O32_GetTextMetrics(hdc, &atm);
-    pwtm->tmHeight = atm.tmHeight;
-    pwtm->tmAscent = atm.tmAscent;
-    pwtm->tmDescent = atm.tmDescent;
-    pwtm->tmInternalLeading = atm.tmInternalLeading;
-    pwtm->tmExternalLeading = atm.tmExternalLeading;
-    pwtm->tmAveCharWidth = atm.tmAveCharWidth;
-    pwtm->tmMaxCharWidth = atm.tmMaxCharWidth;
-    pwtm->tmWeight = atm.tmWeight;
-    pwtm->tmOverhang = atm.tmOverhang;
-    pwtm->tmDigitizedAspectX = atm.tmDigitizedAspectX;
-    pwtm->tmDigitizedAspectY = atm.tmDigitizedAspectY;
-    pwtm->tmFirstChar = atm.tmFirstChar;
-    pwtm->tmLastChar = atm.tmLastChar;
-    pwtm->tmDefaultChar = atm.tmDefaultChar;
-    pwtm->tmBreakChar = atm.tmBreakChar;
-    pwtm->tmItalic = atm.tmItalic;
-    pwtm->tmUnderlined = atm.tmUnderlined;
-    pwtm->tmStruckOut = atm.tmStruckOut;
-    pwtm->tmPitchAndFamily = atm.tmPitchAndFamily;
-    pwtm->tmCharSet = atm.tmCharSet;
-
-    dprintf(("GDI32: GetTextMetricsW %x %x returned %d", hdc, pwtm, rc));
-    return(rc);
 }
 //******************************************************************************
 //******************************************************************************
