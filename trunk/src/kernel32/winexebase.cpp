@@ -1,4 +1,4 @@
-/* $Id: winexebase.cpp,v 1.5 2000-02-16 14:22:11 sandervl Exp $ */
+/* $Id: winexebase.cpp,v 1.6 2000-03-04 19:52:36 sandervl Exp $ */
 
 /*
  * Win32 exe base class
@@ -58,7 +58,12 @@ Win32ExeBase::Win32ExeBase(HINSTANCE hInstance)
 //******************************************************************************
 Win32ExeBase::~Win32ExeBase()
 {
+  //First delete all dlls that were loaded by the exe or dlls
+  //Then delete all dlls loaded by LoadLibrary (to avoid that we
+  //delete some dlls before the dll, that loaded it, is destroyed)
   Win32DllBase::deleteAll();
+  Win32DllBase::deleteAll(TRUE);
+
   WinExe = NULL;
   if(cmdLineA)
 	free(cmdLineA);

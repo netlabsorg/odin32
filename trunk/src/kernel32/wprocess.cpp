@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.70 2000-03-03 11:16:00 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.71 2000-03-04 19:52:37 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -343,18 +343,6 @@ USHORT WIN32API SetWin32TIB()
 }
 //******************************************************************************
 //******************************************************************************
-static void _System Win32DllExitList(ULONG reason)
-{
-  dprintf(("Win32DllExitList %d\n", reason));
-
-  if(WinExe) {
-    delete(WinExe);
-    WinExe = NULL;
-  }
-  return;
-}
-//******************************************************************************
-//******************************************************************************
 VOID WIN32API ExitProcess(DWORD exitcode)
 {
   dprintf(("KERNEL32:  ExitProcess %d\n", exitcode));
@@ -362,9 +350,12 @@ VOID WIN32API ExitProcess(DWORD exitcode)
 
   SetOS2ExceptionChain(-1);
 
-  Win32DllExitList(0);
+  if(WinExe) {
+    	delete(WinExe);
+    	WinExe = NULL;
+  }
 
-  //Note: Needs to be done after Win32DllExitList (destruction of exe + dll objects)
+  //Note: Needs to be done after deleting WinExe (destruction of exe + dll objects)
   //Flush and delete all open memory mapped files
   Win32MemMap::deleteAll();
 
@@ -457,6 +448,10 @@ static HINSTANCE iLoadLibraryA(LPCTSTR lpszLibFile, DWORD dwFlags)
         if(dwFlags & DONT_RESOLVE_DLL_REFERENCES) {
             peldrDll->setNoEntryCalls();
         }
+	//Set flag so this dll doesn't get automatically deleted in ExitProcess
+        //(the first time); give application the chance to free it first
+	//If it's not freed, we delete it the 2nd time in ExitProcess
+	peldrDll->SetDynamicallyLoaded();
 
         if(peldrDll->attachProcess() == FALSE) {
             dprintf(("LoadLibary %s failed (::attachProcess)\n", lpszLibFile));

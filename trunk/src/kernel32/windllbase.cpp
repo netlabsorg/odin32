@@ -1,4 +1,4 @@
-/* $Id: windllbase.cpp,v 1.9 2000-02-16 14:22:11 sandervl Exp $ */
+/* $Id: windllbase.cpp,v 1.10 2000-03-04 19:52:36 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
@@ -48,7 +48,7 @@ Win32DllBase::Win32DllBase(HINSTANCE hinstance, WIN32DLLENTRY DllEntryPoint,
                            Win32ImageBase *parent)
                  : Win32ImageBase(hinstance),
   	           referenced(0), fSkipEntryCalls(FALSE),
-                   fAttachedToProcess(FALSE), fUnloaded(FALSE)
+                   fAttachedToProcess(FALSE), fUnloaded(FALSE), fDynamicLoad(FALSE)
 {
   dllEntryPoint = DllEntryPoint;
 
@@ -95,8 +95,6 @@ Win32DllBase::Win32DllBase(HINSTANCE hinstance, WIN32DLLENTRY DllEntryPoint,
 //******************************************************************************
 Win32DllBase::~Win32DllBase()
 {
- Win32DllBase *dll = head;
-
   dprintf(("Win32DllBase::~Win32DllBase %s", szModule));
 
   if(errorState == NO_ERROR && !fUnloaded)
@@ -109,6 +107,7 @@ Win32DllBase::~Win32DllBase()
 	head = next;
   }
   else {
+        Win32DllBase *dll = head;
 	while(dll && dll->next != this) {
 		dll = dll->next;
         }
@@ -293,11 +292,12 @@ void Win32DllBase::tlsDetachThreadFromAllDlls()
 }
 //******************************************************************************
 //******************************************************************************
-void Win32DllBase::deleteAll()
+void Win32DllBase::deleteAll(BOOL fDynamicLoad)
 {
+ Win32DllBase *dll = Win32DllBase::head, *tmp;
+
 #ifdef DEBUG
   dlllistmutex.enter();
-  Win32DllBase *dll = head;
 
   dprintf(("Win32DllBase::deleteAll: List of loaded dlls:"));
   while(dll) {
@@ -305,10 +305,16 @@ void Win32DllBase::deleteAll()
 	dll = dll->next;
   }
   dlllistmutex.leave();
+  dll = Win32DllBase::head;
 #endif
 
-  while(Win32DllBase::head) {
-	delete Win32DllBase::head;
+  while(dll) {
+	if(fDynamicLoad || !dll->fDynamicLoad) {
+		tmp = dll->next;
+		dll->Release();
+		dll = tmp;
+	}
+	else	dll = dll->next;
   }
 }
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: hmdevio.cpp,v 1.3 2000-02-29 22:44:02 sandervl Exp $ */
+/* $Id: hmdevio.cpp,v 1.4 2000-03-04 19:52:36 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -113,6 +113,7 @@ DWORD HMDeviceDriver::CreateFile (LPCSTR lpFileName,
      	return (NO_ERROR);
   }
 
+tryopen:
   rc = DosOpen(	szOS2Name,                        /* File path name */
                	&hfFileHandle,                  /* File handle */
                	&ulAction,                      /* Action taken */
@@ -121,6 +122,19 @@ DWORD HMDeviceDriver::CreateFile (LPCSTR lpFileName,
            	FILE_OPEN,
            	sharetype,
                	0L);                            /* No extended attribute */
+
+  if(rc == ERROR_TOO_MANY_OPEN_FILES) {
+   ULONG CurMaxFH;
+   LONG  ReqCount = 32;
+
+	rc = DosSetRelMaxFH(&ReqCount, &CurMaxFH);
+	if(rc) {
+		dprintf(("DosSetRelMaxFH returned %d", rc));
+		return rc;
+	}
+	dprintf(("DosOpen failed -> increased nr open files to %d", CurMaxFH));
+	goto tryopen;
+  }
 
   dprintf(("DosOpen %s returned %d\n", szOS2Name, rc));
 
