@@ -1,4 +1,4 @@
-/* $Id: fastdep.c,v 1.30 2001-09-04 13:48:29 bird Exp $
+/* $Id: fastdep.c,v 1.31 2001-09-30 00:22:05 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
@@ -162,7 +162,7 @@ typedef struct _DepRule
     char *          pszRule;            /* Pointer to rule name */
     int             cDeps;              /* Entries in the dependant array. */
     char **         papszDep;           /* Pointer to an array of pointers to dependants. */
-    BOOL            fUpdated;           /* If we have updated this entry during current run. */
+    BOOL            fUpdated;           /* If we have updated this entry during the run. */
     char            szTS[TS_SIZE];      /* Time stamp. */
 } DEPRULE, *PDEPRULE;
 
@@ -233,8 +233,8 @@ static char *textbufferNextLine(void *pvBuffer, char *psz);
 static char *textbufferGetNextLine(void *pvBuffer, void **ppv, char *pszLineBuffer, int cchLineBuffer);
 
 /* depend workers */
-static BOOL  depReadFile(const char *pszFilename);
-static BOOL  depWriteFile(const char *pszFilename);
+static BOOL  depReadFile(const char *pszFilename, BOOL fAppend);
+static BOOL  depWriteFile(const char *pszFilename, BOOL fWriteUpdatedOnly);
 static void  depRemoveAll(void);
 static void *depAddRule(const char *pszRulePath, const char *pszName, const char *pszExt, const char *pszTS);
 static BOOL  depAddDepend(void *pvRule, const char *pszDep, BOOL fCheckCyclic);
@@ -461,7 +461,7 @@ int main(int argc, char **argv)
                     /* if dependencies are generated we'll flush them to the old filename */
                     if (pdepTree != NULL && pszOld != pszDepFile)
                     {
-                        if (!depWriteFile(pszOld))
+                        if (!depWriteFile(pszOld, !options.fAppend))
                             fprintf(stderr, "error: failed to write (flush) dependencies.\n");
                         depRemoveAll();
                     }
@@ -778,7 +778,7 @@ int main(int argc, char **argv)
              * adding new dependencies.
              */
             if (pdepTree == NULL && (options.fAppend || !options.fForceScan))
-                depReadFile(pszDepFile);
+                depReadFile(pszDepFile, options.fAppend);
 
             /*
              * Search for the files specified.
@@ -848,7 +848,7 @@ int main(int argc, char **argv)
     }
 
     /* Write the depend file! */
-    if (!depWriteFile(pszDepFile))
+    if (!depWriteFile(pszDepFile, !options.fAppend))
         fprintf(stderr, "error: failed to write dependencies file!\n");
     #if 0
     printf("cfcNodes=%d\n", cfcNodes);
@@ -1001,7 +1001,8 @@ int langC_CPP(const char *pszFilename, const char *pszNormFilename,
                                          *        All code is included.
                                          */
     } achIfStack[256];
-
+    char    szSrcDir[CCHMAXPATH];
+    filePath(pszNormFilename, szSrcDir);/* determin source code directory. */
 
     /**********************************/
     /* Add the depend rule            */
@@ -1104,14 +1105,16 @@ int langC_CPP(const char *pszFilename, const char *pszNormFilename,
                  */
                 if (achIfStack[iIfStack].fIncluded)
                 {
-                    char szFullname[CCHMAXPATH];
-                    char *psz;
-                    BOOL f = FALSE;
-                    int  j;
+                    char    szFullname[CCHMAXPATH];
+                    char *  psz;
+                    BOOL    f = FALSE;
+                    int     j;
+                    BOOL    fQuote;
 
                     /* extract info between "" or <> */
                     while (i < cbLen && !(f = (szBuffer[i] == '"' || szBuffer[i] == '<')))
                         i++;
+                    fQuote = szBuffer[i] == '"';
                     i++; /* skip '"' or '<' */
 
                     /* if invalid statement then continue with the next line! */
@@ -1132,7 +1135,9 @@ int langC_CPP(const char *pszFilename, const char *pszNormFilename,
                     strlwr(szFullname);
 
                     /* find include file! */
-                    psz = pathlistFindFile(options.pszInclude, szFullname, szBuffer);
+                    psz = fQuote ? pathlistFindFile(szSrcDir, szFullname, szBuffer) : NULL;
+                    if (psz == NULL)
+                        psz = pathlistFindFile(options.pszInclude, szFullname, szBuffer);
                     if (psz == NULL)
                         psz = pathlistFindFile(pszIncludeEnv, szFullname, szBuffer);
 
@@ -2445,7 +2450,7 @@ BOOL filecacheAddDir(const char *pszDir)
     APIRET          rc;
     char            szDir[CCHMAXPATH];
     int             cchDir;
-    char            achBuffer[16384];
+    char            achBuffer[32768];
     PFILEFINDBUF3   pfindbuf3 = (PFILEFINDBUF3)(void*)&achBuffer[0];
     HDIR            hDir = HDIR_CREATE;
     ULONG           cFiles = 0xFFFFFFF;
@@ -3031,7 +3036,7 @@ char *textbufferGetNextLine(void *pvBuffer, void **ppv, char *pszLineBuffer, int
  * Appends a depend file to the internal file.
  * This will update the date in the option struct.
  */
-BOOL  depReadFile(const char *pszFilename)
+BOOL  depReadFile(const char *pszFilename, BOOL fAppend)
 {
     void *      pvFile;
     char *      pszNext;
@@ -3115,7 +3120,7 @@ BOOL  depReadFile(const char *pszFilename)
 
                         psz[i] = '\0';
                         pvRule = depAddRule(trimQuotes(trimR(psz)), NULL, NULL, szTS);
-                        ((PDEPRULE)pvRule)->fUpdated = FALSE;
+                        ((PDEPRULE)pvRule)->fUpdated = fAppend;
                         psz += i + 1;
                         cch -= i + 1;
                         break;
@@ -3157,9 +3162,10 @@ BOOL  depReadFile(const char *pszFilename)
 /**
  *
  * @returns   Success indicator.
- * @params    pszFilename  Pointer to name of the output file.
+ * @param     pszFilename           Pointer to name of the output file.
+ * @param     fWriteUpdatedOnly     If set we'll only write updated rules.
  */
-BOOL  depWriteFile(const char *pszFilename)
+BOOL  depWriteFile(const char *pszFilename, BOOL fWriteUpdatedOnly)
 {
     FILE *phFile;
     phFile = fopen(pszFilename, "w");
@@ -3167,7 +3173,7 @@ BOOL  depWriteFile(const char *pszFilename)
     {
         AVLENUMDATA EnumData;
         PDEPRULE    pdep;
-        char        szBuffer[4096];
+        char        szBuffer[32678];
         int         iBuffer = 0;
         int         cch;
 
@@ -3200,18 +3206,21 @@ BOOL  depWriteFile(const char *pszFilename)
             pdep = (PDEPRULE)(void*)AVLBeginEnumTree((PPAVLNODECORE)(void*)&pdepTree, &EnumData, TRUE);
             while (pdep != NULL)
             {
-                char *psz = pdep->pszRule;
-
-                /* flush buffer? */
-                if (iBuffer + strlen(psz) + 20 >= sizeof(szBuffer))
+                if (!fWriteUpdatedOnly || pdep->fUpdated)
                 {
-                    fwrite(szBuffer, iBuffer, 1, phFile);
-                    iBuffer = 0;
-                }
+                    char *psz = pdep->pszRule;
 
-                /* write rule title as dependant */
-                iBuffer += sprintf(szBuffer + iBuffer,
-                                   " \\\n    %s",psz);
+                    /* flush buffer? */
+                    if (iBuffer + strlen(psz) + 20 >= sizeof(szBuffer))
+                    {
+                        fwrite(szBuffer, iBuffer, 1, phFile);
+                        iBuffer = 0;
+                    }
+
+                    /* write rule title as dependant */
+                    iBuffer += sprintf(szBuffer + iBuffer,
+                                       " \\\n    %s",psz);
+                }
 
                 /* next rule */
                 pdep = (PDEPRULE)(void*)AVLGetNextNode(&EnumData);
@@ -3234,64 +3243,67 @@ BOOL  depWriteFile(const char *pszFilename)
         pdep = (PDEPRULE)(void*)AVLBeginEnumTree((PPAVLNODECORE)(void*)&pdepTree, &EnumData, TRUE);
         while (pdep != NULL)
         {
-            int cchTS = strlen(pdep->szTS);
-            int fQuoted = strpbrk(pdep->pszRule, " \t") != NULL; /* TODO/BUGBUG/FIXME: are there more special chars to look out for?? */
-
-            /* Write rule. Flush the buffer first if necessary. */
-            cch = strlen(pdep->pszRule);
-            if (iBuffer + cch + fQuoted * 2 + cchTS + 9 >= sizeof(szBuffer))
+            if (!fWriteUpdatedOnly || pdep->fUpdated)
             {
-                fwrite(szBuffer, iBuffer, 1, phFile);
-                iBuffer = 0;
-            }
+                int cchTS = strlen(pdep->szTS);
+                int fQuoted = strpbrk(pdep->pszRule, " \t") != NULL; /* TODO/BUGBUG/FIXME: are there more special chars to look out for?? */
 
-            memcpy(szBuffer + iBuffer, "# ", 2);
-            memcpy(szBuffer + iBuffer + 2, pdep->szTS, cchTS);
-            iBuffer += cchTS + 2;
-            szBuffer[iBuffer++] = '\n';
-
-            if (fQuoted) szBuffer[iBuffer++] = '"';
-            strcpy(szBuffer + iBuffer, pdep->pszRule);
-            iBuffer += cch;
-            if (fQuoted) szBuffer[iBuffer++] = '"';
-            strcpy(szBuffer + iBuffer++, ":");
-
-            /* write rule dependants. */
-            if (pdep->papszDep != NULL)
-            {
-                char **ppsz = pdep->papszDep;
-                while (*ppsz != NULL)
+                /* Write rule. Flush the buffer first if necessary. */
+                cch = strlen(pdep->pszRule);
+                if (iBuffer + cch + fQuoted * 2 + cchTS + 9 >= sizeof(szBuffer))
                 {
-                    /* flush buffer? */
-                    fQuoted = strpbrk(*ppsz, " \t") != NULL; /* TODO/BUGBUG/FIXME: are there more special chars to look out for?? */
-                    cch = strlen(*ppsz);
-                    if (iBuffer + cch + fQuoted * 2 + 20 >= sizeof(szBuffer))
-                    {
-                        fwrite(szBuffer, iBuffer, 1, phFile);
-                        iBuffer = 0;
-                    }
-                    strcpy(szBuffer + iBuffer, " \\\n    ");
-                    iBuffer += 7;
-                    if (fQuoted) szBuffer[iBuffer++] = '"';
-                    strcpy(szBuffer + iBuffer, *ppsz);
-                    iBuffer += cch;
-                    if (fQuoted) szBuffer[iBuffer++] = '"';
-
-                    /* next dependant */
-                    ppsz++;
+                    fwrite(szBuffer, iBuffer, 1, phFile);
+                    iBuffer = 0;
                 }
-            }
 
-            /* Add two new lines. Flush buffer first if necessary. */
-            if (iBuffer + CBNEWLINE*2 >= sizeof(szBuffer))
-            {
-                fwrite(szBuffer, iBuffer, 1, phFile);
-                iBuffer = 0;
-            }
+                memcpy(szBuffer + iBuffer, "# ", 2);
+                memcpy(szBuffer + iBuffer + 2, pdep->szTS, cchTS);
+                iBuffer += cchTS + 2;
+                szBuffer[iBuffer++] = '\n';
 
-            /* add 2 linefeeds */
-            strcpy(szBuffer + iBuffer, "\n\n");
-            iBuffer += CBNEWLINE*2;
+                if (fQuoted) szBuffer[iBuffer++] = '"';
+                strcpy(szBuffer + iBuffer, pdep->pszRule);
+                iBuffer += cch;
+                if (fQuoted) szBuffer[iBuffer++] = '"';
+                strcpy(szBuffer + iBuffer++, ":");
+
+                /* write rule dependants. */
+                if (pdep->papszDep != NULL)
+                {
+                    char **ppsz = pdep->papszDep;
+                    while (*ppsz != NULL)
+                    {
+                        /* flush buffer? */
+                        fQuoted = strpbrk(*ppsz, " \t") != NULL; /* TODO/BUGBUG/FIXME: are there more special chars to look out for?? */
+                        cch = strlen(*ppsz);
+                        if (iBuffer + cch + fQuoted * 2 + 20 >= sizeof(szBuffer))
+                        {
+                            fwrite(szBuffer, iBuffer, 1, phFile);
+                            iBuffer = 0;
+                        }
+                        strcpy(szBuffer + iBuffer, " \\\n    ");
+                        iBuffer += 7;
+                        if (fQuoted) szBuffer[iBuffer++] = '"';
+                        strcpy(szBuffer + iBuffer, *ppsz);
+                        iBuffer += cch;
+                        if (fQuoted) szBuffer[iBuffer++] = '"';
+
+                        /* next dependant */
+                        ppsz++;
+                    }
+                }
+
+                /* Add two new lines. Flush buffer first if necessary. */
+                if (iBuffer + CBNEWLINE*2 >= sizeof(szBuffer))
+                {
+                    fwrite(szBuffer, iBuffer, 1, phFile);
+                    iBuffer = 0;
+                }
+
+                /* add 2 linefeeds */
+                strcpy(szBuffer + iBuffer, "\n\n");
+                iBuffer += CBNEWLINE*2;
+            }
 
             /* next rule */
             pdep = (PDEPRULE)(void*)AVLGetNextNode(&EnumData);
