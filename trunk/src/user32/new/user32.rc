@@ -1,4 +1,4 @@
-/* $Id */
+/* $Id: user32.rc,v 1.4 1999-07-25 16:31:44 cbratschi Exp $ */
 /* converted from WINE */
 
 /* Button */
@@ -44,3 +44,24 @@ BITMAP OBM_UPARROW "uparrow.bmp"
 #define OBM_COMBO           32738
 
 BITMAP OBM_COMBO "combo.bmp"
+
+/* Edit */
+
+#define EM_UNDO              0x00c7
+#define WM_CUT               0x0300
+#define WM_COPY              0x0301
+#define WM_PASTE             0x0302
+#define WM_CLEAR             0x0303
+#define EM_SETSEL            0x00b1
+
+MENU 100
+BEGIN
+  MENUITEM "~Undo", EM_UNDO
+  MENUITEM SEPARATOR
+  MENUITEM "Cu~t", WM_CUT
+  MENUITEM "~Copy", WM_COPY
+  MENUITEM "~Paste", WM_PASTE
+  MENUITEM "~Delete", WM_CLEAR
+  MENUITEM SEPARATOR
+  MENUITEM "Select ~All", EM_SETSEL
+END

@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.1 1999-07-24 17:10:25 cbratschi Exp $ */
+/* $Id: edit.cpp,v 1.2 1999-07-25 16:31:44 cbratschi Exp $ */
 /*
  *      Edit control
  *
@@ -13,7 +13,7 @@
 /*
  *      please read EDIT.TODO (and update it when you change things)
   CB:
-   - OS/2 menu resource not  implemented
+   - OS/2 menu not implemented (WM_CONTEXTMENU)
  */
 
 //#include "config.h"
