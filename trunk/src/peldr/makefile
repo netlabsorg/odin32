@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 1999-08-09 21:03:19 phaller Exp $
+# $Id: makefile,v 1.5 1999-08-16 13:54:06 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -16,25 +16,37 @@ PDWIN32_BIN = ..\..\bin
 
 CFLAGS = $(CFLAGS) -Ge+ /Gd-  -I$(PDWIN32_INCLUDE)
 CXXFLAGS = $(CXXFLAGS) -Ge+ /Gd- -I$(PDWIN32_INCLUDE)
-LDFLAGS = $(LDFLAGS) -Ge+ /B"/pmtype:pm /stack:0x30000 /NOBASE /Map" \
-          ..\..\lib\kernel32.lib os2386.lib ..\..\lib\odincrt.lib cppom30.lib
+LDFLAGSEXE = $(LDFLAGS) -Ge+ /B"/pmtype:pm /stack:0x30000 /NOBASE /Map" \
+             $(PDWIN32_LIB)\peldr.lib os2386.lib $(PDWIN32_LIB)\odincrt.lib cppom30.lib
 
 TARGET = pe
+TARGETDLL = peldr
 
 OBJS =  pe.obj
+OBJSDLL =  initterm.obj
 
-all: $(TARGET).exe
+all: $(TARGETDLL).dll $(TARGETDLL).lib $(TARGET).exe
 
 
 $(TARGET).exe: $(OBJS)
-        $(LD) $(LDFLAGS) -Fe$@ $(OBJS)
+        $(LD) $(LDFLAGSEXE) -Fe$@ $(OBJS)
         $(CP) $(TARGET).exe $(PDWIN32_BIN)
 
+$(TARGETDLL).dll: $(OBJSDLL) $(TARGETDLL).def 
+	$(LD) $(LDFLAGS) -Fe$@ $(OBJSDLL) sbsstub.obj $(TARGETDLL).def OS2386.LIB CPPOM30.LIB
+	$(CP) $@ $(PDWIN32_BIN)
+
+$(TARGETDLL).lib: $(TARGETDLL).dll
+	$(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGETDLL).dll
+	$(CP) $@ $(PDWIN32_LIB)
 
 
+initterm.obj: initterm.cpp
 misc.obj: misc.cpp
 pe.obj: pe.cpp pe.h $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\winexe.h
 
 clean:
         $(RM) *.obj *.lib *.dll *~ *.map *.pch *.exe
         $(RM) $(PDWIN32_BIN)\$(TARGET).exe
+	$(RM) $(PDWIN32_BIN)\$(TARGETDLL).dll
+	$(RM) $(PDWIN32_LIB)\$(TARGETDLL).lib
