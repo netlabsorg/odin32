@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.17 2000-02-03 10:24:00 dengert Exp $
+# $Id: makefile,v 1.18 2000-02-03 18:59:36 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -63,7 +63,7 @@ region.obj: region.cpp $(PDWIN32_INCLUDE)\misc.h
 metafile.obj: metafile.cpp $(PDWIN32_INCLUDE)\misc.h
 
 dibitmap.obj: dibitmap.cpp dibsect.h $(PDWIN32_INCLUDE)\misc.h
-blit.obj: blit.cpp dibsect.h $(PDWIN32_INCLUDE)\misc.h
+blit.obj: blit.cpp dibsect.h $(PDWIN32_INCLUDE)\misc.h rgbcvt.h
 
 font.obj: font.cpp \
     $(PDWIN32_INCLUDE)\misc.h \
