@@ -1,4 +1,4 @@
-/* $Id: wininet.cpp,v 1.1 1999-12-28 13:02:56 sandervl Exp $ */
+/* $Id: wininet.cpp,v 1.2 2000-02-03 22:50:28 sandervl Exp $ */
 /*
  * WININET stubs
  *
@@ -20,24 +20,15 @@ BOOL WINAPI InternetTimeFromSystemTime(CONST SYSTEMTIME *pst, DWORD dwRFC,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WINAPI InternetCrackUrlA(LPCSTR lpszUrl, DWORD dwUrlLength, DWORD dwFlags,
-                              LPURL_COMPONENTS lpUrlComponents)
-{dprintf(("ERROR:"__FUNCTION__" not implemented"));
-	SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  	return 0;
-}
-//******************************************************************************
-//******************************************************************************
-
 BOOL WINAPI InternetCrackUrlW(LPCWSTR lpszUrl, DWORD dwUrlLength, DWORD dwFlags,
-                              LPURL_COMPONENTS lpUrlComponents)
+                              LPURL_COMPONENTSW lpUrlComponents)
 {dprintf(("ERROR:"__FUNCTION__" not implemented"));
 	SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   	return 0;
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WINAPI InternetCreateUrlA(LPURL_COMPONENTS lpUrlComponents, DWORD dwFlags,
+BOOL WINAPI InternetCreateUrlA(LPURL_COMPONENTSA lpUrlComponents, DWORD dwFlags,
                                LPSTR lpszUrl, LPDWORD lpdwUrlLength)
 {dprintf(("ERROR:"__FUNCTION__" not implemented"));
 	SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
@@ -45,7 +36,7 @@ BOOL WINAPI InternetCreateUrlA(LPURL_COMPONENTS lpUrlComponents, DWORD dwFlags,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WINAPI InternetCreateUrlW(LPURL_COMPONENTS lpUrlComponents, DWORD dwFlags,
+BOOL WINAPI InternetCreateUrlW(LPURL_COMPONENTSW lpUrlComponents, DWORD dwFlags,
                                LPWSTR lpszUrl, LPDWORD lpdwUrlLength)
 {dprintf(("ERROR:"__FUNCTION__" not implemented"));
 	SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
@@ -87,35 +78,9 @@ BOOL WINAPI InternetCombineUrlW(LPCWSTR lpszBaseUrl, LPCWSTR lpszRelativeUrl,
 }
 //******************************************************************************
 //******************************************************************************
-HINTERNET WINAPI InternetOpenA(LPCSTR lpszAgent, DWORD dwAccessType,
-                               LPCSTR lpszProxy, LPCSTR lpszProxyBypass,
-                               DWORD dwFlags)
-{dprintf(("ERROR:"__FUNCTION__" not implemented"));
-	SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  	return 0;
-}
-//******************************************************************************
-//******************************************************************************
 HINTERNET WINAPI InternetOpenW(LPCWSTR lpszAgent, DWORD dwAccessType,
                                LPCWSTR lpszProxy, LPCWSTR lpszProxyBypass,
                                DWORD dwFlags)
-{dprintf(("ERROR:"__FUNCTION__" not implemented"));
-	SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  	return 0;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WINAPI InternetCloseHandle(HINTERNET hInternet)
-{dprintf(("ERROR:"__FUNCTION__" not implemented"));
-	SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  	return 0;
-}
-//******************************************************************************
-//******************************************************************************
-HINTERNET WINAPI InternetConnectA(HINTERNET hInternet, LPCSTR lpszServerName,
-                                  INTERNET_PORT nServerPort, LPCSTR lpszUserName,
-                                  LPCSTR lpszPassword, DWORD dwService,
-                                  DWORD dwFlags, DWORD dwContext)
 {dprintf(("ERROR:"__FUNCTION__" not implemented"));
 	SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   	return 0;
@@ -148,14 +113,6 @@ HINTERNET WINAPI InternetOpenUrlW(HINTERNET hInternet, LPCWSTR lpszUrl, LPCWSTR 
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WINAPI InternetReadFile(HINTERNET hFile, LPVOID lpBuffer, DWORD dwNumberOfBytesToRead,
-                             LPDWORD lpdwNumberOfBytesRead)
-{dprintf(("ERROR:"__FUNCTION__" not implemented"));
-	SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  	return 0;
-}
-//******************************************************************************
-//******************************************************************************
 DWORD WINAPI InternetSetFilePointer(HINTERNET hFile, LONG lDistanceToMove,
                                     PVOID pReserved, DWORD dwMoveMethod,
                                     DWORD dwContext)
@@ -165,23 +122,8 @@ DWORD WINAPI InternetSetFilePointer(HINTERNET hFile, LONG lDistanceToMove,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WINAPI InternetWriteFile(HINTERNET hFile, LPCVOID lpBuffer, DWORD dwNumberOfBytesToWrite,
-                              LPDWORD lpdwNumberOfBytesWritten)
-{dprintf(("ERROR:"__FUNCTION__" not implemented"));
-	SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  	return 0;
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WINAPI InternetQueryDataAvailable(HINTERNET hFile,LPDWORD lpdwNumberOfBytesAvailable,    
                                        DWORD dwFlags, DWORD dwContext)
-{dprintf(("ERROR:"__FUNCTION__" not implemented"));
-	SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  	return 0;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WINAPI InternetFindNextFileA(HINTERNET hFind, LPVOID lpvFindData)
 {dprintf(("ERROR:"__FUNCTION__" not implemented"));
 	SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   	return 0;
@@ -243,33 +185,8 @@ BOOL WINAPI InternetSetOptionExW(HINTERNET hInternet, DWORD dwOption, LPVOID lpB
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WINAPI InternetGetLastResponseInfoA(LPDWORD lpdwError, LPSTR lpszBuffer,
-                                         LPDWORD lpdwBufferLength)
-{dprintf(("ERROR:"__FUNCTION__" not implemented"));
-	SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  	return 0;
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WINAPI InternetGetLastResponseInfoW(LPDWORD lpdwError, LPWSTR lpszBuffer,
                                          LPDWORD lpdwBufferLength)
-{dprintf(("ERROR:"__FUNCTION__" not implemented"));
-	SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  	return 0;
-}
-//******************************************************************************
-//******************************************************************************
-INTERNET_STATUS_CALLBACK WINAPI InternetSetStatusCallback(HINTERNET hInternet,
-                                                          INTERNET_STATUS_CALLBACK lpfnInternetCallback)
-{dprintf(("ERROR:"__FUNCTION__" not implemented"));
-	SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  	return 0;
-}
-//******************************************************************************
-//******************************************************************************
-HINTERNET WINAPI FtpFindFirstFileA(HINTERNET hConnect, LPCSTR lpszSearchFile,
-                                   LPWIN32_FIND_DATAA lpFindFileData,
-                                   DWORD dwFlags, DWORD dwContext)
 {dprintf(("ERROR:"__FUNCTION__" not implemented"));
 	SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   	return 0;
@@ -285,28 +202,10 @@ HINTERNET WINAPI FtpFindFirstFileW(HINTERNET hConnect, LPCWSTR lpszSearchFile,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WINAPI FtpGetFileA(HINTERNET hConnect, LPCSTR lpszRemoteFile,
-                        LPCSTR lpszNewFile, BOOL fFailIfExists,
-                        DWORD dwFlagsAndAttributes, DWORD dwFlags,
-                        DWORD dwContext)
-{dprintf(("ERROR:"__FUNCTION__" not implemented"));
-	SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  	return 0;
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WINAPI FtpGetFileW(HINTERNET hConnect, LPCWSTR lpszRemoteFile,
                         LPCWSTR lpszNewFile, BOOL fFailIfExists,
                         DWORD dwFlagsAndAttributes, DWORD dwFlags,
                         DWORD dwContext)
-{dprintf(("ERROR:"__FUNCTION__" not implemented"));
-	SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  	return 0;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WINAPI FtpPutFileA(HINTERNET hConnect, LPCSTR lpszLocalFile, LPCSTR lpszNewRemoteFile,
-                        DWORD dwFlags, DWORD dwContext)
 {dprintf(("ERROR:"__FUNCTION__" not implemented"));
 	SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   	return 0;
@@ -349,23 +248,8 @@ BOOL WINAPI FtpRenameFileW(HINTERNET hConnect, LPCWSTR lpszExisting,LPCWSTR lpsz
 }
 //******************************************************************************
 //******************************************************************************
-HINTERNET WINAPI FtpOpenFileA(HINTERNET hConnect, LPCSTR lpszFileName,
-                              DWORD dwAccess, DWORD dwFlags, DWORD dwContext)
-{dprintf(("ERROR:"__FUNCTION__" not implemented"));
-	SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  	return 0;
-}
-//******************************************************************************
-//******************************************************************************
 HINTERNET WINAPI FtpOpenFileW(HINTERNET hConnect, LPCWSTR lpszFileName,
                               DWORD dwAccess, DWORD dwFlags, DWORD dwContext)
-{dprintf(("ERROR:"__FUNCTION__" not implemented"));
-	SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  	return 0;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WINAPI FtpCreateDirectoryA(HINTERNET hConnect, LPCSTR lpszDirectory)
 {dprintf(("ERROR:"__FUNCTION__" not implemented"));
 	SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   	return 0;
@@ -393,22 +277,7 @@ BOOL WINAPI FtpRemoveDirectoryW(HINTERNET hConnect, LPCWSTR lpszDirectory)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WINAPI FtpSetCurrentDirectoryA(HINTERNET hConnect, LPCSTR lpszDirectory)
-{dprintf(("ERROR:"__FUNCTION__" not implemented"));
-	SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  	return 0;
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WINAPI FtpSetCurrentDirectoryW(HINTERNET hConnect, LPCWSTR lpszDirectory)
-{dprintf(("ERROR:"__FUNCTION__" not implemented"));
-	SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  	return 0;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WINAPI FtpGetCurrentDirectoryA(HINTERNET hConnect, LPSTR lpszCurrentDirectory,
-                                    LPDWORD lpdwCurrentDirectory)
 {dprintf(("ERROR:"__FUNCTION__" not implemented"));
 	SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   	return 0;
