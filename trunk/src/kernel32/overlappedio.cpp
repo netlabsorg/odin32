@@ -1,4 +1,4 @@
-/* $Id: overlappedio.cpp,v 1.7 2001-12-07 14:13:38 sandervl Exp $ */
+/* $Id: overlappedio.cpp,v 1.8 2001-12-09 21:19:28 sandervl Exp $ */
 
 /*
  * Win32 overlapped IO class
@@ -427,8 +427,14 @@ BOOL OverlappedIOHandler::WaitForEvent(HANDLE        hHandle,
                                        DWORD         dwTimeOut)
 {
     LPASYNCIOREQUEST lpRequest, current;
+    DWORD            dwLastError, dwResult;
 
     if(!lpOverlapped || lpOverlapped->hEvent == 0) {
+        ::SetLastError(ERROR_INVALID_PARAMETER);
+        return FALSE;
+    }
+    if(!lpPollHandler) {
+        DebugInt3();
         ::SetLastError(ERROR_INVALID_PARAMETER);
         return FALSE;
     }
@@ -450,6 +456,32 @@ BOOL OverlappedIOHandler::WaitForEvent(HANDLE        hHandle,
     lpRequest->dwEventMask         = dwEventMask;
     lpRequest->next                = NULL;
 
+    lpOverlapped->Internal     = ERROR_IO_PENDING;
+    lpOverlapped->InternalHigh = 0;
+    lpOverlapped->Offset       = 0;
+    lpOverlapped->OffsetHigh   = 0;
+    //reset overlapped semaphore to non-signalled
+    ::ResetEvent(lpOverlapped->hEvent);
+
+    //first check if the event has already occured; if so, return result
+    //immediately
+    dwLastError = lpPollHandler(lpRequest, &dwResult, &dwTimeOut);
+    if(dwLastError != ERROR_IO_PENDING) 
+    {
+        dprintf(("OverlappedIOHandler::WaitForEvent %x: result %x, last error %d", lpOverlapped, dwResult, dwLastError));
+        lpOverlapped->Internal     = dwLastError;
+        lpOverlapped->InternalHigh = dwResult;
+        if(lpfdwEvtMask) {
+            *lpfdwEvtMask = dwResult;
+        }
+        //wake up user thread
+        ::SetEvent(lpOverlapped->hEvent);
+
+        delete lpRequest;
+        ::SetLastError(dwLastError);
+        return (dwLastError == ERROR_SUCCESS);
+    }
+
     ::EnterCriticalSection(&critsect);
     if(pending[ASYNC_INDEX_POLL]) {
          current = pending[ASYNC_INDEX_READ];
@@ -460,13 +492,6 @@ BOOL OverlappedIOHandler::WaitForEvent(HANDLE        hHandle,
     }
     else pending[ASYNC_INDEX_POLL] = lpRequest;
     ::LeaveCriticalSection(&critsect);
-
-    lpOverlapped->Internal     = ERROR_IO_PENDING;
-    lpOverlapped->InternalHigh = 0;
-    lpOverlapped->Offset       = 0;
-    lpOverlapped->OffsetHigh   = 0;
-    //reset overlapped semaphore to non-signalled
-    ::ResetEvent(lpOverlapped->hEvent);
 
     //wake up async thread
     ::SetEvent(hEventPoll);
@@ -513,6 +538,7 @@ BOOL OverlappedIOHandler::GetOverlappedResult(HANDLE        hHandle,
 
     ::SetLastError(lpOverlapped->Internal);
 
+    dprintf(("GetOverlappedResult %x -> result %d last error %d", hHandle, lpOverlapped->InternalHigh, lpOverlapped->Internal));
     return (ret == WAIT_OBJECT_0);
 }
 //******************************************************************************
