@@ -1,4 +1,4 @@
-#/* $Id: makefile,v 1.7 1999-11-14 21:05:23 davidr Exp $ */
+#/* $Id: makefile,v 1.8 1999-11-23 21:47:06 davidr Exp $ */
 #
 # PD-Win32 API 
 #
@@ -22,9 +22,15 @@ TARGET = oleaut32
 
 OBJS =  oleaut32.obj guid.obj \
 	initterm.obj olefont.obj \
-	typelib.obj variant.obj \
+	typelib.obj \
+	variant.obj \
 	ole2disp.obj parsedt.obj \
-	ipicture.obj \
+	iPicture.obj \
+	iPictureNone.obj \
+	iPictureBmp.obj \
+	iPictureMeta.obj \
+	iPictureIcon.obj \
+	iPictureEmf.obj \
 	safearray.obj stubs.obj
 
 all: $(TARGET).dll $(TARGET).lib
@@ -49,17 +55,22 @@ $(TARGET).lib: $(TARGET)exp.def
 $(TARGET)exp.def: $(TARGET).def
         $(IMPDEF) $** $@
 
-oleaut32.obj:	oleaut32.cpp oleaut32.h
-initterm.obj:	initterm.cpp
-ole2disp.obj:    ole2disp.cpp oleaut32.h
-variant.obj:    variant.cpp parsedt.h
-typelib.obj:    typelib.cpp oleaut32.h
-olefont.obj:    olefont.cpp oleaut32.h
-ipicture.obj:   ipicture.cpp ipicture.h oleaut32.h
-parsedt.obj:    parsedt.cpp parsedt.h
-safearray.obj:  safearray.cpp oleaut32.h
-guid.obj:       guid.cpp
-stubs.obj:      stubs.cpp
+oleaut32.obj:		oleaut32.cpp oleaut32.h
+initterm.obj:		initterm.cpp
+ole2disp.obj:   	ole2disp.cpp oleaut32.h
+variant.obj:    	variant.cpp parsedt.h
+typelib.obj:		typelib.cpp oleaut32.h
+olefont.obj:		olefont.cpp oleaut32.h
+iPicture.obj:		iPicture.cpp iPicture.h oleaut32.h
+iPictureNone.obj:	iPictureNone.cpp iPicture.h oleaut32.h
+iPictureBmp.obj:	iPictureBmp.cpp iPicture.h oleaut32.h
+iPictureIcon.obj:	iPictureIcon.cpp iPicture.h oleaut32.h
+iPictureMeta.obj:	iPictureMeta.cpp iPicture.h oleaut32.h
+iPictureEmf.obj:	iPictureEmf.cpp iPicture.h oleaut32.h
+parsedt.obj:		parsedt.cpp parsedt.h
+safearray.obj:  	safearray.cpp oleaut32.h
+guid.obj:       	guid.cpp
+stubs.obj:      	stubs.cpp
 
 clean:
 	$(RM) *.obj *.lib *.dll *.map *.pch	
