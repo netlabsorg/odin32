@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.2694 2004-03-10 09:22:02 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2695 2004-03-11 13:42:28 sandervl Exp $ */
+
+ 2004-03-11: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o More WH_MOUSE changes
 
  2004-03-10: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Added support for WH_MOUSE hook
