@@ -1,4 +1,4 @@
-/* $Id: os2heap.cpp,v 1.24 2001-10-06 18:53:11 sandervl Exp $ */
+/* $Id: os2heap.cpp,v 1.25 2001-10-06 19:08:03 sandervl Exp $ */
 
 /*
  * Heap class for OS/2
@@ -319,15 +319,16 @@ void * _LNK_CONV getmoreHeapMem(Heap_t pHeap, size_t *size, int *clean)
 
   dprintf(("KERNEL32: getmoreHeapMem(%08xh, %08xh, %08xh)", pHeap, *size, *clean));
 
-  /* round the size up to a multiple of 4K */
-  *size = (*size / 4096) * 4096 + 4096;
+  /* round the size up to a multiple of 64K */
+  //NOTE: MUST use 64kb here or else we are at risk of running out of virtual
+  //      memory space. (when allocating 4kb we actually get 4kb + 60k uncommited)
+  *size = (*size / 65536) * 65536 + 65536;
 
   rc = DosAllocMem(&newblock, *size, flAllocMem|PAG_READ|PAG_WRITE|PAG_COMMIT|PAG_EXECUTE);
   if(rc != 0) {
 	dprintf(("getmoreHeapMem: DosAllocMem failed with %d", rc));
 	return FALSE;
   }
-success:
   *clean = _BLOCK_CLEAN;
   dprintf(("KERNEL32: getmoreHeapMem %x %d", newblock, *size));
   return newblock;
