@@ -1,4 +1,9 @@
- /* $Id: changelog,v 1.822 2000-03-19 22:33:36 davidr Exp $ */
+ /* $Id: changelog,v 1.823 2000-03-20 20:38:42 sandervl Exp $ */
+
+ 2000-03-20: Sander van Leeuwen <sandervl@xs4all.nl>
+	- WSOCK32: Fixed relay bug in WSAAsyncSelect (delete relay slot 
+                   with same socket nr & window handle; there can
+                   be more selects per window)
 
  2000-03-19: David Raison <djr@lemur.co.uk>
  	- OLE32: Bugfixes.
