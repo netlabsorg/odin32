@@ -290,6 +290,7 @@ BOOL  WINAPI GetFileDialog95A(LPOPENFILENAMEA ofn,UINT iDlgType)
   FileOpenDlgInfos *fodInfos;
   HINSTANCE hInstance;
   LPCSTR lpstrInitialDir = (LPCSTR)-1;
+  LPSTR lpstrSavDir = NULL;
   DWORD dwFlags = 0;
   
   /* Initialise FileOpenDlgInfos structure*/  
@@ -302,6 +303,13 @@ BOOL  WINAPI GetFileDialog95A(LPOPENFILENAMEA ofn,UINT iDlgType)
   /* Save original hInstance value */
   hInstance = ofn->hInstance;
   fodInfos->ofnInfos->hInstance = MapHModuleLS(ofn->hInstance);
+
+  /* save current directory */
+  if (ofn->Flags & OFN_NOCHANGEDIR)
+  {
+     lpstrSavDir = MemAlloc(MAX_PATH);
+     GetCurrentDirectoryA(MAX_PATH, lpstrSavDir);
+  }
 
   dwFlags = ofn->Flags;
   ofn->Flags = ofn->Flags|OFN_WINE;
@@ -321,6 +329,12 @@ BOOL  WINAPI GetFileDialog95A(LPOPENFILENAMEA ofn,UINT iDlgType)
       break;
     default :
       ret = 0;
+  }
+
+  if (lpstrSavDir)
+  {
+      SetCurrentDirectoryA(lpstrSavDir);
+      MemFree(lpstrSavDir);
   }
 
   if (lpstrInitialDir != (LPCSTR)-1)
@@ -382,7 +396,9 @@ BOOL  WINAPI GetFileDialog95W(LPOPENFILENAMEW ofn,UINT iDlgType)
   BOOL ret;
   FileOpenDlgInfos *fodInfos;
   HINSTANCE hInstance;
-  
+#ifdef __WIN32OS2__
+  LPSTR lpstrSavDir = NULL;
+#endif
   /* out arguments */
   LPWSTR lpstrFile = NULL;
   LPWSTR lpstrFileTitle = NULL;
@@ -475,6 +491,15 @@ BOOL  WINAPI GetFileDialog95W(LPOPENFILENAMEW ofn,UINT iDlgType)
   dwFlags = ofn->Flags;
   hInstance = ofn->hInstance;
 
+#ifdef __WIN32OS2__
+  /* save current directory */
+  if (ofn->Flags & OFN_NOCHANGEDIR)
+  {
+     lpstrSavDir = MemAlloc(MAX_PATH);
+     GetCurrentDirectoryA(MAX_PATH, lpstrSavDir);
+  }
+#endif
+
   ofn->Flags = ofn->Flags|OFN_WINE|OFN_UNICODE;
   ofn->hInstance = MapHModuleLS(ofn->hInstance);
 
@@ -490,6 +515,14 @@ BOOL  WINAPI GetFileDialog95W(LPOPENFILENAMEW ofn,UINT iDlgType)
   default :
       ret = 0;
   }
+
+#ifdef __WIN32OS2__
+  if (lpstrSavDir)
+  {
+      SetCurrentDirectoryA(lpstrSavDir);
+      MemFree(lpstrSavDir);
+  }
+#endif
       
   /* restore saved IN arguments and convert OUT arguments back */
   ofn->Flags = dwFlags;
@@ -855,6 +888,7 @@ HRESULT WINAPI FileOpenDlgProc95(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
          FILEDLG95_InitControls(hwnd);
          SendCustomDlgNotificationMessage(hwnd,CDN_INITDONE);
       	 FILEDLG95_FillControls(hwnd, wParam, lParam);
+         SendCustomDlgNotificationMessage(hwnd,CDN_SELCHANGE);
          return 0;
        }
     case WM_COMMAND:
@@ -1547,17 +1581,15 @@ BOOL FILEDLG95_OnOpen(HWND hwnd)
 	    /* FIXME we are sending ASCII-structures. Does not work with NT */
 	    /* first old style */
 	    TRACE("---\n");
-#ifndef __WIN32OS2__
-//-->> crashes Adobe Acrobat 4.0
-	    CallWindowProcA((WNDPROC)fodInfos->ofnInfos->lpfnHook, hwnd,
-	    		 fodInfos->HookMsg.fileokstring, 0, (LPARAM)fodInfos->ofnInfos);
+            CallWindowProcA((WNDPROC)fodInfos->ofnInfos->lpfnHook,
+                            fodInfos->DlgInfos.hwndCustomDlg,
+                            fodInfos->HookMsg.fileokstring, 0, (LPARAM)fodInfos->ofnInfos);
 	    if (GetWindowLongA(hwnd, DWL_MSGRESULT))
 	    {
 	      TRACE("cancled\n");
 	      ret = FALSE;
 	      goto ret;
 	    }
-#endif
 	  }
 
           TRACE("close\n");
