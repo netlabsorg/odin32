@@ -1,4 +1,4 @@
-/* $Id: propsheet.c,v 1.18 2000-02-14 17:31:39 cbratschi Exp $ */
+/* $Id: propsheet.c,v 1.19 2000-02-18 17:13:38 cbratschi Exp $ */
 /*
  * Property Sheets
  *
@@ -1480,7 +1480,7 @@ static void PROPSHEET_PressButton(HWND hwndDlg, int buttonID)
       SendMessageA(hwndDlg, WM_COMMAND, IDOK, 0);
       break;
     default:
-//      FIXME(propsheet, "Invalid button index %d\n", buttonID);
+        //FIXME(propsheet, "Invalid button index %d\n", buttonID);
         break;
   }
 }
@@ -1933,6 +1933,8 @@ INT WINAPI PropertySheetA(LPCPROPSHEETHEADERA lppsh)
   int i;
   BYTE* pByte;
 
+  dprintf(("COMCTL32: PropertySheetA"));
+
   PROPSHEET_CollectSheetInfo(lppsh, psInfo);
 
   psInfo->proppage = (PropPageInfo*) COMCTL32_Alloc(sizeof(PropPageInfo) *
@@ -1963,7 +1965,7 @@ INT WINAPI PropertySheetA(LPCPROPSHEETHEADERA lppsh)
  */
 INT WINAPI PropertySheetW(LPCPROPSHEETHEADERW propertySheetHeader)
 {
-//    FIXME(propsheet, "(%p): stub\n", propertySheetHeader);
+    dprintf(("COMCTL32: PropertySheetW - empty stub!"));
 
     return -1;
 }
@@ -1975,6 +1977,8 @@ HPROPSHEETPAGE WINAPI CreatePropertySheetPageA(
                           LPCPROPSHEETPAGEA lpPropSheetPage)
 {
   PROPSHEETPAGEA* ppsp = COMCTL32_Alloc(sizeof(PROPSHEETPAGEA));
+
+  dprintf(("COMCTL32: CreatePropertySheetPageA"));
 
   *ppsp = *lpPropSheetPage;
 
@@ -1998,7 +2002,7 @@ HPROPSHEETPAGE WINAPI CreatePropertySheetPageA(
  */
 HPROPSHEETPAGE WINAPI CreatePropertySheetPageW(LPCPROPSHEETPAGEW lpPropSheetPage)
 {
-//    FIXME(propsheet, "(%p): stub\n", lpPropSheetPage);
+    dprintf(("COMCTL32: CreatePropertySheetPageW - empty stub!"));
 
     return 0;
 }
@@ -2009,6 +2013,8 @@ HPROPSHEETPAGE WINAPI CreatePropertySheetPageW(LPCPROPSHEETPAGEW lpPropSheetPage
 BOOL WINAPI DestroyPropertySheetPage(HPROPSHEETPAGE hPropPage)
 {
   PROPSHEETPAGEA *psp = (PROPSHEETPAGEA *)hPropPage;
+
+  dprintf(("COMCTL32: DestroyPropertySheetPage"));
 
   if (!psp)
      return FALSE;
@@ -2409,13 +2415,13 @@ PROPSHEET_DialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
       return TRUE;
 
     case PSM_SETTITLEW:
-        FIXME("Unimplemented msg PSM_SETTITLE32W\n");
+        //FIXME("Unimplemented msg PSM_SETTITLE32W\n");
         return 0;
     case PSM_SETCURSELID:
-        FIXME("Unimplemented msg PSM_SETCURSELID\n");
+        //FIXME("Unimplemented msg PSM_SETCURSELID\n");
         return 0;
     case PSM_SETFINISHTEXTW:
-        FIXME("Unimplemented msg PSM_SETFINISHTEXT32W\n");
+        //FIXME("Unimplemented msg PSM_SETFINISHTEXT32W\n");
         return 0;
 
     default:
