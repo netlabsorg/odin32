@@ -1,4 +1,4 @@
-/* $Id: heapstring.h,v 1.10 2000-08-29 21:20:49 sandervl Exp $ */
+/* $Id: heapstring.h,v 1.11 2000-10-02 13:04:29 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -53,6 +53,7 @@ LPVOID WIN32API HEAP_xalloc    ( HANDLE heap, DWORD flags, DWORD size );
 LPVOID WIN32API HEAP_xrealloc  ( HANDLE heap, DWORD flags, LPVOID lpMem, DWORD size );
 LPVOID WIN32API HEAP_malloc    ( DWORD size );
 LPVOID WIN32API HEAP_realloc   ( LPVOID lpMem, DWORD size );
+DWORD  WIN32API HEAP_size      ( LPVOID lpMem );
 VOID   WIN32API HEAP_free      ( LPVOID lpMem );
 
 LPSTR  WIN32API HEAP_strdupA   ( HANDLE heap, DWORD flags, LPCSTR str );
