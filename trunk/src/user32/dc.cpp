@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.116 2002-03-20 10:30:06 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.117 2002-06-28 19:45:00 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -754,9 +754,9 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
         lComplexity = GpiSetClipRegion(pHps->hps, hrgnClip, &hrgnOldClip);
 
         if(lComplexity == RGN_NULL) {
-            dprintf (("BeginPaint %x: EMPTY update rectangle (show=%d/%d vis=%d/%d", hWnd,  WinIsWindowVisible(wnd->getOS2FrameWindowHandle()), WinIsWindowVisible(wnd->getOS2WindowHandle()),  WinIsWindowShowing(wnd->getOS2FrameWindowHandle()), WinIsWindowShowing(wnd->getOS2WindowHandle())));
+            dprintf (("BeginPaint %x: EMPTY update rectangle (vis=%d/%d show=%d/%d", hWnd,  WinIsWindowVisible(wnd->getOS2FrameWindowHandle()), WinIsWindowVisible(wnd->getOS2WindowHandle()),  WinIsWindowShowing(wnd->getOS2FrameWindowHandle()), WinIsWindowShowing(wnd->getOS2WindowHandle())));
         }
-        else dprintf (("BeginPaint %x: (show=%d/%d vis=%d/%d)", hWnd,  WinIsWindowVisible(wnd->getOS2FrameWindowHandle()), WinIsWindowVisible(wnd->getOS2WindowHandle()),  WinIsWindowShowing(wnd->getOS2FrameWindowHandle()), WinIsWindowShowing(wnd->getOS2WindowHandle())));
+        else dprintf (("BeginPaint %x: (vis=%d/%d show=%d/%d)", hWnd,  WinIsWindowVisible(wnd->getOS2FrameWindowHandle()), WinIsWindowVisible(wnd->getOS2WindowHandle()),  WinIsWindowShowing(wnd->getOS2FrameWindowHandle()), WinIsWindowShowing(wnd->getOS2WindowHandle())));
 
         selectClientArea(wnd, pHps);
 
