@@ -3,34 +3,56 @@
 #
 #
 
+# Tell that we're producing an executable
+EXETARGET = 1
+
 PDWIN32_INCLUDE = ..\..\include
 PDWIN32_LIB = ..\..\lib
-PDWIN32_BIN = ..\..\bin
+PDWIN32_BIN = ..\..\$(OBJDIR)
+PDWIN32_TOOLS   = ..\bin
 
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 
-PROJ = odininst
+TARGET = odininst
 
-all: $(PROJ).exe
+all:    $(OBJDIR) \
+        $(OBJDIR)\$(TARGET).exe \
+        $(PDWIN32_BIN)\$(TARGET).exe
 
-# Define project specific macros
-PROJ_OBJS  = odininst.obj 
+# Flag overloads and local macros.
+CLEANEXTRAS = $(PDWIN32_BIN)\$(TARGET).exe
+
+# Object files. All objects should be prefixed with $(OBJDIR)!
+OBJS = $(OBJDIR)\odininst.obj
 
 
-CFLAGS     = -Q  -Si -Ti -Tm+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLUDE)\Win -D__WIN32OS2__ -DDEBUG -D__i386__
-CXXFLAGS   = -Q  -Si -Ti -Tm+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLUDE)\Win -D__WIN32OS2__ -DDEBUG -D__i386__
+# Lib rule - dummy rule.
+lib:
 
-CFLAGS = $(CFLAGS) /Ge+ -I$(PDWIN32_INCLUDE)
-CXXFLAGS = $(CXXFLAGS) /Ge+ -I$(PDWIN32_INCLUDE)
-LDFLAGSEXE = $(LDFLAGS) /Ge+ /B"/pmtype:pm /stack:0x30000 /NOBASE /Map" \
-             $(EXTRA_LIBS) $(PDWIN32_LIB)\kernel32.lib $(PDWIN32_LIB)\user32.lib \
-             $(PDWIN32_LIB)\gdi32.lib os2386.lib $(PDWIN32_LIB)\odincrt.lib $(RTLLIB_O)
 
-# Build rule for EXE
-$(PROJ).exe: $(PROJ_OBJS) 
-        $(LD) $(LDFLAGSEXE) -Fe$@ $(PROJ_OBJS)
-        copy $(PROJ).exe ..\bin
+# Exe rule - builds the target exe.
+$(OBJDIR)\$(TARGET).exe: $(OBJS) $(OBJDIR)\$(TARGET).lrf
+    $(LD2) $(LD2FLAGS_ODINCRT) @$(OBJDIR)\$(TARGET).lrf
 
-# Rules for cleaning out those old files
-clean:
-    del *.bak *.pdb *.obj *.res *.exp *.map *.sbr *.bsc
+# Linker file - creates the parameter file passed on to the linker.
+$(OBJDIR)\$(TARGET).lrf: makefile
+    @echo Creating file <<$@
+/OUT:$(OBJDIR)\$(TARGET).exe
+/MAP:$(OBJDIR)\$(TARGET).map
+/PMTYPE:pm
+/STACK:0x100000
+/NOBASE
+$(OBJS)
+os2386.lib
+$(PDWIN32_LIB)\kernel32.lib
+<<keep
+
+
+# Dep rule - makes depenencies for C, C++ and Asm files.
+dep:
+    $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
+        *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
+
+
+# Includes the common rules.
+!include $(PDWIN32_INCLUDE)/pdwin32.post
