@@ -1,4 +1,4 @@
-/* $Id: oslibdos.h,v 1.16 2000-06-01 11:28:48 sandervl Exp $ */
+/* $Id: oslibdos.h,v 1.17 2000-06-01 14:01:44 sandervl Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -68,7 +68,7 @@ BOOL OSLibDosGetFileAttributesEx(LPSTR pszName, ULONG ulDummy, PVOID pBuffer);
 #define OSLIB_ACCESS_SHAREDENYWRITE     16
 
 DWORD OSLibDosOpen(char *lpszFileName, DWORD flags);
-DWORD OSLibDosClose(DWORD hFile);
+BOOL OSLibDosClose(DWORD hFile);
 BOOL OSLibDosDelete(char *lpszFileName);
 
 #define OSLIB_SETPTR_FILE_CURRENT       1
