@@ -1,4 +1,16 @@
- /* $Id: changelog,v 1.466 1999-11-22 20:37:49 sandervl Exp $ */
+ /* $Id: changelog,v 1.467 1999-11-23 19:35:19 sandervl Exp $ */
+
+ 99-11-23: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Added stubs for ChangeDisplaySettingsExA/W
+                  Ported Wine EnumDisplaySettingsA/W (991031)
+                  Query display color depth during init.
+	- KERNEL32: Ported and adapted Wine GetSystemInfo (now creates
+                    both cpu & fpu registry keys)
+                    Added IsProcessorFeaturePresent
+
+ 99-11-23: Vitali E. Pelenyov <Vitali.Pelenyov@dpt.ustu.ru>
+	- USER32: ChangeDisplaySettingsA bugfix
+	- WSOCK32: Compile fix (include two more headers)
 
  99-11-22: Patrick Haller <phaller@gmx.net>
 	- WSOCK32\NEW: Experimental rewrite using PMWSOCK, incomplete yet
