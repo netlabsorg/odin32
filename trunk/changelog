@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2207 2002-07-05 17:56:09 sandervl Exp $ */
+/* $Id: changelog,v 1.2208 2002-07-05 18:14:39 sandervl Exp $ */
+
+ 2002-07-05: Platon Fomichev <platon@innotek.de>
+    - USER32:   o SetFocus not allowed on invisible windows
 
  2002-07-05: Sander van Leeuwen <sandervl@innotek.de> 
     - KERNEL32: o Dump exception log to except.log in system32 directory
