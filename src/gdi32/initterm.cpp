@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.7 1999-09-15 23:26:06 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.8 1999-12-29 18:51:45 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -38,6 +38,9 @@
 extern "C" {
 void CDECL _ctordtorInit( void );
 void CDECL _ctordtorTerm( void );
+
+ //Win32 resource table (produced by wrc)
+ extern DWORD _Resource_PEResTab;
 }
 
 /*-------------------------------------------------------------------*/
@@ -80,7 +83,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          /* are required and the runtime is dynamically linked.             */
          /*******************************************************************/
 
-	 if(RegisterLxDll(hModule, 0, 0) == FALSE) 
+	 if(RegisterLxDll(hModule, 0, (PVOID)&_Resource_PEResTab) == FALSE) 
 		return 0UL;
 
          rc = DosExitList(0x0000F000|EXLST_ADD, cleanup);
