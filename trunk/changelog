@@ -1,10 +1,18 @@
-/* $Id: changelog,v 1.1489 2001-06-09 14:53:51 sandervl Exp $ */
+/* $Id: changelog,v 1.1490 2001-06-09 19:45:16 sandervl Exp $ */
 
  2001-06-09: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Keep reference count for window and class objects. 
                   Only delete the objects when nobody else is using them anymore.
                   (fixes crashes due to premature destruction of objects;
                    e.g. during Napster startup)
+    - KERNEL32: o heap checking accidentally turned on during logging
+                  (making the debug build extremely slow)
+                o Open32's CreateProcess can fail with ERROR_FILE_NOT_FOUND for
+                  no apparent reason. Don't bail out when that happens, but try
+                  to create the process anyway.
+                  (fixes CreateProcess during Napster install)
+                o Improved version of InterlockedIncrement & InterlockedDecrement
+                  (borrowed from Wine)
 
  2001-06-08: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o WinExec fixes
