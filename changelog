@@ -1,4 +1,41 @@
- /* $Id: changelog,v 1.1098 2000-09-02 08:37:42 sandervl Exp $ */
+ /* $Id: changelog,v 1.1099 2000-09-02 21:31:53 bird Exp $ */
+
+ 2000-09-01: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - Win32k:   Finally. I've merged the new changes into the main branch.
+                The most important things are:
+                    - More correct search order for DLLs. The differences are
+                      now that _ALL_ DLLs are found using the Windows search
+                      order, and that the LIBPATH are also searched (last).
+                    - PE.EXE may be invoked by Win32k.sys.
+                      Win32k.sys will now operate in three modes:
+                        - Pure Pe2Lx mode. Only the Pe2Lx method is used.
+                        - Mixed Pe2Lx and Pe.exe mode. Pe.exe is invoked for
+                          executables which Pe2Lx don't currently support.
+                          (like WinWord, which BTW may trap you PC if invoked
+                          in Pure mode.)
+                          This is the default mode.
+                        - Pe.exe mode. Pe.exe is allways used.
+                      (see readme.txt, I'll update it to ASAP but not to night.
+                       (I tired after working 36 hours on finishing this...)
+                    - UNIX Shell Scripts are working (now).
+                    - JAVA invokation. If you try to load a JAVA class the
+                      it is executed using java.exe. (note that the class
+                      name is case sensitive!)
+                    - Pure REXX. This one is for Nenad. .RX and .REX are
+                      loaded using a tiny REXX starter, kRX.exe (found in
+                      System32 directory).
+                    - Win32k Control Center, Win32kCC.EXE. Simple PM
+                      program which allows you to change the Win32k.SYS
+                      options while running. It does also show some status
+                      information (will be extended).
+                    - Support for FP14 in the Symbol database.
+                      (use the 09th Aug. kernel please).
+
+    - KERNEL32: Speeded up loading by using Win32k.sys IOCtl to get
+                objecttable entries (OTE) for the Pe2Lx executable images,
+                instead of using DosQuerySysState (which gets OTEs for all
+                modules in the entrie system). (This is the reason for the
+                win32k.lib file - it's made by the 'libs' rule from src.)
 
  2000-09-02: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   Rewrote IsZoomed
