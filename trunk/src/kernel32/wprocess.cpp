@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.133 2001-09-26 15:30:41 phaller Exp $ */
+/* $Id: wprocess.cpp,v 1.134 2001-09-26 16:02:54 phaller Exp $ */
 
 /*
  * Win32 process functions
@@ -183,7 +183,9 @@ TEB * WIN32API InitializeTIB(BOOL fMainThread)
     winteb->o.odin.OrgTIBSel       = GetFS();
     winteb->o.odin.pWsockData      = NULL;
     winteb->o.odin.threadId        = GetCurrentThreadId();
+#ifdef DEBUG
     winteb->o.odin.dbgCallDepth    = 0;
+#endif
     winteb->o.odin.pMessageBuffer  = NULL;
   
     if(fMainThread) {
