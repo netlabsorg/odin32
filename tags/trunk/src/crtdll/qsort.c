@@ -26,8 +26,8 @@
 static void qsort1 (char *l, char *r, size_t width,
                     int (* CDECL compare)(const void *x1, const void *x2));
 
-void CDECL qsort (void *base, size_t num, size_t width,
-                  int (*CDECL compare)(const void *x1, const void *x2))
+void CDECL CRTDLL_qsort (void *base, size_t num, size_t width,
+                         int (*CDECL compare)(const void *x1, const void *x2))
 {
   if (width > 0 && num > 1 && base != 0)
     qsort1 ((char *)base, (char *)base+(num-1)*width, width, compare);

@@ -1,4 +1,4 @@
-/* $Id: crt.cpp,v 1.13 1999-12-20 11:47:00 sandervl Exp $ */
+/* $Id: crt.cpp,v 1.1 1999-12-21 12:27:11 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -20,14 +20,14 @@
 #include <wcstr.h>
 #include <wctype.h>
 
-#include "ntdll.h"
-#include <heapstring.h>
-#include "arith64.h"
+#include <os2win.h>
+#include <misc.h>
 
-/*
-NTDLL.sprintf
-NTDLL._wcsicmp
-*/
+#include <ntdef.h>
+#include <winnt.h>
+#include "winbase.h"                     /* fixme: should be taken out sometimes */
+#include <heapstring.h>
+#include "asmhlp.h"
 
 
 /****************************************************************************
@@ -35,8 +35,8 @@ NTDLL._wcsicmp
  ****************************************************************************/
 
 
-LPWSTR CDECL OS2_wcsupr(LPWSTR str);
-int    CDECL OS2_wcsnicmp(LPWSTR str1, LPWSTR str2, long l);
+LPWSTR CDECL CRTDLL__wcsupr(LPWSTR str);
+int    CDECL CRTDLL__wcsnicmp(LPWSTR str1, LPWSTR str2, long l);
 
 
 
@@ -52,13 +52,13 @@ int    CDECL OS2_wcsnicmp(LPWSTR str1, LPWSTR str2, long l);
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-int CDECL OS2_wcsicmp(LPWSTR str1, LPWSTR str2)
+int CDECL CRTDLL__wcsicmp(LPWSTR str1, LPWSTR str2)
 {
-  dprintf(("NTDLL: _wcsicmp(%08xh,%08xh)\n",
+  dprintf(("CRTDLL: _wcsicmp(%08xh,%08xh)\n",
            str1,
            str2));
 
-  return (OS2_wcsnicmp(str1,
+  return (CRTDLL__wcsnicmp(str1,
                        str2,
                        wcslen((wchar_t*) str1)));
 }
@@ -76,11 +76,11 @@ int CDECL OS2_wcsicmp(LPWSTR str1, LPWSTR str2)
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-LPWSTR CDECL OS2_wcslwr(LPWSTR str)
+LPWSTR CDECL CRTDLL__wcslwr(LPWSTR str)
 {
   DWORD dwIndex;
 
-  dprintf(("NTDLL: _wcslwr(%08xh)\n",
+  dprintf(("CRTDLL: _wcslwr(%08xh)\n",
            str));
 
   for (dwIndex = wcslen((const wchar_t*)str);
@@ -106,20 +106,20 @@ LPWSTR CDECL OS2_wcslwr(LPWSTR str)
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-int CDECL OS2_wcsnicmp(LPWSTR str1, LPWSTR str2, long l)
+int CDECL CRTDLL__wcsnicmp(LPWSTR str1, LPWSTR str2, long l)
 {
   LPWSTR w1;
   LPWSTR w2;
 
-  dprintf(("NTDLL: _wcsnicmp(%08xh,%08xh,%08xh)\n",
+  dprintf(("CRTDLL: _wcsnicmp(%08xh,%08xh,%08xh)\n",
            str1,
            str2,
            l));
 
   w1 = HEAP_strdupW(GetProcessHeap(),0,str1);
   w2 = HEAP_strdupW(GetProcessHeap(),0,str2);
-  OS2_wcsupr(w1);
-  OS2_wcsupr(w2);
+  CRTDLL__wcsupr(w1);
+  CRTDLL__wcsupr(w2);
 
   return (wcsncmp((wchar_t*)w1,
                   (wchar_t*)w2,
@@ -139,11 +139,11 @@ int CDECL OS2_wcsnicmp(LPWSTR str1, LPWSTR str2, long l)
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-LPWSTR CDECL OS2_wcsupr(LPWSTR str)
+LPWSTR CDECL CRTDLL__wcsupr(LPWSTR str)
 {
   DWORD dwIndex;
 
-  dprintf(("NTDLL: _wcsupr(%08xh)\n",
+  dprintf(("CRTDLL: _wcsupr(%08xh)\n",
            str));
 
   for (dwIndex = wcslen((const wchar_t*)str);
@@ -170,9 +170,9 @@ LPWSTR CDECL OS2_wcsupr(LPWSTR str)
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-double CDECL OS2abs(double d)
+double CDECL CRTDLL_abs(double d)
 {
-  dprintf(("NTDLL: abs(%f)\n",
+  dprintf(("CRTDLL: abs(%f)\n",
            d));
 
   return (abs(d));
@@ -191,9 +191,9 @@ double CDECL OS2abs(double d)
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-double CDECL OS2atan(double d)
+double CDECL CRTDLL_atan(double d)
 {
-  dprintf(("NTDLL: atan(%f)\n",
+  dprintf(("CRTDLL: atan(%f)\n",
            d));
 
   return (atan(d));
@@ -212,9 +212,9 @@ double CDECL OS2atan(double d)
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-int CDECL OS2atoi(LPSTR str)
+int CDECL CRTDLL_atoi(LPSTR str)
 {
-  dprintf(("NTDLL: atoi(%s)\n",
+  dprintf(("CRTDLL: atoi(%s)\n",
            str));
 
   return (atoi(str));
@@ -233,9 +233,9 @@ int CDECL OS2atoi(LPSTR str)
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-long CDECL OS2atol(LPSTR str)
+long CDECL CRTDLL_atol(LPSTR str)
 {
-  dprintf(("NTDLL: atol(%s)\n",
+  dprintf(("CRTDLL: atol(%s)\n",
            str));
 
   return (atol(str));
@@ -254,9 +254,9 @@ long CDECL OS2atol(LPSTR str)
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-double CDECL OS2ceil(double d)
+double CDECL CRTDLL_ceil(double d)
 {
-  dprintf(("NTDLL: ceil(%f)\n",
+  dprintf(("CRTDLL: ceil(%f)\n",
            d));
 
   return (ceil(d));
@@ -275,9 +275,9 @@ double CDECL OS2ceil(double d)
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-double CDECL OS2cos(double d)
+double CDECL CRTDLL_cos(double d)
 {
-  dprintf(("NTDLL: cos(%f)\n",
+  dprintf(("CRTDLL: cos(%f)\n",
            d));
 
   return (cos(d));
@@ -296,9 +296,9 @@ double CDECL OS2cos(double d)
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-double CDECL OS2fabs(double d)
+double CDECL CRTDLL_fabs(double d)
 {
-  dprintf(("NTDLL: fabs(%f)\n",
+  dprintf(("CRTDLL: fabs(%f)\n",
            d));
 
   return (fabs(d));
@@ -317,9 +317,9 @@ double CDECL OS2fabs(double d)
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-double CDECL OS2floor(double d)
+double CDECL CRTDLL_floor(double d)
 {
-  dprintf(("NTDLL: floor(%f)\n",
+  dprintf(("CRTDLL: floor(%f)\n",
            d));
 
   return (floor(d));
@@ -338,9 +338,9 @@ double CDECL OS2floor(double d)
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-int CDECL OS2isalpha(int i)
+int CDECL CRTDLL_isalpha(int i)
 {
-  dprintf(("NTDLL: isalpha(%08xh)\n",
+  dprintf(("CRTDLL: isalpha(%08xh)\n",
            i));
 
   return (isalpha(i));
@@ -359,9 +359,9 @@ int CDECL OS2isalpha(int i)
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-int CDECL OS2isdigit(int i)
+int CDECL CRTDLL_isdigit(int i)
 {
-  dprintf(("NTDLL: isdigit(%08xh)\n",
+  dprintf(("CRTDLL: isdigit(%08xh)\n",
            i));
 
   return (isdigit(i));
@@ -380,9 +380,9 @@ int CDECL OS2isdigit(int i)
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-int CDECL OS2islower(int i)
+int CDECL CRTDLL_islower(int i)
 {
-  dprintf(("NTDLL: islower(%08xh)\n",
+  dprintf(("CRTDLL: islower(%08xh)\n",
            i));
 
   return (islower(i));
@@ -401,9 +401,9 @@ int CDECL OS2islower(int i)
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-int CDECL OS2isprint(int i)
+int CDECL CRTDLL_isprint(int i)
 {
-  dprintf(("NTDLL: isprint(%08xh)\n",
+  dprintf(("CRTDLL: isprint(%08xh)\n",
            i));
 
   return (isprint(i));
@@ -422,9 +422,9 @@ int CDECL OS2isprint(int i)
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-int CDECL OS2isspace(int i)
+int CDECL CRTDLL_isspace(int i)
 {
-  dprintf(("NTDLL: isspace(%08xh)\n",
+  dprintf(("CRTDLL: isspace(%08xh)\n",
            i));
 
   return (isspace(i));
@@ -443,9 +443,9 @@ int CDECL OS2isspace(int i)
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-int CDECL OS2isupper(int i)
+int CDECL CRTDLL_isupper(int i)
 {
-  dprintf(("NTDLL: isupper(%08xh)\n",
+  dprintf(("CRTDLL: isupper(%08xh)\n",
            i));
 
   return (isupper(i));
@@ -464,13 +464,13 @@ int CDECL OS2isupper(int i)
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-LPSTR CDECL OS2sprintf(LPSTR lpstrBuffer,
+LPSTR CDECL CRTDLL_sprintf(LPSTR lpstrBuffer,
                        LPSTR lpstrFormat,
                        ...)
 {
   va_list argptr;                          /* -> variable argument list */
 
-  dprintf(("NTDLL: sprintf(%08xh,%s)\n",
+  dprintf(("CRTDLL: sprintf(%08xh,%s)\n",
            lpstrBuffer,
            lpstrFormat));
 
@@ -498,10 +498,10 @@ LPSTR CDECL OS2sprintf(LPSTR lpstrBuffer,
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-LPSTR CDECL OS2strcat(      LPSTR str1,
+LPSTR CDECL CRTDLL_strcat(      LPSTR str1,
                       const LPSTR str2)
 {
-  dprintf(("NTDLL: strcat\n"));
+  dprintf(("CRTDLL: strcat\n"));
 
   return (strcat(str1, str2));
 }
@@ -519,10 +519,10 @@ LPSTR CDECL OS2strcat(      LPSTR str1,
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-LPSTR CDECL OS2strchr(const LPSTR str,
+LPSTR CDECL CRTDLL_strchr(const LPSTR str,
                        int         i)
 {
-  dprintf(("NTDLL: strchr(%s,%08xh)\n",
+  dprintf(("CRTDLL: strchr(%s,%08xh)\n",
            str,
            i));
 
@@ -542,10 +542,10 @@ LPSTR CDECL OS2strchr(const LPSTR str,
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-int CDECL OS2strcmp(const LPSTR str1,
+int CDECL CRTDLL_strcmp(const LPSTR str1,
                       const LPSTR str2)
 {
-  dprintf(("NTDLL: strcmp(%s,%s)\n",
+  dprintf(("CRTDLL: strcmp(%s,%s)\n",
            str1,
            str2));
 
@@ -565,10 +565,10 @@ int CDECL OS2strcmp(const LPSTR str1,
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-int CDECL OS2_stricmp(const LPSTR str1,
+int CDECL CRTDLL__stricmp(const LPSTR str1,
                       const LPSTR str2)
 {
-  dprintf(("NTDLL: _stricmp(%s,%s)\n",
+  dprintf(("CRTDLL: _stricmp(%s,%s)\n",
            str1,
            str2));
 
@@ -588,10 +588,10 @@ int CDECL OS2_stricmp(const LPSTR str1,
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-LPSTR CDECL OS2strcpy(      LPSTR str1,
+LPSTR CDECL CRTDLL_strcpy(      LPSTR str1,
                        const LPSTR str2)
 {
-  dprintf(("NTDLL: strcpy\n"));
+  dprintf(("CRTDLL: strcpy\n"));
 
   return (strcpy(str1, str2));
 }
@@ -609,10 +609,10 @@ LPSTR CDECL OS2strcpy(      LPSTR str1,
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-size_t CDECL OS2strcspn(const LPSTR str1,
+size_t CDECL CRTDLL_strcspn(const LPSTR str1,
                                 LPSTR str2)
 {
-  dprintf(("NTDLL: strcspn(%s,%s)\n",
+  dprintf(("CRTDLL: strcspn(%s,%s)\n",
            str1,
            str2));
 
@@ -632,9 +632,9 @@ size_t CDECL OS2strcspn(const LPSTR str1,
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-size_t CDECL OS2strlen(const LPSTR str)
+size_t CDECL CRTDLL_strlen(const LPSTR str)
 {
-  dprintf(("NTDLL: strlen(%s)\n",
+  dprintf(("CRTDLL: strlen(%s)\n",
            str));
 
   return (strlen(str));
@@ -653,11 +653,11 @@ size_t CDECL OS2strlen(const LPSTR str)
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-LPSTR CDECL OS2strncat(      LPSTR str1,
+LPSTR CDECL CRTDLL_strncat(      LPSTR str1,
                         const LPSTR str2,
                         size_t      i)
 {
-  dprintf(("NTDLL: strncat(%s,%s,%08xh)\n",
+  dprintf(("CRTDLL: strncat(%s,%s,%08xh)\n",
            str1,
            str2,
            i));
@@ -678,11 +678,11 @@ LPSTR CDECL OS2strncat(      LPSTR str1,
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-int CDECL OS2strncmp(const LPSTR str1,
+int CDECL CRTDLL_strncmp(const LPSTR str1,
                        const LPSTR str2,
                        size_t      i)
 {
-  dprintf(("NTDLL: strncmp(%s,%s,%08xh)\n",
+  dprintf(("CRTDLL: strncmp(%s,%s,%08xh)\n",
            str1,
            str2,
            i));
@@ -703,11 +703,11 @@ int CDECL OS2strncmp(const LPSTR str1,
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-LPSTR CDECL OS2strncpy(const LPSTR str1,
+LPSTR CDECL CRTDLL_strncpy(const LPSTR str1,
                         const LPSTR str2,
                         size_t      i)
 {
-  dprintf(("NTDLL: strncpy(%s,%s,%08xh)\n",
+  dprintf(("CRTDLL: strncpy(%s,%s,%08xh)\n",
            str1,
            str2,
            i));
@@ -728,10 +728,10 @@ LPSTR CDECL OS2strncpy(const LPSTR str1,
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-LPSTR CDECL OS2strpbrk(const LPSTR str1,
+LPSTR CDECL CRTDLL_strpbrk(const LPSTR str1,
                       const LPSTR str2)
 {
-  dprintf(("NTDLL: strpbrk(%s,%s)\n",
+  dprintf(("CRTDLL: strpbrk(%s,%s)\n",
            str1,
            str2));
 
@@ -751,10 +751,10 @@ LPSTR CDECL OS2strpbrk(const LPSTR str1,
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-LPSTR CDECL OS2strrchr(const LPSTR str,
+LPSTR CDECL CRTDLL_strrchr(const LPSTR str,
                         size_t      i)
 {
-  dprintf(("NTDLL: strrchr(%s,%08xh)\n",
+  dprintf(("CRTDLL: strrchr(%s,%08xh)\n",
            str,
            i));
 
@@ -774,10 +774,10 @@ LPSTR CDECL OS2strrchr(const LPSTR str,
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-size_t CDECL OS2strspn(const LPSTR str1,
+size_t CDECL CRTDLL_strspn(const LPSTR str1,
                        const LPSTR str2)
 {
-  dprintf(("NTDLL: strspn(%s,%s)\n",
+  dprintf(("CRTDLL: strspn(%s,%s)\n",
            str1,
            str2));
 
@@ -797,10 +797,10 @@ size_t CDECL OS2strspn(const LPSTR str1,
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-LPSTR CDECL OS2strstr(const LPSTR str1,
+LPSTR CDECL CRTDLL_strstr(const LPSTR str1,
                        const LPSTR str2)
 {
-  dprintf(("NTDLL: strstr(%s,%s)\n",
+  dprintf(("CRTDLL: strstr(%s,%s)\n",
            str1,
            str2));
 
@@ -820,7 +820,7 @@ LPSTR CDECL OS2strstr(const LPSTR str1,
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-int CDECL OS2swprintf(const LPWSTR str,
+int CDECL CRTDLL_swprintf(const LPWSTR str,
                       int   i,
                       const LPWSTR format,
                       ...)
@@ -828,7 +828,7 @@ int CDECL OS2swprintf(const LPWSTR str,
   va_list valist;
   int     rc;
 
-  dprintf(("NTDLL: swprintf(%s,%d,%s)\n",
+  dprintf(("CRTDLL: swprintf(%s,%d,%s)\n",
            str,
            i,
            format));
@@ -855,9 +855,9 @@ int CDECL OS2swprintf(const LPWSTR str,
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-double CDECL OS2tan(double d)
+double CDECL CRTDLL_tan(double d)
 {
-  dprintf(("NTDLL: tan(%f)\n",
+  dprintf(("CRTDLL: tan(%f)\n",
            d));
 
   return (tan(d));
@@ -876,9 +876,9 @@ double CDECL OS2tan(double d)
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-int CDECL OS2toupper(int c)
+int CDECL CRTDLL_toupper(int c)
 {
-  dprintf(("NTDLL: toupper(%c)\n",
+  dprintf(("CRTDLL: toupper(%c)\n",
            c));
 
   return (toupper(c));
@@ -897,9 +897,9 @@ int CDECL OS2toupper(int c)
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-int CDECL OS2tolower(int c)
+int CDECL CRTDLL_tolower(int c)
 {
-  dprintf(("NTDLL: tolower(%c)\n",
+  dprintf(("CRTDLL: tolower(%c)\n",
            c));
 
   return (tolower(c));
@@ -918,9 +918,9 @@ int CDECL OS2tolower(int c)
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-int CDECL OS2towupper(int c)
+int CDECL CRTDLL_towupper(int c)
 {
-  dprintf(("NTDLL: towupper(%c)\n",
+  dprintf(("CRTDLL: towupper(%c)\n",
            c));
 
   return (towupper(c));
@@ -939,9 +939,9 @@ int CDECL OS2towupper(int c)
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-int CDECL OS2towlower(int c)
+int CDECL CRTDLL_towlower(int c)
 {
-  dprintf(("NTDLL: towlower(%c)\n",
+  dprintf(("CRTDLL: towlower(%c)\n",
            c));
 
   return (towlower(c));
@@ -961,10 +961,10 @@ int CDECL OS2towlower(int c)
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-wchar_t* CDECL OS2wcscat(      wchar_t* str1,
+wchar_t* CDECL CRTDLL_wcscat(      wchar_t* str1,
                        const wchar_t* str2)
 {
-  dprintf(("NTDLL: wcscat(%08xh,%08xh)\n",
+  dprintf(("CRTDLL: wcscat(%08xh,%08xh)\n",
            str1,
            str2));
 
@@ -984,10 +984,10 @@ wchar_t* CDECL OS2wcscat(      wchar_t* str1,
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-wchar_t* CDECL OS2wcschr(const wchar_t* str,
+wchar_t* CDECL CRTDLL_wcschr(const wchar_t* str,
                        int          i)
 {
-  dprintf(("NTDLL: wcschr(%08xh,%08xh)\n",
+  dprintf(("CRTDLL: wcschr(%08xh,%08xh)\n",
            str,
            i));
 
@@ -1007,10 +1007,10 @@ wchar_t* CDECL OS2wcschr(const wchar_t* str,
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-int CDECL OS2wcscmp(const wchar_t* str1,
+int CDECL CRTDLL_wcscmp(const wchar_t* str1,
                     const wchar_t* str2)
 {
-  dprintf(("NTDLL: wcscmp(%08xh,%08xh)\n",
+  dprintf(("CRTDLL: wcscmp(%08xh,%08xh)\n",
            str1,
            str2));
 
@@ -1030,10 +1030,10 @@ int CDECL OS2wcscmp(const wchar_t* str1,
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-wchar_t* CDECL OS2wcscpy(      wchar_t* str1,
+wchar_t* CDECL CRTDLL_wcscpy(      wchar_t* str1,
                        const wchar_t* str2)
 {
-  dprintf(("NTDLL: wcscpy(%08xh,%08xh)\n",
+  dprintf(("CRTDLL: wcscpy(%08xh,%08xh)\n",
            str1,
            str2));
 
@@ -1053,10 +1053,10 @@ wchar_t* CDECL OS2wcscpy(      wchar_t* str1,
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-size_t CDECL OS2wcscspn(const wchar_t* str1,
+size_t CDECL CRTDLL_wcscspn(const wchar_t* str1,
                               wchar_t* str2)
 {
-  dprintf(("NTDLL: wcscspn(%08xh,%08xh)\n",
+  dprintf(("CRTDLL: wcscspn(%08xh,%08xh)\n",
            str1,
            str2));
 
@@ -1076,9 +1076,9 @@ size_t CDECL OS2wcscspn(const wchar_t* str1,
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-size_t CDECL OS2wcslen(const wchar_t* str)
+size_t CDECL CRTDLL_wcslen(const wchar_t* str)
 {
-  dprintf(("NTDLL: wcslen(%08xh)\n",
+  dprintf(("CRTDLL: wcslen(%08xh)\n",
            str));
 
   return (wcslen(str));
@@ -1097,11 +1097,11 @@ size_t CDECL OS2wcslen(const wchar_t* str)
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-wchar_t* CDECL OS2wcsncat(      wchar_t* str1,
+wchar_t* CDECL CRTDLL_wcsncat(      wchar_t* str1,
                         const wchar_t* str2,
                         size_t      i)
 {
-  dprintf(("NTDLL: wcsncat(%08xh,%08xh,%08xh)\n",
+  dprintf(("CRTDLL: wcsncat(%08xh,%08xh,%08xh)\n",
            str1,
            str2,
            i));
@@ -1122,11 +1122,11 @@ wchar_t* CDECL OS2wcsncat(      wchar_t* str1,
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-int CDECL OS2wcsncmp(const wchar_t* str1,
+int CDECL CRTDLL_wcsncmp(const wchar_t* str1,
                      const wchar_t* str2,
                      size_t      i)
 {
-  dprintf(("NTDLL: wcsncmp(%08xh,%08xh,%08xh)\n",
+  dprintf(("CRTDLL: wcsncmp(%08xh,%08xh,%08xh)\n",
            str1,
            str2,
            i));
@@ -1147,11 +1147,11 @@ int CDECL OS2wcsncmp(const wchar_t* str1,
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-wchar_t* CDECL OS2wcsncpy(      wchar_t* str1,
+wchar_t* CDECL CRTDLL_wcsncpy(      wchar_t* str1,
                           const wchar_t* str2,
                           size_t       i)
 {
-  dprintf(("NTDLL: wcsncpy(%s,%s,%08xh)\n",
+  dprintf(("CRTDLL: wcsncpy(%s,%s,%08xh)\n",
            str1,
            str2,
            i));
@@ -1172,10 +1172,10 @@ wchar_t* CDECL OS2wcsncpy(      wchar_t* str1,
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-wchar_t* CDECL OS2wcspbrk(const wchar_t* str1,
+wchar_t* CDECL CRTDLL_wcspbrk(const wchar_t* str1,
                         const wchar_t* str2)
 {
-  dprintf(("NTDLL: wcspbrk(%08xh,%08xh)\n",
+  dprintf(("CRTDLL: wcspbrk(%08xh,%08xh)\n",
            str1,
            str2));
 
@@ -1195,10 +1195,10 @@ wchar_t* CDECL OS2wcspbrk(const wchar_t* str1,
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-wchar_t* CDECL OS2wcsrchr(const wchar_t* str,
+wchar_t* CDECL CRTDLL_wcsrchr(const wchar_t* str,
                         size_t       i)
 {
-  dprintf(("NTDLL: wcsrchr(%08xh,%08xh)\n",
+  dprintf(("CRTDLL: wcsrchr(%08xh,%08xh)\n",
            str,
            i));
 
@@ -1218,10 +1218,10 @@ wchar_t* CDECL OS2wcsrchr(const wchar_t* str,
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-size_t CDECL OS2wcsspn(const wchar_t* str1,
+size_t CDECL CRTDLL_wcsspn(const wchar_t* str1,
                        const wchar_t* str2)
 {
-  dprintf(("NTDLL: wcsspn(%08xh,%08xh)\n",
+  dprintf(("CRTDLL: wcsspn(%08xh,%08xh)\n",
            str1,
            str2));
 
@@ -1241,10 +1241,10 @@ size_t CDECL OS2wcsspn(const wchar_t* str1,
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-wchar_t* CDECL OS2wcsstr(const wchar_t* str1,
+wchar_t* CDECL CRTDLL_wcsstr(const wchar_t* str1,
                          const wchar_t* str2)
 {
-  dprintf(("NTDLL: wcsstr(%s,%s)\n",
+  dprintf(("CRTDLL: wcsstr(%s,%s)\n",
            str1,
            str2));
 
@@ -1264,14 +1264,14 @@ wchar_t* CDECL OS2wcsstr(const wchar_t* str1,
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-char * CDECL OS2_itoa(int i, char *s, int r)
+char * CDECL CRTDLL__itoa(int i, char *s, int r)
 {
-  dprintf(("NTDLL: _itoa(%08xh, %08xh, %08xh)\n",
+  dprintf(("CRTDLL: _itoa(%08xh, %08xh, %08xh)\n",
            i,
            s,
            r));
 
-  return (_itoa(i,s,r));
+  return (itoa(i,s,r));
 }
 
 
@@ -1287,14 +1287,14 @@ char * CDECL OS2_itoa(int i, char *s, int r)
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-char * CDECL OS2_itow(int i, char *s, int r)
+char * CDECL CRTDLL__itow(int i, char *s, int r)
 {
-  dprintf(("NTDLL: _itow(%08xh, %08xh, %08xh) no unicode support !\n",
+  dprintf(("CRTDLL: _itow(%08xh, %08xh, %08xh) no unicode support !\n",
            i,
            s,
            r));
 
-  return (_itoa(i,s,r));
+  return (itoa(i,s,r));
 }
 
 
@@ -1310,7 +1310,7 @@ char * CDECL OS2_itow(int i, char *s, int r)
  * Author    : Jens Wiessner
  *****************************************************************************/
 
-LONG CDECL NTDLL__CIpow()
+LONG CDECL CRTDLL__CIpow()
 {
 	double x,y;
 	POP_FPU(y);
@@ -1331,7 +1331,7 @@ LONG CDECL NTDLL__CIpow()
  * Author    : Jens Wiessner
  *****************************************************************************/
 
-LONG CDECL NTDLL__ftol(void)
+LONG CDECL CRTDLL__ftol(void)
 {
 	/* don't just do DO_FPU("fistp",retval), because the rounding
 	 * mode must also be set to "round towards zero"... */
@@ -1353,7 +1353,7 @@ LONG CDECL NTDLL__ftol(void)
  * Author    : Jens Wiessner
  *****************************************************************************/
 
-LPSTR  CDECL NTDLL__ltoa(long x,LPSTR buf,INT radix)
+LPSTR  CDECL CRTDLL__ltoa(long x,LPSTR buf,INT radix)
 {
     return ltoa(x,buf,radix);
 }
@@ -1371,12 +1371,12 @@ LPSTR  CDECL NTDLL__ltoa(long x,LPSTR buf,INT radix)
  * Author    : Jens Wiessner
  *****************************************************************************/
 
-INT CDECL NTDLL__memicmp(
+INT CDECL CRTDLL__memicmp(
 	LPCSTR s1,	/* [in] first string */
 	LPCSTR s2,	/* [in] second string */
 	DWORD len	/* [in] length to compare */ )
 {
-	dprintf(("NTDLL: memicmp(%08xh, %08xh, %08xh)\n",s1,s2,len));
+	dprintf(("CRTDLL: memicmp(%08xh, %08xh, %08xh)\n",s1,s2,len));
 	int	i;
 
 	for (i=0;i<len;i++) {
@@ -1401,9 +1401,9 @@ INT CDECL NTDLL__memicmp(
  * Author    : Jens Wiessner
  *****************************************************************************/
 
-int  CDECL NTDLL__snprintf( char *buf, size_t bufsize, const char *fmt, ... )
+int  CDECL CRTDLL__snprintf( char *buf, size_t bufsize, const char *fmt, ... )
 {
-  dprintf(("NTDLL: _snprintf(%08xh, %08xh, %08xh) not implemented\n",
+  dprintf(("CRTDLL: _snprintf(%08xh, %08xh, %08xh) not implemented\n",
            buf,
            bufsize,
            fmt));
@@ -1424,9 +1424,9 @@ int  CDECL NTDLL__snprintf( char *buf, size_t bufsize, const char *fmt, ... )
  * Author    : Jens Wiessner
  *****************************************************************************/
 
-int  CDECL NTDLL__snwprintf( wchar_t *buf, size_t bufsize, const wchar_t *fmt, ... )
+int  CDECL CRTDLL__snwprintf( wchar_t *buf, size_t bufsize, const wchar_t *fmt, ... )
 {
-  dprintf(("NTDLL: _snwprintf(%08xh, %08xh, %08xh) not implemented\n",
+  dprintf(("CRTDLL: _snwprintf(%08xh, %08xh, %08xh) not implemented\n",
            buf,
            bufsize,
            fmt));
@@ -1447,9 +1447,9 @@ int  CDECL NTDLL__snwprintf( wchar_t *buf, size_t bufsize, const wchar_t *fmt, .
  * Author    : Jens Wiessner
  *****************************************************************************/
 
-void CDECL NTDLL__splitpath( const char *path, char *drive, char *dir, char *fname, char *ext )
+void CDECL CRTDLL__splitpath( const char *path, char *drive, char *dir, char *fname, char *ext )
 {
-	dprintf(("NTDLL: _splitpath"));
+	dprintf(("CRTDLL: _splitpath"));
 
 	char *tmp_drive;
 	char *tmp_dir;
@@ -1501,9 +1501,9 @@ void CDECL NTDLL__splitpath( const char *path, char *drive, char *dir, char *fna
  * Author    : Jens Wiessner
  *****************************************************************************/
 
-void CDECL NTDLL__strcmpi( LPCSTR s1, LPCSTR s2 )
+void CDECL CRTDLL__strcmpi( LPCSTR s1, LPCSTR s2 )
 {
-  dprintf(("NTDLL: _strcmpi(%08xh, %08xh)\n",
+  dprintf(("CRTDLL: _strcmpi(%08xh, %08xh)\n",
            s1,
            s2));
 
@@ -1523,11 +1523,11 @@ void CDECL NTDLL__strcmpi( LPCSTR s1, LPCSTR s2 )
  * Author    : Jens Wiessner
  *****************************************************************************/
 
-CHAR * CDECL NTDLL__strlwr(char *x)
+CHAR * CDECL CRTDLL__strlwr(char *x)
 {
   char *y =x;
 
-  dprintf(("NTDLL: _strlwr got %s\n", x));
+  dprintf(("CRTDLL: _strlwr got %s\n", x));
   while (*y) {
     if ((*y > 0x40) && (*y< 0x5b))
       *y = *y + 0x20;
@@ -1551,9 +1551,9 @@ CHAR * CDECL NTDLL__strlwr(char *x)
  * Author    : Jens Wiessner
  *****************************************************************************/
 
-int  CDECL NTDLL__strnicmp( LPCSTR s1, LPCSTR s2, INT n )
+int  CDECL CRTDLL__strnicmp( LPCSTR s1, LPCSTR s2, INT n )
 {
-  dprintf(("NTDLL: _strnicmp (%s,%s,%d)\n",
+  dprintf(("CRTDLL: _strnicmp (%s,%s,%d)\n",
            s1,
            s2,
            n));
@@ -1587,9 +1587,9 @@ int  CDECL NTDLL__strnicmp( LPCSTR s1, LPCSTR s2, INT n )
  * Author    : Jens Wiessner
  *****************************************************************************/
 
-LPSTR CDECL NTDLL__strupr(LPSTR x)
+LPSTR CDECL CRTDLL__strupr(LPSTR x)
 {
-  dprintf(("NTDLL: _strupr(%s)\n",
+  dprintf(("CRTDLL: _strupr(%s)\n",
            x));
 
   LPSTR y=x;
@@ -1615,7 +1615,7 @@ LPSTR CDECL NTDLL__strupr(LPSTR x)
  * Author    : Jens Wiessner
  *****************************************************************************/
 
-LPSTR  CDECL NTDLL__ultoa(long x,LPSTR buf,INT radix)
+LPSTR  CDECL CRTDLL__ultoa(long x,LPSTR buf,INT radix)
 {
     return ultoa(x,buf,radix);
 }
@@ -1633,9 +1633,9 @@ LPSTR  CDECL NTDLL__ultoa(long x,LPSTR buf,INT radix)
  * Author    : Jens Wiessner
  *****************************************************************************/
 
-int CDECL NTDLL__vsnprintf( char *s, size_t bufsize, const char *format, va_list arg )
+int CDECL CRTDLL__vsnprintf( char *s, size_t bufsize, const char *format, va_list arg )
 {
-  dprintf(("NTDLL: _ultoa(%08xh, %08xh, %08xh)\n",
+  dprintf(("CRTDLL: _vsnprintf(%08xh, %08xh, %08xh)\n",
            s,
            bufsize,
            format));
@@ -1656,9 +1656,9 @@ int CDECL NTDLL__vsnprintf( char *s, size_t bufsize, const char *format, va_list
  * Author    : Jens Wiessner
  *****************************************************************************/
 
-int CDECL NTDLL_iswalpha(wint_t i)
+int CDECL CRTDLL_iswalpha(wint_t i)
 {
-  dprintf(("NTDLL: iswalpha(%08xh)\n", i));
+  dprintf(("CRTDLL: iswalpha(%08xh)\n", i));
 
   return (iswalpha(i));
 }
@@ -1676,9 +1676,9 @@ int CDECL NTDLL_iswalpha(wint_t i)
  * Author    : Jens Wiessner
  *****************************************************************************/
 
-int CDECL NTDLL_iswctype(wint_t i, wctype_t wct)
+int CDECL CRTDLL_iswctype(wint_t i, wctype_t wct)
 {
-  dprintf(("NTDLL: iswctype(%08xh, %08xh)\n", i, wct));
+  dprintf(("CRTDLL: iswctype(%08xh, %08xh)\n", i, wct));
 
   return (iswctype(i, wct));
 }
@@ -1696,9 +1696,9 @@ int CDECL NTDLL_iswctype(wint_t i, wctype_t wct)
  * Author    : Jens Wiessner
  *****************************************************************************/
 
-int CDECL NTDLL_isxdigit(int i)
+int CDECL CRTDLL_isxdigit(int i)
 {
-  dprintf(("NTDLL: isxdigit(%08xh)\n", i));
+  dprintf(("CRTDLL: isxdigit(%08xh)\n", i));
 
   return (isxdigit(i));
 }
@@ -1716,9 +1716,9 @@ int CDECL NTDLL_isxdigit(int i)
  * Author    : Jens Wiessner
  *****************************************************************************/
 
-long int CDECL NTDLL_labs( long int j )
+long int CDECL CRTDLL_labs( long int j )
 {
-  dprintf(("NTDLL: labs(%08xh)\n", j));
+  dprintf(("CRTDLL: labs(%08xh)\n", j));
 
   return (labs(j));
 }
@@ -1736,9 +1736,9 @@ long int CDECL NTDLL_labs( long int j )
  * Author    : Jens Wiessner
  *****************************************************************************/
 
-double CDECL NTDLL_log( double x )
+double CDECL CRTDLL_log( double x )
 {
-  dprintf(("NTDLL: log(%08xh)\n", x));
+  dprintf(("CRTDLL: log(%08xh)\n", x));
   return (log(x));
 }
 
@@ -1755,9 +1755,9 @@ double CDECL NTDLL_log( double x )
  * Author    : Jens Wiessner
  *****************************************************************************/
 
-size_t CDECL NTDLL_mbstowcs( wchar_t *pwcs, const char *s, size_t n )
+size_t CDECL CRTDLL_mbstowcs( wchar_t *pwcs, const char *s, size_t n )
 {
-      dprintf(("NTDLL: mbstowcs(%08xh, %08xh, %08xh)\n", pwcs, s, n));
+      dprintf(("CRTDLL: mbstowcs(%08xh, %08xh, %08xh)\n", pwcs, s, n));
       return (mbstowcs(pwcs, s, n));
 }
 
@@ -1774,9 +1774,9 @@ size_t CDECL NTDLL_mbstowcs( wchar_t *pwcs, const char *s, size_t n )
  * Author    : Jens Wiessner
  *****************************************************************************/
 
-void * CDECL NTDLL_memchr( const void *s, int c, size_t n )
+void * CDECL CRTDLL_memchr( const void *s, int c, size_t n )
 {
-    dprintf(("NTDLL: memchr(%08xh, %08xh, %08xh)\n", s, c, n));
+    dprintf(("CRTDLL: memchr(%08xh, %08xh, %08xh)\n", s, c, n));
     return memchr( s, c, n );
 }
 
@@ -1793,9 +1793,9 @@ void * CDECL NTDLL_memchr( const void *s, int c, size_t n )
  * Author    : Jens Wiessner
  *****************************************************************************/
 
-int CDECL NTDLL_memcmp( const void * c1, const void * c2, size_t n )
+int CDECL CRTDLL_memcmp( const void * c1, const void * c2, size_t n )
 {
-    dprintf(("NTDLL: memcmp(%08xh, %08xh, %08xh)\n", c1, c2, n));
+    dprintf(("CRTDLL: memcmp(%08xh, %08xh, %08xh)\n", c1, c2, n));
     return memcmp( c1, c2, n );
 }
 
@@ -1811,9 +1811,9 @@ int CDECL NTDLL_memcmp( const void * c1, const void * c2, size_t n )
  * Author    : Jens Wiessner
  *****************************************************************************/
 
-void * CDECL NTDLL_memcpy( void *s1, const void *s2, size_t n )
+void * CDECL CRTDLL_memcpy( void *s1, const void *s2, size_t n )
 {
-    dprintf(("NTDLL: memcpy(%08xh, %08xh, %08xh)\n", s1, s2, n));
+    dprintf(("CRTDLL: memcpy(%08xh, %08xh, %08xh)\n", s1, s2, n));
     return memcpy( s1, s2, n );
 }
 
@@ -1830,12 +1830,17 @@ void * CDECL NTDLL_memcpy( void *s1, const void *s2, size_t n )
  * Author    : Jens Wiessner
  *****************************************************************************/
 
-void * CDECL NTDLL_memset( void *s, int i, size_t n )
+void * CDECL CRTDLL_memset( void *s, int i, size_t n )
 {
-    dprintf(("NTDLL: memset(%08xh, %08xh, %08xh)\n", s, i, n));
+    dprintf(("CRTDLL: memset(%08xh, %08xh, %08xh)\n", s, i, n));
     return memset( s, i, n );
 }
-
+//******************************************************************************
+VOID CDECL CRTDLL_memmove(VOID UNALIGNED *Destination, CONST VOID UNALIGNED *Source, DWORD Length)
+{
+  memmove(Destination, Source, Length);
+}
+//******************************************************************************
 
 /*****************************************************************************
  * Name      :
@@ -1849,9 +1854,9 @@ void * CDECL NTDLL_memset( void *s, int i, size_t n )
  * Author    : Jens Wiessner
  *****************************************************************************/
 
-double CDECL NTDLL_pow( double x, double y )	
+double CDECL CRTDLL_pow( double x, double y )	
 {
-    dprintf(("NTDLL: pow(%08xh, %08xh)\n",x, y));
+    dprintf(("CRTDLL: pow(%08xh, %08xh)\n",x, y));
     return pow( x, y );
 }
 
@@ -1869,9 +1874,9 @@ double CDECL NTDLL_pow( double x, double y )
  * Author    : Jens Wiessner
  *****************************************************************************/
 
-double CDECL NTDLL_sin( double x )
+double CDECL CRTDLL_sin( double x )
 {
-  dprintf(("NTDLL: sin(%08xh)\n", x));
+  dprintf(("CRTDLL: sin(%08xh)\n", x));
   return (sin(x));
 }
 
@@ -1888,9 +1893,9 @@ double CDECL NTDLL_sin( double x )
  * Author    : Jens Wiessner
  *****************************************************************************/
 
-double CDECL NTDLL_sqrt( double x )
+double CDECL CRTDLL_sqrt( double x )
 {
-  dprintf(("NTDLL: sqrt(%08xh)\n", x));
+  dprintf(("CRTDLL: sqrt(%08xh)\n", x));
   return (sqrt(x));
 }
 
@@ -1908,9 +1913,9 @@ double CDECL NTDLL_sqrt( double x )
  * Author    : Jens Wiessner
  *****************************************************************************/
 
-int CDECL NTDLL_sscanf( const char *s, const char *format, ... )
+int CDECL CRTDLL_sscanf( const char *s, const char *format, ... )
 {
-  dprintf(("NTDLL: sscanf(%08xh, %08xh) not implemented.\n"));
+  dprintf(("CRTDLL: sscanf(%08xh, %08xh) not implemented.\n"));
   return 0;
 }
 
@@ -1927,9 +1932,9 @@ int CDECL NTDLL_sscanf( const char *s, const char *format, ... )
  * Author    : Jens Wiessner
  *****************************************************************************/
 
-int CDECL NTDLL_vsprintf( char *s, const char *format, va_list arg )
+int CDECL CRTDLL_vsprintf( char *s, const char *format, va_list arg )
 {
-  dprintf(("NTDLL: vsprintf(%08xh, %08xh)\n", s, format));
+  dprintf(("CRTDLL: vsprintf(%08xh, %08xh)\n", s, format));
   return (vsprintf(s, format, arg));
 }
 
@@ -1946,9 +1951,9 @@ int CDECL NTDLL_vsprintf( char *s, const char *format, va_list arg )
  * Author    : Jens Wiessner
  *****************************************************************************/
 
-wchar_t * CDECL NTDLL_wcstok( wchar_t *s1, const wchar_t *s2, wchar_t **ptr )
+wchar_t * CDECL CRTDLL_wcstok( wchar_t *s1, const wchar_t *s2, wchar_t **ptr )
 {
-  dprintf(("NTDLL: wcstok(%08xh, %08xh, %08xh)\n",s1,s2,ptr));
+  dprintf(("CRTDLL: wcstok(%08xh, %08xh, %08xh)\n",s1,s2,ptr));
   return (wcstok(s1, s2, ptr));
 }
 
@@ -1964,9 +1969,9 @@ wchar_t * CDECL NTDLL_wcstok( wchar_t *s1, const wchar_t *s2, wchar_t **ptr )
  * Author    : Jens Wiessner
  *****************************************************************************/
 
-long int CDECL NTDLL_wcstol( const wchar_t *s1, wchar_t **s2, int i )
+long int CDECL CRTDLL_wcstol( const wchar_t *s1, wchar_t **s2, int i )
 {
-  dprintf(("NTDLL: wcstol(%08xh, %08xh, %08xh)\n",s1,s2,i));
+  dprintf(("CRTDLL: wcstol(%08xh, %08xh, %08xh)\n",s1,s2,i));
   return (wcstol(s1, s2, i));
 }
 
@@ -1983,9 +1988,9 @@ long int CDECL NTDLL_wcstol( const wchar_t *s1, wchar_t **s2, int i )
  * Author    : Jens Wiessner
  *****************************************************************************/
 
-size_t CDECL NTDLL_wcstombs( char *s, const wchar_t *pwcs, size_t n )
+size_t CDECL CRTDLL_wcstombs( char *s, const wchar_t *pwcs, size_t n )
 {
-  dprintf(("NTDLL: wcstombs(%08xh, %08xh, %08xh)\n",s,pwcs,n));
+  dprintf(("CRTDLL: wcstombs(%08xh, %08xh, %08xh)\n",s,pwcs,n));
   return (wcstombs(s, pwcs, n));
 }
 
@@ -2002,9 +2007,9 @@ size_t CDECL NTDLL_wcstombs( char *s, const wchar_t *pwcs, size_t n )
  * Author    : Jens Wiessner
  *****************************************************************************/
 
-unsigned long int CDECL NTDLL_wcstoul( const wchar_t *s1, wchar_t **s2, int i )
+unsigned long int CDECL CRTDLL_wcstoul( const wchar_t *s1, wchar_t **s2, int i )
 {
-  dprintf(("NTDLL: wcstoul(%08xh, %08xh, %08xh)\n",s1,s2,i));
+  dprintf(("CRTDLL: wcstoul(%08xh, %08xh, %08xh)\n",s1,s2,i));
   return (wcstoul(s1, s2, i));
 }
 
@@ -2021,9 +2026,9 @@ unsigned long int CDECL NTDLL_wcstoul( const wchar_t *s1, wchar_t **s2, int i )
  * Author    : Jens Wiessner
  *****************************************************************************/
 
-int CDECL NTDLL__wtoi( const wchar_t *s )
+int CDECL CRTDLL__wtoi( const wchar_t *s )
 {
-  dprintf(("NTDLL: _wtoi(%08xh) not implemented.\n"));
+  dprintf(("CRTDLL: _wtoi(%08xh) not implemented.\n"));
   return 0;
 }
 
@@ -2040,8 +2045,8 @@ int CDECL NTDLL__wtoi( const wchar_t *s )
  * Author    : Jens Wiessner
  *****************************************************************************/
 
-long int CDECL NTDLL__wtol( const wchar_t *s )
+long int CDECL CRTDLL__wtol( const wchar_t *s )
 {
-  dprintf(("NTDLL: _wtol(%08xh) not implemented.\n"));
+  dprintf(("CRTDLL: _wtol(%08xh) not implemented.\n"));
   return 0;
 }
