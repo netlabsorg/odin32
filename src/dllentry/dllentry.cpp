@@ -1,4 +1,4 @@
-/* $Id: dllentry.cpp,v 1.6 2001-03-13 18:47:12 sandervl Exp $ */
+/* $Id: dllentry.cpp,v 1.7 2001-10-01 01:39:17 bird Exp $ */
 
 /*
  * DLL entry point
@@ -117,7 +117,7 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
 int __dll_initialize(unsigned long hModule, unsigned long ulFlag)
 {
     CheckVersionFromHMOD(PE2LX_VERSION, hModule);
-    dllHandle = RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab);
+    dllHandle = RegisterLxDll(hModule, OdinLibMain, (PVOID)&_Resource_PEResTab);
     if (dllHandle == 0)
         return 0;
     return 1;
