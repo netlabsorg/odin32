@@ -1,3 +1,5 @@
+/* $Id: initterm.cpp,v 1.2 1999-06-10 14:23:34 phaller Exp $ */
+
 /*
  * DLL entry point
  *
