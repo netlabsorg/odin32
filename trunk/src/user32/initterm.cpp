@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.15 1999-11-01 19:11:39 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.16 1999-11-27 14:16:35 cbratschi Exp $ */
 
 /*
  * USER32 DLL entry point
@@ -36,6 +36,7 @@
 #include <win32type.h>
 #include <odinlx.h>
 #include <spy.h>
+#include <monitor.h>
 #include "pmwindow.h"
 #include "win32wdesktop.h"
 #include "syscolor.h"
@@ -85,7 +86,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
-	 hInstanceUser32 = RegisterLxDll(hModule, 0, (PVOID)&_Resource_PEResTab);
+         hInstanceUser32 = RegisterLxDll(hModule, 0, (PVOID)&_Resource_PEResTab);
          if(hInstanceUser32 == 0)
                 return 0UL;
 
@@ -109,6 +110,9 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          //SvL: 18-7-'98, Register system window classes (button, listbox etc etc)
          //CB: register internal classes
          RegisterSystemClasses(hModule);
+
+         //CB: initialize PM monitor driver
+         MONITOR_Initialize(&MONITOR_PrimaryMonitor);
 
          //SvL: Create Desktop Window
          if(CreateWin32Desktop() == FALSE) {
@@ -136,6 +140,7 @@ static void APIENTRY cleanup(ULONG ulReason)
    Win32BaseWindow::DestroyAll();
    UnregisterSystemClasses();
    Win32WndClass::DestroyAll();
+   MONITOR_Finalize(&MONITOR_PrimaryMonitor);
    SYSCOLOR_Save();
    CloseSpyQueue();
    _ctordtorTerm();
