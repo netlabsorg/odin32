@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.121 2002-02-11 16:05:59 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.122 2002-02-18 22:07:00 phaller Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -878,7 +878,6 @@ BOOL WIN32API SystemParametersInfoW(UINT uiAction, UINT uiParam, PVOID pvParam, 
 
     switch(uiAction) {
     case SPI_SETNONCLIENTMETRICS:
-        clientMetricsA.cbSize = sizeof(NONCLIENTMETRICSA);
         clientMetricsA.iBorderWidth = clientMetricsW->iBorderWidth;
         clientMetricsA.iScrollWidth = clientMetricsW->iScrollWidth;
         clientMetricsA.iScrollHeight = clientMetricsW->iScrollHeight;
@@ -895,6 +894,9 @@ BOOL WIN32API SystemParametersInfoW(UINT uiAction, UINT uiParam, PVOID pvParam, 
         ConvertFontWA(&clientMetricsW->lfMessageFont, &clientMetricsA.lfMessageFont);
         //no break
     case SPI_GETNONCLIENTMETRICS:
+        // Fix: set the structure size in any case (SET and GET!)
+        clientMetricsA.cbSize = sizeof(NONCLIENTMETRICSA);
+      
         uiParamA = sizeof(NONCLIENTMETRICSA);
         pvParamA = &clientMetricsA;
         break;
