@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.37 2000-03-09 19:03:18 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.38 2000-03-10 16:11:59 sandervl Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -49,6 +49,7 @@
 #include "winexepe2lx.h"
 #include "initsystem.h"
 #include <exitlist.h>
+#include "oslibdos.h"
 #define DBG_LOCALLOG	DBG_initterm
 #include "dbglocal.h"
 
@@ -154,6 +155,8 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
             }
             else
                 flAllocMem = 0;        // no high memory support
+
+	    OSLibDosSetInitialMaxFileHandles(ODIN_DEFAULT_MAX_FILEHANDLES);
 
             InitializeTIB(TRUE);
             //SvL: Do it here instead of during the exe object creation

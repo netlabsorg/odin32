@@ -1,4 +1,4 @@
-/* $Id: oslibdos.h,v 1.11 2000-01-03 21:36:11 sandervl Exp $ */
+/* $Id: oslibdos.h,v 1.12 2000-03-10 16:12:00 sandervl Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -20,6 +20,11 @@ DWORD OSLibDosQueryMem(LPVOID lpMemAddr, DWORD *lpRangeSize, DWORD *lpAttr);
 DWORD OSLibDosSetMem(LPVOID lpMemAddr, DWORD size, DWORD flags);
 DWORD OSLibDosAllocSharedMem(LPVOID *lplpMemAddr, DWORD size, DWORD flags, LPSTR name);
 DWORD OSLibDosGetNamedSharedMem(LPVOID *lplpMemAddr, LPSTR name);
+DWORD OSLibDosChangeMaxFileHandles();
+
+#define ODIN_INCREMENT_MAX_FILEHANDLES	64
+#define ODIN_DEFAULT_MAX_FILEHANDLES	256
+DWORD OSLibDosSetInitialMaxFileHandles(DWORD maxhandles);
 
 BOOL OSLibDosGetFileAttributesEx(LPSTR pszName, ULONG ulDummy, PVOID pBuffer);
 
