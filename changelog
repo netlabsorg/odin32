@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1604 2001-07-15 15:39:31 sandervl Exp $ */
+/* $Id: changelog,v 1.1605 2001-07-16 07:41:51 sandervl Exp $ */
+
+ 2001-07-16: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o RegEnumKeyExW fix (lpszClass can be NULL)
 
  2001-07-15: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMDLG32: o Ported Wine printer dialog code (inactive due to missing
