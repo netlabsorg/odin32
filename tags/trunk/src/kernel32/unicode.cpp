@@ -1,4 +1,4 @@
-/* $Id: unicode.cpp,v 1.17 1999-12-01 18:40:49 sandervl Exp $ */
+/* $Id: unicode.cpp,v 1.18 1999-12-01 20:09:57 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -223,8 +223,8 @@ int WIN32API UnicodeToAsciiN(LPCWSTR ustring, char *astring, int unilen)
 
 //  dprintf(("KERNEL32: UnicodeToAsciiN\n"));
 
-  length = UniStrlen(ustring)+1;
-  unilen = min(length, unilen);
+//  length = UniStrlen(ustring)+1;
+//  unilen = min(length, unilen);
 
   if (getUconvObject())
   {
