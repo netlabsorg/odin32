@@ -1,10 +1,11 @@
-/* $Id: changelog,v 1.1833 2001-11-16 12:49:23 phaller Exp $ */
+/* $Id: changelog,v 1.1834 2001-11-16 15:51:25 phaller Exp $ */
 
  2001-11-16: Patrick Haller <patrick.haller@innotek.de>
     - ODINWRAP: o don't generate any frame procedure for RELEASE build
                   anymore (even no FS: wrapper (meanwhile superfluous))
                   -> significant performance gain for logged micro functions
     - KERNEL32: o heap speedup (30%)
+    - GDI32:    o minor line drawing speedup
 
  2001-11-14: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o fixed infinite loop in PE loader for corrupted or
