@@ -1,4 +1,4 @@
-/* $Id: win32wnd.cpp,v 1.28 1999-08-22 18:29:38 dengert Exp $ */
+/* $Id: win32wnd.cpp,v 1.29 1999-08-23 15:34:47 dengert Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -926,12 +926,12 @@ ULONG Win32Window::MsgPaint(ULONG tmp1, ULONG tmp2)
 //TODO: Is the clipper region of the window DC equal to the invalidated rectangle?
 //	(or are we simply erasing too much here)
 //******************************************************************************
-ULONG Win32Window::MsgEraseBackGround()
+ULONG Win32Window::MsgEraseBackGround(HDC hdc)
 {
     if(isIcon) {
-	    return SendInternalMessageA(WM_ICONERASEBKGND, GetDC(getWindowHandle()), 0);
+	    return SendInternalMessageA(WM_ICONERASEBKGND, hdc, 0);
     }
-    else    return SendInternalMessageA(WM_ERASEBKGND, GetDC(getWindowHandle()), 0);
+    else    return SendInternalMessageA(WM_ERASEBKGND, hdc, 0);
 }
 //******************************************************************************
 //******************************************************************************
