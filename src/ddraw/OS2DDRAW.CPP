@@ -1,277 +1,404 @@
-/* $Id: OS2DDRAW.CPP,v 1.3 1999-06-10 17:10:56 phaller Exp $ */
-
-/*
- * DirectDraw main class
- *
- * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
- *
- * Project Odin Software License can be found in LICENSE.TXT
- *
- */
-/*@Const************************************************************************
-*   Defined Constants                                                          *
-*******************************************************************************/
-#define WIN32SDK_NOPOSTWRAPPER
-
-/*@Header***********************************************************************
-*   Header Files                                                               *
-*******************************************************************************/
-#include <os2win.h>
-#include <dive.h>
-
 #include <memory.h>
-#include <builtin.h>
 
-#include "no.h"
-#include <w_windows.h>
-#include <ddraw.h>
-#include <d3d.h>
-#include <Win32SDKPostWrapper.h>
-
-#include <fourcc.h>
-
+#define INITGUID
 #include "os2ddraw.h"
 #include "os2clipper.h"
 #include "os2palette.h"
 #include "os2surface.h"
+#define _OS2WIN_H
+#define FAR
 #include "misc.h"
-#include "os2util.h"
+#include <winreg.h>
+#include <winuser.h>
+#include <winerror.h>
+#include <builtin.h>
+#include "cio2.h"
 
+// include with the videomodes we support
+// better would be to get these modes from the card
+// But for now we use standard VESA 2.0 modes with 70Hz
+#include "os2ddrawmodes.h"
+#include "os2DDWindow.h"
 
-/* KSO Apr 19 1999: Set correct interface.           *
- * (INTERFACE is used in the THIS and THIS_ macros)  */
-#undef  INTERFACE
-#define INTERFACE   IDirectDraw2
+#define KEY_DIRECT2 "\\Software\\Win32OS2\\Direct2"
+#define KEY_DIRECT2DRAW "\\Software\\Win32OS2\\Direct2\\Draw"
 
-
-
-DIVE_CAPS dcaps           = {0};
-FOURCC    fccFormats[100] = {0};        /* Color format code                 */
-
-
+FOURCC  SupportedFourCCs[] = {FOURCC_LUT8,FOURCC_R565,FOURCC_RGB3,FOURCC_RGB4};
 //******************************************************************************
 //******************************************************************************
 OS2IDirectDraw::OS2IDirectDraw(GUID *lpGUID) :
-       Referenced(0), lastError(DD_OK),
-       pFrameBuffer(NULL), hwndClient(0), screenwidth(640),
-       screenheight(480), screenbpp(8), fFullScreen(TRUE)
+     Referenced(0), lastError(DD_OK),
+     pFrameBuffer(NULL), hwndClient(0), screenwidth(640),
+     screenheight(480), screenbpp(8),PrimaryExists(false)
+
 {
-  if(lpGUID && *lpGUID == IID_IDirect3D) {
-      lpVtbl = (IDirectDraw2Vtbl *)&Vtbl3D;
-      Vtbl3D.AddRef             = D3DAddRef;
-      Vtbl3D.Release            = D3DRelease;
-      Vtbl3D.QueryInterface     = D3DQueryInterface;
-      Vtbl3D.Initialize         = D3DInitialize;
-      Vtbl3D.EnumDevices        = D3DEnumDevices;
-      Vtbl3D.CreateLight        = D3DCreateLight;
-      Vtbl3D.CreateMaterial     = D3DCreateMaterial;
-      Vtbl3D.CreateViewport     = D3DCreateViewport;
-      Vtbl3D.FindDevice         = D3DFindDevice;
+  HKEY  hkDirectDraw2;
+  DWORD dwVSize, dwVType;
+
+  // Setup table for 3d devices
+  Vtbl3D.AddRef         = D3DAddRef;
+  Vtbl3D.Release        = D3DRelease;
+  Vtbl3D.QueryInterface = D3DQueryInterface;
+  Vtbl3D.Initialize     = D3DInitialize;
+  Vtbl3D.EnumDevices    = D3DEnumDevices;
+  Vtbl3D.CreateLight    = D3DCreateLight;
+  Vtbl3D.CreateMaterial = D3DCreateMaterial;
+  Vtbl3D.CreateViewport = D3DCreateViewport;
+  Vtbl3D.FindDevice     = D3DFindDevice;
+
+  // old V2 Interface
+  Vtbl.AddRef                 = DrawAddRef;
+  Vtbl.Release                = DrawRelease;
+  Vtbl.QueryInterface         = DrawQueryInterface;
+  Vtbl.Compact                = DrawCompact;
+  Vtbl.CreateClipper          = DrawCreateClipper;
+  Vtbl.CreatePalette          = DrawCreatePalette;
+  Vtbl.CreateSurface          = DrawCreateSurface;
+  Vtbl.DuplicateSurface       = DrawDuplicateSurface;
+  Vtbl.EnumDisplayModes       = DrawEnumDisplayModes;
+  Vtbl.EnumSurfaces           = DrawEnumSurfaces;
+  Vtbl.FlipToGDISurface       = DrawFlipToGDISurface;
+  Vtbl.GetCaps                = DrawGetCaps;
+  Vtbl.GetDisplayMode         = DrawGetDisplayMode;
+  Vtbl.GetFourCCCodes         = DrawGetFourCCCodes;
+  Vtbl.GetGDISurface          = DrawGetGDISurface;
+  Vtbl.GetMonitorFrequency    = DrawGetMonitorFrequency;
+  Vtbl.GetScanLine            = DrawGetScanLine;
+  Vtbl.GetVerticalBlankStatus = DrawGetVerticalBlankStatus;
+  Vtbl.Initialize             = DrawInitialize;
+  Vtbl.RestoreDisplayMode     = DrawRestoreDisplayMode;
+  Vtbl.SetCooperativeLevel    = DrawSetCooperativeLevel;
+  if(lpGUID && *lpGUID == IID_IDirectDraw2)
+    *(ULONG *)&Vtbl.SetDisplayMode = (ULONG)DrawSetDisplayMode2;
+  else
+    *(ULONG *)&Vtbl.SetDisplayMode = (ULONG)DrawSetDisplayMode;
+  Vtbl.WaitForVerticalBlank   = DrawWaitForVerticalBlank;
+  Vtbl.GetAvailableVidMem     = DrawGetAvailableVidMem;
+
+  // New V4 interface
+  Vtbl4.AddRef                 = DrawAddRef;   // todo change to a DrawAddRef4 as handling this has changed
+  Vtbl4.Release                = DrawRelease;  // see above
+  Vtbl4.QueryInterface         = DrawQueryInterface;
+  Vtbl4.Compact                = DrawCompact;
+  Vtbl4.CreateClipper          = DrawCreateClipper;
+  Vtbl4.CreateSurface          = DrawCreateSurface4;//
+  Vtbl4.DuplicateSurface       = DrawDuplicateSurface4;//
+  Vtbl4.EnumDisplayModes       = DrawEnumDisplayModes4;//
+  Vtbl4.EnumSurfaces           = DrawEnumSurfaces4; //
+  Vtbl4.FlipToGDISurface       = DrawFlipToGDISurface;
+  Vtbl4.GetCaps                = DrawGetCaps;
+  Vtbl4.GetDisplayMode         = DrawGetDisplayMode4;//
+  Vtbl4.GetFourCCCodes         = DrawGetFourCCCodes;
+  Vtbl4.GetGDISurface          = DrawGetGDISurface4;//
+  Vtbl4.GetMonitorFrequency    = DrawGetMonitorFrequency;
+  Vtbl4.GetScanLine            = DrawGetScanLine;
+  Vtbl4.GetVerticalBlankStatus = DrawGetVerticalBlankStatus;
+  Vtbl4.Initialize             = DrawInitialize;
+  Vtbl4.RestoreDisplayMode     = DrawRestoreDisplayMode;
+  Vtbl4.SetCooperativeLevel    = DrawSetCooperativeLevel;
+  Vtbl4.SetDisplayMode         = DrawSetDisplayMode2;
+  Vtbl4.WaitForVerticalBlank   = DrawWaitForVerticalBlank;
+  Vtbl4.GetAvailableVidMem     = DrawGetAvailableVidMem4;
+  Vtbl4.GetSurfaceFromDC       = DrawGetSurfaceFromDC;
+  Vtbl4.RestoreAllSurfaces     = DrawRestoreAllSurfaces;
+  Vtbl4.TestCooperativeLevel   = DrawTestCooperativeLevel;
+  Vtbl4.GetDeviceIdentifier    = DrawGetDeviceIdentifier;
+
+  if(lpGUID && *lpGUID == IID_IDirect3D)
+  {
+    WriteLog("D3D Interface\n");
+
+    lpVtbl = (IDirectDraw4Vtbl *)&Vtbl3D;
   }
-  else {
-      lpVtbl = &Vtbl;
-      Vtbl.AddRef                   = DrawAddRef;
-      Vtbl.Release                  = DrawRelease;
-      Vtbl.QueryInterface           = DrawQueryInterface;
-      Vtbl.Compact                  = DrawCompact;
-      Vtbl.CreateClipper            = DrawCreateClipper;
-      Vtbl.W32_CreatePalette        = DrawCreatePalette; //KSO Apr 19 1999: Sideeffect of the wrapping...
-      Vtbl.CreateSurface            = DrawCreateSurface;
-      Vtbl.DuplicateSurface         = DrawDuplicateSurface;
-      Vtbl.EnumDisplayModes         = DrawEnumDisplayModes;
-      Vtbl.EnumSurfaces             = DrawEnumSurfaces;
-      Vtbl.FlipToGDISurface         = DrawFlipToGDISurface;
-      Vtbl.GetCaps                  = DrawGetCaps;
-      Vtbl.GetDisplayMode           = DrawGetDisplayMode;
-      Vtbl.GetFourCCCodes           = DrawGetFourCCCodes;
-      Vtbl.GetGDISurface            = DrawGetGDISurface;
-      Vtbl.GetMonitorFrequency      = DrawGetMonitorFrequency;
-      Vtbl.GetScanLine              = DrawGetScanLine;
-      Vtbl.GetVerticalBlankStatus   = DrawGetVerticalBlankStatus;
-      Vtbl.Initialize               = DrawInitialize;
-      Vtbl.RestoreDisplayMode       = DrawRestoreDisplayMode;
-      Vtbl.SetCooperativeLevel      = DrawSetCooperativeLevel;
-
-      if(lpGUID && *lpGUID == IID_IDirectDraw2)
-            *(ULONG *)&Vtbl.SetDisplayMode  = (ULONG)DrawSetDisplayMode2;
-      else  *(ULONG *)&Vtbl.SetDisplayMode  = (ULONG)DrawSetDisplayMode;
-
-      Vtbl.WaitForVerticalBlank = DrawWaitForVerticalBlank;
-      Vtbl.GetAvailableVidMem   = DrawGetAvailableVidMem;
+  else
+  {
+    if(lpGUID && *lpGUID == IID_IDirectDraw4)
+    {
+      WriteLog("V4 Interface\n");
+      lpVtbl = &Vtbl4;
+    }
+    else
+    {
+      WriteLog("<V4 Interface\n");
+      lpVtbl = (IDirectDraw4Vtbl *) &Vtbl;
+    }
   }
 
   ULONG rc = DiveOpen(&hDive, FALSE, &pFrameBuffer);
-  if(rc) {
-    dprintf(("ERROR: DiveOpen returned %d\n", rc));
+  if(rc)
+  {
+    WriteLog("ERROR: DiveOpen returned %d\n", rc);
     lastError = DDERR_GENERIC;
     hDive     = NULL;
   }
-  dcaps.pFormatData    = fccFormats;
-  dcaps.ulFormatLength = sizeof(fccFormats);
-  dcaps.ulStructLen    = sizeof(dcaps);
-  DiveQueryCaps(&dcaps, DIVE_BUFFER_SCREEN);
+  else
+  {
+    rc = DiveQueryCaps(&dCaps,DIVE_BUFFER_SCREEN);
+  }
+
+  // Shall we run in FS mode ?
+  if(ERROR_SUCCESS==RegOpenKeyA(HKEY_LOCAL_MACHINE,KEY_DIRECT2DRAW,&hkDirectDraw2))
+  {
+    dwVSize = 4;
+    dwVType = REG_DWORD;
+    if(ERROR_SUCCESS!=RegQueryValueExA(hkDirectDraw2,"Fullscreen",NULL,&dwVType,(LPBYTE)&bScale,&dwVSize))
+      bScale = FALSE;
+  }
+  else
+    bScale = FALSE;
 }
 //******************************************************************************
 //******************************************************************************
 OS2IDirectDraw::~OS2IDirectDraw()
 {
   dprintf(("OS2IDirectDraw::~OS2IDirectDraw()\n"));
-  if(hDive) DiveClose(hDive);
+  if(hDive)
+    DiveClose(hDive);
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawQueryInterface(THIS, REFIID riid, LPVOID FAR * ppvObj)
+FOURCC OS2IDirectDraw::GetScreenFourCC()
 {
-#ifdef DEBUG
-  WriteLog("OS2IDirectDraw::QueryInterface\n");
-#endif
+  return SupportedFourCCs[screenbpp>>3];
+}
+//******************************************************************************
+//******************************************************************************
+HRESULT __stdcall DrawQueryInterface(THIS This, REFIID riid, LPVOID FAR * ppvObj)
+{
+ OS2IDirectDraw *me = (OS2IDirectDraw *)This;
+  #ifdef DEBUG
+    WriteLog("OS2IDirectDraw::QueryInterface\n");
+  #endif
+
   *ppvObj = NULL;
 
   if(!IsEqualGUID(riid, CLSID_DirectDraw) &&
      !IsEqualGUID(riid, IID_IDirectDraw) &&
-     !IsEqualGUID(riid, IID_IDirectDraw2))
+     !IsEqualGUID(riid, IID_IDirectDraw2) &&
+     !IsEqualGUID(riid, IID_IDirectDraw4))
 //&& !IsEqualGUID(riid, IID_IUnknown))
-    return E_NOINTERFACE;
+  return E_NOINTERFACE;
 
+  // ToDo Better way of returning differnent intterfaces for same class
+
+  if(IsEqualGUID(riid, IID_IDirectDraw4))
+  {
+    WriteLog("IID_IDirectDraw4 Interface\n");
+    me->lpVtbl = &me->Vtbl4;
+  }
+  else
+  {
+    WriteLog("No IID_IDirectDraw4 Interface\n");
+    me->lpVtbl = (IDirectDraw4Vtbl *) &me->Vtbl;
+  }
   *ppvObj = This;
-
   DrawAddRef(This);
   return(DD_OK);
 }
 //******************************************************************************
 //******************************************************************************
-ULONG __stdcall DrawAddRef(THIS)
+ULONG __stdcall DrawAddRef(THIS This)
 {
  OS2IDirectDraw *me = (OS2IDirectDraw *)This;
 
-#ifdef DEBUG
-  WriteLog("OS2IDirectDraw::AddRef %d\n", me->Referenced+1);
-#endif
+  #ifdef DEBUG
+    WriteLog("OS2IDirectDraw::AddRef %d\n", me->Referenced+1);
+  #endif
+
   return ++me->Referenced;
 }
 //******************************************************************************
 //******************************************************************************
-ULONG __stdcall DrawRelease(THIS)
+ULONG __stdcall DrawRelease(THIS This)
 {
  OS2IDirectDraw *me = (OS2IDirectDraw *)This;
 
-#ifdef DEBUG
-  WriteLog("OS2IDirectDraw::Release %d\n", me->Referenced-1);
-  WriteLog("OS2IDirectDraw::%X \n", me);
-#endif
-  if(me->Referenced) {
-        me->Referenced--;
-        if(me->Referenced == 0) {
-            delete me;
-            return(0);
-        }
-        else    return me->Referenced;
+  #ifdef DEBUG
+    WriteLog("OS2IDirectDraw::Release %d\n", me->Referenced-1);
+    WriteLog("OS2IDirectDraw::%X \n", me);
+  #endif
+
+  if(me->Referenced)
+  {
+
+    me->Referenced--;
+    if(me->Referenced == 0)
+    {
+      delete me;
+      return(0);
+    }
+    else
+      return me->Referenced;
   }
-  else  return(0);
+  else
+    return(0);
 }
 //******************************************************************************
 //******************************************************************************
 HRESULT __stdcall DrawCompact(THIS)
 {
-#ifdef DEBUG
-  WriteLog("Compact\n");
-#endif
+  #ifdef DEBUG
+    WriteLog("Compact\n");
+  #endif
+
   return(DD_OK);
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawCreateClipper(THIS, DWORD, LPDIRECTDRAWCLIPPER FAR *lplpDD, IUnknown FAR * )
+HRESULT __stdcall DrawCreateClipper(THIS This, DWORD, LPDIRECTDRAWCLIPPER FAR *lplpDD, IUnknown FAR * )
 {
  OS2IDirectDraw        *me = (OS2IDirectDraw *)This;
  OS2IDirectDrawClipper *newclip = new OS2IDirectDrawClipper(me);
  HRESULT                rc;
 
-#ifdef DEBUG
-  WriteLog("CreateClipper\n");
-#endif
-  if(newclip == NULL)   return(DDERR_OUTOFMEMORY);
+  #ifdef DEBUG
+    WriteLog("CreateClipper\n");
+  #endif
+
+  if(newclip == NULL)
+    return(DDERR_OUTOFMEMORY);
 
   newclip->Vtbl.AddRef((IDirectDrawClipper *)newclip);
   rc = newclip->GetLastError();
-  if(rc != DD_OK) {
-        *lplpDD = NULL;
-        delete newclip;
+  if(rc != DD_OK)
+  {
+    *lplpDD = NULL;
+    delete newclip;
   }
-  else  *lplpDD = (IDirectDrawClipper *)newclip;
+  else
+    *lplpDD = (IDirectDrawClipper *)newclip;
 
   return(rc);
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawCreatePalette(THIS, DWORD dwFlags,
-                    W32_LPPALETTEENTRY lpColorTable,
-                    LPDIRECTDRAWPALETTE FAR *lplpDD,
-                    IUnknown FAR *pUnkOuter)
+HRESULT __stdcall DrawCreatePalette(THIS This, DWORD dwFlags,
+            LPPALETTEENTRY lpColorTable,
+            LPDIRECTDRAWPALETTE FAR *lplpDD,
+            IUnknown FAR *pUnkOuter)
 {
- OS2IDirectDraw        *me = (OS2IDirectDraw *)This;
- OS2IDirectDrawPalette *newpal;
- HRESULT                rc;
- int                    palsize = 0;
+  OS2IDirectDraw        *me = (OS2IDirectDraw *)This;
+  OS2IDirectDrawPalette *newpal;
+  HRESULT                rc;
+  int                    palsize = 0;
 
-  if(dwFlags & (DDPCAPS_2BIT | DDPCAPS_4BIT) && !(dwFlags & DDPCAPS_8BITENTRIES)) {
-    //only support 8 bits color palettes...
+  if(dwFlags & DDPCAPS_8BITENTRIES)
+  {
+    // We Don't support Indexed palettes...
+
     return DDERR_INVALIDPARAMS;
   }
-  if(dwFlags & DDPCAPS_2BIT)     palsize = 4;
-  if(dwFlags & DDPCAPS_4BIT)     palsize = 16;
-  if(dwFlags & DDPCAPS_8BIT)     palsize = 256;
-  if(dwFlags & DDPCAPS_ALLOW256) palsize = 256;
-  if(palsize == 0)  return DDERR_INVALIDPARAMS;
 
-  dprintf(("CreatePalette with %d colors\n", palsize));
+  if(dwFlags & DDPCAPS_2BIT)
+    palsize = 4;
+  if(dwFlags & DDPCAPS_4BIT)
+    palsize = 16;
+  if(dwFlags & DDPCAPS_8BIT)
+    palsize = 256;
+  if(dwFlags & DDPCAPS_ALLOW256)
+    palsize = 256;
 
-  newpal = new OS2IDirectDrawPalette(me, palsize, lpColorTable);
-  if(newpal == NULL)    return(DDERR_OUTOFMEMORY);
+  if(palsize == 0)
+    return DDERR_INVALIDPARAMS;
+
+  #ifdef DEBUG
+    WriteLog("CreatePalette with %d colors\n", palsize);
+  #endif
+
+  newpal = new OS2IDirectDrawPalette(me, palsize, lpColorTable, dwFlags);
+  if(newpal == NULL)
+    return(DDERR_OUTOFMEMORY);
 
   newpal->Vtbl.AddRef((IDirectDrawPalette *)newpal);
   rc = newpal->GetLastError();
-  if(rc != DD_OK) {
-        *lplpDD = NULL;
-        delete newpal;
+  if(rc != DD_OK)
+  {
+    *lplpDD = NULL;
+    delete newpal;
   }
-  else  *lplpDD = (IDirectDrawPalette *)newpal;
+  else
+    *lplpDD = (IDirectDrawPalette *)newpal;
 
   return(rc);
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawCreateSurface(THIS, LPDDSURFACEDESC lpDDSurfaceDesc,
-                    LPDIRECTDRAWSURFACE FAR *lplpDD,
-                    IUnknown FAR *pUnkOuter)
+HRESULT __stdcall DrawCreateSurface(THIS This, LPDDSURFACEDESC lpDDSurfaceDesc,
+            LPDIRECTDRAWSURFACE FAR *lplpDD,
+            IUnknown FAR *pUnkOuter)
 {
  OS2IDirectDraw        *me = (OS2IDirectDraw *)This;
  OS2IDirectDrawSurface *newsurf;
  HRESULT                rc;
 
+  #ifdef DEBUG
+    WriteLog("CreateSurface\n");
+    WriteLog("dwSize %d\n", lpDDSurfaceDesc->dwSize);
+    WriteLog("dwFlags %X\n", lpDDSurfaceDesc->dwFlags);
+    WriteLog("dwHeight %d\n", lpDDSurfaceDesc->dwHeight);
+    WriteLog("dwWidth %d\n", lpDDSurfaceDesc->dwWidth);
+    WriteLog("lPitch %d\n", lpDDSurfaceDesc->lPitch);
+    WriteLog("dwBackBufferCount %d\n", lpDDSurfaceDesc->dwBackBufferCount);
+    WriteLog("dwMipMapCount %d\n", lpDDSurfaceDesc->dwMipMapCount);
+    WriteLog("dwAlphaBitDepth %d\n", lpDDSurfaceDesc->dwAlphaBitDepth);
+    WriteLog("ddsCaps.dwCaps %X\n", lpDDSurfaceDesc->ddsCaps.dwCaps);
+  #endif
+
+  newsurf = new OS2IDirectDrawSurface(me, (LPDDSURFACEDESC2)lpDDSurfaceDesc);
+
+  if(newsurf == NULL)
+    return(DDERR_OUTOFMEMORY);
+
+  newsurf->Vtbl.AddRef((IDirectDrawSurface *)newsurf);
+  rc = newsurf->GetLastError();
+  if(rc != DD_OK)
+  {
+    WriteLog("Error createing Surface");
+    *lplpDD = NULL;
+    delete newsurf;
+  }
+  else
+    *lplpDD = (IDirectDrawSurface *)newsurf;
+
+  return(rc);
+}
+//******************************************************************************
+//******************************************************************************
+HRESULT __stdcall DrawCreateSurface4(THIS This, LPDDSURFACEDESC2 lpDDSurfaceDesc2,
+            LPDIRECTDRAWSURFACE4 FAR *lplpDD,
+            IUnknown FAR *pUnkOuter)
+{
+ OS2IDirectDraw         *me = (OS2IDirectDraw *)This;
+ OS2IDirectDrawSurface *newsurf;
+ HRESULT                rc;
+
 #ifdef DEBUG
-  WriteLog("CreateSurface\n");
-  WriteLog("  dwSize %d\n", lpDDSurfaceDesc->dwSize);
-  WriteLog("  dwFlags %X\n", lpDDSurfaceDesc->dwFlags);
-  WriteLog("  dwHeight %d\n", lpDDSurfaceDesc->dwHeight);
-  WriteLog("  dwWidth %d\n", lpDDSurfaceDesc->dwWidth);
-  WriteLog("  lPitch %d\n", lpDDSurfaceDesc->lPitch);
-  WriteLog("  lpSurface %d\n", lpDDSurfaceDesc->lpSurface);
-  WriteLog("  dwBackBufferCount %d\n", lpDDSurfaceDesc->dwBackBufferCount);
-  WriteLog("  dwMipMapCount %d\n", lpDDSurfaceDesc->dwMipMapCount);
-  WriteLog("  dwAlphaBitDepth %d\n", lpDDSurfaceDesc->dwAlphaBitDepth);
-  WriteLog("  ddsCaps.dwCaps %X\n", lpDDSurfaceDesc->ddsCaps.dwCaps);
+  WriteLog("CreateSurface4\n");
+  WriteLog("dwSize %d\n", lpDDSurfaceDesc2->dwSize);
+  WriteLog("dwHeight %d\n", lpDDSurfaceDesc2->dwHeight);
+  WriteLog("dwWidth %d\n", lpDDSurfaceDesc2->dwWidth);
+  WriteLog("lPitch %d\n", lpDDSurfaceDesc2->lPitch);
+  WriteLog("dwBackBufferCount %d\n", lpDDSurfaceDesc2->dwBackBufferCount);
+  WriteLog("dwMipMapCount %d\n", lpDDSurfaceDesc2->dwMipMapCount);
+  WriteLog("dwAlphaBitDepth %d\n", lpDDSurfaceDesc2->dwAlphaBitDepth);
+  WriteLog("ddsCaps.dwCaps %X\n", lpDDSurfaceDesc2->ddsCaps.dwCaps);
 #endif
 
-  newsurf = new OS2IDirectDrawSurface(me, lpDDSurfaceDesc);
-  if(newsurf == NULL)   return(DDERR_OUTOFMEMORY);
+  newsurf = new OS2IDirectDrawSurface(me, lpDDSurfaceDesc2);
 
-  newsurf->Vtbl.AddRef((IDirectDrawSurface2 *)newsurf);
+  if(newsurf == NULL)
+    return(DDERR_OUTOFMEMORY);
+
+  newsurf->Vtbl.AddRef((IDirectDrawSurface *)newsurf);
   rc = newsurf->GetLastError();
-  if(rc != DD_OK) {
-        *lplpDD = NULL;
-        delete newsurf;
+  if(rc != DD_OK)
+  {
+    WriteLog("Error createing Surface");
+    *lplpDD = NULL;
+    delete newsurf;
   }
-  else  *lplpDD = (IDirectDrawSurface *)newsurf;
+  else
+    *lplpDD = (IDirectDrawSurface4 *)newsurf;
 
   return(rc);
 }
@@ -279,178 +406,984 @@ HRESULT __stdcall DrawCreateSurface(THIS, LPDDSURFACEDESC lpDDSurfaceDesc,
 //******************************************************************************
 HRESULT __stdcall DrawDuplicateSurface(THIS, LPDIRECTDRAWSURFACE, LPDIRECTDRAWSURFACE FAR * )
 {
-#ifdef DEBUG
-  WriteLog("DuplicateSurface\n");
-#endif
+  #ifdef DEBUG
+    WriteLog("DuplicateSurface\n");
+  #endif
   return(DD_OK);
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawEnumDisplayModes(THIS, DWORD, LPDDSURFACEDESC, LPVOID, LPDDENUMMODESCALLBACK )
+HRESULT __stdcall DrawDuplicateSurface4(THIS, LPDIRECTDRAWSURFACE4, LPDIRECTDRAWSURFACE4 FAR * )
 {
-#ifdef DEBUG
-  WriteLog("EnumDisplayModes\n");
-#endif
+  #ifdef DEBUG
+    WriteLog("DuplicateSurface\n");
+  #endif
+
+  return(DD_OK);
+}
+//******************************************************************************
+//******************************************************************************
+HRESULT __stdcall DrawEnumDisplayModes(THIS This, DWORD dwFlags, LPDDSURFACEDESC lpDDSurfaceDesc,
+                                       LPVOID lpContext, LPDDENUMMODESCALLBACK lpDDEnumModesCallback)
+{
+  int iMode = 0;
+  DDSURFACEDESC DDSurfAct;
+  BOOL fCallAgain;
+  OS2IDirectDraw        *me = (OS2IDirectDraw *)This;
+
+  #ifdef DEBUG
+    WriteLog("EnumDisplayModes\n");
+  #endif
+
+  // Check for Pointer to callback function
+  if (NULL == lpDDEnumModesCallback)
+  {
+    #ifdef DEBUG
+      WriteLog("EnumDisplayModes : Error NO EnumFunction passed in\n");
+    #endif
+
+    return(DDERR_GENERIC);
+  }
+
+
+  // Setting up the surface
+  // During enum we report resolution and bitdepth, maybe we should
+  // also report back : Caps and Pitch
+  memset(&DDSurfAct,0,sizeof(DDSURFACEDESC));
+  DDSurfAct.dwSize = sizeof(DDSURFACEDESC);
+  DDSurfAct.dwFlags = DDSD_HEIGHT | DDSD_WIDTH | DDSD_PIXELFORMAT ;
+  // Only report the bitdepth hope this is ok this way, we must set the BitMask fields
+
+  DDSurfAct.ddpfPixelFormat.dwSize  = sizeof (DDPIXELFORMAT);
+  DDSurfAct.ddpfPixelFormat.dwFlags = DDPF_RGB;
+  // Check if we use DIVE or Voodoo
+  if(me->lpVtbl != (IDirectDraw4Vtbl *) &(me->Vtbl3D))
+  {
+    // DIVE modes
+
+    // Enumerate all modes ?
+    if (NULL==lpDDSurfaceDesc)
+    {
+      // Check if we shall report 320x200 mode
+
+      if(dwFlags && DDEDM_STANDARDVGAMODES)
+      {
+        DDSurfAct.dwHeight = ModesDive[0].iYRes;
+        DDSurfAct.dwWidth  = ModesDive[0].iXRes;
+        DDSurfAct.ddpfPixelFormat.dwRGBBitCount = ModesDive[0].iBits;
+        if(!lpDDEnumModesCallback(&DDSurfAct,lpContext))
+          return (DD_OK);
+      }
+      // Don't know the flag for Mode X so we skip reporting it
+
+      // Now report all our modes
+      iMode = 2;
+      fCallAgain = TRUE;
+      do
+      {
+        // if the mode fits in the current resolution report it
+        // Change this if we support Fullscreen later !!!
+        if(ModesDive[iMode].iXRes < me->dCaps.ulHorizontalResolution)
+        {
+          DDSurfAct.dwHeight = ModesDive[iMode].iYRes;
+          DDSurfAct.dwWidth  = ModesDive[iMode].iXRes;
+          DDSurfAct.ddpfPixelFormat.dwRGBBitCount = ModesDive[iMode].iBits;
+          switch(ModesDive[iMode].iBits)
+          {
+            case 16:
+              // VESA uses 565 encoding in 16 bit modes
+              lpDDSurfaceDesc->ddpfPixelFormat.dwRBitMask = 0x0000F800;
+              lpDDSurfaceDesc->ddpfPixelFormat.dwGBitMask = 0x000007E0;
+              lpDDSurfaceDesc->ddpfPixelFormat.dwBBitMask = 0x0000001F;
+              break;
+            case 24:
+              // VESA uses per default RGB4
+              lpDDSurfaceDesc->ddpfPixelFormat.dwRBitMask = 0x00FF0000;
+              lpDDSurfaceDesc->ddpfPixelFormat.dwGBitMask = 0x0000FF00;
+              lpDDSurfaceDesc->ddpfPixelFormat.dwBBitMask = 0x000000FF;
+              break;
+            default:
+              break;
+          }
+          fCallAgain = lpDDEnumModesCallback(&DDSurfAct,lpContext);
+        }
+        iMode++;
+      }
+      while((ModesDive[iMode].iBits <= me->dCaps.ulDepth) &&
+            (iMode < NUM_MODES_DIVE) && (TRUE==fCallAgain));
+    }
+    else
+    {
+      // No, so filter modes with lpDDSurfaceDesc
+
+      // Return Error if the program want to use other than the 3 supported values
+      // for filtering
+
+      if (lpDDSurfaceDesc->dwFlags & !(DDSD_WIDTH|DDSD_HEIGHT|DDSD_PIXELFORMAT))
+        return(DDERR_INVALIDPARAMS);
+
+      iMode = 0;
+      if( (dwFlags && DDEDM_STANDARDVGAMODES) &&
+         (
+          (((lpDDSurfaceDesc->dwFlags & DDSD_WIDTH)&&
+            (ModesDive[iMode].iXRes==lpDDSurfaceDesc->dwWidth)
+           )||(!(lpDDSurfaceDesc->dwFlags & DDSD_WIDTH)))&&
+          (((lpDDSurfaceDesc->dwFlags & DDSD_HEIGHT)&&
+            (ModesDive[iMode].iYRes==lpDDSurfaceDesc->dwHeight))||
+           (!(lpDDSurfaceDesc->dwFlags & DDSD_HEIGHT)))&&
+          (((lpDDSurfaceDesc->dwFlags & DDSD_PIXELFORMAT) &&
+            (ModesDive[iMode].iBits==lpDDSurfaceDesc->ddpfPixelFormat.dwRGBBitCount))||
+           (!(lpDDSurfaceDesc->dwFlags & DDSD_PIXELFORMAT)))
+         )
+        )
+      {
+        DDSurfAct.dwHeight = ModesDive[0].iYRes;
+        DDSurfAct.dwWidth  = ModesDive[0].iXRes;
+        DDSurfAct.ddpfPixelFormat.dwRGBBitCount = ModesDive[0].iBits;
+        if(!lpDDEnumModesCallback(&DDSurfAct,lpContext))
+          return (DD_OK);
+      }
+      // Don't know the flag for Mode X so we skip reporting it
+
+      // Now report all our modes
+      iMode = 2;
+      fCallAgain = TRUE;
+      do
+      {
+        // if the mode fits in the current resolution and the filter applies report it
+        // Change this if we support Fullscreen later !!!
+        if( (ModesDive[iMode].iXRes < me->dCaps.ulHorizontalResolution)&&
+           (
+            (((lpDDSurfaceDesc->dwFlags & DDSD_WIDTH)&&
+              (ModesDive[iMode].iXRes==lpDDSurfaceDesc->dwWidth))||
+             (!(lpDDSurfaceDesc->dwFlags & DDSD_WIDTH)))&&
+            (((lpDDSurfaceDesc->dwFlags & DDSD_HEIGHT)&&
+              (ModesDive[iMode].iYRes==lpDDSurfaceDesc->dwHeight))||
+             (!(lpDDSurfaceDesc->dwFlags & DDSD_HEIGHT)))&&
+            (((lpDDSurfaceDesc->dwFlags & DDSD_PIXELFORMAT) &&
+              (ModesDive[iMode].iBits==lpDDSurfaceDesc->ddpfPixelFormat.dwRGBBitCount))||
+             (!(lpDDSurfaceDesc->dwFlags & DDSD_PIXELFORMAT)))
+           )
+          )
+        {
+          DDSurfAct.dwHeight = ModesDive[iMode].iYRes;
+          DDSurfAct.dwWidth  = ModesDive[iMode].iXRes;
+          DDSurfAct.ddpfPixelFormat.dwRGBBitCount = ModesDive[iMode].iBits;
+
+          fCallAgain = lpDDEnumModesCallback(&DDSurfAct,lpContext);
+        }
+        iMode++;
+      }
+      while((ModesDive[iMode].iBits <= me->dCaps.ulDepth) &&
+            (iMode < NUM_MODES_DIVE) && (TRUE==fCallAgain));
+
+    }
+  }
+  else
+  {
+
+    // VOODOO modes
+
+    // Enumerate all modes ?
+    if (NULL==lpDDSurfaceDesc)
+    {
+
+      // report all our modes
+      iMode = 0;
+      fCallAgain = TRUE;
+      do
+      {
+        DDSurfAct.dwHeight = ModesVoodoo[iMode].iYRes;
+        DDSurfAct.dwWidth  = ModesVoodoo[iMode].iXRes;
+        DDSurfAct.ddpfPixelFormat.dwRGBBitCount = ModesVoodoo[iMode].iBits;
+
+        fCallAgain = lpDDEnumModesCallback(&DDSurfAct,lpContext);
+        iMode++;
+      }
+      while((iMode < NUM_MODES_VOODOO) && (TRUE==fCallAgain));
+    }
+    else
+    {
+      // No, so filter modes with lpDDSurfaceDesc
+
+      // Return Error if the program want to use other than the 3 supported values
+      // for filtering
+
+      if (lpDDSurfaceDesc->dwFlags & !(DDSD_WIDTH|DDSD_HEIGHT|DDSD_PIXELFORMAT))
+        return(DDERR_INVALIDPARAMS);
+
+      iMode = 2;
+      fCallAgain = TRUE;
+      do
+      {
+        // if the mode fits the filter applies report it
+        if(
+            (((lpDDSurfaceDesc->dwFlags & DDSD_WIDTH)&&
+              (ModesVoodoo[iMode].iXRes==lpDDSurfaceDesc->dwWidth))||
+             (!(lpDDSurfaceDesc->dwFlags & DDSD_WIDTH)))&&
+            (((lpDDSurfaceDesc->dwFlags & DDSD_HEIGHT)&&
+              (ModesVoodoo[iMode].iYRes==lpDDSurfaceDesc->dwHeight))||
+             (!(lpDDSurfaceDesc->dwFlags & DDSD_HEIGHT)))&&
+            (((lpDDSurfaceDesc->dwFlags & DDSD_PIXELFORMAT) &&
+              (ModesVoodoo[iMode].iBits==lpDDSurfaceDesc->ddpfPixelFormat.dwRGBBitCount))||
+             (!(lpDDSurfaceDesc->dwFlags & DDSD_PIXELFORMAT)))
+          )
+        {
+          DDSurfAct.dwHeight = ModesVoodoo[iMode].iYRes;
+          DDSurfAct.dwWidth  = ModesVoodoo[iMode].iXRes;
+          DDSurfAct.ddpfPixelFormat.dwRGBBitCount = ModesVoodoo[iMode].iBits;
+
+          fCallAgain = lpDDEnumModesCallback(&DDSurfAct,lpContext);
+        }
+        iMode++;
+      }
+      while((iMode < NUM_MODES_VOODOO) && (TRUE==fCallAgain));
+
+    }
+
+  }
+
+  return(DD_OK);
+}
+//******************************************************************************
+//******************************************************************************
+HRESULT __stdcall DrawEnumDisplayModes4(THIS This, DWORD dwFlags, LPDDSURFACEDESC2 lpDDSurfaceDesc2,
+                                       LPVOID lpContext, LPDDENUMMODESCALLBACK2 lpDDEnumModesCallback2)
+{
+  int iMode = 0;
+  DDSURFACEDESC DDSurfAct;
+  BOOL fCallAgain;
+  OS2IDirectDraw        *me = (OS2IDirectDraw *)This;
+
+  #ifdef DEBUG
+    WriteLog("EnumDisplayModes4\n");
+  #endif
   return(DD_OK);
 }
 //******************************************************************************
 //******************************************************************************
 HRESULT __stdcall DrawEnumSurfaces(THIS, DWORD, LPDDSURFACEDESC, LPVOID,LPDDENUMSURFACESCALLBACK )
 {
-#ifdef DEBUG
-  WriteLog("EnumSurfaces\n");
-#endif
+  #ifdef DEBUG
+    WriteLog("EnumSurfaces\n");
+  #endif
+
+  return(DD_OK);
+}
+//******************************************************************************
+//******************************************************************************
+HRESULT __stdcall DrawEnumSurfaces4(THIS, DWORD, LPDDSURFACEDESC2, LPVOID,LPDDENUMSURFACESCALLBACK2 )
+{
+  #ifdef DEBUG
+    WriteLog("EnumSurfaces4\n");
+  #endif
+
   return(DD_OK);
 }
 //******************************************************************************
 //******************************************************************************
 HRESULT __stdcall DrawFlipToGDISurface(THIS)
 {
-#ifdef DEBUG
-  WriteLog("FlipToGDISurface\n");
-#endif
+  #ifdef DEBUG
+    WriteLog("FlipToGDISurface\n");
+  #endif
+
   return(DD_OK);
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawGetCaps(THIS, LPDDCAPS, LPDDCAPS)
+HRESULT __stdcall DrawGetCaps(THIS, LPDDCAPS lpDDDriverCaps, LPDDCAPS lpDDHELCaps)
 {
-#ifdef DEBUG
-  WriteLog("GetCaps\n");
-#endif
+  #ifdef DEBUG
+    WriteLog("GetCaps\n");
+  #endif
+
+  if( (NULL==lpDDDriverCaps) && (NULL==lpDDHELCaps) )
+    return(DDERR_INVALIDPARAMS);
+
+  if(NULL!=lpDDDriverCaps)
+  {
+    // Caller want Driver Caps
+
+    if(sizeof(DDCAPS)!=lpDDDriverCaps->dwSize)
+      return(DDERR_INVALIDPARAMS);
+
+    // Clear structure so we only have to set the supported flags
+    memset(lpDDDriverCaps,0,sizeof(DDCAPS));
+
+    // Reset the size
+    lpDDDriverCaps->dwSize = sizeof(DDCAPS);
+
+    // Now report the CAPs back which we support
+   lpDDDriverCaps->dwCaps = DDCAPS_BLT |              // We do blitting
+                            DDCAPS_BLTCOLORFILL |     // We do colorfills
+                            DDCAPS_COLORKEY |         // We support Colorkeying
+                            DDCAPS_COLORKEYHWASSIST | // But we (may) use the CPU
+                            DDCAPS_GDI |              // Maybe check if we are on Voodoo ?
+                            DDCAPS_PALETTEVSYNC;      // Got VSync
+
+    lpDDDriverCaps->dwCaps2 = DDCAPS2_CERTIFIED |         // Who cares so say yes
+                              DDCAPS2_CANRENDERWINDOWED | // Better check for Voodoo ?!
+                              DDCAPS2_COPYFOURCC |        // yepp memcpy will do this
+                              DDCAPS2_NONLOCALVIDMEM |    // All surfaces are in memory
+                              DDCAPS2_WIDESURFACES;       // Any size you want!
+
+    lpDDDriverCaps->dwCKeyCaps = DDCKEYCAPS_SRCBLT;      // Only source transparent blitting
+
+//    lpDDDriverCaps->dwFXCaps = DDFXCAPS_BLTMIRRORUPDOWN; // DIVE supports this, do we also ?
+                                                         // Maybe later add stretching support?
+
+    lpDDDriverCaps->dwPalCaps = DDPCAPS_8BIT |          // Only 8 Bits pals
+                                DDPCAPS_ALLOW256 |      // But all 256 colors
+                                DDPCAPS_VSYNC  |        // Vsync yet
+                                DDPCAPS_PRIMARYSURFACE; //
+    lpDDDriverCaps->dwVidMemTotal = 2048*1024;           // total video memory
+    lpDDDriverCaps->dwVidMemFree  = 2048*1024;            // total free video memory
+    lpDDDriverCaps->dwNumFourCCCodes;        // number of supported FOURCC codes
+    lpDDDriverCaps->dwRops[DD_ROP_SPACE];    // supported raster ops
+    lpDDDriverCaps->dwSVBCaps = DDCAPS_BLT |              // We do blitting
+                                DDCAPS_BLTCOLORFILL |     // We do colorfills
+                                DDCAPS_COLORKEY |         // We support Colorkeying
+                                DDCAPS_COLORKEYHWASSIST;
+    lpDDDriverCaps->dwSVBCKeyCaps = DDCKEYCAPS_SRCBLT;      // Only source transparent blitting
+    lpDDDriverCaps->dwSVBFXCaps;             //  .
+    lpDDDriverCaps->dwSVBRops[DD_ROP_SPACE]; //  .
+    lpDDDriverCaps->dwVSBCaps = DDCAPS_BLT |              // We do blitting
+                                DDCAPS_BLTCOLORFILL |     // We do colorfills
+                                DDCAPS_COLORKEY |         // We support Colorkeying
+                                DDCAPS_COLORKEYHWASSIST;
+    lpDDDriverCaps->dwVSBCKeyCaps = DDCKEYCAPS_SRCBLT;      // Only source transparent blitting
+    lpDDDriverCaps->dwVSBFXCaps;             //  .
+    lpDDDriverCaps->dwVSBRops[DD_ROP_SPACE]; //  .
+    lpDDDriverCaps->dwSSBCaps = DDCAPS_BLT |              // We do blitting
+                                DDCAPS_BLTCOLORFILL |     // We do colorfills
+                                DDCAPS_COLORKEY |         // We support Colorkeying
+                                DDCAPS_COLORKEYHWASSIST;
+    lpDDDriverCaps->dwSSBCKeyCaps = DDCKEYCAPS_SRCBLT;      // Only source transparent blitting
+    lpDDDriverCaps->dwSSBFXCaps;            //  .
+    lpDDDriverCaps->dwSSBRops[DD_ROP_SPACE]; //  .
+    lpDDDriverCaps->dwSVBCaps2 = DDCAPS2_CANRENDERWINDOWED | // Better check for Voodoo ?!
+                                 DDCAPS2_COPYFOURCC |        // yepp memcpy will do this
+                                 DDCAPS2_WIDESURFACES;       // Any size you want!
+    lpDDDriverCaps->dwNLVBCaps = DDCAPS_BLT |              // We do blitting
+                                 DDCAPS_BLTCOLORFILL |     // We do colorfills
+                                 DDCAPS_COLORKEY |         // We support Colorkeying
+                                 DDCAPS_COLORKEYHWASSIST;
+    lpDDDriverCaps->dwNLVBCaps2 = DDCAPS2_CANRENDERWINDOWED | // Better check for Voodoo ?!
+                                  DDCAPS2_COPYFOURCC |        // yepp memcpy will do this
+                                  DDCAPS2_WIDESURFACES;       // Any size you want!
+    lpDDDriverCaps->dwNLVBCKeyCaps = DDCKEYCAPS_SRCBLT;      // Only source transparent blitting
+    lpDDDriverCaps->dwNLVBFXCaps;            //  .
+    lpDDDriverCaps->dwNLVBRops[DD_ROP_SPACE];//  .
+    DDSCAPS2 ddsCaps;                 // general surface caps
+
+  }
+
+  if(NULL!=lpDDHELCaps)
+  {
+    // Caler wants HEL Caps
+    if(sizeof(DDCAPS)!=lpDDHELCaps->dwSize)
+      return(DDERR_INVALIDPARAMS);
+
+  }
+
   return(DD_OK);
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawGetDisplayMode(THIS, LPDDSURFACEDESC)
+HRESULT __stdcall DrawGetDisplayMode(THIS This, LPDDSURFACEDESC lpDDSurfaceDesc)
 {
-#ifdef DEBUG
-  WriteLog("GetDisplayMode\n");
-#endif
+  OS2IDirectDraw        *me = (OS2IDirectDraw *)This;
+  #ifdef DEBUG
+    WriteLog("GetDisplayMode\n");
+  #endif
+
+  // Check Parameter
+  if(NULL==lpDDSurfaceDesc)
+    return(DDERR_INVALIDPARAMS);
+
+  if(sizeof(DDSURFACEDESC)!=lpDDSurfaceDesc->dwSize)
+    return(DDERR_INVALIDPARAMS);
+
+  // We report back the DIVE caps. maybe we should set up a local DDSURFACEDESC
+  // for the object so we can change the values when we switch modes (or say so)
+  // as a program may use this function to check the values after a mode change
+  // An other reason to to so is Voodoo supports maybe more functions
+
+  // Tell what we report
+  lpDDSurfaceDesc->dwFlags  = DDSD_HEIGHT | DDSD_WIDTH | DDSD_PIXELFORMAT;
+  lpDDSurfaceDesc->dwHeight = me->dCaps.ulHorizontalResolution;
+  lpDDSurfaceDesc->dwWidth  = me->dCaps.ulVerticalResolution;
+  // Set the PixelFormat
+  lpDDSurfaceDesc->ddpfPixelFormat.dwSize = sizeof(DDPIXELFORMAT);
+
+  lpDDSurfaceDesc->ddpfPixelFormat.dwFourCC = me->dCaps.fccColorEncoding;
+  lpDDSurfaceDesc->ddpfPixelFormat.dwRGBBitCount = me->dCaps.ulDepth;
+  lpDDSurfaceDesc->ddpfPixelFormat.dwRGBAlphaBitMask = 0; // No Alpha support
+  switch(me->dCaps.ulDepth)
+  {
+    case 4:
+      // Assume that no one will run OS/2 PM with less then 16 colors and try
+      // to start a DirectX program ;)
+      lpDDSurfaceDesc->ddpfPixelFormat.dwFlags =  DDPF_RGB | DDPF_PALETTEINDEXED4;
+      lpDDSurfaceDesc->ddpfPixelFormat.dwRBitMask = 0;
+      lpDDSurfaceDesc->ddpfPixelFormat.dwGBitMask = 0;
+      lpDDSurfaceDesc->ddpfPixelFormat.dwBBitMask = 0;
+      break;
+    case 8:
+      lpDDSurfaceDesc->ddpfPixelFormat.dwFlags = DDPF_RGB | DDPF_PALETTEINDEXED8 |
+                                                 DDPF_FOURCC;
+      lpDDSurfaceDesc->ddpfPixelFormat.dwRBitMask = 0;
+      lpDDSurfaceDesc->ddpfPixelFormat.dwGBitMask = 0;
+      lpDDSurfaceDesc->ddpfPixelFormat.dwBBitMask = 0;
+      break;
+    case 15:
+    case 16:
+      lpDDSurfaceDesc->ddpfPixelFormat.dwRGBBitCount = 16; // No sure about 15Bit modes
+      lpDDSurfaceDesc->ddpfPixelFormat.dwFlags = DDPF_RGB | DDPF_FOURCC;
+      if (FOURCC_R555 == me->dCaps.fccColorEncoding)
+      {
+        lpDDSurfaceDesc->ddpfPixelFormat.dwRBitMask = 0x00007C00;
+        lpDDSurfaceDesc->ddpfPixelFormat.dwGBitMask = 0x000003E0;
+        lpDDSurfaceDesc->ddpfPixelFormat.dwBBitMask = 0x0000001F;
+      }
+      else
+      {
+        if(FOURCC_R565 == me->dCaps.fccColorEncoding)
+        {
+          lpDDSurfaceDesc->ddpfPixelFormat.dwRBitMask = 0x0000F800;
+          lpDDSurfaceDesc->ddpfPixelFormat.dwGBitMask = 0x000007E0;
+          lpDDSurfaceDesc->ddpfPixelFormat.dwBBitMask = 0x0000001F;
+        }
+        else
+        {
+          // R664
+          lpDDSurfaceDesc->ddpfPixelFormat.dwRBitMask = 0x0000F800;
+          lpDDSurfaceDesc->ddpfPixelFormat.dwGBitMask = 0x000003F0;
+          lpDDSurfaceDesc->ddpfPixelFormat.dwBBitMask = 0x0000000F;
+        }
+      }
+      break;
+    case 24:
+      lpDDSurfaceDesc->ddpfPixelFormat.dwFlags = DDPF_RGB | DDPF_FOURCC;
+      if(FOURCC_RGB3 == me->dCaps.fccColorEncoding)
+      {
+        lpDDSurfaceDesc->ddpfPixelFormat.dwRBitMask = 0x00FF0000;
+        lpDDSurfaceDesc->ddpfPixelFormat.dwGBitMask = 0x0000FF00;
+        lpDDSurfaceDesc->ddpfPixelFormat.dwBBitMask = 0x000000FF;
+      }
+      else
+      {
+        // BGR3
+        lpDDSurfaceDesc->ddpfPixelFormat.dwRBitMask = 0x000000FF;
+        lpDDSurfaceDesc->ddpfPixelFormat.dwGBitMask = 0x0000FF00;
+        lpDDSurfaceDesc->ddpfPixelFormat.dwBBitMask = 0x00FF0000;
+      }
+      break;
+    case 32:
+      lpDDSurfaceDesc->ddpfPixelFormat.dwFlags = DDPF_RGB | DDPF_FOURCC;
+      if(FOURCC_RGB4 == me->dCaps.fccColorEncoding)
+      {
+        lpDDSurfaceDesc->ddpfPixelFormat.dwRBitMask = 0x00FF0000;
+        lpDDSurfaceDesc->ddpfPixelFormat.dwGBitMask = 0x0000FF00;
+        lpDDSurfaceDesc->ddpfPixelFormat.dwBBitMask = 0x000000FF;
+      }
+      else
+      {
+        // BGR4
+        lpDDSurfaceDesc->ddpfPixelFormat.dwRBitMask = 0x000000FF;
+        lpDDSurfaceDesc->ddpfPixelFormat.dwGBitMask = 0x0000FF00;
+        lpDDSurfaceDesc->ddpfPixelFormat.dwBBitMask = 0x00FF0000;
+      }
+      break;
+    default:
+      #ifdef DEBUG
+        WriteLog("Unsupported mode\n");
+      #endif
+      return(DDERR_UNSUPPORTEDMODE);
+  }
+
   return(DD_OK);
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawGetFourCCCodes(THIS, LPDWORD, LPDWORD)
+HRESULT __stdcall DrawGetDisplayMode4(THIS This, LPDDSURFACEDESC2 lpDDSurfaceDesc2)
 {
-#ifdef DEBUG
-  WriteLog("GetFourCCCodes\n");
-#endif
+  OS2IDirectDraw        *me = (OS2IDirectDraw *)This;
+  #ifdef DEBUG
+    WriteLog("GetDisplayMode\n");
+  #endif
+
+  // Check Parameter
+  if(NULL==lpDDSurfaceDesc2)
+    return(DDERR_INVALIDPARAMS);
+
+  if(sizeof(DDSURFACEDESC)!=lpDDSurfaceDesc2->dwSize)
+    return(DDERR_INVALIDPARAMS);
+
+  // We report back the DIVE caps. maybe we should set up a local DDSURFACEDESC
+  // for the object so we can change the values when we switch modes (or say so)
+  // as a program may use this function to check the values after a mode change
+  // An other reason to to so is Voodoo supports maybe more functions
+
+  // Tell what we report
+  lpDDSurfaceDesc2->dwFlags  = DDSD_HEIGHT | DDSD_WIDTH | DDSD_PIXELFORMAT;
+  lpDDSurfaceDesc2->dwHeight = me->dCaps.ulHorizontalResolution;
+  lpDDSurfaceDesc2->dwWidth  = me->dCaps.ulVerticalResolution;
+  // Set the PixelFormat
+  lpDDSurfaceDesc2->ddpfPixelFormat.dwSize = sizeof(DDPIXELFORMAT);
+
+  lpDDSurfaceDesc2->ddpfPixelFormat.dwFourCC = me->dCaps.fccColorEncoding;
+  lpDDSurfaceDesc2->ddpfPixelFormat.dwRGBBitCount = me->dCaps.ulDepth;
+  lpDDSurfaceDesc2->ddpfPixelFormat.dwRGBAlphaBitMask = 0; // No Alpha support
+  switch(me->dCaps.ulDepth)
+  {
+    case 4:
+      // Assume that no one will run OS/2 PM with less then 16 colors and try
+      // to start a DirectX program ;)
+      lpDDSurfaceDesc2->ddpfPixelFormat.dwFlags =  DDPF_RGB | DDPF_PALETTEINDEXED4;
+      lpDDSurfaceDesc2->ddpfPixelFormat.dwRBitMask = 0;
+      lpDDSurfaceDesc2->ddpfPixelFormat.dwGBitMask = 0;
+      lpDDSurfaceDesc2->ddpfPixelFormat.dwBBitMask = 0;
+      break;
+    case 8:
+      lpDDSurfaceDesc2->ddpfPixelFormat.dwFlags = DDPF_RGB | DDPF_PALETTEINDEXED8 |
+                                                 DDPF_FOURCC;
+      lpDDSurfaceDesc2->ddpfPixelFormat.dwRBitMask = 0;
+      lpDDSurfaceDesc2->ddpfPixelFormat.dwGBitMask = 0;
+      lpDDSurfaceDesc2->ddpfPixelFormat.dwBBitMask = 0;
+      break;
+    case 15:
+    case 16:
+      lpDDSurfaceDesc2->ddpfPixelFormat.dwRGBBitCount = 16; // No sure about 15Bit modes
+      lpDDSurfaceDesc2->ddpfPixelFormat.dwFlags = DDPF_RGB | DDPF_FOURCC;
+      if (FOURCC_R555 == me->dCaps.ulDepth)
+      {
+        lpDDSurfaceDesc2->ddpfPixelFormat.dwRBitMask = 0x00007C00;
+        lpDDSurfaceDesc2->ddpfPixelFormat.dwGBitMask = 0x000003E0;
+        lpDDSurfaceDesc2->ddpfPixelFormat.dwBBitMask = 0x0000001F;
+      }
+      else
+      {
+        if(FOURCC_R565 == me->dCaps.fccColorEncoding)
+        {
+          lpDDSurfaceDesc2->ddpfPixelFormat.dwRBitMask = 0x0000F800;
+          lpDDSurfaceDesc2->ddpfPixelFormat.dwGBitMask = 0x000007E0;
+          lpDDSurfaceDesc2->ddpfPixelFormat.dwBBitMask = 0x0000001F;
+        }
+        else
+        {
+          // R664
+          lpDDSurfaceDesc2->ddpfPixelFormat.dwRBitMask = 0x0000F800;
+          lpDDSurfaceDesc2->ddpfPixelFormat.dwGBitMask = 0x000003F0;
+          lpDDSurfaceDesc2->ddpfPixelFormat.dwBBitMask = 0x0000000F;
+        }
+      }
+      break;
+    case 24:
+      lpDDSurfaceDesc2->ddpfPixelFormat.dwFlags = DDPF_RGB | DDPF_FOURCC;
+      if(FOURCC_RGB3 == me->dCaps.fccColorEncoding)
+      {
+        lpDDSurfaceDesc2->ddpfPixelFormat.dwRBitMask = 0x00FF0000;
+        lpDDSurfaceDesc2->ddpfPixelFormat.dwGBitMask = 0x0000FF00;
+        lpDDSurfaceDesc2->ddpfPixelFormat.dwBBitMask = 0x000000FF;
+      }
+      else
+      {
+        // BGR3
+        lpDDSurfaceDesc2->ddpfPixelFormat.dwRBitMask = 0x000000FF;
+        lpDDSurfaceDesc2->ddpfPixelFormat.dwGBitMask = 0x0000FF00;
+        lpDDSurfaceDesc2->ddpfPixelFormat.dwBBitMask = 0x00FF0000;
+      }
+      break;
+    case 32:
+      lpDDSurfaceDesc2->ddpfPixelFormat.dwFlags = DDPF_RGB | DDPF_FOURCC;
+      if(FOURCC_RGB4 == me->dCaps.fccColorEncoding)
+      {
+        lpDDSurfaceDesc2->ddpfPixelFormat.dwRBitMask = 0x00FF0000;
+        lpDDSurfaceDesc2->ddpfPixelFormat.dwGBitMask = 0x0000FF00;
+        lpDDSurfaceDesc2->ddpfPixelFormat.dwBBitMask = 0x000000FF;
+      }
+      else
+      {
+        // BGR4
+        lpDDSurfaceDesc2->ddpfPixelFormat.dwRBitMask = 0x000000FF;
+        lpDDSurfaceDesc2->ddpfPixelFormat.dwGBitMask = 0x0000FF00;
+        lpDDSurfaceDesc2->ddpfPixelFormat.dwBBitMask = 0x00FF0000;
+      }
+      break;
+    default:
+      #ifdef DEBUG
+        WriteLog("Unsupported mode\n");
+      #endif
+      return(DDERR_UNSUPPORTEDMODE);
+  }
+
+  return(DD_OK);
+}
+//******************************************************************************
+//******************************************************************************
+HRESULT __stdcall DrawGetFourCCCodes(THIS, LPDWORD lpNumCodes, LPDWORD lpCodes)
+{
+  DWORD dwFCC[3] = {FOURCC_LUT8,FOURCC_R565,FOURCC_RGB3};
+  #ifdef DEBUG
+    WriteLog("GetFourCCCodes\n");
+  #endif
+
+  if(NULL==lpNumCodes)
+    return(DDERR_INVALIDPARAMS);
+
+  if(NULL==lpCodes)
+  {
+    *lpNumCodes = 3; // LUT8, R565, RGB3 are the FourCC we support for now
+  }
+  else
+  {
+    for(int i=0;(i<3)&&(i<*lpNumCodes);i++)
+    {
+      *lpCodes = dwFCC[i];
+      lpCodes +=4;
+    }
+    if(*lpNumCodes < 3)
+      *lpNumCodes = 3;
+  }
   return(DD_OK);
 }
 //******************************************************************************
 //******************************************************************************
 HRESULT __stdcall DrawGetGDISurface(THIS, LPDIRECTDRAWSURFACE FAR *)
 {
-#ifdef DEBUG
-  WriteLog("GetGDISurface\n");
-#endif
+  #ifdef DEBUG
+    WriteLog("GetGDISurface\n");
+  #endif
+
   return(DD_OK);
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawGetMonitorFrequency(THIS, LPDWORD)
+HRESULT __stdcall DrawGetGDISurface4(THIS, LPDIRECTDRAWSURFACE4 FAR *)
 {
-#ifdef DEBUG
-  WriteLog("GetMonitorFrequency\n");
-#endif
+  #ifdef DEBUG
+    WriteLog("GetGDISurface\n");
+  #endif
+
   return(DD_OK);
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawGetScanLine(THIS, LPDWORD)
+HRESULT __stdcall DrawGetMonitorFrequency(THIS This, LPDWORD lpdwFreq)
 {
-#ifdef DEBUG
-  WriteLog("GetScanLine\n");
-#endif
+  ULONG ulTime1, ulTime2;
+  DWORD dwFlags = DDWAITVB_BLOCKBEGIN;
+  #ifdef DEBUG
+    WriteLog("GetMonitorFrequency\n");
+  #endif
+  if(NULL==lpdwFreq)
+    return(DDERR_INVALIDPARAMS);
+
+  if(DD_OK==DrawWaitForVerticalBlank(This, dwFlags, 0))
+  {
+    ulTime1 = GetTickCount();
+    // Timer has an accuracy of 4 ms so call it al least 4 times
+    DrawWaitForVerticalBlank(This, dwFlags, 0);
+    DrawWaitForVerticalBlank(This, dwFlags, 0);
+    DrawWaitForVerticalBlank(This, dwFlags, 0);
+    DrawWaitForVerticalBlank(This, dwFlags, 0);
+    ulTime2 = GetTickCount();
+    ulTime2 -= ulTime1;
+    if(ulTime2) // paranoid check to avoid DIV0
+      *lpdwFreq = 4000 / ulTime2;
+    else
+      *lpdwFreq = 70;
+  }
+  else
+  {
+    // Assume 70 Hz maybe better return DDERR_UNSUPPORTED if this function isn't mandatory
+    *lpdwFreq = 70;
+  }
   return(DD_OK);
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawGetVerticalBlankStatus(THIS, LPBOOL)
+HRESULT __stdcall DrawGetScanLine(THIS, LPDWORD lpdwLine)
 {
-#ifdef DEBUG
-  WriteLog("GetVerticalBlankStatus\n");
-#endif
+  BOOL bVertBlank;
+  #ifdef DEBUG
+    WriteLog("GetScanLine\n");
+  #endif
+  // ToDO find a way to get this position, so for now simply return DDERR_UNSUPPORTED
+  // as we indicated in DDCAPS we don't support this.
+
+  return(DDERR_UNSUPPORTED);
+
+  //the following code could be used if we implement this
+  /*
+  if(NULL==lpdwLine)
+    return(DDERR_INVALIDPARAMS);
+  DrawGetVertcalBlackStatus(This,&bVertBlank);
+  if(bVertBlank)
+    return (DDERR_VERTICALBLANKINPROGRESS);
+  *lpdwLine = GetLine(); // GetLine would be the function which gets us the line
   return(DD_OK);
+  */
+}
+//******************************************************************************
+//******************************************************************************
+HRESULT __stdcall DrawGetVerticalBlankStatus(THIS , LPBOOL lpbIsInVB)
+{
+  #ifdef DEBUG
+    WriteLog("GetVerticalBlankStatus\n");
+  #endif
+  if(NULL==lpbIsInVB)
+    return(DDERR_INVALIDPARAMS);
+  if(0==io_init1())  // try to get IOPL for the thread
+  {
+    *lpbIsInVB = (c_inb1(0x3da)&0x08)!=0;
+    io_exit1(); // reset IOPL
+    return(DD_OK);
+  }
+
+  return(DDERR_UNSUPPORTED);
 }
 //******************************************************************************
 //******************************************************************************
 HRESULT __stdcall DrawInitialize(THIS, GUID FAR *)
 {
-#ifdef DEBUG
-  WriteLog("Initialize\n");
-#endif
+  #ifdef DEBUG
+    WriteLog("Initialize\n");
+  #endif
+
   return(DD_OK);
 }
 //******************************************************************************
 //******************************************************************************
 HRESULT __stdcall DrawRestoreDisplayMode(THIS)
 {
-#ifdef DEBUG
-  WriteLog("RestoreDisplayMod\n");
-#endif
+  #ifdef DEBUG
+    WriteLog("RestoreDisplayMod\n");
+  #endif
+
   return(DD_OK);
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawSetCooperativeLevel(THIS, W32_HWND hwndClient, DWORD dwFlags)
+HRESULT __stdcall DrawSetCooperativeLevel(THIS This, HWND hwndClient, DWORD dwFlags)
 {
  OS2IDirectDraw        *me = (OS2IDirectDraw *)This;
 
-  dprintf(("SetCooperativeLevel: hwnd %X, Flags %X\n", hwndClient, dwFlags));
-  if(dwFlags & DDSCL_FULLSCREEN) {
-        me->fFullScreen = TRUE;
-  }
-  else  me->fFullScreen = FALSE;
+  #ifdef DEBUG
+    WriteLog("SetCooperativeLevel: hwnd %X, Flags %X\n", hwndClient, dwFlags);
+  #endif
 
   me->hwndClient = hwndClient;
-  OS2MaximizeWindow((HWND)hwndClient);
+  #if 0
+  OS2DDSubclassWindow(hwndClient);
+  #endif
   return(DD_OK);
 }
 //******************************************************************************
 //Backwards compatibility, what's that??
 //******************************************************************************
-HRESULT __stdcall DrawSetDisplayMode2(THIS, DWORD dwWidth, DWORD dwHeight,
-                      DWORD dwBPP, DWORD dwRefreshRate,
-                      DWORD dwFlags)
-{
- OS2IDirectDraw *me = (OS2IDirectDraw *)This;
-
-  dprintf(("SetDisplayMode2 to %dx%d with %d bits colors\n", dwWidth, dwHeight, dwBPP));
-  me->screenwidth  = dwWidth;
-  me->screenheight = dwHeight;
-  me->screenbpp    = dwBPP;
-  return(DD_OK);
-}
-//******************************************************************************
-//******************************************************************************
-HRESULT __stdcall DrawSetDisplayMode(THIS, DWORD dwWidth, DWORD dwHeight,
-                     DWORD dwBPP)
+HRESULT __stdcall DrawSetDisplayMode2(THIS This, DWORD dwWidth, DWORD dwHeight,
+              DWORD dwBPP, DWORD dwRefreshRate,
+              DWORD dwFlags)
 {
  OS2IDirectDraw        *me = (OS2IDirectDraw *)This;
 
-//  _interrupt(3);
-  dprintf(("SetDisplayMode to %dx%d with %d bits colors\n", dwWidth, dwHeight, dwBPP));
+#ifdef DEBUG
+  WriteLog("SetDisplayMode2 to %dx%d with %d bits colors\n", dwWidth, dwHeight, dwBPP);
+#endif
   me->screenwidth  = dwWidth;
   me->screenheight = dwHeight;
   me->screenbpp    = dwBPP;
+//  _interrupt(3);
   return(DD_OK);
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawWaitForVerticalBlank(THIS, DWORD, W32_HANDLE)
+HRESULT __stdcall DrawSetDisplayMode(THIS This, DWORD dwWidth, DWORD dwHeight,
+             DWORD dwBPP)
 {
-  dprintf(("WaitForVerticalBlank\n"));
+ OS2IDirectDraw        *me = (OS2IDirectDraw *)This;
+
+#ifdef DEBUG
+  WriteLog("SetDisplayMode to %dx%d with %d bits colors\n", dwWidth, dwHeight, dwBPP);
+#endif
+  me->screenwidth  = dwWidth;
+  me->screenheight = dwHeight;
+  me->screenbpp    = dwBPP;
+//  _interrupt(3);
   return(DD_OK);
 }
 //******************************************************************************
-/*** Added in the v2 interface ***/
 //******************************************************************************
-HRESULT __stdcall DrawGetAvailableVidMem(THIS, LPDDSCAPS, LPDWORD, LPDWORD)
+HRESULT __stdcall DrawWaitForVerticalBlank(THIS, DWORD dwFlags, HANDLE hEvent)
 {
-  dprintf(("GetAvailableVidMem\n"));
+  HRESULT rc;
+  #ifdef DEBUG
+    WriteLog("WaitForVerticalBlank\n");
+  #endif
+
+  if(DDWAITVB_BLOCKBEGINEVENT == dwFlags) // This parameter isn't support in DX
+    return (DDERR_UNSUPPORTED);
+
+  if(io_init1())  // try to get IOPL for the thread
+    return (DDERR_UNSUPPORTED);  // we failed so return error that we don't support this
+
+  // AT this point we should have IOPL so lets use it!
+
+  rc = DDERR_INVALIDPARAMS; // set returnvalue to fail
+
+  if(DDWAITVB_BLOCKBEGIN == dwFlags)
+  {
+    while ((c_inb1(0x3da)&0x08)!=0); // Wait for end of vert. retrace if one is running
+    while ((c_inb1(0x3da)&0x08)==0); // Wait for new start of retrace
+    rc = DD_OK;
+  }
+
+  if(DDWAITVB_BLOCKEND == dwFlags)
+  {
+    rc = DD_OK;
+    if((c_inb1(0x3da)&0x08)!=0)        // Are we in a vert. retrace
+    {
+      while ((c_inb1(0x3da)&0x08)!=0); // Wait for end of retrace
+    }
+    else
+    {
+      while ((c_inb1(0x3da)&0x08)==0); // Wait for new start of retrace
+      while ((c_inb1(0x3da)&0x08)!=0); // Wait for end of vert. retrace
+    }
+
+  }
+
+  io_exit1();
+
+  return (rc);
+
+}
+//******************************************************************************
+//*** Added in the v2 interface ***
+//******************************************************************************
+HRESULT __stdcall DrawGetAvailableVidMem(THIS, LPDDSCAPS lpDDSCaps,
+                                         LPDWORD lpdwTotal, LPDWORD lpdwFree)
+{
+  #ifdef DEBUG
+    WriteLog("GetAvailableVidMem\n");
+  #endif
+
+  // Check parameters
+  if(NULL==lpDDSCaps)
+    return(DDERR_INVALIDPARAMS);
+
+  if((NULL==lpdwTotal)&&(NULL==lpdwFree))
+    return(DDERR_INVALIDPARAMS);
+
+  if(NULL!=lpdwTotal)
+    *lpdwTotal = 2048 *1024;
+
+  if(NULL!=lpdwFree)
+    *lpdwFree = 2048 *1024;
+
+  return(DD_OK);
+}
+//******************************************************************************
+//
+//******************************************************************************
+HRESULT __stdcall DrawGetAvailableVidMem4(THIS, LPDDSCAPS2 lpDDSCaps2,
+                                         LPDWORD lpdwTotal, LPDWORD lpdwFree)
+{
+  #ifdef DEBUG
+    WriteLog("GetAvailableVidMem\n");
+  #endif
+
+  // Check parameters
+  if(NULL==lpDDSCaps2)
+    return(DDERR_INVALIDPARAMS);
+
+  if((NULL==lpdwTotal)&&(NULL==lpdwFree))
+    return(DDERR_INVALIDPARAMS);
+
+  if(NULL!=lpdwTotal)
+    *lpdwTotal = 2048 *1024;
+
+  if(NULL!=lpdwFree)
+    *lpdwFree = 2048 *1024;
+
+  return(DD_OK);
+}
+//******************************************************************************
+//*** Added in the v4 interface ***
+//******************************************************************************
+HRESULT __stdcall DrawGetSurfaceFromDC(THIS, HDC hdc, LPDIRECTDRAWSURFACE4 *)
+{
+  #ifdef DEBUG
+    WriteLog("GetSurfaceFromDC Unimplemented Stub\n");
+  #endif
+
   return(DD_OK);
 }
 //******************************************************************************
 //******************************************************************************
+HRESULT __stdcall DrawRestoreAllSurfaces(THIS)
+{
+  #ifdef DEBUG
+    WriteLog("RestoreAllSurfaces\n");
+  #endif
+
+  return(DD_OK);
+}
+//******************************************************************************
+//******************************************************************************
+HRESULT __stdcall DrawTestCooperativeLevel(THIS)
+{
+  #ifdef DEBUG
+    WriteLog("TestCooperativeLevel\n");
+  #endif
+
+  return(DD_OK);
+}
+//******************************************************************************
+//******************************************************************************
+HRESULT __stdcall DrawGetDeviceIdentifier( THIS, LPDDDEVICEIDENTIFIER lpdddi,
+                                           DWORD dwFlags)
+{
+  #ifdef DEBUG
+    WriteLog("GetDeviceIdentifier Flags = %d\n",dwFlags);
+  #endif
+  if(NULL==lpdddi)
+    return DDERR_INVALIDPARAMS;
+
+  memset( lpdddi,
+          0,
+          sizeof(DDDEVICEIDENTIFIER));
+  // ToDo: Cretae a GUID and put some better data inside
+  strcpy( lpdddi->szDriver,
+          "OS/2 DIVE Driver");
+  strcpy( lpdddi->szDescription,
+          "ODIN DD Emulation Driver");
+  return(DD_OK);
+}
+//******************************************************************************
+//******************************************************************************
+VOID OS2IDirectDraw::SwitchDisplay(HWND hwnd)
+{
+  DWORD dwVType, dwVSize;
+  HKEY hkDirectDraw2;
+
+  if (bScale)
+  {
+    if (ERROR_SUCCESS==RegOpenKeyA(HKEY_LOCAL_MACHINE,KEY_DIRECT2DRAW,&hkDirectDraw2))
+    {
+      dwVSize = 4;
+      dwVType = REG_DWORD;
+      if (ERROR_SUCCESS!=RegQueryValueExA( hkDirectDraw2, "Fullscreen", NULL, &dwVType,
+                                         (LPBYTE)&bScale, &dwVSize))
+        bScale = FALSE;
+    }
+    else
+      bScale = FALSE;
+  }
+}
+//******************************************************************************
+//******************************************************************************
+
