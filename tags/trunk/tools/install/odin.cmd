@@ -1,4 +1,4 @@
-/* $Id: odin.cmd,v 1.20 2000-12-03 11:42:48 sandervl Exp $
+/* $Id: odin.cmd,v 1.21 2000-12-03 20:18:26 bird Exp $
  *
  * Odin32 API WarpIn installation script generator.
  *
@@ -119,7 +119,14 @@ rc = lineout(sInstFile, '     TARGET="C:\ODIN\SYSTEM32"');
 rc = lineout(sInstFile, '     FIXED');
 title = "     TITLE=""Add Win32k.sys to Config.sys""";
 rc = lineout(sInstFile, title);
-rc = lineout(sInstFile, '     CONFIGSYS="DEVICE=$(1)\SYSTEM32\Win32k.sys -pe:pe | UNIQUE ADDBEFORE(PROTSHELL)"');
+rc = lineout(sInstFile, '     CONFIGSYS="DEVICE=WIN32K.SYS | REMOVELINE"');
+rc = lineout(sInstFile, '     CONFIGSYS="DEVICE=WIN32K.SYS | REMOVELINE"');
+rc = lineout(sInstFile, '     CONFIGSYS="DEVICE=WIN32K.SYS | REMOVELINE"');
+rc = lineout(sInstFile, '     CONFIGSYS="DEVICE=WIN32K.SYS | REMOVELINE"');
+rc = lineout(sInstFile, '     CONFIGSYS="DEVICE=WIN32K.SYS | REMOVELINE"');
+rc = lineout(sInstFile, '     CONFIGSYS="DEVICE=WIN32K.SYS | REMOVELINE"');
+rc = lineout(sInstFile, '     CONFIGSYS="DEVICE=WIN32K.SYS | REMOVELINE"');
+rc = lineout(sInstFile, '     CONFIGSYS="DEVICE=$(1)\SYSTEM32\Win32k.sys -pe:pe | UNIQUE ADDTOP"');
 rc = lineout(sInstFile, '     >Add Win32k.sys to Config.sys .</PCK>');
 rc = lineout(sInstFile, '');
 rc = lineout(sInstFile, '<PCK INDEX=4');
