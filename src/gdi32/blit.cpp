@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.10 2000-04-18 11:11:52 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.11 2000-05-12 19:14:55 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -27,9 +27,9 @@ static ULONG CalcBitmapSize(ULONG cBits, LONG cx, LONG cy);
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API StretchBlt(HDC hdcDest, int nXOriginDest, int nYOriginDest,
-                            int nWidthDest, int nHeightDest,
-                            HDC hdcSrc, int nXOriginSrc, int nYOriginSrc,
-                            int nWidthSrc, int nHeightSrc, DWORD dwRop)
+                         int nWidthDest, int nHeightDest,
+                         HDC hdcSrc, int nXOriginSrc, int nYOriginSrc,
+                         int nWidthSrc, int nHeightSrc, DWORD dwRop)
 {
  BOOL rc;
 
@@ -154,7 +154,8 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
     }
     result = O32_SetDIBitsToDevice(hdc, xDest, yDest, cx, cy, xSrc, ySrc, startscan, lines, (PVOID) bits, (PBITMAPINFO)info, coloruse);
     //SvL: Wrong Open32 return value
-    result = (result == TRUE) ? lines : 0;
+//    result = (result == TRUE) ? lines : 0;
+    result = (result == TRUE) ? cy : 0;
 
     dprintf(("GDI32: SetDIBitsToDevice hdc:%X xDest:%d yDest:%d, cx:%d, cy:%d, xSrc:%d, ySrc:%d, startscan:%d, lines:%d \nGDI32: bits 0x%X, info 0x%X, coloruse %d returned %d",
                  hdc, xDest, yDest, cx, cy, xSrc, ySrc, startscan, lines, (LPVOID) bits, (PBITMAPINFO)info, coloruse, result));
