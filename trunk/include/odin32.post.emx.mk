@@ -1,4 +1,4 @@
-# $Id: odin32.post.emx.mk,v 1.10 2001-01-20 18:18:55 bird Exp $
+# $Id: odin32.post.emx.mk,v 1.11 2001-06-25 23:17:17 bird Exp $
 
 #
 # Odin32 API
@@ -149,13 +149,13 @@ $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS) $(OS2RES) $(DEFFILE) $(OBJDIR)\
 !ifndef NO_LNKFILE_RULE
 $(OBJDIR)\$(TARGET).lrf: $(MAKEFILE) $(ODIN32_INCLUDE)\odin32.post.vac3.mk
     @echo Creating file <<$@
-/OUT:$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
-/MAP:$(OBJDIR)\$(TARGET).map
-$(OBJS:  =^
-)
-$(LIBS:  =^
-)
-$(OBJDIR)\bldlevel.$(DEFFILE)
+$(OBJS: =+^
+)+$(EMX)\lib\dll0.obj,
+$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION),
+$(OBJDIR)\$(TARGET).map,
+$(LIBS: =+^
+),
+$(OBJDIR)\bldlevel.$(DEFFILE);
 <<keep
 !endif
 
@@ -208,13 +208,13 @@ $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS) $(OS2RES) $(DEFFILE) $(OBJDIR)\
 !ifndef NO_LNKFILE_RULE
 $(OBJDIR)\$(TARGET).lrf: $(MAKEFILE) $(ODIN32_INCLUDE)\odin32.post.vac3.mk
     @echo Creating file <<$@
-/OUT:$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
-/MAP:$(OBJDIR)\$(TARGET).map
-$(OBJS:  =^
-)
-$(LIBS:  =^
-)
-$(OBJDIR)\bldlevel.$(DEFFILE)
+$(OBJS: =+^
+)+$(EMX)\lib\crt0.obj,
+$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION),
+$(OBJDIR)\$(TARGET).map,
+$(LIBS: =+^
+),
+$(OBJDIR)\bldlevel.$(DEFFILE);
 <<keep
 !endif
 
@@ -276,11 +276,10 @@ libs: all
 !ifndef NO_MAIN_RULE
 $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS)
     $(RM) $@
-    $(ILIB) $(ILIBFLAGS) $@ @<<
-$(OBJS:  =&^
+    $(ILIB) $(ILIBFLAGS) $@ @<<$@.parm
+$(OBJS:  =^
 )
-$(OBJDIR)\$(@B).lst
-<<
+<<keep
 !endif
 
 
