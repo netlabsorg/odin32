@@ -181,7 +181,7 @@ io_init1  PROC
   PUSH  EAX
   LEA  EAX, [EBP-8]  ; Address of 'fd' arg
   PUSH  EAX
-  PUSH  OFFSET devname
+  PUSH  OFFSET FLAT:devname
   CALL  DosOpen    ; call DosOpen
   ADD  ESP, 32    ; cleanup stack frame
   CMP  EAX, 0    ; is return code zero?
