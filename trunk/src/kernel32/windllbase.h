@@ -1,4 +1,4 @@
-/* $Id: windllbase.h,v 1.6 2000-10-10 17:14:06 sandervl Exp $ */
+/* $Id: windllbase.h,v 1.7 2000-10-23 13:42:43 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
@@ -28,6 +28,8 @@
 #define DONT_RESOLVE_DLL_REFERENCES     0x00000001
 #define LOAD_LIBRARY_AS_DATAFILE        0x00000002
 #define LOAD_WITH_ALTERED_SEARCH_PATH   0x00000008
+
+#define DLL_EXTENSION 		".DLL"
 
 //odin.ini section names to lookup renamed dlls
 //i.e. OLE32 -> OLE32OS2

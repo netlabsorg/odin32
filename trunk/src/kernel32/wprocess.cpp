@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.105 2000-10-18 17:09:34 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.106 2000-10-23 13:42:47 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -678,7 +678,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
                                         /* lpszLibFile contains a path. */
     ULONG           fPE;                /* isPEImage return value. */
     DWORD           Characteristics;    //file header's Characteristics
-    BOOL            fDllModule;         //file type
+    char           *dot;
 
     /** @sketch
      * Some parameter validations is probably useful.
@@ -708,7 +708,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
 
     /** @sketch
      *  First we'll see if the module is allready loaded - either as the EXE or as DLL.
-     *  IF NOT dll AND Executable present AND libfile matches the modname of the executable THEN
+     *  IF Executable present AND libfile matches the modname of the executable THEN
      *      RETURN instance handle of executable.
      *  Endif
      *  IF allready loaded THEN
@@ -720,29 +720,30 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
      *      RETURN instance handle.
      *  Endif
      */
-    if(strstr(lpszLibFile, ".DLL")) {
-        fDllModule = TRUE;
+    strcpy(szModname, lpszLibFile);
+    strupr(szModname);
+    dot = strchr(szModname, '.');
+    if(dot == NULL) {
+        //if there's no extension or trainling dot, we
+        //assume it's a dll (see Win32 SDK docs)
+        strcat(szModname, DLL_EXTENSION);
     }
     else {
-        if(!strstr(lpszLibFile, ".")) {
-            //if there's no extension or trainling dot, we
-            //assume it's a dll (see Win32 SDK docs)
-            fDllModule = TRUE;
+        if(dot[1] == 0) {
+            //a trailing dot means the module has no extension (SDK docs)
+            *dot = 0;
         }
     }
-
-    //todo: the entire exe name probably needs to be identical (path + extension)
-    //      -> check in NT
-    if (!fDllModule && WinExe != NULL && WinExe->matchModName(lpszLibFile))
+    if (WinExe != NULL && WinExe->matchModName(szModname))
         return WinExe->getInstanceHandle();
 
-    pModule = Win32DllBase::findModule((LPSTR)lpszLibFile);
+    pModule = Win32DllBase::findModule((LPSTR)szModname);
     if (pModule)
     {
         pModule->incDynamicLib();
         pModule->AddRef();
         dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): returns 0x%x. Dll found %s",
-                 lpszLibFile, hFile, dwFlags, pModule->getInstanceHandle(), pModule->getFullPath()));
+                 szModname, hFile, dwFlags, pModule->getInstanceHandle(), pModule->getFullPath()));
         return pModule->getInstanceHandle();
     }
 
@@ -757,14 +758,12 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
      *      Endif.
      *  Endif
      */
-    fPath = strchr(lpszLibFile, '\\') || strchr(lpszLibFile, '/');
-    strcpy(szModname, lpszLibFile);
+    fPath = strchr(szModname, '\\') || strchr(szModname, '/');
     Win32DllBase::renameDll(szModname);
-    strupr(szModname);
 
     if (!fPath)
     {
-        char    szModName2[CCHMAXPATH];
+        char szModName2[CCHMAXPATH];
         strcpy(szModName2, szModname);
         if (!Win32ImageBase::findDll(szModName2, szModname, sizeof(szModname)))
         {
@@ -1124,7 +1123,7 @@ ULONG InitCommandLine(const char *pszPeExe)
             dprintf(("KERNEL32: InitCommandLine(%p): malloc(%d) failed\n", pszPeExe, cch));
             return ERROR_NOT_ENOUGH_MEMORY;
         }
-    strcpy((char *)pszCmdLineA, pszPeExe);
+        strcpy((char *)pszCmdLineA, pszPeExe);
 
         rc = NO_ERROR;
     }
@@ -1463,50 +1462,57 @@ DWORD WIN32API GetModuleFileNameW(HMODULE hModule, LPWSTR lpszPath, DWORD cchPat
 //******************************************************************************
 //NOTE: GetModuleHandleA does NOT support files with multiple dots (i.e.
 //      very.weird.exe)
+//
+//  	hinst = LoadLibrary("WINSPOOL.DRV");      -> succeeds
+//	    hinst2 = GetModuleHandle("WINSPOOL.DRV"); -> succeeds
+//      hinst3 = GetModuleHandle("WINSPOOL.");    -> fails
+//      hinst4 = GetModuleHandle("WINSPOOL");     -> fails
+//  	hinst = LoadLibrary("KERNEL32.DLL");      -> succeeds
+//	    hinst2 = GetModuleHandle("KERNEL32.DLL"); -> succeeds
+//      hinst3 = GetModuleHandle("KERNEL32.");    -> fails
+//      hinst4 = GetModuleHandle("KERNEL32");     -> succeeds
+//      Same behaviour as observed in NT4, SP6
 //******************************************************************************
 HANDLE WIN32API GetModuleHandleA(LPCTSTR lpszModule)
 {
  HANDLE    hMod = 0;
  Win32DllBase *windll;
  char      szModule[CCHMAXPATH];
- BOOL      fDllModule = FALSE;
+ char     *dot;
 
-  if(lpszModule == NULL) {
-    if(WinExe)
+    if(lpszModule == NULL)
+    {
+        if(WinExe)
+                hMod = WinExe->getInstanceHandle();
+        else    hMod = -1;
+    }
+    else
+    {
+        strcpy(szModule, OSLibStripPath((char *)lpszModule));
+        strupr(szModule);
+        dot = strchr(szModule, '.');
+        if(dot == NULL) {
+            //if no extension -> add .DLL (see SDK docs)
+            strcat(szModule, DLL_EXTENSION);
+        }
+        else {
+            if(dot[1] == 0) {
+                //a trailing dot means the module has no extension (SDK docs)
+                *dot = 0;
+            }
+        }
+        if(WinExe && WinExe->matchModName(szModule)) {
             hMod = WinExe->getInstanceHandle();
-    else    hMod = -1;
-  }
-  else
-  {
-    strcpy(szModule, OSLibStripPath((char *)lpszModule));
-    strupr(szModule);
-    if(strstr(szModule, ".DLL")) {
-        fDllModule = TRUE;
-    }
-    else {
-        if(!strstr(szModule, ".")) {
-            //if there's no extension or trainling dot, we
-            //assume it's a dll (see Win32 SDK docs)
-            fDllModule = TRUE;
+        }
+        else {
+            windll = Win32DllBase::findModule(szModule);
+            if(windll) {
+                  hMod = windll->getInstanceHandle();
+            }
         }
     }
-    char *dot = strstr(szModule, ".");
-    if(dot)
-        *dot = 0;
-
-    if(!fDllModule && WinExe && WinExe->matchModName(szModule)) {
-        hMod = WinExe->getInstanceHandle();
-    }
-    else {
-        windll = Win32DllBase::findModule(szModule);
-        if(windll) {
-              hMod = windll->getInstanceHandle();
-        }
-    }
-  }
-
-  dprintf(("KERNEL32:  GetModuleHandle %s returned %X\n", lpszModule, hMod));
-  return(hMod);
+    dprintf(("KERNEL32:  GetModuleHandle %s returned %X\n", lpszModule, hMod));
+    return(hMod);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1604,34 +1610,34 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
          *exename = 0;
     }
     if(szAppName[0] == '"') {
-     exename = &szAppName[1];
+        exename = &szAppName[1];
     }
     else exename = szAppName;
 
     if(GetFileAttributesA(exename) == -1) {
-    dprintf(("CreateProcess: can't find executable!"));
-    SetLastError(ERROR_FILE_NOT_FOUND);
-    return FALSE;
+        dprintf(("CreateProcess: can't find executable!"));
+        SetLastError(ERROR_FILE_NOT_FOUND);
+        return FALSE;
     }
     dprintf(("KERNEL32:  CreateProcess %s\n", cmdline));
 
     //SvL: Allright. Before we call O32_CreateProcess, we must take care of
     //     lpCurrentDirectory ourselves. (Open32 ignores it!)
     if(lpCurrentDirectory) {
-    char *newcmdline;
+        char *newcmdline;
 
-    newcmdline = (char *)malloc(strlen(lpCurrentDirectory) + strlen(cmdline) + 32);
-    sprintf(newcmdline, "PE.EXE /OPT:[CURDIR=%s] %s", lpCurrentDirectory, cmdline);
-    free(cmdline);
-    cmdline = newcmdline;
+        newcmdline = (char *)malloc(strlen(lpCurrentDirectory) + strlen(cmdline) + 32);
+        sprintf(newcmdline, "PE.EXE /OPT:[CURDIR=%s] %s", lpCurrentDirectory, cmdline);
+        free(cmdline);
+        cmdline = newcmdline;
     }
     else {
-    char *newcmdline;
+        char *newcmdline;
 
-    newcmdline = (char *)malloc(strlen(cmdline) + 16);
-    sprintf(newcmdline, "PE.EXE %s", cmdline);
-    free(cmdline);
-    cmdline = newcmdline;
+        newcmdline = (char *)malloc(strlen(cmdline) + 16);
+        sprintf(newcmdline, "PE.EXE %s", cmdline);
+        free(cmdline);
+        cmdline = newcmdline;
     }
     rc = O32_CreateProcess("PE.EXE", (LPCSTR)cmdline,lpProcessAttributes,
                          lpThreadAttributes, bInheritHandles, dwCreationFlags,
@@ -1827,59 +1833,31 @@ BOOL SYSTEM GetVersionStruct(char *lpszModName, char *verstruct, ULONG bufLength
 {
  Win32ImageBase *winimage;
  HINSTANCE hDll;
+ BOOL rc = FALSE;
 
-  dprintf(("GetVersionStruct of module %s %x %d", lpszModName, verstruct, bufLength));
-  if(verstruct == NULL) {
-    SetLastError(ERROR_INVALID_PARAMETER);
-    return FALSE;
-  }
-  if(WinExe && !stricmp(WinExe->getFullPath(), lpszModName))
-  {
-        winimage = (Win32ImageBase *)WinExe;
-  }
-  else
-  {
-        winimage = (Win32ImageBase *)Win32DllBase::findModule(lpszModName);
-        if(winimage == NULL)
-        {
-          char modname[CCHMAXPATH];
-
-          strcpy(modname, lpszModName);
-          //rename dll if necessary (i.e. OLE32 -> OLE32OS2)
-          Win32DllBase::renameDll(modname);
-
-          if(Win32ImageBase::isPEImage(modname) != ERROR_SUCCESS)
-          {
-            HINSTANCE hInstance;
-
-              //must be an LX dll, just load it (app will probably load it anyway)
-              hInstance = LoadLibraryA(modname);
-              if(hInstance == 0)
-                  return 0;
-
-              winimage = (Win32ImageBase *)Win32DllBase::findModule(hInstance);
-              if(winimage) {
-                   return winimage->getVersionStruct(verstruct, bufLength);
-              }
-          dprintf(("GetVersionStruct; just loaded dll %s, but can't find it now!", modname));
-              return 0;
-          }
-          BOOL rc = FALSE;
-
-          hDll = LoadLibraryExA(lpszModName, 0, LOAD_LIBRARY_AS_DATAFILE);
-          if(hDll == 0)
-              return 0;
-
-          winimage = (Win32ImageBase *)Win32DllBase::findModule(lpszModName);
-          if(winimage != NULL) {
-            rc = winimage->getVersionStruct(verstruct, bufLength);
-      }
-          else  dprintf(("GetVersionSize; just loaded dll %s, but can't find it now!", lpszModName));
-      FreeLibrary(hDll);
-          return rc;
-        }
-  }
-  return winimage->getVersionStruct(verstruct, bufLength);
+    dprintf(("GetVersionStruct of module %s %x %d", lpszModName, verstruct, bufLength));
+    if(verstruct == NULL) {
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return FALSE;
+    }
+    if (WinExe != NULL && WinExe->matchModName(lpszModName)) {
+        return WinExe->getVersionStruct(verstruct, bufLength);
+    }
+    hDll = LoadLibraryExA(lpszModName, 0, LOAD_LIBRARY_AS_DATAFILE);
+    if(hDll == 0) {
+        dprintf(("ERROR: GetVersionStruct: Unable to load module!!"));
+        return 0;
+    }
+    winimage = (Win32ImageBase *)Win32DllBase::findModule(hDll);
+    if(winimage != NULL) {
+        rc = winimage->getVersionStruct(verstruct, bufLength);
+    }
+    else {
+        dprintf(("GetVersionStruct; just loaded dll %s, but can't find it now!", lpszModName));
+        DebugInt3();
+    }
+    FreeLibrary(hDll);
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1887,54 +1865,28 @@ ULONG SYSTEM GetVersionSize(char *lpszModName)
 {
  Win32ImageBase *winimage;
  HINSTANCE hDll;
+ ULONG size = 0;
 
-  dprintf(("GetVersionSize of %s\n", lpszModName));
-
-  if(WinExe && !stricmp(WinExe->getFullPath(), lpszModName)) {
-        winimage = (Win32ImageBase *)WinExe;
-  }
-  else {
-        winimage = (Win32ImageBase *)Win32DllBase::findModule(lpszModName);
-        if(winimage == NULL)
-        {
-          char modname[CCHMAXPATH];
-
-          strcpy(modname, lpszModName);
-          //rename dll if necessary (i.e. OLE32 -> OLE32OS2)
-          Win32DllBase::renameDll(modname);
-
-          if(Win32ImageBase::isPEImage(modname) != ERROR_SUCCESS)
-          {
-            HINSTANCE hInstance;
-
-            //must be an LX dll, just load it (app will probably load it anyway)
-            hInstance = LoadLibraryA(modname);
-            if(hInstance == 0)
-                return 0;
-
-            winimage = (Win32ImageBase *)Win32DllBase::findModule(hInstance);
-            if(winimage) {
-                return winimage->getVersionSize();
-            }
-        dprintf(("GetVersionSize; just loaded dll %s, but can't find it now!", modname));
-            return 0;
-        }
-        int size = 0;
-
-        hDll = LoadLibraryExA(lpszModName, 0, LOAD_LIBRARY_AS_DATAFILE);
-        if(hDll == 0)
-            return 0;
-
-        winimage = (Win32ImageBase *)Win32DllBase::findModule(lpszModName);
-        if(winimage != NULL) {
-            size = winimage->getVersionSize();
+    dprintf(("GetVersionSize of %s", lpszModName));
+    if (WinExe != NULL && WinExe->matchModName(lpszModName)) {
+        return WinExe->getVersionSize();
     }
-        else    dprintf(("GetVersionSize; just loaded dll %s, but can't find it now!", lpszModName));
+
+    hDll = LoadLibraryExA(lpszModName, 0, LOAD_LIBRARY_AS_DATAFILE);
+    if(hDll == 0) {
+        dprintf(("ERROR: GetVersionStruct: Unable to load module!!"));
+        return 0;
+    }
+    winimage = (Win32ImageBase *)Win32DllBase::findModule(hDll);
+    if(winimage != NULL) {
+        size = winimage->getVersionSize();
+    }
+    else {
+        dprintf(("GetVersionSize; just loaded dll %s, but can't find it now!", lpszModName));
+        DebugInt3();
+    }
     FreeLibrary(hDll);
-        return size;
-      }
-  }
-  return winimage->getVersionSize();
+    return size;
 }
 //******************************************************************************
 //******************************************************************************

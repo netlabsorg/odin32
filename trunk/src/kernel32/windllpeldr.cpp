@@ -1,4 +1,4 @@
-/* $Id: windllpeldr.cpp,v 1.7 2000-05-27 11:30:35 sandervl Exp $ */
+/* $Id: windllpeldr.cpp,v 1.8 2000-10-23 13:42:44 sandervl Exp $ */
 
 /*
  * Win32 PE loader Dll class
@@ -62,7 +62,7 @@ BOOL Win32PeLdrDll::init(ULONG reservedMem)
 
   strupr(szFileName);
   if(!strchr(szFileName, (int)'.')) {
- 	strcat(szFileName,".DLL");
+ 	strcat(szFileName, DLL_EXTENSION);
   }
   dllfile = OSLibDosOpen(szFileName, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
   if(dllfile == NULL) {//search in libpath for dll
