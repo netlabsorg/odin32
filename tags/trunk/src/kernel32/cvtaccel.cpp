@@ -1,9 +1,10 @@
-/* $Id: cvtaccel.cpp,v 1.1 1999-08-19 14:19:14 sandervl Exp $ */
+/* $Id: cvtaccel.cpp,v 1.2 1999-10-08 09:52:34 sandervl Exp $ */
 
 /*
  * PE2LX accelerator resource support code
  *
- * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
+ * Copyright 1999 Sander van Leeuwen (sandervl@xs4all.nl)
+ * Copyright 1999 Edgar Buerkle (Edgar.Buerkle@gmx.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -24,7 +25,27 @@
 #include <win32type.h>
 #include <winaccel.h>
 #include <misc.h>
+#include "console.h"
 
+//******************************************************************************
+//******************************************************************************
+UCHAR vkPM2Win(UCHAR key)
+{
+  return tabVirtualKeyCodes[key];
+}
+//******************************************************************************
+//******************************************************************************
+UCHAR vkWin2PM(UCHAR key)
+{
+  char i;
+
+  for(i=0;i<TABVIRTUALKEYCODES;i++)
+  {
+    if(tabVirtualKeyCodes[i] == key)
+      return i;
+  }
+  return key;
+}
 //******************************************************************************
 //******************************************************************************
 void *ConvertAccelerator(WINACCEL *accdata, int size, int cp)
@@ -46,12 +67,27 @@ void *ConvertAccelerator(WINACCEL *accdata, int size, int cp)
     	OS2Acc->codepage = ulCP;
    }
 
-
+   // TODO: more tests, upper/lowercase, unicode ...
    for(i=0;i<OS2Acc->cAccel;i++) {
-    	OS2Acc->aaccel[i].key = accdata->key;
-    	OS2Acc->aaccel[i].cmd = accdata->cmd;
-    	if(accdata[i].fVirt & FVIRTKEY)
-        	OS2Acc->aaccel[i].fs |= AF_VIRTUALKEY;
+      OS2Acc->aaccel[i].cmd = accdata[i].cmd;
+      if(accdata[i].fVirt & FVIRTKEY)
+      {
+	  OS2Acc->aaccel[i].fs |= AF_VIRTUALKEY;
+          OS2Acc->aaccel[i].key = vkWin2PM(accdata[i].key);
+      }
+      else
+      {
+          if(accdata[i].key < 0x20) // is this OK ?
+          {
+            OS2Acc->aaccel[i].key = accdata[i].key + 0x60;
+            OS2Acc->aaccel[i].fs |= AF_CHAR | AF_CONTROL;
+          }
+          else
+          {
+            OS2Acc->aaccel[i].key = accdata[i].key;
+            OS2Acc->aaccel[i].fs |= AF_CHAR;
+          }
+      }
     	if(accdata[i].fVirt & FNOINVERT)
         	OS2Acc->aaccel[i].fs |= AF_CHAR;
     	if(accdata[i].fVirt & FSHIFT)

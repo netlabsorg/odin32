@@ -1,4 +1,4 @@
-/* $Id: winaccel.h,v 1.1 1999-08-19 14:18:24 sandervl Exp $ */
+/* $Id: winaccel.h,v 1.2 1999-10-08 09:52:02 sandervl Exp $ */
 
 /*
  * PE2LX accelerator resource support code
@@ -23,10 +23,11 @@
 
 #pragma pack(1)
 typedef struct tagWINACCEL {
-    BYTE   fVirt;               /* Also called the flags field */
+    BYTE   fVirt;
+    BYTE   pad0;
     WORD   key;
     WORD   cmd;
-    BYTE   align[3];
+    WORD   pad1;
 } WINACCEL, *LPWINACCEL;
 #pragma pack()
 
