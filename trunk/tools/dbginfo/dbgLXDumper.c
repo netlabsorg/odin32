@@ -1,4 +1,4 @@
-/* $Id: dbgLXDumper.c,v 1.6 2000-03-31 15:35:08 bird Exp $
+/* $Id: dbgLXDumper.c,v 1.7 2000-04-07 02:48:03 bird Exp $
  *
  * dbgLXDumper - reads and interprets the debuginfo found in an LX executable.
  *
@@ -432,11 +432,13 @@ int dumpHLL(FILE *phOut, PBYTE pb, int cb)
                      */
                     fprintf(phOut,
                             "    First entry:\n"
+                            "      usLine           0x%04x\n"
                             "      uchType          0x%02x\n"
                             "      uchReserved      0x%02x\n"
                             "      cEntries         0x%04x\n"
                             "      iSeg             0x%04x\n"
                             "      offBase/cb       0x%08x\n",
+                            pFirstEntry->hll04.usLine,
                             pFirstEntry->hll04.uchType,
                             pFirstEntry->hll04.uchReserved,
                             pFirstEntry->hll04.cEntries,
@@ -509,6 +511,7 @@ int dumpHLL(FILE *phOut, PBYTE pb, int cb)
                             fprintf(phOut,
                                     "      Filenames:\n");
                             pch = &pFilenameEntry->cchName;
+                            cbEntries = 0;
                             for (k = 0; k < pFilenameEntry->cSourceFiles; k++)
                             {
                                 fprintf(phOut,
@@ -522,6 +525,7 @@ int dumpHLL(FILE *phOut, PBYTE pb, int cb)
                                 cbEntries = pFirstEntry->hll01.u1.cbFileNameTable;
                             else
                                 cbEntries = pFirstEntry->hll03.u1.cbFileNameTable;
+                            cbEntries += offsetof(HLLFILENAMEENTRY, cchName);
                             break;
                         }
 
