@@ -1,4 +1,14 @@
-/* $Id: changelog,v 1.2069 2002-05-08 15:03:25 sandervl Exp $ */
+/* $Id: changelog,v 1.2070 2002-05-09 13:54:00 sandervl Exp $ */
+
+ 2002-05-09: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Implemented IOCTL_DISK_GET_PARTITION_INFO & 
+                  IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS
+                o Implemented GetVolumeNameForVolumeMountPointA/W for disk
+                  mountpoints (e.g. C:\)
+                o Rewrote FindFirst/NextVolume to use LVM interface (if
+                  availabe; else fail)
+                o Extended GetDriveType & GetVolumeInformation for volume
+                  names (instead of only disk names (e.g. C:\))
 
  2002-05-08: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMCTL32: o Merged progress, updown, rebar, animate, comboex, flatsb,
@@ -7,8 +17,10 @@
     - ADVAPI32: o AllocateAndInitializeSid bugfix (return value from function
                   in NTDLL)
     - NTDLL:    o RtlAddAccessAllowedAce stub always returns TRUE
-    - KERNEL32: o Stubs for volume & volume mountpoint functions
+    - KERNEL32: o Implemented volume & volume mountpoint functions
                   (win2k and up)
+                o Added stubs for IOCTL_DISK_GET_PARTITION_INFO & 
+                  IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS
 
  2002-05-08: Platon Fomichev <platon@innotek.de>
     - COMCTL32: o Merged listview control with latest Wine
