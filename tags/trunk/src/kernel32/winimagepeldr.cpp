@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.103 2003-01-05 12:31:25 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.104 2003-01-05 13:16:41 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -469,6 +469,9 @@ DWORD Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
         commitPage((ULONG)pFixups, FALSE);
     }
 
+    //Use pointer to image header as module handle now. Some apps needs this
+    hinstance = (HINSTANCE)realBaseAddress;
+
     if(!(dwFlags & FLAG_PELDR_LOADASDATAFILE))
     {
         if(tlsDir = (IMAGE_TLS_DIRECTORY *)ImageDirectoryOffset(win32file, IMAGE_DIRECTORY_ENTRY_TLS))
@@ -629,12 +632,6 @@ DWORD Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
         commitPage((ULONG)entryPoint, FALSE);
     }
 #endif
-
-    //SvL: Use pointer to image header as module handle now. Some apps needs this
-    hinstance = (HINSTANCE)realBaseAddress;
-
-    //SvL: Set instance handle in process database structure
-    SetPDBInstance(hinstance);
 
     //PH: get pResRootDir pointer correct first, since processImports may
     //    implicitly call functions depending on it.
