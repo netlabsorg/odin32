@@ -1,4 +1,4 @@
-/* $Id: unknown.cpp,v 1.3 1999-06-24 19:27:49 phaller Exp $ */
+/* $Id: unknown.cpp,v 1.4 1999-06-25 08:07:13 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -159,3 +159,27 @@ BOOL WIN32API RealShellExecuteExW(LPSHELLEXECUTEINFOW lpExecInfo)
 
   return (0);
 }
+
+
+/*****************************************************************************
+ * Name      : DWORD RegenerateUserEnvironment
+ * Purpose   :
+ * Parameters: unknown, probably wrong
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.233
+ * Status    : UNTESTED STUB UNKNOWN
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
+ *****************************************************************************/
+
+DWORD WIN32API RegenerateUserEnvironment(DWORD x1,
+                                         DWORD x2)
+{
+  dprintf(("SHELL32: RegenerateUserEnvironment(%08xh,%08xhz) not implemented.\n",
+           x1,
+           x2));
+
+  return (0);
+}
+
