@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2075 2002-05-14 16:21:40 sandervl Exp $ */
+/* $Id: changelog,v 1.2076 2002-05-15 10:56:52 sandervl Exp $ */
+
+ 2002-05-15: Sander van Leeuwen <sandervl@xs4all.nl>
+    - DINPUT:   o Made mouse code reentrant
 
  2002-05-14: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o CustForce2GBFileSize function added to force 
