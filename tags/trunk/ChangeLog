@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1468 2001-06-01 19:58:30 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1469 2001-06-02 07:25:28 sandervl Exp $ */
 
  2001-06-01: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Send WM_HELP if F1 pressed & no menu active
@@ -17,6 +17,8 @@
                   only. This doesn't seem to work (anymore) with GpiCharStringPosAt.
                   (fixes border between menu & button bar in Odin MFC app &
                    Acrobat Reader 4.05)
+                o StretchDIBits fix for RGB555 bitmaps 
+                  (fixes pictures in pdf files shown by Acrobat Reader 4.05)
     - SHLWAPI:  o Added PathGetCharTypeA/W from Wine
 
  2001-06-01: Patrick Haller <patrick.haller@innotek.de>
