@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.332 2002-07-30 19:55:35 achimha Exp $ */
+/* $Id: win32wbase.cpp,v 1.333 2002-08-13 10:04:58 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1974,10 +1974,35 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
     case WM_GETHOTKEY:
         return hotkey;
 
-    case WM_CONTEXTMENU:
-        if ((dwStyle & WS_CHILD) && getParent())
-          SendMessageA(getParent()->getWindowHandle(), WM_CONTEXTMENU,wParam,lParam);
-        return 0;
+    case WM_RBUTTONUP:
+        {
+	    POINT pt;
+	    pt.x = SLOWORD(lParam);
+	    pt.y = SHIWORD(lParam);
+	    ClientToScreen(getWindowHandle(), &pt);
+            SendMessageA( getWindowHandle(), WM_CONTEXTMENU, getWindowHandle(),MAKELPARAM(pt.x, pt.y) );
+        }
+        break;
+
+     case WM_CONTEXTMENU:
+         if ((dwStyle & WS_CHILD) && getParent())
+           SendMessageA(getParent()->getWindowHandle(), WM_CONTEXTMENU,wParam,lParam);
+        else
+        {
+            LONG hitcode;
+            POINT pt;
+            if (!GetSysMenu()) return 0;
+            pt.x = SLOWORD(lParam);
+            pt.y = SHIWORD(lParam);
+            hitcode = HandleNCHitTest(pt);
+
+            /* Track system popup if click was in the caption area. */
+            if (hitcode==HTCAPTION || hitcode==HTSYSMENU)
+               TrackPopupMenu(GetSysMenu(),
+                               TPM_LEFTBUTTON | TPM_RIGHTBUTTON,
+                               pt.x, pt.y, 0, getWindowHandle(), NULL);
+        }
+         return 0;
 
     case WM_SHOWWINDOW:
         if (!lParam) return 0; /* sent from ShowWindow */
