@@ -1,4 +1,4 @@
-/* $Id: probkrnl.c,v 1.26 2000-09-12 21:13:34 bird Exp $
+/* $Id: probkrnl.c,v 1.27 2000-10-01 02:58:15 bird Exp $
  *
  * Description:   Autoprobes the os2krnl file and os2krnl[*].sym files.
  *                Another Hack!
@@ -83,58 +83,67 @@
 
 /*
  * aImportTab defines the imported and overloaded OS/2 kernel functions.
- * IMPORTANT: aImportTab has two sibling arrays, one in d32init.c, aulProc, and
- *            the calltab.asm, which must match entry by entry.
+ * IMPORTANT: aImportTab has three sibling arrays, two in dev32\d32init.c (aulProc
+ *            and aTstFakers), and the calltab.asm, which must match entry by entry.
  *            When adding/removing/shuffling items in aImportTab, aulProc and
  *            calltab.asm has to be updated immediately!
+ *            Use the mkcalltab.exe to generate calltab.asm and aTstFakers.
  */
 IMPORTKRNLSYM DATA16_GLOBAL aImportTab[NBR_OF_KRNLIMPORTS] =
-{/* iFound     cchName                  offObject    usSel     fType    */
- /*      iObject      achName                 ulAddress  cProlog        */
-    {FALSE, -1,  8, "_ldrRead",             -1,  -1,  -1,  -1, EPT_PROC32},        /* 0 */
-    {FALSE, -1,  8, "_ldrOpen",             -1,  -1,  -1,  -1, EPT_PROC32},        /* 1 */
-    {FALSE, -1,  9, "_ldrClose",            -1,  -1,  -1,  -1, EPT_PROC32},        /* 2 */
-    {FALSE, -1, 12, "_LDRQAppType",         -1,  -1,  -1,  -1, EPT_PROC32},        /* 3 */
-    {FALSE, -1, 20, "_ldrEnum32bitRelRecs", -1,  -1,  -1,  -1, EPT_PROC32},        /* 4 */
-    {FALSE, -1, 10, "_IOSftOpen",           -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 5 */
-    {FALSE, -1, 11, "_IOSftClose",          -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 6 */
-    {FALSE, -1, 15, "_IOSftTransPath",      -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 7 */
-    {FALSE, -1, 12, "_IOSftReadAt",         -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 8 */
-    {FALSE, -1, 13, "_IOSftWriteAt",        -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 9 */
-    {FALSE, -1, 12, "_SftFileSize",         -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 10 */
-    {FALSE, -1, 11, "_VMAllocMem",          -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 11 */
-    {FALSE, -1, 11, "_VMGetOwner",          -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 12 */
-    {FALSE, -1, 11, "g_tkExecPgm",          -1,  -1,  -1,  -1, EPT_PROC32},        /* 13 */
-    {FALSE, -1, 15, "_tkStartProcess",      -1,  -1,  -1,  -1, EPT_PROC32},        /* 14 */
-    {FALSE, -1, 11, "f_FuStrLenZ",          -1,  -1,  -1,  -1, EPT_PROCIMPORT16},  /* 15 */
-    {FALSE, -1, 10, "f_FuStrLen",           -1,  -1,  -1,  -1, EPT_PROCIMPORT16},  /* 16 */
-    {FALSE, -1,  8, "f_FuBuff",             -1,  -1,  -1,  -1, EPT_PROCIMPORT16},  /* 17 */
-    {FALSE, -1, 16, "_VMObjHandleInfo",     -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 18 */
-    {FALSE, -1, 21, "_ldrASMpMTEFromHandle",-1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 19 */
-    {FALSE, -1, 12, "_ldrOpenPath",         -1,  -1,  -1,  -1, EPT_PROC32},        /* 20 */
-    {FALSE, -1, 12, "_LDRClearSem",         -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 21 */
-    {FALSE, -1, 14, "_ldrFindModule",       -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 22 */
-    {FALSE, -1, 17, "_KSEMRequestMutex",    -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 23 */
-    {FALSE, -1, 17, "_KSEMReleaseMutex",    -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 24 */
-    {FALSE, -1, 15, "_KSEMQueryMutex",      -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 25 */
-    {FALSE, -1,  9, "_KSEMInit",            -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 26 */
-    {FALSE, -1,  7, "_LdrSem",              -1,  -1,  -1,  -1, EPT_VARIMPORT32},   /* 27 */
-    {FALSE, -1, 11, "_LDRLibPath",          -1,  -1,  -1,  -1, EPT_VARIMPORT32},   /* 28 */
-    {FALSE, -1,  9, "_TKSuBuff",            -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 29 */
-    {FALSE, -1,  9, "_TKFuBuff",            -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 30 */
-    {FALSE, -1, 11, "_TKFuBufLen",          -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 31 */
-    {FALSE, -1, 21, "_ldrValidateMteHandle",-1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 32 */
-    {FALSE, -1,  8, "_pTCBCur",             -1,  -1,  -1,  -1, EPT_VARIMPORT16},   /* 33 */
-    {FALSE, -1,  9, "_pPTDACur",            -1,  -1,  -1,  -1, EPT_VARIMPORT16},   /* 34 */
-    {FALSE, -1, 10, "ptda_start",           -1,  -1,  -1,  -1, EPT_VARIMPORT16},   /* 35 */
-    {FALSE, -1, 12, "ptda_environ",         -1,  -1,  -1,  -1, EPT_VARIMPORT16},   /* 36 */
-    {FALSE, -1, 12, "ptda_ptdasem",         -1,  -1,  -1,  -1, EPT_VARIMPORT16},   /* 37 */
-    {FALSE, -1, 11, "ptda_module",          -1,  -1,  -1,  -1, EPT_VARIMPORT16},   /* 38 */
-    {FALSE, -1, 18, "ptda_pBeginLIBPATH",   -1,  -1,  -1,  -1, EPT_VARIMPORT16},   /* 39 */
-    {FALSE, -1, 16, "_ldrpFileNameBuf",     -1,  -1,  -1,  -1, EPT_VARIMPORT32},   /* 40 */
-    {FALSE, -1, 14, "SecPathFromSFN",       -1,  -1,  -1,  -1, EPT_PROCIMPORTNR32},/* 41 */
+{/* iFound     cchName                          offObject   usSel     fType    */
+ /*      iObject      achName            achExtra     ulAddress  cProlog        */
+    /* Overrides */
+    {FALSE, -1, 12, "_ldrOpenPath",         "@20", -1,  -1,  -1,  -1, EPT_PROC32 | EPT_WRAPPED}, /* Must be [0]! See importTabInit. */
+    {FALSE, -1,  8, "_ldrRead",             "@24", -1,  -1,  -1,  -1, EPT_PROC32},
+    {FALSE, -1,  8, "_ldrOpen",             "@12", -1,  -1,  -1,  -1, EPT_PROC32},
+    {FALSE, -1,  9, "_ldrClose",            "@4",  -1,  -1,  -1,  -1, EPT_PROC32},
+    {FALSE, -1, 12, "_LDRQAppType",         "@8",  -1,  -1,  -1,  -1, EPT_PROC32},
+    {FALSE, -1, 20, "_ldrEnum32bitRelRecs", "@24", -1,  -1,  -1,  -1, EPT_PROC32},
+    {FALSE, -1, 11, "g_tkExecPgm",          "",    -1,  -1,  -1,  -1, EPT_PROC32},
+    {FALSE, -1, 15, "_tkStartProcess",      "",    -1,  -1,  -1,  -1, EPT_PROC32},
+    {FALSE, -1, 12, "_LDRClearSem",         "@0",  -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1, 21, "_ldrASMpMTEFromHandle","@4",  -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1, 14, "_ldrFindModule",       "@16", -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1, 21, "_ldrValidateMteHandle","@4",  -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1, 11, "_VMAllocMem",          "@36", -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1, 10, "_VMFreeMem",           "@12", -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1, 11, "_VMGetOwner",          "@8",  -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1, 16, "_VMObjHandleInfo",     "@12", -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1, 16, "_VMMapDebugAlias",     "@20", -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1, 17, "_KSEMRequestMutex",    "@8",  -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1, 17, "_KSEMReleaseMutex",    "@4",  -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1, 15, "_KSEMQueryMutex",      "@8",  -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1, 12, "_TKPidToPTDA",         "@8",  -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1,  9, "_TKSuBuff",            "@16", -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1,  9, "_TKFuBuff",            "@16", -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1, 11, "_TKFuBufLen",          "@20", -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1, 11, "_TKSuFuBuff",          "@16", -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1, 11, "f_FuStrLenZ",          "",    -1,  -1,  -1,  -1, EPT_PROCIMPORT16},
+    {FALSE, -1, 10, "f_FuStrLen",           "",    -1,  -1,  -1,  -1, EPT_PROCIMPORT16},
+    {FALSE, -1,  8, "f_FuBuff",             "",    -1,  -1,  -1,  -1, EPT_PROCIMPORT16},
+    {FALSE, -1, 12, "_SftFileSize",         "@8",  -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1, 16, "_ldrpFileNameBuf",     "",    -1,  -1,  -1,  -1, EPT_VARIMPORT32},
+    {FALSE, -1,  7, "_LdrSem",              "",    -1,  -1,  -1,  -1, EPT_VARIMPORT32},
+    {FALSE, -1,  8, "_pTCBCur",             "",    -1,  -1,  -1,  -1, EPT_VARIMPORT16},
+    {FALSE, -1,  9, "_pPTDACur",            "",    -1,  -1,  -1,  -1, EPT_VARIMPORT16},
+    {FALSE, -1, 10, "ptda_start",           "",    -1,  -1,  -1,  -1, EPT_VARIMPORT16},
+    {FALSE, -1, 12, "ptda_environ",         "",    -1,  -1,  -1,  -1, EPT_VARIMPORT16},
+    {FALSE, -1, 12, "ptda_ptdasem",         "",    -1,  -1,  -1,  -1, EPT_VARIMPORT16},
+    {FALSE, -1, 11, "ptda_handle",          "",    -1,  -1,  -1,  -1, EPT_VARIMPORT16},
+    {FALSE, -1, 11, "ptda_module",          "",    -1,  -1,  -1,  -1, EPT_VARIMPORT16},
+    {FALSE, -1, 18, "ptda_pBeginLIBPATH",   "",    -1,  -1,  -1,  -1, EPT_VARIMPORT16},
+    {FALSE, -1, 14, "SecPathFromSFN",       "",    -1,  -1,  -1,  -1, EPT_PROCIMPORTNR32},
+#if 0 /* not used */
+    {FALSE, -1,  9, "_KSEMInit",            "@12", -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1, 10, "_IOSftOpen",           "@20", -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1, 11, "_IOSftClose",          "@4",  -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1, 15, "_IOSftTransPath",      "@4",  -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1, 12, "_IOSftReadAt",         "@20", -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1, 13, "_IOSftWriteAt",        "@20", -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1, 11, "_LDRLibPath",          "",    -1,  -1,  -1,  -1, EPT_VARIMPORT32},
+#endif
 #if 0/* experimenting...*/
-    {FALSE, -1, 14, "_ldrSetVMflags",       -1,  -1,  -1,  -1, EPT_PROC32},        /* 42 */
+    {FALSE, -1, 14, "_ldrSetVMflags",       "@16", -1,  -1,  -1,  -1, EPT_PROC32},
 #endif
 };
 
@@ -970,7 +979,7 @@ int ProbeSymFile(const char * pszFilename)
      * If not all procedures were found fail.
      */
     for (i = 0; i < NBR_OF_KRNLIMPORTS; i++)
-        if (!aImportTab[i].fFound && !(aImportTab[i].fType & EPT_NOT_REQ))
+        if (!aImportTab[i].fFound && !EPTNotReq(aImportTab[i]))
             return ERROR_PROB_SYM_IMPORTS_NOTFOUND;
 
     /*

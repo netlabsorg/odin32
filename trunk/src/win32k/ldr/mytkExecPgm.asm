@@ -1,4 +1,4 @@
-; $Id: mytkExecPgm.asm,v 1.11 2000-09-02 21:08:10 bird Exp $
+; $Id: mytkExecPgm.asm,v 1.12 2000-10-01 02:58:19 bird Exp $
 ;
 ; mytkExecPgm - tkExecPgm overload
 ;
@@ -24,21 +24,21 @@ CCHMAXPATH      EQU CCHFILENAME - 1     ; Max path length
 ;
 ;   Imported Functions and variables.
 ;
-    extrn  _g_tkExecPgm:PROC
+    extrn  g_tkExecPgm:PROC
 
     ; Scans strings until empy-string is reached.
     ; input:  bx:di
     ; uses:   nearly all (save bp)
     ; return: cx size - CF clear
     ;         ax error- CF set
-    extrn  _f_FuStrLenZ:PROC
+    extrn  f_FuStrLenZ:PROC
 
     ; Stringlength
     ; input:  bx:di
     ; uses:   nearly all (save bp)
     ; return: cx size - CF clear
     ;         ax error- CF set
-    extrn  _f_FuStrLen:PROC
+    extrn  f_FuStrLen:PROC
 
     ;memcpy
     ;input:  bx:si pointer to source
@@ -47,7 +47,7 @@ CCHMAXPATH      EQU CCHFILENAME - 1     ; Max path length
     ;uses:   nearly all (save bp), es, ds
     ;return: success CF clear
     ;        failure CF set
-    extrn  _f_FuBuff:PROC
+    extrn  f_FuBuff:PROC
 
 
     ; 32-bit memcpy. (see OS2KTK.h)
@@ -84,7 +84,7 @@ CCHMAXPATH      EQU CCHFILENAME - 1     ; Max path length
 ;
 ;   Exported symbols
 ;
-    public mytkExecPgm
+    public myg_tkExecPgm
     public tkExecPgmCopyEnv
 
     public fTkExecPgm
@@ -129,7 +129,7 @@ CODE32 SEGMENT
 ; @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
 ;
 ;
-mytkExecPgm PROC FAR
+myg_tkExecPgm PROC FAR
 cchFilename = -4h
 cchArgs     = -08h
 usExecFlag  = -0ch
@@ -175,7 +175,7 @@ OffArg      = -1ah
     ;
     mov     di, dx                      ; bx:di is now filename address
     push    cs                          ; Problem calling far into the calltab segement.
-    call    near ptr FLAT:_f_FuStrLen
+    call    near ptr FLAT:f_FuStrLen
     jc      tkepgm_backout              ; If the FuStrLen call failed we bail out!
 
     ; if filename length is more that CCHMAXPATH then we don't do anything!.
@@ -194,7 +194,7 @@ OffArg      = -1ah
 
     mov     di, [ebp + OffArg]          ; bx:di -> arguments
     push    cs                          ; Problem calling far into the calltab segement.
-    call    near ptr FLAT:_f_FuStrLenZ
+    call    near ptr FLAT:f_FuStrLenZ
     jc      tkepgm_backout
 
 tkepgm1:
@@ -268,7 +268,7 @@ tkepgm1:
     ASSUME DS:NOTHING
     mov     cx, [ebp + cchFilename]     ; cx = length of area to copy
     push    cs                          ; Problem calling far into the calltab segement.
-    call    near ptr FLAT:_f_FuBuff
+    call    near ptr FLAT:f_FuBuff
     jc      tkepgm_backout2             ; In case of error back (quite unlikely).
 
 
@@ -289,12 +289,12 @@ tkepgm1:
     mov     si, [ebp + OffArg]          ; bx:si -> arguments
     mov     cx, [ebp + cchArgs]         ; cx = length of area to copy
     push    cs                          ; Problem calling far into the calltab segement.
-    call    near ptr FLAT:_f_FuBuff
+    call    near ptr FLAT:f_FuBuff
     jc      tkepgm_backout2             ; In case of error back (quite unlikely).
 
 
     ;
-    ; Setup new input parameters (call _g_tkExecPgm)
+    ; Setup new input parameters (call g_tkExecPgm)
     ;
     ; ds:dx is to become &achTkExecPgmFilename[0]
     ; di:si is to become &achTkExecPgmArguments[0]
@@ -311,11 +311,11 @@ tkepgm_setup_parms:
 
 
     ;
-    ; Call _g_tkExecPgm
+    ; Call g_tkExecPgm
     ;
 tkepgm_callbehind:
     push    cs                          ; Problem calling far into the calltab segement.
-    call    near ptr FLAT:_g_tkExecPgm
+    call    near ptr FLAT:g_tkExecPgm
     pushfd                              ; preserve flags
     push    eax                         ; preserve result.
     push    ecx                         ; preserve ecx just in case
@@ -408,12 +408,12 @@ tkepgm_backout:
     mov     di, [ebp + SegArg]
     mov     si, [ebp + OffArg]
 
-mytkExecPgm_CalltkExecPgm:
+myg_tkExecPgm_CalltkExecPgm:
     push    cs                          ; Problem calling far into the calltab segement.
-    call    near ptr FLAT:_g_tkExecPgm
+    call    near ptr FLAT:g_tkExecPgm
     leave
     retf
-mytkExecPgm ENDP
+myg_tkExecPgm ENDP
 
 
 
@@ -542,7 +542,7 @@ tkepel1:
     ror     edi, 16                     ; bx:di -> [fpachTkExecPgmEnv]
     xor     ecx, ecx
     push    cs                          ; Problem calling far into the calltab segement.
-    call    near ptr FLAT:_f_FuStrLenZ
+    call    near ptr FLAT:f_FuStrLenZ
     jc      tkepel_err_ret
     movzx   eax, cx
     jmp     tkepel_ret

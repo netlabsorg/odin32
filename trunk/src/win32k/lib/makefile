@@ -1,5 +1,5 @@
 ##############################################################################
-# $Id: makefile,v 1.4 2000-09-02 21:08:12 bird Exp $
+# $Id: makefile,v 1.5 2000-10-01 02:58:20 bird Exp $
 #
 # PD-Win32 API
 #
@@ -53,6 +53,7 @@ OBJS     =  $(WIN32KOBJ)\libInit.$(OBJEXT)         \
             $(WIN32KOBJ)\libWin32kSetOptions.$(OBJEXT) \
             $(WIN32KOBJ)\libDosAllocMemEx.$(OBJEXT) \
             $(WIN32KOBJ)\libW32kQueryOTEs.$(OBJEXT) \
+            $(WIN32KOBJ)\libW32kProcessReadWrite.$(OBJEXT) \
             $(WIN32KOBJ)\libGetCS.obj
 
 
