@@ -5,6 +5,7 @@
 /lib                                       sandervl phaller achimha bird
 /src                                       sandervl phaller achimha bird
 /include/win                               sandervl phaller achimha bird davidr
+/include/old                               sandervl phaller achimha bird davidr
 /include/win/wine                          sandervl phaller achimha bird davidr
 /src/advapi32                              sandervl phaller achimha bird
 /src/capi2032                              sandervl achimha cbratschi phaller
@@ -14,6 +15,7 @@
 /src/gdi32                                 sandervl phaller achimha bird
 /src/kernel32                              sandervl phaller achimha bird
 /src/kernel32/new                          sandervl phaller achimha bird buerkle dengert cbratschi
+/src/kernel32/old                          sandervl phaller achimha bird
 /src/lz32                                  sandervl achimha phaller
 /src/mpr                                   sandervl phaller achimha bird
 /src/NTDLL                                 sandervl phaller achimha jens
@@ -37,7 +39,9 @@
 /src/shell32/new                           sandervl phaller achimha bird
 /src/spy                                   sandervl phaller achimha dengert
 /src/tapi32                                sandervl phaller achimha bird
-/src/user32                                sandervl phaller achimha bird dengert
+/src/user32                                sandervl phaller achimha bird dengert cbratschi
+/src/user32/new                            sandervl phaller achimha bird buerkle dengert cbratschi
+/src/user32/old                            sandervl phaller achimha bird dengert
 /src/version                               sandervl phaller achimha bird
 /src/winmm                                 sandervl phaller achimha jtroster
 /src/winspool                              sandervl phaller achimha bird
@@ -77,7 +81,6 @@
 /src/tapi32/backup                         sandervl phaller achimha bird
 /src/user32/backup                         sandervl phaller achimha bird
 /src/user32/backups                        sandervl phaller achimha bird
-/src/user32/new                            sandervl phaller achimha bird buerkle dengert cbratschi
 /src/version/backup                        sandervl phaller achimha
 /src/winmm/backup                          sandervl phaller achimha bird
 /src/winspool/backup                       sandervl phaller achimha bird
