@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2582 2003-05-16 10:59:43 sandervl Exp $ */
+/* $Id: changelog,v 1.2583 2003-05-23 13:53:57 sandervl Exp $ */
+
+ 2003-05-23: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o ClearCommError: lpdwError is allowed to be NULL
 
  2003-05-16: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Use our fast critical sections instead of OS/2 mutex semaphores 
