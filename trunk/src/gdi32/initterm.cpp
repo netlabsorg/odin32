@@ -61,8 +61,6 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
       case 0 :
          ctordtorInit();
 
-         CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
-
          return inittermGdi32(hModule, ulFlag);
 
       case 1 :
