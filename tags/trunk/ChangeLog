@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.1010 2000-06-28 18:07:46 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1011 2000-06-28 21:03:55 phaller Exp $ */
 
  2000-06-28: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32:    Cleaned up resource handling (findResourceA/W); much
@@ -15,6 +15,10 @@
  2000-06-28: Michal Necasek <mike@mendelu.cz>
     - USER32:      BeginDeferWindowPos accepts count 0 as valid parameter
                    (verified in NT; negative count is illegal)
+
+ 2000-06-27: Patrick Haller <phaller@gmx.net>
+    - KERNEL32:    Added CreatePipe() call. Note: Anonymous and named
+                   pipes do NOT comply with HandleManager right now!
 
  2000-06-27: Michal Necasek <michalnec@volny.cz>
     - DINPUT:      Fixed some key values, MS uses mostly raw scan
