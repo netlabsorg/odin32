@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.116 2001-03-22 18:16:41 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.117 2001-04-02 22:51:58 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -1650,7 +1650,20 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
         return FALSE;
     }
 
-    dprintf(("KERNEL32:  CreateProcess %s\n", cmdline));
+    dprintf(("KERNEL32: CreateProcess %s\n", cmdline));
+    
+    DWORD Characteristics, SubSystem;
+    if(Win32ImageBase::isPEImage(exename, &Characteristics, &SubSystem)) {
+        dprintf(("CreateProcess: not a PE executable!!"));
+        SetLastError(ERROR_BAD_EXE_FORMAT);
+        return FALSE;
+    }
+
+    char *lpszPE;
+    if(SubSystem == IMAGE_SUBSYSTEM_WINDOWS_CUI) {
+         lpszPE = "PEC.EXE";
+    }
+    else lpszPE = "PE.EXE";
 
     //SvL: Allright. Before we call O32_CreateProcess, we must take care of
     //     lpCurrentDirectory ourselves. (Open32 ignores it!)
@@ -1658,7 +1671,7 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
         char *newcmdline;
 
         newcmdline = (char *)malloc(strlen(lpCurrentDirectory) + strlen(cmdline) + 32);
-        sprintf(newcmdline, "PE.EXE /OPT:[CURDIR=%s] %s", lpCurrentDirectory, cmdline);
+        sprintf(newcmdline, "%s /OPT:[CURDIR=%s] %s", lpszPE, lpCurrentDirectory, cmdline);
         free(cmdline);
         cmdline = newcmdline;
     }
@@ -1666,11 +1679,11 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
         char *newcmdline;
 
         newcmdline = (char *)malloc(strlen(cmdline) + 16);
-        sprintf(newcmdline, "PE.EXE %s", cmdline);
+        sprintf(newcmdline, "%s %s", lpszPE, cmdline);
         free(cmdline);
         cmdline = newcmdline;
     }
-    rc = O32_CreateProcess("PE.EXE", (LPCSTR)cmdline,lpProcessAttributes,
+    rc = O32_CreateProcess(lpszPE, (LPCSTR)cmdline,lpProcessAttributes,
                          lpThreadAttributes, bInheritHandles, dwCreationFlags,
                          lpEnvironment, lpCurrentDirectory, lpStartupInfo,
                          lpProcessInfo);
