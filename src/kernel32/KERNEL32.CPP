@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.19 1999-08-29 14:56:02 sandervl Exp $ */
+/* $Id: KERNEL32.CPP,v 1.20 1999-09-22 11:27:48 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -766,9 +766,9 @@ BOOL WIN32API GetVersionExA(OSVERSIONINFOA *lpVersionInformation)
 
    lpVersionInformation->dwMajorVersion = 4;    //pretend we're NT 4.0
    lpVersionInformation->dwMinorVersion = 0;
-   lpVersionInformation->dwBuildNumber  = 1564;
+   lpVersionInformation->dwBuildNumber  = 0x565;
    lpVersionInformation->dwPlatformId   = VER_PLATFORM_WIN32_NT;
-   lpVersionInformation->szCSDVersion[0]= 0;
+   strcpy(lpVersionInformation->szCSDVersion, "Service Pack 3");
    return(TRUE);
 }
 //******************************************************************************
@@ -782,9 +782,9 @@ BOOL WIN32API GetVersionExW(OSVERSIONINFOW *lpVersionInformation)
 
    lpVersionInformation->dwMajorVersion = 4;    //pretend we're NT 4.0
    lpVersionInformation->dwMinorVersion = 0;
-   lpVersionInformation->dwBuildNumber  = 1564;
+   lpVersionInformation->dwBuildNumber  = 0x565;
    lpVersionInformation->dwPlatformId   = VER_PLATFORM_WIN32_NT;
-   lpVersionInformation->szCSDVersion[0]= 0;
+   lstrcpyW(lpVersionInformation->szCSDVersion, (LPWSTR)L"Service Pack 3");
    return(TRUE);
 }
 //******************************************************************************
