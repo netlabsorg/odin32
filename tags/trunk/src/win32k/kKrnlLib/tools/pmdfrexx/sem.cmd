@@ -38,22 +38,11 @@ select
         return HsemDump(sArgs);
 
     /*
-     * Windows Structures.
+     * Sem32
      */
-    when (sCmd = 'wnddump') then
-        return wndDump(sArgs);
+    when (sCmd = 'sem32check') then
+        return Sem32Check(sArgs);
 
-    /*
-     * Window handles.
-     */
-    when (sCmd = 'hwnd') then
-        return hwnd2PWND(sArgs);
-
-    /*
-     * PM stuff
-     */
-    when (sCMD = 'pmstatus') then
-        return PmStatus(sArgs);
 
     /*
      * Generic dump
@@ -167,9 +156,14 @@ parse arg sHSEM
 
     /* lookup the index */
     iIdx = hsemGetIndex(iHandle);
+    ulSem = 0;
     if (hsemIsPrivate(iHandle)) then
     do  /* private sem lookup */
-        ulSem = 0;
+        ulPTDA = dfProcPTDA('#');
+        if (dfReadDword('%'ulPTDA '+ (%ulPrTotUsed - %ptda_start)') > iIdx) then
+            ulSem  = dfReadDword('%(dw(%'ulPTDA '+ (%pPrSemTbl - %ptda_start))+'d2x(iIdx*4)')');
+        else
+            say 'error-Hsem2psem: Invalid semaphore index. ('sHSEM')'
     end
     else
     do  /* global sem lookup */
@@ -191,10 +185,142 @@ parse arg sHSEM
     ulSem = hsem2psem(sHSEM);
     if (ulSem > 0) then
     do
-        Address df 'CMD' 'asOut' '.d sem32 %'||d2x(ulSem);
-        do i = 1 to asOut.0; say asOut.i; end
+        rc = sem32Dump1Ext(ulSem);
+        return 0;
+    end
+return -1;
+
+
+/**
+ * Dumps a sem32 structure.
+ * @param   ulAddr  Decimal address of the sem32 structure.
+ */
+sem32Dump1Ext: procedure expose(sGlobals)
+parse arg ulAddr
+
+    Address df 'CMD' 'asOut' '.d sem32 %'||d2x(ulAddr);
+
+    do i = 1 to asOut.0;
+        if (pos('ADDR:', translate(asOut.i)) > 0) then
+        do
+            sAddr = strip(substr(asOut.i, pos(':', asOut.i) + 1))
+            if (x2d(sAddr) > 0) then
+                asOut.i = asOut.i '('dfNear(sAddr)')';
+        end
+        if (pos(':', asOut.i) > 0) then
+            say asOut.i;
     end
 return 0;
+
+
+/**
+ * Reads a sem32 structure.
+ * @param   ulAddr  Decimal address of the sem32 structure.
+ */
+sem32Read: procedure expose(sGlobals)
+parse arg ulAddr
+    sSem = '';
+    Address df 'CMD' 'asOut' '.d sem32 %'||d2x(ulAddr);
+    do i = 1 to asOut.0;
+        asOut.i = strip(translate(asOut.i, '=', ': '||'0d0a'x));
+        j = pos(' ', asOut.i);
+        do while (j > 0)
+            asOut.i = substr(asOut.i, 1, j-1) || substr(asOut.i, j+1);
+            j = pos(' ', asOut.i);
+        end
+        if (pos('=', asOut.i) > 0) then
+        do
+            sSem = sSem||';'asOut.i;
+        end
+    end
+    /*say 'dbg-sem32Read:' sSem;*/
+return sSem;
+
+/* access methods */
+sem32IsEvent:       procedure expose(sGlobals); parse arg sSem;     return pos('Event;', sSem) > 0;
+sem32IsMutex:       procedure expose(sGlobals); parse arg sSem;     return pos('Mutex;', sSem) > 0;
+sem32IsPrivate:     procedure expose(sGlobals); parse arg sSem;     return pos('Private', sSem) > 0;
+sem32IsShared:      procedure expose(sGlobals); parse arg sSem;     return pos('Shared', sSem) > 0;
+sem32Flags:         procedure expose(sGlobals); parse arg sSem;
+i = pos('Flags', sSem); if (i > 0) then     return substr(sSem, pos('=', sSem, i)+1, 4);
+return '';
+sem32CreateAddr:    procedure expose(sGlobals); parse arg sSem;
+i = pos('CreateAddr', sSem); if (i > 0) then     return substr(sSem, pos('=', sSem, i)+1, 4);
+return '';
+sem32CallerAddr:    procedure expose(sGlobals); parse arg sSem;
+i = pos('CallerAddr', sSem); if (i > 0) then     return substr(sSem, pos('=', sSem, i)+1, 4);
+return '';
+sem32MuxQ:          procedure expose(sGlobals); parse arg sSem;
+i = pos('pMuxQ', sSem); if (i > 0) then         return substr(sSem, pos('=', sSem, i)+1, 4);
+return '';
+sem32OpenCt:        procedure expose(sGlobals); parse arg sSem;
+i = pos('OpenCount', sSem); if (i > 0) then     return substr(sSem, pos('=', sSem, i)+1, 4);
+return '00';
+
+sem32mtxIsOwned:    procedure expose(sGlobals); parse arg sSem; return sem32mtxOwner(sSem) <> '0000';
+sem32mtxOwner:      procedure expose(sGlobals); parse arg sSem;
+i = pos('Owner', sSem);     if (i > 0) then     return substr(sSem, pos('=', sSem, i)+1, 4);
+return '00';
+sem32mtxRequestCt:  procedure expose(sGlobals); parse arg sSem;
+i = pos('RequestCt', sSem); if (i > 0) then     return substr(sSem, pos('=', sSem, i)+1, 4);
+return '00';
+sem32mtxRequesterCt:procedure expose(sGlobals); parse arg sSem;
+i = pos('RequesterCt', sSem);if (i > 0) then    return substr(sSem, pos('=', sSem, i)+1, 4);
+return '00';
+
+sem32evtIsPosted:   procedure expose(sGlobals); parse arg sSem; return sem32Flags(sSem) = 'Posted';
+sem32evtIsReset:    procedure expose(sGlobals); parse arg sSem; return sem32Flags(sSem) = 'Reset';
+sem32evtPostCount:  procedure expose(sGlobals); parse arg sSem;
+i = pos('PostCount', sSem); if (i > 0) then     return substr(sSem, pos('=', sSem, i)+1, 4);
+return '';
+
+
+/**
+ * Display all the sems which this process is holding.
+ * Only private sems are implemented currently.
+ */
+Sem32Check: procedure  expose(sGlobals)
+    ulPTDA = dfProcPTDA('#');
+
+    cPr = dfReadDWord('%'ulPTDA '+ (ulPrTotUsed-ptda_start)');
+    if (cPr > 0) then
+    do
+        sPrTabMem = dfReadMem('%(dw(%'ulPTDA '+(pPrSemTbl-ptda_start)))', cPr*4);
+        if (sPrTabMem <> '') then
+        do
+            do i = 0 to cPr - 1
+                if (i // 20 = 0) then
+                    say 'info:' right(i-0,length(cPr)) 'of' cPr 'private sems processed...'
+                ulSem = memDword(i*4, sPrTabMem);
+                if (ulSem >= '10000'x) then
+                do
+                    sSem = sem32Read(ulSem);
+                    if (sSem <> '') then
+                    do
+                        fOk = 1;
+                        if (sem32IsMutex(sSem)) then
+                        do /* mutex*/
+                            if (sem32mtxIsOwned(sSem)) then
+                                fOk = 0;
+                        end
+                        else if (sem32IsEvent(sSem)) then
+                        do  /* event */
+                            if (sem32evtIsReset(sSem)) then
+                                fOk = 0;
+                        end
+                        else fOk = 0;
+                        if (\fOk) then
+                            call sem32Dump1Ext ulSem;
+                    end
+                end
+            end
+        end
+        else
+            say 'error-Sem32Check: failed to read private sem table.'
+    end
+
+return 0;
+
 
 
 /*
@@ -320,7 +446,7 @@ return -1;
  * @return  The value of the dword at given address.
  *          -1 on error.
  */
-dfReadDWord: procedure expose(sGlobals)
+dfReadDword: procedure expose(sGlobals)
 parse arg sAddr
     sMem = dfReadMem(sAddr, 4);
     if (sMem <> '') then
@@ -339,8 +465,11 @@ parse arg sAddr
     Address df 'CMD' 'asOut' 'ln' sAddr
     if (rc = 0 & asOut.0 > 0) then
     do
-        parse var asOut.1 .' 'sRet;
-        return strip(sRet);
+        if (pos('symbols found', asOut.1) <= 0) then
+        do
+            parse var asOut.1 .' 'sRet;
+            return strip(sRet);
+        end
     end
 return '';
 
@@ -428,6 +557,7 @@ parse arg fBlockInfo
     end
 return -1;
 
+
 /**
  * Gets the blockId of a process from the dumpformatter.
  * @param   iSlot   The slot to query.
@@ -440,13 +570,38 @@ parse arg iSlot
     if (rc = 0 & asOut.0 > 0) then
     do
         /* *000b# blk fd436190 pmshell */
-        asOut.0 = strip(asOut.0);
-        parse var asOut.0 .' 'sState' 'sBlockId' 'sProcName
+        asOut.2 = strip(asOut.2);
+        parse var asOut.2 .' 'sState' 'sBlockId' 'sProcName
         sBlockId = strip(sBlockId)      /* needed??? */
-        if (strip(sBlockId) <> '') then
+        if (sBlockId <> '') then
             return sBlockId;
     end
 return '0';
+
+
+/**
+ * Gets the PTDA of a process.
+ * @param   sSlot   Slot or special chars '*' and '#'.
+ * @return  Hex pointer to the PTDA.
+ */
+dfProcPTDA: procedure expose(sGlobals)
+parse arg iSlot
+    Address df 'CMD' 'asOut' '.p' iSlot;
+    if (rc = 0 & asOut.0 > 0) then
+    do
+        /*  0074  0033 0000 0033 0002 blk 0500 f88e6000 fe62d220 f9a0b7e8 1e9c 12 muglrqst
+         *  000a  0001 0000 0000 000a blk 081e f8812000 ffdba880 f99f7840 1e94 00 *jitdaem
+         * *000b# 001d 0001 001d 0001 blk 0500 f8814000 fe6270a0 f99f7b44 1e9c 01 pmshell
+         */
+        i = 2;
+        asOut.i = translate(left(asOut.i, 10), '  ', '#*') || substr(asOut.i, 11);
+        parse var asOut.i . . . . . . . hxTSD hxPTDA hxPCB . . .;
+        hxPTDA = strip(hxPTDA)      /* needed??? */
+        if (hxPTDA <> '') then
+            return hxPTDA;
+    end
+return '0';
+
 
 /**
  * Gets a byte from the memory array aMem.
