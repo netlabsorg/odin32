@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.7 1999-09-04 19:42:29 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.8 1999-09-04 19:51:46 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -428,9 +428,9 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   }
 #endif
 
-  fakeWinBase.hwndThisObject = OS2Hwnd;
-  fakeWinBase.pWindowClass = windowClass;
-  *(PULONG)&fakeWinBase -= 0x90 - 8;
+//  fakeWinBase.hwndThisObject = OS2Hwnd;
+//  fakeWinBase.pWindowClass = windowClass;
+//  *(PULONG)&fakeWinBase -= 0x90 - 8;
 //  SetFakeOpen32();
 
   /* Set the window menu */
@@ -1877,12 +1877,6 @@ HWND Win32BaseWindow::GetActiveWindow()
 }
 //******************************************************************************
 //******************************************************************************
-BOOL Win32BaseWindow::IsWindow()
-{
-  return TRUE;
-}
-//******************************************************************************
-//******************************************************************************
 BOOL Win32BaseWindow::IsWindowEnabled()
 {
     return OSLibWinIsWindowEnabled(OS2Hwnd);
@@ -1910,22 +1904,28 @@ BOOL Win32BaseWindow::hasWindowName(LPSTR wndname, BOOL fUnicode)
 }
 //******************************************************************************
 //******************************************************************************
-int Win32BaseWindow::GetWindowTextLengthA()
+int Win32BaseWindow::GetWindowTextLength()
 {
-    return OSLibWinQueryWindowTextLength(OS2Hwnd);
+    return wndNameLength;
 }
 //******************************************************************************
 //******************************************************************************
-int Win32BaseWindow::GetWindowTextA(LPSTR lpsz, int cch)
+int Win32BaseWindow::GetWindowText(LPSTR lpsz, int cch)
 {
-    return OSLibWinQueryWindowText(OS2Hwnd, cch, lpsz);
+    if(isUnicode == FALSE) {
+        strncpy(lpsz, windowNameA, cch);
+    }
+    else {
+        lstrcpynW((LPWSTR)lpsz, windowNameW, cch);
+    }
+    return wndNameLength;
 }
 //******************************************************************************
 //******************************************************************************
 BOOL Win32BaseWindow::SetWindowText(LPSTR lpsz)
 {
     if(lpsz == NULL)
-        return FALSE;
+    	return FALSE;
 
     if(isUnicode == FALSE) {
         windowNameA = (LPSTR)_smalloc(strlen(lpsz)+1);
@@ -1941,8 +1941,8 @@ BOOL Win32BaseWindow::SetWindowText(LPSTR lpsz)
     }
     wndNameLength = strlen(windowNameA)+1; //including 0 terminator
 
-    if(OS2Hwnd)
-        return OSLibWinSetWindowText(OS2Hwnd, (LPSTR)windowNameA);
+    if(OS2HwndFrame)
+        return OSLibWinSetWindowText(OS2HwndFrame, (LPSTR)windowNameA);
 
     return TRUE;
 }
