@@ -1,26 +1,27 @@
-# $Id: setup.os2relmscv6.mk,v 1.6 2002-04-30 19:45:53 bird Exp $
+# $Id: setup.os2debmscv6-16.mk,v 1.1 2002-04-30 19:45:53 bird Exp $
 
-# ---OS2, RELEASE, MSCV6-------------------------
-ENV_NAME="OS/2, Release, Microsoft C v6.0a 32-bit"
+# ---OS2, DEBUG, MSCV6-------------------------
+ENV_NAME="OS/2, Debug, Microsoft C v6.0a 16-bit"
 ENV_STATUS=OK
 !if "$(ENV_ENVS)" == ""
-ENV_ENVS=vac308 mscv6
+ENV_ENVS=vac308 mscv6-16
 !else
-ENV_ENVS_FORCE=vac308 mscv6
+ENV_ENVS_FORCE=vac308 mscv6-16
 !endif
+ENV_16BIT = 16
 
 
 #
 # Include some shared standard stuff: ALP.
 #
-!include $(PATH_MAKE)\setup.os2relalp.mk
+!include $(PATH_MAKE)\setup.os2debalp.mk
 
 
 #
 # The tools
 #
 AR=ilib.exe
-CC=cl386.exe
+CC=cl.exe
 CXX=false
 LINK=ilink.exe
 IMPLIB=implib.exe
@@ -48,7 +49,8 @@ _CC_SEG_DATA     =
 _CC_SEG_XCPT     =
 _CC_DEFAULT_LIBS = /Zl
 _CC_PACK         = /Zp
-_CC_MODEL        =
+_CC_MODEL        = /Asfw
+_OBJ_MODEL       = c
 
 !ifdef ALL_SEG_TEXT
 _CC_SEG_TEXT=/NT$(ALL_SEG_TEXT)
@@ -71,35 +73,64 @@ _CC_PACK        = /Zp$(ALL_PACK)
 !ifdef CC_PACK
 _CC_PACK        = /Zp$(CC_PACK)
 !endif
-!if defined(CXX_MODEL) || defined(ALL_MODEL)
-! if [$(ECHO) warning: CXX_MODEL/ALL_MODEL isn't supported by this compiler$(CLRRST)]
-! endif
+# Model
+!if !defined(CC_MODEL) && defined(ALL_MODEL)
+CC_MODEL    = $(ALL_MODEL)
+!endif
+!ifdef CC_MODEL
+_CC_MODEL   =
+!endif
+!if "$(CC_MODEL)" == "TINY"
+_CC_MODEL   = /AT
+_OBJ_MODEL  = s
+!endif
+!if "$(CC_MODEL)" == "SMALL"
+_CC_MODEL   = /AS
+_OBJ_MODEL  = s
+!endif
+!if "$(CC_MODEL)" == "COMPACT"
+_CC_MODEL   = /AC
+_OBJ_MODEL  = c
+!endif
+!if "$(CC_MODEL)" == "MEDIUM"
+_CC_MODEL   = /AM
+_OBJ_MODEL  = m
+!endif
+!if "$(CC_MODEL)" == "LARGE"
+_CC_MODEL   = /AL
+_OBJ_MODEL  = l
+!endif
+!if "$(CC_MODEL)" == "HUGE"
+_CC_MODEL   = /AH
+_OBJ_MODEL  = l
+!endif
+!if "$(_CC_MODEL)" == ""
+! error Invalid MODEL. CC_MODEL=$(CC_MODEL)
 !endif
 
 _CC_OPTIONAL = $(_CC_SEG_TEXT) $(_CC_SEG_DATA) $(_CC_SEG_XCPT) $(_CC_DEFAULT_LIBS) $(_CC_PACK) $(_CC_MODEL)
 
-CC_FLAGS=/nologo /c /DDEBUG /DOS2 /D__32BIT__ /D__i386__ /W0 /G3 /Ogeitln /Zi $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES) $(ALL_INCLUDES) /I$(PATH_INCLUDES)
+CC_FLAGS=/nologo /c /DDEBUG /DOS2 /D__16BIT__ /W0 /G2s /Zi /Owis $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES) $(ALL_INCLUDES) /I$(PATH_INCLUDES)
 CC_FLAGS_EXE=$(CC_FLAGS)
 CC_FLAGS_DLL=$(CC_FLAGS)
-CC_FLAGS_SYS=$(CC_FLAGS) /DRING0 /Gs
+CC_FLAGS_SYS=$(CC_FLAGS) /DRING0
 CC_FLAGS_IFS=$(CC_FLAGS_SYS)
 CC_OBJ_OUT=/Fo
-CC_LST_OUT=/Fl
-CC_PC_2_STDOUT=/P /C /E
+CC_LST_OUT=/Fa
+CC_PC_2_STDOUT=/P /E
 
 CXX_FLAGS=
 CXX_FLAGS_EXE=
 CXX_FLAGS_DLL=
 CXX_FLAGS_SYS=
-CXX_FLAGS_IFS=
+CC_FLAGS_IFS=
 CXX_OBJ_OUT=
-CXX_LST_OUT=
 CXX_PC_2_STDOUT=
 
 IMPLIB_FLAGS=/NOI /Nologo
 
-LINK_FLAGS=/nofree /nologo /map /NOE /NOD /PACKCODE /PACKDATA /EXEPACK:2 /LINENUMBERS /NODEBUG
-LINK_FLAGS_EXE=$(LINK_FLAGS) /EXECutable /BASE:0x10000 /STACK:$(TARGET_STACKSIZE)
+LINK_FLAGS=/nofree /nologo /de /map /NOE /NOD /Optfunc /PACKCODE /PACKDATA
+LINK_FLAGS_EXE=$(LINK_FLAGS) /EXECutable /STACK:$(TARGET_STACKSIZE)
 LINK_FLAGS_DLL=$(LINK_FLAGS) /DLL
 LINK_FLAGS_SYS=$(LINK_FLAGS) /PDD /Align:16 /NOIgnorecase
 LINK_FLAGS_VDD=$(LINK_FLAGS) /VDD /Align:16 /NOIgnorecase
@@ -124,13 +155,13 @@ RL_FLAGS=-x2 -n
 #
 # Libraries and object files.
 #
-LIB_OS      = os2386.lib
-LIB_C_OBJ   = libc.lib
-LIB_C_DLL   = libc.lib
-LIB_C_RTDLL = libc.lib
+LIB_OS      = os2286.lib
+LIB_C_OBJ   = $(_OBJ_MODEL)libcep.lib
+LIB_C_DLL   = $(_OBJ_MODEL)libcep.lib
+LIB_C_RTDLL = $(_OBJ_MODEL)libcep.lib
 LIB_C_NRE   =
 LIB_C_DMNGL =
 OBJ_PROFILE =
 
-# ---OS2, RELEASE, MSCV6-------------------------
+# ---OS2, DEBUG, MSCV6-------------------------
 

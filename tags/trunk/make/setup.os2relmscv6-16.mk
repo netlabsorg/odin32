@@ -1,13 +1,14 @@
-# $Id: setup.os2relmscv6.mk,v 1.6 2002-04-30 19:45:53 bird Exp $
+# $Id: setup.os2relmscv6-16.mk,v 1.1 2002-04-30 19:45:53 bird Exp $
 
 # ---OS2, RELEASE, MSCV6-------------------------
-ENV_NAME="OS/2, Release, Microsoft C v6.0a 32-bit"
+ENV_NAME="OS/2, Release, Microsoft C v6.0a 16-bit"
 ENV_STATUS=OK
 !if "$(ENV_ENVS)" == ""
-ENV_ENVS=vac308 mscv6
+ENV_ENVS=vac308 mscv6-16
 !else
-ENV_ENVS_FORCE=vac308 mscv6
+ENV_ENVS_FORCE=vac308 mscv6-16
 !endif
+ENV_16BIT = 16
 
 
 #
@@ -20,7 +21,7 @@ ENV_ENVS_FORCE=vac308 mscv6
 # The tools
 #
 AR=ilib.exe
-CC=cl386.exe
+CC=cl.exe
 CXX=false
 LINK=ilink.exe
 IMPLIB=implib.exe
@@ -48,7 +49,7 @@ _CC_SEG_DATA     =
 _CC_SEG_XCPT     =
 _CC_DEFAULT_LIBS = /Zl
 _CC_PACK         = /Zp
-_CC_MODEL        =
+_CC_MODEL        = /Asfw
 
 !ifdef ALL_SEG_TEXT
 _CC_SEG_TEXT=/NT$(ALL_SEG_TEXT)
@@ -71,14 +72,37 @@ _CC_PACK        = /Zp$(ALL_PACK)
 !ifdef CC_PACK
 _CC_PACK        = /Zp$(CC_PACK)
 !endif
-!if defined(CXX_MODEL) || defined(ALL_MODEL)
-! if [$(ECHO) warning: CXX_MODEL/ALL_MODEL isn't supported by this compiler$(CLRRST)]
-! endif
+!if !defined(CC_MODEL) && defined(ALL_MODEL)
+CC_MODEL    = $(ALL_MODEL)
+!endif
+!ifdef CC_MODEL
+_CC_MODEL   =
+!endif
+!if "$(CC_MODEL)" == "TINY"
+_CC_MODEL   = /AT
+!endif
+!if "$(CC_MODEL)" == "SMALL"
+_CC_MODEL   = /AS
+!endif
+!if "$(CC_MODEL)" == "COMPACT"
+_CC_MODEL   = /AC
+!endif
+!if "$(CC_MODEL)" == "MEDIUM"
+_CC_MODEL   = /AM
+!endif
+!if "$(CC_MODEL)" == "LARGE"
+_CC_MODEL   = /AL
+!endif
+!if "$(CC_MODEL)" == "HUGE"
+_CC_MODEL   = /AH
+!endif
+!if "$(_CC_MODEL)" == ""
+! error Invalid MODEL. CC_MODEL=$(CC_MODEL)
 !endif
 
 _CC_OPTIONAL = $(_CC_SEG_TEXT) $(_CC_SEG_DATA) $(_CC_SEG_XCPT) $(_CC_DEFAULT_LIBS) $(_CC_PACK) $(_CC_MODEL)
 
-CC_FLAGS=/nologo /c /DDEBUG /DOS2 /D__32BIT__ /D__i386__ /W0 /G3 /Ogeitln /Zi $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES) $(ALL_INCLUDES) /I$(PATH_INCLUDES)
+CC_FLAGS=/nologo /c /DDEBUG /DOS2 /D__16BIT__ /W0 /G2 /Ogeitln /Zi $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES) $(ALL_INCLUDES) /I$(PATH_INCLUDES)
 CC_FLAGS_EXE=$(CC_FLAGS)
 CC_FLAGS_DLL=$(CC_FLAGS)
 CC_FLAGS_SYS=$(CC_FLAGS) /DRING0 /Gs
@@ -124,10 +148,10 @@ RL_FLAGS=-x2 -n
 #
 # Libraries and object files.
 #
-LIB_OS      = os2386.lib
-LIB_C_OBJ   = libc.lib
-LIB_C_DLL   = libc.lib
-LIB_C_RTDLL = libc.lib
+LIB_OS      = os2286.lib
+LIB_C_OBJ   = clibcep.lib
+LIB_C_DLL   = clibcep.lib
+LIB_C_RTDLL = clibcep.lib
 LIB_C_NRE   =
 LIB_C_DMNGL =
 OBJ_PROFILE =
