@@ -7,6 +7,6 @@ CODE LOADONCALL
 EXPORTS
   GetASPI32SupportInfo       = _GetASPI32SupportInfo@0         @1
   SendASPI32Command          = _SendASPI32Command              @2    ; CDECL
-; GetASPI32DLLVersion        =
+  GetASPI32DLLVersion        = _GetASPI32DLLVersion@0          @3
 ; OrdinalOnlyExport
 
