@@ -1,4 +1,4 @@
-/* $Id: service.cpp,v 1.5 2000-01-06 20:05:00 sandervl Exp $ */
+/* $Id: service.cpp,v 1.6 2001-05-19 11:13:05 sandervl Exp $ */
 
 /*
  * Win32 advanced API functions for OS/2
@@ -61,6 +61,8 @@ ODINDEBUGCHANNEL(ADVAPI32-SERVICE)
 #define REG_SERVICE_STATUS_W		(LPWSTR)L"ServiceStatus"
 //This key exists if DeleteService has been called for a specific service
 #define REG_SERVICE_DELETEPENDING	"DeletePending"
+//TODO: How can you query the name of a key from the key handle????
+#define REG_SERVICE_NAME                "ServiceName"
 
 //Win32 service can call StartServiceCtrlDispatcherA/W only once
 static BOOL fServiceCtrlDispatcherStarted = FALSE;
@@ -588,22 +590,20 @@ BOOL WIN32API CloseServiceHandle(SC_HANDLE hSCObject)
 
   DWORD deletepending, keytype = REG_DWORD, size = sizeof(DWORD);
   if(!RegQueryValueExA((HKEY)hSCObject, REG_SERVICE_DELETEPENDING, 0, &keytype, (LPBYTE)&deletepending, &size)) {
-   FILETIME filetime;
-   DWORD bla, classsize;
-   CHAR szClassName[64];
+   CHAR szKeyName[256] = "";
 
 	HKEY keyServices;
   	if(RegCreateKeyA(HKEY_LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Services", &keyServices) != 0) {
 		SetLastError(ERROR_INTERNAL_ERROR);
 		return FALSE;
 	}
+	keytype = REG_SZ;
+	size    = sizeof(szKeyName);
+	RegQueryValueExA(hSCObject, REG_SERVICE_NAME, 0, &keytype, (LPBYTE)szKeyName, &size);
 
-	//NOTE: Assumes for now there are no subkeys
-	//TODO: DOes not work
-	classsize = sizeof(szClassName);
-	RegQueryValueA((HKEY)hSCObject, NULL, szClassName, (LPLONG)&classsize);
   	RegCloseKey((HKEY)hSCObject);
-	RegDeleteKeyA(keyServices, szClassName);
+	RegDeleteKeyA(keyServices, szKeyName);
+  	RegCloseKey((HKEY)keyServices);
   }
 
   RegCloseKey((HKEY)hSCObject);
@@ -714,6 +714,7 @@ SC_HANDLE WIN32API CreateServiceA(SC_HANDLE hSCManager,
 	SetLastError(ERROR_INTERNAL_ERROR);
 	return 0;
   }
+  RegSetValueExA(keyThisService, REG_SERVICE_NAME, 0, REG_SZ, (LPBYTE)lpServiceName, strlen(lpServiceName)+1);
   RegSetValueExA(keyThisService, REG_SERVICE_TYPE, 0, REG_DWORD, (LPBYTE)&dwServiceType, sizeof(DWORD));
   RegSetValueExA(keyThisService, REG_SERVICE_STARTTYPE, 0, REG_DWORD, (LPBYTE)&dwStartType, sizeof(DWORD));
   RegSetValueExA(keyThisService, REG_SERVICE_ERRORCONTROL, 0, REG_DWORD, (LPBYTE)&dwErrorControl, sizeof(DWORD));
@@ -1182,6 +1183,7 @@ BOOL WIN32API EnumServicesStatusA(SC_HANDLE             hSCManager,
            lpServicesReturned,
            lpResumeHandle));
 
+  SetLastError (ERROR_ACCESS_DENIED);
   return (FALSE); /* signal failure */
 }
 
@@ -1225,6 +1227,7 @@ BOOL WIN32API EnumServicesStatusW(SC_HANDLE             hSCManager,
            lpServicesReturned,
            lpResumeHandle));
 
+  SetLastError (ERROR_ACCESS_DENIED);
   return (FALSE); /* signal failure */
 }
 

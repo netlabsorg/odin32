@@ -1,4 +1,4 @@
-; $Id: ADVAPI32.DEF,v 1.16 2001-04-26 17:00:33 sandervl Exp $
+; $Id: ADVAPI32.DEF,v 1.17 2001-05-19 11:13:04 sandervl Exp $
 
 ;
 ; Based on NT 4.0 SP6: ADVAPI32.DLL 
@@ -400,39 +400,39 @@ EXPORTS
      StartServiceCtrlDispatcherW  = _StartServiceCtrlDispatcherW@4   @363
      StartServiceW              = _StartServiceW@12                  @364
 ;    SynchronizeWindows31FilesAndWindowsNTRegistry		@365
-;    SystemFunction001						@366
-;    SystemFunction002						@367
-;    SystemFunction003						@368
-;    SystemFunction004						@369
-;    SystemFunction005						@370
-;    SystemFunction006						@371
-;    SystemFunction007						@372
-;    SystemFunction008						@373
-;    SystemFunction009						@374
-;    SystemFunction010						@375
-;    SystemFunction011						@376
-;    SystemFunction012						@377
-;    SystemFunction013						@378
-;    SystemFunction014						@379
-;    SystemFunction015						@380
-;    SystemFunction016						@381
-;    SystemFunction017						@382
-;    SystemFunction018						@383
-;    SystemFunction019						@384
-;    SystemFunction020						@385
-;    SystemFunction021						@386
-;    SystemFunction022						@387
-;    SystemFunction023						@388
-;    SystemFunction024						@389
-;    SystemFunction025						@390
-;    SystemFunction026						@391
-;    SystemFunction027						@392
-;    SystemFunction028						@393
-;    SystemFunction029						@394
-;    SystemFunction030						@395
-;    SystemFunction031						@396
-;    SystemFunction032						@397
-;    SystemFunction033						@398
+    SystemFunction001 = _SystemFunction001@12			@366
+    SystemFunction002 = _SystemFunction002@12			@367
+    SystemFunction003 = _SystemFunction003@8			@368
+    SystemFunction004 = _SystemFunction004@12			@369
+    SystemFunction005 = _SystemFunction005@12			@370
+    SystemFunction006 = _SystemFunction006@8			@371
+    SystemFunction007 = _SystemFunction007@8			@372
+    SystemFunction008 = _SystemFunction008@12			@373
+    SystemFunction009 = _SystemFunction009@12			@374
+    SystemFunction010 = _SystemFunction010@12 	        	@375
+    SystemFunction011 = _SystemFunction011@12			@376
+    SystemFunction012 = _SystemFunction012@12			@377
+    SystemFunction013 = _SystemFunction013@12			@378
+    SystemFunction014 = _SystemFunction014@12			@379
+    SystemFunction015 = _SystemFunction015@12			@380
+    SystemFunction016 = _SystemFunction016@12			@381
+    SystemFunction017 = _SystemFunction017@12			@382
+    SystemFunction018 = _SystemFunction018@12			@383
+    SystemFunction019 = _SystemFunction019@12			@384
+    SystemFunction020 = _SystemFunction020@12			@385
+    SystemFunction021 = _SystemFunction021@12			@386
+    SystemFunction022 = _SystemFunction022@12			@387
+    SystemFunction023 = _SystemFunction023@12			@388
+    SystemFunction024 = _SystemFunction024@12			@389
+    SystemFunction025 = _SystemFunction025@12			@390
+    SystemFunction026 = _SystemFunction026@12			@391
+    SystemFunction027 = _SystemFunction027@12			@392
+    SystemFunction028 = _SystemFunction028@8			@393
+    SystemFunction029 = _SystemFunction029@8			@394
+    SystemFunction030 = _SystemFunction030@8                    @395
+    SystemFunction031 = _SystemFunction031@8                    @396
+    SystemFunction032 = _SystemFunction032@8                    @397
+    SystemFunction033 = _SystemFunction033@8                    @398
 ;    TrusteeAccessToObjectA					@399
 ;    TrusteeAccessToObjectW					@400
 
