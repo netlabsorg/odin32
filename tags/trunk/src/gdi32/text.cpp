@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.16 2001-04-04 14:20:52 sandervl Exp $ */
+/* $Id: text.cpp,v 1.17 2001-04-15 17:04:47 sandervl Exp $ */
 
 /*
  * GDI32 text apis
@@ -796,14 +796,21 @@ BOOL InternalTextOutW(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCWST
 //******************************************************************************
 BOOL WIN32API ExtTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR lpszString,UINT cbCount,CONST INT *lpDx)
 {
-  dprintf(("GDI32: ExtTextOutA %x %s (%d,%d) %x %d %x", hdc, lpszString, X, Y, fuOptions, cbCount, lpDx));
+  if(lprc) {
+        dprintf(("GDI32: ExtTextOutA %x %s (%d,%d) %x %d %x rect (%d,%d)(%d,%d)", hdc, lpszString, X, Y, fuOptions, cbCount, lpDx, lprc->left, lprc->top, lprc->right, lprc->bottom));
+  }
+  else  dprintf(("GDI32: ExtTextOutA %x %s (%d,%d) %x %d %x", hdc, lpszString, X, Y, fuOptions, cbCount, lpDx));
+
   return InternalTextOutA(hdc, X, Y, fuOptions, lprc, lpszString, cbCount, lpDx, TRUE);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API ExtTextOutW(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCWSTR lpszString,UINT cbCount,CONST int *lpDx)
 {
-  dprintf(("GDI32: ExtTextOutW\n"));
+  if(lprc) {
+        dprintf(("GDI32: ExtTextOutW %x %ls (%d,%d) %x %d %x rect (%d,%d)(%d,%d)", hdc, lpszString, X, Y, fuOptions, cbCount, lpDx, lprc->left, lprc->top, lprc->right, lprc->bottom));
+  }
+  else  dprintf(("GDI32: ExtTextOutW %x %ls (%d,%d) %x %d %x", hdc, lpszString, X, Y, fuOptions, cbCount, lpDx));
   return InternalTextOutW(hdc, X, Y, fuOptions, lprc, lpszString, cbCount, lpDx, TRUE);
 }
 //******************************************************************************
