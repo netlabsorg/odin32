@@ -1,4 +1,4 @@
-/* $Id: shell32.cpp,v 1.4 1999-06-09 15:22:27 phaller Exp $ */
+/* $Id: shell32.cpp,v 1.5 1999-06-09 21:05:24 phaller Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -80,7 +80,7 @@ int WIN32API ShellAboutA(HWND    hwnd,
                          LPCTSTR szOtherStuff,
                          HICON   hIcon)
 {
-  dprintf(("SHELL32: ShellAboutA(%08xh,%08xh,%08xh,%08xh) not implemented.\n",
+  dprintf(("SHELL32: ShellAboutA(%08xh,%08xh,%08xh,%08xh) not implemented properly.\n",
            hwnd,
            szApp,
            szOtherStuff,
@@ -97,20 +97,60 @@ int WIN32API ShellAboutA(HWND    hwnd,
 
   return(TRUE);
 }
-//******************************************************************************
-//******************************************************************************
-int WIN32API ShellAboutW(HWND   hwnd,
+
+
+/*****************************************************************************
+ * Name      : DWORD ShellAboutW
+ * Purpose   : display a simple about box
+ * Parameters: HWND    hwnd
+ *             LPWSTR  szApplication
+ *             LPWSTR  szMoreInformation
+ *             HICON   hIcon
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED
+ *
+ * Author    : Patrick Haller [Tue, 1999/06/01 09:00]
+ *****************************************************************************/
+
+int WIN32API ShellAboutW(HWND    hwnd,
                          LPCWSTR szApp,
                          LPCWSTR szOtherStuff,
-                         HICON  hIcon)
+                         HICON   hIcon)
 {
-  dprintf(("SHELL32: ShellAboutW(%08xh,%08xh,%08xh,%08xh) not implemented.\n",
+  LPSTR lpszApp;                     /* temporary buffers for A-W conversion */
+  LPSTR lpszOtherStuff;
+  int   iResult;
+
+  dprintf(("SHELL32: ShellAboutW(%08xh,%08xh,%08xh,%08xh).\n",
            hwnd,
            szApp,
            szOtherStuff,
            hIcon));
 
-  return(TRUE);
+  if (szApp != NULL)                             /* convert string on demand */
+    lpszApp = UnicodeToAsciiString((LPWSTR)szApp);
+  else
+    lpszApp = NULL;
+
+  if (szOtherStuff != NULL)
+    lpszOtherStuff = UnicodeToAsciiString((LPWSTR)szOtherStuff);
+  else
+    lpszOtherStuff = NULL;
+
+  iResult = ShellAboutA(hwnd,                          /* call ascii variant */
+                        lpszApp,
+                        lpszOtherStuff,
+                        hIcon);
+
+  if (lpszApp != NULL)                            /* free strings as created */
+     FreeAsciiString(lpszApp);
+
+  if (lpszOtherStuff != NULL)
+     FreeAsciiString(lpszOtherStuff);
+
+  return(iResult);
 }
 //******************************************************************************
 //Borrowed from Wine
@@ -1472,6 +1512,7 @@ DWORD WIN32API ShellMessageBoxW(HMODULE hmod,
                      szTitle,
                      uType);
 }
+
 
 /*****************************************************************************
  * Name      : DWORD ShellMessageBoxA
