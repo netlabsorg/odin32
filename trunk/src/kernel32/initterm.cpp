@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.46 2000-09-07 18:12:56 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.47 2000-10-02 21:40:57 phaller Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -35,7 +35,8 @@
 #include <misc.h>
 #include <wprocess.h>
 #include "handlemanager.h"
-#include "profile.h"
+//#include "profile.h"
+#include <options.h>
 #include "initterm.h"
 #include <win32type.h>
 #include <odinlx.h>
