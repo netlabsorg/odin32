@@ -1,4 +1,4 @@
-# $Id: setup.optional.vac3xx.mk,v 1.2 2002-08-20 05:52:04 bird Exp $
+# $Id: setup.optional.vac3xx.mk,v 1.3 2002-08-24 04:58:14 bird Exp $
 
 #
 #  Helper file for all the optional stuff which is common for
@@ -16,7 +16,11 @@ _CC_SEG_XCPT     =
 _CC_DEFAULT_LIBS = /Gn+
 _CC_PACK         =
 _CC_MODEL        =
+!if "$(BUILD_MODE)" == "DEBUG"
+_CC_DBGMEM       = /Tm+
+!else
 _CC_DBGMEM       = /Tm-
+!endif
 
 !ifdef ALL_SEG_TEXT
 _CC_SEG_TEXT=/NT$(ALL_SEG_TEXT)
@@ -64,7 +68,11 @@ _CXX_DEFAULT_LIBS = /Gn+
 _CXX_PACK         =
 _CXX_XCPT         = /Gx+
 _CXX_MODEL        =
+!if "$(BUILD_MODE)" == "DEBUG"
+_CXX_DBGMEM       = /Tm+
+!else
 _CXX_DBGMEM       = /Tm-
+!endif
 
 !ifdef ALL_SEG_TEXT
 _CXX_SEG_TEXT=/NT$(ALL_SEG_TEXT)
