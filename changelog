@@ -1,4 +1,8 @@
- /* $Id: changelog,v 1.529 1999-12-10 14:07:03 sandervl Exp $ */
+ /* $Id: changelog,v 1.530 1999-12-11 13:37:13 sandervl Exp $ */
+
+ 99-12-11: Jens Wiessner <wiessnej@rfi.de>
+	- CRTDLL: Fix for GetMainArgs (fixes windiff)
+	- MSVCRT: Fix for GetMainArgs 
 
  99-12-10: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Fix for CreateFileMapping; return old handle if
