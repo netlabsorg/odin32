@@ -1,4 +1,4 @@
-/* $Id: winproc.cpp,v 1.8 2003-10-02 10:36:00 sandervl Exp $ */
+/* $Id: winproc.cpp,v 1.9 2004-05-11 09:08:20 sandervl Exp $ */
 /*
  * Window procedure callbacks
  *
@@ -16,6 +16,7 @@
 
 #include <os2win.h>
 #include <string.h>
+#include "callwrap.h"
 #include <win\winproc.h>
 #include <win\debugtools.h>
 #include <heapcode.h>
@@ -312,12 +313,12 @@ LRESULT WINAPI CallWindowProcA(
         //Wine doesn't fail here either
     }
 
-    if (!proc) return func(hwnd, msg, wParam, lParam );
+    if (!proc) return WrapCallback4(func, hwnd, msg, wParam, lParam );
 
     switch(proc->type)
     {
     case WIN_PROC_32A:
-        return func(hwnd, msg, wParam, lParam );
+        return WrapCallback4(func, hwnd, msg, wParam, lParam );
     case WIN_PROC_32W:
         return WINPROC_CallProc32ATo32W( func, hwnd, msg, wParam, lParam );
     default:
@@ -346,14 +347,14 @@ LRESULT WINAPI CallWindowProcW( WNDPROC func, HWND hwnd, UINT msg,
         //Wine doesn't fail here either
     }
 
-    if (!proc) return func( hwnd, msg, wParam, lParam );
+    if (!proc) return WrapCallback4(func,  hwnd, msg, wParam, lParam );
 
     switch(proc->type)
     {
     case WIN_PROC_32A:
         return WINPROC_CallProc32WTo32A( func, hwnd, msg, wParam, lParam );
     case WIN_PROC_32W:
-        return func(hwnd, msg, wParam, lParam );
+        return WrapCallback4(func, hwnd, msg, wParam, lParam );
     default:
         WARN_(relay)("Invalid proc %p\n", proc );
         return 0;

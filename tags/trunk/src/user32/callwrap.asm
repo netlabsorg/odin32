@@ -1,4 +1,4 @@
-; $Id: callwrap.asm,v 1.1 2004-01-11 12:03:12 sandervl Exp $
+; $Id: callwrap.asm,v 1.2 2004-05-11 09:08:19 sandervl Exp $
 
 ;/*
 ; * Project Odin Software License can be found in LICENSE.TXT
@@ -50,6 +50,22 @@ _WrapCallback2 proc near
         ret
 _WrapCallback2 endp
 
+
+        PUBLIC _WrapCallback4@20
+; WrapCallback4(PFN lpfnFunction, DWORD hwnd, DWORD msg, DWORD wParam, DWORD lParam)
+_WrapCallback4@20 proc near
+        push  ebp
+        mov   ebp, esp
+        push  dword ptr [ebp+24]
+        push  dword ptr [ebp+20]
+        push  dword ptr [ebp+16]
+        push  dword ptr [ebp+12]
+        call  dword ptr [ebp+08]
+
+        mov   esp, ebp
+        pop   ebp     
+        ret   20
+_WrapCallback4@20 endp
 
 CODE32          ENDS
 
