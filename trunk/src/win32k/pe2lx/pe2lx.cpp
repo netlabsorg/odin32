@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.26 2001-03-19 14:50:49 bird Exp $
+/* $Id: pe2lx.cpp,v 1.27 2001-06-13 04:49:11 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -448,7 +448,8 @@ ULONG Pe2Lx::init(PCSZ pszFilename)
         return ERROR_BAD_EXE_FORMAT;
     }
     if (pNtHdrs->OptionalHeader.Subsystem != IMAGE_SUBSYSTEM_WINDOWS_CUI &&
-        pNtHdrs->OptionalHeader.Subsystem != IMAGE_SUBSYSTEM_WINDOWS_GUI)
+        pNtHdrs->OptionalHeader.Subsystem != IMAGE_SUBSYSTEM_WINDOWS_GUI &&
+        pNtHdrs->OptionalHeader.Subsystem != IMAGE_SUBSYSTEM_NATIVE)
     {
         printErr(("Subsystem not supported. %d\n", pNtHdrs->OptionalHeader.Subsystem));
         return ERROR_BAD_EXE_FORMAT;
@@ -585,7 +586,7 @@ ULONG Pe2Lx::init(PCSZ pszFilename)
             LXHdr.e32_stacksize = paObjects[i].cbVirtual;
         }
     }
-    LXHdr.e32_mflags = pNtHdrs->OptionalHeader.Subsystem == IMAGE_SUBSYSTEM_WINDOWS_GUI 
+    LXHdr.e32_mflags = pNtHdrs->OptionalHeader.Subsystem == IMAGE_SUBSYSTEM_WINDOWS_GUI
         ? E32PMAPI : E32PMW;
     if (pNtHdrs->FileHeader.Characteristics & IMAGE_FILE_DLL)
         LXHdr.e32_mflags |= E32LIBINIT | E32LIBTERM | E32MODDLL;
