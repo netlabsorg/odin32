@@ -1,4 +1,4 @@
-/* $Id: pe.cpp,v 1.6 1999-07-07 08:11:11 sandervl Exp $ */
+/* $Id: pe.cpp,v 1.7 1999-07-22 11:23:06 sandervl Exp $ */
 
 /*
  * PE2LX PE image interpreter
@@ -684,6 +684,8 @@ void ProcessResSubDir(PIMAGE_RESOURCE_DIRECTORY prdType, int level,
 //Store version resource as OS/2 RT_RCDATA resource
 //to retrieve the original for win32's version apis
 //TODO: Only supports one version resource (who would want to use more??)
+//Allocate unique id for version resource to prevent conflicts
+				id = OS2Exe.GetUniqueId();
                                 OS2Exe.SetVersionResourceId(id);
                         case NTRT_RCDATA:
                                 ShowRCData(id, (char *)((char *)prdRoot + pData->OffsetToData - VirtualAddress), pData->Size);
