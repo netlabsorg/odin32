@@ -1,4 +1,4 @@
-/* $Id: glucb32.cpp,v 1.1 2000-01-27 21:49:12 sandervl Exp $ */
+/* $Id: glucb32.cpp,v 1.2 2000-02-01 19:41:54 sandervl Exp $ */
 /*****************************************************************************/
 /*                                                                           */
 /* GLU/GLUT callback handler                                                 */
@@ -59,8 +59,9 @@ GLUCB *OS2glucbQueryGlucb(GLbyte objtype,void *object,GLenum which)
 
 GLUCB *OS2glucbCreateGlucb(GLenum objtype,void *object,GLenum which,GLint num_parms)
 {
-  GLUCB *glucb;
-  int    i;
+  GLUCB  *glucb;
+  APIRET  rc;
+  int     i;
 
   glucb=(GLUCB *)malloc(sizeof(GLUCB));
 
@@ -69,9 +70,9 @@ GLUCB *OS2glucbCreateGlucb(GLenum objtype,void *object,GLenum which,GLint num_pa
   glucb->which=which;
   glucb->parms_on_stack=num_parms;
 
-  DosAllocMem((PPVOID)(&glucb->entryAddress),
-              4096,
-              PAG_COMMIT | PAG_EXECUTE | PAG_READ | PAG_WRITE);
+  rc=DosAllocMem((PPVOID)(&glucb->entryAddress),
+                 4096,
+                 PAG_COMMIT | PAG_EXECUTE | PAG_READ | PAG_WRITE);
 
   /* Setup the actual machine-code in this page... */
   /* Insert a number of 'PUSH DWORD PTR [ESP+08H]' to set the stack */
@@ -120,11 +121,12 @@ void OS2glucbDestroyGlucb(GLUCB *glucb)
 void OS2glucbSetGlucbAddress(GLUCB *glucb,GLvoid (* WIN32API Address)())
 {
   ULONG  addr=(ULONG)Address;
-  ULONG  addr_e=(ULONG)glucb->entryAddress+4*glucb->parms_on_stack;
-  ULONG  addr_offset=addr_e-addr-5;
+  ULONG  addr_call=4*glucb->parms_on_stack+1;
   BYTE  *code=(BYTE *)glucb->entryAddress;
+  ULONG  addr_e=(ULONG)code+addr_call;
+  LONG   addr_offset=addr-addr_e-4;
 
-  *((ULONG *)code[addr_e+1])=addr_offset;
+  (((ULONG *)addr_e)[0])=addr_offset;
 }
 
 GLUOS2CALLBACK OS2glucbGenerateCallbackFunc(GLbyte  objtype,
@@ -198,8 +200,6 @@ GLUOS2CALLBACK OS2glucbRegisterCallback(GLbyte  objtype,
                                         GLenum  which,
                                         GLUWINCALLBACK CallBackFunc)
 {
-  dprintf(("GLUCALLBACK: Registering Callback!\n"));
-
   switch(objtype)
     {
       case GLUCB_NURBS:
@@ -227,21 +227,27 @@ GLUOS2CALLBACK OS2glucbRegisterCallback(GLbyte  objtype,
       case GLUCB_TESS:
         switch (which)
           {
-            case GLU_TESS_BEGIN:
-            case GLU_TESS_VERTEX:
-            case GLU_TESS_ERROR:
-            case GLU_TESS_EDGE_FLAG:
-            case GLU_TESS_COMBINE:
-            case GLU_TESS_BEGIN_DATA:
-            case GLU_TESS_VERTEX_DATA:
-            case GLU_TESS_END_DATA:
-            case GLU_TESS_ERROR_DATA:
-            case GLU_TESS_EDGE_FLAG_DATA:
-            case GLU_TESS_COMBINE_DATA:
-              return OS2glucbGenerateCallbackFunc(objtype,object,which,CallBackFunc,1);
-
             case GLU_TESS_END:
               return OS2glucbGenerateCallbackFunc(objtype,object,which,CallBackFunc,0);
+
+            case GLU_TESS_BEGIN:
+            case GLU_TESS_EDGE_FLAG:
+            case GLU_TESS_END_DATA:
+            case GLU_TESS_ERROR:
+            case GLU_TESS_VERTEX:
+              return OS2glucbGenerateCallbackFunc(objtype,object,which,CallBackFunc,1);
+
+            case GLU_TESS_BEGIN_DATA:
+            case GLU_TESS_EDGE_FLAG_DATA:
+            case GLU_TESS_ERROR_DATA:
+            case GLU_TESS_VERTEX_DATA:
+              return OS2glucbGenerateCallbackFunc(objtype,object,which,CallBackFunc,2);
+
+            case GLU_TESS_COMBINE:
+              return OS2glucbGenerateCallbackFunc(objtype,object,which,CallBackFunc,4);
+
+            case GLU_TESS_COMBINE_DATA:
+              return OS2glucbGenerateCallbackFunc(objtype,object,which,CallBackFunc,5);
 
             default:                  /* All legal callback values defined!*/
               return 0;

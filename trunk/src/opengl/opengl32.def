@@ -1,4 +1,4 @@
-;/* $Id: opengl32.def,v 1.1 2000-01-27 21:49:15 sandervl Exp $ */
+;/* $Id: opengl32.def,v 1.2 2000-02-01 19:41:56 sandervl Exp $ */
 LIBRARY OPENGL32 INITINSTANCE
 
 DATA MULTIPLE NONSHARED
@@ -545,9 +545,9 @@ EXPORTS
    glLoadName=_glLoadName@4                     @169
    glLogicOp=_glLogicOp@4                       @170
    glMap1d=_glMap1d@32                          @171
-   glMap1f=_glMap1f@32                          @172
+   glMap1f=_glMap1f@24                          @172
    glMap2d=_glMap2d@56                          @173
-   glMap2f=_glMap2f@56                          @174
+   glMap2f=_glMap2f@40                          @174
    glMapGrid1d=_glMapGrid1d@20                  @175
    glMapGrid1f=_glMapGrid1f@12                  @176
    glMapGrid2d=_glMapGrid2d@40                  @177

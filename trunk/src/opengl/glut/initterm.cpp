@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.2 2000-02-01 19:41:55 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.1 2000-02-01 19:42:07 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -34,8 +34,6 @@
 #include <win32type.h>
 #include <odinlx.h>
 #include <misc.h>                      /* PLF Wed  98-03-18 23:18:15       */
-
-#include "initterm.h"
 
 extern "C" {
 void CDECL _ctordtorInit( void );
@@ -88,8 +86,6 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          rc = DosExitList(0x0000F000|EXLST_ADD, cleanup);
          if(rc)
                 return 0UL;
-
-         mod_init();
          break;
 
       case 1 :
@@ -109,8 +105,6 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
 static void APIENTRY cleanup(ULONG ulReason)
 {
-   mod_cleanup();
-
    _ctordtorTerm();
 
    DosExitList(EXLST_EXIT, cleanup);
