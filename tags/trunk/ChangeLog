@@ -1,7 +1,8 @@
- /* $Id: ChangeLog,v 1.274 1999-10-06 07:59:18 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.275 1999-10-06 08:08:10 sandervl Exp $ */
 
  99-10-06: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Fixed memory leaks in SetWindowTextA/W window class methods
+	- KERNEL32: Put back my changes (10/04/99) to winimgres.cpp
 
  99-10-06: Patrick Haller <phaller@gmx.net>
 	- KERNEL32:    Fix for DLLs without Resource Segment (pResDir == NULL)
