@@ -1,5 +1,3 @@
-/* $Id: ole2.h,v 1.1 1999-05-24 20:19:16 ktk Exp $ */
-
 /*
  *	ole2.h - Declarations for OLE2
  */
@@ -9,8 +7,21 @@
 
 #include "windef.h"
 #include "winerror.h"
+#include "wine/obj_storage.h"
+#include "wine/obj_moniker.h"
+#include "wine/obj_base.h"
+#include "wine/obj_dragdrop.h"
+#include "wine/obj_inplace.h"
+#include "wine/obj_oleobj.h"
+#ifndef __WINE__
 #include "oleidl.h"
 #include "oleauto.h"
+#endif
+struct tagMSG;
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* defined(__cplusplus) */
 
 #define OLEIVERB_PRIMARY            (0L)
 #define OLEIVERB_SHOW               (-1L)
@@ -38,11 +49,17 @@ HRESULT  WINAPI OleSetMenuDescriptor(HOLEMENU hmenuDescriptor,HWND hwndFrame,HWN
 
 HRESULT WINAPI ReadClassStg(IStorage *pstg,CLSID *pclsid);
 HRESULT WINAPI WriteClassStm(IStream *pStm,REFCLSID rclsid);
-HRESULT WINAPI ReadClassStm(IStream *pStm,REFCLSID pclsid);
+HRESULT WINAPI ReadClassStm(IStream *pStm,CLSID *pclsid);
 
 
 HRESULT     WINAPI OleSave(LPPERSISTSTORAGE pPS, LPSTORAGE pStg, BOOL fSameAsLoad);
+HRESULT     WINAPI OleRegGetUserType(REFCLSID clsid, 
+				     DWORD dwFormOfType,
+				     LPOLESTR* pszUserType);
 HRESULT     WINAPI OleRegGetMiscStatus (REFCLSID clsid, DWORD dwAspect, DWORD* pdwStatus);
+HRESULT     WINAPI OleRegEnumFormatEtc (REFCLSID clsid, 
+					DWORD    dwDirection,
+					LPENUMFORMATETC* ppenumFormatetc);
 HRESULT     WINAPI CreateStreamOnHGlobal (HGLOBAL hGlobal, BOOL fDeleteOnRelease, LPSTREAM* ppstm);
 HRESULT     WINAPI OleRegEnumVerbs (REFCLSID clsid, LPENUMOLEVERB* ppenum);
 BOOL        WINAPI OleIsRunning(LPOLEOBJECT pObject);
@@ -54,6 +71,7 @@ HRESULT     WINAPI OleSetContainedObject(LPUNKNOWN pUnknown, BOOL fContained);
 HRESULT     WINAPI OleQueryLinkFromData(IDataObject* pSrcDataObject);
 HRESULT     WINAPI OleQueryCreateFromData(LPDATAOBJECT pSrcDataObject);
 HRESULT     WINAPI OleRun(LPUNKNOWN pUnknown);
+VOID        WINAPI ReleaseStgMedium(LPSTGMEDIUM);
 HRESULT     WINAPI OleGetClipboard(IDataObject** ppDataObj);
 HRESULT     WINAPI OleCreateStaticFromData(LPDATAOBJECT pSrcDataObj, REFIID iid,
                 DWORD renderopt, LPFORMATETC pFormatEtc, LPOLECLIENTSITE pClientSite, 
@@ -71,16 +89,25 @@ HRESULT     WINAPI OleCreateLink(LPMONIKER pmkLinkSrc, REFIID riid, DWORD render
                 LPOLECLIENTSITE pClientSite, LPSTORAGE pStg, LPVOID* ppvObj);
 HRESULT     WINAPI OleCreate(REFCLSID rclsid, REFIID riid, DWORD renderopt, LPFORMATETC pFormatEtc, LPOLECLIENTSITE pClientSite,
                 LPSTORAGE pStg, LPVOID* ppvObj);
-HRESULT     WINAPI OleFlushClipboard();
+HRESULT     WINAPI OleFlushClipboard(void);
 HRESULT     WINAPI SetConvertStg(LPSTORAGE pStg, BOOL fConvert);
-BOOL        WINAPI IsAccelerator(HACCEL hAccel, int cAccelEntries, LPMSG lpMsg, WORD* lpwCmd);
+BOOL        WINAPI IsAccelerator(HACCEL hAccel, int cAccelEntries, struct tagMSG* lpMsg, WORD* lpwCmd);
 HRESULT     WINAPI OleCreateLinkToFile(LPCOLESTR lpszFileName, REFIID riid, DWORD renderopt, LPFORMATETC lpFormatEtc,
                 LPOLECLIENTSITE pClientSite, LPSTORAGE pStg, LPVOID* ppvObj);
 HRESULT     WINAPI OleDuplicateData(HANDLE hSrc, CLIPFORMAT cfFormat, UINT uiFlags);
 HRESULT     WINAPI WriteFmtUserTypeStg(LPSTORAGE pstg, CLIPFORMAT cf, LPOLESTR lpszUserType);
-HRESULT     WINAPI OleTranslateAccelerator (LPOLEINPLACEFRAME lpFrame, LPOLEINPLACEFRAMEINFO lpFrameInfo, LPMSG lpmsg);
+HRESULT     WINAPI OleTranslateAccelerator (LPOLEINPLACEFRAME lpFrame, LPOLEINPLACEFRAMEINFO lpFrameInfo, struct tagMSG* lpmsg);
 HRESULT     WINAPI OleCreateFromData(LPDATAOBJECT pSrcDataObj, REFIID riid, DWORD renderopt, LPFORMATETC pFormatEtc,
                 LPOLECLIENTSITE pClientSite, LPSTORAGE pStg, LPVOID* ppvObj);
+HRESULT     WINAPI OleCreateDefaultHandler(REFCLSID  clsid,
+					   LPUNKNOWN pUnkOuter,
+					   REFIID    riid,
+					   LPVOID*   ppvObj);
+HRESULT     WINAPI CreateOleAdviseHolder (LPOLEADVISEHOLDER *ppOAHolder);
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif /* defined(__cplusplus) */
 
 #endif  /* __WINE_OLE2_H */
 
