@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.166 2005-01-23 18:10:39 sao2l02 Exp $
+; $Id: kernel32.def,v 1.167 2005-01-26 18:46:43 sao2l02 Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -1006,6 +1006,7 @@ EXPORTS
     GetSystemWow64DirectoryW   = _GetSystemWow64DirectoryW@8   @917
     GetUserDefaultUILanguage   = _GetUserDefaultUILanguage@0   @918
     GetSystemDefaultUILanguage = _GetSystemDefaultUILanguage@0 @919
+    GetFileSizeEx              = _GetFileSizeEx@8              @920
 ;
 ; First free ordinal is 890
 ;

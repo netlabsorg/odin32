@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.72 2005-01-15 22:17:21 sao2l02 Exp $ */
+/* $Id: Fileio.cpp,v 1.73 2005-01-26 18:46:36 sao2l02 Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -627,6 +627,16 @@ DWORD WIN32API GetFileSize(HANDLE arg1, PDWORD arg2)
                        arg2);
 }
 //******************************************************************************
+/***********************************************************************
+ *           GetFileSizeEx   (KERNEL32.@)
+ */
+#define INVALID_FILE_SIZE        ((DWORD)~0UL)
+BOOL WINAPI GetFileSizeEx( HANDLE hFile, PLARGE_INTEGER lpFileSize )
+{
+    lpFileSize->LowPart = GetFileSize(hFile, ((PDWORD)&lpFileSize->HighPart));
+    return (lpFileSize->LowPart != INVALID_FILE_SIZE);
+}
+
 //******************************************************************************
 BOOL WIN32API DeleteFileA(LPCSTR lpszFile)
 {

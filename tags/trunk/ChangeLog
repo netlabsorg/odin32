@@ -1,66 +1,72 @@
-/* $Id: ChangeLog,v 1.2752 2005-01-23 18:40:12 sao2l02 Exp $ */
+/* $Id: ChangeLog,v 1.2753 2005-01-26 18:46:26 sao2l02 Exp $ */
+2005-01-26: vladest <vladest@voliacable >  
+    - kernel32: o src\kernel32\wintls.cpp
+                  tls - problems, workaround. 
+2005-01-25: Dietrich Teickner <dietrich_teickner@arcor   >
+    - kernel32: o src\kernel32\Fileio.cpp for msi.
+                  src\kernel32\kernel32.def
 2005-01-23: Dietrich Teickner <dietrich_teickner@arcor   >
-    - kernel32: o src/kernel32/directory.cpp
-                  src/kernel32/kernel32.def,kernel32dbg.def
-                  src/kernel32/lang.cpp
-                  src/kernel32/mmapview.cpp
-                  src/kernel32/unicode/string.c
-    - advapi32: o src/advapi32/ADVAPI32.DEF
-                  src/advapi32/security.c
-    - shell32: o  src/shell32/shell32_main.c                  
-    - wininet: o  src/wininet/http.c
-    - NTDLL:   o  src/NTDLL/error.c
-                  src/NTDLL/nt.c
-                  src/NTDLL/sync.c
-    - include: o  include/win/ntstatus.h,sddl.h            
-                  include/win/cderr.h           
-                  include/win/dlgs.h            
-                  include/win/rpcnterr.h        
-                  include/win/thread.h         
-                  include/win/winnt.h 
+    - kernel32: o src\kernel32\directory.cpp
+                  src\kernel32\kernel32.def,kernel32dbg.def
+                  src\kernel32\lang.cpp
+                  src\kernel32\mmapview.cpp
+                  src\kernel32\unicode\string.c
+    - advapi32: o src\advapi32\ADVAPI32.DEF
+                  src\advapi32\security.c
+    - shell32:  o src\shell32\shell32_main.c                  
+    - wininet:  o src\wininet\http.c
+    - NTDLL:    o src\NTDLL\error.c
+                  src\NTDLL\nt.c
+                  src\NTDLL\sync.c
+    - include:  o include\win\ntstatus.h,sddl.h            
+                  include\win\cderr.h           
+                  include\win\dlgs.h            
+                  include\win\rpcnterr.h        
+                  include\win\thread.h         
+                  include\win\winnt.h 
                   2 new headers from wine. Some reorders for more wine-like, for msi,
                   new stups,functions for msi.
                   Please, Test this for regression in others, msi will more work yet, not properly end.
                   One (not complete) change for Acrobat 5.01.          
 2005-01-15: Dietrich Teickner <dietrich_teickner@arcor   > 
-    - kernel32: o \src\kernel32\Fileio.cpp GetLongPathNameA/W, no copy into longPath,
+    - kernel32: o src\kernel32\Fileio.cpp GetLongPathNameA/W, no copy into longPath,
                   if the Size zero. Crash in audacity.exe (longPath is also zero).
-                o \src\kernel32\heap.cpp HeapFree works w2k/wine-like also with zero-pointer
+                o src\kernel32\heap.cpp HeapFree works w2k/wine-like also with zero-pointer
                   and returns TRUE. removed mamy pointercheck before HeapFree.
 2004-12-31: Dietrich Teickner <dietrich_teickner@arcor   >
-    - oleaut32: o \src\oleaut32\dispatch.c,ole2disp.c,oleaut.c,olefont.c,typelib.c
+    - oleaut32: o src\oleaut32\dispatch.c,ole2disp.c,oleaut.c,olefont.c,typelib.c
                   Some resync with Wine.
-    - user32:   o \src\user32\syscolor.cpp add XP - Colors from wine,
+    - user32:   o src\user32\syscolor.cpp add XP - Colors from wine,
                   move them from wingdi.h to winuser.h like wine.
 2004-12-30: Dietrich Teickner <dietrich_teickner@arcor   >
-    - user32:   o \src\user32\dc.cpp
+    - user32:   o src\user32\dc.cpp
                   Remming out the unsupported flag DCX_VALIDATE_W.
                   Makes trubble in debug-build with MySQLQueryBrowser.exe.
-                  \src\user32\timer.cpp
+                  src\user32\timer.cpp
                   Small optimizing.
 2004-12-30: Dietrich Teickner <dietrich_teickner@arcor   >
-    - odincrt:  o \src\odincrt\critsect.cpp
+    - odincrt:  o src\odincrt\critsect.cpp
                   Small optimizing for the first/only using the critical section. 
 2004-12-30: Dietrich Teickner <dietrich_teickner@arcor   >
-    - urlmon:   o \src\urlmon\stubs.cpp
+    - urlmon:   o src\urlmon\stubs.cpp
                   Some stubs for MySQLQueryBrowser.exe. 
 2004-12-30: Dietrich Teickner <dietrich_teickner@arcor   >
-    - oleaut32: o \src\oleaut32\ole2disp.c
+    - oleaut32: o src\oleaut32\ole2disp.c
                   In SysReAllocStringLen, we must check if *old the same as in,
                   if this the same we can not free *old, at next see also into wine. 
 2004-12-30: Dietrich Teickner <dietrich_teickner@arcor   >
     - makefile: o same changes for the dbdwrap.cpp in same dlls-dirs.
 2004-12-20: Dietrich Teickner <dietrich_teickner@arcor   >
-    - Kernel32: o \include\win\thread.h,
-                  \src\kernel32\dbglog.cpp,src\kernel32\wprocess.cpp
+    - Kernel32: o include\win\thread.h,
+                  src\kernel32\dbglog.cpp,src\kernel32\wprocess.cpp
                   better splitt the functions for debugstr_data structure.
 2004-12-07: Dietrich Teickner <dietrich_teickner@arcor   >
-    - Kernel32: o \include\win\thread.h,
-                  \src\kernel32\dbglog.cpp,src\kernel32\wprocess.cpp
+    - Kernel32: o include\win\thread.h,
+                  src\kernel32\dbglog.cpp,src\kernel32\wprocess.cpp
                   Extend the debug-TEB with a pointer to the debugstr_data structure.
                   This should solved the memory problems, which Sander v.L. means.
 2004-12-06: Dietrich Teickner <dietrich_teickner@arcor   >
-    - Kernel32: o src\kernel32\hmthread.cpp,src/kernel32/wprocess.cpp
+    - Kernel32: o src\kernel32\hmthread.cpp,src\kernel32\wprocess.cpp
                   Never remove the current TEB with the destroy
                   for the TEB from failed CreateThread.
                   Do some actions inside the threadListMutex.
@@ -80,30 +86,30 @@
                   HMDeviceThreadClass::CreateThread - changes against invalid thread handle. 
                   src\kernel32\asmutil.asm small optimizing.
 2004-11-23: Dietrich Teickner <dietrich_teickner@arcor   >
-    - Kernel32: o src/kernel32/dbglog.cpp, *.def, include/debugtools.h
+    - Kernel32: o src\kernel32\dbglog.cpp, *.def, include\debugtools.h
                   Multiple debugstr_a/w in one TRACE statement. 
 2004-11-14: Dietrich Teickner <dietrich_teickner@arcor   >
-    - User32:   o src/user32/hook.cpp
+    - User32:   o src\user32\hook.cpp
                   workaround against stackoverflow doring rekursive CallNextHookEx in IrfanView 3.XX. 
 2004-10-24: Dietrich Teickner <dietrich_teickner@arcor   >
-    - User32:   o src/user32/clipboard.cpp
-                  Since 2004-05-04 does a open Clipboard not convert between text/unicodetext/oemtext.
+    - User32:   o src\user32\clipboard.cpp
+                  Since 2004-05-04 does a open Clipboard not convert between text\unicodetext\oemtext.
                   workaround for text->unicodetext (BC2 with riched20.dll to w98-Notepad). 
 2004-10-19: Dietrich Teickner <dietrich_teickner@arcor   >
     - Oleaut32: o more merging from wine into
-                  include/win/oleauto.h, include/win/wine/obj_oleaut.h and src/oleaut32/variant.c
+                  include\win\oleauto.h, include\win\wine\obj_oleaut.h and src\oleaut32\variant.c
                   against problems with VT_BSTR in variant.c for the values "0" and "-1".
 2004-09-26: Dietrich Teickner <dietrich_teickner@arcor   >
-    - GDI32:    o src/gdi32/text.cpp GetTextExtentPointW: dprintf with text-length
+    - GDI32:    o src\gdi32\text.cpp GetTextExtentPointW: dprintf with text-length
                   for non-zero-terminatet wstrings.
-                o src/gdi32/ft2supp.cpp Replacing calls to lstrcpynWtoA with native
+                o src\gdi32\ft2supp.cpp Replacing calls to lstrcpynWtoA with native
                   call to WideCharToMultiByte for better work with non-zero-terminatet wstrings
                   in CFT2Module::Ft2GetTextExtentW and CFT2Module::Ft2CharStringPosAtW.
                   Small optimizing for one-wchar length in CFT2Module::Ft2GetTextExtentW.
 2004-11-14: knut st. osmundsen <bird-changelog@innotek    > merged this
 2004-07-10: Veit Kannegieser
     - WIN32K.SYS:
-                o src/win32k/dev32/d32init.c add newer kernel between 14100 andd 14150
+                o src\win32k\dev32\d32init.c add newer kernel between 14100 andd 14150
 2004-10-12: Chris Wohlgemuth <cinc@innotek.de>
     - OLEAUT32:
                 o VarBstrFromDec() and VarDecFromStr() removed from stubs.cpp.
