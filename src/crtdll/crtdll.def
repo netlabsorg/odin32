@@ -1,4 +1,4 @@
-; $Id: crtdll.def,v 1.7 1999-10-04 09:55:55 sandervl Exp $
+; $Id: crtdll.def,v 1.8 1999-10-07 09:28:48 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY CRTDLL INITINSTANCE TERMINSTANCE
@@ -119,22 +119,22 @@ EXPORTS
     _CIsqrt			= _CRTDLL__CIsqrt		@17
     _CItan			= _CRTDLL__CItan		@18
     _CItanh			= _CRTDLL__CItanh		@19
-;   _HUGE_dll							@20
+    _HUGE_dll			= CRTDLL_HUGE_dll		@20
     _XcptFilter			= _CRTDLL__XcptFilter		@21
     __GetMainArgs		= _CRTDLL__GetMainArgs		@22
     __argc_dll			= CRTDLL_argc_dll		@23
     __argv_dll			= CRTDLL_argv_dll		@24
     __dllonexit			= _CRTDLL___dllonexit		@25
     __doserrno			= _CRTDLL___doserrno		@26
-;   __fpecode							@27
+    __fpecode			= _CRTDLL___fpecode		@27
     __isascii			= _CRTDLL___isascii		@28
     __iscsym			= _CRTDLL___iscsym		@29
     __iscsymf			= _CRTDLL___iscsymf		@30
-    __mb_cur_max_dll		= _CRTDLL___mb_cur_max_dll	@31
-;   __pxcptinfoptrs						@32
+    __mb_cur_max_dll		= CRTDLL_mb_cur_max_dll		@31
+    __pxcptinfoptrs		= _CRTDLL___pxcptinfoptrs	@32
     __threadhandle		= _CRTDLL___threadhandle	@33
     __threadid			= _CRTDLL___threadid		@34
-;   __toascii							@35
+    __toascii			= _CRTDLL___toascii		@35
     _abnormal_termination	= _CRTDLL__abnormal_termination	@36
     _access			= _CRTDLL__access		@37
     _acmdln_dll			= CRTDLL_acmdln_dll		@38
@@ -157,17 +157,17 @@ EXPORTS
     _chsize			= _CRTDLL__chsize		@55
     _clearfp			= _CRTDLL__clearfp		@56
     _close			= _CRTDLL__close		@57
-;   _commit							@58
+    _commit			= _CRTDLL__commit		@58
     _commode_dll		= CRTDLL_commode_dll		@59
     _control87			= _CRTDLL__control87		@60
     _controlfp			= _CRTDLL__controlfp		@61
     _copysign			= _CRTDLL__copysign		@62
     _cprintf			= _CRTDLL__cprintf		@63
-;   _cpumode_dll						@64
+    _cpumode_dll		= CRTDLL_cpumode_dll		@64
     _cputs			= _CRTDLL__cputs		@65
     _creat			= _CRTDLL__creat		@66
     _cscanf			= _CRTDLL__cscanf		@67
-;   _ctype							@68
+    _ctype			= CRTDLL_ctype			@68
     _cwait			= _CRTDLL__cwait		@69
     _daylight_dll		= CRTDLL_daylight_dll		@70
     _dup			= _CRTDLL__dup			@71
@@ -175,7 +175,7 @@ EXPORTS
     _ecvt			= _CRTDLL__ecvt			@73
     _endthread			= _CRTDLL__endthread		@74
     _environ_dll		= CRTDLL_environ_dll		@75
-;   _eof							@76
+    _eof			= _CRTDLL__eof			@76
     _errno			= _CRTDLL__errno		@77
     _except_handler2		= _CRTDLL__except_handler2	@78
     _execl			= _CRTDLL__execl		@79
@@ -223,11 +223,11 @@ EXPORTS
     _getcwd			= _CRTDLL__getcwd		@120
     _getdcwd			= _CRTDLL__getdcwd		@121
     _getdiskfree		= _CRTDLL__getdiskfree		@122
-;   _getdllprocaddr						@123
+    _getdllprocaddr		= _CRTDLL__getdllprocaddr	@123
     _getdrive			= _CRTDLL__getdrive		@124
     _getdrives			= _CRTDLL__getdrives		@125
     _getpid			= _CRTDLL__getpid		@126
-;   _getsystime							@127
+    _getsystime			= _CRTDLL__getsystime		@127
     _getw			= _CRTDLL__getw			@128
     _global_unwind2		= _CRTDLL__global_unwind2	@129
     _heapchk			= _CRTDLL__heapchk		@130
@@ -271,7 +271,7 @@ EXPORTS
     _jn				= _CRTDLL__jn			@168
     _kbhit			= _CRTDLL__kbhit		@169
     _lfind			= _CRTDLL__lfind		@170
-;   _loaddll							@171
+    _loaddll			= _CRTDLL__loaddll		@171
     _local_unwind2		= _CRTDLL__local_unwind2	@172
     _locking			= _CRTDLL__locking		@173
     _logb			= _CRTDLL__logb			@174
@@ -293,7 +293,7 @@ EXPORTS
     _mbctolower			= _CRTDLL__mbctolower		@190
     _mbctombb			= _CRTDLL__mbctombb		@191
     _mbctoupper			= _CRTDLL__mbctoupper		@192
-;   _mbctype							@193
+    _mbctype			= CRTDLL_mbctype		@193
     _mbsbtype			= _CRTDLL__mbsbtype		@194
     _mbscat			= _CRTDLL__mbscat		@195
     _mbschr			= _CRTDLL__mbschr		@196
@@ -346,15 +346,15 @@ EXPORTS
     _osver_dll			= CRTDLL_osver_dll		@242
     _osversion_dll		= CRTDLL_osversion_dll		@243
     _pclose			= _CRTDLL__pclose		@244
-    _pctype_dll			= _CRTDLL__pctype_dll		@245
-;   _pgmptr_dll							@246
+    _pctype_dll			= CRTDLL_pctype_dll		@245
+    _pgmptr_dll			= CRTDLL_pgmptr_dll		@246
     _pipe			= _CRTDLL__pipe			@247
     _popen			= _CRTDLL__popen		@248
-;   _purecall							@249
+    _purecall			= _CRTDLL__purecall		@249
     _putch			= _CRTDLL__putch		@250
     _putenv			= _CRTDLL__putenv		@251
     _putw			= _CRTDLL__putw			@252
-;   _pwctype_dll						@253
+    _pwctype_dll		= CRTDLL_pwctype_dll		@253
     _read			= _CRTDLL__read			@254
     _rmdir			= _CRTDLL__rmdir		@255
     _rmtmp			= _CRTDLL__rmtmp		@256
@@ -365,7 +365,7 @@ EXPORTS
     _seterrormode		= _CRTDLL__seterrormode		@261
     _setjmp			= _CRTDLL__setjmp		@262
     _setmode			= _CRTDLL__setmode		@263
-;   _setsystime							@264
+    _setsystime			= _CRTDLL__setsystime		@264
     _sleep			= _CRTDLL__sleep		@265
     _snprintf			= NTDLL__snprintf		@266
     _snwprintf			= NTDLL__snwprintf		@267
@@ -415,7 +415,7 @@ EXPORTS
     _umask			= _CRTDLL__umask		@310
     _ungetch			= _CRTDLL__ungetch		@311
     _unlink			= _CRTDLL__unlink		@312
-;   _unloaddll							@313
+    _unloaddll			= _CRTDLL__unloaddll		@313
     _utime			= _CRTDLL__utime		@314
     _vsnprintf			= NTDLL__vsnprintf		@315
     _vsnwprintf			= _CRTDLL__vsnwprintf		@316
