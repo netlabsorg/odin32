@@ -1,4 +1,4 @@
-/* $Id: conin.cpp,v 1.4 1999-07-12 17:20:03 phaller Exp $ */
+/* $Id: conin.cpp,v 1.5 1999-08-24 23:37:07 phaller Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -136,8 +136,6 @@ DWORD HMDeviceConsoleInClass::ReadFile(PHMHANDLEDATA pHMHandleData,
   ulCounter = 0;                              /* read ascii chars from queue */
   pszTarget = (PSZ)lpBuffer;
 
-  /* @@@PH: ConsoleMode: ENABLE_LINE_INPUT - blocks until CR is read */
-
                                   /* block if no key events are in the queue */
   for (;ulCounter==0;)                       /* until we got some characters */
   {
@@ -156,10 +154,6 @@ DWORD HMDeviceConsoleInClass::ReadFile(PHMHANDLEDATA pHMHandleData,
       {
         if (InputRecord.EventType == KEY_EVENT)          /* check event type */
         {
-          *pszTarget = InputRecord.Event.KeyEvent.uChar.AsciiChar;
-          pszTarget++;
-          ulCounter++;
-
                                                      /* local echo enabled ? */
           if (pConsoleInput->dwConsoleMode & ENABLE_ECHO_INPUT)
             HMWriteFile(pConsoleGlobals->hConsoleBuffer,
@@ -168,6 +162,17 @@ DWORD HMDeviceConsoleInClass::ReadFile(PHMHANDLEDATA pHMHandleData,
                         &ulPostCounter,                      /* dummy result */
                         NULL);
 
+          // console in line input mode ?
+          if ( (pConsoleInput->dwConsoleMode & ENABLE_LINE_INPUT) &&
+               (InputRecord.Event.KeyEvent.uChar.AsciiChar == 0x0d))
+            goto __readfile_exit;
+
+          // record key stroke
+          *pszTarget = InputRecord.Event.KeyEvent.uChar.AsciiChar;
+          pszTarget++;
+          ulCounter++;
+
+          // buffer filled?
           if (ulCounter >= nNumberOfBytesToRead)        /* at buffer's end ? */
             goto __readfile_exit;
         }
