@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 1999-08-29 14:54:55 sandervl Exp $
+# $Id: makefile,v 1.2 1999-09-08 07:46:53 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -14,8 +14,8 @@ PDWIN32_BIN = ..\..\bin
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 
 
-CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE) /DNONAMELESSUNION
-CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE) /DNONAMELESSUNION
+CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE)
+CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 
 TARGET = imagehlp
