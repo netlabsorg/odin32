@@ -243,6 +243,12 @@ static void APIENTRY cleanup(ULONG ulReason)
     ClosePrivateLogFiles();
     CloseLogFile();
 
+    /*
+     * Terminate win32k library.
+     */
+    libWin32kSetEnvironment(NULL, 0, 0);
+    libWin32kTerm();
+
     DosExitList(EXLST_EXIT, cleanup);
     return ;
 }
