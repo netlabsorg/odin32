@@ -1,4 +1,4 @@
-/* $Id: itypelib.cpp,v 1.1 1999-12-08 19:58:27 davidr Exp $ */
+/* $Id: itypelib.cpp,v 1.2 2000-03-21 08:17:22 davidr Exp $ */
 /* 
  * ITypelib interface
  * 
@@ -295,7 +295,7 @@ HRESULT WIN32API ITypeLibImpl_GetDocumentation(LPTYPELIB iface,
     HRESULT		rc;
     ICOM_THIS(ITypeLibImpl, iface);
 
-    dprintf(("OLEAUT32: ITypeLibImpl(%p)->GetDocumentation()\n", This));
+    dprintf(("OLEAUT32: ITypeLibImpl(%p)->GetDocumentation(idx = %i)\n", This, index));
 
     /* if index is -Ve this is a request for documentation for the typelib */
     if (index < 0)
@@ -303,11 +303,12 @@ HRESULT WIN32API ITypeLibImpl_GetDocumentation(LPTYPELIB iface,
         if (pBstrName)
             *pBstrName = DupAtoBstr(This->szName);
         if (pBstrDocString)
-            *pBstrName = DupAtoBstr(This->szDocString);
+            *pBstrDocString = DupAtoBstr(This->szDocString);
         if (plHelpContext)
             *plHelpContext = This->lHelpContext;
         if (pBstrHelpFile)
-            *pBstrName = DupAtoBstr(This->szHelpFile);
+            *pBstrHelpFile = DupAtoBstr(This->szHelpFile);
+
 	rc = S_OK;
     }
     else

@@ -1,4 +1,4 @@
-/* $Id: itypeinfo.cpp,v 1.1 1999-12-08 19:58:50 davidr Exp $ */
+/* $Id: itypeinfo.cpp,v 1.2 2000-03-21 08:17:22 davidr Exp $ */
 /* 
  * ITypeInfo interface
  * 
@@ -481,6 +481,7 @@ HRESULT WIN32API ITypeInfoImpl_GetDocumentation(LPTYPEINFO iface,
             *pdwHelpContext = This->lHelpContext;
         if (pBstrHelpFile)
             *pBstrHelpFile = DupAtoBstr(This->szDocString);/* FIXME */
+
         return S_OK;
     }
 
