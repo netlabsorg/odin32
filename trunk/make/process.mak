@@ -1,4 +1,4 @@
-# $Id: process.mak,v 1.26 2002-08-30 19:45:29 bird Exp $
+# $Id: process.mak,v 1.27 2002-09-01 15:35:10 bird Exp $
 
 #
 # Unix-like tools for OS/2
@@ -1614,7 +1614,7 @@ $(ECHO) Starting Job Daemon With $(TOOL_JOB_WORKERS) Workers...$(CLRRST)
 #
 !if "$(TARGET_ALWAYS)" != ""
 ! ifndef BUILD_FORCED_BUILD_TEST
-!  if [$(TOOL_MAKE) BUILD_FORCED_BUILD_TEST=1 -f $(MAKEFILE) -q $(TARGET) $(TARGET_ILIB)] != 0
+!  if [$(TOOL_MAKE) BUILD_FORCED_BUILD_TEST=1 -f $(MAKEFILE) -q $(TARGET) $(TARGET_ILIB) >nul 2>nul] != 0
 $(TARGET_ALWAYS): .force
 !  endif
 ! endif
