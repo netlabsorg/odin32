@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2318 2002-09-20 05:31:44 bird Exp $ */
+/* $Id: changelog,v 1.2319 2002-09-24 10:10:48 sandervl Exp $ */
+
+ 2002-09-24: Sander van Leeuwen <sandervl@innotek   >
+    - BIN:      o WGSS update from IBM
 
  2002-09-19:
     - MAKE, TOOLS/BIN/RM, FASTDEP:
