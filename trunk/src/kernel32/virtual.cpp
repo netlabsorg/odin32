@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.52 2003-03-03 16:25:33 sandervl Exp $ */
+/* $Id: virtual.cpp,v 1.53 2003-03-03 16:30:44 sandervl Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -364,7 +364,7 @@ LPVOID WIN32API VirtualAlloc(LPVOID lpvAddress,
         map = Win32MemMapView::findMapByView((ULONG)lpvAddress, &offset, accessflags);
         if(map) {
             //TODO: We don't allow protection flag changes for mmaped files now
-            map->commitPage((ULONG)lpvAddress, offset, FALSE, nrpages);
+            map->commitPage(offset, FALSE, nrpages);
             map->Release();
             return lpvAddress;
         }
