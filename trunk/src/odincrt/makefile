@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.20 2000-12-02 23:40:36 bird Exp $
+# $Id: makefile,v 1.21 2000-12-16 23:33:37 bird Exp $
 
 #
 # Odin32 API
@@ -38,6 +38,9 @@ DEFFILE = odincrt$(DBG).def
 !ifdef VAC36
 DEFFILE = odin36$(DBG).def
 !endif
+!ifdef WAT
+DEFFILE = odinwat$(DBG).def
+!endif
 !ifndef DEFFILE
 !error "not supported on this compiler yet."
 !endif
@@ -49,15 +52,22 @@ DEFFILE = odin36$(DBG).def
 OBJS = \
 $(OBJDIR)\odincrt.obj \
 $(OBJDIR)\initterm.obj \
+!ifndef WAT
 $(OBJDIR)\malloc.obj \
 $(OBJDIR)\string.obj \
 $(OBJDIR)\file.obj
+!else
+$(%WATCOM)\lib386\os2\$(RTLLIB_O)
+!endif
 
 
 #
 # Libraries. One space before the '\'.
 #
-LIBS =
+LIBS = \
+!ifdef WAT
+$(RTLLIB_O)
+!endif
 
 
 #

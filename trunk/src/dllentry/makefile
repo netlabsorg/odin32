@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2000-12-02 23:39:06 bird Exp $
+# $Id: makefile,v 1.8 2000-12-16 23:31:08 bird Exp $
 
 #
 # Odin32 API
@@ -29,19 +29,16 @@ $(OBJDIR)\dllentry.obj
 
 #
 # Target name - name of the obj without extention and path.
-#  NB. Watcom will need it's own target...
 #
-!ifndef WAT
 TARGET = dllentry
-!else
-TARGET = dllentry_watcom
-!endif
 
 
 #
 # All rule - build objs and copies obj to lib.
 #
-all: $(OBJDIR) $(ODIN32_LIB)\$(TARGET).obj
+all:     $(OBJDIR) \
+         $(ODIN32_LIB) \
+         $(ODIN32_LIB)\$(TARGET).obj
 
 
 #
@@ -53,6 +50,11 @@ lib: all
 # Build objs and copies obj to lib.
 $(ODIN32_LIB)\$(TARGET).obj: $(OBJS)
     $(CP) $(OBJS) $@
+
+
+# Create lib directory.
+$(ODIN32_LIB):
+    $(CREATEPATH) $(ODIN32_LIB)
 
 
 #
