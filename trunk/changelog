@@ -1,4 +1,13 @@
-/* $Id: changelog,v 1.2301 2002-09-11 02:33:38 bird Exp $ */
+/* $Id: changelog,v 1.2302 2002-09-12 03:21:54 bird Exp $ */
+
+ 2002-09-12: knut st. osmundsen <bird@anduin   >
+    - MAKE:     o Corrected bug in process which made it put the libraries in
+                  the wrong place.
+                o Always stamp the .def file before linking so that build level
+                  info will be up to date.
+                o Added some shortcuts rules for lazy programmers:
+                  * pass[1-6] for starting from a given pass.
+                  * quick for only doing lib, executable and publish.
 
  2002-09-10: knut st. osmundsen <bird@anduin   >
     - TOOLS/VSLICK:
