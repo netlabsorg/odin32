@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.19.4.6 2000-08-19 14:37:04 bird Exp $
+/* $Id: d32init.c,v 1.19.4.10 2000-08-23 04:23:33 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -88,6 +88,7 @@ extern char     callTab[NBR_OF_KRNLIMPORTS][MAXSIZE_PROLOG];
 
 /* extern(s) located in mytkExecPgm.asm  */
 extern char     mytkExecPgm;
+extern char     mytkStartProcess;
 
 
 /**
@@ -676,6 +677,8 @@ int interpretFunctionProlog32(char *pach, BOOL fOverload)
      *     mov eax, imm32       (2.1x)
      *     <anything>
      *  or
+     *     xor r32, r/m32
+     *  or
      *     mov eax, msoff32
      *
      */
@@ -695,14 +698,19 @@ int interpretFunctionProlog32(char *pach, BOOL fOverload)
         ||
         (pach[0] == 0xB8 && !fOverload) /* the next prolog */
         ||
+        (pach[0] == 0x33 && !fOverload) /* the next prolog */
+        ||
         (pach[0] == 0xa1 && !fOverload) /* last prolog */
         )
     {
-        BOOL fForce;
+        BOOL fForce = FALSE;
+        int  cbWord = 4;
         cb = 0;
         while (cb < 5 || fForce)                  /* 5 is the size of a jump instruction. */
         {
             int cb2;
+            if (!fForce && cbWord != 4)
+                cbWord = 4;
             fForce = FALSE;
             switch (*pach)
             {
@@ -714,6 +722,11 @@ int interpretFunctionProlog32(char *pach, BOOL fOverload)
                 case 0x64:              /* fs segment override */
                 case 0x65:              /* gs segment override */
                     fForce = TRUE;
+                    break;
+
+                case 0x66:              /* 16 bit */
+                    fForce = TRUE;
+                    cbWord = 2;
                     break;
 
                 /* simple one byte instructions */
@@ -761,8 +774,8 @@ int interpretFunctionProlog32(char *pach, BOOL fOverload)
                 case 0x68:              /* push <dword> */
                 case 0xa1:              /* mov eax, moffs16 */
                 case 0xa3:              /* mov moffs16, eax */
-                    pach += 4;
-                    cb += 4;
+                    pach += cbWord;
+                    cb += cbWord;
                     break;
 
                 /* complex sized instructions -  "/r" */
@@ -807,7 +820,7 @@ int interpretFunctionProlog32(char *pach, BOOL fOverload)
                         || (pach[1] & 0x38) == (7<<3)    /* cmp r/m32, imm32  */
                         )
                     {
-                        cb += cb2 = 4 + ModR_M_32bit(pach[1]); /* 4 is the size of the imm32 */
+                        cb += cb2 = cbWord + ModR_M_32bit(pach[1]); /* cbWord is the size of the imm32/imm16 */
                         pach += cb2;
                     }
                     else
@@ -831,7 +844,7 @@ int interpretFunctionProlog32(char *pach, BOOL fOverload)
                  * jmp /digit
                  */
                 case 0xff:
-                    cb += cb2 = 4 + ModR_M_32bit(pach[1]); /* 4 is the size of the imm32 */
+                    cb += cb2 = cbWord + ModR_M_32bit(pach[1]); /* cbWord is the size of the imm32/imm16 */
                     pach += cb2;
                     break;
 
@@ -1138,13 +1151,13 @@ int importTabInit(void)
         0,                              /* 11 */
         0,                              /* 12 */
         (unsigned)&mytkExecPgm,         /* 13 */
-        0,                              /* 14 */
+        (unsigned)&mytkStartProcess,    /* 14 */
         0,                              /* 15 */
         0,                              /* 16 */
         0,                              /* 17 */
-        (unsigned)myldrOpenPath,        /* 18 */
+        0,                              /* 18 */
         0,                              /* 19 */
-        0,                              /* 20 */
+        (unsigned)myldrOpenPath,        /* 20 */
         0,                              /* 21 */
         0,                              /* 22 */
         0,                              /* 23 */
@@ -1155,7 +1168,15 @@ int importTabInit(void)
         0,                              /* 28 */
         0,                              /* 29 */
         0,                              /* 30 */
-        0                               /* 31 */
+        0,                              /* 31 */
+        0,                              /* 32 */
+        0,                              /* 33 */
+        0,                              /* 34 */
+        0,                              /* 35 */
+        0,                              /* 36 */
+        0,                              /* 37 */
+        0,                              /* 38 */
+        0                               /* 39 */
     };
     int i;
     int cb;
@@ -1420,15 +1441,21 @@ VOID R3TstFixImportTab(VOID)
         {(unsigned)fakeVMAllocMem,          1},
         {(unsigned)fakeVMGetOwner,          1},
         {(unsigned)fakeg_tkExecPgm,         1},
+        {(unsigned)fake_tkStartProcess,     1},
         {(unsigned)fakef_FuStrLenZ,         2},
         {(unsigned)fakef_FuStrLen,          2},
         {(unsigned)fakef_FuBuff,            2},
         {(unsigned)fakeVMObjHandleInfo,     1},
+        {(unsigned)fakeldrASMpMTEFromHandle,1},
         {(unsigned)fakeldrOpenPath,         1},
         {(unsigned)fakeLDRClearSem,         1},
+        {(unsigned)fakeldrFindModule,       1},
         {(unsigned)fakeKSEMRequestMutex,    1},
         {(unsigned)fakeKSEMReleaseMutex,    1},
+        {(unsigned)fakeKSEMQueryMutex,      1},
+        {(unsigned)fakeKSEMInit,            1},
         {(unsigned)&fakeLDRSem,             3},
+        {(unsigned)&fakeLDRLibPath,         3},
         {(unsigned)fakeTKSuBuff,            1},
         {(unsigned)fakeTKFuBuff,            1},
         {(unsigned)fakeTKFuBufLen,          1},
@@ -1437,7 +1464,9 @@ VOID R3TstFixImportTab(VOID)
         {(unsigned)&fakepPTDACur,           4},
         {(unsigned)&fakeptda_start,         4},
         {(unsigned)&fakeptda_environ,       4},
-        {(unsigned)&fakeptda_module,        4}
+        {(unsigned)&fakeptda_module,        4},
+        {(unsigned)&fakeptda_module,        4},
+        {(unsigned)&fakeldrpFileNameBuf,    3}
     };
     int i;
 
