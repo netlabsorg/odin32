@@ -1,4 +1,4 @@
-/* $Id: dev32.h,v 1.8 2001-11-19 03:08:35 bird Exp $
+/* $Id: dev32.h,v 1.9 2002-12-16 02:25:06 bird Exp $
  *
  * dev32 - header file for 32-bit part of the driver.
  *
@@ -83,14 +83,19 @@ int     krnlInit2(void);
 extern POTE    pKrnlOTE;                /* d32init.c */
 extern PSMTE   pKrnlSMTE;               /* d32init.c */
 #endif
-extern PULONG TKSSBase16;
+
+extern ULONG  Device_Help;
 #if defined(__IBMC__) || defined(__IBMCPP__)
-    #pragma map( TKSSBase16 , "_TKSSBase16"  )
+    #pragma map( Device_Help , "_Device_Help"  )
 #endif
-#ifndef SSToDS
-extern PULONG pulTKSSBase32;
+
+extern PULONG  pulTKSSBase32;
+#if defined(__IBMC__) || defined(__IBMCPP__)
+    #pragma map( pulTKSSBase32 , "_pulTKSSBase32"  )
+#endif
 extern USHORT CallGateGDT;
 
+#ifndef SSToDS
 /*
  * SSToDS( stack pointer )
  *

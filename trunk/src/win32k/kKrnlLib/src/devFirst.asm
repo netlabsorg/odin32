@@ -1,10 +1,26 @@
-; $Id: devFirst.asm,v 1.2 2002-03-31 19:01:15 bird Exp $
+; $Id: devFirst.asm,v 1.3 2002-12-16 02:24:28 bird Exp $
 ;
-; DevFirst - entrypoint and segment definitions
+; DevFirst - entrypoint, helper code, and segment definitions.
 ;
-; Copyright (c) 1999 knut st. osmundsen
 ;
-; Project Odin Software License can be found in LICENSE.TXT
+; Copyright (c) 1998-2003 knut st. osmundsen <bird@anduin.net>
+;
+; This file is part of kKrnlLib.
+;
+; kKrnlLib is free software; you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation; either version 2 of the License, or
+; (at your option) any later version.
+;
+; kKrnlLib is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with kKrnlLib; if not, write to the Free Software
+; Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+;
 ;
     .386p
 
@@ -19,13 +35,10 @@
 ; Exported symbols
 ;
     public CODE16START
-    public CODE16_INITSTART
-    public DATA16START
     public DATA16START
     public DATA16_BSSSTART
     public DATA16_CONSTSTART
     public DATA16_GLOBALSTART
-    public DATA16_INITSTART
     public CODE16START
     public CODE32START
     public DATA32START
@@ -53,11 +66,8 @@
 ;
 ; Externs
 ;
-DATA16 segment
-    extrn _TKSSBase16:dword
-DATA16 ends
 DATA32 segment
-    extrn pulTKSSBase32:dword
+    extrn _pulTKSSBase32:dword
 DATA32 ends
     extrn R0Init:near
     extrn VerifyImportTab32:near
@@ -120,7 +130,7 @@ _strategyAsm endp
 ;            Not callable from Ring-3 init.
 _SSToDS_16a proc NEAR
     assume CS:CODE16, DS:DATA16, ES:NOTHING
-    mov     edx, ds:_TKSSBase16         ; get pointer held by _TKSSBase16 (pointer to stack base)
+    mov     edx, ds:_pulTKSSBase32      ; get pointer held by _pulTKSSBase32 (pointer to stack base)
     call    far ptr FLAT:far_getCS      ; get flat selector.
     push    es
     mov     es,  ax
@@ -243,15 +253,6 @@ ASMR0Addr32bit proc far
     xor     ecx, ecx
     mov     fs, cx      ;?
     ASSUME  ds:FLAT, es:FLAT, fs:NOTHING
-
-    ; make sure pulTKSSBase32 is ok.
-    cmp     pulTKSSBase32, 0
-    jnz     pulTKSSBase32_OK
-    mov     ecx, _TKSSBase16
-    mov     pulTKSSBase32, ecx
-    xor     ecx, ecx
-
-pulTKSSBase32_OK:
 
     ; do the call. (_System or _Optlink)
 if 0                                    ; of logging reasons we'll call thru a c function.
@@ -444,10 +445,6 @@ MakeCalltab16CodeSegment endp
 CODE32 ends
 
 
-CODE16_INIT segment
-CODE16_INITSTART db 'CODE16_INITSTART',0
-CODE16_INIT ends
-
 DATA16 segment
 DATA16START label byte                  ; Note. no start string here!
 
@@ -494,10 +491,6 @@ DATA16_GLOBAL segment
 DATA16_GLOBALSTART db 'DATA16_GLOBALSTART',0
 _DATA16Base dd offset FLAT:DATA16:DATA16START
 DATA16_GLOBAL ends
-
-DATA16_INIT segment
-DATA16_INITSTART db 'DATA16_INITSTART',0
-DATA16_INIT ends
 
 BSS32 segment
 BSS32START db 'BSS32START',0

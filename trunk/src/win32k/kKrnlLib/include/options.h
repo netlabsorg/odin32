@@ -1,4 +1,4 @@
-/* $Id: options.h,v 1.4 2002-12-16 01:37:07 bird Exp $
+/* $Id: options.h,v 1.5 2002-12-16 02:25:07 bird Exp $
  *
  * Options.
  *
@@ -51,17 +51,17 @@
 struct kKLOptions
 {
     /** @cat misc */
-    ULONG       fQuiet;                 /* Quiet initialization. */
+    unsigned long   fQuiet;             /* Quiet initialization. */
 
     /** @cat logging options */
-    USHORT      usCom;                  /* Output port no. */
-    USHORT      fLogging;               /* Logging. */
+    unsigned short  usCom;              /* Output port no. */
+    unsigned short  fLogging;           /* Logging. */
 
     /** @cat Options affecting the heap. */
-    ULONG       cbSwpHeapInit;          /* Initial heapsize. */
-    ULONG       cbSwpHeapMax;           /* Maximum heapsize. */
-    ULONG       cbResHeapInit;          /* Initial residentheapsize. */
-    ULONG       cbResHeapMax;           /* Maxiumem residentheapsize. */
+    unsigned long   cbSwpHeapInit;      /* Initial heapsize. */
+    unsigned long   cbSwpHeapMax;       /* Maximum heapsize. */
+    unsigned long   cbResHeapInit;      /* Initial residentheapsize. */
+    unsigned long   cbResHeapMax;       /* Maxiumem residentheapsize. */
 };
 #pragma pack()
 
@@ -70,8 +70,8 @@ struct kKLOptions
 *******************************************************************************/
 /* NOINC */
 extern struct kKLOptions    options;  /* defined in d16Globl.c */
-extern USHORT               usVerMajor;
-extern USHORT               usVerMinor;
+extern unsigned short       usVerMajor; /* obsolete? */
+extern unsigned short       usVerMinor; /* obsolete? */
 extern char                 szSymbolFile[128];
 
 #ifdef RING0

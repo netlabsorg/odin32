@@ -1,14 +1,30 @@
-/* $Id: krnlInit.c,v 1.2 2002-03-31 19:01:16 bird Exp $
+/* $Id: krnlInit.c,v 1.3 2002-12-16 02:24:29 bird Exp $
  *
- * krnlInit - Initiates the
+ * Init the OS2 Kernel facilities; identify it, find symbols, import table.
  *
- * Copyright (c) 1998-1999 knut st. osmundsen
+ * Copyright (c) 1998-2003 knut st. osmundsen <bird@anduin.net>
  *
- * Project Odin Software License can be found in LICENSE.TXT
+ *
+ * This file is part of kKrnlLib.
+ *
+ * kKrnlLib is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * kKrnlLib is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with kKrnlLib; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: krnlInit.c,v 1.2 2002-03-31 19:01:16 bird Exp $";
+static const char szFileId[] = "$Id: krnlInit.c,v 1.3 2002-12-16 02:24:29 bird Exp $";
 #endif
 
 
@@ -21,16 +37,16 @@ static const char szFileId[] = "$Id: krnlInit.c,v 1.2 2002-03-31 19:01:16 bird E
     #define kprintf2(a) (void)0
 #endif
 
-#define DWORD   ULONG                   /* exe386.h fixes */
-#define WORD    USHORT
-
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
+#include <kLib/format/LXexe.h>
+#include <kLib/kTypes.h>
+#include <kLib/kDevHlp.h>
+
 #define INCL_DOSERRORS
 #define INCL_NOPMAPI
 #include <os2.h>
-#include <exe386.h>
 #include <string.h>
 
 #define INCL_OS2KRNL_ALL
@@ -42,10 +58,8 @@ static const char szFileId[] = "$Id: krnlInit.c,v 1.2 2002-03-31 19:01:16 bird E
 #define INCL_KKL_LOG
 #include "kKrnlLib.h"
 
-#include "devSegDf.h"
 #include "dev1632.h"
 #include "dev32.h"
-#include "dev32Hlp.h"
 #include "ProbKrnl.h"
 #include "ProbKrnlErrors.h"
 #include "krnlPrivate.h"
@@ -62,43 +76,361 @@ static const char szFileId[] = "$Id: krnlInit.c,v 1.2 2002-03-31 19:01:16 bird E
 *******************************************************************************/
 KSEMMTX     kmtxImports;
 
+PMTE        pKrnlMTE = NULL;            /* Initiated by krnlGetKernelInfo */
+PSMTE       pKrnlSMTE = NULL;           /* Initiated by krnlGetKernelInfo */
+POTE        pKrnlOTE = NULL;            /* Initiated by krnlGetKernelInfo */
+ULONG       cKernelObjects = 0;         /* Initiated by krnlGetKernelInfo */
+
+extern char callTab[1];
+
 
 /*******************************************************************************
 *   Internal Functions                                                         *
 *******************************************************************************/
-int     krnlInitImports(void);
-int     krnlInitExports(void);
+int         krnlGetKernelInfo(void);
+int         krnlLookupKernel(void);
+int         krnlVerifyImportTab(void);
+
+int         krnlInitImports(void);
+int         krnlInitExports(void);
 
 #ifdef R3TST
-void    R3TstFixImportTab(void);
+PMTE        GetOS2KrnlMTETst(void)
+void        R3TstFixImportTab(void);
+#endif
+
+/**
+ * Initiates the imported functions.
+ * @returns 0 on success.
+ *          -1 on failure.
+ */
+int krnlInit(void)
+{
+    KLOGENTRY0("int");
+    int     rc;
+
+    /*
+     * Identify the kernel.
+     */
+    rc = krnlGetKernelInfo();
+    if (rc)
+        return rc;
+
+    /*
+     * Lookup the kernel in the Database
+     */
+    rc = krnlLookupKernel();
+    if (rc)
+    {
+        #if 0 /* FIXME */
+        int rc2 = krnlLoadKernelSym();
+        if (rc2)
+        {
+            kDH_SaveMessage();
+            return rc;
+        }
+        #else
+        return rc;
+        #endif
+    }
+
+    /*
+     * Init imports.
+     */
+    rc = krnlInitImports();
+
+    /*
+     * Init the import semaphore.
+     */
+    KSEMInit((PKSEM)(void*)&kmtxImports, KSEM_MUTEX, 0);
+
+    KLOGEXIT(rc);
+    return rc;
+}
+
+
+/**
+ * Get kernel OTEs
+ * This function set pKrnlMTE, pKrnlSMTE and pKrnlOTE, fKernel, ulKernelBuild and cKernelObjects.
+ *
+ * @returns   Strategy return code:
+ *            STATUS_DONE on success.
+ *            STATUS_DONE | STERR | errorcode on failure.
+ * @status    completely implemented and tested.
+ * @author    knut st. osmundsen
+ */
+int krnlGetKernelInfo(void)
+{
+    KLOGENTRY0("int");
+    int     i;
+    ULONG   rc;
+
+    /* Find the kernel OTE table */
+#ifndef R3TST
+    pKrnlMTE = GetOS2KrnlMTE();
+#else
+    pKrnlMTE = GetOS2KrnlMTETst();
+#endif
+    if (pKrnlMTE != NULL)
+    {
+        pKrnlSMTE = pKrnlMTE->mte_swapmte;
+        if (pKrnlSMTE != NULL)
+        {
+            if (pKrnlSMTE->smte_objcnt <= MAXKRNLOBJECTS)
+            {
+                pKrnlOTE = pKrnlSMTE->smte_objtab;
+                if (pKrnlOTE != NULL)
+                {
+                    BOOL    fKrnlTypeOk;
+
+                    cKernelObjects = (unsigned char)pKrnlSMTE->smte_objcnt;
+                    rc = 0;
+
+                    /*
+                     * Search for internal revision stuff AND 'SAB KNL?' signature in the two first objects.
+                     */
+                    fKrnlTypeOk = FALSE;
+                    fKernel = 0;
+                    ulKernelBuild = 0;
+                    for (i = 0; i < 2 && ulKernelBuild == 0; i++)
+                    {
+                        const char *psz = (const char*)pKrnlOTE[i].ote_base;
+                        const char *pszEnd = psz + pKrnlOTE[i].ote_size - 50; /* Last possible search position. */
+
+                        while (psz < pszEnd)
+                        {
+                            if (strncmp(psz, "Internal revision ", 18) == 0 && (psz[18] >= '0' && psz[18] <= '9'))
+                            {
+                                int j;
+                                kprintf2(("krnlGetKernelInfo: found internal revision: '%s'\n", psz));
+
+                                /* skip to end of "Internal revision " string. */
+                                psz += 18;
+
+                                /* Read number*/
+                                while ((*psz >= '0' && *psz <= '9') || *psz == '.')
+                                {
+                                    if (*psz != '.')
+                                        ulKernelBuild = (unsigned short)(ulKernelBuild * 10 + (*psz - '0'));
+                                    psz++;
+                                }
+
+                                /* Check if build number seems valid. */
+                                if (   !(ulKernelBuild >=  8254 && ulKernelBuild <  8383) /* Warp 3 fp 32 -> fp 60 */
+                                    && !(ulKernelBuild >=  9023 && ulKernelBuild <= 9036) /* Warp 4 GA -> fp 12 */
+                                    && !(ulKernelBuild >= 14039 && ulKernelBuild < 14150) /* Warp 4.5 GA -> ?? */
+                                    && !(ulKernelBuild >=  6600 && ulKernelBuild <= 6678) /* Warp 2.1x fix?? (just for fun!) */
+                                      )
+                                {
+                                    kprintf(("krnlGetKernelInfo: info summary: Build %d is invalid - invalid fixpack?\n", ulKernelBuild));
+                                    rc = ERROR_D32_INVALID_BUILD;
+                                    break;
+                                }
+
+                                /* Check for any revision flag */
+                                if ((*psz >= 'A' && *psz <= 'Z') || (*psz >= 'a' && *psz <= 'z'))
+                                {
+                                    fKernel |= (USHORT)((*psz - (*psz >= 'a' ? 'a'-1 : 'A'-1)) << KF_REV_SHIFT);
+                                    psz++;
+                                }
+                                if (*psz == ',') /* This is ignored! */
+                                    *psz++;
+
+                                /* If this is an Aurora/Warp 4.5 or Warp 3 kernel there is more info! */
+                                if (psz[0] == '_' && (psz[1] == 'S' || psz[1] == 's'))  /* _SMP  */
+                                    fKernel |= KF_SMP;
+                                else
+                                    if (*psz != ','
+                                        && (   (psz[0] == '_' && psz[1] == 'W' && psz[2] == '4')  /* _W4 */
+                                            || (psz[0] == '_' && psz[1] == 'U' && psz[2] == 'N' && psz[3] == 'I' && psz[4] == '4')  /* _UNI4 */
+                                            )
+                                        )
+                                    fKernel |= KF_W4 | KF_UNI;
+                                else
+                                    fKernel |= KF_UNI;
+
+
+                                /* Check if its a debug kernel (look for DEBUG at start of object 3-5) */
+                                if (!fKrnlTypeOk)
+                                {
+                                    j = 3;
+                                    while (j < 5)
+                                    {
+                                        /* There should be no iopl object preceding the debugger data object. */
+                                        if ((pKrnlOTE[j].ote_flags & OBJIOPL) != 0)
+                                            break;
+                                        /* Is this is? */
+                                        if ((pKrnlOTE[j].ote_flags & OBJINVALID) == 0
+                                            && (pKrnlOTE[j].ote_flags & (OBJREAD | OBJWRITE)) == (OBJREAD | OBJWRITE)
+                                            && strncmp((char*)pKrnlOTE[j].ote_base, "DEBUG", 5) == 0)
+                                        {
+                                            fKernel |= KF_DEBUG;
+                                            break;
+                                        }
+                                        j++;
+                                    }
+                                }
+
+                                /* Display info */
+                                kprintf(("krnlGetKernelInfo: info summary: Build %d, fKernel=0x%x\n",
+                                         ulKernelBuild, fKernel));
+
+                                /* Break out */
+                                break;
+                            }
+
+                            /*
+                             * Look for the SAB KNL? signature to check which kernel type we're
+                             * dealing with. This could also be reached thru the selector found
+                             * in the first element for the SAS_tables_area array.
+                             */
+                            if (!fKrnlTypeOk && strncmp(psz, "SAB KNL", 7) == 0)
+                            {
+                                fKrnlTypeOk = TRUE;
+                                if (psz[7] == 'D')
+                                    fKernel |= KF_ALLSTRICT;
+                                else if (psz[7] == 'B')
+                                    fKernel |= KF_HALFSTRICT;
+                                else if (psz[7] != 'R')
+                                    fKrnlTypeOk = FALSE;
+                            }
+
+                            /* next */
+                            psz++;
+                        } /* while loop searching for "Internal revision " */
+                    } /* for loop on objects 0-1. */
+
+                    /* Set error code if not found */
+                    if (ulKernelBuild == 0)
+                    {
+                        rc = ERROR_D32_BUILD_INFO_NOT_FOUND;
+                        kprintf(("krnlGetKernelInfo: Internal revision was not found!\n"));
+                    }
+                }
+                else
+                    rc = ERROR_D32_NO_OBJECT_TABLE;
+            }
+            else
+                rc = ERROR_D32_TOO_MANY_OBJECTS;
+        }
+        else
+            rc = ERROR_D32_NO_SWAPMTE;
+    }
+    else
+        rc = ERROR_D32_GETOS2KRNL_FAILED;
+
+    if (rc != NO_ERROR)
+        kprintf(("krnlGetKernelInfo: failed. rc = %d\n", rc));
+
+    KLOGEXIT(rc);
+    return (rc);
+}
+
+#ifdef R3TST
+/**
+ * Creates a fake kernel MTE, SMTE and OTE for use while testing in Ring3.
+ * @returns Pointer to the fake kernel MTE.
+ * @status  completely implemented.
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ */
+PMTE GetOS2KrnlMTETst(void)
+{
+    KLOGENTRY0("PMTE");
+    static MTE    KrnlMTE;
+    static SMTE   KrnlSMTE;
+
+    KrnlMTE.mte_swapmte = &KrnlSMTE;
+    KrnlSMTE.smte_objtab = &aKrnlOTE[0];
+    KrnlSMTE.smte_objcnt = cObjectsFake;
+
+    KLOGEXIT(&KrnlMTE);
+    return &KrnlMTE;
+}
+
 #endif
 
 
 /**
+ * Lookups a kernel in the 32-bit symbol database.
+ *
+ * @returns NO_ERROR on success.
+ * @returns ERROR_PROB_SYMDB_KRNL_NOT_FOUND if not found.
+ * @returns Low word: error code. High word: function number. Other errors.
+ *
+ * @remark  Supports multiple kernels with same build, type and object count.
+ *          Hence all kernels are searched.
+ * @remark  Uses ulKernelBuild, fKernel, cKernelObjects.
+ */
+int krnlLookupKernel(void)
+{
+    KLOGENTRY0("int");
+    int     i;
+    ULONG   rc = ERROR_PROB_SYMDB_KRNL_NOT_FOUND;
+
+
+    /*
+     * Loop tru the DB entries until a NULL pointer is found.
+     */
+    for (i = 0; aKrnlSymDB32[i].usBuild != 0; i++)
+    {
+        if (   aKrnlSymDB32[i].usBuild  == (USHORT)ulKernelBuild
+            && aKrnlSymDB32[i].fKernel  == fKernel
+            && aKrnlSymDB32[i].cObjects == (char)cKernelObjects)
+        {   /* found matching entry! */
+            int                 j;
+            const KRNLDBENTRY * pEntry = &aKrnlSymDB32[i];
+
+            kprintf(("Found entry for this kernel!\n"));
+
+            /*
+             * Copy symbol data from the DB to aImportTab.
+             */
+            for (j = 0; j < NBR_OF_KRNLIMPORTS; j++)
+            {
+                aImportTab[j].offObject  = pEntry->aSyms[j].offObject;
+                aImportTab[j].iObject    = pEntry->aSyms[j].iObject;
+                aImportTab[j].chOpcode   = pEntry->aSyms[j].chOpcode;
+                aImportTab[j].ulAddress  = pKrnlOTE[pEntry->aSyms[j].iObject].ote_base
+                                           + pEntry->aSyms[j].offObject;
+                aImportTab[j].usSel      = pKrnlOTE[pEntry->aSyms[j].iObject].ote_sel;
+                aImportTab[j].fFound     = (char)((aImportTab[j].offObject != 0xFFFFFFFFUL) ? 1 : 0);
+
+                kprintf2(("  %-3d addr=0x%08lx off=0x%08lx  %s\n",
+                          j, aImportTab[j].ulAddress, aImportTab[j].offObject,
+                          aImportTab[j].achName));
+            }
+
+            /*
+             * Verify prologs and return if successful.
+             */
+            rc = krnlVerifyImportTab();
+            if (!rc)
+            {
+                KLOGEXIT(rc);
+                return rc;
+            }
+        }
+    }
+
+    KLOGEXIT(rc);
+    return rc;
+}
+
+
+/**
  * Verifies the aImportTab.
+ *
  * @returns   16-bit errorcode where the high byte is the procedure number which
  *            the error occured on and the low byte the error code.
  * @remark    Called from IOCtl.
  *            WARNING! This function is called before the initroutine (R0INIT)!
  */
-ULONG VerifyImportTab32(void)
+int krnlVerifyImportTab(void)
 {
-    KLOGENTRY0("ULONG");
-    ULONG   rc;
+    KLOGENTRY0("int");
     int     i;
     int     cb;
     int     cbmax;
-
-    /* VerifyImporTab32 is called before the initroutine! */
-    pulTKSSBase32 = TKSSBase16;
-
-    /* Check that pKrnlOTE is set */
-    rc = GetKernelInfo32(NULL);
-    if (rc != NO_ERROR)
-    {
-        KLOGEXIT(rc);
-        return rc;
-    }
 
     /*
      * Verify aImportTab.
@@ -202,106 +534,8 @@ ULONG VerifyImportTab32(void)
 }
 
 
-/**
- * Lookups a kernel in the 32-bit symbol database.
- * @returns NO_ERROR on success.
- *          ERROR_PROB_SYMDB_KRNL_NOT_FOUND if not found.
- *          Low word: error code. High word: function number. Other errors.
- *
- * @param   plke32Param Pointer to parameters (in resident memory please).
- * @author  knut st. osmundsen (kosmunds@csc.com)
- * @remark  Supports multiple kernels with same build, type and object count.
- *          Hence all kernels are searched.
- * @remark  - Why don't we simply ask for the kernel data from the 32-bit work our self?
- *          * Maybe because this allows the caller to pass in other data...
- *          - Which will not happen...
- */
-ULONG LookupKrnlEntry32(PLKE32PARAM plke32Param)
-{
-#ifndef DB_16BIT
-    KLOGENTRY1("ULONG","PLKE32PARAM plke32Param", plke32Param);
-    int     i;
-    ULONG   rc = ERROR_PROB_SYMDB_KRNL_NOT_FOUND;
-    USHORT  usBuild  = plke32Param->usBuild;
-    USHORT  fKernel  = plke32Param->fKernel;
-    CHAR    cObjects = plke32Param->cObjects;
 
 
-    /*
-     * Loop tru the DB entries until a NULL pointer is found.
-     */
-    for (i = 0; aKrnlSymDB32[i].usBuild != 0; i++)
-    {
-        if (   aKrnlSymDB32[i].usBuild  == usBuild
-            && aKrnlSymDB32[i].fKernel  == fKernel
-            && aKrnlSymDB32[i].cObjects == cObjects)
-        {   /* found matching entry! */
-            int                 j;
-            const KRNLDBENTRY * pEntry = &aKrnlSymDB32[i];
-
-            kprintf(("Found entry for this kernel!\n"));
-
-            /*
-             * Copy symbol data from the DB to aImportTab.
-             */
-            for (j = 0; j < NBR_OF_KRNLIMPORTS; j++)
-            {
-                aImportTab[j].offObject  = pEntry->aSyms[j].offObject;
-                aImportTab[j].iObject    = pEntry->aSyms[j].iObject;
-                aImportTab[j].chOpcode   = pEntry->aSyms[j].chOpcode;
-                aImportTab[j].ulAddress  = pKrnlOTE[pEntry->aSyms[j].iObject].ote_base
-                                           + pEntry->aSyms[j].offObject;
-                aImportTab[j].usSel      = pKrnlOTE[pEntry->aSyms[j].iObject].ote_sel;
-                aImportTab[j].fFound     = (char)((aImportTab[j].offObject != 0xFFFFFFFFUL) ? 1 : 0);
-
-                kprintf2(("  %-3d addr=0x%08lx off=0x%08lx  %s\n",
-                          j, aImportTab[j].ulAddress, aImportTab[j].offObject,
-                          aImportTab[j].achName));
-            }
-
-            /*
-             * Verify prologs and return if successful.
-             */
-            rc = VerifyImportTab32();
-            if (!rc)
-            {
-                KLOGEXIT(rc);
-                return rc;
-            }
-        }
-    }
-
-    KLOGEXIT(rc);
-    return rc;
-#else
-    return -1;
-#endif
-}
-
-
-/**
- * Initiates the imported functions.
- * @returns 0 on success.
- *          -1 on failure.
- */
-int krnlInit(void)
-{
-    KLOGENTRY0("int");
-    int     rc;
-
-    /*
-     * Init imports.
-     */
-    rc = krnlInitImports();
-
-    /*
-     * Init the import semaphore.
-     */
-    KSEMInit((PKSEM)(void*)&kmtxImports, KSEM_MUTEX, 0);
-
-    KLOGEXIT(rc);
-    return rc;
-}
 
 
 /**
@@ -332,16 +566,16 @@ int krnlInitImports(void)
     int         cb;
     char *      pchCTEntry;             /* Pointer to current 32-bit calltab entry. */
     char *      pchCTEntry16;           /* Pointer to current 16-bit calltab entry. */
-    LOCKHANDLE  lhCT16;                 /* Lock handle for the 16-bit calltable */
+    KDHVMLOCK   lhCT16;                 /* Lock handle for the 16-bit calltable */
 
 
     /*
      * verify aImportTab
      */
-    rc = VerifyImportTab32();
+    rc = krnlVerifyImportTab();
     if (rc)
     {
-        kprintf(("VerifyImportTab32 failed with rc=%d\n", rc));
+        kprintf(("krnlVerifyImportTab failed with rc=0x%x\n", rc));
         INT3();
         KLOGEXIT(rc);
         return rc;
@@ -351,7 +585,7 @@ int krnlInitImports(void)
     /*
      * Lock the 16-bit calltab segment.
      */
-    rc = D32Hlp_VMLock2(&callTab16[0], &callTab16END[0] - &callTab16[0], VMDHL_WRITE | VMDHL_LONG, SSToDS(&lhCT16));
+    rc = kDH_VMLock2(&callTab16[0], &callTab16END[0] - &callTab16[0], VMDHL_WRITE | VMDHL_LONG, SSToDS(&lhCT16));
     if (rc)
     {
         kprintf(("D32Hlp_VMLock2(%x, %x, ..) -> rc=%d\n",

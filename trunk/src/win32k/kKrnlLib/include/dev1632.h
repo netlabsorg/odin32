@@ -1,4 +1,4 @@
-/* $Id: dev1632.h,v 1.2 2001-11-19 03:07:59 bird Exp $
+/* $Id: dev1632.h,v 1.3 2002-12-16 02:25:06 bird Exp $
  * dev1632.h - Common header file for 16-bit and 32-bit C
  *
  * Copyright (c) 1999 knut st. osmundsen
@@ -80,8 +80,8 @@ typedef struct _LKE32PARAM
 /*
  * Global data...
  */
-extern CHAR DATA16_GLOBAL   szBuildDate[];
-extern CHAR DATA16_GLOBAL   szBuildTime[];
+extern CHAR     szBuildDate[];
+extern CHAR     szBuildTime[];
 #if defined(__IBMC__) || defined(__IBMCPP__)
     #pragma map( szBuildDate , "_szBuildDate" )
     #pragma map( szBuildTime , "_szBuildTime" )

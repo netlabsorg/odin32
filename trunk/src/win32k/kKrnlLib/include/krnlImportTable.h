@@ -1,4 +1,4 @@
-/* $Id: krnlImportTable.h,v 1.1 2002-12-16 00:28:03 bird Exp $
+/* $Id: krnlImportTable.h,v 1.2 2002-12-16 02:25:07 bird Exp $
  *
  * krnlImportTable definitions.
  *
@@ -165,24 +165,11 @@ typedef struct _KRNLDBENTRY
 *   Global Variables                                                           *
 *   NOTE! These are only available at init time!                               *
 *******************************************************************************/
-extern IMPORTKRNLSYM        aImportTab[NBR_OF_KRNLIMPORTS]; /* Defined in ProbKrnl.c */
-extern char                 szSymbolFile[60];               /* Defined in ProbKrnl.c */
+extern IMPORTKRNLSYM        aImportTab[NBR_OF_KRNLIMPORTS]; /* Defined in krnlImportTable.c */
 extern const KRNLDBENTRY    aKrnlSymDB32[];                 /* Defined in symdb32.c */
 
 #if defined(__IBMC__) || defined(__IBMCPP__)
     #pragma map( aImportTab , "_aImportTab"  )
-    #pragma map( szSymbolFile,"_szSymbolFile")
-#endif
-
-/*
- * 16-bit init time functions.
- */
-#if defined(INCL_16) && defined(MAX_DISKDD_CMD) /* 16-bit only */
-    int             ProbeKernel(PRPINITIN pReqPack);
-    const char *    GetErrorMsg(short sErr);
-    #ifdef _kKLInitHlp_h_
-        int         DoDevIOCtl(KKLR0INITPARAM  *pParam, KKLR0INITDATA *pData);
-    #endif
 #endif
 
 #endif

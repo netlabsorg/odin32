@@ -1,12 +1,28 @@
-; $Id: devLast.asm,v 1.1 2002-03-10 02:45:54 bird Exp $
+; $Id: devLast.asm,v 1.2 2002-12-16 02:24:28 bird Exp $
 ;
-; DevLast - the object file termintating the resident part of the objects.
-; Code after the ???END labes and object files and which are linked in
-; after this file is discarded after init.
+; Segment endmarkers.
 ;
-; Copyright (c) 1999 knut st. osmundsen
+; NOTE: This file must be put into an library to get be linked in last.
 ;
-; Project Odin Software License can be found in LICENSE.TXT
+; Copyright (c) 1999-2002 knut st. osmundsen <bird@anduin.net>
+;
+;
+; This file is part of kLib.
+;
+; kLib is free software; you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation; either version 2 of the License, or
+; (at your option) any later version.
+;
+; kLib is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with kLib; if not, write to the Free Software
+; Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+;
 ;
        .model flat
        .386p
@@ -24,11 +40,9 @@
     public DATA16_BSSEND
     public DATA16_CONSTEND
     public DATA16_GLOBALEND
-    public DATA16_INITEND
-    public DATA16_INIT_BSSEND
-    public DATA16_INIT_CONSTEND
+    public DATA16_ENDEND
     public CODE16END
-    public CODE16_INITEND
+    public CODE16_ENDEND
     public CODE32END
     public DATA32END
     public BSS32END
@@ -61,31 +75,21 @@ db 'DATA16_GLOBALEND'
 DATA16_GLOBALEND db 0
 DATA16_GLOBAL ends
 
-DATA16_INIT segment
-db 'DATA16_INITEND'
-DATA16_INITEND db 0
-DATA16_INIT ends
+DATA16_END segment
+db 'DATA16_ENDEND'
+DATA16_ENDEND db 0
+DATA16_END ends
 
-DATA16_INIT_BSS segment
-db 'DATA16_INIT_BSSEND'
-DATA16_INIT_BSSEND db 0
-DATA16_INIT_BSS ends
-
-DATA16_INIT_CONST segment
-db 'DATA16_CONSTEND'
-DATA16_INIT_CONSTEND db 0
-DATA16_INIT_CONST ends
 
 CODE16 segment
 db 'CODE16END'
 CODE16END db 0
 CODE16 ends
 
-CODE16_INIT segment
-db 'CODE16_INITEND'
-CODE16_INITEND db 0
-CODE16_INIT ends
-
+CODE16_END segment
+db 'CODE16_ENDEND'
+CODE16_ENDEND db 0
+CODE16_END ends
 
 CODE32 segment
 db 'CODE32END'

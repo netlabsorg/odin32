@@ -1,4 +1,4 @@
-/* $Id: d16Strat.c,v 1.2 2002-03-31 19:01:15 bird Exp $
+/* $Id: d16Strat.c,v 1.3 2002-12-16 02:24:28 bird Exp $
  *
  * d16strat.c - 16-bit strategy routine, device headers, device_helper (ptr)
  *              and 16-bit IOClts.
@@ -35,41 +35,6 @@
 #include "kKLInitHlp.h"
 
 /*******************************************************************************
-*   Global Variables                                                           *
-*******************************************************************************/
-#if 0 /* moved to devfirst.asm */
-extern DDHDR _far aDevHdrs[2];
-DDHDR aDevHdrs[2] = /* This is the first piece data in the driver!!!!!!! */
-{
-    {
-        &aDevHdrs[1], /* NextHeader */
-        DEVLEV_3 | DEV_30 | DEV_CHAR_DEV,           /* SDevAtt */
-        (unsigned short)(void _near *)strategyAsm0, /* StrategyEP */
-        0,                                          /* InterruptEP */
-        "$KrnlHlp",                                 /* DevName */
-        0,                                          /* SDevProtCS */
-        0,                                          /* SDevProtDS */
-        0,                                          /* SDevRealCS */
-        0,                                          /* SDevRealDS */
-        DEV_16MB | DEV_IOCTL2                       /* SDevCaps */
-    },
-    {
-        ~0UL,                                       /* NextHeader */
-        DEVLEV_3 | DEV_30 | DEV_CHAR_DEV,           /* SDevAtt */
-        (unsigned short)(void _near *)strategyAsm1, /* StrategyEP */
-        0,                                          /* InterruptEP */
-        "$KrnlLib",                                 /* DevName */
-        0,                                          /* SDevProtCS */
-        0,                                          /* SDevProtDS */
-        0,                                          /* SDevRealCS */
-        0,                                          /* SDevRealDS */
-        DEV_16MB | DEV_IOCTL2                       /* SDevCaps */
-    }
-};
-#endif
-
-
-/*******************************************************************************
 *   Internal Functions                                                         *
 *******************************************************************************/
 USHORT NEAR devGenIOCtl(PRP_GENIOCTL pRp);
@@ -87,18 +52,12 @@ USHORT NEAR strategy(PRPH pRpH, unsigned short usDev)
     switch (pRpH->Cmd)
     {
         case CMDInit:                   /* INIT command */
-            if (fInitTime)
-            {
-                if (usDev == 0)
-                    return dev0Init((PRPINITIN)pRpH, (PRPINITOUT)pRpH);
-                return dev1Init((PRPINITIN)pRpH, (PRPINITOUT)pRpH);
-            }
-            break;
+            if (usDev == 0)
+                return dev0Init((PRPINITIN)pRpH, (PRPINITOUT)pRpH);
+            return dev1Init((PRPINITIN)pRpH, (PRPINITOUT)pRpH);
 
         case CMDGenIOCTL:               /* Generic IOCTL */
-            if (fInitTime)
-                return devGenIOCtl((PRP_GENIOCTL)pRpH);
-            break;
+            return devGenIOCtl((PRP_GENIOCTL)pRpH);
 
         case CMDOpen:                   /* device open */
         case CMDClose:                  /* device close */
@@ -109,11 +68,9 @@ USHORT NEAR strategy(PRPH pRpH, unsigned short usDev)
             return STATUS_DONE;
 
         case CMDInitBase:
-        {
-            MSGTABLE    msg = { 1178, 1, "kKrnlLib.sys is not yet capable of being a BASEDEV." };
-            DevHelp_Save_Message( &msg );
-            break;
-        }
+            if (usDev == 0)
+                return dev0Init((PRPINITIN)pRpH, (PRPINITOUT)pRpH);
+            return dev1Init((PRPINITIN)pRpH, (PRPINITOUT)pRpH);
     }
 
     return STATUS_DONE | STATUS_ERR_UNKCMD;
@@ -143,7 +100,7 @@ USHORT NEAR devGenIOCtl(PRP_GENIOCTL pRp)
              * init TKSSBase for both 16-bit and 32-bit code and be a bit carefull.
              */
             case KKL_IOCTL_RING0INIT:
-                if (TKSSBase16 == 0)
+                if (pulTKSSBase32 == 0)
                     initGetDosTableData();
                 /*
                  * Verify intput.
