@@ -1,4 +1,4 @@
-/* $Id: windowclass.cpp,v 1.21 2001-06-09 14:50:26 sandervl Exp $ */
+/* $Id: windowclass.cpp,v 1.22 2001-07-13 14:31:39 sandervl Exp $ */
 /*
  * Win32 Window Class Code for OS/2
  *
@@ -67,8 +67,9 @@ ATOM WIN32API RegisterClassA(CONST WNDCLASSA *lpWndClass)
     int iSmIconWidth  = GetSystemMetrics(SM_CXSMICON);
     int iSmIconHeight = GetSystemMetrics(SM_CYSMICON);
 
-    wc.hIconSm = CopyImage(wc.hIcon, IMAGE_ICON, iSmIconWidth, iSmIconHeight,
-                           LR_COPYFROMRESOURCE);
+    if(wc.hIcon)
+        wc.hIconSm = CopyImage(wc.hIcon, IMAGE_ICON, iSmIconWidth, iSmIconHeight,
+                               LR_COPYFROMRESOURCE);
 
     wclass = new Win32WndClass(&wc,FALSE);
     if(wclass == NULL) {
@@ -137,8 +138,9 @@ WORD WIN32API RegisterClassW(CONST WNDCLASSW *lpwc)
     int iSmIconWidth  = GetSystemMetrics(SM_CXSMICON);
     int iSmIconHeight = GetSystemMetrics(SM_CYSMICON);
 
-    wc.hIconSm = CopyImage(wc.hIcon, IMAGE_ICON, iSmIconWidth, iSmIconHeight,
-                           LR_COPYFROMRESOURCE);
+    if(wc.hIcon)
+        wc.hIconSm = CopyImage(wc.hIcon, IMAGE_ICON, iSmIconWidth, iSmIconHeight,
+                               LR_COPYFROMRESOURCE);
 
     dprintf(("RegisterClassW"));
     winclass = new Win32WndClass((WNDCLASSEXA *)&wc, TRUE);
