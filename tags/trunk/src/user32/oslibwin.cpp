@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.75 2000-05-03 18:35:51 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.76 2000-05-10 13:14:42 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -328,7 +328,7 @@ BOOL OSLibWinIsWindowVisible(HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibWinQueryActiveWindow()
+HWND OSLibWinQueryActiveWindow()
 {
   return WinQueryActiveWindow(HWND_DESKTOP);
 }
