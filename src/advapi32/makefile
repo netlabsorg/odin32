@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 1999-11-04 12:44:47 phaller Exp $
+# $Id: makefile,v 1.14 1999-11-30 19:41:07 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -20,7 +20,7 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 TARGET = advapi32
 
-OBJS =  advapi32.obj initterm.obj registry.obj lsa.obj
+OBJS =  advapi32.obj initterm.obj registry.obj lsa.obj security.obj
 
 
 all: $(TARGET).dll $(TARGET).lib
@@ -28,7 +28,7 @@ all: $(TARGET).dll $(TARGET).lib
 
 $(TARGET).dll: $(OBJS) $(TARGET).def
         $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
-              $(PDWIN32_LIB)/kernel32.lib \
+              $(PDWIN32_LIB)/kernel32.lib $(PDWIN32_LIB)/ntdll.lib \
               $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
         $(CP) $@ $(PDWIN32_BIN)
 
@@ -47,7 +47,7 @@ lsa.obj:      lsa.cpp $(PDWIN32_INCLUDE)\odinwrap.h
 initterm.obj: initterm.cpp
 
 clean:
-    $(RM) *.obj *.lib *.dll *~ *.map *.pch
+    $(RM) *.obj *.lib *.dll *.map *.pch
     $(RM) $(PDWIN32_BIN)\$(TARGET).dll
     $(RM) $(PDWIN32_LIB)\$(TARGET).lib
     $(RM) $(TARGET)exp.def
