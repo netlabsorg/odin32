@@ -1,7 +1,7 @@
- /* $Id: changelog,v 1.1080 2000-08-20 10:09:51 sandervl Exp $ */
+ /* $Id: changelog,v 1.1081 2000-08-20 11:24:39 bird Exp $ */
 
  2000-08-20: Sander van Leeuwen <sandervl@xs4all.nl>
-    - INCLUDE, COMDLG32, SHLWAPI: 
+    - INCLUDE, COMDLG32, SHLWAPI:
                 Compile errors introduced by shell32 merge fixed
 
  2000-08-19: Sander van Leeuwen <sandervl@xs4all.nl>
@@ -15,6 +15,9 @@
                 Changed "FileVersion"    to 5.81 (NT4, SP6, IE 5.01)
                 Changed "ProductVersion" to 5.00.2919.6304 (NT4, SP6, IE 5.01)
     - COMDLG32: Changed File and Product version to 0x0400 0x0565013F (NT4, SP6)
+
+ 2000-08-19: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - KERNEL32: Made win32k.sys resource sections writable.
 
  2000-08-18: Sander van Leeuwen <sandervl@xs4all.nl>
     - GDI32:    Added support for level 2 debug logging
@@ -35,7 +38,7 @@
     - SHELL32:  roughly synchronized with current WINE
 
  2000-08-17: Sander van Leeuwen <sandervl@xs4all.nl>
-    - KERNEL32: Only call O32_LoadLibrary if dwFlags == 0 and (LX binary 
+    - KERNEL32: Only call O32_LoadLibrary if dwFlags == 0 and (LX binary
                 or win32k process)
                 GetModuleHandleA fix (uninit. var)
                 (PowerDVD install no longer complains about running InstallShield)
