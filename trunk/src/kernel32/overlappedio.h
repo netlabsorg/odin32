@@ -1,4 +1,4 @@
-/* $Id: overlappedio.h,v 1.2 2001-12-05 18:06:03 sandervl Exp $ */
+/* $Id: overlappedio.h,v 1.3 2001-12-05 19:24:37 sandervl Exp $ */
 
 /*
  * Win32 overlapped IO class
@@ -12,23 +12,40 @@
 #ifndef __OVERLAPPEDIO_H__
 #define __OVERLAPPEDIO_H__
 
-#define EVENT_READ		1
-#define EVENT_WRITE		2
-#define EVENT_READWRITE		(EVENT_WRITE|EVENT_READ)
-#define EVENT_POLL		4
+#define NR_ASYNC_OPERATIONS	3
+#define ASYNC_INDEX_READ        0
+#define ASYNC_INDEX_WRITE       1
+#define ASYNC_INDEX_POLL        2
+
+#define ASYNCIO_READ		1
+#define ASYNCIO_WRITE		2
+#define ASYNCIO_READWRITE	4
+#define ASYNCIO_POLL		8
 
 //forward decl
 class OverlappedIOHandler;
 
 typedef struct {
-    DWORD                fEvent;
+    DWORD                dwOperation;
     OverlappedIOHandler *lpOverlappedObj;
 } OVERLAPPED_THREAD_PARAM, *LPOVERLAPPED_THREAD_PARAM;
 
-typedef DWORD (* SYSTEM LPOVERLAPPED_HANDLER)(DWORD dwUserData, LPOVERLAPPED lpOverlapped);
+typedef struct tagOVERLAPPED_ODIN{
+  DWORD               dwAsyncType;
+  HANDLE              hOS2Handle;
+  LPCVOID             lpBuffer;
+  ULONG               nNumberOfBytes;
+  LPOVERLAPPED        lpOverlapped;
+  LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine;
+  DWORD              *lpResult;
+  DWORD               dwUserData;
+  tagOVERLAPPED_ODIN *next;
+} ASYNCIOREQUEST, *LPASYNCIOREQUEST;
+
+typedef DWORD (* SYSTEM LPOVERLAPPED_HANDLER)(LPASYNCIOREQUEST lpRequest);
 
 enum OverlappedIOError {
-  OutOfMemory, EventCreationFailed, ThreadCreationFailed
+  InvalidParameter, OutOfMemory, EventCreationFailed, ThreadCreationFailed
 };
 
 class OverlappedIOHandler
@@ -44,14 +61,16 @@ public:
                       DWORD         nNumberOfBytesToWrite,
                       LPDWORD       lpNumberOfBytesWritten,
                       LPOVERLAPPED  lpOverlapped,
-                      LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine);
+                      LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine,
+                      DWORD         dwUserData);
 
      BOOL   ReadFile(HANDLE        hOS2Handle,
                      LPCVOID       lpBuffer,
                      DWORD         nNumberOfBytesToRead,
                      LPDWORD       lpNumberOfBytesRead,
                      LPOVERLAPPED  lpOverlapped,
-                     LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine);
+                     LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine,
+                     DWORD         dwUserData);
 
      BOOL   CancelIo(HANDLE hOS2Handle);
 
@@ -80,9 +99,11 @@ private:
 
      CRITICAL_SECTION     critsect;
 
-     //linked list of pending operations
-     LPOVERLAPPED pending;
-
+     DWORD                dwAsyncType;
+     //[ASYNC_INDEX_READ]  list of pending read (+ write if half-duplex mode) operations
+     //[ASYNC_INDEX_WRITE] list of pending write (full-duplex mode) operations
+     //[ASYNC_INDEX_POLL]  list of pending poll operations
+     LPASYNCIOREQUEST     pending[NR_ASYNC_OPERATIONS];
 
      friend       DWORD CALLBACK OverlappedIOThread(LPVOID lpThreadParam);
 };
