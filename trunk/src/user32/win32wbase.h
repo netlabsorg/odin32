@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.150 2003-03-22 20:27:12 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.151 2003-03-27 10:42:42 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -176,6 +176,7 @@ virtual  WORD   GetWindowWord(int index);
 virtual  BOOL   isMDIClient();
 virtual  BOOL   isMDIChild();
 virtual  BOOL   isDesktopWindow();
+virtual  BOOL   isFakeWindow();
 
          BOOL   fHasParentDC()                  { return fParentDC; };
 
