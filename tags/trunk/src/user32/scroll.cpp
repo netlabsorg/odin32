@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.21 1999-11-12 17:16:37 cbratschi Exp $ */
+/* $Id: scroll.cpp,v 1.22 1999-11-13 16:42:42 cbratschi Exp $ */
 /*
  * Scrollbar control
  *
@@ -7,7 +7,7 @@
  * Copyright 1993 Martin Ayotte
  * Copyright 1994, 1996 Alexandre Julliard
  *
- * WINE version: 990923
+ * WINE version: 991031
  *
  * Status:  complete
  * Version: 5.00
@@ -1399,33 +1399,31 @@ INT WINAPI SetScrollInfo(HWND hwnd,INT nBar,const SCROLLINFO *info,BOOL bRedraw)
     /* Check if the scrollbar should be hidden or disabled */
     if (info->fMask & (SIF_RANGE | SIF_PAGE | SIF_DISABLENOSCROLL))
     {
-        new_flags = infoPtr->flags;
-        if (infoPtr->MinVal >= infoPtr->MaxVal - MAX( infoPtr->Page-1, 0 ))
+      new_flags = infoPtr->flags;
+      if (infoPtr->MinVal >= infoPtr->MaxVal - MAX( infoPtr->Page-1, 0 ))
+      {
+        /* Hide or disable scroll-bar */
+        if (info->fMask & SIF_DISABLENOSCROLL)
         {
-            /* Hide or disable scroll-bar */
-            if (info->fMask & SIF_DISABLENOSCROLL)
-            {
-                new_flags = ESB_DISABLE_BOTH;
-                action |= SA_SSI_REFRESH;
-            }
-            else if (nBar != SB_CTL)
-            {
-                action = SA_SSI_HIDE;
-                goto done;
-            }
-        }
-        else  /* Show and enable scroll-bar */
+          new_flags = ESB_DISABLE_BOTH;
+          action |= SA_SSI_REFRESH;
+        } else if (nBar != SB_CTL)
         {
-            new_flags = 0;
-            if (nBar != SB_CTL)
-                action |= SA_SSI_SHOW;
+          action = SA_SSI_HIDE;
+          goto done;
         }
+      } else  /* Show and enable scroll-bar */
+      {
+        new_flags = 0;
+        if (nBar != SB_CTL) action |= SA_SSI_SHOW;
+        if (infoPtr->flags) action |= SA_SSI_REFRESH;
+      }
 
-        if (infoPtr->flags != new_flags) /* check arrow flags */
-        {
-            infoPtr->flags = new_flags;
-            action |= SA_SSI_REPAINT_ARROWS;
-        }
+      if (infoPtr->flags != new_flags) /* check arrow flags */
+      {
+        infoPtr->flags = new_flags;
+        action |= SA_SSI_REPAINT_ARROWS;
+      }
     }
 
 done:
@@ -1438,14 +1436,17 @@ done:
         if(action & SA_SSI_SHOW)
           ShowScrollBar(hwnd,nBar,TRUE);
 
-        if(bRedraw && (action & SA_SSI_REFRESH))
-            SCROLL_RefreshScrollBar(hwndScroll,nBar,TRUE,TRUE);
-        else
+        if (bRedraw)
         {
-          if (action & SA_SSI_REPAINT_INTERIOR || action & SA_SSI_MOVE_THUMB)
-            SCROLL_RefreshScrollBar(hwndScroll,nBar,FALSE,TRUE);
-          if (action & SA_SSI_REPAINT_ARROWS )
-            SCROLL_RefreshScrollBar(hwndScroll,nBar,TRUE,FALSE);
+          if (action & SA_SSI_REFRESH)
+            SCROLL_RefreshScrollBar(hwndScroll,nBar,TRUE,TRUE);
+          else
+          {
+            if (action & (SA_SSI_REPAINT_INTERIOR | SA_SSI_MOVE_THUMB))
+              SCROLL_RefreshScrollBar(hwndScroll,nBar,FALSE,TRUE);
+            if (action & SA_SSI_REPAINT_ARROWS)
+              SCROLL_RefreshScrollBar(hwndScroll,nBar,TRUE,FALSE);
+          }
         }
     }
 
@@ -1539,6 +1540,26 @@ INT WINAPI GetScrollPos(
 
     return infoPtr->CurVal;
 }
+
+// CB: functions to get 32bit SB_THUMBTRACK position, for internal use
+
+BOOL IsScrollBarTracking(HWND hwnd,INT nBar)
+{
+  HWND hwndScroll = SCROLL_GetScrollHandle(hwnd,nBar);
+
+  return (SCROLL_MovingThumb && SCROLL_TrackingWin == hwnd && SCROLL_TrackingBar == nBar);
+}
+
+INT GetScrollTrackPos(HWND hwnd,INT nBar)
+{
+  SCROLLBAR_INFO *infoPtr;
+
+  infoPtr = SCROLL_GetInfoPtr(SCROLL_GetScrollHandle(hwnd,nBar),nBar);
+  if (!infoPtr) return 0;
+
+  return (SCROLL_MovingThumb && SCROLL_TrackingWin == hwnd && SCROLL_TrackingBar == nBar) ? SCROLL_TrackingVal:infoPtr->CurVal;
+}
+
 /*************************************************************************
  *           SetScrollRange   (USER32.503)
  *

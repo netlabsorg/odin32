@@ -1,4 +1,4 @@
-/* $Id: static.cpp,v 1.8 1999-10-30 18:40:46 cbratschi Exp $ */
+/* $Id: static.cpp,v 1.9 1999-11-13 16:42:42 cbratschi Exp $ */
 /*
  * Static control
  *
@@ -714,38 +714,16 @@ static void STATIC_PaintEtchedfn( HWND hwnd, HDC hdc )
 {
     DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
     RECT rc;
-    HBRUSH hbrush;
-    HPEN hpen;
 
     GetClientRect( hwnd, &rc );
-    hbrush = SendMessageA( GetParent(hwnd), WM_CTLCOLORSTATIC,
-                             hdc, hwnd );
-    FillRect( hdc, &rc, hbrush );
-
     switch (dwStyle & SS_TYPEMASK)
     {
-        case SS_ETCHEDHORZ:
-            hpen = SelectObject (hdc, GetSysColorPen (COLOR_3DSHADOW));
-            MoveToEx (hdc, rc.left, rc.bottom / 2 - 1, NULL);
-            LineTo (hdc, rc.right - 1, rc.bottom / 2 - 1);
-            SelectObject (hdc, GetSysColorPen (COLOR_3DHIGHLIGHT));
-            MoveToEx (hdc, rc.left, rc.bottom / 2, NULL);
-            LineTo (hdc, rc.right, rc.bottom / 2);
-            LineTo (hdc, rc.right, rc.bottom / 2 - 1);
-            SelectObject (hdc, hpen);
-            break;
-
-        case SS_ETCHEDVERT:
-            hpen = SelectObject (hdc, GetSysColorPen (COLOR_3DSHADOW));
-            MoveToEx (hdc, rc.right / 2 - 1, rc.top, NULL);
-            LineTo (hdc, rc.right / 2 - 1, rc.bottom - 1);
-            SelectObject (hdc, GetSysColorPen (COLOR_3DHIGHLIGHT));
-            MoveToEx (hdc, rc.right / 2, rc.top, NULL);
-            LineTo (hdc, rc.right / 2, rc.bottom);
-            LineTo (hdc, rc.right / 2 -1 , rc.bottom);
-            SelectObject (hdc, hpen);
-            break;
-
+	case SS_ETCHEDHORZ:
+	    DrawEdge(hdc,&rc,EDGE_ETCHED,BF_TOP|BF_BOTTOM);
+	    break;
+	case SS_ETCHEDVERT:
+	    DrawEdge(hdc,&rc,EDGE_ETCHED,BF_LEFT|BF_RIGHT);
+	    break;
         case SS_ETCHEDFRAME:
             DrawEdge (hdc, &rc, EDGE_ETCHED, BF_RECT);
             break;
