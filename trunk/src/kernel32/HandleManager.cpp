@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.83 2001-12-05 14:15:56 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.84 2001-12-07 14:13:36 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -1072,6 +1072,7 @@ HFILE HMCreateFile(LPCSTR lpFileName,
     HMHandleTemp.dwCreation = dwCreationDisposition;
     HMHandleTemp.dwFlags    = dwFlagsAndAttributes;
     HMHandleTemp.lpHandlerData = NULL;
+    HMHandleTemp.hWin32Handle  = iIndexNew;
     HMHandleTemp.lpDeviceData  = pDevData;
   }
 

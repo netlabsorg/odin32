@@ -1,4 +1,4 @@
-/* $Id: overlappedio.h,v 1.5 2001-12-07 11:28:11 sandervl Exp $ */
+/* $Id: overlappedio.h,v 1.6 2001-12-07 14:13:38 sandervl Exp $ */
 
 /*
  * Win32 overlapped IO class
@@ -12,10 +12,11 @@
 #ifndef __OVERLAPPEDIO_H__
 #define __OVERLAPPEDIO_H__
 
-#define NR_ASYNC_OPERATIONS 3
+#define NR_ASYNC_OPERATIONS     4
 #define ASYNC_INDEX_READ        0
 #define ASYNC_INDEX_WRITE       1
 #define ASYNC_INDEX_POLL        2
+#define ASYNC_INDEX_BUSY        3
 
 #define ASYNCIO_READ        1
 #define ASYNCIO_WRITE       2
@@ -30,21 +31,40 @@ typedef struct {
     OverlappedIOHandler *lpOverlappedObj;
 } OVERLAPPED_THREAD_PARAM, *LPOVERLAPPED_THREAD_PARAM;
 
-typedef struct tagOVERLAPPED_ODIN{
-  DWORD               dwAsyncType;
-  HANDLE              hHandle;
-  LPCVOID             lpBuffer;
-  DWORD               nNumberOfBytes;
-  DWORD               dwTimeOut;
-  LPOVERLAPPED        lpOverlapped;
-  LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine;
-  DWORD              *lpdwResult;
-  DWORD               dwLastError;
-  DWORD               dwUserData;
-  tagOVERLAPPED_ODIN *next;
-} ASYNCIOREQUEST, *LPASYNCIOREQUEST;
 
-typedef BOOL (* LPOVERLAPPED_HANDLER)(LPASYNCIOREQUEST lpRequest, DWORD *lpdwResult, DWORD *lpdwTimeOut);
+class ASYNCIOREQUEST
+{
+public:
+    ASYNCIOREQUEST()
+    {
+        memset(this, 0, sizeof(ASYNCIOREQUEST));
+        hEventCancel = ::CreateEventA(NULL, TRUE, FALSE, NULL);
+        if(hEventCancel == 0) DebugInt3();
+    };
+
+    ~ASYNCIOREQUEST()
+    {
+        ::CloseHandle(hEventCancel);
+    };
+
+    DWORD               dwAsyncType;
+    HANDLE              hHandle;
+    LPCVOID             lpBuffer;
+    DWORD               nNumberOfBytes;
+    DWORD               dwTimeOut;
+    LPOVERLAPPED        lpOverlapped;
+    LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine;
+    DWORD              *lpdwResult;
+    DWORD               dwLastError;
+    DWORD               dwEventMask;
+    DWORD               dwUserData;
+    HANDLE              hEventCancel;
+    ASYNCIOREQUEST     *next;
+};
+
+typedef ASYNCIOREQUEST *LPASYNCIOREQUEST;
+
+typedef DWORD (* LPOVERLAPPED_HANDLER)(LPASYNCIOREQUEST lpRequest, DWORD *lpdwResult, DWORD *lpdwTimeOut);
 
 enum OverlappedIOError {
   InvalidParameter, OutOfMemory, EventCreationFailed, ThreadCreationFailed
@@ -77,6 +97,7 @@ public:
                      DWORD         dwTimeOut = INFINITE);
 
      BOOL   WaitForEvent(HANDLE        hHandle,
+                         DWORD         dwEventMask,
                          LPDWORD       lpfdwEvtMask,
                          LPOVERLAPPED  lpOverlapped,
                          LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine,
@@ -115,6 +136,7 @@ private:
      //[ASYNC_INDEX_READ]  list of pending read (+ write if half-duplex mode) operations
      //[ASYNC_INDEX_WRITE] list of pending write (full-duplex mode) operations
      //[ASYNC_INDEX_POLL]  list of pending poll operations
+     //[ASYNC_INDEX_BUSY]  list of operations that are being handled
      LPASYNCIOREQUEST     pending[NR_ASYNC_OPERATIONS];
 
      friend       DWORD CALLBACK OverlappedIOThread(LPVOID lpThreadParam);

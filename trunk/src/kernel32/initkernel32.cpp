@@ -1,4 +1,4 @@
-/* $Id: initkernel32.cpp,v 1.10 2001-12-07 11:28:11 sandervl Exp $
+/* $Id: initkernel32.cpp,v 1.11 2001-12-07 14:13:37 sandervl Exp $
  *
  * KERNEL32 DLL entry point
  *
@@ -215,8 +215,6 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
 void APIENTRY cleanupKernel32(ULONG ulReason)
 {
     dprintf(("kernel32 exit %d\n", ulReason));
-
-    HMDeviceCommClass::CloseOverlappedIOHandlers();
 
     //Flush and delete all open memory mapped files
     Win32MemMap::deleteAll();

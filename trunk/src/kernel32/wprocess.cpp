@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.140 2001-12-07 11:28:11 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.141 2001-12-07 14:13:39 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -419,12 +419,12 @@ VOID WIN32API ExitProcess(DWORD exitcode)
 
     SetOS2ExceptionChain(-1);
 
+    HMDeviceCommClass::CloseOverlappedIOHandlers();
+
     if(WinExe) {
         delete(WinExe);
         WinExe = NULL;
     }
-
-    HMDeviceCommClass::CloseOverlappedIOHandlers();
 
     //Note: Needs to be done after deleting WinExe (destruction of exe + dll objects)
     //Flush and delete all open memory mapped files

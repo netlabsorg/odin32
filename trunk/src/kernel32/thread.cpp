@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.38 2001-12-03 12:13:10 sandervl Exp $ */
+/* $Id: thread.cpp,v 1.39 2001-12-07 14:13:38 sandervl Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -324,13 +324,18 @@ DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
   CONTROL87(0x27F, 0xFFF);
   rc = AsmCallThreadHandler(winthread, userdata);
 
-  HMSetThreadTerminated(GetCurrentThread());
-  winteb->o.odin.exceptFrame = 0;
-  Win32DllBase::detachThreadFromAllDlls();  //send DLL_THREAD_DETACH message to all dlls
-  Win32DllBase::tlsDetachThreadFromAllDlls(); //destroy TLS structures of all dlls
-  WinExe->tlsDetachThread();		  //destroy TLS structure of main exe
-  DestroyTIB();
-  OS2UnsetExceptionHandler((void *)&exceptFrame);
+  if(fExitProcess) {
+      OSLibDosExitThread(rc);
+  }
+  else {
+      HMSetThreadTerminated(GetCurrentThread());
+      winteb->o.odin.exceptFrame = 0;
+      Win32DllBase::detachThreadFromAllDlls();  //send DLL_THREAD_DETACH message to all dlls
+      Win32DllBase::tlsDetachThreadFromAllDlls(); //destroy TLS structures of all dlls
+      if(WinExe) WinExe->tlsDetachThread();		  //destroy TLS structure of main exe
+      DestroyTIB();
+      OS2UnsetExceptionHandler((void *)&exceptFrame);
+  }
 
   return rc;
 }

@@ -1,4 +1,4 @@
-/* $Id: winexelx.cpp,v 1.9 2001-04-22 10:38:11 sandervl Exp $ */
+/* $Id: winexelx.cpp,v 1.10 2001-12-07 14:13:39 sandervl Exp $ */
 
 /*
  * Win32 LX Exe class (compiled in OS/2 using Odin32 api)
@@ -122,6 +122,7 @@ ULONG Win32LxExe::start()
 
   OS2UnsetExceptionHandler((void *)&exceptFrame);
 
+  ExitProcess(rc);
   return rc;
 }
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.89 2001-12-03 12:13:09 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.90 2001-12-07 14:13:37 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -2949,6 +2949,12 @@ DWORD OSLibDosSetPriority(ULONG tid, int priority)
 void  OSLibDosSleep(ULONG msecs)
 {
   DosSleep(msecs);
+}
+//******************************************************************************
+//******************************************************************************
+void OSLibDosExitThread(ULONG retcode)
+{
+  DosExit(EXIT_THREAD, retcode);
 }
 //******************************************************************************
 //******************************************************************************

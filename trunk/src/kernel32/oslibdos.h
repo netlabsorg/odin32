@@ -1,4 +1,4 @@
-/* $Id: oslibdos.h,v 1.41 2001-12-03 12:13:09 sandervl Exp $ */
+/* $Id: oslibdos.h,v 1.42 2001-12-07 14:13:38 sandervl Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -359,6 +359,7 @@ BOOL  OSLibDosQueryAffinity(DWORD fMaskType, DWORD *pdwThreadAffinityMask);
 
 DWORD OSLibDosDevConfig(PVOID pdevinfo, ULONG item);
 void  OSLibDosSleep(ULONG msecs);
+void  OSLibDosExitThread(ULONG retcode);
 
 DWORD OSLibDosSetPriority(ULONG tid, int priority);
 
