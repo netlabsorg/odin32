@@ -6,15 +6,22 @@
 extern "C" {
 #endif
 
-void _Optlink __ctordtorInit( void );
-#define ctordtorInit	__ctordtorInit
-
 #if (__IBMCPP__ == 300) || (__IBMC__ == 300)
+void _Optlink __ctordtorInit( void );
+#define ctordtorInit()	__ctordtorInit()
+
 void _Optlink __ctordtorTerm( void );
-#define ctordtorTerm	__ctordtorTerm
+#define ctordtorTerm()	__ctordtorTerm()
+
+#elif (__IBMCPP__ == 360) || (__IBMC__ == 360)
+void _Optlink __ctordtorInit( int flag );
+#define ctordtorInit()	__ctordtorInit(0)
+
+void _Optlink __ctordtorTerm( int flag );
+#define ctordtorTerm()	__ctordtorTerm(0)
+
 #else
-void CDECL _ctordtorTerm( int workaroundforstupidcompilerbug );
-#define ctordtorTerm()	_ctordtorTerm(1)
+#error "Unknown compiler!"
 #endif
 
 
