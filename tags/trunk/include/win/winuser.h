@@ -1,4 +1,4 @@
-/* $Id: winuser.h,v 1.14 1999-11-03 22:02:52 cbratschi Exp $ */
+/* $Id: winuser.h,v 1.15 1999-11-04 19:05:26 phaller Exp $ */
 
 #ifndef __INCLUDE_WINUSER_H
 #define __INCLUDE_WINUSER_H
@@ -3643,8 +3643,8 @@ HWND      WINAPI WindowFromPoint(POINT);
 BOOL      WINAPI WinHelpA(HWND,LPCSTR,UINT,DWORD);
 BOOL      WINAPI WinHelpW(HWND,LPCWSTR,UINT,DWORD);
 #define     WinHelp WINELIB_NAME_AW(WinHelp)
-UINT      WINAPI WNetAddConnectionA(LPCSTR,LPCSTR,LPCSTR);
-UINT      WINAPI WNetAddConnectionW(LPCWSTR,LPCWSTR,LPCWSTR);
+DWORD     WINAPI WNetAddConnectionA(LPCSTR,LPCSTR,LPCSTR);
+DWORD     WINAPI WNetAddConnectionW(LPCWSTR,LPCWSTR,LPCWSTR);
 #define     WNetAddConnection WINELIB_NAME_AW(WNetAddConnection)
 INT       WINAPIV wsnprintfA(LPSTR,UINT,LPCSTR,...);
 INT       WINAPIV wsnprintfW(LPWSTR,UINT,LPCWSTR,...);
