@@ -1,4 +1,3 @@
-/* $Id: heap.cpp,v 1.39 2001-10-15 17:17:48 sandervl Exp $ */
 
 /*
  * Win32 heap API functions for OS/2
@@ -31,13 +30,32 @@ ODINDEBUGCHANNEL(KERNEL32-HEAP)
 static HANDLE processheap = NULL;
 OS2Heap *OS2ProcessHeap = NULL;
 
+
+
+//******************************************************************************
+// Fast Heap Handle Management
+//******************************************************************************
+
+extern HANDLE   fhhm_lastHandle;
+extern OS2Heap* fhhm_lastHeap;
+
+#define FINDHEAP(curheap, hHeap)     \
+  if (fhhm_lastHeap &&               \
+      hHeap == fhhm_lastHandle)      \
+    curheap = fhhm_lastHeap;         \
+  else                               \
+    curheap = OS2Heap::find(hHeap);  \
+
+
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTIONNODBG3(LPVOID, HeapAlloc, HANDLE, hHeap, DWORD, dwFlags, 
-                   DWORD, dwBytes)
+LPVOID WIN32API HeapAlloc(HANDLE hHeap, 
+                          DWORD dwFlags,
+                          DWORD dwBytes)
 {
- OS2Heap *curheap = OS2Heap::find(hHeap);
- LPVOID   rc;
+  OS2Heap *curheap;
+  FINDHEAP(curheap,hHeap)
+  LPVOID   rc;
 
   if(curheap == NULL)
         return(NULL);
@@ -48,10 +66,13 @@ ODINFUNCTIONNODBG3(LPVOID, HeapAlloc, HANDLE, hHeap, DWORD, dwFlags,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTIONNODBG4(LPVOID, HeapReAlloc, HANDLE, hHeap, DWORD, dwFlags, LPVOID, 
-                   lpMem, DWORD, dwBytes)
+LPVOID HeapReAlloc(HANDLE hHeap, 
+                   DWORD dwFlags,
+                   LPVOID lpMem, 
+                   DWORD dwBytes)
 {
- OS2Heap *curheap = OS2Heap::find(hHeap);
+  OS2Heap *curheap;
+  FINDHEAP(curheap,hHeap)
 
   dprintf2(("HeapReAlloc %x %x %x %X bytes", hHeap, dwFlags, lpMem, dwBytes));
   if(curheap == NULL)
@@ -65,15 +86,22 @@ ODINFUNCTIONNODBG4(LPVOID, HeapReAlloc, HANDLE, hHeap, DWORD, dwFlags, LPVOID,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTIONNODBG3(BOOL, HeapFree, HANDLE, hHeap, DWORD, dwFlags, LPVOID, lpMem)
+BOOL WIN32API HeapFree(HANDLE hHeap, 
+                       DWORD dwFlags,
+                       LPVOID lpMem)
 {
- OS2Heap *curheap = OS2Heap::find(hHeap);
+  OS2Heap *curheap;
+  FINDHEAP(curheap,hHeap)
 
   dprintf2(("HeapFree %X", lpMem));
   if(curheap == NULL)
-        return(FALSE);
+    return(FALSE);
 
-  return(curheap->Free(dwFlags, lpMem));
+  BOOL fResult = curheap->Free(dwFlags, lpMem);
+  if (fResult == FALSE)
+    SetLastError(ERROR_INVALID_HANDLE); /// @@@PH possibly wrong return code!
+  
+  return fResult;
 }
 //******************************************************************************
 //******************************************************************************
@@ -103,7 +131,8 @@ ODINFUNCTIONNODBG3(HANDLE, HeapCreate, DWORD, flOptions, DWORD, dwInitialSize,
 //******************************************************************************
 ODINFUNCTIONNODBG1(BOOL, HeapDestroy, HANDLE, hHeap)
 {
- OS2Heap *curheap = OS2Heap::find(hHeap);
+  OS2Heap *curheap;
+  FINDHEAP(curheap,hHeap)
 
   dprintf2(("HeapDestroy %X", hHeap));
   if(curheap == NULL)
@@ -116,7 +145,8 @@ ODINFUNCTIONNODBG1(BOOL, HeapDestroy, HANDLE, hHeap)
 //******************************************************************************
 ODINFUNCTIONNODBG3(DWORD, HeapSize, HANDLE, hHeap, DWORD, arg2, PVOID, lpMem)
 {
- OS2Heap *curheap = OS2Heap::find(hHeap);
+  OS2Heap *curheap;
+  FINDHEAP(curheap,hHeap)
 
   dprintf2(("HeapSize %X %x %x", hHeap, arg2, lpMem));
   if(curheap == NULL)
@@ -135,7 +165,8 @@ ODINFUNCTIONNODBG2(DWORD, HeapCompact, HANDLE, hHeap, DWORD, dwFlags)
 //******************************************************************************
 ODINFUNCTIONNODBG3(BOOL, HeapValidate, HANDLE, hHeap, DWORD, dwFlags, LPCVOID, lpMem)
 {
- OS2Heap *curheap = OS2Heap::find(hHeap);
+  OS2Heap *curheap;
+  FINDHEAP(curheap,hHeap)
 
   dprintf2(("KERNEL32: HeapValidate %x %x %x", hHeap, dwFlags, lpMem));
   if(curheap == NULL)
@@ -167,10 +198,8 @@ ODINFUNCTIONNODBG2(BOOL, HeapWalk, HANDLE, hHeap, LPVOID, lpEntry)
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTIONNODBG0(HANDLE, GetProcessHeap)
+HANDLE WIN32API GetProcessHeap()
 {
- HANDLE hHeap;
-
 //    dprintf2(("KERNEL32: GetProcessHeap\n"));
     //SvL: Only one process heap per process
     if(processheap == NULL) {
@@ -241,7 +270,6 @@ ODINFUNCTION2(HGLOBAL, GlobalAlloc,
    if((flags & GMEM_MOVEABLE)==0) /* POINTER */
    {
       palloc=HeapAlloc(GetProcessHeap(), hpflags, size);
-      dprintf(("KERNEL32: GlobalAlloc %x %d returned %x", flags, size, palloc));
       return (HGLOBAL) palloc;
    }
    else  /* HANDLE */
@@ -269,7 +297,6 @@ ODINFUNCTION2(HGLOBAL, GlobalAlloc,
       
       /* HeapUnlock(heap); */
        
-      dprintf(("KERNEL32: GlobalAlloc %x %d returned %x", flags, size, INTERN_TO_HANDLE(pintern)));
       return INTERN_TO_HANDLE(pintern);
    }
 }
@@ -476,7 +503,10 @@ ODINFUNCTION3(HGLOBAL, GlobalReAlloc,
    DWORD heap_flags = (flags & GMEM_ZEROINIT) ? HEAP_ZERO_MEMORY : 0;
 
 #ifdef __WIN32OS2__
-   hmem = GlobalHandle((LPCVOID)hmem);
+/* @@@PH 20011017
+  convert a handle to a handle ???
+  hmem = GlobalHandle((LPCVOID)hmem);
+  */
 #endif
 
    hnew = 0;
@@ -580,7 +610,12 @@ ODINFUNCTION1(HGLOBAL, GlobalFree,
 {
    PGLOBAL32_INTERN pintern;
    HGLOBAL        hreturned = 0;
-
+  
+  // 2001-10-17 PH
+  // Note: we do have a *HANDLE* here still ...
+  // any may not terminate w/o setting SetLastError()
+  // plus returning 0 means "OK"!
+#if 0
    /* verify lpMem address */
    if (hmem >= (HGLOBAL)ulMaxAddr || hmem < (HGLOBAL)0x10000)
    {
@@ -588,10 +623,14 @@ ODINFUNCTION1(HGLOBAL, GlobalFree,
 //        DebugInt3();
     	return 0;
    }
-
+#endif
+  
    if(ISPOINTER(hmem)) /* POINTER */
    {
-      if(!HeapFree(GetProcessHeap(), 0, (LPVOID) hmem)) hmem = 0;
+     if(HeapFree(GetProcessHeap(), 0, (LPVOID) hmem) == TRUE)
+       hreturned = 0;    // success
+     else
+       hreturned = hmem; // failure
    }
    else  /* HANDLE */
    {
@@ -612,8 +651,16 @@ ODINFUNCTION1(HGLOBAL, GlobalFree,
 	 if(!HeapFree(GetProcessHeap(), 0, pintern))
 	    hreturned=hmem;
       }      
+      else
+      {
+        // this was not a heap handle!
+        SetLastError(ERROR_INVALID_HANDLE);
+        hreturned = hmem;
+      }
+     
       /* HeapUnlock(heap); */
    }
+  
    return hreturned;
 }
 
