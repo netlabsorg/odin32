@@ -17,6 +17,7 @@ static const char * const SHELL_People[] =
     "Jeroen van den Horn",
     "Patrick Haller",
     "Achim Hasenmueller",
+    "KO Myung-Hun",
     "Kevin Langman",
     "Bart van Leeuwen",
     "Sander van Leeuwen",
