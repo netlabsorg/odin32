@@ -1,7 +1,12 @@
-/* $Id: changelog,v 1.2290 2002-08-28 02:17:30 bird Exp $ */
+/* $Id: changelog,v 1.2291 2002-08-28 05:05:01 bird Exp $ */
 
  2002-08-27: knut st. osmundsen <bird@anduin   >
-    - MAKE:     o Tweaked cyclic dependency checks performance a little bit more.
+    - FASTDEP:  o Tweaked cyclic dependency checks performance a little bit more.
+    - MAKE      o Splitted out linker and library configs into separat config
+                  files. Both to have less files to update, and to be able to
+                  easer choose linker or archiver.
+                o Tried to make ilink and optional linker for watcom, but
+                  it produces bad executable files. Will fix this later.
 
  2002-08-27: Platon Fomichev <platon@innotek   >
     - USER32:   o Added support for WS_EX_TOPMOST
