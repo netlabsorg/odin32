@@ -1,4 +1,4 @@
-/* $Id: user32.h,v 1.3 1999-09-15 23:20:41 sandervl Exp $ */
+/* $Id: user32.h,v 1.4 1999-09-25 19:07:34 sandervl Exp $ */
 
 /*****************************************************************************
  * Name      : USER32.H
@@ -13,6 +13,7 @@
 #include <os2win.h>
 #include <stdlib.h>
 #include <string.h>
+#include <nameid.h>
 
 inline void ConvertFontAW(LOGFONTA *fa, LOGFONTW *fw)
 {

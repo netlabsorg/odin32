@@ -1,4 +1,4 @@
-/* $Id: winimage.cpp,v 1.1 1999-09-15 23:33:02 sandervl Exp $ */
+/* $Id: winimage.cpp,v 1.2 1999-09-25 19:06:17 sandervl Exp $ */
 
 /*
  * Win32 PE Image class
@@ -35,7 +35,7 @@
 #include "winres.h"
 #include "oslibmisc.h"
 #include "initterm.h"
-#include <win\virtual.h>
+#include <virtual.h>
 
 char szErrorTitle[]     = "Win32 for OS/2";
 char szMemErrorMsg[]    = "Memory allocation failure";
