@@ -1,4 +1,4 @@
-/* $Id: fastdep.c,v 1.5 2000-03-15 15:02:11 bird Exp $
+/* $Id: fastdep.c,v 1.6 2000-03-15 17:02:29 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
@@ -104,6 +104,18 @@ typedef struct _ConfigEntry
 } CONFIGENTRY, *PCONFIGENTRY;
 
 
+/**
+ * Dependant Rule
+ */
+typedef struct _DepRule
+{
+    char *           pszRule;          /* Pointer to rule name */
+    int              cDeps;            /* Entries in the dependant array. */
+    char **          papszDep;         /* Pointer to an array of pointers to dependants. */
+    struct _DepRule *pNext;            /* Pointer to the next rule */
+} DEPRULE, *PDEPRULE;
+
+
 /*******************************************************************************
 *   Internal Functions                                                         *
 *******************************************************************************/
@@ -135,15 +147,37 @@ static char *findEndOfWord(char *psz);
 static char *findStartOfWord(char *psz, const char *pszStart);
 #endif
 
+/* file helpers */
+static signed long fsize(FILE *phFile);
+
+/* text helpers */
+static char *trim(char *psz);
+static char *trimR(char *psz);
+
+/* textbuffer */
+static void *textbufferCreate(const char *pszFilename);
+static void  textbufferDestroy(void *pvBuffer);
+static char *textbufferNextLine(void *pvBuffer, char *psz);
+
+/* depend workers */
+static BOOL  depReadFile(const char *pszFilename);
+static BOOL  depWriteFile(const char *pszFilename);
+static void *depAddRule(const char *pszRule);
+static BOOL  depAddDepend(void *pvRule, const char *pszDep);
+
+static BOOL  depCleanFile(const char *pszFilename);
+
+
 /*******************************************************************************
 *   Global Variables                                                           *
 *******************************************************************************/
+static PDEPRULE pdepList = NULL;
+
 static const char pszDefaultDepFile[] = ".depend";
 static const char *apszExtC_CPP[] = {"c", "sqc", "cpp", "h", "hpp", NULL};
 static const char *apszExtAsm[]   = {"asm", "inc", NULL};
 static const char *apszExtRC[]    = {"rc", "dlg", NULL};
 static const char *apszExtCOBOL[] = {"cbl", "cob", "sqb", NULL};
-
 static CONFIGENTRY aConfig[] =
 {
     {
@@ -1473,8 +1507,381 @@ static char *findStartOfWord(const char *psz, const char *pszStart)
 }
 #endif
 
+/**
+ * Find the size of a file.
+ * @returns   Size of file. -1 on error.
+ * @param     phFile  File handle.
+ */
+static signed long fsize(FILE *phFile)
+{
+    int ipos;
+    signed long cb;
+
+    if ((ipos = ftell(phFile)) < 0
+        ||
+        fseek(phFile, 0, SEEK_END) != 0
+        ||
+        (cb = ftell(phFile)) < 0
+        ||
+        fseek(phFile, ipos, SEEK_SET) != 0
+        )
+        cb = -1;
+    return cb;
+}
+
+
+
+/**
+ * Trims a string, ie. removing spaces (and tabs) from both ends of the string.
+ * @returns   Pointer to first not space or tab char in the string.
+ * @param     psz   Pointer to the string which is to be trimmed.
+ * @status    completely implmented.
+ * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ */
+static char *trim(char *psz)
+{
+    int i;
+    if (psz == NULL)
+        return NULL;
+    while (*psz == ' ' || *psz == '\t')
+        psz++;
+    i = strlen(psz) - 1;
+    while (i >= 0 && (psz[i] == ' ' || *psz == '\t'))
+        i--;
+    psz[i+1] = '\0';
+    return psz;
+}
+
+
+/**
+ * Right trims a string, ie. removing spaces (and tabs) from the end of the stri
+ * @returns   Pointer to the string passed in.
+ * @param     psz   Pointer to the string which is to be right trimmed.
+ * @status    completely implmented.
+ * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ */
+static char *trimR(char *psz)
+{
+    int i;
+    if (psz == NULL)
+        return NULL;
+    i = strlen(psz) - 1;
+    while (i >= 0 && (psz[i] == ' ' || *psz == '\t'))
+        i--;
+    psz[i+1] = '\0';
+    return psz;
+}
+
+
+/**
+ * Creates a memory buffer for a text file.
+ * @returns   Pointer to file memoryblock. NULL on error.
+ * @param     pszFilename  Pointer to filename string.
+ */
+static void *textbufferCreate(const char *pszFilename)
+{
+    void *pvFile = NULL;
+    FILE *phFile;
+
+    phFile = fopen(pszFilename, "r");
+    if (phFile != NULL)
+    {
+        signed long cbFile = fsize(phFile);
+        if (cbFile != -1)
+        {
+            pvFile = malloc(cbFile + 1);
+            if (pvFile != NULL)
+            {
+                memset(pvFile, 0, cbFile + 1);
+                if (fread(pvFile, 1, cbFile, phFile) == 0)
+                {   /* failed! */
+                    free(pvFile);
+                    pvFile = NULL;
+                }
+            }
+        }
+        fclose(phFile);
+    }
+    return pvFile;
+}
+
+
+/**
+ * Destroys a text textbuffer.
+ * @param     pvBuffer   Buffer handle.
+ */
+static void textbufferDestroy(void *pvBuffer)
+{
+    free(pvBuffer);
+}
+
+
+/**
+ * Gets the next line from an textbuffer.
+ * @returns   Pointer to the next line.
+ * @param     pvBuffer  Buffer handle.
+ * @param     psz       Pointer to current line.
+ *                      NULL is passed in to get the first line.
+ */
+static char *textbufferNextLine(void *pvBuffer, register char *psz)
+{
+    register char ch;
+
+    /* if first line psz is NULL. */
+    if (psz == NULL)
+        return (char*)pvBuffer;
+
+    /* skip till end of file or end of line. */
+    ch = *psz;
+    while (ch != '\0' && ch != '\n' && ch != '\r')
+        ch = *++psz;
+
+    /* skip line end */
+    if (ch == '\n')
+        psz++;
+    if (*psz == '\r')
+        psz++;
+
+    return psz;
+}
+
+
+/**
+ * Appends a depend file to the internal file.
+ */
+static BOOL  depReadFile(const char *pszFilename)
+{
+    void *pvFile;
+    char *pszNext;
+    BOOL  fMoreDeps = FALSE;
+    void *pvRule = NULL;
+
+    /* read depend file */
+    pvFile = textbufferCreate(pszFilename);
+    if (pvFile == NULL)
+        return FALSE;
+
+    /* parse the original depend file */
+    pszNext = pvFile;
+    while (*pszNext != '\0')
+    {
+        int   i;
+        int   cch;
+        char *psz;
+
+        /* get the next line. */
+        psz = pszNext;
+        pszNext = textbufferNextLine(pvFile, pszNext);
+
+        /*
+         * Process the current line:
+         *   Start off by terminating the line.
+         *   Trim the line,
+         *   Skip empty lines.
+         *   If not looking for more deps Then
+         *     Check if new rule starts here.
+         *   Endif
+         *
+         *   If more deps to last rule Then
+         *     Get dependant name.
+         *   Endif
+         */
+        i = -1;
+        while (psz >= &pszNext[i] && pszNext[i] == '\n' || pszNext[i] == '\r')
+            pszNext[i--] = '\0';
+        trimR(psz);
+        cch = strlen(psz);
+        if (cch == 0)
+            continue;
+
+        /* new rule? */
+        if (!fMoreDeps && *psz != ' ' && *psz != '\t' && *psz != '\0')
+        {
+            while (psz[i] != '\0')
+            {
+                if (psz[i] == ':'
+                    && (psz[i+1] == ' '
+                        || psz[i+1] == '\t'
+                        || psz[i+1] == '\0'
+                        || psz[i+1] == '\\'
+                        )
+                    )
+                    break;
+                i++;
+            }
+
+            if (psz[i] == ':')
+            {   /* new rule! */
+                psz[i] = '\0';
+                pvRule = depAddRule(trimR(psz));
+                psz += i + 1;
+                fMoreDeps = TRUE;
+            }
+        }
+
+        /* more dependants */
+        if (fMoreDeps)
+        {
+            if (cch > 0 && psz[cch-1] == '\\')
+            {
+                fMoreDeps = TRUE;
+                psz[cch-1] = '\0';
+            }
+            else
+                fMoreDeps = FALSE;
+            psz = trim(psz);
+            if (*psz != '\0')
+                depAddDepend(pvRule, psz);
+        }
+    } /* while */
+
+
+    /* return succesfully */
+    textbufferDestroy(pvFile);
+    return TRUE;
+}
+
+/**
+ *
+ * @returns   Success indicator.
+ * @params    pszFilename  Pointer to name of the output file.
+ */
+static BOOL  depWriteFile(const char *pszFilename)
+{
+    FILE *phFile;
+    phFile = fopen(pszFilename, "w");
+    if (phFile != NULL)
+    {
+        PDEPRULE pdep = pdepList;
+        while (pdep != NULL)
+        {
+
+            fprintf(phFile, "%s:", pdep->pszRule);
+            if (pdep->papszDep != NULL)
+            {
+                char **ppsz = pdep->papszDep;
+                while (*ppsz != NULL)
+                {
+                    fprintf(phFile, " \\\n    %s", *ppsz);
+
+                    /* next dependant */
+                    ppsz++;
+                }
+            }
+            fputs("\n\n", phFile);
+
+            /* next rule */
+            pdep = pdep->pNext;
+        }
+
+        fclose(phFile);
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
+/**
+ * Adds a rule to the list of dependant rules.
+ * @returns   Rule handle. NULL if rule exists/error.
+ * @param     pszRule   Pointer to rule text. Empty strings are banned!
+ *
+ */
+static void *depAddRule(const char *pszRule)
+{
+    PDEPRULE pdepPrev = NULL;
+    PDEPRULE pdep = pdepList;
+    PDEPRULE pNew;
+
+    /* find location */
+    while (pdep != NULL &&
+           stricmp(pdep->pszRule, pszRule) < 0
+           )
+    {
+        pdep = pdepPrev;
+        pdep = pdep->pNext;
+    }
+
+    /* check if matching rule name */
+    if (pdep != NULL && stricmp(pdep->pszRule, pszRule) == 0)
+        return NULL;
+
+    /* allocate a new rule structure and fill in data */
+    pNew = malloc(sizeof(DEPRULE));
+    if (pNew == NULL)
+        return NULL;
+    pNew->pszRule = malloc(strlen(pszRule) + 1);
+    if (pNew->pszRule == NULL)
+    {
+        free(pNew);
+        return NULL;
+    }
+    strcpy(pNew->pszRule, pszRule);
+    pNew->cDeps = 0;
+    pNew->papszDep = NULL;
+
+    /* link in module (before pdep) */
+    pNew->pNext = pdep;
+    if (pdepPrev == NULL)
+        pdepList = pNew;
+    else
+        pdepPrev->pNext = pNew;
+
+    return pNew;
+}
+
+
+
+/**
+ * Adds a dependant to a rule.
+ * @returns   Successindicator.
+ * @param     pvRule   Rule handle.
+ * @param     pszDep   Pointer to dependant name
+ */
+static BOOL  depAddDepend(void *pvRule, const char *pszDep)
+{
+    PDEPRULE pdep = (PDEPRULE)pvRule;
+
+    /* allocate more array space */
+    if (pdep->cDeps == 0 || (pdep->cDeps + 2) % 32 == 0)
+    {
+        pdep->papszDep = realloc(pdep->papszDep, 32 * sizeof(char*));
+        if (pdep->papszDep == NULL)
+        {
+            pdep->cDeps = 0;
+            return FALSE;
+        }
+    }
+
+    /* allocate string space and copy pszDep */
+    if ((pdep->papszDep[pdep->cDeps] = malloc(strlen(pszDep) + 1)) == NULL)
+        return FALSE;
+    strcpy(pdep->papszDep[pdep->cDeps], pszDep);
+
+    /* terminate array and increment dep count */
+    pdep->papszDep[++pdep->cDeps] = NULL;
+
+    /* successful! */
+    return TRUE;
+}
+
+
+
+/**
+ * Removes double dependencies.
+ * @returns   Success indicator.
+ * @param     pszFilename  Depend filename.
+ */
+static BOOL depCleanFile(const char *pszFilename)
+{
+    if (depReadFile(pszFilename))
+        return depWriteFile(pszFilename);
+    return FALSE;
+}
+
+
 /*
- * Testin purpose.
+ * Testing purpose.
  */
 #include <os2.h>
 
