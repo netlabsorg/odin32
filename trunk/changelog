@@ -1,4 +1,13 @@
-/* $Id: changelog,v 1.1729 2001-10-09 20:24:34 sandervl Exp $ */
+/* $Id: changelog,v 1.1730 2001-10-10 11:05:11 phaller Exp $ */
+
+ 2001-10-10: Patrick Haller <patrick.haller@innotek.de>
+    - KERNEL32: o added IOCTL_CDROM_EJECT_MEDIA
+                        IOCTL_CDROM_LOAD_MEDIA
+                        IOCTL_CDROM_PAUSE_AUDIO
+                        IOCTL_CDROM_STOP_AUDIO
+                        IOCTL_CDROM_RESUME_AUDIO
+                o added IOCTL_STORAGE_EJECT_MEDIA
+                        IOCTL_STORAGE_LOAD_MEDIA
 
  2001-10-09: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Image header page must be readonly
