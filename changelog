@@ -1,4 +1,10 @@
- /* $Id: changelog,v 1.940 2000-05-15 19:06:30 sandervl Exp $ */
+ /* $Id: changelog,v 1.941 2000-05-16 07:16:04 jeroen Exp $ */
+
+ 2000-05-16: Jeroen van den Horn <J.vandenHorn@fibre.a2000.nl>
+    - GDI32: Fixed bug in font.cpp
+             iFontRename should use strncpy instead of memcpy since source
+             string passed may be smaller than amount of bytes to copy
+             resulting in GPF.
 
  2000-05-14: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
     - WNASPI32: Implemented working ASPI.
@@ -14,15 +20,15 @@
     - KERNEL32: Print name of image referenced by EIP (stackdump)
 
  2000-05-12: Sander van Leeuwen <sandervl@xs4all.nl>
-    - USER32:   
+    - USER32:
                 Fixed bug in HOOK_RemoveHook (wrong call for enter semaphore method)
                 SetSysColors bugfix (called itself for some reason)
                 Fixed wrong dispatch of messages under certain conditions
-    - COMDLG32: 
+    - COMDLG32:
                 Fixed initial directory for GetOpen/SaveFileNameW
                 If initial dir string == "" -> use current dir (not only
                 when ptr equals NULL) (verified this behaviour in NT 4)
-    - GDI32:    
+    - GDI32:
                 Do manual image flip in dib section blit (fixes wrong position
                 of Palm Emulator bitmap)
                 Might also fix reversed video in RealPlayer 7 (Warp 4 FP13/WSeB FP1)
