@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.24 2001-06-01 19:59:00 sandervl Exp $ */
+/* $Id: text.cpp,v 1.25 2001-06-03 12:01:41 sandervl Exp $ */
 
 /*
  * GDI32 text apis
@@ -859,7 +859,7 @@ BOOL WIN32API TextOutA(HDC hdc,int nXStart,int nYStart,LPCSTR lpszString,int cbS
 //******************************************************************************
 BOOL WIN32API TextOutW(HDC hdc,int nXStart,int nYStart,LPCWSTR lpszString,int cbString)
 {
-  dprintf(("GDI32: TextOutW"));
+  dprintf(("GDI32: TextOutW %x (%d,%d) %ls", hdc, nXStart, nYStart, lpszString));
 
   return InternalTextOutW(hdc,nXStart,nYStart,0,NULL,lpszString,cbString,NULL,FALSE);
 }
