@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.1215 2001-01-10 19:22:14 bird Exp $ */
+/* $Id: changelog,v 1.1216 2001-01-10 20:37:32 sandervl Exp $ */
+
+ 2001-01-10: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Fix for WriteFile & ReadFile (wrong return code was expected)
+    - USER32:   o HAS_THICKFRAME macro changed (identical to Wine now)
+                  (fixes MDI window borders (which were too thin))
 
  2001-01-10: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - tools\install:
