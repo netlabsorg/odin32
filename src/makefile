@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.45 2000-02-10 01:47:40 bird Exp $
+# $Id: makefile,v 1.46 2000-02-10 22:28:15 bird Exp $
 
 #
 # PD-Win32 API
@@ -37,8 +37,9 @@ MAKE_CMD = $(MAKE_CMD) NODEBUGINFO=1
 # Exclude lists which is to be passed in to DOWITHDIRS
 #
 NOTTOBEMADE = CVS;win32k;pe2lx;odin32api;odinwps;spy    # generally not made
-NOTDLLS     = $(NOTTOBEMADE);peldr                      # not dlls
-NOTHAVELIBS = $(NOTDLLS)                                # don't generate libs
+NOTDLLS     = $(NOTTOBEMADE);peldr;dllentry             # not dlls
+NOTHAVELIBS = $(NOTTOBEMADE);peldr                      # don't generate libs
+NOTWIN32DLLS= $(NOTDLLS);odincrt;dllentry               # not win32 dlls.
 
 
 all: libs
@@ -146,12 +147,34 @@ dep:
     $(MAKE_CMD) NODEP=1 dep
     cd ..\..
 
-
 clean:
     $(DOWITHDIRS) -e$(NOTTOBEMADE) -cp $(MAKE_CMD) NODEP=1 clean
     cd win32k\pe2lx
     $(MAKE_CMD) NODEP=1 clean
-    cd ..\win32k
+    cd ..
     if exist makefile.inc $(MAKE_CMD) NODEP=1 clean
     cd ..
+
+
+#
+# Odin32 API DB Management
+#
+apiimport:
+    $(DOWITHDIRS) -e$(NOTWIN32DLLS) -ewnetap32 -cp \
+        ..\..\tools\bin\APIImport.cmd
+    cd wnetap32
+    echo LIBRARY NETAPI32 > APIImport.def
+    grep -v "LIBRARY WNETAP32" netapi32.def >> APIImport.def
+    ..\..\tools\bin\APIImport.exe APIImport.def
+
+stateupd:
+    ..\..\tools\bin\StateUpd.exe -io+
+    -$(DOWITHDIRS) -e$(NOTWIN32DLLS) -ewnetap32 -cp -i \
+        ..\..\tools\bin\StateUpd.exe -ie- -ib-
+    ..\..\tools\bin\StateUpd.exe -io+
+
+cleandblogs:
+    $(DOWITHDIRS) -e$(NOTWIN32DLLS) -cp \
+        $(RM) apiimport.log signals.log stateupd.log apiimport.def
+    $(RM) signals.log statupd.log
 
