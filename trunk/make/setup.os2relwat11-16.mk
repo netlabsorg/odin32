@@ -1,4 +1,4 @@
-# $Id: setup.os2relwat11-16.mk,v 1.4 2002-08-20 08:03:00 bird Exp $
+# $Id: setup.os2relwat11-16.mk,v 1.5 2002-08-20 19:14:34 bird Exp $
 
 # ---OS2, RELEASE, WAT11-------------------------
 ENV_NAME="OS/2, Release, Watcom C/C++ v11.0c 16-bit"
@@ -42,7 +42,7 @@ _AR_LNK3= +"$(TARGET_OBJS: ="&^
  +")"
 AR_LNK3= $(_AR_LNK3:+""&^
 =)
-AR_LNK4= "$(@R).lst"
+AR_LNK4= "$(@R).lst";
 
 _CC_FLAGS_OS =
 

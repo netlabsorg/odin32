@@ -1,4 +1,4 @@
-# $Id: setup.os2debmscv6-16.mk,v 1.4 2002-08-20 05:50:52 bird Exp $
+# $Id: setup.os2debmscv6-16.mk,v 1.5 2002-08-20 19:14:31 bird Exp $
 
 # ---OS2, DEBUG, MSCV6-------------------------
 ENV_NAME="OS/2, Debug, Microsoft C v6.0a 16-bit"
@@ -42,7 +42,7 @@ _AR_LNK3= +"$(TARGET_OBJS: ="&^
  +")"
 AR_LNK3= $(_AR_LNK3:+""&^
 =)
-AR_LNK4= "$(@R).lst"
+AR_LNK4= "$(@R).lst";
 
 
 #

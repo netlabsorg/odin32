@@ -1,4 +1,4 @@
-# $Id: setup.os2relmscv6.mk,v 1.8 2002-05-16 11:37:04 bird Exp $
+# $Id: setup.os2relmscv6.mk,v 1.9 2002-08-20 19:14:33 bird Exp $
 
 # ---OS2, RELEASE, MSCV6-------------------------
 ENV_NAME="OS/2, Release, Microsoft C v6.0a 32-bit"
@@ -34,11 +34,15 @@ EXEPACK=lxlite.exe
 # The flags
 #
 AR_FLAGS=/nologo /noignorecase
-AR_CMD=$(AR) $(AR_FLAGS) $@ @$(TARGET_LNK)
-_AR_LNK1= "$(TARGET_OBJS: ="&^
-")"
-AR_LNK1= $(_AR_LNK1:""=)
-AR_LNK2= $(@R).lst
+AR_CMD=$(AR) $(AR_FLAGS) @"$(TARGET_LNK)"
+AR_LNK1= "$(@R).$(EXT_LIB)"
+AR_LNK2=y
+_AR_LNK3= +"$(TARGET_OBJS: ="&^
+ +")"
+AR_LNK3= $(_AR_LNK3:+""&^
+=)
+AR_LNK4= "$(@R).lst";
+
 
 
 #
