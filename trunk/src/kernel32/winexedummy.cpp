@@ -1,4 +1,4 @@
-/* $Id: winexedummy.cpp,v 1.4 2003-04-02 11:03:32 sandervl Exp $ */
+/* $Id: winexedummy.cpp,v 1.5 2004-01-12 17:27:28 sandervl Exp $ */
 
 /*
  * Win32 Dummy Exe class
@@ -26,6 +26,8 @@
 #include <wprocess.h>
 #include "initterm.h"
 
+static BOOL fIsDummyExe = FALSE;
+
 //******************************************************************************
 //Create Dummy Exe object
 //******************************************************************************
@@ -40,7 +42,8 @@ BOOL WIN32API RegisterDummyExe(LPSTR pszExeName)
 
     if(winexe) {
         InitCommandLine(FALSE);
-   	    winexe->start();
+        winexe->start();
+        fIsDummyExe = TRUE;
     }
     else {
       	eprintf(("Win32DummyExe creation failed!\n"));
@@ -48,6 +51,12 @@ BOOL WIN32API RegisterDummyExe(LPSTR pszExeName)
        	return FALSE;
     }
     return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API IsDummyExeLoaded()
+{
+    return fIsDummyExe;
 }
 //******************************************************************************
 //******************************************************************************
