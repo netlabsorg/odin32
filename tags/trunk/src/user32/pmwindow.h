@@ -1,4 +1,4 @@
-/* $Id: pmwindow.h,v 1.3 1999-10-30 15:16:57 dengert Exp $ */
+/* $Id: pmwindow.h,v 1.4 1999-11-08 13:44:14 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -17,5 +17,8 @@ PVOID SubclassWithDefHandler(HWND hwnd);
 
 void RegisterSystemClasses(ULONG hModule);
 void UnregisterSystemClasses();
+
+extern ULONG ScreenWidth;
+extern ULONG ScreenHeight;
 
 #endif

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.76 1999-11-05 09:16:22 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.77 1999-11-08 13:44:15 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -40,6 +40,7 @@
 #include "pmwindow.h"
 #include "controls.h"
 #include <wprocess.h>
+#include "winmouse.h"
 
 #define HAS_DLGFRAME(style,exStyle) \
     (((exStyle) & WS_EX_DLGMODALFRAME) || \
@@ -1033,6 +1034,11 @@ ULONG Win32BaseWindow::MsgButton(ULONG msg, ULONG ncx, ULONG ncy, ULONG clx, ULO
  ULONG win32ncmsg;
  BOOL  fClick = FALSE;
 
+    if(ISMOUSE_CAPTURED()) {
+	if(DInputMouseHandler(getWindowHandle(), MOUSEMSG_BUTTON, ncx, ncy, msg))
+		return 0;
+    }
+
     dprintf(("MsgButton to (%d,%d)", ncx, ncy));
     switch(msg) {
         case BUTTON_LEFTDOWN:
@@ -1145,6 +1151,14 @@ ULONG Win32BaseWindow::MsgMouseMove(ULONG keystate, ULONG x, ULONG y)
 {
  ULONG winstate = 0;
  ULONG setcursormsg = WM_MOUSEMOVE;
+
+    if(ISMOUSE_CAPTURED()) {
+	POINT point = {x,y};
+        
+        MapWindowPoints(getWindowHandle(), HWND_DESKTOP, &point, 1);
+	if(DInputMouseHandler(getWindowHandle(), MOUSEMSG_MOVE, point.x, point.y, keystate))
+		return 0;
+    }
 
     if(keystate & WMMOVE_LBUTTON)
         winstate |= MK_LBUTTON;
