@@ -1,4 +1,4 @@
-/* $Id: OS2SURFACE.CPP,v 1.30 2001-03-28 16:21:06 sandervl Exp $ */
+/* $Id: OS2SURFACE.CPP,v 1.31 2001-04-02 18:21:10 sandervl Exp $ */
 
 /*
  * DirectDraw Surface class implementaion
@@ -1319,6 +1319,46 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
         {
           dprintf(("DDRAW: Backbuffer # = %d\n",DDSurfaceDesc.dwBackBufferCount));
 
+#if 1
+          memset( &ComplexSurfaceDesc,
+                  0,
+                  sizeof(DDSURFACEDESC2));
+
+          ComplexSurfaceDesc.dwSize  = sizeof(DDSURFACEDESC2);
+          ComplexSurfaceDesc.dwFlags = DDSD_CAPS |
+                                       DDSD_WIDTH |
+                                       DDSD_HEIGHT |
+                                       DDSD_PIXELFORMAT;
+          ComplexSurfaceDesc.ddsCaps.dwCaps = DDSCAPS_BACKBUFFER | DDSCAPS_FLIP;
+          ComplexSurfaceDesc.dwHeight = DDSurfaceDesc.dwHeight;
+          ComplexSurfaceDesc.dwWidth = DDSurfaceDesc.dwWidth;
+          ComplexSurfaceDesc.ddpfPixelFormat.dwFlags = DDSurfaceDesc.ddpfPixelFormat.dwFlags;
+          ComplexSurfaceDesc.ddpfPixelFormat.dwRBitMask = DDSurfaceDesc.ddpfPixelFormat.dwRBitMask;
+          ComplexSurfaceDesc.ddpfPixelFormat.dwGBitMask = DDSurfaceDesc.ddpfPixelFormat.dwGBitMask;
+          ComplexSurfaceDesc.ddpfPixelFormat.dwBBitMask = DDSurfaceDesc.ddpfPixelFormat.dwBBitMask;
+          ComplexSurfaceDesc.ddpfPixelFormat.dwRGBBitCount = DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount;
+
+          if(DDSurfaceDesc.dwBackBufferCount>1)
+          {
+            ComplexSurfaceDesc.dwFlags |=DDSD_BACKBUFFERCOUNT;
+            ComplexSurfaceDesc.dwBackBufferCount = DDSurfaceDesc.dwBackBufferCount -1;
+            ComplexSurfaceDesc.ddsCaps.dwCaps|= DDSCAPS_COMPLEX;
+          }
+
+          BackBuffer = new OS2IDirectDrawSurface(lpDraw, &ComplexSurfaceDesc, TRUE, TRUE);
+          BackBuffer->Vtbl.AddRef((IDirectDrawSurface *)BackBuffer);
+
+          if (BackBuffer->GetLastError()==DD_OK)
+          {
+            dprintf(("DDRAW: created backbuffer"));
+            DDSurfaceDesc.dwFlags |= DDSCAPS_FLIP;
+            BackBuffer->SetFrontBuffer(this);
+          }
+          else
+          {
+            dprintf(("DDRAW: Error creating backbuffer"));
+          }
+#else
           memcpy( &ComplexSurfaceDesc,
                   &DDSurfaceDesc,
                   sizeof(DDSURFACEDESC2));
@@ -1335,7 +1375,6 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
             ComplexSurfaceDesc.dwFlags &= ~DDSD_BACKBUFFERCOUNT;
             ComplexSurfaceDesc.ddsCaps.dwCaps &= ~DDSCAPS_COMPLEX;
           }
-
           BackBuffer = new OS2IDirectDrawSurface(lpDraw, &ComplexSurfaceDesc, TRUE, Mainchain);
           BackBuffer->Vtbl.AddRef((IDirectDrawSurface *)BackBuffer);
 
@@ -1344,7 +1383,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
             DDSurfaceDesc.dwFlags |= DDSCAPS_FLIP;
             BackBuffer->SetFrontBuffer(this);
           }
-
+#endif
         }
 
         // MipMap Surfaces are handled here
@@ -4475,10 +4514,10 @@ HRESULT WIN32API SurfLock( THIS This,
 
   dprintf(("DDRAW: SurfLock %d %08X %d %d\n", (int)lpRect, (int)lpSurfaceDesc, dwFlags, hEvent));
 
-  if((NULL==lpSurfaceDesc)||(NULL!=hEvent))
+  if((NULL==lpSurfaceDesc)|| ((dwFlags & DDLOCK_EVENT) && NULL != hEvent))
     return DDERR_INVALIDPARAMS;
 
-  if(lpSurfaceDesc->dwSize != sizeof(DDSURFACEDESC))
+  if(lpSurfaceDesc->dwSize != sizeof(DDSURFACEDESC) && lpSurfaceDesc->dwSize != sizeof(DDSURFACEDESC2))
     return DDERR_INVALIDPARAMS;
 
   SurfaceDesc4.dwSize = sizeof(DDSURFACEDESC2);
@@ -4492,7 +4531,7 @@ HRESULT WIN32API SurfLock( THIS This,
   {
     memcpy( (char*)lpSurfaceDesc,
             (char*)&SurfaceDesc4,
-            sizeof(DDSURFACEDESC) );
+            lpSurfaceDesc->dwSize );
   }
 
   return(rc);
