@@ -1,4 +1,4 @@
-/* $Id: ddrawrsrc.orc,v 1.2 2000-08-18 21:28:45 sandervl Exp $ */
+/* $Id: ddrawrsrc.orc,v 1.3 2000-08-25 09:02:21 sandervl Exp $ */
 
 #include "winuser.h"
 #include "odinrsrc.h"
@@ -7,6 +7,9 @@
 /////////////////////////////////////////////////////////////////////////////
 //
 // Version (based on NT 4 SP6)
+//
+// Note: Change registry version in kernel32\initsystem.c when changing
+//       the overall version of DirectX (now dx4)
 //
 
 1 VERSIONINFO
