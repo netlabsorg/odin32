@@ -1,4 +1,24 @@
-/* $Id: ChangeLog,v 1.1610 2001-07-19 19:52:07 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1611 2001-07-20 15:31:23 sandervl Exp $ */
+
+ 2001-07-20: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Moved wsnprintf to user32
+    - USER32:   o Removed FatalAppExitA/W (already in kernel32)
+    - SHLWAPI:  o Removed WINE_StringFromCLSID & StringFromGUID2 (not used)
+                o Removed several string function that were not used or exported
+    - NTDLL:    o Replaced 64 bits math assembly functions (disassembled Wine C code 
+                  compiled with VAC 3.6.5)
+    - ODINCRT:  o Export 64 bits math rtl functions
+                o Added 64 bits math rtl functions for VAC 3.0 (assembly; 
+                  borrowed from VAC 3.6.5)
+                  NOTE: __divi64 might cause problems (in theory) since 
+                        it uses the FPU and doesn't save the FPU state
+    - OLE32/WINMM/KERNEL32/USER32/GDI32/COMCTL32/COMDLG32/SHLWAPI/SHELL32/
+      RPCRT4/WSOCK32/VERSION:
+                o Rewrote initterm + debug logging to allow us to build
+                  a single dll containing the code of many Odin dlls
+    - CUSTOMBUILD:
+                o Example of creating a custom dll with the Odin32 environment 
+                  that can be used for a ported win32 app. (not done yet)
 
  2001-07-19: Sander van Leeuwen <sandervl@xs4all.nl>
     - DOC:      o Added license for WGSS50
