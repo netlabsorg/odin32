@@ -1,4 +1,4 @@
-/* $Id: conprop2.cpp,v 1.4 2000-02-16 14:25:33 sandervl Exp $ */
+/* $Id: conprop2.cpp,v 1.5 2000-03-03 09:06:19 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -89,7 +89,7 @@ LONG  _System _O32_RegQueryValueEx(HKEY,LPSTR,LPDWORD,LPDWORD,LPBYTE,LPDWORD);
 LONG  _System _O32_RegCloseKey(HKEY);
 LONG  _System _O32_RegSetValueEx( HKEY, LPCSTR, DWORD, DWORD, LPBYTE, DWORD );
 
-DWORD _System GetModuleFileNameA(HMODULE,LPSTR,DWORD);
+DWORD WIN32API GetModuleFileNameA(HMODULE,LPSTR,DWORD);
 
 
 /*****************************************************************************
