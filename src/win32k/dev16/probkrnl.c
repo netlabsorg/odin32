@@ -1,4 +1,4 @@
-/* $Id: probkrnl.c,v 1.37 2001-07-31 21:48:32 bird Exp $
+/* $Id: probkrnl.c,v 1.38 2002-12-06 02:55:33 bird Exp $
  *
  * Description:   Autoprobes the os2krnl file and os2krnl[*].sym files.
  *                Another Hack!
@@ -1282,7 +1282,7 @@ void ShowResult(int rc)
             printf16("    Build:            %ld - v%d.%d\n",
                      options.ulBuild, options.usVerMajor, options.usVerMinor);
         else if (rc >= ERROR_PROB_KRNL_FIRST)
-            printf16("    Kernel probing failed with rc=%d.\n", rc);
+            printf16("    Kernel probing failed with rc=%d (0x%x).\n", rc, rc);
         else
             printf16("    Failed before probing kernel.\n");
 
@@ -1318,7 +1318,7 @@ void ShowResult(int rc)
         if (rc != NO_ERROR)
         {
             const char *psz = GetErrorMsg(rc);
-            printf16("ProbeKernel failed with rc=%d. iProc=%x\n", rc, iProc);
+            printf16("ProbeKernel failed with rc=%d (0x%x). iProc=%x\n", rc, rc, iProc);
             if (psz) printf16("%s\n", psz);
             printf16("\n");
         }
@@ -1432,8 +1432,8 @@ int ProbeKernel(PRPINITIN pReqPack)
             rc = ProbeSymFile(szSymbolFile);
             if (rc)
             {
-                printf16("Warning: Invalid symbol file specified. rc=%x iProc=%d\n"
-                         "         Tries defaults.\n", rc, iProc);
+                printf16("Warning: Invalid symbol file specified. rc=%d (0x%x) iProc=%d\n"
+                         "         Tries defaults.\n", rc, rc, iProc);
                 szSymbolFile[0] = '\0';
                 DosSleep(3000);
             }
