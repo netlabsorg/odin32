@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2597 2003-07-07 12:26:47 sandervl Exp $ */
+/* $Id: changelog,v 1.2598 2003-07-09 13:03:24 bird Exp $ */
+
+ 2003-07-09: knut st. osmundsen <bird-odinspam@anduin    >
+    - MAKEFILES:o Invoke RC directly and not thru the CMDQD.
 
  2002-07-07: Dmitry Froloff <froloff@os2   >
     - PMKDBHK:  o Pass Alt-Shift on to PM (Russian language switch hotkey)
@@ -43,12 +46,12 @@
     - KERNEL32: o ClearCommError: lpdwError is allowed to be NULL
 
  2003-05-16: Sander van Leeuwen <sandervl@innotek   >
-    - USER32:   o Use our fast critical sections instead of OS/2 mutex semaphores 
+    - USER32:   o Use our fast critical sections instead of OS/2 mutex semaphores
                   in the timer code.
                 o Handle WM_(SYS)TIMER timer calls in DispatchMessageA/W.
                   We previously called timer handlers when we received WM_TIMER
                   from PM. That's not correct. These messages must be returned
-                  by Get/PeekMessage. The handler will not be called if the 
+                  by Get/PeekMessage. The handler will not be called if the
                   timer message is not dispatched. (verified in NT4)
 
  2003-05-16: Platon Fomichev <stauff@innotek   >
@@ -60,11 +63,11 @@
     - USER32:   o Window creation: updated the coordinate fix code with the latest Rewind version
                 o ReleaseDC: always verify window associated with DC
     - COMCTL32: o Complete resync with latest Wine (except draglist)
-                o Implemented LVM_APPROXIMATEVIEWRECT for LVS_REPORT controls 
+                o Implemented LVM_APPROXIMATEVIEWRECT for LVS_REPORT controls
                   (needed to get rid of a crash; very likely to be incorrect)
 
  2003-05-14: Sander van Leeuwen <sandervl@innotek   >
-    - GDI32:    o DIB section: do not fetch more colors from a bitmap header than 
+    - GDI32:    o DIB section: do not fetch more colors from a bitmap header than
                   biClrUsed (if != 0)
                 o GetDIBits: save and restore negative height & log failure
     - USER32:   o Do not send any SetWindowPos related messages if the state
@@ -79,7 +82,7 @@
 
  2003-05-06: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Fixed closing of parent file handle by duplicate memory map
-                o Compare file names instead of handles when checking for 
+                o Compare file names instead of handles when checking for
                   duplicate file maps.
     - USER32:   o ReleaseDC check if hwnd parameter is correct (WindowFromDC(hdc))
                 o Messagebox: Wrong ReleaseDC call
@@ -122,7 +125,7 @@
                   allocated.
 
  2003-04-25: Sander van Leeuwen <sandervl@innotek   >
-    - NTDLL:    o Initialize kernel32 first (circular dependency between 
+    - NTDLL:    o Initialize kernel32 first (circular dependency between
                   kernel32 & ntdll)
 
  2003-04-25: knut st. osmundsen <bird-odin-spam@anduin   >
