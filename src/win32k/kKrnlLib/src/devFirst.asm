@@ -1,4 +1,4 @@
-; $Id: devFirst.asm,v 1.3 2002-12-16 02:24:28 bird Exp $
+; $Id: devFirst.asm,v 1.4 2002-12-19 01:49:07 bird Exp $
 ;
 ; DevFirst - entrypoint, helper code, and segment definitions.
 ;
@@ -52,10 +52,10 @@
     public _strategyAsm1
     public _CallR0Addr32bit
     public _SSToDS_16a
-    public GetOS2KrnlMTE
+    public krnlGetOS2KrnlMTE
+    public krnlMakeCalltab16CodeSegment
     public x86DisableWriteProtect
     public x86RestoreWriteProtect
-    public MakeCalltab16CodeSegment
     public _GetR0InitPtr
     public _GetVerifyImportTab32Ptr
     public _GetGetKernelInfo32Ptr
@@ -300,11 +300,11 @@ far_getCS endp
 
 ;;
 ; Gets the a 32-bit flat pointer to the OS/2 Kernel MTE.
-; @cproto    extern PMTE _System GetOS2KrnlMTE(void);
+; @cproto    extern PMTE _System krnlGetOS2KrnlMTE(void);
 ; @returns   Pointer to kernel MTE.
 ; @status    completely implemented.
 ; @author    knut st. osmundsen
-GetOS2KrnlMTE PROC NEAR
+krnlGetOS2KrnlMTE PROC NEAR
     push    es
 
     mov     ax,  SAS_selector               ;70h - Read-only SAS selector.
@@ -317,7 +317,7 @@ GetOS2KrnlMTE PROC NEAR
 
     pop     es
     ret
-GetOS2KrnlMTE ENDP
+krnlGetOS2KrnlMTE ENDP
 
 
 ;;
@@ -388,7 +388,7 @@ CODE32 segment
 ;           -1 on error.
 ; @uses     eax
 ; @author   knut st. osmundsen (kosmunds@csc.com)
-MakeCalltab16CodeSegment proc near
+krnlMakeCalltab16CodeSegment proc near
     ASSUME  ds:FLAT, ss:nothing
     xor     eax, eax
     mov     ax, seg CALLTAB16
@@ -439,7 +439,7 @@ mccs_OK:
     xor     eax, eax                    ; success.
 mccs_ret:
     ret
-MakeCalltab16CodeSegment endp
+krnlMakeCalltab16CodeSegment endp
 
 
 CODE32 ends

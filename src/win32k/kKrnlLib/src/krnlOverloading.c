@@ -1,23 +1,37 @@
-/* $Id: krnlOverloading.c,v 1.2 2002-03-31 19:01:16 bird Exp $
+/* $Id: krnlOverloading.c,v 1.3 2002-12-19 01:49:09 bird Exp $
  *
- * Overloading routines.
+ * Interfaces for overloading kernel routines.
  *
- * Copyright (c) 2001 knut st. osmundsen (kosmunds@csc.com)
+ * Copyright (c) 2001-2001 knut st. osmundsen <bird@anduin.net>
  *
- * Project Odin Software License can be found in LICENSE.TXT
+ *
+ * This file is part of kKrnlLib.
+ *
+ * kKrnlLib is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * kKrnlLib is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with kKrnlLib; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: krnlOverloading.c,v 1.2 2002-03-31 19:01:16 bird Exp $";
+static const char szFileId[] = "$Id: krnlOverloading.c,v 1.3 2002-12-19 01:49:09 bird Exp $";
 #endif
 
 
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
-#define INCL_DOSERRORS
-#define INCL_NOPMAPI
-#include <os2.h>
+#include <kLib/kTypes.h>
 
 #define INCL_OS2KRNL_ALL
 #include "OS2Krnl.h"
@@ -27,9 +41,7 @@ static const char szFileId[] = "$Id: krnlOverloading.c,v 1.2 2002-03-31 19:01:16
 #define INCL_KKL_FUNC
 #include "kKrnlLib.h"
 
-#include "devSegDf.h"
-#include "dev32.h"
-#include "ProbKrnl.h"
+#include "krnlImportTable.h"
 #include "krnlPrivate.h"
 
 
@@ -186,9 +198,9 @@ char * krnlFindOrgProlog(int iFunc)
  * @param   ulOverloaderAddr    Address (32-bit) of the overloading function.
  * @author  knut st. osmundsen (kosmunds@csc.com)
  */
-BOOL kKLOverload32(ULONG ulFuncAddr, ULONG ulOverloaderAddr)
+KBOOL kKLOverload32(ULONG ulFuncAddr, ULONG ulOverloaderAddr)
 {
-    KLOGENTRY2("BOOL","ULONG ulFuncAddr, ULONG ulOverloaderAddr", ulFuncAddr, ulOverloaderAddr);
+    KLOGENTRY2("KBOOL","ULONG ulFuncAddr, ULONG ulOverloaderAddr", ulFuncAddr, ulOverloaderAddr);
     int     iFunc;
 
     /*
@@ -219,7 +231,7 @@ BOOL kKLOverload32(ULONG ulFuncAddr, ULONG ulOverloaderAddr)
     /*
      * Overload the function.
      */
-    LockedWrite(ulFuncAddr, 0xe9, ulOverloaderAddr - ulFuncAddr + 5);
+    krnlLockedWrite(ulFuncAddr, 0xe9, ulOverloaderAddr - ulFuncAddr + 5);
 
     IMPORT_UNLOCK();
 
@@ -238,9 +250,9 @@ BOOL kKLOverload32(ULONG ulFuncAddr, ULONG ulOverloaderAddr)
  *                              currently overloading the function.
  * @author  knut st. osmundsen (kosmunds@csc.com)
  */
-BOOL kKLRestore32(ULONG ulFuncAddr, ULONG ulOverloaderAddr)
+KBOOL kKLRestore32(ULONG ulFuncAddr, ULONG ulOverloaderAddr)
 {
-    KLOGENTRY2("BOOL","ULONG ulFuncAddr, ULONG ulOverloaderAddr", ulFuncAddr, ulOverloaderAddr);
+    KLOGENTRY2("KBOOL","ULONG ulFuncAddr, ULONG ulOverloaderAddr", ulFuncAddr, ulOverloaderAddr);
     int     iFunc;
     char *  pchOrgProlog;
 
@@ -288,7 +300,7 @@ BOOL kKLRestore32(ULONG ulFuncAddr, ULONG ulOverloaderAddr)
     /*
      * Restore function prolog.
      */
-    LockedWrite(ulFuncAddr, *pchOrgProlog, *(unsigned long *)(void*)(pchOrgProlog + 1));
+    krnlLockedWrite(ulFuncAddr, *pchOrgProlog, *(unsigned long *)(void*)(pchOrgProlog + 1));
 
     IMPORT_UNLOCK();
 
@@ -305,9 +317,9 @@ BOOL kKLRestore32(ULONG ulFuncAddr, ULONG ulOverloaderAddr)
  * @param   ulOverloaderFarAddr     Far address of the overloader function.
  * @author  knut st. osmundsen (kosmunds@csc.com)
  */
-BOOL kKLOverload16(ULONG ulFuncFarAddr, ULONG ulOverloaderFarAddr)
+KBOOL kKLOverload16(ULONG ulFuncFarAddr, ULONG ulOverloaderFarAddr)
 {
-    KLOGENTRY2("BOOL","ULONG ulFuncFarAddr, ULONG ulOverloaderFarAddr", ulFuncFarAddr, ulOverloaderFarAddr);
+    KLOGENTRY2("KBOOL","ULONG ulFuncFarAddr, ULONG ulOverloaderFarAddr", ulFuncFarAddr, ulOverloaderFarAddr);
     int     iFunc;
 
     /*
@@ -339,7 +351,7 @@ BOOL kKLOverload16(ULONG ulFuncFarAddr, ULONG ulOverloaderFarAddr)
     /*
      * Overload the function.
      */
-    LockedWrite(aImportTab[iFunc].ulAddress, 0xea, ulOverloaderFarAddr);
+    krnlLockedWrite(aImportTab[iFunc].ulAddress, 0xea, ulOverloaderFarAddr);
 
     IMPORT_UNLOCK();
 
@@ -357,9 +369,9 @@ BOOL kKLOverload16(ULONG ulFuncFarAddr, ULONG ulOverloaderFarAddr)
  * @author  knut st. osmundsen (kosmunds@csc.com)
  * @remark  Currently not supported.
  */
-BOOL kKLRestore16(ULONG ulFuncFarAddr, ULONG ulOverloaderFarAddr)
+KBOOL kKLRestore16(ULONG ulFuncFarAddr, ULONG ulOverloaderFarAddr)
 {
-    KLOGENTRY2("BOOL","ULONG ulFuncFarAddr, ULONG ulOverloaderFarAddr", ulFuncFarAddr, ulOverloaderFarAddr);
+    KLOGENTRY2("KBOOL","ULONG ulFuncFarAddr, ULONG ulOverloaderFarAddr", ulFuncFarAddr, ulOverloaderFarAddr);
     int     iFunc;
     char *  pchOrgProlog;
 
@@ -409,7 +421,7 @@ BOOL kKLRestore16(ULONG ulFuncFarAddr, ULONG ulOverloaderFarAddr)
     /*
      * Restore function prolog.
      */
-    LockedWrite(aImportTab[iFunc].ulAddress, *pchOrgProlog, *(unsigned long *)(void*)(pchOrgProlog + 1));
+    krnlLockedWrite(aImportTab[iFunc].ulAddress, *pchOrgProlog, *(unsigned long *)(void*)(pchOrgProlog + 1));
 
     IMPORT_UNLOCK();
 
@@ -427,15 +439,16 @@ BOOL kKLRestore16(ULONG ulFuncFarAddr, ULONG ulOverloaderFarAddr)
  * @author  knut st. osmundsen (kosmunds@csc.com)
  * @remark  Currently not supported.
  */
-BOOL kKLOverload16H(ULONG ulFuncFarAddr, ULONG ulOverloaderFarAddr)
+KBOOL kKLOverload16H(ULONG ulFuncFarAddr, ULONG ulOverloaderFarAddr)
 {
-    KLOGENTRY2("BOOL","ULONG ulFuncFarAddr, ULONG ulOverloaderFarAddr", ulFuncFarAddr, ulOverloaderFarAddr);
+    KLOGENTRY2("KBOOL","ULONG ulFuncFarAddr, ULONG ulOverloaderFarAddr", ulFuncFarAddr, ulOverloaderFarAddr);
     kprintf(("not supported currently\n"));
     KNOREF(ulFuncFarAddr);
     KNOREF(ulOverloaderFarAddr);
     KLOGEXIT(FALSE);
     return FALSE;
 }
+
 
 /**
  * Restores a overloaded hybrid 16-bit function.
@@ -446,9 +459,9 @@ BOOL kKLOverload16H(ULONG ulFuncFarAddr, ULONG ulOverloaderFarAddr)
  * @author  knut st. osmundsen (kosmunds@csc.com)
  * @remark  Currently not supported.
  */
-BOOL kKLRestore16H(ULONG ulFuncFarAddr, ULONG ulOverloaderFarAddr)
+KBOOL kKLRestore16H(ULONG ulFuncFarAddr, ULONG ulOverloaderFarAddr)
 {
-    KLOGENTRY2("BOOL","ULONG ulFuncFarAddr, ULONG ulOverloaderFarAddr", ulFuncFarAddr, ulOverloaderFarAddr);
+    KLOGENTRY2("KBOOL","ULONG ulFuncFarAddr, ULONG ulOverloaderFarAddr", ulFuncFarAddr, ulOverloaderFarAddr);
     kprintf(("not supported currently\n"));
     KNOREF(ulFuncFarAddr);
     KNOREF(ulOverloaderFarAddr);

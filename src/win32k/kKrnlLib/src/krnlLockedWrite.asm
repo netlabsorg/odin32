@@ -1,4 +1,4 @@
-; $Id: krnlLockedWrite.asm,v 1.1 2002-03-10 02:45:55 bird Exp $
+; $Id: krnlLockedWrite.asm,v 1.2 2002-12-19 01:49:09 bird Exp $
 ;
 ; Locked Write functions used by krnlImport to overload
 ; and restore functions.
@@ -9,12 +9,17 @@
 ;
     .386p
 
-;
-;   Header Files
-;
+
+;*******************************************************************************
+;* Header Files                                                                *
+;*******************************************************************************
 include devSegDf.inc
 
 
+;*******************************************************************************
+;* Exported Symbols                                                            *
+;*******************************************************************************
+public krnlLockedWrite
 
 
 
@@ -30,7 +35,7 @@ CODE32 segment
 ; @param    ulDword (ecx)   A dword (4 bytes) following the opcode.
 ; @uses     eax, edx, ecx
 ; @author   knut st. osmundsen (kosmunds@csc.com)
-LockedWrite proc near
+krnlLockedWrite proc near
     push    ebx                         ; Save ebx accoring to _Optlink.
     pushfd                              ; Save flags so we restore interrupts correctly.
 
@@ -65,7 +70,7 @@ LockedWrite proc near
     pop     ebx                         ; Restore ebx according to _Optlink.
     xor     eax, eax                    ; How could we fail?
     ret
-LockedWrite endp
+krnlLockedWrite endp
 
 
 
