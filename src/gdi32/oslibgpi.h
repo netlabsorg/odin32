@@ -1,4 +1,4 @@
-/* $Id: oslibgpi.h,v 1.8 2000-11-15 13:56:45 sandervl Exp $ */
+/* $Id: oslibgpi.h,v 1.9 2000-11-16 16:34:49 sandervl Exp $ */
 
 /*
  * GPI interface code
@@ -11,6 +11,7 @@
 #ifndef __OSLIBGPI_H__
 #define __OSLIBGPI_H__
 
+#include <dcdata.h>
 
 #ifdef DEBUG
 void dprintfOrigin(HDC hdc);
@@ -132,7 +133,7 @@ BOOL OSLibGpiQueryCharStringPosAt(PVOID pHps,PPOINTLOS2 ptl,ULONG flOptions,LONG
 BOOL OSLibGpiSetTextAlignment(PVOID pHps,LONG lHoriz,LONG lVert);
 BOOL OSLibGpiQueryTextAlignment(PVOID pHps,PLONG plHoriz,PLONG plVert);
 
-LONG OSLibGpiQueryTabbedTextExtent(PVOID pHps,INT lCount,LPCSTR pchString,INT lTabCount,PINT puTabStops);
+LONG OSLibGpiQueryTabbedTextExtent(pDCData pHps,INT lCount,LPCSTR pchString,INT lTabCount,PINT puTabStops);
 LONG OSLibGpiTabbedCharStringAt(PVOID pHps,PPOINTLOS2 pPtStart,PRECTLOS2 prclRect,ULONG flOptions,INT lCount,LPCSTR pchString,INT lTabCount,PINT puTabStops,INT lTabOrigin);
 
 #define TXTBOXOS_TOPLEFT                  0L
@@ -142,7 +143,7 @@ LONG OSLibGpiTabbedCharStringAt(PVOID pHps,PPOINTLOS2 pPtStart,PRECTLOS2 prclRec
 #define TXTBOXOS_CONCAT                   4L
 #define TXTBOXOS_COUNT                    5L
 
-BOOL OSLibGpiQueryTextBox(PVOID pHps,LONG lCount1,LPCSTR pchString,LONG lCount2,PPOINTLOS2 aptlPoints);
+BOOL OSLibGpiQueryTextBox(pDCData pHps,LONG lCount1,LPCSTR pchString,LONG lCount2,PPOINTLOS2 aptlPoints);
 
 VOID calcDimensions(POINTLOS2 box[],PPOINTLOS2 point);
 
@@ -207,6 +208,10 @@ BOOL drawLinePoint(PVOID pHps,PPOINTLOS2 pt,LONG color);
 ULONG OSLibGpiQueryCp(HDC hdc);
 BOOL  OSLibGpiSetCp(HDC hdc, ULONG codepage);
 
+#define OSLIB_CAPS_HORIZONTAL_RESOLUTION      8L      /* pels per meter  */
+#define OSLIB_CAPS_VERTICAL_RESOLUTION        9L      /* pels per meter  */
+
+BOOL  OSLibDevQueryCaps(pDCData hHps, LONG lStart, LONG lCount, LONG *alArray);
 
    // from pmddi.h:
    /* CopyClipRegion */

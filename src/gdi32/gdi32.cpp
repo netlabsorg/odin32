@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.62 2000-11-15 16:10:41 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.63 2000-11-16 16:34:48 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -31,15 +31,6 @@ ODINDEBUGCHANNEL(GDI32-GDI32)
 
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GetTextExtentPointA(HDC hdc, LPCSTR lpsz, int cbString, LPSIZE lpSize)
-{
- BOOL rc;
-
-  lpSize->cx = lpSize->cy = 0;
-  rc = O32_GetTextExtentPoint(hdc, lpsz, cbString, lpSize);
-  dprintf(("GDI32: GetTextExtentPointA of %s returned %d\n", lpsz, rc));
-  return(rc);
-}
 //******************************************************************************
 //******************************************************************************
 COLORREF WIN32API SetBkColor(HDC hdc, COLORREF crColor)
@@ -753,18 +744,32 @@ BOOL WIN32API GetCharABCWidthsW( HDC arg1, UINT arg2, UINT arg3, LPABC arg4)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GetCharWidth32A( HDC arg1, UINT arg2, UINT arg3, PINT  arg4)
+BOOL WIN32API GetCharWidth32A( HDC hdc, UINT iFirstChar, UINT iLastChar, PINT pWidthArray)
 {
-    dprintf(("GDI32: GetCharWidth32A"));
-    return O32_GetCharWidth(arg1, arg2, arg3, arg4);
+ BOOL ret;
+
+    dprintf(("GDI32: GetCharWidth32A %x %x %x %x", hdc, iFirstChar, iLastChar, pWidthArray));
+    ret = O32_GetCharWidth(hdc, iFirstChar, iLastChar, pWidthArray);
+    dprintf(("GDI32: GetCharWidth32A returned %d", ret));
+#ifdef DEBUG
+    if(ret) {
+      for(int i=iFirstChar;i<iLastChar;i++) {
+          if((i >= 'a' && i <= 'z') || (i >= 'A' && i <= 'Z')) {
+                dprintf2(("Char %c -> width %d", i, pWidthArray[i]));
+          } 
+          else  dprintf2(("Char %x -> width %d", i, pWidthArray[i]));
+      }
+    }
+#endif
+    return ret;
 }
 //******************************************************************************
 //TODO: Cut off Unicode chars?
 //******************************************************************************
-BOOL WIN32API GetCharWidth32W(HDC arg1, UINT iFirstChar, UINT iLastChar, PINT  arg4)
+BOOL WIN32API GetCharWidth32W(HDC hdc, UINT iFirstChar, UINT iLastChar, PINT pWidthArray)
 {
     dprintf(("GDI32: GetCharWidth32W, not properly implemented"));
-    return O32_GetCharWidth(arg1, iFirstChar, iLastChar, arg4);
+    return O32_GetCharWidth(hdc, iFirstChar, iLastChar, pWidthArray);
 }
 //******************************************************************************
 //******************************************************************************
@@ -890,49 +895,6 @@ COLORREF WIN32API GetTextColor( HDC hdc)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GetTextExtentPoint32A( HDC hdc, LPCSTR lpsz, int cbString, PSIZE  lpSize)
-{
- BOOL rc;
-
-    lpSize->cx = lpSize->cy = 0;
-    rc = O32_GetTextExtentPoint32(hdc, lpsz, cbString, lpSize);
-    dprintf(("GDI32: GetTextExtentPoint32A %x %s %d returned %d (%d,%d)", hdc, lpsz, cbString, rc, lpSize->cx, lpSize->cy));
-    return rc;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetTextExtentPoint32W(HDC arg1, LPCWSTR arg2, int arg3, PSIZE lpSize)
-{
- char *astring = UnicodeToAsciiString((LPWSTR)arg2);
- BOOL  rc;
-
-    dprintf(("GDI32: GetTextExtentPoint32W %s\n", astring));
-    lpSize->cx = lpSize->cy = 0;
-    rc = O32_GetTextExtentPoint32(arg1, astring, arg3, lpSize);
-    FreeAsciiString(astring);
-    return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetTextExtentPointW(HDC    hdc,
-                                  LPCWSTR lpString,
-                                  int    cbString,
-                                  PSIZE  lpSize)
-{
-  char *astring = UnicodeToAsciiString((LPWSTR)lpString);
-  BOOL  rc;
-
-  lpSize->cx = lpSize->cy = 0;
-  rc = O32_GetTextExtentPoint(hdc,
-                         astring,
-                         cbString,
-                         lpSize);
-  dprintf(("GDI32: GetTextExtentPointW %X %s (size %08xh) returned %d\n", hdc, astring, cbString, rc));
-  dprintf(("GDI32: GetTextExtentPointW (%d,%d)\n", lpSize->cx, lpSize->cy));
-
-  FreeAsciiString(astring);
-  return(rc);
-}
 //******************************************************************************
 //******************************************************************************
 int WIN32API GetTextFaceA( HDC hdc, int arg2, LPSTR  arg3)

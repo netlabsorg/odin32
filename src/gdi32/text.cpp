@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.13 2000-10-02 13:11:47 phaller Exp $ */
+/* $Id: text.cpp,v 1.14 2000-11-16 16:34:49 sandervl Exp $ */
 
 /*
  * GDI32 text apis
@@ -17,6 +17,7 @@
 #include <string.h>
 #include <float.h>
 #include "oslibgpi.h"
+#include <dcdata.h>
 
 #define DBG_LOCALLOG    DBG_text
 #include "dbglocal.h"
@@ -111,7 +112,7 @@ INT SYSTEM EXPORT InternalDrawTextExA(HDC hdc,LPCSTR lpchText,INT cchText,LPRECT
     return 0;
   }
 
-  PVOID pHps = OSLibGpiQueryDCData(hdc);
+  pDCData pHps = (pDCData)OSLibGpiQueryDCData(hdc);
 
   if (!pHps)
   {
@@ -166,8 +167,11 @@ INT SYSTEM EXPORT InternalDrawTextExA(HDC hdc,LPCSTR lpchText,INT cchText,LPRECT
       return rc;
     }
   }
-
+#ifdef INVERT
   flCmd = DTOS_INVERT | DTOS_WORLDRECT | DTOS_TEXTATTRS | DTOS_AMPERSAND | DTOS_VERTICALEXTENT;
+#else
+  flCmd = DTOS_WORLDRECT | DTOS_TEXTATTRS | DTOS_AMPERSAND | DTOS_VERTICALEXTENT;
+#endif
 
   LONG lMixMode = OSLibGpiQueryBackMix(pHps);
   if (lMixMode == BMOS_OVERPAINT) flCmd |= DTOS_OPAQUE;
@@ -230,7 +234,21 @@ INT SYSTEM EXPORT InternalDrawTextExA(HDC hdc,LPCSTR lpchText,INT cchText,LPRECT
       rectPtr->top    = lprc->top;
       rectPtr->bottom = lprc->bottom;
     }
+
+#ifndef INVERT
+    if (pHps->yInvert > 0) {
+      int temp        = pHps->yInvert - rectPtr->bottom;
+      rectPtr->bottom = pHps->yInvert - rectPtr->top;
+      rectPtr->top    = temp;
+    }
+#endif
   }
+
+#ifndef INVERT
+////  dwDTFormat &= ~DT_INVERT;
+////  dwDTFormat |=  DT_INVERTCHAR;
+  int top = rectPtr->top;
+#endif
 
   if (dwDTFormat & DT_EXPANDTABS)
   {
@@ -397,6 +415,13 @@ INT SYSTEM EXPORT InternalDrawTextExA(HDC hdc,LPCSTR lpchText,INT cchText,LPRECT
 
   if (dwDTFormat & DT_CALCRECT)
   {
+#ifndef INVERT
+    if (pHps->yInvert > 0) {
+         top              = top - rectPtr->top;
+         rectPtr->top    += top;
+         rectPtr->bottom += top;
+    } /* endif */
+#endif
     if (!(dwDTFormat & DT_RIGHT) && (rectPtr->left < xLeft))
     {
       rectPtr->right = xLeft+(rectPtr->right-rectPtr->left);
@@ -439,7 +464,7 @@ INT SYSTEM EXPORT InternalDrawTextExW(HDC hdc,LPCWSTR lpchText,INT cchText,LPREC
 //******************************************************************************
 DWORD SYSTEM EXPORT InternalGetTabbedTextExtentA(HDC hDC,LPCSTR lpString,INT nCount,INT nTabPositions,LPINT lpnTabStopPositions)
 {
-  PVOID pHps = OSLibGpiQueryDCData(hDC);
+  pDCData pHps = (pDCData)OSLibGpiQueryDCData(hDC);
   BOOL result;
   POINTLOS2 pts[TXTBOXOS_COUNT];
   POINTLOS2 widthHeight = {0,0};
@@ -495,7 +520,7 @@ DWORD SYSTEM EXPORT InternalGetTabbedTextExtentW(HDC hDC,LPCWSTR lpString,INT nC
 //******************************************************************************
 LONG SYSTEM EXPORT InternalTabbedTextOutA(HDC hdc,INT x,INT y,LPCSTR lpString,INT nCount,INT nTabPositions,LPINT lpnTabStopPositions,INT nTabOrigin)
 {
-  PVOID pHps = OSLibGpiQueryDCData(hdc);
+  pDCData pHps = (pDCData)OSLibGpiQueryDCData(hdc);
   POINTLOS2 ptl;
   DWORD dimensions;
 
@@ -520,12 +545,18 @@ LONG SYSTEM EXPORT InternalTabbedTextOutA(HDC hdc,INT x,INT y,LPCSTR lpString,IN
     SetLastError(ERROR_INVALID_HANDLE);
     return 0;
   }
-  if (getAlignUpdateCP(pHps) == TRUE)
+  if (getAlignUpdateCP(pHps) == TRUE) {
     OSLibGpiQueryCurrentPosition(pHps,&ptl);
+  }
   else
   {
     ptl.x = x;
     ptl.y = y;
+#ifndef INVERT
+    if (pHps->yInvert > 0) {
+       ptl.y = pHps->yInvert - ptl.y;
+    }
+#endif
   }
 
   //CB: nTabOrigin is ignored! -> wrong size (width)!
@@ -568,7 +599,7 @@ LONG SYSTEM EXPORT InternalTabbedTextOutW(HDC hdc,INT x,INT y,LPCWSTR lpString,I
 //******************************************************************************
 BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR lpszString,INT cbCount,CONST INT *lpDx,BOOL IsExtTextOut)
 {
-  PVOID pHps = OSLibGpiQueryDCData(hdc);
+  pDCData pHps = (pDCData)OSLibGpiQueryDCData(hdc);
   ULONG flOptions = 0;
   RECTLOS2 pmRect;
   POINTLOS2 ptl;
@@ -606,6 +637,13 @@ BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR
         dprintf(("InternalTextOutA: excludeBottomRightPoint returned 0"));
         return TRUE;
       }
+#ifndef INVERT
+      if (pHps->yInvert > 0) {
+          int temp       = pHps->yInvert - pmRect.yTop;
+          pmRect.yTop    = pHps->yInvert - pmRect.yBottom;
+          pmRect.yBottom = temp;
+      }    
+#endif
 
       if (fuOptions & ETO_CLIPPED) flOptions |= CHSOS_CLIP;
       if (fuOptions & ETO_OPAQUE)  flOptions |= CHSOS_OPAQUE;
@@ -642,6 +680,12 @@ BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR
     ptl.x = X;
     ptl.y = Y;
 
+#ifndef INVERT
+    if (pHps->yInvert > 0) {
+       ptl.y = pHps->yInvert - Y;
+    }
+#endif
+
     flOptions |= CHSOS_LEAVEPOS;
   }
   else OSLibGpiQueryCurrentPosition(pHps,&ptl);
@@ -669,6 +713,15 @@ BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR
 
   ptl.y += getWorldYDeltaFor1Pixel(pHps);
 
+#ifndef INVERT
+  int vertAdjust = 0;
+  if ((pHps->taMode & 0x18) == TA_TOP) 
+  {
+      vertAdjust = OSLibGpiQueryFontMaxHeight(pHps->hps);
+  }
+  ptl.y -= vertAdjust;
+#endif
+
   hits = OSLibGpiCharStringPosAt(pHps,&ptl,&pmRect,flOptions,cbCount,lpszString,lpDx);
 
   if (lprc && ((align & 0x18) == TA_BASELINE))
@@ -683,6 +736,9 @@ BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR
   {
     OSLibGpiQueryCurrentPosition(pHps,&ptl);
     ptl.y -= getWorldYDeltaFor1Pixel(pHps);
+#ifndef INVERT
+    ptl.y += vertAdjust;
+#endif
     OSLibGpiSetCurrentPosition(pHps,&ptl);
   }
 
@@ -704,23 +760,21 @@ BOOL InternalTextOutW(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCWST
 //******************************************************************************
 BOOL WIN32API ExtTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR lpszString,UINT cbCount,CONST INT *lpDx)
 {
-  dprintf(("GDI32: ExtTextOutA %x %s", hdc, lpszString));
-
-  return InternalTextOutA(hdc,X,Y,fuOptions,lprc,lpszString,cbCount,lpDx,TRUE);
+  dprintf(("GDI32: ExtTextOutA %x %s (%d,%d) %x %d %x", hdc, lpszString, X, Y, fuOptions, cbCount, lpDx));
+  return InternalTextOutA(hdc, X, Y, fuOptions, lprc, lpszString, cbCount, lpDx, TRUE);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API ExtTextOutW(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCWSTR lpszString,UINT cbCount,CONST int *lpDx)
 {
   dprintf(("GDI32: ExtTextOutW\n"));
-
-  return InternalTextOutW(hdc,X,Y,fuOptions,lprc,lpszString,cbCount,lpDx,TRUE);
+  return InternalTextOutW(hdc, X, Y, fuOptions, lprc, lpszString, cbCount, lpDx, TRUE);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API TextOutA(HDC hdc,int nXStart,int nYStart,LPCSTR lpszString,int cbString)
 {
-  dprintf(("GDI32: TextOutA %x %s", hdc, lpszString));
+  dprintf(("GDI32: TextOutA %x (%d,%d) %s", hdc, nXStart, nYStart, lpszString));
 
   return InternalTextOutA(hdc,nXStart,nYStart,0,NULL,lpszString,cbString,NULL,FALSE);
 }
@@ -764,3 +818,106 @@ BOOL WIN32API PolyTextOutW(HDC hdc,POLYTEXTW *pptxt,int cStrings)
 
   return TRUE;
 }
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetTextExtentPointA(HDC hdc, LPCTSTR lpsz, int cbString,
+                                  LPSIZE lpsSize)
+{
+   BOOL       rc;
+   POINTLOS2  pts[TXTBOXOS_COUNT];
+   POINTLOS2  widthHeight = { 0, 0};
+   pDCData    pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
+
+   dprintf(("GDI32: GetTextExtentPointA %s\n", lpsz));
+   if(pHps == NULL)
+   {
+      SetLastError(ERROR_INVALID_HANDLE);
+      return FALSE;
+   }
+
+   if(lpsz == NULL || cbString < 0 || lpsSize == NULL)
+   {
+      SetLastError(ERROR_INVALID_PARAMETER);
+      return FALSE;
+   }
+
+   lpsSize->cx = 0;
+   lpsSize->cy = 0;
+
+   // Verified with NT4, SP6
+   if(cbString == 0)
+   {
+      SetLastError(ERROR_SUCCESS);
+      return TRUE;
+   }
+   if(cbString > 512) {
+      dprintf(("ERROR: Oh, oh, string too long!!"));
+      DebugInt3();
+   }
+
+   rc = OSLibGpiQueryTextBox(pHps, cbString, lpsz, TXTBOXOS_COUNT, pts);
+   if(rc == FALSE)
+   {
+      SetLastError(ERROR_INVALID_PARAMETER);	//todo wrong error
+      return FALSE;
+   }
+   calcDimensions(pts, &widthHeight);
+   lpsSize->cx = widthHeight.x;
+   lpsSize->cy = widthHeight.y;
+
+   if(pHps && pHps->isPrinter && pHps->hdc)
+   {//scale for printer dcs
+       LONG alArray[2];
+
+       if (OSLibDevQueryCaps(pHps, OSLIB_CAPS_HORIZONTAL_RESOLUTION, 2, &alArray[0]))
+         lpsSize->cx = lpsSize->cx * alArray[0] / alArray[1];
+   }
+
+   dprintf(("GDI32: GetTextExtentPointA %x %s %d returned %d (%d,%d)", hdc, lpsz, cbString, rc, lpsSize->cx, lpsSize->cy));
+   SetLastError(ERROR_SUCCESS);
+   return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetTextExtentPointW(HDC    hdc,
+                                  LPCWSTR lpString,
+                                  int    cbString,
+                                  PSIZE  lpSize)
+{
+  char *astring = UnicodeToAsciiString((LPWSTR)lpString);
+  BOOL  rc;
+
+  dprintf(("GDI32: GetTextExtentPointW %s\n", astring));
+  lpSize->cx = lpSize->cy = 0;
+  rc = GetTextExtentPointA(hdc,
+                           astring,
+                           cbString,
+                           lpSize);
+  FreeAsciiString(astring);
+  return(rc);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetTextExtentPoint32A( HDC hdc, LPCSTR lpsz, int cbString, PSIZE  lpSize)
+{
+ BOOL rc;
+
+    dprintf(("GDI32: GetTextExtentPoint32A %s\n", lpsz));
+    lpSize->cx = lpSize->cy = 0;
+    rc = GetTextExtentPointA(hdc, lpsz, cbString, lpSize);
+    return rc;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetTextExtentPoint32W(HDC arg1, LPCWSTR arg2, int arg3, PSIZE lpSize)
+{
+ char *astring = UnicodeToAsciiString((LPWSTR)arg2);
+ BOOL  rc;
+
+    dprintf(("GDI32: GetTextExtentPoint32W %s\n", astring));
+    rc = GetTextExtentPointA(arg1, astring, arg3, lpSize);
+    FreeAsciiString(astring);
+    return(rc);
+}
+//******************************************************************************
+//******************************************************************************
