@@ -1,4 +1,4 @@
-/* $Id: hmstd.cpp,v 1.8 2002-05-22 12:57:23 sandervl Exp $ */
+/* $Id: hmstd.cpp,v 1.9 2002-06-26 07:13:00 sandervl Exp $ */
 
 /*
  * Handle Manager class for standard in, out & error handles
@@ -119,44 +119,56 @@ BOOL HMDeviceStandardClass::WriteFile(PHMHANDLEDATA pHMHandleData,
                                       LPOVERLAPPED  lpOverlapped,
                                       LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
 {
- DWORD  byteswritten;
- LPVOID lpLowMemBuffer;
+    DWORD  byteswritten;
+    LPVOID lpLowMemBuffer;
 
-  dprintf(("KERNEL32: HMDeviceStandardClass::WriteFile %s(%08x,%08x,%08x,%08x,%08x)",
-           lpHMDeviceName,
-           pHMHandleData,
-           lpBuffer,
-           nNumberOfBytesToWrite,
-           lpNumberOfBytesWritten,
-           lpOverlapped));
-  if(lpNumberOfBytesWritten == NULL) {
-     lpNumberOfBytesWritten = &byteswritten;
-  }
-  if(lpCompletionRoutine) {
-      dprintf(("!WARNING!: lpCompletionRoutine not supported -> fall back to sync IO"));
-  }
+    dprintf(("KERNEL32: HMDeviceStandardClass::WriteFile %s(%08x,%08x,%08x,%08x,%08x)",
+             lpHMDeviceName,
+             pHMHandleData,
+             lpBuffer,
+             nNumberOfBytesToWrite,
+             lpNumberOfBytesWritten,
+             lpOverlapped));
+    if (lpNumberOfBytesWritten == NULL)
+        lpNumberOfBytesWritten = &byteswritten;
+    if (lpCompletionRoutine)
+    {
+        dprintf(("!WARNING!: lpCompletionRoutine not supported -> fall back to sync IO"));
+    }
 
-  if(pHMHandleData->dwUserData == STD_INPUT_HANDLE) {
-     return FALSE;
-  }
-  lpLowMemBuffer = alloca(nNumberOfBytesToWrite);
-  if(lpLowMemBuffer == NULL) {
-     DebugInt3();
-     return FALSE;
-  }
-  memcpy(lpLowMemBuffer, lpBuffer, nNumberOfBytesToWrite);
-  if(pHMHandleData->dwUserData == STD_ERROR_HANDLE) {
-     dprintf(("STDERR: %s", lpLowMemBuffer));
-     return TRUE;
-  }
-  if(WinExe && !WinExe->isConsoleApp()) {
-     //DosWrite returns error 436 when PM apps try to write to std out
-     dprintf(("STDOUT (GUI): %s", lpLowMemBuffer));
-     return TRUE;
-  }
-  dprintf(("STDOUT: %*s", nNumberOfBytesToWrite, lpLowMemBuffer));
-  return O32_WriteFile(pHMHandleData->hHMHandle, lpLowMemBuffer, nNumberOfBytesToWrite,
-                       lpNumberOfBytesWritten, lpOverlapped);
+    if (pHMHandleData->dwUserData == STD_INPUT_HANDLE)
+        return FALSE;
+    lpLowMemBuffer = alloca(nNumberOfBytesToWrite);
+    if (lpLowMemBuffer == NULL)
+    {
+        DebugInt3();
+        return FALSE;
+    }
+    memcpy(lpLowMemBuffer, lpBuffer, nNumberOfBytesToWrite);
+
+    if (    WinExe
+        &&  !WinExe->isConsoleApp()
+        &&  O32_GetFileType(pHMHandleData->hHMHandle) == FILE_TYPE_UNKNOWN) /* kso */
+    {
+        //DosWrite returns error 436 when PM apps try to write to std out
+        //kso - Jun 23 2002 2:54am:
+        //Yeah, cause PM programs doesn't have working STD* handles unless you redirect them!
+        //So, we should rather check if valid handle than !console.
+        dprintf(("%s (GUI): %*s", pHMHandleData->dwUserData == STD_ERROR_HANDLE ? "STDERR" : "STDOUT",
+                 nNumberOfBytesToWrite, lpLowMemBuffer));
+        return TRUE;
+    }
+
+    dprintf(("%s: %*s", pHMHandleData->dwUserData == STD_ERROR_HANDLE ? "STDERR" : "STDOUT",
+             nNumberOfBytesToWrite, lpLowMemBuffer));
+    if (!O32_WriteFile(pHMHandleData->hHMHandle, lpLowMemBuffer, nNumberOfBytesToWrite,
+                       lpNumberOfBytesWritten, lpOverlapped))
+    {
+        /* Open32 wasn't made for console apps... */
+        dprintf(("STD*: failed with lasterror=%d\n", GetLastError()));
+        return FALSE;
+    }
+    return TRUE;
 }
 
 
@@ -177,6 +189,9 @@ DWORD HMDeviceStandardClass::GetFileType(PHMHANDLEDATA pHMHandleData)
   dprintf2(("KERNEL32: HMDeviceStandardClass::GetFileType %s(%08x)\n",
            lpHMDeviceName,
            pHMHandleData));
-
+  #if 0
   return FILE_TYPE_CHAR;
+  #else
+  return O32_GetFileType(pHMHandleData->hHMHandle);
+  #endif
 }
