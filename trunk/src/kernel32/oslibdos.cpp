@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.47 2000-10-02 13:38:56 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.48 2000-10-09 22:51:18 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -2040,3 +2040,41 @@ ULONG OSLibDosQuerySysInfo(ULONG iStart, ULONG iLast, PVOID pBuf, ULONG cbBuf)
   SetLastError(error2WinError(rc,ERROR_INVALID_HANDLE));
   return rc;
 }
+//******************************************************************************
+//returned length is number of characters required or used for current dir
+//*excluding* terminator
+//******************************************************************************
+ULONG OSLibDosQueryDir(DWORD length, LPSTR lpszCurDir)
+{
+  ULONG  drivemap, currentdisk, len;
+  char  *lpszCurDriveAndDir = lpszCurDir +3;
+  APIRET rc;
+
+   len = (length > 3) ? length - 3 : 0;
+
+   rc = DosQueryCurrentDir(0, lpszCurDriveAndDir, &len);
+   if(rc != ERROR_BUFFER_OVERFLOW)
+   {
+        if(rc)
+        {
+             SetLastError(error2WinError(rc,ERROR_INVALID_PARAMETER));
+             return 0;
+        }
+        len = strlen(lpszCurDriveAndDir) + 3;
+
+        // Dir returned by DosQueryCurDir doesn't include drive, so add it 
+        DosQueryCurrentDisk(&currentdisk, &drivemap);
+
+        if(isupper(lpszCurDir[3])) {
+             lpszCurDir[0] = (char)('A' - 1 + currentdisk);
+        }
+        else lpszCurDir[0] = (char)('a' - 1 + currentdisk);
+
+        lpszCurDir[1] = ':';
+        lpszCurDir[2] = '\\';
+   }
+   else len += 3;   // + 3 since DosQueryCurDir doesn't include drive
+   return len;
+}
+//******************************************************************************
+//******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: directory.cpp,v 1.31 2000-10-06 15:16:03 sandervl Exp $ */
+/* $Id: directory.cpp,v 1.32 2000-10-09 22:51:17 sandervl Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
@@ -102,7 +102,8 @@ void InitDirectories()
  * Parameters:
  * Variables :
  * Result    :
- * Remark    :
+ * Remark    : returned length is number of characters required or used for current dir
+ *             *excluding* terminator
  * Status    :
  *
  * Author    : Patrick Haller [Wed, 1999/09/28 20:44]
@@ -113,10 +114,11 @@ ODINFUNCTION2(UINT, GetCurrentDirectoryA, UINT,  nBufferLength,
 {
  UINT rc;
 
-  rc = O32_GetCurrentDirectory(nBufferLength, lpBuffer);
-  if(rc) {
-    dprintf(("CurrentDirectory = %s", lpBuffer)); 
+  rc = OSLibDosQueryDir(nBufferLength, lpBuffer);
+  if(rc && rc < nBufferLength) {
+       dprintf(("CurrentDirectory = %s (%d)", lpBuffer, rc)); 
   }
+  else dprintf(("CurrentDirectory returned %d", rc)); 
   return rc;
 }
 
