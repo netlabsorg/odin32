@@ -1,13 +1,16 @@
-/* $Id: MakeBldLevelInfo.cmd,v 1.1 2000-12-16 20:10:06 bird Exp $
+/* $Id: MakeBldLevelInfo.cmd,v 1.2 2001-01-22 20:25:02 phaller Exp $
  *
  * Adds a Description string to the given .def-file.
  * Fills in default values; like build time and host.
  *
  */
 
-call RxFuncAdd 'SysLoadFuncs', 'RexxUtil', 'SysLoadFuncs';
-call SysLoadFuncs;
-
+if RxFuncQuery('SysLoadFuncs'=0 THEN
+DO
+  call RxFuncAdd 'SysLoadFuncs', 'RexxUtil', 'SysLoadFuncs';
+  call SysLoadFuncs;
+END
+  
 /*
  * Set default parameter values.
  */
