@@ -1,4 +1,4 @@
-/* $Id: hmparport.cpp,v 1.5 2001-11-23 00:50:06 phaller Exp $ */
+/* $Id: hmparport.cpp,v 1.6 2001-11-23 16:07:19 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -148,6 +148,10 @@ HMDeviceParPortClass::HMDeviceParPortClass(LPCSTR lpDeviceName) : HMDeviceHandle
   pData = CreateDevData();
   if(pData!= NULL)
     HMDeviceRegisterEx("LPT1", this, pData);
+  
+  // @@@PH
+  // Note: also register \Device\ParallelPort1...
+  // -> we need the kernel object name space mapping
 }
 
 /*****************************************************************************
