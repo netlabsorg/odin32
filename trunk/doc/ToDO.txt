@@ -1,9 +1,12 @@
-/* $Id: ToDO.txt,v 1.4 2000-07-12 20:02:40 phaller Exp $ */
+/* $Id: ToDO.txt,v 1.5 2000-07-18 18:31:37 sandervl Exp $ */
 
 /* -- History --------------------------------------------------------------
 
    $Log: ToDO.txt,v $
-   Revision 1.4  2000-07-12 20:02:40  phaller
+   Revision 1.5  2000-07-18 18:31:37  sandervl
+   *** empty log message ***
+
+   Revision 1.4  2000/07/12 20:02:40  phaller
    .
 
    Revision 1.3  2000/07/10 20:35:38  phaller
@@ -38,6 +41,11 @@ JW              Improve CRTDLL and MSVCRT as this is one major show stopper
 SvL             Remove GPI32 calls from the original FS: macros and replace
                 them with ODINFUNCTION wrappers. Internally call to ODIN_xxx
                 GPI functions to get much better performance.
+
+NOONE           WINMM: wave recording
+
+NOONE	        KERNEL32: Async file io
+
 
 NOONE           Setup a test /verification plan and freeze some modules such
                 as LZ32, VERSION which are considered complete.

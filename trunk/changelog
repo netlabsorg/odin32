@@ -1,4 +1,21 @@
- /* $Id: changelog,v 1.1036 2000-07-18 17:45:14 bird Exp $ */
+ /* $Id: changelog,v 1.1037 2000-07-18 18:33:15 sandervl Exp $ */
+
+ 2000-07-18: Yuri Dario <mc6530@mclink.it>
+    - INCLUDE\win: 
+                Compilation fixes for Opera
+    - USER32:   Extra logging information
+                Fixed sending WM_PARENTNOTIFY in ::DestroyWindow
+
+ 2000-07-18: Sander van Leeuwen <sandervl@xs4all.nl>
+    - WINMM:    If waveOutSetVolume called with NULL waveout handle, use
+                that volume as the default for newly created streams.
+                (fixes volume in RealPlayer 7)
+    - KERNEL32: Fixed old unload order bug (causes a crash when quitting 
+                RealPlayer 7); increase dynamic library count after calling
+                dll entrypoint with DLL_PROCESS_ATTACH. (used to be before;
+                -> wrong unload order of RPAP3260 & PNRS3260)
+                Call dll entrypoint with DLL_PROCESS_DETACH even when
+                thread library calls disabled.
 
  2000-07-18: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - KERNEL32: APIs are to be placed should have ordinal less than 1200
@@ -28,7 +45,6 @@
                 both applications
     - KERNEL32: Added extra check in isPEImage method
                 lpNumberOfBytesRead/Written can be NULL in Read/WriteFile
-
     - PELDR:    Fix for arguments with quotes (first and last quote removed)
                 (i.e. pe rnuninst "RealNetworks|RealPlayer|6.0| -i -p")
                 Fix for exe name with dir containing spaces
