@@ -1,11 +1,12 @@
-/* $Id: changelog,v 1.2111 2002-05-29 16:05:15 sandervl Exp $ */
+/* $Id: changelog,v 1.2112 2002-05-29 16:08:35 sandervl Exp $ */
 
  2002-05-29: Sander van Leeuwen <sandervl@innotek.de>
     - USER32:   o Fix for ToAscii(Ex) & GetKeyboardState (WinTranslateChar2 call)
                   (fixes AbiWord keyboard input)
     - WINMM:    o mixerGetLineControlsA (MIXER_GETLINECONTROLSF_ALL) fixes
                 o mixerGetLineInfoW fix
-    - COMCTL32: o Match behaviour of ImageList_LoadImageA wrt cx parameter (when set to zero)
+    - COMCTL32: o ImageList_LoadImageW: match behaviour of ImageList_LoadImageA 
+                  wrt cx parameter (when set to zero)
                   (fixes properties dialog of sndvol32.exe (windows mixer app))
                 o Updated status control to latest Wine & applied two
                   bugfixes (already sent to wine-patches)
