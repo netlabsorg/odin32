@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.14 2000-03-04 19:10:09 jeroen Exp $
+# $Id: makefile,v 1.15 2000-03-04 20:03:42 bird Exp $
 #
 # PD-Win32 API
 #
@@ -129,15 +129,15 @@ dep:
     $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
         *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
     cd glut
-    $(MAKE_CMD) NODEP=1 dep
+    $(MAKE_CMD) dep
     cd ..\glu
-    $(MAKE_CMD) NODEP=1 dep
+    $(MAKE_CMD) dep
     cd ..\glide
-    $(MAKE_CMD) NODEP=1 dep
+    $(MAKE_CMD) dep
     cd ..\mesa
-    $(MAKE_CMD) NODEP=1 dep
+    $(MAKE_CMD) dep
     cd 3dfx
-    $(MAKE_CMD) NODEP=1 dep
+    $(MAKE_CMD) dep
     cd ..\..
 
 !ifndef NODEP
