@@ -1,12 +1,91 @@
 #ifndef __CUSTOMBUILD_H__
 #define __CUSTOMBUILD_H__
 
+#include <win\peexe.h>
+#include <initdll.h>
+
 //HKEY_LOCAL_MACHINE
 #define CUSTOM_BUILD_OPTIONS_KEY  "System\\CustomBuild"
 #define DISABLE_AUDIO_KEY         "DisableAudio"
 #define DISABLE_ASPI_KEY          "DisableASPI"
 
+#define DUMMY_PREFIX 	          "DUMMY_"
+
+#define MAX_FONT_MAPPINGS	  8
+#define MAX_REGISTER_DLLS         64
+
+typedef BOOL (WIN32API *PFN_PRECUSTOMIZE)();
+typedef BOOL (WIN32API *PFN_POSTCUSTOMIZE)();
+typedef BOOL (WIN32API *PFN_ENDCUSTOMIZE)();
+
+typedef struct {
+  char               *szWindowsFont;
+  char               *szPMFont;
+} CUSTOMBUILD_FONTMAP;
+
+typedef struct {
+  char               *szName;	 //caps, including extension (e.g. "KERNEL32.DLL")
+  PIMAGE_FILE_HEADER  pfh;       //PE file header
+  char               *szExportPrefix;
+} CUSTOMBUILD_DLL;
+
+typedef struct {
+  char               *szName;
+  PFN_INITDLL         pfnInitterm;
+} CUSTOMBUILD_PRIVATE_INITTERM;
+
+typedef struct {
+  PFN_PRECUSTOMIZE    pfnPreCustomize;	//called after kernel32, user32 and gdi32 are initialized
+  PFN_POSTCUSTOMIZE   pfnPostCustomize;	//called at the end of dll load
+  PFN_ENDCUSTOMIZE    pfnEndCustomize;  //called when dll is unloaded
+
+  char               *szCustomBuildDllName;
+
+  char               *szRegistryBase;
+  char               *szMemMapName;
+  char               *szEnvExceptLogDisable;
+  char               *szEnvExceptLogPath;
+  char               *szPMWindowClassName;
+  char               *szWindowHandleSemName;
+
+  //standard kernel32 settings
+  DWORD               dwWindowsVersion;
+  BOOL                fOdinIni;
+
+  //standard user32 settings
+  BOOL                fDragDrop;
+  BOOL                fOdinSysMenuItems;
+  DWORD               dwWindowAppearance;
+  BOOL                fMonoCursor;
+
+  //standard gdi32 settings 
+  //font mappings (null terminated)
+  CUSTOMBUILD_FONTMAP fontMapping[MAX_FONT_MAPPINGS];
+  
+  //winmm
+  BOOL                fDirectAudio;
+  BOOL                fWaveAudio;
+
+  //first three important dlls (initialized in this order
+  CUSTOMBUILD_DLL     dllNtdll;
+  CUSTOMBUILD_DLL     dllKernel32;
+  CUSTOMBUILD_DLL     dllUser32;
+  CUSTOMBUILD_DLL     dllGdi32;
+
+  //list of remainder of registered dlls (order is important due to dependencies!!)
+  //(null terminated)
+  CUSTOMBUILD_DLL     registeredDll[MAX_REGISTER_DLLS];
+ 
+  //list of dummy dlls (to prevent accidental load)
+  //(null terminated)
+  CUSTOMBUILD_DLL     dummyDll[MAX_REGISTER_DLLS];
+
+} CUSTOMBUILD;
+
 extern BOOL fCustomBuild;
+
+void WIN32API SetRegistryRootKey(HKEY hRootkey, HKEY hKey);
+void WIN32API SetCustomBuildName(char *lpszName, PIMAGE_FILE_HEADER  pfh = NULL);
 
 void WIN32API InitDirectoriesCustom(char *szSystemDir, char *szWindowsDir);
 
@@ -99,9 +178,7 @@ void WIN32API SetCustomWndHandleSemName(LPSTR pszSemName);
 void WIN32API SetCustomMMapSemName(LPSTR pszSemName);
 
 //Override std class names used in Odin 
-void WIN32API SetCustomCDClassName(LPSTR pszCDClassName);
 void WIN32API SetCustomStdClassName(LPSTR pszStdClassName);
-void WIN32API SetCustomStdFrameClassName(LPSTR pszStdFrameClassName);
 
 //Turn off ASPI
 void WIN32API DisableASPI();
@@ -264,8 +341,46 @@ USHORT WIN32API ODIN_ThreadLeaveOdinContextNested(void *pExceptionRegRec, BOOL f
 /** Re-enter Odin context after being back in OS/2 code. */
 void   WIN32API ODIN_ThreadEnterOdinContextNested(void *pExceptionRegRec, BOOL fRestoreOdinExcpt, USHORT selFSOld);
 
+void   WIN32API ODIN_SetExceptionHandler(void *pExceptionRegRec);
+void   WIN32API ODIN_UnsetExceptionHandler(void *pExceptionRegRec);
+
 /* Turn on CD Polling (window with 2 second timer to check CD disk presence) */
 void WIN32API CustEnableCDPolling();
+
+
+//Fake PE headers
+extern "C" {
+extern IMAGE_FILE_HEADER nt_ntdll_header;
+extern IMAGE_FILE_HEADER nt_gdi32_header;
+extern IMAGE_FILE_HEADER nt_kernel32_header;
+extern IMAGE_FILE_HEADER nt_user32_header;
+extern IMAGE_FILE_HEADER nt_advapi32_header;
+extern IMAGE_FILE_HEADER nt_version_header;
+extern IMAGE_FILE_HEADER nt_wsock32_header;
+extern IMAGE_FILE_HEADER nt_ws2_32_header;
+extern IMAGE_FILE_HEADER nt_winmm_header;
+extern IMAGE_FILE_HEADER nt_ole32_header;
+extern IMAGE_FILE_HEADER nt_comctl32_header;
+extern IMAGE_FILE_HEADER nt_shell32_header;
+extern IMAGE_FILE_HEADER nt_comdlg32_header;
+extern IMAGE_FILE_HEADER nt_winspool_header;
+extern IMAGE_FILE_HEADER nt_ddraw_header;
+extern IMAGE_FILE_HEADER nt_oleaut32_header;
+extern IMAGE_FILE_HEADER nt_msvfw32_header;
+extern IMAGE_FILE_HEADER nt_imm32_header;
+extern IMAGE_FILE_HEADER nt_mpr_header;
+extern IMAGE_FILE_HEADER nt_iphlpapi_header;
+extern IMAGE_FILE_HEADER nt_olepro32_header;
+extern IMAGE_FILE_HEADER nt_msvcrt_header;
+extern IMAGE_FILE_HEADER nt_lz32_header;
+extern IMAGE_FILE_HEADER nt_oledlg_header;
+extern IMAGE_FILE_HEADER nt_riched32_header;
+extern IMAGE_FILE_HEADER nt_psapi_header;
+extern IMAGE_FILE_HEADER nt_rpcrt4_header;
+extern IMAGE_FILE_HEADER nt_shlwapi_header;
+extern IMAGE_FILE_HEADER nt_shfolder_header;
+extern IMAGE_FILE_HEADER nt_wininet_header;
+};
 
 #endif  /*__CUSTOMBUILD_H__*/
 
