@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.71 1999-11-01 19:11:43 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.72 1999-11-02 17:07:25 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1600,7 +1600,7 @@ LRESULT Win32BaseWindow::DefWindowProcW(UINT Msg, WPARAM wParam, LPARAM lParam)
 
     case WM_SETTEXT:
     {
-        if(!fInternalMsg) 
+        if(!fInternalMsg)
         {
            LRESULT result;
            char *aText = (char *) malloc((lstrlenW((LPWSTR)lParam)+1)*sizeof(WCHAR));
@@ -2421,20 +2421,20 @@ end:
 //******************************************************************************
 HWND Win32BaseWindow::SetActiveWindow()
 {
-  return OSLibWinSetActiveWindow(OS2Hwnd);
+  return OSLibWinSetActiveWindow(OS2HwndFrame);
 }
 //******************************************************************************
 //WM_ENABLE is sent to hwnd, but not to it's children (as it should be)
 //******************************************************************************
 BOOL Win32BaseWindow::EnableWindow(BOOL fEnable)
 {
-  return OSLibWinEnableWindow(OS2Hwnd, fEnable);
+  return OSLibWinEnableWindow(OS2HwndFrame, fEnable);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL Win32BaseWindow::CloseWindow()
 {
-  return OSLibWinMinimizeWindow(OS2Hwnd);
+  return OSLibWinMinimizeWindow(OS2HwndFrame);
 }
 //******************************************************************************
 //******************************************************************************
@@ -2458,7 +2458,7 @@ HWND Win32BaseWindow::GetActiveWindow()
 //******************************************************************************
 BOOL Win32BaseWindow::IsWindowEnabled()
 {
-    return OSLibWinIsWindowEnabled(OS2Hwnd);
+    return OSLibWinIsWindowEnabled(OS2HwndFrame);
 }
 //******************************************************************************
 //******************************************************************************
@@ -2467,7 +2467,7 @@ BOOL Win32BaseWindow::IsWindowVisible()
 #if 1
     return (dwStyle & WS_VISIBLE) == WS_VISIBLE;
 #else
-    return OSLibWinIsWindowVisible(OS2Hwnd);
+    return OSLibWinIsWindowVisible(OS2HwndFrame);
 #endif
 }
 //******************************************************************************

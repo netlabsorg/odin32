@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.26 1999-10-31 01:14:42 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.27 1999-11-02 17:07:25 cbratschi Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -18,6 +18,7 @@
 #include <misc.h>
 #include <win32dlg.h>
 #include "oslibmsg.h"
+#include "oslibwin.h"
 #include "win32wdesktop.h"
 #include "controls.h"
 
@@ -269,6 +270,8 @@ INT Win32Dialog::doDialogBox()
     if (!dialogFlags & DF_END) /* was EndDialog called in WM_INITDIALOG ? */
     {
         topOwner->EnableWindow( FALSE );
+        //CB: todo: make modal, implement modeless, remove FCF_TASKLIST
+        //    emulate WinProcessDlg
         ShowWindow( SW_SHOW );
 
         //CB: 100% CPU usage, need a better solution with OSLibWinGetMsg
