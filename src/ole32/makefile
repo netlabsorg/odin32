@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.28 2000-12-02 23:40:42 bird Exp $
+# $Id: makefile,v 1.29 2001-08-04 14:13:08 bird Exp $
 
 #
 # Odin32 API
@@ -20,7 +20,7 @@
 #
 _all: all
 
-all clean:  # add all common rules here
+$(COMMONRULES:dep lib=):
     $(MAKE_CMD) -f ole32.mak $@
     $(MAKE_CMD) -f regsvr32.mak $@
 
