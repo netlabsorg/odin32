@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.10 2002-08-22 03:07:06 bird Exp $
+# $Id: Makefile,v 1.11 2002-08-24 22:07:40 bird Exp $
 
 #
 # kKrnlLib/dev32 makefile.
@@ -11,29 +11,32 @@
 #
 # Setup config
 #
-PATH_ROOT = ..\..\..\..
+ALL_INCLUDES    = -I../include -I../kLib/include
+ALL_DEFINES     = -DKKRNLLIB
+PATH_ROOT       = ..\..\..\..
 !include $(PATH_ROOT)\$(BUILD_SETUP_MAK)
 
 #
 # Target config
 #
-TARGET_MODE  = SYSLIB
-TARGET_NAME  = kKrnlLib_src
-ALL_INCLUDES = -I../include -I../kLib/include
-ALL_DEFINES  = -DKKRNLLIB
+TARGET_MODE     = SYSLIB
+TARGET_NAME     = src
+TARGET_SUB      = kKrnlLib
 
-PREMAKEFILES =\
-    MkCallTab.mak \
+PREMAKEFILES_NEEDED =\
+    MkCallTab.mak\
+
+PREMAKEFILES_LIB    =\
     newdbg.mak \
     newrel.mak \
     Dev16.mak \
 
-POSTMAKEFILES =\
+POSTMAKEFILES_LIB =\
     first.mak \
     last.mak \
 #    srcR3Tst.mak \
 
-TARGET_OBJS =\
+TARGET_OBJS     =\
 $(PATH_TARGET)\d32Globals.$(EXT_OBJ)\
 $(PATH_TARGET)\d32Hlp.$(EXT_OBJ)\
 $(PATH_TARGET)\d32Init.$(EXT_OBJ)\
@@ -57,21 +60,22 @@ $(PATH_TARGET)\smalloc.$(EXT_OBJ)\
 $(PATH_TARGET)\stricmp.$(EXT_OBJ)\
 $(PATH_TARGET)\vprintf.$(EXT_OBJ)\
 $(PATH_TARGET)\vsprintf.$(EXT_OBJ)\
-$(PATH_OBJ)\kKrnlLib_newdbg.$(EXT_LIB)\kKrnlLib_newdbg.$(EXT_LIB)\
-$(PATH_OBJ)\kKrnlLib_newrel.$(EXT_LIB)\kKrnlLib_newrel.$(EXT_LIB)\
+$(PATH_OBJ)\$(TARGET_SUB)\newdbg.$(EXT_LIB)\newdbg.$(EXT_LIB)\
+$(PATH_OBJ)\$(TARGET_SUB)\newrel.$(EXT_LIB)\newrel.$(EXT_LIB)\
 \
-$(PATH_ROOT)\obj\$(SHT_TRGPLTFRM)$(SHT_BLDMD)mscv6-16\kKrnlLib_dev16.$(EXT_LIB)\kKrnlLib_dev16.$(EXT_LIB)\
+$(PATH_ROOT)\obj\$(SHT_TRGPLTFRM)$(SHT_BLDMD)mscv6-16\$(TARGET_SUB)\dev16.$(EXT_LIB)\dev16.$(EXT_LIB)\
 \
 $(PATH_TARGET)\SymDB32.$(EXT_OBJ)\
 $(PATH_TARGET)\calltaba.$(EXT_OBJ)\
 
-TARGET_NO_DEP=\
-calltaba.c
+TARGET_NO_DEP   =\
+calltaba.c \
+calltaba.asm
 
 #
 # Rules config
 #
-RULES_FORWARD = calltaba.asm
+RULES_FORWARD   = calltaba.asm
 !include $(MAKE_INCLUDE_PROCESS)
 
 !if !$(BUILD_FORWARDING)

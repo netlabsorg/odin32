@@ -1,7 +1,7 @@
-# $Id: first.mak,v 1.5 2002-08-20 05:04:42 bird Exp $
+# $Id: first.mak,v 1.6 2002-08-24 22:07:41 bird Exp $
 
 #
-# kKrnlLib_first.lib makefile.
+# devFirst.lib makefile.
 #
 # Copyright (c) 1998-2002 knut st. osmundsen (bird@anduin.net)
 #
@@ -9,31 +9,23 @@
 #
 
 #
-# Load the build setup.
+# Setup config.
 #
-PATH_ROOT = ..\..\..\..
+ALL_INCLUDES    = -I../include -I../kLib/include
+ALL_DEFINES     = -DKKRNLLIB
+PATH_ROOT       = ..\..\..\..
 !include $(PATH_ROOT)\make\setup.mak
 
+#
+# Target config.
+#
+TARGET_MODE     = SYSLIB
+TARGET_NAME     = devFirst
+TARGET_SUB      = kKrnlLib
+MAKEFILE        = first.mak
 
 #
-# Config.
-#
-TARGET_MODE = SYSLIB
-TARGET_NAME = kKrnlLib_first
-MAKEFILE    = first.mak
-ALL_INCLUDES= -I../include -I../kLib/include
-ALL_DEFINES = -DKKRNLLIB
-
-
-#
-# Object files.
-#
-TARGET_OBJS =\
-$(PATH_TARGET)\devFirst.$(EXT_OBJ)\
-
-
-#
-# Load the build process rules.
+# Rules config.
 #
 !include $(MAKE_INCLUDE_PROCESS)
 
