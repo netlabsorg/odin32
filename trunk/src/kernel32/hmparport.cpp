@@ -1,4 +1,4 @@
-/* $Id: hmparport.cpp,v 1.12 2001-11-29 10:53:27 phaller Exp $ */
+/* $Id: hmparport.cpp,v 1.13 2001-11-29 10:58:44 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -148,7 +148,15 @@ HMDeviceParPortClass::HMDeviceParPortClass(LPCSTR lpDeviceName) : HMDeviceHandle
 #endif
   
   // first, we determine the number of parallel port devices available
-  BYTE  bParallelPorts;
+  BYTE  bParallelPorts = 9;
+  
+#if 0
+  // Note:
+  // OSLibDosDevConfig does *NOT* report any OS/2 related information
+  // about the parallel ports such as LPT redirections or even an
+  // installed LPT device driver, it appears to just report what the
+  // BIOS told.
+  
   DWORD rc = OSLibDosDevConfig(&bParallelPorts,
                                DEVINFO_PRINTER);
   dprintf(("HMDeviceParPortClass: Parallel ports reported: %d\n",
@@ -159,7 +167,7 @@ HMDeviceParPortClass::HMDeviceParPortClass(LPCSTR lpDeviceName) : HMDeviceHandle
   // @@@PH
   // query configuration data from Resource Manager
   // (base i/o ports, etc. for the IOCTL_INTERNAL_GET_xxx)
-  
+#endif
   
   VOID *pData;
   dprintf(("HMDeviceParPortClass: Registering LPTs with Handle Manager\n"));
