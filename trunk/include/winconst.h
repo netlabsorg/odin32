@@ -1,4 +1,4 @@
-/* $Id: winconst.h,v 1.15 1999-12-16 00:09:31 sandervl Exp $ */
+/* $Id: winconst.h,v 1.16 1999-12-17 16:55:13 sandervl Exp $ */
 
 /*
  * Win32 constants
@@ -293,3 +293,13 @@
 #ifndef WH_NB_HOOKS
 #define WH_NB_HOOKS           (WH_MAXHOOK_W-WH_MINHOOK_W+1)
 #endif
+
+#define EXCEPTION_DEBUG_EVENT       1
+#define CREATE_THREAD_DEBUG_EVENT   2
+#define CREATE_PROCESS_DEBUG_EVENT  3
+#define EXIT_THREAD_DEBUG_EVENT     4
+#define EXIT_PROCESS_DEBUG_EVENT    5
+#define LOAD_DLL_DEBUG_EVENT        6
+#define UNLOAD_DLL_DEBUG_EVENT      7
+#define OUTPUT_DEBUG_STRING_EVENT   8
+#define RIP_EVENT                   9

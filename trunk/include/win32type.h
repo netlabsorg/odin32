@@ -1,4 +1,4 @@
-/* $Id: win32type.h,v 1.28 1999-10-20 13:43:39 sandervl Exp $ */
+/* $Id: win32type.h,v 1.29 1999-12-17 16:55:12 sandervl Exp $ */
 
 /*
  * Win32 type definitions for OS/2
@@ -665,6 +665,89 @@ typedef struct
 typedef BOOL    (* CALLBACK WNDENUMPROC)(HWND,LPARAM);
 
 #endif
+
+typedef DWORD (* CALLBACK LPTHREAD_START_ROUTINE)(LPVOID);
+/* typedef struct _EXCEPTION_RECORD {
+    DWORD   ExceptionCode;
+    DWORD   ExceptionFlags;
+    struct  _EXCEPTION_RECORD *ExceptionRecord;
+    LPVOID  ExceptionAddress;
+    DWORD   NumberParameters;
+    DWORD   ExceptionInformation[15];
+} EXCEPTION_RECORD; */
+
+typedef struct _EXCEPTION_DEBUG_INFO {
+/*    EXCEPTION_RECORD ExceptionRecord; */
+    DWORD dwFirstChange;
+} EXCEPTION_DEBUG_INFO;
+
+typedef struct _CREATE_THREAD_DEBUG_INFO {
+    HANDLE hThread;
+    LPVOID lpThreadLocalBase;
+    LPTHREAD_START_ROUTINE lpStartAddress;
+} CREATE_THREAD_DEBUG_INFO;
+
+typedef struct _CREATE_PROCESS_DEBUG_INFO {
+    HANDLE hFile;
+    HANDLE hProcess;
+    HANDLE hThread;
+    LPVOID lpBaseOfImage;
+    DWORD dwDebugInfoFileOffset;
+    DWORD nDebugInfoSize;
+    LPVOID lpThreadLocalBase;
+    LPTHREAD_START_ROUTINE lpStartAddress;
+    LPVOID lpImageName;
+    WORD fUnicode;
+} CREATE_PROCESS_DEBUG_INFO;
+
+typedef struct _EXIT_THREAD_DEBUG_INFO {
+    DWORD dwExitCode;
+} EXIT_THREAD_DEBUG_INFO;
+
+typedef struct _EXIT_PROCESS_DEBUG_INFO {
+    DWORD dwExitCode;
+} EXIT_PROCESS_DEBUG_INFO;
+
+typedef struct _LOAD_DLL_DEBUG_INFO {
+    HANDLE hFile;
+    LPVOID   lpBaseOfDll;
+    DWORD    dwDebugInfoFileOffset;
+    DWORD    nDebugInfoSize;
+    LPVOID   lpImageName;
+    WORD     fUnicode;
+} LOAD_DLL_DEBUG_INFO;
+
+typedef struct _UNLOAD_DLL_DEBUG_INFO {
+    LPVOID lpBaseOfDll;
+} UNLOAD_DLL_DEBUG_INFO;
+
+typedef struct _OUTPUT_DEBUG_STRING_INFO {
+    LPSTR lpDebugStringData;
+    WORD  fUnicode;
+    WORD  nDebugStringLength;
+} OUTPUT_DEBUG_STRING_INFO;
+
+typedef struct _RIP_INFO {
+    DWORD dwError;
+    DWORD dwType;
+} RIP_INFO;
+
+typedef struct _DEBUG_EVENT {
+    DWORD dwDebugEventCode;
+    DWORD dwProcessId;
+    DWORD dwThreadId;
+    union {
+        EXCEPTION_DEBUG_INFO      Exception;
+        CREATE_THREAD_DEBUG_INFO  CreateThread;
+        CREATE_PROCESS_DEBUG_INFO CreateProcessInfo;
+        EXIT_THREAD_DEBUG_INFO    ExitThread;
+        EXIT_PROCESS_DEBUG_INFO   ExitProcess;
+        LOAD_DLL_DEBUG_INFO       LoadDll;
+        UNLOAD_DLL_DEBUG_INFO     UnloadDll;
+        OUTPUT_DEBUG_STRING_INFO  DebugString;
+        RIP_INFO                  RipInfo;
+    } u;
+} DEBUG_EVENT, *LPDEBUG_EVENT;
 
 #pragma pack()
 
