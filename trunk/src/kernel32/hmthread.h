@@ -1,4 +1,4 @@
-/* $Id: hmthread.h,v 1.1 2000-03-16 19:21:54 sandervl Exp $ */
+/* $Id: hmthread.h,v 1.2 2000-03-17 16:08:40 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -29,7 +29,8 @@ public:
                               LPTHREAD_START_ROUTINE lpStartAddr,
                               LPVOID                 lpvThreadParm,
                               DWORD                  fdwCreate,
-                              LPDWORD                lpIDThread);
+                              LPDWORD                lpIDThread, 
+                              BOOL                   fFirstThread);
 
   /* this is a handler method for calls to WaitForSingleObject */
   virtual DWORD WaitForSingleObject(PHMHANDLEDATA pHMHandleData,

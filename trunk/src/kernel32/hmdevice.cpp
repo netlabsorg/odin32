@@ -1,4 +1,4 @@
-/* $Id: hmdevice.cpp,v 1.17 2000-03-16 19:20:37 sandervl Exp $ */
+/* $Id: hmdevice.cpp,v 1.18 2000-03-17 16:08:39 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -1188,7 +1188,8 @@ HANDLE HMDeviceHandler::CreateThread(PHMHANDLEDATA pHMHandleData,
                                      LPTHREAD_START_ROUTINE lpStartAddr,
                                      LPVOID                 lpvThreadParm,
                                      DWORD                  fdwCreate,
-                                     LPDWORD                lpIDThread)
+                                     LPDWORD                lpIDThread, 
+                                     BOOL                   fFirstThread)
 {
   dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::CreateThread %08xh",
            pHMHandleData->hHMHandle));

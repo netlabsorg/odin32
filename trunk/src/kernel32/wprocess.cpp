@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.73 2000-03-16 19:20:40 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.74 2000-03-17 16:08:40 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -137,7 +137,9 @@ TEB *InitializeTIB(BOOL fMainThread)
 	        DebugInt3();
 	        return NULL;
     	}
-	HMHandleAllocate(&hThreadMain, O32_GetCurrentThread());
+        //SvL: This doesn't really create a thread, but only sets up the
+        //     handle of thread 0
+	hThreadMain = HMCreateThread(NULL, 0, 0, 0, 0, 0, TRUE);
    }
    if(OSLibAllocSel(PAGE_SIZE, &tibsel) == FALSE)
    {

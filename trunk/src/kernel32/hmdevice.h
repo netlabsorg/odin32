@@ -1,4 +1,4 @@
-/* $Id: hmdevice.h,v 1.16 2000-03-16 19:20:38 sandervl Exp $ */
+/* $Id: hmdevice.h,v 1.17 2000-03-17 16:08:39 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -308,7 +308,8 @@ public:
                              LPTHREAD_START_ROUTINE lpStartAddr,
                              LPVOID                 lpvThreadParm,
                              DWORD                  fdwCreate,
-                             LPDWORD                lpIDThread);
+                             LPDWORD                lpIDThread, 
+                             BOOL                   fFirstThread);
 
  virtual INT    GetThreadPriority(PHMHANDLEDATA pHMHandleData);
  virtual DWORD  SuspendThread(PHMHANDLEDATA pHMHandleData);

@@ -1,4 +1,4 @@
-/* $Id: hmthread.cpp,v 1.1 2000-03-16 19:21:53 sandervl Exp $ */
+/* $Id: hmthread.cpp,v 1.2 2000-03-17 16:08:40 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -40,17 +40,23 @@ HANDLE HMDeviceThreadClass::CreateThread(PHMHANDLEDATA          pHMHandleData,
                                          LPTHREAD_START_ROUTINE lpStartAddr,
                                          LPVOID                 lpvThreadParm,
                                          DWORD                  fdwCreate,
-                                         LPDWORD                lpIDThread)
+                                         LPDWORD                lpIDThread,
+                                         BOOL                   fFirstThread)
 {
   Win32Thread *winthread;
 
+  pHMHandleData->dwInternalType = HMTYPE_THREAD;
+  pHMHandleData->dwUserData     = THREAD_ALIVE;
+
+  //SvL: This doesn't really create a thread, but only sets up the
+  //     handle of thread 0
+  if(fFirstThread) {
+	return O32_GetCurrentThread(); //return Open32 handle of thread	0
+  }
   winthread = new Win32Thread(lpStartAddr, lpvThreadParm, fdwCreate, pHMHandleData->hHMHandle);
 
   if(winthread == 0)
     return(0);
-
-  pHMHandleData->dwInternalType = HMTYPE_THREAD;
-  pHMHandleData->dwUserData     = THREAD_ALIVE;
 
 #ifdef DEBUG
   // @@@PH Note: with debug code enabled, ODIN might request more stack space!

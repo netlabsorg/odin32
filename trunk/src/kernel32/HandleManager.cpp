@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.36 2000-03-16 19:20:36 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.37 2000-03-17 16:08:38 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -2939,7 +2939,8 @@ HANDLE HMCreateThread(LPSECURITY_ATTRIBUTES  lpsa,
                       LPTHREAD_START_ROUTINE lpStartAddr,
                       LPVOID                 lpvThreadParm,
                       DWORD                  fdwCreate,
-                      LPDWORD                lpIDThread)
+                      LPDWORD                lpIDThread,
+                      BOOL                   fFirstThread)
 {
   int             iIndex;                     /* index into the handle table */
   int             iIndexNew;                  /* index into the handle table */
@@ -2981,7 +2982,7 @@ HANDLE HMCreateThread(LPSECURITY_ATTRIBUTES  lpsa,
   //              a valid HandleManager-internal handle!
   rc = pDeviceHandler->CreateThread(&TabWin32Handles[iIndexNew].hmHandleData,
                                     lpsa,  cbStack, lpStartAddr,
-                                    lpvThreadParm, fdwCreate, lpIDThread);
+                                    lpvThreadParm, fdwCreate, lpIDThread, fFirstThread);
 
   if (rc == 0)     /* oops, creation failed within the device handler */
   {
