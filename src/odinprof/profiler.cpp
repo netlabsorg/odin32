@@ -1,4 +1,4 @@
-/* $Id: profiler.cpp,v 1.1 2001-11-22 10:43:59 phaller Exp $ */
+/* $Id: profiler.cpp,v 1.2 2001-11-22 11:34:43 phaller Exp $ */
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  * Execution Trace Profiler
@@ -32,6 +32,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <direct.h>
+#include <process.h>
 
 #include "symfile.h"
 
@@ -396,6 +397,7 @@ static void i_ProfileQuerySymbol(ULONG eip_function,
   ULONG  ulObject;                        /* object number within the module */
   CHAR   szModule[260];                        /* buffer for the module name */
   ULONG  ulOffset;             /* offset within the object within the module */
+  ULONG  ulSymbolOffset;
   
   rc = DosQueryModFromEIP(&ulModule,
                           &ulObject,
@@ -413,7 +415,8 @@ static void i_ProfileQuerySymbol(ULONG eip_function,
                                          ulObject,
                                          ulOffset,
                                          szFunction,
-                                         sizeof(szFunction)) )
+                                         sizeof(szFunction),
+                                         &ulSymbolOffset) )
     {
       sprintf(szFunction,
               "func_#%08xh",
@@ -449,6 +452,10 @@ ULONG _System C_ProfileHook32Enter(ULONG eip_function, ULONG ret, ULONG time_hi,
     // so bottom half will never be called
     return ret;
   
+  USHORT sel = RestoreOS2FS();
+  // DosEnterCritSec();
+  
+  
   // "call _ProfileHook32" has 5 bytes, adjust here
   eip_function -= 5;
   
@@ -471,8 +478,6 @@ ULONG _System C_ProfileHook32Enter(ULONG eip_function, ULONG ret, ULONG time_hi,
   // 3.1 - if not, create new entry
   if (NULL == pPE)
   {
-    USHORT sel = RestoreOS2FS();
-    
     pPE = (PPROFILEENTRY)malloc( sizeof(PROFILEENTRY) );
     
     i_ProfileQuerySymbol(eip_function,
@@ -490,8 +495,6 @@ ULONG _System C_ProfileHook32Enter(ULONG eip_function, ULONG ret, ULONG time_hi,
     // add to the hashtable
     // @@@PH need to synchronize access!
     pPB->pHashtable->addElement(eip_function, pPE);
-    
-    SetFS(sel);
   }
   
   // update available statistical data
@@ -499,6 +502,9 @@ ULONG _System C_ProfileHook32Enter(ULONG eip_function, ULONG ret, ULONG time_hi,
   
   // register call and skip to the next empty slot
   pPB->ulCalldepth++;
+  
+  // DosExitCritSec();
+  SetFS(sel);
   
   // get "compensated" timestamp
   // -> keep the time between entering the function and
@@ -521,6 +527,9 @@ ULONG _System C_ProfileHook32Exit(ULONG time_hi, ULONG time_lo)
     // available, so we're definately gonna crash!
     return NULL;
   
+  USHORT sel = RestoreOS2FS();
+  // DosEnterCritSec();
+  
   // register call exit
   pPB->ulCalldepth--;
   
@@ -530,32 +539,28 @@ ULONG _System C_ProfileHook32Exit(ULONG time_hi, ULONG time_lo)
   PPROFILEENTRY pPE = (PPROFILEENTRY) pPB->pHashtable->getElement(eip_function);
   if (pPE)
   {
-    // Note:
-    // we don't take the values for the 1st call since all the lookup values
-    // are virtually non-deterministic and cannot be compensated for.
-    if (pPE->ulCalls > 1)
-    {
-      ULONG ulDiffHi = time_hi - pPB->enterTimeHi[i];
-      ULONG ulDiffLo = time_lo - pPB->enterTimeLo[i];
-      
-      // test for wrap around
-      if (ulDiffHi)
-        ulDiffLo = ~ulDiffLo;
-      
-      // timestamps are in "cpu cycles"
-      // ULONG ulTime = (ulDiffHi >> 4) | (ulDiffLo << 28);
-      ULONG ulTime = ulDiffLo;
-      
-      if (pPE->ulTimeMinimum > ulTime)
-        pPE->ulTimeMinimum = ulTime;
-      
-      if (pPE->ulTimeMaximum < ulTime)
-        pPE->ulTimeMaximum = ulTime;
-      
-      pPE->ulTimeTotal += ulTime;
-    }
+    ULONG ulDiffHi = time_hi - pPB->enterTimeHi[i];
+    ULONG ulDiffLo = time_lo - pPB->enterTimeLo[i];
+    
+    // test for wrap around
+    if (ulDiffHi)
+      ulDiffLo = ~ulDiffLo;
+    
+    // timestamps are in "cpu cycles"
+    // ULONG ulTime = (ulDiffHi >> 4) | (ulDiffLo << 28);
+    ULONG ulTime = ulDiffLo;
+    
+    if (pPE->ulTimeMinimum > ulTime)
+      pPE->ulTimeMinimum = ulTime;
+    
+    if (pPE->ulTimeMaximum < ulTime)
+      pPE->ulTimeMaximum = ulTime;
+    
+    pPE->ulTimeTotal += ulTime;
   }
-
+  
+  // DosExitCritSec();
+  SetFS(sel);
   
   // 2 - return saved return address
   return pPB->ret[pPB->ulCalldepth];
@@ -656,6 +661,17 @@ int _Optlink sortHashtableEntries3(const void *arg1,const void *arg2)
   unsigned long int iAvg2 = p2->ulTimeTotal / p2->ulCalls;
   
   return iAvg1 - iAvg2;
+}
+
+int _Optlink sortHashtableEntries4(const void *arg1,const void *arg2)
+{
+  PHASHTABLEENTRYID pHTE1 = (PHASHTABLEENTRYID)arg1;
+  PHASHTABLEENTRYID pHTE2 = (PHASHTABLEENTRYID)arg2;
+  
+  PPROFILEENTRY p1 = (PPROFILEENTRY)pHTE1->pObject;
+  PPROFILEENTRY p2 = (PPROFILEENTRY)pHTE2->pObject;
+  
+  return p1->EIP - p2->EIP;
 }
 
 
@@ -784,6 +800,31 @@ void _Optlink Profiler_DumpProfile(FILE *file)
   }
   
   
+  // sort the list by address
+  qsort(arrEntries,
+        iEntries,
+        sizeof( HASHTABLEENTRYID ),
+        sortHashtableEntries4);
+  
+  
+  // write to file
+  fprintf(file,
+          "Functions / symbols sorted by address\n"
+          "Address ----- Function / Symbol -------------------------------------------\n");
+  for(i = 0;
+      i < iEntries;
+      i++)
+  {
+    PPROFILEENTRY p = (PPROFILEENTRY)arrEntries[i].pObject;
+    if (p->ulCalls > 1)
+    fprintf(file,
+            "#%08xh %-9s %s\n",
+            p->EIP,
+            p->pszModule,
+            p->pszFunction);
+  }
+  
+
   ProfilerEnable(flagLock);
 }
 
@@ -793,8 +834,9 @@ void _System ProfilerWrite()
   FILE* _privateLogFile;
   char szFilename[260];
   USHORT sel = RestoreOS2FS();
+  int pid = _getpid();
 
-  sprintf(szFilename, "%s\\perf.log", szWorkingDirectory);
+  sprintf(szFilename, "%s\\%d.prof", szWorkingDirectory, pid);
   _privateLogFile = fopen(szFilename, "w");
   
   if(_privateLogFile == NULL) 
