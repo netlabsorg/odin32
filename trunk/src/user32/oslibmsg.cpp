@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.51 2001-12-11 17:34:53 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.52 2001-12-12 16:40:43 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -657,4 +657,31 @@ BOOL OSLibPostThreadMessage(ULONG threadid, UINT msg, WPARAM wParam, LPARAM lPar
 }
 //******************************************************************************
 //******************************************************************************
+DWORD GetThreadMessageExtraInfo()
+{
+ TEB *teb;
 
+  teb = GetThreadTEB();
+  if(teb)
+  {
+      return teb->o.odin.dwMsgExtraInfo;
+  }
+  dprintf(("GetThreadMessageExtraInfo: teb == NULL!!"));
+  return 0;
+}
+//******************************************************************************
+//******************************************************************************
+DWORD SetThreadMessageExtraInfo(DWORD lParam)
+{
+ TEB *teb;
+
+  teb = GetThreadTEB();
+  if(teb)
+  {
+        teb->o.odin.dwMsgExtraInfo = lParam;
+  }
+  else  dprintf(("SetThreadMessageExtraInfo: teb == NULL!!"));
+  return 0;
+}
+//******************************************************************************
+//******************************************************************************

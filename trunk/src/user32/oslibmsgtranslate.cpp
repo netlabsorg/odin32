@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.78 2001-12-11 17:34:53 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.79 2001-12-12 16:40:43 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -556,65 +556,18 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
       ULONG  keyFlags=0;
       USHORT scanCode=0;
       ULONG  flags = SHORT1FROMMP(os2Msg->mp1);
-      BOOL   keyWasPressed, isExtended = FALSE;
+      BOOL   keyWasPressed;
       char   c;
       USHORT usPMScanCode = CHAR4FROMMP(os2Msg->mp1);
 
-      teb->o.odin.fTranslated = FALSE;
-      repeatCount = CHAR3FROMMP(os2Msg->mp1);
-      scanCode = CHAR4FROMMP(os2Msg->mp1);
-      keyWasPressed = ((SHORT1FROMMP (os2Msg->mp1) & KC_PREVDOWN) == KC_PREVDOWN);
+        teb->o.odin.fTranslated = FALSE;
+        repeatCount = CHAR3FROMMP(os2Msg->mp1);
+        scanCode = CHAR4FROMMP(os2Msg->mp1);
+        keyWasPressed = ((SHORT1FROMMP (os2Msg->mp1) & KC_PREVDOWN) == KC_PREVDOWN);
 
         dprintf(("PM: WM_CHAR: %x %x rep=%d scancode=%x", SHORT1FROMMP(os2Msg->mp2), SHORT2FROMMP(os2Msg->mp2), repeatCount, scanCode));
         dprintf(("PM: WM_CHAR: hwnd %x flags %x mp1 %x, mp2 %x, time=%08xh", win32wnd->getWindowHandle(), flags, os2Msg->mp1, os2Msg->mp2, os2Msg->time));
 
-        // vitali add begin
-        if ( ( SHORT1FROMMP(os2Msg->mp2) & 0x0FF ) == 0x0E0 )
-        {
-            // an extended key ( arrows, ins, del and so on )
-            // get "virtual" scancode from character code because
-            // for "regular" keys they are equal
-            if(!(flags & (KC_SHIFT|KC_ALT|KC_CTRL))) {
-                scanCode = ( SHORT1FROMMP(os2Msg->mp2) >> 8) & 0x0FF;
-            }
-            isExtended = TRUE;
-        }
-        // vitali add end
-      
-        // both WM_KEYUP & WM_KEYDOWN want a virtual key, find the right Win32 virtual key
-        // given the OS/2 virtual key and OS/2 character
-
-        //if (((SHORT1FROMMP (mp1) & KC_CHAR) == KC_CHAR) ||
-        //    ((SHORT1FROMMP (mp1) & KC_LONEKEY) == KC_LONEKEY))
-        c = 0;
-        if ((SHORT1FROMMP (os2Msg->mp1) & 0xFF) != 0)
-        {
-            c = SHORT1FROMMP (os2Msg->mp2);
-            if ((c >= 'A') && (c <= 'Z')) {
-                virtualKey = c;
-                goto VirtualKeyFound;
-            }
-            if ((c >='a') && (c <= 'z')) {
-                virtualKey = c - 32;   // make it uppercase
-                goto VirtualKeyFound;
-            }
-            if ((c >= '0') && (c <= '9')) {
-                virtualKey = c;
-                goto VirtualKeyFound;
-            }
-        }
-
-VirtualKeyFound:
-//        dprintf (("VIRTUALKEYFOUND:(%x)", virtualKey));
-      
-        // @@@PH: what's this supposed to be?
-        // Adjust PM scancodes for Win* keys
-        if (scanCode >= 0x70)
-          scanCode -= 0x10;
-        // winMsg->wParam  = pmscan2winkey[scanCode][0];
-        // wWinScan  = pmscan2winkey[scanCode][1];
-     
-      {
         BOOL  fWinExtended;
         BYTE  bWinVKey;
         WORD  wWinScan;
@@ -632,13 +585,14 @@ VirtualKeyFound:
         // Set the extended bit when appropriate
         if (fWinExtended)
             winMsg->lParam = winMsg->lParam | WIN_KEY_EXTENDED;
-      }
 
+#if 0
+//TODO
         // Adjust VKEY value for pad digits if NumLock is on
         if ((scanCode >= 0x47) && (scanCode <= 0x53) &&
             (virtualKey >= 0x30) && (virtualKey >= 39))
             winMsg->wParam = virtualKey + 0x30;
-      
+#endif
 
 #ifdef ALTGR_HACK
      

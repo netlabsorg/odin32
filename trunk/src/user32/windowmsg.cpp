@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.30 2001-09-27 10:42:59 phaller Exp $ */
+/* $Id: windowmsg.cpp,v 1.31 2001-12-12 16:40:44 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -142,8 +142,15 @@ BOOL WIN32API PeekMessageW(LPMSG msg, HWND hwndOwner, UINT uMsgFilterMin,
 //******************************************************************************
 LONG WIN32API GetMessageExtraInfo()
 {
-    dprintf(("USER32: GetMessageExtraInfo"));
+    dprintf(("USER32: GetMessageExtraInfo %x", GetThreadMessageExtraInfo()));
     return GetThreadMessageExtraInfo();
+}
+//******************************************************************************
+//******************************************************************************
+LPARAM WIN32API SetMessageExtraInfo(LPARAM lParam)
+{
+  dprintf(("USER32: SetMessageExtraInfo %x", lParam));
+  return SetThreadMessageExtraInfo(lParam);
 }
 //******************************************************************************
 //******************************************************************************
@@ -349,13 +356,6 @@ BOOL WIN32API SendNotifyMessageW(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPar
 {
   dprintf(("USER32:  SendNotifyMessageW, not completely implemented\n"));
   return(SendMessageA(hwnd, Msg, wParam, lParam));
-}
-//******************************************************************************
-//******************************************************************************
-LPARAM WIN32API SetMessageExtraInfo(LPARAM lParam)
-{
-  dprintf(("USER32:  SetMessageExtraInfo\n"));
-  return SetThreadMessageExtraInfo(lParam);
 }
 /*****************************************************************************
  * Name      : BOOL WIN32API SendMessageCallbackA
