@@ -1,4 +1,4 @@
-/* $Id: profile.cpp,v 1.5 1999-08-04 00:44:33 phaller Exp $ */
+/* $Id: profile.cpp,v 1.6 1999-08-04 14:37:52 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -70,8 +70,6 @@ typedef struct
 {
     BOOL             changed;
     PROFILESECTION  *section;
-    char            *dos_name;
-    char            *unix_name;
     char            *filename;
     time_t           mtime;
 } PROFILE;
@@ -393,8 +391,6 @@ static PROFILEKEY *PROFILE_Find( PROFILESECTION **section,
  */
 static BOOL PROFILE_FlushFile(void)
 {
-    char *p, buffer[MAX_PATHNAME_LEN];
-    const char *unix_name;
     FILE *file = NULL;
     struct stat buf;
 
@@ -404,34 +400,23 @@ static BOOL PROFILE_FlushFile(void)
         return FALSE;
     }
 
-    if (!CurProfile->changed || !CurProfile->dos_name) return TRUE;
-    if (!(unix_name = CurProfile->unix_name) || !(file = fopen(unix_name, "w")))
-    {
-        /* Try to create it in $HOME/.wine */
-        /* FIXME: this will need a more general solution */
-        if ((p = getenv( "HOME" )) != NULL)
-        {
-            strcpy( buffer, p );
-            strcat( buffer, "/.wine/" );
-            p = buffer + strlen(buffer);
-            strcpy( p, strrchr( CurProfile->dos_name, '\\' ) + 1 );
-            CharLowerA( p );
-            file = fopen( buffer, "w" );
-            unix_name = buffer;
-        }
-    }
+    // not changed, return immediately
+    if (!CurProfile->changed)
+      return TRUE;
 
+    // try to open file
+    file = fopen(CurProfile->filename, "w");
     if (!file)
     {
-        dprintf(("Kernel32:Profile:could not save profile file %s\n", CurProfile->dos_name));
+        dprintf(("Kernel32:Profile:could not save profile file %s\n", CurProfile->filename));
         return FALSE;
     }
 
-    dprintf(("Kernel32:Profile:Saving '%s' into '%s'\n", CurProfile->dos_name, unix_name ));
+    dprintf(("Kernel32:Profile:Saving %s\n", CurProfile->filename ));
     PROFILE_Save( file, CurProfile->section );
     fclose( file );
     CurProfile->changed = FALSE;
-    if(!stat(unix_name,&buf))
+    if(!stat(CurProfile->filename,&buf))
        CurProfile->mtime=buf.st_mtime;
     return TRUE;
 }
@@ -446,13 +431,9 @@ static void PROFILE_ReleaseFile(void)
 {
     PROFILE_FlushFile();
     PROFILE_Free( CurProfile->section );
-    if (CurProfile->dos_name) HeapFree( SystemHeap, 0, CurProfile->dos_name );
-    if (CurProfile->unix_name) HeapFree( SystemHeap, 0, CurProfile->unix_name );
     if (CurProfile->filename) HeapFree( SystemHeap, 0, CurProfile->filename );
     CurProfile->changed   = FALSE;
     CurProfile->section   = NULL;
-    CurProfile->dos_name  = NULL;
-    CurProfile->unix_name = NULL;
     CurProfile->filename  = NULL;
     CurProfile->mtime     = 0;
 }
@@ -466,7 +447,6 @@ static void PROFILE_ReleaseFile(void)
 static BOOL PROFILE_Open( LPCSTR filename )
 {
     char buffer[MAX_PATHNAME_LEN];
-    char *newdos_name, *p;
     FILE *file = NULL;
     int i,j;
     struct stat buf;
@@ -480,8 +460,6 @@ static BOOL PROFILE_Open( LPCSTR filename )
           MRUProfile[i]= (PROFILE*)HEAP_xalloc( SystemHeap, 0, sizeof(PROFILE) );
           MRUProfile[i]->changed=FALSE;
           MRUProfile[i]->section=NULL;
-          MRUProfile[i]->dos_name=NULL;
-          MRUProfile[i]->unix_name=NULL;
           MRUProfile[i]->filename=NULL;
           MRUProfile[i]->mtime=0;
          }
@@ -509,7 +487,7 @@ static BOOL PROFILE_Open( LPCSTR filename )
                 MRUProfile[j]=MRUProfile[j-1];
              CurProfile=tempProfile;
             }
-          if(!stat(CurProfile->unix_name,&buf) && CurProfile->mtime==buf.st_mtime)
+          if(!stat(CurProfile->filename,&buf) && CurProfile->mtime==buf.st_mtime)
              dprintf(("Kernel32:Profile:(%s): already opened (mru=%d)\n",
                               filename, i ));
           else
@@ -533,48 +511,23 @@ static BOOL PROFILE_Open( LPCSTR filename )
 
     if(CurProfile->filename) PROFILE_ReleaseFile();
 
-    newdos_name = HEAP_strdupA( SystemHeap, 0, filename );
-    CurProfile->dos_name  = newdos_name;
     CurProfile->filename  = HEAP_strdupA( SystemHeap, 0, filename );
 
-    /* Try to open the profile file, first in $HOME/.wine */
-
-    /* FIXME: this will need a more general solution */
-    if ((p = getenv( "HOME" )) != NULL)
-    {
-        strcpy( buffer, p );
-        strcat( buffer, "/.wine/" );
-        p = buffer + strlen(buffer);
-        strcpy( p, strrchr( newdos_name, '\\' ) + 1 );
-        CharLowerA( p );
-        if ((file = fopen( buffer, "r" )))
-        {
-            dprintf(("Kernel32:Profile:(%s): found it in %s\n",
-                             filename, buffer ));
-            CurProfile->unix_name = HEAP_strdupA( SystemHeap, 0, buffer );
-        }
-    }
-
-    if (!file)
-    {
-        CurProfile->unix_name = HEAP_strdupA( SystemHeap, 0,
-                                             filename );
-        if ((file = fopen( filename, "r" )))
-            dprintf(("Kernel32:Profile:(%s): found it in %s\n",
-                             filename, filename ));
-    }
-
+    file = fopen( filename, "r" );
     if (file)
     {
+      dprintf(("Kernel32:Profile:(%s): found it in %s\n",
+               filename, filename ));
+
         CurProfile->section = PROFILE_Load( file );
         fclose( file );
-        if(!stat(CurProfile->unix_name,&buf))
+        if(!stat(CurProfile->filename,&buf))
            CurProfile->mtime=buf.st_mtime;
     }
     else
     {
         /* Does not exist yet, we will create it in PROFILE_FlushFile */
-        dprintf(("Kernel32:Profile:profile file %s not found\n", newdos_name ));
+        dprintf(("Kernel32:Profile:profile file %s not found\n", filename ));
     }
     return TRUE;
 }
