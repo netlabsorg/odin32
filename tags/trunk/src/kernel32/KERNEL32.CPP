@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.38 1999-12-09 11:00:40 sandervl Exp $ */
+/* $Id: KERNEL32.CPP,v 1.39 1999-12-24 18:40:08 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -406,16 +406,6 @@ int WIN32API MulDiv(int arg1, int arg2, int  arg3)
 
     return O32_MulDiv(arg1, arg2, arg3);
 }
-//******************************************************************************
-//******************************************************************************
-//SvL: BUGFIX: C calling convention!
-//******************************************************************************
-VOID __cdecl OS2memmove(VOID UNALIGNED *Destination, CONST VOID UNALIGNED *Source, DWORD Length)
-{
-  memmove(Destination, Source, Length);
-}
-//******************************************************************************
-
 //******************************************************************************
 UINT WIN32API CompareStringA(LCID lcid, DWORD fdwStyle, LPCSTR lpString1,
                              DWORD cch1, LPCSTR lpString2, DWORD cch2)

@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.59 1999-12-18 21:45:53 sandervl Exp $
+; $Id: kernel32.def,v 1.60 1999-12-24 18:40:08 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -955,10 +955,6 @@ EXPORTS
 ; ----------------------------------------------------------------------------
 ;   KERNEL32 / WINE support functions that do not exist in real Win32
 ; ----------------------------------------------------------------------------
-
-;really belongs in NTDLL.DLL...
-    memmove                    = _OS2memmove                      @906
-
 
     DebugErrorBox                 = DebugErrorBox                 @1201
     WriteLog                      = WriteLog                      @1202
