@@ -1,4 +1,4 @@
-/* $Id: initterm.h,v 1.4 2001-04-05 09:31:27 sandervl Exp $ */
+/* $Id: initterm.h,v 1.5 2001-07-15 14:58:06 sandervl Exp $ */
 
 /*
  * Win32 icon conversion functions for OS/2
@@ -13,6 +13,7 @@
 #define __INITTERM_H__
 
 extern DWORD hInstanceUser32;
+extern BOOL  fVersionWarp3;
 
 //winicon.cpp
 void RestoreCursor();

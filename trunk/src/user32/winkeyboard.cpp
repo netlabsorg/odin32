@@ -1,4 +1,4 @@
-/* $Id: winkeyboard.cpp,v 1.13 2001-07-08 15:51:43 sandervl Exp $ */
+/* $Id: winkeyboard.cpp,v 1.14 2001-07-15 14:58:12 sandervl Exp $ */
 /*
  * Win32 <-> PM key translation
  *
@@ -15,6 +15,7 @@
 #include <heapstring.h>
 #include <pmscan.h>
 #include <winuser32.h>
+#include "initterm.h"
 
 #define DBG_LOCALLOG    DBG_winkeyboard
 #include "dbglocal.h"
@@ -942,7 +943,10 @@ SHORT WIN32API GetKeyState( int nVirtKey)
 WORD WIN32API GetAsyncKeyState(INT nVirtKey)
 {
     dprintf2(("USER32: GetAsyncKeyState %x", nVirtKey));
-    return O32_GetAsyncKeyState(nVirtKey);
+    if(fVersionWarp3) {//Not present in Warp 3's PMWINX
+          return O32_GetKeyState(nVirtKey);
+    }
+    else  return O32_GetAsyncKeyState(nVirtKey);
 }
 //******************************************************************************
 //******************************************************************************
