@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.3 2000-02-05 02:05:37 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.4 2000-12-16 23:33:37 bird Exp $ */
 
 /*
  * DLL entry point
@@ -34,6 +34,7 @@
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
 #include <exitlist.h>
 
+#ifdef __IBMCPP__
 extern "C" {
 /*-------------------------------------------------------------------*/
 /* _CRT_init is the C run-time environment initialization function.  */
@@ -70,7 +71,6 @@ static void APIENTRY cleanup(ULONG reason);
 unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
                                    ulFlag)
 {
-   size_t i;
    APIRET rc;
 
    /*-------------------------------------------------------------------------*/
@@ -133,3 +133,37 @@ static void APIENTRY cleanup(ULONG ulReason)
    DosExitList(EXLST_EXIT, cleanup);
    return ;
 }
+
+#elif defined(__WATCOM_CPLUSPLUS__)
+
+/*
+ * Watcom dll init and term routines.
+ */
+
+int __dll_initialize(unsigned long hModule, unsigned long ulFlag)
+{
+    APIRET rc;
+    #if 1 /*
+          * Experimental console hack. Sets apptype to PM anyhow.
+          * First Dll to be initiated should now allways be OdinCrt!
+          * So include odincrt first!
+          */
+    PPIB pPIB;
+    PTIB pTIB;
+    rc = DosGetInfoBlocks(&pTIB, &pPIB);
+    if (rc != NO_ERROR)
+        return 0UL;
+    pPIB->pib_ultype = 3;
+    #endif
+    return 1;
+}
+
+int __dll_terminate(unsigned long hModule, unsigned long ulFlag)
+{
+    return 1;
+}
+
+#else
+#error message("compiler is not supported");
+#endif
+
