@@ -1,5 +1,3 @@
-/* $Id: icon.cpp,v 1.1 1999-05-24 20:19:54 ktk Exp $ */
-
 /*
  * PE2LX icons
  *

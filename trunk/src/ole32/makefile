@@ -1,5 +1,3 @@
-# $Id: makefile,v 1.1 1999-05-24 20:19:52 ktk Exp $ 
-
 #
 # PD-Win32 API 
 #
@@ -39,7 +37,7 @@ $(TARGET).lib: $(TARGET).dll
 
 
 ole32.obj: ole32.cpp ole32.h
-initterm.obj: initterm.c
+initterm.obj: initterm.cpp
 
 
 clean:

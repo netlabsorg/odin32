@@ -1,5 +1,3 @@
-/* $Id: mmio.cpp,v 1.1 1999-05-24 20:20:07 ktk Exp $ */
-
 /*
  * MMIO stubs
  *

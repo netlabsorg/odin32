@@ -1,5 +1,3 @@
-/* $Id: stubs.cpp,v 1.2 1999-05-31 22:08:13 phaller Exp $ */
-
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -20,8 +18,6 @@
 #include <winnls.h>
 #include "unicode.h"
 #include <builtin.h>
-#include "misc.h"
-
 #include "handlemanager.h"
 
 #include "stubs.h"

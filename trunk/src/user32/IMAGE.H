@@ -1,5 +1,3 @@
-/* $Id: IMAGE.H,v 1.1 1999-05-24 20:19:59 ktk Exp $ */
-
 #ifndef __IMAGE_H__
 #define __IMAGE_H__
 

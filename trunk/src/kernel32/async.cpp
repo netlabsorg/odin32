@@ -1,5 +1,3 @@
-/* $Id: async.cpp,v 1.1 1999-05-24 20:19:43 ktk Exp $ */
-
 /*
  * Win32 Asynchronous I/O Subsystem for OS/2
  *

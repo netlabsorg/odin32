@@ -40,7 +40,7 @@ $(TARGET).lib: $(TARGET).dll
 	$(CP) $@ $(PDWIN32_LIB)
 
 comctl32.obj: comctl32.c
-initterm.obj: initterm.c
+initterm.obj: initterm.cpp
 progress.obj: progress.c
 comctl32undoc.obj: comctl32undoc.c
 imagelist.obj: imagelist.c
@@ -57,7 +57,7 @@ tab.obj: tab.c
 status.obj: status.c
 header.obj: header.c
 updown.obj: updown.c
-rebar:obj: rebar.c
+rebar.obj: rebar.c
 cache.obj: cache.c
 trackbar.obj: trackbar.c
 tooltips.obj: tooltips.c

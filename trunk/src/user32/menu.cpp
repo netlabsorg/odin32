@@ -1,5 +1,3 @@
-/* $Id: menu.cpp,v 1.2 1999-05-31 22:08:15 phaller Exp $ */
-
 /*
  * Win32 menu API functions for OS/2
  *
@@ -15,11 +13,7 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
-
-#include <os2win.h>
-#include <misc.h>
 #include "user32.h"
-
 
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 1999-06-07 13:35:59 sandervl Exp $ 
+# $Id: makefile,v 1.3 1999-06-07 20:57:55 sandervl Exp $ 
 
 #
 # PD-Win32 API

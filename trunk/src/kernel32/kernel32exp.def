@@ -823,3 +823,5 @@ CheckVersion                             @1224
 
 Win32QueryModuleName                     @1225
 
+GetFS					   @1226
+SetFS					   @1227

@@ -1,5 +1,3 @@
-/* $Id: Fileio.cpp,v 1.2 1999-05-31 22:08:11 phaller Exp $ */
-
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -16,9 +14,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "unicode.h"
-#include "misc.h"
-
-
 #include "handlemanager.h"
 #include "devio.h"
 

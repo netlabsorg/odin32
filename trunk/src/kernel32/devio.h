@@ -1,5 +1,3 @@
-/* $Id: devio.h,v 1.1 1999-05-24 20:19:46 ktk Exp $ */
-
 #ifndef __DEVIO_H__
 #define __DEVIO_H__
 

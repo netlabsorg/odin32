@@ -1,5 +1,3 @@
-/* $Id: no.h,v 1.1 1999-05-24 20:19:39 ktk Exp $ */
-
 /*
  * Window.h NO* defines for the dsound module.
  *

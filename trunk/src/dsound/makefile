@@ -1,5 +1,3 @@
-# $Id: makefile,v 1.1 1999-05-24 20:19:38 ktk Exp $ 
-
 #
 # PD-Win32 API
 #
@@ -57,7 +55,7 @@ os2sndbuffer.obj: os2sndbuffer.cpp \
 misc.obj: misc.c \
           $(PDWIN32_INCLUDE)\misc.h
 
-initterm.obj: initterm.c
+initterm.obj: initterm.cpp
 
 
 clean:

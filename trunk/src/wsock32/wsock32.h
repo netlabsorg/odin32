@@ -1,5 +1,3 @@
-/* $Id: wsock32.h,v 1.1 1999-05-24 20:20:10 ktk Exp $ */
-
 /* WSOCK32.H--definitions & conversions for Odin's wsock32.dll. 
  * Unused/unneeded Microsoft declarations removed.
  *
@@ -16,9 +14,6 @@
 #define _WINSOCKAPI_
 
 #define FAR
-#define PASCAL __stdcall
-#define WINAPI __stdcall
-#define WIN32API __stdcall
 
 #ifndef IN
 #define IN
@@ -668,127 +663,127 @@ struct  Wlinger {
 extern "C" {
 #endif
 
-SOCKET PASCAL FAR OS2accept (SOCKET s, struct sockaddr *addr,
+SOCKET WIN32API FAR OS2accept (SOCKET s, struct sockaddr *addr,
                           int *addrlen);
 
-int PASCAL FAR OS2bind (SOCKET s, const struct sockaddr FAR *addr, int namelen);
+int WIN32API FAR OS2bind (SOCKET s, const struct sockaddr FAR *addr, int namelen);
 
-int PASCAL FAR OS2closesocket (SOCKET s);
+int WIN32API FAR OS2closesocket (SOCKET s);
 
-int PASCAL FAR OS2connect (SOCKET s, const struct sockaddr FAR *name, int namelen);
+int WIN32API FAR OS2connect (SOCKET s, const struct sockaddr FAR *name, int namelen);
 
-int PASCAL FAR OS2ioctlsocket (SOCKET s, long cmd, u_long FAR *argp);
+int WIN32API FAR OS2ioctlsocket (SOCKET s, long cmd, u_long FAR *argp);
 
-int PASCAL FAR OS2getpeername (SOCKET s, struct sockaddr FAR *name,
+int WIN32API FAR OS2getpeername (SOCKET s, struct sockaddr FAR *name,
                             int FAR * namelen);
 
-int PASCAL FAR OS2getsockname (SOCKET s, struct sockaddr FAR *name,
+int WIN32API FAR OS2getsockname (SOCKET s, struct sockaddr FAR *name,
                             int FAR * namelen);
 
-int PASCAL FAR OS2getsockopt (SOCKET s, int level, int optname,
+int WIN32API FAR OS2getsockopt (SOCKET s, int level, int optname,
                            char FAR * optval, int FAR *optlen);
 
-u_long PASCAL FAR OS2htonl (u_long hostlong);
+u_long WIN32API FAR OS2htonl (u_long hostlong);
 
-u_short PASCAL FAR OS2htons (u_short hostshort);
+u_short WIN32API FAR OS2htons (u_short hostshort);
 
-unsigned long PASCAL FAR OS2inet_addr (const char FAR * cp);
+unsigned long WIN32API FAR OS2inet_addr (const char FAR * cp);
 
-char FAR * PASCAL FAR OS2inet_ntoa (struct in_addr in);
+char FAR * WIN32API FAR OS2inet_ntoa (struct in_addr in);
 
-int PASCAL FAR OS2listen (SOCKET s, int backlog);
+int WIN32API FAR OS2listen (SOCKET s, int backlog);
 
-u_long PASCAL FAR OS2ntohl (u_long netlong);
+u_long WIN32API FAR OS2ntohl (u_long netlong);
 
-u_short PASCAL FAR OS2ntohs (u_short netshort);
+u_short WIN32API FAR OS2ntohs (u_short netshort);
 
-int PASCAL FAR OS2recv (SOCKET s, char FAR * buf, int len, int flags);
+int WIN32API FAR OS2recv (SOCKET s, char FAR * buf, int len, int flags);
 
-int PASCAL FAR OS2recvfrom (SOCKET s, char FAR * buf, int len, int flags,
+int WIN32API FAR OS2recvfrom (SOCKET s, char FAR * buf, int len, int flags,
                          struct sockaddr FAR *from, int FAR * fromlen);
 
-int PASCAL FAR OS2select (int nfds, Wfd_set FAR *readfds, Wfd_set FAR *writefds,
+int WIN32API FAR OS2select (int nfds, Wfd_set FAR *readfds, Wfd_set FAR *writefds,
                        Wfd_set FAR *exceptfds, const struct Wtimeval FAR *timeout);
 
-int PASCAL FAR OS2send (SOCKET s, const char FAR * buf, int len, int flags);
+int WIN32API FAR OS2send (SOCKET s, const char FAR * buf, int len, int flags);
 
-int PASCAL FAR OS2sendto (SOCKET s, const char FAR * buf, int len, int flags,
+int WIN32API FAR OS2sendto (SOCKET s, const char FAR * buf, int len, int flags,
                        const struct sockaddr FAR *to, int tolen);
 
-int PASCAL FAR OS2setsockopt (SOCKET s, int level, int optname,
+int WIN32API FAR OS2setsockopt (SOCKET s, int level, int optname,
                            const char FAR * optval, int optlen);
 
-int PASCAL FAR OS2shutdown (SOCKET s, int how);
+int WIN32API FAR OS2shutdown (SOCKET s, int how);
 
-SOCKET PASCAL FAR OS2socket (int af, int type, int protocol);
+SOCKET WIN32API FAR OS2socket (int af, int type, int protocol);
 
 /* Database function prototypes */
 
-struct Whostent FAR * PASCAL FAR OS2gethostbyaddr(const char FAR * addr,
+struct Whostent FAR * WIN32API FAR OS2gethostbyaddr(const char FAR * addr,
                                               int len, int type);
 
-struct Whostent FAR * PASCAL FAR OS2gethostbyname(const char FAR * name);
+struct Whostent FAR * WIN32API FAR OS2gethostbyname(const char FAR * name);
 
-int PASCAL FAR OS2gethostname (char FAR * name, int namelen);
+int WIN32API FAR OS2gethostname (char FAR * name, int namelen);
 
-struct Wservent FAR * PASCAL FAR OS2getservbyport(int port, const char FAR * proto);
+struct Wservent FAR * WIN32API FAR OS2getservbyport(int port, const char FAR * proto);
 
-struct Wservent FAR * PASCAL FAR OS2getservbyname(const char FAR * name,
+struct Wservent FAR * WIN32API FAR OS2getservbyname(const char FAR * name,
                                               const char FAR * proto);
 
-struct Wprotoent FAR * PASCAL FAR OS2getprotobynumber(int proto);
+struct Wprotoent FAR * WIN32API FAR OS2getprotobynumber(int proto);
 
-struct Wprotoent FAR * PASCAL FAR OS2getprotobyname(const char FAR * name);
+struct Wprotoent FAR * WIN32API FAR OS2getprotobyname(const char FAR * name);
 
 /* Microsoft Windows Extension function prototypes */
 
-int PASCAL FAR OS2WSAStartup(WORD wVersionRequired, LPWSADATA lpWSAData);
+int WIN32API FAR OS2WSAStartup(WORD wVersionRequired, LPWSADATA lpWSAData);
 
-int PASCAL FAR OS2WSACleanup(void);
+int WIN32API FAR OS2WSACleanup(void);
 
-void PASCAL FAR OS2WSASetLastError(int iError);
+void WIN32API FAR OS2WSASetLastError(int iError);
 
-int PASCAL FAR OS2WSAGetLastError(void);
+int WIN32API FAR OS2WSAGetLastError(void);
 
-BOOL PASCAL FAR OS2WSAIsBlocking(void);
+BOOL WIN32API FAR OS2WSAIsBlocking(void);
 
-int PASCAL FAR OS2WSAUnhookBlockingHook(void);
+int WIN32API FAR OS2WSAUnhookBlockingHook(void);
 
-FARPROC PASCAL FAR OS2WSASetBlockingHook(FARPROC lpBlockFunc);
+FARPROC WIN32API FAR OS2WSASetBlockingHook(FARPROC lpBlockFunc);
 
-int PASCAL FAR OS2WSACancelBlockingCall(void);
+int WIN32API FAR OS2WSACancelBlockingCall(void);
 
-HANDLE PASCAL FAR OS2WSAAsyncGetServByName(HWND hWnd, u_int wMsg,
+HANDLE WIN32API FAR OS2WSAAsyncGetServByName(HWND hWnd, u_int wMsg,
                                         const char FAR * name,
                                         const char FAR * proto,
                                         char FAR * buf, int buflen);
 
-HANDLE PASCAL FAR OS2WSAAsyncGetServByPort(HWND hWnd, u_int wMsg, int port,
+HANDLE WIN32API FAR OS2WSAAsyncGetServByPort(HWND hWnd, u_int wMsg, int port,
                                         const char FAR * proto, char FAR * buf,
                                         int buflen);
 
-HANDLE PASCAL FAR OS2WSAAsyncGetProtoByName(HWND hWnd, u_int wMsg,
+HANDLE WIN32API FAR OS2WSAAsyncGetProtoByName(HWND hWnd, u_int wMsg,
                                          const char FAR * name, char FAR * buf,
                                          int buflen);
 
-HANDLE PASCAL FAR OS2WSAAsyncGetProtoByNumber(HWND hWnd, u_int wMsg,
+HANDLE WIN32API FAR OS2WSAAsyncGetProtoByNumber(HWND hWnd, u_int wMsg,
                                            int number, char FAR * buf,
                                            int buflen);
 
-HANDLE PASCAL FAR OS2WSAAsyncGetHostByName(HWND hWnd, u_int wMsg,
+HANDLE WIN32API FAR OS2WSAAsyncGetHostByName(HWND hWnd, u_int wMsg,
                                         const char FAR * name, char FAR * buf,
                                         int buflen);
 
-HANDLE PASCAL FAR OS2WSAAsyncGetHostByAddr(HWND hWnd, u_int wMsg,
+HANDLE WIN32API FAR OS2WSAAsyncGetHostByAddr(HWND hWnd, u_int wMsg,
                                         const char FAR * addr, int len, int type,
                                         char FAR * buf, int buflen);
 
-int PASCAL FAR OS2WSACancelAsyncRequest(HANDLE hAsyncTaskHandle);
+int WIN32API FAR OS2WSACancelAsyncRequest(HANDLE hAsyncTaskHandle);
 
-int PASCAL FAR OS2WSAAsyncSelect(SOCKET s, HWND hWnd, u_int wMsg,
+int WIN32API FAR OS2WSAAsyncSelect(SOCKET s, HWND hWnd, u_int wMsg,
                                long lEvent);
 
-int PASCAL FAR OS2WSARecvEx (SOCKET s, char FAR * buf, int len, int FAR *flags);
+int WIN32API FAR OS2WSARecvEx (SOCKET s, char FAR * buf, int len, int FAR *flags);
 
 typedef struct _TRANSMIT_FILE_BUFFERS {
     PVOID Head;
@@ -808,7 +803,7 @@ typedef struct _OVERLAPPED {
 
 
 BOOL
-PASCAL FAR
+WIN32API FAR
 OS2TransmitFile (
     IN SOCKET hSocket,
     IN HANDLE hFile,

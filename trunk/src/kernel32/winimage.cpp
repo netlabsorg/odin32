@@ -1,5 +1,3 @@
-/* $Id: winimage.cpp,v 1.1 1999-05-24 20:19:49 ktk Exp $ */
-
 /*
  * Win32 PE Image class
  *

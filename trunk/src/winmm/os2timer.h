@@ -1,5 +1,3 @@
-/* $Id: os2timer.h,v 1.1 1999-05-24 20:20:07 ktk Exp $ */
-
 #ifndef __OS2TIMER_H__
 #define __OS2TIMER_H__
 /*

@@ -1,5 +1,3 @@
-; $Id: asmutil.asm,v 1.1 1999-05-24 20:19:37 ktk Exp $ 
-
 ; asmutil.asm Color key bit blitting for DirectDraw
 ;
 ; Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)

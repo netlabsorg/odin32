@@ -1,5 +1,3 @@
-/* $Id: icongrp.cpp,v 1.1 1999-05-24 20:19:55 ktk Exp $ */
-
 /*
  * PE2LX Icon group code
  *

@@ -1,5 +1,3 @@
-/* $Id: wndclass.cpp,v 1.1 1999-05-24 20:20:00 ktk Exp $ */
-
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -91,31 +89,31 @@ void RegisterSystemClasses(ULONG hModule)
 {
  WNDCLASSA wndclass;
 
-   if(GetClassInfoA(NULL, "BUTTON", &wndclass)) {
+   if(O32_GetClassInfo(NULL, "BUTTON", &wndclass)) {
 	new Win32WindowClass(ButtonCallback, "BUTTON", hModule);
 	ButtonHandler = (WNDPROC_O32)wndclass.lpfnWndProc;
    }
-   if(GetClassInfoA(NULL, "LISTBOX", &wndclass)) {
+   if(O32_GetClassInfo(NULL, "LISTBOX", &wndclass)) {
 	new Win32WindowClass(ListboxCallback, "LISTBOX", hModule);
 	ListboxHandler = (WNDPROC_O32)wndclass.lpfnWndProc;
    }
-   if(GetClassInfoA(NULL, "COMBOBOX", &wndclass)) {
+   if(O32_GetClassInfo(NULL, "COMBOBOX", &wndclass)) {
 	new Win32WindowClass(ComboboxCallback, "COMBOBOX", hModule);
 	ComboboxHandler = (WNDPROC_O32)wndclass.lpfnWndProc;
    }
-   if(GetClassInfoA(NULL, "EDIT", &wndclass)) {
+   if(O32_GetClassInfo(NULL, "EDIT", &wndclass)) {
 	new Win32WindowClass(EditCallback, "EDIT", hModule);
 	EditHandler = (WNDPROC_O32)wndclass.lpfnWndProc;
    }
-   if(GetClassInfoA(NULL, "MDICLIENT", &wndclass)) {
+   if(O32_GetClassInfo(NULL, "MDICLIENT", &wndclass)) {
 	new Win32WindowClass(MdiClientCallback, "MDICLIENT", hModule);
 	MdiClientHandler = (WNDPROC_O32)wndclass.lpfnWndProc;
    }
-   if(GetClassInfoA(NULL, "SCROLLBAR", &wndclass)) {
+   if(O32_GetClassInfo(NULL, "SCROLLBAR", &wndclass)) {
 	new Win32WindowClass(ScrollbarCallback, "SCROLLBAR", hModule);
 	ScrollbarHandler = (WNDPROC_O32)wndclass.lpfnWndProc;
    }
-   if(GetClassInfoA(NULL, "STATIC", &wndclass)) {
+   if(O32_GetClassInfo(NULL, "STATIC", &wndclass)) {
 	new Win32WindowClass(StaticCallback, "STATIC", hModule);
 	StaticHandler = (WNDPROC_O32)wndclass.lpfnWndProc;
    }

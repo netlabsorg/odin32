@@ -1,5 +1,3 @@
-/* $Id: thunk.h,v 1.1 1999-05-24 20:19:49 ktk Exp $ */
-
 #ifndef __THUNK_H__
 #define __THUNK_H__
 

@@ -1,5 +1,3 @@
-# $Id: makefile,v 1.1 1999-05-24 20:19:46 ktk Exp $ 
-
 #
 # PD-Win32 API
 #
@@ -68,7 +66,7 @@ OBJS = KERNEL32.OBJ      \
 
 TARGET = kernel32
 
-all: $(TARGET).dll $(TARGET).LIB
+all: $(PDWIN32_LIB)\pmwinx.lib $(TARGET).dll $(TARGET).LIB 
 
 
 $(TARGET).dll: $(OBJS) $(TARGET).def
@@ -81,6 +79,8 @@ $(TARGET).LIB: $(TARGET)exp.def
         $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
         $(CP) $@ $(PDWIN32_LIB)
 
+$(PDWIN32_LIB)\pmwinx.lib:
+        $(IMPLIB) $(IMPLIBFLAGS) $@ $(PDWIN32_LIB)\pmwinx.def
 
 kernel32.OBJ: kernel32.cpp \
     except.h \
@@ -91,7 +91,7 @@ kernel32.OBJ: kernel32.cpp \
     $(PDWIN32_INCLUDE)\nameid.h
 
 comm.OBJ: \
-    .\comm.c \
+    .\comm.cpp \
     $(PDWIN32_INCLUDE)\unicode.h
 
 profile.obj: profile.cpp \
@@ -126,10 +126,10 @@ os2heap.OBJ: \
     $(PDWIN32_INCLUDE)\win32type.h \
     os2heap.h
 
-initterm.OBJ: .\initterm.c
+initterm.OBJ: .\initterm.cpp
 
 thunk.OBJ: \
-    .\thunk.c \
+    .\thunk.cpp \
     thunk.h
 
 vmutex.OBJ: vmutex.cpp \
@@ -145,7 +145,7 @@ message.OBJ: \
     $(PDWIN32_INCLUDE)\unicode.h
 
 devio.OBJ: \
-    .\devio.c \
+    .\devio.cpp \
     devio.h \
     map.h \
     cio.h 
@@ -166,12 +166,12 @@ wprocess.OBJ: \
     os2util.h
 
 map.OBJ: \
-    .\map.c \
+    .\map.cpp \
     map.h \
     mapos2.h
 
 os2native.OBJ: \
-    .\os2native.c \
+    .\os2native.cpp \
     $(PDWIN32_INCLUDE)\unicode.h 
 
 network.OBJ: \
@@ -179,15 +179,15 @@ network.OBJ: \
     $(PDWIN32_INCLUDE)\unicode.h 
 
 misc.OBJ: \
-    .\misc.c \
+    .\misc.cpp \
     $(PDWIN32_INCLUDE)\misc.h
 
 win32util.OBJ: \
-    .\win32util.c \
+    .\win32util.cpp \
     $(PDWIN32_INCLUDE)\win32util.h
 
 npipe.OBJ: \
-    .\npipe.c \
+    .\npipe.cpp \
     $(PDWIN32_INCLUDE)\misc.h
 
 unicode.OBJ: \
@@ -207,12 +207,12 @@ mmap.OBJ: \
     $(PDWIN32_INCLUDE)\unicode.h
 
 lfile.OBJ: \
-    .\lfile.c \
+    .\lfile.cpp \
     wprocess.h \
     os2util.h 
 
 obsolete.OBJ: \
-    .\obsolete.c
+    .\obsolete.cpp
 
 nameid.OBJ: \
     .\nameid.cpp \
@@ -254,7 +254,7 @@ winmod.OBJ: \
     $(PDWIN32_INCLUDE)\winimage.h \
     $(PDWIN32_INCLUDE)\misc.h
 
-os2util.OBJ: .\os2util.c
+os2util.OBJ: .\os2util.cpp
 
 handlemanager.OBJ:  \
         .\handlemanager.cpp \

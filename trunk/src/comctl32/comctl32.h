@@ -19,9 +19,16 @@
 #include <win/commctrl.h>
 
 
-/* registers window classes inside this DLL */
-void RegisterCOMCTL32WindowClasses(unsigned long hinstDLL);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
+/* registers window classes inside this DLL */
+void CDECL RegisterCOMCTL32WindowClasses(unsigned long hinstDLL);
+void CDECL UnregisterCOMCTL32WindowClasses(void);
+#ifdef __cplusplus
+}
+#endif
 
 
 /**************************************************************************

@@ -1,5 +1,3 @@
-/* $Id: wndsubproc.cpp,v 1.1 1999-05-24 20:20:00 ktk Exp $ */
-
 /*
  * Win32 window subproc class for OS/2
  *
