@@ -1,11 +1,11 @@
-/* $Id: listbox.cpp,v 1.24 2000-03-18 16:13:30 cbratschi Exp $ */
+/* $Id: listbox.cpp,v 1.25 2000-05-22 17:21:08 cbratschi Exp $ */
 /*
  * Listbox controls
  *
  * Copyright 1996 Alexandre Julliard
  * Copyright 1999 Christoph Bratschi (ported from WINE)
  *
- * Corel version: 20000317
+ * Corel version: 20000513
  * (WINE version: 991212)
  *
  * Status: ???
@@ -33,8 +33,16 @@
  - WS_EX_NOPARENTNOTIFY
  - VK_LINEDOWN -> bottom most item not always visible
  - performance not optimized
- - ownerdraw is broken -> toolbar customize dialog
  - first item selection mark not redrawn on new selection
+ - LISTBOX_HandleLButtonDownCombo fails, bug in GetWindowRect or ClientToScreen!
+   I clicked on the vertical scrollbar, this happens:
+    t1: SendInternalMessageA WM_LBUTTONDOWN for 68000009 1 1d00c6
+    t1: GetClientRect of 68000009 returned (0,0) (191,110)
+    t1: USER32: GetCapture returned 68000009
+    t1: GetWindowRect 68000009 (450,130) (657,242)
+    t1: ClientToScreen 68000009 (198,29) -> (424,108)
+   mouse position is ok, but screen point is outside window rect!!!
+   the new point is left-top and not on the right!!!
  */
 
 //CB: drive funtions (… la wine drive.c)
@@ -110,7 +118,7 @@ typedef struct
 
 #define SEND_NOTIFICATION(hwnd,descr,code) \
     (SendMessageA( (descr)->owner, WM_COMMAND, \
-     MAKEWPARAM((((descr)->lphc)?ID_CB_LISTBOX:GetWindowLongA(hwnd,GWL_ID)), (code) ), hwnd ))
+     MAKEWPARAM(GetWindowLongA(hwnd,GWL_ID), (code)), hwnd ))
 
 /* Current timer status */
 typedef enum
@@ -480,7 +488,7 @@ static void LISTBOX_DrawItem( HWND hwnd, LB_DESCR *descr, HDC hdc,
     if (IS_OWNERDRAW(descr))
     {
         DRAWITEMSTRUCT dis;
-        UINT           id = (descr->lphc) ? ID_CB_LISTBOX : GetWindowLongA(hwnd,GWL_ID);
+        UINT           id = GetWindowLongA(hwnd,GWL_ID);
 
         if (!item)
         {
@@ -712,7 +720,7 @@ static INT LISTBOX_FindStringPos( HWND hwnd, LB_DESCR *descr, LPCSTR str,
         else
         {
             COMPAREITEMSTRUCT cis;
-            UINT                id = (descr->lphc) ? ID_CB_LISTBOX : GetWindowLongA(hwnd,GWL_ID);
+            UINT                id = GetWindowLongA(hwnd,GWL_ID);
 
             cis.CtlType    = ODT_LISTBOX;
             cis.CtlID      = id;
@@ -885,8 +893,9 @@ static LRESULT LISTBOX_Draw( HWND hwnd, LB_DESCR *descr, HDC hdc )
     DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
     INT focusItem;
 
-    SetRect( &rect, 0, 0, descr->width, descr->height );
     if (descr->style & LBS_NOREDRAW) return 0;
+
+    SetRect( &rect, 0, 0, descr->width, descr->height );
     if (descr->style & LBS_MULTICOLUMN)
         rect.right = rect.left + descr->column_width;
     else if (descr->horz_pos)
@@ -964,7 +973,7 @@ static LRESULT LISTBOX_Draw( HWND hwnd, LB_DESCR *descr, HDC hdc )
 
     /* Paint the focus item now */
     descr->focus_item = focusItem;
-    if (focusRect.top != focusRect.bottom)
+    if (focusRect.top != focusRect.bottom && descr->caret_on)
         LISTBOX_DrawItem( hwnd, descr, hdc, &focusRect, descr->focus_item, ODA_FOCUS );
 
     if (!IS_OWNERDRAW(descr))
@@ -1279,21 +1288,32 @@ static LRESULT LISTBOX_SetSelection( HWND hwnd, LB_DESCR *descr, INT index,
     else
     {
         INT oldsel = descr->selected_item;
-        //SvL: Why was this commented out??? (enabled in latest wine code)
-        if (index == oldsel) return LB_OKAY;
 
-        if (oldsel != -1) descr->items[oldsel].selected = FALSE;
-        if (index != -1) descr->items[index].selected = TRUE;
-        descr->selected_item = index;
-        if (oldsel != -1) LISTBOX_RepaintItem( hwnd, descr, oldsel, ODA_SELECT);
-        if (index != -1) LISTBOX_RepaintItem( hwnd, descr, index, ODA_SELECT );
-        if (send_notify && descr->nb_items) SEND_NOTIFICATION( hwnd, descr,
-                               (index != -1) ? LBN_SELCHANGE : LBN_SELCANCEL );
-        else
-            if( descr->lphc ) /* set selection change flag for parent combo */
-                descr->lphc->wState |= CBF_SELCHANGE;
+        if (index != oldsel)
+        {
+          if (oldsel != -1) descr->items[oldsel].selected = FALSE;
+          if (index != -1) descr->items[index].selected = TRUE;
+
+          descr->selected_item = index;
+
+          if (oldsel != -1)
+            LISTBOX_RepaintItem( hwnd, descr, oldsel, ODA_SELECT);
+          if (index != -1)
+            LISTBOX_RepaintItem( hwnd, descr, index, ODA_SELECT );
+
+          if (send_notify && descr->nb_items)
+            SEND_NOTIFICATION( hwnd, descr, (index != -1)
+                               ? LBN_SELCHANGE : LBN_SELCANCEL );
+          else
+            if( descr->lphc )
+              /* set selection change flag for parent combo */
+              descr->lphc->wState |= CBF_SELCHANGE;
+        }
     }
-    return LB_OKAY;
+
+    /* "If the index parameter is -1, the return value is LB_ERR even though
+     * no error occurred." (At least for single selection boxes.) */
+    return (index == -1) ? LB_ERR : LB_OKAY;
 }
 
 
@@ -1394,7 +1414,7 @@ static LRESULT LISTBOX_InsertItem( HWND hwnd, LB_DESCR *descr, INT index,
     if (descr->style & LBS_OWNERDRAWVARIABLE)
     {
         MEASUREITEMSTRUCT mis;
-        UINT                id = (descr->lphc) ? ID_CB_LISTBOX : GetWindowLongA(hwnd,GWL_ID);
+        UINT              id = GetWindowLongA(hwnd,GWL_ID);
 
         mis.CtlType    = ODT_LISTBOX;
         mis.CtlID      = id;
@@ -1488,7 +1508,7 @@ static void LISTBOX_DeleteItem( HWND hwnd, LB_DESCR *descr, INT index )
     if (IS_OWNERDRAW(descr) || descr->items[index].data)
     {
         DELETEITEMSTRUCT dis;
-        UINT               id = (descr->lphc) ? ID_CB_LISTBOX : GetWindowLongA(hwnd,GWL_ID);
+        UINT             id = GetWindowLongA(hwnd,GWL_ID);
 
         dis.CtlType  = ODT_LISTBOX;
         dis.CtlID    = id;
@@ -1975,7 +1995,7 @@ static LRESULT LISTBOX_HandleLButtonDown( HWND hwnd, LB_DESCR *descr,
  */
 
 static LRESULT LISTBOX_HandleLButtonDownCombo( HWND hwnd, LB_DESCR *pDescr,
-                                               WPARAM wParam, INT x, INT y)
+                                               UINT msg,WPARAM wParam, INT x, INT y)
 {
     RECT clientRect, screenRect;
     POINT mousePos;
@@ -1987,65 +2007,54 @@ static LRESULT LISTBOX_HandleLButtonDownCombo( HWND hwnd, LB_DESCR *pDescr,
 
     if(PtInRect(&clientRect, mousePos))
     {
-        /* MousePos is in client, resume normal processing */
-        return LISTBOX_HandleLButtonDown( hwnd, pDescr, wParam, x, y);
+      /* MousePos is in client, resume normal processing */
+      if (msg == WM_LBUTTONDOWN)
+      {
+         pDescr->lphc->droppedIndex = pDescr->nb_items ? pDescr->selected_item : -1;
+         return LISTBOX_HandleLButtonDown( hwnd, pDescr, wParam, x, y);
+      }
+      else if (pDescr->style & LBS_NOTIFY)
+        SEND_NOTIFICATION( hwnd, pDescr, LBN_DBLCLK );
+      return 0;
     }
     else
     {
-        POINT screenMousePos;
-        HWND hWndOldCapture;
+      POINT screenMousePos;
+      RECT screenRect;
+      HWND hWndOldCapture;
+//CB: read buglist
+      /* Check the Non-Client Area */
+      screenMousePos = mousePos;
+      hWndOldCapture = GetCapture();
+      GetWindowRect(hwnd,&screenRect);
+      ClientToScreen(hwnd,&screenMousePos);
 
-        /* Check the Non-Client Area */
-        screenMousePos = mousePos;
-        hWndOldCapture = GetCapture();
+      if (!PtInRect(&screenRect,screenMousePos))
+      {
         ReleaseCapture();
-        GetWindowRect(hwnd, &screenRect);
-        ClientToScreen(hwnd, &screenMousePos);
+        LISTBOX_SetSelection( hwnd, pDescr, pDescr->lphc->droppedIndex, FALSE, FALSE );
+        COMBO_FlipListbox( pDescr->lphc, FALSE, FALSE );
 
-        if(!PtInRect(&screenRect, screenMousePos))
-        {
-            /* Close The Drop Down */
-            SEND_NOTIFICATION( hwnd, pDescr, LBN_SELCANCEL );
-            return 0;
-        }
-        else
-        {
-            /* Check to see the NC is a scrollbar */
-            INT nHitTestType=0;
-            DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
-            /* Check Vertical scroll bar */
-            if (dwStyle & WS_VSCROLL)
-            {
-                clientRect.right += GetSystemMetrics(SM_CXVSCROLL);
-                if (PtInRect( &clientRect, mousePos ))
-                {
-                    nHitTestType = HTVSCROLL;
-                }
-            }
-              /* Check horizontal scroll bar */
-            if (dwStyle & WS_HSCROLL)
-            {
-                clientRect.bottom += GetSystemMetrics(SM_CYHSCROLL);
-                if (PtInRect( &clientRect, mousePos ))
-                {
-                    nHitTestType = HTHSCROLL;
-                }
-            }
-            /* Windows sends this message when a scrollbar is clicked
-             */
+        return 0;
+      } else
+      {
+        /* Check to see the NC is a scrollbar */
+        INT nHitTestType = SendMessageA(hwnd,WM_NCHITTEST,0,MAKELONG(screenMousePos.x,screenMousePos.y));
 
-            if(nHitTestType != 0)
-            {
-                SendMessageA(hwnd, WM_NCLBUTTONDOWN, nHitTestType,
-                    MAKELONG(screenMousePos.x, screenMousePos.y));
-            }
-            /* Resume the Capture after scrolling is complete
-             */
-            if(hWndOldCapture != 0)
-            {
-                SetCapture(hWndOldCapture);
-            }
+        /* Windows sends this message when a scrollbar is clicked
+         */
+        if (nHitTestType != HTCLIENT)
+        {
+          SendMessageA(hwnd,(msg == WM_LBUTTONDOWN) ? WM_NCLBUTTONDOWN:WM_NCLBUTTONDBLCLK,nHitTestType,MAKELONG(screenMousePos.x,screenMousePos.y));
         }
+
+        /* Resume the Capture after scrolling is complete
+         */
+        if (hWndOldCapture)
+        {
+          SetCapture(hWndOldCapture);
+        }
+      }
     }
     return 0;
 }
@@ -2133,7 +2142,7 @@ static LRESULT LISTBOX_HandleMouseMove( HWND hwnd, LB_DESCR *descr,
                                      INT x, INT y )
 {
     INT index;
-    TIMER_DIRECTION dir;
+    TIMER_DIRECTION dir = LB_TIMER_NONE;
 
     if (GetCapture() != hwnd) return 0;
     if (!descr->captured) return 0;
@@ -2154,13 +2163,11 @@ static LRESULT LISTBOX_HandleMouseMove( HWND hwnd, LB_DESCR *descr,
             dir = LB_TIMER_RIGHT;
             x = descr->width - 1;
         }
-        else dir = LB_TIMER_NONE;  /* inside */
     }
     else
     {
         if (y < 0) dir = LB_TIMER_UP;  /* above */
         else if (y >= descr->height) dir = LB_TIMER_DOWN;  /* below */
-        else dir = LB_TIMER_NONE;  /* inside */
     }
 
     index = LISTBOX_GetItemFromPoint( hwnd, descr, x, y );
@@ -2354,7 +2361,7 @@ static LRESULT LISTBOX_Create( HWND hwnd, LPHEADCOMBO lphc )
     descr->horz_pos      = 0;
     descr->nb_tabs       = 0;
     descr->tabs          = NULL;
-    descr->caret_on      = TRUE;
+    descr->caret_on      = lphc ? FALSE:TRUE;
     descr->in_focus      = FALSE;
     descr->captured      = FALSE;
     descr->font          = 0;
@@ -2386,7 +2393,7 @@ static LRESULT LISTBOX_Create( HWND hwnd, LPHEADCOMBO lphc )
         }
         else
         {
-            UINT        id = (descr->lphc ) ? ID_CB_LISTBOX : GetWindowLongA(hwnd,GWL_ID);
+            UINT        id = GetWindowLongA(hwnd,GWL_ID);
 
             mis.CtlType    = ODT_LISTBOX;
             mis.CtlID      = id;
@@ -3060,7 +3067,8 @@ LRESULT WINAPI ComboLBWndProc( HWND hwnd, UINT msg,
                  return LISTBOX_HandleLButtonUp( hwnd, descr );
             }
             case WM_LBUTTONDOWN:
-                 return LISTBOX_HandleLButtonDownCombo( hwnd, descr, wParam,
+            case WM_LBUTTONDBLCLK:
+                 return LISTBOX_HandleLButtonDownCombo( hwnd, descr,msg, wParam,
                          (INT16)LOWORD(lParam), (INT16)HIWORD(lParam));
             case WM_MOUSEACTIVATE:
                  return MA_NOACTIVATE;
@@ -3075,7 +3083,7 @@ LRESULT WINAPI ComboLBWndProc( HWND hwnd, UINT msg,
                          ( (lphc->wState & CBF_EUI) && !(lphc->wState & CBF_DROPPED)
                            && (wParam == VK_DOWN || wParam == VK_UP)) )
                      {
-                         COMBO_FlipListbox( lphc, FALSE );
+                         COMBO_FlipListbox( lphc, FALSE, FALSE );
                          return 0;
                      }
                  }

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.191 2000-05-20 14:57:24 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.192 2000-05-22 17:21:11 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -207,7 +207,7 @@ Win32BaseWindow::~Win32BaseWindow()
         horzScrollInfo = NULL;
     }
     if(propertyList) {
-	removeWindowProps();
+        removeWindowProps();
     }
 }
 //******************************************************************************
@@ -502,7 +502,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   OSLibWinConvertStyle(dwStyle,dwExStyle,&dwOSWinStyle);
 #if 0
   if(((dwStyle & (WS_CAPTION|WS_POPUP)) == WS_CAPTION) && (getParent() == NULL || getParent() == windowDesktop)) {
-	fTaskList = TRUE;
+        fTaskList = TRUE;
   }
 #else
   if (((dwStyle & (WS_CAPTION | WS_SYSMENU | 0xC0000000)) == (WS_CAPTION | WS_SYSMENU))) fTaskList = TRUE;
@@ -866,7 +866,7 @@ ULONG Win32BaseWindow::MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd, H
 
     //SvL: Don't send WM_(NC)ACTIVATE messages when the window is being destroyed
     if(fDestroyWindowCalled) {
-	return 0;
+        return 0;
     }
 
     //According to SDK docs, if app returns FALSE & window is being deactivated,
@@ -915,7 +915,7 @@ ULONG Win32BaseWindow::MsgSetFocus(HWND hwnd)
 {
     //SvL: Don't send WM_(NC)ACTIVATE messages when the window is being destroyed
     if(fDestroyWindowCalled) {
-	return 0;
+        return 0;
     }
 
     return  SendInternalMessageA(WM_SETFOCUS, hwnd, 0);
@@ -926,7 +926,7 @@ ULONG Win32BaseWindow::MsgKillFocus(HWND hwnd)
 {
     //SvL: Don't send WM_(NC)ACTIVATE messages when the window is being destroyed
     if(fDestroyWindowCalled) {
-	return 0;
+        return 0;
     }
     return  SendInternalMessageA(WM_KILLFOCUS, hwnd, 0);
 }
@@ -1055,25 +1055,25 @@ ULONG Win32BaseWindow::MsgNCPaint()
     ULONG rc;
     RECT client = rectClient;
 
-    	if ((rect.left >= client.left) && (rect.left < client.right) &&
+        if ((rect.left >= client.left) && (rect.left < client.right) &&
            (rect.right >= client.left) && (rect.right < client.right) &&
            (rect.top  >= client.top) && (rect.top < client.bottom) &&
            (rect.bottom >= client.top) && (rect.bottom < client.bottom))
         {
-      	   	return 0;
+                return 0;
         }
 
-    	dprintf(("MsgNCPaint (%d,%d)(%d,%d)", rect.left, rect.top, rect.right, rect.bottom));
-	hrgn = CreateRectRgnIndirect(&rect);
-   	if (!hrgn) return 0;
+        dprintf(("MsgNCPaint (%d,%d)(%d,%d)", rect.left, rect.top, rect.right, rect.bottom));
+        hrgn = CreateRectRgnIndirect(&rect);
+        if (!hrgn) return 0;
 
-    	rc = SendInternalMessageA(WM_NCPAINT,hrgn,0);
+        rc = SendInternalMessageA(WM_NCPAINT,hrgn,0);
 
-    	DeleteObject(hrgn);
+        DeleteObject(hrgn);
 
-    	return rc;
+        return rc;
   }
-  else 	return 0;
+  else  return 0;
 }
 //******************************************************************************
 //Called when either the frame's size or position has changed (lpWndPos != NULL)
@@ -1328,7 +1328,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         dprintf(("WM_SETTEXT of %x to %s\n", Win32Hwnd, lParam));
         if ((dwStyle & WS_CAPTION) == WS_CAPTION)
         {
-//          HandleNCPaint((HRGN)1);
+          HandleNCPaint((HRGN)1);
           OSLibWinSetWindowText(OS2HwndFrame,(LPSTR)windowNameA);
         }
 
@@ -1637,16 +1637,16 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         }
         if((HIWORD(lParam) & KEYDATA_ALT) && wParam)
         {
-                if (wParam == VK_TAB || wParam == VK_ESCAPE) 
-			break;
+                if (wParam == VK_TAB || wParam == VK_ESCAPE)
+                        break;
                 if (wParam == VK_SPACE && (getStyle() & WS_CHILD)) {
-                	getParent()->SendMessageA(Msg, wParam, lParam );
-		}
+                        getParent()->SendMessageA(Msg, wParam, lParam );
+                }
                 else    SendMessageA(WM_SYSCOMMAND, (WPARAM)SC_KEYMENU, (LPARAM)(DWORD)wParam );
         }
         else /* check for Ctrl-Esc */
-        	if (wParam != VK_ESCAPE) MessageBeep(0);
-            		break;
+                if (wParam != VK_ESCAPE) MessageBeep(0);
+                        break;
     }
 
     case WM_SETHOTKEY:
@@ -2036,7 +2036,7 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
 {
  ULONG showstate = 0;
  HWND  hWinAfter;
- BOOL  rc;
+ BOOL  rc,wasVisible,showFlag;
 
     dprintf(("ShowWindow %x %x", getWindowHandle(), nCmdShow));
 
@@ -2047,6 +2047,10 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
         showstate = SWPOS_SHOW | SWPOS_ACTIVATE;
         break;
     case SW_HIDE:
+        if (!wasVisible) return wasVisible;
+         if(GetCapture() == getWindowHandle() || IsChild(GetCapture()))
+           ReleaseCapture();
+
         showstate = SWPOS_HIDE;
         break;
     case SW_RESTORE:
@@ -2076,7 +2080,7 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
     }
 
     /* We can't activate a child window (WINE) */
-    if(getStyle() & WS_CHILD)
+    if((getStyle() & WS_CHILD) && !(getExStyle() & WS_EX_MDICHILD))
         showstate &= ~SWPOS_ACTIVATE;
 
     if(showstate & SWPOS_SHOW) {
@@ -2084,10 +2088,18 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
     }
     else    setStyle(getStyle() & ~WS_VISIBLE);
 
+    showFlag = (nCmdShow != SW_HIDE);
+
     rc = OSLibWinShowWindow(OS2HwndFrame, showstate);
     OSLibWinShowWindow(OS2Hwnd, showstate);
 
-    SendInternalMessageA(WM_SHOWWINDOW, (showstate & SWPOS_SHOW) ? 1 : 0, 0);
+    //CB: PMFrame: WM_MINMAXFRAME SWP_* handling isn't always successful!
+    if ((showstate & SWPOS_MAXIMIZE) == SWPOS_MAXIMIZE)
+      setStyle((getStyle() & ~WS_MINIMIZE) | WS_MAXIMIZE);
+    else if ((showstate & SWPOS_MINIMIZE) == SWPOS_MINIMIZE)
+      setStyle((getStyle() & ~WS_MAXIMIZE) | WS_MINIMIZE);
+    else if ((showstate & SWPOS_RESTORE) == SWPOS_RESTORE)
+      setStyle(getStyle() & ~(WS_MINIMIZE | WS_MAXIMIZE));
 
     if (flags & WIN_NEED_SIZE)
     {
@@ -2139,12 +2151,12 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
     }
     else
     {
-	if (!(fuFlags & SWP_SHOWWINDOW)) 
-	      fuFlags |= SWP_NOREDRAW;
-	fuFlags &= ~SWP_HIDEWINDOW;
+        if (!(fuFlags & SWP_SHOWWINDOW))
+              fuFlags |= SWP_NOREDRAW;
+        fuFlags &= ~SWP_HIDEWINDOW;
     }
 
-    if(cx < 0) cx = 0; 
+    if(cx < 0) cx = 0;
     if(cy < 0) cy = 0;
 
     if((rectWindow.right - rectWindow.left == cx) && (rectWindow.bottom - rectWindow.top == cy)) {
@@ -2158,13 +2170,13 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
     if(getWindowHandle() == GetActiveWindow()) {
         fuFlags |= SWP_NOACTIVATE;   /* Already active */
     }
-    else 
+    else
     if((getStyle() & (WS_POPUP | WS_CHILD)) != WS_CHILD )
     {
         if(!(fuFlags & SWP_NOACTIVATE)) /* Bring to the top when activating */
         {
             fuFlags &= ~SWP_NOZORDER;
- 	    hwndInsertAfter = HWND_TOP;           
+            hwndInsertAfter = HWND_TOP;
         }
     }
 #endif
@@ -2218,21 +2230,21 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
     dprintf (("WinSetWindowPos %x %x (%d,%d)(%d,%d) %x", swp.hwnd, swp.hwndInsertBehind, swp.x, swp.y, swp.cx, swp.cy, swp.fl));
 
     if(fuFlags & SWP_SHOWWINDOW && !IsWindowVisible()) {
-       	setStyle(getStyle() | WS_VISIBLE);
-	//SvL: TODO: Send WM_SHOWWINDOW??
-    	OSLibWinShowWindow(OS2Hwnd, SWPOS_SHOW);
+        setStyle(getStyle() | WS_VISIBLE);
+        //SvL: TODO: Send WM_SHOWWINDOW??
+        OSLibWinShowWindow(OS2Hwnd, SWPOS_SHOW);
     }
     else
     if(fuFlags & SWP_HIDEWINDOW && IsWindowVisible()) {
-	setStyle(getStyle() & ~WS_VISIBLE);
-	//SvL: TODO: Send WM_SHOWWINDOW??
-    	OSLibWinShowWindow(OS2Hwnd, SWPOS_HIDE);
+        setStyle(getStyle() & ~WS_VISIBLE);
+        //SvL: TODO: Send WM_SHOWWINDOW??
+        OSLibWinShowWindow(OS2Hwnd, SWPOS_HIDE);
     }
     rc = OSLibWinSetMultWindowPos(&swp, 1);
 
 #ifdef DEBUG
     if(fShow) {
-	dprintf(("Frame style 0x%08x, client style 0x%08x", OSLibQueryWindowStyle(OS2HwndFrame), OSLibQueryWindowStyle(OS2Hwnd)));
+        dprintf(("Frame style 0x%08x, client style 0x%08x", OSLibQueryWindowStyle(OS2HwndFrame), OSLibQueryWindowStyle(OS2Hwnd)));
     }
 #endif
     if (rc == FALSE)
@@ -2305,10 +2317,10 @@ BOOL Win32BaseWindow::DestroyWindow()
     if(IsWindowVisible())
     {
         SetWindowPos(0, 0, 0, 0, 0, SWP_HIDEWINDOW |
-		     SWP_NOACTIVATE|SWP_NOZORDER|SWP_NOMOVE|SWP_NOSIZE);
+                     SWP_NOACTIVATE|SWP_NOZORDER|SWP_NOMOVE|SWP_NOSIZE);
         if(!::IsWindow(hwnd))
         {
-		return TRUE;
+                return TRUE;
         }
     }
     dprintf(("DestroyWindow %x -> HIDDEN", hwnd));
@@ -2673,15 +2685,15 @@ BOOL Win32BaseWindow::EnableWindow(BOOL fEnable)
   //return true if previous state was disabled, else false (sdk docs)
   rc = (getStyle() & WS_DISABLED) != 0;
   if(rc && !fEnable) {
-    	SendMessageA(WM_CANCELMODE, 0, 0);
+        SendMessageA(WM_CANCELMODE, 0, 0);
   }
   OSLibWinEnableWindow(OS2HwndFrame, fEnable);
   if(fEnable == FALSE) {
-	//SvL: No need to clear focus as PM already does this
-	if(getWindowHandle() == GetCapture()) {
-	   	ReleaseCapture();  /* A disabled window can't capture the mouse */
-		dprintf(("Released capture for window %x that is being disabled", getWindowHandle()));
-	}
+        //SvL: No need to clear focus as PM already does this
+        if(getWindowHandle() == GetCapture()) {
+                ReleaseCapture();  /* A disabled window can't capture the mouse */
+                dprintf(("Released capture for window %x that is being disabled", getWindowHandle()));
+        }
   }
   return rc;
 }
@@ -2983,7 +2995,7 @@ Win32BaseWindow *Win32BaseWindow::GetWindowFromHandle(HWND hwnd)
     return NULL;
 }
 //******************************************************************************
-//Note: Should return NULL if window is frame window! (IsOS2FrameWindowHandle depends on this 
+//Note: Should return NULL if window is frame window! (IsOS2FrameWindowHandle depends on this
 //      behaviour)
 //******************************************************************************
 Win32BaseWindow *Win32BaseWindow::GetWindowFromOS2Handle(HWND hwnd)
@@ -3059,7 +3071,7 @@ BOOL Win32BaseWindow::IsOS2FrameWindowHandle(HWND hwndWin32, HWND hwndOS2)
  Win32BaseWindow *window = GetWindowFromHandle(hwndWin32);
 
     if(window->getOS2FrameWindowHandle() == hwndOS2) {
-	return TRUE;
+        return TRUE;
     }
     return FALSE;
 }

@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.34 2000-03-18 16:13:25 cbratschi Exp $ */
+/* $Id: button.cpp,v 1.35 2000-05-22 17:21:06 cbratschi Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
@@ -6,7 +6,7 @@
  * Copyright (C) 1994 Alexandre Julliard
  * Copyright (c) 1999 Christoph Bratschi
  *
- * Corel version: 20000317
+ * Corel version: 20000513
  * (WINE version: 20000130)
  *
  * Status: complete
@@ -923,7 +923,9 @@ static void CB_Paint(HWND hwnd,HDC hDC,WORD action)
     BUTTONINFO* infoPtr = (BUTTONINFO*)GetInfoPtr(hwnd);
     DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
     RECT rbox, rtext, client;
-    HBRUSH hBrush;
+    HBRUSH hBrush, hOldBrush;
+    HPEN hPen, hOldPen;
+    COLORREF colour;
     int textLen, delta;
     char* text = NULL;
 
@@ -959,6 +961,22 @@ static void CB_Paint(HWND hwnd,HDC hDC,WORD action)
     SendMessageA(GetParent(hwnd),WM_CTLCOLORBTN,hDC,hwnd);
 
     hBrush = GetSysColorBrush(COLOR_BTNFACE);
+
+    /* In order to make things right, draw the rectangle background! */
+    if ( !(infoPtr->state & BUTTON_HASFOCUS) && (action == ODA_DRAWENTIRE) )
+    {
+        colour = GetBkColor(hDC);
+        hPen = CreatePen( PS_SOLID, 1, colour );
+        if ( hPen )
+        {
+            hOldBrush = SelectObject( hDC, hBrush );
+            hOldPen = SelectObject( hDC, hPen );
+            Rectangle( hDC, client.left, client.top, client.right, client.bottom );
+            SelectObject( hDC, hOldPen );
+            SelectObject( hDC, hOldBrush );
+            DeleteObject( hPen );
+        }
+    }
 
     if (dwStyle & BS_LEFTTEXT)
     {
