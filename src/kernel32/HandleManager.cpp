@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.10 1999-08-17 17:04:50 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.11 1999-08-19 12:57:41 phaller Exp $ */
 
 /*
  *
@@ -130,13 +130,13 @@ struct _HMGlobals
  *****************************************************************************/
 
                         /* get appropriate device handler by the device name */
-static HMDeviceHandler *_HMDeviceFind(PSZ pszDeviceName);
+static HMDeviceHandler*  _Optlink _HMDeviceFind(PSZ pszDeviceName);
 
                                /* get next free handle from the handle table */
-static ULONG            _HMHandleGetFree(void);
+static ULONG            _Optlink _HMHandleGetFree(void);
 
                                        /* get handle table entry from handle */
-static ULONG            _HMHandleQuery(HANDLE hHandle);
+static ULONG            _Optlink _HMHandleQuery(HANDLE hHandle);
 
 
 
@@ -187,7 +187,9 @@ static ULONG _HMHandleGetFree(void)
 {
   register ULONG ulLoop;
 
-  for (ulLoop = 0;
+  for (ulLoop = 1; // @@@PH Note, this is an experimental change
+                   // 0L as hHandle is sometimes considered invalid!
+                   // this will never return 0l as free handle now.
        ulLoop < MAX_OS2_HMHANDLES;
        ulLoop++)
   {
@@ -395,7 +397,7 @@ DWORD  HMHandleAllocate (PULONG phHandle16,
     ulHandle++;                                        /* skip to next entry */
 
     if (ulHandle >= MAX_OS2_HMHANDLES)                     /* check boundary */
-      ulHandle = 0;
+      ulHandle = 1;
   }
   while (ulHandle != HMGlobals.ulHandleLast);
 
@@ -491,7 +493,7 @@ DWORD  HMHandleTranslateToWin (ULONG  hHandleOS2,
            phHandle16));
 #endif
 
-  for (ulIndex = 0;
+  for (ulIndex = 1;
        ulIndex < MAX_OS2_HMHANDLES;
        ulIndex++)
   {
