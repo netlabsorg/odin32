@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.22 1999-12-03 17:31:49 cbratschi Exp $ */
+/* $Id: gdi32.cpp,v 1.23 1999-12-04 13:53:12 hugh Exp $ */
 
 /*
  * GDI32 apis
@@ -148,13 +148,23 @@ COLORREF WIN32API SetTextColor(HDC hdc, COLORREF crColor)
 }
 //******************************************************************************
 //******************************************************************************
+
+static hFntDefaultGui = NULL;
 HGDIOBJ WIN32API GetStockObject(int arg1)
 {
  HGDIOBJ obj;
 
-    switch(arg1) {
+    switch(arg1)
+    {
         case DEFAULT_GUI_FONT:
-                obj = NULL;
+                if(NULL==hFntDefaultGui)
+                  hFntDefaultGui = CreateFontA( 0, 0, 0, 0, FW_MEDIUM, FALSE,
+                                                FALSE, FALSE, ANSI_CHARSET,
+                                                OUT_DEFAULT_PRECIS,
+                                                CLIP_DEFAULT_PRECIS,
+                                                DEFAULT_QUALITY,
+                                                FIXED_PITCH|FF_MODERN, "WarpSans");
+                obj = hFntDefaultGui;
                 break;
         default:
                 obj = O32_GetStockObject(arg1);
@@ -167,7 +177,7 @@ HGDIOBJ WIN32API GetStockObject(int arg1)
 //******************************************************************************
 UINT WIN32API RealizePalette( HDC arg1)
 {
-    dprintf(("GDI32: RealizePalette\n"));
+    dprintf(("GDI32: RealizePalette(0x%08X)\n",arg1));
     return O32_RealizePalette(arg1);
 }
 //******************************************************************************
@@ -175,17 +185,17 @@ UINT WIN32API RealizePalette( HDC arg1)
 int WIN32API GetObjectA( HGDIOBJ arg1, int arg2, void *  arg3)
 {
 
-    if(DIBSection::getSection() != NULL)
+  if(DIBSection::getSection() != NULL)
+  {
+    DIBSection *dsect = DIBSection::find(arg1);
+    if(dsect)
     {
-      DIBSection *dsect = DIBSection::find(arg1);
-      if(dsect)
-      {
-        return dsect->GetDIBSection(arg2, (DIBSECTION*)arg3);
-      }
+      return dsect->GetDIBSection(arg2, (DIBSECTION*)arg3);
     }
+  }
 
-    dprintf(("GDI32: GetObject %X %X %X\n", arg1, arg2, arg3));
-    return O32_GetObject(arg1, arg2, arg3);
+  dprintf(("GDI32: GetObject %X %X %X\n", arg1, arg2, arg3));
+  return O32_GetObject(arg1, arg2, arg3);
 }
 //******************************************************************************
 //******************************************************************************
@@ -213,8 +223,16 @@ BOOL WIN32API DeleteDC( HDC arg1)
 //******************************************************************************
 HPALETTE WIN32API CreatePalette( const LOGPALETTE * arg1)
 {
+  HPALETTE rc;
     dprintf(("GDI32: CreatePalette\n"));
-    return O32_CreatePalette(arg1);
+   for(int i=0; i<arg1->palNumEntries;i++)
+   {
+     dprintf2(("Index %d : 0x%08X\n",i, *((DWORD*)(&arg1->palPalEntry[i])) ));
+   }
+   rc = O32_CreatePalette(arg1);
+   dprintf(("  returns 0x%08X\n",rc));
+
+   return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -265,12 +283,23 @@ HBRUSH WIN32API CreateDIBPatternBrushPt( const VOID * arg1, UINT  arg2)
 //******************************************************************************
 HBITMAP WIN32API CreateDIBitmap(HDC arg1, const BITMAPINFOHEADER * arg2, DWORD arg3, const void * arg4, const BITMAPINFO * arg5, UINT  arg6)
 {
+  int iHeight;
+  HBITMAP rc;
     dprintf(("GDI32: CreateDIBitmap\n"));
-//TEMPORARY HACK TO PREVENT CRASH IN OPEN32 (WSeB GA)
-    if(arg2->biHeight < 0) {
-        ((BITMAPINFOHEADER *)arg2)->biHeight = -arg2->biHeight;
+
+    //TEMPORARY HACK TO PREVENT CRASH IN OPEN32 (WSeB GA)
+
+    iHeight = arg2->biHeight;
+    if(arg2->biHeight < 0)
+    {
+      ((BITMAPINFOHEADER *)arg2)->biHeight = -arg2->biHeight;
     }
-    return O32_CreateDIBitmap(arg1, arg2, arg3, arg4, arg5, arg6);
+
+    rc = O32_CreateDIBitmap(arg1, arg2, arg3, arg4, arg5, arg6);
+
+    ((BITMAPINFOHEADER *)arg2)->biHeight = iHeight;
+
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -377,7 +406,7 @@ BOOL WIN32API StrokePath( HDC arg1)
 //******************************************************************************
 int WIN32API SetStretchBltMode( HDC arg1, int  arg2)
 {
-  dprintf(("GDI32: SetStretchBltMode %X, %x\n",arg1, arg2));
+  dprintf(("GDI32: SetStretchBltMode 0x%08X, 0x%08X\n",arg1, arg2));
 
   if(DIBSection::getSection() != NULL)
   {
@@ -397,24 +426,30 @@ HGDIOBJ WIN32API SelectObject(HDC hdc, HGDIOBJ hObj)
 
 ////    dprintf(("GDI32: SelectObject\n"));
 
-    if(DIBSection::getSection() != NULL) {
-        DIBSection *dsect;
+    if(DIBSection::getSection() != NULL)
+    {
+      DIBSection *dsect;
 
-        dsect = DIBSection::find(hdc);
-        if(dsect) {//remove previously selected dibsection
-                dsect->UnSelectDIBObject();
-        }
-        dsect = DIBSection::find((DWORD)hObj);
-        if(dsect) {
-                dsect->SelectDIBObject(hdc);
-        }
+      dsect = DIBSection::find(hdc);
+      if(dsect)
+      {
+        //remove previously selected dibsection
+        dsect->UnSelectDIBObject();
+      }
+      dsect = DIBSection::find((DWORD)hObj);
+      if(dsect)
+      {
+        dsect->SelectDIBObject(hdc);
+      }
     }
     rc = O32_SelectObject(hdc, hObj);
-    if(rc != 0 && DIBSection::getSection != NULL) {
-        DIBSection *dsect = DIBSection::find((DWORD)rc);
-        if(dsect) {
-                dsect->UnSelectDIBObject();
-        }
+    if(rc != 0 && DIBSection::getSection != NULL)
+    {
+      DIBSection *dsect = DIBSection::find((DWORD)rc);
+      if(dsect)
+      {
+        dsect->UnSelectDIBObject();
+      }
     }
     return(rc);
 }
@@ -422,8 +457,24 @@ HGDIOBJ WIN32API SelectObject(HDC hdc, HGDIOBJ hObj)
 //******************************************************************************
 HPALETTE WIN32API SelectPalette(HDC arg1, HPALETTE arg2, BOOL arg3)
 {
-    dprintf(("GDI32: SelectPalette %x", arg1));
-    return O32_SelectPalette(arg1, arg2, arg3);
+  dprintf(("GDI32: SelectPalette (0x%08X, 0x%08X, 0x%08X)\n", arg1, arg2, arg3));
+  if(DIBSection::getSection() != NULL)
+  {
+    DIBSection *dsect = DIBSection::findHDC(arg1);
+    if(dsect)
+    {
+      PALETTEENTRY Pal[256];
+      char PalSize = dsect->GetBitCount();
+      dprintf(("       - Set Palette Values in DIBSection\n"));
+      if(PalSize<=8)
+      {
+        GetPaletteEntries( arg2, 0, 1<<PalSize, (LPPALETTEENTRY)&Pal);
+        dsect->SetDIBColorTable(0, 1<< PalSize, (RGBQUAD*)&Pal);
+      }
+
+    }
+  }
+  return O32_SelectPalette(arg1, arg2, arg3);
 }
 //******************************************************************************
 //******************************************************************************
@@ -650,6 +701,7 @@ HDC WIN32API CreateDCW( LPCWSTR arg1, LPCWSTR arg2, LPCWSTR arg3, const DEVMODEW
     char *astring1 = UnicodeToAsciiString((LPWSTR)arg1);
     char *astring2 = UnicodeToAsciiString((LPWSTR)arg2);
     char *astring3 = UnicodeToAsciiString((LPWSTR)arg3);
+
     if(arg4)
     {
       astring4 = UnicodeToAsciiString((LPWSTR)(arg4->dmDeviceName));
@@ -696,7 +748,6 @@ HDC WIN32API CreateDCW( LPCWSTR arg1, LPCWSTR arg2, LPCWSTR arg3, const DEVMODEW
       devmode.dmDitherType       = arg4->dmDitherType;
       devmode.dmReserved1        = arg4->dmReserved1;
       devmode.dmReserved2        = arg4->dmReserved2;
-
       rc = O32_CreateDC(astring1,astring2,astring3,&devmode);
     }
     else
@@ -705,6 +756,7 @@ HDC WIN32API CreateDCW( LPCWSTR arg1, LPCWSTR arg2, LPCWSTR arg3, const DEVMODEW
     FreeAsciiString(astring1);
     FreeAsciiString(astring2);
     FreeAsciiString(astring3);
+
     if(arg4)
     {
       FreeAsciiString(astring4);
@@ -738,10 +790,15 @@ HENHMETAFILE WIN32API CreateEnhMetaFileA( HDC arg1, LPCSTR arg2, const RECT * ar
 //******************************************************************************
 HENHMETAFILE WIN32API CreateEnhMetaFileW( HDC arg1, LPCWSTR arg2, const RECT * arg3, LPCWSTR  arg4)
 {
-    dprintf(("GDI32: CreateEnhMetaFileW STUB"));
-    // NOTE: This will not work as is (needs UNICODE support)
-//    return O32_CreateEnhMetaFile(arg1, arg2, arg3, arg4);
-    return 0;
+    char *astring1 = UnicodeToAsciiString((LPWSTR)arg2);
+    char *astring2 = UnicodeToAsciiString((LPWSTR)arg4);
+    HENHMETAFILE   rc;
+
+    dprintf(("GDI32: CreateMetaFileW"));
+    rc = O32_CreateEnhMetaFile(arg1,astring1,arg3,astring2);
+    FreeAsciiString(astring1);
+    FreeAsciiString(astring2);
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1321,8 +1378,11 @@ COLORREF WIN32API GetNearestColor( HDC arg1, COLORREF  arg2)
 //******************************************************************************
 UINT WIN32API GetNearestPaletteIndex( HPALETTE arg1, COLORREF  arg2)
 {
-    dprintf(("GDI32: GetNearestPaletteIndex\n"));
-    return O32_GetNearestPaletteIndex(arg1, arg2);
+    UINT rc;
+    dprintf(("GDI32: GetNearestPaletteIndex (0x%08X ,0x%08X) ",arg1,arg2));
+    rc = O32_GetNearestPaletteIndex(arg1, arg2);
+    dprintf(("Returns %d\n",rc));
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -2107,42 +2167,81 @@ BOOL WIN32API SetColorAdjustment(HDC hdc, CONST COLORADJUSTMENT *lpca)
 }
 //******************************************************************************
 //WINE: OBJECTS\DIB.C
-//******************************************************************************
-HBITMAP WIN32API CreateDIBSection(HDC hdc, BITMAPINFO *pbmi, UINT iUsage,
-                                     VOID **ppvBits, HANDLE hSection, DWORD dwOffset)
+//*********************************************************************************
+HBITMAP WIN32API CreateDIBSection( HDC hdc, BITMAPINFO *pbmi, UINT iUsage,
+                                   VOID **ppvBits, HANDLE hSection, DWORD dwOffset)
 {
  HBITMAP res = 0;
  BOOL    fFlip = 0;
+ int iHeight, iWidth;
 
   dprintf(("GDI32: CreateDIBSection %x %x %x %d", hdc, iUsage, hSection, dwOffset));
-  if(hSection) {
-        dprintf(("GDI32: CreateDIBSection, hSection != NULL, not supported!\n"));
-        return NULL;
+  if(hSection)
+  {
+    dprintf(("GDI32: CreateDIBSection, hSection != NULL, not supported!\n"));
+    return NULL;
   }
 
   //SvL: 13-9-98: StarCraft uses bitmap with negative height
-  if(pbmi->bmiHeader.biWidth < 0) {
-        pbmi->bmiHeader.biWidth = -pbmi->bmiHeader.biWidth;
-        fFlip = FLIP_HOR;
+  iWidth = pbmi->bmiHeader.biWidth;
+  if(pbmi->bmiHeader.biWidth < 0)
+  {
+    pbmi->bmiHeader.biWidth = -pbmi->bmiHeader.biWidth;
+    fFlip = FLIP_HOR;
   }
-  if(pbmi->bmiHeader.biHeight < 0) {
-        pbmi->bmiHeader.biHeight = -pbmi->bmiHeader.biHeight;
-        fFlip |= FLIP_VERT;
+  iHeight = pbmi->bmiHeader.biHeight;
+  if(pbmi->bmiHeader.biHeight < 0)
+  {
+    pbmi->bmiHeader.biHeight = -pbmi->bmiHeader.biHeight;
+    fFlip |= FLIP_VERT;
   }
 
   res = O32_CreateDIBitmap(hdc, &pbmi->bmiHeader, 0, NULL, pbmi, 0);
   if (res)
   {
-        DIBSection *dsect = new DIBSection((WINBITMAPINFOHEADER *)&pbmi->bmiHeader, (DWORD)res, fFlip);
-        dprintf(("Constructor returned\n",res));
-        if(ppvBits!=NULL)
-          *ppvBits = dsect->GetDIBObject();
-        dprintf(("GDI32: return %08X\n",res));
-        return(res);
+    ULONG Pal[256];
+    char PalSize;
+    LOGPALETTE tmpPal = { 0x300,1,{0,0,0,0}};
+    HPALETTE hpalCur, hpalTmp;
+    DIBSection *dsect = new DIBSection((WINBITMAPINFOHEADER *)&pbmi->bmiHeader, (DWORD)res, fFlip);
+    dprintf(("Constructor returned\n"));
+
+    if(NULL!=dsect)
+    {
+      PalSize = dsect->GetBitCount();
+      if(PalSize<=8)
+      {
+        // Now get the current Palette from the DC
+        hpalTmp = CreatePalette(&tmpPal);
+        hpalCur = SelectPalette(hdc, hpalTmp, FALSE);
+
+        // and use it to set the DIBColorTable
+        GetPaletteEntries( hpalCur, 0, 1<<PalSize, (LPPALETTEENTRY)&Pal);
+        dsect->SetDIBColorTable(0, 1<< PalSize, (RGBQUAD*)&Pal);
+
+        // Restore the DC Palette
+        SelectPalette(hdc,hpalCur,FALSE);
+        DeleteObject(hpalTmp);
+      }
+      // Set the hdc in the DIBSection so we can update the palete if a new
+      // Paletet etc. gets selected into the DC.
+
+      dsect->SelectDIBObject(hdc);
+
+      if(ppvBits!=NULL)
+        *ppvBits = dsect->GetDIBObject();
+
+      pbmi->bmiHeader.biWidth = iWidth;
+      pbmi->bmiHeader.biHeight = iHeight;
+
+      dprintf(("GDI32: return %08X\n",res));
+      return(res);
+    }
   }
 
   /* Error.  */
-  if (res) DeleteObject(res);
+  if (res)
+    DeleteObject(res);
   *ppvBits = NULL;
 #ifdef DEBUG
   dprintf(("GDI32: CreateDIBSection, error!\n"));
@@ -2155,7 +2254,7 @@ HBITMAP WIN32API CreateDIBSection(HDC hdc, BITMAPINFO *pbmi, UINT iUsage,
 }
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API GetDIBColorTable(HDC hdc, UINT uStartIndex, UINT cEntries,
+UINT WIN32API GetDIBColorTable( HDC hdc, UINT uStartIndex, UINT cEntries,
                                   RGBQUAD *pColors)
 {
  HPALETTE hpal = O32_GetCurrentObject(hdc, OBJ_PAL);
@@ -2187,10 +2286,12 @@ UINT WIN32API SetDIBColorTable(HDC hdc, UINT uStartIndex, UINT cEntries,
  DIBSection *dsect = DIBSection::findHDC(hdc);
 
   dprintf(("GDI32: SetDIBColorTable\n"));
-  if(dsect) {
-        return(dsect->SetDIBColorTable(uStartIndex, cEntries, pColors));
+  if(dsect)
+  {
+    return(dsect->SetDIBColorTable(uStartIndex, cEntries, pColors));
   }
-  else  return(0);
+  else
+    return(0);
 }
 //******************************************************************************
 //******************************************************************************
@@ -2571,21 +2672,44 @@ BOOL WIN32API ColorMatchToTarget(HDC   hdc,
  * Variables :
  * Result    : TRUE / FALSE
  * Remark    :
- * Status    : UNTESTED STUB
+ * Status    : UNTESTED
  *
  * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
+ *             Markus Montkowski [Wen, 1999/01/12 20:18]
  *****************************************************************************/
 
 BOOL WIN32API CombineTransform(LPXFORM lLPXFORMResult,
                                   CONST   XFORM *lLPXFORM1,
                                   CONST   XFORM *lLPXFORM2)
 {
-  dprintf(("GDI32: CombineTransform(%08xh,%08xh,%08xh) not implemented.\n",
+  dprintf(("GDI32: CombineTransform(%08xh,%08xh,%08xh).\n",
            lLPXFORMResult,
            lLPXFORM1,
            lLPXFORM2));
 
+  XFORM xfrm;
+  if( O32_IsBadWritePtr( (void*)lLPXFORMResult, sizeof(XFORM)) ||
+      O32_IsBadReadPtr(  (void*)lLPXFORM1, sizeof(XFORM)) ||
+      O32_IsBadWritePtr( (void*)lLPXFORM2, sizeof(XFORM)) )
   return (FALSE);
+
+  // Add the translations
+  lLPXFORMResult->eDx = lLPXFORM1->eDx + lLPXFORM2->eDx;
+  lLPXFORMResult->eDy = lLPXFORM1->eDy + lLPXFORM2->eDy;
+
+  // Multiply the matrixes
+  xfrm.eM11 = lLPXFORM1->eM11 * lLPXFORM2->eM11 + lLPXFORM1->eM21 * lLPXFORM1->eM12;
+  xfrm.eM12 = lLPXFORM1->eM11 * lLPXFORM2->eM12 + lLPXFORM1->eM12 * lLPXFORM1->eM22;
+  xfrm.eM21 = lLPXFORM1->eM21 * lLPXFORM2->eM11 + lLPXFORM1->eM22 * lLPXFORM1->eM21;
+  xfrm.eM22 = lLPXFORM1->eM21 * lLPXFORM2->eM12 + lLPXFORM1->eM22 * lLPXFORM1->eM22;
+
+  // Now copy to resulting XFROM as the pt must not be distinct
+  lLPXFORMResult->eM11 = xfrm.eM11;
+  lLPXFORMResult->eM12 = xfrm.eM12;
+  lLPXFORMResult->eM21 = xfrm.eM21;
+  lLPXFORMResult->eM22 = xfrm.eM22;
+
+  return (TRUE);
 }
 
 

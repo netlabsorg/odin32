@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.10 1999-12-02 13:26:04 achimha Exp $ */
+/* $Id: dibsect.cpp,v 1.11 1999-12-04 13:53:12 hugh Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -100,6 +100,7 @@ DIBSection::DIBSection(WINBITMAPINFOHEADER *pbmi, DWORD handle, int fFlip)
    dprintf(("pOS2bmp->cBitCount     %d\n", pOS2bmp->cBitCount));
    dprintf(("pOS2bmp->ulCompression %d\n", pOS2bmp->ulCompression));
    dprintf(("pOS2bmp->cbImage       %d\n", pOS2bmp->cbImage));
+   dprintf(("Bits at 0x%08X\n",bmpBits));
 
    this->handle = handle;
 
@@ -122,6 +123,7 @@ DIBSection::DIBSection(WINBITMAPINFOHEADER *pbmi, DWORD handle, int fFlip)
      }
      dsect->next = this;
    }
+
    dprintf(("Class created"));
 }
 //******************************************************************************
@@ -133,16 +135,19 @@ DIBSection::~DIBSection()
    if(pOS2bmp)
         free(pOS2bmp);
 
-   if(section == this) {
-        section = this->next;
+   if(section == this)
+   {
+     section = this->next;
    }
-   else {
-        DIBSection *dsect = section;
+   else
+   {
+     DIBSection *dsect = section;
 
-        while(dsect->next != this) {
-                dsect = dsect->next;
-        }
-        dsect->next = this->next;
+     while(dsect->next != this)
+     {
+       dsect = dsect->next;
+     }
+     dsect->next = this->next;
    }
 }
 //******************************************************************************
@@ -160,32 +165,34 @@ int DIBSection::SetDIBits(HDC hdc, HBITMAP hbitmap, UINT startscan, UINT
 
   switch(pbmi->biBitCount)
   {
-        case 1:
-                bmpsize /= 8;
-                palsize = ((1 << pbmi->biBitCount))*sizeof(RGB2);
-                os2bmpsize += palsize;
-                break;
-        case 4:
-                bmpsize /= 2;
-                palsize = ((1 << pbmi->biBitCount))*sizeof(RGB2);
-                os2bmpsize += palsize;
-                break;
-        case 8:
-                palsize = ((1 << pbmi->biBitCount))*sizeof(RGB2);
-                os2bmpsize += palsize;
-                break;
-        case 16:
-                bmpsize *= 2;
-                break;
-        case 24:
-                bmpsize *= 3;
-                break;
-        case 32:
-                bmpsize *= 4;
-                break;
+    case 1:
+      bmpsize /= 8;
+      palsize = ((1 << pbmi->biBitCount))*sizeof(RGB2);
+      os2bmpsize += palsize;
+      break;
+    case 4:
+      bmpsize /= 2;
+      palsize = ((1 << pbmi->biBitCount))*sizeof(RGB2);
+      os2bmpsize += palsize;
+      break;
+    case 8:
+      palsize = ((1 << pbmi->biBitCount))*sizeof(RGB2);
+      os2bmpsize += palsize;
+      break;
+    case 16:
+      bmpsize *= 2;
+      break;
+    case 24:
+      bmpsize *= 3;
+      break;
+    case 32:
+      bmpsize *= 4;
+      break;
    }
-   if(bmpsize & 3) {
-        bmpsize = (bmpsize + 3) & ~3;
+
+   if(bmpsize & 3)
+   {
+     bmpsize = (bmpsize + 3) & ~3;
    }
 
    bmpBits    = (char *)realloc(bmpBits, bmpsize*pbmi->biHeight);
@@ -215,14 +222,20 @@ int DIBSection::SetDIBColorTable(int startIdx, int cEntries, RGBQUAD *rgb)
 {
  int i;
 
-  if(startIdx + cEntries > (1 << pOS2bmp->cBitCount)) {
-        dprintf(("DIBSection::SetDIBColorTable, invalid nr of entries %d %d\n", startIdx, cEntries));
-        return(0);
+  if(startIdx + cEntries > (1 << pOS2bmp->cBitCount))
+  {
+    dprintf(("DIBSection::SetDIBColorTable, invalid nr of entries %d %d\n", startIdx, cEntries));
+    return(0);
   }
+
   memcpy(&pOS2bmp->argbColor[startIdx], rgb, cEntries*sizeof(RGB2));
-  for(i=startIdx;i<cEntries;i++) {
-        pOS2bmp->argbColor[i].fcOptions = 0;
+
+  for(i=startIdx;i<cEntries;i++)
+  {
+    pOS2bmp->argbColor[i].fcOptions = 0;
+    dprintf2(("Index %d : 0x%08X\n",i, *((ULONG*)(&pOS2bmp->argbColor[i])) ));
   }
+
   return(cEntries);
 }
 //******************************************************************************
@@ -305,6 +318,7 @@ void DIBSection::SelectDIBObject(HDC hdc)
 {
   this->hdc  = hdc;
   hwndParent = WinWindowFromDC(hdc);
+  dprintf(("SelectDIBObject(0x%08X) hwndParent = 0x%08X\n",hdc, hwndParent));
 }
 //******************************************************************************
 //******************************************************************************
@@ -312,11 +326,13 @@ DIBSection *DIBSection::find(DWORD handle)
 {
  DIBSection *dsect = section;
 
-  while(dsect) {
-        if(dsect->handle == handle) {
-                return(dsect);
-        }
-        dsect = dsect->next;
+  while(dsect)
+  {
+    if(dsect->handle == handle)
+    {
+      return(dsect);
+    }
+    dsect = dsect->next;
   }
   return(NULL);
 }
@@ -327,11 +343,13 @@ DIBSection *DIBSection::findHDC(HDC hdc)
 {
  DIBSection *dsect = section;
 
-  while(dsect) {
-        if(dsect->hdc == hdc) {
-                return(dsect);
-        }
-        dsect = dsect->next;
+  while(dsect)
+  {
+    if(dsect->hdc == hdc)
+    {
+      return(dsect);
+    }
+    dsect = dsect->next;
   }
   return(NULL);
 }
@@ -342,12 +360,13 @@ void DIBSection::deleteSection(DWORD handle)
  DIBSection *dsect = find(handle);
 
   if(dsect)
-        delete dsect;
+    delete dsect;
 
 }
 //******************************************************************************
 //******************************************************************************
-int DIBSection::GetDIBSection(int iSize , DIBSECTION *pDIBSection){
+int DIBSection::GetDIBSection(int iSize , DIBSECTION *pDIBSection)
+{
   if( (sizeof(DIBSECTION)==iSize) &&
       (pDIBSection !=NULL))
   {
@@ -387,5 +406,13 @@ int DIBSection::GetDIBSection(int iSize , DIBSECTION *pDIBSection){
 }
 //******************************************************************************
 //******************************************************************************
+char  DIBSection::GetBitCount()
+{
+   if(NULL==pOS2bmp)
+     return 0;
+   else
+     return pOS2bmp->cBitCount;
+}
+//******************************************************************************
+//******************************************************************************
 DIBSection *DIBSection::section = NULL;
-
