@@ -1,4 +1,4 @@
-/* $Id: listbox.cpp,v 1.6 1999-10-14 18:27:55 sandervl Exp $ */
+/* $Id: listbox.cpp,v 1.7 1999-10-17 12:17:42 cbratschi Exp $ */
 /*
  * Listbox controls
  *
@@ -23,8 +23,6 @@
  * - LBS_USETABSTOPS
  * - Unicode
  * - Locale handling
- CB:
-  - KillSystemTimer, SetSystemTimer
  */
 
 //CB: drive funtions (… la wine drive.c)
@@ -199,7 +197,7 @@ static void LISTBOX_UpdateScroll( HWND hwnd, LB_DESCR *descr )
     }
     else
     {
-       	info.nPos  = descr->top_item;
+        info.nPos  = descr->top_item;
 
         info.nPage = LISTBOX_GetCurrentPageSize( hwnd, descr );
         info.fMask = SIF_RANGE | SIF_POS | SIF_PAGE;
@@ -210,15 +208,15 @@ static void LISTBOX_UpdateScroll( HWND hwnd, LB_DESCR *descr )
         if (descr->style & LBS_DISABLENOSCROLL)
             info.fMask |= SIF_DISABLENOSCROLL;
 
-	if(info.nMax > (INT)info.nPage) {
-	    ShowScrollBar(hwnd, SB_VERT, TRUE);
-	    EnableScrollBar(hwnd, SB_VERT, ESB_ENABLE_BOTH);		
+        if(info.nMax > (INT)info.nPage) {
+            ShowScrollBar(hwnd, SB_VERT, TRUE);
+            EnableScrollBar(hwnd, SB_VERT, ESB_ENABLE_BOTH);
             SetScrollInfo( hwnd, SB_VERT, &info, TRUE );
-	}
-	else {
-	    ShowScrollBar(hwnd, SB_VERT, FALSE);
-	    EnableScrollBar(hwnd, SB_VERT, ESB_DISABLE_BOTH);		
-	}
+        }
+        else {
+            ShowScrollBar(hwnd, SB_VERT, FALSE);
+            EnableScrollBar(hwnd, SB_VERT, ESB_DISABLE_BOTH);
+        }
 
         if (descr->horz_extent)
         {
@@ -1900,10 +1898,9 @@ static LRESULT LISTBOX_HandleLButtonDownCombo( HWND hwnd, LB_DESCR *pDescr,
  */
 static LRESULT LISTBOX_HandleLButtonUp( HWND hwnd, LB_DESCR *descr )
 {
-/* CB: implement!
     if (LISTBOX_Timer != LB_TIMER_NONE)
         KillSystemTimer( hwnd, LB_TIMER_ID );
-*/
+
     LISTBOX_Timer = LB_TIMER_NONE;
     if (descr->captured)
     {
@@ -1961,9 +1958,8 @@ static LRESULT LISTBOX_HandleSystemTimer( HWND hwnd, LB_DESCR *descr )
 {
     if (!LISTBOX_HandleTimer( hwnd, descr, descr->focus_item, LISTBOX_Timer ))
     {
-/* CB: implement!
         KillSystemTimer( hwnd, LB_TIMER_ID );
-*/
+
         LISTBOX_Timer = LB_TIMER_NONE;
     }
     return 0;
@@ -2014,14 +2010,11 @@ static void LISTBOX_HandleMouseMove( HWND hwnd, LB_DESCR *descr,
 
     /* Start/stop the system timer */
 
-/* CB: implement!
     if (dir != LB_TIMER_NONE)
         SetSystemTimer( hwnd, LB_TIMER_ID, LB_SCROLL_TIMEOUT, NULL);
-*/
-/* CB: implement!
     else if (LISTBOX_Timer != LB_TIMER_NONE)
         KillSystemTimer( hwnd, LB_TIMER_ID );
-*/
+
     LISTBOX_Timer = dir;
 }
 
@@ -2564,7 +2557,7 @@ LRESULT WINAPI ListBoxWndProc( HWND hwnd, UINT msg,
         if (GetCapture() == hwnd)
             LISTBOX_HandleMouseMove( hwnd, descr, (INT16)LOWORD(lParam),
                                      (INT16)HIWORD(lParam) );
-	return 1; //SvL: Bugfix -> PMWINDOW expects non-zero return value if
+        return 1; //SvL: Bugfix -> PMWINDOW expects non-zero return value if
                   //               we want to restore the default mouse cursor
 
     case WM_LBUTTONUP:
@@ -2676,19 +2669,19 @@ LRESULT WINAPI ComboLBWndProc( HWND hwnd, UINT msg,
                     */
 
                    GetClientRect(hwnd, &clientRect);
-		   if (PtInRect( &clientRect, mousePos ))
-		   {
-		       captured = descr->captured;
-		       descr->captured = TRUE;			
-		
-		       LISTBOX_HandleMouseMove( hwnd, descr,
-						    mousePos.x, mousePos.y);
+                   if (PtInRect( &clientRect, mousePos ))
+                   {
+                       captured = descr->captured;
+                       descr->captured = TRUE;
+
+                       LISTBOX_HandleMouseMove( hwnd, descr,
+                                                    mousePos.x, mousePos.y);
                        descr->captured = captured;
                    }
                    else
                    {
-		       LISTBOX_HandleMouseMove( hwnd, descr,
-		                		    mousePos.x, mousePos.y);
+                       LISTBOX_HandleMouseMove( hwnd, descr,
+                                                    mousePos.x, mousePos.y);
                    }
 
 

@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.15 1999-10-16 11:05:38 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.16 1999-10-17 12:17:44 cbratschi Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -260,6 +260,34 @@ INT Win32Dialog::doDialogBox()
         topOwner->EnableWindow( FALSE );
         ShowWindow( SW_SHOW );
 
+        //CB: 100% CPU usage, need a better solution with OSLibWinGetMsg
+        //    is WM_ENTERIDLE used and leaving away breaks an application?
+        //    this style was useful for Win3.1 but today there are threads
+        // solution: send only few WM_ENTERIDLE messages
+
+#if 1
+        while (TRUE)
+        {
+          if (!OSLibWinPeekMsg(&msg,0,0,0,MSG_NOREMOVE))
+          {
+            if(!(getStyle() & DS_NOIDLEMSG))
+              topOwner->SendMessageA(WM_ENTERIDLE,MSGF_DIALOGBOX,getWindowHandle());
+            OSLibWinGetMsg(&msg,0,0,0);
+          } else OSLibWinPeekMsg(&msg,0,0,0,MSG_REMOVE);
+
+          if(msg.message == WM_QUIT)
+          {
+            dprintf(("Win32Dialog::doDialogBox: received  WM_QUIT"));
+            break;
+          }
+          if (!IsDialogMessageA( getWindowHandle(), &msg))
+          {
+            TranslateMessage( &msg );
+            DispatchMessageA( &msg );
+          }
+          if (dialogFlags & DF_END) break;
+        }
+#else
         while (TRUE) {
 //        while (OSLibWinPeekMsg(&msg, getWindowHandle(), owner, MSGF_DIALOGBOX,
 //                                       MSG_REMOVE, !(getStyle() & DS_NOIDLEMSG), NULL ))
@@ -283,6 +311,7 @@ INT Win32Dialog::doDialogBox()
                 }
             }
         }
+#endif
         topOwner->EnableWindow( TRUE );
     }
     retval = idResult;
