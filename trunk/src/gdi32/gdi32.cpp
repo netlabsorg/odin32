@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.75 2001-08-02 14:49:31 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.76 2001-11-13 15:42:05 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -23,6 +23,7 @@
 #include "oslibgdi.h"
 #include <dcdata.h>
 #include <winuser32.h>
+#include "font.h"
 
 #define DBG_LOCALLOG    DBG_gdi32
 #include "dbglocal.h"
@@ -50,8 +51,6 @@ COLORREF WIN32API SetTextColor(HDC hdc, COLORREF crColor)
 }
 //******************************************************************************
 //******************************************************************************
-
-static hFntDefaultGui = NULL;
 HGDIOBJ WIN32API GetStockObject(int arg1)
 {
  HGDIOBJ obj;
