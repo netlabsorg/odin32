@@ -1,4 +1,4 @@
-/* $Id: oslibdebug.cpp,v 1.2 2000-02-16 14:25:44 sandervl Exp $ */
+/* $Id: oslibdebug.cpp,v 1.3 2000-03-13 13:10:10 sandervl Exp $ */
 
 /*
  * OS/2 debug apis
@@ -16,7 +16,7 @@
 #define INCL_DOSMODULEMGR
 #define INCL_DOSEXCEPTIONS
 #define INCL_DOSERRORS
-#include <os2.h>
+#include <os2wrap.h>
 #include <process.h>
 #include <os2sel.h>
 #include <stdlib.h>

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.87 2000-03-01 13:30:06 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.88 2000-03-13 13:10:48 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -20,7 +20,6 @@
 #include <gen_object.h>
 #include <win32wndchild.h>
 #include <winres.h>
-#include <winconst.h>
 #include <scroll.h>
 
 class Win32BaseWindow;
@@ -430,7 +429,11 @@ public:
          VOID  AdjustMaximizedRect(LPRECT rect);
          VOID  AdjustTrackInfo(PPOINT minTrackSize,PPOINT maxTrackSize);
 
+#ifndef OS2_INCLUDED
+         BOOL   isOwnDC() { return (windowClass && windowClass->getStyle() & CS_OWNDC); }
+#else
          BOOL   isOwnDC() { return (windowClass && windowClass->getStyle() & CS_OWNDC_W); }
+#endif
          HDC    getOwnDC() { return ownDC; }
          void   setOwnDC(HDC hdc) { ownDC = hdc; }
 protected:

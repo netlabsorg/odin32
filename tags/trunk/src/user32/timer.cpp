@@ -1,4 +1,4 @@
-/* $Id: timer.cpp,v 1.11 2000-02-16 14:34:36 sandervl Exp $ */
+/* $Id: timer.cpp,v 1.12 2000-03-13 13:10:48 sandervl Exp $ */
 
 /*
  * timer functions for USER32
@@ -12,7 +12,7 @@
 
 #define INCL_WIN
 #define INCL_DOSSEMAPHORES
-#include <os2.h>
+#include <os2wrap.h>
 #include <os2sel.h>
 #include <stdlib.h>
 #include "win32type.h"

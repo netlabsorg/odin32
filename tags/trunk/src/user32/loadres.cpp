@@ -1,4 +1,4 @@
-/* $Id: loadres.cpp,v 1.24 2000-02-22 17:07:40 cbratschi Exp $ */
+/* $Id: loadres.cpp,v 1.25 2000-03-13 13:10:45 sandervl Exp $ */
 
 /*
  * Win32 resource API functions for OS/2
@@ -22,7 +22,6 @@
 #include <winres.h>
 #include <heapstring.h>
 #include <oslibres.h>
-#include <winconst.h>
 #include <win\virtual.h>
 #include "dib.h"
 #include "initterm.h"

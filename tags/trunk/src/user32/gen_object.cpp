@@ -1,4 +1,4 @@
-/* $Id: gen_object.cpp,v 1.5 2000-02-16 14:34:19 sandervl Exp $ */
+/* $Id: gen_object.cpp,v 1.6 2000-03-13 13:10:45 sandervl Exp $ */
 /*
  * Generic Object Class for OS/2
  *
@@ -10,7 +10,6 @@
  *
  */
 #define  INCL_DOSSEMAPHORES
-#include <os2.h>
 #include <os2wrap.h>
 #include <stdlib.h>
 #include <win32type.h>
