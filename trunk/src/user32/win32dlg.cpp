@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.27 1999-11-02 17:07:25 cbratschi Exp $ */
+/* $Id: win32dlg.cpp,v 1.28 1999-11-03 18:00:26 cbratschi Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -269,10 +269,17 @@ INT Win32Dialog::doDialogBox()
 
     if (!dialogFlags & DF_END) /* was EndDialog called in WM_INITDIALOG ? */
     {
-        topOwner->EnableWindow( FALSE );
-        //CB: todo: make modal, implement modeless, remove FCF_TASKLIST
-        //    emulate WinProcessDlg
-        ShowWindow( SW_SHOW );
+        HWND hwndOldDialog;
+        BOOL bOldOwner;
+
+        fIsModalDialog = TRUE;
+        topOwner->EnableWindow(FALSE);
+
+        bOldOwner = topOwner->IsModalDialogOwner();
+        topOwner->setModalDialogOwner(TRUE);
+        hwndOldDialog = topOwner->getOS2HwndModalDialog();
+        topOwner->setOS2HwndModalDialog(OS2HwndFrame);
+        ShowWindow(SW_SHOW);
 
         //CB: 100% CPU usage, need a better solution with OSLibWinGetMsg
         //    is WM_ENTERIDLE used and leaving away breaks an application?
@@ -326,7 +333,9 @@ INT Win32Dialog::doDialogBox()
             }
         }
 #endif
-        topOwner->EnableWindow( TRUE );
+        topOwner->setModalDialogOwner(bOldOwner);
+        topOwner->setOS2HwndModalDialog(hwndOldDialog);
+        if (!bOldOwner) topOwner->EnableWindow(TRUE);
     }
     retval = idResult;
     DestroyWindow();
