@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.907 2000-04-23 15:58:04 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.908 2000-04-25 01:59:54 phaller Exp $ */
+
+ 2000-04-25: Patrick Haller <phaller@gmx.net>
+        - SHLWAPI: - stubbed all the UrlXXX functions (required for IE4/5 ;-)
 
  2000-04-23: Sander van Leeuwen <sandervl@xs4all.nl>
 	- GDI32:   Dib section blit fix (missing pixels)
