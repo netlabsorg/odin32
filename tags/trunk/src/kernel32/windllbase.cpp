@@ -1,4 +1,4 @@
-/* $Id: windllbase.cpp,v 1.29 2002-06-09 10:48:50 sandervl Exp $ */
+/* $Id: windllbase.cpp,v 1.30 2002-07-26 10:48:40 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
@@ -560,7 +560,20 @@ void Win32DllBase::detachThreadFromAllDlls()
         dll->detachThread();
         dll = dll->getNext();
     }
-  dlllistmutex.leave();
+    dlllistmutex.leave();
+}
+//******************************************************************************
+//Send DLL_PROCESS_DETACH message to all dlls for process that's about to end
+//******************************************************************************
+void Win32DllBase::detachProcessFromAllDlls()
+{
+    dlllistmutex.enter();
+    Win32DllBase *dll = Win32DllBase::head;
+    while(dll) {
+        dll->detachProcess();
+        dll = dll->getNext();
+    }
+    dlllistmutex.leave();
 }
 //******************************************************************************
 //Setup TLS structure for all dlls for a new thread
