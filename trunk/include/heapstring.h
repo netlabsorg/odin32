@@ -15,6 +15,7 @@
 #define strncmpiW       lstrncmpiW
 #define _strlwr(a) 	strlwr(a)
 
+
 /*****************************************************************************
  * Prototypes                                                                *
  *****************************************************************************/
@@ -55,4 +56,51 @@ LPSTR  WIN32API HEAP_strdupWtoA( HANDLE heap, DWORD flags, LPCWSTR str );
 
 INT WIN32API WideCharToLocal(LPSTR pLocal, LPWSTR pWide, INT dwChars);
 INT WIN32API LocalToWideChar(LPWSTR pWide, LPSTR pLocal, INT dwChars);
+
+
+/*****************************************************************************
+ * Special accelerator macros (avoid heap trashing)                          *
+ *****************************************************************************/
+
+#ifdef __WIN32OS2__
+
+#ifndef CP_ACP
+// from include/win/winnls.h
+#define CP_ACP                                  0
+#endif
+
+#define STACK_strdupAtoW(strA,strW)                                      \
+  if (!strA) strW = NULL;                                                \
+  else                                                                   \
+  {                                                                      \
+    int len = MultiByteToWideChar( CP_ACP, 0, strA, -1, NULL, 0);        \
+    strW = (LPWSTR)_alloca( len*sizeof(WCHAR) );                         \
+    MultiByteToWideChar(CP_ACP, 0, strA, -1, strW, len);                 \
+  }
+
+#define STACK_strdupWtoA(strW,strA)                                      \
+  if (!strW) strA = NULL;                                                \
+  else                                                                   \
+  {                                                                      \
+      int len = WideCharToMultiByte( CP_ACP, 0, strW, -1, NULL, 0, 0, NULL);\
+      strA = (LPSTR)_alloca(len);                                        \
+      WideCharToMultiByte(CP_ACP, 0, strW, -1, strA, len, 0, NULL );     \
+  }
+
+#define STACK_strdupA(strDest, strSrc)                                   \
+  {                                                                      \
+    int iLength = lstrlenA(strSrc) + 1;                                  \
+    strDest = (LPSTR)_alloca( iLength );                                 \
+    memcpy( strDest, strSrc, iLength );                                  \
+  }
+
+#define STACK_strdupW(strDest, strSrc)                                   \
+  {                                                                      \
+    int iLength = lstrlenW(strSrc) + 1;                                  \
+    strDest = (LPWSTR)_alloca( iLength * sizeof(WCHAR) );                \
+    memcpy( strDest, strSrc, iLength );                                  \
+  }
+
+
+#endif
 
