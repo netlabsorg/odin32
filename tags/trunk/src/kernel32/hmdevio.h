@@ -1,4 +1,4 @@
-/* $Id: hmdevio.h,v 1.3 2001-06-04 21:18:40 sandervl Exp $ */
+/* $Id: hmdevio.h,v 1.4 2001-10-28 12:48:04 sandervl Exp $ */
 
 #ifndef __DEVIO_H__
 #define __DEVIO_H__
@@ -10,6 +10,7 @@
 #include <handlemanager.h>
 #include "HMDevice.h"
 #include "HMObjects.h"
+#include <custombuild.h>
 
 #ifndef _OS2WIN_H
 #define GENERIC_READ                 0x80000000
@@ -102,13 +103,6 @@ typedef BOOL (* WINIOCTL)(HANDLE hDevice, DWORD dwIoControlCode,
               LPVOID lpOutBuffer, DWORD nOutBufferSize,
               LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped);
 
-typedef HANDLE (* WIN32API DrvOpen)(DWORD dwAccess, DWORD dwShare);
-typedef void   (* WIN32API DrvClose)(HANDLE hDevice);
-typedef BOOL   (* WIN32API DrvIOCtl)(HANDLE hDevice, DWORD dwIoControlCode,
-                       LPVOID lpInBuffer, DWORD nInBufferSize,
-                       LPVOID lpOutBuffer, DWORD nOutBufferSize,
-                       LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped);
-
 typedef struct {
     char     szWin32Name[32];
     char     szOS2Name[32];
@@ -151,6 +145,9 @@ class HMCustomDriver : public HMDeviceDriver
 {
 public:
   HMCustomDriver(HINSTANCE hInstance, LPCSTR lpDeviceName);
+  HMCustomDriver(PFNDRVOPEN pfnDriverOpen, PFNDRVCLOSE pfnDriverClose, 
+                 PFNDRVIOCTL pfnDriverIOCtl, LPCSTR lpDeviceName);
+
   virtual ~HMCustomDriver();
 
                        /* this is a handler method for calls to CreateFile() */
@@ -167,9 +164,9 @@ public:
                                      LPVOID lpOutBuffer, DWORD nOutBufferSize,
                                      LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped);
 private:
-  DrvOpen  driverOpen;
-  DrvClose driverClose;
-  DrvIOCtl driverIOCtl;
+  PFNDRVOPEN  driverOpen;
+  PFNDRVCLOSE driverClose;
+  PFNDRVIOCTL driverIOCtl;
   HINSTANCE hDrvDll;
 };
 
