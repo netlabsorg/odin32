@@ -1,10 +1,24 @@
- /* $Id: changelog,v 1.1003 2000-06-22 19:00:37 cbratschi Exp $ */
+ /* $Id: changelog,v 1.1004 2000-06-23 19:01:14 sandervl Exp $ */
+
+ 2000-06-23: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32:    Changed version; Odin presents itself as Windows NT 4 Service Pack 6
+                   Return build nr in high word in GetVersion
+                   Minor fixes in GetSystemInfo (processor level & revision)
+                   FindResource bugfix for resource types starting with '#'
+                   (i.e. "#102" really means numeric id 102)
+
+ 2000-06-22: Michal Necasek <mike@mendelu.cz>
+    - KERNEL32:    Added language support for Czech Republic
+    - USER32:      wsprintf bugfix for %#04x (didn't add leading 0('s) if required)
 
  2000-06-22: Christoph Bratschi <cbratschi@datacomm.ch>
     - COMCTL32:    fixed ANIMATE_ThreadFunc's calling convention
 
  2000-06-21: Sander van Leeuwen <sandervl@xs4all.nl>
-    - KERNEL32:    Setup enviroment similar to NT. I.e.:
+    - USER32:      Owner bugfix (WS_CHILD window has no owner)
+                   Replaced calls to PM frame window handler (i.e. WM_FOCUSCHANGE)
+                   Activated menu keyboard accelerators
+    - KERNEL32:    Setup environment similar to NT. I.e.:
                    CPU=i386
                    HOMEDRIVE=<Odin drive>
                    HOMEPATH=\
