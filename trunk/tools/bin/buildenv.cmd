@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.5 2002-04-22 02:01:37 bird Exp $
+/* $Id: buildenv.cmd,v 1.6 2002-04-30 19:52:51 bird Exp $
  *
  * This is the master environment script. It contains settings for many
  * enviroment configurations. Environments may be set and unset
@@ -97,8 +97,9 @@
             when (sEnv.i = 'ida38') then        rc = IDA38(fRM);
             when (sEnv.i = 'ida40') then        rc = IDA40(fRM);
             when (sEnv.i = 'idasdk') then       rc = IDASDK(fRM);
-            when (sEnv.i = 'mscv6') then        rc = MSCV6(fRM);
-            when (sEnv.i = 'msc60') then        rc = MSCV6(fRM);
+            when (sEnv.i = 'mscv6') then        rc = MSCV6_32(fRM);
+            when (sEnv.i = 'mscv6-16') then     rc = MSCV6_16(fRM);
+            when (sEnv.i = 'msc60') then        rc = MSCV6_16(fRM);
             when (sEnv.i = 'mysql') then        rc = mySQL(fRM);
             when (sEnv.i = 'netqos2') then      rc = NetQOS2(fRM);
             when (sEnv.i = 'python') then       rc = Python(fRM);
@@ -122,8 +123,10 @@
             when (sEnv.i = 'vac365') then       rc = VAC365(fRM);
             when (sEnv.i = 'vac40') then        rc = VAC40(fRM);
             when (sEnv.i = 'warpin') then       rc = WarpIn(fRM);
-            when (sEnv.i = 'watcomc11') then    rc = WatComC11(fRM);
-            when (sEnv.i = 'watcomc11c') then   rc = WatComC11c(fRM);
+            when (sEnv.i = 'watcomc11') then    rc = WatComC11(fRM, 32);
+            when (sEnv.i = 'watcomc11c') then   rc = WatComC11c(fRM, 32);
+            when (sEnv.i = 'watcomc11-16') then rc = WatComC11(fRM, 16);
+            when (sEnv.i = 'watcomc11c-16') then rc = WatComC11c(fRM, 16);
             when (sEnv.i = 'odin32testcase') then rc = Odin32Testcase(fRM);
 
             otherwise
@@ -198,7 +201,7 @@ QueryPath: procedure
         when (sProgram = 'ida414') then     return 'f:\ida414';
         when (sProgram = 'idasdk') then     return 'f:\idasdk';
         when (sProgram = 'ddkbase') then    return 'f:\ddk\base';
-        when (sProgram = 'mscv6') then      return 'f:\ddktools\toolkits\msc60';
+        when (sProgram = 'mscv6-16') then   return 'f:\ddktools\toolkits\msc60';
         when (sProgram = 'mysql') then      return 'f:\mysql2';
         when (sProgram = 'netqos2') then    return 'f:\netqos2';
         when (sProgram = 'perl') then       return 'f:\perllib';
@@ -488,24 +491,47 @@ return 0;
 
 
 /*
- * Microsoft C v6.0a
+ * Microsoft C v6.0a 16-bit
  */
-MSCV6: procedure
+MSCV6_16: procedure
     parse arg fRM
 
     /*
      * Microsoft C v6.0a main directory.
      */
-    sPathMSC    = QueryPath('mscv6');
-    call EnvVar_Set      fRM, 'BUILD_ENV',  'MSCV6'
+    sPathMSC    = QueryPath('mscv6-16');
+    call EnvVar_Set      fRM, 'BUILD_ENV',  'MSCV6-16'
     call EnvVar_Set      fRM, 'BUILD_PLATFORM', 'OS2'
     call EnvVar_Set      fRM, 'PATH_MSC',   sPathMSC;
     call EnvVar_AddFront fRM, 'path',       sPathMSC'\binp;'
     call EnvVar_AddFront fRM, 'include',    sPathMSC'\include;'
     call EnvVar_AddFront fRM, 'include16',  sPathMSC'\include;'
     call EnvVar_AddFront fRM, 'lib',        sPathMSC'\lib;'
+
 return 0;
 
+
+/*
+ * Microsoft C v6.0a 32-bit
+ */
+MSCV6_32: procedure
+    parse arg fRM
+
+    /*
+     * This is where the compiler really is.
+     */
+    call DDKBase fRM;
+
+    /*
+     * Microsoft C v6.0a 32-bit main directory.
+     */
+    sPathDDKBase    = QueryPath('ddkbase');
+    call EnvVar_Set      fRM, 'BUILD_ENV',  'MSCV6'
+    call EnvVar_Set      fRM, 'BUILD_PLATFORM', 'OS2'
+    call EnvVar_Set      fRM, 'PATH_MSC',   sPathDDKBase;
+    call EnvVar_AddFront fRM, 'include',    sPathDDKBase'\h32;'
+    call EnvVar_AddFront fRM, 'lib',        sPathDDKBase'\lib;'
+return 0;
 
 
 /*
@@ -911,7 +937,7 @@ return 0;
  * WatCom C/C++ v11.0
  */
 WatComC11: procedure
-    parse arg fRM
+    parse arg fRM, iBits
 
     /*
      * Watcom C/C++ v11.0 main directory
@@ -920,6 +946,8 @@ WatComC11: procedure
     call EnvVar_Set      fRM, 'PATH_WATCOM', sPathWatcom
     call EnvVar_Set      fRM, 'CCENV',      'WAT'
     call EnvVar_Set      fRM, 'BUILD_ENV',  'WAT11'
+    if (iBits == 16) then
+        call EnvVar_Set      fRM, 'BUILD_ENV',  'WAT11-16'
     call EnvVar_Set      fRM, 'BUILD_PLATFORM', 'OS2'
 
     call EnvVar_Set      fRM, 'watcom',      sPathWatcom
@@ -941,7 +969,7 @@ return 0;
  * WatCom C/C++ v11.0c
  */
 WatComC11c: procedure
-    parse arg fRM
+    parse arg fRM, iBits
 
     /*
      * Watcom C/C++ v11.0c main directory
@@ -950,6 +978,8 @@ WatComC11c: procedure
     call EnvVar_Set      fRM, 'PATH_WATCOM', sPathWatcom
     call EnvVar_Set      fRM, 'CCENV',      'WAT'
     call EnvVar_Set      fRM, 'BUILD_ENV',  'WAT11C'
+    if (iBits = 16) then
+        call EnvVar_Set      fRM, 'BUILD_ENV',  'WAT11C-16'
     call EnvVar_Set      fRM, 'BUILD_PLATFORM', 'OS2'
 
     call EnvVar_Set      fRM, 'watcom',      sPathWatcom
