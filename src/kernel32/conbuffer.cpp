@@ -1,4 +1,4 @@
-/* $Id: conbuffer.cpp,v 1.19 2003-04-11 12:08:35 sandervl Exp $ */
+/* $Id: conbuffer.cpp,v 1.20 2004-02-19 13:03:05 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -2497,7 +2497,6 @@ DWORD HMDeviceConsoleBufferClass::WriteConsoleA(PHMHANDLEDATA pHMHandleData,
                                                 NULL, NULL));
 }
 
-
 /*****************************************************************************
  * Name      : DWORD HMDeviceConsoleBufferClass::WriteConsoleW
  * Purpose   : write a string to the console
@@ -2523,6 +2522,7 @@ DWORD HMDeviceConsoleBufferClass::WriteConsoleW(PHMHANDLEDATA pHMHandleData,
   PCONSOLEBUFFER pConsoleBuffer = (PCONSOLEBUFFER)pHMHandleData->lpHandlerData;
   DWORD          rc;
   LPSTR          pszAscii;
+  int            alen;
 
 #ifdef DEBUG_LOCAL2
   WriteLog("KERNEL32/CONSOLE: CONBUFFER$::WriteConsoleW(%08x,%08x,%u,%08x,%08x).\n",
@@ -2533,20 +2533,23 @@ DWORD HMDeviceConsoleBufferClass::WriteConsoleW(PHMHANDLEDATA pHMHandleData,
            lpvReserved);
 #endif
 
+  alen = WideCharToMultiByte( GetConsoleCP(), 0, (LPCWSTR)lpvBuffer, cchToWrite, 0, 0, 0, 0 );
   /* Ascii -> unicode translation */
-  pszAscii = (LPSTR)HEAP_malloc(cchToWrite+1);
+  pszAscii = (LPSTR)HEAP_malloc(( alen + 1 ) * sizeof( WCHAR ));
   if (pszAscii == NULL)
      return ERROR_NOT_ENOUGH_MEMORY;
 
-  lstrcpynWtoA(pszAscii, (LPWSTR)lpvBuffer, cchToWrite+1);
+  WideCharToMultiByte( GetConsoleCP(), 0, (LPWSTR)lpvBuffer, cchToWrite, pszAscii, alen, 0, 0 );
+  pszAscii[ alen ] = 0;
 
   /* simply forward the request to that routine */
   rc = HMDeviceConsoleBufferClass::WriteFile(pHMHandleData,
                                              pszAscii,
-                                             cchToWrite,
+                                             alen,
                                              lpcchWritten,
                                              NULL, NULL);
 
+  *lpcchWritten = MultiByteToWideChar( GetConsoleCP(), 0, pszAscii, *lpcchWritten, 0, 0 );
   // free memory again
   HEAP_free(pszAscii);
   return (rc);

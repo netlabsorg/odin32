@@ -1,4 +1,4 @@
-/* $Id: console.cpp,v 1.32 2002-12-27 13:42:08 sandervl Exp $ */
+/* $Id: console.cpp,v 1.33 2004-02-19 13:03:06 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -60,8 +60,10 @@
 #define  INCL_DOSMEMMGR
 #define  INCL_DOSSEMAPHORES
 #define  INCL_DOSERRORS
+#define  INCL_DOSEXCEPTIONS
 #define  INCL_DOSPROCESS
 #define  INCL_DOSMODULEMGR
+#define  INCL_DOSDEVICES
 #define  INCL_VIO
 #define  INCL_KBD
 #define  INCL_AVIO
@@ -176,6 +178,11 @@ APIRET iConsoleInit(BOOL fVioConsole)              /* creation of the console su
 
   if (ConsoleGlobals.hevConsole != NULLHANDLE) /* we're already initialized ?*/
     return (NO_ERROR);                             /* then abort immediately */
+
+  rc = DosSetSignalExceptionFocus(SIG_SETFOCUS, &ulPostCount);
+  if(rc) {
+      dprintf(("DosSetSignalExceptionFocus failed with %d", rc));
+  }
 
   if(flVioConsole == TRUE)
   {
@@ -2694,21 +2701,18 @@ DWORD WIN32API GetConsoleTitleA(LPTSTR lpConsoleTitle,
  * Author    : Patrick Haller [Thu, 1998/02/12 23:31]
  *****************************************************************************/
 
+
 DWORD WIN32API GetConsoleTitleW(LPWSTR lpConsoleTitle,
                                 DWORD  nSize)
 {
-  ULONG ulLength;                                          /* length of text */
-
   if (ConsoleGlobals.pszWindowTitle == NULL)    /* is there a window title ? */
     return 0;                                           /* abort immediately */
 
-  ulLength = strlen(ConsoleGlobals.pszWindowTitle);        /* length of text */
+  MultiByteToWideChar( GetConsoleCP(), 0, ConsoleGlobals.pszWindowTitle, -1,
+        lpConsoleTitle, nSize );
+  lpConsoleTitle[ nSize - 1 ] = 0;
 
-  lstrcpynAtoW(lpConsoleTitle,
-               ConsoleGlobals.pszWindowTitle,
-               nSize);
-
-  return (nSize < ulLength) ? nSize : ulLength;
+  return lstrlenW( lpConsoleTitle );
 }
 
 
@@ -3442,20 +3446,19 @@ BOOL WIN32API SetConsoleTitleA(LPTSTR lpszTitle)
 
 BOOL WIN32API SetConsoleTitleW(LPWSTR lpszTitle)
 {
+  int alen;
+
   if (lpszTitle == NULL)                                 /* check parameters */
     return FALSE;
 
   if (ConsoleGlobals.pszWindowTitle != NULL)           /* previously set name */
     free (ConsoleGlobals.pszWindowTitle);                     /* then free it */
 
+  alen = WideCharToMultiByte( GetConsoleCP(), 0, lpszTitle, -1, 0, 0, 0, 0 );
   /* create an ascii copy of the lpszTitle */
-  int iLength = lstrlenW(lpszTitle);
-
-  ConsoleGlobals.pszWindowTitle = (PSZ)malloc(iLength+1);
-  ConsoleGlobals.pszWindowTitle[iLength] = 0;
-  lstrcpynWtoA(ConsoleGlobals.pszWindowTitle,
-               lpszTitle,
-               iLength+1); //must add one (lstrcpynWtoA terminates string)
+  ConsoleGlobals.pszWindowTitle = (PSZ)malloc( alen );
+  WideCharToMultiByte( GetConsoleCP(), 0, lpszTitle, -1,
+        ConsoleGlobals.pszWindowTitle, alen, 0, 0 );
 
   WinSetWindowText(ConsoleGlobals.hwndFrame,           /* set new title text */
                    ConsoleGlobals.pszWindowTitle);
