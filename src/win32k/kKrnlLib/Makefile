@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.16 2001-10-19 02:06:55 bird Exp $
+# $Id: Makefile,v 1.17 2001-10-24 03:52:37 bird Exp $
 
 #
 # kKrnlLib.sys makefile.
@@ -68,6 +68,7 @@ OBJS  =\
     $(WIN32KOBJ)\smalloc.obj \
     $(WIN32KOBJ)\rmalloc.obj \
     $(WIN32KOBJ)\new.obj \
+    $(WIN32KOBJ)\newdbg.obj \
     $(WIN32KOBJ)\stricmp.obj \
     $(WIN32KOBJ)\vsprintf.obj \
     $(WIN32KOBJ)\vprintf.obj \
@@ -147,6 +148,20 @@ $(LASTLIB): $(LASTOBJ)
     -@$(RM) $@ > nul 2> nul
     $(ILIB) $@ $**;
 
+#
+#
+#   S p e c i a l   O b j e c t s
+#
+#
+!if "$(VAC3)" == "1" | "$(VAC36)" == "1"
+$(WIN32KOBJ)\new.obj new.obj: clib\new.cpp
+    @$(CPPCOMPILE) -Tm- clib\new.cpp
+
+$(WIN32KOBJ)\newdbg.obj newdbg.obj: clib\newdbg.cpp
+    @$(CPPCOMPILE) -Tm+ clib\newdbg.cpp
+!endif
+
+
 
 #
 # Win32ktst.exe object configuration.
@@ -178,6 +193,7 @@ TSTOBJS =\
     $(WIN32KOBJ)\smalloc.obj \
     $(WIN32KOBJ)\rmalloc.obj \
     $(WIN32KOBJ)\new.obj \
+    $(WIN32KOBJ)\newdbg.obj \
     $(WIN32KOBJ)\stricmp.obj \
     $(WIN32KOBJ)\vsprintf.obj \
     $(WIN32KOBJ)\vprintf.obj_tst. \
