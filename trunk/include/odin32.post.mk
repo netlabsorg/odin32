@@ -1,4 +1,4 @@
-# $Id: odin32.post.mk,v 1.3 2001-08-04 14:27:25 bird Exp $
+# $Id: odin32.post.mk,v 1.4 2001-09-30 09:46:16 bird Exp $
 
 #
 # Odin32 API
@@ -28,7 +28,6 @@
 # Altern configuration if we're making the custom build object library.
 #
 !if "$(CUSTOMBUILD)" == "1"
-TARGET = $(TARGET)o         # this just bearly works cause of stupid recursion...
 OBJS = $(OBJS:initterm.obj=dummy.obj)
 !endif
 

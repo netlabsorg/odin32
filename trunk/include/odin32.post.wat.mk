@@ -1,4 +1,4 @@
-# $Id: odin32.post.wat.mk,v 1.16 2001-09-30 00:59:03 bird Exp $
+# $Id: odin32.post.wat.mk,v 1.17 2001-09-30 09:46:16 bird Exp $
 
 #
 # Odin32 API
@@ -246,8 +246,8 @@ all:    $(OBJDIR) \
         $(ADDITIONAL_ALL) \
         .SYMBOLIC
 !else
-        $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION) \
-        $(ODIN32_LIB)\$(TARGET).$(TARGET_EXTENSION) \
+        $(OBJDIR)\$(TARGET)$(CUST).$(TARGET_EXTENSION) \
+        $(ODIN32_LIB)\$(TARGET)$(CUST).$(TARGET_EXTENSION) \
         $(ADDITIONAL_ALL) \
         .SYMBOLIC
 !endif
@@ -278,7 +278,7 @@ libs: all .SYMBOLIC
 # Lib: Main target rule - builds the target internal library.
 #       (fixme)
 !ifndef NO_MAIN_RULE
-$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS)
+$(OBJDIR)\$(TARGET)$(CUST).$(TARGET_EXTENSION): $(OBJS)
     $(RM) $@
     $(ILIB) $(ILIBFLAGS) $@ @<<
 $(OBJS:  =&^
@@ -331,7 +331,7 @@ $(INTLIBS): .SYMBOLIC
 !ifndef PUBLICLIB
 $(ODIN32_LIB)\$(ORGTARGET).lib: $(OBJDIR)\$(ORGTARGET).lib
 !else
-$(ODIN32_LIB)\$(TARGET).$(TARGET_EXTENSION): $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
+$(ODIN32_LIB)\$(TARGET)$(CUST).$(TARGET_EXTENSION): $(OBJDIR)\$(TARGET)$(CUST).$(TARGET_EXTENSION)
 !endif
     @if not exist $^: $(CREATEPATH) $^:
     $(CP) $[@ $@

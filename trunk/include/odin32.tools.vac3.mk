@@ -1,4 +1,4 @@
-# $Id: odin32.tools.vac3.mk,v 1.6 2001-09-30 00:48:14 bird Exp $
+# $Id: odin32.tools.vac3.mk,v 1.7 2001-09-30 09:46:17 bird Exp $
 
 #
 # Odin32 API
@@ -16,7 +16,11 @@ MAPSYM      = mapsym
 #
 # Make command definition.
 #
+!ifndef CUSTOMBUILD
 MAKE_CMD    = nmake /nologo
+!else
+MAKE_CMD    = nmake /nologo CUSTOMBUILD=1
+!endif
 !ifdef DEBUG
 MAKE_CMD    = $(MAKE_CMD) DEBUG=1
 !endif
