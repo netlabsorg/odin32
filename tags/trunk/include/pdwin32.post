@@ -1,4 +1,4 @@
-# $Id: pdwin32.post,v 1.8 2000-03-09 19:41:20 sandervl Exp $
+# $Id: pdwin32.post,v 1.9 2000-05-02 20:49:27 sandervl Exp $
 #
 # Odin32 API
 #
@@ -28,8 +28,13 @@ $(PDWIN32_BIN)\$(TARGET).dll: $(OBJDIR)\$(TARGET).dll
 !else
 $(PDWIN32_BIN)\$(TARGET).exe: $(OBJDIR)\$(TARGET).exe
 !endif
+    cd $(OBJDIR)
+    $(MAPSYM) $(TARGET).map 
+    cd ..\..
+    $(CP) $(OBJDIR)\$(TARGET).sym $(PDWIN32_BIN)
     $(CP) $** $@
     $(CP) $** $(@D)..\..\$(@F)
+    $(CP) $(OBJDIR)\$(TARGET).sym $(@D)..\..
 
 
 !ifndef NOTEXPDEF
