@@ -1,4 +1,4 @@
-/* $Id: sh.cpp,v 1.5 1999-06-25 08:07:12 phaller Exp $ */
+/* $Id: sh.cpp,v 1.6 1999-07-05 13:49:23 phaller Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -1879,3 +1879,4 @@ DWORD WIN32API NTSHChangeNotifyDeregister(LONG x1)
 
   return SHChangeNotifyDeregister(x1);
 }
+
