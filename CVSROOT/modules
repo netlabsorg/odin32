@@ -26,4 +26,6 @@
 # spread out over the entire source repository.
 DailyBuild          tools/DailyBuild
 win32k              src/win32k
+kKrnlLib            src/win32k/kKrnlLib
 include             include
+
