@@ -1,4 +1,4 @@
-/* $Id: windowclass.cpp,v 1.12 2000-10-17 17:11:09 sandervl Exp $ */
+/* $Id: windowclass.cpp,v 1.13 2000-10-22 19:53:25 sandervl Exp $ */
 /*
  * Win32 Window Class Code for OS/2
  *
@@ -106,6 +106,7 @@ WORD WIN32API RegisterClassW(CONST WNDCLASSW *lpwc)
     //CB: size new in ex structure
     wc.cbSize = sizeof(wc);
     memcpy(&wc.style, lpwc, sizeof(WNDCLASSA));
+    wc.hIconSm = 0;
 
     if(Win32WndClass::FindClass(wc.hInstance, (LPWSTR)wc.lpszClassName)) {
         dprintf(("RegisterClassW %x %x already exists", wc.hInstance, wc.lpszClassName));
