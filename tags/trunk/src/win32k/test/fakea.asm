@@ -1,8 +1,8 @@
-; $Id: fakea.asm,v 1.2 2000-09-02 21:08:21 bird Exp $
+; $Id: fakea.asm,v 1.3 2000-10-01 02:58:21 bird Exp $
 ;
 ; Fake assembly imports.
 ;
-; Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+; Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
 ;
 ; Project Odin Software License can be found in LICENSE.TXT
 ;
@@ -20,6 +20,7 @@
     include devsegdf.inc
     include devhlp.inc
     include os2.inc
+    include options.inc
 
 
 ;
@@ -29,6 +30,7 @@
     public fakepPTDACur
     public fakeptda_start
     public fakeptda_environ
+    public fakeptda_handle
     public fakeptda_module
     public fakeptda_ptdasem
     public fakeptda_pBeginLIBPATH
@@ -36,8 +38,9 @@
     public fakef_FuStrLen
     public fakef_FuBuff
     public fakeg_tkExecPgm
-    public fake_tkStartProcess
+    public faketkStartProcess
     public CalltkExecPgm
+    public _fakeldrOpenPath@20
 
 
 ;
@@ -46,7 +49,10 @@
     extrn tkExecPgmWorker:PROC          ; fake.c
     extrn _fakeLDRClearSem@0:PROC       ; fake.c
     extrn _fakeKSEMRequestMutex@8:PROC  ; fake.c
-    extrn fakeLDRSem:BYTE               ; fake.c
+    extrn _fakeldrOpenPath_old@16:PROC  ; fake.c
+    extrn _fakeldrOpenPath_new@20:PROC  ; fake.c
+    extrn _options:options              ; d16globl.c
+
 
 DATA16 SEGMENT
 ; Fake data in 16-bit segment.
@@ -62,6 +68,7 @@ fakeptda_pPTDAExecChild     dd      offset FLAT:fakeptda_start
 fakeptda_dummy              db  123 dup (0)
 fakeptda_environ            dw      1   ; 1 is the hardcoded HOB of the win32ktst.exe's environment.
 fakeptda_ptdasem            db  20  dup (0) ; PTDA semaphore - Intra-Process serialisation mutex KSEM (sg244640).
+fakeptda_handle             dw      2   ; 2 is the hardcoded HPTDA of the current process.
 fakeptda_module             dw      1   ; 1 is the hardcoded HMTE of the current executable module.
 fakeptda_pBeginLIBPATH      dd      0   ; BEGINLIBPATH not implemented.
                             dd      0   ; ENDLIBPATH not implemented.
@@ -260,7 +267,7 @@ CODE16 ENDS
 CODE32 SEGMENT
 ;;
 ; Faker of which simply clears the loader semaphore.
-; @cproto    none! (void _Optlink   fake_tkStartProcess(void))
+; @cproto    none! (void _Optlink   faketkStartProcess(void))
 ; @returns
 ; @param
 ; @uses
@@ -268,9 +275,9 @@ CODE32 SEGMENT
 ; @time
 ; @sketch
 ; @status
-; @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+; @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
 ; @remark
-fake_tkStartProcess PROC NEAR
+faketkStartProcess PROC NEAR
     push    ebp
     mov     ebp, esp
 
@@ -285,7 +292,7 @@ fake_tkStartProcess PROC NEAR
     xor     eax, eax
     leave
     ret
-fake_tkStartProcess ENDP
+faketkStartProcess ENDP
 
 
 ;;
@@ -301,7 +308,7 @@ fake_tkStartProcess ENDP
 ;            may modify later if this is a UNIX shellscript or
 ;            a PE-file started by pe.exe.
 ; @status    completely implemented.
-; @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+; @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
 ;
 ;
 fakeg_tkExecPgm PROC NEAR
@@ -343,7 +350,7 @@ fakeg_tkExecPgm PROC NEAR
                                         ;     esp+0, esp+4, esp+08, esp+0c
     or      eax, eax
     jnz     ftkep_ret
-    call    fake_tkStartProcess         ; If succesfully so far. call start process.
+    call    faketkStartProcess          ; If succesfully so far. call start process.
     jmp     ftkep_ret2                  ; <Currently no parameters are implemented.>
 
 ftkep_ret:
@@ -371,7 +378,7 @@ fakeg_tkExecPgm ENDP
 ; @param    ebp + 14h       pExecName
 ; @uses     eax, ecx, edx
 ; @status   completely implemented.
-; @author   knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+; @author   knut st. osmundsen (knut.stange.osmundsen@mynd.no)
 ; @remark
 CalltkExecPgm PROC NEAR
     push    ebp
@@ -489,6 +496,45 @@ GetSelectorDATA32 PROC NEAR
     ret
 GetSelectorDATA32 ENDP
 
+
+;;
+; Wrapper for fakeldrOpenPath.
+; @cproto       ULONG LDRCALL   fakeldrOpenPath(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *plv, PULONG pful, ULONG lLibPath);
+; @returns      Return of the current fakeldrOpenPath
+; @param        pachFilename  Pointer to modulename. Not zero terminated!
+; @param        cchFilename   Modulename length.
+; @param        plv           Loader local variables? (Struct from KERNEL.SDF)
+; @param        pful          Pointer to flags which are passed on to ldrOpen.
+; @param        lLibPath      New parameter in build 14053.
+;                             ldrGetMte calls with 1
+;                             ldrOpenNewExe calls with 3
+;                             This is compared to the initial libpath index.
+;                                 The libpath index is:
+;                                     BEGINLIBPATH    1
+;                                     LIBPATH         2
+;                                     ENDLIBPATH      3
+;                                 The initial libpath index is either 1 or 2.
+;                             - ignored -
+; @uses         ecx, eax, edx
+; @sketch
+; @status
+; @author       knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+; @remark
+_fakeldrOpenPath@20 PROC NEAR
+    ASSUME ds:FLAT
+    ; dummy prolog.
+    push    ebp
+    mov     ebp, esp
+    sub     esp, 10h
+    add     esp, 10h
+    pop     ebp
+    ; real code
+    cmp     FLAT:DATA16:_options.ulBuild, 14053
+    jge     new
+    jmp     near ptr FLAT:CODE32:_fakeldrOpenPath_old@16
+new:
+    jmp     near ptr FLAT:CODE32:_fakeldrOpenPath_new@20
+_fakeldrOpenPath@20 ENDP
 
 
 CODE32 ENDS

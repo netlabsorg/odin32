@@ -1,4 +1,4 @@
-/* $Id: OS2KTK.h,v 1.2 2000-09-02 21:08:00 bird Exp $
+/* $Id: OS2KTK.h,v 1.3 2000-10-01 02:58:16 bird Exp $
  *
  * OS2KTK - OS/2 Kernel Task.
  *
@@ -16,6 +16,8 @@
 *******************************************************************************/
 #define TK_FUSU_FATAL       0x3         /* Traps the task on failure. */
 #define TK_FUSU_NONFATAL    0x0         /* Returns error code to caller on failure. */
+#define TK_FUSU_USER_SRC    0x10        /* Source buffer is in user memory. (TKSuFuBuff) */
+#define TK_FUSU_USER_DST    0x20        /* Target buffer is in user memory. (TKSuFuBuff) */
 
 
 
@@ -100,5 +102,27 @@ extern ULONG KRNLCALL   TKSuBuff(PVOID pvUsr, PVOID pv, ULONG cb, ULONG fl);
  */
 extern ULONG KRNLCALL   TKFuBufLen(PLONG pcch, PVOID pvUsr, ULONG cchMax, ULONG fl, BOOL fDblNULL);
 
+
+/**
+ * Copy user memory to user memory.
+ * @returns   OS/2 return code. (NO_ERROR is success)
+ * @param     pvTarget  Pointer to target (user) data area.
+ * @param     pvSource  Pointer to source (user) data area.
+ * @param     cb        Count of bytes to copy.
+ * @param     fl        Flags.
+ */
+extern ULONG KRNLCALL   TKSuFuBuff(PVOID pvTarget, PVOID pvSource, ULONG cb, ULONG fl);
+
+
+#ifdef INCL_OS2KRNL_PTDA
+/**
+ * PID to PTDA pointer.
+ * @returns     OS/2 return code.
+ * @param       pid     Process Identifier.
+ * @param       ppPTDA  Pointer to the PTDA-pointer variabel which is to receive
+ *                      the PTDA pointer on successful return.
+ */
+extern ULONG KRNLCALL  TKPidToPTDA(PID pid, PPPTDA ppPTDA);
+#endif
 
 #endif

@@ -1,4 +1,4 @@
-/* $Id: OS2KPTDA.c,v 1.2 2000-09-02 21:08:12 bird Exp $
+/* $Id: OS2KPTDA.c,v 1.3 2000-10-01 02:58:20 bird Exp $
  *
  * PTDA access functions.
  *
@@ -33,6 +33,7 @@
 extern ULONG    pptda_start;
 extern ULONG    pptda_environ;
 extern ULONG    pptda_ptdasem;
+extern ULONG    pptda_handle;
 extern ULONG    pptda_module;
 
 
@@ -45,6 +46,18 @@ extern ULONG    pptda_module;
 USHORT  ptdaGet_ptda_environ(PPTDA pPTDA)
 {
     return *(PUSHORT)(void*)(((char*)(void*)pPTDA) + (pptda_environ - pptda_start));
+}
+
+
+/**
+ * Gets the ptda_handle PTDA member. This member holds the PTDA handle for the
+ * given PTDA.
+ * @returns     Content of the pPTDA->ptda_handle member.
+ * @param       pPTDA   PTDA Pointer. (NULL is not allowed!)
+ */
+HPTDA  ptdaGet_ptda_handle(PPTDA pPTDA)
+{
+    return *(PHPTDA)(void*)(((char*)(void*)pPTDA) + (pptda_handle - pptda_start));
 }
 
 

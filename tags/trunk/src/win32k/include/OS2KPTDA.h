@@ -1,4 +1,4 @@
-/* $Id: OS2KPTDA.h,v 1.2 2000-09-02 21:07:59 bird Exp $
+/* $Id: OS2KPTDA.h,v 1.3 2000-10-01 02:58:16 bird Exp $
  *
  * PTDA access functions.
  *
@@ -52,8 +52,8 @@ extern  PPPTDA      ppPTDACur;          /* Please access this only thru the ptda
 #define ptdaGet_pPTDAExecChild(pPTDA)   ((PPTDA)(pPTDA))->pPTDAExecChild
 
 
-
 USHORT      ptdaGet_ptda_environ(PPTDA pPTDA);
+HPTDA       ptdaGet_ptda_handle(PPTDA pPTDA);
 USHORT      ptdaGet_ptda_module(PPTDA pPTDA);
 HKSEMMTX    ptda_ptda_ptdasem(PPTDA pPTDA);
 

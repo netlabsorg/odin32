@@ -1,4 +1,4 @@
-/* $Id: OS2KVM.h,v 1.6 2000-09-08 21:34:11 bird Exp $
+/* $Id: OS2KVM.h,v 1.7 2000-10-01 02:58:17 bird Exp $
  *
  * OS/2 kernel VM functions.
  *
@@ -16,6 +16,40 @@
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
 *******************************************************************************/
+
+/*
+ * From SG24-4640-00
+ * Object flags. (ob_fs)
+ */
+#define OB_PSEUDO           0x8000      /* Pseudo-object */
+#define OB_API              0x4000      /* API allocated object */
+#define OB_LOCKWAIT         0x2000      /* Some thread to wake in VMUnlock */
+#define OB_LALIAS           0x1000      /* Object has aliases */
+#define OB_SHARED           0x0800      /* Object's contents are shared */
+#define OB_UVIRT            0x0400      /* UVirt object */
+#define OB_ZEROINIT         0x0200      /* Object is zero-initialized */
+#define OB_RESIDENT         0x0100      /* Initial allocation was resident */
+#define OB_LOWMEM           0x0040      /* Object is in low memory */
+#define OB_GUARD            0x0080      /* Page attribute/permission flags */
+#define OB_EXEC             0x0020      /* Executable */
+#define OB_READ             0x0010      /* Read permission */
+#define OB_USER             0x0008      /* User Storage */
+#define OB_WRITE            0x0004      /* Write permission */
+#define OB_HUGE             0x0002      /* Object is huge */
+#define OB_SHRINKABLE       0x0001      /* Object is Shrinkable */
+#define OB_DHSETMEM         0x0001      /* DevHlp_VMSetMems are allowed */
+
+
+/*
+ * From SG24-4640-00
+ * ob_xflags
+ */
+#define VMOB_SLOCK_WAIT     0x01        /* Waiting on short term locks to clear */
+#define VMOB_LLOCK_WAIT     0x02        /* Waiting on long term locks to clear */
+#define VMOB_DISC_SEG       0x04        /* Object is part of a discardable seg */
+#define VMOB_HIGHMEM        0x08        /* Object was allocated via dh_vmalloc */
+
+
 
 /*                                            v8086.h */
 #define VM_PG_W            0x00000002      /* VPMPG_W       - Page Writeable. */
@@ -66,11 +100,12 @@
 #define VMA_ARENAPRIVATE    0x02000000UL  /* (VPMVMAC_ARENAPRV) Private Arena */
 #define VMA_ARENAHEAP       0x06000000UL  /* Heap Arena */
 #define VMA_ARENAHIGHA      0x00008000UL  /* High shared arena (Warp >= fp13) */
-#define VMA_ARENAHIGH   (options.ulBuild >= MERLINFP13 ? VMA_ARENAHIGHA : 0UL)
+#define VMA_ARENAHIGH   (options.ulBuild >= AURORAGA ? VMA_ARENAHIGHA : 0UL)
 #define VMA_ARENAMASKW      0x06000000UL  /* Warp < fp13 Arena Mask */
 #define VMA_ARENAMASKA      0x06008000UL  /* Aurora Arena Mask */
-#define VMA_ARENAMASK   (options.ulBuild >= MERLINFP13 ? VMA_ARENAMASKA : VMA_ARENAMASKW)
+#define VMA_ARENAMASK   (options.ulBuild >= AURORAGA ? VMA_ARENAMASKA : VMA_ARENAMASKW)
 
+#define VMA_ALIGNSEL        0x10000000UL  /* Selector aligment */
 #define VMA_ALIGNPAGE       0x18000000UL  /* (VPMVMAC_ALIGNPAGE)      Page alignment */
 
 #define VMA_LOCMASK         0xC0000000UL  /* Location mask */
@@ -90,6 +125,14 @@
 #endif
 
 #define VMAF2_WRITE         0x00000002UL  /* PAG_WRITE */
+
+
+/*
+ * VMMapDebugAlias flags.
+ */
+#define VMMDA_ARENAPRIVATE  0           /* Create alias in private arena */
+#define VMMDA_ARENASYSTEM   4           /* Create alias in system arena */
+#define VMMDA_READONLY      1           /* Create readonly alias */
 
 
 
@@ -120,6 +163,18 @@ APIRET KRNLCALL VMAllocMem(
     HMTE    hMTE,
     ULONG   flFlags2,
     ULONG   SomeArg2,
+    PVMAC   pvmac);
+
+APIRET KRNLCALL VMFreeMem(
+    ULONG   ulAddress,
+    HPTDA   hPTDA,
+    ULONG   flFlags);
+
+APIRET KRNLCALL VMMapDebugAlias(
+    ULONG   flVMFlags,
+    ULONG   ulAddress,
+    ULONG   cbSize,
+    HPTDA   hPTDA,
     PVMAC   pvmac);
 
 APIRET KRNLCALL VMObjHandleInfo(

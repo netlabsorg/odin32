@@ -1,4 +1,4 @@
-/* $Id: test.h,v 1.3 2000-09-08 21:34:11 bird Exp $
+/* $Id: test.h,v 1.4 2000-10-01 02:58:17 bird Exp $
  *
  * Definitions and declarations for test moduls.
  *
@@ -16,6 +16,21 @@
 extern "C" {
 #endif
 
+/*******************************************************************************
+*   Structures and Typedefs                                                    *
+*******************************************************************************/
+typedef struct _TstFaker
+{
+    unsigned   uAddress;
+    int        fObj;                   /* 1 = CODE32, 2 = CODE16, 3 = DATA32, 4 = DATA16 */
+} TSTFAKER, *PTSTFAKER, **PPTSTFAKER;
+#ifdef NBR_OF_KRNLIMPORTS
+extern TSTFAKER aTstFakers[NBR_OF_KRNLIMPORTS];
+#endif
+
+/*******************************************************************************
+*   Function Prototypes.                                                       *
+*******************************************************************************/
 VOID  _Optlink ThunkStack32To16(VOID);  /* dh.asm */
 VOID  _Optlink ThunkStack16To32(VOID);  /* dh.asm */
 VOID  _Optlink dhinit(VOID);            /* dh.asm */
@@ -95,28 +110,44 @@ APIRET KRNLCALL fakeVMAllocMem(
     ULONG   flFlags2,
     ULONG   SomeArg2,
     PVMAC   pvmac);
+APIRET KRNLCALL fakeVMFreeMem(
+    PVOID   pv,
+    USHORT  hPTDA,
+    ULONG   flFlags
+    );
 APIRET KRNLCALL fakeVMObjHandleInfo(
     USHORT  usHob,
     PULONG  pulAddr,
     PUSHORT pushPTDA);
 PMTE KRNLCALL fakeldrASMpMTEFromHandle(
     HMTE  hMTE);
-ULONG LDRCALL   fakeldrOpenPath(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *plv, PULONG pful);
+APIRET KRNLCALL fakeVMMapDebugAlias(
+    ULONG   flVMFlags,
+    ULONG   ulAddress,
+    ULONG   cbSize,
+    HPTDA   hPTDA,
+    PVMAC   pvmac);
+
+ULONG LDRCALL   fakeldrOpenPath(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *plv, PULONG pful, ULONG lLibPath);
+ULONG LDRCALL   fakeldrOpenPath_new(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *plv, PULONG pful, ULONG lLibPath);
+ULONG LDRCALL   fakeldrOpenPath_old(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *plv, PULONG pful);
 ULONG LDRCALL   fakeLDRClearSem(void);
 ULONG LDRCALL   fakeldrFindModule(PCHAR pachFilename, USHORT cchFilename, USHORT usClass, PPMTE ppMTE);
 ULONG KRNLCALL  fakeKSEMRequestMutex(HKSEMMTX hkmtx, ULONG ulTimeout);
 ULONG KRNLCALL  fakeKSEMReleaseMutex(HKSEMMTX hkmtx);
 BOOL  KRNLCALL  fakeKSEMQueryMutex(HKSEMMTX hkmtx, PUSHORT pcusNest);
 VOID  KRNLCALL  fakeKSEMInit(PKSEM pksem, ULONG fulType, ULONG fulFlags);
-extern KSEMMTX  fakeLDRSem;
+extern KSEMMTX  fakeLdrSem;
 extern char *   fakeLDRLibPath;
 ULONG KRNLCALL  fakeTKFuBuff(PVOID pv, PVOID pvUsr, ULONG cb, ULONG fl);
 ULONG KRNLCALL  fakeTKSuBuff(PVOID pvUsr, PVOID pv, ULONG cb, ULONG fl);
 ULONG KRNLCALL  fakeTKFuBufLen(PLONG pcch, PVOID pvUsr, ULONG cchMax, ULONG fl, BOOL fDblNULL);
+ULONG KRNLCALL  fakeTKSuFuBuff(PVOID pvUsr, PVOID pv, ULONG cb, ULONG fl);
+ULONG KRNLCALL  fakeTKPidToPTDA(PID pid, PPPTDA ppPTDA);
 PMTE LDRCALL    fakeldrValidateMteHandle(HMTE hMTE);
 PSZ  SECCALL    fakeSecPathFromSFN(SFN hFile);
 void _Optlink   fakeg_tkExecPgm(void);    /* Not callable! (fakea.asm) */
-void _Optlink   fake_tkStartProcess(void);/* Not callable! (fakea.asm) */
+void _Optlink   faketkStartProcess(void); /* Not callable! (fakea.asm) */
 void _Optlink   fakef_FuStrLenZ(void);    /* Not callable! (fakea.asm) */
 void _Optlink   fakef_FuStrLen(void);     /* Not callable! (fakea.asm) */
 void _Optlink   fakef_FuBuff(void);       /* Not callable! (fakea.asm) */
@@ -125,6 +156,7 @@ extern PPTDA    fakepPTDACur;
 extern char     fakeptda_start;
 extern USHORT   fakeptda_environ;
 extern KSEMMTX  fakeptda_ptdasem;
+extern HMTE     fakeptda_handle;
 extern HMTE     fakeptda_module;
 extern PSZ      fakeptda_pBeginLIBPATH;
 extern PSZ      fakeldrpFileNameBuf;
