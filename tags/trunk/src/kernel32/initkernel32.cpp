@@ -1,4 +1,4 @@
-/* $Id: initkernel32.cpp,v 1.21 2002-07-15 14:40:16 sandervl Exp $
+/* $Id: initkernel32.cpp,v 1.22 2002-07-21 09:17:28 sandervl Exp $
  *
  * KERNEL32 DLL entry point
  *
@@ -133,15 +133,30 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
 
             OpenPrivateLogFiles();
 
+            //SvL: Do it here instead of during the exe object creation
+            //(std handles can be used in win32 dll initialization routines
+            HMInitialize();             /* store standard handles within HandleManager */
+
+            /* knut: check for high memory support */
+            rc = DosQuerySysInfo(QSV_VIRTUALADDRESSLIMIT, QSV_VIRTUALADDRESSLIMIT, &ulSysinfo, sizeof(ulSysinfo));
+            if (rc == 0 && ulSysinfo > 512)   //VirtualAddresslimit is in MB
+            {
+                flAllocMem = PAG_ANY;      // high memory support. Let's use it!
+                ulMaxAddr = ulSysinfo * (1024*1024);
+                OSLibInitWSeBFileIO();
+                if (PROFILE_GetOdinIniInt(ODINSYSTEM_SECTION, HIGHMEM_KEY, 1) == 0) {
+                    dprintf(("WARNING: OS/2 kernel supports high memory, but support is DISABLED because of HIGHMEM odin.ini key"));
+                    flAllocMem = 0;
+                }
+            }
+            else
+                flAllocMem = 0;        // no high memory support
+
             if (InitializeSharedHeap() == FALSE)
                 return 0UL;
 
             if (InitializeCodeHeap() == FALSE)
                 return 0UL;
-
-            //SvL: Do it here instead of during the exe object creation
-            //(std handles can be used in win32 dll initialization routines
-            HMInitialize();             /* store standard handles within HandleManager */
 
             InitializeMemMaps();
 
@@ -158,21 +173,6 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
                 module->AddRef();
                 module->DisableUnload();
             }
-
-            /* knut: check for high memory support */
-            rc = DosQuerySysInfo(QSV_VIRTUALADDRESSLIMIT, QSV_VIRTUALADDRESSLIMIT, &ulSysinfo, sizeof(ulSysinfo));
-            if (rc == 0 && ulSysinfo > 512)   //VirtualAddresslimit is in MB
-            {
-                flAllocMem = PAG_ANY;      // high memory support. Let's use it!
-                ulMaxAddr = ulSysinfo * (1024*1024);
-                OSLibInitWSeBFileIO();
-                if (PROFILE_GetOdinIniInt(ODINSYSTEM_SECTION, HIGHMEM_KEY, 1) == 0) {
-                    dprintf(("WARNING: OS/2 kernel supports high memory, but support is DISABLED because of HIGHMEM odin.ini key"));
-                    flAllocMem = 0;
-                }
-            }
-            else
-                flAllocMem = 0;        // no high memory support
 
             OSLibDosSetInitialMaxFileHandles(ODIN_DEFAULT_MAX_FILEHANDLES);
 
