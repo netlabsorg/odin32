@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.49 1999-09-09 18:08:46 dengert Exp $
+# $Id: makefile,v 1.50 1999-09-13 16:13:46 dengert Exp $
 
 #
 # PD-Win32 API
@@ -105,7 +105,7 @@ win32wndhandle.obj: win32wndhandle.cpp win32wndhandle.h
 
 pmwindow.obj:   pmwindow.cpp win32class.h win32wbase.h win32dlg.h pmwindow.h win32wndchild.h $(PDWIN32_INCLUDE)\wprocess.h oslibgdi.h oslibwin.h
 win32class.obj: win32class.cpp win32class.h win32wbase.h win32dlg.h gen_object.h heapshared.h oslibwin.h win32wndchild.h
-win32wbase.obj:   win32wbase.cpp win32class.h win32wbase.h win32dlg.h gen_object.h heapshared.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h win32wndhandle.h oslibdos.h
+win32wbase.obj:   win32wbase.cpp win32class.h win32wbase.h win32dlg.h gen_object.h heapshared.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h win32wndhandle.h oslibdos.h dc.h
 win32wnd.obj:   win32wnd.cpp win32class.h win32wbase.h win32wnd.h win32dlg.h gen_object.h heapshared.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h win32wndhandle.h oslibdos.h oslibmenu.h
 win32dlg.obj:   win32dlg.cpp win32class.h win32wbase.h win32dlg.h gen_object.h heapshared.h oslibwin.h win32wndchild.h oslibmsg.h
 win32wndchild.obj: win32wndchild.cpp win32wndchild.h
@@ -119,7 +119,7 @@ oslibmenu.obj:  oslibmenu.cpp oslibmenu.h
 oslibgdi.obj:   oslibgdi.cpp oslibgdi.h win32wbase.h
 oslibres.obj:   oslibres.cpp oslibwin.h oslibres.h $(PDWIN32_INCLUDE)\winconst.h
 oslibdos.obj:   oslibdos.cpp oslibdos.h
-dc.obj:         dc.cpp win32wbase.h
+dc.obj:         dc.cpp win32wbase.h dc.h
 
 clipboard.obj:  clipboard.cpp
 dib.obj:        dib.cpp dib.h
