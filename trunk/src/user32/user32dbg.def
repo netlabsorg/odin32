@@ -1,4 +1,4 @@
-; $Id: user32dbg.def,v 1.1 2002-02-11 13:49:05 sandervl Exp $
+; $Id: user32dbg.def,v 1.2 2002-02-12 12:00:03 sandervl Exp $
 
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
 DESCRIPTION 'Odin32 System Dll - User32'
@@ -56,26 +56,26 @@ EXPORTS
     ChangeDisplaySettingsW     = _DbgChangeDisplaySettingsW@8   @24
     ChangeMenuA                = _DbgChangeMenuA@20             @25
     ChangeMenuW                = _DbgChangeMenuW@20             @26
-    CharLowerA                 = _DbgCharLowerA@4               @27
-    CharLowerBuffA             = _DbgCharLowerBuffA@8           @28
-    CharLowerBuffW             = _DbgCharLowerBuffW@8           @29
-    CharLowerW                 = _DbgCharLowerW@4               @30
-    CharNextA                  = _DbgCharNextA@4                @31
-    CharNextExA                = _DbgCharNextExA@12             @32
-    CharNextExW                = _DbgCharNextExW@12             @33
-    CharNextW                  = _DbgCharNextW@4                @34
-    CharPrevA                  = _DbgCharPrevA@8                @35
-    CharPrevExA                = _DbgCharPrevExA@16             @36
-    CharPrevExW                = _DbgCharPrevExW@16             @37
-    CharPrevW                  = _DbgCharPrevW@8                @38
-    CharToOemA                 = _DbgCharToOemA@8               @39
-    CharToOemBuffA             = _DbgCharToOemBuffA@12          @40
-    CharToOemBuffW             = _DbgCharToOemBuffW@12          @41
-    CharToOemW                 = _DbgCharToOemW@8               @42
-    CharUpperA                 = _DbgCharUpperA@4               @43
-    CharUpperBuffA             = _DbgCharUpperBuffA@8           @44
-    CharUpperBuffW             = _DbgCharUpperBuffW@8           @45
-    CharUpperW                 = _DbgCharUpperW@4               @46
+    CharLowerA                 = _CharLowerA@4               @27
+    CharLowerBuffA             = _CharLowerBuffA@8           @28
+    CharLowerBuffW             = _CharLowerBuffW@8           @29
+    CharLowerW                 = _CharLowerW@4               @30
+    CharNextA                  = _CharNextA@4                @31
+    CharNextExA                = _CharNextExA@12             @32
+    CharNextExW                = _CharNextExW@12             @33
+    CharNextW                  = _CharNextW@4                @34
+    CharPrevA                  = _CharPrevA@8                @35
+    CharPrevExA                = _CharPrevExA@16             @36
+    CharPrevExW                = _CharPrevExW@16             @37
+    CharPrevW                  = _CharPrevW@8                @38
+    CharToOemA                 = _CharToOemA@8               @39
+    CharToOemBuffA             = _CharToOemBuffA@12          @40
+    CharToOemBuffW             = _CharToOemBuffW@12          @41
+    CharToOemW                 = _CharToOemW@8               @42
+    CharUpperA                 = _CharUpperA@4               @43
+    CharUpperBuffA             = _CharUpperBuffA@8           @44
+    CharUpperBuffW             = _CharUpperBuffW@8           @45
+    CharUpperW                 = _CharUpperW@4               @46
     CheckDlgButton             = _DbgCheckDlgButton@12          @47
     CheckMenuItem              = _DbgCheckMenuItem@12           @48
     CheckMenuRadioItem         = _DbgCheckMenuRadioItem@20      @49
@@ -363,14 +363,14 @@ EXPORTS
     InvalidateRect             = _DbgInvalidateRect@12          @328
     InvalidateRgn              = _DbgInvalidateRgn@12           @329
     InvertRect                 = _DbgInvertRect@8               @330
-    IsCharAlphaA               = _DbgIsCharAlphaA@4             @331
-    IsCharAlphaNumericA        = _DbgIsCharAlphaNumericA@4      @332
-    IsCharAlphaNumericW        = _DbgIsCharAlphaNumericW@4      @333
-    IsCharAlphaW               = _DbgIsCharAlphaW@4             @334
-    IsCharLowerA               = _DbgIsCharLowerA@4             @335
-    IsCharLowerW               = _DbgIsCharLowerW@4             @336
-    IsCharUpperA               = _DbgIsCharUpperA@4             @337
-    IsCharUpperW               = _DbgIsCharUpperW@4             @338
+    IsCharAlphaA               = _IsCharAlphaA@4             @331
+    IsCharAlphaNumericA        = _IsCharAlphaNumericA@4      @332
+    IsCharAlphaNumericW        = _IsCharAlphaNumericW@4      @333
+    IsCharAlphaW               = _IsCharAlphaW@4             @334
+    IsCharLowerA               = _IsCharLowerA@4             @335
+    IsCharLowerW               = _IsCharLowerW@4             @336
+    IsCharUpperA               = _IsCharUpperA@4             @337
+    IsCharUpperW               = _IsCharUpperW@4             @338
     IsChild                    = _DbgIsChild@8                  @339
     IsClipboardFormatAvailable  = _DbgIsClipboardFormatAvailable@4 @340
     IsDialogMessage            = _DbgIsDialogMessageA@8         @341
@@ -433,10 +433,10 @@ EXPORTS
     MoveWindow                 = _DbgMoveWindow@24              @396
     MsgWaitForMultipleObjects  = _DbgMsgWaitForMultipleObjects@20 @397
     OemKeyScan                 = _DbgOemKeyScan@4               @398
-    OemToCharA                 = _DbgOemToCharA@8               @399
-    OemToCharBuffA             = _DbgOemToCharBuffA@12          @400
-    OemToCharBuffW             = _DbgOemToCharBuffW@12          @401
-    OemToCharW                 = _DbgOemToCharW@8               @402
+    OemToCharA                 = _OemToCharA@8               @399
+    OemToCharBuffA             = _OemToCharBuffA@12          @400
+    OemToCharBuffW             = _OemToCharBuffW@12          @401
+    OemToCharW                 = _OemToCharW@8               @402
     OffsetRect                 = _DbgOffsetRect@12              @403
     OpenClipboard              = _DbgOpenClipboard@4            @404
     OpenDesktopA               = _DbgOpenDesktopA@16            @405
