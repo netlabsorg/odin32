@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.1316 2001-03-23 16:25:37 sandervl Exp $ */
+/* $Id: changelog,v 1.1317 2001-03-24 13:24:11 sandervl Exp $ */
+
+ 2001-03-24: Sander van Leeuwen <sandervl@xs4all.nl>
+    - WINMM:    o mmsystemGetVersion returned wrong version. Should be 0x030A.
+                  (as done in NT4, SP6)
+                o Ported Wine's PlaySoundA/W, sndPlaySoundA/W
 
  2001-03-23: Sander van Leeuwen <sandervl@xs4all.nl>
     - WINMM:    o Wrong calling convention for timer thread handler (os2timer.cpp)
