@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.28 2000-08-30 13:50:53 sandervl Exp $
+# $Id: makefile,v 1.29 2000-11-09 21:09:53 sandervl Exp $
 
 #
 # Odin32 API
@@ -108,6 +108,28 @@ $(TARGET).def
 dep:
     $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
         *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
+
+
+$(OBJDIR)\shres.obj: shell32_Ca.orc \
+shell32_Cs.orc \
+shell32_Da.orc \
+shell32_De.orc \
+shell32_En.orc \
+shell32_Eo.orc \
+shell32_Es.orc \
+shell32_Fi.orc \
+shell32_Fr.orc \
+shell32_Hu.orc \
+shell32_It.orc \
+shell32_Nl.orc \
+shell32_No.orc \
+shell32_Pl.orc \
+shell32_Pt.orc \
+shell32_Ru.orc \
+shell32_Sv.orc \
+shell32_Wa.orc \
+shell32_xx.orc \
+shres.orc \
 
 
 # Includes the common rules.
