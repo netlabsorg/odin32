@@ -1,4 +1,4 @@
-/* $Id: hmdevio.cpp,v 1.5 2000-09-20 21:32:52 hugh Exp $ */
+/* $Id: hmdevio.cpp,v 1.6 2000-09-21 20:03:00 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -17,7 +17,7 @@
 #define INCL_DOSERRORS           /* DOS Error values         */
 #define INCL_DOSPROCESS          /* DOS Process values       */
 #define INCL_DOSMISC             /* DOS Miscellanous values  */
-#include <os2wrap.h>  //Odin32 OS/2 api wrappers
+#include <os2wrap.h>	//Odin32 OS/2 api wrappers
 #include <string.h>
 
 #include <win32type.h>
@@ -27,13 +27,13 @@
 #include "map.h"
 #include "exceptutil.h"
 
-#define DBG_LOCALLOG  DBG_hmdevio
+#define DBG_LOCALLOG	DBG_hmdevio
 #include "dbglocal.h"
 
 static fX86Init  = FALSE;
 //SvL: Used in iccio.asm (how can you put these in the .asm data segment without messing things up?)
-//ULONG  ioentry   = 0;
-//USHORT gdt       = 0;
+ULONG  ioentry   = 0;
+USHORT gdt       = 0;
 char   devname[] = "/dev/fastio$";
 
 static BOOL GpdDevIOCtl(HANDLE hDevice, DWORD dwIoControlCode, LPVOID lpInBuffer, DWORD nInBufferSize, LPVOID lpOutBuffer, DWORD nOutBufferSize, LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped);
@@ -41,7 +41,7 @@ static BOOL MAPMEMIOCtl(HANDLE hDevice, DWORD dwIoControlCode, LPVOID lpInBuffer
 static BOOL FXMEMMAPIOCtl(HANDLE hDevice, DWORD dwIoControlCode, LPVOID lpInBuffer, DWORD nInBufferSize, LPVOID lpOutBuffer, DWORD nOutBufferSize, LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped);
 
 static WIN32DRV knownDriver[] =
-    {{"\\\\.\\GpdDev", "/dev/fastio$", TRUE,  666,   GpdDevIOCtl},
+    {{"\\\\.\\GpdDev", "",      TRUE,  666,   GpdDevIOCtl},
     { "\\\\.\\MAPMEM", "PMAP$", FALSE, 0,     MAPMEMIOCtl},
     { "FXMEMMAP.VXD",  "PMAP$", FALSE, 0,     FXMEMMAPIOCtl}};
 
@@ -54,23 +54,23 @@ void RegisterDevices()
  HMDeviceDriver *driver;
  DWORD rc;
 
-    for(int i=0;i<nrKnownDrivers;i++)
+    for(int i=0;i<nrKnownDrivers;i++) 
     {
-  driver = new HMDeviceDriver(knownDriver[i].szWin32Name,
+	driver = new HMDeviceDriver(knownDriver[i].szWin32Name,
                                     knownDriver[i].szOS2Name,
                                     knownDriver[i].fCreateFile,
                                     knownDriver[i].devIOCtl);
 
-  rc = HMDeviceRegister(knownDriver[i].szWin32Name, driver);
-      if (rc != NO_ERROR)                                  /* check for errors */
-          dprintf(("KERNEL32:RegisterDevices: registering %s failed with %u.\n",
-                    knownDriver[i].szWin32Name, rc));
+	rc = HMDeviceRegister(knownDriver[i].szWin32Name, driver);
+    	if (rc != NO_ERROR)                                  /* check for errors */
+      		dprintf(("KERNEL32:RegisterDevices: registering %s failed with %u.\n",
+              		  knownDriver[i].szWin32Name, rc));
     }
     return;
 }
 //******************************************************************************
 //******************************************************************************
-HMDeviceDriver::HMDeviceDriver(LPCSTR lpDeviceName, LPSTR lpOS2DevName, BOOL fCreate,
+HMDeviceDriver::HMDeviceDriver(LPCSTR lpDeviceName, LPSTR lpOS2DevName, BOOL fCreate, 
                                WINIOCTL pDevIOCtl)
                 : HMDeviceKernelObjectClass(lpDeviceName)
 {
@@ -109,42 +109,40 @@ DWORD HMDeviceDriver::CreateFile (LPCSTR lpFileName,
     sharetype |= OPEN_SHARE_DENYWRITE;
 
   if(szOS2Name[0] == 0) {
-      pHMHandleData->hHMHandle = 0;
-      return (NO_ERROR);
+     	pHMHandleData->hHMHandle = 0;
+     	return (NO_ERROR);
   }
 
 tryopen:
-  rc = DosOpen( szOS2Name,                        /* File path name */
-                &hfFileHandle,                  /* File handle */
-                &ulAction,                      /* Action taken */
-          0,
-          FILE_NORMAL,
-            FILE_OPEN,
-            sharetype,
-                0L);                            /* No extended attribute */
+  rc = DosOpen(	szOS2Name,                        /* File path name */
+               	&hfFileHandle,                  /* File handle */
+               	&ulAction,                      /* Action taken */
+	       	0,
+         	FILE_NORMAL,
+           	FILE_OPEN,
+           	sharetype,
+               	0L);                            /* No extended attribute */
 
   if(rc == ERROR_TOO_MANY_OPEN_FILES) {
    ULONG CurMaxFH;
    LONG  ReqCount = 32;
 
-  rc = DosSetRelMaxFH(&ReqCount, &CurMaxFH);
-  if(rc) {
-    dprintf(("DosSetRelMaxFH returned %d", rc));
-    return rc;
-  }
-  dprintf(("DosOpen failed -> increased nr open files to %d", CurMaxFH));
-  goto tryopen;
+	rc = DosSetRelMaxFH(&ReqCount, &CurMaxFH);
+	if(rc) {
+		dprintf(("DosSetRelMaxFH returned %d", rc));
+		return rc;
+	}
+	dprintf(("DosOpen failed -> increased nr open files to %d", CurMaxFH));
+	goto tryopen;
   }
 
   dprintf(("DosOpen %s returned %d\n", szOS2Name, rc));
 
-  if(rc == NO_ERROR)
-  {
-    pHMHandleData->hHMHandle = hfFileHandle;
-    return (NO_ERROR);
+  if(rc == NO_ERROR) {
+     	pHMHandleData->hHMHandle = hfFileHandle;
+     	return (NO_ERROR);
   }
-  else
-    return(rc);
+  else  return(rc);
 }
 //******************************************************************************
 //******************************************************************************
@@ -167,20 +165,11 @@ BOOL HMDeviceDriver::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoCont
 static BOOL GpdDevIOCtl(HANDLE hDevice, DWORD dwIoControlCode, LPVOID lpInBuffer, DWORD nInBufferSize, LPVOID lpOutBuffer, DWORD nOutBufferSize, LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped)
 {
  ULONG port, val = 0;
- WORD  gdt;
- HRESULT rc;
- ULONG ulAction;
 
-  if(fX86Init == FALSE)
-  {
-    rc = DosDevIOCtl( hDevice, 118, 100, 0,0,0,&gdt,2,&ulAction);
-
-    if(rc)
-      return FALSE;
-
-    io_init2(gdt);
-
-    fX86Init = TRUE;
+  if(fX86Init == FALSE) {
+    	if(io_init() == 0)
+        	fX86Init = TRUE;
+    	else   	return(FALSE);
   }
 
   *lpBytesReturned = 0;
@@ -308,8 +297,8 @@ BOOL WIN32API QueryPerformanceCounter(LARGE_INTEGER *lpPerformanceCount)
 
   rc = DosTmrQueryTime(&time);
   if(rc) {
-      dprintf(("DosTmrQueryTime returned %d\n", rc));
-      return(FALSE);
+    	dprintf(("DosTmrQueryTime returned %d\n", rc));
+    	return(FALSE);
   }
   lpPerformanceCount->u.LowPart  = time.ulLo;
   lpPerformanceCount->u.HighPart = time.ulHi;
@@ -324,8 +313,8 @@ BOOL WIN32API QueryPerformanceFrequency(LARGE_INTEGER *lpFrequency)
 
   rc = DosTmrQueryFreq(&freq);
   if(rc) {
-      dprintf(("DosTmrQueryFreq returned %d\n", rc));
-      return(FALSE);
+    	dprintf(("DosTmrQueryFreq returned %d\n", rc));
+    	return(FALSE);
   }
   lpFrequency->u.LowPart  = freq;
   lpFrequency->u.HighPart = 0;
