@@ -1,4 +1,4 @@
-/* $Id: OS2CLIPPER.H,v 1.7 2000-09-02 08:27:05 sandervl Exp $ */
+/* $Id: OS2CLIPPER.H,v 1.8 2001-05-28 17:17:12 phaller Exp $ */
 
 /*
  * DX clipper class definition
@@ -23,7 +23,8 @@ class OS2IDirectDrawClipper
   IDirectDrawClipperVtbl  Vtbl;
 
   OS2IDirectDrawClipper(OS2IDirectDraw *lpDirectDraw);
-       ~OS2IDirectDrawClipper();
+  OS2IDirectDrawClipper(void);
+  ~OS2IDirectDrawClipper();
 
         int             Referenced;
         inline  HRESULT       GetLastError() { return lastError; };
