@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.6 1999-10-19 10:23:26 phaller Exp $ */
+/* $Id: misc.cpp,v 1.7 2000-05-19 12:09:24 sandervl Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -285,51 +285,6 @@ ODINFUNCTION2(int,    StrToOleStr,
                              MAX_PATH);
 }
 
-
-/*****************************************************************************
- * Name      : StrCpyNW
- * Purpose   :
- * Parameters:
- * Variables :
- * Result    :
- * Remark    : SHELL32.310 - used by winfile.exe
- * Status    : UNTESTED UNKNOWN STUB
- *
- * Author    : Christoph Bratschi [Fri, 1999/08/6 19:00]
- *****************************************************************************/
-
-ODINFUNCTION3(LPWSTR, StrCpyNW,
-              LPWSTR, lpString1,
-              LPWSTR, lpString2,
-              int,    iMaxLength)
-{
-  dprintf(("SHELL32: undoc StrCpyNW\n"));
-
-  return lstrcpynW(lpString1,lpString2,iMaxLength);
-}
-
-/*****************************************************************************
- * Name      : StrNCpyW
- * Purpose   :
- * Parameters:
- * Variables :
- * Result    :
- * Remark    : SHELL32.316 - used by winfile.exe
- * Status    : UNTESTED UNKNOWN STUB
- *
- * Author    : Christoph Bratschi [Fri, 1999/08/6 19:00]
- *****************************************************************************/
-
-ODINFUNCTION2(LPWSTR, StrNCpyW,
-              LPWSTR, lpString1,
-              LPWSTR, lpString2)
-{
-  dprintf(("SHELL32: undoc StrNCpyW\n"));
-
-  return lstrcpyW(lpString1,lpString2);
-}
-
-
 /*****************************************************************************
  * Name      : InternalExtractIconListA
  * Purpose   :
@@ -401,29 +356,6 @@ ODINFUNCTION1(DWORD, ExtractIconResInfoW, DWORD, dwArg1)
   dprintf(("SHELL32: undoc ExtractIconResInfoW\n"));
   return 0;
 }
-
-/*************************************************************************
- *				FindEnvironmentString	[SHELL.38]
- *
- * Returns a pointer into the DOS environment... Ugh.
- */
-LPSTR SHELL_FindStringA(LPSTR lpEnv, LPCSTR entry)
-{ UINT16 l;
-
-  //TRACE_(shell)("\n");
-
-  l = strlen(entry);
-  for( ; *lpEnv ; lpEnv+=strlen(lpEnv)+1 )
-  { if( lstrncmpiA(lpEnv, entry, l) )
-      continue;
-	if( !*(lpEnv+l) )
-	    return (lpEnv + l); 		/* empty entry */
-	else if ( *(lpEnv+l)== '=' )
-	    return (lpEnv + l + 1);
-    }
-    return NULL;
-}
-
 
 /*****************************************************************************
  * Name      : CheckEscapesA
