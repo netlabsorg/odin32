@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.120 1999-08-22 11:12:29 sandervl Exp $ */
+ /* $Id: changelog,v 1.121 1999-08-22 11:40:24 sandervl Exp $ */
 
  99-08-22: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Moved CloseLogFile call to after DestroyTIB (fixes crashes
@@ -11,7 +11,8 @@
                           from OS2ExceptionHandler.
 	- USER32/NEW: Changed WM_ERASEBKGND handling. Fixes FreeCell background.
                       (but might not be completely correct)
-	
+	- INCLUDE\WIN: Added custcntl.h & fixed GetObject definition
+
  99-08-21: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: Fixed window class bug. Freecell menu now properly
                       loaded.
