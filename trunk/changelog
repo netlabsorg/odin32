@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2043 2002-04-12 11:45:33 bird Exp $ */
+/* $Id: changelog,v 1.2044 2002-04-13 04:44:49 bird Exp $ */
+
+ 2002-04-11: knut st. osmundsen <bird@anduin.net>
+    - Windefs.h:
+                o _MAX_PATH, _MAX_DIR, _MAX_EXT crashes with Watcom C.
 
  2002-04-11: knut st. osmundsen <bird@anduin.net>
     - Makefiles:
