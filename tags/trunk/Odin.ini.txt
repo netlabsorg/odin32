@@ -1,4 +1,4 @@
-/* $Id: Odin.ini.txt,v 1.5 2000-01-09 19:47:19 sandervl Exp $ */
+/* $Id: Odin.ini.txt,v 1.6 2000-01-11 13:05:43 sandervl Exp $ */
 
 Odin initialization file documentation
 
@@ -29,11 +29,6 @@ NETAPI32=WNETAP32
 [DLLRENAMEOS2]
 OLE32OS2=OLE32
 WNETAP32=NETAPI32
-
-[CUSTOMIZATION]
-OS2Look         values 0, 1
-		0 -> Windows NT-like windows
-		1 -> OS/2 window look
 
 [TWAIN]
 TwainIF    	values 1,2,3 (default=1)
