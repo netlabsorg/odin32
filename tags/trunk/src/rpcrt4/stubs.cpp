@@ -1,19 +1,18 @@
-/* $Id: stubs.cpp,v 1.2 2000-04-04 19:49:03 davidr Exp $ */
+/* $Id: stubs.cpp,v 1.3 2000-10-16 17:59:22 sandervl Exp $ */
 
 /*
  * RPCRT4 library
  * Stubs
  *
  * 2000/04/03
- * 
+ *
  * Copyright 2000 David J. Raison
- * 
+ *
  * Project Odin Software License can be found in LICENSE.TXT
- * 
+ *
  */
 
 #include "rpcrt4.h"
-
 
 // ----------------------------------------------------------------------
 // RpcIfInqId
@@ -369,5 +368,27 @@ DceErrorInqTextW (
     dprintf(("RPCRT4: %s - Stub", __FUNCTION__));
     return RPC_S_OUT_OF_MEMORY;
 }
-
-
+// ----------------------------------------------------------------------
+// ----------------------------------------------------------------------
+HRESULT RPC_ENTRY NdrDllRegisterProxy(
+    HMODULE                  hDll,
+//    const ProxyFileInfo **   pProxyFileList,
+    void ** pProxyFileList,
+    const CLSID *            pclsid)
+{
+    dprintf(("RPCRT4: %s - Stub", __FUNCTION__));
+    return RPC_S_OUT_OF_MEMORY;
+}
+// ----------------------------------------------------------------------
+// ----------------------------------------------------------------------
+HRESULT RPC_ENTRY NdrDllUnregisterProxy(
+    HMODULE                  hDll,
+//    const ProxyFileInfo **   pProxyFileList,
+    void ** pProxyFileList,
+    const CLSID *            pclsid)
+{
+    dprintf(("RPCRT4: %s - Stub", __FUNCTION__));
+    return RPC_S_OUT_OF_MEMORY;
+}
+// ----------------------------------------------------------------------
+// ----------------------------------------------------------------------
