@@ -1,4 +1,4 @@
-/* $Id: oslibres.h,v 1.8 2001-05-17 11:25:48 sandervl Exp $ */
+/* $Id: oslibres.h,v 1.9 2001-07-04 09:55:17 sandervl Exp $ */
 /*
  * Window GUI resource wrapper functions for OS/2
  *
@@ -40,13 +40,8 @@ typedef struct
 } BITMAP_W, *LPBITMAP_W;
 
 HANDLE  OSLibWinSetAccelTable(HWND hwnd, HANDLE hAccel, PVOID acceltemplate);
-HANDLE  OSLibWinCreateIcon(PVOID iconbitmap, ULONG cxDesired, ULONG cyDesired);
 
-//NOTE: Depends on origin of bitmap data!!!
-//      Assumes 1 bpp bitmaps have a top left origin and all others have a bottom left origin
-HANDLE  OSLibWinCreatePointer(PVOID cursorbitmap, ULONG cxDesired, ULONG cyDesired);
-
-HANDLE  OSLibWinCreateCursor(CURSORICONINFO *pInfo, char *pAndBits, BITMAP_W *pAndBmp, char *pXorBits, BITMAP_W *pXorBmp);
+HANDLE  OSLibWinCreatePointer(CURSORICONINFO *pInfo, char *pAndBits, BITMAP_W *pAndBmp, char *pXorBits, BITMAP_W *pXorBmp, BOOL fCursor);
 HANDLE  OSLibWinQuerySysPointer(ULONG type,INT w,INT h);
 HANDLE  OSLibWinQuerySysIcon(ULONG type,INT w,INT h);
 VOID    OSLibWinDestroyPointer(HANDLE hPointer);
