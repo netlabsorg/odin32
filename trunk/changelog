@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1714 2001-10-01 07:05:52 sandervl Exp $ */
+/* $Id: changelog,v 1.1715 2001-10-01 17:27:39 sandervl Exp $ */
+
+ 2001-10-01: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Lastest Wine revision of GetNextDlgGroupItem ported + modified
 
  2001-09-30: Sander van Leeuwen <sandervl@xs4all.nl>
     - INCLUDE:  o Hook constants added to winconst.h
