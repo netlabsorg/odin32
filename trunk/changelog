@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1909 2001-12-13 15:30:49 sandervl Exp $ */
+/* $Id: changelog,v 1.1910 2001-12-14 10:21:29 sandervl Exp $ */
+
+ 2001-12-14: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o CancelIo & GetOverlappedResult added for custom device drivers
 
  2001-12-13: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Added function to override name of the PM keyboard hook dll
