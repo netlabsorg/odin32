@@ -1,4 +1,4 @@
-; $Id: kernel32dbg.def,v 1.2 2002-02-08 16:47:11 sandervl Exp $
+; $Id: kernel32dbg.def,v 1.3 2002-02-09 13:36:20 achimha Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -1126,6 +1126,19 @@ EXPORTS
     HEAP_strdupAtoW            = _DbgHEAP_strdupAtoW@12              @1246 NONAME
     HEAP_strdupA               = _DbgHEAP_strdupA@12                 @1247 NONAME
     HEAP_strdupW               = _DbgHEAP_strdupW@12                 @1248 NONAME
+; AH 2002-02-09 export the debug functions under their mangled non debug name as well
+    _HEAP_xalloc@12            = HEAP_xalloc                         @1340 NONAME
+    _HEAP_xrealloc@16          = HEAP_xrealloc                       @1341 NONAME
+    _HEAP_malloc@4             = HEAP_malloc                         @1342 NONAME
+    _HEAP_realloc@8            = HEAP_realloc                        @1343 NONAME
+    _HEAP_size@4               = HEAP_size                           @1392 NONAME
+    _HEAP_free@4               = HEAP_free                           @1344 NONAME
+    _HEAP_strdupWtoA@12        = HEAP_strdupWtoA                     @1345 NONAME
+    _HEAP_strdupAtoW@12        = HEAP_strdupAtoW                     @1346 NONAME
+    _HEAP_strdupA@12           = HEAP_strdupA                        @1347 NONAME
+    _HEAP_strdupW@12           = HEAP_strdupW                        @1348 NONAME
+
+
 
     _VIRTUAL_MapFileA@12                                          @1251 NONAME
     _VIRTUAL_MapFileW@12                                          @1252 NONAME
