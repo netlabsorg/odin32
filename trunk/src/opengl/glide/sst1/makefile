@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2000-12-03 00:26:12 bird Exp $
+# $Id: makefile,v 1.10 2000-12-03 05:13:36 bird Exp $
 
 #
 # Odin32 API
@@ -9,8 +9,10 @@
 
 #
 # Tell buildenvironment that we should not copy this into /bin.
+# Tell buildenvironment to make addtional target in the all rule.
 #
 NO_MAIN_BIN_COPY = 1
+ADDITIONAL_ALL = $(ODIN32_BIN)\readme.txt
 
 
 #
@@ -20,7 +22,7 @@ NO_MAIN_BIN_COPY = 1
 
 
 #
-# Overrides.
+# Change bin directory.
 #
 ODIN32_BIN = $(ODIN32_BIN__)\Glide\Voodoo1
 
@@ -67,4 +69,11 @@ TARGET = glide2x
 # Includes the common rules.
 #
 !include $(ODIN32_POST_INC)
+
+
+#
+# Copyrule for the readme.txt file.
+#
+$(ODIN32_BIN)\readme.txt: readme.txt
+    $(CP) readme.txt $@
 

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2000-12-02 23:58:37 bird Exp $
+# $Id: makefile,v 1.13 2000-12-03 05:13:02 bird Exp $
 
 #
 # Odin32 API
@@ -7,11 +7,12 @@
 #
 
 
-
 #
 # Tell buildenvironment that we should not copy this into /bin.
+# Tell buildenvironment to make addtional target in the all rule.
 #
 NO_MAIN_BIN_COPY = 1
+ADDITIONAL_ALL = $(ODIN32_BIN)\readme.txt
 
 
 #
@@ -21,9 +22,14 @@ NO_MAIN_BIN_COPY = 1
 
 
 #
+# Change bin directory.
+#
+ODIN32_BIN = $(ODIN32_BIN__)\Glide
+
+
+#
 # Overrides.
 #
-ODIN32_BIN  = $(ODIN32_BIN__)\Glide
 CINCLUDES   = -I.. -I..\GL $(CINCLUDES) -I..\..\glut -I..\..\glide\cvg\glide \
               -I..\..\glide\swlibs\fxmisc -I..\..\glide\cvg\incsrc
 CDEFINES    = $(CDEFINES_WIN32APP) \
@@ -189,4 +195,11 @@ mydep:
     $(DEPEND) -a $(CINCLUDES) \
         ..\*.c ..\*.asm ..\*.h ..\GL\*.h ..\..\glut\*.h ..\..\glide\cvg\glide\*.h \
         ..\..\glide\swlibs\fxmisc\*.h ..\..\glide\cvg\incsrc\*.h
+
+
+#
+# Copyrule for the readme.txt file.
+#
+$(ODIN32_BIN)\readme.txt: readme.txt
+    $(CP) readme.txt $@
 
