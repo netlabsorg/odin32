@@ -1,4 +1,4 @@
-# $Id: makefile.os2,v 1.13 2001-04-16 17:10:52 sandervl Exp $
+# $Id: makefile.os2,v 1.14 2001-04-16 17:22:25 sandervl Exp $
 
 
 ODIN32_TOOLS = ..\bin
@@ -7,7 +7,7 @@ ODIN32_INCLUDE = ..\..\include
 
 
 #DEFS      = -D__WINE__ -D__WIN32OS2__ -idirafter ../../include/win -idirafter ../../include
-DEFS      = -D__WINE__ -D__EMX__ -DMASM -D__SEMICOLON__  -I. -I../../include/win -I../../include -g -DDEBUG
+DEFS      = -D__WINE__ -D__EMX__ -DMASM -D__SEMICOLON__  -I. -I../../include/win -I../../include
 
 PROGRAMS = wrc.exe
 MODULE   = none
@@ -112,7 +112,7 @@ LEX=flex
     $(CC) $(CFLAGS_G) $(DEFS) -c $< -o $@
 
 wrc.exe: lexyy.c y.tab.c $(OBJS)
-    $(CC) $(CFLAGS) -o $@ $(OBJS)  -L. -lm
+    $(CC) $(CFLAGS) -o $@ $(OBJS)
     copy $@ ..\bin
 
 y.tab.c y.tab.h: parser.y
