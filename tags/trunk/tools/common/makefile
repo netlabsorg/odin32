@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2001-02-02 08:45:42 bird Exp $
+# $Id: makefile,v 1.13 2001-09-29 20:18:34 bird Exp $
 
 #
 # Odin32 API
@@ -96,4 +96,12 @@ force:  $(SYMBOLIC)
 # Lib rule - dummy rule
 #
 lib:    $(SYMBOLIC)
+
+
+#
+# Nothing rule used for makefile debugging.
+#
+nothing:
+    @echo Did nothing with makefile $(MAKEDIR)\$(MAKEFILE)
+
 
