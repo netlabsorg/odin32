@@ -1,4 +1,4 @@
-; $Id: msvcrt.def,v 1.11 1999-12-21 12:25:55 sandervl Exp $
+; $Id: msvcrt.def,v 1.12 1999-12-21 13:45:41 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY MSVCRT INITINSTANCE TERMINSTANCE
@@ -435,7 +435,7 @@ EXPORTS
     _set_sbh_threshold		= _MSVCRT__set_sbh_threshold	@422
     _seterrormode		= _CRTDLL__seterrormode		@423
     _setjmp			= _CRTDLL__setjmp		@424
-    _setjmp3			= _CRTDLL__setjmp		@425 ; Not correct
+    _setjmp3			= _CRTDLL__setjmp3		@425 ; Not correct
     _setmaxstdio		= _MSVCRT__setmaxstdio		@426
     _setmbcp			= _MSVCRT__setmbcp		@427
     _setmode							@428
