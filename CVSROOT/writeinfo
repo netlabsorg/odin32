@@ -10,8 +10,10 @@
 /src/advapi32                              sandervl phaller achimha bird
 /src/capi2032                              sandervl achimha cbratschi phaller
 /src/comdlg32                              sandervl achimha cbratschi
-/src/ddraw                                 sandervl hugh achimha
-/src/dsound                                sandervl hugh achimha
+/src/ddraw                                 sandervl hugh achimha mike
+/src/dsound                                sandervl hugh achimha mike
+/src/dinput                                sandervl hugh achimha mike
+/src/dplay                                 sandervl hugh achimha mike
 /src/gdi32                                 sandervl phaller achimha bird cbratschi hugh
 /src/kernel32                              sandervl phaller achimha bird
 /src/kernel32/new                          sandervl phaller achimha bird buerkle dengert cbratschi
