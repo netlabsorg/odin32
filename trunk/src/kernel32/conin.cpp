@@ -1,4 +1,4 @@
-/* $Id: conin.cpp,v 1.2 1999-06-19 10:54:40 sandervl Exp $ */
+/* $Id: conin.cpp,v 1.3 1999-06-21 18:53:51 phaller Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -88,7 +88,7 @@ DWORD HMDeviceConsoleInClass::CreateFile (LPCSTR        lpFileName,
   WriteLog("KERNEL32/CONSOLE:HMDeviceConsoleInClass::CreateFile %s(%s,%08x,%08x,%08x)\n",
            lpHMDeviceName,
            lpFileName,
-           pHMHandleData->hWinHandle,
+           pHMHandleData->hHMHandle,
            lpSecurityAttributes,
            pHMHandleDataTemplate);
 #endif
@@ -126,7 +126,7 @@ DWORD HMDeviceConsoleInClass::ReadFile(PHMHANDLEDATA pHMHandleData,
 #ifdef DEBUG_LOCAL
   WriteLog("KERNEL32/CONSOLE:HMDeviceConsoleInClass::ReadFile %s(%08x,%08x,%08x,%08x,%08x)\n",
            lpHMDeviceName,
-           pHMHandleData->hWinHandle,
+           pHMHandleData->hHMHandle,
            lpBuffer,
            nNumberOfBytesToRead,
            lpNumberOfBytesRead,
@@ -207,7 +207,7 @@ DWORD HMDeviceConsoleInClass::WriteFile(PHMHANDLEDATA pHMHandleData,
 #ifdef DEBUG_LOCAL
   WriteLog("KERNEL32/CONSOLE:HMDeviceConsoleInClass:WriteFile %s(%08x,%08x,%08x,%08x,%08x)\n",
            lpHMDeviceName,
-           pHMHandleData->hWinHandle,
+           pHMHandleData->hHMHandle,
            lpBuffer,
            nNumberOfBytesToWrite,
            lpNumberOfBytesWritten,
@@ -312,7 +312,7 @@ DWORD  HMDeviceConsoleInClass::_DeviceRequest (PHMHANDLEDATA pHMHandleData,
 #ifdef DEBUG_LOCAL
   WriteLog("KERNEL32/CONSOLE:HMDeviceConsoleInClass:_DeviceRequest %s(%08x,%08x,%08x,%08x,%08x,%08x) unknown request\n",
            lpHMDeviceName,
-           pHMHandleData->hWinHandle,
+           pHMHandleData->hHMHandle,
            ulRequestCode,
            arg1,
            arg2,
