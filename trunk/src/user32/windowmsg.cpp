@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.34 2002-06-15 17:17:17 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.35 2002-07-31 16:51:00 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -828,46 +828,100 @@ DWORD WIN32API MsgWaitForMultipleObjects(DWORD nCount, LPHANDLE pHandles, BOOL f
  DWORD curtime, endtime, ret;
  MSG msg;
 
-  dprintf(("MsgWaitForMultipleObjects %x %x %d %d %x", nCount, pHandles, fWaitAll, dwMilliseconds, dwWakeMask));
-  // @@@PH this is a temporary bugfix for WINFILE.EXE
-  if (nCount == 0)
-  {
-        if(dwMilliseconds == 0) {
-                if(GetQueueStatus(dwWakeMask) == 0) {
-                        return WAIT_TIMEOUT;
-                }
-                return WAIT_OBJECT_0;
-        }
-        //SvL: Check time, wait for any message, check msg type and determine if
-        //     we have to return
-        //TODO: Timeout isn't handled correctly (can return too late)
+    //TODO: Functions such as GetMessage, PeekMessage and WaitMessage can mark messages as old
+    //      MsgWaitForMultipleObjects shouldn't return until new input has arrived (MSDN)
+    //      We are not 100% correct with this implementation. GetQueueStatus checks all messages
+    //      in the queue.
+    //      Very obscure behaviour, so it's unlikely any application depends on it
+    dprintf(("MsgWaitForMultipleObjects %x %x %d %d %x", nCount, pHandles, fWaitAll, dwMilliseconds, dwWakeMask));
+    if(fWaitAll) 
+    {   //wait for message arrival first
         curtime = GetCurrentTime();
         endtime = curtime + dwMilliseconds;
         while(curtime < endtime || dwMilliseconds == INFINITE) {
-                if(OSLibWinWaitMessage() == FALSE) {
-                        dprintf(("OSLibWinWaitMessage returned FALSE!"));
-                        return WAIT_ABANDONED;
-                }
-                if(GetQueueStatus(dwWakeMask) != 0) {
-                        return WAIT_OBJECT_0;
-                }
-                //TODO: Ignoring all messages could be dangerous. But processing them,
-                //while the app doesn't expect any, isn't safe either.
-                if(PeekMessageA(&msg, NULL, 0, 0, PM_REMOVE)) 
-                {
-                    if (msg.message == WM_QUIT) {
-                         dprintf(("ERROR: MsgWaitForMultipleObjects call abandoned because WM_QUIT msg was received!!"));
-                         return WAIT_ABANDONED;
-                    }
-   
-                    /* otherwise dispatch it */
-                    DispatchMessageA(&msg);
-                }
-                curtime = GetCurrentTime();
+              if(OSLibWinWaitMessage() == FALSE) {
+                      dprintf(("OSLibWinWaitMessage returned FALSE!"));
+                      return WAIT_ABANDONED;
+              }
+              if(GetQueueStatus(dwWakeMask) != 0) {
+                      break;
+              }
+              //TODO: Ignoring all messages could be dangerous. But processing them,
+              //while the app doesn't expect any, isn't safe either.
+              if(PeekMessageA(&msg, NULL, 0, 0, PM_REMOVE)) 
+              {
+                  if (msg.message == WM_QUIT) {
+                       dprintf(("ERROR: MsgWaitForMultipleObjects call abandoned because WM_QUIT msg was received!!"));
+                       return WAIT_ABANDONED;
+                  }
+
+                  /* otherwise dispatch it */
+                  DispatchMessageA(&msg);
+              }
+              curtime = GetCurrentTime();
         }
-        return WAIT_TIMEOUT;
-  }
-  //Call handlemanager function as we need to translate handles (KERNEL32)
-  ret = HMMsgWaitForMultipleObjects(nCount,pHandles,fWaitAll,dwMilliseconds,dwWakeMask);
-  return ret;
+        if(dwMilliseconds != INFINITE && curtime > endtime) {
+            dprintf(("No messages found in specified time"));
+            return WAIT_TIMEOUT;
+        }
+        //ok, the right message has arrived, now try to grab all objects
+        ret = WaitForMultipleObjects(nCount, pHandles, fWaitAll, dwMilliseconds);
+        if(ret >= WAIT_OBJECT_0 + nCount) {
+            //failure
+            dprintf(("WaitForMultipleObjects failed with %d", ret));
+            return ret;
+        }
+        return ret;
+    }
+    if(dwMilliseconds == 0) {
+        //TODO: what has a higher priority; message presence or signalled object?
+        if(GetQueueStatus(dwWakeMask) == 0) {
+            if(nCount) {
+                return WaitForMultipleObjects(nCount, pHandles, fWaitAll, dwMilliseconds);
+            }
+            return WAIT_TIMEOUT;
+        }
+        return WAIT_OBJECT_0 + nCount;  //right message has arrived
+    }
+    //TODO: Timeout isn't handled correctly (can return too late)
+    curtime = GetCurrentTime();
+    endtime = curtime + dwMilliseconds;
+    while(curtime < endtime || dwMilliseconds == INFINITE) {
+        //check queue status for presence of requested message types
+        if(GetQueueStatus(dwWakeMask) != 0) {
+            dprintf(("Found message(s) we were looking for. Return success"));
+            return WAIT_OBJECT_0 + nCount;  //present, return success
+        }
+        //TODO: Ignoring all messages could be dangerous. But processing them,
+        //while the app doesn't expect any, isn't safe either.
+        if(PeekMessageA(&msg, NULL, 0, 0, PM_REMOVE)) 
+        {
+            if (msg.message == WM_QUIT) {
+                dprintf(("ERROR: MsgWaitForMultipleObjects call abandoned because WM_QUIT msg was received!!"));
+                return WAIT_ABANDONED;
+            }
+
+            /* otherwise dispatch it */
+            DispatchMessageA(&msg);
+        }
+        //check if any object is signalled (timeout 10ms)
+        ret = WaitForMultipleObjects(nCount, pHandles, fWaitAll, 10);
+        if(ret < WAIT_OBJECT_0 + nCount) {
+            //an object was signalled, return immediately
+            dprintf(("WaitForMultipleObjects success with %d", ret));
+            return ret;
+        }
+        else
+        if(ret != WAIT_TIMEOUT) {
+            //failure, abort
+            dprintf(("WaitForMultipleObjects failed with %d", ret));
+            return ret;
+        }
+        curtime = GetCurrentTime();
+    }
+    return WAIT_TIMEOUT;
+
+//  //Call handlemanager function as we need to translate handles (KERNEL32)
+//  ret = HMMsgWaitForMultipleObjects(nCount,pHandles,fWaitAll,dwMilliseconds,dwWakeMask);
+//  return ret;
 }
