@@ -1,4 +1,3 @@
-/* $Id: finddlg32.c,v 1.4 2001-09-05 12:12:01 bird Exp $ */
 /*
  *  Common Dialog Boxes interface (32 bit)
  *  Find/Replace
