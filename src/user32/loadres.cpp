@@ -1,4 +1,4 @@
-/* $Id: loadres.cpp,v 1.33 2000-11-09 18:15:18 sandervl Exp $ */
+/* $Id: loadres.cpp,v 1.34 2000-11-12 10:58:12 sandervl Exp $ */
 
 /*
  * Win32 resource API functions for OS/2
@@ -263,41 +263,57 @@ HANDLE LoadBitmapW(HINSTANCE hinst, LPCWSTR lpszName, int cxDesired, int cyDesir
         info = (BITMAPINFO *)((char *)info + sizeof(BITMAPFILEHEADER));
     }
 
-    if (info->bmiHeader.biSize == sizeof(BITMAPCOREHEADER)) {
-      size = sizeof(BITMAPINFOHEADER) +
-             (sizeof (RGBTRIPLE) << ((BITMAPCOREHEADER *)info)->bcBitCount);
-    } else
-      size = DIB_BitmapInfoSize(info, DIB_RGB_COLORS);
+    if (info->bmiHeader.biSize == sizeof(BITMAPCOREHEADER))
+    {//determine size of converted header
+         BITMAPCOREHEADER *core = (BITMAPCOREHEADER *)info;
+
+         int colors = 0;
+         if (core->bcBitCount <= 8) {
+                 colors = (1 << core->bcBitCount);
+         }
+         size =  sizeof(BITMAPINFOHEADER) + colors * sizeof(RGBQUAD);
+    }
+    else size = DIB_BitmapInfoSize(info, DIB_RGB_COLORS);
 
     if ((hFix = GlobalAlloc(0, size)) != NULL) fix_info = (BITMAPINFO *)GlobalLock(hFix);
-    if (fix_info) {
+    if (fix_info)
+    {
       BYTE pix;
 
-      if (info->bmiHeader.biSize == sizeof(BITMAPCOREHEADER)) {
-        ULONG colors;
-        ULONG *p, *q;
+      if (info->bmiHeader.biSize == sizeof(BITMAPCOREHEADER))
+      {//convert old bitmap header to new format
+            ULONG colors;
+            ULONG *p, *q;
 
-        memset (fix_info, 0, sizeof (BITMAPINFOHEADER));
-        fix_info->bmiHeader.biSize     = sizeof (BITMAPINFOHEADER);
-        fix_info->bmiHeader.biWidth    = ((BITMAPCOREHEADER *)info)->bcWidth;
-        fix_info->bmiHeader.biHeight   = ((BITMAPCOREHEADER *)info)->bcHeight;
-        fix_info->bmiHeader.biPlanes   = ((BITMAPCOREHEADER *)info)->bcPlanes;
-        fix_info->bmiHeader.biBitCount = ((BITMAPCOREHEADER *)info)->bcBitCount;
+            memset (fix_info, 0, sizeof (BITMAPINFOHEADER));
+            fix_info->bmiHeader.biSize     = sizeof (BITMAPINFOHEADER);
+            fix_info->bmiHeader.biWidth    = ((BITMAPCOREHEADER *)info)->bcWidth;
+            fix_info->bmiHeader.biHeight   = ((BITMAPCOREHEADER *)info)->bcHeight;
+            fix_info->bmiHeader.biPlanes   = ((BITMAPCOREHEADER *)info)->bcPlanes;
+            fix_info->bmiHeader.biBitCount = ((BITMAPCOREHEADER *)info)->bcBitCount;
 
-        p = (PULONG)((char *)info + sizeof(BITMAPCOREHEADER));
-        q = (PULONG)((char *)fix_info + sizeof(BITMAPINFOHEADER));
-        for (colors = 1 << fix_info->bmiHeader.biBitCount; colors > 0; colors--) {
-          *q = *p & 0x00FFFFFFUL;
-          q++;
-          p = (PULONG)((char *)p + sizeof (RGBTRIPLE));
-        }
-      } else
-        memcpy(fix_info, info, size);
+            if(fix_info->bmiHeader.biBitCount <= 8)
+            {
+                p = (PULONG)((char *)info + sizeof(BITMAPCOREHEADER));
+                q = (PULONG)((char *)fix_info + sizeof(BITMAPINFOHEADER));
+                //convert RGBTRIPLE to RGBQUAD
+                for (colors = 1 << fix_info->bmiHeader.biBitCount; colors > 0; colors--) {
+                    *q = *p & 0x00FFFFFFUL;
+                    q++;
+                    p = (PULONG)((char *)p + sizeof (RGBTRIPLE));
+                }
+            }
+      }
+      else {
+            memcpy(fix_info, info, size);
+      }
 
       size = DIB_BitmapInfoSize(info, DIB_RGB_COLORS);
+
       pix = *((LPBYTE)info + size);
       DIB_FixColorsToLoadflags(fix_info, fuLoad, pix);
-      if ((hdc = GetDC(0)) != 0) {
+      if ((hdc = GetDC(0)) != 0)
+      {
         char *bits = (char *)info + size;
         if (fuLoad & LR_CREATEDIBSECTION) {
           DIBSECTION dib;
@@ -306,21 +322,24 @@ HANDLE LoadBitmapW(HINSTANCE hinst, LPCWSTR lpszName, int cxDesired, int cyDesir
           SetDIBits(hdc, hbitmap, 0, dib.dsBm.bmHeight, bits, info,
                     DIB_RGB_COLORS);
         }
-        else {
-//        if(fix_info->bmiHeader.biBitCount == 1) {
-//              hbitmap = CreateBitmap(fix_info->bmiHeader.biWidth,
-//                                       fix_info->bmiHeader.biHeight,
-//                                       fix_info->bmiHeader.biPlanes,
-//                                       fix_info->bmiHeader.biBitCount,
-//                                       (PVOID)bits);
-//        }
-//        else {
-                hbitmap = CreateDIBitmap(hdc, &fix_info->bmiHeader, CBM_INIT,
-                                         bits, fix_info, DIB_RGB_COLORS );
-        if(hbitmap == 0) {
-            dprintf(("LoadBitmapW: CreateDIBitmap failed!!"));
-        }
-//        }
+        else
+        {
+#if 0
+          if(fix_info->bmiHeader.biBitCount == 1) {
+              hbitmap = CreateBitmap(fix_info->bmiHeader.biWidth,
+                                     fix_info->bmiHeader.biHeight,
+                                     fix_info->bmiHeader.biPlanes,
+                                     fix_info->bmiHeader.biBitCount,
+                                     (PVOID)bits);
+          }
+          else {
+#endif
+              hbitmap = CreateDIBitmap(hdc, &fix_info->bmiHeader, CBM_INIT,
+                                       bits, fix_info, DIB_RGB_COLORS );
+//          }
+          if(hbitmap == 0) {
+              dprintf(("LoadBitmapW: CreateDIBitmap failed!!"));
+          }
         }
         ReleaseDC( 0, hdc );
       }
