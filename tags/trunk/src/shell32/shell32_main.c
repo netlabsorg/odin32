@@ -1,4 +1,4 @@
-/* $Id: shell32_main.c,v 1.1 2000-08-30 13:52:54 sandervl Exp $ */
+/* $Id: shell32_main.c,v 1.2 2001-04-28 13:33:45 sandervl Exp $ */
 /*
  * 				Shell basics
  *
@@ -88,19 +88,6 @@ LPWSTR* WINAPI CommandLineToArgvW(LPWSTR cmdline,LPDWORD numargs)
 	return argv;
 }
 
-/*************************************************************************
- * Control_RunDLL			[SHELL32.12]
- *
- * Wild speculation in the following!
- *
- * http://premium.microsoft.com/msdn/library/techart/msdn193.htm
- */
-
-void WINAPI Control_RunDLL( HWND hwnd, LPCVOID code, LPCSTR cmd, DWORD arg4 )
-{
-    FIXME("(0x%08x, %p, %s, 0x%08lx): stub\n", hwnd, code,
-          debugstr_a(cmd), arg4);
-}
 
 /*************************************************************************
  * SHGetFileInfoA			[SHELL32.@]
@@ -129,6 +116,65 @@ DWORD WINAPI SHGetFileInfoA(LPCSTR path,DWORD dwFileAttributes,
 	psfi->szDisplayName[0] = '\0';
 	psfi->szTypeName[0] = '\0';
 	psfi->iIcon = 0;
+
+	if (flags & SHGFI_EXETYPE) {
+	  BOOL status = FALSE;
+	  HANDLE hfile;
+	  DWORD BinaryType;
+	  IMAGE_DOS_HEADER mz_header;
+	  IMAGE_NT_HEADERS nt;
+	  DWORD len;
+	  char magic[4];
+
+	  if (flags != SHGFI_EXETYPE) return 0;
+
+	  status = GetBinaryTypeA (path, &BinaryType);
+	  if (!status) return 0;
+	  if ((BinaryType == SCS_DOS_BINARY)
+		|| (BinaryType == SCS_PIF_BINARY)) return 0x4d5a;
+
+	  hfile = CreateFileA( path, GENERIC_READ, FILE_SHARE_READ,
+		NULL, OPEN_EXISTING, 0, 0 );
+	  if ( hfile == INVALID_HANDLE_VALUE ) return 0;
+
+	/* The next section is adapted from MODULE_GetBinaryType, as we need
+	 * to examine the image header to get OS and version information. We
+	 * know from calling GetBinaryTypeA that the image is valid and either
+	 * an NE or PE, so much error handling can be omitted.
+	 * Seek to the start of the file and read the header information.
+	 */
+
+	  SetFilePointer( hfile, 0, NULL, SEEK_SET );  
+	  ReadFile( hfile, &mz_header, sizeof(mz_header), &len, NULL );
+
+         SetFilePointer( hfile, mz_header.e_lfanew, NULL, SEEK_SET );
+         ReadFile( hfile, magic, sizeof(magic), &len, NULL );
+         if ( *(DWORD*)magic      == IMAGE_NT_SIGNATURE )
+         {
+             SetFilePointer( hfile, mz_header.e_lfanew, NULL, SEEK_SET ); 
+             ReadFile( hfile, &nt, sizeof(nt), &len, NULL );
+	      CloseHandle( hfile );
+	      if (nt.OptionalHeader.Subsystem == IMAGE_SUBSYSTEM_WINDOWS_GUI) {
+                 return IMAGE_NT_SIGNATURE
+			| (nt.OptionalHeader.MajorSubsystemVersion << 24)
+			| (nt.OptionalHeader.MinorSubsystemVersion << 16);
+	      }
+	      return IMAGE_NT_SIGNATURE;
+	  }
+         else if ( *(WORD*)magic == IMAGE_OS2_SIGNATURE )
+         {
+             IMAGE_OS2_HEADER ne;
+             SetFilePointer( hfile, mz_header.e_lfanew, NULL, SEEK_SET ); 
+             ReadFile( hfile, &ne, sizeof(ne), &len, NULL );
+	      CloseHandle( hfile );
+             if (ne.ne_exetyp == 2) return IMAGE_OS2_SIGNATURE
+			| (ne.ne_expver << 16);
+	      return 0;
+	  }
+	  CloseHandle( hfile );
+	  return 0;
+      }
+
 	
 	/* translate the path into a pidl only when SHGFI_USEFILEATTRIBUTES in not specified 
 	   the pidl functions fail on not existing file names */
@@ -258,11 +304,7 @@ DWORD WINAPI SHGetFileInfoA(LPCSTR path,DWORD dwFileAttributes,
 
 	/* icon handle */
 	if (SUCCEEDED(hr) && (flags & SHGFI_ICON))
-	  psfi->hIcon = pImageList_GetIcon((flags & SHGFI_LARGEICON) ? ShellBigIconList:ShellSmallIconList, psfi->iIcon, ILD_NORMAL);
-
-
-	if (flags & SHGFI_EXETYPE)
-	  FIXME("type of executable, stub\n");
+	  psfi->hIcon = ImageList_GetIcon((flags & SHGFI_LARGEICON) ? ShellBigIconList:ShellSmallIconList, psfi->iIcon, ILD_NORMAL);
 
 	if (flags & (SHGFI_UNKNOWN1 | SHGFI_UNKNOWN2 | SHGFI_UNKNOWN3))
 	  FIXME("unknown attribute!\n");
@@ -279,8 +321,7 @@ DWORD WINAPI SHGetFileInfoA(LPCSTR path,DWORD dwFileAttributes,
 		psfi->hIcon, psfi->iIcon, psfi->dwAttributes, psfi->szDisplayName, psfi->szTypeName, ret);
 #endif
 	return ret;
-}
-
+} 
 /*************************************************************************
  * SHGetFileInfoW			[SHELL32.@]
  */
@@ -288,9 +329,26 @@ DWORD WINAPI SHGetFileInfoA(LPCSTR path,DWORD dwFileAttributes,
 DWORD WINAPI SHGetFileInfoW(LPCWSTR path,DWORD dwFileAttributes,
                               SHFILEINFOW *psfi, UINT sizeofpsfi,
                               UINT flags )
-{	FIXME("(%s,0x%lx,%p,0x%x,0x%x)\n",
-	      debugstr_w(path),dwFileAttributes,psfi,sizeofpsfi,flags);
-	return 0;
+{
+	INT len;
+	LPSTR temppath;
+	DWORD ret;
+	SHFILEINFOA temppsfi;
+
+	len = WideCharToMultiByte(CP_ACP, 0, path, -1, NULL, 0, NULL, NULL);
+	temppath = HeapAlloc(GetProcessHeap(), 0, len);
+	WideCharToMultiByte(CP_ACP, 0, path, -1, temppath, len, NULL, NULL);
+
+        WideCharToMultiByte(CP_ACP, 0, psfi->szDisplayName, -1, temppsfi.szDisplayName,
+                            sizeof(temppsfi.szDisplayName), NULL, NULL);
+        WideCharToMultiByte(CP_ACP, 0, psfi->szTypeName, -1, temppsfi.szTypeName,
+                            sizeof(temppsfi.szTypeName), NULL, NULL);
+
+	ret = SHGetFileInfoA(temppath, dwFileAttributes, &temppsfi, sizeof(temppsfi), flags);
+
+	HeapFree(GetProcessHeap(), 0, temppath);
+	
+	return ret;
 }
 
 /*************************************************************************
@@ -807,36 +865,16 @@ HRESULT WINAPI SHELL32_DllGetVersion (DLLVERSIONINFO *pdvi)
  * all are once per process
  *
  */
-void	(* WINAPI  pDLLInitComctl)(LPVOID);
-INT	(* WINAPI  pImageList_AddIcon) (HIMAGELIST himl, HICON hIcon);
-INT	(* WINAPI  pImageList_ReplaceIcon) (HIMAGELIST, INT, HICON);
-HIMAGELIST (* WINAPI  pImageList_Create) (INT,INT,UINT,INT,INT);
-BOOL	(* WINAPI  pImageList_Draw) (HIMAGELIST himl, int i, HDC hdcDest, int x, int y, UINT fStyle);
-HICON	(* WINAPI  pImageList_GetIcon) (HIMAGELIST, INT, UINT);
-INT	(* WINAPI  pImageList_GetImageCount)(HIMAGELIST);
-COLORREF (* WINAPI pImageList_SetBkColor)(HIMAGELIST, COLORREF);
+void	(* WINAPI pDLLInitComctl)(LPVOID);
 
 LPVOID	(* WINAPI  pCOMCTL32_Alloc) (INT);  
 BOOL	(* WINAPI  pCOMCTL32_Free) (LPVOID);  
-
-HDPA	(* WINAPI  pDPA_Create) (INT);  
-INT	(* WINAPI  pDPA_InsertPtr) (const HDPA, INT, LPVOID); 
-BOOL	(* WINAPI  pDPA_Sort) (const HDPA, PFNDPACOMPARE, LPARAM); 
-LPVOID	(* WINAPI  pDPA_GetPtr) (const HDPA, INT);   
-BOOL	(* WINAPI  pDPA_Destroy) (const HDPA); 
-INT	(* WINAPI pDPA_Search) (const HDPA, LPVOID, INT, PFNDPACOMPARE, LPARAM, UINT);
-LPVOID	(* WINAPI pDPA_DeletePtr) (const HDPA hdpa, INT i);
-
-/* user32 */
-HICON (* WINAPI pLookupIconIdFromDirectoryEx)(LPBYTE dir, BOOL bIcon, INT width, INT height, UINT cFlag);
-HICON (* WINAPI pCreateIconFromResourceEx)(LPBYTE bits,UINT cbSize, BOOL bIcon, DWORD dwVersion, INT width, INT height,UINT cFlag);
 
 static HINSTANCE	hComctl32;
 static INT		shell32_RefCount = 0;
 
 LONG		shell32_ObjCount = 0;
 HINSTANCE	shell32_hInstance = 0; 
-HMODULE		huser32 = 0;
 HIMAGELIST	ShellSmallIconList = 0;
 HIMAGELIST	ShellBigIconList = 0;
 
@@ -860,42 +898,20 @@ BOOL WINAPI Shell32LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 
 	    shell32_hInstance = hinstDLL;
 	    hComctl32 = GetModuleHandleA("COMCTL32.DLL");	
-	    if(!huser32) huser32 = GetModuleHandleA("USER32.DLL");
 	    DisableThreadLibraryCalls(shell32_hInstance);
 
-	    if (!hComctl32 || !huser32)
+	    if (!hComctl32)
 	    {
 	      ERR("P A N I C SHELL32 loading failed\n");
 	      return FALSE;
 	    }
 
 	    /* comctl32 */
-	    pDLLInitComctl=(void*)GetProcAddress(hComctl32,"InitCommonControlsEx");
-	    pImageList_Create=(void*)GetProcAddress(hComctl32,"ImageList_Create");
-	    pImageList_AddIcon=(void*)GetProcAddress(hComctl32,"ImageList_AddIcon");
-	    pImageList_ReplaceIcon=(void*)GetProcAddress(hComctl32,"ImageList_ReplaceIcon");
-	    pImageList_GetIcon=(void*)GetProcAddress(hComctl32,"ImageList_GetIcon");
-	    pImageList_GetImageCount=(void*)GetProcAddress(hComctl32,"ImageList_GetImageCount");
-	    pImageList_Draw=(void*)GetProcAddress(hComctl32,"ImageList_Draw");
-	    pImageList_SetBkColor=(void*)GetProcAddress(hComctl32,"ImageList_SetBkColor");
 	    pCOMCTL32_Alloc=(void*)GetProcAddress(hComctl32, (LPCSTR)71L);
 	    pCOMCTL32_Free=(void*)GetProcAddress(hComctl32, (LPCSTR)73L);
-	    pDPA_Create=(void*)GetProcAddress(hComctl32, (LPCSTR)328L);
-	    pDPA_Destroy=(void*)GetProcAddress(hComctl32, (LPCSTR)329L);
-	    pDPA_GetPtr=(void*)GetProcAddress(hComctl32, (LPCSTR)332L);
-	    pDPA_InsertPtr=(void*)GetProcAddress(hComctl32, (LPCSTR)334L);
-	    pDPA_DeletePtr=(void*)GetProcAddress(hComctl32, (LPCSTR)336L);
-	    pDPA_Sort=(void*)GetProcAddress(hComctl32, (LPCSTR)338L);
-	    pDPA_Search=(void*)GetProcAddress(hComctl32, (LPCSTR)339L);
-	    /* user32 */
-	    pLookupIconIdFromDirectoryEx=(void*)GetProcAddress(huser32,"LookupIconIdFromDirectoryEx");
-	    pCreateIconFromResourceEx=(void*)GetProcAddress(huser32,"CreateIconFromResourceEx");
 
 	    /* initialize the common controls */
-	    if (pDLLInitComctl)
-	    {
-	      pDLLInitComctl(NULL);
-	    }
+            InitCommonControlsEx(NULL);
 
 	    SIC_Initialize();
 	    SYSTRAY_Init();

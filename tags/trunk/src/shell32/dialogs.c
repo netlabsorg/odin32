@@ -1,4 +1,4 @@
-/* $Id: dialogs.c,v 1.1 2000-08-30 13:52:51 sandervl Exp $ */
+/* $Id: dialogs.c,v 1.2 2001-04-28 13:33:43 sandervl Exp $ */
 /*
  *	common shell dialogs
  */
@@ -61,7 +61,11 @@ void WINAPI RunFileDlg(
 void WINAPI ExitWindowsDialog (HWND hWndOwner)
 {
 	TRACE("(0x%08x)\n", hWndOwner);
+#ifdef __WIN32OS2__
+	if (MessageBoxA( hWndOwner, "Do you want to exit Odin?", "Shutdown", MB_YESNO|MB_ICONQUESTION) == IDOK)
+#else
 	if (MessageBoxA( hWndOwner, "Do you want to exit WINE?", "Shutdown", MB_YESNO|MB_ICONQUESTION) == IDOK)
+#endif
 	{
 	  SendMessageA ( hWndOwner, WM_QUIT, 0, 0);
 	}

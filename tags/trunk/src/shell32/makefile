@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.32 2000-12-02 23:57:22 bird Exp $
+# $Id: makefile,v 1.33 2001-04-28 13:33:44 sandervl Exp $
 
 #
 # Odin32 API
@@ -53,6 +53,7 @@ $(OBJDIR)\shell.obj \
 $(OBJDIR)\shv_bg_cmenu.obj \
 $(OBJDIR)\shv_item_cmenu.obj \
 $(OBJDIR)\unknown.obj \
+$(OBJDIR)\control.obj \
 $(OBJDIR)\misc.obj \
 $(OBJDIR)\she.obj \
 $(OBJDIR)\sh.obj \

@@ -1,4 +1,3 @@
-/* $Id: shpolicy.c,v 1.1 2000-08-30 13:53:00 sandervl Exp $ */
 /*
  * shpolicy.c - Data for shell/system policies.
  *
@@ -13,10 +12,6 @@
  * 
  * Up to date as of SHELL32 v4.72 (Win98, Win95 with MSIE 5)
  */
-#ifdef __WIN32OS2__
-#define ICOM_CINTERFACE 1
-#include <odin.h>
-#endif
 
 #include <stdlib.h>
 #include <string.h>

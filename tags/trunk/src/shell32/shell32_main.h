@@ -1,4 +1,4 @@
-/* $Id: shell32_main.h,v 1.8 2001-04-23 10:47:23 sandervl Exp $ */
+/* $Id: shell32_main.h,v 1.9 2001-04-28 13:33:45 sandervl Exp $ */
 /*
  * 	internal Shell32 Library definitions
  */
@@ -16,6 +16,7 @@
 #include "wine/obj_shellview.h"
 #include "wine/obj_shelllink.h"
 #include "wine/obj_extracticon.h"
+#include "wine/obj_oleview.h"
 #ifdef __WIN32OS2__
 #include <heapstring.h>
 #endif
@@ -34,29 +35,21 @@ extern HDPA		sic_hdpa;
 /*******************************************
 * pointer to functions dynamically loaded
 */
-extern void	(* WINAPI pDLLInitComctl)(LPVOID);
-extern INT	(* WINAPI pImageList_AddIcon) (HIMAGELIST himl, HICON hIcon);
-extern INT	(* WINAPI pImageList_ReplaceIcon) (HIMAGELIST, INT, HICON);
-extern HIMAGELIST (* WINAPI pImageList_Create) (INT,INT,UINT,INT,INT);
-extern BOOL	(* WINAPI pImageList_Draw) (HIMAGELIST himl, int i, HDC hdcDest, int x, int y, UINT fStyle);
-extern HICON	(* WINAPI pImageList_GetIcon) (HIMAGELIST, INT, UINT);
-extern INT	(* WINAPI pImageList_GetImageCount)(HIMAGELIST);
-extern COLORREF (* WINAPI pImageList_SetBkColor)(HIMAGELIST, COLORREF);
-
 extern LPVOID	(* WINAPI pCOMCTL32_Alloc) (INT);  
 extern BOOL	(* WINAPI pCOMCTL32_Free) (LPVOID);  
 
-extern HDPA	(* WINAPI pDPA_Create) (INT);  
-extern INT	(* WINAPI pDPA_InsertPtr) (const HDPA, INT, LPVOID); 
-extern BOOL	(* WINAPI pDPA_Sort) (const HDPA, PFNDPACOMPARE, LPARAM); 
-extern LPVOID	(* WINAPI pDPA_GetPtr) (const HDPA, INT);   
-extern BOOL	(* WINAPI pDPA_Destroy) (const HDPA); 
-extern INT	(* WINAPI pDPA_Search) (const HDPA, LPVOID, INT, PFNDPACOMPARE, LPARAM, UINT);
-extern LPVOID	(* WINAPI pDPA_DeletePtr) (const HDPA hdpa, INT i);
+#define pDPA_Create	DPA_Create
+#define pDPA_InsertPtr  DPA_InsertPtr
+#define pDPA_Sort       DPA_Sort
+#define pDPA_GetPtr     DPA_GetPtr
+#define pDPA_Destroy    DPA_Destroy
+#define pDPA_Search     DPA_Search
+#define pDPA_DeletePtr  DPA_DeletePtr
+
 #define pDPA_GetPtrCount(hdpa)  (*(INT*)(hdpa))   
 
-extern HICON (* WINAPI pLookupIconIdFromDirectoryEx)(LPBYTE dir, BOOL bIcon, INT width, INT height, UINT cFlag);
-extern HICON (* WINAPI pCreateIconFromResourceEx)(LPBYTE bits,UINT cbSize, BOOL bIcon, DWORD dwVersion, INT width, INT height,UINT cFlag);
+#define pLookupIconIdFromDirectoryEx LookupIconIdFromDirectoryEx
+#define pCreateIconFromResourceEx    CreateIconFromResourceEx
 
 /* ole2 */
 /*
@@ -67,10 +60,6 @@ extern HRESULT (* WINAPI pRegisterDragDrop)(HWND hwnd, IDropTarget* pDropTarget)
 extern HRESULT (* WINAPI pRevokeDragDrop)(HWND hwnd);
 */
 BOOL WINAPI Shell_GetImageList(HIMAGELIST * lpBigList, HIMAGELIST * lpSmallList);
-
-HRESULT WINAPI StrRetToStrNA (LPVOID dest, DWORD len, LPSTRRET src, LPITEMIDLIST pidl);
-HRESULT WINAPI StrRetToStrNW (LPVOID dest, DWORD len, LPSTRRET src, LPITEMIDLIST pidl);
-HRESULT WINAPI StrRetToStrN (LPVOID dest, DWORD len, LPSTRRET src, LPITEMIDLIST pidl);
 
 /* Iconcache */
 #define INVALID_INDEX -1

@@ -1,4 +1,4 @@
-; $Id: shell32.def,v 1.34 2000-12-16 22:53:43 bird Exp $
+; $Id: shell32.def,v 1.35 2001-04-28 13:33:45 sandervl Exp $
 
 ; Based on Windows 95
 LIBRARY SHELL32 INITINSTANCE
@@ -79,8 +79,8 @@ EXPORTS
     SHCreateDefClassObject            = _SHCreateDefClassObject@20            @70
     Shell_GetImageList                = _Shell_GetImageList@8                 @71
     Shell_GetCachedImageIndex         = _Shell_GetCachedImageIndexAW@12       @72
-    Shell_GetCachedImageIndexW        = _Shell_GetCachedImageIndexW@12
-    Shell_GetCachedImageIndexA        = _Shell_GetCachedImageIndexA@12
+    Shell_GetCachedImageIndexW        = _Shell_GetCachedImageIndexW@12        @1572
+    Shell_GetCachedImageIndexA        = _Shell_GetCachedImageIndexA@12        @1573
     SHShellFolderView_Message         = _SHShellFolderView_Message@12         @73
     SHCreateStdEnumFmtEtc             = _SHCreateStdEnumFmtEtc@12             @74
     PathYetAnotherMakeUniqueName      = _PathYetAnotherMakeUniqueNameAW@16    @75
@@ -175,10 +175,10 @@ EXPORTS
     Win32DeleteFile                   = _Win32DeleteFile@4                    @164
     SHCreateDirectory                 = _SHCreateDirectory@8                  @165
 ;   CallCPLEntry16                    = _CallCPLEntry16@?                     @166
-;   SHAddFromPropSheetExtArray        = _SHAddFromPropSheetExtArray@?         @167
-;   SHCreatePropSheetExtArray         = _SHCreatePropSheetExtArray@?          @168
-;   SHDestroyPropSheetExtArray        = _SHDestroyPropSheetExtArray@?         @169
-;   SHReplaceFromPropSheetExtArray    = _SHReplaceFromPropSheetExtArray@?     @170
+    SHAddFromPropSheetExtArray        = _SHAddFromPropSheetExtArray@12        @167
+    SHCreatePropSheetExtArray         = _SHCreatePropSheetExtArray@12         @168
+    SHDestroyPropSheetExtArray        = _SHDestroyPropSheetExtArray@4         @169
+    SHReplaceFromPropSheetExtArray    = _SHReplaceFromPropSheetExtArray@16    @170
     PathCleanupSpec                   = _PathCleanupSpecAW@8                  @171
 ;   SHCreateLinks                     = _SHCreateLinks@?                      @172
     SHValidateUNC                     = _SHValidateUNC@12                     @173
@@ -319,19 +319,19 @@ EXPORTS
     StrCmpNW                          = _StrCmpNW@12                           @308
     StrCpyNA                          = _lstrcpynA@12                         @309
     StrCpyNW                          = _lstrcpynW@12                         @310
-;   StrNCmpA                          = _StrNCmpA@?                           @311
-;   StrNCmpIA                         = _StrNCmpIA@?                          @312
-;   StrNCmpIW                         = _StrNCmpIW@?                          @313
-;   StrNCmpW                          = _StrNCmpW@?                           @314
+    StrNCmpA                          = _StrCmpNA@12                          @311
+    StrNCmpIA                         = _StrCmpNIA@12                         @312
+    StrNCmpIW                         = _StrCmpNIW@12                         @313
+    StrNCmpW                          = _StrCmpNW@12                          @314
     StrNCpyA                          = _lstrcpynA@12                         @315
     StrNCpyW                          = _lstrcpynW@12                         @316
     StrRChrA                          = _StrRChrA@12                          @317
-;   StrRChrIA                         = _StrRChrIA@?                          @318
-;   StrRChrIW                         = _StrRChrIW@?                          @319
+;    StrRChrIA                         = _StrRChrIA@8                          @318
+;    StrRChrIW                         = _StrRChrIW@8                          @319
     StrRChrW                          = _StrRChrW@12                          @320
 ;   StrRStrA                          = _StrRStrA@?                           @321
-;   StrRStrIA                         = _StrRStrIA@?                          @322
-;   StrRStrIW                         = _StrRStrIW@?                          @323
+;    StrRStrIA                         = _StrRStrIA@8                          @322
+;    StrRStrIW                         = _StrRStrIW@8                          @323
 ;   StrRStrW                          = _StrRStrW@?                           @324
     StrStrA                           = _StrStrA@8                            @325
     StrStrIA                          = _StrStrIA@8                           @326
@@ -348,7 +348,7 @@ EXPORTS
     SHRegDeleteKeyW                   = _SHRegDeleteKeyW@8                    @512
     SHRegDeleteKeyA                   = _SHRegDeleteKeyA@8                    @513 ;?
     SHAllocShared                     = _SHAllocShared@12                     @520
-    SHInitRestricted                  = _SHInitRestricted@8
+    SHInitRestricted                  = _SHInitRestricted@8                   @1521
     SHLockShared                      = _SHLockShared@8                       @521
     SHUnlockShared                    = _SHUnlockShared@4                     @522
     SHFreeShared                      = _SHFreeShared@8                       @523
@@ -376,7 +376,7 @@ EXPORTS
 ;
     SHGetSpecialFolderPathA           = _SHGetSpecialFolderPathA@16           @690
 
-    SHGetSettings                     = _SHGetSettings@12                     @691
+    SHGetSettings                     = _SHGetSettings@8                      @691
 
 ;
 ; version 5.00 (Win2K)
@@ -389,6 +389,7 @@ EXPORTS
 ;   FOOBAR1217                        = _FOOBAR1217@?                         @1217
 
     DllGetVersion                     = _SHELL32_DllGetVersion@4              @1220
+    DllCanUnloadNow                   = _SHELL32_DllCanUnloadNow@0            @1221
 
     _StrFormatByteSizeA@12                @1041
     _StrFormatByteSizeW@12                @1042

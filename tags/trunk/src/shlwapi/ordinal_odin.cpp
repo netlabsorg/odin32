@@ -1,4 +1,4 @@
-/* $Id: ordinal.cpp,v 1.5 2000-08-24 09:32:42 sandervl Exp $ */
+/* $Id: ordinal_odin.cpp,v 1.1 2001-04-28 13:32:37 sandervl Exp $ */
 
 /*
  * Win32 Lightweight SHELL32 for OS/2
@@ -688,49 +688,6 @@ ODINFUNCTION2(DWORD,SHLWAPI_22,
 }
 
 
-/*****************************************************************************
- * Name      : SHLWAPI_23
- * Purpose   :
- * Parameters:
- * Variables :
- * Result    : returns strlen(str)
- * Remark    : converts a guid to a string
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
- *****************************************************************************/
-
-ODINFUNCTION3(DWORD,  SHLWAPI_23,
-              REFGUID,guid,  /* [in]  clsid */
-              LPSTR,  str,     /* [out] buffer */
-              INT,    cmax) /* [in]  size of buffer */
-{
-    char xguid[80];
-
-    TRACE("(%s %p 0x%08x)stub\n", debugstr_guid(guid), str, cmax);
-
-    if (WINE_StringFromCLSID(guid,xguid)) return 0;
-    if (strlen(xguid)>=cmax) return 0;
-    strcpy(str,xguid);
-    return strlen(xguid) + 1;
-}
-
-
-/*************************************************************************
-*      SHLWAPI_24  [SHLWAPI.24]
-*
-* NOTES
-*   converts a guid to a string
-*   returns strlen(str)
-*/
-ODINFUNCTION3(DWORD,   SHLWAPI_24,
-              REFGUID, guid,   /* [in]  clsid */
-              LPWSTR,  str,    /* [out] buffer */
-              INT,     cmax)   /* [in]  size of buffer */
-{
-  TRACE("(%s %p 0x%08x)stub\n", debugstr_guid(guid), str, cmax);
-  return StringFromGUID2(guid, str, cmax);
-}
 
 
 /*****************************************************************************
@@ -754,51 +711,8 @@ ODINFUNCTION1(DWORD,SHLWAPI_28,
 }
 
 
-/*****************************************************************************
- * Name      : SHLWAPI_30
- * Purpose   : Check for whitespace in ascii and unicode ?
- * Parameters:
- * Variables :
- * Result    :
- * Remark    :
- * Status    : COMPLETELY IMPLEMENTED ? UNTESTED
- *
- * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
- *****************************************************************************/
-
-ODINFUNCTION1(DWORD,SHLWAPI_30,
-              WORD, ch)
-{
-  if ( (ch == 0x09)   || // tab
-       (ch == 0x20)   || // space
-       (ch == 0x3000) ||
-       (ch == 0xFEFF) )
-    return 1;
-  else
-    return 0;
-}
 
 
-
-/*****************************************************************************
- * Name      : DWORD SHLWAPI_156
- * Purpose   : Case-sensitive wide string compare
- * Parameters: LPSTR lpStr1
- *             LPSTR lpStr2
- * Variables :
- * Result    : case-sensitive comparsion result between the two strings
- * Remark    : SHLWAPI.158
- * Status    : COMPLETELY IMPLEMENTED UNTESTED
- *
- * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
- *****************************************************************************/
-
-ODINFUNCTION2(DWORD,  SHLWAPI_156,
-              LPWSTR, str1,   /* "shell32.dll" */
-              LPWSTR, str2)   /* "shell32.dll" */
-{
-  return lstrcmpW(str1,str2);
-}
 
 
 /*****************************************************************************
@@ -869,51 +783,6 @@ ODINFUNCTION2(DWORD,  SHLWAPI_160,
 
 
 
-/*************************************************************************
-*      SHLWAPI_169 [SHLWAPI]
-*/
-ODINFUNCTION1(DWORD,       SHLWAPI_169,
-              IUnknown **, lplpUnknown)
-{
-  IUnknown *lpUnknown;
-
-  if (lplpUnknown == NULL)
-    return 0;
-
-  lpUnknown = *lplpUnknown;
-  if (lpUnknown == NULL)
-    return 0;
-
-  *lplpUnknown = NULL; // kill object pointer
-
-  // and still call the object's release method
-  return IUnknown_Release(lpUnknown);
-}
-
-
-/*****************************************************************************
- * Name      : LPSTR SHLWAPI_170
- * Purpose   : verify if current string position is "//" or not
- *             skip "//" ...
- * Parameters: LPSTR lpStr
- * Variables :
- * Result    : lpStr + 2 or NULL
- * Remark    : SHLWAPI.170
- * Status    : COMPLETELY IMPLEMENTED UNTESTED
- *
- * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
- *****************************************************************************/
-
-ODINFUNCTION1(LPSTR, SHLWAPI_170,
-              LPSTR, lpStr)
-{
-  if ( (lpStr      != NULL) &&
-       (*lpStr     == '/' ) &&
-       (*(lpStr+1) == '/' ) )
-    return lpStr+2;
-  else
-    return lpStr;
-}
 
 
 /*****************************************************************************
@@ -1042,21 +911,6 @@ ODINFUNCTION6(DWORD,  SHLWAPI_191,
 
 
 
-/*************************************************************************
-*      SHLWAPI_193 [SHLWAPI]
-* query current color depth
-*/
-ODINFUNCTION0(DWORD, SHLWAPI_193)
-{
-  HDC hdc;
-  DWORD ret;
-
-  hdc = GetDC(0);
-  ret = GetDeviceCaps(hdc, BITSPIXEL) * GetDeviceCaps(hdc, PLANES);
-  ReleaseDC(0, hdc);
-  return ret;
-}
-
 
 /*****************************************************************************
  * Name      : BOOL SHLWAPI_197
@@ -1107,84 +961,7 @@ ODINFUNCTION4(HRESULT, SHLWAPI_219,
 }
 
 
-/*************************************************************************
-*      SHLWAPI_222 [SHLWAPI]
-*
-* NOTES
-*  securityattributes missing
-*/
-ODINFUNCTION1(HANDLE,  SHLWAPI_222,
-              LPCLSID, guid)
-{
-  char lpstrName[80];
-  strcpy( lpstrName,"shell.");
-  WINE_StringFromCLSID(guid, lpstrName + strlen(lpstrName));
 
-  FIXME("(%s) stub\n", lpstrName);
-  return CreateSemaphoreA(NULL,0, 0x7fffffff, lpstrName);
-}
-
-
-/*************************************************************************
-*      SHLWAPI_223 [SHLWAPI]
-*
-* NOTES
-*  function guessed
-*/
-ODINFUNCTION1(DWORD,  SHLWAPI_223,
-              HANDLE, handle)
-{
-  LONG oldCount;
-
-  FIXME("(0x%08x) stub\n",handle);
-
-  ReleaseSemaphore( handle, 1, &oldCount);
-  WaitForSingleObject( handle, 0 );
-  return 0;
-}
-
-
-/*************************************************************************
-*      SHLWAPI_237 [SHLWAPI]
-* Purpose: verify a WNDCLASSW structure
-*/
-ODINFUNCTION1(DWORD,       SHLWAPI_237,
-              LPWNDCLASSW, lpWndClass)
-{
-  WNDCLASSW wndClass;
-
-  if (GetClassInfoW(lpWndClass->hInstance,
-                    (LPWSTR)lpWndClass->lpszClassName,
-                    &wndClass) == TRUE)
-    return 1;
-  else
-    return 0;
-}
-
-
-/*****************************************************************************
- * Name      : SHLWAPI_240
- * Purpose   : universal window procedure
- * Parameters:
- * Variables :
- * Result    :
- * Remark    : SHLWAPI.240
- * Status    : COMPLETELY IMPLEMENTED ? UNTESTED
- *
- * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
- *****************************************************************************/
-
-ODINFUNCTION4(DWORD,  SHLWAPI_240,
-              HWND,   hwnd,
-              UINT,   Msg,
-              WPARAM, wParam,
-              LPARAM, lParam)
-{
-  if (IsWindowUnicode(hwnd))
-    return DefWindowProcW(hwnd, Msg, wParam, lParam);
-  else
-    return DefWindowProcA(hwnd, Msg, wParam, lParam);
-}
 
 
 /*************************************************************************
@@ -1274,17 +1051,6 @@ ODINFUNCTION0(DWORD, SHLWAPI_276)
 
 
 /*************************************************************************
-*      SHLWAPI_309 [SHLWAPI]
-*
-*/
-ODINFUNCTION1(DWORD, SHLWAPI_309,
-              LPVOID, x)
-{
-  FIXME("(%p)stub\n",x);
-  return 0xabba1245;
-}
-
-/*************************************************************************
 *      SHLWAPI_342 [SHLWAPI]
 *
 */
@@ -1296,45 +1062,6 @@ ODINFUNCTION4(DWORD,  SHLWAPI_342,
 {
   FIXME("(%p %p %p %p)stub\n",w,x,y,z);
   return 0xabba1249;
-}
-
-/*************************************************************************
-*      SHLWAPI_346 [SHLWAPI]
-*/
-ODINFUNCTION3(DWORD,   SHLWAPI_346,
-              LPCWSTR, src,
-              LPWSTR,  dest,
-              int,     len)
-{
-  FIXME("(%s %p 0x%08x)stub\n",debugstr_w(src),dest,len);
-  lstrcpynW(dest, src, len);
-  return lstrlenW(dest)+1;
-}
-
-
-/*****************************************************************************
- * Name      : SHLWAPI_364
- * Purpose   : call lstrcpynA
- * Parameters:
- * Variables :
- * Result    :
- * Remark    : SHLWAPI.364
- * Status    : COMPLETELY IMPLEMENTED ? UNTESTED
- *
- * Author    :
- *****************************************************************************/
-
-ODINFUNCTION3(INT,   SHLWAPI_364,
-              LPSTR, lpStr1,
-              LPSTR, lpStr2,
-              INT,   nLength)
-{
-  // @@@PH is there some parameter twisting ?
-  lstrcpynA(lpStr2,
-            lpStr1,
-            nLength);
-
-  return 1;
 }
 
 
@@ -1635,11 +1362,3 @@ ODINFUNCTION1(int,     SHIsLowMemoryMachine,
   return flagIsLowMemoryMachine;
 }
 
-/*************************************************************************
- *      SHCreateShellPalette	[SHLWAPI.@]
- */
-HPALETTE WINAPI SHCreateShellPalette(HDC hdc)
-{
-	FIXME("stub\n");
-	return CreateHalftonePalette(hdc);
-}
