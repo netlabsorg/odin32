@@ -1,4 +1,4 @@
-/* $Id: loadres.cpp,v 1.14 2000-01-03 20:53:49 cbratschi Exp $ */
+/* $Id: loadres.cpp,v 1.15 2000-01-10 23:29:12 sandervl Exp $ */
 
 /*
  * Win32 resource API functions for OS/2
@@ -231,6 +231,53 @@ HCURSOR WIN32API LoadCursorW(HINSTANCE hinst, LPCWSTR lpszCursor)
     return(hCursor);
 }
 //******************************************************************************
+//******************************************************************************
+BOOL IsSystemBitmap(ULONG id)
+{
+   switch(id)
+   {
+        case OBM_UPARROW:
+        case OBM_DNARROW:
+        case OBM_RGARROW:
+        case OBM_LFARROW:
+        case OBM_RESTORE:
+        case OBM_RESTORED:
+        case OBM_UPARROWD:
+        case OBM_DNARROWD:
+        case OBM_RGARROWD:
+        case OBM_LFARROWD:
+        case OBM_OLD_UPARROW:
+        case OBM_OLD_DNARROW:
+        case OBM_OLD_RGARROW:
+        case OBM_OLD_LFARROW:
+        case OBM_CHECK:
+        case OBM_CHECKBOXES:
+        case OBM_BTNCORNERS:
+        case OBM_COMBO:
+        case OBM_REDUCE:
+        case OBM_REDUCED:
+        case OBM_ZOOM:
+        case OBM_ZOOMD:
+        case OBM_SIZE:
+        case OBM_CLOSE:
+        case OBM_MNARROW:
+        case OBM_UPARROWI:
+        case OBM_DNARROWI:
+        case OBM_RGARROWI:
+        case OBM_LFARROWI:
+	case OBM_CLOSED:
+        case OBM_OLD_CLOSE:
+        case OBM_BTSIZE:
+        case OBM_OLD_REDUCE:
+        case OBM_OLD_ZOOM:
+        case OBM_OLD_RESTORE:
+                return TRUE;
+
+        default:
+                return FALSE;
+   }
+}
+//******************************************************************************
 //NOTE: LR_CREATEDIBSECTION flag doesn't work (crash in GDI32)!
 //******************************************************************************
 HANDLE LoadBitmapA(HINSTANCE hinst, LPCSTR lpszName, int cxDesired, int cyDesired,
@@ -323,11 +370,23 @@ HANDLE LoadBitmapA(HINSTANCE hinst, LPCSTR lpszName, int cxDesired, int cyDesire
 //******************************************************************************
 //TODO: No support for RT_NEWBITMAP
 //******************************************************************************
+//******************************************************************************
+//TODO: No support for RT_NEWBITMAP
+//******************************************************************************
 HBITMAP WIN32API LoadBitmapA(HINSTANCE hinst, LPCSTR lpszBitmap)
 {
  HBITMAP hBitmap = 0;
 
-  return LoadBitmapA((hinst == 0) ? hInstanceUser32:hinst,lpszBitmap,0,0,0);
+  if (!hinst)
+  {
+    if(IsSystemBitmap((ULONG)lpszBitmap))
+    {
+      	 hBitmap =  LoadBitmapA(hInstanceUser32, lpszBitmap, 0, 0, 0);
+    } 
+  } 
+  if(!hBitmap) 
+  	hBitmap = LoadBitmapA(hinst, lpszBitmap, 0, 0, 0);
+
   dprintf(("LoadBitmapA returned %08xh\n", hBitmap));
 
   return(hBitmap);

@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.11 2000-01-09 14:14:22 cbratschi Exp $ */
+/* $Id: oslibmsg.cpp,v 1.12 2000-01-10 23:29:12 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -182,6 +182,7 @@ LONG OSLibWinDispatchMsg(MSG *msg, BOOL isUnicode)
             return (LONG)WinDispatchMsg(thdb->hab, &os2msg);
         }
         //SvL: Don't dispatch messages sent by PostThreadMessage (correct??)
+        //     Or WM_TIMER msgs with no window handle or timer proc
         return 0;
 
   }
@@ -218,7 +219,7 @@ BOOL OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMa
         memcpy(pMsg, &thdb->msgWCHAR, sizeof(MSG));
         MsgThreadPtr->msg  = 0;
         MsgThreadPtr->hwnd = 0;
-        return TRUE;
+        return (pMsg->message == WINWM_QUIT);
   }
 
 continuegetmsg:
@@ -229,7 +230,7 @@ continuegetmsg:
         }
         while(rc == FALSE);
 
-    return (pMsg->message == WINWM_QUIT);
+        return (pMsg->message == WINWM_QUIT);
   }
   else
   {
