@@ -1,4 +1,4 @@
-/* $Id: kHll.cpp,v 1.10 2000-04-07 02:47:00 bird Exp $
+/* $Id: kHll.cpp,v 1.11 2000-04-07 17:20:24 bird Exp $
  *
  * kHll - Implementation of the class kHll.
  *        That class is used to create HLL debuginfo.
@@ -1000,7 +1000,7 @@ int         kHll::write(FILE *phFile)
      */
     if (fseek(phFile, lPosStart + cchWritten, SEEK_SET) != 0)
         return -2;
-    hllHdr.offDirectory = cchWritten + sizeof(hllHdr) - 1;
+    hllHdr.offDirectory = cchWritten + sizeof(hllHdr);
     cch = fwrite(&hllHdr, 1, sizeof(hllHdr), phFile);
     if (cch != sizeof(hllHdr))
         return -1;
@@ -1178,7 +1178,7 @@ APIRET          kHll::writeToLX(
                             if (e32.e32_debuginfo != 0 && e32.e32_debuglen != 0)
                                 lPosDebug = e32.e32_debuginfo;
                             else
-                                lPosDebug = cbLXFile;
+                                lPosDebug = (cbLXFile + 0x400) & ~0x1FF; //try do some alignment.
 
                             /*
                              * Go to debug info position in the file and write debug info.
