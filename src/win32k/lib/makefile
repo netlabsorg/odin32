@@ -1,5 +1,5 @@
 ##############################################################################
-# $Id: makefile,v 1.5 2000-10-01 02:58:20 bird Exp $
+# $Id: makefile,v 1.6 2000-10-17 12:07:23 bird Exp $
 #
 # PD-Win32 API
 #
@@ -90,8 +90,10 @@ clean:
 # Dependencies.
 ##############################################################################
 dep:
-    $(DEPEND) -obj$(OBJEXT) -o$(WIN32KOBJ) $(CINCLUDES) \
+    $(DEPEND) @<<
+        -obj$(OBJEXT) -o$(WIN32KOBJ) $(CINCLUDES)
         $(WIN32KBASE)\include\*.h *.c* *.asm
+<<
 
 !if [$(EXISTS) .depend] == 0
 !   include .depend
