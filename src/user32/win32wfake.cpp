@@ -1,4 +1,4 @@
-/* $Id: win32wfake.cpp,v 1.1 2003-03-20 13:20:46 sandervl Exp $ */
+/* $Id: win32wfake.cpp,v 1.2 2003-03-27 10:42:42 sandervl Exp $ */
 /*
  * Win32 Fake Window Class for OS/2
  *
@@ -119,6 +119,12 @@ BOOL Win32FakeWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx,
     OSLibWinQueryWindowClientRect(OS2Hwnd, &rectClient);
     OSLibQueryWindowRectAbsolute (OS2Hwnd, &rectWindow);
 
+    return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32FakeWindow::isFakeWindow()
+{
     return TRUE;
 }
 //******************************************************************************
