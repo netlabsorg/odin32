@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.32 2000-01-08 14:15:06 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.33 2000-01-09 14:37:09 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -288,5 +288,6 @@ BOOL  OSLibWinEnableWindowUpdate(HWND hwnd,BOOL fEnable);
 ULONG OSLibWinGetLastError();
 
 HWND  OSLibWinIsFrameControl(HWND hwnd);
+HWND  OSLibWinGetFrameControlHandle(HWND hwndFrame, int framecontrol);
  
 #endif //__OSLIBWIN_H__

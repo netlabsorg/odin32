@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.33 2000-01-08 14:15:06 sandervl Exp $ */
+/* $Id: pmframe.cpp,v 1.34 2000-01-09 14:37:09 sandervl Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -233,7 +233,6 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
       dprintf(("PMFRAME: WM_FORMATFRAME %x",hwnd));
       //CB: call WM_NCCALCSIZE and set client pos
       //    WM_PAINT -> WM_NCPAINT
-      //    WM_HITTEST -> MsgHitTest()
       //    mouse messages -> MsgButton()
       goto RunDefFrameProc;
 
@@ -319,6 +318,13 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
 
         dprintf(("PMFRAME: WM_WINDOWPOSCHANGED (%x) %x %x (%d,%d) (%d,%d)", mp2, win32wnd->getWindowHandle(), pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
 
+	//Signal to the children that their parent's window rect has changed
+        //(the children don't always receive a notification -> their window
+        // rectangle (in screen coordinates) will get out of sync)
+        if(pswp->fl & (SWP_MOVE | SWP_SIZE)) {
+		win32wnd->setWindowRectChanged();
+        }
+
         RestoreOS2TIB();
         rc = OldFrameProc(hwnd,msg,mp1,mp2);
         SetWin32TIB();
@@ -336,9 +342,10 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
         }
         OSLibMapSWPtoWINDOWPOSFrame(pswp, &wp, &swpOld, hParent, hwnd);
 
-        win32wnd->setWindowRect(wp.x, wp.y, wp.x+wp.cx, wp.y+wp.cy);
-        win32wnd->setClientRect(swpOld.x, swpOld.y, swpOld.x + swpOld.cx, swpOld.y + swpOld.cy);
-
+        if(pswp->fl & (SWP_MOVE | SWP_SIZE)) {
+        	win32wnd->setWindowRect(wp.x, wp.y, wp.x+wp.cx, wp.y+wp.cy);
+        	win32wnd->setClientRect(swpOld.x, swpOld.y, swpOld.x + swpOld.cx, swpOld.y + swpOld.cy);
+	}
         if(win32wnd->CanReceiveSizeMsgs())
           win32wnd->MsgPosChanged((LPARAM)&wp);
 

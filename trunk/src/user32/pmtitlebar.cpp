@@ -1,10 +1,13 @@
-/* $Id: pmtitlebar.cpp,v 1.1 2000-01-08 14:15:38 sandervl Exp $ */
+/* $Id: pmtitlebar.cpp,v 1.2 2000-01-09 14:37:10 sandervl Exp $ */
 /*
  * Win32 Titlebar Managment Code for OS/2
  *
  * Copyright 2000 Sander van Leeuwen (sandervl@xs4all.nl)
  * Copyright 2000 by Christoph Bratschi (cbratschi@datacomm.ch)
  *
+ *
+ * NOTE:  When fOS2Look == TRUE, mouse message & painting is handled by us
+ *        (not by the PM titlebar control)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -26,6 +29,7 @@
 #include "oslibwin.h"
 #include "oslibmsg.h"
 #include "pmtitlebar.h"
+#include "pmwindow.h"
 
 //******************************************************************************
 //******************************************************************************
@@ -49,9 +53,6 @@ MRESULT EXPENTRY Win32TitleBarProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
   }
   OldTitleBarProc = (PFNWP)win32wnd->getOldTitleBarProc();
 
-  if(msg == WM_MOUSEMOVE) {
-	rc = 0;
-  }
   if((thdb->msgstate & 1) == 0)
   {//message that was sent directly to our window proc handler; translate it here
         QMSG qmsg;
@@ -78,33 +79,14 @@ MRESULT EXPENTRY Win32TitleBarProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
 
   switch(pWinMsg->message)
   {
-  case WINWM_NCHITTEST:
-  {
-      DWORD res;
-
-      // Only send this message if the window is enabled
-      if (!WinIsWindowEnabled(hwnd))
-        res = HT_ERROR;
-      else if (win32wnd->getIgnoreHitTest())
-        res = HT_NORMAL;
-      else
-      {
-        dprintf(("USER32: WM_HITTEST %x (%d,%d)",hwnd,(*(POINTS *)&mp1).x,(*(POINTS *)&mp1).y));
-
-        //CB: WinWindowFromPoint: PM sends WM_HITTEST -> loop -> stack overflow
-        win32wnd->setIgnoreHitTest(TRUE);
-        res = win32wnd->MsgHitTest(pWinMsg);
-        win32wnd->setIgnoreHitTest(FALSE);
-      }
-      RestoreOS2TIB();
-      return (MRESULT)res;
-  }
   case WINWM_NCPAINT:
         win32wnd->DispatchMsgA(pWinMsg);
-	if(win32wnd->getDefWndProcCalled())
-        	goto RunDefTitleBarProc;
 	goto RunDefWndProc;
 
+  case WINWM_NCACTIVATE:
+        win32wnd->DispatchMsgA(pWinMsg);
+        break;
+	
   case WINWM_NCLBUTTONDOWN:
   case WINWM_NCLBUTTONUP:
   case WINWM_NCLBUTTONDBLCLK:
@@ -115,18 +97,12 @@ MRESULT EXPENTRY Win32TitleBarProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
   case WINWM_NCRBUTTONUP:
   case WINWM_NCRBUTTONDBLCLK:
         win32wnd->MsgButton(pWinMsg);
-	if(win32wnd->getDefWndProcCalled())
-        	goto RunDefTitleBarProc;
-
         rc = TRUE;
         break;
 
   case WINWM_NCMOUSEMOVE:
   {
-        //OS/2 Window coordinates -> Win32 Window coordinates
         win32wnd->MsgMouseMove(pWinMsg);
-	if(win32wnd->getDefWndProcCalled())
-        	goto RunDefTitleBarProc;
         break;
   }
 

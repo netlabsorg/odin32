@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.57 2000-01-08 14:15:06 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.58 2000-01-09 14:37:09 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -174,15 +174,21 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG *dwExStyle, ULONG *OSWinStyle, UL
   }
   else
   {
-    if((dwStyle & WS_CAPTION_W) == WS_DLGFRAME_W)
+    if((dwStyle & WS_CAPTION_W) == WS_DLGFRAME_W) {
         *OSFrameStyle |= FCF_DLGBORDER;
+        *borderHeight = *borderWidth = 2; //TODO: Correct?
+    }
     else
     {
-        if((dwStyle & WS_CAPTION_W) == WS_CAPTION_W)
+        if((dwStyle & WS_CAPTION_W) == WS_CAPTION_W) {
             *OSFrameStyle |= (FCF_TITLEBAR | FCF_BORDER);
+            *borderHeight = *borderWidth = 1;
+        }
         else
-        if(dwStyle & WS_BORDER_W)
+        if(dwStyle & WS_BORDER_W) {
             *OSFrameStyle |= FCF_BORDER;
+            *borderHeight = *borderWidth = 1;
+        }
     }
 
     if(dwStyle & WS_VSCROLL_W)
@@ -190,13 +196,13 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG *dwExStyle, ULONG *OSWinStyle, UL
     if(dwStyle & WS_HSCROLL_W)
           *OSFrameStyle |= FCF_HORZSCROLL;
 
-    if(dwStyle & WS_SYSMENU_W)
-          *OSFrameStyle |= FCF_SYSMENU;
     if(dwStyle & WS_THICKFRAME_W)
           *OSFrameStyle |= FCF_SIZEBORDER;        //??
 
     //SvL: We subclass the titlebar control when win32 look is selected
     if(fOS2Look) {
+    	if(dwStyle & WS_SYSMENU_W)
+          *OSFrameStyle |= FCF_SYSMENU;
     	if(dwStyle & WS_MINIMIZEBOX_W)
           *OSFrameStyle |= FCF_MINBUTTON;
     	if(dwStyle & WS_MAXIMIZEBOX_W)
@@ -1161,6 +1167,25 @@ HWND OSLibWinIsFrameControl(HWND hwnd)
 	return hwndFrame;
    }
    return 0;
+}
+//******************************************************************************
+//******************************************************************************
+HWND OSLibWinGetFrameControlHandle(HWND hwndFrame, int framecontrol, RECT *lpRect)
+{
+    switch(framecontrol) {
+    case OSLIB_FID_TITLEBAR:
+	framecontrol = FID_TITLEBAR;
+	break;
+    case OSLIB_FID_SYSMENU:
+	framecontrol = FID_SYSMENU;
+	break;
+    case OSLIB_FID_MENU:
+	framecontrol = FID_MENU;
+	break;
+    default:
+	return 0;
+    }
+    return WinWindowFromID(hwndFrame, framecontrol);
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: win32wbasepos.cpp,v 1.7 1999-12-16 00:11:47 sandervl Exp $ */
+/* $Id: win32wbasepos.cpp,v 1.8 2000-01-09 14:37:12 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (nonclient/position methods)
  *
@@ -85,8 +85,8 @@ UINT Win32BaseWindow::MinMaximize(UINT cmd, LPRECT lpRect )
     POINT pt, size;
     LPINTERNALPOS lpPos;
 
-    size.x = rectWindow.left; size.y = rectWindow.top;
-    lpPos = WINPOS_InitInternalPos( wndPtr, size, &rectWindow );
+    size.x = getWindowRect()->left; size.y = getWindowRect()->top;
+    lpPos = WINPOS_InitInternalPos( wndPtr, size, getWindowRect() );
 
     if (lpPos && !HOOK_CallHooks16(WH_CBT, HCBT_MINMAX, hwndSelf, cmd))
     {

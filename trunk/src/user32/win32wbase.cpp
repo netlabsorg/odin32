@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.134 2000-01-08 14:41:27 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.135 2000-01-09 14:37:11 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -150,6 +150,7 @@ void Win32BaseWindow::Init()
   fTaskList            = FALSE;
   fParentDC            = FALSE;
   fDefWndProcCalled    = FALSE;
+  fWindowRectChanged   = FALSE; //Set when parent window has been moved; cleared when window rect is updated
 
   windowNameA      = NULL;
   windowNameW      = NULL;
@@ -192,7 +193,6 @@ void Win32BaseWindow::Init()
   flags            = 0;
   isIcon           = FALSE;
   lastHitTestVal   = HTOS_NORMAL;
-  fIgnoreHitTest   = FALSE;
   owner            = NULL;
   windowClass      = 0;
 
@@ -644,7 +644,8 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
   FrameGetScrollBarHandles(this,dwStyle & WS_HSCROLL,dwStyle & WS_VSCROLL);
   subclassScrollBars(dwStyle & WS_HSCROLL,dwStyle & WS_VSCROLL);
 
-//  FrameSubclassTitleBar(this);
+  if(!fOS2Look)
+    FrameSubclassTitleBar(this);
 
   fakeWinBase.hwndThis     = OS2Hwnd;
   fakeWinBase.pWindowClass = windowClass;
@@ -863,21 +864,14 @@ ULONG Win32BaseWindow::MsgScroll(ULONG msg, ULONG scrollCode, ULONG scrollPos)
   return SendInternalMessageA(msg, MAKELONG(scrollCode, scrollPos), 0);
 }
 //******************************************************************************
+// NOTE: WM_NCHITTEST messages are sent whenever the mouse cursor moves or a mouse button is clicked/released
+//       (directly when receiving those messages)
 //******************************************************************************
-ULONG Win32BaseWindow::MsgHitTest(MSG *msg)
+ULONG Win32BaseWindow::MsgHitTest(ULONG x, ULONG y)
 {
-  lastHitTestVal = SendInternalMessageA(WM_NCHITTEST, 0, MAKELONG((USHORT)msg->pt.x, (USHORT)msg->pt.y));
-  dprintf2(("MsgHitTest returned %x", lastHitTestVal));
-
-  if (lastHitTestVal == HTERROR)
-    return HTOS_ERROR;
-
-#if 0 //CB: problems with groupboxes, internal handling is better
-  if (lastHitTestVal == HTTRANSPARENT)
-    return HTOS_TRANSPARENT;
-#endif
-
-  return HTOS_NORMAL;
+  lastHitTestVal = SendInternalMessageA(WM_NCHITTEST, 0, MAKELONG((USHORT)x, (USHORT)y));
+  dprintf(("MsgHitTest (%d,%d) (%d,%d) (%d,%d) returned %x", x, y, rectWindow.left, rectWindow.right, rectWindow.top, rectWindow.bottom, lastHitTestVal));
+  return lastHitTestVal;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1238,116 +1232,6 @@ BOOL Win32BaseWindow::showScrollBars(BOOL changeHorz,BOOL changeVert,BOOL fShow)
   return rc;
 }
 /***********************************************************************
- *           NC_HandleNCLButtonDown
- *
- * Handle a WM_NCLBUTTONDOWN message. Called from DefWindowProc().
- */
-LONG Win32BaseWindow::HandleNCLButtonDown(WPARAM wParam,LPARAM lParam)
-{
-  switch(wParam)  /* Hit test */
-  {
-    case HTCAPTION:
-      SendInternalMessageA(WM_SYSCOMMAND,SC_MOVE+HTCAPTION,lParam);
-      break;
-
-    case HTSYSMENU:
-      SendInternalMessageA(WM_SYSCOMMAND,SC_MOUSEMENU+HTSYSMENU,lParam);
-      break;
-
-    case HTMENU:
-      SendInternalMessageA(WM_SYSCOMMAND,SC_MOUSEMENU,lParam);
-      break;
-
-    case HTHSCROLL:
-      SendInternalMessageA(WM_SYSCOMMAND,SC_HSCROLL+HTHSCROLL,lParam);
-      break;
-
-    case HTVSCROLL:
-      SendInternalMessageA(WM_SYSCOMMAND,SC_VSCROLL+HTVSCROLL,lParam);
-      break;
-
-    case HTLEFT:
-    case HTRIGHT:
-    case HTTOP:
-    case HTTOPLEFT:
-    case HTTOPRIGHT:
-    case HTBOTTOM:
-    case HTBOTTOMLEFT:
-    case HTBOTTOMRIGHT:
-        /* make sure hittest fits into 0xf and doesn't overlap with HTSYSMENU */
-        SendInternalMessageA(WM_SYSCOMMAND,SC_SIZE+wParam-2,lParam);
-        break;
-    case HTBORDER:
-        break;
-  }
-
-  return 0;
-}
-//******************************************************************************
-//******************************************************************************
-LONG Win32BaseWindow::HandleNCLButtonUp(WPARAM wParam,LPARAM lParam)
-{
-  switch(wParam)  /* Hit test */
-  {
-    case HTMINBUTTON:
-      SendInternalMessageA(WM_SYSCOMMAND,SC_MINIMIZE,lParam);
-      break;
-
-    case HTMAXBUTTON:
-      SendInternalMessageA(WM_SYSCOMMAND,SC_MAXIMIZE,lParam);
-      break;
-
-    case HTCLOSE:
-      SendInternalMessageA(WM_SYSCOMMAND,SC_CLOSE,lParam);
-      break;
-  }
-
-  return 0;
-}
-/***********************************************************************
- *           NC_HandleNCLButtonDblClk
- *
- * Handle a WM_NCLBUTTONDBLCLK message. Called from DefWindowProc().
- */
-LONG Win32BaseWindow::HandleNCLButtonDblClk(WPARAM wParam,LPARAM lParam)
-{
-  /*
-   * if this is an icon, send a restore since we are handling
-   * a double click
-   */
-  if (dwStyle & WS_MINIMIZE)
-  {
-    SendInternalMessageA(WM_SYSCOMMAND,SC_RESTORE,lParam);
-    return 0;
-  }
-
-  switch(wParam)  /* Hit test */
-  {
-    case HTCAPTION:
-      /* stop processing if WS_MAXIMIZEBOX is missing */
-      if (dwStyle & WS_MAXIMIZEBOX)
-        SendInternalMessageA(WM_SYSCOMMAND,
-                      (dwStyle & WS_MAXIMIZE) ? SC_RESTORE : SC_MAXIMIZE,
-                      lParam);
-      break;
-
-    case HTSYSMENU:
-      if (!(GetClassWord(Win32Hwnd,GCW_STYLE) & CS_NOCLOSE))
-        SendInternalMessageA(WM_SYSCOMMAND,SC_CLOSE,lParam);
-      break;
-
-    case HTHSCROLL:
-      SendInternalMessageA(WM_SYSCOMMAND,SC_HSCROLL+HTHSCROLL,lParam);
-      break;
-
-    case HTVSCROLL:
-      SendInternalMessageA(WM_SYSCOMMAND,SC_VSCROLL+HTVSCROLL,lParam);
-      break;
-  }
-
-  return 0;
-}
-/***********************************************************************
  *           NC_HandleSysCommand
  *
  * Handle a WM_SYSCOMMAND message. Called from DefWindowProc().
@@ -1604,7 +1488,8 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
       {
         setStyle(getStyle() | WS_VISIBLE);
         OSLibWinEnableWindowUpdate(OS2HwndFrame,TRUE);
-      } else
+      }
+      else
       {
         if (getStyle() & WS_VISIBLE)
         {
@@ -1614,21 +1499,6 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
       }
       return 0;
     }
-
-    case WM_NCPAINT:
-        return 0;
-
-    case WM_NCACTIVATE:
-        return TRUE;
-
-    case WM_NCCREATE:
-        return(TRUE);
-
-    case WM_NCDESTROY:
-        return 0;
-
-    case WM_NCCALCSIZE:
-        return NCHandleCalcSize(wParam, (NCCALCSIZE_PARAMS *)lParam);
 
     case WM_CTLCOLORMSGBOX:
     case WM_CTLCOLOREDIT:
@@ -1777,8 +1647,8 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         {
           if( (getStyle() & WS_MINIMIZE) && getWindowClass()->getIcon())
           {
-            int x = (rectWindow.right - rectWindow.left - GetSystemMetrics(SM_CXICON))/2;
-            int y = (rectWindow.bottom - rectWindow.top - GetSystemMetrics(SM_CYICON))/2;
+            int x = (getWindowRect()->right - getWindowRect()->left - GetSystemMetrics(SM_CXICON))/2;
+            int y = (getWindowRect()->bottom - getWindowRect()->top - GetSystemMetrics(SM_CYICON))/2;
             dprintf(("Painting class icon: vis rect=(%i,%i - %i,%i)\n", ps.rcPaint.left, ps.rcPaint.top, ps.rcPaint.right, ps.rcPaint.bottom ));
             DrawIcon(hdc, x, y, getWindowClass()->getIcon() );
           }
@@ -1790,14 +1660,44 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
     case WM_GETDLGCODE:
         return 0;
 
+    case WM_NCPAINT:
+        if(!fOS2Look) {
+            HandleNCPaint(wParam, FALSE);
+        }
+        return 0;
+
+    case WM_NCACTIVATE:
+        if(!fOS2Look) {
+            return HandleNCActivate(wParam);
+        }
+        return TRUE;
+
+    case WM_NCCREATE:
+        return(TRUE);
+
+    case WM_NCDESTROY:
+        return 0;
+
+    case WM_NCCALCSIZE:
+        return NCHandleCalcSize(wParam, (NCCALCSIZE_PARAMS *)lParam);
+
     case WM_NCLBUTTONDOWN:
-        return HandleNCLButtonDown(wParam,lParam);
+        if(!fOS2Look) {
+            return HandleNCLButtonDown(wParam,lParam);
+        }
+        return 0;
 
     case WM_NCLBUTTONUP:
-        return HandleNCLButtonUp(wParam,lParam);
+        if(!fOS2Look) {
+            return HandleNCLButtonUp(wParam,lParam);
+        }
+        return 0;
 
     case WM_NCLBUTTONDBLCLK:
-        return HandleNCLButtonDblClk(wParam,lParam);
+        if(!fOS2Look) {
+            return HandleNCLButtonDblClk(wParam,lParam);
+        }
+        return 0;
 
     case WM_NCRBUTTONDOWN:
     case WM_NCRBUTTONDBLCLK:
@@ -1817,7 +1717,10 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
       point.x = (SHORT)LOWORD(lParam);
       point.y = (SHORT)HIWORD(lParam);
 
-      return FrameHitTest(this,point.x,point.y);
+      if(fOS2Look) {
+                return FrameHitTest(this, point.x, point.y);
+      }
+      else      return HandleNCHitTest(point);
     }
 
     case WM_SYSCOMMAND:
@@ -2313,6 +2216,54 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
     BOOL rc = OSLibWinShowWindow(OS2HwndFrame, showstate);
 
     return rc;
+}
+//******************************************************************************
+//When our parent window is moved, we aren't notified of the change (rectWindow is in
+//screen coordinates, so it needs to be updated)
+//Set the fWindowRectChanged flag and do the same for all the children
+//Whenever getWindowRect is called and this flag is set, it refreshes the rectWindow structure
+//******************************************************************************
+void Win32BaseWindow::setWindowRectChanged()
+{
+ Win32BaseWindow *child;
+
+    fWindowRectChanged = TRUE;
+
+    child = (Win32BaseWindow *)getFirstChild();
+    while(child)
+    {
+        child->setWindowRectChanged();
+        child = (Win32BaseWindow *)child->getNextChild();
+    }
+}
+//******************************************************************************
+//******************************************************************************
+PRECT Win32BaseWindow::getWindowRect()
+{
+    if(fWindowRectChanged) {
+        OSLibWinQueryWindowRect(getOS2FrameWindowHandle(), &rectWindow, RELATIVE_TO_SCREEN);
+        fWindowRectChanged = FALSE;
+    }
+    return &rectWindow;
+}
+//******************************************************************************
+//******************************************************************************
+void Win32BaseWindow::setWindowRect(LONG left, LONG top, LONG right, LONG bottom)
+{
+    fWindowRectChanged = FALSE;
+
+    rectWindow.left   = left;
+    rectWindow.top    = top;
+    rectWindow.right  = right;
+    rectWindow.bottom = bottom;
+}
+//******************************************************************************
+//******************************************************************************
+void Win32BaseWindow::setWindowRect(PRECT rect)
+{
+    fWindowRectChanged = FALSE;
+
+    rectWindow = *rect;
 }
 //******************************************************************************
 //******************************************************************************
@@ -2881,12 +2832,6 @@ BOOL Win32BaseWindow::IsWindowVisible()
 #else
     return OSLibWinIsWindowVisible(OS2HwndFrame);
 #endif
-}
-//******************************************************************************
-//******************************************************************************
-BOOL Win32BaseWindow::GetWindowRect(PRECT pRect)
-{
-    return OSLibWinQueryWindowRect(OS2HwndFrame, pRect, RELATIVE_TO_SCREEN);
 }
 //******************************************************************************
 //******************************************************************************
