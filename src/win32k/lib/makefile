@@ -1,5 +1,5 @@
 ##############################################################################
-# $Id: makefile,v 1.6 2000-10-17 12:07:23 bird Exp $
+# $Id: makefile,v 1.7 2000-11-09 02:44:27 bird Exp $
 #
 # PD-Win32 API
 #
@@ -58,7 +58,8 @@ OBJS     =  $(WIN32KOBJ)\libInit.$(OBJEXT)         \
 
 
 
-all: $(TARGET)
+all:    $(TARGET) \
+        $(PDWIN32_LIB)\$(TARGET)
 
 ##############################################################################
 # win32k.lib rule.
@@ -67,7 +68,9 @@ $(TARGET): $(OBJS)
     @$(ECHO) making library $@
     -$(RM) $@
     $(ILIB) $(ILIBFLAGS) $@ $(OBJS);
-    $(CP) $@ $(PDWIN32_LIB)
+
+$(PDWIN32_LIB)\$(TARGET): $(TARGET)
+    $(CP) $(TARGET) $(PDWIN32_LIB)
 
 ##############################################################################
 # libtest.exe - test program for the library.
