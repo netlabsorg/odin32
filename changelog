@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2189 2002-06-26 07:43:19 sandervl Exp $ */
+/* $Id: changelog,v 1.2190 2002-06-26 11:07:50 sandervl Exp $ */
 
  2002-06-26: Sander van Leeuwen <sandervl@innotek.de>
     - KERNEL32: o There are no bugs in the WGSS SystemTimeToFileTime & 
@@ -7,7 +7,9 @@
                   by DosFindFirst, DosFindNext, DosQueryPathInfo & 
                   DosQueryFileInfo are in local time; we must convert them
                   to file time (UTC)
-
+                o Fixed bug in OSLibGetDriveType; broke GetDriveType for
+                  floppy drives
+                o Fixed CreateFile for disks
 
  2002-06-26: knut st. osmundsen <bird@anduin.net>
     - KERNEL32\testcase:
