@@ -1,4 +1,4 @@
-/* $Id: winmouse.h,v 1.5 2000-03-01 13:30:07 sandervl Exp $ */
+/* $Id: winmouse.h,v 1.6 2000-03-04 19:54:03 sandervl Exp $ */
 /*
  * Mouse handler for DINPUT
  *
@@ -21,6 +21,6 @@ extern WNDPROC            keyboardHandler;
 #define MOUSEMSG_MOVE   1
 
 BOOL DInputMouseHandler(HWND hwnd, ULONG msg, ULONG x, ULONG y);
-void DInputKeyBoardHandler(MSG *msg);
+BOOL DInputKeyBoardHandler(MSG *msg);
 
 #endif //__WINMOUSE_H__
