@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1202 2001-01-04 18:19:17 sandervl Exp $ */
+/* $Id: changelog,v 1.1203 2001-01-05 23:22:45 sandervl Exp $ */
+
+ 2001-01-05: Sander van Leeuwen <sandervl@xs4all.nl>
+    - makefiles:o Use LXLite for release build binaries (better compression)
+                  Can't use it for debug binaries as IPMD doesn't like it.
 
  2001-01-02: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o KERNEL32_99 should return 1 (according to Wine)
