@@ -1,8 +1,11 @@
- /* $Id: ChangeLog,v 1.1166 2000-10-03 17:43:11 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1167 2000-10-03 19:23:14 sandervl Exp $ */
 
  2000-10-03: Sander van Leeuwen <sandervl@xs4all.nl>
     - Include\uniconv.h
                 FS wrappers for Unicode api
+    - Include\heapstring.h:
+                strcasecmp & strncasecmp are case insensitive (fixes
+                profile apis (and probably some other things too))
     - KERNEL32: Calculate cpu speed and set HARDWARE\DESCRIPTION\System\CentralProcessor\x\~Mhz key
                 Added GetFileType method to conin/out which return FILE_TYPE_CHAR
                 Create new keys during installation:
