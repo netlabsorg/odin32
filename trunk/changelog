@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2385 2002-12-12 13:56:34 sandervl Exp $ */
+/* $Id: changelog,v 1.2386 2002-12-13 16:45:35 sandervl Exp $ */
+
+ 2002-12-13: Sander van Leeuwen <sandervl@innotek   >
+    - USER32;   o Query loader path for WPS object creation
+    - KERNEL32: o Changes for loader path query & default setup
 
  2002-12-12: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Fixed wrong access of global memory map critical section
