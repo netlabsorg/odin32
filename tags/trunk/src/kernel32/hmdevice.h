@@ -1,4 +1,4 @@
-/* $Id: hmdevice.h,v 1.5 1999-08-24 18:46:39 sandervl Exp $ */
+/* $Id: hmdevice.h,v 1.6 1999-08-25 08:55:18 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -24,8 +24,8 @@
  * defines                                                                   *
  *****************************************************************************/
 
-#define HMTYPE_UNKNOWN	0
-#define HMTYPE_MEMMAP	1
+#define HMTYPE_UNKNOWN                   0
+#define HMTYPE_MEMMAP                    1
 //.....
 
 /*****************************************************************************
@@ -231,19 +231,19 @@ public:
    * Semaphores                                                              *
    ***************************************************************************/
 
-                     /* this is a handler method for calls to CreateSemaphore() */
+                  /* this is a handler method for calls to CreateSemaphore() */
   virtual DWORD CreateSemaphore (PHMHANDLEDATA         pHMHandleData,
                                  LPSECURITY_ATTRIBUTES lpsa,
                                  LONG                  lInitialCount,
                                  LONG                  lMaximumCount,
                                  LPCSTR                lpszSemaphoreName);
 
-                       /* this is a handler method for calls to OpenSemaphore() */
+                    /* this is a handler method for calls to OpenSemaphore() */
   virtual DWORD OpenSemaphore   (PHMHANDLEDATA         pHMHandleData,
                                  BOOL                  fInheritHandle,
                                  LPCSTR                lpszSemaphoreName);
 
-                     /* this is a handle method for calls to ReleaseSemaphore() */
+                  /* this is a handle method for calls to ReleaseSemaphore() */
   virtual BOOL  ReleaseSemaphore(PHMHANDLEDATA pHMHandleData,
                                  LONG          cReleaseCount,
                                  LPLONG        lpPreviousCount);
@@ -259,17 +259,33 @@ public:
 
                   /* this is a handler method for calls to OpenFileMapping() */
   virtual DWORD OpenFileMapping     (PHMHANDLEDATA              pHMHandleData,
-		                     DWORD access,   /* [in] Access mode */
+                                     DWORD access,   /* [in] Access mode */
                                      BOOL                       fInherit,
                                      LPCSTR                     lpName);
 
-                    /* this is a handler method for calls to MapViewOfFileEx() */
+                    /* this is a handler method for calls to MapViewOfFile() */
+  virtual LPVOID MapViewOfFile      (PHMHANDLEDATA              pHMHandleData,
+                                     DWORD                      dwDesiredAccess,
+                                     DWORD                      dwFileOffsetHigh,
+                                     DWORD                      dwFileOffsetLow,
+                                     DWORD                      dwNumberOfBytesToMap);
+
+                  /* this is a handler method for calls to MapViewOfFileEx() */
   virtual LPVOID MapViewOfFileEx    (PHMHANDLEDATA              pHMHandleData,
                                      DWORD                      dwDesiredAccess,
                                      DWORD                      dwFileOffsetHigh,
                                      DWORD                      dwFileOffsetLow,
                                      DWORD                      dwNumberOfBytesToMap,
-			             LPVOID                     lpBaseAddress);
+                                     LPVOID                     lpBaseAddress);
+
+                  /* this is a handler method for calls to UnmapViewOfFile() */
+  virtual BOOL   UnmapViewOfFile    (PHMHANDLEDATA              pHMHandleData,
+                                     LPVOID                     lpBaseAddress);
+
+                  /* this is a handler method for calls to FlushViewOfFile() */
+  virtual BOOL   FlushViewOfFile    (PHMHANDLEDATA              pHMHandleData,
+                                     LPVOID                     lpBaseAddress,
+                                     DWORD                      dwNumberOfBytesToFlush);
 
 };
 

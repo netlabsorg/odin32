@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.13 1999-08-24 18:46:38 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.14 1999-08-25 08:55:17 phaller Exp $ */
 
 /*
  *
@@ -2278,7 +2278,7 @@ HANDLE HMOpenFileMapping(DWORD   fdwAccess,
 
                                                   /* call the device handler */
   rc = pDeviceHandler->OpenFileMapping(&TabWin32Handles[iIndexNew].hmHandleData,
-				       fdwAccess,
+                                       fdwAccess,
                                        fInherit,
                                        lpName);
   if (rc != NO_ERROR)     /* oops, creation failed within the device handler */
@@ -2289,6 +2289,47 @@ HANDLE HMOpenFileMapping(DWORD   fdwAccess,
   }
 
   return iIndexNew;                                   /* return valid handle */
+}
+
+
+/*****************************************************************************
+ * Name      : HMMapViewOfFile
+ * Purpose   : router function for MapViewOfFile
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
+ *****************************************************************************/
+
+LPVOID HMMapViewOfFile(HANDLE hFileMappingObject,
+                       DWORD  dwDesiredAccess,
+                       DWORD  dwFileOffsetHigh,
+                       DWORD  dwFileOffsetLow,
+                       DWORD  dwNumberOfBytesToMap)
+{
+  int       iIndex;                           /* index into the handle table */
+  LPVOID    lpResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hFileMappingObject);              /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return (NULL);                                         /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  lpResult = pHMHandle->pDeviceHandler->MapViewOfFile(&pHMHandle->hmHandleData,
+                                                      dwDesiredAccess,
+                                                      dwFileOffsetHigh,
+                                                      dwFileOffsetLow,
+                                                      dwNumberOfBytesToMap);
+
+  return (lpResult);                                  /* deliver return code */
 }
 
 
@@ -2333,6 +2374,76 @@ LPVOID HMMapViewOfFileEx(HANDLE hFileMappingObject,
 
   return (lpResult);                                  /* deliver return code */
 }
+
+
+/*****************************************************************************
+ * Name      : HMUnmapViewOfFile
+ * Purpose   : router function for UnmapViewOfFile
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
+ *****************************************************************************/
+
+BOOL HMUnmapViewOfFile(LPVOID lpBaseAddress)
+{
+  int       iIndex;                           /* index into the handle table */
+  BOOL      bResult;                 /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  iIndex = HMDeviceMemMapClass::findByBaseAddress(lpBaseAddress);
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return (NULL);                                         /* signal failure */
+  }
+
+  bResult = pHMHandle->pDeviceHandler->UnmapViewOfFile(&pHMHandle->hmHandleData,
+                                                       lpBaseAddress);
+
+  return (bResult);                                   /* deliver return code */
+}
+
+
+/*****************************************************************************
+ * Name      : HMFlushViewOfFile
+ * Purpose   : router function for FlushViewOfFile
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
+ *****************************************************************************/
+
+BOOL HMFlushViewOfFile(LPVOID lpBaseAddress,
+                       DWORD  dwNumberOfBytesToFlush)
+{
+  int       iIndex;                           /* index into the handle table */
+  BOOL      bResult;                 /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  iIndex = HMDeviceMemMapClass::findByBaseAddress(lpBaseAddress);
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return (NULL);                                         /* signal failure */
+  }
+
+  bResult = pHMHandle->pDeviceHandler->FlushViewOfFile(&pHMHandle->hmHandleData,
+                                                       lpBaseAddress,
+                                                       dwNumberOfBytesToFlush);
+
+  return (bResult);                                  /* deliver return code */
+}
+
+
 
 /*****************************************************************************
  * Name      : HMWaitForMultipleObjects

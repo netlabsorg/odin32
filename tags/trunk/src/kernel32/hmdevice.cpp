@@ -1,4 +1,4 @@
-/* $Id: hmdevice.cpp,v 1.4 1999-08-24 18:46:39 sandervl Exp $ */
+/* $Id: hmdevice.cpp,v 1.5 1999-08-25 08:55:18 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -982,7 +982,7 @@ DWORD HMDeviceHandler::OpenFileMapping(PHMHANDLEDATA pHMHandleData,
 {
   dprintf(("KERNEL32: HandleManager::DeviceHandler::OpenFileMapping(%08xh,%08xh,%08xh,%08xh)\n",
            pHMHandleData->hHMHandle,
-	   fdwAccess,
+           fdwAccess,
            fInherit,
            lpName));
 
@@ -1005,12 +1005,46 @@ DWORD HMDeviceHandler::OpenFileMapping(PHMHANDLEDATA pHMHandleData,
  * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
  *****************************************************************************/
 
-LPVOID HMDeviceHandler::MapViewOfFileEx(PHMHANDLEDATA pHMHandleData,
+LPVOID HMDeviceHandler::MapViewOfFile(PHMHANDLEDATA pHMHandleData,
                                       DWORD         dwDesiredAccess,
                                       DWORD         dwFileOffsetHigh,
                                       DWORD         dwFileOffsetLow,
-                                      DWORD         dwNumberOfBytesToMap,
-			              LPVOID        lpBaseAddress)
+                                      DWORD         dwNumberOfBytesToMap)
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::MapViewOfFile(%08xh,%08xh,%08xh,%08xh,%08xh)\n",
+           pHMHandleData->hHMHandle,
+           dwDesiredAccess,
+           dwFileOffsetHigh,
+           dwFileOffsetLow,
+           dwNumberOfBytesToMap));
+
+  return(NULL);
+}
+
+
+/*****************************************************************************
+ * Name      : DWORD HMDeviceHandler::MapViewOfFileEx
+ * Purpose   : map memory mapped file
+ * Parameters: PHMHANDLEDATA pHMHandleData
+ *             DWORD         dwDesiredAccess,
+ *             DWORD         dwFileOffsetHigh,
+ *             DWORD         dwFileOffsetLow,
+ *             DWORD         dwNumberOfBytesToMap
+ *             LPVOID        lpBaseAddress
+ * Variables :
+ * Result    : address to memory mapped region
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
+ *****************************************************************************/
+
+LPVOID HMDeviceHandler::MapViewOfFileEx(PHMHANDLEDATA pHMHandleData,
+                                        DWORD         dwDesiredAccess,
+                                        DWORD         dwFileOffsetHigh,
+                                        DWORD         dwFileOffsetLow,
+                                        DWORD         dwNumberOfBytesToMap,
+                                        LPVOID        lpBaseAddress)
 {
   dprintf(("KERNEL32: HandleManager::DeviceHandler::MapViewOfFileEx(%08xh,%08xh,%08xh,%08xh,%08xh,%08xh)\n",
            pHMHandleData->hHMHandle,
@@ -1021,3 +1055,55 @@ LPVOID HMDeviceHandler::MapViewOfFileEx(PHMHANDLEDATA pHMHandleData,
 
   return(NULL);
 }
+
+
+/*****************************************************************************
+ * Name      : DWORD HMDeviceHandler::UnmapViewOfFile
+ * Purpose   : map memory mapped file
+ * Parameters: PHMHANDLEDATA pHMHandleData
+ *             LPVOID        lpBaseAddress
+ * Variables :
+ * Result    : address to memory mapped region
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
+ *****************************************************************************/
+
+BOOL HMDeviceHandler::UnmapViewOfFile(PHMHANDLEDATA pHMHandleData,
+                                      LPVOID        lpBaseAddress)
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::UnmapViewOfFile(%08xh,%08xh)\n",
+           pHMHandleData->hHMHandle,
+           lpBaseAddress));
+
+  return(FALSE);
+}
+
+
+/*****************************************************************************
+ * Name      : DWORD HMDeviceHandler::FlushViewOfFile
+ * Purpose   : map memory mapped file
+ * Parameters: PHMHANDLEDATA pHMHandleData
+ *             LPVOID        lpBaseAddress
+ *             DWORD         dwNumberOfBytesToFlush
+ * Variables :
+ * Result    : address to memory mapped region
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
+ *****************************************************************************/
+
+BOOL HMDeviceHandler::FlushViewOfFile(PHMHANDLEDATA pHMHandleData,
+                                      LPVOID        lpBaseAddress,
+                                      DWORD         dwNumberOfBytesToFlush)
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::FlushViewOfFile(%08xh,%08xh,%08xh)\n",
+           pHMHandleData->hHMHandle,
+           lpBaseAddress,
+           dwNumberOfBytesToFlush));
+
+  return(FALSE);
+}
+

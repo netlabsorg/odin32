@@ -1,4 +1,4 @@
-/* $Id: HandleManager.h,v 1.6 1999-08-24 18:48:10 sandervl Exp $ */
+/* $Id: HandleManager.h,v 1.7 1999-08-25 08:54:32 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -274,19 +274,32 @@ HANDLE HMCreateFileMapping(
                 DWORD protect,   /* [in] Protection for mapping object */
                 DWORD size_high, /* [in] High-order 32 bits of object size */
                 DWORD size_low,  /* [in] Low-order 32 bits of object size */
-                LPCSTR name);    /* [in] Name of file-mapping object */ 
+                LPCSTR name);    /* [in] Name of file-mapping object */
 
 HANDLE HMOpenFileMapping(
                 DWORD access,   /* [in] Access mode */
                 BOOL inherit,   /* [in] Inherit flag */
                 LPCSTR name );  /* [in] Name of file-mapping object */
 
+LPVOID HMMapViewOfFile              (HANDLE                     hFileMappingObject,
+                                     DWORD                      dwDesiredAccess,
+                                     DWORD                      dwFileOffsetHigh,
+                                     DWORD                      dwFileOffsetLow,
+                                     DWORD                      dwNumberOfBytesToMap);
+
 LPVOID HMMapViewOfFileEx            (HANDLE                     hFileMappingObject,
                                      DWORD                      dwDesiredAccess,
                                      DWORD                      dwFileOffsetHigh,
                                      DWORD                      dwFileOffsetLow,
                                      DWORD                      dwNumberOfBytesToMap,
-			             LPVOID                     lpBaseAddress);
+                                     LPVOID                     lpBaseAddress);
+
+BOOL   HMUnmapViewOfFile            (LPVOID                     lpBaseAddress);
+
+BOOL   HMFlushViewOfFile            (LPVOID                     lpBaseAddress,
+                                     DWORD                      dwNumberOfBytesToFlush);
+
+
 
 #ifdef __cplusplus__
   }
