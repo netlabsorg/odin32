@@ -13,14 +13,15 @@ void DisableOdinIni();
 void DisableOdinSysMenuItems();
 
 
-typedef HANDLE (* WIN32API PFNDRVOPEN)(DWORD dwAccess, DWORD dwShare);
-typedef void   (* WIN32API PFNDRVCLOSE)(HANDLE hDevice);
-typedef BOOL   (* WIN32API PFNDRVIOCTL)(HANDLE hDevice, DWORD dwIoControlCode,
+typedef HANDLE (* WIN32API PFNDRVOPEN)(DWORD dwAccess, DWORD dwShare, DWORD dwFlags);
+typedef void   (* WIN32API PFNDRVCLOSE)(HANDLE hDevice, DWORD dwFlags);
+typedef BOOL   (* WIN32API PFNDRVIOCTL)(HANDLE hDevice, DWORD dwFlags, DWORD dwIoControlCode,
                                         LPVOID lpInBuffer, DWORD nInBufferSize,
                                         LPVOID lpOutBuffer, DWORD nOutBufferSize,
                                         LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped);
 
 typedef BOOL   (* WIN32API PFNDRVREAD)(HANDLE        hDevice,
+                                       DWORD         dwFlags,
                                        LPCVOID       lpBuffer,
                                        DWORD         nNumberOfBytesToRead,
                                        LPDWORD       lpNumberOfBytesRead,
@@ -28,14 +29,16 @@ typedef BOOL   (* WIN32API PFNDRVREAD)(HANDLE        hDevice,
                                        LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine);
 
 typedef BOOL   (* WIN32API PFNDRVWRITE)(HANDLE        hDevice,
+                                        DWORD         dwFlags,
                                         LPCVOID       lpBuffer,
                                         DWORD         nNumberOfBytesToWrite,
                                         LPDWORD       lpNumberOfBytesWrite,
                                         LPOVERLAPPED  lpOverlapped,
                                         LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine);
 
-typedef BOOL   (* WIN32API PFNDRVCANCELIO)(HANDLE hDevice);
+typedef BOOL   (* WIN32API PFNDRVCANCELIO)(HANDLE hDevice, DWORD dwFlags);
 typedef DWORD  (* WIN32API PFNDRVGETOVERLAPPEDRESULT)(HANDLE        hDevice,
+                                                      DWORD         dwFlags,
                                                       LPOVERLAPPED  lpOverlapped,
                                                       LPDWORD       lpcbTransfer,
                                                       BOOL          fWait);

@@ -1,4 +1,4 @@
-/* $Id: overlappedio.cpp,v 1.12 2001-12-10 14:04:24 sandervl Exp $ */
+/* $Id: overlappedio.cpp,v 1.13 2001-12-14 12:44:57 sandervl Exp $ */
 
 /*
  * Win32 overlapped IO class
@@ -15,7 +15,7 @@
 #include <string.h>
 #include <handlemanager.h>
 #include <heapstring.h>
-#include "overlappedio.h"
+#include <overlappedio.h>
 #include "oslibdos.h"
 
 #define DBG_LOCALLOG  DBG_overlappedio
@@ -238,19 +238,22 @@ DWORD OverlappedIOHandler::threadHandler(DWORD dwOperation)
                 }
                 else lpRequest->dwLastError = lpWriteHandler(lpRequest, &dwResult, NULL);
 
-                lpOverlapped->Internal     = lpRequest->dwLastError;
-                lpOverlapped->InternalHigh = dwResult;
-                if(lpRequest->lpdwResult) {
-                    *lpRequest->lpdwResult = dwResult;
-                }
+                if(!lpRequest->fCancelled) 
+                {
+                    lpOverlapped->Internal     = lpRequest->dwLastError;
+                    lpOverlapped->InternalHigh = dwResult;
+                    if(lpRequest->lpdwResult) {
+                        *lpRequest->lpdwResult = dwResult;
+                    }
 #ifdef DEBUG
-                if(lpRequest->dwAsyncType == ASYNCIO_READ) {
-                     dprintf(("ASYNCIO_READ %x finished; result %x, last error %d", lpOverlapped, dwResult, lpRequest->dwLastError));
-                }
-                else dprintf(("ASYNCIO_WRITE %x finished; result %x, last error %d", lpOverlapped, dwResult, lpRequest->dwLastError));
+                    if(lpRequest->dwAsyncType == ASYNCIO_READ) {
+                         dprintf(("ASYNCIO_READ %x finished; result %x, last error %d", lpOverlapped, dwResult, lpRequest->dwLastError));
+                    }
+                    else dprintf(("ASYNCIO_WRITE %x finished; result %x, last error %d", lpOverlapped, dwResult, lpRequest->dwLastError));
 #endif
-                //wake up user thread
-                ::SetEvent(lpOverlapped->hEvent);
+                    //wake up user thread
+                    ::SetEvent(lpOverlapped->hEvent);
+                }
                 break;
 
             case ASYNCIO_POLL:
@@ -278,7 +281,7 @@ DWORD OverlappedIOHandler::threadHandler(DWORD dwOperation)
                     }
                 }
                 //Don't access the overlapped & result memory when CancelIo was used to cancel the operation
-                if(ret == WAIT_TIMEOUT)
+                if(ret == WAIT_TIMEOUT && !lpRequest->fCancelled)
                 {
                     dprintf(("ASYNCIO_POLL %x: result %x, last error %d", lpOverlapped, dwResult, lpRequest->dwLastError));
                     lpOverlapped->Internal     = lpRequest->dwLastError;
