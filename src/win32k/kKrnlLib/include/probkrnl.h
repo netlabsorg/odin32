@@ -1,4 +1,4 @@
-/* $Id: probkrnl.h,v 1.6 2001-10-14 22:50:57 bird Exp $
+/* $Id: probkrnl.h,v 1.7 2001-11-19 03:06:06 bird Exp $
  *
  * Include file for ProbKrnl.
  *
@@ -121,7 +121,7 @@ typedef struct tagIMPORTKRNLSYM
     unsigned char       cbProlog;       /* Size of the prolog needing to be exchanged */
     unsigned char       chOpcode;       /* The opcode of the function. 0 if not known. */
     unsigned char       fType;          /* Entry-Point Type Flags */
-} IMPORTKRNLSYM;
+} IMPORTKRNLSYM, *PIMPORTKRNLSYM;
 #pragma pack()
 
 
@@ -152,20 +152,29 @@ typedef struct
 *******************************************************************************/
 extern IMPORTKRNLSYM DATA16_GLOBAL  aImportTab[NBR_OF_KRNLIMPORTS]; /* Defined in ProbKrnl.c */
 extern char          DATA16_GLOBAL  szSymbolFile[60];               /* Defined in ProbKrnl.c */
-extern KRNLDBENTRY   DATA16_INIT    aKrnlSymDB[];                   /* Defined in symdb.c (for 16-bit usage) */
+#ifdef DB_16BIT
+extern const KRNLDBENTRY DATA16_INIT aKrnlSymDB[];                  /* Defined in symdb.c (for 16-bit usage) */
+#else
+extern const KRNLDBENTRY            aKrnlSymDB32[];                 /* Defined in symdb32.c */
+#endif
 
 #if defined(__IBMC__) || defined(__IBMCPP__)
     #pragma map( aImportTab , "_aImportTab"  )
     #pragma map( szSymbolFile,"_szSymbolFile")
+#ifdef DB_16BIT
     #pragma map( aKrnlSymDB , "_aKrnlSymDB"  )
+#endif
 #endif
 
 /*
  * 16-bit init time functions.
  */
 #if defined(INCL_16) && defined(MAX_DISKDD_CMD) /* 16-bit only */
-    int ProbeKernel(PRPINITIN pReqPack);
+    int             ProbeKernel(PRPINITIN pReqPack);
     const char *    GetErrorMsg(short sErr);
+    #ifdef _kKLInitHlp_h_
+        int         DoDevIOCtl(KKLR0INITPARAM  *pParam, KKLR0INITDATA *pData);
+    #endif
 #endif
 
 #endif
