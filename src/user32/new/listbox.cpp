@@ -1,4 +1,4 @@
-/* $Id */
+/* $Id: listbox.cpp,v 1.2 1999-07-24 17:10:25 cbratschi Exp $ */
 /*
  * Listbox controls
  *
@@ -2616,12 +2616,12 @@ BOOL LISTBOX_Register()
     if (GlobalFindAtomA(LISTBOXCLASSNAME)) return FALSE;
 
     ZeroMemory(&wndClass,sizeof(WNDCLASSA));
-    wndClass.style         = CS_GLOBALCLASS | CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
+    wndClass.style         = CS_GLOBALCLASS | CS_DBLCLKS;
     wndClass.lpfnWndProc   = (WNDPROC)ListBoxWndProc;
     wndClass.cbClsExtra    = 0;
     wndClass.cbWndExtra    = sizeof(VOID*);
     wndClass.hCursor       = LoadCursorA(0,IDC_ARROWA);
-    wndClass.hbrBackground = (HBRUSH)(COLOR_3DFACE+1);
+    wndClass.hbrBackground = (HBRUSH)0;
     wndClass.lpszClassName = LISTBOXCLASSNAME;
 
     return RegisterClassA(&wndClass);
@@ -2642,12 +2642,12 @@ BOOL COMBOLBOX_Register()
     if (GlobalFindAtomA(COMBOLBOXCLASSNAME)) return FALSE;
 
     ZeroMemory(&wndClass,sizeof(WNDCLASSA));
-    wndClass.style         = CS_GLOBALCLASS | CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
+    wndClass.style         = CS_GLOBALCLASS | CS_DBLCLKS | CS_SAVEBITS;
     wndClass.lpfnWndProc   = (WNDPROC)ComboLBWndProc;
     wndClass.cbClsExtra    = 0;
     wndClass.cbWndExtra    = sizeof(VOID*);
     wndClass.hCursor       = LoadCursorA(0,IDC_ARROWA);
-    wndClass.hbrBackground = (HBRUSH)(COLOR_3DFACE+1);
+    wndClass.hbrBackground = (HBRUSH)0;
     wndClass.lpszClassName = COMBOLBOXCLASSNAME;
 
     return RegisterClassA(&wndClass);

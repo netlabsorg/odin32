@@ -1,4 +1,4 @@
-/* $Id: controls.cpp,v 1.7 1999-07-24 12:40:20 cbratschi Exp $ */
+/* $Id: controls.cpp,v 1.8 1999-07-24 17:10:24 cbratschi Exp $ */
 /* File: controls.cpp -- Win32 common controls
  *
  * Copyright (c) 1999 Christoph Bratschi
@@ -13,7 +13,7 @@
 #include "button.h"
 #include "static.h"
 #include "scroll.h"
-#include "combo.H" //listbox included
+#include "combo.H" //listbox,combo,edit
 
 /* registration */
 
@@ -36,6 +36,9 @@ void CONTROLS_Register()
 
   dprintf(("Register COMBOBOX class"));
   if (!COMBOBOX_Register()) dprintf(("failed!!!"));
+
+  dprintf(("Register EDIT class"));
+  if (!EDIT_Register()) dprintf(("failed!!!"));
 }
 
 void CONTROLS_Unregister()
@@ -57,5 +60,8 @@ void CONTROLS_Unregister()
 
   dprintf(("Unregister COMBOBOX class"));
   if (!COMBOBOX_Unregister()) dprintf(("failed!!!"));
+
+  dprintf(("Unregister EDIT class"));
+  if (!EDIT_Unregister()) dprintf(("failed!!!"));
 }
 
