@@ -1,4 +1,4 @@
-/* $Id: hmdevice.h,v 1.15 2000-01-05 19:39:56 sandervl Exp $ */
+/* $Id: hmdevice.h,v 1.16 2000-03-16 19:20:38 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -29,6 +29,8 @@
 #define HMTYPE_DEVICE   	2
 #define HMTYPE_PROCESSTOKEN 	3
 #define HMTYPE_THREADTOKEN 	4
+#define HMTYPE_THREAD           5
+
 //.....
 
 /*****************************************************************************
@@ -65,7 +67,6 @@ public:
   LPCSTR lpHMDeviceName;                   /* a reference to the device name */
 
   HMDeviceHandler(LPCSTR lpDeviceName);      /* constructor with device name */
-
 
   /***********************************
    * handle generic standard methods *
@@ -301,6 +302,26 @@ public:
  virtual DWORD  OpenProcessToken(PHMHANDLEDATA pHMHandleData, DWORD dwUserData,
                                   HANDLE  ProcessHandle);
 
+ virtual HANDLE CreateThread(PHMHANDLEDATA          pHMHandleData,
+                             LPSECURITY_ATTRIBUTES  lpsa,
+                             DWORD                  cbStack,
+                             LPTHREAD_START_ROUTINE lpStartAddr,
+                             LPVOID                 lpvThreadParm,
+                             DWORD                  fdwCreate,
+                             LPDWORD                lpIDThread);
+
+ virtual INT    GetThreadPriority(PHMHANDLEDATA pHMHandleData);
+ virtual DWORD  SuspendThread(PHMHANDLEDATA pHMHandleData);
+ virtual BOOL   SetThreadPriority(PHMHANDLEDATA pHMHandleData, int priority);
+
+ virtual BOOL   GetThreadContext(PHMHANDLEDATA pHMHandleData, PCONTEXT lpContext);
+ virtual BOOL   SetThreadContext(PHMHANDLEDATA pHMHandleData, const CONTEXT *lpContext);
+
+ virtual BOOL   TerminateThread(PHMHANDLEDATA pHMHandleData, DWORD exitcode);
+ virtual DWORD  ResumeThread(PHMHANDLEDATA pHMHandleData);
+ virtual BOOL   SetThreadTerminated(PHMHANDLEDATA pHMHandleData);
+
+ virtual BOOL   GetExitCodeThread(PHMHANDLEDATA pHMHandleData, LPDWORD lpExitCode);
 };
 
 

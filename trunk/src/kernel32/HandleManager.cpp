@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.35 2000-02-16 14:23:57 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.36 2000-03-16 19:20:36 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -56,7 +56,8 @@
 #include "HMMMap.h"
 #include "HMComm.h"
 #include "HMToken.h"
-#include <winconst.h>
+#include "HMThread.h"
+#include <vmutex.h>
 
 #define DBG_LOCALLOG	DBG_handlemanager
 #include "dbglocal.h"
@@ -108,8 +109,9 @@ class HMDeviceDebugClass : public HMDeviceHandler
 
             /* the device name is repeated here to enable device alias names */
 static PHMDEVICE TabWin32Devices = NULL;
-static HMHANDLE TabWin32Handles[MAX_OS2_HMHANDLES];   /* static handle table */
 
+static HMHANDLE TabWin32Handles[MAX_OS2_HMHANDLES];   /* static handle table */
+VMutex          handleMutex;
 
 struct _HMGlobals
 {
@@ -127,6 +129,7 @@ struct _HMGlobals
   HMDeviceHandler        *pHMFileMapping;  /* static instances of subsystems */
   HMDeviceHandler        *pHMComm;                   /* serial communication */
   HMDeviceHandler        *pHMToken;         /* security tokens */
+  HMDeviceHandler        *pHMThread;
 
   ULONG         ulHandleLast;                   /* index of last used handle */
 } HMGlobals;
@@ -194,6 +197,8 @@ static ULONG _HMHandleGetFree(void)
 {
   register ULONG ulLoop;
 
+  handleMutex.enter();
+
   for (ulLoop = 1; // @@@PH Note, this is an experimental change
                    // 0L as hHandle is sometimes considered invalid!
                    // this will never return 0l as free handle now.
@@ -204,10 +209,12 @@ static ULONG _HMHandleGetFree(void)
     if (INVALID_HANDLE_VALUE == TabWin32Handles[ulLoop].hmHandleData.hHMHandle) {
 	TabWin32Handles[ulLoop].hmHandleData.dwUserData     = 0;
 	TabWin32Handles[ulLoop].hmHandleData.dwInternalType = HMTYPE_UNKNOWN;
+  	handleMutex.leave();
       	return (ulLoop);                    /* OK, then return it to the caller */
     }
   }
 
+  handleMutex.leave();
   return (INVALID_HANDLE_VALUE);             /* haven't found any free handle */
 }
 
@@ -325,11 +332,12 @@ DWORD HMInitialize(void)
   {
     HMGlobals.fIsInitialized = TRUE;                             /* OK, done */
 
+    handleMutex.enter();
     // fill handle table
-    for (ulIndex = 0;
-         ulIndex < MAX_OS2_HMHANDLES;
-         ulIndex++)
-      TabWin32Handles[ulIndex].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
+    for(ulIndex = 0; ulIndex < MAX_OS2_HMHANDLES; ulIndex++) {
+      	TabWin32Handles[ulIndex].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
+    }
+    handleMutex.leave();
 
     dprintf(("KERNEL32:HandleManager:HMInitialize() storing handles.\n"));
 
@@ -337,7 +345,7 @@ DWORD HMInitialize(void)
            0,
            sizeof(HMGlobals));
 
-                       /* copy standard handles from OS/2's Open32 Subsystem */
+    /* copy standard handles from OS/2's Open32 Subsystem */
     HMSetStdHandle(STD_INPUT_HANDLE,  GetStdHandle(STD_INPUT_HANDLE));
     HMSetStdHandle(STD_OUTPUT_HANDLE, GetStdHandle(STD_OUTPUT_HANDLE));
     HMSetStdHandle(STD_ERROR_HANDLE,  GetStdHandle(STD_ERROR_HANDLE));
@@ -350,6 +358,7 @@ DWORD HMInitialize(void)
     HMGlobals.pHMFileMapping= new HMDeviceMemMapClass("\\\\MEMMAP\\");
     HMGlobals.pHMComm       = new HMDeviceCommClass("\\\\COM\\");
     HMGlobals.pHMToken      = new HMDeviceTokenClass("\\\\TOKEN\\");
+    HMGlobals.pHMThread     = new HMDeviceThreadClass("\\\\THREAD\\");
   }
   return (NO_ERROR);
 }
@@ -407,8 +416,8 @@ DWORD HMTerminate(void)
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-DWORD  HMHandleAllocate (PULONG phHandle16,
-                         ULONG  hHandleOS2)
+DWORD HMHandleAllocate (PULONG phHandle16,
+                        ULONG  hHandleOS2)
 {
   register ULONG ulHandle;
 
@@ -420,19 +429,22 @@ DWORD  HMHandleAllocate (PULONG phHandle16,
 
   ulHandle = HMGlobals.ulHandleLast;                      /* get free handle */
 
+  handleMutex.enter();
+
   if(ulHandle == 0) {
 	ulHandle = 1; //SvL: Start searching from index 1
   }
   do
   {
-                                                  /* check if handle is free */
+    /* check if handle is free */
     if (TabWin32Handles[ulHandle].hmHandleData.hHMHandle == INVALID_HANDLE_VALUE)
     {
-      *phHandle16 = ulHandle;
-      TabWin32Handles[ulHandle].hmHandleData.hHMHandle = hHandleOS2;
-      HMGlobals.ulHandleLast = ulHandle;          /* to shorten search times */
+     	*phHandle16 = ulHandle;
+      	TabWin32Handles[ulHandle].hmHandleData.hHMHandle = hHandleOS2;
+      	HMGlobals.ulHandleLast = ulHandle;          /* to shorten search times */
 
-      return (NO_ERROR);                                               /* OK */
+  	handleMutex.leave();
+      	return (NO_ERROR);                                               /* OK */
     }
 
     ulHandle++;                                        /* skip to next entry */
@@ -441,6 +453,8 @@ DWORD  HMHandleAllocate (PULONG phHandle16,
       ulHandle = 1;
   }
   while (ulHandle != HMGlobals.ulHandleLast);
+
+  handleMutex.leave();
 
   return (ERROR_TOO_MANY_OPEN_FILES);                      /* OK, we're done */
 }
@@ -2909,4 +2923,351 @@ DWORD HMOpenProcessToken(HANDLE  ProcessHandle,
   *TokenHandle = iIndexNew;                                   /* return valid handle */
   return STATUS_SUCCESS;
 }
+/*****************************************************************************
+ * Name      : HMCreateThread
+ * Purpose   : router function for CreateThread
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+HANDLE HMCreateThread(LPSECURITY_ATTRIBUTES  lpsa,
+                      DWORD                  cbStack,
+                      LPTHREAD_START_ROUTINE lpStartAddr,
+                      LPVOID                 lpvThreadParm,
+                      DWORD                  fdwCreate,
+                      LPDWORD                lpIDThread)
+{
+  int             iIndex;                     /* index into the handle table */
+  int             iIndexNew;                  /* index into the handle table */
+  HMDeviceHandler *pDeviceHandler;         /* device handler for this handle */
+  PHMHANDLEDATA   pHMHandleData;
+  HANDLE          rc;                                     /* API return code */
 
+  SetLastError(ERROR_SUCCESS);
+
+  pDeviceHandler = HMGlobals.pHMThread;         /* device is predefined */
+
+  iIndexNew = _HMHandleGetFree();                         /* get free handle */
+  if (-1 == iIndexNew)                            /* oops, no free handles ! */
+  {
+    SetLastError(ERROR_NOT_ENOUGH_MEMORY);      /* use this as error message */
+    return 0; 
+  }
+
+  /* initialize the complete HMHANDLEDATA structure */
+  pHMHandleData = &TabWin32Handles[iIndexNew].hmHandleData;
+  pHMHandleData->dwType     = FILE_TYPE_UNKNOWN;      /* unknown handle type */
+  pHMHandleData->dwAccess   = 0;
+  pHMHandleData->dwShare    = 0;
+  pHMHandleData->dwCreation = 0;
+  pHMHandleData->dwFlags    = 0;
+  pHMHandleData->lpHandlerData = NULL;
+
+
+  /* we've got to mark the handle as occupied here, since another device */
+  /* could be created within the device handler -> deadlock */
+
+  /* write appropriate entry into the handle table if open succeeded */
+  TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = iIndexNew;
+  TabWin32Handles[iIndexNew].pDeviceHandler         = pDeviceHandler;
+
+                                                  /* call the device handler */
+
+  // @@@PH: Note: hFile is a Win32-style handle, it's not (yet) converted to
+  //              a valid HandleManager-internal handle!
+  rc = pDeviceHandler->CreateThread(&TabWin32Handles[iIndexNew].hmHandleData,
+                                    lpsa,  cbStack, lpStartAddr,
+                                    lpvThreadParm, fdwCreate, lpIDThread);
+
+  if (rc == 0)     /* oops, creation failed within the device handler */
+  {
+    	TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
+	return 0;                                           /* signal error */
+  }
+
+  return iIndexNew;
+}
+/*****************************************************************************
+ * Name      : HMGetThreadPriority
+ * Purpose   : router function for GetThreadPriority
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+INT HMGetThreadPriority(HANDLE hThread)
+{
+  int       iIndex;                           /* index into the handle table */
+  INT       lpResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+  SetLastError(ERROR_SUCCESS);
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hThread);              /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return (-1);                                         /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  lpResult = pHMHandle->pDeviceHandler->GetThreadPriority(&TabWin32Handles[iIndex].hmHandleData);
+
+  return (lpResult);                                  /* deliver return code */
+}
+/*****************************************************************************
+ * Name      : HMSuspendThread
+ * Purpose   : router function for SuspendThread
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+DWORD HMSuspendThread(HANDLE hThread)
+{
+  int       iIndex;                           /* index into the handle table */
+  HANDLE    lpResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+  SetLastError(ERROR_SUCCESS);
+                                                         /* validate handle */
+  iIndex = _HMHandleQuery(hThread);              /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return -1;                                         /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  lpResult = pHMHandle->pDeviceHandler->SuspendThread(&TabWin32Handles[iIndex].hmHandleData);
+
+  return (lpResult);                                  /* deliver return code */
+}
+/*****************************************************************************
+ * Name      : HMSetThreadPriority
+ * Purpose   : router function for SetThreadPriority
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+BOOL HMSetThreadPriority(HANDLE hThread, int priority)
+{
+  int       iIndex;                           /* index into the handle table */
+  BOOL      lpResult;                   /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+  SetLastError(ERROR_SUCCESS);
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hThread);              /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return FALSE;                                         /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  lpResult = pHMHandle->pDeviceHandler->SetThreadPriority(&TabWin32Handles[iIndex].hmHandleData, priority);
+
+  return (lpResult);                                  /* deliver return code */
+}
+/*****************************************************************************
+ * Name      : HMGetThreadContext
+ * Purpose   : router function for GetThreadContext
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+BOOL HMGetThreadContext(HANDLE hThread, CONTEXT *lpContext)
+{
+  int       iIndex;                           /* index into the handle table */
+  BOOL      lpResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+  SetLastError(ERROR_SUCCESS);
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hThread);              /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return FALSE;                                         /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  lpResult = pHMHandle->pDeviceHandler->GetThreadContext(&TabWin32Handles[iIndex].hmHandleData, lpContext);
+
+  return (lpResult);                                  /* deliver return code */
+}
+/*****************************************************************************
+ * Name      : HMSetThreadContext
+ * Purpose   : router function for SetThreadContext
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+BOOL HMSetThreadContext(HANDLE hThread, const CONTEXT *lpContext)
+{
+  int       iIndex;                           /* index into the handle table */
+  BOOL      lpResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+  SetLastError(ERROR_SUCCESS);
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hThread);              /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return FALSE;                                         /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  lpResult = pHMHandle->pDeviceHandler->SetThreadContext(&TabWin32Handles[iIndex].hmHandleData, lpContext);
+
+  return (lpResult);                                  /* deliver return code */
+}
+/*****************************************************************************
+ * Name      : HMTerminateThread
+ * Purpose   : router function for TerminateThread
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+BOOL HMTerminateThread(HANDLE hThread, DWORD exitcode)
+{
+  int       iIndex;                           /* index into the handle table */
+  BOOL      lpResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+  SetLastError(ERROR_SUCCESS);
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hThread);              /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return FALSE;                                         /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  lpResult = pHMHandle->pDeviceHandler->TerminateThread(&TabWin32Handles[iIndex].hmHandleData, exitcode);
+
+  return (lpResult);                                  /* deliver return code */
+}
+/*****************************************************************************
+ * Name      : HMResumeThread
+ * Purpose   : router function for ResumeThread
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+DWORD HMResumeThread(HANDLE hThread)
+{
+  int       iIndex;                           /* index into the handle table */
+  DWORD     lpResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+  SetLastError(ERROR_SUCCESS);
+                                                 /* validate handle */
+  iIndex = _HMHandleQuery(hThread);              /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return -1;                                         /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  lpResult = pHMHandle->pDeviceHandler->ResumeThread(&TabWin32Handles[iIndex].hmHandleData);
+
+  return (lpResult);                                  /* deliver return code */
+}
+
+/*****************************************************************************
+ * Name      : HMGetExitCodeThread
+ * Purpose   : router function for GetExitCodeThread
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+BOOL HMGetExitCodeThread(HANDLE hThread, LPDWORD lpExitCode)
+{
+  int       iIndex;                           /* index into the handle table */
+  BOOL      lpResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+  SetLastError(ERROR_SUCCESS);
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hThread);              /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return FALSE;                                         /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  lpResult = pHMHandle->pDeviceHandler->GetExitCodeThread(&TabWin32Handles[iIndex].hmHandleData, lpExitCode);
+
+  return (lpResult);                                  /* deliver return code */
+}
+/*****************************************************************************
+ * Name      : HMSetThreadTerminated
+ * Purpose   : 
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+BOOL HMSetThreadTerminated(HANDLE hThread)
+{
+  int       iIndex;                           /* index into the handle table */
+  BOOL      lpResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+  SetLastError(ERROR_SUCCESS);
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hThread);              /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return FALSE;                                         /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  lpResult = pHMHandle->pDeviceHandler->SetThreadTerminated(&TabWin32Handles[iIndex].hmHandleData);
+
+  return (lpResult);                                  /* deliver return code */
+}

@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.38 2000-03-10 16:11:59 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.39 2000-03-16 19:20:39 sandervl Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -158,10 +158,10 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
 	    OSLibDosSetInitialMaxFileHandles(ODIN_DEFAULT_MAX_FILEHANDLES);
 
-            InitializeTIB(TRUE);
             //SvL: Do it here instead of during the exe object creation
             //(std handles can be used in win32 dll initialization routines
             HMInitialize();             /* store standard handles within HandleManager */
+            InitializeTIB(TRUE); 	//MUST be done after HMInitialize!
             InitDirectories();
             RegisterDevices();
 	    Win32DllBase::setDefaultRenaming();
@@ -191,6 +191,7 @@ static void APIENTRY cleanup(ULONG ulReason)
     dprintf(("kernel32 exit %d\n", ulReason));
     //Flush and delete all open memory mapped files
     Win32MemMap::deleteAll();
+    WinExe = NULL;
 
     WriteOutProfiles();
     DestroyTIB();
