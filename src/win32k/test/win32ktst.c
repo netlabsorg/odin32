@@ -1,4 +1,4 @@
-/* $Id: win32ktst.c,v 1.7 2001-02-10 11:11:48 bird Exp $
+/* $Id: win32ktst.c,v 1.8 2001-02-11 15:28:10 bird Exp $
  *
  * Win32k test module.
  *
@@ -651,6 +651,8 @@ int TestCase1(int argc, char **argv)
                     case 'a': case 'A': opt.fKernel |= KF_REV_A; break;
                     case 'b': case 'B': opt.fKernel |= KF_REV_B; break;
                     case 'c': case 'C': opt.fKernel |= KF_REV_C; break;
+                    case 'd': case 'D': opt.fKernel |= KF_REV_D; break;
+                    case 'e': case 'E': opt.fKernel |= KF_REV_E; break;
                     default:
                     opt.fKernel = (argv[8][0] - (argv[8][0] >= 'a' ? 'a'-1 : 'A'-1)) << KF_REV_SHIFT;
                 }
