@@ -1,4 +1,4 @@
-/* $Id: winuser.h,v 1.19 1999-11-19 18:38:29 cbratschi Exp $ */
+/* $Id: winuser.h,v 1.20 1999-11-24 19:17:51 cbratschi Exp $ */
 
 #ifndef __INCLUDE_WINUSER_H
 #define __INCLUDE_WINUSER_H
@@ -1464,6 +1464,11 @@ typedef BOOL (* CALLBACK DRAWSTATEPROC)(HDC,LPARAM,WPARAM,INT,INT);
 #define BN_UNHILITE            3
 #define BN_DISABLE             4
 #define BN_DOUBLECLICKED       5
+#define BN_PUSHED              BN_HILITE
+#define BN_UNPUSHED            BN_UNHILITE
+#define BN_DBLCLK              BN_DOUBLECLICKED
+#define BN_SETFOCUS            6
+#define BN_KILLFOCUS           7
 
 /* Button states */
 #define BST_UNCHECKED        0x0000
@@ -3673,6 +3678,7 @@ INT       WINAPI wvsnprintfW(LPWSTR,UINT,LPCWSTR,va_list);
 #define     wvsnprintf WINELIB_NAME_AW(wvsnprintf)
 INT       WINAPI wvsprintfA(LPSTR,LPCSTR,va_list);
 INT       WINAPI wvsprintfW(LPWSTR,LPCWSTR,va_list);
+#define     wvsprintf WINELIB_NAME_AW(wvsprintf)
 
 BOOL      WINAPI RegisterShellHook16(HWND16,UINT16);
 /* NOTE: This is SYSTEM.3, not USER.182, which is also named KillSystemTimer */
