@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.296 1999-10-09 13:34:28 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.297 1999-10-09 15:04:07 sandervl Exp $ */
 
  99-10-09: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Clipboard fixes (window handle translation)
@@ -9,6 +9,8 @@
 	- KERNEL32: Don't switch FS selectors for Odin32 OS/2 apps (win32
                     apps compiled in OS/2).
                     Fixed reversed stack top & bottom in TEB structure.
+	- KERNEL32  Added code to dispatch OS exceptions to win32 apps.
+                    Doesn't seem to be necessary though, so it's inactive for now.
 
  99-10-09: Jens Wiessner <wiessnej@rfi.de>
 	- CRTDLL: Implemented functions; only 62 stubs left
