@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1889 2001-12-08 10:14:18 sandervl Exp $ */
+/* $Id: changelog,v 1.1890 2001-12-08 10:38:43 sandervl Exp $ */
+
+ 2001-12-08: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Added read & write functions to custom driver interface
 
  2001-12-07: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o GetFileType for parallel port device returns FILE_TYPE_PIPE
