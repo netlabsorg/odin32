@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.11 1999-10-20 13:46:25 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.12 1999-10-20 16:27:00 cbratschi Exp $ */
 
 /*
  * USER32 DLL entry point
@@ -39,6 +39,7 @@
 #include "pmwindow.h"
 #include "heapshared.h"
 #include "win32wdesktop.h"
+#include "syscolor.h"
 
 /*-------------------------------------------------------------------*/
 /* A clean up routine registered with DosExitList must be used if    */
@@ -81,8 +82,8 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
-	 if(RegisterLxDll(hModule, 0, 0) == FALSE) 
-		return 0UL;
+         if(RegisterLxDll(hModule, 0, 0) == FALSE)
+                return 0UL;
 
          /*******************************************************************/
          /* A DosExitList routine must be used to clean up if runtime calls */
@@ -100,8 +101,8 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          //SvL: Try to start communication with our message spy queue server
          InitSpyQueue();
 
-	 if(InitializeSharedHeap() == FALSE) 
-		return 0UL;
+         if(InitializeSharedHeap() == FALSE)
+                return 0UL;
 
          //SvL: Init win32 PM classes
          if(InitPM() == FALSE) {
@@ -112,14 +113,14 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          //CB: register internal classes
          RegisterSystemClasses(hModule);
 
-	 //SvL: Create Desktop Window
-	 if(CreateWin32Desktop() == FALSE) {
+         //SvL: Create Desktop Window
+         if(CreateWin32Desktop() == FALSE) {
                 return 0UL;
-	 }
+         }
 
          break;
       case 1 :
-	 UnregisterLxDll(hModule);
+         UnregisterLxDll(hModule);
          break;
       default  :
          return 0UL;
@@ -140,6 +141,7 @@ static void APIENTRY cleanupQueue(ULONG ulReason)
 static void APIENTRY cleanup(ULONG ulReason)
 {
    dprintf(("user32 exit\n"));
+   SYSCOLOR_Save();
    DestroyDesktopWindow();
    UnregisterSystemClasses();
    DestroySharedHeap();
