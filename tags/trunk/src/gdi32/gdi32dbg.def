@@ -1,4 +1,4 @@
-; $Id: gdi32dbg.def,v 1.1 2002-11-26 10:53:09 sandervl Exp $
+; $Id: gdi32dbg.def,v 1.2 2003-11-12 14:10:55 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY GDI32 INITINSTANCE
@@ -15,11 +15,11 @@ IMPORTS
     WinDrawTabbedText          = PMMERGE.5432
 
 EXPORTS
-    _GDI_CallDevInstall16@20                                 @100
-    _GDI_CallExtDeviceModePropSheet16@16                     @101
-    _GDI_CallExtDeviceMode16@28                              @102
-    _GDI_CallAdvancedSetupDialog16@16                        @103
-    _GDI_CallDeviceCapabilities16@20                         @104
+    _GDI_CallDevInstall16@20                                 @100 NONAME
+    _GDI_CallExtDeviceModePropSheet16@16                     @101 NONAME
+    _GDI_CallExtDeviceMode16@28                              @102 NONAME
+    _GDI_CallAdvancedSetupDialog16@16                        @103 NONAME
+    _GDI_CallDeviceCapabilities16@20                         @104 NONAME
 
     AbortDoc                   = _DbgAbortDoc@4                 @105
     AbortPath                  = _DbgAbortPath@4                @106
@@ -206,7 +206,7 @@ EXPORTS
     GetPixelFormat             = _DbgGetPixelFormat@4           @287
     GetPolyFillMode            = _DbgGetPolyFillMode@4          @288
     GetROP2                    = _DbgGetROP2@4                  @289
-;    GetRandomRgn               = _DbgGetRandomRgn@??            @290
+    GetRandomRgn               = _DbgGetRandomRgn@12            @290
     GetRasterizerCaps          = _DbgGetRasterizerCaps@8        @291
     GetRegionData              = _DbgGetRegionData@12           @292
     GetRgnBox                  = _DbgGetRgnBox@8                @293
@@ -351,6 +351,13 @@ EXPORTS
 ;    gdiPlaySpoolStream         = _DbggdiPlaySpoolStream@??      @432
 ;    pfnRealizePalette          = _DbgpfnRealizePalette@??       @433
 ;    pfnSelectPalette           = _DbgpfnSelectPalette@??        @434
+    GetGlyphIndicesA           = _GetGlyphIndicesA@20            @435
+    GetGlyphIndicesW           = _GetGlyphIndicesW@20            @436
+
+;
+; ENDOFEXPORTS
+; Internal function marker
+;
 
 
 ;
@@ -373,3 +380,11 @@ EXPORTS
     
     OSLibGpiSetCp__FUlT1                                        @1213 NONAME
     _ConvertRGB555to565@12                                      @1214 NONAME
+
+    _DbgFillRect@12                                             @1215 NONAME
+    _DbgFrameRect@12                                            @1216 NONAME
+    _DbgInvertRect@8                                            @1217 NONAME
+
+    _GdiCombineVisRgn@12                                        @1218 NONAME
+    _GdiSetVisRgn@8                                             @1219 NONAME
+    _GdiCombineVisRgnClipRgn@12                                 @1220 NONAME

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.155 2003-07-31 15:56:47 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.156 2003-11-12 14:10:21 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -135,7 +135,7 @@ virtual  ULONG  MsgEnable(BOOL fEnable);
          ULONG  MsgChar(MSG *msg);
          ULONG  MsgPaint(ULONG tmp1, BOOL select = TRUE);
          ULONG  MsgEraseBackGround(HDC hdc);
-         ULONG  MsgNCPaint(PRECT pUpdateRect);
+         ULONG  MsgNCPaint(PRECT pUpdateRect, HRGN hrgnUpdate);
          ULONG  MsgFormatFrame(WINDOWPOS *lpWndPos);
          ULONG  DispatchMsgA(MSG *msg);
          ULONG  DispatchMsgW(MSG *msg);
@@ -230,7 +230,9 @@ virtual  PRECT  getWindowRect();
 
          //Save old clip region for CS_OWNDC windows (in BeginPaint)
          HRGN   GetClipRegion()                   { return hClipRegion; };
-         void   SetClipRegion(HRGN hRegion)       { hClipRegion = hRegion; };
+         HRGN   GetVisRegion()                    { return hVisRegion; };
+         void   SaveClipRegion(HRGN hrgnClip)     { hClipRegion = hrgnClip; };
+         void   SaveVisRegion(HRGN hrgnVis)       { hVisRegion = hrgnVis; };
 
          void   saveAndValidateUpdateRegion();
          void   checkForDirtyUpdateRegion();
@@ -285,8 +287,6 @@ virtual  BOOL   DestroyWindow();
          BOOL   IsWindowUnicode();
          BOOL   IsMixMaxStateChanging()       { return fMinMaxChange; };
 
-         void   SetVisibleRegionChanged(BOOL changed) { fVisibleRegionChanged = changed; };
-         BOOL   IsVisibleRegionChanged()              { return fVisibleRegionChanged; };
          BOOL   setVisibleRgnNotifyProc(VISRGN_NOTIFY_PROC lpNotifyProc, DWORD dwUserData);
          void   callVisibleRgnNotifyProc(BOOL fDrawingAllowed);
          BOOL   isLocked()                            { return fWindowLocked; };
@@ -414,10 +414,10 @@ protected:
                  fXDefault:1,
                  fCXDefault:1,
                  fParentDC:1,
-             fComingToTop:1,
+                 fComingToTop:1,
                  isUnicode:1,
                  fMinMaxChange:1,        //set when switching between min/max/restored state
-                 fVisibleRegionChanged:1, //set when visible region has changed -> erase background must be sent during next BeginPaint
+                 fPMUpdateRegionChanged:1, //set when PM update has changed -> erase background must be sent during next BeginPaint
                  fEraseBkgndFlag:1,
                  fIsDragDropActive:1,
                  fDirtyUpdateRegion:1,
@@ -425,7 +425,7 @@ protected:
 
         ULONG   state;
         HRGN    hWindowRegion;
-        HRGN    hClipRegion;
+        HRGN    hClipRegion, hVisRegion;
         HRGN    hUpdateRegion;
 
         DWORD   dwThreadId;             //id of thread that created this window
@@ -532,6 +532,9 @@ protected:
 public:
          VOID   setEraseBkgnd (BOOL erase)      { fEraseBkgndFlag = erase; }
          BOOL   needsEraseBkgnd()               { return fEraseBkgndFlag; }
+
+         void   SetPMUpdateRegionChanged(BOOL changed)  { fPMUpdateRegionChanged = changed; };
+         BOOL   hasPMUpdateRegionChanged()              { return fPMUpdateRegionChanged; };
 };
 
 #endif //__cplusplus

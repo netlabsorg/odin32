@@ -1,13 +1,25 @@
-/* $Id: region.cpp,v 1.32 2003-06-03 13:48:13 sandervl Exp $ */
+/* $Id: region.cpp,v 1.33 2003-11-12 14:10:55 sandervl Exp $ */
 
 /*
  * GDI32 region code
  *
  * Copyright 1998-2000 Sander van Leeuwen (sandervl@xs4all.nl)
  * Copyright 1998 Patrick Haller
+ * Copyright 2002-2003 Innotek Systemberatung GmbH (sandervl@innotek.de)
  *
  * TODO: Metafile recording
  * TODO: Do we need to translate & set the last error for Gpi operations?
+ *
+ *
+ * NOTE: In windows there is a clip and a visible region (just like in PM)
+ *       We do not map the Win32 visible region to the PM visible region
+ *       as that's rather annoying.
+ *       Instead we use the intersection of the win32 visible and win32 clip 
+ *       region for the PM clip region.
+ *       The original Win32 clip region is saved in pHps->hrgnWin32Clip.
+ *       The Win32 visible region is saved in pHps->hrgnWinVis.
+ * 
+ *
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -30,9 +42,13 @@
 #include "oslibgpi.h"
 #include <stats.h>
 #include "dibsect.h"
+#include <wingdi32.h>
 
 #define DBG_LOCALLOG    DBG_region
 #include "dbglocal.h"
+
+//GPI and Windows use the same values
+#define GPI_TO_WIN_COMPLEXITY(a)	a
 
 typedef enum
 {
@@ -41,6 +57,8 @@ typedef enum
 } InterpMode;
 
 #define MEM_HPS_MAX 768
+
+int WIN32API OffsetRgn( HRGN  hrgn, int  xOffset, int  yOffset);
 
 static void convertDeviceRect(HWND hwnd, pDCData pHps, PRECTL pRectl, ULONG count);
 
@@ -106,7 +124,7 @@ LONG hdcHeight(HWND hwnd, pDCData pHps)
         RECTL rectl;
         LONG y = 0;
 
-        if(pHps == 0 || pHps->isClient) //client area
+        if(pHps && pHps->isClient) //client area
         {
             if(GetClientRect(OS2ToWin32Handle(hwnd), &rect) == TRUE) {
                 y = rect.bottom - rect.top;
@@ -131,7 +149,7 @@ LONG hdcHeight(HWND hwnd, pDCData pHps)
    else
    if(pHps->isPrinter)
    {
-      return pHps->printPageHeight;
+      return GetDeviceCaps(pHps->hps, VERTRES_W);
    }
    else
    {
@@ -151,7 +169,7 @@ LONG hdcWidth(HWND hwnd, pDCData pHps)
         RECTL rectl;
         LONG x = 0;
 
-        if(pHps == 0 || pHps->isClient) //client area
+        if(pHps && pHps->isClient) //client area
         {
             if(GetClientRect(OS2ToWin32Handle(hwnd), &rect) == TRUE) {
                 x = rect.right - rect.left;
@@ -162,6 +180,21 @@ LONG hdcWidth(HWND hwnd, pDCData pHps)
             x = rectl.xRight;
 
         return x;
+   }
+   else
+   if(pHps->bitmapHandle)
+   {
+      return pHps->bitmapWidth;
+   }
+   else
+   if(pHps->isMetaPS)
+   {
+      return 0;
+   }
+   else
+   if(pHps->isPrinter)
+   {
+      return GetDeviceCaps(pHps->hps, HORZRES_W);
    }
 //   else
 //     DebugInt3();
@@ -210,7 +243,7 @@ static void convertDeviceRect(HWND hwnd, pDCData pHps, PRECTL pRectl, ULONG coun
 
     if(pHps)
     {
-         wHeight += pHps->HPStoHDCInversionHeight;
+        wHeight += pHps->HPStoHDCInversionHeight;
     }
 
     if(hwnd || (pHps && pHps->hwnd)) {
@@ -387,73 +420,282 @@ BOOL WIN32API setWinDeviceRegionFromPMDeviceRegion(HRGN winHrgn, HRGN pmHrgn, pD
    return success;
 }
 //******************************************************************************
+// GdiSetVisRgn
+//
+// Change the Win32 visible region to the specified region
+//
+// Parameters:
+// 
+// pDCData pHps		- presentation space structure
+// HRGN hrgn		- region handle (GPI)
+//
+//
+// Returns:  	- ERROR_W         -> failure
+//      	- NULLREGION_W    -> empty region
+//              - SIMPLEREGION_W  -> rectangular region
+//              - COMPLEXREGION_W -> complex region
+//
+// NOTE: In windows there is a clip and a visible region (just like in PM)
+//       We do not map the Win32 visible region to the PM visible region
+//       as that's rather annoying.
+//       Instead we use the intersection of the win32 visible and win32 clip 
+//       region for the PM clip region.
+//       The Win32 clip region is saved in pHps->hrgnWin32Clip.
+//       The Win32 visible region is saved in pHps->hrgnWinVis.
+//
 //******************************************************************************
-int WIN32API SelectClipRgn(HDC hdc, HRGN hrgn)
+INT WIN32API GdiSetVisRgn(pDCData pHps, HRGN hrgn)
 {
- LONG lComplexity = RGN_NULL;
- HRGN hrgnNewClip;
- HRGN hrgnOldClip;
-#ifdef DEBUG
- HRGN hrgn1 = hrgn;
-#endif
+    HRGN hrgnNewClip = NULLHANDLE, hrgnOldClip = NULLHANDLE;
+    LONG lComplexity = RGN_NULL;
+    RECTL rectl = {0, 0, 1, 1};
 
-    pDCData  pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
-    if(!pHps)
-    {
-        dprintf(("WARNING: SelectClipRgn: invalid hdc!", hdc, hrgn));
-        SetLastError(ERROR_INVALID_HANDLE_W);
+    if(pHps == NULL) {
+        DebugInt3();
         return ERROR_W;
     }
 
-    if(hrgn)
+    if(hrgn != NULLHANDLE) 
     {
-        hrgn = ObjQueryHandleData(hrgn, HNDL_REGION);
-        if(hrgn == HANDLE_OBJ_ERROR) {
-            dprintf(("WARNING: SelectClipRgn: invalid region!", hdc, hrgn1));
-            SetLastError(ERROR_INVALID_HANDLE_W);
-            return ERROR_W;
-        }
-    }
-
-    if(hrgn)
-    {
-        RECTL rectl = {0,0,1,1};
         hrgnNewClip = GpiCreateRegion(pHps->hps, 1, &rectl);
-        if(interpretRegionAs(pHps, hrgnNewClip, hrgn, AS_DEVICE) == 0)
-        {
-            lComplexity = RGN_ERROR;
+        if(hrgnNewClip == NULLHANDLE) {
+            dprintf(("ERROR: GdiCombineVisRgn: GpiCreateRegion failed!!"));
+            DebugInt3();
+            goto failure;
         }
+        //make a copy of the new visible region
+        lComplexity = GpiCombineRegion(pHps->hps, hrgnNewClip, hrgn, NULLHANDLE, CRGN_COPY);
     }
-    else
-        hrgnNewClip = 0;
+    else {
+        hrgnNewClip = NULLHANDLE;
+    }
 
-    if(lComplexity != RGN_ERROR)
+    //and set that as the GPI clip region
+    lComplexity = GpiSetClipRegion(pHps->hps, hrgnNewClip, &hrgnOldClip);
+    if (lComplexity != RGN_ERROR)
     {
-        if(hrgnNewClip == 0) {
-            GpiSetClipPath(pHps->hps, 0, SCP_RESET);
-        }
-        lComplexity = GpiSetClipRegion(pHps->hps, hrgnNewClip, &hrgnOldClip);
-        if (lComplexity != RGN_ERROR )
-        {
-            if(hrgnOldClip)
-                GpiDestroyRegion(pHps->hps, hrgnOldClip);
+        //SvL: Must check if origin changed here. Sometimes happens when
+        //     window looses focus. (don't know why....)
+        checkOrigin(pHps);
 
-            //todo: metafile recording
-            SetLastError(ERROR_SUCCESS_W);
+        if(hrgnOldClip) GpiDestroyRegion(pHps->hps, hrgnOldClip);
+
+        dprintf(("New visible region %x", hrgn));
+        pHps->hrgnWinVis = hrgn;
+        return GPI_TO_WIN_COMPLEXITY(lComplexity);
+    }
+failure:
+    if(hrgnNewClip) GpiDestroyRegion(pHps->hps, hrgnNewClip);
+
+    return ERROR_W;
+}
+//******************************************************************************
+// GdiCombineVisRgn
+//
+// Combine the specified region with the visible region according to the operation
+//
+// Parameters:
+// 
+// pDCData pHps		- presentation space structure
+// HRGN hrgn		- region handle (Win32)
+// INT operation	- combine operation (RGN_*)
+//
+//
+// Returns:  	- ERROR_W         -> failure
+//      	- NULLREGION_W    -> empty region
+//              - SIMPLEREGION_W  -> rectangular region
+//              - COMPLEXREGION_W -> complex region
+//
+// NOTE: In windows there is a clip and a visible region (just like in PM)
+//       We do not map the Win32 visible region to the PM visible region
+//       as that's rather annoying.
+//       Instead we use the intersection of the win32 visible and win32 clip 
+//       region for the PM clip region.
+//       The Win32 clip region is saved in pHps->hrgnWin32Clip.
+//       The Win32 visible region is saved in pHps->hrgnWinVis.
+//
+//******************************************************************************
+INT WIN32API GdiCombineVisRgn(pDCData pHps, HRGN hrgn, INT operation)
+{
+#ifdef DEBUG
+    HRGN hrgn1 = hrgn;
+#endif
+    LONG lComplexity = RGN_NULL;
+
+    if(pHps == NULL) {
+        DebugInt3();
+        return ERROR_W;
+    }
+
+    hrgn = ObjQueryHandleData(hrgn, HNDL_REGION);
+    if(hrgn == HANDLE_OBJ_ERROR || !pHps) {
+        dprintf(("ERROR: GdiCombineVisRgn %x invalid handle", hrgn1));
+        return ERROR_W;
+    }
+    //interpretRegionAs converts the region and saves it in pHps->hrgnHDC
+    if(!interpretRegionAs(pHps, 0, hrgn, AS_DEVICE) )
+    {
+        dprintf(("ERROR: interpretRegionAs failed!!"));
+        return ERROR_W;
+    }
+
+    //If there is no visible region, then create one that covers the whole DC
+    if(pHps->hrgnWinVis == NULLHANDLE) 
+    {
+         RECTL rectl = {0, 0, hdcWidth(0, pHps), hdcHeight(0, pHps)};
+         dprintf(("No visible region: create one (0,0)(%d,%d)", rectl.xRight, rectl.yTop));
+         pHps->hrgnWinVis = GpiCreateRegion(pHps->hps, 1, &rectl);
+         if(pHps->hrgnWinVis == NULLHANDLE) {
+             dprintf(("ERROR: GdiCombineVisRgn: GpiCreateRegion failed!!"));
+             DebugInt3();
+             goto failure;
+         }
+    }
+
+    LONG lMode;
+    switch (operation)
+    {
+    case  RGN_AND_W  : lMode = CRGN_AND ; break;
+    case  RGN_DIFF_W : lMode = CRGN_DIFF; break;
+    default:
+        dprintf(("ERROR: GdiCombineVisRgn %d invalid parameter", operation));
+        DebugInt3();
+        goto failure;
+    }
+    lComplexity = GpiCombineRegion(pHps->hps, pHps->hrgnWinVis, pHps->hrgnWinVis, pHps->hrgnHDC, lMode);
+    if (lComplexity != RGN_ERROR)
+    {
+        return GdiSetVisRgn(pHps, pHps->hrgnWinVis);
+    }
+    dprintf(("ERROR: GdiCombineVisRgn: GpiCombineRegion failed"));
+    DebugInt3();
+
+failure:
+    return ERROR_W;
+}
+//******************************************************************************
+// GdiCombineVisRgnClipRgn
+//
+// Combine the specified clip region with the visible region according to the operation
+//
+// Parameters:
+// 
+// pDCData pHps		- presentation space structure
+// HRGN hrgn		- region handle (GPI)
+// INT operation	- combine operation (RGN_*)
+//
+//
+// Returns:  	- ERROR_W         -> failure
+//      	- NULLREGION_W    -> empty region
+//              - SIMPLEREGION_W  -> rectangular region
+//              - COMPLEXREGION_W -> complex region
+//
+// NOTE: In windows there is a clip and a visible region (just like in PM)
+//       We do not map the Win32 visible region to the PM visible region
+//       as that's rather annoying.
+//       Instead we use the intersection of the win32 visible and win32 clip 
+//       region for the PM clip region.
+//       The Win32 clip region is saved in pHps->hrgnWin32Clip.
+//       The Win32 visible region is saved in pHps->hrgnWinVis.
+//
+//******************************************************************************
+INT WIN32API GdiCombineVisRgnClipRgn(pDCData pHps, HRGN hrgn, INT operation)
+{
+    HRGN hrgnClip = NULL, hrgnOldClip, hrgnNewClip;
+    LONG lComplexity = RGN_NULL;
+
+    //Create a region that will be used for the new GPI clip region
+    RECTL rectl = {0, 0, 1, 1};
+    hrgnNewClip = GpiCreateRegion(pHps->hps, 1, &rectl);
+    if(hrgnNewClip == NULLHANDLE) {
+        dprintf(("ERROR: GdiCombineVisRgnClipRgn: GpiCreateRegion failed!!"));
+        DebugInt3();
+        return ERROR_W;
+    }
+
+    if(hrgn == NULLHANDLE) 
+    {
+        if(pHps->hrgnWin32Clip != NULL) 
+        {
+            //Only reset the path if both the visible and clip regions are zero
+            if(!pHps->hrgnWinVis) {
+                GpiSetClipPath(pHps->hps, 0, SCP_RESET);
+
+                GpiDestroyRegion(pHps->hps, hrgnNewClip);
+                hrgnNewClip = NULLHANDLE;
+            }
+            else 
+            {//set PM clip region to Win32 visible region
+                lComplexity = GpiCombineRegion(pHps->hps, hrgnNewClip, pHps->hrgnWinVis, NULLHANDLE, CRGN_COPY);
+                if(lComplexity == RGN_ERROR) {
+                    dprintf(("ERROR: GdiCombineVisRgnClipRgn: GpiSetClipRegion failed!!"));
+                    DebugInt3();
+                    goto failure;
+                }
+            }
+            dprintfRegion(pHps->hps, hrgnNewClip);
+            lComplexity = GpiSetClipRegion(pHps->hps, hrgnNewClip, &hrgnOldClip);
+            if(lComplexity == RGN_ERROR) {
+                dprintf(("ERROR: GdiCombineVisRgnClipRgn: GpiSetClipRegion failed!!"));
+                DebugInt3();
+            }
 
             //SvL: Must check if origin changed here. Sometimes happens when
             //     window looses focus. (don't know why....)
             checkOrigin(pHps);
-            return lComplexity;
+            if(hrgnOldClip) GpiDestroyRegion(pHps->hps, hrgnOldClip);
         }
+        //else already NULL, so nothing to do.
+
+        pHps->hrgnWin32Clip = hrgn;
+        return NULLREGION_W;
     }
 
-    dprintf(("WARNING: SelectClipRgn: RGN_ERROR!", hdc, hrgn1));
-    if(hrgnNewClip)
-        GpiDestroyRegion(pHps->hps, hrgnNewClip);
+    LONG lMode;
+    switch (operation)
+    {
+    case  RGN_AND_W  : lMode = CRGN_AND ; break;  //intersect clip & visible region
+    default:
+        dprintf(("ERROR: GdiCombineVisRgnClipRgn %d invalid parameter", operation));
+        DebugInt3();
+        goto failure;
+    }
+    // If there's no visible region (meaning entire DC is visible), then just set 
+    // the GPI clip region to the win32 clip region
+    if (pHps->hrgnWinVis == NULLHANDLE) 
+    {
+         lComplexity = GpiCombineRegion(pHps->hps, hrgnNewClip, hrgn, NULLHANDLE, CRGN_COPY);
+    }
+    else lComplexity = GpiCombineRegion(pHps->hps, hrgnNewClip, pHps->hrgnWinVis, hrgn, lMode);
 
-    SetLastError(ERROR_SUCCESS_W);
-    return lComplexity;
+    if (lComplexity != RGN_ERROR)
+    {
+        dprintfRegion(pHps->hps, hrgnNewClip);
+        //And activate the new clip region
+        lComplexity = GpiSetClipRegion(pHps->hps, hrgnNewClip, &hrgnOldClip);
+        if (lComplexity == RGN_ERROR )
+        {
+            dprintf(("ERROR: GdiCombineVisRgnClipRgn: GpiSetClipRegion failed"));
+            DebugInt3();
+            goto failure;
+        }
+        //SvL: Must check if origin changed here. Sometimes happens when
+        //     window looses focus. (don't know why....)
+        checkOrigin(pHps);
+
+        if(hrgnOldClip) GpiDestroyRegion(pHps->hps, hrgnOldClip);
+
+        pHps->hrgnWin32Clip = hrgn;
+
+        return GPI_TO_WIN_COMPLEXITY(lComplexity);
+    }
+    dprintf(("ERROR: GdiCombineVisRgnClipRgn: GpiCombineRegion failed"));
+    DebugInt3();
+
+failure:
+    if(hrgnNewClip) GpiDestroyRegion(pHps->hps, hrgnNewClip);
+
+    return ERROR_W;
 }
 //******************************************************************************
 //******************************************************************************
@@ -463,7 +705,7 @@ int WIN32API ExtSelectClipRgn(HDC hdc, HRGN hrgn, int mode)
    HRGN hrgn1 = hrgn;
 #endif
 
-   pDCData    pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
+   pDCData pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
    if (!pHps)
    {
         dprintf(("WARNING: ExtSelectRgn %x %x %d invalid hdc", hdc, hrgn, mode));
@@ -472,7 +714,7 @@ int WIN32API ExtSelectClipRgn(HDC hdc, HRGN hrgn, int mode)
    }
 
    LONG lComplexity;
-   HRGN hrgnCurrent = NULLHANDLE;
+   HRGN hrgnCurrent = NULLHANDLE, hrgnOld = NULLHANDLE;
 
    if(!hrgn && mode != RGN_COPY_W)
    {
@@ -505,11 +747,13 @@ int WIN32API ExtSelectClipRgn(HDC hdc, HRGN hrgn, int mode)
             SetLastError(ERROR_INVALID_HANDLE_W);
             return 0;
         }
+        dprintfRegion(hdc, hrgn);
    }
 
    //TODO: metafile recording
    if(hrgn)
    {
+        //interpretRegionAs converts the region and saves it in pHps->hrgnHDC
         if(!interpretRegionAs(pHps, 0, hrgn, AS_DEVICE) )
         {
             return ERROR_W;
@@ -517,20 +761,18 @@ int WIN32API ExtSelectClipRgn(HDC hdc, HRGN hrgn, int mode)
    }
    else
    {
-        //remove clip region
-        GpiSetClipPath(pHps->hps, 0, SCP_RESET);
-        GpiSetClipRegion(pHps->hps, NULLHANDLE, &hrgnCurrent);
-
-        if(hrgnCurrent)
-            GpiDestroyRegion(pHps->hps, hrgnCurrent);
+        //Intersect the Windows clip region with the current visible region
+        lComplexity = GdiCombineVisRgnClipRgn(pHps, NULLHANDLE, RGN_AND_W);
 
         return NULLREGION_W;
    }
 
-   GpiSetClipRegion(pHps->hps, NULLHANDLE, &hrgnCurrent);
+   // get current clipping region
+   hrgnOld     = pHps->hrgnWin32Clip;
+   hrgnCurrent = hrgnOld;
 
    if(hrgnCurrent == NULLHANDLE)
-   {
+   {//if none, then create one
         lMode = CRGN_COPY;
         RECTL rectl = {0, 0, 1, 1};
         hrgnCurrent = GpiCreateRegion(pHps->hps, 1, &rectl);
@@ -553,20 +795,35 @@ int WIN32API ExtSelectClipRgn(HDC hdc, HRGN hrgn, int mode)
    if (lComplexity != RGN_ERROR)
    {
         HRGN hrgnOld;
-        lComplexity = GpiSetClipRegion(pHps->hps, hrgnCurrent, &hrgnOld);
+
+        //Intersect the Windows clip region with the current visible region
+        lComplexity = GdiCombineVisRgnClipRgn(pHps, hrgnCurrent, RGN_AND_W);
+
         SetLastError(ERROR_SUCCESS_W);
 
-        //SvL: Must check if origin changed here. Sometimes happens when
-        //     window looses focus. (don't know why....)
-        checkOrigin(pHps);
-
-        if (lComplexity != RGN_ERROR)
+        if (lComplexity != RGN_ERROR) {
             return lComplexity;
+        }
    }
-   SetLastError(ERROR_SUCCESS_W);
+   GpiDestroyRegion(pHps->hps, hrgnCurrent); //delete newly created region
+
+   SetLastError(ERROR_INVALID_PARAMETER_W); //TODO
    return ERROR_W;
 }
 //******************************************************************************
+//******************************************************************************
+int WIN32API SelectClipRgn(HDC hdc, HRGN hrgn)
+{
+    return ExtSelectClipRgn(hdc, hrgn, RGN_COPY_W);
+}
+//******************************************************************************
+// The GetClipBox function retrieves the dimensions of the tightest bounding 
+// rectangle that can be drawn around the current visible area on the device. 
+// The visible area is defined by the current clipping region or clip path, as well 
+// as any overlapping windows.
+//
+// NOTE: We simply call GpiQueryClipBox as it behaves just like GetClipBox
+//
 //******************************************************************************
 int WIN32API GetClipBox(HDC hdc, PRECT lpRect)
 {
@@ -582,6 +839,8 @@ int WIN32API GetClipBox(HDC hdc, PRECT lpRect)
     }
     if(pHps->isPrinter)
     {
+        //Some printers return the wrong clip box. Return the full page instead.
+        //(TODO: which is incorrect!)
         lpRect->left   = 0;
         lpRect->top    = 0;
         lpRect->right  = GetDeviceCaps( hdc, HORZRES_W);
@@ -607,9 +866,9 @@ int WIN32API GetClipBox(HDC hdc, PRECT lpRect)
 #ifndef INVERT
             //Convert coordinates from PM to win32
             if (pHps->yInvert > 0) {
-             LONG temp     = pHps->yInvert - rectl.yBottom;
-                 rectl.yBottom = pHps->yInvert - rectl.yTop;
-             rectl.yTop    = temp;
+                LONG temp     = pHps->yInvert - rectl.yBottom;
+                rectl.yBottom = pHps->yInvert - rectl.yTop;
+                rectl.yTop    = temp;
             }
 #endif
             //Convert including/including to including/excluding
@@ -627,7 +886,7 @@ int WIN32API GetClipBox(HDC hdc, PRECT lpRect)
                 lpRect->bottom = rectl.yTop;
             }
 
-            rc = (lComplexity == RGN_RECT) ? SIMPLEREGION_W : COMPLEXREGION_W;
+            rc = GPI_TO_WIN_COMPLEXITY(lComplexity);
         }
     }
 //    if(lpRect->left == 0 && lpRect->top == 0 && lpRect->right == 0 && lpRect->bottom == 0)
@@ -654,31 +913,58 @@ int WIN32API GetClipRgn(HDC hdc, HRGN hrgn)
         return 0;
     }
 
-    if(GpiSetClipRegion(pHps->hps, NULL, &hrgnClip) == RGN_ERROR) {
-        dprintf(("WARNING: GetClipRgn GpiSetClipRegion failed! (%x)", WinGetLastError(0)));
-        SetLastError(ERROR_INVALID_PARAMETER_W); //todo right errror
-        return 0;
-    }
-    if(hrgnClip) {
-        if(!setWinDeviceRegionFromPMDeviceRegion(hrgn, hrgnClip, pHps, NULL)) {
-                dprintf(("WARNING: GetClipRgn setWinDeviceRegionFromPMDeviceRegion failed!"));
-                GpiSetClipRegion(pHps->hps, hrgnClip, &hrgnTemp);
-                SetLastError(ERROR_INVALID_PARAMETER_W); //todo right errror
-                return 0;
-        }
-        if(GpiSetClipRegion(pHps->hps, hrgnClip, &hrgnTemp) == RGN_ERROR )
-        {
-            dprintf(("WARNING: GetClipRgn GpiSetClipRegion failed %x!", WinGetLastError(0)));
+    if(pHps->hrgnWin32Clip) {
+        dprintfRegion(hdc, pHps->hrgnWin32Clip);
+        if(!setWinDeviceRegionFromPMDeviceRegion(hrgn, pHps->hrgnWin32Clip, pHps, NULL)) {
+            dprintf(("WARNING: GetClipRgn setWinDeviceRegionFromPMDeviceRegion failed!"));
+            GpiSetClipRegion(pHps->hps, hrgnClip, &hrgnTemp);
             SetLastError(ERROR_INVALID_PARAMETER_W); //todo right errror
             return 0;
         }
     }
-    else lComplexity = RGN_NULL;
+    else {
+       //no clip region; return NULL
+       lComplexity = RGN_NULL;
+    }
 
     SetLastError(ERROR_SUCCESS_W);
     if(lComplexity == RGN_NULL)
          return 0;
     else return 1;
+}
+//******************************************************************************
+// The GetRandomRgn function copies the system clipping region of a specified 
+// device context to a specific region.
+// It returns the visible region of the specified device context in screen
+// coordinates (if it belongs to a window).
+//
+// VALUE = 1: This undocumented value will return the current Clip Region contained in the DC.
+// VALUE = 2: This undocumented value will return the current Meta Region contained in the DC.
+// VALUE = 3: This undocumented value will return the intersection of the Clip Region and Meta Region. 
+// VALUE = 4, SYSRGN: The only value that is documented and defined for this function. 
+//                    This value returns the System Region
+//******************************************************************************
+INT WIN32API GetRandomRgn(HDC hdc, HRGN hrgn, INT iNum)
+{
+    HWND hwnd;
+    INT  ret;
+
+    if(iNum != SYSRGN_W) {
+        dprintf(("WARNING: GetRandomRgn: invalid parameter %x", iNum));
+        SetLastError(ERROR_INVALID_PARAMETER_W);
+        return ERROR_W;
+    }
+    ret = GetClipRgn(hdc, hrgn);
+
+    hwnd = WindowFromDC(hdc);
+    if(hwnd) {
+        POINT pt = {0,0};
+        //map from client to desktop coordinates
+        MapWindowPoints(hwnd, 0, &pt, 1);
+
+        OffsetRgn(hrgn, pt.x, pt.y);
+    }
+    return ret;
 }
 //******************************************************************************
 //******************************************************************************
@@ -687,7 +973,7 @@ int WIN32API ExcludeClipRect(HDC  hdc, int  left, int  top, int  right, int bott
     pDCData  pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
     if(!pHps)
     {
-        dprintf(("WARNING: ExcludeClipRgn %x (%d,%d)(%d,%d) invalid hdc", hdc, left, top, right, bottom));
+        dprintf(("ERROR: ExcludeClipRgn %x (%d,%d)(%d,%d) invalid hdc", hdc, left, top, right, bottom));
         SetLastError(ERROR_INVALID_HANDLE_W);
         return ERROR_W;
     }
@@ -711,10 +997,34 @@ int WIN32API ExcludeClipRect(HDC  hdc, int  left, int  top, int  right, int bott
 #endif
 
     dprintf(("ExcludeClipRgn %x (%d,%d)(%d,%d)", hdc, left, top, right, bottom));
+
     lComplexity = GpiExcludeClipRectangle(pHps->hps, &rectl);
     if (lComplexity == RGN_ERROR) {
+        dprintf(("ERROR: ExcludeClipRgn: GpiExcludeClipRectangle failed!!"));
         SetLastError(ERROR_INVALID_PARAMETER_W); //TODO: wrong error
         return ERROR_W;
+    }
+
+    //Ok, success. Now update the cached win32 clip region
+    if(pHps->hrgnWin32Clip != NULLHANDLE) 
+    {
+        HRGN hrgnClipRect = GpiCreateRegion(pHps->hps, 1, &rectl);
+        if(hrgnClipRect == NULLHANDLE) {
+            dprintf(("ERROR: ExcludeClipRgn GpiCreateRegion failed!!"));
+            DebugInt3();
+            SetLastError(ERROR_INVALID_PARAMETER_W); //TODO: wrong error
+            return ERROR_W;
+        }
+        //subtract rect region from clip region
+        lComplexity = GpiCombineRegion(pHps->hps, pHps->hrgnWin32Clip, pHps->hrgnWin32Clip, hrgnClipRect, CRGN_DIFF);
+        GpiDestroyRegion(pHps->hps, hrgnClipRect);
+
+        if (lComplexity == RGN_ERROR) {
+            dprintf(("ERROR: ExcludeClipRgn GpiCombineRegion failed!!"));
+            DebugInt3();
+            SetLastError(ERROR_INVALID_PARAMETER_W); //TODO: wrong error
+            return ERROR_W;
+        }
     }
 
     //todo metafile recording
@@ -755,6 +1065,33 @@ int WIN32API IntersectClipRect(HDC hdc, int left, int top, int right, int bottom
 
     dprintf(("IntersectClipRect %x (%d,%d)(%d,%d)", hdc, left, top, right, bottom));
     lComplexity = GpiIntersectClipRectangle(pHps->hps, &rectl);
+    if (lComplexity == RGN_ERROR) {
+        dprintf(("ERROR: IntersectClipRect: GpiIntersectClipRectangle failed!!"));
+        SetLastError(ERROR_INVALID_PARAMETER_W); //TODO: wrong error
+        return ERROR_W;
+    }
+
+    //Ok, success. Now update the cached win32 clip region
+    if(pHps->hrgnWin32Clip != NULLHANDLE) 
+    {
+        HRGN hrgnClipRect = GpiCreateRegion(pHps->hps, 1, &rectl);
+        if(hrgnClipRect == NULLHANDLE) {
+            dprintf(("ERROR: IntersectClipRect GpiCreateRegion failed!!"));
+            DebugInt3();
+            SetLastError(ERROR_INVALID_PARAMETER_W); //TODO: wrong error
+            return ERROR_W;
+        }
+        //intersect rect region with clip region
+        lComplexity = GpiCombineRegion(pHps->hps, pHps->hrgnWin32Clip, pHps->hrgnWin32Clip, hrgnClipRect, CRGN_AND);
+        GpiDestroyRegion(pHps->hps, hrgnClipRect);
+
+        if (lComplexity == RGN_ERROR) {
+            dprintf(("ERROR: IntersectClipRect GpiCombineRegion failed!!"));
+            DebugInt3();
+            SetLastError(ERROR_INVALID_PARAMETER_W); //TODO: wrong error
+            return ERROR_W;
+        }
+    }
 
     //todo metafile recording
 
@@ -783,7 +1120,22 @@ int WIN32API OffsetClipRgn(HDC  hdc, int  nXOffset, int  nYOffset )
    }
 #endif
 
-   lComplexity = GpiOffsetClipRegion(pHps->hps, &pointl);
+   if(pHps->hrgnWin32Clip == NULLHANDLE) {
+       lComplexity = NULLREGION_W;
+   }
+   else {
+       lComplexity = GpiOffsetRegion(pHps->hps, pHps->hrgnWin32Clip, &pointl);
+       if (lComplexity == RGN_ERROR) {
+           dprintf(("ERROR: OffsetClipRgn: GpiOffsetRegion failed!!"));
+           SetLastError(ERROR_INVALID_PARAMETER_W); //TODO: wrong error
+           return ERROR_W;
+       }
+
+       //Intersect the Windows clip region with the current visible region
+       lComplexity = GdiCombineVisRgnClipRgn(pHps, pHps->hrgnWin32Clip, RGN_AND_W);
+
+       lComplexity = GPI_TO_WIN_COMPLEXITY(lComplexity);
+   }
 
    //todo metafile recording
 
@@ -1037,6 +1389,11 @@ HRGN WIN32API CreateEllipticRgn(int  left, int  top, int  right, int  bottom)
 
     dprintf(("CreateEllipticRgn (%d,%d)(%d,%d)", left, top, right, bottom));
     hrgn = GpiCreateEllipticRegion(hpsRegion, &rectl);
+    if(hrgn == RGN_ERROR) {
+        SetLastError(ERROR_INVALID_PARAMETER_W); //todo: not right
+        dprintf(("WARNING: CreateEllipticRgn: GpiCreateEllipticRegion failed! %x", WinGetLastError(0)));
+        return 0;
+    }
 
     if(ObjAllocateHandle(&hrgn, hrgn, HNDL_REGION) == FALSE) {
         GpiDestroyRegion(hpsRegion, hrgn);
@@ -1085,8 +1442,18 @@ HRGN WIN32API CreatePolygonRgn(const POINT * lppt, int  cPoints, int  fnPolyFill
     polygon.ulPoints = cPoints - 1;
     polygon.aPointl  = (PPOINTL)(lppt + 1);
 
+#ifdef DEBUG
+    for(int i=0;i<cPoints;i++) {
+        dprintf(("Point %d: (%d,%d)", i, lppt[i].x, lppt[i].y));
+    }
+#endif
     GpiMove(hpsRegion, (PPOINTL)lppt);
     hrgn = GpiCreatePolygonRegion(hpsRegion, 1, &polygon, POLYGON_BOUNDARY | flMode);
+    if(hrgn == RGN_ERROR) {
+        SetLastError(ERROR_INVALID_PARAMETER_W); //todo: not right
+        dprintf(("WARNING: CreatePolygonRgn: GpiCreatePolygonRegion failed! %x", WinGetLastError(0)));
+        return 0;
+    }
 
     if(ObjAllocateHandle(&hrgn, hrgn, HNDL_REGION) == FALSE) {
         GpiDestroyRegion(hpsRegion, hrgn);
@@ -1283,7 +1650,7 @@ int WIN32API GetRgnBox( HRGN  hrgn, PRECT pRect)
     if(hrgn == HANDLE_OBJ_ERROR) {
         dprintf(("WARNING: GetRgnBox %x %x invalid region!", hrgn1, pRect));
         SetLastError(ERROR_INVALID_HANDLE_W);
-        return FALSE;
+        return ERROR_W;
     }
 
     RECTL  rectl;
@@ -1355,6 +1722,7 @@ BOOL WIN32API InvertRgn( HDC  hdc, HRGN  hrgn)
         return FALSE;
     }
 
+    DIBSECTION_MARK_INVALID(hdc);
     return TRUE;
 }
 //******************************************************************************
@@ -1447,6 +1815,9 @@ BOOL WIN32API FrameRgn(HDC hdc, HRGN hrgn, HBRUSH hBrush, int width, int height)
     if(hbrushRestore)
         SelectObject(hdc, hbrushRestore);
 
+    if(lHits != GPI_ERROR) 
+        DIBSECTION_MARK_INVALID(hdc);
+
     //todo metafile recording
     return (lHits != GPI_ERROR);
 }
@@ -1457,9 +1828,8 @@ BOOL WIN32API FillRgn(HDC hdc, HRGN hrgn, HBRUSH hBrush)
  BOOL   success;
  HBRUSH hbrushRestore = 0;
 #ifdef DEBUG
- HRGN   hrgn1 = hrgn;
+    HRGN   hrgn1 = hrgn;
 #endif
-
 
     pDCData  pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
 
@@ -1482,6 +1852,7 @@ BOOL WIN32API FillRgn(HDC hdc, HRGN hrgn, HBRUSH hBrush)
     }
     dprintf(("FillRgn %x %x %x", hdc, hrgn1, hBrush));
 
+    DIBSECTION_CHECK_IF_DIRTY(hdc);
     interpretRegionAs(pHps, NULL, hrgn, AS_WORLD);
 
     dprintfRegion(pHps->hps, pHps->hrgnHDC);
@@ -1494,16 +1865,8 @@ BOOL WIN32API FillRgn(HDC hdc, HRGN hrgn, HBRUSH hBrush)
     if(hbrushRestore)
         SelectObject(hdc, hbrushRestore);
 
-    /* PF Sync DIBSection as well */
-    if(DIBSection::getSection() != NULL) 
-    {
-        DIBSection *dsect = DIBSection::findHDC(hdc);
-        if(dsect) 
-        {
-            dsect->sync(hdc, 0, dsect->GetHeight());
-        }
-    }
-
+    if(success)
+        DIBSECTION_MARK_INVALID(hdc);
 
     return(success);
 }
@@ -1511,14 +1874,7 @@ BOOL WIN32API FillRgn(HDC hdc, HRGN hrgn, HBRUSH hBrush)
 //******************************************************************************
 BOOL WIN32API PaintRgn( HDC  hdc, HRGN  hrgn)
 {
-   pDCData  pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
-   if(!pHps)
-   {
-      SetLastError(ERROR_INVALID_HANDLE_W);
-      return FALSE;
-   }
-
-   return FillRgn(hdc, hrgn, (HBRUSH) pHps->lastBrushKey);
+   return FillRgn(hdc, hrgn, (HBRUSH) GetCurrentObject(hdc, OBJ_BRUSH_W));
 }
 //******************************************************************************
 //******************************************************************************

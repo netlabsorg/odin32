@@ -1,4 +1,4 @@
-/* $Id: inituser32.cpp,v 1.16 2003-10-22 12:43:13 sandervl Exp $ */
+/* $Id: inituser32.cpp,v 1.17 2003-11-12 14:10:19 sandervl Exp $ */
 /*
  * USER32 DLL entry point
  *
@@ -70,104 +70,6 @@ DWORD hInstanceUser32 = 0;
 
 extern INT __cdecl wsnprintfA(LPSTR,UINT,LPCSTR,...);
 
-static char PMKBDHK_MODULE[16] = STD_PMKBDHK_MODULE;
-
-static BOOL pmkbdhk_installed = FALSE;
-static HMODULE hmodPMKBDHK;
-
-static PFN_HOOKINIT pfnHookInit = NULL;
-static PFN_HOOKTERM pfnHookTerm = NULL;
-
-// defined initialized in pmwindow.cpp: InitPM()
-extern HAB hab;
-
-//******************************************************************************
-//******************************************************************************
-void WIN32API SetCustomPMHookDll(LPSTR pszKbdDllName)
-{
-   strcpy(PMKBDHK_MODULE, pszKbdDllName);
-}
-//******************************************************************************
-//******************************************************************************
-void pmkbdhk_initialize(HAB _hab)
-{
-  APIRET rc;
-
-  if ((pmkbdhk_installed == FALSE) && PMKBDHK_MODULE[0])
-  {
-    CHAR szBuf[260];
-
-    // load the DLL
-    rc = DosLoadModule(szBuf,
-                       sizeof(szBuf),
-                       PMKBDHK_MODULE,
-                       &hmodPMKBDHK);
-    if (NO_ERROR != rc)
-    {
-      dprintf(("USER32: pmkbdhk_initalize(%08xh) failed rc=%d\n",
-               _hab,
-               rc));
-
-      return;
-    }
-
-    // get the entry points
-    rc = DosQueryProcAddr(hmodPMKBDHK,
-                          0,
-                          PMKBDHK_HOOK_INIT,
-                          (PFN*)&pfnHookInit);
-    if (NO_ERROR == rc)
-      rc = DosQueryProcAddr(hmodPMKBDHK,
-                            0,
-                            PMKBDHK_HOOK_TERM,
-                            (PFN*)&pfnHookTerm);
-
-    if (NO_ERROR != rc)
-    {
-      dprintf(("USER32: pmkbdhk_initalize(%08xh) failed importing functions, rc=%d\n",
-               _hab,
-               rc));
-
-      // free the DLL again
-      DosFreeModule(hmodPMKBDHK);
-      hmodPMKBDHK = NULLHANDLE;
-
-      return;
-    }
-
-    // now finally call the initializer function
-    if(pfnHookInit(_hab, WIN32_STDCLASS) == FALSE) DebugInt3();
-
-    // OK, hook is armed
-    pmkbdhk_installed = TRUE;
-  }
-}
-//******************************************************************************
-//******************************************************************************
-void pmkbdhk_terminate(void)
-{
-  if (pmkbdhk_installed == TRUE)
-  {
-    // call the terminator function
-    pfnHookTerm();
-
-    // OK, hook is disarmed
-    pmkbdhk_installed = FALSE;
-  }
-
-  // unload the dll
-  if (NULLHANDLE != hmodPMKBDHK)
-  {
-    APIRET rc = DosFreeModule(hmodPMKBDHK);
-    if (NO_ERROR != rc)
-    {
-      dprintf(("USER32: pmkbdhk_terminate() failed rc=%d\n",
-               rc));
-
-      hmodPMKBDHK = NULLHANDLE;
-    }
-  }
-}
 //******************************************************************************
 #define FONTSDIRECTORY "Fonts"
 #define REGPATH "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Fonts"
@@ -260,9 +162,6 @@ ULONG APIENTRY inittermUser32(ULONG hModule, ULONG ulFlag)
          if (FALSE == InitPM())
            return 0UL;
 
-         // try to install the keyboard hook
-         pmkbdhk_initialize(hab);
-
          InitializeWindowHandles();
 
          //SvL: 18-7-'98, Register system window classes (button, listbox etc etc)
@@ -297,9 +196,6 @@ ULONG APIENTRY inittermUser32(ULONG hModule, ULONG ulFlag)
 void APIENTRY cleanupUser32(ULONG ulReason)
 {
   dprintf(("user32 exit\n"));
-
-  // try to unistall the keyboard hook
-  pmkbdhk_terminate();
 
 //SvL: Causes PM hangs on some (a lot?) machines. Reason unknown.
 ////   RestoreCursor();

@@ -1,4 +1,4 @@
-; $Id: USER32.DEF,v 1.81 2003-10-02 10:35:59 sandervl Exp $
+; $Id: USER32.DEF,v 1.82 2003-11-12 14:10:18 sandervl Exp $
 
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
 DESCRIPTION 'Odin32 System Dll - User32'
@@ -640,6 +640,9 @@ EXPORTS
     NotifyWinEvent             = _NotifyWinEvent@16          @606
     UnhookWinEvent             = _UnhookWinEvent@4           @607
     SetWinEventHook            = _SetWinEventHook@28         @608
+
+    GetAncestor                = _GetAncestor@8              @609
+    GetWindowModuleFileNameA   = _GetWindowModuleFileNameA@12 @610
 
 ;------------
 ; Windows 98

@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.87 2002-12-28 10:16:20 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.88 2003-11-12 14:12:01 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -34,6 +34,45 @@ ODINDEBUGCHANNEL(GDI32-GDI32)
 
 //******************************************************************************
 //******************************************************************************
+int WIN32API FillRect(HDC hDC, const RECT * lprc, HBRUSH hbr)
+{
+    int ret;
+
+    //SvL: brush 0 means current selected brush (verified in NT4)
+    if(hbr == 0) {
+        hbr = GetCurrentObject(hDC, OBJ_BRUSH);
+    }
+    else
+    if (hbr <= (HBRUSH) (COLOR_MAX + 1)) {
+	hbr = GetSysColorBrush( (INT) hbr - 1 );
+    }
+    dprintf(("USER32:  FillRect %x (%d,%d)(%d,%d) brush %X", hDC, lprc->left, lprc->top, lprc->right, lprc->bottom, hbr));
+    ret = O32_FillRect(hDC,lprc,hbr);
+    return ret;
+}
+//******************************************************************************
+//******************************************************************************
+int WIN32API FrameRect( HDC hDC, const RECT * lprc, HBRUSH  hbr)
+{
+    int ret;
+
+    dprintf(("USER32: FrameRect %x (%d,%d)(%d,%d) brush %x", hDC, lprc->top, lprc->left, lprc->bottom, lprc->right, hbr));
+    ret = O32_FrameRect(hDC,lprc,hbr);
+    return ret;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API InvertRect( HDC hDC, const RECT * lprc)
+{
+    int ret;
+
+    if(lprc) {
+         dprintf(("USER32: InvertRect %x (%d,%d)(%d,%d)", hDC, lprc->left, lprc->top, lprc->right, lprc->bottom));
+    }
+    else dprintf(("USER32: InvertRect %x NULL", hDC));
+    ret = O32_InvertRect(hDC,lprc);
+    return ret;
+}
 //******************************************************************************
 //******************************************************************************
 COLORREF WIN32API SetBkColor(HDC hdc, COLORREF crColor)

@@ -1,4 +1,4 @@
-; $Id: user32dbg.def,v 1.14 2003-10-02 10:36:00 sandervl Exp $
+; $Id: user32dbg.def,v 1.15 2003-11-12 14:10:20 sandervl Exp $
 
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
 DESCRIPTION 'Odin32 System Dll - User32'
@@ -236,13 +236,13 @@ EXPORTS
     EqualRect                  = _DbgEqualRect@8                @193
     ExcludeUpdateRgn           = _DbgExcludeUpdateRgn@8         @194
     ExitWindowsEx              = _DbgExitWindowsEx@8            @195
-    FillRect                   = _DbgFillRect@12                @196
+    FillRect                   = _FillRect@12                   @196
     FindWindowA                = _DbgFindWindowA@8              @197
     FindWindowExA              = _DbgFindWindowExA@16           @198
     FindWindowExW              = _DbgFindWindowExW@16           @199
     FindWindowW                = _DbgFindWindowW@8              @200
     FlashWindow                = _DbgFlashWindow@8              @201
-    FrameRect                  = _DbgFrameRect@12               @202
+    FrameRect                  = _FrameRect@12                  @202
     FreeDDElParam              = _DbgFreeDDElParam@8            @203
     GetActiveWindow            = _DbgGetActiveWindow@0          @204
     GetAsyncKeyState           = _DbgGetAsyncKeyState@4         @205
@@ -373,7 +373,7 @@ EXPORTS
     IntersectRect              = _DbgIntersectRect@12           @327
     InvalidateRect             = _DbgInvalidateRect@12          @328
     InvalidateRgn              = _DbgInvalidateRgn@12           @329
-    InvertRect                 = _DbgInvertRect@8               @330
+    InvertRect                 = _InvertRect@8                  @330
     IsCharAlphaA               = _IsCharAlphaA@4             @331
     IsCharAlphaNumericA        = _IsCharAlphaNumericA@4      @332
     IsCharAlphaNumericW        = _IsCharAlphaNumericW@4      @333
@@ -640,6 +640,9 @@ EXPORTS
     NotifyWinEvent             = _DbgNotifyWinEvent@16          @606
     UnhookWinEvent             = _DbgUnhookWinEvent@4           @607
     SetWinEventHook            = _DbgSetWinEventHook@28         @608
+
+    GetAncestor                = _DbgGetAncestor@8              @609
+    GetWindowModuleFileNameA   = _DbgGetWindowModuleFileNameA@12 @610
 
 ;------------
 ; Windows 98
