@@ -1,4 +1,4 @@
-/* $Id: message.cpp,v 1.4 1999-06-10 20:48:00 phaller Exp $ */
+/* $Id: message.cpp,v 1.5 1999-06-22 17:25:28 phaller Exp $ */
 
 /*
  *
@@ -124,30 +124,48 @@ DWORD WIN32API FormatMessageA(
         DWORD   width = dwFlags & FORMAT_MESSAGE_MAX_WIDTH_MASK;
         DWORD   nolinefeed = 0;
 
-        dprintf(("FormatMessageA\n"));
+        dprintf(("KERNEL32: FormatMessageA (%08xh,%s,%08xh,%08xh,%08xh,%08xh,%08xh)\n",
+                 dwFlags,
+                 lpSource,
+                 dwMessageId,
+                 dwLanguageId,
+                 lpBuffer,
+                 nSize,
+                 args));
 
         from = NULL;
-        if (dwFlags & FORMAT_MESSAGE_FROM_STRING) {
-                from = (char *)HeapAlloc(GetProcessHeap(),0, strlen((char *)lpSource)+1);
-                UnicodeToAscii((LPWSTR)lpSource, from);
-        }
-        if (dwFlags & FORMAT_MESSAGE_FROM_SYSTEM) {
-                from = (char *)HeapAlloc(GetProcessHeap(),0,200 );
-                sprintf(from,"Systemmessage, messageid = 0x%08lx\n",dwMessageId);
-        }
-        if (dwFlags & FORMAT_MESSAGE_FROM_HMODULE) {
-                int bufsize;
 
-                dwMessageId &= 0xFFFF;
-                bufsize=LoadMessageA(0,dwMessageId,dwLanguageId,NULL,100);
-                if (bufsize) {
-                        from = (char *)HeapAlloc(GetProcessHeap(), 0, bufsize + 1 );
-                        LoadMessageA(0,dwMessageId,dwLanguageId,from,bufsize+1);
-                }
-        }
-        target  = (char *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, 100);
-        t       = target;
-        talloced= 100;
+  if (dwFlags & FORMAT_MESSAGE_FROM_STRING)
+  {
+    from = (char *)HeapAlloc(GetProcessHeap(),
+                             0,
+                             strlen((char*)lpSource) + 1);
+    strcpy (from,
+            (char*)lpSource);
+  }
+  else
+    if (dwFlags & FORMAT_MESSAGE_FROM_SYSTEM)
+    {
+      from = (char *)HeapAlloc(GetProcessHeap(), 0, 200 );
+      sprintf(from,"Systemmessage, messageid = 0x%08lx\n",dwMessageId);
+    }
+    else
+    if (dwFlags & FORMAT_MESSAGE_FROM_HMODULE)
+    {
+      int bufsize;
+
+      dwMessageId &= 0xFFFF;
+      bufsize=LoadMessageA(0,dwMessageId,dwLanguageId,NULL,100);
+      if (bufsize)
+      {
+        from = (char *)HeapAlloc(GetProcessHeap(), 0, bufsize + 1 );
+        LoadMessageA(0,dwMessageId,dwLanguageId,from,bufsize+1);
+      }
+    }
+
+  target  = (char *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, 100);
+  t       = target;
+  talloced= 100;
 
 #define ADD_TO_T(c) \
         *t++=c;\
@@ -249,27 +267,37 @@ DWORD WIN32API FormatMessageA(
                 }
                 *t='\0';
         }
-        if (!nolinefeed && t[-1]!='\n')
-                ADD_TO_T('\n');
-        talloced = strlen(target)+1;
-        if (nSize && talloced<nSize) {
-                target = (char*)HeapReAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,target,nSize);
-        }
-        if (dwFlags & FORMAT_MESSAGE_ALLOCATE_BUFFER) {
-                /* nSize is the MINIMUM size */
-                *((LPVOID*)lpBuffer) = (LPVOID)LocalAlloc(GMEM_ZEROINIT,talloced);
-                memcpy(*(LPSTR*)lpBuffer,target,talloced);
-        } else
-                strncpy(lpBuffer,target,nSize);
-        HeapFree(GetProcessHeap(),0,target);
-        if (from) HeapFree(GetProcessHeap(),0,from);
-        dprintf(("FormatMessageA returned %s\n",
-                                (dwFlags & FORMAT_MESSAGE_ALLOCATE_BUFFER) ?
-                                *(LPSTR*)lpBuffer:
-                                lpBuffer));
-        return (dwFlags & FORMAT_MESSAGE_ALLOCATE_BUFFER) ?
-                        strlen(*(LPSTR*)lpBuffer):
-                        strlen(lpBuffer);
+
+  if (!nolinefeed && t[-1]!='\n')
+    ADD_TO_T('\n');
+
+  talloced = strlen(target)+1;
+  if (nSize && talloced<nSize)
+  {
+    target = (char*)HeapReAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,target,nSize);
+  }
+
+  if (dwFlags & FORMAT_MESSAGE_ALLOCATE_BUFFER)
+  {
+    /* nSize is the MINIMUM size */
+    *((LPVOID*)lpBuffer) = (LPVOID)LocalAlloc(GMEM_ZEROINIT,talloced);
+    memcpy(*(LPSTR*)lpBuffer,target,talloced);
+  }
+  else
+    strncpy(lpBuffer,target,nSize);
+
+  HeapFree(GetProcessHeap(),0,target);
+
+  if (from) HeapFree(GetProcessHeap(),0,from);
+
+  dprintf(("KERNEL32: FormatMessageA returned %s\n",
+           (dwFlags & FORMAT_MESSAGE_ALLOCATE_BUFFER) ?
+            *(LPSTR*)lpBuffer:
+            lpBuffer));
+
+  return (dwFlags & FORMAT_MESSAGE_ALLOCATE_BUFFER) ?
+            strlen(*(LPSTR*)lpBuffer):
+            strlen(lpBuffer);
 }
 #undef ADD_TO_T
 
@@ -291,18 +319,20 @@ DWORD WIN32API FormatMessageW(
         DWORD   width = dwFlags & FORMAT_MESSAGE_MAX_WIDTH_MASK;
         DWORD   nolinefeed = 0;
 
-        dprintf(("FormatMessageW\n"));
+        dprintf(("KERNEL32: FormatMessageW\n"));
 
         from = NULL;
         if (dwFlags & FORMAT_MESSAGE_FROM_STRING) {
                 from = (char *)HeapAlloc(GetProcessHeap(),0, UniStrlen((UniChar*)lpSource)+1);
                 UnicodeToAscii((LPWSTR)lpSource, from);
         }
+        else
         if (dwFlags & FORMAT_MESSAGE_FROM_SYSTEM) {
                 /* gather information from system message tables ... */
                 from = (char *)HeapAlloc( GetProcessHeap(),0,200 );
                 sprintf(from,"Systemmessage, messageid = 0x%08lx\n",dwMessageId);
         }
+        else
         if (dwFlags & FORMAT_MESSAGE_FROM_HMODULE) {
                 int bufsize;
 
@@ -314,6 +344,7 @@ DWORD WIN32API FormatMessageW(
                     LoadMessageW(0,dwMessageId,dwLanguageId,(LPWSTR)from,bufsize+1);
                 }
         }
+
         target  = (char *)HeapAlloc( GetProcessHeap(), HEAP_ZERO_MEMORY, 100 );
         t       = target;
         talloced= 100;
@@ -431,7 +462,7 @@ DWORD WIN32API FormatMessageW(
         }
         else    AsciiToUnicode(target, lpBuffer);
 
-        dprintf(("FormatMessageW returned %s\n", target));
+        dprintf(("KERNEL32: FormatMessageW returned %s\n", target));
 
         HeapFree(GetProcessHeap(),0,target);
         if (from) HeapFree(GetProcessHeap(),0,from);
@@ -455,7 +486,7 @@ DWORD WIN32API FormatMessageA(DWORD  dwFlags, LPCVOID lpSource,
 {
  char *msgBuffer;
 
-  dprintf(("FormatMessageA Not Implemented\n"));
+  dprintf(("KERNEL32: FormatMessageA Not Implemented\n"));
 
   if(dwFlags & FORMAT_MESSAGE_ALLOCATE_BUFFER) {
         msgBuffer          = (char *)LocalAlloc(LMEM_FIXED, nSize);
@@ -478,7 +509,7 @@ DWORD WIN32API FormatMessageW(DWORD  dwFlags, LPCVOID lpSource,
 {
  WCHAR *msgBuffer;
 
-  dprintf(("FormatMessageW Not Implemented\n"));
+  dprintf(("KERNEL32: FormatMessageW Not Implemented\n"));
 
   if(dwFlags & FORMAT_MESSAGE_ALLOCATE_BUFFER) {
         msgBuffer          = (WCHAR *)LocalAlloc(LMEM_FIXED, nSize*sizeof(USHORT));
