@@ -5,6 +5,7 @@
 #ifdef __WIN32OS2__
 #include <odinwrap.h>
 #include <odin.h>
+#include <stdio.h>
 
 #ifndef __MISC_H__
 
@@ -205,10 +206,13 @@ typedef struct _GUID
 } GUID;
 #endif
 
+#ifdef __GNUC__
+inline static const char *debugstr_guid( const GUID *id )
+#else
 static char *debugstr_guid( const GUID *id )
+#endif
 {
     static char temp[64];
-    char *str;
 
     if (!id) return "(null)";
     if (!HIWORD(id))
@@ -229,7 +233,11 @@ static char *debugstr_guid( const GUID *id )
 }
 #endif
 
+#ifdef __GNUC__
+inline static LPCSTR debugstr_an (LPCSTR src, int n)
+#else
 static LPCSTR debugstr_an (LPCSTR src, int n)
+#endif
 {
   LPSTR dst;
   static char res[128];
@@ -280,7 +288,11 @@ static LPCSTR debugstr_an (LPCSTR src, int n)
 
 /* ---------------------------------------------------------------------- */
 
+#ifdef __GNUC__
+inline static LPCSTR debugstr_wn (LPCWSTR src, int n)
+#else
 static LPCSTR debugstr_wn (LPCWSTR src, int n)
+#endif
 {
   LPSTR dst;
   static char res[128];

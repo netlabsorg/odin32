@@ -1,4 +1,4 @@
-/* $Id: FastInfoBlocks.h,v 1.1 2003-02-28 10:28:09 sandervl Exp $
+/* $Id: FastInfoBlocks.h,v 1.2 2003-04-07 18:40:06 sandervl Exp $
  *
  * Fast InfoBlock Access.
  *
@@ -97,6 +97,10 @@ extern "C" {
 #define fibIsFullScreeProcess() (fibGetProcessType() == 0)
 
 
+/**
+ * System stuff
+ */
+#define fibGetMsCount()         (_gpfibGIS->SIS_MsCount)
 
 
 
