@@ -1,4 +1,9 @@
-/* $Id: ChangeLog,v 1.1223 2001-01-18 21:10:05 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1224 2001-01-19 02:48:08 bird Exp $ */
+
+ 2001-01-19: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - Win32k:   o Added support for kernel revisions. (like 14062A)
+                o Added build 14062a kernels.
+                o Added build 14062 kernels for Warp 4.
 
  2001-01-18: Sander van Leeuwen <sandervl@xs4all.nl>
     - GDI32:    o More logging
@@ -11,10 +16,10 @@
     - KERNEL32: o Create system.ini with '[mci] cdaudio=mcicda.drv' section
                   during installation
                 o Fixed bug in lstrncpyA (return when specified length is 0)
-                o MultiByteToWideChar bugfix (calculate string length if input 
+                o MultiByteToWideChar bugfix (calculate string length if input
                   length is -1 before checking if dest length is 0)
                   (MS Word 97 no longer crashes)
-                o RegQueryValueExW bugfix 
+                o RegQueryValueExW bugfix
                   (caused stack corruption in Excel and probably many other
                    apps that use this function too)
     - OLEAUT32: o Ported David's typelib changes.
@@ -23,14 +28,14 @@
                   TODO: Check bugfixes/changes in latest Wine code and merge
                         them.
                   TODO: Port picture classes
-                  
+
  2000-01-17: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
     - WINMM\MCICDA:
                 o Wrong call to os2CDCloseTray
 
  2001-01-13: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMDLG32: o Get current directory if initial dir == NULL (win31 style
-                  file dialog). 
+                  file dialog).
                 o Fix for filter. (default to NULL; not " /0/0")
                 o Scale icons to 16x16 (win31 style file dialog) -> system
                   default (32x32) is too big. (TODO: Our user32 icons are too
