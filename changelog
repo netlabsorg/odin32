@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1523 2001-06-16 16:13:10 sandervl Exp $ */
+/* $Id: changelog,v 1.1524 2001-06-16 20:22:14 sandervl Exp $ */
 
  2001-06-16: Sander van Leeuwen <sandervl@xs4all.nl>
     - DDRAW:    o Save & Restore FS when calling io_init2
@@ -8,6 +8,8 @@
     - KERNEL32: o Implemented IOCTL_DISK_GET_DRIVE_GEOMETRY & IOCTL_DISK_GET_MEDIA_TYPES
                 o Allow direct sector reading from disk + changing read position
                   with SetFilePointer
+                o 6/14 kernel32 changes broke dynamic loading of LX dlls; getHMOD
+                  returned the wrong module handle
 
  2001-06-15: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Removed yesterday's getControl dialog change. 
