@@ -1,4 +1,15 @@
-/* $Id: changelog,v 1.2460 2003-01-23 20:21:06 sandervl Exp $ */
+/* $Id: changelog,v 1.2461 2003-01-28 16:19:59 sandervl Exp $ */
+
+ 2003-01-28: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Don't use DrawFocusRect from WGSS anymore
+    - GDI32:    o Fixes for InternalTextOutA without y-inversion (not activated)
+
+ 2003-01-27: Platon Fomichev <platon@innotek   >
+    - INCLUDE:  o Illegal calling convention specified for _System calling
+                  convention in headers for GCC. Bugs in ASM code for SetFS 
+                  RestoreFS. 
+    - NTDLL:    o In C++ files specify extern "C" for _System calling convention 
+                  as well. Affected _DLL_InitTerm
 
  2003-01-23: knut st. osmundsen <bird-odin-spam@anduin.net>
     - TOOLS\COMMON, TOOLS\WRC\U:
