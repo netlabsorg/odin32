@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.14 2000-01-02 22:51:39 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.15 2000-01-03 21:36:11 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -618,11 +618,15 @@ DWORD OSLibDosCreateNamedPipe(LPCTSTR lpName,
   }
   dwOS2PipeMode |= nMaxInstances;
 
-  // we must delete string \.\ because
-  // in Windows named pipes scheme is a \.\PIPE\pipename
-  // but in OS/2 only \PIPE\pipename
-  lpOS2Name = (LPSTR)lpName + 3;
-
+  if (strstr(lpName,"\\\\."))
+  {
+    // If pipe is created on the local machine
+    // we must delete string \\. because
+    // in Windows named pipes scheme is a \\.\PIPE\pipename
+    // but in OS/2 only \PIPE\pipename
+    lpOS2Name = (LPSTR)lpName + 3;
+  }
+  else lpOS2Name = (LPSTR)lpName;
 
   dprintf(("DosCreateNPipe(%s,%x,%x,%x,%x,%x)",lpOS2Name,dwOS2Mode,dwOS2PipeMode,nInBufferSize,nOutBufferSize,nDefaultTimeOut));
   rc=DosCreateNPipe(lpOS2Name,
@@ -690,10 +694,16 @@ BOOL OSLibDosCallNamedPipe( LPCTSTR lpNamedPipeName,
 {
   LPSTR lpOS2Name;
   DWORD rc;
-  // we must delete string \.\ because
-  // in Windows named pipes scheme is a \.\PIPE\pipename
-  // but in OS/2 only \PIPE\pipename
-  lpOS2Name = (LPSTR)lpNamedPipeName + 3;
+
+  if (strstr(lpNamedPipeName,"\\\\."))
+  {
+    // If pipe is created on the local machine
+    // we must delete string \\. because
+    // in Windows named pipes scheme is a \\.\PIPE\pipename
+    // but in OS/2 only \PIPE\pipename
+    lpOS2Name = (LPSTR)lpNamedPipeName + 3;
+  }
+  else lpOS2Name = (LPSTR)lpNamedPipeName;
 
   rc=DosCallNPipe(lpOS2Name,
                   lpInBuffer,
@@ -750,6 +760,7 @@ BOOL OSLibDosTransactNamedPipe( DWORD  hNamedPipe,
                       nInBufferSize,
                       lpBytesRead);
 
+  dprintf(("DosTransactNPipe returned rc=%d");)
   if (!rc) return (TRUE);
    else
   if ( rc==ERROR_ACCESS_DENIED      ) SetLastError(ERROR_ACCESS_DENIED_W);    
@@ -769,5 +780,102 @@ BOOL OSLibDosTransactNamedPipe( DWORD  hNamedPipe,
   // Unknown error
   SetLastError(ERROR_PIPE_NOT_CONNECTED_W);
 
-  return FALSE;
+  return (FALSE);
+}
+
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibDosPeekNamedPipe(DWORD   hPipe, 
+                        LPVOID  lpvBuffer, 
+                        DWORD   cbBuffer,
+                        LPDWORD lpcbRead, 
+                        LPDWORD lpcbAvail, 
+                        LPDWORD lpcbMessage)
+{
+  DWORD     rc;
+  AVAILDATA availData ={0};
+  ULONG     ulDummy;
+
+  rc=DosPeekNPipe(hPipe,lpvBuffer,cbBuffer,lpcbRead,&availData,&ulDummy);
+  
+  dprintf(("DosPeekNPipe returned rc=%d",rc));
+
+  if (!rc) 
+  {
+    *lpcbAvail   = availData.cbpipe;
+    *lpcbMessage = availData.cbmessage;
+    return (TRUE);
+  }
+   else
+  if ( rc==ERROR_ACCESS_DENIED      ) SetLastError(ERROR_ACCESS_DENIED_W);    
+    else
+  if ( rc==ERROR_PIPE_BUSY          ) SetLastError(ERROR_PIPE_BUSY_W);    
+    else
+  if ( rc==ERROR_BAD_PIPE           ) SetLastError(ERROR_BAD_PIPE_W);
+    else
+  if ( rc==ERROR_PIPE_NOT_CONNECTED ) SetLastError(ERROR_PIPE_NOT_CONNECTED_W);
+    else
+  // Unknown error
+  SetLastError(ERROR_PIPE_NOT_CONNECTED_W);
+
+  return (FALSE);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibDosDisconnectNamedPipe(DWORD hPipe)
+{
+  DWORD     rc;
+
+  rc=DosDisConnectNPipe(hPipe);
+
+  dprintf(("DosDisConnectNPipe returned rc=%d",rc));
+
+  if (!rc) return TRUE;
+    else
+  if ( rc==ERROR_BROKEN_PIPE        ) SetLastError(ERROR_BROKEN_PIPE_W);    
+    else
+  if ( rc==ERROR_BAD_PIPE           ) SetLastError(ERROR_BAD_PIPE_W);
+    else
+     // Unknown error
+     SetLastError(ERROR_PIPE_NOT_CONNECTED_W); // Maybe another?
+
+  return (FALSE);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibDosWaitNamedPipe(LPCSTR lpszNamedPipeName,
+                            DWORD   dwTimeout)
+{
+  LPSTR lpOS2Name;
+  DWORD rc;
+
+  if (strstr(lpszNamedPipeName,"\\\\."))
+  {
+    // If pipe is created on the local machine
+    // we must delete string \\. because
+    // in Windows named pipes scheme is a \\.\PIPE\pipename
+    // but in OS/2 only \PIPE\pipename
+    lpOS2Name = (LPSTR)lpszNamedPipeName + 3;
+  }
+  else lpOS2Name = (LPSTR)lpszNamedPipeName;
+
+  rc=DosWaitNPipe(lpOS2Name,dwTimeout);
+
+  dprintf(("DosWaitNPipe returned rc=%d",rc));
+
+  if (!rc) return TRUE;
+    else
+  if ( rc == ERROR_PATH_NOT_FOUND ) SetLastError(ERROR_PATH_NOT_FOUND_W);
+    else
+  if ( rc==ERROR_BAD_PIPE         ) SetLastError(ERROR_BAD_PIPE_W);
+    else
+  if ( rc == ERROR_PIPE_BUSY      ) SetLastError(ERROR_PIPE_BUSY_W);
+    else
+  if ( rc == ERROR_SEM_TIMEOUT_W  ) SetLastError(ERROR_SEM_TIMEOUT_W);
+    else
+  // TODO: Implemnt this using Windows Errors
+  // if (rc==ERROR_INTERRUPT)
+  SetLastError(ERROR_PIPE_NOT_CONNECTED_W);
+
+  return (FALSE);
 }

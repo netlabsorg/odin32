@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.78 2000-01-02 22:51:11 sandervl Exp $
+# $Id: makefile,v 1.79 2000-01-03 21:36:10 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -141,7 +141,7 @@ thread.OBJ: \
     .\thread.cpp \
     $(PDWIN32_INCLUDE)\wprocess.h \
     $(PDWIN32_INCLUDE)\winimagebase.h $(PDWIN32_INCLUDE)\winexebase.h $(PDWIN32_INCLUDE)\windllbase.h \
-    thread.h
+    oslibmisc.h thread.h
 
 heap.OBJ: \
     .\heap.cpp \
