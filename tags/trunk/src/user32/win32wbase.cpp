@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.1 1999-09-15 23:19:01 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.2 1999-09-17 18:49:53 dengert Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -895,7 +895,7 @@ ULONG Win32BaseWindow::MsgSetFocus(HWND hwnd)
             //other app lost focus
             SendInternalMessageA(WM_ACTIVATEAPP, TRUE, 0); //TODO: Need thread id from hwnd app
     }
-    return  SendInternalMessageA(WM_SETFOCUS, hwnd, 0);
+    return  SendInternalMessageA(WM_SETFOCUS, OS2ToWin32Handle (hwnd), 0);
 }
 //******************************************************************************
 //******************************************************************************
@@ -905,8 +905,9 @@ ULONG Win32BaseWindow::MsgKillFocus(HWND hwnd)
             //other app lost focus
             SendInternalMessageA(WM_ACTIVATEAPP, FALSE, 0); //TODO: Need thread id from hwnd app
     }
-    return  SendInternalMessageA(WM_KILLFOCUS, hwnd, 0);
+    return  SendInternalMessageA(WM_KILLFOCUS, OS2ToWin32Handle (hwnd), 0);
 }
+//******************************************************************************
 //******************************************************************************
 //******************************************************************************
 ULONG Win32BaseWindow::MsgButton(ULONG msg, ULONG ncx, ULONG ncy, ULONG clx, ULONG cly)

@@ -1,4 +1,11 @@
- /* $Id: ChangeLog,v 1.207 1999-09-16 18:00:42 dengert Exp $ */
+ /* $Id: ChangeLog,v 1.208 1999-09-17 18:49:52 dengert Exp $ */
+
+ 99-09-17: Daniela Engert <dani@ngrt.de>
+	- USER32:   Fix: window focus management.
+		    OSLIBWIN.H: the definitions of OSLIB_HWND_DESKTOP and
+		    OSLIB_HWND_OBJECT were 1 off (with respect to the definition
+		    in PMWIN.H)! So OSLIB_HWND_DESKTOP was in effect NULLHANDLE,
+		    and OSLIB_HWND_OBJECT was HWND_DESKTOP.
 
  99-09-16: Daniela Engert <dani@ngrt.de>
 	- USER32:   Fix: UpdateWindow
