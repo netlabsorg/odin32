@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.104 2001-09-15 09:16:09 sandervl Exp $ */
+/* $Id: window.cpp,v 1.105 2001-09-19 09:10:13 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -1875,7 +1875,7 @@ HWND WIN32API GetLastActivePopup( HWND hWnd)
 ////    hwnd = OS2ToWin32Handle(O32_GetLastActivePopup(hwnd));
 
     dprintf(("GetLastActivePopup %x returned %x NOT CORRECTLY IMPLEMENTED", hWnd, hwnd));
-    return 0;
+    return hWnd;
 }
 //******************************************************************************
 //******************************************************************************
