@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.120 2001-05-07 10:07:40 phaller Exp $ */
+/* $Id: wprocess.cpp,v 1.121 2001-06-08 11:04:26 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -1695,40 +1695,42 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
     dprintf(("KERNEL32: CreateProcess %s\n", cmdline));
     
     DWORD Characteristics, SubSystem;
-    if(Win32ImageBase::isPEImage(exename, &Characteristics, &SubSystem)) {
-        dprintf(("CreateProcess: not a PE executable!!"));
-        SetLastError(ERROR_BAD_EXE_FORMAT);
-        return FALSE;
-    }
+    if(Win32ImageBase::isPEImage(exename, &Characteristics, &SubSystem) == 0) {
+        char *lpszPE;
+        if(SubSystem == IMAGE_SUBSYSTEM_WINDOWS_CUI) {
+             lpszPE = "PEC.EXE";
+        }
+        else lpszPE = "PE.EXE";
+    
+        //SvL: Allright. Before we call O32_CreateProcess, we must take care of
+        //     lpCurrentDirectory ourselves. (Open32 ignores it!)
+        if(lpCurrentDirectory) {
+            char *newcmdline;
+    
+            newcmdline = (char *)malloc(strlen(lpCurrentDirectory) + strlen(cmdline) + 32);
+            sprintf(newcmdline, "%s /OPT:[CURDIR=%s] %s", lpszPE, lpCurrentDirectory, cmdline);
+            free(cmdline);
+            cmdline = newcmdline;
+        }
+        else {
+            char *newcmdline;
 
-    char *lpszPE;
-    if(SubSystem == IMAGE_SUBSYSTEM_WINDOWS_CUI) {
-         lpszPE = "PEC.EXE";
+            newcmdline = (char *)malloc(strlen(cmdline) + 16);
+            sprintf(newcmdline, "%s %s", lpszPE, cmdline);
+            free(cmdline);
+            cmdline = newcmdline;
+        }
+        rc = O32_CreateProcess(lpszPE, (LPCSTR)cmdline,lpProcessAttributes,
+                               lpThreadAttributes, bInheritHandles, dwCreationFlags,
+                               lpEnvironment, lpCurrentDirectory, lpStartupInfo,
+                               lpProcessInfo);
     }
-    else lpszPE = "PE.EXE";
-
-    //SvL: Allright. Before we call O32_CreateProcess, we must take care of
-    //     lpCurrentDirectory ourselves. (Open32 ignores it!)
-    if(lpCurrentDirectory) {
-        char *newcmdline;
-
-        newcmdline = (char *)malloc(strlen(lpCurrentDirectory) + strlen(cmdline) + 32);
-        sprintf(newcmdline, "%s /OPT:[CURDIR=%s] %s", lpszPE, lpCurrentDirectory, cmdline);
-        free(cmdline);
-        cmdline = newcmdline;
+    else {//16 bits windows app
+        rc = O32_CreateProcess(NULL, (LPCSTR)cmdline,lpProcessAttributes,
+                               lpThreadAttributes, bInheritHandles, dwCreationFlags,
+                               lpEnvironment, lpCurrentDirectory, lpStartupInfo,
+                               lpProcessInfo);
     }
-    else {
-        char *newcmdline;
-
-        newcmdline = (char *)malloc(strlen(cmdline) + 16);
-        sprintf(newcmdline, "%s %s", lpszPE, cmdline);
-        free(cmdline);
-        cmdline = newcmdline;
-    }
-    rc = O32_CreateProcess(lpszPE, (LPCSTR)cmdline,lpProcessAttributes,
-                         lpThreadAttributes, bInheritHandles, dwCreationFlags,
-                         lpEnvironment, lpCurrentDirectory, lpStartupInfo,
-                         lpProcessInfo);
     if(rc == TRUE)
     {
       if (dwCreationFlags & DEBUG_PROCESS && pThreadDB != NULL)
@@ -1794,13 +1796,19 @@ HINSTANCE WIN32API WinExec(LPCSTR lpCmdLine, UINT nCmdShow)
  STARTUPINFOA        startinfo = {0};
  PROCESS_INFORMATION procinfo;
  DWORD               rc;
+ HINSTANCE           hInstance;
 
     dprintf(("KERNEL32: WinExec %s\n", lpCmdLine));
     startinfo.dwFlags = nCmdShow;
     if(CreateProcessA(NULL, (LPSTR)lpCmdLine, NULL, NULL, FALSE, 0, NULL, NULL,
                       &startinfo, &procinfo) == FALSE)
     {
-        return 0;
+        hInstance = (HINSTANCE)GetLastError();
+        if(hInstance >= 32) {
+            hInstance = 11;
+        }
+        dprintf(("KERNEL32: WinExec failed with rc %d", hInstance));
+        return hInstance;
     }
     //block until the launched app waits for input (or a timeout of 15 seconds)
     //TODO: Shouldn't call Open32, but the api in user32..
@@ -1808,7 +1816,9 @@ HINSTANCE WIN32API WinExec(LPCSTR lpCmdLine, UINT nCmdShow)
     if(rc != 0) {
         dprintf(("WinExec: WaitForInputIdle %x returned %x", procinfo.hProcess, rc));
     }
-    return procinfo.hProcess; //correct?
+    CloseHandle(procinfo.hThread);
+    CloseHandle(procinfo.hProcess);
+    return 33;
 }
 //******************************************************************************
 //******************************************************************************
