@@ -1,4 +1,4 @@
-/* $Id: winuser.h,v 1.40 2000-04-09 11:09:12 sandervl Exp $ */
+/* $Id: winuser.h,v 1.41 2000-05-22 17:19:00 cbratschi Exp $ */
 
 #ifndef __INCLUDE_WINUSER_H
 #define __INCLUDE_WINUSER_H
@@ -299,6 +299,7 @@ typedef struct
 #define ES_AUTOVSCROLL  0x00000040
 #define ES_AUTOHSCROLL  0x00000080
 #define ES_NOHIDESEL    0x00000100
+#define ES_COMBO        0x00000200   /* Undocumented. Parent is a combobox */
 #define ES_OEMCONVERT   0x00000400
 #define ES_READONLY     0x00000800
 #define ES_WANTRETURN   0x00001000
