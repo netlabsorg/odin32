@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.28 1999-11-27 12:48:25 achimha Exp $ */
+/* $Id: HandleManager.cpp,v 1.29 1999-12-10 14:06:10 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -2297,7 +2297,7 @@ HANDLE HMCreateFileMapping(HANDLE                hFile,
   HMDeviceHandler *pDeviceHandler;         /* device handler for this handle */
   PHMHANDLEDATA   pHMHandleData;
   DWORD           rc;                                     /* API return code */
-
+  HANDLE          hOldMemMap = -1;
 
   pDeviceHandler = HMGlobals.pHMFileMapping;         /* device is predefined */
 
@@ -2336,13 +2336,16 @@ HANDLE HMCreateFileMapping(HANDLE                hFile,
                                          flProtect,
                                          dwMaximumSizeHigh,
                                          dwMaximumSizeLow,
-                                         lpName);
+                                         lpName, &hOldMemMap);
 
   if (rc != NO_ERROR)     /* oops, creation failed within the device handler */
   {
-    TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
-    SetLastError(rc);          /* Hehe, OS/2 and NT are pretty compatible :) */
-    return (NULL);                                           /* signal error */
+    	TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
+    	SetLastError(rc);          /* Hehe, OS/2 and NT are pretty compatible :) */
+  	if(rc == ERROR_ALREADY_EXISTS) {
+		return hOldMemMap; //return handle of existing file mapping
+	}
+	else	return (NULL);                                           /* signal error */
   }
   else
     SetLastError(ERROR_SUCCESS); //@@@PH 1999/10/27 rc5desg requires this?
