@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.10 1999-06-20 20:50:18 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.11 1999-06-21 00:42:48 buerkle Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -898,6 +898,8 @@ BOOL WIN32API UpdateWindow(HWND hwnd)
 #ifdef DEBUG
   WriteLog("USER32:  UpdateWindow\n");
 #endif
+
+#if 0 // EB: ->>> doesn't work. No correct update of Winhlp32 scrolling area.
   if(O32_GetUpdateRect(hwnd, &rect, FALSE) != FALSE) {//update region empty?
     WndCallback(hwnd, WM_PAINT, 0, 0);
 //  O32_PostMessage(hwnd, WM_PAINT, 0, 0);
@@ -906,6 +908,9 @@ BOOL WIN32API UpdateWindow(HWND hwnd)
   else WriteLog("USER32:  Update region empty!\n");
 #endif
   return(TRUE);
+#endif
+
+  return O32_UpdateWindow(hwnd);
 }
 //******************************************************************************
 //******************************************************************************
