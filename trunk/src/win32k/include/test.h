@@ -1,4 +1,4 @@
-/* $Id: test.h,v 1.5 2000-12-11 06:53:52 bird Exp $
+/* $Id: test.h,v 1.6 2000-12-16 23:04:51 bird Exp $
  *
  * Definitions and declarations for test moduls.
  *
@@ -133,6 +133,12 @@ ULONG LDRCALL   fakeldrOpenPath_new(PCHAR pachFilename, USHORT cchFilename, ldrl
 ULONG LDRCALL   fakeldrOpenPath_old(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *plv, PULONG pful);
 ULONG LDRCALL   fakeLDRClearSem(void);
 ULONG LDRCALL   fakeldrFindModule(PCHAR pachFilename, USHORT cchFilename, USHORT usClass, PPMTE ppMTE);
+
+ULONG LDRCALL   fakeldrCheckInternalName(PMTE pMTE);
+ULONG LDRCALL   fakeldrTransPath(PSZ pszFilename);
+ULONG LDRCALL   fakeldrGetFileName(PSZ pszFilename, PCHAR *ppchName, PCHAR *ppchExt);
+VOID  LDRCALL   fakeldrUCaseString(PCHAR pachString, unsigned cchString);
+
 ULONG KRNLCALL  fakeKSEMRequestMutex(HKSEMMTX hkmtx, ULONG ulTimeout);
 ULONG KRNLCALL  fakeKSEMReleaseMutex(HKSEMMTX hkmtx);
 BOOL  KRNLCALL  fakeKSEMQueryMutex(HKSEMMTX hkmtx, PUSHORT pcusNest);
@@ -160,6 +166,16 @@ extern HMTE     fakeptda_handle;
 extern HMTE     fakeptda_module;
 extern PSZ      fakeptda_pBeginLIBPATH;
 extern PSZ      fakeldrpFileNameBuf;
+extern PMTE     fakemte_h;
+extern PMTE     fakeglobal_h;
+extern PMTE     fakeglobal_l;
+extern PMTE     fakespecific_h;
+extern PMTE     fakespecific_l;
+extern PMTE     fakeprogram_h;
+extern PMTE     fakeprogram_l;
+
+
+
 
 #endif /* INCL_NO_FAKE */
 
