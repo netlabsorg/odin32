@@ -1327,6 +1327,9 @@ static LRESULT ShellView_OnNotify(IShellViewImpl * This, UINT CtlID, LPNMHDR lpn
 		  /* get selected item */
 		  item_index = ListView_GetNextItem(This->hWndList, 
 			item_index, LVNI_SELECTED);
+#ifdef __WIN32OS2__
+     	          item.mask = LVIF_PARAM;
+#endif
 		  item.iItem = item_index;
 		  ListView_GetItemA(This->hWndList, &item);
 
