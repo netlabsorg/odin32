@@ -1,4 +1,8 @@
- /* $Id: changelog,v 1.757 2000-02-29 10:55:55 bird Exp $ */
+ /* $Id: changelog,v 1.758 2000-02-29 19:15:14 sandervl Exp $ */
+
+ 2000-02-29: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+	- USER32: Added support for keyboard hooks (fixes Moorhuhn)
+                  in PeekMessage & GetMessage
 
  2000-02-29: knut st. osmundsen <knut.stange.osmundse@pmsc.no>
         - TOOLS\FASTDEP: Restructured it a little. Support for multiple
@@ -23,7 +27,13 @@
                        NOTE: This is not yet included in the daily build
 	  NOTE: The Mesa 3dfx graphics library has a different license
                 (see LICENSE.TXT in the Mesa\3dfx directory)
+<<<<<<< ChangeLog
+	- KERNEL32: Only call ExitProcess the first time KillWin32Process
+                    is executed. Call DosExit otherwise.
+                   
+=======
 
+>>>>>>> 1.757
  2000-02-28: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Call ExitProcess in KillWin32Process to make sure
                     the dll libmain handlers are called after a crash.
