@@ -1,4 +1,4 @@
-/* $Id: options.h,v 1.24 2001-09-30 04:55:56 bird Exp $
+/* $Id: options.h,v 1.25 2003-03-31 01:22:45 bird Exp $
  *
  * Options.
  *
@@ -100,6 +100,7 @@
             FALSE,                  /* fSkipFixups   */     \
             NULL,                   /* pszCustomDll  */     \
             NULL,                   /* pszCustomExports  */ \
+            NULL,                   /* pszCustomDllExclude  */ \
             TRUE,                   /* fDllFixes     */     \
             TRUE,                   /* fExeFixes     */     \
             FALSE,                  /* fForcePreload */     \
@@ -194,8 +195,9 @@ struct options
     ULONG       fNoLoader;              /* No loader stuff. !FIXME! We should import / functions even if this flag is set!!! */
 
     ULONG       fSkipFixups;
-    char *      pszCustomDll;           /* pointer to custom odin dll name */
-    char *      pszCustomExports;       /* pointer to custom export table */
+    char *      pszCustomDll;           /* Pointer to custom odin dll name */
+    char *      pszCustomExports;       /* Pointer to custom export table */
+    char *      pszCustomDllExclude;    /* Pointer to non custom dlls. */
 
     /** @cat Options affecting the behaviour changes in the OS/2 loader */
     ULONG       fDllFixes;              /* Enables the long DLL name and non .DLL extention fixes. */
