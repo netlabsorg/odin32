@@ -6,8 +6,7 @@ require "Odin32DBHelpers.php3";
  * Configuration:
  */
 $sCVSROOT = "g:/cvsroot";
-$sCVSROOT = "d:/odin32/cvs/cvsroot";
-$sCVSROOT = "./cvsroot";
+$sCVSROOT = "e:/netlabs.cvs/odin";
 $sIconsUrl = "/icons";
 $sIconsUrl = "http://www.netlabs.org/icons";
 
