@@ -955,6 +955,32 @@ DECL_WINELIB_TYPE_AW(OUTLINETEXTMETRIC)
 DECL_WINELIB_TYPE_AW(LPOUTLINETEXTMETRIC)
 
 
+typedef struct
+{
+    INT       x;
+    INT       y;
+    UINT      n;
+    LPCSTR    lpstr;
+    UINT      uiFlags;
+    RECT      rcl;
+    INT       *pdx;
+} POLYTEXTA, *PPOLYTEXTA, *LPPOLYTEXTA;
+
+typedef struct
+{
+    INT       x;
+    INT       y;
+    UINT      n;
+    LPCWSTR   lpstr;
+    UINT      uiFlags;
+    RECT      rcl;
+    INT       *pdx;
+} POLYTEXTW, *PPOLYTEXTW, *LPPOLYTEXTW;
+
+DECL_WINELIB_TYPE_AW(POLYTEXT)
+DECL_WINELIB_TYPE_AW(PPOLYTEXT)
+DECL_WINELIB_TYPE_AW(LPPOLYTEXT)
+
 
 /* ntmFlags field flags */
 #define NTM_REGULAR     0x00000040L
@@ -1199,12 +1225,13 @@ typedef struct
 
 typedef struct tagEXTLOGPEN
 {
-	DWORD elpPenStyle;
-	DWORD elpWidth;
-	DWORD elpBrushStyle;
-	DWORD elpColor;
-	DWORD elpNumEntries;
-	DWORD elpStyleEntry[1];
+    DWORD    elpPenStyle;
+    DWORD    elpWidth;
+    UINT     elpBrushStyle;
+    COLORREF elpColor;
+    LONG     elpHatch;
+    DWORD    elpNumEntries;
+    DWORD    elpStyleEntry[1];
 } EXTLOGPEN, *PEXTLOGPEN, *NPEXTLOGPEN, *LPEXTLOGPEN;
 
 #define PS_SOLID         0x00000000
@@ -2156,6 +2183,19 @@ typedef struct {
 
 typedef struct {
     EMR   emr;
+    DWORD iMode;
+} EMRSELECTCLIPPATH,    *PEMRSELECTCLIPPATH,
+  EMRSETBKMODE,         *PEMRSETBKMODE,
+  EMRSETMAPMODE,        *PEMRSETMAPMODE,
+  EMRSETPOLYFILLMODE,   *PEMRSETPOLYFILLMODE,
+  EMRSETROP2,           *PEMRSETROP2,
+  EMRSETSTRETCHBLTMODE, *PEMRSETSTRETCHBLTMODE,
+  EMRSETTEXTALIGN,      *PEMRSETTEXTALIGN,
+  EMRSETICMMODE,        *PERMSETICMMODE,
+  EMRSETLAYOUT,         *PEMRSETLAYOUT;
+
+typedef struct {
+    EMR   emr;
     DWORD ihPal;
 } EMRSELECTPALETTE, *PEMRSELECTPALETTE;
 
@@ -2274,6 +2314,24 @@ typedef struct {
     LONG  cxDest;
     LONG  cyDst;
 } EMRSTRETCHDIBITS, *PEMRSTRETCHDIBITS;
+
+typedef struct {
+    EMR                   emr; 
+    PIXELFORMATDESCRIPTOR pfd; 
+} EMRPIXELFORMAT, *PEMRPIXELFORMAT;
+
+typedef struct tagEMRGLSRECORD {
+  EMR   emr;
+  DWORD cbData;
+  BYTE  Data[1];
+} EMRGLSRECORD, *PEMRGLSRECORD;
+
+typedef struct {
+  EMR   emr;
+  RECTL rclBounds;
+  DWORD cbData;
+  BYTE  Data[1];
+} EMRGLSBOUNDEDRECORD, *PEMRGLSBOUNDEDRECORD; 
 
 typedef INT (* CALLBACK ENHMFENUMPROC)(HDC, LPHANDLETABLE,
 					  LPENHMETARECORD, INT, LPVOID);
@@ -2775,6 +2833,8 @@ BOOL      WINAPI MaskBlt(HDC,INT,INT,INT,INT,HDC,INT,INT,HBITMAP,INT,INT,DWORD);
 BOOL      WINAPI PlgBlt(HDC,const POINT*,HDC,INT,INT,INT,INT,HBITMAP,INT,INT);
 BOOL      WINAPI PolyDraw(HDC,const POINT*,const BYTE*,DWORD);
 BOOL      WINAPI SetColorAdjustment(HDC,const COLORADJUSTMENT*);
+HCOLORSPACE WINAPI SetColorSpace(HDC,HCOLORSPACE);
+BOOL      WINAPI SetDeviceGammaRamp(HDC,LPVOID);
 BOOL      WINAPI SetMiterLimit(HDC, FLOAT, PFLOAT);
 BOOL      WINAPI CombineTransform(LPXFORM,const XFORM *,const XFORM *);
 HENHMETAFILE WINAPI CopyEnhMetaFileA(HENHMETAFILE,LPCSTR);
@@ -2811,6 +2871,7 @@ BOOL      WINAPI SetBrushOrgEx(HDC,INT,INT,LPPOINT);
 HENHMETAFILE WINAPI SetEnhMetaFileBits(UINT,const BYTE *);
 INT       WINAPI SetGraphicsMode(HDC,INT);
 HMETAFILE WINAPI SetMetaFileBitsEx(UINT,const BYTE*);
+INT       WINAPI SetMetaRgn(HDC);
 BOOL      WINAPI SetWorldTransform(HDC,const XFORM*);
 BOOL      WINAPI TranslateCharsetInfo(LPDWORD,LPCHARSETINFO,DWORD);
 
@@ -2835,6 +2896,9 @@ HMETAFILE WINAPI CopyMetaFileW(HMETAFILE,LPCWSTR);
 HBITMAP   WINAPI CreateBitmap(INT,INT,UINT,UINT,LPCVOID);
 HBITMAP   WINAPI CreateBitmapIndirect(const BITMAP*);
 HBRUSH    WINAPI CreateBrushIndirect(const LOGBRUSH*);
+HCOLORSPACE WINAPI CreateColorSpaceA(LPLOGCOLORSPACEA);
+HCOLORSPACE WINAPI CreateColorSpaceW(LPLOGCOLORSPACEW);
+#define     CreateColorSpace WINELIB_NAME_AW(CreateColorSpace)
 HBITMAP   WINAPI CreateCompatibleBitmap(HDC,INT,INT);
 HDC       WINAPI CreateCompatibleDC(HDC);
 HDC       WINAPI CreateDCA(LPCSTR,LPCSTR,LPCSTR,const DEVMODEA*);
@@ -2877,6 +2941,7 @@ BOOL      WINAPI CreateScalableFontResourceW(DWORD,LPCWSTR,LPCWSTR,LPCWSTR);
 
 HBRUSH    WINAPI CreateSolidBrush(COLORREF);
 BOOL      WINAPI DeleteDC(HDC);
+BOOL      WINAPI DeleteColorSpace(HCOLORSPACE);
 BOOL      WINAPI DeleteMetaFile(HMETAFILE);
 BOOL      WINAPI DeleteObject(HGDIOBJ);
 INT       WINAPI DescribePixelFormat(HDC,int,UINT,LPPIXELFORMATDESCRIPTOR);
@@ -3060,21 +3125,23 @@ UINT      WINAPI SetBoundsRect(HDC,const RECT*,UINT);
 UINT      WINAPI SetDIBColorTable(HDC,UINT,UINT,RGBQUAD*);
 INT       WINAPI SetDIBits(HDC,HBITMAP,UINT,UINT,LPCVOID,const BITMAPINFO*,UINT);
 INT       WINAPI SetDIBitsToDevice(HDC,INT,INT,DWORD,DWORD,INT,INT,UINT,UINT,LPCVOID,const BITMAPINFO*,UINT);
+INT       WINAPI SetICMMode(HDC,INT);
+DWORD     WINAPI SetLayout(HDC,DWORD);
 INT       WINAPI SetMapMode(HDC,INT);
-DWORD       WINAPI SetMapperFlags(HDC,DWORD);
+DWORD     WINAPI SetMapperFlags(HDC,DWORD);
 UINT      WINAPI SetPaletteEntries(HPALETTE,UINT,UINT,LPPALETTEENTRY);
-COLORREF    WINAPI SetPixel(HDC,INT,INT,COLORREF);
+COLORREF  WINAPI SetPixel(HDC,INT,INT,COLORREF);
 BOOL      WINAPI SetPixelV(HDC,INT,INT,COLORREF);
 BOOL      WINAPI SetPixelFormat(HDC,int,const PIXELFORMATDESCRIPTOR*);
 INT       WINAPI SetPolyFillMode(HDC,INT);
-BOOL        WINAPI SetRectRgn(HRGN,INT,INT,INT,INT);
+BOOL      WINAPI SetRectRgn(HRGN,INT,INT,INT,INT);
 INT       WINAPI SetRelAbs(HDC,INT);
 INT       WINAPI SetROP2(HDC,INT);
 INT       WINAPI SetStretchBltMode(HDC,INT);
 UINT      WINAPI SetSystemPaletteUse(HDC,UINT);
 UINT      WINAPI SetTextAlign(HDC,UINT);
 INT       WINAPI SetTextCharacterExtra(HDC,INT);
-COLORREF    WINAPI SetTextColor(HDC,COLORREF);
+COLORREF  WINAPI SetTextColor(HDC,COLORREF);
 BOOL      WINAPI SetTextJustification(HDC,INT,INT);
 BOOL      WINAPI SetViewportExtEx(HDC,INT,INT,LPSIZE);
 BOOL      WINAPI SetViewportOrgEx(HDC,INT,INT,LPPOINT);
@@ -3098,6 +3165,9 @@ BOOL      WINAPI TextOutW(HDC,INT,INT,LPCWSTR,INT);
 BOOL      WINAPI UnrealizeObject(HGDIOBJ);
 BOOL      WINAPI UpdateColors(HDC);
 BOOL      WINAPI WidenPath(HDC);
+BOOL      WINAPI PolyTextOutA(HDC,PPOLYTEXTA,INT);
+BOOL      WINAPI PolyTextOutW(HDC,PPOLYTEXTW,INT);
+#define   PolyTextOut WINELIB_NAME_AW(PolyTextOut)
 
 
 typedef int (* CALLBACK ICMENUMPROCA)(LPSTR, LPARAM);
