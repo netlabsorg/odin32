@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.183 1999-09-08 11:02:57 bird Exp $ */
+ /* $Id: changelog,v 1.184 1999-09-08 12:14:47 sandervl Exp $ */
+
+ 99-09-08: Yuri Dario <mc6530@mclink.it>
+	- INCLUDE\WIN: Changes to wingdi.h (more WINELIB_NAME defs) & winuser.h (mssing definitions)
 
  99-09-08: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
     - KERNEL32, USER32, USER32\NEW, GDI32, ADVAPI32: <dllname>exp.def is

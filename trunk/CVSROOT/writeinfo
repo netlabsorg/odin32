@@ -1,11 +1,11 @@
 /                                          sandervl phaller achimha cbratschi hugh davidr vince jtroster bird dengert
 /CVSROOT                                   ktk sandervl
 /bin                                       sandervl phaller achimha bird
-/include                                   sandervl phaller achimha bird dengert
+/include                                   sandervl phaller achimha bird dengert davidr
 /lib                                       sandervl phaller achimha bird
 /src                                       sandervl phaller achimha bird
-/include/win                               sandervl phaller achimha bird
-/include/win/wine                          sandervl phaller achimha bird
+/include/win                               sandervl phaller achimha bird davidr
+/include/win/wine                          sandervl phaller achimha bird davidr
 /src/advapi32                              sandervl phaller achimha bird
 /src/capi2032                              sandervl achimha cbratschi phaller
 /src/comdlg32                              sandervl achimha cbratschi

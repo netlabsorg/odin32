@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.47 1999-09-08 07:46:54 sandervl Exp $
+# $Id: makefile,v 1.48 1999-09-08 12:11:54 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -129,4 +129,5 @@ clean:
         $(RM) *.obj *.lib *.dll *~ *.map *.pch
         $(RM) $(PDWIN32_BIN)\$(TARGET).dll
         $(RM) $(PDWIN32_LIB)\$(TARGET).lib
-        $(RM) $(TARGET)exp.def
+#        $(RM) $(TARGET)exp.def
+
