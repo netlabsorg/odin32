@@ -1,4 +1,4 @@
-/* $Id: win32class.cpp,v 1.25 2001-06-09 14:50:20 sandervl Exp $ */
+/* $Id: win32class.cpp,v 1.26 2001-08-07 21:35:36 sandervl Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -84,7 +84,7 @@ Win32WndClass::Win32WndClass(WNDCLASSEXA *wndclass, BOOL fUnicode)
         classAtom       = (DWORD)wndclass->lpszClassName;
   }
   if(!(wndclass->style & CS_GLOBALCLASS)) {
-        processId = GetCurrentProcess();
+        processId = GetCurrentProcessId();
   }
   menuNameA = 0;
   menuNameW = 0;

@@ -1,4 +1,4 @@
-/* $Id: oslibres.cpp,v 1.16 2001-07-16 19:32:55 sandervl Exp $ */
+/* $Id: oslibres.cpp,v 1.17 2001-08-07 21:35:36 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -13,6 +13,7 @@
 #define  INCL_PM
 #include <os2wrap.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 #include <misc.h>
@@ -516,3 +517,111 @@ BOOL OSLibWinGetClipCursor(LPRECT pRect)
 }
 //******************************************************************************
 //******************************************************************************
+char *OSLibStripPath(char *path)
+{
+  char *pszFilename;
+  char *pszFilename1;
+
+  pszFilename  = strrchr(path, '\\');                 /* find rightmost backslash */
+  pszFilename1 = strrchr(path, '/');                  /* find rightmost slash */
+  if(pszFilename > pszFilename1 && pszFilename != NULL)
+    return (++pszFilename);              /* return pointer to next character */
+
+  if (pszFilename1 != NULL)
+    return (++pszFilename1);              /* return pointer to next character */
+
+  return (path);                                     /* default return value */
+}
+//******************************************************************************
+//******************************************************************************
+void OSLibStripFile(char *path)
+{
+  char *pszFilename;
+  char *pszFilename1;
+
+   pszFilename  = strrchr(path, '\\');                 /* find rightmost backslash */
+   pszFilename1 = strrchr(path, '/');                  /* find rightmost slash */
+   if(pszFilename > pszFilename1 && pszFilename != NULL)
+     *pszFilename = 0;
+   else
+   if (pszFilename1 != NULL)
+     *pszFilename1 = 0;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API OSLibWinCreateObject(LPSTR pszPath, LPSTR pszArgs, 
+                                   LPSTR pszWorkDir, LPSTR pszLink, 
+                                   LPSTR pszDescription, LPSTR pszIcoPath,
+                                   INT iIcoNdx, BOOL fDesktop)
+{
+   HOBJECT hObject = 0;
+   LPSTR   pszName;
+   LPSTR   pszSetupString;
+   LPSTR   pszFolder;
+   char    szSystemDir[256];
+   char    temp[128];
+   char    szWorkDir[256];
+
+   if(pszName) {
+       char *tmp;
+       pszName = OSLibStripPath(pszLink);
+       tmp = pszName;
+       while(*tmp) {
+           if(*tmp == '.') {
+               *tmp = 0;
+               break;
+           }
+           tmp++;
+       }
+   }
+   dprintf(("OSLibWinCreateObject %s %s %s\n    %s %s %s %d %d", pszPath, pszArgs, 
+            pszWorkDir, pszName, pszDescription, pszIcoPath, iIcoNdx, fDesktop));
+   dprintf(("Link path %s", pszLink));
+
+   GetSystemDirectoryA(szSystemDir, sizeof(szSystemDir));
+   strcpy(szWorkDir, pszPath);
+   OSLibStripFile(szWorkDir);
+
+   pszSetupString = (LPSTR)malloc(128 + strlen(pszPath) + strlen(pszName) + 
+                                  strlen(pszLink) + 2*strlen(szSystemDir) +
+                                  strlen(szWorkDir) + strlen(pszIcoPath) +
+                                  ((pszArgs) ? strlen(pszArgs) : 0) + 
+                                  ((pszWorkDir) ? strlen(pszWorkDir) : 0)); 
+
+   sprintf(pszSetupString, "PROGTYPE=PM;OBJECTID=<%s>;EXENAME=%s\\PE.EXE;SET BEGINLIBPATH=%s;STARTUPDIR=%s;ICONFILE=%s;PARAMETERS=\"%s\"", pszName, szSystemDir, szSystemDir, szWorkDir, pszIcoPath, pszPath);
+   if(pszArgs && *pszArgs) {
+       strcat(pszSetupString, " ");
+       strcat(pszSetupString, pszArgs);
+   }
+   if(pszWorkDir && *pszWorkDir) {
+       sprintf(temp, " /OPT:[CURDIR=%s]", pszWorkDir);
+       strcat(pszSetupString, temp);
+   }
+   strcat(pszSetupString, ";");
+
+   if(fDesktop) {
+       dprintf(("Name = %s", pszName));
+       dprintf(("Setup string = %s", pszSetupString));
+       hObject = WinCreateObject("WPProgram", pszName, pszSetupString, 
+                                 "<WP_DESKTOP>", CO_REPLACEIFEXISTS);
+   }
+   else {
+       //e.g.: Link path k:\source\odin32\bin\win\Start Menu\Programs\Winamp\Winamp
+       OSLibStripFile(pszLink);
+       pszFolder = OSLibStripPath(pszLink);
+       sprintf(temp, "<FOLDER_%s>", pszFolder);
+       sprintf(szWorkDir, "OBJECTID=%s;", temp);
+       hObject = WinCreateObject("WPFolder", pszFolder, szWorkDir,
+                                 "<ODINFOLDER>", CO_UPDATEIFEXISTS);
+       hObject = WinCreateObject("WPProgram", pszName, pszSetupString, 
+                                 temp, CO_REPLACEIFEXISTS);
+   }
+// If SysCreateObject("WPProgram", "WarpMix", "<ICHAUDIO>",,
+//                    "PROGTYPE=PM;OBJECTID=<WARPMIX>;ICONFILE=WARPMIX.ICO;EXENAME="||bootDrive||"\MMOS2\WARPMIX.EXE")  
+
+   free(pszSetupString);
+   return hObject != 0;
+}
+//******************************************************************************
+//******************************************************************************
+
