@@ -1,4 +1,4 @@
-/* $Id: kList.h,v 1.1 1999-09-05 02:09:17 bird Exp $ */
+/* $Id: kList.h,v 1.2 2000-03-25 23:17:47 bird Exp $ */
 /*
  * Simple list and sorted list template class.
  * Note: simple list is not implemented yet, as it is not yet needed.
@@ -84,7 +84,20 @@
     template <class kEntry>
     class kList
     {
+        private:
+            kEntry        *pFirst;
+            kEntry        *pLast;
+            unsigned long  cEntries;
 
+        public:
+            kList(void);
+            ~kList(void);
+
+            void            destroy(void);
+            void            insert(kEntry *pEntry);
+            kEntry *        getFirst(void) const;
+            kEntry *        getLast(void) const;
+            unsigned long   getCount(void) const;
     };
 
 #endif

@@ -1,4 +1,4 @@
-/* $Id: kList.cpp,v 1.1 1999-09-05 02:09:17 bird Exp $ */
+/* $Id: kList.cpp,v 1.2 2000-03-25 23:17:46 bird Exp $ */
 /*
  * Simple list and sorted list template class.
  * Note: simple list is not implemented yet, as it is not yet needed.
@@ -150,4 +150,115 @@ unsigned long kSortedList<kEntry>::getCount(void) const
 {
     return cEntries;
 }
+
+
+
+
+
+
+/**
+ * Constructor.
+ */
+template <class kEntry>
+kList<kEntry>::kList() : pFirst(NULL), pLast(NULL), cEntries(0)
+{
+}
+
+
+/**
+ * Destructor.
+ */
+template <class kEntry>
+kList<kEntry>::~kList()
+{
+    destroy();
+}
+
+
+/**
+ * Removes all entries in the list.
+ */
+template <class kEntry>
+void kList<kEntry>::destroy()
+{
+    while (pFirst != NULL)
+    {
+        kEntry *p = pFirst;
+        pFirst = (kEntry*)pFirst->getNext();
+        delete p;
+        #ifdef DEBUG
+            cEntries--;
+        #endif
+    }
+    #ifdef DEBUG
+        if (cEntries != 0)
+            fprintf(stderr,
+                    "%s(%d, %s)internal processing warning - cEntires was incorrect upon list destruction.",
+                    __FILE__, __LINE__, __FUNCTION__);
+    #endif
+    cEntries = 0;
+    pLast = NULL;
+}
+
+
+/**
+ * Inserts an entry into the end of the list.
+ * @param     pEntry  Pointer to entry to insert.
+ */
+template <class kEntry>
+void kList<kEntry>::insert(kEntry *pEntry)
+{
+    if (pEntry == NULL)
+        return;
+
+    if (pFirst == NULL)
+    {
+        pEntry->setNext(NULL);
+        pLast = pFirst = pEntry;
+    }
+    else
+    {
+        pEntry->setNext(NULL);
+        pLast->setNext(pEntry);
+        pLast = pEntry;
+    }
+    cEntries++;
+}
+
+
+/**
+ * Get first element from the list without removing it.
+ * @returns    pointer to matching object. NULL if empty list.
+ * @remark
+ */
+template <class kEntry>
+kEntry *kList<kEntry>::getFirst(void) const
+{
+    return pFirst;
+}
+
+
+/**
+ * Get first element from the list without removing it.
+ * @returns    pointer to matching object. NULL if empty list.
+ * @remark
+ */
+template <class kEntry>
+kEntry *kList<kEntry>::getLast(void) const
+{
+    return pLast;
+}
+
+
+/**
+ * Gets count of entries in the list.
+ * @returns   Entry count.
+ */
+template <class kEntry>
+unsigned long kList<kEntry>::getCount(void) const
+{
+    return cEntries;
+}
+
+
 #endif
