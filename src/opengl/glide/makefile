@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2000-03-08 14:49:40 bird Exp $
+# $Id: makefile,v 1.6 2000-09-28 03:08:07 bird Exp $
 #
 # Odin32 API
 #
@@ -6,10 +6,10 @@
 #
 
 # Directories
-PDWIN32_INCLUDE = ..\..\include
+PDWIN32_INCLUDE = ..\..\..\include
 
 # Common tools macros. (MAKE_CMD)
-!include ..\..\..\include\pdwin32.tools
+!include $(PDWIN32_INCLUDE)\pdwin32.tools
 
 # Dummy all rule - nmake without target will make all targets of the first rule.
 all_: all
