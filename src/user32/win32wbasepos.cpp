@@ -1,4 +1,4 @@
-/* $Id: win32wbasepos.cpp,v 1.26 2001-06-09 14:50:22 sandervl Exp $ */
+/* $Id: win32wbasepos.cpp,v 1.27 2002-02-05 17:59:01 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (nonclient/position methods)
  *
@@ -114,7 +114,7 @@ void Win32BaseWindow::GetMinMaxInfo(POINT *maxSize, POINT *maxPos,
         MinMax.ptMaxPosition.y -= yinc;
 //    }
 
-    SendInternalMessageA(WM_GETMINMAXINFO, 0, (LPARAM)&MinMax );
+    SendMessageA(getWindowHandle(), WM_GETMINMAXINFO, 0, (LPARAM)&MinMax );
 
       /* Some sanity checks */
 
@@ -162,7 +162,7 @@ LONG Win32BaseWindow::SendNCCalcSize(BOOL calcValidRect, RECT *newWindowRect,
 
         params.lppos = &winposCopy;
    }
-   result = SendInternalMessageA(WM_NCCALCSIZE, calcValidRect, (LPARAM)&params );
+   result = SendMessageA(getWindowHandle(), WM_NCCALCSIZE, calcValidRect, (LPARAM)&params );
 
    /* If the application send back garbage, ignore it */
    if(params.rgrc[0].left <= params.rgrc[0].right && params.rgrc[0].top <= params.rgrc[0].bottom)
@@ -292,7 +292,7 @@ UINT Win32BaseWindow::MinMaximize(UINT cmd, LPRECT lpRect)
     {
         if(getStyle() & WS_MINIMIZE )
         {
-            if(!SendInternalMessageA(WM_QUERYOPEN, 0, 0L))
+            if(!SendMessageA(getWindowHandle(), WM_QUERYOPEN, 0, 0L))
                 return (SWP_NOSIZE | SWP_NOMOVE);
         }
         switch( cmd )

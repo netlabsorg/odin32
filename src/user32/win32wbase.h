@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.138 2002-01-12 14:09:31 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.139 2002-02-05 17:59:01 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -81,9 +81,6 @@ typedef struct
         ULONG           wParam;
         ULONG           lParam;
 } POSTMSG_PACKET;
-
-#define BROADCAST_SEND          0
-#define BROADCAST_POST          1
 
 #define HAS_DLGFRAME(style,exStyle) \
     (((exStyle) & WS_EX_DLGMODALFRAME) || \
@@ -189,6 +186,7 @@ virtual  WORD   GetWindowWord(int index);
  Win32WndClass *getWindowClass()                { return windowClass; };
 
          LONG   getLastHitTestVal()             { return lastHitTestVal; }
+         void   setLastHitTestVal(LONG hittest) { lastHitTestVal = hittest; }
 
          DWORD  getWindowContextHelpId()        { return contextHelpId; };
          void   setWindowContextHelpId(DWORD id){ contextHelpId = id; };
@@ -322,12 +320,6 @@ virtual  BOOL   DestroyWindow();
 
  SCROLLBAR_INFO *getScrollInfo(int nBar);
 
-       LRESULT  SendMessageA(ULONG msg, WPARAM wParam, LPARAM lParam);
-       LRESULT  SendMessageW(ULONG msg, WPARAM wParam, LPARAM lParam);
-static LRESULT  BroadcastMessageA(int type, UINT msg, WPARAM wParam, LPARAM lParam);
-static LRESULT  BroadcastMessageW(int type, UINT msg, WPARAM wParam, LPARAM lParam);
-       void     CallWindowHookProc(ULONG hooktype, ULONG Msg, WPARAM wParam, LPARAM lParam, BOOL fUnicode = FALSE);
-
        LRESULT  DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam);
        LRESULT  DefWindowProcW(UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -373,8 +365,6 @@ protected:
 #ifndef OS2_INCLUDED
         BOOL  CreateWindowExA(CREATESTRUCTA *lpCreateStruct, ATOM classAtom);
 #endif
-       LRESULT  SendInternalMessageA(ULONG msg, WPARAM wParam, LPARAM lParam);
-       LRESULT  SendInternalMessageW(ULONG msg, WPARAM wParam, LPARAM lParam);
         void    Init();
 
         void    NotifyFrameChanged(WINDOWPOS *wpos, RECT *oldClientRect);
@@ -416,8 +406,6 @@ protected:
                  fIsDialog:1,
                  fIsModalDialog:1,
                  fIsModalDialogOwner:1,
-                 fInternalMsg:1,         //Used to distinguish between messages
-                                         //sent by PM and those sent by apps
                  fParentChange:1,
                  fDestroyWindowCalled:1, //DestroyWindow was called for this window
                  fTaskList:1,            //should be listed in PM tasklist or not

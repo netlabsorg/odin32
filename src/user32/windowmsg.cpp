@@ -1,8 +1,8 @@
-/* $Id: windowmsg.cpp,v 1.32 2001-12-21 18:43:59 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.33 2002-02-05 17:59:02 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
- * Copyright 1999 Sander van Leeuwen
+ * Copyright 1999-2001 Sander van Leeuwen
  *
  * Parts based on Wine Windows code (windows\message.c) 990508
  *
@@ -36,13 +36,6 @@
 ODINDEBUGCHANNEL(USER32-WINDOWMSG)
 
 
-//******************************************************************************
-//******************************************************************************
-VOID WIN32API PostQuitMessage( int nExitCode)
-{
-    dprintf(("USER32:  PostQuitMessage\n"));
-    OSLibWinPostQuitMessage(nExitCode);
-}
 //******************************************************************************
 //******************************************************************************
 LONG WIN32API DispatchMessageA(const MSG * msg)
@@ -171,114 +164,6 @@ LONG WIN32API GetMessageTime(void)
 }
 //******************************************************************************
 //******************************************************************************
-LRESULT WIN32API SendMessageA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-  Win32BaseWindow *window;
-  LRESULT result;
-
-    if (hwnd == HWND_BROADCAST|| hwnd == HWND_TOPMOST)
-    {
-        Win32BaseWindow::BroadcastMessageA(BROADCAST_SEND, msg, wParam, lParam);
-        return TRUE;
-    }
-
-    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
-    if(!window) {
-        dprintf(("SendMessageA, %x %x %x window %x not found", msg, wParam, lParam, hwnd));
-        return 0;
-    }
-    result = window->SendMessageA(msg, wParam, lParam);
-    RELEASE_WNDOBJ(window);
-    return result;
-}
-//******************************************************************************
-//******************************************************************************
-LRESULT WIN32API SendMessageW(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-  Win32BaseWindow *window;
-  LRESULT result;
-
-    if (hwnd == HWND_BROADCAST|| hwnd == HWND_TOPMOST)
-    {
-        Win32BaseWindow::BroadcastMessageW(BROADCAST_SEND, msg, wParam, lParam);
-        return TRUE;
-    }
-
-    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
-    if(!window) {
-        dprintf(("SendMessageW, window %x not found", hwnd));
-        return 0;
-    }
-    result = window->SendMessageW(msg, wParam, lParam);
-    RELEASE_WNDOBJ(window);
-    return result;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API PostMessageA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-  Win32BaseWindow *window;
-  HWND hwndOS2;
-
-    if (hwnd == HWND_BROADCAST) //Not HWND_TOPMOST???
-    {
-        Win32BaseWindow::BroadcastMessageA(BROADCAST_POST, msg, wParam, lParam);
-        return TRUE;
-    }
-
-    if(hwnd == NULL)
-        return PostThreadMessageA(GetCurrentThreadId(), msg, wParam, lParam);
-
-    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
-    if(!window) {
-        dprintf(("PostMessageA, window %x not found", hwnd));
-        return FALSE;
-    }
-    hwndOS2 = window->getOS2WindowHandle();
-    RELEASE_WNDOBJ(window);
-    dprintf(("PostMessageA, %x %x %x %x", hwnd, msg, wParam, lParam));
-    return OSLibPostMessage(hwndOS2, msg, wParam, lParam, FALSE);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API PostMessageW(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-  Win32BaseWindow *window;
-  HWND hwndOS2;
-
-    if (hwnd == HWND_BROADCAST) //Not HWND_TOPMOST???
-    {
-        Win32BaseWindow::BroadcastMessageW(BROADCAST_POST, msg, wParam, lParam);
-        return TRUE;
-    }
-
-    if(hwnd == NULL)
-        return PostThreadMessageW(GetCurrentThreadId(), msg, wParam, lParam);
-
-    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
-    if(!window) {
-        dprintf(("PostMessageW, window %x not found", hwnd));
-        return FALSE;
-    }
-    hwndOS2 = window->getOS2WindowHandle();
-    RELEASE_WNDOBJ(window);
-    dprintf(("PostMessageW, %x %x %x %x", hwnd, msg, wParam, lParam));
-    return OSLibPostMessage(hwndOS2, msg, wParam, lParam, TRUE);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API PostThreadMessageA( DWORD threadid, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-    return OSLibPostThreadMessage(threadid, msg, wParam, lParam, FALSE);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API PostThreadMessageW( DWORD threadid, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-    return OSLibPostThreadMessage(threadid, msg, wParam, lParam, TRUE);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API WaitMessage(void)
 {
     dprintf2(("USER32: WaitMessage"));
@@ -297,6 +182,13 @@ BOOL WIN32API ReplyMessage(LRESULT result)
 {
     dprintf(("USER32: ReplyMessage %x", result));
     return OSLibWinReplyMessage(result);
+}
+//******************************************************************************
+//******************************************************************************
+VOID WIN32API PostQuitMessage( int nExitCode)
+{
+    dprintf(("USER32:  PostQuitMessage\n"));
+    OSLibWinPostQuitMessage(nExitCode);
 }
 //******************************************************************************
 //******************************************************************************
@@ -322,160 +214,6 @@ BOOL WIN32API SetMessageQueue(int cMessagesMax)
 {
   dprintf(("USER32:  SetMessageQueue\n"));
   return(TRUE);
-}
-//******************************************************************************
-//******************************************************************************
-LRESULT WIN32API SendMessageTimeoutA(HWND hwnd, UINT Msg, WPARAM wParam,
-                    LPARAM lParam, UINT fuFlags, UINT uTimeOut,
-                    LPDWORD lpdwResult)
-{
-  dprintf(("USER32:  SendMessageTimeoutA, partially implemented\n"));
-  //ignore fuFlags & wTimeOut
-  *lpdwResult = SendMessageA(hwnd, Msg, wParam, lParam);
-  return(TRUE);
-}
-//******************************************************************************
-//******************************************************************************
-LRESULT WIN32API SendMessageTimeoutW(HWND hwnd, UINT Msg, WPARAM wParam,
-                    LPARAM lParam, UINT fuFlags, UINT uTimeOut,
-                    LPDWORD lpdwResult)
-{
-  dprintf(("USER32:  SendMessageTimeoutW, partially implemented\n"));
-  return(SendMessageTimeoutA(hwnd, Msg, wParam, lParam, fuFlags, uTimeOut, lpdwResult));
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SendNotifyMessageA(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
-{
-  dprintf(("USER32:  SendNotifyMessageA, not completely implemented\n"));
-  return(SendMessageA(hwnd, Msg, wParam, lParam));
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SendNotifyMessageW(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
-{
-  dprintf(("USER32:  SendNotifyMessageW, not completely implemented\n"));
-  return(SendMessageA(hwnd, Msg, wParam, lParam));
-}
-/*****************************************************************************
- * Name      : BOOL WIN32API SendMessageCallbackA
- * Purpose   : The SendMessageCallback function sends the specified message to
- *             a window or windows. The function calls the window procedure for
- *             the specified window and returns immediately. After the window
- *             procedure processes the message, the system calls the specified
- *             callback function, passing the result of the message processing
- *             and an application-defined value to the callback function.
- * Parameters: HWND  hwnd                      handle of destination window
- *             UINT  uMsg                      message to send
- *             WPARAM  wParam                  first message parameter
- *             LPARAM  lParam                  second message parameter
- *             SENDASYNCPROC  lpResultCallBack function to receive message value
- *             DWORD  dwData                   value to pass to callback function
- * Variables :
- * Result    : If the function succeeds, the return value is TRUE.
- *             If the function fails, the return value is FALSE. To get extended
- *             error information, call GetLastError.
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-BOOL WIN32API SendMessageCallbackA(HWND          hWnd,
-                                   UINT          uMsg,
-                                   WPARAM        wParam,
-                                   LPARAM        lParam,
-                                   SENDASYNCPROC lpResultCallBack,
-                                   DWORD         dwData)
-{
-  dprintf(("USER32:SendMessageCallBackA (%08xh,%08xh,%08xh,%08xh,%08xh,%08x) not implemented.\n",
-         hWnd,
-         uMsg,
-         wParam,
-         lParam,
-         lpResultCallBack,
-         dwData));
-
-  return (FALSE);
-}
-
-
-/*****************************************************************************
- * Name      : BOOL WIN32API SendMessageCallbackW
- * Purpose   : The SendMessageCallback function sends the specified message to
- *             a window or windows. The function calls the window procedure for
- *             the specified window and returns immediately. After the window
- *             procedure processes the message, the system calls the specified
- *             callback function, passing the result of the message processing
- *             and an application-defined value to the callback function.
- * Parameters: HWND  hwnd                      handle of destination window
- *             UINT  uMsg                      message to send
- *             WPARAM  wParam                  first message parameter
- *             LPARAM  lParam                  second message parameter
- *             SENDASYNCPROC  lpResultCallBack function to receive message value
- *             DWORD  dwData                   value to pass to callback function
- * Variables :
- * Result    : If the function succeeds, the return value is TRUE.
- *             If the function fails, the return value is FALSE. To get extended
- *             error information, call GetLastError.
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-BOOL WIN32API SendMessageCallbackW(HWND          hWnd,
-                                      UINT          uMsg,
-                                      WPARAM        wParam,
-                                      LPARAM        lParam,
-                                      SENDASYNCPROC lpResultCallBack,
-                                      DWORD         dwData)
-{
-  dprintf(("USER32:SendMessageCallBackW (%08xh,%08xh,%08xh,%08xh,%08xh,%08x) not implemented.\n",
-         hWnd,
-         uMsg,
-         wParam,
-         lParam,
-         lpResultCallBack,
-         dwData));
-
-  return (FALSE);
-}
-/*****************************************************************************
- * Name      : long WIN32API BroadcastSystemMessage
- * Purpose   : The BroadcastSystemMessage function sends a message to the given
- *             recipients. The recipients can be applications, installable
- *             drivers, Windows-based network drivers, system-level device
- *             drivers, or any combination of these system components.
- * Parameters: DWORD   dwFlags,
-               LPDWORD lpdwRecipients,
-               UINT    uiMessage,
-               WPARAM  wParam,
-               LPARAM  lParam
- * Variables :
- * Result    : If the function succeeds, the return value is a positive value.
- *             If the function is unable to broadcast the message, the return value is -1.
- *             If the dwFlags parameter is BSF_QUERY and at least one recipient returned FALSE to the corresponding message, the return value is zero.
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-long WIN32API BroadcastSystemMessage(DWORD   dwFlags,
-                                        LPDWORD lpdwRecipients,
-                                        UINT    uiMessage,
-                                        WPARAM  wParam,
-                                        LPARAM  lParam)
-{
-  dprintf(("USER32:BroadcastSystemMessage(%08xh,%08xh,%08xh,%08xh,%08x) not implemented.\n",
-        dwFlags,
-        lpdwRecipients,
-        uiMessage,
-        wParam,
-        lParam));
-
-  return (-1);
 }
 //******************************************************************************
 //******************************************************************************
