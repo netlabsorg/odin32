@@ -1,4 +1,13 @@
- /* $Id: ChangeLog,v 1.589 1999-12-29 18:52:23 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.590 1999-12-29 22:52:29 cbratschi Exp $ */
+
+ 99-12-29: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32: rewrote coordinate mapping (map*) and fixed some 1 pixel bugs
+		  pro memoria:
+		    point:     newY   = windowH-1-oldY
+		    rectangle: newTop = windowH-oldTop
+		  fixed some wrong window handles
+		  Win32BaseWindow: added getClientHeight/Width,
+		  getWindowHeight returns now the window height
 
  99-12-29: Patrick Haller <phaller@gmx.net>
 	- INCLUDE: ODINWRAP: new macros to save FS register for callback registration
