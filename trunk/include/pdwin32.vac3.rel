@@ -1,4 +1,4 @@
-# $Id: pdwin32.vac3.rel,v 1.24 2000-07-19 18:59:22 sandervl Exp $
+# $Id: pdwin32.vac3.rel,v 1.25 2000-09-01 16:01:20 bird Exp $
 # ODIN / win32os2 Project
 #
 # RELEASE makefile for the VAC3 compiler environment
@@ -43,7 +43,8 @@ LD2FLAGS_ODINCRT = /nologo /noe /map /packcode /packdata /exepack:2 /nodebug
 IMPLIBFLAGS      = /nologo
 ILIBFLAGS        = /quiet /nologo
 RCFLAGS          = -s -I. -I$(CPPMAIN)\include -I$(PDWIN32_INCLUDE) -I$(PDWIN32_INCLUDE)\win
-OS2RCFLAGS       = -r
+OS2RCFLAGS       = -r -n
+OS2RCLFLAGS      = -x2 -n
 
 !ifdef EXETARGET
 CFLAGS           = $(CFLAGS) -Ge+ -Gn-
