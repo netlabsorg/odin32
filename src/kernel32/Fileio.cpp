@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.8 1999-08-24 23:46:36 phaller Exp $ */
+/* $Id: Fileio.cpp,v 1.9 1999-09-21 11:00:23 phaller Exp $ */
 
 /*
  *
@@ -19,6 +19,7 @@
 #include <heapstring.h>
 #include "handlemanager.h"
 #include "devio.h"
+#include "oslibdos.h"
 
 //******************************************************************************
 //******************************************************************************
@@ -785,7 +786,7 @@ DWORD WIN32API GetCompressedFileSizeA(LPCTSTR  lpFileName,
  *****************************************************************************/
 
 DWORD WIN32API GetCompressedFileSizeW(LPCWSTR  lpFileName,
-                                         LPDWORD  lpFileSizeHigh)
+                                      LPDWORD  lpFileSizeHigh)
 {
   LPCTSTR lpAsciiFileName;                             /* converted filename */
   DWORD   rc;                                             /* function result */
@@ -803,3 +804,71 @@ DWORD WIN32API GetCompressedFileSizeW(LPCWSTR  lpFileName,
 
   return (rc);                                              /* return result */
 }
+
+
+/*****************************************************************************
+ * Name      : BOOL GetFileAttributesExA
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : KERNEL32.874
+ * Status    : UNTESTED
+ *
+ * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
+ *****************************************************************************/
+
+BOOL WIN32API GetFileAttributesExA(LPCSTR                 lpFileName,
+                                   GET_FILEEX_INFO_LEVELS fInfoLevelId,
+                                   LPVOID                 lpFileInformation)
+{
+  BOOL rc;
+
+  dprintf(("KERNEL32: GetFileAttributesExA(%s,%08xh,%08xh) mostly implemented.\n",
+           lpFileName,
+           fInfoLevelId,
+           lpFileInformation));
+
+  if (lpFileName == NULL) return FALSE;
+  if (lpFileInformation == NULL) return FALSE;
+
+  if (fInfoLevelId == GetFileExInfoStandard)
+  {
+    LPWIN32_FILE_ATTRIBUTE_DATA lpFad = (LPWIN32_FILE_ATTRIBUTE_DATA) lpFileInformation;
+
+    rc = OSLibDosGetFileAttributesEx((LPSTR)lpFileName,
+                                     fInfoLevelId,
+                                     lpFileInformation);
+    return (rc);
+  }
+  else
+  {
+    dprintf(("KERNEL32: GetFileAttributesExA - invalid info level %d!\n",
+             fInfoLevelId));
+    return FALSE;
+  }
+}
+
+
+/*****************************************************************************
+ * Name      : BOOL GetFileAttributesExW
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : KERNEL32.875
+ * Status    : UNTESTED
+ *
+ * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
+ *****************************************************************************/
+
+BOOL WINAPI GetFileAttributesExW(LPCWSTR                lpFileName,
+                                 GET_FILEEX_INFO_LEVELS fInfoLevelId,
+                                 LPVOID                 lpFileInformation)
+{
+  LPSTR nameA = HEAP_strdupWtoA( GetProcessHeap(), 0, lpFileName );
+  BOOL res = GetFileAttributesExA( nameA, fInfoLevelId, lpFileInformation);
+  HeapFree( GetProcessHeap(), 0, nameA );
+  return res;
+}
+

@@ -1,4 +1,4 @@
-/* $Id: oslibdos.h,v 1.3 1999-08-27 16:51:00 sandervl Exp $ */
+/* $Id: oslibdos.h,v 1.4 1999-09-21 11:00:23 phaller Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -18,6 +18,8 @@ DWORD OSLibDosAllocMem(LPVOID *lplpMemAddr, DWORD size, DWORD flags);
 DWORD OSLibDosFreeMem(LPVOID lpMemAddr);
 DWORD OSLibDosQueryMem(LPVOID lpMemAddr, DWORD *lpRangeSize, DWORD *lpAttr);
 DWORD OSLibDosSetMem(LPVOID lpMemAddr, DWORD size, DWORD flags);
+
+BOOL OSLibDosGetFileAttributesEx(PSZ pszName, ULONG ulDummy, PVOID pBuffer);
 
 #define OSLIB_NOERROR			0
 #define OSLIB_ERROR_INVALID_ADDRESS	1

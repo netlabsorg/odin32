@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.3 1999-08-27 16:51:00 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.4 1999-09-21 11:00:22 phaller Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -162,3 +162,61 @@ DWORD OSLibDosSetFilePtr(DWORD hFile, DWORD offset, DWORD method)
 }
 //******************************************************************************
 //******************************************************************************
+//@@@PH Note: this routine is nothing but a QUICK'N'DIRTY HACK!
+//@@@PH       this function should be implemented accordingly to NTDLL's
+//            RtlSecondsSince1980ToTime
+//            RtlTimeToSecondsSince1980
+static void iFDATEFTIME2FILETIME(FDATE fdOS2, FTIME ftOS2, LPFILETIME pftWin32)
+{
+  float f;
+  #define facSECOND 2                // as encoded in OS/2
+  #define facMINUTE 60
+  #define facHOUR   3600
+  #define facDAY    86400
+  #define facMONTH  facDAY * 30      // cough, cough :)
+  #define facYEAR   facDAY * 365
+
+  /* pftWin32 is 100ns based from 01.01.1601 00:00:00 */
+  f =   (fdOS2.year  +  379) * facYEAR        // 1980 - 1601
+      + (fdOS2.month - 0   ) * facMONTH
+      + (fdOS2.day   - 1   ) * facDAY
+      + (ftOS2.hours       ) * facHOUR
+      + (ftOS2.minutes     ) * facMINUTE
+      + (ftOS2.twosecs     ) * facSECOND;
+
+  f *= 10000; // convert to 100ns base
+  pftWin32->dwHighDateTime = (f / (float)(0xffffffff) );
+  pftWin32->dwLowDateTime  = (f - (float)((float)pftWin32->dwHighDateTime *
+                                          (float)0xffffffff) );
+}
+
+BOOL OSLibDosGetFileAttributesEx(PSZ   pszName,
+                                 ULONG ulDummy,
+                                 PVOID pBuffer)
+{
+  APIRET      rc;                                         /* API return code */
+  FILESTATUS3 fs3;                             /* file information structure */
+  LPWIN32_FILE_ATTRIBUTE_DATA lpFad = (LPWIN32_FILE_ATTRIBUTE_DATA) pBuffer;
+
+  // Note: we only handle standard "GetFileExInfoStandard" requests
+  rc = DosQueryPathInfo(pszName,               /* query the file information */
+                        FIL_STANDARD,
+                        &fs3,
+                        sizeof(fs3));
+  if (rc != NO_ERROR)                                    /* check for errors */
+    return FALSE;                                   /* raise error condition */
+
+  // convert structure
+  lpFad->dwFileAttributes = fs3.attrFile; // directly interchangeable
+  iFDATEFTIME2FILETIME(fs3.fdateCreation,   fs3.ftimeCreation,   &lpFad->ftCreationTime);
+  iFDATEFTIME2FILETIME(fs3.fdateLastAccess, fs3.ftimeLastAccess, &lpFad->ftLastAccessTime);
+  iFDATEFTIME2FILETIME(fs3.fdateLastWrite,  fs3.ftimeLastWrite,  &lpFad->ftLastWriteTime);
+
+  /* @@@PH we might add Aurora support ...
+  lpFad->nFileSizeHigh    = info.nFileSizeHigh;
+  */
+  lpFad->nFileSizeHigh    = 0;
+  lpFad->nFileSizeLow     = fs3.cbFile;
+
+  return TRUE;
+}
