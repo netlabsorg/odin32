@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.16 1999-08-27 16:52:09 sandervl Exp $ */
+/* $Id: window.cpp,v 1.17 1999-08-28 14:09:30 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -567,7 +567,7 @@ BOOL WIN32API SetWindowTextA(HWND hwnd, LPCSTR lpsz)
         return 0;
     }
     dprintf(("SetWindowTextA %x %s", hwnd, lpsz));
-    return window->SetWindowTextA(lpsz);
+    return window->SetWindowText((LPSTR)lpsz);
 }
 //******************************************************************************
 //******************************************************************************
@@ -644,20 +644,31 @@ HWND WIN32API GetDesktopWindow(void)
 //******************************************************************************
 HWND WIN32API FindWindowA(LPCSTR lpszClass, LPCSTR lpszWindow)
 {
+    if(!lpszClass) {
+	SetLastError(ERROR_INVALID_PARAMETER);
+	return 0;
+    }
     if(HIWORD(lpszClass)) {
     	 dprintf(("USER32:  FindWindow %s %s\n", lpszClass, lpszWindow));
     }
     else dprintf(("USER32:  FindWindow %x %s\n", lpszClass, lpszWindow));
-    return O32_FindWindow(lpszClass, lpszWindow);
+
+    return Win32Window::FindWindowEx(OSLIB_HWND_DESKTOP, 0, (LPSTR)lpszClass, (LPSTR)lpszWindow);
 }
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API FindWindowExA(HWND hwnd1, HWND hwnd2, LPCSTR lpszClass, LPCSTR lpszWindow)
+HWND WIN32API FindWindowExA(HWND hwndParent, HWND hwndChildAfter, LPCSTR lpszClass, LPCSTR lpszWindow)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  FindWindowExA, not completely implemented\n");
-#endif
-    return FindWindowA(lpszClass, lpszWindow);
+    if(!lpszClass) {
+	SetLastError(ERROR_INVALID_PARAMETER);
+	return 0;
+    }
+    if(HIWORD(lpszClass)) {
+    	 dprintf(("USER32:  FindWindowExA (%x,%x) %s %s\n", hwndParent, hwndChildAfter, lpszClass, lpszWindow));
+    }
+    else dprintf(("USER32:  FindWindowExA (%x,%x)%x %s\n", hwndParent, hwndChildAfter, lpszClass, lpszWindow));
+
+    return Win32Window::FindWindowEx(hwndParent, hwndChildAfter, (LPSTR)lpszClass, (LPSTR)lpszWindow);
 }
 /*****************************************************************************
  * Name      : HWND WIN32API FindWindowExW
@@ -685,13 +696,13 @@ HWND WIN32API FindWindowExW(HWND    hwndParent,
                                LPCWSTR lpszClass,
                                LPCWSTR lpszWindow)
 {
-  dprintf(("USER32:FindWindowExW (%08xh,%08xh,%s,%s) not implemented.\n",
-         hwndParent,
-         hwndChildAfter,
-         lpszClass,
-         lpszWindow));
+    if(!lpszClass) {
+	SetLastError(ERROR_INVALID_PARAMETER);
+	return 0;
+    }
+    dprintf(("USER32:  FindWindowExW (%x,%x) %x %s\n", hwndParent, hwndChildAfter, lpszClass, lpszWindow));
 
-  return (NULL);
+    return Win32Window::FindWindowEx(hwndParent, hwndChildAfter, (LPSTR)lpszClass, (LPSTR)lpszWindow);
 }
 //******************************************************************************
 //******************************************************************************
