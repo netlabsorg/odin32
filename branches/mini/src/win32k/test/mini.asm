@@ -1,4 +1,4 @@
-; $Id: mini.asm,v 1.1.2.8 2001-08-14 22:51:29 bird Exp $
+; $Id: mini.asm,v 1.1.2.9 2001-08-15 03:17:36 bird Exp $
 ;
 ; Haveing great fun making small executables...
 ;
@@ -34,7 +34,7 @@ public minilx
 ;
 ; Data
 ;
-ImReallySmall   db  "I'm really small!",013
+ImReallySmall   db  "I'm really small!",0ah
 ifdef CLIB
 terminator db 0
 endif
@@ -262,7 +262,7 @@ minilx:
 fixup dd 0h
     add     esp, 12
     ret
-ImReallySmall   db  "I'm really small!",013
+ImReallySmall   db  "I'm really small!",0ah
 
 db 0,0,0
 ;lxdump db 'lxdumplxdumplxdumplxdump'
