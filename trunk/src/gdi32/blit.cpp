@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.3 2000-02-03 10:23:24 dengert Exp $ */
+/* $Id: blit.cpp,v 1.4 2000-02-03 18:59:04 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -13,8 +13,10 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <cpuhlp.h>
 #include "misc.h"
 #include "dibsect.h"
+#include "rgbcvt.h"
 
 static ULONG QueryPaletteSize(BITMAPINFOHEADER *pBHdr);
 static ULONG CalcBitmapSize(ULONG cBits, LONG cx, LONG cy);
@@ -85,7 +87,7 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
 {
     INT result, imgsize, palsize, height, width;
     char *ptr;
-    ULONG compression = 0;
+    ULONG compression = 0, iHeight;
     WORD *newbits = 0;
 
     SetLastError(0);
@@ -134,18 +136,21 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
         dprintf(("BI_BITFIELDS compression %x %x %x", *bitfields, *(bitfields+1), *(bitfields+2)));
         ((BITMAPINFO *)info)->bmiHeader.biCompression = 0;
         compression = BI_BITFIELDS;
-        if(*(bitfields+1) == 0x3E0) {//RGB 555?
-            extern void _Optlink RGB555to565 (WORD *dest, WORD *src, ULONG num);
-
+        if(*(bitfields+1) == 0x3E0) 
+	{//RGB 555?
                 newbits = (WORD *)malloc(imgsize);
-                RGB555to565 (newbits, (WORD *)bits, imgsize/sizeof(WORD));
+		if(CPUFeatures & CPUID_MMX) {
+			RGB555to565MMX(newbits, (WORD *)bits, imgsize/sizeof(WORD));
+		}
+		else   	RGB555to565(newbits, (WORD *)bits, imgsize/sizeof(WORD));
                 bits = newbits;
         }
     }
 
-    if(info->bmiHeader.biHeight < 0)
+    iHeight = info->bmiHeader.biHeight;
+    if(info->bmiHeader.biHeight < 0) {
         ((BITMAPINFO *)info)->bmiHeader.biHeight = -info->bmiHeader.biHeight;
-
+    }
     result = O32_SetDIBitsToDevice(hdc, xDest, yDest, cx, cy, xSrc, ySrc, startscan, lines, (PVOID) bits, (PBITMAPINFO)info, coloruse);
     //SvL: Wrong Open32 return value
     result = (result == TRUE) ? lines : 0;
@@ -158,6 +163,7 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
         ((BITMAPINFO *)info)->bmiHeader.biCompression = BI_BITFIELDS;
         if(newbits) free(newbits);
     }
+    ((BITMAPINFO *)info)->bmiHeader.biHeight = iHeight;
     return result;
 
 invalid_parameter:

@@ -1,8 +1,18 @@
-; $Id: rgbcvt.asm,v 1.2 2000-02-03 18:06:36 achimha Exp $
+; $Id: rgbcvt.asm,v 1.3 2000-02-03 18:59:04 sandervl Exp $
 ; Copyright 2000 Daniela Engert (dani@ngrt.de)
 
-	.386p
+	.586p
+	.MMX
 	.MODEL FLAT
+
+	.DATA
+
+	align	4
+  and1mask dd	 001F001Fh
+	   dd    001F001Fh
+  and2mask dd   0FFC0FFC0h
+           dd   0FFC0FFC0h
+
 	.CODE
 
 ; void _Optlink RGB555to565 (WORD *dest, WORD *src, ULONG num);
@@ -11,40 +21,133 @@
 
 RGB555to565 PROC NEAR
 
-	PUSH	ESI
-	PUSH	EDI
-	CLD
+	push	esi
+	push	edi
+	cld
 
-	MOV	EDI, EAX		; _Optlink arg1 = EAX
-	MOV	ESI, EDX		; _Optlink arg2 = EDX
-	SHR	ECX, 1			; _Optlink arg3 = ECX
-	PUSHF
+	mov	edi, eax		; _Optlink arg1 = EAX
+	mov	esi, edx		; _Optlink arg2 = EDX
+	shr	ecx, 1			; _Optlink arg3 = ECX
+	pushf
 cvt:
-	LODSD
-	MOV	EDX, EAX
-	AND	EDX, 001F001Fh
-	SHL	EAX, 1
-	AND	EAX, 0FFC0FFC0h
-	OR	EAX, EDX
-	STOSD
-	LOOP	cvt
+	mov	eax, [esi]
+	mov	edx, eax
 
-	POPF
-	JNC	SHORT done
+	add	esi, 4
+	shl	eax, 1
 
-	LODSW
-	MOV	DX, AX
-	AND	DX, 001Fh
-	SHL	AX, 1
-	AND	AX, 0FFC0h
-	OR	AX, DX
-	STOSW
+	and	edx, 001F001Fh
+	and	eax, 0FFC0FFC0h
+
+	add	edi, 4
+	or	eax, edx
+
+	mov	[edi-4], eax
+	loop	cvt
+
+	popf
+	jnc	SHORT done
+
+	mov	ax, [esi]
+	mov	dx, ax
+	and	dx, 001Fh
+	shl	ax, 1
+	and	ax, 0FFC0h
+	or	ax, dx
+	mov	[edi], ax
 
 done:
-	POP	EDI
-	POP	ESI
-	RET
+	pop	edi
+	pop	esi
+	ret
 
-	ENDP
+RGB555to565 ENDP
+
+; void _Optlink RGB555to565MMX(WORD *dest, WORD *src, ULONG num);
+
+	PUBLIC RGB555to565MMX
+
+RGB555to565MMX PROC NEAR
+	push	esi
+	push	edi
+	cld
+
+	cmp	ecx, 0
+	jz	done
+
+	push	ecx
+	
+	mov	edi, eax		; _Optlink arg1 = EAX
+	mov	esi, edx		; _Optlink arg2 = EDX
+	shr	ecx, 3			; _Optlink arg3 = ECX
+	jz	lastpixels
+
+	sub	esp, 108
+	fsaved	dword ptr [esp]
+
+	movq	mm2, qword ptr and1mask		;  0001F001F001F001Fh
+	movq	mm3, qword ptr and2mask		;  FFC0FFC00FFC0FFC0h
+
+cvt:
+	movq	mm0, qword ptr [esi]
+	add	edi, 16
+
+	movq	mm4, qword ptr [esi+8]
+	movq	mm1, mm0
+
+	movq	mm5, mm4
+	psllq	mm0, 1
+
+	psllq	mm4, 1
+	pand	mm1, mm2
+
+	pand	mm0, mm3
+	pand	mm5, mm2
+
+	pand	mm4, mm3
+	por	mm0, mm1
+
+	por	mm4, mm5
+	add	esi, 16
+
+	movq	qword ptr [edi-16], mm0
+	dec	ecx
+
+	movq	qword ptr [edi-8], mm4
+	jnz	cvt
+
+	nop
+	nop
+
+	frstord	dword ptr [esp]
+	add	esp, 108
+
+lastpixels:
+	pop	ecx
+	and	ecx, 3
+	jz	short done
+
+cvt2loop:
+	mov	ax, [esi]
+	mov	dx, ax
+
+	add	esi, 2
+	and	dx, 001Fh
+
+	shl	ax, 1
+	add	edi, 2
+
+	and	ax, 0FFC0h
+	or	ax, dx
+
+	mov	[edi-2], ax
+	loop	cvt2loop
+
+done:
+	pop	edi
+	pop	esi
+	ret
+
+RGB555to565MMX ENDP
 
 	END
