@@ -1,4 +1,4 @@
-/* $Id: toolhelp.cpp,v 1.2 2000-02-16 14:23:12 sandervl Exp $ */
+/* $Id: toolhelp.cpp,v 1.3 2000-10-08 14:01:02 sandervl Exp $ */
 
 /*
  * Misc Toolhelp functions
@@ -22,7 +22,6 @@
 #include "winbase.h"
 #include "winerror.h"
 #include "tlhelp32.h"
-#include "toolhelp.h"
 
 #define DBG_LOCALLOG	DBG_toolhelp
 #include "dbglocal.h"
@@ -36,7 +35,7 @@ ODINDEBUGCHANNEL(KERNEL32-TOOLHELP)
 ODINFUNCTION2(HANDLE,CreateToolhelp32Snapshot,DWORD,dwFlags,
                                               DWORD,dwProcess)
 {
-  dprintf(("KERNEL32: CreateToolhelp32Snapshot not implemented.\n"));
+  dprintf(("KERNEL32: CreateToolhelp32Snapshot %x %x not implemented, dwFlags, dwProcess"));
   SetLastError( ERROR_CALL_NOT_IMPLEMENTED );
   return INVALID_HANDLE_VALUE;
 }
@@ -48,9 +47,9 @@ ODINFUNCTION2(HANDLE,CreateToolhelp32Snapshot,DWORD,dwFlags,
  * Return info about the first process in a toolhelp32 snapshot
  */
 ODINFUNCTION2(BOOL,Process32First,HANDLE,        hSnapshot,
-                                  LPPROCESSENTRY,lppe)
+                                  LPPROCESSENTRY32,lppe)
 {
-  dprintf(("KERNEL32: Process32First not implemented.\n"));
+  dprintf(("KERNEL32: Process32First %x %x not implemented", hSnapshot, lppe));
   SetLastError( ERROR_CALL_NOT_IMPLEMENTED );
   return FALSE;
 }
@@ -61,9 +60,9 @@ ODINFUNCTION2(BOOL,Process32First,HANDLE,        hSnapshot,
  * Return info about the "next" process in a toolhelp32 snapshot
  */
 ODINFUNCTION2(BOOL,Process32Next,HANDLE,        hSnapshot,
-                                 LPPROCESSENTRY,lppe)
+                                 LPPROCESSENTRY32,lppe)
 {
-  dprintf(("KERNEL32: Process32Next not implemented.\n"));
+  dprintf(("KERNEL32: Process32Next %x %x not implemented", hSnapshot, lppe));
   SetLastError( ERROR_CALL_NOT_IMPLEMENTED );
   return FALSE;
 }
@@ -74,10 +73,9 @@ ODINFUNCTION2(BOOL,Process32Next,HANDLE,        hSnapshot,
  * Return info about the "first" module in a toolhelp32 snapshot
  */
 ODINFUNCTION2(BOOL,Module32First,HANDLE,hSnapshot,
-                                 LPVOID,lpme)
+                                 LPMODULEENTRY32,lpme)
 {
-  //                               LPMODULEENTY,lpme)
-  dprintf(("KERNEL32: Module32First not implemented.\n"));
+  dprintf(("KERNEL32: Module32First %x %x not implemented", hSnapshot, lpme));
   SetLastError( ERROR_CALL_NOT_IMPLEMENTED );
   return FALSE;
 }
@@ -88,11 +86,24 @@ ODINFUNCTION2(BOOL,Module32First,HANDLE,hSnapshot,
  * Return info about the "next" module in a toolhelp32 snapshot
  */
 ODINFUNCTION2(BOOL,Module32Next,HANDLE,hSnapshot,
-                                LPVOID,lpme)
+                                LPMODULEENTRY32,lpme)
 {
-  //                              LPMODULEENTRY,lpme)
-  dprintf(("KERNEL32: Module32Next not implemented.\n"));
+  dprintf(("KERNEL32: Module32Next %x %x not implemented", hSnapshot, lpme));
   SetLastError( ERROR_CALL_NOT_IMPLEMENTED );
   return FALSE;
 }
 
+
+BOOL WINAPI Thread32First(HANDLE hSnapshot,LPTHREADENTRY32 lpte)
+{
+  dprintf(("KERNEL32: Thread32First %x %x not implemented", hSnapshot, lpte));
+  SetLastError( ERROR_CALL_NOT_IMPLEMENTED );
+  return FALSE;
+}
+
+BOOL WINAPI Thread32Next(HANDLE hSnapshot, LPTHREADENTRY32 lpte)
+{
+  dprintf(("KERNEL32: Thread32Next %x %x not implemented", hSnapshot, lpte));
+  SetLastError( ERROR_CALL_NOT_IMPLEMENTED );
+  return FALSE;
+}

@@ -1,4 +1,4 @@
-/* $Id: environ.cpp,v 1.8 2000-10-02 16:22:09 phaller Exp $ */
+/* $Id: environ.cpp,v 1.9 2000-10-08 14:01:01 sandervl Exp $ */
 
 /*
  * Win32 environment file functions for OS/2
@@ -119,6 +119,7 @@ ODINFUNCTION3(DWORD,  GetEnvironmentVariableA,
               LPSTR,  lpBuffer,
               DWORD,  nSize)
 {
+  dprintf(("GetEnvironmentVariableA %s", lpName));
   return O32_GetEnvironmentVariable(lpName, lpBuffer, nSize);
 }
 //******************************************************************************
@@ -131,14 +132,19 @@ ODINFUNCTION3(DWORD, GetEnvironmentVariableW,
   char *astring, *asciibuffer;
   DWORD rc;
 
-  asciibuffer = (char *)malloc(nSize+1);
-  *asciibuffer = 0;
+  if(nSize) {
+       asciibuffer = (char *)malloc(nSize+1);
+       *asciibuffer = 0;
+  }
+  else asciibuffer = NULL;
+
   astring     = UnicodeToAsciiString((LPWSTR)lpName);
 
-  rc = O32_GetEnvironmentVariable(astring, asciibuffer, nSize);
+  rc = CALL_ODINFUNC(GetEnvironmentVariableA)(astring, asciibuffer, nSize);
   AsciiToUnicode(asciibuffer, lpBuffer);
   FreeAsciiString(astring);
-  free(asciibuffer);
+  if(asciibuffer)
+	free(asciibuffer);
   return(rc);
 }
 /***********************************************************************

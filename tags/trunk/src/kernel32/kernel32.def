@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.89 2000-10-06 15:15:59 sandervl Exp $
+; $Id: kernel32.def,v 1.90 2000-10-08 14:00:59 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -230,7 +230,7 @@ EXPORTS
 ;    CreateSocketHandle         = _CreateSocketHandle@??           @176  ;W95
      CreateTapePartition        = _CreateTapePartition@16          @177
      CreateThread               = _CreateThread@24                 @178
-     CreateToolhelp32Snapshot   = _CreateToolhelp32Snapshot@8      @179  ;W95
+;;;;     CreateToolhelp32Snapshot   = _CreateToolhelp32Snapshot@8      @179  ;W95
 ;    CreateVirtualBuffer        = _CreateVirtualBuffer@??          @68   ;NT
      CreateWaitableTimerA       = _CreateWaitableTimerA@12         @69   ;NT
      CreateWaitableTimerW       = _CreateWaitableTimerW@12         @70   ;NT
@@ -633,8 +633,8 @@ EXPORTS
     MapSLFix                   = _MapSLFix@4                 @524       ;W95
     MapViewOfFile              = _MapViewOfFile@20           @525
     MapViewOfFileEx            = _MapViewOfFileEx@24         @526
-    Module32First              = _Module32First@8            @527       ;W95
-    Module32Next               = _Module32Next@8             @528       ;W95
+;;;;    Module32First              = _Module32First@8            @527       ;W95
+;;;;    Module32Next               = _Module32Next@8             @528       ;W95
     MoveFileA                  = _MoveFileA@8                @529
     MoveFileExA                = _MoveFileExA@12             @530
     MoveFileExW                = _MoveFileExW@12             @531
@@ -664,8 +664,8 @@ EXPORTS
     PeekNamedPipe              = _PeekNamedPipe@24           @552
     PostQueuedCompletionStatus  = _PostQueuedCompletionStatus@16 @553
     PrepareTape                = _PrepareTape@12             @554
-    Process32First             = _Process32First@8           @555       ;W95
-    Process32Next              = _Process32Next@8            @556       ;W95
+;;;    Process32First             = _Process32First@8           @555       ;W95
+;;;    Process32Next              = _Process32Next@8            @556       ;W95
     PulseEvent                 = _PulseEvent@4               @557
     PurgeComm                  = _PurgeComm@8                @558
     QT_Thunk                   = _QT_Thunk@4                    @559       ;W95
@@ -831,8 +831,8 @@ EXPORTS
     SystemTimeToTzSpecificLocalTime  = _SystemTimeToTzSpecificLocalTime@12 @683
     TerminateProcess           = _TerminateProcess@8         @684
     TerminateThread            = _TerminateThread@8          @685
-;   Thread32First              = _Thread32First@??           @686       ;W95
-;   Thread32Next               = _Thread32Next@??            @687       ;W95
+;;;;    Thread32First              = _Thread32First@8            @686       ;W95
+;;;;    Thread32Next               = _Thread32Next@8             @687       ;W95
     ThunkConnect32             = _ThunkConnect32@24          @688       ;W95
     TlsAlloc                   = _TlsAlloc@0                 @689
 ;   TlsAllocInternal           = _TlsAllocInternal@??        @690       ;W95
