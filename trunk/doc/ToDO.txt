@@ -1,0 +1,53 @@
+ /* $Id: ToDO.txt,v 1.1 2000-07-09 22:27:54 phaller Exp $ */
+
+ 2000-07-07: Sander van Leeuwen <sandervl@xs4all.nl>
+    - NTDLL:    Bugfix for NtQueryInformationToken (TOKEN_USER); updated
+                with latest Wine code (TODO: NTDLL needs to be resynced)
+
+ 2000-07-06: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: Store user default language in thread database struct
+                Set/GetThreadLocale change/return this LCID value
+                Fixed EnumSystemLocalesA/W; now returns default user language id
+                (in text) (TODO: should return all supported locales)
+    - KERNEL32/GDI32/USER32: Changed/fixed calls to strncpy (for 0 termination)
+
+ 2000-07-06: Vitali E. Pelenyov <Vitali.Pelenyov@dpt.ustu.ru>
+    - ODINCRT:  Fixed wrong implementation of strncpy; do not 0 terminate
+                string unless length < length parameter
+                (this is correct behaviour according to C library manual)
+                TODO: Check lstrcpyn* functions in kernel32\heapstring.cpp!
+ 
+ 2000-07-04: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: Unstubbed CopyFileExA/W (calls CopyFileA/W; not properly implemented)
+                Unstubbed CreateDirectoryExA/W (calls CreateDirectoryA/W; not properly implemented)
+                Fixed GetShortPathNameA/W; don't touch short path parameter if
+                it's NULL; behaviour (as seen in NT 4, SP6):
+                - converts long filename to 8.3 short filname (TODO: not yet done here!)
+                - fails on volume that doesn't support 8.3 filenames
+                - if lpszShortPath 0 or cchBuffer too small -> return required length
+                  (INCLUDING 0 terminator)
+                - if lpszLongPath == NULL -> ERROR_INVALID_PARAMETER (return 0)
+                - if lpszLongPath empty -> proceed as if nothing is wrong
+                  (Wine claims it sets last error to ERROR_BAD_PATHNAME)
+                - does NOT clear the last error if successful!
+                - if successful -> return length of string (excluding 0 terminator)
+    - USER32:   Fixed adding windows to tasklist (done too late)
+    - GDI32/USER32:
+                - Rewrote Set/GetViewportExtEx, Set/GetMapMode & moved them
+                  from gdi32 to user32
+
+ 2000-07-03: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - KERNEL32: Added IsDebuggerPresent (debug.cpp). Returns FALSE, but by
+                SETing ODIN32.DEBUGGERPRESENT=1 it will return TRUE. (Some
+                application might issue calls to OutputDebugString if they
+                think they're being debugged.)
+                Moved OutputDebugString(A/W) to debug.cpp.
+
+ 2000-07-02: Sander van Leeuwen <sandervl@xs4all.nl>
+    - RICHED32: Fixed bug when creating edit window (needs to be WS_CHILD)
+    - USER32:   Fixed moving of child windows in MsgFormatFrame & move
+                child windows if only client rectangle changes
+                (fixes Acrobat Distiller window)
+    - SHELL32:  Put back check for registration of ShellView window class
+                -> RegisterClass now fails if already registered
+                (fixed openfile dialogs)
