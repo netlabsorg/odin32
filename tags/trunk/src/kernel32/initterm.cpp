@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.27 1999-11-23 19:31:35 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.28 1999-11-23 20:01:18 sandervl Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -140,7 +140,11 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
             InitDirectories();
             RegisterDevices();
 	    Win32DllBase::setDefaultRenaming();
-	    InitSystemInfo();
+            rc = DosQuerySysInfo(QSV_NUMPROCESSORS, QSV_NUMPROCESSORS, &ulSysinfo, sizeof(ulSysinfo));
+            if (rc != 0) 
+		ulSysinfo = 1;
+            InitSystemInfo(ulSysinfo);
+	    
             break;
 	}
         case 1 :
