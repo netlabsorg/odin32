@@ -1,4 +1,4 @@
-/* $Id: abort.c,v 1.1 2000-10-27 09:55:05 bird Exp $
+/* $Id: abort.c,v 1.2 2000-12-11 06:41:19 bird Exp $
  *
  * Abort replacement.
  *
@@ -21,6 +21,7 @@
 #include "log.h"
 
 #include <builtin.h>
+#include <asmutils.h>
 #define assert(a) ((a) ? (void)0 : __interrupt(3))
 
 
