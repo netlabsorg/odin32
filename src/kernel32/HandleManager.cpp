@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.29 1999-12-10 14:06:10 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.30 1999-12-12 14:57:14 phaller Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -793,7 +793,7 @@ HFILE HMCreateFile(LPCSTR lpFileName,
 
                            /* initialize the complete HMHANDLEDATA structure */
   if (lpFileName == NULL)                            /* create from template */
-    memcpy (&TabWin32Handles[iIndexNew].hmHandleData,
+    memcpy (&HMHandleTemp,
             &TabWin32Handles[iIndex].hmHandleData,
             sizeof(HMHANDLEDATA));
   else
