@@ -1,4 +1,4 @@
-/* $Id: windlgmsg.cpp,v 1.13 2002-05-28 09:40:30 sandervl Exp $ */
+/* $Id: windlgmsg.cpp,v 1.14 2002-06-28 19:46:28 sandervl Exp $ */
 /*
  * Win32 dialog message APIs for OS/2
  *
@@ -315,6 +315,12 @@ BOOL WIN32API IsDialogMessageA( HWND hwndDlg, LPMSG msg)
     if ((hwndDlg != msg->hwnd) && !IsChild( hwndDlg, msg->hwnd ))
         return FALSE;
 
+#ifdef __WIN32OS2__
+    if(CallMsgFilterA(msg, HC_ACTION)) {
+        return TRUE;
+    }
+#endif
+
     dlgCode = SendMessageA( msg->hwnd, WM_GETDLGCODE, 0, (LPARAM)msg);
     ret = DIALOG_IsDialogMessage(hwndDlg,&translate,&dispatch,dlgCode,msg);
     if (translate) TranslateMessage( msg );
@@ -331,6 +337,12 @@ BOOL WIN32API IsDialogMessageW(HWND hwndDlg, LPMSG msg)
 
     if ((hwndDlg != msg->hwnd) && !IsChild( hwndDlg, msg->hwnd ))
         return FALSE;
+
+#ifdef __WIN32OS2__
+    if(CallMsgFilterW(msg, HC_ACTION)) {
+        return TRUE;
+    }
+#endif
 
     dlgCode = SendMessageW( msg->hwnd, WM_GETDLGCODE, 0, (LPARAM)msg);
     ret = DIALOG_IsDialogMessage(hwndDlg,&translate,&dispatch,dlgCode,msg);
