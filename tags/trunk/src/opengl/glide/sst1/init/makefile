@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2000-02-25 00:31:27 sandervl Exp $
+# $Id: makefile,v 1.2 2000-03-04 20:03:43 bird Exp $
 #
 # PD-Win32 API
 #
@@ -21,15 +21,15 @@ CINCLUDE=-I..\incsrc;..\..\swlibs\fxmisc;initvg;..\glide;..\texus;..\..\swlibs\p
 CFLAGS = $(CFLAGS) $(CINCLUDE)
 CXXFLAGS = $(CXXFLAGS) $(CINCLUDE)
 
-OBJS =	H3DRVR.OBJ      INIT.OBJ        VG96DRVR.OBJ    VGDRVR.OBJ \
- 	$(TARGET2)\DAC.OBJ         $(TARGET2)\GAMMA.OBJ       $(TARGET2)\GDEBUG.OBJ      $(TARGET2)\INFO.OBJ        $(TARGET2)\PARSE.OBJ \
-	$(TARGET2)\PRINT.OBJ       $(TARGET2)\SLI.OBJ         $(TARGET2)\SST1INIT.OBJ    $(TARGET2)\UTIL.OBJ        $(TARGET2)\VIDEO.OBJ
+OBJS =  H3DRVR.OBJ      INIT.OBJ        VG96DRVR.OBJ    VGDRVR.OBJ \
+        $(TARGET2)\DAC.OBJ         $(TARGET2)\GAMMA.OBJ       $(TARGET2)\GDEBUG.OBJ      $(TARGET2)\INFO.OBJ        $(TARGET2)\PARSE.OBJ \
+        $(TARGET2)\PRINT.OBJ       $(TARGET2)\SLI.OBJ         $(TARGET2)\SST1INIT.OBJ    $(TARGET2)\UTIL.OBJ        $(TARGET2)\VIDEO.OBJ
 
 all: $(TARGET2).lib $(TARGET1).lib
 
 $(TARGET1).lib: $(OBJS)
-	$(RM) $(TARGET1).lib
-	$(ILIB) $(ILIBFLAGS) $(TARGET1).lib $(OBJS),,
+        $(RM) $(TARGET1).lib
+        $(ILIB) $(ILIBFLAGS) $(TARGET1).lib $(OBJS),,
 
 
 $(TARGET2).lib:
@@ -40,9 +40,9 @@ $(TARGET2).lib:
 dep:
     $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win $(CINCLUDE) \
         *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h \
-        ..\incsrc\*.h ..\..\swlibs\fxmisc\*.h initvg\*.h ..\glide\*.h ..\texus\*.h ..\..\swlibs\pcilib\*.h 
+        ..\incsrc\*.h ..\..\swlibs\fxmisc\*.h initvg\*.h ..\glide\*.h ..\texus\*.h ..\..\swlibs\pcilib\*.h
     cd initvg
-    $(MAKE_CMD) NODEP=1 dep
+    $(MAKE_CMD) dep
 
 !ifndef NODEP
 !include .depend

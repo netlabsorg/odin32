@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2000-03-01 14:26:49 sandervl Exp $
+# $Id: makefile,v 1.6 2000-03-04 20:03:43 bird Exp $
 #
 # PD-Win32 API
 #
@@ -17,13 +17,13 @@ TARGET = glide2x
 CFLAGS = $(CFLAGS)  -I$(PDWIN32_INCLUDE)
 CXXFLAGS = $(CXXFLAGS)  -I$(PDWIN32_INCLUDE)
 
-OBJS =	initterm.obj \
-	glideres.obj \
-	..\swlibs\pcilib\pcilib.lib \
-	texus\texus.lib \
-	init\init.lib \
+OBJS =  initterm.obj \
+        glideres.obj \
+        ..\swlibs\pcilib\pcilib.lib \
+        texus\texus.lib \
+        init\init.lib \
         glide\glide.lib \
- 
+
 all: ..\swlibs\pcilib\pcilib.lib init\init.lib texus\texus.lib glide\glide.lib $(TARGET).dll $(TARGET).lib
 
 ..\swlibs\pcilib\pcilib.lib:
@@ -72,13 +72,13 @@ dep:
     $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
         *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
     cd ..\swlibs\pcilib
-    $(MAKE_CMD) NODEP=1 dep
+    $(MAKE_CMD) dep
     cd ..\..\cvg\glide
-    $(MAKE_CMD) NODEP=1 dep
+    $(MAKE_CMD) dep
     cd ..\init
-    $(MAKE_CMD) NODEP=1 dep
+    $(MAKE_CMD) dep
     cd ..\texus
-    $(MAKE_CMD) NODEP=1 dep
+    $(MAKE_CMD) dep
     cd ..
 
 !ifndef NODEP
