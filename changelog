@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2172 2002-06-17 14:05:28 sandervl Exp $ */
+/* $Id: changelog,v 1.2173 2002-06-18 21:34:01 bird Exp $ */
+
+ 2002-06-18: knut st. osmundsen <bird@anduin.net>
+    - Win32k:   o Fixed compiler warning which caused the M$ compiler
+                  to choke on some systems.
 
  2002-06-17: Sander van Leeuwen <sandervl@innotek.de>
     - USER32:   o Disabled drag 'n drop temporarily (not yet stable)
@@ -19,7 +23,7 @@
                 o hmfile.cpp: ParsePath fix; check boundary
                 o LoadLibraryExA: expand library filename; might contain
                   environment variables
-                o RegSetValueExA: translate REG_EXPAND_SZ into REG_SZ; 
+                o RegSetValueExA: translate REG_EXPAND_SZ into REG_SZ;
                   registry.dll doesn't like this type for some reason
     - USER32:   o Do proper filtering for PeekMessage
     - NTDLL:    o Forward heap functions to kernel32
@@ -29,17 +33,17 @@
 
  2002-06-13: Sander van Leeuwen <sandervl@innotek.de>
     - USER32:   o SetCustomWndHandleSemName added to override shared semaphore
-                  name used to synchronize global window handle array access 
+                  name used to synchronize global window handle array access
                   (to avoid name clash with Odin)
     - KERNEL32: o SetCustomMMapSemName added to override shared semaphore
-                  name used to synchronize global memory map list access 
+                  name used to synchronize global memory map list access
                   (to avoid name clash with Odin)
 
  2002-06-13: Platon Fomichev <platon@innotek.de>
     - USER32:   o Only minimize or maximize window if appropriate style flag set
 
  2002-06-12: Sander van Leeuwen <sandervl@innotek.de>
-    - KERNEL32: o If bytes present in COM device buffer, read them directly; 
+    - KERNEL32: o If bytes present in COM device buffer, read them directly;
                   even for overlapped IO calls.
 
  2002-06-11: Platon Fomichev <platon@innotek.de>
@@ -50,7 +54,7 @@
     - OLEAUT32, SHELL32:
                 o Some Wine updates
     - KERNEL32: o Overlapped IO bugfixes
-                o Thread TEB linking bugfix 
+                o Thread TEB linking bugfix
                 o Setup TEB structure before creating thread. Otherwise it's
                   created too late and thread functions called by the app
                   right after thread creation will fail.(e.g. SetThreadPriority)
