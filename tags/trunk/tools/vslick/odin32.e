@@ -1,4 +1,4 @@
-/* $Id: odin32.e,v 1.9 2001-10-23 02:14:02 bird Exp $
+/* $Id: odin32.e,v 1.10 2001-10-23 02:30:54 bird Exp $
  *
  * Visual SlickEdit Documentation Macros.
  *
@@ -225,10 +225,56 @@ void odin32_funcbox()
     }
     else
     {
+        int     cArgs = 1;
+        _str    sArgs = "";
+        boolean fFoundFn = !odin32_func_goto_nearest();
+        if (fFoundFn)
+        {
+            sArgs = odin32_getparams();
+            cArgs = odin32_countparams(sArgs);
+        }
+
         _insert_text("/**\n");
         _insert_text(" * \n");
         _insert_text(" * @returns \n");
-        _insert_text(" * @param   \n");
+        if (fFoundFn)
+        {
+            int     i;
+            /*
+             * Determin parameter description indent.
+             */
+            int     cchMaxLen = 0;
+            for (i = 0; i < cArgs; i++)
+            {
+                _str sName, sType, sDefault;
+                if (!odin32_enumparams(sArgs, i, sType, sName, sDefault)
+                    && cchMaxLen < length(sName))
+                    cchMaxLen = length(sName);
+            }
+            cchMaxLen += length(" * @param   ");
+            cchMaxLen = ((cchMaxLen + 2 + p_SyntaxIndent-1) intdiv p_SyntaxIndent) * p_SyntaxIndent;
+
+            /*
+             * Insert parameter.
+             */
+            for (i = 0; i < cArgs; i++)
+            {
+                _str sName, sType, sDefault;
+                if (!odin32_enumparams(sArgs, i, sType, sName, sDefault))
+                {
+                    _insert_text(" * @param   "sName"");
+                    while (p_col <= cchMaxLen)
+                        _insert_text(" ");
+                    if (sDefault != "")
+                        _insert_text("(default="sDefault")");
+                    _insert_text("\n");
+                }
+                else
+                    _insert_text(" * @param   \n");
+            }
+        }
+        else
+            _insert_text(" * @param   \n");
         _insert_text(" * @equiv   \n");
         _insert_text(" * @time    \n");
         _insert_text(" * @sketch  \n");
@@ -236,7 +282,7 @@ void odin32_funcbox()
         _insert_text(" * @author  "sOdin32UserName" (" sOdin32UserEmail ")\n");
         _insert_text(" * @remark  \n");
         _insert_text(" */\n");
-        up(10);
+        up(9 + cArgs);
         p_col = 4;
     }
 }
@@ -311,7 +357,7 @@ void odin32_modulebox()
     _begin_line();
     if (file_eq(p_extension, 'asm'))
     {
-        _insert_text("; $Id: odin32.e,v 1.9 2001-10-23 02:14:02 bird Exp $\n");
+        _insert_text("; $Id: odin32.e,v 1.10 2001-10-23 02:30:54 bird Exp $\n");
         _insert_text("; \n");
         _insert_text("; \n");
         _insert_text("; \n");
@@ -324,7 +370,7 @@ void odin32_modulebox()
     }
     else
     {
-        _insert_text("/* $Id: odin32.e,v 1.9 2001-10-23 02:14:02 bird Exp $\n");
+        _insert_text("/* $Id: odin32.e,v 1.10 2001-10-23 02:30:54 bird Exp $\n");
         _insert_text(" * \n");
         _insert_text(" * \n");
         _insert_text(" * \n");
@@ -971,6 +1017,8 @@ static int odin32_enumparams(_str sParams, int iParam, _str &sType, _str &sName,
                 &&  ch != '_' && ch != '$')
                 break;
         }
+        if (sArg == "...")
+            i = 0;
         sName = strip(substr(sArg, i + 1));
         sType = strip(substr(sArg, 1, i));
 
