@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.98 2001-06-12 08:02:35 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.99 2001-06-13 08:19:34 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -170,11 +170,14 @@ BOOL OSLibWinPositionFrameControls(HWND hwndFrame, RECTLOS2 *pRect)
       swp[i].hwndInsertBehind = HWND_TOP;
       swp[i].x  = pRect->xLeft;
       swp[i].y  = pRect->yBottom;
+      if(pRect->yTop - pRect->yBottom > minmaxheight) {
+          swp[i].y += pRect->yTop - pRect->yBottom - minmaxheight;
+      }
       swp[i].cx = pRect->xRight - pRect->xLeft;
       if(WinWindowFromID(hwndFrame, FID_MINMAX)) {
           swp[i].cx -= (minmaxwidth + minmaxwidth/2);
       }
-      swp[i].cy = pRect->yTop - pRect->yBottom;
+      swp[i].cy = minmaxheight;
       swp[i].fl = SWP_SIZE | SWP_MOVE | SWP_SHOW;
       dprintf(("FID_TITLEBAR (%d,%d)(%d,%d)", swp[i].x, swp[i].y, swp[i].cx, swp[i].cy));
       pRect->xLeft += swp[i].cx;
