@@ -1,4 +1,4 @@
-/* $Id: ldr.cpp,v 1.7 2000-01-22 18:21:01 bird Exp $
+/* $Id: ldr.cpp,v 1.8 2000-09-02 21:08:06 bird Exp $
  *
  * ldr.cpp - Loader helpers.
  *
@@ -13,37 +13,61 @@
 *******************************************************************************/
 #define INCL_DOSERRORS
 #define INCL_NOPMAPI
-
+#define INCL_OS2KRNL_SEM
+#define INCL_OS2KRNL_PTDA
 
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>
 
+#include "devSegDf.h"
 #include "malloc.h"
 #include "new.h"
 #include <memory.h>
 #include <stdlib.h>
 #include <stddef.h>
+#include <string.h>
 
 #include "log.h"
+#include "avl.h"
 #include <peexe.h>
 #include <exe386.h>
 #include "OS2Krnl.h"
+#include "ldr.h"
+#include "ldrCalls.h"
 #include "ModuleBase.h"
 #include "pe2lx.h"
-#include "avl.h"
-#include "ldr.h"
 #include "options.h"
 
 
 /*******************************************************************************
 *   Global Variables                                                           *
 *******************************************************************************/
-PAVLNODECORE    pSFNRoot = NULL;
-PAVLNODECORE    pMTERoot = NULL;
+static PAVLNODECORE    pSFNRoot = NULL;
+static PAVLNODECORE    pMTERoot = NULL;
 
+
+/*
+ * Loader State. (See ldr.h for more info.)
+ */
+ULONG          ulLdrState = LDRSTATE_UNKNOWN;
+
+
+/*
+ * Pointer to the executable module being loaded.
+ * This pointer is set by ldrOpen and cleared by tkExecPgm.
+ * It's hence only valid at tkExecPgm time. (isLdrStateExecPgm() == TRUE).
+ */
+PMODULE         pExeModule = NULL;
+
+
+/*
+ * Filehandle bitmap.
+ */
 unsigned char   achHandleStates[MAX_FILE_HANDLES/8];
+
+
 
 
 /**
@@ -63,7 +87,7 @@ PMODULE     getModuleBySFN(SFN hFile)
 /**
  * Gets a module by the MTE.
  * @returns   Pointer to module node. If not found NULL.
- * @param     pMTE  Pointer an Module Table Entry.
+ * @param     pMTE  Pointer a Module Table Entry.
  * @sketch    Try find it in the MTE tree.
  *            IF not found THEN
  *            BEGIN
@@ -119,6 +143,27 @@ PMODULE     getModuleByMTE(PMTE pMTE)
 
         return NULL;
     #endif
+}
+
+
+/**
+ * Gets a module by the hMTE.
+ * @returns   Pointer to module node. If not found NULL.
+ * @param     hMTE  Handle to a Module Table Entry.
+ * @sketch    Convert hMte to an pMTE (pointer to MTE).
+ *            Call getModuleByMTE with MTE pointer.
+ * @status    completely implemented.
+ * @author    knut st. osmundsen
+ */
+PMODULE     getModuleByhMTE(HMTE hMTE)
+{
+    PMTE pMTE;
+
+    pMTE = ldrValidateMteHandle(hMTE);
+    if (pMTE != NULL)
+        return getModuleByMTE(pMTE);
+
+    return NULL;
 }
 
 
@@ -235,18 +280,135 @@ ULONG      removeModule(SFN hFile)
         case MOD_TYPE_PE2LX:
             delete pMod->Data.pPe2Lx;
             break;
-
+/*
         case MOD_TYPE_ELF2LX:
-        case MOD_TYPE_SCRIPT:
-        case MOD_TYPE_PE:
+            break;
+*/
+#ifdef DEBUG
         default:
             kprintf(("removeModule: Unknown type, %#x\n", pMod->fFlags & MOD_TYPE_MASK));
+#endif
     }
 
     /* Free the module node. */
     free(pMod);
 
     return NO_ERROR;
+}
+
+
+/**
+ * Gets the path of the executable being executed.
+ * @returns     Pointer to pszPath on success. Path has _NOT_ a trailing slash.
+ *              NULL pointer on error.
+ * @param       pszPath     Pointer to path buffer. Expects CCHMAXPATH length.
+ * @param       fExecChild  Use hMTE of the PTDAExecChild if present.
+ * @sketch
+ * @status      completely implemented.
+ * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @remark      The path from the pExeModule might not be fully qualified.
+ */
+PSZ ldrGetExePath(PSZ pszPath, BOOL fExecChild)
+{
+    PCSZ    pszFilename;
+    PCSZ    psz;
+
+    #if 0 /* getFilename not implemented */
+    if (pExeModule != NULL)
+        /*
+         * We have the executable object pointer. Let's use it!
+         */
+        pszFilename = pExeModule->Data.pModule->getFilename();
+    else
+    #endif
+    {
+        /*
+         * Get the hMTE for the executable using the pPTDAExecChild
+         * Then get the pMTE, and access the smte_path to get a pointer to the executable path.
+         */
+        PPTDA   pPTDACur;               /* Pointer to the current (system context) PTDA */
+        PPTDA   pPTDA;                  /* PTDA in question. */
+        HMTE    hMTE = NULLHANDLE;      /* Modulehandle of the executable module. */
+        PMTE    pMTE;                   /* Pointer to ModuleTableEntry of the executable module. */
+
+        /*
+         *  Get the current PTDA. (Fail if this call failes.)
+         *  IF pPTDAExecChild isn't NULL THEN get hMTE for that.
+         *  IF no pPTDAExecChild THEN  get hMte for the current PTDA.
+         */
+        pPTDACur = ptdaGetCur();
+        if (pPTDACur != NULL)
+        {
+            pPTDA = ptdaGet_pPTDAExecChild(pPTDACur);
+            if (pPTDA != NULL && fExecChild)
+                hMTE = ptdaGet_ptda_module(pPTDA);
+            if (hMTE == NULLHANDLE)
+                hMTE = ptdaGet_ptda_module(pPTDACur);
+        }
+        else
+        {   /* Not called at task time? No current task! */
+            kprintf(("ldrGetExePath: Failed to get current PTDA.\n"));
+            return NULL;
+        }
+
+        /* fail if hMTE is NULLHANDLE ie. not found / invalid */
+        if (hMTE == NULLHANDLE)
+        {
+            kprintf(("ldrGetExePath: Failed to get hMTE from the PTDAs.\n"));
+            return NULL;
+        }
+
+        /* get the pMTE for this hMTE */
+        pMTE = ldrASMpMTEFromHandle(hMTE);
+        if (pMTE == NULL)
+        {
+            kprintf(("ldrGetExePath: ldrASMpMTEFromHandle failed for hMTE=0x%04.\n", hMTE));
+            return NULL;
+        }
+        if (pMTE->mte_swapmte == NULL) /* paranoia */
+        {
+            kprintf(("ldrGetExePath: mte_swapmte is NULL.\n"));
+            return NULL;
+        }
+
+        /* take the filename from the swappable MTE */
+        pszFilename = pMTE->mte_swapmte->smte_path;
+        if (pszFilename == NULL)
+        {
+            kprintf(("ldrGetExePath: smte_path is NULL.\n"));
+            return NULL;
+        }
+    }
+
+    /* paranoia... */
+    if (*pszFilename == '\0')
+    {
+        kprintf(("ldrGetExePath: pszFilename is empty!\n"));
+        return NULL;
+    }
+
+    /*
+     * Skip back over the filename. (stops pointing at the slash or ':')
+     */
+    psz = pszFilename + strlen(pszFilename)-1;
+    while (psz >= pszFilename && *psz != '\\' && *psz != '/' && *psz != ':')
+        psz--;
+
+    /*
+     * If no path the fail.
+     */
+    if (psz <= pszFilename)
+    {
+        kprintf(("ldrGetExePath: Exepath is empty.\n"));
+        return NULL;
+    }
+
+    /*
+     * Copy path and return.
+     */
+    memcpy(pszPath, pszFilename, psz - pszFilename);
+    pszPath[psz - pszFilename] = '\0';
+    return pszPath;
 }
 
 

@@ -1,4 +1,4 @@
-/* $Id: dev32.h,v 1.8 2000-02-25 18:15:04 bird Exp $
+/* $Id: dev32.h,v 1.9 2000-09-02 21:08:00 bird Exp $
  *
  * dev32 - header file for 32-bit part of the driver.
  *
@@ -99,12 +99,14 @@ extern PULONG pulTKSSBase32;
 /*
  * START and END labels. NOTE: these are not bytes only assembly labels.
  */
-extern char CODE16START      ;
-extern char DATA16START      ;
 extern char DATA16START      ;
 extern char DATA16_BSSSTART  ;
 extern char DATA16_CONSTSTART;
+extern char DATA16_INITSTART      ;
+extern char DATA16_INIT_BSSSTART  ;
+extern char DATA16_INIT_CONSTSTART;
 extern char CODE16START      ;
+extern char CODE16_INITSTART      ;
 extern char CODE32START      ;
 extern char DATA32START      ;
 extern char BSS32START       ;
@@ -114,18 +116,18 @@ extern char EH_DATASTART     ;
 
 extern char CODE16END      ;
 extern char DATA16END      ;
-extern char DATA16END      ;
 extern char DATA16_BSSEND  ;
 extern char DATA16_CONSTEND;
+extern char DATA16_INITEND      ;
+extern char DATA16_INIT_BSSEND  ;
+extern char DATA16_INIT_CONSTEND;
 extern char CODE16END      ;
+extern char CODE16_INITEND      ;
 extern char CODE32END      ;
 extern char DATA32END      ;
 extern char BSS32END       ;
 extern char CONST32_ROEND  ;
 extern char _VFTEND        ;
 extern char EH_DATAEND     ;
-
-
-
 
 #endif

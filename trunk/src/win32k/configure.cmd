@@ -1,4 +1,4 @@
-/* $Id: configure.cmd,v 1.10 2000-03-08 09:23:04 bird Exp $
+/* $Id: configure.cmd,v 1.11 2000-09-02 21:07:53 bird Exp $
  *
  * Configuration script.
  * Generates makefile.inc and an empty .depend file.
@@ -104,6 +104,24 @@
 
         call stream sIncFile, 'c', 'close';
 
+        /*
+         * Create output directories.
+         */
+        'mkdir Bin > nul 2> nul'
+        'mkdir Bin\Release > nul 2> nul'
+        'mkdir Bin\Debug > nul 2> nul'
+
+        'mkdir List > nul 2> nul'
+        'mkdir List\Release > nul 2> nul'
+        'mkdir List\Debug > nul 2> nul'
+
+        'mkdir Object > nul 2> nul'
+        'mkdir Object\Debug > nul 2> nul'
+        'mkdir Object\Release > nul 2> nul'
+
+        /*
+         * Display output.
+         */
         if (fInteractive = 1) then
         do
             say 'Configuration completed!'

@@ -1,11 +1,11 @@
-/* $Id: d16init.c,v 1.6 2000-02-25 18:15:02 bird Exp $
+/* $Id: d16init.c,v 1.7 2000-09-02 21:07:55 bird Exp $
  *
  * d16init - init routines for both drivers.
  *
  * IMPORTANT! Code and data defined here will be discarded after init is
  *            compleated. CodeEnd and DataEnd should not be set here.?
  *
- * Copyright (c) 1999 knut st. osmundsen
+ * Copyright (c) 1999-2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -35,9 +35,19 @@
 #include <string.h>
 #include <memory.h>
 
+#include "devSegDf.h"
+#undef  DATA16_INIT
+#define DATA16_INIT
+#undef  CODE16_INIT
+#define CODE16_INIT
 #include "probkrnl.h"
 #include "dev1632.h"
 #include "dev16.h"
+#include "vprntf16.h"
+#include "log.h"
+#include "options.h"
+
+
 
 /**
  * init function - device 0.
@@ -50,11 +60,20 @@
  */
 USHORT NEAR dev0Init(PRPINITIN pRpIn, PRPINITOUT pRpOut)
 {
+    APIRET  rc;
     Device_Help = pRpIn->DevHlpEP;
 
+    /*
+     * Does this work at Ring-3 (inittime)?
+     * If this work we could be saved from throuble!
+     */
+    rc = initGetDosTableData();
+    if (rc != NO_ERROR)
+        printf16("win32k - elf$: initGetDosTableData failed with rc=%d\n", rc);
+
     pRpOut->BPBArray = NULL;
-    pRpOut->CodeEnd  = (USHORT)&CODE16END;
-    pRpOut->DataEnd  = (USHORT)&DATA16END;
+    pRpOut->CodeEnd = (USHORT)&CODE16_INITSTART;
+    pRpOut->DataEnd = (USHORT)&DATA16_INITSTART;
     pRpOut->Unit     = 0;
     pRpOut->rph.Status = STATUS_DONE;
     return STATUS_DONE;
@@ -79,9 +98,16 @@ USHORT NEAR dev1Init(PRPINITIN pRpIn, PRPINITOUT pRpOut)
     USHORT          usAction = 0;
     NPSZ            npszErrMsg = NULL;
 
+    /*
+     * Probe kernel data.
+     */
     rc = ProbeKernel(pRpIn);
     if (rc == NO_ERROR)
     {
+        /*
+         * Open and send a Ring-0 init packet to elf$.
+         * If this succeeds win32k$ init succeeds.
+         */
         rc = DosOpen("\\dev\\elf$", &hDev0, &usAction, 0UL, FILE_NORMAL,
                      OPEN_ACTION_FAIL_IF_NEW | OPEN_ACTION_OPEN_IF_EXISTS,
                      OPEN_SHARE_DENYNONE | OPEN_ACCESS_READONLY,
@@ -92,61 +118,58 @@ USHORT NEAR dev1Init(PRPINITIN pRpIn, PRPINITOUT pRpOut)
             rc = DosDevIOCtl(&data, &param, D16_IOCTL_RING0INIT, D16_IOCTL_CAT, hDev0);
             if (rc == NO_ERROR)
             {
-                if (data.Status != STATUS_DONE)
-                    npszErrMsg = "Ring-0 initiation failed\n\r";
-                else
+                if ((rc = data.Status) == STATUS_DONE)
                 {
-                    /* FIXME quiet test! */
-                    register NPSZ npsz = "Win32k.sys succesfully initiated!\n\r";
-                    DosPutMessage(1, strlen(npsz)+1, npsz);
-                    pRpOut->Status = data.Status;
+                    if (!options.fQuiet)
+                        printf16("Win32k.sys succesfully initiated!\n");
+                    pRpOut->Status = pRpOut->rph.Status = data.Status;
                 }
+                else
+                    npszErrMsg = "Ring-0 initiation failed. rc=%d\n";
             }
             else
-            {
-                APIRET rc2 = rc;
-                NPSZ   npsz;
-                            /*0123456789012345678901234567890 1*/
-                npszErrMsg = "DosDevIOCtl failed. rc=       \n\r";
-
-                npsz  = &npszErrMsg[29];
-                do
-                {
-                    *npsz-- = (char)((rc2 % 10) + '0');
-                    rc2 = rc2/10;
-                } while (rc2 > 0);
-            }
-
+                npszErrMsg = "Ring-0 init: DosDevIOCtl failed. rc=%d\n";
             DosClose(hDev0);
         }
         else
-            npszErrMsg = "DosOpen failed.\n\r";
+            npszErrMsg = "Ring-0 init: DosOpen failed. rc=%d\n";
     }
     else
-        npszErrMsg = "ProbeKernel failed.\n\r";
-    pRpOut->BPBArray = NULL;
-    pRpOut->CodeEnd = (USHORT)&CODE16END;
-    pRpOut->DataEnd = (USHORT)&DATA16END;
+        npszErrMsg = ""; /* ProbeKrnl do its own complaining, but we need something here to indicate failure. */
+
+    /*
+     * Fill return data.
+     */
+    pRpOut->CodeEnd = (USHORT)&CODE16_INITSTART;
+    pRpOut->DataEnd = (USHORT)&DATA16_INITSTART;
+    pRpOut->BPBArray= NULL;
     pRpOut->Unit    = 0;
 
+    /*
+     * Any errors?, if so complain!
+     */
     if (npszErrMsg)
     {
-        DosPutMessage(1, strlen(npszErrMsg) + 1, npszErrMsg);
-        return pRpOut->rph.Status = STATUS_DONE | STERR | ERROR_I24_QUIET_INIT_FAIL;
+        printf16(npszErrMsg, rc);
+        pRpOut->Status = pRpOut->rph.Status = STATUS_DONE | STERR | ERROR_I24_QUIET_INIT_FAIL;
     }
 
+    /* Init is completed. */
+    fInitTime = FALSE;
+
+    /* successful return */
     return pRpOut->rph.Status;
 }
 
 
 
 /**
- * R0 16-bit initiation function.
+ * R0 16-bit initiation.
  * This gets TKSSBase, thunks parameters and calls R0 32-bit initiation function.
  * @returns   Status word.
  * @param     pRp  Generic IO Control request packet.
  */
-USHORT NEAR R0Init16(PRP_GENIOCTL pRp)
+USHORT NEAR  R0Init16(PRP_GENIOCTL pRp)
 {
     USHORT usRc = STATUS_DONE;
     APIRET rc;
@@ -161,6 +184,9 @@ USHORT NEAR R0Init16(PRP_GENIOCTL pRp)
         char  hLockData[12] = {0};
         ULONG ulLinData;
 
+        /*
+         * Thunk the request packet and lock userdata.
+         */
         if (!DevHelp_VirtToLin(SELECTOROF(pRp->ParmPacket), OFFSETOF(pRp->ParmPacket), &ulLinParm)
             &&
             !DevHelp_VirtToLin(SELECTOROF(pRp->DataPacket), OFFSETOF(pRp->DataPacket), &ulLinData)
@@ -174,8 +200,11 @@ USHORT NEAR R0Init16(PRP_GENIOCTL pRp)
                                 ulLinData, sizeof(D16R0INITDATA),
                                 (LIN)~0UL, SSToDS_16(&hLockData[0]), &cPages)
                 )
-            {   /* data and param is locked (do we need to lock the request packet too ?). */
-                /* create new 32-bit packet */
+            {
+                /*
+                 * -data and param is locked (do we need to lock the request packet too ?).-
+                 * Create new 32-bit init packet - Parameter pointer is thunked.
+                 */
                 RP32INIT rp32init;
 
                 _fmemcpy(&rp32init, ((PD16R0INITPARAM)pRp->ParmPacket)->pRpInitIn, sizeof(RPINITIN));
@@ -190,7 +219,9 @@ USHORT NEAR R0Init16(PRP_GENIOCTL pRp)
 
                 ((PD16R0INITDATA)pRp->DataPacket)->Status = usRc;
 
-                /* finished - unlock data and parm */
+                /*
+                 * finished - unlock data and parm
+                 */
                 DevHelp_VMUnLock((LIN)SSToDS_16(&hLockParm[0]));
                 DevHelp_VMUnLock((LIN)SSToDS_16(&hLockData[0]));
             }
@@ -202,23 +233,6 @@ USHORT NEAR R0Init16(PRP_GENIOCTL pRp)
     }
     else
         usRc |= ERROR_I24_GEN_FAILURE;
-
-
-    #if 0
-    rc = DevHelp_VMLock(VMDHL_LONG | VMDHL_WRITE | VMDHL_VERIFY,
-                        &DATA32START,
-                        (ULONG)(&end) - (ULONG)&DATA32START),
-                        (void*)-1,
-                        &lock[0],
-                        &cPages);
-
-    rc = DevHelp_VMLock(VMDHL_LONG | VMDHL_VERIFY,
-                        &CODE32START,
-                        (ULONG)(&CODE32END) - (ULONG)&CODE32START),
-                        (void*)-1,
-                        &lock[0],
-                        &cPages);
-    #endif
 
     return usRc;
 }
@@ -234,8 +248,9 @@ USHORT NEAR R0Init16(PRP_GENIOCTL pRp)
  * @remark    If you are not sure if TKSSBase16 is set or not, call this.
  *            After R0Init16 is called TKSSBase16 _is_ set.
  *            IMPORTANT! This function must _not_ be called after the initiation of the second device driver!!!
+ *                       (Since this is init code not present after init...)
  */
-USHORT NEAR initGetDosTableData(void)
+USHORT NEAR  initGetDosTableData(void)
 {
     APIRET     rc;
     PDOSTABLE  pDT;
@@ -243,6 +258,11 @@ USHORT NEAR initGetDosTableData(void)
 
     if (TKSSBase16 != 0)
         return NO_ERROR;
+    /*
+    _asm {
+        int 3;
+    }
+    */
 
     /* First we're to get the DosTable2 stuff. */
     rc = DevHelp_GetDOSVar(9, 0, &pDT);

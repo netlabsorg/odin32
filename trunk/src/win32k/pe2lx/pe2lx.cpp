@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.18 2000-02-27 02:18:10 bird Exp $
+/* $Id: pe2lx.cpp,v 1.19 2000-09-02 21:08:16 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -80,6 +80,8 @@
 #include <newexe.h>                     /* OS/2 NE structs and definitions. */
 #include <exe386.h>                     /* OS/2 LX structs and definitions. */
 
+#include "devSegDf.h"                   /* Win32k segment definitions. */
+
 #include "malloc.h"                     /* win32k malloc (resident). Not C library! */
 #include "smalloc.h"                    /* win32k swappable heap. */
 #include "rmalloc.h"                    /* win32k resident heap. */
@@ -94,11 +96,15 @@
 #include "OS2Krnl.h"                    /* kernel structs.  (SFN) */
 #ifdef RING0
     #include "ldrCalls.h"               /* ldr* calls. (ldrRead) */
+    #include "avl.h"                    /* AVL tree. (ldr.h need it) */
+    #include "ldr.h"                    /* ldr helpers. (ldrGetExePath) */
+    #include "env.h"                    /* Environment helpers. */
 #endif
 #include "modulebase.h"                 /* ModuleBase class definitions, ++. */
 #include "pe2lx.h"                      /* Pe2Lx class definitions, ++. */
 #include <versionos2.h>                 /* Pe2Lx version. */
 #include "yield.h"                      /* Yield CPU. */
+#include "options.h"                    /* Win32k options. */
 
 
 /*******************************************************************************
@@ -169,6 +175,11 @@ struct Pe2Lx::LieListEntry Pe2Lx::paLieList[] =
     {NULL,                                 NULL} /* end-of-list entry */
 };
 
+LONG            Pe2Lx::cLoadedModules;  /* Count of existing objects. Updated by constructor and destructor. */
+const char *    Pe2Lx::pszOdin32Path;   /* Odin32 base path (include a slash). */
+ULONG           Pe2Lx::cchOdin32Path;   /* Odin32 base path length. */
+SFN             Pe2Lx::sfnKernel32;     /* Odin32 Kernel32 filehandle. */
+
 
 
 /**
@@ -204,6 +215,7 @@ Pe2Lx::Pe2Lx(SFN hFile) :
     LXHdr.e32_os        = NE_OS2;
     LXHdr.e32_pagesize  = PAGESIZE;
     LXHdr.e32_objtab    = sizeof(LXHdr);
+    cLoadedModules++;
 }
 
 
@@ -276,6 +288,20 @@ Pe2Lx::~Pe2Lx()
     }
     _res_heapmin();
     _swp_heapmin();
+
+    /*
+     * If no Pe2Lx objects left, then invalidate the Odin32Path.
+     *  We'll have to do this since we may (theoretically) not receive
+     *  a close on a kernel32 handle if loading failes before kernel32
+     *  is loaded and the odin32path is determined using ldrOpenPath.
+     *  (Ie. no sfnKernel32.)
+     */
+    if (--cLoadedModules <= 0)
+        invalidateOdin32Path();
+#ifdef DEBUG
+    if (cLoadedModules < 0)
+        printIPE(("Pe2Lx::cLoadedModules is %d which is less that zero!\n", cLoadedModules));
+#endif
 }
 
 
@@ -456,10 +482,12 @@ ULONG Pe2Lx::init(PCSZ pszFilename)
 
         dumpSectionHeader(&paSections[i]);
 
-        /* 8a. Convert characteristics to flags */
+        /* 8a. Convert characteristics to flags and check/fix incompatible flags! */
         for (j = 0; j < (sizeof(paSecChars2Flags)/sizeof(paSecChars2Flags[0])); j++)
             if ((paSections[i].Characteristics & paSecChars2Flags[j].Characteristics) == paSecChars2Flags[j].Characteristics)
                 flFlags |= paSecChars2Flags[j].flFlags;
+        if ((flFlags & (OBJEXEC | OBJWRITE)) == (OBJEXEC | OBJWRITE))
+            flFlags &= (ULONG)~OBJEXEC;
 
         /* 8b. Virtual/physical size */
         /* The virtual size and physical size is somewhat problematic. Some linkers sets Misc.VirtualSize and
@@ -528,6 +556,7 @@ ULONG Pe2Lx::init(PCSZ pszFilename)
 
     /* 11.Align section. (Fix which is applied to EXEs/Dlls which contain no fixups and has an
      *    alignment which is not a multiple of 64Kb. The sections are concatenated into one big object. */
+    /* TODO! this test has to be enhanced a bit. WWPack32, new Borland++ depends on image layout. */
     fAllInOneObject = (pNtHdrs->FileHeader.Characteristics & IMAGE_FILE_RELOCS_STRIPPED) == IMAGE_FILE_RELOCS_STRIPPED;
     if (fAllInOneObject)
     {
@@ -656,8 +685,10 @@ ULONG Pe2Lx::init(PCSZ pszFilename)
 
     Yield();
     _res_heapmin();
-    #if 0 /* testing */
+    #ifndef RING0
+    #if 1 /* testing */
     testApplyFixups();
+    #endif
     #endif
 
     return NO_ERROR;
@@ -669,13 +700,13 @@ ULONG Pe2Lx::init(PCSZ pszFilename)
  * @param     offLXFile  Offset (into the virtual lx file) of the data to read
  * @param     pvBuffer   Pointer to buffer where data is to be put.
  * @param     cbToRead   Bytes to be read.
- * @param     flFlag     Flags which was spesified to the ldrRead call.
+ * @param     fpBuffer   Flags which was spesified to the ldrRead call.
  * @parma     pMTE       Pointer to MTE which was specified to the ldrRead call.
  * @return    NO_ERROR if successful something else if not.
  * @status    completely implmented; tested.
  * @author    knut st. osmundsen
  */
-ULONG Pe2Lx::read(ULONG offLXFile, PVOID pvBuffer, ULONG cbToRead, ULONG flFlags, PMTE pMTE)
+ULONG Pe2Lx::read(ULONG offLXFile, PVOID pvBuffer, ULONG fpBuffer, ULONG cbToRead, PMTE pMTE)
 {
     APIRET rc = NO_ERROR;   /* Return code. */
     ULONG  cbReadVar;       /* Number of bytes in a read operation. */
@@ -695,7 +726,7 @@ ULONG Pe2Lx::read(ULONG offLXFile, PVOID pvBuffer, ULONG cbToRead, ULONG flFlags
     }
     #endif
 
-    printInf(("read(%d, 0x%08x, %d, 0x%08x)\n", offLXFile, pvBuffer, cbToRead, flFlags));
+    printInf(("Pe2Lx::read(%d, 0x%08x, 0x%08x, %d)\n", offLXFile, pvBuffer, fpBuffer, cbToRead));
 
     /* Could we skip right to the datapages? */
     if (offLXFile < LXHdr.e32_datapage)
@@ -930,14 +961,14 @@ ULONG Pe2Lx::read(ULONG offLXFile, PVOID pvBuffer, ULONG cbToRead, ULONG flFlags
         {   /* not TIB object OR after the TIBFix code */
             /* calc PE offset and size of read. */
             cbReadVar = min(paObjects[iObj].cbPhysical - offObject, cbToRead);
-            rc = ReadAtF(hFile, offPEFile, pvBuffer, cbReadVar, flFlags, pMTE);
+            rc = ReadAtF(hFile, offPEFile, pvBuffer, fpBuffer, cbReadVar, pMTE);
         }
         else
         {   /* before or in the TIBFix code. */
             if (offObject < paObjects[iObj].Misc.offTIBFix)
             {   /* before TIBFix code. */
                 cbReadVar = min(paObjects[iObj].Misc.offTIBFix - offObject, cbToRead);
-                rc = ReadAtF(hFile, offPEFile, pvBuffer, cbReadVar, flFlags, pMTE);
+                rc = ReadAtF(hFile, offPEFile, pvBuffer, fpBuffer, cbReadVar, pMTE);
             }
             else
             {   /* TIBFix code.*/
@@ -958,7 +989,7 @@ ULONG Pe2Lx::read(ULONG offLXFile, PVOID pvBuffer, ULONG cbToRead, ULONG flFlags
                       rc, offPEFile, cbReadVar, iObj));
     }
 
-    NOREF(flFlags);
+    NOREF(fpBuffer);
     NOREF(pMTE);
     return rc;
 }
@@ -1076,6 +1107,7 @@ ULONG  Pe2Lx::applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID pvPa
         ULONG flRead = 0;   /* bitmask: 0 = no read, 1 = ulBefore is read, 2 = ulAfter is read */
 
         while ((unsigned)pbr - (unsigned)pBaseRelocs + 8 < cbBaseRelocs /* 8= VirtualAddress and SizeOfBlock members */
+               && pbr->SizeOfBlock >= 8
                && pbr->VirtualAddress < ulRVAPage + PAGESIZE)
         {
             if (pbr->VirtualAddress + PAGESIZE >= ulRVAPage)
@@ -1280,6 +1312,295 @@ ULONG  Pe2Lx::applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID pvPa
 
 
 
+/**
+ * openPath - opens file eventually searching loader specific paths.
+ * This method is only called for DLLs. (DosLoadModule and Imports.)
+ *
+ *
+ * @returns   OS2 return code.
+ *            pLdrLv->lv_sfn  is set to filename handle.
+ * @param     pachFilename  Pointer to filename. Not zero terminated!
+ * @param     cchFilename   Filename length.
+ * @param     pLdrLv        Loader local variables? (Struct from KERNEL.SDF)
+ * @param     pful          Pointer to flags which are passed on to ldrOpen.
+ * @sketch
+ * This is roughly what the original ldrOpenPath does:
+ *      if !CLASS_GLOBAL or miniifs then
+ *          ldrOpen(pachModName)
+ *      else
+ *          loop until no more libpath elements
+ *              get next libpath element and add it to the modname.
+ *              try open the modname
+ *              if successfull then break the loop.
+ *          endloop
+ *      endif
+ */
+ULONG  Pe2Lx::openPath(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *pLdrLv, PULONG pful) /* (ldrOpenPath) */
+{
+    #ifdef RING0
+
+    /*
+     * Mark the SFN invalid in the case of error.
+     * Initiate the Odin32 Path static variable and call worker.
+     */
+    return openPath2(pachFilename, cchFilename, pLdrLv, pful, initOdin32Path());
+
+    #else
+    NOREF(pachFilename);
+    NOREF(cchFilename);
+    NOREF(pLdrLv);
+    NOREF(pful);
+    return ERROR_NOT_SUPPORTED;
+    #endif
+}
+
+
+/**
+ * openPath2 - Worker for openPath which is also used by initOdin32Path.
+ *
+ * @returns   OS2 return code.
+ *            pLdrLv->lv_sfn  is set to filename handle.
+ * @param     pachFilename      Pointer to filename. Not zero terminated!
+ * @param     cchFilename       Filename length.
+ * @param     pLdrLv            Loader local variables? (Struct from KERNEL.SDF)
+ * @param     pful              Pointer to flags which are passed on to ldrOpen.
+ * @param     fOdin32PathValid  Flag indicating that the pszOdin32Path is valid or not.
+ * @sketch
+ * This is roughly what the original ldrOpenPath does:
+ *      if !CLASS_GLOBAL or miniifs then
+ *          ldrOpen(pachModName)
+ *      else
+ *          loop until no more libpath elements
+ *              get next libpath element and add it to the modname.
+ *              try open the modname
+ *              if successfull then break the loop.
+ *          endloop
+ *      endif
+ * @remark      cchFilename has to be ULONG due to an optimization bug in VA 3.08.
+ *              (cchFilename should have been USHORT. But, then the compiler would
+ *               treat it as an ULONG.)
+ */
+ULONG  Pe2Lx::openPath2(PCHAR pachFilename, ULONG cchFilename, ldrlv_t *pLdrLv, PULONG pful, BOOL fOdin32PathValid)
+{
+    #ifdef RING0
+
+    APIRET  rc;                         /* Returncode. */
+    ULONG   cchExt;                     /* Count of chars in additional extention. (0 if extention exists.) */
+
+    /* These defines sets the order the paths and pathlists are examined. */
+    #define FINDDLL_EXECUTABLEDIR   1
+    #define FINDDLL_CURRENTDIR      2
+    #define FINDDLL_SYSTEM32DIR     3
+    #define FINDDLL_SYSTEM16DIR     4
+    #define FINDDLL_WINDIR          5
+    #define FINDDLL_PATH            6
+    #define FINDDLL_BEGINLIBPATH    7   /* uses ldrOpenPath */
+    #define FINDDLL_LIBPATH         8   /* uses ldrOpenPath */
+    #define FINDDLL_ENDLIBPATH      9   /* uses ldrOpenPath */
+    #define FINDDLL_FIRST           FINDDLL_EXECUTABLEDIR
+    #define FINDDLL_LAST            FINDDLL_PATH
+
+    struct _LocalVars
+    {
+        char    sz[CCHMAXPATH];
+        char    szPath[CCHMAXPATH];
+    } *pVars;
+
+
+    /** @sketch
+     * Mark the SFN invalid in the case of error.
+     * Allocate memory for local variables.
+     * Check for extention.
+     */
+    pLdrLv->lv_sfn = 0xffff;
+    pVars = (struct _LocalVars*)rmalloc(sizeof(struct _LocalVars));
+    if (pVars == NULL)
+        return ERROR_NOT_ENOUGH_MEMORY;
+
+    cchExt = cchFilename - 1;
+    while (cchExt != 0 && pachFilename[cchExt] != '.')
+        cchExt--;
+    cchExt = cchExt != 0 ? 0 : 4;
+
+
+    /** @sketch
+     * Loop thru the paths and pathlists searching them for the filename.
+     */
+    for (int iPath = FINDDLL_FIRST; iPath <= FINDDLL_LAST; iPath++)
+    {
+        char  * pszPath;                /* Pointer to the path being examined. */
+
+        /** @sketch
+         * Get the path/dir to examin. (This is determined by the value if iPath.)
+         */
+        switch (iPath)
+        {
+            case FINDDLL_EXECUTABLEDIR:
+                if ((pszPath = ldrGetExePath(pVars->szPath, TRUE)) == NULL)
+                    continue;
+                break;
+
+            case FINDDLL_CURRENTDIR:
+                pszPath = ".";
+                break;
+
+            case FINDDLL_SYSTEM32DIR:
+                if (!fOdin32PathValid)
+                    continue;
+                pszPath = pVars->szPath;
+                strcpy(pszPath, pszOdin32Path);
+                strcpy(pszPath + cchOdin32Path, "System32");
+                break;
+
+            case FINDDLL_SYSTEM16DIR:
+                if (!fOdin32PathValid)
+                    continue;
+                pszPath = pVars->szPath;
+                strcpy(pszPath, pszOdin32Path);
+                strcpy(pszPath + cchOdin32Path, "System");
+                break;
+
+            case FINDDLL_WINDIR:
+                if (!fOdin32PathValid)
+                    continue;
+                pszPath = pVars->szPath;
+                strcpy(pszPath, pszOdin32Path);
+                pszPath[cchOdin32Path - 1] = '\0'; /* remove slash */
+                break;
+
+            case FINDDLL_PATH:
+                pszPath = (char*)GetEnv(TRUE);
+                if (pszPath == NULL)
+                    continue;
+                pszPath = (char*)ScanEnv(pszPath, "PATH");
+                break;
+
+            #if 0
+            case FINDDLL_BEGINLIBPATH:
+                pszPath = ptda_GetBeginLibpath()...  ;
+                if (pszPath == NULL)
+                    continue;
+                break;
+
+            case FINDDLL_LIBPATH:
+                pszPath = *pLdrLibPath;
+                break;
+
+            case FINDDLL_ENDLIBPATH:
+                pszPath = ptda_GetEndLibpath()...  ;
+                if (pszPath == NULL)
+                    continue;
+                break;
+            #endif
+            default: /* !internalerror! */
+                printIPE(("Pe2Lx::openPath(%.*s,..): iPath is %d which is invalid.\n", cchFilename, pachFilename, iPath));
+                rfree(pVars);
+                return ERROR_FILE_NOT_FOUND;
+        }
+
+
+        /** @sketch
+         * pszPath is now set to the pathlist to be searched.
+         * So we'll loop thru all the paths in the list.
+         */
+        while (pszPath != NULL && *pszPath != '\0')
+        {
+            char *  pszNext;            /* Pointer to the next pathlist path */
+            int     cch;                /* Length of path (including the slash after the slash is added). */
+
+            /** @sketch
+             * Find the end of the path and set pszNext.
+             * Uncount any trailing slash.
+             * Check that the filename fits within the buffer (and OS/2 filelength limits).
+             */
+            pszNext = strchr(pszPath, ';');
+            if (pszNext != NULL)
+            {
+                cch = pszNext - pszPath;
+                pszNext++;
+            }
+            else
+                cch = strlen(pszPath);
+
+            if (pszPath[cch - 1] == '\\' || pszPath[cch-1] == '/')
+                cch--;
+
+            if (cch == 0 || cch + cchFilename + 2 + cchExt > sizeof(pVars->sz)) /* assertion */
+            {
+                printErr(("Pe2Lx::openPath(%.*s,..): cch (%d) + cchFilename (%d) + 2 + cchExt (%d) > sizeof(pVars->sz) (%d) - path's too long!, iPath=%d",
+                          cchFilename, pachFilename, cch, cchExt, cchFilename, sizeof(pVars->sz), iPath));
+
+                pszPath = pszNext;
+                continue;
+            }
+
+
+            /** @sketch
+             * Copy the path into the pVars->sz buffer.
+             * Add a '\\' and the filename (pszFullname) to the path;
+             * then we'll have a fullpath.
+             */
+            memcpy(pVars->sz, pszPath, cch);
+            pVars->sz[cch++] = '\\';
+            memcpy(&pVars->sz[cch], pachFilename, (size_t)cchFilename);
+            if (cchExt != 0)
+                memcpy(&pVars->sz[cch + cchFilename], ".DLL", 5);
+            else
+                pVars->sz[cch + cchFilename] = '\0';
+
+
+            /** @sketch
+             * Try open the file using myLdrOpen.
+             * Return if successfully opened or if fatal error.
+             */
+            rc = myldrOpen(&pLdrLv->lv_sfn, pVars->sz, pful);
+            switch (rc)
+            {
+                /* these errors are ignored (not fatal) */
+                case ERROR_FILE_NOT_FOUND:          case ERROR_PATH_NOT_FOUND:          case ERROR_ACCESS_DENIED:           case ERROR_INVALID_ACCESS:
+                case ERROR_INVALID_DRIVE:           case ERROR_NOT_DOS_DISK:            case ERROR_REM_NOT_LIST:            case ERROR_BAD_NETPATH:
+                case ERROR_NETWORK_BUSY:            case ERROR_DEV_NOT_EXIST:           case ERROR_TOO_MANY_CMDS:           case ERROR_ADAP_HDW_ERR:
+                case ERROR_UNEXP_NET_ERR:           case ERROR_BAD_REM_ADAP:            case ERROR_NETNAME_DELETED:         case ERROR_BAD_DEV_TYPE:
+                case ERROR_NETWORK_ACCESS_DENIED:   case ERROR_BAD_NET_NAME:            case ERROR_TOO_MANY_SESS:           case ERROR_REQ_NOT_ACCEP:
+                case ERROR_INVALID_PASSWORD:        case ERROR_OPEN_FAILED:             case ERROR_INVALID_NAME:            case ERROR_FILENAME_EXCED_RANGE:
+                case ERROR_VC_DISCONNECTED:
+                    rc = ERROR_FILE_NOT_FOUND;
+                    pszPath = pszNext;
+                    break;
+
+                /* all errors and success is let out here */
+                case NO_ERROR:
+                default:
+                    rfree(pVars);
+                    return rc;
+            }
+
+            /** @sketch
+             * Advance to the next path part
+             */
+            pszPath = pszNext;
+        }
+    } /* for iPath */
+
+
+    /*
+     * Cleanup: free local variables.
+     * Since we haven't found the file yet we'll return thru ldrOpenPath.
+     */
+    rfree(pVars);
+    return ldrOpenPath(pachFilename, (USHORT)cchFilename, pLdrLv, pful);
+
+    #else
+    NOREF(pachFilename);
+    NOREF(cchFilename);
+    NOREF(pLdrLv);
+    NOREF(pful);
+    NOREF(fOdin32PathValid);
+    return ERROR_NOT_SUPPORTED;
+    #endif
+}
+
+
 #ifndef RING0
 /**
  * This method test the applyFixups method.
@@ -1312,21 +1633,30 @@ ULONG Pe2Lx::testApplyFixups()
         return rc;
     }
 
-    rc = readAtRVA(0x00000000, &achPage[0], PAGESIZE);
-    if (rc != NO_ERROR)
+    /*
+     * Test load and apply all (internal) fixups.
+     */
+    for (i = 0; i < cObjects; i++)
     {
-        printErr(("readAtRVA failed with rc=%d\n"));
-        return rc;
+        ULONG ulAddress = smte.smte_objtab[i].ote_base;
+        ULONG ulRVA = paObjects[i].ulRVA;
+        LONG  cbObject = paObjects[i].cbVirtual;
+        for (i=i; cbObject > 0; cbObject -= PAGESIZE, ulAddress += PAGESIZE, ulRVA += PAGESIZE)
+        {
+            rc = readAtRVA(ulRVA, &achPage[0], PAGESIZE);
+            if (rc != NO_ERROR)
+            {
+                printErr(("readAtRVA failed with rc=%d\n"));
+                return rc;
+            }
+            rc = applyFixups(&mte, 1, 1, &achPage[0], ulAddress, NULL);
+            if (rc != NO_ERROR)
+            {
+                printErr(("applyFixups failed with rc=%d\n"));
+                return rc;
+            }
+        }
     }
-    rc = applyFixups(&mte, 0, ~0UL, &achPage[0], 0x125D0000, NULL);
-
-    rc = readAtRVA(0x00001000, &achPage[0], PAGESIZE);
-    if (rc != NO_ERROR)
-    {
-        printErr(("readAtRVA failed with rc=%d\n"));
-        return rc;
-    }
-    rc = applyFixups(&mte, 1, 1, &achPage[0], 0x125E0000, NULL);
 
     return rc;
 }
@@ -1380,7 +1710,7 @@ ULONG Pe2Lx::writeFile(PCSZ pszLXFilename)
         while (cbLXFile > 0UL)
         {
             ULONG cbToRead = min(cbLXFile, sizeof(achReadBuffer));
-            rc = read(offLXFile, &achReadBuffer[0], cbToRead, 0UL, NULL);
+            rc = read(offLXFile, &achReadBuffer[0], 0UL, cbToRead, NULL);
             if (rc != NO_ERROR)
             {
                 printErr(("read failed with rc=%d.\n", rc));
@@ -1410,6 +1740,50 @@ ULONG Pe2Lx::writeFile(PCSZ pszLXFilename)
     return rc;
 }
 #endif
+
+
+/**
+ * Is this module an executable?
+ * @returns   TRUE if executable.
+ *            FALSE if not an executable.
+ * @sketch
+ * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ */
+BOOL    Pe2Lx::isExe()
+{
+    return ((this->LXHdr.e32_mflags & E32MODMASK) == E32MODEXE);
+}
+
+
+/**
+ * Is this module an dynamic link library.
+ * @returns   TRUE if dynamic link library.
+ *            FALSE if not a dynamic link library.
+ * @sketch
+ * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ */
+BOOL    Pe2Lx::isDll()
+{
+    return ((this->LXHdr.e32_mflags & E32MODMASK) == E32MODDLL);
+}
+
+
+/**
+ * Invalidates the odin32path.
+ * Called by ldrClose when the kernel32 handle is closed.
+ * @sketch      Free path
+ *              nullify path pointer and kernel32 handle.
+ * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ */
+VOID Pe2Lx::invalidateOdin32Path()
+{
+    if (pszOdin32Path != NULL)
+    {
+        rfree((void*)pszOdin32Path);
+        pszOdin32Path = NULL;
+    }
+    sfnKernel32 = NULLHANDLE;
+}
 
 
 /**
@@ -2754,7 +3128,8 @@ ULONG Pe2Lx::loadBaseRelocations()
             else
             {
                 PIMAGE_BASE_RELOCATION pbrCur = pBaseRelocs;
-                while ((void*)pbrCur < (void*)((unsigned)pBaseRelocs + cbBaseRelocs))
+                while ((void*)pbrCur < (void*)((unsigned)pBaseRelocs + cbBaseRelocs)
+                       && pbrCur->SizeOfBlock >= 8)
                 {
                     if ((unsigned)pbrCur->SizeOfBlock + (unsigned)pbrCur > (unsigned)pBaseRelocs + cbBaseRelocs)
                         printErr(("Debug-check - Chunk is larger than the base relocation directory. "
@@ -4329,6 +4704,151 @@ PCSZ Pe2Lx::queryOdin32ModuleName(PCSZ pszWin32ModuleName)
 
     return pszWin32ModuleName;
 }
+
+
+
+/**
+ * Initiates the odin32path.
+ * @returns     Success indicator.
+ * @sketch      If allready inited ok Then do nothing return TRUE.
+ *
+ *              Check if KERNEL32 is loaded using ldrFindModule.
+ *              If loaded then set path according to the smte_path and return.
+ *
+ *              If the path is set to something then return TRUE. (ie. the following method is allready applied.)
+ *
+ *              Use odinPath2 to locate the KERNEL32 module in the LIBPATHs. The
+ *                win32k loaders are temporarily disabled. Path is returned in
+ *                the ldrpFileNameBuf buffer.
+ *              If found the Then set path according to ldrpFileNameBuf and return
+ *
+ *              Fail returning FALSE.
+ * @status
+ * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @remark
+ */
+BOOL Pe2Lx::initOdin32Path()
+{
+    #ifdef RING0
+    APIRET rc;
+    PMTE   pMTE;
+
+
+    if (sfnKernel32 != NULLHANDLE)
+        return TRUE;
+
+    /*
+     * Try find it using ldrFindModule.
+     */
+    pMTE = NULL;
+    rc = ldrFindModule("KERNEL32", 8, CLASS_GLOBAL, (PPMTE)SSToDS(&pMTE));
+    if (rc == NO_ERROR && pMTE != NULL && pMTE->mte_swapmte != NULL)
+    {
+        /*
+         * We now take the smte_path. Start at the end and skip the filename,
+         * and one directory up. We assume a fully qualified path is found in
+         * smte_path.
+         */
+        if (pMTE->mte_swapmte->smte_path != NULL)//paranoia
+        {
+            sfnKernel32 = pMTE->mte_sfn;
+            return setOdin32Path(pMTE->mte_swapmte->smte_path);
+        }
+    }
+
+
+    /*
+     * KERNEL32 isn't loaded. We'll only search the paths if
+     */
+    if (pszOdin32Path != NULL)
+        return TRUE;
+
+
+    /*
+     * Try find it searching the LIBPATHs.
+     *
+     * For the time being:
+     *  We'll use odinPath2 to do this, but we'll have to
+     *  disable the win32k.sys overloading temporarily.
+     */
+    ldrlv_t lv = {0};
+    ULONG   ful = 0;
+    ULONG   ul;
+
+    ul = options.fNoLoader;
+    options.fNoLoader = TRUE;
+    lv.lv_class = CLASS_GLOBAL;
+    rc = openPath2("KERNEL32", 8, (ldrlv_t*)SSToDS(&lv), (PULONG)SSToDS(&ful), FALSE);
+    options.fNoLoader = ul;
+    if (rc == NO_ERROR)
+    {
+        /*
+         * Set the odin32path according to the kernel32 path we've found.
+         * (ldrOpen sets ldrpFileNameBuf to the fully qualified path of
+         *  the last opended filed, which in this case is kernel32.dll.)
+         * We'll close the file handle first of course.
+         */
+        rc = setOdin32Path(ldrpFileNameBuf);
+        ldrClose(lv.lv_sfn);
+        return rc;
+    }
+
+    #endif
+    return FALSE;
+}
+
+
+
+/**
+ * Sets the Odin32Path to the given fully qualified filename of kernel32.
+ * @returns     Success indicator.
+ * @param       psz     Fully qualified filename of kernel32 with path.
+ * @sketch
+ * @status
+ * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @remark
+ */
+BOOL Pe2Lx::setOdin32Path(const char *psz)
+{
+    const char * psz2;
+
+    /*
+     * We now take the psz. Start at the end and skip the filename,
+     * and one directory up. We assume a fully qualified path.
+     */
+    psz2 = psz + strlen(psz) - 1;
+    while (psz2 > psz && *psz2 != '\\' && *psz2 != '/' && *psz2 != ':')
+        psz2--;
+    psz2--;
+    while (psz2 > psz && *psz2 != '\\' && *psz2 != '/' && *psz2 != ':')
+        psz2--;
+    if (psz2 > psz)
+    {
+        char *pszPath;
+        /*
+         * Free old path (if any) and allocate space for a new path.
+         * Copy the path including the slash.
+         * Remember the kernel32 filehandle (to be able to invalidate the path).
+         */
+        if (pszOdin32Path)
+            rfree((void*)pszOdin32Path);
+        if (*psz2 == ':') //in case someone installed odin in a root directory.
+            psz2++;
+        psz2++;       //include the slash
+        cchOdin32Path = psz2 - psz;
+        pszPath = (char*)rmalloc((size_t)cchOdin32Path);
+        if (pszPath == NULL) return FALSE;
+        memcpy(pszPath, psz, (size_t)cchOdin32Path);
+        pszPath[cchOdin32Path] = '\0';
+        pszOdin32Path = pszPath;
+
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
+
 
 
 /**

@@ -1,6 +1,6 @@
-; $Id: buffer.asm,v 1.5 2000-02-21 09:24:02 bird Exp $
+; $Id: buffer.asm,v 1.6 2000-09-02 21:08:13 bird Exp $
 ;
-; Simple resident buffer for use when overloading tkExecPgm.
+; Simple resident buffer for use when overloading tkExecPgm - obsolete!
 ;
 ; Copyright (c) 2000 knut st. osmundsen
 ;
@@ -12,7 +12,7 @@
 ;
 ;   Defined Constants And Macros
 ;
-NBR_BUFFERS     EQU 20
+NBR_BUFFERS     EQU 2
 BUFFER_SIZE     EQU 1536
 
 ;

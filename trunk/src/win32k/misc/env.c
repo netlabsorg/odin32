@@ -1,4 +1,4 @@
-/* $Id: env.c,v 1.2 2000-04-17 02:26:04 bird Exp $
+/* $Id: env.c,v 1.3 2000-09-02 21:08:13 bird Exp $
  *
  * Environment access functions
  *
@@ -13,20 +13,20 @@
 *******************************************************************************/
 #define INCL_DOSERRORS                  /* Error codes */
 #define INCL_OS2KRNL_VM                 /* OS2KRNL: Virtual Memory Management */
-
+#define INCL_OS2KRNL_PTDA               /* OS2KNRL: (per)ProcessTaskDataArea */
 
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>
 
+#include "devSegDf.h"                   /* Win32k segment definitions. */
 #include "dev32.h"
 #include "dev32hlp.h"
 #include "log.h"
-#include "ptda.h"
 #include "OS2Krnl.h"
 #include <string.h>
-
+#include "macros.h"
 #include "env.h"
 
 
@@ -38,41 +38,53 @@
  *            If the variable wasn't found NULL is returned.
  * @param     paszEnv   Pointer to the environment data to search.
  *                      The environment data is a list of zero-strings terminated
- *                      by an empty string. The strings are paired, that means
- *                      that the first string is the variable name and the
- *                      following string is the value of the variable.
- *                      AFAIK a variable can't have an empty value string!
- * @param     pszVar    Name of the environment variable to find.
+ *                      by an empty string. The strings consists of two parts which
+ *                      are separated by a euqal char ('='). The first part is the
+ *                      variable name. The second part is the value of the variable.
+ *
+ *                      IF this is NULL we'll simply return NULL.
+ * @param     pszVar    Name of the environment variable to find. (NULL not allowed.)
  */
 const char *ScanEnv(const char *paszEnv, const char *pszVar)
 {
+    int     cchVar;
+    /*
+     * Return if environment not found.
+     */
+    #ifdef DEBUG
+    if (pszVar < (const char *)0x10000 || *pszVar == '\0')
+        kprintf(("ScanEnv: Invalid parameter pszVar (%p)\n", pszVar));
+    #endif
+    if (paszEnv == NULL)
+        return NULL;
+    #ifdef DEBUG
+    if (paszEnv < (const char *)0x10000)
+        kprintf(("ScanEnv: Invalid parameter paszEnv (%p)\n", paszEnv));
+    #endif
+
     /*
      * Loop thru the environment data until an empty string is reached.
      */
+    cchVar = strlen(pszVar);
     while (*paszEnv != '\0')
     {
-        register int i;                 /* Variable use to store the compare result. */
-
         /*
-         * Variable name.
-         * Check if it's matching the name we're searching for and skip the variable name.
+         * Check if the variable name is it's matching the one we're searching for.
          */
-        i = stricmp(paszEnv, pszVar);
-        paszEnv += strlen(paszEnv) + 1;
-        if (i == 0)
-        {   /* Variable was found. Return pointer to the value. */
-            return paszEnv;
+        const char *pszEqual = strchr(paszEnv, '=');
+        if (pszEqual != NULL && (pszEqual - paszEnv) == cchVar
+            && memcmp(paszEnv, pszVar, cchVar) == 0
+            )
+        {
+            /*
+             * Variable was found. Return pointer to the value.
+             */
+            return pszEqual + 1;
         }
 
         /*
-         * !Paranoia!
-         * If no value string we'll quit. This may be an IPE, if not it might
-         * cause one if we continue processing the environment data.
+         * Skip this variable. (Don't use pszEqual since it might be NULL)
          */
-        if (*paszEnv == '\0')
-            break;
-
-        /* Skip value */
         paszEnv += strlen(paszEnv) + 1;
     }
 
@@ -81,23 +93,27 @@ const char *ScanEnv(const char *paszEnv, const char *pszVar)
 
 
 /**
- * Get the linear pointer to the environment data.
+ * Get the linear pointer to the environment data for the current
+ * process or the process being started (EXECed).
  *
- * @returns   Pointer to environment data.
- *            NULL on failure.
+ * @param       fExecChild      TRUE:  Get exec child environment.
+ *                                     (Not supported by method 2)
+ *                              FALSE: Get current process environment.
+ * @returns     Pointer to environment data.
+ *              NULL on failure.
  */
-const char *GetEnv(void)
+const char *GetEnv(BOOL fExecChild)
 {
-    /*  There is probably two ways of getting the environment data for a the
+    /*  There are probably two ways of getting the environment data for the
      *  current process: 1) get it from the PTDA->ptda_environ
      *                   2) Local infosegment (LIS from GetDosVar devhlp)
-     *  I am not sure which one of these works best. What I know is that
+     *  I am not sure which one of these which works best. What I know is that
      *  method 1) is used by the w_GetEnv API worker. This API is called at
      *  Ring-0 from some delete file operation. (Which uses it to get the
      *  DELETEDIR environment variable.) The w_GetEnv API worker is 16-bit
      *  I don't want to thunk around using that. There for I'll implement
      *  my own GetEnv. So, currently I'll write the code for both 1) and
-     *  2), testing will show which one of them are most handy.
+     *  2), testing will show which one of them are the better.
      */
 
     #if 1
@@ -115,10 +131,10 @@ const char *GetEnv(void)
      *  IF failed or no pPTDAExecChild THEN try get environment from pPTDA.
      */
     pPTDACur = ptdaGetCur();
-    if (pPTDA != NULL)
+    if (pPTDACur != NULL)
     {
-        pPTDA = ptdaGet_pPTDAExecChild(pPTDA);
-        if (pPTDA != NULL)
+        pPTDA = ptdaGet_pPTDAExecChild(pPTDACur);
+        if (pPTDA != NULL && fExecChild)
         {
             hobEnviron = ptdaGet_ptda_environ(pPTDA);
             if (hobEnviron != 0)
@@ -126,7 +142,7 @@ const char *GetEnv(void)
                 rc = VMObjHandleInfo(hobEnviron, SSToDS(&ulAddr), SSToDS(&ushPTDA));
                 if (rc == NO_ERROR)
                     return (const char *)ulAddr;
-                kprintf(("GetEnv: VMObjHandleInfo failed with rc=%d for hob=0x%04x\n", rc, hobEnviron));
+                kprintf(("GetEnv: (1) VMObjHandleInfo failed with rc=%d for hob=0x%04x \n", rc, hobEnviron));
             }
         }
 
@@ -134,20 +150,21 @@ const char *GetEnv(void)
         if (hobEnviron != 0)
         {
             rc = VMObjHandleInfo(hobEnviron, SSToDS(&ulAddr), SSToDS(&ushPTDA));
-            if (rc != NO_ERROR)
-            {
-                kprintf(("GetEnv: VMObjHandleInfo failed with rc=%d for hob=0x%04x\n", rc, hobEnviron));
-            }
+            if (rc == NO_ERROR)
+                return (const char *)ulAddr;
+            kprintf(("GetEnv: (2) VMObjHandleInfo failed with rc=%d for hob=0x%04x\n", rc, hobEnviron));
         }
     }
     else
-    {
+    {   /* Not called at task time? No current task! */
         kprintf(("GetEnv: Failed to get current PTDA.\n"));
     }
 
-    return (const char *)ulAddr;
+    return NULL;
+
 
     #else
+
 
     struct InfoSegLDT * pLIS;           /* Pointer to local infosegment. */
     PVOID               pv;             /* Address to return. */
@@ -161,6 +178,7 @@ const char *GetEnv(void)
     if (pLIS == NULL)
     {
         kprintf(("GetEnv: Failed to get local info segment\n"));
+        NOREF(fExecChild);
         return NULL;
     }
 

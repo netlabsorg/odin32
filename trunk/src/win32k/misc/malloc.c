@@ -1,4 +1,4 @@
-/* $Id: malloc.c,v 1.6 2000-01-24 18:19:00 bird Exp $
+/* $Id: malloc.c,v 1.7 2000-09-02 21:08:14 bird Exp $
  *
  * Common Heap - this forwards to the swappable heap!
  *
@@ -19,6 +19,7 @@
 *  Headerfiles
 ******************************************************************************/
 #include <os2.h>
+#include "devSegDf.h"                   /* Win32k segment definitions. */
 #include "smalloc.h"
 #include "rmalloc.h"
 #include "options.h"
@@ -27,7 +28,7 @@
 /******************************************************************************
 *  Global data
 ******************************************************************************/
-#ifndef RING0
+#if !defined(RING0) || defined(R3TST)
     char           fInited;       /* init flag */
 #endif
 
@@ -52,7 +53,7 @@ int heapInit(unsigned cbResInit, unsigned cbResMax,
     rc = swpHeapInit(cbSwpInit, cbSwpMax);
     if (rc != 0)
         return rc;
-    #ifdef RING3
+    #if !defined(RING0) || defined(R3TST)
         fInited = TRUE;
     #endif
     return 0;
@@ -68,6 +69,16 @@ int heapInit(unsigned cbResInit, unsigned cbResMax,
  */
 void * malloc(unsigned cbSize)
 {
+    #ifdef R3TST
+    if (!fInited)
+    {
+        PVOID pv;
+        if (!DosAllocMem(&pv, cbSize, PAG_WRITE | PAG_READ | PAG_COMMIT)) /* no SSToDS! */
+            return pv;
+        else
+            return NULL;
+    }
+    #endif
     return smalloc(cbSize);
 }
 
@@ -80,6 +91,10 @@ void * malloc(unsigned cbSize)
  */
 void *realloc(void *pv, unsigned cbNew)
 {
+    #ifdef R3TST
+    if (!fInited)
+        Int3();
+    #endif
     return srealloc(pv, cbNew);
 }
 
@@ -90,6 +105,10 @@ void *realloc(void *pv, unsigned cbNew)
  */
 void free(void *pv)
 {
+    #ifdef R3TST
+    if (!fInited) /* controlled leak! */
+       return;
+    #endif
     sfree(pv);
 }
 
@@ -153,6 +172,7 @@ int _heap_check(void)
 }
 
 
+
 #if !defined(RING0) && defined(__IBMC__)
 
 /**
@@ -161,7 +181,8 @@ int _heap_check(void)
  */
 int _rmem_init(void)
 {
-    int rc = heapInit(CB_RES_INIT, CB_RES_MAX, CB_SWP_INIT, CB_SWP_MAX);
+    int rc;
+    rc = heapInit(CB_RES_INIT, CB_RES_MAX, CB_SWP_INIT, CB_SWP_MAX);
     return rc;
 }
 

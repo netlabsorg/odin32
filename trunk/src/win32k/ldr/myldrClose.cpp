@@ -1,4 +1,4 @@
-/* $Id: myldrClose.cpp,v 1.5 2000-01-22 18:21:02 bird Exp $
+/* $Id: myldrClose.cpp,v 1.6 2000-09-02 21:08:07 bird Exp $
  *
  * myldrClose - ldrClose
  *
@@ -22,14 +22,16 @@
 #include <memory.h>
 #include <stdlib.h>
 
+#include "devSegDf.h"                   /* Win32k segment definitions. */
 #include "log.h"
+#include "avl.h"
 #include <peexe.h>
 #include <exe386.h>
 #include "OS2Krnl.h"
-#include "avl.h"
-#include "ModuleBase.h"
 #include "ldr.h"
 #include "ldrCalls.h"
+#include "ModuleBase.h"
+#include "Pe2Lx.h"
 
 
 /**
@@ -41,7 +43,7 @@
 ULONG LDRCALL myldrClose(SFN hFile)
 {
     /* closes handle */
-    kprintf(("ldrClose: hFile = %.4x\n", hFile));
+    kprintf(("myldrClose: hFile = %.4x\n", hFile));
     if (GetState(hFile) == HSTATE_OUR)
     {
         APIRET rc;
@@ -51,17 +53,27 @@ ULONG LDRCALL myldrClose(SFN hFile)
         if (pMod != NULL)
             pMod->Data.pModule->dumpVirtualLxFile();
         else
-            kprintf(("ldrClose: getModuleBySFN failed!!!"));
+            kprintf(("myldrClose: getModuleBySFN failed!!!"));
         #endif
 
         rc = removeModule(hFile);
         if (rc != NO_ERROR)
-            kprintf(("ldrClose: removeModule retured rc=%d\n", rc));
+            kprintf(("myldrClose: removeModule retured rc=%d\n", rc));
 
         #pragma info(notrd)
         SetState(hFile, HSTATE_UNUSED);
         #pragma info(restore)
     }
+    /*
+     * Invalidate the odin32path if kernel32 is closed.
+     *  (Might possible not be needed as Pe2Lx does invalides
+     *   the odin32path on object destruction.)
+     */
+    else if (Pe2Lx::getKernel32SFN() == hFile)
+        Pe2Lx::invalidateOdin32Path();
 
+    /*
+     * Finally call the real close function.
+     */
     return ldrClose(hFile);
 }

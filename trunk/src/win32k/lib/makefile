@@ -1,5 +1,5 @@
 ##############################################################################
-# $Id: makefile,v 1.3 2000-03-17 17:38:27 bird Exp $
+# $Id: makefile,v 1.4 2000-09-02 21:08:12 bird Exp $
 #
 # PD-Win32 API
 #
@@ -48,7 +48,11 @@ TARGET   = win32k.lib
 
 OBJS     =  $(WIN32KOBJ)\libInit.$(OBJEXT)         \
             $(WIN32KOBJ)\libTerm.$(OBJEXT)     \
+            $(WIN32KOBJ)\libWin32kInstalled.$(OBJEXT) \
+            $(WIN32KOBJ)\libWin32kQueryOptionsStatus.$(OBJEXT) \
+            $(WIN32KOBJ)\libWin32kSetOptions.$(OBJEXT) \
             $(WIN32KOBJ)\libDosAllocMemEx.$(OBJEXT) \
+            $(WIN32KOBJ)\libW32kQueryOTEs.$(OBJEXT) \
             $(WIN32KOBJ)\libGetCS.obj
 
 
@@ -85,7 +89,8 @@ clean:
 # Dependencies.
 ##############################################################################
 dep:
-    $(DEPEND) -obj$(OBJEXT) -o$(WIN32KOBJ) $(CINCLUDES) $(WIN32KBASE)\include\*.h
+    $(DEPEND) -obj$(OBJEXT) -o$(WIN32KOBJ) $(CINCLUDES) \
+        $(WIN32KBASE)\include\*.h *.c* *.asm
 
 !if [$(EXISTS) .depend] == 0
 !   include .depend

@@ -1,4 +1,4 @@
-; $Id: fakea.asm,v 1.1 2000-07-16 22:18:15 bird Exp $
+; $Id: fakea.asm,v 1.2 2000-09-02 21:08:21 bird Exp $
 ;
 ; Fake assembly imports.
 ;
@@ -29,18 +29,24 @@
     public fakepPTDACur
     public fakeptda_start
     public fakeptda_environ
+    public fakeptda_module
+    public fakeptda_ptdasem
+    public fakeptda_pBeginLIBPATH
     public fakef_FuStrLenZ
     public fakef_FuStrLen
     public fakef_FuBuff
     public fakeg_tkExecPgm
+    public fake_tkStartProcess
     public CalltkExecPgm
 
 
 ;
-;   Imported Functions
+;   Imported Functions and Variables.
 ;
     extrn tkExecPgmWorker:PROC          ; fake.c
-
+    extrn _fakeLDRClearSem@0:PROC       ; fake.c
+    extrn _fakeKSEMRequestMutex@8:PROC  ; fake.c
+    extrn fakeLDRSem:BYTE               ; fake.c
 
 DATA16 SEGMENT
 ; Fake data in 16-bit segment.
@@ -55,6 +61,10 @@ fakeptda_pPTDAFirstChild    dd      0
 fakeptda_pPTDAExecChild     dd      offset FLAT:fakeptda_start
 fakeptda_dummy              db  123 dup (0)
 fakeptda_environ            dw      1   ; 1 is the hardcoded HOB of the win32ktst.exe's environment.
+fakeptda_ptdasem            db  20  dup (0) ; PTDA semaphore - Intra-Process serialisation mutex KSEM (sg244640).
+fakeptda_module             dw      1   ; 1 is the hardcoded HMTE of the current executable module.
+fakeptda_pBeginLIBPATH      dd      0   ; BEGINLIBPATH not implemented.
+                            dd      0   ; ENDLIBPATH not implemented.
 
 
 ; TCB - just needs some dummy data for reading and writing to the TCBFailErr.
@@ -249,6 +259,36 @@ CODE16 ENDS
 
 CODE32 SEGMENT
 ;;
+; Faker of which simply clears the loader semaphore.
+; @cproto    none! (void _Optlink   fake_tkStartProcess(void))
+; @returns
+; @param
+; @uses
+; @equiv
+; @time
+; @sketch
+; @status
+; @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+; @remark
+fake_tkStartProcess PROC NEAR
+    push    ebp
+    mov     ebp, esp
+
+    push    ebx
+    push    ecx
+
+    call    _fakeLDRClearSem@0
+
+    pop     ecx
+    pop     ebx
+
+    xor     eax, eax
+    leave
+    ret
+fake_tkStartProcess ENDP
+
+
+;;
 ; Fake g_tkExecPgm implementation.
 ; @proto     none. (void _Optlink fakeg_tkExecPgm(void);)
 ; @returns   same as tkExecPgm: eax, edx and carry flag
@@ -269,7 +309,7 @@ fakeg_tkExecPgm PROC NEAR
     mov     ebp, esp
 
     ;
-    ; We just have to make some common code...
+    ; Call C worker
     ;
     sub     esp, 10h
     movzx   eax, ax
@@ -301,7 +341,17 @@ fakeg_tkExecPgm PROC NEAR
     add     esp, 10                     ;       eax,   edx,    ecx,
                                         ;     ebp+8, ebp+c, ebp+10, ebp+14
                                         ;     esp+0, esp+4, esp+08, esp+0c
+    or      eax, eax
+    jnz     ftkep_ret
+    call    fake_tkStartProcess         ; If succesfully so far. call start process.
+    jmp     ftkep_ret2                  ; <Currently no parameters are implemented.>
 
+ftkep_ret:
+    push    eax
+    call    _fakeLDRClearSem@0          ; clear the semaphore.
+    pop     eax
+
+ftkep_ret2:
     leave
     ret
 fakeg_tkExecPgm ENDP

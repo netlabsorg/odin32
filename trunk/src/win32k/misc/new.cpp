@@ -1,4 +1,4 @@
-/* $Id: new.cpp,v 1.4 2000-01-27 23:46:57 bird Exp $
+/* $Id: new.cpp,v 1.5 2000-09-02 21:08:14 bird Exp $
  *
  * new - new and delete operators.
  *
@@ -20,6 +20,7 @@
 *******************************************************************************/
 #include <os2.h>
 
+#include "devSegDf.h"                   /* Win32k segment definitions. */
 #include "new.h"
 #include "rmalloc.h"
 #include "log.h"

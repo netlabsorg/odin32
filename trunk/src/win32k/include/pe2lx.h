@@ -1,4 +1,4 @@
-/* $Id: pe2lx.h,v 1.9 2000-02-27 02:16:43 bird Exp $
+/* $Id: pe2lx.h,v 1.10 2000-09-02 21:08:03 bird Exp $
  *
  * Pe2Lx class declarations. Ring 0 and Ring 3
  *
@@ -65,10 +65,20 @@ public:
     ULONG  read(ULONG offLXFile, PVOID pvBuffer, ULONG cbToRead, ULONG flFlags, PMTE pMTE);
     ULONG  applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID pvPage,
                        ULONG ulPageAddress, PVOID pvPTDA); /*(ldrEnum32bitRelRecs)*/
+    ULONG  openPath(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *pLdrLv, PULONG pful); /* (ldrOpenPath) */
+    static ULONG  openPath2(PCHAR pachFilename, ULONG cchFilename, ldrlv_t *pLdrLv, PULONG pful, BOOL fOdin32PathValid);
     #ifndef RING0
     ULONG  testApplyFixups();
     ULONG  writeFile(PCSZ pszLXFilename);
     #endif
+
+    /** @cat public query methods */
+    BOOL    isExe();
+    BOOL    isDll();
+    static SFN  getKernel32SFN()        {   return sfnKernel32;   }
+    static VOID setKernel32SFN(SFN sfn) {   sfnKernel32 = sfn;    }
+    static VOID invalidateOdin32Path();
+    static LONG getLoadedModuleCount()  {   return cLoadedModules;}
 
     /** @cat public Helper methods */
     ULONG  querySizeOfLxFile();
@@ -119,6 +129,8 @@ private:
 
     /** @cat static helpers */
     static PCSZ queryOdin32ModuleName(PCSZ pszWin32ModuleName);
+    static BOOL initOdin32Path();
+    static BOOL setOdin32Path(const char *psz);
 
     /** @cat static dump methods */
     static VOID dumpNtHeaders(PIMAGE_NT_HEADERS pNtHdrs);
@@ -194,6 +206,11 @@ private:
         unsigned int Characteristics;       /* set of section characteristics */
         ULONG flFlags;                      /* equivalent object flags */
     } paSecChars2Flags[];
+
+    static LONG             cLoadedModules; /* Count of existing objects. Updated by constructor and destructor. */
+    static const char *     pszOdin32Path;  /* Odin32 base path (include a slash). */
+    static ULONG            cchOdin32Path;  /* Odin32 base path length. */
+    static SFN              sfnKernel32;    /* Odin32 Kernel32 filehandle. */
 };
 
 

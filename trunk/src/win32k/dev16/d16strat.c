@@ -1,4 +1,4 @@
-/* $Id: d16strat.c,v 1.8 2000-02-25 18:15:02 bird Exp $
+/* $Id: d16strat.c,v 1.9 2000-09-02 21:07:56 bird Exp $
  *
  * d16strat.c - 16-bit strategy routine, device headers, device_helper (ptr)
  *              and 16-bit IOClts.
@@ -15,6 +15,8 @@
 #define INCL_DOSERRORS
 #define INCL_NOPMAPI
 
+#define NO_WIN32K_LIB_FUNCTIONS
+
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
@@ -27,6 +29,7 @@
 
 /* Note that C-library function are only allowed during init! */
 
+#include "devSegDf.h"
 #include "dev1632.h"
 #include "dev16.h"
 #include "win32k.h"
@@ -118,7 +121,7 @@ extern char end;
  * @returns   Status word.
  * @param     pRp  Request packet.
  */
-USHORT dev0GenIOCtl(PRP_GENIOCTL pRp)
+USHORT NEAR dev0GenIOCtl(PRP_GENIOCTL pRp)
 {
     USHORT rc;
 
@@ -134,7 +137,6 @@ USHORT dev0GenIOCtl(PRP_GENIOCTL pRp)
                 if (fInitTime)
                 {
                     rc = R0Init16(pRp);
-                    fInitTime = FALSE;
                     return rc;
                 }
                 break;
@@ -217,7 +219,7 @@ USHORT dev0GenIOCtl(PRP_GENIOCTL pRp)
  * @returns   Status word.
  * @param     pRp  Request packet.
  */
-USHORT dev1GenIOCtl(PRP_GENIOCTL pRp)
+USHORT NEAR dev1GenIOCtl(PRP_GENIOCTL pRp)
 {
     if (pRp->Category == IOCTL_W32K_K32 || pRp->Category == IOCTL_W32K_ELF)
     {

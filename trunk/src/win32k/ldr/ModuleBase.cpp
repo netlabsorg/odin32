@@ -1,4 +1,4 @@
-/* $Id: ModuleBase.cpp,v 1.3 2000-02-27 02:17:06 bird Exp $
+/* $Id: ModuleBase.cpp,v 1.4 2000-09-02 21:08:06 bird Exp $
  *
  * ModuleBase - Implementetation.
  *
@@ -11,28 +11,30 @@
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
 *******************************************************************************/
-#define INCL_DOSERRORS                      /* DOS Error codes. */
+#define INCL_DOSERRORS                  /* DOS Error codes. */
 #ifdef RING0
-    #define INCL_NOAPI                      /* RING0: No apis. */
+    #define INCL_NOAPI                  /* RING0: No apis. */
 #else /*RING3*/
-    #define INCL_DOSFILEMGR                 /* RING3: DOS File api. */
+    #define INCL_DOSFILEMGR             /* RING3: DOS File api. */
 #endif
 
 
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
-#include <os2.h>                            /* OS/2 header file. */
+#include <os2.h>                        /* OS/2 header file. */
 
-#include "malloc.h"                         /* win32k malloc. Not C library! */
+#include "devSegDf.h"                   /* Win32k segment definitions. */
+#include "malloc.h"                     /* Win32k malloc. Not C library! */
 
-#include <string.h>                         /* C library string.h. */
-#include <stdarg.h>                         /* C library stdarg.h. */
+#include <string.h>                     /* C library string.h. */
+#include <stdarg.h>                     /* C library stdarg.h. */
 
-#include "vprintf.h"                        /* win32k printf and vprintf. Not C library! */
-#include "dev32.h"                          /* 32-Bit part of the device driver. (SSToDS) */
-#include "OS2Krnl.h"                        /* kernel structs.  (SFN) */
-#include "modulebase.h"                     /* ModuleBase class definitions, ++. */
+#include "vprintf.h"                    /* win32k printf and vprintf. Not C library! */
+#include "dev32.h"                      /* 32-Bit part of the device driver. (SSToDS) */
+#include "OS2Krnl.h"                    /* kernel structs.  (SFN) */
+#include "ldrCalls.h"                   /* ldrOpenPath and ldrlv_t. */
+#include "modulebase.h"                 /* ModuleBase class definitions, ++. */
 
 
 /*******************************************************************************
@@ -159,6 +161,44 @@ ULONG  ModuleBase::applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID
 }
 
 
+/**
+ * openPath - opens file eventually searching loader specific paths.
+ *
+ * This base implementation simply calls ldrOpenPath.
+ * This method is only called for DLLs. DosLoadModule and Imports.
+ *
+ * @returns   OS2 return code.
+ *            pLdrLv->lv_sfn  is set to filename handle.
+ * @param     pachFilename  Pointer to filename. Not zero terminated!
+ * @param     cchFilename   Filename length.
+ * @param     pLdrLv        Loader local variables? (Struct from KERNEL.SDF)
+ * @param     pful          Pointer to flags which are passed on to ldrOpen.
+ * @sketch
+ * This is roughly what the original ldrOpenPath does:
+ *      if !CLASS_GLOBAL or miniifs then
+ *          ldrOpen(pachModName)
+ *      else
+ *          loop until no more libpath elements
+ *              get next libpath element and add it to the modname.
+ *              try open the modname
+ *              if successfull then break the loop.
+ *          endloop
+ *      endif
+ */
+ULONG  ModuleBase::openPath(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *pLdrLv, PULONG pful) /* (ldrOpenPath) */
+{
+    #ifdef RING0
+    printf("ModuleBase::openPath:\n");
+    return ldrOpenPath(pachFilename, cchFilename, pLdrLv, pful);
+    #else
+    NOREF(pachFilename);
+    NOREF(cchFilename);
+    NOREF(pLdrLv);
+    NOREF(pful);
+    return ERROR_NOT_SUPPORTED;
+    #endif
+}
+
 
 #ifndef RING0
 
@@ -231,6 +271,29 @@ BOOL  ModuleBase::queryIsModuleName(PCSZ pszFilename)
 
 
 /**
+ * Gets the fullpath filename.
+ * @returns     Const ("Readonly") pointer to the filename.
+ * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ */
+PCSZ ModuleBase::getFilename()
+{
+    return pszFilename;
+}
+
+
+/**
+ * Gets the modulename.
+ * @returns     Const ("Readonly") pointer to the module name.
+ * @author      knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @remark      Modulename is filename without path and extention.
+ */
+PCSZ ModuleBase::getModuleName()
+{
+    return pszModuleName;
+}
+
+
+/**
  * Output function for Modules.
  * @param     pszFormat    Pointer to format string.
  * @status    completely implemented; tested.
@@ -272,7 +335,7 @@ APIRET ReadAt(SFN hFile, ULONG ulOffset, PVOID pvBuffer, ULONG cbToRead)
     if (rc == NO_ERROR)
         rc = DosRead(hFile, pvBuffer, cbToRead, &cbRead);
     else
-        printErr(("DosSetFilePtr(hfile, %#8x(%d),..) failed with rc = %d.",
+        printErr(("DosSetFilePtr(hfile, %#8x(%d),..) failed with rc = %d.\n",
                   ulOffset, ulOffset, rc));
 
     return rc;

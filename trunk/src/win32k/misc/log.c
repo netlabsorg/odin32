@@ -1,4 +1,4 @@
-/* $Id: log.c,v 1.1 1999-09-06 02:20:02 bird Exp $
+/* $Id: log.c,v 1.2 2000-09-02 21:08:13 bird Exp $
  *
  * log - C-style logging - kprintf.
  *
@@ -22,6 +22,7 @@
 #include <stdarg.h>
 #include <builtin.h>
 
+#include "devSegDf.h"                   /* Win32k segment definitions. */
 #include "dev32.h"
 #include "options.h"
 #include "log.h"
