@@ -1,4 +1,4 @@
-# $Id: win32k.tools.mk,v 1.8 2001-03-11 16:46:39 bird Exp $
+# $Id: win32k.tools.mk,v 1.9 2001-05-15 21:38:21 bird Exp $
 
 #
 # Win32k common tools makefile.
@@ -39,12 +39,12 @@ ILIB        = ilib /nobackup /nologo \
 !endif
 
 !ifndef DEBUG
-CFLAGS16    = -c -W3 -Asfw /NTCODE16 /NDDATA16 -G2s -Zp -Zl -nologo -Ogeitln -Gs
+CFLAGS16    = -c -W0 -Asfw /NTCODE16 /NDDATA16 -G2s -Zp -Zl -nologo -Ogeitln -Gs
 CFLAGS      = -q -Ge -Gs- -Gr+ -Rn -Ss+ -Mp -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext- -Ti+ -G4 -Oc+
 CPPFLAGS    = -q -Ge -Gs- -Gr+ -Rn -Ss+ -Mp -Wall+ppt-ppc-inl-cnv-gnr-vft-        -Gx+ -Ti+ -G4 -Oc+
 LFLAGS      = /nologo /MAP /NOI /NOE /NOD /A:16 /PACKCODE /PACKDATA /EXEPACK:2 /NODEBUG
 !else
-CFLAGS16    = -c -W3 -Asfw /NTCODE16 /NDDATA16 -G2s -Zp -Zl -nologo -Zi -Owis
+CFLAGS16    = -c -W0 -Asfw /NTCODE16 /NDDATA16 -G2s -Zp -Zl -nologo -Zi -Owis
 CFLAGS      = -q -Ge -Gs- -Gr+ -Rn -Ss+ -Mp -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext- -Ti+ -Oc+ -Os-
 CPPFLAGS    = -q -Ge -Gs- -Gr+ -Rn -Ss+ -Mp -Wall+ppt-ppc-inl-cnv-gnr-vft-        -Gx+ -Ti+ -Oc+ -Os-
 !ifdef NODEBUGINFO
