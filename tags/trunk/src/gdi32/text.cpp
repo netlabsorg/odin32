@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.17 2001-04-15 17:04:47 sandervl Exp $ */
+/* $Id: text.cpp,v 1.18 2001-04-26 17:01:08 sandervl Exp $ */
 
 /*
  * GDI32 text apis
@@ -776,19 +776,22 @@ BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR
 //******************************************************************************
 BOOL InternalTextOutW(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCWSTR lpszString,INT cbCount,CONST INT *lpDx,BOOL IsExtTextOut)
 {
-  char *astring;
+  char *astring = NULL;
   BOOL  rc;
 
   if(cbCount == -1) {
      astring = UnicodeToAsciiString((LPWSTR)lpszString);
   }
-  else {
+  else 
+  if(cbCount) {
      astring = (char *)HEAP_malloc(cbCount+1);
      UnicodeToAscii((LPWSTR)lpszString, astring);
      astring[cbCount] = 0;
   }
   rc = InternalTextOutA(hdc,X,Y,fuOptions,lprc,(LPCSTR)astring,cbCount,lpDx,IsExtTextOut);
-  FreeAsciiString(astring);
+  if(astring) {
+      FreeAsciiString(astring);
+  }
 
   return(rc);
 }
