@@ -1,4 +1,4 @@
-/* $Id: exception.h,v 1.1 1999-08-22 22:52:05 sandervl Exp $ */
+/* $Id: exception.h,v 1.2 2002-04-07 17:33:06 sandervl Exp $ */
 /*
  * Wine exception handling
  *
@@ -53,11 +53,11 @@
  * This is only useful when compiling to a native Windows binary, as the built-in
  * compiler exceptions will most certainly not work under Winelib.
  */
-#ifdef USE_COMPILER_EXCEPTIONS
-
-#define __TRY __try
-#define __EXCEPT(func) __except((func)(GetExceptionInformation()))
-#define __FINALLY(func) __finally { (func)(!AbnormalTermination()); }
+//#ifdef USE_COMPILER_EXCEPTIONS
+#if 1
+#define __TRY if(1)
+#define __EXCEPT(func) else
+//#define __FINALLY(func) __finally { (func)(!AbnormalTermination()); }
 #define __ENDTRY /*nothing*/
 
 #else  /* USE_COMPILER_EXCEPTIONS */
