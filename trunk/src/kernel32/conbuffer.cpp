@@ -1,4 +1,4 @@
-/* $Id: conbuffer.cpp,v 1.7 1999-11-03 21:10:30 phaller Exp $ */
+/* $Id: conbuffer.cpp,v 1.8 1999-12-09 19:08:23 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -213,7 +213,7 @@ DWORD HMDeviceConsoleBufferClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-DWORD HMDeviceConsoleBufferClass::ReadFile(PHMHANDLEDATA pHMHandleData,
+BOOL HMDeviceConsoleBufferClass::ReadFile(PHMHANDLEDATA pHMHandleData,
                                            LPCVOID       lpBuffer,
                                            DWORD         nNumberOfBytesToRead,
                                            LPDWORD       lpNumberOfBytesRead,
@@ -230,7 +230,8 @@ DWORD HMDeviceConsoleBufferClass::ReadFile(PHMHANDLEDATA pHMHandleData,
            lpOverlapped);
 #endif
 
-  return(ERROR_ACCESS_DENIED);
+  SetLastError(ERROR_ACCESS_DENIED);
+  return FALSE;
 }
 
 
@@ -246,7 +247,7 @@ DWORD HMDeviceConsoleBufferClass::ReadFile(PHMHANDLEDATA pHMHandleData,
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-DWORD HMDeviceConsoleBufferClass::WriteFile(PHMHANDLEDATA pHMHandleData,
+BOOL HMDeviceConsoleBufferClass::WriteFile(PHMHANDLEDATA pHMHandleData,
                                             LPCVOID       lpBuffer,
                                             DWORD         nNumberOfBytesToWrite,
                                             LPDWORD       lpNumberOfBytesWritten,
@@ -268,9 +269,10 @@ DWORD HMDeviceConsoleBufferClass::WriteFile(PHMHANDLEDATA pHMHandleData,
 #endif
 
                       /* check if we're called with non-existing line buffer */
-  if (pConsoleBuffer->ppszLine == NULL)
-    return (ERROR_SYS_INTERNAL);
-
+  if (pConsoleBuffer->ppszLine == NULL) {
+  	SetLastError(ERROR_SYS_INTERNAL);
+  	return FALSE;
+  }
   for (ulCounter = 0;
        ulCounter < nNumberOfBytesToWrite;
        ulCounter++)
@@ -384,7 +386,7 @@ DWORD HMDeviceConsoleBufferClass::WriteFile(PHMHANDLEDATA pHMHandleData,
 
   *lpNumberOfBytesWritten = ulCounter;
 
-  return(ulCounter);
+  return TRUE;
 }
 
 

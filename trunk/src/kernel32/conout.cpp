@@ -1,4 +1,4 @@
-/* $Id: conout.cpp,v 1.4 1999-10-27 18:36:35 phaller Exp $ */
+/* $Id: conout.cpp,v 1.5 1999-12-09 19:08:26 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -213,11 +213,11 @@ DWORD HMDeviceConsoleOutClass::CreateFile (LPCSTR        lpFileName,
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-DWORD HMDeviceConsoleOutClass::ReadFile(PHMHANDLEDATA pHMHandleData,
-                                        LPCVOID       lpBuffer,
-                                        DWORD         nNumberOfBytesToRead,
-                                        LPDWORD       lpNumberOfBytesRead,
-                                        LPOVERLAPPED  lpOverlapped)
+BOOL HMDeviceConsoleOutClass::ReadFile(PHMHANDLEDATA pHMHandleData,
+                                       LPCVOID       lpBuffer,
+                                       DWORD         nNumberOfBytesToRead,
+                                       LPDWORD       lpNumberOfBytesRead,
+                                       LPOVERLAPPED  lpOverlapped)
 {
 
 #ifdef DEBUG_LOCAL
@@ -230,7 +230,8 @@ DWORD HMDeviceConsoleOutClass::ReadFile(PHMHANDLEDATA pHMHandleData,
            lpOverlapped);
 #endif
 
-  return(ERROR_ACCESS_DENIED);
+  SetLastError(ERROR_ACCESS_DENIED);
+  return FALSE;
 }
 
 
@@ -246,16 +247,16 @@ DWORD HMDeviceConsoleOutClass::ReadFile(PHMHANDLEDATA pHMHandleData,
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-DWORD HMDeviceConsoleOutClass::WriteFile(PHMHANDLEDATA pHMHandleData,
+BOOL HMDeviceConsoleOutClass::WriteFile(PHMHANDLEDATA pHMHandleData,
                                          LPCVOID       lpBuffer,
                                          DWORD         nNumberOfBytesToWrite,
                                          LPDWORD       lpNumberOfBytesWritten,
                                          LPOVERLAPPED  lpOverlapped)
 {
-  DWORD dwResult;                        /* result from subsequent WriteFile */
+  BOOL dwResult;                        /* result from subsequent WriteFile */
 
 #ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE:HMDeviceConsoleOutClass:WriteFile %s(%08x,%08x,%08x,%08x,%08x)\n",
+  WriteLog("KERNEL32/CONSOLE:HMDeviceConsoleOutClass:WriteFile %s(%08x,%s,%08x,%08x,%08x)\n",
            lpHMDeviceName,
            pHMHandleData->hHMHandle,
            lpBuffer,
@@ -295,7 +296,7 @@ DWORD HMDeviceConsoleOutClass::WriteFile(PHMHANDLEDATA pHMHandleData,
     return (dwResult);                                 /* return result code */
   }
   else
-    return (ERROR_SYS_INTERNAL);                    /* raise error condition */
+    return (FALSE);                    /* raise error condition */
 }
 
 

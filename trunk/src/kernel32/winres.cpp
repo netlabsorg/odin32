@@ -1,4 +1,4 @@
-/* $Id: winres.cpp,v 1.24 1999-12-09 00:52:21 sandervl Exp $ */
+/* $Id: winres.cpp,v 1.25 1999-12-09 19:08:29 sandervl Exp $ */
 
 /*
  * Win32 resource class
@@ -79,7 +79,8 @@ Win32Resource::Win32Resource(Win32ImageBase *module, ULONG id, ULONG type,
 
   if(type == NTRT_STRING) {
     	memcpy(winresdata, resdata, size);
-        ((USHORT *)winresdata)[size/sizeof(WCHAR)-1] = 0;
+        ((USHORT *)winresdata)[size/sizeof(WCHAR)] = 0;
+//        ((USHORT *)winresdata)[size/sizeof(WCHAR)-1] = 0;
   }
   else  memcpy(winresdata, resdata, size);
 
