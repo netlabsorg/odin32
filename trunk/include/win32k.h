@@ -1,4 +1,4 @@
-/* $Id: win32k.h,v 1.4 2001-02-02 08:42:56 bird Exp $
+/* $Id: win32k.h,v 1.5 2001-02-11 15:31:08 bird Exp $
  *
  * Top level make file for the Win32k library.
  * Contains library and 32-bit IOCtl definition.
@@ -29,6 +29,7 @@
 #define K32_SETOPTIONS          0x04
 #define K32_PROCESSREADWRITE    0x05
 #define K32_HANDLESYSTEMEVENT   0x06
+#define K32_QUERYSYSTEMMEMINFO  0x07
 
 /*
  * Elf category
@@ -52,6 +53,14 @@
 #define K32_SYSEVENT_POWEROFF               0x0a    /* dh SendEvent - Power off event            */
 #define K32_SYSEVENT_CTRL_ALT_2xNUMLOCK     0x0b    /* VectorSDF    - System Dump                */
 #define K32_SYSEVENT_LAST                   K32_SYSEVENT_CTRL_ALT_2xNUMLOCK
+
+/*
+ * System Memory Info flags.
+ */
+#define K32_SYSMEMINFO_ALL                  0       /* Everything is queried. */
+#define K32_SYSMEMINFO_SWAPFILE             0x01    /* Swapfile stuff is queried. */
+#define K32_SYSMEMINFO_PAGING               0x02    /* Paging and Physical memory stuff is queried. */
+#define K32_SYSMEMINFO_VM                   0x04    /* Virtual memory stuff is all queried. */
 
 
 #ifndef INCL_16                         /* We don't need this in 16-bit code. */
@@ -172,6 +181,63 @@ typedef struct _K32Status
 } K32STATUS, *PK32STATUS;
 
 
+/*
+ * Memory information struct.
+ */
+typedef struct _k32SystemMemInfo
+{
+    ULONG       cb;                     /* Size of this structure - must be set. */
+                                        /* This will be used to distinguish futher versions. */
+    ULONG       flFlags;                /* This is used to limit amount of information collected - must be set. (K32_SYSMEMINFO_*) */
+                                        /* Some conciderations.
+                                         *    - VM uses worker functions which traverses internal lists.
+                                         *    - Page and physical memory traverses one internal structure (PGPhysAvail())
+                                         *    - Swap File only accesses variables.
+                                         */
+
+    /* SwapFile Info */
+    BOOL        fSwapFile;              /* Swap File: Swapping enabled or disabled. (SMswapping) */
+                                        /*            (The SwapFile data below is valid when swapping is enbled!) */
+    ULONG       cbSwapFileSize;         /* Swap File: Current size. (smFileSize<<PAGESIZE) */
+    ULONG       cbSwapFileAvail;        /* Swap File: Available within current file. ((smFileSize-smcBrokenDF-SMcDFInuse)<<PAGESIZE) */
+    ULONG       cbSwapFileUsed;         /* Swap File: Used within current file. (SMcDFInuse<<PAGESIZE) */
+    ULONG       cbSwapFileMinFree;      /* Swap File: Addjusted min free on swap volume. (SMMinFree<<PAGESHIFT) */
+    ULONG       cbSwapFileCFGMinFree;   /* Swap File: Configured min free on swap volume. ((SMCFGMinFree<<PAGESHIFT)/4) */
+    ULONG       cbSwapFileCFGSwapSize;  /* Swap File: Configured initial swap file size. ((SMCFGSwapSize<<PAGESHIFT)/4) */
+    ULONG       cSwapFileBrokenDF;      /* Swap File: Number of broken disk frames (DF). (smcBrokenDF) */
+    ULONG       cSwapFileGrowFails;     /* Swap File: Number of times growoperation has failed. (smcGrowFails) */
+    ULONG       cSwapFileInMemFile;     /* Swap File: Number of pages in the "In-Memory-swapFile". (SMcInMemFile) */
+                                        /*            These pages are not counted into the SMcDFInuse count I think. */
+
+    /* Physical Memory Info */
+    ULONG       cbPhysSize;             /* Physical memory: total (bytes). (pgPhysPages<<PAGESHIFT) */
+    ULONG       cbPhysAvail;            /* Physical memory: available (bytes). (PGPhysAvail()) */
+    ULONG       cbPhysUsed;             /* Physical memory: used (bytes). (PGPhysPresent()<<PAGESHIFT) */
+
+    /* Other paging info */
+    BOOL        fPagingSwapEnabled;     /* Paging: TRUE when swapping is enabled, else false. (PGSwapEnabled) */
+    ULONG       cPagingPageFaults;      /* Paging: Number of pagefaults which has occured since boot. (pgcPageFaults) */
+    ULONG       cPagingPageFaultsActive;/* Paging: Number of pagefaults currently being processed. (pgcPageFaultsActive) */
+    ULONG       cPagingPhysPages;       /* Paging: Count of physical pages. (hope this is correct) (pgPhysPages) */
+    ULONG       ulPagingPhysMax;        /* Paging: Top of physical memory (physical page number) (pgPhysMax) */
+    ULONG       cPagingResidentPages;   /* Paging: Count of resident pages. (pgResidentPages) */
+    ULONG       cPagingSwappablePages;  /* Paging: Count of swappable pages which is currently present in memory. (pgSwappablePages) */
+    ULONG       cPagingDiscardableInmem;/* Paging: Count of discardable pages which is currently present in memory. (pgDiscardableInmem) */
+    ULONG       cPagingDiscardablePages;/* Paging: Count of discardable pages allocated. (pgDiscardablePages) */
+
+    /* Virtual Memory manager info. */
+    ULONG       ulAddressLimit;         /* VM: Current user virtual address limit - use this for high arena check. (VirtualAddressLimit / 0x20000000) */
+    ULONG       ulVMArenaPrivMax;       /* VM: Current highest address in the private arena. (vmRecalcShrBound()) */
+    ULONG       ulVMArenaSharedMin;     /* VM: Current lowest address in the shared arena. (ahvmShr) */
+    ULONG       ulVMArenaSharedMax;     /* VM: Current highest address in the shared arena. (ahvmShr) */
+    ULONG       ulVMArenaSystemMin;     /* VM: Current lowest address in the system arena. (ahvmhSys) */
+    ULONG       ulVMArenaSystemMax;     /* VM: Current highest address in the system arena. (ahvmhSys) */
+    ULONG       ulVMArenaHighPrivMax;   /* VM: Current highest address in the high private arena - aurora/smp only. (vmRecalcShrBound) */
+    ULONG       ulVMArenaHighSharedMin; /* VM: Current lowest address in the high shared arena - aurora/smp only. (ahvmhShr) */
+    ULONG       ulVMArenaHighSharedMax; /* VM: Current highest address in the high shared arena - aurora/smp only. (ahvmhShr) */
+
+} K32SYSTEMMEMINFO, *PK32SYSTEMMEMINFO;
+
 
 /*
  * K32 category parameter structs
@@ -231,6 +297,13 @@ typedef struct _k32HandleSystemEvent
     ULONG       rc;                     /* Return code. */
 } K32HANDLESYSTEMEVENT, *PK32HANDLESYSTEMEVENT;
 
+typedef struct _k32QuerySystemMemInfo
+{
+    PK32SYSTEMMEMINFO   pMemInfo;       /* Pointer to system memory info structure with cb set. */
+                                        /* The other members will be filled on successful return. */
+    APIRET      rc;                     /* Return code. */
+} K32QUERYSYSTEMMEMINFO, *PK32QUERYSYSTEMMEMINFO;
+
 
 #pragma pack()
 
@@ -249,6 +322,7 @@ APIRET APIENTRY  libWin32kSetOption(PK32OPTIONS pOptions);
 /* "Extra OS2 APIs" */
 APIRET APIENTRY  DosAllocMemEx(PPVOID ppv, ULONG cb, ULONG flag);
 APIRET APIENTRY  W32kQueryOTEs(HMODULE hMTE, PQOTEBUFFER pQOte, ULONG cbQOte);
+APIRET APIENTRY  W32kQuerySystemMemInfo(PK32SYSTEMMEMINFO pMemInfo);
 APIRET APIENTRY  W32kProcessReadWrite(PID pid, ULONG cb, PVOID pvSource, PVOID pvTarget, BOOL fRead);
 APIRET APIENTRY  W32kHandleSystemEvent(ULONG ulEvent, HEV hev, BOOL fHandle);
 
