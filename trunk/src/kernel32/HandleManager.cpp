@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.27 1999-11-26 21:10:51 phaller Exp $ */
+/* $Id: HandleManager.cpp,v 1.28 1999-11-27 12:48:25 achimha Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -2589,4 +2589,72 @@ BOOL WIN32API DeviceIoControl(HANDLE hDevice, DWORD dwIoControlCode,
                                                 lpBytesReturned, lpOverlapped);
 
   return (fResult);                                   /* deliver return code */
+}
+
+
+/*****************************************************************************
+ * Name      : HMSetupComm
+ * Purpose   : router function for SetupComm
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Achim Hasenmueller [Sat, 1999/11/27 13:13]
+ *****************************************************************************/
+
+BOOL HMSetupComm(HANDLE hFile, DWORD dwInQueue, DWORD dwOutQueue)
+{
+  int       iIndex;                           /* index into the handle table */
+  BOOL      bResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hFile);              /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return (NULL);                                         /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  bResult = pHMHandle->pDeviceHandler->SetupComm(&pHMHandle->hmHandleData,
+                                                 dwInQueue, dwOutQueue);
+
+  return (bResult);                                  /* deliver return code */
+}
+
+
+/*****************************************************************************
+ * Name      : HMGetCommState
+ * Purpose   : router function for GetCommState
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Achim Hasenmueller [Sat, 1999/11/27 13:40]
+ *****************************************************************************/
+
+BOOL HMGetCommState(INT hCommDev, LPDCB lpdcb)
+{
+  int       iIndex;                           /* index into the handle table */
+  BOOL      bResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hCommDev);              /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return (NULL);                                         /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  bResult = pHMHandle->pDeviceHandler->GetCommState(&pHMHandle->hmHandleData,
+                                                    lpdcb);
+
+  return (bResult);                                  /* deliver return code */
 }

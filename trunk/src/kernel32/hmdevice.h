@@ -1,4 +1,4 @@
-/* $Id: hmdevice.h,v 1.10 1999-11-12 14:57:14 sandervl Exp $ */
+/* $Id: hmdevice.h,v 1.11 1999-11-27 12:48:26 achimha Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -285,6 +285,11 @@ public:
                                      LPVOID lpInBuffer, DWORD nInBufferSize,
                                      LPVOID lpOutBuffer, DWORD nOutBufferSize,
                                      LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped);
+
+ /* COM ports */
+ virtual BOOL SetupComm(PHMHANDLEDATA pHMHandleData, DWORD dwInQueue, DWORD dwOutQueue);
+
+ virtual BOOL GetCommState(PHMHANDLEDATA pHMHandleData, LPDCB lpdcb);
 
 };
 

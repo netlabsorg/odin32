@@ -1,4 +1,4 @@
-/* $Id: hmdevice.cpp,v 1.9 1999-11-12 14:57:13 sandervl Exp $ */
+/* $Id: hmdevice.cpp,v 1.10 1999-11-27 12:48:26 achimha Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -1081,3 +1081,45 @@ BOOL HMDeviceHandler::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoCon
 
   return(FALSE);
 }
+
+
+/*****************************************************************************
+ * Name      : DWORD HMDeviceHandler::SetupComm      
+ * Purpose   : set com port parameters (queue)
+ * Variables :
+ * Result    : 
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Achim Hasenmueller
+ *****************************************************************************/
+
+BOOL HMDeviceHandler::SetupComm(PHMHANDLEDATA pHMHandleData, DWORD dwInQueue, DWORD dwOutQueue)
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::SetupComm(%08xh,%08xh,%08xh)\n",
+           pHMHandleData->hHMHandle,
+           dwInQueue, dwOutQueue));
+
+  return(FALSE);
+}
+
+
+/*****************************************************************************
+ * Name      : DWORD HMDeviceHandler::GetCommState   
+ * Purpose   : query com port control block   
+ * Variables :
+ * Result    : 
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Achim Hasenmueller
+ *****************************************************************************/
+BOOL HMDeviceHandler::GetCommState(PHMHANDLEDATA pHMHandleData, LPDCB lpdcb)
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::GetCommState(%08xh,%08xh)\n",
+           pHMHandleData->hHMHandle,
+           lpdcb));
+
+  return(FALSE);
+}
+
