@@ -1,4 +1,4 @@
-/* $Id: sec.cpp,v 1.5 1999-12-19 12:25:55 sandervl Exp $ */
+/* $Id: sec.cpp,v 1.6 2000-10-02 13:10:12 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -12,6 +12,10 @@
  * Copyright 1996-1998 Marcus Meissner
  */
 
+#include <odin.h>
+#include <odinwrap.h>
+#include <os2sel.h>
+
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -20,6 +24,9 @@
 
 #include <os2win.h>
 #include "ntdll.h"
+
+
+ODINDEBUGCHANNEL(NTDLL-SEC)
 
 /*
  * SID FUNCTIONS
@@ -168,16 +175,12 @@ DWORD WINAPI RtlLengthSid(PSID sid)
 /**************************************************************************
  *                 RtlInitializeSid            [NTDLL.410]
  */
-DWORD WINAPI RtlInitializeSid(PSID                      psid,
-                              PSID_IDENTIFIER_AUTHORITY psidauth,
-                              DWORD                     c)
+ODINFUNCTION3(DWORD, RtlInitializeSid,
+              PSID, psid,
+              PSID_IDENTIFIER_AUTHORITY, psidauth,
+              DWORD, c)
 {
   BYTE  a = c & 0xff;
-
-  dprintf(("NTDLL: RtlInitializeSid(%08xh,%08xh,%08xh)\n",
-           psid,
-           psidauth,
-           c));
 
   if (a>=SID_MAX_SUB_AUTHORITIES)
     return a;
@@ -206,13 +209,10 @@ PSID_IDENTIFIER_AUTHORITY WINAPI RtlIdentifierAuthoritySid( PSID pSid )
 /**************************************************************************
  *                 RtlSubAuthoritySid          [NTDLL.497]
  */
-LPDWORD WINAPI RtlSubAuthoritySid(PSID  psid,
-                                  DWORD nr)
+ODINFUNCTION2(LPDWORD, RtlSubAuthoritySid,
+              PSID, psid,
+              DWORD, nr)
 {
-  dprintf(("NTDLL: RtlSubAuthoritySid(%08xh,%08xh)\n",
-           psid,
-           nr));
-
   return &(psid->SubAuthority[nr]);
 }
 
