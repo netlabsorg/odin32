@@ -17,7 +17,7 @@ EXPORTS
     CoCreateFreeThreadedMarshaler  = _CoCreateFreeThreadedMarshaler@8  @5
     CoCreateGuid               = _CoCreateGuid@4             @6
     CoCreateInstance           = _CoCreateInstance@20        @7
-    CoCreateInstanceEx         = _CoCreateInstanceEx@24
+    CoCreateInstanceEx         = _CoCreateInstanceEx@24	     @9999
     CoDisconnectObject         = _CoDisconnectObject@8       @8
     CoDosDateTimeToFileTime    = _CoDosDateTimeToFileTime@12 @9
     CoFileTimeNow              = _CoFileTimeNow@4            @10
@@ -36,7 +36,7 @@ EXPORTS
     CoGetStandardMarshal       = _CoGetStandardMarshal@24    @23
     CoGetState                 = _CoGetState@0               @24
     CoGetTreatAsClass          = _CoGetTreatAsClass@8        @25
-    CoInitializeEx             = _CoInitializeEx@8
+    CoInitializeEx             = _CoInitializeEx@8           @9998
     CoInitialize               = _CoInitialize@4             @26
     CoInitializeWOW            = _CoInitializeWOW@0          @27
     CoIsHandlerConnected       = _CoIsHandlerConnected@4     @28

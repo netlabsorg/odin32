@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.7 1999-09-08 11:29:28 davidr Exp $ */
+/* $Id: stubs.cpp,v 1.8 1999-09-20 20:38:20 davidr Exp $ */
 /* 
  * Win32 COM/OLE stubs for OS/2
  * 
@@ -218,13 +218,6 @@ HRESULT WIN32API BindMoniker(LPMONIKER pmk, DWORD grfOpt, REFIID iidResult,
 {
     dprintf(("OLE32: BindMoniker- stub"));
     return MK_E_NOOBJECT;
-}
-//*******************************************************************************
-//*******************************************************************************
-HRESULT WIN32API CreateAntiMoniker(LPMONIKER *ppmk)
-{
-    dprintf(("OLE32: CreateAntiMoniker - stub"));
-    return E_OUTOFMEMORY;
 }
 //*******************************************************************************
 //*******************************************************************************

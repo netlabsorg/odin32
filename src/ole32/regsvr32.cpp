@@ -1,4 +1,4 @@
-/* $Id: regsvr32.cpp,v 1.2 1999-09-08 11:29:28 davidr Exp $ */
+/* $Id: regsvr32.cpp,v 1.3 1999-09-20 20:38:20 davidr Exp $ */
 /* 
  * 
  * Project Odin Software License can be found in LICENSE.TXT
@@ -13,9 +13,13 @@
  * 
  */
 
-#include "ole32.h"
+#include <windows.h>
+#include <odinlx.h>
 #include <stdarg.h>
+#include <stdio.h>
+#include <string.h>
 #include <ctype.h>
+
 
 // ======================================================================
 // Local Data
@@ -41,12 +45,20 @@ static	HRESULT	sign_off(void);
 static	HRESULT	report_msg(char * fmt, ...);
 static	HRESULT	report_err(HRESULT hr, char * fmt, ...);
 static	HRESULT	usage(char * fmt, ...);
+static int WIN32API EntryPoint(HINSTANCE hInstance, HINSTANCE hPrevInstance,
+		    LPSTR lpCmdLine, int nCmdShow);
 
 // ======================================================================
 // Public API's
 // ======================================================================
-extern int main(int argc, char * argv[])
+
+// ----------------------------------------------------------------------
+// main
+// ----------------------------------------------------------------------
+int main(int argc, char *argv[])
 {
+    RegisterLxExe(EntryPoint, NULL);
+
     HRESULT	hr;
 
     if((hr = sign_on()) != S_OK)
@@ -75,6 +87,18 @@ extern int main(int argc, char * argv[])
 // ======================================================================
 // Private functions.
 // ======================================================================
+
+// ----------------------------------------------------------------------
+// EntryPoint
+// ----------------------------------------------------------------------
+static int WIN32API EntryPoint
+   (HINSTANCE	hInstance,
+    HINSTANCE	hPrevInstance,
+    LPSTR	lpCmdLine,
+    int		nCmdShow)
+{
+    return S_OK;
+}
 
 // ----------------------------------------------------------------------
 // sign_on
