@@ -1,4 +1,4 @@
-/* $Id: tooltips.c,v 1.10 1999-07-04 21:06:00 cbratschi Exp $ */
+/* $Id: tooltips.c,v 1.11 1999-07-07 17:08:43 cbratschi Exp $ */
 /*
  * Tool tip control
  *
@@ -1132,7 +1132,9 @@ TOOLTIPS_GetTextA (HWND hwnd, WPARAM wParam, LPARAM lParam)
     nTool = TOOLTIPS_GetToolFromInfoA (infoPtr, lpToolInfo);
     if (nTool == -1) return 0;
 
-    lstrcpyWtoA (lpToolInfo->lpszText, infoPtr->tools[nTool].lpszText);
+    TOOLTIPS_GetTipText(hwnd,infoPtr,nTool);
+
+    lstrcpyWtoA(lpToolInfo->lpszText,infoPtr->szTipText);
 
     return 0;
 }
@@ -1153,7 +1155,9 @@ TOOLTIPS_GetTextW (HWND hwnd, WPARAM wParam, LPARAM lParam)
     nTool = TOOLTIPS_GetToolFromInfoW (infoPtr, lpToolInfo);
     if (nTool == -1) return 0;
 
-    lstrcpyW (lpToolInfo->lpszText, infoPtr->tools[nTool].lpszText);
+    TOOLTIPS_GetTipText(hwnd,infoPtr,nTool);
+
+    lstrcpyW(lpToolInfo->lpszText,infoPtr->szTipText);
 
     return 0;
 }
