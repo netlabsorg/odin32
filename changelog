@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.1858 2001-11-27 17:33:34 phaller Exp $ */
+/* $Id: changelog,v 1.1859 2001-11-28 15:33:48 sandervl Exp $ */
+
+ 2001-11-28: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o WaitCommEvent fixes (must reset overlapped event semaphore &
+                  store result of overlapped operation in parameter)
+    - INCLUDE:  o winbase.h: CBR_xxxx definitions wrong
 
  2001-11-27: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o added \\.\ as standard symbolic link to the local namespace
