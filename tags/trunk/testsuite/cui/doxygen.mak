@@ -1,4 +1,4 @@
-# $Id: doxygen.mak,v 1.1 2002-06-19 01:59:27 bird Exp $
+# $Id: doxygen.mak,v 1.2 2002-06-19 23:16:36 bird Exp $
 
 #
 # This script contains the testcases for Doxygen version 1.2.16
@@ -10,6 +10,7 @@
 PATH_ROOT = ..\..
 !include $(PATH_ROOT)\$(BUILD_SETUP_MAK)
 !include $(PATH_MAKE)\testsuite.tools.mk
+
 
 # Testsuite config for the process include.
 TARGET_MODE = TESTCASE
@@ -32,30 +33,22 @@ BIN_FILES =\
 #
 # Main rule, this runs all the other rulez.
 #
-testcase:   testcase-banner \
-            $(BIN_FILES) \
-            testcase-help \
-            testcase-kFileFormatBase
-    @$(ECHO) + Completed DoxyGen v1.2.16! $(CLRRST)
-
-testcase-banner:
+testcase:   $(BIN_FILES)
     @$(ECHO) + Running testcases for DoxyGen v1.2.16! $(CLRRST)
-
+    $(TS_EXEC_1) "help" $(TS_EXEC_2) testcase-help
+    $(TS_EXEC_1) "kFileFormatBase" $(TS_EXEC_2) testcase-kFileFormatBase
+    @$(ECHO) + Completed DoxyGen v1.2.16! $(CLRRST)
 
 
 #
 # This testcase checks the --help output.
 # BUGBUG: why doesn't DOXYGEN.EXE output an absolute path?
 #
-testcase-help: testcase-help-banner $(PATH_TARGET)\doxygen.help.stdout
+testcase-help: $(PATH_TARGET)\doxygen.help.stdout
     -1 $(TS_PEC) $(DOXYGEN) --help > $(PATH_TARGET)\stdout 2> $(PATH_TARGET)\stderr
     $(TS_TEST_FILE_Z)   $(PATH_TARGET)\stderr
     $(TS_TEST_FILE_NZ)  $(PATH_TARGET)\stdout
     $(TS_SED) "s/ [.][.].*\\doxygen.exe/ DOXYGEN.EXE/I" $(PATH_TARGET)\stdout | $(TS_CMP) - $(PATH_TARGET)\doxygen.help.stdout
-    @$(ECHO) ++ help done!$(CLRRST)
-
-testcase-help-banner:
-    @$(ECHO) ++ help$(CLRRST)
 
 # This is the output of testcase-help
 $(PATH_TARGET)\doxygen.help.stdout: $(MAKEFILE)
@@ -96,7 +89,7 @@ If configName is omitted `Doxyfile' will be used as a default.
 #
 # Testcase where we try to run doxygen on tools/common/kFileFormatBase.[cpp|h].
 #
-testcase-kFileFormatBase: testcase-kFileFormatBase-banner \
+testcase-kFileFormatBase: \
             $(PATH_TARGET)\kFileFormatBase.conf \
             $(PATH_TARGET)\kFileFormatBase.stdout \
             $(PATH_TARGET)\kFileFormatBase.html.dir \
@@ -112,10 +105,6 @@ testcase-kFileFormatBase: testcase-kFileFormatBase-banner \
     $(TS_TEST_FILE_NZ) $(PATH_TARGET)\rtf\refman.rtf
     $(TS_TEST_DIR) $(PATH_TARGET)\man\man3
     $(TS_TEST_FILE_NZ) $(PATH_TARGET)\man\man3\kFileFormatBase.3
-    @$(ECHO) * kFileFormatBase done!$(CLRRST)
-
-testcase-kFileFormatBase-banner:
-    @$(ECHO) * kFileFormatBase$(CLRRST)
 
 
 $(PATH_TARGET)\kFileFormatBase.conf: $(MAKEFILE)
