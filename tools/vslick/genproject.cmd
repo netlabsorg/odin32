@@ -1,9 +1,9 @@
-/* $Id: genproject.cmd,v 1.4 2000-10-02 04:08:49 bird Exp $
+/* $Id: genproject.cmd,v 1.5 2000-11-15 00:20:44 bird Exp $
  *
  * This script generates a Visual Slick project of the source and include
  * files found in the directory tree starting at the current directory.
  *
- * Copyright (c) 1999 knut st. osmundsen
+ * Copyright (c) 1999-2000 knut st. osmundsen
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -15,6 +15,8 @@
 
     sIncludes = '';
     sProjFile = '';
+    fFullDir = 1;
+    fRecursive = 0;
 
     sArgs.0 = 0;
     i = 0;
@@ -49,14 +51,29 @@
         if substr(sArg, 1, 1) == '-' | substr(sArg, 1, 1) == '/' then do
             /* option */
             chArg = substr(sArg, 2, 1);
-            sArg  = substr(sArg, 3);
+            sArg  = strip(substr(sArg, 3));
             select
                 when chArg = 'I' | chArg = 'i' then do
-                    sIncludes = sIncludes||sArg;
+                    if (sArg <> '' & substr(sArg, length(sArg), 1) <> ';')  then
+                        sincludes = sIncludes || sArg || ';';
+                    else
+                        sIncludes = sIncludes || sArg;
+                end
+
+                when chArg = 'f' | chArg = 'F' then do
+                    fFullDir = 1;
+                end
+
+                when chArg = 'r' | chArg = 'R' then do
+                    fFullDir = 0;
                 end
 
                 when chArg = 'h' | chArg = '?' | sArg = '-help' then do
                     call syntax;
+                end
+
+                when chArg = 's' | chArg = 'S' then do
+                    fRecursive = 1;
                 end
 
                 otherwise  do
@@ -88,9 +105,9 @@
         call lineout sProjFile, '[COMPILER]'
         call lineout sProjFile, 'MACRO=odin32_setcurrentdir();\nodin32_maketagfile();\n'
         call lineout sProjFile, 'FILTEREXPANSION=1 1 0 0 1'
-        call lineout sProjFile, 'compile=concur|capture|clear|:Compile:&Compile,nmake %n.obj'
+        call lineout sProjFile, 'compile=concur|capture|clear|:Compile:&Compile,nmake .\bin\debug\%n.obj'
         call lineout sProjFile, 'make=concur|capture|clear|:Build:&Build,nmake'
-        call lineout sProjFile, 'rebuild=concur|capture|clear|:Rebuild:&Rebuild,nmake /A'
+        call lineout sProjFile, 'rebuild=concur|capture|clear|:Rebuild:&Rebuild,nmake -a'
         call lineout sProjFile, 'debug=:Debug:&Debug,'
         call lineout sProjFile, 'execute=:Execute:E&xecute,'
         call lineout sProjFile, 'user1=hide|:User 1:User 1,'
@@ -103,7 +120,7 @@
         call lineout sProjFile, 'reffile='
 
         call lineout sProjFile, '[FILES]'
-        call processDirTree sProjFile, directory(), directory();
+        call processDirTree sProjFile, directory(), directory(), fRecursive, fFullDir;
         call lineout sProjFile, '[ASSOCIATION]'
         call lineout sProjFile, '[STATE]'
         call lineout sProjFile, 'FILEHIST: 0'
@@ -128,28 +145,40 @@
 /*********************/
 
 syntax: procedure
-    say 'syntax: genproject.cmd  <project filename> [-I<include directories>]'
-    say ''
-    say 'Copyright (c) 1999 knut st. osmundsen'
+    say 'Syntax: genproject.cmd  <project filename> [-I<include directories>]'
+    say '   switches:   -s                  Recursivly scan subdirectories too.'
+    say '                                   (default: Current dir only)'
+    say '               -f                  Full filenames.         (default)'
+    say '               -r                  Relative filenames.     (default: -f)'
+    say '               -I<dir or dirlist>  Include directories.'
+    say 'Copyright (c) 1999-2000 knut st. osmundsen'
     exit (1);
 
 /* processes an directory tree */
 processDirTree: procedure
-    parse arg sProjFile, sDirectory, sRoot
+    parse arg sProjFile, sDirectory, sRoot, fRecursive, fFullDir
 
     rc = SysFileTree(sDirectory'\*', sFiles, 'FO');
     if rc == 0  then do
         do i = 1 to sFiles.0
             if filterFile(sFiles.i) then
-                call lineout sProjFile, substr(sFiles.i, length(sRoot)+2)
+            do
+                if (fFullDir) then
+                    call lineout sProjFile, sFiles.i;
+                else
+                    call lineout sProjFile, substr(sFiles.i, length(sRoot)+2);
+            end
         end
     end
 
-    rc = SysFileTree(sDirectory'\*', sDirs, 'DO');
-    if rc == 0  then do
-        do i = 1 to sDirs.0
-            if filterDirectory(sDirs.i) then
-                call processDirTree sProjFile, sDirs.i, sRoot
+    if (fRecursive) then
+    do
+        rc = SysFileTree(sDirectory'\*', sDirs, 'DO');
+        if rc == 0  then do
+            do i = 1 to sDirs.0
+                if filterDirectory(sDirs.i) then
+                    call processDirTree sProjFile, sDirs.i, sRoot, fRecursive, fFullDir
+            end
         end
     end
 
