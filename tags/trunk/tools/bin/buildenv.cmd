@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.35 2002-09-20 05:04:38 bird Exp $
+/* $Id: buildenv.cmd,v 1.36 2002-10-15 12:31:47 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -26,7 +26,7 @@
     /*
      * Version
      */
-    sVersion = '1.0.8 [2002-09-15]';
+    sVersion = '1.0.9 [2002-10-15]';
 
     /*
      * Create argument array with lowercase arguments.
@@ -877,7 +877,7 @@ PathSetDefault: procedure expose aCfg. aPath. sPathFile
     /*
      * Bird: laptop box.
      */
-    if (translate(EnvGet('HOSTNAME')) = 'BIRD') then
+    if (translate(EnvGet('HOSTNAME')) = 'DELIRIUM') then
     do
         say 'Info: No or empty path file, using birds work defaults.';
         aPath.i.sPId = 'cvs';                       aPath.i.sPath = 'e:\cvs111';                    i = i + 1;
@@ -957,10 +957,10 @@ PathSetDefault: procedure expose aCfg. aPath. sPathFile
         aPath.i.sPId = 'unixroot';                  aPath.i.sPath = 'd:\unix';                      i = i + 1;
         aPath.i.sPId = 'xfree86';                   aPath.i.sPath = 'd:\xfree86';                   i = i + 1;
         aPath.i.sPId = 'vac308';                    aPath.i.sPath = 'd:\dev\VACpp\v308';            i = i + 1;
-      /*aPath.i.sPId = 'vac365';                    aPath.i.sPath = 'e:\ibmcxxo';                   i = i + 1;
-        aPath.i.sPId = 'vac40';                     aPath.i.sPath = 'e:\ibmcpp40';                  i = i + 1;*/
+        aPath.i.sPId = 'vac365';                    aPath.i.sPath = 'd:\dev\VACpp\v365';            i = i + 1;
+        aPath.i.sPId = 'vac40';                     aPath.i.sPath = 'd:\dev\VACpp\v40ga';           i = i + 1;
         aPath.i.sPId = 'warpin';                    aPath.i.sPath = 'c:\warpin';                    i = i + 1;
-      /*aPath.i.sPId = 'watcom11';                  aPath.i.sPath = 'e:\watcom';                    i = i + 1;*/
+        aPath.i.sPId = 'watcom11';                  aPath.i.sPath = 'd:\dev\watcom\v110';           i = i + 1;
         aPath.i.sPId = 'watcom11c';                 aPath.i.sPath = 'd:\dev\watcom\v110c';          i = i + 1;
         aPath.i.sPId = 'testcase_drive_unused';     aPath.i.sPath = 't'; /* reqired */              i = i + 1;
         aPath.i.sPId = 'testcase_drive_fixed';      aPath.i.sPath = 'f'; /* reqired */              i = i + 1;
