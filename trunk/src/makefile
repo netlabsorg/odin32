@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.78 2001-09-30 00:35:13 bird Exp $
+# $Id: makefile,v 1.79 2001-09-30 09:36:03 bird Exp $
 
 #
 # Odin32 API
@@ -97,7 +97,8 @@ $(COMMONRULES:clean dep lib all=):
 #
 # Custom rules
 #
-CUSTOMBUILD = kernel32 user32 gdi32 comctl32 comdlg32 shell32 shlwapi msvfw32 wsock32 winmm ole32 rpcrt4 version lz32
+CUSTOMBUILD = kernel32 user32 gdi32 comctl32 comdlg32 shell32 shlwapi \
+              msvfw32 wsock32 winmm ole32 rpcrt4 version lz32 riched32
 custombuild:
     @$(DODIRS) "$(CUSTOMBUILD)" $(MAKE_CMD) all CUSTOMBUILD=1
     @$(DODIRS) ".\win32k\lib custombuild" $(MAKE_CMD) all

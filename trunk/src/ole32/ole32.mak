@@ -1,15 +1,16 @@
-# $Id: ole32.mak,v 1.13 2001-07-29 19:01:40 sandervl Exp $
+# $Id: ole32.mak,v 1.14 2001-09-30 09:24:01 bird Exp $
 
 #
 # Odin32 API
 #
 #       ole32.dll makefile
 #
-WRC_PREFIX_RESOURCE=1
+
 
 #
 # Tell buildenvironment that we have a non-default makefilename.
 #
+WRC_PREFIX_RESOURCE=1
 MAKEFILE = ole32.mak
 
 
@@ -18,7 +19,12 @@ MAKEFILE = ole32.mak
 #
 !include ../../makefile.inc
 
+
+#
+# Overrides.
+#
 CDEFINES = $(CDEFINES) -DWINE_LARGE_INTEGER
+
 
 #
 # Object files. Prefix with OBJDIR and one space before the '\'.
