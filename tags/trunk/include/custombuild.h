@@ -78,5 +78,8 @@ void WIN32API SetCustomPMHookDll(LPSTR pszKbdDllName);
 //Turn off wave audio in winmm
 void WIN32API DisableWaveAudio();
 
+//force color to mono cursor conversion
+void WIN32API CustForceMonoCursor();
+
 #endif  /*__CUSTOMBUILD_H__*/
 

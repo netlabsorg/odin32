@@ -1,4 +1,4 @@
-/* $Id: pmwindow.h,v 1.15 2001-12-26 19:05:35 achimha Exp $ */
+/* $Id: pmwindow.h,v 1.16 2002-02-18 10:14:57 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -25,6 +25,7 @@ extern ULONG ScreenWidth;
 extern ULONG ScreenHeight;
 extern ULONG ScreenBitsPerPel;
 extern BOOL  fOS2Look;
+extern BOOL  fForceMonoCursor;
 extern HWND  hwndCD;
 extern LONG CapsCharHeight;
 
