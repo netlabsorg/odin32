@@ -1,4 +1,4 @@
-# $Id: ole32.mak,v 1.6 2001-04-26 19:32:49 sandervl Exp $
+# $Id: ole32.mak,v 1.7 2001-06-06 17:11:17 sandervl Exp $
 
 #
 # Odin32 API
@@ -22,7 +22,7 @@ MAKEFILE = ole32.mak
 # Overrides.
 #
 !if "$(CCENV)" == "VAC36"
-CDEFINES    = $(CDEFINES) -DNONAMELESSSTRUCT
+CDEFINES    = $(CDEFINES) -DNONAMELESSSTRUCT -DNONAMELESSUNION
 !endif
 CDEFINES    = $(CDEFINES) -DWINE_LARGE_INTEGER
 
