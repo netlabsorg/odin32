@@ -1,4 +1,4 @@
-/* $Id: win32wndhandle.cpp,v 1.14 2002-06-13 14:02:50 sandervl Exp $ */
+/* $Id: win32wndhandle.cpp,v 1.15 2002-07-30 18:20:44 achimha Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
@@ -6,6 +6,8 @@
  * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
  *
  *
+ * TODO: a linear list might not be the optimal implementation. Look
+ *       into using some sort of tree
  * TODO: The table should be dynamically increased when necessary
  *       This is just a quick and dirty implementation 
  * TODO: Probably need to clean up the table when app closes
