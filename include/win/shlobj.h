@@ -1,4 +1,4 @@
-/* $Id: shlobj.h,v 1.7 2000-08-18 02:04:08 phaller Exp $ */
+/* $Id: shlobj.h,v 1.8 2000-08-20 09:46:15 sandervl Exp $ */
 #ifndef __WINE_SHLOBJ_H
 #define __WINE_SHLOBJ_H
 
@@ -353,7 +353,27 @@ DWORD WINAPI SHGetMalloc(LPMALLOC *lpmal) ;
  * SHGetSettings ()
  */
 typedef struct
-{	BOOL fShowAllObjects : 1;
+{
+#ifdef __WIN32OS2__
+	UINT fShowAllObjects : 1;
+	UINT fShowExtensions : 1;
+	UINT fNoConfirmRecycle : 1;
+	UINT fShowSysFiles : 1;
+
+	UINT fShowCompColor : 1;
+	UINT fDoubleClickInWebView : 1;
+	UINT fDesktopHTML : 1;
+	UINT fWin95Classic : 1;
+
+	UINT fDontPrettyPath : 1;
+	UINT fShowAttribCol : 1;
+	UINT fMapNetDrvBtn : 1;
+	UINT fShowInfoTip : 1;
+
+	UINT fHideIcons : 1;
+	UINT fRestFlags : 3;
+#else
+	BOOL fShowAllObjects : 1;
 	BOOL fShowExtensions : 1;
 	BOOL fNoConfirmRecycle : 1;
 	BOOL fShowSysFiles : 1;
@@ -370,6 +390,7 @@ typedef struct
 
 	BOOL fHideIcons : 1;
 	UINT fRestFlags : 3;
+#endif
 } SHELLFLAGSTATE, * LPSHELLFLAGSTATE;
 
 void WINAPI SHGetSettings(LPSHELLFLAGSTATE lpsfs, DWORD dwMask, DWORD dwx);
