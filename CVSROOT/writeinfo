@@ -63,7 +63,7 @@
 /tools/bin                                 bird,sandervl
 /tools/common                              bird,sandervl
 /tools/database/gd                         bird
-/tools/database/mysql                      bird
+/tools/database/mysql                      bird sandervl
 /tools/database                            bird
 /tools/impdef                              bird,sandervl
 /tools/omfdumper                           bird,sandervl
