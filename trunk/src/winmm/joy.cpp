@@ -1,4 +1,4 @@
-/* $Id: joy.cpp,v 1.7 2000-02-17 14:09:30 sandervl Exp $ */
+/* $Id: joy.cpp,v 1.8 2000-08-02 17:30:05 bird Exp $ */
 /*
  * Odin Joystick apis
  *
@@ -25,7 +25,7 @@
 #include "os2timer.h"
 #include "joyos2.h"
 
-#define DBG_LOCALLOG	DBG_joy
+#define DBG_LOCALLOG    DBG_joy
 #include "dbglocal.h"
 
 ODINDEBUGCHANNEL(WINMM-JOY)
@@ -93,13 +93,11 @@ LONG JoyGetPos(HANDLE hGame, UINT wID, LPJOYINFO lpInfo)
   return (0);
 }
 
-/*****************************************************************************
-ODINFUNCTION0(*, :
-ODINFUNCTION0(INT, joyGetNumDevs* Purpose   : Get number of installed joysticks
- * Status    : Done
- *
- * Author    : Przemyslaw Dobrowolski [Tue, 1999/06/29 10:00]
- *****************************************************************************/
+/**
+ * Get number of installed joysticks
+ * @status      Completely Done
+ * @author      Przemyslaw Dobrowolski [Tue, 1999/06/29 10:00]
+ */
 ODINFUNCTION0(UINT, joyGetNumDevs)
 {
   HANDLE            hJoy;
@@ -130,14 +128,11 @@ ODINFUNCTION0(UINT, joyGetNumDevs)
   return(joy_count);
 }
 
-/*****************************************************************************
-ODINFUNCTION1(*, :,
-ODINFUNCTION1(UINT,, *,
-              Purpose, :Get Joystick capatibities (Unicode)
- * Status    : Done
- *
- * Author    : Przemyslaw Dobrowolski [Tue, 1999/06/29 09:40]
- *****************************************************************************/
+/**
+ * Get Joystick capatibities (Unicode)
+ * @status      Completely
+ * @author      Przemyslaw Dobrowolski [Tue, 1999/06/29 09:40]
+ */
 ODINFUNCTION3(MMRESULT, joyGetDevCapsW,
               UINT, wID,
               LPJOYCAPSW, lpCaps,
@@ -179,14 +174,11 @@ ODINFUNCTION3(MMRESULT, joyGetDevCapsW,
       return MMSYSERR_NODRIVER;
 }
 
-/*****************************************************************************
-ODINFUNCTION1(*, :,
-ODINFUNCTION1(UINT,, *,
-              Purpose, :Get Joystick capatibities (Unicode)
- * Status    : Done
- *
- * Author    : Przemyslaw Dobrowolski [Tue, 1999/06/29 09:00]
- *****************************************************************************/
+/**
+ * Get Joystick capatibities (Unicode)
+ * @status      Completely Done
+ * @author      Przemyslaw Dobrowolski [Tue, 1999/06/29 09:00]
+ */
 ODINFUNCTION3(MMRESULT, joyGetDevCapsA,
               UINT, wID,
               LPJOYCAPSA, lpCaps,
@@ -227,15 +219,13 @@ ODINFUNCTION3(MMRESULT, joyGetDevCapsA,
       return MMSYSERR_NODRIVER;
 }
 
-/*****************************************************************************
-ODINFUNCTION1(*, :,
-ODINFUNCTION1(MMRESULT,, *,
-              Purpose, :Get the extended actual joystick position
- * Status    : Done (but not all functions are functionally but Quake2
- *             running with this function)
- *
- * Author    : Przemyslaw Dobrowolski [Tue, 1999/06/29 23:42]
- *****************************************************************************/
+/**
+ * Get the extended actual joystick position
+ * @status      Partially
+ * @author      Przemyslaw Dobrowolski [Tue, 1999/06/29 23:42]
+ * @remark      Not all functions are functionally but Quake2
+ *              running with this function.
+ */
 ODINFUNCTION2(MMRESULT, joyGetPosEx,
               UINT, uJoyID,
               LPJOYINFOEX, pji)
@@ -319,16 +309,11 @@ ODINFUNCTION2(MMRESULT, joyGetPosEx,
   return JOYERR_NOERROR;
 }
 
-/*****************************************************************************
-ODINFUNCTION2(*, :,
-ODINFUNCTION6(MMRESULT,, joyGetPos,
-              *,, Purpose:,
-              Get, the,
-              actual, joystick,
-              position *, Status,
-              :, Done,
-              * *, Author: Przemyslaw Dobrowolski [Tue, 1999/06/29 09:00]
- *****************************************************************************/
+/**
+ * Get the actual  joystick position
+ * @status      Completely implemented
+ * @author      Przemyslaw Dobrowolski [Tue, 1999/06/29 09:00]
+ */
 ODINFUNCTION2(MMRESULT, joyGetPos,
               UINT, uJoyID,
               LPJOYINFO, pji)
@@ -349,12 +334,12 @@ ODINFUNCTION2(MMRESULT, joyGetPos,
 
   return JOYERR_NOERROR;
 }
-/*****************************************************************************
-ODINFUNCTION2(*, :,
-ODINFUNCTION2(MMRESULT,, joyGetThreshold,
-              *,, Status:,
-              Done *, *Author    : Przemyslaw Dobrowolski [Tue, 1999/06/29 09:00]
- *****************************************************************************/
+
+/**
+ *
+ * @status      Completely implemented. ?
+ * @author      Przemyslaw Dobrowolski [Tue, 1999/06/29 09:00]
+ */
 ODINFUNCTION2(MMRESULT, joyGetThreshold,
               UINT, wID,
               LPUINT, lpThreshold)
@@ -368,12 +353,10 @@ ODINFUNCTION2(MMRESULT, joyGetThreshold,
     return JOYERR_NOERROR;
 }
 
-/*****************************************************************************
-ODINFUNCTION2(*, :,
-ODINFUNCTION2(MMRESULT,, joySetThreshold,
-              *,, Status:,
-              Done *, *Author    : Przemyslaw Dobrowolski [Tue, 1999/06/29 09:00]
- *****************************************************************************/
+/**
+ * @status      Completely implemented?
+ * @author      Przemyslaw Dobrowolski [Tue, 1999/06/29 09:00]
+ */
 ODINFUNCTION2(MMRESULT, joySetThreshold,
               UINT, wID,
               UINT, wThreshold)
@@ -394,16 +377,11 @@ typedef struct _JOYTHREADOPT
 } JOYTHREADOPT;
 typedef JOYTHREADOPT *PJOYTHREADOPT;
 
-/*****************************************************************************
-ODINFUNCTION4(*, :,
-ODINFUNCTION4(MMRESULT,, joySetCapture,
-              *,, Purpose,
-              :,, Start,
-              joystick,, movescapturing,
-              *, Status: Done
- *
- * Author    : Przemyslaw Dobrowolski [Tue, 1999/06/29 09:00]
- *****************************************************************************/
+/**
+ * Start joystick movescapturing,
+ * @status      Completely implemented?
+ * @author      Przemyslaw Dobrowolski [Tue, 1999/06/29 09:00]
+ */
 ODINFUNCTION4(MMRESULT, joySetCapture,
               HWND, hWnd,
               UINT, wID,
@@ -437,14 +415,12 @@ ODINFUNCTION4(MMRESULT, joySetCapture,
    return JOYERR_NOCANDO; /* FIXME: what should be returned ? */
 }
 
-/*****************************************************************************
-ODINFUNCTION1(*, :,
-ODINFUNCTION1(MMRESULT,, *,
-              Purpose, :Stop capturing joystick moves
- * Status    : Done (but must be rewriting)
- *
- * Author    : Przemyslaw Dobrowolski [Tue, 1999/06/29 09:00]
- *****************************************************************************/
+/**
+ * Stop capturing joystick moves.
+ * @status      Completely implemented?
+ * @author      Przemyslaw Dobrowolski [Tue, 1999/06/29 09:00]
+ * @remark      Must be rewritten.
+ */
 ODINFUNCTION1(MMRESULT, joyReleaseCapture,
               UINT, wID)
 {
@@ -458,15 +434,10 @@ ODINFUNCTION1(MMRESULT, joyReleaseCapture,
   return JOYERR_NOERROR;
 }
 
-/*****************************************************************************
-ODINFUNCTION1(*, :,
-ODINFUNCTION4(MMRESULT,, *,
-              Status, :,
-              Stub, but,
-              done, ;-,
-              * *, Author)
-: Przemyslaw Dobrowolski [Tue, 1999/06/29 09:00]
- *****************************************************************************/
+/**
+ * @status      Stub
+ * @author      Przemyslaw Dobrowolski [Tue, 1999/06/29 09:00]
+ */
 ODINFUNCTION1(MMRESULT, joyConfigChanged,
               DWORD, dwFlags)
 {
