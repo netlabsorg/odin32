@@ -1,9 +1,13 @@
-/* $Id: ChangeLog,v 1.1319 2001-03-25 08:51:22 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1320 2001-03-25 20:06:12 mike Exp $ */
+
+ 2001-03-25: Michal Necasek <michalnec@volny.cz>
+    - DINPUT:   o Fixed keyboard handling. Now arrow keys should work right
+                  on both numpad and the separate arrow block among other things.
 
  2001-03-25: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o If a static window has children, then we can't return HTTRANSPARENT
-                  for WM_NCHITTEST. For some reason PM then sends all mouse messages 
-                  to the parent of the static window; even if they are intended 
+                  for WM_NCHITTEST. For some reason PM then sends all mouse messages
+                  to the parent of the static window; even if they are intended
                   for the children of the static window.
                   TODO: This could break some win32 apps (parent not receiving mouse
                         message for static window (non-child) area)
@@ -37,8 +41,6 @@
                   thread handlers. (like @#$@#% PowerDVD)
                   (fixes crash in PowerDVD with release build of kernel32)
 
- 2001-03-22: Michal Necasek <michalnec@volny.cz>
-    - USER32:   o Show the mouse pointer in the exitlist handler of user32.
                   (should restore the mouse pointer after a game crashes)
 
  2001-03-21: Sander van Leeuwen <sandervl@xs4all.nl>
@@ -78,15 +80,6 @@
     - Pe2Lx:    o Convert CUI subsystem to VIO apps. CUI applications will
                   now work as executed thru pec.exe.
     - Kernel32: o Init VIO Console for Pe2Lx CUI images.
-
-                  [DirectDraw]
-                  Fullscreen=[True|False|0|1]
-
-                  Don't blame me if your machine goes up in smoke after you've
-                  turned fullscreen on ;-)
-                  Note: It seems that fullscreen currently doesn't work right
-                  with newer SDD releases for 8bpp apps, though 16/24/32bpp
-                  should be OK (palette setting problems)
 
  2001-03-15: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - tools/dailbuild:
