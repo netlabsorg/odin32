@@ -1,4 +1,13 @@
-/* $Id: changelog,v 1.1860 2001-11-28 15:47:08 sandervl Exp $ */
+/* $Id: changelog,v 1.1861 2001-11-29 00:23:01 phaller Exp $ */
+
+ 2001-11-28: Patrick Haller <patrick.haller@innotek.de>
+    - KERNEL32: o fixes in ::CreateFile calls (return codes must be Win32)
+                o fixes in symbolic link management
+                o marked some important TBDs for phys. disk mgmt!
+                o fixed HMCOMM to accept (what a good idea)
+                  \\.\COM1, COM1, COM1: but not "\\.\COM1:" (NT4SP6)
+                o added support for AUX->COM1, PRN->LPT1, CON->CONOUT$
+                o added NUL device
 
  2001-11-28: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o WaitCommEvent fixes (must reset overlapped event semaphore &
