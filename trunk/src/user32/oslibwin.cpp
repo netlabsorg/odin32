@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.116 2002-03-18 13:03:53 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.117 2002-03-27 10:56:24 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -21,6 +21,7 @@
 #include <win32type.h>
 #include <winconst.h>
 #include <winuser32.h>
+#include <wprocess.h>
 #include "oslibwin.h"
 #include "oslibutil.h"
 #include "oslibmsg.h"
@@ -804,7 +805,11 @@ BOOL OSLibWinEndEnumWindows(HWND hwndEnum)
 //******************************************************************************
 BOOL OSLibWinQueryWindowProcess(HWND hwnd, ULONG *pid, ULONG *tid)
 {
-   return WinQueryWindowProcess(hwnd, pid, tid);
+   BOOL ret;
+
+   ret = WinQueryWindowProcess(hwnd, pid, tid);
+   *tid = MAKE_THREADID(*pid, *tid);
+   return ret;
 }
 //******************************************************************************
 //******************************************************************************
