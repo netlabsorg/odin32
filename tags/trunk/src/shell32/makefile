@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 1999-10-11 20:17:10 sandervl Exp $
+# $Id: makefile,v 1.14 1999-10-14 18:28:30 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -19,7 +19,7 @@ CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE)
 CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 
-RC = wrc
+RC = $(PDWIN32_TOOLS)\wrc
 RCFLAGS = -s -I. -If:\ibmcpp\include -I$(PDWIN32_INCLUDE) -I$(PDWIN32_INCLUDE)\win
 
 TARGET = shell32
