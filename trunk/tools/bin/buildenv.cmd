@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.49 2003-06-09 18:02:50 bird Exp $
+/* $Id: buildenv.cmd,v 1.50 2003-06-12 00:45:33 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -26,7 +26,7 @@
     /*
      * Version
      */
-    sVersion = '1.0.20 [2003-06-09]';
+    sVersion = '1.0.21 [2003-06-11]';
 
     /*
      * Create argument array with lowercase arguments.
@@ -116,6 +116,7 @@
     aCfg.i.sId = 'gcc302';          aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'GCC3xx,''gcc302''';      aCfg.i.sDesc = 'GCC/EMX v3.0.2beta with binutils 2.11.2'; i = i + 1;
     aCfg.i.sId = 'gcc303';          aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'GCC3xx,''gcc303''';      aCfg.i.sDesc = 'GCC/EMX v3.0.3beta with binutils 2.11.2'; i = i + 1;
     aCfg.i.sId = 'gcc321';          aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'GCC3xx,''gcc321''';      aCfg.i.sDesc = 'GCC/EMX v3.2.1beta with binutils 2.11.2'; i = i + 1;
+    aCfg.i.sId = 'gcc322';          aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'GCC322plus,''gcc322''';  aCfg.i.sDesc = 'Innotek GCC v3.2.2';        i = i + 1;
     aCfg.i.sId = 'icatgam';         aCfg.i.sGrp = 'debugger';   aCfg.i.sSet = 'ICATGam';                aCfg.i.sDesc = 'ICAT for OS/2 latest';      i = i + 1;
     aCfg.i.sId = 'icatgam406rc1';   aCfg.i.sGrp = 'debugger';   aCfg.i.sSet = 'ICATGam406RC1';          aCfg.i.sDesc = 'ICAT for OS/2 v4.0.6 release candidate 1'; i = i + 1;
     aCfg.i.sId = 'icatpe';          aCfg.i.sGrp = 'debugger';   aCfg.i.sSet = 'ICATPe';                 aCfg.i.sDesc = 'ICAT for OS/2 with PE support (test version)'; i = i + 1;
@@ -847,6 +848,7 @@ PathSetDefault: procedure expose aCfg. aPath. sPathFile
         aPath.i.sPId = 'gcc302';                    aPath.i.sPath = 'f:\GCC\v3.0.2beta_os2\emx';    i = i + 1;
         aPath.i.sPId = 'gcc303';                    aPath.i.sPath = 'f:\GCC\v3.0.3beta_os2\emx';    i = i + 1;
         aPath.i.sPId = 'gcc321';                    aPath.i.sPath = 'f:\GCC\v3.2.1beta_os2\emx';    i = i + 1;
+        aPath.i.sPId = 'gcc322';                    aPath.i.sPath = 'f:\GCC\v3.2.2alpha1_os2\usr';  i = i + 1;
         aPath.i.sPId = 'home';                      aPath.i.sPath = 'e:\user\kso';                  i = i + 1;
         aPath.i.sPId = 'icatgam';                   aPath.i.sPath = 'f:\Icat\v4.0.6rc1_os2';        i = i + 1;
         aPath.i.sPId = 'icatgam406rc1';             aPath.i.sPath = 'f:\Icat\v4.0.6rc1_os2';        i = i + 1;
@@ -2063,6 +2065,101 @@ GCC3xx: procedure expose aCfg. aPath. sPathFile
             return 2;
     end
 
+
+    rc = CheckCmdOutput('gcc --version', 0, fQuiet, sVer);
+    if (rc = 0) then
+        rc = CheckCmdOutput('g++ --version', 0, fQuiet, sVer);
+    if (rc = 0) then
+    do
+        sVerAS = '2.11.2';
+        rc = CheckCmdOutput('as --version', 0, fQuiet, 'GNU assembler 'sVerAS);
+    end
+return rc;
+
+
+/*
+ * Innotek GCC 3.2.x and higher - this environment is EMX RT free.
+ * Note! make .lib of every .a! in 4OS2: for /R %i in (*.a) do if not exist %@NAME[%i].lib emxomf %i
+ */
+GCC322plus: procedure expose aCfg. aPath. sPathFile
+    parse arg sToolId,sOperation,fRM,fQuiet,sPathId
+
+    /*
+     * EMX/GCC main directory.
+     */
+    sGCC = PathQuery(sPathId, sToolId, sOperation);
+    if (sGCC = '') then
+        return 1;
+    /* If config operation we're done now. */
+    if (pos('config', sOperation) > 0) then
+        return 0;
+
+    /* parse out the version / constants */
+    chMajor = '3';
+    chMinor = left(right(sToolId, 2), 1);
+    chRel   = right(sToolId, 1);
+    sVer    = chMajor'.'chMinor'.'chRel
+    sVerShrt= chMajor||chMinor||chRel;
+    sTrgt   = 'i386-pc-os2-emx'
+
+    sGCCBack    = translate(sGCC, '\', '/');
+    sGCCForw    = translate(sGCC, '/', '\');
+    call EnvSet      fRM, 'PATH_EMXPGCC',   sGCCBack;
+    call EnvSet      fRM, 'CCENV',          'EMX'
+    call EnvSet      fRM, 'BUILD_ENV',      'EMX'
+    call EnvSet      fRM, 'BUILD_PLATFORM', 'OS2'
+
+    call EnvAddFront fRM, 'BEGINLIBPATH',       sGCCBack'\'sTrgt'\lib;'sGCCBack'\lib;'
+    call EnvAddFront fRM, 'DPATH',              sGCCBack'\lib;'
+    /*call EnvAddFront fRM, 'HELP',               sGCCBack'\lib;'*/
+    call EnvAddFront fRM, 'PATH',               sGCCBack'\'sTrgt'\bin;'sGCCBack'\bin;'
+    /*call EnvAddFront fRM, 'DPATH',              sGCCBack'\book;'
+    call EnvAddFront fRM, 'BOOKSHELF',          sGCCBack'\book;'
+    call EnvAddFront fRM, 'HELP',               sGCCBack'\help;' */
+    call EnvAddFront fRM, 'C_INCLUDE_PATH',     sGCCForw'/include;'
+    call EnvAddFront fRM, 'C_INCLUDE_PATH',     sGCCForw'/lib/gcc-lib/'sTrgt'/'sVer'/include;'
+    call EnvAddFront fRM, 'CPLUS_INCLUDE_PATH', sGCCForw'/include;'
+    call EnvAddFront fRM, 'C_INCLUDE_PATH',     sGCCForw'/lib/gcc-lib/'sTrgt'/'sVer'/include;'
+    call EnvAddFront fRM, 'CPLUS_INCLUDE_PATH', sGCCForw'/include/c++/'sVer'/backward;'
+    call EnvAddFront fRM, 'CPLUS_INCLUDE_PATH', sGCCForw'/include/c++/'sVer'/'sTrgt';'
+    call EnvAddFront fRM, 'CPLUS_INCLUDE_PATH', sGCCForw'/include/c++/'sVer'/;'
+    call EnvAddFront fRM, 'LIBRARY_PATH',       sGCCForw'/lib'
+    call EnvAddFront fRM, 'LIBRARY_PATH',       sGCCForw'/lib/gcc-lib/'sTrgt'/'sVer';'
+    call EnvAddFront fRM, 'INFOPATH',           sGCCForw'/info'
+    /* is this used? */
+    call EnvSet      fRM, 'PROTODIR',           sGCCForw'/include/c++/gen'
+    call EnvSet      fRM, 'EMXOMFLD_LINKER',    'ILINK -nofree -STUB:'sGCCBack'\bin\os2stub.bin '
+
+    /*
+     * Verify.
+     */
+    if (pos('verify', sOperation) <= 0) then
+        return 0;
+    if (    \CfgVerifyFile(sGCCBack'\bin\gcc.exe', fQuiet),
+        |   \CfgVerifyFile(sGCCBack'\bin\g++.exe', fQuiet),
+        |   \CfgVerifyFile(sGCCBack'\bin\as.exe', fQuiet),
+        |   \CfgVerifyFile(sGCCBack'\bin\readelf.exe', fQuiet),
+        |   \CfgVerifyFile(sGCCBack'\bin\emxomf.exe', fQuiet),
+        |   \CfgVerifyFile(sGCCBack'\lib\opcode2B.dll', fQuiet),
+        |   \CfgVerifyFile(sGCCBack'\lib\gcc'sVerShrt'.dll', fQuiet),
+        |   \CfgVerifyFile(sGCCBack'\lib\libiberty.a', fQuiet),
+        |   \CfgVerifyFile(sGCCBack'\lib\libiberty.lib', fQuiet),
+        |   \CfgVerifyFile(sGCCBack'\lib\opcode2B.dll', fQuiet),
+        |   \CfgVerifyFile(sGCCBack'\lib\libopcodes.a', fQuiet),
+        |   \CfgVerifyFile(sGCCBack'\lib\libopcodes.lib', fQuiet),
+        |   \CfgVerifyFile(sGCCBack'\include\unikbd.h', fQuiet),
+        |   \CfgVerifyFile(sGCCBack'\include\c++\'sVer'\streambuf', fQuiet),
+        |   \CfgVerifyFile(sGCCBack'\lib\gcc-lib\'sTrgt'\'sVer'\specs', fQuiet),
+        |   \CfgVerifyFile(sGCCBack'\lib\gcc-lib\'sTrgt'\'sVer'\cpp0.exe', fQuiet),
+        |   \CfgVerifyFile(sGCCBack'\lib\gcc-lib\'sTrgt'\'sVer'\cc1plus.exe', fQuiet),
+        |   \CfgVerifyFile(sGCCBack'\lib\gcc-lib\'sTrgt'\'sVer'\gcc'sVerShrt'.a', fQuiet),
+        |   \CfgVerifyFile(sGCCBack'\lib\gcc-lib\'sTrgt'\'sVer'\gcc'sVerShrt'.lib', fQuiet),
+        |   \CfgVerifyFile(sGCCBack'\lib\gcc-lib\'sTrgt'\'sVer'\libgcc.a', fQuiet),
+        |   \CfgVerifyFile(sGCCBack'\lib\gcc-lib\'sTrgt'\'sVer'\libgcc.lib', fQuiet),
+        |   \CfgVerifyFile(sGCCBack'\lib\gcc-lib\'sTrgt'\'sVer'\libgcc_eh.a', fQuiet),
+        |   \CfgVerifyFile(sGCCBack'\lib\gcc-lib\'sTrgt'\'sVer'\libgcc_eh.lib', fQuiet),
+        ) then
+        return 2;
 
     rc = CheckCmdOutput('gcc --version', 0, fQuiet, sVer);
     if (rc = 0) then
