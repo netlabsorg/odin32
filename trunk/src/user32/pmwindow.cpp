@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.206 2003-03-29 16:37:59 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.207 2003-04-01 09:58:36 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -72,6 +72,9 @@ BOOL    fForceMonoCursor = FALSE;
 BOOL    fDragDropActive = FALSE;
 BOOL    fDragDropDisabled = FALSE;
 
+char WIN32_CDCLASS[255]       = "Win32CDWindowClass";
+char WIN32_STDCLASS[255]      = "Win32WindowClass";
+char WIN32_STDFRAMECLASS[255] = "Win32FrameClass";
 
 #define PMMENU_MINBUTTON           0
 #define PMMENU_MAXBUTTON           1
@@ -2339,8 +2342,29 @@ failure:
     DrgFreeDraginfo(pDragInfo);
     return FALSE;    
 }
+
+// @@PF Three funcs to override std class names we use in Odin
 //******************************************************************************
 //******************************************************************************
+void WIN32API SetCustomCDClassName(LPSTR pszCDClassName)
+{
+   strcpy(WIN32_CDCLASS, pszCDClassName);
+}
+//******************************************************************************
+//******************************************************************************
+void WIN32API SetCustomStdClassName(LPSTR pszStdClassName)
+{
+   strcpy(WIN32_STDCLASS, pszStdClassName);
+}
+//******************************************************************************
+//******************************************************************************
+void WIN32API SetCustomStdFrameClassName(LPSTR pszStdFrameClassName)
+{
+   strcpy(WIN32_STDFRAMECLASS, pszStdFrameClassName);
+}
+//******************************************************************************
+//******************************************************************************
+
 #ifdef DEBUG
 static char *DbgGetStringSWPFlags(ULONG flags)
 {
@@ -2427,5 +2451,3 @@ static char *DbgPrintQFCFlags(ULONG flags)
     return szQFCFlags;
 }
 #endif
-//******************************************************************************
-//******************************************************************************
