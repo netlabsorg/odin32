@@ -1,4 +1,4 @@
-/* $Id: win32wndchild.h,v 1.4 2000-01-18 20:08:17 sandervl Exp $ */
+/* $Id: win32wndchild.h,v 1.5 2000-06-07 21:45:52 sandervl Exp $ */
 /*
  * Win32 Child/Parent window class for OS/2
  *
@@ -27,8 +27,8 @@ ChildWindow   *getNextChild()   		{ return nextchild; };
 
 protected:
 
- ChildWindow *GetParent()			{ return parent; };
- ChildWindow *SetParent(ChildWindow *newParent)
+ ChildWindow *getParentOfChild()		{ return parent; };
+ ChildWindow *setParentOfChild(ChildWindow *newParent)
  {
   ChildWindow *oldparent = parent;
 
@@ -36,12 +36,12 @@ protected:
 	return oldparent;
  }                   
 
-	BOOL   AddChild(ChildWindow *child);
-	BOOL   RemoveChild(ChildWindow *child);
+	BOOL   addChild(ChildWindow *child);
+	BOOL   removeChild(ChildWindow *child);
 
         void   setNextChild(ChildWindow *child)	{ nextchild = child; };
 
-	BOOL   DestroyChildren();
+	BOOL   destroyChildren();
 
 private:
         VMutex mutex;
