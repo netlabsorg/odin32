@@ -45,6 +45,7 @@
 #include "oslibwin.h"
 
 HBRUSH WIN32API GetOS2ColorBrush(int nIndex);
+COLORREF WIN32API GetOS2Color(int nIndex);
 
 static BOOL fDisableOdinSysMenuItems = FALSE;
 
@@ -1237,8 +1238,8 @@ static void MENU_DrawMenuItem( HWND hwnd, HMENU hmenu, HWND hwndOwner, HDC hdc, 
 		if(menuBar)
 		    DrawEdge(hdc, &rect, BDR_SUNKENOUTER, BF_RECT);
 		else
-#ifdef __WIN32OS2__
-                    if(fOS2Look) 
+#if 0 //def __WIN32OS2__
+                    if(!fOS2Look) 
                          FillRect( hdc, &rect, GetOS2ColorBrush(PMSYSCLR_MENUHILITEBGND) );
                     else FillRect( hdc, &rect, GetSysColorBrush(COLOR_HIGHLIGHT) );
 #else
@@ -1312,7 +1313,13 @@ static void MENU_DrawMenuItem( HWND hwnd, HMENU hmenu, HWND hwndOwner, HDC hdc, 
 		    SetTextColor(hdc, GetSysColor(COLOR_GRAYTEXT));
 		else
 		    SetTextColor(hdc, GetSysColor(COLOR_HIGHLIGHTTEXT));
+#if 0 //def __WIN32OS2__
+                if(!fOS2Look) 
+                     SetBkColor(hdc, GetOS2Color(PMSYSCLR_MENUHILITEBGND));
+                else SetBkColor(hdc, GetSysColor(COLOR_HIGHLIGHT));
+#else
                 SetBkColor(hdc, GetSysColor(COLOR_HIGHLIGHT));
+#endif
 	    }
 	}
 	else /* Not Win98 Look */
@@ -1358,12 +1365,7 @@ static void MENU_DrawMenuItem( HWND hwnd, HMENU hmenu, HWND hwndOwner, HDC hdc, 
                 SelectObject( hdcMem, bm );
                 BitBlt( hdc, rect.left, (y - check_bitmap_height) / 2,
                         check_bitmap_width, check_bitmap_height,
-#ifdef __WIN32OS2__
-                        //how can SRCCOPY work in Wine??
-                        hdcMem, 0, 0, (lpitem->fState & MF_HILITE) ? MERGEPAINT : SRCAND );
-#else
                         hdcMem, 0, 0, SRCCOPY );
-#endif
                 DeleteDC( hdcMem );
             }
             else if (lpitem->fState & MF_CHECKED)  /* standard bitmaps */
@@ -1377,12 +1379,7 @@ static void MENU_DrawMenuItem( HWND hwnd, HMENU hmenu, HWND hwndOwner, HDC hdc, 
                                   (lpitem->fType & MFT_RADIOCHECK) ?
                                   DFCS_MENUBULLET : DFCS_MENUCHECK );
                 BitBlt( hdc, rect.left, (y - r.bottom) / 2, r.right, r.bottom,
-#ifdef __WIN32OS2__
-                        //how can SRCCOPY work in Wine??
-                        hdcMem, 0, 0, (lpitem->fState & MF_HILITE) ? MERGEPAINT : SRCAND );
-#else
                         hdcMem, 0, 0, SRCCOPY );
-#endif
                 DeleteDC( hdcMem );
                 DeleteObject( bm );
             }
@@ -1398,12 +1395,7 @@ static void MENU_DrawMenuItem( HWND hwnd, HMENU hmenu, HWND hwndOwner, HDC hdc, 
 	    BitBlt( hdc, rect.right - arrow_bitmap_width - 1,
 		      (y - arrow_bitmap_height) / 2,
 		      arrow_bitmap_width, arrow_bitmap_height,
-#ifdef __WIN32OS2__
-                      //how can SRCCOPY work in Wine??
-                      hdcMem, 0, 0, (lpitem->fState & MF_HILITE) ? MERGEPAINT : SRCAND );
-#else
 		      hdcMem, 0, 0, SRCCOPY );
-#endif
             SelectObject( hdcMem, hOrigBitmap );
 	    DeleteDC( hdcMem );
 	}

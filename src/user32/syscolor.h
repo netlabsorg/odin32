@@ -1,4 +1,4 @@
-/* $Id: syscolor.h,v 1.15 2001-11-30 13:53:50 sandervl Exp $ */
+/* $Id: syscolor.h,v 1.16 2003-01-03 21:43:17 sandervl Exp $ */
 
 /*
  * WINE:
@@ -12,6 +12,7 @@
 #define __WINE_SYSCOLOR_H
 
 HBRUSH WIN32API GetOS2ColorBrush(int nIndex);
+COLORREF WIN32API GetOS2Color(int nIndex);
 
 extern void SYSCOLOR_Init(int fOverride = -1);
 extern void SYSCOLOR_Save(void);
