@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.46 2000-10-05 18:36:49 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.47 2000-10-18 17:09:31 sandervl Exp $ */
 
 /* WARNING: Compiling this module with ICC with optimizations turned on   */
 /* currently breaks this module. To get correct code, it is not necessary */
@@ -1047,9 +1047,6 @@ void static dprintfException(PEXCEPTIONREPORTRECORD       pERepRec,
 #define XCPT_CONTINUE_STOP 0x00716668
 #endif
 
-//in misc.cpp
-void CheckLogException();
-
 ULONG APIENTRY OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
                                    PEXCEPTIONREGISTRATIONRECORD pERegRec,
                                    PCONTEXTRECORD               pCtxRec,
@@ -1057,8 +1054,7 @@ ULONG APIENTRY OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
 {
   //SvL: Check if exception inside debug fprintf -> if so, clear lock so
   //     next dprintf won't wait forever
-  CheckLogException();
-
+  LogException(ENTER_EXCEPTION);
 
   /* Access violation at a known location */
   switch(pERepRec->ExceptionNum)
@@ -1082,19 +1078,19 @@ ULONG APIENTRY OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
                         pCtxRec->ctx_stack[0].signexp = 0;
                 }
                 dprintf(("KERNEL32: OS2ExceptionHandler: fix and continue\n"));
-                return (XCPT_CONTINUE_EXECUTION);
+                goto continueexecution;
         }
         else
         {
                 dprintf(("KERNEL32: OS2ExceptionHandler: continue search\n"));
-                return (XCPT_CONTINUE_SEARCH);
+                goto continuesearch;
         }
 
   case XCPT_PROCESS_TERMINATE:
   case XCPT_ASYNC_PROCESS_TERMINATE:
         dprintfException(pERepRec, pERegRec, pCtxRec, p);
         SetExceptionChain((ULONG)-1);
-        return (XCPT_CONTINUE_SEARCH);
+        goto continuesearch;
 
   case XCPT_ACCESS_VIOLATION:
   {
@@ -1125,7 +1121,7 @@ ULONG APIENTRY OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
                 goto continueFail;
         }
         if(map->commitPage(offset, fWriteAccess) == TRUE)
-                return (XCPT_CONTINUE_EXECUTION);
+                goto continueexecution;
 
         //no break;
   }
@@ -1176,7 +1172,7 @@ CrashAndBurn:
         //    of this exception handler. We better bail out ASAP or we'll likely
         //    recurse infinitely until we run out of stack space!!
         if (pERepRec->fHandlerFlags & EH_NESTED_CALL)
-                return XCPT_CONTINUE_SEARCH;
+                goto continuesearch;
 
 #ifdef DEBUG
         dprintfException(pERepRec, pERegRec, pCtxRec, p);
@@ -1188,36 +1184,43 @@ CrashAndBurn:
         {
                 if(OSLibDispatchException(pERepRec, pERegRec, pCtxRec, p) == TRUE)
                 {
-                        return (XCPT_CONTINUE_EXECUTION);
+                        goto continueexecution;
                 }
         }
-        else    return XCPT_CONTINUE_SEARCH; //pass on to OS/2 RTL or app exception handler
+        else    goto continuesearch; //pass on to OS/2 RTL or app exception handler
 
         dprintf(("KERNEL32: OS2ExceptionHandler: Continue and kill\n"));
         pCtxRec->ctx_RegEip = (ULONG)KillWin32Process;
         pCtxRec->ctx_RegEsp = pCtxRec->ctx_RegEsp + 0x10;
         pCtxRec->ctx_RegEax = pERepRec->ExceptionNum;
         pCtxRec->ctx_RegEbx = pCtxRec->ctx_RegEip;
-        return (XCPT_CONTINUE_EXECUTION);
+        goto continueexecution;
 
   //@@@PH: growing thread stacks might need special treatment
   case XCPT_GUARD_PAGE_VIOLATION:
-    dprintf(("KERNEL32: OS2ExceptionHandler: trying to grow stack (continue search)"));
-    return (XCPT_CONTINUE_SEARCH);
+        //SvL: don't print anything here -> fatal hang if happens inside fprintf
+        //dprintf(("KERNEL32: OS2ExceptionHandler: trying to grow stack (continue search)"));
+        goto continuesearch;
 
   case XCPT_SIGNAL:
-      if(pERepRec->ExceptionInfo[0] == XCPT_SIGNAL_KILLPROC)          /* resolve signal information */
-      {
-        SetExceptionChain((ULONG)-1);
-        return (XCPT_CONTINUE_SEARCH);
-      }
-      goto CrashAndBurn;
+        if(pERepRec->ExceptionInfo[0] == XCPT_SIGNAL_KILLPROC)          /* resolve signal information */
+        {
+            SetExceptionChain((ULONG)-1);
+            goto continuesearch;
+        }
+        goto CrashAndBurn;
 
   default: //non-continuable exceptions
         dprintfException(pERepRec, pERegRec, pCtxRec, p);
-        return (XCPT_CONTINUE_SEARCH);
+        goto continuesearch;
   }
-  return (XCPT_CONTINUE_SEARCH);
+continuesearch:
+  LogException(LEAVE_EXCEPTION);
+  return XCPT_CONTINUE_SEARCH;
+
+continueexecution:
+  LogException(LEAVE_EXCEPTION);
+  return XCPT_CONTINUE_EXECUTION;
 }
 
 /*****************************************************************************
