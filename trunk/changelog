@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.566 1999-12-21 01:39:26 hugh Exp $ */
+ /* $Id: changelog,v 1.567 1999-12-21 12:30:50 sandervl Exp $ */
 
  99-12-21: Markus Montkowski <mmontkowski@gmx.de>
         - ddraw: Some cleanup in surface handling 
@@ -6,11 +6,22 @@
                   8bit to all hicolormodes(16,24,32) and 
                   between the highcolormodes
                  Do Colorfills for the above modes. 
-                 Removed inhertiance rom IBASE in DDRectangle
+                 Removed inhertiance from IBASE in DDRectangle
 
  99-12-21: Sander van Leeuwen <sandervl@xs4all.nl>
 	- ADVAPI32: Fixed some bugs in service.cpp; implemented some service apis
 	- INCLUDE\WIN: Added winsvc.h; removed service definitions from winbase.h & winreg.h
+	- NTDLL/CRTDLL: Moved all CRT functions into CRTDLL
+                        CRTDLL should contain all shared RTL functions (in addition
+                        to those present in the win32 version); this is more
+                        consistent than putting half the rtl functions in NTDLL
+                        and the rest in CRTDLL.
+	- MSVCRT: Removed all forwarders from def file. Link with CRTDLL instead.
+                  NOTE: Non-existant forwarders don't generate errors when loading
+                        this dll!!!
+                        Linking with a lib makes sure the import really exists.
+	- KERNEL32: Moved memmove to NTDLL (forwarded to CRTDLL)
+	- ODINCRT: Added wrappers for file io functions (to prevent FS corruption)
 
  99-12-20: Rene Pronk <R.Pronk@twi.tudelft.nl>
 	- WINMM: Bugfixes in waveOutOpen (flags) for winamp
