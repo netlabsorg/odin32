@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.49 1999-12-16 16:53:56 cbratschi Exp $
+# $Id: Makefile,v 1.50 1999-12-19 20:16:46 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -149,7 +149,7 @@ timer.obj:      timer.cpp win32wbase.h timer.h
 caret.obj:      caret.cpp win32wbase.h caret.h dcdata.h
 text.obj:       text.cpp
 
-clipboard.obj:  clipboard.cpp
+clipboard.obj:  clipboard.cpp win32wbase.h
 dib.obj:        dib.cpp dib.h
 wsprintf.obj:   wsprintf.cpp
 
@@ -157,7 +157,7 @@ winmouse.obj:   winmouse.cpp winmouse.h oslibmsg.h pmwindow.h win32wbase.h
 winkeyboard.obj: winkeyboard.cpp $(PDWIN32_INCLUDE)\winkeyboard.h
 display.obj: display.cpp pmwindow.h
 
-winproc.obj: winproc.cpp $(PDWIN32_INCLUDE)\win\winproc.h $(PDWIN32_INCLUDE)\heapcode.h
+winproc.obj: winproc.cpp $(PDWIN32_INCLUDE)\win\winproc.h $(PDWIN32_INCLUDE)\heapcode.h win32wbase.h
 
 clean:
         $(RM) *.obj *.lib *.dll *.map *.pch *.res *.lrf resource.asm *.lrf
