@@ -1,4 +1,4 @@
-/* $Id: windllpe2lx.cpp,v 1.13 2002-12-20 12:40:43 sandervl Exp $ */
+/* $Id: windllpe2lx.cpp,v 1.14 2003-03-31 11:54:28 sandervl Exp $ */
 
 /*
  * Win32 PE2LX Dll class
@@ -166,22 +166,22 @@ Win32Pe2LxDll::~Win32Pe2LxDll()
 /**
  * Init object.
  * Must be called immedeately after objecte construction.
- * @returns   Success indicator. (TRUE == success)
- * @sketch    call init method of the parten class.
- *            set dllEntryPoint
- * @status    completely implemented.
- * @author    knut st. osmundsen
+ * @returns LDRERROR_SUCCESS on success.
+ * @returns Apporpriate LDRERROR_* on failure.
+ * @sketch  call init method of the parten class.
+ *          set dllEntryPoint
+ * @status  completely implemented.
+ * @author  knut st. osmundsen
  */
-BOOL Win32Pe2LxDll::init()
+DWORD Win32Pe2LxDll::init()
 {
-    if (Win32Pe2LxImage::init())
+    DWORD rc = Win32Pe2LxImage::init();
+    if (rc == LDRERROR_SUCCESS)
     {
         /* set entry point. */
         dllEntryPoint = (WIN32DLLENTRY)entryPoint;
     }
-    else
-        return FALSE;
-    return TRUE;
+    return rc;
 }
 
 

@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.105 2003-02-18 18:58:47 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.106 2003-03-31 11:54:28 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -185,7 +185,7 @@ DWORD Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
     this->ulPEOffset = ulPEOffset;
 
     hFile = OSLibDosOpen(szFileName, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
-  
+
     dprintf((LOG, "KERNEL32-PELDR: Opening PE-image (%s) returned handle %08xh.\n",
              szFileName,
              hFile));
@@ -197,7 +197,7 @@ DWORD Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
             goto failure;
         }
     }
-  
+
     //default error:
     strcpy(szErrorModule, OSLibStripPath(szFileName));
     if(hFile == NULL) {
@@ -701,7 +701,7 @@ static inline APIRET _Optlink fastDosRead(HFILE hFile,
             *pulBytesRead = 0;
             return rc;
         }
-      
+
       // PH 2001-11-15
       // For corrupt or misinterpreted PE headers,
       // the preceeding DosSetFilePtr may have moved the
@@ -1596,7 +1596,6 @@ Win32DllBase *Win32PeLdrImage::loadDll(char *pszCurModule)
         APIRET rc;
         char   szModuleFailure[CCHMAXPATH] = "";
         ULONG  hInstanceNewDll;
-        Win32LxDll *lxdll;
 
         char *dot = strchr(modname, '.');
         if(dot == NULL) {
@@ -1609,20 +1608,25 @@ Win32DllBase *Win32PeLdrImage::loadDll(char *pszCurModule)
             errorState = rc;
             return NULL;
         }
-        lxdll = Win32LxDll::findModuleByOS2Handle(hInstanceNewDll);
-        if(lxdll == NULL) {//shouldn't happen!
+        /* bird 2003-03-30: search pe2lx dlls too! */
+        WinDll = Win32DllBase::findModuleByOS2Handle(hInstanceNewDll);
+        if (WinDll == NULL) {//shouldn't happen!
             dprintf((LOG, "Just loaded the dll, but can't find it anywhere?!!?"));
             errorState = ERROR_INTERNAL;
             return NULL;
         }
-        lxdll->setDllHandleOS2(hInstanceNewDll);
-        if(lxdll->AddRef() == -1) {//-1 -> load failed (attachProcess)
-            dprintf((LOG, "Dll %s refused to be loaded; aborting", modname));
-            delete lxdll;
-            errorState = ERROR_INTERNAL;
-            return NULL;
+        if (WinDll->isLxDll())
+        {
+            Win32LxDll *lxdll = (Win32LxDll *)WinDll;
+            lxdll->setDllHandleOS2(hInstanceNewDll);
+            if(lxdll->AddRef() == -1) {//-1 -> load failed (attachProcess)
+                dprintf((LOG, "Dll %s refused to be loaded; aborting", modname));
+                delete lxdll;
+                errorState = ERROR_INTERNAL;
+                return NULL;
+            }
+            WinDll = (Win32DllBase*)lxdll;
         }
-        WinDll = (Win32DllBase*)lxdll;
     }
     else {
          Win32PeLdrDll *pedll;
@@ -2112,7 +2116,7 @@ ULONG Win32PeLdrImage::setApi(int ordinal, ULONG pfnNewProc)
 
     //Name exports also contain an ordinal, so check this
     nexport = nameexports;
-    for(int i=0;i<nrNameExports;i++) 
+    for(int i=0;i<nrNameExports;i++)
     {
         if(nexport->ordinal == ordinal) {
             ULONG pfnOldProc = nexport->virtaddr;
