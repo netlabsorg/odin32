@@ -1,4 +1,4 @@
-/* $Id: msvcrt.cpp,v 1.13 2000-08-22 02:45:40 phaller Exp $ */
+/* $Id: msvcrt.cpp,v 1.14 2000-08-22 08:09:21 phaller Exp $ */
 
 /*
  * The Visual C RunTime DLL (MSVCRT/MSVCRT20/MSVCRT40)
@@ -23,6 +23,65 @@
 #include "msvcrt.h"
 
 ODINDEBUGCHANNEL(msvcrt)
+
+
+/*****************************************************************************
+ * local variables                                                           *
+ *****************************************************************************/
+
+wchar_t ** __wargv;
+wchar_t * _wpgmptr;
+wchar_t ** _wenviron;
+
+int __app_type;
+int __usermatherr;
+
+static new_handler_type new_handler;
+
+// var Defs
+UINT 	MSVCRT___argc;      
+LPSTR 	*MSVCRT___argv;     
+int     MSVCRT___mb_cur_max;
+LPSTR  	MSVCRT__acmdln;     
+UINT 	MSVCRT__basemajor;  
+UINT 	MSVCRT__baseminor;  
+UINT 	MSVCRT__baseversion;
+UINT 	MSVCRT__commode;    
+UINT 	MSVCRT__daylight;   
+LPSTR	MSVCRT__environ;    
+LPSTR	MSVCRT__fileinfo;   
+UINT 	MSVCRT__fmode;      
+double  *MSVCRT__HUGE;      
+UINT 	MSVCRT__osmajor;    
+UINT 	MSVCRT__osminor;    
+UINT 	MSVCRT__osmode;     
+UINT 	MSVCRT__osver;      
+UINT 	MSVCRT__osversion;  
+USHORT  MSVCRT__pctype[] = {0,0};
+LPSTR  	MSVCRT__pgmptr;      
+USHORT *MSVCRT__pwctype;     
+UINT 	MSVCRT__timezone;    
+LPSTR	MSVCRT__tzname;
+UINT 	MSVCRT__winmajor;    
+UINT 	MSVCRT__winminor;    
+UINT 	MSVCRT__winver;      
+
+
+// syserr / sysnerr Defs
+const char *MSVCRT_sys_errlist[] = {
+__syserr00, __syserr01, __syserr02, __syserr03, __syserr04,
+__syserr05, __syserr06, __syserr07, __syserr08, __syserr09,
+__syserr10, __syserr11, __syserr12, __syserr13, __syserr14,
+__syserr15, __syserr16, __syserr17, __syserr18, __syserr19,
+__syserr20, __syserr21, __syserr22, __syserr23, __syserr24,
+__syserr25, __syserr26, __syserr27, __syserr28, __syserr29,
+__syserr30, __syserr31, __syserr32, __syserr33, __syserr34,
+__syserr35, __syserr36, __syserr37, __syserr38
+};
+int __sys_nerr = sizeof(MSVCRT_sys_errlist) / sizeof(MSVCRT_sys_errlist[0]);
+int*	MSVCRT__sys_nerr = &__sys_nerr;
+
+
 
 /*********************************************************************
  *                  ??3@YAXPAX@Z    (MSVCRT.1)
@@ -1246,58 +1305,6 @@ wchar_t * CDECL MSVCRT__itow( int value, wchar_t *string, int radix )
   dprintf(("MSVCRT: _itow not implemented.\n"));
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
-}
-
-
-/*********************************************************************
- *                  _unlock    (MSVCRT.480)
- */
-// Note: PH 2000/08/22 array size is probably larger than 0x12!
-static CRITICAL_SECTION* arrpCriticalSections[0x12] = {0};
-
-#define CRITSEC_TABLE_LOCK 0x11
- 
-VOID CDECL MSVCRT__unlock(unsigned long ulIndex)
-{
-  dprintf(("MSVCRT: _unlock\n"));
-  
-  CRITICAL_SECTION *pCS = arrpCriticalSections[ulIndex];
-  LeaveCriticalSection(pCS);
-}
-
-
-/*********************************************************************
- *                  _lock    (MSVCRT.318)
- */
-// Prototype from CRTDLL.CPP
-VOID CDECL amsg_exit(int errnum);
-
-VOID CDECL MSVCRT__lock(unsigned long ulIndex)
-{
-  dprintf(("MSVCRT: _lock\n"));
-  
-  CRITICAL_SECTION *pCS = arrpCriticalSections[ulIndex];
-  if (pCS == NULL)
-  {
-    CRITICAL_SECTION *pCSNew;
-    
-    pCSNew = (CRITICAL_SECTION*)malloc( sizeof(CRITICAL_SECTION) );
-    if (pCSNew == NULL)
-      amsg_exit(0x11); // yield error message
-    
-    MSVCRT__lock(CRITSEC_TABLE_LOCK); // lock table
-    if (pCS != NULL) // has been modified meanwhile by other thread ?
-      free(pCSNew);
-    else
-    {
-      InitializeCriticalSection(pCSNew);
-      arrpCriticalSections[ulIndex] = pCSNew;
-    }
-      
-    MSVCRT__unlock(CRITSEC_TABLE_LOCK); // unlock table
-  }
-    
-  EnterCriticalSection(pCS);
 }
 
 
