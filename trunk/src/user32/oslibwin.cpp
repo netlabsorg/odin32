@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.110 2001-11-30 13:53:49 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.111 2001-12-22 12:12:06 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -843,7 +843,9 @@ USHORT APIENTRY WinTranslateChar2( USHORT  /* Codepage (currently ignored) */
 //******************************************************************************
 USHORT OSLibWinTranslateChar(USHORT usScanCode, ULONG type, USHORT shiftstate)
 {
-  WinTranslateChar2(0, &usScanCode, NULL, type, &shiftstate);
+  USHORT sel = GetFS();
+  usScanCode = WinTranslateChar2(0, &usScanCode, NULL, type, &shiftstate);
+  SetFS(sel);
   return usScanCode;
 }
 //******************************************************************************
