@@ -1,4 +1,4 @@
-/* $Id: hmthread.cpp,v 1.15 2002-07-26 10:47:19 sandervl Exp $ */
+/* $Id: hmthread.cpp,v 1.16 2002-12-29 14:11:23 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -165,7 +165,7 @@ BOOL HMDeviceThreadClass::SetThreadPriority(HANDLE hThread, PHMHANDLEDATA pHMHan
     if(teb == NULL) {
         dprintf(("!WARNING!: TEB not found!!"));
         SetLastError(ERROR_INVALID_HANDLE);
-        return THREAD_PRIORITY_ERROR_RETURN;
+        return FALSE;
     }
     DWORD ret = OSLibDosSetPriority(ODIN_TO_OS2_THREADID(teb->o.odin.threadId), priority);
     if(ret == ERROR_SUCCESS) {
