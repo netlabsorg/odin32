@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.208 2000-07-20 18:08:13 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.209 2000-09-02 08:30:09 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1615,6 +1615,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
             Win32BaseWindow *window = GetTopParent();
             if(window && !(window->getClass()->getStyle() & CS_NOCLOSE))
                 PostMessageA(getWindowHandle(), WM_SYSCOMMAND, SC_CLOSE, 0);
+            return 0;
         }
 
         Win32BaseWindow *siblingWindow;
@@ -2187,6 +2188,9 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
    HWND hParent = 0;
    RECT oldClientRect = rectClient;
 
+    if(getWindowHandle() == 0x6800000a) {
+	rc = FALSE;
+    }
     if (fuFlags &
        ~(SWP_NOSIZE     | SWP_NOMOVE     | SWP_NOZORDER     |
          SWP_NOREDRAW   | SWP_NOACTIVATE | SWP_FRAMECHANGED |

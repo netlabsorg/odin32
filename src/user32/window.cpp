@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.72 2000-08-02 20:18:25 bird Exp $ */
+/* $Id: window.cpp,v 1.73 2000-09-02 08:30:11 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -706,8 +706,12 @@ HWND WIN32API GetFocus(void)
 //******************************************************************************
 BOOL WIN32API IsZoomed(HWND hwnd)
 {
-    dprintf(("USER32:  IsZoomed\n"));
-    return O32_IsZoomed(Win32BaseWindow::Win32ToOS2Handle(hwnd));
+ DWORD style;
+
+    style = GetWindowLongA(hwnd, GWL_STYLE);
+    dprintf(("USER32: IsZoomed %x returned %d", hwnd, ((style & WS_MAXIMIZE) != 0)));
+
+    return (style & WS_MAXIMIZE) != 0;
 }
 //******************************************************************************
 //******************************************************************************
