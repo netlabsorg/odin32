@@ -1,6 +1,9 @@
-/* $Id: changelog,v 1.2729 2004-05-06 12:40:40 sandervl Exp $ */
+/* $Id: changelog,v 1.2730 2004-05-07 10:28:24 sandervl Exp $ */
 
- 2004-05-07: Sander van Leeuwen <sandervl@innotek   >
+ 2004-05-07: KO Myung-Hun <komh@chollian    >
+    - GDI32:    o DBCS updates
+
+ 2004-05-06: Sander van Leeuwen <sandervl@innotek   >
     - COMDLG32: o Update the hDevNames member of the printer dialog structure
                   whenever the user chooses another printer
 
