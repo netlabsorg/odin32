@@ -1,4 +1,3 @@
-/* $Id: datetime.c,v 1.18 2001-09-05 12:04:57 bird Exp $ */
 /*
  * Date and time picker control
  *

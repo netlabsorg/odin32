@@ -1,5 +1,4 @@
 /* -*- tab-width: 8; c-basic-offset: 4 -*- */
-/* $Id: animate.c,v 1.14 2001-09-05 12:04:56 bird Exp $ */
 /*
  * Animation control
  *

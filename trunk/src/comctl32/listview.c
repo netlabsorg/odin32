@@ -1,4 +1,3 @@
-/* $Id: listview.c,v 1.33 2001-09-05 12:04:59 bird Exp $ */
 /*
  * Listview control
  *

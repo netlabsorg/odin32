@@ -1,4 +1,3 @@
-/* $Id: comctl32undoc.c,v 1.22 2001-09-05 12:04:57 bird Exp $ */
 /*
  * Undocumented functions from COMCTL32.DLL
  *

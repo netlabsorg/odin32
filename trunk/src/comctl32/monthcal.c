@@ -1,4 +1,3 @@
-/* $Id: monthcal.c,v 1.12 2001-09-05 12:05:00 bird Exp $ */
 /* Month calendar control
  *
  *

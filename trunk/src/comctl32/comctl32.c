@@ -1,4 +1,3 @@
-/* $Id: comctl32.c,v 1.18 2001-09-05 12:04:56 bird Exp $ */
 /*
  * Common controls functions
  *
