@@ -1,4 +1,4 @@
-/* $Id: advapi32.h,v 1.7 2000-01-06 20:05:00 sandervl Exp $ */
+/* $Id: advapi32.h,v 1.8 2000-03-03 11:14:58 sandervl Exp $ */
 
 /*
  * Win32 advanced API functions for OS/2
@@ -86,50 +86,5 @@ LONG      ODIN_INTERNAL ODIN_RegSetValueExA(HKEY,LPSTR,DWORD,DWORD,LPBYTE,DWORD)
 LONG      ODIN_INTERNAL ODIN_RegSetValueExW(HKEY,LPWSTR,DWORD,DWORD,LPBYTE,DWORD);
 LONG      ODIN_INTERNAL ODIN_RegCreateKeyExA(HKEY,LPCSTR,DWORD,LPSTR,DWORD,REGSAM,LPSECURITY_ATTRIBUTES,PHKEY,LPDWORD);
 LONG      ODIN_INTERNAL ODIN_RegCreateKeyExW(HKEY,LPCWSTR,DWORD,LPWSTR,DWORD,REGSAM,LPSECURITY_ATTRIBUTES,PHKEY,LPDWORD);
-
-#ifdef USE_ODIN_REGISTRY_APIS
-#define RegConnectRegistryA ODIN_RegConnectRegistryA
-#define RegConnectRegistryW ODIN_RegConnectRegistryW
-#define RegEnumKeyExA ODIN_RegEnumKeyExA
-#define RegEnumKeyExW ODIN_RegEnumKeyExW
-#define RegGetKeySecurity ODIN_RegGetKeySecurity
-#define RegLoadKeyA ODIN_RegLoadKeyA
-#define RegLoadKeyW ODIN_RegLoadKeyW
-#define RegNotifyChangeKeyValue ODIN_RegNotifyChangeKeyValue
-#define RegOpenKeyExW ODIN_RegOpenKeyExW
-#define RegOpenKeyExA ODIN_RegOpenKeyExA
-#define RegQueryInfoKeyW ODIN_RegQueryInfoKeyW
-#define RegQueryInfoKeyA ODIN_RegQueryInfoKeyA
-#define RegReplaceKeyA ODIN_RegReplaceKeyA
-#define RegReplaceKeyW ODIN_RegReplaceKeyW
-#define RegRestoreKeyA ODIN_RegRestoreKeyA
-#define RegRestoreKeyW ODIN_RegRestoreKeyW
-#define RegUnLoadKeyA ODIN_RegUnLoadKeyA
-#define RegUnLoadKeyW ODIN_RegUnLoadKeyW
-#define RegCloseKey ODIN_RegCloseKey
-#define RegFlushKey ODIN_RegFlushKey
-#define RegCreateKeyA ODIN_RegCreateKeyA
-#define RegCreateKeyW ODIN_RegCreateKeyW
-#define RegDeleteKeyA ODIN_RegDeleteKeyA
-#define RegDeleteKeyW ODIN_RegDeleteKeyW
-#define RegDeleteValueA ODIN_RegDeleteValueA
-#define RegDeleteValueW ODIN_RegDeleteValueW
-#define RegEnumKeyA ODIN_RegEnumKeyA
-#define RegEnumKeyW ODIN_RegEnumKeyW
-#define RegEnumValueA ODIN_RegEnumValueA
-#define RegEnumValueW ODIN_RegEnumValueW
-#define RegOpenKeyA ODIN_RegOpenKeyA
-#define RegOpenKeyW ODIN_RegOpenKeyW
-#define RegQueryValueA ODIN_RegQueryValueA
-#define RegQueryValueW ODIN_RegQueryValueW
-#define RegQueryValueExA ODIN_RegQueryValueExA
-#define RegQueryValueExW ODIN_RegQueryValueExW
-#define RegSetValueA ODIN_RegSetValueA
-#define RegSetValueW ODIN_RegSetValueW
-#define RegSetValueExA ODIN_RegSetValueExA
-#define RegSetValueExW ODIN_RegSetValueExW
-#define RegCreateKeyExA ODIN_RegCreateKeyExA
-#define RegCreateKeyExW ODIN_RegCreateKeyExW
-#endif
 
 #endif
