@@ -3309,7 +3309,7 @@ typedef struct tagNMLVODSTATECHANGE
     (int)SendMessageA((hwnd), LVM_GETCOLUMNWIDTH, (WPARAM)(int)(iCol), 0)
 
 #define ListView_FindItem(hwnd,nItem,plvfi) \
-    (INT)SendMessageA((hwnd),LVM_FINDITEMA,(WPARAM)(INT)(nItem),(LPARAM)(LVFINDINFO*)(plvfi))
+    (INT)SendMessageA((hwnd),LVM_FINDITEMA,(WPARAM)(INT)(nItem),(LPARAM)(LVFINDINFOA*)(plvfi))
 
 #define ListView_SetColumnWidth(hwnd, iCol, cx) \
     (BOOL)SendMessageA((hwnd), LVM_SETCOLUMNWIDTH, (WPARAM)(int)(iCol), MAKELPARAM((cx), 0))
