@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.16 1999-10-30 18:40:43 cbratschi Exp $ */
+/* $Id: button.cpp,v 1.17 1999-11-13 16:42:40 cbratschi Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
@@ -6,7 +6,7 @@
  * Copyright (C) 1994 Alexandre Julliard
  * Copyright (c) 1999 Christoph Bratschi
  *
- * WINE version: 990923
+ * WINE version: 991031
  */
 
 #include <string.h>
@@ -200,9 +200,12 @@ static LRESULT BUTTON_LButtonDblClk(HWND hwnd,WPARAM wParam,LPARAM lParam)
 
 static LRESULT BUTTON_LButtonDown(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
+  BUTTONINFO* infoPtr = (BUTTONINFO*)GetInfoPtr(hwnd);
+
   SetCapture(hwnd);
   SetFocus(hwnd);
   SendMessageA(hwnd,BM_SETSTATE,TRUE,0);
+  infoPtr->state |= BUTTON_BTNPRESSED;
 
   return 0;
 }
@@ -216,9 +219,15 @@ static LRESULT BUTTON_LButtonUp(HWND hwnd,WPARAM wParam,LPARAM lParam)
   pt.x = LOWORD(lParam);
   pt.y = HIWORD(lParam);
 
-  ReleaseCapture();
-  if (!(infoPtr->state & BUTTON_HIGHLIGHTED)) return 0;
+  if (!(infoPtr->state & BUTTON_BTNPRESSED)) return 0;
+  infoPtr->state &= BUTTON_NSTATES;
+  if (!(infoPtr->state & BUTTON_HIGHLIGHTED))
+  {
+    ReleaseCapture();
+    return 0;
+  }
   SendMessageA(hwnd,BM_SETSTATE,FALSE,0);
+  ReleaseCapture();
   GetClientRect(hwnd,&rect);
   if (PtInRect(&rect,pt))
   {
@@ -240,6 +249,20 @@ static LRESULT BUTTON_LButtonUp(HWND hwnd,WPARAM wParam,LPARAM lParam)
         break;
     }
     SendMessageA(GetParent(hwnd),WM_COMMAND,MAKEWPARAM(id,BN_CLICKED),hwnd);
+  }
+
+  return 0;
+}
+
+static LRESULT BUTTON_CaptureChanged(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  BUTTONINFO* infoPtr = (BUTTONINFO*)GetInfoPtr(hwnd);
+
+  if (infoPtr->state & BUTTON_BTNPRESSED)
+  {
+    infoPtr->state &= BUTTON_NSTATES;
+    if (infoPtr->state & BUTTON_HIGHLIGHTED)
+      SendMessageA( hwnd, BM_SETSTATE, FALSE, 0 );
   }
 
   return 0;
@@ -541,6 +564,9 @@ LRESULT WINAPI ButtonWndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 
     case WM_LBUTTONUP:
       return BUTTON_LButtonUp(hwnd,wParam,lParam);
+
+    case WM_CAPTURECHANGED:
+      return BUTTON_CaptureChanged(hwnd,wParam,lParam);
 
     case WM_MOUSEMOVE:
       return BUTTON_MouseMove(hwnd,wParam,lParam);
@@ -1073,7 +1099,6 @@ static void OB_Paint(HWND hwnd,HDC hDC,WORD action)
     GetClientRect( hwnd, &dis.rcItem );
 
     SetBkColor( hDC, GetSysColor( COLOR_BTNFACE ) );
-    FillRect( hDC,  &dis.rcItem, GetSysColorBrush( COLOR_BTNFACE ) );
 
     dprintf(("OWNERDRAW button %x, enabled %d", hwnd, !(dwStyle & WS_DISABLED)));
     SendMessageA( GetParent(hwnd), WM_DRAWITEM,

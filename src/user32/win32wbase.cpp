@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.81 1999-11-11 13:17:31 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.82 1999-11-13 16:42:43 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1324,7 +1324,6 @@ BOOL Win32BaseWindow::showScrollBars(BOOL changeHorz,BOOL changeVert,BOOL fShow)
         horzScrollInfo->MinVal = horzScrollInfo->CurVal = horzScrollInfo->Page = 0;
         horzScrollInfo->MaxVal = 100;
         horzScrollInfo->flags  = ESB_ENABLE_BOTH;
-        dwStyle |= WS_HSCROLL;
       }
 
       if (createVert && !vertScrollInfo)
@@ -1333,7 +1332,6 @@ BOOL Win32BaseWindow::showScrollBars(BOOL changeHorz,BOOL changeVert,BOOL fShow)
         vertScrollInfo->MinVal = vertScrollInfo->CurVal = vertScrollInfo->Page = 0;
         vertScrollInfo->MaxVal = 100;
         vertScrollInfo->flags  = ESB_ENABLE_BOTH;
-        dwStyle |= WS_VSCROLL;
       }
 
       rc = FrameCreateScrollBars(this,createHorz,createVert,FALSE,&flags);
