@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.13 1999-12-03 12:59:40 achimha Exp $ */
+/* $Id: wsock32.cpp,v 1.14 1999-12-04 18:54:33 achimha Exp $ */
 
 /*
  *
@@ -1181,8 +1181,8 @@ ODINFUNCTION6(LHANDLE,OS2WSAAsyncGetServByName,
   // add entry to list, we need to store both our temp buffer and the apps buffer
   ulNewID = RelayAlloc(hWnd,
                        wMsg,
-                       FALSE,
                        ASYNCREQUEST_GETSERVBYNAME,
+                       FALSE,
                        buf);
 
   // call pmwsock function, will fill our temp buffer
@@ -1231,8 +1231,8 @@ ODINFUNCTION6(LHANDLE,OS2WSAAsyncGetServByPort,
   // add entry to list, we need to store both our temp buffer and the apps buffer
   ulNewID = RelayAlloc(hWnd,
                        wMsg,
-                       FALSE,
                        ASYNCREQUEST_GETSERVBYPORT,
+                       FALSE,
                        buf);
 
   // call pmwsock function, will fill our temp buffer
@@ -1280,8 +1280,8 @@ ODINFUNCTION5(LHANDLE,OS2WSAAsyncGetProtoByName,
   // add entry to list, we need to store both our temp buffer and the apps buffer
   ulNewID = RelayAlloc(hWnd,
                        wMsg,
-                       FALSE,
                        ASYNCREQUEST_GETPROTOBYNAME,
+                       FALSE,
                        buf);
 
   // call pmwsock function, will fill our temp buffer
@@ -1328,8 +1328,8 @@ ODINFUNCTION5(LHANDLE,OS2WSAAsyncGetProtoByNumber,
   // add entry to list, we need to store both our temp buffer and the apps buffer
   ulNewID = RelayAlloc(hWnd,
                        wMsg,
-                       FALSE,
                        ASYNCREQUEST_GETPROTOBYNUMBER,
+                       FALSE,
                        buf);
 
   // call pmwsock function, will fill our temp buffer
@@ -1376,8 +1376,8 @@ ODINFUNCTION5(LHANDLE,OS2WSAAsyncGetHostByName,
   // add entry to list, we need to store both our temp buffer and the apps buffer
   ulNewID = RelayAlloc(hWnd,
                        wMsg,
-                       FALSE,
                        ASYNCREQUEST_GETHOSTBYNAME,
+                       FALSE,
                        (PVOID)buf, (PVOID)buflen);
 
   // call pmwsock function, will fill our temp buffer
@@ -1426,8 +1426,8 @@ ODINFUNCTION7(LHANDLE,OS2WSAAsyncGetHostByAddr,
   // add entry to list, we need to store both our temp buffer and the apps buffer
   ulNewID = RelayAlloc(hWnd,
                        wMsg,
-                       FALSE,
                        ASYNCREQUEST_GETHOSTBYADDR,
+                       FALSE,
                        buf);
 
   // call pmwsock function, will fill our temp buffer
@@ -1520,8 +1520,8 @@ ODINFUNCTION4(int,OS2WSAAsyncSelect,
     // add entry to list
     ulNewID = RelayAlloc(hWnd,
                          wMsg,
-                         TRUE,
-                         ASYNCREQUEST_SELECT);
+                         ASYNCREQUEST_SELECT,
+                         TRUE);
 
   rc = WSAAsyncSelect(s,
                       hwndRelay,
