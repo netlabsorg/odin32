@@ -1,4 +1,4 @@
-/* $Id: button.h,v 1.6 1999-11-13 17:40:00 cbratschi Exp $ */
+/* $Id: button.h,v 1.7 2003-10-06 10:00:33 sandervl Exp $ */
 
 /*
  * Button-class extra info
@@ -12,7 +12,7 @@
 
 #include "wingdi.h"
 
-#define BUTTONCLASSNAME "BUTTON"
+#define BUTTONCLASSNAME "Button"
 
   /* Extra info for BUTTON windows */
   /* Note: under MS-Windows, state is a BYTE and this structure is */
