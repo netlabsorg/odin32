@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.74 2000-10-09 17:26:47 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.75 2000-11-04 16:28:25 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -224,6 +224,7 @@ BOOL setPageXForm(Win32BaseWindow *wnd, pDCData pHps)
    mlf.lM23  = 0;
    mlf.lM31  = pHps->viewportOrg.x - (LONG)(pHps->windowOrg.x * xScale);
    mlf.lM32  = pHps->viewportOrg.y - (LONG)(pHps->windowOrg.y * yScale);
+   mlf.lM33  = 1;
 
    pHps->isLeftLeft = mlf.fxM11 >= 0;
    pHps->isTopTop = mlf.fxM22 >= 0;
@@ -248,10 +249,25 @@ BOOL setPageXForm(Win32BaseWindow *wnd, pDCData pHps)
 //      (pHps->pMetaFileObject && pHps->pMetaFileObject->isEnhanced()))
       rc = GpiSetDefaultViewMatrix(pHps->hps, 8, &mlf, TRANSFORM_REPLACE);
 
+#ifdef INVERT
    if (bEnableYInversion)
       GpiEnableYInversion(pHps->hps, pHps->height + pHps->HPStoHDCInversionHeight);
    else
       GpiEnableYInversion(pHps->hps, 0);
+#else
+   pHps->yInvert = 0;
+   if(bEnableYInversion)
+   {
+      pHps->yInvert4Enable = pHps->height + pHps->HPStoHDCInversionHeight;
+      if(pHps->isPrinter)
+      {
+         pHps->yInvert = pHps->yInvert4Enable
+                       * (pHps->windowExt.cy / (double)pHps->viewportYExt);
+      } else {
+         pHps->yInvert = pHps->yInvert4Enable;
+      }
+   }
+#endif
 
    TestWideLine(pHps);
    Calculate1PixelDelta(pHps);
@@ -468,6 +484,42 @@ LONG clientHeight(Win32BaseWindow *wnd, HWND hwnd, pDCData pHps)
 }
 //******************************************************************************
 //******************************************************************************
+BOOL   WIN32API WGSS_changePageXForm(pDCData pHps, PPOINTL pValue, int x, int y, PPOINTL pPrev)
+{
+ Win32BaseWindow *wnd;
+
+   wnd = Win32BaseWindow::GetWindowFromOS2Handle(pHps->hwnd);
+   return changePageXForm(wnd, pHps, pValue, x, y, pPrev);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL   WIN32API WGSS_setPageXForm(pDCData pHps)
+{
+ Win32BaseWindow *wnd;
+
+   wnd = Win32BaseWindow::GetWindowFromOS2Handle(pHps->hwnd);
+   return setPageXForm(wnd, pHps);
+}
+//******************************************************************************
+//******************************************************************************
+VOID   WIN32API WGSS_removeClientArea(pDCData pHps)
+{
+ Win32BaseWindow *wnd;
+
+   wnd = Win32BaseWindow::GetWindowFromOS2Handle(pHps->hwnd);
+   removeClientArea(wnd, pHps);
+}
+//******************************************************************************
+//******************************************************************************
+LONG   WIN32API WGSS_clientHeight(HWND hwnd, pDCData pHps)
+{
+ Win32BaseWindow *wnd;
+
+   wnd = Win32BaseWindow::GetWindowFromOS2Handle(pHps->hwnd);
+   return clientHeight(wnd, hwnd, pHps);
+}
+//******************************************************************************
+//******************************************************************************
 BOOL isYup (pDCData pHps)
 {
    if (((pHps->windowExt.cy < 0) && (pHps->viewportYExt > 0.0)) ||
@@ -651,9 +703,14 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
 	//change origin of clip region (window -> client)
 	POINTL point = {-rectlClient.xLeft, -rectlClient.yBottom};
 	GpiOffsetRegion(pHps->hps, hrgnClip, &point);
-
+#ifdef DEBUG
+        dprintfRegion1(pHps->hps, hWnd, hrgnClip);
+#endif
 	//set clip region
-	GpiSetClipRegion(pHps->hps, hrgnClip, &hrgnOldClip);
+	lComplexity = GpiSetClipRegion(pHps->hps, hrgnClip, &hrgnOldClip);
+
+        GpiQueryClipBox(pHps->hps, &rectl);
+        dprintf(("ClipBox (%d): (%d,%d)(%d,%d)", lComplexity, rectl.xLeft, rectl.yBottom, rectl.xRight, rectl.yTop));
 
         //save old clip region (restored for CS_OWNDC windows in EndPaint)
         wnd->SetClipRegion(hrgnOldClip);
@@ -671,12 +728,6 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
    HideCaret(hwnd);
    WinShowTrackRect(wnd->getOS2WindowHandle(), FALSE);
 
-#ifdef DEBUG
-   POINTL point;
-   GreGetDCOrigin(pHps->hps, &point);
-   dprintf(("dc origin (%d,%d)", point.x, point.y));
-#endif
-
    if(wnd->needsEraseBkgnd() && lComplexity != RGN_NULL) {
         wnd->setEraseBkgnd(FALSE);
         lpps->fErase = (wnd->MsgEraseBackGround(pHps->hps) != 0);
@@ -684,6 +735,7 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
    else lpps->fErase = TRUE;
 
 #ifdef DEBUG
+   POINTL point;
    GreGetDCOrigin(pHps->hps, &point);
    dprintf(("dc origin (%d,%d)", point.x, point.y));
 #endif
