@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.55 2001-06-12 17:01:10 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.56 2001-08-18 03:49:24 phaller Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -750,10 +750,14 @@ void DIBSection::SelectDIBObject(HDC hdc)
 //******************************************************************************
 DIBSection *DIBSection::findObj(HANDLE handle)
 {
- DIBSection *dsect = section;
+  // PH 2001-08-18 shortcut for performance optimization
+  if (!section)
+      return NULL;
 
+  DIBSection *dsect = section;
   dibMutex.enter();
-  while(dsect)
+
+  do
   {
     if(dsect->handle == handle)
     {
@@ -762,6 +766,8 @@ DIBSection *DIBSection::findObj(HANDLE handle)
     }
     dsect = dsect->next;
   }
+  while(dsect);
+
   dibMutex.leave();
   return(NULL);
 }
