@@ -1,4 +1,4 @@
-/* $Id: odinbuild.h,v 1.99 2001-06-22 03:36:25 bird Exp $
+/* $Id: odinbuild.h,v 1.100 2001-06-23 07:43:12 bird Exp $
  *
  * Odin32 version number and build numbers.
  *
@@ -10,6 +10,11 @@
 
 #ifndef _ODINBUILD_H_
 #define _ODINBUILD_H_
+
+/*
+ * API for querying the build number of Odin32. Well.. Kernel32 really...
+ */
+int     WIN32API Odin32GetBuildNumber(void);
 
 /*
  * Current Odin version and build number.
