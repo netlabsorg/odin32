@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.2 1999-06-24 19:27:48 phaller Exp $ */
+/* $Id: misc.cpp,v 1.3 1999-08-16 10:31:27 phaller Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -22,6 +22,7 @@
 #include "shell32.h"
 #include <misc.h>
 #include <string.h>
+#include "winbase.h"
 
 
 /*****************************************************************************
@@ -319,6 +320,27 @@ HICON WIN32API ExtractAssociatedIconA(HINSTANCE hInst,
   return hIcon;
 }
 
+/*****************************************************************************
+ * Name      : HICON WIN32API ExtractAssociatedIconExA
+ * Purpose   : Return icon for given file (either from file itself or from associated
+ *             executable) and patch parameters if needed.
+ * Parameters: ???
+ * Variables :
+ * Result    :
+ * Remark    : SHELL.150
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Christoph Bratschi [Fri, 1999/08/6 20:00]
+ *****************************************************************************/
+
+HICON WIN32API ExtractAssociatedIconExA(HINSTANCE hInst,
+                                      LPSTR     lpIconPath,
+                                      LPWORD    lpiIcon)
+{
+  dprintf(("SHELL32: undoc ExtractAssociatedIconExA\n"));
+
+  return ExtractAssociatedIconA(hInst,lpIconPath,lpiIcon);
+}
 
 /*****************************************************************************
  * Name      : HICON WIN32API ExtractAssociatedIconW
@@ -354,6 +376,27 @@ HICON WIN32API ExtractAssociatedIconW(HINSTANCE hInst,
   return (hIcon);
 }
 
+/*****************************************************************************
+ * Name      : HICON WIN32API ExtractAssociatedIconExW
+ * Purpose   : Return icon for given file (either from file itself or from associated
+ *             executable) and patch parameters if needed.
+ * Parameters: ???
+ * Variables :
+ * Result    :
+ * Remark    : SHELL.186
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Christoph Bratschi [Fri, 1999/08/6 20:00]
+ *****************************************************************************/
+
+HICON WIN32API ExtractAssociatedIconExW(HINSTANCE hInst,
+                                      LPWSTR     lpIconPath,
+                                      LPWORD    lpiIcon)
+{
+  dprintf(("SHELL32: undoc ExtractAssociatedIconExW\n"));
+
+  return ExtractAssociatedIconW(hInst,lpIconPath,lpiIcon);
+}
 
 /*****************************************************************************
  * Name      : ParseField
@@ -1105,3 +1148,309 @@ HRESULT WIN32API SetAppStartingCursor(HWND  u,
   return 0;
 }
 
+/*****************************************************************************
+ * Name      : StrCpyNW
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.310 - used by winfile.exe
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Christoph Bratschi [Fri, 1999/08/6 19:00]
+ *****************************************************************************/
+
+LPWSTR WIN32API StrCpyNW(LPWSTR lpString1,LPWSTR lpString2,int iMaxLength)
+{
+  dprintf(("SHELL32: undoc StrCpyNW\n"));
+
+  return lstrcpynW(lpString1,lpString2,iMaxLength);
+}
+
+/*****************************************************************************
+ * Name      : StrNCpyW
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.316 - used by winfile.exe
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Christoph Bratschi [Fri, 1999/08/6 19:00]
+ *****************************************************************************/
+
+LPWSTR WIN32API StrNCpyW(LPWSTR lpString1,LPWSTR lpString2)
+{
+  dprintf(("SHELL32: undoc StrNCpyW\n"));
+
+  return lstrcpyW(lpString1,lpString2);
+}
+
+/*****************************************************************************
+ * Name      : FreeIconList
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.220 - used by progman.exe
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Christoph Bratschi [Fri, 1999/08/6 19:00]
+ *****************************************************************************/
+
+void WIN32API FreeIconList(DWORD dw)
+{
+  dprintf(("SHELL32: undoc FreeIconList %08xh\n",dw));
+}
+
+/*****************************************************************************
+ * Name      : InternalExtractIconListA
+ * Purpose   :
+ * Parameters: ???
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.221 - used by progman.exe
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Christoph Bratschi [Fri, 1999/08/6 19:00]
+ *****************************************************************************/
+
+void WIN32API InternalExtractIconListA(VOID)
+{
+  dprintf(("SHELL32: undoc InternalExtractIconListA \n"));
+}
+
+/*****************************************************************************
+ * Name      : InternalExtractIconListW
+ * Purpose   :
+ * Parameters: ???
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.222 - used by progman.exe
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Christoph Bratschi [Fri, 1999/08/6 19:00]
+ *****************************************************************************/
+
+void WIN32API InternalExtractIconListW(VOID)
+{
+  dprintf(("SHELL32: undoc InternalExtractIconListW\n"));
+}
+
+/*****************************************************************************
+ * Name      : ExtractIconResInfoA
+ * Purpose   :
+ * Parameters: ???
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.192 - used by progman.exe
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Christoph Bratschi [Fri, 1999/08/6 19:00]
+ *****************************************************************************/
+
+void WIN32API ExtractIconResInfoA(VOID)
+{
+  dprintf(("SHELL32: undoc ExtractIconResInfoA\n"));
+}
+
+/*****************************************************************************
+ * Name      : ExtractIconResInfoW
+ * Purpose   :
+ * Parameters: ???
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.193 - used by progman.exe
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Christoph Bratschi [Fri, 1999/08/6 19:00]
+ *****************************************************************************/
+
+void WIN32API ExtractIconResInfoW(VOID)
+{
+  dprintf(("SHELL32: undoc ExtractIconResInfoW\n"));
+}
+
+INT WINAPI lstrncmpiA( LPCSTR str1, LPCSTR str2, INT n )
+{
+  //CB: implement!
+  return 0;
+}
+
+/*************************************************************************
+ *				FindEnvironmentString	[SHELL.38]
+ *
+ * Returns a pointer into the DOS environment... Ugh.
+ */
+LPSTR SHELL_FindStringA(LPSTR lpEnv, LPCSTR entry)
+{ UINT16 l;
+
+  //TRACE_(shell)("\n");
+
+  l = strlen(entry);
+  for( ; *lpEnv ; lpEnv+=strlen(lpEnv)+1 )
+  { if( lstrncmpiA(lpEnv, entry, l) )
+      continue;
+	if( !*(lpEnv+l) )
+	    return (lpEnv + l); 		/* empty entry */
+	else if ( *(lpEnv+l)== '=' )
+	    return (lpEnv + l + 1);
+    }
+    return NULL;
+}
+
+/*****************************************************************************
+ * Name      : DoEnvironmentSubstA
+ * Purpose   :
+ * Parameters: ??? ported WINE 16 bit function
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.44 - used by progman.exe
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Christoph Bratschi [Fri, 1999/08/6 19:00]
+ *****************************************************************************/
+
+DWORD WIN32API DoEnvironmentSubstA(LPSTR str,DWORD length)
+{
+  LPSTR   lpEnv = (LPSTR)GetEnvironmentStringsA();
+  LPSTR   lpBuffer = (LPSTR)HeapAlloc( GetProcessHeap(), 0, length);
+  LPSTR   lpstr = str;
+  LPSTR   lpbstr = lpBuffer;
+
+  dprintf(("SHELL32: undoc DoEnvironmentSubstA\n"));
+
+  CharToOemA(str,str);
+
+  while( *lpstr && lpbstr - lpBuffer < length )
+   {
+     LPSTR lpend = lpstr;
+
+     if( *lpstr == '%' )
+       {
+	  do { lpend++; } while( *lpend && *lpend != '%' );
+	  if( *lpend == '%' && lpend - lpstr > 1 )	/* found key */
+	    {
+	       LPSTR lpKey;
+	      *lpend = '\0';
+	       lpKey = SHELL_FindStringA(lpEnv, lpstr+1);
+	       if( lpKey )				/* found key value */
+		 {
+		   int l = strlen(lpKey);
+
+		   if( l > length - (lpbstr - lpBuffer) - 1 )
+		     {
+           //WARN_(shell)("-- Env subst aborted - string too short\n");
+		      *lpend = '%';
+		       break;
+		     }
+		   strcpy(lpbstr, lpKey);
+		   lpbstr += l;
+		 }
+	       else break;
+	      *lpend = '%';
+	       lpstr = lpend + 1;
+	    }
+	  else break;					/* back off and whine */
+
+	  continue;
+       }
+
+     *lpbstr++ = *lpstr++;
+   }
+
+ *lpbstr = '\0';
+  if( lpstr - str == strlen(str) )
+    {
+      strncpy(str, lpBuffer, length);
+      length = 1;
+    }
+  else
+      length = 0;
+
+  //TRACE_(shell)("-- return %s\n", str);
+
+  OemToCharA(str,str);
+  HeapFree( GetProcessHeap(), 0, lpBuffer);
+
+  FreeEnvironmentStringsA(lpEnv);
+
+  /*  Return str length in the LOWORD
+   *  and 1 in HIWORD if subst was successful.
+   */
+
+ return (DWORD)MAKELONG(strlen(str), length);
+}
+
+/*****************************************************************************
+ * Name      : DoEnvironmentSubstW
+ * Purpose   :
+ * Parameters: ???
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.193 - used by progman.exe
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Christoph Bratschi [Fri, 1999/08/6 19:00]
+ *****************************************************************************/
+
+DWORD WIN32API DoEnvironmentSubstW(LPWSTR str,DWORD length)
+{
+  //CB: call DoEnvironmentSubstW
+  dprintf(("SHELL32: undoc DoEnvironmentSubstW\n"));
+
+  return 0;
+}
+
+/*****************************************************************************
+ * Name      : CheckEscapesA
+ * Purpose   :
+ * Parameters: ???
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.3 - used by progman.exe
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Christoph Bratschi [Fri, 1999/08/6 19:00]
+ *****************************************************************************/
+
+void WIN32API CheckEscapesA(DWORD x1,DWORD x2)
+{
+  dprintf(("SHELL32: undoc CheckEscapesA\n"));
+}
+
+/*****************************************************************************
+ * Name      : CheckEscapesW
+ * Purpose   :
+ * Parameters: ???
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.6 - used by progman.exe
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Christoph Bratschi [Fri, 1999/08/6 19:00]
+ *****************************************************************************/
+
+void WIN32API CheckEscapesW(DWORD x1,DWORD x2)
+{
+  dprintf(("SHELL32: undoc CheckEscapesW\n"));
+}
+
+/*****************************************************************************
+ * Name      : DuplicateIcon
+ * Purpose   :
+ * Parameters: ???
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.138 - used by progman.exe
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Christoph Bratschi [Fri, 1999/08/6 19:00]
+ *****************************************************************************/
+
+DWORD WIN32API DuplicateIcon(DWORD x1)
+{
+  dprintf(("SHELL32: undoc DuplicateIcon\n"));
+
+  return 0;
+}
