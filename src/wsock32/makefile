@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 1999-10-20 20:10:57 phaller Exp $
+# $Id: makefile,v 1.11 1999-10-21 14:58:54 phaller Exp $
 
 #
 # PD-Win32 API
@@ -9,7 +9,7 @@
 PDWIN32_INCLUDE = ..\..\include
 PDWIN32_LIB = ..\..\lib
 PDWIN32_BIN = ..\..\bin
-
+PDWIN32_TOOLS = ..\..\tools\bin
 
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 
@@ -28,7 +28,7 @@ all: $(TARGET).dll $(TARGET).lib
 $(TARGET).dll: $(OBJS) $(TARGET).def
 	$(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
               $(PDWIN32_LIB)\pmwinx.lib $(PDWIN32_LIB)\user32.lib \
-              tcpip32.lib tcp32dll.lib so32dll.lib  $(PDWIN32_LIB)\kernel32.lib \
+              tcp32dll.lib so32dll.lib  $(PDWIN32_LIB)\kernel32.lib \
               $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
 	$(CP) $@ $(PDWIN32_BIN)
 

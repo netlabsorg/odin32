@@ -1,4 +1,4 @@
-; $Id: wsock32.def,v 1.8 1999-10-20 20:11:01 phaller Exp $
+; $Id: wsock32.def,v 1.9 1999-10-21 14:58:54 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY WSOCK32 INITINSTANCE
@@ -8,6 +8,7 @@ IMPORTS
     PostMessageA           = USER32.416
     SetLastError           = KERNEL32.654
     GetLastError           = KERNEL32.340
+    os2_select             = TCPIP32.12
 
 
 EXPORTS
