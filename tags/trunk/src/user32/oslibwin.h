@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.64 2002-01-20 15:26:21 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.65 2002-03-18 13:03:53 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -27,6 +27,7 @@ typedef struct _SWP    /* swp */
    ULONG   ulReserved1;
    ULONG   ulReserved2;
 } SWP, *PSWP;
+typedef POINTL *PPOINTL;
 #endif
 
 //SvL: Must be the same as HWND_DESKTOP/OBJECT in pmwin.h!
@@ -197,6 +198,7 @@ BOOL OSLibWinSetSysValue(LONG iSysValue, ULONG val);
 ULONG OSLibWinQueryDlgItemText(HWND hwndDlg,ULONG idItem,LONG cchBufferMax,char* pchBuffer);
 BOOL OSLibWinSetDlgItemText(HWND hwndDlg,ULONG idItem,char* pszText);
 BOOL OSLibWinQueryPointerPos(PPOINT pptlPoint); //pptlPoint == POINTL pointer!
+BOOL OSLibWinGetMinPosition(HWND hwndDlg,PSWP swp, PPOINTL pointl);
 BOOL OSLibWinSetPointerPos(int x, int y);
 
 #define SWPOS_SIZE                   0x0001

@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.115 2002-03-05 16:09:17 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.116 2002-03-18 13:03:53 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -249,6 +249,13 @@ BOOL OSLibWinSetWindowULong(HWND hwnd, ULONG offset, ULONG value)
 
   return WinSetWindowULong(hwnd, offset, value);
 }
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinGetMinPosition(HWND hwnd, PSWP pswp, PPOINTL pointl)
+{
+  return WinGetMinPosition(hwnd, pswp, pointl);
+}
+
 //******************************************************************************
 //******************************************************************************
 ULONG OSLibWinGetWindowULong(HWND hwnd, ULONG offset)
