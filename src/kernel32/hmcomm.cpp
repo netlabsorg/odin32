@@ -1,4 +1,4 @@
-/* $Id: hmcomm.cpp,v 1.6 2000-11-14 14:26:59 sandervl Exp $ */
+/* $Id: hmcomm.cpp,v 1.7 2000-12-31 12:28:53 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -249,7 +249,7 @@ BOOL HMDeviceCommClass::SetupComm( PHMHANDLEDATA pHMHandleData,
   PHMDEVCOMDATA pDevData = (PHMDEVCOMDATA)pHMHandleData->lpHandlerData;
   if((NULL==pDevData) || (pDevData->ulMagic != MAGIC_COM) )
   {
-    O32_SetLastError(ERROR_INVALID_HANDLE);
+    SetLastError(ERROR_INVALID_HANDLE);
     return FALSE;
   }
   pDevData->dwInBuffer  = dwInQueue;
@@ -648,6 +648,187 @@ BOOL HMDeviceCommClass::TransmitCommChar( PHMHANDLEDATA pHMHandleData,
   return(rc==0);
 }
 
+/*****************************************************************************
+ * Name      : BOOL HMDeviceCommClass::WriteFile
+ * Purpose   : write data to handle / device
+ * Parameters: PHMHANDLEDATA pHMHandleData,
+ *             LPCVOID       lpBuffer,
+ *             DWORD         nNumberOfBytesToWrite,
+ *             LPDWORD       lpNumberOfBytesWritten,
+ *             LPOVERLAPPED  lpOverlapped
+ * Variables :
+ * Result    : Boolean
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+
+BOOL HMDeviceCommClass::WriteFile(PHMHANDLEDATA pHMHandleData,
+                                  LPCVOID       lpBuffer,
+                                  DWORD         nNumberOfBytesToWrite,
+                                  LPDWORD       lpNumberOfBytesWritten,
+                                  LPOVERLAPPED  lpOverlapped)
+{
+  dprintf(("KERNEL32:HMDeviceCommClass::WriteFile %s(%08x,%08x,%08x,%08x,%08x)",
+           lpHMDeviceName,
+           pHMHandleData->hHMHandle,
+           lpBuffer,
+           nNumberOfBytesToWrite,
+           lpNumberOfBytesWritten,
+           lpOverlapped));
+
+  APIRET rc;
+  ULONG ulBytesWritten;
+
+  if((pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && !lpOverlapped) {
+    dprintf(("FILE_FLAG_OVERLAPPED flag set, but lpOverlapped NULL!!"));
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
+  }
+  if(!(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && lpOverlapped) {
+    dprintf(("Warning: lpOverlapped != NULL & !FILE_FLAG_OVERLAPPED; sync operation"));
+  }
+
+  rc = OSLibDosWrite(pHMHandleData->hHMHandle, (LPVOID)lpBuffer, nNumberOfBytesToWrite, 
+                     &ulBytesWritten);
+
+  if(lpNumberOfBytesWritten) {
+       *lpNumberOfBytesWritten = (rc) ? 0 : ulBytesWritten;
+  }
+  return(rc==0);
+}
+
+/*****************************************************************************
+ * Name      : BOOL WriteFileEx
+ * Purpose   : The WriteFileEx function writes data to a file. It is designed
+ *             solely for asynchronous operation, unlike WriteFile, which is
+ *             designed for both synchronous and asynchronous operation.
+ *             WriteFileEx reports its completion status asynchronously,
+ *             calling a specified completion routine when writing is completed
+ *             and the calling thread is in an alertable wait state.
+ * Parameters: HANDLE       hFile                handle of file to write
+ *             LPVOID       lpBuffer             address of buffer
+ *             DWORD        nNumberOfBytesToRead number of bytes to write
+ *             LPOVERLAPPED lpOverlapped         address of offset
+ *             LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine address of completion routine
+ * Variables :
+ * Result    : TRUE / FALSE
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
+ *****************************************************************************/
+
+BOOL HMDeviceCommClass::WriteFileEx(PHMHANDLEDATA pHMHandleData,
+                           LPVOID       lpBuffer,
+                           DWORD        nNumberOfBytesToWrite,
+                           LPOVERLAPPED lpOverlapped,
+                           LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
+{
+  dprintf(("ERROR: WriteFileEx %s (%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
+           lpHMDeviceName,
+           pHMHandleData->hHMHandle,
+           lpBuffer,
+           nNumberOfBytesToWrite,
+           lpOverlapped,
+           lpCompletionRoutine));
+
+  SetLastError(ERROR_INVALID_FUNCTION);
+  return FALSE;
+}
+
+/*****************************************************************************
+ * Name      : BOOL HMDeviceCommClass::ReadFile
+ * Purpose   : read data from handle / device
+ * Parameters: PHMHANDLEDATA pHMHandleData,
+ *             LPCVOID       lpBuffer,
+ *             DWORD         nNumberOfBytesToRead,
+ *             LPDWORD       lpNumberOfBytesRead,
+ *             LPOVERLAPPED  lpOverlapped
+ * Variables :
+ * Result    : Boolean
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+
+BOOL HMDeviceCommClass::ReadFile(PHMHANDLEDATA pHMHandleData,
+                                 LPCVOID       lpBuffer,
+                                 DWORD         nNumberOfBytesToRead,
+                                 LPDWORD       lpNumberOfBytesRead,
+                                 LPOVERLAPPED  lpOverlapped)
+{
+  dprintf(("KERNEL32:HMDeviceCommClass::ReadFile %s(%08x,%08x,%08x,%08x,%08x)",
+           lpHMDeviceName,
+           pHMHandleData->hHMHandle,
+           lpBuffer,
+           nNumberOfBytesToRead,
+           lpNumberOfBytesRead,
+           lpOverlapped));
+
+  APIRET rc;
+  ULONG ulBytesRead;
+
+  if((pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && !lpOverlapped) {
+    dprintf(("FILE_FLAG_OVERLAPPED flag set, but lpOverlapped NULL!!"));
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
+  }
+  if(!(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && lpOverlapped) {
+    dprintf(("Warning: lpOverlapped != NULL & !FILE_FLAG_OVERLAPPED; sync operation"));
+  }
+
+  rc = OSLibDosRead(pHMHandleData->hHMHandle, (LPVOID)lpBuffer, nNumberOfBytesToRead, 
+                    &ulBytesRead);
+
+  if(lpNumberOfBytesRead) {
+       *lpNumberOfBytesRead = (rc) ? 0 : ulBytesRead;
+  }
+  return(rc==0);
+}
+
+/*****************************************************************************
+ * Name      : BOOL ReadFileEx
+ * Purpose   : The ReadFileEx function reads data from a file asynchronously.
+ *             It is designed solely for asynchronous operation, unlike the
+ *             ReadFile function, which is designed for both synchronous and
+ *             asynchronous operation. ReadFileEx lets an application perform
+ *             other processing during a file read operation.
+ *             The ReadFileEx function reports its completion status asynchronously,
+ *             calling a specified completion routine when reading is completed
+ *             and the calling thread is in an alertable wait state.
+ * Parameters: HANDLE       hFile                handle of file to read
+ *             LPVOID       lpBuffer             address of buffer
+ *             DWORD        nNumberOfBytesToRead number of bytes to read
+ *             LPOVERLAPPED lpOverlapped         address of offset
+ *             LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine address of completion routine
+ * Variables :
+ * Result    : TRUE / FALSE
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
+ *****************************************************************************/
+BOOL HMDeviceCommClass::ReadFileEx(PHMHANDLEDATA pHMHandleData,
+                           LPVOID       lpBuffer,
+                           DWORD        nNumberOfBytesToRead,
+                           LPOVERLAPPED lpOverlapped,
+                           LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
+{
+  dprintf(("ERROR: ReadFileEx %s (%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
+           lpHMDeviceName,
+           pHMHandleData->hHMHandle,
+           lpBuffer,
+           nNumberOfBytesToRead,
+           lpOverlapped,
+           lpCompletionRoutine));
+
+  SetLastError(ERROR_INVALID_FUNCTION);
+  return FALSE;
+}
+
 BOOL HMDeviceCommClass::SetCommBreak( PHMHANDLEDATA pHMHandleData )
 {
   APIRET rc;
@@ -705,14 +886,14 @@ BOOL HMDeviceCommClass::GetCommConfig( PHMHANDLEDATA pHMHandleData,
   if( O32_IsBadWritePtr(lpCC,sizeof(COMMCONFIG)) ||
       *lpdwSize< sizeof(COMMCONFIG) )
   {
-    O32_SetLastError(ERROR_INSUFFICIENT_BUFFER);
+    SetLastError(ERROR_INSUFFICIENT_BUFFER);
     *lpdwSize= sizeof(COMMCONFIG);
     return FALSE;
   }
 
   if((NULL==pDevData) || (pDevData->ulMagic != MAGIC_COM) )
   {
-    O32_SetLastError(ERROR_INVALID_HANDLE);
+    SetLastError(ERROR_INVALID_HANDLE);
     return FALSE;
   }
 
@@ -789,7 +970,7 @@ BOOL HMDeviceCommClass::EscapeCommFunction( PHMHANDLEDATA pHMHandleData,
                              0,0,0);
       break;
     default:
-      O32_SetLastError(ERROR_INVALID_PARAMETER);
+      SetLastError(ERROR_INVALID_PARAMETER);
       return(FALSE);
   }
 
@@ -803,7 +984,7 @@ BOOL HMDeviceCommClass::SetDefaultCommConfig( PHMHANDLEDATA pHMHandleData,
   PHMDEVCOMDATA pDevData = (PHMDEVCOMDATA)pHMHandleData->lpDeviceData;
   if((NULL==pDevData) || (pDevData->ulMagic != MAGIC_COM) )
   {
-    O32_SetLastError(ERROR_INVALID_HANDLE);
+    SetLastError(ERROR_INVALID_HANDLE);
     return FALSE;
   }
   memset(&pDevData->CommCfg,0, sizeof(COMMCONFIG));
@@ -820,14 +1001,14 @@ BOOL HMDeviceCommClass::GetDefaultCommConfig( PHMHANDLEDATA pHMHandleData,
   if( O32_IsBadWritePtr(lpCC,sizeof(COMMCONFIG)) ||
       *lpdwSize< sizeof(COMMCONFIG) )
   {
-    O32_SetLastError(ERROR_INSUFFICIENT_BUFFER);
+    SetLastError(ERROR_INSUFFICIENT_BUFFER);
     *lpdwSize= sizeof(COMMCONFIG);
     return FALSE;
   }
 
   if((NULL==pDevData) || (pDevData->ulMagic != MAGIC_COM) )
   {
-    O32_SetLastError(ERROR_INVALID_HANDLE);
+    SetLastError(ERROR_INVALID_HANDLE);
     return FALSE;
   }
 
