@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.12 1999-10-03 20:38:02 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.13 1999-10-04 20:53:46 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -232,7 +232,8 @@ protected:
         BOOL    fCreated;
         BOOL    fFirstShow;
         BOOL    fIsDialog;
-
+        BOOL    fInternalMsg;           //Used to distinguish between messages 
+                                        //sent by PM and those sent by apps
    Win32BaseWindow *owner;
 
  Win32Resource *acceltableResource;
