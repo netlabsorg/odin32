@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2558 2003-04-24 13:59:37 sandervl Exp $ */
+/* $Id: changelog,v 1.2559 2003-04-24 14:32:26 sandervl Exp $ */
 
  2003-04-24: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o EndDialog: Enable owner window regardless of whether it was
@@ -8,6 +8,9 @@
                              have focus)
                 o Win32BaseWindow::GetWindowFromOS2Handle: also check fake
                   windows)
+
+ 2003-04-24: Platon Fomichev <stauff@innotek   >
+    - USER32:   o Fixed restore/maximize from minimized state for MDI windows.
 
  2003-04-15: knut st. osmundsen <bird-odin-spam@anduin   >
     - USER32:   o Properties allocated from shared memory.
