@@ -1,4 +1,4 @@
-# $Id: kernel32.mak,v 1.38 2003-02-13 17:16:49 sandervl Exp $
+# $Id: kernel32.mak,v 1.39 2003-03-03 16:37:26 sandervl Exp $
 
 #
 # Odin32 API
@@ -99,6 +99,8 @@ $(OBJDIR)\windllbase.obj \
 $(OBJDIR)\winexebase.obj \
 $(OBJDIR)\time.obj \
 $(OBJDIR)\mmap.obj \
+$(OBJDIR)\mmapview.obj \
+$(OBJDIR)\mmapdup.obj \
 $(OBJDIR)\winimagepe2lx.obj \
 $(OBJDIR)\winimagepeldr.obj \
 $(OBJDIR)\windllpe2lx.obj \
@@ -148,6 +150,7 @@ $(OBJDIR)\hmmailslot.obj \
 $(OBJDIR)\mailslot.obj \
 $(OBJDIR)\oslibtime.obj \
 $(OBJDIR)\conodin32.obj \
+$(OBJDIR)\oslibwps.obj \
 $(OBJDIR)\kernelrsrc.obj
 
 
