@@ -1,4 +1,4 @@
-/* $Id: asyncapi.cpp,v 1.3 2000-03-24 19:28:03 sandervl Exp $ */
+/* $Id: asyncapi.cpp,v 1.4 2000-03-28 17:13:05 sandervl Exp $ */
 
 /*
  *
@@ -460,9 +460,14 @@ asyncloopstart:
 	if(ret == SOCKET_ERROR) {
 		int selecterr = sock_errno();
         	dprintf(("WSAsyncSelectThreadProc %x rds=%d, wrs=%d, oos =%d, pending = %x select returned %x", pThreadParm->u.asyncselect.s, noread, nowrite, noexcept, lEventsPending, selecterr));
+		if(selecterr && selecterr < SOCBASEERR) {
+			selecterr += SOCBASEERR;
+		}
 		switch(selecterr) 
 		{
 		case SOCEINTR:
+        		state = ioctl(s, FIOBSTATUS, (char *)&tmp, sizeof(tmp));
+			dprintf(("SOCEINTR; state = %x", state));
 			goto asyncloopstart;	//so_cancel was called
 
 		case SOCECONNRESET:

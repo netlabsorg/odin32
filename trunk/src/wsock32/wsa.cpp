@@ -1,4 +1,4 @@
-/* $Id: wsa.cpp,v 1.3 2000-03-24 19:28:08 sandervl Exp $ */
+/* $Id: wsa.cpp,v 1.4 2000-03-28 17:13:06 sandervl Exp $ */
 
 /*
  *
@@ -156,8 +156,7 @@ void WSASetBlocking(BOOL fBlock, HANDLE tid)
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(int,__WSAFDIsSet,SOCKET, s,
-                                  ws_fd_set*,set)
+ODINFUNCTION2(int,__WSAFDIsSet,SOCKET, s, ws_fd_set*,set)
 {
   int i = set->fd_count;
     
@@ -172,6 +171,10 @@ UINT wsaErrno()
 {
  int loc_errno = sock_errno();
 
+    //Warp 4 returns errors with base 0
+    if(loc_errno && loc_errno < SOCBASEERR) {
+	loc_errno += SOCBASEERR;
+    }
     switch(loc_errno)
     {
 	case SOCEINTR:		return WSAEINTR;
@@ -214,21 +217,9 @@ UINT wsaErrno()
 	case SOCEHOSTDOWN:	return WSAEHOSTDOWN;
 	case SOCEHOSTUNREACH:	return WSAEHOSTUNREACH;
 	case SOCENOTEMPTY:	return WSAENOTEMPTY;
-#ifdef EPROCLIM
-	case SOCEPROCLIM:	return WSAEPROCLIM;
-#endif
-#ifdef EUSERS
-	case SOCEUSERS:		return WSAEUSERS;
-#endif
-#ifdef EDQUOT
-	case SOCEDQUOT:		return WSAEDQUOT;
-#endif
-#ifdef ESTALE
-	case SOCESTALE:		return WSAESTALE;
-#endif
-#ifdef EREMOTE
-	case SOCEREMOTE:	return WSAEREMOTE;
-#endif
+	case SOCENXIO:
+	case SOCESRCH:
+	case SOCEOS2ERR:        return WSAEFAULT;
 
         /* just in case we ever get here and there are no problems */
 	case 0:			return 0;
