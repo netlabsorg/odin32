@@ -1,4 +1,4 @@
-/* $Id: oslibgpi.cpp,v 1.17 2004-01-11 11:42:19 sandervl Exp $ */
+/* $Id: oslibgpi.cpp,v 1.18 2004-04-14 09:44:13 sandervl Exp $ */
 
 /*
  * GPI interface code
@@ -394,12 +394,12 @@ BOOL drawLinePoint(PVOID pHps,PPOINTLOS2 pt,LONG color)
   lbNew.lColor = color;
   BOOL rc = GpiSetAttrs(GetDCData(pHps)->hps,PRIM_LINE,LBB_COLOR,0,&lbNew);
   if(rc == FALSE) {
-      dprintf(("GpiSetAttrs/GpiSetPel failed with %x", WinGetLastError(0)));
+      dprintf(("GpiSetAttrs failed with %x", WinGetLastError(0)));
   }
   else {
       rc = GpiSetPel(GetDCData(pHps)->hps,(PPOINTL)pt) != GPI_ERROR;
-      if(rc == FALSE && LOWORD(WinGetLastError(0)) == PMERR_INV_IN_PATH) {
-          dprintf(("WARNING: GpiSetPel invalid in path; retrying with GpiLine"));
+      if(rc == FALSE) {
+          dprintf(("WARNING: GpiSetPel failed %x (invalid in path?); retrying with GpiLine", WinGetLastError(0)));
           rc = GpiLine(GetDCData(pHps)->hps,(PPOINTL)pt) != GPI_ERROR;
       }
   }
