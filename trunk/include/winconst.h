@@ -1,4 +1,4 @@
-/* $Id: winconst.h,v 1.37 2000-11-05 18:47:11 sandervl Exp $ */
+/* $Id: winconst.h,v 1.38 2000-12-07 11:58:59 sandervl Exp $ */
 
 /*
  * Win32 constants
@@ -1448,3 +1448,15 @@
 #define MM_TWIPS_W	  6
 #define MM_ISOTROPIC_W	  7
 #define MM_ANISOTROPIC_W  8
+
+
+#define DRIVE_UNKNOWN_W              0
+#define DRIVE_NO_ROOT_DIR_W          1
+#define DRIVE_CANNOTDETERMINE_W      0
+#define DRIVE_DOESNOTEXIST_W         1
+#define DRIVE_REMOVABLE_W            2
+#define DRIVE_FIXED_W                3
+#define DRIVE_REMOTE_W               4
+/* Win32 additions */
+#define DRIVE_CDROM_W                5
+#define DRIVE_RAMDISK_W              6
