@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.3 1999-07-16 11:32:09 sandervl Exp $ */
+/* $Id: window.cpp,v 1.4 1999-07-17 11:52:23 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -9,6 +9,9 @@
  * Copyright 1993, 1994 Alexandre Julliard
  *
  * Project Odin Software License can be found in LICENSE.TXT
+ *
+ *
+ * TODO: Decide what to do about commands for OS/2 windows (non-Win32 apps)
  *
  */
 
@@ -183,9 +186,10 @@ BOOL WIN32API DestroyWindow(HWND hwnd)
 
     window = Win32Window::GetWindowFromHandle(hwnd);
     if(!window) {
-	dprintf(("SendMessageA, window %x not found", hwnd));
+	dprintf(("DestroyWindow, window %x not found", hwnd));
 	return 0;
     }
+    dprintf(("DestroyWindow %x", hwnd));
     return window->DestroyWindow();
 }
 //******************************************************************************
@@ -196,9 +200,10 @@ HWND WIN32API SetActiveWindow( HWND hwnd)
 
     window = Win32Window::GetWindowFromHandle(hwnd);
     if(!window) {
-	dprintf(("SendMessageA, window %x not found", hwnd));
+	dprintf(("SetActiveWindow, window %x not found", hwnd));
 	return 0;
     }
+    dprintf(("SetActiveWindow %x", hwnd));
     return window->SetActiveWindow();
 }
 //******************************************************************************
@@ -209,9 +214,10 @@ HWND WIN32API GetParent( HWND hwnd)
 
     window = Win32Window::GetWindowFromHandle(hwnd);
     if(!window) {
-	dprintf(("SendMessageA, window %x not found", hwnd));
+	dprintf(("GetParent, window %x not found", hwnd));
 	return 0;
     }
+    dprintf(("GetParent %x", hwnd));
     return window->GetParent();
 }
 //******************************************************************************
@@ -222,9 +228,10 @@ HWND WIN32API SetParent( HWND hwndChild, HWND hwndNewParent)
 
     window = Win32Window::GetWindowFromHandle(hwndChild);
     if(!window) {
-	dprintf(("SendMessageA, window %x not found", hwndChild));
+	dprintf(("SetParent, window %x not found", hwndChild));
 	return 0;
     }
+    dprintf(("SetParent %x %x", hwndChild, hwndNewParent));
     return window->SetParent(hwndNewParent);
 }
 //******************************************************************************
@@ -235,9 +242,10 @@ BOOL WIN32API IsChild( HWND hwndParent, HWND hwnd)
 
     window = Win32Window::GetWindowFromHandle(hwnd);
     if(!window) {
-	dprintf(("SendMessageA, window %x not found", hwnd));
+	dprintf(("IsChild, window %x not found", hwnd));
 	return 0;
     }
+    dprintf(("IsChild %x %x", hwndParent, hwnd));
     return window->IsChild(hwndParent);
 }
 //******************************************************************************
@@ -248,9 +256,10 @@ HWND WIN32API GetTopWindow( HWND hwnd)
 
     window = Win32Window::GetWindowFromHandle(hwnd);
     if(!window) {
-	dprintf(("SendMessageA, window %x not found", hwnd));
+	dprintf(("GetTopWindow, window %x not found", hwnd));
 	return 0;
     }
+    dprintf(("GetTopWindow %x", hwnd));
     return window->GetTopWindow();
 }
 //******************************************************************************
@@ -261,9 +270,10 @@ BOOL WIN32API UpdateWindow(HWND hwnd)
 
     window = Win32Window::GetWindowFromHandle(hwnd);
     if(!window) {
-	dprintf(("SendMessageA, window %x not found", hwnd));
+	dprintf(("UpdateWindow, window %x not found", hwnd));
 	return 0;
     }
+    dprintf(("UpdateWindow %x", hwnd));
     return window->UpdateWindow();
 }
 //******************************************************************************
@@ -274,22 +284,25 @@ BOOL WIN32API IsIconic( HWND hwnd)
 
     window = Win32Window::GetWindowFromHandle(hwnd);
     if(!window) {
-	dprintf(("SendMessageA, window %x not found", hwnd));
+	dprintf(("IsIconic, window %x not found", hwnd));
 	return 0;
     }
+    dprintf(("IsIconic %x", hwnd));
     return window->IsIconic();
 }
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API GetWindow(HWND arg1, UINT arg2)
+HWND WIN32API GetWindow(HWND hwnd, UINT uCmd)
 {
- HWND rc;
+  Win32Window *window;
 
-    rc = O32_GetWindow(arg1, arg2);
-#ifdef DEBUG
-    WriteLog("USER32:  GetWindow %X %d returned %d\n", arg1, arg2, rc);
-#endif
-    return(rc);
+    window = Win32Window::GetWindowFromHandle(hwnd);
+    if(!window) {
+	dprintf(("GetWindow, window %x not found", hwnd));
+	return 0;
+    }
+    dprintf(("GetWindow %x %d", hwnd, uCmd));
+    return window->GetWindow(uCmd);
 }
 //******************************************************************************
 //******************************************************************************
@@ -302,45 +315,107 @@ HDC WIN32API GetWindowDC(HWND arg1)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API EnableWindow( HWND arg1, BOOL  arg2)
+BOOL WIN32API EnableWindow( HWND hwnd, BOOL fEnable)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  EnableWindow\n");
-#endif
-    return O32_EnableWindow(arg1, arg2);
+  Win32Window *window;
+
+    window = Win32Window::GetWindowFromHandle(hwnd);
+    if(!window) {
+	dprintf(("EnableWindow, window %x not found", hwnd));
+	return 0;
+    }
+    dprintf(("EnableWindow %x %d", hwnd, fEnable));
+    return window->EnableWindow(fEnable);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API BringWindowToTop( HWND arg1)
+BOOL WIN32API BringWindowToTop(HWND hwnd)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  BringWindowToTop\n");
-#endif
-    return O32_BringWindowToTop(arg1);
+  Win32Window *window;
+
+    window = Win32Window::GetWindowFromHandle(hwnd);
+    if(!window) {
+	dprintf(("BringWindowToTop, window %x not found", hwnd));
+	return 0;
+    }
+    dprintf(("BringWindowToTop %x", hwnd));
+    return window->BringWindowToTop();
 }
 //******************************************************************************
 //******************************************************************************
 HWND WIN32API GetActiveWindow()
 {
-  return(O32_GetActiveWindow());
+  return Win32Window::GetActiveWindow();
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API ShowWindow(HWND arg1, int arg2)
+BOOL WIN32API ShowWindow(HWND hwnd, int nCmdShow)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  ShowWindow %X %d\n", arg1, arg2);
-#endif
-    return O32_ShowWindow(arg1, arg2);
+  Win32Window *window;
+
+    window = Win32Window::GetWindowFromHandle(hwnd);
+    if(!window) {
+	dprintf(("ShowWindow, window %x not found", hwnd));
+	return 0;
+    }
+    dprintf(("ShowWindow %x", hwnd));
+    return window->ShowWindow(nCmdShow);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetWindowPos( HWND arg1, HWND arg2, int arg3, int arg4, int arg5, int arg6, UINT  arg7)
+BOOL WIN32API SetWindowPos(HWND hwnd, HWND hwndInsertAfter, int x, int y, int cx, int cy, UINT fuFlags)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  SetWindowPos\n");
-#endif
-    return O32_SetWindowPos(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+  Win32Window *window;
+
+    window = Win32Window::GetWindowFromHandle(hwnd);
+    if(!window) {
+	dprintf(("SetWindowPos, window %x not found", hwnd));
+	return 0;
+    }
+    dprintf(("SetWindowPos %x %x x=%d y=%d cx=%d cy=%d %x", hwnd, hwndInsertAfter, x, y, cx, cy, fuFlags));
+    return window->SetWindowPos(hwndInsertAfter, x, y, cx, cy, fuFlags);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API IsWindow( HWND hwnd)
+{
+  Win32Window *window;
+
+    window = Win32Window::GetWindowFromHandle(hwnd);
+    if(!window) {
+	dprintf(("IsWindow, window %x not found", hwnd));
+	return FALSE;
+    }
+    dprintf(("IsWindow %x", hwnd));
+    return window->IsWindow();
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API IsWindowEnabled( HWND hwnd)
+{
+  Win32Window *window;
+
+    window = Win32Window::GetWindowFromHandle(hwnd);
+    if(!window) {
+	dprintf(("IsWindowEnabled, window %x not found", hwnd));
+	return 0;
+    }
+    dprintf(("IsWindowEnabled %x", hwnd));
+    return window->IsWindowEnabled();
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API IsWindowVisible( HWND hwnd)
+{
+  Win32Window *window;
+
+    window = Win32Window::GetWindowFromHandle(hwnd);
+    if(!window) {
+	dprintf(("IsWindowVisible, window %x not found", hwnd));
+	return 0;
+    }
+    dprintf(("IsWindowVisible %x", hwnd));
+    return window->IsWindowVisible();
 }
 /***********************************************************************
  *           GetInternalWindowPos   (USER32.245)
@@ -363,33 +438,6 @@ UINT WIN32API GetInternalWindowPos(HWND    hwnd,
    return wndpl.showCmd;
     }
     return 0;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API IsWindow( HWND arg1)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  IsWindow\n");
-#endif
-    return O32_IsWindow(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API IsWindowEnabled( HWND arg1)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  IsWindowEnabled\n");
-#endif
-    return O32_IsWindowEnabled(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API IsWindowVisible( HWND arg1)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  IsWindowVisible\n");
-#endif
-    return O32_IsWindowVisible(arg1);
 }
 //******************************************************************************
 //******************************************************************************

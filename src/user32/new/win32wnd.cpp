@@ -1,4 +1,4 @@
-/* $Id: win32wnd.cpp,v 1.5 1999-07-17 09:17:58 sandervl Exp $ */
+/* $Id: win32wnd.cpp,v 1.6 1999-07-17 11:52:23 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -122,8 +122,14 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   /* Find the parent window */
   if (cs->hwndParent)
   {
+    	Win32Window *window = GetWindowFromHandle(cs->hwndParent);
+    	if(!window) {
+                dprintf(("Bad parent %04x\n", cs->hwndParent ));
+                SetLastError(ERROR_INVALID_PARAMETER);
+		return FALSE;
+    	}
         /* Make sure parent is valid */
-        if (!IsWindow( cs->hwndParent ))
+        if (!window->IsWindow() )
         {
                 dprintf(("Bad parent %04x\n", cs->hwndParent ));
                 SetLastError(ERROR_INVALID_PARAMETER);
@@ -344,7 +350,16 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         dprintf(("WM_CREATE: WinSetWindowULong2 %X failed!!", OS2Hwnd));
         return FALSE;
   }
-
+  if(OS2Hwnd != OS2HwndFrame) {
+  	if(OSLibWinSetWindowULong(OS2HwndFrame, OFFSET_WIN32WNDPTR, (ULONG)this) == FALSE) {
+        	dprintf(("WM_CREATE: WinSetWindowULong %X failed!!", OS2HwndFrame));
+        	return FALSE;
+  	}
+  	if(OSLibWinSetWindowULong(OS2HwndFrame, OFFSET_WIN32PM_MAGIC, WIN32PM_MAGIC) == FALSE) {
+        	dprintf(("WM_CREATE: WinSetWindowULong2 %X failed!!", OS2HwndFrame));
+        	return FALSE;
+  	}
+  }
   /* Set the window menu */
   if ((dwStyle & (WS_CAPTION | WS_CHILD)) == WS_CAPTION )
   {
@@ -414,7 +429,7 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 		/* Notify the parent window only */
 
 		NotifyParent(WM_CREATE, 0, 0);
-                if( !IsWindow(Win32Hwnd) )
+                if( !IsWindow() )
                 {
                     return FALSE;
 	        }
@@ -974,9 +989,12 @@ BOOL Win32Window::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, int c
 
   switch(hwndInsertAfter) {
   	case HWND_BOTTOM:
+		hwndInsertAfter = HWNDOS_BOTTOM;
+		break;
+	case HWND_TOPMOST: //TODO:
+	case HWND_NOTOPMOST: //TODO:
   	case HWND_TOP:
-	case HWND_TOPMOST:
-	case HWND_NOTOPMOST:
+		hwndInsertAfter = HWNDOS_TOP;
 		break;
 	default:
 		window = GetWindowFromHandle(hwndInsertAfter);
@@ -1020,13 +1038,6 @@ BOOL Win32Window::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, int c
 BOOL Win32Window::DestroyWindow()
 {
   return OSLibWinDestroyWindow(OS2HwndFrame);
-}
-//******************************************************************************
-//TODO:
-//******************************************************************************
-HWND Win32Window::SetActiveWindow()
-{
-  return O32_SetActiveWindow(OS2Hwnd);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1077,14 +1088,7 @@ BOOL Win32Window::IsChild(HWND hwndParent)
 //******************************************************************************
 HWND Win32Window::GetTopWindow()
 {
- HWND topchild;
-
-  topchild = OSLibWinQueryTopMostChildWindow(OS2HwndFrame);
-  if(topchild)
-  {
-	return topchild;
-  }
-  else	return 0;
+  return GetWindow(GW_CHILD);
 }
 //******************************************************************************
 //Don't call WinUpdateWindow as that one also updates the child windows
@@ -1106,6 +1110,113 @@ BOOL Win32Window::UpdateWindow()
 BOOL Win32Window::IsIconic()
 {
   return OSLibWinIsIconic(OS2HwndFrame);
+}
+//******************************************************************************
+//TODO: not complete nor correct (distinction between top-level, top-most & child windows)
+//******************************************************************************
+HWND Win32Window::GetWindow(UINT uCmd)
+{
+ Win32Window  *win32wnd;
+ ULONG         magic;
+ ULONG         getcmd = 0;
+ HWND          hwndRelated;
+
+  dprintf(("GetWindow %x %d NOT COMPLETE", getWindowHandle(), uCmd));
+  switch(uCmd)
+  {
+	case GW_CHILD:
+		getcmd = QWOS_TOP;
+		break;
+	case GW_HWNDFIRST:
+		if(getParent()) {
+			getcmd = QWOS_TOP; //top of child windows
+		}
+		else	getcmd = QWOS_TOP; //TODO
+		break;
+	case GW_HWNDLAST:
+		if(getParent()) {
+			getcmd = QWOS_BOTTOM; //bottom of child windows
+		}
+		else	getcmd = QWOS_BOTTOM; //TODO
+		break;
+	case GW_HWNDNEXT:
+		getcmd = QWOS_NEXT;
+		break;
+	case GW_HWNDPREV:
+		getcmd = QWOS_PREV;
+		break;
+	case GW_OWNER:
+		if(owner) {
+			return owner->getWindowHandle();
+		}
+		else 	return 0;
+  }
+  hwndRelated = OSLibWinQueryWindow(OS2HwndFrame, getcmd);
+  if(hwndRelated) 
+  {
+	win32wnd = (Win32Window *)OSLibWinGetWindowULong(hwndRelated, OFFSET_WIN32WNDPTR);
+	magic    = OSLibWinGetWindowULong(hwndRelated, OFFSET_WIN32PM_MAGIC);
+	if(CheckMagicDword(magic) && win32wnd)
+	{
+		return win32wnd->getWindowHandle();
+	}
+  }
+  return 0;
+}
+//******************************************************************************
+//******************************************************************************
+HWND Win32Window::SetActiveWindow()
+{
+  return OSLibWinSetActiveWindow(OS2HwndFrame);
+}
+//******************************************************************************
+//WM_ENABLE is sent to hwnd, but not to it's children (as it should be)
+//******************************************************************************
+BOOL Win32Window::EnableWindow(BOOL fEnable)
+{
+  return OSLibWinEnableWindow(OS2HwndFrame, fEnable);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32Window::BringWindowToTop()
+{
+  return SetWindowPos(HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE );
+}
+//******************************************************************************
+//******************************************************************************
+HWND Win32Window::GetActiveWindow()
+{
+ HWND          hwndActive;
+ Win32Window  *win32wnd;
+ ULONG         magic;
+
+  hwndActive = OSLibWinQueryActiveWindow();
+
+  win32wnd = (Win32Window *)OSLibWinGetWindowULong(hwndActive, OFFSET_WIN32WNDPTR);
+  magic    = OSLibWinGetWindowULong(hwndActive, OFFSET_WIN32PM_MAGIC);
+  if(CheckMagicDword(magic) && win32wnd)
+  {
+	return win32wnd->getWindowHandle();
+  }
+  return hwndActive;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32Window::IsWindow()
+{
+  return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32Window::IsWindowEnabled()
+{
+  return OSLibWinIsWindowEnabled(OS2Hwnd);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32Window::IsWindowVisible()
+{
+  return OSLibWinIsWindowVisible(OS2Hwnd);
 }
 //******************************************************************************
 //******************************************************************************
