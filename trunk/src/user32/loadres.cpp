@@ -1,4 +1,4 @@
-/* $Id: loadres.cpp,v 1.36 2001-03-28 16:20:32 sandervl Exp $ */
+/* $Id: loadres.cpp,v 1.37 2001-05-25 10:04:59 sandervl Exp $ */
 
 /*
  * Win32 resource API functions for OS/2
@@ -249,7 +249,7 @@ HANDLE LoadBitmapW(HINSTANCE hinst, LPCWSTR lpszName, int cxDesired, int cyDesir
 
       pix = *((LPBYTE)info + size);
       DIB_FixColorsToLoadflags(fix_info, fuLoad, pix);
-      if ((hdc = GetDC(0)) != 0)
+      if ((hdc = CreateCompatibleDC(0)) != 0)
       {
         char *bits = (char *)info + size;
         if (fuLoad & LR_CREATEDIBSECTION) {
@@ -278,7 +278,7 @@ HANDLE LoadBitmapW(HINSTANCE hinst, LPCWSTR lpszName, int cxDesired, int cyDesir
               dprintf(("LoadBitmapW: CreateDIBitmap failed!!"));
           }
         }
-        ReleaseDC( 0, hdc );
+        DeleteDC(hdc);
       }
       GlobalUnlock(hFix);
       GlobalFree(hFix);
