@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.13 1999-07-07 08:11:10 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.14 1999-07-09 15:58:54 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -71,7 +71,7 @@ TEB *InitializeTIB(BOOL fMainThread)
    }
    memset(winteb, 0, PAGE_SIZE);
    thdb       = (THDB *)(winteb+1);
-   TIBFlatPtr = (DWORD *)winteb;
+   *TIBFlatPtr = (DWORD)winteb;
 
    winteb->except      = (PVOID)-1;               /* 00 Head of exception handling chain */
    winteb->stack_top   = (PVOID)OS2GetTIB(TIB_STACKTOP); /* 04 Top of thread stack */
@@ -119,7 +119,7 @@ void DestroyTIB()
    dprintf(("DestroyTIB: FS     = %x", GetFS()));
    dprintf(("DestroyTIB: FS:[0] = %x", QueryExceptionChain()));
 
-   winteb = (TEB *)TIBFlatPtr;
+   winteb = (TEB *)*TIBFlatPtr;
    if(winteb) {
 	thdb = (THDB *)(winteb+1);
 	orgtibsel = thdb->OrgTIBSel;
@@ -133,7 +133,7 @@ void DestroyTIB()
    else dprintf(("Already destroyed TIB"));
 
    dprintf(("DestroyTIB: FS(%x):[0] = %x", GetFS(), QueryExceptionChain()));
-   TIBFlatPtr = NULL;
+   *TIBFlatPtr = 0;
    return;
 }
 /******************************************************************************/
@@ -144,7 +144,7 @@ void WIN32API RestoreOS2TIB()
  TEB   *winteb;
  THDB  *thdb;
 
-   winteb = (TEB *)TIBFlatPtr;
+   winteb = (TEB *)*TIBFlatPtr;
    if(winteb) {
 	thdb = (THDB *)(winteb+1);
 	orgtibsel = thdb->OrgTIBSel;
@@ -161,7 +161,7 @@ USHORT WIN32API SetWin32TIB()
  TEB   *winteb;
  THDB  *thdb;
 
-   winteb = (TEB *)TIBFlatPtr;
+   winteb = (TEB *)*TIBFlatPtr;
    if(winteb) {
 	thdb = (THDB *)(winteb+1);
 	win32tibsel = thdb->teb_sel;
@@ -171,7 +171,7 @@ USHORT WIN32API SetWin32TIB()
    }
    else DebugInt3();
 
-   return 0;
+   return GetFS();
 }
 /******************************************************************************/
 //******************************************************************************
