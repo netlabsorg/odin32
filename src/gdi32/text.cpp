@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.6 1999-12-27 22:52:39 cbratschi Exp $ */
+/* $Id: text.cpp,v 1.7 2000-01-29 14:22:13 sandervl Exp $ */
 
 /*
  * GDI32 text apis
@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <misc.h>
 #include <string.h>
+#include <float.h>
 #include "oslibgpi.h"
 
 #define ELLIPSIS    "..."
@@ -405,9 +406,16 @@ INT SYSTEM EXPORT InternalDrawTextExA(HDC hdc,LPCSTR lpchText,INT cchText,LPRECT
 
   return rc;
 */
+  UINT fpuctrlword;
+  INT rc;
 
+  //SvL: Open32's DrawText messes up the fpu control word! (@#$@#$@#$)
+  fpuctrlword = _control87(0, 0);
   dwDTFormat &= ~(DT_END_ELLIPSIS | DT_PATH_ELLIPSIS);
-  return O32_DrawText(hdc,lpchText,cchText,lprc,dwDTFormat);
+
+  rc = O32_DrawText(hdc,lpchText,cchText,lprc,dwDTFormat);
+  _control87(fpuctrlword, 0xFFFF);
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************
