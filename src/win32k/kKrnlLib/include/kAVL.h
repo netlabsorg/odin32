@@ -1,8 +1,8 @@
-/* $Id: kAVL.h,v 1.2 2001-09-15 18:54:19 bird Exp $
+/* $Id: kAVL.h,v 1.3 2001-09-27 03:05:58 bird Exp $
  *
  * kAVL - header file for all the AVL trees.
  *
- * Copyright (c) 1999-2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 1999-2001 knut st. osmundsen (kosmunds@csc.com)
  *
  */
 #ifndef _kAVL_h_
@@ -118,7 +118,7 @@ unsigned            KLIBCALL AVLStrIDoWithAll(PPAVLSTRINODECORE ppTree, int fFro
 /**
  * AVL key type
  */
-typedef const char *AVLPVKEY;
+typedef void *AVLPVKEY;
 
 /**
  * AVL Core node.
