@@ -1,4 +1,4 @@
-/* $Id: pmkbdhk.cpp,v 1.5 2003-07-07 12:26:08 sandervl Exp $ */
+/* $Id: pmkbdhk.cpp,v 1.6 2003-10-22 09:48:08 sandervl Exp $ */
 /*
  * OS/2 native Presentation Manager hooks
  *
@@ -453,8 +453,24 @@ BOOL EXPENTRY hookPreAccelHook(HAB hab, PQMSG pqmsg, ULONG option)
             case PMSCAN_SHIFTLEFT:
             case PMSCAN_SHIFTRIGHT:
                 if( SHORT1FROMMP(pqmsg->mp1) & KC_ALT )
-                    // Let PM process CP switching msg
-                    return FALSE;
+                {
+                  BOOL      fsuccess;
+                  ULONG     ulLayerID;
+
+                  if( CHAR4FROMMP(pqmsg->mp1) == PMSCAN_SHIFTLEFT )
+                    ulLayerID= KL_NATIONAL;
+                  else
+                    ulLayerID= KL_LATIN;
+                  fsuccess= WinSetKbdLayer( pqmsg->hwnd /* HWND_DESKTOP */
+                                          , ulLayerID        /* First country/language layout       */
+                                          , SKLF_SENDMSG );  /* Post the WM_KBDLAYERCHANGED message */
+                  HWND hwnd;
+                  /* Store layerFlag in parent(frame) window data */
+                  hwnd= WinQueryWindow( pqmsg->hwnd, QW_PARENT );
+                  WinSetWindowULong( hwnd, QWL_KBDLAYER, ulLayerID );
+                }
+                //no break
+
             // Intercept PM Window Hotkeys such as 
             // Alt-F7 do enable window moving by keyboard.
             case PMSCAN_F1:
