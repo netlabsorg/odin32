@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.14 1999-07-09 15:58:54 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.15 1999-07-17 09:18:38 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -39,6 +39,27 @@ DWORD    *TIBFlatPtr    = 0;
 
 extern "C" ULONG QueryExceptionChain();
 
+//******************************************************************************
+//******************************************************************************
+TEB *WIN32API GetThreadTEB()
+{
+  return (TEB *)*TIBFlatPtr;
+}
+//******************************************************************************
+//******************************************************************************
+THDB *WIN32API GetThreadTHDB()
+{
+ TEB  *winteb;
+ THDB *thdb;
+
+  winteb = (TEB *)*TIBFlatPtr;
+  if(winteb == NULL) {
+	return NULL;
+  }
+  thdb = (THDB *)(winteb+1);
+
+  return thdb;
+}
 //******************************************************************************
 // Set up the TIB selector and memory for the current thread
 //******************************************************************************

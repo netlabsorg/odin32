@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.16 1999-07-07 08:11:09 sandervl Exp $
+; $Id: KERNEL32.DEF,v 1.17 1999-07-17 09:18:38 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -972,3 +972,6 @@ EXPORTS
    HMHandleAllocate__FPUlUl				           @1231
    HMHandleFree__FUl  	  	 	 	                   @1232
    HMHandleTranslateToOS2__FUlPUl				   @1233
+
+   GetThreadTEB         = _GetThreadTEB@0                          @1234
+   GetThreadTHDB        = _GetThreadTHDB@0			   @1235

@@ -1,4 +1,4 @@
-/* $Id: thread.h,v 1.4 1999-07-07 08:11:09 sandervl Exp $ */
+/* $Id: thread.h,v 1.5 1999-07-17 09:19:15 sandervl Exp $ */
 
 /*
  * Thread definitions
@@ -97,6 +97,8 @@ typedef struct _THDB
     struct _THDB  *next;           /* Global thread list */
 #ifdef __WIN32OS2__
     DWORD          OrgTIBSel;	   // Original OS/2 TIB selector (always the same, but let's not assume too much for future compatibility)
+    ULONG          hmq;		   // Thread message queue
+    ULONG          hab;            // Thread Anchor block
 #endif
 } THDB;
 

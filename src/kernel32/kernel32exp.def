@@ -1,4 +1,4 @@
-; $Id: kernel32exp.def,v 1.8 1999-07-04 11:44:04 sandervl Exp $
+; $Id: kernel32exp.def,v 1.9 1999-07-17 09:18:38 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -805,13 +805,13 @@ ConvertNameId                  @1200
 UpCase                         @1201
 WriteLog                       @1202
 WriteLogError                  @1214
-_RegisterResourceUsage@20      @1203
+_RegisterExe@44                @1203
 enter__6VMutexFUl                                               @1204
 leave__6VMutexFv                                                @1205
 __ct__6VMutexFv                                                 @1206
 __dt__6VMutexFv                                                 @1207
-_DLLExitList@4                 @1208
-_RegisterDll@20                @1209
+;;;_DLLExitList@4                 @1208
+_RegisterDll@44                @1209
 _UnicodeToAsciiString@4                  @1210
 _UnicodeToAscii@8                        @1211
 _FreeAsciiString@4                       @1212
@@ -836,3 +836,7 @@ RestoreOS2FS                             @1230
    HMHandleAllocate__FPUlUl				           @1231
    HMHandleFree__FUl  	  	 	 	                   @1232
    HMHandleTranslateToOS2__FUlPUl				   @1233
+
+   _GetThreadTEB@0                           @1234
+   _GetThreadTHDB@0			   @1235
+

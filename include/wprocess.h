@@ -1,4 +1,4 @@
-/* $Id: wprocess.h,v 1.5 1999-07-07 08:11:09 sandervl Exp $ */
+/* $Id: wprocess.h,v 1.6 1999-07-17 09:19:15 sandervl Exp $ */
 /*
  * Process help functions
  *
@@ -15,6 +15,7 @@
 
 #ifdef OS2_INCLUDED
 typedef DWORD TEB;
+typedef DWORD THDB;
 #else
 #include <winprocess.h>
 #include <thread.h>
@@ -30,5 +31,8 @@ extern BOOL fExeStarted;
 
 //Flat pointer to thread TIB structure
 extern DWORD  *TIBFlatPtr;
+
+TEB  *WIN32API GetThreadTEB();
+THDB *WIN32API GetThreadTHDB();
 
 #endif 
