@@ -1,4 +1,4 @@
-/* $Id: uitools.cpp,v 1.5 2000-01-01 14:57:24 cbratschi Exp $ */
+/* $Id: uitools.cpp,v 1.6 2000-01-10 17:18:09 cbratschi Exp $ */
 /*
  * User Interface Functions
  *
@@ -1790,21 +1790,6 @@ BOOL WIN32API DrawIconEx(HDC hdc, int xLeft, int yTop, HICON hIcon,
   if (ii.hbmMask) DeleteObject(ii.hbmMask);
 
   return TRUE;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API DrawMenuBar(HWND hwnd)
-{
- Win32BaseWindow *window;
-
-    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
-    if(!window) {
-        dprintf(("DrawMenuBar, window %x not found", hwnd));
-        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
-        return 0;
-    }
-    dprintf(("DrawMenuBar %x", hwnd));
-    return O32_DrawMenuBar(window->getOS2FrameWindowHandle());
 }
 /*****************************************************************************
  * Name      : BOOL WIN32API DrawAnimatedRects

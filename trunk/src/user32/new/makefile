@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.54 2000-01-09 14:14:22 cbratschi Exp $
+# $Id: makefile,v 1.55 2000-01-10 17:18:07 cbratschi Exp $
 
 #
 # PD-Win32 API
@@ -30,17 +30,17 @@ TARGET = user32
 
 OBJS =  user32.obj loadres.obj \
         dde.obj win32wndhandle.obj wsprintf.obj winmouse.obj \
-        icon.obj hook.obj winmenu.obj winkeyboard.obj \
+        icon.obj hook.obj winkeyboard.obj \
         defwndproc.obj syscolor.obj char.obj initterm.obj \
         uitools.obj unknown.obj spy.obj wndmsg.obj display.obj \
         pmwindow.obj pmframe.obj win32class.obj win32wnd.obj win32dlg.obj \
         msgbox.obj window.obj windowmsg.obj windowclass.obj win32wbase.obj \
         windowword.obj gen_object.obj oslibwin.obj win32wndchild.obj \
-        controls.obj button.obj static.obj scroll.obj listbox.obj \
+        controls.obj button.obj static.obj scroll.obj listbox.obj menu.obj\
         combo.obj edit.obj winswitch.obj icontitle.obj clipboard.obj winicon.obj \
         win32wmdiclient.obj oslibutil.obj oslibmsg.obj dib.obj oslibdos.obj \
         win32wmdichild.obj winprop.obj wingdi.obj oslibgdi.obj winaccel.obj \
-        win32wbasepos.obj oslibres.obj dummy.obj oslibmenu.obj dc.obj timer.obj \
+        win32wbasepos.obj oslibres.obj dummy.obj dc.obj timer.obj \
         caret.obj resource.obj winproc.obj text.obj oslibmsgtranslate.obj \
         windlgmsg.obj windlg.obj win32wdesktop.obj
 
@@ -93,7 +93,6 @@ dummy.obj: dummy.cpp
 char.obj: char.cpp user32.h
 loadres.obj: loadres.cpp user32.h dib.h
 icon.obj: icon.cpp $(PDWIN32_INCLUDE)\winicon.h
-winmenu.obj: winmenu.cpp user32.h $(PDWIN32_INCLUDE)\winres.h win32wbase.h winmenudef.h oslibwin.h oslibmenu.h
 syscolor.obj: syscolor.cpp syscolor.h
 dde.obj: dde.cpp
 hook.obj: hook.cpp $(PDWIN32_INCLUDE)\win\hook.h
@@ -134,7 +133,7 @@ pmframe.obj: pmframe.cpp win32class.h win32wbase.h pmframe.h win32wndchild.h
 win32class.obj: win32class.cpp win32class.h win32wbase.h win32dlg.h gen_object.h $(PDWIN32_INCLUDE)\heapshared.h oslibwin.h win32wndchild.h $(PDWIN32_INCLUDE)\win\winproc.h
 win32wbase.obj:   win32wbase.cpp win32class.h win32wbase.h win32dlg.h gen_object.h $(PDWIN32_INCLUDE)\heapshared.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h win32wndhandle.h oslibdos.h dc.h pmframe.h win32wdesktop.h controls.h winmouse.h $(PDWIN32_INCLUDE)\win\winproc.h $(PDWIN32_INCLUDE)\win\hook.h oslibmsg.h
 win32wbasepos.obj: win32wbasepos.cpp win32class.h win32wbase.h win32dlg.h gen_object.h $(PDWIN32_INCLUDE)\heapshared.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h win32wndhandle.h oslibdos.h dc.h pmframe.h win32wdesktop.h
-win32wnd.obj:   win32wnd.cpp win32class.h win32wbase.h win32wnd.h win32dlg.h gen_object.h $(PDWIN32_INCLUDE)\heapshared.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h win32wndhandle.h oslibdos.h oslibmenu.h
+win32wnd.obj:   win32wnd.cpp win32class.h win32wbase.h win32wnd.h win32dlg.h gen_object.h $(PDWIN32_INCLUDE)\heapshared.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h win32wndhandle.h oslibdos.h
 win32dlg.obj:   win32dlg.cpp win32class.h win32wbase.h win32dlg.h gen_object.h $(PDWIN32_INCLUDE)\heapshared.h oslibwin.h win32wndchild.h oslibmsg.h controls.h $(PDWIN32_INCLUDE)\win\winproc.h
 win32wndchild.obj: win32wndchild.cpp win32wndchild.h gen_object.h
 win32wmdiclient.obj: win32wmdiclient.cpp win32wbase.h win32wmdiclient.h win32wmdichild.h gen_object.h
@@ -145,7 +144,6 @@ oslibwin.obj:   oslibwin.cpp oslibwin.h oslibutil.h oslibgdi.h $(PDWIN32_INCLUDE
 oslibutil.obj:  oslibutil.cpp oslibutil.h $(PDWIN32_INCLUDE)\wprocess.h oslibmsg.h
 oslibmsg.obj:   oslibmsg.cpp oslibmsg.h timer.h win32wbase.h win32wnd.h $(PDWIN32_INCLUDE)\win\thread.h
 oslibmsgtranslate.obj: oslibmsgtranslate.cpp oslibmsg.h timer.h win32wbase.h win32wnd.h $(PDWIN32_INCLUDE)\win\thread.h
-oslibmenu.obj:  oslibmenu.cpp oslibmenu.h
 oslibgdi.obj:   oslibgdi.cpp oslibgdi.h win32wbase.h
 oslibres.obj:   oslibres.cpp oslibwin.h oslibres.h $(PDWIN32_INCLUDE)\winconst.h
 oslibdos.obj:   oslibdos.cpp oslibdos.h

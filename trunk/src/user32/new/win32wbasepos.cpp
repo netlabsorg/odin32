@@ -1,4 +1,4 @@
-/* $Id: win32wbasepos.cpp,v 1.3 2000-01-05 21:25:08 cbratschi Exp $ */
+/* $Id: win32wbasepos.cpp,v 1.4 2000-01-10 17:18:11 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (nonclient/position methods)
  *
@@ -31,7 +31,6 @@
 #include "oslibutil.h"
 #include "oslibgdi.h"
 #include "oslibres.h"
-#include "oslibmenu.h"
 #include "oslibdos.h"
 #include "syscolor.h"
 #include "win32wndhandle.h"
