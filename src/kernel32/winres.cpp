@@ -1,4 +1,4 @@
-/* $Id: winres.cpp,v 1.9 1999-08-19 19:50:41 sandervl Exp $ */
+/* $Id: winres.cpp,v 1.10 1999-08-20 11:52:44 sandervl Exp $ */
 
 /*
  * Win32 resource class
@@ -7,6 +7,7 @@
  *
  *
  * Project Odin Software License can be found in LICENSE.TXT
+ *
  *
  */
 #define INCL_BASE
@@ -30,6 +31,8 @@
 #include <winexe.h>
 #include "cvtresource.h"
 
+//******************************************************************************
+//******************************************************************************
 static ULONG CalcBitmapSize(ULONG cBits, LONG cx, LONG cy)
 {
         ULONG alignment;
@@ -154,7 +157,13 @@ Win32Resource::Win32Resource(Win32Image *module, ULONG id, ULONG type,
     DebugInt3();
     return;
   }
-  memcpy(winresdata, resdata, size);
+  OS2ResHandle = 0;
+
+  if(type == NTRT_STRING) {
+	memcpy(winresdata, resdata, size-sizeof(WCHAR));
+	((USHORT *)winresdata)[size/sizeof(WCHAR)-1] = 0;
+  }
+  else	memcpy(winresdata, resdata, size);
 }
 //******************************************************************************
 //******************************************************************************
@@ -252,16 +261,17 @@ PVOID Win32Resource::lockResource()
   }
 
   if(winresdata == NULL) {
-    rc = DosGetResource((HMODULE)module->hinstance, os2type, id, (PPVOID)&resdata);
-    if(rc) {
-        dprintf(("Can't find original string!!!\n"));
-        return(NULL);
-    }
-    winresdata = (char *)malloc(ressize);
-    memcpy(winresdata, resdata, ressize);
+    	rc = DosGetResource((HMODULE)module->hinstance, os2type, id, (PPVOID)&resdata);
+    	if(rc) {
+        	dprintf(("Can't find original resource!!!\n"));
+        	return(NULL);
+    	}
+    	winresdata = (char *)malloc(ressize);
+    	memcpy(winresdata, resdata, ressize);
   }
   if(resdata)
-    DosFreeResource(resdata);
+    	DosFreeResource(resdata);
+
   return winresdata;
 }
 //******************************************************************************
@@ -320,9 +330,11 @@ PVOID Win32Resource::convertResource(void *win32res)
     case NTRT_FONTDIR:
     case NTRT_FONT:
     case NTRT_MESSAGETABLE:
-    case NTRT_STRING:
     case NTRT_RCDATA:
     case NTRT_VERSION:
+    case NTRT_STRING:
+	break;
+
     default:
         break;
   }
