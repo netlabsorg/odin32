@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.187 1999-09-08 19:38:44 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.188 1999-09-09 10:25:54 phaller Exp $ */
+
+ 99-09-09: Patrick Haller <phaller@gmx.net>
+	- SHELL32\NEW:	improvement of shell32
 
  99-09-08: David Raison
 	- Src\OleAut32 Added stubs for undefined exports in OLEAut32
