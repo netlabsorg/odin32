@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.8 1999-06-28 07:55:16 sandervl Exp $ */
+/* $Id: KERNEL32.CPP,v 1.9 1999-06-30 13:25:01 sandervl Exp $ */
 
 /*
  *
@@ -13,7 +13,7 @@
  * Copyright 1998 Peter Fitzsimmons
  * Copyright 1998 Knut St. Osmundsen
  *
- * @(#) KERNEL32.CPP            1.0.1	1998/06/12 PH added HandleManager support
+ * @(#) KERNEL32.CPP            1.0.1   1998/06/12 PH added HandleManager support
  */
 
 
@@ -698,8 +698,10 @@ LPSTR WIN32API lstrcpynA(LPSTR arg1, LPCSTR  arg2, int arg3)
 
   //PH: looks like either \0 or arg3 terminate the copy
   //return strncpy(arg1, arg2, arg3);
-  for (;*p2 && arg3; arg3--)
+  for (;*p2 && (arg3 > 1); arg3--)
     *p1++ = *p2++;
+
+  *p1 = 0; //CB: copy arg-1, set end 0
 
   return arg1;
 }
@@ -708,7 +710,9 @@ LPSTR WIN32API lstrcpynA(LPSTR arg1, LPCSTR  arg2, int arg3)
 LPWSTR WIN32API lstrcpynW(LPWSTR dest, LPCWSTR src, int arg3)
 {
     dprintf(("KERNEL32:  OS2lstrcpynW"));
-    UniStrncpy( (UniChar*)dest, (UniChar*)src, arg3 );
+    if (arg3 == 0) return NULL;
+    UniStrncpy( (UniChar*)dest, (UniChar*)src, arg3-1); //CB: copy arg3-1 characters
+    dest[arg3-1] = 0; //CB: set end
     return dest;
 }
 //******************************************************************************
@@ -1147,6 +1151,7 @@ BOOL WIN32API IsDBCSLeadByteEx(UINT CodePage, BYTE TestChar)
     return O32_IsDBCSLeadByte(TestChar);
 }
 //******************************************************************************
+
 
 
 

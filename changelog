@@ -1,4 +1,9 @@
- /* $Id: changelog,v 1.35 1999-06-30 11:28:56 sandervl Exp $ */
+ /* $Id: changelog,v 1.36 1999-06-30 13:24:24 sandervl Exp $ */
+ 99-06-30: Christoph Bratschi <cbratschi@datacomm.ch>
+	- KERNEL32: Unicode changes (unicode.cpp)
+		    lstrcpynA/W (kernel32.cpp
+	- USER32: LoadStringA unicode conversion bugfix
+
  99-06-30: Przemysˆaw Dobrowolski <dobrawka@asua.org.pl>
 	- WINMM: Implemented remaining joystick apis + bugfixes
 
