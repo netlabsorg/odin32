@@ -1,4 +1,4 @@
-/* $Id: directory.cpp,v 1.27 2000-06-13 21:19:32 sandervl Exp $ */
+/* $Id: directory.cpp,v 1.28 2000-06-30 08:39:20 sandervl Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
@@ -173,8 +173,7 @@ ODINFUNCTION1(BOOL,   SetCurrentDirectoryA,
     LPSTR lpTemp = (LPSTR)_alloca(len);
     lstrcpynA(lpTemp,
               lpstrDirectory,
-              len - 1);
-    lpTemp[len - 1] = 0;
+              len); // len is including trailing NULL!!
     lpstrDirectory = lpTemp;
   }
 
@@ -232,8 +231,7 @@ ODINFUNCTION2(BOOL,                CreateDirectoryA,
     LPSTR lpTemp = (LPSTR)_alloca(len);
     lstrcpynA(lpTemp,
               lpstrDirectory,
-              len - 1);
-    lpTemp[len - 1] = 0;
+              len ); // len is including trailing NULL!!
     lpstrDirectory = lpTemp;
   }
   
@@ -424,8 +422,7 @@ ODINFUNCTION1(BOOL,   RemoveDirectoryA,
     LPSTR lpTemp = (LPSTR)_alloca(len);
     lstrcpynA(lpTemp,
               lpstrDirectory,
-              len - 1);
-    lpTemp[len - 1] = 0;
+              len ); // len is including trailing NULL!!
     lpstrDirectory = lpTemp;
   }
   
@@ -596,8 +593,7 @@ DWORD WINAPI SearchPathA(LPCSTR path, LPCSTR name, LPCSTR ext, DWORD buflen,
     char full_name[MAX_PATHNAME_LEN];
 
     if (!DIR_SearchPath( path, name, ext, (LPSTR)full_name )) return 0;
-    lstrcpynA( buffer, (LPSTR)full_name, buflen-1);
-    buffer[buflen-2] = 0;
+    lstrcpynA( buffer, (LPSTR)full_name, buflen);
     SetLastError(0);
     return strlen(buffer);
 }
@@ -620,8 +616,7 @@ DWORD WINAPI SearchPathW(LPCWSTR path, LPCWSTR name, LPCWSTR ext,
     HeapFree( GetProcessHeap(), 0, pathA );
     if (!ret) return 0;
 
-    lstrcpynAtoW( buffer, full_name, buflen-1 );
-    buffer[buflen-2] = 0;
+    lstrcpynAtoW( buffer, full_name, buflen);
     SetLastError(0);
     return strlen(full_name);
 }
