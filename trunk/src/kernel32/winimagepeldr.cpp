@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.73 2001-04-02 22:51:58 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.74 2001-04-19 08:32:49 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -1693,6 +1693,9 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
         }
         else {
              WinDll = loadDll(pszCurModule);
+             if(WinDll == NULL) {
+                 return FALSE;
+             }
         }
     }
     else {
