@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.24 1999-08-22 11:11:10 sandervl Exp $
+# $Id: makefile,v 1.25 1999-08-22 14:30:59 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -24,42 +24,15 @@ OBJS = KERNEL32.OBJ KOBJECTS.OBJ CONSOLE.OBJ CONIN.OBJ CONBUFFER.OBJ \
        MESSAGE.OBJ RESOURCE.OBJ NAMEID.OBJ WINRES.OBJ WINMOD.OBJ \
        OS2NATIVE.OBJ EXCEPTIONS.OBJ LFILE.OBJ NPIPE.OBJ \
        MISC.OBJ EXCEPTUTIL.OBJ LANG.OBJ ICCIO.OBJ MAP.OBJ \
-       WIN32UTIL.OBJ \
-       heap.OBJ \
-       heapstring.obj \
-       os2heap.OBJ \
-       vmutex.OBJ \
-       initterm.OBJ \
-       os2util.OBJ \
-       handlemanager.OBJ \
-       hmdevice.obj \
-       hmopen32.obj \
-       hmobjects.obj \
-       hmevent.obj \
-       hmmutex.obj \
-       hmsemaphore.obj \
-       wprocess.OBJ \
-       conprop.OBJ \
-       winimage.OBJ \
-       windll.OBJ \
-       winexe.OBJ \
-       time.obj \
-       pefile.OBJ \
-       winimgres.OBJ \
-       wintls.obj \
-       async.OBJ \
-       fileio.obj \
-       atom.obj \
-       disk.obj \
-       directory.obj \
-       cvtbitmap.obj \
-       cvtmenu.obj \
-       cvtaccel.obj \
-       cvticon.obj \
-       cvticongrp.obj \
-       cvtcursor.obj \
-       cvtcursorgrp.obj \
-       stubs.obj
+       WIN32UTIL.OBJ heap.OBJ heapstring.obj os2heap.OBJ \
+       vmutex.OBJ initterm.OBJ os2util.OBJ handlemanager.OBJ \
+       hmdevice.obj hmopen32.obj hmobjects.obj hmevent.obj \
+       hmmutex.obj hmsemaphore.obj wprocess.OBJ conprop.OBJ \
+       winimage.OBJ windll.OBJ winexe.OBJ time.obj \
+       pefile.OBJ winimgres.OBJ wintls.obj async.OBJ fileio.obj \
+       atom.obj disk.obj directory.obj cvtbitmap.obj \
+       cvtmenu.obj cvtaccel.obj cvticon.obj cvticongrp.obj \
+       cvtcursor.obj cvtcursorgrp.obj stubs.obj
 
 
 TARGET = kernel32
