@@ -1,4 +1,4 @@
-/* $Id: win32type.h,v 1.29 1999-12-17 16:55:12 sandervl Exp $ */
+/* $Id: win32type.h,v 1.30 1999-12-17 17:25:28 sandervl Exp $ */
 
 /*
  * Win32 type definitions for OS/2
@@ -11,7 +11,7 @@
  */
 
 
-#ifndef __WIN32TYPE_H__
+#if !defined(__WIN32TYPE_H__) && !defined(_OS2WIN_H) && !defined(__INCLUDE_WINUSER_H) && !defined(__WINE_WINBASE_H)
 #define __WIN32TYPE_H__
 
 #include <odin.h>
