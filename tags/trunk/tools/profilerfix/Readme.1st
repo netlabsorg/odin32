@@ -1,0 +1,44 @@
+/* $Id: Readme.1st,v 1.1 2002-04-17 04:09:57 bird Exp $ */
+
+Forget these fixes. I've just made a little discovery.
+Read the article: http://www.mainframeforum.com/t115794/s.html
+
+If you're lazy just read the following:
+
+How to trace your VAC308 and VAC365 programs
+---------------------------------------------
+
+1. Compile with -Gh+ so that profile hooks are generated.
+2. Link with cpppan40.obj from VAC4. (*not* with CPPOPA3.OBJ!!!)
+3. Run your program in the profiler, patrace.exe:
+        patrace.exe <tracefile> <programname> [options]
+   Note. Remember to have the cpppan40.sys driver installed
+         elsewise patrace will exit with no explanation.
+4. Start the VAC4 IDE in tech preview mode. From the commandline this means:
+	vacide.exe -TECHPREVIEW [more args]
+   - Open any project.
+   - Go the 'Project' tab. There you'll find a 'Performance...' button.
+   - Then use the 'Browse...' button to open the trace file you
+     generated a little while ago.
+
+5. Now a 'PA'<tracefilename> Tab will show up. From that you have access two
+   tree graphs. Sorrily the really really nice graphical presentation isn't
+   there. but this is lot's better than nothing! Usually the
+   'Statistics Details' should give you most of the info you need.
+
+
+
+For Project Odin
+-----------------
+
+1. Copy cpppan40.obj to <odinroot>\lib\profile and <odinroot>\lib\profile.vac36.
+2. Unset DEBUG
+        Set DEBUG=
+3. Set PROFILE
+        Set PROFILE=1
+4. Build the entire odin sources or the part you like to profile.
+
+
+
+- knut st. osmundsen
+ (2002-04-17)
