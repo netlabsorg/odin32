@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.64 2001-04-05 05:54:51 sandervl Exp $ */
+/* $Id: KERNEL32.CPP,v 1.65 2001-06-02 17:11:21 achimha Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -156,6 +156,9 @@ DWORD WIN32API GetLastError()
   rc = O32_GetLastError();
   if(rc) {
     dprintf2(("KERNEL32:  GetLastError returned %d\n", rc));
+  } else
+  {
+    dprintf2(("KERNEL32: GetLastError returned no error\n"));
   }
   return(rc);
 }
