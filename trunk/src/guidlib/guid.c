@@ -1,4 +1,4 @@
-/* $Id: guid.c,v 1.3 2002-02-07 10:54:58 sandervl Exp $ */
+/* $Id: guid.c,v 1.4 2002-02-15 14:17:37 sandervl Exp $ */
 #define ICOM_CINTERFACE 1
 #include <odin.h>
 
@@ -28,6 +28,7 @@
 #include <wine/obj_oleview.h>
 #include <wine/obj_dragdrop.h>
 #include <wine/obj_inplace.h>
+#include <wine/obj_channel.h>
 #include <wine/obj_control.h>
 #include <wine/obj_shellfolder.h>
 #include <wine/obj_shelllink.h>
