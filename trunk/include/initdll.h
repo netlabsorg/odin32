@@ -87,6 +87,7 @@ ULONG APIENTRY inittermRiched32(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermWnaspi32(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermUxTheme(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermDInput(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermDSound(ULONG hModule, ULONG ulFlag);
 
 ULONG APIENTRY InitializeKernel32();
 

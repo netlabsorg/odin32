@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2303 2002-09-12 09:26:49 sandervl Exp $ */
+/* $Id: changelog,v 1.2304 2002-09-14 08:30:11 sandervl Exp $ */
+
+ 2002-09-14: Yuri Dario <mc6530@mclink   >
+    - DSOUND:   o Load MMPM2 (MDM.DLL) on demand
 
  2002-09-12: Platon Fomichev <platon@innotek   >
     - USER32:   o Translate PM WM_VSCROLL to WM_MOUSEWHEEL messages (currently
