@@ -1,4 +1,4 @@
-/* $Id: static.cpp,v 1.25 2001-11-07 19:19:09 sandervl Exp $ */
+/* $Id: static.cpp,v 1.26 2002-11-04 13:31:14 sandervl Exp $ */
 /*
  * Static control
  *
@@ -340,22 +340,67 @@ LRESULT STATIC_SysColorChange(HWND hwnd,WPARAM wParam,LPARAM lParam)
   return 0;
 }
 
+/***********************************************************************
+ *           STATIC_TryPaintFcn
+ *
+ * Try to immediately paint the control.
+ */
+static VOID STATIC_TryPaintFcn(HWND hwnd, LONG full_style)
+{
+    LONG style = full_style & SS_TYPEMASK;
+    RECT rc;
+
+    GetClientRect( hwnd, &rc );
+    if (!IsRectEmpty(&rc) && IsWindowVisible(hwnd) && staticPaintFunc[style])
+    {
+	HDC hdc;
+	hdc = GetDC( hwnd );
+	(staticPaintFunc[style])( hwnd, hdc );
+	ReleaseDC( hwnd, hdc );
+    }
+}
+
 LRESULT STATIC_SetText(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   DWORD style = GetWindowLongA(hwnd,GWL_STYLE) & SS_TYPEMASK;
 
-  if (style == SS_ICON)
-    STATIC_SetIcon(hwnd,STATIC_LoadIcon(hwnd,(LPCSTR)lParam));
-  else if (style == SS_BITMAP)
-    STATIC_SetBitmap(hwnd,STATIC_LoadBitmap(hwnd,(LPCSTR)lParam));
-  else if (style == SS_ENHMETAFILE)
-    STATIC_SetMetafile(hwnd,STATIC_LoadMetafile(hwnd,(LPCSTR)lParam));
-  else
-    DefWindowProcA(hwnd,WM_SETTEXT,wParam,lParam);
-
-  InvalidateRect(hwnd,NULL,FALSE);
-
-  return TRUE;
+  switch (style) {
+	case SS_ICON:
+	{
+	    HICON hIcon;
+            hIcon = STATIC_LoadIcon(hwnd, (LPCSTR)lParam);
+            /* FIXME : should we also return the previous hIcon here ??? */
+            STATIC_SetIcon(hwnd, hIcon);
+	    break;
+	}
+        case SS_BITMAP: 
+	{
+	    HBITMAP hBitmap;
+            hBitmap = STATIC_LoadBitmap(hwnd, (LPCSTR)lParam);
+            STATIC_SetBitmap(hwnd, hBitmap);
+	    break;
+	}
+	case SS_LEFT:
+	case SS_CENTER:
+	case SS_RIGHT:
+	case SS_SIMPLE:
+	case SS_LEFTNOWORDWRAP:
+        {
+	    if (HIWORD(lParam))
+	    {
+		 DefWindowProcA( hwnd, WM_SETTEXT, wParam, lParam );
+	    }
+            STATIC_TryPaintFcn( hwnd, style );
+	    break;
+	}
+	default:
+	    if (HIWORD(lParam))
+	    {
+                DefWindowProcA( hwnd, WM_SETTEXT, wParam, lParam );
+    	    }
+            InvalidateRect(hwnd, NULL, TRUE);
+	}
+        return 1; /* success. FIXME: check text length */
 }
 
 LRESULT STATIC_GetText(HWND hwnd,WPARAM wParam,LPARAM lParam)
