@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.4 1999-11-29 07:22:55 phaller Exp $ */
+/* $Id: wsock32.cpp,v 1.5 1999-11-29 22:23:07 phaller Exp $ */
 
 /*
  *
@@ -42,8 +42,9 @@
 #include <misc.h>
 #include <wprocess.h>
 #include <heapstring.h>
+#include <win32wnd.h>
 
-#include <wsock32.h>
+#include "wsock32.h"
 
 
 ODINDEBUGCHANNEL(WSOCK32-WSOCK32)
@@ -1341,6 +1342,7 @@ ODINFUNCTION4(int,OS2WSAAsyncSelect,
 {
   int rc;
   int iError;
+  HWND hwndOS2;
   
   /* @@@PH: our source window doesn't seem to have an anchor block.
             Docs suggest we've missed to call WinInitialize on the
@@ -1354,9 +1356,10 @@ ODINFUNCTION4(int,OS2WSAAsyncSelect,
             counterpart.
    */
   
+  hwndOS2 = Win32ToOS2Handle(hWnd);
   
   rc = WSAAsyncSelect(s,
-                      hWnd,
+                      hwndOS2,
                       wMsg,
                       lEvent);
 
