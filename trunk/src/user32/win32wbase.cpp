@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.339 2002-09-17 17:43:07 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.340 2002-09-19 09:37:42 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -824,6 +824,13 @@ if (!cs->hMenu) cs->hMenu = LoadMenuA(windowClass->getInstance(),"MYAPP");
         state   = STATE_POST_WMNCCREATE;
 
         //set the window size and update the client
+        //@@PF Popup children of inactive windows can thus bring inactive window
+        //on top, this is not correct, popup windows can be on top only if their owner
+        //is in foreground, otherwise they are linked after owner. 
+        if (((dwStyle & (WS_CHILD|WS_POPUP)) == WS_POPUP) && getOwner() && (getOwner()->getWindowHandle() != GetForegroundWindow()))
+        {
+            hwndLinkAfter = getOwner()->getWindowHandle();
+        }
         SetWindowPos(hwndLinkAfter, tmpRect.left, tmpRect.top, tmpRect.right-tmpRect.left, tmpRect.bottom-tmpRect.top,SWP_NOACTIVATE | SWP_NOREDRAW | SWP_FRAMECHANGED);
 
         state = STATE_PRE_WMCREATE;
