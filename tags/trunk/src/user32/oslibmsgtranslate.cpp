@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.11 2000-01-09 14:37:09 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.12 2000-01-09 17:57:47 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -395,41 +395,45 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
       ULONG x = 0, y = 0;
       ULONG win32sc;
 
+
         if(SHORT2FROMMP(os2Msg->mp2) == TRUE) {//syscommand caused by mouse action
-            POINTL pointl;
-            WinQueryPointerPos(HWND_DESKTOP, &pointl);
-            x = pointl.x;
-            y = mapScreenY(y);
+            x = winMsg->pt.x;
+            y = winMsg->pt.y;
         }
-        switch(SHORT1FROMMP(os2Msg->mp1)) {
-        case SC_MOVE:
-            win32sc = SC_MOVE_W;
-            break;
-        case SC_CLOSE:
-            win32sc = SC_CLOSE_W;
-            break;
-        case SC_MAXIMIZE:
-            win32sc = SC_MAXIMIZE_W;
-            break;
-        case SC_MINIMIZE:
-            win32sc = SC_MINIMIZE_W;
-            break;
-        case SC_NEXTFRAME:
-        case SC_NEXTWINDOW:
-            win32sc = SC_NEXTWINDOW_W;
-            break;
-        case SC_RESTORE:
-            win32sc = SC_RESTORE_W;
-            break;
-        case SC_TASKMANAGER:
-            win32sc = SC_TASKLIST_W;
-            break;
-        default:
-            goto dummymessage;
+        //When fOS2Look == 0, we display our own system menu (so no translation required)
+        if(fOS2Look) {
+            switch(SHORT1FROMMP(os2Msg->mp1)) {
+            case SC_MOVE:
+                win32sc = SC_MOVE_W;
+                break;
+            case SC_CLOSE:
+                win32sc = SC_CLOSE_W;
+                break;
+            case SC_MAXIMIZE:
+                win32sc = SC_MAXIMIZE_W;
+                break;
+            case SC_MINIMIZE:
+                win32sc = SC_MINIMIZE_W;
+                break;
+            case SC_NEXTFRAME:
+            case SC_NEXTWINDOW:
+                win32sc = SC_NEXTWINDOW_W;
+                break;
+            case SC_RESTORE:
+                win32sc = SC_RESTORE_W;
+                break;
+            case SC_TASKMANAGER:
+                win32sc = SC_TASKLIST_W;
+                break;
+            default:
+                goto dummymessage;
+            }
         }
-        winMsg->message    = WINWM_SYSCOMMAND;
-        winMsg->wParam = (WPARAM)win32sc;
-        winMsg->lParam = MAKELONG((USHORT)x, (USHORT)y);
+        else    win32sc = (ULONG)os2Msg->mp1;
+
+        winMsg->message = WINWM_SYSCOMMAND;
+        winMsg->wParam  = (WPARAM)win32sc;
+        winMsg->lParam  = MAKELONG((USHORT)x, (USHORT)y);
         break;
     }
     case WM_CHAR:
