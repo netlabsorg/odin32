@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.39 2002-11-03 01:10:44 bird Exp $
+/* $Id: buildenv.cmd,v 1.40 2002-12-18 16:45:19 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -26,7 +26,7 @@
     /*
      * Version
      */
-    sVersion = '1.0.11 [2002-11-02]';
+    sVersion = '1.0.12 [2002-12-18]';
 
     /*
      * Create argument array with lowercase arguments.
@@ -888,22 +888,22 @@ PathSetDefault: procedure expose aCfg. aPath. sPathFile
     if (translate(EnvGet('HOSTNAME')) = 'DELIRIUM') then
     do
         say 'Info: No or empty path file, using birds work defaults.';
-        aPath.i.sPId = 'cvs';                       aPath.i.sPath = 'e:\cvs111';                    i = i + 1;
+        aPath.i.sPId = 'cvs';                       aPath.i.sPath = 'e:\dev\cvs\v11.1';             i = i + 1;
         aPath.i.sPId = 'emx';                       aPath.i.sPath = 'e:\emx';                       i = i + 1;
-        aPath.i.sPId = 'emxpgcc';                   aPath.i.sPath = 'e:\emxpgcc';                   i = i + 1;
+        aPath.i.sPId = 'emxpgcc';                   aPath.i.sPath = 'e:\dev\emxpgcc\v2.95.2';       i = i + 1;
       /*aPath.i.sPId = 'db2v52';                    aPath.i.sPath = 'e:\sqllib52';                  i = i + 1;
         aPath.i.sPId = 'icatgam';                   aPath.i.sPath = 'e:\icatos2';                   i = i + 1;
         aPath.i.sPId = 'icatgam406rc1';             aPath.i.sPath = 'e:\icatos2.4.0.6.rc1';         i = i + 1;
         aPath.i.sPId = 'icatpe';                    aPath.i.sPath = 'e:\icatpe';                    i = i + 1;
         aPath.i.sPId = 'ida38';                     aPath.i.sPath = 'e:\ida38';                     i = i + 1;
         aPath.i.sPId = 'ida40';                     aPath.i.sPath = 'e:\ida401';                    i = i + 1; */
-        aPath.i.sPId = 'ida414';                    aPath.i.sPath = 'e:\ida414';                    i = i + 1;
+        aPath.i.sPId = 'ida414';                    aPath.i.sPath = 'e:\dev\ida\v414';                    i = i + 1;
       /*aPath.i.sPId = 'idasdk';                    aPath.i.sPath = 'e:\idasdk';                    i = i + 1; */
-        aPath.i.sPId = 'ddk';                       aPath.i.sPath = 'e:\ddk';                       i = i + 1;
-        aPath.i.sPId = 'ddkbase';                   aPath.i.sPath = 'e:\ddk\base';                  i = i + 1;
-        aPath.i.sPId = 'ddkvideo';                  aPath.i.sPath = 'e:\ddk\video';                 i = i + 1;
-        aPath.i.sPId = 'home';                      aPath.i.sPath = 'x:\home';                      i = i + 1;
-        aPath.i.sPId = 'mscv6-16';                  aPath.i.sPath = 'e:\ddktools\toolkits\msc60';   i = i + 1;
+        aPath.i.sPId = 'ddk';                       aPath.i.sPath = 'e:\dev\ddk\june02';                       i = i + 1;
+        aPath.i.sPId = 'ddkbase';                   aPath.i.sPath = 'e:\dev\ddk\june02\base';                  i = i + 1;
+        aPath.i.sPId = 'ddkvideo';                  aPath.i.sPath = 'e:\dev\ddk\june02\video';                 i = i + 1;
+        aPath.i.sPId = 'home';                      aPath.i.sPath = 'e:\home';                      i = i + 1;
+        aPath.i.sPId = 'mscv6-16';                  aPath.i.sPath = 'e:\dev\ddktools\toolkits\msc60';   i = i + 1;
       /*aPath.i.sPId = 'mscv7-16';                  aPath.i.sPath = 'e:\msc\v7.0';                  i = i + 1;
         aPath.i.sPId = 'mysql';                     aPath.i.sPath = 'e:\mysql2';                    i = i + 1;
         aPath.i.sPId = 'netqos2';                   aPath.i.sPath = 'e:\netqos2';                   i = i + 1;
@@ -912,15 +912,15 @@ PathSetDefault: procedure expose aCfg. aPath. sPathFile
         aPath.i.sPId = 'toolkit40';                 aPath.i.sPath = 'e:\toolkit';                   i = i + 1;
         aPath.i.sPId = 'toolkit45';                 aPath.i.sPath = 'e:\toolkit45';                 i = i + 1;
         aPath.i.sPId = 'toolkit451';                aPath.i.sPath = 'e:\toolkit451';                i = i + 1; */
-        aPath.i.sPId = 'toolkit452';                aPath.i.sPath = 'e:\toolkit452';                i = i + 1;
+        aPath.i.sPId = 'toolkit452';                aPath.i.sPath = 'e:\dev\toolkit\v452';                i = i + 1;
         aPath.i.sPId = 'unixroot';                  aPath.i.sPath = 'e:\unix';                      i = i + 1;
         aPath.i.sPId = 'xfree86';                   aPath.i.sPath = 'e:\xfree86';                   i = i + 1;
-        aPath.i.sPId = 'vac308';                    aPath.i.sPath = 'e:\ibmcpp308';                 i = i + 1;
-      /*aPath.i.sPId = 'vac365';                    aPath.i.sPath = 'e:\ibmcxxo';                   i = i + 1;
-        aPath.i.sPId = 'vac40';                     aPath.i.sPath = 'e:\ibmcpp40';                  i = i + 1;*/
+        aPath.i.sPId = 'vac308';                    aPath.i.sPath = 'e:\dev\vacpp\v308';                 i = i + 1;
+        aPath.i.sPId = 'vac365';                    aPath.i.sPath = 'e:\dev\vacpp\v365';                   i = i + 1;
+      /*aPath.i.sPId = 'vac40';                     aPath.i.sPath = 'e:\ibmcpp40';                  i = i + 1;*/
         aPath.i.sPId = 'warpin';                    aPath.i.sPath = 'e:\warpin';                    i = i + 1;
       /*aPath.i.sPId = 'watcom11';                  aPath.i.sPath = 'e:\watcom';                    i = i + 1;*/
-        aPath.i.sPId = 'watcom11c';                 aPath.i.sPath = 'e:\watcom11c';                 i = i + 1;
+/*        aPath.i.sPId = 'watcom11c';                 aPath.i.sPath = 'e:\dev\watcom\v11c';                 i = i + 1; */
         aPath.i.sPId = 'testcase_drive_unused';     aPath.i.sPath = 't'; /* reqired */              i = i + 1;
         aPath.i.sPId = 'testcase_drive_fixed';      aPath.i.sPath = 'd'; /* reqired */              i = i + 1;
         aPath.i.sPId = 'testcase_drive_floppy';     aPath.i.sPath = 'a'; /* reqired */              i = i + 1;
@@ -3504,9 +3504,9 @@ VAC365: procedure expose aCfg. aPath. sPathFile
         return 2;
     rc = CheckCmdOutput('icc', 0, fQuiet, 'IBM* C and C++ Compilers for OS/2*, AIX* and for Windows NT**, Version 3.6');
     if (rc = 0) then
-        rc = CheckCmdOutput('ilink', 16, fQuiet, 'IBM(R) Linker for OS/2(R), Version 03.06.PPK1990125');
+        rc = CheckCmdOutput('ilink', 16, fQuiet, 'IBM(R) Linker for OS/2(R), Version 03.06.PPK1010917.011116ilink');
     if (rc = 0) then
-        rc = CheckCmdOutput('ilib /?', 0, fQuiet, 'IBM Librarian for OS/2(R) Version 03.99.PPK1990310');
+        rc = CheckCmdOutput('ilib /?', 0, fQuiet, 'IBM Librarian for OS/2(R) Version 03.99.PPK1001123');
     if (stream(sPathCxx'\bin\cppcbe36.exe', 'c', 'query size') <> 603122) then
     do
         say 'Error!!! Get latest vac365 optimizer fixes from the OS2 Mozilla project.';
