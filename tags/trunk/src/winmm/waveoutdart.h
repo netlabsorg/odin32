@@ -1,4 +1,4 @@
-/* $Id: waveoutdart.h,v 1.3 2002-06-04 17:36:56 sandervl Exp $ */
+/* $Id: waveoutdart.h,v 1.4 2003-04-03 14:04:50 sandervl Exp $ */
 
 /*
  * Wave playback class (DART)
@@ -66,6 +66,7 @@ private:
 
         BOOL            fMixerSetup;
         BOOL            fUnderrun;
+        ULONG           ulUnderrunBase;
 
 #ifndef _OS2WIN_H
         friend LONG APIENTRY WaveOutHandler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags);
