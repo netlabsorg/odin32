@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2340 2002-10-10 16:28:15 sandervl Exp $ */
+/* $Id: changelog,v 1.2341 2002-10-11 14:57:11 sandervl Exp $ */
+
+ 2002-10-11: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o SetParent bugfix; don't clear window id if parent is set to 
+                  0.
 
  2002-10-10: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Overlapped IO bugfixes for synchronization (typically seen
