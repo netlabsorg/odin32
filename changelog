@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1271 2001-02-19 10:17:03 sandervl Exp $ */
+/* $Id: changelog,v 1.1272 2001-02-19 17:28:02 bird Exp $ */
+
+ 2000-02-18: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - KERNEL32: o Use DosAllocMemEx to 64KB align memory (OSLibDosAllocMem)
+                  when available.
 
  2001-02-19: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMDLG32: o Commented out Norse ChooseFont dialog (incomplete translation)
