@@ -1,4 +1,4 @@
-/* $Id: OS2DDRAW.CPP,v 1.34 2002-03-22 13:49:54 sandervl Exp $ */
+/* $Id: OS2DDRAW.CPP,v 1.35 2002-06-08 13:12:33 sandervl Exp $ */
 
 /*
  * DX Draw base class implementation
@@ -47,7 +47,12 @@
 
 BOOL bUseFSDD = FALSE;
 
-FOURCC  SupportedFourCCs[] = {FOURCC_SCRN,FOURCC_LUT8,FOURCC_R565,FOURCC_RGB3,FOURCC_RGB4};
+FOURCC SupportedFourCCs[]   = {FOURCC_SCRN,FOURCC_LUT8,FOURCC_R565,FOURCC_RGB3,FOURCC_RGB4};
+
+#define MAX_DIVE_FOURCC   32
+int    nrOfDiveFourCCs              = 0;
+FOURCC DiveFOURCCs[MAX_DIVE_FOURCC] = {0};
+
 //******************************************************************************
 //******************************************************************************
 OS2IDirectDraw::OS2IDirectDraw(GUID *lpGUID) :
@@ -59,7 +64,6 @@ OS2IDirectDraw::OS2IDirectDraw(GUID *lpGUID) :
   HKEY  hkDirectDraw2;
   DWORD dwVSize, dwVType;
   ULONG rc;
-  FOURCC fccModes[100];
 
   // Setup table for 3d devices
   Vtbl3D.AddRef         = D3DAddRef;
@@ -197,13 +201,21 @@ OS2IDirectDraw::OS2IDirectDraw(GUID *lpGUID) :
           0,
           sizeof(DIVE_CAPS) );
   dCaps.ulStructLen = sizeof(DIVE_CAPS);
-  dCaps.ulFormatLength = 100;
-  dCaps.pFormatData = &fccModes[0];
+  dCaps.ulFormatLength = sizeof(DiveFOURCCs);
+  dCaps.pFormatData    = &DiveFOURCCs[0];
 
-  rc = DiveQueryCaps( &dCaps,
-                      DIVE_BUFFER_SCREEN);
+  rc = DiveQueryCaps( &dCaps, DIVE_BUFFER_SCREEN);
 
   dprintf(("DDRAW: DiveQueryCaps rc=0x%08X\n",rc));
+
+  FOURCC *pFourCC = (FOURCC *)dCaps.pFormatData;
+  nrOfDiveFourCCs = dCaps.ulInputFormats;
+  for(i=0;i<dCaps.ulInputFormats+dCaps.ulOutputFormats;i++) {
+      if(i < dCaps.ulInputFormats) {
+           dprintf(("INPUT FOURCC %C%C%C%C", (char)(pFourCC[i]), (char)(pFourCC[i] >> 8), (char)(pFourCC[i] >> 16), (char)(pFourCC[i] >> 24)));
+      }
+      else dprintf(("OUTPUT FOURCC %C%C%C%C", (char)(pFourCC[i]), (char)(pFourCC[i] >> 8), (char)(pFourCC[i] >> 16), (char)(pFourCC[i] >> 24)));
+  }
 
   pdwUnknownData[235] = dCaps.ulHorizontalResolution;
   pdwUnknownData[236] = dCaps.ulVerticalResolution;
@@ -274,7 +286,18 @@ OS2IDirectDraw::~OS2IDirectDraw()
 //******************************************************************************
 FOURCC OS2IDirectDraw::GetScreenFourCC()
 {
-  return SupportedFourCCs[screenbpp>>3];
+    return SupportedFourCCs[screenbpp>>3];
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OS2IDirectDraw::IsFourCCSupported(FOURCC fourcc)
+{
+    for(int i=0;i<nrOfDiveFourCCs;i++) {
+        if(DiveFOURCCs[i] == fourcc) {
+            return TRUE;
+        }
+    }
+    return FALSE;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1198,7 +1221,6 @@ HRESULT WIN32API DrawGetCaps(THIS This, LPDDCAPS lpDDDriverCaps, LPDDCAPS lpDDHE
                              DDCAPS_PALETTEVSYNC |     // Got VSync
 //                             DDCAPS_READSCANLINE |
                              DDCAPS_BLTFOURCC;
-
     lpDDDriverCaps->dwCaps2 = DDCAPS2_CERTIFIED |         // Who cares so say yes
                               DDCAPS2_CANRENDERWINDOWED | // Better check for Voodoo ?!
                               DDCAPS2_COPYFOURCC |        // yepp memcpy will do this
@@ -1217,6 +1239,7 @@ HRESULT WIN32API DrawGetCaps(THIS This, LPDDCAPS lpDDDriverCaps, LPDDCAPS lpDDHE
                                 DDPCAPS_PRIMARYSURFACE; //
     lpDDDriverCaps->dwVidMemTotal = me->dCaps.ulApertureSize;          // total video memory
     lpDDDriverCaps->dwVidMemFree  = me->dCaps.ulApertureSize;          // total free video memory
+
     lpDDDriverCaps->dwNumFourCCCodes = MAX_FOURCC_CODES;        // number of supported FOURCC codes
 /*
     ToDo: must finde out ow the array is used for this
@@ -1644,7 +1667,6 @@ HRESULT WIN32API DrawGetDisplayMode4(THIS This, LPDDSURFACEDESC2 lpDDSurfaceDesc
 //******************************************************************************
 HRESULT WIN32API DrawGetFourCCCodes(THIS This, LPDWORD lpNumCodes, LPDWORD lpCodes)
 {
-//  DWORD dwFCC[MAX_FOURCC_CODES] = {FOURCC_LUT8,FOURCC_R565,FOURCC_RGB3,FOURCC_YUY2};
   DWORD dwFCC[MAX_FOURCC_CODES] = {FOURCC_LUT8,FOURCC_R565,FOURCC_R555,FOURCC_RGB3};
 
   dprintf(("DDRAW: GetFourCCCodes %x %x %x", This, lpNumCodes, lpCodes));
@@ -1654,16 +1676,29 @@ HRESULT WIN32API DrawGetFourCCCodes(THIS This, LPDWORD lpNumCodes, LPDWORD lpCod
 
   if(NULL==lpCodes)
   {
+#ifdef SUPPORT_ALL_DIVE_FOURCCS
+    *lpNumCodes = nrOfDiveFourCCs;
+#else
     *lpNumCodes = MAX_FOURCC_CODES; // LUT8, R565, RGB3 are the FourCC we support for now
+#endif
   }
   else
   {
+#ifdef SUPPORT_ALL_DIVE_FOURCCS
+    for(int i=0;(i<nrOfDiveFourCCs)&&(i<*lpNumCodes);i++)
+    {
+      *lpCodes = DiveFOURCCs[i];
+      lpCodes++;
+    }
+    *lpNumCodes = nrOfDiveFourCCs;
+#else
     for(int i=0;(i<MAX_FOURCC_CODES)&&(i<*lpNumCodes);i++)
     {
       *lpCodes = dwFCC[i];
       lpCodes++;
     }
     *lpNumCodes = MAX_FOURCC_CODES;
+#endif
   }
   return(DD_OK);
 }
