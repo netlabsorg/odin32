@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.28 2000-11-21 11:35:08 sandervl Exp $ */
+/* $Id: misc.cpp,v 1.29 2001-01-29 01:21:28 bird Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -82,7 +82,7 @@ static int printf_(struct perthread *);
 /* The "printf" function.  Note this has a variable number of        */
 /* arguments.                                                        */
 /* ----------------------------------------------------------------- */
-int SYSTEM EXPORT WriteLog(char *f, ...)
+int SYSTEM WriteLog(char *f, ...)
   {
   TIB    *ptib;                    /* process/thread id structures */
   PIB    *ppib;                    /* .. */
@@ -256,7 +256,7 @@ int checkOdinHeap = 1;
 #define ODIN_HEAPCHECK()
 #endif
 
-int SYSTEM EXPORT WriteLog(char *tekst, ...)
+int SYSTEM WriteLog(char *tekst, ...)
 {
   USHORT  sel = RestoreOS2FS();
   va_list argptr;
@@ -310,7 +310,7 @@ int SYSTEM EXPORT WriteLog(char *tekst, ...)
 }
 //******************************************************************************
 //******************************************************************************
-int SYSTEM EXPORT WriteLogNoEOL(char *tekst, ...)
+int SYSTEM WriteLogNoEOL(char *tekst, ...)
 {
   USHORT  sel = RestoreOS2FS();
   va_list argptr;
@@ -368,7 +368,7 @@ void SYSTEM IncreaseLogCount()
 }
 //******************************************************************************
 //******************************************************************************
-int SYSTEM EXPORT WritePrivateLog(void *logfile, char *tekst, ...)
+int SYSTEM WritePrivateLog(void *logfile, char *tekst, ...)
 {
   USHORT  sel = RestoreOS2FS();
   va_list argptr;
@@ -399,29 +399,32 @@ int SYSTEM EXPORT WritePrivateLog(void *logfile, char *tekst, ...)
 //******************************************************************************
 void LogException(int state)
 {
-  TEB *teb = GetThreadTEB();
-  USHORT *lock;
+    TEB *teb = GetThreadTEB();
 
-  if(!teb) return;
+    if (!teb) return;
 
-  if(teb->o.odin.logfile) {
-    if(state == ENTER_EXCEPTION) {
+#if !defined(__EMX__)
+    if (teb->o.odin.logfile)
+    {
 #if (__IBMCPP__ == 300) || (__IBMC__ == 300)
-        lock = (USHORT *)(teb->o.odin.logfile+0x1C);
+        PUSHORT lock = (USHORT *)(teb->o.odin.logfile+0x1C);
 #else
 #error Check the offset of the lock count word in the file stream structure for this compiler revision!!!!!
 #endif
-        (*lock)--;
+        if (state == ENTER_EXCEPTION)
+        {
+            (*lock)--;
+        }
+        else
+        { //LEAVE_EXCEPTION
+            (*lock)++;
+        }
     }
-    else { //LEAVE_EXCEPTION
-#if (__IBMCPP__ == 300) || (__IBMC__ == 300)
-        lock = (USHORT *)(teb->o.odin.logfile+0x1C);
 #else
-#error Check the offset of the lock count word in the file stream structure for this compiler revision!!!!!
+//kso 2001-01-29: EMX/GCC
+// we maybe should do something with the _more->rsem (_rmutex) structure but
+// I wanna have this compile, so we'll address problems later.
 #endif
-        (*lock)++;
-    }
-  }
 }
 //******************************************************************************
 //Check if the exception occurred inside a fprintf (logging THDB member set)
@@ -431,19 +434,25 @@ void LogException(int state)
 void CheckLogException()
 {
   TEB *teb = GetThreadTEB();
-  USHORT *lock;
+  PUSHORT lock;
 
   if(!teb) return;
 
+#if !defined(__EMX__)
   if(teb->o.odin.logfile) {
     //oops, exception in vfprintf; let's clear the lock count
 #if (__IBMCPP__ == 300) || (__IBMC__ == 300)
-    lock = (USHORT *)(teb->o.odin.logfile+0x1C);
+    lock = (PUSHORT)(teb->o.odin.logfile+0x1C);
 #else
 #error Check the offset of the lock count word in the file stream structure for this compiler revision!!!!!
 #endif
     (*lock)--;
   }
+#else
+//kso 2001-01-29: EMX/GCC
+// we maybe should do something with the _more->rsem (_rmutex) structure but
+// I wanna have this compile, so we'll address problems later.
+#endif
 }
 //******************************************************************************
 //NOTE: No need to save/restore FS, as our FS selectors have already been
@@ -485,7 +494,7 @@ void ClosePrivateLogFiles()
 }
 //******************************************************************************
 //******************************************************************************
-int SYSTEM EXPORT WriteLogError(char *tekst, ...)
+int SYSTEM WriteLogError(char *tekst, ...)
 {
   USHORT  sel = RestoreOS2FS();
   va_list argptr;
@@ -567,9 +576,9 @@ void WIN32API DebugBreak()
  * Author    : Patrick Haller [Tue, 1999/09/13 19:55]
  *****************************************************************************/
 
-int SYSTEM EXPORT DebugErrorBox(ULONG  iErrorCode,
-                                char*  pszFormat,
-                                ...)
+int SYSTEM DebugErrorBox(ULONG  iErrorCode,
+                         char*  pszFormat,
+                         ...)
 {
   char   szMessageBuffer[1024];              /* buffer for the text message */
   char   szErrorBuffer[1024];       /* buffer for the operating system text */
