@@ -1,7 +1,8 @@
- /* $Id: changelog,v 1.950 2000-05-19 18:52:46 jeroen Exp $ */
+ /* $Id: changelog,v 1.951 2000-05-19 19:16:25 jeroen Exp $ */
 
  2000-05-19: Jeroen van den Horn <J.vandenHorn@fibre.a2000.nl>
     - ICMP: Initial release of ICMP.DLL and header files
+    - OPENGL32/GLU32/GLUT32: Upgraded to latest available level
 
  2000-05-19: Yuri Dario <mc6530@mclink.it>
     - USER32:   Don't send WM_PARENTNOTIFY if parent has already been destroyed
