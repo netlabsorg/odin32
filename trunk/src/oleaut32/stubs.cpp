@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.2 1999-11-14 01:26:36 davidr Exp $ */
+/* $Id: stubs.cpp,v 1.3 1999-12-03 11:56:54 sandervl Exp $ */
 /* 
  * Win32 COM/OLE stubs for OS/2
  * 
@@ -101,7 +101,7 @@ HRESULT WIN32API CreateDispTypeInfo
     ITypeInfo **	pptinfo)
 {
     dprintf(("OLEAUT32: CreateDispTypeInfo - stub"));
-    return S_OK;
+    return E_OUTOFMEMORY;
 }
 
 //*****************************************************************************
