@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.20 1999-07-26 09:01:34 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.21 1999-07-26 20:03:49 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -108,10 +108,12 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle, ULO
 
   if(dwStyle & WINWS_CAPTION)
         *OSFrameStyle |= FCF_TITLEBAR;
-  if(dwStyle & WINWS_BORDER)
-        *OSFrameStyle |= FCF_BORDER;
   if(dwStyle & WINWS_DLGFRAME)
         *OSFrameStyle |= FCF_DLGBORDER;
+  else
+  if(dwStyle & WINWS_BORDER)
+        *OSFrameStyle |= FCF_BORDER;
+
   if(dwStyle & WINWS_VSCROLL)
         *OSFrameStyle |= FCF_VERTSCROLL;
   if(dwStyle & WINWS_HSCROLL)
@@ -367,6 +369,14 @@ HWND OSLibWinWindowFromPoint(HWND hwnd, PVOID ppoint)
 BOOL OSLibWinMinimizeWindow(HWND hwnd)
 {
   return WinSetWindowPos(hwnd, 0, 0, 0, 0, 0, SWP_MINIMIZE);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinGetBorderSize(HWND hwnd, OSLIBPOINT *pointl)
+{
+  pointl->x = 0;
+  pointl->y = 0;
+  return (BOOL) WinSendMsg(hwnd, WM_QUERYBORDERSIZE, MPFROMP( &pointl), 0);
 }
 //******************************************************************************
 //******************************************************************************
