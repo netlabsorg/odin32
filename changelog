@@ -1,4 +1,8 @@
- /* $Id: changelog,v 1.519 1999-12-07 18:20:34 sandervl Exp $ */
+ /* $Id: changelog,v 1.520 1999-12-07 20:35:40 achimha Exp $ */
+
+ 99-12-07: Achim Hasenmueller <achimha@innotek.de>
+        - WSOCK32: Moved old implementation to wsock32/old and promoted
+                   wsock32/new (based on PMWSOCK.DLL) as the default implementation
 
  99-12-07: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Fixed string resource load bug (last character of string resource set to 0)
