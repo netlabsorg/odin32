@@ -1,4 +1,4 @@
-/* $Id: msacm.h,v 1.2 1999-11-05 09:14:59 sandervl Exp $ */
+/* $Id: msacm.h,v 1.3 2000-11-19 13:09:14 sandervl Exp $ */
 /*
  *      msacm.h   -       Declarations for MSACM
  */
@@ -7,7 +7,7 @@
 #define __WINE_MSACM_H
 
 #include "windef.h"
-#include "driver.h"
+////#include "driver.h"
 #include "mmsystem.h"
 #include "mmreg.h"
 

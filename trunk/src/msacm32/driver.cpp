@@ -1,4 +1,4 @@
-/* $Id: driver.cpp,v 1.3 2000-08-02 15:49:31 bird Exp $ */
+/* $Id: driver.cpp,v 1.4 2000-11-19 13:08:41 sandervl Exp $ */
 /*
  *      MSACM32 library
  *
@@ -12,7 +12,7 @@
 #include "windef.h"
 #include "winuser.h"
 #include "debugtools.h"
-#include "driver.h"
+////#include "driver.h"
 #include "heapstring.h"
 #include "mmsystem.h"
 #include "msacm.h"
