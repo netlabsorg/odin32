@@ -1,4 +1,4 @@
-/* $Id: kInterfaces.h,v 1.2 2001-04-17 00:26:12 bird Exp $
+/* $Id: kInterfaces.h,v 1.3 2001-04-17 04:16:02 bird Exp $
  *
  * This headerfile contains interfaces for the common tools classes.
  *
@@ -13,10 +13,22 @@
 #define _kInterfaces_h_
 
 
+/*******************************************************************************
+*   Defined Constants And Macros                                               *
+*******************************************************************************/
+#define MAXEXPORTNAME   256
+#define MAXDBGNAME      256
+
+
+/*******************************************************************************
+*   Structures and Typedefs                                                    *
+*******************************************************************************/
 class kPageI;
 class kExportI;
 class kExportEntry;
 class kModuleI;
+class kExecutableI;
+class kDbgTypeI;
 
 
 /**
@@ -82,7 +94,6 @@ public:
  */
 class kExportEntry
 {
-#define MAXEXPORTNAME 256
 public:
     unsigned long   ulOrdinal;                  /* Ordinal of export. 0 if invalid. */
     char            achName[MAXEXPORTNAME];     /* Public or exported name. */
@@ -169,7 +180,7 @@ public:
 /**
  * Interface class (ie. virtual) which defines the interface for
  * executables files.
- * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
 class kExecutableI : public kModuleI, public kExportI
 {
@@ -182,4 +193,69 @@ public:
     #endif
 };
 
+
+/**
+ * Communication class/struct used by kDbgTypeI and others.
+ * This is structure or union member class.
+ * (This might turn out very similar to a normal variable class,
+ *  and will if so be changed to that when time comes.)
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ */
+class kDbgMemberEntry
+{
+public:
+    char        szName[MAXDBGNAME];     /* Member name. */
+    char        cb;                     /* Count of bytes it covers. */
+    char        szTypeName[MAXDBGNAME]; /* Type name. */
+    int         flFlags;                /* Type flags. One of the kDbgTypeI::enm*. optional: defaults to kDbgTypeI::enmAny */
+};
+
+
+/**
+ * Communication class/struct used by kDbgTypeI.
+ * This is the type.
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ */
+class kDbgTypeEntry
+{
+public:
+    char        szName[MAXDBGNAME];     /* Name of the type. */
+    char        cb;                     /* Count of bytes it covers. */
+    int         flFlags;                /* Type flags. One of the kDbgTypeI::enm*. */
+
+    int         cMembers;               /* Number of members. This is 0 if not a union or a struct. */
+    kDbgMemberEntry * paMembers;        /* Pointer array of member entries if union or struct. */
+
+public:
+    /** @cat Internal use only - don't mess! */
+    int         flSearchFlags;          /* Type flags which this search was started with. One of the kDbgTypeI::enm*. */
+};
+
+
+
+/**
+ * Interface class (ie. virtual) which defines the interface for
+ * debug typeinfo on debug module level.
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ */
+class kDbgTypeI
+{
+public:
+    /** @cat Debug Type information methods. */
+    virtual kDbgTypeEntry * dbgtypeFindFirst(int flFlags);
+    virtual kDbgTypeEntry * dbgtypeFindNext(kDbgTypeEntry *kDbgTypeEntry);
+    virtual void            dbgtypeFindClose(kDbgTypeEntry *kDbgTypeEntry);
+
+    virtual kDbgTypeEntry * dbgtypeLookup(const char *pszName, int flFlags);
+    enum
+    {   enmAny,                         /* Any/unknown type. */
+        enmStruct,                      /* Structure:       struct _somestruct {..}; */
+        enmUnion,                       /* Union:           union  _someunion  {..}; */
+        enmEnum,                        /* Enumeration:     enum   _someenum   {..}; */
+        enmTypedef,                     /* Type definition: typedef <type expr>     sometype; */
+        enmMask = 0x0000000ff,          /* Type mask. */
+        enmFlagMask = 0xffffff00,       /* Flag mask. */
+        enmflPointer = 0x00000100       /* This is pointer to something. (flag) */
+    };
+};
 #endif
