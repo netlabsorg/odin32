@@ -1,4 +1,4 @@
-/* $Id: ole32.cpp,v 1.10 1999-09-08 11:29:28 davidr Exp $ */
+/* $Id: ole32.cpp,v 1.11 1999-09-24 21:49:43 davidr Exp $ */
 /* 
  * 
  * Project Odin Software License can be found in LICENSE.TXT
@@ -21,7 +21,8 @@
 #include "ole32.h"
 
 #include "oString.h"
-#include "moniker.h"	// RunningObjectTableImpl_***
+#include "moniker.h"		// RunningObjectTableImpl_***
+#include "filemoniker.h"	// FileMonikerImpl_***
 
 // ======================================================================
 // Local Data
@@ -582,6 +583,81 @@ HRESULT WIN32API CoRevokeClassObject(DWORD dwRegister)
     return E_INVALIDARG;
 }
 
+// ----------------------------------------------------------------------
+// GetClassFile
+// ----------------------------------------------------------------------
+// This function supplies the CLSID associated with the given filename.
+HRESULT WIN32API GetClassFile(LPOLESTR filePathName, CLSID *pclsid)
+{
+    IStorage *	pstg = 0;
+    HRESULT 	res;
+    int 	nbElm = 0;
+    int		length = 0;
+    int		i = 0;
+    LONG 	sizeProgId = 20;
+    LPOLESTR *	pathDec = 0;
+    LPOLESTR	absFile = 0;
+    LPOLESTR	progId = 0;
+    WCHAR 	extention[100] = {0};
+
+    dprintf(("OLE32: GetClassFile"));
+
+    // if the file contain a storage object the return the CLSID
+    // writen by IStorage_SetClass method
+
+    if((StgIsStorageFile(filePathName)) == S_OK)
+    {
+	res = StgOpenStorage(filePathName, NULL, STGM_READ | STGM_SHARE_DENY_WRITE, NULL, 0, &pstg);
+
+	if (SUCCEEDED(res))
+	    res = ReadClassStg(pstg, pclsid);
+
+	IStorage_Release(pstg);
+
+	return res;
+    }
+
+    /* if the obove strategies fail then search for the extension key in the registry */
+
+    /* get the last element (absolute file) in the path name */
+    nbElm = FileMonikerImpl_DecomposePath(filePathName, &pathDec);
+    absFile = pathDec[nbElm-1];
+
+    /* failed if the path represente a directory and not an absolute file name*/
+    if (lstrcmpW(absFile, (LPOLESTR)"\\"))
+	return MK_E_INVALIDEXTENSION;
+
+    /* get the extension of the file */
+    length = lstrlenW(absFile);
+    for(i = length-1; ( (i >= 0) && (extention[i] = absFile[i]) ); i--);
+	
+    /* get the progId associated to the extension */
+    progId = (WCHAR *)CoTaskMemAlloc(sizeProgId);
+
+    res = RegQueryValueW(HKEY_CLASSES_ROOT, extention, progId, &sizeProgId);
+
+    if (res == ERROR_MORE_DATA)
+    {
+	CoTaskMemRealloc(progId,sizeProgId);
+
+	res = RegQueryValueW(HKEY_CLASSES_ROOT, extention, progId, &sizeProgId);
+    }
+    if (res == ERROR_SUCCESS)
+	/* return the clsid associated to the progId */
+	res =  CLSIDFromProgID(progId, pclsid);
+
+    for(i = 0; pathDec[i] != NULL; i++)
+	CoTaskMemFree(pathDec[i]);
+
+    CoTaskMemFree(pathDec);
+
+    CoTaskMemFree(progId);
+
+    if (res == ERROR_SUCCESS)
+	return res;
+
+    return MK_E_INVALIDEXTENSION;
+}
 // ======================================================================
 // Private functions.
 // ======================================================================
