@@ -1,7 +1,9 @@
-/* $Id: changelog,v 1.1856 2001-11-27 11:12:37 sandervl Exp $ */
+/* $Id: changelog,v 1.1857 2001-11-27 12:33:02 sandervl Exp $ */
 
  2001-11-27: Sander van Leeuwen <sandervl@xs4all.nl>
     - WSOCK32:  o Missing FS wrapper macros added
+    - KERNEL32: o Accept \\.\COMx as name for COM ports
+    - USER32:   o EnumChildWindow bugfix
 
  2001-11-26: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Implemented CancelIo & GetOverlappedResult for serial comm
