@@ -1,4 +1,4 @@
-/* $Id: version.h,v 1.4 1999-08-12 23:33:38 phaller Exp $ */
+/* $Id: version.h,v 1.5 2001-05-19 13:26:11 sandervl Exp $ */
 
 /* Definitions for the VERsion infolibrary (VER.DLL)
  *
@@ -202,8 +202,8 @@ DWORD       WINAPI GetFileVersionInfoSizeA(LPSTR,LPDWORD);
 DWORD       WINAPI GetFileVersionInfoSizeW(LPWSTR,LPDWORD);
 BOOL        WINAPI GetFileVersionInfoA(LPSTR,DWORD,DWORD,LPVOID);
 BOOL        WINAPI GetFileVersionInfoW(LPWSTR,DWORD,DWORD,LPVOID);
-DWORD       WINAPI VerLanguageNameA(DWORD,LPSTR,DWORD);
-DWORD       WINAPI VerLanguageNameW(DWORD,LPWSTR,DWORD);
+DWORD       WINAPI VerLanguageNameA( UINT wLang, LPSTR szLang, UINT nSize );
+DWORD       WINAPI VerLanguageNameW( UINT wLang, LPWSTR szLang, UINT nSize );
 
 /* 20 GETFILEVERSIONINFORAW */
 
