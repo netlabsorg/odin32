@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.256 2001-05-15 14:31:39 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.257 2001-05-16 07:42:26 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1419,7 +1419,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         {
             setStyle(getStyle() | WS_VISIBLE);
             dprintf(("Enable window update for %x", getWindowHandle()));
-            OSLibWinEnableWindowUpdate(OS2Hwnd,TRUE);
+            OSLibWinEnableWindowUpdate(OS2HwndFrame, OS2Hwnd, TRUE);
         }
         else
         {
@@ -1427,7 +1427,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
             {
                 setStyle(getStyle() & ~WS_VISIBLE);
                 dprintf(("Disable window update for %x", getWindowHandle()));
-                OSLibWinEnableWindowUpdate(OS2Hwnd,FALSE);
+                OSLibWinEnableWindowUpdate(OS2HwndFrame, OS2Hwnd, FALSE);
             }
         }
         return 0;

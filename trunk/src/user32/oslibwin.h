@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.54 2001-05-11 08:39:43 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.55 2001-05-16 07:42:26 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -280,7 +280,7 @@ BOOL  OSLibWinSetKeyboardStateTable(unsigned char * PMKeyState);
 #define HTOS_DISCARD                  (-2)
 #define HTOS_ERROR                    (-3)
 
-BOOL  OSLibWinEnableWindowUpdate(HWND hwnd,BOOL fEnable);
+BOOL OSLibWinEnableWindowUpdate(HWND hwndFrame, HWND hwndClient ,BOOL fEnable);
 ULONG OSLibWinGetLastError();
 
 void  OSLibWinShowTaskList(HWND hwndFrame);
