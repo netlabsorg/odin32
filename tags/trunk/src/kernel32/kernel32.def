@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.106 2001-04-28 13:30:44 sandervl Exp $
+; $Id: kernel32.def,v 1.107 2001-05-19 09:12:46 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -844,7 +844,7 @@ EXPORTS
     TransactNamedPipe          = _TransactNamedPipe@28       @696
     TransmitCommChar           = _TransmitCommChar@8         @697
 ;   TrimVirtualBuffer          = _TrimVirtualBuffer@??                  ;NT
-;   TryEnterCriticalSection    = _TryEnterCriticalSection               ;NT
+    TryEnterCriticalSection    = _TryEnterCriticalSection@4  @898       ;NT
 ;   UTRegister                 = _UTRegister@??              @698       ;W95
 ;   UTUnRegister               = _UTUnRegister@??            @699       ;W95
     UnMapLS                    = _UnMapLS@4                  @700       ;W95
