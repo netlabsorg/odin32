@@ -1,4 +1,4 @@
-/* $Id: wnetap32.cpp,v 1.8 2000-10-02 13:32:44 phaller Exp $ */
+/* $Id: wnetap32.cpp,v 1.9 2000-10-02 13:58:26 phaller Exp $ */
 
 /*
  *
@@ -2827,10 +2827,10 @@ ODINFUNCTION3(NET_API_STATUS, OS2NetWkstaGetInfo,
         // calculate new size for target buffer
         int iSizeComputername = (lstrlenA((LPCSTR)pOS2wki10->wki10_computername) + 1) * 2;
         int iSizeLangroup = (lstrlenA((LPCSTR)pOS2wki10->wki10_langroup) + 1) * 2;
-        int iSize = sizeof(pwki100) + iSizeComputername + iSizeLangroup;
+        int iSize = sizeof(WKSTA_INFO_100) + iSizeComputername + iSizeLangroup;
 
         // pointer to the data area
-        PBYTE pData = (PBYTE)pwki100 + sizeof(pwki100);
+        PBYTE pData = (PBYTE)pwki100 + sizeof(WKSTA_INFO_100);
         
         rc = OS2NetApiBufferAllocate(iSize, (LPVOID*)&pwki100);
         if (!rc)
@@ -2859,10 +2859,10 @@ ODINFUNCTION3(NET_API_STATUS, OS2NetWkstaGetInfo,
         int iSizeComputername = (lstrlenA((LPCSTR)pOS2wki1->wki1_computername) + 1) * 2;
         int iSizeLangroup = (lstrlenA((LPCSTR)pOS2wki1->wki1_langroup) + 1) * 2;
         int iSizeLanroot  = (lstrlenA((LPCSTR)pOS2wki1->wki1_root) + 1) * 2;
-        int iSize = sizeof(pwki101) + iSizeComputername + iSizeLangroup + iSizeLanroot;
+        int iSize = sizeof(WKSTA_INFO_101) + iSizeComputername + iSizeLangroup + iSizeLanroot;
 
         // pointer to the data area
-        PBYTE pData = (PBYTE)pwki101 + sizeof(pwki101);
+        PBYTE pData = (PBYTE)pwki101 + sizeof(WKSTA_INFO_101);
         
         rc = OS2NetApiBufferAllocate(iSize, (LPVOID*)&pwki101);
         if (!rc)
@@ -2893,10 +2893,10 @@ ODINFUNCTION3(NET_API_STATUS, OS2NetWkstaGetInfo,
         int iSizeComputername = (lstrlenA((LPCSTR)pOS2wki1->wki1_computername) + 1) * 2;
         int iSizeLangroup = (lstrlenA((LPCSTR)pOS2wki1->wki1_langroup) + 1) * 2;
         int iSizeLanroot  = (lstrlenA((LPCSTR)pOS2wki1->wki1_root) + 1) * 2;
-        int iSize = sizeof(pwki102) + iSizeComputername + iSizeLangroup + iSizeLanroot;
+        int iSize = sizeof(WKSTA_INFO_102) + iSizeComputername + iSizeLangroup + iSizeLanroot;
 
         // pointer to the data area
-        PBYTE pData = (PBYTE)pwki102 + sizeof(pwki102);
+        PBYTE pData = (PBYTE)pwki102 + sizeof(WKSTA_INFO_102);
         
         rc = OS2NetApiBufferAllocate(iSize, (LPVOID*)&pwki102);
         if (!rc)
@@ -2924,7 +2924,7 @@ ODINFUNCTION3(NET_API_STATUS, OS2NetWkstaGetInfo,
         PWKSTA_INFO_502 pwki502;
         struct wksta_info_1 *pOS2wki1 = (struct wksta_info_1 *)pOS2Buffer;
         
-        rc = OS2NetApiBufferAllocate(sizeof(pwki502), (LPVOID*)&pwki502);;
+        rc = OS2NetApiBufferAllocate(sizeof(WKSTA_INFO_502), (LPVOID*)&pwki502);;
         if (!rc)
         {
           char *hs = (char *)pOS2wki1->wki1_wrkheuristics;
