@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.50 2000-02-15 09:17:09 bird Exp $
+# $Id: makefile,v 1.51 2000-02-26 18:01:38 bird Exp $
 
 #
 # PD-Win32 API
@@ -36,7 +36,7 @@ MAKE_CMD = $(MAKE_CMD) NODEBUGINFO=1
 #
 # Exclude lists which is to be passed in to DOWITHDIRS
 #
-NOTTOBEMADE = CVS;win32k;pe2lx;odin32api;odinwps;spy    # generally not made
+NOTTOBEMADE = CVS;pe2lx;odin32api;odinwps;spy           # generally not made
 NOTDLLS     = $(NOTTOBEMADE);peldr;dllentry             # not dlls
 NOTHAVELIBS = $(NOTTOBEMADE);peldr                      # don't generate libs
 NOTWIN32DLLS= $(NOTDLLS);odincrt;dllentry               # not win32 dlls.
@@ -85,9 +85,9 @@ all: libs
     $(MAKE_CMD)
     cd ..\peldr
     $(MAKE_CMD)
-    cd ..\win32k\pe2lx
+    cd ..\win32k
     $(MAKE_CMD)
-    cd ..\..\ddraw
+    cd ..\ddraw
     $(MAKE_CMD)
     cd ..\dinput
     $(MAKE_CMD)
@@ -140,20 +140,11 @@ all: libs
 libs:
     $(DOWITHDIRS) -e$(NOTHAVELIBS) -cp $(MAKE_CMD) lib
 
-
 dep:
     $(DOWITHDIRS) -e$(NOTTOBEMADE) -cp $(MAKE_CMD) NODEP=1 dep
-    cd win32k\pe2lx
-    $(MAKE_CMD) NODEP=1 dep
-    cd ..\..
 
 clean:
     $(DOWITHDIRS) -e$(NOTTOBEMADE) -cp $(MAKE_CMD) NODEP=1 clean
-    cd win32k\pe2lx
-    $(MAKE_CMD) NODEP=1 clean
-    cd ..
-    if exist makefile.inc $(MAKE_CMD) NODEP=1 clean
-    cd ..
 
 
 #
