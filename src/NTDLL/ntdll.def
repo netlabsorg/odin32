@@ -1,4 +1,4 @@
-; $Id: ntdll.def,v 1.38 2001-06-13 14:45:15 bird Exp $
+; $Id: ntdll.def,v 1.39 2001-07-20 15:39:47 sandervl Exp $
 
 ;
 ; Based on NT 4.0 SP6: NTDLL.DLL
@@ -403,7 +403,7 @@ EXPORTS
 ;   RtlExtendHeap                           @388
     RtlExtendedIntegerMultiply     = _RtlExtendedIntegerMultiply@12     @389
     RtlExtendedLargeIntegerDivide  = _RtlExtendedLargeIntegerDivide@16  @390
-    RtlExtendedMagicDivide         = _RtlExtendedMagicDivide@20         @391
+;;    RtlExtendedMagicDivide         = _RtlExtendedMagicDivide@20         @391
     RtlFillMemory                  = _RtlFillMemory@12              @392
 ;   RtlFillMemoryUlong                          @393
     RtlFindClearBits          = _RtlFindClearBits@12        @394
