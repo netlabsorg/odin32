@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1946 2002-01-09 17:36:48 bird Exp $ */
+/* $Id: changelog,v 1.1947 2002-01-12 10:29:01 sandervl Exp $ */
+
+ 2002-01-10: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o CreateFakeWindowEx change; need to specifiy window class
+    - KERNEL32: o Custom device driver changes for driver instance pointer
 
  2002-01-09: knut st. osmundsen <bird@anduin.net>
     - Tools/CmdQd:
