@@ -1,4 +1,4 @@
-/* $Id: console.cpp,v 1.11 1999-08-06 12:14:10 phaller Exp $ */
+/* $Id: console.cpp,v 1.12 1999-08-26 12:55:35 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -551,7 +551,7 @@ APIRET iConsoleDevicesRegister(void)
  * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
  *****************************************************************************/
 
-APIRET iConsoleTerminate(VOID)
+ULONG iConsoleTerminate(VOID)
 {
   APIRET rc;
 
