@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.114 2001-12-26 11:35:38 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.115 2001-12-30 10:47:43 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -1375,7 +1375,7 @@ BOOL WIN32API UpdateWindow (HWND hwnd)
 
          dprintf (("User32: UpdateWindow hwnd %x: update rectangle (%d,%d)(%d,%d)", hwnd, rectUpdate.left, rectUpdate.top, rectUpdate.right, rectUpdate.bottom));
     }
-    else dprintf (("User32: UpdateWindow hwnd %x; EMPTY update rectangle (vis=%d/%d, show=%d/%d)", hwnd, WinIsWindowVisible(wnd->getOS2FrameWindowHandle()), WinIsWindowVisible(wnd->getOS2WindowHandle()), WinIsWindowShowing(wnd->getOS2FrameWindowHandle()), WinIsWindowShowing(wnd->getOS2WindowHandle())));
+    else dprintf (("User32: UpdateWindow hwnd %x; EMPTY update rectangle (vis=%d/%d, show=%d/%d, vis parent=%d)", hwnd, WinIsWindowVisible(wnd->getOS2FrameWindowHandle()), WinIsWindowVisible(wnd->getOS2WindowHandle()), WinIsWindowShowing(wnd->getOS2FrameWindowHandle()), WinIsWindowShowing(wnd->getOS2WindowHandle()), IsWindowVisible(GetParent(hwnd))));
 #endif
     //SvL: This doesn't work right (Wine uses RDW_NOCHILDREN_W -> doesn't work here)
     //     Breaks vpbuddy
