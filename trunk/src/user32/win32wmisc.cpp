@@ -1,4 +1,4 @@
-/* $Id: win32wmisc.cpp,v 1.2 2003-01-03 16:35:57 sandervl Exp $ */
+/* $Id: win32wmisc.cpp,v 1.3 2003-05-27 09:46:30 sandervl Exp $ */
 /*
  * Misc. functions for window management
  *
@@ -19,7 +19,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <assert.h>
-#include <misc.h>
+#include <dbglog.h>
 #include <win32wnd.h>
 #include <heapstring.h>
 #include <spy.h>

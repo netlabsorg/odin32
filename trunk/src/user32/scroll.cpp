@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.49 2003-04-08 13:45:04 sandervl Exp $ */
+/* $Id: scroll.cpp,v 1.50 2003-05-27 09:46:30 sandervl Exp $ */
 /*
  * Scrollbar control
  *
@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <os2win.h>
 #include "controls.h"
+#include "ctrlconf.h"
 #include "scroll.h"
 #include "win32wbase.h"
 #include "oslibwin.h"
@@ -1653,12 +1654,12 @@ BOOL WINAPI ShowScrollBar(
         if (fShow)
         {
             fShowH = !(dwStyle & WS_HSCROLL);
-            SetWindowLongA(hwnd, GWL_STYLE, dwStyle | WS_HSCROLL);
+            dwStyle |= WS_HSCROLL;
         }
         else  /* hide it */
         {
             fShowH = (dwStyle & WS_HSCROLL);
-            SetWindowLongA(hwnd, GWL_STYLE, dwStyle & ~WS_HSCROLL);
+            dwStyle &= ~WS_HSCROLL;
         }
         if( nBar == SB_HORZ )
         {
@@ -1671,12 +1672,12 @@ BOOL WINAPI ShowScrollBar(
         if (fShow)
         {
             fShowV = !(dwStyle & WS_VSCROLL);
-            SetWindowLongA(hwnd, GWL_STYLE, dwStyle | WS_VSCROLL);
+            dwStyle |= WS_VSCROLL;
         }
         else  /* hide it */
         {
             fShowV = (dwStyle & WS_VSCROLL);
-            SetWindowLongA(hwnd, GWL_STYLE, dwStyle & ~WS_VSCROLL);
+            dwStyle &= ~WS_VSCROLL;
         }
         if ( nBar == SB_VERT )
            fShowH = FALSE;
@@ -1688,6 +1689,7 @@ BOOL WINAPI ShowScrollBar(
 
     if( fShowH || fShowV ) /* frame has been changed, let the window redraw itself */
     {
+        WIN_SetStyle( hwnd, dwStyle );
         SetWindowPos( hwnd, 0, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE
                     | SWP_NOACTIVATE | SWP_NOZORDER | SWP_FRAMECHANGED );
     }
