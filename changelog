@@ -1,8 +1,12 @@
- /* $Id: changelog,v 1.473 1999-11-25 19:22:36 sandervl Exp $ */
+ /* $Id: changelog,v 1.474 1999-11-26 00:04:02 sandervl Exp $ */
 
  99-11-25: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Removed hardcoded dependency on ADVAPI32 (cpu.cpp); fixes
                     logging of multiple apps.
+                    TLS bugfix (exception arrived too early; print info later on)
+                    Continue during OSLibDosAliasMem if size != range (needs to
+                    be fixed)
+                    Allow executables to export functions (MS Word)
 	- USER32: PUT BACK GetWindowContextHelpId & SetWindowContextHelpId
 	- USER32: Win32BaseWindow::SetParent bugfix (setparent(0))
                   Changed broadcasting of messages. Check all valid window handles.
@@ -12,6 +16,9 @@
                   if it is allowed)
                   Changed WM_SETREDRAW default handler to directly change
                   style (not call SetWindowLongA)
+                  Fixed bugs in GetWindow.
+	- INCLUDE\OS2WRAP.H: Wrong macro fixed (GpiCreatePS didn't have any renaming
+                             -> FS corruption)
 
  99-11-25: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- KERNEL32: MultiByteToWideChar & WideCharToMultiByte Wine port (991031)
