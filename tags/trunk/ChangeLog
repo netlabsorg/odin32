@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.224 1999-09-23 09:38:03 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.225 1999-09-23 10:33:06 sandervl Exp $ */
 
  99-09-23: Jens Wiessner <wiessnej@rfi.de>
 	- CRTDLL: Added stubs, implemented some stubs
@@ -9,6 +9,11 @@
  99-09-23: Sander van Leeuwen <sandervl@xs4all.nl>
 	- WINMM: Changed WinPostMsg calls into PostMessageA as win32 window
                  handles are not the same as PM handles anymore.
+	- USER32: Adding desktop window class. When user32 is loaded, a desktop
+                  window object is created. 
+                  GetDesktopWindow returns handle of this window.
+                  Winhlp32 no longer crashes immediately, but briefly shows
+                  it's window before quitting.
 
  99-09-22: David Raison <djr@lemur.co.uk>
 	- KERNEL32: Return "Service Pack 3" as CSD string in GetVersionExA/W
