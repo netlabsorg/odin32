@@ -3214,6 +3214,18 @@ typedef VOID (* CALLBACK SENDASYNCPROC)(HWND, UINT, DWORD, LRESULT);
 #define STATE_SYSTEM_VALID              0x7FFFFFFF
 
 
+typedef struct tagGUITHREADINFO {
+    DWORD  cbSize;
+    DWORD  flags;
+    HWND   hwndActive;
+    HWND   hwndFocus;
+    HWND   hwndCapture;
+    HWND   hwndMenuOwner;
+    HWND   hwndMoveSize;
+    HWND   hwndCaret;
+    RECT   rcCaret;
+} GUITHREADINFO, *PGUITHREADINFO, *LPGUITHREADINFO;
+
 /* RegisterDeviceNotification stuff */
 typedef  PVOID           HDEVNOTIFY;
 typedef  HDEVNOTIFY     *PHDEVNOTIFY;
@@ -3269,6 +3281,7 @@ INT       WINAPI EnumPropsExW(HWND,PROPENUMPROCEXW,LPARAM);
 #define     EnumPropsEx WINELIB_NAME_AW(EnumPropsEx)
 BOOL      WINAPI EnumThreadWindows(DWORD,WNDENUMPROC,LPARAM);
 BOOL      WINAPI ExitWindowsEx(UINT,DWORD);
+BOOL      WINAPI GetGUIThreadInfo(DWORD dwThreadId, GUITHREADINFO *lpThreadInfo);
 BOOL      WINAPI GetIconInfo(HICON,LPICONINFO);
 HKL       WINAPI GetKeyboardLayout(DWORD);
 INT       WINAPI GetKeyboardLayoutList(INT,HKL *);
