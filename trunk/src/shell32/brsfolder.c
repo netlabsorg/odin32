@@ -1,4 +1,4 @@
-/* $Id: brsfolder.c,v 1.9 2002-06-09 12:38:17 sandervl Exp $ */
+/* $Id: brsfolder.c,v 1.10 2002-06-27 12:00:23 sandervl Exp $ */
 
 /*
  * Win32 compatibility SHELL32 BRSFOLDER for OS/2
@@ -240,7 +240,15 @@ static LRESULT MsgNotify(HWND hWnd,  UINT CtlID, LPNMHDR lpnmh)
 	        lptvid=(LPTV_ITEMDATA)pnmtv->itemNew.lParam;
 		pidlRet = lptvid->lpifq;
 		if (lpBrowseInfo->lpfn)
+#ifdef __WIN32OS2__
+		{
+                   //@PF: windows enables the ok button before sending it notifies the app
+            	   EnableWindow(GetDlgItem(hWnd, 1), TRUE);
 		   (lpBrowseInfo->lpfn)(hWnd, BFFM_SELCHANGED, (LPARAM)pidlRet, lpBrowseInfo->lParam);
+		}
+#else
+		   (lpBrowseInfo->lpfn)(hWnd, BFFM_SELCHANGED, (LPARAM)pidlRet, lpBrowseInfo->lParam);
+#endif
 	        break;
 
 	      default:
