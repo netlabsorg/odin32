@@ -1,4 +1,4 @@
-// $Id: exitlist.h,v 1.3 2001-11-22 10:40:55 phaller Exp $
+// $Id: exitlist.h,v 1.4 2002-07-29 11:26:11 sandervl Exp $
 /*
  * Win32 dll exit list invocation orders
  *
@@ -38,7 +38,7 @@
 
 //Order of USER32 & GDI32
 #define EXITLIST_USER32			0x00009D00
-#define EXITLIST_GDI32			0x00009D00
+#define EXITLIST_GDI32			0x00009D01
 
 //Order of Kernel32
 #define EXITLIST_KERNEL32		0x00009E00
