@@ -1,9 +1,9 @@
 [COMPILER]
-MACRO=odin32_maketagfile();\n
-FILTEREXPANSION=1 1 1 1 0 0 1 1 1 0 0 0 0 1
-compile=concur|capture|clear|:Compile:&Compile,nmake %n.obj
+MACRO=odin32_setcurrentdir();\nodin32_maketagfile();\n
+FILTEREXPANSION=0 0 0 0 0 0 0 0 0 0 0 0 0 0
+compile=concur|capture|clear|:Compile:&Compile,nmake -f win32k.mak .\bin\debug\%n.obj
 make=concur|capture|clear|:Build:&Build,nmake
-rebuild=concur|capture|clear|:Rebuild:&Rebuild,nmake /A
+rebuild=concur|capture|clear|:Rebuild:&Rebuild,nmake -a
 debug=:Debug:&Debug,
 execute=:Execute:E&xecute,
 user1=hide|:User 1:User 1,
@@ -21,19 +21,26 @@ FILTERASSOCIATEFILETYPES=0 0 0 0 0 0 0 0 0 0 0 0 0 0
 calltrees.txt
 Check.cmd
 Check.mk
+clfix.c
 configure.cmd
+dump
 fastdep.c
 history.txt
 libconv.c
+makedesc.cmd
 Makefile
 Makefile.inc
 win32k.def
+win32k.mak
+win32k.tools.mk
 win32k.txt
+Win32knew.def
 win32ktst.def
-..\..\include\win\peexe.h
 dev16\d16globl.c
 dev16\d16init.c
 dev16\d16strat.c
+dev16\extract.c
+dev16\mkcalltab.c
 dev16\probkrnl.c
 dev16\SymDB.c
 dev16\vprntf16.c
@@ -48,8 +55,6 @@ elf2lx\elf2lx.cpp
 elf2lx\elf2lxmain.cpp
 elf2lx\elfdumper.cpp
 elf2lx\makefile
-include\errors.h
-include\OS2KSEC.h
 include\asmutils.h
 include\avl.h
 include\cout.h
@@ -57,10 +62,12 @@ include\dev16.h
 include\dev1632.h
 include\dev32.h
 include\dev32hlp.h
-include\devSegDf.inc
+include\devSegDf.h
+include\devsegdf.inc
 include\elf.h
 include\elf2lx.h
 include\env.h
+include\errors.h
 include\k32.h
 include\ldr.h
 include\ldrCalls.h
@@ -72,16 +79,19 @@ include\myExecPgm.h
 include\new.h
 include\omf.h
 include\options.h
+include\options.inc
 include\OS2KIO.h
 include\OS2KPTDA.h
 include\OS2Krnl.h
 include\OS2Krnl.inc
+include\OS2KSEC.h
 include\OS2KSEM.h
 include\OS2KTCB.h
 include\OS2KTK.h
 include\OS2KVM.h
 include\pe2lx.h
 include\probkrnl.h
+include\ptda.h
 include\rmalloc.h
 include\smalloc.h
 include\sprintf.h
@@ -90,18 +100,26 @@ include\test.h
 include\types.h
 include\vprintf.h
 include\vprntf16.h
-include\Win32k.h
 include\yield.h
 k32\k32AllocMemEx.cpp
-ldr\calltab.asm
+k32\k32ProcessReadWrite.cpp
+k32\k32QueryOptionsStatus.cpp
+k32\k32QueryOTEs.cpp
+k32\k32SetOptions.cpp
+ldr\calltaba.asm
 ldr\ldr.cpp
 ldr\ModuleBase.cpp
+ldr\myldrCheckInternalName.cpp
 ldr\myldrClose.cpp
 ldr\myldrEnum32bitRelRecs.cpp
+ldr\myldrFindModule.cpp
+ldr\myldrGetFileName.asm
 ldr\myldrOpen.cpp
 ldr\myldrOpenPath.cpp
+ldr\myldrOpenPatha.asm
 ldr\myLDRQAppType.cpp
 ldr\myldrRead.cpp
+ldr\myldrSetVMflags.cpp
 ldr\mytkExecPgm.asm
 ldr\mytkStartProcess.asm
 ldr\myVMAllocMem.cpp
@@ -110,7 +128,13 @@ lib\libGetCS.asm
 lib\libInit.c
 lib\libTerm.c
 lib\libTest.c
+lib\libW32kProcessReadWrite.c
+lib\libW32kQueryOTEs.c
+lib\libWin32kInstalled.c
+lib\libWin32kQueryOptionsStatus.c
+lib\libWin32kSetOptions.c
 lib\makefile
+misc\abort.c
 misc\asmutils.asm
 misc\avl.c
 misc\buffer.asm
@@ -124,6 +148,7 @@ misc\malloc_old.c
 misc\new.cpp
 misc\OS2KPTDA.c
 misc\OS2KTCB.c
+misc\ptda.c
 misc\rmalloc.c
 misc\rmalloc_avl.c
 misc\smalloc_avl.c
@@ -131,6 +156,7 @@ misc\stricmp.c
 misc\vprintf.c
 misc\vsprintf.c
 misc\yield.c
+mmf\mmf.cpp
 pe2lx\makefile
 pe2lx\pe2lx.cpp
 pe2lx\pe2lxmain.cpp
@@ -138,11 +164,22 @@ rexx\kRx.c
 rexx\kRx.def
 rexx\kRxa.asm
 rexx\makefile
+rexx\tst.cmd
 test\dh.asm
 test\dos.c
 test\dosa.asm
 test\fake.c
 test\fakea.asm
 test\init.asm
+test\TestKernels.cmd
+test\TstProcessReadWrite.c
 test\win32ktst.c
+utils\makefile
+utils\Win32kCC.c
+utils\Win32kCC.dlg
+utils\Win32kCC.h
+utils\Win32kCC.rc
 [ASSOCIATION]
+[STATE]
+
+
