@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.15 2000-03-07 11:08:46 bird Exp $
+# $Id: makefile,v 1.16 2000-03-18 19:48:53 sandervl Exp $
 
 #
 # Odin32 API
@@ -27,6 +27,7 @@ CLEANEXTRAS = msvcrtrsrc.asm msvcrt20rsrc.asm msvcrt40rsrc.asm \
 # Object files. All objects should be prefixed with $(OBJDIR)!
 OBJS = \
 $(OBJDIR)\msvcrt.obj \
+$(OBJDIR)\util.obj \
 $(OBJDIR)\$(TARGET)rsrc.obj \
 $(PDWIN32_LIB)\dllentry.obj
 
