@@ -1,4 +1,4 @@
-/* $Id: commctrl.h,v 1.13 1999-10-04 16:01:29 cbratschi Exp $ */
+/* $Id: commctrl.h,v 1.14 1999-10-06 15:40:18 cbratschi Exp $ */
 /*
  * Common controls definitions
  */
@@ -644,8 +644,8 @@ HRESULT WINAPI UninitializeFlatSB(HWND);
 #define HDN_GETDISPINFOA      (HDN_FIRST-9)
 #define HDN_GETDISPINFOW      (HDN_FIRST-29)
 #define HDN_GETDISPINFO WINELIB_NAME_AW(HDN_GETDISPINFO)
-#define HDN_BEGINDRACK          (HDN_FIRST-10)
-#define HDN_ENDDRACK            (HDN_FIRST-11)
+#define HDN_BEGINDRAG          (HDN_FIRST-10)
+#define HDN_ENDDRAG            (HDN_FIRST-11)
 #define HDN_FILTERCHANGE        (HDN_FIRST-12)
 #define HDN_FILTERBTNCLICK      (HDN_FIRST-13)
 
