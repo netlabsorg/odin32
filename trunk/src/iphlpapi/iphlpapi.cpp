@@ -1,4 +1,4 @@
-/* $Id: iphlpapi.cpp,v 1.12 2002-10-07 11:02:03 sandervl Exp $ */
+/* $Id: iphlpapi.cpp,v 1.13 2003-05-05 15:10:56 sandervl Exp $ */
 /*
  *	IPHLPAPI library
  *
@@ -20,6 +20,7 @@
 
 #include <string.h>
 #include "iphlpapi.h"
+#include <winnls.h>
 
 #define BSD_SELECT 1
 #define OS2 1
@@ -83,8 +84,9 @@ ODINDEBUGCHANNEL(IPHLPAPI-IPHLPAPI)
  * module global variables
  ****************************************************************************/
 
-static PIP_ADAPTER_INFO pipAdapter = NULL;
-
+static PIP_ADAPTER_INFO pipAdapter    = NULL;
+static PMIB_IFTABLE     pmibTable     = NULL;
+static PMIB_IPADDRTABLE pmipaddrTable = NULL;
 
 //******************************************************************************
 //******************************************************************************
@@ -114,11 +116,11 @@ static void i_initializeAdapterInformation(void)
   struct rlist * rnode = NULL, * rdef = NULL;
   PIP_ADAPTER_INFO oldAdapter = NULL,topAdapter = NULL;
   struct sockaddr_in * sin;
-  struct ifmib ifmibget;
   int rc,i;
   char *buffer=NULL,*buffer2=NULL;
   struct ifnet *pifnet;
-  short int cInterfaces;
+  struct ifmib  ifmibget;
+  int cInterfaces;
 #ifndef TCPV40HDRS
   struct ortentry *r;
 #else
@@ -157,6 +159,14 @@ static void i_initializeAdapterInformation(void)
   }        
   cInterfaces = *(short int*)buffer;
   dprintf(("IPHLPAPI Call returned %d interfaces\n", cInterfaces));
+
+  pmibTable = (PMIB_IFTABLE)malloc(cInterfaces*sizeof(MIB_IFTABLE));
+  memset(pmibTable, 0, cInterfaces*sizeof(MIB_IFTABLE));
+  pmibTable->dwNumEntries = cInterfaces;
+
+  pmipaddrTable = (PMIB_IPADDRTABLE)malloc(cInterfaces*sizeof(MIB_IPADDRTABLE));
+  memset(pmipaddrTable, 0, cInterfaces*sizeof(MIB_IPADDRTABLE));
+  pmipaddrTable->dwNumEntries = cInterfaces;
 
   for (int currentInterface = 0; currentInterface < cInterfaces; currentInterface++)
   {
@@ -204,7 +214,49 @@ static void i_initializeAdapterInformation(void)
     pipAdapter->Index = ifmibget.iftable[i].ifIndex;
     pipAdapter->Type = ifmibget.iftable[i].ifType; // Careful with this (?)
     pipAdapter->DhcpEnabled = 0; // Also a question
+
+    MultiByteToWideChar(CP_ACP, 0, iShortName, strlen(iShortName),
+                        pmibTable->table[currentInterface].wszName, 
+                        MAX_INTERFACE_NAME_LEN);
   
+    pmibTable->table[currentInterface].dwIndex = ifmibget.iftable[i].ifIndex;
+    pmibTable->table[currentInterface].dwType  = ifmibget.iftable[i].ifType;         /* type of the interface   */
+    pmibTable->table[currentInterface].dwMtu   = ifmibget.iftable[i].ifMtu;          /* MTU of the interface   */
+    pmibTable->table[currentInterface].dwSpeed = ifmibget.iftable[i].ifSpeed;
+
+    pmibTable->table[currentInterface].dwPhysAddrLen = 0; //??
+    memcpy(pmibTable->table[currentInterface].bPhysAddr, ifmibget.iftable[i].ifPhysAddr, sizeof(ifmibget.iftable[i].ifPhysAddr));
+
+    pmibTable->table[currentInterface].dwAdminStatus = ifmibget.iftable[i].ifOperStatus;
+    pmibTable->table[currentInterface].dwOperStatus = (ifmibget.iftable[i].ifOperStatus == IFF_UP) ? MIB_IF_OPER_STATUS_OPERATIONAL : MIB_IF_OPER_STATUS_NON_OPERATIONAL;
+
+    pmibTable->table[currentInterface].dwLastChange = ifmibget.iftable[i].ifLastChange;
+    pmibTable->table[currentInterface].dwInOctets   = ifmibget.iftable[i].ifInOctets;
+    pmibTable->table[currentInterface].dwInUcastPkts = ifmibget.iftable[i].ifInUcastPkts;
+    pmibTable->table[currentInterface].dwInNUcastPkts = ifmibget.iftable[i].ifInNUcastPkts;
+    pmibTable->table[currentInterface].dwInDiscards = ifmibget.iftable[i].ifInDiscards;
+    pmibTable->table[currentInterface].dwInErrors = ifmibget.iftable[i].ifInErrors;
+    pmibTable->table[currentInterface].dwInUnknownProtos = ifmibget.iftable[i].ifInUnknownProtos;
+    pmibTable->table[currentInterface].dwOutOctets = ifmibget.iftable[i].ifOutOctets;
+    pmibTable->table[currentInterface].dwOutUcastPkts = ifmibget.iftable[i].ifOutUcastPkts;
+    pmibTable->table[currentInterface].dwOutNUcastPkts = ifmibget.iftable[i].ifOutNUcastPkts;
+    pmibTable->table[currentInterface].dwOutDiscards = ifmibget.iftable[i].ifOutDiscards;
+    pmibTable->table[currentInterface].dwOutErrors = ifmibget.iftable[i].ifOutErrors;
+//    pmibTable->table[currentInterface].dwOutQLen
+
+    pmibTable->table[currentInterface].dwDescrLen = strlen(ifmibget.iftable[i].ifDescr);
+    strncpy((char *)pmibTable->table[currentInterface].bDescr, ifmibget.iftable[i].ifDescr, sizeof(pmibTable->table[currentInterface].bDescr));
+
+
+    pmipaddrTable->table[currentInterface].dwAddr = ifInfo->IPAddress;
+    pmipaddrTable->table[currentInterface].dwMask = ifInfo->netmask;
+    pmipaddrTable->table[currentInterface].dwBCastAddr = 0; //??
+    pmipaddrTable->table[currentInterface].dwIndex = ifmibget.iftable[i].ifIndex;
+
+;  /* MTU of the interface   */
+
+
+
     // TODO: Adapter may support multiple IP addrs
     IP_ADDR_STRING iasAdapterIP;
     iasAdapterIP.Next = NULL;
@@ -489,3 +541,92 @@ DWORD DeleteIPAddress(
                       ULONG NTEContext // net table entry context
                      );
 // SIOCDIFADDR
+
+//******************************************************************************
+//******************************************************************************
+DWORD WIN32API GetIpAddrTable(PMIB_IPADDRTABLE pIpAddrTable, PULONG pdwSize,
+                              BOOL bOrder)
+{
+    DWORD buflen;
+    DWORD rc;
+
+    dprintf(("GetIpAddrTable %x %x %d", pIpAddrTable, pdwSize, bOrder));
+
+    if(pdwSize == NULL) {
+        rc = ERROR_INVALID_PARAMETER;
+        goto end;
+    }
+
+    if(pmipaddrTable == NULL)
+    {
+        // gather the information and save it
+        i_initializeAdapterInformation();
+    }
+    if(pmipaddrTable == NULL)
+        return ERROR_NO_DATA;
+
+
+    buflen = sizeof(MIB_IPADDRTABLE) - sizeof(MIB_IPADDRROW);
+    buflen+= pmibTable->dwNumEntries*sizeof(MIB_IPADDRROW);
+
+    if(buflen > *pdwSize) {
+        *pdwSize = buflen;
+        rc = ERROR_BUFFER_OVERFLOW;
+        goto end;
+    }
+    rc = ERROR_SUCCESS;
+
+    memcpy(pIpAddrTable, pmipaddrTable, buflen);
+
+end:
+    dprintf(("GetIpAddrTable returned %d", rc));
+    return rc;
+}
+//******************************************************************************
+//******************************************************************************
+DWORD WIN32API GetIfTable(PMIB_IFTABLE pIfTable, PULONG pdwSize, BOOL bOrder)
+{
+    DWORD buflen;
+    DWORD rc;
+
+    dprintf(("GetIfTable %x %x %d", pIfTable, pdwSize, bOrder));
+
+    if(pdwSize == NULL) {
+        rc = ERROR_INVALID_PARAMETER;
+        goto end;
+    }
+
+    if(pmibTable == NULL)
+    {
+        // gather the information and save it
+        i_initializeAdapterInformation();
+    }
+    if(pmibTable == NULL)
+        return ERROR_NO_DATA;
+
+
+    buflen = sizeof(MIB_IFTABLE) - sizeof(MIB_IFROW);
+    buflen+= pmibTable->dwNumEntries*sizeof(MIB_IFROW);
+
+    if(buflen > *pdwSize) {
+        *pdwSize = buflen;
+        rc = ERROR_BUFFER_OVERFLOW;
+        goto end;
+    }
+
+    memcpy(pIfTable, pmibTable, buflen);
+
+    rc = ERROR_SUCCESS;
+end:
+    dprintf(("GetIfTable returned %d", rc));
+    return rc;
+}
+//******************************************************************************
+//******************************************************************************
+DWORD WIN32API GetFriendlyIfIndex(DWORD IfIndex)
+{
+    dprintf(("GetFriendlyIfIndex %d; returns the same index", IfIndex));
+    return IfIndex;
+}
+//******************************************************************************
+//******************************************************************************
