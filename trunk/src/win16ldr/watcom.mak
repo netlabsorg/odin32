@@ -1,4 +1,4 @@
-# $Id: watcom.mak,v 1.1 2001-06-13 02:19:34 bird Exp $
+# $Id: watcom.mak,v 1.2 2001-06-13 02:55:19 bird Exp $
 
 #
 #  Watcom v11.0 makefile.
@@ -30,9 +30,9 @@ LDFLAGS     =
 # Work according to existing environment.
 #
 !ifdef DEBUG
-OBJDIR=.\bin\debug
+OBJDIR=.\bin\debug.wc16
 !else
-OBJDIR=.\bin\release
+OBJDIR=.\bin\release.wc16
 !endif
 !if [ mkdir bin 2> nul > nul ]
 !endif
@@ -48,8 +48,8 @@ all:    $(OBJDIR)\w16odin.exe  $(OBJDIR)\odindll.dll
 #
 # W16Odin.EXE.
 #
-w16odin.exe: $(OBJDIR)\w16odin.exe watcom.mak
-$(OBJDIR)\w16odin.exe: $(OBJDIR)\odin.obj
+w16odin.exe: $(OBJDIR)\w16odin.exe
+$(OBJDIR)\w16odin.exe: $(OBJDIR)\odin.obj watcom.mak
     $(LD) @<<$(OBJDIR)\$(@B).lnk
 Name    $@
 $(LDFLAGS)
@@ -70,7 +70,8 @@ Segment Type DATA SHARED
 #
 # OdinDLL.DLL.
 #
-$(OBJDIR)\odindll.dll: $(OBJDIR)\odindll.obj odindll.def watcom.mak
+odindll.dll: $(OBJDIR)\odindll.dll
+$(OBJDIR)\odindll.dll: $(OBJDIR)\odindll.obj watcom.mak
     $(LD) @<<$(OBJDIR)\$(@B).lnk
 Name    $@
 $(LDFLAGS)
