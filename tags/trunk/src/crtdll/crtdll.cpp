@@ -1,4 +1,4 @@
-/* $Id: crtdll.cpp,v 1.17 1999-12-21 12:27:11 sandervl Exp $ */
+/* $Id: crtdll.cpp,v 1.18 1999-12-21 13:46:24 sandervl Exp $ */
 
 /*
  * The C RunTime DLL
@@ -52,6 +52,9 @@
 
 DEFAULT_DEBUG_CHANNEL(crtdll)
 
+//SvL: per process heap for CRTDLL
+HANDLE CRTDLL_hHeap = 0;
+
 
 /*********************************************************************
  *                  CRTDLL_MainInit  (CRTDLL.init)
@@ -62,7 +65,13 @@ BOOL WINAPI CRTDLL_Init(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 		CRTDLL__fdopen(0,"r");
 		CRTDLL__fdopen(1,"w");
 		CRTDLL__fdopen(2,"w");
+	     	CRTDLL_hHeap = HeapCreate(0, 0x10000, 0);
 	}
+	else 
+	if (fdwReason == DLL_PROCESS_DETACH) {
+        	HeapDestroy(CRTDLL_hHeap);
+        	CRTDLL_hHeap = 0;
+	}	
 	return TRUE;
 }
 
@@ -74,7 +83,7 @@ VOID* CDECL CRTDLL_new(DWORD size)
 {
     dprintf(("CRTDLL: ??2@YAPAXI@Z\n"));
     VOID* result;
-    if(!(result = HeapAlloc(GetProcessHeap(),0,size)) && new_handler)
+    if(!(result = Heap_Alloc(size)) && new_handler)
 	(*new_handler)();
     return result;
 }
@@ -86,7 +95,7 @@ VOID* CDECL CRTDLL_new(DWORD size)
 VOID CDECL CRTDLL_delete(VOID* ptr)
 {
     dprintf(("CRTDLL: ??3@YAXPAX@Z\n"));
-    HeapFree(GetProcessHeap(),0,ptr);
+    Heap_Free(ptr);
 }
 
 
@@ -1046,7 +1055,7 @@ CRTDLL_FILE * CDECL CRTDLL__fdopen(INT handle, LPCSTR mode)
         if (!file->handle) file->handle = GetStdHandle( STD_ERROR_HANDLE );
         break;
     default:
-        file = (PCRTDLL_FILE)HeapAlloc( GetProcessHeap(), 0, sizeof(*file) );
+        file = (PCRTDLL_FILE)Heap_Alloc(sizeof(*file) );
         file->handle = handle;
         break;
     }
@@ -3486,7 +3495,16 @@ void CDECL CRTDLL__seterrormode(int i)
  */
 int CDECL CRTDLL__setjmp( jmp_buf env )
 {
-  dprintf(("CRTDLL: _setjmp -> setjmp\n"));
+  dprintf(("CRTDLL: _setjmp -> setjmp (NOT IDENTICAL!!!)\n"));
+  return(setjmp( env));
+}
+
+/*********************************************************************
+ *           CRTDLL__setjmp3 	 (CRTDLL.262)
+ */
+int CDECL CRTDLL__setjmp3( jmp_buf env )
+{
+  dprintf(("CRTDLL: _setjmp3 -> setjmp (NOT IDENTICAL!!!)\n"));
   return(setjmp( env));
 }
 
@@ -4191,8 +4209,8 @@ double CDECL CRTDLL_atof( const char *nptr )
  */
 void * CDECL CRTDLL_calloc( size_t n, size_t size )
 {
-  dprintf(("CRTDLL: calloc\n"));
-  return (calloc(n, size));
+//  dprintf(("CRTDLL: calloc\n"));
+  return Heap_Alloc(size*n);
 }
 
 
@@ -4427,7 +4445,7 @@ wint_t CDECL CRTDLL_fputwc( wint_t wc, FILE *strm )
  */
 size_t CDECL CRTDLL_fread( void *ptr, size_t size, size_t n, FILE *fp )
 {
-  dprintf(("CRTDLL: fread\n"));
+//  dprintf(("CRTDLL: fread\n"));
   return (fread(ptr, size, n, fp));
 }
 
@@ -4437,8 +4455,8 @@ size_t CDECL CRTDLL_fread( void *ptr, size_t size, size_t n, FILE *fp )
  */
 VOID CDECL CRTDLL_free(LPVOID ptr)
 {
-    dprintf(("CRTDLL: free\n"));
-    HeapFree(GetProcessHeap(),0,ptr);
+//    dprintf(("CRTDLL: free\n"));
+    Heap_Free(ptr);
 }
 
 
@@ -4844,8 +4862,8 @@ VOID CDECL CRTDLL_longjmp(jmp_buf env, int val)
  */
 VOID* CDECL CRTDLL_malloc(DWORD size)
 {
-      dprintf(("CRTDLL: malloc\n"));
-      return HeapAlloc(GetProcessHeap(),0,size);
+//      dprintf(("CRTDLL: malloc\n"));
+      return Heap_Alloc(size);
 }
 
 

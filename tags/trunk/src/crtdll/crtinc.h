@@ -1,4 +1,4 @@
-/* $Id: crtinc.h,v 1.12 1999-12-21 12:27:12 sandervl Exp $ */
+/* $Id: crtinc.h,v 1.13 1999-12-21 13:46:25 sandervl Exp $ */
 
 /* Definitions for the CRTDLL library (CRTDLL.DLL)
  *
@@ -9,6 +9,11 @@
 #ifndef MAX_PATHNAME_LEN 
 #define MAX_PATHNAME_LEN 260 
 #endif 
+
+//SvL: Internal heap allocation definitions for NTDLL
+extern HANDLE CRTDLL_hHeap;
+#define Heap_Alloc(a)	HeapAlloc(CRTDLL_hHeap, HEAP_ZERO_MEMORY, a)
+#define Heap_Free(a)	HeapFree(CRTDLL_hHeap, 0, (PVOID)a)
 
 // MBC Defs
 #define _MBC_SINGLE	 0	
