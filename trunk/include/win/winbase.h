@@ -1,4 +1,4 @@
-/* $Id: winbase.h,v 1.24 2000-11-22 00:34:15 phaller Exp $ */
+/* $Id: winbase.h,v 1.25 2000-11-22 00:37:28 phaller Exp $ */
 
 #ifndef __WINE_WINBASE_H
 #define __WINE_WINBASE_H
@@ -1985,8 +1985,8 @@ INT       WINAPI lstrcmpW(LPCWSTR,LPCWSTR);
 INT       WINAPI lstrcmpiA(LPCSTR,LPCSTR);
 INT       WINAPI lstrcmpiW(LPCWSTR,LPCWSTR);
 #define     lstrcmpi WINELIB_NAME_AW(lstrcmpi)
-int    WIN32API lstrncmpiA     (LPCSTR, LPCSTR, int);
-int    WIN32API lstrncmpiW     (LPCWSTR, LPCWSTR, int);
+int       WINAPI lstrncmpiA(LPCSTR, LPCSTR, int);
+int       WINAPI lstrncmpiW(LPCWSTR, LPCWSTR, int);
 #define     lstrncmpi WINELIB_NAME_AW(lstrncmpi)
 
 VOID        WINAPI SetLastError(DWORD);
