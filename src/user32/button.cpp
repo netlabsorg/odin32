@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.41 2001-08-25 10:28:44 sandervl Exp $ */
+/* $Id: button.cpp,v 1.42 2001-08-25 10:54:18 sandervl Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
@@ -436,7 +436,7 @@ static LRESULT BUTTON_SetFocus(HWND hwnd,WPARAM wParam,LPARAM lParam)
   DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
   DWORD style = dwStyle & 0x0f;
 
-////  if (dwStyle & BS_NOTIFY) BUTTON_SendNotify(hwnd,BN_SETFOCUS);
+  if (dwStyle & BS_NOTIFY) BUTTON_SendNotify(hwnd,BN_SETFOCUS);
 
   if (((style == BS_AUTORADIOBUTTON) || (style == BS_RADIOBUTTON)) &&
       (GetCapture() != hwnd) && !(SendMessageA(hwnd,BM_GETCHECK,0,0) & BST_CHECKED))
@@ -459,7 +459,7 @@ static LRESULT BUTTON_KillFocus(HWND hwnd,WPARAM wParam,LPARAM lParam)
   DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
   DWORD style = dwStyle & 0x0f;
 
-////  if (dwStyle & BS_NOTIFY) BUTTON_SendNotify(hwnd,BN_KILLFOCUS);
+  if (dwStyle & BS_NOTIFY) BUTTON_SendNotify(hwnd,BN_KILLFOCUS);
 
   if (infoPtr->state & BUTTON_HASFOCUS)
   {
