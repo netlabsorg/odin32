@@ -69,5 +69,6 @@ inline PDB * PROCESS_Current(void)
 #endif
 
 ULONG InitCommandLine(const char *pszPeExe);
+BOOL  InitLoaders();
 
 #endif
