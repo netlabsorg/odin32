@@ -1,6 +1,10 @@
- /* $Id: ChangeLog,v 1.121 1999-08-22 11:40:24 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.122 1999-08-22 22:16:26 sandervl Exp $ */
 
  99-08-22: Sander van Leeuwen <sandervl@xs4all.nl>
+	- OLE32: Changes for updated WINE headers
+	- OLEAUT32: Created (Wine port)
+	- KERNEL32: Export HEAP_* string functions in lib
+	- KERNEL32: Fixed some PE resource dll load bugs
 	- KERNEL32: Moved CloseLogFile call to after DestroyTIB (fixes crashes
                     as WriteLog was still called in DestroyTIB & WriteOutProfiles)
 	- KERNEL32: Added exception handling code for each thread, entrypoint &
@@ -12,6 +16,7 @@
 	- USER32/NEW: Changed WM_ERASEBKGND handling. Fixes FreeCell background.
                       (but might not be completely correct)
 	- INCLUDE\WIN: Added custcntl.h & fixed GetObject definition
+	- INCLUDE\WIN, WIN\WINE: Added several files, updated OLE headers
 
  99-08-21: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: Fixed window class bug. Freecell menu now properly
