@@ -1,4 +1,4 @@
-# $Id: setup.mak,v 1.3 2002-04-13 04:39:59 bird Exp $
+# $Id: setup.mak,v 1.4 2002-04-22 00:28:46 bird Exp $
 
 #
 # Generic makefile system.
@@ -98,6 +98,8 @@ PATH_LIB    = $(PATH_ROOT)\lib\$(BUILD_MODE)
 PATH_DLL    = $(PATH_ROOT)\bin\$(BUILD_MODE)
 # Where the drivers goes. (common for IFS and SYS.)
 PATH_SYS    = $(PATH_ROOT)\bin\$(BUILD_MODE)
+# Where the virtual dos drivers goes.
+PATH_VDD    = $(PATH_ROOT)\bin\$(BUILD_MODE)
 # Where the documentation goes.
 PATH_DOC    = $(PATH_ROOT)\bin\$(BUILD_MODE)
 # Where the helpfiles goes.
@@ -167,7 +169,7 @@ BUILD_ENVS_BASE_PRE     =
 
 MAKE_INCLUDE_SETUP = $(PATH_MAKE)\setup.$(SHT_TRGPLTFRM)$(SHT_BLDMD)$(SHT_BLDENV).mk
 !ifndef BUILD_QUIET
-! if [$(ECHO) Including platform setup file $(CLRFIL)"$(MAKE_INCLUDE_SETUP)"$(CLRRST)]
+! if [$(ECHO) Including platform setup file $(CLRFIL)$(MAKE_INCLUDE_SETUP)$(CLRRST)]
 ! endif
 !endif
 !include $(MAKE_INCLUDE_SETUP)
