@@ -1,28 +1,28 @@
-# $Id: setup.os2ar.mk,v 1.1 2002-08-29 10:01:41 bird Exp $
+# $Id: setup.os2ar.mk,v 1.2 2002-09-14 23:35:27 bird Exp $
 
 #
 # Archiver(/lib manager) fanout.
 #
-_AR_INCLUDED = 0
+MAKE_INCLUDE_AR_SETUP =
 !ifdef AR_USE_WLIB
-_AR_INCLUDED = 1
 ! include $(PATH_MAKE)\setup.$(SHT_TRGPLTFRM)allwlib.mk
+MAKE_INCLUDE_AR_SETUP = $(PATH_MAKE)\setup.$(SHT_TRGPLTFRM)allwlib.mk
 !endif
 !ifdef AR_USE_ILIB
-_AR_INCLUDED = 1
-! include $(PATH_MAKE)\setup.$(SHT_TRGPLTFRM)allilib.mk
+MAKE_INCLUDE_AR_SETUP = $(PATH_MAKE)\setup.$(SHT_TRGPLTFRM)allilib.mk
 !endif
 !ifdef AR_USE_LIB
-_AR_INCLUDED = 1
-! include $(PATH_MAKE)\setup.$(SHT_TRGPLTFRM)alllib.mk
+MAKE_INCLUDE_AR_SETUP = $(PATH_MAKE)\setup.$(SHT_TRGPLTFRM)alllib.mk
 !endif
 
 # Use default one (for the given environment)
-!if !$(_AR_INCLUDED)
+!if "$(MAKE_INCLUDE_AR_SETUP)" == ""
 ! if "$(BUILD_ENV:WAT=xxx)" != "$(BUILD_ENV)" # (watcom check)
-!  include $(PATH_MAKE)\setup.$(SHT_TRGPLTFRM)allwlib.mk
+MAKE_INCLUDE_AR_SETUP = $(PATH_MAKE)\setup.$(SHT_TRGPLTFRM)allwlib.mk
 ! else
-!  include $(PATH_MAKE)\setup.$(SHT_TRGPLTFRM)allilib.mk
+MAKE_INCLUDE_AR_SETUP = $(PATH_MAKE)\setup.$(SHT_TRGPLTFRM)allilib.mk
 ! endif
 !endif
+
+!include $(MAKE_INCLUDE_AR_SETUP)
 

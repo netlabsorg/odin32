@@ -1,4 +1,5 @@
-# $Id: setup.optional.ilink.mk,v 1.2 2002-08-28 04:40:58 bird Exp $
+# $Id: setup.optional.ilink.mk,v 1.3 2002-09-14 23:31:27 bird Exp $
+MAKE_INCLUDE_CX_OPT = $(PATH_MAKE)\setup.optional.ilink.mk
 
 #
 # Helper file for all the option stuff for the ibm linker (ilink).

@@ -1,4 +1,6 @@
-# $Id: setup.os2allwrc.mk,v 1.1 2002-08-30 18:27:22 bird Exp $
+# $Id: setup.os2allwrc.mk,v 1.2 2002-09-14 23:35:26 bird Exp $
+
+MAKE_INCLUDE_ORC_SETUP = $(PATH_MAKE)\setup.os2allwrc.mk
 
 #
 # The tool - Odin32 RC
@@ -11,7 +13,7 @@ ORC = $(PATH_TOOLS)\wrc.exe
 ORC_FLAGS   = -DOS2 \
 !if "$(BUILD_MODE)" != "RELEASE"
               -DDEBUG \
-!endif              
+!endif
               $(ORC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES:-D__WINE__=) \
               $(ALL_INCLUDES) $(ORC_INCLUDES) -I$(PATH_INCLUDES) \
               -I$(PATH_VAC308)\include;$(PATH_VAC365)\include;$(PATH_WATCOM)\include \

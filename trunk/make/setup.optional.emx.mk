@@ -1,4 +1,4 @@
-# $Id: setup.optional.emx.mk,v 1.2 2002-05-16 11:37:00 bird Exp $
+# $Id: setup.optional.emx.mk,v 1.3 2002-09-14 23:31:27 bird Exp $
 
 #
 #  Helper file for all the optional stuff which is common for
@@ -6,6 +6,7 @@
 #  Concidering the size of this, it really make sense putting it here.
 #
 
+MAKE_INCLUDE_CX_OPT = $(PATH_MAKE)\setup.optional.emx.mk
 
 #
 # C Compiler flags.

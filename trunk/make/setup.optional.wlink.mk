@@ -1,10 +1,11 @@
-# $Id: setup.optional.wlink.mk,v 1.5 2002-08-30 18:57:13 bird Exp $
+# $Id: setup.optional.wlink.mk,v 1.6 2002-09-14 23:31:28 bird Exp $
 
 #
 #  Helper file for all the optional stuff which is common for
 #  all watcom11xx compilers.
 #  Concidering the size of this, it really make sense putting it here.
 #
+MAKE_INCLUDE_LD_OPT = $(PATH_MAKE)\setup.optional.wlink.mk
 
 
 #
