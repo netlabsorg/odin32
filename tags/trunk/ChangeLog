@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.2594 2003-06-03 11:59:15 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2595 2003-06-03 12:28:58 sandervl Exp $ */
 
  2003-06-03: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Don't search for keyboard accelerators in the default
@@ -6,6 +6,7 @@
                 o Send focus messages when we receive the undocumented WM_FOCUSCHANGED
                   PM message. Removes the need for the ugly hack to deal with
                   nested focus changes.
+    - COMCTL32: o Rebar fix for recursive size changes
 
  2003-06-02: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o CreatePipe: create unique named pipe
