@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.24 1999-10-30 18:08:19 dengert Exp $ */
+/* $Id: win32dlg.cpp,v 1.25 1999-10-30 18:40:47 cbratschi Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -45,17 +45,8 @@ Win32Dialog::Win32Dialog(HINSTANCE hInst, LPCSTR dlgTemplate, HWND owner,
     memset(&dlgInfo, 0, sizeof(dlgInfo));
 
     dprintf(("********* CREATE DIALOG ************"));
-    if(fInitialized == FALSE) {
-        if(DIALOG_Init() == FALSE) {
-            dprintf(("DIALOG_Init FAILED!"));
-            DebugInt3();
-            SetLastError(ERROR_GEN_FAILURE);
-            return;
-        }
-        fInitialized = TRUE;
-    }
-    xUnit = xBaseUnit;
-    yUnit = yBaseUnit;
+    xUnit = getXBaseUnit();
+    yUnit = getYBaseUnit();
 
     /* Parse dialog template */
     dlgTemplate = parseTemplate(dlgTemplate, &dlgInfo);
@@ -236,16 +227,6 @@ ULONG Win32Dialog::MsgCreate(HWND hwndFrame, HWND hwndClient)
     dprintf(("********* DIALOG CREATION FAILED! ************"));
     return FALSE;
 }
-//******************************************************************************
-//******************************************************************************
-BOOL Win32Dialog::MapDialogRect(LPRECT rect)
-{
-    rect->left   = (rect->left * xUnit) / 4;
-    rect->right  = (rect->right * xUnit) / 4;
-    rect->top    = (rect->top * yUnit) / 8;
-    rect->bottom = (rect->bottom * yUnit) / 8;
-    return TRUE;
-}
 /***********************************************************************
  *           DIALOG_DoDialogBox
  */
@@ -328,95 +309,6 @@ INT Win32Dialog::doDialogBox()
     retval = idResult;
     DestroyWindow();
     return retval;
-}
-/***********************************************************************
- *           DIALOG_Init
- *
- * Initialisation of the dialog manager.
- */
-BOOL Win32Dialog::DIALOG_Init(void)
-{
-    HDC hdc;
-    SIZE size;
-
-    /* Calculate the dialog base units */
-    if (!(hdc = CreateDCA( "DISPLAY", NULL, NULL, NULL ))) return FALSE;
-    if (!getCharSizeFromDC( hdc, 0, &size )) return FALSE;
-    DeleteDC( hdc );
-    xBaseUnit = size.cx;
-    yBaseUnit = size.cy;
-
-    return TRUE;
-}
-/***********************************************************************
- *           DIALOG_GetCharSizeFromDC
- *
- *
- *  Calculates the *true* average size of English characters in the
- *  specified font as oppposed to the one returned by GetTextMetrics.
- */
-BOOL Win32Dialog::getCharSizeFromDC( HDC hDC, HFONT hUserFont, SIZE * pSize )
-{
-    BOOL Success = FALSE;
-    HFONT hUserFontPrev = 0;
-    pSize->cx = xBaseUnit;
-    pSize->cy = yBaseUnit;
-
-    if ( hDC )
-    {
-        /* select the font */
-        TEXTMETRICA tm;
-        memset(&tm,0,sizeof(tm));
-        if (hUserFont) hUserFontPrev = SelectFont(hDC,hUserFont);
-        if (GetTextMetricsA(hDC,&tm))
-        {
-            pSize->cx = tm.tmAveCharWidth;
-            pSize->cy = tm.tmHeight;
-
-            /* if variable width font */
-            if (tm.tmPitchAndFamily & TMPF_FIXED_PITCH)
-            {
-                SIZE total;
-                static const char szAvgChars[53] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-                /* Calculate a true average as opposed to the one returned
-                 * by tmAveCharWidth. This works better when dealing with
-                 * proportional spaced fonts and (more important) that's
-                 * how Microsoft's dialog creation code calculates the size
-                 * of the font
-                 */
-                if (GetTextExtentPointA(hDC,szAvgChars,sizeof(szAvgChars),&total))
-                {
-                   /* round up */
-                    pSize->cx = ((2*total.cx/sizeof(szAvgChars)) + 1)/2;
-                    Success = TRUE;
-                }
-            }
-            else
-            {
-                Success = TRUE;
-            }
-        }
-
-        /* select the original font */
-        if (hUserFontPrev) SelectFont(hDC,hUserFontPrev);
-    }
-    return (Success);
-}
-/***********************************************************************
- *           DIALOG_GetCharSize
- *
- *
- *  Calculates the *true* average size of English characters in the
- *  specified font as oppposed to the one returned by GetTextMetrics.
- *  A convenient variant of DIALOG_GetCharSizeFromDC.
- */
-BOOL Win32Dialog::getCharSize( HFONT hUserFont, SIZE * pSize )
-{
-    HDC  hDC = GetDC(0);
-    BOOL Success = getCharSizeFromDC( hDC, hUserFont, pSize );
-    ReleaseDC(0, hDC);
-    return Success;
 }
 /***********************************************************************
  *           DIALOG_ParseTemplate32
@@ -1011,160 +903,6 @@ BOOL Win32Dialog::setDefButton(HWND hwndNew )
     return TRUE;
 }
 //******************************************************************************
-// GetNextDlgTabItem32   (USER32.276)
-//******************************************************************************
-HWND Win32Dialog::getNextDlgTabItem(HWND hwndCtrl, BOOL fPrevious)
-{
- Win32BaseWindow *child, *nextchild, *lastchild;
- HWND retvalue;
-
-    if (hwndCtrl)
-    {
-        child = GetWindowFromHandle(hwndCtrl);
-        if (!child)
-        {
-            retvalue = 0;
-            goto END;
-        }
-        /* Make sure hwndCtrl is a top-level child */
-        while ((child->getStyle() & WS_CHILD) && (child->getParent() != this))
-        {
-            child = child->getParent();
-            if(child == NULL) break;
-        }
-
-        if (!child || child->getParent() != this)
-        {
-            retvalue = 0;
-            goto END;
-        }
-    }
-    else
-    {
-        /* No ctrl specified -> start from the beginning */
-        child = (Win32BaseWindow *)getFirstChild();
-        if (!child)
-        {
-            retvalue = 0;
-            goto END;
-        }
-
-        if (!fPrevious)
-        {
-            while (child->getNextChild())
-            {
-                child = (Win32BaseWindow *)child->getNextChild();
-            }
-        }
-    }
-
-    lastchild = child;
-    nextchild = (Win32BaseWindow *)child->getNextChild();
-    while (TRUE)
-    {
-        if (!nextchild) nextchild = (Win32BaseWindow *)getFirstChild();
-
-        if (child == nextchild) break;
-
-        if ((nextchild->getStyle() & WS_TABSTOP) && (nextchild->getStyle() & WS_VISIBLE) &&
-            !(nextchild->getStyle() & WS_DISABLED))
-        {
-            lastchild = nextchild;
-            if (!fPrevious) break;
-        }
-        nextchild = (Win32BaseWindow *)nextchild->getNextChild();
-    }
-    retvalue = lastchild->getWindowHandle();
-
-END:
-    return retvalue;
-}
-//******************************************************************************
-//******************************************************************************
-HWND Win32Dialog::getNextDlgGroupItem(HWND hwndCtrl, BOOL fPrevious)
-{
- Win32BaseWindow *child, *nextchild, *lastchild;
- HWND retvalue;
-
-    if (hwndCtrl)
-    {
-        child = GetWindowFromHandle(hwndCtrl);
-        if (!child)
-        {
-            retvalue = 0;
-            goto END;
-        }
-        /* Make sure hwndCtrl is a top-level child */
-        while ((child->getStyle() & WS_CHILD) && (child->getParent() != this))
-        {
-            child = child->getParent();
-            if(child == NULL) break;
-        }
-
-        if (!child || child->getParent() != this)
-        {
-            retvalue = 0;
-            goto END;
-        }
-    }
-    else
-    {
-        /* No ctrl specified -> start from the beginning */
-        child = (Win32BaseWindow *)getFirstChild();
-        if (!child)
-        {
-            retvalue = 0;
-            goto END;
-        }
-
-        if (fPrevious)
-        {
-            while (child->getNextChild())
-            {
-                child = (Win32BaseWindow *)child->getNextChild();
-            }
-        }
-    }
-
-    lastchild = child;
-    nextchild = (Win32BaseWindow *)child->getNextChild();
-    while (TRUE)
-    {
-        if (!nextchild || nextchild->getStyle() & WS_GROUP)
-        {
-            /* Wrap-around to the beginning of the group */
-            Win32BaseWindow *pWndTemp;
-
-            nextchild = (Win32BaseWindow *)getFirstChild();
-
-            for(pWndTemp = nextchild;pWndTemp;pWndTemp = (Win32BaseWindow *)pWndTemp->getNextChild())
-            {
-                if (pWndTemp->getStyle() & WS_GROUP)
-                    nextchild = pWndTemp;
-
-                if (pWndTemp == child)
-                    break;
-            }
-
-        }
-        if (nextchild == child)
-            break;
-
-        if ((nextchild->getStyle() & WS_VISIBLE) && !(nextchild->getStyle() & WS_DISABLED))
-        {
-            lastchild = nextchild;
-
-            if (!fPrevious)
-                break;
-        }
-
-        nextchild = (Win32BaseWindow *)nextchild->getNextChild();
-    }
-    retvalue = lastchild->getWindowHandle();
-END:
-    return retvalue;
-}
-//******************************************************************************
 //******************************************************************************
 BOOL Win32Dialog::endDialog(int retval)
 {
@@ -1239,6 +977,4 @@ BOOL DIALOG_Unregister()
 }
 //******************************************************************************
 //******************************************************************************
-BOOL Win32Dialog::fInitialized = FALSE;
-int  Win32Dialog::xBaseUnit    = 10;
-int  Win32Dialog::yBaseUnit    = 20;
+

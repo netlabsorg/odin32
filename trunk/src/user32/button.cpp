@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.15 1999-10-24 22:56:00 sandervl Exp $ */
+/* $Id: button.cpp,v 1.16 1999-10-30 18:40:43 cbratschi Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
@@ -625,6 +625,25 @@ static void PB_Paint( HWND hwnd, HDC hDC, WORD action )
                           bHighLighted);
 }
 
+static INT BUTTON_GetTextFormat(DWORD dwStyle,INT defHorz,INT defVert)
+{
+  INT format = 0;
+
+  if (dwStyle & BS_LEFT) format = DT_LEFT;
+  else if (dwStyle & BS_CENTER) format = DT_CENTER;
+  else if (dwStyle & BS_RIGHT) format = DT_RIGHT;
+  else format = defHorz;
+
+  if (dwStyle & BS_TOP) format |= DT_TOP;
+  else if (dwStyle & BS_VCENTER) format |= DT_VCENTER;
+  else if (dwStyle & BS_BOTTOM) format |= DT_BOTTOM;
+  else format |= defVert;
+
+  if (!(dwStyle & BS_MULTILINE)) format |= DT_SINGLELINE;
+
+  return format;
+}
+
 /**********************************************************************
  * This method will actually do the drawing of the pushbutton
  * depending on it's state and the pushedState parameter.
@@ -691,15 +710,16 @@ static void BUTTON_DrawPushButton(
     textLen = GetWindowTextLengthA(hwnd);
     if (textLen > 0 && (!(dwStyle & (BS_ICON|BS_BITMAP))))
     {
+        INT format = BUTTON_GetTextFormat(dwStyle,DT_CENTER,DT_VCENTER);
+
         textLen++;
         text = (char*)malloc(textLen);
         GetWindowTextA(hwnd,text,textLen);
 
-        if (dwStyle & WS_DISABLED) DrawDisabledText(hDC,text,&rc,DT_SINGLELINE | DT_CENTER | DT_VCENTER); else
+        if (dwStyle & WS_DISABLED) DrawDisabledText(hDC,text,&rc,format); else
         {
-            SetTextColor( hDC, GetSysColor(COLOR_BTNTEXT) );
-            DrawTextA( hDC, text, -1, &rc,
-                         DT_SINGLELINE | DT_CENTER | DT_VCENTER );
+            SetTextColor(hDC,GetSysColor(COLOR_BTNTEXT));
+            DrawTextA(hDC,text,-1,&rc,format);
             /* do we have the focus?
              * Win9x draws focus last with a size prop. to the button
              */
@@ -902,9 +922,10 @@ static void CB_Paint(HWND hwnd,HDC hDC,WORD action)
 
         if( text && action != ODA_SELECT )
         {
+          INT format = BUTTON_GetTextFormat(dwStyle,DT_TOP,DT_VCENTER);
 
-          if (dwStyle & WS_DISABLED) DrawDisabledText(hDC,text,&rtext,DT_SINGLELINE | DT_VCENTER);
-          else DrawTextA(hDC,text,-1,&rtext,DT_SINGLELINE | DT_VCENTER);
+          if (dwStyle & WS_DISABLED) DrawDisabledText(hDC,text,&rtext,format);
+          else DrawTextA(hDC,text,-1,&rtext,format);
         }
     }
 
@@ -915,8 +936,7 @@ static void CB_Paint(HWND hwnd,HDC hDC,WORD action)
 
         SetRectEmpty(&rbox);
         if(textLen > 0)
-          DrawTextA( hDC, text, -1, &rbox,
-                     DT_SINGLELINE | DT_CALCRECT );
+          DrawTextA(hDC,text,-1,&rbox,DT_SINGLELINE | DT_CALCRECT);
         textLen = rbox.bottom - rbox.top;
         delta = ((rtext.bottom - rtext.top) - textLen)/2;
         rbox.bottom = (rbox.top = rtext.top + delta - 1) + textLen + 2;
@@ -942,9 +962,10 @@ static void BUTTON_CheckAutoRadioButton(HWND hwnd)
     if (!(dwStyle & WS_CHILD)) return;
     parent = GetParent(hwnd);
     /* assure that starting control is not disabled or invisible */
-//    start = sibling = GetNextDlgGroupItem( parent, hwnd, TRUE );
+    start = sibling = GetNextDlgGroupItem( parent, hwnd, TRUE );
     //@YD: bugfix
-    start = sibling = GetNextDlgGroupItem( parent, hwnd, FALSE );
+    //CB: doesn't work!
+    //start = sibling = GetNextDlgGroupItem( parent, hwnd, FALSE );
     do
     {
         if (!sibling) break;
@@ -986,20 +1007,21 @@ static void GB_Paint(HWND hwnd,HDC hDC,WORD action)
     textLen = GetWindowTextLengthA(hwnd);
     if (textLen > 0)
     {
-        textLen++;
-        text = (char*)malloc(textLen);
-        GetWindowTextA(hwnd,text,textLen);
-        if (infoPtr->hFont) SelectObject( hDC, infoPtr->hFont );
-        rc.left += 10;
+      INT format = BUTTON_GetTextFormat(dwStyle,DT_LEFT,DT_TOP) | DT_NOCLIP | DT_SINGLELINE;
 
-        if (dwStyle & WS_DISABLED) DrawDisabledText(hDC,text,&rc,DT_SINGLELINE | DT_NOCLIP); else
-        {
-            SetTextColor( hDC, GetSysColor(COLOR_BTNTEXT) );
-            DrawTextA( hDC, text, -1, &rc,
-                         DT_SINGLELINE | DT_NOCLIP );
-        }
+      textLen++;
+      text = (char*)malloc(textLen);
+      GetWindowTextA(hwnd,text,textLen);
+      if (infoPtr->hFont) SelectObject( hDC, infoPtr->hFont );
+      rc.left += 10;
 
-        free(text);
+      if (dwStyle & WS_DISABLED) DrawDisabledText(hDC,text,&rc,format); else
+      {
+        SetTextColor(hDC,GetSysColor(COLOR_BTNTEXT));
+        DrawTextA(hDC,text,-1,&rc,format);
+      }
+
+      free(text);
     }
 }
 

@@ -1,4 +1,4 @@
-/* $Id: windlg.cpp,v 1.8 1999-10-30 10:55:16 sandervl Exp $ */
+/* $Id: windlg.cpp,v 1.9 1999-10-30 18:40:49 cbratschi Exp $ */
 /*
  * Win32 dialog apis for OS/2
  *
@@ -201,39 +201,39 @@ int WIN32API DialogBoxParamW(HINSTANCE hInst, LPCWSTR lpszTemplate, HWND hwndOwn
  */
 BOOL WIN32API MapDialogRect(HWND hwndDlg, LPRECT rect)
 {
-  Win32Dialog *dialog;
+  Win32BaseWindow *window;
 
-    dialog = (Win32Dialog *)Win32BaseWindow::GetWindowFromHandle(hwndDlg);
-    if(!dialog || !dialog->IsDialog()) {
+    window = Win32BaseWindow::GetWindowFromHandle(hwndDlg);
+    if(!window) {
         dprintf(("MapDialogRect, window %x not found", hwndDlg));
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("USER32: MapDialogRect\n"));
-    return dialog->MapDialogRect(rect);
+    return window->MapDialogRect(rect);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API IsDlgButtonChecked( HWND hwnd, UINT id)
 {
     dprintf(("USER32:  IsDlgButtonChecked\n"));
-    //CB: get button state
+
     return (BOOL)SendDlgItemMessageA(hwnd, id,BM_GETCHECK,0,0);
 }
 //******************************************************************************
 //******************************************************************************
 HWND WIN32API GetNextDlgTabItem(HWND hwndDlg, HWND hwndCtrl, BOOL fPrevious)
 {
-  Win32Dialog *dialog;
+  Win32BaseWindow *window;
 
-    dialog = (Win32Dialog *)Win32BaseWindow::GetWindowFromHandle(hwndDlg);
-    if(!dialog || !dialog->IsDialog()) {
+    window = (Win32BaseWindow*)Win32BaseWindow::GetWindowFromHandle(hwndDlg);
+    if(!window) {
         dprintf(("GetNextDlgTabItem, window %x not found", hwndDlg));
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("USER32:  GetNextDlgTabItem\n"));
-    return dialog->getNextDlgTabItem(hwndCtrl, fPrevious);
+    return window->getNextDlgTabItem(hwndCtrl, fPrevious);
 }
 //******************************************************************************
 //Can be used for any parent-child pair
@@ -250,7 +250,7 @@ HWND WIN32API GetDlgItem(HWND hwnd, int id)
     }
     dlgcontrol = window->FindWindowById(id);
     if(dlgcontrol) {
-    	dprintf(("USER32: GetDlgItem %x %d returned %x\n", hwnd, id, dlgcontrol->getWindowHandle()));
+        dprintf(("USER32: GetDlgItem %x %d returned %x\n", hwnd, id, dlgcontrol->getWindowHandle()));
         return dlgcontrol->getWindowHandle();
     }
     dprintf(("USER32: GetDlgItem %x %d NOT FOUND!\n", hwnd, id));
@@ -368,16 +368,16 @@ UINT WIN32API GetDlgItemInt(HWND hwnd, INT id, BOOL *translated, BOOL fSigned)
 //******************************************************************************
 HWND WIN32API GetNextDlgGroupItem( HWND hwnd, HWND hwndCtrl, BOOL fPrevious)
 {
-  Win32Dialog *dialog;
+  Win32BaseWindow *window;
 
-    dialog = (Win32Dialog *)Win32BaseWindow::GetWindowFromHandle(hwnd);
-    if(!dialog || !dialog->IsDialog()) {
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if(!window) {
         dprintf(("GetNextDlgGroupItem, window %x not found", hwnd));
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("USER32:  GetNextDlgGroupItem\n"));
-    return dialog->getNextDlgGroupItem(hwndCtrl, fPrevious);
+    return window->getNextDlgGroupItem(hwndCtrl, fPrevious);
 }
 /***********************************************************************
  *           GetDialogBaseUnits   (USER.243) (USER32.233)

@@ -1,4 +1,4 @@
-/* $Id: dc.h,v 1.5 1999-10-22 18:11:44 sandervl Exp $ */
+/* $Id: dc.h,v 1.6 1999-10-30 18:40:44 cbratschi Exp $ */
 /*
  * public dc functions
  *
@@ -144,6 +144,7 @@ typedef struct _RGNDATA_W {
 #define SW_SCROLLCHILDREN_W    0x0001
 #define SW_INVALIDATE_W        0x0002
 #define SW_ERASE_W             0x0004
+#define SW_SMOOTHSCROLL_W      0x0010
 
 /*********************/
 
@@ -163,7 +164,7 @@ inline BOOL APIENTRY GpiEnableYInversion (HPS hps, LONG lHeight)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 //LONG    APIENTRY GpiQueryYInversion (HPS hps);
 
@@ -178,7 +179,7 @@ inline PVOID APIENTRY GpiAllocateDCData (HPS GpiH, ULONG size)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 PVOID   APIENTRY _GpiQueryDCData (HPS hps);
 
@@ -191,7 +192,7 @@ inline PVOID APIENTRY GpiQueryDCData (HPS hps)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 HDC     OPEN32API _HPSToHDC (HWND hwnd, HPS hps, HDC hdc, PVOID a);
 
@@ -204,7 +205,7 @@ inline HDC OPEN32API HPSToHDC (HWND hwnd, HPS hps, HDC hdc, PVOID a)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 void    OPEN32API _DeleteHDC (HDC hdc);
 
@@ -214,7 +215,7 @@ inline void OPEN32API DeleteHDC (HDC hdc)
 
     _DeleteHDC(hdc);
     SetFS(sel);
-} 
+}
 
 BOOL    OPEN32API _O32_EndPaint (HWND hwnd, const PAINTSTRUCT_W *lpps);
 
@@ -227,7 +228,7 @@ inline BOOL O32_EndPaint(HWND a, CONST PAINTSTRUCT_W *b)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 int     OPEN32API _O32_GetUpdateRgn (HWND hwnd, HRGN hrgn, BOOL erase);
 
@@ -240,7 +241,7 @@ inline int O32_GetUpdateRgn(HWND a, HRGN b, BOOL c)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 ULONG   OPEN32API _O32_GetRegionData (HRGN hrgn, ULONG count, PRGNDATA_W pData);
 
@@ -253,7 +254,7 @@ inline DWORD O32_GetRegionData(HRGN a, DWORD b, PRGNDATA_W c)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 BOOL    OPEN32API _O32_DeleteObject (LHANDLE hgdiobj);
 
@@ -266,7 +267,7 @@ inline BOOL O32_DeleteObject(HANDLE a)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 int     OPEN32API _O32_ReleaseDC (HWND hwnd, HDC hdc);
 
@@ -279,7 +280,7 @@ inline int O32_ReleaseDC(HWND a, HDC b)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 VOID    OPEN32API _O32_SetLastError( DWORD );
 
@@ -289,7 +290,7 @@ inline VOID O32_SetLastError(DWORD a)
 
     _O32_SetLastError(a);
     SetFS(sel);
-} 
+}
 
 BOOL    OPEN32API _O32_SetRectRgn (HRGN dest, int left, int top, int right, int bottom);
 
@@ -302,7 +303,7 @@ inline BOOL O32_SetRectRgn(HRGN a, int b, int c, int d, int e)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 int     OPEN32API _O32_CombineRgn (HRGN dest, HRGN src1, HRGN src2, int mode);
 
@@ -315,7 +316,7 @@ inline int O32_CombineRgn(HRGN a, HRGN b, HRGN c, int d)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 HRGN    OPEN32API _O32_CreateRectRgn (int left, int top, int right, int bottom);
 
@@ -328,7 +329,7 @@ inline HRGN O32_CreateRectRgn(int a, int b, int c, int d)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 BOOL OPEN32API _O32_CreateCaret (HWND hwnd, HBITMAP hbm, int width, int height);
 
@@ -341,7 +342,7 @@ inline BOOL O32_CreateCaret(HWND a, HBITMAP b, int c, int d)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 BOOL    APIENTRY  __DestroyCaret (void);
 
@@ -354,7 +355,7 @@ inline BOOL APIENTRY _DestroyCaret (void)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 UINT    APIENTRY  __GetCaretBlinkTime (void);
 
@@ -367,7 +368,7 @@ inline UINT APIENTRY _GetCaretBlinkTime (void)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 BOOL    APIENTRY  __HideCaret (HWND hwnd);
 
@@ -381,7 +382,7 @@ inline BOOL APIENTRY _HideCaret (HWND hwnd)
 
     return yyrc;
 }
- 
+
 BOOL    APIENTRY  __SetCaretBlinkTime (UINT mSecs);
 
 inline BOOL APIENTRY _SetCaretBlinkTime (UINT mSecs)
@@ -393,7 +394,7 @@ inline BOOL APIENTRY _SetCaretBlinkTime (UINT mSecs)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 BOOL    APIENTRY  __ShowCaret (HWND hwnd);
 
@@ -406,7 +407,7 @@ inline BOOL APIENTRY _ShowCaret (HWND hwnd)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 #endif //INCLUDED_BY_DC
 
