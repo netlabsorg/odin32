@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.51 2001-07-07 13:58:36 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.52 2001-08-10 19:32:23 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -38,6 +38,152 @@
 
 ODINDEBUGCHANNEL(KERNEL32-FILEIO)
 
+#include <ctype.h>
+#include "fileio.h"
+
+#if 0
+#define IS_END_OF_NAME(ch)  (!(ch) || ((ch) == '/') || ((ch) == '\\'))
+#define INVALID_DOS_CHARS  "*?<>|\"+=,;[] \345"
+#define FILE_toupper(a)		toupper(a)
+#define FILE_tolower(a)		tolower(a)
+
+/***********************************************************************
+ *           DOSFS_ValidDOSName
+ *
+ * Return 1 if Unix file 'name' is also a valid MS-DOS name
+ * (i.e. contains only valid DOS chars, lower-case only, fits in 8.3 format).
+ * File name can be terminated by '\0', '\\' or '/'.
+ */
+static int DOSFS_ValidDOSName( const char *name, int ignore_case )
+{
+    static const char invalid_chars[] = INVALID_DOS_CHARS;
+    const char *p = name;
+    const char *invalid = ignore_case ? (invalid_chars + 26) : invalid_chars;
+    int len = 0;
+
+    if (*p == '.')
+    {
+        /* Check for "." and ".." */
+        p++;
+        if (*p == '.') p++;
+        /* All other names beginning with '.' are invalid */
+        return (IS_END_OF_NAME(*p));
+    }
+    while (!IS_END_OF_NAME(*p))
+    {
+        if (strchr( invalid, *p )) return 0;  /* Invalid char */
+        if (*p == '.') break;  /* Start of the extension */
+        if (++len > 8) return 0;  /* Name too long */
+        p++;
+    }
+    if (*p != '.') return 1;  /* End of name */
+    p++;
+    if (IS_END_OF_NAME(*p)) return 0;  /* Empty extension not allowed */
+    len = 0;
+    while (!IS_END_OF_NAME(*p))
+    {
+        if (strchr( invalid, *p )) return 0;  /* Invalid char */
+        if (*p == '.') return 0;  /* Second extension not allowed */
+        if (++len > 3) return 0;  /* Extension too long */
+        p++;
+    }
+    return 1;
+}
+
+/***********************************************************************
+ *           DOSFS_Hash
+ *
+ * Transform a Unix file name into a hashed DOS name. If the name is a valid
+ * DOS name, it is converted to upper-case; otherwise it is replaced by a
+ * hashed version that fits in 8.3 format.
+ * File name can be terminated by '\0', '\\' or '/'.
+ * 'buffer' must be at least 13 characters long.
+ */
+void DOSFS_Hash( LPCSTR name, LPSTR buffer, BOOL dir_format,
+                 BOOL ignore_case )
+{
+    static const char invalid_chars[] = INVALID_DOS_CHARS "~.";
+    static const char hash_chars[33] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ012345";
+
+    const char *p, *ext;
+    char *dst;
+    unsigned short hash;
+    int i;
+
+    if (dir_format) strcpy( buffer, "           " );
+
+    if (DOSFS_ValidDOSName( name, ignore_case ))
+    {
+        /* Check for '.' and '..' */
+        if (*name == '.')
+        {
+            buffer[0] = '.';
+            if (!dir_format) buffer[1] = buffer[2] = '\0';
+            if (name[1] == '.') buffer[1] = '.';
+            return;
+        }
+
+        /* Simply copy the name, converting to uppercase */
+
+        for (dst = buffer; !IS_END_OF_NAME(*name) && (*name != '.'); name++)
+            *dst++ = FILE_toupper(*name);
+        if (*name == '.')
+        {
+            if (dir_format) dst = buffer + 8;
+            else *dst++ = '.';
+            for (name++; !IS_END_OF_NAME(*name); name++)
+                *dst++ = FILE_toupper(*name);
+        }
+        if (!dir_format) *dst = '\0';
+        return;
+    }
+
+    /* Compute the hash code of the file name */
+    /* If you know something about hash functions, feel free to */
+    /* insert a better algorithm here... */
+    if (ignore_case)
+    {
+        for (p = name, hash = 0xbeef; !IS_END_OF_NAME(p[1]); p++)
+            hash = (hash<<3) ^ (hash>>5) ^ FILE_tolower(*p) ^ (FILE_tolower(p[1]) << 8);
+        hash = (hash<<3) ^ (hash>>5) ^ FILE_tolower(*p); /* Last character*/
+    }
+    else
+    {
+        for (p = name, hash = 0xbeef; !IS_END_OF_NAME(p[1]); p++)
+            hash = (hash << 3) ^ (hash >> 5) ^ *p ^ (p[1] << 8);
+        hash = (hash << 3) ^ (hash >> 5) ^ *p;  /* Last character */
+    }
+
+    /* Find last dot for start of the extension */
+    for (p = name+1, ext = NULL; !IS_END_OF_NAME(*p); p++)
+        if (*p == '.') ext = p;
+    if (ext && IS_END_OF_NAME(ext[1]))
+        ext = NULL;  /* Empty extension ignored */
+
+    /* Copy first 4 chars, replacing invalid chars with '_' */
+    for (i = 4, p = name, dst = buffer; i > 0; i--, p++)
+    {
+        if (IS_END_OF_NAME(*p) || (p == ext)) break;
+        *dst++ = strchr( invalid_chars, *p ) ? '_' : FILE_toupper(*p);
+    }
+    /* Pad to 5 chars with '~' */
+    while (i-- >= 0) *dst++ = '~';
+
+    /* Insert hash code converted to 3 ASCII chars */
+    *dst++ = hash_chars[(hash >> 10) & 0x1f];
+    *dst++ = hash_chars[(hash >> 5) & 0x1f];
+    *dst++ = hash_chars[hash & 0x1f];
+
+    /* Copy the first 3 chars of the extension (if any) */
+    if (ext)
+    {
+        if (!dir_format) *dst++ = '.';
+        for (i = 3, ext++; (i > 0) && !IS_END_OF_NAME(*ext); i--, ext++)
+            *dst++ = strchr( invalid_chars, *ext ) ? '_' : FILE_toupper(*ext);
+    }
+    if (!dir_format) *dst = '\0';
+}
+#endif
 //******************************************************************************
 //******************************************************************************
 ODINFUNCTION7(HFILE,  CreateFileA,
@@ -592,7 +738,7 @@ ODINFUNCTION4(DWORD, SetFilePointer,
 ODINFUNCTION1(DWORD, GetFileAttributesA,
               LPCSTR, lpszFileName)
 {
- DWORD rc, error;
+    DWORD rc, error;
 
     if((NULL!=lpszFileName) && strlen(lpszFileName)==2 && lpszFileName[1] == ':')
     {
@@ -604,18 +750,18 @@ ODINFUNCTION1(DWORD, GetFileAttributesA,
         rc = O32_GetFileAttributes((LPSTR)szDrive);
     }
     else {
-  rc = O32_GetFileAttributes((LPSTR)lpszFileName);
-  if(rc == -1 && lpszFileName[strlen(lpszFileName)-1] != '\\') {
-    char *filename = (char *)alloca(strlen(lpszFileName)+2); //+2!!!!!!
-    strcpy(filename, lpszFileName);
-                strcat(filename, "\\");
-    rc = O32_GetFileAttributes((LPSTR)filename);
-  }
+        rc = O32_GetFileAttributes((LPSTR)lpszFileName);
+        if(rc == -1 && lpszFileName[strlen(lpszFileName)-1] != '\\') {
+            char *filename = (char *)alloca(strlen(lpszFileName)+2); //+2!!!!!!
+            strcpy(filename, lpszFileName);
+            strcat(filename, "\\");
+            rc = O32_GetFileAttributes((LPSTR)filename);
+        }
     }
     //SvL: Open32 returns FILE_ATTRIBUTE_DIRECTORY|FILE_ATTRIBUTE_NORMAL for
     //     directories whereas NT 4 (SP6) only returns FILE_ATTRIBUTE_DIRECTORY
     if(rc != -1 && (rc & FILE_ATTRIBUTE_DIRECTORY)) {
-  rc = FILE_ATTRIBUTE_DIRECTORY;
+        rc = FILE_ATTRIBUTE_DIRECTORY;
     }
 
 #if 0 // need more tests, maybe there is also a better way to hide simulated b:
@@ -1157,7 +1303,7 @@ ODINFUNCTION3(HANDLE, FindFirstChangeNotificationA,
               BOOL, bWatchSubtree,
               DWORD, dwNotifyFilter)
 {
-  dprintf(("KERNEL32:  FindFirstChangeNotificationA, Not implemented (faked)\n"));
+  dprintf(("KERNEL32:  FindFirstChangeNotificationA %s, Not implemented (faked)", lpPathName));
   return -1;
 }
 //******************************************************************************
