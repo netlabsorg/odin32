@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.165 2002-12-13 16:54:17 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.166 2002-12-17 13:48:24 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -2007,7 +2007,7 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
         if(lpCurrentDirectory) {
             char *newcmdline;
 
-            newcmdline = (char *)malloc(strlen(lpCurrentDirectory) + iNewCommandLineLength + 32);
+            newcmdline = (char *)malloc(strlen(lpCurrentDirectory) + iNewCommandLineLength + strlen(lpszPE) + 16);
             sprintf(newcmdline, "%s /OPT:[CURDIR=%s] %s %s", lpszPE, lpCurrentDirectory, szAppName, lpCommandLine);
             free(cmdline);
             cmdline = newcmdline;
@@ -2015,7 +2015,7 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
         else {
             char *newcmdline;
 
-            newcmdline = (char *)malloc(iNewCommandLineLength + 16);
+            newcmdline = (char *)malloc(iNewCommandLineLength + strlen(lpszPE) + 16);
             sprintf(newcmdline, "%s %s %s", lpszPE, szAppName, lpCommandLine);
             free(cmdline);
             cmdline = newcmdline;
@@ -2034,7 +2034,7 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
     if(fNEExe) {//16 bits windows app
         char *newcmdline;
 
-        newcmdline = (char *)malloc(strlen(szAppName) + strlen(cmdline) + 512);
+        newcmdline = (char *)malloc(strlen(szAppName) + strlen(cmdline) + strlen(szNELoader) + strlen(szPEGUILoader) + strlen(lpCommandLine) + 32);
 
         sprintf(newcmdline, "%s /PELDR=[%s] %s", szNELoader, szPEGUILoader, szAppName, lpCommandLine);
         free(cmdline);
