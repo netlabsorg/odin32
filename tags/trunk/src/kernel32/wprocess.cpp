@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.22 1999-08-18 17:18:01 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.23 1999-08-19 22:10:03 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -214,10 +214,9 @@ void WIN32API RegisterExe(WIN32EXEENTRY EntryPoint, PIMAGE_TLS_CALLBACK *TlsCall
     io_init1();
   }
 
-  //SvL: Use 0 instead of the real instance handle (for resource lookup)
   Win32Exe *winexe;
 
-  winexe = new Win32Exe(0, NameTableId, Win32TableId);
+  winexe = new Win32Exe(hinstance, NameTableId, Win32TableId);
 
   if(winexe) {
    	dprintf(("RegisterExe Win32TableId = %x", Win32TableId));
@@ -226,7 +225,6 @@ void WIN32API RegisterExe(WIN32EXEENTRY EntryPoint, PIMAGE_TLS_CALLBACK *TlsCall
    	dprintf(("RegisterExe Pe2lxVersion = %x", Pe2lxVersion));
 
       	winexe->setVersionId(VersionResId);
-      	winexe->setOS2InstanceHandle(hinstance);
    	winexe->setEntryPoint((ULONG)EntryPoint);
    	winexe->setTLSAddress(TlsAddress);
    	winexe->setTLSInitSize(TlsInitSize);
@@ -561,20 +559,20 @@ DWORD WIN32API GetModuleFileNameA(HMODULE hinstModule, LPTSTR lpszPath, DWORD cc
  char *fpath = NULL;
 
   dprintf(("GetModuleFileName %X", hinstModule));
-  if(hinstModule == 0 || hinstModule == -1 || (WinExe && hinstModule == WinExe->getOS2InstanceHandle())) {
-    module = (Win32Image *)WinExe;
+  if(hinstModule == 0 || hinstModule == -1 || (WinExe && hinstModule == WinExe->getInstanceHandle())) {
+    	module = (Win32Image *)WinExe;
   }
   else {
-    module = (Win32Image *)Win32Dll::findModule(hinstModule);
+    	module = (Win32Image *)Win32Dll::findModule(hinstModule);
   }
 
   if(module) {
-    fpath = module->getFullPath();
+    	fpath = module->getFullPath();
   }
   if(fpath) {
-    //SvL: 13-9-98: +1
-    rc = min(strlen(fpath)+1, cchPath);
-    strncpy(lpszPath, fpath, rc);
+    	//SvL: 13-9-98: +1
+    	rc = min(strlen(fpath)+1, cchPath);
+    	strncpy(lpszPath, fpath, rc);
   }
   else  rc = O32_GetModuleFileName(hinstModule, lpszPath, cchPath);
 
@@ -744,18 +742,18 @@ BOOL SYSTEM GetVersionStruct(char *modname, char *verstruct, ULONG bufLength)
   dprintf(("GetVersionStruct"));
   hinstance = OS2QueryModuleHandle(modname);
   if(hinstance == 0) {
-    dprintf(("GetVersionStruct can't find handle for %s\n", modname));
-    return(FALSE);
+    	dprintf(("GetVersionStruct can't find handle for %s\n", modname));
+    	return(FALSE);
   }
-  if(WinExe && WinExe->getOS2InstanceHandle() == hinstance) {
-    winimage = (Win32Image *)WinExe;
+  if(WinExe && WinExe->getInstanceHandle() == hinstance) {
+    	winimage = (Win32Image *)WinExe;
   }
   else {
-    winimage = (Win32Image *)Win32Dll::findModule(hinstance);
-    if(winimage == NULL) {
-        dprintf(("GetVersionStruct can't find Win32Image for %s\n", modname));
-        return(FALSE);
-    }
+    	winimage = (Win32Image *)Win32Dll::findModule(hinstance);
+    	if(winimage == NULL) {
+        	dprintf(("GetVersionStruct can't find Win32Image for %s\n", modname));
+        	return(FALSE);
+    	}
   }
   if(winimage->getVersionId() == -1) {
     dprintf(("GetVersionStruct: %s has no version resource!\n", modname));
@@ -777,19 +775,19 @@ ULONG SYSTEM GetVersionSize(char *modname)
     return(FALSE);
   }
 
-  if(WinExe && WinExe->getOS2InstanceHandle() == hinstance) {
-    winimage = (Win32Image *)WinExe;
+  if(WinExe && WinExe->getInstanceHandle() == hinstance) {
+    	winimage = (Win32Image *)WinExe;
   }
   else {
-    winimage = (Win32Image *)Win32Dll::findModule(hinstance);
-    if(winimage == NULL) {
-        dprintf(("GetVersionSize can't find Win32Image for %s\n", modname));
-        return(FALSE);
-    }
+    	winimage = (Win32Image *)Win32Dll::findModule(hinstance);
+    	if(winimage == NULL) {
+        	dprintf(("GetVersionSize can't find Win32Image for %s\n", modname));
+        	return(FALSE);
+    	}
   }
   if(winimage->getVersionId() == -1) {
-    dprintf(("GetVersionSize: %s has no version resource!\n", modname));
-    return(FALSE);
+    	dprintf(("GetVersionSize: %s has no version resource!\n", modname));
+    	return(FALSE);
   }
   ULONG size = OS2GetResourceSize(hinstance, winimage->getVersionId());
 
