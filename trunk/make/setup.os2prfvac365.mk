@@ -1,13 +1,20 @@
-# $Id: setup.os2prfvac365.mk,v 1.4 2002-04-22 00:30:10 bird Exp $
+# $Id: setup.os2prfvac365.mk,v 1.5 2002-04-22 02:09:28 bird Exp $
 
 # ---OS2, PROFILE, VAC365-------------------------
 ENV_NAME="OS/2, Profile, IBM VisualAge for C++ 3.6.5"
 ENV_STATUS=OK
+!if "$(ENV_ENVS)" == ""
+ENV_ENVS=vac365
+!else
+ENV_ENVS_FORCE=vac365
+!endif
+
 
 #
 # Include some shared standard stuff: ALP.
 #
 !include $(PATH_MAKE)\setup.os2prfalp.mk
+
 
 #
 # The tools
@@ -20,6 +27,7 @@ IMPLIB=implib.exe
 RC=rc.exe
 RL=rc.exe
 EXEPACK=lxlite.exe
+
 
 #
 # The flags
@@ -76,6 +84,7 @@ LINK_LNK5=$(TARGET_DEF)
 
 RC_FLAGS=-r -n -i $(PATH_INCLUDES:;= -i ) $(RC_DEFINES) $(RC_INCLUDES)
 RL_FLAGS=-x2 -n
+
 
 #
 # Libraries and object files.
