@@ -1,5 +1,3 @@
-/* $Id: thread.h,v 1.18 2000-11-21 11:33:59 sandervl Exp $ */
-
 /*
  * Thread definitions
  *
@@ -141,6 +139,7 @@ typedef struct _TEB
               DWORD          logfile;        // last FILE ptr used for logging (for exception handling in vfprintf)
               PROCESSTHREAD_SECURITYINFO threadinfo; //used to store security info for thread tokens
               DWORD          lcid;           // thread lcid
+              BOOL           fIgnoreMsgs;    // set to true if waiting in WaitForSingleObject
           } odin;
 #endif
           /* the following are nt specific fields */
