@@ -1,4 +1,4 @@
-/* $Id: windlllx.cpp,v 1.23 2001-10-16 11:39:38 sandervl Exp $ */
+/* $Id: windlllx.cpp,v 1.24 2002-05-20 14:22:37 sandervl Exp $ */
 
 /*
  * Win32 LX Dll class (compiled in OS/2 using Odin32 api)
@@ -194,6 +194,12 @@ Win32LxDll::Win32LxDll(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint, PVOID pRes
   hinstance = (HINSTANCE)buildHeader(MajorImageVersion, MinorImageVersion,
                                      Subsystem);
   dprintf(("Fake PE header %x for dll %s", hinstance, getModuleName()));
+
+  //HACK ALERT!!
+  //This makes sure the LX dll never gets unloaded.
+  //Necessary since unloading doesn't work due to dependencies on dlls
+  //with exitlist handlers.
+  referenced++;
 }
 //******************************************************************************
 //******************************************************************************
@@ -265,11 +271,12 @@ ULONG Win32LxDll::Release()
   ret = Win32DllBase::Release();
   if(ret == 0 && !fNoUnload) {//only set for kernel32.dll (fDisableUnload)
     //DosFreeModule sends a termination message to the dll.
-        //The LX dll informs us when it's removed (UnregisterDll call)
+    //The LX dll informs us when it's removed (UnregisterDll call)
     rc = DosFreeModule(hinst);
     if(rc) {
             dprintf(("Win32LxDll::Release: DosFreeModule %x returned %d", hinst, rc));
-            if(rc == ERROR_INVALID_ACCESS && !fExitProcess) {
+            if(rc == ERROR_INVALID_ACCESS && !fExitProcess) 
+            {
                 //Dll refused to unload because it has an active exitlist handler
                 //or depends on a dll that registered an exitlist handler
                 //In this case the handle remains valid and the entrypoint of
