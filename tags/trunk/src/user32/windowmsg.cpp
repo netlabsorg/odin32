@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.14 1999-12-29 12:39:45 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.15 1999-12-29 14:37:19 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -174,7 +174,7 @@ BOOL WIN32API PostMessageA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         return 0;
     }
     dprintf(("PostMessageA, %x %x %x %x", hwnd, msg, wParam, lParam));
-    return window->PostMessageA(msg, wParam, lParam);
+    return OSLibPostMessage(window->getOS2WindowHandle(), msg, wParam, lParam, FALSE);
 }
 //******************************************************************************
 //******************************************************************************
@@ -197,7 +197,19 @@ BOOL WIN32API PostMessageW(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         return 0;
     }
     dprintf(("PostMessageW, %x %x %x %x", hwnd, msg, wParam, lParam));
-    return window->PostMessageW(msg, wParam, lParam);
+    return OSLibPostMessage(window->getOS2WindowHandle(), msg, wParam, lParam, TRUE);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API PostThreadMessageA( DWORD threadid, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+    return OSLibPostThreadMessage(threadid, msg, wParam, lParam, FALSE);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API PostThreadMessageW( DWORD threadid, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+    return OSLibPostThreadMessage(threadid, msg, wParam, lParam, TRUE);
 }
 //******************************************************************************
 //******************************************************************************
@@ -220,18 +232,6 @@ BOOL WIN32API ReplyMessage(LRESULT result)
 {
     dprintf(("USER32: ReplyMessage %x", result));
     return OSLibWinReplyMessage(result);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API PostThreadMessageA( DWORD threadid, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-    return Win32BaseWindow::PostThreadMessageA(threadid, msg, wParam, lParam);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API PostThreadMessageW( DWORD threadid, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-    return Win32BaseWindow::PostThreadMessageW(threadid, msg, wParam, lParam);
 }
 //******************************************************************************
 //SvL: 24-6-'97 - Added
