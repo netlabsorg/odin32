@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.15 1999-09-26 11:09:39 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.16 1999-09-26 22:24:29 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -896,6 +896,27 @@ ULONG Win32BaseWindow::MsgSysCommand(ULONG win32sc, ULONG x, ULONG y)
     return SendInternalMessageA(WM_SYSCOMMAND, win32sc, MAKELONG((USHORT)x, (USHORT)y));
 }
 //******************************************************************************
+//TODO: Is this correct and complete?
+//******************************************************************************
+void Win32BaseWindow::setExtendedKey(ULONG virtualkey, ULONG *lParam)
+{
+    switch(virtualkey) {
+    case VK_DOWN:
+    case VK_UP:
+    case VK_PRIOR:
+    case VK_NEXT:
+    case VK_END:
+    case VK_DIVIDE:
+    case VK_DELETE:
+    case VK_EXECUTE: //Numeric enter key?
+    case VK_HOME:
+    case VK_INSERT:
+    case VK_RCONTROL:
+    case VK_RMENU: //is this the right alt???
+        *lParam = *lParam | (1<<24);
+    }
+}
+//******************************************************************************
 //TODO: virtual key & (possibly) scancode translation, extended keyboard bit & Unicode
 //******************************************************************************
 ULONG Win32BaseWindow::MsgChar(ULONG cmd, ULONG repeatcnt, ULONG scancode, ULONG vkey, ULONG keyflags)
@@ -904,6 +925,8 @@ ULONG Win32BaseWindow::MsgChar(ULONG cmd, ULONG repeatcnt, ULONG scancode, ULONG
 
     lParam  = repeatcnt;
     lParam |= (scancode << 16);
+    setExtendedKey(vkey, &lParam);
+
     if(keyflags & KEY_ALTDOWN)
         lParam |= (1<<29);
     if(keyflags & KEY_PREVDOWN)
@@ -935,6 +958,7 @@ ULONG Win32BaseWindow::MsgKeyUp (ULONG repeatCount, ULONG scancode, ULONG virtua
 
     dprintf(("WM_KEYUP: vkey:(%x) param:(%x)", virtualKey, lParam));
 
+    setExtendedKey(virtualKey, &lParam);
     return SendInternalMessageA (WM_KEYUP, virtualKey, lParam);
 }
 //******************************************************************************
@@ -951,6 +975,8 @@ ULONG Win32BaseWindow::MsgKeyDown (ULONG repeatCount, ULONG scancode, ULONG virt
     if (keyWasPressed)
         lParam |= 1 << 30;                          // bit 30, previous state, 1 means key was pressed
                                                     // bit 31, transition state, always 0 for WM_KEYDOWN
+
+    setExtendedKey(virtualKey, &lParam);
 
     dprintf(("WM_KEYDOWN: vkey:(%x) param:(%x)", virtualKey, lParam));
 
@@ -970,6 +996,7 @@ ULONG Win32BaseWindow::MsgSysKeyUp (ULONG repeatCount, ULONG scancode, ULONG vir
     lParam |= 1 << 30;                              // bit 30, previous state, always 1 for a WM_KEYUP message
     lParam |= 1 << 31;                              // bit 31, transition state, always 1 for WM_KEYUP
 
+    setExtendedKey(virtualKey, &lParam);
     dprintf(("WM_SYSKEYUP: vkey:(%x) param:(%x)", virtualKey, lParam));
 
     return SendInternalMessageA (WM_SYSKEYUP, virtualKey, lParam);
@@ -989,6 +1016,7 @@ ULONG Win32BaseWindow::MsgSysKeyDown (ULONG repeatCount, ULONG scancode, ULONG v
         lParam |= 1 << 30;                          // bit 30, previous state, 1 means key was pressed
                                                     // bit 31, transition state, always 0 for WM_KEYDOWN
 
+    setExtendedKey(virtualKey, &lParam);
     dprintf(("WM_SYSKEYDOWN: vkey:(%x) param:(%x)", virtualKey, lParam));
 
     return SendInternalMessageA (WM_SYSKEYDOWN, virtualKey, lParam);
@@ -1317,6 +1345,19 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 
     case WM_NCHITTEST: //TODO: Calculate position of
         return HTCLIENT;
+
+    case WM_SYSKEYDOWN:
+	    if(HIWORD(lParam) & KEYDATA_ALT)
+	    {
+    	    if(wParam == VK_F4)	/* try to close the window */
+    	    {
+    		    HWND hWnd = WIN_GetTopParent( wndPtr->hwndSelf );
+    		    wndPtr = WIN_FindWndPtr( hWnd );
+    		    if( wndPtr && !(getClass()->getStyle() & CS_NOCLOSE) )
+        		    PostMessage(WM_SYSCOMMAND, SC_CLOSE, 0);
+    	    }
+    	}
+    	return 0;
 
     default:
         return 1;

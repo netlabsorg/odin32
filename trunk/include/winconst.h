@@ -1,4 +1,4 @@
-/* $Id: winconst.h,v 1.9 1999-09-26 10:09:25 sandervl Exp $ */
+/* $Id: winconst.h,v 1.10 1999-09-26 22:24:51 sandervl Exp $ */
 
 /*
  * Win32 constants
@@ -219,3 +219,21 @@
 #define SB_BOTTOM_W           7
 #define SB_RIGHT_W            7
 #define SB_ENDSCROLL_W        8
+
+/* WM_SYSCOMMAND parameters */
+#define SC_SIZE_W         0xf000
+#define SC_MOVE_W         0xf010
+#define SC_MINIMIZE_W     0xf020
+#define SC_MAXIMIZE_W     0xf030
+#define SC_NEXTWINDOW_W   0xf040
+#define SC_PREVWINDOW_W   0xf050
+#define SC_CLOSE_W        0xf060
+#define SC_VSCROLL_W      0xf070
+#define SC_HSCROLL_W      0xf080
+#define SC_MOUSEMENU_W    0xf090
+#define SC_KEYMENU_W      0xf100
+#define SC_ARRANGE_W      0xf110
+#define SC_RESTORE_W      0xf120
+#define SC_TASKLIST_W     0xf130
+#define SC_SCREENSAVE_W   0xf140
+#define SC_HOTKEY_W       0xf150
