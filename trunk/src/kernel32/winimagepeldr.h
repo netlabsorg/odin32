@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.h,v 1.7 2001-01-22 18:26:52 sandervl Exp $ */
+/* $Id: winimagepeldr.h,v 1.8 2001-02-25 16:05:40 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -99,8 +99,8 @@ virtual ~Win32PeLdrImage();
 	BOOL  commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPageCmd = SECTION_PAGES);
 
 protected:
-        void  StoreImportByOrd(Win32DllBase *WinDll, ULONG ordinal, ULONG impaddr);
-        void  StoreImportByName(Win32DllBase *WinDll, char *impname, ULONG impaddr);
+        void  StoreImportByOrd(Win32ImageBase *WinImage, ULONG ordinal, ULONG impaddr);
+        void  StoreImportByName(Win32ImageBase *WinImage, char *impname, ULONG impaddr);
 
         void  addSection(ULONG type, ULONG rawoffset, ULONG rawsize, ULONG virtaddress, ULONG virtsize, ULONG flags);
         BOOL  allocSections(ULONG reservedMem);
