@@ -1,4 +1,4 @@
-# $Id: odin32.mk,v 1.5 2001-08-04 14:16:17 bird Exp $
+# $Id: odin32.mk,v 1.6 2001-09-30 09:46:16 bird Exp $
 
 #
 # Odin32 API
@@ -66,8 +66,8 @@ ODIN32_BIN  = $(ODIN32_BIN_)\Debug$(DIREXT)
 ODIN32_BIN__= $(ODIN32_BIN_)\Debug$(DIREXT)
 !  else
 !    ifdef PROFILE
-ODIN32_BIN  = $(ODIN32_BIN_)\Debug$(DIREXT)
-ODIN32_BIN__= $(ODIN32_BIN_)\Debug$(DIREXT)
+ODIN32_BIN  = $(ODIN32_BIN_)\Profile$(DIREXT)
+ODIN32_BIN__= $(ODIN32_BIN_)\Profile$(DIREXT)
 !    else
 ODIN32_BIN  = $(ODIN32_BIN_)\Release$(DIREXT)
 ODIN32_BIN__= $(ODIN32_BIN_)\Release$(DIREXT)
@@ -81,8 +81,8 @@ ODIN32_LIB  = $(ODIN32_LIB_)\Debug$(DIREXT)
 ODIN32_LIB__= $(ODIN32_LIB_)\Debug$(DIREXT)
 !  else
 !    ifdef PROFILE
-ODIN32_LIB  = $(ODIN32_LIB_)\Debug$(DIREXT)
-ODIN32_LIB__= $(ODIN32_LIB_)\Debug$(DIREXT)
+ODIN32_LIB  = $(ODIN32_LIB_)\Profile$(DIREXT)
+ODIN32_LIB__= $(ODIN32_LIB_)\Profile$(DIREXT)
 !    else
 ODIN32_LIB  = $(ODIN32_LIB_)\Release$(DIREXT)
 ODIN32_LIB__= $(ODIN32_LIB_)\Release$(DIREXT)
@@ -93,9 +93,9 @@ ODIN32_LIB__= $(ODIN32_LIB_)\Release$(DIREXT)
 !ifndef OBJDIR
 !  ifdef DEBUG
 OBJDIR   = .\bin\Debug$(DIREXT)
-!    else
+!  else
 !    ifdef PROFILE
-OBJDIR   = .\bin\Debug$(DIREXT)
+OBJDIR   = .\bin\Profile$(DIREXT)
 !    else
 OBJDIR   = .\bin\Release$(DIREXT)
 !    endif
@@ -119,12 +119,13 @@ COMMONRULES = clean dep lib all nothing
 #
 # Altern configuration if we're making the custom build object library.
 #
+CUST =
 !if "$(CUSTOMBUILD)" == "1"
 !   ifndef LIBTARGET
 !       ifndef PUBLICLIB
-LIBTARGET = 1
-EXETARGET = 1
-PUBLICLIB = 1
+CUST        = o
+LIBTARGET   = 1
+PUBLICLIB   = 1
 WRC_PREFIX_RESOURCE=1
 !       else
 CUSTOMBUILD = 0
@@ -148,6 +149,14 @@ CUSTOMBUILD = 0
 !    include $(ODIN32_INCLUDE)/odin32.rel.$(CCENV).mk
 !  endif
 !endif
+!endif
+
+
+#
+# Compiler environment modifications for custombuild.
+#
+!if "$(CUSTOMBUILD)" == "1"
+DLLENTRY =
 !endif
 
 

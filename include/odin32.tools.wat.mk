@@ -1,4 +1,4 @@
-# $Id: odin32.tools.wat.mk,v 1.5 2001-04-02 12:38:04 sandervl Exp $
+# $Id: odin32.tools.wat.mk,v 1.6 2001-09-30 09:46:17 bird Exp $
 
 #
 # Odin32 API
@@ -17,7 +17,10 @@ KDEF2WAT = $(ODIN32_TOOLS)\kDef2Wat.exe
 #
 # Make command definition.
 #
-MAKE_CMDLINE= wmake -u
+MAKE_CMDLINE = wmake -u
+!ifdef CUSTOMBUILD
+MAKE_CMDLINE += CUSTOMBUILD=1
+!endif
 !if "$(%DEBUG)" != ""
 DEBUG = 1
 !endif
