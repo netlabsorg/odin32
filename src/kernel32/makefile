@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.69 1999-12-09 11:59:28 sandervl Exp $
+# $Id: makefile,v 1.70 1999-12-10 14:06:12 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -177,6 +177,7 @@ oslibexcept.obj: \
     oslibexcept.h
 
 hmdevio.OBJ: \
+    .\hmdevice.h \
     .\hmdevio.cpp \
     exceptutil.h \
     hmdevio.h \
@@ -296,6 +297,7 @@ handlemanager.OBJ: \
 
 hmcomm.obj: \
         .\hmcomm.cpp \
+        .\hmdevice.h \
         .\hmcomm.h \
         $(PDWIN32_INCLUDE)\handlemanager.h
 

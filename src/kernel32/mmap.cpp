@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.26 1999-12-09 00:52:21 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.27 1999-12-10 14:06:12 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -173,6 +173,7 @@ BOOL Win32MemMap::commitPage(ULONG offset, BOOL fWriteAccess, int nrpages)
  LPVOID lpPageFaultAddr = (LPVOID)((ULONG)pMapping + offset);
  DWORD pageAddr         = (DWORD)lpPageFaultAddr & ~0xFFF;
  DWORD oldProt, newProt, nrBytesRead, size;
+ int i;
 
 //  mapMutex.enter();
 
@@ -183,64 +184,70 @@ BOOL Win32MemMap::commitPage(ULONG offset, BOOL fWriteAccess, int nrpages)
 
   dprintf(("Win32MemMap::commitPage %x (faultaddr %x)", pageAddr, lpPageFaultAddr));
   if(hMemFile != -1) {
-	if(VirtualQuery((LPSTR)pageAddr, &memInfo, nrpages*PAGE_SIZE) == 0) {
-		dprintf(("Win32MemMap::commitPage: VirtualQuery (%x,%x) failed for %x", pageAddr, nrpages*PAGE_SIZE));
-		goto fail;
-	}
-	//Only changes the state of the pages with the same attribute flags
-	//(returned in memInfo.RegionSize)
-	//If it's smaller than the mNrPages, it simply means one or more of the
-        //other pages have already been committed
-	if(memInfo.State & MEM_COMMIT)
-        {//if it's already committed, then the app tried to write to it
-		if(!fWriteAccess) {
-			dprintf(("Win32MemMap::commitPage: Huh? Already committed and not trying to write (%x,%x) failed for %x", pageAddr, memInfo.RegionSize));
+//	for(i=0;i<nrpages;i++) {
+		if(VirtualQuery((LPSTR)pageAddr, &memInfo, nrpages*PAGE_SIZE) == 0) {
+			dprintf(("Win32MemMap::commitPage: VirtualQuery (%x,%x) failed for %x", pageAddr, nrpages*PAGE_SIZE));
 			goto fail;
 		}
-		if(VirtualProtect((LPVOID)pageAddr, memInfo.RegionSize, newProt, &oldProt) == FALSE) {
-			dprintf(("Win32MemMap::commitPage: Failed to set write flag on page (%x,%x) failed for %x", pageAddr, memInfo.RegionSize));
-			goto fail;
-		}
-	}
-	else {
-  		if(VirtualAlloc((LPVOID)pageAddr, memInfo.RegionSize, MEM_COMMIT, PAGE_READWRITE) == FALSE) {
-			goto fail;
-  		}
-		offset = pageAddr - (ULONG)pMapping;
-		size   = memInfo.RegionSize;
-		if(offset + size > mSize) {
-			dprintf(("Adjusting size from %d to %d", size, mSize - offset));
-			size = mSize - offset;
-		}
-		if(SetFilePointer(hMemFile, offset, NULL, FILE_BEGIN) != offset) {
-			dprintf(("Win32MemMap::commitPage: SetFilePointer failed to set pos to %x", offset));
-			goto fail;
-		}
-		if(ReadFile(hMemFile, (LPSTR)pageAddr, size, &nrBytesRead, NULL) == FALSE) {
-			dprintf(("Win32MemMap::commitPage: ReadFile failed for %x", pageAddr));
-			goto fail;
-		}
-		if(nrBytesRead != size) {
-			dprintf(("Win32MemMap::commitPage: ReadFile didn't read all bytes for %x", pageAddr));
-			goto fail;
-		}
-		if(mProtFlags != PAGE_READWRITE) {
-  			if(VirtualProtect((LPVOID)pageAddr, memInfo.RegionSize, newProt, &oldProt) == FALSE) {
+		//Only changes the state of the pages with the same attribute flags
+		//(returned in memInfo.RegionSize)
+		//If it's smaller than the mNrPages, it simply means one or more of the
+	        //other pages have already been committed
+		if(memInfo.State & MEM_COMMIT)
+	        {//if it's already committed, then the app tried to write to it
+			if(!fWriteAccess) {
+				dprintf(("Win32MemMap::commitPage: Huh? Already committed and not trying to write (%x,%x) failed for %x", pageAddr, memInfo.RegionSize));
+				goto fail;
+			}
+			if(VirtualProtect((LPVOID)pageAddr, memInfo.RegionSize, newProt, &oldProt) == FALSE) {
+				dprintf(("Win32MemMap::commitPage: Failed to set write flag on page (%x,%x) failed for %x", pageAddr, memInfo.RegionSize));
 				goto fail;
 			}
 		}
-	}
+		else {
+	  		if(VirtualAlloc((LPVOID)pageAddr, memInfo.RegionSize, MEM_COMMIT, PAGE_READWRITE) == FALSE) {
+				goto fail;
+	  		}
+			offset = pageAddr - (ULONG)pMapping;
+			size   = memInfo.RegionSize;
+			if(offset + size > mSize) {
+				dprintf(("Adjusting size from %d to %d", size, mSize - offset));
+				size = mSize - offset;
+			}
+			if(SetFilePointer(hMemFile, offset, NULL, FILE_BEGIN) != offset) {
+				dprintf(("Win32MemMap::commitPage: SetFilePointer failed to set pos to %x", offset));
+				goto fail;
+			}
+			if(ReadFile(hMemFile, (LPSTR)pageAddr, size, &nrBytesRead, NULL) == FALSE) {
+				dprintf(("Win32MemMap::commitPage: ReadFile failed for %x", pageAddr));
+				goto fail;
+			}
+			if(nrBytesRead != size) {
+				dprintf(("Win32MemMap::commitPage: ReadFile didn't read all bytes for %x", pageAddr));
+				goto fail;
+			}
+			if(mProtFlags != PAGE_READWRITE) {
+	  			if(VirtualProtect((LPVOID)pageAddr, memInfo.RegionSize, newProt, &oldProt) == FALSE) {
+					goto fail;
+				}
+			}
+		}
+//		pageAddr += PAGE_SIZE;
+//	}
   }
   else {
-	if(VirtualQuery((LPSTR)pageAddr, &memInfo, nrpages*PAGE_SIZE) == 0) {
-		dprintf(("Win32MemMap::commitPage: VirtualQuery (%x,%x) failed for %x", pageAddr, nrpages*PAGE_SIZE));
-		goto fail;
-	}
-	if(!(memInfo.State & MEM_COMMIT))
-        {//if it's already committed, then the app tried to write to it
-	  	if(VirtualAlloc((LPVOID)pageAddr, memInfo.RegionSize, MEM_COMMIT, newProt) == FALSE) 
+	for(i=0;i<nrpages;i++) {
+		if(VirtualQuery((LPSTR)pageAddr, &memInfo, PAGE_SIZE) == 0) {
+			dprintf(("Win32MemMap::commitPage: VirtualQuery (%x,%x) failed for %x", pageAddr, PAGE_SIZE));
 			goto fail;
-  	}
+		}
+		if(!(memInfo.State & MEM_COMMIT))
+	        {//if it's already committed, then the app tried to write to it
+		  	if(VirtualAlloc((LPVOID)pageAddr, memInfo.RegionSize, MEM_COMMIT, newProt) == FALSE) 
+				goto fail;
+	  	}
+		pageAddr += PAGE_SIZE;
+	}
   }
 
 //  mapMutex.leave();
