@@ -1,4 +1,4 @@
-/* $Id: regsvr32.cpp,v 1.7 2001-10-02 17:14:57 sandervl Exp $ */
+/* $Id: regsvr32.cpp,v 1.8 2002-05-28 07:35:07 sandervl Exp $ */
 /* 
  * RegSvr32 for OS/2
  * 
@@ -53,14 +53,32 @@ static int WIN32API EntryPoint(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 // ----------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
+    HRESULT	hr;
+
+    if((hr = parse_command(argc, argv)) != S_OK)
+	return hr;
+
     RegisterLxExe(EntryPoint, NULL);
 
+    return 0;
+}
+
+// ======================================================================
+// Private functions.
+// ======================================================================
+
+// ----------------------------------------------------------------------
+// EntryPoint
+// ----------------------------------------------------------------------
+static int WIN32API EntryPoint
+   (HINSTANCE	hInstance,
+    HINSTANCE	hPrevInstance,
+    LPSTR	lpCmdLine,
+    int		nCmdShow)
+{
     HRESULT	hr;
 
     if((hr = sign_on()) != S_OK)
-	return hr;
-
-    if((hr = parse_command(argc, argv)) != S_OK)
 	return hr;
 
     if((hr = load_object()) != S_OK)
@@ -78,22 +96,6 @@ int main(int argc, char *argv[])
 	return hr;
 
     return sign_off();
-}
-
-// ======================================================================
-// Private functions.
-// ======================================================================
-
-// ----------------------------------------------------------------------
-// EntryPoint
-// ----------------------------------------------------------------------
-static int WIN32API EntryPoint
-   (HINSTANCE	hInstance,
-    HINSTANCE	hPrevInstance,
-    LPSTR	lpCmdLine,
-    int		nCmdShow)
-{
-    return S_OK;
 }
 
 // ----------------------------------------------------------------------
