@@ -1,4 +1,4 @@
-/* $Id: dde.cpp,v 1.10 2000-02-16 14:34:14 sandervl Exp $ */
+/* $Id: dde.cpp,v 1.11 2001-03-28 16:20:32 sandervl Exp $ */
 
 /*
  * Win32 default window API functions for OS/2
@@ -41,7 +41,6 @@ HDDEDATA WIN32API DdeClientTransaction(PVOID arg1, DWORD arg2, HCONV arg3,
                                        HSZ arg4, UINT arg5, UINT arg6, DWORD arg7, 
                                        PDWORD  arg8)
 {
-
     dprintf(("USER32:  DdeClientTransaction\n"));
 
     return O32_DdeClientTransaction(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
@@ -57,12 +56,13 @@ int WIN32API DdeCmpStringHandles( HSZ arg1, HSZ  arg2)
 }
 //******************************************************************************
 //******************************************************************************
-HCONV WIN32API DdeConnect( DWORD arg1, HSZ arg2, HSZ arg3, LPCONVCONTEXT  arg4)
+HCONV WIN32API DdeConnect(DWORD idInst, HSZ hszService, HSZ hszTopic, 
+                          LPCONVCONTEXT pCC)
 {
  HCONV rc;
 
-    rc = O32_DdeConnect(arg1, arg2, arg3, arg4);
-    dprintf(("USER32: DdeConnect %x %x returned %d (%x)", arg2, arg3, rc, DdeGetLastError(arg1)));
+    rc = O32_DdeConnect(idInst, hszService, hszTopic, pCC);
+    dprintf(("USER32: DdeConnect %x %x %x %x returned %d (%x)", idInst, hszService, hszTopic, pCC, rc, DdeGetLastError(idInst)));
     return rc;
 }
 //******************************************************************************
@@ -84,12 +84,12 @@ HDDEDATA WIN32API DdeCreateDataHandle(DWORD arg1, PVOID arg2, DWORD arg3, DWORD 
 }
 //******************************************************************************
 //******************************************************************************
-HSZ WIN32API DdeCreateStringHandleA(DWORD arg1, LPCSTR arg2, int  arg3)
+HSZ WIN32API DdeCreateStringHandleA(DWORD idInst, LPCSTR lpszString, int codepage)
 {
  HSZ rc;
 
-    rc = O32_DdeCreateStringHandle(arg1, arg2, arg3);
-    dprintf(("USER32: OS2DdeCreateStringHandleA %s returned %x", arg2, rc));
+    rc = O32_DdeCreateStringHandle(idInst, lpszString, codepage);
+    dprintf(("USER32: DdeCreateStringHandleA %x %s %x returned %x", idInst, lpszString, codepage, rc));
     return rc;
 }
 //******************************************************************************
@@ -169,24 +169,38 @@ UINT WIN32API DdeGetLastError(DWORD arg1)
 }
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API DdeInitializeA(PDWORD arg1, PFNCALLBACK arg2, DWORD arg3, DWORD  arg4)
+HDDEDATA EXPENTRY_O32 DdeCallback(UINT uType, UINT uFmt, HCONV hconv, HSZ hsz1, 
+                                  HSZ hsz2, HDDEDATA hdata, DWORD dwData1, 
+                                  DWORD dwData2) 
 {
- UINT rc;
-
-    rc = O32_DdeInitialize(arg1, arg2, arg3, arg4);
-
-    dprintf(("USER32:  DdeInitializeA\n"));
-    return rc;
+   dprintf(("DdeCallback %x %x %x %x %x %x %x %x", uType, uFmt, hconv, hsz1, hsz2,
+            hdata, dwData1, dwData2));
+   return 0;
 }
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API DdeInitializeW(PDWORD arg1, PFNCALLBACK arg2, DWORD arg3, DWORD  arg4)
+UINT WIN32API DdeInitializeA(PDWORD lpidInst, PFNCALLBACK pfnCallback, 
+                             DWORD afCmd, DWORD ulRes)
 {
+ UINT ret;
 
-    dprintf(("USER32:  DdeInitializeW\n"));
+//    ret = O32_DdeInitialize(lpidInst, pfnCallback, afCmd, ulRes);
+    ret = O32_DdeInitialize(lpidInst, (PFNCALLBACK_O32)DdeCallback, afCmd, ulRes);
+    dprintf(("USER32: DdeInitialize %x %x %x %x returned %x", lpidInst, pfnCallback, afCmd, ulRes, ret));
+    return ret;
+}
+//******************************************************************************
+//******************************************************************************
+UINT WIN32API DdeInitializeW(PDWORD lpidInst, PFNCALLBACK pfnCallback, 
+                             DWORD afCmd, DWORD ulRes)
+{
+ UINT ret;
 
     // NOTE: This will not work as is (needs UNICODE support)
-    return O32_DdeInitialize(arg1, arg2, arg3, arg4);
+    ret = O32_DdeInitialize(lpidInst, (PFNCALLBACK_O32)DdeCallback, afCmd, ulRes);
+    dprintf(("USER32: DdeInitializeW %x %x %x %x returned %x", lpidInst, pfnCallback, afCmd, ulRes, ret));
+    return ret;
+//    return O32_DdeInitialize(arg1, arg2, arg3, arg4);
 }
 //******************************************************************************
 //******************************************************************************
