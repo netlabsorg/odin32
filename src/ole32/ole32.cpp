@@ -1,4 +1,4 @@
-/* $Id: ole32.cpp,v 1.11 1999-09-24 21:49:43 davidr Exp $ */
+/* $Id: ole32.cpp,v 1.12 2000-01-08 09:27:56 davidr Exp $ */
 /* 
  * 
  * Project Odin Software License can be found in LICENSE.TXT
@@ -544,15 +544,16 @@ HRESULT WIN32API CoRegisterClassObject(
 }
 
 // ----------------------------------------------------------------------
-// CoRegisterClassObject
-// ----------------------------------------------------------------------
+// CoRevokeClassObject
+//
 // This method will remove a class object from the class registry
+// ----------------------------------------------------------------------
 HRESULT WIN32API CoRevokeClassObject(DWORD dwRegister) 
 {
     RegisteredClass * *	prevClassLink;
     RegisteredClass *	curClass;
 
-    dprintf(("OLE32: CoRegisterClassObject"));
+    dprintf(("OLE32: CoRevokeClassObject"));
 
     // Iterate through the whole list and try to match the cookie.
     curClass      = firstRegisteredClass;
@@ -585,8 +586,9 @@ HRESULT WIN32API CoRevokeClassObject(DWORD dwRegister)
 
 // ----------------------------------------------------------------------
 // GetClassFile
-// ----------------------------------------------------------------------
+//
 // This function supplies the CLSID associated with the given filename.
+// ----------------------------------------------------------------------
 HRESULT WIN32API GetClassFile(LPOLESTR filePathName, CLSID *pclsid)
 {
     IStorage *	pstg = 0;
