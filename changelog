@@ -1,4 +1,11 @@
- /* $Id: changelog,v 1.713 2000-02-09 12:11:43 bird Exp $ */
+ /* $Id: changelog,v 1.714 2000-02-09 13:41:39 sandervl Exp $ */
+
+ 2000-02-09: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Implemented WaitForInputIdle
+	- KERNEL32: WinExec: Wait for process to block on input before
+                    returning
+	- OpenGL base, GLUT, GLU: Added version resource, removed dll exitlist
+                                  handlers
 
  2000-02-09: Knut Stange Osmundsen (knut.stange.osmundsen@pmsc.no)
         - OpenGL base, GLUT, GLU: NODEBUGINFO implemented in the makefiles.
@@ -18,7 +25,7 @@
                   Corrected a problem with overloading _ldrEnum32bitRelRecs;
                   it failed on WS4eB. (Message 'DosDevIOCtl failed')
 
- 2000-02-07: Sander van Leeuwen <sandervl@xs4all.nl>
+ 2000-02-08: Sander van Leeuwen <sandervl@xs4all.nl>
         - USER32: Don't use shell positioning for child windows (breaks Notes)
                   Turn of WM_BACKERASEBKGND when calling RedrawWindow to
                   invalidate a window (without erase flag set; but also without
