@@ -1,4 +1,4 @@
-/* $Id: environ.cpp,v 1.14 2002-02-09 12:45:12 sandervl Exp $ */
+/* $Id: environ.cpp,v 1.15 2002-02-10 13:12:51 sandervl Exp $ */
 
 /*
  * Win32 environment file functions for OS/2
@@ -39,7 +39,7 @@ ODINDEBUGCHANNEL(KERNEL32-ENVIRONMENT)
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION0(LPSTR, GetEnvironmentStringsA)
+LPSTR WIN32API GetEnvironmentStringsA()
 {
   return (LPSTR) O32_GetEnvironmentStrings();
 }
