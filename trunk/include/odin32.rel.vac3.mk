@@ -1,4 +1,4 @@
-# $Id: odin32.rel.vac3.mk,v 1.11 2003-01-22 17:05:18 sandervl Exp $
+# $Id: odin32.rel.vac3.mk,v 1.12 2003-01-23 12:32:35 sandervl Exp $
 
 #
 # Odin32 API
@@ -69,7 +69,10 @@ CXXFLAGS         = -c -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn+ $(PROFILEFLAGS) $(C
 CXXFLAGS_ODINCRT = -c -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn- $(PROFILEFLAGS) $(CXXTARGETFLAGS) /Gx+
 CFLAGS_WIN32APP  = -c -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn+ $(PROFILEFLAGS) $(CTARGETFLAGS)
 CXXFLAGS_WIN32APP= -c -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn+ $(PROFILEFLAGS) $(CXXTARGETFLAGS)
-CINCLUDES        = -I$(ODIN32_INCLUDE)\incl_vac -I$(ODIN32_INCLUDE)\Win -I. -I$(ODIN32_INCLUDE) 
+CINCLUDES        = -I$(ODIN32_INCLUDE)\Win -I. -I$(ODIN32_INCLUDE) 
+!ifndef STATIC_CRT
+CINCLUDES        = -I$(ODIN32_INCLUDE)\incl_vac $(CINCLUDES) 
+!endif
 CDEFINES         = -D__WIN32OS2__ -D__WINE__ -D__i386__ -DTCPV40HDRS -DCOMCTL32UNDOC
 CDEFINES_ODINCRT = -D__WIN32OS2__ -D__WINE__ -D__i386__
 CDEFINES_WIN32APP= -D__WIN32OS2__ -D__i386__
