@@ -1,4 +1,4 @@
-/* $Id: cursoricon.h,v 1.3 2000-11-09 18:23:22 sandervl Exp $ */
+/* $Id: cursoricon.h,v 1.4 2000-11-19 11:50:13 sandervl Exp $ */
 
 /*
  * Cursor and icon definitions
@@ -74,6 +74,8 @@ typedef struct tagCURSORICONINFO
     BYTE    bPlanes;
     BYTE    bBitsPerPixel;
     HBITMAP hColorBmp;
+    HINSTANCE hInstance;
+    DWORD     dwResGroupId;
 } CURSORICONINFO;
 
 
