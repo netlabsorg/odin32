@@ -1,4 +1,4 @@
-; $Id: devfirst.asm,v 1.8 2001-07-08 02:55:25 bird Exp $
+; $Id: devfirst.asm,v 1.9 2001-07-10 05:19:34 bird Exp $
 ;
 ; DevFirst - entrypoint and segment definitions
 ;
@@ -56,6 +56,7 @@
     extrn WIN32KOPEN:FAR
     extrn WIN32KCLOSE:FAR
     .286p
+    extrn h_POST_SIGNAL:FAR
     extrn _strategy:near
 
 
@@ -311,7 +312,58 @@ x86RWP_end:
 x86RestoreWriteProtect endp
 
 
+;;
+; Post signal to one or more processes.
+; @cproto   extern ULONG POST_SIGNAL32(USHORT usSignal, USHORT usAction, USHORT usSignalArg, USHORT usPIDSGR);
+; @returns  NO_ERROR on success.
+;           On error ERROR_NOT_DESCENDANT, ERROR_SIGNAL_REFUSED,
+;           ERROR_INVALID_PROCID, ERROR_ZOMBIE_PROCESS, ERROR_SIGNAL_PENDING. (it seems)
+; @param    ax          Signal number.
+; @param    dx          Action.
+;                       0 - the process and all children.
+;                       1 - only the process
+;                       2 - the process and all it's decendants.
+;                       3 - all processes in that screen group.
+; @param    cx          Signal argument.
+; @param    [ebp+14h]   Process Id or Screen Group Id.
+; @uses     eax, edx, ecx
+; @status   completely implemented.
+; @author   knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+; @remark   Used by importTabInit.
+POST_SIGNAL32 proc near
+    push    ebp
+    mov     ebp, esp
+    push    ebx
+
+    movzx   eax, ax                     ; signal
+    movzx   ebx, dx                     ; action
+    movzx   ecx, cx                     ; argument
+    movzx   edx, word ptr [ebp+14h]     ; pid
+
+    jmp     far ptr CODE16:Thunk16_POST_SIGNAL32
+Thunk32_POST_SIGNAL32::
+    jc      cps_error                   ; jump on error
+    xor     eax, eax                    ; just to make sure it's all empty.
+    jmp     cps_end
+
+cps_error:
+    movzx   eax, ax                     ; make sure upper part is empty as well.
+
+cps_end:
+    pop     ebx
+    leave
+    ret
+POST_SIGNAL32 endp
 CODE32 ends
+
+CODE16 segment
+Thunk16_POST_SIGNAL32::
+    call    far ptr h_POST_SIGNAL
+    jmp     far ptr FLAT:Thunk32_POST_SIGNAL32
+CODE16 ends
+
+
+
 
 CODE16_INIT segment
 CODE16_INITSTART label byte
