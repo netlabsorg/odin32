@@ -1,4 +1,4 @@
-/* $Id: winmouse.cpp,v 1.21 2002-02-06 16:31:34 sandervl Exp $ */
+/* $Id: winmouse.cpp,v 1.22 2002-02-11 16:06:00 sandervl Exp $ */
 /*
  * Win32 mouse functions
  *
@@ -54,8 +54,7 @@ WNDPROC            keyboardHandler = NULL;
 
 //******************************************************************************
 //******************************************************************************
-ODINPROCEDURE1(MOUSE_Enable,
-               LPMOUSE_EVENT_PROC, lpMouseEventProc)
+VOID WIN32API MOUSE_Enable(LPMOUSE_EVENT_PROC lpMouseEventProc)
 {
   if(lpMouseEventProc == (LPMOUSE_EVENT_PROC)-1)
     mouseHandler = NULL;
@@ -64,8 +63,7 @@ ODINPROCEDURE1(MOUSE_Enable,
 }
 //******************************************************************************
 //******************************************************************************
-ODINPROCEDURE1(KEYBOARD_Enable,
-               WNDPROC, handler)
+VOID WIN32API KEYBOARD_Enable(WNDPROC handler)
 {
   keyboardHandler = handler;
 }
@@ -138,7 +136,7 @@ BOOL DInputMouseHandler(HWND hwnd, ULONG msg, ULONG x, ULONG y)
 // capture handle "cache"
 static HWND hwndWin32Capture = 0;
 
-ODINFUNCTION0(HWND, GetCapture)
+HWND WIN32API GetCapture()
 {
   if (0 == hwndWin32Capture)
     hwndWin32Capture = OS2ToWin32Handle(OSLibWinQueryCapture());
@@ -147,8 +145,7 @@ ODINFUNCTION0(HWND, GetCapture)
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(HWND, SetCapture,
-              HWND, hwnd)
+HWND WIN32API SetCapture(HWND hwnd)
 {
   HWND hwndPrev = GetCapture();
   BOOL rc;
@@ -184,7 +181,7 @@ ODINFUNCTION1(HWND, SetCapture,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION0(BOOL, ReleaseCapture)
+BOOL WIN32API ReleaseCapture()
 {
   HWND hwndPrev;
   BOOL ret;
@@ -203,7 +200,7 @@ ODINFUNCTION0(BOOL, ReleaseCapture)
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION0(UINT, GetDoubleClickTime)
+UINT WIN32API GetDoubleClickTime()
 {
   UINT result = OSLibWinQuerySysValue(SVOS_DBLCLKTIME);
   if(result == 0)
@@ -213,8 +210,7 @@ ODINFUNCTION0(UINT, GetDoubleClickTime)
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(BOOL, SetDoubleClickTime,
-              UINT, uInterval)
+BOOL WIN32API SetDoubleClickTime(UINT uInterval)
 {
   BOOL ret = TRUE;
 
@@ -242,8 +238,7 @@ inline BOOL _SwapMouseButton(BOOL swapFlag)
 }
 
 //******************************************************************************
-ODINFUNCTION1(BOOL, SwapMouseButton,
-              BOOL, fSwap)
+BOOL WIN32API SwapMouseButton(BOOL fSwap)
 {
   return _SwapMouseButton(fSwap);
 }
@@ -264,12 +259,8 @@ ODINFUNCTION1(BOOL, SwapMouseButton,
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
 
-ODINPROCEDURE5(mouse_event,
-               DWORD, dwFlags, 
-               DWORD, dx,
-               DWORD, dy,
-               DWORD, cButtons,
-               DWORD, dwExtraInfo)
+VOID WIN32API mouse_event(DWORD dwFlags, DWORD dx, DWORD dy, DWORD cButtons,
+                          DWORD dwExtraInfo)
 {
   INPUT i;
   
@@ -302,10 +293,7 @@ ODINPROCEDURE5(mouse_event,
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
 
-ODINFUNCTION3(UINT,    SendInput,
-              UINT,    nInputs,
-              LPINPUT, pInputs,
-              int,     chSize)
+UINT WIN32API SendInput(UINT nInputs, LPINPUT pInputs, int chSize)
 {
   dprintf(("not correctly implemented"));
   
@@ -428,9 +416,7 @@ ODINFUNCTION3(UINT,    SendInput,
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-ODINFUNCTION2(BOOL,  DragDetect,
-              HWND,  hwnd,
-              POINT, pt)
+BOOL WIN32API DragDetect(HWND hwnd, POINT pt)
 {
   dprintf(("not implemented"));
 

@@ -1,4 +1,4 @@
-/* $Id: winkeyboard.cpp,v 1.31 2002-02-11 14:03:18 sandervl Exp $ */
+/* $Id: winkeyboard.cpp,v 1.32 2002-02-11 16:06:00 sandervl Exp $ */
 /*
  * Win32 <-> PM key translation
  *
@@ -862,10 +862,8 @@ BYTE abPMScanToWinScan[256][2] =
 //******************************************************************************
 //******************************************************************************
 
-ODINPROCEDURE3(KeyTranslatePMToWinBuf,
-               BYTE *, pmkey,
-               BYTE *, winkey,
-               int,    nrkeys)
+VOID WIN32API KeyTranslatePMToWinBuf(BYTE *pmkey, BYTE *winkey,
+                                     int nrkeys)
 {
    for(int i=1;i<nrkeys;i++) {
        if(abWinVKeyToPMScan[i].bPMScanCode) {
@@ -968,15 +966,13 @@ BYTE KeyTranslateWinScanToPMScan(BYTE bWinScan, BOOL fExtended)
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(int, GetKeyboardType,
-              int, nTypeFlag)
+INT WIN32API GetKeyboardType(INT nTypeFlag)
 {
     return O32_GetKeyboardType(nTypeFlag);
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(BOOL,  GetKeyboardState,
-              PBYTE, lpKeyState)
+BOOL WIN32API GetKeyboardState(PBYTE lpKeyState)
 {
  BYTE   PMKeyState[256];
  BOOL   rc;
@@ -1010,8 +1006,7 @@ ODINFUNCTION1(BOOL,  GetKeyboardState,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(BOOL,  SetKeyboardState,
-              PBYTE, lpKeyState)
+BOOL WIN32API SetKeyboardState(PBYTE lpKeyState)
 {
   dprintf(("USER32: SetKeyboardState %x not implemented", lpKeyState));
   return(TRUE);
@@ -1024,8 +1019,7 @@ ODINFUNCTION1(BOOL,  SetKeyboardState,
  *        - the thread identifier (dwLayout) is also ignored.
  */
 // * Remark    : Based on Wine version (991031)
-ODINFUNCTION1(HKL,   GetKeyboardLayout,
-              DWORD, dwLayout)
+HKL WIN32API GetKeyboardLayout(DWORD dwLayout)
 {
         HKL layout;
         layout = GetSystemDefaultLCID(); /* FIXME */
@@ -1047,8 +1041,7 @@ ODINFUNCTION1(HKL,   GetKeyboardLayout,
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-ODINFUNCTION1(INT,   GetKeyboardLayoutNameA,
-              LPSTR, pwszKLID)
+INT WIN32API GetKeyboardLayoutNameA(LPSTR pwszKLID)
 {
    dprintf(("not correctly implemented"));
 
@@ -1071,8 +1064,7 @@ ODINFUNCTION1(INT,   GetKeyboardLayoutNameA,
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-ODINFUNCTION1(INT,    GetKeyboardLayoutNameW,
-              LPWSTR, pwszKLID)
+INT WIN32API GetKeyboardLayoutNameW(LPWSTR pwszKLID)
 {
    LPSTR buf = (LPSTR)HEAP_xalloc( GetProcessHeap(), 0, strlen("00000409")+1);
 
@@ -1092,9 +1084,7 @@ ODINFUNCTION1(INT,    GetKeyboardLayoutNameW,
  *
  * Remark    : Based on Wine version (991031)
  */
-ODINFUNCTION2(INT,   GetKeyboardLayoutList,
-              INT,   nBuff,
-              HKL *, layouts)
+INT WIN32API GetKeyboardLayoutList(INT nBuff, HKL *layouts)
 {
   dprintf(("not correctly implemented"));
   
@@ -1129,12 +1119,8 @@ ODINFUNCTION2(INT,   GetKeyboardLayoutList,
  * Author    : SvL
  *****************************************************************************/
 
-ODINFUNCTION5(int,    ToAscii,
-              UINT,   uVirtKey,
-              UINT,   uScanCode,
-              PBYTE,  lpbKeyState,
-              LPWORD, lpwTransKey,
-              UINT,   fuState)
+int WIN32API ToAscii(UINT uVirtKey, UINT uScanCode, PBYTE lpbKeyState,
+                     LPWORD lpwTransKey, UINT fuState)
 {
   INT ret;
 
@@ -1236,13 +1222,8 @@ ODINFUNCTION5(int,    ToAscii,
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
 
-ODINFUNCTION6(int,    ToAsciiEx,
-              UINT,   uVirtKey,
-              UINT,   uScanCode,
-              PBYTE,  lpbKeyState,
-              LPWORD, lpwTransKey,
-              UINT,   fuState,
-              HKL,    hkl)
+int WIN32API ToAsciiEx(UINT uVirtKey, UINT uScanCode, PBYTE lpbKeyState,
+                       LPWORD lpwTransKey, UINT fuState, HKL hkl)
 {
   dprintf(("imcompletely implemented"));
 
@@ -1282,13 +1263,8 @@ ODINFUNCTION6(int,    ToAsciiEx,
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
 
-ODINFUNCTION6(int,    ToUnicode,
-              UINT,   uVirtKey,
-              UINT,   uScanCode,
-              PBYTE,  lpKeyState,
-              LPWSTR, pwszBuff,
-              int,    cchBuff,
-              UINT,   wFlags)
+int WIN32API ToUnicode(UINT uVirtKey, UINT uScanCode, PBYTE lpKeyState,
+                       LPWSTR pwszBuff, int cchBuff, UINT wFlags)
 {
   dprintf(("not implemented.\n"));
 
@@ -1408,8 +1384,7 @@ int WIN32API GetKeyNameTextW(LPARAM lParam, LPWSTR lpString, int nSize)
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(SHORT, GetKeyState,
-              int,   nVirtKey)
+SHORT WIN32API GetKeyState(int nVirtKey)
 {
   // check overlay array first
   char nState = arrchOverlayKeyState[nVirtKey & 0xff];
@@ -1430,8 +1405,7 @@ ODINFUNCTION1(SHORT, GetKeyState,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(WORD,  GetAsyncKeyState,
-              INT,   nVirtKey)
+WORD WIN32API GetAsyncKeyState(INT nVirtKey)
 {
   // check overlay array first
   char nState = arrchOverlayKeyState[nVirtKey & 0xff];
@@ -1452,9 +1426,7 @@ ODINFUNCTION1(WORD,  GetAsyncKeyState,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(UINT,  MapVirtualKeyA,
-              UINT,  uCode, 
-              UINT,  uMapType)
+UINT WIN32API MapVirtualKeyA(UINT uCode,  UINT uMapType)
 {
   dprintf(("imcompletely implemented"));
   
@@ -1479,9 +1451,7 @@ ODINFUNCTION2(UINT,  MapVirtualKeyA,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(UINT,  MapVirtualKeyW,
-              UINT,  uCode, 
-              UINT,  uMapType)
+UINT WIN32API MapVirtualKeyW(UINT uCode, UINT uMapType)
 {
   dprintf(("incorrectly implemented\n"));
   
@@ -1505,10 +1475,7 @@ ODINFUNCTION2(UINT,  MapVirtualKeyW,
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-ODINFUNCTION3(UINT,  MapVirtualKeyExA,
-              UINT,  uCode, 
-              UINT,  uMapType, 
-              HKL,   dwhkl)
+UINT WIN32API MapVirtualKeyExA(UINT uCode,  UINT uMapType, HKL dwhkl)
 {
   dprintf(("incompletely implemented"));
 
@@ -1531,10 +1498,7 @@ ODINFUNCTION3(UINT,  MapVirtualKeyExA,
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-ODINFUNCTION3(UINT, MapVirtualKeyExW,
-              UINT, uCode, 
-              UINT, uMapType, 
-              HKL,  dwhkl)
+UINT WIN32API MapVirtualKeyExW(UINT uCode, UINT uMapType, HKL dwhkl)
 {
   dprintf(("incompletely implemented"));
 
@@ -1554,8 +1518,7 @@ ODINFUNCTION3(UINT, MapVirtualKeyExW,
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-ODINFUNCTION1(DWORD, OemKeyScan,
-              WORD,  wOemChar)
+DWORD WIN32API OemKeyScan(WORD wOemChar)
 {
   int nVirtKey;
   
@@ -1578,11 +1541,8 @@ ODINFUNCTION1(DWORD, OemKeyScan,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION4(BOOL,  RegisterHotKey,
-              HWND,  hwnd, 
-              int,   idHotKey, 
-              UINT,  fuModifiers, 
-              UINT,  uVirtKey)
+BOOL WIN32API RegisterHotKey(HWND hwnd, int idHotKey, UINT fuModifiers, 
+                             UINT uVirtKey)
 {
   dprintf(("not implemented"));
   
@@ -1591,9 +1551,7 @@ ODINFUNCTION4(BOOL,  RegisterHotKey,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(BOOL, UnregisterHotKey,
-              HWND, hwnd, 
-              int,  idHotKey)
+BOOL WIN32API UnregisterHotKey(HWND hwnd, int idHotKey)
 {
   dprintf(("not implemented"));
   
@@ -1603,17 +1561,14 @@ ODINFUNCTION2(BOOL, UnregisterHotKey,
 }
 
 //******************************************************************************
-//SvL: 24-6-'97 - Added
 //******************************************************************************
-ODINFUNCTION1(WORD, VkKeyScanA,
-              char, ch)
+WORD WIN32API VkKeyScanA(char ch)
 {
   return O32_VkKeyScan(ch);
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(WORD,  VkKeyScanW,
-              WCHAR, wch)
+WORD WIN32API VkKeyScanW(WCHAR wch)
 {
   dprintf(("incorrectly implemented"));
   // NOTE: This will not work as is (needs UNICODE support)
@@ -1634,9 +1589,7 @@ ODINFUNCTION1(WORD,  VkKeyScanW,
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-ODINFUNCTION2(WORD,  VkKeyScanExW,
-              WCHAR, uChar,
-              HKL,   hkl)
+WORD WIN32API VkKeyScanExW(WCHAR uChar, HKL hkl)
 {
   dprintf(("partially implemented"));
 
@@ -1657,9 +1610,7 @@ ODINFUNCTION2(WORD,  VkKeyScanExW,
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-ODINFUNCTION2(WORD, VkKeyScanExA,
-              CHAR, uChar,
-              HKL,  hkl)
+WORD WIN32API VkKeyScanExA(CHAR uChar, HKL hkl)
 {
   dprintf(("partially implemented"));
 
@@ -1683,11 +1634,7 @@ ODINFUNCTION2(WORD, VkKeyScanExA,
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-ODINPROCEDURE4(keybd_event,
-               BYTE,  bVk,
-               BYTE,  bScan,
-               DWORD, dwFlags,
-               DWORD, dwExtraInfo)
+VOID WIN32API keybd_event(BYTE bVk, BYTE bScan, DWORD dwFlags, DWORD dwExtraInfo)
 {
   INPUT i;
   
@@ -1718,9 +1665,7 @@ ODINPROCEDURE4(keybd_event,
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-ODINFUNCTION2(HKL,     LoadKeyboardLayoutA,
-              LPCSTR,  pwszKLID,
-              UINT,    Flags)
+HKL WIN32API LoadKeyboardLayoutA(LPCSTR pwszKLID, UINT Flags)
 {
   dprintf(("USER32:LeadKeyboardLayoutA (%s,%u) not implemented.\n",
          pwszKLID,
@@ -1745,9 +1690,7 @@ ODINFUNCTION2(HKL,     LoadKeyboardLayoutA,
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-ODINFUNCTION2(HKL,     LoadKeyboardLayoutW,
-              LPCWSTR, pwszKLID,
-              UINT,    Flags)
+HKL WIN32API LoadKeyboardLayoutW(LPCWSTR pwszKLID, UINT Flags)
 {
   dprintf(("USER32:LoadKeyboardLayoutW (%ls,%u) not implemented.\n",
          pwszKLID,
@@ -1757,9 +1700,7 @@ ODINFUNCTION2(HKL,     LoadKeyboardLayoutW,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(BOOL,  ActivateKeyboardLayout,
-              HKL,   hkl,
-              UINT,  fuFlags)
+BOOL WIN32API ActivateKeyboardLayout(HKL hkl, UINT fuFlags)
 {
   dprintf(("not implemented\n"));
   return(TRUE);
@@ -1787,9 +1728,7 @@ BOOL WIN32API UnloadKeyboardLayout(HKL hkl)
 //******************************************************************************
 
 // this is an internal function to emulate Alt-Gr behaviour
-ODINPROCEDURE2(KeySetOverlayKeyState,
-               int, nVirtKey,
-               char, nState)
+VOID WIN32API KeySetOverlayKeyState(int nVirtKey, char nState)
 {
   // setup overlay array
   arrchOverlayKeyState[nVirtKey & 0xff] = nState;

@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.117 2002-02-11 13:48:42 sandervl Exp $ */
+/* $Id: window.cpp,v 1.118 2002-02-11 16:05:59 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -51,19 +51,18 @@ ODINDEBUGCHANNEL(USER32-WINDOW)
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION12(HWND,      CreateWindowExA,
-               DWORD,     exStyle,
-               LPCSTR,    className,
-               LPCSTR,    windowName,
-               DWORD,     style,
-               INT,       x,
-               INT,       y,
-               INT,       width,
-               INT,       height,
-               HWND,      parent,
-               HMENU,     menu,
-               HINSTANCE, instance,
-               LPVOID,    data )
+HWND WIN32API CreateWindowExA(DWORD exStyle,
+                              LPCSTR     className,
+                              LPCSTR     windowName,
+                              DWORD     style,
+                              INT        x,
+                              INT        y,
+                              INT        width,
+                              INT        height,
+                              HWND       parent,
+                              HMENU      menu,
+                              HINSTANCE  instance,
+                              LPVOID     data )
 {
   Win32BaseWindow *window;
   ATOM classAtom;
@@ -156,19 +155,18 @@ ODINFUNCTION12(HWND,      CreateWindowExA,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION12(HWND,      CreateWindowExW,
-               DWORD,     exStyle,
-               LPCWSTR,   className,
-               LPCWSTR,   windowName,
-               DWORD,     style,
-               INT,       x,
-               INT,       y,
-               INT,       width,
-               INT,       height,
-               HWND,      parent,
-               HMENU,     menu,
-               HINSTANCE, instance,
-               LPVOID,    data )
+HWND WIN32API CreateWindowExW(DWORD     exStyle,
+                              LPCWSTR    className,
+                              LPCWSTR    windowName,
+                              DWORD     style,
+                              INT        x,
+                              INT        y,
+                              INT        width,
+                              INT        height,
+                              HWND       parent,
+                              HMENU      menu,
+                              HINSTANCE  instance,
+                              LPVOID     data )
 {
   Win32BaseWindow *window;
   ATOM classAtom;
@@ -262,8 +260,7 @@ ODINFUNCTION12(HWND,      CreateWindowExW,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(HWND, CreateFakeWindowEx,
-              HWND, hwndOS2, ATOM, classAtom)
+HWND WIN32API CreateFakeWindowEx(HWND  hwndOS2, ATOM  classAtom)
 {
  Win32BaseWindow *window;
 
@@ -283,8 +280,7 @@ ODINFUNCTION2(HWND, CreateFakeWindowEx,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(BOOL, DestroyFakeWindow,
-              HWND, hwnd)
+BOOL WIN32API DestroyFakeWindow(HWND hwnd)
 {
   Win32BaseWindow *window;
 
@@ -299,8 +295,7 @@ ODINFUNCTION1(BOOL, DestroyFakeWindow,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(BOOL, DestroyWindow,
-              HWND, hwnd)
+BOOL WIN32API DestroyWindow(HWND  hwnd)
 {
   Win32BaseWindow *window;
   BOOL             ret;
@@ -317,8 +312,7 @@ ODINFUNCTION1(BOOL, DestroyWindow,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(HWND, SetActiveWindow,
-              HWND, hwnd)
+HWND WIN32API SetActiveWindow(HWND hwnd)
 {
   Win32BaseWindow *window;
   HWND             hwndActive;
@@ -363,9 +357,7 @@ HWND WIN32API GetParent(HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(HWND, SetParent,
-              HWND, hwndChild,
-              HWND, hwndNewParent)
+HWND WIN32API  SetParent(HWND  hwndChild, HWND  hwndNewParent)
 {
   Win32BaseWindow *window;
   HWND             hwndOldParent;
@@ -394,9 +386,7 @@ ODINFUNCTION2(HWND, SetParent,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(BOOL, IsChild,
-              HWND, hwndParent,
-              HWND, hwnd)
+BOOL WIN32API IsChild(HWND hwndParent, HWND hwnd)
 {
   Win32BaseWindow *window;
   BOOL             fIsChild;
@@ -414,8 +404,7 @@ ODINFUNCTION2(BOOL, IsChild,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(HWND, GetTopWindow,
-              HWND, hwnd)
+HWND WIN32API GetTopWindow(HWND hwnd)
 {
   Win32BaseWindow *window;
   HWND hwndTop;
@@ -439,8 +428,7 @@ ODINFUNCTION1(HWND, GetTopWindow,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(BOOL, IsIconic,
-              HWND, hwnd)
+BOOL WIN32API IsIconic(HWND hwnd)
 {
   Win32BaseWindow *window;
   BOOL fIsIconic;
@@ -458,9 +446,7 @@ ODINFUNCTION1(BOOL, IsIconic,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(HWND, GetWindow,
-              HWND, hwnd,
-              UINT, uCmd)
+HWND WIN32API GetWindow(HWND hwnd, UINT uCmd)
 {
   Win32BaseWindow *window;
   HWND hwndRelated;
@@ -477,9 +463,7 @@ ODINFUNCTION2(HWND, GetWindow,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(BOOL, EnableWindow,
-              HWND, hwnd,
-              BOOL, fEnable)
+BOOL WIN32API EnableWindow(HWND hwnd, BOOL fEnable)
 {
   Win32BaseWindow *window;
   BOOL             fEnabled;
@@ -497,20 +481,16 @@ ODINFUNCTION2(BOOL, EnableWindow,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(BOOL, BringWindowToTop,
-              HWND, hwnd)
+BOOL WIN32API  BringWindowToTop(HWND hwnd)
 {
     dprintf(("BringWindowToTop %x", hwnd));
-    return SetWindowPos( hwnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE );
+    return SetWindowPos( hwnd,  HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE );
 }
 /***********************************************************************
  *           SetInternalWindowPos   (USER32.483)
  */
-ODINPROCEDURE4(SetInternalWindowPos,
-               HWND,    hwnd,
-               UINT,    showCmd,
-               LPRECT,  lpRect,
-               LPPOINT, lpPoint )
+VOID WIN32API SetInternalWindowPos(HWND hwnd,  UINT showCmd, LPRECT lpRect,
+                                   LPPOINT lpPoint )
 {
     if( IsWindow(hwnd) )
     {
@@ -531,17 +511,14 @@ ODINPROCEDURE4(SetInternalWindowPos,
         {
             wndpl.rcNormalPosition = *lpRect;
         }
-        SetWindowPlacement( hwnd, &wndpl);
+        SetWindowPlacement(hwnd, &wndpl);
     }
 
 }
 /***********************************************************************
  *           GetInternalWindowPos   (USER32.245)
  */
-ODINFUNCTION3(UINT,    GetInternalWindowPos,
-              HWND,    hwnd,
-              LPRECT,  rectWnd,
-              LPPOINT, ptIcon )
+UINT WIN32API GetInternalWindowPos(HWND hwnd, LPRECT rectWnd, LPPOINT ptIcon )
 {
     WINDOWPLACEMENT wndpl;
 
@@ -555,15 +532,13 @@ ODINFUNCTION3(UINT,    GetInternalWindowPos,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION0(HWND, GetActiveWindow)
+HWND GetActiveWindow()
 {
     return Win32BaseWindow::GetActiveWindow();
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(BOOL, ShowWindow,
-              HWND, hwnd,
-              int,  nCmdShow)
+BOOL WIN32API ShowWindow(HWND hwnd, INT nCmdShow)
 {
   Win32BaseWindow *window;
   BOOL             ret;
@@ -595,21 +570,14 @@ ODINFUNCTION2(BOOL, ShowWindow,
 BOOL WIN32API ShowWindowAsync(HWND hwnd, int nCmdShow)
 {
   dprintf(("USER32:ShowWindowAsync (%08xh,%08x) not correctly implemented.\n",
-         hwnd,
-         nCmdShow));
+           hwnd, nCmdShow));
 
   return ShowWindow(hwnd, nCmdShow);
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION7(BOOL, SetWindowPos,
-              HWND, hwnd,
-              HWND, hwndInsertAfter,
-              int,  x,
-              int,  y,
-              int,  cx,
-              int,  cy,
-              UINT, fuFlags)
+BOOL WIN32API SetWindowPos(HWND hwnd, HWND hwndInsertAfter, INT x,
+                           INT y, INT cx, INT cy, UINT fuFlags)
 {
   Win32BaseWindow *window;
 
@@ -632,9 +600,7 @@ ODINFUNCTION7(BOOL, SetWindowPos,
 //******************************************************************************
 //NOTE: length must equal structure size or else api fails (verified in NT4, SP6)
 //******************************************************************************
-ODINFUNCTION2(BOOL, SetWindowPlacement,
-              HWND, hwnd,
-              const WINDOWPLACEMENT *, winpos)
+BOOL WIN32API SetWindowPlacement(HWND hwnd, const WINDOWPLACEMENT *winpos)
 {
   Win32BaseWindow *window;
 
@@ -658,9 +624,7 @@ ODINFUNCTION2(BOOL, SetWindowPlacement,
 //NOTE: Length does not need to be correct (even though the SDK docs claim otherwise)
 //      (Verified in NT4, SP6)
 //******************************************************************************
-ODINFUNCTION2(BOOL, GetWindowPlacement,
-              HWND, hwnd,
-              LPWINDOWPLACEMENT, winpos)
+BOOL WIN32API GetWindowPlacement(HWND hwnd,  LPWINDOWPLACEMENT winpos)
 {
   Win32BaseWindow *window;
 
@@ -699,10 +663,9 @@ BOOL WIN32API IsWindow(HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(BOOL, IsWindowEnabled,
-              HWND, hwnd)
+BOOL WIN32API IsWindowEnabled(HWND hwnd)
 {
-  DWORD            dwStyle;
+  DWORD dwStyle;
 
     if(!IsWindow(hwnd)) {
         dprintf(("IsWindowEnabled, window %x not found", hwnd));
@@ -763,8 +726,7 @@ end:
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(HWND, SetFocus,
-              HWND, hwnd)
+HWND WIN32API SetFocus(HWND hwnd)
 {
  Win32BaseWindow *window;
  Win32BaseWindow *oldfocuswnd;
@@ -828,7 +790,7 @@ ODINFUNCTION1(HWND, SetFocus,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION0(HWND, GetFocus)
+HWND WIN32API GetFocus()
 {
  TEB *teb;
  HWND hwnd;
@@ -854,8 +816,7 @@ ODINFUNCTION0(HWND, GetFocus)
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(BOOL, IsZoomed,
-              HWND, hwnd)
+BOOL WIN32API IsZoomed(HWND hwnd)
 {
  DWORD style;
 
@@ -866,16 +827,13 @@ ODINFUNCTION1(BOOL, IsZoomed,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(BOOL, LockWindowUpdate,
-              HWND, hwnd)
+BOOL WIN32API LockWindowUpdate(HWND hwnd)
 {
   return OSLibWinLockWindowUpdate(Win32ToOS2Handle(hwnd));
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(BOOL,  GetWindowRect,
-              HWND,  hwnd,
-              PRECT, pRect)
+BOOL WIN32API GetWindowRect(HWND hwnd, PRECT pRect)
 {
   Win32BaseWindow *window;
 
@@ -908,8 +866,7 @@ ODINFUNCTION2(BOOL,  GetWindowRect,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(int,  GetWindowTextLengthA,
-              HWND, hwnd)
+INT WIN32API GetWindowTextLengthA(HWND hwnd)
 {
    Win32BaseWindow *window;
 
@@ -926,7 +883,7 @@ ODINFUNCTION1(int,  GetWindowTextLengthA,
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API GetWindowTextA( HWND hwnd, LPSTR lpsz, int cch)
+int WIN32API GetWindowTextA( HWND hwnd,  LPSTR lpsz, int cch)
 {
    Win32BaseWindow *window;
    int rc;
@@ -961,7 +918,7 @@ int WIN32API GetWindowTextLengthW( HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API GetWindowTextW(HWND hwnd, LPWSTR lpsz, int cch)
+int WIN32API GetWindowTextW(HWND hwnd,  LPWSTR lpsz, int cch)
 {
    Win32BaseWindow *window;
 
@@ -978,7 +935,7 @@ int WIN32API GetWindowTextW(HWND hwnd, LPWSTR lpsz, int cch)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetWindowTextA(HWND hwnd, LPCSTR lpsz)
+BOOL WIN32API SetWindowTextA(HWND hwnd,  LPCSTR lpsz)
 {
    Win32BaseWindow *window;
 
@@ -995,7 +952,7 @@ BOOL WIN32API SetWindowTextA(HWND hwnd, LPCSTR lpsz)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetWindowTextW( HWND hwnd, LPCWSTR lpsz)
+BOOL WIN32API SetWindowTextW( HWND hwnd,  LPCWSTR lpsz)
 {
    Win32BaseWindow *window;
 
@@ -1013,16 +970,14 @@ BOOL WIN32API SetWindowTextW( HWND hwnd, LPCWSTR lpsz)
 /*******************************************************************
  *      InternalGetWindowText    (USER32.326)
  */
-int WIN32API InternalGetWindowText(HWND   hwnd,
+int WIN32API InternalGetWindowText(HWND hwnd, 
                                    LPWSTR lpString,
                                    INT    nMaxCount )
 {
     dprintf(("USER32: InternalGetWindowText(%08xh,%08xh,%08xh) not properly implemented.\n",
-             hwnd,
-             lpString,
-             nMaxCount));
+             hwnd, lpString, nMaxCount));
 
-    return GetWindowTextW(hwnd,lpString,nMaxCount);
+    return GetWindowTextW(hwnd, lpString,nMaxCount);
 }
 //******************************************************************************
 //TODO: Correct?
@@ -1035,7 +990,7 @@ BOOL WIN32API SetForegroundWindow(HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GetClientRect( HWND hwnd, PRECT pRect)
+BOOL WIN32API GetClientRect( HWND hwnd,  PRECT pRect)
 {
  HWND hwndWin32 = hwnd;
  Win32BaseWindow *window;
@@ -1223,7 +1178,7 @@ int WIN32API MapWindowPoints(HWND hwndFrom, HWND hwndTo, LPPOINT lpPoints,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API ScreenToClient(HWND hwnd, LPPOINT pt)
+BOOL WIN32API ScreenToClient(HWND hwnd,  LPPOINT pt)
 {
     PRECT rcl;
     BOOL rc;
@@ -1327,7 +1282,7 @@ HWND WIN32API FindWindowExW(HWND    hwndParent,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API FlashWindow(HWND hwnd, BOOL fFlash)
+BOOL WIN32API FlashWindow(HWND hwnd,  BOOL fFlash)
 {
     dprintf(("FlashWindow %x %d\n", hwnd, fFlash));
 //    return OSLibWinFlashWindow(Win32ToOS2Handle(hwnd), fFlash);
@@ -1335,7 +1290,7 @@ BOOL WIN32API FlashWindow(HWND hwnd, BOOL fFlash)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API MoveWindow( HWND hwnd, INT x, INT y, INT cx, INT cy,
+BOOL WIN32API MoveWindow( HWND hwnd,  INT x, INT y, INT cx, INT cy,
                           BOOL repaint )
 {
     int flags = SWP_NOZORDER | SWP_NOACTIVATE;
@@ -1347,7 +1302,7 @@ BOOL WIN32API MoveWindow( HWND hwnd, INT x, INT y, INT cx, INT cy,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API ClientToScreen (HWND hwnd, PPOINT pt)
+BOOL WIN32API ClientToScreen (HWND hwnd,  PPOINT pt)
 {
     PRECT rcl;
 
@@ -1403,7 +1358,7 @@ HDWP WIN32API BeginDeferWindowPos(int count)
  * TODO: SvL: Does this need to be thread safe?
  *
  */
-HDWP WIN32API DeferWindowPos( HDWP hdwp, HWND hwnd, HWND hwndAfter,
+HDWP WIN32API DeferWindowPos( HDWP hdwp, HWND hwnd,  HWND hwndAfter,
                               INT x, INT y, INT cx, INT cy,
                               UINT flags )
 {
@@ -1531,7 +1486,7 @@ BOOL WIN32API EndDeferWindowPos( HDWP hdwp)
 }
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API ChildWindowFromPoint( HWND hwnd, POINT pt)
+HWND WIN32API ChildWindowFromPoint( HWND hwnd,  POINT pt)
 {
     dprintf(("USER32:  ChildWindowFromPoint\n"));
     return ChildWindowFromPointEx(hwnd, pt, 0);
@@ -1620,7 +1575,7 @@ BOOL WIN32API CloseWindow(HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
-static BOOL IsPointInWindow(HWND hwnd, POINT point)
+static BOOL IsPointInWindow(HWND hwnd,  POINT point)
 {
     RECT  rectWindow;
     DWORD hittest, dwStyle, dwExStyle;
@@ -1715,7 +1670,7 @@ BOOL WIN32API IsWindowUnicode(HWND hwnd)
 /***********************************************************************
  *             SwitchToThisWindow   (USER32.539)
  */
-DWORD WINAPI SwitchToThisWindow( HWND hwnd, BOOL restore )
+DWORD WINAPI SwitchToThisWindow( HWND hwnd,  BOOL restore )
 {
     return ShowWindow( hwnd, restore ? SW_RESTORE : SW_SHOWMINIMIZED );
 }
@@ -1727,7 +1682,7 @@ BOOL WIN32API EnumThreadWindows(DWORD dwThreadId, WNDENUMPROC lpfn, LPARAM lPara
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API EnumChildWindows(HWND hwnd, WNDENUMPROC lpfn, LPARAM lParam)
+BOOL WIN32API EnumChildWindows(HWND hwnd,  WNDENUMPROC lpfn, LPARAM lParam)
 {
     Win32BaseWindow *window;
     BOOL   ret = TRUE;
@@ -1816,9 +1771,7 @@ BOOL WIN32API OpenIcon(HWND hwnd)
 //     hidden with the same api
 //TODO: -> needs testing
 //******************************************************************************
-ODINFUNCTION2(BOOL, ShowOwnedPopups,
-              HWND, hwndOwner,
-              BOOL, fShow)
+BOOL WIN32API  ShowOwnedPopups(HWND hwndOwner, BOOL fShow)
 {
     Win32BaseWindow *window, *owner;
     HWND hwnd;
@@ -1872,7 +1825,7 @@ ODINFUNCTION2(BOOL, ShowOwnedPopups,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION0(HWND, GetForegroundWindow)
+HWND WIN32API GetForegroundWindow()
 {
   HWND hwnd;
 
@@ -1891,8 +1844,7 @@ ODINFUNCTION0(HWND, GetForegroundWindow)
  * - The window identified by hWnd is not a top-level window or it is
  *   owned by another window.
  */
-ODINFUNCTION1(HWND, GetLastActivePopup,
-              HWND, hWnd)
+HWND WIN32API GetLastActivePopup(HWND hWnd)
 {
   Win32BaseWindow *owner;
 
@@ -1914,7 +1866,7 @@ ODINFUNCTION1(HWND, GetLastActivePopup,
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API GetWindowThreadProcessId(HWND hwnd, PDWORD lpdwProcessId)
+DWORD WIN32API GetWindowThreadProcessId(HWND hwnd,  PDWORD lpdwProcessId)
 {
     DWORD dwThreadId;
 
@@ -1926,8 +1878,7 @@ DWORD WIN32API GetWindowThreadProcessId(HWND hwnd, PDWORD lpdwProcessId)
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(DWORD, GetWindowContextHelpId,
-              HWND,  hwnd)
+DWORD WIN32API GetWindowContextHelpId(HWND hwnd)
 {
   Win32BaseWindow *window;
 
@@ -1944,9 +1895,7 @@ ODINFUNCTION1(DWORD, GetWindowContextHelpId,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(BOOL,  SetWindowContextHelpId,
-              HWND,  hwnd,
-              DWORD, dwContextHelpId)
+BOOL WIN32API SetWindowContextHelpId(HWND hwnd, DWORD dwContextHelpId)
 {
   Win32BaseWindow *window;
 
@@ -1963,9 +1912,7 @@ ODINFUNCTION2(BOOL,  SetWindowContextHelpId,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(HANDLE, GetPropA,
-              HWND,   hwnd,
-              LPCSTR, str )
+HANDLE WIN32API GetPropA(HWND hwnd, LPCSTR str )
 {
   Win32BaseWindow *window;
 
@@ -1981,9 +1928,7 @@ ODINFUNCTION2(HANDLE, GetPropA,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(HANDLE,  GetPropW,
-              HWND,    hwnd,
-              LPCWSTR, str )
+HANDLE WIN32API GetPropW(HWND hwnd, LPCWSTR str)
 {
   Win32BaseWindow *window;
   LPSTR strA;
@@ -2009,10 +1954,7 @@ ODINFUNCTION2(HANDLE,  GetPropW,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(BOOL,   SetPropA,
-              HWND,   hwnd,
-              LPCSTR, str,
-              HANDLE, handle )
+BOOL WIN32API SetPropA(HWND hwnd, LPCSTR  str, HANDLE handle )
 {
   Win32BaseWindow *window;
 
@@ -2028,10 +1970,7 @@ ODINFUNCTION3(BOOL,   SetPropA,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(BOOL,    SetPropW,
-              HWND,    hwnd,
-              LPCWSTR, str,
-              HANDLE,  handle )
+BOOL SetPropW(HWND hwnd, LPCWSTR str, HANDLE handle )
 {
     BOOL ret;
     LPSTR strA;
@@ -2045,9 +1984,7 @@ ODINFUNCTION3(BOOL,    SetPropW,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(HANDLE, RemovePropA,
-              HWND,   hwnd,
-              LPCSTR, str )
+HANDLE WIN32API RemovePropA(HWND hwnd, LPCSTR str)
 {
   Win32BaseWindow *window;
 
@@ -2063,9 +2000,7 @@ ODINFUNCTION2(HANDLE, RemovePropA,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(HANDLE,  RemovePropW,
-              HWND,    hwnd,
-              LPCWSTR, str )
+HANDLE WIN32API RemovePropW(HWND hwnd, LPCWSTR str)
 {
     LPSTR strA;
     HANDLE ret;
@@ -2079,26 +2014,19 @@ ODINFUNCTION2(HANDLE,  RemovePropW,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(INT, EnumPropsA,
-              HWND, hwnd,
-              PROPENUMPROCA, func )
+INT WIN32API EnumPropsA(HWND hwnd, PROPENUMPROCA func )
 {
     return EnumPropsExA( hwnd, (PROPENUMPROCEXA)func, 0 );
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(INT, EnumPropsW,
-              HWND, hwnd,
-              PROPENUMPROCW, func )
+INT WIN32API EnumPropsW(HWND hwnd, PROPENUMPROCW func )
 {
     return EnumPropsExW( hwnd, (PROPENUMPROCEXW)func, 0 );
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(INT, EnumPropsExA,
-              HWND, hwnd,
-              PROPENUMPROCEXA, func,
-              LPARAM, lParam)
+INT WIN32API EnumPropsExA(HWND hwnd, PROPENUMPROCEXA func, LPARAM lParam)
 {
   Win32BaseWindow *window;
 
@@ -2114,10 +2042,7 @@ ODINFUNCTION3(INT, EnumPropsExA,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(INT, EnumPropsExW,
-              HWND, hwnd,
-              PROPENUMPROCEXW, func,
-              LPARAM, lParam)
+INT WIN32API EnumPropsExW(HWND hwnd, PROPENUMPROCEXW func, LPARAM lParam)
 {
   Win32BaseWindow *window;
 
@@ -2152,7 +2077,7 @@ ODINFUNCTION3(INT, EnumPropsExW,
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-ODINFUNCTION0(BOOL, AnyPopup)
+BOOL WIN32API AnyPopup()
 {
   dprintf(("USER32:AnyPopup() not implemented.\n"));
 
