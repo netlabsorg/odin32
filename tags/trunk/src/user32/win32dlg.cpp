@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.31 1999-11-04 18:53:11 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.32 1999-11-05 17:50:30 achimha Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -755,7 +755,7 @@ LRESULT Win32Dialog::DefDlg_Proc(UINT msg, WPARAM wParam, LPARAM lParam)
         if (dialogFlags & DF_END) return 0;
         if (idResult)
             return MAKELONG( idResult, DC_HASDEFID );
-        if ((hwndDefId = findDefButton()))
+        if ((hwndDefId = findDefButton()) != 0)
             return MAKELONG( GetDlgCtrlID( hwndDefId ), DC_HASDEFID);
 
         return 0;

@@ -1,4 +1,4 @@
-/* $Id: spy.cpp,v 1.6 1999-09-15 23:18:55 sandervl Exp $ */
+/* $Id: spy.cpp,v 1.7 1999-11-05 17:50:29 achimha Exp $ */
 
 /*
  * Queue procedures to send messages to the spy server
@@ -37,15 +37,15 @@ BOOL InitSpyQueue()
 {
  APIRET rc;
 
-   if (rc = DosOpenQueue(&pidServer, &hqQueue, "\\queues\\"Q_NAME))
+   if ((rc = DosOpenQueue(&pidServer, &hqQueue, "\\queues\\"Q_NAME)) != 0)
    {
 	dprintf(("InitSpyQueue: couldn't open spy queue rc=%d!", rc));
 	return FALSE;
    }
-   if (rc = DosAllocSharedMem((VOID **)&pvdQMemory,
+   if ((rc = DosAllocSharedMem((VOID **)&pvdQMemory,
                          NULL,
                          Q_BUFFER_SIZE,
-                         fALLOCSHR))
+                         fALLOCSHR)) != 0)
    {
 	dprintf(("InitSpyQueue: DosAllocSharedMem failed rc=%d", rc));
 	DosCloseQueue(hqQueue);
@@ -93,11 +93,11 @@ BOOL PostSpyMessage(HWND hwnd, ULONG Msg, ULONG wParam, ULONG lParam)
    pvdQMemory[msgIndex].wParam = wParam;
    pvdQMemory[msgIndex].lParam = lParam;
 
-   if (rc = DosWriteQueue(hqQueue,
+   if ((rc = DosWriteQueue(hqQueue,
                      Q_SPYMSG_WNDMSG,
                      sizeof(Q_SPYMSG),
                      &pvdQMemory[msgIndex],
-                     0))
+                     0)) != 0)
    {
 	hqQueue = 0; //give up, server probably died
 	dprintf(("PostSpyMessage: DosWriteQueue returned %d", rc));
