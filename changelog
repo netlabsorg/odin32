@@ -1,4 +1,9 @@
- /* $Id: changelog,v 1.599 2000-01-01 12:18:34 sandervl Exp $ */
+ /* $Id: changelog,v 1.600 2000-01-01 14:36:59 cbratschi Exp $ */
+
+ 2000-01-01: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32: copied all files to subdirectory /NEW for non-client frame changes
+		  ATTENTION: add your new code to /NEW or synchronize both 
+			     directories
 
  2000-01-01: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Workaround for crash in Lotus Notes when switching to a new
