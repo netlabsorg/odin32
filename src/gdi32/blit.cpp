@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.27 2001-05-11 17:09:45 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.28 2001-05-24 08:18:45 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -157,6 +157,7 @@ static INT SetDIBitsToDevice_(HDC hdc, INT xDest, INT yDest, DWORD cx,
         bitfields[2] = 0;
         break;
     }
+
     if(bitfields[1] == 0x3E0) 
     {//RGB 555?
         dprintf(("RGB 555->565 conversion required %x %x %x", bitfields[0], bitfields[1], bitfields[2]));
@@ -247,6 +248,8 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
         }
         return rc;
     }
+//SvL: Breaks startup bitmap of Acrobat Reader 4.05
+#if 0
     else
     if(info->bmiHeader.biBitCount == 8 && info->bmiHeader.biCompression == 0 && !(GetDeviceCaps( hdc, RASTERCAPS ) & RC_PALETTE)) {
         INT rc = 0;
@@ -313,7 +316,9 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
             free( newBits );
         }
         return rc;
-    } else {
+    } 
+#endif
+    else {
         return SetDIBitsToDevice_( hdc, xDest, yDest, cx, cy, xSrc, ySrc, startscan, lines, bits, info, coloruse );
     }
 }
