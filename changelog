@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.2407 2002-12-31 16:52:28 sandervl Exp $ */
+/* $Id: changelog,v 1.2408 2003-01-01 14:28:57 sandervl Exp $ */
+
+ 2003-01-01: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Fixes for windows with an iconless class and WS_EX_DLGMODALFRAME
+                  style. (they shouldn't have a system menu)
+                  (either right after creation or when the app add this extended
+                   style later on)
 
  2002-12-31: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Removed wrong cx & cy check during window creation
