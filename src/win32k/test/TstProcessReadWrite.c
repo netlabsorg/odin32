@@ -1,4 +1,4 @@
-/* $Id: TstProcessReadWrite.c,v 1.1 2000-10-01 02:58:21 bird Exp $
+/* $Id: TstProcessReadWrite.c,v 1.2 2000-12-11 06:53:56 bird Exp $
  *
  * Test program for the ProcessReadWrite API.
  *  The testprogram will spawn a child process which it will interact with.
@@ -8,7 +8,7 @@
  *      - Parent writes some text data to the child process.
  *      - Parent process reads the text data back again and displays it.
  *
- * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -64,7 +64,7 @@ static char szReadBuffer[1024];
  * @time
  * @sketch
  * @status
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  * @remark
  */
 int main(int argc, char **argv)

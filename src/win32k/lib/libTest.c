@@ -1,8 +1,8 @@
-/* $Id: libTest.c,v 1.2 2000-09-02 21:08:11 bird Exp $
+/* $Id: libTest.c,v 1.3 2000-12-11 06:53:54 bird Exp $
  *
  * Test program for the win32k library.
  *
- * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *

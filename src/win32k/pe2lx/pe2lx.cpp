@@ -1,8 +1,8 @@
-/* $Id: pe2lx.cpp,v 1.21 2000-09-22 09:22:41 bird Exp $
+/* $Id: pe2lx.cpp,v 1.22 2000-12-11 06:53:55 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
- * Copyright (c) 1998-2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * Copyright (c) 1998-2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  * Copyright (c) 1998 Sander van Leeuwen (sandervl@xs4all.nl)
  * Copyright (c) 1998 Peter Fitzsimmons
  *
@@ -1755,7 +1755,7 @@ ULONG Pe2Lx::writeFile(PCSZ pszLXFilename)
  * @returns   TRUE if executable.
  *            FALSE if not an executable.
  * @sketch
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
 BOOL    Pe2Lx::isExe()
 {
@@ -1768,7 +1768,7 @@ BOOL    Pe2Lx::isExe()
  * @returns   TRUE if dynamic link library.
  *            FALSE if not a dynamic link library.
  * @sketch
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
 BOOL    Pe2Lx::isDll()
 {

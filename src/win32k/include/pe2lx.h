@@ -1,8 +1,8 @@
-/* $Id: pe2lx.h,v 1.11 2000-09-22 09:22:37 bird Exp $
+/* $Id: pe2lx.h,v 1.12 2000-12-11 06:53:51 bird Exp $
  *
  * Pe2Lx class declarations. Ring 0 and Ring 3
  *
- * Copyright (c) 1998-2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * Copyright (c) 1998-2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *

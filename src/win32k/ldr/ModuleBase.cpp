@@ -1,8 +1,8 @@
-/* $Id: ModuleBase.cpp,v 1.5 2000-09-22 09:22:39 bird Exp $
+/* $Id: ModuleBase.cpp,v 1.6 2000-12-11 06:53:53 bird Exp $
  *
  * ModuleBase - Implementetation.
  *
- * Copyright (c) 1999-2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * Copyright (c) 1999-2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -301,7 +301,7 @@ PCSZ ModuleBase::getFilename()
 /**
  * Gets the modulename.
  * @returns     Const ("Readonly") pointer to the module name.
- * @author      knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  * @remark      Modulename is filename without path and extention.
  */
 PCSZ ModuleBase::getModuleName()

@@ -1,9 +1,9 @@
-/* $Id: k32AllocMemEx.cpp,v 1.3 2000-09-02 21:08:05 bird Exp $
+/* $Id: k32AllocMemEx.cpp,v 1.4 2000-12-11 06:53:52 bird Exp $
  *
  * k32AllocMemEx - Equivalent to DosAllocMem, but this one
  *                 uses the address in ppv.
  *
- * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -94,7 +94,7 @@ ULONG vmApiF1[] =
  * @param     ulEIP  EIP where the memoryobject were requested.
  * @sketch
  * @status    stub
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  * @remark
  */
 APIRET k32AllocMemEx(PPVOID ppv, ULONG cb, ULONG flag, ULONG ulCS, ULONG ulEIP)
