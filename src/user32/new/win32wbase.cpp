@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.13 1999-09-05 18:32:26 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.14 1999-09-06 20:50:35 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -384,7 +384,11 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 #endif
 
   if(cs->lpszName)
-        SetWindowTextA((LPSTR)cs->lpszName);
+  {
+        if(isUnicode)
+                SetWindowTextW((LPWSTR)cs->lpszName);
+        else    SetWindowTextA((LPSTR)cs->lpszName);
+  }
 
   OS2Hwnd = OSLibWinCreateWindow((getParent()) ? getParent()->getOS2WindowHandle() : OSLIB_HWND_DESKTOP,
                                  dwOSWinStyle, dwOSFrameStyle, (char *)windowNameA,
