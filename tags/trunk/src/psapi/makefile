@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 1999-09-04 09:09:03 sandervl Exp $
+# $Id: makefile,v 1.2 1999-11-03 23:28:06 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -32,8 +32,8 @@ $(TARGET).dll: $(OBJS) $(TARGET).def
 	$(CP) $@ $(PDWIN32_BIN)
 
 
-$(TARGET).lib: $(TARGET).dll
-	$(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET).dll
+$(TARGET).lib: $(TARGET).def
+	$(IMPLIB) $(IMPLIBFLAGS) $@ $**
 	$(CP) $@ $(PDWIN32_LIB)
 
 
@@ -41,7 +41,7 @@ initterm.obj: initterm.cpp
 psapi.obj: psapi.cpp
 
 clean:
-	$(RM) *.obj *.lib *.dll *~ *.map *.pch	
+	$(RM) *.obj *.lib *.dll *~ *.map *.pch
 	$(RM) $(PDWIN32_BIN)\$(TARGET).dll
 	$(RM) $(PDWIN32_LIB)\$(TARGET).lib
 
