@@ -1,4 +1,4 @@
-/* $Id: hmcomm.cpp,v 1.36 2002-06-12 14:28:33 sandervl Exp $ */
+/* $Id: hmcomm.cpp,v 1.37 2002-07-06 09:57:31 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -247,6 +247,11 @@ DWORD HMDeviceCommClass::CreateFile(LPCSTR lpFileName,
                     ret = ERROR_NOT_ENOUGH_MEMORY;
                     goto fail;
                 }
+                if(handler[comnr] == NULL) {
+                    ret = ERROR_NOT_ENOUGH_MEMORY;
+                    goto fail;
+                }
+                handler[comnr]->AddRef();
             }
             pDevData->iohandler = handler[comnr];
         }
@@ -1573,7 +1578,7 @@ void HMDeviceCommClass::CloseOverlappedIOHandlers()
 {
     for(int i=0;i<MAX_COMPORTS;i++) {
         if(handler[i]) {
-            delete handler[i];
+            handler[i]->Release(TRUE);
             handler[i] = NULL;
         }
     }
