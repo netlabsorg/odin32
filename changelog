@@ -1,7 +1,10 @@
-/* $Id: changelog,v 1.2231 2002-07-23 13:25:06 sandervl Exp $ */
+/* $Id: changelog,v 1.2232 2002-07-23 13:51:05 sandervl Exp $ */
 
  2002-07-23: Sander van Leeuwen <sandervl@innotek.de> 
     - KERNEL32: o Enhanced CreateWin32PeLdrExe
+                o Enhanced PE loader class to support files with PE image
+                  starting at an offset != 0 (custom build)
+                o Fixes for memory map view with offset
     - PELDR:    o Modified for new CreateWin32PeLdrExe
 
  2002-07-22: Sander van Leeuwen <sandervl@innotek.de> 
