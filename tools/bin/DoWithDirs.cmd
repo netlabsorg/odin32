@@ -1,4 +1,4 @@
-/* $Id: DoWithDirs.cmd,v 1.11 2001-05-16 01:14:03 bird Exp $
+/* $Id: DoWithDirs.cmd,v 1.12 2001-09-30 00:24:35 bird Exp $
  *
  * Syntax: dowithdirs.cmd [-e<list of excludes>] [-c] [-i] [-l] [-r] <cmd with args...>
  *    -e      Exclude directories.
@@ -13,204 +13,225 @@
  *    -s      Skip locked directories in stead of stopping.
  */
 
-if RxFuncQuery('SysLoadFuncs')=1 THEN
-DO
-  call RxFuncAdd 'SysLoadFuncs', 'RexxUtil', 'SysLoadFuncs'
-  call SysLoadFuncs
-END
+if (RxFuncQuery('SysLoadFuncs') = 1) then
+do
+    call RxFuncAdd 'SysLoadFuncs', 'RexxUtil', 'SysLoadFuncs'
+    call SysLoadFuncs
+end
 
 
-    /* init options */
-    fIgnoreFailure = 0;
-    asIgnore.0 = 0;
-    fCD = 0;
-    fLocking = 0;
-    fDontStop = 0;
-    fReverse = 0;
-    fExitOnLock = 1;
-    sLockTag = '';
+/*
+ * Color config.
+ */
+if (  (value('BUILD_NOCOLOR',,'OS2ENVIRONMENT') = ''),
+    & (value('SLKRUNS',,'OS2ENVIRONMENT') = '')) then
+do
+    sClrMak = '[35;1m'
+    sClrErr = '[31;1m'
+    sClrRst = '[0m'
+end
+else
+do
+    sClrMak = ''
+    sClrErr = ''
+    sClrRst = ''
+end
 
-    /* parse arguments */
-    parse arg sArg.1 sArg.2 sArg.3 sArg.4 sArg.5 sArg.6 sArg.7 sArg.8 sArg.9
-    sArg.0 = 9;
-    do i = 1 to sArg.0
-        if (sArg.i <> '') then
+
+/* init options */
+fIgnoreFailure = 0;
+asIgnore.0 = 0;
+fCD = 0;
+fLocking = 0;
+fDontStop = 0;
+fReverse = 0;
+fExitOnLock = 1;
+sLockTag = '';
+
+/* parse arguments */
+parse arg sArg.1 sArg.2 sArg.3 sArg.4 sArg.5 sArg.6 sArg.7 sArg.8 sArg.9
+sArg.0 = 9;
+do i = 1 to sArg.0
+    if (sArg.i <> '') then
+    do
+        if (substr(sArg.i, 1, 1) = '-') then
         do
-            if (substr(sArg.i, 1, 1) = '-') then
-            do
-                ch = translate(substr(sArg.i, 2, 1));
-                select
-                    when ch = 'E' then
-                    do
-                        sLeft = substr(sArg.i, 3);
-                        do while (sLeft <> '' & sLeft <> ';')
-                            j = asIgnore.0 + 1;
-                            iPos = pos(';', sLeft);
-                            if (iPos < 1) then do
-                                asIgnore.j = sLeft;
-                                sLeft = '';
-                                asIgnore.0 = j;
-                            end
-                            else do
-                                asIgnore.j = substr(sLeft, 1, iPos - 1);
-                                sLeft = substr(sLeft, iPos + 1);
-                                asIgnore.0 = j;
-                            end
+            ch = translate(substr(sArg.i, 2, 1));
+            select
+                when ch = 'E' then
+                do
+                    sLeft = substr(sArg.i, 3);
+                    do while (sLeft <> '' & sLeft <> ';')
+                        j = asIgnore.0 + 1;
+                        iPos = pos(';', sLeft);
+                        if (iPos < 1) then do
+                            asIgnore.j = sLeft;
+                            sLeft = '';
+                            asIgnore.0 = j;
                         end
-                        /*
-                        do j = 1 to asIgnore.0
-                            say 'dbg:' asIgnore.j;
+                        else do
+                            asIgnore.j = substr(sLeft, 1, iPos - 1);
+                            sLeft = substr(sLeft, iPos + 1);
+                            asIgnore.0 = j;
                         end
-                        */
                     end
-
-                    when ch = 'C' then
-                    do
-                        fCD = 1;
+                    /*
+                    do j = 1 to asIgnore.0
+                        say 'dbg:' asIgnore.j;
                     end
-
-                    when ch = 'I' then
-                    do
-                        fIgnoreFailure = 1;
-                    end
-
-                    when ch = 'R' then
-                    do
-                        fReverse = 1;
-                    end
-
-                    when ch = 'L' then
-                    do
-                        fLocking = 1;
-                        sLockTag = substr(sArg.i, 3);
-                    end
-
-                    when ch = 'S' then
-                    do
-                        fExitOnLock = 0;
-                    end
-
-                    otherwise
-                        say 'unknown argument:' sArg.i;
-                        call syntax;
+                    */
                 end
-            end
-            else
-            do  /* the rest of the args is part of the cmd */
-                sCmds = '';
-                do j = i to sArg.0;
-                    if (sArg.j <> '') then
-                    sCmds = sCmds || ' ' || sArg.j;
+
+                when ch = 'C' then
+                do
+                    fCD = 1;
                 end
-                i = sArg.0;
+
+                when ch = 'I' then
+                do
+                    fIgnoreFailure = 1;
+                end
+
+                when ch = 'R' then
+                do
+                    fReverse = 1;
+                end
+
+                when ch = 'L' then
+                do
+                    fLocking = 1;
+                    sLockTag = substr(sArg.i, 3);
+                end
+
+                when ch = 'S' then
+                do
+                    fExitOnLock = 0;
+                end
+
+                otherwise
+                    say 'unknown argument:' sArg.i;
+                    call syntax;
             end
         end
         else
-        do
-            say 'missing cmd.';
-            call syntax;
+        do  /* the rest of the args is part of the cmd */
+            sCmds = '';
+            do j = i to sArg.0;
+                if (sArg.j <> '') then
+                sCmds = sCmds || ' ' || sArg.j;
+            end
+            i = sArg.0;
         end
     end
-
-    /* sanity check */
-    if (fLocking & \fCD) then
+    else
     do
-        say '-l (Locking) requires -cd to be specified!';
+        say 'missing cmd.';
         call syntax;
     end
+end
 
-    /* process directories */
-    rc = SysFileTree('*.', 'asDirs', 'DO');
-    if rc <> 0 then do
-        say 'SysFileTree failed rc='rc;
-        exit(rc);
+/* sanity check */
+if (fLocking & \fCD) then
+do
+    say '-l (Locking) requires -cd to be specified!';
+    call syntax;
+end
+
+/* process directories */
+rc = SysFileTree('*.', 'asDirs', 'DO');
+if rc <> 0 then do
+    say sClrErr||'SysFileTree failed rc='rc||sClrRst;
+    exit(rc);
+end
+
+sArgDirs = ' ';
+do ii = 1 to asDirs.0
+    /* calculate index */
+    if (fReverse) then
+        i = asDirs.0 - ii + 1;
+    else
+        i = ii;
+
+    /* ignore the directory? */
+    fFound = 0;
+    do j = 1 to asIgnore.0
+        if translate(asIgnore.j) = translate(filespec('name', asDirs.i)) then
+        do
+            fFound = 1;
+            leave;
+        end
     end
 
-    sArgDirs = ' ';
-    do ii = 1 to asDirs.0
-        /* calculate index */
-        if (fReverse) then
-            i = asDirs.0 - ii + 1;
-        else
-            i = ii;
+    if \fFound then
+    do
+        /* switch execution type. */
+        if (fCD) then
+        do
+            /* exectute the command in the directory */
+            say sClrMak||'[Entering directory:' asDirs.i']'||sClrRst;
+            /* save old dir and enter the new dir. */
+            sOldDir = directory();
+            call directory asDirs.i;
 
-        /* ignore the directory? */
-        fFound = 0;
-        do j = 1 to asIgnore.0
-            if translate(asIgnore.j) = translate(filespec('name', asDirs.i)) then
+            /* Lock the directory? */
+            fOK = 1;
+            if (fLocking) then
+                if (\lockdir(sLockTag)) then
+                do
+                    if (fExitOnLock) then
+                    do
+                        /* restore old directory and return sucessfully */
+                        call directory sOldDir;
+                        say '[ !Lock found, stops processing.]';
+                        exit(0);
+                    end
+                    say sClrMak||'[ !Skipping ' || asDirs.i || ' - directory was locked.]'||sClrRst;
+                    fOK = 0;
+                end
+
+            /* continue only if locking was successful. */
+            if (fOK) then
             do
-                fFound = 1;
-                leave;
+                /* execute command */
+                'call' sCmds;
+                ret = rc;
+
+                /* unlock directory */
+                if (fLocking & fOk) then
+                    call unlockdir sLockTag;
+
+                /* check for return? */
+                if (ret <> 0) then
+                do
+                    /* complain and fail if errors aren't ignored. */
+                    if (\fIgnoreFailure) then
+                    do
+                        say sClrErr||'[ - rc = 'ret' ' || asDirs.i || ']'||sClrErr;
+                        exit(rc);
+                    end
+                    say '[ - rc = 'ret' ' || asDirs.i || ']';
+                end
+            end
+
+            /* restore old directory */
+            say sClrMak||'[Leaving  directory:' directory()']'||sClrRst;
+            call directory sOldDir;
+        end
+        else
+        do
+            /* execute the command with the directory as the last parameter */
+            'call' sCmds filespec('name', asDirs.i);
+            if (rc <> 0) then
+            do
+                say '[ - rc = ' || rc']';
+                if (\fIgnoreFailure) then
+                    exit(rc);
             end
         end
+    end /* loop */
+end
 
-        if \fFound then
-        do
-            /* switch execution type. */
-            if (fCD) then
-            do
-                /* exectute the command in the directory */
-                say '[Entering directory:' asDirs.i']';
-                /* save old dir and enter the new dir. */
-                sOldDir = directory();
-                call directory asDirs.i;
-
-                /* Lock the directory? */
-                fOK = 1;
-                if (fLocking) then
-                    if (\lockdir(sLockTag)) then
-                    do
-                        if (fExitOnLock) then
-                        do
-                            /* restore old directory and return sucessfully */
-                            call directory sOldDir;
-                            say '[ !Lock found, stops processing.]';
-                            exit(0);
-                        end
-                        say '[ !Skipping ' || asDirs.i || ' - directory was locked.]';
-                        fOK = 0;
-                    end
-
-                /* continue only if locking was successful. */
-                if (fOK) then
-                do
-                    /* execute command */
-                    'call' sCmds;
-                    ret = rc;
-
-                    /* unlock directory */
-                    if (fLocking & fOk) then
-                        call unlockdir sLockTag;
-
-                    /* check for return? */
-                    if (ret <> 0) then
-                    do
-                        /* complain and fail if errors aren't ignored. */
-                        say '[ - rc = 'ret' ' || asDirs.i || ']';
-                        if (\fIgnoreFailure) then
-                            exit(rc);
-                    end
-                end
-
-                /* restore old directory */
-                say '[Leaving  directory:' directory()']'
-                call directory sOldDir;
-            end
-            else
-            do
-                /* execute the command with the directory as the last parameter */
-                'call' sCmds filespec('name', asDirs.i);
-                if (rc <> 0) then
-                do
-                    say '[ - rc = ' || rc']';
-                    if (\fIgnoreFailure) then
-                        exit(rc);
-                end
-            end
-        end /* loop */
-    end
-
-    exit(rc);
+exit(rc);
 
 
 syntax:
