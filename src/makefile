@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.73 2001-07-20 15:43:06 sandervl Exp $
+# $Id: makefile,v 1.74 2001-07-30 22:52:25 bird Exp $
 
 #
 # Odin32 API
@@ -86,6 +86,19 @@ dep:
 clean:
     $(DOWITHDIRS) -e$(NOTTOBEMADE) -c -lcln$(CCENV)$(DEBUG) $(EXTRA) \
         $(MAKE_CMD) NODEP=1 clean
+
+
+#
+# Custom rules
+#
+CUSTOMBUILD = kernel32 user32 gdi32 comctl32 comdlg32 shell32 shlwapi msvfw32 wsock32 winmm ole32 rpcrt4 version lz32
+custombuild:
+    $(DODIRS) "$(CUSTOMBUILD)" $(MAKE_CMD) all CUSTOMBUILD=1
+    $(DODIRS) ".\win32k\lib custombuild" $(MAKE_CMD) all
+
+custombuild_all custombuild_clean custombuild_dep:
+    $(DODIRS) "$(CUSTOMBUILD)" $(MAKE_CMD) $(@:custombuild_=) CUSTOMBUILD=1
+    $(DODIRS) ".\win32k\lib custombuild" $(MAKE_CMD) $(@:custombuild_=)
 
 
 #

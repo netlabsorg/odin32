@@ -1,4 +1,4 @@
-# $Id: odin32.mk,v 1.3 2001-06-25 23:17:53 bird Exp $
+# $Id: odin32.mk,v 1.4 2001-07-30 22:51:34 bird Exp $
 
 #
 # Odin32 API
@@ -113,6 +113,25 @@ ODIN32_POST_INC = $(ODIN32_INCLUDE)/odin32.post.mk
 # Common rules macro. (All makefiles should have these!)
 #
 COMMONRULES = clean dep lib all
+
+
+#
+# Altern configuration if we're making the custom build object library.
+#
+!if "$(CUSTOMBUILD)" == "1"
+!   ifndef LIBTARGET
+!       ifndef PUBLICLIB
+LIBTARGET = 1
+EXETARGET = 1
+PUBLICLIB = 1
+WRC_PREFIX_RESOURCE=1
+!       else
+CUSTOMBUILD = 0
+!       endif
+!   else
+CUSTOMBUILD = 0
+!   endif
+!endif
 
 
 #
