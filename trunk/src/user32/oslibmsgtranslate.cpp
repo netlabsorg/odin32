@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.92 2002-09-03 14:03:16 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.93 2002-09-12 09:30:05 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -43,6 +43,13 @@
 
 static BOOL fGenerateDoubleClick = FALSE;
 static MSG  doubleClickMsg = {0};
+
+//For wheel mouse translation
+#define WHEEL_DELTA  120
+#define OS2_WHEEL_CORRECTION 6
+//This happens because OS/2 Wheel scrolling of IBM driver issues 6 WM_VSCROLL
+//messages and they need to transform in 1 WM_MOUSEWHEEL. If however user
+//will tweak driver to produce less or more messages, we will also react
 
 //******************************************************************************
 //******************************************************************************
@@ -920,26 +927,37 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
 
     case WM_HSCROLL:
     case WM_VSCROLL:
-        winMsg->message = (os2Msg->msg == WM_HSCROLL) ? WINWM_HSCROLL : WINWM_VSCROLL;
-        winMsg->lParam  = 0;
-	winMsg->wParam  = 0;
-        switch(SHORT2FROMMP(os2Msg->mp2)) {
-        case SB_LINERIGHT:
-            winMsg->wParam = SB_LINERIGHT_W;
-            break;
-        case SB_LINELEFT:
-            winMsg->wParam = SB_LINELEFT_W;
-            break;
-        case SB_PAGELEFT:
-            winMsg->wParam = SB_PAGELEFT_W;
-            break;
-        case SB_PAGERIGHT:
-            winMsg->wParam = SB_PAGERIGHT_W;
-            break;
-        default:
-            dprintf(("Unsupported WM_H/VSCROLL message %x!!", SHORT2FROMMP(os2Msg->mp2)));
+        //PF For win32 we support only vertical scrolling for WM_MOUSEWHEEL
+        if((os2Msg->msg == WM_VSCROLL) && (fMsgRemoved == MSG_REMOVE))
+        {
+            MSLLHOOKSTRUCT hook;
+
+            //TODO:
+            winMsg->message = WINWM_MOUSEWHEEL;
+            winMsg->lParam  = 0;
+            winMsg->wParam  = 0;
+
+            hook.pt.x       = os2Msg->ptl.x & 0xFFFF;
+            hook.pt.y       = mapScreenY(os2Msg->ptl.y);
+            if (SHORT2FROMMP(os2Msg->mp2) == SB_LINEDOWN)
+                hook.mouseData   = MAKELONG(0, -WHEEL_DELTA/OS2_WHEEL_CORRECTION);  
+            else
+            if (SHORT2FROMMP(os2Msg->mp2) == SB_LINEUP)
+            { 
+                hook.mouseData   = MAKELONG(0, WHEEL_DELTA/OS2_WHEEL_CORRECTION);  
+            }
+            else goto dummymessage; // IBM driver produces other messages as well sometimes
+
+            hook.flags       = LLMHF_INJECTED;
+            hook.time        = winMsg->time;
+            hook.dwExtraInfo = 0;
+            if(HOOK_CallHooksW( WH_MOUSE_LL, HC_ACTION, WINWM_MOUSEWHEEL, (LPARAM)&hook)) {
+                goto dummymessage; //hook swallowed message
+            }
             goto dummymessage;
-        }
+        } 
+        goto dummymessage; //eat this message
+       
         break;
 
     case WM_INITMENU:

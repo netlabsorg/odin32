@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.126 2002-08-27 09:30:50 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.127 2002-09-12 09:30:06 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -1208,6 +1208,15 @@ BOOL OSLibWinShowPointer(BOOL fShow)
 ULONG  OSLibWinQuerySysColor(int index)
 {
     return CONVERT_RGB(WinQuerySysColor(HWND_DESKTOP, index, 0));
+}
+//******************************************************************************
+//PF This was added for IBM Wheel Mouse driver - it searches for scrollbars and
+//only if they exist sends WM_VSCROLL messages to the window
+//******************************************************************************
+HWND OSLibWinCreateInvisibleScroller(HWND parentHWND, int direction)
+{
+    return WinCreateWindow(parentHWND, WC_SCROLLBAR, NULL, direction,
+                           0, 0, 0, 0, parentHWND, HWND_BOTTOM, 1, NULL, NULL);
 }
 //******************************************************************************
 //******************************************************************************
