@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1958 2002-02-06 16:36:40 sandervl Exp $ */
+/* $Id: changelog,v 1.1959 2002-02-06 17:24:48 sandervl Exp $ */
 
  2002-02-06: Sander van Leeuwen <sandervl@xs4all.nl>
     - WSOCK32:  o minor recv update for error handling
@@ -7,6 +7,8 @@
                 o Force switch to win32 FS selector when calling PE image
                   entrypoints (necessary for Odin32 applications that use
                   PE dlls (like Opera))
+    - COMCTL32: o Wine updates (smoothscroll, ipaddress, rebar, toolbar, tab,
+                  comboex, imagelist)
 
  2002-02-05: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Ported SendMessageCallbackA/W, SendMessageTimeoutA/W,
