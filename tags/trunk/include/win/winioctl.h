@@ -1,9 +1,20 @@
-/* $Id: winioctl.h,v 1.1 1999-05-24 20:19:22 ktk Exp $ */
+/* $Id: winioctl.h,v 1.2 2000-09-13 20:58:29 sandervl Exp $ */
 
 #ifndef __WINE_WINIOCTL_H
 #define __WINE_WINIOCTL_H
 
+#ifndef OS2_INCLUDED
 #include "winnt.h"
+#else
+#ifndef FILE_READ_DATA
+#define FILE_READ_DATA            0x0001    /* file & pipe */
+#endif
+
+#ifndef FILE_WRITE_DATA
+#define FILE_WRITE_DATA           0x0002    /* file & pipe */
+#endif
+
+#endif
 
 #define CTL_CODE( DeviceType, Function, Method, Access ) (                 \
     (DWORD)((DeviceType) << 16) | ((Access) << 14) | ((Function) << 2) | (Method) \
