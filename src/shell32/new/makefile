@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 1999-09-02 11:59:12 phaller Exp $
+# $Id: makefile,v 1.2 1999-09-04 10:03:10 achimha Exp $
 
 #
 # PD-Win32 API
@@ -23,10 +23,10 @@ TARGET = shell32
 OBJS =  initterm.obj \
         brsfolder.obj classes.obj contmenu.obj dataobject.obj \
         enumidlist.obj folders.obj iconcache.obj memorystream.obj \
-        pidl.obj regstream.obj shell32_main.obj shell.obj \
+        pidl.obj regstream.obj shell32_main.obj \
         shellguid.obj shelllink.obj shlmenu.obj shellole.obj \
-        shellord.obj shellpath.obj shlfolder.obj shlview.obj \
-        shv_bg_cmenu.obj
+        shellord.obj shellpath.obj shv_bg_cmenu.obj \
+        shlfolder.obj shlview.obj shell.obj
 
 all: $(TARGET).dll $(TARGET).lib
 
