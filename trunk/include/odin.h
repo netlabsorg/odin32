@@ -1,7 +1,13 @@
-/* $Id: odin.h,v 1.5 1999-08-12 23:33:36 phaller Exp $ */
+/* $Id: odin.h,v 1.6 1999-09-01 14:59:49 phaller Exp $ */
 /*
- *
  * ODIN - Build Environment Definition
+ *
+ * Copyright (C) 1999 Patrick Haller   <phaller@gmx.net>
+ *
+ * ------------------------------------------------------------
+ * Note: Only compiler linkage definitions and similar stuff
+ *       goes here. Nothing else.
+ * ------------------------------------------------------------
  *
  */
 
@@ -10,9 +16,9 @@
 #define _ODIN_H_
 
 
-/*
- * Compiler Environment Definition
- */
+/***********************************
+ * Compiler Environment Definition *
+ ***********************************/
 
 #ifdef CDECL
 #  undef CDECL
