@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.87 2002-05-23 07:13:00 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.88 2002-06-04 10:11:58 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -627,8 +627,6 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         if (fWinExtended)
             winMsg->lParam = winMsg->lParam | WIN_KEY_EXTENDED;
 
-        //@PF PM does not add KC_ALT to right alt but win32 does it
-        if (WinGetKeyState(HWND_DESKTOP, VK_ALTGRAF) & 0x8000) flags |= KC_ALT;
 #if 0
 //TODO
         // Adjust VKEY value for pad digits if NumLock is on
@@ -714,6 +712,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
           else 
           { // send WM_KEYDOWN message
             winMsg->message = WINWM_KEYDOWN;
+
             if (keyWasPressed)
               winMsg->lParam |= WIN_KEY_PREVSTATE;                  // bit 30, previous state, 1 means key was pressed
              
@@ -751,6 +750,10 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
                     setThreadQueueExtraCharMessage(teb, &extramsg);
               }
             }
+          }
+          // if right alt is down, then we need to set the alt down bit too
+          if (WinGetKeyState(HWND_DESKTOP, VK_ALTGRAF) & 0x8000) {
+              winMsg->lParam |= WIN_KEY_ALTHELD;            
           }
         }
         else 
