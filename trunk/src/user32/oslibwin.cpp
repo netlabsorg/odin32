@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.131 2002-12-29 17:17:16 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.132 2003-01-01 14:29:42 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -116,7 +116,8 @@ HWND OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle, ULONG dwOSFrameStyle
 //******************************************************************************
 //Note: Also check OSLibSetWindowStyle when changing this!!
 //******************************************************************************
-BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle, ULONG *OSFrameStyle)
+BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle, 
+                          ULONG *OSFrameStyle)
 {
   *OSWinStyle   = 0;
   *OSFrameStyle = 0;
@@ -134,6 +135,7 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle, ULO
   if(fOS2Look) {
       if((dwStyle & WS_CAPTION_W) == WS_CAPTION_W) {
           *OSFrameStyle = FCF_TITLEBAR;
+
           if((dwStyle & WS_SYSMENU_W) && !(dwExStyle & WS_EX_TOOLWINDOW_W))
           {
               *OSFrameStyle |= FCF_SYSMENU;
@@ -154,7 +156,8 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle, ULO
 //******************************************************************************
 //******************************************************************************
 BOOL OSLibWinPositionFrameControls(HWND hwndFrame, RECTLOS2 *pRect, DWORD dwStyle, 
-                                   DWORD dwExStyle, HICON hSysMenuIcon, BOOL drawCloseButton)
+                                   DWORD dwExStyle, HICON hSysMenuIcon, 
+                                   BOOL drawCloseButton, BOOL fClassIcon)
 {
   SWP  swp[3];
   HWND hwndControl;
@@ -170,6 +173,8 @@ BOOL OSLibWinPositionFrameControls(HWND hwndFrame, RECTLOS2 *pRect, DWORD dwStyl
   }
   
   if(fOS2Look == OS2_APPEARANCE_SYSMENU) {
+      //Note: If no class icon *and* WS_EX_DLGMODALFRAME -> no system menu!!
+      //      --> TODO
       hwndControl = WinWindowFromID(hwndFrame, FID_SYSMENU);
       if(hwndControl) {
           swp[i].hwnd = hwndControl;
@@ -186,10 +191,12 @@ BOOL OSLibWinPositionFrameControls(HWND hwndFrame, RECTLOS2 *pRect, DWORD dwStyl
           pRect->xLeft += minmaxwidth/2;
           i++;
       }
-
   }
   else
-  if((dwStyle & WS_SYSMENU_W) && !(dwExStyle & WS_EX_TOOLWINDOW_W) && hSysMenuIcon) {
+  //Note: If no class icon *and* WS_EX_DLGMODALFRAME -> no system menu!!
+  if((dwStyle & WS_SYSMENU_W) && !(dwExStyle & WS_EX_TOOLWINDOW_W) &&
+     !(!fClassIcon && (dwExStyle & WS_EX_DLGMODALFRAME_W)) && hSysMenuIcon)
+  {
       pRect->xLeft += minmaxwidth/2;
   }
 
@@ -987,7 +994,8 @@ void OSLibWinShowTaskList(HWND hwndFrame)
 }
 //******************************************************************************
 //******************************************************************************
-void OSLibSetWindowStyle(HWND hwndFrame, HWND hwndClient, ULONG dwStyle, ULONG dwExStyle)
+void OSLibSetWindowStyle(HWND hwndFrame, HWND hwndClient, ULONG dwStyle, 
+                         ULONG dwExStyle)
 {
     ULONG dwWinStyle;
     ULONG dwOldWinStyle;
@@ -1094,7 +1102,6 @@ void OSLibSetWindowStyle(HWND hwndFrame, HWND hwndClient, ULONG dwStyle, ULONG d
        }
    } // os2look
 }
-
 //******************************************************************************
 //******************************************************************************
 BOOL OSLibChangeCloseButtonState(HWND hwndFrame, BOOL State)
