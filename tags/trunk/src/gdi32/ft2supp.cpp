@@ -261,7 +261,7 @@ BOOL CFT2Module::Ft2GetTextExtentW(HPS hps, LONG lCount1,LPCWSTR pchString, PPOI
         calcDimensions(aptlPoints, pwidthHeight);
 
         DecreaseLogCount();
-        if(GetTextMetricsW( hps, &tmW ) == TRUE) 
+        if(GetTextMetricsW( hps, &tmW ) == TRUE)
         {
             pwidthHeight->y = tmW.tmHeight;    // *Must* use the maximum height of the font
         }
@@ -315,6 +315,7 @@ BOOL CFT2Module::Ft2CharStringPosAtW(HPS hps, PPOINTLOS2 ptl,PRECTLOS2 rct,ULONG
     //NOTE: We don't support fuWin32Options in the fallback case
     int   len;
     LPSTR astring;
+    LPINT lpDx = NULL;
 
     pDCData pHps = (pDCData)OSLibGpiQueryDCData(hps);
 
@@ -322,8 +323,28 @@ BOOL CFT2Module::Ft2CharStringPosAtW(HPS hps, PPOINTLOS2 ptl,PRECTLOS2 rct,ULONG
     astring = (char *)malloc( len + 1 );
     lstrcpynWtoA(astring, pchString, len + 1 );
 
+    if( IsDBCSEnv() && alAdx )
+    {
+        int i, j;
+
+        lpDx = ( LPINT )malloc( len * sizeof( INT ));
+        for( i = j = 0; i < len; i++, j++ )
+        {
+            lpDx[ i ] = alAdx[ j ];
+            if( IsDBCSLeadByte( astring[ i ]))
+                lpDx[ ++i ] = 0;
+        }
+
+        alAdx = ( CONST INT * )lpDx;
+    }
+
     ret = OSLibGpiCharStringPosAt(pHps,ptl,rct,flOptions,len,astring,alAdx);
+
+    if( lpDx )
+        free( lpDx );
+
     free(astring);
+
     return ret;
 }
 //******************************************************************************
