@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.2539 2003-04-02 12:56:23 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2540 2003-04-02 14:28:24 bird Exp $ */
+
+ 2002-04-02: knut st. osmundsen <bird-odin-spam@anduin   >
+    - WIN32K:   o Win32VersionValue in OptionalHeader.
 
  2002-04-02: Yuri Dario <mc6530@mclink   >
     - INCLUDE, GDI32, USER32, KERNEL32:
@@ -7,7 +10,7 @@
 
  2003-04-02: Platon Fomichev <platon@innotek   >
     - INCLUDE, KERNEL32:
-                o Corrected HFILE definition as it is in Wine and in Win2k + 
+                o Corrected HFILE definition as it is in Wine and in Win2k +
                   header updates.
     - INCLUDE\EMXRUNTIME:
                 o Modified EMX headers
@@ -24,8 +27,8 @@
     - SHELL32:  o Shell file operations update
 
  2003-03-31: Platon Fomichev <platon@innotek   >
-    - KERNEL32: o Added vsnprintfW/snprintfW funcs for syncing with latest 
-                  wine NTDLL 
+    - KERNEL32: o Added vsnprintfW/snprintfW funcs for syncing with latest
+                  wine NTDLL
 
  2003-03-31: knut st. osmundsen <bird-odin-spam@anduin   >
     - PE2LX/WIN32K:
