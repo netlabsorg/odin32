@@ -1,4 +1,4 @@
-/* $Id: treeview.cpp,v 1.12 2000-04-17 17:04:14 cbratschi Exp $ */
+/* $Id: treeview.cpp,v 1.13 2000-05-10 19:50:33 cbratschi Exp $ */
 /* Treeview control
  *
  * Copyright 1998 Eric Kohl <ekohl@abo.rhein-zeitung.de>
@@ -1374,8 +1374,8 @@ static BOOL TREEVIEW_CalcItems(HWND hwnd,HDC hdc,TREEVIEW_INFO *infoPtr)
   {
     TREEVIEW_HideInfoTip(hwnd,infoPtr);
     itemHeight = 0;
-    ImageList_GetIconSize (infoPtr->himlNormal, &x, &itemHeight);
-    itemHeight = MAX(infoPtr->uItemHeight,itemHeight);
+    ImageList_GetIconSize(infoPtr->himlNormal,&x,&itemHeight);
+    if (infoPtr->uItemHeight != -1) itemHeight = MAX(infoPtr->uItemHeight,itemHeight);
 
     if (!hdc)
     {
