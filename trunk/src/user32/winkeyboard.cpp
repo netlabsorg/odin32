@@ -1,4 +1,4 @@
-/* $Id: winkeyboard.cpp,v 1.17 2001-10-09 05:18:05 phaller Exp $ */
+/* $Id: winkeyboard.cpp,v 1.18 2001-10-23 08:36:20 phaller Exp $ */
 /*
  * Win32 <-> PM key translation
  *
@@ -569,7 +569,6 @@ BYTE abWinVKeyToPMScan[256] =
 /* 0xFF                   */ , 0x00
                              };
 
-
 //******************************************************************************
 //******************************************************************************
 
@@ -586,6 +585,16 @@ ODINPROCEDURE3(KeyTranslatePMToWinBuf,
    winkey[VK_SHIFT]   = winkey[VK_LSHIFT] | winkey[VK_RSHIFT];
    winkey[VK_CONTROL] = winkey[VK_LCONTROL] | winkey[VK_RCONTROL];
    winkey[VK_MENU]    = winkey[VK_LMENU] | winkey[VK_RMENU];
+}
+//******************************************************************************
+//******************************************************************************
+BYTE KeyTranslateWinVKeyToPMScan(BYTE bWinScan)
+{
+  // Note: array size of 256, so the BYTE value can't overflow
+  
+  // translate scancode to vkey
+  BYTE bWinVKey = MapVirtualKeyA(bWinScan ,3);
+  return abWinVKeyToPMScan[bWinVKey];
 }
 //******************************************************************************
 //******************************************************************************
@@ -941,7 +950,23 @@ ODINFUNCTION3(int,    GetKeyNameTextA,
               LPSTR,  lpString, 
               int,    nSize)
 {
-  return O32_GetKeyNameText(lParam,lpString,nSize);
+  // Note: Open32 expects PM Scancodes, NOT Winscancodes.
+  UCHAR ucPMScanCode = KeyTranslateWinVKeyToPMScan( (lParam & 0x00ff0000) >> 16);
+  
+  // switch the bits
+  lParam &= 0xFF00FFFF;
+  lParam |= (ucPMScanCode << 16);
+  
+  // @@@PH
+  // Bugs in Open32:
+  // 1 - the "extended key bit" is not taken into account
+  // 2 - special injected scancodes (0x21d for Ctrl for AltGr) skipped
+  
+  int result = O32_GetKeyNameText(lParam,lpString,nSize);
+  if (result)
+    dprintf(("keyname=[%s]\n",
+             lpString));
+  return result;
 }
 //******************************************************************************
 //******************************************************************************

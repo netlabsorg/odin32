@@ -1,4 +1,12 @@
-/* $Id: changelog,v 1.1776 2001-10-22 23:34:10 phaller Exp $ */
+/* $Id: changelog,v 1.1777 2001-10-23 08:39:05 phaller Exp $ */
+
+ 2001-10-22: Patrick Haller <patrick.haller@innotek.de>
+    - USER32:   o major improvement on keyboard handling
+                  Special AltGr mapping missing yet
+                o partial fix to GetKeyNameText(),
+                  two Open32 bugs remaining:
+                  (injected scancodes ignored (undoc),
+                   extended key bit ignored)
 
  2001-10-22: Patrick Haller <patrick.haller@innotek.de>
     - TESTAPP:  o added keyboard test program for low-level testing
