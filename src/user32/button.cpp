@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.31 2000-02-03 17:13:00 cbratschi Exp $ */
+/* $Id: button.cpp,v 1.32 2000-02-05 19:45:14 cbratschi Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
@@ -687,13 +687,13 @@ static void PB_Paint( HWND hwnd, HDC hDC, WORD action )
                           bHighLighted);
 }
 
-static INT BUTTON_GetTextFormat(DWORD dwStyle,INT defHorz,INT defVert)
+static INT BUTTON_GetTextFormat(DWORD dwStyle,DWORD dwExStyle,INT defHorz,INT defVert)
 {
   INT format = 0;
 
   if (dwStyle & BS_LEFT) format = DT_LEFT;
   else if (dwStyle & BS_CENTER) format = DT_CENTER;
-  else if (dwStyle & BS_RIGHT) format = DT_RIGHT;
+  else if ((dwStyle & BS_RIGHT) || (dwExStyle & WS_EX_RIGHT)) format = DT_RIGHT;
   else format = defHorz;
 
   if (dwStyle & BS_TOP) format |= DT_TOP;
@@ -774,7 +774,7 @@ static void BUTTON_DrawPushButton(
     textLen = GetWindowTextLengthA(hwnd);
     if ((textLen > 0) && (!(dwStyle & (BS_ICON|BS_BITMAP))))
     {
-        INT format = BUTTON_GetTextFormat(dwStyle,DT_CENTER,DT_VCENTER);
+        INT format = BUTTON_GetTextFormat(dwStyle,GetWindowLongA(hwnd,GWL_EXSTYLE),DT_CENTER,DT_VCENTER);
 
         textLen++;
         text = (char*)malloc(textLen);
@@ -998,7 +998,7 @@ static void CB_Paint(HWND hwnd,HDC hDC,WORD action)
 
         if( text && action != ODA_SELECT )
         {
-          INT format = BUTTON_GetTextFormat(dwStyle,DT_TOP,DT_VCENTER);
+          INT format = BUTTON_GetTextFormat(dwStyle,GetWindowLongA(hwnd,GWL_EXSTYLE),DT_TOP,DT_VCENTER);
 
           if (dwStyle & WS_DISABLED) DrawDisabledText(hDC,text,&rtext,format);
           else DrawTextA(hDC,text,-1,&rtext,format);
@@ -1083,7 +1083,7 @@ static void GB_Paint(HWND hwnd,HDC hDC,WORD action)
     textLen = GetWindowTextLengthA(hwnd);
     if (textLen > 0)
     {
-      INT format = BUTTON_GetTextFormat(dwStyle,DT_LEFT,DT_TOP) | DT_NOCLIP | DT_SINGLELINE;
+      INT format = BUTTON_GetTextFormat(dwStyle,GetWindowLongA(hwnd,GWL_EXSTYLE),DT_LEFT,DT_TOP) | DT_NOCLIP | DT_SINGLELINE;
 
       textLen++;
       text = (char*)malloc(textLen);

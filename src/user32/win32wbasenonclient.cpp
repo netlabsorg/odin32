@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.8 2000-02-03 17:13:03 cbratschi Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.9 2000-02-05 19:45:19 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -628,7 +628,7 @@ BOOL Win32BaseWindow::DrawSysButton(HDC hdc,RECT *rect)
   if(hIcon == 0)
     if (!(dwStyle & DS_MODALFRAME))
       hIcon = LoadImageA(0, MAKEINTRESOURCEA(OIC_ODINICON), IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
-
+//CB: todo: add icons (including Odin icon) to user32.rc
   if (hIcon)
     DrawIconEx(hdc,r.left+2,r.top+2,hIcon,
                GetSystemMetrics(SM_CXSMICON),
@@ -779,9 +779,45 @@ VOID Win32BaseWindow::DrawMinButton(HDC hdc,RECT *rect,BOOL down,BOOL bGrayed)
   DeleteDC( hdcMem );
 }
 //******************************************************************************
-// redrawText: only redraws text
 //******************************************************************************
-VOID Win32BaseWindow::DrawCaption(HDC hdc,RECT *rect,BOOL active,BOOL redrawText)
+VOID Win32BaseWindow::DrawHelpButton(HDC hdc,RECT *rect,BOOL down,BOOL bGrayed)
+{
+  RECT r;
+  HDC hdcMem;
+  BITMAP  bmp;
+  HBITMAP  hBmp,hOldBmp;
+
+  if (!rect) GetInsideRect(&r);
+  else r = *rect;
+#if 0 //CB: todo
+  hdcMem = CreateCompatibleDC( hdc );
+  hBmp = down ? hbitmapMinimizeD : hbitmapMinimize;
+  hOldBmp= SelectObject( hdcMem, hBmp );
+  GetObjectA (hBmp, sizeof(BITMAP), &bmp);
+
+  if (dwStyle & WS_SYSMENU)
+    r.right -= GetSystemMetrics(SM_CYCAPTION) + 1;
+
+  /* In win 95 there is always a Maximize box when there is a Minimize one */
+  if ((dwStyle & WS_MAXIMIZEBOX) || (dwStyle & WS_MINIMIZEBOX))
+    r.right -= bmp.bmWidth;
+
+  BitBlt( hdc, r.right - (GetSystemMetrics(SM_CXSIZE) + bmp.bmWidth) / 2,
+          r.top + (GetSystemMetrics(SM_CYCAPTION) - 1 - bmp.bmHeight) / 2,
+          bmp.bmWidth, bmp.bmHeight, hdcMem, 0, 0, SRCCOPY );
+
+  if(bGrayed)
+    DrawGrayButton(hdc, r.right - (GetSystemMetrics(SM_CXSIZE) + bmp.bmWidth) / 2 + 2,
+                   r.top + (GetSystemMetrics(SM_CYCAPTION) - 1 - bmp.bmHeight) / 2 + 2);
+
+
+  SelectObject (hdcMem, hOldBmp);
+  DeleteDC( hdcMem );
+#endif
+}
+//******************************************************************************
+//******************************************************************************
+VOID Win32BaseWindow::DrawCaption(HDC hdc,RECT *rect,BOOL active)
 {
   RECT  r = *rect,r2;
   char  buffer[256];
@@ -849,23 +885,22 @@ VOID Win32BaseWindow::DrawCaption(HDC hdc,RECT *rect,BOOL active,BOOL redrawText
 
   if ((dwStyle & WS_SYSMENU) && !(dwExStyle & WS_EX_TOOLWINDOW))
   {
-    if (redrawText || DrawSysButton(memDC,&r))
+    if (DrawSysButton(memDC,&r))
       r.left += GetSystemMetrics(SM_CYCAPTION) - 1;
   }
+
+  //CB: todo: integrate help button
 
   if (dwStyle & WS_SYSMENU)
   {
     UINT state;
 
-    if (!redrawText)
-    {
-      /* Go get the sysmenu */
-      state = GetMenuState(hSysMenu, SC_CLOSE, MF_BYCOMMAND);
+    /* Go get the sysmenu */
+    state = GetMenuState(hSysMenu, SC_CLOSE, MF_BYCOMMAND);
 
-      /* Draw a grayed close button if disabled and a normal one if SC_CLOSE is not there */
-      DrawCloseButton(memDC,&r2,FALSE,
-                      ((((state & MF_DISABLED) || (state & MF_GRAYED))) && (state != 0xFFFFFFFF)));
-    }
+    /* Draw a grayed close button if disabled and a normal one if SC_CLOSE is not there */
+    DrawCloseButton(memDC,&r2,FALSE,
+                    ((((state & MF_DISABLED) || (state & MF_GRAYED))) && (state != 0xFFFFFFFF)));
     r.right -= GetSystemMetrics(SM_CYCAPTION) - 1;
 
     if ((dwStyle & WS_MAXIMIZEBOX) || (dwStyle & WS_MINIMIZEBOX))
@@ -873,12 +908,10 @@ VOID Win32BaseWindow::DrawCaption(HDC hdc,RECT *rect,BOOL active,BOOL redrawText
       /* In win95 the two buttons are always there */
       /* But if the menu item is not in the menu they're disabled*/
 
-      if (!redrawText)
-        DrawMaxButton(memDC,&r2,FALSE,(!(dwStyle & WS_MAXIMIZEBOX)));
+      DrawMaxButton(memDC,&r2,FALSE,(!(dwStyle & WS_MAXIMIZEBOX)));
       r.right -= GetSystemMetrics(SM_CXSIZE) + 1;
 
-      if (!redrawText)
-        DrawMinButton(memDC,&r2,FALSE,  (!(dwStyle & WS_MINIMIZEBOX)));
+      DrawMinButton(memDC,&r2,FALSE,  (!(dwStyle & WS_MINIMIZEBOX)));
       r.right -= GetSystemMetrics(SM_CXSIZE) + 1;
     }
   }
@@ -973,7 +1006,7 @@ VOID Win32BaseWindow::DoNCPaint(HRGN clip,BOOL suppress_menupaint)
       rect.top += GetSystemMetrics(SM_CYCAPTION);
     }
     if( !clip || IntersectRect( &rfuzz, &r, &rectClip ) )
-      DrawCaption(hdc,&r,active,FALSE);
+      DrawCaption(hdc,&r,active);
   }
 
   if (HAS_MENU())
