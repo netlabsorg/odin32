@@ -1,4 +1,4 @@
-/* $Id: conbuffer.cpp,v 1.2 1999-06-19 10:54:39 sandervl Exp $ */
+/* $Id: conbuffer.cpp,v 1.3 1999-06-21 18:53:50 phaller Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -121,7 +121,7 @@ DWORD HMDeviceConsoleBufferClass::CreateFile (LPCSTR        lpFileName,
   WriteLog("KERNEL32/CONSOLE:HMDeviceConsoleBufferClass %s(%s,%08x,%08x,%08x)\n",
            lpHMDeviceName,
            lpFileName,
-           pHMHandleData->hWinHandle,
+           pHMHandleData->hHMHandle,
            lpSecurityAttributes,
            pHMHandleDataTemplate);
 #endif
@@ -222,7 +222,7 @@ DWORD HMDeviceConsoleBufferClass::ReadFile(PHMHANDLEDATA pHMHandleData,
 #ifdef DEBUG_LOCAL
   WriteLog("KERNEL32/CONSOLE:HMDeviceConsoleBufferClass::ReadFile %s(%08x,%08x,%08x,%08x,%08x)\n",
            lpHMDeviceName,
-           pHMHandleData->hWinHandle,
+           pHMHandleData->hHMHandle,
            lpBuffer,
            nNumberOfBytesToRead,
            lpNumberOfBytesRead,
@@ -259,7 +259,7 @@ DWORD HMDeviceConsoleBufferClass::WriteFile(PHMHANDLEDATA pHMHandleData,
 #ifdef DEBUG_LOCAL2
   WriteLog("KERNEL32/CONSOLE:HMDeviceConsoleBufferClass:WriteFile %s(%08x,%08x,%08x,%08x,%08x)\n",
            lpHMDeviceName,
-           pHMHandleData->hWinHandle,
+           pHMHandleData->hHMHandle,
            lpBuffer,
            nNumberOfBytesToWrite,
            lpNumberOfBytesWritten,
@@ -342,7 +342,7 @@ DWORD HMDeviceConsoleBufferClass::WriteFile(PHMHANDLEDATA pHMHandleData,
     {
                                                           /* write character */
       *(pConsoleBuffer->ppszLine[pConsoleBuffer->coordCursorPosition.Y] +
-        pConsoleBuffer->coordCursorPosition.X * 2) = pszBuffer[ulCounter];
+        pConsoleBuffer->coordCursorPosition.X * 2) = ucChar;
 
       pConsoleBuffer->coordCursorPosition.X++;
 
@@ -373,7 +373,7 @@ DWORD HMDeviceConsoleBufferClass::WriteFile(PHMHANDLEDATA pHMHandleData,
   }
 
                                           /* update screen if active console */
-  if (pHMHandleData->hWinHandle == pConsoleGlobals->hConsoleBuffer)
+  if (pHMHandleData->hHMHandle == pConsoleGlobals->hConsoleBuffer)
     pConsoleGlobals->fUpdateRequired = TRUE;      /* update with next WM_TIMER */
 
   *lpNumberOfBytesWritten = ulCounter;
@@ -751,7 +751,7 @@ DWORD  HMDeviceConsoleBufferClass::_DeviceRequest (PHMHANDLEDATA pHMHandleData,
 #ifdef DEBUG_LOCAL
   WriteLog("KERNEL32/CONSOLE:HMDeviceConsoleBufferClass:_DeviceRequest %s(%08x,%08x,%08x,%08x,%08x,%08x) unknown request\n",
            lpHMDeviceName,
-           pHMHandleData->hWinHandle,
+           pHMHandleData->hHMHandle,
            ulRequestCode,
            arg1,
            arg2,
@@ -845,7 +845,7 @@ DWORD HMDeviceConsoleBufferClass::FillConsoleOutputAttribute(PHMHANDLEDATA pHMHa
           *lpNumberOfAttrsWritten = ulCounter;
 
                                           /* update screen if active console */
-        if (pHMHandleData->hWinHandle == pConsoleGlobals->hConsoleBuffer)
+        if (pHMHandleData->hHMHandle == pConsoleGlobals->hConsoleBuffer)
           pConsoleGlobals->fUpdateRequired = TRUE;/* update with next WM_TIMER */
 
         return (TRUE);
@@ -854,7 +854,7 @@ DWORD HMDeviceConsoleBufferClass::FillConsoleOutputAttribute(PHMHANDLEDATA pHMHa
   }
 
                                           /* update screen if active console */
-  if (pHMHandleData->hWinHandle == pConsoleGlobals->hConsoleBuffer)
+  if (pHMHandleData->hHMHandle == pConsoleGlobals->hConsoleBuffer)
     pConsoleGlobals->fUpdateRequired = TRUE;      /* update with next WM_TIMER */
 
   if (lpNumberOfAttrsWritten != NULL)             /* ensure pointer is valid */
@@ -945,7 +945,7 @@ DWORD HMDeviceConsoleBufferClass::FillConsoleOutputCharacterA(PHMHANDLEDATA pHMH
           *lpNumberOfCharsWritten = ulCounter;
 
                                           /* update screen if active console */
-        if (pHMHandleData->hWinHandle == pConsoleGlobals->hConsoleBuffer)
+        if (pHMHandleData->hHMHandle == pConsoleGlobals->hConsoleBuffer)
           pConsoleGlobals->fUpdateRequired = TRUE;/* update with next WM_TIMER */
 
         return (TRUE);
@@ -954,7 +954,7 @@ DWORD HMDeviceConsoleBufferClass::FillConsoleOutputCharacterA(PHMHANDLEDATA pHMH
   }
 
                                           /* update screen if active console */
-  if (pHMHandleData->hWinHandle == pConsoleGlobals->hConsoleBuffer)
+  if (pHMHandleData->hHMHandle == pConsoleGlobals->hConsoleBuffer)
     pConsoleGlobals->fUpdateRequired = TRUE;      /* update with next WM_TIMER */
 
   if (lpNumberOfCharsWritten != NULL)             /* ensure pointer is valid */
@@ -1045,7 +1045,7 @@ DWORD HMDeviceConsoleBufferClass::FillConsoleOutputCharacterW(PHMHANDLEDATA pHMH
           *lpNumberOfCharsWritten = ulCounter;
 
                                           /* update screen if active console */
-        if (pHMHandleData->hWinHandle == pConsoleGlobals->hConsoleBuffer)
+        if (pHMHandleData->hHMHandle == pConsoleGlobals->hConsoleBuffer)
           pConsoleGlobals->fUpdateRequired = TRUE;/* update with next WM_TIMER */
 
         return (TRUE);
@@ -1054,7 +1054,7 @@ DWORD HMDeviceConsoleBufferClass::FillConsoleOutputCharacterW(PHMHANDLEDATA pHMH
   }
 
                                           /* update screen if active console */
-  if (pHMHandleData->hWinHandle == pConsoleGlobals->hConsoleBuffer)
+  if (pHMHandleData->hHMHandle == pConsoleGlobals->hConsoleBuffer)
     pConsoleGlobals->fUpdateRequired = TRUE;      /* update with next WM_TIMER */
 
   if (lpNumberOfCharsWritten != NULL)             /* ensure pointer is valid */
@@ -1930,7 +1930,7 @@ DWORD HMDeviceConsoleBufferClass::ScrollConsoleScreenBufferA(PHMHANDLEDATA pHMHa
   }
 
                                           /* update screen if active console */
-  if (pHMHandleData->hWinHandle == pConsoleGlobals->hConsoleBuffer)
+  if (pHMHandleData->hHMHandle == pConsoleGlobals->hConsoleBuffer)
     pConsoleGlobals->fUpdateRequired = TRUE;      /* update with next WM_TIMER */
 
   return (TRUE);
@@ -2054,7 +2054,7 @@ DWORD HMDeviceConsoleBufferClass::ScrollConsoleScreenBufferW(PHMHANDLEDATA pHMHa
   }
 
                                           /* update screen if active console */
-  if (pHMHandleData->hWinHandle == pConsoleGlobals->hConsoleBuffer)
+  if (pHMHandleData->hHMHandle == pConsoleGlobals->hConsoleBuffer)
     pConsoleGlobals->fUpdateRequired = TRUE;      /* update with next WM_TIMER */
 
   return (TRUE);
@@ -2094,7 +2094,7 @@ DWORD HMDeviceConsoleBufferClass::SetConsoleCursorInfo(PHMHANDLEDATA        pHMH
   }
 
               /* if we're the active buffer, remove cursor from screen first */
-  if (pHMHandleData->hWinHandle == pConsoleGlobals->hConsoleBuffer)
+  if (pHMHandleData->hHMHandle == pConsoleGlobals->hConsoleBuffer)
     iConsoleCursorShow(pConsoleBuffer,
                        CONSOLECURSOR_HIDE);
 
@@ -2282,7 +2282,7 @@ DWORD HMDeviceConsoleBufferClass::SetConsoleScreenBufferSize (PHMHANDLEDATA pHMH
   pConsoleBuffer->coordWindowPosition.Y = 0;
 
                                           /* update screen if active console */
-  if (pHMHandleData->hWinHandle == pConsoleGlobals->hConsoleBuffer)
+  if (pHMHandleData->hHMHandle == pConsoleGlobals->hConsoleBuffer)
     pConsoleGlobals->fUpdateRequired = TRUE;      /* update with next WM_TIMER */
 
   return TRUE;
@@ -2337,7 +2337,7 @@ DWORD HMDeviceConsoleBufferClass::SetConsoleActiveScreenBuffer(PHMHANDLEDATA pHM
 #endif
 
                               /* set new buffer handle to the global console */
-  pConsoleGlobals->hConsoleBuffer  = pHMHandleData->hWinHandle;
+  pConsoleGlobals->hConsoleBuffer  = pHMHandleData->hHMHandle;
   pConsoleGlobals->fUpdateRequired = TRUE;      /* update with next WM_TIMER */
 
   return (TRUE);
@@ -2448,7 +2448,7 @@ BOOL HMDeviceConsoleBufferClass::SetConsoleWindowInfo(PHMHANDLEDATA pHMHandleDat
 
                                           /* update window contents (scroll) */
                                           /* update screen if active console */
-  if (pHMHandleData->hWinHandle == pConsoleGlobals->hConsoleBuffer)
+  if (pHMHandleData->hHMHandle == pConsoleGlobals->hConsoleBuffer)
     pConsoleGlobals->fUpdateRequired = TRUE;      /* update with next WM_TIMER */
 
   return (TRUE);                                                       /* OK */
@@ -2640,7 +2640,7 @@ DWORD HMDeviceConsoleBufferClass::WriteConsoleOutputA(PHMHANDLEDATA pHMHandleDat
   }
 
                                           /* update screen if active console */
-  if (pHMHandleData->hWinHandle == pConsoleGlobals->hConsoleBuffer)
+  if (pHMHandleData->hHMHandle == pConsoleGlobals->hConsoleBuffer)
     pConsoleGlobals->fUpdateRequired = TRUE;      /* update with next WM_TIMER */
 
   return (TRUE);                                            /* OK, that's it */
@@ -2746,7 +2746,7 @@ DWORD HMDeviceConsoleBufferClass::WriteConsoleOutputW(PHMHANDLEDATA pHMHandleDat
   }
 
                                           /* update screen if active console */
-  if (pHMHandleData->hWinHandle == pConsoleGlobals->hConsoleBuffer)
+  if (pHMHandleData->hHMHandle == pConsoleGlobals->hConsoleBuffer)
     pConsoleGlobals->fUpdateRequired = TRUE;      /* update with next WM_TIMER */
 
   return (TRUE);                                            /* OK, that's it */
@@ -2836,7 +2836,7 @@ DWORD HMDeviceConsoleBufferClass::WriteConsoleOutputAttribute(PHMHANDLEDATA pHMH
           *lpcWritten = ulCounter;
 
                                           /* update screen if active console */
-        if (pHMHandleData->hWinHandle == pConsoleGlobals->hConsoleBuffer)
+        if (pHMHandleData->hHMHandle == pConsoleGlobals->hConsoleBuffer)
           pConsoleGlobals->fUpdateRequired = TRUE;/* update with next WM_TIMER */
 
         return (TRUE);
@@ -2845,7 +2845,7 @@ DWORD HMDeviceConsoleBufferClass::WriteConsoleOutputAttribute(PHMHANDLEDATA pHMH
   }
 
                                           /* update screen if active console */
-  if (pHMHandleData->hWinHandle == pConsoleGlobals->hConsoleBuffer)
+  if (pHMHandleData->hHMHandle == pConsoleGlobals->hConsoleBuffer)
     pConsoleGlobals->fUpdateRequired = TRUE;      /* update with next WM_TIMER */
 
   if (lpcWritten != NULL)                         /* ensure pointer is valid */
@@ -2936,7 +2936,7 @@ DWORD HMDeviceConsoleBufferClass::WriteConsoleOutputCharacterA(PHMHANDLEDATA pHM
           *lpcWritten = ulCounter;
 
                                           /* update screen if active console */
-        if (pHMHandleData->hWinHandle == pConsoleGlobals->hConsoleBuffer)
+        if (pHMHandleData->hHMHandle == pConsoleGlobals->hConsoleBuffer)
           pConsoleGlobals->fUpdateRequired = TRUE;/* update with next WM_TIMER */
 
         return (TRUE);
@@ -2945,7 +2945,7 @@ DWORD HMDeviceConsoleBufferClass::WriteConsoleOutputCharacterA(PHMHANDLEDATA pHM
   }
 
                                           /* update screen if active console */
-  if (pHMHandleData->hWinHandle == pConsoleGlobals->hConsoleBuffer)
+  if (pHMHandleData->hHMHandle == pConsoleGlobals->hConsoleBuffer)
     pConsoleGlobals->fUpdateRequired = TRUE;      /* update with next WM_TIMER */
 
   if (lpcWritten != NULL)                         /* ensure pointer is valid */
@@ -3037,7 +3037,7 @@ DWORD HMDeviceConsoleBufferClass::WriteConsoleOutputCharacterW(PHMHANDLEDATA pHM
           *lpcWritten = ulCounter;
 
                                           /* update screen if active console */
-        if (pHMHandleData->hWinHandle == pConsoleGlobals->hConsoleBuffer)
+        if (pHMHandleData->hHMHandle == pConsoleGlobals->hConsoleBuffer)
           pConsoleGlobals->fUpdateRequired = TRUE;/* update with next WM_TIMER */
 
         return (TRUE);
@@ -3046,7 +3046,7 @@ DWORD HMDeviceConsoleBufferClass::WriteConsoleOutputCharacterW(PHMHANDLEDATA pHM
   }
 
                                           /* update screen if active console */
-  if (pHMHandleData->hWinHandle == pConsoleGlobals->hConsoleBuffer)
+  if (pHMHandleData->hHMHandle == pConsoleGlobals->hConsoleBuffer)
     pConsoleGlobals->fUpdateRequired = TRUE;      /* update with next WM_TIMER */
 
   if (lpcWritten != NULL)                         /* ensure pointer is valid */

@@ -1,4 +1,4 @@
-/* $Id: conout.cpp,v 1.2 1999-06-19 10:54:40 sandervl Exp $ */
+/* $Id: conout.cpp,v 1.3 1999-06-21 18:53:51 phaller Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -124,7 +124,7 @@ DWORD HMDeviceConsoleOutClass::CreateFile (LPCSTR        lpFileName,
   WriteLog("KERNEL32/CONSOLE:HMDeviceConsoleOutClass %s(%s,%08x,%08x,%08x)\n",
            lpHMDeviceName,
            lpFileName,
-           pHMHandleData->hWinHandle,
+           pHMHandleData->hHMHandle,
            lpSecurityAttributes,
            pHMHandleDataTemplate);
 #endif
@@ -213,7 +213,7 @@ DWORD HMDeviceConsoleOutClass::ReadFile(PHMHANDLEDATA pHMHandleData,
 #ifdef DEBUG_LOCAL
   WriteLog("KERNEL32/CONSOLE:HMDeviceConsoleOutClass::ReadFile %s(%08x,%08x,%08x,%08x,%08x)\n",
            lpHMDeviceName,
-           pHMHandleData->hWinHandle,
+           pHMHandleData->hHMHandle,
            lpBuffer,
            nNumberOfBytesToRead,
            lpNumberOfBytesRead,
@@ -247,7 +247,7 @@ DWORD HMDeviceConsoleOutClass::WriteFile(PHMHANDLEDATA pHMHandleData,
 #ifdef DEBUG_LOCAL2
   WriteLog("KERNEL32/CONSOLE:HMDeviceConsoleOutClass:WriteFile %s(%08x,%08x,%08x,%08x,%08x)\n",
            lpHMDeviceName,
-           pHMHandleData->hWinHandle,
+           pHMHandleData->hHMHandle,
            lpBuffer,
            nNumberOfBytesToWrite,
            lpNumberOfBytesWritten,
@@ -256,7 +256,7 @@ DWORD HMDeviceConsoleOutClass::WriteFile(PHMHANDLEDATA pHMHandleData,
 
         /* just prevent an endless loop, although this condition might never */
                                                                 /* be true ! */
-  if (pHMHandleData->hWinHandle != pConsoleGlobals->hConsoleBuffer)
+  if (pHMHandleData->hHMHandle != pConsoleGlobals->hConsoleBuffer)
   {
 #if 0
     HMDeviceRequest(pConsoleGlobals->hConsoleBuffer,        /* hide the cursor */
@@ -312,7 +312,7 @@ DWORD HMDeviceConsoleOutClass::_DeviceRequest (PHMHANDLEDATA pHMHandleData,
 #ifdef DEBUG_LOCAL2
   WriteLog("KERNEL32/CONSOLE:HMDeviceConsoleOutClass:_DeviceRequest %s(%08x,%08x,%08x,%08x,%08x,%08x)\n",
            lpHMDeviceName,
-           pHMHandleData->hWinHandle,
+           pHMHandleData->hHMHandle,
            ulRequestCode,
            arg1,
            arg2,
@@ -321,7 +321,7 @@ DWORD HMDeviceConsoleOutClass::_DeviceRequest (PHMHANDLEDATA pHMHandleData,
 #endif
         /* just prevent an endless loop, although this condition might never */
                                                                 /* be true ! */
-  if (pHMHandleData->hWinHandle != pConsoleGlobals->hConsoleBuffer)
+  if (pHMHandleData->hHMHandle != pConsoleGlobals->hConsoleBuffer)
     return (HMDeviceRequest(pConsoleGlobals->hConsoleBuffer,
                             ulRequestCode,
                             arg1,
