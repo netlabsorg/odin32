@@ -1,4 +1,4 @@
-; $Id: shell32dbg.def,v 1.4 2003-02-14 10:07:18 sandervl Exp $
+; $Id: shell32dbg.def,v 1.5 2003-10-02 10:39:22 sandervl Exp $
 
 ; Based on Windows 95
 LIBRARY SHELL32 INITINSTANCE
@@ -187,8 +187,8 @@ EXPORTS
     SHSetInstanceExplorer             = _DbgSHSetInstanceExplorer@4              @176
 ;   DAD_SetDragImageFromListView      = _DbgDAD_SetDragImageFromListView@?       @177
 ;   SHObjectProperties                = _DbgSHObjectProperties@?                 @178
-;   SHGetNewLinkInfoA                 = _DbgSHGetNewLinkInfoA@?                  @179
-;   SHGetNewLinkInfoW                 = _DbgSHGetNewLinkInfoW@?                  @180
+    SHGetNewLinkInfoA                 = _SHGetNewLinkInfoA@20                    @179
+    SHGetNewLinkInfoW                 = _SHGetNewLinkInfoW@20                    @180
     RegisterShellHook                 = _DbgRegisterShellHook@8                  @181
     ShellMessageBoxW                  = _ShellMessageBoxW                     @182 ;cdecl
     ShellMessageBoxA                  = _ShellMessageBoxA                     @183 ;cdecl
@@ -368,7 +368,7 @@ EXPORTS
     ReadCabinetState                  = _DbgReadCabinetState@8                   @651
     WriteCabinetState                 = _DbgWriteCabinetState@4                  @652
     PathProcessCommand                = _DbgPathProcessCommandAW@16              @653
-                                        _SHELL32_654@8                        @654
+                                        _SHELL32_654@8                        @654 NONAME
     FileIconInit                      = _DbgFileIconInit@4                       @660
     IsUserAdmin                       = _DbgIsUserAdmin@0                        @680
 
@@ -393,5 +393,5 @@ EXPORTS
     DllGetVersion                     = _DbgSHELL32_DllGetVersion@4              @1220
     DllCanUnloadNow                   = _DbgSHELL32_DllCanUnloadNow@0            @1221
 
-    _StrFormatByteSizeA@12                @1041
-    _StrFormatByteSizeW@12                @1042
+    _StrFormatByteSizeA@12                @1041 NONAME
+    _StrFormatByteSizeW@12                @1042 NONAME

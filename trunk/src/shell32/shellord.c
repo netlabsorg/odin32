@@ -745,12 +745,22 @@ typedef struct tagCREATEMRULIST
 
     /* Get the pure document name from the input
      */
+#ifdef __WIN32OS2__
+    if (uFlags == SHARD_PIDL)
+	SHGetPathFromIDListA((LPCITEMIDLIST) pv, doc_name);
+    else 
+        if (uFlags == SHARD_PATHW)
+        	lstrcpyWtoA(doc_name, (LPWSTR) pv);
+        else
+            	lstrcpyA(doc_name, (LPSTR) pv);
+#else
     if (uFlags & SHARD_PIDL) {
 	SHGetPathFromIDListA((LPCITEMIDLIST) pv, doc_name);
     }
     else {
 	lstrcpyA(doc_name, (LPSTR) pv);
     }
+#endif
     TRACE("full document name %s\n", doc_name);
     PathStripPathA(doc_name);
     TRACE("stripped document name %s\n", doc_name);
@@ -890,11 +900,22 @@ typedef struct tagCREATEMRULIST
 	    }
 
 	    /* Set the document path or pidl */
+#ifdef __WIN32OS2__
+            if (uFlags == SHARD_PIDL)
+		hres = IShellLinkA_SetIDList(psl, (LPCITEMIDLIST) pv);
+	    else 
+             if (uFlags == SHARD_PIDL)
+	    	hres = IShellLinkW_SetPath(psl, (LPCWSTR) pv);
+             else 
+	    	hres = IShellLinkA_SetPath(psl, (LPCWSTR) pv);
+#else
+
 	    if (uFlags & SHARD_PIDL) {
 		hres = IShellLinkA_SetIDList(psl, (LPCITEMIDLIST) pv);
 	    } else {
 		hres = IShellLinkA_SetPath(psl, (LPCSTR) pv);
 	    }
+#endif
 	    if(FAILED(hres)) {
 		/* bombed */
 		ERR("failed Set{IDList|Path} %08lx\n", hres);

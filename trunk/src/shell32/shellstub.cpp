@@ -1,4 +1,4 @@
-/* $Id: shellstub.cpp,v 1.5 2002-02-14 12:10:11 sandervl Exp $ */
+/* $Id: shellstub.cpp,v 1.6 2003-10-02 10:39:22 sandervl Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -108,4 +108,20 @@ DWORD WIN32API SHHandleDiskFull(DWORD x1, DWORD x2)
 {
   dprintf(("STUB!"));
   return 0;
+}
+
+BOOL WIN32API SHGetNewLinkInfoA(LPCTSTR pszLinkTo, LPCTSTR pszDir,
+                                LPTSTR pszName, BOOL *pfMustCopy,
+                                UINT uFlags)
+{
+  dprintf(("NOT IMPLEMENTED: SHGetNewLinkInfoA %s %s %s %x %x", pszLinkTo, pszDir, pszName, pfMustCopy, uFlags));
+  return FALSE;
+}
+
+BOOL WIN32API SHGetNewLinkInfoW(LPCWSTR pszLinkTo, LPCWSTR pszDir,
+                                LPWSTR pszName, BOOL *pfMustCopy,
+                                UINT uFlags)
+{
+  dprintf(("NOT IMPLEMENTED: SHGetNewLinkInfoA %ls %ls %ls %x %x", pszLinkTo, pszDir, pszName, pfMustCopy, uFlags));
+  return FALSE;
 }
