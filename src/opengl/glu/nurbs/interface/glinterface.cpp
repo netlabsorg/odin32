@@ -1,4 +1,4 @@
-/* $Id: glinterface.cpp,v 1.1 2000-02-09 08:49:01 jeroen Exp $ */
+/* $Id: glinterface.cpp,v 1.2 2000-02-29 13:56:48 sandervl Exp $ */
 /*
 ** License Applicability. Except to the extent portions of this file are
 ** made subject to an alternative license as permitted in the SGI Free
@@ -32,10 +32,10 @@
 ** published by SGI, but has not been independently verified as being
 ** compliant with the OpenGL(R) version 1.2.1 Specification.
 **
-** $Date: 2000-02-09 08:49:01 $ $Revision: 1.1 $
+** $Date: 2000-02-29 13:56:48 $ $Revision: 1.2 $
 */
 /*
-** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glu/nurbs/interface/glinterface.cpp,v 1.1 2000-02-09 08:49:01 jeroen Exp $
+** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glu/nurbs/interface/glinterface.cpp,v 1.2 2000-02-29 13:56:48 sandervl Exp $
 */
 
 #include "gluos.h"
@@ -429,8 +429,8 @@ gluGetNurbsProperty(GLUnurbs *r, GLenum property, GLfloat *value)
     }
 }
 
-extern "C" void GLAPI
-gluNurbsCallback(GLUnurbs *r, GLenum which, GLvoid (*fn)())
+GLUAPI void GLAPIENTRY gluNurbsCallback( GLUnurbsObj *nobj, GLenum which,
+                                         void (GLCALLBACK *fn)() )
 {
     switch (which) {
     case GLU_NURBS_BEGIN:
@@ -445,22 +445,14 @@ gluNurbsCallback(GLUnurbs *r, GLenum which, GLvoid (*fn)())
     case GLU_NURBS_NORMAL_DATA:
     case GLU_NURBS_TEXTURE_COORD_DATA:
     case GLU_NURBS_COLOR_DATA:
-#ifdef __WIN32OS2__
-        r->putSurfCallBack(which, (GLvoid (* WIN32API)(...))fn);
-#else
-        r->putSurfCallBack(which, (GLvoid (*)(...))fn);
-#endif
+        nobj->putSurfCallBack(which, (GLvoid (*)(...))fn);
         break;
 
     case GLU_NURBS_ERROR:
-#ifdef __WIN32OS2__
-        r->errorCallback = (void (* WIN32API)( GLenum )) fn;
-#else
-        r->errorCallback = (void (*)( GLenum )) fn;
-#endif
+        nobj->errorCallback = (void (*)( GLenum )) fn;
         break;
     default:
-        r->postError(GLU_INVALID_ENUM);
+        nobj->postError(GLU_INVALID_ENUM);
         return;
     }
 }
