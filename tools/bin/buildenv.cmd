@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.14 2002-08-18 13:29:20 bird Exp $
+/* $Id: buildenv.cmd,v 1.15 2002-08-18 13:48:54 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -12,6 +12,11 @@
  *     - LANG is set to en_US by both VAC36 and TOOLKIT45. When unsetting
  *       those the original value, for example of no_NO, is not restored.
  *     - Same goes for some other stuff, we have no stack of previous values.
+ *             
+ * Copyright (c) 1999-2002 knut st. osmundsen (bird@anduin.net)
+ *
+ * GPL v2
+ *
  */
     
     Address CMD '@echo off';
@@ -21,7 +26,7 @@
     /*
      * Version
      */
-    sVersion = '1.0.1 [2002-08-18]';
+    sVersion = '1.0.2 [2002-08-18]';
     
     /*
      * Create argument array with lowercase arguments.
@@ -50,8 +55,9 @@
         say 'Syntax: BuildEnv.cmd <environments>[action]'
         say ''
         say 'Actions:'
-        say '   +   Install tools in environment. Default action.'
-        say '   -   Remove tools from environment.'
+        say '   +   Install tool in environment. Default action.'
+        say '   ~   Install tool in environment if it''s configured.'
+        say '   -   Remove tool from environment.'
         say '   *   Configure tool if needed.'
         say '   !   Forced tool configuretion.'
         say '   @   Verify tool configuration.'
@@ -154,13 +160,16 @@
          *
          */
         ch = substr(sEnv.i, length(sEnv.i), 1);
-        if (ch = '-' | ch = '+' | ch = '*' | ch = '!' | ch = '?' | ch = '@') then
+        if (ch = '-' | ch = '+' | ch = '*' | ch = '!' | ch = '?' | ch = '@' | ch = '~') then
             sEnv.i = substr(sEnv.i, 1, length(sEnv.i) - 1);
+        else
+            ch = '+';
         fRM = (ch = '-');
         fCfg = (ch = '*');
         fForcedCfg = (ch = '!');
         fVerify = (ch = '@')
         fQuery = (ch = '?')
+        fOptional = (ch = '~')
 
         /*
          * do the switch.
@@ -270,13 +279,17 @@
                             rc = CfgVerify(j, 0, 1);
                         else if (fQuery) then
                         do
-                            /*rc = CfgVerify(j, 1, 1);*/
                             rc = 0;
                             if (\CfgIsConfigured(j)) then
                                 return 3;
                         end
                         else
-                            rc = CfgInstallUninstall(j, fRM);
+                        do
+                            if (\fOptional) then
+                                rc = CfgInstallUninstall(j, fRM);
+                            else if (CfgIsConfigured(j)) then
+                                rc = CfgInstallUninstall(j, fRM);
+                        end
                         leave;
                     end
                 end /* loop */
