@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1649 2001-08-16 04:33:12 bird Exp $ */
+/* $Id: ChangeLog,v 1.1650 2001-08-16 18:11:43 sandervl Exp $ */
 
  2001-08-16: knut st. osmundsen <kosmunds@csc.com>
     - Tools\CmdQd:
@@ -16,6 +16,9 @@
                   </ul>
                 o This feature will speedup make of single modules alot on SMP
                   machines.
+
+ 2000-08-14: Carsten Tenbrink <Carsten@C-Tenbrink.DE>
+    - CAPI2032: o Fix for applications that register with CAPI twice
 
  2001-08-10: Sander van Leeuwen <sandervl@xs4all.nl>
     - INSTALL:  o Add COM registry keys for OLE32 & OLEAUT32
