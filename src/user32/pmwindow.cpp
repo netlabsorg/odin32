@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.46 1999-10-28 18:22:27 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.47 1999-10-28 22:41:01 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -855,7 +855,8 @@ VirtualKeyFound:
         if(win32wnd->MsgPaint(0, 0)) {
                 goto RunDefWndProc;
         }
-        break;
+	//Apparently there are apps that return 0, but don't do anything during WM_PAINT
+        goto RunDefWndProc;
 
     case WM_HITTEST:
     // Only send this message if the window is enabled
