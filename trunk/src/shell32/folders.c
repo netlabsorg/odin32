@@ -1,4 +1,4 @@
-/* $Id: folders.c,v 1.3 2000-11-24 13:19:11 sandervl Exp $ */
+/* $Id: folders.c,v 1.4 2000-11-24 15:23:30 sandervl Exp $ */
 /*
  *  Copyright 1997  Marcus Meissner
  *  Copyright 1998  Juergen Schmied
@@ -155,7 +155,7 @@ static HRESULT WINAPI IExtractIconA_fnGetIconLocation(
     {
       lstrcpynA(szIconFile, "shell32.dll", cchMax);
 #ifdef __WIN32OS2__
-      *piIndex = SHLICON_DESKTOP;
+      *piIndex = -SHLICON_DESKTOP;
 #else
       *piIndex = 34;
 #endif
@@ -193,7 +193,7 @@ static HRESULT WINAPI IExtractIconA_fnGetIconLocation(
     {
 #ifdef __WIN32OS2__
       lstrcpynA(szIconFile, "shell32.dll", cchMax);
-      *piIndex = 8; /* hard disk */
+      *piIndex = -SHLICON_HARDDISK; /* hard disk */
 
       if ( _ILGetDrive( pSimplePidl, sTemp, cchMax ) )
       {
@@ -201,7 +201,7 @@ static HRESULT WINAPI IExtractIconA_fnGetIconLocation(
              ( sTemp[ 0 ] == 'B' ) || ( sTemp[ 0 ] == 'b' ) )
         {
             /* FIXME determine 5.25 Floppy */
-            *piIndex = SHLICON_FLOPPY35;
+            *piIndex = -SHLICON_FLOPPY35;
         }
         else
         {
@@ -209,11 +209,11 @@ static HRESULT WINAPI IExtractIconA_fnGetIconLocation(
             switch ( nType )
             {
                 case DRIVE_REMOVABLE:
-                    *piIndex = SHLICON_REMOVABLE_DISK;
+                    *piIndex = -SHLICON_REMOVABLE_DISK;
                     break;
 
                 case DRIVE_FIXED:
-                    *piIndex = SHLICON_HARDDISK;
+                    *piIndex = -SHLICON_HARDDISK;
                     break;
 
                 case DRIVE_REMOTE:
@@ -221,23 +221,23 @@ static HRESULT WINAPI IExtractIconA_fnGetIconLocation(
                     /* FIXME: connected (9) / disconnected (10)state */
                     BOOL connected = TRUE;
                     if ( connected )
-                        *piIndex = SHLICON_NETDRIVE_CONN;
+                        *piIndex = -SHLICON_NETDRIVE_CONN;
                     else
-                        *piIndex = SHLICON_NETDRIVE_DISCON;
+                        *piIndex = -SHLICON_NETDRIVE_DISCON;
                     break;
                 }
                 case DRIVE_CDROM:
-                    *piIndex = SHLICON_CDROM_DRIVE;
+                    *piIndex = -SHLICON_CDROM_DRIVE;
                     break;
 
                 case DRIVE_RAMDISK:
-                    *piIndex = SHLICON_RAMDRIVE;
+                    *piIndex = -SHLICON_RAMDRIVE;
                     break;
 
                 case DRIVE_UNKNOWN:
                 case DRIVE_NO_ROOT_DIR:
                 default:
-                    *piIndex = SHLICON_HARDDISK;
+                    *piIndex = -SHLICON_HARDDISK;
                     break;
             }
         }
@@ -306,7 +306,7 @@ static HRESULT WINAPI IExtractIconA_fnGetIconLocation(
                 SHGetPathFromIDListA(This->pidl, sTemp);
                 lstrcpynA(szIconFile, "shell32.dll", cchMax);
 #ifdef __WIN32OS2__
-                *piIndex = SHLICON_TREE; //???
+                *piIndex = -SHLICON_TREE; //???
 #else
                 *piIndex = 42;
 #endif
@@ -316,7 +316,7 @@ static HRESULT WINAPI IExtractIconA_fnGetIconLocation(
                 SHGetPathFromIDListA(This->pidl, sTemp);
                 lstrcpynA(szIconFile, "shell32.dll", cchMax);
 #ifdef __WIN32OS2__
-                *piIndex = SHLICON_APPLICATION;
+                *piIndex = -SHLICON_APPLICATION;
 #else
                 *piIndex = 2;
 #endif
