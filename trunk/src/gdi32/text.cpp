@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.26 2001-07-21 15:57:17 sandervl Exp $ */
+/* $Id: text.cpp,v 1.27 2001-09-09 12:24:13 sandervl Exp $ */
 
 /*
  * GDI32 text apis
@@ -25,28 +25,6 @@
 
 #define ELLIPSIS    "..."
 #define ELLIPSISLEN 3
-
-typedef struct _POLYTEXTA
-{
-    int     x;
-    int     y;
-    UINT    n;
-    LPCSTR lpstr;
-    UINT    uiFlags;
-    RECT    rcl;
-    int     *pdx;
-} POLYTEXTA;
-
-typedef struct _POLYTEXTW
-{
-    int     x;
-    int     y;
-    UINT    n;
-    LPCWSTR lpstr;
-    UINT    uiFlags;
-    RECT    rcl;
-    int     *pdx;
-} POLYTEXTW;
 
 //******************************************************************************
 //******************************************************************************
@@ -171,7 +149,7 @@ INT SYSTEM EXPORT InternalDrawTextExA(HDC hdc,LPCSTR lpchText,INT cchText,LPRECT
 #ifdef INVERT
   flCmd = DTOS_INVERT | DTOS_WORLDRECT | DTOS_TEXTATTRS | DTOS_AMPERSAND | DTOS_VERTICALEXTENT;
 #else
-  flCmd = DTOS_WORLDRECT | DTOS_TEXTATTRS | DTOS_AMPERSAND | DTOS_VERTICALEXTENT;
+  flCmd = DTOS_INVERT | DTOS_WORLDRECT | DTOS_TEXTATTRS | DTOS_AMPERSAND | DTOS_VERTICALEXTENT;
 #endif
 
   LONG lMixMode = OSLibGpiQueryBackMix(pHps);
