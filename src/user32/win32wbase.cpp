@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.252 2001-04-25 20:53:38 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.253 2001-04-27 17:36:38 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -105,6 +105,7 @@ void Win32BaseWindow::Init()
   fCreateSetWindowPos = FALSE;
   fCreationFinished= FALSE;
   fMinMaxChange    = FALSE;
+  fOwnDCDirty      = FALSE;
 
   windowNameA      = NULL;
   windowNameW      = NULL;
