@@ -1,4 +1,4 @@
-/* $Id: MapSym.cmd,v 1.4 2002-04-30 19:51:42 bird Exp $
+/* $Id: MapSym.cmd,v 1.5 2002-05-01 03:59:24 bird Exp $
  *
  * Helper script for calling MAPSYM.EXE.
  *
@@ -104,6 +104,7 @@ select
 
     when (sLinker = 'WATCOM') then
     do
+        /*sTmpMapFile = watos2.map*/
         rc = wat2map(sMapFile, sTmpMapFile);
         if (rc <> 0) then
         do
@@ -474,6 +475,7 @@ If Length( arg2 ) = 0 Then Do;
 End;
 mapFile = arg1          /* Can be Null, in which case we pull from stdin. */
 outFile = arg2
+fFlatMode = 0;
 
 /* erase outfile */  /* kill the old map file */
 rc=SysFileDelete(outfile)
@@ -512,16 +514,33 @@ If Lines( mapFile ) = 0 Then Do;        /* If end of file ... */
    Say "Error:  Expected to find line with text 'Segments ... Size' "
    Return 4
 End
-junk = LineIn( mapFile )       /* Discard a couple lines of formatting. */
-junk = LineIn( mapFile )
 
+
+junk = LineIn( mapFile )      /* Discard a couple lines of formatting. */
+junk = LineIn( mapFile )      /* Discard a couple lines of formatting. */
 /*--- 4.  Translate segment table.  ---*/
+/*"Segment                Class          Group          Address         Size"*/
+iClass = pos('Class', watcomText);
+iGroup = pos('Group', watcomText);
+iAddress = pos('Address', watcomText);
+iSize = pos('Size', watcomText);
+
 call lineout outfile , " Start         Length     Name                   Class"  /* bird bird bird fixed!!! */
 Do While Lines( mapFile ) <> 0
    watcomText = LineIn( mapFile )
-   Parse Value watcomText With segName className groupName address size .
+   /* do it the hard way to make sure we support spaces segment names. */
+   segName = strip(substr(watcomText, 1, iClass-1));
    If segName = "" Then Leave;          /* Empty line, break from loop. */
-   length = '0000' || Substr( size, 4, 5 ) || 'H     '
+   className = strip(substr(watcomText, iClass, iGroup-iClass));
+   groupName = strip(substr(watcomText, iGroup, iAddress-iGroup));
+   address = strip(substr(watcomText, iAddress, iSize-iAddress));
+   size = strip(substr(watcomText, iSize));
+   if (pos(':', address) <= 0) then     /* NT binaries doesn't have a segment number. */
+   do
+      fFlatMode = 1;
+      address = '0001:'||address;
+   end
+   length = right(strip(strip(size), 'L', '0'), 9, '0') || 'H     '
    segName = Left( segName, 23 )
    call lineout outfile ,' ' || address || ' ' || length || segName || className
 End
@@ -537,11 +556,15 @@ call lineout outfile ,'  Address         Publics by Value'
 
 Do While Lines( mapFile ) <> 0
    watcomText = LineIn( mapFile )
-   Parse Value watcomText With seg ':' ofs 10 . 16 declaration
+   Parse Value watcomText With seg ':' ofs 14 . 16 declaration
+   if (fFlatMode) then
+   do
+      seg = '0001';
+      Parse Value watcomText With ofs 9 . 16 declaration
+   end
+   /*say ofs  '-'declaration*/
    is_Adress = (is_Hex(seg) = 1) & (is_Hex(ofs) = 1)
    If ((is_Adress = 1) & (seg <> '0000')) Then Do;          /* bird: skip symbols with segment 0. (__DOSseg__) */
-      ofs = substr(watcomText, pos(':', watcomText)+1, 8);  /* bird bird bird fixed!!! */
-
       /*--- Haven't done the work to xlate operator symbols - skip the line. */
       If Pos( '::operator', declaration ) <> 0 Then Iterate;
 
@@ -577,6 +600,8 @@ Do While Lines( mapFile ) <> 0
    if (pos('Entry point address', watcomText) > 0) then
    do
        parse var watcomText 'Entry point address:' sEntryPoint
+       if (pos(':', sEntryPoint) <= 0) then
+           sEntryPoint = '0001:'||strip(sEntryPoint);
        call lineout outfile, ''
        call lineout outfile, 'Program entry point at' strip(sEntryPoint)
        leave;
