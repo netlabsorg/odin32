@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 1999-05-24 20:19:30 ktk Exp $ 
+# $Id: makefile,v 1.2 1999-06-03 17:50:29 achimha Exp $ 
 
 #
 # PD-Win32 API
@@ -53,7 +53,8 @@ all:
         cd ..\peldr
         $(MAKE_CMD)
         cd ..\pe2lx
-        wmake -f makefile.wat
+#        wmake -f makefile.wat
+        $(MAKE_CMD)
         cd ..\ddraw
         $(MAKE_CMD)
         cd ..\dsound
