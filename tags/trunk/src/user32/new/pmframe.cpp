@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.14 2000-01-12 22:07:28 cbratschi Exp $ */
+/* $Id: pmframe.cpp,v 1.15 2000-01-13 13:54:52 sandervl Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -262,15 +262,7 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
 
         if ((pswp->fl & (SWP_SIZE | SWP_MOVE | SWP_ZORDER)) == 0)
         {
-                swpClient.hwnd = win32wnd->getOS2WindowHandle();
-                swpClient.hwndInsertBehind = 0;
-                swpClient.x  = 0;
-                swpClient.y  = 0;
-                swpClient.cx = 0;
-                swpClient.cy = 0;
-                swpClient.fl = pswp->fl & ~SWP_ZORDER;
-                WinSetMultWindowPos(thdb->hab, &swpClient, 1);
-                goto PosChangedEnd;
+        	goto RunDefFrameProc;
         }
 
         if(pswp->fl & (SWP_MOVE | SWP_SIZE)) {
@@ -283,11 +275,16 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
         }
         OSLibMapSWPtoWINDOWPOSFrame(pswp, &wp, &swpOld, hParent, hwnd);
 
+	if(pswp->fl & SWP_ACTIVATE)
+	{
+             WinSendMsg(hwnd, WM_ACTIVATE, (MPARAM)TRUE, (MPARAM)hwnd);
+	}
+
         if(pswp->fl & (SWP_MOVE | SWP_SIZE))
         {
-          win32wnd->setWindowRect(wp.x, wp.y, wp.x+wp.cx, wp.y+wp.cy);
+	  //Note: Also updates the new window rectangle
+          win32wnd->MsgFormatFrame(&wp);
 
-          win32wnd->MsgFormatFrame();
           //CB: todo: use result for WM_CALCVALIDRECTS
           mapWin32ToOS2Rect(WinQueryWindow(hwnd,QW_PARENT),hwnd,win32wnd->getClientRectPtr(),(PRECTLOS2)&rect);
 
@@ -327,7 +324,8 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
             if (redrawAll)
             {
               WinInvalidateRect(hwnd,NULL,TRUE);
-            } else
+            } 
+            else
             {
               HPS hps = WinGetPS(hwnd);
               RECTL frame,client,arcl[4];
@@ -361,7 +359,8 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
               WinReleasePS(hps);
             }
           }
-        } else
+        } 
+        else
         {
           //update child positions: rectWindow is in window coordinates
           if(pswp->fl & (SWP_MOVE | SWP_SIZE)) {
@@ -389,6 +388,7 @@ PosChangedEnd:
         HWND hwndTitle;
         USHORT flags = WinQueryWindowUShort(hwnd,QWS_FLAGS);
 
+        dprintf(("PMFRAME: WM_ACTIVATE %x %x", hwnd, mp2));
         if (win32wnd->IsWindowCreated())
         {
           WinSendMsg(WinWindowFromID(hwnd,FID_CLIENT),WM_ACTIVATE,mp1,mp2);
@@ -448,7 +448,7 @@ VOID FrameUpdateClient(Win32BaseWindow *win32wnd)
   RECTL rect;
   SWP swpClient = {0};
 
-        win32wnd->MsgFormatFrame();
+        win32wnd->MsgFormatFrame(NULL);
         //CB: todo: use result for WM_CALCVALIDRECTS
         mapWin32ToOS2Rect(WinQueryWindow(win32wnd->getOS2FrameWindowHandle(),QW_PARENT),win32wnd->getOS2FrameWindowHandle(),win32wnd->getClientRectPtr(),(PRECTLOS2)&rect);
 

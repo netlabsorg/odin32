@@ -1,4 +1,4 @@
-/* $Id: win32wmdichild.h,v 1.4 2000-01-01 14:54:56 cbratschi Exp $ */
+/* $Id: win32wmdichild.h,v 1.5 2000-01-13 13:54:55 sandervl Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -23,7 +23,7 @@ public:
                 Win32MDIChildWindow(CREATESTRUCTA *lpCreateStructA, ATOM classAtom, BOOL fUnicode);
 virtual        ~Win32MDIChildWindow();
 
-virtual  ULONG  MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd);
+virtual  ULONG  MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd, HWND hwndOS2Win);
 
    static HWND  createChild(Win32MDIClientWindow *client, LPMDICREATESTRUCTA cs);
            void childGetMinMaxInfo(MINMAXINFO* lpMinMax);
