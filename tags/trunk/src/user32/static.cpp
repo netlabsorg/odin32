@@ -1,4 +1,4 @@
-/* $Id: static.cpp,v 1.24 2001-05-11 08:39:44 sandervl Exp $ */
+/* $Id: static.cpp,v 1.25 2001-11-07 19:19:09 sandervl Exp $ */
 /*
  * Static control
  *
@@ -721,10 +721,21 @@ static void STATIC_PaintIconfn( HWND hwnd, HDC hdc )
     hbrush = SendMessageA( GetParent(hwnd), WM_CTLCOLORSTATIC,
                              hdc, hwnd );
     FillRect( hdc, &rc, hbrush );
+
     if (dwStyle & SS_CENTERIMAGE)
     {
       ICONINFO ii;
       BITMAP bmp;
+
+#if 0
+//TODO: fill with upper left pixel of icon
+      COLORREF color;
+
+      color = GetPixel(hMemDC, 0, 0);
+      hbrush = CreateSolidBrush(color);
+      FillRect( hdc, &rc, hbrush );
+      DeleteObject(hbrush);
+#endif
 
       if (!GetIconInfo(infoPtr->hIcon,&ii)) return;
       if (ii.hbmColor)
@@ -737,7 +748,11 @@ static void STATIC_PaintIconfn( HWND hwnd, HDC hdc )
       DrawIcon(hdc,(rc.right-bmp.bmWidth)/2,(rc.bottom-bmp.bmHeight)/2,infoPtr->hIcon);
       if (ii.hbmColor) DeleteObject(ii.hbmColor);
       if (ii.hbmMask) DeleteObject(ii.hbmMask);
-    } else if (infoPtr->hIcon) DrawIcon(hdc,rc.left,rc.top,infoPtr->hIcon);
+    } 
+    else 
+    if (infoPtr->hIcon) {
+        DrawIcon(hdc,rc.left,rc.top,infoPtr->hIcon);
+    }
 }
 
 static void STATIC_PaintBitmapfn(HWND hwnd, HDC hdc )
@@ -752,7 +767,6 @@ static void STATIC_PaintBitmapfn(HWND hwnd, HDC hdc )
     GetClientRect( hwnd, &rc );
     hbrush = SendMessageA( GetParent(hwnd), WM_CTLCOLORSTATIC,
                              hdc, hwnd );
-    FillRect( hdc, &rc, hbrush );
 
     if (infoPtr->hIcon)
     {
@@ -769,6 +783,13 @@ static void STATIC_PaintBitmapfn(HWND hwnd, HDC hdc )
         {
             SIZE szbm;
             SIZE szdc;
+            COLORREF color;
+
+            //SvL: Fill client area with pixel in upper left corner (SDK docs)
+            color = GetPixel(hMemDC, 0, 0);
+            hbrush = CreateSolidBrush(color);
+            FillRect( hdc, &rc, hbrush );
+            DeleteObject(hbrush);
 
             if(bm.bmWidth > rc.right - rc.left)
             {
@@ -793,10 +814,11 @@ static void STATIC_PaintBitmapfn(HWND hwnd, HDC hdc )
                 szdc.cy = ((rc.bottom - rc.top) - bm.bmHeight) / 2;
             }
             BitBlt(hdc, szdc.cx, szdc.cy, bm.bmWidth, bm.bmHeight, hMemDC,
-                szbm.cx, szbm.cy, SRCCOPY);
+                   szbm.cx, szbm.cy, SRCCOPY);
         }
         else
         {
+            FillRect( hdc, &rc, hbrush );
             BitBlt(hdc, 0, 0, bm.bmWidth, bm.bmHeight, hMemDC, 0, 0, SRCCOPY);
         }
 
