@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.82 2002-02-12 18:36:41 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.83 2002-02-13 15:10:46 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -565,10 +565,12 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
 
         dprintf(("PM: WM_CHAR: %x %x rep=%d scancode=%x", SHORT1FROMMP(os2Msg->mp2), SHORT2FROMMP(os2Msg->mp2), repeatCount, scanCode));
         dprintf(("PM: WM_CHAR: hwnd %x flags %x mp1 %x, mp2 %x, time=%08xh", win32wnd->getWindowHandle(), flags, os2Msg->mp1, os2Msg->mp2, os2Msg->time));
-
+       
         BOOL  fWinExtended;
         BYTE  bWinVKey;
         WORD  wWinScan;
+
+        if (scanCode==0) goto dummymessage;
 
         // Note: Numlock-state currently ignored, see below
         KeyTranslatePMScanToWinVKey(usPMScanCode,
