@@ -38,6 +38,7 @@
 
 #ifdef __WIN32OS2__
 #include <wctype.h>
+#include <unicode.h>
 
 #define DBG_LOCALLOG	DBG_kernel32
 #include "dbglocal.h"
@@ -3237,13 +3238,39 @@ INT WINAPI GetDateFormatW(LCID locale,DWORD flags,
 			      LPCWSTR format,
 			      LPWSTR date, INT datelen)
 {
+  // convert "format" on passing in into ASCII
+  LPSTR pszAsciiFormat = UnicodeToAsciiString((LPWSTR) format);
+  LPSTR pszAsciiDate = (char *)alloca(datelen);
+  
+  TRACE("Kernel32-ole2nls: GetDateFormatW(0x%04lx,0x%08lx,%p,%s,%p,%d) not yet complete\n",
+	      locale,flags,xtime,pszAsciiFormat,date,datelen);
+
+  // call ASCII variant
+  int rc = GetDateFormatA(locale,
+                          flags,
+                          xtime,
+                          pszAsciiFormat,
+                          pszAsciiDate,
+                          datelen);  // is in "characters", not bytes
+    
+  FreeAsciiString(pszAsciiFormat);
+  
+  // convert "date" on returning to UNICODE
+  if (datelen != 0)
+  {
+    // in this case 'rc' holds the number of characters to convert
+    lstrcpynAtoW(date, pszAsciiDate, rc);
+  }
+  
+  return rc;
+  
+#if PH_OFF
    unsigned short datearr[] = {'1','9','9','4','-','1','-','1',0};
 
    FIXME("STUB (should call OLE_GetFormatW)\n");   
    lstrcpynW(date, datearr, datelen);
    return (  datelen < 9) ? datelen : 9;
-   
-   
+#endif
 }
 
 /**************************************************************************
