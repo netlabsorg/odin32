@@ -1,4 +1,4 @@
-/* $Id: win32wmdiclient.cpp,v 1.12 1999-10-30 09:19:46 sandervl Exp $ */
+/* $Id: win32wmdiclient.cpp,v 1.13 1999-12-09 10:59:05 sandervl Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -519,7 +519,7 @@ void Win32MDIClientWindow::updateFrameText(BOOL repaint, LPCSTR lpTitle )
         }
         else
         {
-            strncpy(lpBuffer, frameTitle, MDI_MAXTITLELENGTH );
+            lstrcpynA(lpBuffer, frameTitle, MDI_MAXTITLELENGTH );
             lpBuffer[MDI_MAXTITLELENGTH]='\0';
         }
     }
