@@ -1,4 +1,4 @@
-/* $Id: version.cpp,v 1.4 2001-10-15 17:10:55 sandervl Exp $ */
+/* $Id: version.cpp,v 1.5 2001-12-08 12:01:28 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -41,34 +41,56 @@
 
 typedef struct
 {
+    LONG           getVersion16;
     LONG           getVersion;
     OSVERSIONINFOA getVersionEx;
 } VERSION_DATA;
 
 static VERSION_DATA VersionData[WINVERSION_MAX] =
 {
-    // Win98
+    // Windows 98
     {
+        0x070A5F03,
 	0xC0000A04,
 	{
 	    sizeof(OSVERSIONINFOA), 4, 10, 0x40A07CE,
 	    VER_PLATFORM_WIN32_WINDOWS, "Win98"
 	}
     },
-    // NT40
+    // Windows ME
     {
+        0x07005F03, /* Assuming DOS 7 like the other Win9x */
+        0xC0005A04,
+        {
+            sizeof(OSVERSIONINFOA), 4, 90, 0x45A0BB8,
+            VER_PLATFORM_WIN32_WINDOWS, " "
+        }
+    },
+    // Windows NT 4.0 (SP6)
+    {
+        0x05000A03,
         ODINNT_VERSION,
         {
             sizeof(OSVERSIONINFOA), ODINNT_MAJOR_VERSION, ODINNT_MINOR_VERSION, 
             ODINNT_BUILD_NR, VER_PLATFORM_WIN32_NT, ODINNT_CSDVERSION
         }
     },
-    // Windows 2000 TODO!!!!!!!!!!!!!!!!!
+    // Windows 2000 (SP2)
     {
-        ODINNT_VERSION,
+        0x05005F03,
+        0x08930005,
         {
-            sizeof(OSVERSIONINFOA), ODINNT_MAJOR_VERSION, ODINNT_MINOR_VERSION, 
-            ODINNT_BUILD_NR, VER_PLATFORM_WIN32_NT, ODINNT_CSDVERSION
+            sizeof(OSVERSIONINFOA), 5, 0, 0x893,
+            VER_PLATFORM_WIN32_NT, "Service Pack 2"
+        }
+    },
+    // Windows XP
+    {
+        0x05005F03, /* Assuming DOS 5 like the other NT */
+        0x0A280105,
+        {
+            sizeof(OSVERSIONINFOA), 5, 1, 0xA28,
+            VER_PLATFORM_WIN32_NT, ""
         }
     }
 };
@@ -76,6 +98,23 @@ static VERSION_DATA VersionData[WINVERSION_MAX] =
 static BOOL fCheckVersion = FALSE;
 static int  winversion    = WINVERSION_NT40;
 
+//******************************************************************************
+//******************************************************************************
+void WIN32API OdinSetVersion(ULONG version) 
+{
+    switch(version) {
+    case WINVERSION_WIN98:
+    case WINVERSION_WINME:
+    case WINVERSION_NT40:
+    case WINVERSION_WIN2000:
+    case WINVERSION_WINXP:
+        break;
+    default: 
+        DebugInt3();
+        return;
+    }
+    winversion = version;
+}
 //******************************************************************************
 //******************************************************************************
 void CheckVersion()
@@ -89,8 +128,16 @@ void CheckVersion()
 		winversion = WINVERSION_WIN98;
 	}
 	else
+	if(!stricmp(szVersion, PROFILE_WINVERSION_WINME)) {
+		winversion = WINVERSION_WINME;
+	}
+	else
 	if(!stricmp(szVersion, PROFILE_WINVERSION_WIN2000)) {
 		winversion = WINVERSION_WIN2000;
+	}
+	else
+	if(!stricmp(szVersion, PROFILE_WINVERSION_WINXP)) {
+		winversion = WINVERSION_WINXP;
 	}
   }
   fCheckVersion = TRUE;
