@@ -1,4 +1,4 @@
-/* $Id: test.h,v 1.7 2001-02-11 15:12:38 bird Exp $
+/* $Id: test.h,v 1.8 2001-02-20 05:04:24 bird Exp $
  *
  * Definitions and declarations for test moduls.
  *
@@ -156,11 +156,13 @@ ULONG KRNLCALL  fakePGPhysAvail(void);
 ULONG KRNLCALL  fakePGPhysPresent(void);
 VOID  KRNLCALL  fakevmRecalcShrBound(ULONG flFlags, PULONG pulSentinelAddress);
 
-void _Optlink   fakeg_tkExecPgm(void);    /* Not callable! (fakea.asm) */
-void _Optlink   faketkStartProcess(void); /* Not callable! (fakea.asm) */
-void _Optlink   fakef_FuStrLenZ(void);    /* Not callable! (fakea.asm) */
-void _Optlink   fakef_FuStrLen(void);     /* Not callable! (fakea.asm) */
-void _Optlink   fakef_FuBuff(void);       /* Not callable! (fakea.asm) */
+void _Optlink   fakeg_tkExecPgm(void);      /* Not callable! (fakea.asm) */
+void _Optlink   faketkStartProcess(void);   /* Not callable! (fakea.asm) */
+void _Optlink   fakef_FuStrLenZ(void);      /* Not callable! (fakea.asm) */
+void _Optlink   fakef_FuStrLen(void);       /* Not callable! (fakea.asm) */
+void _Optlink   fakef_FuBuff(void);         /* Not callable! (fakea.asm) */
+void _Optlink   fakeKMEnterKmodeSEF(void);  /* Not callable! (fakea.asm) */
+void _Optlink   fakeKMExitKmodeSEF8(void);  /* Not callable! (fakea.asm) */
 extern PTCB     fakepTCBCur;
 extern PPTDA    fakepPTDACur;
 extern char     fakeptda_start;
