@@ -1,8 +1,8 @@
-/* $Id: changelog,v 1.2249 2002-08-08 07:21:59 sandervl Exp $ */
+/* $Id: changelog,v 1.2250 2002-08-08 07:23:15 sandervl Exp $ */
 
  2002-08-08: Sander van Leeuwen <sandervl@innotek   >
     - ChangeLog:o Obfuscated email addresses because people continue to
-                  post the ChangeLog in mailinglists/newsgroups.
+                  post the ChangeLog file in mailinglists/newsgroups.
 
  2002-08-07: Platon Fomichev <platon@innotek   >
     - USER32:   o Listbox fix for keyboard search (Rewind (Wine/X11))
