@@ -38,6 +38,7 @@
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
 #include <initdll.h>
 #include <exitlist.h>
+#include "ordinals.h"
 
 BOOL  fVersionWarp3 = FALSE;
 static HKEY hKeyClassesRoot  = 0;
