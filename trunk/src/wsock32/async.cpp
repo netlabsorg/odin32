@@ -1,4 +1,4 @@
-/* $Id: async.cpp,v 1.9 1999-10-26 21:43:00 phaller Exp $ */
+/* $Id: async.cpp,v 1.10 1999-10-27 08:38:03 phaller Exp $ */
 
 /*
  *
@@ -61,6 +61,8 @@ int _System bsd_select(int,
                        fd_set *,
                        struct timeval);
 
+// wsock32.cpp: error code translation
+int iTranslateSockErrToWSock(int iError);
 
 
 /*****************************************************************************
@@ -633,8 +635,9 @@ void WSAAsyncWorker::asyncGetHostByAddr   (PASYNCREQUEST pRequest)
                              (int)        pRequest->ul3);
     if (pHostent == NULL) // error ?
     {
-      rc = sock_errno();   // assuming OS/2 return codes are
-      WSASetLastError(rc); // same as Winsock return codes
+      // build error return code
+      rc = iTranslateSockErrToWSock(sock_errno());
+      WSASetLastError(rc);
     }
     else
     {
@@ -693,10 +696,9 @@ void WSAAsyncWorker::asyncGetHostByName   (PASYNCREQUEST pRequest)
     pHostent = gethostbyname((char*)pRequest->ul1);
     if (pHostent == NULL) // error ?
     {
-      rc = sock_errno();   // assuming OS/2 return codes are
-      WSASetLastError(rc); // same as Winsock return codes
-
-      dprintf (("  pHostent==NULL -> rc=%d\n", rc));
+      // build error return code
+      rc = iTranslateSockErrToWSock(sock_errno());
+      WSASetLastError(rc);
     }
     else
     {
@@ -755,8 +757,9 @@ void WSAAsyncWorker::asyncGetProtoByName  (PASYNCREQUEST pRequest)
     pProtoent = getprotobyname((char*)pRequest->ul1);
     if (pProtoent == NULL) // error ?
     {
-      rc = sock_errno();   // assuming OS/2 return codes are
-      WSASetLastError(rc); // same as Winsock return codes
+      // build error return code
+      rc = iTranslateSockErrToWSock(sock_errno());
+      WSASetLastError(rc);
     }
     else
     {
@@ -813,8 +816,9 @@ void WSAAsyncWorker::asyncGetProtoByNumber(PASYNCREQUEST pRequest)
     pProtoent = getprotobyname(( char*)pRequest->ul1);
     if (pProtoent == NULL) // error ?
     {
-      rc = sock_errno();   // assuming OS/2 return codes are
-      WSASetLastError(rc); // same as Winsock return codes
+      // build error return code
+      rc = iTranslateSockErrToWSock(sock_errno());
+      WSASetLastError(rc);
     }
     else
     {
@@ -872,8 +876,9 @@ void WSAAsyncWorker::asyncGetServByName(PASYNCREQUEST pRequest)
                              (char*)pRequest->ul2);
     if (pServent == NULL) // error ?
     {
-      rc = sock_errno();   // assuming OS/2 return codes are
-      WSASetLastError(rc); // same as Winsock return codes
+      // build error return code
+      rc = iTranslateSockErrToWSock(sock_errno());
+      WSASetLastError(rc);
     }
     else
     {
@@ -932,8 +937,9 @@ void WSAAsyncWorker::asyncGetServByPort(PASYNCREQUEST pRequest)
                              (char*)pRequest->ul2);
     if (pServent == NULL) // error ?
     {
-      rc = sock_errno();   // assuming OS/2 return codes are
-      WSASetLastError(rc); // same as Winsock return codes
+      // build error return code
+      rc = iTranslateSockErrToWSock(sock_errno());
+      WSASetLastError(rc);
     }
     else
     {
@@ -1012,7 +1018,7 @@ void WSAAsyncWorker::asyncSelect(PASYNCREQUEST pRequest)
   else
     if (irc == 0)                                      /* this means timeout */
     {
-      lParam = WSAETIMEDOUT;                        /* raise error condition */
+      lParam = iTranslateSockErrToWSock(WSAETIMEDOUT);/* raise error condition */
     }
     else
     {
