@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.16 1999-11-11 13:16:40 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.17 1999-11-24 19:30:18 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -1902,7 +1902,16 @@ BOOL WIN32API SetBrushOrgEx( HDC arg1, int arg2, int arg3, PPOINT  arg4)
 //******************************************************************************
 int WIN32API SetDIBits( HDC arg1, HBITMAP arg2, UINT arg3, UINT arg4, const VOID * arg5, const BITMAPINFO * arg6, UINT  arg7)
 {
-    dprintf(("GDI32: SetDIBits\n"));
+    dprintf(("GDI32: SetDIBits %x %x %x %x %x %x %x\n", arg1, arg2, arg3, arg4, arg5, arg6, arg7));
+
+    if(DIBSection::getSection() != NULL) {
+        DIBSection *dsect;
+
+        dsect = DIBSection::find((DWORD)arg2);
+        if(dsect) {
+           return dsect->SetDIBits(arg1, arg2, arg3, arg4, arg5, (WINBITMAPINFOHEADER *)&arg6->bmiHeader, arg7);
+        }
+    }
     return O32_SetDIBits(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
 }
 //******************************************************************************
