@@ -1,4 +1,4 @@
-/* $Id: win32wnd.h,v 1.16 1999-07-20 07:42:36 sandervl Exp $ */
+/* $Id: win32wnd.h,v 1.17 1999-07-20 15:46:54 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -92,11 +92,14 @@ virtual	 WORD   GetWindowWord(int index);
 	 DWORD  getFlags()			{ return flags; };
 	 void   setFlags(DWORD newflags)	{ flags = newflags; };
 
- 	 ULONG  GetAccelTable()                     { return (ULONG) acceltableResource; };
+ 	 HACCEL GetAccelTable()                     { return (HACCEL) acceltableResource; };
 	 BOOL   SetAccelTable(ULONG hAccel);
 
-         ULONG  GetMenu()                     	    { return (ULONG) menuResource; };
+         HMENU  GetMenu()                     	    { return (HMENU) menuResource; };
 	 BOOL   SetMenu(ULONG hMenu);
+
+	 BOOL 	SetIcon(HICON hIcon);
+	 HICON  GetIcon()                           { return (HICON) iconResource; };
 
 	 BOOL   ShowWindow(ULONG nCmdShow);
 	 BOOL   SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, int cy, UINT fuFlags);
@@ -190,6 +193,7 @@ protected:
 
  Win32Resource *acceltableResource;
  Win32Resource *menuResource;
+ Win32Resource *iconResource;
 
 	char   *windowName;
 	ULONG   wndNameLength;

@@ -1,4 +1,4 @@
-/* $Id: win32class.h,v 1.2 1999-07-14 08:35:37 sandervl Exp $ */
+/* $Id: win32class.h,v 1.3 1999-07-20 15:46:53 sandervl Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -41,6 +41,8 @@ public:
        WNDPROC  getWindowProc() 	{ return windowProc; };
 	 LPSTR  getMenuNameA()  	{ return menuNameA; };
 	 DWORD  getExtraWndWords() 	{ return nrExtraWindowWords; };
+
+ 	 HICON  getIcon()               { return hIcon; };
 
 	  void  setMenuName(LPSTR newMenuName);
 

@@ -1,4 +1,4 @@
-/* $Id: loadres.cpp,v 1.3 1999-07-20 07:42:35 sandervl Exp $ */
+/* $Id: loadres.cpp,v 1.4 1999-07-20 15:46:53 sandervl Exp $ */
 
 /*
  *
@@ -36,15 +36,18 @@ HICON WIN32API LoadIconA(HINSTANCE hinst, LPCSTR lpszIcon)
 {
  HICON rc;
 
-    if((int)lpszIcon >> 16 != 0) {//convert string name identifier to numeric id
-         dprintf(("LoadIcon %s\n", lpszIcon));
-	 lpszIcon = (LPCSTR)ConvertNameId(hinst, (char *)lpszIcon);
-    }
-    else dprintf(("LoadIcon %d\n", (int)lpszIcon));
+    rc = (HICON)FindResourceA(hinst, lpszIcon, RT_ICONA);
+    dprintf(("LoadIconA (%X) returned %d\n", hinst, rc));
+    return(rc);
+}
+//******************************************************************************
+//******************************************************************************
+HICON WIN32API LoadIconW(HINSTANCE hinst, LPCWSTR lpszIcon)
+{
+ HICON rc;
 
-    rc = O32_LoadIcon(hinst, lpszIcon);
-
-    dprintf(("LoadIcon returned %d\n", rc));
+    rc = (HICON)FindResourceW(hinst, lpszIcon, RT_ICONW);
+    dprintf(("LoadIconW (%X) returned %d\n", hinst, rc));
     return(rc);
 }
 //******************************************************************************
@@ -132,30 +135,6 @@ HCURSOR WIN32API LoadCursorW(HINSTANCE hinst, LPCWSTR lpszCursor)
     dprintf(("LoadCursorW returned %d\n", rc));
     return(rc);
 }
-//******************************************************************************
-//******************************************************************************
-HICON WIN32API LoadIconW(HINSTANCE hinst, LPCWSTR lpszIcon)
-{
- char  *astring = NULL;
- HICON rc;
-
-    if((int)lpszIcon >> 16 != 0) {//convert string name identifier to numeric id
-	 astring = UnicodeToAsciiString((LPWSTR)lpszIcon);
-
-         dprintf(("lpszIcon %s\n", astring));
-	 lpszIcon = (LPWSTR)ConvertNameId(hinst, (char *)astring);
-    }
-    else dprintf(("lpszIcon %d\n", (int)lpszIcon));
-
-    rc = O32_LoadIcon(hinst, (char *)lpszIcon);
-    if(astring)
-	FreeAsciiString(astring);
-
-    dprintf(("LoadIconW returned %d\n", rc));
-    return(rc);
-}
-//******************************************************************************
-//******************************************************************************
 //******************************************************************************
 //TODO: Far from complete, but works for loading resources from exe
 //fuLoad flag ignored
