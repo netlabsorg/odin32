@@ -1,4 +1,4 @@
-/* $Id: crtdll.cpp,v 1.11 1999-11-28 17:22:26 sandervl Exp $ */
+/* $Id: crtdll.cpp,v 1.12 1999-11-30 14:16:44 sandervl Exp $ */
 
 /*
  * The C RunTime DLL
@@ -307,23 +307,18 @@ DWORD CDECL CRTDLL__GetMainArgs(LPDWORD argc,LPSTR **argv,
 	/* missing threading init */
 
 	i=0;xargv=NULL;xargc=0;afterlastspace=0;
-/*
-	dprintf(("CRTDLL: GetMainArgs i loop\n"));
 	while (cmdline[i]) {
 		if (cmdline[i]==' ') {
-	dprintf(("CRTDLL: GetMainArgs *1\n"));
 			xargv=(char**)HeapReAlloc( GetProcessHeap(), 0, xargv,
                                                    sizeof(char*)*(++xargc));
 			cmdline[i]='\0';
 			xargv[xargc-1] = HEAP_strdupA( GetProcessHeap(), 0,
                                                        cmdline+afterlastspace);
 			i++;
-	dprintf(("CRTDLL: GetMainArgs *2\n"));
 			while (cmdline[i]==' ')
 				i++;
 			if (cmdline[i])
 				afterlastspace=i;
-	dprintf(("CRTDLL: GetMainArgs *3\n"));
 
 		} else
 			i++;
@@ -332,12 +327,9 @@ DWORD CDECL CRTDLL__GetMainArgs(LPDWORD argc,LPSTR **argv,
 
 	xargv=(char**)HeapReAlloc( GetProcessHeap(), 0, xargv,
                                    sizeof(char*)*(++xargc));
-	dprintf(("CRTDLL: GetMainArgs *4\n"));
 	cmdline[i]='\0';
-	dprintf(("CRTDLL: GetMainArgs *5\n"));
 	xargv[xargc-1] = HEAP_strdupA( GetProcessHeap(), 0,
                                        cmdline+afterlastspace);
-*/
 	CRTDLL_argc_dll	= xargc;
 	*argc		= xargc;
 	CRTDLL_argv_dll	= xargv;
