@@ -1,10 +1,15 @@
- /* $Id: changelog,v 1.133 1999-08-25 10:29:08 sandervl Exp $ */
+ /* $Id: changelog,v 1.134 1999-08-25 11:23:17 sandervl Exp $ */
 
  99-08-25: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Several changes for memory mapped files.
                     Not yet tested, but I'm going to do so right now.
                     Put back handlemanager changes. (i.e. MapViewOfFile)
 	- USER32\NEW: Deleted win32type.h
+	- ADVAPI32: Fixed some incorrect definitions of security apis
+	- INCLUDE\WIN: Changed WINE_NAME_AW definition (now you can use
+                       apis without the 'A' or 'W' suffix)
+	- INCLUDE: Added makefile for VAC 3.6.5
+                   To compile use i.e.: nmake DEBUG=1 CCENV=VAC36
 
  99-08-24: Patrick Haller <phaller@gmx.net>
 	- USER32:   added extended Open32 WinX control styles (OS2CTLWX)
