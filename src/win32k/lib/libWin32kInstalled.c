@@ -1,4 +1,4 @@
-/* $Id: libWin32kInstalled.c,v 1.2 2000-09-02 21:08:11 bird Exp $
+/* $Id: libWin32kInstalled.c,v 1.3 2001-02-21 07:47:59 bird Exp $
  *
  * libWin32kInstalled - checks if Win32k is installed or not.
  *
@@ -20,12 +20,7 @@
 *******************************************************************************/
 #include <os2.h>
 #include "win32k.h"
-
-
-/*******************************************************************************
-*   Global Variables                                                           *
-*******************************************************************************/
-extern BOOL     fInited;
+#include "libPrivate.h"
 
 
 /**

@@ -1,9 +1,9 @@
-/* $Id: libWin32kQueryOptionsStatus.c,v 1.2 2000-09-02 21:08:12 bird Exp $
+/* $Id: libWin32kQueryOptionsStatus.c,v 1.3 2001-02-21 07:47:59 bird Exp $
  *
  * libWin32kQueryOptionsStatus - Queries the options and/or the status of
  *                               Win32k.sys driver.
  *
- * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 2000-2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -23,13 +23,7 @@
 *******************************************************************************/
 #include <os2.h>
 #include "win32k.h"
-
-
-/*******************************************************************************
-*   Global Variables                                                           *
-*******************************************************************************/
-extern BOOL     fInited;
-extern HFILE    hWin32k;
+#include "libPrivate.h"
 
 
 /**
@@ -70,10 +64,13 @@ APIRET APIENTRY  libWin32kQueryOptionsStatus(PK32OPTIONS pOptions, PK32STATUS pS
         ULONG           cbParam = sizeof(Param);
         ULONG           cbData = 0UL;
 
+        Param.hdr.cb    = sizeof(Param);
+        Param.hdr.rc    = ERROR_NOT_SUPPORTED;
         Param.pOptions  = pOptions;
         Param.pStatus   = pStatus;
-        Param.rc = ERROR_INVALID_PARAMETER;
 
+        if (usCGSelector)
+            return libCallThruCallGate(K32_QUERYOPTIONSSTATUS, &Param);
         rc = DosDevIOCtl(hWin32k,
                          IOCTL_W32K_K32,
                          K32_QUERYOPTIONSSTATUS,
@@ -81,7 +78,7 @@ APIRET APIENTRY  libWin32kQueryOptionsStatus(PK32OPTIONS pOptions, PK32STATUS pS
                          "", 1, &cbData);
 
         if (rc == NO_ERROR)
-            rc = Param.rc;
+            rc = Param.hdr.rc;
     }
     else
         rc = ERROR_INIT_ROUTINE_FAILED;

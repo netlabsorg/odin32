@@ -1,4 +1,4 @@
-/* $Id: dev32.h,v 1.10 2001-02-10 11:11:43 bird Exp $
+/* $Id: dev32.h,v 1.11 2001-02-21 07:46:10 bird Exp $
  *
  * dev32 - header file for 32-bit part of the driver.
  *
@@ -63,12 +63,17 @@ USHORT _loadds _Far32 _Pascal Win32kIOCtl(PRP32GENIOCTL pRpIOCtl);
 #ifdef _OS2KLDR_H_
 PMTE _System GetOS2KrnlMTE(void); /* (devfirst.asm) */
 #endif
+ULONG  _Optlink InitCallGate(void);
+ULONG  _Optlink x86DisableWriteProtect(void);
+ULONG  _Optlink x86RestoreWriteProtect(ULONG flWP);
+
 
 
 /*
  * Global variables
  */
 extern PULONG pulTKSSBase32;
+extern USHORT CallGateGDT;
 
 /*
  * SSToDS( stack pointer )

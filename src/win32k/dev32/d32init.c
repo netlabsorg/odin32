@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.36 2001-02-20 04:58:33 bird Exp $
+/* $Id: d32init.c,v 1.37 2001-02-21 07:44:57 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -174,7 +174,7 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
             case 'e':
             case 'E':/* Elf or EXe */
                 pszTmp2 = strpbrk(pszTmp, ":=/- ");
-                if (pszTmp[1] != 'x' && pszTmp != 'X')
+                if (pszTmp[1] != 'x' && pszTmp[1] != 'X')
                 {
                     options.fElf = !(pszTmp2 != NULL
                                      && (   pszTmp2[1] == 'N' || pszTmp2[1] == 'n'
@@ -413,6 +413,13 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
         return (USHORT)rc;
     #endif
 
+    /* callgate */
+    if ((rc = InitCallGate()) != NO_ERROR)
+    {
+        kprintf(("R0Init32: InitCallGate failed with rc=%d\n", rc));
+        return (USHORT)rc;
+    }
+
 
     /*
      * Lock the 32-bit objects/segments and 16-bit datasegment in memory
@@ -435,7 +442,8 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
     if (rc != NO_ERROR)
         kprintf(("data segment lock failed with with rc=%d\n", rc));
 
-    /* 16-bit data segment - is this really necessary? */
+    /* 16-bit data segment - is this really necessary? - no!!! */
+    #if 0 /* This should not be necessary!!! it's allocated from the kernel resident heap if I am not much mistaken. */
     memset(SSToDS(&lockhandle), 0, sizeof(lockhandle));
     rc = D32Hlp_VMLock2(&DATA16START,
                         &DATA16END - &DATA16START,
@@ -443,6 +451,7 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
                         SSToDS(&lockhandle));
     if (rc != NO_ERROR)
         kprintf(("16-bit data segment lock failed with with rc=%d\n", rc));
+    #endif
 
     return NO_ERROR;
 }
@@ -591,7 +600,7 @@ USHORT _loadds _Far32 _Pascal GetKernelInfo32(PKRNLINFO pKrnlInfo)
                                 pKrnlInfo->fKernel = 0;
                                 if ((*psz >= 'A' && *psz <= 'E') || (*psz >= 'a' && *psz <= 'e'))
                                 {
-                                    pKrnlInfo->fKernel = (*psz - (*psz >= 'a' ? 'a'-1 : 'A'-1)) << KF_REV_SHIFT;
+                                    pKrnlInfo->fKernel = (USHORT)((*psz - (*psz >= 'a' ? 'a'-1 : 'A'-1)) << KF_REV_SHIFT);
                                     psz++;
                                 }
                                 if (*psz == 'F' || *psz == 'f' || *psz == ',') /* These are ignored! */
@@ -903,8 +912,8 @@ int interpretFunctionProlog32(char *pach, BOOL fOverload)
 
                 /* fixed five byte instructions */
                 case 0xe8:              /* call imm32 */
-                    pach =+ 4;
-                    cb =+ 4;
+                    pach += 4;
+                    cb += 4;
                     break;
 
                 /* complex sized instructions -  "/r" */
@@ -1272,6 +1281,7 @@ int importTabInit(void)
     int     cb;
     int     cbmax;
     char *  pchCTEntry;                 /* Pointer to current calltab entry. */
+    ULONG   flWP;                       /* CR0 WP flag restore value. */
 
     /*
      * Apply build specific changes to the auFuncs table
@@ -1326,6 +1336,7 @@ int importTabInit(void)
      * rehook / import
      */
     pchCTEntry = &callTab[0];
+    flWP = x86DisableWriteProtect();
     for (i = 0; i < NBR_OF_KRNLIMPORTS; i++)
     {
         switch (aImportTab[i].fType & ~EPT_WRAPPED)
@@ -1365,6 +1376,7 @@ int importTabInit(void)
                 {   /* !fatal! - this could never happen really... */
                     kprintf(("ImportTabInit: FATAL verify failed for procedure no.%d when rehooking it!\n", i));
                     Int3(); /* ipe - later! */
+                    x86RestoreWriteProtect(flWP);
                     return ERROR_D32_IPE | (i << ERROR_D32_PROC_SHIFT) | ERROR_D32_PROC_FLAG;
                 }
                 pchCTEntry += OVERLOAD32_ENTRY;
@@ -1411,6 +1423,7 @@ int importTabInit(void)
                 {   /* !fatal! - this could never happen really... */
                     kprintf(("ImportTabInit: FATAL verify failed for procedure no.%d when rehooking it!\n", i));
                     Int3(); /* ipe - later! */
+                    x86RestoreWriteProtect(flWP);
                     return ERROR_D32_IPE | (i << ERROR_D32_PROC_SHIFT) | ERROR_D32_PROC_FLAG;
                 }
                 pchCTEntry += OVERLOAD16_ENTRY;
@@ -1443,6 +1456,7 @@ int importTabInit(void)
                 {   /* !fatal! - this should never really happen... */
                     kprintf(("ImportTabInit: FATAL verify failed for procedure no.%d when importing it!\n", i));
                     Int3(); /* ipe - later! */
+                    x86RestoreWriteProtect(flWP);
                     return ERROR_D32_IPE | (i << ERROR_D32_PROC_SHIFT) | ERROR_D32_PROC_FLAG;
                 }
                 pchCTEntry += IMPORT32_ENTRY;
@@ -1479,6 +1493,7 @@ int importTabInit(void)
                 {   /* !fatal! - this should never really happen... */
                     kprintf(("ImportTabInit: FATAL verify failed for procedure no.%d when importing it!\n", i));
                     Int3(); /* ipe - later! */
+                    x86RestoreWriteProtect(flWP);
                     return ERROR_D32_IPE | (i << ERROR_D32_PROC_SHIFT) | ERROR_D32_PROC_FLAG;
                 }
                 pchCTEntry += IMPORT16_ENTRY;
@@ -1516,9 +1531,12 @@ int importTabInit(void)
             default:
                 kprintf(("ImportTabInit: unsupported type. (procedure no.%d, cb=%d)\n", i, cb));
                 Int3(); /* ipe - later! */
+                x86RestoreWriteProtect(flWP);
                 return ERROR_D32_IPE | (i << ERROR_D32_PROC_SHIFT) | ERROR_D32_PROC_FLAG;
         } /* switch - type */
     }   /* for */
+
+    x86RestoreWriteProtect(flWP);
 
     return NO_ERROR;
 }
