@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.268 2001-06-13 17:28:07 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.269 2001-06-14 11:30:56 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -139,6 +139,7 @@ void Win32BaseWindow::Init()
 
   dwExStyle        = 0;
   dwStyle          = 0;
+  dwOldStyle       = 0;
   win32wndproc     = 0;
   hInstance        = 0;
   dwIDMenu         = 0; //0xFFFFFFFF; //default -1
@@ -452,9 +453,10 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
     }
 
     WINPROC_SetProc((HWINDOWPROC *)&win32wndproc, windowClass->getWindowProc(), WINPROC_GetProcType(windowClass->getWindowProc()), WIN_PROC_WINDOW);
-    hInstance = cs->hInstance;
-    dwStyle   = cs->style & ~WS_VISIBLE;
-    dwExStyle = cs->dwExStyle;
+    hInstance  = cs->hInstance;
+    dwStyle    = cs->style & ~WS_VISIBLE;
+    dwOldStyle = dwStyle;
+    dwExStyle  = cs->dwExStyle;
 
     hwndLinkAfter = ((cs->style & (WS_CHILD|WS_MAXIMIZE)) == WS_CHILD) ? HWND_BOTTOM : HWND_TOP;
 
@@ -2261,6 +2263,8 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
     dprintf(("ShowWindow %x %x", getWindowHandle(), nCmdShow));
     wasVisible = (getStyle() & WS_VISIBLE) != 0;
 
+    dwOldStyle = getStyle();
+
     switch(nCmdShow)
     {
     case SW_HIDE:
@@ -2317,7 +2321,6 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
     case SW_SHOWNORMAL:  /* same as SW_NORMAL: */
     case SW_SHOWDEFAULT: /* FIXME: should have its own handler */
     case SW_RESTORE:
-         //TODO: WIN_RESTORE_MAX flag!!!!!!!!!!!!!!
          swp |= SWP_SHOWWINDOW | SWP_FRAMECHANGED;
 
          if( getStyle() & (WS_MINIMIZE | WS_MAXIMIZE) ) {
@@ -2484,7 +2487,7 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
 
     if(getParent()) {
           OSLibMapWINDOWPOStoSWP(&wpos, &swp, &swpOld, getParent()->getClientHeight(),
-                                      OS2HwndFrame);
+                                 OS2HwndFrame);
     }
     else  OSLibMapWINDOWPOStoSWP(&wpos, &swp, &swpOld, OSLibQueryScreenHeight(), OS2HwndFrame);
 

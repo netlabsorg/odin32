@@ -1,4 +1,4 @@
-; $Id: USER32.DEF,v 1.56 2001-06-13 10:29:44 sandervl Exp $
+; $Id: USER32.DEF,v 1.57 2001-06-14 11:30:55 sandervl Exp $
 
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
 DESCRIPTION 'Odin32 System Dll - User32'
@@ -21,6 +21,7 @@ IMPORTS
     _GpiQueryYInversion         = PMGPI.726
     _WinQueryPointerClipRect    = PMMERGE.5433
     _WinSetPointerClipRect      = PMMERGE.5434
+    DspInitSystemDriverName     = PMGPI.656
 
 ;;;; Present in WGSS50
 ;;;;    _GpiQueryDCData             = PMGPI.665

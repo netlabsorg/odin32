@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.38 2001-05-25 19:59:29 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.39 2001-06-14 11:30:55 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -272,8 +272,13 @@ continuegetmsg:
 	            eaten = TIMER_HandleTimer(&os2msg);
 	} while (eaten);
   }
+  if(OS2ToWinMsgTranslate((PVOID)teb, &os2msg, pMsg, isUnicode, MSG_REMOVE) == FALSE) {
+      //dispatch untranslated message immediately
+      WinDispatchMsg(teb->o.odin.hab, &os2msg);
+      //and get the next one
+      return OSLibWinGetMsg(pMsg, hwnd, uMsgFilterMin, uMsgFilterMax, isUnicode);
+  }
 
-  OS2ToWinMsgTranslate((PVOID)teb, &os2msg, pMsg, isUnicode, MSG_REMOVE);
   memcpy(&teb->o.odin.os2msg, &os2msg, sizeof(QMSG));
   memcpy(&teb->o.odin.winmsg, pMsg, sizeof(MSG));
 
