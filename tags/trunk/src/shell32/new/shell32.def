@@ -1,4 +1,4 @@
-; $Id: shell32.def,v 1.4 1999-09-09 20:17:45 phaller Exp $
+; $Id: shell32.def,v 1.5 1999-09-09 20:48:40 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 ;based on Windows 95
@@ -77,7 +77,9 @@ EXPORTS
 ;   SHGetNetResource                  = _SHGetNetResource@?                   @69
 ;   SHCreateDefClassObject            = _SHCreateDefClassObject@?             @70
     Shell_GetImageList                = _Shell_GetImageList@8                 @71
-    Shell_GetCachedImageIndex         = _Shell_GetCachedImageIndex@12         @72
+    Shell_GetCachedImageIndex         = _Shell_GetCachedImageIndexAW@12       @72
+    Shell_GetCachedImageIndexW        = _Shell_GetCachedImageIndexW@12
+    Shell_GetCachedImageIndexA        = _Shell_GetCachedImageIndexA@12
     SHShellFolderView_Message         = _SHShellFolderView_Message@12         @73
 ;   SHCreateStdEnumFmtEtc             = _SHCreateStdEnumFmtEtc@?              @74
     PathYetAnotherMakeUniqueName      = _PathYetAnotherMakeUniqueNameA@8      @75

@@ -31,6 +31,7 @@
 #include "winreg.h"
 //#include "syslevel.h"
 #include "imagelist.h"
+#include "shell32_main.h"
 
 #include <heapstring.h>
 #include <misc.h>
@@ -181,6 +182,40 @@ UINT WINAPI DragQueryFileW(HDROP hDrop, UINT lFile, LPWSTR lpszwFile,
     i = SHELL_DragQueryFile(NULL, lpwCurrent, lFile, NULL, lpszwFile,lLength);
     GlobalUnlock(hDrop);
     return i;
+}
+
+
+/*****************************************************************************
+ * Name      : UINT DragQueryFileAorW
+ * Purpose   :
+ * Parameters: HDROP  hDrop    - drop structure handle
+ *             UINT   iFile    - index of file to query
+ *             LPTSTR lpszFile - target buffer
+ *             UINT   cch      - target buffer size
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1999/06/09 20:00]
+ *****************************************************************************/
+
+UINT WIN32API DragQueryFileAorW(HDROP  hDrop,
+                                UINT   iFile,
+                                LPTSTR lpszFile,
+                                UINT   cch)
+{
+  dprintf(("SHELL32: DragQueryFileAorW(%08xh,%08xh,%s,%08xh).\n",
+           hDrop,
+           iFile,
+           lpszFile,
+           cch));
+
+  // @@@PH maybe they want automatic determination here
+  if (VERSION_OsIsUnicode())
+    return DragQueryFileW(hDrop, iFile, (LPWSTR)lpszFile, cch);
+  else
+    return DragQueryFileA(hDrop, iFile, lpszFile, cch);
 }
 
 
