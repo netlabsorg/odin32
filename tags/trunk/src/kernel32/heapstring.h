@@ -32,6 +32,10 @@ LPWSTR WIN32API lstrcpyAtoW    (LPWSTR unicode, LPSTR ascii);
 
 LPVOID          HEAP_xalloc    ( HANDLE heap, DWORD flags, DWORD size );
 LPVOID          HEAP_xrealloc  ( HANDLE heap, DWORD flags, LPVOID lpMem, DWORD size );
+LPVOID          HEAP_malloc    ( DWORD size );
+LPVOID          HEAP_realloc   ( LPVOID lpMem, DWORD size );
+VOID            HEAP_free      ( LPVOID lpMem );
+
 LPSTR           HEAP_strdupA   ( HANDLE heap, DWORD flags, LPCSTR str );
 LPWSTR          HEAP_strdupW   ( HANDLE heap, DWORD flags, LPCWSTR str );
 LPWSTR          HEAP_strdupAtoW( HANDLE heap, DWORD flags, LPCSTR str );
