@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.11 1999-07-18 20:41:12 cbratschi Exp $
+# $Id: makefile,v 1.12 1999-07-19 11:50:04 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -36,11 +36,14 @@ OBJS =  user32.obj resstring.obj dialog.obj loadres.obj \
 all: $(TARGET).dll $(TARGET).lib
 
 
-$(TARGET).dll: $(OBJS) $(TARGET).def
+$(TARGET).dll: $(OBJS) $(TARGET).def $(TARGET).res
         $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
               $(PDWIN32_LIB)/pmwinx.lib $(PDWIN32_LIB)/gdi32.lib $(PDWIN32_LIB)/kernel32.lib $(PDWIN32_LIB)/libuls.lib
+        rc $(TARGET).res $(TARGET).dll
         $(CP) $@ $(PDWIN32_BIN)
 
+$(TARGET).res:
+        rc -r user32.rc user32.res
 
 $(TARGET).lib: $(TARGET)exp.def
         $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def

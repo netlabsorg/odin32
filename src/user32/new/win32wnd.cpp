@@ -1,4 +1,4 @@
-/* $Id: win32wnd.cpp,v 1.13 1999-07-18 18:04:30 sandervl Exp $ */
+/* $Id: win32wnd.cpp,v 1.14 1999-07-19 11:50:04 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -28,6 +28,7 @@
 #include <oslibwin.h>
 #include <oslibutil.h>
 #include <oslibgdi.h>
+#include <winres.h>
 
 #define HAS_DLGFRAME(style,exStyle) \
     (((exStyle) & WS_EX_DLGMODALFRAME) || \
@@ -1031,8 +1032,27 @@ void Win32Window::NotifyParent(UINT Msg, WPARAM wParam, LPARAM lParam)
 //******************************************************************************
 BOOL Win32Window::SetMenu(ULONG hMenu)
 {
- PVOID menutemplate;
+ PVOID          menutemplate;
+ Win32Resource *winres = (Win32Resource *)hMenu;
 
+#if 1
+    if(winres == NULL) {
+        dprintf(("Win32Window:: Win32Resource *winres == 0"));
+        return FALSE;
+    }
+    menutemplate = winres->lockOS2Resource();
+    if(menutemplate == NULL)
+    {
+        dprintf(("Win32Window::SetMenu menutemplate == 0"));
+        return FALSE;
+    }
+    OS2HwndMenu = OSLibWinCreateMenu(OS2HwndFrame, menutemplate);
+    if(OS2HwndMenu == 0) {
+        dprintf(("Win32Window::SetMenu OS2HwndMenu == 0"));
+        return FALSE;
+    }
+    return TRUE;
+#else
    if(HMHandleTranslateToOS2(hMenu, (PULONG)&menutemplate) == NO_ERROR)
    {
     OS2HwndMenu = OSLibWinCreateMenu(OS2HwndFrame, menutemplate);
@@ -1043,6 +1063,7 @@ BOOL Win32Window::SetMenu(ULONG hMenu)
    }
    dprintf(("Win32Window::SetMenu unknown hMenu (%x)", hMenu));
    return FALSE;
+#endif
 }
 //******************************************************************************
 //******************************************************************************
