@@ -24,7 +24,7 @@ extern "C" {
 #define ENABLE_WRAP_AT_EOL_OUTPUT 0x02
 
 
-typedef BOOL (WINAPI *PHANDLER_ROUTINE)(DWORD dwCtrlType);
+typedef BOOL (* WINAPI PHANDLER_ROUTINE)(DWORD dwCtrlType);
 
 /* Attributes flags: */
 
