@@ -1,4 +1,4 @@
-/* $Id: odinlx.h,v 1.1 1999-09-15 23:29:51 sandervl Exp $ */
+/* $Id: odinlx.h,v 1.2 1999-09-18 15:55:45 sandervl Exp $ */
 
 /*
  *
@@ -34,5 +34,15 @@ BOOL WIN32API UnregisterLxDll(HINSTANCE hInstance);
 //******************************************************************************
 BOOL WIN32API RegisterLxExe(WINMAIN EntryPoint, PVOID unused);
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void  OS2SetExceptionHandler(void *exceptframe);
+void  OS2UnsetExceptionHandler(void *exceptframe);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

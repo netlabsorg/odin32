@@ -1,4 +1,4 @@
-/* $Id: windows.h,v 1.2 1999-08-14 09:05:06 sandervl Exp $ */
+/* $Id: windows.h,v 1.3 1999-09-18 15:55:45 sandervl Exp $ */
 
 #ifndef __WINE_WINDOWS_H
 #define __WINE_WINDOWS_H
@@ -9,6 +9,7 @@ extern "C" {
 
 #ifdef __WIN32OS2__
 #include <odin.h>
+#define CINTERFACE 1
 #endif
 
 #include "winbase.h"
@@ -21,9 +22,12 @@ extern "C" {
 #include "winver.h"
 #include "lzexpand.h"
 #include "shellapi.h"
-#include "ole2.h"
 #include "winnls.h"
+#ifdef __cplusplus
+#include "ole2.h"
 #include "objbase.h"
+#endif
+#include "winver.h"
 
 #if 0
   Where does this belong? Nobody uses this stuff anyway.

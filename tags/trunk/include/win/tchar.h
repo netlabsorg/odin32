@@ -1,9 +1,11 @@
-/* $Id: tchar.h,v 1.1 1999-05-24 20:19:20 ktk Exp $ */
+/* $Id: tchar.h,v 1.2 1999-09-18 15:55:45 sandervl Exp $ */
 
 #ifndef __WINE_TCHAR_H
 #define __WINE_TCHAR_H
 
 #include "windef.h"
+
+#ifndef __WIN32OS2__
 
 #ifdef __cplusplus
 extern "C" {
@@ -252,6 +254,8 @@ char *_strupr(char *string);
 #define _TEXT(x) __T(x)
 #define __T(x) x
 
+#endif //__WIN32OS2__
+
 typedef CHAR  _TCHARA;
 typedef WCHAR _TCHARW;
 DECL_WINELIB_TYPE_AW (_TCHAR)
@@ -265,7 +269,7 @@ DECL_WINELIB_TYPE_AW (PTCHAR)
 typedef LPWSTR PTSTRW, LPTSTRW;
 typedef LPSTR PTSTRA, LPTSTRA;
 DECL_WINELIB_TYPE_AW (PTSTR)
-DECL_WINELIB_TYPE_AW (LPTSTR)
+//DECL_WINELIB_TYPE_AW (LPTSTR)
 	 
 #ifdef __cplusplus
 } /* extern "C" */
