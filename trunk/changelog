@@ -1,4 +1,13 @@
- /* $Id: changelog,v 1.142 1999-08-27 12:46:39 phaller Exp $ */
+ /* $Id: changelog,v 1.143 1999-08-27 16:53:59 sandervl Exp $ */
+
+ 99-08-27: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: Rewrote memory mapped files for multiple views
+		    Increased default nr of pages loaded so loading
+                    large apps doesn't take forever to start in IPMD.
+	- KERNEL32: Process dll exports before imports in order to support
+                    circular dll dependencies.
+	- KERNEL32: Replaced fopen/fclose calls in windll.cpp; they mess up FS.
+                    Init full path of image during Init method.
 
  99-08-27: Patrick Haller <phaller@gmx.net>
 	- KERNEL32: removed logging page faults if mmapped i/o
