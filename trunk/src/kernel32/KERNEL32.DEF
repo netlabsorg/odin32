@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.40 1999-09-21 11:00:23 phaller Exp $
+; $Id: KERNEL32.DEF,v 1.41 1999-10-04 20:52:33 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -937,6 +937,7 @@ EXPORTS
     GetFileAttributesExW       = _GetFileAttributesExW@12    @875
 
     lstrncmpiA                 = _lstrncmpiA@12              @887
+    lstrncmpiW                 = _lstrncmpiW@12              @888
 
 ; ----------------------------------------------------------------------------
 ;   KERNEL32 / WINE support functions that do not exist in real Win32

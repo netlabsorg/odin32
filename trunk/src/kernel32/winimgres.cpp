@@ -1,4 +1,4 @@
-/* $Id: winimgres.cpp,v 1.18 1999-10-04 09:55:57 sandervl Exp $ */
+/* $Id: winimgres.cpp,v 1.19 1999-10-04 20:52:34 sandervl Exp $ */
 
 /*
  * Win32 PE Image class (resource methods)
@@ -9,7 +9,6 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  * TODO: Check created resource objects before loading the resource!
- * TODO: Is the name id of the version resource always 1?
  * TODO: Once the resource handling in PE2LX/win32k is changed, 
  *       getVersionStruct/Size can be moved into the Win32ImageBase class
  *
@@ -142,14 +141,16 @@ PIMAGE_RESOURCE_DATA_ENTRY
   prdType = (PIMAGE_RESOURCE_DIRECTORY)((ULONG)prdType & ~0x80000000);
   prde    = (PIMAGE_RESOURCE_DIRECTORY_ENTRY)((DWORD)prdType + sizeof(IMAGE_RESOURCE_DIRECTORY));
 
-  if(level == 3 && *nodeData == LANG_GETFIRST) {
+  //level 2 (id)   -> get first id?
+  //level 3 (lang) -> get first language?
+  if(*nodeData == IDLANG_GETFIRST) {
 	nrres  = prdType->NumberOfNamedEntries + prdType->NumberOfIdEntries;
 	fNumId = (prdType->NumberOfNamedEntries == 0);
   }
   else {
   	fNumId = HIWORD(*nodeData) == 0;
 
-  	if(fNumId) {//numeric or string id?
+	if(fNumId) {//numeric or string id?
   		nrres = prdType->NumberOfIdEntries;
   		prde += prdType->NumberOfNamedEntries;  //skip name entries
   	}
@@ -160,6 +161,10 @@ PIMAGE_RESOURCE_DATA_ENTRY
     	/* locate directory or each resource type */
     	prdType2 = (PIMAGE_RESOURCE_DIRECTORY)((ULONG)pResDir + (ULONG)prde->u2.OffsetToData);
 
+      	if(*nodeData == IDLANG_GETFIRST) {
+		fFound = TRUE; //always take the first one
+	}
+	else
     	if(!fNumId) {//name or id entry?
 		nameOffset = prde->u1.Name;
         	if(prde->u1.s.NameIsString) //unicode directory string /*PLF Sat  97-06-21 22:30:35*/
@@ -179,8 +184,6 @@ PIMAGE_RESOURCE_DATA_ENTRY
          	if(*nodeData == prde->u1.Id)
                   	fFound = TRUE;
       	}
-      	if(*nodeData == LANG_GETFIRST)
-         	fFound = TRUE;
 
    	if(fFound) {
          	if((ULONG)prdType2 & 0x80000000) {//subdirectory?
@@ -473,7 +476,7 @@ BOOL Win32ImageBase::getVersionStruct(char *verstruct, ULONG bufLength)
 	SetLastError(ERROR_INVALID_PARAMETER);
 	return FALSE;
   }
-  pData = getPEResourceEntry(1, NTRT_VERSION);
+  pData = getPEResourceEntry(ID_GETFIRST, NTRT_VERSION);
   if(pData == NULL) {
 	dprintf(("Win32PeLdrImage::getVersionStruct: couldn't find version resource!"));
 	return 0;
