@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.29 2000-02-26 16:20:28 bird Exp $
+# $Id: Makefile,v 1.30 2000-02-26 17:51:43 bird Exp $
 #
 # Copyright 1998-1999 knut st. osmundsen
 #
@@ -85,7 +85,7 @@ CPPFLAGS    = $(CPPFLAGS)   -O+ -Oi-
 ################################################################################
 # COMPILER/ASSEMBLER INCLUDEPATHS
 ################################################################################
-CINCLUDES  = -I$(WIN32KBASE)\include \
+CINCLUDES  = -I$(WIN32KINCLUDE) \
              -I$(TOOLKIT)\h \
              -I$(VACPATH)\include \
              -I$(DDKPATH)\h \
@@ -94,14 +94,14 @@ CINCLUDES  = -I$(WIN32KBASE)\include \
              -I$(PDWIN32_INCLUDE) \
              -I$(PDWIN32_INCLUDE)\win
 
-CINCLUDES16= -I$(WIN32KBASE)\include \
+CINCLUDES16= -I$(WIN32KINCLUDE) \
              -I. \
              -I$(DDKPATH)\h \
              -I$(MSCPATH)\include \
              -I$(PDWIN32_INCLUDE)
 
 
-AINCLUDES  = -Fdi:$(WIN32KBASE)\include \
+AINCLUDES  = -Fdi:$(WIN32KINCLUDE) \
              -Fdi:$(DDKPATH)\inc
 
 
@@ -166,9 +166,11 @@ AINCLUDES  = -Fdi:$(WIN32KBASE)\include \
 ################################################################################
 # TARGETS
 ################################################################################
-#all: $(NAME).sys ProbKrnl.exe
-all:$(NAME).sys
-
+!if "$(DDKBASE)" == "" || "$(MSCPATH)" == ""  || "$(TOOLKIT)" == "" || "$(VACPATH)" == ""
+all: pe2lx.exe
+!else
+all: $(NAME).sys pe2lx.exe
+!endif
 
 
 ################################################################################
@@ -229,8 +231,8 @@ LIBSINIT = \
 # SPECIAL RULES - Testing
 ################################################################################
 ProbKrnl.exe: dev16\ProbKrnl.c dev16\symdb.c dev16\vprntf16.c \
-              $(WIN32KBASE)\include\sym.h \
-              $(WIN32KBASE)\include\probKrnl.h
+              $(WIN32KINCLUDE)\sym.h \
+              $(WIN32KINCLUDE)\probKrnl.h
     $(CC16) -c -W4 -Asfw -G2s -Zp -Zl -nologo -Fa -Zi -Od -Lp \
         -DDEBUG -DDEBUGR3 -Fa$(WIN32KLIST)\$(*B).s     \
         -Fo$(WIN32KOBJ)\probkrnl_p.obj $(CINCLUDES16) dev16\probkrnl.c
@@ -245,8 +247,8 @@ ProbKrnl.exe: dev16\ProbKrnl.c dev16\symdb.c dev16\vprntf16.c \
         probkrnl.exe, probkrnl.map, $(TOOLKIT)\lib\os2286.lib + $(MSCPATH)\lib\clibcep.lib;
 
 extract.exe: dev16\ProbKrnl.c dev16\vprntf16.c \
-             $(WIN32KBASE)\include\sym.h \
-             $(WIN32KBASE)\include\probKrnl.h
+             $(WIN32KINCLUDE)\sym.h \
+             $(WIN32KINCLUDE)\probKrnl.h
     $(CC16) -c -W4 -Asfw -G2s -Zp -Zl -nologo -Fo$@ -Fa -Zi -Od -Lp \
         -DDEBUG -DEXTRACT -Fa$(WIN32KLIST)\$(*B).s     \
         -Fo$(WIN32KOBJ)\probkrnl_e.obj $(CINCLUDES16) dev16\probkrnl.c
@@ -264,7 +266,7 @@ d32init.exe: dev32\d32init.c
 
 
 ################################################################################
-# Win32k.sys rule. Don't mess with the order or objects and libraries!
+# Win32k.sys rule. (Don't mess with the order or objects and libraries!)
 ################################################################################
 $(NAME).sys: $(OBJS) $(LIBS) last.lib init.lib $(LIBSINIT) $(NAME).def
     -@$(ECHO) linking: $@
@@ -276,8 +278,22 @@ $(OBJS) $(LIBS) last.lib init.lib /IG $(LIBSINIT) $(NAME).def
     $(CP) $*.sym $(PDWIN32_BIN)
     $(CP) $*.ddp $(PDWIN32_BIN)
 
-#    copy win32k.sym c:\temp
-#    copy win32k.sys c:\temp
+
+################################################################################
+# Pe2Lx.exe rule
+################################################################################
+pe2lx.exe:
+    cd pe2lx
+    $(MAKE_CMD)
+    cd ..
+
+################################################################################
+# Libraries - global libraries
+################################################################################
+lib:
+    cd lib
+    $(MAKE_CMD)
+    cd ..
 
 
 ################################################################################
@@ -332,6 +348,11 @@ clean:
         $(WIN32KLIST)\*.s $(WIN32KLIST)\*.asm $(WIN32KLIST)\*.map \
         $(WIN32KLIST)\*.lst \
         $(PDWIN32_BIN)\$(NAME).sys
+    cd pe2lx
+    $(MAKE_CMD) clean
+    cd ..\lib
+    $(MAKE_CMD) clean
+    cd ..
 
 
 ################################################################################
@@ -344,10 +365,15 @@ clean:
 dep:
     IF NOT EXIST makefile.inc configure.cmd noninteractive
     $(MAKE_CMD) NODEP=1 MAKEFILE_INC=1 dep2
+    cd pe2lx
+    $(MAKE_CMD) NODEP=1 dep
+    cd ..\lib
+    $(MAKE_CMD) NODEP=1 dep
+    cd ..
 
 dep2:
     $(PDWIN32_TOOLS)\fastdep -o$(WIN32KOBJ) $(CINCLUDES) misc\*.c* ldr\*.c* dev32\*.c* \
-        dev16\*.c* pe2lx\*.c* k32\*.c* lib\*.c include\*.h
+        dev16\*.c* pe2lx\*.c* k32\*.c* lib\*.c $(WIN32KINCLUDE)\*.h
     $(PDWIN32_TOOLS)\fastdep -a+ -o$(WIN32KOBJ) $(CINCLUDES16) dev16\*.c*
 
 
