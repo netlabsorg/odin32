@@ -1,4 +1,4 @@
-/* $Id: cpuhlp.h,v 1.3 2000-03-21 20:13:30 sandervl Exp $ */
+/* $Id: cpuhlp.h,v 1.4 2000-10-03 17:26:03 sandervl Exp $ */
 
 #ifndef _CPUHLP_H_
 #define _CPUHLP_H_
@@ -23,11 +23,12 @@ extern "C" {
 #define CPUID_CONDITIONAL_MOVE		BIT(15)
 #define CPUID_MMX			BIT(23)
 
-BOOL  __cdecl SupportsCPUID();
+BOOL  CDECL SupportsCPUID();
 
-void  __cdecl GetCPUVendorString(char *vendor);
-DWORD __cdecl GetCPUFeatures();
-DWORD __cdecl GetCPUSignature();
+void  CDECL GetCPUVendorString(char *vendor);
+DWORD CDECL GetCPUFeatures();
+DWORD CDECL GetCPUSignature();
+void  CDECL GetTSC(LONG *high, LONG *low);
 
 void  InitSystemInfo(int nrcpus);
 
