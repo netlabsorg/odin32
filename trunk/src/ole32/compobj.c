@@ -436,13 +436,27 @@ HRESULT WINAPI CLSIDFromString16(
   BYTE *s = (BYTE *) idstr;
   BYTE *p;
   int	i;
+  
+  
+#ifdef __WIN32OS2__
+  // Note: only setup the lookup table once!
+  static BOOL fCLSIDTableInitialized = FALSE;
+  static BYTE table[256];
+#else
   BYTE table[256];
+#endif
 
   if (!s)
 	  s = "{00000000-0000-0000-0000-000000000000}";
   else {  /* validate the CLSID string */
-
-      if (strlen(s) != 38)
+    
+#ifdef __WIN32OS2__
+    // PH: all other characters are tested up to the 38th
+    // and cannot be zero so this test should be sufficient.
+    if (s[38] != 0)
+#else
+    if (strlen(s) != 38)
+#endif
           return CO_E_CLASSSTRING;
 
       if ((s[0]!='{') || (s[9]!='-') || (s[14]!='-') || (s[19]!='-') || (s[24]!='-') || (s[37]!='}'))
@@ -460,17 +474,28 @@ HRESULT WINAPI CLSIDFromString16(
   }
 
   TRACE("%s -> %p\n", s, id);
-
-  /* quick lookup table */
-  memset(table, 0, 256);
-
-  for (i = 0; i < 10; i++) {
-    table['0' + i] = i;
+  
+  
+#ifdef __WIN32OS2__
+  if (fCLSIDTableInitialized == FALSE)
+  {
+    fCLSIDTableInitialized = TRUE;
+#endif
+    
+    /* quick lookup table */
+    memset(table, 0, 256);
+  
+    for (i = 0; i < 10; i++) {
+      table['0' + i] = i;
+    }
+    for (i = 0; i < 6; i++) {
+      table['A' + i] = i+10;
+      table['a' + i] = i+10;
+    }
+    
+#ifdef __WIN32OS2__
   }
-  for (i = 0; i < 6; i++) {
-    table['A' + i] = i+10;
-    table['a' + i] = i+10;
-  }
+#endif
 
   /* in form {XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX} */
 
