@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.23 1999-10-22 18:11:50 sandervl Exp $ */
+/* $Id: window.cpp,v 1.24 1999-10-23 23:04:39 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -737,7 +737,7 @@ BOOL WIN32API AdjustWindowRect(PRECT rect, DWORD style, BOOL menu)
 //******************************************************************************
 BOOL WIN32API AdjustWindowRectEx( PRECT rect, DWORD style, BOOL menu, DWORD exStyle)
 {
-    dprintf(("AdjustWindowRectEx %x %x %d (%d,%d)(%d,%d)\n", style, exStyle, menu, rect->right, rect->top, rect->left, rect->bottom));
+    dprintf(("AdjustWindowRectEx %x %x %d (%d,%d)(%d,%d)\n", style, exStyle, menu, rect->left, rect->top, rect->right, rect->bottom));
 
     /* Correct the window style */
     if (!(style & (WS_POPUP | WS_CHILD)))  /* Overlapped window */
@@ -751,7 +751,7 @@ BOOL WIN32API AdjustWindowRectEx( PRECT rect, DWORD style, BOOL menu, DWORD exSt
     Win32BaseWindow::NC_AdjustRectOuter( rect, style, menu, exStyle );
     Win32BaseWindow::NC_AdjustRectInner( rect, style, exStyle );
 
-    dprintf(("AdjustWindowRectEx returned (%d,%d)(%d,%d)\n", rect->right, rect->top, rect->left, rect->bottom));
+    dprintf(("AdjustWindowRectEx returned (%d,%d)(%d,%d)\n", rect->left, rect->top, rect->right, rect->bottom));
     return TRUE;
 }
 //******************************************************************************
@@ -941,7 +941,7 @@ BOOL WIN32API ClientToScreen (HWND hwnd, PPOINT pt)
     Win32BaseWindow *wnd;
     PRECT rcl;
 
-    dprintf(("USER32:  ClientToScreen\n"));
+    dprintf(("ClientToScreen (%d,%d)\n", pt->x, pt->y));
     if (!hwnd) {
         SetLastError(ERROR_INVALID_PARAMETER);
         return (FALSE);
@@ -956,6 +956,7 @@ BOOL WIN32API ClientToScreen (HWND hwnd, PPOINT pt)
     pt->y = (rcl->bottom - rcl->top) - pt->y;
     OSLibWinMapWindowPoints (wnd->getOS2WindowHandle(), OSLIB_HWND_DESKTOP, (OSLIBPOINT *)pt, 1);
     pt->y = ScreenHeight - pt->y;
+    dprintf(("ClientToScreen returned (%d,%d)\n", pt->x, pt->y));
     return (TRUE);
 }
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.19 1999-10-22 18:11:46 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.20 1999-10-23 23:04:36 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -249,6 +249,7 @@ BOOL  OSLibWinQueryWindowPos (HWND hwnd, PSWP pswp);
 void  OSLibMapSWPtoWINDOWPOS(PSWP pswp, struct tagWINDOWPOS *pwpos, PSWP pswpOld, HWND hParent, HWND hFrame);
 void  OSLibMapSWPtoWINDOWPOSFrame(PSWP pswp, struct tagWINDOWPOS *pwpos, PSWP pswpOld, HWND hParent, HWND hFrame);
 void  OSLibMapWINDOWPOStoSWP(struct tagWINDOWPOS *pwpos, PSWP pswp, PSWP pswpOld, HWND hParent, HWND hFrame);
+void  OSLibMapWINDOWPOStoSWPFrame(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, HWND hParent, HWND hFrame);
 
 HWND  OSLibWinBeginEnumWindows(HWND hwnd);
 HWND  OSLibWinGetNextWindow(HWND hwndEnum);

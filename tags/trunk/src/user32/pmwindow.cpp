@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.42 1999-10-23 16:45:20 cbratschi Exp $ */
+/* $Id: pmwindow.cpp,v 1.43 1999-10-23 23:04:37 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -28,10 +28,10 @@
 #include "oslibgdi.h"
 #include "oslibmsg.h"
 #include "dc.h"
-#include "timer.h"
 #include <thread.h>
 #include <wprocess.h>
-#include <caret.h>
+#include "caret.h"
+#include "timer.h"
 
 HMQ  hmq = 0;                             /* Message queue handle         */
 HAB  hab = 0;
@@ -247,11 +247,11 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         }
         break;
 
-#if 1
+#if 0
     case WM_ADJUSTWINDOWPOS:
     {
       PSWP     pswp = (PSWP)mp1;
-      SWP      swpOld;
+      SWP      swpOld, swpNew;
       WINDOWPOS wp;
       ULONG     parentHeight = 0;
       HWND      hParent = NULLHANDLE, hFrame = NULLHANDLE, hwndAfter;
@@ -290,18 +290,17 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         {//app or default window handler changed wp
             dprintf(("OS2: WM_ADJUSTWINDOWPOS, app changed windowpos struct"));
             dprintf(("%x (%d,%d), (%d,%d)", pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
-            OSLibMapWINDOWPOStoSWP(&wp, pswp, &swpOld, hParent, hFrame);
-            dprintf(("%x (%d,%d), (%d,%d)", pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
-            pswp->fl |= SWP_NOADJUST;
-            pswp->hwndInsertBehind = hwndAfter;
-            pswp->hwnd = hFrame;
+            OSLibMapWINDOWPOStoSWP(&wp, &swpNew, &swpOld, hParent, hFrame);
+            dprintf(("%x (%d,%d), (%d,%d)", swpNew.fl, swpNew.x, swpNew.y, swpNew.cx, swpNew.cy));
+            swpNew.fl |= SWP_NOADJUST;
+            swpNew.hwndInsertBehind = hwndAfter;
+            swpNew.hwnd = hFrame;
 
-            WinSetMultWindowPos(GetThreadHAB(), pswp, 1);
+            WinSetMultWindowPos(GetThreadHAB(), &swpNew, 1);
             return (MRESULT)0;
         }
         break;
     }
-#endif
 
     case WM_WINDOWPOSCHANGED:
     {
@@ -315,7 +314,6 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         dprintf(("OS2: WM_WINDOWPOSCHANGED %x %x (%d,%d) (%d,%d)", hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
 
         if ((pswp->fl & (SWP_SIZE | SWP_MOVE | SWP_ZORDER)) == 0) break;
-        if (!win32wnd->CanReceiveSizeMsgs())    break;
 
         if(pswp->fl & (SWP_MOVE | SWP_SIZE)) {
             if (win32wnd->isChild()) {
@@ -325,7 +323,9 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                 else    goto RunDefWndProc; //parent has just been destroyed
             }
         }
-        OSLibMapSWPtoWINDOWPOS(pswp, &wp, &swpOld, hParent, hwnd);
+        OSLibMapSWPtoWINDOWPOS(pswp, &wp, &swpOld, hParent, win32wnd->getOS2FrameWindowHandle());
+
+        if (!win32wnd->CanReceiveSizeMsgs())    break;
 
         win32wnd->setWindowRect(wp.x, wp.y, wp.x+wp.cx, wp.y+wp.cy);
         win32wnd->setClientRect(swpOld.x, swpOld.y, swpOld.x + swpOld.cx, swpOld.y + swpOld.cy);
@@ -397,24 +397,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
         goto RunDefWndProc;
     }
-
-    case WM_SIZE:
-    {
-        dprintf(("OS2: WM_SIZE (%d,%d) (%d,%d)", SHORT1FROMMP(mp2), SHORT2FROMMP(mp2), SHORT1FROMMP(mp1), SHORT2FROMMP(mp2)));
-        break;
-    }
-
-    case WM_OWNERPOSCHANGE:
-    {
-        dprintf(("OS2: WM_OWNERPOSCHANGE"));
-        goto RunDefWndProc;
-    }
-
-    case WM_CALCVALIDRECTS:
-    {
-        dprintf(("OS2: WM_CALCVALIDRECTS"));
-        goto RunDefWndProc;
-    }
+#endif
 
     case WM_ACTIVATE:
     {
@@ -437,6 +420,25 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         }
         break;
     }
+
+    case WM_SIZE:
+    {
+        dprintf(("OS2: WM_SIZE (%d,%d) (%d,%d)", SHORT1FROMMP(mp2), SHORT2FROMMP(mp2), SHORT1FROMMP(mp1), SHORT2FROMMP(mp2)));
+        break;
+    }
+
+    case WM_OWNERPOSCHANGE:
+    {
+        dprintf(("OS2: WM_OWNERPOSCHANGE"));
+        goto RunDefWndProc;
+    }
+
+    case WM_CALCVALIDRECTS:
+    {
+        dprintf(("OS2: WM_CALCVALIDRECTS"));
+        goto RunDefWndProc;
+    }
+
     case WM_FOCUSCHANGE:
         dprintf(("OS2: WM_FOCUSCHANGE %x", hwnd));
         goto RunDefWndProc;

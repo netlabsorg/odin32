@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.34 1999-10-23 10:21:43 sandervl Exp $
+# $Id: Makefile,v 1.35 1999-10-23 23:04:31 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -18,6 +18,8 @@ PDWIN32_TOOLS = ..\..\tools\bin
 CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE)
 CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
+RC = $(PDWIN32_TOOLS)\wrc
+RCFLAGS = -s -I. -I$(CPPMAIN)\include -I$(PDWIN32_INCLUDE) -I$(PDWIN32_INCLUDE)\win
 
 TARGET = user32
 
@@ -33,22 +35,21 @@ OBJS =  user32.obj loadres.obj \
         combo.obj edit.obj clipboard.obj winicon.obj win32wmdiclient.obj \
         oslibutil.obj oslibmsg.obj dib.obj oslibdos.obj win32wmdichild.obj \
         winprop.obj wingdi.obj oslibgdi.obj winaccel.obj win32wbasepos.obj \
-        nativerc.obj oslibres.obj dummy.obj oslibmenu.obj dc.obj timer.obj \
-        caret.obj \
+        oslibres.obj dummy.obj oslibmenu.obj dc.obj timer.obj \
+        caret.obj resource.obj \
         windlgmsg.obj windlg.obj win32wdesktop.obj
 
 
 all: $(TARGET).dll $(TARGET).lib
 
 
-$(TARGET).dll: $(OBJS) $(TARGET).def $(TARGET).res $(TARGET).lrf
+$(TARGET).dll: $(OBJS) $(TARGET).def $(TARGET).lrf
 !ifdef DEBUG
 #	icc -Si -Ti -Ge- -Ss+ -W3 -Gm+ /B"/noe /NOD /NOFREE" @$(TARGET).lrf
 	ilink /de /map /noe /NOD /dbgpack /NoLogo /NOFREE @$(TARGET).lrf
 !else
 	ilink /map  /noe /NOD /NoLogo /FREE @$(TARGET).lrf
 !endif
-        rc $(TARGET).res $(TARGET).dll
         $(CP) $@ $(PDWIN32_BIN)
 
 $(TARGET).lrf: makefile
@@ -64,9 +65,6 @@ $(RTLLIB_O)
 $(TARGET).def
 <<keep
 
-$(TARGET).res:
-        rc -r user32.rc user32.res
-
 $(TARGET).lib: $(TARGET)exp.def
         $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
         $(CP) $@ $(PDWIN32_LIB)
@@ -74,6 +72,11 @@ $(TARGET).lib: $(TARGET)exp.def
 $(TARGET)exp.def: $(TARGET).def
         $(IMPDEF) $** $@
 
+
+resource.asm: user32.rc 
+    $(RC) $(RCFLAGS) -o resource.asm user32.rc 
+
+resource.obj: resource.asm
 
 user32.obj: user32.cpp $(PDWIN32_INCLUDE)\wndproc.h \
             $(PDWIN32_INCLUDE)\winicon.h syscolor.h
@@ -87,7 +90,7 @@ dde.obj: dde.cpp
 hook.obj: hook.cpp hooks.h
 defwndproc.obj: defwndproc.cpp syscolor.h win32wmdiclient.h win32wbase.h win32wnd.h win32dlg.h
 hooks.obj: hooks.cpp hooks.h
-initterm.obj: initterm.cpp $(PDWIN32_INCLUDE)\spy.h pmwindow.h heapshared.h
+initterm.obj: initterm.cpp $(PDWIN32_INCLUDE)\spy.h pmwindow.h heapshared.h initterm.h
 uitools.obj: uitools.cpp win32wbase.h
 unknown.obj: unknown.cpp
 wndmsg.obj: wndmsg.cpp wndmsg.h $(PDWIN32_INCLUDE)\spy.h
@@ -95,14 +98,12 @@ wndmsg.obj: wndmsg.cpp wndmsg.h $(PDWIN32_INCLUDE)\spy.h
 spy.obj: spy.cpp $(PDWIN32_INCLUDE)\spy.h
 
 controls.obj: controls.cpp controls.h win32wmdiclient.h win32dlg.h win32wdesktop.h
-button.obj: button.cpp $(PDWIN32_INCLUDE)\win\button.h
-static.obj: static.cpp $(PDWIN32_INCLUDE)\win\static.h
+button.obj: button.cpp $(PDWIN32_INCLUDE)\win\button.h initterm.h
+static.obj: static.cpp $(PDWIN32_INCLUDE)\win\static.h initterm.h
 scroll.obj: scroll.cpp $(PDWIN32_INCLUDE)\win\scroll.h win32wbase.h oslibwin.h
 listbox.obj: listbox.cpp $(PDWIN32_INCLUDE)\win\combo.h
-combo.obj: combo.cpp $(PDWIN32_INCLUDE)\win\combo.h
+combo.obj: combo.cpp $(PDWIN32_INCLUDE)\win\combo.h initterm.h
 edit.obj: edit.cpp $(PDWIN32_INCLUDE)\win\combo.h
-
-nativerc.obj: nativerc.cpp
 
 msgbox.obj:    msgbox.cpp
 window.obj:    window.cpp win32class.h win32wbase.h win32wndchild.h oslibwin.h win32wmdiclient.h win32wdesktop.h

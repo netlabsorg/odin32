@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.33 1999-10-23 16:45:24 cbratschi Exp $ */
+/* $Id: win32wbase.h,v 1.34 1999-10-23 23:04:39 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -148,7 +148,7 @@ Win32BaseWindow *getParent()                    { return (Win32BaseWindow *)Chil
 
          BOOL   ShowWindow(ULONG nCmdShow);
          BOOL   SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, int cy, UINT fuFlags);
-         BOOL   SetWindowPlacement(WINDOWPLACEMENT *winpos);
+	 BOOL   SetWindowPlacement(WINDOWPLACEMENT *winpos);
          BOOL   DestroyWindow();
          HWND   SetActiveWindow();
          HWND   GetParent();
@@ -218,9 +218,9 @@ static Win32BaseWindow *GetWindowFromOS2FrameHandle(HWND hwnd);
        ULONG getBorderWidth() { return borderWidth; };
        ULONG getBorderHeight() { return borderHeight; };
 
-static  void  NC_AdjustRectInner(LPRECT rect, DWORD style, DWORD exStyle);
-static  void  NC_AdjustRectOuter(LPRECT rect, DWORD style, BOOL menu, DWORD exStyle);
-static  BOOL  WindowNeedsWMBorder( DWORD style, DWORD exStyle );
+static	void  NC_AdjustRectInner(LPRECT rect, DWORD style, DWORD exStyle);
+static	void  NC_AdjustRectOuter(LPRECT rect, DWORD style, BOOL menu, DWORD exStyle);
+static	BOOL  WindowNeedsWMBorder( DWORD style, DWORD exStyle );
 
        PVOID getOldWndProc() { return pOldWndProc; }
        VOID  setOldWndProc(PVOID aOldWndProc) { pOldWndProc = aOldWndProc; }
@@ -303,7 +303,7 @@ static GenericObject *windows;
 private:
 #ifndef OS2_INCLUDED
         void  GetMinMaxInfo(POINT *maxSize, POINT *maxPos, POINT *minTrack, POINT *maxTrack );
-        LONG  HandleWindowPosChanging(WINDOWPOS *winpos);
+	LONG  HandleWindowPosChanging(WINDOWPOS *winpos);
         LONG  HandleSysCommand(WPARAM wParam, POINT *pt32);
 
         LONG  SendNCCalcSize(BOOL calcValidRect,

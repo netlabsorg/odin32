@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.6 1999-10-20 06:38:09 sandervl Exp $ */
+/* $Id: edit.cpp,v 1.7 1999-10-23 23:04:33 sandervl Exp $ */
 /*
  *      Edit control
  *
@@ -13,8 +13,6 @@
 
 /*
  *      please read EDIT.TODO (and update it when you change things)
-  CB:
-   - OS/2 menu not implemented (WM_CONTEXTMENU)
  */
 
 #include <os2win.h>
@@ -2669,7 +2667,6 @@ static void EDIT_WM_Command(HWND hwnd, EDITSTATE *es, INT code, INT id, HWND con
  */
 static void EDIT_WM_ContextMenu(HWND hwnd, EDITSTATE *es, HWND hwndBtn, INT x, INT y)
 {
-//CB: implement native menu!
         HMENU menu = LoadMenuA(GetModuleHandleA("USER32"), "EDITMENU");
         HMENU popup = GetSubMenu(menu, 0);
         UINT start = es->selection_start;

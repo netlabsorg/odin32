@@ -1,4 +1,4 @@
-/* $Id: combo.cpp,v 1.8 1999-10-21 12:19:26 sandervl Exp $ */
+/* $Id: combo.cpp,v 1.9 1999-10-23 23:04:33 sandervl Exp $ */
 /*
  * Combo controls
  *
@@ -14,6 +14,7 @@
 #include <os2win.h>
 #include "controls.h"
 #include "combo.h"
+#include "initterm.h"
 
   /* bits in the dwKeyData */
 #define KEYDATA_ALT             0x2000
@@ -59,12 +60,10 @@ static BOOL COMBO_Init()
   if(hDC)
   {
     BOOL      bRet = FALSE;
-    HINSTANCE hinst;
 
-    //CB: Open32 hack to load our own bitmap
-    hinst = LoadLibraryA("USER32.DLL");
-    hComboBmp = NativeLoadBitmap(0,MAKEINTRESOURCEA(OBM_COMBO));
-    FreeLibrary(hinst);
+//SvL: Combo bitmap is invalid
+    hComboBmp = LoadBitmapA(0, MAKEINTRESOURCEA(OBM_COMBO));
+//    hComboBmp = LoadBitmapA(hInstanceUser32, MAKEINTRESOURCEA(OBM_COMBO));
     if(hComboBmp)
     {
       BITMAP      bm;
@@ -164,9 +163,6 @@ static void CBForceDummyResize(
   LPHEADCOMBO lphc)
 {
   RECT windowRect;
-
-  //SvL: Doesn't work for us
-  return;
 
   GetWindowRect(CB_HWND(lphc), &windowRect);
 
@@ -1720,7 +1716,8 @@ static void COMBO_LButtonUp( LPHEADCOMBO lphc, LPARAM lParam )
            CBUpdateEdit( lphc, index );
        }
        ReleaseCapture();
-       SetCapture(lphc->hWndLBox);
+//SvL: Don't set the capture here. Otherwise other controls don't respond the first time!
+//       SetCapture(lphc->hWndLBox);
    }
 
    if( lphc->wState & CBF_BUTTONDOWN )

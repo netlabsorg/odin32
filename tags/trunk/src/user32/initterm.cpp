@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.12 1999-10-20 16:27:00 cbratschi Exp $ */
+/* $Id: initterm.cpp,v 1.13 1999-10-23 23:04:34 sandervl Exp $ */
 
 /*
  * USER32 DLL entry point
@@ -40,6 +40,7 @@
 #include "heapshared.h"
 #include "win32wdesktop.h"
 #include "syscolor.h"
+#include "initterm.h"
 
 /*-------------------------------------------------------------------*/
 /* A clean up routine registered with DosExitList must be used if    */
@@ -53,8 +54,12 @@ static void APIENTRY cleanupQueue(ULONG ulReason);
 extern "C" {
 void CDECL _ctordtorInit( void );
 void CDECL _ctordtorTerm( void );
+
+ //Win32 resource table (produced by wrc)
+ extern DWORD _Resource_PEResTab;
 }
 
+DWORD hInstanceUser32 = 0;
 
 /****************************************************************************/
 /* _DLL_InitTerm is the function that gets called by the operating system   */
@@ -82,7 +87,8 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
-         if(RegisterLxDll(hModule, 0, 0) == FALSE)
+	 hInstanceUser32 = RegisterLxDll(hModule, 0, (PVOID)&_Resource_PEResTab);
+         if(hInstanceUser32 == 0)
                 return 0UL;
 
          /*******************************************************************/

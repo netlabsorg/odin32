@@ -1,4 +1,4 @@
-/* $Id: loadres.cpp,v 1.9 1999-10-14 19:31:29 sandervl Exp $ */
+/* $Id: loadres.cpp,v 1.10 1999-10-23 23:04:35 sandervl Exp $ */
 
 /*
  * Win32 resource API functions for OS/2
@@ -33,6 +33,7 @@ int WIN32API LoadStringA(HINSTANCE hinst, UINT wID, LPSTR lpBuffer, int cchBuffe
     winres = (Win32Resource *)FindResourceA(hinst, (LPSTR)wID, RT_STRINGA);
     if(winres == NULL) {
         dprintf(("LoadStringA NOT FOUND from %X, id %d buffersize %d\n", hinst, wID, cchBuffer));
+        *lpBuffer = 0;
         return 0;
     }
 
@@ -60,6 +61,7 @@ int WIN32API LoadStringW(HINSTANCE hinst, UINT wID, LPWSTR lpBuffer, int cchBuff
     winres = (Win32Resource *)FindResourceW(hinst, (LPWSTR)wID, RT_STRINGW);
     if(winres == NULL) {
         dprintf(("LoadStringW NOT FOUND from %X, id %d buffersize %d\n", hinst, wID, cchBuffer));
+        *lpBuffer = 0;
         return 0;
     }
 
@@ -327,7 +329,7 @@ HBITMAP WIN32API LoadBitmapA(HINSTANCE hinst, LPCSTR lpszBitmap)
   if(IsSystemBitmap((ULONG *)&lpszBitmap)) {
         hBitmap = O32_LoadBitmap(hinst, lpszBitmap);
   }
-  else {
+  if(!hBitmap) {
         hBitmap = LoadBitmapA(hinst, lpszBitmap, 0, 0, 0);
   }
   dprintf(("LoadBitmapA returned %08xh\n", hBitmap));
@@ -344,7 +346,7 @@ HBITMAP WIN32API LoadBitmapW(HINSTANCE hinst, LPCWSTR lpszBitmap)
   if(IsSystemBitmap((ULONG *)&lpszBitmap)) {
         hBitmap = O32_LoadBitmap(hinst, (LPCSTR)lpszBitmap);
   }
-  else {
+  if(!hBitmap) {
         if(HIWORD(lpszBitmap) != 0) {
                  lpszBitmap = (LPWSTR)UnicodeToAsciiString((LPWSTR)lpszBitmap);
         }
@@ -367,7 +369,10 @@ HANDLE WIN32API LoadImageA(HINSTANCE hinst, LPCSTR lpszName, UINT uType,
 {
  HANDLE hRet = 0;
 
-  dprintf(("LoadImageA NOT COMPLETE (%d,%d)\n", cxDesired, cyDesired));
+  if(HIWORD(lpszName)) {
+  	dprintf(("LoadImageA NOT COMPLETE %x %s %d (%d,%d)\n", hinst, lpszName, uType, cxDesired, cyDesired));
+  }
+  else 	dprintf(("LoadImageA NOT COMPLETE %x %x %d (%d,%d)\n", hinst, lpszName, uType, cxDesired, cyDesired));
 
   if (fuLoad & LR_DEFAULTSIZE) {
         if (uType == IMAGE_ICON) {
