@@ -1,4 +1,8 @@
- /* $Id: changelog,v 1.568 1999-12-21 13:45:03 sandervl Exp $ */
+ /* $Id: changelog,v 1.569 1999-12-21 16:59:45 cbratschi Exp $ */
+
+ 99-12-21: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32: merged controls with WINE 991212
+		  fixed listbox WM_SETREDRAW bug
 
  99-12-21: Markus Montkowski <mmontkowski@gmx.de>
         - ddraw: Some cleanup in surface handling 
