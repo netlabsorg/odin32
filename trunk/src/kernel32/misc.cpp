@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.12 1999-10-23 12:34:47 sandervl Exp $ */
+/* $Id: misc.cpp,v 1.13 1999-10-25 21:38:50 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -341,6 +341,11 @@ void SYSTEM CheckVersionFromHMOD(ULONG version, HMODULE hModule)
 void WIN32API DebugBreak()
 {
   dprintf(("DebugBreak\n"));
+
+  LPSTR lpstrEnv = getenv("WIN32.DEBUGBREAK");              /* query environment */
+  if (lpstrEnv == NULL)      /* if environment is not set, don't call debugger ! */
+     return;
+
 #ifdef __WATCOMC__
   interrupt3();
 #else
