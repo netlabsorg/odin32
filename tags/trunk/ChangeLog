@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.1622 2001-07-30 02:02:57 bird Exp $ */
+/* $Id: ChangeLog,v 1.1623 2001-07-30 10:20:45 sandervl Exp $ */
+
+ 2001-07-30: Sander van Leeuwen <sandervl@xs4all.nl>
+    - WINMM:    o Rewrote timeGetSystemTime & timeGetTime
 
  2001-07-29: knut st. osmundsen <kosmunds@csc.com>
     - Makefiles:
