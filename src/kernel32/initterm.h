@@ -1,4 +1,4 @@
-/* $Id: initterm.h,v 1.4 1999-11-24 19:38:55 sandervl Exp $ */
+/* $Id: initterm.h,v 1.5 2000-06-21 20:51:52 sandervl Exp $ */
 /*
  * KERNEL32 DLL entry point header
  *
@@ -35,5 +35,7 @@ extern int loadNr;
 extern ULONG flAllocMem; /* flag to optimize DosAllocMem to use all the memory on SMP machines */
 extern ULONG ulMaxAddr; /* end of user address space */
 extern char  kernel32Path[];
+
+void InitEnvironment(int nrcpus); //initsystem.cpp
 
 #endif
