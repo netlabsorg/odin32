@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2712 2004-03-18 16:54:50 sandervl Exp $ */
+/* $Id: changelog,v 1.2713 2004-03-22 12:45:18 sandervl Exp $ */
+
+ 2004-03-22: Sander van Leeuwen <sandervl@innotek   >
+    - COMCTL32: o Rebar: changed resize fix again
 
  2004-03-18: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o RedrawWindow: ignore if window is not visible
