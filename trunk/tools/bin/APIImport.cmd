@@ -1,4 +1,4 @@
-/* $Id: APIImport.cmd,v 1.4 2000-03-14 16:10:33 bird Exp $
+/* $Id: APIImport.cmd,v 1.5 2000-08-02 20:19:34 bird Exp $
  *
  * Helper script which invokes APIImport.exe with the correct .def file.
  *
@@ -14,7 +14,7 @@
     parse source sD1 sD2 sSrc;
 
     sSrc = filespec('drive', sSrc) || filespec('path', sSrc);
-    sAPIImport= sSrc||'APIImport.exe';
+    sAPIImport= sSrc||'APIImport.exe  -e+ ';
     if (sDllName = 'msvcrt') then
     do
         call MakeTempDeffile sDllName, 'APIImport.def';
