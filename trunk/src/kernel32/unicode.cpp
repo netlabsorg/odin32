@@ -1,4 +1,4 @@
-/* $Id: unicode.cpp,v 1.18 1999-12-01 20:09:57 sandervl Exp $ */
+/* $Id: unicode.cpp,v 1.19 1999-12-05 21:11:40 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -287,6 +287,7 @@ char * WIN32API UnicodeToAsciiString(LPCWSTR ustring)
   return(astring);
 }
 //******************************************************************************
+// length = characters to convert
 //******************************************************************************
 char * WIN32API UnicodeToAsciiStringN(LPCWSTR ustring, ULONG length)
 {
@@ -295,7 +296,7 @@ char * WIN32API UnicodeToAsciiStringN(LPCWSTR ustring, ULONG length)
   if(ustring == NULL)  return(NULL);
 
   astring = (char *)malloc( 1 + length );
-  UnicodeToAscii( ustring, astring );
+  UnicodeToAsciiN( ustring, astring, length+1 ); //terminating 0 always added
   return(astring);
 }
 //******************************************************************************
@@ -405,6 +406,7 @@ void WIN32API AsciiToUnicode(const char *ascii, WCHAR *unicode)
   /* forward to call with length parameter */
   AsciiToUnicodeN(ascii, unicode, strlen(ascii)+1); //end included
 }
+
 
 
 
