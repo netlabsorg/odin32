@@ -1,4 +1,4 @@
-/* $Id: hmfile.cpp,v 1.11 2000-07-12 18:21:43 sandervl Exp $ */
+/* $Id: hmfile.cpp,v 1.12 2000-07-15 17:12:48 sandervl Exp $ */
 
 /*
  * File IO win32 apis
@@ -409,7 +409,7 @@ BOOL HMDeviceFileClass::ReadFile(PHMHANDLEDATA pHMHandleData,
 {
   LPVOID       lpRealBuf;
   Win32MemMap *map;
-  DWORD        offset;
+  DWORD        offset, bytesread;
   BOOL         bRC;
 
   dprintfl(("KERNEL32: HMDeviceFileClass::ReadFile %s(%08x,%08x,%08x,%08x,%08x) - stub?\n",
@@ -419,6 +419,12 @@ BOOL HMDeviceFileClass::ReadFile(PHMHANDLEDATA pHMHandleData,
            nNumberOfBytesToRead,
            lpNumberOfBytesRead,
            lpOverlapped));
+
+  //SvL: It's legal for this pointer to be NULL
+  if(lpNumberOfBytesRead) {
+	lpNumberOfBytesRead = 0;
+  }
+  else  lpNumberOfBytesRead = &bytesread;
 
   if((pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && !lpOverlapped) {
 	dprintf(("FILE_FLAG_OVERLAPPED flag set, but lpOverlapped NULL!!"));
@@ -526,7 +532,7 @@ BOOL HMDeviceFileClass::WriteFile(PHMHANDLEDATA pHMHandleData,
 {
   LPVOID       lpRealBuf;
   Win32MemMap *map;
-  DWORD        offset;
+  DWORD        offset, byteswritten;
   BOOL         bRC;
 
   dprintfl(("KERNEL32: HMDeviceFileClass::WriteFile %s(%08x,%08x,%08x,%08x,%08x) - stub?\n",
@@ -536,6 +542,12 @@ BOOL HMDeviceFileClass::WriteFile(PHMHANDLEDATA pHMHandleData,
            nNumberOfBytesToWrite,
            lpNumberOfBytesWritten,
            lpOverlapped));
+
+  //SvL: It's legal for this pointer to be NULL
+  if(lpNumberOfBytesWritten) {
+	lpNumberOfBytesWritten = 0;
+  }
+  else  lpNumberOfBytesWritten = &byteswritten;
 
   if((pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && !lpOverlapped) {
 	dprintf(("FILE_FLAG_OVERLAPPED flag set, but lpOverlapped NULL!!"));
