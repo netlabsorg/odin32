@@ -1,4 +1,4 @@
-/* $Id: glut_event.c,v 1.8 2000-03-11 15:07:44 sandervl Exp $ */
+/* $Id: glut_event.c,v 1.9 2000-03-11 17:07:44 sandervl Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1994, 1995, 1996, 1997, 1998. */
 
 /* This program is freely distributable without licensing fees
@@ -950,8 +950,6 @@ static GLUTwindow **beforeEnd;
 static GLUTwindow *
 processWindowWorkList(GLUTwindow * window)
 {
-//_interrupt(3);
-
   int workMask;
 
   if (window->prevWorkWin) {

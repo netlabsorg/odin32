@@ -1,4 +1,4 @@
-/* $Id: glu.h,v 1.4 2000-03-11 15:08:36 sandervl Exp $ */
+/* $Id: glu.h,v 1.5 2000-03-11 17:06:35 sandervl Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -65,9 +65,8 @@ extern "C" {
 #define GLAPIENTRY
 #endif
 
-#undef GLCALLBACK
 #ifndef GLCALLBACK
-#define GLCALLBACK __stdcall
+#define GLCALLBACK 
 #endif
 
 

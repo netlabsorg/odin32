@@ -1,4 +1,4 @@
-/* $Id: glutint.h,v 1.6 2000-03-11 15:07:47 sandervl Exp $ */
+/* $Id: glutint.h,v 1.7 2000-03-11 17:07:46 sandervl Exp $ */
 #ifndef __glutint_h__
 #define __glutint_h__
 
@@ -248,29 +248,29 @@ typedef struct _DisplayMode {
 } DisplayMode;
 
 /* GLUT  function types */
-typedef void (* GLCALLBACK GLUTdisplayCB) (void);
-typedef void (* GLCALLBACK GLUTreshapeCB) (int, int);
-typedef void (* GLCALLBACK GLUTkeyboardCB) (unsigned char, int, int);
-typedef void (* GLCALLBACK GLUTmouseCB) (int, int, int, int);
-typedef void (* GLCALLBACK GLUTmotionCB) (int, int);
-typedef void (* GLCALLBACK GLUTpassiveCB) (int, int);
-typedef void (* GLCALLBACK GLUTentryCB) (int);
-typedef void (* GLCALLBACK GLUTvisibilityCB) (int);
-typedef void (* GLCALLBACK GLUTwindowStatusCB) (int);
-typedef void (* GLCALLBACK GLUTidleCB) (void);
-typedef void (* GLCALLBACK GLUTtimerCB) (int);
-typedef void (* GLCALLBACK GLUTmenuStateCB) (int);  /* DEPRICATED.              */
-typedef void (* GLCALLBACK GLUTmenuStatusCB) (int, int, int);
-typedef void (* GLCALLBACK GLUTselectCB) (int);
-typedef void (* GLCALLBACK GLUTspecialCB) (int, int, int);
-typedef void (* GLCALLBACK GLUTspaceMotionCB) (int, int, int);
-typedef void (* GLCALLBACK GLUTspaceRotateCB) (int, int, int);
-typedef void (* GLCALLBACK GLUTspaceButtonCB) (int, int);
-typedef void (* GLCALLBACK GLUTdialsCB) (int, int);
-typedef void (* GLCALLBACK GLUTbuttonBoxCB) (int, int);
-typedef void (* GLCALLBACK GLUTtabletMotionCB) (int, int);
-typedef void (* GLCALLBACK GLUTtabletButtonCB) (int, int, int, int);
-typedef void (* GLCALLBACK GLUTjoystickCB) (unsigned int buttonMask, int x, int y, int z);
+typedef void (* GLUTCALLBACK GLUTdisplayCB) (void);
+typedef void (* GLUTCALLBACK GLUTreshapeCB) (int, int);
+typedef void (* GLUTCALLBACK GLUTkeyboardCB) (unsigned char, int, int);
+typedef void (* GLUTCALLBACK GLUTmouseCB) (int, int, int, int);
+typedef void (* GLUTCALLBACK GLUTmotionCB) (int, int);
+typedef void (* GLUTCALLBACK GLUTpassiveCB) (int, int);
+typedef void (* GLUTCALLBACK GLUTentryCB) (int);
+typedef void (* GLUTCALLBACK GLUTvisibilityCB) (int);
+typedef void (* GLUTCALLBACK GLUTwindowStatusCB) (int);
+typedef void (* GLUTCALLBACK GLUTidleCB) (void);
+typedef void (* GLUTCALLBACK GLUTtimerCB) (int);
+typedef void (* GLUTCALLBACK GLUTmenuStateCB) (int);  /* DEPRICATED.              */
+typedef void (* GLUTCALLBACK GLUTmenuStatusCB) (int, int, int);
+typedef void (* GLUTCALLBACK GLUTselectCB) (int);
+typedef void (* GLUTCALLBACK GLUTspecialCB) (int, int, int);
+typedef void (* GLUTCALLBACK GLUTspaceMotionCB) (int, int, int);
+typedef void (* GLUTCALLBACK GLUTspaceRotateCB) (int, int, int);
+typedef void (* GLUTCALLBACK GLUTspaceButtonCB) (int, int);
+typedef void (* GLUTCALLBACK GLUTdialsCB) (int, int);
+typedef void (* GLUTCALLBACK GLUTbuttonBoxCB) (int, int);
+typedef void (* GLUTCALLBACK GLUTtabletMotionCB) (int, int);
+typedef void (* GLUTCALLBACK GLUTtabletButtonCB) (int, int, int, int);
+typedef void (* GLUTCALLBACK GLUTjoystickCB) (unsigned int buttonMask, int x, int y, int z);
 #ifdef SUPPORT_FORTRAN
 typedef void (*GLUTdisplayFCB) (void);
 typedef void (*GLUTreshapeFCB) (int *, int *);
@@ -659,7 +659,7 @@ extern unsigned int __glutModifierMask;
 /* private variables from glut_menu.c */
 extern GLUTmenuItem *__glutItemSelected;
 extern GLUTmenu **__glutMenuList;
-extern void (* GLCALLBACK __glutMenuStatusFunc) (int, int, int);
+extern void (* GLUTCALLBACK __glutMenuStatusFunc) (int, int, int);
 extern void __glutMenuModificationError(void);
 extern void __glutSetMenuItem(GLUTmenuItem * item,
   const char *label, int value, Bool isTrigger);
@@ -741,7 +741,7 @@ extern XVisualInfo *__glutGetVisualInfo(unsigned int mode);
 extern void __glutSetWindow(GLUTwindow * window);
 extern void __glutReshapeFunc(GLUTreshapeCB reshapeFunc,
   int callingConvention);
-extern void  GLCALLBACK __glutDefaultReshape(int, int);
+extern void  GLUTCALLBACK __glutDefaultReshape(int, int);
 extern GLUTwindow *__glutCreateWindow(
   GLUTwindow * parent,
   int x, int y, int width, int height, int gamemode);
