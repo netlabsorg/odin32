@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.33 2000-02-16 14:25:42 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.34 2000-02-17 14:08:51 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -276,7 +276,7 @@ BOOL Win32MemMap::unmapViewOfFile(Win32MemMapView *view)
 
   delete view;
 
-  if(--nrMappings) {
+  if(--nrMappings == 0) {
 	VirtualFree(pMapping, mSize, MEM_RELEASE);
 	pMapping = NULL;
   }
