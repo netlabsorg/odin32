@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.12 1999-10-09 18:16:57 sandervl Exp $ */
+/* $Id: window.cpp,v 1.13 1999-10-11 20:54:26 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -18,108 +18,17 @@
 
 #include <os2win.h>
 #include <misc.h>
+#include <string.h>
+#include <stdio.h>
 #include <win32wbase.h>
 #include <win32wmdiclient.h>
 #include <win32wdesktop.h>
+#include "win32dlg.h"
 #include <oslibwin.h>
 #include <oslibgdi.h>
 #include "user32.h"
 #include "winicon.h"
 
-//******************************************************************************
-//******************************************************************************
-#ifdef DEBUG
-void PrintWindowStyle(DWORD dwStyle, DWORD dwExStyle)
-{
- char style[256] = "";
- char exstyle[256] = "";
-
-  /* Window styles */
-  if(dwStyle & WS_CHILD)
-        strcat(style, "WS_CHILD ");
-  if(dwStyle & WS_POPUP)
-        strcat(style, "WS_POPUP ");
-  if(dwStyle & WS_VISIBLE)
-        strcat(style, "WS_VISIBLE ");
-  if(dwStyle & WS_DISABLED)
-        strcat(style, "WS_DISABLED ");
-  if(dwStyle & WS_CLIPSIBLINGS)
-        strcat(style, "WS_CLIPSIBLINGS ");
-  if(dwStyle & WS_CLIPCHILDREN)
-        strcat(style, "WS_CLIPCHILDREN ");
-  if(dwStyle & WS_MAXIMIZE)
-        strcat(style, "WS_MAXIMIZE ");
-  if(dwStyle & WS_MINIMIZE)
-        strcat(style, "WS_MINIMIZE ");
-  if(dwStyle & WS_GROUP)
-        strcat(style, "WS_GROUP ");
-  if(dwStyle & WS_TABSTOP)
-        strcat(style, "WS_TABSTOP ");
-
-  if(dwStyle & WS_CAPTION)
-        strcat(style, "WS_CAPTION ");
-  if(dwStyle & WS_DLGFRAME)
-        strcat(style, "WS_DLGFRAME ");
-  if(dwStyle & WS_BORDER)
-        strcat(style, "WS_BORDER ");
-
-  if(dwStyle & WS_VSCROLL)
-        strcat(style, "WS_VSCROLL ");
-  if(dwStyle & WS_HSCROLL)
-        strcat(style, "WS_HSCROLL ");
-  if(dwStyle & WS_SYSMENU)
-        strcat(style, "WS_SYSMENU ");
-  if(dwStyle & WS_THICKFRAME)
-        strcat(style, "WS_THICKFRAME ");
-  if(dwStyle & WS_MINIMIZEBOX)
-        strcat(style, "WS_MINIMIZEBOX ");
-  if(dwStyle & WS_MAXIMIZEBOX)
-        strcat(style, "WS_MAXIMIZEBOX ");
-
-  if(dwExStyle & WS_EX_DLGMODALFRAME)
-        strcat(exstyle, "WS_EX_DLGMODALFRAME ");
-  if(dwExStyle & WS_EX_ACCEPTFILES)
-        strcat(exstyle, "WS_EX_ACCEPTFILES ");
-  if(dwExStyle & WS_EX_NOPARENTNOTIFY)
-        strcat(exstyle, "WS_EX_NOPARENTNOTIFY ");
-  if(dwExStyle & WS_EX_TOPMOST)
-        strcat(exstyle, "WS_EX_TOPMOST ");
-  if(dwExStyle & WS_EX_TRANSPARENT)
-        strcat(exstyle, "WS_EX_TRANSPARENT ");
-
-  if(dwExStyle & WS_EX_MDICHILD)
-        strcat(exstyle, "WS_EX_MDICHILD ");
-  if(dwExStyle & WS_EX_TOOLWINDOW)
-        strcat(exstyle, "WS_EX_TOOLWINDOW ");
-  if(dwExStyle & WS_EX_WINDOWEDGE)
-        strcat(exstyle, "WS_EX_WINDOWEDGE ");
-  if(dwExStyle & WS_EX_CLIENTEDGE)
-        strcat(exstyle, "WS_EX_CLIENTEDGE ");
-  if(dwExStyle & WS_EX_CONTEXTHELP)
-        strcat(exstyle, "WS_EX_CONTEXTHELP ");
-  if(dwExStyle & WS_EX_RIGHT)
-        strcat(exstyle, "WS_EX_RIGHT ");
-  if(dwExStyle & WS_EX_LEFT)
-        strcat(exstyle, "WS_EX_LEFT ");
-  if(dwExStyle & WS_EX_RTLREADING)
-        strcat(exstyle, "WS_EX_RTLREADING ");
-  if(dwExStyle & WS_EX_LTRREADING)
-        strcat(exstyle, "WS_EX_LTRREADING ");
-  if(dwExStyle & WS_EX_LEFTSCROLLBAR)
-        strcat(exstyle, "WS_EX_LEFTSCROLLBAR ");
-  if(dwExStyle & WS_EX_RIGHTSCROLLBAR)
-        strcat(exstyle, "WS_EX_RIGHTSCROLLBAR ");
-  if(dwExStyle & WS_EX_CONTROLPARENT)
-        strcat(exstyle, "WS_EX_CONTROLPARENT ");
-  if(dwExStyle & WS_EX_STATICEDGE)
-        strcat(exstyle, "WS_EX_STATICEDGE ");
-  if(dwExStyle & WS_EX_APPWINDOW)
-        strcat(exstyle, "WS_EX_APPWINDOW ");
-
-  dprintf(("Window style:   %x %s", dwStyle, style));
-  dprintf(("Window exStyle: %x %s", dwExStyle, exstyle));
-}
-#endif
 //******************************************************************************
 //******************************************************************************
 HWND WIN32API CreateWindowExA(DWORD exStyle, LPCSTR className,
@@ -131,26 +40,30 @@ HWND WIN32API CreateWindowExA(DWORD exStyle, LPCSTR className,
   Win32BaseWindow *window;
   ATOM classAtom;
   CREATESTRUCTA cs;
-
-#ifdef DEBUG
-    PrintWindowStyle(style, exStyle);
-#endif
+  char tmpClass[20];
 
     if(exStyle & WS_EX_MDICHILD)
         return CreateMDIWindowA(className, windowName, style, x, y, width, height, parent, instance, (LPARAM)data);
 
-    //TODO: According to the docs className can be a 16 bits atom
-    //      Wine seems to assume it's a string though...
     /* Find the class atom */
     if (!(classAtom = GlobalFindAtomA(className)))
     {
-        dprintf(("CreateWindowEx32A: bad class name "));
-        if (!HIWORD(className)) {
-                dprintf(("CreateWindowEx32A: bad class name %04x\n", LOWORD(className)));
+        if (!HIWORD(className))
+        {
+          sprintf(tmpClass,"#%d", (int) className);
+          classAtom = GlobalFindAtomA(tmpClass);
+          className = tmpClass;
         }
-        else    dprintf(("CreateWindowEx32A: bad class name '%s'\n", className ));
-        SetLastError(ERROR_INVALID_PARAMETER);
-        return 0;
+        if (!classAtom)
+        {
+          if (!HIWORD(className)) {
+                  dprintf(("CreateWindowEx32W: bad class name %04x\n", LOWORD(className)));
+          }
+          else    dprintf(("CreateWindowEx32W: bad class name '%s'\n", className ));
+
+          SetLastError(ERROR_INVALID_PARAMETER);
+          return 0;
+        }
     }
 
     /* Create the window */
@@ -171,10 +84,27 @@ HWND WIN32API CreateWindowExA(DWORD exStyle, LPCSTR className,
     }
     else dprintf(("CreateWindowExA: class %d parent %x (%d,%d) (%d,%d), %x %x", className, parent, x, y, width, height, style, exStyle));
 
-    //TODO: According to the docs className can be a 16 bits atom
-    //      Wine seems to assume it's a string though...
     if(!strcmpi(className, MDICLIENTCLASSNAMEA)) {
         window = (Win32BaseWindow *) new Win32MDIClientWindow(&cs, classAtom, FALSE);
+    }
+    else 
+    if(!strcmpi((char *) className, DIALOG_CLASS_NAMEA)) 
+    {
+      DLG_TEMPLATE dlgTemplate = {0};
+      dlgTemplate.style = cs.style;
+      dlgTemplate.exStyle = cs.dwExStyle;
+      dlgTemplate.x = cs.x;
+      dlgTemplate.y = cs.y;
+      dlgTemplate.cx = cs.cx;
+      dlgTemplate.cy = cs.cy;
+      dlgTemplate.className = cs.lpszClass;
+      dlgTemplate.caption = cs.lpszName;
+      window = (Win32BaseWindow *) new Win32Dialog(cs.hInstance,
+                                                   (LPCSTR) &dlgTemplate,
+                                                   cs.hwndParent,
+                                                   NULL,
+                                                   (LPARAM) data,
+                                                   FALSE);
     }
     else {
         window = new Win32BaseWindow( &cs, classAtom, FALSE );
@@ -203,22 +133,32 @@ HWND WIN32API CreateWindowExW(DWORD exStyle, LPCWSTR className,
   Win32BaseWindow *window;
   ATOM classAtom;
   CREATESTRUCTA cs;
+  char tmpClassA[20];
+  WCHAR tmpClassW[20];
 
     if(exStyle & WS_EX_MDICHILD)
         return CreateMDIWindowW(className, windowName, style, x, y, width, height, parent, instance, (LPARAM)data);
 
-    //TODO: According to the docs className can be a 16 bits atom
-    //      Wine seems to assume it's a string though...
     /* Find the class atom */
     if (!(classAtom = GlobalFindAtomW(className)))
     {
-        dprintf(("CreateWindowEx32A: bad class name "));
-        if (!HIWORD(className)) {
-                dprintf(("CreateWindowEx32A: bad class name %04x\n", LOWORD(className)));
+        if (!HIWORD(className))
+        {
+          sprintf(tmpClassA,"#%d", (int) className);
+	  AsciiToUnicode(tmpClassA, tmpClassW);
+          classAtom = GlobalFindAtomW(tmpClassW);
+          className = (LPCWSTR)tmpClassW;
         }
-//        else    dprintf(("CreateWindowEx32A: bad class name '%s'\n", className ));
-        SetLastError(ERROR_INVALID_PARAMETER);
-        return 0;
+        if (!classAtom)
+        {
+          if (!HIWORD(className)) {
+                  dprintf(("CreateWindowEx32W: bad class name %04x\n", LOWORD(className)));
+          }
+	  else    dprintf(("CreateWindowEx32W: bad class name "));
+
+          SetLastError(ERROR_INVALID_PARAMETER);
+          return 0;
+        }
     }
 
     /* Create the window */
@@ -235,10 +175,26 @@ HWND WIN32API CreateWindowExW(DWORD exStyle, LPCWSTR className,
     cs.lpszClass      = (LPSTR)className;
     cs.dwExStyle      = exStyle;
 
-    //TODO: According to the docs className can be a 16 bits atom
-    //      Wine seems to assume it's a string though...
     if(!lstrcmpiW(className, (LPWSTR)MDICLIENTCLASSNAMEW)) {
         window = (Win32BaseWindow *) new Win32MDIClientWindow(&cs, classAtom, TRUE);
+    }
+    if(!lstrcmpiW(className, (LPWSTR)DIALOG_CLASS_NAMEW)) 
+    {
+      DLG_TEMPLATE dlgTemplate = {0};
+      dlgTemplate.style = cs.style;
+      dlgTemplate.exStyle = cs.dwExStyle;
+      dlgTemplate.x = cs.x;
+      dlgTemplate.y = cs.y;
+      dlgTemplate.cx = cs.cx;
+      dlgTemplate.cy = cs.cy;
+      dlgTemplate.className = cs.lpszClass;
+      dlgTemplate.caption = cs.lpszName;
+      window = (Win32BaseWindow *) new Win32Dialog(cs.hInstance,
+                                                   (LPCSTR) &dlgTemplate,
+                                                   cs.hwndParent,
+                                                   NULL,
+                                                   (LPARAM) data,
+                                                   TRUE);
     }
     else {
         window = new Win32BaseWindow( &cs, classAtom, TRUE );

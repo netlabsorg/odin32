@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.35 1999-10-11 16:04:51 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.36 1999-10-11 20:54:25 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -56,6 +56,8 @@
 
 #define IS_OVERLAPPED(style) \
     !(style & (WS_CHILD | WS_POPUP))
+
+void PrintWindowStyle(DWORD dwStyle, DWORD dwExStyle);
 
 //******************************************************************************
 //******************************************************************************
@@ -133,6 +135,8 @@ void Win32BaseWindow::Init()
   vertScrollInfo     = NULL;
   hwndHorzScroll     = 0;
   hwndVertScroll     = 0;
+
+  ownDC              = 0;
 }
 //******************************************************************************
 //todo get rid of resources (menu, accel, icon etc)
@@ -184,6 +188,10 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
  char  buffer[256];
  INT   sw = SW_SHOW;
  POINT maxSize, maxPos, minTrack, maxTrack;
+
+#ifdef DEBUG
+    PrintWindowStyle(cs->style, cs->dwExStyle);
+#endif
 
     SetLastError(0);
 
@@ -1456,7 +1464,7 @@ LRESULT Win32BaseWindow::DefWndControlColor(UINT ctlType, HDC hdc)
 
     if( ctlType == CTLCOLOR_SCROLLBAR)
     {
-            HBRUSH hb = GetSysColorBrush(COLOR_SCROLLBAR);
+        HBRUSH hb = GetSysColorBrush(COLOR_SCROLLBAR);
         COLORREF bk = GetSysColor(COLOR_3DHILIGHT);
         SetTextColor( hdc, GetSysColor(COLOR_3DFACE));
         SetBkColor( hdc, bk);
@@ -1477,15 +1485,15 @@ LRESULT Win32BaseWindow::DefWndControlColor(UINT ctlType, HDC hdc)
 
     SetTextColor( hdc, GetSysColor(COLOR_WINDOWTEXT));
 
-        if ((ctlType == CTLCOLOR_EDIT) || (ctlType == CTLCOLOR_LISTBOX))
-        {
-            SetBkColor( hdc, GetSysColor(COLOR_WINDOW) );
-        }
-        else
-        {
-            SetBkColor( hdc, GetSysColor(COLOR_3DFACE) );
-            return (LRESULT)GetSysColorBrush(COLOR_3DFACE);
-        }
+    if ((ctlType == CTLCOLOR_EDIT) || (ctlType == CTLCOLOR_LISTBOX))
+    {
+        SetBkColor( hdc, GetSysColor(COLOR_WINDOW) );
+    }
+    else
+    {
+        SetBkColor( hdc, GetSysColor(COLOR_3DFACE) );
+        return (LRESULT)GetSysColorBrush(COLOR_3DFACE);
+    }
     return (LRESULT)GetSysColorBrush(COLOR_WINDOW);
 }
 //******************************************************************************
@@ -1531,7 +1539,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         return DefWndControlColor(Msg - WM_CTLCOLORMSGBOX, (HDC)wParam);
 
     case WM_CTLCOLOR:
-            return DefWndControlColor(HIWORD(lParam), (HDC)wParam);
+        return DefWndControlColor(HIWORD(lParam), (HDC)wParam);
 
     case WM_VKEYTOITEM:
     case WM_CHARTOITEM:
@@ -2043,7 +2051,8 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
    wpos.hwndInsertAfter  = hwndInsertAfter;
    wpos.hwnd             = getWindowHandle();
 
-   if(~fuFlags & (SWP_NOMOVE | SWP_NOSIZE)) {
+   if(~fuFlags & (SWP_NOMOVE | SWP_NOSIZE))
+   {
        if (isChild())
        {
            hParent = getParent()->getOS2WindowHandle();
@@ -2087,6 +2096,7 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
 
    if (rc == FALSE)
    {
+        dprintf(("OSLibWinSetMultWindowPos failed!"));
    }
    else
    {
@@ -2633,6 +2643,100 @@ HWND Win32BaseWindow::OS2ToWin32Handle(HWND hwnd)
         }
         else    return hwnd;    //OS/2 window handle
 }
+//******************************************************************************
+//******************************************************************************
+#ifdef DEBUG
+void PrintWindowStyle(DWORD dwStyle, DWORD dwExStyle)
+{
+ char style[256] = "";
+ char exstyle[256] = "";
+
+  /* Window styles */
+  if(dwStyle & WS_CHILD)
+        strcat(style, "WS_CHILD ");
+  if(dwStyle & WS_POPUP)
+        strcat(style, "WS_POPUP ");
+  if(dwStyle & WS_VISIBLE)
+        strcat(style, "WS_VISIBLE ");
+  if(dwStyle & WS_DISABLED)
+        strcat(style, "WS_DISABLED ");
+  if(dwStyle & WS_CLIPSIBLINGS)
+        strcat(style, "WS_CLIPSIBLINGS ");
+  if(dwStyle & WS_CLIPCHILDREN)
+        strcat(style, "WS_CLIPCHILDREN ");
+  if(dwStyle & WS_MAXIMIZE)
+        strcat(style, "WS_MAXIMIZE ");
+  if(dwStyle & WS_MINIMIZE)
+        strcat(style, "WS_MINIMIZE ");
+  if(dwStyle & WS_GROUP)
+        strcat(style, "WS_GROUP ");
+  if(dwStyle & WS_TABSTOP)
+        strcat(style, "WS_TABSTOP ");
+
+  if((dwStyle & WS_CAPTION) == WS_CAPTION)
+        strcat(style, "WS_CAPTION ");
+  if(dwStyle & WS_DLGFRAME)
+        strcat(style, "WS_DLGFRAME ");
+  if(dwStyle & WS_BORDER)
+        strcat(style, "WS_BORDER ");
+
+  if(dwStyle & WS_VSCROLL)
+        strcat(style, "WS_VSCROLL ");
+  if(dwStyle & WS_HSCROLL)
+        strcat(style, "WS_HSCROLL ");
+  if(dwStyle & WS_SYSMENU)
+        strcat(style, "WS_SYSMENU ");
+  if(dwStyle & WS_THICKFRAME)
+        strcat(style, "WS_THICKFRAME ");
+  if(dwStyle & WS_MINIMIZEBOX)
+        strcat(style, "WS_MINIMIZEBOX ");
+  if(dwStyle & WS_MAXIMIZEBOX)
+        strcat(style, "WS_MAXIMIZEBOX ");
+
+  if(dwExStyle & WS_EX_DLGMODALFRAME)
+        strcat(exstyle, "WS_EX_DLGMODALFRAME ");
+  if(dwExStyle & WS_EX_ACCEPTFILES)
+        strcat(exstyle, "WS_EX_ACCEPTFILES ");
+  if(dwExStyle & WS_EX_NOPARENTNOTIFY)
+        strcat(exstyle, "WS_EX_NOPARENTNOTIFY ");
+  if(dwExStyle & WS_EX_TOPMOST)
+        strcat(exstyle, "WS_EX_TOPMOST ");
+  if(dwExStyle & WS_EX_TRANSPARENT)
+        strcat(exstyle, "WS_EX_TRANSPARENT ");
+
+  if(dwExStyle & WS_EX_MDICHILD)
+        strcat(exstyle, "WS_EX_MDICHILD ");
+  if(dwExStyle & WS_EX_TOOLWINDOW)
+        strcat(exstyle, "WS_EX_TOOLWINDOW ");
+  if(dwExStyle & WS_EX_WINDOWEDGE)
+        strcat(exstyle, "WS_EX_WINDOWEDGE ");
+  if(dwExStyle & WS_EX_CLIENTEDGE)
+        strcat(exstyle, "WS_EX_CLIENTEDGE ");
+  if(dwExStyle & WS_EX_CONTEXTHELP)
+        strcat(exstyle, "WS_EX_CONTEXTHELP ");
+  if(dwExStyle & WS_EX_RIGHT)
+        strcat(exstyle, "WS_EX_RIGHT ");
+  if(dwExStyle & WS_EX_LEFT)
+        strcat(exstyle, "WS_EX_LEFT ");
+  if(dwExStyle & WS_EX_RTLREADING)
+        strcat(exstyle, "WS_EX_RTLREADING ");
+  if(dwExStyle & WS_EX_LTRREADING)
+        strcat(exstyle, "WS_EX_LTRREADING ");
+  if(dwExStyle & WS_EX_LEFTSCROLLBAR)
+        strcat(exstyle, "WS_EX_LEFTSCROLLBAR ");
+  if(dwExStyle & WS_EX_RIGHTSCROLLBAR)
+        strcat(exstyle, "WS_EX_RIGHTSCROLLBAR ");
+  if(dwExStyle & WS_EX_CONTROLPARENT)
+        strcat(exstyle, "WS_EX_CONTROLPARENT ");
+  if(dwExStyle & WS_EX_STATICEDGE)
+        strcat(exstyle, "WS_EX_STATICEDGE ");
+  if(dwExStyle & WS_EX_APPWINDOW)
+        strcat(exstyle, "WS_EX_APPWINDOW ");
+
+  dprintf(("Window style:   %x %s", dwStyle, style));
+  dprintf(("Window exStyle: %x %s", dwExStyle, exstyle));
+}
+#endif
 //******************************************************************************
 //******************************************************************************
 
