@@ -1,9 +1,10 @@
-; $Id: asmutils.asm,v 1.2 1999-09-12 00:26:27 bird Exp $
+; $Id: asmutils.asm,v 1.3 1999-10-27 02:02:59 bird Exp $
 ;
 ; asmutils - assembly utility functions
 ;
 ; Copyright (c) 1998-1999 knut st. osmundsen
 ;
+; Project Odin Software License can be found in LICENSE.TXT
 ;
     .386p
 
@@ -11,7 +12,6 @@
 ; Include files
 ;
     include devsegdf.inc
-    include sas.inc
 
 ;
 ; Exported symbols
@@ -25,7 +25,6 @@
     public Int3
     public _memrevmov@12
     public _memmov@12
-    public GetOS2KrnlMTE
 ;    public DisableInterrupts
 ;    public EnableInterrupts
 
@@ -193,24 +192,6 @@ _memmov@12 PROC NEAR
 
     jmp memmov_end
 _memmov@12 ENDP
-
-
-; gets the FLAT pointer to the OS2 Kernel MTE.
-; eax is flat pointer to OS2 Kernel MTE.
-GetOS2KrnlMTE PROC NEAR
-    push    es
-
-    mov     ax, SAS_selector            ;70h - Read-only SAS selector.
-    mov     es, ax
-    xor     ebx, ebx
-    assume  ebx: PTR SAS
-    mov     bx, [ebx].SAS_vm_data       ;SAS_vm_data (0ch)
-    assume  ebx: PTR SAS_vm_section
-    mov     eax,[ebx].SAS_vm_krnl_mte   ;SAS_vm_krnl_mte (0ch)
-
-    pop     es
-    ret
-GetOS2KrnlMTE ENDP
 
 
 CODE32 ends

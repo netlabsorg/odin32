@@ -1,4 +1,4 @@
-/* $Id: OS2Krnl.h,v 1.1 1999-09-06 02:19:57 bird Exp $
+/* $Id: OS2Krnl.h,v 1.2 1999-10-27 02:02:55 bird Exp $
  *
  * OS/2 kernel structures, typedefs and macros.
  *
@@ -9,8 +9,8 @@
 
 #pragma pack(1)
 
-#ifndef RING0_DEBUG_IN_RING3
-    typedef USHORT SFN,*PSFN;         /* system file number */
+#ifdef RING0
+    typedef USHORT SFN, *PSFN;         /* system file number */
 #else
     #define SFN HFILE
     #define PSFN PHFILE

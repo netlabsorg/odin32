@@ -1,4 +1,4 @@
-/* $Id: dev16.h,v 1.1 1999-09-06 02:19:57 bird Exp $
+/* $Id: dev16.h,v 1.2 1999-10-27 02:02:56 bird Exp $
  * dev16 - 16-bit specific. Should not be used in 32-bit C/C++.
  *
  * Copyright (c) 1999 knut st. osmundsen
@@ -41,38 +41,58 @@ typedef D16R0INITPARAM FAR *PD16R0INITPARAM;
  */
 #define D16_IOCTL_VERIFYPROCTAB     0x42
 
-
 /**
- * Regards goes to Matthieu Willm for this!
+ * Regards goes to Matthieu Willm for (parts of) this!
  */
+#ifdef INCL_16
+    typedef void FAR * FPVOID;
+#else
+    typedef ULONG FPVOID;
+#endif
 typedef struct _DosTable /* dt */
 {
     UCHAR  cul;             /* count of entries (dwords) in this table.*/
-    ULONG  notinterestingAtAll;
+    FPVOID fph_HardError;
+    FPVOID fph_UCase;
+    ULONG  UnknownOrReserved1;
+    ULONG  UnknownOrReserved2;
+    ULONG  UnknownOrReserved3;
+    FPVOID fph_MemMapAlias;
+    FPVOID fph_MemUnmapAlias;
+    FPVOID fph_GoProtAll;
+    FPVOID fph_GoRealAll;
+    FPVOID fph_doshlp_RedirDev;
+    ULONG  UnknownOrReserved4;
+    ULONG  UnknownOrReserved5;
+    FPVOID fph_SFFromSFN;
+    FPVOID fph_SegGetInfo;
+    FPVOID fph_AsgCheckDrive;
+    ULONG  UnknownOrReserved6;
+    ULONG  UnknownOrReserved7;
 } DOSTABLE, FAR *PDOSTABLE , NEAR *NPDOSTABLE;
 
 typedef struct _DosTable2 /* dt2 */
 {
     UCHAR  cul;             /* count of entries (dwords) in this table.*/
-    ULONG  notinteresting0;
-    ULONG  notinteresting1;
-    ULONG  notinteresting2;
-    ULONG  notinteresting3;
-    ULONG  notinteresting4;
-    ULONG  notinteresting5;
-    ULONG  notinteresting6;
-    ULONG  notinteresting7;
-    ULONG  notinteresting8;
+    FPVOID fpErrMap24;
+    FPVOID fpErrMap24End;
+    FPVOID fpErr_Table_24;
+    FPVOID fpCDSAddr;
+    FPVOID fpGDT_RDR1;
+    FPVOID fpInterrupLevel;
+    FPVOID fp_cInDos;
+    ULONG  UnknownOrReserved1;
+    ULONG  UnknownOrReserved2;
     ULONG  R0FlatCS;
     ULONG  R0FlatDS;
-    ULONG  TKSSBase;
-    ULONG  notinterestingC;
-    ULONG  notinterestingD;
-    ULONG  notinterestingE;
-    ULONG  notinterestingF;
-    ULONG  ReserveVM;
-    ULONG  notinterestingH;
-    ULONG  notinterestingI;
+    LIN    pTKSSBase;
+    LIN    pintSwitchStack;
+    LIN    pprivatStack;
+    FPVOID fpPhysDiskTablePtr;
+    LIN    pforceEMHandler;
+    LIN    pReserveVM;
+    LIN    p_pgpPageDir;
+    ULONG  UnknownOrReserved3;
 } DOSTABLE2, FAR *PDOSTABLE2 , NEAR *NPDOSTABLE2;
 
 
@@ -88,7 +108,8 @@ USHORT NEAR R0Init16(PRP_GENIOCTL pRp);
  * Thunking "functions" prototypes
  */
 USHORT NEAR CallR0Init32(LIN pRpInit);
-
+USHORT NEAR CallGetOTEs32(ULONG addressOTEBuf);
+USHORT NEAR CallVerifyProcTab32(void);
 
 /*
  * These are only for use in the 'aDevHdrs'.

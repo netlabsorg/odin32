@@ -1,10 +1,12 @@
-/* $Id: cout.h,v 1.1 1999-09-06 02:19:57 bird Exp $
+/* $Id: cout.h,v 1.2 1999-10-27 02:02:55 bird Exp $
  *
  * cout - cout replacement.
  *
  * Copyright (c) 1998-1999 knut st. osmundsen
  *
  */
+
+#error("Not used! Use kprintf/dprintf!")
 
 #ifndef _cout_h_
 #define _cout_h_

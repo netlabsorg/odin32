@@ -1,4 +1,4 @@
-/* $Id: myldrRead.cpp,v 1.3 1999-10-14 02:36:08 bird Exp $
+/* $Id: myldrRead.cpp,v 1.4 1999-10-27 02:02:58 bird Exp $
  *
  * myldrRead - _ldrRead.
  *
@@ -26,6 +26,7 @@
 #include <exe386.h>
 #include "OS2Krnl.h"
 #include "pe2lx.h"
+#include "avl.h"
 #include "ldrCalls.h"
 #include "ldr.h"
 
@@ -44,20 +45,27 @@ ULONG LDRCALL myldrRead(
     /* Check if this is an overrided handle */
     if (GetState(hFile) == HSTATE_OUR)
     {
-        PPENODE pNode;
+        PMODULE pMod;
+        kprintf(("_ldrRead+: hF=%+04x off=%+08x pB=%+08x fl=%+08x cb=%+04x pMTE=%+08x\n",hFile,ulOffset,pBuffer,ulFlags,ulBytesToRead,pMTE));
 
-        pNode = getNodePtr(hFile);
-        if (pNode != NULL)
+        pMod = getModuleBySFN(hFile);
+        if (pMod != NULL)
         {
             /* I would love to have a pointer to the MTE */
-            if (pNode->pMTE == NULL && pMTE != NULL)
-                pNode->pMTE == pMTE;
+            if (pMod->pMTE == NULL && pMTE != NULL)
+                pMod->pMTE == pMTE;
 
             /* debug */
             if (ulFlags != 0)
                 kprintf(("_ldrRead: Warning ulFlags = 0x%x (!= 0)\n", ulFlags));
 
-            rc = pNode->pPe2Lx->read(ulOffset, pBuffer, ulBytesToRead, ulFlags, pMTE);
+            if ((pMod->fFlags & MOD_TYPE_MASK) == MOD_TYPE_PE2LX)
+                rc = pMod->Data.pPe2Lx->read(ulOffset, pBuffer, ulBytesToRead, ulFlags, pMTE);
+            else
+            {
+                kprintf(("_ldrRead: Invalid module type, %#x\n", pMod->fFlags & MOD_TYPE_MASK));
+                rc = ERROR_READ_FAULT;
+            }
             return rc;
         }
         else
@@ -66,7 +74,10 @@ ULONG LDRCALL myldrRead(
 
     rc = _ldrRead(hFile, ulOffset, pBuffer, ulFlags, ulBytesToRead, pMTE);
 
-//  kprintf(("_ldrRead:  hF=%+04x off=%+08x pB=%+08x fl=%+08x cb=%+04x pMTE=%+08x rc=%d\n",hFile,ulOffset,pBuffer,ulFlags,ulBytesToRead,pMTE,rc));
+    #if 0
+    kprintf(("_ldrRead:  hF=%+04x off=%+08x pB=%+08x fl=%+08x cb=%+04x pMTE=%+08x rc=%d\n",
+             hFile,ulOffset,pBuffer,ulFlags,ulBytesToRead,pMTE,rc));
+    #endif
 
     return rc;
 }

@@ -1,4 +1,4 @@
-/* $Id: myldrClose.cpp,v 1.2 1999-10-14 01:25:38 bird Exp $
+/* $Id: myldrClose.cpp,v 1.3 1999-10-27 02:02:58 bird Exp $
  *
  * myldrClose - _ldrClose
  *
@@ -25,6 +25,7 @@
 #include <exe386.h>
 #include "OS2Krnl.h"
 #include "pe2lx.h"
+#include "avl.h"
 #include "ldr.h"
 #include "ldrCalls.h"
 
@@ -43,9 +44,9 @@ ULONG LDRCALL myldrClose(SFN hFile)
     kprintf(("_ldrClose: hFile = %.4x\n", hFile));
     if (GetState(hFile) == HSTATE_OUR)
     {
-        rc = deleteNode(hFile);
+        rc = removeModule(hFile);
         if (rc != NO_ERROR)
-            kprintf(("Funny! deleteNode failed rc = %d\n", rc));
+            kprintf(("_ldrClose: removeModule retured rc=%d\n", rc));
 
         SetState(hFile, HSTATE_UNUSED);
     }

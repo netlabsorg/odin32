@@ -1,4 +1,4 @@
-/* $Id: pe2lx.h,v 1.4 1999-10-14 01:17:55 bird Exp $
+/* $Id: pe2lx.h,v 1.5 1999-10-27 02:02:57 bird Exp $
  *
  * Pe2Lx class declarations. Ring 0 and Ring 3
  *
@@ -16,14 +16,6 @@
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
 *******************************************************************************/
-/*
- * RING3 wrappings for RING0 constructs.
- */
-#ifdef RING3
-    typedef HFILE SFN;      /* System File Number. (OS2Krnl.h) */
-    typedef PVOID PMTE;     /* Pointer to Module Table Entry. (OS2Krnl.h) */
-#endif
-
 /*
  * Misc
  */

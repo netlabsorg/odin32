@@ -1,4 +1,4 @@
-; $Id: devSegDf.inc,v 1.1 1999-09-06 02:19:58 bird Exp $
+; $Id: devSegDf.inc,v 1.2 1999-10-27 02:02:56 bird Exp $
 ;
 ; Segment definitions for win32k.sys.
 ;
@@ -23,7 +23,7 @@ CODE16 ends
 CODE32 segment dword public 'CODE' use32
 CODE32 ends
 
-CALLTAB segment dword public 'CODE' use32
+CALLTAB segment dword public 'DATA' use32
 CALLTAB ends
 
 DGROUP group BSS32, DATA32

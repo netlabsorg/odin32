@@ -1,4 +1,4 @@
-/* $Id: ldr.h,v 1.2 1999-10-14 01:16:49 bird Exp $
+/* $Id: ldr.h,v 1.3 1999-10-27 02:02:56 bird Exp $
  *
  * ldr - loader header file.
  *
@@ -13,9 +13,9 @@
         /* state variable */
         extern BOOL fQAppType;
 
-        /***************************************************************/
-        /* handle state - Array of handle states. Four state per byte! */
-        /***************************************************************/
+        /*
+         * handle state - Array of handle states. Eight state per byte!
+         */
         #define MAX_FILE_HANDLES 0x10000
 
         extern unsigned char achHandleStates[MAX_FILE_HANDLES/8];
@@ -30,42 +30,50 @@
         #define SetState(a,b)       (achHandleStates[(a)/8] = (achHandleStates[(a)/8] & (HSTATE_MASK << ((a)%8) | HSTATE_MASK >> 8-((a)%8)) | ((b) & 0x1) << ((a)%8)))
 
 
-        /**************/
-        /* PE handles */
-        /**************/
-        typedef struct _PENode
+        /*
+         * Module struct.
+         */
+        typedef struct _Module
         {
-            /* linking stuff */
-            struct _PENode *left;
-            struct _PENode *right;
+            AVLNODECORE     coreKey;    /* Key is hFile. */
+            AVLNODECORE     coreMTE;    /* Key is pMTE. */
 
-            /* key */
-            SFN hFile;                      /* system file number or file handle if you prefer that */
+            SFN             hFile;      /* System file number or file handle if you prefer that. */
+            PMTE            pMTE;       /* Pointer to MTE if we got one - NULL is allowed. */
 
-            /* misc */
-            PMTE pMTE;                      /* pointer to MTE if we got one - may be NULL */
+            ULONG           fFlags;     /* Flags. Flags if coreMte is in use and what Data contains. */
+            union
+            {
+                Pe2Lx *     pPe2Lx;     /* Pointer to a Pe2Lx object. (Win32 executables) */
+                #if 0
+                Elf2Lx *    pElf2Lx;    /* Pointer to a Elf2Lx object. (ELF executables) */
+                Script *    pScript;    /* Pointer to a Script object. (Shell scripts) */
+                Pe *        pPe;        /* Pointer to a Pe object. (Ring3 loader) */
+                #endif
+                void *      pv;
+            } Data;                     /* Pointer to data. Currently it's allways a Pe2Lx object! */
+        } MODULE, *PMODULE;
 
-            /* Pe2Lx object */
-            Pe2Lx *pPe2Lx;
-        } PENODE, *PPENODE;
+        #define MOD_FLAGS_IN_MTETREE    0x00000010 /* The node is present in the MTE-tree. */
+        #define MOD_TYPE_MASK           0x0000000F /* Type mask. */
+        #define MOD_TYPE_PE2LX          0x00000001 /* Pe2Lx module. */
+        #define MOD_TYPE_ELF2LX         0x00000002 /* Elf2Lx module. */
+        #define MOD_TYPE_SCRIPT         0x00000003 /* Script module. */
+        #define MOD_TYPE_PE             0x00000004 /* Pe module. */
 
-        #define SIZEOF_NODE (sizeof(NODE))
 
-        ULONG       insertNode(PPENODE pNode);
-        ULONG       deleteNode(SFN key);        /* removes from tree and freeNode */
-        PPENODE     getNodePtr(SFN key);
-        PPENODE     findNodePtr(const char *pszFilename);
-        ULONG       depthPE(void);
-        PPENODE     allocateNode(void);
-        ULONG       freeNode(PPENODE pNode);    /* don't remove from tree! */
+        /*
+         * Modules operations.
+         */
+        PMODULE     getModuleBySFN(SFN hFile);
+        PMODULE     getModuleByMTE(PMTE pMTE);
+        PMODULE     getModuleByFilename(PCSZ pszFilename);
 
-        /* if sequential insertion - this will give a lower tree. */
-        /* testing shows that 3 gives best results for 27 to 134 nodes */
-        #define ROTATION 3
-        #define AdjustKey(a) ((USHORT)(a << 16-ROTATION) | (USHORT)(a >> ROTATION) )
-        #define UnAdjustKey(a) ((USHORT)(a >> 16-ROTATION) | (USHORT)(a << ROTATION) )
+        ULONG       addModule(SFN hFile, PMTE pMTE, ULONG fFlags, void *pData);
+        ULONG       removeModule(SFN hFile);
 
     #endif
+
     /*************/
     /* functions */
     /*************/

@@ -1,4 +1,4 @@
-/* $Id: malloc.h,v 1.2 1999-10-14 01:16:50 bird Exp $
+/* $Id: malloc.h,v 1.3 1999-10-27 02:02:57 bird Exp $
  *
  * Heap.
  *
@@ -45,7 +45,8 @@ extern unsigned  _uHeapMaxPtr;/* heap pointers are less than this. */
 #define MINPTR _uHeapMinPtr
 #define MAXPTR _uHeapMaxPtr
 
-#define HEAP_SIZE 0x00600000U /* 10MB of heap */
+/*#define HEAP_SIZE 0x00600000U*/ /* 10MB of heap */
+#define HEAP_SIZE 0x100000U /* 1MB of heap */
 
 /* HeapPointer assert - old ones... */
 #define ltasserthp(a)         if (!_validptr((void*)(a))){ _ltasserthp((void*)(a), #a,__FILE__,__LINE__); return FALSE;}

@@ -1,4 +1,4 @@
-/* $Id: dev32.h,v 1.2 1999-10-14 01:16:49 bird Exp $
+/* $Id: dev32.h,v 1.3 1999-10-27 02:02:56 bird Exp $
  *
  * dev32 - header file for 32-bit part of the driver.
  *
@@ -47,21 +47,39 @@ extern "C" {
 /*
  * Function prototypes.
  */
-#ifndef __cplusplus
+#if !defined(__cplusplus) && defined(RING0)
 USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit);
 USHORT _loadds _Far32 _Pascal GetOTEs32(PKRNLOBJTABLE pOTEBuf);
 USHORT _loadds _Far32 _Pascal VerifyProcTab32(void);
 #endif
+#ifdef _OS2Krnl_h_
+PMTE _System GetOS2KrnlMTE(void); /* (devfirst.asm) */
+#endif
+
 
 /*
  * Global variables
  */
-extern ULONG TKSSBase32;
+extern PULONG pulTKSSBase32;
 
 /*
- * Macros
+ * SSToDS( stack pointer )
+ *
+ * In RING-0 this translates pointers to stack memory in the
+ * Stack Segment (SS) to pointers to stack memory in the
+ * Data Segment (DS). SS is 16-bit compatible, DS is 32-bit flat.
+ * It is vitally important to use this macro whenever creating
+ * a pointer to stack memory which don't implies that is a pointer
+ * relative to SS. For example when passing the pointer to an stack
+ * variable into an function call; like the addToModule calls.
+ *
+ * @returns    32-bit FLAT stack pointer.
  */
-#define SSToDS(a)   ((PVOID)((ULONG)(a) + TKSSBase32))
+#ifdef RING0
+    #define SSToDS(a)   ((PVOID)((ULONG)(a) + *pulTKSSBase32))
+#else
+    #define SSToDS(a)   ((PVOID)(a))
+#endif
 
 #ifdef __cplusplus
 }
