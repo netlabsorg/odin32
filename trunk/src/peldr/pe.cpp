@@ -1,4 +1,4 @@
-/* $Id: pe.cpp,v 1.36 2002-12-28 13:40:10 sandervl Exp $ */
+/* $Id: pe.cpp,v 1.37 2003-01-05 17:05:20 sandervl Exp $ */
 
 /*
  * PELDR main exe loader code
@@ -322,7 +322,7 @@ tryagain:
             break;
         }
 
-        WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
+        MyWinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
         goto fail;
   }
 
