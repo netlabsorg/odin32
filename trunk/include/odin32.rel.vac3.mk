@@ -1,4 +1,4 @@
-# $Id: odin32.rel.vac3.mk,v 1.7 2001-11-22 10:46:08 phaller Exp $
+# $Id: odin32.rel.vac3.mk,v 1.8 2001-11-29 00:24:19 phaller Exp $
 
 #
 # Odin32 API
@@ -59,6 +59,9 @@ OS2RCLFLAGS      = -x2 -n
 #   every line and the way it is done. We have some problems with nmake
 #   when we add new flags to for example CXXFLAGS too many times.
 #
+!ifdef PROFILEHOOKS
+PROFILEFLAGS=-Gh+
+!endif
 !ifdef EXETARGET
 CTARGETFLAGS     = -Ge+
 CXXTARGETFLAGS   = -Ge+
@@ -67,11 +70,11 @@ CTARGETFLAGS     = -Ge-
 CXXTARGETFLAGS   = -Ge-
 !endif
 CXXEXCEPTIONS    = -Gx-
-CFLAGS           = -c -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn+ $(CTARGETFLAGS)
-CXXFLAGS         = -c -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn+ $(CXXTARGETFLAGS) /Gx+
-CXXFLAGS_ODINCRT = -c -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn- $(CXXTARGETFLAGS) /Gx+
-CFLAGS_WIN32APP  = -c -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn+ $(CTARGETFLAGS)
-CXXFLAGS_WIN32APP= -c -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn+ $(CXXTARGETFLAGS)
+CFLAGS           = -c -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn+ $(PROFILEFLAGS) $(CTARGETFLAGS)
+CXXFLAGS         = -c -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn+ $(PROFILEFLAGS) $(CXXTARGETFLAGS) /Gx+
+CXXFLAGS_ODINCRT = -c -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn- $(PROFILEFLAGS) $(CXXTARGETFLAGS) /Gx+
+CFLAGS_WIN32APP  = -c -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn+ $(PROFILEFLAGS) $(CTARGETFLAGS)
+CXXFLAGS_WIN32APP= -c -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn+ $(PROFILEFLAGS) $(CXXTARGETFLAGS)
 CINCLUDES        = -I$(ODIN32_INCLUDE)\Win -I. -I$(ODIN32_INCLUDE)
 CDEFINES         = -D__WIN32OS2__ -D__WINE__ -D__i386__ -DTCPV40HDRS -DCOMCTL32UNDOC
 CDEFINES_ODINCRT = -D__WIN32OS2__ -D__WINE__ -D__i386__
