@@ -1,4 +1,4 @@
-/* $Id: hmfile.cpp,v 1.41 2003-03-06 10:44:33 sandervl Exp $ */
+/* $Id: hmfile.cpp,v 1.42 2003-04-02 12:58:29 sandervl Exp $ */
 
 /*
  * File IO win32 apis
@@ -871,7 +871,7 @@ DWORD HMDeviceFileClass::SetFilePointer(PHMHANDLEDATA pHMHandleData,
 
 
 /*****************************************************************************
- * Name      : DWORD HMDeviceFileClass::LockFile
+ * Name      : BOOL HMDeviceFileClass::LockFile
  * Purpose   : file locking
  * Parameters: PHMHANDLEDATA pHMHandleData
  *             DWORD arg2

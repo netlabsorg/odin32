@@ -1,4 +1,4 @@
-/* $Id: ole2nls.c,v 1.5 2002-07-30 12:55:06 sandervl Exp $
+/* $Id: ole2nls.c,v 1.6 2003-04-02 12:58:30 sandervl Exp $
  *
  *  National Language Support library
  *
@@ -2555,7 +2555,7 @@ static INT OLE_GetFormatW(LCID locale, DWORD flags, DWORD tflags,
  *
  */
 INT WINAPI GetDateFormatA(LCID locale,DWORD flags,
-                  LPSYSTEMTIME xtime,
+                  CONST SYSTEMTIME *xtime,
                   LPCSTR format, LPSTR date,INT datelen)
 {
 
@@ -2630,7 +2630,7 @@ INT WINAPI GetDateFormatA(LCID locale,DWORD flags,
  *
  */
 INT WINAPI GetDateFormatW(LCID locale,DWORD flags,
-                  LPSYSTEMTIME xtime,
+                  CONST SYSTEMTIME *xtime,
                   LPCWSTR format,
                   LPWSTR date, INT datelen)
 {
@@ -3699,7 +3699,7 @@ static LCID OLE2NLS_CheckLocale (LCID locale)
 INT WINAPI
 GetTimeFormatA(LCID locale,        /* [in]  */
            DWORD flags,        /* [in]  */
-           LPSYSTEMTIME xtime, /* [in]  */
+           CONST SYSTEMTIME *xtime, /* [in]  */
            LPCSTR format,      /* [in]  */
            LPSTR timestr,      /* [out] */
            INT timelen         /* [in]  */)
@@ -3747,7 +3747,7 @@ GetTimeFormatA(LCID locale,        /* [in]  */
 INT WINAPI
 GetTimeFormatW(LCID locale,        /* [in]  */
            DWORD flags,        /* [in]  */
-           LPSYSTEMTIME xtime, /* [in]  */
+           CONST SYSTEMTIME *xtime, /* [in]  */
            LPCWSTR format,     /* [in]  */
            LPWSTR timestr,     /* [out] */
            INT timelen         /* [in]  */)

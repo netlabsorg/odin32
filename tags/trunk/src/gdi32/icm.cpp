@@ -1,4 +1,4 @@
-/* $Id: icm.cpp,v 1.3 2002-11-26 10:53:09 sandervl Exp $ */
+/* $Id: icm.cpp,v 1.4 2003-04-02 12:58:58 sandervl Exp $ */
 
 /*
  * GDI32 Color Management apis
@@ -33,15 +33,15 @@ ODINDEBUGCHANNEL(GDI32-ICM)
 //******************************************************************************
 BOOL WIN32API DeleteColorSpace(HCOLORSPACE hColorSpace)
 {
-        dprintf(("GDI32: DeleteColorSpace - stub\n"));
-        return FALSE;
+    dprintf(("GDI32: DeleteColorSpace - stub\n"));
+    return FALSE;
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetColorSpace(HDC hdc, HCOLORSPACE hColorSpace)
+HCOLORSPACE WIN32API SetColorSpace(HDC hdc, HCOLORSPACE hColorSpace)
 {
-        dprintf(("GDI32: SetColorSpace - stub\n"));
-        return FALSE;
+    dprintf(("GDI32: SetColorSpace - stub\n"));
+    return 0;
 }
 //******************************************************************************
 //******************************************************************************
