@@ -1,4 +1,4 @@
-/* $Id: console.cpp,v 1.22 2000-10-20 11:46:46 sandervl Exp $ */
+/* $Id: console.cpp,v 1.23 2000-10-23 19:35:10 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -3771,7 +3771,7 @@ BOOL WIN32API SetConsoleTitleW(LPWSTR lpszTitle)
   ConsoleGlobals.pszWindowTitle[iLength] = 0;
   lstrcpynWtoA(ConsoleGlobals.pszWindowTitle,
                lpszTitle,
-               iLength);
+               iLength+1); //must add one (lstrcpynWtoA terminates string)
 
   WinSetWindowText(ConsoleGlobals.hwndFrame,           /* set new title text */
                    ConsoleGlobals.pszWindowTitle);

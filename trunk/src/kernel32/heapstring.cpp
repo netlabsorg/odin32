@@ -1,4 +1,4 @@
-/* $Id: heapstring.cpp,v 1.33 2000-10-02 13:05:37 phaller Exp $ */
+/* $Id: heapstring.cpp,v 1.34 2000-10-23 19:35:11 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -493,6 +493,11 @@ int WIN32API lstrcpynCtoA(LPSTR  astring,
   UniChar* in_buf;
   char*    out_buf;
 
+  dprintf2(("KERNEL32: HeapString: lstrcpynWtoA(%08x,%08xh,%d)\n",
+           astring,
+           ustring,
+           unilen));
+
   if (ustring == NULL)
   {
     if (astring != NULL && unilen > 0)
@@ -551,11 +556,17 @@ int WIN32API lstrcpynCtoA(LPSTR  astring,
   }
 }
 
+//lstrcpynWtoA and lstrcpynAtoW must zero-terminate the string
+//because Wine code depends on this behaviour (i.e. comdlg32)
 int WIN32API lstrcpynWtoA(LPSTR  astring,
                           LPCWSTR ustring,
                           int    unilen)
 {
-    return lstrcpynCtoA(astring, ustring, unilen, GetWindowsUconvObject());
+ int ret;
+
+    ret = lstrcpynCtoA(astring, ustring, unilen, GetWindowsUconvObject());
+    astring[unilen-1] = 0;
+    return ret;
 }
 
 
@@ -659,11 +670,17 @@ int lstrcpynAtoC(LPWSTR unicode,
   }
 }
 
+//lstrcpynWtoA and lstrcpynAtoW must zero-terminate the string
+//because Wine code depends on this behaviour (i.e. comdlg32)
 int WIN32API lstrcpynAtoW(LPWSTR unicode,
                           LPCSTR  ascii,
                           int    asciilen)
 {
-    return lstrcpynAtoC(unicode, ascii, asciilen, GetWindowsUconvObject());
+ int ret;
+
+    ret = lstrcpynAtoC(unicode, ascii, asciilen, GetWindowsUconvObject());
+    unicode[asciilen-1] = 0;
+    return ret;
 }
 
 /*****************************************************************************
