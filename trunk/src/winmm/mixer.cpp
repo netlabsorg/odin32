@@ -1,4 +1,4 @@
-/* $Id: mixer.cpp,v 1.20 2002-05-27 16:10:24 sandervl Exp $ */
+/* $Id: mixer.cpp,v 1.21 2002-05-28 13:35:02 sandervl Exp $ */
 
 /*
  * Mixer functions
@@ -115,7 +115,7 @@ MMRESULT WINAPI mixerGetControlDetailsA(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS 
                 return MMSYSERR_INVALPARAM;
             }
 
-            if(OSLibMixGetRecSource(&dwRecSrc, NULL, NULL) == FALSE) {
+            if(OSLibMixGetRecSource(&dwRecSrc) == FALSE) {
                 dprintf(("OSLibMixGetRecSource failed!!"));
                 return MIXERR_INVALCONTROL;
             }
@@ -143,14 +143,14 @@ MMRESULT WINAPI mixerGetControlDetailsA(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS 
             DWORD dwVolLeft, dwVolRight;
 
             dprintf(("MIXERCONTROL_CONTROLTYPE_VOLUME"));
-            if(OSLibMixGetVolume(mixerControls[lpmcd->dwControlID].id, NULL, &dwVolLeft, &dwVolRight) == FALSE) {
+            if(OSLibMixGetVolume(mixerControls[lpmcd->dwControlID].id, &dwVolLeft, &dwVolRight) == FALSE) {
                 dprintf(("OSLibMixGetVolume failed!!"));
                 return MIXERR_INVALCONTROL;
             }
             pDetails->dwValue = dwVolLeft;
-            dprintf(("Left volume %d", dwVolLeft));
+            dprintf(("%s Left volume %d", mixerControls[lpmcd->dwControlID].ctrl.szName, dwVolLeft));
             if(lpmcd->cChannels == 2) {
-                dprintf(("Right volume %d", dwVolRight));
+                dprintf(("%s Right volume %d", mixerControls[lpmcd->dwControlID].ctrl.szName, dwVolRight));
                 pDetails += 1;
                 pDetails->dwValue = dwVolRight;
             }
@@ -164,14 +164,14 @@ MMRESULT WINAPI mixerGetControlDetailsA(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS 
             BOOL  fMute;
 
             dprintf(("MIXERCONTROL_CONTROLTYPE_MUTE"));
-            if(OSLibMixGetVolume(mixerControls[lpmcd->dwControlID].id, &fMute, NULL, NULL) == FALSE) {
+            if(OSLibMixGetMute(mixerControls[lpmcd->dwControlID].id, &fMute) == FALSE) {
                 dprintf(("OSLibMixGetVolume failed!!"));
                 return MIXERR_INVALCONTROL;
             }
             pDetails->fValue = fMute;
-            dprintf(("Left mute %d", fMute));
+            dprintf(("%s Left mute %d", mixerControls[lpmcd->dwControlID].ctrl.szName, fMute));
             if(lpmcd->cChannels == 2) {
-                dprintf(("Right mute %d", fMute));
+                dprintf(("%s Right mute %d", mixerControls[lpmcd->dwControlID].ctrl.szName, fMute));
                 pDetails += 1;
                 pDetails->fValue = fMute;
             }
@@ -186,11 +186,7 @@ MMRESULT WINAPI mixerGetControlDetailsA(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS 
 
             dprintf(("MIXERCONTROL_CONTROLTYPE_FADER"));
 
-            if(lpmcd->cChannels != 1) {
-                dprintf(("Invalid nr of channels %d!!", lpmcd->cChannels));
-                return MMSYSERR_INVALPARAM;
-            }
-            if(OSLibMixGetVolume(mixerControls[lpmcd->dwControlID].id, NULL, &dwLevelL, NULL) == FALSE) {
+            if(OSLibMixGetVolume(mixerControls[lpmcd->dwControlID].id, &dwLevelL, NULL) == FALSE) {
                 dprintf(("OSLibMixGetVolume failed!!"));
                 return MIXERR_INVALCONTROL;
             }
@@ -201,46 +197,39 @@ MMRESULT WINAPI mixerGetControlDetailsA(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS 
             }
             else dprintf(("3D depth %d", dwLevelL));
 #endif
+            if(lpmcd->cChannels == 2) {
+                pDetails += 1;
+                pDetails->dwValue = dwLevelL;
+            }
+            //todo > 2 channels (??)
             return MMSYSERR_NOERROR;
         }
 
         case MIXERCONTROL_CONTROLTYPE_BASS:
-        {
-            MIXERCONTROLDETAILS_UNSIGNED *pDetails = (MIXERCONTROLDETAILS_UNSIGNED *)lpmcd->paDetails;
-            DWORD dwLevelL;
-
-            dprintf(("MIXERCONTROL_CONTROLTYPE_BASS"));
-
-            if(lpmcd->cChannels != 1) {
-                dprintf(("Invalid nr of channels %d!!", lpmcd->cChannels));
-                return MMSYSERR_INVALPARAM;
-            }
-            if(OSLibMixGetVolume(mixerControls[lpmcd->dwControlID].id, NULL, &dwLevelL, NULL) == FALSE) {
-                dprintf(("OSLibMixGetVolume failed!!"));
-                return MIXERR_INVALCONTROL;
-            }
-            pDetails->dwValue = dwLevelL;
-            dprintf(("Bass %d", dwLevelL));
-            return MMSYSERR_NOERROR;
-        }
-
         case MIXERCONTROL_CONTROLTYPE_TREBLE:
         {
             MIXERCONTROLDETAILS_UNSIGNED *pDetails = (MIXERCONTROLDETAILS_UNSIGNED *)lpmcd->paDetails;
             DWORD dwLevelL;
 
-            dprintf(("MIXERCONTROL_CONTROLTYPE_TREBLE"));
-
-            if(lpmcd->cChannels != 1) {
-                dprintf(("Invalid nr of channels %d!!", lpmcd->cChannels));
-                return MMSYSERR_INVALPARAM;
+            switch(fdwDetails & MIXER_GETCONTROLDETAILSF_QUERYMASK) {
+            case MIXERCONTROL_CONTROLTYPE_TREBLE:
+                dprintf(("MIXERCONTROL_CONTROLTYPE_TREBLE"));
+                break;
+            case MIXERCONTROL_CONTROLTYPE_BASS:
+                dprintf(("MIXERCONTROL_CONTROLTYPE_BASS"));
+                break;
             }
-            if(OSLibMixGetVolume(mixerControls[lpmcd->dwControlID].id, NULL, &dwLevelL, NULL) == FALSE) {
+
+            if(OSLibMixGetVolume(mixerControls[lpmcd->dwControlID].id, &dwLevelL, NULL) == FALSE) {
                 dprintf(("OSLibMixGetVolume failed!!"));
                 return MIXERR_INVALCONTROL;
             }
             pDetails->dwValue = dwLevelL;
-            dprintf(("Treble %d", dwLevelL));
+            dprintf(("%s %d", mixerControls[lpmcd->dwControlID].ctrl.szName, dwLevelL));
+            if(lpmcd->cChannels == 2) {
+                pDetails += 1;
+                pDetails->dwValue = dwLevelL;
+            }
             return MMSYSERR_NOERROR;
         }
         
@@ -465,8 +454,8 @@ MMRESULT WINAPI mixerSetControlDetails(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS l
             return MMSYSERR_NODRIVER;
         }
     }
-    if(lpmcd == NULL || lpmcd->cbDetails != sizeof(MIXERCONTROLDETAILS)) {
-        dprintf(("ERROR: invalid pointer or structure size"));
+    if(lpmcd == NULL || lpmcd->cbStruct != sizeof(MIXERCONTROLDETAILS)) {
+        dprintf(("ERROR: invalid pointer or structure size %x %d", lpmcd, lpmcd->cbStruct));
         return MMSYSERR_INVALPARAM;
     }
     
@@ -503,102 +492,99 @@ MMRESULT WINAPI mixerSetControlDetails(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS l
                 DebugInt3();
                 return MMSYSERR_INVALPARAM;
             }
-#if 0
-            if(OSLibMixGetRecSource(&dwRecSrc, NULL, NULL) == FALSE) {
-                dprintf(("OSLibMixGetRecSource failed!!"));
-                return MIXERR_INVALCONTROL;
-            }
-            //clear the array
-            memset(pDetails, 0, sizeof(MIXERCONTROLDETAILS_BOOLEAN)*lpmcd->u.cMultipleItems);
-            //mark recording source
+            //select recording source
             for(int i=0;i<nrDestinations;i++) {
-                if(mixerDest[i].id == MIXER_DEST_WAVEIN) {
+                if(mixerDest[i].id == MIXER_DEST_WAVEIN) 
+                {
                     for(int j=0;j<mixerDest[i].cConnections;j++) {
                         dprintf(("wavein source %d (id %d)", pmixerLines[mixerDest[i].Connections[j]]->id, mixerDest[i].Connections[j]));
-                        if(pmixerLines[mixerDest[i].Connections[j]]->id == dwRecSrc) {
-                            pDetails[j].fValue = 1;
+                        if(pDetails[j].fValue) 
+                        {
+                            if(OSLibMixSetRecSource(pmixerLines[mixerDest[i].Connections[j]]->id) == FALSE) {
+                                dprintf(("OSLibMixGetRecSource failed!!"));
+                                return MIXERR_INVALCONTROL;
+                            }
                             return MMSYSERR_NOERROR;
                         }
                     }
                 }
             }
             dprintf(("recording source %d not found!!", dwRecSrc));
-#endif
             break;
         }
 
         case MIXERCONTROL_CONTROLTYPE_VOLUME: //unsigned
         {
             MIXERCONTROLDETAILS_UNSIGNED *pDetails = (MIXERCONTROLDETAILS_UNSIGNED *)lpmcd->paDetails;
+            DWORD dwVolumeL, dwVolumeR;
 
             dprintf(("MIXERCONTROL_CONTROLTYPE_VOLUME"));
-            dprintf(("Left volume %d", pDetails->dwValue));
+            dwVolumeL = pDetails->dwValue;
+
+            dprintf(("%s Left volume %d", mixerControls[lpmcd->dwControlID].ctrl.szName, pDetails->dwValue));
             if(lpmcd->cChannels == 2) {
                 pDetails += 1;
-                dprintf(("Right volume %d", pDetails->dwValue));
+                dprintf(("%s Right volume %d", mixerControls[lpmcd->dwControlID].ctrl.szName, pDetails->dwValue));
+                dwVolumeR = pDetails->dwValue;
             }
+            else dwVolumeR = dwVolumeL;
             //todo > 2 channels
+
+            if(OSLibMixSetVolume(mixerControls[lpmcd->dwControlID].id, dwVolumeL, dwVolumeR) == FALSE) {
+                return MMSYSERR_INVALPARAM;
+            }
+            mixerControls[lpmcd->dwControlID].val[0].dwValue = dwVolumeL;
+            mixerControls[lpmcd->dwControlID].val[1].dwValue = dwVolumeR;
             return MMSYSERR_NOERROR;
         }
 
         case MIXERCONTROL_CONTROLTYPE_MUTE: //assuming boolean
         {
             MIXERCONTROLDETAILS_BOOLEAN *pDetails = (MIXERCONTROLDETAILS_BOOLEAN *)lpmcd->paDetails;
+            BOOL fMute;
 
             dprintf(("MIXERCONTROL_CONTROLTYPE_MUTE"));
-            dprintf(("Left mute %d", pDetails->fValue));
+            dprintf(("%s Left mute %d", mixerControls[lpmcd->dwControlID].ctrl.szName, pDetails->fValue));
+            fMute = pDetails->fValue;
             if(lpmcd->cChannels == 2) {
                 pDetails += 1;
-                dprintf(("Right mute %d", pDetails->fValue));
+                dprintf(("%s Right mute %d", mixerControls[lpmcd->dwControlID].ctrl.szName, pDetails->fValue));
             }
             //todo > 2 channels (usually only 1 channel is requested though)
-            return MMSYSERR_NOERROR;
-        }
 
-        case MIXERCONTROL_CONTROLTYPE_FADER:
-        {
-            MIXERCONTROLDETAILS_UNSIGNED *pDetails = (MIXERCONTROLDETAILS_UNSIGNED *)lpmcd->paDetails;
-
-            dprintf(("MIXERCONTROL_CONTROLTYPE_FADER"));
-
-            if(lpmcd->cChannels != 1) {
-                dprintf(("Invalid nr of channels %d!!", lpmcd->cChannels));
+            if(OSLibMixSetMute(mixerControls[lpmcd->dwControlID].id, fMute) == FALSE) {
                 return MMSYSERR_INVALPARAM;
             }
-#ifdef DEBUG
-            if(mixerControls[lpmcd->dwControlID].id == MIX_CTRL_OUT_L_3DCENTER) {
-                 dprintf(("3D center %d", pDetails->dwValue));
-            }
-            else dprintf(("3D depth %d", pDetails->dwValue));
-#endif
+            mixerControls[lpmcd->dwControlID].val[0].dwValue = fMute;
             return MMSYSERR_NOERROR;
         }
 
         case MIXERCONTROL_CONTROLTYPE_BASS:
-        {
-            MIXERCONTROLDETAILS_UNSIGNED *pDetails = (MIXERCONTROLDETAILS_UNSIGNED *)lpmcd->paDetails;
-
-            dprintf(("MIXERCONTROL_CONTROLTYPE_BASS"));
-
-            if(lpmcd->cChannels != 1) {
-                dprintf(("Invalid nr of channels %d!!", lpmcd->cChannels));
-                return MMSYSERR_INVALPARAM;
-            }
-            dprintf(("Bass %d", pDetails->dwValue));
-            return MMSYSERR_NOERROR;
-        }
-
         case MIXERCONTROL_CONTROLTYPE_TREBLE:
+        case MIXERCONTROL_CONTROLTYPE_FADER:
         {
             MIXERCONTROLDETAILS_UNSIGNED *pDetails = (MIXERCONTROLDETAILS_UNSIGNED *)lpmcd->paDetails;
+            DWORD dwLevel;
 
-            dprintf(("MIXERCONTROL_CONTROLTYPE_TREBLE"));
-
-            if(lpmcd->cChannels != 1) {
-                dprintf(("Invalid nr of channels %d!!", lpmcd->cChannels));
+#ifdef DEBUG
+            switch(fdwDetails & MIXER_GETCONTROLDETAILSF_QUERYMASK) {
+            case MIXERCONTROL_CONTROLTYPE_TREBLE:
+                dprintf(("MIXERCONTROL_CONTROLTYPE_TREBLE"));
+                break;
+            case MIXERCONTROL_CONTROLTYPE_BASS:
+                dprintf(("MIXERCONTROL_CONTROLTYPE_BASS"));
+                break;
+            case MIXERCONTROL_CONTROLTYPE_FADER:
+                dprintf(("MIXERCONTROL_CONTROLTYPE_FADER"));
+                break;
+            }
+#endif
+            dprintf(("%s %d", mixerControls[lpmcd->dwControlID].ctrl.szName, pDetails->dwValue));
+            dwLevel = pDetails->dwValue;
+            if(OSLibMixSetVolume(mixerControls[lpmcd->dwControlID].id, dwLevel, dwLevel) == FALSE) {
                 return MMSYSERR_INVALPARAM;
             }
-            dprintf(("Treble %d", pDetails->dwValue));
+            mixerControls[lpmcd->dwControlID].val[0].dwValue = dwLevel;
             return MMSYSERR_NOERROR;
         }
         
