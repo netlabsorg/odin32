@@ -1,4 +1,4 @@
-/* $Id: devcontext.cpp,v 1.1 2004-01-11 11:42:09 sandervl Exp $ */
+/* $Id: devcontext.cpp,v 1.2 2004-02-10 15:35:38 sandervl Exp $ */
 
 /*
  * GDI32 device context apis
@@ -363,6 +363,7 @@ int WIN32API SaveDC( HDC hdc)
          return 0;
     }
     //overwrite the current clip region with the copy
+    dprintf2(("New win32 clip region %x", hClipRgn));
     pHps->hrgnWin32Clip = hClipRgn;
     return id;
 }
@@ -392,6 +393,8 @@ BOOL WIN32API RestoreDC(HDC hdc, int id)
 
         // Activate previous clip region
         GdiCombineVisRgnClipRgn(pHps, pHps->hrgnWin32Clip, RGN_AND);
+
+        dprintf2(("New win32 clip region %x", pHps->hrgnWin32Clip));
     }
     return ret;
 }

@@ -1,4 +1,4 @@
-/* $Id: region.cpp,v 1.37 2004-01-30 22:20:00 bird Exp $ */
+/* $Id: region.cpp,v 1.38 2004-02-10 15:35:39 sandervl Exp $ */
 
 /*
  * GDI32 region code
@@ -720,15 +720,16 @@ HRGN GdiCopyClipRgn(pDCData pHps)
     if(hrgnNewClip == NULLHANDLE) {
         dprintf(("ERROR: GdiCopyClipRgn: GpiCreateRegion failed!!"));
         DebugInt3();
-        return 0;
+        return NULLHANDLE;
     }
     lComplexity = GpiCombineRegion(pHps->hps, hrgnNewClip, pHps->hrgnWin32Clip, NULLHANDLE, CRGN_COPY);
     if (lComplexity != RGN_ERROR)
     {
-        return TRUE;
+        return hrgnNewClip;
     }
+    dprintf(("GpiCombineRegion %x %x %x failed!!", pHps->hps, hrgnNewClip, pHps->hrgnWin32Clip));
     DebugInt3();
-    return FALSE;
+    return NULLHANDLE;
 }
 //******************************************************************************
 // GdiDestroyRgn
@@ -807,6 +808,7 @@ int WIN32API ExtSelectClipRgn(HDC hdc, HRGN hrgn, int mode)
         //interpretRegionAs converts the region and saves it in pHps->hrgnHDC
         if(!interpretRegionAs(pHps, 0, hrgn, AS_DEVICE) )
         {
+            dprintf(("interpretRegionAs failed!!"));
             return ERROR_W;
         }
    }
@@ -856,6 +858,7 @@ int WIN32API ExtSelectClipRgn(HDC hdc, HRGN hrgn, int mode)
             return lComplexity;
         }
    }
+   dprintf(("GpiCombineRegion failed %x %x %x %d", hrgnCurrent, hrgnSrc1, hrgnSrc2, lMode));
    GpiDestroyRegion(pHps->hps, hrgnCurrent); //delete newly created region
 
    SetLastError(ERROR_INVALID_PARAMETER_W); //TODO
@@ -2046,6 +2049,28 @@ error:
 
     SetLastError(ERROR_INVALID_HANDLE_W);       //todo right error
     return NULLHANDLE;
+}
+//******************************************************************************
+//Selects the current path as a clipping region for a device context, combining
+//any existing clipping region by using the specified mode
+//TODO: Can be emulated with SelectClipRegion??
+//******************************************************************************
+BOOL WIN32API SelectClipPath(HDC hdc, int iMode)
+{
+    HRGN hrgn;
+    BOOL ret = FALSE;
+
+    hrgn = PathToRegion(hdc);
+    if(hrgn) 
+    {
+        ret = ExtSelectClipRgn(hdc, hrgn, iMode) != ERROR_W;
+        DeleteObject(hrgn);
+    }
+
+    if(hrgn == NULLHANDLE || ret == FALSE) {
+        dprintf(("GDI32: SelectClipPath FAILED %x %d", hrgn, ret));
+    }
+    return ret;
 }
 //******************************************************************************
 //Needs wrapper as this file includes os2.h!!
