@@ -1,7 +1,10 @@
-/* $Id: changelog,v 1.2637 2003-10-22 09:48:27 sandervl Exp $ */
+/* $Id: changelog,v 1.2638 2003-10-22 12:41:56 sandervl Exp $ */
 
- 2002-10-22: Dmitry Froloff <froloff@os2   >
-    - PMKBDHK:  o Fix for NLS layer switching (alt-shift)
+ 2003-10-22: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Use WC_FRAME for the Odin frame window and subclass it. There's
+                  some PM code that makes assumptions about frame window names.
+                o Updates for new keyboard hook
+    - PMKBDHK:  o Updates
 
  2003-10-20: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o PM windows should have no owner if none is specified. (instead 
