@@ -1,4 +1,14 @@
- /* $Id: ChangeLog,v 1.1045 2000-07-25 18:21:45 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1046 2000-07-26 18:05:06 sandervl Exp $ */
+
+ 2000-07-26: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: Don't translate values returned by WaitForSingleObject.
+                Open32's WaitForSingleObject returns the correct values.
+                -> breaks a lot of things including RealPlayer 7
+                (removed bugfix 2000-07-17: fixed return codes for HMWaitForSingleObject)
+    - DOC\ToDo.txt:
+                Added:
+                USER32: Fix LoadImage to resize icons, cursors or bitmaps
+                        to the specified dimensions (if required)
 
  2000-07-25: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: Added environment setting for disabling wait on exit
