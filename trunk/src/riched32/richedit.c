@@ -617,8 +617,12 @@ static LRESULT WINAPI RICHED32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
             DPRINTF_EDIT_MSG32("WM_STYLECHANGED Passed to edit control");
 	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
      case WM_NCCALCSIZE:
+#ifdef __WIN32OS2__
+            break; //this is completely wrong, we resize the control in the WM_SIZE handler
+#else
             DPRINTF_EDIT_MSG32("WM_NCCALCSIZE Passed to edit control");
 	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
+#endif
      case WM_GETTEXT:
             DPRINTF_EDIT_MSG32("WM_GETTEXT Passed to edit control");
 	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
