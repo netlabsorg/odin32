@@ -1,4 +1,4 @@
-/* $Id: palette.cpp,v 1.4 2000-05-22 19:11:28 sandervl Exp $ */
+/* $Id: palette.cpp,v 1.5 2000-05-23 18:46:21 sandervl Exp $ */
 
 /*
  * GDI32 palette apis
@@ -53,8 +53,11 @@ UINT WINAPI GetSystemPaletteUse(HDC hdc) /* [in] Handle of device context */
 //******************************************************************************
 UINT WIN32API RealizePalette( HDC hdc)
 {
-    dprintf(("GDI32: RealizePalette %x", hdc));
-    return O32_RealizePalette(hdc);
+ UINT rc;
+
+    rc = O32_RealizePalette(hdc);
+    dprintf(("GDI32: RealizePalette %x returned %d", hdc, rc));
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
