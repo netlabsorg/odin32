@@ -1,10 +1,10 @@
-/* $Id: misc.cpp,v 1.47 2002-06-02 12:42:09 sandervl Exp $ */
+/* $Id: dbglog.cpp,v 1.1 2002-07-26 10:46:14 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
- * Logging procedures
+ * Debug Logging procedures
  *
- * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
+ * Copyright 1998-2002 Sander van Leeuwen (sandervl@xs4all.nl)
  * Copyright 1998 Joel Troster
  * Copyright 1998 Peter FitzSimmons
  *
@@ -26,7 +26,7 @@
 #include <stdarg.h>
 #include <win32type.h>
 #include <win32api.h>
-#include <misc.h>
+#include <dbglog.h>
 #include "initterm.h"
 #include "logging.h"
 #include "exceptutil.h"
