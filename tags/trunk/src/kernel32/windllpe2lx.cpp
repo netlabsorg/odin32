@@ -1,4 +1,4 @@
-/* $Id: windllpe2lx.cpp,v 1.6 2000-02-16 14:22:11 sandervl Exp $ */
+/* $Id: windllpe2lx.cpp,v 1.7 2000-03-09 19:03:21 sandervl Exp $ */
 
 /*
  * Win32 PE2LX Dll class
@@ -15,7 +15,7 @@
 *******************************************************************************/
 #define INCL_DOSERRORS      /* DOS Error values */
 #define INCL_DOSMODULEMGR   /* DOS Module management */
-
+#define INCL_DOSSEMAPHORES
 
 /*******************************************************************************
 *   Header Files                                                               *

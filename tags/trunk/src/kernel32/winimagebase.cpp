@@ -1,4 +1,4 @@
-/* $Id: winimagebase.cpp,v 1.9 2000-02-22 19:12:53 sandervl Exp $ */
+/* $Id: winimagebase.cpp,v 1.10 2000-03-09 19:03:22 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -95,6 +95,32 @@ void Win32ImageBase::setFullPath(char *name)
   fullpath = (char *)malloc(strlen(name)+1);
   dassert(fullpath, ("setFullPath, fullpath == NULL"));
   strcpy(fullpath, name);
+}
+//******************************************************************************
+//Add image to dependency list of this image
+//******************************************************************************
+void Win32ImageBase::addDependency(Win32DllBase *image)
+{
+  loadedDlls.Push((ULONG)image);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32ImageBase::dependsOn(Win32DllBase *image)
+{
+ QueueItem    *item;
+ BOOL          ret = FALSE;
+
+  dlllistmutex.enter();
+  item = loadedDlls.Head();
+  while(item) {
+	if(loadedDlls.getItem(item) == (ULONG)image) {
+		ret = TRUE;
+		break;
+	}	  
+	item = loadedDlls.getNext(item);
+  }
+  dlllistmutex.leave();
+  return ret;
 }
 //******************************************************************************
 //Returns required OS version for this image

@@ -1,4 +1,4 @@
-/* $Id: dbglocal.cpp,v 1.2 2000-02-22 19:12:52 sandervl Exp $ */
+/* $Id: dbglocal.cpp,v 1.3 2000-03-09 19:03:18 sandervl Exp $ */
 
 /*
  * debug logging functions for OS/2
@@ -109,7 +109,9 @@ char  *DbgFileNames[DBG_MAXFILES] =
 "toolhelp",
 "codepage",
 "debug",
-"oslibdebug"
+"oslibdebug",
+"registry",
+"queue"
 };
 //******************************************************************************
 //******************************************************************************

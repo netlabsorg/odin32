@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.35 2000-03-02 19:17:21 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.36 2000-03-09 19:03:19 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -501,7 +501,6 @@ Win32MemMap *Win32MemMap::findMap(ULONG address)
   return map;
 }
 //******************************************************************************
-//Assumes mutex has been acquired
 //******************************************************************************
 void Win32MemMap::deleteAll()
 {
@@ -509,6 +508,7 @@ void Win32MemMap::deleteAll()
  DWORD processId = GetCurrentProcess();
 
   //delete all maps created by this process
+  globalviewMutex.enter();
   while(map) {
 	nextmap = map->next;
 	if(map->getProcessId() == processId) {
@@ -524,6 +524,7 @@ void Win32MemMap::deleteAll()
 	}
 	map = nextmap;
   }
+  globalviewMutex.leave();
 }
 //******************************************************************************
 //******************************************************************************
@@ -690,6 +691,7 @@ Win32MemMapView *Win32MemMapView::findView(LPVOID address)
 {
   Win32MemMapView *view = mapviews;
 
+  globalviewMutex.enter();
   if(view != NULL) {
   	while(view) {
 		if(view->getViewAddr() == address)
@@ -699,6 +701,7 @@ Win32MemMapView *Win32MemMapView::findView(LPVOID address)
 		view = view->next;
 	}
   }
+  globalviewMutex.leave();
   return view;
 }
 //******************************************************************************
