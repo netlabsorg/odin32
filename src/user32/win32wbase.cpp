@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.338 2002-09-06 12:31:41 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.339 2002-09-17 17:43:07 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1735,6 +1735,11 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 
     case WM_MOUSEMOVE:
         return 0;
+
+    case WM_MOUSEWHEEL:
+        if (::GetWindowLongA( getWindowHandle(), GWL_STYLE ) & WS_CHILD)
+            return ::SendMessageA( ::GetParent(getWindowHandle()), WM_MOUSEWHEEL, wParam, lParam );
+	break;
 
     case WM_WINDOWPOSCHANGED:
     {
