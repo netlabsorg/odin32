@@ -1,0 +1,47 @@
+/* $Id: myLDRQAppType.cpp,v 1.1 1999-09-06 02:20:01 bird Exp $
+ *
+ * _myLDRQAppType - _LDRQAppType overload.
+ *
+ * Copyright (c) 1998-1999 knut  St.  osmundsen
+ *
+ */
+
+/*******************************************************************************
+*   Defined Constants And Macros                                               *
+*******************************************************************************/
+#define INCL_DOSERRORS
+#define INCL_NOPMAPI
+
+/*******************************************************************************
+*   Header Files                                                               *
+*******************************************************************************/
+#include <os2.h>
+
+#include "OS2Krnl.h"
+#include "ldrCalls.h"
+#include "log.h"
+
+BOOL fQAppType = FALSE;
+
+/**
+ * LDRQAppType - Loader Query Application Type.
+ * We set a flag while we're executing this function. Just to speed up processing.
+ * If a PE file is queried, a dummy LX header is presented.
+ * @returns   return code.
+ * @param     p1
+ * @param     p2
+ */
+ULONG LDRCALL myLDRQAppType(ULONG p1, ULONG p2)
+{
+    int rc;
+
+    kprintf(("_LDRQAppType: entry\n"));
+    fQAppType = 1;
+
+    rc = _LDRQAppType(p1, p2);
+
+    fQAppType = 0;
+    kprintf(("_LDRQAppType: exit\n"));
+
+    return rc;
+}
