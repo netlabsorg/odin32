@@ -42,9 +42,9 @@ class scsiObj
     ULONG       space(UCHAR id, UCHAR lun, UCHAR code, ULONG count);
     ULONG       read_position(UCHAR id, UCHAR lun, ULONG* pos, ULONG* partition, BOOL* BOP, BOOL* EOP);
     ULONG       HA_inquiry(UCHAR ha);
-    ULONG       getDeviceType(UCHAR id, UCHAR lun);
+    ULONG       getDeviceType(UCHAR ha_num, UCHAR id, UCHAR lun);
     ULONG       testUnitReady(UCHAR id, UCHAR lun);
-    ULONG       resetDevice(UCHAR id, UCHAR lun);
+    ULONG       resetDevice(UCHAR ha_num,UCHAR id, UCHAR lun);
     ULONG       abort();
     BOOL        waitPost();
     ULONG       SendSRBlock(VOID);
