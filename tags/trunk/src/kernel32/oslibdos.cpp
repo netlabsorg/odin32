@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.98 2002-04-13 07:41:31 bird Exp $ */
+/* $Id: oslibdos.cpp,v 1.99 2002-04-13 07:47:24 bird Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -2966,40 +2966,6 @@ DWORD OSLibDosDevIOCtl( DWORD hFile, DWORD dwCat, DWORD dwFunc,
   PVOID pTiledData    = pData;
   BOOL  flagTiledData = FALSE;
 
-#define MEM_TILED_CEILING 0x1fffffff
-
-  // bounce buffer support
-  // make sure no parameter or data buffer can pass the tiled memory region
-  // barrier (usually 512MB). OS/2 kernel does not correctly translate these
-  // addresses to a 16:16 address used in device driver land. In fact,
-  // DosDevIOCtl is not a high memory enabled API!
-
-  if (pTiledParm && (((DWORD)pTiledParm + max(dwParmMaxLen, *pdwParmLen)) > MEM_TILED_CEILING))
-  {
-    rc = DosAllocMem(&pTiledParm, dwParmMaxLen, PAG_READ | PAG_WRITE);
-    if (rc)
-      goto _exit_ioctl;
-
-    flagTiledParm = TRUE;
-  }
-
-  if (pTiledData && (((DWORD)pTiledData + max(dwDataMaxLen, *pdwDataLen)) > MEM_TILED_CEILING))
-  {
-    rc = DosAllocMem(&pTiledData, dwDataMaxLen, PAG_READ | PAG_WRITE);
-    if (rc)
-        goto _exit_ioctl;
-
-    flagTiledData = TRUE;
-  }
-
-  // copy data from real buffers to
-  // bounce buffers if necessary
-  if (pTiledParm != pParm)
-    memcpy(pTiledParm, pParm, *pdwParmLen);
-
-  if (pTiledData != pData)
-    memcpy(pTiledData, pData, *pdwDataLen);
-
 #if 1
     /*
      * Quick and Dirty Fix!
@@ -3053,6 +3019,41 @@ DWORD OSLibDosDevIOCtl( DWORD hFile, DWORD dwCat, DWORD dwFunc,
     }
 
 #endif
+
+#define MEM_TILED_CEILING 0x1fffffff
+
+  // bounce buffer support
+  // make sure no parameter or data buffer can pass the tiled memory region
+  // barrier (usually 512MB). OS/2 kernel does not correctly translate these
+  // addresses to a 16:16 address used in device driver land. In fact,
+  // DosDevIOCtl is not a high memory enabled API!
+
+  if (pTiledParm && (((DWORD)pTiledParm + max(dwParmMaxLen, *pdwParmLen)) > MEM_TILED_CEILING))
+  {
+    rc = DosAllocMem(&pTiledParm, dwParmMaxLen, PAG_READ | PAG_WRITE);
+    if (rc)
+      goto _exit_ioctl;
+
+    flagTiledParm = TRUE;
+  }
+
+  if (pTiledData && (((DWORD)pTiledData + max(dwDataMaxLen, *pdwDataLen)) > MEM_TILED_CEILING))
+  {
+    rc = DosAllocMem(&pTiledData, dwDataMaxLen, PAG_READ | PAG_WRITE);
+    if (rc)
+        goto _exit_ioctl;
+
+    flagTiledData = TRUE;
+  }
+
+  // copy data from real buffers to
+  // bounce buffers if necessary
+  if (pTiledParm != pParm)
+    memcpy(pTiledParm, pParm, *pdwParmLen);
+
+  if (pTiledData != pData)
+    memcpy(pTiledData, pData, *pdwDataLen);
+
 
   rc = DosDevIOCtl( (HFILE)hFile, dwCat, dwFunc,
                      pParm, dwParmMaxLen, pdwParmLen,
