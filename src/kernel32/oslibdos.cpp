@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.24 2000-04-02 15:11:12 cbratschi Exp $ */
+/* $Id: oslibdos.cpp,v 1.25 2000-04-03 15:01:22 cbratschi Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -1078,6 +1078,7 @@ DWORD OSLibDosFindFirst(LPCSTR lpFileName,WIN32_FIND_DATAA* lpFindFileData)
   ULONG searchCount = 1;
 
   attrs = FILE_READONLY | FILE_HIDDEN | FILE_SYSTEM | FILE_DIRECTORY | FILE_ARCHIVED;
+  result.achName[0] = 0;
 
   DosError(FERR_DISABLEHARDERR | FERR_DISABLEEXCEPTION);
   APIRET rc = DosFindFirst((PSZ)lpFileName,&hDir,attrs,&result,sizeof(result),&searchCount,FIL_STANDARD);
@@ -1089,6 +1090,7 @@ DWORD OSLibDosFindFirst(LPCSTR lpFileName,WIN32_FIND_DATAA* lpFindFileData)
   {
     while ((strcmp(result.achName,".") == 0) || (strcmp(result.achName,"..") == 0))
     {
+      result.achName[0] = 0;
       DosError(FERR_DISABLEHARDERR | FERR_DISABLEEXCEPTION);
       searchCount = 1;
       APIRET rc = DosFindNext(hDir,&result,sizeof(result),&searchCount);
