@@ -21,6 +21,7 @@ TARGET = ole32
 
 OBJS =  ole32.obj \
         moniker.obj \
+        antimoniker.obj \
 	initterm.obj \
 	oString.obj \
 	clsid.obj \
