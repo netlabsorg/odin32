@@ -1,15 +1,22 @@
- /* $Id: ChangeLog,v 1.737 2000-02-18 10:34:18 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.738 2000-02-21 10:32:08 sandervl Exp $ */
+
+ 2000-02-21: Sander van Leeuwen <sandervl@xs4all.nl>
+	- GDI32: SetDIBits bugfix (for dib sections)
+
+ 2000-02-21: Jens Wiessner <wiessnej@rfi.de>
+	- RASAPI32: Added stubs
+	- OLEPRO32: Ported Corel Wine stub dll
+	- CRTDLL: Replaced some stubs
 
  2000-02-18: Sander van Leeuwen <sandervl@xs4all.nl>
 	- OPENGL\GLIDE: Added Odin version of Glide based on the OS/2 port
                         written by Craig Ballantyne. (Voodoo 1)
                         NOTE: Includes 3dfx Glide license
-                        (UNTESTED)
 
  2000-02-17: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Fixed memory map view bug (main map deleted when there
-                    are still views left) -> fixes crash when playing Realplayer
-                    videos (.rm files)
+                    were still views left) -> fixes crash when playing Realplayer
+                    video (.rm) files
 	- WINMM: Added new logging feature + fixed waveout query format bug
 
  2000-02-16: Christoph Bratschi <cbratschi@datacomm.ch>
