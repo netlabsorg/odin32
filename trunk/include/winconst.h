@@ -1,4 +1,4 @@
-/* $Id: winconst.h,v 1.24 2000-02-07 14:29:21 sandervl Exp $ */
+/* $Id: winconst.h,v 1.25 2000-02-10 00:34:15 sandervl Exp $ */
 
 /*
  * Win32 constants
@@ -1010,3 +1010,35 @@
 #define RGN_XOR_W           3
 #define RGN_DIFF_W          4
 #define RGN_COPY_W          5
+
+
+#define	PAGE_NOACCESS_W			0x01
+#define	PAGE_READONLY_W			0x02
+#define	PAGE_READWRITE_W		0x04
+#define	PAGE_WRITECOPY_W		0x08
+#define	PAGE_EXECUTE_W			0x10
+#define	PAGE_EXECUTE_READ_W		0x20
+#define	PAGE_EXECUTE_READWRITE_W	0x40
+#define	PAGE_EXECUTE_WRITECOPY_W	0x80
+#define	PAGE_GUARD_W			0x100
+#define	PAGE_NOCACHE_W			0x200
+
+#define MEM_COMMIT_W              	0x00001000
+#define MEM_RESERVE_W             	0x00002000
+#define MEM_DECOMMIT_W            	0x00004000
+#define MEM_RELEASE_W             	0x00008000
+#define MEM_FREE_W                	0x00010000
+#define MEM_PRIVATE_W             	0x00020000
+#define MEM_MAPPED_W              	0x00040000
+#define MEM_TOP_DOWN_W            	0x00100000
+
+#define SEC_FILE_W                	0x00800000
+#define SEC_IMAGE_W               	0x01000000
+#define SEC_RESERVE_W             	0x04000000
+#define SEC_COMMIT_W              	0x08000000
+#define SEC_NOCACHE_W             	0x10000000
+
+#define FILE_MAP_COPY_W                 0x00000001
+#define FILE_MAP_WRITE_W                0x00000002
+#define FILE_MAP_READ_W                 0x00000004
+#define FILE_MAP_ALL_ACCESS_W           0x000f001f
