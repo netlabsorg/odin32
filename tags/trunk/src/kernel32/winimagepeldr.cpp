@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.92 2001-11-24 14:58:04 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.93 2001-12-20 15:08:56 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -291,144 +291,123 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
     }
     memset(section, 0, nSections*sizeof(Section));
 
-    if(!(dwFlags & FLAG_PELDR_LOADASDATAFILE))
+    imageSize = 0;
+    if ((psh = (PIMAGE_SECTION_HEADER)SECTIONHDROFF (win32file)) != NULL)
     {
-        imageSize = 0;
-        if ((psh = (PIMAGE_SECTION_HEADER)SECTIONHDROFF (win32file)) != NULL)
+        dprintf((LOG, "*************************PE SECTIONS START**************************" ));
+        for (i=0; i<nSections; i++)
         {
-            dprintf((LOG, "*************************PE SECTIONS START**************************" ));
-            for (i=0; i<nSections; i++)
+            dprintf((LOG, "Section:              %-8s", psh[i].Name ));
+            dprintf((LOG, "Raw data size:        %x", psh[i].SizeOfRawData ));
+            dprintf((LOG, "Virtual Address:      %x", psh[i].VirtualAddress ));
+            dprintf((LOG, "Virtual Address Start:%x", psh[i].VirtualAddress+oh.ImageBase ));
+            dprintf((LOG, "Virtual Address End:  %x", psh[i].VirtualAddress+oh.ImageBase+psh[i].Misc.VirtualSize ));
+            dprintf((LOG, "Virtual Size:         %x", psh[i].Misc.VirtualSize ));
+            dprintf((LOG, "Pointer to raw data:  %x", psh[i].PointerToRawData ));
+            dprintf((LOG, "Section flags:        %x\n\n", psh[i].Characteristics ));
+
+            if(IsSectionType(win32file, &psh[i], IMAGE_DIRECTORY_ENTRY_BASERELOC))
             {
-                dprintf((LOG, "Section:              %-8s", psh[i].Name ));
-                dprintf((LOG, "Raw data size:        %x", psh[i].SizeOfRawData ));
-                dprintf((LOG, "Virtual Address:      %x", psh[i].VirtualAddress ));
-                dprintf((LOG, "Virtual Address Start:%x", psh[i].VirtualAddress+oh.ImageBase ));
-                dprintf((LOG, "Virtual Address End:  %x", psh[i].VirtualAddress+oh.ImageBase+psh[i].Misc.VirtualSize ));
-                dprintf((LOG, "Virtual Size:         %x", psh[i].Misc.VirtualSize ));
-                dprintf((LOG, "Pointer to raw data:  %x", psh[i].PointerToRawData ));
-                dprintf((LOG, "Section flags:        %x\n\n", psh[i].Characteristics ));
-
-                if(IsSectionType(win32file, &psh[i], IMAGE_DIRECTORY_ENTRY_BASERELOC))
-                {
-                    dprintf((LOG, ".reloc" ));
-                    addSection(SECTION_RELOC, psh[i].PointerToRawData,
-                               psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
-                               psh[i].Misc.VirtualSize, psh[i].Characteristics);
-                    continue;
-                }
-                if(IsSectionType(win32file, &psh[i], IMAGE_DIRECTORY_ENTRY_EXPORT))
-                {
-                    //SvL: Angus.exe has empty export section that's really an
-                    //     uninitialized data section
-                    if(psh[i].SizeOfRawData) {
-                         dprintf((LOG, ".edata" ));
-                         addSection(SECTION_EXPORT, psh[i].PointerToRawData,
-                                    psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
-                                    psh[i].Misc.VirtualSize, psh[i].Characteristics);
-                        continue;
-                    }
-                }
-                if(IsSectionType(win32file, &psh[i], IMAGE_DIRECTORY_ENTRY_RESOURCE))
-                {
-                    dprintf((LOG, ".rsrc" ));
-                    addSection(SECTION_RESOURCE, psh[i].PointerToRawData,
-                               psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
-                               psh[i].Misc.VirtualSize, psh[i].Characteristics);
-                    continue;
-                }
-                if(IsSectionType(win32file, &psh[i], IMAGE_DIRECTORY_ENTRY_TLS))
-                {
-                    dprintf((LOG, "TLS section"));
-                    tlsDir = (IMAGE_TLS_DIRECTORY *)ImageDirectoryOffset(win32file, IMAGE_DIRECTORY_ENTRY_TLS);
-                    if(tlsDir) {
-                        addSection(SECTION_TLS, psh[i].PointerToRawData,
-                                   psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
-                                   psh[i].Misc.VirtualSize, psh[i].Characteristics);
-                    }
-                    continue;
-                }
-                if(IsSectionType(win32file, &psh[i], IMAGE_DIRECTORY_ENTRY_DEBUG))
-                {
-                    dprintf((LOG, ".rdebug" ));
-                    addSection(SECTION_DEBUG,  psh[i].PointerToRawData,
-                               psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
-                               psh[i].Misc.VirtualSize, psh[i].Characteristics);
-                    continue;
-                }
-                if(IsSectionType(win32file, &psh[i], IMAGE_DIRECTORY_ENTRY_IMPORT))
-                {
-                    int type = SECTION_IMPORT;
-
-                    dprintf((LOG, "Import Data Section" ));
-                    if(psh[i].Characteristics & IMAGE_SCN_CNT_CODE) {
-                        dprintf((LOG, "Also Code Section"));
-                        type |= SECTION_CODE;
-                    }
-                    addSection(type, psh[i].PointerToRawData,
-                               psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
-                               psh[i].Misc.VirtualSize, psh[i].Characteristics);
-                    continue;
-                }
-
-                //KSO Sun 1998-08-09: Borland does not alway set the CODE flag for its "CODE" section
-                if(psh[i].Characteristics & IMAGE_SCN_CNT_CODE ||
-                   (psh[i].Characteristics & IMAGE_SCN_MEM_EXECUTE &&
-                   !(psh[i].Characteristics & (IMAGE_SCN_CNT_UNINITIALIZED_DATA | IMAGE_SCN_CNT_INITIALIZED_DATA))) //KSO: make sure its not marked as a datasection
-                  )
-                {
-                    dprintf((LOG, "Code Section"));
-                    addSection(SECTION_CODE, psh[i].PointerToRawData,
-                               psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
-                               psh[i].Misc.VirtualSize, psh[i].Characteristics);
-                    continue;
-                }
-                if(!(psh[i].Characteristics & IMAGE_SCN_MEM_WRITE)) { //read only data section
-                    dprintf((LOG, "Read Only Data Section" ));
-                    addSection(SECTION_READONLYDATA, psh[i].PointerToRawData,
-                               psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
-                               psh[i].Misc.VirtualSize, psh[i].Characteristics);
-                    continue;
-                }
-                if(psh[i].Characteristics & IMAGE_SCN_CNT_UNINITIALIZED_DATA) {
-                    dprintf((LOG, "Uninitialized Data Section" ));
-                    addSection(SECTION_UNINITDATA, psh[i].PointerToRawData,
-                               psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
-                               psh[i].Misc.VirtualSize, psh[i].Characteristics);
-                    continue;
-                }
-                if(psh[i].Characteristics & IMAGE_SCN_CNT_INITIALIZED_DATA) {
-                    dprintf((LOG, "Initialized Data Section" ));
-                    addSection(SECTION_INITDATA, psh[i].PointerToRawData,
-                               psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
-                               psh[i].Misc.VirtualSize, psh[i].Characteristics);
-                    continue;
-                }
-                if(psh[i].Characteristics & (IMAGE_SCN_MEM_WRITE | IMAGE_SCN_MEM_READ)) {
-                    dprintf((LOG, "Other Section, stored as read/write uninit data" ));
-                    addSection(SECTION_UNINITDATA, psh[i].PointerToRawData,
-                               psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
-                               psh[i].Misc.VirtualSize, psh[i].Characteristics);
-                    continue;
-                }
-                dprintf((LOG, "Unknown section" ));
-                goto failure;
+                dprintf((LOG, ".reloc" ));
+                addSection(SECTION_RELOC, psh[i].PointerToRawData,
+                           psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
+                           psh[i].Misc.VirtualSize, psh[i].Characteristics);
+                continue;
             }
-        }
-    }
-    else {
-        if(GetSectionHdrByImageDir(win32file, IMAGE_DIRECTORY_ENTRY_RESOURCE, &sh))
-        {
-            dprintf((LOG, "*************************PE SECTIONS START**************************" ));
-            dprintf((LOG, "Raw data size:        %x", sh.SizeOfRawData ));
-            dprintf((LOG, "Virtual Address:      %x", sh.VirtualAddress ));
-            dprintf((LOG, "Virtual Address Start:%x", sh.VirtualAddress+oh.ImageBase ));
-            dprintf((LOG, "Virtual Address End:  %x", sh.VirtualAddress+oh.ImageBase+sh.Misc.VirtualSize ));
-            dprintf((LOG, "Virtual Size:         %x", sh.Misc.VirtualSize ));
-            dprintf((LOG, "Pointer to raw data:  %x", sh.PointerToRawData ));
-            dprintf((LOG, "Section flags:        %x\n\n", sh.Characteristics ));
-            addSection(SECTION_RESOURCE, sh.PointerToRawData,
-                       sh.SizeOfRawData, sh.VirtualAddress + oh.ImageBase,
-                       sh.Misc.VirtualSize, sh.Characteristics);
+            if(IsSectionType(win32file, &psh[i], IMAGE_DIRECTORY_ENTRY_EXPORT))
+            {
+                //SvL: Angus.exe has empty export section that's really an
+                //     uninitialized data section
+                if(psh[i].SizeOfRawData) {
+                     dprintf((LOG, ".edata" ));
+                     addSection(SECTION_EXPORT, psh[i].PointerToRawData,
+                                psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
+                                 psh[i].Misc.VirtualSize, psh[i].Characteristics);
+                     continue;
+                }
+            }
+            if(IsSectionType(win32file, &psh[i], IMAGE_DIRECTORY_ENTRY_RESOURCE))
+            {
+                dprintf((LOG, ".rsrc" ));
+                addSection(SECTION_RESOURCE, psh[i].PointerToRawData,
+                           psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
+                           psh[i].Misc.VirtualSize, psh[i].Characteristics);
+                continue;
+            }
+            if(IsSectionType(win32file, &psh[i], IMAGE_DIRECTORY_ENTRY_TLS))
+            {
+                dprintf((LOG, "TLS section"));
+                tlsDir = (IMAGE_TLS_DIRECTORY *)ImageDirectoryOffset(win32file, IMAGE_DIRECTORY_ENTRY_TLS);
+                if(tlsDir) {
+                    addSection(SECTION_TLS, psh[i].PointerToRawData,
+                               psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
+                               psh[i].Misc.VirtualSize, psh[i].Characteristics);
+                }
+                continue;
+            }
+            if(IsSectionType(win32file, &psh[i], IMAGE_DIRECTORY_ENTRY_DEBUG))
+            {
+                dprintf((LOG, ".rdebug" ));
+                addSection(SECTION_DEBUG,  psh[i].PointerToRawData,
+                           psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
+                           psh[i].Misc.VirtualSize, psh[i].Characteristics);
+                continue;
+            }
+            if(IsSectionType(win32file, &psh[i], IMAGE_DIRECTORY_ENTRY_IMPORT))
+            {
+                int type = SECTION_IMPORT;
+                dprintf((LOG, "Import Data Section" ));
+                if(psh[i].Characteristics & IMAGE_SCN_CNT_CODE) {
+                   dprintf((LOG, "Also Code Section"));
+                   type |= SECTION_CODE;
+                }
+                addSection(type, psh[i].PointerToRawData,
+                           psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
+                           psh[i].Misc.VirtualSize, psh[i].Characteristics);
+                continue;
+            }
+            //KSO Sun 1998-08-09: Borland does not alway set the CODE flag for its "CODE" section
+            if(psh[i].Characteristics & IMAGE_SCN_CNT_CODE ||
+               (psh[i].Characteristics & IMAGE_SCN_MEM_EXECUTE &&
+               !(psh[i].Characteristics & (IMAGE_SCN_CNT_UNINITIALIZED_DATA | IMAGE_SCN_CNT_INITIALIZED_DATA))) //KSO: make sure its not marked as a datasection
+              )
+            {
+                dprintf((LOG, "Code Section"));
+                addSection(SECTION_CODE, psh[i].PointerToRawData,
+                           psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
+                           psh[i].Misc.VirtualSize, psh[i].Characteristics);
+                continue;
+            }
+            if(!(psh[i].Characteristics & IMAGE_SCN_MEM_WRITE)) { //read only data section
+                dprintf((LOG, "Read Only Data Section" ));
+                addSection(SECTION_READONLYDATA, psh[i].PointerToRawData,
+                           psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
+                           psh[i].Misc.VirtualSize, psh[i].Characteristics);
+                continue;
+            }
+            if(psh[i].Characteristics & IMAGE_SCN_CNT_UNINITIALIZED_DATA) {
+                dprintf((LOG, "Uninitialized Data Section" ));
+                addSection(SECTION_UNINITDATA, psh[i].PointerToRawData,
+                           psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
+                           psh[i].Misc.VirtualSize, psh[i].Characteristics);
+                continue;
+            }
+            if(psh[i].Characteristics & IMAGE_SCN_CNT_INITIALIZED_DATA) {
+                dprintf((LOG, "Initialized Data Section" ));
+                addSection(SECTION_INITDATA, psh[i].PointerToRawData,
+                           psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
+                           psh[i].Misc.VirtualSize, psh[i].Characteristics);
+                continue;
+            }
+            if(psh[i].Characteristics & (IMAGE_SCN_MEM_WRITE | IMAGE_SCN_MEM_READ)) {
+                dprintf((LOG, "Other Section, stored as read/write uninit data" ));
+                addSection(SECTION_UNINITDATA, psh[i].PointerToRawData,
+                           psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
+                           psh[i].Misc.VirtualSize, psh[i].Characteristics);
+                continue;
+            }
+            dprintf((LOG, "Unknown section" ));
+            goto failure;
         }
     }
     dprintf((LOG, "*************************PE SECTIONS END **************************" ));
@@ -617,11 +596,6 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
             goto failure;
         }
     }
-#ifdef COMMIT_ALL
-    else {
-        commitPage((ULONG)section[0].realvirtaddr, FALSE, COMPLETE_SECTION);
-    }
-#endif
 
 #ifndef COMMIT_ALL
     if(entryPoint) {
@@ -648,8 +622,12 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
     //Allocate TLS index for this module
     //Must do this before dlls are loaded for this module. Some apps assume
     //they get TLS index 0 for their main executable
-    tlsAlloc();
-    tlsAttachThread();  //setup TLS (main thread)
+    {
+      USHORT sel = SetWin32TIB();
+      tlsAlloc();
+      tlsAttachThread();  //setup TLS (main thread)
+      SetFS(sel);
+    }
 
     if(!(dwFlags & (FLAG_PELDR_LOADASDATAFILE | FLAG_PELDR_SKIPIMPORTS)))
     {
@@ -750,6 +728,7 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
  ULONG    ulNewPos, ulRead, orgVirtAddress = virtAddress;
  APIRET   rc;
 
+    dprintf((LOG, "Win32PeLdrImage::commitPage %x %d %d", virtAddress, fWriteAccess, fPageCmd));
     if(virtAddress == 0) {
         return FALSE;
     }
@@ -828,7 +807,7 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
     size = min(size, range);
     sectionsize = min(sectionsize, range);
 
-    if(fileoffset != -1) {
+    if(size && fileoffset != -1) {
         rc = DosEnterCritSec();
         if(rc) {
             dprintf((LOG, "DosEnterCritSec failed with rc %d", rc));
