@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2426 2003-01-05 14:52:53 sandervl Exp $ */
+/* $Id: changelog,v 1.2427 2003-01-05 16:34:24 sandervl Exp $ */
 
  2003-01-05: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Added ODIN_SetDllLoadCallback; install a dll load hook
@@ -6,6 +6,7 @@
                   (so before any code is executed that can use the dll)
                 o Added ODIN_SetProcAddress; override a name or ordinal export
     - USER32:   o Corrected wrong bitmap headers in resources
+                o Added workaround for handling black & white cursors
 
  2002-01-05: Dietrich Teickner <Dietrich_Teickner@t-online   >
     - USER32:   o Return MA_NOACTIVATE in listbox WM_MOUSEACTIVATE handler.
