@@ -1,4 +1,4 @@
-/* $Id: winos2def.h,v 1.3 1999-05-31 22:08:08 phaller Exp $ */
+/* $Id: winos2def.h,v 1.4 1999-05-31 22:37:22 phaller Exp $ */
 
 /*
  *
@@ -28,6 +28,10 @@ typedef ULONG           APIRET;
 
 #ifndef APIRET
 #  define APIRET ULONG
+#endif
+
+#ifndef PSZ
+#  define PSZ char *
 #endif
 
 
