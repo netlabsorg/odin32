@@ -1,4 +1,4 @@
-/* $Id: win32class.cpp,v 1.14 2000-02-16 14:28:22 sandervl Exp $ */
+/* $Id: win32class.cpp,v 1.15 2000-02-22 19:15:20 sandervl Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -62,13 +62,13 @@ Win32WndClass::Win32WndClass(WNDCLASSEXA *wndclass, BOOL fUnicode) : GenericObje
                 strcpy((char *)classNameA, wndclass->lpszClassName);
                 AsciiToUnicode(classNameA, classNameW);
         }
-    classAtom = 0;
-    //SvL: If a system control has already be registered, use that atom instead
+    	classAtom = 0;
+    	//SvL: If a system control has already be registered, use that atom instead
         //     of creating a new one
-    if(wndclass->style & CS_GLOBALCLASS) {
-        classAtom = GlobalFindAtomA(classNameA);
-    }
-    if(!classAtom) classAtom = GlobalAddAtomA(classNameA);
+    	if(wndclass->style & CS_GLOBALCLASS) {
+        	classAtom = GlobalFindAtomA(classNameA);
+    	}
+    	if(!classAtom) classAtom = GlobalAddAtomA(classNameA);
   }
   else {
         classNameA      = NULL;
@@ -76,7 +76,7 @@ Win32WndClass::Win32WndClass(WNDCLASSEXA *wndclass, BOOL fUnicode) : GenericObje
         classAtom       = (DWORD)wndclass->lpszClassName;
   }
   if(!(wndclass->style & CS_GLOBALCLASS)) {
-    processId = GetCurrentProcess();
+    	processId = GetCurrentProcess();
   }
   menuNameA = 0;
   menuNameW = 0;
@@ -113,6 +113,8 @@ Win32WndClass::Win32WndClass(WNDCLASSEXA *wndclass, BOOL fUnicode) : GenericObje
   else  hdcClass = 0;
 
   windowStyle           = wndclass->style;
+
+  windowProc = 0;
   WINPROC_SetProc((HWINDOWPROC *)&windowProc, wndclass->lpfnWndProc, (isUnicode) ? WIN_PROC_32W : WIN_PROC_32A, WIN_PROC_CLASS);
   dprintf2(("Window class ptr %x", windowProc));
 
