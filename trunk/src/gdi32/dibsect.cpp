@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.40 2000-10-07 09:03:49 hugh Exp $ */
+/* $Id: dibsect.cpp,v 1.41 2000-10-07 11:39:16 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -51,48 +51,48 @@ DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DW
   switch(pbmi->biBitCount)
   {
         case 1:
-          bmpsize = ((bmpsize + 31) & ~31) / 8;
-          palsize = ((1 << pbmi->biBitCount))*sizeof(RGB2);
-          os2bmphdrsize += palsize;
-                break;
+            bmpsize = ((bmpsize + 31) & ~31) / 8;
+            palsize = ((1 << pbmi->biBitCount))*sizeof(RGB2);
+            os2bmphdrsize += palsize;
+            break;
         case 4:
-                bmpsize = ((bmpsize + 7) & ~7) / 2;
-          palsize = ((1 << pbmi->biBitCount))*sizeof(RGB2);
-                os2bmphdrsize += palsize;
-                break;
+            bmpsize = ((bmpsize + 7) & ~7) / 2;
+            palsize = ((1 << pbmi->biBitCount))*sizeof(RGB2);
+            os2bmphdrsize += palsize;
+            break;
         case 8:
-          palsize = ((1 << pbmi->biBitCount))*sizeof(RGB2);
-          os2bmphdrsize += palsize;
-          bmpsize = (bmpsize + 3) & ~3;
-                break;
+            palsize = ((1 << pbmi->biBitCount))*sizeof(RGB2);
+            os2bmphdrsize += palsize;
+            bmpsize = (bmpsize + 3) & ~3;
+            break;
         case 16:
-                bmpsize *= 2;
-          bmpsize = (bmpsize + 3) & ~3;
-                break;
+            bmpsize *= 2;
+            bmpsize = (bmpsize + 3) & ~3;
+            break;
         case 24:
-                bmpsize *= 3;
-          bmpsize = (bmpsize + 3) & ~3;
-                break;
+            bmpsize *= 3;
+            bmpsize = (bmpsize + 3) & ~3;
+            break;
         case 32:
-                bmpsize *= 4;
-                break;
-  default:
-    dprintf(("Unsupported nr of bits %d", pbmi->biBitCount));
-    DebugInt3();
-    break;
+            bmpsize *= 4;
+            break;
+        default:
+            dprintf(("Unsupported nr of bits %d", pbmi->biBitCount));
+            DebugInt3();
+            break;
    }
 
    this->hSection = hSection;
    this->dwOffset = dwOffset;
    if(hSection) {
-  bmpBits = (char *)MapViewOfFile(hSection, FILE_MAP_ALL_ACCESS_W, 0, dwOffset, bmpsize*pbmi->biHeight);
-  if(!bmpBits) {
-    dprintf(("Dibsection: mapViewOfFile %x failed!", hSection));
-    DebugInt3();
-  }
+        bmpBits = (char *)MapViewOfFile(hSection, FILE_MAP_ALL_ACCESS_W, 0, dwOffset, bmpsize*pbmi->biHeight);
+        if(!bmpBits) {
+            dprintf(("Dibsection: mapViewOfFile %x failed!", hSection));
+            DebugInt3();
+        }
    }
    if(!bmpBits) {
-  DosAllocMem((PPVOID)&bmpBits, bmpsize*pbmi->biHeight, PAG_READ|PAG_WRITE|PAG_COMMIT);
+        DosAllocMem((PPVOID)&bmpBits, bmpsize*pbmi->biHeight, PAG_READ|PAG_WRITE|PAG_COMMIT);
    }
    memset(bmpBits, 0, bmpsize*pbmi->biHeight);
 
@@ -110,7 +110,7 @@ DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DW
    pOS2bmp->ulCompression = pbmi->biCompression;
    //SvL: Ignore BI_BITFIELDS_W type (GpiDrawBits fails otherwise)
    if(pOS2bmp->ulCompression == BI_BITFIELDS_W) {
-  pOS2bmp->ulCompression = 0;
+        pOS2bmp->ulCompression = 0;
    }
    pOS2bmp->cbImage       = pbmi->biSizeImage;
    dprintf(("handle                 %x", handle));
@@ -141,13 +141,13 @@ DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DW
    if(iUsage == DIB_PAL_COLORS || pbmi->biBitCount <= 8)
    {
         dibinfo.dsBitfields[0] = dibinfo.dsBitfields[1] = dibinfo.dsBitfields[2] = 0;
-    if(palsize) {
-    SetDIBColorTable(0, (1 << pbmi->biBitCount), (RGBQUAD *)(pbmi+1));
-    }
+        if(palsize) {
+            SetDIBColorTable(0, (1 << pbmi->biBitCount), (RGBQUAD *)(pbmi+1));
+        }
    }
    else {
-  switch(pbmi->biBitCount)
-    {
+        switch(pbmi->biBitCount)
+        {
            case 16:
                 dibinfo.dsBitfields[0] = (pbmi->biCompression == BI_BITFIELDS_W) ? *(DWORD *)pColors : 0x7c00;
                 dibinfo.dsBitfields[1] = (pbmi->biCompression == BI_BITFIELDS_W) ? *((DWORD *)pColors + 1) : 0x03e0;
@@ -164,16 +164,16 @@ DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DW
                 dibinfo.dsBitfields[0] = (pbmi->biCompression == BI_BITFIELDS_W) ? *(DWORD *)pColors : 0xff;
                 dibinfo.dsBitfields[1] = (pbmi->biCompression == BI_BITFIELDS_W) ? *((DWORD *)pColors + 1) : 0xff00;
                 dibinfo.dsBitfields[2] = (pbmi->biCompression == BI_BITFIELDS_W) ? *((DWORD *)pColors + 2) : 0xff0000;
-    if(dibinfo.dsBitfields[0] != 0xff && dibinfo.dsBitfields[1] != 0xff00 && dibinfo.dsBitfields[2] != 0xff0000) {
-      dprintf(("DIBSection: unsupported bitfields for 32 bits bitmap!!"));
-    }
+                if(dibinfo.dsBitfields[0] != 0xff && dibinfo.dsBitfields[1] != 0xff00 && dibinfo.dsBitfields[2] != 0xff0000) {
+                    dprintf(("DIBSection: unsupported bitfields for 32 bits bitmap!!"));
+                }
                 break;
         }
-  dprintf(("BI_BITFIELDS_W %x %x %x", dibinfo.dsBitfields[0], dibinfo.dsBitfields[1], dibinfo.dsBitfields[2]));
+        dprintf(("BI_BITFIELDS_W %x %x %x", dibinfo.dsBitfields[0], dibinfo.dsBitfields[1], dibinfo.dsBitfields[2]));
    }
    //double buffer for rgb 555 dib sections (for conversion) or flipped sections
    if(dibinfo.dsBitfields[1] == 0x03e0 || (fFlip & FLIP_VERT)) {
-  DosAllocMem((PPVOID)&bmpBitsDblBuffer, bmpsize*pbmi->biHeight, PAG_READ|PAG_WRITE|PAG_COMMIT);
+        DosAllocMem((PPVOID)&bmpBitsDblBuffer, bmpsize*pbmi->biHeight, PAG_READ|PAG_WRITE|PAG_COMMIT);
    }
 
    this->handle = handle;
@@ -208,14 +208,14 @@ DIBSection::~DIBSection()
    dprintf(("Delete DIBSection %x", handle));
 
    if(hSection) {
-  UnmapViewOfFile(bmpBits);
+        UnmapViewOfFile(bmpBits);
    }
    else
    if(bmpBits)
         DosFreeMem(bmpBits);
 
    if(bmpBitsDblBuffer)
-  DosFreeMem(bmpBitsDblBuffer);
+        DosFreeMem(bmpBitsDblBuffer);
 
    if(pOS2bmp)
         free(pOS2bmp);
@@ -283,12 +283,12 @@ int DIBSection::SetDIBits(HDC hdc, HBITMAP hbitmap, UINT startscan, UINT
    if(!hSection && pOS2bmp->cx != pbmi->biWidth && pOS2bmp->cy != pbmi->biHeight &&
       pOS2bmp->cBitCount != pbmi->biBitCount)
    {
-  char *oldbits = bmpBits;
-  int oldsize = dibinfo.dsBm.bmWidthBytes * dibinfo.dsBm.bmHeight;
+        char *oldbits = bmpBits;
+        int oldsize = dibinfo.dsBm.bmWidthBytes * dibinfo.dsBm.bmHeight;
 
-  DosAllocMem((PPVOID)&bmpBits, bmpsize*pbmi->biHeight, PAG_READ|PAG_WRITE|PAG_COMMIT);
-  memcpy(bmpBits, oldbits, min(oldsize, bmpsize*pbmi->biHeight));
-  DosFreeMem(oldbits);
+        DosAllocMem((PPVOID)&bmpBits, bmpsize*pbmi->biHeight, PAG_READ|PAG_WRITE|PAG_COMMIT);
+        memcpy(bmpBits, oldbits, min(oldsize, bmpsize*pbmi->biHeight));
+        DosFreeMem(oldbits);
    }
    pOS2bmp    = (BITMAPINFO2 *)realloc(pOS2bmp, os2bmphdrsize);
    pOS2bmp->cbFix         = sizeof(BITMAPINFO2) - sizeof(RGB2);
@@ -320,10 +320,10 @@ int DIBSection::SetDIBits(HDC hdc, HBITMAP hbitmap, UINT startscan, UINT
         dibinfo.dsBitfields[0] = dibinfo.dsBitfields[1] = dibinfo.dsBitfields[2] = 0;
    }
    else {
-  char *pColors = (char *)pbmi + 1;
+        char *pColors = (char *)pbmi + 1;
 
-  switch(pbmi->biBitCount)
-    {
+        switch(pbmi->biBitCount)
+        {
            case 16:
                 dibinfo.dsBitfields[0] = (pbmi->biCompression == BI_BITFIELDS_W) ? *(DWORD *)pColors : 0x7c00;
                 dibinfo.dsBitfields[1] = (pbmi->biCompression == BI_BITFIELDS_W) ? *((DWORD *)pColors + 1) : 0x03e0;
@@ -340,25 +340,25 @@ int DIBSection::SetDIBits(HDC hdc, HBITMAP hbitmap, UINT startscan, UINT
                 dibinfo.dsBitfields[0] = (pbmi->biCompression == BI_BITFIELDS_W) ? *(DWORD *)pColors : 0xff;
                 dibinfo.dsBitfields[1] = (pbmi->biCompression == BI_BITFIELDS_W) ? *((DWORD *)pColors + 1) : 0xff00;
                 dibinfo.dsBitfields[2] = (pbmi->biCompression == BI_BITFIELDS_W) ? *((DWORD *)pColors + 2) : 0xff0000;
-    if(dibinfo.dsBitfields[0] != 0xff && dibinfo.dsBitfields[1] != 0xff00 && dibinfo.dsBitfields[2] != 0xff0000) {
-      dprintf(("DIBSection: unsupported bitfields for 32 bits bitmap!!"));
-    }
+                if(dibinfo.dsBitfields[0] != 0xff && dibinfo.dsBitfields[1] != 0xff00 && dibinfo.dsBitfields[2] != 0xff0000) {
+                    dprintf(("DIBSection: unsupported bitfields for 32 bits bitmap!!"));
+                }
                 break;
         }
-  dprintf(("BI_BITFIELDS_W %x %x %x", dibinfo.dsBitfields[0], dibinfo.dsBitfields[1], dibinfo.dsBitfields[2]));
+        dprintf(("BI_BITFIELDS_W %x %x %x", dibinfo.dsBitfields[0], dibinfo.dsBitfields[1], dibinfo.dsBitfields[2]));
    }
 
    //double buffer for rgb 555 dib sections (for conversion) or flipped sections
    if(dibinfo.dsBitfields[1] == 0x03e0 || (fFlip & FLIP_VERT)) {
-  if(bmpBitsDblBuffer) {
-    DosFreeMem(bmpBitsDblBuffer);
-  }
-  DosAllocMem((PPVOID)&bmpBitsDblBuffer, dibinfo.dsBm.bmWidthBytes*pbmi->biHeight, PAG_READ|PAG_WRITE|PAG_COMMIT);
+        if(bmpBitsDblBuffer) {
+            DosFreeMem(bmpBitsDblBuffer);
+        }
+        DosAllocMem((PPVOID)&bmpBitsDblBuffer, dibinfo.dsBm.bmWidthBytes*pbmi->biHeight, PAG_READ|PAG_WRITE|PAG_COMMIT);
    }
 
    dprintf(("DIBSection::SetDIBits (%d,%d), %d %d", pbmi->biWidth, pbmi->biHeight, pbmi->biBitCount, pbmi->biCompression));
    if(palsize) {
-  SetDIBColorTable(0, 1 << pbmi->biBitCount, (RGBQUAD *)(pbmi+1));
+        SetDIBColorTable(0, 1 << pbmi->biBitCount, (RGBQUAD *)(pbmi+1));
    }
 
    if(bits)
@@ -410,13 +410,13 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
   pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdcDest);
   if(!pHps)
   {
-      SetLastError(ERROR_INVALID_HANDLE_W);
-      return FALSE;
+        SetLastError(ERROR_INVALID_HANDLE_W);
+        return FALSE;
   }
 
   hwndDest = WindowFromDC(hdcDest); //could return desktop window, so check that
   if(hwndDest && pHps->hwnd && !pHps->isClient) {
-  fFrameWindowDC = TRUE;
+        fFrameWindowDC = TRUE;
   }
 
   dprintf(("DIBSection::BitBlt %x %X (hps %x) %x to(%d,%d)(%d,%d) from (%d,%d)(%d,%d) rop %x flip %x",
@@ -424,27 +424,27 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
           nXsrc, nYsrc, nSrcWidth, nSrcHeight, Rop, fFlip));
 
   if(hwndDest) {
-  RECT rect;
+        RECT rect;
 
-  if(fFrameWindowDC) {
-    GetWindowRect(hwndDest, &rect);
-  }
-  else  GetClientRect(hwndDest, &rect);
-  hdcHeight = rect.bottom - rect.top;
-  hdcWidth  = rect.right - rect.left;
+        if(fFrameWindowDC) {
+            GetWindowRect(hwndDest, &rect);
+        }
+        else  GetClientRect(hwndDest, &rect);
+        hdcHeight = rect.bottom - rect.top;
+        hdcWidth  = rect.right - rect.left;
   }
   else {
-    DIBSection *dsect = DIBSection::findHDC(hdcDest);
-    if(dsect)
-    {
-      hdcHeight = dsect->GetHeight();
-      hdcWidth  = dsect->GetWidth();
-    }
-    else
-    {
-      hdcHeight = pOS2bmp->cy;
-      hdcWidth  = pOS2bmp->cx;
-    }
+        DIBSection *dsect = DIBSection::findHDC(hdcDest);
+        if(dsect)
+        {
+            hdcHeight = dsect->GetHeight();
+            hdcWidth  = dsect->GetWidth();
+        }
+        else
+        {
+            hdcHeight = pOS2bmp->cy;
+            hdcWidth  = pOS2bmp->cx;
+        }
   }
 
   //win32 coordinates are relative to left top, OS/2 expects left bottom
@@ -452,12 +452,12 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
   //destination rectangle is incl.-inclusive (everything included)
 
   if(nXdest + nDestWidth > hdcWidth) {
-    nDestWidth  = hdcWidth - nXdest;
-    }
+        nDestWidth  = hdcWidth - nXdest;
+  }
 
   if(nYdest + nDestHeight > hdcHeight) {
-    nDestHeight = hdcHeight - nYdest;
-    }
+        nDestHeight = hdcHeight - nYdest;
+  }
 
   point[0].x = nXdest;
   point[0].y = hdcHeight - nYdest - nDestHeight;
@@ -466,10 +466,10 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
 
   //target rectangle is inclusive-inclusive
   if(nXsrc + nSrcWidth > pOS2bmp->cx) {
-  nSrcWidth  = pOS2bmp->cx - nXsrc;
+        nSrcWidth  = pOS2bmp->cx - nXsrc;
   }
   if(nYsrc + nSrcHeight > pOS2bmp->cy) {
-  nSrcHeight = pOS2bmp->cy - nYsrc;
+        nSrcHeight = pOS2bmp->cy - nYsrc;
   }
   point[2].x = nXsrc;
   point[2].y = pOS2bmp->cy - nYsrc - nSrcHeight;
@@ -489,8 +489,8 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
 */
   oldyinversion = GpiQueryYInversion(hps);
   if(oldyinversion != 0) {
-  GpiEnableYInversion(hps, 0);
-  fRestoryYInversion = TRUE;
+        GpiEnableYInversion(hps, 0);
+        fRestoryYInversion = TRUE;
   }
 
   if(fFlip & FLIP_HOR)
@@ -507,26 +507,26 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
   winmode = GetStretchBltMode(hdcDest);
   switch(winmode) {
   case BLACKONWHITE_W:
-  os2mode = BBO_AND;
-  break;
+        os2mode = BBO_AND;
+        break;
   case WHITEONBLACK_W:
   case HALFTONE_W: //TODO:
-  os2mode = BBO_OR;
-  break;
+        os2mode = BBO_OR;
+        break;
   case COLORONCOLOR_W:
-  os2mode = BBO_IGNORE;
-  break;
+        os2mode = BBO_IGNORE;
+        break;
   }
   if(fFlip & FLIP_VERT) {
-  //manually reverse bitmap data
-  char *src = bmpBits + (pOS2bmp->cy-1)*dibinfo.dsBm.bmWidthBytes;
-  char *dst = bmpBitsDblBuffer;
-  for(int i=0;i<pOS2bmp->cy;i++) {
-    memcpy(dst, src, dibinfo.dsBm.bmWidthBytes);
-    dst += dibinfo.dsBm.bmWidthBytes;
-    src -= dibinfo.dsBm.bmWidthBytes;
-  }
-  bitmapBits = bmpBitsDblBuffer;
+        //manually reverse bitmap data
+        char *src = bmpBits + (pOS2bmp->cy-1)*dibinfo.dsBm.bmWidthBytes;
+        char *dst = bmpBitsDblBuffer;
+        for(int i=0;i<pOS2bmp->cy;i++) {
+            memcpy(dst, src, dibinfo.dsBm.bmWidthBytes);
+            dst += dibinfo.dsBm.bmWidthBytes;
+            src -= dibinfo.dsBm.bmWidthBytes;
+        }
+        bitmapBits = bmpBitsDblBuffer;
   }
   else  bitmapBits = bmpBits;
 
@@ -534,31 +534,29 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
   if(dibinfo.dsBitfields[1] == 0x3E0) {//RGB 555?
         dprintf(("DIBSection::BitBlt; convert rgb 555 to 565 (old y inv. = %d)", oldyinversion));
 
-  if(bmpBitsDblBuffer == NULL)
-    DebugInt3();
+        if(bmpBitsDblBuffer == NULL)
+            DebugInt3();
 
-    // PH 2000/10/01 - Fix for Beyond Compare 1.9d
-    // Note: according to documentation, cmImage can be zero for
-    // RGB- / non-compressed bitmaps.
-    int iLength = pOS2bmp->cbImage;
-    if (iLength == 0)
-      iLength = pOS2bmp->cx * pOS2bmp->cy * (pOS2bmp->cBitCount >> 3);
+        // PH 2000/10/01 - Fix for Beyond Compare 1.9d
+        // Note: according to documentation, cmImage can be zero for
+        // RGB- / non-compressed bitmaps.
+        int iLength = pOS2bmp->cbImage;
+        if (iLength == 0)
+            iLength = pOS2bmp->cx * pOS2bmp->cy * (pOS2bmp->cBitCount >> 3);
 
-    if (iLength > 0)
-    {
-      if(CPUFeatures & CPUID_MMX)
-        RGB555to565MMX((WORD *)bmpBitsDblBuffer, (WORD *)bitmapBits, iLength/sizeof(WORD));
-      else
-        RGB555to565((WORD *)bmpBitsDblBuffer, (WORD *)bitmapBits, iLength/sizeof(WORD));
-    }
-    else
-    {
-      dprintf(("GDI32: DIBSect::BitBlt: WARNING! zero-length bitmap! %08xh",
-               pOS2bmp));
-    }
+        if (iLength > 0)
+        {
+            if(CPUFeatures & CPUID_MMX)
+                    RGB555to565MMX((WORD *)bmpBitsDblBuffer, (WORD *)bitmapBits, iLength/sizeof(WORD));
+            else    RGB555to565((WORD *)bmpBitsDblBuffer, (WORD *)bitmapBits, iLength/sizeof(WORD));
+        }
+        else
+        {
+            dprintf(("GDI32: DIBSect::BitBlt: WARNING! zero-length bitmap! %08xh", pOS2bmp));
+        }
 
 
-    rc = GpiDrawBits(hps, bmpBitsDblBuffer, pOS2bmp, 4, &point[0], ROP_SRCCOPY, os2mode);
+        rc = GpiDrawBits(hps, bmpBitsDblBuffer, pOS2bmp, 4, &point[0], ROP_SRCCOPY, os2mode);
   }
   else  rc = GpiDrawBits(hps, bitmapBits, pOS2bmp, 4, &point[0], ROP_SRCCOPY, os2mode);
 
@@ -569,15 +567,15 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
   }
 */
   if(rc == GPI_OK) {
-    DIBSection *destdib = DIBSection::findHDC(hdcDest);
+        DIBSection *destdib = DIBSection::findHDC(hdcDest);
         if(destdib) {
-    destdib->sync(hps, nYdest, nDestHeight);
+            destdib->sync(hps, nYdest, nDestHeight);
         }
-  //restore old y inversion height
-  if(fRestoryYInversion) GpiEnableYInversion(hps, oldyinversion);
-      SetLastError(ERROR_SUCCESS_W);
+        //restore old y inversion height
+        if(fRestoryYInversion) GpiEnableYInversion(hps, oldyinversion);
+            SetLastError(ERROR_SUCCESS_W);
 
-      return(TRUE);
+        return(TRUE);
   }
   if(fRestoryYInversion) GpiEnableYInversion(hps, oldyinversion);
 
@@ -617,48 +615,48 @@ void DIBSection::sync(HDC hdc, DWORD nYdest, DWORD nDestHeight)
   memcpy(tmphdr, pOS2bmp, os2bmphdrsize);
 
   if(fFlip & FLIP_VERT) {
-    destBuf = bmpBitsDblBuffer + nYdest*dibinfo.dsBm.bmWidthBytes;
+        destBuf = bmpBitsDblBuffer + nYdest*dibinfo.dsBm.bmWidthBytes;
 
         rc = GpiQueryBitmapBits(hdc, nYdest, nDestHeight, destBuf,
                                 tmphdr);
-  //manually reverse bitmap data
-  char *src = destBuf;
-  char *dst = GetDIBObject() + (nYdest+nDestHeight-1)*dibinfo.dsBm.bmWidthBytes;
-  for(int i=0;i<nDestHeight;i++) {
-    memcpy(dst, src, dibinfo.dsBm.bmWidthBytes);
-    dst -= dibinfo.dsBm.bmWidthBytes;
-    src += dibinfo.dsBm.bmWidthBytes;
-  }
+        //manually reverse bitmap data
+        char *src = destBuf;
+        char *dst = GetDIBObject() + (nYdest+nDestHeight-1)*dibinfo.dsBm.bmWidthBytes;
+        for(int i=0;i<nDestHeight;i++) {
+            memcpy(dst, src, dibinfo.dsBm.bmWidthBytes);
+            dst -= dibinfo.dsBm.bmWidthBytes;
+            src += dibinfo.dsBm.bmWidthBytes;
+        }
   }
   else {
-    destBuf = GetDIBObject() + nYdest*dibinfo.dsBm.bmWidthBytes;
+        destBuf = GetDIBObject() + nYdest*dibinfo.dsBm.bmWidthBytes;
         rc = GpiQueryBitmapBits(hdc, nYdest, nDestHeight, destBuf,
                           tmphdr);
 #ifdef DEBUG_PALETTE
-  if(rc != GPI_ALTERROR && tmphdr->cBitCount <= 8) {
-      for(int i=0;i<(1<<tmphdr->cBitCount);i++)
-      {
-          dprintf2(("Index %d : 0x%08X\n",i, *((ULONG*)(&tmphdr->argbColor[i])) ));
-      }
-  }
+        if(rc != GPI_ALTERROR && tmphdr->cBitCount <= 8) {
+            for(int i=0;i<(1<<tmphdr->cBitCount);i++)
+            {
+                dprintf2(("Index %d : 0x%08X\n",i, *((ULONG*)(&tmphdr->argbColor[i])) ));
+            }
+        }
 #endif
   }
 #endif
 #if 0
   if(dibinfo.dsBitfields[1] == 0x3E0) {//RGB 555?
-  dprintf(("DIBSection::sync: convert RGB 565 to RGB 555"));
+    dprintf(("DIBSection::sync: convert RGB 565 to RGB 555"));
 
     destBuf = GetDIBObject() + nYdest*dibinfo.dsBm.bmWidthBytes;
 
-  if(CPUFeatures & CPUID_MMX) {
-    RGB565to555MMX((WORD *)destBuf, (WORD *)destBuf, (nDestHeight*dibinfo.dsBm.bmWidthBytes)/sizeof(WORD));
-  }
-  else    RGB565to555((WORD *)destBuf, (WORD *)destBuf, (nDestHeight*dibinfo.dsBm.bmWidthBytes)/sizeof(WORD));
+    if(CPUFeatures & CPUID_MMX) {
+            RGB565to555MMX((WORD *)destBuf, (WORD *)destBuf, (nDestHeight*dibinfo.dsBm.bmWidthBytes)/sizeof(WORD));
+    }
+    else    RGB565to555((WORD *)destBuf, (WORD *)destBuf, (nDestHeight*dibinfo.dsBm.bmWidthBytes)/sizeof(WORD));
   }
 #endif
   free(tmphdr);
   if(rc != nDestHeight) {
-  DebugInt3();
+    DebugInt3();
   }
 }
 //******************************************************************************
@@ -676,9 +674,9 @@ void DIBSection::sync(DWORD xDst, DWORD yDst, DWORD widthDst, DWORD heightDst, P
                     (xDst*dibinfo.dsBm.bmWidthBytes)/pOS2bmp->cx;
    linesize = (widthDst*dibinfo.dsBm.bmWidthBytes)/pOS2bmp->cx;
    for(int i=0;i<heightDst;i++) {
-  memcpy(destbuf, srcbuf, linesize);
-  destbuf += dibinfo.dsBm.bmWidthBytes;
-  srcbuf  += linesize;
+        memcpy(destbuf, srcbuf, linesize);
+        destbuf += dibinfo.dsBm.bmWidthBytes;
+        srcbuf  += linesize;
    }
 }
 //******************************************************************************
@@ -700,7 +698,7 @@ DIBSection *DIBSection::find(DWORD handle)
   {
     if(dsect->handle == handle)
     {
-    dibMutex.leave();
+        dibMutex.leave();
         return(dsect);
     }
     dsect = dsect->next;
@@ -717,11 +715,11 @@ DIBSection *DIBSection::findHDC(HDC hdc)
 
   while(dsect)
   {
-    if(dsect->hdc == hdc)
-    {
-      return(dsect);
-    }
-    dsect = dsect->next;
+        if(dsect->hdc == hdc)
+        {
+            return(dsect);
+        }
+        dsect = dsect->next;
   }
   return(NULL);
 }
@@ -732,8 +730,7 @@ void DIBSection::deleteSection(DWORD handle)
  DIBSection *dsect = find(handle);
 
   if(dsect)
-    delete dsect;
-
+        delete dsect;
 }
 //******************************************************************************
 //******************************************************************************
@@ -745,14 +742,14 @@ int DIBSection::GetDIBSection(int iSize, void *lpBuffer)
   dprintf2(("GetDIBSection %x %d %x", handle, iSize, lpBuffer));
   if(iSize == sizeof(DIBSECTION))
   {
-  memcpy(pDIBSection, &dibinfo, sizeof(dibinfo));
+        memcpy(pDIBSection, &dibinfo, sizeof(dibinfo));
         return sizeof(DIBSECTION);
   }
   else
   if(iSize == sizeof(BITMAP_W))
   {
-  memcpy(dsBm, &dibinfo.dsBm, sizeof(dibinfo.dsBm));
-  return sizeof(BITMAP_W);
+        memcpy(dsBm, &dibinfo.dsBm, sizeof(dibinfo.dsBm));
+        return sizeof(BITMAP_W);
   }
   return 0;
 
