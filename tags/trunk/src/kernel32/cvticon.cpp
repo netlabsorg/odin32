@@ -1,4 +1,4 @@
-/* $Id: cvticon.cpp,v 1.3 1999-09-04 12:41:46 sandervl Exp $ */
+/* $Id: cvticon.cpp,v 1.4 1999-09-21 08:24:53 sandervl Exp $ */
 
 /*
  * PE2LX icons
@@ -130,13 +130,7 @@ void *ConvertIcon(WINBITMAPINFOHEADER *bmpHdr, int size, int *os2size, int offse
   //SvL, 3-3-98: 2*bwsize
   iconsize = 2*sizeof(BITMAPFILEHEADER2) + 2*sizeof(RGB2) +
              rgbsize + 2*bwsize + bmpHdr->biSizeImage;
-#if 0
-  //SvL: Not necessary anymore
-  //There are icons without an XOR mask, so check for it
-  if(bmpHdr->biSizeImage == colorsize) {
-        iconsize += bwsize;
-  }
-#endif
+
   iconhdr  = (BITMAPFILEHEADER2 *)malloc(iconsize);
   memset(iconhdr, 0, iconsize);
   iconhdr->usType        = BFT_COLORICON;
@@ -181,7 +175,7 @@ void *ConvertIcon(WINBITMAPINFOHEADER *bmpHdr, int size, int *os2size, int offse
         }
   }
   //write 2*mono pixels + color pixels
-  //There are icons without an XOR mask, so check for it
+  //There are icons without an AND mask, so check for it
   if(bmpHdr->biSizeImage == colorsize) 
   {
         memset((char *)os2rgb, 0, bwsize);
@@ -189,9 +183,13 @@ void *ConvertIcon(WINBITMAPINFOHEADER *bmpHdr, int size, int *os2size, int offse
         memcpy((char *)os2rgb+2*bwsize, (char *)rgb, colorsize);
   }
   else {
-        memcpy((char *)os2rgb, (char *)rgb+colorsize, bwsize);
-        memcpy((char *)os2rgb+bwsize, (char *)rgb+colorsize, bwsize);
-        memcpy((char *)os2rgb+2*bwsize, (char *)rgb, colorsize);
+        memset((char *)os2rgb, 0, bwsize); // windows has no xor mask
+        memcpy((char *)os2rgb+bwsize, (char *)rgb+colorsize, bwsize); // and-mask
+        memcpy((char *)os2rgb+2*bwsize, (char *)rgb, colorsize); // color(xor-mask)
+
+//        memcpy((char *)os2rgb, (char *)rgb+colorsize, bwsize);
+//        memcpy((char *)os2rgb+bwsize, (char *)rgb+colorsize, bwsize);
+//        memcpy((char *)os2rgb+2*bwsize, (char *)rgb, colorsize);
   }
   *os2size = iconsize;
   return (void *)iconhdr;

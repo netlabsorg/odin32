@@ -1,4 +1,4 @@
-/* $Id: cvtcursorgrp.cpp,v 1.3 1999-09-15 23:38:00 sandervl Exp $ */
+/* $Id: cvtcursorgrp.cpp,v 1.4 1999-09-21 08:24:53 sandervl Exp $ */
 
 /*
  * PE2LX cursor group code
@@ -73,11 +73,6 @@ void *ConvertCursorGroup(CursorHeader *chdr, int size, Win32ImageBase *module)
                 continue;
         }
 
-        if(i != chdr->cwCount -1) {
-                bafh->offNext = (int)&bafh->bfh - (int)orgbafh + winres->getSize();
-        }
-        else    bafh->offNext = 0;
-
 	cursorhdr = (CursorComponent *)winres->lockResource();
 	os2cursor = ConvertCursor(cursorhdr, winres->getSize(), &os2cursorsize, (int)bafh - (int)orgbafh + sizeof(BITMAPARRAYFILEHEADER)-sizeof(BITMAPFILEHEADER));
 
@@ -87,6 +82,11 @@ void *ConvertCursorGroup(CursorHeader *chdr, int size, Win32ImageBase *module)
                 rdir++;
                 continue;
         }
+
+        if(i != chdr->cwCount -1) {
+                bafh->offNext = (int)&bafh->bfh - (int)orgbafh + os2cursorsize;
+        }
+        else    bafh->offNext = 0;
 
         memcpy((char *)&bafh->bfh, os2cursor, os2cursorsize);
 	free(os2cursor);
