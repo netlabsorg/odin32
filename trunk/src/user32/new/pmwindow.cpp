@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.4 1999-07-15 18:03:02 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.5 1999-07-17 09:17:58 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -21,6 +21,7 @@
 #include <win32dlg.h>
 #include "pmwindow.h"
 #include "oslibwin.h"
+#include "oslibutil.h"
 
 HMQ  hmq = 0;                             /* Message queue handle         */
 HAB  hab = 0;
@@ -50,6 +51,8 @@ BOOL InitPM()
           //CB: get queue handle (todo)
         }
   }
+  SetThreadHAB(hab);
+  SetThreadMessageQueue(hmq);
 
   if(!WinRegisterClass(                 /* Register window class        */
      hab,                               /* Anchor block handle          */

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 1999-07-17 07:36:50 sandervl Exp $
+# $Id: makefile,v 1.6 1999-07-17 09:17:57 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -28,7 +28,7 @@ OBJS =  user32.obj resstring.obj dialog.obj loadres.obj \
         pmwindow.obj win32class.obj win32wnd.obj win32dlg.obj \
         msgbox.obj window.obj windowmsg.obj windowclass.obj windlgmsg.obj \
         windowword.obj gen_object.obj oslibwin.obj win32wndchild.obj \
-        controls.obj button.obj
+        controls.obj button.obj oslibutil.obj
 
 
 all: $(TARGET).dll $(TARGET).lib
@@ -76,13 +76,14 @@ windlgmsg.obj: windlgmsg.cpp win32class.h win32wnd.h win32dlg.h win32wndchild.h
 windowclass.obj: windowclass.cpp win32class.h win32wnd.h win32wndchild.h
 windowword.obj:  windowword.cpp win32class.h win32wnd.h win32dlg.h win32wndchild.h
 
-pmwindow.obj:   pmwindow.cpp win32class.h win32wnd.h win32dlg.h pmwindow.h win32wndchild.h
+pmwindow.obj:   pmwindow.cpp win32class.h win32wnd.h win32dlg.h pmwindow.h win32wndchild.h $(PDWIN32_INCLUDE)\wprocess.h
 win32class.obj: win32class.cpp win32class.h win32wnd.h win32dlg.h gen_object.h oslibwin.h win32wndchild.h
 win32wnd.obj:   win32wnd.cpp win32class.h win32wnd.h win32dlg.h gen_object.h oslibwin.h win32wndchild.h
 win32dlg.obj:   win32dlg.cpp win32class.h win32wnd.h win32dlg.h gen_object.h oslibwin.h win32wndchild.h
 win32wndchild.obj: win32wndchild.cpp win32wndchild.h
 gen_object.obj: gen_object.cpp gen_object.h
-oslibwin.obj:   oslibwin.cpp oslibwin.h
+oslibwin.obj:   oslibwin.cpp oslibwin.h oslibutil.h
+oslibutil.obj:  oslibutil.cpp oslibutil.h $(PDWIN32_INCLUDE)\wprocess.h
 
 clean:
         $(RM) *.obj *.lib *.dll *~ *.map *.pch

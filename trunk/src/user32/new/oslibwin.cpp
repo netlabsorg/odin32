@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.4 1999-07-16 11:32:08 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.5 1999-07-17 09:17:58 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -13,8 +13,10 @@
 #define  INCL_PM
 #include <os2.h>
 #include <os2wrap.h>
+#include <misc.h>
 #include <oslibwin.h>
 #include "oslibstyle.h"
+#include "oslibutil.h"
 #include "pmwindow.h"
 
 //******************************************************************************
@@ -32,37 +34,39 @@ BOOL OSLibWinSetParent(HWND hwnd, HWND hwndParent, ULONG fRedraw)
 //******************************************************************************
 HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
                           char *pszName, ULONG x, ULONG y, ULONG cx, ULONG cy,
-                          HWND Owner, ULONG fHWND_BOTTOM)
+                          HWND Owner, ULONG fHWND_BOTTOM, HWND *hwndFrame)
 {
  HWND  hwndClient;
- HWND  hwndFrame;
  RECTL rectl;
 
   if(hwndParent == 0) {
         hwndParent = HWND_DESKTOP;
   }
-  if(WinQueryWindowRect(hwndParent, &rectl) == 0) {
+  if(WinQueryWindowRect(hwndParent, &rectl) == TRUE) {
         y = OS2TOWIN32POINT(rectl.yTop - rectl.yBottom, y);
   }
   if(dwFrameStyle) {
         dwWinStyle &= ~WS_CLIPCHILDREN; //invalid style according to docs
-        hwndFrame = WinCreateStdWindow(hwndParent, dwWinStyle,
+        *hwndFrame = WinCreateStdWindow(hwndParent, dwWinStyle,
                                        &dwFrameStyle, WIN32_STDCLASS,
                                        "", 0, 0, 0, &hwndClient) != 0;
-        if(hwndFrame) {
+        if(*hwndFrame) {
                 if(pszName) {
-                        WinSetWindowText(hwndFrame, pszName);
+                        WinSetWindowText(*hwndFrame, pszName);
                 }
-                WinSetWindowPos(hwndFrame, (fHWND_BOTTOM) ? HWND_BOTTOM :HWND_TOP,
+                WinSetWindowPos(*hwndFrame, (fHWND_BOTTOM) ? HWND_BOTTOM :HWND_TOP,
                                 x, y, cx, cy, SWP_SIZE | SWP_MOVE);
 
-                return hwndFrame;
+                return hwndClient;
         }
+	dprintf(("OSLibWinCreateWindow: WinCreateStdWindow failed (%x)", WinGetLastError(GetThreadHAB())));
         return 0;
   }
-  else  return WinCreateWindow(hwndParent, WIN32_STDCLASS, pszName, dwWinStyle, x, y, cx, cy,
+  hwndClient = WinCreateWindow(hwndParent, WIN32_STDCLASS, pszName, dwWinStyle, x, y, cx, cy,
                                Owner, (fHWND_BOTTOM) ? HWND_BOTTOM :HWND_TOP, 0, NULL,
                                NULL);
+  *hwndFrame = hwndClient;
+  return hwndClient;
 }
 //******************************************************************************
 //******************************************************************************
@@ -139,6 +143,48 @@ HWND OSLibWinCreateMenu(HWND hwndParent, PVOID menutemplate)
 HWND OSLibWinQueryTopMostChildWindow(HWND hwndParent)
 {
   return WinQueryWindow(hwndParent, QW_TOP);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinSetWindowPos(HWND hwnd, HWND hwndInsertBehind, LONG x, LONG y, LONG cx, 
+                          LONG cy, ULONG fl)
+{
+  return WinSetWindowPos(hwnd, hwndInsertBehind, x, y, cx, cy, fl);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinShowWindow(HWND hwnd, ULONG fl)
+{
+  return WinSetWindowPos(hwnd, 0, 0, 0, 0, 0, fl);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinDestroyWindow(HWND hwnd)
+{
+  return WinDestroyWindow(hwnd);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinQueryUpdateRect(HWND hwnd, PVOID pRect)
+{
+  return WinQueryUpdateRect(hwnd, (RECTL *)pRect);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinIsIconic(HWND hwnd)
+{
+ SWP  swp;
+ BOOL rc;
+
+  rc = WinQueryWindowPos(hwnd, &swp);
+  if(rc == FALSE) {
+	dprintf(("OSLibWinIsIconic: WinQueryWindowPos %x failed", hwnd));
+	return FALSE;
+  }
+
+  if(swp.fl & SWP_MINIMIZE)
+	return TRUE;
+  else	return FALSE;
 }
 //******************************************************************************
 //******************************************************************************

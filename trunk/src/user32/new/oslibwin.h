@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.3 1999-07-16 11:32:08 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.4 1999-07-17 09:17:58 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -20,7 +20,7 @@ BOOL  OSLibWinSetParent(HWND hwnd, HWND hwndParent, ULONG fRedraw = TRUE);
 
 HWND  OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
                            char *pszName, ULONG x, ULONG y, ULONG cx, ULONG cy,
-                           HWND Owner, ULONG fHWND_BOTTOM);
+                           HWND Owner, ULONG fHWND_BOTTOM, HWND *hwndFrame);
 
 BOOL  OSLibWinConvertStyle(ULONG dwStyle, ULONG *OSWinStyle, ULONG *OSFrameStyle);
 
@@ -32,5 +32,30 @@ BOOL  OSLibPostMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam);
 HWND  OSLibWinCreateMenu(HWND hwndParent, PVOID menutemplate);
 
 HWND  OSLibWinQueryTopMostChildWindow(HWND hwndParent);
+
+
+#define SWPOS_SIZE                   0x0001
+#define SWPOS_MOVE                   0x0002
+#define SWPOS_ZORDER                 0x0004
+#define SWPOS_SHOW                   0x0008
+#define SWPOS_HIDE                   0x0010
+#define SWPOS_NOREDRAW               0x0020
+#define SWPOS_NOADJUST               0x0040
+#define SWPOS_ACTIVATE               0x0080
+#define SWPOS_DEACTIVATE             0x0100
+#define SWPOS_EXTSTATECHANGE         0x0200
+#define SWPOS_MINIMIZE               0x0400
+#define SWPOS_MAXIMIZE               0x0800
+#define SWPOS_RESTORE                0x1000
+#define SWPOS_FOCUSACTIVATE          0x2000
+#define SWPOS_FOCUSDEACTIVATE        0x4000
+#define SWPOS_NOAUTOCLOSE            0x8000    /* Valid in PROGDETAILS struct only */
+
+BOOL  OSLibWinSetWindowPos(HWND hwnd, HWND hwndInsertBehind, LONG x, LONG y, LONG cx, LONG cy, ULONG fl);
+BOOL  OSLibWinShowWindow(HWND hwnd, ULONG fl);
+
+BOOL  OSLibWinDestroyWindow(HWND hwnd);
+BOOL  OSLibWinQueryUpdateRect(HWND hwnd, PVOID pRect); //must be RECTL pointer!
+BOOL  OSLibWinIsIconic(HWND hwnd);
 
 #endif //__OSLIBWIN_H__
