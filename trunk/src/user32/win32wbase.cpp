@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.387 2004-03-16 13:56:12 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.388 2004-04-15 16:18:55 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2473,7 +2473,10 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx,
                   fuFlags |= SWP_NOREDRAW;
             fuFlags &= ~SWP_HIDEWINDOW;
         }
-
+        //SvL: These checks are causing problems in Lotus Notes 6
+        //     It's not entirely clear why, but child windows are not placed
+        //     correctly when enabling them. 
+#if 0
         if((rectWindow.right - rectWindow.left == cx) && (rectWindow.bottom - rectWindow.top == cy)) {
             fuFlags |= SWP_NOSIZE;    /* Already the right size */
         }
@@ -2481,6 +2484,7 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx,
         if((rectWindow.left == x) && (rectWindow.top == y)) {
             fuFlags |= SWP_NOMOVE;    /* Already the right position */
         }
+#endif
 
         if(getWindowHandle() == GetActiveWindow()) {
             fuFlags |= SWP_NOACTIVATE;   /* Already active */
@@ -2495,6 +2499,7 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx,
             }
         }
     }
+
     /* TODO: Check hwndInsertAfter */
 
     //Note: Solitaire crashes when receiving WM_SIZE messages before WM_CREATE
