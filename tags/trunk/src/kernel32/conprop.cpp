@@ -1,4 +1,4 @@
-/* $Id: conprop.cpp,v 1.1 1999-05-24 20:19:43 ktk Exp $ */
+/* $Id: conprop.cpp,v 1.2 1999-05-25 19:29:30 phaller Exp $ */
 
 /*
  *
@@ -236,7 +236,6 @@ static VOID ErrorMsg( PSZ szFormat,
                        1,
                        MB_OK | MB_MOVEABLE );
   free( szMsg );
-  return;
 }
 
 
