@@ -1,4 +1,4 @@
-# $Id: mini.mak,v 1.1.2.8 2001-08-20 18:47:54 bird Exp $
+# $Id: mini.mak,v 1.1.2.9 2001-08-20 19:11:36 bird Exp $
 
 #
 # Odin32 API
@@ -56,15 +56,15 @@ os2386.lib
 
 
 #
-# Say that we actually have an definition file.
-#
-DEFFILE = $(TARGET).def
-
-
-#
 # Target name - name of the exe without extention and path.
 #
-TARGET  = mini
+!ifdef NORMAL
+TARGET  = minic
+!else
+TARGET  = minio
+!endif
+DEFFILE = mini.def
+
 
 
 !ifdef NORMAL
