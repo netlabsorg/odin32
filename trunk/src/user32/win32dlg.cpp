@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.74 2001-11-12 18:01:05 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.75 2001-11-20 15:25:18 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -262,19 +262,31 @@ ULONG Win32Dialog::MsgCreate(HWND hwndOS2)
         HWND hwndPreInitFocus = GetFocus();
         if(SendInternalMessageA(WM_INITDIALOG, (WPARAM)hwndFocus, param)) 
         {
-            /* check where the focus is again,
-	     * some controls status might have changed in WM_INITDIALOG */
-            hwndFocus = GetNextDlgTabItem( getWindowHandle(), 0, FALSE );
-            if(GetFocus() != hwndFocus) {
-                SetFocus(hwndFocus);
+            //SvL: Experiments in NT4 show that dialogs that are children don't
+            //     receive focus. Not sure if this is always true. (couldn't
+            //     find any remarks about this in the SDK docs)
+            if(!(getStyle() & WS_CHILD)) 
+            {
+                /* check where the focus is again,
+                 * some controls status might have changed in WM_INITDIALOG */
+                hwndFocus = GetNextDlgTabItem( getWindowHandle(), 0, FALSE );
+                if(GetFocus() != hwndFocus) {
+                    SetFocus(hwndFocus);
+                }
             }
         }
         else
         {
-            /* If the dlgproc has returned FALSE (indicating handling of keyboard focus)
-               but the focus has not changed, set the focus where we expect it. */
-            if ( (getStyle() & WS_VISIBLE) && ( GetFocus() == hwndPreInitFocus ) )
-                SetFocus( hwndFocus );
+            //SvL: Experiments in NT4 show that dialogs that are children don't
+            //     receive focus. Not sure if this is always true. (couldn't
+            //     find any remarks about this in the SDK docs)
+            if(!(getStyle() & WS_CHILD)) 
+            {
+                /* If the dlgproc has returned FALSE (indicating handling of keyboard focus)
+                   but the focus has not changed, set the focus where we expect it. */
+                if ( (getStyle() & WS_VISIBLE) && ( GetFocus() == hwndPreInitFocus ) )
+                    SetFocus( hwndFocus );
+            }
         }
 
         if (dlgInfo.style & WS_VISIBLE && !(getStyle() & WS_VISIBLE))
