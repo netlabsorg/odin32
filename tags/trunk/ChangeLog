@@ -1,4 +1,11 @@
- /* $Id: ChangeLog,v 1.270 1999-10-04 22:48:05 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.271 1999-10-05 14:28:06 sandervl Exp $ */
+
+ 99-10-05: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: Set fs:0 to -1 in OS2UnsetExceptionHandler. 
+                    Prevents crash due to corrupted handler chain (see
+                    comments in that function)
+	- ODIN32API: Remove exception handler set & unset. Not necessary
+                     as it's also done in the start method of an exe image.
 
  99-10-04: Patrick Haller <phaller@gmx.net>
 	- SHELL32\NEW: Compilation fix (indirectly included win32type.h)

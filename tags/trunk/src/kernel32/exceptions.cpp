@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.19 1999-09-02 20:56:48 phaller Exp $ */
+/* $Id: exceptions.cpp,v 1.20 1999-10-05 14:28:33 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -999,7 +999,10 @@ void OS2SetExceptionHandler(void *exceptframe)
  *****************************************************************************/
 void OS2UnsetExceptionHandler(void *exceptframe)
 {
-  DosUnsetExceptionHandler((PEXCEPTIONREGISTRATIONRECORD)exceptframe);
+  SetExceptionChain(-1);
+  //TODO: Somebody messes up the exception handler chaing when executing
+  //      the LX version of generic, opening the About dialogbox and quitting
+//  DosUnsetExceptionHandler((PEXCEPTIONREGISTRATIONRECORD)exceptframe);
 }
 
 void SetOS2ExceptionChain(ULONG val)

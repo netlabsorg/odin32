@@ -1,4 +1,4 @@
-/* $Id: odinexe.cpp,v 1.2 1999-09-18 17:46:47 sandervl Exp $ */
+/* $Id: odinexe.cpp,v 1.3 1999-10-05 14:28:52 sandervl Exp $ */
 /*
  * Win32 Odin32 Application executable entrypoint
  *
@@ -11,7 +11,6 @@
 #include <os2.h>
 #include <win32type.h>
 #include <odinlx.h>
-#include <exceptions.h>
 
 //Win32 app entrypoint:
 int WIN32API WinMain(HINSTANCE hInstance,
@@ -27,11 +26,7 @@ extern "C" {
 //******************************************************************************
 int main(int argc, char *argv[])
 {
- WINEXCEPTION_FRAME exceptFrame;
-
-  OS2SetExceptionHandler(&exceptFrame);
   RegisterLxExe(WinMain, (PVOID)&_Resource_PEResTab);
-  OS2UnsetExceptionHandler(&exceptFrame);
 }
 //******************************************************************************
 //******************************************************************************
