@@ -1,4 +1,4 @@
-/* $Id: DoWithDirs.cmd,v 1.14 2002-08-24 04:29:06 bird Exp $
+/* $Id: DoWithDirs.cmd,v 1.15 2002-08-29 11:49:37 bird Exp $
  *
  * Syntax: dowithdirs.cmd [-e<list of excludes>] [-c] [-i] [-l] [-r] <cmd with args...>
  *    -e      Exclude directories.
@@ -15,6 +15,7 @@
  * Copyright (c) 1999-2002 knut st. osmundsen (bird@anduin.net)
  */
 signal on novalue name NoValueHandler
+Address CMD '@echo off'
 
 if (RxFuncQuery('SysLoadFuncs') = 1) then
 do
