@@ -1,4 +1,4 @@
-/* $Id: clipboard.cpp,v 1.15 2002-09-03 12:34:01 sandervl Exp $ */
+/* $Id: clipboard.cpp,v 1.16 2002-11-25 09:48:13 sandervl Exp $ */
 
 /*
  * Win32 Clipboard API functions for OS/2
@@ -27,7 +27,7 @@
 BOOL WIN32API ChangeClipboardChain( HWND hwndRemove, HWND hwndNext)
 {
     Win32BaseWindow *wndRemove, *wndNext;
-    HWND hwndOS2Remove, hwndOS2Next;
+    HWND hwndOS2Remove, hwndOS2Next = 0;
 
     wndRemove = Win32BaseWindow::GetWindowFromHandle(hwndRemove);
     if(!wndRemove) {
@@ -38,14 +38,16 @@ BOOL WIN32API ChangeClipboardChain( HWND hwndRemove, HWND hwndNext)
     hwndOS2Remove = wndRemove->getOS2WindowHandle();
     RELEASE_WNDOBJ(wndRemove);
 
-    wndNext = Win32BaseWindow::GetWindowFromHandle(hwndNext);
-    if(!wndNext) {
-        dprintf(("ChangeClipboardChain, window %x not found", hwndNext));
-        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
-        return 0;
+    if(hwndNext) {
+        wndNext = Win32BaseWindow::GetWindowFromHandle(hwndNext);
+        if(!wndNext) {
+            dprintf(("ChangeClipboardChain, window %x not found", hwndNext));
+            SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+            return 0;
+        }
+        hwndOS2Next = wndNext->getOS2WindowHandle();
+        RELEASE_WNDOBJ(wndNext);
     }
-    hwndOS2Next = wndNext->getOS2WindowHandle();
-    RELEASE_WNDOBJ(wndNext);
 
     dprintf(("USER32:  ChangeClipboardChain\n"));
     return O32_ChangeClipboardChain(hwndOS2Remove, hwndOS2Next);
@@ -242,6 +244,20 @@ HANDLE WIN32API GetClipboardData(UINT uFormat)
 {
     HANDLE hRet = O32_GetClipboardData(uFormat);
     dprintf(("GetClipboardData %x returned %x", uFormat, hRet));
+#ifdef DEBUG
+    if(hRet) {
+        if(uFormat == CF_TEXT || uFormat == CF_DSPTEXT) {
+            char *lpszText = (char *)GlobalLock(hRet);
+            if(lpszText) dprintf(("GetClipboardData %s", lpszText));
+            GlobalUnlock(hRet);
+        }
+        if(uFormat == CF_UNICODETEXT) {
+            LPWSTR lpszText = (LPWSTR)GlobalLock(hRet);
+            if(lpszText) dprintf(("GetClipboardData %ls", lpszText));
+            GlobalUnlock(hRet);
+        }
+    }
+#endif
     return hRet;
 }
 //******************************************************************************
@@ -249,6 +265,20 @@ HANDLE WIN32API GetClipboardData(UINT uFormat)
 HANDLE WIN32API SetClipboardData( UINT uFormat, HANDLE hClipObj)
 {
     dprintf(("SetClipboardData %x %x", uFormat, hClipObj));
+#ifdef DEBUG
+    if(hClipObj) {
+        if(uFormat == CF_TEXT || uFormat == CF_DSPTEXT) {
+            char *lpszText = (char *)GlobalLock(hClipObj);
+            if(lpszText) dprintf(("SetClipboardData %s", lpszText));
+            GlobalUnlock(hClipObj);
+        }
+        if(uFormat == CF_UNICODETEXT) {
+            LPWSTR lpszText = (LPWSTR)GlobalLock(hClipObj);
+            if(lpszText) dprintf(("SetClipboardData %ls", lpszText));
+            GlobalUnlock(hClipObj);
+        }
+    }
+#endif
     return O32_SetClipboardData(uFormat, hClipObj);
 }
 //******************************************************************************
