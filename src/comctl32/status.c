@@ -401,7 +401,15 @@ STATUSBAR_GetTextA (STATUSWINDOWINFO *infoPtr, HWND hwnd, WPARAM wParam, LPARAM 
     if (infoPtr->simple)
 	part = &infoPtr->part0;
     else
+#ifdef __WIN32OS2__
+    {
+        if (nPart >= infoPtr->numParts)
+   	    return FALSE;
 	part = &infoPtr->parts[nPart];
+    }
+#else
+	part = &infoPtr->parts[nPart];
+#endif
 
     if (part->style & SBT_OWNERDRAW)
 	result = (LRESULT)part->text;
@@ -428,7 +436,15 @@ STATUSBAR_GetTextW (STATUSWINDOWINFO *infoPtr, HWND hwnd, WPARAM wParam, LPARAM 
     if (infoPtr->simple)
 	part = &infoPtr->part0;
     else
+#ifdef __WIN32OS2__
+    {
+        if (nPart >= infoPtr->numParts)
+   	    return FALSE;
 	part = &infoPtr->parts[nPart];
+    }
+#else
+	part = &infoPtr->parts[nPart];
+#endif
 
     if (part->style & SBT_OWNERDRAW)
 	result = (LRESULT)part->text;
@@ -452,10 +468,19 @@ STATUSBAR_GetTextLength (STATUSWINDOWINFO *infoPtr, HWND hwnd, WPARAM wParam)
     nPart = ((INT) wParam) & 0x00ff;
 
     TRACE("part %d\n", nPart);
+
     if (infoPtr->simple)
 	part = &infoPtr->part0;
     else
+#ifdef __WIN32OS2__
+    {
+        if (nPart >= infoPtr->numParts)
+   	    return FALSE;
 	part = &infoPtr->parts[nPart];
+    }
+#else
+	part = &infoPtr->parts[nPart];
+#endif
 
     if (part->text)
 	result = strlenW(part->text);
@@ -691,7 +716,15 @@ STATUSBAR_SetTextA (STATUSWINDOWINFO *infoPtr, HWND hwnd, WPARAM wParam, LPARAM 
     if (nPart==255)
 	part = &infoPtr->part0;
     else if (!infoPtr->simple && infoPtr->parts!=NULL)
+#ifdef __WIN32OS2__
+    {
+        if (nPart >= infoPtr->numParts)
+   	    return FALSE;
 	part = &infoPtr->parts[nPart];
+    }
+#else
+	part = &infoPtr->parts[nPart];
+#endif
     if (!part) return FALSE;
 
     if (part->style != style)
@@ -748,7 +781,15 @@ STATUSBAR_SetTextW (STATUSWINDOWINFO *infoPtr, HWND hwnd, WPARAM wParam, LPARAM 
     if ((infoPtr->simple) || (infoPtr->parts==NULL) || (nPart==255))
 	part = &infoPtr->part0;
     else
+#ifdef __WIN32OS2__
+    {
+        if (nPart >= infoPtr->numParts)
+   	    return FALSE;
 	part = &infoPtr->parts[nPart];
+    }
+#else
+	part = &infoPtr->parts[nPart];
+#endif
     if (!part) return FALSE;
 
     if(part->style != style)
