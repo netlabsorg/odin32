@@ -1,5 +1,3 @@
-/* $Id: winerror.h,v 1.2 1999-09-02 10:31:20 phaller Exp $ */
-
 #ifndef __WINE_WINERROR_H
 #define __WINE_WINERROR_H
 
@@ -242,6 +240,7 @@ extern int WIN32_LastError;
 #define ERROR_IO_PENDING            997
 #define ERROR_NOACCESS              998
 #define ERROR_SWAPERROR             999
+
 #define ERROR_STACK_OVERFLOW                  1001L
 #define ERROR_INVALID_MESSAGE                 1002L
 #define ERROR_CAN_NOT_COMPLETE                1003L
@@ -325,11 +324,6 @@ extern int WIN32_LastError;
 #define ERROR_NOT_ENOUGH_SERVER_MEMORY        1130L
 #define ERROR_POSSIBLE_DEADLOCK               1131L
 #define ERROR_MAPPED_ALIGNMENT                1132L
-#define ERROR_BAD_USERNAME                    2202L
-#define ERROR_NOT_CONNECTED                   2250L
-#define ERROR_OPEN_FILES                      2401L
-#define ERROR_ACTIVE_CONNECTIONS              2402L
-#define ERROR_DEVICE_IN_USE                   2404L
 #define ERROR_BAD_DEVICE                      1200L
 #define ERROR_CONNECTION_UNAVAIL              1201L
 #define ERROR_DEVICE_ALREADY_REMEMBERED       1202L
@@ -374,6 +368,12 @@ extern int WIN32_LastError;
 #define ERROR_INCORRECT_ADDRESS               1241L
 #define ERROR_ALREADY_REGISTERED              1242L
 #define ERROR_SERVICE_NOT_FOUND               1243L
+#define ERROR_NOT_AUTHENTICATED     	      1244L
+#define ERROR_NOT_LOGGED_ON                   1245L
+#define ERROR_CONTINUE                        1246L
+#define ERROR_ALREADY_INITIALIZED             1247L
+#define ERROR_NO_MORE_DEVICES                 1248L
+
 #define ERROR_NOT_ALL_ASSIGNED                1300L
 #define ERROR_SOME_NOT_MAPPED                 1301L
 #define ERROR_NO_QUOTAS_FOR_ACCOUNT           1302L
@@ -468,6 +468,7 @@ extern int WIN32_LastError;
 #define ERROR_FILE_CORRUPT                    1392L
 #define ERROR_DISK_CORRUPT                    1393L
 #define ERROR_NO_USER_SESSION_KEY             1394L
+
 #define ERROR_INVALID_WINDOW_HANDLE           1400L
 #define ERROR_INVALID_MENU_HANDLE             1401L
 #define ERROR_INVALID_CURSOR_HANDLE           1402L
@@ -518,6 +519,8 @@ extern int WIN32_LastError;
 #define ERROR_NO_SCROLLBARS                   1447L
 #define ERROR_INVALID_SCROLLBAR_RANGE         1448L
 #define ERROR_INVALID_SHOWWIN_COMMAND         1449L
+#define ERROR_COMMITMENT_LIMIT                1455L
+
 #define ERROR_EVENTLOG_FILE_CORRUPT           1500L
 #define ERROR_EVENTLOG_CANT_START             1501L
 #define ERROR_LOG_FILE_FULL                   1502L
@@ -572,6 +575,13 @@ extern int WIN32_LastError;
 #define ERROR_METAFILE_NOT_SUPPORTED          2003L
 #define ERROR_TRANSFORM_NOT_SUPPORTED         2004L
 #define ERROR_CLIPPING_NOT_SUPPORTED          2005L
+
+#define ERROR_BAD_USERNAME                    2202L
+#define ERROR_NOT_CONNECTED                   2250L
+#define ERROR_OPEN_FILES                      2401L
+#define ERROR_ACTIVE_CONNECTIONS              2402L
+#define ERROR_DEVICE_IN_USE                   2404L
+
 #define ERROR_UNKNOWN_PRINT_MONITOR           3000L
 #define ERROR_PRINTER_DRIVER_IN_USE           3001L
 #define ERROR_SPOOL_FILE_NOT_FOUND            3002L
@@ -621,7 +631,6 @@ extern int WIN32_LastError;
 #define CLIPBRD_E_CANT_SET      0x800401D2L
 #define CLIPBRD_E_BAD_DATA      0x800401D3L
 #define CLIPBRD_E_CANT_CLOSE    0x800401D4L
-
 
 /* Drag and Drop */
 #define DRAGDROP_S_DROP   0x00040100L

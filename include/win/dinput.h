@@ -1,7 +1,5 @@
-/* $Id: dinput.h,v 1.1 1999-05-24 20:19:11 ktk Exp $ */
-
-#ifndef _WINE_DINPUT_H
-#define _WINE_DINPUT_H
+#ifndef __WINE_DINPUT_H
+#define __WINE_DINPUT_H
 
 #include "windef.h" /* for MAX_PATH */
 #include "unknwn.h"
@@ -459,9 +457,9 @@ typedef const DIPROPRANGE *LPCDIPROPRANGE;
 
 typedef struct DIPROPCAL {
 	DIPROPHEADER diph;
-	LONG    lMin;
-	LONG    lCenter;
-	LONG    lMax;
+	LONG	lMin;
+	LONG	lCenter;
+	LONG	lMax;
 } DIPROPCAL, *LPDIPROPCAL;
 typedef const DIPROPCAL *LPCDIPROPCAL;
 
@@ -637,36 +635,124 @@ typedef BOOL (CALLBACK * LPDIENUMEFFECTSCALLBACKA)(LPCDIEFFECTINFOA, LPVOID);
 typedef BOOL (CALLBACK * LPDIENUMEFFECTSCALLBACKW)(LPCDIEFFECTINFOW, LPVOID);
 
 typedef struct DIEFFESCAPE {
-	DWORD			dwSize;
-	DWORD			dwCommand;
-	LPVOID			lpvInBuffer;
-	DWORD			cbInBuffer;
-	LPVOID			lpvOutBuffer;
-	DWORD			cbOutBuffer;
+	DWORD	dwSize;
+	DWORD	dwCommand;
+	LPVOID	lpvInBuffer;
+	DWORD	cbInBuffer;
+	LPVOID	lpvOutBuffer;
+	DWORD	cbOutBuffer;
 } DIEFFESCAPE, *LPDIEFFESCAPE;
+
+typedef struct DIJOYSTATE {
+	LONG	lX;
+	LONG	lY;
+	LONG	lZ;
+	LONG	lRx;
+	LONG	lRy;
+	LONG	lRz;
+	LONG	rglSlider[2];
+	DWORD	rgdwPOV[4];
+	BYTE	rgbButtons[32];
+} DIJOYSTATE, *LPDIJOYSTATE;
+
+typedef struct DIJOYSTATE2 {
+	LONG	lX;
+	LONG	lY;
+	LONG	lZ;
+	LONG	lRx;
+	LONG	lRy;
+	LONG	lRz;
+	LONG	rglSlider[2];
+	DWORD	rgdwPOV[4];
+	BYTE	rgbButtons[128];
+	LONG	lVX;		/* 'v' as in velocity */
+	LONG	lVY;
+	LONG	lVZ;
+	LONG	lVRx;
+	LONG	lVRy;
+	LONG	lVRz;
+	LONG	rglVSlider[2];
+	LONG	lAX;		/* 'a' as in acceleration */
+	LONG	lAY;
+	LONG	lAZ;
+	LONG	lARx;
+	LONG	lARy;
+	LONG	lARz;
+	LONG	rglASlider[2];
+	LONG	lFX;		/* 'f' as in force */
+	LONG	lFY;
+	LONG	lFZ;
+	LONG	lFRx;		/* 'fr' as in rotational force aka torque */
+	LONG	lFRy;
+	LONG	lFRz;
+	LONG	rglFSlider[2];
+} DIJOYSTATE2, *LPDIJOYSTATE2;
+
+#define DIJOFS_X		FIELD_OFFSET(DIJOYSTATE, lX)
+#define DIJOFS_Y		FIELD_OFFSET(DIJOYSTATE, lY)
+#define DIJOFS_Z		FIELD_OFFSET(DIJOYSTATE, lZ)
+#define DIJOFS_RX		FIELD_OFFSET(DIJOYSTATE, lRx)
+#define DIJOFS_RY		FIELD_OFFSET(DIJOYSTATE, lRy)
+#define DIJOFS_RZ		FIELD_OFFSET(DIJOYSTATE, lRz)
+#define DIJOFS_SLIDER(n)	(FIELD_OFFSET(DIJOYSTATE, rglSlider) + \
+                                                        (n) * sizeof(LONG))
+#define DIJOFS_POV(n)		(FIELD_OFFSET(DIJOYSTATE, rgdwPOV) + \
+                                                        (n) * sizeof(DWORD))
+#define DIJOFS_BUTTON(n)	(FIELD_OFFSET(DIJOYSTATE, rgbButtons) + (n))
+#define DIJOFS_BUTTON0		DIJOFS_BUTTON(0)
+#define DIJOFS_BUTTON1		DIJOFS_BUTTON(1)
+#define DIJOFS_BUTTON2		DIJOFS_BUTTON(2)
+#define DIJOFS_BUTTON3		DIJOFS_BUTTON(3)
+#define DIJOFS_BUTTON4		DIJOFS_BUTTON(4)
+#define DIJOFS_BUTTON5		DIJOFS_BUTTON(5)
+#define DIJOFS_BUTTON6		DIJOFS_BUTTON(6)
+#define DIJOFS_BUTTON7		DIJOFS_BUTTON(7)
+#define DIJOFS_BUTTON8		DIJOFS_BUTTON(8)
+#define DIJOFS_BUTTON9		DIJOFS_BUTTON(9)
+#define DIJOFS_BUTTON10		DIJOFS_BUTTON(10)
+#define DIJOFS_BUTTON11		DIJOFS_BUTTON(11)
+#define DIJOFS_BUTTON12		DIJOFS_BUTTON(12)
+#define DIJOFS_BUTTON13		DIJOFS_BUTTON(13)
+#define DIJOFS_BUTTON14		DIJOFS_BUTTON(14)
+#define DIJOFS_BUTTON15		DIJOFS_BUTTON(15)
+#define DIJOFS_BUTTON16		DIJOFS_BUTTON(16)
+#define DIJOFS_BUTTON17		DIJOFS_BUTTON(17)
+#define DIJOFS_BUTTON18		DIJOFS_BUTTON(18)
+#define DIJOFS_BUTTON19		DIJOFS_BUTTON(19)
+#define DIJOFS_BUTTON20		DIJOFS_BUTTON(20)
+#define DIJOFS_BUTTON21		DIJOFS_BUTTON(21)
+#define DIJOFS_BUTTON22		DIJOFS_BUTTON(22)
+#define DIJOFS_BUTTON23		DIJOFS_BUTTON(23)
+#define DIJOFS_BUTTON24		DIJOFS_BUTTON(24)
+#define DIJOFS_BUTTON25		DIJOFS_BUTTON(25)
+#define DIJOFS_BUTTON26		DIJOFS_BUTTON(26)
+#define DIJOFS_BUTTON27		DIJOFS_BUTTON(27)
+#define DIJOFS_BUTTON28		DIJOFS_BUTTON(28)
+#define DIJOFS_BUTTON29		DIJOFS_BUTTON(29)
+#define DIJOFS_BUTTON30		DIJOFS_BUTTON(30)
+#define DIJOFS_BUTTON31		DIJOFS_BUTTON(31)
 
 /*****************************************************************************
  * IDirectInputEffect interface
  */
 #define ICOM_INTERFACE IDirectInputEffect
 #define IDirectInputEffect_METHODS \
-    ICOM_METHOD3(HRESULT,Initialize,      HINSTANCE,, DWORD,, REFGUID,) \
-    ICOM_METHOD1(HRESULT,GetEffectGuid,   LPGUID,) \
-    ICOM_METHOD2(HRESULT,GetParameters,   LPDIEFFECT,, DWORD,) \
-    ICOM_METHOD2(HRESULT,SetParameters,   LPCDIEFFECT,, DWORD,) \
-    ICOM_METHOD2(HRESULT,Start,           DWORD,, DWORD,) \
+    ICOM_METHOD3(HRESULT,Initialize,      HINSTANCE, hinst, DWORD, dwVersion, REFGUID, rguid) \
+    ICOM_METHOD1(HRESULT,GetEffectGuid,   LPGUID,a) \
+    ICOM_METHOD2(HRESULT,GetParameters,   LPDIEFFECT,a, DWORD,b) \
+    ICOM_METHOD2(HRESULT,SetParameters,   LPCDIEFFECT,a, DWORD,b) \
+    ICOM_METHOD2(HRESULT,Start,           DWORD,a, DWORD,b) \
     ICOM_METHOD (HRESULT,Stop) \
-    ICOM_METHOD1(HRESULT,GetEffectStatus, LPDWORD,) \
+    ICOM_METHOD1(HRESULT,GetEffectStatus, LPDWORD,a) \
     ICOM_METHOD (HRESULT,Download) \
     ICOM_METHOD (HRESULT,Unload) \
-    ICOM_METHOD1(HRESULT,Escape,          LPDIEFFESCAPE,)
+    ICOM_METHOD1(HRESULT,Escape,          LPDIEFFESCAPE,a)
 #define IDirectInputEffect_IMETHODS \
     IUnknown_IMETHODS \
     IDirectInputEffect_METHODS
 ICOM_DEFINE(IDirectInputEffect,IUnknown)
 #undef ICOM_INTERFACE
 
-#ifdef ICOM_CINTERFACE
     /*** IUnknown methods ***/
 #define IDirectInputEffect_QueryInterface(p,a,b) ICOM_CALL2(QueryInterface,p,a,b)
 #define IDirectInputEffect_AddRef(p)             ICOM_CALL (AddRef,p)
@@ -682,7 +768,6 @@ ICOM_DEFINE(IDirectInputEffect,IUnknown)
 #define IDirectInputEffect_Download(p)            ICOM_CALL (Download,p)
 #define IDirectInputEffect_Unload(p)              ICOM_CALL (Unload,p)
 #define IDirectInputEffect_Escape(p,a)            ICOM_CALL1(Escape,p,a)
-#endif
 
 
 /*****************************************************************************
@@ -711,7 +796,6 @@ ICOM_DEFINE(IDirectInputEffect,IUnknown)
 ICOM_DEFINE(IDirectInputDeviceA,IUnknown)
 #undef ICOM_INTERFACE
 
-#ifdef ICOM_CINTERFACE
     /*** IUnknown methods ***/
 #define IDirectInputDevice_QueryInterface(p,a,b) ICOM_CALL2(QueryInterface,p,a,b)
 #define IDirectInputDevice_AddRef(p)             ICOM_CALL (AddRef,p)
@@ -732,7 +816,6 @@ ICOM_DEFINE(IDirectInputDeviceA,IUnknown)
 #define IDirectInputDevice_GetDeviceInfo(p,a)         ICOM_CALL1(GetDeviceInfo,p,a)
 #define IDirectInputDevice_RunControlPanel(p,a,b)     ICOM_CALL2(RunControlPanel,p,a,b)
 #define IDirectInputDevice_Initialize(p,a,b,c)        ICOM_CALL3(Initialize,p,a,b,c)
-#endif
 
 
 /*****************************************************************************
@@ -755,7 +838,6 @@ ICOM_DEFINE(IDirectInputDeviceA,IUnknown)
 ICOM_DEFINE(IDirectInputDevice2A,IDirectInputDeviceA)
 #undef ICOM_INTERFACE
 
-#ifdef ICOM_CINTERFACE
 /*** IUnknown methods ***/
 #define IDirectInputDevice2_QueryInterface(p,a,b) ICOM_CALL2(QueryInterface,p,a,b)
 #define IDirectInputDevice2_AddRef(p)             ICOM_CALL (AddRef,p)
@@ -786,7 +868,6 @@ ICOM_DEFINE(IDirectInputDevice2A,IDirectInputDeviceA)
 #define IDirectInputDevice2_Escape(p,a)                       ICOM_CALL1(Escape,p,a)
 #define IDirectInputDevice2_Poll(p)                           ICOM_CALL (Poll,p)
 #define IDirectInputDevice2_SendDeviceData(p,a,b,c,d)         ICOM_CALL4(SendDeviceData,p,a,b,c,d)
-#endif
 
 /* "Standard" Mouse report... */
 typedef struct DIMOUSESTATE {
@@ -821,7 +902,6 @@ typedef struct DIMOUSESTATE {
 ICOM_DEFINE(IDirectInputA,IUnknown)
 #undef ICOM_INTERFACE
 
-#ifdef ICOM_CINTERFACE
 /*** IUnknown methods ***/
 #define IDirectInputA_QueryInterface(p,a,b) ICOM_CALL2(QueryInterface,p,a,b)
 #define IDirectInputA_AddRef(p)             ICOM_CALL (AddRef,p)
@@ -832,7 +912,11 @@ ICOM_DEFINE(IDirectInputA,IUnknown)
 #define IDirectInputA_GetDeviceStatus(p,a)   ICOM_CALL1(GetDeviceStatus,p,a)
 #define IDirectInputA_RunControlPanel(p,a,b) ICOM_CALL2(RunControlPanel,p,a,b)
 #define IDirectInputA_Initialize(p,a,b)      ICOM_CALL2(Initialize,p,a,b)
-#endif
 
+/* Export functions */ 
+
+HRESULT WINAPI DirectInputCreateA(HINSTANCE,DWORD,LPDIRECTINPUTA *,LPUNKNOWN);
+HRESULT WINAPI DirectInputCreateW(HINSTANCE,DWORD,LPDIRECTINPUTA *,LPUNKNOWN);
+#define DirectInputCreate WINELIB_NAME_AW(DirectInputCreate)
 
 #endif /* __WINE_DINPUT_H */
