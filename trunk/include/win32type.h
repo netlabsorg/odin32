@@ -1,4 +1,4 @@
-/* $Id: win32type.h,v 1.13 1999-08-24 12:22:48 sandervl Exp $ */
+/* $Id: win32type.h,v 1.14 1999-08-24 15:09:45 phaller Exp $ */
 
 #ifndef __WIN32TYPE_H__
 #define __WIN32TYPE_H__
@@ -56,6 +56,7 @@ typedef UINT    WPARAM;
 #define LPTSTR  char *
 #define LPSTR   char *
 #define LPCSTR  const char *
+#define LPCTSTR const char *
 #define LPBYTE  unsigned char *
 #define HANDLE  ULONG
 #define WORD    USHORT
