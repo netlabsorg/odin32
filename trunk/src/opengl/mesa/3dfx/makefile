@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2000-03-02 13:25:33 sandervl Exp $
+# $Id: makefile,v 1.5 2000-03-04 19:41:39 bird Exp $
 #
 # PD-Win32
 #
@@ -12,15 +12,11 @@ PDWIN32_TOOLS = ..\..\..\..\tools\bin
 
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 
-!ifdef DEBUG
-L=/CO
-!endif
+MESADEFS= -DNO_PARALLEL -DNO_STEREO -DGL_MESA_window_pos -DTHREADS \
+          -DUSE_X86_ASM_NOT -DUSE_MMX_ASM_NOT -DUSE_3DNOW_ASM_NOT \
+          -DFX -DFX_V2 -DFX_SILENT -DBUILD_GL32
 
-MESADEFS=-DNO_PARALLEL -DNO_STEREO -DGL_MESA_window_pos -DTHREADS \
-         -DUSE_X86_ASM_NOT -DUSE_MMX_ASM_NOT -DUSE_3DNOW_ASM_NOT \
-         /DFX /DFX_V2 /DFX_SILENT /DBUILD_GL32
-
-CFLAGS = -I.. -I..\GL $(CFLAGS_WIN32APP) -I$(PDWIN32_INCLUDE) -I..\..\glut -I..\..\glide\cvg\glide -I..\..\glide\swlibs\fxmisc -I..\..\glide\cvg\incsrc $(MESADEFS) /Wcnd- /Tdp
+CFLAGS   = -I.. -I..\GL $(CFLAGS_WIN32APP) -I$(PDWIN32_INCLUDE) -I..\..\glut -I..\..\glide\cvg\glide -I..\..\glide\swlibs\fxmisc -I..\..\glide\cvg\incsrc $(MESADEFS) /Wcnd- /Tdp
 CXXFLAGS = -I.. -I..\GL $(CXXFLAGS_WIN32APP) -I$(PDWIN32_INCLUDE) -I..\..\glut -I..\..\glide\cvg\glide -I..\..\glide\swlibs\fxmisc -I..\..\glide\cvg\incsrc $(MESADEFS)
 
 TARGET = OPENGL32
@@ -55,7 +51,7 @@ OBJS =  fxapi.obj \
     osmesa.obj
 
 $(TARGET).DLL: $(OBJS) $(TARGET).lrf $(TARGET).def
-    -ILINK /FREE /NOE $(L) @$(TARGET).lrf
+    -$(LD2) $(LD2FLAGS) /FREE /NOE @$(TARGET).lrf
     $(CP) $@ $(PDWIN32_BIN)\Glide
 
 $(TARGET).lrf: makefile
@@ -74,6 +70,17 @@ $(TARGET).def
 
 resource.asm: fxmesa32.rc
     $(RC) $(RCFLAGS) -o resource.asm fxmesa32.rc
+
+#
+# Tried to create a general interference rule for these?
+# As long as there isn't any .c, .cpp or .asm files with matching
+# names in the current directory thise shouldn't be any problem.
+# For example:
+#   {..}.c.obj:
+#       $(CC) $(CFLAGS) -c $<
+#
+# Regards knut.
+#
 
 accum.obj: ..\accum.c
     $(CC) $(CFLAGS) -c ..\accum.c
@@ -231,11 +238,6 @@ dep:
 !endif
 
 clean:
-        $(RM) *.obj
-        $(RM) *.dll
-        $(RM) *.lib
-        $(RM) *.lrf
-        $(RM) resource.asm
-        $(RM) $(PDWIN32_BIN)\$(TARGET).dll
-        $(RM) $(PDWIN32_LIB)\$(TARGET).lib
+    $(RM) *.obj *.dll *.lib *.lrf resource.asm $(PDWIN32_BIN)\$(TARGET).dll \
+        $(PDWIN32_LIB)\$(TARGET).lib
 
