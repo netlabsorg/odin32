@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.1180 2000-10-08 14:04:50 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1181 2000-10-08 18:44:57 sandervl Exp $ */
 
  2000-10-08: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32: GetMinMaxInfo fix for windows with both WS_THICKFRAME and
@@ -6,6 +6,7 @@
               Win32BaseWindow::GetMinMaxInfo)
               Fix for CS_OWNDC windows (origin needs to be changed after
               window size/position changes)
+              Fix for ShowScrollBar (enabling/disabling both scrollbars at once did not work (vert))
     - KERNEL32: Do not export the toolhelp apis; NT4 doesn't do that. (only win9x)
 
  2000-10-07: Markus Montkowski <mmontkowski@gmx.de>
