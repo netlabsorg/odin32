@@ -1,10 +1,16 @@
-/* $Id: ChangeLog,v 1.2642 2003-10-24 14:53:52 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2643 2003-10-26 01:48:49 bird Exp $ */
 
  2003-10-24: Sander van Leeuwen <sandervl@innotek   >
     - SHLWAPI:  o Removed wrong debug wrappers for forwarders
     - WININET:  o Fixed initterm
-    - VERSION:  o Resync with Wine 
+    - VERSION:  o Resync with Wine
     - PEBUILD:  o Added
+
+ 2003-10-25: knut st. osmundsen <bird-changelog@anduin    >
+    - MAKE:     o pe_*.obj changes for custombuilds.
+                o Custombuild objects goes into .\bin\<buildmode>.cust so it's
+                  possible to build both in the same tree.
+                o Don't build the src/custombuild directory as it's broken.
 
  2003-10-22: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Use WC_FRAME for the Odin frame window and subclass it. There's
@@ -13,12 +19,12 @@
     - PMKBDHK:  o Updates
 
  2003-10-20: Sander van Leeuwen <sandervl@innotek   >
-    - USER32:   o PM windows should have no owner if none is specified. (instead 
-                  of their parent) 
+    - USER32:   o PM windows should have no owner if none is specified. (instead
+                  of their parent)
                   (NOTE: Potentially dangerous change!)
 
  2003-10-20: Platon Fomichev <stauff@innotek   >
-    - USER32:   o On init we should migrate fonts that Windows applications 
+    - USER32:   o On init we should migrate fonts that Windows applications
                   installed globally.
 
  2003-10-16: Sander van Leeuwen <sandervl@innotek   >
