@@ -1,4 +1,4 @@
-/* $Id: uitools.cpp,v 1.3 1999-06-26 15:29:11 achimha Exp $ */
+/* $Id: uitools.cpp,v 1.4 1999-08-03 21:22:33 sandervl Exp $ */
 /*
  * User Interface Functions
  *
@@ -6,6 +6,7 @@
  * Copyright 1997 Bertho A. Stultiens
  * Copyright 1999 Achim Hasenmueller
  * Copyright 1999 Christoph Bratschi
+ * Copyright 1999 Rene Pronk
  */
 
 #include "winuser.h"
@@ -1372,4 +1373,348 @@ BOOL WIN32API DrawFrameControl(HDC hdc, LPRECT rc, UINT uType,
 //         hdc,rc,uType,uState );
     }
     return FALSE;
+}
+
+
+/*****************************************************************************
+ * Name      : int WIN32API DrawTextExA
+ * Purpose   : The DrawTextEx function draw the text in the rectangle
+ * Parameters:
+ * Variables :
+ * Result    : If the function succeeds, the return value is the height of the
+ *             text, otherwise zero.
+ * Remark    : TODO: Returned number of characters is always the entire string
+ *             since there is no way to know the real answer this way.
+ * Status    : PARTIALLY IMPLEMENTED AND TESTED
+ *
+ * Author    : Rene Pronk [Thu, 1999/07/29 15:03]
+ *****************************************************************************/
+
+int WIN32API DrawTextExA (HDC hdc, LPTSTR lpchText, int cchText, LPRECT lprc,
+                          UINT dwDTFormat, LPDRAWTEXTPARAMS lpDTParams) {
+
+   int result;
+
+   dprintf(("USER32:DrawTextExA (%08xh,%s,%08xh,%08xh,%08xh,%08xh).\n",
+            hdc, lpchText, cchText, lprc, dwDTFormat, lpDTParams));
+
+   if (lpDTParams != NULL) {
+           // 'create' margins
+           lprc->left += lpDTParams->iLeftMargin;
+           lprc->right -= lpDTParams->iRightMargin;
+
+           // just assume all the text has been drawn
+           if (cchText != -1)
+                   lpDTParams->uiLengthDrawn = cchText;
+           else {
+                   // determine string length
+                   int size = 0;
+                   while ((BYTE) *(lpchText + size) != 0)
+                           size ++;
+                   lpDTParams->uiLengthDrawn = size;
+           }
+   }
+
+   result = DrawTextA (hdc, lpchText, cchText, lprc, dwDTFormat);
+
+   if (lpDTParams != NULL) {
+           // don't forget to restore the margins
+           lprc->left -= lpDTParams->iLeftMargin;
+           lprc->right += lpDTParams->iRightMargin;
+   }
+
+   return result;
+}
+
+
+
+/*****************************************************************************
+ * Name      : int WIN32API DrawTextExW
+ * Purpose   : The DrawTextEx function draw the text in the rectangle
+ * Parameters:
+ * Variables :
+ * Result    : If the function succeeds, the return value is the height of the
+ *             text, otherwise zero.
+ * Remark    : TODO: Returned number of characters is always the entire string
+ *             since there is no way to know the real answer this way.
+ * Status    : PARTIALLY IMPLEMENTED AND TESTED
+ *
+ * Author    : Rene Pronk [Thu, 1999/07/29 15:03]
+ *****************************************************************************/
+
+int WIN32API DrawTextExW (HDC hdc, LPTSTR lpchText, int cchText, LPRECT lprc,
+                          UINT dwDTFormat, LPDRAWTEXTPARAMS lpDTParams) {
+
+   char *astring = UnicodeToAsciiString((LPWSTR)lpchText);
+   int   rc;
+
+   dprintf(("USER32:DrawTextExW (%08xh,%s,%08xh,%08xh,%08xh,%08xh).\n",
+            hdc, astring, cchText, lprc, dwDTFormat, lpDTParams));
+
+   rc = DrawTextExA (hdc, astring, cchText, lprc, dwDTFormat, lpDTParams);
+   FreeAsciiString(astring);
+   return(rc);
+}
+
+
+/******************************************************************************
+ *
+ * This function is used by Paint_DrawState which is inturn used by both
+ * DrawStateA and DrawStateW. The code is directly borrowed from Wine.
+ *
+ ******************************************************************************/
+
+static BOOL Paint_DrawStateJam(HDC hdc, UINT opcode,
+                               DRAWSTATEPROC func, LPARAM lp, WPARAM wp,
+                               LPRECT rc, UINT dtflags, BOOL unicode)
+{
+    HDC memdc;
+    HBITMAP hbmsave;
+    BOOL retval;
+    INT cx = rc->right - rc->left;
+    INT cy = rc->bottom - rc->top;
+
+    switch(opcode)
+    {
+    case DST_TEXT:
+    case DST_PREFIXTEXT:
+        if(unicode)
+            return DrawTextW(hdc, (LPWSTR)lp, (INT)wp, rc, dtflags);
+        else
+            return DrawTextA(hdc, (LPSTR)lp, (INT)wp, rc, dtflags);
+
+    case DST_ICON:
+        return DrawIcon(hdc, rc->left, rc->top, (HICON)lp);
+
+    case DST_BITMAP:
+        memdc = CreateCompatibleDC(hdc);
+        if(!memdc) return FALSE;
+        hbmsave = (HBITMAP)SelectObject(memdc, (HBITMAP)lp);
+        if(!hbmsave)
+        {
+            DeleteDC(memdc);
+            return FALSE;
+        }
+        retval = BitBlt(hdc, rc->left, rc->top, cx, cy, memdc, 0, 0, SRCCOPY);
+        SelectObject(memdc, hbmsave);
+        DeleteDC(memdc);
+        return retval;
+
+    case DST_COMPLEX:
+        if(func)
+            return func(hdc, lp, wp, cx, cy);
+        else
+            return FALSE;
+    }
+    return FALSE;
+}
+
+
+/******************************************************************************
+ *
+ * This function is used by both DrawStateA and DrawStateW. The code is directly
+ * borrowed from Wine
+ *
+ ******************************************************************************/
+BOOL Paint_DrawState (HDC hdc, HBRUSH hbr, DRAWSTATEPROC func, LPARAM lp, WPARAM wp,
+                      INT x, INT y, INT cx, INT cy, UINT flags, BOOL unicode)
+{
+    HBITMAP hbm, hbmsave;
+    HFONT hfsave;
+    HBRUSH hbsave;
+    HDC memdc;
+    RECT rc;
+    UINT dtflags = DT_NOCLIP;
+    COLORREF fg, bg;
+    UINT opcode = flags & 0xf;
+    INT len = wp;
+    BOOL retval, tmp;
+
+    if((opcode == DST_TEXT || opcode == DST_PREFIXTEXT) && !len)    /* The string is '\0' terminated */
+    {
+        if(unicode)
+            len = lstrlenW((LPWSTR)lp);
+        else
+            len = lstrlenA((LPSTR)lp);
+   }
+
+    /* Find out what size the image has if not given by caller */
+    if(!cx || !cy)
+    {
+        SIZE s;
+        BITMAP bmp;
+
+        switch(opcode)
+        {
+        case DST_TEXT:
+        case DST_PREFIXTEXT:
+            if(unicode)
+                retval = GetTextExtentPoint32W(hdc, (LPWSTR)lp, len, &s);
+            else
+                retval = GetTextExtentPoint32A(hdc, (LPSTR)lp, len, &s);
+            if(!retval) return FALSE;
+            break;
+
+        case DST_ICON:
+            /* Just assume the icon has the size given by GetSystemMetrics. This should be
+               valid since both CreateIcon and LoadIcon can't create icons with different
+               sizes. I wouldn't how else to get the size of the icon. RP
+            */
+            s.cx = GetSystemMetrics (SM_CXICON);
+            s.cy = GetSystemMetrics (SM_CYICON);
+            break;
+
+        case DST_BITMAP:
+            retval = GetObjectA ((HBITMAP) lp, sizeof (BITMAP), &bmp);
+            if(retval == 0) return FALSE;
+            s.cx = bmp.bmWidth;
+            s.cy = bmp.bmHeight;
+            break;
+
+        case DST_COMPLEX: /* cx and cy must be set in this mode */
+            return FALSE;
+        }
+
+        if(!cx) cx = s.cx;
+        if(!cy) cy = s.cy;
+    }
+
+    rc.left   = x;
+    rc.top    = y;
+    rc.right  = x + cx;
+    rc.bottom = y + cy;
+
+    if(flags & DSS_RIGHT)    /* This one is not documented in the win32.hlp file */
+        dtflags |= DT_RIGHT;
+    if(opcode == DST_TEXT)
+        dtflags |= DT_NOPREFIX;
+
+    /* For DSS_NORMAL we just jam in the image and return */
+    if((flags & 0x7ff0) == DSS_NORMAL)
+    {
+        return Paint_DrawStateJam(hdc, opcode, func, lp, len, &rc, dtflags, unicode);
+    }
+
+    /* For all other states we need to convert the image to B/W in a local bitmap */
+    /* before it is displayed */
+    fg = SetTextColor(hdc, RGB(0, 0, 0));
+    bg = SetBkColor(hdc, RGB(255, 255, 255));
+    hbm = (HBITMAP)NULL; hbmsave = (HBITMAP)NULL;
+    memdc = (HDC)NULL; hbsave = (HBRUSH)NULL;
+    retval = FALSE; /* assume failure */
+
+    /* From here on we must use "goto cleanup" when something goes wrong */
+    hbm     = CreateBitmap(cx, cy, 1, 1, NULL);
+    if(!hbm) goto cleanup;
+    memdc   = CreateCompatibleDC(hdc);
+    if(!memdc) goto cleanup;
+    hbmsave = (HBITMAP)SelectObject(memdc, hbm);
+    if(!hbmsave) goto cleanup;
+    rc.left = rc.top = 0;
+    rc.right = cx;
+    rc.bottom = cy;
+    if(!FillRect(memdc, &rc, (HBRUSH)GetStockObject(WHITE_BRUSH))) goto cleanup;
+    SetBkColor(memdc, RGB(255, 255, 255));
+    SetTextColor(memdc, RGB(0, 0, 0));
+    hfsave  = (HFONT)SelectObject(memdc, GetCurrentObject(hdc, OBJ_FONT));
+    if(!hfsave && (opcode == DST_TEXT || opcode == DST_PREFIXTEXT)) goto cleanup;
+    tmp = Paint_DrawStateJam(memdc, opcode, func, lp, len, &rc, dtflags, unicode);
+    if(hfsave) SelectObject(memdc, hfsave);
+    if(!tmp) goto cleanup;
+
+    /* These states cause the image to be dithered */
+    if(flags & (DSS_UNION|DSS_DISABLED))
+    {
+        WORD wPattern55AA[] = { 0x5555, 0xaaaa, 0x5555, 0xaaaa, 0x5555, 0xaaaa, 0x5555, 0xaaaa };
+        HBITMAP hPattern55AABitmap = CreateBitmap( 8, 8, 1, 1, wPattern55AA );
+        HBRUSH hPattern55AABrush = CreatePatternBrush(hPattern55AABitmap);
+
+        hbsave = (HBRUSH)SelectObject(memdc, hPattern55AABrush);
+        if(!hbsave) goto cleanup;
+        tmp = PatBlt(memdc, 0, 0, cx, cy, 0x00FA0089);
+        if(hbsave) SelectObject(memdc, hbsave);
+        if(!tmp) goto cleanup;
+    }
+
+    hbsave = (HBRUSH)SelectObject(hdc, hbr ? hbr : GetStockObject(WHITE_BRUSH));
+    if(!hbsave) goto cleanup;
+
+    if(!BitBlt(hdc, x, y, cx, cy, memdc, 0, 0, 0x00B8074A)) goto cleanup;
+
+    /* DSS_DEFAULT makes the image boldface */
+    if(flags & DSS_DEFAULT)
+    {
+        if(!BitBlt(hdc, x+1, y, cx, cy, memdc, 0, 0, 0x00B8074A)) goto cleanup;
+    }
+
+    retval = TRUE; /* We succeeded */
+
+cleanup:
+    SetTextColor(hdc, fg);
+    SetBkColor(hdc, bg);
+
+    if(hbsave)  SelectObject(hdc, hbsave);
+    if(hbmsave) SelectObject(memdc, hbmsave);
+    if(hbm)     DeleteObject(hbm);
+    if(memdc)   DeleteDC(memdc);
+
+    return retval;
+}
+
+
+
+/*****************************************************************************
+ * Name      : BOOL WIN32API DrawStateA
+ * Purpose   : Draws a bitmap, icon, text or complex object in one of the following
+ *             states: normal, disabled, union or mono
+ * Parameters:
+ * Variables :
+ * Result    : If the function succeeds, the return value is a handle of the
+ *               window station associated with the calling process.
+ *             If the function fails, the return value is NULL. This can occur
+ *               if the calling process is not an application written for Windows
+ *               NT. To get extended error information, call GetLastError.
+ * Remark    : Disabled doesn't look like the Windows implementation, but it does
+ *             look disabled.
+ * Status    : PARTIALLY IMPLEMENTED
+ *
+ * Author    : Rene Pronk [Sun, 1999/07/25 21:27]
+ *****************************************************************************/
+
+BOOL WIN32API DrawStateA(HDC hdc, HBRUSH hbc, DRAWSTATEPROC lpOutputFunc, LPARAM lData,
+                         WPARAM wData, int x, int y, int cx, int cy, UINT fuFlags)
+{
+  dprintf(("USER32:DrawStateA (%08xh,%08xh,%08xh,%08xh,%08xh,%d,%d,%d,%d,%08x).\n",
+         hdc, hbc, lpOutputFunc, lData, wData, x, y, cx, cy, fuFlags));
+
+  return Paint_DrawState (hdc, hbc, lpOutputFunc, lData, wData, x, y ,cx, cy, fuFlags, FALSE);
+}
+
+
+
+/*****************************************************************************
+ * Name      : BOOL WIN32API DrawStateW
+ * Purpose   : Draws a bitmap, icon, text or complex object in one of the following
+ *             states: normal, disabled, union or mono
+ * Parameters:
+ * Variables :
+ * Result    : If the function succeeds, the return value is a handle of the
+ *               window station associated with the calling process.
+ *             If the function fails, the return value is NULL. This can occur
+ *               if the calling process is not an application written for Windows
+ *               NT. To get extended error information, call GetLastError.
+ * Remark    : Disabled doesn't look like the Windows implementation, but it does
+ *             look disabled.
+ * Status    : PARTIALLY IMPLEMENTED
+ *
+ * Author    : Rene Pronk [Sun, 1999/07/25 21:27]
+ *****************************************************************************/
+
+BOOL WIN32API DrawStateW(HDC hdc, HBRUSH hbc, DRAWSTATEPROC lpOutputFunc, LPARAM lData,
+                         WPARAM wData, int x, int y, int cx, int cy, UINT fuFlags)
+{
+  dprintf(("USER32:DrawStateW (%08xh,%08xh,%08xh,%08xh,%08xh,%d,%d,%d,%d,%08x).\n",
+         hdc, hbc, lpOutputFunc, lData, wData, x, y, cx, cy, fuFlags));
+
+  return Paint_DrawState (hdc, hbc, lpOutputFunc, lData, wData, x, y ,cx, cy, fuFlags, TRUE);
 }

@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.19 1999-07-11 21:11:57 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.20 1999-08-03 21:22:33 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -479,13 +479,13 @@ HDC WIN32API GetDCEx(HWND arg1, HRGN arg2, DWORD arg3)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GetClientRect( HWND arg1, PRECT  arg2)
+BOOL WIN32API GetClientRect( HWND hwnd, PRECT pRect)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  GetClientRect of %X\n", arg1);
-#endif
+ BOOL rc;
 
-    return O32_GetClientRect(arg1, arg2);
+    rc = O32_GetClientRect(hwnd, pRect);
+    dprintf(("USER32:  GetClientRect of %X returned (%d,%d) (%d,%d)\n", hwnd, pRect->left, pRect->top, pRect->right, pRect->bottom));
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -682,15 +682,6 @@ int WIN32API DrawTextA(HDC arg1, LPCSTR arg2, int arg3, PRECT arg4, UINT arg5)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API DrawTextExA(HDC arg1, LPCSTR arg2, int arg3, PRECT arg4, UINT arg5, LPDRAWTEXTPARAMS lpDTParams)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  DrawTextExA (not completely implemented) %s", arg2);
-#endif
-    return O32_DrawText(arg1, arg2, arg3, arg4, arg5);
-}
-//******************************************************************************
-//******************************************************************************
 int WIN32API GetSystemMetrics(int arg1)
 {
  int rc;
@@ -790,9 +781,7 @@ int WIN32API GetSystemMetrics(int arg1)
         rc = O32_GetSystemMetrics(arg1);
         break;
     }
-#ifdef DEBUG
-    WriteLog("USER32:  GetSystemMetrics %d returned %d\n", arg1, rc);
-#endif
+    dprintf(("USER32:  GetSystemMetrics %d returned %d\n", arg1, rc));
     return(rc);
 }
 //******************************************************************************
@@ -1720,20 +1709,6 @@ int WIN32API DrawTextW( HDC arg1, LPCWSTR arg2, int arg3, PRECT arg4, UINT  arg5
 
 #ifdef DEBUG
     WriteLog("USER32:  DrawTextW %s\n", astring);
-#endif
-    rc = O32_DrawText(arg1, astring, arg3, arg4, arg5);
-    FreeAsciiString(astring);
-    return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API DrawTextExW(HDC arg1, LPCWSTR arg2, int arg3, PRECT arg4, UINT arg5, LPDRAWTEXTPARAMS lpDTParams)
-{
- char *astring = UnicodeToAsciiString((LPWSTR)arg2);
- int   rc;
-
-#ifdef DEBUG
-    WriteLog("USER32:  DrawTextExW (not completely supported) %s\n", astring);
 #endif
     rc = O32_DrawText(arg1, astring, arg3, arg4, arg5);
     FreeAsciiString(astring);
@@ -3523,17 +3498,6 @@ BOOL WIN32API UnregisterHotKey(HWND hwnd, int idHotKey)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API DrawStateA(HDC hdc, HBRUSH hbc, DRAWSTATEPROC lpOutputFunc,
-                LPARAM lData, WPARAM wData, int x, int y, int cx,
-                int cy, UINT fuFlags)
-{
-#ifdef DEBUG
-  WriteLog("USER32:  DrawStateA, not implemented\n");
-#endif
-  return(TRUE);
-}
-//******************************************************************************
-//******************************************************************************
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API SetWindowContextHelpId(HWND hwnd, DWORD dwContextHelpId)
@@ -4105,42 +4069,6 @@ BOOL WIN32API DrawCaption (HWND hwnd,
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-
-BOOL WIN32API DrawStateW(HDC           hdc,
-                         HBRUSH        hBrush,
-                         DRAWSTATEPROC lpOutputFunc,
-                         LPARAM        lParam,
-                         WPARAM        wParam,
-                         int           x,
-                         int           y,
-                         int           cx,
-                         int           cy,
-                         UINT          fuFlags)
-{
-  dprintf(("USER32:DrawStateW (%08xh,%08xh,%08xh,%08xh,%08xh,%d,%d,%d,%d,%08x) not implemented.\n",
-         hdc,
-         hBrush,
-         lpOutputFunc,
-         lParam,
-         wParam,
-         x,
-         y,
-         cx,
-         cy,
-         fuFlags));
-
-  return(DrawStateA(hdc,
-                    hBrush,
-                    lpOutputFunc,
-                    lParam,
-                    wParam,
-                    x,
-                    y,
-                    cx,
-                    cy,
-                    fuFlags));
-}
-
 
 /*****************************************************************************
  * Name      : BOOL WIN32API EnumDesktopWindows
