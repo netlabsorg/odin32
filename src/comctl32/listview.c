@@ -2371,7 +2371,14 @@ static BOOL LISTVIEW_InitSubItem(HWND hwnd, LISTVIEW_SUBITEM *lpSubItem,
           {
             lpSubItem->pszText = NULL;
           }
-
+#ifdef __WIN32OS2__
+          else {
+             //No need to change anything if text is the same
+             if(lpSubItem->pszText && !strcmp(lpSubItem->pszText, lpLVItem->pszText)) {
+                 return FALSE;
+             }
+          }
+#endif
           bResult = Str_SetPtrA(&lpSubItem->pszText, lpLVItem->pszText);
         }
       }
@@ -2740,9 +2747,15 @@ static BOOL LISTVIEW_SetSubItem(HWND hwnd, LPLVITEMA lpLVItem)
             bResult = LISTVIEW_AddSubItem(hwnd, lpLVItem);
           }
 
+#ifdef __WIN32OS2__
+          if(bResult) {
+#endif
           rcItem.left = LVIR_BOUNDS;
       LISTVIEW_GetItemRect(hwnd, lpLVItem->iItem, &rcItem);
       InvalidateRect(hwnd, &rcItem, FALSE);
+#ifdef __WIN32OS2__
+          }
+#endif
         }
       }
     }
