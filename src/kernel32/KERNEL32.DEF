@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.104 2001-04-04 14:20:32 sandervl Exp $
+; $Id: KERNEL32.DEF,v 1.105 2001-04-21 11:22:25 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -955,6 +955,8 @@ EXPORTS
     lstrncmpiA                 = _lstrncmpiA@12              @887
     lstrncmpiW                 = _lstrncmpiW@12              @888
 
+    GetLongPathNameA           = _GetLongPathNameA@12        @900
+    GetLongPathNameW           = _GetLongPathNameW@12        @901
 ;
 ; First free ordinal is 890
 ;

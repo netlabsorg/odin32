@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.46 2000-12-09 16:16:27 phaller Exp $ */
+/* $Id: Fileio.cpp,v 1.47 2001-04-21 11:22:25 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -954,6 +954,62 @@ ODINFUNCTION3(DWORD, GetShortPathNameW,
         return(length); //return length required (including 0 terminator)
   }
   lstrcpyW(lpszShortPath, lpszLongPath);
+  return(length-1);
+}
+//******************************************************************************
+//Behaviour in NT 4, SP6: (presumably the same as GetShortPathNameA; TODO check)
+//- converts short filename to long filenames (TODO: not yet done here!)
+//- if lpszShortPath 0 or cchBuffer too small -> return required length
+//  (INCLUDING 0 terminator)
+//- if lpszLongPath == NULL -> ERROR_INVALID_PARAMETER (return 0)
+//- if lpszLongPath empty -> proceed as if nothing is wrong
+//- does NOT clear the last error if successful!
+//- if successful -> return length of string (excluding 0 terminator)
+//******************************************************************************
+DWORD WINAPI GetLongPathNameA( LPCSTR lpszShortPath, LPSTR lpszLongPath,
+                               DWORD cchBuffer )
+{
+ int length;
+
+  dprintf(("GetLongPathNameA %x %s %d", lpszShortPath, lpszLongPath, cchBuffer));
+  
+  if(!lpszShortPath) {
+      SetLastError(ERROR_INVALID_PARAMETER);
+      return 0;
+  }
+
+  length = lstrlenA(lpszShortPath) + 1;
+  if(length > cchBuffer) {
+      if(lpszLongPath) {
+          *lpszLongPath = 0;
+      }
+      return(length); //return length required (including 0 terminator)
+  }
+  lstrcpyA(lpszLongPath, lpszShortPath);
+  return(length-1);
+}
+//******************************************************************************
+//******************************************************************************
+DWORD WINAPI GetLongPathNameW( LPCWSTR lpszShortPath, LPWSTR lpszLongPath,
+                               DWORD cchBuffer )
+{
+ int length;
+
+  dprintf(("GetLongPathNameW %x %ls %d", lpszShortPath, lpszLongPath, cchBuffer));
+
+  if(!lpszShortPath) {
+      SetLastError(ERROR_INVALID_PARAMETER);
+      return 0;
+  }
+
+  length = lstrlenW(lpszShortPath) + 1;
+  if(length > cchBuffer) {
+      if(lpszLongPath) {
+          *lpszLongPath = 0;
+      }
+      return(length); //return length required (including 0 terminator)
+  }
+  lstrcpyW(lpszLongPath, lpszShortPath);
   return(length-1);
 }
 //******************************************************************************
