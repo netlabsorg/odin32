@@ -1,4 +1,4 @@
-/* $Id: loadres.cpp,v 1.2 1999-07-19 11:50:04 sandervl Exp $ */
+/* $Id: loadres.cpp,v 1.3 1999-07-20 07:42:35 sandervl Exp $ */
 
 /*
  *
@@ -66,23 +66,6 @@ HCURSOR WIN32API LoadCursorA(HINSTANCE hinst, LPCSTR lpszCursor)
 }
 //******************************************************************************
 //******************************************************************************
-HACCEL WIN32API LoadAcceleratorsA(HINSTANCE hinst, LPCSTR lpszAcc)
-{
- HACCEL rc;
-
-    if((int)lpszAcc >> 16 != 0) {//convert string name identifier to numeric id
-         dprintf(("lpszAcc %s\n", lpszAcc));
-	 lpszAcc = (LPCSTR)ConvertNameId(hinst, (char *)lpszAcc);
-    }
-    else dprintf(("lpszAcc %d\n", (int)lpszAcc));
- 
-    rc = O32_LoadAccelerators(hinst, lpszAcc);
-
-    dprintf(("LoadAccelerators returned %d\n", rc));
-    return(rc);
-}
-//******************************************************************************
-//******************************************************************************
 HBITMAP WIN32API LoadBitmapA(HINSTANCE hinst, LPCSTR lpszBitmap)
 {
  HBITMAP rc;
@@ -105,29 +88,6 @@ HBITMAP WIN32API LoadBitmapA(HINSTANCE hinst, LPCSTR lpszBitmap)
            rc));
   
   return(rc);
-}
-
-//******************************************************************************
-//******************************************************************************
-HACCEL WIN32API LoadAcceleratorsW(HINSTANCE hinst, LPCWSTR lpszAccel)
-{
- char   *astring = NULL;
- HACCEL rc;
-
-    if((int)lpszAccel >> 16 != 0) {//convert string name identifier to numeric id
-	 astring = UnicodeToAsciiString((LPWSTR)lpszAccel);
-
-         dprintf(("lpszAccel %s\n", astring));
-	 lpszAccel = (LPWSTR)ConvertNameId(hinst, (char *)astring);
-    }
-    else dprintf(("lpszAccel %d\n", (int)lpszAccel));
-
-    rc = O32_LoadAccelerators(hinst, (char *)lpszAccel);
-    if(astring)
-	FreeAsciiString(astring);
-
-    dprintf(("LoadAcceleratorsW returned %d\n", rc));
-    return(rc);
 }
 //******************************************************************************
 //******************************************************************************
@@ -196,74 +156,6 @@ HICON WIN32API LoadIconW(HINSTANCE hinst, LPCWSTR lpszIcon)
 }
 //******************************************************************************
 //******************************************************************************
-HMENU WIN32API LoadMenuA(HINSTANCE hinst, LPCSTR lpszMenu)
-{
- HMENU rc;
-
-#if 1
-    rc = (HMENU)FindResourceA(hinst, lpszMenu, RT_MENUA);
-#else
-    if((int)lpszMenu >> 16 != 0) {//convert string name identifier to numeric id
-         dprintf(("lpszMenu %s\n", lpszMenu));
-
-	 lpszMenu = (LPCSTR)ConvertNameId(hinst, (char *)lpszMenu);
-    }
-    else dprintf(("lpszMenu %d\n", (int)lpszMenu));
-
-    rc = O32_LoadMenu(hinst, lpszMenu);
-#endif
-    dprintf(("LoadMenuA (%X) returned %d\n", hinst, rc));
-    return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-HMENU WIN32API LoadMenuW(HINSTANCE hinst, LPCWSTR lpszMenu)
-{
- HMENU rc;
-
-#if 1
-    rc = (HMENU)FindResourceW(hinst, lpszMenu, RT_MENUW);
-#else
- char  *astring = NULL;
-    if((int)lpszMenu >> 16 != 0) {//convert string name identifier to numeric id
-	 astring = UnicodeToAsciiString((LPWSTR)lpszMenu);
-
-         dprintf(("lpszMenu %s\n", astring));
-	 lpszMenu = (LPWSTR)ConvertNameId(hinst, (char *)astring);
-    }
-    else dprintf(("lpszMenu %d\n", (int)lpszMenu));
-
-    rc  = O32_LoadMenu(hinst, (char *)lpszMenu);
-    if(astring)
-	FreeAsciiString(astring);
-#endif
-    dprintf(("LoadMenuW (%X) returned %d\n", hinst, rc));
-    return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-HMENU WIN32API LoadMenuIndirectA( const MENUITEMTEMPLATEHEADER * arg1)
-{
- char  *astring = NULL;
- HMENU rc;
-
-    dprintf(("OS2LoadMenuIndirectA\n"));
-
-    rc = O32_LoadMenuIndirect(arg1);
-    if(astring)
-	FreeAsciiString(astring);
-    return(rc);
-}
-//******************************************************************************
-//Won't work...
-//******************************************************************************
-HMENU WIN32API LoadMenuIndirectW(const MENUITEMTEMPLATEHEADER * arg1)
-{
-    dprintf(("OS2LoadMenuIndirectW, improperly implemented!!\n"));
-
-    return 0;
-//    return O32_LoadMenuIndirect(arg1);
-}
 //******************************************************************************
 //TODO: Far from complete, but works for loading resources from exe
 //fuLoad flag ignored

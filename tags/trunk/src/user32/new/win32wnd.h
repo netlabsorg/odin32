@@ -1,4 +1,4 @@
-/* $Id: win32wnd.h,v 1.15 1999-07-19 18:40:44 sandervl Exp $ */
+/* $Id: win32wnd.h,v 1.16 1999-07-20 07:42:36 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -17,6 +17,7 @@
 #include <win32class.h>
 #include <gen_object.h>
 #include <win32wndchild.h>
+#include <winres.h>
 
 class Win32Window;
 
@@ -86,11 +87,17 @@ virtual	 WORD   GetWindowWord(int index);
         DWORD   getWindowId()                   { return windowId; };
          void   setWindowId(DWORD id)           { windowId = id; };
 	 ULONG  getWindowHeight()		{ return rectClient.bottom - rectClient.top; };
+	 BOOL   isChild();
 
 	 DWORD  getFlags()			{ return flags; };
 	 void   setFlags(DWORD newflags)	{ flags = newflags; };
 
+ 	 ULONG  GetAccelTable()                     { return (ULONG) acceltableResource; };
+	 BOOL   SetAccelTable(ULONG hAccel);
+
+         ULONG  GetMenu()                     	    { return (ULONG) menuResource; };
 	 BOOL   SetMenu(ULONG hMenu);
+
 	 BOOL   ShowWindow(ULONG nCmdShow);
 	 BOOL   SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, int cy, UINT fuFlags);
 	 BOOL   DestroyWindow();
@@ -180,6 +187,9 @@ protected:
 	BOOL    isIcon;
 
    Win32Window *owner;			
+
+ Win32Resource *acceltableResource;
+ Win32Resource *menuResource;
 
 	char   *windowName;
 	ULONG   wndNameLength;

@@ -1,4 +1,4 @@
-/* $Id: oslibgdi.cpp,v 1.3 1999-07-19 18:40:43 sandervl Exp $ */
+/* $Id: oslibgdi.cpp,v 1.4 1999-07-20 07:42:35 sandervl Exp $ */
 /*
  * Window GDI wrapper functions for OS/2
  *
@@ -53,7 +53,7 @@ BOOL MapOS2ToWin32Point(HWND hwndParent, HWND hwndChild, OSLIBPOINT *point)
         return FALSE;
     }
     WinQueryWindowRect(hwndParent, (PRECTL)&rectParent);
-    point->y = rectParent.yTop - point->y;
+    point->y = rectParent.yTop - point->y - 1;
     return TRUE;
 }
 //******************************************************************************

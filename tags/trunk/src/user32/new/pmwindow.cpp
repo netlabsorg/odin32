@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.12 1999-07-19 18:40:43 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.13 1999-07-20 07:42:36 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -23,6 +23,7 @@
 #include "oslibwin.h"
 #include "oslibutil.h"
 #include "oslibgdi.h"
+#include "oslibmsg.h"
 
 HMQ  hmq = 0;                             /* Message queue handle         */
 HAB  hab = 0;
@@ -74,7 +75,7 @@ BOOL InitPM()
         return(FALSE);
    }
 
-   return(TRUE);
+   return OSLibInitMsgQueue();
 } /* End of main */
 //******************************************************************************
 //Win32 window message handler
@@ -162,26 +163,38 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
     case WM_ADJUSTWINDOWPOS:
     {
-      RECTLOS2 rectChild;
-      ULONG x, y;
+      ULONG    x, y;
+      PSWP     pswp = (PSWP)mp1;
 
         dprintf(("OS2: WM_ADJUSTWINDOWPOS %x", hwnd));
 
-        WinQueryWindowRect(hwnd, (PRECTL)&rectChild);
+        if(pswp->fl & SWP_MOVE) {
+            if(win32wnd->isChild()) {
+                x = pswp->x;
+                y = pswp->cy - y - 1;
+            }
+            else {
+                OSLIBPOINT point;
 
-        //Calculate position relative to parent window (real window or desktop)
-        x = rectChild.xLeft;
-//        y = MapOS2ToWin32Y(hwnd, &rectChild, rectChild.yBottom);
+                point.x = pswp->x;
+                point.y = pswp->y;
 
-        if(win32wnd->MsgMove(x, y)) {
-            goto RunDefWndProc;
+                MapOS2ToWin32Point(OSLIB_HWND_DESKTOP, hwnd, &point);
+                x = point.x;
+                y = point.y;
+            }
+            if(win32wnd->MsgMove(x, y)) {
+                goto RunDefWndProc;
+            }
+            break;
         }
-        break;
+        goto RunDefWndProc;
     }
 
     case WM_WINDOWPOSCHANGED:
     {
         dprintf(("OS2: WM_WINDOWPOSCHANGED %x", hwnd));
+        goto RunDefWndProc;
     }
 
     case WM_ERASEBACKGROUND:
@@ -382,12 +395,18 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         if(SHORT1FROMMP(mp2) == CMDSRC_MENU) {
             win32wnd->MsgCommand(CMD_MENU, SHORT1FROMMP(mp1), 0);
         }
+        if(SHORT1FROMMP(mp2) == CMDSRC_ACCELERATOR) {
+            win32wnd->MsgCommand(CMD_ACCELERATOR, SHORT1FROMMP(mp1), 0);
+        }
         //todo controls + accelerators
         break;
 
     case WM_SYSCOMMAND:
+        dprintf(("WM_SYSCOMMAND"));
+        break;
 
     case WM_CHAR:
+        dprintf(("WM_CHAR"));
 
     case WM_INITMENU:
     case WM_MENUSELECT:
