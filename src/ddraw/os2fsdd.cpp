@@ -1,4 +1,5 @@
-/*
+/* $Id: os2fsdd.cpp,v 1.2 2001-09-05 12:50:39 bird Exp $
+ *
  * Few routines for full-screen DirectDraw on OS/2
  *
  * Copyright 2000 Michal Necasek
