@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.25 2002-09-01 11:50:11 bird Exp $
+/* $Id: buildenv.cmd,v 1.26 2002-09-01 11:52:54 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -3343,7 +3343,7 @@ WatComC11c: procedure expose aCfg. aPath. sPathFile
         |   \CfgVerifyFile(sPathWatcom'\binp\wcc386.exe', fQuiet),
         |   \CfgVerifyFile(sPathWatcom'\binp\wpp386.exe', fQuiet),
         |   \CfgVerifyFile(sPathWatcom'\binp\wlink.exe', fQuiet),
-        |   \CfgVerifyFile(sPathWatcom'\lib286\os2\os2.lib', fQuiet),
+        |   \CfgVerifyFile(sPathWatcom'\lib286\os2\os2.lib', fQuiet, 1),
         |   \CfgVerifyFile(sPathWatcom'\lib386\os2\clbrdll.lib', fQuiet),
         |   \CfgVerifyFile(sPathWatcom'\lib386\os2\clib3r.lib', fQuiet),
         |   \CfgVerifyFile(sPathWatcom'\lib386\nt\kernel32.lib', fQuiet, 1),
