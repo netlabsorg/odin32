@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2001-07-30 22:54:19 bird Exp $
+# $Id: makefile,v 1.5 2001-08-06 17:40:25 achimha Exp $
 
 #
 # Odin32 API
@@ -6,6 +6,7 @@
 #       gdi32.dll makefile
 #
 NOINTERNALFUNCTIONS=1
+IMPDEF_FLAGS=-I:20000
 
 #
 # Compiler, tools, and interference rules.
