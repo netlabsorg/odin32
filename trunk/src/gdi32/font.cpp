@@ -1,4 +1,4 @@
-/* $Id: font.cpp,v 1.2 1999-11-09 19:52:33 phaller Exp $ */
+/* $Id: font.cpp,v 1.3 1999-11-10 22:44:19 phaller Exp $ */
 
 /*
  * GDI32 font apis
@@ -36,30 +36,87 @@ FONTENUMPROCW FontEnumProcWinW;
 
 //******************************************************************************
 //******************************************************************************
-HFONT WIN32API CreateFontA(int arg1, int arg2, int arg3, int arg4, int arg5,
-                               DWORD arg6, DWORD arg7, DWORD arg8, DWORD arg9,
-                               DWORD arg10, DWORD arg11, DWORD arg12, DWORD arg13, LPCSTR arg14)
+ODINFUNCTION14(HFONT,  CreateFontA,
+               int,    nHeight,
+               int,    nWidth,
+               int,    nEscapement,
+               int,    nOrientation,
+               int,    fnWeight,
+               DWORD,  fdwItalic,
+               DWORD,  fdwUnderline,
+               DWORD,  fdwStrikeOut,
+               DWORD,  fdwCharSet,
+               DWORD,  fdwOutputPrecision,
+               DWORD,  fdwClipPrecision,
+               DWORD,  fdwQuality,
+               DWORD,  fdwPitchAndFamily,
+               LPCSTR, lpszFace)
 {
- HFONT hfont;
+  dprintf(("lpszFace = %s\n", lpszFace));
 
-    hfont = O32_CreateFont(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14);
-    dprintf(("GDI32: CreateFontA '%s' returned %D\n", arg14, hfont));
-    return(hfont);
+  return  O32_CreateFont(nHeight,
+                         nWidth,
+                         nEscapement,
+                         nOrientation,
+                         fnWeight,
+                         fdwItalic,
+                         fdwUnderline,
+                         fdwStrikeOut,
+                         fdwCharSet,
+                         fdwOutputPrecision,
+                         fdwClipPrecision,
+                         fdwQuality,
+                         fdwPitchAndFamily,
+                         lpszFace);
 }
 //******************************************************************************
 //******************************************************************************
-HFONT WIN32API CreateFontW(int arg1, int arg2, int arg3, int arg4, int arg5,
-                              DWORD arg6, DWORD arg7, DWORD arg8, DWORD arg9,
-                              DWORD arg10, DWORD arg11, DWORD arg12, DWORD arg13, LPCWSTR arg14)
+ODINFUNCTION14(HFONT,  CreateFontW,
+               int,    nHeight,
+               int,    nWidth,
+               int,    nEscapement,
+               int,    nOrientation,
+               int,    fnWeight,
+               DWORD,  fdwItalic,
+               DWORD,  fdwUnderline,
+               DWORD,  fdwStrikeOut,
+               DWORD,  fdwCharSet,
+               DWORD,  fdwOutputPrecision,
+               DWORD,  fdwClipPrecision,
+               DWORD,  fdwQuality,
+               DWORD,  fdwPitchAndFamily,
+               LPCWSTR,lpszFace)
 {
- char *astring = UnicodeToAsciiString((LPWSTR)arg14);
- HFONT rc;
+  char *astring;
+  HFONT hFont;
 
-   dprintf(("GDI32: OS2CreateFontW\n"));
-   rc = O32_CreateFont(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, astring);
-   FreeAsciiString(astring);
-   return(rc);
+  // NULL is valid for lpszFace
+  if(lpszFace != NULL)
+    astring = UnicodeToAsciiString((LPWSTR)lpszFace);
+  else
+    astring = NULL;
+
+  // @@@PH switch to ODIN_ later
+  hFont =    CreateFontA(nHeight,
+                         nWidth,
+                         nEscapement,
+                         nOrientation,
+                         fnWeight,
+                         fdwItalic,
+                         fdwUnderline,
+                         fdwStrikeOut,
+                         fdwCharSet,
+                         fdwOutputPrecision,
+                         fdwClipPrecision,
+                         fdwQuality,
+                         fdwPitchAndFamily,
+                         astring);
+  if (astring != NULL)
+    FreeAsciiString(astring);
+
+  return(hFont);
 }
+
 //******************************************************************************
 //******************************************************************************
 HFONT WIN32API CreateFontIndirectA(const LOGFONTA *lplf)
@@ -94,6 +151,7 @@ ODINFUNCTION1(HFONT, CreateFontIndirectW,const LOGFONTW *, lplf)
 
   //memcpy(&afont, lplf, ((int)&afont.lfFaceName - (int)&afont));
   memcpy(&afont, lplf, sizeof(LOGFONTA));
+  memset(afont.lfFaceName, 0, LF_FACESIZE);
   UnicodeToAsciiN((WCHAR *)lplf->lfFaceName, afont.lfFaceName, LF_FACESIZE-1);
   hfont = CreateFontIndirectA(&afont);
   return(hfont);
