@@ -1,4 +1,4 @@
-# $Id: pdwin32.wat.tools,v 1.2 2000-08-29 21:38:25 sandervl Exp $
+# $Id: pdwin32.wat.tools,v 1.3 2000-09-27 22:25:53 bird Exp $
 # ODIN / win32os2 Project
 #
 # makefile for the build system tools and standard rules
@@ -37,7 +37,7 @@ MAKE_CMD    = $(MAKE_CMDLINE) -f makefile.os2
 #
 .ERASE
 .SUFFIXES:
-.SUFFIXES: .lst .res .obj .cpp .c .rc .asm .orc
+.SUFFIXES: .lst .res .obj .asm .orc .cpp .c .rc
 
 .obj: $(OBJDIR)
 .res: $(OBJDIR)
