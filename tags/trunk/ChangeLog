@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.1384 2001-04-27 19:31:16 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1385 2001-04-28 09:14:33 hugh Exp $ */
+
+ 2001-04-28: Markus Montkowski <mmontkowski@gmx.de|
+    - MSVFW32:  o Fixed ICOpen, check and correct fccType from VIDC to vidc.
+                  Videocodecs do load now.
 
  2001-04-27: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Call WH_GETMESSAGE hook handler from GetMessage and PeekMessage
