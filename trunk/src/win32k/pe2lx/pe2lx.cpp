@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.29 2001-07-09 08:13:34 bird Exp $
+/* $Id: pe2lx.cpp,v 1.30 2001-07-09 12:56:53 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -179,6 +179,7 @@ struct Pe2Lx::LieListEntry Pe2Lx::paLieList[] =
     {"OPENGL.DLL",                         "OPENGL32"},
     {"CRTDLL",                             "CRTDLL32"},
     {"CRTDLL.DLL",                         "CRTDLL32"},
+    {"MCICDA.DRV",                         "MCICDA.DLL"},
     {"WINSPOOL.DRV",                       "WINSPOOL.DLL"},
     {NULL,                                 NULL} /* end-of-list entry */
 };
