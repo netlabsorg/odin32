@@ -1,10 +1,15 @@
- /* $Id: ChangeLog,v 1.927 2000-05-03 22:34:01 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.928 2000-05-05 11:34:14 sandervl Exp $ */
+
+ 2000-05-05: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32:   Fixed window property functions (ported from Wine)
+                    The old ones used Open32 functions which no longer work
+                    due to atom api changes a few months ago.
 
  2000-05-04: Achim Hasenmueller <achimha@innotek.de>
-	- USER32: Applied fix to GetDCEx where the check to see if
-	          the window has its own DC was applying invalid
-	          style flags due to missing parantheses
-	          (reported by Oliver Braun)
+	- USER32:   Applied fix to GetDCEx where the check to see if
+  	            the window has its own DC was applying invalid
+	            style flags due to missing parantheses
+	            (reported by Oliver Braun)
 
  2000-05-04: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32:   Menu font from bold to normal again. Bold fonts are too
