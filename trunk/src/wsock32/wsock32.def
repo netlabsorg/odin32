@@ -1,8 +1,12 @@
-; $Id: wsock32.def,v 1.19 2000-03-24 19:28:10 sandervl Exp $
+; $Id: wsock32.def,v 1.20 2000-03-24 19:53:05 achimha Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY WSOCK32 INITINSTANCE
 DATA MULTIPLE NONSHARED
+
+IMPORTS
+  ; this is not in every so32dll.lib
+  winsockcleanupsockets = SO32DLL.WINSOCKCLEANUPSOCKETS
 
 
 EXPORTS
