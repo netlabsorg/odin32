@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.24 1999-12-04 00:04:19 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.25 1999-12-07 12:26:58 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -515,7 +515,7 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
 //   {
 //      WinSendMsg( hwnd, /* WM_DRAW */ 0x20D, (MPARAM)hps, MPVOID );
       //CB: subclassed window haven't got a frame
-      if (!wnd->isSubclassedOS2Wnd()) selectClientArea(wnd, pHps, &rect);
+//      if (!wnd->isSubclassedOS2Wnd()) selectClientArea(wnd, pHps, &rect);
 //   }
 
    if (hPS_ownDC == 0)
@@ -561,13 +561,13 @@ dprintf (("USER32: EndPaint(%x)", hwnd));
 
    if (!wnd) goto exit;
 
-   if (wnd->isOwnDC())
+   if(wnd->isOwnDC())
    {
        pDCData pHps = (pDCData)GpiQueryDCData((HPS)pPaint->hdc);
        if (pHps && (pHps->hdcType == TYPE_3))
        {
            removeClientArea (pHps);
-           WinEndPaint (pHps->hps);
+          WinEndPaint (pHps->hps);
        }
    }
    else

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.49 1999-12-05 16:37:59 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.50 1999-12-07 12:26:59 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -363,7 +363,8 @@ public:
 
          fakeOpen32WinBaseClass fakeWinBase;
 
-         BOOL   isOwnDC() { return (windowClass && windowClass->getStyle() & CS_OWNDC_W); }
+//         BOOL   isOwnDC() { return (windowClass && windowClass->getStyle() & CS_OWNDC_W); }
+         BOOL   isOwnDC() { return FALSE; }
          HDC    getOwnDC() { return ownDC; }
          void   setOwnDC(HDC hdc) { ownDC = hdc; }
 protected:
