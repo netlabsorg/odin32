@@ -1,4 +1,14 @@
- /* $Id: ChangeLog,v 1.393 1999-11-01 16:18:03 dengert Exp $ */
+ /* $Id: ChangeLog,v 1.394 1999-11-01 19:12:36 sandervl Exp $ */
+
+ 99-11-01: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Delete all process windows & classes in exitlist handler
+                  Set hwndInsertBehind to HWND_BOTTOM for group boxes
+                  (fixes problems when groupbox control is defined after
+                   controls inside it in dialog template)
+                  Mouse activate fix.
+	- WINMM: Return failure for waveOutGetDevCapsA/W when there's no
+                 audio hardware present.
+
 
  99-11-01: Daniela Engert <dani@ngrt.de>
 	- USER32: add WS_CLIPSIBLINGS to not-WS_GROUP style STATIC controls
