@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.34 1999-08-31 17:15:29 sandervl Exp $
+; $Id: KERNEL32.DEF,v 1.35 1999-09-02 17:12:32 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -1004,14 +1004,17 @@ EXPORTS
     HEAP_strdupAtoW            = _HEAP_strdupAtoW@12              @1246
     HEAP_strdupA               = _HEAP_strdupA@12                 @1247
     HEAP_strdupW               = _HEAP_strdupW@12                 @1248
+    WideCharToLocal            = _WideCharToLocal@12              @1249
+    LocalToWideChar            = _LocalToWideChar@12              @1250
 
-    VIRTUAL_MapFileA           = _VIRTUAL_MapFileA@8              @1249
-    VIRTUAL_MapFileW           = _VIRTUAL_MapFileW@8              @1250
+    VIRTUAL_MapFileA           = _VIRTUAL_MapFileA@8              @1251
+    VIRTUAL_MapFileW           = _VIRTUAL_MapFileW@8              @1252
 
-    OS2SetExceptionHandler   @1251
-    OS2UnsetExceptionHandler @1252
+    OS2SetExceptionHandler                                        @1253
+    OS2UnsetExceptionHandler                                      @1254
 
     __ct__12Win32MenuResFP10Win32ImageUlN22                       @1260
-    __ct__12Win32MenuResFP10Win32ImageUlN22Pc			  @1261
-    __ct__12Win32MenuResFUl					  @1262
+    __ct__12Win32MenuResFP10Win32ImageUlN22Pc                     @1261
+    __ct__12Win32MenuResFUl                                       @1262
     __ct__12Win32MenuResFPv                                       @1263
+
