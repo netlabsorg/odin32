@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.6 1999-10-04 09:56:01 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.7 1999-10-04 18:32:50 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -205,6 +205,7 @@ Win32Dialog::Win32Dialog(HINSTANCE hInst, LPCSTR dlgTemplate, HWND owner,
             ShowWindow( SW_SHOWNORMAL );    /* SW_SHOW doesn't always work */
             ::UpdateWindow( getWindowHandle() );
         }
+	SetLastError(0);
         dprintf(("********* DIALOG CREATED ************"));
         return;
     }
