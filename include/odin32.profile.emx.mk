@@ -1,4 +1,4 @@
-# $Id: odin32.profile.emx.mk,v 1.2 2001-10-01 01:23:14 bird Exp $
+# $Id: odin32.profile.emx.mk,v 1.3 2002-02-23 23:51:49 bird Exp $
 
 #
 # Odin32 API
@@ -16,9 +16,10 @@
 SOMLIB   = somtk.lib
 RTLLIB   =
 RTLLIB_O =
-#RTLLIB_NRE =
+RTLLIB_NRE =
 DLLENTRY = $(ODIN32_LIB)\dllentry.obj
 ODINCRT  = odincrtd
+LIB_DEMANGLE =
 
 
 #

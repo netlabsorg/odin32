@@ -1,4 +1,4 @@
-# $Id: odin32.profile.watn.mk,v 1.1 2001-10-01 01:19:57 bird Exp $
+# $Id: odin32.profile.watn.mk,v 1.2 2002-02-23 23:51:50 bird Exp $
 
 #
 # Odin32 API
@@ -22,6 +22,7 @@ RTLLIB_O = clib3r.lib plbrdll.lib mt7rdll.lib
 RTLLIB_NRE = clib3r.lib
 DLLENTRY = $(ODIN32_LIB)\dllentry.obj
 ODINCRT  = odincrtd
+LIB_DEMANGLE =
 
 
 #

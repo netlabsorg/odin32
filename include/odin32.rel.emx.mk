@@ -1,4 +1,4 @@
-# $Id: odin32.rel.emx.mk,v 1.6 2001-10-01 01:23:13 bird Exp $
+# $Id: odin32.rel.emx.mk,v 1.7 2002-02-23 23:51:50 bird Exp $
 
 #
 # Odin32 API
@@ -25,9 +25,10 @@ $(EMX)\lib\gcc.lib \
 $(EMX)\lib\end.lib
 
 RTLLIB_O = $(EMX)\lib\mt\c_import.lib $(RTLIB)
-#RTLLIB_NRE =
+RTLLIB_NRE =
 DLLENTRY = $(ODIN32_LIB)\dllentry.obj
 ODINCRT  = odincrtd
+LIB_DEMANGLE =
 
 
 #

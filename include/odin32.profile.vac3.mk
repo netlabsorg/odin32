@@ -1,4 +1,4 @@
-# $Id: odin32.profile.vac3.mk,v 1.7 2001-11-29 00:24:19 phaller Exp $
+# $Id: odin32.profile.vac3.mk,v 1.8 2002-02-23 23:51:49 bird Exp $
 
 #
 # Odin32 API
@@ -15,8 +15,8 @@ RTLLIB   = cppom30.lib
 RTLLIB_O = cppom30o.lib
 RTLLIB_NRE = cppon30.lib
 DLLENTRY = $(ODIN32_LIB)\dllentry.obj
-DEMANGLLIB = demangl.lib
 ODINCRT  = odincrtp
+LIB_DEMANGLE = demangl.lib
 
 
 #
