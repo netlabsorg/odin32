@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.45 2002-12-29 17:17:16 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.46 2003-01-01 14:29:45 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -906,8 +906,10 @@ VOID Win32BaseWindow::DrawCaption(HDC hdc,RECT *rect,BOOL active)
   HBITMAP memBmp,oldBmp;
 
   if(fOS2Look) {
-      if ((dwStyle & WS_SYSMENU) && !(dwExStyle & WS_EX_TOOLWINDOW) &&
-           fOS2Look != OS2_APPEARANCE_SYSMENU)
+      //Note: If no class icon *and* WS_EX_DLGMODALFRAME -> no system menu
+      if((dwStyle & WS_SYSMENU) && !(dwExStyle & WS_EX_TOOLWINDOW) &&
+         !(!windowClass->getIcon() && (dwExStyle & WS_EX_DLGMODALFRAME)) &&
+         fOS2Look != OS2_APPEARANCE_SYSMENU)
       {
          HICON hSysIcon = IconForWindow(ICON_SMALL);
 
@@ -985,7 +987,9 @@ VOID Win32BaseWindow::DrawCaption(HDC hdc,RECT *rect,BOOL active)
     hbitmapContextHelpD = LoadBitmapA(0,MAKEINTRESOURCEA(OBM_CONTEXTHELPD));
   }
 
-  if ((dwStyle & WS_SYSMENU) && !(dwExStyle & WS_EX_TOOLWINDOW))
+  //Note: If no class icon *and* WS_EX_DLGMODALFRAME -> no system menu
+  if((dwStyle & WS_SYSMENU) && !(dwExStyle & WS_EX_TOOLWINDOW) &&
+     !(!windowClass->getIcon() && (dwExStyle & WS_EX_DLGMODALFRAME)))
   {
     if (DrawSysButton(memDC,&r))
       r.left += GetSystemMetrics(SM_CYCAPTION) - 1;
@@ -1549,4 +1553,56 @@ BOOL WIN32API DrawCaptionTempW (HWND hwnd,HDC hdc,const RECT *rect,HFONT hFont,H
 
   return DrawCaptionTemp(hwnd,hdc,rect,hFont,hIcon,(LPWSTR)str,uFlags,TRUE);
 }
+#if 0
+//Control helpers
+/***********************************************************************
+ *           NC_GetSysPopupPos
+ */
+void NC_GetSysPopupPos( HWND hwnd, RECT* rect )
+{
+    if (IsIconic(hwnd)) GetWindowRect( hwnd, rect );
+    else
+    {
+#ifdef __WIN32OS2__
+        Win32BaseWindow *win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
+        if (!win32wnd) return;
 
+        win32wnd->GetSysPopupPos(rect);
+
+        RELEASE_WNDOBJ(win32wnd);
+#else
+        WND *wndPtr = WIN_FindWndPtr( hwnd );
+        if (!wndPtr) return;
+
+        NC_GetInsideRect( hwnd, rect );
+        OffsetRect( rect, wndPtr->rectWindow.left, wndPtr->rectWindow.top);
+        if (wndPtr->dwStyle & WS_CHILD)
+            ClientToScreen( GetParent(hwnd), (POINT *)rect );
+        if (TWEAK_WineLook == WIN31_LOOK) {
+            rect->right = rect->left + GetSystemMetrics(SM_CXSIZE);
+            rect->bottom = rect->top + GetSystemMetrics(SM_CYSIZE);
+        }
+        else {
+            rect->right = rect->left + GetSystemMetrics(SM_CYCAPTION) - 1;
+            rect->bottom = rect->top + GetSystemMetrics(SM_CYCAPTION) - 1;
+        }
+        WIN_ReleaseWndPtr( wndPtr );
+#endif
+    }
+}
+//*****************************************************************************
+//*****************************************************************************
+BOOL NC_DrawSysButton95 (HWND hwnd, HDC hdc, BOOL down)
+{
+    BOOL ret;
+
+    Win32BaseWindow *win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if (!win32wnd) return FALSE;
+
+    ret = win32wnd->DrawSysButton(hwnd, hdc);
+
+    RELEASE_WNDOBJ(win32wnd);
+
+    return ret;
+}
+#endif
