@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.267 1999-10-04 18:35:56 sandervl Exp $ */
+ /* $Id: changelog,v 1.268 1999-10-04 19:11:04 sandervl Exp $ */
 
  99-10-04: Patrick Haller <phaller@gmx.net>
 	- SHELL32\NEW: Compilation fix (indirectly included win32type.h)
@@ -12,6 +12,8 @@
  99-10-04: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Deleted dialog.cpp
                   Set last error to 0 if dialog creation succeeds.
+	- SHELL32: Removed nameid.h include in she.cpp & sh.cpp. Fixed makefile
+                   addition for export library (extra ".." for tool path)
 	- DPLAY, MSACM32: Compilation fix (indirectly included win32type.h)
 	- KERNEL32: Fixed getVersionStruct for PE & LX images (didn't copy
                     version data before)
