@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.72 2001-10-10 22:54:05 phaller Exp $ */
+/* $Id: HandleManager.cpp,v 1.73 2001-10-22 08:24:13 phaller Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -332,7 +332,7 @@ DWORD HMHandleSetUserData(ULONG  hHandle, ULONG dwUserData)
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-static ULONG _HMHandleQuery(HANDLE hHandle)
+static ULONG INLINE _HMHandleQuery(HANDLE hHandle)
 {
   if (hHandle > MAX_OS2_HMHANDLES)                  /* check the table range */
     return (INVALID_HANDLE_VALUE);             /* nope, ERROR_INVALID_HANDLE */
