@@ -1,7 +1,15 @@
- /* $Id: ChangeLog,v 1.811 2000-03-16 21:14:23 bird Exp $ */
+ /* $Id: ChangeLog,v 1.812 2000-03-17 04:36:38 bird Exp $ */
 
  2000-03-16: knut st. osmundsen <knut.stange.osmundse@pmsc.no>
-    - TOOLS\FASTDEP: Speed optimizations.
+    - TOOLS\FASTDEP:
+            Speed optimizations: using AVL trees, include dir caching,
+                dependencies stored in AVL tree until all files has been
+                processes, buffered write.
+            Cyclic dependency check.
+            All files but the objectfiles now should have fully qualified paths.
+
+    - INCLUDE\PDWIN32.TOOLS:
+            DEPEND: Enabled cyclic check.
 
  2000-03-16: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Fixed virtual keycode of return key
