@@ -1,4 +1,4 @@
-/* $Id: winmenu.cpp,v 1.2 1999-09-16 15:14:18 phaller Exp $ */
+/* $Id: winmenu.cpp,v 1.3 1999-09-19 18:33:32 sandervl Exp $ */
 
 /*
  * Win32 menu API functions for OS/2
@@ -235,8 +235,7 @@ HMENU WIN32API GetSubMenu(HWND hMenu, int  arg2)
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(HMENU,GetSystemMenu,HWND,hSystemWindow,
-                                  BOOL,bRevert)
+HMENU WIN32API GetSystemMenu(HWND hSystemWindow, BOOL bRevert)
 {
   dprintf(("USER32: GetSystemMenu not implemented correctly."));
   //Win32BaseWindow *window;

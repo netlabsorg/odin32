@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.2 1999-09-17 18:49:53 dengert Exp $ */
+/* $Id: win32wbase.cpp,v 1.3 1999-09-19 18:33:32 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1019,14 +1019,14 @@ ULONG Win32BaseWindow::MsgEraseBackGround(HDC hdc)
     HDC   hdcErase = hdc;
 
     if (hdcErase == 0)
-        hdcErase = O32_GetDC(OS2Hwnd);
+        hdcErase = GetDC(Win32Hwnd);
 
     if(isIcon)
         rc = SendInternalMessageA(WM_ICONERASEBKGND, hdcErase, 0);
     else
         rc = SendInternalMessageA(WM_ERASEBKGND, hdcErase, 0);
     if (hdc == 0)
-        O32_ReleaseDC(OS2Hwnd, hdcErase);
+        ReleaseDC(Win32Hwnd, hdcErase);
     return (rc);
 }
 //******************************************************************************
@@ -1464,7 +1464,11 @@ BOOL Win32BaseWindow::SetAccelTable(HACCEL hAccel)
 BOOL Win32BaseWindow::SetIcon(HICON hIcon)
 {
     dprintf(("Win32BaseWindow::SetIcon %x", hIcon));
-    return OSLibWinSetIcon(OS2HwndFrame, hIcon);
+    if(OSLibWinSetIcon(OS2HwndFrame, hIcon) == TRUE) {
+	SendInternalMessageA(WM_SETICON, hIcon, 0);
+	return TRUE;
+    }
+    return FALSE;
 }
 //******************************************************************************
 //******************************************************************************
