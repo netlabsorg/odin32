@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.5 1999-10-08 00:28:51 bird Exp $
+# $Id: Makefile,v 1.6 1999-10-14 01:25:37 bird Exp $
 #
 # Copyright 1998-1999 knut st. osmundsen
 #
@@ -160,25 +160,28 @@ OBJS  = object\devfirst.obj                 \
         object\stricmp.obj                  \
         object\yield.obj                    \
         object\vsprintf.obj                 \
+        object\vprintf.obj                  \
         object\ldr.obj                      \
         object\myldrClose.obj               \
         object\myldrOpen.obj                \
         object\myldrRead.obj                \
         object\myLDRQAppType.obj            \
-        object\lxSuper.obj                  \
-        object\lxFile.obj                   \
-        object\accelerator.obj              \
-        object\bitmap.obj                   \
-        object\cursor.obj                   \
-        object\cursorgrp.obj                \
-        object\dialog.obj                   \
-        object\icon.obj                     \
-        object\icongrp.obj                  \
-        object\menu.obj                     \
-        object\misc.obj                     \
-        object\pefile.obj                   \
-        object\rcdata.obj                   \
-        object\strings.obj                  \
+        object\pe2lx.obj
+#
+#        object\lxSuper.obj                  \
+#        object\lxFile.obj                   \
+#        object\accelerator.obj              \
+#        object\bitmap.obj                   \
+#        object\cursor.obj                   \
+#        object\cursorgrp.obj                \
+#        object\dialog.obj                   \
+#        object\icon.obj                     \
+#        object\icongrp.obj                  \
+#        object\menu.obj                     \
+#        object\misc.obj                     \
+#        object\pefile.obj                   \
+#        object\rcdata.obj                   \
+#        object\strings.obj                  \
 
 
 OBJSINIT =                                  \
@@ -186,11 +189,11 @@ OBJSINIT =                                  \
         object\d32init.obj                  \
         object\probkrnl.obj
 
-
+LIBS =  \
 !if "$(CCENV)" == "VAC36"
-LIBS  = $(VACPATH)\lib\cpprni36.lib         \
+        $(VACPATH)\lib\cpprni36.lib         \
 !else
-LIBS  = $(VACPATH)\lib\cppon30.lib          \
+        $(VACPATH)\lib\cppon30.lib          \
 !endif
         $(DDKPATH)\lib\os2286.lib
 
@@ -207,8 +210,8 @@ ProbKrnl.exe: dev16\ProbKrnl.c $(WIN32KBASE)\include\sym.h \
     $(CC16) -c -W4 -Asfw -G2s -Zp -Zl -nologo -Fo$@ -Fa -Zi -Od -Lp \
         $(CDEFINES16) -DDEBUGR3 -Fa$(WIN32KLIST)\$(*B).s     \
         -Foprobkrnl.obj $(CINCLUDES16) dev16\probkrnl.c
-    $(MSCPATH)\binb\link /NOD /MAP:FULL /CO /pmtype:vio probkrnl.obj, probkrnl.exe, probkrnl.map, $(TOOLKIT)\lib\os2286.lib + $(MSCPATH)\lib\clibcr.lib;
-#    link /NOD /MAP:FULL /CO /pmtype:vio probkrnl.obj, probkrnl.exe, probkrnl.map, f:\toolkit\lib\os2286.lib + $(MSCPATH)\lib\clibcep.lib;
+    link /NOD /MAP:FULL /CO /pmtype:vio probkrnl.obj, probkrnl.exe, probkrnl.map, f:\toolkit\lib\os2286.lib + $(MSCPATH)\lib\clibcep.lib;
+#     $(MSCPATH)\binb\link /NOD /MAP:FULL /CO /pmtype:vio probkrnl.obj, probkrnl.exe, probkrnl.map, $(TOOLKIT)\lib\os2286.lib + $(MSCPATH)\lib\clibcr.lib;
 
 
 
@@ -269,10 +272,10 @@ win32k.vpj:
 # Cleanup
 ################################################################################
 clean:
-   @$(ECHO) cleaning....
-   @$(ECHO) #do nmake depend > .depend
-   @$(RM) $(NAME).sys *.lib $(WIN32KOBJ)\* $(WIN32KLIST)\* *.obj *.exe
-   @$(RM) *.sym *.map
+   $(ECHO) cleaning....
+   $(ECHO) #do nmake depend > .depend
+   $(RM) $(NAME).sys *.lib $(WIN32KOBJ)\* $(WIN32KLIST)\* *.obj *.exe
+   $(RM) *.sym *.map
 #  @$(RM) $(PDWIN32_BIN)\$(NAME).sys
 
 
