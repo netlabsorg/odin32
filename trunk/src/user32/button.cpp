@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.2 1999-09-20 16:19:54 cbratschi Exp $ */
+/* $Id: button.cpp,v 1.3 1999-09-20 19:17:57 sandervl Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
@@ -611,9 +611,9 @@ static void PB_Paint( HWND hwnd, HDC hDC, WORD action )
      * method.
      */
     BUTTON_DrawPushButton(hwnd,
-                          hDC,
-                          action,
-                          bHighLighted);
+			  hDC,
+			  action,
+			  bHighLighted);
 }
 
 /**********************************************************************
@@ -648,7 +648,7 @@ static void BUTTON_DrawPushButton(
     if ((dwStyle & 0x000f) == BS_DEFPUSHBUTTON)
     {
         Rectangle(hDC, rc.left, rc.top, rc.right, rc.bottom);
-        InflateRect( &rc, -1, -1 );
+	InflateRect( &rc, -1, -1 );
     }
 
     UINT uState = DFCS_BUTTONPUSH;
@@ -692,7 +692,7 @@ static void BUTTON_DrawPushButton(
             GetSysColor(COLOR_GRAYTEXT)==lb.lbColor)
             /* don't write gray text on gray background */
             PaintGrayOnGray( hDC,infoPtr->hFont,&rc,text,
-                               DT_CENTER | DT_VCENTER );
+			       DT_CENTER | DT_VCENTER );
         else
         {
             SetTextColor( hDC, (dwStyle & WS_DISABLED) ?
@@ -701,86 +701,86 @@ static void BUTTON_DrawPushButton(
             DrawTextA( hDC, text, -1, &rc,
                          DT_SINGLELINE | DT_CENTER | DT_VCENTER );
             /* do we have the focus?
-             * Win9x draws focus last with a size prop. to the button
-             */
+	     * Win9x draws focus last with a size prop. to the button
+	     */
         }
         free(text);
     }
     if ( ((dwStyle & BS_ICON) || (dwStyle & BS_BITMAP) ) &&
-         (infoPtr->hImage != NULL) )
+	 (infoPtr->hImage != NULL) )
     {
-        int yOffset, xOffset;
-        int imageWidth, imageHeight;
+	int yOffset, xOffset;
+	int imageWidth, imageHeight;
 
-        /*
-         * We extract the size of the image from the handle.
-         */
-        if (dwStyle & BS_ICON)
-        {
-            ICONINFO iconInfo;
-            BITMAP   bm;
+	/*
+	 * We extract the size of the image from the handle.
+	 */
+	if (dwStyle & BS_ICON)
+	{
+	    ICONINFO iconInfo;
+	    BITMAP   bm;
 
-            GetIconInfo((HICON)infoPtr->hImage, &iconInfo);
-            GetObjectA (iconInfo.hbmColor, sizeof(BITMAP), &bm);
-
-            imageWidth  = bm.bmWidth;
-            imageHeight = bm.bmHeight;
+	    GetIconInfo((HICON)infoPtr->hImage, &iconInfo);
+	    GetObjectA (iconInfo.hbmColor, sizeof(BITMAP), &bm);
+	
+	    imageWidth  = bm.bmWidth;
+	    imageHeight = bm.bmHeight;
 
             DeleteObject(iconInfo.hbmColor);
             DeleteObject(iconInfo.hbmMask);
 
-        }
-        else
-        {
-            BITMAP   bm;
+	}
+	else
+	{
+	    BITMAP   bm;
 
-            GetObjectA (infoPtr->hImage, sizeof(BITMAP), &bm);
+	    GetObjectA (infoPtr->hImage, sizeof(BITMAP), &bm);
+	
+	    imageWidth  = bm.bmWidth;
+	    imageHeight = bm.bmHeight;
+	}
 
-            imageWidth  = bm.bmWidth;
-            imageHeight = bm.bmHeight;
-        }
+	/* Center the bitmap */
+	xOffset = (((rc.right - rc.left) - 2*xBorderOffset) - imageWidth ) / 2;
+	yOffset = (((rc.bottom - rc.top) - 2*yBorderOffset) - imageHeight) / 2;
 
-        /* Center the bitmap */
-        xOffset = (((rc.right - rc.left) - 2*xBorderOffset) - imageWidth ) / 2;
-        yOffset = (((rc.bottom - rc.top) - 2*yBorderOffset) - imageHeight) / 2;
-
-        /* If the image is too big for the button then create a region*/
+	/* If the image is too big for the button then create a region*/
         if(xOffset < 0 || yOffset < 0)
-        {
+	{
             HRGN hBitmapRgn = NULL;
             hBitmapRgn = CreateRectRgn(
                 rc.left + xBorderOffset, rc.top +yBorderOffset,
                 rc.right - xBorderOffset, rc.bottom - yBorderOffset);
             SelectClipRgn(hDC, hBitmapRgn);
             DeleteObject(hBitmapRgn);
-        }
+	}
 
-        /* Let minimum 1 space from border */
-        xOffset++, yOffset++;
+	/* Let minimum 1 space from border */
+	xOffset++, yOffset++;
 
-        /*
-         * Draw the image now.
-         */
-        if (dwStyle & BS_ICON)
-        {
-            DrawIcon(hDC,
+	/*
+	 * Draw the image now.
+	 */
+	if (dwStyle & BS_ICON)
+	{
+  	    DrawIcon(hDC,
                 rc.left + xOffset, rc.top + yOffset,
-                     (HICON)infoPtr->hImage);
-        }
-        else
+		     (HICON)infoPtr->hImage);
+	}
+	else
         {
-            HDC hdcMem;
+	    HDC hdcMem;
 
-            hdcMem = CreateCompatibleDC (hDC);
-            SelectObject (hdcMem, (HBITMAP)infoPtr->hImage);
-            BitBlt(hDC,
-                   rc.left + xOffset,
-                   rc.top + yOffset,
-                   imageWidth, imageHeight,
-                   hdcMem, 0, 0, SRCCOPY);
-
-            DeleteDC (hdcMem);
-        }
+	    hdcMem = CreateCompatibleDC (hDC);
+	    SelectObject (hdcMem, (HBITMAP)infoPtr->hImage);
+	    BitBlt(hDC,
+		   rc.left + xOffset,
+		   rc.top + yOffset,
+		   imageWidth, imageHeight,
+		   hdcMem, 0, 0, SRCCOPY);
+	
+	    DeleteDC (hdcMem);
+	}
 
         if(xOffset < 0 || yOffset < 0)
         {
@@ -829,7 +829,6 @@ static void PaintGrayOnGray(HDC hDC,HFONT hFont,RECT *rc,char *text,
     RECT rect,rc2;
 
     rect=*rc;
-    SetBkMode(hDC,TRANSPARENT);
     DrawTextA( hDC, text, -1, &rect, DT_SINGLELINE | DT_CALCRECT);
     /* now text width and height are in rect.right and rect.bottom */
     rc2=rect;
@@ -875,13 +874,13 @@ static void CB_Paint(HWND hwnd,HDC hDC,WORD action)
     if (infoPtr->hImage!=NULL)
     {
         BOOL bHighLighted = ((infoPtr->state & BUTTON_HIGHLIGHTED) ||
-                             (infoPtr->state & BUTTON_CHECKED));
+			     (infoPtr->state & BUTTON_CHECKED));
 
         BUTTON_DrawPushButton(hwnd,
-                              hDC,
-                              action,
-                              bHighLighted);
-        return;
+			      hDC,
+			      action,
+			      bHighLighted);
+	return;
     }
 
     textLen = 0;
@@ -895,6 +894,9 @@ static void CB_Paint(HWND hwnd,HDC hDC,WORD action)
      * BUTTON_SEND_CTLCOLOR() is even worse since it returns 0 in this
      * particular case and the background is not painted at all.
      */
+    //SvL: 20/09/99: This works well for us. Now the background of
+    //               the dialog button strings in Solitaire is gray
+    SendMessageA(GetParent(hwnd),WM_CTLCOLORBTN,hDC,hwnd);
 
     hBrush = GetSysColorBrush(COLOR_BTNFACE);
 
@@ -950,7 +952,6 @@ static void CB_Paint(HWND hwnd,HDC hDC,WORD action)
           } else {
             if (dwStyle & WS_DISABLED)
                 SetTextColor( hDC, GetSysColor(COLOR_GRAYTEXT) );
-            SetBkMode(hDC,TRANSPARENT);
             DrawTextA( hDC, text, -1, &rtext,
                          DT_SINGLELINE | DT_VCENTER );
             textLen = 0; /* skip DrawText() below */
@@ -1041,7 +1042,6 @@ static void GB_Paint(HWND hwnd,HDC hDC,WORD action)
         if (dwStyle & WS_DISABLED)
             SetTextColor( hDC, GetSysColor(COLOR_GRAYTEXT) );
         rc.left += 10;
-        SetBkMode(hDC,TRANSPARENT);
         DrawTextA( hDC, text, -1, &rc, DT_SINGLELINE | DT_NOCLIP );
         free(text);
     }

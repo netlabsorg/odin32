@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.3 1999-09-19 18:33:32 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.4 1999-09-20 19:17:58 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1083,12 +1083,25 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
     case WM_NCCREATE:
         return(TRUE);
 
+    //SvL: Set background color to default button color (not window (white))
+    case WM_CTLCOLORBTN:
+         SetBkColor((HDC)wParam, GetSysColor(COLOR_BTNFACE));
+         SetTextColor((HDC)wParam, GetSysColor(COLOR_WINDOWTEXT));
+         return GetSysColorBrush(COLOR_BTNFACE);
+	
+    //SvL: Set background color to default dialog color if window is dialog
+    case WM_CTLCOLORDLG:
+    case WM_CTLCOLORSTATIC:
+	 if(IsDialog()) {
+         	SetBkColor((HDC)wParam, GetSysColor(COLOR_BTNFACE));
+         	SetTextColor((HDC)wParam, GetSysColor(COLOR_WINDOWTEXT));
+         	return GetSysColorBrush(COLOR_BTNFACE);
+	 }
+	 //no break
+
     case WM_CTLCOLORMSGBOX:
     case WM_CTLCOLOREDIT:
     case WM_CTLCOLORLISTBOX:
-    case WM_CTLCOLORBTN:
-    case WM_CTLCOLORDLG:
-    case WM_CTLCOLORSTATIC:
     case WM_CTLCOLORSCROLLBAR:
          SetBkColor((HDC)wParam, GetSysColor(COLOR_WINDOW));
          SetTextColor((HDC)wParam, GetSysColor(COLOR_WINDOWTEXT));
