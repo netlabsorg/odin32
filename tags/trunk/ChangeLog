@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1461 2001-05-30 18:33:00 phaller Exp $ */
+/* $Id: ChangeLog,v 1.1462 2001-05-30 18:36:35 phaller Exp $ */
 
  2001-05-30: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o further performance improvement of hashtables
