@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.45 2000-09-03 20:39:37 bird Exp $
+# $Id: Makefile,v 1.46 2000-09-08 14:49:22 bird Exp $
 #
 # Win32k makefile.
 #
@@ -120,14 +120,14 @@ AINCLUDES  = -Fdi:$(WIN32KINCLUDE) \
 ################################################################################
 # SUFFIXES AND INFERENCE RULES
 ################################################################################
-.SUFFIXES: .obj .cpp .c .asm
+.SUFFIXES: .obj .cpp .c .asm .c .obj_e
 
 {dev16}.c.obj:
-    @$(ECHO) compiling 16bit: $< ($@)
+    @$(ECHO) compiling 16bit: $<
     $(CC16) -c $(CFLAGS16) $(CDEFINES16) $(CINCLUDES16) -Fo$(WIN32KOBJ)\$(*B).obj -Fa$(WIN32KLIST)\$(*B).s $<
 
 {dev16}.c.obj_init:
-    @$(ECHO) compiling 16bit: $< ($@)
+    @$(ECHO) compiling 16bit: $<
     $(CC16) -c $(CFLAGS16) $(CDEFINES16) $(CINCLUDES16) /NTCODE16_INIT /NDDATA16_INIT -Fo$(WIN32KOBJ)\$(*B).obj_init -Fa$(WIN32KLIST)\$(*B).s $<
     $(CP) $@ $@.obj
 
@@ -339,6 +339,7 @@ OBJS  =\
     $(WIN32KOBJ)\myLDRQAppType.obj \
     $(WIN32KOBJ)\myldrEnum32bitRelRecs.obj \
     $(WIN32KOBJ)\myldrOpenPath.obj \
+    $(WIN32KOBJ)\myldrSetVMflags.obj \
     $(WIN32KOBJ)\OS2KTCB.obj \
     $(WIN32KOBJ)\OS2KPTDA.obj \
     $(WIN32KOBJ)\pe2lx.obj \
@@ -401,6 +402,7 @@ TSTOBJS =\
     $(WIN32KOBJ)\myLDRQAppType.obj \
     $(WIN32KOBJ)\myldrEnum32bitRelRecs.obj \
     $(WIN32KOBJ)\myldrOpenPath.obj \
+    $(WIN32KOBJ)\myldrSetVMflags.obj \
     $(WIN32KOBJ)\OS2KTCB.obj \
     $(WIN32KOBJ)\OS2KPTDA.obj \
     $(WIN32KOBJ)\pe2lx.obj \
@@ -424,49 +426,31 @@ TSTLASTOBJ = $(LASTOBJ)
 TSTLIBS = $(LIBS)
 
 
-
-
 ################################################################################
-# SPECIAL RULES - Testing
+# extract.exe rule.
 ################################################################################
-Probkrnl.exe: $(WIN32KBIN)\ProbKrnl.exe
-    $(CP) $** $@
-$(WIN32KBIN)\ProbKrnl.exe: dev16\ProbKrnl.c dev16\symdb.c dev16\vprntf16.c \
-              $(WIN32KINCLUDE)\sym.h \
-              $(WIN32KINCLUDE)\probKrnl.h
-    $(CC16) -c -W3 -Asfw -G2s -Zp -Zl -nologo -Fa -Zi -Od -Lp \
-        -DDEBUG -DDEBUGR3 -Fa$(WIN32KLIST)\$(*B)_p.s     \
-        -Fo$(WIN32KOBJ)\probkrnl_p.obj $(CINCLUDES16) dev16\probkrnl.c
-    $(CC16) -c -W3 -Asfw -G2s -Zp -Zl -nologo -Fa -Zi -Od -Lp \
-        -DDEBUG -DDEBUGR3 -Fa$(WIN32KLIST)\$(*B)_p.s     \
-        -Fo$(WIN32KOBJ)\symdb_p.obj $(CINCLUDES16) dev16\symdb.c
-    $(CC16) -c -W3 -Asfw -G2s -Zp -Zl -nologo -Fa -Zi -Od -Lp \
-        -DDEBUG -DDEBUGR3 -Fa$(WIN32KLIST)\$(*B)_p.s     \
-        -Fo$(WIN32KOBJ)\vprntf16_p.obj $(CINCLUDES16) dev16\vprntf16.c
-    link /NOD /MAP:FULL /CO /pmtype:vio \
-        $(WIN32KOBJ)\probkrnl_p.obj + $(WIN32KOBJ)\symdb_p.obj + $(WIN32KOBJ)\vprntf16_p.obj, \
-        $@, $(WIN32KBIN)\probkrnl.map, \
-        $(TOOLKIT)\lib\os2286.lib + $(MSCPATH)\lib\clibcep.lib;
+EXTRACTOBJS = \
+$(WIN32KOBJ)\extract.obj_e \
+$(WIN32KOBJ)\probkrnl.obj_e \
+$(WIN32KOBJ)\d16globl.obj_e \
+$(WIN32KOBJ)\vprntf16.obj_e
+
+{dev16}.c.obj_e:
+    @$(ECHO) compiling 16bit (extract): $<
+    @$(CC16) -c -W3 -Asfw -G2s -Zp -Zl -nologo -Fo$@ -Fa -Zi -Od -Lp -DDEBUG -DEXTRACT \
+        -Fa$(WIN32KLIST)\$(*B)_e.s -Fo$(WIN32KOBJ)\$(@B).obj_e $(CINCLUDES16) $<
+
+$(WIN32KBIN)\extract.exe: $(EXTRACTOBJS)
+    $(LD) $(LFLAGS) /pmtype:vio @<<$(WIN32KOBJ)\$(@B).lnk
+        /OUT:$@
+        /MAP:$(WIN32KBIN)\$(@B).map
+        $(EXTRACTOBJS)
+        $(TOOLKIT)\lib\os2286.lib
+        $(MSCPATH)\lib\clibcep.lib
+<<keep
 
 extract.exe: $(WIN32KBIN)\extract.exe
     $(CP) $** $@
-$(WIN32KBIN)\extract.exe: dev16\ProbKrnl.c dev16\vprntf16.c \
-             $(WIN32KINCLUDE)\sym.h \
-             $(WIN32KINCLUDE)\probKrnl.h
-    $(CC16) -c -W3 -Asfw -G2s -Zp -Zl -nologo -Fo$@ -Fa -Zi -Od -Lp \
-        -DDEBUG -DEXTRACT -Fa$(WIN32KLIST)\$(*B)_e.s     \
-        -Fo$(WIN32KOBJ)\probkrnl_e.obj $(CINCLUDES16) dev16\probkrnl.c
-    $(CC16) -c -W3 -Asfw -G2s -Zp -Zl -nologo -Fo$@ -Fa -Zi -Od -Lp \
-        -DDEBUG -DEXTRACT -Fa$(WIN32KLIST)\$(*B)_e.s     \
-        -Fo$(WIN32KOBJ)\vprntf16_e.obj $(CINCLUDES16) dev16\vprntf16.c
-    $(CC16) -c -W3 -Asfw -G2s -Zp -Zl -nologo -Fo$@ -Fa -Zi -Od -Lp \
-        -DDEBUG -DEXTRACT -Fa$(WIN32KLIST)\$(*B)_e.s     \
-        -Fo$(WIN32KOBJ)\d16globl_e.obj $(CINCLUDES16) dev16\d16globl.c
-    link /NOD /MAP:FULL /CO /pmtype:vio \
-        $(WIN32KOBJ)\probkrnl_e.obj + $(WIN32KOBJ)\vprntf16_e.obj + $(WIN32KOBJ)\d16globl_e.obj, \
-        $@, $(WIN32KBIN)\$(*B).map, \
-        $(TOOLKIT)\lib\os2286.lib + $(MSCPATH)\lib\clibcep.lib;
-
 
 
 ################################################################################
@@ -659,9 +643,9 @@ dep:
         $(WIN32KINCLUDE)\*.h
     $(PDWIN32_TOOLS)\fastdep -a+ -objobj_tst -o$$(WIN32KOBJ) $(CINCLUDES) misc\*.c* ldr\*.c* \
         dev32\*.c* pe2lx\*.c* k32\*.c* lib\*.c elf2lx\*.c* test\*.c*
-    $(PDWIN32_TOOLS)\fastdep -a+ -o$$(WIN32KOBJ) $(CINCLUDES16) dev16\*.c*
     $(PDWIN32_TOOLS)\fastdep -a+ -o$$(WIN32KOBJ) -I$(WIN32KINCLUDE) \
         -I$(DDKPATH)\inc dev32\*.asm ldr\*.asm misc\*.asm test\*.asm include\*.inc
+    $(PDWIN32_TOOLS)\fastdep -a+ -obr- $(CINCLUDES16) dev16\*.c*
     cd pe2lx
     $(MAKE_CMD) dep
     cd ..\lib
