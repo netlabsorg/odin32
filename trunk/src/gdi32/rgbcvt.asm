@@ -1,4 +1,4 @@
-; $Id: rgbcvt.asm,v 1.1 2000-02-03 10:23:25 dengert Exp $
+; $Id: rgbcvt.asm,v 1.2 2000-02-03 18:06:36 achimha Exp $
 ; Copyright 2000 Daniela Engert (dani@ngrt.de)
 
 	.386p
@@ -7,9 +7,9 @@
 
 ; void _Optlink RGB555to565 (WORD *dest, WORD *src, ULONG num);
 
-	PUBLIC ?RGB555to565
+	PUBLIC RGB555to565
 
-?RGB555to565 PROC NEAR
+RGB555to565 PROC NEAR
 
 	PUSH	ESI
 	PUSH	EDI
