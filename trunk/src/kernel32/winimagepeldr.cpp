@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.100 2002-07-24 11:29:23 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.101 2002-07-26 10:46:56 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -742,6 +742,7 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
  ULONG    offset, size, sectionsize, protflags, fileoffset, range, attr;
  ULONG    ulNewPos, ulRead, orgVirtAddress = virtAddress;
  APIRET   rc;
+ BOOL     fCriticalSection = FALSE;
 
     dprintf((LOG, "Win32PeLdrImage::commitPage %x %d %d", virtAddress, fWriteAccess, fPageCmd));
     if(virtAddress == 0) {
@@ -795,17 +796,25 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
     if(fPageCmd == COMPLETE_SECTION && (section && section->type == SECTION_DEBUG)) {//ignore
         return TRUE;
     }
+    rc = DosEnterCritSec();
+    if(rc) {
+        dprintf((LOG, "DosEnterCritSec failed with rc %d", rc));
+        goto fail;
+    }
+    //tell fail handler to call DosExitCritSec
+    fCriticalSection = TRUE;
+
     //Check range of pages with the same attributes starting at virtAddress
     //(some pages might already have been loaded)
     range = sectionsize;
     rc = DosQueryMem((PVOID)virtAddress, &range, &attr);
     if(rc) {
         dprintf((LOG, "Win32PeLdrImage::commitPage: DosQueryMem for %x returned %d", virtAddress, rc));
-        return FALSE;
+        goto fail;
     }
     if(attr & PAG_COMMIT) {
         dprintf((LOG, "Win32PeLdrImage::commitPage: Memory at 0x%x already committed!", virtAddress));
-        return FALSE;
+        goto fail;
     }
 
     if(fPageCmd == SINGLE_PAGE) {
@@ -823,20 +832,13 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
     sectionsize = min(sectionsize, range);
 
     if(size && fileoffset != -1) {
-        rc = DosEnterCritSec();
-        if(rc) {
-            dprintf((LOG, "DosEnterCritSec failed with rc %d", rc));
-            goto fail;
-        }
         rc = DosSetMem((PVOID)virtAddress, sectionsize, PAG_READ|PAG_WRITE|PAG_COMMIT);
         if(rc) {
-            DosExitCritSec();
             dprintf((LOG, "Win32PeLdrImage::commitPage: DosSetMem failed (%d)!", rc));
             goto fail;
         }
 
         if(DosSetFilePtr(hFile, ulPEOffset+fileoffset, FILE_BEGIN, &ulNewPos) == -1) {
-            DosExitCritSec();
             dprintf((LOG, "Win32PeLdrImage::commitPage: DosSetFilePtr failed for 0x%x!", fileoffset));
             goto fail;
         }
@@ -849,49 +851,40 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
         rc = DosRead(hFile, (PVOID)virtAddress, size, &ulRead);
 #endif
         if(rc) {
-            DosExitCritSec();
             dprintf((LOG, "Win32PeLdrImage::commitPage: DosRead failed for 0x%x %x %x %x (rc=%d)!", virtAddress, size, ulRead, fileoffset, rc));
             goto fail;
         }
         if(ulRead != size) {
-            DosExitCritSec();
             dprintf((LOG, "Win32PeLdrImage::commitPage: DosRead failed to read %x (%x) bytes at %x for 0x%x!", size, ulRead, fileoffset, virtAddress));
             goto fail;
         }
         setFixups(virtAddress, sectionsize);
 
         rc = DosSetMem((PVOID)virtAddress, sectionsize, protflags);
-        DosExitCritSec();
         if(rc) {
             dprintf((LOG, "Win32PeLdrImage::commitPage: DosSetMem failed (%d)!", rc));
             goto fail;
         }
     }
     else {
-        rc = DosEnterCritSec();
-        if(rc) {
-            dprintf((LOG, "DosEnterCritSec failed with rc %d", rc));
-            goto fail;
-        }
-
         rc = DosSetMem((PVOID)virtAddress, sectionsize, PAG_READ|PAG_WRITE|PAG_COMMIT);
         if(rc) {
-            DosExitCritSec();
             dprintf((LOG, "Win32PeLdrImage::commitPage: DosSetMem failed (%d)!", rc));
             goto fail;
         }
         setFixups(virtAddress, sectionsize);
 
         rc = DosSetMem((PVOID)virtAddress, sectionsize, protflags);
-        DosExitCritSec();
         if(rc) {
             dprintf((LOG, "Win32PeLdrImage::commitPage: DosSetMem failed (%d)!", rc));
             goto fail;
         }
     }
+    DosExitCritSec();
     return TRUE;
 
 fail:
+    if(fCriticalSection) DosExitCritSec();
     return FALSE;
 }
 //******************************************************************************
