@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.55 2000-09-08 04:31:48 phaller Exp $ */
+/* $Id: gdi32.cpp,v 1.56 2000-10-16 22:26:53 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -1052,10 +1052,10 @@ BOOL WIN32API PolyPolyline( HDC hdc, const POINT * lppt, const DWORD * lpdwPolyP
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API Polygon( HDC arg1, const POINT * arg2, int  arg3)
+BOOL WIN32API Polygon( HDC hdc, const POINT *lpPoints, int count)
 {
-    dprintf(("GDI32: Polygon"));
-    return O32_Polygon(arg1, arg2, arg3);
+    dprintf(("GDI32: Polygon %x %x %d", hdc, lpPoints, count));
+    return O32_Polygon(hdc, lpPoints, count);
 }
 //******************************************************************************
 //******************************************************************************
