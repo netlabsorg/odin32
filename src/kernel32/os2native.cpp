@@ -1,4 +1,4 @@
-/* $Id: os2native.cpp,v 1.4 1999-06-20 12:46:09 sandervl Exp $ */
+/* $Id: os2native.cpp,v 1.5 1999-08-22 11:11:10 sandervl Exp $ */
 
 /*
  * Misc procedures
@@ -51,13 +51,28 @@ ULONG commit = 0, reserve = 0;
 //******************************************************************************
 //******************************************************************************
 LPVOID WIN32API VirtualAlloc(LPVOID lpvAddress, DWORD cbSize, DWORD fdwAllocationType,
-                                 DWORD fdwProtect)
+                             DWORD fdwProtect)
 {
  PVOID Address = lpvAddress;
- ULONG flag = 0;
+ ULONG flag = 0, base;
  APIRET rc;
 
   dprintf(("VirtualAlloc at %X; %d bytes, fAlloc %d, fProtect %d\n", (int)lpvAddress, cbSize, fdwAllocationType, fdwProtect));
+
+  if (cbSize > 0x7fc00000)  /* 2Gb - 4Mb */
+  {
+	dprintf(("VirtualAlloc: size too large"));
+//        SetLastError( ERROR_OUTOFMEMORY );
+        return NULL;
+  }
+
+  if (!(fdwAllocationType & (MEM_COMMIT | MEM_RESERVE)) ||
+       (fdwAllocationType & ~(MEM_COMMIT | MEM_RESERVE)))
+  {
+	dprintf(("VirtualAlloc: Invalid parameter"));
+//        SetLastError( ERROR_INVALID_PARAMETER );
+        return NULL;
+  }
 
   if(fdwAllocationType & MEM_COMMIT) {
         dprintf(("VirtualAlloc: commit\n"));
@@ -116,9 +131,10 @@ LPVOID WIN32API VirtualAlloc(LPVOID lpvAddress, DWORD cbSize, DWORD fdwAllocatio
     rc = DosAllocMem(&Address, cbSize, flag | flAllocMem );
   }
 
-//TODO: Set last error in case rc != 0
+  //TODO: Set last error in case rc != 0
   if(rc) {
         dprintf(("DosSetMem returned %d\n", rc));
+//        SetLastError( ERROR_OUTOFMEMORY );
         return(NULL);
   }
 

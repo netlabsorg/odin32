@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.16 1999-08-18 21:54:26 phaller Exp $ */
+/* $Id: KERNEL32.CPP,v 1.17 1999-08-22 11:11:09 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -936,7 +936,7 @@ BOOL WIN32API FlushInstructionCache(     /*PLF Mon  98-02-09 23:56:49 : STUB STU
 //******************************************************************************
 VOID WIN32API UninitializeCriticalSection(CRITICAL_SECTION * lpcsCriticalSection)
 {
-  dprintf(("KERNEL32:  UninitializeCriticalSection\n"));
+  dprintf(("KERNEL32:  UninitializeCriticalSection NOT IMPLEMENTED\n"));
 }
 
 int WIN32API GetNumberFormatA(LCID     Locale,
