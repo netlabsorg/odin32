@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.62 1999-12-20 16:45:17 cbratschi Exp $ */
+/* $Id: user32.cpp,v 1.63 1999-12-24 18:39:11 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -128,7 +128,7 @@ BOOL WIN32API EqualRect( const RECT *lprc1, const RECT *lprc2)
 //******************************************************************************
 BOOL WIN32API InflateRect( PRECT lprc, int dx, int  dy)
 {
-    dprintf(("USER32:  InflateRect\n"));
+    dprintf2(("USER32:  InflateRect\n"));
     if (!lprc)
     {
       SetLastError(ERROR_INVALID_PARAMETER);
@@ -1621,42 +1621,6 @@ BOOL WIN32API AnyPopup(VOID)
 //******************************************************************************
 //******************************************************************************
 /*****************************************************************************
- * Name      : int WIN32API GetWindowRgn
- * Purpose   : The GetWindowRgn function obtains a copy of the window region of a window.
- * Parameters: HWND hWnd handle to window whose window region is to be obtained
- *             HRGN hRgn handle to region that receives a copy of the window region
- * Variables :
- * Result    : NULLREGION, SIMPLEREGION, COMPLEXREGION, ERROR
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-int WIN32API GetWindowRgn (HWND hWnd,
-                              HRGN hRgn)
-{
-  dprintf(("USER32:GetWindowRgn (%08xh,%08x) not implemented.\n",
-         hWnd,
-         hRgn));
-  //Attention: Win32 hwnd handle!
-
-  return (NULLREGION);
-}
-//******************************************************************************
-//******************************************************************************
-#if 0
-BOOL WIN32API InvalidateRgn( HWND hWnd, HRGN hRgn, BOOL bErase)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  InvalidateRgn\n");
-#endif
-    hWnd = Win32Window::Win32ToOS2Handle(hWnd);
-
-    return O32_InvalidateRgn(hWnd,hRgn,bErase);
-}
-#endif
-/*****************************************************************************
  * Name      : BOOL WIN32API PaintDesktop
  * Purpose   : The PaintDesktop function fills the clipping region in the
  *             specified device context with the desktop pattern or wallpaper.
@@ -1676,58 +1640,6 @@ BOOL WIN32API PaintDesktop(HDC hdc)
          hdc));
 
   return (FALSE);
-}
-/*****************************************************************************
- * Name      : int WIN32API SetWindowRgn
- * Purpose   : The SetWindowRgn function sets the window region of a window. The
- *             window region determines the area within the window where the
- *             operating system permits drawing. The operating system does not
- *             display any portion of a window that lies outside of the window region
- * Parameters: HWND  hWnd    handle to window whose window region is to be set
- *             HRGN  hRgn    handle to region
- *             BOOL  bRedraw window redraw flag
- * Variables :
- * Result    : If the function succeeds, the return value is non-zero.
- *             If the function fails, the return value is zero.
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-int WIN32API SetWindowRgn(HWND hWnd,
-                             HRGN hRgn,
-                             BOOL bRedraw)
-{
-  dprintf(("USER32:SetWindowRgn (%08xh,%08xh,%u) not implemented.\n",
-         hWnd,
-         hRgn,
-         bRedraw));
-  //Attention: Win32 hwnd handle!
-
-  return (0);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API ValidateRect( HWND hwnd, const RECT * lprc)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  ValidateRect\n");
-#endif
-    hwnd = Win32Window::Win32ToOS2Handle(hwnd);
-
-    return O32_ValidateRect(hwnd,lprc);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API ValidateRgn( HWND hwnd, HRGN  hrgn)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  ValidateRgn\n");
-#endif
-    hwnd = Win32Window::Win32ToOS2Handle(hwnd);
-
-    return O32_ValidateRgn(hwnd,hrgn);
 }
 
 /* Filled Shape Functions */
@@ -1768,6 +1680,14 @@ int WIN32API GetKeyboardType( int nTypeFlag)
 #endif
     return O32_GetKeyboardType(nTypeFlag);
 }
+
+/* Message and Message Queue Functions */
+
+
+/* Device Context Functions */
+
+
+/* Window Station and Desktop Functions */
 /*****************************************************************************
  * Name      : HDESK WIN32API GetThreadDesktop
  * Purpose   : The GetThreadDesktop function returns a handle to the desktop
@@ -1788,14 +1708,6 @@ HDESK WIN32API GetThreadDesktop(DWORD dwThreadId)
 
   return (NULL);
 }
-
-/* Message and Message Queue Functions */
-
-
-/* Device Context Functions */
-
-
-/* Window Station and Desktop Functions */
 
 /*****************************************************************************
  * Name      : BOOL WIN32API CloseDesktop

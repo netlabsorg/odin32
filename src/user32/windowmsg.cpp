@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.10 1999-12-16 00:11:49 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.11 1999-12-24 18:39:13 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -20,6 +20,7 @@
 #include <win32wbase.h>
 #include <win.h>
 #include <heapstring.h>
+#include <handlemanager.h>
 #include "oslibwin.h"
 #include "oslibmsg.h"
 
@@ -44,10 +45,9 @@ LONG WIN32API DispatchMessageW( const MSG * msg)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API TranslateMessage( const MSG * arg1)
+BOOL WIN32API TranslateMessage( const MSG * msg)
 {
-//    return O32_TranslateMessage(arg1);
-   return TRUE;
+   return OSLibWinTranslateMessage((MSG *)msg);
 }
 //******************************************************************************
 //******************************************************************************
@@ -69,9 +69,9 @@ BOOL WIN32API PeekMessageA(LPMSG msg, HWND hwndOwner, UINT uMsgFilterMin,
  BOOL fFoundMsg;
 
     fFoundMsg = OSLibWinPeekMsg(msg, 0, uMsgFilterMin, uMsgFilterMax,
-                                (fuRemoveMsg & PM_REMOVE) ? 1 : 0, FALSE);
+                                fuRemoveMsg, FALSE);
     if(fFoundMsg) {
-        if (msg->message == WM_QUIT && (fuRemoveMsg & (PM_REMOVE))) {
+        if (msg->message == WM_QUIT && (fuRemoveMsg & PM_REMOVE)) {
             //TODO: Post WM_QUERYENDSESSION message when WM_QUIT received and system is shutting down
         }
     }
@@ -990,11 +990,13 @@ DWORD WIN32API GetQueueStatus( UINT flags)
 BOOL WIN32API GetInputState(VOID)
 {
  DWORD queueStatus;
+ BOOL  rc;
 
-  dprintf(("USER32:GetInputState()"));
   queueStatus = OSLibWinQueryQueueStatus();
 
-  return (queueStatus & (QS_KEY | QS_MOUSEBUTTON)) ? TRUE : FALSE;
+  rc = (queueStatus & (QS_KEY | QS_MOUSEBUTTON)) ? TRUE : FALSE;
+  dprintf(("USER32:GetInputState() returned %d", rc));
+  return rc;
 }
 //******************************************************************************
 /* Synchronization Functions */
@@ -1031,5 +1033,6 @@ DWORD MsgWaitForMultipleObjects(DWORD nCount, LPHANDLE pHandles, BOOL fWaitAll,
 	}
         return WAIT_TIMEOUT;
   }
-  return O32_MsgWaitForMultipleObjects(nCount,pHandles,fWaitAll,dwMilliseconds,dwWakeMask);
+  //SvL: Call handlemanager function as we need to translate handles
+  return HMMsgWaitForMultipleObjects(nCount,pHandles,fWaitAll,dwMilliseconds,dwWakeMask);
 }
