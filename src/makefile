@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 1999-08-27 19:36:33 achimha Exp $
+# $Id: makefile,v 1.11 1999-08-28 07:44:29 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -82,9 +82,9 @@ clean:
         $(MAKE_CMD) clean
         cd ..\kernel32
         $(MAKE_CMD) clean
-        cd ..\user32
+        cd ..\user32\new
         $(MAKE_CMD) clean
-        cd ..\gdi32
+        cd ..\..\gdi32
         $(MAKE_CMD) clean
         cd ..\advapi32
         $(MAKE_CMD) clean
