@@ -1,4 +1,4 @@
-/* $Id: message.cpp,v 1.13 2000-10-20 11:46:47 sandervl Exp $ */
+/* $Id: message.cpp,v 1.14 2003-07-28 11:35:31 sandervl Exp $ */
 
 /*
  * Win32 message API functions for OS/2
@@ -59,11 +59,7 @@ int LoadMessageA(HINSTANCE instance, UINT id, WORD lang,
         DWORD   lastentry;
         DWORD   offset;
     } *se;
-    struct      _stringentry {
-        WORD    len;
-        WORD    unknown;
-        CHAR    str[1];
-    } *stre;
+    MESSAGE_RESOURCE_ENTRY *stre;
 
     /*FIXME: I am not sure about the '1' ... But I've only seen those entries*/
     hrsrc = FindResourceW(instance,(LPWSTR)1,RT_MESSAGELISTW);
@@ -77,7 +73,7 @@ int LoadMessageA(HINSTANCE instance, UINT id, WORD lang,
     se = (struct _subentry*)(p+4);
     for (i=nrofentries;i--;) {
         if ((id>=se->firstentry) && (id<=se->lastentry)) {
-            stre = (struct _stringentry*)(p+se->offset);
+            stre = (PMESSAGE_RESOURCE_ENTRY)(p+se->offset);
             id  -= se->firstentry;
             break;
         }
@@ -86,18 +82,21 @@ int LoadMessageA(HINSTANCE instance, UINT id, WORD lang,
     if (!stre)
         return 0;
     for (i=id;i--;) {
-        if (!(slen=stre->len))
+        if (!(slen=stre->Length))
                 return 0;
-        stre = (struct _stringentry*)(((char*)stre)+slen);
+        stre = (PMESSAGE_RESOURCE_ENTRY)(((char*)stre)+slen);
     }
-    slen=stre->len;
+    slen=stre->Length;
 
     i = min(buflen - 1, slen);
     if (buffer == NULL)
         return slen; /* different to LoadString */
     if (i>0) {
-        strncpy(buffer,stre->str,i);
-        buffer[i]=0;
+	if (stre->Flags & MESSAGE_RESOURCE_UNICODE)
+            WideCharToMultiByte( CP_ACP, 0, (LPWSTR)stre->Text, -1, buffer, i, NULL, NULL );
+	else
+	    lstrcpynA(buffer, (LPSTR)stre->Text, i);
+	buffer[i]=0;
     } else {
         if (buflen>1) {
             buffer[0]=0;
@@ -165,8 +164,16 @@ DWORD WIN32API FormatMessageA(DWORD   dwFlags,
 
    if (dwFlags & FORMAT_MESSAGE_FROM_SYSTEM)
    {
-      from = (char*)HeapAlloc( GetProcessHeap(),0,200 );
-      sprintf(from,"Systemmessage, messageid = 0x%08lx\n",dwMessageId);
+      INT bufsize;
+      HMODULE hmodule;
+
+      hmodule = GetModuleHandleA("kernel32");
+      bufsize=LoadMessageA(hmodule,dwMessageId,dwLanguageId,NULL,100);
+      if (bufsize)
+      {
+        from = (char*)HeapAlloc( GetProcessHeap(), 0, bufsize + 1 );
+        LoadMessageA(hmodule,dwMessageId,dwLanguageId,from,bufsize+1);
+      }
    }
 
    if (dwFlags & FORMAT_MESSAGE_FROM_HMODULE)
@@ -414,9 +421,16 @@ DWORD WINAPI FormatMessageW(DWORD   dwFlags,
 
    if (dwFlags & FORMAT_MESSAGE_FROM_SYSTEM)
    {
-      /* gather information from system message tables ... */
-      from = (char*)HeapAlloc( GetProcessHeap(),0,200 );
-      sprintf(from,"Systemmessage, messageid = 0x%08lx\n",dwMessageId);
+      INT bufsize;
+      HMODULE hmodule;
+
+      hmodule = GetModuleHandleA("kernel32");
+      bufsize=LoadMessageA(hmodule,dwMessageId,dwLanguageId,NULL,100);
+      if (bufsize)
+      {
+        from = (char*)HeapAlloc( GetProcessHeap(), 0, bufsize + 1 );
+        LoadMessageA(hmodule,dwMessageId,dwLanguageId,from,bufsize+1);
+      }
    }
 
    if (dwFlags & FORMAT_MESSAGE_FROM_HMODULE)

@@ -1,7 +1,7 @@
-/* $Id: critsect.cpp,v 1.8 2003-02-06 10:30:02 sandervl Exp $ */
+/* $Id: critsect.cpp,v 1.9 2003-07-28 11:30:17 sandervl Exp $ */
 /*
  * Critical sections in the Win32 sense
- * 
+ *
  * Copyright 2002 Sander van Leeuwen <sandervl@innotek.de>
  *
  */
@@ -11,6 +11,7 @@
 #include <os2wrap.h>
 #include <win32type.h>
 #include <win32api.h>
+#include <FastInfoBlocks.h>
 
 #include <assert.h>
 #include <stdio.h>
@@ -22,6 +23,7 @@
 #else
 #define DebugInt3()
 #endif
+
 
 //******************************************************************************
 // This is an OS/2 implementation of what Win32 treats as "critical sections"
@@ -41,10 +43,13 @@
 //******************************************************************************
 inline ULONG GetCurrentThreadId()
 {
+#ifdef fibGetPid
+    return MAKE_THREADID(fibGetPid(), fibGetTid());
+#else
     PTIB   ptib;
     PPIB   ppib;
     APIRET rc;
- 
+
     rc = DosGetInfoBlocks(&ptib, &ppib);
     if(rc == NO_ERROR) {
 #ifdef DEBUG
@@ -56,27 +61,32 @@ inline ULONG GetCurrentThreadId()
     }
     DebugInt3();
     return 0;
+#endif
 }
 //******************************************************************************
 //******************************************************************************
 inline ULONG GetCurrentProcessId()
 {
+#ifdef fibGetPid
+    return fibGetPid();
+#else
     PTIB   ptib;
     PPIB   ppib;
     APIRET rc;
- 
+
     rc = DosGetInfoBlocks(&ptib, &ppib);
     if(rc == NO_ERROR) {
         return ppib->pib_ulpid;
     }
     DebugInt3();
     return 0;
+#endif
 }
 
 /***********************************************************************
  *           DosInitializeCriticalSection
  */
-ULONG WIN32API DosInitializeCriticalSection(CRITICAL_SECTION_OS2 *crit, 
+ULONG WIN32API DosInitializeCriticalSection(CRITICAL_SECTION_OS2 *crit,
                                             PSZ pszSemName, BOOL fShared)
 {
     APIRET rc;
@@ -130,7 +140,9 @@ ULONG WIN32API DosDeleteCriticalSection( CRITICAL_SECTION_OS2 *crit )
     if (crit->hmtxLock)
     {
 #ifdef DEBUG
-        if (crit->LockCount != -1 || crit->OwningThread || crit->RecursionCount)  /* Should not happen */
+        if (  (crit->LockCount != -1 && crit->CreationCount == 1)
+            || crit->OwningThread
+            || crit->RecursionCount)  /* Should not happen */
         {
            DebugInt3();
         }
@@ -180,7 +192,7 @@ testenter:
         // the crit sect is in use
         ULONG ulnrposts;
 
-        // now wait for it 
+        // now wait for it
         APIRET rc = DosWaitEventSem(crit->hmtxLock, ulTimeout);
         if(rc != NO_ERROR) {
             DebugInt3();
@@ -205,7 +217,7 @@ ULONG WIN32API DosLeaveCriticalSection( CRITICAL_SECTION_OS2 *crit )
         DebugInt3();
         return ERROR_INVALID_PARAMETER;
     }
-       
+
     if (--crit->RecursionCount)
     {
         //just return

@@ -1,4 +1,4 @@
-; $Id: user32dbg.def,v 1.12 2003-04-23 18:00:59 sandervl Exp $
+; $Id: user32dbg.def,v 1.13 2003-07-28 11:27:49 sandervl Exp $
 
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
 DESCRIPTION 'Odin32 System Dll - User32'
@@ -725,3 +725,9 @@ EXPORTS
     _Win32ToOS2FrameHandle@4                                     @2034 NONAME
 
     _CustForceMonoCursor@0                                       @2036 NONAME
+
+    _OSLibDragOver@12                                            @2038 NONAME
+    _OSLibDragLeave@4                                            @2039 NONAME
+    _OSLibDragDrop@16                                            @2040 NONAME
+    _OSLibCreateDragStruct@16                                    @2041 NONAME
+    _OSLibFreeDragStruct@4                                       @2042 NONAME

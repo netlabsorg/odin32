@@ -1,4 +1,4 @@
-/* $Id: enumidlist.c,v 1.6 2002-08-22 14:20:44 sandervl Exp $ */
+/* $Id: enumidlist.c,v 1.7 2003-07-28 11:28:56 sandervl Exp $ */
 /*
  *	IEnumIDList
  *
@@ -201,6 +201,8 @@ static BOOL CreateFolderEnumList(
             {
               for (x = 0;x < count;x++)
               {
+   	        if ( !(dwFlags & SHCONTF_INCLUDEHIDDEN) && (stffile[x].dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) ) continue;
+
                 if (stffile[x].dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
                 { //directory
                   if (strcmp (stffile[x].cFileName, ".") && strcmp (stffile[x].cFileName, ".."))
@@ -246,6 +248,8 @@ static BOOL CreateFolderEnumList(
             {
               for (x = 0;x < count;x++)
               {
+ 	        if ( !(dwFlags & SHCONTF_INCLUDEHIDDEN) && (stffile[x].dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) ) continue;
+
                 if (! (stffile[x].dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) )
                 {
                   pidl = _ILCreateValue(&stffile[x]);

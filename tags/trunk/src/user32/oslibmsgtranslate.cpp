@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.110 2003-05-16 10:59:27 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.111 2003-07-28 11:27:46 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -93,25 +93,6 @@ ULONG ConvertNumPadKey(ULONG pmScan)
   KeyTranslatePMScanToWinVKey(ret, FALSE, (PBYTE)&winKey, NULL, NULL);
   return winKey;
 
-}
-//******************************************************************************
-//******************************************************************************
-ULONG GetMouseKeyState()
-{
-  ULONG keystate = 0;
-
-  if(WinGetKeyState(HWND_DESKTOP, VK_BUTTON1) & 0x8000)
-    keystate |= MK_LBUTTON_W;
-  if(WinGetKeyState(HWND_DESKTOP, VK_BUTTON2) & 0x8000)
-    keystate |= MK_RBUTTON_W;
-  if(WinGetKeyState(HWND_DESKTOP, VK_BUTTON3) & 0x8000)
-    keystate |= MK_MBUTTON_W;
-  if(WinGetKeyState(HWND_DESKTOP, VK_SHIFT) & 0x8000)
-    keystate |= MK_SHIFT_W;
-  if(WinGetKeyState(HWND_DESKTOP, VK_CTRL) & 0x8000)
-    keystate |= MK_CONTROL_W;
-
-  return keystate;
 }
 //******************************************************************************
 //******************************************************************************

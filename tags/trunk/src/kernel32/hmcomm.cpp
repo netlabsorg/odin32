@@ -1,4 +1,4 @@
-/* $Id: hmcomm.cpp,v 1.39 2003-05-23 13:53:43 sandervl Exp $ */
+/* $Id: hmcomm.cpp,v 1.40 2003-07-28 11:35:31 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -15,6 +15,7 @@
 
 #include <os2win.h>
 #include <string.h>
+#include <stdio.h>
 #include <handlemanager.h>
 #include "handlenames.h"
 #include <heapstring.h>
@@ -63,6 +64,9 @@ static DWORD CommPollIOHandler(LPASYNCIOREQUEST lpRequest, DWORD *lpdwResult, DW
 #ifdef DEBUG
 static char *DebugCommEvent(DWORD dwEvents);
 static char *DebugModemStatus(DWORD dwModemStatus);
+#ifdef DEBUG_COMOUTPUT
+static FILE *comlog = NULL;
+#endif
 #endif
 //******************************************************************************
 //******************************************************************************
@@ -116,6 +120,9 @@ HMDeviceCommClass::HMDeviceCommClass(LPCSTR lpDeviceName) : HMDeviceHandler(lpDe
     HandleNamesAddSymbolicLink("AUX",        "COM1");
     HandleNamesAddSymbolicLink("AUX:",       "COM1");
     HandleNamesAddSymbolicLink("\\\\.\\AUX", "COM1");
+#ifdef DEBUG_COMOUTPUT
+    comlog = fopen("comlog", "w");
+#endif
 }
 
 /*****************************************************************************
@@ -228,6 +235,7 @@ DWORD HMDeviceCommClass::CreateFile(LPCSTR lpFileName,
             delete pHMHandleData->lpHandlerData;
             return rc;
         }
+
         rc = SetBaud(pHMHandleData,9600);
         dprintf(("Init Baud to 9600 rc = %d",rc));
         rc = SetLine(pHMHandleData,8,0,0);
@@ -327,13 +335,16 @@ DWORD CommReadIOHandler(LPASYNCIOREQUEST lpRequest, DWORD *lpdwResult, DWORD *lp
     ret = OSLibDosRead(pHMHandleData->hHMHandle, (LPVOID)lpRequest->lpBuffer, lpRequest->nNumberOfBytes, &ulBytesRead);
 
     *lpdwResult = (ret) ? ulBytesRead : 0;
-    dprintf2(("KERNEL32: CommReadIOHandler %d bytes read", *lpdwResult));
+    dprintf(("KERNEL32: CommReadIOHandler %d bytes read", *lpdwResult));
 
     if(ret == FALSE) {
         dprintf(("!ERROR!: CommReadIOHandler failed with rc %d", GetLastError()));
     }
     else {
 #ifdef DEBUG
+        if(ulBytesRead < qInfo.cch) {
+            dprintf(("WARNING: Not all data removed from queue!!"));
+        }
         dprintf2(("%d Bytes read:", ulBytesRead));
         for(int i=0;i<min(ulBytesRead, 16);i++) {
             dprintf2(("%x %c", ((char *)lpRequest->lpBuffer)[i], ((char *)lpRequest->lpBuffer)[i]));
@@ -371,6 +382,9 @@ DWORD CommWriteIOHandler(LPASYNCIOREQUEST lpRequest, DWORD *lpdwResult, DWORD *l
     *lpdwResult = (ret) ? ulBytesWritten : 0;
     dprintf2(("KERNEL32:CommWriteIOHandler %d byte(s) written", *lpdwResult));
 
+    if(ulBytesWritten != lpRequest->nNumberOfBytes) {
+        dprintf(("WARNING: ulBytesWritten (%d) != lpRequest->nNumberOfBytes (%d)", ulBytesWritten, lpRequest->nNumberOfBytes));
+    }
     if(ret == FALSE) {
        dprintf(("!ERROR!: CommWriteIOHandler failed with rc %d", GetLastError()));
     }
@@ -431,6 +445,20 @@ DWORD CommPollIOHandler(LPASYNCIOREQUEST lpRequest, DWORD *lpdwResult, DWORD *lp
         dwEvent |= (COMEvt&0x0080)? EV_ERR:0;
         dwEvent |= (COMEvt&0x0100)? EV_RING:0;
  
+#ifdef DEBUG
+        if(dwEvent & EV_ERR) {
+            ULONG COMErr = 0;
+
+            rc = OSLibDosDevIOCtl( pHMHandleData->hHMHandle,
+                    IOCTL_ASYNC,
+                    ASYNC_GETCOMMERROR,
+                    0,0,0,
+                    &COMErr,2,&ulLen);
+
+            dprintf(("!!!!!!!----> ERROR OCCURRED (EV_ERR) reason %x <-----!!!!!", COMErr));
+
+        }
+#endif
         if((dwEvent & EV_RXCHAR) && (dwMask & EV_RXCHAR)) 
         {
             //check if there's really data in the in queue
@@ -508,6 +536,13 @@ BOOL HMDeviceCommClass::WriteFile(PHMHANDLEDATA pHMHandleData,
         dprintf(("!WARNING!: lpCompletionRoutine not supported -> fall back to sync IO"));
     }
 
+#ifdef DEBUG
+    dprintf2(("WriteFile: bytes to write:"));
+    for(int i=0;i<min(nNumberOfBytesToWrite, 16);i++) {
+        dprintf2(("%x %c", ((char *)lpBuffer)[i], ((char *)lpBuffer)[i]));
+    }
+#endif
+
     if(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) {
         return pDevData->iohandler->WriteFile(pHMHandleData->hWin32Handle, lpBuffer, nNumberOfBytesToWrite,
                                               lpNumberOfBytesWritten, lpOverlapped, lpCompletionRoutine, (DWORD)pDevData);
@@ -516,7 +551,7 @@ BOOL HMDeviceCommClass::WriteFile(PHMHANDLEDATA pHMHandleData,
     ret = OSLibDosWrite(pHMHandleData->hHMHandle, (LPVOID)lpBuffer, nNumberOfBytesToWrite,
                         &ulBytesWritten);
 
-    if(lpNumberOfBytesWritten) {
+    if(lpNumberOfBytesWritten) { 
        *lpNumberOfBytesWritten = (ret) ? ulBytesWritten : 0;
        dprintf2(("KERNEL32:HMDeviceCommClass::WriteFile %d byte(s) written", *lpNumberOfBytesWritten));
     }
@@ -592,14 +627,30 @@ BOOL HMDeviceCommClass::ReadFile(PHMHANDLEDATA pHMHandleData,
     if(lpNumberOfBytesRead) {
         *lpNumberOfBytesRead = (ret) ? ulBytesRead : 0;
         dprintf2(("KERNEL32:HMDeviceCommClass::ReadFile %d bytes read", *lpNumberOfBytesRead));
+        if(qInfo.cch > ulBytesRead) {
+            dprintf(("Warning: more bytes available!!"));
+        }
     }
     if(ret == FALSE) {
         dprintf(("!ERROR!: ReadFile failed with rc %d", GetLastError()));
     }
 #ifdef DEBUG
     else {
+        int i;
         dprintf2(("%d Bytes read:", ulBytesRead));
-        for(int i=0;i<min(ulBytesRead, 16);i++) {
+#ifdef DEBUG_COMOUTPUT
+        char *tmp = (char *)malloc(ulBytesRead+1);
+        memcpy(tmp, lpBuffer, ulBytesRead);
+        tmp[ulBytesRead] = 0;
+        dprintf2(("RF: %s", tmp));
+        WORD sel = RestoreOS2FS();
+        for(i=0;i<ulBytesRead;i++) {
+            fprintf(comlog, "%c", tmp[i]);
+        }
+        SetFS(sel);
+        free(tmp);
+#endif
+        for(i=0;i<ulBytesRead;i++) {
             dprintf2(("%x %c", ((char *)lpBuffer)[i], ((char *)lpBuffer)[i]));
         }
     }
@@ -892,7 +943,7 @@ BOOL HMDeviceCommClass::ClearCommError( PHMHANDLEDATA pHMHandleData,
 
   if(lpdwErrors == NULL) 
      lpdwErrors = &dwError;
-
+ 
   dprintf(("HMDeviceCommClass::ClearCommError"));
   ulLen = sizeof(USHORT);
 
@@ -907,6 +958,7 @@ BOOL HMDeviceCommClass::ClearCommError( PHMHANDLEDATA pHMHandleData,
   *lpdwErrors |= (COMErr & 0x0004)?CE_RXPARITY:0;
   *lpdwErrors |= (COMErr & 0x0008)?CE_FRAME:0;
 
+  dprintf(("Error %x", *lpdwErrors));
   if(lpcst)
   {
     UCHAR ucStatus;
@@ -1529,6 +1581,27 @@ APIRET HMDeviceCommClass::SetOS2DCB( PHMHANDLEDATA pHMHandleData,
     pCurDCB->XonChar            = XonChar;
     pCurDCB->XoffChar           = XoffChar;
     pCurDCB->ErrorChar          = ErrorChar;
+
+    dprintf(("OS/2 DCB:\n"
+             " WriteTimeout           : %d\n"
+             " ReadTimeout            : %d\n"
+             " CtlHandshake           : 0x%x\n"
+             " FlowReplace            : 0x%x\n"
+             " Timeout                : 0x%x\n"
+             " Error replacement Char : 0x%x\n"
+             " Break replacement Char : 0x%x\n"
+             " XON Char               : 0x%x\n"
+             " XOFF Char              : 0x%x\n",
+             os2dcb.usWriteTimeout,
+             os2dcb.usReadTimeout,
+             os2dcb.fbCtlHndShake,
+             os2dcb.fbFlowReplace,
+             os2dcb.fbTimeOut,
+             os2dcb.bErrorReplacementChar,
+             os2dcb.bBreakReplacementChar,
+             os2dcb.bXONChar,
+             os2dcb.bXOFFChar));
+
   }
 
   return rc;

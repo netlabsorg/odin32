@@ -165,6 +165,11 @@ static void OLEDD_TrackStateChange(
 			 DWORD              keyState);
 static DWORD OLEDD_GetButtonState();
 
+#ifdef __WIN32OS2__
+static IDropTarget *IDropTarget_Constructor();
+
+HWND hwndTracker = 0;
+#endif
 
 /******************************************************************************
  *		OleBuildVersion	[OLE2.1]
@@ -560,6 +565,10 @@ HRESULT WINAPI DoDragDrop (
   trackerInfo.curDragTargetHWND = 0;
   trackerInfo.curDragTarget     = 0;
 
+#ifdef __WIN32OS2__
+  IDataObject_AddRef(trackerInfo.dataObject);
+#endif
+
   hwndTrackWindow = CreateWindowA(OLEDD_DRAGTRACKERCLASS,
 				    "TrackerWindow",
 				    WS_POPUP,
@@ -572,6 +581,9 @@ HRESULT WINAPI DoDragDrop (
 
   if (hwndTrackWindow!=0)
   {
+#ifdef __WIN32OS2__
+    hwndTracker = hwndTrackWindow;
+#endif
     /*
      * Capture the mouse input
      */
@@ -618,8 +630,16 @@ HRESULT WINAPI DoDragDrop (
      */
     DestroyWindow(hwndTrackWindow);
 
+#ifdef __WIN32OS2__
+    IDataObject_Release(trackerInfo.dataObject);
+#endif
+
     return trackerInfo.returnValue;
   }
+
+#ifdef __WIN32OS2__
+  IDataObject_Release(trackerInfo.dataObject);
+#endif
 
   return E_FAIL;
 }
@@ -1635,6 +1655,15 @@ static void OLEDD_Initialize()
     wndClass.lpszClassName = OLEDD_DRAGTRACKERCLASS;
  
     RegisterClassA (&wndClass);
+
+#ifdef __WIN32OS2__
+    {
+      IDropTarget *desktopdnd;
+
+      desktopdnd = IDropTarget_Constructor();
+      RegisterDragDrop(GetDesktopWindow(), desktopdnd);
+    }
+#endif
 }
 
 /***
@@ -1933,6 +1962,10 @@ static void OLEDD_TrackMouseMove(
    * Get the handle of the window under the mouse
    */
   hwndNewTarget = WindowFromPoint(mousePos);
+
+#ifdef __WIN32OS2__
+  dprintf(("OLEDD_TrackMouseMove: hwndNewTarget %x current %x", hwndNewTarget, trackerInfo->curDragTargetHWND));
+#endif
 
   /*
    * Every time, we re-initialize the effects passed to the
@@ -2511,7 +2544,7 @@ static HRESULT WINAPI IDataObject_fnGetData(LPDATAOBJECT iface, LPFORMATETC pfor
 
     dprintf(("IDataObject_fnGetData %x %x", pformatetcIn, pmedium));
 
-	if(pformatetcIn->cfFormat != CF_HDROP)
+	if(pformatetcIn->cfFormat != CF_HDROP && pformatetcIn->cfFormat != CF_TEXT && pformatetcIn->cfFormat != CF_UNICODETEXT)
 	{
         FIXME("-- expected clipformat not implemented\n");
         return (E_INVALIDARG);
@@ -2882,6 +2915,328 @@ BOOL WIN32API OLEDD_DragLeave(HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
+
+#include <oslibdnd.h>
+
+typedef struct
+{
+    /* IUnknown fields */
+    ICOM_VFIELD(IDropTarget);
+    DWORD ref;
+
+    LPVOID       lpDnDData;
+    LPSTR        lpOS2StringData;
+    LPVOID       lpDragStruct;
+    POINTL       pt;
+    HGLOBAL      hDndData;
+    FORMATETC    format;
+    STGMEDIUM    medium;
+    LPDATAOBJECT pDataObject;
+} IDropTargetImpl;
+
+
+/***************************************************************************
+*  IDropTarget_QueryInterface
+*/
+static HRESULT WINAPI IDropTarget_fnQueryInterface(IDropTarget *iface, REFIID riid, LPVOID * ppvObj)
+{
+    ICOM_THIS(IDropTargetImpl,iface);
+
+    dprintf(("IDropTarget_fnQueryInterface (%p)->(\n\tIID:\t%s,%p)\n",This,debugstr_guid(riid),ppvObj));
+
+    *ppvObj = NULL;
+
+    if(IsEqualIID(riid, &IID_IUnknown))          /*IUnknown*/
+    {
+        *ppvObj = This; 
+    }
+    else if(IsEqualIID(riid, &IID_IDropTarget))  /*IDropTarget*/
+    {
+        *ppvObj = (IDropTarget*)This;
+    }   
+
+    if(*ppvObj)
+    {
+        IUnknown_AddRef((IUnknown*)*ppvObj);      
+        TRACE("-- Interface: (%p)->(%p)\n",ppvObj,*ppvObj);
+        return S_OK;
+    }
+    TRACE("-- Interface: E_NOINTERFACE\n");
+    return E_NOINTERFACE;
+}
+
+/**************************************************************************
+*  IDropTarget_AddRef
+*/
+static ULONG WINAPI IDropTarget_fnAddRef(IDropTarget *iface)
+{
+    ICOM_THIS(IDropTargetImpl,iface);
+
+    dprintf(("IDropTarget_fnAddRef (%p)->(count=%lu)\n",This, This->ref));
+
+    return ++(This->ref);
+}
+
+/**************************************************************************
+*  IDropTarget_fnCleanup
+*/
+static ULONG WINAPI IDropTarget_fnCleanup(IDropTarget *iface)
+{
+    ICOM_THIS(IDropTargetImpl,iface);
+
+    if(This->pDataObject) {
+        IDataObject_Release(This->pDataObject);
+        This->pDataObject = 0;
+        if(This->lpDnDData) {
+            HeapFree(GetProcessHeap(), 0, This->lpDnDData);
+            This->lpDnDData = NULL;
+        }
+        if(This->lpOS2StringData) {
+            HeapFree(GetProcessHeap(), 0, This->lpOS2StringData);
+            This->lpOS2StringData = NULL;
+        }
+        if(This->lpDragStruct) {
+            OSLibFreeDragStruct(This->lpDragStruct);
+            This->lpDragStruct = NULL;
+        }  
+    }
+}
+/**************************************************************************
+*  IDropTarget_Release
+*/
+static ULONG WINAPI IDropTarget_fnRelease(IDropTarget *iface)
+{
+    ICOM_THIS(IDropTargetImpl,iface);
+
+    dprintf(("IDropTarget_fnRelease (%p)->(count=%lu)\n",This, This->ref));
+
+    IDropTarget_fnCleanup(iface);
+    if(This->ref == 1) {
+        if(This->hDndData) {
+            GlobalFree(This->hDndData);
+            This->hDndData = 0;
+        }
+    }
+    return --(This->ref);
+}
+//******************************************************************************
+//******************************************************************************
+static HRESULT WINAPI IDropTarget_fnDragEnter(IDropTarget *iface, IDataObject* pDataObject, 
+                                DWORD grfKeyState, POINTL pt, DWORD* pdwEffect)
+{
+    HRESULT ret;
+    DWORD   size, dwEffect;
+    LPVOID  lpData;
+    DROPFILES *lpDrop;
+    LPSTR     *lpStringData;
+    ICOM_THIS(IDropTargetImpl,iface);
+    DWORD   supportedformats[] = {CF_HDROP, CF_TEXT};
+    int     i;
+
+    dprintf(("IDropTarget_fnDragEnter %x (%d,%d)", grfKeyState, pt.x, pt.y));
+    IDropTarget_fnCleanup(iface);
+
+    IDataObject_AddRef(pDataObject);
+    This->pDataObject = pDataObject;
+
+#ifdef DEBUG
+    {
+      IEnumFORMATETC *enumfmt = NULL;
+
+      if(IDataObject_EnumFormatEtc(pDataObject, DATADIR_GET, &enumfmt) == S_OK) {
+          for (;;) {
+	
+             FORMATETC tmp;
+             ULONG     actual = 1, res;
+
+             res = IEnumFORMATETC_Next(enumfmt, 1, &tmp, &actual);
+
+             if(res != S_OK) break;
+
+             dprintf(("format %x typed %x", tmp.cfFormat, tmp.tymed));
+          }
+          IEnumFORMATETC_Release(enumfmt);
+      }
+    }
+#endif
+
+    for(i=0;i<sizeof(supportedformats)/sizeof(supportedformats[0]);i++) 
+    {
+        This->format.cfFormat = supportedformats[i];
+        This->format.ptd      = NULL;
+        This->format.dwAspect = DVASPECT_CONTENT;  
+        This->format.lindex   = -1;
+        This->format.tymed    = TYMED_HGLOBAL; 
+        ret = IDataObject_GetData(pDataObject, &This->format, &This->medium);
+        if(ret != S_OK) {
+            dprintf(("IDataObject_GetData failed with %x", ret));
+            continue;
+        }
+        size = GlobalSize(This->medium.u.hGlobal);
+        if(size == 0) {
+            dprintf(("GlobalSize failed for %x", This->medium.u.hGlobal));
+            ReleaseStgMedium(&This->medium);
+            return E_OUTOFMEMORY;
+        }
+        dprintf(("handle %x size %d, format %x tymed %x", This->medium.u.hGlobal, size, This->format.cfFormat, This->format.tymed));
+
+        if(size == 1) {//empty string; use previous data
+             if(This->hDndData == 0) {
+                 DebugInt3();
+                 ReleaseStgMedium(&This->medium);
+                 return E_OUTOFMEMORY;
+             }
+             This->medium.u.hGlobal = This->hDndData;
+
+             dprintf(("Reuse old global handle %x", This->hDndData));
+             size = GlobalSize(This->medium.u.hGlobal);
+             if(size == 0) {
+                 dprintf(("GlobalSize failed for %x", This->medium.u.hGlobal));
+                 ReleaseStgMedium(&This->medium);
+                 return E_OUTOFMEMORY;
+             }
+             dprintf(("handle %x size %d, format %x tymed %x", This->medium.u.hGlobal, size, This->format.cfFormat, This->format.tymed));
+        }
+        else This->hDndData = This->medium.u.hGlobal;
+
+        This->lpDnDData = (LPVOID)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, size);
+        if(This->lpDnDData == NULL) {
+            dprintf(("HeapAlloc failed for %d bytes", size));
+            return E_OUTOFMEMORY;
+        }
+        This->lpOS2StringData = (LPVOID)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, size*2);
+        if(This->lpOS2StringData == NULL) {
+            dprintf(("HeapAlloc failed for %d bytes", size));
+            return E_OUTOFMEMORY;
+        }
+        lpData = GlobalLock(This->medium.u.hGlobal);
+
+        if(This->format.cfFormat == CF_HDROP) {
+            memcpy(This->lpDnDData, lpData, size);
+            lpDrop = (DROPFILES *)This->lpDnDData;
+            lpStringData = (LPSTR)(lpDrop) + lpDrop->pFiles;
+            if(lpDrop->fWide == FALSE) {
+                 OemToCharA((LPSTR)lpStringData, (LPSTR)This->lpOS2StringData);
+            }
+            else {
+                 int len;
+                 len = lstrlenW((LPWSTR)lpStringData);
+                 WideCharToMultiByte( CP_OEMCP, 0, (LPWSTR)lpStringData, len, (LPSTR)This->lpOS2StringData, len, NULL, NULL );
+            }
+        }
+        else
+        if(This->format.cfFormat == CF_TEXT) {
+            strcpy(This->lpDnDData, lpData);
+            OemToCharA( This->lpDnDData, This->lpOS2StringData );
+        }
+        dprintf(("Drop string %s", This->lpOS2StringData));
+        GlobalUnlock(This->medium.u.hGlobal);
+
+        This->pt = pt;
+
+        This->lpDragStruct = OSLibCreateDragStruct(hwndTracker, This->pt.x, This->pt.y, This->lpOS2StringData);
+        if(This->lpDragStruct == NULL) {
+            dprintf(("OSLibCreateDragStruct"));
+            ReleaseStgMedium(&This->medium);
+            return E_OUTOFMEMORY;
+        }
+
+        dwEffect = OSLibDragOver(This->lpDragStruct, pt.x, pt.y);
+        break;
+    }   
+    if(ret != S_OK) {
+        dprintf(("IDataObject_GetData failed (fatal) with %x", ret));
+        return ret;
+    }
+    if(pdwEffect) {
+        *pdwEffect = dwEffect;
+    }
+  
+    return S_OK;
+}
+//******************************************************************************
+//******************************************************************************
+static HRESULT WINAPI IDropTarget_fnDragOver(IDropTarget *iface, DWORD grfKeyState, POINTL pt, 
+                               DWORD* pdwEffect)
+{
+    DWORD dwEffect;
+    ICOM_THIS(IDropTargetImpl,iface);
+
+    dprintf(("IDropTarget_fnDragOver %x (%d,%d)", grfKeyState, pt.x, pt.y));
+
+    dwEffect = OSLibDragOver(This->lpDragStruct, pt.x, pt.y);
+    if(pdwEffect) {
+        *pdwEffect = dwEffect;
+    }
+    return S_OK;
+}
+//******************************************************************************
+//******************************************************************************
+static HRESULT WINAPI IDropTarget_fnDragLeave(IDropTarget *iface)
+{
+    ICOM_THIS(IDropTargetImpl,iface);
+
+    dprintf(("IDropTarget_fnDragLeave"));
+ 
+    OSLibDragLeave(This->lpDragStruct);
+
+    IDropTarget_fnCleanup(iface);
+    return S_OK;
+}
+//******************************************************************************
+//******************************************************************************
+static HRESULT WINAPI IDropTarget_fnDrop(IDropTarget *iface, IDataObject* pDataObject, DWORD grfKeyState, 
+                           POINTL pt, DWORD* pdwEffect)
+{
+    DWORD dwEffect;
+    ICOM_THIS(IDropTargetImpl,iface);
+
+    dprintf(("IDropTarget_fnDrop %x (%d,%d) %s", grfKeyState, pt.x, pt.y, This->lpOS2StringData));
+
+    dwEffect = OSLibDragDrop(This->lpDragStruct, pt.x, pt.y, This->lpOS2StringData);
+    if(pdwEffect) {
+        *pdwEffect = dwEffect;
+    }
+    return S_OK;
+}
+//******************************************************************************
+//******************************************************************************
+
+static struct ICOM_VTABLE(IDropTarget) droptarget = 
+{
+	ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
+	IDropTarget_fnQueryInterface,
+	IDropTarget_fnAddRef,
+	IDropTarget_fnRelease,
+	IDropTarget_fnDragEnter,
+	IDropTarget_fnDragOver,
+	IDropTarget_fnDragLeave,
+	IDropTarget_fnDrop,
+};
+
+
+/**************************************************************************
+*  IDropTarget_Constructor
+*/
+static IDropTarget *IDropTarget_Constructor()
+{
+	IDropTargetImpl* dto;
+
+	dto = (IDropTargetImpl*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(IDropTargetImpl));
+
+	if (dto)
+	{
+	  dto->ref = 1;
+          dto->pDataObject = NULL;
+          dto->lpDnDData   = NULL;
+          dto->lpOS2StringData = NULL;
+          dto->hDndData = 0;
+	  ICOM_VTBL(dto) = &droptarget;
+	}
+	
+	return (IDropTarget *)dto;
+}
+
 #endif
 
 #ifndef __WIN32OS2__

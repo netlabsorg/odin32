@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.h,v 1.20 2003-04-11 14:22:05 sandervl Exp $ */
+/* $Id: oslibmsg.h,v 1.21 2003-07-28 11:27:45 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -54,6 +54,7 @@ BOOL  OSLibPostThreadMessage(ULONG threadid, UINT msg, WPARAM wParam, LPARAM lPa
 BOOL  OSLibPostMessage(HWND hwndWin32, HWND hwndOS2, ULONG msg, ULONG wParam, ULONG lParam, BOOL fUnicode);
 ULONG OSLibSendMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam, BOOL fUnicode);
 ULONG OSLibWinBroadcastMsg(ULONG msg, ULONG wParam, ULONG lParam, BOOL fSend);
+BOOL  OSLibSendWinMessage(HWND hwnd, ULONG winmsg);
 
 //Direct posting of messages that must remain invisible to the win32 app
 BOOL OSLibPostMessageDirect(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam);
