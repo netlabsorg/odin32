@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.67 2000-01-26 18:02:35 cbratschi Exp $ */
+/* $Id: user32.cpp,v 1.68 2000-02-03 23:29:53 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -2156,8 +2156,8 @@ BOOL WIN32API GetUserObjectInformationW(HANDLE  hObj,
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
 BOOL WIN32API GetUserObjectSecurity(HANDLE                hObj,
-                                       SECURITY_INFORMATION * pSIRequested,
-                                       LPSECURITY_DESCRIPTOR  pSID,
+                                       PSECURITY_INFORMATION pSIRequested,
+                                       PSECURITY_DESCRIPTOR  pSID,
                                        DWORD                 nLength,
                                        LPDWORD               lpnLengthNeeded)
 {
@@ -2446,8 +2446,8 @@ BOOL WIN32API SetUserObjectInformationW(HANDLE hObject,
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
 BOOL WIN32API SetUserObjectSecurity(HANDLE hObject,
-                                       SECURITY_INFORMATION * psi,
-                                       LPSECURITY_DESCRIPTOR  psd)
+                                       PSECURITY_INFORMATION psi,
+                                       PSECURITY_DESCRIPTOR  psd)
 {
   dprintf(("USER32:SetUserObjectSecuroty (%08xh,%08xh,%08x) not implemented.\n",
            hObject,
