@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.14 1999-10-30 18:40:44 cbratschi Exp $ */
+/* $Id: pmframe.cpp,v 1.15 1999-10-31 17:53:51 cbratschi Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -280,7 +280,7 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
             RestoreOS2TIB();
             return (MRESULT)0xf;
         }
-        break;
+        goto RunDefFrameProc; //CB: must call def frame proc or frame control activation is broken
     }
 
     case WM_WINDOWPOSCHANGED:
@@ -426,11 +426,19 @@ PosChangedEnd:
 #else
     case WM_ACTIVATE:
       {
+        HWND hwndTitle;
+        USHORT flags = WinQueryWindowUShort(hwnd,QWS_FLAGS);
+
+        //CB: emulate WM_ACTIVATE -> no flickering
+        hwndTitle = WinWindowFromID(hwnd,FID_TITLEBAR);
+        if (hwndTitle) WinSendMsg(hwndTitle,TBM_SETHILITE,mp1,MPVOID);
+
+        WinSendMsg(WinWindowFromID(hwnd,FID_CLIENT),WM_ACTIVATE,mp1,mp2);
+        WinSetWindowUShort(hwnd,QWS_FLAGS,mp1 ? (flags | FF_ACTIVE):(flags & ~FF_ACTIVE));
+
+
         RestoreOS2TIB();
-        MRESULT rc = OldFrameProc(hwnd,msg,mp1,mp2);
-        //CB: overwrite OS/2's default frame
-        DrawActivate(win32wnd, hwnd);
-        return rc;
+        return 0;
       }
 
 #endif
@@ -487,6 +495,7 @@ PosChangedEnd:
       #endif
       if (InSizeBox(win32wnd,(POINTS*)&mp1))
       {
+        WinSetActiveWindow(HWND_DESKTOP,hwnd);
         WinSendMsg(hwnd,WM_TRACKFRAME,(MPARAM)(TF_RIGHT | TF_BOTTOM),(MPARAM)0);
         RestoreOS2TIB();
         return (MRESULT)TRUE;

@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.29 1999-10-31 16:44:05 dengert Exp $ */
+/* $Id: window.cpp,v 1.30 1999-10-31 17:53:55 cbratschi Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -188,7 +188,7 @@ HWND WIN32API CreateWindowExW(DWORD exStyle, LPCWSTR className,
     }
     else dprintf(("CreateWindowExW: class %d parent %x (%d,%d) (%d,%d), %x %x", className, parent, x, y, width, height, style, exStyle));
 
-    if (!strcmpi(className, L"BUTTON") && ((style & 0x0f) == BS_GROUPBOX))
+    if (!lstrcmpiW(className,(LPCWSTR)L"BUTTON") && ((style & 0x0f) == BS_GROUPBOX))
       style |= WS_CLIPSIBLINGS;
 
     /* Create the window */
