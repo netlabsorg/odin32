@@ -1,4 +1,9 @@
-/* $Id: ChangeLog,v 1.2467 2003-02-04 17:40:30 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2468 2003-02-05 14:03:39 sandervl Exp $ */
+
+ 2003-02-05: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Check ESP when calling the entrypoint of a newly created thread.
+                  If close to a 64kb boundary, adjust it. Some ancient 16 bits
+                  code will crash if there's not enough stack left. 
 
  2003-02-04: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Support DuplicateHandle for threads
