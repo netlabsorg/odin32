@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.203 2000-06-29 12:26:01 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.204 2000-07-01 09:51:53 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1110,6 +1110,25 @@ ULONG Win32BaseWindow::MsgFormatFrame(WINDOWPOS *lpWndPos)
 
   dprintf(("MsgFormatFrame: old client rect (%d,%d)(%d,%d), new client (%d,%d)(%d,%d)", client.left, client.top, client.right, client.bottom, rectClient.left, rectClient.top, rectClient.right, rectClient.bottom));
   dprintf(("MsgFormatFrame: old window rect (%d,%d)(%d,%d), new window (%d,%d)(%d,%d)", oldWindowRect.left, oldWindowRect.top, oldWindowRect.right, oldWindowRect.bottom, rectWindow.left, rectWindow.top, rectWindow.right, rectWindow.bottom));
+
+#if 1
+//this doesn't always work 
+//  if(!fNoSizeMsg && (client.left != rectClient.left || client.top != rectClient.top)) 
+  if(!fNoSizeMsg && (oldWindowRect.right - oldWindowRect.left < rectClient.left 
+                  || oldWindowRect.bottom - oldWindowRect.top < rectClient.top))
+  {
+   Win32BaseWindow *child = (Win32BaseWindow *)getFirstChild();
+
+	//client rectangle has moved -> inform children
+	dprintf(("MsgFormatFrame -> client rectangle has changed, move children"));
+	while(child) {
+		child->SetWindowPos(HWND_TOP, child->getClientRectPtr()->left, 
+                                    child->getClientRectPtr()->top, 0, 0, 
+                                    SWP_NOACTIVATE|SWP_NOSIZE|SWP_NOZORDER);
+		child = (Win32BaseWindow *)child->getNextChild();
+	}
+  }
+#endif
   return rc;
 }
 //******************************************************************************
