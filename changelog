@@ -1,7 +1,12 @@
- /* $Id: changelog,v 1.906 2000-04-23 15:35:03 sandervl Exp $ */
+ /* $Id: changelog,v 1.907 2000-04-23 15:58:04 sandervl Exp $ */
 
  2000-04-23: Sander van Leeuwen <sandervl@xs4all.nl>
-	- GDI32: Dib section blit fix (missing pixels)
+	- GDI32:   Dib section blit fix (missing pixels)
+	- WSOCK32: Don't send FD_CLOSE message when select returns
+                   and there's no data available (recv in another thread
+                   might have taken that data before the ioctl call in
+                   the WSAAsyncSelect thread)
+                   -> fixes lost connections in RealPlayer 7
 
  2000-04-19: Patrick Haller <phaller@gmx.net>
         - INCLUDE/PDWIN32.TOOLS: fix build rule for (old) .asm sources
