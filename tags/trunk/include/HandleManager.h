@@ -1,4 +1,4 @@
-/* $Id: HandleManager.h,v 1.25 2001-04-26 13:27:58 sandervl Exp $ */
+/* $Id: HandleManager.h,v 1.26 2001-10-03 13:50:58 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -101,6 +101,7 @@ DWORD  HMHandleAllocate       (PULONG phHandle16,
 DWORD  HMHandleFree           (ULONG  hHandle16);
 
 DWORD  HMHandleGetUserData    (ULONG  hHandle16);
+DWORD  HMHandleSetUserData    (ULONG  hHandle16, ULONG dwUserData);
 
 DWORD  HMHandleValidate       (ULONG  hHandle16);
 
