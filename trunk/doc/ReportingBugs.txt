@@ -1,4 +1,4 @@
-/* $Id: ReportingBugs.txt,v 1.2 2000-07-23 11:59:30 sandervl Exp $ */
+/* $Id: ReportingBugs.txt,v 1.3 2000-08-01 23:17:55 sandervl Exp $ */
 
 Reporting Odin bugs
 -------------------
@@ -29,15 +29,16 @@ Odin build: 		date & debug/release
 Installed Odin:		manually/WarpIN
 Method of launching
 win32 apps:            	win32k/pe.exe
-
+                        (if pe.exe is used, win32k must not be loaded at all!)
 OS/2 version:		OS/2 Warp 4 or OS/2 Warp Server for e-Business 
                         (Warp 3 not officially supported)
 Fixpack level:		
 
 Windows application:	name, version + url (if it can be downloaded somewhere)
-Problem desription:	Try to give an accurate desription so we can reproduce it on our systems
+Problem description:	Try to give an accurate desription so we can reproduce it on our systems
 
-Log file:		Search for 'stack dump' in odin32_0.log and include the exception information + last few lines preceding it.
+Log file:		Search for 'stack dump' or 'Exception Information' in odin32_0.log and include 
+                        the exception information + last few lines preceding it.
 			i.e:
 			t1: GDI32: SaveDC
 			t1: GDI32: StretchDIBits 1000245 to (0,0) (740,61) from (0,0) (740,61), 1d3001c 18817f0 0 cc0020
