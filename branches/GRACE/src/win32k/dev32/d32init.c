@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.19.4.3 2000-08-15 06:16:01 bird Exp $
+/* $Id: d32init.c,v 1.19.4.4 2000-08-15 07:03:25 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -1153,7 +1153,8 @@ int importTabInit(void)
         0,                              /* 26 */
         0,                              /* 27 */
         0,                              /* 28 */
-        0                               /* 29 */
+        0,                              /* 29 */
+        0                               /* 30 */
     };
     int i;
     int cb;

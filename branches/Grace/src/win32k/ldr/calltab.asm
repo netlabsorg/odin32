@@ -1,4 +1,4 @@
-; $Id: calltab.asm,v 1.12.4.1 2000-07-16 22:43:34 bird Exp $
+; $Id: calltab.asm,v 1.12.4.2 2000-08-15 07:03:25 bird Exp $
 ;
 ; callTab - Call back again table - table with entry for each function or
 ;           variable which is overrided.
@@ -74,6 +74,10 @@
     public _fpptda_environ
     public ptda_environ_sel
 
+    public pptda_module
+    public ptda_module_offObject
+    public _fpptda_module
+    public ptda_module_sel
 
 
 ;
@@ -255,7 +259,12 @@ _fpptda_environ        dd  0
 ptda_environ_sel       dw  0
     db (MAXSIZE_PROLOG - 14) dup(0cch)
 
-
+; 30
+pptda_module          dd  0
+ptda_module_offObject dd  0
+_fpptda_module        dd  0
+ptda_module_sel       dw  0
+    db (MAXSIZE_PROLOG - 14) dup(0cch)
 
 
 
