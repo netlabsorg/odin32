@@ -1,4 +1,4 @@
-/* $Id: probkrnl.c,v 1.6 2000-01-22 18:20:56 bird Exp $
+/* $Id: probkrnl.c,v 1.7 2000-02-01 08:08:54 bird Exp $
  *
  * Description:   Autoprobes the os2krnl file and os2krnl[*].sym files.
  *                Another Hack!
@@ -48,7 +48,8 @@
 #define WORD unsigned short int
 #define DWORD unsigned long int
 
-/* "@#IBM:14.020#@    os2krnl... "*/
+/* "@#IBM:14.039#@    os2krnl... "*/
+/* "@#IBM:8.264#@    os2krnl... "*/
 #define KERNEL_ID_STRING_LENGTH  42
 #define KERNEL_READ_SIZE        512
 
@@ -65,7 +66,7 @@
 #include <strat2.h>
 #include <reqpkt.h>
 
-#include "os2krnl.h" /* must be included before dev1632.h! */
+#include "os2krnl.h"                    /* must be included before dev1632.h! */
 #include "sym.h"
 #include "probkrnl.h"
 #include "dev16.h"
@@ -139,11 +140,11 @@ static KRNLOBJTABLE KrnlOTEs = {0};
 
 /* messages */
 static char szBanner[]   = "Win32k - Odin32 support driver.";
-static char szMsg1[]     = "\n\r\tFound kernel: ";
-static char szMsg1a[]    = "\n\r\tBuild: ";
-static char szMsg2[]     = "\n\r\tFound symbolfile: ";
-static char szMsg4[]     = "\n\r\tFailed to find symbolfile!\n\r";
-static char szMsgfailed[]= "failed!";
+static char szMsg1[]     = "\n\r    Found kernel:     ";
+static char szMsg1a[]    = "\n\r    Build:            ";
+static char szMsg2[]     = "\n\r    Found symbolfile: ";
+static char szMsg4[]     = "\n\r    Failed to find symbolfile!\n\r";
+static char szMsgfailed[]= "failed!   ";
 
 
 /*******************************************************************************
@@ -908,9 +909,12 @@ static void ShowResult(int rc, int iSym)
 
             for (i = 0; i < NUMBER_OF_PROCS; i++)
             {
-                puts("\n\r\t");
+                if ((i % 2) == 0)
+                    puts("\n\r    ");
+                else
+                    puts("    ");
                 puts(aProcTab[i].achName);
-                for (j = aProcTab[i].cchName; j < 17; j++)
+                for (j = aProcTab[i].cchName; j < 20; j++)
                     puts(" ");
 
                 puts(" at ");
