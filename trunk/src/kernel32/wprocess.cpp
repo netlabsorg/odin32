@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.48 1999-11-10 16:38:36 phaller Exp $ */
+/* $Id: wprocess.cpp,v 1.49 1999-11-11 19:10:09 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -808,7 +808,6 @@ ULONG SYSTEM GetVersionSize(char *lpszModName)
 			delete rsrcimg;
 	        	return(FALSE);
 		}
-	    	rsrcimg->init(0);
 		int size = rsrcimg->getVersionSize();
 		delete rsrcimg;
 		return size;

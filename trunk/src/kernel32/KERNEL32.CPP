@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.29 1999-11-09 19:22:31 sandervl Exp $ */
+/* $Id: KERNEL32.CPP,v 1.30 1999-11-11 19:10:08 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -366,6 +366,7 @@ DWORD WIN32API GetEnvironmentVariableW(LPCWSTR lpName, LPWSTR lpBuffer,
 
     dprintf(("KERNEL32:  OS2GetEnvironmentVariableW\n"));
     asciibuffer = (char *)malloc(nSize+1);
+    *asciibuffer = 0;
     astring     = UnicodeToAsciiString((LPWSTR)lpName);
 
     rc = O32_GetEnvironmentVariable(astring, asciibuffer, nSize);
