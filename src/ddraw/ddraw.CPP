@@ -1,4 +1,4 @@
-/* $Id: ddraw.CPP,v 1.11 2000-02-04 19:31:23 hugh Exp $ */
+/* $Id: ddraw.CPP,v 1.12 2000-03-03 19:21:22 hugh Exp $ */
 
 /*
  * DXDraw DLL implementaion
@@ -44,7 +44,7 @@ HRESULT WIN32API OS2DirectDrawCreate( GUID FAR *lpGUID,
   }
   else
   {
-    newdraw->Vtbl.AddRef((IDirectDraw *)newdraw);
+    newdraw->Vtbl.AddRef((IDirectDraw2 *)newdraw);
     rc = newdraw->GetLastError();
     if(rc != DD_OK)
     {
