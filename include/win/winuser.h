@@ -1,4 +1,4 @@
-/* $Id: winuser.h,v 1.42 2000-10-17 17:14:32 sandervl Exp $ */
+/* $Id: winuser.h,v 1.43 2000-11-16 18:02:31 sandervl Exp $ */
 
 #ifndef __INCLUDE_WINUSER_H
 #define __INCLUDE_WINUSER_H
@@ -2240,6 +2240,66 @@ typedef struct
 #define SPIF_UPDATEINIFILE              1
 #define SPIF_SENDWININICHANGE           2
 #define SPIF_SENDCHANGE                 SPIF_SENDWININICHANGE
+
+
+typedef struct {
+	UINT		cbSize;
+	INT		iBorderWidth;
+	INT		iScrollWidth;
+	INT		iScrollHeight;
+	INT		iCaptionWidth;
+	INT		iCaptionHeight;
+	LOGFONTA	lfCaptionFont;
+	INT		iSmCaptionWidth;
+	INT		iSmCaptionHeight;
+	LOGFONTA	lfSmCaptionFont;
+	INT		iMenuWidth;
+	INT		iMenuHeight;
+	LOGFONTA	lfMenuFont;
+	LOGFONTA	lfStatusFont;
+	LOGFONTA	lfMessageFont;
+} NONCLIENTMETRICSA,*LPNONCLIENTMETRICSA;
+
+typedef struct {
+	UINT		cbSize;
+	INT		iBorderWidth;
+	INT		iScrollWidth;
+	INT		iScrollHeight;
+	INT		iCaptionWidth;
+	INT		iCaptionHeight;
+	LOGFONTW	lfCaptionFont;
+	INT		iSmCaptionWidth;
+	INT		iSmCaptionHeight;
+	LOGFONTW	lfSmCaptionFont;
+	INT		iMenuWidth;
+	INT		iMenuHeight;
+	LOGFONTW	lfMenuFont;
+	LOGFONTW	lfStatusFont;
+	LOGFONTW	lfMessageFont;
+} NONCLIENTMETRICSW,*LPNONCLIENTMETRICSW;
+
+DECL_WINELIB_TYPE_AW(NONCLIENTMETRICS)
+DECL_WINELIB_TYPE_AW(LPNONCLIENTMETRICS)
+
+typedef struct tagICONMETRICSA {
+    UINT cbSize;
+    int iHorzSpacing;
+    int iVertSpacing;
+    int iTitleWrap;
+    LOGFONTA lfFont;
+} ICONMETRICSA, *PICONMETRICSA, *LPICONMETRICSA;
+
+typedef struct tagICONMETRICSW {
+    UINT cbSize;
+    int iHorzSpacing;
+    int iVertSpacing;
+    int iTitleWrap;
+    LOGFONTW lfFont;
+} ICONMETRICSW, *PICONMETRICSW, *LPICONMETRICSW;
+
+DECL_WINELIB_TYPE_AW(ICONMETRICS)
+DECL_WINELIB_TYPE_AW(PICONMETRICS)
+DECL_WINELIB_TYPE_AW(LPICONMETRICS)
 
 /* Window Styles */
 #define WS_OVERLAPPED    0x00000000L
