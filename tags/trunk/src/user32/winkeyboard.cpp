@@ -1,4 +1,4 @@
-/* $Id: winkeyboard.cpp,v 1.33 2002-05-01 08:03:05 sandervl Exp $ */
+/* $Id: winkeyboard.cpp,v 1.34 2002-05-23 07:13:00 sandervl Exp $ */
 /*
  * Win32 <-> PM key translation
  *
@@ -117,7 +117,7 @@ BYTE abPMScanToWinVKey[256][2] =
 /* 0x33 PMSCAN_COMMA        */ , VK_COMMA                   ,FALSE
 /* 0x34 PMSCAN_PERIOD       */ , VK_PERIOD                  ,FALSE
 /* 0x35 PMSCAN_SLASH        */ , VK_SLASH                   ,FALSE
-/* 0x36 PMSCAN_SHIFTRIGHT   */ , VK_RSHIFT                  ,TRUE
+/* 0x36 PMSCAN_SHIFTRIGHT   */ , VK_RSHIFT                  ,FALSE
 /* 0x37 PMSCAN_PADASTERISK  */ , VK_MULTIPLY                ,FALSE
 /* 0x38 PMSCAN_ALTLEFT      */ , VK_LMENU                   ,FALSE
 /* 0x39 PMSCAN_SPACE        */ , VK_SPACE                   ,FALSE
@@ -1400,7 +1400,8 @@ SHORT WIN32API GetKeyState(int nVirtKey)
       
     case KEYOVERLAYSTATE_UP:
       return 0x0000;
-  }   
+  } 
+  if (nVirtKey == VK_MENU)  return O32_GetKeyState(VK_LMENU) | O32_GetKeyState(VK_RMENU);
   return O32_GetKeyState(nVirtKey);
 }
 //******************************************************************************
@@ -1422,6 +1423,7 @@ WORD WIN32API GetAsyncKeyState(INT nVirtKey)
     case KEYOVERLAYSTATE_UP:
       return 0x0000;
   } 
+  if (nVirtKey == VK_MENU)  return O32_GetKeyState(VK_LMENU) | O32_GetKeyState(VK_RMENU);
   return O32_GetAsyncKeyState(nVirtKey);
 }
 //******************************************************************************
