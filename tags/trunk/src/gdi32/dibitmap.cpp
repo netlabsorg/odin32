@@ -1,4 +1,4 @@
-/* $Id: dibitmap.cpp,v 1.28 2001-11-13 13:18:22 sandervl Exp $ */
+/* $Id: dibitmap.cpp,v 1.29 2001-12-15 18:50:25 sandervl Exp $ */
 
 /*
  * GDI32 dib & bitmap code
@@ -18,6 +18,7 @@
 #include <winuser32.h>
 #include "dibsect.h"
 #include "rgbcvt.h"
+#include <stats.h>
 
 #define DBG_LOCALLOG    DBG_dibitmap
 #include "dbglocal.h"
@@ -130,6 +131,8 @@ HBITMAP WIN32API CreateDIBitmap(HDC hdc, const BITMAPINFOHEADER *lpbmih,
     ((BITMAPINFOHEADER *)lpbmih)->biHeight   = iHeight;
     ((BITMAPINFOHEADER *)lpbmih)->biBitCount = biBitCount;
 
+    if(rc) STATS_CreateDIBitmap(rc, hdc, lpbmih, fdwInit, lpbInit, lpbmi, fuUsage);
+
     return rc;
 }
 //******************************************************************************
@@ -140,6 +143,8 @@ HBITMAP WIN32API CreateCompatibleBitmap( HDC hdc, int nWidth, int nHeight)
 
     hBitmap = O32_CreateCompatibleBitmap(hdc, nWidth, nHeight);
     dprintf(("GDI32: CreateCompatibleBitmap %x (%d,%d) returned %x", hdc, nWidth, nHeight, hBitmap));
+    if(hBitmap) STATS_CreateCompatibleBitmap(hBitmap,hdc, nWidth, nHeight);
+
     return hBitmap;
 }
 //******************************************************************************
@@ -159,6 +164,8 @@ HBITMAP WIN32API CreateBitmap(int nWidth, int nHeight, UINT cPlanes,
 
     hBitmap = O32_CreateBitmap(nWidth, nHeight, cPlanes, cBitsPerPel, lpvBits);
     dprintf(("GDI32: CreateBitmap (%d,%d) bps %d returned %x", nWidth, nHeight, cBitsPerPel, hBitmap));
+    if(hBitmap) STATS_CreateBitmap(hBitmap,nWidth, nHeight, cPlanes, cBitsPerPel, lpvBits);
+
     return(hBitmap);
 }
 //******************************************************************************
@@ -169,6 +176,8 @@ HBITMAP WIN32API CreateBitmapIndirect( const BITMAP *pBitmap)
 
     dprintf(("GDI32: CreateBitmapIndirect (%d,%d) bpp %d bits %x", pBitmap->bmWidth, pBitmap->bmHeight, pBitmap->bmBitsPixel, pBitmap->bmBits));
     hBitmap = O32_CreateBitmapIndirect(pBitmap);
+    if(hBitmap) STATS_CreateBitmapIndirect(hBitmap, pBitmap);
+
     dprintf(("GDI32: CreateBitmapIndirect returned %x", hBitmap));
     return hBitmap;
 }
@@ -242,6 +251,9 @@ HBITMAP WIN32API CreateDIBSection( HDC hdc, BITMAPINFO *pbmi, UINT iUsage,
             pbmi->bmiHeader.biHeight = iHeight;
 
             if(fCreateDC) DeleteDC(hdc);
+
+            STATS_CreateDIBSection(res, hdc, pbmi, iUsage, ppvBits, hSection, dwOffset);
+
             return(res);
         }
     }

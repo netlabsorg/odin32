@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.76 2001-11-13 15:42:05 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.77 2001-12-15 18:50:26 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -24,6 +24,7 @@
 #include <dcdata.h>
 #include <winuser32.h>
 #include "font.h"
+#include <stats.h>
 
 #define DBG_LOCALLOG    DBG_gdi32
 #include "dbglocal.h"
@@ -76,37 +77,95 @@ HGDIOBJ WIN32API GetStockObject(int arg1)
 }
 //******************************************************************************
 //******************************************************************************
-HBRUSH WIN32API CreatePatternBrush(HBITMAP arg1)
-{
- HBRUSH brush;
-
-    brush = O32_CreatePatternBrush(arg1);
-    dprintf(("GDI32: CreatePatternBrush from bitmap %X returned %X\n", arg1, brush));
-    return(brush);
-}
-//******************************************************************************
-//******************************************************************************
 ODINFUNCTION3(HPEN, CreatePen, int, fnPenStyle, int, nWidth, COLORREF, crColor)
 {
+ HPEN hPen;
+
     //CB: todo: PS_DOT is different in Win32 (. . . . and not - - - -)
     //    Open32 looks like LINETYPE_SHORTDASH instead of LINETYPE_DOT!!!
     //    -> difficult to fix without performance decrease!
 
-    return O32_CreatePen(fnPenStyle,nWidth,crColor);
+    hPen = O32_CreatePen(fnPenStyle,nWidth,crColor);
+    if(hPen) STATS_CreatePen(hPen, fnPenStyle,nWidth,crColor);
+    return hPen;
 }
 //******************************************************************************
 //******************************************************************************
 HPEN WIN32API CreatePenIndirect(const LOGPEN * lplgpn)
 {
+ HPEN hPen;
+
     dprintf(("GDI32: CreatePenIndirect %x", lplgpn));
-    return O32_CreatePenIndirect(lplgpn);
+    hPen = O32_CreatePenIndirect(lplgpn);
+    if(hPen) STATS_CreatePenIndirect(hPen, lplgpn);
+    return hPen;
+}
+//******************************************************************************
+//******************************************************************************
+HPEN WIN32API ExtCreatePen(DWORD dwPenStyle, DWORD dwWidth, const LOGBRUSH *lplb, 
+                           DWORD dwStyleCount, const DWORD *lpStyle)
+{
+ HPEN hPen;
+
+    hPen = O32_ExtCreatePen(dwPenStyle, dwWidth, lplb, dwStyleCount, lpStyle);
+    dprintf(("GDI32: ExtCreatePen %x %x %x %x %x returned %x", dwPenStyle, dwWidth, lplb, dwStyleCount, lpStyle, hPen));
+    if(hPen) STATS_ExtCreatePen(hPen, dwPenStyle, dwWidth, lplb, dwStyleCount, lpStyle);
+    return hPen;
+}
+//******************************************************************************
+//******************************************************************************
+HBRUSH WIN32API CreatePatternBrush(HBITMAP hBitmap)
+{
+ HBRUSH hBrush;
+
+    hBrush = O32_CreatePatternBrush(hBitmap);
+    if(hBrush) STATS_CreatePatternBrush(hBrush, hBitmap);
+
+    dprintf(("GDI32: CreatePatternBrush from bitmap %X returned %X\n", hBitmap, hBrush));
+    return(hBrush);
+}
+//******************************************************************************
+//******************************************************************************
+ODINFUNCTION1(HBRUSH, CreateSolidBrush, COLORREF, color)
+{
+    HBRUSH hBrush;
+
+    hBrush = O32_CreateSolidBrush(color);
+    if(hBrush) STATS_CreateSolidBrush(hBrush, color);
+    return(hBrush);
+}
+//******************************************************************************
+//******************************************************************************
+HBRUSH WIN32API CreateBrushIndirect( const LOGBRUSH *pLogBrush)
+{
+ HBRUSH hBrush;
+
+    hBrush = O32_CreateBrushIndirect((LPLOGBRUSH)pLogBrush);
+    dprintf(("GDI32: CreateBrushIndirect %x %x %x returned %x", pLogBrush->lbStyle, pLogBrush->lbColor, pLogBrush->lbHatch, hBrush));
+    if(hBrush) STATS_CreateBrushIndirect(hBrush, (LPLOGBRUSH)pLogBrush);
+    return hBrush;
+}
+//******************************************************************************
+//******************************************************************************
+HBRUSH WIN32API CreateHatchBrush(int fnStyle, COLORREF clrref)
+{
+ HBRUSH hBrush;
+ 
+    dprintf(("GDI32: CreateHatchBrush %x %x", fnStyle, clrref));
+    hBrush = O32_CreateHatchBrush(fnStyle, clrref);
+    if(hBrush) STATS_CreateHatchBrush(hBrush, fnStyle, clrref);
+    return hBrush;
 }
 //******************************************************************************
 //******************************************************************************
 HBRUSH WIN32API CreateDIBPatternBrushPt( const VOID * buffer, UINT usage)
 {
+ HBRUSH hBrush;
+
     dprintf(("GDI32: CreateDIBPatternBrushPt %x %x", buffer, usage));
-    return O32_CreateDIBPatternBrushPt(buffer, usage);
+    hBrush = O32_CreateDIBPatternBrushPt(buffer, usage);
+    if(hBrush) STATS_CreateDIBPatternBrushPt(hBrush, buffer, usage);
+    return hBrush;
 }
 /*****************************************************************************
  * Name      : HBRUSH CreateDIBPatternBrush
@@ -150,7 +209,7 @@ HBRUSH WIN32API CreateDIBPatternBrush( HGLOBAL hglbDIBPacked,
       GlobalUnlock(hglbDIBPacked);
   }
   else {
-      dprintf(("ERROR: CreateDIBPatternBrush (%08xh, %08xh) -> INVALID memory handle!!",
+      dprintf(("!ERROR!: CreateDIBPatternBrush (%08xh, %08xh) -> INVALID memory handle!!",
                 hglbDIBPacked, fuColorSpec));
   }
   return (ret);
@@ -165,6 +224,8 @@ HDC WIN32API CreateCompatibleDC( HDC hdc)
     ULONG oldcp = OSLibGpiQueryCp(hdc);
     if (!oldcp) /* If new DC is to be created */
         oldcp = GetDisplayCodepage();
+
+    if(newHdc) STATS_CreateCompatibleDC(hdc, newHdc);
 
     OSLibGpiSetCp(newHdc, oldcp);
     dprintf(("CreateCompatibleDC %X returned %x", hdc, newHdc));
@@ -196,6 +257,7 @@ ODINFUNCTION1(BOOL, DeleteDC, HDC, hdc)
       return ReleaseDC(OS2ToWin32Handle(pHps->hwnd), hdc);
   }
 
+  STATS_DeleteDC(hdc);
   return O32_DeleteDC(hdc);
 }
 //******************************************************************************
@@ -312,16 +374,6 @@ BOOL WIN32API CloseFigure(HDC hdc)
 }
 //******************************************************************************
 //******************************************************************************
-HBRUSH WIN32API CreateBrushIndirect( const LOGBRUSH *pLogBrush)
-{
- HBRUSH hBrush;
-
-    hBrush = O32_CreateBrushIndirect((LPLOGBRUSH)pLogBrush);
-    dprintf(("GDI32: CreateBrushIndirect %x %x %x returned %x", pLogBrush->lbStyle, pLogBrush->lbColor, pLogBrush->lbHatch, hBrush));
-    return hBrush;
-}
-//******************************************************************************
-//******************************************************************************
 HDC WIN32API CreateDCA(LPCSTR lpszDriver, LPCSTR lpszDevice, LPCSTR lpszOutput, const DEVMODEA *lpInitData)
 {
     HDC hdc;
@@ -341,6 +393,7 @@ HDC WIN32API CreateDCA(LPCSTR lpszDriver, LPCSTR lpszDevice, LPCSTR lpszOutput, 
     hdc = O32_CreateDC(lpszDriver, lpszDevice, lpszOutput, lpInitData);
     if(hdc) {
         OSLibGpiSetCp(hdc, GetDisplayCodepage());
+        STATS_CreateDCA(hdc, lpszDriver, lpszDevice, lpszOutput, lpInitData);
     }
 
     dprintf(("GDI32: CreateDCA %s %s %s %x returned %x", lpszDriver, lpszDevice, lpszOutput, lpInitData, hdc));
@@ -421,17 +474,11 @@ HDC WIN32API CreateDCW( LPCWSTR arg1, LPCWSTR arg2, LPCWSTR arg3, const DEVMODEW
 }
 //******************************************************************************
 //******************************************************************************
-HBRUSH WIN32API CreateHatchBrush( int arg1, COLORREF  arg2)
-{
-    dprintf(("GDI32: CreateHatchBrush"));
-    return O32_CreateHatchBrush(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
 HDC WIN32API CreateICA(LPCSTR lpszDriver, LPCSTR lpszDevice, LPCSTR lpszOutput,
                        const DEVMODEA *lpdvmInit)
 {
  static char *szDisplay = "DISPLAY";
+ HDC          hdc;
 
     dprintf(("GDI32: CreateICA"));
     //SvL: Open32 tests for "DISPLAY"
@@ -442,7 +489,9 @@ HDC WIN32API CreateICA(LPCSTR lpszDriver, LPCSTR lpszDevice, LPCSTR lpszOutput,
     if(lpszDriver == NULL) {
         lpszDriver = lpszDevice;
     }
-    return O32_CreateIC(lpszDriver, lpszDevice, lpszOutput, lpdvmInit);
+    hdc = O32_CreateIC(lpszDriver, lpszDevice, lpszOutput, lpdvmInit);
+    if(hdc) STATS_CreateICA(hdc, lpszDriver, lpszDevice, lpszOutput, lpdvmInit);
+    return hdc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -515,12 +564,6 @@ HDC WIN32API CreateICW( LPCWSTR arg1, LPCWSTR arg2, LPCWSTR arg3, const DEVMODEW
     }
 
     return rc;
-}
-//******************************************************************************
-//******************************************************************************
-ODINFUNCTION1(HBRUSH, CreateSolidBrush, COLORREF, color)
-{
-    return O32_CreateSolidBrush(color);
 }
 //******************************************************************************
 //******************************************************************************
@@ -630,15 +673,6 @@ int WIN32API SetROP2( HDC hdc, int rop2)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API EnumObjects( HDC hdc, int objType, GOBJENUMPROC objFunc, LPARAM lParam)
-{
-    //calling convention differences
-    dprintf(("ERROR: GDI32: EnumObjects STUB"));
-//    return O32_EnumObjects(arg1, arg2, arg3, arg4);
-    return 0;
-}
-//******************************************************************************
-//******************************************************************************
 int WIN32API Escape( HDC hdc, int nEscape, int cbInput, LPCSTR lpvInData, PVOID lpvOutData)
 {
  int rc;
@@ -650,13 +684,6 @@ int WIN32API Escape( HDC hdc, int nEscape, int cbInput, LPCSTR lpvInData, PVOID 
     else dprintf(("GDI32: Escape %x %d %d %x %x returned %d ", hdc, nEscape, cbInput, lpvInData, lpvOutData, rc));
 
     return rc;
-}
-//******************************************************************************
-//******************************************************************************
-HPEN WIN32API ExtCreatePen( DWORD arg1, DWORD arg2, const LOGBRUSH * arg3, DWORD arg4, const DWORD *  arg5)
-{
-    dprintf(("GDI32: ExtCreatePen"));
-    return O32_ExtCreatePen(arg1, arg2, arg3, arg4, arg5);
 }
 //******************************************************************************
 //******************************************************************************
@@ -777,13 +804,6 @@ BOOL WIN32API GetCharWidth32W(HDC hdc, UINT iFirstChar, UINT iLastChar, PINT pWi
 {
     dprintf(("GDI32: GetCharWidth32W might not work properly %x %x %x %x", hdc, iFirstChar, iLastChar, pWidthArray));
     return O32_GetCharWidth(hdc, iFirstChar, iLastChar, pWidthArray);
-}
-//******************************************************************************
-//******************************************************************************
-HANDLE WIN32API GetCurrentObject( HDC hdc, UINT arg2)
-{
-    dprintf(("GDI32: GetCurrentObject %x %x", hdc, arg2));
-    return (HANDLE)O32_GetCurrentObject(hdc, arg2);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1153,15 +1173,6 @@ ODINFUNCTION2(int, SetTextCharacterExtra, HDC, hdc, int, nCharExtra)
 ODINFUNCTION3(BOOL, SetTextJustification, HDC, hdc, int, nBreakExtra, int, nBreakCount)
 {
     return O32_SetTextJustification(hdc, nBreakExtra, nBreakCount);
-}
-//******************************************************************************
-//******************************************************************************
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API UnrealizeObject( HGDIOBJ hObject)
-{
-    dprintf(("GDI32: UnrealizeObject %x", hObject));
-    return O32_UnrealizeObject(hObject);
 }
 //******************************************************************************
 //******************************************************************************

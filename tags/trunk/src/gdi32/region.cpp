@@ -1,4 +1,4 @@
-/* $Id: region.cpp,v 1.24 2001-10-16 11:40:18 sandervl Exp $ */
+/* $Id: region.cpp,v 1.25 2001-12-15 18:50:27 sandervl Exp $ */
 
 /*
  * GDI32 region code
@@ -32,6 +32,7 @@
 #include <dcdata.h>
 #include <winuser32.h>
 #include "oslibgpi.h"
+#include <stats.h>
 
 #define DBG_LOCALLOG    DBG_region
 #include "dbglocal.h"
@@ -831,9 +832,12 @@ ODINFUNCTIONNODBG4(HRGN, CreatePolyPolygonRgn, const POINT * , lppt, const int *
    }
 
    if(ObjAllocateHandle(&hrgn, hrgn, GDIOBJ_REGION) == FALSE) {
+        GpiDestroyRegion(hpsRegion, hrgn);
         SetLastError(ERROR_OUTOFMEMORY_W);
         return 0;
    }
+   STATS_CreatePolyPolygonRgn(hrgn, lppt, pPolyCount, nCount, fnPolyFillMode);
+
    SetLastError(ERROR_SUCCESS_W);
    return hrgn;
 }
@@ -852,9 +856,12 @@ ODINFUNCTIONNODBG4(HRGN, CreateRectRgn, int, left, int, top, int, right, int, bo
    }
 
    if(ObjAllocateHandle(&hrgn, hrgn, GDIOBJ_REGION) == FALSE) {
+        GpiDestroyRegion(hpsRegion, hrgn);
         SetLastError(ERROR_OUTOFMEMORY_W);
         return 0;
    }
+   STATS_CreateRectRgn(hrgn, left, top, right, bottom);
+
    dprintf(("CreateRectRegion (%d,%d)(%d,%d) returned %x", left, top, right, bottom, hrgn));
    SetLastError(ERROR_SUCCESS_W);
    return hrgn;
@@ -884,9 +891,12 @@ ODINFUNCTIONNODBG6(HRGN, CreateRoundRectRgn, int, left, int, top, int, right, in
    }
 
    if(ObjAllocateHandle(&hrgn, hrgn, GDIOBJ_REGION) == FALSE) {
+        GpiDestroyRegion(hpsRegion, hrgn);
         SetLastError(ERROR_OUTOFMEMORY_W);
         return 0;
    }
+   STATS_CreateRoundRectRgn(hrgn, left, top, right, bottom, nWidthEllipse, nHeightEllipse);
+
    dprintf(("CreateRoundRectRegion (%d,%d)(%d,%d) (%d,%d) returned %x", left, top, right, bottom, nWidthEllipse, nHeightEllipse, hrgn));
    SetLastError(ERROR_SUCCESS_W);
    return hrgn;
@@ -994,9 +1004,11 @@ ODINFUNCTIONNODBG3(HRGN, ExtCreateRegion, const XFORM_W *, pXform, DWORD, count,
     }
 
     if(ObjAllocateHandle(&hrgn, hrgn, GDIOBJ_REGION) == FALSE) {
-            SetLastError(ERROR_OUTOFMEMORY_W);
-            return 0;
+        GpiDestroyRegion(hpsRegion, hrgn);
+        SetLastError(ERROR_OUTOFMEMORY_W);
+        return 0;
     }
+    STATS_ExtCreateRegion(hrgn, (PVOID)pXform, count, pData);
     SetLastError(ERROR_SUCCESS_W);
     return hrgn;
 }
@@ -1015,9 +1027,11 @@ ODINFUNCTIONNODBG4(HRGN, CreateEllipticRgn, int, left, int, top, int, right, int
     hrgn = GpiCreateEllipticRegion(hpsRegion, &rectl);
 
     if(ObjAllocateHandle(&hrgn, hrgn, GDIOBJ_REGION) == FALSE) {
-            SetLastError(ERROR_OUTOFMEMORY_W);
-            return 0;
+        GpiDestroyRegion(hpsRegion, hrgn);
+        SetLastError(ERROR_OUTOFMEMORY_W);
+        return 0;
     }
+    STATS_CreateEllipticRgn(hrgn, left, top, right, bottom);
     SetLastError(ERROR_SUCCESS_W);
     return hrgn;
 }
@@ -1053,9 +1067,7 @@ ODINFUNCTIONNODBG3(HRGN, CreatePolygonRgn, const POINT *, lppt, int, cPoints, in
         SetLastError(ERROR_INVALID_PARAMETER_W);
         return 0;
     }
-
     dprintf(("CreatePolygonRgn %x %d %d", lppt, cPoints, fnPolyFillMode));
-
 
     POLYGON  polygon;
     polygon.ulPoints = cPoints - 1;
@@ -1065,9 +1077,11 @@ ODINFUNCTIONNODBG3(HRGN, CreatePolygonRgn, const POINT *, lppt, int, cPoints, in
     hrgn = GpiCreatePolygonRegion(hpsRegion, 1, &polygon, POLYGON_BOUNDARY | flMode);
 
     if(ObjAllocateHandle(&hrgn, hrgn, GDIOBJ_REGION) == FALSE) {
-            SetLastError(ERROR_OUTOFMEMORY_W);
-            return 0;
+        GpiDestroyRegion(hpsRegion, hrgn);
+        SetLastError(ERROR_OUTOFMEMORY_W);
+        return 0;
     }
+    STATS_CreatePolygonRgn(hrgn, lppt, cPoints, fnPolyFillMode);
     SetLastError(ERROR_SUCCESS_W);
     return hrgn;
 }
