@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.51 2003-02-27 17:16:33 sandervl Exp $ */
+/* $Id: virtual.cpp,v 1.52 2003-03-03 16:25:33 sandervl Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -179,7 +179,7 @@ BOOL WINAPI FlushViewOfFile(
         SetLastError( ERROR_INVALID_ADDRESS );
         return FALSE;
     }
-    ret = map->flushView((ULONG)base, offset, cbFlush);
+    ret = map->flushView(offset, cbFlush);
     map->Release();
     return ret;
 }
