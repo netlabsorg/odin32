@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.19 1999-11-02 19:13:00 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.20 1999-11-10 14:16:44 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -1399,6 +1399,18 @@ INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, cons
     }
 
     return (regionType);
+}
+//******************************************************************************
+//******************************************************************************
+HWND WIN32API WindowFromDC(HDC hdc)
+{
+   pDCData pHps = (pDCData)GpiQueryDCData( (HPS)hdc );
+
+   dprintf(("USER32:  WindowFromDC %x", hdc));
+   if ( pHps )
+      return Win32BaseWindow::OS2ToWin32Handle(pHps->hwnd);
+   else
+      return 0;
 }
 //******************************************************************************
 //******************************************************************************

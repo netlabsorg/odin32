@@ -1,4 +1,4 @@
-/* $Id: wingdi.cpp,v 1.2 1999-09-21 17:04:27 dengert Exp $ */
+/* $Id: wingdi.cpp,v 1.3 1999-11-10 14:16:45 sandervl Exp $ */
 /*
  * Win32 Window graphics apis for OS/2
  *
@@ -129,16 +129,5 @@ HDC WIN32API GetWindowDC(HWND hwnd)
 #endif
 }
 #endif
-//******************************************************************************
-//******************************************************************************
-HWND WIN32API WindowFromDC(HDC hdc)
-{
-    dprintf(("USER32:  WindowFromDC\n"));
-#ifdef OPEN32_GDI
-    return O32_WindowFromDC(hdc);
-#else
-    ?????
-#endif
-}
 //******************************************************************************
 //******************************************************************************
