@@ -1,4 +1,4 @@
-/* $Id: wnetap32.cpp,v 1.11 2000-10-02 14:04:08 phaller Exp $ */
+/* $Id: wnetap32.cpp,v 1.12 2000-10-02 21:19:12 phaller Exp $ */
 
 /*
  *
@@ -30,13 +30,13 @@
 
 #include <odin.h>
 #include <odinwrap.h>
-#include <os2sel.h>
 #include <os2win.h>
 #include <misc.h>
 #include <heapstring.h>
+#include <string.h>
 
 #include "oslibnet.h"
-#include "lmwksta.h"
+#include "lanman.h"
 
 ODINDEBUGCHANNEL(WNETAP32-WNETAP32)
 
@@ -4396,15 +4396,195 @@ ODINFUNCTION4(NET_API_STATUS,OS2NetUseGetInfo,LPWSTR,  lpServerName,
  * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
  *****************************************************************************/
 
+void UL2LI(PLARGE_INTEGER pli, ULONG ul)
+{
+  pli->LowPart = ul;
+  pli->HighPart = 0;
+}
+
+void LOHI2LI(PLARGE_INTEGER pli, ULONG lo, ULONG hi)
+{
+  pli->LowPart = lo;
+  pli->HighPart = hi;
+}
+
+
 ODINFUNCTION5(NET_API_STATUS,OS2NetStatisticsGet,LPWSTR,  lpServerName,
                                                  LPWSTR,  lpService,
                                                  DWORD,   dwLevel,
                                                  DWORD,   dwOptions,
                                                  LPBYTE*, bufptr)
 {
-  dprintf(("NETAPI32: NetUseStatisticsGet not implemented\n"));
+  // Note: as we use the static addresses of the strings
+  // for a faster comparsion, the compiler may NOT
+  // merge duplicate static const strings.
+  static LPSTR SERVICE_SERVER       = "SERVER";
+  static LPSTR SERVICE_REQUESTER_NT = "REQUESTER";
+  static LPSTR SERVICE_REQUESTER_LM = "REQUESTER";
+  static LPSTR SERVICE_UNKNOWN      = "UNKNOWN";
+  
+  // Convert servername to ASCII
+  // Convert service name to ASCII AND OS/2-Pendant
+  // OS/2 only allowes "SERVER" and "REQUESTER"
+  char *asciiServername = NULL;
+  if (lpServerName) asciiServername = UnicodeToAsciiString(lpServerName);
+  
+  // server remains
+  LPSTR lpstrOS2Service = NULL;
+  if (lpService != NULL)
+    if (lstrcmpiW((LPCWSTR)L"WORKSTATION",      (LPCWSTR)lpService) == 0) lpstrOS2Service = (LPSTR)SERVICE_REQUESTER_NT;
+    else
+    if (lstrcmpW((LPCWSTR)L"LanmanWorkstation", (LPCWSTR)lpService) == 0) lpstrOS2Service = (LPSTR)SERVICE_REQUESTER_LM;
+    else
+    if (lstrcmpiW((LPCWSTR)L"SERVER",           (LPCWSTR)lpService) == 0) lpstrOS2Service = (LPSTR)SERVICE_SERVER;
+    else
+    if (lstrcmpW((LPCWSTR)L"LanmanServer",      (LPCWSTR)lpService) == 0) lpstrOS2Service = (LPSTR)SERVICE_SERVER;
+    else
+    lpstrOS2Service = (LPSTR)SERVICE_UNKNOWN;  // to prevent crashes in NETAPI
+  
+  // Note: The Win32 docs say nothing about "LanmanWorkstation"
+  // Probably this is a request for the LANMAN-Workstation specific data?
+#ifdef DEBUG
+  {
+    char *asciiService = UnicodeToAsciiString(lpService);
+    dprintf(("WINMM: NetStatisticsGet server=[%s], service=[%s]\n",
+             asciiServername,
+             asciiService));
+    FreeAsciiString(asciiService);
+  }
+#endif
+  
+  
+  // @@@PH convert information modes!
+  int iOS2Level = dwLevel;     // both must be 0
+  int iOS2Options = dwOptions; // seems to be identical
+  
+  ULONG  ulBytesAvailable;
+  DWORD  rc;
+  
+  // determine required size of buffer
+  char pOS2Buffer[4096];
+  rc = OSLibNetStatisticsGet((const unsigned char*)asciiServername,
+                             (const unsigned char*)lpstrOS2Service,
+                             0,
+                             iOS2Level,
+                             iOS2Options,
+                             (unsigned char*)pOS2Buffer,
+                             sizeof(pOS2Buffer),
+                             &ulBytesAvailable);
+  
+  if (asciiServername) FreeAsciiString(asciiServername);
+  
+  // convert the structures
+  switch (dwLevel)
+  {
+    case 0:
+      // Note: address comparsion is valid :)
+      if (lpstrOS2Service == SERVICE_REQUESTER_NT)
+      {
+        PSTAT_WORKSTATION_NT_0 pstw0;
+        struct stat_workstation_0 *pOS2stw0 = (struct stat_workstation_0 *)pOS2Buffer;
 
-  return (NERR_BASE);
+        // calculate new size for target buffer
+        rc = OS2NetApiBufferAllocate(sizeof(STAT_WORKSTATION_NT_0), (LPVOID*)&pstw0);
+        if (!rc)
+        {
+          // buffer is zeroed?
+          //memset(pstw0, 0, sizeof(STAT_WORKSTATION_0));
+
+          UL2LI  (&pstw0->StatisticsStartTime, pOS2stw0->stw0_start);
+          LOHI2LI(&pstw0->BytesReceived,       pOS2stw0->stw0_bytesrcvd_r_lo, pOS2stw0->stw0_bytesrcvd_r_hi);
+          pstw0->SmbsReceived;
+          pstw0->PagingReadBytesRequested;
+          pstw0->NonPagingReadBytesRequested;
+          pstw0->CacheReadBytesRequested;
+          pstw0->NetworkReadBytesRequested;
+          LOHI2LI(&pstw0->BytesTransmitted,    pOS2stw0->stw0_bytessent_r_lo, pOS2stw0->stw0_bytessent_r_hi);
+          pstw0->SmbsTransmitted;
+          pstw0->PagingWriteBytesRequested;
+          pstw0->NonPagingWriteBytesRequested;
+          pstw0->CacheWriteBytesRequested;
+          pstw0->NetworkWriteBytesRequested;
+          
+          pstw0->InitiallyFailedOperations;
+          pstw0->FailedCompletionOperations;
+          pstw0->ReadOperations;
+          pstw0->RandomReadOperations;
+          pstw0->ReadSmbs;
+          pstw0->LargeReadSmbs;
+          pstw0->SmallReadSmbs;
+          pstw0->WriteOperations;
+          pstw0->RandomWriteOperations;
+          pstw0->WriteSmbs;
+          pstw0->LargeWriteSmbs;
+          pstw0->SmallWriteSmbs;
+          pstw0->RawReadsDenied;
+          pstw0->RawWritesDenied;
+          
+          pstw0->NetworkErrors;
+          pstw0->Sessions                   = pOS2stw0->stw0_sesstart;
+          pstw0->FailedSessions             = pOS2stw0->stw0_sessfailcon;
+          pstw0->Reconnects                 = pOS2stw0->stw0_autorec;
+          pstw0->CoreConnects;
+          pstw0->Lanman20Connects;
+          pstw0->Lanman21Connects;
+          pstw0->LanmanNtConnects;
+          pstw0->ServerDisconnects;
+          pstw0->HungSessions               = pOS2stw0->stw0_sessbroke;
+          pstw0->UseCount                   = pOS2stw0->stw0_uses;
+          pstw0->FailedUseCount             = pOS2stw0->stw0_usefail;
+          pstw0->CurrentCommands;
+        }
+        // the caller is responsible for freeing the memory!
+        *bufptr = (LPBYTE)pstw0;
+      }
+      else
+      if (lpstrOS2Service == SERVICE_REQUESTER_LM)
+      {
+        // LanmanWorkstation !
+        PSTAT_WORKSTATION_LM_0 pstw0;
+        struct stat_workstation_0 *pOS2stw0 = (struct stat_workstation_0 *)pOS2Buffer;
+
+        // calculate new size for target buffer
+        rc = OS2NetApiBufferAllocate(sizeof(STAT_WORKSTATION_LM_0), (LPVOID*)&pstw0);
+        if (!rc)
+        {
+          // Note: the really nice thing is, the lanman structures are
+          // exactly identical between OS/2 and NT ... :)
+          memcpy(pstw0,
+                 pOS2stw0,
+                 sizeof(STAT_WORKSTATION_LM_0));
+        }
+        
+        // the caller is responsible for freeing the memory!
+        *bufptr = (LPBYTE)pstw0;
+      }
+      else
+      if (lpstrOS2Service == SERVICE_SERVER)
+      {
+        // SERVER !
+        PSTAT_SERVER_0 psts0;
+        struct stat_server_0 *pOS2sts0 = (struct stat_server_0 *)pOS2Buffer;
+
+        // calculate new size for target buffer
+        rc = OS2NetApiBufferAllocate(sizeof(STAT_SERVER_0), (LPVOID*)&psts0);
+        if (!rc)
+        {
+          // Note: the really nice thing is, the server structures are
+          // exactly identical between OS/2 and NT ... :)
+          memcpy(psts0,
+                 pOS2sts0,
+                 sizeof(STAT_SERVER_0));
+        }
+        
+        // the caller is responsible for freeing the memory!
+        *bufptr = (LPBYTE)psts0;
+      }
+    
+    break;
+  }
+  
+  return (rc);
 }
 
 
