@@ -1,4 +1,15 @@
- /* $Id: ChangeLog,v 1.471 1999-11-24 18:20:13 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.472 1999-11-24 19:34:24 sandervl Exp $ */
+
+ 99-11-24: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Fixed desktop window handle (shouldn't be 0)
+                  Added support for broadcasting messages (in post/sendmessage)
+                  (Note: might not be complete correct to use WinBroadcastMsg)
+                  Changed Post(Thread)MessageA/W; now packs message info in
+                  shared memory buffer and posts it using a specific PM message.
+	- KERNEL32: Return kernel32path\win in GetWindowsDirectoryA if
+                    neither the env variable or odin.ini key is present.
+                    (also create this dir)
+                    Fixed incorrect dll & exe renaming.
 
  99-11-24: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: added missing button styles and messages
