@@ -156,12 +156,6 @@ BOOL   HMReadFile                   (HANDLE                     hFile,
                                      LPVOID                     lpBuffer,
                                      DWORD                      nNumberOfBytesToRead,
                                      LPDWORD                    lpNumberOfBytesRead,
-                                     LPOVERLAPPED               lpOverlapped);
-
-
-BOOL   HMReadFileEx                 (HANDLE                     hFile,
-                                     LPVOID                     lpBuffer,
-                                     DWORD                      nNumberOfBytesToRead,
                                      LPOVERLAPPED               lpOverlapped,
                                      LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine);
 
@@ -169,13 +163,8 @@ BOOL   HMWriteFile                  (HANDLE                     hFile,
                                      LPCVOID                    lpBuffer,
                                      DWORD                      nNumberOfBytesToWrite,
                                      LPDWORD                    lpNumberOfBytesWritten,
-                                     LPOVERLAPPED               lpOverlapped);
-
-BOOL   HMWriteFileEx                 (HANDLE                     hFile,
-                                      LPVOID                     lpBuffer,
-                                      DWORD                      nNumberOfBytesToWrite,
-                                      LPOVERLAPPED               lpOverlapped,
-                                      LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine);
+                                     LPOVERLAPPED               lpOverlapped,
+                                     LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine);
 
 DWORD  HMGetFileType                (HANDLE                     hFile);
 
