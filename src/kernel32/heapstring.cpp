@@ -1,5 +1,3 @@
-/* $Id: heapstring.cpp,v 1.45 2001-10-15 17:10:54 sandervl Exp $ */
-
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -52,7 +50,8 @@ ODINDEBUGCHANNEL(KERNEL32-HEAPSTRING)
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
-int WIN32API lstrlenA(LPCSTR arg1)
+ODINFUNCTIONNODBG1(int, lstrlenA,
+                   LPCSTR, arg1)
 {
   dprintf2(("KERNEL32: lstrlenA(%s)\n",
            arg1));
@@ -77,7 +76,8 @@ int WIN32API lstrlenA(LPCSTR arg1)
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
-int WIN32API lstrlenW(LPCWSTR arg1)
+ODINFUNCTIONNODBG1(int, lstrlenW,
+                   LPCWSTR, arg1)
 {
   int rc;
 
@@ -106,7 +106,9 @@ int WIN32API lstrlenW(LPCWSTR arg1)
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
-LPSTR WIN32API lstrcatA(LPSTR arg1, LPCSTR arg2)
+ODINFUNCTIONNODBG2(LPSTR, lstrcatA,
+                   LPSTR, arg1, 
+                   LPCSTR, arg2)
 {
   dprintf2(("KERNEL32: lstrcat(%s,%s)\n",
            arg1,
@@ -131,7 +133,9 @@ LPSTR WIN32API lstrcatA(LPSTR arg1, LPCSTR arg2)
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
-LPWSTR WIN32API lstrcatW(LPWSTR arg1, LPCWSTR arg2)
+ODINFUNCTIONNODBG2(LPWSTR, lstrcatW,
+                   LPWSTR, arg1,
+                   LPCWSTR, arg2)
 {
   dprintf2(("KERNEL32: OS2lstrcatW(%08xh,%08xh)\n",
            arg1,
@@ -157,7 +161,9 @@ LPWSTR WIN32API lstrcatW(LPWSTR arg1, LPCWSTR arg2)
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
-int WIN32API lstrcmpA(LPCSTR arg1, LPCSTR  arg2)
+ODINFUNCTIONNODBG2(int, lstrcmpA,
+                   LPCSTR, arg1,
+                   LPCSTR, arg2)
 {
   dprintf2(("KERNEL32: OS2lstrcmpA(%s,%s)\n",
            arg1,
@@ -184,7 +190,10 @@ int WIN32API lstrcmpA(LPCSTR arg1, LPCSTR  arg2)
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
-int WIN32API lstrncmpA(LPCSTR arg1, LPCSTR  arg2, int l)
+ODINFUNCTIONNODBG3(int, lstrncmpA,
+                   LPCSTR, arg1, 
+                   LPCSTR, arg2,
+                   int, l)
 {
   dprintf2(("KERNEL32: OS2lstrncmpA(%s,%s,%d)\n",
            arg1,
@@ -205,7 +214,10 @@ int WIN32API lstrncmpA(LPCSTR arg1, LPCSTR  arg2, int l)
  *
  * Author    : Przemyslaw Dobrowolski
  *****************************************************************************/
-INT WINAPI lstrncmpiA( LPCSTR str1, LPCSTR str2, INT n )
+ODINFUNCTIONNODBG3(INT, lstrncmpiA,
+                   LPCSTR, str1,
+                   LPCSTR, str2,
+                   INT, n )
 {
   INT firstch,lastch;
   INT result = 0;
@@ -226,7 +238,10 @@ INT WINAPI lstrncmpiA( LPCSTR str1, LPCSTR str2, INT n )
   return(result);
 }
 //TODO: Don't know if this is completely correct
-int WIN32API lstrncmpiW(LPCWSTR str1, LPCWSTR str2, int n)
+ODINFUNCTIONNODBG3(int, lstrncmpiW,
+                   LPCWSTR, str1, 
+                   LPCWSTR, str2,
+                   int, n)
 {
   INT firstch,lastch;
   INT result = 0;
@@ -259,7 +274,9 @@ int WIN32API lstrncmpiW(LPCWSTR str1, LPCWSTR str2, int n)
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
-int WIN32API lstrcmpW(LPCWSTR arg1, LPCWSTR arg2)
+ODINFUNCTIONNODBG2(int, lstrcmpW,
+                   LPCWSTR, arg1,
+                   LPCWSTR, arg2)
 {
     dprintf2(("KERNEL32: lstrcmpW (%08xh, %08xh)\n",
              arg1,
@@ -286,7 +303,10 @@ int WIN32API lstrcmpW(LPCWSTR arg1, LPCWSTR arg2)
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
-int WIN32API lstrncmpW(LPCWSTR arg1, LPCWSTR  arg2, int l)
+ODINFUNCTIONNODBG3(int, lstrncmpW,
+                   LPCWSTR, arg1,
+                   LPCWSTR, arg2,
+                   int, l)
 {
   dprintf2(("KERNEL32: OS2lstrncmpW(%08xh,%08xh,%d)\n",
            arg1,
@@ -310,7 +330,9 @@ int WIN32API lstrncmpW(LPCWSTR arg1, LPCWSTR  arg2, int l)
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
-LPSTR WIN32API lstrcpyA(LPSTR dest, LPCSTR src)
+ODINFUNCTIONNODBG2(LPSTR, lstrcpyA,
+                   LPSTR, dest,
+                   LPCSTR, src)
 {
     if ( (src == NULL) || (dest == NULL) ) // stupid parameter checking
         return NULL;
@@ -331,7 +353,9 @@ LPSTR WIN32API lstrcpyA(LPSTR dest, LPCSTR src)
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
-LPWSTR WIN32API lstrcpyW(LPWSTR dest, LPCWSTR src)
+ODINFUNCTIONNODBG2(LPWSTR, lstrcpyW,
+                   LPWSTR, dest,
+                   LPCWSTR, src)
 {
     if ( (src == NULL) || (dest == NULL) ) // stupid parameter checking
         return NULL;
@@ -354,15 +378,13 @@ LPWSTR WIN32API lstrcpyW(LPWSTR dest, LPCWSTR src)
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
-LPSTR WIN32API lstrcpynA(LPSTR arg1, LPCSTR  arg2, int arg3)
+ODINFUNCTIONNODBG3(LPSTR, lstrcpynA,
+                   LPSTR, arg1,
+                   LPCSTR, arg2,
+                   int, arg3)
 {
   register LPSTR p1 = arg1;
   register LPSTR p2 = (LPSTR)arg2;
-
-  dprintf2(("KERNEL32: OS2lstrcpyA(%08xh, %08xh, %08xh)\n",
-           arg1,
-           arg2,
-           arg3));
 
   if(arg3 == 0) {
     return NULL;
@@ -394,13 +416,11 @@ LPSTR WIN32API lstrcpynA(LPSTR arg1, LPCSTR  arg2, int arg3)
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
-LPWSTR WIN32API lstrcpynW(LPWSTR dest, LPCWSTR src, int arg3)
+ODINFUNCTION3(LPWSTR, lstrcpynW,
+              LPWSTR, dest,
+              LPCWSTR, src,
+              int, arg3)
 {
-  dprintf2(("KERNEL32: lstrcpynW(%08xh,%08xh,%08xh)",
-           dest,
-           src,
-           arg3));
-
   if (arg3 == 0)
     return NULL;
 
@@ -424,7 +444,9 @@ LPWSTR WIN32API lstrcpynW(LPWSTR dest, LPCWSTR src, int arg3)
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
-int WIN32API lstrcmpiA(LPCSTR arg1, LPCSTR  arg2)
+ODINFUNCTIONNODBG2(int, lstrcmpiA,
+                   LPCSTR, arg1,
+                   LPCSTR, arg2)
 {
   dprintf2(("KERNEL32: lstrcmpiA(%s,%s)\n",
            arg1,
@@ -452,24 +474,26 @@ int WIN32API lstrcmpiA(LPCSTR arg1, LPCSTR  arg2)
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
-int WIN32API lstrcmpiW(LPCWSTR str1, LPCWSTR str2)
+ODINFUNCTIONNODBG2(int, lstrcmpiW,
+                   LPCWSTR, str1,
+                   LPCWSTR, str2)
 {
-    dprintf2(("KERNEL32: lstrcmpiW(%08xh,%08xh)", str1, str2));
-
-    if (!str1 || !str2) {
-        SetLastError(ERROR_INVALID_PARAMETER);
-        return 0;
-    }
-    return strcmpiW( str1, str2 );
+  if (!str1 || !str2) {
+    
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return 0;
+  }
+  return strcmpiW( str1, str2 );
 }
 
 //*****************************************************************************
 //lstrcpynWtoA and lstrcpynAtoW must zero-terminate the string
 //because Wine code depends on this behaviour (i.e. comdlg32)
 //*****************************************************************************
-int WIN32API lstrcpynWtoA(LPSTR   astring,
-                          LPCWSTR ustring,
-                          int     length)
+ODINFUNCTIONNODBG3(int, lstrcpynWtoA,
+                   LPSTR,   astring,
+                   LPCWSTR, ustring,
+                   int,     length)
 {
  int ret;
 
@@ -491,9 +515,10 @@ int WIN32API lstrcpynWtoA(LPSTR   astring,
 
 //lstrcpynWtoA and lstrcpynAtoW must zero-terminate the string
 //because Wine code depends on this behaviour (i.e. comdlg32)
-int WIN32API lstrcpynAtoW(LPWSTR unicode,
-                          LPCSTR  ascii,
-                          int    asciilen)
+ODINFUNCTIONNODBG3(int,     lstrcpynAtoW,
+                   LPWSTR,  unicode,
+                   LPCSTR,  ascii,
+                   int ,    asciilen)
 {
  int ret;
 
@@ -527,7 +552,9 @@ int WIN32API lstrcpynAtoW(LPWSTR unicode,
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
-LPSTR WIN32API lstrcpyWtoA(LPSTR ascii, LPCWSTR unicode)
+ODINFUNCTIONNODBG2(LPSTR, lstrcpyWtoA,
+                   LPSTR, ascii,
+                   LPCWSTR, unicode)
 {
     //@@@PH huh? wuz dat?
     if (unicode == NULL)
@@ -563,7 +590,9 @@ LPSTR WIN32API lstrcpyWtoA(LPSTR ascii, LPCWSTR unicode)
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
-LPWSTR WIN32API lstrcpyAtoW(LPWSTR unicode, LPCSTR ascii)
+ODINFUNCTIONNODBG2(LPWSTR, lstrcpyAtoW,
+                   LPWSTR, unicode,
+                   LPCSTR, ascii)
 {
     /* achimha for security, strlen might trap if garbage in */
     /* @@@PH 98/06/07 */
@@ -599,7 +628,10 @@ LPWSTR WIN32API lstrcpyAtoW(LPWSTR unicode, LPCSTR ascii)
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
-LPVOID WIN32API HEAP_xalloc( HANDLE heap, DWORD flags, DWORD size )
+ODINFUNCTIONNODBG3(LPVOID, HEAP_xalloc,
+                   HANDLE, heap,
+                   DWORD, flags,
+                   DWORD, size )
 {
   LPVOID p = HeapAlloc( heap, flags, size );
   if (!p)
@@ -625,7 +657,11 @@ LPVOID WIN32API HEAP_xalloc( HANDLE heap, DWORD flags, DWORD size )
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
-LPVOID WIN32API HEAP_xrealloc( HANDLE heap, DWORD flags, LPVOID lpMem, DWORD size )
+ODINFUNCTIONNODBG4(LPVOID, HEAP_xrealloc,
+                   HANDLE, heap,
+                   DWORD, flags,
+                   LPVOID, lpMem,
+                   DWORD, size )
 {
   LPVOID p = HeapReAlloc( heap, flags, lpMem, size );
   if (!p)
@@ -652,7 +688,8 @@ LPVOID WIN32API HEAP_xrealloc( HANDLE heap, DWORD flags, LPVOID lpMem, DWORD siz
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
-LPVOID WIN32API HEAP_malloc(DWORD size )
+ODINFUNCTIONNODBG1(LPVOID, HEAP_malloc,
+                   DWORD, size )
 {
   LPVOID p = HeapAlloc( GetProcessHeap(), 0, size );
   if (!p)
@@ -676,7 +713,8 @@ LPVOID WIN32API HEAP_malloc(DWORD size )
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
-DWORD WIN32API HEAP_size(LPVOID lpMem)
+ODINFUNCTIONNODBG1(DWORD, HEAP_size,
+                   LPVOID, lpMem)
 {
   return HeapSize( GetProcessHeap(), 0, lpMem );
 }
@@ -694,7 +732,9 @@ DWORD WIN32API HEAP_size(LPVOID lpMem)
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
-LPVOID WIN32API HEAP_realloc(LPVOID lpMem, DWORD size )
+ODINFUNCTIONNODBG2(LPVOID, HEAP_realloc,
+                   LPVOID, lpMem,
+                   DWORD, size )
 {
   LPVOID p = HeapReAlloc( GetProcessHeap(), 0, lpMem, size );
   if (!p)
@@ -719,11 +759,9 @@ LPVOID WIN32API HEAP_realloc(LPVOID lpMem, DWORD size )
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
-VOID WIN32API HEAP_free(LPVOID lpMem)
+ODINPROCEDURENODBG1(HEAP_free,
+                    LPVOID, lpMem)
 {
-  dprintf2(("KERNEL32: HEAP_free(%08xh)\n",
-           lpMem));
-
   HeapFree( GetProcessHeap(), 0, lpMem);
 }
 
@@ -740,11 +778,15 @@ VOID WIN32API HEAP_free(LPVOID lpMem)
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
-LPSTR WIN32API HEAP_strdupA( HANDLE heap, DWORD flags, LPCSTR str )
+ODINFUNCTIONNODBG3(LPSTR, HEAP_strdupA,
+                   HANDLE, heap,
+                   DWORD, flags,
+                   LPCSTR, str )
 {
-    LPSTR p = (LPSTR)HEAP_xalloc( heap, flags, lstrlenA(str) + 1 );
-    lstrcpyA( p, str );
-    return p;
+  int iLength = lstrlenA(str) + 1;
+  LPSTR p = (LPSTR)HEAP_xalloc( heap, flags, iLength );
+  memcpy( p, str, iLength );
+  return p;
 }
 
 
@@ -760,11 +802,14 @@ LPSTR WIN32API HEAP_strdupA( HANDLE heap, DWORD flags, LPCSTR str )
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
-LPWSTR WIN32API HEAP_strdupW( HANDLE heap, DWORD flags, LPCWSTR str )
+ODINFUNCTIONNODBG3(LPWSTR, HEAP_strdupW,
+                   HANDLE, heap,
+                   DWORD, flags,
+                   LPCWSTR, str )
 {
     INT len = lstrlenW(str) + 1;
     LPWSTR p = (LPWSTR)HEAP_xalloc( heap, flags, len * sizeof(WCHAR) );
-    lstrcpyW( p, str );
+    memcpy( p, str, len );
     return p;
 }
 
@@ -781,7 +826,10 @@ LPWSTR WIN32API HEAP_strdupW( HANDLE heap, DWORD flags, LPCWSTR str )
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
-LPWSTR WIN32API HEAP_strdupAtoW( HANDLE heap, DWORD flags, LPCSTR str )
+ODINFUNCTIONNODBG3(LPWSTR, HEAP_strdupAtoW,
+                   HANDLE, heap,
+                   DWORD, flags,
+                   LPCSTR, str )
 {
     LPWSTR ret;
     int   len;
@@ -808,7 +856,10 @@ LPWSTR WIN32API HEAP_strdupAtoW( HANDLE heap, DWORD flags, LPCSTR str )
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
-LPSTR WIN32API HEAP_strdupWtoA( HANDLE heap, DWORD flags, LPCWSTR str )
+ODINFUNCTIONNODBG3(LPSTR, HEAP_strdupWtoA,
+                   HANDLE, heap,
+                   DWORD, flags,
+                   LPCWSTR, str )
 {
     LPSTR ret;
     int   len;
