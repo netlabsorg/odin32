@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.9 1999-09-26 10:09:59 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.10 1999-09-29 08:27:15 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -708,6 +708,100 @@ BOOL OSLibWinShowScrollBar(HWND hwndParent, int scrollBar, BOOL fShow)
 	WinShowWindow(hwndScroll, fShow);
    }
    return TRUE;   
+}
+//******************************************************************************
+//******************************************************************************
+ULONG OSLibWinGetScrollPos(HWND hwndParent, int scrollBar)
+{
+ HWND hwndScroll;
+
+   if(scrollBar == OSLIB_VSCROLL) {
+	hwndScroll = WinWindowFromID(hwndParent, FID_VERTSCROLL);
+   }
+   else hwndScroll = WinWindowFromID(hwndParent, FID_HORZSCROLL);
+
+   if(hwndScroll == NULL)
+	return 0;
+
+   return (ULONG)WinSendMsg(hwndScroll, SBM_QUERYPOS, 0, 0);
+}
+//******************************************************************************
+//******************************************************************************
+ULONG OSLibWinSetScrollPos(HWND hwndParent, int scrollBar, int pos, int fRedraw)
+{
+ HWND  hwndScroll;
+ ULONG oldPos;
+
+   if(scrollBar == OSLIB_VSCROLL) {
+	hwndScroll = WinWindowFromID(hwndParent, FID_VERTSCROLL);
+   }
+   else hwndScroll = WinWindowFromID(hwndParent, FID_HORZSCROLL);
+
+   if(hwndScroll == NULL)
+	return 0;
+
+   oldPos = (ULONG)WinSendMsg(hwndScroll, SBM_QUERYPOS, 0, 0);
+
+   if(WinSendMsg(hwndScroll, SBM_SETPOS, MPFROMSHORT(pos), MPFROMLONG(fRedraw)) == FALSE)
+	return 0;
+
+   return oldPos;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinSetScrollRange(HWND hwndParent, int scrollBar, int minpos, 
+                            int maxpos, int fRedraw)
+{
+ HWND hwndScroll;
+
+   if(scrollBar == OSLIB_VSCROLL) {
+	hwndScroll = WinWindowFromID(hwndParent, FID_VERTSCROLL);
+   }
+   else hwndScroll = WinWindowFromID(hwndParent, FID_HORZSCROLL);
+
+   if(hwndScroll == NULL)
+	return 0;
+
+   return (BOOL)WinSendMsg( hwndScroll, SBM_SETSCROLLBAR,
+                            MPFROMLONG(WinSendMsg(hwndScroll, SBM_QUERYPOS, 0, 0)),
+                            MPFROM2SHORT( minpos ,maxpos ) );
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinSetScrollPageSize(HWND hwndParent, int scrollBar, int pagesize, 
+                               int totalsize, int fRedraw)
+{
+ HWND hwndScroll;
+
+   if(scrollBar == OSLIB_VSCROLL) {
+	hwndScroll = WinWindowFromID(hwndParent, FID_VERTSCROLL);
+   }
+   else hwndScroll = WinWindowFromID(hwndParent, FID_HORZSCROLL);
+
+   if(hwndScroll == NULL)
+	return 0;
+
+   return (BOOL)WinSendMsg( hwndScroll, SBM_SETTHUMBSIZE,
+                            MPFROM2SHORT(pagesize, totalsize),
+                            0);
+}
+//******************************************************************************
+//******************************************************************************
+void OSLibWinChangeScrollStyle(HWND hwndParent, int scrollBar, int Reserved)
+{
+ HWND hwndScroll;
+
+   if(scrollBar == OSLIB_VSCROLL) {
+	hwndScroll = WinWindowFromID(hwndParent, FID_VERTSCROLL);
+   }
+   else hwndScroll = WinWindowFromID(hwndParent, FID_HORZSCROLL);
+
+   if(hwndScroll == NULL)
+	return;
+
+   WinSetWindowULong(hwndScroll, QWL_STYLE,
+                     WinQueryWindowULong(hwndScroll, QWL_STYLE) |
+                     SBS_AUTOTRACK | SBS_AUTOSIZE);
 }
 //******************************************************************************
 //******************************************************************************

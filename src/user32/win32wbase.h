@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.8 1999-09-26 22:24:31 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.9 1999-09-29 08:27:16 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -21,6 +21,7 @@
 #include <win32wndchild.h>
 #include <winres.h>
 #include <winconst.h>
+#include <scroll.h>
 
 class Win32BaseWindow;
 
@@ -173,6 +174,8 @@ Win32WndClass  *getClass()  { return windowClass; };
 Win32BaseWindow *getOwner()                   { return owner; };
 
 Win32BaseWindow *getTopParent();
+ SCROLLBAR_INFO *getScrollInfo(int nBar);
+       LONG      setScrollInfo(int nBar, SCROLLINFO *info, int fRedraw);
 
        LRESULT  SendMessageA(ULONG msg, WPARAM wParam, LPARAM lParam);
        LRESULT  SendMessageW(ULONG msg, WPARAM wParam, LPARAM lParam);
@@ -242,6 +245,9 @@ protected:
 
         RECT    rectWindow;
         RECT    rectClient;
+
+SCROLLBAR_INFO *vertScrollInfo;
+SCROLLBAR_INFO *horzScrollInfo;
 
 Win32WndClass  *windowClass;
 
