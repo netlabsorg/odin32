@@ -1,4 +1,4 @@
-# $Id: setup.os2debwlink.mk,v 1.1 2002-08-28 04:42:05 bird Exp $
+# $Id: setup.os2debwlink.mk,v 1.2 2002-08-29 10:01:43 bird Exp $
 
 #
 # Include optional stuff.
@@ -17,7 +17,11 @@ TOOL_DEFCONV    = $(PATH_TOOLS)\kDef2Wat.exe $(_LD_FORMAT)
 LINK_FLAGS      = Option eliminate, manglednames, caseexact, verbose, cache $(_LD_OPTIONAL) Debug codeview all
 LINK_FLAGS_EXE  = $(LINK_FLAGS)
 LINK_FLAGS_DLL  = $(LINK_FLAGS)
+!if "$(LD_FORMAT)" == "NE"
+LINK_FLAGS_SYS  = $(LINK_FLAGS) segment type code preload segment type data preload
+!else
 LINK_FLAGS_SYS  = $(LINK_FLAGS) segment type code preload segment type data preload Option internalrelocs, togglerelocs
+!endif
 LINK_FLAGS_VDD  = $(LINK_FLAGS_SYS)
 LINK_FLAGS_IFS  = $(LINK_FLAGS) segment type code preload segment type data preload
 

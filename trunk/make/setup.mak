@@ -1,4 +1,4 @@
-# $Id: setup.mak,v 1.15 2002-08-28 03:47:09 bird Exp $
+# $Id: setup.mak,v 1.16 2002-08-29 10:01:40 bird Exp $
 
 #
 # Generic makefile system.
@@ -129,7 +129,7 @@ PATH_DEF        = .
 # Where the include files are located.
 PATH_INCLUDES   = $(PATH_ROOT)\include\win;.;$(PATH_ROOT)\include
 # Where the temporary files goes.
-PATH_OBJ        = $(PATH_ROOT)\obj\$(SHT_TRGPLTFRM)$(SHT_BLDMD)$(SHT_BLDENV)
+PATH_OBJ        = $(PATH_ROOT)\obj\$(SHT_TRGPLTFRM)$(SHT_BLDMD)$(SHT_BLDENV:-=_)
 # Where the libraries goes.
 PATH_LIB        = $(PATH_ROOT)\lib\$(BUILD_MODE)
 # Base directory of the published files.
@@ -205,6 +205,28 @@ OBJ_DLLENTRY            =
 # This is the process file to include at end of the makefile.
 MAKE_INCLUDE_PROCESS    = $(PATH_MAKE)\process.mak
 
+# -----------------------------------------------------------------------------
+# Build the environments variables
+# -----------------------------------------------------------------------------
+
+# In the makefiles you're allowed to use the BUILD_ENVS_PRE,
+# BUILD_ENV_FORCE, BUILD_ENVS_POST variables to make private changes to the
+# environment. These are combined with the two base ones as follows:
+#   $(BUILD_ENVS_BASE_PRE) $(BUILD_ENVS_PRE) $(ENV_ENVS) $(BUILD_ENVS_BASE_POST) $(BUILD_ENVS_POST)
+#
+# BUILD_ENV_FORCE is used for changing the base compiler. Do *NOT* use
+# BUILD_ENV for that! BUILD_ENV_FORCE isn't used directly but in the setup
+# string above, but ENV_ENVS from the setup.[w]xyz.mk setup file is used.
+#
+
+# These strings are passed on to the BuildEnv.cmd script to setup the correct
+# shell environment.
+# TODO   Should these be overridable by setup.[w]xyz.mak ? (kso)
+BUILD_ENVS_BASE_POST    = toolkit40
+BUILD_ENVS_BASE_POST_16 =
+BUILD_ENVS_BASE_PRE     = buildsetup emx cvs
+BUILD_ENVS_BASE_PRE_16  = buildsetup emx cvs toolkit40 ddkbase
+
 
 # -----------------------------------------------------------------------------
 # Set forwarding flag.
@@ -278,32 +300,10 @@ $(ECHO) Including platform setup file $(CLRFIL)$(MAKE_INCLUDE_SETUP)$(CLRRST)
 #!endif
 #
 
+
 # -----------------------------------------------------------------------------
-# Build the environments
-# -----------------------------------------------------------------------------
-
-# In the makefiles you're allowed to use the BUILD_ENVS_PRE,
-# BUILD_ENV_FORCE, BUILD_ENVS_POST variables to make private changes to the
-# environment. These are combined with the two base ones as follows:
-#   $(BUILD_ENVS_BASE_PRE) $(BUILD_ENVS_PRE) $(ENV_ENVS) $(BUILD_ENVS_BASE_POST) $(BUILD_ENVS_POST)
-#
-# BUILD_ENV_FORCE is used for changing the base compiler. Do *NOT* use
-# BUILD_ENV for that! BUILD_ENV_FORCE isn't used directly but in the setup
-# string above, but ENV_ENVS from the setup.[w]xyz.mk setup file is used.
-#
-
-# These strings are passed on to the BuildEnv.cmd script to setup the correct
-# shell environment.
-# TODO   Should these be overridable by setup.[w]xyz.mak ? (kso)
-
-BUILD_ENVS_BASE_POST    = toolkit40
-BUILD_ENVS_BASE_POST_16 =
-BUILD_ENVS_BASE_PRE     = buildsetup emx cvs
-BUILD_ENVS_BASE_PRE_16  = buildsetup emx cvs toolkit40 ddkbase
-
-#
 # Forwarding processing.
-#
+# -----------------------------------------------------------------------------
 !if $(BUILD_FORWARDING)
 
 MAKE_INCLUDE_PROCESS = $(PATH_MAKE)\process.forwarder.mak

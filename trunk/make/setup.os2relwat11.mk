@@ -1,4 +1,4 @@
-# $Id: setup.os2relwat11.mk,v 1.9 2002-08-28 05:02:23 bird Exp $
+# $Id: setup.os2relwat11.mk,v 1.10 2002-08-29 10:01:46 bird Exp $
 
 #
 # Note! Watcom is unable to do debug info release builds.
@@ -22,17 +22,13 @@ ENV_ENVS_FORCE=vac308 watcomc11c
 # Include some shared standard stuff: ALP, VAC optional stuff.
 #
 AS_DEBUG_TYPE   = Codeview
-!include $(PATH_MAKE)\setup.os2relalp.mk
+!include $(PATH_MAKE)\setup.os2as.mk
 !include $(PATH_MAKE)\setup.os2relrc.mk
 !include $(PATH_MAKE)\setup.os2relwrc.mk
-!ifdef LD_USE_ILINK
 LD_OLDCPP       = 1
-! include $(PATH_MAKE)\setup.os2relilink.mk
-!else
 _LD_LIBPATH     = $(PATH_WATCOM)\lib386\os2;$(PATH_WATCOM)\lib386;
-! include $(PATH_MAKE)\setup.os2relwlink.mk
-!endif
-!include $(PATH_MAKE)\setup.os2allilib.mk
+!include $(PATH_MAKE)\setup.os2ld.mk
+!include $(PATH_MAKE)\setup.os2ar.mk
 !include $(PATH_MAKE)\setup.optional.watcom11x.mk
 
 
@@ -41,28 +37,41 @@ _LD_LIBPATH     = $(PATH_WATCOM)\lib386\os2;$(PATH_WATCOM)\lib386;
 #
 CC=wcc386.exe
 CXX=wpp386.exe
-LINK=wlink.exe
 
 
 #
 # The flags
 #
-CC_FLAGS=-bt=os2v2 -dOS2 -d__32BIT__ -d__i386__ -5r -zq -bm -ze -w4 -zld $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
-CC_FLAGS_EXE=$(CC_FLAGS) -omlinear -zc
-CC_FLAGS_DLL=$(CC_FLAGS) -omlinear -zc -bd
-CC_FLAGS_SYS=$(CC_FLAGS) -omlinear -s -zdp -zff -zgf -zu
+!if "$(_CC_OPTIM)" == ""
+_CC_OPTIM_    = -omlinear
+_CC_OPTIM_IFS = -omlnaru
+!else
+_CC_OPTIM_    =
+_CC_OPTIM_IFS =
+!endif
+CC_FLAGS=-bt=os2v2 -dOS2 -d__32BIT__ -d__i386__ -zq -bm -ze -w4 -zld $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
+CC_FLAGS_EXE=$(CC_FLAGS) $(_CC_OPTIM_) -zc
+CC_FLAGS_DLL=$(CC_FLAGS) $(_CC_OPTIM_) -zc -bd
+CC_FLAGS_SYS=$(CC_FLAGS) $(_CC_OPTIM_) -s -zdp -zff -zgf -zu
 CC_FLAGS_VDD=$(CC_FLAGS_SYS)
-CC_FLAGS_IFS=$(CC_FLAGS_SYS) -omlnaru -bd
+CC_FLAGS_IFS=$(CC_FLAGS_SYS) $(_CC_OPTIM_IFS) -bd
 CC_OBJ_OUT=-fo=
 CC_LST_OUT=
 CC_PC_2_STDOUT=-pc
 
-CXX_FLAGS=-bt=os2v2 -dOS2 -d__32BIT__ -d__i386__ -5r -zq -bm -ze -w4 -zld $(_CXX_OPTIONAL)  $(CXX_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CXX_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
-CXX_FLAGS_EXE=$(CXX_FLAGS) -omlinear -zc
-CXX_FLAGS_DLL=$(CXX_FLAGS) -omlinear -zc -bd
-CXX_FLAGS_SYS=$(CXX_FLAGS) -omlinear -omlinear -s -zdp -zff -zgf -zu
+!if "$(_CXX_OPTIM)" == ""
+_CXX_OPTIM_    = -omlinear
+_CXX_OPTIM_IFS = -omlnaru
+!else
+_CXX_OPTIM_    =
+_CXX_OPTIM_IFS =
+!endif
+CXX_FLAGS=-bt=os2v2 -dOS2 -d__32BIT__ -d__i386__ -zq -bm -ze -w4 -zld $(_CXX_OPTIONAL)  $(CXX_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CXX_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
+CXX_FLAGS_EXE=$(CXX_FLAGS) $(_CXX_OPTIM_) -zc
+CXX_FLAGS_DLL=$(CXX_FLAGS) $(_CXX_OPTIM_) -zc -bd
+CXX_FLAGS_SYS=$(CXX_FLAGS) $(_CXX_OPTIM_) -omlinear -s -zdp -zff -zgf -zu
 CXX_FLAGS_VDD=$(CXX_FLAGS_SYS)
-CXX_FLAGS_IFS=$(CXX_FLAGS_SYS) -omlnaru -bd
+CXX_FLAGS_IFS=$(CXX_FLAGS_SYS) $(_CXX_OPTIM_IFS) -bd
 CXX_OBJ_OUT=-fo=
 CXX_LST_OUT=
 CXX_PC_2_STDOUT=-pc
@@ -95,14 +104,14 @@ CXX_FLAGS_IFS=$(CC_FLAGS_IFS)
 #
 LIB_OS      = os2386.lib
 !if "$(_CXX_XCPT)" == "-xd"
-LIB_C_OBJ   = clib3r.lib plibmt3r.lib math387r.lib emu387.lib
-LIB_C_DLL   = clbrdll.lib plbrdll.lib mt7rdll.lib emu387.lib
-LIB_C_RTDLL = clbrdll.lib  # TODO
+LIB_C_OBJ   = $(PATH_WATCOM)\lib386\os2\clib3r.lib $(PATH_WATCOM)\lib386\os2\plibmt3r.lib $(PATH_WATCOM)\lib386\plibmt3r.lib $(PATH_WATCOM)\lib386\math387r.lib $(PATH_WATCOM)\lib386\os2\emu387.lib
+LIB_C_DLL   = $(PATH_WATCOM)\lib386\os2\clbrdll.lib $(PATH_WATCOM)\lib386\os2\plbrdll.lib $(PATH_WATCOM)\lib386\plbrdll.lib $(PATH_WATCOM)\lib386\os2\mt7rdll.lib $(PATH_WATCOM)\lib386\os2\emu387.lib
+LIB_C_RTDLL = $(PATH_WATCOM)\lib386\os2\clbrdll.lib  # TODO
 LIB_C_NRE   = $(LIB_C_OBJ) # TODO
 !else
-LIB_C_OBJ   = clib3r.lib plbxmt3r.lib math387r.lib emu387.lib
-LIB_C_DLL   = clbrdll.lib plbrdllx.lib mt7rdll.lib emu387.lib
-LIB_C_RTDLL = clbrdll.lib  # TODO
+LIB_C_OBJ   = $(PATH_WATCOM)\lib386\os2\clib3r.lib $(PATH_WATCOM)\lib386\os2\plbxmt3r.lib $(PATH_WATCOM)\lib386\plbxmt3r.lib $(PATH_WATCOM)\lib386\math387r.lib $(PATH_WATCOM)\lib386\os2\emu387.lib
+LIB_C_DLL   = $(PATH_WATCOM)\lib386\os2\clbrdll.lib $(PATH_WATCOM)\lib386\os2\plbrdllx.lib $(PATH_WATCOM)\lib386\plbrdllx.lib $(PATH_WATCOM)\lib386\os2\mt7rdll.lib $(PATH_WATCOM)\lib386\os2\emu387.lib
+LIB_C_RTDLL = $(PATH_WATCOM)\lib386\os2\clbrdll.lib  # TODO
 LIB_C_NRE   = $(LIB_C_OBJ) # TODO
 !endif
 LIB_C_DMNGL =

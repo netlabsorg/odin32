@@ -1,4 +1,4 @@
-# $Id: setup.os2debemx.mk,v 1.9 2002-08-28 05:02:20 bird Exp $
+# $Id: setup.os2debemx.mk,v 1.10 2002-08-29 10:01:42 bird Exp $
 
 # ---OS2, DEBUG, EMX----------------------------
 ENV_NAME="OS/2, Debug, EMX/GCC Compiler"
@@ -22,12 +22,12 @@ SPACE=_
 #
 # Include some shared standard stuff: ALP, VAC optional stuff.
 #
-!include $(PATH_MAKE)\setup.os2debalp.mk
+!include $(PATH_MAKE)\setup.os2as.mk
 !include $(PATH_MAKE)\setup.os2debrc.mk
 !include $(PATH_MAKE)\setup.os2debwrc.mk
 _LD_LAST_LIB = end.$(EXT_LIB)
-!include $(PATH_MAKE)\setup.os2debilink.mk
-!include $(PATH_MAKE)\setup.os2allilib.mk
+!include $(PATH_MAKE)\setup.os2ld.mk
+!include $(PATH_MAKE)\setup.os2ar.mk
 !include $(PATH_MAKE)\setup.optional.emx.mk
 
 

@@ -1,4 +1,4 @@
-# $Id: setup.optional.watcom11x.mk,v 1.5 2002-08-28 04:42:04 bird Exp $
+# $Id: setup.optional.watcom11x.mk,v 1.6 2002-08-29 10:01:41 bird Exp $
 
 #
 #  Helper file for all the optional stuff which is common for
@@ -10,20 +10,36 @@
 #
 # C Compiler flags.
 #
-_CC_SEG_TEXT     =
-_CC_SEG_DATA     =
-_CC_SEG_XCPT     =
-_CC_DEFAULT_LIBS = -zl
-_CC_PACK         =
+_CC_SEG_TEXT    =
+_CC_SEG_DATA    =
+_CC_SEG_XCPT    =
+_CC_SEG_TEXT_CLASS=
+_CC_DEFAULT_LIBS= -zl
+_CC_PACK        =
 !ifdef ENV_16BIT
-_CC_MODEL        = -ms
-_OBJ_MODEL       = s
-_CC_DEF_MODEL    = SMALL
+_CC_MODEL       = -ms
+_OBJ_MODEL      = s
+_CC_DEF_MODEL   = SMALL
 !else
-_CC_MODEL        = -mf
-_CC_DEF_MODEL    = FLAT
+_CC_MODEL       = -mf
+_CC_DEF_MODEL   = FLAT
 !endif
-_CC_OPT_R        =
+_CC_OPT_R       =
+_CC_O_INLINE_USER =
+_CC_O_FRAMES=
+_CC_O_O2    =
+_CC_O_INLINE=
+_CC_O_SIZE  =
+_CC_O_TIME  =
+_CC_O_DISABLE =
+_CC_O_X     =
+!if "$(BUILD_MODE)" == "RELEASE"
+! ifdef ENV_16BIT
+_CC_O_CPU   = -5
+!else
+_CC_O_CPU   = -5r
+!endif
+!endif
 
 !ifdef ALL_SEG_TEXT
 _CC_SEG_TEXT=-nt=$(ALL_SEG_TEXT)
@@ -36,6 +52,12 @@ _CC_SEG_DATA=-nd=$(ALL_SEG_TEXT)
 !endif
 !ifdef CC_SEG_DATA
 _CC_SEG_DATA=-nd=$(CC_SEG_TEXT)
+!endif
+!ifdef ALL_SEG_TEXT_CLASS
+_CC_SEG_TEXT_CLASS =-nc=$(ALL_SEG_TEXT_CLASS)
+!endif
+!ifdef CC_SEG_TEXT_CLASS
+_CC_SEG_TEXT_CLASS =-nc=$(CC_SEG_TEXT_CLASS)
 !endif
 !if defined(CC_DEFAULT_LIBS) || defined(ALL_DEFAULT_LIBS)
 _CC_DEFAULT_LIBS =
@@ -103,33 +125,102 @@ _CC_DEF_MODEL= LARGE
 ! error Invalid MODEL. CC_MODEL=$(CC_MODEL)
 !endif
 
+# watcom options.
 !if defined(CC_SAVE_SEGS_ACCROSS_CALLS) || defined(ALL_SAVE_SEGS_ACCROSS_CALLS)
 _CC_OPT_R = -r
 !endif
-_CC_OPTIONAL = $(_CC_SEG_TEXT) $(_CC_SEG_DATA) $(_CC_SEG_XCPT) $(_CC_DEFAULT_LIBS) $(_CC_PACK) $(_CC_MODEL) -d$(_CC_DEF_MODEL) \
-               $(_CC_OPT_R)
+
+# watcom optimizations.
+!if !defined(ALL_NO_O) && !defined(CC_NO_O)
+! if defined(ALL_O_INLINE_USER)
+_CC_O_INLINE_USER = -e=$(ALL_O_INLINE_USER)
+! endif
+! if defined(CC_O_INLINE_USER)
+_CC_O_INLINE_USER = -e=$(CC_O_INLINE_USER)
+! endif
+! if defined(CC_O_FRAMES) || defined(ALL_O_FRAMES)
+_CC_O_FRAMES=f+
+! endif
+! if defined(CC_O_O2)     || defined(ALL_O_O2)
+_CC_O_O2    =h
+! endif
+! if defined(CC_O_INLINE) || defined(ALL_O_INLINE)
+_CC_O_INLINE=i
+! endif
+! if defined(CC_O_SIZE)   || defined(ALL_O_SIZE)
+_CC_O_SIZE  =s
+! endif
+! if defined(CC_O_TIME)   || defined(ALL_O_TIME)
+_CC_O_TIME  =t
+! endif
+! if defined(CC_O_X)   || defined(ALL_O_X)
+_CC_O_X  =x
+! endif
+!else
+_CC_O_DISABLE=d
+!endif
+
+_CC_OPTIM = -o$(_CC_O_DISABLE)$(_CC_O_O2)$(_CC_O_INLINE)$(_CC_O_SIZE)$(_CC_O_TIME)$(_CC_O_X)$(_CC_O_FRAMES)$(_CC_O_INLINE_USER)
+!if "$(_CC_OPTIM)" == "-o"
+_CC_OPTIM =
+!endif
+
+!if defined(ALL_O_CPU)
+! ifdef ENV_16BIT
+_CC_O_CPU   = -$(ALL_O_CPU)
+! else
+_CC_O_CPU   = -$(ALL_O_CPU)r
+! endif
+!endif
+!if defined(CC_O_CPU)
+! ifdef ENV_16BIT
+_CC_O_CPU   = -$(CC_O_CPU)
+! else
+_CC_O_CPU   = -$(CC_O_CPU)r
+! endif
+!endif
+
+_CC_OPTIONAL = $(_CC_SEG_TEXT) $(_CC_SEG_DATA) $(_CC_SEG_XCPT) $(_CC_SEG_TEXT_CLASS) $(_CC_DEFAULT_LIBS) \
+               $(_CC_PACK) $(_CC_MODEL) -d$(_CC_DEF_MODEL) $(_CC_OPT_R) $(_CC_O_CPU) $(_CC_OPTIM)
 
 
 
 #
 # C++ Compiler flags.
 #
-_CXX_SEG_TEXT     =
-_CXX_SEG_DATA     =
-_CXX_SEG_XCPT     =
-_CXX_DEFAULT_LIBS = -zl
-_CXX_PACK         =
-_CXX_XCPT         = -xd
-_CXX_MODEL        = -mf
+_CXX_SEG_TEXT    =
+_CXX_SEG_DATA    =
+_CXX_SEG_XCPT    =
+_CXX_SEG_TEXT_CLASS =
+_CXX_DEFAULT_LIBS= -zl
+_CXX_PACK        =
+_CXX_XCPT        = -xd
+_CXX_MODEL       = -mf
 !ifdef ENV_16BIT
-_CXX_MODEL        = -ms
-_OBJ_MODEL        = s
-_CXX_DEF_MODEL    = SMALL
+_CXX_MODEL       = -ms
+_OBJ_MODEL       = s
+_CXX_DEF_MODEL   = SMALL
 !else
-_CXX_MODEL        = -mf
-_CXX_DEF_MODEL    = FLAT
+_CXX_MODEL       = -mf
+_CXX_DEF_MODEL   = FLAT
 !endif
-_CXX_OPT_R        =
+_CXX_OPT_R       =
+_CXX_O_INLINE_USER =
+_CXX_O_FRAMES=
+_CXX_O_O2    =
+_CXX_O_INLINE=
+_CXX_O_SIZE  =
+_CXX_O_TIME  =
+_CXX_O_DISABLE =
+_CXX_O_X     =
+_CXX_O_CPU   =
+!if "$(BUILD_MODE)" == "RELEASE"
+! ifdef ENV_16BIT
+_CXX_O_CPU   = -5
+!else
+_CXX_O_CPU   = -5r
+!endif
+!endif
 
 !ifdef ALL_SEG_TEXT
 _CXX_SEG_TEXT=-nt=$(ALL_SEG_TEXT)
@@ -148,6 +239,12 @@ _CXX_SEG_XCPT=
 !endif
 !ifdef CXX_SEG_XCPT
 _CXX_SEG_XCPT=
+!endif
+!ifdef ALL_SEG_TEXT_CLASS
+_CXX_SEG_TEXT_CLASS =-nc=$(ALL_SEG_TEXT_CLASS)
+!endif
+!ifdef CXX_SEG_TEXT_CLASS
+_CXX_SEG_TEXT_CLASS =-nc=$(CXX_SEG_TEXT_CLASS)
 !endif
 !if defined(CXX_DEFAULT_LIBS) || defined(ALL_DEFAULT_LIBS)
 _CXX_DEFAULT_LIBS =
@@ -224,6 +321,57 @@ _CXX_DEF_MODEL= LARGE
 _CXX_OPT_R = -r
 !endif
 
-_CXX_OPTIONAL = $(_CXX_SEG_TEXT) $(_CXX_SEG_DATA) $(_CXX_SEG_XCPT) $(_CXX_DEFAULT_LIBS) $(_CXX_PACK) $(_CXX_XCPT) $(_CXX_MODEL) -d$(_CXX_DEF_MODEL) \
-                $(_CXX_OPT_R)
+
+# watcom optimizations.
+!if !defined(ALL_NO_O) && !defined(CXX_NO_O)
+! if defined(ALL_O_INLINE_USER)
+_CXX_O_INLINE_USER = -e=$(ALL_O_INLINE_USER)
+! endif
+! if defined(CXX_O_INLINE_USER)
+_CXX_O_INLINE_USER = -e=$(CXX_O_INLINE_USER)
+! endif
+! if defined(CXX_O_FRAMES) || defined(ALL_O_FRAMES)
+_CXX_O_FRAMES=f+
+! endif
+! if defined(CXX_O_O2)     || defined(ALL_O_O2)
+_CXX_O_O2    =h
+! endif
+! if defined(CXX_O_INLINE) || defined(ALL_O_INLINE)
+_CXX_O_INLINE=i
+! endif
+! if defined(CXX_O_SIZE)   || defined(ALL_O_SIZE)
+_CXX_O_SIZE  =s
+! endif
+! if defined(CXX_O_TIME)   || defined(ALL_O_TIME)
+_CXX_O_TIME  =t
+! endif
+! if defined(CXX_O_X)   || defined(ALL_O_X)
+_CXX_O_X  =x
+! endif
+!else
+_CXX_O_DISABLE=d
+!endif
+
+_CXX_OPTIM = -o$(_CXX_O_DISABLE)$(_CXX_O_O2)$(_CXX_O_INLINE)$(_CXX_O_SIZE)$(_CXX_O_TIME)$(_CXX_O_FRAMES)$(_CXX_O_X)$(_CXX_O_INLINE_USER)
+!if "$(_CXX_OPTIM)" == "-o"
+_CXX_OPTIM =
+!endif
+
+!if defined(ALL_O_CPU)
+! ifdef ENV_16BIT
+_CXX_O_CPU   = -$(ALL_O_CPU)
+! else
+_CXX_O_CPU   = -$(ALL_O_CPU)r
+! endif
+!endif
+!if defined(CXX_O_CPU)
+! ifdef ENV_16BIT
+_CXX_O_CPU   = -$(CXX_O_CPU)
+! else
+_CXX_O_CPU   = -$(CXX_O_CPU)r
+! endif
+!endif
+
+_CXX_OPTIONAL = $(_CXX_SEG_TEXT) $(_CXX_SEG_DATA) $(_CXX_SEG_XCPT) $(_CXX_SEG_TEXT_CLASS) $(_CXX_DEFAULT_LIBS) \
+                $(_CXX_PACK) $(_CXX_XCPT) $(_CXX_MODEL) -d$(_CXX_DEF_MODEL) $(_CXX_OPT_R) $(_CXX_O_CPU) $(_CXX_OPTIM)
 

@@ -1,4 +1,4 @@
-# $Id: setup.os2prfvac308.mk,v 1.17 2002-08-28 05:02:21 bird Exp $
+# $Id: setup.os2prfvac308.mk,v 1.18 2002-08-29 10:01:44 bird Exp $
 
 # ---OS2, PROFILE, VAC308-------------------------
 ENV_NAME="OS/2, Profile, IBM VisualAge for C++ 3.08"
@@ -14,11 +14,11 @@ ENV_ENVS_FORCE=vac308
 #
 # Include some shared standard stuff: ALP, VAC optional stuff.
 #
-!include $(PATH_MAKE)\setup.os2prfalp.mk
+!include $(PATH_MAKE)\setup.os2as.mk
 !include $(PATH_MAKE)\setup.os2prfrc.mk
 !include $(PATH_MAKE)\setup.os2prfwrc.mk
-!include $(PATH_MAKE)\setup.os2prfilink.mk
-!include $(PATH_MAKE)\setup.os2allilib.mk
+!include $(PATH_MAKE)\setup.os2ld.mk
+!include $(PATH_MAKE)\setup.os2ar.mk
 !include $(PATH_MAKE)\setup.optional.vac3xx.mk
 
 

@@ -1,4 +1,4 @@
-# $Id: process.mak,v 1.24 2002-08-27 03:01:01 bird Exp $
+# $Id: process.mak,v 1.25 2002-08-29 10:01:40 bird Exp $
 
 #
 # Unix-like tools for OS/2
@@ -435,6 +435,7 @@ _SRC = $<
 !ifdef SLKRUNS
 _SRC = $(PATH_CURRENT)\$<
 !endif
+_DST = $(PATH_TARGET)\$(@F)
 
 
 # Assembling assembly source.
@@ -445,9 +446,17 @@ _SRC = $(PATH_CURRENT)\$<
     @ \
 ! endif
 !if "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "SYSLIB" || "$(TARGET_MODE)" == "IFS" || "$(TARGET_MODE)" == "IFSLIB"
-    $(TOOL_JOB_SUB) $(AS) $(AS_FLAGS_SYS) $(_SRC) $(AS_OBJ_OUT)$@
+! ifdef AS_CMD_SYS
+    $(TOOL_JOB_SUB) $(AS_CMD_SYS)
+! else
+    $(TOOL_JOB_SUB) $(AS) $(AS_FLAGS_SYS) $(_SRC) $(AS_OBJ_OUT)$(_DST)
+! endif
 !else
-    $(TOOL_JOB_SUB) $(AS) $(AS_FLAGS) $(_SRC) $(AS_OBJ_OUT)$@
+! ifdef AS_CMD
+    $(TOOL_JOB_SUB) $(AS_CMD)
+! else
+    $(TOOL_JOB_SUB) $(AS) $(AS_FLAGS) $(_SRC) $(AS_OBJ_OUT)$(_DST)
+! endif
 !endif
 
 .asm.$(EXT_OBJ):
@@ -457,9 +466,17 @@ _SRC = $(PATH_CURRENT)\$<
     @ \
 !endif
 !if "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "SYSLIB" || "$(TARGET_MODE)" == "IFS" || "$(TARGET_MODE)" == "IFSLIB"
-    $(AS) $(AS_FLAGS_SYS) $(_SRC) $(AS_OBJ_OUT)$(PATH_TARGET)\$(@F)
+! ifdef AS_CMD_SYS
+    $(AS_CMD_SYS)
+! else
+    $(AS) $(AS_FLAGS_SYS) $(_SRC) $(AS_OBJ_OUT)$(_DST)
+! endif
 !else
-    $(AS) $(AS_FLAGS) $(_SRC) $(AS_OBJ_OUT)$(PATH_TARGET)\$(@F)
+! ifdef AS_CMD
+    $(AS_CMD)
+! else
+    $(AS) $(AS_FLAGS) $(_SRC) $(AS_OBJ_OUT)$(_DST)
+! endif
 !endif
 
 # C++ Compiler base line
@@ -488,7 +505,7 @@ _CXX_BASELINE = $(CXX) \
 !if "$(CXX_LST_OUT)" != ""
         $(CXX_LST_OUT)$(PATH_TARGET)\$(@B).s \
 !endif
-        $(CXX_OBJ_OUT)$@ $(_SRC)
+        $(CXX_OBJ_OUT)$(_DST) $(_SRC)
 
 .cpp.$(EXT_OBJ):
     @$(ECHO) C++ Compiler $(CLRFIL)$(_SRC) $(CLRRST)
@@ -500,7 +517,7 @@ _CXX_BASELINE = $(CXX) \
 !if "$(CXX_LST_OUT)" != ""
         $(CXX_LST_OUT)$(PATH_TARGET)\$(@B).s \
 !endif
-        $(CXX_OBJ_OUT)$(PATH_TARGET)\$(@F) $(_SRC)
+        $(CXX_OBJ_OUT)$(_DST) $(_SRC)
 
 
 # Pre-Compiling C++ source.
@@ -554,7 +571,7 @@ _CC_BASELINE = $(CC) \
 !if "$(CC_LST_OUT)" != ""
         $(CC_LST_OUT)$(PATH_TARGET)\$(@B).s \
 !endif
-        $(CC_OBJ_OUT)$@ $(_SRC)
+        $(CC_OBJ_OUT)$(_DST) $(_SRC)
 
 .c.$(EXT_OBJ):
     @$(ECHO) C Compiler $(CLRFIL)$(_SRC) $(CLRRST)
@@ -566,7 +583,7 @@ _CC_BASELINE = $(CC) \
 !if "$(CC_LST_OUT)" != ""
         $(CC_LST_OUT)$(PATH_TARGET)\$(@B).s \
 !endif
-        $(CC_OBJ_OUT)$(PATH_TARGET)\$(@F) $(_SRC)
+        $(CC_OBJ_OUT)$(_DST) $(_SRC)
 
 
 # Pre-Compiling C source.
@@ -600,7 +617,7 @@ _CC_BASELINE = $(CC) \
 !ifndef BUILD_VERBOSE
     @ \
 !endif
-    $(TOOL_JOB_SUB) $(RC) $(RC_FLAGS) $(_SRC) $@
+    $(TOOL_JOB_SUB) $(RC) $(RC_FLAGS) $(_SRC) $(_DST)
 
 .rc.res:
     @$(ECHO) RC Compiler $(CLRFIL)$(_SRC) $(CLRRST)
@@ -608,7 +625,7 @@ _CC_BASELINE = $(CC) \
 !ifndef BUILD_VERBOSE
     @ \
 !endif
-    $(RC) $(RC_FLAGS) $(_SRC) $(PATH_TARGET)\$(@F)
+    $(RC) $(RC_FLAGS) $(_SRC) $(_DST)
 
 
 # Compiling Odin32 resources.
@@ -623,7 +640,7 @@ _CC_BASELINE = $(CC) \
 !ifndef BUILD_VERBOSE
     @ \
 !endif
-    $(AS) $(AS_FLAGS) $(PATH_TARGET)\$(@B).asm $(AS_OBJ_OUT)$(PATH_TARGET)\$(@F)
+    $(AS) $(AS_FLAGS) $(PATH_TARGET)\$(@B).asm $(AS_OBJ_OUT)$(_DST)
 
 .orc.obj:
     @$(ECHO) ORC Compiler $(CLRFIL)$(_SRC) $(CLRRST)
@@ -636,7 +653,7 @@ _CC_BASELINE = $(CC) \
 !ifndef BUILD_VERBOSE
     @ \
 !endif
-    $(AS) $(AS_FLAGS) $(PATH_TARGET)\$(@B).asm $(AS_OBJ_OUT)$(PATH_TARGET)\$(@F)
+    $(AS) $(AS_FLAGS) $(PATH_TARGET)\$(@B).asm $(AS_OBJ_OUT)$(_DST)
 
 
 
