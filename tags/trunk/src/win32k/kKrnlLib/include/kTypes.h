@@ -1,4 +1,4 @@
-/* $Id: kTypes.h,v 1.3 2001-10-14 22:51:58 bird Exp $
+/* $Id: kTypes.h,v 1.4 2001-10-19 01:47:27 bird Exp $
  *
  * Common typedefinitions for kLib.
  *
@@ -26,6 +26,14 @@
 
 #ifndef PAGESHIFT
 #   define PAGESHIFT    12
+#endif
+
+#ifndef NULL
+#   ifdef __cplusplus
+#       define NULL 0
+#   else
+#       define NULL ((void *)0)
+#   endif
 #endif
 
 
