@@ -1,4 +1,4 @@
-# $Id: common.post.mk,v 1.1 2000-12-02 23:26:58 bird Exp $
+# $Id: common.post.mk,v 1.2 2001-09-30 00:18:11 bird Exp $
 #
 # Common rules for tools.
 #
@@ -12,23 +12,25 @@
 #
 
 
+# dummy
+$(COMMONLIB):
+
 
 #
 # Rules for making
 #
-$(ODIN32_TCOMMON)\$(OBJDIR)\common.a  \
-$(ODIN32_TCOMMON)\$(OBJDIR)\common.lib : commonforce
-    $(DODIRS)  "$(ODIN32_TCOMMON)" \
+common_lib: commonforce
+    @$(DODIRS)  "$(ODIN32_TCOMMON)" \
 !ifdef MAKE_CMD
     $(MAKE_CMD) \
 !else
     $(MAKE) -nologo \
 !endif
-        $(OBJDIR)\$(@F)
+        $(OBJDIR)\common.lib
 
 
 #
 # Dummy rule which forces a target to be made
 #
 commonforce:
-    $(ECHO) ...
+    @$(ECHO) ...

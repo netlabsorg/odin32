@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 2001-09-29 20:18:34 bird Exp $
+# $Id: makefile,v 1.14 2001-09-30 00:18:11 bird Exp $
 
 #
 # Odin32 API
@@ -46,15 +46,13 @@ needed:     $(OBJDIR)\common.lib \
 # The library.
 #
 libs $(OBJDIR)\common.lib: force
-    -@echo $@
-    @$(MAKE_CMD) -f common.mak all
+    @$(DOMAKES) "common.mak" $(MAKE_CMD) all
 
 #
 # The Aout library.
 #
 $(OBJDIR)\common.a: force
-    -@echo $@
-    @$(MAKE_CMD) OMF=1 -f common.mak all
+    @$(DOMAKES) "common.mak" $(MAKE_CMD) OMF=1 all
 
 
 #
@@ -62,17 +60,14 @@ $(OBJDIR)\common.a: force
 #
 $(ODIN32_TOOLS)\kDump.exe    $(OBJDIR)\kDump.exe    kDump.exe \
 $(ODIN32_TOOLS)\kDef2Wat.exe $(OBJDIR)\kDef2Wat.exe kDef2Wat.exe : force
-    -@echo $@
-    @$(MAKE_CMD) -f $(@B).mak all
+    @$(DOMAKES) "$(@B).mak" $(MAKE_CMD) all
 
 
 #
 # Clean rule.
 #
 clean:  $(SYMBOLIC)
-    $(MAKE_CMD) -f common.mak clean
-    $(MAKE_CMD) -f kDef2Wat.mak clean
-    $(MAKE_CMD) -f kDump.mak clean
+    @$(DOMAKES) "common.mak kDef2Wat.mak kDump.mak" $(MAKE_CMD) all
 
 
 #
@@ -89,7 +84,9 @@ dep:    $(SYMBOLIC)
 # A simple hack to make nmake process the target.
 #
 force:  $(SYMBOLIC)
+#!ifdef MAKEVER
      -@echo ...
+#!endif
 
 
 #
