@@ -1,4 +1,12 @@
-/* $Id: changelog,v 1.2435 2003-01-07 20:01:28 sandervl Exp $ */
+/* $Id: changelog,v 1.2436 2003-01-08 14:25:24 sandervl Exp $ */
+
+ 2003-01-08: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o SetTimeZoneInformation: save info in registry:
+                  HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\TimeZoneInformation
+                o GetTimeZoneInformation: read info from registery if present;
+                  otherwise call WGSS
+                o RegQueryValue(Ex)W: workaround to return bytes for strings
+                  must always be executed when lpcbData != NULL.
 
  2003-01-07: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Convert color masks to b&w in CreateIconIndirect
