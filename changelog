@@ -1,4 +1,18 @@
-/* $Id: changelog,v 1.2281 2002-08-21 17:23:54 sandervl Exp $ */
+/* $Id: changelog,v 1.2282 2002-08-22 03:31:41 bird Exp $ */
+
+ 2002-08-21: knut st. osmundsen <bird@anduin   >
+    - MAKE:     o Implemented a 'needed' pass to make required tools (for
+                  instance code generators).
+                o Made SUBDIRS and PRE/POSTMAKEFILES more customizable by
+                  adding support for override macros:
+                     [SUBDIRS|[PRE|POST]MAKEFILES]_<mainrule>
+                  This is good when you wanna skip a tree for a rule (=pass)
+                  or/and just run do a rule (=pass) in a specific tree.
+                o Added check for TARGET_PRIVATE macro before installing
+                  anything.
+    - CMDQD, FASTDEP:
+                o Made makefiles support the new build system.
+                  (Testing for the env.var. BUILD_SETUP_MAK.)
 
  2002-08-21: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o EV_RLSD/MS_RLSD_ON status corresponds to OS/2 DCD (data carrier detect) status
