@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.3 1999-10-09 09:45:27 sandervl Exp $ */
+/* $Id: pmframe.cpp,v 1.4 1999-10-11 16:04:51 cbratschi Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -20,6 +20,139 @@
 #include <win32wbase.h>
 #include "wprocess.h"
 #include "pmframe.h"
+#include "oslibutil.h"
+
+#define PMFRAMELOG
+
+VOID Draw3DRect(HPS hps,RECTL rect,LONG colorBR,LONG colorTL)
+{
+  POINTL point;
+
+  GpiSetColor(hps,colorBR);
+  point.x = rect.xLeft;
+  point.y = rect.yBottom;
+  GpiMove(hps,&point);
+  point.x = rect.xRight-1;
+  GpiLine(hps,&point);
+  point.y = rect.yTop-1;
+  GpiLine(hps,&point);
+  GpiSetColor(hps,colorTL);
+  point.x--;
+  GpiMove(hps,&point);
+  point.x = rect.xLeft;
+  GpiLine(hps,&point);
+  point.y = rect.yBottom+1;
+  GpiLine(hps,&point);
+}
+
+VOID DeflateRect(RECTL *rect)
+{
+  rect->xLeft++;
+  rect->xRight--;
+  rect->yTop--;
+  rect->yBottom++;
+}
+
+VOID DrawFrame(HPS hps,RECTL *rect,Win32BaseWindow *win32wnd)
+{
+  LONG clrWhite,clrBlack,clrDark,clrLight;
+  POINTL point;
+  DWORD dwExStyle = win32wnd->getExStyle();
+  DWORD dwStyle = win32wnd->getStyle();
+
+  clrWhite = CLR_WHITE;
+  clrBlack = CLR_BLACK;
+  clrLight = CLR_PALEGRAY;
+  clrDark  = CLR_DARKGRAY;
+
+  if (dwExStyle & WS_EX_CLIENTEDGE_W)
+  {
+    Draw3DRect(hps,*rect,clrWhite,clrDark);
+    DeflateRect(rect);
+    Draw3DRect(hps,*rect,clrLight,clrBlack);
+  } else if (dwExStyle & WS_EX_DLGMODALFRAME_W)
+  {
+    Draw3DRect(hps,*rect,clrBlack,clrLight);
+    DeflateRect(rect);
+    Draw3DRect(hps,*rect,clrDark,clrWhite);
+    DeflateRect(rect);
+    Draw3DRect(hps,*rect,clrLight,clrLight);
+  } else if (dwExStyle & WS_EX_STATICEDGE_W)
+  {
+    Draw3DRect(hps,*rect,clrWhite,clrDark);
+  } else if (dwExStyle & WS_EX_WINDOWEDGE_W);
+  else if (dwStyle & WS_BORDER_W)
+  {
+    Draw3DRect(hps,*rect,clrBlack,clrBlack);
+  }
+
+  DeflateRect(rect);
+}
+
+BOOL CanDrawSizeBox(Win32BaseWindow *win32wnd)
+{
+  return (!win32wnd->isChild() && WinQueryWindowULong(win32wnd->getOS2FrameWindowHandle(),QWL_STYLE) & FS_SIZEBORDER
+          && win32wnd->getVertScrollHandle() && WinQueryWindow(win32wnd->getVertScrollHandle(),QW_PARENT) == win32wnd->getOS2FrameWindowHandle()
+          && win32wnd->getHorzScrollHandle() && WinQueryWindow(win32wnd->getHorzScrollHandle(),QW_PARENT) == win32wnd->getOS2FrameWindowHandle());
+}
+
+VOID GetSizeBox(Win32BaseWindow *win32wnd,RECTL *rect)
+{
+  SWP swpHorz,swpVert;
+
+  WinQueryWindowPos(win32wnd->getVertScrollHandle(),&swpVert);
+  WinQueryWindowPos(win32wnd->getHorzScrollHandle(),&swpHorz);
+  rect->xLeft = swpVert.x;
+  rect->xRight = swpVert.x+swpVert.cx;
+  rect->yTop = swpHorz.y+swpHorz.cy;
+  rect->yBottom = swpHorz.y;
+}
+
+BOOL InSizeBox(Win32BaseWindow *win32wnd,POINTS *points)
+{
+  if (CanDrawSizeBox(win32wnd))
+  {
+    RECTL rect;
+    POINTL point;
+
+    point.x = points->x;
+    point.y = points->y;
+    GetSizeBox(win32wnd,&rect);
+    return (WinPtInRect(GetThreadHAB(),&rect,&point));
+  }
+
+  return FALSE;
+}
+
+VOID DrawSizeBox(HPS hps,RECTL rect)
+{
+  POINTL p1,p2;
+  LONG clrDark = CLR_DARKGRAY,clrWhite = CLR_WHITE;
+  INT x;
+
+  WinFillRect(hps,&rect,SYSCLR_DIALOGBACKGROUND);
+  p1.x = rect.xRight-2;
+  p1.y = rect.yBottom;
+  p2.x = rect.xRight-1;
+  p2.y = rect.yBottom+1;
+  for (x = 0;x < 3;x++)
+  {
+    GpiSetColor(hps,clrDark);
+    GpiMove(hps,&p1);
+    GpiLine(hps,&p2);
+    p1.x--;
+    p2.y++;
+    GpiMove(hps,&p1);
+    GpiLine(hps,&p2);
+    GpiSetColor(hps,clrWhite);
+    p1.x--;
+    p2.y++;
+    GpiMove(hps,&p1);
+    GpiLine(hps,&p2);
+    p1.x -= 2;
+    p2.y += 2;
+  }
+}
 
 //******************************************************************************
 //Win32 frame message handler
@@ -44,12 +177,125 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
   switch(msg)
   {
     case WM_DESTROY:
+      #ifdef PMFRAMELOG
+       dprintf(("PMFRAME: WM_DESTROY"));
+      #endif
       WinSubclassWindow(hwnd,OldFrameProc);
       win32wnd->setOldFrameProc(NULL);
       goto RunDefFrameProc;
 
+    case WM_MOUSEMOVE:
+      #ifdef PMFRAMELOG
+       dprintf(("PMFRAME: WM_MOUSEMOVE"));
+      #endif
+      if (InSizeBox(win32wnd,(POINTS*)&mp1))
+      {
+        WinSetPointer(HWND_DESKTOP,WinQuerySysPointer(HWND_DESKTOP,SPTR_SIZENWSE,FALSE));
+        RestoreOS2TIB();
+        return (MRESULT)TRUE;
+      } else if (win32wnd->isChild()) goto RunDefWndProc;
+      else goto RunDefFrameProc;
+
+    case WM_BUTTON1DOWN:
+      #ifdef PMFRAMELOG
+       dprintf(("PMFRAME: WM_BUTTON1DOWN"));
+      #endif
+      if (InSizeBox(win32wnd,(POINTS*)&mp1))
+      {
+        WinSendMsg(hwnd,WM_TRACKFRAME,(MPARAM)(TF_RIGHT | TF_BOTTOM),(MPARAM)0);
+        RestoreOS2TIB();
+        return (MRESULT)TRUE;
+      } else if (win32wnd->isChild()) goto RunDefWndProc;
+      else goto RunDefFrameProc;
+
+    case WM_BUTTON2DOWN:
+    case WM_BUTTON3DOWN:
+      #ifdef PMFRAMELOG
+       dprintf(("PMFRAME: WM_BUTTON2/3DOWN"));
+      #endif
+      if (win32wnd->isChild()) goto RunDefWndProc;
+      else goto RunDefFrameProc;
+
+    case WM_ACTIVATE:
+      #ifdef PMFRAMELOG
+       dprintf(("PMFRAME: WM_ACTIVATE"));
+      #endif
+      if (!win32wnd->isChild())
+      {
+        if (CanDrawSizeBox(win32wnd))
+        {
+          MRESULT res;
+          HPS hps;
+          RECTL rect;
+
+          RestoreOS2TIB();
+          res = OldFrameProc(hwnd,msg,mp1,mp2);
+          SetWin32TIB();
+
+          GetSizeBox(win32wnd,&rect);
+          hps = WinGetPS(hwnd);
+          DrawSizeBox(hps,rect);
+          WinReleasePS(hps);
+
+          RestoreOS2TIB();
+          return res;
+        } else goto RunDefFrameProc;
+      } else
+      {
+        MRESULT res;
+        HPS hps;
+        RECTL rect;
+
+        RestoreOS2TIB();
+        res = OldFrameProc(hwnd,msg,mp1,mp2);
+        SetWin32TIB();
+
+        hps = WinGetClipPS(hwnd,0,PSF_CLIPCHILDREN);
+        WinQueryWindowRect(hwnd,&rect);
+        DrawFrame(hps,&rect,win32wnd);
+        WinFillRect(hps,&rect,SYSCLR_DIALOGBACKGROUND);
+        WinReleasePS(hps);
+
+        RestoreOS2TIB();
+        return res;
+      }
+
     case WM_PAINT:
-      //CB: todo
+      #ifdef PMFRAMELOG
+       dprintf(("PMFRAME: WM_PAINT"));
+      #endif
+      if (!win32wnd->isChild())
+      {
+        if (CanDrawSizeBox(win32wnd))
+        {
+          MRESULT res;
+          HPS hps;
+          RECTL rect;
+
+          RestoreOS2TIB();
+          res = OldFrameProc(hwnd,msg,mp1,mp2);
+          SetWin32TIB();
+
+          GetSizeBox(win32wnd,&rect);
+          hps = WinGetPS(hwnd);
+          DrawSizeBox(hps,rect);
+          WinReleasePS(hps);
+
+          RestoreOS2TIB();
+          return res;
+        } else goto RunDefFrameProc;
+      } else
+      {
+        RECTL rect;
+        HPS hps = WinBeginPaint(hwnd,0,&rect);
+
+        DrawFrame(hps,&rect,win32wnd);
+        WinFillRect(hps,&rect,SYSCLR_DIALOGBACKGROUND);
+        WinEndPaint(hps);
+
+        RestoreOS2TIB();
+        return (MRESULT)0;
+      }
 
     default:
       RestoreOS2TIB();
@@ -73,7 +319,40 @@ PVOID FrameSubclassFrameWindow(Win32BaseWindow *win32wnd)
   return WinSubclassWindow(win32wnd->getOS2FrameWindowHandle(),PFNWP(Win32FrameProc));
 }
 
-VOID FrameSetBorderSize(Win32BaseWindow *win32wnd)
+VOID FrameGetBorderSize(Win32BaseWindow *win32wnd,PWPOINT pSize)
 {
+  WinSendMsg(win32wnd->getOS2FrameWindowHandle(),WM_QUERYBORDERSIZE,(MPARAM)pSize,(MPARAM)0);
+}
+
+VOID FrameSetBorderSize(Win32BaseWindow *win32wnd,BOOL resize)
+{
+  POINTL point;
+
+  if (!resize)
+  {
+    WinSendMsg(win32wnd->getOS2FrameWindowHandle(),WM_SETBORDERSIZE,(MPARAM)win32wnd->getBorderWidth(),(MPARAM)win32wnd->getBorderHeight());
+
+    return;
+  }
+
+  FrameGetBorderSize(win32wnd,&point);
   WinSendMsg(win32wnd->getOS2FrameWindowHandle(),WM_SETBORDERSIZE,(MPARAM)win32wnd->getBorderWidth(),(MPARAM)win32wnd->getBorderHeight());
+  if (point.x != win32wnd->getBorderWidth() || point.y != win32wnd->getBorderHeight())
+  {
+    INT xDiff = win32wnd->getBorderWidth()-point.x;
+    INT yDiff = win32wnd->getBorderHeight()-point.y;
+    SWP swp;
+
+    WinQueryWindowPos(win32wnd->getOS2FrameWindowHandle(),&swp);
+    swp.x  += xDiff;
+    swp.y  += yDiff;
+    swp.cx -= 2*xDiff;
+    swp.cy -= 2*yDiff;
+    WinSetWindowPos(win32wnd->getOS2FrameWindowHandle(),0,swp.x,swp.y,swp.cx,swp.cy,SWP_MOVE | SWP_SIZE);
+  }
+}
+
+UINT FrameGetDefSizeBorderSize(VOID)
+{
+  return WinQuerySysValue(HWND_DESKTOP,SV_CXSIZEBORDER);
 }

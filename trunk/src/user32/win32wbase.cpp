@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.34 1999-10-11 15:26:05 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.35 1999-10-11 16:04:51 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -431,7 +431,8 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 
   DWORD dwOSWinStyle, dwOSFrameStyle;
 
-  OSLibWinConvertStyle(cs->style, cs->dwExStyle, &dwOSWinStyle, &dwOSFrameStyle, &borderWidth, &borderHeight);
+  OSLibWinConvertStyle(cs->style, &cs->dwExStyle, &dwOSWinStyle, &dwOSFrameStyle, &borderWidth, &borderHeight);
+  dwExStyle = cs->dwExStyle;
 
 //CB: dwOSFrameStyle handled by OSLibWinConvertStyle
 //    OSLibWinCreateWindow: perhaps problems
@@ -531,7 +532,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         SetWindowPos(getParent()->getWindowHandle(), rectClient.left, rectClient.top,
                      rectClient.right-rectClient.left,
                      rectClient.bottom-rectClient.top,
-                     SWP_NOACTIVATE | SWP_NOZORDER);
+                     SWP_NOACTIVATE | SWP_NOZORDER );
   }
   else {
         SetWindowPos(HWND_TOP, rectClient.left, rectClient.top,
@@ -539,12 +540,12 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
                      rectClient.bottom-rectClient.top,
                      SWP_NOACTIVATE);
   }
-  //Subclass frame
 
+  //Subclass frame
   if (isFrameWindow())
   {
     pOldFrameProc = FrameSubclassFrameWindow(this);
-    if (dwStyle & WS_CHILD && HAS_3DFRAME(dwExStyle)) FrameSetBorderSize(this);
+    if (isChild()) FrameSetBorderSize(this,TRUE);
   }
 
   //Get the client window rectangle
@@ -1455,7 +1456,7 @@ LRESULT Win32BaseWindow::DefWndControlColor(UINT ctlType, HDC hdc)
 
     if( ctlType == CTLCOLOR_SCROLLBAR)
     {
-	    HBRUSH hb = GetSysColorBrush(COLOR_SCROLLBAR);
+            HBRUSH hb = GetSysColorBrush(COLOR_SCROLLBAR);
         COLORREF bk = GetSysColor(COLOR_3DHILIGHT);
         SetTextColor( hdc, GetSysColor(COLOR_3DFACE));
         SetBkColor( hdc, bk);
@@ -1470,21 +1471,21 @@ LRESULT Win32BaseWindow::DefWndControlColor(UINT ctlType, HDC hdc)
              return CACHE_GetPattern55AABrush();
         }
 #endif
-    	UnrealizeObject( hb );
+        UnrealizeObject( hb );
         return (LRESULT)hb;
     }
 
     SetTextColor( hdc, GetSysColor(COLOR_WINDOWTEXT));
 
-	if ((ctlType == CTLCOLOR_EDIT) || (ctlType == CTLCOLOR_LISTBOX))
-	{
-	    SetBkColor( hdc, GetSysColor(COLOR_WINDOW) );
-	}
-	else
-	{
-	    SetBkColor( hdc, GetSysColor(COLOR_3DFACE) );
-	    return (LRESULT)GetSysColorBrush(COLOR_3DFACE);
-	}
+        if ((ctlType == CTLCOLOR_EDIT) || (ctlType == CTLCOLOR_LISTBOX))
+        {
+            SetBkColor( hdc, GetSysColor(COLOR_WINDOW) );
+        }
+        else
+        {
+            SetBkColor( hdc, GetSysColor(COLOR_3DFACE) );
+            return (LRESULT)GetSysColorBrush(COLOR_3DFACE);
+        }
     return (LRESULT)GetSysColorBrush(COLOR_WINDOW);
 }
 //******************************************************************************
@@ -1530,11 +1531,11 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         return DefWndControlColor(Msg - WM_CTLCOLORMSGBOX, (HDC)wParam);
 
     case WM_CTLCOLOR:
-	    return DefWndControlColor(HIWORD(lParam), (HDC)wParam);
+            return DefWndControlColor(HIWORD(lParam), (HDC)wParam);
 
     case WM_VKEYTOITEM:
     case WM_CHARTOITEM:
-	     return -1;
+             return -1;
 
     case WM_PARENTNOTIFY:
         return 0;
@@ -1966,7 +1967,7 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
 
     dprintf(("ShowWindow %x", nCmdShow));
     if(fFirstShow) {
-        if(isFrameWindow() && IS_OVERLAPPED(getStyle())) {
+        if(isFrameWindow() && IS_OVERLAPPED(getStyle()) && !isChild()) {
                 SendMessageA(WM_SIZE, SIZE_RESTORED,
                                 MAKELONG(rectClient.right-rectClient.left,
                                          rectClient.bottom-rectClient.top));
@@ -2046,7 +2047,7 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
        if (isChild())
        {
            hParent = getParent()->getOS2WindowHandle();
-           OSLibWinQueryWindowPos(OS2Hwnd, &swpOld);
+           OSLibWinQueryWindowPos(isFrameWindow() ? OS2HwndFrame:OS2Hwnd, &swpOld);
        }
        else
            OSLibWinQueryWindowPos(OS2HwndFrame, &swpOld);
@@ -2063,14 +2064,17 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
    }
    if (isFrameWindow())
    {
-      POINT maxSize, maxPos, minTrack, maxTrack;
+      if (!isChild())
+      {
+        POINT maxSize, maxPos, minTrack, maxTrack;
 
-      GetMinMaxInfo(&maxSize, &maxPos, &minTrack, &maxTrack);
+        GetMinMaxInfo(&maxSize, &maxPos, &minTrack, &maxTrack);
 
-      if (swp.cx > maxTrack.x) swp.cx = maxTrack.x;
-      if (swp.cy > maxTrack.y) swp.cy = maxTrack.y;
-      if (swp.cx < minTrack.x) swp.cx = minTrack.x;
-      if (swp.cy < minTrack.y) swp.cy = minTrack.y;
+        if (swp.cx > maxTrack.x) swp.cx = maxTrack.x;
+        if (swp.cy > maxTrack.y) swp.cy = maxTrack.y;
+        if (swp.cx < minTrack.x) swp.cx = minTrack.x;
+        if (swp.cy < minTrack.y) swp.cy = minTrack.y;
+      }
 
       swp.hwnd = OS2HwndFrame;
    }
@@ -2601,21 +2605,7 @@ Win32BaseWindow *Win32BaseWindow::GetWindowFromOS2Handle(HWND hwnd)
 //******************************************************************************
 Win32BaseWindow *Win32BaseWindow::GetWindowFromOS2FrameHandle(HWND hwnd)
 {
- Win32BaseWindow *win32wnd;
- DWORD        magic;
-
   return GetWindowFromOS2Handle(OSLibWinWindowFromID(hwnd,OSLIB_FID_CLIENT));
-
-  //CB: doesn't work with frame window words
-/*
-  win32wnd = (Win32BaseWindow *)OSLibWinGetWindowULong(hwnd, OFFSET_WIN32WNDPTR);
-  magic    = OSLibWinGetWindowULong(hwnd, OFFSET_WIN32PM_MAGIC);
-
-  if(win32wnd && CheckMagicDword(magic)) {
-        return win32wnd;
-  }
-  return 0;
-*/
 }
 //******************************************************************************
 //******************************************************************************
@@ -2645,4 +2635,5 @@ HWND Win32BaseWindow::OS2ToWin32Handle(HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
+
 GenericObject *Win32BaseWindow::windows  = NULL;

@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.19 1999-10-10 08:59:40 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.20 1999-10-11 16:04:50 cbratschi Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -66,7 +66,8 @@ HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
 //        if(pszName)
 //                dwFrameStyle |= FCF_TITLEBAR;
 
-        dwFrameStyle |= FCF_TASKLIST | FCF_NOMOVEWITHOWNER | FCF_NOBYTEALIGN;
+        dwFrameStyle |= FCF_NOBYTEALIGN;
+        if (hwndParent == HWND_DESKTOP) dwFrameStyle |= FCF_TASKLIST | FCF_NOMOVEWITHOWNER;
         dwWinStyle   &= ~WS_CLIPCHILDREN;
 
         *hwndFrame = WinCreateStdWindow(hwndParent, dwWinStyle,
@@ -89,7 +90,7 @@ HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle, ULONG *OSFrameStyle, ULONG *borderWidth, ULONG *borderHeight)
+BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG *dwExStyle, ULONG *OSWinStyle, ULONG *OSFrameStyle, ULONG *borderWidth, ULONG *borderHeight)
 {
   *OSWinStyle   = 0;
   *OSFrameStyle = 0;
@@ -119,27 +120,39 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle, ULO
 
   if (dwStyle & WS_CHILD_W)
   {
-//SvL: Causes crash in VPBuddy if enabled
+//SvL: Causes crash in VPBuddy if enabled -> find bug
 #if 0
-    if (dwStyle & WS_BORDER_W ||
-        dwStyle & WS_DLGFRAME_W ||
-        dwStyle & WS_THICKFRAME_W)
-          if (!HAS_3DFRAME(dwExStyle)) dwExStyle |= WS_EX_WINDOWEDGE_W;
+    if (!HAS_3DFRAME(*dwExStyle) && (dwStyle & (WS_DLGFRAME_W | WS_THICKFRAME_W))) *dwExStyle |= WS_EX_DLGMODALFRAME_W;
 #endif
 
-    if (dwExStyle & WS_EX_CLIENTEDGE_W ||
-        dwExStyle & WS_EX_STATICEDGE_W ||
-        dwExStyle & WS_EX_WINDOWEDGE_W)
-          {
-            *OSFrameStyle |= FCF_DLGBORDER;
-            *borderHeight = *borderWidth = 2; //CB: right?
-          }
+    if (*dwExStyle & WS_EX_CLIENTEDGE_W)
+    {
+      *OSFrameStyle |= FCF_SIZEBORDER;
+      *borderHeight = *borderWidth = 2;
+    } else if (*dwExStyle & WS_EX_DLGMODALFRAME_W)
+    {
+      *OSFrameStyle |= FCF_SIZEBORDER;
+      *borderHeight = *borderWidth = 3;
+    } else if (*dwExStyle & WS_EX_STATICEDGE_W)
+    {
+      *OSFrameStyle |= FCF_SIZEBORDER;
+      *borderHeight = *borderWidth = 1;
+
+    } else if (*dwExStyle & WS_EX_WINDOWEDGE_W); //no border
+//SvL: Causes crash in VPBuddy if enabled -> find bug
+#if 0
+    else if (dwStyle & WS_BORDER_W)
+    {
+      *OSFrameStyle |= FCF_SIZEBORDER;
+      *borderHeight = *borderWidth = 1;
+    }
+#endif
+
     if(dwStyle & WS_VSCROLL_W)
           *OSFrameStyle |= FCF_VERTSCROLL;
     if(dwStyle & WS_HSCROLL_W)
           *OSFrameStyle |= FCF_HORZSCROLL;
-  } 
-  else
+  } else
   {
     if((dwStyle & WS_CAPTION_W) == WS_CAPTION_W)
           *OSFrameStyle |= FCF_TITLEBAR;
@@ -163,7 +176,7 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle, ULO
     if(dwStyle & WS_MAXIMIZEBOX_W)
           *OSFrameStyle |= FCF_MAXBUTTON;
 
-    if(dwExStyle & WS_EX_DLGMODALFRAME_W)
+    if(*dwExStyle & WS_EX_DLGMODALFRAME_W)
           *OSFrameStyle |= FCF_DLGBORDER;
   }
 
@@ -841,9 +854,9 @@ void OSLibTranslateScrollCmdAndMsg(ULONG *msg, ULONG *scrollcmd)
 //******************************************************************************
 void OSLibSetWindowStyle(HWND hwnd, ULONG dwStyle)
 {
-  ULONG OSWinStyle, OSFrameStyle, borderWidth, borderHeight;
+  ULONG OSWinStyle, OSFrameStyle, borderWidth, borderHeight,dwExStyle;
 
-  OSLibWinConvertStyle(dwStyle, 0, &OSWinStyle, &OSFrameStyle, &borderWidth, &borderHeight);
+  OSLibWinConvertStyle(dwStyle, &dwExStyle, &OSWinStyle, &OSFrameStyle, &borderWidth, &borderHeight);
 
   WinSetWindowULong(hwnd, QWL_STYLE,
                     (WinQueryWindowULong(hwnd, QWL_STYLE) & ~0xffff0000) |

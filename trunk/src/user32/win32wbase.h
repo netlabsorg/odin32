@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.17 1999-10-11 15:26:06 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.18 1999-10-11 16:04:52 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -204,8 +204,8 @@ static Win32BaseWindow *GetWindowFromOS2FrameHandle(HWND hwnd);
 
        PVOID getOldFrameProc() { return pOldFrameProc; };
        VOID  setOldFrameProc(PVOID aOldFrameProc) { pOldFrameProc = aOldFrameProc; };
-       ULONG   getBorderWidth() { return borderWidth; };
-       ULONG   getBorderHeight() { return borderHeight; };
+       ULONG getBorderWidth() { return borderWidth; };
+       ULONG getBorderHeight() { return borderHeight; };
 
 protected:
 #ifndef OS2_INCLUDED
