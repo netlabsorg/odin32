@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.109 2001-06-09 14:50:16 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.110 2001-07-20 15:34:16 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -75,7 +75,7 @@ BOOL changePageXForm(Win32BaseWindow *wnd, pDCData pHps, PPOINTL pValue, int x, 
 LONG clientHeight(Win32BaseWindow *wnd, HWND hwnd, pDCData pHps);
 
 #ifdef DEBUG
-#define dprintfRegion(a,b,c) if(DbgEnabledLvl2[DBG_LOCALLOG] == 1) dprintfRegion1(a,b,c)
+#define dprintfRegion(a,b,c) if(DbgEnabledLvl2USER32[DBG_LOCALLOG] == 1) dprintfRegion1(a,b,c)
 
 void dprintfRegion1(HPS hps, HWND hWnd, HRGN hrgnClip)
 {

@@ -1,4 +1,4 @@
-/* $Id: mmio.cpp,v 1.7 2000-08-02 17:18:33 bird Exp $ */
+/* $Id: mmio.cpp,v 1.8 2001-07-20 15:35:00 sandervl Exp $ */
 /*
  * MMIO functions
  *
@@ -114,7 +114,11 @@ static LRESULT WIN32API mmioDosIOProc(LPMMIOINFO lpmmioinfo, UINT uMessage, LPAR
 			LONG cch = (LONG) lParam2;
 			LONG count;
 
+#ifdef __WIN32OS2__
+			count = _lwrite((HFILE)lpmmioinfo->adwInfo[0], pch, cch);
+#else
 			count = _hwrite((HFILE)lpmmioinfo->adwInfo[0], pch, cch);
+#endif
 			if (count != -1)
 				lpmmioinfo->lDiskOffset += count;
 

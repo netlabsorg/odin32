@@ -12,7 +12,7 @@
 
 #ifdef DEBUG
 //Parses environment variable for selective enabling/disabling of logging
-void ParseLogStatus();
+void ParseLogStatusKERNEL32();
 
 #define DBG_ENVNAME        "dbg_kernel32"
 #define DBG_ENVNAME_LVL2   "dbg_kernel32_lvl2"
@@ -123,24 +123,24 @@ void ParseLogStatus();
 #define DBG_hmmailslot     103
 #define DBG_MAXFILES       104
 
-extern USHORT DbgEnabled[DBG_MAXFILES];
-extern USHORT DbgEnabledLvl2[DBG_MAXFILES];
+extern USHORT DbgEnabledKERNEL32[DBG_MAXFILES];
+extern USHORT DbgEnabledLvl2KERNEL32[DBG_MAXFILES];
 
 #ifdef dprintf
 #undef dprintf
 #endif
 
-#define dprintf(a)      if(DbgEnabled[DBG_LOCALLOG] == 1) WriteLog a
+#define dprintf(a)      if(DbgEnabledKERNEL32[DBG_LOCALLOG] == 1) WriteLog a
 
 #ifdef dprintf2
 #undef dprintf2
 #endif
 
-#define dprintf2(a)     if(DbgEnabledLvl2[DBG_LOCALLOG] == 1) WriteLog a
+#define dprintf2(a)     if(DbgEnabledLvl2KERNEL32[DBG_LOCALLOG] == 1) WriteLog a
 
 #else
 
-#define ParseLogStatus()
+#define ParseLogStatusKERNEL32()
 
 #endif //DEBUG
 

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.32 2001-04-29 10:30:56 sandervl Exp $
+# $Id: makefile,v 1.33 2001-07-20 15:35:30 sandervl Exp $
 
 #
 # Odin32 API
@@ -19,6 +19,7 @@
 OBJS = \
 $(OBJDIR)\comctl32.obj \
 $(OBJDIR)\initterm.obj \
+$(OBJDIR)\initcomctl32.obj \
 $(OBJDIR)\progress.obj \
 $(OBJDIR)\comctl32undoc.obj \
 $(OBJDIR)\imagelist.obj \

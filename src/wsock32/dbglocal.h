@@ -1,4 +1,4 @@
-/* $Id: dbglocal.h,v 1.4 2000-03-24 19:28:05 sandervl Exp $ */
+/* $Id: dbglocal.h,v 1.5 2001-07-20 15:41:04 sandervl Exp $ */
 
 /*
  * debug logging functions for OS/2
@@ -14,9 +14,10 @@
 
 #ifdef DEBUG
 //Parses environment variable for selective enabling/disabling of logging
-void ParseLogStatus();
+void ParseLogStatusWSOCK32();
 
 #define DBG_ENVNAME        "dbg_wsock32"
+#define DBG_ENVNAME_LVL2   "dbg_wsock32_lvl2"
 
 #define DBG_initterm       0
 #define DBG_wsastruct      1
@@ -27,17 +28,24 @@ void ParseLogStatus();
 #define DBG_wsa            6
 #define DBG_MAXFILES       7
 
-extern USHORT DbgEnabled[DBG_MAXFILES];
+extern USHORT DbgEnabledWSOCK32[DBG_MAXFILES];
+extern USHORT DbgEnabledLvl2WSOCK32[DBG_MAXFILES];
 
 #ifdef dprintf
 #undef dprintf
 #endif
 
-#define dprintf(a)      if(DbgEnabled[DBG_LOCALLOG] == 1) WriteLog a
+#define dprintf(a)      if(DbgEnabledWSOCK32[DBG_LOCALLOG] == 1) WriteLog a
+
+#ifdef dprintf2
+#undef dprintf2
+#endif
+
+#define dprintf2(a)     if(DbgEnabledLvl2WSOCK32[DBG_LOCALLOG] == 1) WriteLog a
 
 #else
 
-#define ParseLogStatus()
+#define ParseLogStatusWSOCK32()
 
 #endif //DEBUG
 

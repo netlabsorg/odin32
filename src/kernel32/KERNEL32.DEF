@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.114 2001-07-09 07:58:12 sandervl Exp $
+; $Id: KERNEL32.DEF,v 1.115 2001-07-20 15:33:28 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -1162,9 +1162,6 @@ EXPORTS
 
 ;Build number
     _Odin32GetBuildNumber@0                                       @1293 NONAME
-
-;Export for MSACM32
-    _wsnprintfA                                                   @2000 NONAME
 
     IsExeStarted__Fv                                              @2001 NONAME
     CheckCurFS                                                    @2002 NONAME
