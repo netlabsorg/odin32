@@ -1,4 +1,4 @@
-/* $Id: oslibgdi.h,v 1.1 1999-10-01 10:14:59 sandervl Exp $ */
+/* $Id: oslibgdi.h,v 1.2 1999-12-09 16:49:45 cbratschi Exp $ */
 
 /*
  * GDI32 support code
@@ -11,9 +11,9 @@
 #ifndef __OSLIBGDI_H__
 #define __OSLIBGDI_H__
 
-INT OSLibSetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx, DWORD cy, 
-                           INT xSrc, INT ySrc, UINT startscan, UINT lines, 
-                           LPCVOID bits, WINBITMAPINFOHEADER *info, 
+INT OSLibSetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx, DWORD cy,
+                           INT xSrc, INT ySrc, UINT startscan, UINT lines,
+                           LPCVOID bits, WINBITMAPINFOHEADER *info,
                            UINT coloruse);
 
 #endif
