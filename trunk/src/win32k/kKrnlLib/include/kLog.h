@@ -1,4 +1,4 @@
-/* $Id: kLog.h,v 1.10 2001-11-19 03:09:40 bird Exp $
+/* $Id: kLog.h,v 1.11 2002-01-09 03:21:59 bird Exp $
  *
  * kLog - Generic Logging and Trace Routines.
  *
@@ -39,6 +39,7 @@ extern "C" {
  * Flags.
  */
 #define KLOG_TYPEDEF_PTR        0x8000  /* flags this typedef as a pointer. */
+#define KLOG_TYPEDEF_ARRAY      0x4000  /* flags this typedef as an array. */
 #define KLOG_TYPEDEF_SIZE       0x0fff  /* Mask to get the size. */
 
 #define KLOG_FLAGS_DISABLED     0x0000
