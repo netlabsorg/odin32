@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.3 1999-12-03 11:56:54 sandervl Exp $ */
+/* $Id: stubs.cpp,v 1.4 1999-12-08 20:03:26 davidr Exp $ */
 /* 
  * Win32 COM/OLE stubs for OS/2
  * 
@@ -322,21 +322,6 @@ ULONG WIN32API LHashValOfNameSysA (SYSKIND syskind, LCID lcid, LPCSTR szName)
 void WIN32API ClearCustData(LPCUSTDATA pCustData)
 {
     dprintf(("OLEAUT32: ClearCustData - stub"));
-}
-
-//*****************************************************************************
-//*****************************************************************************
-typedef enum tagREGKIND
-{
-    REGKIND_DEFAULT,
-    REGKIND_REGISTER,
-    REGKIND_NONE
-} REGKIND;
-
-HRESULT WIN32API LoadTypeLibEx(LPCOLESTR szFile, REGKIND regkind, ITypeLib ** pptlib)
-{
-    dprintf(("OLEAUT32: LoadTypeLibEx - stub"));
-    return S_OK;
 }
 
 //*****************************************************************************
