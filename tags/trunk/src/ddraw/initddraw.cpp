@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.20 2003-01-21 11:20:35 sandervl Exp $
+/* $Id: initddraw.cpp,v 1.1 2003-01-21 11:20:35 sandervl Exp $
  *
  * DLL entry point
  *
@@ -33,35 +33,19 @@
 #include <win32type.h>
 #include <winconst.h>
 #include <odinlx.h>
-#include <exitlist.h>
-#include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
-#include <initdll.h>
-#include "os2fsdd.h"    // For RestorePM()
+#include <dbglog.h>
+#include "divewrap.h"
 
+extern "C" {
+ //Win32 resource table (produced by wrc)
+ extern DWORD _Resource_PEResTab;
+}
+
+char ddrawPath[CCHMAXPATH] = "";
+static HMODULE dllHandle = 0;
 
 static void APIENTRY cleanup(ULONG ulReason);
 
-//******************************************************************************
-//******************************************************************************
-BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
-{
-   switch (fdwReason)
-   {
-   case DLL_PROCESS_ATTACH:
-        return TRUE;
-
-   case DLL_THREAD_ATTACH:
-   case DLL_THREAD_DETACH:
-        return TRUE;
-
-   case DLL_PROCESS_DETACH:
-#ifdef __IBMCPP__
-        ctordtorTerm();
-#endif
-        return TRUE;
-   }
-   return FALSE;
-}
 /****************************************************************************/
 /* _DLL_InitTerm is the function that gets called by the operating system   */
 /* loader when it loads and frees this DLL for each process that accesses   */
@@ -70,11 +54,8 @@ BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 /* linkage convention MUST be used because the operating system loader is   */
 /* calling this function.                                                   */
 /****************************************************************************/
-unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
-                                   ulFlag)
+ULONG APIENTRY inittermDDraw(ULONG hModule, ULONG ulFlag)
 {
-   APIRET rc;
-
    /*-------------------------------------------------------------------------*/
    /* If ulFlag is zero then the DLL is being loaded so initialization should */
    /* be performed.  If ulFlag is 1 then the DLL is being freed so            */
@@ -84,25 +65,29 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
    switch (ulFlag) {
       case 0 :
       {
-#ifdef __IBMCPP__
-         ctordtorInit();
-#endif
+         APIRET rc;
 
-#ifdef FULLSCREEN_DDRAW
-         rc = DosExitList(EXITLIST_NONCOREDLL | EXLST_ADD, cleanup);
-         if (rc)
+         DosQueryModuleName(hModule, CCHMAXPATH, ddrawPath);
+         char *endofpath = strrchr(ddrawPath, '\\');
+         if (endofpath)
+            *(endofpath+1) = '\0';
+
+         CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
+
+         dllHandle = RegisterLxDll(hModule, NULL, (PVOID)&_Resource_PEResTab,
+                                   DDRAW_MAJORIMAGE_VERSION, DDRAW_MINORIMAGE_VERSION,
+                                   IMAGE_SUBSYSTEM_WINDOWS_GUI);
+         if (dllHandle == 0)
             return 0UL;
-#endif
 
-         rc = inittermDDraw(hModule, ulFlag);
+         DiveLoad();
          break;
       }
       case 1 :
-#ifdef __IBMCPP__
-         ctordtorTerm();
-#endif
-         
-         rc = inittermDDraw(hModule, ulFlag);
+         DiveUnload();
+         if(dllHandle) {
+            UnregisterLxDll(dllHandle);
+         }
          break;
       default  :
          return 0UL;
@@ -111,19 +96,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
    /***********************************************************/
    /* A non-zero value must be returned to indicate success.  */
    /***********************************************************/
-   return rc;
+   return 1UL;
 }
 //******************************************************************************
 //******************************************************************************
-#ifdef FULLSCREEN_DDRAW
-static void APIENTRY cleanup(ULONG ulReason)
-{
-   dprintf(("DDRAW processing exitlist"));
-   RestorePM();
-   dprintf(("DDRAW exitlist done"));
-
-   DosExitList(EXLST_EXIT, cleanup);
-}
-//******************************************************************************
-//******************************************************************************
-#endif
