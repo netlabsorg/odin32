@@ -1,4 +1,4 @@
-# $Id: kKrnlLib.mak,v 1.2 2002-03-31 19:01:03 bird Exp $
+# $Id: kKrnlLib.mak,v 1.3 2002-04-01 12:43:10 bird Exp $
 
 #
 # kKrnlLib.
@@ -81,14 +81,6 @@ PREMAKEFILES= clib16.mak devhelp16.mak
 #
 cmd:
     $(COMSPEC) /K
-
-
-#
-# Generate calltaba.asm
-#
-CallTaba.asm:
-    $(PATH_TOOLS)\MkCallTab.exe calltab > $@
-
 
 #
 # kKrnlLib Import library.
