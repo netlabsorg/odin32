@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.1159 2000-10-02 17:33:44 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1160 2000-10-02 18:57:14 sandervl Exp $ */
 
  2000-10-02: Sander van Leeuwen <sandervl@xs4all.nl>
     - SHLWAPI:  Rewrote VERSION_OsIsUnicode (same as SHELL_OsIsUnicode now)
@@ -10,8 +10,10 @@
                 Windows 98 or Windows NT 4.0 (default = NT40)
                 Odin.ini:
                 [WinVersion]
-                Version=Win98
+                Version=Win98   
     - OLE32:    Added stubs for CoGetInstanceFromFile & CoGetInstanceFromIStorage
+    - KERNEL32, WSOCK32, WINMM, include\odinwrap.h
+                Changes/fixes for new ODINFUNCTION macros
 
  2000-10-02: Patrick Haller <phaller@gmx.net>
     - GDI32:    fixed possible error in text.cpp (strrchr)
