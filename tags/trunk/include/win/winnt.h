@@ -675,23 +675,24 @@ typedef HANDLE *PHANDLE;
 
 #ifdef __i386__
 #define _DEFINE_REGS_ENTRYPOINT( name, fn, args ) \
-  __asm__(".align 4\n\t"                         \
-          ".globl " #name "\n\t"                 \
-          ".type " #name ",@function\n\t"        \
-          #name ":\n\t"                          \
-          "call CALL32_Regs\n\t"                 \
-          ".long " #fn "\n\t"                    \
-          ".byte " #args ", " #args "\n\t");
-
+    __ASM_GLOBAL_FUNC( name, \
+                       "call " __ASM_NAME("__wine_call_from_32_regs") "\n\t" \
+                       ".long " __ASM_NAME(#fn) "\n\t" \
+                       ".byte " #args ", " "0")
 #define DEFINE_REGS_ENTRYPOINT_0( name, fn ) \
+  extern void WINAPI name(void); \
   _DEFINE_REGS_ENTRYPOINT( name, fn, 0 )
 #define DEFINE_REGS_ENTRYPOINT_1( name, fn, t1 ) \
+  extern void WINAPI name( t1 a1 ); \
   _DEFINE_REGS_ENTRYPOINT( name, fn, 4 )
 #define DEFINE_REGS_ENTRYPOINT_2( name, fn, t1, t2 ) \
+  extern void WINAPI name( t1 a1, t2 a2 ); \
   _DEFINE_REGS_ENTRYPOINT( name, fn, 8 )
 #define DEFINE_REGS_ENTRYPOINT_3( name, fn, t1, t2, t3 ) \
+  extern void WINAPI name( t1 a1, t2 a2, t3 a3 ); \
   _DEFINE_REGS_ENTRYPOINT( name, fn, 12 )
 #define DEFINE_REGS_ENTRYPOINT_4( name, fn, t1, t2, t3, t4 ) \
+  extern void WINAPI name( t1 a1, t2 a2, t3 a3, t4 a4 ); \
   _DEFINE_REGS_ENTRYPOINT( name, fn, 16 )
 
 #endif  /* __i386__ */
