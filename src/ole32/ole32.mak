@@ -1,4 +1,4 @@
-# $Id: ole32.mak,v 1.10 2001-06-07 12:46:41 sandervl Exp $
+# $Id: ole32.mak,v 1.11 2001-06-08 06:50:52 sandervl Exp $
 
 #
 # Odin32 API
@@ -16,6 +16,8 @@ MAKEFILE = ole32.mak
 # Compiler, tools, and interference rules.
 #
 !include ../../makefile.inc
+
+CDEFINES = $(CDEFINES) -DWINE_LARGE_INTEGER
 
 #
 # Object files. Prefix with OBJDIR and one space before the '\'.
