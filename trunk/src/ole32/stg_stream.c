@@ -7,12 +7,21 @@
  *
  * Copyright 1999 Francis Beaudet
  * Copyright 1999 Thuy Nguyen
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#ifdef __WIN32OS2__
-#include "ole32.h"
-#include "heapstring.h"
-#endif
-
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -21,11 +30,11 @@
 #include "winbase.h"
 #include "winerror.h"
 #include "ntddk.h"
-#include "debugtools.h"
+#include "wine/debug.h"
 
 #include "storage32.h"
 
-DEFAULT_DEBUG_CHANNEL(storage);
+WINE_DEFAULT_DEBUG_CHANNEL(storage);
 
 
 /*
@@ -550,49 +559,8 @@ HRESULT WINAPI StgStreamImpl_Seek(
       return STG_E_INVALIDFUNCTION;
   }
 
-#ifdef __WIN32OS2__
-  /*
-   * do some multiword arithmetic:
-   *    treat HighPart as a signed value
-   *    treat LowPart as unsigned
-   *  NOTE: this stuff is two's complement specific!
-   */
-  if (dlibMove.s.HighPart < 0) { /* dlibMove is < 0 */
-      /* calculate the absolute value of dlibMove ... */
-      dlibMove.s.HighPart = -dlibMove.s.HighPart;
-      dlibMove.s.LowPart ^= -1;
-      /* ... and subtract with carry */
-      if (dlibMove.s.LowPart > plibNewPosition->s.LowPart) {
-	  /* carry needed, This accounts for any underflows at [1]*/
-	  plibNewPosition->s.HighPart -= 1; 
-      }
-      plibNewPosition->s.LowPart -= dlibMove.s.LowPart; /* [1] */
-      plibNewPosition->s.HighPart -= dlibMove.s.HighPart; 
-  } else {
-      /* add directly */
-      int initialLowPart = plibNewPosition->s.LowPart;
-      plibNewPosition->s.LowPart += dlibMove.s.LowPart;
-      if((plibNewPosition->s.LowPart < initialLowPart) ||
-	 (plibNewPosition->s.LowPart < dlibMove.s.LowPart)) {
-	  /* LowPart has rolled over => add the carry digit to HighPart */
-	  plibNewPosition->s.HighPart++;
-      }
-      plibNewPosition->s.HighPart += dlibMove.s.HighPart; 
-  }
-  /*
-   * Check if we end-up before the beginning of the file. That should 
-   * trigger an error.
-   */
-  if (plibNewPosition->s.HighPart < 0) {
-      return STG_E_INVALIDPOINTER;
-  }
-
-    /*
-   * We currently don't support files with offsets of >32 bits.  
-   * Note that we have checked for a negative offset already
-     */
-  assert(plibNewPosition->s.HighPart <= 0);
-
+#if defined(__WIN32OS2__) && defined(__IBMC__)
+  *((LARGE_INTEGER*)&plibNewPosition )= RtlpLargeIntegerAdd( (LARGE_INTEGER *)plibNewPosition, &dlibMove );
 #else
   plibNewPosition->QuadPart = RtlLargeIntegerAdd( plibNewPosition->QuadPart, dlibMove.QuadPart );
 #endif

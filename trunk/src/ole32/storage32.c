@@ -8,9 +8,23 @@
  * Copyright 1999 Francis Beaudet
  * Copyright 1999 Sylvain St-Germain
  * Copyright 1999 Thuy Nguyen
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+
 #ifdef __WIN32OS2__
-#include <odin.h>
 #include "ole32.h"
 #include "heapstring.h"
 #endif
@@ -23,7 +37,7 @@
 #include "winbase.h" /* for lstrlenW() and the likes */
 #include "winnls.h"
 #include "wine/unicode.h"
-#include "debugtools.h"
+#include "wine/debug.h"
 
 #include "storage32.h"
 #include "ole2.h"      /* For Write/ReadClassStm */
@@ -31,7 +45,7 @@
 #include "winreg.h"
 #include "wine/wingdi16.h"
 
-DEFAULT_DEBUG_CHANNEL(storage);
+WINE_DEFAULT_DEBUG_CHANNEL(storage);
 
 #define FILE_BEGIN 0
 
@@ -5509,7 +5523,7 @@ HRESULT WINAPI StgOpenStorage(
   DWORD          shareMode;
   DWORD          accessMode;
   WCHAR          fullname[MAX_PATH];
-  WIN32_FILE_ATTRIBUTE_DATA Fad;
+  DWORD          length;
 
   TRACE("(%s, %p, %lx, %p, %ld, %p)\n", 
 	debugstr_w(pwcsName), pstgPriority, grfMode,
@@ -5552,6 +5566,7 @@ HRESULT WINAPI StgOpenStorage(
                        FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS,
                        0);
   
+  length = GetFileSize(hFile, NULL);
   
   if (hFile==INVALID_HANDLE_VALUE)
   {
@@ -5604,7 +5619,7 @@ HRESULT WINAPI StgOpenStorage(
          NULL,
          grfMode,
          TRUE,
-	 !(Fad.nFileSizeHigh || Fad.nFileSizeLow) /* FALSE */ );
+	 !length );
   
   if (FAILED(hr))
   {
