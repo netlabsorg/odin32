@@ -1,4 +1,4 @@
-/* $Id: os2timer.cpp,v 1.11 1999-08-31 16:41:48 phaller Exp $ */
+/* $Id: os2timer.cpp,v 1.12 1999-08-31 20:22:27 phaller Exp $ */
 
 /*
  * OS/2 Timer class
@@ -76,6 +76,7 @@ static DWORD _System TimerHlpHandler(LPVOID timer);
  *****************************************************************************/
 
 OS2TimerResolution::OS2TimerResolution(int dwPeriod)
+  : next(NULL)
 {
   // add to linked list
   OS2TimerResolution *timeRes = OS2TimerResolution::sTimerResolutions;
@@ -218,7 +219,8 @@ int OS2TimerResolution::queryCurrentResolution()
 /******************************************************************************/
 /******************************************************************************/
 OS2Timer::OS2Timer() : TimerSem(0), TimerHandle(0), TimerThreadID(0),
-                  clientCallback(NULL), TimerStatus(Stopped), fFatal(FALSE)
+                  clientCallback(NULL), TimerStatus(Stopped), fFatal(FALSE),
+                  next(NULL)
 {
   OS2Timer *timer = OS2Timer::timers;
 
