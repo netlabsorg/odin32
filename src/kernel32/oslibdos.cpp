@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.57 2001-02-19 17:25:14 bird Exp $ */
+/* $Id: oslibdos.cpp,v 1.58 2001-02-19 18:12:20 bird Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -304,7 +304,7 @@ DWORD OSLibDosAllocMem(LPVOID *lplpMemAddr, DWORD cb, DWORD flFlags)
      */
     if (libWin32kInstalled())
     {
-        rc = DosAllocMemEx(&pvMemAddr, cb, flFlags | flAllocMem | OBJ_ALIGN64K);
+        rc = DosAllocMemEx(lplpMemAddr, cb, flFlags | flAllocMem | OBJ_ALIGN64K);
         if (rc != ERROR_NOT_SUPPORTED)  /* This call was stubbed until recently. */
             return rc;
     }
