@@ -1,4 +1,4 @@
-/* $Id: win32type.h,v 1.42 2000-10-27 07:58:52 sandervl Exp $ */
+/* $Id: win32type.h,v 1.43 2000-11-21 11:33:59 sandervl Exp $ */
 
 /*
  * Win32 type definitions for OS/2
@@ -321,6 +321,7 @@ typedef unsigned short  WCHAR;
 #define LPCSTR  const char *
 #define LPCTSTR const char *
 #define LPWSTR  WCHAR *
+#define PWSTR   WCHAR *
 #define LPCWSTR const WCHAR *
 
 // handles
@@ -1337,6 +1338,12 @@ typedef CONTEXT *PCONTEXT;
 #pragma pack()
 
 #endif //__WINE_WINNT_H
+
+typedef struct _UNICODE_STRING {
+	USHORT	Length;		/* bytes */
+	USHORT	MaximumLength;	/* bytes */
+	PWSTR	Buffer;
+} UNICODE_STRING,*PUNICODE_STRING;
 
 typedef DWORD COLORREF, *LPCOLORREF;
 typedef BOOL (* CALLBACK ABORTPROC)(HDC32, INT);
