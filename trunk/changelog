@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2016 2002-03-08 10:58:03 sandervl Exp $ */
+/* $Id: changelog,v 1.2017 2002-03-08 11:35:11 sandervl Exp $ */
 
  2002-03-08: Patrick Haller <patrick.haller@innotek.de>
     - SHELL32:  o WINE sync
@@ -8,6 +8,11 @@
     - MAKEFILES:
                 o replaced our version of "netapi32.lib" with "wnetap32.lib"
                   to avoid conflict with toolkit
+    - WNETAP32: o replaced NETAPI32 references by WNETAP32 to avoid
+                  toolkit conflict (netapi32.lib)
+                o NetBios support implemented (disabled for now)
+                  (yet resources are global and not per-process)
+    - WS2_32:   o added fake version of WSAEnumProtocol()
 
  2002-03-07: Platon Fomichev <platon@innotek.de>
     - USER32:   o CloseWindow fix (use frame window handle)
