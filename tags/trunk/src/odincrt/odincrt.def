@@ -947,3 +947,8 @@ EXPORTS
       __dt__18ostream_withassignFv
       __dt__18istream_withassignFv
 
+; @@@AH manually added
+
+      __ctordtorInit
+      __ctordtorTerm
+      _dllentry
