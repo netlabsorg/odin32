@@ -1,4 +1,4 @@
-/* $Id: profile.cpp,v 1.12 1999-08-18 08:42:25 sandervl Exp $ */
+/* $Id: profile.cpp,v 1.13 1999-08-18 10:56:53 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -505,8 +505,8 @@ static BOOL PROFILE_Open( LPCSTR filename )
 
     /* check for path */
 
-    if (!strchr( filename,'/') ||
-        !strchr( filename,'\\') ||
+    if ((!strchr( filename,'/') &&
+        !strchr( filename,'\\')) ||
         !strchr( filename,':'))
     {
       char fullname[MAX_PATHNAME_LEN];
@@ -904,7 +904,7 @@ int PROFILE_LoadWineIni(void)
         {
             PROFILE_WineProfile = PROFILE_Load( f );
             fclose( f );
-       strncpy(PROFILE_WineIniUsed,buffer,MAX_PATHNAME_LEN-1);
+       	    strncpy(PROFILE_WineIniUsed,buffer,MAX_PATHNAME_LEN-1);
             return 1;
         }
     }
@@ -1176,6 +1176,7 @@ BOOL WINAPI WritePrivateProfileStringA( LPCSTR section, LPCSTR entry,
 {
     BOOL ret = FALSE;
 
+    dprintf(("WritePrivateProfileStringA: %s %s %s", section, entry, string));
     EnterCriticalSection( &PROFILE_CritSect );
 
     if (PROFILE_Open( filename ))
@@ -1397,6 +1398,7 @@ void WINAPI WriteOutProfiles(void)
     PROFILE *lastCurProfile;
     INT x;
 
+    dprintf(("WriteOutProfiles"));
     EnterCriticalSection(&PROFILE_CritSect);
     PROFILE_FlushFile(); //flash current
     lastCurProfile = CurProfile;
