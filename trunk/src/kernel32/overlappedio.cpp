@@ -1,4 +1,4 @@
-/* $Id: overlappedio.cpp,v 1.8 2001-12-09 21:19:28 sandervl Exp $ */
+/* $Id: overlappedio.cpp,v 1.9 2001-12-09 21:55:17 sandervl Exp $ */
 
 /*
  * Win32 overlapped IO class
@@ -26,10 +26,13 @@
 //******************************************************************************
 OverlappedIOHandler::OverlappedIOHandler(LPOVERLAPPED_HANDLER lpReadHandler,
                                          LPOVERLAPPED_HANDLER lpWriteHandler,
-                                         LPOVERLAPPED_HANDLER lpPollHandler) :
+                                         LPOVERLAPPED_HANDLER lpPollHandler,
+                                         BOOL fFullDuplex) :
                    hThreadRead(0), hThreadWrite(0), hThreadPoll(0)
 {
     OverlappedIOError errcode = OutOfMemory;
+
+    this->fFullDuplex = fFullDuplex;
 
     if(lpReadHandler == NULL || lpPollHandler == NULL) {
         throw(InvalidParameter);
@@ -49,6 +52,8 @@ OverlappedIOHandler::OverlappedIOHandler(LPOVERLAPPED_HANDLER lpReadHandler,
     hEventRead   = ::CreateEventA(NULL, FALSE, FALSE, NULL);
     hEventWrite  = ::CreateEventA(NULL, FALSE, FALSE, NULL);
 
+    dprintf(("OverlappedIOThread: hEventRead %x hEventWrite %x hEventPoll %x", hEventRead, hEventWrite, hEventPoll));
+
     //the exit event semaphore is manual reset, because this event
     //must be able to wake up multiple threads
     hEventExit   = ::CreateEventA(NULL, TRUE, FALSE, NULL);
@@ -62,14 +67,14 @@ OverlappedIOHandler::OverlappedIOHandler(LPOVERLAPPED_HANDLER lpReadHandler,
     DWORD dwThreadId;
     LPOVERLAPPED_THREAD_PARAM threadparam;
 
-    dwAsyncType = (lpWriteHandler) ? ASYNCIO_READ : ASYNCIO_READWRITE;
+    dwAsyncType = (lpWriteHandler && fFullDuplex) ? ASYNCIO_READ : ASYNCIO_READWRITE;
     threadparam = (LPOVERLAPPED_THREAD_PARAM)malloc(sizeof(OVERLAPPED_THREAD_PARAM));
     if(!threadparam) goto outofmem;
     threadparam->dwOperation     = dwAsyncType;
     threadparam->lpOverlappedObj = this;
     hThreadRead  = ::CreateThread(NULL, 32*1024, OverlappedIOThread, (LPVOID)threadparam, 0, &dwThreadId);
 
-    if(lpWriteHandler) {
+    if(lpWriteHandler && fFullDuplex) {
         dwAsyncType |= ASYNCIO_WRITE;
 
         threadparam = (LPOVERLAPPED_THREAD_PARAM)malloc(sizeof(OVERLAPPED_THREAD_PARAM));
@@ -89,7 +94,7 @@ OverlappedIOHandler::OverlappedIOHandler(LPOVERLAPPED_HANDLER lpReadHandler,
         hThreadPoll  = ::CreateThread(NULL, 32*1024, OverlappedIOThread, (LPVOID)threadparam, 0, &dwThreadId);
     }
 
-    if((lpPollHandler && !hThreadPoll) || !hThreadRead || (lpWriteHandler && !hThreadWrite))
+    if((lpPollHandler && !hThreadPoll) || !hThreadRead || (lpWriteHandler && fFullDuplex && !hThreadWrite))
     {
         DebugInt3();
         errcode = ThreadCreationFailed;
@@ -225,7 +230,11 @@ DWORD OverlappedIOHandler::threadHandler(DWORD dwOperation)
         switch(dwOperation) {
         case ASYNCIO_READ:
         case ASYNCIO_READWRITE:
-            lpRequest->dwLastError = lpReadHandler(lpRequest, &dwResult, NULL);
+            if(lpRequest->dwAsyncType == ASYNCIO_READ || lpWriteHandler == NULL) {
+                 lpRequest->dwLastError = lpReadHandler(lpRequest, &dwResult, NULL);
+            }
+            else lpRequest->dwLastError = lpWriteHandler(lpRequest, &dwResult, NULL);
+
             lpOverlapped->Internal     = lpRequest->dwLastError;
             lpOverlapped->InternalHigh = dwResult;
             if(lpRequest->lpdwResult) {
@@ -330,7 +339,7 @@ BOOL OverlappedIOHandler::WriteFile(HANDLE        hHandle,
     lpRequest->dwTimeOut           = dwTimeOut;
     lpRequest->next                = NULL;
 
-    if(dwAsyncType == ASYNCIO_READWRITE) {
+    if(dwAsyncType & ASYNCIO_READWRITE) {
          index = ASYNC_INDEX_READ;
     }
     else index = ASYNC_INDEX_WRITE;
@@ -354,7 +363,7 @@ BOOL OverlappedIOHandler::WriteFile(HANDLE        hHandle,
     ::ResetEvent(lpOverlapped->hEvent);
 
     //wake up async thread
-    ::SetEvent((dwAsyncType == ASYNCIO_READWRITE) ? hEventRead : hEventWrite);
+    ::SetEvent((dwAsyncType & ASYNCIO_READWRITE) ? hEventRead : hEventWrite);
 
     ::SetLastError(ERROR_IO_PENDING);
     return FALSE;
