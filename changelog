@@ -1,4 +1,14 @@
-/* $Id: changelog,v 1.2523 2003-03-20 13:20:19 sandervl Exp $ */
+/* $Id: changelog,v 1.2524 2003-03-22 20:26:44 sandervl Exp $ */
+
+ 2003-03-22: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o If an application doesn't validate the update region 
+                  while processing WM_PAINT, then we must remember it for 
+                  the next time. 
+                  Windows will only send a WM_PAINT once until another part of 
+                  the window is invalidated. Unfortunately PM keeps on sending
+                  WM_PAINT messages until we validate the update region.
+                  This affects UpdateWindow, RedrawWindow, GetUpdateRgn, GetUpdateRect,
+                  BeginPaint and the next WM_PAINT message.
 
  2003-03-20: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o WindowFromPoint: only send WM_NCHITTEST to windows belonging
