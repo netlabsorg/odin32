@@ -224,7 +224,7 @@ HRESULT __stdcall PalSetEntries(THIS This, DWORD dwFlags,
   else
   {
     if(NULL!=((OS2IDirectDraw*)me->lpDraw)->pPrimSurf)
-      ((OS2IDirectDrawSurface*)((OS2IDirectDraw*)me->lpDraw)->pPrimSurf)->ColorConversion(NULL);;
+      ((OS2IDirectDrawSurface*)((OS2IDirectDraw*)me->lpDraw)->pPrimSurf)->ColorConversion(NULL);
   }
   return(DD_OK);
 }
