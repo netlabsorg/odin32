@@ -1,4 +1,4 @@
-/* $Id: wndmsg.cpp,v 1.16 2001-10-08 23:24:43 phaller Exp $ */
+/* $Id: wndmsg.cpp,v 1.17 2002-02-06 16:31:49 sandervl Exp $ */
 /*
  * Win32 window message text function for OS/2
  *
@@ -764,8 +764,9 @@ char *GetMsgText(int Msg)
   return(msgtxt);
 }
 
+#include <commctrl.h>
 
-void DebugPrintMessage(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam, BOOL fUnicode, BOOL fInternalMsg)
+void DebugPrintMessage(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam, BOOL fUnicode, BOOL fPostMessage)
 {
  char unicode;
 
@@ -777,18 +778,24 @@ void DebugPrintMessage(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam, BOOL f
   {//sent *very* often
         if(PostSpyMessage(hwnd, Msg, wParam, lParam) == FALSE)
         {
-            if(fInternalMsg) {
-                    dprintf(("SendInternalMessage%c %s for %x %x %x", unicode, GetMsgText(Msg), hwnd, wParam, lParam));
+            if(fPostMessage) {
+                    dprintf(("PostMessage%c %s for %x %x %x", unicode, GetMsgText(Msg), hwnd, wParam, lParam));
             }
             else    dprintf(("SendMessage%c %s for %x %x %x", unicode, GetMsgText(Msg), hwnd, wParam, lParam));
         }
   }
   else {
-        if(fInternalMsg) {
-            	dprintf2(("SendInternalMessage%c %s for %x %x %x", unicode, GetMsgText(Msg), hwnd, wParam, lParam));
+        if(fPostMessage) {
+            	dprintf2(("PostMessage%c %s for %x %x %x", unicode, GetMsgText(Msg), hwnd, wParam, lParam));
         }
         else    dprintf2(("SendMessage%c %s for %x %x %x", unicode, GetMsgText(Msg), hwnd, wParam, lParam));
   }
+//testestest
+  if(Msg == WM_NOTIFY && (hwnd == 0x6800000a || hwnd == 0x6800000c)) {
+      LPNMLISTVIEW pHdr = (LPNMLISTVIEW)lParam;
+      dprintf(("WM_NOTIFY %x %x %x", pHdr->hdr.hwndFrom, pHdr->hdr.idFrom, pHdr->hdr.code));
+  }
+//testestest
 }
 
 #endif

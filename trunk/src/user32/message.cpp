@@ -1,4 +1,4 @@
-/* $Id: message.cpp,v 1.1 2002-02-05 17:58:59 sandervl Exp $ */
+/* $Id: message.cpp,v 1.2 2002-02-06 16:31:48 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -28,6 +28,7 @@
 #include "oslibwin.h"
 #include "oslibmsg.h"
 #include "hook.h"
+#include "wndmsg.h"
 
 #define DBG_LOCALLOG	DBG_message
 #include "dbglocal.h"
@@ -262,6 +263,7 @@ LRESULT WINAPI SendMessageTimeoutA( HWND hwnd, UINT msg, WPARAM wparam, LPARAM l
 LRESULT WIN32API SendMessageA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     LRESULT res = 0;
+    DebugPrintMessage(hwnd, msg, wParam, lParam, FALSE, FALSE);
     SendMessageTimeoutA(hwnd, msg, wParam, lParam, SMTO_NORMAL, INFINITE, (LPDWORD)&res);
     return res;
 }
@@ -270,6 +272,7 @@ LRESULT WIN32API SendMessageA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 LRESULT WIN32API SendMessageW(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     LRESULT res = 0;
+    DebugPrintMessage(hwnd, msg, wParam, lParam, TRUE, FALSE);
     SendMessageTimeoutW(hwnd, msg, wParam, lParam, SMTO_NORMAL, INFINITE, (LPDWORD)&res);
     return res;
 }
@@ -313,7 +316,7 @@ BOOL WIN32API PostMessageA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     }
     hwndOS2 = window->getOS2WindowHandle();
     RELEASE_WNDOBJ(window);
-    dprintf(("PostMessageA, %x %x %x %x", hwnd, msg, wParam, lParam));
+    DebugPrintMessage(hwnd, msg, wParam, lParam, FALSE, TRUE);
     return OSLibPostMessage(hwndOS2, msg, wParam, lParam, FALSE);
 }
 //******************************************************************************
@@ -348,7 +351,7 @@ BOOL WIN32API PostMessageW(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     }
     hwndOS2 = window->getOS2WindowHandle();
     RELEASE_WNDOBJ(window);
-    dprintf(("PostMessageW, %x %x %x %x", hwnd, msg, wParam, lParam));
+    DebugPrintMessage(hwnd, msg, wParam, lParam, TRUE, TRUE);
     return OSLibPostMessage(hwndOS2, msg, wParam, lParam, TRUE);
 }
 //******************************************************************************
