@@ -1,9 +1,10 @@
-/* $Id: wprocess.cpp,v 1.91 2000-09-12 04:29:59 bird Exp $ */
+/* $Id: wprocess.cpp,v 1.92 2000-09-12 04:32:36 bird Exp $ */
 
 /*
  * Win32 process functions
  *
- * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
+ * Copyright 1998-2000 Sander van Leeuwen (sandervl@xs4all.nl)
+ * Copyright 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * NOTE: Even though Odin32 OS/2 apps don't switch FS selectors,
  *       we still allocate a TEB to store misc information.
