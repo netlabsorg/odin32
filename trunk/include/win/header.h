@@ -1,4 +1,4 @@
-/* $Id: header.h,v 1.3 1999-10-04 16:01:30 cbratschi Exp $ */
+/* $Id: header.h,v 1.4 1999-10-05 17:34:18 cbratschi Exp $ */
 
 /*
  * Header window definitions
@@ -40,6 +40,7 @@ typedef struct
     BOOL      bCaptured;        /* Is the mouse captured? */
     BOOL      bPressed; /* Is a header item pressed (down)? */
     BOOL      bTracking;        /* Is in tracking mode? */
+    BOOL      bTrackOpen;
     BOOL      bUnicode;       /* Unicode flag */
     INT       iMoveItem;        /* index of tracked item. (Tracking mode) */
     INT       xTrackOffset;     /* distance between the right side of the tracked item and the cursor */
