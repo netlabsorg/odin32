@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.112 1999-12-16 00:47:21 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.113 1999-12-17 17:18:03 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -41,6 +41,8 @@
 #include <wprocess.h>
 #include "winmouse.h"
 #include <win\hook.h>
+#define INCL_TIMERWIN32
+#include "timer.h"
 
 #define HAS_DLGFRAME(style,exStyle) \
     (((exStyle) & WS_EX_DLGMODALFRAME) || \
@@ -806,13 +808,15 @@ ULONG Win32BaseWindow::MsgDestroy()
     }
     SendInternalMessageA(WM_DESTROY, 0, 0);
     if(::IsWindow(hwnd) == FALSE) {
-	//object already destroyed, so return immediately
-	return 1;
+        //object already destroyed, so return immediately
+        return 1;
     }
     SendInternalMessageA(WM_NCDESTROY, 0, 0);
 
     if (hwndHorzScroll && OSLibWinQueryWindow(hwndHorzScroll,QWOS_PARENT) == OSLibWinQueryObjectWindow()) OSLibWinDestroyWindow(hwndHorzScroll);
     if (hwndVertScroll && OSLibWinQueryWindow(hwndVertScroll,QWOS_PARENT) == OSLibWinQueryObjectWindow()) OSLibWinDestroyWindow(hwndVertScroll);
+
+    TIMER_KillTimerFromWindow(OS2Hwnd);
 
     if(getFirstChild() == NULL) {
         delete this;
@@ -1988,9 +1992,20 @@ LRESULT Win32BaseWindow::SendInternalMessageA(ULONG Msg, WPARAM wParam, LPARAM l
         case WM_LBUTTONDOWN:
         case WM_MBUTTONDOWN:
         case WM_RBUTTONDOWN:
-                NotifyParent(Msg, wParam, lParam);
+        {
+                if (getParent())
+                {
+                  POINTS pt = MAKEPOINTS(lParam);
+                  POINT point;
+
+                  point.x = pt.x;
+                  point.y = pt.y;
+                  MapWindowPoints(getParent()->getWindowHandle(),Win32Hwnd,&point,1);
+                  NotifyParent(Msg,wParam,MAKELPARAM(point.x,point.y));
+                }
                 rc = win32wndproc(getWindowHandle(), Msg, wParam, lParam);
                 break;
+        }
 
         case WM_DESTROY:
                 rc = win32wndproc(getWindowHandle(), WM_DESTROY, 0, 0);

@@ -1,4 +1,4 @@
-/* $Id: timer.cpp,v 1.6 1999-10-23 16:45:21 cbratschi Exp $ */
+/* $Id: timer.cpp,v 1.7 1999-12-17 17:18:03 cbratschi Exp $ */
 
 /*
  * timer functions for USER32
@@ -183,9 +183,34 @@ static BOOL TIMER_KillTimer (HWND hwnd, UINT id, BOOL sys)
 
     WinStopTimer (GetThreadHAB(), pTimer->PMhwnd, pTimer->PMid);
 
+    pTimer->inUse   = TIMER::free;
+    pTimer->PMhwnd  = 0;
+    pTimer->PMid    = 0;
+
     LeaveCriticalSection();
 
     return TRUE;
+}
+
+VOID TIMER_KillTimerFromWindow(HWND hwnd)
+{
+    Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    int i;
+    TIMER * pTimer;
+
+    if (hwnd && !wnd) return;
+
+    EnterCriticalSection();
+
+    for (i = 0, pTimer = TimersArray; i < NB_TIMERS; i++, pTimer++)
+      if (pTimer->inUse && pTimer->hwnd == hwnd)
+      {
+        pTimer->inUse   = TIMER::free;
+        pTimer->PMhwnd  = 0;
+        pTimer->PMid    = 0;
+      }
+
+    LeaveCriticalSection();
 }
 
 /***********************************************************************
