@@ -1,4 +1,4 @@
-/* $Id: hmopen32.cpp,v 1.12 1999-11-13 14:21:30 sandervl Exp $ */
+/* $Id: hmopen32.cpp,v 1.13 1999-11-13 18:50:22 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -292,6 +292,14 @@ DWORD HMDeviceOpen32Class::ReadFile(PHMHANDLEDATA pHMHandleData,
   map = Win32MemMapView::findMapByView((ULONG)lpBuffer, &offset, MEMMAP_ACCESS_READ);
   if(map) {
 	lpRealBuf = (LPVOID)((ULONG)map->getMappingAddr() + offset);
+	DWORD nrpages = nNumberOfBytesToRead/4096;
+	if(offset & 0xfff) 
+		nrpages++;
+	else
+	if(nNumberOfBytesToRead & 0xfff) 
+		nrpages++;
+
+	map->commitPage(offset & ~0xfff, TRUE, nrpages);
   }
   else  lpRealBuf = (LPVOID)lpBuffer;
   
