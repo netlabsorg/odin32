@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.74 2003-02-13 17:16:47 sandervl Exp $ */
+/* $Id: KERNEL32.CPP,v 1.75 2003-04-29 10:27:18 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -336,53 +336,6 @@ int WIN32API MulDiv(int arg1, int arg2, int  arg3)
 	return 0;
 
     return O32_MulDiv(arg1, arg2, arg3);
-}
-//******************************************************************************
-//Borrowed from Wine
-//******************************************************************************
-void WIN32API GetStartupInfoA(LPSTARTUPINFOA lpStartupInfo)
-{
-  lpStartupInfo->cb               = sizeof(STARTUPINFOA);
-  lpStartupInfo->lpReserved       = "<Reserved>";
-  lpStartupInfo->lpDesktop        = "Desktop";
-  lpStartupInfo->lpTitle          = "Title";
-  lpStartupInfo->dwX              = 0;
-  lpStartupInfo->dwY              = 0;
-  lpStartupInfo->dwXSize          = 640;
-  lpStartupInfo->dwYSize          = 480;
-  lpStartupInfo->dwXCountChars    = 80;      // for console
-  lpStartupInfo->dwYCountChars    = 25;
-  lpStartupInfo->dwFillAttribute  = 0x0720;
-  lpStartupInfo->dwFlags          = STARTF_USESHOWWINDOW   |
-                                    STARTF_USEPOSITION     |
-                                    STARTF_USESIZE         |
-                                    STARTF_USECOUNTCHARS   |
-                                    STARTF_USEFILLATTRIBUTE|
-                                    STARTF_USESTDHANDLES;
-  lpStartupInfo->wShowWindow      = SW_SHOWDEFAULT;
-  lpStartupInfo->cbReserved2      = 0;
-  lpStartupInfo->lpReserved2      = NULL; /* must be NULL for VC runtime */
-  lpStartupInfo->hStdInput        = GetStdHandle(STD_INPUT_HANDLE);
-  lpStartupInfo->hStdOutput       = GetStdHandle(STD_OUTPUT_HANDLE);
-  lpStartupInfo->hStdError        = GetStdHandle(STD_ERROR_HANDLE);
-  return;
-}
-//******************************************************************************
-//Borrowed from Wine
-//******************************************************************************
-void WIN32API GetStartupInfoW(LPSTARTUPINFOW lpStartupInfo)
-{
-  static WCHAR lpReserved[] = {'<', 'R','e','s','e','r','v','e','d','>', 0};
-  static WCHAR lpDesktop[]  = {'D', 'e','s','k','t','o','p', 0};
-  static WCHAR lpTitle[]    = {'T', 'i','t','l','e', 0};
-
-  // forward call to ascii variant
-  GetStartupInfoA((LPSTARTUPINFOA)lpStartupInfo);
-  lpStartupInfo->cb          = sizeof(STARTUPINFOW);
-  lpStartupInfo->lpReserved  = lpReserved;
-  lpStartupInfo->lpDesktop   = lpDesktop;
-  lpStartupInfo->lpTitle     = lpTitle;
-  return;
 }
 //******************************************************************************
 //******************************************************************************
