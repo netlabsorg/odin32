@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.30 2000-01-18 20:10:31 sandervl Exp $ */
+/* $Id: button.cpp,v 1.31 2000-02-03 17:13:00 cbratschi Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
@@ -6,7 +6,7 @@
  * Copyright (C) 1994 Alexandre Julliard
  * Copyright (c) 1999 Christoph Bratschi
  *
- * WINE version: 991212
+ * WINE version: 20000130
  *
  * Status: complete
  * Version: 5.00

@@ -1,4 +1,4 @@
-/* $Id: win32wbasepos.cpp,v 1.11 2000-01-26 18:02:38 cbratschi Exp $ */
+/* $Id: win32wbasepos.cpp,v 1.12 2000-02-03 17:13:03 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (nonclient/position methods)
  *
@@ -58,8 +58,7 @@ void Win32BaseWindow::GetMinMaxInfo(POINT *maxSize, POINT *maxPos,
     MinMax.ptMaxTrackSize.x = GetSystemMetrics(SM_CXSCREEN);
     MinMax.ptMaxTrackSize.y = GetSystemMetrics(SM_CYSCREEN);
 
-    if (flags & WIN_MANAGED) xinc = yinc = 0;
-    else if (HAS_DLGFRAME( dwStyle, dwExStyle ))
+    if (HAS_DLGFRAME( dwStyle, dwExStyle ))
     {
         xinc = GetSystemMetrics(SM_CXDLGFRAME);
         yinc = GetSystemMetrics(SM_CYDLGFRAME);
