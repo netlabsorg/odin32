@@ -1,3 +1,4 @@
+/* $Id: debugtools.h,v 1.17 2001-10-12 03:20:41 phaller Exp $ */
 
 #ifndef __WINE_DEBUGTOOLS_H
 #define __WINE_DEBUGTOOLS_H
@@ -210,35 +211,41 @@ static LPCSTR debugstr_an (LPCSTR src, int n)
   if (n < 0) n = 0;
   dst = res;
   *dst++ = '"';
-  while (n-- > 0 && *src)
+  
+  // PH safety margin 10 characters, overwrites
+  // memory otherwise
+  while (n-- > 10 && *src)
+  {
+    BYTE c = *src++;
+    switch (c)
     {
-      BYTE c = *src++;
-      switch (c)
-   {
-   case '\n': *dst++ = '\\'; *dst++ = 'n'; break;
-   case '\r': *dst++ = '\\'; *dst++ = 'r'; break;
-   case '\t': *dst++ = '\\'; *dst++ = 't'; break;
-   case '"': *dst++ = '\\'; *dst++ = '"'; break;
-   case '\\': *dst++ = '\\'; *dst++ = '\\'; break;
-   default:
-     if (c >= ' ' && c <= 126)
-       *dst++ = c;
-     else
-       {
-         *dst++ = '\\';
-         *dst++ = '0' + ((c >> 6) & 7);
-         *dst++ = '0' + ((c >> 3) & 7);
-         *dst++ = '0' + ((c >> 0) & 7);
-       }
-   }
+    case '\n': *dst++ = '\\'; *dst++ = 'n'; break;
+    case '\r': *dst++ = '\\'; *dst++ = 'r'; break;
+    case '\t': *dst++ = '\\'; *dst++ = 't'; break;
+    case '"': *dst++ = '\\'; *dst++ = '"'; break;
+    case '\\': *dst++ = '\\'; *dst++ = '\\'; break;
+    default:
+      if (c >= ' ' && c <= 126)
+        *dst++ = c;
+      else
+      {
+        n -= 3;
+        *dst++ = '\\';
+        *dst++ = '0' + ((c >> 6) & 7);
+        *dst++ = '0' + ((c >> 3) & 7);
+        *dst++ = '0' + ((c >> 0) & 7);
+      }
     }
+  }
+  
   *dst++ = '"';
+  
   if (*src)
-    {
-      *dst++ = '.';
-      *dst++ = '.';
-      *dst++ = '.';
-    }
+  {
+    *dst++ = '.';
+    *dst++ = '.';
+    *dst++ = '.';
+  }
   *dst++ = '\0';
   return res;
 }
@@ -262,34 +269,38 @@ static LPCSTR debugstr_wn (LPCWSTR src, int n)
   dst = res;
   *dst++ = 'L';
   *dst++ = '"';
-  while (n-- > 0 && *src)
+  
+  // PH safety margin 10 characters, overwrites
+  // memory otherwise
+  while (n-- > 10 && *src)
+  {
+    WORD c = *src++;
+    switch (c)
     {
-      WORD c = *src++;
-      switch (c)
-   {
-   case '\n': *dst++ = '\\'; *dst++ = 'n'; break;
-   case '\r': *dst++ = '\\'; *dst++ = 'r'; break;
-   case '\t': *dst++ = '\\'; *dst++ = 't'; break;
-   case '"': *dst++ = '\\'; *dst++ = '"'; break;
-   case '\\': *dst++ = '\\'; *dst++ = '\\'; break;
-   default:
-     if (c >= ' ' && c <= 126)
-       *dst++ = (char)c;
-     else
-       {
-         *dst++ = '\\';
-          sprintf(dst,"%04x",c);
-          dst+=4;
-       }
-   }
+    case '\n': *dst++ = '\\'; *dst++ = 'n'; break;
+    case '\r': *dst++ = '\\'; *dst++ = 'r'; break;
+    case '\t': *dst++ = '\\'; *dst++ = 't'; break;
+    case '"': *dst++ = '\\'; *dst++ = '"'; break;
+    case '\\': *dst++ = '\\'; *dst++ = '\\'; break;
+    default:
+      if (c >= ' ' && c <= 126)
+        *dst++ = (char)c;
+      else
+      {
+        n -= 3;
+        *dst++ = '\\';
+        sprintf(dst,"%04x",c);
+        dst+=4;
+      }
     }
+  }
   *dst++ = '"';
   if (*src)
-    {
-      *dst++ = '.';
-      *dst++ = '.';
-      *dst++ = '.';
-    }
+  {
+    *dst++ = '.';
+    *dst++ = '.';
+    *dst++ = '.';
+  }
   *dst++ = '\0';
   return res;
 }
