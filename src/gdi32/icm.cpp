@@ -1,4 +1,4 @@
-/* $Id: icm.cpp,v 1.1 2001-05-28 09:17:54 phaller Exp $ */
+/* $Id: icm.cpp,v 1.2 2001-09-09 12:24:13 sandervl Exp $ */
 
 /*
  * GDI32 Color Management apis
@@ -31,56 +31,42 @@ ODINDEBUGCHANNEL(GDI32-ICM)
 
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API DeleteColorSpace(                                              /*KSO Thu 21.05.1998*/
-        HCOLORSPACE hColorSpace
-        )
+BOOL WIN32API DeleteColorSpace(HCOLORSPACE hColorSpace)
 {
         dprintf(("GDI32: DeleteColorSpace - stub\n"));
         return FALSE;
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetColorSpace(                                                 /*KSO Thu 21.05.1998*/
-        HDC     hdc,
-        HCOLORSPACE hColorSpace
-        )
+BOOL WIN32API SetColorSpace(HDC hdc, HCOLORSPACE hColorSpace)
 {
         dprintf(("GDI32: SetColorSpace - stub\n"));
         return FALSE;
 }
 //******************************************************************************
 //******************************************************************************
- HCOLORSPACE WIN32API CreateColorSpaceA(                             /*KSO Thu 21.05.1998*/
-        LPLOGCOLORSPACEA lpLogColorSpace
-        )
+HCOLORSPACE WIN32API CreateColorSpaceA(LPLOGCOLORSPACEA lpLogColorSpace)
 {
         dprintf(("GDI32: CreateColorSpaceA - stub\n"));
         return 0;
 }
 //******************************************************************************
 //******************************************************************************
-HCOLORSPACE WIN32API CreateColorSpaceW(                              /*KSO Thu 21.05.1998*/
-        LPLOGCOLORSPACEW lpwLogColorSpace
-        )
+HCOLORSPACE WIN32API CreateColorSpaceW(LPLOGCOLORSPACEW lpwLogColorSpace)
 {
         dprintf(("GDI32: CreateColorSpaceW - stub\n"));
         return 0;
 }
 //******************************************************************************
 //******************************************************************************
-HANDLE WIN32API GetColorSpace(                                               /*KSO Thu 21.05.1998*/
-        HDC hdc
-        )
+HANDLE WIN32API GetColorSpace(HDC hdc)
 {
         dprintf(("GDI32: GetColorSpace - stub\n"));
         return 0;
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API SetICMMode(                                                             /*KSO Thu 21.05.1998*/
-        HDC hdc,
-        int mode
-        )
+int WIN32API SetICMMode(HDC hdc, int mode)
 {
         dprintf(("GDI32: SetICMMode - stub\n"));
         return 0;

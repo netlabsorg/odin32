@@ -1,4 +1,4 @@
-/* $Id: line.cpp,v 1.9 2001-02-01 18:01:52 sandervl Exp $ */
+/* $Id: line.cpp,v 1.10 2001-09-09 12:24:13 sandervl Exp $ */
 /*
  * Line API's
  *
@@ -80,15 +80,6 @@ BOOL WIN32API MoveToEx( HDC hdc, int X, int Y, LPPOINT lpPoint)
   {
     POINTLOS2 newPoint = {X,Y};
 
-#ifndef INVERT
-    if(pHps->yInvert > 0) {
-         newPoint.y =  pHps->yInvert - newPoint.y;
-         if (lpPoint) {
-            lpPoint->y = pHps->yInvert - lpPoint->y;
-         }
-    }
-#endif
-
     if (lpPoint)
     {
       POINTLOS2 lastPoint;
@@ -97,6 +88,15 @@ BOOL WIN32API MoveToEx( HDC hdc, int X, int Y, LPPOINT lpPoint)
       lpPoint->x = lastPoint.x;
       lpPoint->y = lastPoint.y;
     }
+
+#ifndef INVERT
+    if(pHps->yInvert > 0) {
+         newPoint.y =  pHps->yInvert - newPoint.y;
+         if (lpPoint) {
+            lpPoint->y = pHps->yInvert - lpPoint->y;
+         }
+    }
+#endif
 
     if (OSLibGpiMove(pHps,&newPoint))
     {
