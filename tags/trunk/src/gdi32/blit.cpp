@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.11 2000-05-12 19:14:55 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.12 2000-05-22 19:11:27 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -216,6 +216,76 @@ BOOL WIN32API PlgBlt(HDC hdcDest, CONST POINT *lpPoint, HDC hdcSrc, int nXSrc,
 {
   dprintf(("GDI32: PlgBlt, not implemented\n"));
   return(FALSE);
+}
+//******************************************************************************
+//******************************************************************************
+INT WIN32API StretchDIBits(HDC hdc, INT xDst, INT yDst, INT widthDst,
+                           INT heightDst, INT xSrc, INT ySrc, INT widthSrc,
+                           INT heightSrc, const void *bits,
+                           const BITMAPINFO *info, UINT wUsage, DWORD dwRop )
+{
+#if 1
+ INT rc;
+
+    dprintf(("GDI32: StretchDIBits %x to (%d,%d) (%d,%d) from (%d,%d) (%d,%d), %x %x %x %x", hdc, xDst, yDst, widthDst, heightDst, xSrc, ySrc, widthSrc, heightSrc, bits, info, wUsage, dwRop));
+
+    if(wUsage == DIB_PAL_COLORS && info->bmiHeader.biSize == sizeof(BITMAPINFOHEADER))
+    {
+      	// workaround for open32 bug.
+      	// If syscolors > 256 and wUsage == DIB_PAL_COLORS.
+
+      	int i;
+      	USHORT *pColorIndex = (USHORT *)info->bmiColors;
+      	RGBQUAD *pColors = (RGBQUAD *) alloca(info->bmiHeader.biClrUsed *
+                         sizeof(RGBQUAD));
+      	BITMAPINFO *infoLoc = (BITMAPINFO *) alloca(sizeof(BITMAPINFO) +
+                             info->bmiHeader.biClrUsed * sizeof(RGBQUAD));
+
+      	memcpy(infoLoc, info, sizeof(BITMAPINFO));
+
+      	if(GetDIBColorTable(hdc, 0, info->bmiHeader.biClrUsed, pColors) == 0)
+        	return FALSE;
+
+      	for(i=0;i<info->bmiHeader.biClrUsed;i++, pColorIndex++)
+      	{
+         	infoLoc->bmiColors[i] = pColors[*pColorIndex];
+      	}
+
+      	rc = O32_StretchDIBits(hdc, xDst, yDst, widthDst, heightDst, xSrc, ySrc,
+                               widthSrc, heightSrc, (void *)bits,
+                               (PBITMAPINFO)infoLoc, DIB_RGB_COLORS, dwRop);
+
+      	if(rc != heightDst) {
+		dprintf(("StretchDIBits failed with rc %x", rc));
+      	}
+	else {
+  		DIBSection *destdib = DIBSection::findHDC(hdc);
+  		if(destdib) {
+			destdib->sync(hdc, yDst, heightDst);
+  		}
+	}
+
+	return rc;
+    }
+
+    rc = O32_StretchDIBits(hdc, xDst, yDst, widthDst, heightDst, xSrc, ySrc,
+                             widthSrc, heightSrc, (void *)bits,
+                             (PBITMAPINFO)info, wUsage, dwRop);
+    if(rc != heightDst) {
+	dprintf(("StretchDIBits failed with rc %x", rc));
+    }
+    else {
+  	DIBSection *destdib = DIBSection::findHDC(hdc);
+  	if(destdib) {
+		destdib->sync(hdc, yDst, heightDst);
+  	}
+    }
+
+    return rc;
+#else
+    dprintf(("GDI32: StretchDIBits\n"));
+    return O32_StretchDIBits(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, (void *)arg10, (PBITMAPINFO)arg11, arg12, arg13);
+#endif
 }
 //******************************************************************************
 //******************************************************************************
