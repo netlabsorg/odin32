@@ -9,7 +9,10 @@
 #endif
 #include <wctype.h> /* needed for towupper */
 #endif
+
+#ifndef OS2_INCLUDED
 #include "windef.h"
+#endif
 
 #define MB_PRECOMPOSED              0x00000001
 #define MB_COMPOSITE                0x00000002
@@ -599,6 +602,8 @@ typedef DWORD CALID;
 #endif
 
 
+#ifndef OS2_INCLUDED
+
 DECL_WINELIB_TYPE_AW(CALINFO_ENUMPROC)
 
 BOOL  WINAPI EnumCalendarInfoA(CALINFO_ENUMPROCA lpCalInfoEnumProc,LCID Locale,CALID Calendar,CALTYPE CalType);
@@ -636,5 +641,6 @@ typedef struct _currencyfmtW {
     LPWSTR  lpCurrencySymbol;
 } CURRENCYFMTW, *LPCURRENCYFMTW;
 #endif //__WIN32OS2__
+#endif //#ifndef OS2_INCLUDED
 
 #endif  /* __WINE_WINNLS_H */
