@@ -1,4 +1,4 @@
-/* $Id: cvtcursor.cpp,v 1.2 1999-08-22 22:11:21 sandervl Exp $ */
+/* $Id: cvtcursor.cpp,v 1.3 1999-09-04 12:41:45 sandervl Exp $ */
 
 /*
  * PE2LX cursor conversion code
@@ -27,10 +27,22 @@
 #include <misc.h>
 
 //******************************************************************************
+//******************************************************************************
+ULONG QueryConvertedCursorSize(CursorComponent *curHdr, int size)
+{
+ WINBITMAPINFOHEADER *bhdr = (WINBITMAPINFOHEADER *)(curHdr+1);
+ int                  bmpsize, cursorsize;
+
+  bmpsize = size - sizeof(CursorComponent) - (1<<bhdr->biBitCount)*sizeof(RGBQUAD);
+  cursorsize = sizeof(BITMAPFILEHEADER2) + bmpsize + (1<<bhdr->biBitCount)*sizeof(RGB2);
+
+  return cursorsize;
+}
+//******************************************************************************
 //NOTE: offsetBits is the value added to the offBits bitmap structure members
 //      (handy for converting cursor groups)
 //******************************************************************************
-void *ConvertCursor(CursorComponent *curHdr, int size, int offsetBits)
+void *ConvertCursor(CursorComponent *curHdr, int size, int *os2size, int offsetBits)
 {
  RGBQUAD   *rgb;
  RGB2      *os2rgb;
@@ -105,6 +117,7 @@ void *ConvertCursor(CursorComponent *curHdr, int size, int offsetBits)
   //write XOR and AND mask
   memcpy((char *)os2rgb, (char *)rgb, bwsize);
 
+  *os2size = cursorsize;
   return cursorhdr;
 }
 //******************************************************************************

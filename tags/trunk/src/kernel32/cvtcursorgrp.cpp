@@ -1,4 +1,4 @@
-/* $Id: cvtcursorgrp.cpp,v 1.1 1999-08-19 19:51:00 sandervl Exp $ */
+/* $Id: cvtcursorgrp.cpp,v 1.2 1999-09-04 12:41:45 sandervl Exp $ */
 
 /*
  * PE2LX cursor group code
@@ -34,7 +34,7 @@ HRSRC WIN32API FindResourceA(HINSTANCE hModule, LPCSTR lpszName, LPCSTR lpszType
 void *ConvertCursorGroup(CursorHeader *chdr, int size, Win32Image *module)
 {
  CursorResDir *rdir = (CursorResDir *)(chdr + 1);
- int i, groupsize = 0;
+ int i, groupsize = 0, os2cursorsize;
  BITMAPARRAYFILEHEADER *bafh, *orgbafh;
  CursorComponent       *cursorhdr;
  Win32Resource         *winres;
@@ -49,7 +49,10 @@ void *ConvertCursorGroup(CursorHeader *chdr, int size, Win32Image *module)
         dprintf(("Height  : %d", (int)rdir->wHeight));
         dprintf(("Bits    : %d", rdir->wBitCount));
         dprintf(("ResBytes: %d", rdir->lBytesInRes));
-        groupsize += module->getResourceSizeA((LPSTR)rdir->wNameOrdinal, (LPSTR)NTRT_CURSOR);
+	winres     = (Win32Resource *)FindResourceA(module->getInstanceHandle(), 
+                                                    (LPCSTR)rdir->wNameOrdinal, 
+                                                    (LPSTR)NTRT_CURSOR);
+	groupsize += winres->getOS2Size();
         rdir++;
   }
   bafh    = (BITMAPARRAYFILEHEADER *)malloc(groupsize+chdr->cwCount*sizeof(BITMAPARRAYFILEHEADER));
@@ -76,7 +79,7 @@ void *ConvertCursorGroup(CursorHeader *chdr, int size, Win32Image *module)
         else    bafh->offNext = 0;
 
 	cursorhdr = (CursorComponent *)winres->lockResource();
-	os2cursor = ConvertCursor(cursorhdr, winres->getSize(), (int)bafh - (int)orgbafh + sizeof(BITMAPARRAYFILEHEADER)-sizeof(BITMAPFILEHEADER));
+	os2cursor = ConvertCursor(cursorhdr, winres->getSize(), &os2cursorsize, (int)bafh - (int)orgbafh + sizeof(BITMAPARRAYFILEHEADER)-sizeof(BITMAPFILEHEADER));
 
         if(os2cursor == NULL) {
                 dprintf(("Can't convert cursor!"));
@@ -85,10 +88,10 @@ void *ConvertCursorGroup(CursorHeader *chdr, int size, Win32Image *module)
                 continue;
         }
 
-        memcpy((char *)&bafh->bfh, os2cursor, winres->getSize());
+        memcpy((char *)&bafh->bfh, os2cursor, os2cursorsize);
 	free(os2cursor);
 
-        bafh = (BITMAPARRAYFILEHEADER *)((int)&bafh->bfh + winres->getSize());
+        bafh = (BITMAPARRAYFILEHEADER *)((int)&bafh->bfh + os2cursorsize);
 	delete winres;
 
         rdir++;

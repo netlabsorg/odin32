@@ -1,4 +1,4 @@
-/* $Id: cvtbitmap.cpp,v 1.1 1999-08-19 14:19:14 sandervl Exp $ */
+/* $Id: cvtbitmap.cpp,v 1.2 1999-09-04 12:41:45 sandervl Exp $ */
 
 /*
  * PE2LX bitmap conversion code
@@ -504,7 +504,7 @@ static ULONG CalcBitmapSize(ULONG cBits, LONG cx, LONG cy)
 }
 //******************************************************************************
 //******************************************************************************
-ULONG QuerySizeBitmap(WINBITMAPINFOHEADER *pBHdr, ULONG ulSize)
+ULONG QueryConvertedBitmapSize(WINBITMAPINFOHEADER *pBHdr, ULONG ulSize)
 {
         ULONG retSize;
         ltassert((ULONG)pBHdr > MINPTR && (ULONG)pBHdr+ulSize < MAXPTR);
@@ -588,7 +588,7 @@ ULONG QuerySizeBitmap(WINBITMAPINFOHEADER *pBHdr, ULONG ulSize)
         /* Unknown                            */
         /**************************************/
         default: //fail
-                dprintf(("QuerySizeBitmap - default - fail!"));
+                dprintf(("QueryConvertedBitmapSize - default - fail!"));
                 return 0;
         }
 

@@ -1,4 +1,4 @@
-/* $Id: cvticongrp.cpp,v 1.1 1999-08-19 19:50:40 sandervl Exp $ */
+/* $Id: cvticongrp.cpp,v 1.2 1999-09-04 12:41:46 sandervl Exp $ */
 
 /*
  * PE2LX Icon group code
@@ -34,7 +34,7 @@ HRSRC WIN32API FindResourceA(HINSTANCE hModule, LPCSTR lpszName, LPCSTR lpszType
 void *ConvertIconGroup(IconHeader *ihdr, int size, Win32Image *module)
 {
  ResourceDirectory *rdir = (ResourceDirectory *)(ihdr + 1);
- int i, groupsize = 0;
+ int i, groupsize = 0, os2iconsize;
  BITMAPARRAYFILEHEADER2 *bafh, *orgbafh;
  WINBITMAPINFOHEADER    *iconhdr;
  Win32Resource          *winres;
@@ -49,7 +49,10 @@ void *ConvertIconGroup(IconHeader *ihdr, int size, Win32Image *module)
         dprintf(("Colors  : %d", (int)rdir->bColorCount));
         dprintf(("Bits    : %d", rdir->wBitCount));
         dprintf(("ResBytes: %d", rdir->lBytesInRes));
-        groupsize += module->getResourceSizeA((LPSTR)rdir->wNameOrdinal, (LPSTR)NTRT_ICON);
+	winres     = (Win32Resource *)FindResourceA(module->getInstanceHandle(), 
+                                                   (LPCSTR)rdir->wNameOrdinal, 
+                                                   (LPSTR)NTRT_ICON);
+	groupsize += winres->getOS2Size();
         rdir++;
   }
   bafh    = (BITMAPARRAYFILEHEADER2 *)malloc(groupsize+ihdr->wCount*sizeof(BITMAPARRAYFILEHEADER2));
@@ -75,7 +78,7 @@ void *ConvertIconGroup(IconHeader *ihdr, int size, Win32Image *module)
         else    bafh->offNext = 0;
 
 	iconhdr = (WINBITMAPINFOHEADER *)winres->lockResource();
-	os2icon = ConvertIcon(iconhdr, winres->getSize(), (int)bafh - (int)orgbafh + sizeof(BITMAPARRAYFILEHEADER2)-sizeof(BITMAPFILEHEADER2));
+	os2icon = ConvertIcon(iconhdr, winres->getSize(), &os2iconsize, (int)bafh - (int)orgbafh + sizeof(BITMAPARRAYFILEHEADER2)-sizeof(BITMAPFILEHEADER2));
 
         if(os2icon == NULL) {
                 dprintf(("Can't convert icon!"));
@@ -84,10 +87,10 @@ void *ConvertIconGroup(IconHeader *ihdr, int size, Win32Image *module)
                 continue;
         }
 
-        memcpy((char *)&bafh->bfh2, os2icon, winres->getSize());
+        memcpy((char *)&bafh->bfh2, os2icon, os2iconsize);
 	free(os2icon);
 
-        bafh = (BITMAPARRAYFILEHEADER2 *)((int)&bafh->bfh2 + winres->getSize());
+        bafh = (BITMAPARRAYFILEHEADER2 *)((int)&bafh->bfh2 + os2iconsize);
 	delete winres;
 
         rdir++;
