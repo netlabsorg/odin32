@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.122 2002-07-11 18:14:20 achimha Exp $ */
+/* $Id: oslibwin.cpp,v 1.123 2002-08-21 12:32:40 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -158,7 +158,7 @@ BOOL OSLibWinPositionFrameControls(HWND hwndFrame, RECTLOS2 *pRect, DWORD dwStyl
       minmaxwidth  = WinQuerySysValue(HWND_DESKTOP, SV_CXMINMAXBUTTON);
       minmaxheight = WinQuerySysValue(HWND_DESKTOP, SV_CYMINMAXBUTTON);
   }
-
+  
   if(fOS2Look == OS2_APPEARANCE_SYSMENU) {
       hwndControl = WinWindowFromID(hwndFrame, FID_SYSMENU);
       if(hwndControl) {
@@ -279,9 +279,37 @@ HWND OSLibWinQueryFocus(HWND hwndDeskTop)
 }
 //******************************************************************************
 //******************************************************************************
+HWND OSLibWinControlWindow(HWND hwndWindow, INT controlID, HWND controlHWND)
+{
+ HWND hwnd = NULL, hwndParent = NULL; 
+
+ if (controlHWND)
+ {
+   WinSetParent(controlHWND, hwndWindow, TRUE);
+   return NULL; // this is done to minimize assignments
+ }
+ else
+ {
+   hwnd = WinWindowFromID(hwndWindow, controlID);
+   if (hwnd)
+   {
+    WinSetParent(hwnd, HWND_OBJECT, TRUE);
+    return hwnd;   
+   }
+ }
+ return NULL;
+}
+//******************************************************************************
+//******************************************************************************
 HWND OSLibWinWindowFromID(HWND hwndParent,ULONG id)
 {
     return WinWindowFromID(hwndParent,id);
+}
+//******************************************************************************
+//******************************************************************************
+LONG OSLibWinGetPhysKeyState(LONG scan)
+{
+    return WinGetPhysKeyState(HWND_DESKTOP,scan); 	
 }
 //******************************************************************************
 //******************************************************************************
@@ -313,7 +341,7 @@ LONG OSLibWinQuerySysValue(LONG iSysValue)
 //******************************************************************************
 BOOL OSLibWinSetSysValue(LONG iSysValue, ULONG val)
 {
-    return WinQuerySysValue(iSysValue, val);
+    return WinSetSysValue(HWND_DESKTOP, iSysValue, val);
 }
 //******************************************************************************
 //******************************************************************************
@@ -552,6 +580,7 @@ BOOL OSLibWinMinimizeWindow(HWND hwnd)
     HWND hwndNext;
 
     rc = WinSetWindowPos(hwnd, 0, 0, 0, 0, 0, SWP_MINIMIZE);
+
     if (rc) {
         rc = WinSetWindowPos(hwnd, HWND_BOTTOM, 0, 0, 0, 0, SWP_DEACTIVATE | SWP_ZORDER);
         if (rc)
@@ -566,6 +595,7 @@ BOOL OSLibWinMinimizeWindow(HWND hwnd)
           rc = WinSetWindowPos(hwndNext, HWND_TOP, 0, 0, 0, 0, SWP_ACTIVATE | SWP_ZORDER);
         }
     }
+
     return (rc);
 }
 //******************************************************************************
