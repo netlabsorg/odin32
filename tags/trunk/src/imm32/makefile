@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.14 2004-05-24 08:51:00 sandervl Exp $
+# $Id: makefile,v 1.15 2004-05-26 08:44:42 sandervl Exp $
 
 #
 # Odin32 API
@@ -40,7 +40,7 @@ $(RTLLIB_O)
 #
 # Target name - name of the dll without extention and path.
 #
-TARGET = imm32
+TARGET = imm32os2
 
 
 #
