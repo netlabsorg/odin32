@@ -1,4 +1,4 @@
-/* $Id: api1.c,v 1.2 2000-03-11 09:05:06 jeroen Exp $ */
+/* $Id: api1.c,v 1.3 2000-03-11 09:07:13 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -965,9 +965,7 @@ void GLAPIENTRY glEndList(CTX_VOID )
    GLuint count = IM->Count++;                          \
    IM->Flag[count] |= VERT_EVAL_C2;                     \
    ASSIGN_4V(IM->Obj[count], x, y, 0, 1);               \
-   WriteLog("OPENGL32: EVALCOORD2 (%f,%f) IM: %08X - cnt %d\n",x,y,IM,count); \
    if (count == VB_MAX-1)                               \
-   {WriteLog("OPENGL32: EVALCOORD2 is calling maybe_transform\n"); \
       IM->maybe_transform_vb( IM );                     }\
 }
 
