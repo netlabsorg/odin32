@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.2063 2002-05-07 09:21:04 bird Exp $ */
+/* $Id: changelog,v 1.2064 2002-05-07 13:29:08 sandervl Exp $ */
+
+ 2002-05-07: Platon Fomichev <platon@innotek.de>
+    - USER32:   o Listbox/combobox fix for MFC apps
+                o SetParent doesn't change WS_CHILD style
+                o Experimental change for getParent
 
  2002-05-07: knut st. osmundsen <bird@anduin.net>
     - CmdQd:    o The daemon shouldn't inherit standard handles when started.
