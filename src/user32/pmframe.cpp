@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.54 2000-05-22 17:21:10 cbratschi Exp $ */
+/* $Id: pmframe.cpp,v 1.55 2000-05-24 19:30:05 sandervl Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -463,7 +463,7 @@ PosChangedEnd:
         HWND hwndTitle;
         USHORT flags = WinQueryWindowUShort(hwnd,QWS_FLAGS);
 
-        dprintf(("PMFRAME: WM_ACTIVATE %x %x", hwnd, mp2));
+        dprintf(("PMFRAME: WM_ACTIVATE %x %x %x", hwnd, mp1, mp2));
         if(win32wnd->IsWindowCreated())
           win32wnd->DispatchMsgA(pWinMsg);
 
