@@ -1,4 +1,4 @@
-/* $Id: oslibres.cpp,v 1.13 2001-04-15 14:29:48 sandervl Exp $ */
+/* $Id: oslibres.cpp,v 1.14 2001-05-17 11:25:48 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -469,6 +469,12 @@ VOID OSLibWinDestroyPointer(HANDLE hPointer)
 BOOL OSLibWinSetPointer(HANDLE hPointer)
 {
     return WinSetPointer(HWND_DESKTOP, hPointer);
+}
+//******************************************************************************
+//******************************************************************************
+HANDLE  OSLibWinQueryPointer()
+{
+    return WinQueryPointer(HWND_DESKTOP);
 }
 //******************************************************************************
 //******************************************************************************
