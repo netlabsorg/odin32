@@ -1,4 +1,10 @@
- /* $Id: ChangeLog,v 1.350 1999-10-20 22:37:18 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.351 1999-10-21 12:20:06 sandervl Exp $ */
+
+ 99-10-21: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: Increase reference count for LX dlls. (RegisterLxDll)
+	- USER32: Added support for SWP_NOSIZECHANGING to SetWindowPos
+                  Fixed WM_ADJUSTWINDOWPOS (when position/size changed by app)
+                  Combobox fixes (simple combobox works, more complex don't)
 
  99-10-20: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- GDI32: Implemented EnumFontFamiliesA/W
