@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.92 2001-02-19 21:43:12 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.93 2001-03-24 15:40:56 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -1157,15 +1157,6 @@ BOOL WIN32API ActivateKeyboardLayout(HKL hkl, UINT fuFlags)
   dprintf(("USER32:  ActivateKeyboardLayout, not implemented\n"));
   return(TRUE);
 }
-//******************************************************************************
-//SvL: 24-6-'97 - Added
-//TODO: Not implemented
-//******************************************************************************
-WORD WIN32API GetAsyncKeyState(INT nVirtKey)
-{
-    dprintf2(("USER32:  GetAsyncKeyState Not implemented\n"));
-    return 0;
-}
 /*****************************************************************************
  * Name      : UINT WIN32API GetKBCodePage
  * Purpose   : The GetKBCodePage function is provided for compatibility with
@@ -1204,13 +1195,20 @@ int WIN32API GetKeyNameTextW( LPARAM lParam, LPWSTR lpString, int  nSize)
 //    return O32_GetKeyNameText(arg1, arg2, arg3);
 }
 //******************************************************************************
-//SvL: 24-6-'97 - Added
 //******************************************************************************
 SHORT WIN32API GetKeyState( int nVirtKey)
 {
-    dprintf2(("USER32:  GetKeyState %d\n", nVirtKey));
+    dprintf2(("USER32: GetKeyState %x", nVirtKey));
     return O32_GetKeyState(nVirtKey);
 }
+//******************************************************************************
+//******************************************************************************
+WORD WIN32API GetAsyncKeyState(INT nVirtKey)
+{
+    dprintf2(("USER32: GetAsyncKeyState %x", nVirtKey));
+    return O32_GetAsyncKeyState(nVirtKey);
+}
+
 /*****************************************************************************
  * Name      : VOID WIN32API keybd_event
  * Purpose   : The keybd_event function synthesizes a keystroke. The system
