@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.43 2001-12-01 16:02:16 sandervl Exp $*/
+/* $Id: menu.cpp,v 1.44 2001-12-26 11:35:39 sandervl Exp $*/
 /*
  * Menu functions
  *
@@ -4435,7 +4435,7 @@ static BOOL GetMenuItemInfo_common ( HMENU hmenu, UINT item, BOOL bypos,
 BOOL WINAPI GetMenuItemInfoA( HMENU hmenu, UINT item, BOOL bypos,
                                   LPMENUITEMINFOA lpmii)
 {
-    dprintf(("USER32: GetMenuItemInfoA"));
+    dprintf(("USER32: GetMenuItemInfoA %x %d %d %x", hmenu, item, bypos, lpmii));
 
     return GetMenuItemInfo_common (hmenu, item, bypos, lpmii, FALSE);
 }
@@ -4446,7 +4446,7 @@ BOOL WINAPI GetMenuItemInfoA( HMENU hmenu, UINT item, BOOL bypos,
 BOOL WINAPI GetMenuItemInfoW( HMENU hmenu, UINT item, BOOL bypos,
                                   LPMENUITEMINFOW lpmii)
 {
-    dprintf(("USER32: GetMenuItemInfoW"));
+    dprintf(("USER32: GetMenuItemInfoW %x %d %d %x", hmenu, item, bypos, lpmii));
 
     return GetMenuItemInfo_common (hmenu, item, bypos,
                                      (LPMENUITEMINFOA)lpmii, TRUE);

@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.44 2001-11-21 11:51:37 sandervl Exp $ */
+/* $Id: button.cpp,v 1.45 2001-12-26 11:35:38 sandervl Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
@@ -1027,26 +1027,13 @@ static void CB_Paint(HWND hwnd,HDC hDC,WORD action)
 
     if (infoPtr->hFont) SelectObject( hDC, infoPtr->hFont );
 
-    /* GetControlBrush16 sends WM_CTLCOLORBTN, plus it returns default brush
-     * if parent didn't return valid one. So we kill two hares at once
-     */
-    hBrush = GetControlBrush( hwnd, hDC, CTLCOLOR_BTN );
-
-    /* In order to make things right, draw the rectangle background! */
-    if ( !(infoPtr->state & BUTTON_HASFOCUS) && (action == ODA_DRAWENTIRE) )
-    {
-        colour = GetBkColor(hDC);
-        hPen = CreatePen( PS_SOLID, 1, colour );
-        if ( hPen )
-        {
-            hOldBrush = SelectObject( hDC, hBrush );
-            hOldPen = SelectObject( hDC, hPen );
-            Rectangle( hDC, client.left, client.top, client.right, client.bottom );
-            SelectObject( hDC, hOldPen );
-            SelectObject( hDC, hOldBrush );
-            DeleteObject( hPen );
-        }
-    }
+#ifdef __WIN32OS2__
+    //(Auto)Check, (Auto)Radio & (Auto)3State buttons send WM_CTLCOLORSTATIC
+    //instead of WM_CTLCOLORBTN (verified in NT4)
+    hBrush = SendMessageW( GetParent(hwnd), WM_CTLCOLORSTATIC, hDC, (LPARAM)hwnd );
+    if (!hBrush) /* did the app forget to call defwindowproc ? */
+        hBrush = DefWindowProcW( GetParent(hwnd), WM_CTLCOLORSTATIC, hDC, (LPARAM)hwnd );
+#endif
 
     if (dwStyle & BS_LEFTTEXT)
     {
@@ -1076,6 +1063,10 @@ static void CB_Paint(HWND hwnd,HDC hDC,WORD action)
     if ((action == ODA_DRAWENTIRE) || (action == ODA_SELECT))
     {
         UINT state;
+
+	/* Since WM_ERASEBKGND does nothing, first prepare background */
+	if (action == ODA_SELECT) FillRect( hDC, &rbox, hBrush );
+	else FillRect( hDC, &client, hBrush );
 
         if (((dwStyle & 0x0f) == BS_RADIOBUTTON) ||
             ((dwStyle & 0x0f) == BS_AUTORADIOBUTTON)) state = DFCS_BUTTONRADIO;

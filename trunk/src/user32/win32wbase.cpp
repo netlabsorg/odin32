@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.305 2001-12-12 16:40:44 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.306 2001-12-26 11:35:39 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2159,7 +2159,7 @@ LRESULT Win32BaseWindow::SendInternalMessageA(ULONG Msg, WPARAM wParam, LPARAM l
         return rc;
   }
   fInternalMsg = fInternalMsgBackup;
-  dprintf2(("SendMessageA %x %x %x %x returned %d", getWindowHandle(), Msg, wParam, lParam, rc));
+  dprintf2(("SendMessageA %x %x %x %x returned %x", getWindowHandle(), Msg, wParam, lParam, rc));
   return rc;
 }
 //******************************************************************************
@@ -2220,7 +2220,7 @@ LRESULT Win32BaseWindow::SendInternalMessageW(ULONG Msg, WPARAM wParam, LPARAM l
         return rc;
   }
   fInternalMsg = fInternalMsgBackup;
-  dprintf2(("SendMessageW %x %x %x %x returned %d", getWindowHandle(), Msg, wParam, lParam, rc));
+  dprintf2(("SendMessageW %x %x %x %x returned %x", getWindowHandle(), Msg, wParam, lParam, rc));
   return rc;
 }
 //******************************************************************************
