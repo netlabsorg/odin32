@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.117 2003-02-27 13:14:38 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.118 2003-03-03 16:39:11 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -354,6 +354,9 @@ DWORD error2WinError(APIRET rc,DWORD defaultCode)
 
     case ERROR_MORE_DATA: //234
         return ERROR_MORE_DATA_W;
+
+    case ERROR_INVALID_PATH: //253
+        return ERROR_INVALID_NAME_W;
 
     case ERROR_INVALID_EA_NAME: //254
         return ERROR_INVALID_EA_NAME_W;
