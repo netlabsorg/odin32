@@ -1,4 +1,14 @@
- /* $Id: changelog,v 1.679 2000-01-30 18:47:55 sandervl Exp $ */
+ /* $Id: changelog,v 1.680 2000-01-31 22:32:03 sandervl Exp $ */
+
+ 2000-02-01: Jens Wiessner <wiessnej@rfi.de>
+	- NTDLL: Updated .def file (similar to NT 4 SP6) + bugfix for impdef
+
+ 2000-01-31: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: GetDCEx with window handle 0 fails in Windows 98; now it also 
+                  returns an error in Odin.
+                  GetWindowDC & GetDC use the desktop window handle if hwnd == 0
+                  (before calling GetDCEx)
+	- GDI32: Set dibsection bitmap data to 0 when allocating it.
 
  2000-01-30: Sander van Leeuwen <sandervl@xs4all.nl>
 	- PELDR: Fixed error messages for images without fixups (peldr.dll no
