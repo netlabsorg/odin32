@@ -1,4 +1,4 @@
--- $Id: CreateTables.sql,v 1.16 2000-08-02 01:01:36 bird Exp $
+-- $Id: CreateTables.sql,v 1.17 2000-08-02 01:22:34 bird Exp $
 --
 -- Create all tables.
 --
@@ -110,6 +110,7 @@ CREATE TABLE designnote (
     file        INTEGER NOT NULL,
     seqnbrfile  SMALLINT NOT NULL,
     seqnbr      INTEGER NOT NULL,
+    line        INTEGER  NOT NULL DEFAULT -1,
     title       TEXT,
     note        TEXT    NOT NULL,
     UNIQUE      u1(refcode),
@@ -137,6 +138,7 @@ CREATE TABLE function (
     return   VARCHAR(64),
     type     CHAR     NOT NULL DEFAULT 'A',
     updated  TINYINT  NOT NULL DEFAULT 0,
+    line     INTEGER  NOT NULL DEFAULT -1,
     description TEXT,
     remark      TEXT,
     returndesc  TEXT,
