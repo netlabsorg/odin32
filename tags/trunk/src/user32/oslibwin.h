@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.67 2002-08-21 15:40:28 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.68 2002-09-12 09:30:06 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -355,7 +355,7 @@ BOOL   OSLibWinLockWindowUpdate(HWND hwnd);
 BOOL   OSLibWinGetMaxPosition(HWND hwndOS2, RECT *rect);
 
 BOOL   OSLibWinShowPointer(BOOL fShow);
-
+HWND OSLibWinCreateInvisibleScroller(HWND parentHWND, int direction);
 
    #define PMSYSCLR_SHADOWHILITEBGND         (-50L)
    #define PMSYSCLR_SHADOWHILITEFGND         (-49L)
