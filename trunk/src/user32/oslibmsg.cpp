@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.50 2001-11-16 17:47:05 phaller Exp $ */
+/* $Id: oslibmsg.cpp,v 1.51 2001-12-11 17:34:53 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -208,6 +208,7 @@ LONG OSLibWinDispatchMsg(MSG *msg, BOOL isUnicode)
 //******************************************************************************
 //******************************************************************************
 
+#ifdef ALTGR_HACK
 static void i_MostUglyAltGrHack(LPMSG pMsg)
 {
   switch (pMsg->message)
@@ -223,7 +224,9 @@ static void i_MostUglyAltGrHack(LPMSG pMsg)
       break;
   }
 }
-
+#else
+#define i_MostUglyAltGrHack(a)
+#endif
 
 BOOL OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax,
                     BOOL isUnicode)
@@ -250,7 +253,9 @@ BOOL OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMa
 	return TRUE;
   }
 
-  if(teb->o.odin.fTranslated && (!hwnd || hwnd == teb->o.odin.msgWCHAR.hwnd)) {
+  if(teb->o.odin.fTranslated && (!hwnd || hwnd == teb->o.odin.msgWCHAR.hwnd)) 
+  {
+        dprintf(("Return queued WM_CHAR message hwnd=%x msg=%d wParam=%x lParam=%x", teb->o.odin.msgWCHAR.hwnd, teb->o.odin.msgWCHAR.message, teb->o.odin.msgWCHAR.wParam, teb->o.odin.msgWCHAR.lParam));
         if(uMsgFilterMin) {
             if(teb->o.odin.msgWCHAR.message < uMsgFilterMin)
                 goto continuegetmsg;
@@ -280,9 +285,9 @@ BOOL OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMa
               goto continuegetmsg;
             break;
         }
-    
+
         i_MostUglyAltGrHack(pMsg);
-    
+
         return (pMsg->message != WINWM_QUIT);
   }
 
@@ -384,7 +389,9 @@ BOOL OSLibWinPeekMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterM
         return FALSE;
   }
 
-  if(teb->o.odin.fTranslated && (!hwnd || hwnd == teb->o.odin.msgWCHAR.hwnd)) {
+  if(teb->o.odin.fTranslated && (!hwnd || hwnd == teb->o.odin.msgWCHAR.hwnd)) 
+  {
+        dprintf(("Return queued WM_CHAR message hwnd=%x msg=%d wParam=%x lParam=%x", teb->o.odin.msgWCHAR.hwnd, teb->o.odin.msgWCHAR.message, teb->o.odin.msgWCHAR.wParam, teb->o.odin.msgWCHAR.lParam));
         if(uMsgFilterMin) {
             if(teb->o.odin.msgWCHAR.message < uMsgFilterMin)
                 goto continuepeekmsg;

@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.77 2001-11-16 17:47:04 phaller Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.78 2001-12-11 17:34:53 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -613,7 +613,7 @@ VirtualKeyFound:
           scanCode -= 0x10;
         // winMsg->wParam  = pmscan2winkey[scanCode][0];
         // wWinScan  = pmscan2winkey[scanCode][1];
-      
+     
       {
         BOOL  fWinExtended;
         BYTE  bWinVKey;
@@ -631,7 +631,7 @@ VirtualKeyFound:
       
         // Set the extended bit when appropriate
         if (fWinExtended)
-            winMsg->lParam = winMsg->lParam | (1<<24);
+            winMsg->lParam = winMsg->lParam | WIN_KEY_EXTENDED;
       }
 
         // Adjust VKEY value for pad digits if NumLock is on
@@ -639,12 +639,9 @@ VirtualKeyFound:
             (virtualKey >= 0x30) && (virtualKey >= 39))
             winMsg->wParam = virtualKey + 0x30;
       
-      
-        #define WIN_KEY_EXTENDED   0x01000000
-        #define WIN_KEY_DONTCARE   0x02000000
-        #define WIN_KEY_ALTHELD    0x20000000
-        #define WIN_KEY_PREVSTATE  0x40000000
 
+#ifdef ALTGR_HACK
+     
         if (usPMScanCode == PMSCAN_ALTRIGHT)
         {
           // Turn message into CTRL-event
@@ -660,8 +657,8 @@ VirtualKeyFound:
           if (flags & KC_KEYUP)
           {
             winMsg->message = WINWM_SYSKEYUP;
-            winMsg->lParam |= 1 << 29;                              // bit 29, alt was pressed
-            winMsg->lParam |= 1 << 30;                              // bit 30, previous state, always 1 for a WM_KEYUP message
+            winMsg->lParam |= WIN_KEY_ALTHELD;                      // bit 29, alt was pressed
+            winMsg->lParam |= WIN_KEY_PREVSTATE;                    // bit 30, previous state, always 1 for a WM_KEYUP message
             winMsg->lParam |= 1 << 31;                              // bit 31, transition state, always 1 for WM_KEYUP
             
             // Note: altgr affects the alt-key state in windows!
@@ -674,7 +671,7 @@ VirtualKeyFound:
           {
             winMsg->lParam |= WIN_KEY_ALTHELD;
             if (keyWasPressed)
-              winMsg->lParam |= 1 << 30;                          // bit 30, previous state, 1 means key was pressed
+              winMsg->lParam |= WIN_KEY_PREVSTATE;     // bit 30, previous state, 1 means key was pressed
             winMsg->message = WINWM_KEYDOWN;
             
             // Note: altgr affects the alt-key state in windows!
@@ -688,10 +685,8 @@ VirtualKeyFound:
             // Note: when CTRL comes up, windows keeps ALTGR still down!
             // KeySetOverlayKeyState(VK_RMENU_W, KEYOVERLAYSTATE_DOWN);
           }
-          
-          break;
-        }
-      
+        }     
+#endif
       
         if (!(flags & KC_ALT))
         {
@@ -718,7 +713,7 @@ VirtualKeyFound:
               winMsg->message = WINWM_KEYUP;
             }
             
-            winMsg->lParam |= 1 << 30;                              // bit 30, previous state, always 1 for a WM_KEYUP message
+            winMsg->lParam |= WIN_KEY_PREVSTATE;                    // bit 30, previous state, always 1 for a WM_KEYUP message
             winMsg->lParam |= 1 << 31;                              // bit 31, transition state, always 1 for WM_KEYUP
           }
           else 
@@ -726,7 +721,7 @@ VirtualKeyFound:
             // send WM_KEYDOWN message
             winMsg->message = WINWM_KEYDOWN;
             if (keyWasPressed)
-              winMsg->lParam |= 1 << 30;                          // bit 30, previous state, 1 means key was pressed
+              winMsg->lParam |= WIN_KEY_PREVSTATE;                  // bit 30, previous state, 1 means key was pressed
           }
         }
         else 
@@ -738,7 +733,7 @@ VirtualKeyFound:
           {
             // send WM_SYSKEYUP message
             winMsg->message = WINWM_SYSKEYUP;
-            winMsg->lParam |= 1 << 30;                              // bit 30, previous state, always 1 for a WM_KEYUP message
+            winMsg->lParam |= WIN_KEY_PREVSTATE;                    // bit 30, previous state, always 1 for a WM_KEYUP message
             winMsg->lParam |= 1 << 31;                              // bit 31, transition state, always 1 for WM_KEYUP
           }
           else 
@@ -746,11 +741,11 @@ VirtualKeyFound:
             // send WM_SYSKEYDOWN message
             winMsg->message = WINWM_SYSKEYDOWN;
             if (keyWasPressed)
-              winMsg->lParam |= 1 << 30;                          // bit 30, previous state, 1 means key was pressed
+              winMsg->lParam |= WIN_KEY_PREVSTATE;                  // bit 30, previous state, 1 means key was pressed
 
             // pressed ALT-key generates additional flag 0x2000000
             // if the current window has keyboard focus
-            winMsg->lParam |= 1 << 29;
+            winMsg->lParam |= WIN_KEY_ALTHELD;
           }
         }
 
@@ -760,6 +755,39 @@ VirtualKeyFound:
                 goto dummymessage; //dinput swallowed message
             }
         }
+
+#ifdef ALTGR_HACK
+        // it's a PMSCAN_ALTRIGHT WM_CHAR message?
+        // and not previously translated?
+        if(fMsgRemoved && usPMScanCode == PMSCAN_ALTRIGHT && !(teb->o.odin.fTranslated))
+        {
+            dprintf(("Queue ALTRIGHT message"));
+            // special ALTRIGHT treatment:
+            // we try to insert another WM_KEYDOWN or WM_KEYUP instead of
+            // the usual WM_CHAR which is expected here.
+            // -> experimental
+            // it's really an OS/2-style WM_CHAR message?
+            MSG extramsg;
+            memcpy(&extramsg, winMsg, sizeof(MSG));
+    
+            // AltGr is not released with WINWM_SYSKEYUP, but WINWM_KEYUP
+            if(flags & KC_KEYUP)
+            {
+                extramsg.message = WINWM_KEYUP;
+            }
+            extramsg.wParam = VK_RMENU_W;
+    
+            // mask out message bits and scan code
+            extramsg.lParam &= (0xDC00FFFF);
+            extramsg.lParam |= (WINSCAN_ALTRIGHT & 0x1FF) << 16;
+////            extramsg.lParam |= WIN_KEY_EXTENDED;
+            if (!(flags & KC_KEYUP))
+                extramsg.lParam |= WIN_KEY_ALTHELD;
+  
+            // insert message into the queue
+            setThreadQueueExtraCharMessage(teb, &extramsg);
+        }
+#endif
         break;
     }
 
@@ -914,44 +942,7 @@ BOOL OSLibWinTranslateMessage(MSG *msg)
 
   UCHAR ucPMScanCode = CHAR4FROMMP(teb->o.odin.os2msg.mp1);
   ULONG fl = SHORT1FROMMP(teb->o.odin.os2msg.mp1);
-  
-  
-  // special ALTRIGHT treatment:
-  // we try to insert another WM_KEYDOWN or WM_KEYUP instead of
-  // the usual WM_CHAR which is expected here.
-  // -> experimental
-  if (ucPMScanCode == PMSCAN_ALTRIGHT)
-  {
-    // it's really an OS/2-style WM_CHAR message?
-    // and not previously translated?
-    if ( ( (teb->o.odin.os2msg.msg != WM_CHAR) &&
-           (teb->o.odin.os2msg.msg != WM_CHAR_SPECIAL) ) ||
-         (teb->o.odin.fTranslated) )
-      return FALSE;
-    
-    memcpy(&extramsg, msg, sizeof(MSG));
-    
-    // AltGr is not released with WINWM_SYSKEYUP, but WINWM_KEYUP
-    if (fl & KC_KEYUP)
-    {
-      extramsg.message = WINWM_KEYUP;
-    }
-      
-    
-    extramsg.wParam = VK_RMENU_W;
-    
-    // mask out message bits and scan code
-    extramsg.lParam &= (0xDC00FFFF);
-    extramsg.lParam |= (WINSCAN_ALTRIGHT & 0x1FF) << 16;
-    extramsg.lParam |= WIN_KEY_EXTENDED;
-    if (!(fl & KC_KEYUP))
-      extramsg.lParam |= WIN_KEY_ALTHELD;
-    
-    // insert message into the queue
-    setThreadQueueExtraCharMessage(teb, &extramsg);
-
-    return TRUE;
-  }
+ 
   
     //NOTE: These actually need to be posted so that the next message retrieved by GetMessage contains
     //      the newly generated WM_CHAR message.
@@ -1005,9 +996,9 @@ BOOL OSLibWinTranslateMessage(MSG *msg)
 
       extramsg.lParam = msg->lParam & 0x00FFFFFF;
       if(fl & KC_ALT)
-        extramsg.lParam |= (1<<29);
+        extramsg.lParam |= WIN_KEY_ALTHELD;
       if(fl & KC_PREVDOWN)
-        extramsg.lParam |= (1<<30);
+        extramsg.lParam |= WIN_KEY_PREVSTATE;
       if(fl & KC_KEYUP)
         extramsg.lParam |= (1<<31);
 

@@ -1,4 +1,4 @@
-/* $Id: winkeyboard.cpp,v 1.26 2001-11-09 01:26:15 phaller Exp $ */
+/* $Id: winkeyboard.cpp,v 1.27 2001-12-11 17:34:53 sandervl Exp $ */
 /*
  * Win32 <-> PM key translation
  *
@@ -592,7 +592,7 @@ WINVKEYTOPMSCAN abWinVKeyToPMScan[256] =
 
 
 // @@@PH
-// Note: windoes uses different scancodes if numlock is pressed
+// Note: windows uses different scancodes if numlock is pressed
 // This is not (yet) reflected here!
 BYTE abPMScanToWinScan[256][2] =
 /****************************************************************************/
@@ -707,26 +707,26 @@ BYTE abPMScanToWinScan[256][2] =
 /* 0x6A PMSCAN_F23          */ , WINSCAN_F23                ,FALSE
 /* 0x6B PMSCAN_F24          */ , WINSCAN_F24                ,FALSE
 /* 0x6C PMSCAN_SYSMEM       */ , 0x00                       ,FALSE
-/* 0x6D PMSCAN_ERASEEOF     */ , WINSCAN_ERASEEOF           ,FALSE
-/* 0x6E PMSCAN_BREAK        */ , WINSCAN_BREAK              ,TRUE
+/* 0x6D PMSCAN_ERASEEOF     */ , 0x00                       ,FALSE
+/* 0x6E PMSCAN_BREAK        */ , 0x00                       ,TRUE
 /* 0x6F PMSCAN_MOVEWIN      */ , 0x00                       ,FALSE
-/* 0x70 PMSCAN_NLS3         */ , 0x00                       ,FALSE
-/* 0x71 PMSCAN_HELP         */ , WINSCAN_HELP               ,FALSE
+/* 0x70 PMSCAN_NLS3         */ , WINSCAN_NLS3               ,FALSE
+/* 0x71 PMSCAN_HELP         */ , 0x00                       ,FALSE
 /* 0x72 PMSCAN_TASKMAN      */ , 0x00                       ,FALSE
-/* 0x73 PMSCAN_B11          */ , 0x00                       ,FALSE
+/* 0x73 PMSCAN_B11          */ , WINSCAN_B11                ,FALSE
 /* 0x74 PMSCAN_JUMP         */ , 0x00                       ,FALSE
 /* 0x75 PMSCAN_MINWIN       */ , 0x00                       ,FALSE
 /* 0x76 PMSCAN_CLEAR        */ , 0x00                       ,FALSE
 /* 0x77 PMSCAN_77           */ , 0x00                       ,FALSE
 /* 0x78 PMSCAN_78           */ , 0x00                       ,FALSE
-/* 0x79 PMSCAN_NLS2         */ , 0x00                       ,FALSE
+/* 0x79 PMSCAN_NLS2         */ , WINSCAN_NLS2	            ,FALSE
 /* 0x7a PMSCAN_SIZE         */ , 0x00                       ,FALSE
-/* 0x7b PMSCAN_NLS1         */ , 0x00                       ,FALSE
-/* 0x7c PMSCAN_APPLICATION  */ , WINSCAN_APPLICATION        ,TRUE
-/* 0x7d PMSCAN_E13          */ , 0x00                       ,FALSE
-/* 0x7e PMSCAN              */ , WINSCAN_WINLEFT            ,TRUE
-/* 0x7f PMSCAN              */ , WINSCAN_WINRIGHT           ,TRUE
-/* 0x80 PMSCAN_PA1          */ , WINSCAN_PA1                ,FALSE
+/* 0x7b PMSCAN_NLS1         */ , WINSCAN_NLS1               ,FALSE
+/* 0x7c PMSCAN_APPLICATION  */ , WINSCAN_WINAPPLICATION     ,TRUE
+/* 0x7d PMSCAN_E13          */ , WINSCAN_YEN                ,FALSE
+/* 0x7e PMSCAN              */ , WINSCAN_ABNT_C2            ,TRUE
+/* 0x7f PMSCAN              */ , 0x00                       ,TRUE
+/* 0x80 PMSCAN_PA1          */ , 0x00                       ,FALSE
 /* 0x81 PMSCAN_F13          */ , WINSCAN_F13                ,FALSE
 /* 0x82 PMSCAN_F14          */ , WINSCAN_F14                ,FALSE
 /* 0x83 PMSCAN_F15          */ , WINSCAN_F15                ,FALSE
@@ -735,34 +735,34 @@ BYTE abPMScanToWinScan[256][2] =
 /* 0x86 PMSCAN_SPACEBREAK   */ , 0x00                       ,FALSE
 /* 0x87 PMSCAN_TABRIGHT     */ , 0x00                       ,FALSE
 /* 0x88 PMSCAN_NOOP         */ , 0x00                       ,FALSE
-/* 0x89 PMSCAN_F16          */ , WINSCAN_F16                ,FALSE
-/* 0x8a PMSCAN_F17          */ , WINSCAN_F17                ,FALSE
-/* 0x8b PMSCAN_F18          */ , WINSCAN_F18                ,FALSE
-/* 0x8c PMSCAN_F19          */ , WINSCAN_F19                ,FALSE
-/* 0x8d PMSCAN_F20          */ , WINSCAN_F20                ,FALSE
-/* 0x8e PMSCAN_F21          */ , WINSCAN_F21                ,FALSE
-/* 0x8f PMSCAN_F22          */ , WINSCAN_F22                ,FALSE
-/* 0x90                     */ , 0x00                       ,FALSE
-/* 0x91                     */ , 0x00                       ,FALSE
-/* 0x92                     */ , 0x00                       ,FALSE
-/* 0x93                     */ , 0x00                       ,FALSE
-/* 0x94                     */ , 0x00                       ,FALSE
-/* 0x95                     */ , 0x00                       ,FALSE
-/* 0x96                     */ , 0x00                       ,FALSE
-/* 0x97                     */ , 0x00                       ,FALSE
+/* 0x89 PMSCAN_F16          */ , 0x00                       ,FALSE
+/* 0x8a PMSCAN_F17          */ , 0x00                       ,FALSE
+/* 0x8b PMSCAN_F18          */ , 0x00                       ,FALSE
+/* 0x8c PMSCAN_F19          */ , 0x00                       ,FALSE
+/* 0x8d PMSCAN_F20          */ , WINSCAN_NUMPADEQUALS       ,FALSE
+/* 0x8e PMSCAN_F21          */ , 0x00                       ,FALSE
+/* 0x8f PMSCAN_F22          */ , 0x00                       ,FALSE
+/* 0x90                     */ , WINSCAN_PREVTRACK          ,FALSE
+/* 0x91                     */ , WINSCAN_AT                 ,FALSE
+/* 0x92                     */ , WINSCAN_COLON              ,FALSE
+/* 0x93                     */ , WINSCAN_UNDERLINE          ,FALSE
+/* 0x94                     */ , WINSCAN_KANJI              ,FALSE
+/* 0x95                     */ , WINSCAN_STOP               ,FALSE
+/* 0x96                     */ , WINSCAN_AX                 ,FALSE
+/* 0x97                     */ , WINSCAN_UNLABELED          ,FALSE
 /* 0x98                     */ , 0x00                       ,FALSE
-/* 0x99                     */ , 0x00                       ,FALSE
+/* 0x99                     */ , WINSCAN_NEXTTRACK          ,FALSE
 /* 0x9A                     */ , 0x00                       ,FALSE
 /* 0x9B                     */ , 0x00                       ,FALSE
 /* 0x9C                     */ , 0x00                       ,FALSE
 /* 0x9D                     */ , 0x00                       ,FALSE
 /* 0x9E                     */ , 0x00                       ,FALSE
 /* 0x9F                     */ , 0x00                       ,FALSE
-/* 0xA0                     */ , 0x00                       ,FALSE
-/* 0xA1                     */ , 0x00                       ,FALSE
-/* 0xA2                     */ , 0x00                       ,FALSE
+/* 0xA0                     */ , WINSCAN_MUTE               ,FALSE
+/* 0xA1                     */ , WINSCAN_CALCULATOR         ,FALSE
+/* 0xA2                     */ , WINSCAN_PLAYPAUSE          ,FALSE
 /* 0xA3                     */ , 0x00                       ,FALSE
-/* 0xA4                     */ , 0x00                       ,FALSE
+/* 0xA4                     */ , WINSCAN_MEDIASTOP          ,FALSE
 /* 0xA5                     */ , 0x00                       ,FALSE
 /* 0xA6                     */ , 0x00                       ,FALSE
 /* 0xA7                     */ , 0x00                       ,FALSE
@@ -772,12 +772,12 @@ BYTE abPMScanToWinScan[256][2] =
 /* 0xAB                     */ , 0x00                       ,FALSE
 /* 0xAC                     */ , 0x00                       ,FALSE
 /* 0xAD                     */ , 0x00                       ,FALSE
-/* 0xAE                     */ , 0x00                       ,FALSE
+/* 0xAE                     */ , WINSCAN_VOLUMEDOWN         ,FALSE
 /* 0xAF                     */ , 0x00                       ,FALSE
-/* 0xB0                     */ , 0x00                       ,FALSE
+/* 0xB0                     */ , WINSCAN_VOLUMEUP           ,FALSE
 /* 0xB1                     */ , 0x00                       ,FALSE
-/* 0xB2                     */ , 0x00                       ,FALSE
-/* 0xB3                     */ , 0x00                       ,FALSE
+/* 0xB2                     */ , WINSCAN_WEBHOME            ,FALSE
+/* 0xB3                     */ , WINSCAN_NUMPADCOMMA        ,FALSE
 /* 0xB4                     */ , 0x00                       ,FALSE
 /* 0xB5                     */ , 0x00                       ,FALSE
 /* 0xB6                     */ , 0x00                       ,FALSE
@@ -820,22 +820,22 @@ BYTE abPMScanToWinScan[256][2] =
 /* 0xDB                     */ , 0x00                       ,FALSE
 /* 0xDC                     */ , 0x00                       ,FALSE
 /* 0xDD                     */ , 0x00                       ,FALSE
-/* 0xDE                     */ , 0x00                       ,FALSE
-/* 0xDF                     */ , 0x00                       ,FALSE
+/* 0xDE                     */ , WINSCAN_POWER              ,FALSE
+/* 0xDF                     */ , WINSCAN_SLEEP              ,FALSE
 /* 0xE0                     */ , 0x00                       ,FALSE
 /* 0xE1                     */ , 0x00                       ,FALSE
 /* 0xE2                     */ , 0x00                       ,FALSE
-/* 0xE3                     */ , 0x00                       ,FALSE
+/* 0xE3                     */ , WINSCAN_WAKE               ,FALSE
 /* 0xE4                     */ , 0x00                       ,FALSE
-/* 0xE5                     */ , 0x00                       ,FALSE
-/* 0xE6                     */ , 0x00                       ,FALSE
-/* 0xE7                     */ , 0x00                       ,FALSE
-/* 0xE8                     */ , 0x00                       ,FALSE
-/* 0xE9                     */ , 0x00                       ,FALSE
-/* 0xEA                     */ , 0x00                       ,FALSE
-/* 0xEB                     */ , 0x00                       ,FALSE
-/* 0xEC                     */ , 0x00                       ,FALSE
-/* 0xED                     */ , 0x00                       ,FALSE
+/* 0xE5                     */ , WINSCAN_WEBSEARCH          ,FALSE
+/* 0xE6                     */ , WINSCAN_WEBFAVORITES       ,FALSE
+/* 0xE7                     */ , WINSCAN_WEBREFRESH         ,FALSE
+/* 0xE8                     */ , WINSCAN_WEBSTOP            ,FALSE
+/* 0xE9                     */ , WINSCAN_WEBFORWARD         ,FALSE
+/* 0xEA                     */ , WINSCAN_WEBBACK            ,FALSE
+/* 0xEB                     */ , WINSCAN_MYCOMPUTER         ,FALSE
+/* 0xEC                     */ , WINSCAN_MAIL               ,FALSE
+/* 0xED                     */ , WINSCAN_MEDIASELECT        ,FALSE
 /* 0xEE                     */ , 0x00                       ,FALSE
 /* 0xEF                     */ , 0x00                       ,FALSE
 /* 0xF0                     */ , 0x00                       ,FALSE
@@ -1322,8 +1322,8 @@ ODINFUNCTION3(int,    GetKeyNameTextA,
 {
   // check the scancodes if the extended key bit is set so
   // we can easily distinguish between "left" and "right" special keys, etc.
-  BOOL  fDontCare = (lParam & 0x02000000) != 0;
-  BOOL  fExtended = (lParam & 0x01000000) != 0;
+  BOOL  fDontCare = (lParam & WIN_KEY_DONTCARE) != 0;
+  BOOL  fExtended = (lParam & WIN_KEY_EXTENDED) != 0;
   UCHAR ucWinScan = (lParam & 0x00ff0000) >> 16;
   UCHAR ucWinVKey;
   UCHAR ucPMScan;
@@ -1419,8 +1419,7 @@ ODINFUNCTION1(SHORT, GetKeyState,
       
     case KEYOVERLAYSTATE_UP:
       return 0x0000;
-  }
-    
+  }   
   return O32_GetKeyState(nVirtKey);
 }
 //******************************************************************************
@@ -1442,16 +1441,8 @@ ODINFUNCTION1(WORD,  GetAsyncKeyState,
       
     case KEYOVERLAYSTATE_UP:
       return 0x0000;
-  }
-  
-  if(fVersionWarp3) 
-  {
-    dprintf(("WARNING: not correctly implemented for Warp 3"));
-    //Not present in Warp 3's PMWINX
-    return O32_GetKeyState(nVirtKey);
-  }
-  else  
-    return O32_GetAsyncKeyState(nVirtKey);
+  } 
+  return O32_GetAsyncKeyState(nVirtKey);
 }
 //******************************************************************************
 //******************************************************************************
