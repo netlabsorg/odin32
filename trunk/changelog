@@ -1,10 +1,11 @@
- /* $Id: changelog,v 1.650 2000-01-15 15:43:26 sandervl Exp $ */
+ /* $Id: changelog,v 1.651 2000-01-15 16:37:35 sandervl Exp $ */
 
  2000-01-15: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: Fixed scroll repaints (never use GetMessage with window
                       handle as that can prevent WM_PAINTs from being dispatched)
                       (may need reworking of Get/PeekMessage instead)
                       ScrollWindow changes
+                      Removed frame drawing 'bugfix'.
 	- KERNEL32:   Check for null pointers in lstrcmpA
 
  2000-01-15: Christoph Bratschi <cbratschi@datacomm.ch>
