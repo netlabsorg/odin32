@@ -1,4 +1,4 @@
-/* $Id: oslibgdi.h,v 1.4 1999-07-24 14:01:44 sandervl Exp $ */
+/* $Id: oslibgdi.h,v 1.5 1999-08-30 11:59:53 sandervl Exp $ */
 /*
  * Window GDI wrapper functions for OS/2
  *
@@ -15,7 +15,7 @@
 #ifdef OS2_INCLUDED
 #include "win32type.h"
 #endif
-#include <win32wnd.h>
+#include <win32wbase.h>
 
 typedef struct
 {
@@ -43,7 +43,7 @@ BOOL  OSLibWinQueryUpdateRect(HWND hwnd, PRECT pRect);
 //******************************************************************************
 //Map win32 y coordinate (in window coordinates) to OS/2 y coord. (in window coordinates)
 //******************************************************************************
-inline ULONG MapOS2ToWin32Y(Win32Window *window, ULONG y)
+inline ULONG MapOS2ToWin32Y(Win32BaseWindow *window, ULONG y)
 {
     return window->getWindowHeight() - y - 1;
 }

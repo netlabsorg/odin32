@@ -1,4 +1,4 @@
-/* $Id: winaccel.cpp,v 1.3 1999-07-20 07:42:36 sandervl Exp $ */
+/* $Id: winaccel.cpp,v 1.4 1999-08-30 11:59:54 sandervl Exp $ */
 /*
  * Win32 accelartor key functions for OS/2
  *
@@ -10,7 +10,7 @@
  */
 #include <os2win.h>
 #include <misc.h>
-#include <win32wnd.h>
+#include <win32wbase.h>
 
 //******************************************************************************
 //******************************************************************************
@@ -41,9 +41,9 @@ BOOL WIN32API DestroyAcceleratorTable( HACCEL haccel)
  Win32Resource *winres;
 
     if(HIWORD(haccel) == 0) {
-	dprintf(("DestroyAcceleratorTable: invalid haccel %x", haccel));
-	SetLastError(ERROR_INVALID_PARAMETER);
-	return FALSE;
+    dprintf(("DestroyAcceleratorTable: invalid haccel %x", haccel));
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
     }
     dprintf(("DestroyAcceleratorTable %x\n", haccel));
     winres = (Win32Resource *)haccel;
@@ -55,17 +55,17 @@ BOOL WIN32API DestroyAcceleratorTable( HACCEL haccel)
 //******************************************************************************
 int WIN32API TranslateAcceleratorA(HWND hwnd, HACCEL haccel, LPMSG lpmsg)
 {
- Win32Window *window;
+ Win32BaseWindow *window;
 
-    window = Win32Window::GetWindowFromHandle(hwnd);
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
 //Msg for (non-client) child of our frame window
-//    	dprintf(("TranslateAcceleratorA, window %x not found", hwnd));
-    	return FALSE;
+//      dprintf(("TranslateAcceleratorA, window %x not found", hwnd));
+        return FALSE;
     }
     if(window->GetAccelTable() != haccel) {
-	dprintf(("TranslateAcceleratorA %X %X %X", hwnd, haccel, lpmsg->hwnd));
-	window->SetAccelTable(haccel);
+    dprintf(("TranslateAcceleratorA %X %X %X", hwnd, haccel, lpmsg->hwnd));
+    window->SetAccelTable(haccel);
     }
 
     //SvL: OS/2 automatically translates accelerator keys

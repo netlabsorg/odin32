@@ -1,4 +1,4 @@
-/* $Id: win32dlg.h,v 1.2 1999-07-14 08:35:37 sandervl Exp $ */
+/* $Id: win32dlg.h,v 1.3 1999-08-30 11:59:53 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -12,11 +12,11 @@
 #ifndef __WIN32DLG_H__
 #define __WIN32DLG_H__
 
-#include <win32wnd.h>
+#include <win32wbase.h>
 
 #ifdef __cplusplus
 
-class Win32Dialog : public Win32Window
+class Win32Dialog : public Win32BaseWindow
 {
 public:
  	 Win32Dialog();

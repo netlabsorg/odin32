@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.35 1999-08-28 19:32:46 sandervl Exp $
+# $Id: makefile,v 1.36 1999-08-30 11:59:53 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -26,7 +26,7 @@ OBJS =  user32.obj dialog.obj loadres.obj \
         usrcall.obj defwndproc.obj syscolor.obj char.obj initterm.obj \
         uitools.obj unknown.obj spy.obj wndmsg.obj \
         pmwindow.obj win32class.obj win32wnd.obj win32dlg.obj \
-        msgbox.obj window.obj windowmsg.obj windowclass.obj \
+        msgbox.obj window.obj windowmsg.obj windowclass.obj win32wbase.obj \
         windowword.obj gen_object.obj oslibwin.obj win32wndchild.obj \
         controls.obj button.obj static.obj scroll.obj listbox.obj \
         combo.obj edit.obj clipboard.obj winicon.obj \
@@ -60,7 +60,7 @@ dummy.obj: dummy.cpp
 char.obj: char.cpp user32.h
 loadres.obj: loadres.cpp user32.h dib.h
 icon.obj: icon.cpp $(PDWIN32_INCLUDE)\winicon.h
-winmenu.obj: winmenu.cpp user32.h $(PDWIN32_INCLUDE)\winres.h
+winmenu.obj: winmenu.cpp user32.h $(PDWIN32_INCLUDE)\winres.h win32wbase.h
 syscolor.obj: syscolor.cpp syscolor.h
 usrcall.obj: usrcall.cpp usrcall.h
 dialog.obj: dialog.cpp
@@ -86,29 +86,30 @@ edit.obj: edit.cpp $(PDWIN32_INCLUDE)\win\combo.h
 nativerc.obj: nativerc.cpp
 
 msgbox.obj:    msgbox.cpp
-window.obj:    window.cpp win32class.h win32wnd.h win32wndchild.h oslibwin.h
-windowmsg.obj: windowmsg.cpp win32class.h win32wnd.h win32wndchild.h
+window.obj:    window.cpp win32class.h win32wbase.h win32wndchild.h oslibwin.h
+windowmsg.obj: windowmsg.cpp win32class.h win32wbase.h win32wndchild.h
 winprop.obj:   winprop.cpp
-wingdi.obj:    wingdi.cpp win32wnd.h oslibgdi.h
-windowclass.obj: windowclass.cpp win32class.h win32wnd.h win32wndchild.h
-windowword.obj:  windowword.cpp win32class.h win32wnd.h win32dlg.h win32wndchild.h
-winaccel.obj:     winaccel.cpp  $(PDWIN32_INCLUDE)\winres.h
-winscrollbar.obj: winscrollbar.cpp
-winicon.obj:    winicon.cpp $(PDWIN32_INCLUDE)\winicon.h
-windlg.obj:    windlg.cpp win32wnd.h win32dlg.h
-windlgmsg.obj: windlgmsg.cpp win32class.h win32wnd.h win32dlg.h win32wndchild.h
+wingdi.obj:    wingdi.cpp win32wbase.h oslibgdi.h
+windowclass.obj: windowclass.cpp win32class.h win32wbase.h win32wndchild.h
+windowword.obj:  windowword.cpp win32class.h win32wbase.h win32dlg.h win32wndchild.h
+winaccel.obj:     winaccel.cpp  $(PDWIN32_INCLUDE)\winres.h win32wbase.h
+winscrollbar.obj: winscrollbar.cpp win32wbase.h
+winicon.obj:    winicon.cpp $(PDWIN32_INCLUDE)\winicon.h win32wbase.h
+windlg.obj:    windlg.cpp win32wbase.h win32dlg.h
+windlgmsg.obj: windlgmsg.cpp win32class.h win32wbase.h win32dlg.h win32wndchild.h
 win32wndhandle.obj: win32wndhandle.cpp win32wndhandle.h
 
-pmwindow.obj:   pmwindow.cpp win32class.h win32wnd.h win32dlg.h pmwindow.h win32wndchild.h $(PDWIN32_INCLUDE)\wprocess.h oslibgdi.h oslibwin.h
-win32class.obj: win32class.cpp win32class.h win32wnd.h win32dlg.h gen_object.h heapshared.h oslibwin.h win32wndchild.h
-win32wnd.obj:   win32wnd.cpp win32class.h win32wnd.h win32dlg.h gen_object.h heapshared.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h win32wndhandle.h oslibdos.h
-win32dlg.obj:   win32dlg.cpp win32class.h win32wnd.h win32dlg.h gen_object.h heapshared.h oslibwin.h win32wndchild.h
+pmwindow.obj:   pmwindow.cpp win32class.h win32wbase.h win32dlg.h pmwindow.h win32wndchild.h $(PDWIN32_INCLUDE)\wprocess.h oslibgdi.h oslibwin.h
+win32class.obj: win32class.cpp win32class.h win32wbase.h win32dlg.h gen_object.h heapshared.h oslibwin.h win32wndchild.h
+win32wbase.obj:   win32wbase.cpp win32class.h win32wbase.h win32dlg.h gen_object.h heapshared.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h win32wndhandle.h oslibdos.h
+win32wnd.obj:   win32wnd.cpp win32class.h win32wbase.h win32wnd.h win32dlg.h gen_object.h heapshared.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h win32wndhandle.h oslibdos.h
+win32dlg.obj:   win32dlg.cpp win32class.h win32wbase.h win32dlg.h gen_object.h heapshared.h oslibwin.h win32wndchild.h
 win32wndchild.obj: win32wndchild.cpp win32wndchild.h
 gen_object.obj: gen_object.cpp gen_object.h heapshared.h
 oslibwin.obj:   oslibwin.cpp oslibwin.h oslibutil.h oslibgdi.h $(PDWIN32_INCLUDE)\winconst.h
 oslibutil.obj:  oslibutil.cpp oslibutil.h $(PDWIN32_INCLUDE)\wprocess.h oslibmsg.h
 oslibmsg.obj:   oslibmsg.cpp oslibmsg.h
-oslibgdi.obj:   oslibgdi.cpp oslibgdi.h
+oslibgdi.obj:   oslibgdi.cpp oslibgdi.h win32wbase.h
 oslibres.obj:   oslibres.cpp oslibwin.h oslibres.h $(PDWIN32_INCLUDE)\winconst.h
 oslibdos.obj:   oslibdos.cpp oslibdos.h
 
