@@ -1,4 +1,4 @@
-/* $Id: crt.cpp,v 1.10 1999-10-25 19:24:13 phaller Exp $ */
+/* $Id: crt.cpp,v 1.11 1999-11-09 09:30:20 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -1645,12 +1645,12 @@ LPSTR  CDECL NTDLL__ultoa(long x,LPSTR buf,INT radix)
 
 int CDECL NTDLL__vsnprintf( char *s, size_t bufsize, const char *format, va_list arg )
 {
-  dprintf(("NTDLL: _ultoa(%08xh, %08xh, %08xh) not implemented\n",
+  dprintf(("NTDLL: _ultoa(%08xh, %08xh, %08xh)\n",
            s,
            bufsize,
            format));
 
-  return 0;
+  return wvsnprintfA(s, bufsize, format, arg);
 }
 
 

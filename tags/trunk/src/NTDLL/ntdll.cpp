@@ -1,4 +1,4 @@
-/* $Id: ntdll.cpp,v 1.2 1999-08-18 21:45:13 phaller Exp $ */
+/* $Id: ntdll.cpp,v 1.3 1999-11-09 09:30:20 phaller Exp $ */
 
 /*
  *
@@ -50,3 +50,29 @@
 #define NTSTATUS DWORD
 
 
+/*****************************************************************************
+ * Name      : DbgPrint
+ * Purpose   : print a debug line to somewhere?
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.21
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1999/06/01 09:00]
+ *****************************************************************************/
+void __cdecl DbgPrint(LPCSTR lpcstrFormat,LPVOID args)
+{
+  UCHAR   szBuffer[600]; // as in original NTDLL.DLL
+  int     rc;
+
+  rc = wvsnprintfA((LPSTR)szBuffer,
+                   sizeof(szBuffer),
+                   lpcstrFormat,
+                   (va_list)args);
+
+  dprintf(("NTDLL: DbgPrint[%s]\n",
+           szBuffer));
+
+  //@@@PH raise debug exception if running in debugger
+}

@@ -1,4 +1,4 @@
-/* $Id: unknown.cpp,v 1.6 1999-08-19 20:43:19 phaller Exp $ */
+/* $Id: unknown.cpp,v 1.7 1999-11-09 09:30:21 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -371,21 +371,8 @@ DWORD WIN32API NtReplyPort(DWORD x1,
  *                 NTDLL_alloca_probe             [NTDLL.861]
  * Glorified "enter xxxx".
  */
-void CDECL OS2_chkstk(DWORD x1)
-{
-  dprintf(("NTDLL: _chkstk(%08xh) not implemented.\n",
-           x1));
-
-    //ESP_reg(context) -= EAX_reg(context);
-}
-
-void CDECL OS2_alloca_probe(DWORD x1)
-{
-  dprintf(("NTDLL: _alloca_probe(%08xh) not implemented.\n",
-           x1));
-
-    //ESP_reg(context) -= EAX_reg(context);
-}
+extern void CDECL _chkstk(DWORD x1);
+extern void CDECL _alloca_probe(DWORD x1);
 
 
 /*****************************************************************************
