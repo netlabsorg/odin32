@@ -1,4 +1,4 @@
-/* $Id: initsystem.cpp,v 1.27 2001-04-01 14:33:50 sandervl Exp $ */
+/* $Id: initsystem.cpp,v 1.28 2001-06-27 13:35:46 sandervl Exp $ */
 /*
  * Odin system initialization (registry, directories & environment)
  *
@@ -66,7 +66,7 @@ void InitEnvironment(int nrcpus)
         GetCPUVendorString(buffer1);
         buffer1[12] = 0;
         signature = GetCPUSignature();
-        sprintf(buffer, "x86 Family %x Model %x Stepping %x, %s", (signature >> 8)&0xf, signature & 0xf, (signature >> 4)&0xf, buffer1);
+        sprintf(buffer, "x86 Family %x Model %x Stepping %x, %s", (signature >> 8)&0xf, (signature >> 4) & 0xf, signature & 0xf, buffer1);
         SetEnvironmentVariableA("PROCESSOR_IDENTIFIER", buffer);
         sprintf(buffer, "%x", (signature >> 8)&0xf);
         SetEnvironmentVariableA("PROCESSOR_LEVEL", buffer);

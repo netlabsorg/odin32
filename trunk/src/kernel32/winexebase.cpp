@@ -1,4 +1,4 @@
-/* $Id: winexebase.cpp,v 1.15 2001-06-11 09:49:36 phaller Exp $ */
+/* $Id: winexebase.cpp,v 1.16 2001-06-27 13:35:46 sandervl Exp $ */
 
 /*
  * Win32 exe base class
@@ -109,9 +109,8 @@ ULONG Win32ExeBase::start()
   OS2SetExceptionHandler((void *)&exceptFrame);
   SetWin32TIB();
 
-  //Set default FPU control word (no exceptions); same as in NT
-  CONTROL87(0x27F, 0xFFF);
-  
+  //Reset FPU to default values (control word 0x27F; same as in NT)
+  _fpreset();
   dprintf(("KERNEL32: Win32ExeBase::start exe at %08xh\n",
           (void*)entryPoint ));
   rc = ((WIN32EXEENTRY)entryPoint)(NULL);

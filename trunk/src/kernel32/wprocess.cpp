@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.126 2001-06-15 18:58:39 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.127 2001-06-27 13:35:47 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -1659,11 +1659,12 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
         sprintf(cmdline, "%s", lpCommandLine);
     }
 
-    char szAppName[255];
+    char szAppName[MAX_PATH];
+    char buffer[MAX_PATH];
     DWORD fileAttr;
-    char *exename = szAppName;
-    strncpy(szAppName, cmdline, sizeof(szAppName));
-    szAppName[254] = 0;
+    char *exename = buffer;
+    strncpy(buffer, cmdline, sizeof(szAppName));
+    buffer[MAX_PATH-1] = 0;
     if(*exename == '"') {
         exename++;
         while(*exename != 0 && *exename != '"')
@@ -1672,7 +1673,12 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
         if(*exename != 0) {
              *exename = 0;
         }
-        exename = &szAppName[1];
+        exename++;
+        if (SearchPathA( NULL, &buffer[1], ".exe", sizeof(szAppName), szAppName, NULL ) ||
+            SearchPathA( NULL, &buffer[1], NULL, sizeof(szAppName), szAppName, NULL )) 
+        {
+            //
+        }
     }
     else {
         BOOL fTerminate = FALSE;
@@ -1686,30 +1692,34 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
                   *exename = 0;
                   fTerminate = TRUE;
              }
-
-             fileAttr = GetFileAttributesA(szAppName);
-             if(fileAttr != -1 && !(fileAttr & FILE_ATTRIBUTE_DIRECTORY)) {
-                  break;
+             dprintf(("Trying '%s'", buffer ));
+             if (SearchPathA( NULL, buffer, ".exe", sizeof(szAppName), szAppName, NULL ) ||
+                 SearchPathA( NULL, buffer, NULL, sizeof(szAppName), szAppName, NULL ))
+             {
+                 if(fTerminate) exename++;
+                 break;
              }
+
              if(fTerminate) {
                   *exename = ' ';
                   exename++;
                   fTerminate = FALSE;
              }
         }
-        exename = szAppName;
     }
-    fileAttr = GetFileAttributesA(exename);
+    lpCommandLine = exename; //start of command line parameters
+
+    fileAttr = GetFileAttributesA(szAppName);
     if(fileAttr == -1 || (fileAttr & FILE_ATTRIBUTE_DIRECTORY)) {
         dprintf(("CreateProcess: can't find executable!"));
         SetLastError(ERROR_FILE_NOT_FOUND);
         return FALSE;
     }
 
-    dprintf(("KERNEL32: CreateProcess %s\n", cmdline));
+    dprintf(("KERNEL32: CreateProcess %s %s", szAppName, lpCommandLine));
 
     DWORD Characteristics, SubSystem, fNEExe;
-    if(Win32ImageBase::isPEImage(exename, &Characteristics, &SubSystem, &fNEExe) == 0) {
+    if(Win32ImageBase::isPEImage(szAppName, &Characteristics, &SubSystem, &fNEExe) == 0) {
         char *lpszPE;
         if(SubSystem == IMAGE_SUBSYSTEM_WINDOWS_CUI) {
              lpszPE = "PEC.EXE";
@@ -1721,16 +1731,16 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
         if(lpCurrentDirectory) {
             char *newcmdline;
 
-            newcmdline = (char *)malloc(strlen(lpCurrentDirectory) + strlen(cmdline) + 32);
-            sprintf(newcmdline, "%s /OPT:[CURDIR=%s] %s", lpszPE, lpCurrentDirectory, cmdline);
+            newcmdline = (char *)malloc(strlen(lpCurrentDirectory) + strlen(szAppName) + strlen(lpCommandLine) + 32);
+            sprintf(newcmdline, "%s /OPT:[CURDIR=%s] %s %s", lpszPE, lpCurrentDirectory, szAppName, lpCommandLine);
             free(cmdline);
             cmdline = newcmdline;
         }
         else {
             char *newcmdline;
 
-            newcmdline = (char *)malloc(strlen(cmdline) + 16);
-            sprintf(newcmdline, "%s %s", lpszPE, cmdline);
+            newcmdline = (char *)malloc(strlen(szAppName) + strlen(lpCommandLine) + 16);
+            sprintf(newcmdline, "%s %s %s", lpszPE, szAppName, lpCommandLine);
             free(cmdline);
             cmdline = newcmdline;
         }
@@ -1743,8 +1753,8 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
     if(fNEExe) {//16 bits windows app
         char *newcmdline;
 
-        newcmdline = (char *)malloc(strlen(cmdline) + 16);
-        sprintf(newcmdline, "w16odin.exe %s", cmdline);
+        newcmdline = (char *)malloc(strlen(szAppName) + strlen(cmdline) + 16);
+        sprintf(newcmdline, "w16odin.exe %s", szAppName, lpCommandLine);
         free(cmdline);
         cmdline = newcmdline;
         //Force Open32 to use DosStartSession (DosExecPgm won't do)
@@ -1755,7 +1765,7 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
                                lpProcessInfo);
     }
     else {//os/2 app??
-        rc = O32_CreateProcess(NULL, (LPCSTR)cmdline,lpProcessAttributes,
+        rc = O32_CreateProcess(szAppName, (LPCSTR)lpCommandLine, lpProcessAttributes,
                                lpThreadAttributes, bInheritHandles, dwCreationFlags,
                                lpEnvironment, lpCurrentDirectory, lpStartupInfo,
                                lpProcessInfo);
