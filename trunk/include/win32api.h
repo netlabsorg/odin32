@@ -128,6 +128,7 @@ DWORD   WIN32API GetFileType(HANDLE hFile);
 BOOL    WIN32API SetWindowPos(HWND,HWND,INT,INT,INT,INT,UINT);
 HWND    WIN32API GetWindow(HWND hwnd, UINT uCmd);
 BOOL    WIN32API IntersectRect( PRECT lprcDst, const RECT * lprcSrc1, const RECT * lprcSrc2);
+BOOL    WIN32API OffsetRect( PRECT lprc, int x, int  y);
 
 DWORD   WIN32API GetTickCount(void);
 DWORD   WIN32API GetCurrentThreadId();
