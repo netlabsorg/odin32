@@ -1,10 +1,14 @@
- /* $Id: ChangeLog,v 1.242 1999-09-26 10:09:06 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.243 1999-09-26 11:05:12 achimha Exp $ */
+
+ 99-09-26: Achim Hasenmueller <achimha@innotek.de>
+        - COMCTL32: Merged with WINE 990923 changes
+                    (propsheet.c not fully done)   
 
  99-09-26: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32:   Started with standard window scrollbar implementation
                     Rewrote ScrollWindow (not done and not working correctly)
 
- 99-09-25: Christoph Bratschi<cbratschi@datacomm.ch>
+ 99-09-25: Christoph Bratschi <cbratschi@datacomm.ch>
         - USER32: WS_EX_* 3D frame support for child windows
 	- USER32: Double click handling changed
 
