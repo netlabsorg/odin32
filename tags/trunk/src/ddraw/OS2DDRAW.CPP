@@ -354,13 +354,14 @@ HRESULT __stdcall DrawCreateSurface(THIS This, LPDDSURFACEDESC lpDDSurfaceDesc,
   rc = newsurf->GetLastError();
   if(rc != DD_OK)
   {
-    WriteLog("Error createing Surface");
+    WriteLog("Error createing Surface\n\n");
     *lplpDD = NULL;
     delete newsurf;
   }
   else
     *lplpDD = (IDirectDrawSurface *)newsurf;
 
+  WriteLog("New Surface created at %08X\n\n", newsurf);
   return(rc);
 }
 //******************************************************************************
@@ -394,12 +395,14 @@ HRESULT __stdcall DrawCreateSurface4(THIS This, LPDDSURFACEDESC2 lpDDSurfaceDesc
   rc = newsurf->GetLastError();
   if(rc != DD_OK)
   {
-    WriteLog("Error createing Surface");
+    WriteLog("Error createing Surface\n\n");
     *lplpDD = NULL;
     delete newsurf;
   }
   else
     *lplpDD = (IDirectDrawSurface4 *)newsurf;
+
+  WriteLog("New Surface created at %08X\n\n", newsurf);
 
   return(rc);
 }
@@ -1189,6 +1192,7 @@ HRESULT __stdcall DrawSetDisplayMode2(THIS This, DWORD dwWidth, DWORD dwHeight,
               DWORD dwBPP, DWORD dwRefreshRate,
               DWORD dwFlags)
 {
+ ULONG rc;
  OS2IDirectDraw        *me = (OS2IDirectDraw *)This;
 
 #ifdef DEBUG
@@ -1197,6 +1201,14 @@ HRESULT __stdcall DrawSetDisplayMode2(THIS This, DWORD dwWidth, DWORD dwHeight,
   me->screenwidth  = dwWidth;
   me->screenheight = dwHeight;
   me->screenbpp    = dwBPP;
+  if(me->screenbpp!=me->dCaps.ulDepth)
+  {
+    rc = DiveOpen( &me->hDiveColorConv,
+                   FALSE,
+                   0);
+    WriteLog("Screen in different mode than requested, open addional DIVE instance(rc=%X)\n\n",rc);
+
+  }
 //  _interrupt(3);
   return(DD_OK);
 }
@@ -1205,6 +1217,7 @@ HRESULT __stdcall DrawSetDisplayMode2(THIS This, DWORD dwWidth, DWORD dwHeight,
 HRESULT __stdcall DrawSetDisplayMode(THIS This, DWORD dwWidth, DWORD dwHeight,
              DWORD dwBPP)
 {
+ ULONG rc;
  OS2IDirectDraw        *me = (OS2IDirectDraw *)This;
 
 #ifdef DEBUG
@@ -1213,6 +1226,14 @@ HRESULT __stdcall DrawSetDisplayMode(THIS This, DWORD dwWidth, DWORD dwHeight,
   me->screenwidth  = dwWidth;
   me->screenheight = dwHeight;
   me->screenbpp    = dwBPP;
+  if(me->screenbpp!=me->dCaps.ulDepth)
+  {
+    rc = DiveOpen( &me->hDiveColorConv,
+                   FALSE,
+                   0);
+    WriteLog("Screen in different mode than requested, open addional DIVE instance(rc=%X)\n\n",rc);
+
+  }
 //  _interrupt(3);
   return(DD_OK);
 }
