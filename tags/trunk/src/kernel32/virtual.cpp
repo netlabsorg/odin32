@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.36 2000-11-10 10:14:25 sandervl Exp $ */
+/* $Id: virtual.cpp,v 1.37 2000-11-14 21:16:26 sandervl Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -406,7 +406,7 @@ ODINFUNCTION4(LPVOID, VirtualAlloc, LPVOID, lpvAddress,
                             if((flag & (PAG_READ|PAG_WRITE|PAG_EXECUTE)) != (os2flags & (PAG_READ|PAG_WRITE|PAG_EXECUTE)))
                             {   //change protection flags
                                 DWORD tmp;
-                                if(VirtualProtect(lpvAddress, cbSize, fdwAllocationType, &tmp) == TRUE) {
+                                if(VirtualProtect(lpvAddress, cbSize, fdwProtect, &tmp) == TRUE) {
                                     return lpvAddress;
                                 }
                                 dprintf(("ERROR: VirtualAlloc: commit on committed memory -> VirtualProtect failed!!"));
