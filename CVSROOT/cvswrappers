@@ -28,6 +28,7 @@
 *.sys -k 'b'
 *.obj -k 'b'
 *.res -l 'b'
+*.lib -k 'b'
 
 # diverse others
 *.zip -k 'b'
