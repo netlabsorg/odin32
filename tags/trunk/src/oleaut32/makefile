@@ -1,4 +1,4 @@
-#/* $Id: makefile,v 1.5 1999-11-09 14:16:43 sandervl Exp $ */
+#/* $Id: makefile,v 1.6 1999-11-14 01:26:36 davidr Exp $ */
 #
 # PD-Win32 API 
 #
@@ -24,6 +24,7 @@ OBJS =  oleaut32.obj guid.obj \
 	initterm.obj olefont.obj \
 	typelib.obj variant.obj \
 	ole2disp.obj parsedt.obj \
+	ipicture.obj \
 	safearray.obj stubs.obj
 
 all: $(TARGET).dll $(TARGET).lib
@@ -54,6 +55,7 @@ ole2disp.obj:    ole2disp.cpp oleaut32.h
 variant.obj:    variant.cpp parsedt.h
 typelib.obj:    typelib.cpp oleaut32.h
 olefont.obj:    olefont.cpp oleaut32.h
+ipicture.obj:   ipicture.cpp oleaut32.h
 parsedt.obj:    parsedt.cpp parsedt.h
 safearray.obj:  safearray.cpp oleaut32.h
 guid.obj:       guid.cpp
@@ -63,5 +65,7 @@ clean:
 	$(RM) *.obj *.lib *.dll *.map *.pch	
 	$(RM) $(PDWIN32_BIN)\$(TARGET).dll
 	$(RM) $(PDWIN32_LIB)\$(TARGET).lib
+
+
 
 

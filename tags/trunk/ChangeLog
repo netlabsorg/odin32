@@ -1,4 +1,9 @@
- /* $Id: ChangeLog,v 1.445 1999-11-13 18:50:54 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.446 1999-11-14 01:27:36 davidr Exp $ */
+
+ 99-11-14: David Raison <djr@lemur.co.uk>
+ 	- OLEAUT32: Added beginnings of IPicture interface for VB6 support.
+ 	            Mostly stubs, but enough to get a simple VB6 app started.
+ 	            ICreatePictureIndirect updated.
 
  99-11-13: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: fixed more edit bugs
