@@ -1,4 +1,4 @@
-/* $Id: dev1632.h,v 1.7 2001-02-10 11:11:43 bird Exp $
+/* $Id: dev1632.h,v 1.8 2001-07-08 03:03:51 bird Exp $
  * dev1632.h - Common header file for 16-bit and 32-bit C
  *
  * Copyright (c) 1999 knut st. osmundsen
@@ -42,6 +42,11 @@ typedef struct _RP32GENIOCTL
     USHORT      DataLen;
 } RP32GENIOCTL, *PRP32GENIOCTL;
 
+typedef struct _RP32OPENCLOSE
+{
+    RPH32       rph;
+    USHORT      sfn;
+} RP32OPENCLOSE, *PRP32OPENCLOSE;
 
 #ifdef _OS2KLDR_H_
 
