@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.104 2003-03-19 10:29:48 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.105 2003-03-25 12:17:09 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -38,6 +38,7 @@
 #include <winkeyboard.h>
 #include "hook.h"
 #include "user32api.h"
+
 
 #define DBG_LOCALLOG    DBG_oslibmsgtranslate
 #include "dbglocal.h"
@@ -627,6 +628,12 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         winMsg->wParam = (WPARAM)win32sc;
         winMsg->lParam = MAKELONG((USHORT)x, (USHORT)y);
         break;
+    }
+
+    case WM_CHAR_SPECIAL_CONSOLE_BREAK:
+    {
+         GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT_W,0);
+         break;
     }
 
     case WM_CHAR_SPECIAL_ALTGRCONTROL:
