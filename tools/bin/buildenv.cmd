@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.20 2002-08-29 11:49:59 bird Exp $
+/* $Id: buildenv.cmd,v 1.21 2002-08-30 09:07:34 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -2788,7 +2788,7 @@ Unix: procedure expose aCfg. aPath. sPathFile
     call EnvSet      fRM, 'groff_tmac_path',    sUnixForw'/lib/groff/tmac'
     call EnvSet      fRM, 'refer',              sUnixForw'/lib/groff/dict/papers/ind'
 
-    call EnvSet      fRM, 'editor',             'e:/verkty/boxer/b2.exe -Vr25'
+    call EnvSet      fRM, 'editor',             'TEDIT'
 
     sXF86Forw = translate(sXF86Back, '/', '\');
     call EnvSet      fRM, 'PATH_XFREE86',       sXF86Back
