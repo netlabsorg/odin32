@@ -1,4 +1,4 @@
-/* $Id: pe2lx.h,v 1.13 2001-07-08 02:59:21 bird Exp $
+/* $Id: pe2lx.h,v 1.13.2.1 2002-04-01 09:58:55 bird Exp $
  *
  * Pe2Lx class declarations. Ring 0 and Ring 3
  *
@@ -108,9 +108,9 @@ private:
     /** @cat Fixups Helpers - calls allowed from makeFixups only! */
     ULONG       initFixups();
     ULONG       addPageFixupEntry(BOOL fLast = FALSE);
-    ULONG       add32OffsetFixup(WORD offSource, ULONG ulTarget);
-    ULONG       add32OrdImportFixup(WORD offSource, ULONG ulModuleOrdinal, ULONG ulFunctionOrdinal);
-    ULONG       add32NameImportFixup(WORD offSource, ULONG ulModuleOrdinal, PCSZ pszFnName);
+    ULONG       add32OffsetFixup(USHORT offSource, ULONG ulTarget);
+    ULONG       add32OrdImportFixup(USHORT offSource, ULONG ulModuleOrdinal, ULONG ulFunctionOrdinal);
+    ULONG       add32NameImportFixup(USHORT offSource, ULONG ulModuleOrdinal, PCSZ pszFnName);
     ULONG       addModule(PCSZ pszModuleName, PULONG pulModuleOrdinal);
     ULONG       addImportFunctionName(PCSZ pszFnName, PULONG poffFnName);
     VOID        finalizeFixups();
