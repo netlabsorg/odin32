@@ -1,4 +1,4 @@
-/* $Id: win32api.h,v 1.16 2000-06-25 09:45:34 sandervl Exp $ */
+/* $Id: win32api.h,v 1.17 2000-08-01 23:18:26 sandervl Exp $ */
 
 /*
  *
@@ -51,6 +51,8 @@ VOID   WIN32API ExitProcess(DWORD exitcode);
 
 BOOL   WIN32API PostMessageA(HWND,UINT,WPARAM,LPARAM);
 BOOL   WIN32API PostMessageW(HWND,UINT,WPARAM,LPARAM);
+LRESULT WIN32API SendMessageA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT WIN32API SendMessageW(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 BOOL   WIN32API IsWindow(HWND);
 
