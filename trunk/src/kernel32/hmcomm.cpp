@@ -1,4 +1,4 @@
-/* $Id: hmcomm.cpp,v 1.29 2001-12-07 14:13:36 sandervl Exp $ */
+/* $Id: hmcomm.cpp,v 1.30 2001-12-07 14:33:34 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -390,14 +390,15 @@ DWORD CommPollIOHandler(LPASYNCIOREQUEST lpRequest, DWORD *lpdwResult, DWORD *lp
 
     pDevData = (PHMDEVCOMDATA)pHMHandleData->lpHandlerData;
 
-    dprintf(("CommPollIOHandler %x %x", pHMHandleData->hHMHandle, lpRequest->dwEventMask));
+////    dprintf(("CommPollIOHandler %x %x", pHMHandleData->hHMHandle, lpRequest->dwEventMask));
 
     *lpdwTimeOut = TIMEOUT_COMM;
 
-    ulLen = sizeof(CHAR);
+    ulLen   = sizeof(CHAR);
     dwEvent = 0;
-    rc = 0;
-    ulLen = sizeof(COMEvt);
+    rc      = 0;
+    ulLen   = sizeof(COMEvt);
+    dwMask  = lpRequest->dwEventMask;
 
     if(lpRequest->dwEventMask != pDevData->dwEventMask) {
         dprintf(("!WARNING!: CommPollIOHandler: operation aborted (event mask changed)"));
@@ -420,6 +421,7 @@ DWORD CommPollIOHandler(LPASYNCIOREQUEST lpRequest, DWORD *lpdwResult, DWORD *lp
         dwEvent |= (COMEvt&0x0080)? EV_ERR:0;
         dwEvent |= (COMEvt&0x0100)? EV_RING:0;
         if((dwEvent & dwMask)) {
+            dprintf(("CommPollIOHandler: event(s) %x occured", (dwEvent & dwMask)));
             *lpdwResult = (dwEvent & dwMask);
             return ERROR_SUCCESS;
         }
