@@ -1,4 +1,8 @@
- /* $Id: changelog,v 1.55 1999-07-21 11:44:33 sandervl Exp $ */
+ /* $Id: changelog,v 1.56 1999-07-22 08:23:01 sandervl Exp $ */
+ 99-07-22: Sander van Leeuwen <sandervl@xs4all.nl>
+	- DDRAW: Now compiles
+	- COMCTL32: Create library with correct api names
+
  99-07-21: Edgar Buerkle <100566.557@compuserve.com>
 	- KERNEL32: Fix for LoadResource; should return pointer to resource data
                     LockResource just returns the pointer returned by LoadResource
