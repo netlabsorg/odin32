@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.81 1999-08-14 09:06:38 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.82 1999-08-14 16:15:54 cbratschi Exp $ */
+
+ 99-08-14: Christoph Bratschi <cbratschi@datacomm.ch>
+        - COMCTL32: wine-990731 update
 
  99-08-14: Sander van Leeuwen <sandervl@xs4all.nl>
 	- INCLUDE\win\windows.h: Include odin.h if __WIN32OS2__ is defined
