@@ -1,4 +1,4 @@
-/* $Id: hmcomm.cpp,v 1.23 2001-12-01 19:26:40 sandervl Exp $ */
+/* $Id: hmcomm.cpp,v 1.24 2001-12-02 12:00:50 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -27,10 +27,13 @@
 #define DBG_LOCALLOG  DBG_hmcomm
 #include "dbglocal.h"
 
+//#define TESTING_COMM
+#ifdef TESTING_COMM
 #undef dprintf
 #define dprintf(a) WriteLog a
 #undef dprintf2
 #define dprintf2(a) WriteLog a
+#endif
 
 BAUDTABLEENTRY BaudTable[] =
 {
