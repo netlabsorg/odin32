@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.44 1999-10-15 10:03:15 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.45 1999-10-15 13:52:54 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -100,6 +100,7 @@ void Win32BaseWindow::Init()
   fIsDialog        = FALSE;
   fInternalMsg     = FALSE;
   fNoSizeMsg       = FALSE;
+  fIsDestroyed     = FALSE;
 
   windowNameA      = NULL;
   windowNameW      = NULL;
@@ -160,33 +161,44 @@ void Win32BaseWindow::Init()
 //******************************************************************************
 Win32BaseWindow::~Win32BaseWindow()
 {
-  OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32WNDPTR, 0);
-  OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32PM_MAGIC, 0);
+    OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32WNDPTR, 0);
+    OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32PM_MAGIC, 0);
 
-  if (isOwnDC())
+    if(getParent() && getParent()->getFirstChild() == this && getNextChild() == NULL)
+    {
+        //if we're the last child that's being destroyed and our
+        //parent window was also destroyed, then we delete the parent object
+        if(getParent()->IsWindowDestroyed())
+        {
+            dprintf(("Last Child (%x) destroyed, get rid of our parent window (%x)", getWindowHandle(), getParent()->getWindowHandle()));
+            delete getParent();
+            setParent(NULL);  //or else we'll crash in the dtor of the ChildWindow class
+        }
+    }
+    if (isOwnDC())
         releaseOwnDC (ownDC);
 
-  if(Win32Hwnd)
+    if(Win32Hwnd)
         HwFreeWindowHandle(Win32Hwnd);
 
-  if(userWindowLong)
+    if(userWindowLong)
         free(userWindowLong);
-  if(windowNameA) {
+    if(windowNameA) {
         free(windowNameA);
         windowNameA = NULL;
-  }
-  if(windowNameW) {
+    }
+    if(windowNameW) {
         free(windowNameW);
         windowNameW = NULL;
-  }
-  if(vertScrollInfo) {
+    }
+    if(vertScrollInfo) {
         free(vertScrollInfo);
         vertScrollInfo = NULL;
-  }
-  if(horzScrollInfo) {
+    }
+    if(horzScrollInfo) {
         free(horzScrollInfo);
         horzScrollInfo = NULL;
-  }
+    }
   //TODO: Destroy windows if they're not associated with our window anymore (showwindow false)?
 //  hwndHorzScroll
 //  hwndVertScroll
@@ -196,7 +208,7 @@ Win32BaseWindow::~Win32BaseWindow()
 //******************************************************************************
 BOOL Win32BaseWindow::isChild()
 {
-    return (dwStyle & WS_CHILD) != 0;
+    return ((dwStyle & WS_CHILD) != 0);
 }
 //******************************************************************************
 //******************************************************************************
@@ -654,7 +666,6 @@ ULONG Win32BaseWindow::MsgClose()
   if(SendInternalMessageA(WM_CLOSE, 0, 0) == 0) {
         return 0; //app handles this message
   }
-  delete this;
   return 1;
 }
 //******************************************************************************
@@ -662,10 +673,23 @@ ULONG Win32BaseWindow::MsgClose()
 ULONG Win32BaseWindow::MsgDestroy()
 {
  ULONG rc;
+ Win32BaseWindow *child;
 
-  rc = SendInternalMessageA(WM_DESTROY, 0, 0);
-  delete this;
-  return rc;
+    //According to the SDK, WM_PARENTNOTIFY messages are sent to the parent (this window)
+    //before any window destruction has begun
+    child = (Win32BaseWindow *)getFirstChild();
+    while(child) {
+        child->NotifyParent(WM_DESTROY, 0, 0);
+
+        child = (Win32BaseWindow *)child->getNextChild();
+    }
+    SendInternalMessageA(WM_DESTROY, 0, 0);
+
+    fIsDestroyed = TRUE;
+    if(getFirstChild() == NULL) {
+        delete this;
+    }
+    return 1;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1660,6 +1684,7 @@ LRESULT Win32BaseWindow::SendMessageA(ULONG Msg, WPARAM wParam, LPARAM lParam)
                 break;
 
         case WM_DESTROY:
+                win32wndproc(getWindowHandle(), WM_NCDESTROY, 0, 0);
                 rc = win32wndproc(getWindowHandle(), WM_DESTROY, 0, 0);
                 break;
 
@@ -1713,7 +1738,6 @@ LRESULT Win32BaseWindow::SendMessageW(ULONG Msg, WPARAM wParam, LPARAM lParam)
 
         case WM_DESTROY:
                 win32wndproc(getWindowHandle(), WM_NCDESTROY, 0, 0);
-                NotifyParent(Msg, wParam, lParam);
                 rc = win32wndproc(getWindowHandle(), WM_DESTROY, 0, 0);
                 break;
 
@@ -1761,7 +1785,6 @@ LRESULT Win32BaseWindow::SendInternalMessageA(ULONG Msg, WPARAM wParam, LPARAM l
 
         case WM_DESTROY:
                 win32wndproc(getWindowHandle(), WM_NCDESTROY, 0, 0);
-                NotifyParent(Msg, wParam, lParam);
                 rc = win32wndproc(getWindowHandle(), WM_DESTROY, 0, 0);
                 break;
         default:
@@ -1809,7 +1832,6 @@ LRESULT Win32BaseWindow::SendInternalMessageW(ULONG Msg, WPARAM wParam, LPARAM l
 
         case WM_DESTROY:
                 win32wndproc(getWindowHandle(), WM_NCDESTROY, 0, 0);
-                NotifyParent(Msg, wParam, lParam);
                 rc = win32wndproc(getWindowHandle(), WM_DESTROY, 0, 0);
                 break;
         default:
