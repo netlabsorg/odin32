@@ -1,4 +1,4 @@
-; $Id: USER32.DEF,v 1.40 2000-11-05 18:49:06 sandervl Exp $
+; $Id: USER32.DEF,v 1.41 2000-11-11 18:39:29 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
@@ -612,6 +612,10 @@ EXPORTS
 
     ChangeDisplaySettingsExA   = _ChangeDisplaySettingsExA@20 @604
     ChangeDisplaySettingsExW   = _ChangeDisplaySettingsExW@20 @605
+
+    NotifyWinEvent             = _NotifyWinEvent@16          @606
+    UnhookWinEvent             = _UnhookWinEvent@4           @607
+    SetWinEventHook            = _SetWinEventHook@28         @608
 
 ;------------
 ; Windows 98

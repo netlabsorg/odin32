@@ -1,4 +1,4 @@
-/* $Id: win32class.cpp,v 1.18 2000-09-05 19:20:35 sandervl Exp $ */
+/* $Id: win32class.cpp,v 1.19 2000-11-11 18:39:30 sandervl Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -94,6 +94,8 @@ Win32WndClass::Win32WndClass(WNDCLASSEXA *wndclass, BOOL fUnicode) : GenericObje
   if(HIWORD(wndclass->lpszClassName))
        dprintf(("USER32:  wndclass->lpszClassName %s\n", classNameA));
   else dprintf(("USER32:  wndclass->lpszClassName %X\n", wndclass->lpszClassName));
+
+  dprintf(("USER32:  wndclass->classAtom %x", classAtom));
 
   if(HIWORD(wndclass->lpszMenuName)) {//convert string name identifier to numeric id
        dprintf(("USER32:  lpszMenuName %s\n", menuNameA));
