@@ -1,4 +1,4 @@
-/* $Id: os2newapi.h,v 1.2 1999-06-19 13:57:50 sandervl Exp $ */
+/* $Id: os2newapi.h,v 1.3 2000-03-11 00:00:04 sandervl Exp $ */
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -48,5 +48,22 @@ ULONG _Optlink DosSelToFlat(ULONG seladdr);
 ULONG _Optlink DosFlatToSel(ULONG lin);
 
 #endif
+
+//undocumented OS/2 api to read data from an executable image
+
+#define QHINF_EXEINFO       1 /* NE exeinfo. */
+#define QHINF_READRSRCTBL   2 /* Reads from the resource table. */
+#define QHINF_READFILE      3 /* Reads from the executable file. */
+#define QHINF_LIBPATHLENGTH 4 /* Gets the libpath length. */
+#define QHINF_LIBPATH       5 /* Gets the entire libpath. */
+#define QHINF_FIXENTRY      6 /* NE only */
+#define QHINF_STE           7 /* NE only */
+#define QHINF_MAPSEL        8 /* NE only */
+
+APIRET APIENTRY DosQueryHeaderInfo(HMODULE hmod,
+                                   ULONG   ulIndex,
+                                   PVOID   pvBuffer,
+                                   ULONG   cbBuffer,
+                                   ULONG   ulSubFunction);
 
 #endif //__OS2SEL_H__
