@@ -1,4 +1,4 @@
-/* $Id: cvtcursor.cpp,v 1.4 1999-09-24 22:47:00 sandervl Exp $ */
+/* $Id: cvtcursor.cpp,v 1.5 1999-09-25 14:11:30 sandervl Exp $ */
 
 /*
  * PE2LX cursor conversion code
@@ -61,7 +61,7 @@ void *ConvertCursor(CursorComponent *curHdr, int size, int *os2size, int offsetB
   cursorhdr->xHotspot      = curHdr->xHotspot;
 
   /* @@@PH y-hotspot is upside down ! */
-  cursorhdr->yHotspot      = (bhdr->biHeight >> 1) - 1       /* height div 2 */
+  cursorhdr->yHotspot      = (bhdr->biHeight >> 1)       /* height div 2 */
                              - curHdr->yHotspot;         /* subtract hot.y */
 
   dprintf(("Cursor Hot.x   : %d", curHdr->xHotspot));
@@ -117,8 +117,9 @@ void *ConvertCursor(CursorComponent *curHdr, int size, int *os2size, int offsetB
   }
   else    bwsize = bhdr->biSizeImage;
 
-  //write XOR and AND mask
-  memcpy((char *)os2rgb, (char *)rgb, bwsize);
+  //write XOR and AND mask in reversed order (Win32 XOR-AND, PM AND-XOR)
+  memcpy((char *)os2rgb, (char *)rgb+bwsize/2, bwsize/2);
+  memcpy((char *)os2rgb+bwsize/2, (char *)rgb, bwsize/2);
 
   *os2size = cursorsize;
   return cursorhdr;
