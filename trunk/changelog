@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2017 2002-03-08 11:35:11 sandervl Exp $ */
+/* $Id: changelog,v 1.2018 2002-03-08 15:48:57 sandervl Exp $ */
+
+ 2002-03-08: Platon Fomichev <platon@innotek.de>
+    - USER32:   o Menu: fix for double click on minimized window (icon)
 
  2002-03-08: Patrick Haller <patrick.haller@innotek.de>
     - SHELL32:  o WINE sync
