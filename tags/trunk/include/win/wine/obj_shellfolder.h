@@ -1,4 +1,4 @@
-/* $Id: obj_shellfolder.h,v 1.8 2000-08-18 02:04:21 phaller Exp $ */
+/* $Id: obj_shellfolder.h,v 1.9 2002-02-06 23:54:01 sandervl Exp $ */
 /*
  * Defines the COM interfaces and APIs related to IShellFolder
  *
@@ -19,6 +19,7 @@
 extern "C" {
 #endif /* defined(__cplusplus) */
 
+#ifndef __WIN32OS2__
 /****************************************************************************
 *  STRRET
 */
@@ -40,6 +41,7 @@ typedef struct _STRRET
     WCHAR       cStrW[MAX_PATH];
   }u;
 } STRRET,*LPSTRRET;
+#endif
 
 /*****************************************************************************
  * Predeclare the interfaces
