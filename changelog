@@ -1,4 +1,26 @@
- /* $Id: changelog,v 1.394 1999-11-01 19:12:36 sandervl Exp $ */
+ /* $Id: changelog,v 1.395 1999-11-02 19:04:47 sandervl Exp $ */
+
+ 99-11-02: Sander van Leeuwen <sandervl@xs4all.nl>
+	- INCLUDE\odinwrap.h: 
+                  fixed wrong define (_ODINWARP instead of _ODINWRAP)
+                  Only check the heap for consistency when DEBUG_ODINHEAP is
+                  defined.
+	- USER32: Uncommented EDIT_NOTIFY_PARENT call in EDIT_WM_SetFocus
+                  (yesterday's showwindow fix makes sure no WM_SETFOCUS msgs
+                   arrive before the dialog received it's WM_INITDIALOG msg)
+                  Fixed more FS corruption in dc.cpp.
+	- SHELL32: Added extra exports for comdlg32
+	- COMDLG32: Ported Wine file & find common dialogs (990815)
+                    Find & Replace dialogs enabled, Wine code called for
+                    file dialogs if the app supplies a dialog template.
+                    NOTE: Disabled for now. Comctl32 isn't stable enough
+                          for the Win95 style Wine comdlg dialogs.
+                    Fixed check for find/replace dialog. Notepad uses 32 byte
+                    buffer, so why does the wine code fail for < 80 bytes?
+                    Fixed display of find/replace dialog -> if not hooked
+                    show dialog!
+	- makefiles: Added debugsmp/nodebuginfosmp/releasesmp options to
+                     start two nmake process to build everything on two cpus.
 
  99-11-01: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Delete all process windows & classes in exitlist handler
@@ -6,6 +28,7 @@
                   (fixes problems when groupbox control is defined after
                    controls inside it in dialog template)
                   Mouse activate fix.
+                  Don't activate child windows in ShowWindow.
 	- WINMM: Return failure for waveOutGetDevCapsA/W when there's no
                  audio hardware present.
 
