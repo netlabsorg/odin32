@@ -1,5 +1,5 @@
-/* $Id */
-/*
+/*  $Id: oslibnet.cpp,v 1.4 2001-09-05 10:27:54 bird Exp $
+ *
  * Wrappers for OS/2 Netbios/Network/LAN API
  *
  * Copyright 2000 Patrick Haller (patrick.haller@innotek.de)
@@ -65,9 +65,9 @@ static DWORD error2WinError(APIRET rc)
   case NERR_InvalidAPI:        return NERR_InvalidAPI;
   case NERR_BadEventName:      return NERR_BadEventName;
   case NERR_BASE + 44:         return NERR_BASE + 44; // NERR_DupNameReboot
-    
+
   // ...
-    
+
     case NO_ERROR: //0
         return ERROR_SUCCESS_W;
 
@@ -207,7 +207,7 @@ static DWORD error2WinError(APIRET rc)
 /*****************************************************************************
  * Name      : NET_API_STATUS OSLibNetWkstaGetInfo
  * Purpose   :
- * Parameters: 
+ * Parameters:
  * Variables :
  * Result    :
  * Remark    :
@@ -217,13 +217,13 @@ static DWORD error2WinError(APIRET rc)
  *****************************************************************************/
 
 DWORD OSLibNetWkstaGetInfo (const unsigned char * pszServer,
-                    unsigned long         ulLevel,       
+                    unsigned long         ulLevel,
                     unsigned char       * pbBuffer,
-                    unsigned long         ulBuffer,      
-                    unsigned long       * pulTotalAvail) 
+                    unsigned long         ulBuffer,
+                    unsigned long       * pulTotalAvail)
 {
   USHORT sel = RestoreOS2FS();
-  
+
   APIRET rc = error2WinError(Net32WkstaGetInfo(pszServer, ulLevel, pbBuffer, ulBuffer, pulTotalAvail));
   SetFS(sel);
   return rc;
@@ -233,7 +233,7 @@ DWORD OSLibNetWkstaGetInfo (const unsigned char * pszServer,
 /*****************************************************************************
  * Name      : NET_API_STATUS OSLibNetStatisticsGet
  * Purpose   :
- * Parameters: 
+ * Parameters:
  * Variables :
  * Result    :
  * Remark    :
