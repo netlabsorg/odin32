@@ -1,4 +1,4 @@
-/* $Id: file.h,v 1.1 1999-11-08 13:46:16 sandervl Exp $ */
+/* $Id: file.h,v 1.2 2002-08-16 09:55:24 sandervl Exp $ */
 /*
  * File handling declarations
  *
@@ -22,6 +22,7 @@ typedef struct
 } DOS_FULL_NAME;
 
 #define IS_END_OF_NAME(ch)  (!(ch) || ((ch) == '/') || ((ch) == '\\'))
+#define INVALID_DOS_CHARS  "*?<>|\"+=,;[] \345"
 
 /* DOS device descriptor */
 typedef struct
