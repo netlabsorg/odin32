@@ -1,4 +1,11 @@
- /* $Id: ChangeLog,v 1.1071 2000-08-17 17:09:00 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.1072 2000-08-17 18:28:23 sandervl Exp $ */
+
+ 2000-08-17: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: Only call O32_LoadLibrary if dwFlags == 0 and (LX binary 
+                or win32k process)
+                GetModuleHandleA fix (uninit. var)
+                (PowerDVD install no longer complains about running InstallShield)
+    - DSOUND:   Fixed wrong type for dllHandle (caused load failure)
 
  2000-08-16: Christoph Bratschi <cbratschi@datacomm.ch>
     - COMCTL32: propsheet: workaround for PROPSHEET_GetPaddingInfoWizard
