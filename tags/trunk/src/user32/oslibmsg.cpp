@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.62 2002-10-24 16:56:46 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.63 2002-10-28 12:22:31 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -460,7 +460,11 @@ continuepeekmsg:
 
                     rc = WinPeekMsg(teb->o.odin.hab, &os2msg, hwndOS2, ulPMFilter, ulPMFilter, 
                                     (fRemove & PM_REMOVE_W) ? PM_REMOVE : PM_NOREMOVE);
-
+                    //Sadly indeed WinPeekMsg sometimes does not filter well!
+                    if (rc && (os2msg.msg != ulPMFilter)) {// drop this message
+                       dprintf(("WARNING: WinPeekMsg returns %x even though we filter for %x", os2msg.msg, ulPMFilter));
+                       rc = 0;   
+                    }
                     if (rc && (fRemove & PM_REMOVE_W) && os2msg.msg == WM_TIMER) {
                         eaten = TIMER_HandleTimer(&os2msg);
                     }
