@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.190 2000-05-20 13:30:59 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.191 2000-05-20 14:57:24 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2085,6 +2085,7 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
     else    setStyle(getStyle() & ~WS_VISIBLE);
 
     rc = OSLibWinShowWindow(OS2HwndFrame, showstate);
+    OSLibWinShowWindow(OS2Hwnd, showstate);
 
     SendInternalMessageA(WM_SHOWWINDOW, (showstate & SWPOS_SHOW) ? 1 : 0, 0);
 
@@ -2115,7 +2116,7 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
    BOOL rc = FALSE;
    Win32BaseWindow *window;
    HWND hParent = 0;
-   BOOL fShow = FALSE, fHide = FALSE;
+   BOOL fShow = FALSE;
 
     if (fuFlags &
        ~(SWP_NOSIZE     | SWP_NOMOVE     | SWP_NOZORDER     |
@@ -2197,13 +2198,6 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
         {
             FrameUpdateClient(this);
         }
-    	if(fuFlags & SWP_SHOWWINDOW) {
-            	setStyle(getStyle() | WS_VISIBLE);
-    	}
-    	else
-    	if(fuFlags & SWP_HIDEWINDOW) {
-		setStyle(getStyle() & ~WS_VISIBLE);
-        }
         return TRUE;
     }
 
@@ -2225,18 +2219,26 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
 
     if(fuFlags & SWP_SHOWWINDOW && !IsWindowVisible()) {
        	setStyle(getStyle() | WS_VISIBLE);
+	//SvL: TODO: Send WM_SHOWWINDOW??
+    	OSLibWinShowWindow(OS2Hwnd, SWPOS_SHOW);
     }
     else
     if(fuFlags & SWP_HIDEWINDOW && IsWindowVisible()) {
 	setStyle(getStyle() & ~WS_VISIBLE);
+	//SvL: TODO: Send WM_SHOWWINDOW??
+    	OSLibWinShowWindow(OS2Hwnd, SWPOS_HIDE);
     }
     rc = OSLibWinSetMultWindowPos(&swp, 1);
 
+#ifdef DEBUG
+    if(fShow) {
+	dprintf(("Frame style 0x%08x, client style 0x%08x", OSLibQueryWindowStyle(OS2HwndFrame), OSLibQueryWindowStyle(OS2Hwnd)));
+    }
+#endif
     if (rc == FALSE)
     {
         dprintf(("OSLibWinSetMultWindowPos failed! Error %x",OSLibWinGetLastError()));
     }
-
     if((fuFlags & SWP_FRAMECHANGED) && (fuFlags & (SWP_NOMOVE | SWP_NOSIZE) == (SWP_NOMOVE | SWP_NOSIZE)))
     {
         FrameUpdateClient(this);
