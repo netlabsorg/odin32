@@ -1,4 +1,4 @@
-/* $Id: shell32.cpp,v 1.6 1999-06-23 22:17:52 phaller Exp $ */
+/* $Id: shell32.cpp,v 1.7 1999-06-23 22:28:52 phaller Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -53,8 +53,23 @@
  *****************************************************************************/
 
 
-//******************************************************************************
-//******************************************************************************
+/*****************************************************************************
+ * Name      : HINSTANCE ShellExecuteA
+ * Purpose   : Start a program
+ * Parameters: HWND    hwnd
+ *             LPCTSTR lpOperation
+ *             LPCTSTR lpFile
+ *             LPCTSTR lpParameters
+ *             LPCTSTR lpDirectory
+ *             INT     nShowCmd
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED
+ *
+ * Author    : Patrick Haller [Tue, 1999/06/01 09:00]
+ *****************************************************************************/
+
 HINSTANCE WIN32API ShellExecuteA(HWND    hwnd,
                                  LPCTSTR lpOperation,
                                  LPCTSTR lpFile,
@@ -72,9 +87,78 @@ HINSTANCE WIN32API ShellExecuteA(HWND    hwnd,
 
   return(0); //out of memory
 }
-//******************************************************************************
-//TODO: Make nice dialog window
-//******************************************************************************
+
+
+/*****************************************************************************
+ * Name      : HINSTANCE ShellExecuteW
+ * Purpose   : Start a program
+ * Parameters: HWND    hwnd
+ *             LPCWSTR lpOperation
+ *             LPCWSTR lpFile
+ *             LPCWSTR lpParameters
+ *             LPCWSTR lpDirectory
+ *             INT     nShowCmd
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED
+ *
+ * Author    : Patrick Haller [Tue, 1999/06/01 09:00]
+ *****************************************************************************/
+
+HINSTANCE WIN32API ShellExecuteW(HWND    hwnd,
+                                 LPCWSTR lpOperation,
+                                 LPCWSTR lpFile,
+                                 LPCWSTR lpParameters,
+                                 LPCWSTR lpDirectory,
+                                 INT     nShowCmd)
+{
+  HINSTANCE hInstance;
+  LPSTR     lpOperationA  = UnicodeToAsciiString((LPWSTR)lpOperation);
+  LPSTR     lpFileA       = UnicodeToAsciiString((LPWSTR)lpFile);
+  LPSTR     lpParametersA = UnicodeToAsciiString((LPWSTR)lpParameters);
+  LPSTR     lpDirectoryA  = UnicodeToAsciiString((LPWSTR)lpDirectory);
+
+  dprintf (("SHELL32: ShellExecuteW(%08xh,%s,%s,%s,%s,%08xh).\n",
+            hwnd,
+            lpOperationA,
+            lpFileA,
+            lpParametersA,
+            lpDirectoryA,
+            nShowCmd));
+
+  hInstance = ShellExecuteA(hwnd,
+                            lpOperationA,
+                            lpFileA,
+                            lpParametersA,
+                            lpDirectoryA,
+                            nShowCmd);
+
+  FreeAsciiString(lpOperationA);
+  FreeAsciiString(lpFileA);
+  FreeAsciiString(lpParametersA);
+  FreeAsciiString(lpDirectoryA);
+
+  return hInstance;
+}
+
+
+
+/*****************************************************************************
+ * Name      : DWORD ShellAboutA
+ * Purpose   : display a simple about box
+ * Parameters: HWND   hwnd
+ *             LPSTR  szApplication
+ *             LPSTR  szMoreInformation
+ *             HICON  hIcon
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED
+ *
+ * Author    : Patrick Haller [Tue, 1999/06/01 09:00]
+ *****************************************************************************/
+
 int WIN32API ShellAboutA(HWND    hwnd,
                          LPCTSTR szApp,
                          LPCTSTR szOtherStuff,
