@@ -1,4 +1,4 @@
-/* $Id: win32wmdiclient.cpp,v 1.24 2000-02-16 14:28:24 sandervl Exp $ */
+/* $Id: win32wmdiclient.cpp,v 1.25 2000-02-21 17:25:32 cbratschi Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -35,7 +35,7 @@
 #include "syscolor.h"
 #include "win32wndhandle.h"
 
-#define DBG_LOCALLOG	DBG_win32wmdiclient
+#define DBG_LOCALLOG    DBG_win32wmdiclient
 #include "dbglocal.h"
 
 
@@ -856,9 +856,19 @@ BOOL Win32MDIClientWindow::augmentFrameMenu(Win32MDIChildWindow *child)
 
   // In Win 95 look, the system menu is replaced by the child icon
 
-  HICON hIcon = GetClassLongA(child->getWindowHandle(), GCL_HICONSM);
-  if (!hIcon)
-    hIcon = GetClassLongA(child->getWindowHandle(), GCL_HICON);
+  /* Find small icon */
+  HICON hIcon = child->GetSmallIcon();
+
+  /* If no small icon or overwridden large icon, use class small icon.. */
+  if (!hIcon && !child->GetIcon())
+    hIcon = GetClassLongA(child->getWindowHandle(),GCL_HICONSM);
+
+  /* Use large icon */
+  if (!hIcon) hIcon = child->GetIcon();
+
+  /* If all else fails, use large class icon. */
+  if (!hIcon) hIcon = GetClassLongA(child->getWindowHandle(),GCL_HICON);
+
   if (hIcon)
   {
     HDC hMemDC;
