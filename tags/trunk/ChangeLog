@@ -1,4 +1,9 @@
- /* $Id: ChangeLog,v 1.968 2000-06-01 13:59:19 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.969 2000-06-03 04:07:34 bird Exp $ */
+
+ 2000-06-03: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - Win32k/REXX:  Rewrote the REXX stub program in assembly.
+                    (exe size: 688 bytes) Might be able to embedd it in
+                    win32k.sys... (not priority)
 
  2000-06-01: Sander van Leeuwen <sandervl@xs4all.nl>
     - GDI32/USER32: Moved GetClipRgn & GetClipBox into user32 (dc.cpp)
