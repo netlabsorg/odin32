@@ -1,4 +1,4 @@
-/* $Id: status.c,v 1.17 1999-12-26 17:32:13 cbratschi Exp $ */
+/* $Id: status.c,v 1.18 2000-02-10 18:51:19 cbratschi Exp $ */
 /*
  * Interface code to StatusWindow widget/control
  *
@@ -852,50 +852,50 @@ STATUSBAR_WMCreate (HWND hwnd, WPARAM wParam, LPARAM lParam)
     RECT        rect;
     int         width, len;
     HDC hdc;
-    STATUSWINDOWINFO *self;
+    STATUSWINDOWINFO *infoPtr;
 
-    self = (STATUSWINDOWINFO*)COMCTL32_Alloc (sizeof(STATUSWINDOWINFO));
-    SetWindowLongA (hwnd, 0, (DWORD)self);
+    infoPtr = (STATUSWINDOWINFO*)COMCTL32_Alloc (sizeof(STATUSWINDOWINFO));
+    SetWindowLongA (hwnd, 0, (DWORD)infoPtr);
 
-    self->numParts = 1;
-    self->parts = 0;
-    self->simple = FALSE;
-    self->clrBk = CLR_DEFAULT;
-    self->hFont = 0;
+    infoPtr->numParts = 1;
+    infoPtr->parts = 0;
+    infoPtr->simple = FALSE;
+    infoPtr->clrBk = CLR_DEFAULT;
+    infoPtr->hFont = 0;
     GetClientRect (hwnd, &rect);
 
     nclm.cbSize = sizeof(NONCLIENTMETRICSA);
     SystemParametersInfoA (SPI_GETNONCLIENTMETRICS, 0, &nclm, 0);
-    self->hDefaultFont = CreateFontIndirectA (&nclm.lfStatusFont);
+    infoPtr->hDefaultFont = CreateFontIndirectA (&nclm.lfStatusFont);
 
     /* initialize simple case */
-    self->part0.bound = rect;
-    self->part0.text = 0;
-    self->part0.x = 0;
-    self->part0.style = 0;
-    self->part0.hIcon = 0;
+    infoPtr->part0.bound = rect;
+    infoPtr->part0.text = 0;
+    infoPtr->part0.x = 0;
+    infoPtr->part0.style = 0;
+    infoPtr->part0.hIcon = 0;
 
     /* initialize first part */
-    self->parts = COMCTL32_Alloc (sizeof(STATUSWINDOWPART));
-    self->parts[0].bound = rect;
-    self->parts[0].text = 0;
-    self->parts[0].x = -1;
-    self->parts[0].style = 0;
-    self->parts[0].hIcon = 0;
+    infoPtr->parts = COMCTL32_Alloc (sizeof(STATUSWINDOWPART));
+    infoPtr->parts[0].bound = rect;
+    infoPtr->parts[0].text = 0;
+    infoPtr->parts[0].x = -1;
+    infoPtr->parts[0].style = 0;
+    infoPtr->parts[0].hIcon = 0;
 
     if (IsWindowUnicode (hwnd)) {
-        self->bUnicode = TRUE;
+        infoPtr->bUnicode = TRUE;
         if (lpCreate->lpszName &&
             (len = lstrlenW ((LPCWSTR)lpCreate->lpszName))) {
-            self->parts[0].text = COMCTL32_Alloc ((len + 1)*sizeof(WCHAR));
-            lstrcpyW (self->parts[0].text, (LPCWSTR)lpCreate->lpszName);
+            infoPtr->parts[0].text = COMCTL32_Alloc ((len + 1)*sizeof(WCHAR));
+            lstrcpyW (infoPtr->parts[0].text, (LPCWSTR)lpCreate->lpszName);
         }
     }
     else {
         if (lpCreate->lpszName &&
             (len = lstrlenA ((LPCSTR)lpCreate->lpszName))) {
-            self->parts[0].text = COMCTL32_Alloc ((len + 1)*sizeof(WCHAR));
-            lstrcpyAtoW (self->parts[0].text, (char*)lpCreate->lpszName);
+            infoPtr->parts[0].text = COMCTL32_Alloc ((len + 1)*sizeof(WCHAR));
+            lstrcpyAtoW (infoPtr->parts[0].text, (char*)lpCreate->lpszName);
         }
     }
 
@@ -904,28 +904,28 @@ STATUSBAR_WMCreate (HWND hwnd, WPARAM wParam, LPARAM lParam)
         TEXTMETRICA tm;
         HFONT hOldFont;
 
-        hOldFont = SelectObject (hdc,self->hDefaultFont);
+        hOldFont = SelectObject (hdc,infoPtr->hDefaultFont);
         GetTextMetricsA(hdc, &tm);
-        self->textHeight = tm.tmHeight;
+        infoPtr->textHeight = tm.tmHeight;
         SelectObject (hdc, hOldFont);
         ReleaseDC(0, hdc);
     }
 
     if (GetWindowLongA (hwnd, GWL_STYLE) & SBT_TOOLTIPS) {
-        self->hwndToolTip =
+        infoPtr->hwndToolTip =
             CreateWindowExA (0, TOOLTIPS_CLASSA, NULL, 0,
                                CW_USEDEFAULT, CW_USEDEFAULT,
                                CW_USEDEFAULT, CW_USEDEFAULT,
                              hwnd, 0,
                              GetWindowLongA (hwnd, GWL_HINSTANCE), NULL);
 
-        if (self->hwndToolTip) {
+        if (infoPtr->hwndToolTip) {
             NMTOOLTIPSCREATED nmttc;
 
             nmttc.hdr.hwndFrom = hwnd;
             nmttc.hdr.idFrom = GetWindowLongA (hwnd, GWL_ID);
             nmttc.hdr.code = NM_TOOLTIPSCREATED;
-            nmttc.hwndToolTips = self->hwndToolTip;
+            nmttc.hwndToolTips = infoPtr->hwndToolTip;
 
             SendMessageA (GetParent (hwnd), WM_NOTIFY,
                             (WPARAM)nmttc.hdr.idFrom, (LPARAM)&nmttc);
@@ -934,9 +934,10 @@ STATUSBAR_WMCreate (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     GetClientRect (GetParent (hwnd), &rect);
     width = rect.right - rect.left;
-    self->height = self->textHeight + 4 + VERT_BORDER;
-    MoveWindow (hwnd, lpCreate->x, lpCreate->y-1,
-                  width, self->height, FALSE);
+    infoPtr->height = infoPtr->textHeight + 4 + VERT_BORDER;
+//CB: todo: find bug!
+infoPtr->height += 4;
+    MoveWindow(hwnd,lpCreate->x,lpCreate->y-1,width,infoPtr->height,FALSE);
     STATUSBAR_SetPartBounds (hwnd);
 
     return 0;

@@ -1,4 +1,4 @@
-/*$Id: listview.c,v 1.21 2000-02-04 17:02:07 cbratschi Exp $*/
+/*$Id: listview.c,v 1.22 2000-02-10 18:51:17 cbratschi Exp $*/
 /*
  * Listview control
  *
@@ -50,7 +50,7 @@
 #include "winbase.h"
 #include "commctrl.h"
 #include "listview.h"
-#include "debugtools.h"
+//#include "debugtools.h"
 #include "comctl32.h"
 
 /*
@@ -328,42 +328,37 @@ static VOID LISTVIEW_UnsupportedStyles(LONG lStyle)
 {
   if ((LVS_TYPEMASK & lStyle) == LVS_EDITLABELS)
   {
-    FIXME("  LVS_EDITLABELS\n");
+    //FIXME("  LVS_EDITLABELS\n");
   }
 
   if ((LVS_TYPEMASK & lStyle) == LVS_NOLABELWRAP)
   {
-    FIXME("  LVS_NOLABELWRAP\n");
+    //FIXME("  LVS_NOLABELWRAP\n");
   }
 
   if ((LVS_TYPEMASK & lStyle) == LVS_NOSCROLL)
   {
-    FIXME("  LVS_NOSCROLL\n");
-  }
-
-  if ((LVS_TYPEMASK & lStyle) == LVS_NOSORTHEADER)
-  {
-    FIXME("  LVS_NOSORTHEADER\n");
+    //FIXME("  LVS_NOSCROLL\n");
   }
 
   if ((LVS_TYPEMASK & lStyle) == LVS_OWNERDRAWFIXED)
   {
-    FIXME("  LVS_OWNERDRAWFIXED\n");
+    //FIXME("  LVS_OWNERDRAWFIXED\n");
   }
 
   if ((LVS_TYPEMASK & lStyle) == LVS_SHAREIMAGELISTS)
   {
-    FIXME("  LVS_SHAREIMAGELISTS\n");
+    //FIXME("  LVS_SHAREIMAGELISTS\n");
   }
 
   if ((LVS_TYPEMASK & lStyle) == LVS_SORTASCENDING)
   {
-    FIXME("  LVS_SORTASCENDING\n");
+    //FIXME("  LVS_SORTASCENDING\n");
   }
 
   if ((LVS_TYPEMASK & lStyle) == LVS_SORTDESCENDING)
   {
-    FIXME("  LVS_SORTDESCENDING\n");
+    //FIXME("  LVS_SORTDESCENDING\n");
   }
 }
 
@@ -3560,12 +3555,15 @@ static LRESULT LISTVIEW_GetItemA(HWND hwnd, LPLVITEMA lpLVItem, BOOL internal)
       (lpLVItem->iItem >= GETITEMCOUNT(infoPtr))
      )
     return FALSE;
+
   hdpaSubItems = (HDPA)DPA_GetPtr(infoPtr->hdpaItems, lpLVItem->iItem);
   if (hdpaSubItems == NULL)
     return FALSE;
+
   lpItem = (LISTVIEW_ITEM *)DPA_GetPtr(hdpaSubItems, 0);
   if (lpItem == NULL)
     return FALSE;
+
   ZeroMemory(&dispInfo, sizeof(NMLVDISPINFOA));
   if (lpLVItem->iSubItem == 0)
   {
@@ -3639,6 +3637,7 @@ static LRESULT LISTVIEW_GetItemA(HWND hwnd, LPLVITEMA lpLVItem, BOOL internal)
       lstrcpynA(lpLVItem->pszText, *ppszText, lpLVItem->cchTextMax);
     }
   }
+
   if (lpLVItem->iSubItem == 0)
   {
     if (dispInfo.item.mask & LVIF_STATE)
@@ -3651,15 +3650,18 @@ static LRESULT LISTVIEW_GetItemA(HWND hwnd, LPLVITEMA lpLVItem, BOOL internal)
     {
       lpLVItem->state = lpItem->state & lpLVItem->stateMask;
     }
+
     if (lpLVItem->mask & LVIF_PARAM)
     {
       lpLVItem->lParam = lpItem->lParam;
     }
+
     if (lpLVItem->mask & LVIF_INDENT)
     {
       lpLVItem->iIndent = lpItem->iIndent;
     }
   }
+
   return TRUE;
 }
 
@@ -5716,6 +5718,7 @@ static LRESULT LISTVIEW_Create(HWND hwnd, WPARAM wParam, LPARAM lParam)
   LPCREATESTRUCTA lpcs = (LPCREATESTRUCTA)lParam;
   UINT uView = lpcs->style & LVS_TYPEMASK;
   LOGFONTA logFont;
+  DWORD headerStyle = WS_CHILD | HDS_HORZ;
 
   /* initialize info pointer */
   ZeroMemory(infoPtr, sizeof(LISTVIEW_INFO));
@@ -5750,8 +5753,9 @@ static LRESULT LISTVIEW_Create(HWND hwnd, WPARAM wParam, LPARAM lParam)
   infoPtr->hFont = infoPtr->hDefaultFont;
 
   /* create header */
+  if (!(lpcs->style & LVS_NOSORTHEADER)) headerStyle |= HDS_BUTTONS;
   infoPtr->hwndHeader = CreateWindowA(WC_HEADERA, (LPCSTR)NULL,
-                                      WS_CHILD | HDS_HORZ | HDS_BUTTONS,
+                                      headerStyle,
                                       0, 0, 0, 0, hwnd, (HMENU)0,
                                       lpcs->hInstance, NULL);
 
@@ -6474,7 +6478,7 @@ static LRESULT LISTVIEW_NotifyFormat(HWND hwndFrom, HWND hwnd, INT nCommand)
                                          (WPARAM)hwnd, (LPARAM)NF_QUERY);
     if (infoPtr->notifyFormat == NFR_UNICODE)
     {
-      FIXME("NO support for unicode structures");
+      //FIXME("NO support for unicode structures");
     }
   }
 
@@ -6907,6 +6911,17 @@ static INT LISTVIEW_StyleChanged(HWND hwnd, WPARAM wStyleType,
       {
         LISTVIEW_AlignTop(hwnd);
       }
+    }
+
+    if ((lpss->styleOld & LVS_NOSORTHEADER) != (lpss->styleNew & LVS_NOSORTHEADER))
+    {
+      INT headerStyle = GetWindowLongA(infoPtr->hwndHeader,GWL_STYLE);
+
+      if (lpss->styleNew & LVS_NOSORTHEADER)
+        headerStyle &= ~HDS_BUTTONS;
+      else
+        headerStyle |= HDS_BUTTONS;
+      SetWindowLongA(infoPtr->hwndHeader,GWL_STYLE,headerStyle);
     }
 
     /* update the size of the client area */

@@ -1,7 +1,7 @@
 ;/* This file is generated with wrc version 1.0.14 (08-Aug-1999). Do not edit! */
 ;/* Source : rsrc.rc */
 ;/* Cmdline: wrc -s -I. -IE:\IBMCPP\include -I..\..\include -I..\..\include\win -o resource.asm rsrc.rc */
-;/* Date   : Thu Jan 13 17:56:56 2000 */
+;/* Date   : Fri Feb  4 19:27:28 2000 */
 
 	.386p
 	.model flat
@@ -11,7 +11,7 @@
 _Resource_PEResTab:
 	public	_Resource_PEResTab
 	dd	0
-	dd	0387e03d8h
+	dd	0389b1a10h
 	dd	0
 	dw	0, 5
 	dd	2
@@ -26,7 +26,7 @@ _Resource_PEResTab:
 	dd	(L16 - _Resource_PEResTab) or 80000000h
 L2:
 	dd	0
-	dd	0387e03d8h
+	dd	0389b1a10h
 	dd	0
 	dw	0, 7
 	dd	120
@@ -45,14 +45,14 @@ L2:
 	dd	(L2_401 - _Resource_PEResTab) or 80000000h
 L4:
 	dd	0
-	dd	0387e03d8h
+	dd	0389b1a10h
 	dd	0
 	dw	0, 1
 	dd	300
 	dd	(L4_300 - _Resource_PEResTab) or 80000000h
 L5:
 	dd	0
-	dd	0387e03d8h
+	dd	0389b1a10h
 	dd	0
 	dw	0, 3
 	dd	200
@@ -63,105 +63,105 @@ L5:
 	dd	(L5_1020 - _Resource_PEResTab) or 80000000h
 L6:
 	dd	0
-	dd	0387e03d8h
+	dd	0389b1a10h
 	dd	0
 	dw	0, 1
 	dd	261
 	dd	(L6_261 - _Resource_PEResTab) or 80000000h
 L16:
 	dd	0
-	dd	0387e03d8h
+	dd	0389b1a10h
 	dd	0
 	dw	0, 1
 	dd	1
 	dd	(L16_1 - _Resource_PEResTab) or 80000000h
 L2_120:
 	dd	0
-	dd	0387e03d8h
+	dd	0389b1a10h
 	dd	0
 	dw	0, 1
 	dd	000000000h
 	dd	L2_120_0 - _Resource_PEResTab
 L2_121:
 	dd	0
-	dd	0387e03d8h
+	dd	0389b1a10h
 	dd	0
 	dw	0, 1
 	dd	000000000h
 	dd	L2_121_0 - _Resource_PEResTab
 L2_124:
 	dd	0
-	dd	0387e03d8h
+	dd	0389b1a10h
 	dd	0
 	dw	0, 1
 	dd	000000000h
 	dd	L2_124_0 - _Resource_PEResTab
 L2_125:
 	dd	0
-	dd	0387e03d8h
+	dd	0389b1a10h
 	dd	0
 	dw	0, 1
 	dd	000000000h
 	dd	L2_125_0 - _Resource_PEResTab
 L2_130:
 	dd	0
-	dd	0387e03d8h
+	dd	0389b1a10h
 	dd	0
 	dw	0, 1
 	dd	000000000h
 	dd	L2_130_0 - _Resource_PEResTab
 L2_131:
 	dd	0
-	dd	0387e03d8h
+	dd	0389b1a10h
 	dd	0
 	dw	0, 1
 	dd	000000000h
 	dd	L2_131_0 - _Resource_PEResTab
 L2_401:
 	dd	0
-	dd	0387e03d8h
+	dd	0389b1a10h
 	dd	0
 	dw	0, 1
 	dd	000000000h
 	dd	L2_401_0 - _Resource_PEResTab
 L4_300:
 	dd	0
-	dd	0387e03d8h
+	dd	0389b1a10h
 	dd	0
 	dw	0, 1
 	dd	000000000h
 	dd	L4_300_0 - _Resource_PEResTab
 L5_200:
 	dd	0
-	dd	0387e03d8h
+	dd	0389b1a10h
 	dd	0
 	dw	0, 1
 	dd	000000000h
 	dd	L5_200_0 - _Resource_PEResTab
 L5_1006:
 	dd	0
-	dd	0387e03d8h
+	dd	0389b1a10h
 	dd	0
 	dw	0, 1
 	dd	000000000h
 	dd	L5_1006_0 - _Resource_PEResTab
 L5_1020:
 	dd	0
-	dd	0387e03d8h
+	dd	0389b1a10h
 	dd	0
 	dw	0, 1
 	dd	000000000h
 	dd	L5_1020_0 - _Resource_PEResTab
 L6_261:
 	dd	0
-	dd	0387e03d8h
+	dd	0389b1a10h
 	dd	0
 	dw	0, 1
 	dd	000000000h
 	dd	L6_261_0 - _Resource_PEResTab
 L16_1:
 	dd	0
-	dd	0387e03d8h
+	dd	0389b1a10h
 	dd	0
 	dw	0, 1
 	dd	000000000h
