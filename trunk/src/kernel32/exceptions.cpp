@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.73 2004-01-11 11:57:52 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.74 2004-01-20 13:41:10 sandervl Exp $ */
 
 /*
  * Win32 Exception functions for OS/2
@@ -1130,10 +1130,17 @@ static void logException()
 #define XCPT_CONTINUE_STOP 0x00716668
 #endif
 
+// Assembly wrapper for clearing the direction flag before calling our real
+// exception handler
 ULONG APIENTRY OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
                                    PEXCEPTIONREGISTRATIONRECORD pERegRec,
                                    PCONTEXTRECORD               pCtxRec,
-                                   PVOID                        p)
+                                   PVOID                        p);
+
+ULONG APIENTRY OS2ExceptionHandler2ndLevel(PEXCEPTIONREPORTRECORD       pERepRec,
+                                           PEXCEPTIONREGISTRATIONRECORD pERegRec,
+                                           PCONTEXTRECORD               pCtxRec,
+                                           PVOID                        p)
 {
     //SvL: Check if exception inside debug fprintf -> if so, clear lock so
     //     next dprintf won't wait forever

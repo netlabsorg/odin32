@@ -1,4 +1,4 @@
-; $Id: exceptutil.asm,v 1.25 2003-03-06 12:49:08 sandervl Exp $
+; $Id: exceptutil.asm,v 1.26 2004-01-20 13:41:11 sandervl Exp $
 
 ;/*
 ; * Project Odin Software License can be found in LICENSE.TXT
@@ -107,6 +107,16 @@ _RtlUnwind@16 proc near
 _RtlUnwind@16 endp
 
 
+        PUBLIC OS2ExceptionHandler
+        EXTRN  OS2ExceptionHandler2ndLevel:NEAR
+
+OS2ExceptionHandler proc near
+        ;Clear the direction flag (as specified by the _System calling convention)
+        ;(OS/2 doesn't bother checking before calling our exception handler)
+        cld
+        jmp OS2ExceptionHandler2ndLevel
+OS2ExceptionHandler endp
+
         PUBLIC QueryExceptionChain
 
 QueryExceptionChain proc near
@@ -197,6 +207,14 @@ _AsmCallThreadHandler proc near
 
 @goodthreadstack:
 
+        mov     eax, esp
+        sub     eax, 16
+        and     eax, 0FFFFFFF0h
+;now we make sure the stack is aligned at 16 bytes when the entrypoint is called
+;(8+4+4(return address) = 16)
+        add     eax, 8
+        mov     esp, eax
+
         push    dword ptr [ebp+16]
         mov     eax, dword ptr [ebp+12]
         call    eax
@@ -246,7 +264,9 @@ _CallEntryPoint proc near
         mov     eax, esp
         sub     eax, 16
         and     eax, 0FFFFFFF0h
-        add     eax, 4
+;now we make sure the stack is aligned at 16 bytes when the entrypoint is called
+;(8+4+4(return address) = 16)
+        add     eax, 8
         mov     esp, eax
 
         push    dword ptr [ebp+12]
