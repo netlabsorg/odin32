@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.14 2000-11-22 00:49:56 phaller Exp $
+# $Id: makefile,v 1.15 2000-12-03 01:10:12 bird Exp $
 
 #
 # Odin32 API
@@ -10,7 +10,7 @@
 #
 # Compiler, tools, and interference rules.
 #
-!include ../../include/pdwin32.mk
+!include ../../makefile.inc
 
 
 #
@@ -40,10 +40,10 @@ $(OBJDIR)\crtdllrsrc.obj
 # Libraries. One space before the '\'.
 #
 LIBS = \
-$(PDWIN32_LIB)/kernel32.lib \
-$(PDWIN32_LIB)/$(ODINCRT).lib \
-$(PDWIN32_LIB)/user32.lib \
-$(PDWIN32_LIB)/pmwinx.lib \
+$(ODIN32_LIB)/kernel32.lib \
+$(ODIN32_LIB)/$(ODINCRT).lib \
+$(ODIN32_LIB)/user32.lib \
+$(ODIN32_LIB)/pmwinx.lib \
 os2386.lib \
 $(RTLLIB_O)
 
@@ -57,4 +57,4 @@ TARGET = crtdll
 #
 # Includes the common rules.
 #
-!include $(PDWIN32_INCLUDE)/pdwin32.post
+!include $(ODIN32_POST_INC)
