@@ -1,4 +1,4 @@
-/* $Id: unknown.cpp,v 1.5 1999-08-05 17:18:09 phaller Exp $ */
+/* $Id: unknown.cpp,v 1.6 1999-08-05 23:19:56 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -200,10 +200,79 @@ DWORD WIN32API RestartDialog(DWORD x1,
                              DWORD x2,
                              DWORD x3)
 {
-  dprintf(("SHELL32: RestartDialog(%08xh,%08xhz) not implemented.\n",
+  dprintf(("SHELL32: RestartDialog(%08xh,%08xh,%08xh) not implemented.\n",
            x1,
            x2,
            x3));
+
+  return (0);
+}
+
+
+/*****************************************************************************
+ * Name      : DWORD SheConvertPathW
+ * Purpose   :
+ * Parameters: unknown, probably wrong
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.275
+ * Status    : UNTESTED STUB UNKNOWN
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
+ *****************************************************************************/
+
+DWORD WIN32API SheConvertPathW(DWORD x1,
+                               DWORD x2)
+{
+  dprintf(("SHELL32: SheConvertPathW(%08xh,%08xh) not implemented.\n",
+           x1,
+           x2));
+
+  return (0);
+}
+
+
+/*****************************************************************************
+ * Name      : DWORD SheShortenPathW
+ * Purpose   :
+ * Parameters: unknown, probably wrong
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.287
+ * Status    : UNTESTED STUB UNKNOWN
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
+ *****************************************************************************/
+
+DWORD WIN32API SheShortenPathW(DWORD x1,
+                               DWORD x2)
+{
+  dprintf(("SHELL32: SheShortenPathW(%08xh,%08xh) not implemented.\n",
+           x1,
+           x2));
+
+  return (0);
+}
+
+
+/*****************************************************************************
+ * Name      : DWORD SheShortenPathA
+ * Purpose   :
+ * Parameters: unknown, probably wrong
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.286
+ * Status    : UNTESTED STUB UNKNOWN
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
+ *****************************************************************************/
+
+DWORD WIN32API SheShortenPathA(DWORD x1,
+                               DWORD x2)
+{
+  dprintf(("SHELL32: SheShortenPathA(%08xh,%08xh) not implemented.\n",
+           x1,
+           x2));
 
   return (0);
 }

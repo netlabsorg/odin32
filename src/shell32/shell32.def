@@ -1,4 +1,4 @@
-; $Id: shell32.def,v 1.12 1999-08-05 17:18:09 phaller Exp $
+; $Id: shell32.def,v 1.13 1999-08-05 23:19:55 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 ;based on Windows 95
@@ -279,7 +279,7 @@ EXPORTS
 ;   SheChangeDirExA                   = _SheChangeDirExA@?                    @271
 ;   SheChangeDirExW                   = _SheChangeDirExW@?                    @272
     SheChangeDirW                     = _SheChangeDirW@4                      @273
-;   SheConvertPathW                   = _SheConvertPathW@?                    @274
+    SheConvertPathW                   = _SheConvertPathW@8                    @274
 ;   SheFullPathA                      = _SheFullPathA@?                       @275
 ;   SheFullPathW                      = _SheFullPathW@?                       @276
     SheSetCurDrive                    = _SheSetCurDrive@4                     @277
@@ -290,8 +290,8 @@ EXPORTS
 ;   SheRemoveQuotesA                  = _SheRemoveQuotesA@?                   @282
 ;   SheRemoveQuotesW                  = _SheRemoveQuotesW@?                   @283
 ;   SheSetCurDrive                    = _SheSetCurDrive@?                     @284
-;   SheShortenPathA                   = _SheShortenPathA@?                    @285
-;   SheShortenPathW                   = _SheShortenPathW@?                    @286
+    SheShortenPathA                   = _SheShortenPathA@8                    @285
+    SheShortenPathW                   = _SheShortenPathW@8                    @286
     ShellAboutA                       = _ShellAboutA@16                       @287
     ShellAboutW                       = _ShellAboutW@16                       @288
     ShellExecuteA                     = _ShellExecuteA@24                     @289
@@ -325,7 +325,7 @@ EXPORTS
 ;   StrRChrA                          = _StrRChrA@?                           @317
 ;   StrRChrIA                         = _StrRChrIA@?                          @318
 ;   StrRChrIW                         = _StrRChrIW@?                          @319
-;   StrRChrW                          = _StrRChrW@?                           @320
+    StrRChrW                          = _StrRChrW@12                          @320
 ;   StrRStrA                          = _StrRStrA@?                           @321
 ;   StrRStrIA                         = _StrRStrIA@?                          @322
 ;   StrRStrIW                         = _StrRStrIW@?                          @323
