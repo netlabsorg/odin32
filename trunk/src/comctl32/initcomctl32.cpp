@@ -1,3 +1,4 @@
+/* $Id: initcomctl32.cpp,v 1.3 2001-09-05 12:04:58 bird Exp $ */
 /*
  * COMCTL32 DLL entry point
  *
@@ -25,7 +26,7 @@
 /* Include files */
 #define  INCL_DOSMODULEMGR
 #define  INCL_DOSPROCESS
-#include <os2wrap.h>	//Odin32 OS/2 api wrappers
+#include <os2wrap.h>    //Odin32 OS/2 api wrappers
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -58,7 +59,7 @@ BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
    case DLL_PROCESS_DETACH:
    {
         BOOL ret = COMCTL32_LibMain(hinstDLL, fdwReason, fImpLoad);
-	return ret;
+    return ret;
    }
    }
    return FALSE;
@@ -84,16 +85,16 @@ ULONG APIENTRY inittermComctl32(unsigned long hModule, unsigned long ulFlag)
 
    switch (ulFlag) {
       case 0 :
-	 dllHandle = RegisterLxDll(hModule, LibMain, (PVOID)&comctl32_PEResTab,
+     dllHandle = RegisterLxDll(hModule, LibMain, (PVOID)&comctl32_PEResTab,
                                    COMCTL32_MAJORIMAGE_VERSION, COMCTL32_MINORIMAGE_VERSION,
                                    IMAGE_SUBSYSTEM_WINDOWS_GUI);
-         if(dllHandle == 0) 
-		return 0UL;
+         if(dllHandle == 0)
+        return 0UL;
 
          break;
       case 1 :
          if(dllHandle) {
-	 	UnregisterLxDll(dllHandle);
+        UnregisterLxDll(dllHandle);
          }
          break;
       default  :

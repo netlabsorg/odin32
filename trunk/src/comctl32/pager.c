@@ -1,3 +1,4 @@
+/* $Id: pager.c,v 1.9 2001-09-05 12:05:01 bird Exp $ */
 /*
  * Pager control
  *
@@ -38,7 +39,7 @@ typedef struct
     INT    nButtonSize;/* size of the pager btns */
     INT    nPos;       /* scroll position */
     INT    nWidth;     /* from child wnd's response to PGN_CALCSIZE */
-    INT    nHeight;    /* from child wnd's response to PGN_CALCSIZE */ 
+    INT    nHeight;    /* from child wnd's response to PGN_CALCSIZE */
     BOOL   bForward;   /* forward WM_MOUSEMOVE msgs to the contained wnd */
     INT    TLbtnState; /* state of top or left btn */
     INT    BRbtnState; /* state of bottom or right btn */
@@ -56,7 +57,7 @@ typedef struct
 #define INITIAL_DELAY    500
 #define REPEAT_DELAY     50
 
-/* the horizontal arrows are: 
+/* the horizontal arrows are:
  *
  * 01234    01234
  * 1  *      *
@@ -65,7 +66,7 @@ typedef struct
  * 4***      ***
  * 5 **      **
  * 6  *      *
- * 7  
+ * 7
  *
  */
 static void
@@ -73,7 +74,7 @@ PAGER_DrawHorzArrow (HDC hdc, RECT r, INT colorRef, BOOL left)
 {
     INT x, y, w, h;
     HPEN hOldPen;
-    
+
     w = r.right - r.left + 1;
     h = r.bottom - r.top + 1;
     if ((h < MIN_ARROW_WIDTH) || (w < MIN_ARROW_HEIGHT))
@@ -106,10 +107,10 @@ PAGER_DrawHorzArrow (HDC hdc, RECT r, INT colorRef, BOOL left)
     SelectObject( hdc, hOldPen );
 }
 
-/* the vertical arrows are: 
+/* the vertical arrows are:
  *
  * 01234567    01234567
- * 1******        **  
+ * 1******        **
  * 2 ****        ****
  * 3  **        ******
  * 4
@@ -120,7 +121,7 @@ PAGER_DrawVertArrow (HDC hdc, RECT r, INT colorRef, BOOL up)
 {
     INT x, y, w, h;
     HPEN hOldPen;
-    
+
     w = r.right - r.left + 1;
     h = r.bottom - r.top + 1;
     if ((h < MIN_ARROW_WIDTH) || (w < MIN_ARROW_HEIGHT))
@@ -164,14 +165,14 @@ PAGER_DrawButton(HDC hdc, COLORREF clrBk, RECT arrowRect,
         return;
 
     if ((rc.right - rc.left <= 0) || (rc.bottom - rc.top <= 0))
-        return;  
+        return;
 
     hBrush = CreateSolidBrush(clrBk);
     hOldBrush = (HBRUSH)SelectObject(hdc, hBrush);
 
     FillRect(hdc, &rc, hBrush);
 
-    if (btnState == PGF_HOT) 
+    if (btnState == PGF_HOT)
     {
        DrawEdge( hdc, &rc, BDR_RAISEDINNER, BF_RECT);
        if (horz)
@@ -179,7 +180,7 @@ PAGER_DrawButton(HDC hdc, COLORREF clrBk, RECT arrowRect,
        else
            PAGER_DrawVertArrow(hdc, rc, COLOR_WINDOWFRAME, topLeft);
     }
-    else if (btnState == PGF_NORMAL) 
+    else if (btnState == PGF_NORMAL)
     {
        DrawEdge (hdc, &rc, BDR_OUTER, BF_FLAT);
        if (horz)
@@ -187,7 +188,7 @@ PAGER_DrawButton(HDC hdc, COLORREF clrBk, RECT arrowRect,
        else
            PAGER_DrawVertArrow(hdc, rc, COLOR_WINDOWFRAME, topLeft);
     }
-    else if (btnState == PGF_DEPRESSED) 
+    else if (btnState == PGF_DEPRESSED)
     {
        DrawEdge( hdc, &rc, BDR_SUNKENOUTER, BF_RECT);
        if (horz)
@@ -195,7 +196,7 @@ PAGER_DrawButton(HDC hdc, COLORREF clrBk, RECT arrowRect,
        else
            PAGER_DrawVertArrow(hdc, rc, COLOR_WINDOWFRAME, topLeft);
     }
-    else if (btnState == PGF_GRAYED) 
+    else if (btnState == PGF_GRAYED)
     {
        DrawEdge (hdc, &rc, BDR_OUTER, BF_FLAT);
        if (horz)
@@ -232,7 +233,7 @@ PAGER_ForwardMouse (HWND hwnd, WPARAM wParam)
 static inline LRESULT
 PAGER_GetButtonState (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
-    PAGER_INFO *infoPtr = PAGER_GetInfoPtr (hwnd); 
+    PAGER_INFO *infoPtr = PAGER_GetInfoPtr (hwnd);
     LRESULT btnState = PGF_INVISIBLE;
     INT btn = (INT)lParam;
     TRACE("[%04x]\n", hwnd);
@@ -249,7 +250,7 @@ PAGER_GetButtonState (HWND hwnd, WPARAM wParam, LPARAM lParam)
 static inline LRESULT
 PAGER_GetPos(HWND hwnd)
 {
-    PAGER_INFO *infoPtr = PAGER_GetInfoPtr (hwnd); 
+    PAGER_INFO *infoPtr = PAGER_GetInfoPtr (hwnd);
     TRACE("[%04x] returns %d\n", hwnd, infoPtr->nPos);
     return (LRESULT)infoPtr->nPos;
 }
@@ -257,7 +258,7 @@ PAGER_GetPos(HWND hwnd)
 static inline LRESULT
 PAGER_GetButtonSize(HWND hwnd)
 {
-    PAGER_INFO *infoPtr = PAGER_GetInfoPtr (hwnd); 
+    PAGER_INFO *infoPtr = PAGER_GetInfoPtr (hwnd);
     TRACE("[%04x] returns %d\n", hwnd, infoPtr->nButtonSize);
     return (LRESULT)infoPtr->nButtonSize;
 }
@@ -265,7 +266,7 @@ PAGER_GetButtonSize(HWND hwnd)
 static inline LRESULT
 PAGER_GetBorder(HWND hwnd)
 {
-    PAGER_INFO *infoPtr = PAGER_GetInfoPtr (hwnd); 
+    PAGER_INFO *infoPtr = PAGER_GetInfoPtr (hwnd);
     TRACE("[%04x] returns %d\n", hwnd, infoPtr->nBorder);
     return (LRESULT)infoPtr->nBorder;
 }
@@ -273,13 +274,13 @@ PAGER_GetBorder(HWND hwnd)
 static inline LRESULT
 PAGER_GetBkColor(HWND hwnd)
 {
-    PAGER_INFO *infoPtr = PAGER_GetInfoPtr (hwnd); 
+    PAGER_INFO *infoPtr = PAGER_GetInfoPtr (hwnd);
     TRACE("[%04x] returns %06lx\n", hwnd, infoPtr->clrBk);
     return (LRESULT)infoPtr->clrBk;
 }
 
-static void 
-PAGER_CalcSize (HWND hwnd, INT* size, BOOL getWidth) 
+static void
+PAGER_CalcSize (HWND hwnd, INT* size, BOOL getWidth)
 {
     NMPGCALCSIZE nmpgcs;
     ZeroMemory (&nmpgcs, sizeof (NMPGCALCSIZE));
@@ -332,7 +333,7 @@ PAGER_PositionChildWnd(HWND hwnd, PAGER_INFO* infoPtr)
             if (infoPtr->nHeight < wndSize)
                 infoPtr->nHeight = wndSize;
 
-            TRACE("[%04x] SWP %dx%d at (%d,%d)\n", hwnd, 
+            TRACE("[%04x] SWP %dx%d at (%d,%d)\n", hwnd,
                          infoPtr->nWidth, infoPtr->nHeight,
                          0, -nPos);
             SetWindowPos(infoPtr->hwndChild, 0,
@@ -378,7 +379,7 @@ PAGER_GetScrollRange(HWND hwnd, PAGER_INFO* infoPtr)
     return scrollRange;
 }
 
-static void 
+static void
 PAGER_GrayAndRestoreBtns(PAGER_INFO* infoPtr, INT scrollRange,
                          BOOL* needsResize, BOOL* needsRepaint)
 {
@@ -415,7 +416,7 @@ PAGER_GrayAndRestoreBtns(PAGER_INFO* infoPtr, INT scrollRange,
 }
 
 
-static void 
+static void
 PAGER_NormalizeBtns(PAGER_INFO* infoPtr, BOOL* needsRepaint)
 {
     if (infoPtr->TLbtnState & (PGF_HOT | PGF_DEPRESSED))
@@ -431,7 +432,7 @@ PAGER_NormalizeBtns(PAGER_INFO* infoPtr, BOOL* needsRepaint)
     }
 }
 
-static void 
+static void
 PAGER_HideGrayBtns(PAGER_INFO* infoPtr, BOOL* needsResize)
 {
     if (infoPtr->TLbtnState == PGF_GRAYED)
@@ -463,15 +464,15 @@ PAGER_UpdateBtns(HWND hwnd, PAGER_INFO *infoPtr,
         PAGER_HideGrayBtns(infoPtr, &resizeClient);
 
     if (resizeClient) /* initiate NCCalcSize to resize client wnd */
-        SetWindowPos(hwnd, 0,0,0,0,0, 
+        SetWindowPos(hwnd, 0,0,0,0,0,
                      SWP_FRAMECHANGED | SWP_NOSIZE | SWP_NOMOVE |
                      SWP_NOZORDER | SWP_NOACTIVATE);
 
     if (repaintBtns)
-        SendMessageA(hwnd, WM_NCPAINT, 0, 0); 
+        SendMessageA(hwnd, WM_NCPAINT, 0, 0);
 }
 
-static LRESULT  
+static LRESULT
 PAGER_SetPos(HWND hwnd, INT newPos, BOOL fromBtnPress)
 {
     PAGER_INFO *infoPtr = PAGER_GetInfoPtr (hwnd);
@@ -517,7 +518,7 @@ PAGER_HandleWindowPosChanging(HWND hwnd, WINDOWPOS *winpos)
     return 0;
 }
 
-static void 
+static void
 PAGER_SetFixedWidth(HWND hwnd, PAGER_INFO* infoPtr)
 {
   /* Must set the non-scrollable dimension to be less than the full height/width
@@ -543,15 +544,15 @@ PAGER_SetFixedWidth(HWND hwnd, PAGER_INFO* infoPtr)
     h = wndRect.bottom - wndRect.top + infoPtr->nButtonSize;
 
     /* adjust non-scrollable dimension to fit the child */
-    SetWindowPos(hwnd, 0, 0,0, infoPtr->nWidth, h, 
+    SetWindowPos(hwnd, 0, 0,0, infoPtr->nWidth, h,
                  SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOZORDER);
 
 
     TRACE("[%04x] infoPtr->nWidth set to %d\n",
-	       hwnd, infoPtr->nWidth);
+           hwnd, infoPtr->nWidth);
 }
 
-static void 
+static void
 PAGER_SetFixedHeight(HWND hwnd, PAGER_INFO* infoPtr)
 {
   /* Must set the non-scrollable dimension to be less than the full height/width
@@ -577,11 +578,11 @@ PAGER_SetFixedHeight(HWND hwnd, PAGER_INFO* infoPtr)
     w = wndRect.right - wndRect.left + infoPtr->nButtonSize;
 
     /* adjust non-scrollable dimension to fit the child */
-    SetWindowPos(hwnd, 0, 0,0, w, infoPtr->nHeight, 
+    SetWindowPos(hwnd, 0, 0,0, w, infoPtr->nHeight,
                  SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOZORDER);
 
     TRACE("[%04x] infoPtr->nHeight set to %d\n",
-	       hwnd, infoPtr->nHeight);
+           hwnd, infoPtr->nHeight);
 }
 
 static LRESULT
@@ -600,7 +601,7 @@ PAGER_RecalcSize(HWND hwnd)
             infoPtr->nPos = -1;
             PAGER_SetPos(hwnd, 0, FALSE);
         }
-        else 
+        else
         {
             PAGER_UpdateBtns(hwnd, infoPtr, scrollRange, TRUE);
             PAGER_PositionChildWnd(hwnd, infoPtr);
@@ -699,8 +700,8 @@ PAGER_Scroll(HWND hwnd, INT dir)
         nmpgScroll.hdr.idFrom   = GetWindowLongA (hwnd, GWL_ID);
         nmpgScroll.hdr.code = PGN_SCROLL;
 
-        GetWindowRect(hwnd, &rcWnd);  
-        GetClientRect(hwnd, &nmpgScroll.rcParent);  
+        GetWindowRect(hwnd, &rcWnd);
+        GetClientRect(hwnd, &nmpgScroll.rcParent);
         nmpgScroll.iXpos = nmpgScroll.iYpos = 0;
         nmpgScroll.iDir = dir;
 
@@ -715,10 +716,10 @@ PAGER_Scroll(HWND hwnd, INT dir)
             nmpgScroll.iYpos = infoPtr->nPos;
         }
         nmpgScroll.iScroll -= 2*infoPtr->nButtonSize;
-  
+
         SendMessageA (hwnd, WM_NOTIFY,
                     (WPARAM)nmpgScroll.hdr.idFrom, (LPARAM)&nmpgScroll);
-  
+
         TRACE("[%04x] PGN_SCROLL returns iScroll=%d\n", hwnd, nmpgScroll.iScroll);
 
         if (nmpgScroll.iScroll > 0)
@@ -768,10 +769,10 @@ PAGER_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
     if (dwStyle & PGS_DRAGNDROP)
         FIXME("[%04x] Drag and Drop style is not implemented yet.\n", hwnd);
     /*
-	 * If neither horizontal nor vertical style specified, default to vertical.
-	 * This is probably not necessary, since the style may be set later on as
-	 * the control is initialized, but just in case it isn't, set it here.
-	 */
+     * If neither horizontal nor vertical style specified, default to vertical.
+     * This is probably not necessary, since the style may be set later on as
+     * the control is initialized, but just in case it isn't, set it here.
+     */
     if (!(dwStyle & PGS_HORZ) && !(dwStyle & PGS_VERT))
     {
         dwStyle |= PGS_VERT;
@@ -799,16 +800,16 @@ PAGER_NCCalcSize(HWND hwnd, WPARAM wParam, LPARAM lParam)
     LPRECT lpRect = (LPRECT)lParam;
     /*
      * lParam points to a RECT struct.  On entry, the struct
-     * contains the proposed wnd rectangle for the window. 
+     * contains the proposed wnd rectangle for the window.
      * On exit, the struct should contain the screen
      * coordinates of the corresponding window's client area.
      */
-	
+
     if (PAGER_IsHorizontal(hwnd))
     {
         if (infoPtr->TLbtnState) /* != PGF_INVISIBLE */
             lpRect->left += infoPtr->nButtonSize;
-        if (infoPtr->BRbtnState) 
+        if (infoPtr->BRbtnState)
             lpRect->right -= infoPtr->nButtonSize;
     }
     else
@@ -862,13 +863,13 @@ PAGER_NCPaint (HWND hwnd, WPARAM wParam, LPARAM lParam)
     PAGER_DrawButton(hdc, infoPtr->clrBk, rcTopLeft,
                      bHorizontal, TRUE, infoPtr->TLbtnState);
     PAGER_DrawButton(hdc, infoPtr->clrBk, rcBottomRight,
-                     bHorizontal, FALSE, infoPtr->BRbtnState); 
+                     bHorizontal, FALSE, infoPtr->BRbtnState);
 
     ReleaseDC( hwnd, hdc );
     return 0;
 }
 
-static INT 
+static INT
 PAGER_HitTest (HWND hwnd, LPPOINT pt)
 {
     PAGER_INFO *infoPtr = PAGER_GetInfoPtr (hwnd);
@@ -975,13 +976,13 @@ PAGER_SetCursor( HWND hwnd, WPARAM wParam, LPARAM lParam )
         /* Make sure tracking is enabled so we receive a WM_MOUSELEAVE message */
         if(!(trackinfo.dwFlags & TME_LEAVE)) {
             trackinfo.dwFlags = TME_LEAVE; /* notify upon leaving */
- 
+
            /* call TRACKMOUSEEVENT so we receive a WM_MOUSELEAVE message */
            /* and can properly deactivate the hot button */
            _TrackMouseEvent(&trackinfo);
         }
 
-        SendMessageA(hwnd, WM_NCPAINT, 0, 0); 
+        SendMessageA(hwnd, WM_NCPAINT, 0, 0);
     }
 
     return TRUE;
@@ -1024,7 +1025,7 @@ PAGER_LButtonDown (HWND hwnd, WPARAM wParam, LPARAM lParam)
     INT hit;
 
     TRACE("[%04x]\n", hwnd);
-	
+
     hit = PAGER_HitTest(hwnd, &pt);
 
     /* put btn in DEPRESSED state */
@@ -1032,17 +1033,17 @@ PAGER_LButtonDown (HWND hwnd, WPARAM wParam, LPARAM lParam)
     {
         repaintBtns = infoPtr->TLbtnState != PGF_DEPRESSED;
         infoPtr->TLbtnState = PGF_DEPRESSED;
-        SetTimer(hwnd, TIMERID1, INITIAL_DELAY, 0); 
+        SetTimer(hwnd, TIMERID1, INITIAL_DELAY, 0);
     }
     else if (hit == HTRIGHT || hit == HTBOTTOM)
     {
         repaintBtns = infoPtr->BRbtnState != PGF_DEPRESSED;
         infoPtr->BRbtnState = PGF_DEPRESSED;
-        SetTimer(hwnd, TIMERID1, INITIAL_DELAY, 0); 
+        SetTimer(hwnd, TIMERID1, INITIAL_DELAY, 0);
     }
 
     if (repaintBtns)
-        SendMessageA(hwnd, WM_NCPAINT, 0, 0); 
+        SendMessageA(hwnd, WM_NCPAINT, 0, 0);
 
     switch(hit)
     {
@@ -1129,7 +1130,7 @@ PAGER_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     PAGER_INFO *infoPtr = PAGER_GetInfoPtr (hwnd);
 
     if (!infoPtr && (uMsg != WM_CREATE))
-	return DefWindowProcA (hwnd, uMsg, wParam, lParam);
+    return DefWindowProcA (hwnd, uMsg, wParam, lParam);
 
     switch (uMsg)
     {
@@ -1155,7 +1156,7 @@ PAGER_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
         case PGM_RECALCSIZE:
             return PAGER_RecalcSize(hwnd);
-    
+
         case PGM_SETBKCOLOR:
             return PAGER_SetBkColor (hwnd, wParam, lParam);
 
@@ -1203,10 +1204,10 @@ PAGER_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         case WM_MOUSEMOVE:
             if (infoPtr->bForward && infoPtr->hwndChild)
                 PostMessageA(infoPtr->hwndChild, WM_MOUSEMOVE, wParam, lParam);
-            return TRUE;			
+            return TRUE;
 
         case WM_MOUSELEAVE:
-            return PAGER_MouseLeave (hwnd, wParam, lParam);	
+            return PAGER_MouseLeave (hwnd, wParam, lParam);
 
         case WM_LBUTTONDOWN:
             return PAGER_LButtonDown (hwnd, wParam, lParam);
@@ -1218,7 +1219,7 @@ PAGER_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             return PAGER_EraseBackground (hwnd, wParam, lParam);
 /*
         case WM_PAINT:
-            return PAGER_Paint (hwnd, wParam); 
+            return PAGER_Paint (hwnd, wParam);
 */
         case WM_TIMER:
             /* if initial timer, kill it and start the repeat timer */
@@ -1232,7 +1233,7 @@ PAGER_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             if (infoPtr->direction > 0)
             {
                 PAGER_Scroll(hwnd, infoPtr->direction);
-                SetTimer(hwnd, TIMERID2, REPEAT_DELAY, 0);	    
+                SetTimer(hwnd, TIMERID2, REPEAT_DELAY, 0);
             }
             break;
 
@@ -1265,7 +1266,7 @@ PAGER_Register (void)
     wndClass.hCursor       = LoadCursorA (0, IDC_ARROWA);
     wndClass.hbrBackground = 0;
     wndClass.lpszClassName = WC_PAGESCROLLERA;
- 
+
     RegisterClassA (&wndClass);
 }
 
