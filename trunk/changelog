@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2221 2002-07-15 14:26:46 sandervl Exp $ */
+/* $Id: changelog,v 1.2222 2002-07-15 14:39:35 sandervl Exp $ */
 
  2002-07-15: Sander van Leeuwen <sandervl@innotek.de> 
     - GDI32:    o Graphics handle management updates
@@ -6,12 +6,16 @@
                   CreateDIBitmap)
                 o DEFAULT_GUI_FONT is a system object (applications are not allowed
                   to delete it)
+                o Dynamically allocate GDI handle array to prevent waste of
+                  shared memory (as it is a private array)
     - USER32:   o Updates for new handle management
                 o System pens & brushes can't be deleted by applications
     - KERNEL32: o Rewrote algorithm for 64kb alignment in VirtualAlloc'ed memory
                 o Allocate fake PE headers in high memory
                 o Allocate win32 & code heap memory in 64kb chunks
                 o Allocate PE image memory at 64kb boundary
+                o Dynamically allocate handlemanager array to prevent waste of
+                  shared memory (as it is a private array (for now))
 
  2002-07-13: Sander van Leeuwen <sandervl@innotek.de> 
     - KERNEL32: o We do NOT want to use any win32k services with custom builds
