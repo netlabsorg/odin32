@@ -1,4 +1,4 @@
-/* $Id: comctl32undoc.c,v 1.10 1999-08-14 16:13:10 cbratschi Exp $ */
+/* $Id: comctl32undoc.c,v 1.11 1999-08-28 09:25:56 achimha Exp $ */
 /*
  * Undocumented functions from COMCTL32.DLL
  *
@@ -10,6 +10,8 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+
+/* WINE 990815 level */
 
 /* CB: todo
   - porting/implementing string functions
@@ -1836,7 +1838,7 @@ LPWSTR WINAPI COMCTL32_StrChrW( LPCWSTR lpStart, WORD wMatch) {
  *
  */
 INT WINAPI COMCTL32_StrCmpNA( LPCSTR lpStr1, LPCSTR lpStr2, int nChar) {
-//  return lstrncmpA(lpStr1, lpStr2, nChar);
+  return strncmp(lpStr1, lpStr2, nChar);
 }
 
 /**************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: tab.c,v 1.11 1999-08-21 12:10:02 cbratschi Exp $ */
+/* $Id: tab.c,v 1.12 1999-08-28 09:25:56 achimha Exp $ */
 /*
  * Tab control
  *
@@ -11,7 +11,10 @@
  * TODO:
  *  Image list support
  *  Multiline support
+ *  Unicode support
  */
+
+/* WINE 990815 level */
 
 #include <string.h>
 
@@ -642,8 +645,8 @@ static void TAB_SetItemBounds (HWND hwnd)
    * We need to get text information so we need a DC and we need to select
    * a font.
    */
-  hdc = GetDC(hwnd);
-
+  hdc = GetDC(hwnd); 
+    
   hFont = infoPtr->hFont ? infoPtr->hFont : GetStockObject (SYSTEM_FONT);
   hOldFont = SelectObject (hdc, hFont);
 
@@ -652,7 +655,7 @@ static void TAB_SetItemBounds (HWND hwnd)
    * of the control.
    */
   GetClientRect(hwnd, &clientRect);
-
+  
   /*
    * The leftmost item will be "0" aligned
    */
@@ -660,16 +663,33 @@ static void TAB_SetItemBounds (HWND hwnd)
 
   if (!((lStyle & TCS_FIXEDWIDTH) || (lStyle & TCS_OWNERDRAWFIXED)))
   {
+    int item_height;
+    int icon_height = 0;
+
     /*
      * Use the current font to determine the height of a tab.
      */
     GetTextMetricsA(hdc, &fontMetrics);
 
     /*
-     * Make sure there is enough space for the letters + growing the
-     * selected item + extra space for the selected item.
+     * Get the icon height
      */
-    infoPtr->tabHeight = fontMetrics.tmHeight + 2*VERTICAL_ITEM_PADDING +
+    if (infoPtr->himl)
+      ImageList_GetIconSize(infoPtr->himl, 0, &icon_height);
+
+    /*
+     * Take the highest between font or icon
+     */
+    if (fontMetrics.tmHeight > icon_height)
+      item_height = fontMetrics.tmHeight;
+    else
+      item_height = icon_height;
+
+    /*
+     * Make sure there is enough space for the letters + icon + growing the 
+     * selected item + extra space for the selected item.   
+     */
+    infoPtr->tabHeight = item_height + 2*VERTICAL_ITEM_PADDING +  
       SELECTED_TAB_OFFSET;
   }
 
@@ -678,18 +698,18 @@ static void TAB_SetItemBounds (HWND hwnd)
     /*
      * Calculate the vertical position of the tab
      */
-    if (lStyle & TCS_BOTTOM)
+    if (lStyle & TCS_BOTTOM) 
     {
-      infoPtr->items[curItem].rect.bottom = clientRect.bottom -
+      infoPtr->items[curItem].rect.bottom = clientRect.bottom - 
                                             SELECTED_TAB_OFFSET;
-      infoPtr->items[curItem].rect.top = clientRect.bottom -
+      infoPtr->items[curItem].rect.top = clientRect.bottom - 
                                          infoPtr->tabHeight;
     }
-    else
+    else 
     {
-      infoPtr->items[curItem].rect.top = clientRect.top +
+      infoPtr->items[curItem].rect.top = clientRect.top + 
                                          SELECTED_TAB_OFFSET;
-      infoPtr->items[curItem].rect.bottom = clientRect.top +
+      infoPtr->items[curItem].rect.bottom = clientRect.top + 
                                             infoPtr->tabHeight;
     }
 
@@ -706,22 +726,35 @@ static void TAB_SetItemBounds (HWND hwnd)
     }
     else
     {
+      int icon_width  = 0;
+      int num = 2;
+
       /*
        * Calculate how wide the tab is depending on the text it contains
        */
-      GetTextExtentPoint32W(hdc, infoPtr->items[curItem].pszText,
-                            lstrlenW(infoPtr->items[curItem].pszText), &size);
+      GetTextExtentPoint32A(hdc, infoPtr->items[curItem].pszText, 
+                            lstrlenA(infoPtr->items[curItem].pszText), &size);
+
+      /*
+       * Add the icon width
+       */
+      if (infoPtr->himl)
+      {
+        ImageList_GetIconSize(infoPtr->himl, &icon_width, 0);
+        num++;
+      }
 
       infoPtr->items[curItem].rect.right = infoPtr->items[curItem].rect.left +
-                                           size.cx + 2*HORIZONTAL_ITEM_PADDING;
+                                           size.cx + icon_width + 
+                                           num*HORIZONTAL_ITEM_PADDING;
     }
 
-//    TRACE(tab, "TextSize: %i\n ", size.cx);
-//    TRACE(tab, "Rect: T %i, L %i, B %i, R %i\n",
-//        infoPtr->items[curItem].rect.top,
-//        infoPtr->items[curItem].rect.left,
-//        infoPtr->items[curItem].rect.bottom,
-//        infoPtr->items[curItem].rect.right);
+//    TRACE("TextSize: %i\n ", size.cx);
+//    TRACE("Rect: T %i, L %i, B %i, R %i\n", 
+//	  infoPtr->items[curItem].rect.top,
+//	  infoPtr->items[curItem].rect.left,
+//	  infoPtr->items[curItem].rect.bottom,
+//	  infoPtr->items[curItem].rect.right);  
 
     /*
      * The leftmost position of the next item is the rightmost position
@@ -736,11 +769,11 @@ static void TAB_SetItemBounds (HWND hwnd)
   /*
    * Check if we need a scrolling control.
    */
-  infoPtr->needsScrolling = (curItemLeftPos + (2*SELECTED_TAB_OFFSET) >
+  infoPtr->needsScrolling = (curItemLeftPos + (2*SELECTED_TAB_OFFSET) > 
                              clientRect.right);
 
-  TAB_SetupScrolling(hwnd, infoPtr, &clientRect);
-
+  TAB_SetupScrolling(hwnd, infoPtr, &clientRect);      
+  
   /*
    * Cleanup
    */
@@ -932,7 +965,7 @@ static void TAB_DrawItem(
       ImageList_Draw (infoPtr->himl, iItem, hdc,
                       r.left, r.top+1, ILD_NORMAL);
       ImageList_GetIconSize (infoPtr->himl, &cx, &cy);
-      r.left+=cx;
+      r.left+=(cx + HORIZONTAL_ITEM_PADDING);
     }
 
     /*
@@ -1397,17 +1430,17 @@ TAB_SetItemSize (HWND hwnd, WPARAM wParam, LPARAM lParam)
   return lResult;
 }
 
-static LRESULT
+static LRESULT 
 TAB_SetItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
   TAB_INFO *infoPtr = TAB_GetInfoPtr(hwnd);
-  TCITEMA *tabItem;
-  TAB_ITEM *wineItem;
+  TCITEMA *tabItem; 
+  TAB_ITEM *wineItem; 
   INT    iItem,len;
 
   iItem=(INT) wParam;
   tabItem=(LPTCITEMA ) lParam;
-//  TRACE (tab,"%d %p\n",iItem, tabItem);
+//  TRACE("%d %p\n",iItem, tabItem);
   if ((iItem<0) || (iItem>infoPtr->uNumItem)) return FALSE;
 
   wineItem=& infoPtr->items[iItem];
@@ -1418,18 +1451,24 @@ TAB_SetItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
   if (tabItem->mask & TCIF_PARAM)
     wineItem->lParam=tabItem->lParam;
 
-//  if (tabItem->mask & TCIF_RTLREADING)
-//    FIXME (tab,"TCIF_RTLREADING\n");
+//  if (tabItem->mask & TCIF_RTLREADING) 
+//    FIXME("TCIF_RTLREADING\n");
 
-  if (tabItem->mask & TCIF_STATE)
+  if (tabItem->mask & TCIF_STATE) 
     wineItem->dwState=tabItem->dwState;
 
   if (tabItem->mask & TCIF_TEXT) {
-   len = lstrlenA (tabItem->pszText);
-   if (len>wineItem->cchTextMax)
-     wineItem->pszText = COMCTL32_ReAlloc (wineItem->pszText, (len+1)*sizeof(WCHAR));
-   lstrcpyAtoW (wineItem->pszText, tabItem->pszText);
+   len=lstrlenA (tabItem->pszText);
+   if (len>wineItem->cchTextMax) 
+     wineItem->pszText= COMCTL32_ReAlloc (wineItem->pszText, len+1);
+   lstrcpyA (wineItem->pszText, tabItem->pszText);
   }
+
+  /*
+   * Update and repaint tabs.
+   */
+  TAB_SetItemBounds(hwnd);
+  TAB_InvalidateTabArea(hwnd,infoPtr);
 
   return TRUE;
 }
