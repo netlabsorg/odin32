@@ -1,4 +1,4 @@
-# $Id: odin32.mk,v 1.2 2000-12-09 16:04:21 phaller Exp $
+# $Id: odin32.mk,v 1.3 2001-06-25 23:17:53 bird Exp $
 
 #
 # Odin32 API
@@ -33,10 +33,16 @@ CCENV   = VAC36
 DIREXT  = .vac36
 VAC36   = 1
 !       else
+!           if "$(CCENV)" == "EMX"
+CCENV   = EMX
+DIREXT  = .emx
+EMXENV  = 1             # Can't use EMX. (SET EMX will show you why)
+!           else
 # default compiler
 CCENV   = VAC3
 DIREXT  =
 VAC3    = 1
+!           endif
 !       endif
 !   endif
 !else
