@@ -1,4 +1,4 @@
-/* $Id: dibitmap.cpp,v 1.29 2001-12-15 18:50:25 sandervl Exp $ */
+/* $Id: dibitmap.cpp,v 1.30 2001-12-30 22:19:05 sandervl Exp $ */
 
 /*
  * GDI32 dib & bitmap code
@@ -488,6 +488,9 @@ int WIN32API SetDIBits(HDC hdc, HBITMAP hBitmap, UINT startscan, UINT numlines, 
         pBits = newbits;
     }
 
+    if(pBitmapInfo->bmiHeader.biHeight < 0) {
+        dprintf(("!WARNING! Negative height!!"));
+    }
     ret = O32_SetDIBits(hdc, hBitmap, startscan, numlines, pBits, pBitmapInfo, usage);
     if(newbits) free(newbits);
 
