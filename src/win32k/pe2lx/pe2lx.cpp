@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.18.4.1 2000-07-16 22:43:41 bird Exp $
+/* $Id: pe2lx.cpp,v 1.18.4.2 2000-08-11 02:26:59 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -1282,9 +1282,8 @@ ULONG  Pe2Lx::applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID pvPa
 
 /**
  * openPath - opens file eventually searching loader specific paths.
- * This method is only called for DLLs. DosLoadModule and Imports.
+ * This method is only called for DLLs. (DosLoadModule and Imports.)
  *
- * This base implementation simply calls ldrOpenPath.
  *
  * @returns   OS2 return code.
  *            pLdrLv->lv_sfn  is set to filename handle.
@@ -1306,7 +1305,7 @@ ULONG  Pe2Lx::applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID pvPa
  */
 ULONG  Pe2Lx::openPath(PCHAR pachModname, USHORT cchModname, ldrlv_t *pLdrLv, PULONG pfl) /* (ldrOpenPath) */
 {
-    #ifdef RING0
+    #if 0 //def RING0
 
     /* These defines sets the order the paths and pathlists are examined. */
     #define FINDDLL_EXECUTABLEDIR   1
@@ -1321,7 +1320,7 @@ ULONG  Pe2Lx::openPath(PCHAR pachModname, USHORT cchModname, ldrlv_t *pLdrLv, PU
     #define FINDDLL_FIRST           FINDDLL_EXECUTABLEDIR
     #define FINDDLL_LAST            FINDDLL_ENDLIBPATH
 
-    struct
+    struct _LocalVars
     {
         char    sz[CCHMAXPATH];
     } *pVars;
@@ -1334,8 +1333,8 @@ ULONG  Pe2Lx::openPath(PCHAR pachModname, USHORT cchModname, ldrlv_t *pLdrLv, PU
      */
     pLdrLv->lv_sfn = 0xffff;
     initOdin32Path();
-    pVar = rmalloc(sizeof(*pVars));
-    if (pVar == NULL)
+    pVars = (struct _LocalVars*)rmalloc(sizeof(struct _LocalVars));
+    if (pVars == NULL)
         return ERROR_NOT_ENOUGH_MEMORY;
 
     /* init stuff */
@@ -1346,7 +1345,7 @@ ULONG  Pe2Lx::openPath(PCHAR pachModname, USHORT cchModname, ldrlv_t *pLdrLv, PU
     /** @sketch
      * Loop thru the paths and pathlists searching them for the filename.
      */
-    for (iPath = FINDDLL_FIRST; iPath <= FINDDLL_LAST; iPath++)
+    for (int iPath = FINDDLL_FIRST; iPath <= FINDDLL_LAST; iPath++)
     {
         APIRET          rc;             /* Returncode from OS/2 APIs. */
         const char  *   pszPath;        /* Pointer to the path being examined. */
