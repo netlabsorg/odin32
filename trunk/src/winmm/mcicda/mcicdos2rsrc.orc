@@ -1,4 +1,4 @@
-/* $Id: mcicda.rc,v 1.1 2000-02-06 20:52:34 sandervl Exp $ */
+/* $Id: mcicdos2rsrc.orc,v 1.1 2000-12-02 11:37:06 sandervl Exp $ */
 
 #include "winuser.h"
 #include "odinrsrc.h"
