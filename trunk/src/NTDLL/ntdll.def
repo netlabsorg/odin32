@@ -1,4 +1,4 @@
-; $Id: ntdll.def,v 1.39 2001-07-20 15:39:47 sandervl Exp $
+; $Id: ntdll.def,v 1.40 2001-07-21 08:47:27 sandervl Exp $
 
 ;
 ; Based on NT 4.0 SP6: NTDLL.DLL
@@ -987,13 +987,13 @@ EXPORTS
     _ultoa                        = _CRTDLL__ultoa                      @967
 ;    _ultow                        = _MSVCRT__ultow                         @968
     _vsnprintf                    = _CRTDLL__vsnprintf                  @969
-    _wcsicmp                      = _CRTDLL__wcsicmp                    @970
-    _wcslwr                       = _CRTDLL__wcslwr                     @971
-    _wcsnicmp                     = _CRTDLL__wcsnicmp                   @972
-    _wcsupr                       = _CRTDLL__wcsupr                     @973
-    _wtoi                         = _CRTDLL__wtoi                       @974
+    _wcsicmp                      = _NTDLL__wcsicmp                     @970
+    _wcslwr                       = _NTDLL__wcslwr                      @971
+    _wcsnicmp                     = _NTDLL__wcsnicmp                    @972
+    _wcsupr                       = _NTDLL__wcsupr                      @973
+    _wtoi                         = __wtoi                              @974
 ;    _wtoi64                    = _MSVCRT__wtoi64               @975
-    _wtol                         = _CRTDLL__wtol                       @976
+    _wtol                         = __wtol                              @976
     abs                           = _CRTDLL_abs                         @977
     atan                          = _CRTDLL_atan                        @978
     atoi                          = _CRTDLL_atoi                        @979
@@ -1012,12 +1012,12 @@ EXPORTS
     ispunct                 = _CRTDLL_ispunct               @992
     isspace                       = _CRTDLL_isspace                     @993
     isupper                       = _CRTDLL_isupper                     @994
-    iswalpha                      = _CRTDLL_iswalpha                    @995
-    iswctype                      = _CRTDLL_iswctype                    @996
+    iswalpha                      = _NTDLL_iswalpha 	                @995
+    iswctype                      = _NTDLL_iswctype                     @996
     isxdigit                      = _CRTDLL_isxdigit                    @997
     labs                          = _CRTDLL_labs                        @998
     log                           = _CRTDLL_log                         @999
-    mbstowcs                      = _CRTDLL_mbstowcs                    @1000
+    mbstowcs                      = _NTDLL_mbstowcs                     @1000
 
     memchr                        = _CRTDLL_memchr                      @1001
     memcmp                        = _CRTDLL_memcmp                      @1002
@@ -1045,28 +1045,30 @@ EXPORTS
     strstr                        = _CRTDLL_strstr                      @1024
     strtol                  = _CRTDLL_strtol                @1025
     strtoul                 = _CRTDLL_strtoul               @1026
-    swprintf                      = _CRTDLL_swprintf                    @1027
+    swprintf                      = _NTDLL_swprintf                     @1027
     tan                           = _CRTDLL_tan                         @1028
     tolower                       = _CRTDLL_tolower                     @1029
     toupper                       = _CRTDLL_toupper                     @1030
-    towlower                      = _CRTDLL_towlower                    @1031
-    towupper                      = _CRTDLL_towupper                    @1032
+    towlower                      = _NTDLL_towlower                     @1031
+    towupper                      = _NTDLL_towupper                     @1032
     vsprintf                      = _CRTDLL_vsprintf                    @1033
-    wcscat                        = _CRTDLL_wcscat                      @1034
-    wcschr                        = _CRTDLL_wcschr                      @1035
-    wcscmp                        = _CRTDLL_wcscmp                      @1036
-    wcscpy                        = _CRTDLL_wcscpy                      @1037
-    wcscspn                       = _CRTDLL_wcscspn             @1038
-    wcslen                        = _CRTDLL_wcslen                      @1039
-    wcsncat                       = _CRTDLL_wcsncat                     @1040
-    wcsncmp                       = _CRTDLL_wcsncmp                     @1041
-    wcsncpy                       = _CRTDLL_wcsncpy                     @1042
-    wcspbrk                       = _CRTDLL_wcspbrk                     @1043
-    wcsrchr                       = _CRTDLL_wcsrchr                     @1044
-    wcsspn                        = _CRTDLL_wcsspn                      @1045
-    wcsstr                        = _CRTDLL_wcsstr              @1046
-    wcstol                        = _CRTDLL_wcstol                      @1047
-    wcstombs                      = _CRTDLL_wcstombs                    @1048
+
+    wcscat                        = _NTDLL_wcscat                       @1034
+    wcschr                        = _NTDLL_wcschr                       @1035
+    wcscmp                        = _NTDLL_wcscmp                       @1036
+    wcscpy                        = _NTDLL_wcscpy                       @1037
+    wcscspn                       = _NTDLL_wcscspn                      @1038
+    wcslen                        = _NTDLL_wcslen                       @1039
+    wcsncat                       = _NTDLL_wcsncat                      @1040
+    wcsncmp                       = _NTDLL_wcsncmp                      @1041
+    wcsncpy                       = _NTDLL_wcsncpy                      @1042
+    wcspbrk                       = _NTDLL_wcspbrk                      @1043
+    wcsrchr                       = _NTDLL_wcsrchr                      @1044
+    wcsspn                        = _NTDLL_wcsspn                       @1045
+    wcsstr                        = _NTDLL_wcsstr                       @1046
+    wcstok                        = _NTDLL_wcstok                       @1050
+    wcstol                        = _NTDLL_wcstol                       @1047
+    wcstombs                      = _NTDLL_wcstombs                     @1048
     wcstoul                       = _CRTDLL_wcstoul                     @1049
 
 

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.29 2001-07-20 15:39:46 sandervl Exp $
+# $Id: makefile,v 1.30 2001-07-21 08:47:27 sandervl Exp $
 
 #
 # Odin32 API
@@ -25,6 +25,7 @@ $(OBJDIR)\om.obj \
 $(OBJDIR)\reg.obj \
 $(OBJDIR)\rtl.obj \
 $(OBJDIR)\rtlstr.obj \
+$(OBJDIR)\wcstring.obj \
 $(OBJDIR)\sec.obj \
 $(OBJDIR)\sync.obj \
 $(OBJDIR)\initterm.obj \
