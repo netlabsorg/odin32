@@ -1,4 +1,4 @@
-/* $Id: winimagebase.cpp,v 1.5 1999-11-29 00:04:06 bird Exp $ */
+/* $Id: winimagebase.cpp,v 1.6 1999-11-30 19:40:26 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -94,6 +94,14 @@ void Win32ImageBase::setFullPath(char *name)
   fullpath = (char *)malloc(strlen(name)+1);
   dassert(fullpath, ("setFullPath, fullpath == NULL"));
   strcpy(fullpath, name);
+}
+//******************************************************************************
+//Returns required OS version for this image
+//******************************************************************************
+ULONG Win32ImageBase::getVersion()
+{
+  dprintf(("Win32ImageBase::getVersion: NOT IMPLEMENTED!"));
+  return 0x40000; //NT 4
 }
 //******************************************************************************
 //******************************************************************************

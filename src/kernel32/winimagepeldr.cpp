@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.20 1999-11-30 15:06:55 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.21 1999-11-30 19:40:26 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -45,6 +45,7 @@
 #include <win\virtual.h>
 #include "oslibdos.h"
 #include "mmap.h"
+#include <wprocess.h>
 
 char szErrorTitle[]     = "Odin";
 char szMemErrorMsg[]    = "Memory allocation failure";
@@ -272,6 +273,8 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
   fout << "Subsystem         : " << oh.Subsystem << endl;
   fout << "Image Size        : " << oh.SizeOfImage << endl;
   fout << "Header Size       : " << oh.SizeOfHeaders << endl;
+  fout << "MajorImageVersion : " << oh.MajorImageVersion << endl;
+  fout << "MinorImageVersion : " << oh.MinorImageVersion << endl;
 
   //get header page
   commitPage(realBaseAddress, FALSE);
@@ -478,6 +481,9 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
 
   //SvL: Use pointer to image header as module handle now. Some apps needs this
   hinstance = (HINSTANCE)realBaseAddress;
+
+  //SvL: Set instance handle in process database structure
+  SetPDBInstance(hinstance);
 
   //PH: get pResDir pointer correct first, since processImports may
   //    implicitly call functions depending on it.
@@ -1489,6 +1495,13 @@ ULONG Win32PeLdrImage::getApi(int ordinal)
 	nexport = (NameExport *)((ULONG)nexport->name + nexport->nlength);
   }
   return(0);
+}
+//******************************************************************************
+//Returns required OS version for this image
+//******************************************************************************
+ULONG Win32PeLdrImage::getVersion()
+{
+  return (oh.MajorOperatingSystemVersion << 16) | oh.MinorOperatingSystemVersion;
 }
 //******************************************************************************
 //******************************************************************************

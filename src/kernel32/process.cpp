@@ -1,4 +1,4 @@
-/* $Id: process.cpp,v 1.1 1999-11-30 14:16:16 sandervl Exp $ */
+/* $Id: process.cpp,v 1.2 1999-11-30 19:40:26 sandervl Exp $ */
 
 /*
  * Win32 process functions for OS/2
@@ -27,6 +27,7 @@
 #include <misc.h>
 #include <wprocess.h>
 #include <win\task.h>
+#include <winimagebase.h>
 
 #define SHUTDOWN_NORETRY 1
 
@@ -35,6 +36,25 @@ static unsigned int shutdown_priority = 0x280L;
 static        DWORD ProcessAffinityMask = 1;
 static PDB *PROCESS_First = &ProcessPDB;
 
+/***********************************************************************
+ *           PROCESS_IdToPDB
+ *
+ * Convert a process id to a PDB, making sure it is valid.
+ */
+PDB *PROCESS_IdToPDB( DWORD id )
+{
+    PDB *pdb;
+
+    if (!id) return PROCESS_Current();
+    pdb = PROCESS_First;
+    while (pdb)
+    {
+        if ((DWORD)pdb->server_pid == id) return pdb;
+        pdb = pdb->next;
+    }
+    SetLastError( ERROR_INVALID_PARAMETER );
+    return NULL;
+}
 //******************************************************************************
 //******************************************************************************
 HANDLE WIN32API OpenProcess(DWORD arg1, BOOL arg2, DWORD arg3)
@@ -71,12 +91,25 @@ BOOL WIN32API TerminateProcess( HANDLE arg1, DWORD arg2)
     return O32_TerminateProcess(arg1, arg2);
 }
 //******************************************************************************
-//Should retrieve this from the exe...
 //******************************************************************************
 DWORD WIN32API GetProcessVersion(DWORD Processid)
 {
-  dprintf(("KERNEL32:  OS2GetProcessVersion not correctly implemented!!\n"));
-  return(WIN32OS2_VERSION);
+ Win32ImageBase *image;
+ PDB *process = PROCESS_IdToPDB( Processid );
+ DWORD version;
+
+  if(process == NULL) {
+  	dprintf(("GetProcessVersion: can't find process (%d)", Processid));
+	return 0;
+  }
+  image = Win32ImageBase::findModule(process->hInstance);
+  if(image) {
+	version = image->getVersion();
+  	dprintf(("GetProcessVersion of %x = %x", Processid, version));
+  	return version;
+  }
+  dprintf(("GetProcessVersion: can't find module %x (%d)", process->hInstance, Processid));
+  return 0;
 }
 /***********************************************************************
  *          SetProcessAffinityMask   (KERNEL32.662)
@@ -236,25 +269,6 @@ BOOL WINAPI GetProcessWorkingSetSize(HANDLE hProcess,LPDWORD minset,
 	if (minset) *minset = 32*1024*1024;
 	if (maxset) *maxset = 32*1024*1024;
 	return TRUE;
-}
-/***********************************************************************
- *           PROCESS_IdToPDB
- *
- * Convert a process id to a PDB, making sure it is valid.
- */
-PDB *PROCESS_IdToPDB( DWORD id )
-{
-    PDB *pdb;
-
-    if (!id) return PROCESS_Current();
-    pdb = PROCESS_First;
-    while (pdb)
-    {
-        if ((DWORD)pdb->server_pid == id) return pdb;
-        pdb = pdb->next;
-    }
-    SetLastError( ERROR_INVALID_PARAMETER );
-    return NULL;
 }
 /***********************************************************************
  *           GetProcessDword    (KERNEL32.18) (KERNEL.485)
