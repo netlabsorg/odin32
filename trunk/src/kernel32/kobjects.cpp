@@ -1,4 +1,4 @@
-/* $Id: kobjects.cpp,v 1.12 2001-03-19 19:27:13 sandervl Exp $ */
+/* $Id: kobjects.cpp,v 1.13 2001-04-05 05:54:51 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -19,8 +19,9 @@
 #include <os2sel.h>
 
 #include <os2win.h>
-#include "misc.h"
-#include "handlemanager.h"
+#include <misc.h>
+#include <unicode.h>
+#include <handlemanager.h>
 
 #define DBG_LOCALLOG	DBG_kobjects
 #include "dbglocal.h"
