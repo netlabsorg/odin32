@@ -25,6 +25,7 @@
 /* Include files */
 #define  INCL_DOSMODULEMGR
 #define  INCL_DOSPROCESS
+#define  INCL_DOSSEMAPHORES
 #include <os2wrap.h>    //Odin32 OS/2 api wrappers
 #include <stdlib.h>
 #include <stdio.h>
@@ -37,6 +38,9 @@
 #include <odinlx.h>
 #include <initdll.h>
 #include "auxiliary.h"
+#include "winmmtype.h"
+#include "waveoutbase.h"
+#include <win\options.h>
 
 #define DBG_LOCALLOG    DBG_initterm
 #include "dbglocal.h"
@@ -62,6 +66,7 @@ BOOL WINAPI OdinLibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
   switch (fdwReason)
     {
     case DLL_PROCESS_ATTACH:
+    {
         if (!MULTIMEDIA_CreateIData(hinstDLL))
             return FALSE;
 
@@ -72,7 +77,14 @@ BOOL WINAPI OdinLibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
             }
             bInitDone = TRUE;
         }
+        DWORD dwVolume;
+
+        dwVolume = PROFILE_GetOdinIniInt(WINMM_SECTION, DEFVOL_KEY, 100);
+        dwVolume = (dwVolume*0xFFFF)/100;
+        dwVolume = (dwVolume << 16) | dwVolume;
+        WaveOut::setDefaultVolume(dwVolume);
         return TRUE;
+   }
 
    case DLL_THREAD_ATTACH:
    case DLL_THREAD_DETACH:
