@@ -1,4 +1,4 @@
-/* $Id: windllbase.h,v 1.8 2001-06-15 09:42:48 bird Exp $ */
+/* $Id: windllbase.h,v 1.9 2002-06-09 10:48:50 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
@@ -109,7 +109,7 @@ static  Win32DllBase *findModule(WIN32DLLENTRY DllEntryPoint);
 static  Win32DllBase *findModuleByAddr(ULONG address);
 static  Win32DllBase *findModuleByOS2Handle(HINSTANCE hinstance);
 
-#ifdef DEBUG_ENABLELOG_LEVEL2
+#ifdef DEBUG
     void          printListOfDlls();
 #endif
 

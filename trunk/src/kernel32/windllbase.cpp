@@ -1,4 +1,4 @@
-/* $Id: windllbase.cpp,v 1.28 2002-02-06 16:33:38 sandervl Exp $ */
+/* $Id: windllbase.cpp,v 1.29 2002-06-09 10:48:50 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
@@ -216,9 +216,7 @@ ULONG Win32DllBase::AddRef()
     ++referenced;
 #ifdef DEBUG
     if(referenced == 1) {
-#ifdef DEBUG_ENABLELOG_LEVEL2
         printListOfDlls();
-#endif
         //printDependencies(NULL);
     }
 #endif
@@ -232,6 +230,7 @@ ULONG Win32DllBase::Release()
  QueueItem    *item;
  Win32DllBase *dll;
  LONG          ret;
+ char          szModuleName[256];
 
     dprintf(("Win32DllBase::Release %s %d", getModuleName(), referenced-1));
 
@@ -253,10 +252,11 @@ ULONG Win32DllBase::Release()
             item = queue.getNext(item);
         }
 #ifdef DEBUG
-        //printDependencies(NULL);
+//        printDependencies(getName());
 #endif
 
         dprintf(("Win32DllBase::Release %s referenced == 0", getModuleName()));
+        strncpy(szModuleName, getModuleName(), sizeof(szModuleName));
 
         //delete dll object
         delete this;
@@ -270,6 +270,7 @@ ULONG Win32DllBase::Release()
                 DebugInt3();
                 return -1;
             }
+            dprintf(("Remove %s->%s dependency", szModuleName, dll->getName()));
             dll->Release();
             item = queue.getNext(item);
         }
@@ -370,7 +371,6 @@ void Win32DllBase::printDependencies(char *parent)
 }
 //******************************************************************************
 //******************************************************************************
-#ifdef DEBUG_ENABLELOG_LEVEL2
 void Win32DllBase::printListOfDlls()
 {
  Win32DllBase *dll;
@@ -383,7 +383,6 @@ void Win32DllBase::printListOfDlls()
         dll = dll->next;
     }
 }
-#endif
 #endif
 //******************************************************************************
 //******************************************************************************
@@ -431,7 +430,7 @@ BOOL Win32DllBase::attachProcess()
 
 #ifdef DEBUG
     int time1, time2;
-    dprintf(("attachProcess to dll %s", szModule));
+    dprintf(("attachProcess to dll %s (%x)", szModule, dllEntryPoint));
     time1 = GetTickCount();
 #endif
 
@@ -474,7 +473,7 @@ BOOL Win32DllBase::detachProcess()
         return(TRUE);
     }
 
-    dprintf(("detachProcess from dll %s", szModule));
+    dprintf(("detachProcess from dll %s (%x)", szModule, dllEntryPoint));
 
     //Note: The Win32 exception structure references by FS:[0] is the same
     //      in OS/2
@@ -597,7 +596,7 @@ void Win32DllBase::deleteAll()
 
     dprintf(("Win32DllBase::deleteAll"));
 
-#ifdef DEBUG_ENABLELOG_LEVEL2
+#ifdef DEBUG
     if(dll) dll->printListOfDlls();
 #endif
 
@@ -618,7 +617,7 @@ void Win32DllBase::deleteDynamicLibs()
  QueueItem    *item;
 
     dprintf(("Win32DllBase::deleteDynamicLibs"));
-#ifdef DEBUG_ENABLELOG_LEVEL2
+#ifdef DEBUG
     if(dll) dll->printListOfDlls();
 #endif
 
@@ -629,6 +628,7 @@ void Win32DllBase::deleteDynamicLibs()
         dll = (Win32DllBase *)loadLibDlls.getItem(item);
         int dynref = dll->nrDynamicLibRef;
         if(dynref) {
+            dprintf(("delete dynamic library references for %s", dll->getName()));
             while(dynref) {
                 dynref--;
                 dll->decDynamicLib();
