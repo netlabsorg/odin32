@@ -1,4 +1,4 @@
-; $Id: mini.asm,v 1.1.2.5 2001-08-14 19:17:40 bird Exp $
+; $Id: mini.asm,v 1.1.2.6 2001-08-14 21:17:31 bird Exp $
 ;
 ; Haveing great fun making small executables...
 ;
@@ -17,14 +17,29 @@ ifdef NORMAL  ;
 ;
 ;
     .386
-
-    ;APIRET APIENTRY  DosPutMessage(HFILE hfile,
-    ;                               ULONG cbMsg,
-    ;                               PCHAR pBuf);
-    extrn DosPutMessage:PROC
+;    .model flat
+;    .stack 1000h
 
 
-DATA32 segment byte common use32 'STACK'
+;
+; Segment definitions. (needed somehow ot
+;
+DATA32 segment byte public use32 'DATA'
+DATA32 ends
+
+BSS32 segment byte public use32 'BSS'
+BSS32 ends
+
+DGROUP  group BSS32, DATA32
+;    assume  cs:FLAT, ds:FLAT, ss:FLAT, es:FLAT
+
+;APIRET APIENTRY  DosPutMessage(HFILE hfile,
+;                               ULONG cbMsg,
+;                               PCHAR pBuf);
+extrn DosPutMessage:PROC
+
+
+CODE32 segment byte public use32 'CODE'
 ;
 ; Data
 ;
@@ -38,7 +53,7 @@ minilx:
     ret
 ImReallySmall   db  "I'm really small!",013
 
-DATA32 ends
+CODE32 ends
 
 
 END minilx

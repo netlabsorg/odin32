@@ -1,8 +1,4 @@
-;$Id: mini.def,v 1.1.2.2 2001-08-14 19:17:40 bird Exp $
+;$Id: mini.def,v 1.1.2.3 2001-08-14 21:17:31 bird Exp $
 NAME '' WINDOWCOMPAT
 STUB NONE
 
-STACKSIZE 4060
-
-SEGMENTS
-    'DATA32'  class 'CODE' READWRITE PRELOAD
