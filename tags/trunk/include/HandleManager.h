@@ -1,4 +1,4 @@
-/* $Id: HandleManager.h,v 1.12 1999-11-27 12:16:26 achimha Exp $ */
+/* $Id: HandleManager.h,v 1.13 1999-11-27 12:47:07 achimha Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -44,6 +44,38 @@ typedef struct
     DWORD    OffsetHigh;
     HANDLE   hEvent;
 } OVERLAPPED, *POVERLAPPED, *LPOVERLAPPED;
+
+typedef struct tagDCB
+{
+    DWORD DCBlength;
+    DWORD BaudRate;
+    unsigned fBinary               :1;
+    unsigned fParity               :1;
+    unsigned fOutxCtsFlow          :1;
+    unsigned fOutxDsrFlow          :1;
+    unsigned fDtrControl           :2;
+    unsigned fDsrSensitivity       :1;
+    unsigned fTXContinueOnXoff     :1;
+    unsigned fOutX                 :1;
+    unsigned fInX                  :1;
+    unsigned fErrorChar            :1;
+    unsigned fNull                 :1;
+    unsigned fRtsControl           :2;
+    unsigned fAbortOnError         :1;
+    unsigned fDummy2               :17;
+    WORD wReserved;
+    WORD XonLim;
+    WORD XoffLim;
+    BYTE ByteSize;
+    BYTE Parity;
+    BYTE StopBits;
+    char XonChar;
+    char XoffChar;
+    char ErrorChar;
+    char EofChar;
+    char EvtChar;
+} DCB, *LPDCB;
+
 #endif
 
 
@@ -303,6 +335,8 @@ BOOL HMDuplicateHandle(HANDLE  srcprocess,
                        DWORD   fdwOptions);
 
 BOOL HMSetupComm(HANDLE hFile, DWORD dwInQueue, DWORD dwOutQueue);
+
+BOOL HMGetCommState(INT hCommDev, LPDCB lpdcb);
 
 #ifdef __cplusplus__
   }
