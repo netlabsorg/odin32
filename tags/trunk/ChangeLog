@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.63 1999-07-26 20:04:12 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.64 1999-07-27 06:58:19 sandervl Exp $ */
+ 99-07-27: Przemysˆaw Dobrowolski <dobrawka@asua.org.pl>
+	- KERNEL32: Implemented GetComputerNameA/W
+
  99-07-25: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32/NEW: Lots of changes; Solitaire displays cards correctly
 		      Status bar correctly drawn
