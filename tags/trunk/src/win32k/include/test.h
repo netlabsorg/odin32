@@ -1,4 +1,4 @@
-/* $Id: test.h,v 1.9 2001-02-23 02:57:54 bird Exp $
+/* $Id: test.h,v 1.10 2001-07-10 05:24:18 bird Exp $
  *
  * Definitions and declarations for test moduls.
  *
@@ -127,6 +127,13 @@ APIRET KRNLCALL fakeVMMapDebugAlias(
     ULONG   cbSize,
     HPTDA   hPTDA,
     PVMAC   pvmac);
+APIRET KRNLCALL fakeVMCreatePseudoHandle(
+    PVOID   pvData,
+    VMHOB   usOwner,
+    PVMHOB  phob);
+APIRET KRNLCALL fakeVMFreePseudoHandle(
+    VMHOB   hob);
+
 
 ULONG LDRCALL   fakeldrOpenPath(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *plv, PULONG pful, ULONG lLibPath);
 ULONG LDRCALL   fakeldrOpenPath_new(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *plv, PULONG pful, ULONG lLibPath);
@@ -150,6 +157,14 @@ ULONG KRNLCALL  fakeTKSuBuff(PVOID pvUsr, PVOID pv, ULONG cb, ULONG fl);
 ULONG KRNLCALL  fakeTKFuBufLen(PLONG pcch, PVOID pvUsr, ULONG cchMax, ULONG fl, BOOL fDblNULL);
 ULONG KRNLCALL  fakeTKSuFuBuff(PVOID pvUsr, PVOID pv, ULONG cb, ULONG fl);
 ULONG KRNLCALL  fakeTKPidToPTDA(PID pid, PPPTDA ppPTDA);
+void KRNLCALL   fakeTKForceThread(ULONG flFlag, PTCB pTCB);
+void KRNLCALL   fakeTKForceTask(ULONG flFlag, PPTDA pPTDA, BOOL fForce);
+ULONG KRNLCALL  fakeTKGetPriority(PTCB pTCB);
+ULONG KRNLCALL  fakeTKSleep(ULONG ulSleepId, ULONG ulTimeout, ULONG fUnInterruptable, ULONG flWakeupType);
+ULONG KRNLCALL  fakeTKWakeup(ULONG ulSleepId, ULONG flWakeupType, PULONG cWakedUp);
+ULONG KRNLCALL  fakeTKWakeThread(PTCB pTCB);
+PTCB  KRNLCALL  fakeTKQueryWakeup(ULONG ulSleepId, ULONG flWakeupType);
+
 PMTE LDRCALL    fakeldrValidateMteHandle(HMTE hMTE);
 PSZ  SECCALL    fakeSecPathFromSFN(SFN hFile);
 ULONG KRNLCALL  fakePGPhysAvail(void);
@@ -162,6 +177,7 @@ void _Optlink   fakef_FuStrLenZ(void);      /* Not callable! (fakea.asm) */
 void _Optlink   fakef_FuStrLen(void);       /* Not callable! (fakea.asm) */
 void _Optlink   fakef_FuBuff(void);         /* Not callable! (fakea.asm) */
 void _Optlink   fakedh_SendEvent(void);     /* Not callable! (fakea.asm) */
+void _Optlink   fakeh_POST_SIGNAL(void);    /* Not callable! (fakea.asm) */
 void _Optlink   fakeRASRST(void);           /* Not callable! (fakea.asm) */
 void _Optlink   fakeKMEnterKmodeSEF(void);  /* Not callable! (fakea.asm) */
 void _Optlink   fakeKMExitKmodeSEF8(void);  /* Not callable! (fakea.asm) */
