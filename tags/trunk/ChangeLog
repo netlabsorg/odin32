@@ -1,6 +1,10 @@
-/* $Id: ChangeLog,v 1.1429 2001-05-19 19:14:55 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1430 2001-05-19 19:44:23 sandervl Exp $ */
 
  2001-05-19: Sander van Leeuwen <sandervl@xs4all.nl>
+    - GDI32:    o LPtoDP/DPtoLP: check input because GpiConvert doesn't like 
+                  illegal values (TODO: check what NT does)
+                  (fixes huge buttons in VirtualPC dialog (font with wrong
+                   height created))
     - INCLUDE\odinwrap.h:
                 o ODINFUNCTIONNODBG & ODINPROCEDURENODBG should still save
                   and restore FS!!!
