@@ -1,4 +1,4 @@
-/* $Id: wprocess.h,v 1.16 2000-09-10 21:55:04 sandervl Exp $ */
+/* $Id: wprocess.h,v 1.17 2000-09-12 04:26:40 bird Exp $ */
 /*
  * Process help functions
  *
@@ -52,4 +52,6 @@ inline PDB * PROCESS_Current(void)
 }
 #endif
 
-#endif 
+ULONG InitCommandLine(const char *pszPeExe);
+
+#endif
