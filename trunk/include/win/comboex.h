@@ -1,4 +1,4 @@
-/* $Id: comboex.h,v 1.2 2000-02-23 17:03:00 cbratschi Exp $ */
+/* $Id: comboex.h,v 1.3 2000-11-17 14:32:48 sandervl Exp $ */
 
 /*
  * ComboBoxEx class extra info
@@ -9,17 +9,15 @@
 #ifndef __WINE_COMBOEX_H
 #define __WINE_COMBOEX_H
 
-typedef struct tagCOMBOEX_INFO
-{
-    COMCTL32_HEADER header;
-    HIMAGELIST      himl;
-    HWND            hwndCombo;
-    DWORD           dwExtStyle;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-} COMBOEX_INFO;
+VOID COMBOEX_Register (VOID);
+VOID COMBOEX_Unregister (VOID);
 
-
-extern VOID COMBOEX_Register (VOID);
-extern VOID COMBOEX_Unregister (VOID);
+#ifdef __cplusplus
+}
+#endif
 
 #endif  /* __WINE_COMBOEX_H */
