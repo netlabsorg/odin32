@@ -1,4 +1,4 @@
-/* $Id: odinwrap.h,v 1.4 1999-08-11 22:25:50 phaller Exp $ */
+/* $Id: odinwrap.h,v 1.5 1999-08-13 00:30:34 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -60,7 +60,7 @@
     unsigned short sel = RestoreOS2FS();      \
     dprintf(("%s: void "#cName"() enter\n",    \
              pszOdinDebugChannel));           \
-    cName();                                  \
+    ODIN_##cName();                                  \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
     SetFS(sel);                               \
@@ -78,7 +78,7 @@
     dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
              a1));                            \
-    cRet   rc  = cName(a1);                   \
+    cRet   rc  = ODIN_##cName(a1);                   \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
@@ -96,7 +96,7 @@
     dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
              a1));                            \
-    cName(a1);                                \
+    ODIN_##cName(a1);                                \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
     SetFS(sel);                               \
@@ -114,7 +114,7 @@
     dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
              a1,a2));                         \
-    cRet   rc  = cName(a1,a2);                \
+    cRet   rc  = ODIN_##cName(a1,a2);                \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
@@ -132,7 +132,7 @@
     dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
              a1,a2));                         \
-    cName(a1,a2);                             \
+    ODIN_##cName(a1,a2);                             \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
     SetFS(sel);                               \
@@ -150,7 +150,7 @@
     dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
              a1,a2,a3));                      \
-    cRet   rc  = cName(a1,a2,a3); \
+    cRet   rc  = ODIN_##cName(a1,a2,a3); \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
@@ -168,7 +168,7 @@
     dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
              a1,a2,a3));                      \
-    cName(a1,a2,a3);              \
+    ODIN_##cName(a1,a2,a3);              \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
     SetFS(sel);                   \
@@ -186,7 +186,7 @@
     dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh, "#t4" "#a4"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
              a1,a2,a3,a4));                   \
-    cRet   rc  = cName(a1,a2,a3,a4); \
+    cRet   rc  = ODIN_##cName(a1,a2,a3,a4); \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
@@ -204,7 +204,7 @@
     dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh, "#t4" "#a4"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
              a1,a2,a3,a4));                    \
-    cName(a1,a2,a3,a4); \
+    ODIN_##cName(a1,a2,a3,a4); \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
     SetFS(sel);      \
@@ -223,7 +223,7 @@
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
              a1,a2,a3,a4,a5));                \
-    cRet   rc  = cName(a1,a2,a3,a4,a5); \
+    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5); \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
@@ -242,7 +242,7 @@
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
              a1,a2,a3,a4,a5));                \
-    cName(a1,a2,a3,a4,a5); \
+    ODIN_##cName(a1,a2,a3,a4,a5); \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
     SetFS(sel);      \
@@ -261,7 +261,7 @@
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
              a1,a2,a3));                      \
-    cRet   rc  = cName(a1,a2,a3,a4,a5,a6); \
+    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6); \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
@@ -280,7 +280,7 @@
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
              a1,a2,a3));                      \
-    cName(a1,a2,a3,a4,a5,a6); \
+    ODIN_##cName(a1,a2,a3,a4,a5,a6); \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
     SetFS(sel);      \
@@ -299,7 +299,7 @@
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
              a1,a2,a3));                      \
-    cRet   rc  = cName(a1,a2,a3,a4,a5,a6,a7); \
+    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7); \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
@@ -318,7 +318,7 @@
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
              a1,a2,a3));                      \
-    cName(a1,a2,a3,a4,a5,a6,a7); \
+    ODIN_##cName(a1,a2,a3,a4,a5,a6,a7); \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
     SetFS(sel);      \
@@ -338,7 +338,7 @@
              ", "#t8" "#a8"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
              a1,a2,a3));                      \
-    cRet   rc  = cName(a1,a2,a3,a4,a5,a6,a7,a8); \
+    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8); \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
@@ -358,7 +358,7 @@
              ", "#t8" "#a8"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
              a1,a2,a3));                      \
-    cName(a1,a2,a3,a4,a5,a6,a7,a8); \
+    ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8); \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
     SetFS(sel);      \
@@ -378,7 +378,7 @@
              ", "#t8" "#a8"=%08xh, "#t9" "#a9"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
              a1,a2,a3));                      \
-    cRet   rc  = cName(a1,a2,a3,a4,a5,a6,a7,a8,a9); \
+    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9); \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
@@ -398,7 +398,7 @@
              ", "#t8" "#a8"=%08xh, "#t9" "#a9"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
              a1,a2,a3));                      \
-    cName(a1,a2,a3,a4,a5,a6,a7,a8,a9); \
+    ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9); \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
     SetFS(sel);      \
@@ -418,7 +418,7 @@
              ", "#t8" "#a8"=%08xh, "#t9" "#a9"=%08xh, "#t10" "#a10"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
              a1,a2,a3));                      \
-    cRet   rc  = cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10); \
+    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10); \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
@@ -438,7 +438,7 @@
              ", "#t8" "#a8"=%08xh, "#t9" "#a9"=%08xh, "#t10" "#a10"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
              a1,a2,a3));                      \
-    cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10); \
+    ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10); \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
     SetFS(sel);      \
@@ -458,7 +458,7 @@
              ", "#t8" "#a8"=%08xh, "#t9" "#a9"=%08xh, "#t10" "#a10"=%08xh, "#t11" "#a11"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
              a1,a2,a3));                      \
-    cRet   rc  = cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11); \
+    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11); \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
@@ -478,7 +478,7 @@
              ", "#t8" "#a8"=%08xh, "#t9" "#a9"=%08xh, "#t10" "#a10"=%08xh, "#t11" "#a11"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
              a1,a2,a3));                      \
-    cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11); \
+    ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11); \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
     SetFS(sel);      \
@@ -499,7 +499,7 @@
              ", "#t12" "#a12"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
              a1,a2,a3));                      \
-    cRet   rc  = cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12); \
+    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12); \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
@@ -520,7 +520,7 @@
              ", "#t12" "#a12"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
              a1,a2,a3));                      \
-    cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12); \
+    ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12); \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
     SetFS(sel);      \
@@ -541,7 +541,7 @@
   cRet WINAPI cName(void)  \
   {                               \
     unsigned short sel = RestoreOS2FS();  \
-    cRet   rc  = cName();         \
+    cRet   rc  = ODIN_##cName();         \
     SetFS(sel);                   \
     return rc;                    \
   }                               \
@@ -554,7 +554,7 @@
   void WINAPI cName(void)  \
   {                               \
     unsigned short sel = RestoreOS2FS();  \
-                 cName();         \
+                 ODIN_##cName();         \
                  SetFS(sel);      \
   }                               \
                                   \
@@ -567,7 +567,7 @@
   cRet WINAPI cName(t1 a1) \
   {                               \
     unsigned short sel = RestoreOS2FS();  \
-    cRet   rc  = cName(a1);       \
+    cRet   rc  = ODIN_##cName(a1);       \
     SetFS(sel);                   \
     return rc;                    \
   }                               \
@@ -579,7 +579,7 @@
   void WINAPI cName(t1 a1) \
   {                               \
     unsigned short sel = RestoreOS2FS();  \
-                 cName(a1);       \
+                 ODIN_##cName(a1);       \
                  SetFS(sel);      \
   }                               \
                                   \
@@ -592,7 +592,7 @@
   cRet WINAPI cName(t1 a1,t2 a2)        \
   {                               \
     unsigned short sel = RestoreOS2FS();  \
-    cRet   rc  = cName(a1,a2);    \
+    cRet   rc  = ODIN_##cName(a1,a2);    \
     SetFS(sel);                   \
     return rc;                    \
   }                               \
@@ -604,7 +604,7 @@
   void WINAPI cName(t1 a1,t2 a2) \
   {                               \
     unsigned short sel = RestoreOS2FS();  \
-                 cName(a1,a2);    \
+                 ODIN_##cName(a1,a2);    \
                  SetFS(sel);      \
   }                               \
                                   \
@@ -617,7 +617,7 @@
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3)        \
   {                               \
     unsigned short sel = RestoreOS2FS();  \
-    cRet   rc  = cName(a1,a2,a3); \
+    cRet   rc  = ODIN_##cName(a1,a2,a3); \
     SetFS(sel);                   \
     return rc;                    \
   }                               \
@@ -629,7 +629,7 @@
   void WINAPI cName(t1 a1,t2 a2,t3 a3)    \
   {                               \
     unsigned short sel = RestoreOS2FS();  \
-                 cName(a1,a2,a3); \
+                 ODIN_##cName(a1,a2,a3); \
                  SetFS(sel);      \
   }                               \
                                   \
@@ -642,7 +642,7 @@
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4)        \
   {                               \
     unsigned short sel = RestoreOS2FS();  \
-    cRet   rc  = cName(a1,a2,a3,a4); \
+    cRet   rc  = ODIN_##cName(a1,a2,a3,a4); \
     SetFS(sel);                   \
     return rc;                    \
   }                               \
@@ -654,7 +654,7 @@
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4)    \
   {                               \
     unsigned short sel = RestoreOS2FS();  \
-                 cName(a1,a2,a3,a4); \
+                 ODIN_##cName(a1,a2,a3,a4); \
                  SetFS(sel);      \
   }                               \
                                   \
@@ -667,7 +667,7 @@
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5)        \
   {                               \
     unsigned short sel = RestoreOS2FS();  \
-    cRet   rc  = cName(a1,a2,a3,a4,a5); \
+    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5); \
     SetFS(sel);                   \
     return rc;                    \
   }                               \
@@ -679,7 +679,7 @@
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5)    \
   {                               \
     unsigned short sel = RestoreOS2FS();  \
-                 cName(a1,a2,a3,a4,a5); \
+                 ODIN_##cName(a1,a2,a3,a4,a5); \
                  SetFS(sel);      \
   }                               \
                                   \
@@ -692,7 +692,7 @@
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6)        \
   {                               \
     unsigned short sel = RestoreOS2FS();  \
-    cRet   rc  = cName(a1,a2,a3,a4,a5,a6); \
+    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6); \
     SetFS(sel);                   \
     return rc;                    \
   }                               \
@@ -704,7 +704,7 @@
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6)    \
   {                               \
     unsigned short sel = RestoreOS2FS();  \
-                 cName(a1,a2,a3,a4,a5,a6); \
+                 ODIN_##cName(a1,a2,a3,a4,a5,a6); \
                  SetFS(sel);      \
   }                               \
                                   \
@@ -717,7 +717,7 @@
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7)        \
   {                               \
     unsigned short sel = RestoreOS2FS();  \
-    cRet   rc  = cName(a1,a2,a3,a4,a5,a6,a7); \
+    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7); \
     SetFS(sel);                   \
     return rc;                    \
   }                               \
@@ -729,7 +729,7 @@
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7)    \
   {                               \
     unsigned short sel = RestoreOS2FS();  \
-                 cName(a1,a2,a3,a4,a5,a6,a7); \
+                 ODIN_##cName(a1,a2,a3,a4,a5,a6,a7); \
                  SetFS(sel);      \
   }                               \
                                   \
@@ -742,7 +742,7 @@
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8)        \
   {                               \
     unsigned short sel = RestoreOS2FS();  \
-    cRet   rc  = cName(a1,a2,a3,a4,a5,a6,a7,a8); \
+    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8); \
     SetFS(sel);                   \
     return rc;                    \
   }                               \
@@ -754,7 +754,7 @@
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8)    \
   {                               \
     unsigned short sel = RestoreOS2FS();  \
-                 cName(a1,a2,a3,a4,a5,a6,a7,a8); \
+                 ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8); \
                  SetFS(sel);      \
   }                               \
                                   \
@@ -767,7 +767,7 @@
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9)        \
   {                               \
     unsigned short sel = RestoreOS2FS();  \
-    cRet   rc  = cName(a1,a2,a3,a4,a5,a6,a7,a8,a9); \
+    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9); \
     SetFS(sel);                   \
     return rc;                    \
   }                               \
@@ -779,7 +779,7 @@
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9)    \
   {                               \
     unsigned short sel = RestoreOS2FS();  \
-                 cName(a1,a2,a3,a4,a5,a6,a7,a8,a9); \
+                 ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9); \
                  SetFS(sel);      \
   }                               \
                                   \
@@ -792,7 +792,7 @@
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10)        \
   {                               \
     unsigned short sel = RestoreOS2FS();  \
-    cRet   rc  = cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10); \
+    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10); \
     SetFS(sel);                   \
     return rc;                    \
   }                               \
@@ -804,7 +804,7 @@
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10)    \
   {                               \
     unsigned short sel = RestoreOS2FS();  \
-                 cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10); \
+                 ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10); \
                  SetFS(sel);      \
   }                               \
                                   \
@@ -817,7 +817,7 @@
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11)        \
   {                               \
     unsigned short sel = RestoreOS2FS();  \
-    cRet   rc  = cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11); \
+    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11); \
     SetFS(sel);                   \
     return rc;                    \
   }                               \
@@ -829,7 +829,7 @@
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11)    \
   {                               \
     unsigned short sel = RestoreOS2FS();  \
-                 cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11); \
+                 ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11); \
                  SetFS(sel);      \
   }                               \
                                   \
@@ -842,7 +842,7 @@
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12)        \
   {                               \
     unsigned short sel = RestoreOS2FS();  \
-    cRet   rc  = cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12); \
+    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12); \
     SetFS(sel);                   \
     return rc;                    \
   }                               \
@@ -854,7 +854,7 @@
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12)    \
   {                               \
     unsigned short sel = RestoreOS2FS();  \
-                 cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12); \
+                 ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12); \
                  SetFS(sel);      \
   }                               \
                                   \
