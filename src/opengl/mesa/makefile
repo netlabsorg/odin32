@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2000-11-19 08:58:15 bird Exp $
+# $Id: makefile,v 1.10 2000-12-02 23:58:37 bird Exp $
 
 #
 # Odin32 API
@@ -8,18 +8,9 @@
 
 
 #
-# Directory macros.
-#
-PDWIN32_INCLUDE = ..\..\..\include
-PDWIN32_LIB     = ..\..\..\lib
-PDWIN32_BIN     = ..\..\..\$(OBJDIR)
-PDWIN32_TOOLS   = ..\..\..\tools\bin
-
-
-#
 # Compiler, tools, and interference rules.
 #
-!include $(PDWIN32_INCLUDE)/pdwin32.mk
+!include ../../../makefile.inc
 
 
 #
@@ -133,10 +124,10 @@ $(OBJDIR)\os2thread.obj
 # Libraries. One space before the '\'.
 #
 LIBS = \
-$(PDWIN32_LIB)/$(ODINCRT).lib \
-$(PDWIN32_LIB)\kernel32.lib \
-$(PDWIN32_LIB)\gdi32.lib \
-$(PDWIN32_LIB)\user32.lib \
+$(ODIN32_LIB)/$(ODINCRT).lib \
+$(ODIN32_LIB)\kernel32.lib \
+$(ODIN32_LIB)\gdi32.lib \
+$(ODIN32_LIB)\user32.lib \
 $(RTLLIB_O) \
 os2386.lib \
 mmpm2.lib
@@ -151,29 +142,7 @@ TARGET = opengl32
 #
 # Includes the common rules.
 #
-!include $(PDWIN32_INCLUDE)/pdwin32.post
-
-
-#
-# Libs rule to support objectlibrary used by 3dxf.
-#
-libs: $(OBJDIR)\$(TARGET).lib
-
-
-#
-# Internal objectlibrary rule.
-#
-$(OBJDIR)\$(TARGET).lib: $(OBJS)
-!if "$(VAC3)" == "1" | "$(VAC36)" == "1"
-    $(RM) $(OBJDIR)\$(TARGET)
-    $(ILIB) $(ILIBFLAGS) $@ @<<
-$(OBJS:  = &^
-)
-$(OBJDIR)\$(@B).lst
-<<
-!else
-!   error "Compiler is not yet supported."
-!endif
+!include $(ODIN32_POST_INC)
 
 
 #

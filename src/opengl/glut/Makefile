@@ -1,19 +1,10 @@
-# $Id: Makefile,v 1.16 2000-11-19 08:58:15 bird Exp $
+# $Id: Makefile,v 1.17 2000-12-02 23:58:44 bird Exp $
 
 #
 # Odin32 API
 #
 #       glut32.dll makefile
 #
-
-
-#
-# Directory macros.
-#
-PDWIN32_INCLUDE = ..\..\..\include
-PDWIN32_LIB     = ..\..\..\lib
-PDWIN32_BIN     = ..\..\..\$(OBJDIR)
-PDWIN32_TOOLS   = ..\..\..\tools\bin
 
 
 #
@@ -25,7 +16,7 @@ ADDITIONAL_DEP = mydep
 #
 # Compiler, tools, and interference rules.
 #
-!include $(PDWIN32_INCLUDE)/pdwin32.mk
+!include ../../../makefile.inc
 
 
 #
@@ -97,14 +88,14 @@ $(OBJDIR)\glut32rsrc.obj
 # Libraries. One space before the '\'.
 #
 LIBS = \
-$(PDWIN32_LIB)/$(ODINCRT).lib \
+$(ODIN32_LIB)/$(ODINCRT).lib \
 $(RTLLIB_O) \
-$(PDWIN32_LIB)\winmm.lib \
-$(PDWIN32_LIB)\kernel32.lib \
-$(PDWIN32_LIB)\gdi32.lib \
-$(PDWIN32_LIB)\user32.lib \
-$(PDWIN32_LIB)\glu32.lib \
-$(PDWIN32_LIB)\opengl32.lib \
+$(ODIN32_LIB)/winmm.lib \
+$(ODIN32_LIB)/kernel32.lib \
+$(ODIN32_LIB)/gdi32.lib \
+$(ODIN32_LIB)/user32.lib \
+$(ODIN32_LIB)/glu32.lib \
+$(ODIN32_LIB)/opengl32.lib \
 os2386.lib
 
 
@@ -117,7 +108,7 @@ TARGET = glut32
 #
 # Includes the common rules.
 #
-!include $(PDWIN32_INCLUDE)/pdwin32.post
+!include $(ODIN32_POST_INC)
 
 
 #
@@ -125,5 +116,5 @@ TARGET = glut32
 #
 mydep:
     $(DEPEND) -a $(CINCLUDES) \
-        *.c *.cpp *.asm *.inc $(PDWIN32_INCLUDE)\*.h ..\mesa\gl\*.h
+        *.c *.cpp *.asm *.inc $(ODIN32_INCLUDE)\*.h ..\mesa\gl\*.h
 

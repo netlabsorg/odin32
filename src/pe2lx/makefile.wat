@@ -1,13 +1,13 @@
-# $Id: makefile.wat,v 1.3 1999-07-05 12:36:12 sandervl Exp $
+# $Id: makefile.wat,v 1.4 2000-12-02 23:58:01 bird Exp $
 
 #===================================================================
 #
 #   Setup the environment properly
 #
 #===================================================================
-PDWIN32_INCLUDE = ..\..\include
-PDWIN32_LIB = ..\..\lib
-PDWIN32_BIN = ..\..\bin
+ODIN32_INCLUDE = ..\..\include
+ODIN32_LIB = ..\..\lib
+ODIN32_BIN = ..\..\bin
 INC     = $(%WATCOM)\h;f:\toolkit\h;.;..\..\include;..\..\include\win
 DEF     =
 !ifndef %RELEASE
@@ -61,7 +61,7 @@ FILE3   = rcdata.obj icongrp.obj
 FILE4   = strings.obj bitmap.obj
 FILE5   = accelerator.obj
 FILE6   = cursor.obj cursorgrp.obj
-FILE7   = $(PDWIN32_LIB)\LIBCONV.LIB
+FILE7   = $(ODIN32_LIB)\LIBCONV.LIB
 FILE8   =
 FILE9   =
 FILES   = $(FILE0) $(FILE1) $(FILE2) $(FILE3) $(FILE4) $(FILE5) $(FILE6) $(FILE7) $(FILE8) $(FILE9)
