@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.31 2001-06-03 14:52:46 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.32 2001-06-11 15:57:15 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -141,7 +141,7 @@ static INT SetDIBitsToDevice_(HDC hdc, INT xDest, INT yDest, DWORD cx,
 
     switch(info->bmiHeader.biBitCount) {
     case 15:
-    case 16:
+    case 16: //Default if BI_BITFIELDS not set is RGB 555
         bitfields[0] = (info->bmiHeader.biCompression == BI_BITFIELDS) ? *(DWORD *)info->bmiColors : 0x7c00;
         bitfields[1] = (info->bmiHeader.biCompression == BI_BITFIELDS) ?  *((DWORD *)info->bmiColors + 1) : 0x03e0;
         bitfields[2] = (info->bmiHeader.biCompression == BI_BITFIELDS) ?  *((DWORD *)info->bmiColors + 2) : 0x001f;
@@ -435,7 +435,7 @@ static INT StretchDIBits_(HDC hdc, INT xDst, INT yDst, INT widthDst,
 
     switch(info->bmiHeader.biBitCount) {
     case 15:
-    case 16:
+    case 16: //Default if BI_BITFIELDS not set is RGB 555
         bitfields[0] = (info->bmiHeader.biCompression == BI_BITFIELDS) ? *(DWORD *)info->bmiColors : 0x7c00;
         bitfields[1] = (info->bmiHeader.biCompression == BI_BITFIELDS) ?  *((DWORD *)info->bmiColors + 1) : 0x03e0;
         bitfields[2] = (info->bmiHeader.biCompression == BI_BITFIELDS) ?  *((DWORD *)info->bmiColors + 2) : 0x001f;
