@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.42 1999-11-03 19:51:42 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.43 1999-11-10 17:11:29 cbratschi Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -70,7 +70,7 @@ HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
 
   BOOL TopLevel = hwndParent == HWND_DESKTOP;
 //  if(dwFrameStyle & FCF_TITLEBAR)
-//	TopLevel = TRUE;
+//      TopLevel = TRUE;
 
   FRAMECDATA FCData = {sizeof (FRAMECDATA), 0, 0, 0};
 
@@ -87,7 +87,7 @@ HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
   *hwndFrame = WinCreateWindow (hwndParent,
                                 TopLevel ? WC_FRAME : WIN32_INNERFRAME,
                                 pszName, dwWinStyle, 0, 0, 50, 30,
-                                hwndParent, HWND_TOP, 
+                                hwndParent, HWND_TOP,
                                 id, &FCData, NULL);
   if (*hwndFrame) {
     hwndClient = WinCreateWindow (*hwndFrame, WIN32_STDCLASS,
@@ -953,38 +953,6 @@ BOOL OSLibWinEnableScrollBar(HWND hwndParent, int scrollBar, BOOL fEnable)
 HWND OSLibWinQueryObjectWindow(VOID)
 {
   return WinQueryObjectWindow(HWND_DESKTOP);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL OSLibWinShowScrollBar(HWND hwndParent, HWND hwndScroll, int scrollBar,
-                           BOOL fShow, BOOL fForceChange)
-{
-   HWND hwndObj = WinQueryObjectWindow(HWND_DESKTOP),hwndCurPar = WinQueryWindow(hwndScroll,QW_PARENT);
-
-   if(hwndScroll == NULL) {
-        dprintf(("OSLibWinShowScrollBar: scrollbar %d (parent %x) not found!", scrollBar, hwndParent));
-        return FALSE;
-   }
-
-   if ((fShow && hwndCurPar == hwndObj) || (!fShow && hwndCurPar != hwndObj) || fForceChange)
-   {
-     //CB: bug: winhlp32: hide vert scrollbar on maximize doesn't update the frame
-         WinSetParent(hwndScroll,fShow ? hwndParent:HWND_OBJECT,FALSE);
-         WinSendMsg(hwndParent, WM_UPDATEFRAME,
-                    MPFROMLONG( ( scrollBar == OSLIB_VSCROLL ) ? FCF_VERTSCROLL
-                                                               : FCF_HORZSCROLL),
-                    MPVOID );
-   }
-   return TRUE;
-}
-//******************************************************************************
-//******************************************************************************
-HWND OSLibWinQueryScrollBarHandle(HWND hwndParent, int scrollBar)
-{
-   if(scrollBar == OSLIB_VSCROLL) {
-        return WinWindowFromID(hwndParent, FID_VERTSCROLL);
-   }
-   else return WinWindowFromID(hwndParent, FID_HORZSCROLL);
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.78 1999-11-09 19:23:17 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.79 1999-11-10 17:11:30 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -95,6 +95,8 @@ Win32BaseWindow::Win32BaseWindow(HWND os2Handle,VOID* win32WndProc) : GenericObj
   setWindowProc((WNDPROC)win32WndProc);
   fIsSubclassedOS2Wnd = TRUE;
   fFirstShow = FALSE;
+
+  SetLastError(0);
 
   //CB: replace by a secure method
 
@@ -594,12 +596,7 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
 
   OSLibWinSetOwner(OS2Hwnd, OS2HwndFrame);
 
-  if (dwStyle & WS_HSCROLL)
-    hwndHorzScroll = OSLibWinQueryScrollBarHandle(OS2HwndFrame, OSLIB_HSCROLL);
-
-  if (dwStyle & WS_VSCROLL)
-    hwndVertScroll = OSLibWinQueryScrollBarHandle(OS2HwndFrame, OSLIB_VSCROLL);
-
+  FrameGetScrollBarHandles(this,dwStyle & WS_HSCROLL,dwStyle & WS_VSCROLL);
   subclassScrollBars(dwStyle & WS_HSCROLL,dwStyle & WS_VSCROLL);
 
   fakeWinBase.hwndThis     = OS2Hwnd;
@@ -1289,6 +1286,87 @@ SCROLLBAR_INFO *Win32BaseWindow::getScrollInfo(int nBar)
 VOID Win32BaseWindow::subclassScrollBars(BOOL subHorz,BOOL subVert)
 {
   SCROLL_SubclassScrollBars(subHorz ? hwndHorzScroll:0,subVert ? hwndVertScroll:0);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32BaseWindow::showScrollBars(BOOL changeHorz,BOOL changeVert,BOOL fShow)
+{
+  BOOL rc = TRUE;
+  DWORD flags = 0;
+
+  if (fShow)
+  {
+    BOOL createHorz = FALSE,createVert = FALSE;
+    BOOL showHorz = FALSE,showVert = FALSE;
+
+    if (changeHorz)
+    {
+      if (!hwndHorzScroll)
+        createHorz = TRUE;
+      else
+        showHorz = TRUE;
+    }
+
+    if (changeVert)
+    {
+      if (!hwndVertScroll)
+        createVert = TRUE;
+      else
+        showVert = TRUE;
+    }
+
+    if (createHorz || createVert)
+    {
+      if (createHorz && !horzScrollInfo)
+      {
+        horzScrollInfo = (SCROLLBAR_INFO*)malloc(sizeof(SCROLLBAR_INFO));
+        horzScrollInfo->MinVal = horzScrollInfo->CurVal = horzScrollInfo->Page = 0;
+        horzScrollInfo->MaxVal = 100;
+        horzScrollInfo->flags  = ESB_ENABLE_BOTH;
+        dwStyle |= WS_HSCROLL;
+      }
+
+      if (createVert && !vertScrollInfo)
+      {
+        vertScrollInfo = (SCROLLBAR_INFO*)malloc(sizeof(SCROLLBAR_INFO));
+        vertScrollInfo->MinVal = vertScrollInfo->CurVal = vertScrollInfo->Page = 0;
+        vertScrollInfo->MaxVal = 100;
+        vertScrollInfo->flags  = ESB_ENABLE_BOTH;
+        dwStyle |= WS_VSCROLL;
+      }
+
+      rc = FrameCreateScrollBars(this,createHorz,createVert,FALSE,&flags);
+
+      if (!rc) return FALSE;
+      if (createHorz) dwStyle |= WS_HSCROLL;
+      if (createVert) dwStyle |= WS_VSCROLL;
+    }
+
+    if (showVert || showHorz)
+    {
+      DWORD newFlags;
+      rc = FrameShowScrollBars(this,showHorz,showVert,fShow,FALSE,&newFlags);
+      flags |= newFlags;
+      if (rc)
+      {
+        if (showHorz) dwStyle |= WS_HSCROLL;
+        if (showVert) dwStyle |= WS_VSCROLL;
+      }
+    }
+
+    if (flags) FrameUpdateFrame(this,flags);
+  } else
+  {
+    rc = FrameShowScrollBars(this,changeHorz && hwndHorzScroll,changeVert && hwndVertScroll,fShow,TRUE);
+
+    if (rc)
+    {
+      if (changeHorz) dwStyle &= ~WS_HSCROLL;
+      if (changeVert) dwStyle &= ~WS_VSCROLL;
+    }
+  }
+
+  return rc;
 }
 /***********************************************************************
  *           NC_HandleSysCommand

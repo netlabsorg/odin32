@@ -580,3 +580,4 @@ EXPORTS
     _MOUSE_Enable@4                           @2007
     _KeyTranslatePMToWin@4                    @2008
     _KeyTranslatePMToWinBuf@12                @2009
+    _wvsnprintfA@16                           @2010
