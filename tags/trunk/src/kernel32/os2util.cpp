@@ -1,4 +1,4 @@
-/* $Id: os2util.cpp,v 1.5 1999-06-19 17:58:32 sandervl Exp $ */
+/* $Id: os2util.cpp,v 1.6 1999-07-22 11:22:42 sandervl Exp $ */
 
 /*
  * Misc util. procedures
@@ -192,19 +192,19 @@ BOOL OS2GetResource(HMODULE hinstance, int id, char *destbuf, int bufLength)
    rc = DosQueryResourceSize(hinstance, RT_RCDATA, id, &size);
    if(rc) {
     dprintf(("OS2GetResource: Can't get resource size of %d!!!\n", id));
-    return(0);
+    return(FALSE);
    }
    rc = DosGetResource(hinstance, RT_RCDATA, id, (PPVOID)&resdata);
    if(rc) {
     dprintf(("OS2GetResource: Can't find resource %d!!!\n", id));
-    return(0);
+    return(FALSE);
    }
    dprintf(("OS2GetResoure: bufLength %d, size %d, id %d", bufLength, size, id));
    size = min(size, bufLength);
    memcpy(destbuf, resdata, size);
    DosFreeResource(resdata);
 
-   return(FALSE);
+   return(TRUE);
 }
 
 void  OS2Wait(ULONG msec)
