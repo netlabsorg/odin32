@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2643 2003-10-26 01:48:49 bird Exp $ */
+/* $Id: changelog,v 1.2644 2003-10-30 12:55:44 sandervl Exp $ */
+
+ 2003-10-30: Sander van Leeuwen <sandervl@innotek   >
+    - SHELL32:  o Wrong if statement in recent SHAddToRecentDocs patch
 
  2003-10-24: Sander van Leeuwen <sandervl@innotek   >
     - SHLWAPI:  o Removed wrong debug wrappers for forwarders
