@@ -1,33 +1,54 @@
 #ifdef __IBMC__
-#pragma strings(readonly)
+#pragma strings(writeable)
 #endif
 
+/*
+ * Config
+ */
 //#define LIBC
 
-#ifndef LIBC
 
-#define INCL_DOSMISC
-#include <os2.h>
-/*unsigned long _System
-DosPutMessage(
-    unsigned long hFile,
-    unsigned long cchMsg,
-    const char *  pszMsg);
-*/
+
+/*******************************************************************************
+*   External Functions                                                         *
+*******************************************************************************/
+#ifndef LIBC
+unsigned long _System DosPutMessage(unsigned long hFile,
+                                    unsigned long cchMsg,
+                                    char *  pszMsg);
 #else
-#include <stdio.h>
+extern int    _Optlink printf( char * pszMsg, ...);
 #endif
+
+/*******************************************************************************
+*   Global Variables                                                           *
+*******************************************************************************/
+#ifdef __WATCOMC__
+#pragma data_seg("STACK32", "CODE")
+#endif
+char szMsg[19] = {"I'm really small!\n"};
+
+#ifdef __WATCOMC__
+#pragma data_seg("MYSTACK", "STACK")
+int dummy;
+#endif
+
 
 #ifdef __IBMC__
-#pragma entry(entry)
+#pragma entry(minihll)
 #endif
-
 
 
 /*
  * Main entry potin etc.
  */
-void entry(void)
+void _Optlink minihll(void)
 {
-    DosPutMessage(0, 18, "I'm really small!\r");
+    #ifndef LIBC
+    DosPutMessage(0, 18, szMsg);
+    #else
+    printf(szMsg);
+    #endif
 }
+
+
