@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.1178 2000-10-07 09:12:21 hugh Exp $ */
+ /* $Id: changelog,v 1.1179 2000-10-07 09:34:04 sandervl Exp $ */
  
  2000-10-07: Markus Montkowski <mmontkowski@gmx.de>
     - GDI32: Fixed bitblt, it used the size of the source DC
@@ -9,7 +9,6 @@
              Added GetWidth() member function for this.
              Fixes: Civilisation Test of Times
 
-Fixes Civilisation Test of Times.
  2000-10-06: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: PE loader: no longer rely on section names, but on image
                 directories instead
