@@ -1,8 +1,9 @@
- /* $Id: changelog,v 1.666 2000-01-25 20:28:31 sandervl Exp $ */
+ /* $Id: changelog,v 1.667 2000-01-25 21:01:03 sandervl Exp $ */
 
  2000-01-25: Sander van Leeuwen <sandervl@xs4all.nl>
 	- PELDR/KERNEL32: Allocate low memory at right address and with right size
                           in peldr.dll (fixes install of Windows Media Player)
+	- KERNEL32: Print thread id for each log message
 
  2000-01-22: Michal Necasek <mike@mendelu.cz>
 	- DINPUT: Fixes + basic functionality is complete; enough for many games
