@@ -1,4 +1,4 @@
-/* $Id: lang.cpp,v 1.32 2001-04-03 14:10:47 sandervl Exp $ */
+/* $Id: lang.cpp,v 1.33 2001-04-04 09:00:58 sandervl Exp $ */
 /*
  * Win32 language API functions for OS/2
  *
@@ -22,6 +22,7 @@
 #include "unicode.h"
 #include "oslibmisc.h"
 #include <wprocess.h>
+#include <uniconv.h>
 
 #define DBG_LOCALLOG	DBG_lang
 #include "dbglocal.h"

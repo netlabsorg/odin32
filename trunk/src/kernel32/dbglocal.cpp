@@ -1,4 +1,4 @@
-/* $Id: dbglocal.cpp,v 1.13 2001-01-23 18:31:26 sandervl Exp $ */
+/* $Id: dbglocal.cpp,v 1.14 2001-04-04 09:00:57 sandervl Exp $ */
 
 /*
  * debug logging functions for OS/2
@@ -26,7 +26,6 @@ char  *DbgFileNames[DBG_MAXFILES] =
 "conin",
 "conbuffer",
 "conout",
-"unicode",
 "network",
 "hmdevio",
 "profile",
