@@ -1,4 +1,4 @@
-/* $Id: hmdevio.h,v 1.10 2002-01-12 10:28:17 sandervl Exp $ */
+/* $Id: hmdevio.h,v 1.11 2002-07-05 17:59:29 sandervl Exp $ */
 
 #ifndef __DEVIO_H__
 #define __DEVIO_H__
@@ -115,7 +115,7 @@ typedef struct {
  * Structures                                                                *
  *****************************************************************************/
 
-class HMDeviceDriver : public HMDeviceKernelObjectClass
+class HMDeviceDriver : public HMDeviceHandler
 {
 public:
   HMDeviceDriver(LPCSTR lpDeviceName, LPSTR lpOS2DevName, BOOL fCreate, WINIOCTL pDevIOCtl);

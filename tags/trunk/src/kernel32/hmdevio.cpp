@@ -1,4 +1,4 @@
-/* $Id: hmdevio.cpp,v 1.27 2002-04-29 16:28:37 sandervl Exp $ */
+/* $Id: hmdevio.cpp,v 1.28 2002-07-05 17:59:30 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -63,12 +63,12 @@ void RegisterDevices()
 
     for(int i=0;i<nrKnownDrivers;i++) 
     {
-	driver = new HMDeviceDriver(knownDriver[i].szWin32Name,
+	    driver = new HMDeviceDriver(knownDriver[i].szWin32Name,
                                     knownDriver[i].szOS2Name,
                                     knownDriver[i].fCreateFile,
                                     knownDriver[i].devIOCtl);
 
-	rc = HMDeviceRegister(knownDriver[i].szWin32Name, driver);
+	    rc = HMDeviceRegister(knownDriver[i].szWin32Name, driver);
     	if (rc != NO_ERROR)                                  /* check for errors */
       		dprintf(("KERNEL32:RegisterDevices: registering %s failed with %u.\n",
               		  knownDriver[i].szWin32Name, rc));
@@ -137,8 +137,8 @@ BOOL WIN32API RegisterCustomDriver(PFNDRVOPEN pfnDriverOpen, PFNDRVCLOSE pfnDriv
                                    PFNDRVGETOVERLAPPEDRESULT pfnDriverGetOverlappedResult,
                                    LPCSTR lpDeviceName, LPVOID lpDriverData)
 {
- HMDeviceDriver *driver;
- DWORD rc;
+    HMCustomDriver *driver;
+    DWORD rc;
 
     dprintf(("RegisterCustomDriver %s", lpDeviceName));
     driver = new HMCustomDriver(pfnDriverOpen, pfnDriverClose, pfnDriverIOCtl, pfnDriverRead, pfnDriverWrite, pfnDriverCancelIo, pfnDriverGetOverlappedResult, lpDeviceName, lpDriverData);
@@ -157,7 +157,7 @@ BOOL WIN32API RegisterCustomDriver(PFNDRVOPEN pfnDriverOpen, PFNDRVCLOSE pfnDriv
 //******************************************************************************
 HMDeviceDriver::HMDeviceDriver(LPCSTR lpDeviceName, LPSTR lpOS2DevName, BOOL fCreate, 
                                WINIOCTL pDevIOCtl)
-                : HMDeviceKernelObjectClass(lpDeviceName)
+                : HMDeviceHandler(lpDeviceName)
 {
     this->fCreateFile = fCreateFile;
     this->szOS2Name   = lpOS2DevName;
@@ -166,7 +166,7 @@ HMDeviceDriver::HMDeviceDriver(LPCSTR lpDeviceName, LPSTR lpOS2DevName, BOOL fCr
 //******************************************************************************
 //******************************************************************************
 HMDeviceDriver::HMDeviceDriver(LPCSTR lpDeviceName)
-                : HMDeviceKernelObjectClass(lpDeviceName)
+                : HMDeviceHandler(lpDeviceName)
 {
 }
 //******************************************************************************
@@ -610,34 +610,34 @@ BOOL HMCustomDriver::GetOverlappedResult(PHMHANDLEDATA pHMHandleData,
 //******************************************************************************
 BOOL WIN32API QueryPerformanceCounter(LARGE_INTEGER *lpPerformanceCount)
 {
- QWORD  time;
- APIRET rc;
+    QWORD  time;
+    APIRET rc;
 
-  rc = DosTmrQueryTime(&time);
-  if(rc) {
+    rc = DosTmrQueryTime(&time);
+    if(rc) {
     	dprintf(("DosTmrQueryTime returned %d\n", rc));
     	return(FALSE);
-  }
-  lpPerformanceCount->u.LowPart  = time.ulLo;
-  lpPerformanceCount->u.HighPart = time.ulHi;
-  return(TRUE);
+    }
+    lpPerformanceCount->u.LowPart  = time.ulLo;
+    lpPerformanceCount->u.HighPart = time.ulHi;
+    return(TRUE);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API QueryPerformanceFrequency(LARGE_INTEGER *lpFrequency)
 {
- APIRET  rc;
- ULONG   freq;
+    APIRET  rc;
+    ULONG   freq;
 
-  rc = DosTmrQueryFreq(&freq);
-  if(rc) {
+    rc = DosTmrQueryFreq(&freq);
+    if(rc) {
     	dprintf(("DosTmrQueryFreq returned %d\n", rc));
     	return(FALSE);
-  }
-  lpFrequency->u.LowPart  = freq;
-  lpFrequency->u.HighPart = 0;
-  dprintf2(("QueryPerformanceFrequency returned 0x%X%X\n", lpFrequency->u.HighPart, lpFrequency->u.LowPart));
-  return(TRUE);
+    }
+    lpFrequency->u.LowPart  = freq;
+    lpFrequency->u.HighPart = 0;
+    dprintf2(("QueryPerformanceFrequency returned 0x%X%X\n", lpFrequency->u.HighPart, lpFrequency->u.LowPart));
+    return(TRUE);
 }
 //******************************************************************************
 //******************************************************************************
