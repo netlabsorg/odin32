@@ -1,4 +1,4 @@
-/* $Id: asyncapi.cpp,v 1.12 2001-07-07 17:53:15 achimha Exp $ */
+/* $Id: asyncapi.cpp,v 1.13 2001-07-07 17:56:41 achimha Exp $ */
 
 /*
  *
@@ -406,14 +406,14 @@ void AsyncSelectNotifyEvent(PASYNCTHREADPARM pThreadParm, ULONG event, ULONG soc
 
     if (pThreadParm->u.asyncselect.mode == WSA_SELECT_HWND)
     {
-        dprintf(("AsyncSelectNotifyEvent: notifying window %x %x %x %x", pThreadParm->u.asyncselect.s, pThreadParm->notifyHandle, pThreadParm->notifyData, event));
+        dprintf(("AsyncSelectNotifyEvent: notifying window, socket: 0x%x, window handle: 0x%x, window message: 0x%x, event: 0x%x", pThreadParm->u.asyncselect.s, pThreadParm->notifyHandle, pThreadParm->notifyData, event));
         PostMessageA((HWND)pThreadParm->notifyHandle, (DWORD)pThreadParm->notifyData, (WPARAM)pThreadParm->u.asyncselect.s,
                      (LPARAM)event);
     }
     else
     if (pThreadParm->u.asyncselect.mode == WSA_SELECT_HEVENT)
     {
-        dprintf(("AsyncSelectNotifyEvent: notifying event semaphore %x %x %x %x", pThreadParm->u.asyncselect.s, pThreadParm->notifyHandle, pThreadParm->notifyData, event));
+        dprintf(("AsyncSelectNotifyEvent: notifying event semaphore, socket: 0x%x, HEVENT: 0x%x, event: 0x%x", pThreadParm->u.asyncselect.s, pThreadParm->notifyHandle, event));
         SetEvent(pThreadParm->notifyHandle);
     }
     else
