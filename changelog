@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1615 2001-07-23 19:15:00 sandervl Exp $ */
+/* $Id: changelog,v 1.1616 2001-07-28 12:54:44 sandervl Exp $ */
+
+ 2001-07-28: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Set/GetWindowWord changes (must handle GWW_ID, GWW_HINSTANCE 
+                  and GWW_HWNDPARENT
 
  2001-07-22: Sander van Leeuwen <sandervl@xs4all.nl>
     - TOOLS\INSTALL: 
