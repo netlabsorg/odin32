@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.35 2001-12-05 18:06:00 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.36 2001-12-08 14:28:53 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -556,6 +556,7 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
         break;
 
     case IOCTL_DISK_GET_DRIVE_GEOMETRY:
+    case IOCTL_STORAGE_GET_MEDIA_TYPES:
     case IOCTL_DISK_GET_MEDIA_TYPES:
     {
         PDISK_GEOMETRY pGeom = (PDISK_GEOMETRY)lpOutBuffer;
@@ -981,10 +982,7 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
                                   -1,
                                   lpBytesReturned);
     }
-      
-    case IOCTL_STORAGE_GET_MEDIA_TYPES:
-         break;
-      
+           
     case IOCTL_STORAGE_LOAD_MEDIA:
     // case IOCTL_STORAGE_LOAD_MEDIA2:
     {
