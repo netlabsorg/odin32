@@ -1,4 +1,4 @@
-/* $Id: winres.cpp,v 1.13 1999-08-31 14:36:46 sandervl Exp $ */
+/* $Id: winres.cpp,v 1.14 1999-08-31 17:15:30 sandervl Exp $ */
 
 /*
  * Win32 resource class
@@ -102,6 +102,9 @@ Win32Resource::Win32Resource() :
   hres       = 0;
   orgos2type = -1;
   OS2ResHandle = 0;
+  //resources are in Unicode format by default; indirectly created resources
+  //can also be in ascii format
+  isUnicode  = TRUE; 
 }
 //******************************************************************************
 //******************************************************************************
@@ -159,6 +162,8 @@ Win32Resource::Win32Resource(Win32Image *module, HRSRC hRes, ULONG id, ULONG typ
     dprintf(("Win32Resource ctor: DosQueryResourceSize %x %d %d returned %X\n", module->hinstance, type, id, rc));
     ressize = 0;
   }
+  //resources are in Unicode format by default
+  isUnicode  = TRUE; 
 }
 //******************************************************************************
 //******************************************************************************
@@ -188,6 +193,9 @@ Win32Resource::Win32Resource(Win32Image *module, ULONG id, ULONG type,
 	((USHORT *)winresdata)[size/sizeof(WCHAR)-1] = 0;
   }
   else	memcpy(winresdata, resdata, size);
+
+  //resources are in Unicode format by default
+  isUnicode  = TRUE; 
 }
 //******************************************************************************
 //******************************************************************************
@@ -196,7 +204,7 @@ Win32Resource::~Win32Resource()
  Win32Resource *res = module->winres;
 
   //returned by DosGetResource, so we don't (and mustn't) free it
-  if(os2resdata && resType == RSRC_PELOADER)    
+  if(os2resdata && (resType == RSRC_PELOADER || resType == RSRC_CUSTOMINDIRECT))
 	free(os2resdata);
 
   if(winresdata)    free(winresdata);
@@ -349,7 +357,7 @@ PVOID Win32Resource::convertResource(void *win32res)
 
     case NTRT_NEWMENU:
     case NTRT_MENU:
-	return ConvertMenu((MenuHeader *)win32res, ressize);
+	return ConvertMenu((MenuHeader *)win32res, ressize, isUnicode);
 
     case NTRT_NEWDIALOG:
     case NTRT_DIALOG:

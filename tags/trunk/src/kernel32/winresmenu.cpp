@@ -1,4 +1,4 @@
-/* $Id: winresmenu.cpp,v 1.1 1999-08-31 14:36:46 sandervl Exp $ */
+/* $Id: winresmenu.cpp,v 1.2 1999-08-31 17:15:30 sandervl Exp $ */
 
 /*
  * Win32 Menu resource class
@@ -48,17 +48,20 @@ Win32MenuRes::Win32MenuRes(HWND hwndObjectMenu)
   resType      = RSRC_CUSTOMNODATA;
 }
 //******************************************************************************
+//Template always contains Unicode strings
 //******************************************************************************
-Win32MenuRes::Win32MenuRes(LPVOID menutemplate, BOOL isUnicode)
+Win32MenuRes::Win32MenuRes(LPVOID menutemplate)
       : Win32Resource()
 {
-  resType      = RSRC_CUSTOMINDIRECT;
+  resType         = RSRC_CUSTOMINDIRECT;
+
+  os2resdata      = ConvertMenu((MenuHeader *)menutemplate, 0);
+  OS2ResHandle    = 0;
 }
 //******************************************************************************
 //******************************************************************************
 Win32MenuRes::~Win32MenuRes()
 {
-
 }
 //******************************************************************************
 //******************************************************************************
