@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2386 2002-12-13 16:45:35 sandervl Exp $ */
+/* $Id: changelog,v 1.2387 2002-12-17 13:48:09 sandervl Exp $ */
+
+ 2002-12-17: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o CreateProcess bugfix (heap corruption)
 
  2002-12-13: Sander van Leeuwen <sandervl@innotek   >
     - USER32;   o Query loader path for WPS object creation
