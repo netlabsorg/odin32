@@ -1,4 +1,8 @@
- /* $Id: changelog,v 1.1171 2000-10-05 01:27:07 bird Exp $ */
+ /* $Id: changelog,v 1.1172 2000-10-05 07:30:19 bird Exp $ */
+
+ 2000-10-05: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - tools\common: Implemented read and write buffering for class kFile
+                to speed up kDef2Wat and ImpDef.
 
  2000-10-04: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: Added forwarder support for PE loader (required for msvcrt40.dll)
