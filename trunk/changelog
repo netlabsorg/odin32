@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2251 2002-08-08 12:34:57 sandervl Exp $ */
+/* $Id: changelog,v 1.2252 2002-08-08 15:38:03 sandervl Exp $ */
 
  2002-08-08: Platon Fomichev <platon@innotek   >
     - USER32:   o Fix for handling VK_RETURN in dialogs
@@ -6,6 +6,8 @@
  2002-08-08: Sander van Leeuwen <sandervl@innotek   >
     - ChangeLog:o Obfuscated email addresses because people continue to
                   post the ChangeLog file in mailinglists/newsgroups.
+    - KERNEL32: o CreateFile now fails earlier if used for non-existing drive 
+                  letter. 
 
  2002-08-07: Platon Fomichev <platon@innotek   >
     - USER32:   o Listbox fix for keyboard search (Rewind (Wine/X11))
