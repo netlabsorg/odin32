@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.37 2001-12-08 16:06:49 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.38 2001-12-30 10:45:22 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -1239,7 +1239,7 @@ BOOL HMDeviceDiskClass::ReadFile(PHMHANDLEDATA pHMHandleData,
       if(!pHMHandleData->hHMHandle) {
           dprintf(("No disk inserted; aborting"));
           SetLastError(ERROR_NOT_READY);
-          return -1;
+          return FALSE;
       }
   }
 
@@ -1400,7 +1400,7 @@ BOOL HMDeviceDiskClass::WriteFile(PHMHANDLEDATA pHMHandleData,
       if(!pHMHandleData->hHMHandle) {
           dprintf(("No disk inserted; aborting"));
           SetLastError(ERROR_NOT_READY);
-          return -1;
+          return FALSE;
       }
   }
   //NOTE: For now only allow an application to write to drive A
@@ -1408,7 +1408,7 @@ BOOL HMDeviceDiskClass::WriteFile(PHMHANDLEDATA pHMHandleData,
   //      too dangerous to allow win32 apps to write to the harddisk directly
   if(drvInfo->driveLetter != 'A') {
       SetLastError(ERROR_ACCESS_DENIED);
-      return -1;
+      return FALSE;
   }
 
 
