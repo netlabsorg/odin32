@@ -1,4 +1,4 @@
-/* $Id: asyncthread.cpp,v 1.11 2001-07-07 14:29:40 achimha Exp $ */
+/* $Id: asyncthread.cpp,v 1.12 2001-10-13 18:51:07 sandervl Exp $ */
 
 /*
  * Async thread help functions
@@ -39,6 +39,7 @@ static void _Optlink AsyncThread(void *arg)
 ////  if(pThreadParm->request == ASYNC_BLOCKHOOK)
 ////	WSASetBlocking(FALSE, pThreadParm->hThread);
 
+  dprintf(("AsyncThread %x exit", pThreadParm->hAsyncTaskHandle));
   free((PVOID)pThreadParm);
 }
 //******************************************************************************
@@ -108,6 +109,27 @@ void RemoveFromQueue(PASYNCTHREADPARM pThreadParm)
    }   
    memset(pThreadParm, 0, sizeof(*pThreadParm));
    asyncThreadMutex.leave();
+}
+//******************************************************************************
+//******************************************************************************
+void WSACancelAllAsyncRequests()
+{
+ PASYNCTHREADPARM pThreadInfo;
+ BOOL             found = FALSE;
+
+   dprintf(("WSACancelAllAsyncRequests"));
+   asyncThreadMutex.enter();
+   pThreadInfo = threadList;
+
+   while(pThreadInfo) {
+        dprintf(("WSACancelAllAsyncRequests %x", pThreadInfo->hAsyncTaskHandle));
+        pThreadInfo->fCancelled = TRUE;
+        pThreadInfo->u.asyncselect.asyncSem->post();
+	pThreadInfo = pThreadInfo->next;
+   }
+   asyncThreadMutex.leave();
+   //TODO: not the right way to wait for the async threads to die
+   DosSleep(250);
 }
 //******************************************************************************
 //******************************************************************************
