@@ -12,7 +12,7 @@
 /src/comdlg32                              sandervl achimha cbratschi
 /src/ddraw                                 sandervl hugh achimha
 /src/dsound                                sandervl hugh achimha
-/src/gdi32                                 sandervl phaller achimha bird
+/src/gdi32                                 sandervl phaller achimha bird cbratschi
 /src/kernel32                              sandervl phaller achimha bird
 /src/kernel32/new                          sandervl phaller achimha bird buerkle dengert cbratschi
 /src/kernel32/old                          sandervl phaller achimha bird
