@@ -1,4 +1,4 @@
-/* $Id: os2timer.cpp,v 1.10 1999-08-31 15:47:48 phaller Exp $ */
+/* $Id: os2timer.cpp,v 1.11 1999-08-31 16:41:48 phaller Exp $ */
 
 /*
  * OS/2 Timer class
@@ -34,12 +34,27 @@
  ****************************************************************************/
 
 
+/***********************************
+ * PH: fixups for missing os2win.h *
+ ***********************************/
+
+extern "C"
+{
+  typedef DWORD (* CALLBACK LPTHREAD_START_ROUTINE)(LPVOID);
+
+  HANDLE WIN32API CreateThread(LPSECURITY_ATTRIBUTES lpsa,
+                               DWORD cbStack,
+                               LPTHREAD_START_ROUTINE lpStartAddr,
+                               LPVOID lpvThreadParm,
+                               DWORD fdwCreate,
+                               LPDWORD lpIDThread);
+}
+
 /****************************************************************************
  * Local Prototypes                                                         *
  ****************************************************************************/
 
-static void _Optlink TimerHlpHandler(void *);
-
+static DWORD _System TimerHlpHandler(LPVOID timer);
 
 
 
@@ -205,7 +220,7 @@ int OS2TimerResolution::queryCurrentResolution()
 OS2Timer::OS2Timer() : TimerSem(0), TimerHandle(0), TimerThreadID(0),
                   clientCallback(NULL), TimerStatus(Stopped), fFatal(FALSE)
 {
- OS2Timer *timer = OS2Timer::timers;
+  OS2Timer *timer = OS2Timer::timers;
 
   if(timer != NULL)
   {
@@ -218,7 +233,16 @@ OS2Timer::OS2Timer() : TimerSem(0), TimerHandle(0), TimerThreadID(0),
   else
     timers = this;
 
-  TimerThreadID = _beginthread(TimerHlpHandler, NULL, 0x4000, (void *)this);
+  //TimerThreadID = _beginthread(TimerHlpHandler, NULL, 0x4000, (void *)this);
+  hTimerThread = CreateThread(NULL,
+                              0x1000,
+                              (LPTHREAD_START_ROUTINE)TimerHlpHandler,
+                              (LPVOID)this,
+                              0, // thread creation flags
+                              &TimerThreadID);
+
+
+  //@@@PH: CreateThread() should be used instead
   //@@@PH: logic sux ... waits for creation of semaphores
   DosSleep(100);
 }
@@ -328,7 +352,7 @@ void OS2Timer::TimerHandler()
   if(rc != 0)
   {
     dprintf(("WINMM: OS2Timer: DosCreateEventSem failed rc=#%08xh\n", rc));
-      _endthread();
+    return; // terminate thread
   }
 
   TimerStatus = Stopped;
@@ -351,11 +375,13 @@ void OS2Timer::TimerHandler()
 }
 //******************************************************************************
 //******************************************************************************
-static void _Optlink TimerHlpHandler(void *timer)
+//static void _Optlink TimerHlpHandler(void *timer)
+static DWORD _System TimerHlpHandler(LPVOID timer)
 {
   ((OS2Timer *)timer)->TimerHandler();
 
-  _endthread();
+  //_endthread(); isn't really required
+  return 0;
 }
 
 

@@ -1,4 +1,4 @@
-/* $Id: os2timer.h,v 1.5 1999-08-31 15:39:21 phaller Exp $ */
+/* $Id: os2timer.h,v 1.6 1999-08-31 16:41:48 phaller Exp $ */
 
 #ifndef __OS2TIMER_H__
 #define __OS2TIMER_H__
@@ -102,7 +102,8 @@ protected:
 private:
         HEV            TimerSem;
         HTIMER         TimerHandle;
-        int            TimerThreadID;
+        HANDLE         hTimerThread;
+        DWORD          TimerThreadID;
         LPTIMECALLBACK clientCallback;
         DWORD          userData;
 
