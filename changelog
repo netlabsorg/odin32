@@ -1,110 +1,133 @@
- /* $Id: changelog,v 1.931 2000-05-10 13:10:57 sandervl Exp $ */
+ /* $Id: changelog,v 1.932 2000-05-10 13:58:21 sandervl Exp $ */
 
  2000-05-10: Sander van Leeuwen <sandervl@xs4all.nl>
-	- USER32:   Fix for SetForegroundWindow (SWP_NOZORDER flag removed)
-                    GetForegroundWindow now uses WinQueryActiveWindow instead
-                    of Open32's GetForegroundWindow
-	- KERNEL32: Extra logging for atom functions, fixed GlobalGetAtomNameW
-	- COMDLG32: Added missing ascii to unicode conversions in GetFileDialog95W
-                    (file name (returned), initial dir & file dialog title)
-	- RICHED32: Added (Wine port)
+    - USER32:
+                Fix for SetForegroundWindow (SWP_NOZORDER flag removed)
+                GetForegroundWindow now uses WinQueryActiveWindow instead
+                of Open32's GetForegroundWindow
+    - KERNEL32:
+                Extra logging for atom functions, fixed GlobalGetAtomNameW
+    - COMDLG32:
+                Added missing ascii to unicode conversions in GetFileDialog95W
+                (file name (returned), initial dir & file dialog title)
+    - RICHED32:
+                Added (Wine port)
+    - TOOLS\INSTALL: 
+                Added ChangeLog to installation script
 
  2000-05-09: Sander van Leeuwen <sandervl@xs4all.nl>
-	- KERNEL32: Enclose executable name in quotes if it (or it's directory) 
-                    contains spaces
-                    Route rtl error messages to logfile (_set_crt_msg_handle)
-                    Added support for system, user default & neutral language in 
-                    FindResourceExA/W
-                    Fill in correct language id in GetUserDefaultLCID/GetSystemDefaultLCID
-                    GetUserDefaultLangID & GetSystemDefaultLangID; gets country
-                    with DosQueryCtryInfo
-	- WSOCK32:  Return WSAWOULDBLOCK if recv returns 0 and connection is
-                    still available. (experimental change for rp7)
-	- USER32:   MENU_PtMenu: return when menu has no window handle (prevents
-                    Moraff's YourJongg from crashing -> need to check why this
-                    happens)
-                    Bugfix in AdjustWindowRectEx; if style, exstyle and menu 
-                    = 0 -> no changes required to the input rectangle
-                    (verified this in NT 4)
-                    Don't send WM_ACTIVATE, WM_SET/KILLFOCUS & WM_SHOWWINDOW
-                    messages when window is being destroyed.
-	- SHELL32:  Wrong systray classname used when creating systray window
-                    Fixed bugs in SYSTRAY_SetTip/SYSTRAY_ModifyTip; string
-                    copy operations used wrong size -> heap corruption
-	- DINPUT:   Check window handle if app acquired mouse input in
+    - KERNEL32:
+                Enclose executable name in quotes if it (or it's directory)
+                contains spaces
+                Route rtl error messages to logfile (_set_crt_msg_handle)
+                Added support for system, user default & neutral language in
+                FindResourceExA/W
+                Fill in correct language id in GetUserDefaultLCID/GetSystemDefaultLCID
+                GetUserDefaultLangID & GetSystemDefaultLangID; gets country
+                with DosQueryCtryInfo
+    - WSOCK32:
+                Return WSAWOULDBLOCK if recv returns 0 and connection is
+                still available. (experimental change for rp7)
+    - USER32:
+                MENU_PtMenu: return when menu has no window handle (prevents
+                Moraff's YourJongg from crashing -> need to check why this
+                happens)
+                Bugfix in AdjustWindowRectEx; if style, exstyle and menu
+                = 0 -> no changes required to the input rectangle
+                (verified this in NT 4)
+                Don't send WM_ACTIVATE, WM_SET/KILLFOCUS & WM_SHOWWINDOW
+                messages when window is being destroyed.
+    - SHELL32:
+                Wrong systray classname used when creating systray window
+                Fixed bugs in SYSTRAY_SetTip/SYSTRAY_ModifyTip; string
+                copy operations used wrong size -> heap corruption
+    - DINPUT:   Check window handle if app acquired mouse input in
                     cooperative mode
-	- TOOLS\INSTALL: Fixed wrong glide dll for voodoo 2 install package
+    - TOOLS\INSTALL: Fixed wrong glide dll for voodoo 2 install package
 
  2000-05-06: Sander van Leeuwen <sandervl@xs4all.nl>
-	- GDI32:    Added stretch blit mode support to dibsection blits
+    - GDI32:
+                Added stretch blit mode support to dibsection blits
 
  2000-05-05: Sander van Leeuwen <sandervl@xs4all.nl>
-	- USER32:   Fixed window property functions (ported from Wine)
-                    The old ones used Open32 functions which no longer work
-                    due to atom api changes a few months ago.
-                    If the mouse has already been captured, then it must
-                    be released before calling WinSetCapture ->
-                    fixes menus & dialog in MS Word 97
-	- OLE32:    Fixed BindCtxImpl_SetBindOptions/BindCtxImpl_GetBindOptions
-                    Need to check size of bind structure before copying (as done in Wine)
-                    -> fixes crash (stack corruption) in MS Word 97
-	- WSOCK32:  When changing the receive or send buffer (setsockopt) and
-                    it fails with WSAENOBUFS, decrease size until no error
-                    is returned (63kb buffer is not always accepted by the
-                    16 bits tcpip stack) (stops when buffer < 4096)
+    - USER32:
+                Fixed window property functions (ported from Wine)
+                The old ones used Open32 functions which no longer work
+                due to atom api changes a few months ago.
+                If the mouse has already been captured, then it must
+                be released before calling WinSetCapture ->
+                fixes menus & dialog in MS Word 97
+    - OLE32:
+                Fixed BindCtxImpl_SetBindOptions/BindCtxImpl_GetBindOptions
+                Need to check size of bind structure before copying (as done in Wine)
+                -> fixes crash (stack corruption) in MS Word 97
+    - WSOCK32:
+                When changing the receive or send buffer (setsockopt) and
+                it fails with WSAENOBUFS, decrease size until no error
+                is returned (63kb buffer is not always accepted by the
+                16 bits tcpip stack) (stops when buffer < 4096)
 
  2000-05-04: Achim Hasenmueller <achimha@innotek.de>
-	- USER32:   Applied fix to GetDCEx where the check to see if
-  	            the window has its own DC was applying invalid
-	            style flags due to missing parantheses
-	            (reported by Oliver Braun)
+    - USER32:
+                Applied fix to GetDCEx where the check to see if
+                the window has its own DC was applying invalid
+                style flags due to missing parantheses
+                (reported by Oliver Braun)
 
  2000-05-04: Sander van Leeuwen <sandervl@xs4all.nl>
-	- USER32:   Menu font from bold to normal again. Bold fonts are too
-                    big (rp7 menu split in two parts).
+    - USER32:
+                Menu font from bold to normal again. Bold fonts are too
+                big (rp7 menu split in two parts).
 
  2000-05-03: Sander van Leeuwen <sandervl@xs4all.nl>
-	- WSOCK32:  Fixed WSAEFAULT errors in setsockopt (16 bits TCP/IP stack
-                    doesn't like high addresses; similar problems can also occur 
-                    elsewhere in wsock32)
-	- USER32:   Change settings return by SystemParameterInfo for SPI_GETNONCLIENTMETRICS
-                    Caption & menu fonts now bold; different sizes (more like Wine now)
-                    Set/clear WS_VISIBLE flag in SetWindowPos; don't call 
-                    ShowWindow.
-                    Implemented Set/Get/ReleaseCapture without Open32
-                    Release capture for window that is about to be disabled
-                    Send WM_CAPTURECHANGED messages when capture changes
-                    
- 2000-05-02: Sander van Leeuwen <sandervl@xs4all.nl>
-	- KERNEL32: GetLocaleInfoA/W fix (size of buffer for i.e. LOCALE_IDATE
-                    should be >= 2, not > 2)
-                    VirtualFree: Check for ERROR_ALIAS return value
+    - WSOCK32:
+                Fixed WSAEFAULT errors in setsockopt (16 bits TCP/IP stack
+                doesn't like high addresses; similar problems can also occur
+                elsewhere in wsock32)
+    - USER32:
+                Change settings return by SystemParameterInfo for SPI_GETNONCLIENTMETRICS
+                Caption & menu fonts now bold; different sizes (more like Wine now)
+                Set/clear WS_VISIBLE flag in SetWindowPos; don't call
+                ShowWindow.
+                Implemented Set/Get/ReleaseCapture without Open32
+                Release capture for window that is about to be disabled
+                Send WM_CAPTURECHANGED messages when capture changes
 
-                    Ported and changed/fixed XFolder stack dump code (symbol file only)
-                    When a win32 app crashes, a dump of the stack is written
-                    in odin32_0.log.
-	- USER32:   Merged some Wine dialog changes (setting focus + font size)
-                    Extra logging for some apis
-                    Added support for RDW_FRAME flag to GetDCEx
-	- INCLUDE\makefiles: Added rule for converting map to symfile
-                             A symbol file is now created for each exe/dll
-	- INCLUDE\ODINWRAP: Turned off profiling by default. 
-                            Our log is big enough as it is without even
-                            more logging.
+ 2000-05-02: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32:
+                GetLocaleInfoA/W fix (size of buffer for i.e. LOCALE_IDATE
+                should be >= 2, not > 2)
+                VirtualFree: Check for ERROR_ALIAS return value
+
+                Ported and changed/fixed XFolder stack dump code (symbol file only)
+                When a win32 app crashes, a dump of the stack is written
+                in odin32_0.log.
+    - USER32:
+                Merged some Wine dialog changes (setting focus + font size)
+                Extra logging for some apis
+                Added support for RDW_FRAME flag to GetDCEx
+    - INCLUDE\makefiles:
+                Added rule for converting map to symfile
+                A symbol file is now created for each exe/dll
+    - INCLUDE\ODINWRAP:
+                Turned off profiling by default.
+                Our log is big enough as it is without even
+                more logging.
 
  2000-05-02: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
         - makefile and tools/makefile:
-                    tools/install is not a "needed tool" required for
-                    to do the rest of the build; and it'is dependent on
-                    kernel32.lib which haven't been made at the time
-                    the needed_tools are being made. So, the making of
-                    tools/install is the last thing we do in the makeprocess.
+                tools/install is not a "needed tool" required for
+                to do the rest of the build; and it'is dependent on
+                kernel32.lib which haven't been made at the time
+                the needed_tools are being made. So, the making of
+                tools/install is the last thing we do in the makeprocess.
         - WSOCK32, WINMM:
-                    ODINWRAP changes below broke WSOCK32 and WINMM.
-                    I've created some highly temporary fix for it this problem.
-                    Could someone please make a permanent fix?
+                ODINWRAP changes below broke WSOCK32 and WINMM.
+                I've created some highly temporary fix for it this problem.
+                Could someone please make a permanent fix?
         - tools/bin/wrc.exe and tools/wrc:
-                    Important notice: __WIN32OS2__ is not defined when making wrc!
-                    This was the reason why ':' was used as include separator.
-                    This is corrected now. ';' is now the include separator.
-                    A new wrc.exe has been checked in.
+                Important notice: __WIN32OS2__ is not defined when making wrc!
+                This was the reason why ':' was used as include separator.
+                This is corrected now. ';' is now the include separator.
+                A new wrc.exe has been checked in.
+
