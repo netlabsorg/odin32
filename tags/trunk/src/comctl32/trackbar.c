@@ -1,4 +1,4 @@
-/* $Id: trackbar.c,v 1.15 1999-08-21 12:10:02 cbratschi Exp $ */
+/* $Id: trackbar.c,v 1.16 1999-08-22 13:20:26 cbratschi Exp $ */
 /*
  * Trackbar control
  *
@@ -971,25 +971,21 @@ TRACKBAR_AlignBuddies (HWND hwnd, TRACKBAR_INFO *infoPtr)
     RECT rcSelf,rcBuddy;
     INT x, y;
 
-    GetClientRect(hwnd,&rcSelf);
-    MapWindowPoints(hwnd,hwndParent,(LPPOINT)&rcSelf,2);
+    GetWindowRect(hwnd,&rcSelf);
 
     /* align buddy left or above */
     if (infoPtr->hwndBuddyLA)
     {
-      GetClientRect(infoPtr->hwndBuddyLA,&rcBuddy);
-      MapWindowPoints(infoPtr->hwndBuddyLA,hwndParent,(LPPOINT)&rcBuddy,2);
+      GetWindowRect(infoPtr->hwndBuddyLA,&rcBuddy);
 
       if (dwStyle & TBS_VERT)
       { //above
-        x = (infoPtr->rcChannel.right+infoPtr->rcChannel.left)/2-
-            (rcBuddy.right-rcBuddy.left)/2+rcSelf.left; //CB: right?
+        x = rcSelf.left-(rcBuddy.right-rcBuddy.left)/2+infoPtr->rcChannel.left+(infoPtr->rcChannel.right-infoPtr->rcChannel.left)/2;
         y = rcSelf.top-(rcBuddy.bottom-rcBuddy.top);
       } else
       { //left
-        x = rcSelf.left-(rcBuddy.right-rcBuddy.left);
-        y = (infoPtr->rcChannel.bottom+infoPtr->rcChannel.top)/2 -
-            (rcBuddy.bottom-rcBuddy.top)/2+rcSelf.top; //CB: right?
+        x = rcSelf.left+infoPtr->rcChannel.left-(rcBuddy.right-rcBuddy.left)/2;
+        y = rcSelf.top-(rcBuddy.bottom-rcBuddy.top);
       }
 
       SetWindowPos(infoPtr->hwndBuddyLA,0,x,y,0,0,SWP_NOZORDER | SWP_NOSIZE);
@@ -999,19 +995,16 @@ TRACKBAR_AlignBuddies (HWND hwnd, TRACKBAR_INFO *infoPtr)
     /* align buddy right or below */
     if (infoPtr->hwndBuddyRB)
     {
-      GetClientRect(infoPtr->hwndBuddyRB,&rcBuddy);
-      MapWindowPoints(infoPtr->hwndBuddyRB,hwndParent,(LPPOINT)&rcBuddy,2);
+      GetWindowRect(infoPtr->hwndBuddyRB,&rcBuddy);
 
       if (dwStyle & TBS_VERT)
       { //below
-        x = (infoPtr->rcChannel.right+infoPtr->rcChannel.left)/2-
-            (rcBuddy.right-rcBuddy.left)/2+rcSelf.left; //CB: right?
+        x = rcSelf.left-(rcBuddy.right-rcBuddy.left)/2+infoPtr->rcChannel.left+(infoPtr->rcChannel.right-infoPtr->rcChannel.left)/2;
         y = rcSelf.bottom;
       } else
       {
-        x = rcSelf.right;
-        y = (infoPtr->rcChannel.bottom+infoPtr->rcChannel.top)/2-
-            (rcBuddy.bottom-rcBuddy.top)/2+rcSelf.top; //CB: right?
+        x = rcSelf.right-infoPtr->rcChannel.left-(rcBuddy.right-rcBuddy.left)/2;
+        y = rcSelf.top-(rcBuddy.bottom-rcBuddy.top);
       }
 
       SetWindowPos(infoPtr->hwndBuddyRB,0,x,y,0,0,SWP_NOZORDER | SWP_NOSIZE);
