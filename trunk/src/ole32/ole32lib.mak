@@ -1,4 +1,4 @@
-# $Id: ole32lib.mak,v 1.2 2001-07-29 19:01:40 sandervl Exp $
+# $Id: ole32lib.mak,v 1.3 2001-07-30 22:53:03 bird Exp $
 
 #
 # Odin32 API
@@ -63,7 +63,7 @@ $(OBJDIR)\ole32rsrc.obj
 #
 # Target name - name of the library without extention and path.
 #
-TARGET  = ole32o
+TARGET  = ole32os2o
 
 
 #
