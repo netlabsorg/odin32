@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.122 2003-11-12 14:10:18 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.123 2004-01-11 12:03:13 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -617,26 +617,6 @@ HDC sendEraseBkgnd (Win32BaseWindow *wnd)
 }
 //******************************************************************************
 //******************************************************************************
-void releaseOwnDC (HDC hps)
-{
-   pDCData pHps = (pDCData)GpiQueryDCData ((HPS)hps);
-
-   dprintf2(("releaseOwnDC %x", hps));
-
-   if (pHps) {
-      if (pHps->hrgnHDC)
-         GpiDestroyRegion (pHps->hps, pHps->hrgnHDC);
-
-      GpiSetBitmap (pHps->hps, NULL);
-      O32_DeleteObject (pHps->nullBitmapHandle);
-      GpiDestroyPS(pHps->hps);
-
-      if (pHps->hdc)
-         DevCloseDC(pHps->hdc);
-   }
-}
-//******************************************************************************
-//******************************************************************************
 HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
 {
  HWND     hwnd = hWnd ? hWnd : HWND_DESKTOP;
@@ -684,6 +664,7 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
                 return (HDC)NULLHANDLE;
             }
             hpsPaint = hPS_ownDC;
+            STATS_GetDCEx(hwnd, hpsPaint, 0, 0);
         }
     }
     if(!hpsPaint) {
@@ -864,7 +845,8 @@ int WIN32API ReleaseDC (HWND hwnd, HDC hdc)
    int rc;
 
     HWND hwndDC = WindowFromDC(hdc);
-
+ 
+    //hwndDC can be zero if the window has already been destroyed
     if(hwndDC != hwnd) {
         dprintf(("WARNING: ReleaseDC: wrong window handle specified %x -> %x", hwnd, hwndDC));
         hwnd = hwndDC;
@@ -907,13 +889,13 @@ int WIN32API ReleaseDC (HWND hwnd, HDC hdc)
         RELEASE_WNDOBJ(wnd);
     }
 
+    STATS_ReleaseDC(hwnd, hdc);
     if(isOwnDC) {
         rc = TRUE;
     }
     else {
         UnselectGDIObjects(hdc);
         rc = O32_ReleaseDC (0, hdc);
-        STATS_ReleaseDC(hwnd, hdc);
     }
 
     dprintf(("ReleaseDC %x %x", hwnd, hdc));
@@ -1115,7 +1097,6 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
     }
 
     RELEASE_WNDOBJ(wnd);
-
 
     STATS_GetDCEx(hwnd, pHps->hps, hrgn, flags);
     return (HDC)pHps->hps;
@@ -1619,8 +1600,7 @@ INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, cons
                                        hrgn, &rectlUpdate, scrollFlagsOS2);
     if (lComplexity == RGN_ERROR)
     {
-        RELEASE_WNDOBJ(window);
-        return ERROR_W;
+        goto fail;
     }
 
     //Notify children that they have moved (according to the SDK docs,
@@ -1645,8 +1625,7 @@ INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, cons
                 child = Win32BaseWindow::GetWindowFromHandle(hwndChild);
                 if(!child) {
                     dprintf(("ERROR: ScrollWindowEx, child %x not found", hwnd));
-                    RELEASE_WNDOBJ(window);
-                    return 0;
+                    goto fail;
                 }
                 rectChild = *child->getWindowRect();
                 if(!pScroll || IntersectRect(&rectChild, &rectChild, &rc))
@@ -1711,6 +1690,12 @@ INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, cons
 
     RELEASE_WNDOBJ(window);
     return (regionType);
+
+fail:
+    if(hrgn)      GpiDestroyRegion(hpsScreen, hrgn);
+    if(hpsScreen) WinReleasePS(hpsScreen);
+    RELEASE_WNDOBJ(window);
+    return ERROR_W;
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.382 2003-11-17 13:15:03 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.383 2004-01-11 12:03:18 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -67,6 +67,7 @@
 #define INCL_TIMERWIN32
 #include "timer.h"
 #include "user32api.h"
+#include "callwrap.h"
 
 #define DBG_LOCALLOG    DBG_win32wbase
 #include "dbglocal.h"
@@ -143,6 +144,7 @@ void Win32BaseWindow::Init()
         dprintf(("Win32BaseWindow::Init HwAllocateWindowHandle failed!!"));
         DebugInt3();
   }
+  Win32HwndOrg     = Win32Hwnd;
 
   posx = posy      = 0;
   width = height   = 0;
@@ -248,13 +250,14 @@ Win32BaseWindow::~Win32BaseWindow()
         RELEASE_WNDOBJ(owner);
     }
 
-    /* Decrement class window counter */
+    // Decrement class window counter 
+    // NOTE: Must be done before ReleaseDC call for ownDC!
     if(windowClass) {
         RELEASE_CLASSOBJ(windowClass);
     }
 
-    if(isOwnDC())
-        releaseOwnDC(ownDC);
+    if(ownDC)
+        ReleaseDC(Win32HwndOrg, ownDC);
 
     if(Win32Hwnd)
         HwFreeWindowHandle(Win32Hwnd);
@@ -669,7 +672,7 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndOS2)
         //not a good solution, but it's a bit difficult to share a single
         //DC among different windows... DevOpenDC apparently can't be used
         //for window DCs and WinOpenWindowDC must be associated with a window
-        ownDC = GetDCEx(getWindowHandle(), NULL, DCX_USESTYLE);
+        ownDC = 0; //GetDCEx(getWindowHandle(), NULL, DCX_USESTYLE);
     }
     /* Set the window menu */
     if ((dwStyle & (WS_CAPTION | WS_CHILD)) == WS_CAPTION )
@@ -887,6 +890,16 @@ ULONG Win32BaseWindow::MsgDestroy()
         if(Win32Hwnd) {
             HwFreeWindowHandle(Win32Hwnd);
             Win32Hwnd = 0;
+        }
+        // Decrement class window counter 
+        // NOTE: Must be done before ReleaseDC call for ownDC!
+        if(windowClass) {
+            RELEASE_CLASSOBJ(windowClass);
+        }
+
+        if(ownDC) {
+            ReleaseDC(Win32Hwnd, ownDC);
+            ownDC = 0;
         }
     }
     return 1;
@@ -2350,9 +2363,7 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
         break;
 
     case SW_SHOWNOACTIVATE:
-        swp |= SWP_NOZORDER;
-        if (GetActiveWindow())
-            swp |= SWP_NOACTIVATE;
+        swp |= SWP_NOZORDER | SWP_NOACTIVATE;
         /* fall through */
     case SW_SHOWNORMAL:  /* same as SW_NORMAL: */
     case SW_SHOWDEFAULT: /* FIXME: should have its own handler */
@@ -2538,6 +2549,18 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx,
             dprintf(("WARNING: Don't allow size change for minimized window; only save new restore position"));
             dprintf(("new window rectangle (%d,%d)(%d,%d)", rectWindow.left, rectWindow.top, rectWindow.right, rectWindow.bottom));
         }
+    }
+
+    // Hack alert: This makes sure the tooltips windows in OpenOffice don't 
+    //             activate the owner windows too.
+    //             First condition takes care of SetWindowPos during window
+    //             creation. The 2nd one for calls made by OpenOffice
+    if(((getStyle() & WS_POPUP) && (getExStyle() & WS_EX_TOPMOST)) || (fuFlags & SWP_NOOWNERZORDER)) 
+    { 
+        //SWP_NOOWNERZORDER means only the z-order of this window changes; it
+        //should not affect the owner
+        //PM doesn't support this feature, so this hack might work
+        wpos.flags |= SWP_NOZORDER;
     }
 
     if(getParent()) {
@@ -3122,7 +3145,7 @@ BOOL Win32BaseWindow::EnumChildWindows(WNDENUMPROC lpfn, LPARAM lParam)
         }
         child->addRef();
         unlock();
-        if(lpfn(hwnd, lParam) == FALSE)
+        if(WrapCallback2((WNDPROC)lpfn, hwnd, lParam) == FALSE)
         {
                 child->release();
                 return FALSE;
@@ -3188,7 +3211,7 @@ BOOL Win32BaseWindow::EnumThreadWindows(DWORD dwThreadId, WNDENUMPROC lpfn, LPAR
 
             if(dwThreadId == tid) {
                 dprintf(("EnumThreadWindows: Found Window %x", hwndWin32));
-                if((rc = lpfn(hwndWin32, lParam)) == FALSE) {
+                if((rc = WrapCallback2((WNDPROC)lpfn, hwndWin32, lParam)) == FALSE) {
                     break;
                 }
             }
@@ -3222,7 +3245,7 @@ BOOL Win32BaseWindow::EnumWindows(WNDENUMPROC lpfn, LPARAM lParam)
             if ((dwStyle & WS_POPUP) || ((dwStyle & WS_CAPTION) == WS_CAPTION))
             {
                 dprintf2(("EnumWindows: Found Window %x", hwnd));
-                if((rc = lpfn(hwnd, lParam)) == FALSE) {
+                if((rc = WrapCallback2((WNDPROC)lpfn, hwnd, lParam)) == FALSE) {
                     break;
                 }
             }

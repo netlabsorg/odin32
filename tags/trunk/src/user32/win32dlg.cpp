@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.81 2003-04-24 13:59:14 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.82 2004-01-11 12:03:17 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -425,6 +425,7 @@ BOOL Win32Dialog::DIALOG_Init(void)
     if (!(hdc = CreateDCA( "DISPLAY", NULL, NULL, NULL ))) return FALSE;
     if (!getCharSizeFromDC( hdc, 0, &size )) return FALSE;
     DeleteDC( hdc );
+    dprintf(("Dialog base unit size (%d,%d)", size.cx, size.cy));
     xBaseUnit = size.cx;
     yBaseUnit = size.cy;
 
