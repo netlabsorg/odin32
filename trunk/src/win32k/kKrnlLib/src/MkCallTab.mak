@@ -1,4 +1,4 @@
-# $Id: MkCallTab.mak,v 1.8 2002-08-20 05:47:53 bird Exp $
+# $Id: MkCallTab.mak,v 1.9 2002-08-20 07:04:34 bird Exp $
 
 #
 # MkCallTab - 16-bit source generator.
@@ -49,10 +49,18 @@ $(PATH_MSC)\lib\$(LIB_C_OBJ)\
 
 
 #
+# Rules to automatically forward.
+#
+RULES_FORWARD = calltaba.asm kKrnlLib.def TstFakers.c tst
+
+
+#
 # Process.
 #
 !include $(MAKE_INCLUDE_PROCESS)
 
+
+!if !$(BUILD_FORWARDING)
 #
 # Install duplicate...
 #
@@ -77,3 +85,4 @@ calltaba.asm:               $(PATH_TOOLS)\$(TARGET_NAME).$(TARGET_EXT)
 TstFakers.c:                $(PATH_TOOLS)\$(TARGET_NAME).$(TARGET_EXT)
     $(PATH_TOOLS)\MkCallTab.exe tstfakers > $@
 
+!endif # !BUILD_FORWARDING
