@@ -1,4 +1,4 @@
-/* $Id: winkeyboard.cpp,v 1.44 2004-03-15 14:00:12 sandervl Exp $ */
+/* $Id: winkeyboard.cpp,v 1.45 2004-03-23 15:49:50 sandervl Exp $ */
 /*
  * Win32 <-> PM key translation
  *
@@ -892,6 +892,7 @@ BYTE KeyTranslateWinVKeyToPMScan(BYTE bWinVKey, BOOL fExtended)
   BYTE bAlmost = 0;
   
   // experiment
+
 #if 0
   bAlmost = abWinVKeyToPMScan[bWinVKey].bPMScanCode;
 #else
@@ -972,6 +973,16 @@ BYTE KeyTranslateWinScanToPMScan(BYTE bWinScan, BOOL fExtended)
   // almost a match or no match at all.
   return bAlmost; 
   
+}
+//******************************************************************************
+//******************************************************************************
+BYTE KeyTranslatePMScanToWinScan(BYTE bPMScan)
+{
+  // Note:
+  // MapVirtualKeyA requires this function,
+  // O32_MapVirtualKeyA uses PM Scancodes only!
+  
+  return abPMScanToWinScan[bPMScan][0];
 }
 //******************************************************************************
 //******************************************************************************
@@ -1636,7 +1647,11 @@ UINT WIN32API MapVirtualKeyA(UINT uCode,  UINT uMapType)
            dprintf(("MapVirtualKeyA %x (%c) -> %x", uCode, '0' + uCode - VK_0, ret));
            return ret;
       }
-      break;
+      ret = O32_MapVirtualKey(uCode, uMapType);
+
+      // WGSS returns PM scancodes
+      ret = KeyTranslatePMScanToWinScan(ret);
+      return ret;
     }
 
     case 1:
