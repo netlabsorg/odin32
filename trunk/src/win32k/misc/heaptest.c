@@ -1,4 +1,4 @@
-/* $Id: heaptest.c,v 1.3 2000-01-24 01:45:20 bird Exp $
+/* $Id: heaptest.c,v 1.4 2000-01-24 03:05:13 bird Exp $
  *
  * Test of resident and swappable heaps.
  *
@@ -46,8 +46,9 @@ int main(int argc, char *argv)
     int           fResSimple = 0;
     int           fResRandom = 0;
     int           fSwpTests = 1;
-    int           fSwpSimple = 1;
+    int           fSwpSimple = 0;
     int           fSwpRandom = 1;
+    enum   {malloc,realloc, free, unknown} enmLast = unknown;
 
     /*
      * Initiate the heap.
@@ -89,6 +90,7 @@ int main(int argc, char *argv)
                 if ((i % (NUMBER_OF_POINTERS/3)) == 1)
                     acb[i] += 1024*260;
                 apv[i] = rmalloc(acb[i]);
+                enmLast = malloc;
                 if (apv[i] == NULL)
                 {
                     printf("rmalloc failed: acb[%d]=%d\n", i, acb[i]);
@@ -111,6 +113,7 @@ int main(int argc, char *argv)
                 if (cb != ((acb[i] + 3) & ~3) && (cb < ((acb[i] + 3) & ~3) || cb > 52 + ((acb[i] + 3) & ~3)) )
                     printf("size of avp[%d] (%d) != acb[%d] (%d)\n", i, cb, i, acb[i]);
                 rfree(apv[i]);
+                enmLast = free;
             }
 
 
@@ -167,6 +170,7 @@ int main(int argc, char *argv)
                         if ((i % (RANDOMTEST_ITERATIONS/20)) == 1)
                             acb[j] += 1024*256;
                         apv[j] = rmalloc(acb[j]);
+                        enmLast = malloc;
                         if (apv[j] == NULL)
                         {
                             printf("rmalloc failed, acb[%d] = %d\n", j, acb[j]);
@@ -223,6 +227,7 @@ int main(int argc, char *argv)
                                 Int3();
                             */
                             pv = rrealloc(apv[j], cb);
+                            enmLast = realloc;
                             if (pv == NULL)
                             {
                                 printf("realloc(apv[%d](0x%08), %d) failed\n", j, apv[j], cb);
@@ -234,6 +239,7 @@ int main(int argc, char *argv)
                         else
                         {   /* free */
                             rfree(apv[j]);
+                            enmLast = free;
                             apv[j] = NULL;
                             cAllocations--;
                             crfree++;
@@ -285,6 +291,7 @@ int main(int argc, char *argv)
                 if ((i % (NUMBER_OF_POINTERS/3)) == 1)
                     acb[i] += 1024*260;
                 apv[i] = smalloc(acb[i]);
+                enmLast = malloc;
                 if (apv[i] == NULL)
                 {
                     printf("smalloc failed: acb[%d]=%d\n", i, acb[i]);
@@ -307,6 +314,7 @@ int main(int argc, char *argv)
                 if (cb != ((acb[i] + 3) & ~3) && (cb < ((acb[i] + 3) & ~3) || cb > 52 + ((acb[i] + 3) & ~3)) )
                     printf("size of avp[%d] (%d) != acb[%d] (%d)\n", i, cb, i, acb[i]);
                 sfree(apv[i]);
+                enmLast = free;
             }
 
 
@@ -363,6 +371,7 @@ int main(int argc, char *argv)
                         if ((i % (RANDOMTEST_ITERATIONS/20)) == 1)
                             acb[j] += 1024*256;
                         apv[j] = smalloc(acb[j]);
+                        enmLast = malloc;
                         if (apv[j] == NULL)
                         {
                             printf("rmalloc failed, acb[%d] = %d\n", j, acb[j]);
@@ -419,6 +428,7 @@ int main(int argc, char *argv)
                                 Int3();
                             */
                             pv = srealloc(apv[j], cb);
+                            enmLast = realloc;
                             if (pv == NULL)
                             {
                                 printf("realloc(apv[%d](0x%08), %d) failed\n", j, apv[j], cb);
@@ -430,6 +440,7 @@ int main(int argc, char *argv)
                         else
                         {   /* free */
                             sfree(apv[j]);
+                            enmLast = free;
                             apv[j] = NULL;
                             cAllocations--;
                             crfree++;
