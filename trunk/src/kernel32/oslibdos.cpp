@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.84 2001-11-10 12:47:46 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.85 2001-11-19 13:02:58 phaller Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -162,6 +162,12 @@ DWORD error2WinError(APIRET rc,DWORD defaultCode)
 
     case ERROR_INVALID_ACCESS: //12
         return ERROR_INVALID_ACCESS_W;
+    
+    case ERROR_INVALID_DATA: //13
+      return ERROR_INVALID_DATA_W;
+    
+    case ERROR_INVALID_DRIVE: //15
+      return ERROR_INVALID_DRIVE_W;
     
     case ERROR_CURRENT_DIRECTORY: // 16
         return ERROR_CURRENT_DIRECTORY_W;
