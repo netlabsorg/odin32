@@ -25,7 +25,7 @@
 /* Include files */
 #define  INCL_DOSMODULEMGR
 #define  INCL_DOSPROCESS
-#include <os2wrap.h>	//Odin32 OS/2 api wrappers
+#include <os2wrap.h>    //Odin32 OS/2 api wrappers
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -38,7 +38,7 @@
 #include <initdll.h>
 #include "auxiliary.h"
 
-#define DBG_LOCALLOG	DBG_initterm
+#define DBG_LOCALLOG    DBG_initterm
 #include "dbglocal.h"
 
 BOOL MULTIMEDIA_MciInit(void);
@@ -57,34 +57,33 @@ static HMODULE dllHandle = 0;
 //******************************************************************************
 BOOL WINAPI OdinLibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 {
-  static BOOL     		bInitDone = FALSE;
-  
+  static BOOL           bInitDone = FALSE;
+
   switch (fdwReason)
     {
     case DLL_PROCESS_ATTACH:
-      if (!MULTIMEDIA_CreateIData(hinstDLL))
-        return FALSE;
-      
-      if (!bInitDone) { /* to be done only once */
-	    if (!MULTIMEDIA_MciInit() /*|| !MMDRV_Init() */ ) {
-          MULTIMEDIA_DeleteIData();
-          return FALSE;
-	    }
-        bInitDone = TRUE;	
-      }
-      
-	return TRUE;
+        if (!MULTIMEDIA_CreateIData(hinstDLL))
+            return FALSE;
+
+        if (!bInitDone) { /* to be done only once */
+            if (!MULTIMEDIA_MciInit() /*|| !MMDRV_Init() */ ) {
+                MULTIMEDIA_DeleteIData();
+                return FALSE;
+            }
+            bInitDone = TRUE;
+        }
+        return TRUE;
 
    case DLL_THREAD_ATTACH:
    case DLL_THREAD_DETACH:
-	return TRUE;
+        return TRUE;
 
    case DLL_PROCESS_DETACH:
         MULTIMEDIA_DeleteIData();
         auxOS2Close(); /* SvL: Close aux device if necessary */
-   	IRTMidiShutdown;  /* JT: Shutdown RT Midi subsystem, if running. */
-	ctordtorTerm();
-	return TRUE;
+        IRTMidiShutdown;  /* JT: Shutdown RT Midi subsystem, if running. */
+        ctordtorTerm();
+        return TRUE;
    }
    return FALSE;
 }
@@ -98,44 +97,40 @@ BOOL WINAPI OdinLibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 /****************************************************************************/
 ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
 {
-   size_t i;
-   APIRET rc;
+    /*-------------------------------------------------------------------------*/
+    /* If ulFlag is zero then the DLL is being loaded so initialization should */
+    /* be performed.  If ulFlag is 1 then the DLL is being freed so            */
+    /* termination should be performed.                                        */
+    /*-------------------------------------------------------------------------*/
 
-   /*-------------------------------------------------------------------------*/
-   /* If ulFlag is zero then the DLL is being loaded so initialization should */
-   /* be performed.  If ulFlag is 1 then the DLL is being freed so            */
-   /* termination should be performed.                                        */
-   /*-------------------------------------------------------------------------*/
+    switch (ulFlag)
+    {
+    case 0 :
+        ctordtorInit();
 
-   switch (ulFlag) {
-      case 0 :
-         ctordtorInit();
+        ParseLogStatus();
 
-         ParseLogStatus();
+        CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
+        dllHandle = RegisterLxDll(hModule, OdinLibMain, (PVOID)&_Resource_PEResTab);
+        if(dllHandle == 0)
+            return 0UL;/* Error */
 
-         CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
+        dprintf(("winmm init %s %s (%x)", __DATE__, __TIME__, DLLENTRYPOINT_NAME));
+        break;
+    case 1 :
+        auxOS2Close(); /* SvL: Close aux device if necessary */
+        if(dllHandle) {
+            UnregisterLxDll(dllHandle);
+        }
+        break;
+    default  :
+        return 0UL;
+    }
 
-         dllHandle = RegisterLxDll(hModule, OdinLibMain, (PVOID)&_Resource_PEResTab);
-         if(dllHandle == 0) 
-           return 0UL;/* Error */
-
-         dprintf(("winmm init %s %s (%x)", __DATE__, __TIME__, DLLENTRYPOINT_NAME));
-
-         break;
-      case 1 :
-         auxOS2Close(); /* SvL: Close aux device if necessary */
-         if(dllHandle) {
-	   	UnregisterLxDll(dllHandle);
-         }
-         break;
-      default  :
-         return 0UL;
-   }
-
-   /***********************************************************/
-   /* A non-zero value must be returned to indicate success.  */
-   /***********************************************************/
-   return 1UL;
+    /***********************************************************/
+    /* A non-zero value must be returned to indicate success.  */
+    /***********************************************************/
+    return 1UL;
 }
 //******************************************************************************
 //******************************************************************************
