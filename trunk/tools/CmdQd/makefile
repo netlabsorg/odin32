@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2002-08-22 00:13:04 bird Exp $
+# $Id: makefile,v 1.10 2002-08-24 04:22:30 bird Exp $
 
 #
 # Odin32 API
@@ -19,6 +19,7 @@ PATH_ROOT = ..\..
 # Target config
 #
 TARGET_NAME = CmdQd
+TARGET_MODE = EXE
 TARGET_PUBLIC = 1
 TARGET_PUBNAME = $(PATH_TOOLS)\$(TARGET_NAME).$(EXT_EXE)
 

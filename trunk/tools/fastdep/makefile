@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 2002-08-23 19:29:14 bird Exp $
+# $Id: makefile,v 1.14 2002-08-24 04:22:18 bird Exp $
 
 #
 # Odin32 API
@@ -24,6 +24,7 @@ PATH_ROOT = ..\..
 # Target config
 #
 TARGET_NAME = fastdep
+TARGET_MODE = EXE
 TARGET_PUBLIC = 1
 TARGET_PUBNAME = $(PATH_TOOLS)\fastdep.$(EXT_EXE)
 
