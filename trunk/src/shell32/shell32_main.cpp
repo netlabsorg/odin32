@@ -1,4 +1,4 @@
-/* $Id: shell32_main.cpp,v 1.5 1999-11-02 20:38:47 phaller Exp $ */
+/* $Id: shell32_main.cpp,v 1.6 1999-12-01 10:48:58 sandervl Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -142,7 +142,7 @@ ODINFUNCTION5(DWORD, SHGetFileInfoA, LPCSTR,       path,
    DWORD ret = TRUE, dwAttributes = 0;
    IShellFolder * psfParent = NULL;
    IExtractIcon * pei = NULL;
-   LPITEMIDLIST   pidlLast, pidl = NULL;
+   LPITEMIDLIST   pidlLast = NULL, pidl = NULL;
    HRESULT hr = S_OK;
 
    dprintf(("SHELL32:Shell32_main:SHGetFileInfoA (%s,0x%lx,%p,0x%x,0x%x)\n",
