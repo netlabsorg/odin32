@@ -1,4 +1,19 @@
- /* $Id: ChangeLog,v 1.974 2000-06-07 21:46:52 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.975 2000-06-07 22:56:26 bird Exp $ */
+
+
+2000-08-03: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+   - tools/install:Added a stram 'close' on the changelog.
+                   (4OS2 can't copy files which are opened for write(?).
+                   The changelog has to be closed after copying it into
+                   the odininst.wis file.)
+   - tools/DailyBuild:
+                   - Creates .WPI releases too.
+                     (odin32pack.cmd and odin32ftp2.cmd)
+                   - WarpIn is added to the build environment variables
+                     (odin32env.cmd).
+                                                                                                                          - WarpIn is added to the build environment variables
+                                                                                                                                               (odin32env.cmd).
+
 
  2000-06-07: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:       Fixed wrong dispatch of WM_NCHITTEST
