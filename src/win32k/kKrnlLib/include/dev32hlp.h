@@ -1,4 +1,4 @@
-/* $Id: dev32hlp.h,v 1.1 2001-09-11 01:27:27 bird Exp $
+/* $Id: dev32hlp.h,v 1.2 2001-10-16 02:20:27 bird Exp $
  *
  * Dev32Hlp - 32-bit Device helpers.
  *
@@ -124,7 +124,10 @@ D32RET D32HLPCALL D32Hlp_VMLock2(PVOID   pvAddress,
                                  ULONG   flFlags,
                                  PLOCKHANDLE  pLockHandle);
 D32RET D32HLPCALL D32Hlp_VMUnLock(PLOCKHANDLE pLockHandle);
-
+D32RET D32HLPCALL D32Hlp_RAS(ULONG      major,
+                             ULONG      cbBuffer,
+                             ULONG      minor,
+                             ULONG      pf16Buffer);
 
 #ifdef __cplusplus
 }
