@@ -1,4 +1,4 @@
-/* $Id: tooltips.c,v 1.16 1999-11-02 21:44:03 achimha Exp $ */
+/* $Id: tooltips.c,v 1.17 1999-11-09 14:38:01 achimha Exp $ */
 /*
  * Tool tip control
  *
@@ -290,13 +290,13 @@ TOOLTIPS_Show (HWND hwnd, TOOLTIPS_INFO *infoPtr)
     NMHDR  hdr;
 
     if (infoPtr->nTool == -1) {
-	TRACE("invalid tool (-1)!\n");
+//	TRACE("invalid tool (-1)!\n");
 	return;
     }
 
     infoPtr->nCurrentTool = infoPtr->nTool;
 
-    TRACE("Show tooltip pre %d!\n", infoPtr->nTool);
+//    TRACE("Show tooltip pre %d!\n", infoPtr->nTool);
 
     TOOLTIPS_GetTipText (hwnd, infoPtr, infoPtr->nCurrentTool);
 
@@ -305,7 +305,7 @@ TOOLTIPS_Show (HWND hwnd, TOOLTIPS_INFO *infoPtr)
 	return;
     }
 
-    TRACE("Show tooltip %d!\n", infoPtr->nCurrentTool);
+//    TRACE("Show tooltip %d!\n", infoPtr->nCurrentTool);
     toolPtr = &infoPtr->tools[infoPtr->nCurrentTool];
 
     hdr.hwndFrom = hwnd;
@@ -317,7 +317,7 @@ TOOLTIPS_Show (HWND hwnd, TOOLTIPS_INFO *infoPtr)
 //    TRACE("\"%s\"\n", debugstr_w(infoPtr->szTipText));
 
     TOOLTIPS_CalcTipSize (hwnd, infoPtr, &size);
-    TRACE("size %d - %d\n", size.cx, size.cy);
+//    TRACE("size %d - %d\n", size.cx, size.cy);
 
     if (toolPtr->uFlags & TTF_CENTERTIP) {
 	RECT rc;
@@ -336,7 +336,7 @@ TOOLTIPS_Show (HWND hwnd, TOOLTIPS_INFO *infoPtr)
 	rect.top += 20;
     }
 
-    TRACE("pos %d - %d\n", rect.left, rect.top);
+//    TRACE("pos %d - %d\n", rect.left, rect.top);
 
     rect.right = rect.left + size.cx;
     rect.bottom = rect.top + size.cy;
