@@ -1,4 +1,12 @@
- /* $Id: ChangeLog,v 1.901 2000-04-18 20:07:59 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.902 2000-04-19 14:43:27 sandervl Exp $ */
+
+ 2000-04-19: Sander van Leeuwen <sandervl@xs4all.nl>
+	- TOOLS\WRC: Resync with latest Wine wrc + added code to produce
+                     masm compatible assembly (for some reason removed from
+                     wrc some time ago)
+                     -> fixes file open dialog (nothing painted)
+	- COMCTL32:  Check for NULL pointers before freeing memory
+                     (toolbar; removes some warnings from the logfiles)
 
  2000-04-18: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32:   Added LR_LOADFROMFILE support for icon & cursor loading
