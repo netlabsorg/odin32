@@ -1,4 +1,4 @@
-/* $Id: winkeyboard.cpp,v 1.40 2003-02-16 18:29:27 sandervl Exp $ */
+/* $Id: winkeyboard.cpp,v 1.41 2003-03-17 17:59:34 sandervl Exp $ */
 /*
  * Win32 <-> PM key translation
  *
@@ -1426,6 +1426,33 @@ int WIN32API GetKeyNameTextW(LPARAM lParam, LPWSTR lpString, int nSize)
     return 0;
 //    return O32_GetKeyNameText(arg1, arg2, arg3);
 }
+
+//******************************************************************************
+//******************************************************************************
+ULONG WinConvertNumPadKey(ULONG winVKey)
+{
+ ULONG ret;
+ BYTE winKey;
+
+  switch (winVKey)
+  {
+   case VK_HOME:  ret = VK_NUMPAD7; break;
+   case VK_UP:    ret = VK_NUMPAD8; break;
+   case VK_PRIOR: ret = VK_NUMPAD9; break;
+   case VK_LEFT:  ret = VK_NUMPAD4; break;
+   case VK_RIGHT: ret = VK_NUMPAD6; break;
+   case VK_END:   ret = VK_NUMPAD1; break;
+   case VK_DOWN:  ret = VK_NUMPAD2; break;
+   case VK_NEXT:  ret = VK_NUMPAD3; break;
+   case VK_INSERT:ret = VK_NUMPAD0; break;
+   case VK_DELETE:ret = VK_DECIMAL; break;
+   default:
+           ret = winVKey;
+  }
+ dprintf(("Returning %x",ret));  
+ return ret;
+}
+
 //******************************************************************************
 //******************************************************************************
 SHORT WIN32API GetKeyState(int nVirtKey)
@@ -1463,6 +1490,18 @@ SHORT WIN32API GetKeyState(int nVirtKey)
           //not down, check the control keys
       }
 
+      if ((nVirtKey >= VK_PRIOR) && (nVirtKey <= VK_DELETE))
+      {
+         WORD numState = OSLibWinGetScanState(abWinVKeyToPMScan[VK_NUMLOCK].bPMScanCode) & 1;
+
+         if(!numState) {
+             //@PF We also keep track in PM how much times the key has been pressed
+             //in win32 we can ignore this information - if some apps will demand this 
+             //this is TO-DO
+             nVirtKey2 = WinConvertNumPadKey(nVirtKey);
+         }
+      }
+      else	
       if (nVirtKey == VK_MENU)  {
           nVirtKey  = VK_LMENU;
           nVirtKey2 = VK_RMENU;
@@ -1522,6 +1561,19 @@ WORD WIN32API GetAsyncKeyState(INT nVirtKey)
           }
           //not down, check the control keys
       }
+
+      if ((nVirtKey >= VK_PRIOR) && (nVirtKey <= VK_DELETE))
+      {
+         WORD numState = OSLibWinGetScanState(abWinVKeyToPMScan[VK_NUMLOCK].bPMScanCode) & 1;
+
+         if(!numState) {
+             //@PF We also keep track in PM how much times the key has been pressed
+             //in win32 we can ignore this information - if some apps will demand this 
+             //this is TO-DO
+             nVirtKey2 = WinConvertNumPadKey(nVirtKey);
+         }
+      }
+      else	
       if (nVirtKey == VK_MENU)  {
           nVirtKey  = VK_LMENU;
           nVirtKey2 = VK_RMENU;
