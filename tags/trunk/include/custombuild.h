@@ -110,6 +110,8 @@ void WIN32API SetCustomExceptionLog(LPSTR lpszLogName);
 //Enable/disable exception logging
 void WIN32API SetExceptionLogging(BOOL fEnable);
 
+//Disable OS2CDROM.DMD aspi support
+void WIN32API DisableCDIo();
 
 #endif  /*__CUSTOMBUILD_H__*/
 
