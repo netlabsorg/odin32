@@ -1,5 +1,6 @@
- /* $Id: changelog,v 1.91 1999-08-17 13:30:11 phaller Exp $ */
+ /* $Id: changelog,v 1.92 1999-08-17 17:00:45 sandervl Exp $ */
  99-08-17: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32/LZ32: Fixed compilation problems introduced by changes below
 	- ODINCRT: Rewrote __threadid Clib function to get rid of crashes
                    (restores OS/2 FS selector before accessing PIB ptr and
                     puts back original FS selector afterwards)
