@@ -1,4 +1,4 @@
-/* $Id: oslibdos.h,v 1.44 2002-02-28 19:27:48 sandervl Exp $ */
+/* $Id: oslibdos.h,v 1.45 2002-05-09 13:55:34 sandervl Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -388,6 +388,9 @@ void  OSLibDosSleep(ULONG msecs);
 void  OSLibDosExitThread(ULONG retcode);
 
 DWORD OSLibDosSetPriority(ULONG tid, int priority);
+
+//functions for physical disk & partition information
+DWORD OSLibDosGetNumPhysDrives();
 
 #endif //__OSLIBDOS_H__
 

@@ -655,20 +655,18 @@ DEBUGWRAP8(GetLogicalDriveStringsW);
 DEBUGWRAP0(GetLogicalDrives);
 
 
-NODEF_DEBUGWRAP8(FindFirstVolumeA);
-NODEF_DEBUGWRAP8(FindFirstVolumeW);
-NODEF_DEBUGWRAP12(FindNextVolumeA);
-NODEF_DEBUGWRAP12(FindNextVolumeW);
-NODEF_DEBUGWRAP4(FindVolumeClose);
-
-NODEF_DEBUGWRAP12(FindFirstVolumeMountPointA);
-NODEF_DEBUGWRAP12(FindFirstVolumeMountPointW);
-NODEF_DEBUGWRAP12(FindNextVolumeMountPointA);
-NODEF_DEBUGWRAP12(FindNextVolumeMountPointW);
-NODEF_DEBUGWRAP4(FindVolumeMountPointClose);
-  
-NODEF_DEBUGWRAP12(GetVolumeNameForVolumeMountPointA);
-NODEF_DEBUGWRAP12(GetVolumeNameForVolumeMountPointW);
+DEBUGWRAP8(FindFirstVolumeA);
+DEBUGWRAP8(FindFirstVolumeW);
+DEBUGWRAP12(FindNextVolumeA);
+DEBUGWRAP12(FindNextVolumeW);
+DEBUGWRAP4(FindVolumeClose);
+DEBUGWRAP12(FindFirstVolumeMountPointA);
+DEBUGWRAP12(FindFirstVolumeMountPointW);
+DEBUGWRAP12(FindNextVolumeMountPointA);
+DEBUGWRAP12(FindNextVolumeMountPointW);
+DEBUGWRAP4(FindVolumeMountPointClose);
+DEBUGWRAP12(GetVolumeNameForVolumeMountPointA);
+DEBUGWRAP12(GetVolumeNameForVolumeMountPointW);
 
 #undef DBG_LOCALLOG
 #define DBG_LOCALLOG    DBG_mailslot
