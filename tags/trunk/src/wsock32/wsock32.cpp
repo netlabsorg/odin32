@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.25 2000-03-24 23:14:29 sandervl Exp $ */
+/* $Id: wsock32.cpp,v 1.26 2000-03-28 17:13:06 sandervl Exp $ */
 
 /*
  *
@@ -261,11 +261,15 @@ ODINFUNCTION3(int,OS2connect,
    ret = connect(s, (sockaddr *)name, namelen);
    // map BSD error codes
    if(ret == SOCKET_ERROR) {
-      	if(sock_errno() == SOCEINPROGRESS) {
+	int sockerror = sock_errno();
+   	if(sockerror && sockerror < SOCBASEERR) {
+		sockerror += SOCBASEERR;
+	}
+      	if(sockerror == SOCEINPROGRESS) {
          	WSASetLastError(WSAEWOULDBLOCK);
       	} 
 	else 
-	if (sock_errno() == SOCEOPNOTSUPP) {
+	if(sockerror == SOCEOPNOTSUPP) {
          	WSASetLastError(WSAEINVAL);
       	}
 	else	WSASetLastError(wsaErrno());
@@ -323,7 +327,12 @@ ODINFUNCTION3(int,OS2ioctlsocket,
    ret = ioctl(s, cmd, (char *)argp, sizeof(int));
 
    // Map EOPNOTSUPP to EINVAL
-   if(ret == SOCKET_ERROR && sock_errno() == SOCEOPNOTSUPP)
+   int sockerror = sock_errno();
+   if(sockerror && sockerror < SOCBASEERR) {
+	sockerror += SOCBASEERR;
+   }
+
+   if(ret == SOCKET_ERROR && sockerror == SOCEOPNOTSUPP)
      	WSASetLastError(WSAEINVAL);
    else
    if(ret == SOCKET_ERROR) {
