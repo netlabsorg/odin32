@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.24 1999-10-25 18:20:52 achimha Exp $ */
+/* $Id: KERNEL32.CPP,v 1.25 1999-10-27 18:11:38 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -436,13 +436,6 @@ DWORD WIN32API GetEnvironmentVariableW(LPCWSTR lpName, LPWSTR lpBuffer,
     FreeAsciiString(astring);
     free(asciibuffer);
     return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-HINSTANCE WIN32API WinExec(LPCSTR arg1, UINT  arg2)
-{
-    dprintf(("KERNEL32:  WinExec %s\n", arg1));
-    return (HINSTANCE)O32_WinExec(arg1, arg2);
 }
 //******************************************************************************
 //******************************************************************************
