@@ -1,4 +1,4 @@
-/* $Id: initsystem.cpp,v 1.19 2000-10-18 17:09:32 sandervl Exp $ */
+/* $Id: initsystem.cpp,v 1.20 2000-10-21 12:48:40 sandervl Exp $ */
 /*
  * Odin system initialization (registry, directories & environment)
  *
@@ -58,6 +58,13 @@
 #define DSOUND_CLASSID		"{47D4D946-62E8-11cf-93BC-444553540000}"
 #define DSOUND_DEFAULT		"DirectSound Object"
 #define DSOUND_DLL		"dsound.dll"
+#define DPLAYX_CLASSID          "{D1EB6D20-8923-11d0-9D97-00A0C90A43CB}"
+#define DPLAYX_DEFAULT          "DirectPlay Object"
+#define DPLAYX_DLL              "dplayx.dll"
+#define DPLAYX_LOBBY_CLASSID    "{2FE8F810-B2A5-11d0-A787-0000F803ABFC}"
+#define DPLAYX_LOBBY_DEFAULT    "DirectPlayLobby Object"
+#define DPLAYX_LOBBY_DLL        DPLAYX_DLL
+
 #define CLASS_DESKTOP    	"Desktop"
 #define CLASS_SHORTCUT          "Shortcut"
 #define CLASS_SHELL32DLL 	"shell32.dll"
@@ -409,6 +416,34 @@ BOOL InitSystemAndRegistry()
    	goto initreg_error;
    }
    RegSetValueExA(hkey1,"",0,REG_SZ, (LPBYTE)DSOUND_DLL, sizeof(DSOUND_DLL));
+   RegSetValueExA(hkey1, COM_THREADMODEL, 0,REG_SZ, (LPBYTE)THREAD_BOTH, sizeof(THREAD_BOTH));
+   RegCloseKey(hkey1);
+   RegCloseKey(hkey);
+
+   //DirectPlay
+   if(RegCreateKeyA(HKEY_LOCAL_MACHINE, "Software\\CLASSES\\CLSID\\"DPLAYX_CLASSID ,&hkey)!=ERROR_SUCCESS) {
+   	goto initreg_error;
+   }
+   RegSetValueExA(hkey,"",0,REG_SZ, (LPBYTE)DPLAYX_DEFAULT, sizeof(DPLAYX_DEFAULT));
+   if(RegCreateKeyA(hkey,COM_INPROCSERVER, &hkey1)!=ERROR_SUCCESS) {
+   	RegCloseKey(hkey);
+   	goto initreg_error;
+   }
+   RegSetValueExA(hkey1,"",0,REG_SZ, (LPBYTE)DPLAYX_DLL, sizeof(DPLAYX_DLL));
+   RegSetValueExA(hkey1, COM_THREADMODEL, 0,REG_SZ, (LPBYTE)THREAD_BOTH, sizeof(THREAD_BOTH));
+   RegCloseKey(hkey1);
+   RegCloseKey(hkey);
+
+   //DirectPlay Lobby
+   if(RegCreateKeyA(HKEY_LOCAL_MACHINE, "Software\\CLASSES\\CLSID\\"DPLAYX_LOBBY_CLASSID ,&hkey)!=ERROR_SUCCESS) {
+   	goto initreg_error;
+   }
+   RegSetValueExA(hkey,"",0,REG_SZ, (LPBYTE)DPLAYX_LOBBY_DEFAULT, sizeof(DPLAYX_LOBBY_DEFAULT));
+   if(RegCreateKeyA(hkey,COM_INPROCSERVER, &hkey1)!=ERROR_SUCCESS) {
+   	RegCloseKey(hkey);
+   	goto initreg_error;
+   }
+   RegSetValueExA(hkey1,"",0,REG_SZ, (LPBYTE)DPLAYX_LOBBY_DLL, sizeof(DPLAYX_LOBBY_DLL));
    RegSetValueExA(hkey1, COM_THREADMODEL, 0,REG_SZ, (LPBYTE)THREAD_BOTH, sizeof(THREAD_BOTH));
    RegCloseKey(hkey1);
    RegCloseKey(hkey);
