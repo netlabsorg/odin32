@@ -2853,7 +2853,6 @@ BOOL WIN32API OLEDD_DragEnter(HWND hwnd, HDROP hDrop, DWORD dwEffect)
 
     pTarget->hDrop      = hDrop;
     pTarget->pDataObject = IDataObject_Constructor();
-    IDataObject_AddRef(pTarget->pDataObject);
     IDataObject_SetData(pTarget->pDataObject, &fe, &medium, TRUE);
     return IDropTarget_DragEnter(pTarget->dropTarget, pTarget->pDataObject, keyState, mousePosParam, &dwEffect) == S_OK;
 }
