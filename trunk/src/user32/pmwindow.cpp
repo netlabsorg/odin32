@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.153 2001-10-07 11:48:28 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.154 2001-10-08 12:19:10 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -66,6 +66,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
 MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
 void FrameReplaceMenuItem(HWND hwndMenu, ULONG nIndex, ULONG idOld, ULONG   idNew,
                           HBITMAP hbmNew);
+void FrameSetFocus(HWND hwnd);
 
 VOID APIENTRY DspInitSystemDriverName(PSZ pszDriverName, ULONG lenDriverName);
 
@@ -912,10 +913,9 @@ adjustend:
             }
             if(ulFlags & SWP_ACTIVATE) 
             {
-                ULONG ulFrameFlags;
-
                 if(ulFlags & SWP_ZORDER) {
-                    ulFrameFlags = WinQueryWindowUShort(hwnd, QWS_FLAGS);
+                    dprintf(("Set FF_NOACTIVATESWP"));
+                    ULONG ulFrameFlags = WinQueryWindowUShort(hwnd, QWS_FLAGS);
                     WinSetWindowUShort(hwnd, QWS_FLAGS, ulFrameFlags | FF_NOACTIVATESWP);
                 }
 
@@ -925,17 +925,7 @@ adjustend:
                 }
                 else
                 {
-                    HWND hwndFocusSave = WinQueryWindowULong(hwnd, QWL_HWNDFOCUSSAVE);
-                    if(!WinIsWindow(hab, hwndFocusSave)) {
-                        hwndFocusSave = WinWindowFromID(hwnd, FID_CLIENT);
-                        WinSetWindowULong(hwnd, QWL_HWNDFOCUSSAVE, hwndFocusSave);
-                    }
-                    dprintf(("WM_ADJUSTWINDOWPOS: hwndFocusSave %x %x", OS2ToWin32Handle(hwndFocusSave), hwndFocusSave));
-                    WinSetFocus(HWND_DESKTOP, hwndFocusSave);
-
-                    ulFrameFlags  = WinQueryWindowUShort(hwnd, QWS_FLAGS);
-                    ulFrameFlags &= ~FF_NOACTIVATESWP;
-                    WinSetWindowUShort(hwnd, QWS_FLAGS, ulFrameFlags);
+                    FrameSetFocus(hwnd);
                 }
             }
         }
@@ -958,16 +948,17 @@ adjustend:
                 }
             }
         }
-        dprintf(("WM_ADJUSTWINDOWPOS ret %x", ret));
+        dprintf(("WM_ADJUSTWINDOWPOS ret %x flags %x", ret, WinQueryWindowUShort(hwnd, QWS_FLAGS)));
         rc = (MRESULT)ret;
         break;
     }
 
     case WM_WINDOWPOSCHANGED:
     {
-      PSWP      pswp   = (PSWP)mp1,pswpOld = pswp+1;
-      SWP       swpOld = *(pswp + 1);
+      PSWP      pswp    = (PSWP)mp1,pswpOld = pswp+1;
+      SWP       swpOld  = *(pswp + 1);
       WINDOWPOS wp;
+      ULONG     flAfp   = (ULONG)mp2;
       HWND      hParent = NULLHANDLE;
       RECTL     rect;
 
@@ -989,6 +980,7 @@ adjustend:
             if(pswp->fl & SWP_HIDE) {
                 WinShowWindow(win32wnd->getOS2WindowHandle(), 0);
             } 
+            //MUST call the old frame window proc!
             goto RunDefFrameWndProc;
         }
 
@@ -1028,6 +1020,11 @@ adjustend:
         else
         if(pswp->fl & SWP_HIDE) {
             WinShowWindow(win32wnd->getOS2WindowHandle(), 0);
+        }
+
+        if(flAfp & AWP_ACTIVATE)
+        {
+            FrameSetFocus(hwnd);
         }
 
 #ifndef USE_CALCVALIDRECT
@@ -1458,6 +1455,22 @@ RunDefWndProc:
     //calling WinDefWindowProc here breaks Opera hotlist window (WM_ADJUSTWINDOWPOS)
 //    return pfnFrameWndProc(hwnd, msg, mp1, mp2);
     return WinDefWindowProc( hwnd, msg, mp1, mp2 );
+}
+//******************************************************************************
+//******************************************************************************
+void FrameSetFocus(HWND hwnd)
+{
+    HWND hwndFocusSave = WinQueryWindowULong(hwnd, QWL_HWNDFOCUSSAVE);
+    if(!WinIsWindow(hab, hwndFocusSave)) {
+        hwndFocusSave = WinWindowFromID(hwnd, FID_CLIENT);
+        WinSetWindowULong(hwnd, QWL_HWNDFOCUSSAVE, hwndFocusSave);
+    }
+    dprintf(("FrameSetFocus: hwndFocusSave %x %x", OS2ToWin32Handle(hwndFocusSave), hwndFocusSave));
+    WinSetFocus(HWND_DESKTOP, hwndFocusSave);
+
+    ULONG ulFrameFlags  = WinQueryWindowUShort(hwnd, QWS_FLAGS);
+    ulFrameFlags &= ~FF_NOACTIVATESWP;
+    WinSetWindowUShort(hwnd, QWS_FLAGS, ulFrameFlags);
 }
 #ifndef CUSTOM_TRACKFRAME 
 //******************************************************************************
