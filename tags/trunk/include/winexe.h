@@ -1,4 +1,4 @@
-/* $Id: winexe.h,v 1.2 1999-05-27 15:17:59 phaller Exp $ */
+/* $Id: winexe.h,v 1.3 1999-08-16 13:55:27 sandervl Exp $ */
 
 /*
  *
@@ -18,6 +18,9 @@
 #include "windll.h"
 
 typedef ULONG (* WIN32API WIN32EXEENTRY)();
+
+class Win32Exe;
+typedef Win32Exe *(* WIN32API WIN32CTOR)(char *);
 
 class Win32Exe : public Win32Image
 {

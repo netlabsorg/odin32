@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.19 1999-08-13 18:38:19 sandervl Exp $
+; $Id: kernel32.def,v 1.20 1999-08-16 13:54:32 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -978,6 +978,8 @@ EXPORTS
 
    GetThreadTEB         = _GetThreadTEB@0                          @1234
    GetThreadTHDB        = _GetThreadTHDB@0			   @1235
+
+   CreateWin32Exe       = _CreateWin32Exe@4                        @1236
 
 ; HEAP Management (heap.cpp, heapstring.cpp)
     HEAP_xalloc                = _HEAP_xalloc@12                   @1240
