@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.2650 2003-11-21 11:25:12 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2651 2003-12-01 11:45:17 sandervl Exp $ */
+
+ 2003-12-01: Dietrich Teickner <Dietrich_Teickner@t-online   >
+    - SHELL32:  o Fixed memory leak
 
  2002-11-21: Dmitry Froloff <froloff@os2   >/Alex Samorukov (samm@os2.kiev   )
     - KERNEL32: o Support for Ukrainian language added
