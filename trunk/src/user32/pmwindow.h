@@ -1,4 +1,4 @@
-/* $Id: pmwindow.h,v 1.18 2002-11-27 13:56:27 sandervl Exp $ */
+/* $Id: pmwindow.h,v 1.19 2003-03-20 13:20:45 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -20,6 +20,8 @@ BOOL InitPM();
 
 void RegisterSystemClasses(ULONG hModule);
 void UnregisterSystemClasses();
+
+PVOID PMWinSubclassFakeWindow(HWND hwndOS2);
 
 extern ULONG ScreenWidth;
 extern ULONG ScreenHeight;

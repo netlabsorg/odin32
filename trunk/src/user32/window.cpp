@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.132 2003-03-20 09:15:31 sandervl Exp $ */
+/* $Id: window.cpp,v 1.133 2003-03-20 13:20:46 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -261,41 +261,6 @@ HWND WIN32API CreateWindowExW(DWORD     exStyle,
   
     RELEASE_WNDOBJ(window);
     return hwnd;
-}
-//******************************************************************************
-//******************************************************************************
-HWND WIN32API CreateFakeWindowEx(HWND  hwndOS2, ATOM  classAtom)
-{
- Win32BaseWindow *window;
-
-    window = new Win32BaseWindow(hwndOS2, classAtom);
-    if(window == NULL)
-    {
-        dprintf(("Win32BaseWindow creation failed!!"));
-        return 0;
-    }
-    HWND hwnd = window->getWindowHandle();
-  
-    // set myself as last active popup / window
-    window->setLastActive( hwnd );
-  
-    RELEASE_WNDOBJ(window);
-    return hwnd;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API DestroyFakeWindow(HWND hwnd)
-{
-  Win32BaseWindow *window;
-
-    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
-    if(!window) {
-        dprintf(("DestroyFakeWindow, window %x not found", hwnd));
-        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
-        return 0;
-    }
-    delete window;
-    return TRUE;
 }
 //******************************************************************************
 //******************************************************************************

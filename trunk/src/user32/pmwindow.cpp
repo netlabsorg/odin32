@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.201 2003-02-27 14:22:43 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.202 2003-03-20 13:20:44 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -2044,6 +2044,87 @@ RunDefWndProc:
     dbg_ThreadPopCall();
 #endif
     return WinDefWindowProc( hwnd, msg, mp1, mp2 );
+}
+//******************************************************************************
+//******************************************************************************
+MRESULT EXPENTRY Win32FakeWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
+{
+    PFNWP            pfnOldWindowProc;
+    Win32BaseWindow *win32wnd, *win32wndchild;
+    TEB             *teb;
+    MRESULT          rc = 0;
+
+    //Restore our FS selector
+    SetWin32TIB();
+
+    //We can't query the window object directly from this window as it's not the
+    //real thing. There should be a genuine win32 child window which we can use.
+    HWND hwndChild = WinQueryWindow(hwnd, QW_TOP);
+
+    win32wndchild = Win32BaseWindow::GetWindowFromOS2FrameHandle(hwndChild);
+    if(win32wndchild == NULL) {
+        DebugInt3();
+        goto RunDefWndProc;
+    }
+    //now get the parent window object
+    win32wnd = Win32BaseWindow::GetWindowFromHandle(GetParent(win32wndchild->getWindowHandle()));
+    if(win32wndchild) RELEASE_WNDOBJ(win32wndchild);
+
+    if(win32wnd == NULL) {
+        DebugInt3();
+        goto RunDefWndProc;
+    }
+
+    pfnOldWindowProc = (PFNWP)win32wnd->getOldPMWindowProc();
+    if(pfnOldWindowProc == NULL) {
+        DebugInt3();
+        goto RunDefWndProc;
+    }
+
+    rc = pfnOldWindowProc(hwnd, msg, mp1, mp2);
+    switch(msg) {
+    case WM_WINDOWPOSCHANGED:
+    {
+        PSWP      pswp    = (PSWP)mp1,pswpOld = pswp+1;
+        SWP       swpOld  = *(pswp + 1);
+        WINDOWPOS wp;
+
+        if(win32wnd->getParent()) {
+             OSLibMapSWPtoWINDOWPOS(pswp, &wp, &swpOld, win32wnd->getParent()->getClientHeight(),
+                                    hwnd);
+        }
+        else OSLibMapSWPtoWINDOWPOS(pswp, &wp, &swpOld, OSLibQueryScreenHeight(), hwnd);
+
+        win32wnd->SetWindowPos(wp.hwndInsertAfter, wp.x, wp.y, wp.cx, wp.cy, wp.flags);
+        break;
+    }
+
+    }
+    if(win32wnd) RELEASE_WNDOBJ(win32wnd);
+    RestoreOS2TIB();
+    return rc;
+
+RunDefWndProc:
+    RestoreOS2TIB();
+    return WinDefWindowProc( hwnd, msg, mp1, mp2 );
+}
+//******************************************************************************
+// PMWinSubclassFakeWindow
+//
+// Subclass a fake window (converted PM window)
+//
+// Parameters
+//
+//     HWND hwndOS2		- PM handle of fake window
+//
+// Returns
+//     NULL			- Failure
+//     else                     - Old PM window procedure
+//
+//******************************************************************************
+PVOID PMWinSubclassFakeWindow(HWND hwndOS2)
+{
+    return WinSubclassWindow(hwndOS2, Win32FakeWindowProc);
 }
 //******************************************************************************
 //******************************************************************************

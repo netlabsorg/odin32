@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.148 2003-01-03 16:35:56 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.149 2003-03-20 13:20:46 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -112,7 +112,6 @@ class Win32BaseWindow : public GenericObject, public ChildWindow
 public:
                 Win32BaseWindow();
                 Win32BaseWindow(CREATESTRUCTA *lpCreateStructA, ATOM classAtom, BOOL isUnicode);
-                Win32BaseWindow(HWND hwndOS2, ATOM classAtom);
 
 virtual        ~Win32BaseWindow();
 
@@ -200,7 +199,7 @@ Win32BaseWindow *getParent();
                 rect->left = rect->top = 0;
          }
          void   setClientRect(PRECT rect)       { rectClient = *rect; };
-         PRECT  getWindowRect()                 { return &rectWindow; };
+virtual  PRECT  getWindowRect();
          void   setClientRect(LONG left, LONG top, LONG right, LONG bottom)
          {
                 rectClient.left  = left;  rectClient.top    = top;
@@ -231,7 +230,7 @@ Win32BaseWindow *getParent();
          void   SetClipRegion(HRGN hRegion)       { hClipRegion = hRegion; };
 
          BOOL   ShowWindow(ULONG nCmdShow);
-         BOOL   SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, int cy, UINT fuFlags, BOOL fShowWindow = FALSE);
+virtual  BOOL   SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, int cy, UINT fuFlags, BOOL fShowWindow = FALSE);
          BOOL   SetWindowPlacement(WINDOWPLACEMENT *winpos);
          BOOL   GetWindowPlacement(LPWINDOWPLACEMENT winpos);
          BOOL   ScrollWindow(int dx, int dy);
@@ -245,6 +244,9 @@ virtual  BOOL   DestroyWindow();
 
          HWND   GetTopWindow();
          HWND   GetTopParent();
+
+         PVOID  getOldPMWindowProc()                   { return pfnOldPMWndProc; };
+         void   setOldPMWindowProc(PVOID pfnPMWndProc) { pfnOldPMWndProc = pfnPMWndProc; };
 
          HWND   GetWindow(UINT uCmd);
  virtual BOOL   EnableWindow(BOOL fEnable);
@@ -413,8 +415,7 @@ protected:
                  fMinMaxChange:1,        //set when switching between min/max/restored state
                  fVisibleRegionChanged:1, //set when visible region has changed -> erase background must be sent during next BeginPaint
                  fEraseBkgndFlag:1,
-                 fIsDragDropActive:1,
-                 fFakeWindow:1;
+                 fIsDragDropActive:1;
 
         ULONG   state;
         HRGN    hWindowRegion;
@@ -436,6 +437,8 @@ protected:
         RECT    rectWindow;  //relative to parent
         RECT    rectClient;  //relative to frame
 WINDOWPLACEMENT windowpos;
+
+        PVOID   pfnOldPMWndProc;
 
     PROPERTY   *propertyList;
 
