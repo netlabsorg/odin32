@@ -1,4 +1,4 @@
-/* $Id: initkernel32.cpp,v 1.23 2002-09-18 10:58:48 sandervl Exp $
+/* $Id: initkernel32.cpp,v 1.24 2002-12-13 16:46:44 sandervl Exp $
  *
  * KERNEL32 DLL entry point
  *
@@ -202,6 +202,9 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
             DWORD dwProcessAffinityMask, dwSystemAffinityMask;
             GetProcessAffinityMask(GetCurrentProcess(), &dwProcessAffinityMask, &dwSystemAffinityMask);
             SetProcessAffinityMask(GetCurrentProcess(), dwSystemAffinityMask);
+
+            //Set default paths for PE & NE loaders
+            InitLoaders();
             break;
         }
 

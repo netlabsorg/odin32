@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.163 2002-12-11 17:12:59 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.164 2002-12-13 16:46:44 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -46,6 +46,7 @@
 #include <wprocess.h>
 #include "mmap.h"
 #include "initterm.h"
+#include "directory.h"
 
 #define DBG_LOCALLOG    DBG_wprocess
 #include "dbglocal.h"
@@ -1757,19 +1758,41 @@ HMODULE WIN32API GetModuleHandleW(LPCWSTR lpwszModuleName)
 }
 //******************************************************************************
 //******************************************************************************
-const char *szPECmdLoader = "PEC.EXE";
-const char *szPEGUILoader = "PE.EXE";
-const char *szNELoader    = "w16odin.exe";
+static char szPECmdLoader[260] = "";
+static char szPEGUILoader[260] = "";
+static char szNELoader[260]    = "";
+//******************************************************************************
+//Set default paths for PE & NE loaders
+//******************************************************************************
+BOOL InitLoaders()
+{
+    sprintf(szPECmdLoader, "%s\\PEC.EXE", InternalGetSystemDirectoryA());
+    sprintf(szPEGUILoader, "%s\\PE.EXE", InternalGetSystemDirectoryA());
+    sprintf(szNELoader, "%s\\W16ODIN.EXE", InternalGetSystemDirectoryA());
+
+    return TRUE;
+}
 //******************************************************************************
 //Override loader names (PEC, PE, W16ODIN)
-//NOTE: String must be resident
 //******************************************************************************
 BOOL WIN32API ODIN_SetLoaders(LPCSTR pszPECmdLoader, LPCSTR pszPEGUILoader,
                               LPCSTR pszNELoader)
 {
-    if(pszPECmdLoader)   szPECmdLoader = pszPECmdLoader;
-    if(pszPEGUILoader)   szPEGUILoader = pszPEGUILoader;
-    if(pszNELoader)      szNELoader = pszNELoader;
+    if(pszPECmdLoader)   strcpy(szPECmdLoader, pszPECmdLoader);
+    if(pszPEGUILoader)   strcpy(szPEGUILoader, pszPEGUILoader);
+    if(pszNELoader)      strcpy(szNELoader, pszNELoader);
+
+    return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API ODIN_QueryLoaders(LPSTR pszPECmdLoader, INT cchPECmdLoader,
+                                LPSTR pszPEGUILoader, INT cchPEGUILoader,
+                                LPSTR pszNELoader, INT cchNELoader)
+{
+    if(pszPECmdLoader)   strncpy(szPECmdLoader, szPECmdLoader, cchPECmdLoader);
+    if(pszPEGUILoader)   strncpy(szPEGUILoader, szPEGUILoader, cchPEGUILoader);
+    if(pszNELoader)      strncpy(szNELoader, szNELoader, cchNELoader);
 
     return TRUE;
 }
