@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.32 2001-09-26 15:29:39 phaller Exp $ */
+/* $Id: thread.cpp,v 1.33 2001-11-10 12:47:48 sandervl Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -30,6 +30,7 @@
 #include <winexebase.h>
 #include "exceptutil.h"
 #include "oslibmisc.h"
+#include "oslibdos.h"
 #include <handlemanager.h>
 
 #define DBG_LOCALLOG	DBG_thread
@@ -125,6 +126,37 @@ VOID WIN32API ExitThread(DWORD exitcode)
 
   O32_ExitThread(exitcode);
 }
+/*****************************************************************************
+ * Name      : DWORD SetThreadAffinityMask
+ * Purpose   : The SetThreadAffinityMask function sets a processor affinity
+ *             mask for a specified thread.
+ *             A thread affinity mask is a bit vector in which each bit
+ *             represents the processors that a thread is allowed to run on.
+ *             A thread affinity mask must be a proper subset of the process
+ *             affinity mask for the containing process of a thread. A thread
+ *             is only allowed to run on the processors its process is allowed to run on.
+ * Parameters: HANDLE hThread              handle to the thread of interest
+ *             DWORD  dwThreadAffinityMask a thread affinity mask
+ * Variables :
+ * Result    : TRUE / FALSE
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
+ *****************************************************************************/
+
+DWORD WIN32API SetThreadAffinityMask(HANDLE hThread,
+                                     DWORD  dwThreadAffinityMask)
+{
+  dprintf(("KERNEL32: SetThreadAffinityMask(%08xh,%08xh)",
+           hThread, dwThreadAffinityMask));
+
+  if(hThread != GetCurrentThread()) {
+      dprintf(("WARNING: Setting the affinity mask for another thread than the current one is not supported!!"));
+      return FALSE;
+  }
+  return OSLibDosSetThreadAffinity(dwThreadAffinityMask);
+}
 //******************************************************************************
 //******************************************************************************
 Win32Thread::Win32Thread(LPTHREAD_START_ROUTINE pUserCallback, LPVOID lpData, DWORD dwFlags, HANDLE hThread)
@@ -170,6 +202,14 @@ DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
   winteb->o.odin.exceptFrame = (ULONG)&exceptFrame;
 
   SetWin32TIB();
+
+  DWORD dwProcessAffinityMask, dwSystemAffinityMask;
+
+  //Change the affinity mask of this thread to the mask for the whole process
+  if(GetProcessAffinityMask(GetCurrentProcess(), &dwProcessAffinityMask, &dwSystemAffinityMask) == TRUE) {
+      SetThreadAffinityMask(GetCurrentThread(), dwProcessAffinityMask);
+  }
+
   WinExe->tlsAttachThread();		  //setup TLS structure of main exe
   Win32DllBase::tlsAttachThreadToAllDlls(); //setup TLS structures of all dlls
   Win32DllBase::attachThreadToAllDlls();	  //send DLL_THREAD_ATTACH message to all dlls
