@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.33 2001-01-09 18:12:58 sandervl Exp $
+# $Id: makefile,v 1.34 2001-02-01 18:01:52 sandervl Exp $
 
 #
 # Odin32 API
@@ -16,7 +16,7 @@
 #
 # Overrides.
 #
-CDEFINES    = $(CDEFINES) -DINVERT -DSTDCALL_ENUMPROCS
+CDEFINES    = $(CDEFINES) -DINVERT
 
 
 #

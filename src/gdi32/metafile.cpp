@@ -1,4 +1,4 @@
-/* $Id: metafile.cpp,v 1.3 2000-11-04 16:29:24 sandervl Exp $ */
+/* $Id: metafile.cpp,v 1.4 2001-02-01 18:01:52 sandervl Exp $ */
 
 /*
  * GDI32 metafile code
@@ -133,16 +133,10 @@ HMETAFILE WIN32API CopyMetaFileW( HMETAFILE arg1, LPCWSTR  arg2)
 //******************************************************************************
 BOOL WIN32API EnumMetaFile( HDC hdc, HMETAFILE hMetafile, MFENUMPROC metaProc, LPARAM lParam)
 {
-#ifdef STDCALL_ENUMPROCS
-    dprintf(("GDI32: EnumMetaFile %x %x %x %x", hdc, hMetafile, metaProc, lParam));
-    //should change os2win.h
-    return O32_EnumMetaFile(hdc, hMetafile, (MFENUMPROC_O32)metaProc, lParam);
-#else
     dprintf(("GDI32: EnumMetaFile NOT IMPLEMENTED"));
     //calling convention differences
 //    return O32_EnumMetaFile(arg1, arg2, arg3, arg4);
     return 0;
-#endif
 }
 //******************************************************************************
 //******************************************************************************
