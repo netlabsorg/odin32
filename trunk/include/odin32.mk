@@ -1,4 +1,4 @@
-# $Id: odin32.mk,v 1.4 2001-07-30 22:51:34 bird Exp $
+# $Id: odin32.mk,v 1.5 2001-08-04 14:16:17 bird Exp $
 
 #
 # Odin32 API
@@ -111,8 +111,9 @@ ODIN32_POST_INC = $(ODIN32_INCLUDE)/odin32.post.mk
 
 #
 # Common rules macro. (All makefiles should have these!)
+# (Please don't change order of these rules!)
 #
-COMMONRULES = clean dep lib all
+COMMONRULES = clean dep lib all nothing
 
 
 #
