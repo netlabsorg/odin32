@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2101 2002-05-28 07:34:26 sandervl Exp $ */
+/* $Id: changelog,v 1.2102 2002-05-28 09:41:19 sandervl Exp $ */
+
+ 2002-05-29: Platon Fomichev <platon@innotek.de>
+    - USER32:   o Don't send WM_COMMAND to disabled button in DIALOG_IsDialogMessage
 
  2002-05-28: Sander van Leeuwen <sandervl@innotek.de>
     - REGSVR32: o Fixed startup
