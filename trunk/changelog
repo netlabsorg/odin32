@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.364 1999-10-25 18:23:02 achimha Exp $ */
+ /* $Id: changelog,v 1.365 1999-10-25 19:25:34 phaller Exp $ */
 
  99-10-25: Achim Hasenmueller <achimha@innotek.de>
         - KERNEL32: Added ReinitializeCriticalSection, ported WINE code
@@ -6,6 +6,7 @@
 
  99-10-25: Patrick Haller <phaller@gmx.net>
 	- ODINWRAP: Fix: Bugfix + Heap Check embracing every wrapper function 
+	- NTDLL:    Add: functions by Jens Wiesner
 
  99-10-25: Markus Montkowski <mmontkowski@gmx.de>
         - DDRAW:  Fixed bug in Color conversion of surfaces DDEX1.EXE now works,
