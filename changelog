@@ -1,4 +1,9 @@
- /* $Id: changelog,v 1.503 1999-12-04 00:03:47 sandervl Exp $ */
+ /* $Id: changelog,v 1.504 1999-12-04 13:54:17 hugh Exp $ */
+
+ 99-12-04  Markus Montkowski <mmontkowski@gmx.de>
+        - GDI32: Implemented DEFAULT_GUI_FONT for GetStockObject
+		 DIBSecttion now get the DC Palette on creation and 
+		 updated if DC Pal changes.
 
  99-12-03: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Experimental WM_ERASEBACKGND change
