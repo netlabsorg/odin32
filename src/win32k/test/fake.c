@@ -1,4 +1,4 @@
-/* $Id: fake.c,v 1.1 2000-07-16 22:18:14 bird Exp $
+/* $Id: fake.c,v 1.1.4.1 2000-08-11 02:21:09 bird Exp $
  *
  * Fake stubs for the ldr and kernel functions we imports or overloads.
  *
@@ -1478,7 +1478,7 @@ ULONG LDRCALL   fakeldrLoadImports(PMTE pmte)
          i < pmte->mte_impmodcnt && rc == NO_ERROR;
          i++, psz += 1 + *psz)
     {
-        if (!memcmp(psz+1, "DOSCALLS", *psz))
+        if (*psz == 8 && !strnicmp(psz+1, "DOSCALLS", 8))
             continue;
 
         rc = fakeldrGetMte(psz + 1, *psz, LVTYPE_DLL, CLASS_GLOBAL, &papmte[i]);
