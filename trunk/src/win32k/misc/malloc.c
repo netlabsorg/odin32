@@ -1,4 +1,4 @@
-/* $Id: malloc.c,v 1.1 1999-09-06 02:20:02 bird Exp $
+/* $Id: malloc.c,v 1.2 1999-10-14 01:19:21 bird Exp $
  *
  * Heap.
  *
@@ -18,32 +18,39 @@
 #endif
 
 #define SIGNATURE 0xBEEFFEEB
-#define CB_HDR (sizeof(MEMBLOCK) - 1) /* size of MEMBLOCK header (in bytes) */
+/*#define CB_HDR (sizeof(MEMBLOCK) - 1) /* size of MEMBLOCK header (in bytes) */
+#define CB_HDR (int)&(((PMEMBLOCK)0)->achUserData[0])
 #define PNEXT_BLOCK(a) ((PMEMBLOCK)((unsigned)(a) + CB_HDR + (a)->cbSize))
 
 #define INCL_DOS
 #define INCL_DOSERRORS
 #ifdef RING0
-#define INCL_NOAPI
+    #define INCL_NOAPI
 #else
-#define INCL_DOSMEMMGR
+    #define INCL_DOSMEMMGR
 #endif
+
 
 /******************************************************************************
 *  Headerfiles
 ******************************************************************************/
 #include <os2.h>
-
+#ifdef RING0
+    #include "dev32hlp.h"
+    #include "asmutils.h"
+#else
+    #include <builtin.h>
+    #define Int3() __interrupt(3)
+#endif
 #include "log.h"
-#include "dev32hlp.h"
-#include "asmutils.h"
 #include "malloc.h"
-#include "memory.h"
+#include <memory.h>
 
 
 /******************************************************************************
 *  Structs and Typedefs
 ******************************************************************************/
+#pragma pack(1)
 typedef struct _MEMBLOCK /* MB */
 {
 #ifdef DEBUG_ALLOC
@@ -53,16 +60,20 @@ typedef struct _MEMBLOCK /* MB */
    struct _MEMBLOCK *pNext;
    unsigned char     achUserData[1];
 } MEMBLOCK, *PMEMBLOCK;
-
+#pragma pack()
 
 /******************************************************************************
 *  Global data
 ******************************************************************************/
+/*#pragma info(nogen, nouni, noext)*/
 static PMEMBLOCK   pUsed;         /* pointer to the used memblock chain. */
 static PMEMBLOCK   pFree;         /* pointer to the free memblock chain. */
 static unsigned    cbFree;        /* bytes of free user memory in the heap.*/
-unsigned           _uHeapMinPtr; /* heap pointers are greater or equal to this.*/
-unsigned           _uHeapMaxPtr; /* heap pointers are less than this. */
+unsigned           _uHeapMinPtr;  /* heap pointers are greater or equal to this.*/
+unsigned           _uHeapMaxPtr;  /* heap pointers are less than this. */
+#ifndef RING0
+    char           fInited;       /* init flag */
+#endif
 
 /******************************************************************************
 *  Internal functions
@@ -276,11 +287,11 @@ int heapInit(unsigned cbSize)
 {
     pUsed = NULL;
 
-    #if RING0
+    #ifdef RING0
         pFree = D32Hlp_VMAlloc(VMDHA_SWAP | VMDHA_USEHIGHMEM, cbSize, ~0UL);
     #else
-        if (DosAllocMem(&pFree, cbSize, PAG_COMMIT | PAG_READ | PAG_WRITE) != 0)
-            pFree = NULL
+        if (DosAllocMem((void*)&pFree, cbSize, PAG_COMMIT | PAG_READ | PAG_WRITE) != 0)
+            pFree = NULL;
     #endif
     if (pFree == NULL)
     {
@@ -308,6 +319,9 @@ int heapInit(unsigned cbSize)
             return -2;
         }
     #endif
+    #ifdef RING3
+        fInited = TRUE;
+    #endif
     return 0;
 }
 
@@ -322,6 +336,7 @@ int heapInit(unsigned cbSize)
 void * malloc(unsigned cbSize)
 {
     void *pvRet = NULL;
+
     #ifdef DEBUG_ALLOC
         if (!_heap_check())
         {
@@ -383,9 +398,12 @@ void *realloc(void *pv, unsigned cbNew)
         {   /* expand block */
             pvRet = malloc(cbNew);
             if (pvRet != NULL)
+            {
                 memcpy(pvRet, pv, pMemblock->cbSize);
+                free(pv);
+            }
         }
-
+        return pvRet;
     }
     return NULL;
 }
@@ -597,3 +615,25 @@ int _heap_check(void)
 }
 
 
+#if !defined(RING0) && defined(__IBMC__)
+
+/**
+ * Initialize Memory Functions
+ * Called from _exeentry.
+ */
+int _rmem_init(void)
+{
+    int rc = heapInit(HEAP_SIZE);
+    return rc;
+}
+
+/**
+ * Initialize Memory Functions
+ * Called from _exeentry.
+ */
+int _rmem_term(void)
+{
+    return 0;
+}
+
+#endif

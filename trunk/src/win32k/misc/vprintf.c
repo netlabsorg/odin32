@@ -1,6 +1,6 @@
-/* $Id: vsprintf.c,v 1.2 1999-10-14 01:19:22 bird Exp $
+/* $Id: vprintf.c,v 1.1 1999-10-14 01:19:22 bird Exp $
  *
- * vsprintf and sprintf
+ * vprintf and printf
  *
  * Copyright (c) 1999 knut st. osmundsen
  *
@@ -35,14 +35,15 @@
 #else
     #define SSToDS(a) (a)
 #endif
-#include "sprintf.h"
+#include "vprintf.h"
 
 
 /*******************************************************************************
 *   Internal Functions                                                         *
 *******************************************************************************/
-static unsigned  _strnlen(const char *psz, unsigned cchMax);
 static int       _atoi_skip(const char **ppsz);
+static unsigned  _strnlen(const char *psz, unsigned cchMax);
+_Inline void     chout(int ch);
 
 
 /**
@@ -93,7 +94,7 @@ static unsigned _strnlen(const char *psz, unsigned cchMax)
  * @param     cchPrecision   Precision.
  * @param     fFlags         Flags (NTFS_*).
  */
-static char * numtostr(char *psz, long lValue, unsigned int uiBase,
+static char * numtostr(long lValue, unsigned int uiBase,
                        signed int cchWidth, signed int cchPrecision,
                        unsigned int fFlags
                        )
@@ -128,17 +129,25 @@ static char * numtostr(char *psz, long lValue, unsigned int uiBase,
         if (lValue < 0)
         {
             lValue = -lValue;
-            psz[i++] = '-';
+            chout('-');
+            i++;
         }
         else if (fFlags & (NTSF_PLUS | NTSF_BLANK))
-            psz[i++] = (char)(fFlags & NTSF_PLUS ? '+' : ' ');
+        {
+            chout(fFlags & NTSF_PLUS ? '+' : ' ');
+            i++;
+        }
     }
 
     if (fFlags & NTSF_SPECIAL && (uiBase % 8) == 0)
     {
-        psz[i++] = '0';
+        chout('0');
+        i++;
         if (uiBase == 16)
-            psz[i++] = (char)(fFlags & NTSF_CAPITAL ? 'X' : 'x');
+        {
+            chout(fFlags & NTSF_CAPITAL ? 'X' : 'x');
+            i++;
+        }
     }
 
 
@@ -147,62 +156,63 @@ static char * numtostr(char *psz, long lValue, unsigned int uiBase,
     if (fFlags & NTSF_ZEROPAD)
         while (--cchWidth >= 0)
         {
-            psz[i++] = '0';
+            chout('0');
             cchPrecision--;
         }
+    #if 0
     else if (!(fFlags & NTSF_LEFT) && cchWidth > 0)
-    {
+    {   /* not supported! */
+        /*
         for (j = i-1; j >= 0; j--)
             psz[cchWidth + j] = psz[j];
         for (j = 0; j < cchWidth; j++)
             psz[j] = ' ';
         i += cchWidth;
+        */
     }
-
-    psz += i;
+    #endif
 
     /* percision */
     while (--cchPrecision >= cchValue)
-        *psz++ = '0';
+        chout('0');
 
-    /* write number - not good enough but it works */
-    i = -1;
-    psz += cchValue;
-    do
+    ul = 1;
+    for (i = 1; i < cchValue; i++)
+        ul *= uiBase;
+    for (i = 0; i < cchValue; i++)
     {
-        psz[i--] = achDigits[lValue % uiBase];
-        lValue /= uiBase;
-    } while (lValue > 0);
+        chout(achDigits[lValue / ul]);
+        lValue %= ul;
+        ul /= uiBase;
+    }
 
     /* width if NTSF_LEFT */
     if (fFlags & NTSF_LEFT)
         while (--cchWidth >= 0)
-            *psz++ = ' ';
+            chout(' ');
 
 
-    return psz;
+    return NULL;
 }
 
 
 #pragma info(notrd)
 /**
- * Partial vsprintf implementation.
+ * Partial vprintf implementation.
  * @returns   number of
  * @param     pszBuffer   Output buffer.
  * @param     pszFormat   Format string.
  * @param     args        Argument list.
  */
-int vsprintf(char *pszBuffer, const char *pszFormat, va_list args)
+int vprintf(const char *pszFormat, va_list args)
 {
-    char *psz = pszBuffer;
-
     while (*pszFormat != '\0')
     {
         if (*pszFormat == '%')
         {
             pszFormat++;  /* skip '%' */
             if (*pszFormat == '%')    /* '%%'-> '%' */
-                *psz++ = *pszFormat++;
+                chout(*pszFormat++);
             else
             {
                 long         lValue;
@@ -271,12 +281,12 @@ int vsprintf(char *pszBuffer, const char *pszFormat, va_list args)
                     case 'c':
                         if (!(fFlags & NTSF_LEFT))
                             while (--cchWidth > 0)
-                                *psz++ = ' ';
+                                chout(' ');
 
-                        *psz++ = va_arg(args, int);
+                        chout(va_arg(args, int));
 
                         while (--cchWidth > 0)
-                            *psz++ = ' ';
+                            chout(' ');
                         continue;
 
                     case 'd': /* signed decimal integer */
@@ -304,12 +314,12 @@ int vsprintf(char *pszBuffer, const char *pszFormat, va_list args)
                         cchStr = _strnlen(pszStr, (unsigned)cchPrecision);
                         if (!(fFlags & NTSF_LEFT))
                             while (--cchWidth >= cchStr)
-                                *psz++ = ' ';
+                                 chout(' ');
                         for (i = cchStr; i > 0; i--)
-                            *psz++ = *pszStr++;
+                            chout(*pszStr++);
 
                         while (--cchWidth >= cchStr)
-                            *psz++ = ' ';
+                            chout(' ');
                         continue;
                     }
 
@@ -337,35 +347,101 @@ int vsprintf(char *pszBuffer, const char *pszFormat, va_list args)
                     lValue = va_arg(args, signed short);
                 else
                     lValue = va_arg(args, signed int);
-                psz = numtostr(psz, lValue, uiBase, cchWidth,
-                               cchPrecision, fFlags);
+                numtostr(lValue, uiBase, cchWidth, cchPrecision, fFlags);
             }
         }
         else
-            *psz++ = *pszFormat++;
+            chout(*pszFormat++);
     }
-    *psz = '\0';
 
-    return psz - pszBuffer;
+    return 0UL;
+}
+
+/* stub */
+int _vprintfieee(const char *pszFormat, va_list args)
+{
+    return vprintf(pszFormat, args);
 }
 
 
 /**
- * sprintf - wraps arguments into a vsprintf call.
+ * printf - wraps arguments into a vprintf call.
  * @returns   number of bytes written.
- * @param     pszBuffer  Pointer to output buffer.
  * @param     pszFormat  Pointer to format string.
  * @param     ...        Optional parameters.
  */
-int sprintf(char *pszBuffer, const char *pszFormat, ...)
+int printf(const char *pszFormat, ...)
 {
     int     cch;
     va_list arguments;
 
     va_start(arguments, pszFormat);
-    cch = vsprintf(pszBuffer, pszFormat, arguments);
+    cch = vprintf(pszFormat, arguments);
     va_end(arguments);
 
     return cch;
+}
+
+
+/* stub */
+int _printfieee(const char *pszFormat, ...)
+{
+    int     cch;
+    va_list arguments;
+
+    va_start(arguments, pszFormat);
+    cch = vprintf(pszFormat, arguments);
+    va_end(arguments);
+
+    return cch;
+}
+
+/* stub */
+int _printf_ansi(const char *pszFormat, ...)
+{
+    int     cch;
+    va_list arguments;
+
+    va_start(arguments, pszFormat);
+    cch = vprintf(pszFormat, arguments);
+    va_end(arguments);
+
+    return cch;
+}
+
+
+
+
+/**
+ * Writes a char to output device.
+ * @param     ch  Char to write.
+ * @status    completely
+ * @author    knut st. osmundsen
+ */
+_Inline void  chout(int ch)
+{
+    #ifdef RING0
+
+    #else
+        ULONG ulWrote;
+    #endif
+
+    if (ch != '\r')
+    {
+        if (ch == '\n')
+        {
+            static char chReturn = '\r';
+            #ifdef RING0
+
+            #else
+                DosWrite(1, (void*)&chReturn, 1, &ulWrote);
+            #endif
+        }
+        #ifdef RING0
+
+        #else
+            DosWrite(1, (void*)&ch, 1, &ulWrote);
+        #endif
+    }
 }
 

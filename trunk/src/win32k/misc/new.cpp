@@ -1,4 +1,4 @@
-/* $Id: new.cpp,v 1.1 1999-09-06 02:20:02 bird Exp $
+/* $Id: new.cpp,v 1.2 1999-10-14 01:19:21 bird Exp $
  *
  * new - new and delete operators.
  *
@@ -19,10 +19,11 @@
 #include <os2.h>
 
 #include "new.h"
-#include "cout.h"
 #include "malloc.h"
+#include "log.h"
 
 
+#pragma info(none)
 /**
  * New.
  * @returns   pointer to allocated memory.
@@ -39,7 +40,7 @@ void *operator new(size_t size)
  */
 void *operator new(size_t size, void *location)
 {
-    cout << "operator new(size,location) not implemented"<< endl;
+    dprintf(("operator new(size,location) not implemented\n"));
     return NULL;
 }
 
@@ -49,7 +50,7 @@ void *operator new(size_t size, void *location)
  */
 void *operator new[](size_t size)
 {
-    cout << "operator new[](size) not implemented"<< endl;
+    dprintf(("operator new[](size) not implemented\n"));
     return NULL;
 }
 
@@ -59,11 +60,11 @@ void *operator new[](size_t size)
  */
 void *operator new[](size_t size, void *location)
 {
-    cout << "operator new[](size,location) not implemented"<< endl;
+    dprintf(("operator new[](size,location) not implemented\n"));
     return NULL;
 }
 
-
+#ifndef __DEBUG_ALLOC__
 /**
  * Delete.
  * @param     location  Pointer to memory block which are to be freed.
@@ -79,6 +80,70 @@ void operator delete(void *location)
  */
 void operator delete[](void *location)
 {
-    cout << "operator delete[](location) - not implemented" << endl;
+    dprintf(("operator delete[](location) - not implemented\n"));
+}
+#endif
+
+/***
+ *  debug!
+ ***/
+
+/**
+ * New.
+ * @returns   pointer to allocated memory.
+ * @param     Size  Size requested.
+ */
+void *operator new(size_t size, const char *filename, size_t lineno)
+{
+    return malloc(size);
 }
 
+
+/**
+ * stub
+ */
+void *operator new(size_t size, const char *filename, size_t lineno, void *location)
+{
+    dprintf(("operator new(size,location) not implemented\n"));
+    return NULL;
+}
+
+
+/**
+ * stub
+ */
+void *operator new[](size_t size, const char *filename, size_t lineno)
+{
+    dprintf(("operator new[](size) not implemented\n"));
+    return NULL;
+}
+
+
+/**
+ * stub
+ */
+void *operator new[](size_t size, const char *filename, size_t lineno, void *location)
+{
+    dprintf(("operator new[](size,location) not implemented\n"));
+    return NULL;
+}
+
+#ifdef __DEBUG_ALLOC__
+/**
+ * Delete.
+ * @param     location  Pointer to memory block which are to be freed.
+ */
+void operator delete(void *location, const char *filename, size_t lineno)
+{
+    free(location);
+}
+
+
+/**
+ * stub
+ */
+void operator delete[](void *location, const char *filename, size_t lineno)
+{
+    dprintf(("operator delete[](location) - not implemented\n"));
+}
+#endif
