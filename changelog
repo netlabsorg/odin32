@@ -1,8 +1,13 @@
-/* $Id: changelog,v 1.2021 2002-03-18 10:04:36 sandervl Exp $ */
+/* $Id: changelog,v 1.2022 2002-03-18 13:01:41 sandervl Exp $ */
 
  2002-03-18: Sander van Leeuwen <sandervl@xs4all.nl>
     - WGSS50:   o WGSS update from IBM
     - WSOCK32:  o Return requested version in WSAStartup
+
+ 2002-03-16: Platon Fomichev <platon@innotek.de>
+    - COMCTL32: o Ownerdrawn listview control items have no margin
+    - USER32:   o DIB_BitmapInfoSize fix for 24 bpp bitmaps
+    - WNASPI32: o Added DisableASPI function
 
  2002-03-14: knut st. osmundsen <bird@anduin.net>
     - Fastdep:  o Some minor -E<somthing> issues (non Odin32 use).
