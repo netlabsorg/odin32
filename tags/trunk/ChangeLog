@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.1389 2001-04-29 14:39:12 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1390 2001-04-29 16:24:00 sandervl Exp $ */
+
+ 2001-04-29: Dietrich Teickner <Dietrich_Teickner@t-online.de>
+    - SHELL32:  o Update for SHFileOperationA (FO_COPY)
 
  2001-04-29: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMCTL32: o Resync with latest Wine (20010418) (animate, comboex, rebar, 
