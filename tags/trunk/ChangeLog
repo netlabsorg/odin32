@@ -1,4 +1,10 @@
-/* $Id: ChangeLog,v 1.1660 2001-08-25 13:39:06 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1661 2001-08-26 14:20:24 sandervl Exp $ */
+
+ 2001-08-26: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Convert icon & cursor to OS/2 format in CreateIconIndirect,
+                  CreateCursor & CreateIcon
+                o Convert RGB 555 to 565 for 16 bits icons and cursors 
+                  (win to os/2 icon/cursor conversion)
 
  2001-08-25: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Set last error to ERROR_ALREADY_EXISTS when CreateMutex,
