@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.6 1999-09-04 19:51:47 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.7 1999-09-05 12:03:33 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -149,15 +149,18 @@ Win32BaseWindow *getParent()                    { return (Win32BaseWindow *)Chil
   static HWND   GetActiveWindow();
 	 //Window handle has already been verified, so just return true
          BOOL   IsWindow()                    { return TRUE; };
+	 BOOL   IsDialog()                    { return fIsDialog; };
+
          BOOL   IsWindowEnabled();
          BOOL   IsWindowVisible();
          BOOL   IsUnicode()  { return isUnicode; };
-
          BOOL   GetWindowRect(PRECT pRect);
          int    GetWindowTextLength();
-         int    GetWindowText(LPSTR lpsz, int cch);
-         BOOL   SetWindowText(LPSTR lpsz);
-          BOOL  hasWindowName(LPSTR wndname, BOOL fUnicode = 0);
+         int    GetWindowTextA(LPSTR lpsz, int cch);
+         int    GetWindowTextW(LPWSTR lpsz, int cch);
+         BOOL   SetWindowTextA(LPSTR lpsz);
+         BOOL   SetWindowTextW(LPWSTR lpsz);
+         BOOL   hasWindowName(LPSTR wndname, BOOL fUnicode = 0);
 Win32WndClass  *getClass()  { return windowClass; };
         char   *getWindowNameA()              { return windowNameA; };
 Win32BaseWindow *getOwner()                   { return owner; };
