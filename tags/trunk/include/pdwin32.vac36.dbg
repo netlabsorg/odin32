@@ -1,4 +1,4 @@
-# $Id: pdwin32.vac36.dbg,v 1.19 2000-09-20 20:42:36 sandervl Exp $
+# $Id: pdwin32.vac36.dbg,v 1.20 2000-09-28 03:16:24 bird Exp $
 # ODIN / win32os2 Project
 #
 # DEBUG makefile for the VAC 3.6.5 compiler environment
@@ -9,8 +9,10 @@
 SOMLIB   = somtk.lib
 RTLLIB   = cpprms36.lib
 RTLLIB_O = cpprmo36.lib
+DLLENTRY = $(PDWIN32_LIB)\dllentry.obj
 
-OBJDIR   = .\bin\debug
+OBJDIR   = .\bin\debug.vac36
+
 
 #
 # Tools

@@ -1,4 +1,4 @@
-# $Id: pdwin32.post,v 1.11 2000-09-21 11:17:28 bird Exp $
+# $Id: pdwin32.post,v 1.12 2000-09-28 03:16:23 bird Exp $
 #
 # Odin32 API
 #
@@ -12,95 +12,16 @@
 # Define CLEAN2 to invoke a second clean rule named 'clean2'.
 # Define NOCLEAN to exclude the clean rule. (Remember to make your own!)
 #
-
-
-# Copy library rule.
-!ifndef ORGTARGET
-$(PDWIN32_LIB)\$(TARGET).lib: $(TARGET).lib
-!else
-$(PDWIN32_LIB)\$(ORGTARGET).lib: $(ORGTARGET).lib
-!endif
-    $(CP) $** $@
-
-
-# Copy dll rule.
-!ifndef EXETARGET
-$(PDWIN32_BIN)\$(TARGET).dll: $(OBJDIR)\$(TARGET).dll
-!else
-$(PDWIN32_BIN)\$(TARGET).exe: $(OBJDIR)\$(TARGET).exe
-!endif
-    cd $(OBJDIR)
-    $(MAPSYM) $(TARGET).map
-    cd ..\..
-    $(CP) $(OBJDIR)\$(TARGET).sym $(PDWIN32_BIN)
-    $(CP) $** $@
-    $(CP) $** $(@D)..\..\$(@F)
-    $(CP) $(OBJDIR)\$(TARGET).sym $(@D)..\..
-
-
-!ifndef NOTEXPDEF
-# make library from the <>exp.def file.
-!ifndef ORGTARGET
-$(TARGET).LIB: $(TARGET)exp.def
-!else
-$(ORGTARGET).LIB: $(ORGTARGET)exp.def
-!endif
-    $(IMPLIB) $(IMPLIBFLAGS) $@ $**
-    $(CP) $@ $(PDWIN32_LIB)
-
-
-# make the <>exp.def file.
-!ifndef ORGTARGET
-$(TARGET)exp.def: $(TARGET).def
-!else
-$(ORGTARGET)exp.def: $(ORGTARGET).def
-!endif
-    $(IMPDEF) $** $@
-!endif
-
-
-# Create the object directory.
-$(OBJDIR):
-    @if not exist bin $(MKDIR) bin
-    @if not exist $(OBJDIR) $(MKDIR) $(OBJDIR)
-
-
+# New style: (define NEW_STYLE)
+# Define NO_ALL_RULE to not make default all rule.
+# Define NO_LIB_RULE to not make default lib rule.
+# Define NO_DLL_RULE to not make default dll rule.
+# Define NO_EXE_RULE to not make default exe rule.
+# Define NO_LNKFILE_RULE to not make default link-file rule.
+# Define NO_DEP_RULE to not make dependencies rule.
+# Define NO_CLEAN_RULE to not make clean rule (same as NOCLEAN - use this!).
 #
-# General clean rule. To clean more add it to CLEANEXTRAS!
-#
-!ifndef NOCLEAN
-!ifndef CLEAN2
-clean:
-!else
-clean:  clean2
-!endif
-    $(RM) *.LIB *.res *.map *.pch \
-!if "$(OBJDIR)" != ""
-     $(OBJDIR)\* \
-!endif
-!ifndef LOCALCLEAN
-        $(PDWIN32_LIB)\$(TARGET).LIB \
-!ifndef EXETARGET
-        $(PDWIN32_BIN)\$(TARGET).dll $(TARGET)exp.def *.dll \
-!else
-        $(PDWIN32_BIN)\$(TARGET).exe *.exe \
-!endif
-        $(CLEANEXTRAS)
-!else
-        $(CLEANEXTRAS)
-!endif
-!endif
 
+# Include compiler spesific post rule file.
+!include $(PDWIN32_INCLUDE)/pdwin32.$(CCENV).post
 
-#
-# Include the .depend file.
-#   If the depend file don't exists we'll complain about it.
-#
-!ifndef NODEP
-!   if [$(EXISTS) .depend] == 0
-!       include .depend
-!   else
-!       if [$(ECHO) .depend doesn't exist]
-!       endif
-!   endif
-!endif
