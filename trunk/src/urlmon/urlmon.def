@@ -1,4 +1,4 @@
-; $Id: urlmon.def,v 1.2 2000-12-16 22:53:46 bird Exp $
+; $Id: urlmon.def,v 1.3 2001-07-07 04:36:57 bird Exp $
 
 LIBRARY URLMON INITINSTANCE
 DESCRIPTION 'Odin32 System DLL - URLMon'
@@ -26,11 +26,11 @@ EXPORTS
 ;    HlinkNavigateMoniker               @19
 ;    HlinkNavigateString                @20
 ;    HlinkSimpleNavigateToMoniker           @21
-;    HlinkSimpleNavigateToString            @22
+     HlinkSimpleNavigateToString = _HlinkSimpleNavigateToString@32   @22
 ;    IsAsyncMoniker                 @23
 ;    IsValidURL                     @24
 ;    MkParseDisplayNameEx               @25
-;    RegisterBindStatusCallback             @26
+     RegisterBindStatusCallback  = _RegisterBindStatusCallback@16    @26
 ;    RegisterFormatEnumerator               @27
 ;    RegisterMediaTypeClass             @28
 ;    RegisterMediaTypes                 @29
