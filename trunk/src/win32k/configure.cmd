@@ -1,9 +1,9 @@
-/* $Id: configure.cmd,v 1.21 2001-06-10 01:43:36 bird Exp $
+/* $Id: configure.cmd,v 1.22 2002-04-29 11:29:16 bird Exp $
  *
  * Configuration script.
  * Generates makefile.inc and an empty .depend file.
  *
- * Copyright (c) 1999-2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 1999-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -14,6 +14,7 @@
     /* Argument defaults */
     fInteractive    = 1;
     fWin32k         = 1;
+    fWithKLib       = 0;
 
     /* parse arguments */
     parse arg asArgs.1 asArgs.2 asArgs.3 asArgs.4 asArgs.5 asArgs.6 asArgs.7 asArgs.8 asArgs.9
@@ -34,13 +35,26 @@
                     fInteractive = 1;
                 when (ch = 'W') then
                     fWin32k = 0;
+                when (ch = '-') then
+                do
+                    parse var sArg sParm'='sOpt
+                    say sParm
+                    select
+                        when (sParm = '-WITH-KLIB') then
+                            fWithKLib = 1;
+                        otherwise
+                            say 'syntax error ('asArgs.i')';
+                            exit(2);
+                    end
+                end
                 when (ch = '?' | ch = 'H' | substr(sArg, 1, 2) = '-H') then
                 do
-                    say 'Odin32 Configure.cmd. $Revision: 1.21 $.'
-                    say 'syntax: Configure.cmd [-n] [-w]'
-                    say '  -n   Noninteractive.'
-                    say '  -w   Don''t build Win32k.'
-                    say '  -h   This text.'
+                    say 'syntax: Configure.cmd [options]'
+                    say '  -n           Noninteractive.'
+                    say '  -w           Don''t build Win32k.'
+                    say '  --with-klib  Build with kLib. (Will checkout kLib for you.)'
+                    say '  -h           This text.'
+                    say '  -h           This text.'
                     exit(1);
                 end
                 otherwise
@@ -68,6 +82,8 @@
         call lineout sIncFile, '# Note! These should be absolute paths!'
         call lineout sIncFile, '################################################################################'
         sWin32kBase = directory();
+        call lineout sIncFile, 'PATH_WIN32K      =' sWin32kBase;
+        call lineout sIncFile, 'PATH_KKRNLLIB    =' sWin32kBase'\kKrnlLib';
         call lineout sIncFile, 'WIN32KBASE       =' sWin32kBase;
         call lineout sIncFile, 'WIN32KDEV16      =' sWin32kBase'\dev16'
         call lineout sIncFile, 'WIN32KDEV32      =' sWin32kBase'\dev32'
@@ -175,6 +191,27 @@
         say 'oops, failed to open outputfile,' sIncFile;
         exit 1;
     end
+
+    /*
+     * Checkout K-Lib
+     */
+    if (fWithKLib) then
+    do
+        sDir = directory();
+        if (chdir('kKrnlLib')) then
+        do
+            if (fInteractive) then
+            do
+                say 'Log in to the kLib cvs repository? (Y/N)';
+                pull sAnswer
+                if (substr(sAnswer, 1, 1) = 'Y') then
+                    'cvs -d:pserver:readonly@www.netlabs.org:/netlabs.cvs/ktaskmanager login'
+            end
+            'cvs -d:pserver:readonly@www.netlabs.org:/netlabs.cvs/ktaskmanager co kLibSrc kLibInclude'
+        end
+        call directory sDir;
+    end
+
     exit 0;
 
 
@@ -262,4 +299,22 @@ ValidatePath: procedure expose fWin32k
     say 'Warning: Validatation of the' sPath 'failed. Win32k.sys will not be built.'
     say '         path='sPath;
 return '';
+
+
+
+/**
+ * Changes the directory.
+ * On error we will call failure.
+ * @returns success indicator.
+ */
+ChDir: procedure expose sStartDir;
+    parse arg sDir
+
+    'cd' sDir
+    if (rc <> 0) then
+    do
+        call failure rc, 'Failed to ChDir into' sDir '(CWD='directory()').'
+        return 0;
+    end
+return 1;
 
