@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2395 2002-12-20 15:09:25 sandervl Exp $ */
+/* $Id: changelog,v 1.2396 2002-12-27 15:25:24 sandervl Exp $ */
+
+ 2002-12-27: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Cleaned up console code (hardcoded WriteLog calls)
+                o Fixed stack address detection in VirtualFree
 
  2002-12-20: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Removed obsolete code for Glide drivers and IOPL
