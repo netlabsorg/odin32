@@ -1,6 +1,5 @@
-/* $Id: bindctx.c,v 1.2 2001-09-05 13:17:07 bird Exp $ */
 /***************************************************************************************
- *                        BindCtx implementation
+ *	                      BindCtx implementation
  *
  *  Copyright 1999  Noomen Hamza
  ***************************************************************************************/
@@ -17,10 +16,22 @@
 #include "debugtools.h"
 #include "heap.h"
 
+#ifdef __WIN32OS2__
+#undef FIXME
+#undef TRACE
+#ifdef DEBUG
+#define TRACE WriteLog("OLE32: %s", __FUNCTION__); WriteLog
+#define FIXME WriteLog("FIXME OLE32: %s", __FUNCTION__); WriteLog
+#else
+#define TRACE 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
+#define FIXME 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
+#endif
+#endif
+
 DEFAULT_DEBUG_CHANNEL(ole);
 
 /* represent the first size table and it's increment block size */
-#define  BLOCK_TAB_SIZE 10
+#define  BLOCK_TAB_SIZE 10 
 #define  MAX_TAB_SIZE   0xFFFFFFFF
 
 /* data structure of the BindCtx table elements */
@@ -38,7 +49,7 @@ typedef struct BindCtxObject{
 typedef struct BindCtxImpl{
 
     ICOM_VFIELD(IBindCtx); /* VTable relative to the IBindCtx interface.*/
-
+                                     
     ULONG ref; /* reference counter for this object */
 
     BindCtxObject* bindCtxTable; /* this is a table in which all bounded objects are stored*/
@@ -102,7 +113,7 @@ HRESULT WINAPI BindCtxImpl_QueryInterface(IBindCtx* iface,REFIID riid,void** ppv
   /* Perform a sanity check on the parameters.*/
   if ( (This==0) || (ppvObject==0) )
       return E_INVALIDARG;
-
+  
   /* Initialize the return parameter.*/
   *ppvObject = 0;
 
@@ -116,7 +127,7 @@ HRESULT WINAPI BindCtxImpl_QueryInterface(IBindCtx* iface,REFIID riid,void** ppv
   /* Check that we obtained an interface.*/
   if ((*ppvObject)==0)
       return E_NOINTERFACE;
-
+  
    /* Query Interface always increases the reference count by one when it is successful */
   BindCtxImpl_AddRef(iface);
 
@@ -223,9 +234,9 @@ HRESULT WINAPI BindCtxImpl_RegisterObjectBound(IBindCtx* iface,IUnknown* punk)
 
     if (punk==NULL)
         return E_POINTER;
-
+    
     IUnknown_AddRef(punk);
-
+    
     /* put the object in the first free element in the table */
     This->bindCtxTable[lastIndex].pObj = punk;
     This->bindCtxTable[lastIndex].pkeyObj = NULL;
@@ -263,15 +274,15 @@ HRESULT WINAPI BindCtxImpl_RevokeObjectBound(IBindCtx* iface, IUnknown* punk)
 
     /* check if the object was registred or not */
     if (BindCtxImpl_GetObjectIndex(This,punk,NULL,&index)==S_FALSE)
-
+        
         return MK_E_NOTBOUND;
 
     IUnknown_Release(This->bindCtxTable[index].pObj);
-
+    
     /* left-shift all elements in the right side of the current revoked object */
     for(j=index; j<This->bindCtxTableLastIndex-1; j++)
         This->bindCtxTable[j]= This->bindCtxTable[j+1];
-
+    
     This->bindCtxTableLastIndex--;
 
     return S_OK;
@@ -307,7 +318,7 @@ HRESULT WINAPI BindCtxImpl_SetBindOptions(IBindCtx* iface,LPBIND_OPTS2 pbindopts
 
     if (pbindopts==NULL)
         return E_POINTER;
-
+    
     if (pbindopts->cbStruct > sizeof(BIND_OPTS2))
     {
         WARN("invalid size");
@@ -351,7 +362,7 @@ HRESULT WINAPI BindCtxImpl_GetRunningObjectTable(IBindCtx* iface,IRunningObjectT
 
     if (pprot==NULL)
         return E_POINTER;
-
+    
     res=GetRunningObjectTable(0, pprot);
 
     return res;
@@ -368,7 +379,7 @@ HRESULT WINAPI BindCtxImpl_RegisterObjectParam(IBindCtx* iface,LPOLESTR pszkey, 
 
     if (punk==NULL)
         return E_INVALIDARG;
-
+    
     IUnknown_AddRef(punk);
 
     This->bindCtxTable[This->bindCtxTableLastIndex].pObj = punk;
@@ -389,7 +400,7 @@ HRESULT WINAPI BindCtxImpl_RegisterObjectParam(IBindCtx* iface,LPOLESTR pszkey, 
 }
 
     This->bindCtxTableLastIndex++;
-
+    
     if (This->bindCtxTableLastIndex == This->bindCtxTableSize){ /* table is full ! must be resized */
 
         This->bindCtxTableSize+=BLOCK_TAB_SIZE; /* new table size */
@@ -419,12 +430,12 @@ HRESULT WINAPI BindCtxImpl_GetObjectParam(IBindCtx* iface,LPOLESTR pszkey, IUnkn
         return E_POINTER;
 
     *punk=0;
-
+    
     if (BindCtxImpl_GetObjectIndex(This,NULL,pszkey,&index)==S_FALSE)
         return E_FAIL;
 
     IUnknown_AddRef(This->bindCtxTable[index].pObj);
-
+    
     *punk = This->bindCtxTable[index].pObj;
 
     return S_OK;
@@ -446,11 +457,11 @@ HRESULT WINAPI BindCtxImpl_RevokeObjectParam(IBindCtx* iface,LPOLESTR ppenum)
 
     /* release the object if it's found */
     IUnknown_Release(This->bindCtxTable[index].pObj);
-
+    
     /* remove the object from the table with a left-shifting of all objects in the right side */
     for(j=index; j<This->bindCtxTableLastIndex-1; j++)
         This->bindCtxTable[j]= This->bindCtxTable[j+1];
-
+    
     This->bindCtxTableLastIndex--;
 
     return S_OK;
@@ -476,7 +487,7 @@ HRESULT WINAPI BindCtxImpl_GetObjectIndex(BindCtxImpl* This,
 
     DWORD i;
     BYTE found=0;
-
+    
     TRACE("(%p,%p,%p,%p)\n",This,punk,pszkey,index);
 
     if (punk==NULL)

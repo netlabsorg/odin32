@@ -1,4 +1,3 @@
-/* $Id: stg_stream.c,v 1.3 2001-09-05 13:17:12 bird Exp $ */
 /*
  * Compound Storage (32 bit version)
  * Stream implementation
@@ -27,6 +26,18 @@
 #include "debugtools.h"
 
 #include "storage32.h"
+
+#ifdef __WIN32OS2__
+#undef FIXME
+#undef TRACE
+#ifdef DEBUG
+#define TRACE WriteLog("OLE32: %s", __FUNCTION__); WriteLog
+#define FIXME WriteLog("FIXME OLE32: %s", __FUNCTION__); WriteLog
+#else
+#define TRACE 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
+#define FIXME 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
+#endif
+#endif
 
 DEFAULT_DEBUG_CHANNEL(storage);
 
@@ -65,14 +76,14 @@ static ICOM_VTABLE(IStream) StgStreamImpl_Vtbl =
  *    ownerProperty - Index of the property that points to this stream.
  */
 StgStreamImpl* StgStreamImpl_Construct(
-        StorageBaseImpl* parentStorage,
+		StorageBaseImpl* parentStorage,
     DWORD            grfMode,
     ULONG            ownerProperty)
 {
   StgStreamImpl* newStream;
 
   newStream = HeapAlloc(GetProcessHeap(), 0, sizeof(StgStreamImpl));
-
+  
   if (newStream!=0)
   {
     /*
@@ -80,7 +91,7 @@ StgStreamImpl* StgStreamImpl_Construct(
      */
     ICOM_VTBL(newStream) = &StgStreamImpl_Vtbl;
     newStream->ref       = 0;
-
+    
     /*
      * We want to nail-down the reference to the storage in case the
      * stream out-lives the storage in the client application.
@@ -88,15 +99,15 @@ StgStreamImpl* StgStreamImpl_Construct(
     newStream->parentStorage = parentStorage;
     IStorage_AddRef((IStorage*)newStream->parentStorage);
 
-    newStream->grfMode = grfMode;
+    newStream->grfMode = grfMode;    
     newStream->ownerProperty = ownerProperty;
-
+    
     /*
      * Start the stream at the begining.
      */
     newStream->currentPosition.s.HighPart = 0;
     newStream->currentPosition.s.LowPart = 0;
-
+    
     /*
      * Initialize the rest of the data.
      */
@@ -104,21 +115,21 @@ StgStreamImpl* StgStreamImpl_Construct(
     newStream->streamSize.s.LowPart  = 0;
     newStream->bigBlockChain       = 0;
     newStream->smallBlockChain     = 0;
-
+    
     /*
      * Read the size from the property and determine if the blocks forming
      * this stream are large or small.
      */
     StgStreamImpl_OpenBlockChain(newStream);
   }
-
+  
   return newStream;
 }
 
 /***
  * This is the destructor of the StgStreamImpl class.
  *
- * This method will clean-up all the resources used-up by the given StgStreamImpl
+ * This method will clean-up all the resources used-up by the given StgStreamImpl 
  * class. The pointer passed-in to this function will be freed and will not
  * be valid anymore.
  */
@@ -150,7 +161,7 @@ void StgStreamImpl_Destroy(StgStreamImpl* This)
   /*
    * Finally, free the memory used-up by the class.
    */
-  HeapFree(GetProcessHeap(), 0, This);
+  HeapFree(GetProcessHeap(), 0, This);  
 }
 
 /***
@@ -158,9 +169,9 @@ void StgStreamImpl_Destroy(StgStreamImpl* This)
  * class
  */
 HRESULT WINAPI StgStreamImpl_QueryInterface(
-          IStream*     iface,
-          REFIID         riid,        /* [in] */
-          void**         ppvObject)   /* [iid_is][out] */
+		  IStream*     iface,
+		  REFIID         riid,	      /* [in] */          
+		  void**         ppvObject)   /* [iid_is][out] */ 
 {
   StgStreamImpl* const This=(StgStreamImpl*)iface;
 
@@ -169,36 +180,36 @@ HRESULT WINAPI StgStreamImpl_QueryInterface(
    */
   if (ppvObject==0)
     return E_INVALIDARG;
-
+  
   /*
    * Initialize the return parameter.
    */
   *ppvObject = 0;
-
+  
   /*
    * Compare the riid with the interface IDs implemented by this object.
    */
-  if (memcmp(&IID_IUnknown, riid, sizeof(IID_IUnknown)) == 0)
+  if (memcmp(&IID_IUnknown, riid, sizeof(IID_IUnknown)) == 0) 
   {
     *ppvObject = (IStream*)This;
   }
-  else if (memcmp(&IID_IStream, riid, sizeof(IID_IStream)) == 0)
+  else if (memcmp(&IID_IStream, riid, sizeof(IID_IStream)) == 0) 
   {
     *ppvObject = (IStream*)This;
   }
-
+  
   /*
    * Check that we obtained an interface.
    */
   if ((*ppvObject)==0)
     return E_NOINTERFACE;
-
+  
   /*
    * Query Interface always increases the reference count by one when it is
    * successful
    */
   StgStreamImpl_AddRef(iface);
-
+  
   return S_OK;;
 }
 
@@ -207,12 +218,12 @@ HRESULT WINAPI StgStreamImpl_QueryInterface(
  * class
  */
 ULONG WINAPI StgStreamImpl_AddRef(
-        IStream* iface)
+		IStream* iface)
 {
   StgStreamImpl* const This=(StgStreamImpl*)iface;
 
   This->ref++;
-
+  
   return This->ref;
 }
 
@@ -221,16 +232,16 @@ ULONG WINAPI StgStreamImpl_AddRef(
  * class
  */
 ULONG WINAPI StgStreamImpl_Release(
-        IStream* iface)
+		IStream* iface)
 {
   StgStreamImpl* const This=(StgStreamImpl*)iface;
 
   ULONG newRef;
-
+  
   This->ref--;
-
+  
   newRef = This->ref;
-
+  
   /*
    * If the reference count goes down to 0, perform suicide.
    */
@@ -238,7 +249,7 @@ ULONG WINAPI StgStreamImpl_Release(
   {
     StgStreamImpl_Destroy(This);
   }
-
+  
   return newRef;
 }
 
@@ -272,18 +283,18 @@ void StgStreamImpl_OpenBlockChain(
    * Read the information from the property.
    */
   readSucessful = StorageImpl_ReadProperty(This->parentStorage->ancestorStorage,
-                         This->ownerProperty,
-                         &curProperty);
-
+					     This->ownerProperty,
+					     &curProperty);
+  
   if (readSucessful)
   {
     This->streamSize = curProperty.size;
-
+    
     /*
      * This code supports only streams that are <32 bits in size.
      */
     assert(This->streamSize.s.HighPart == 0);
-
+    
     if(curProperty.startingBlock == BLOCK_END_OF_CHAIN)
     {
       assert( (This->streamSize.s.HighPart == 0) && (This->streamSize.s.LowPart == 0) );
@@ -291,18 +302,18 @@ void StgStreamImpl_OpenBlockChain(
     else
     {
       if ( (This->streamSize.s.HighPart == 0) &&
-       (This->streamSize.s.LowPart < LIMIT_TO_USE_SMALL_BLOCK) )
+	   (This->streamSize.s.LowPart < LIMIT_TO_USE_SMALL_BLOCK) )
       {
-    This->smallBlockChain = SmallBlockChainStream_Construct(
-                                This->parentStorage->ancestorStorage,
-                                This->ownerProperty);
+	This->smallBlockChain = SmallBlockChainStream_Construct(
+								This->parentStorage->ancestorStorage,	
+								This->ownerProperty);
       }
       else
       {
-    This->bigBlockChain = BlockChainStream_Construct(
-                             This->parentStorage->ancestorStorage,
-                             NULL,
-                             This->ownerProperty);
+	This->bigBlockChain = BlockChainStream_Construct(
+							 This->parentStorage->ancestorStorage,
+							 NULL,
+							 This->ownerProperty);
       }
     }
   }
@@ -317,11 +328,11 @@ void StgStreamImpl_OpenBlockChain(
  *
  * See the documentation of ISequentialStream for more info.
  */
-HRESULT WINAPI StgStreamImpl_Read(
-          IStream*     iface,
-          void*          pv,        /* [length_is][size_is][out] */
-          ULONG          cb,        /* [in] */
-          ULONG*         pcbRead)   /* [out] */
+HRESULT WINAPI StgStreamImpl_Read( 
+		  IStream*     iface,
+		  void*          pv,        /* [length_is][size_is][out] */
+		  ULONG          cb,        /* [in] */                     
+		  ULONG*         pcbRead)   /* [out] */                    
 {
   StgStreamImpl* const This=(StgStreamImpl*)iface;
 
@@ -329,21 +340,21 @@ HRESULT WINAPI StgStreamImpl_Read(
   ULONG bytesToReadFromBuffer;
 
   TRACE("(%p, %p, %ld, %p)\n",
-    iface, pv, cb, pcbRead);
+	iface, pv, cb, pcbRead);
 
-  /*
+  /* 
    * If the caller is not interested in the nubmer of bytes read,
    * we use another buffer to avoid "if" statements in the code.
    */
   if (pcbRead==0)
     pcbRead = &bytesReadBuffer;
-
+  
   /*
    * Using the known size of the stream, calculate the number of bytes
    * to read from the block chain
    */
   bytesToReadFromBuffer = min( This->streamSize.s.LowPart - This->currentPosition.s.LowPart, cb);
-
+  
   /*
    * Depending on the type of chain that was opened when the stream was constructed,
    * we delegate the work to the method that read the block chains.
@@ -351,19 +362,19 @@ HRESULT WINAPI StgStreamImpl_Read(
   if (This->smallBlockChain!=0)
   {
     SmallBlockChainStream_ReadAt(This->smallBlockChain,
-                 This->currentPosition,
-                 bytesToReadFromBuffer,
-                 pv,
-                 pcbRead);
-
+				 This->currentPosition,
+				 bytesToReadFromBuffer,
+				 pv,
+				 pcbRead);
+    
   }
   else if (This->bigBlockChain!=0)
   {
     BlockChainStream_ReadAt(This->bigBlockChain,
-                This->currentPosition,
-                bytesToReadFromBuffer,
-                pv,
-                pcbRead);
+			    This->currentPosition,
+			    bytesToReadFromBuffer,
+			    pv,
+			    pcbRead);
   }
   else
   {
@@ -386,7 +397,7 @@ HRESULT WINAPI StgStreamImpl_Read(
    * Advance the pointer for the number of positions read.
    */
   This->currentPosition.s.LowPart += *pcbRead;
-
+  
   /*
    * The function returns S_OK if the buffer was filled completely
    * it returns S_FALSE if the end of the stream is reached before the
@@ -394,10 +405,10 @@ HRESULT WINAPI StgStreamImpl_Read(
    */
   if(*pcbRead == cb)
     return S_OK;
-
+  
   return S_FALSE;
 }
-
+        
 /***
  * This method is part of the ISequentialStream interface.
  *
@@ -409,10 +420,10 @@ HRESULT WINAPI StgStreamImpl_Read(
  * See the documentation of ISequentialStream for more info.
  */
 HRESULT WINAPI StgStreamImpl_Write(
-              IStream*     iface,
-          const void*    pv,          /* [size_is][in] */
-          ULONG          cb,          /* [in] */
-          ULONG*         pcbWritten)  /* [out] */
+	          IStream*     iface,
+		  const void*    pv,          /* [size_is][in] */ 
+		  ULONG          cb,          /* [in] */          
+		  ULONG*         pcbWritten)  /* [out] */         
 {
   StgStreamImpl* const This=(StgStreamImpl*)iface;
 
@@ -420,8 +431,8 @@ HRESULT WINAPI StgStreamImpl_Write(
   ULONG bytesWritten = 0;
 
   TRACE("(%p, %p, %ld, %p)\n",
-    iface, pv, cb, pcbWritten);
-
+	iface, pv, cb, pcbWritten);
+ 
   /*
    * Do we have permission to write to this stream?
    */
@@ -435,7 +446,7 @@ HRESULT WINAPI StgStreamImpl_Write(
    */
   if (pcbWritten == 0)
     pcbWritten = &bytesWritten;
-
+  
   /*
    * Initialize the out parameter
    */
@@ -450,7 +461,7 @@ HRESULT WINAPI StgStreamImpl_Write(
     newSize.s.HighPart = 0;
     newSize.s.LowPart = This->currentPosition.s.LowPart + cb;
   }
-
+  
   /*
    * Verify if we need to grow the stream
    */
@@ -459,7 +470,7 @@ HRESULT WINAPI StgStreamImpl_Write(
     /* grow stream */
     IStream_SetSize(iface, newSize);
   }
-
+  
   /*
    * Depending on the type of chain that was opened when the stream was constructed,
    * we delegate the work to the method that readwrites to the block chains.
@@ -467,28 +478,28 @@ HRESULT WINAPI StgStreamImpl_Write(
   if (This->smallBlockChain!=0)
   {
     SmallBlockChainStream_WriteAt(This->smallBlockChain,
-                  This->currentPosition,
-                  cb,
-                  pv,
-                  pcbWritten);
-
+				  This->currentPosition,
+				  cb,
+				  pv,
+				  pcbWritten);
+    
   }
   else if (This->bigBlockChain!=0)
   {
     BlockChainStream_WriteAt(This->bigBlockChain,
-                 This->currentPosition,
-                 cb,
-                 pv,
-                 pcbWritten);
+			     This->currentPosition,
+			     cb,
+			     pv,
+			     pcbWritten);
   }
   else
     assert(FALSE);
-
+  
   /*
    * Advance the position pointer for the number of positions written.
    */
   This->currentPosition.s.LowPart += *pcbWritten;
-
+  
   return S_OK;
 }
 
@@ -499,21 +510,21 @@ HRESULT WINAPI StgStreamImpl_Write(
  * given.
  *
  * See the documentation of IStream for more info.
- */
-HRESULT WINAPI StgStreamImpl_Seek(
-          IStream*      iface,
-          LARGE_INTEGER   dlibMove,         /* [in] */
-          DWORD           dwOrigin,         /* [in] */
-          ULARGE_INTEGER* plibNewPosition) /* [out] */
+ */        
+HRESULT WINAPI StgStreamImpl_Seek( 
+		  IStream*      iface,
+		  LARGE_INTEGER   dlibMove,         /* [in] */ 
+		  DWORD           dwOrigin,         /* [in] */ 
+		  ULARGE_INTEGER* plibNewPosition) /* [out] */
 {
   StgStreamImpl* const This=(StgStreamImpl*)iface;
 
   ULARGE_INTEGER newPosition;
 
   TRACE("(%p, %ld, %ld, %p)\n",
-    iface, dlibMove.s.LowPart, dwOrigin, plibNewPosition);
+	iface, dlibMove.s.LowPart, dwOrigin, plibNewPosition);
 
-  /*
+  /* 
    * The caller is allowed to pass in NULL as the new position return value.
    * If it happens, we assign it to a dynamic variable to avoid special cases
    * in the code below.
@@ -555,24 +566,24 @@ HRESULT WINAPI StgStreamImpl_Seek(
       dlibMove.s.LowPart ^= -1;
       /* ... and subtract with carry */
       if (dlibMove.s.LowPart > plibNewPosition->s.LowPart) {
-      /* carry needed, This accounts for any underflows at [1]*/
-      plibNewPosition->s.HighPart -= 1;
+	  /* carry needed, This accounts for any underflows at [1]*/
+	  plibNewPosition->s.HighPart -= 1; 
       }
       plibNewPosition->s.LowPart -= dlibMove.s.LowPart; /* [1] */
-      plibNewPosition->s.HighPart -= dlibMove.s.HighPart;
+      plibNewPosition->s.HighPart -= dlibMove.s.HighPart; 
   } else {
       /* add directly */
       int initialLowPart = plibNewPosition->s.LowPart;
       plibNewPosition->s.LowPart += dlibMove.s.LowPart;
       if((plibNewPosition->s.LowPart < initialLowPart) ||
-     (plibNewPosition->s.LowPart < dlibMove.s.LowPart)) {
-      /* LowPart has rolled over => add the carry digit to HighPart */
-      plibNewPosition->s.HighPart++;
+	 (plibNewPosition->s.LowPart < dlibMove.s.LowPart)) {
+	  /* LowPart has rolled over => add the carry digit to HighPart */
+	  plibNewPosition->s.HighPart++;
       }
-      plibNewPosition->s.HighPart += dlibMove.s.HighPart;
+      plibNewPosition->s.HighPart += dlibMove.s.HighPart; 
   }
   /*
-   * Check if we end-up before the beginning of the file. That should
+   * Check if we end-up before the beginning of the file. That should 
    * trigger an error.
    */
   if (plibNewPosition->s.HighPart < 0) {
@@ -580,7 +591,7 @@ HRESULT WINAPI StgStreamImpl_Seek(
   }
 
     /*
-   * We currently don't support files with offsets of >32 bits.
+   * We currently don't support files with offsets of >32 bits.  
    * Note that we have checked for a negative offset already
      */
   assert(plibNewPosition->s.HighPart <= 0);
@@ -593,7 +604,7 @@ HRESULT WINAPI StgStreamImpl_Seek(
    * tell the caller what we calculated
    */
   This->currentPosition = *plibNewPosition;
-
+ 
   return S_OK;
 }
 
@@ -606,9 +617,9 @@ HRESULT WINAPI StgStreamImpl_Seek(
  *
  * See the documentation of IStream for more info.
  */
-HRESULT WINAPI StgStreamImpl_SetSize(
-                     IStream*      iface,
-                     ULARGE_INTEGER  libNewSize)   /* [in] */
+HRESULT WINAPI StgStreamImpl_SetSize( 
+				     IStream*      iface,
+				     ULARGE_INTEGER  libNewSize)   /* [in] */ 
 {
   StgStreamImpl* const This=(StgStreamImpl*)iface;
 
@@ -657,11 +668,11 @@ HRESULT WINAPI StgStreamImpl_SetSize(
    */
   Success = StorageImpl_ReadProperty(This->parentStorage->ancestorStorage,
                                        This->ownerProperty,
-                                       &curProperty);
+                                       &curProperty); 
   /*
    * Determine if we have to switch from small to big blocks or vice versa
-   */
-  if ( (This->smallBlockChain!=0) &&
+   */  
+  if ( (This->smallBlockChain!=0) && 
        (curProperty.size.s.LowPart < LIMIT_TO_USE_SMALL_BLOCK) )
   {
     if (libNewSize.s.LowPart >= LIMIT_TO_USE_SMALL_BLOCK)
@@ -693,19 +704,19 @@ HRESULT WINAPI StgStreamImpl_SetSize(
 
   curProperty.size.s.HighPart = libNewSize.s.HighPart;
   curProperty.size.s.LowPart = libNewSize.s.LowPart;
-
+  
   if (Success)
   {
     StorageImpl_WriteProperty(This->parentStorage->ancestorStorage,
-                This->ownerProperty,
-                &curProperty);
+				This->ownerProperty,
+				&curProperty);
   }
-
+  
   This->streamSize = libNewSize;
-
+  
   return S_OK;
 }
-
+        
 /***
  * This method is part of the IStream interface.
  *
@@ -713,12 +724,12 @@ HRESULT WINAPI StgStreamImpl_SetSize(
  *
  * See the documentation of IStream for more info.
  */
-HRESULT WINAPI StgStreamImpl_CopyTo(
-                    IStream*      iface,
-                    IStream*      pstm,         /* [unique][in] */
-                    ULARGE_INTEGER  cb,           /* [in] */
-                    ULARGE_INTEGER* pcbRead,      /* [out] */
-                    ULARGE_INTEGER* pcbWritten)   /* [out] */
+HRESULT WINAPI StgStreamImpl_CopyTo( 
+				    IStream*      iface,
+				    IStream*      pstm,         /* [unique][in] */ 
+				    ULARGE_INTEGER  cb,           /* [in] */         
+				    ULARGE_INTEGER* pcbRead,      /* [out] */        
+				    ULARGE_INTEGER* pcbWritten)   /* [out] */        
 {
   HRESULT        hr = S_OK;
   BYTE           tmpBuffer[128];
@@ -726,8 +737,8 @@ HRESULT WINAPI StgStreamImpl_CopyTo(
   ULARGE_INTEGER totalBytesRead;
   ULARGE_INTEGER totalBytesWritten;
 
-  TRACE("(%p, %p, %ld, %p, %p)\n",
-    iface, pstm, cb.s.LowPart, pcbRead, pcbWritten);
+  TRACE("(%p, %p, %ld, %p, %p)\n", 
+	iface, pstm, cb.s.LowPart, pcbRead, pcbWritten);
 
   /*
    * Sanity check
@@ -749,11 +760,11 @@ HRESULT WINAPI StgStreamImpl_CopyTo(
       copySize = 128;
     else
       copySize = cb.s.LowPart;
-
+    
     IStream_Read(iface, tmpBuffer, copySize, &bytesRead);
 
     totalBytesRead.s.LowPart += bytesRead;
-
+    
     IStream_Write(pstm, tmpBuffer, bytesRead, &bytesWritten);
 
     totalBytesWritten.s.LowPart += bytesWritten;
@@ -766,7 +777,7 @@ HRESULT WINAPI StgStreamImpl_CopyTo(
       hr = STG_E_MEDIUMFULL;
       break;
     }
-
+    
     if (bytesRead!=copySize)
       cb.s.LowPart = 0;
     else
@@ -797,10 +808,10 @@ HRESULT WINAPI StgStreamImpl_CopyTo(
  * does nothing. This is what the documentation tells us.
  *
  * See the documentation of IStream for more info.
- */
-HRESULT WINAPI StgStreamImpl_Commit(
-          IStream*      iface,
-          DWORD           grfCommitFlags)  /* [in] */
+ */        
+HRESULT WINAPI StgStreamImpl_Commit( 
+		  IStream*      iface,
+		  DWORD           grfCommitFlags)  /* [in] */ 
 {
   return S_OK;
 }
@@ -812,28 +823,28 @@ HRESULT WINAPI StgStreamImpl_Commit(
  * does nothing. This is what the documentation tells us.
  *
  * See the documentation of IStream for more info.
- */
-HRESULT WINAPI StgStreamImpl_Revert(
-          IStream* iface)
+ */        
+HRESULT WINAPI StgStreamImpl_Revert( 
+		  IStream* iface)
 {
   return S_OK;
 }
 
-HRESULT WINAPI StgStreamImpl_LockRegion(
-                    IStream*     iface,
-                    ULARGE_INTEGER libOffset,   /* [in] */
-                    ULARGE_INTEGER cb,          /* [in] */
-                    DWORD          dwLockType)  /* [in] */
+HRESULT WINAPI StgStreamImpl_LockRegion( 
+					IStream*     iface,
+					ULARGE_INTEGER libOffset,   /* [in] */ 
+					ULARGE_INTEGER cb,          /* [in] */ 
+					DWORD          dwLockType)  /* [in] */ 
 {
   FIXME("not implemented!\n");
   return E_NOTIMPL;
 }
 
-HRESULT WINAPI StgStreamImpl_UnlockRegion(
-                      IStream*     iface,
-                      ULARGE_INTEGER libOffset,   /* [in] */
-                      ULARGE_INTEGER cb,          /* [in] */
-                      DWORD          dwLockType)  /* [in] */
+HRESULT WINAPI StgStreamImpl_UnlockRegion( 
+					  IStream*     iface,
+					  ULARGE_INTEGER libOffset,   /* [in] */ 
+					  ULARGE_INTEGER cb,          /* [in] */ 
+					  DWORD          dwLockType)  /* [in] */ 
 {
   FIXME("not implemented!\n");
   return E_NOTIMPL;
@@ -846,42 +857,76 @@ HRESULT WINAPI StgStreamImpl_UnlockRegion(
  * stream.
  *
  * See the documentation of IStream for more info.
- */
-HRESULT WINAPI StgStreamImpl_Stat(
-          IStream*     iface,
-          STATSTG*       pstatstg,     /* [out] */
-          DWORD          grfStatFlag)  /* [in] */
+ */        
+HRESULT WINAPI StgStreamImpl_Stat( 
+		  IStream*     iface,
+		  STATSTG*       pstatstg,     /* [out] */
+		  DWORD          grfStatFlag)  /* [in] */ 
 {
   StgStreamImpl* const This=(StgStreamImpl*)iface;
 
   StgProperty    curProperty;
   BOOL         readSucessful;
-
+  
   /*
    * Read the information from the property.
    */
   readSucessful = StorageImpl_ReadProperty(This->parentStorage->ancestorStorage,
-                         This->ownerProperty,
-                         &curProperty);
-
+					     This->ownerProperty,
+					     &curProperty);
+  
   if (readSucessful)
   {
-    StorageUtl_CopyPropertyToSTATSTG(pstatstg,
-                     &curProperty,
-                     grfStatFlag);
+    StorageUtl_CopyPropertyToSTATSTG(pstatstg, 
+				     &curProperty, 
+				     grfStatFlag);
 
     pstatstg->grfMode = This->grfMode;
-
+    
     return S_OK;
   }
-
+  
   return E_FAIL;
 }
-
-HRESULT WINAPI StgStreamImpl_Clone(
-                   IStream*     iface,
-                   IStream**    ppstm) /* [out] */
+        
+/***
+ * This method is part of the IStream interface.
+ *
+ * This method returns a clone of the interface that allows for
+ * another seek pointer
+ *
+ * See the documentation of IStream for more info.
+ *
+ * I am not totally sure what I am doing here but I presume that this
+ * should be basically as simple as creating a new stream with the same
+ * parent etc and positioning its seek cursor.
+ */        
+HRESULT WINAPI StgStreamImpl_Clone( 
+				   IStream*     iface,
+				   IStream**    ppstm) /* [out] */ 
 {
-  FIXME("not implemented!\n");
-  return E_NOTIMPL;
+  StgStreamImpl* const This=(StgStreamImpl*)iface;
+  HRESULT hres;
+  StgStreamImpl* new_stream;
+  LARGE_INTEGER seek_pos;
+
+  /*
+   * Sanity check
+   */
+  if ( ppstm == 0 )
+    return STG_E_INVALIDPOINTER;
+
+  new_stream = StgStreamImpl_Construct (This->parentStorage, This->grfMode, This->ownerProperty);
+
+  if (!new_stream)
+    return STG_E_INSUFFICIENTMEMORY; /* Currently the only reason for new_stream=0 */
+
+  *ppstm = (IStream*) new_stream;
+  seek_pos.QuadPart = This->currentPosition.QuadPart;
+  
+  hres=StgStreamImpl_Seek (*ppstm, seek_pos, STREAM_SEEK_SET, NULL);
+  
+  assert (SUCCEEDED(hres));
+
+  return S_OK;
 }

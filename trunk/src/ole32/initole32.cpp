@@ -1,4 +1,4 @@
-/* $Id: initole32.cpp,v 1.3 2001-09-05 13:17:10 bird Exp $
+/*
  * DLL entry point
  *
  * Copyright 1998 Sander van Leeuwen
@@ -51,11 +51,11 @@ BOOL WINAPI LibMainOLE32(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
    case DLL_PROCESS_ATTACH:
    case DLL_THREAD_ATTACH:
    case DLL_THREAD_DETACH:
-    return OLE32_DllEntryPoint(hinstDLL, fdwReason, fImpLoad);
+	return OLE32_DllEntryPoint(hinstDLL, fdwReason, fImpLoad);
 
    case DLL_PROCESS_DETACH:
         OLE32_DllEntryPoint(hinstDLL, fdwReason, fImpLoad);
-    return TRUE;
+	return TRUE;
    }
    return FALSE;
 }
@@ -81,15 +81,15 @@ ULONG APIENTRY inittermOle32(unsigned long hModule, unsigned long ulFlag)
    switch (ulFlag) {
       case 0 :
       {
-     dllHandle = RegisterLxDll(hModule, LibMainOLE32, (PVOID)&ole32os2_PEResTab);
-         if(dllHandle == 0)
-        return 0UL;
+	 dllHandle = RegisterLxDll(hModule, LibMainOLE32, (PVOID)&ole32os2_PEResTab);
+         if(dllHandle == 0) 
+		return 0UL;
 
          break;
       }
       case 1 :
          if(dllHandle) {
-        UnregisterLxDll(dllHandle);
+	 	UnregisterLxDll(dllHandle);
          }
          break;
 

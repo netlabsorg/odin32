@@ -58,16 +58,16 @@ BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
    switch (fdwReason)
    {
    case DLL_PROCESS_ATTACH:
-    return TRUE;
+	return TRUE;
 
    case DLL_THREAD_ATTACH:
    case DLL_THREAD_DETACH:
-    return TRUE;
+	return TRUE;
 
    case DLL_PROCESS_DETACH:
-    ctordtorTerm();
-    ClosePrivateLogFiles();
-    return TRUE;
+   	ctordtorTerm();
+   	ClosePrivateLogFiles();
+	return TRUE;
    }
    return FALSE;
 }
@@ -94,34 +94,34 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
    switch (ulFlag) {
       case 0 :
       {
-     loadNr = globLoadNr++;
+	 loadNr = globLoadNr++;
 
-     DosQueryModuleName(hModule, sizeof(oleaut32Path), oleaut32Path);
-     char *endofpath = strrchr(oleaut32Path, '\\');
-     *(endofpath+1) = 0;
+	 DosQueryModuleName(hModule, sizeof(oleaut32Path), oleaut32Path);
+	 char *endofpath = strrchr(oleaut32Path, '\\');
+	 *(endofpath+1) = 0;
 
          ctordtorInit();
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
-     dllHandle = RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab);
-         if(dllHandle == 0)
-        return 0UL;
+	 dllHandle = RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab);
+         if(dllHandle == 0) 
+		return 0UL;
 
 #ifdef DEFAULT_LOGGING_OFF
-         if(getenv("WIN32LOG_ENABLED")) {
+    	 if(getenv("WIN32LOG_ENABLED")) {
 #else
-         if(!getenv("NOWIN32LOG")) {
+    	 if(!getenv("NOWIN32LOG")) {
 #endif
-            OpenPrivateLogFiles();
-     }
+         	OpenPrivateLogFiles();
+	 }
          Hash_Initialise();
 
          break;
       }
       case 1 :
          if(dllHandle) {
-        UnregisterLxDll(dllHandle);
+	 	UnregisterLxDll(dllHandle);
          }
          break;
 
