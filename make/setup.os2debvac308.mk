@@ -1,4 +1,4 @@
-# $Id: setup.os2debvac308.mk,v 1.9 2002-04-30 22:42:48 bird Exp $
+# $Id: setup.os2debvac308.mk,v 1.10 2002-05-16 11:37:01 bird Exp $
 
 # ---OS2, DEBUG, VAC308-------------------------
 ENV_NAME="OS/2, Debug, IBM VisualAge for C++ 3.08"
@@ -8,6 +8,7 @@ ENV_ENVS=vac308
 !else
 ENV_ENVS_FORCE=vac308
 !endif
+!undef ENV_16BIT
 
 
 #
@@ -50,7 +51,7 @@ CC_OBJ_OUT=/Fo
 CC_LST_OUT=/Fa
 CC_PC_2_STDOUT=/Pd+ /P+
 
-CXX_FLAGS=/Q /DDEBUG /DOS2 /D__32BIT__ /D__i386__ /DMODEL=FLAT /Ti+ /O- /Ss+ /C+ $(_CXX_OPTIONAL) $(CXX_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CXX_INCLUDES) $(ALL_INCLUDES) /I$(PATH_INCLUDES)
+CXX_FLAGS=/Q /DDEBUG /DOS2 /D__i386__ /DMODEL=FLAT /Ti+ /O- /Ss+ /C+ $(_CXX_OPTIONAL) $(CXX_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CXX_INCLUDES) $(ALL_INCLUDES) /I$(PATH_INCLUDES)
 CXX_FLAGS_EXE=$(CXX_FLAGS) /Gm+ /Ge+
 CXX_FLAGS_DLL=$(CXX_FLAGS) /Gm+ /Ge-
 CXX_FLAGS_SYS=$(CXX_FLAGS) /Rn  /Ge+ /DRING0 /Gr+ /Gs- /Tm- /Wall+ppt-ppc-inl-cnv-gnr-vft- /Gx+
@@ -59,6 +60,28 @@ CXX_FLAGS_IFS=$(CXX_FLAGS_SYS)
 CXX_OBJ_OUT=/Fo
 CXX_LST_OUT=/Fa
 CXX_PC_2_STDOUT=/Pd+ /P+
+
+!if "$(CC_AS_CXX)" != ""
+! if "$(CXX_AS_CC)" != ""
+!  if [@(ECHO) $(CLRERR)Error: Do you think you're smart? CC_AS_CXX and CXX_AS_CC is mutual execlusive!$(CLRRST)]
+!  endif
+!  error
+! endif
+CC=$(CXX)
+CC_FLAGS_EXE=$(CXX_FLAGS_EXE) /Tdp
+CC_FLAGS_DLL=$(CXX_FLAGS_DLL) /Tdp
+CC_FLAGS_SYS=$(CXX_FLAGS_SYS) /Tdp
+CC_FLAGS_VDD=$(CXX_FLAGS_VDD) /Tdp
+CC_FLAGS_IFS=$(CXX_FLAGS_IFS) /Tdp
+!endif
+!if "$(CXX_AS_CC)" != ""
+CXX=$(CC)
+CXX_FLAGS_EXE=$(C_FLAGS_EXE) /Tdc
+CXX_FLAGS_DLL=$(C_FLAGS_DLL) /Tdc
+CXX_FLAGS_SYS=$(C_FLAGS_SYS) /Tdc
+CXX_FLAGS_VDD=$(C_FLAGS_VDD) /Tdc
+CXX_FLAGS_IFS=$(C_FLAGS_IFS) /Tdc
+!endif
 
 IMPLIB_FLAGS=/NOI /Nologo
 
@@ -81,7 +104,7 @@ LINK_LNK4=$(TARGET_LIBS: =+^
 ),
 LINK_LNK5=$(TARGET_DEF_LINK)
 
-RC_FLAGS=-r -n -i $(PATH_INCLUDES:;= -i ) $(RC_DEFINES) $(RC_INCLUDES)
+RC_FLAGS=-r -n $(RC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(RC_INCLUDES:-I=-i ) $(ALL_INCLUDES:-I=-i ) -i $(PATH_INCLUDES:;= -i )
 RL_FLAGS=-x2 -n
 
 
