@@ -1,4 +1,4 @@
-# $Id: kKrnlLibR3Tst.mak,v 1.1 2002-03-31 19:30:39 bird Exp $
+# $Id: kKrnlLibR3Tst.mak,v 1.2 2002-04-07 22:40:16 bird Exp $
 
 #
 # kKrnlLib - Ring3 Test suite for the driver.
@@ -11,7 +11,7 @@
 # Setup.
 #
 PATH_ROOT = ..\..\..
-!include $(PATH_ROOT)\tools\make\setup.mak
+!include $(PATH_ROOT)\make\setup.mak
 
 
 #
@@ -38,7 +38,6 @@ ALL_DEFINES = -DKKRNLLIB -DR3TST
 #$(PATH_TARGET)\stub.$(EXT_OBJ)\
 TARGET_OBJS =\
 $(PATH_OBJ)\kKrnlLib_first.$(EXT_LIB)\kKrnlLib_first.$(EXT_LIB)\
-$(PATH_OBJ)\kKrnlLib_testcase.$(EXT_LIB)\kKrnlLib_testcase.$(EXT_LIB)\
 $(PATH_OBJ)\kKrnlLib_srcR3Tst.$(EXT_LIB)\kKrnlLib_srcR3Tst.$(EXT_LIB)\
 
 TARGET_LIBS =\
@@ -65,7 +64,7 @@ $(PATH_OBJ)\kKrnlLib_devhelp.$(EXT_LIB)\kKrnlLib_devhelp.$(EXT_LIB)\
 $(PATH_OBJ)\kKrnlLib_clib16.$(EXT_LIB)\kKrnlLib_clib16.$(EXT_LIB)\
 $(PATH_OBJ)\kKrnlLib_last.$(EXT_LIB)\kKrnlLib_last.$(EXT_LIB)
 
-SUBDIRS     = include src kLib testcase
+SUBDIRS     = include src kLib
 
 PREMAKEFILES= clib16.mak devhelp16.mak
 
