@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1626 2001-07-30 22:58:00 bird Exp $ */
+/* $Id: changelog,v 1.1627 2001-07-31 07:57:41 sandervl Exp $ */
+
+ 2001-07-31: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o PostThreadMessage & DDE callback change for new wgss
 
  2001-07-29: knut st. osmundsen <kosmunds@csc.com>
     - Custombuild, Makefiles:
