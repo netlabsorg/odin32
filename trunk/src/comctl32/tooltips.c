@@ -1,4 +1,4 @@
-/* $Id: tooltips.c,v 1.13 1999-08-14 16:13:15 cbratschi Exp $ */
+/* $Id: tooltips.c,v 1.14 1999-09-26 11:01:11 achimha Exp $ */
 /*
  * Tool tip control
  *
@@ -20,6 +20,8 @@
  - WM_NCCREATE not handled first -> title bar visible if WS_POPUP wasn't set before
  - CS_SAVEBITS: window movements are slow, bug in Open32?
 */
+
+/* WINE 990923 level */
 
 #include <string.h>
 
@@ -833,7 +835,8 @@ TOOLTIPS_DelToolA (HWND hwnd, WPARAM wParam, LPARAM lParam)
     /* delete text string */
     toolPtr = &infoPtr->tools[nTool];
     if ((toolPtr->hinst) && (toolPtr->lpszText)) {
-        if (toolPtr->lpszText != LPSTR_TEXTCALLBACKW)
+	if ( (toolPtr->lpszText != LPSTR_TEXTCALLBACKW) &&
+	     (HIWORD((INT)toolPtr->lpszText) != 0) )
             COMCTL32_Free (toolPtr->lpszText);
     }
 
@@ -890,7 +893,8 @@ TOOLTIPS_DelToolW (HWND hwnd, WPARAM wParam, LPARAM lParam)
     /* delete text string */
     toolPtr = &infoPtr->tools[nTool];
     if ((toolPtr->hinst) && (toolPtr->lpszText)) {
-        if (toolPtr->lpszText != LPSTR_TEXTCALLBACKW)
+	if ( (toolPtr->lpszText != LPSTR_TEXTCALLBACKW) &&
+	     (HIWORD((INT)toolPtr->lpszText) != 0) )
             COMCTL32_Free (toolPtr->lpszText);
     }
 
@@ -1572,7 +1576,8 @@ TOOLTIPS_SetToolInfoA (HWND hwnd, WPARAM wParam, LPARAM lParam)
         if (lpToolInfo->lpszText == LPSTR_TEXTCALLBACKA)
             toolPtr->lpszText = LPSTR_TEXTCALLBACKW;
         else {
-            if (toolPtr->lpszText) {
+	    if ( (toolPtr->lpszText) &&
+		 (HIWORD((INT)toolPtr->lpszText) != 0) ) {
                 COMCTL32_Free (toolPtr->lpszText);
                 toolPtr->lpszText = NULL;
             }
@@ -1626,7 +1631,8 @@ TOOLTIPS_SetToolInfoW (HWND hwnd, WPARAM wParam, LPARAM lParam)
         if (lpToolInfo->lpszText == LPSTR_TEXTCALLBACKW)
             toolPtr->lpszText = LPSTR_TEXTCALLBACKW;
         else {
-            if (toolPtr->lpszText) {
+	    if ( (toolPtr->lpszText) &&
+		 (HIWORD((INT)toolPtr->lpszText) != 0) ) {
                 COMCTL32_Free (toolPtr->lpszText);
                 toolPtr->lpszText = NULL;
             }
@@ -1710,7 +1716,6 @@ TOOLTIPS_Update (HWND hwnd, WPARAM wParam, LPARAM lParam)
 }
 
 
-static LRESULT
 TOOLTIPS_UpdateTipTextA (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
     TOOLTIPS_INFO *infoPtr = TOOLTIPS_GetInfoPtr (hwnd);
@@ -1718,44 +1723,46 @@ TOOLTIPS_UpdateTipTextA (HWND hwnd, WPARAM wParam, LPARAM lParam)
     TTTOOL_INFO *toolPtr;
     INT nTool;
 
-    if (lpToolInfo == NULL) return 0;
-    if (lpToolInfo->cbSize < TTTOOLINFO_V1_SIZEA) return FALSE;
+    if (lpToolInfo == NULL)
+	return 0;
+    if (lpToolInfo->cbSize < TTTOOLINFO_V1_SIZEA)
+	return FALSE;
 
-    nTool = TOOLTIPS_GetToolFromInfoA(infoPtr,lpToolInfo);
+    nTool = TOOLTIPS_GetToolFromInfoA (infoPtr, lpToolInfo);
     if (nTool == -1) return 0;
 
-//    TRACE (tooltips, "tool %d\n", nTool);
+//    TRACE("tool %d\n", nTool);
 
     toolPtr = &infoPtr->tools[nTool];
 
     /* copy tool text */
     toolPtr->hinst  = lpToolInfo->hinst;
 
-    if ((lpToolInfo->hinst) && (HIWORD((INT)lpToolInfo->lpszText) == 0))
-    {
-      toolPtr->lpszText = (LPWSTR)lpToolInfo->lpszText;
-    } else if (lpToolInfo->lpszText)
-    {
-      if (lpToolInfo->lpszText == LPSTR_TEXTCALLBACKA) toolPtr->lpszText = LPSTR_TEXTCALLBACKW;
-      else
-      {
-        if (toolPtr->lpszText)
-        {
-          COMCTL32_Free(toolPtr->lpszText);
-          toolPtr->lpszText = NULL;
-        }
-        if (lpToolInfo->lpszText)
-        {
-          INT len = lstrlenA(lpToolInfo->lpszText);
-          toolPtr->lpszText = COMCTL32_Alloc((len+1)*sizeof(WCHAR));
-          lstrcpyAtoW(toolPtr->lpszText,lpToolInfo->lpszText);
-        }
-      }
+    if ((lpToolInfo->hinst) && (HIWORD((INT)lpToolInfo->lpszText) == 0)){
+	toolPtr->lpszText = (LPWSTR)lpToolInfo->lpszText;
+    }
+    else if (lpToolInfo->lpszText) {
+	if (lpToolInfo->lpszText == LPSTR_TEXTCALLBACKA)
+	    toolPtr->lpszText = LPSTR_TEXTCALLBACKW;
+	else {
+	    if ( (toolPtr->lpszText) &&
+		 (HIWORD((INT)toolPtr->lpszText) != 0) ) {
+		COMCTL32_Free (toolPtr->lpszText);
+		toolPtr->lpszText = NULL;
+	    }
+	    if (lpToolInfo->lpszText) {
+		INT len = lstrlenA (lpToolInfo->lpszText);
+		toolPtr->lpszText = COMCTL32_Alloc ((len+1)*sizeof(WCHAR));
+		lstrcpyAtoW (toolPtr->lpszText, lpToolInfo->lpszText);
+	    }
+	}
     }
 
     /* force repaint */
-    if (infoPtr->bActive) TOOLTIPS_Show(hwnd,infoPtr);
-    else if (infoPtr->bTrackActive) TOOLTIPS_TrackShow(hwnd,infoPtr);
+    if (infoPtr->bActive)
+	TOOLTIPS_Show (hwnd, infoPtr);
+    else if (infoPtr->bTrackActive)
+	TOOLTIPS_TrackShow (hwnd, infoPtr);
 
     return 0;
 }
@@ -1770,15 +1777,15 @@ TOOLTIPS_UpdateTipTextW (HWND hwnd, WPARAM wParam, LPARAM lParam)
     INT nTool;
 
     if (lpToolInfo == NULL)
-        return 0;
+	return 0;
     if (lpToolInfo->cbSize < TTTOOLINFO_V1_SIZEW)
-        return FALSE;
+	return FALSE;
 
     nTool = TOOLTIPS_GetToolFromInfoW (infoPtr, lpToolInfo);
     if (nTool == -1)
-        return 0;
+	return 0;
 
-//    TRACE (tooltips, "tool %d\n", nTool);
+//    TRACE("tool %d\n", nTool);
 
     toolPtr = &infoPtr->tools[nTool];
 
@@ -1786,29 +1793,30 @@ TOOLTIPS_UpdateTipTextW (HWND hwnd, WPARAM wParam, LPARAM lParam)
     toolPtr->hinst  = lpToolInfo->hinst;
 
     if ((lpToolInfo->hinst) && (HIWORD((INT)lpToolInfo->lpszText) == 0)){
-        toolPtr->lpszText = lpToolInfo->lpszText;
+	toolPtr->lpszText = lpToolInfo->lpszText;
     }
     else if (lpToolInfo->lpszText) {
-        if (lpToolInfo->lpszText == LPSTR_TEXTCALLBACKW)
-            toolPtr->lpszText = LPSTR_TEXTCALLBACKW;
-        else {
-            if (toolPtr->lpszText) {
-                COMCTL32_Free (toolPtr->lpszText);
-                toolPtr->lpszText = NULL;
-            }
-            if (lpToolInfo->lpszText) {
-                INT len = lstrlenW (lpToolInfo->lpszText);
-                toolPtr->lpszText = COMCTL32_Alloc ((len+1)*sizeof(WCHAR));
-                lstrcpyW (toolPtr->lpszText, lpToolInfo->lpszText);
-            }
-        }
+	if (lpToolInfo->lpszText == LPSTR_TEXTCALLBACKW)
+	    toolPtr->lpszText = LPSTR_TEXTCALLBACKW;
+	else {
+	    if ( (toolPtr->lpszText)  &&
+		 (HIWORD((INT)toolPtr->lpszText) != 0) ) {
+		COMCTL32_Free (toolPtr->lpszText);
+		toolPtr->lpszText = NULL;
+	    }
+	    if (lpToolInfo->lpszText) {
+		INT len = lstrlenW (lpToolInfo->lpszText);
+		toolPtr->lpszText = COMCTL32_Alloc ((len+1)*sizeof(WCHAR));
+		lstrcpyW (toolPtr->lpszText, lpToolInfo->lpszText);
+	    }
+	}
     }
 
     /* force repaint */
     if (infoPtr->bActive)
-        TOOLTIPS_Show (hwnd, infoPtr);
+	TOOLTIPS_Show (hwnd, infoPtr);
     else if (infoPtr->bTrackActive)
-        TOOLTIPS_TrackShow (hwnd, infoPtr);
+	TOOLTIPS_TrackShow (hwnd, infoPtr);
 
     return 0;
 }
@@ -1881,19 +1889,34 @@ TOOLTIPS_Destroy (HWND hwnd, WPARAM wParam, LPARAM lParam)
     INT i;
 
     /* free tools */
-    if (infoPtr->tools)
-    {
-      for (i = 0;i < infoPtr->uNumTools;i++)
-      {
-        toolPtr = &infoPtr->tools[i];
-        if ((toolPtr->hinst) && (toolPtr->lpszText))
-        {
-          if (toolPtr->lpszText != LPSTR_TEXTCALLBACKW) COMCTL32_Free(toolPtr->lpszText);
-        }
+    if (infoPtr->tools) {
+	for (i = 0; i < infoPtr->uNumTools; i++) {
+	    toolPtr = &infoPtr->tools[i];
+	    if ((toolPtr->hinst) && (toolPtr->lpszText)) {
+		if ( (toolPtr->lpszText != LPSTR_TEXTCALLBACKW) &&
+		     (HIWORD((INT)toolPtr->lpszText) != 0) ) 
+		{
+		    COMCTL32_Free (toolPtr->lpszText);
+		    toolPtr->lpszText = NULL;
+		}
+	    }
 
-        /* remove subclassing */
-        TOOLTIPS_Desubclass(toolPtr);
+	    /* remove subclassing */
+	    if (toolPtr->uFlags & TTF_SUBCLASS) {
+		LPTT_SUBCLASS_INFO lpttsi;
 
+		if (toolPtr->uFlags & TTF_IDISHWND)
+		    lpttsi = (LPTT_SUBCLASS_INFO)GetPropA ((HWND)toolPtr->uId, COMCTL32_aSubclass);
+		else
+		    lpttsi = (LPTT_SUBCLASS_INFO)GetPropA (toolPtr->hwnd, COMCTL32_aSubclass);
+
+		if (lpttsi) {
+		    SetWindowLongA ((HWND)toolPtr->uId, GWL_WNDPROC,
+				      (LONG)lpttsi->wpOrigProc);
+		    RemovePropA ((HWND)toolPtr->uId, COMCTL32_aSubclass);
+		    COMCTL32_Free (&lpttsi);
+		}
+	    }
       }
       COMCTL32_Free (infoPtr->tools);
     }

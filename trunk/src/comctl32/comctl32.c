@@ -1,4 +1,4 @@
-/* $Id: comctl32.c,v 1.9 1999-09-13 18:49:02 cbratschi Exp $ */
+/* $Id: comctl32.c,v 1.10 1999-09-26 11:01:08 achimha Exp $ */
 /*
  * Win32 common controls implementation
  *
@@ -10,6 +10,8 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+
+/* WINE 990923 level (commctrl.c) */
 
 #include "comctl32.h"
 #include "winerror.h"
@@ -165,6 +167,16 @@ MenuHelp (UINT uMsg, WPARAM wParam, LPARAM lParam, HMENU hMainMenu,
                 }
             }
             break;
+
+        case WM_COMMAND :
+//	    TRACE("WM_COMMAND wParam=0x%X lParam=0x%lX\n",
+//		   wParam, lParam);
+	    /* WM_COMMAND is not invalid since it is documented
+	     * in the windows api reference. So don't output
+             * any FIXME for WM_COMMAND
+             */
+//	    WARN("We don't care about the WM_COMMAND\n");
+	    break;
 
         default:
 //          FIXME (commctrl, "Invalid Message 0x%x!\n", uMsg);
@@ -645,11 +657,12 @@ CreateMappedBitmap (HINSTANCE hInstance, INT idBitmap, UINT wFlags,
     HRSRC hRsrc;
     LPBITMAPINFOHEADER lpBitmap, lpBitmapInfo;
     UINT nSize, nColorTableSize;
-    DWORD *pColorTable;
+    RGBQUAD *pColorTable;
     INT iColor, i, iMaps, nWidth, nHeight;
     HDC hdcScreen;
     HBITMAP hbm;
     LPCOLORMAP sysColorMap;
+    COLORREF cRef;
     COLORMAP internalColorMap[4] =
         {{0x000000, 0}, {0x808080, 0}, {0xC0C0C0, 0}, {0xFFFFFF, 0}};
 
@@ -684,11 +697,14 @@ CreateMappedBitmap (HINSTANCE hInstance, INT idBitmap, UINT wFlags,
         return 0;
     RtlMoveMemory (lpBitmapInfo, lpBitmap, nSize);
 
-    pColorTable = (DWORD*)(((LPBYTE)lpBitmapInfo)+(UINT)lpBitmapInfo->biSize);
+    pColorTable = (RGBQUAD*)(((LPBYTE)lpBitmapInfo)+(UINT)lpBitmapInfo->biSize);
 
     for (iColor = 0; iColor < nColorTableSize; iColor++) {
         for (i = 0; i < iMaps; i++) {
-            if (pColorTable[iColor] == sysColorMap[i].from) {
+            cRef = RGB(pColorTable[iColor].rgbRed,
+                       pColorTable[iColor].rgbGreen,
+                       pColorTable[iColor].rgbBlue);
+	    if ( cRef  == sysColorMap[i].from) {
 #if 0
                 if (wFlags & CBS_MASKED) {
                     if (sysColorMap[i].to != COLOR_BTNTEXT)
@@ -696,12 +712,13 @@ CreateMappedBitmap (HINSTANCE hInstance, INT idBitmap, UINT wFlags,
                 }
                 else
 #endif
-                    pColorTable[iColor] = sysColorMap[i].to;
+                    pColorTable[iColor].rgbBlue  = GetBValue(sysColorMap[i].to);
+                    pColorTable[iColor].rgbGreen = GetGValue(sysColorMap[i].to);
+                    pColorTable[iColor].rgbRed   = GetRValue(sysColorMap[i].to);
                 break;
             }
         }
     }
-
     nWidth  = (INT)lpBitmapInfo->biWidth;
     nHeight = (INT)lpBitmapInfo->biHeight;
     hdcScreen = GetDC ((HWND)0);

@@ -1,4 +1,4 @@
-/* $Id: imagelist.c,v 1.6 1999-08-14 16:13:11 cbratschi Exp $ */
+/* $Id: imagelist.c,v 1.7 1999-09-26 11:01:09 achimha Exp $ */
 /*
  *  ImageList implementation
  *
@@ -28,6 +28,8 @@
   - ImageList_Read
   - ImageList_Write
 */
+
+/* WINE 990923 level */
 
 /* This must be defined because the HIMAGELIST type is just a pointer
  * to the _IMAGELIST data structure. But M$ does not want us to know
@@ -205,6 +207,7 @@ IMAGELIST_InternalDrawMask(IMAGELISTDRAWPARAMS *pimldp, INT cx, INT cy)
     HBRUSH hBrush, hOldBrush;
     HBITMAP hOldBitmapImage, hOldBitmapMask;
     HIMAGELIST himlLocal = pimldp->himl;
+    COLORREF oldBkColor, oldFgColor;
 
     bUseCustomBackground = (himlLocal->clrBk != CLR_NONE);
     bBlendFlag = (pimldp->fStyle & ILD_BLEND50 )
@@ -237,6 +240,12 @@ IMAGELIST_InternalDrawMask(IMAGELISTDRAWPARAMS *pimldp, INT cx, INT cy)
         || ((pimldp->fStyle & ILD_IMAGE) && bUseCustomBackground)
         || bBlendFlag)
     {
+        /* to obtain a transparent look, background color should be set
+           to white and foreground color to black when blting the 
+           monochrome mask. */
+        oldBkColor = SetBkColor(pimldp->hdcDst, RGB(0xff, 0xff, 0xff)); 
+        oldFgColor = SetTextColor(pimldp->hdcDst, RGB(0, 0, 0));
+
         BitBlt(pimldp->hdcDst,
             pimldp->x, pimldp->y, cx, cy,
             hMaskDC,
@@ -248,6 +257,9 @@ IMAGELIST_InternalDrawMask(IMAGELISTDRAWPARAMS *pimldp, INT cx, INT cy)
             hImageDC,
             himlLocal->cx * pimldp->i, 0,
             SRCPAINT);
+
+	SetBkColor(pimldp->hdcDst, oldBkColor); 
+	SetTextColor(pimldp->hdcDst, oldFgColor);
     }
     /* Draw the image when no Background is specified
     */
@@ -888,15 +900,19 @@ ImageList_Create (INT cx, INT cy, UINT flags,
 
 //    TRACE(imagelist, "Image: %d Bits per Pixel\n", himl->uBitsPixel);
 
-    himl->hbmImage =
-        CreateBitmap (himl->cx * himl->cMaxImage, himl->cy,
+    if (himl->cMaxImage > 0) {
+        himl->hbmImage =
+	  CreateBitmap (himl->cx * himl->cMaxImage, himl->cy,
                         1, himl->uBitsPixel, NULL);
-    if (himl->hbmImage == 0) {
-//        ERR(imagelist, "Error creating image bitmap!\n");
-        return NULL;
+	if (himl->hbmImage == 0) {
+//	    ERR("Error creating image bitmap!\n");
+	    return NULL;
+	}
     }
-
-    if (himl->flags & ILC_MASK) {
+    else
+        himl->hbmImage = 0;
+    
+    if ( (himl->cMaxImage > 0) && (himl->flags & ILC_MASK)) {
         himl->hbmMask = CreateBitmap (himl->cx * himl->cMaxImage, himl->cy,
                                         1, 1, NULL);
         if (himl->hbmMask == 0) {
@@ -2106,6 +2122,7 @@ ImageList_ReplaceIcon (HIMAGELIST himl, INT i, HICON hIcon)
 {
     HDC     hdcImageList, hdcImage;
     INT     nIndex;
+    HICON   hBestFitIcon;
     HBITMAP hbmOldSrc, hbmOldDst;
     ICONINFO  ii;
     BITMAP  bmp;
@@ -2117,7 +2134,12 @@ ImageList_ReplaceIcon (HIMAGELIST himl, INT i, HICON hIcon)
     if ((i >= himl->cCurImage) || (i < -1))
         return -1;
 
-    GetIconInfo (hIcon, &ii);
+    hBestFitIcon = CopyImage(
+        hIcon, IMAGE_ICON, 
+        himl->cx, himl->cy, 
+        LR_COPYFROMRESOURCE);
+
+    GetIconInfo (hBestFitIcon, &ii);
 //    if (ii.hbmMask == 0)
 //      ERR (imagelist, "no mask!\n");
 //    if (ii.hbmColor == 0)
@@ -2161,6 +2183,8 @@ ImageList_ReplaceIcon (HIMAGELIST himl, INT i, HICON hIcon)
     SelectObject (hdcImage, hbmOldSrc);
     SelectObject (hdcImageList, hbmOldDst);
 
+    if(hBestFitIcon)
+	DestroyIcon(hBestFitIcon);
     if (hdcImageList)
         DeleteDC (hdcImageList);
     if (hdcImage)
