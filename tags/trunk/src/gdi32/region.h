@@ -1,9 +1,9 @@
-//$Id: region.h,v 1.1 2000-06-14 13:17:51 sandervl Exp $
+//$Id: region.h,v 1.2 2000-09-08 18:06:33 sandervl Exp $
 #ifndef __REGION_H__
 #define __REGION_H__
 
 BOOL InitRegionSpace();
 
-void OSLibDeleteRegion(HANDLE hRegion);
+BOOL WIN32API OSLibDeleteRegion(HANDLE hRegion);
 
 #endif //__REGION_H__

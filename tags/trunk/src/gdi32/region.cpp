@@ -1,4 +1,4 @@
-/* $Id: region.cpp,v 1.11 2000-09-02 08:31:23 sandervl Exp $ */
+/* $Id: region.cpp,v 1.12 2000-09-08 18:06:33 sandervl Exp $ */
 
 /*
  * GDI32 region code
@@ -1498,12 +1498,14 @@ error:
     return NULLHANDLE;
 }
 //******************************************************************************
+//Needs wrapper as this file includes os2.h!!
 //******************************************************************************
-void OSLibDeleteRegion(HANDLE hRegion)
+ODINFUNCTIONNODBG1(BOOL, OSLibDeleteRegion, HANDLE, hRegion)
 {
     if(GpiDestroyRegion(hpsRegion, hRegion) == FALSE) {
         dprintf(("WARNING: OSLibDeleteRegion %x; GpiDestroyRegion failed (%x)", hRegion, WinGetLastError(0)));
     }
+    return (0);
 }
 /*****************************************************************************
  * Name      : int GetMetaRgn
