@@ -31,8 +31,6 @@ PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
  *
  * Copyright (c) 1994, Regents of the University of California
  *
- * $Id: parsedt.h,v 1.3 2000-12-24 14:39:55 sandervl Exp $
- *
  *-------------------------------------------------------------------------
  */
 #ifndef DT_H

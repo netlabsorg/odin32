@@ -2,29 +2,42 @@
  *	OLE2DISP library
  *
  *	Copyright 1995	Martin von Loewis
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#ifdef __WIN32OS2__
-#define HAVE_FLOAT_H
-#define WINE_LARGE_INTEGER
-#include "oleaut32.h"
-#endif
+
+#include "config.h"
+
 #include <string.h>
 
-#include "windef.h"
-#include "winbase.h"
-#include "wingdi.h"
-#include "winuser.h"
-#include "winerror.h"
 #include "wine/windef16.h"
 #include "ole2.h"
-#include "olectl.h"
 #include "oleauto.h"
-#include "heap.h"
-#include "debugtools.h"
+#include "windef.h"
+#include "winbase.h"
+#include "winerror.h"
+#include "wingdi.h"
+#include "winuser.h"
 
-DEFAULT_DEBUG_CHANNEL(ole);
+#include "ole2disp.h"
+#include "olectl.h"
 
-#ifndef __WIN32OS2__
+#include "wine/debug.h"
+
+WINE_DEFAULT_DEBUG_CHANNEL(ole);
+
 /* This implementation of the BSTR API is 16-bit only. It
    represents BSTR as a 16:16 far pointer, and the strings
    as ISO-8859 */
@@ -34,8 +47,8 @@ DEFAULT_DEBUG_CHANNEL(ole);
  */
 static BSTR16 BSTR_AllocBytes(int n)
 {
-    void *ptr = SEGPTR_ALLOC(n);
-    return (BSTR16)SEGPTR_GET(ptr);
+    void *ptr = HeapAlloc( GetProcessHeap(), 0, n );
+    return (BSTR16)MapLS(ptr);
 }
 
 /******************************************************************************
@@ -43,7 +56,9 @@ static BSTR16 BSTR_AllocBytes(int n)
  */
 static void BSTR_Free(BSTR16 in)
 {
-    SEGPTR_FREE( MapSL((SEGPTR)in) );
+    void *ptr = MapSL( (SEGPTR)in );
+    UnMapLS( (SEGPTR)in );
+    HeapFree( GetProcessHeap(), 0, ptr );
 }
 
 /******************************************************************************
@@ -55,7 +70,7 @@ static void* BSTR_GetAddr(BSTR16 in)
 }
 
 /******************************************************************************
- *		SysAllocString16	[OLE2DISP.2]
+ *		SysAllocString	[OLE2DISP.2]
  */
 BSTR16 WINAPI SysAllocString16(LPCOLESTR16 in)
 {
@@ -64,14 +79,17 @@ BSTR16 WINAPI SysAllocString16(LPCOLESTR16 in)
 	if (!in) return 0;
     
 	out = BSTR_AllocBytes(strlen(in)+1);
-	if(!out)return 0;
+	if (!out) return 0;
 	strcpy(BSTR_GetAddr(out),in);
 	return out;
 }
-#endif
 
 /******************************************************************************
  *		SysAllocString	[OLEAUT32.2]
+ *
+ * MSDN (October 2001) states that this returns a NULL value if the argument
+ * is a zero-length string.  This does not appear to be true; certainly it
+ * returns a value under Win98 (Oleaut32.dll Ver 2.40.4515.0)
  */
 BSTR WINAPI SysAllocString(LPCOLESTR in)
 {
@@ -81,9 +99,8 @@ BSTR WINAPI SysAllocString(LPCOLESTR in)
     return SysAllocStringLen(in, lstrlenW(in));
 }
 
-#ifndef __WIN32OS2__
 /******************************************************************************
- *		SysReAllocString16	[OLE2DISP.3]
+ *		SysReallocString	[OLE2DISP.3]
  */
 INT16 WINAPI SysReAllocString16(LPBSTR16 old,LPCOLESTR16 in)
 {
@@ -92,7 +109,6 @@ INT16 WINAPI SysReAllocString16(LPBSTR16 old,LPCOLESTR16 in)
 	*old=new;
 	return 1;
 }
-#endif
 
 /******************************************************************************
  *		SysReAllocString	[OLEAUT32.3]
@@ -119,9 +135,8 @@ INT WINAPI SysReAllocString(LPBSTR old,LPCOLESTR in)
      return 1;
 }
 
-#ifndef __WIN32OS2__
 /******************************************************************************
- *		SysAllocStringLen16	[OLE2DISP.4]
+ *		SysAllocStringLen	[OLE2DISP.4]
  */
 BSTR16 WINAPI SysAllocStringLen16(const char *in, int len)
 {
@@ -142,7 +157,6 @@ BSTR16 WINAPI SysAllocStringLen16(const char *in, int len)
 
 	return out;
 }
-#endif
 
 /******************************************************************************
  *             SysAllocStringLen     [OLEAUT32.4]
@@ -211,9 +225,8 @@ BSTR WINAPI SysAllocStringLen(const OLECHAR *in, unsigned int len)
     return (LPWSTR)stringBuffer;
 }
 
-#ifndef __WIN32OS2__
 /******************************************************************************
- *		SysReAllocStringLen16	[OLE2DISP.5]
+ *		SysReAllocStringLen	[OLE2DISP.5]
  */
 int WINAPI SysReAllocStringLen16(BSTR16 *old,const char *in,int len)
 {
@@ -222,7 +235,6 @@ int WINAPI SysReAllocStringLen16(BSTR16 *old,const char *in,int len)
 	*old=new;
 	return 1;
 }
-#endif
 
  
 /******************************************************************************
@@ -250,15 +262,13 @@ int WINAPI SysReAllocStringLen(BSTR* old, const OLECHAR* in, unsigned int len)
     return 1;
 }
 
-#ifndef __WIN32OS2__
 /******************************************************************************
- *		SysFreeString16	[OLE2DISP.6]
+ *		SysFreeString	[OLE2DISP.6]
  */
 void WINAPI SysFreeString16(BSTR16 in)
 {
 	BSTR_Free(in);
 }
-#endif
 
 /******************************************************************************
  *		SysFreeString	[OLEAUT32.6]
@@ -280,20 +290,18 @@ void WINAPI SysFreeString(BSTR in)
     bufferPointer--;
 
     /*
-     * Free the memory from it's "real" origin.
+     * Free the memory from its "real" origin.
      */
     HeapFree(GetProcessHeap(), 0, bufferPointer);
 }
 
-#ifndef __WIN32OS2__
 /******************************************************************************
- *		SysStringLen16	[OLE2DISP.7]
+ *		SysStringLen	[OLE2DISP.7]
  */
 int WINAPI SysStringLen16(BSTR16 str)
 {
 	return strlen(BSTR_GetAddr(str));
 }
-#endif
 
 /******************************************************************************
  *             SysStringLen  [OLEAUT32.7]
@@ -343,22 +351,8 @@ int WINAPI SysStringByteLen(BSTR str)
     return (int)(*bufferPointer);
 }
 
-#ifndef __WIN32OS2__
 /******************************************************************************
- * CreateDispTypeInfo16 [OLE2DISP.31]
- */
-HRESULT WINAPI CreateDispTypeInfo16(
-	INTERFACEDATA *pidata,
-	LCID lcid,
-	ITypeInfo **pptinfo)
-{
-	FIXME("(%p,%ld,%p),stub\n",pidata,lcid,pptinfo);
-	return 0;
-}
-#endif
-
-/******************************************************************************
- * CreateDispTypeInfo [OLE2DISP.31]
+ * CreateDispTypeInfo [OLEAUT32.31]
  */
 HRESULT WINAPI CreateDispTypeInfo(
 	INTERFACEDATA *pidata,
@@ -369,9 +363,20 @@ HRESULT WINAPI CreateDispTypeInfo(
 	return 0;
 }
 
-#ifndef __WIN32OS2__
 /******************************************************************************
- * CreateStdDispatch16 [OLE2DISP.32]
+ * CreateDispTypeInfo [OLE2DISP.31]
+ */
+HRESULT WINAPI CreateDispTypeInfo16(
+	INTERFACEDATA *pidata,
+	LCID lcid,
+	ITypeInfo **pptinfo)
+{
+	FIXME("(%p,%ld,%p),stub\n",pidata,lcid,pptinfo);
+	return E_NOTIMPL;
+}
+
+/******************************************************************************
+ * CreateStdDispatch [OLE2DISP.32]
  */
 HRESULT WINAPI CreateStdDispatch16(
         IUnknown* punkOuter,
@@ -383,10 +388,9 @@ HRESULT WINAPI CreateStdDispatch16(
                ppunkStdDisp);
 	return 0;
 }
-#endif
 
 /******************************************************************************
- * CreateStdDispatch [OLE2DISP.32]
+ * CreateStdDispatch [OLEAUT32.32]
  */
 HRESULT WINAPI CreateStdDispatch(
         IUnknown* punkOuter,
@@ -396,10 +400,9 @@ HRESULT WINAPI CreateStdDispatch(
 {
 	FIXME("(%p,%p,%p,%p),stub\n",punkOuter, pvThis, ptinfo,
                ppunkStdDisp);
-	return 0;
+	return E_NOTIMPL;
 }
 
-#ifndef __WIN32OS2__
 /******************************************************************************
  * RegisterActiveObject [OLE2DISP.35]
  */
@@ -407,9 +410,8 @@ HRESULT WINAPI RegisterActiveObject16(
 	IUnknown *punk, REFCLSID rclsid, DWORD dwFlags, unsigned long *pdwRegister
 ) {
 	FIXME("(%p,%s,0x%08lx,%p):stub\n",punk,debugstr_guid(rclsid),dwFlags,pdwRegister);
-	return 0;
+	return E_NOTIMPL;
 }
-#endif
 
 /******************************************************************************
  *		OleTranslateColor	[OLEAUT32.421]
@@ -503,7 +505,7 @@ BSTR WINAPI SysAllocStringByteLen(LPCSTR in, UINT len)
 
     /*
      * Allocate a new buffer to hold the string.
-     * dont't forget to keep an empty spot at the begining of the
+     * dont't forget to keep an empty spot at the beginning of the
      * buffer for the character count and an extra character at the
      * end for the NULL.
      */

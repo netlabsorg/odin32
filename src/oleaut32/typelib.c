@@ -5,6 +5,20 @@
  *		      1999  Rein Klazes
  *		      2000  Francois Jacques
  *		      2001  Huw D M Davies for CodeWeavers
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *                    
  * --------------------------------------------------------------------------------------
  * Known problems (2000, Francois Jacques)
@@ -37,11 +51,6 @@
  *      partly laziness, partly I want to check how windows does it.
  * 
  */
-#ifdef __WIN32OS2__
-#define HAVE_FLOAT_H
-#define WINE_LARGE_INTEGER
-#include "oleaut32.h"
-#endif
 
 #include "config.h"
 
@@ -60,15 +69,12 @@
 #include "heap.h"
 #include "ole2disp.h"
 #include "typelib.h"
-#include "debugtools.h"
+#include "wine/debug.h"
 #include "ntddk.h"
 
-DEFAULT_DEBUG_CHANNEL(ole);
-DECLARE_DEBUG_CHANNEL(typelib);
+WINE_DEFAULT_DEBUG_CHANNEL(ole);
+WINE_DECLARE_DEBUG_CHANNEL(typelib);
 
-#ifdef __WIN32OS2__
-#include <neexe.h>
-#else
 /****************************************************************************
  *		QueryPathOfRegTypeLib	[TYPELIB.14]
  *
@@ -112,8 +118,7 @@ QueryPathOfRegTypeLib16(
 	*path = SysAllocString16(pathname);
 	return S_OK;
 }
-#endif
-
+ 
 /****************************************************************************
  *		QueryPathOfRegTypeLib	[OLEAUT32.164]
  * RETURNS
@@ -132,16 +137,13 @@ QueryPathOfRegTypeLib(
 
     HRESULT hr        = E_FAIL;
 
-    DWORD   dwPathLen = _MAX_PATH;
     LCID    myLCID    = lcid;
 
     char    szXGUID[80];
     char    szTypeLibKey[100];
-#ifdef __WIN32OS2__
-    char    szPath[_MAX_PATH];
-#else
-    char    szPath[dwPathLen];
-#endif
+    char    szPath[MAX_PATH];
+    DWORD   dwPathLen = sizeof(szPath);
+
     if ( !HIWORD(guid) )
     {
         sprintf(szXGUID,
@@ -466,10 +468,36 @@ HRESULT WINAPI RegisterTypeLib(
 		TYPEATTR *tattr = NULL;
 		ITypeInfo_GetTypeAttr(tinfo, &tattr);
 		if (tattr) {
-		    TRACE_(typelib)("guid=%s, flags=%04x\n",
+		    TRACE_(typelib)("guid=%s, flags=%04x (",
 				    debugstr_guid(&tattr->guid),
 				    tattr->wTypeFlags);
-		    if (tattr->wTypeFlags & TYPEFLAG_FOLEAUTOMATION) {
+		    if (TRACE_ON(typelib)) {
+#define XX(x) if (TYPEFLAG_##x & tattr->wTypeFlags) MESSAGE(#x"|");
+			XX(FAPPOBJECT);
+			XX(FCANCREATE);
+			XX(FLICENSED);
+			XX(FPREDECLID);
+			XX(FHIDDEN);
+			XX(FCONTROL);
+			XX(FDUAL);
+			XX(FNONEXTENSIBLE);
+			XX(FOLEAUTOMATION);
+			XX(FRESTRICTED);
+			XX(FAGGREGATABLE);
+			XX(FREPLACEABLE);
+			XX(FDISPATCHABLE);
+			XX(FREVERSEBIND);
+			XX(FPROXY);
+#undef XX
+			MESSAGE("\n");
+		    }
+		    /*
+		     * FIXME: The 1 is just here until we implement rpcrt4
+		     *        stub/proxy handling. Until then it helps IShield
+		     *        v6 to work.
+		     */
+		    if (1 || (tattr->wTypeFlags & TYPEFLAG_FOLEAUTOMATION))
+		    {
 			/* register interface<->typelib coupling */
 			StringFromGUID2(&tattr->guid, guid, 80);
 			guidA = HEAP_strdupWtoA(GetProcessHeap(), 0, guid);
@@ -545,7 +573,6 @@ HRESULT WINAPI UnRegisterTypeLib(
     return S_OK;	/* FIXME: pretend everything is OK */
 }
 
-#ifndef __WIN32OS2__
 /****************************************************************************
  *	OaBuildVersion				(TYPELIB.15)
  *
@@ -582,7 +609,6 @@ DWORD WINAPI OaBuildVersion16(void)
 		return 0;
     }
 }
-#endif
 
 /* for better debugging info leave the static out for the time being */
 #define static

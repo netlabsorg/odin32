@@ -1,4 +1,4 @@
-/* $Id: oleaut32.h,v 1.11 2001-10-03 19:21:59 sandervl Exp $ */
+/* $Id: oleaut32.h,v 1.12 2002-05-17 10:16:59 sandervl Exp $ */
 /*
  * Win32 OLE stubs for OS/2
  *
@@ -51,12 +51,6 @@
 #include <heapstring.h>
 #include <misc.h>
 #include <unicode.h>
-
-extern int 	loadNr;
-extern char 	oleaut32Path[];
-
-void ClosePrivateLogFileTypelib();
-void OpenPrivateLogFileTypelib();
 
 #define snprintf wsnprintfA
 #endif
