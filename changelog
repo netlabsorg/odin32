@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.2444 2003-01-14 19:38:17 sandervl Exp $ */
+/* $Id: changelog,v 1.2445 2003-01-15 10:40:20 sandervl Exp $ */
+
+ 2003-01-15: Platon Fomichev <platon@innotek   >
+    - MSVCRT:   o Updates
+    - VERSION:  o Don't use crtdll
+    - INCLUDE:  o Updates for GCC builds
 
  2003-01-14: Sander van Leeuwen <sandervl@innotek   >
     - WINMM:    o Delete all wave object on unload
