@@ -6,12 +6,28 @@
  *  this in in a single file due to interfering definitions
  *
  */
+#include <odin.h>
+
+#define ICOM_CINTERFACE 1
+#define CINTERFACE 1
 #define INITGUID
 
-/* #include "shlguid.h" */
+#include <os2win.h>
+#include <shlguid.h>
+#include <wine/obj_oleview.h>
+#include <wine/obj_dragdrop.h>
+#include <wine/obj_inplace.h>
+#include <wine/obj_control.h>
+#include <wine/obj_shellfolder.h>
+#include <wine/obj_shelllink.h>
+#include <wine/obj_contextmenu.h>
+#include <wine/obj_commdlgbrowser.h>
+#include <wine/obj_extracticon.h>
+#include <wine/obj_shellextinit.h>
+//#include <docobj.h>
 
 /*
- * Francis Beaudet <francis@macadamian.com> 
+ * Francis Beaudet <francis@macadamian.com>
  *
  * I moved the contents of this file to the ole/guid.c file.
  *
