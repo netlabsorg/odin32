@@ -1,4 +1,11 @@
- /* $Id: ChangeLog,v 1.653 2000-01-15 22:01:35 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.654 2000-01-16 18:15:57 cbratschi Exp $ */
+
+ 2000-01-16: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32/NEW: implemented sysmenu commands: SC_SIZE and SC_TASKLIST
+		      fixed WM_MOVE
+		      changed HTCAPTION system menu position
+		      changed maximized window position
+		      don't move/size maximized windows
 
  2000-01-15: Jens Wiessner <wiessnej@rfi.de>
 	- TWAIN_32: Update
@@ -62,6 +69,14 @@
 	- KERNEL32:   Added DisableLogging & EnableLogging functions to
                       disable logging in parts of code. Logging will only be
                       done if the logcount is bigger than 0.
+<<<<<<< ChangeLog
+<<<<<<< ChangeLog
+>>>>>>> 1.646
+=======
+>>>>>>> 1.653
+
+=======
+>>>>>>> 1.648
 
  2000-01-12: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32/NEW: fixed WM_CALCVALIDRECTS
