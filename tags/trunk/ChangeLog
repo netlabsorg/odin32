@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.295 1999-10-09 13:30:18 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.296 1999-10-09 13:34:28 sandervl Exp $ */
 
  99-10-09: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Clipboard fixes (window handle translation)
@@ -11,7 +11,7 @@
                     Fixed reversed stack top & bottom in TEB structure.
 
  99-10-09: Jens Wiessner <wiessnej@rfi.de>
-	- CRTDLL: Implemented functions; only 80 stubs left
+	- CRTDLL: Implemented functions; only 62 stubs left
 
  99-10-09: Edgar Buerkle <Edgar.Buerkle@gmx.net>
         - USER32: Enabled accelerator WM_COMMANDs

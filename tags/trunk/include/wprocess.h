@@ -1,4 +1,4 @@
-/* $Id: wprocess.h,v 1.8 1999-09-26 22:24:51 sandervl Exp $ */
+/* $Id: wprocess.h,v 1.9 1999-10-09 13:31:44 sandervl Exp $ */
 /*
  * Process help functions
  *
@@ -26,6 +26,8 @@ USHORT WIN32API SetWin32TIB();
 
 extern BOOL fExeStarted;
 extern BOOL fFreeLibrary;
+extern BOOL fIsOS2Image; //TRUE  -> Odin32 OS/2 application (not converted!)
+                         //FALSE -> otherwise
 
 //Flat pointer to thread TIB structure
 extern DWORD  *TIBFlatPtr;
