@@ -1,7 +1,10 @@
-/* $Id: changelog,v 1.1913 2001-12-17 16:22:42 sandervl Exp $ */
+/* $Id: changelog,v 1.1914 2001-12-19 00:45:58 bird Exp $ */
+
+ 2001-12-19: knut st. osmundsen <kosmunds@csc.com>
+    - MAKEFILES:o Changed inference rules in /src/mesa/3dfx to support MULTIJOBS.
 
  2001-12-17: Sander van Leeuwen <sandervl@xs4all.nl>
-    - KERNEL32: o GetVolumeInformation changes: 
+    - KERNEL32: o GetVolumeInformation changes:
                   - report JFS as NTFS
                   - report UDF & CDFS as UDF & CDFS (no change)
                   - report everthing else as FAT16
@@ -29,7 +32,7 @@
  2001-12-12: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Put back old windows key scancodes
                 o Fix for handling Alt-F4 in default window handler
-                o SendInput fix; send message and clear extra info 
+                o SendInput fix; send message and clear extra info
                   afterwards
     - COMCTL32: o Comboex, rebar, tooltips, toolbar bugfixes: (Wine)
                   NEVER delete the font object received by WM_SETFONT
@@ -37,7 +40,7 @@
  2001-12-11: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Swallow message if WH_KEYBOARD_LL hook returns TRUE
                 o Fixed windows key scancodes
-                o Do no generate a left control key message when Alt-Gr 
+                o Do no generate a left control key message when Alt-Gr
                   is pressed (experimental change)
 
  2001-12-11: Patrick Haller <patrick.haller@innotek.de>
@@ -60,10 +63,10 @@
                   [WinVersion]
                   Version=Win98        -> Windows 98
                   Version=WinME        -> Windows ME
-                  Version=NT4          -> Windows NT4  SP6 
+                  Version=NT4          -> Windows NT4  SP6
                   Version=Win2000      -> Windows 2000 SP2 (default)
                   Version=WinXP        -> Windows XP
-                o IOCTL_STORAGE_GET_MEDIA_TYPES is identical to 
+                o IOCTL_STORAGE_GET_MEDIA_TYPES is identical to
                   IOCTL_DISK_GET_MEDIA_TYPES
                 o Support for Windows 2000 GetVersionEx extension (OSVERSIONINFOEX
                   structure) added
@@ -95,7 +98,7 @@
                 o Removed dwType handle manager structure member; added
                   win32 handle to structure
                   (NOTE: All work in progress for new framework for overlapped IO)
-                o ReadFileEx/WriteFileEx: lpOverlapped->Offset & lpOverlapped->OffsetHigh 
+                o ReadFileEx/WriteFileEx: lpOverlapped->Offset & lpOverlapped->OffsetHigh
                   must be 0 if used with named pipes
 
  2001-12-04: Patrick Haller <patrick.haller@innotek.de>
@@ -118,9 +121,9 @@
                 o GetThreadPriority: return priority stored in TEB
                 o Rewrote SetThreadPriority; allow it to change priority
                   classes too. WGSS only changes delta in SetThreadPriority
-                  and class in SetPriorityClass (but that one affects the whole 
+                  and class in SetPriorityClass (but that one affects the whole
                   process, so it is rarely used by applications)
-                  THREAD_PRIORITY_IDLE          -> PRTYC_IDLETIME, 0 
+                  THREAD_PRIORITY_IDLE          -> PRTYC_IDLETIME, 0
                   THREAD_PRIORITY_LOWEST        -> PRTYC_REGULAR, PRTYD_MINIMUM
                   THREAD_PRIORITY_BELOW_NORMAL  -> PRTYC_REGULAR, -15
                   THREAD_PRIORITY_NORMAL        -> PRTYC_REGULAR, 0
