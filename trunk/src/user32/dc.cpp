@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.68 2000-07-19 19:05:24 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.69 2000-07-22 12:51:59 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -328,7 +328,7 @@ VOID removeClientArea(pDCData pHps)
 }
 //******************************************************************************
 //******************************************************************************
-HRGN selectClientArea(Win32BaseWindow *window, pDCData pHps, PRECTL prclPaint)
+void selectClientArea(Win32BaseWindow *window, pDCData pHps)
 {
    // This function checks to see if the DC needs to be adjusted to a client
    // area and makes the adjustment.
@@ -344,13 +344,12 @@ HRGN selectClientArea(Win32BaseWindow *window, pDCData pHps, PRECTL prclPaint)
       window->getClientWidth()  == window->getWindowWidth())
    {
 	//client rectangle = frame rectangle -> no change necessary
-        //only setup the clip region
-	goto setupclipregion;
+	return;
    }
    if(pHps->isClientArea) {
 	//TODO: counter
 	dprintf(("WARNING: selectClientArea; already selected!!"));
-	goto setupclipregion;
+	return;
    }
    pHps->isClient = TRUE;
 
@@ -411,25 +410,6 @@ HRGN selectClientArea(Win32BaseWindow *window, pDCData pHps, PRECTL prclPaint)
 
    // Destroy the region now we have finished with it.
    GreDestroyRegion(pHps->hps, hrgnRect);
-
-setupclipregion:
-   if(prclPaint) {
-#if 0
-	hrgnClip = GpiQueryClipRegion(pHps->hps);
-      	if(hrgnClip) {
-      		rc = GreIntersectClipRectangle(pHps->hps, prclPaint);
-		if(rc == RGN_ERROR) {
-			dprintf(("selectClientArea: GreIntersectClipRectangle returned RGN_ERROR!"));
-		}
-      	}
-      	else {
-#endif
-      		hrgnClip = GreCreateRectRegion(pHps->hps, prclPaint, 1);
-      		GreSelectClipRegion(pHps->hps, hrgnClip, &hrgnOldClip);
-//	}
-   }
-
-   return hrgnOldClip;
 }
 //******************************************************************************
 //******************************************************************************
@@ -571,7 +551,7 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
  pDCData  pHps = NULLHANDLE;
  HPS      hPS_ownDC = NULLHANDLE, hpsPaint = 0;
  RECTL    rectl = {0, 0, 1, 1};
- HRGN     hrgnUpdate, hrgnOld, hrgnOldClip;
+ HRGN     hrgnOldClip;
  LONG     lComplexity;
  RECTL    rectlClient;
  RECTL    rectlClip;
@@ -611,26 +591,51 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
         }
    }
 
+   //testest
+   if(hwnd == 0x6800000f) {
+	lComplexity = 1;
+   }
+
    if(WinQueryUpdateRect(hwndClient, &rectl) == FALSE) {
 	memset(&rectl, 0, sizeof(rectl));
         dprintf (("USER32: WARNING: WinQueryUpdateRect failed (error or no update rectangle)!!"));
 
-//	mapWin32ToOS2Rect(wnd->getWindowHeight(), wnd->getClientRectPtr(), (PRECTLOS2)&rectlClient);
-//	WinOffsetRect(NULL, &rectlClient, -rectlClient.xLeft, -rectlClient.yBottom);
+   	selectClientArea(wnd, pHps);
 
-   	hrgnOldClip = selectClientArea(wnd, pHps, &rectl);
+	HRGN hrgnClip = GpiCreateRegion(pHps->hps, 1, &rectl);
+	GpiSetClipRegion(pHps->hps, hrgnClip, &hrgnOldClip);
+
         //save old clip region (restored for CS_OWNDC windows in EndPaint)
         wnd->SetClipRegion(hrgnOldClip);
 	lComplexity = RGN_NULL;
    }
    else {
-        WinValidateRect(hwndClient, &rectl, FALSE);
+	rectlClip.yBottom = rectlClip.xLeft = 0;
+	rectlClip.yTop = rectlClip.xRight = 1;
+
+	//Query update region
+	HRGN hrgnClip = GpiCreateRegion(pHps->hps, 1, &rectlClip);
+	WinQueryUpdateRegion(hwndClient, hrgnClip);
+        WinValidateRegion(hwndClient, hrgnClip, FALSE);
 
 	mapWin32ToOS2Rect(wnd->getWindowHeight(), wnd->getClientRectPtr(), (PRECTLOS2)&rectlClient);
 	WinIntersectRect(NULL, &rectlClip, &rectl, &rectlClient);
 	WinOffsetRect(NULL, &rectlClip, -rectlClient.xLeft, -rectlClient.yBottom);
- 
-   	hrgnOldClip = selectClientArea(wnd, pHps, &rectlClip);
+
+	//change presentation space for client window
+   	selectClientArea(wnd, pHps);
+
+	//clip update region with client window rectangle
+	HRGN hrgnClient = GpiCreateRegion(pHps->hps, 1, &rectlClient);
+	GpiCombineRegion(pHps->hps, hrgnClip, hrgnClip, hrgnClient, CRGN_AND);
+	GpiDestroyRegion(pHps->hps, hrgnClient);
+
+	//change origin of clip region (window -> client)
+	POINTL point = {-rectlClient.xLeft, -rectlClient.yBottom};
+	GpiOffsetRegion(pHps->hps, hrgnClip, &point);
+
+	//set clip region
+	GpiSetClipRegion(pHps->hps, hrgnClip, &hrgnOldClip);
 
         //save old clip region (restored for CS_OWNDC windows in EndPaint)
         wnd->SetClipRegion(hrgnOldClip);
@@ -807,7 +812,7 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
         if (!pHps)
             goto error;
 
-        selectClientArea(wnd, pHps, NULL);
+        selectClientArea(wnd, pHps);
 
 	//TODO: Is this always necessary??
         setPageXForm (wnd, pHps);
@@ -875,7 +880,7 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
 
    if(!(flags & DCX_WINDOW_W))
    {
- 	selectClientArea(wnd, pHps, NULL);
+ 	selectClientArea(wnd, pHps);
    }
    else removeClientArea(pHps);
 
@@ -1172,9 +1177,9 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
 //        if((redraw & RDW_ERASE_W) && (redraw & RDW_ERASENOW_W))
         if(redraw & RDW_ERASENOW_W && wnd->needsEraseBkgnd())
                 wnd->setEraseBkgnd(sendEraseBkgnd(wnd) == 0);
-	if(redraw & RDW_ALLCHILDREN_W) {
-		EnumChildWindows(wnd->getWindowHandle(), RedrawChildEnumProc, redraw);
-	}
+//	if(redraw & RDW_ALLCHILDREN_W) {
+//		EnumChildWindows(wnd->getWindowHandle(), RedrawChildEnumProc, redraw);
+//	}
    }
    else if((redraw & RDW_INTERNALPAINT_W) && !(redraw & RDW_INVALIDATE_W))
    {
