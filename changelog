@@ -1,4 +1,8 @@
- /* $Id: changelog,v 1.496 1999-12-02 07:54:52 phaller Exp $ */
+ /* $Id: changelog,v 1.497 1999-12-02 15:23:34 achimha Exp $ */
+
+ 99-12-02: Achim Hasenmueller <achimha@innotek.de>
+       - WSOCK32\NEW: Not really working :(
+                      Fixed WSAAsyncGetHostByName, added request data to table
 
  99-12-01: Patrick Haller <phaller@gmx.net>
 	- WSOCK32\NEW: Working now :)
