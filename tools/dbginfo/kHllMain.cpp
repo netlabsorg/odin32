@@ -1,4 +1,4 @@
-/* $Id: kHllMain.cpp,v 1.1 2000-08-31 03:02:28 bird Exp $
+/* $Id: kHllMain.cpp,v 1.2 2002-04-12 01:40:21 bird Exp $
  *
  * kHllMain - interface to the kHll class.
  *
@@ -35,6 +35,9 @@
 #include <stdlib.h>
 #include <assert.h>
 
+#include <kTypes.h>
+#include <kError.h>
+#include <kFileInterfaces.h>
 #include <kList.h>
 #include <kFile.h>
 #include <kFileFormatBase.h>
