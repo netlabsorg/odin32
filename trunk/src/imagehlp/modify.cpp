@@ -1,3 +1,4 @@
+/* $Id: modify.cpp,v 1.2 2000-08-02 14:56:26 bird Exp $ */
 /*
  *	IMAGEHLP library
  *
@@ -27,7 +28,7 @@ BOOL WINAPI BindImageEx(
   DWORD Flags, LPSTR ImageName, LPSTR DllPath, LPSTR SymbolPath,
   PIMAGEHLP_STATUS_ROUTINE StatusRoutine)
 {
-  dprintf(("BindImageEx: stub\n")); 
+  dprintf(("BindImageEx: stub\n"));
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
@@ -36,7 +37,7 @@ BOOL WINAPI BindImageEx(
  *		CheckSumMappedFile (IMAGEHLP.@)
  */
 PIMAGE_NT_HEADERS WINAPI CheckSumMappedFile(
-  LPVOID BaseAddress, DWORD FileLength, 
+  LPVOID BaseAddress, DWORD FileLength,
   LPDWORD HeaderSum, LPDWORD CheckSum)
 {
   dprintf(("(%p, %ld, %p, %p): stub\n",
@@ -108,7 +109,7 @@ VOID WINAPI RemoveRelocations(PCHAR ImageName)
  *		SplitSymbols (IMAGEHLP.@)
  */
 BOOL WINAPI SplitSymbols(
-  LPSTR ImageName, LPSTR SymbolsPath, 
+  LPSTR ImageName, LPSTR SymbolsPath,
   LPSTR SymbolFilePath, DWORD Flags)
 {
   dprintf(("SplitSymbols: stub\n"));

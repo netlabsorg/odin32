@@ -1,9 +1,10 @@
+/* $Id: charlist.c,v 1.2 2000-08-02 14:58:40 bird Exp $ */
 /*
- * 
+ *
  *  Character List
- * 
+ *
  *  Copyright (c) 2000 by Jean-Claude Batista
- *  
+ *
  */
 
 #include <stdio.h>
@@ -17,18 +18,18 @@
 extern HANDLE RICHED32_hHeap;
 
 void CHARLIST_Enqueue( CHARLIST* pCharList, char myChar )
-{   
+{
     CHARLISTENTRY* pNewEntry = HeapAlloc(RICHED32_hHeap, 0,sizeof(CHARLISTENTRY));
     pNewEntry->pNext = NULL;
     pNewEntry->myChar = myChar;
-    
+
     if(pCharList->pTail == NULL)
     {
          pCharList->pHead = pCharList->pTail = pNewEntry;
     }
     else
     {
-         CHARLISTENTRY* pCurrent = pCharList->pTail;         
+         CHARLISTENTRY* pCurrent = pCharList->pTail;
          pCharList->pTail = pCurrent->pNext = pNewEntry;
     }
 
@@ -36,11 +37,11 @@ void CHARLIST_Enqueue( CHARLIST* pCharList, char myChar )
 }
 
 void CHARLIST_Push( CHARLIST* pCharList, char myChar)
-{   
+{
     CHARLISTENTRY* pNewEntry = malloc(sizeof(CHARLISTENTRY));
-    
+
     pNewEntry->myChar = myChar;
-    
+
     if(pCharList->pHead == NULL)
     {
          pCharList->pHead = pCharList->pTail = pNewEntry;
@@ -61,14 +62,14 @@ char CHARLIST_Dequeue(CHARLIST* pCharList)
     CHARLISTENTRY* pCurrent;
     char myChar;
 
-    if(pCharList->nCount == 0) 
+    if(pCharList->nCount == 0)
       return 0;
-    
+
     pCharList->nCount--;
     myChar = pCharList->pHead->myChar;
     pCurrent = pCharList->pHead->pNext;
     HeapFree(RICHED32_hHeap, 0,pCharList->pHead);
- 
+
     if(pCharList->nCount == 0)
     {
         pCharList->pHead = pCharList->pTail = NULL;
@@ -78,7 +79,7 @@ char CHARLIST_Dequeue(CHARLIST* pCharList)
         pCharList->pHead = pCurrent;
     }
 
-    return myChar;   
+    return myChar;
 }
 
 int CHARLIST_GetNbItems(CHARLIST* pCharList)
@@ -88,7 +89,7 @@ int CHARLIST_GetNbItems(CHARLIST* pCharList)
 
 void CHARLIST_FreeList(CHARLIST* pCharList){
     while(pCharList->nCount)
-        CHARLIST_Dequeue(pCharList);       
+        CHARLIST_Dequeue(pCharList);
 }
 
 /* this function count the number of occurences of a caracter */
@@ -96,24 +97,24 @@ int CHARLIST_CountChar(CHARLIST* pCharList, char myChar)
 {
     CHARLISTENTRY *pCurrent;
     int nCount = 0;
-    
+
     for(pCurrent =pCharList->pHead ;pCurrent;pCurrent=pCurrent->pNext)
     	if(pCurrent->myChar == myChar)
 	    nCount++;
-    
+
     return nCount;
 }
 
 int CHARLIST_toBuffer(CHARLIST* pCharList, char* pBuffer, int nBufferSize)
 {
-   
+
    /* we add one to store a NULL caracter */
-   if(nBufferSize < pCharList->nCount + 1) 
+   if(nBufferSize < pCharList->nCount + 1)
         return pCharList->nCount;
-  
+
    for(;pCharList->nCount;pBuffer++)
        *pBuffer = CHARLIST_Dequeue(pCharList);
-   
+
    *pBuffer = '\0';
 
    return 0;

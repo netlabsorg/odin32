@@ -1,14 +1,15 @@
+/* $Id: richedit.c,v 1.3 2000-08-02 14:58:40 bird Exp $ */
 /*
  * RichEdit32  functions
  *
  * This module is a simple wrap-arround the edit controls.
- * At the point, it is good only for application who use the RICHEDIT control to 
+ * At the point, it is good only for application who use the RICHEDIT control to
  * display RTF text.
  *
  * Copyright 2000 by Jean-Claude Batista
- * 
+ *
  */
- 
+
 #include "windows.h"
 #include "winbase.h"
 #include "heap.h"
@@ -46,7 +47,7 @@ HMODULE RICHED32_hModule = 0;
 BOOL WINAPI
 RICHED32_LibMain (HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 {
-        
+
     switch (fdwReason) {
 	    case DLL_PROCESS_ATTACH:
 
@@ -59,7 +60,7 @@ RICHED32_LibMain (HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 		        RICHED32_hHeap = HeapCreate (0, 0x10000, 0);
 
 	        }
-		
+
 	        /* register the Rich Edit class */
 	        RICHED32_Register ();
 
@@ -69,14 +70,14 @@ RICHED32_LibMain (HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 	    case DLL_PROCESS_DETACH:
 	        RICHED32_dwProcessesAttached--;
 
-	        /* unregister all common control classes */      
+	        /* unregister all common control classes */
 	        RICHED32_Unregister ();
 
 	        if (RICHED32_dwProcessesAttached == 0) {
 		    HeapDestroy (RICHED32_hHeap);
 		    RICHED32_hHeap = (HANDLE)NULL;
                 }
-		break;	    
+		break;
     }
 
     return TRUE;
@@ -93,17 +94,17 @@ static LRESULT WINAPI RICHED32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
 {
     int RTFToBuffer(char* pBuffer, int nBufferSize);
     LONG newstyle = 0;
-    LONG style = 0;  
+    LONG style = 0;
 
     static HWND hwndEdit;
     static char* rtfBuffer;
     int rtfBufferSize;
-    
+
     switch (uMsg)
     {
- 
-    case WM_CREATE :           
-            
+
+    case WM_CREATE :
+
 	    /* remove SCROLLBARS from the current window style */
 	    newstyle = style = ((LPCREATESTRUCTA) lParam)->style;
             newstyle &= ~WS_HSCROLL;
@@ -112,44 +113,44 @@ static LRESULT WINAPI RICHED32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
             newstyle &= ~ES_AUTOVSCROLL;
 
 #ifdef __WIN32OS2__
-	    style |= WS_CHILD;                                  
+	    style |= WS_CHILD;
 #endif
             hwndEdit = CreateWindowA ("edit", ((LPCREATESTRUCTA) lParam)->lpszName,
                                    style, 0, 0, 0, 0,
                                    hwnd, (HMENU) ID_EDIT,
                                    ((LPCREATESTRUCTA) lParam)->hInstance, NULL) ;
-	
-	    SetWindowLongA(hwnd,GWL_STYLE, newstyle); 		   
+
+	    SetWindowLongA(hwnd,GWL_STYLE, newstyle);
             return 0 ;
-          
-    case WM_SETFOCUS :            
+
+    case WM_SETFOCUS :
             SetFocus (hwndEdit) ;
             return 0 ;
-          
-    case WM_SIZE :             
+
+    case WM_SIZE :
             MoveWindow (hwndEdit, 0, 0, LOWORD (lParam), HIWORD (lParam), TRUE) ;
             return 0 ;
-          
+
     case WM_COMMAND :
             if (LOWORD (wParam) == ID_EDIT)
-                 if (HIWORD (wParam) == EN_ERRSPACE || 
+                 if (HIWORD (wParam) == EN_ERRSPACE ||
                            HIWORD (wParam) == EN_MAXTEXT)
 
                       MessageBoxA (hwnd, "RichEdit control out of space.",
                                   "ERROR", MB_OK | MB_ICONSTOP) ;
             return 0 ;
-     
-    case EM_STREAMIN:                               
-            
+
+    case EM_STREAMIN:
+
 	    /* setup the RTF parser */
 	    RTFSetEditStream(( EDITSTREAM*)lParam);
 	    WriterInit();
 	    RTFInit ();
-	    BeginFile();	    
+	    BeginFile();
 
 	    /* do the parsing */
 	    RTFRead ();
-            
+
 	    rtfBufferSize = RTFToBuffer(NULL, 0);
 	    rtfBuffer = HeapAlloc(RICHED32_hHeap, 0,rtfBufferSize*sizeof(char));
 	    if(rtfBuffer)
@@ -160,8 +161,8 @@ static LRESULT WINAPI RICHED32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
 	    }
 	    else
 		WARN("Not enough memory for a allocating rtfBuffer\n");
-		
-            return 0;   
+
+            return 0;
     }
     /*return SendMessageA( hwndEdit,uMsg,wParam,lParam);*/
     return DefWindowProcA( hwnd,uMsg,wParam,lParam);
@@ -187,7 +188,7 @@ HRESULT WINAPI
 RICHED32_DllGetVersion (DLLVERSIONINFO *pdvi)
 {
     if (pdvi->cbSize != sizeof(DLLVERSIONINFO)) {
- 
+
 	return E_INVALIDARG;
     }
 
@@ -202,7 +203,7 @@ RICHED32_DllGetVersion (DLLVERSIONINFO *pdvi)
 /***
  * DESCRIPTION:
  * Registers the window class.
- * 
+ *
  * PARAMETER(S):
  * None
  *
@@ -211,7 +212,7 @@ RICHED32_DllGetVersion (DLLVERSIONINFO *pdvi)
  */
 VOID RICHED32_Register(void)
 {
-    WNDCLASSA wndClass; 
+    WNDCLASSA wndClass;
 
     ZeroMemory(&wndClass, sizeof(WNDCLASSA));
     wndClass.style = CS_HREDRAW | CS_VREDRAW | CS_GLOBALCLASS;
@@ -228,7 +229,7 @@ VOID RICHED32_Register(void)
 /***
  * DESCRIPTION:
  * Unregisters the window class.
- * 
+ *
  * PARAMETER(S):
  * None
  *

@@ -1,3 +1,4 @@
+/* $Id: access.cpp,v 1.2 2000-08-02 14:56:26 bird Exp $ */
 /*
  *	IMAGEHLP library
  *
@@ -104,7 +105,7 @@ PVOID WINAPI ImageDirectoryEntryToData(
  */
 PLOADED_IMAGE WINAPI ImageLoad(LPSTR DllName, LPSTR DllPath)
 {
-  PLOADED_IMAGE pLoadedImage = 
+  PLOADED_IMAGE pLoadedImage =
     (_LOADED_IMAGE*)HeapAlloc(IMAGEHLP_hHeap, 0, sizeof(LOADED_IMAGE));
   return pLoadedImage;
 }
@@ -158,8 +159,8 @@ BOOL WINAPI ImageUnload(PLOADED_IMAGE pLoadedImage)
 
   pFind=&pLoadedImage->Links;
   pCurrent=&IMAGEHLP_pFirstLoadedImage->Links;
-  while((pCurrent != pFind) && 
-    (pCurrent != NULL)) 
+  while((pCurrent != pFind) &&
+    (pCurrent != NULL))
       pCurrent = pCurrent->Flink;
   if(!pCurrent)
     {

@@ -1,3 +1,4 @@
+/* $Id: internal.cpp,v 1.3 2000-08-02 14:56:26 bird Exp $ */
 /*
  *	IMAGEHLP library
  *
@@ -81,10 +82,10 @@ VOID RemoveEntryList(PLIST_ENTRY pEntry)
 PLIST_ENTRY RemoveHeadList(PLIST_ENTRY pListHead)
 {
   PLIST_ENTRY p = pListHead->Flink;
-  
+
   if(p != pListHead)
     {
-      RemoveEntryList(pListHead); 
+      RemoveEntryList(pListHead);
       return p;
     }
   else

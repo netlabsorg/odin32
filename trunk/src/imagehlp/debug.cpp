@@ -1,3 +1,4 @@
+/* $Id: debug.cpp,v 1.2 2000-08-02 14:56:26 bird Exp $ */
 /*
  *	IMAGEHLP library
  *
