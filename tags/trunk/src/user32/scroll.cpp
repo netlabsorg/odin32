@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.47 2001-11-16 16:11:01 sandervl Exp $ */
+/* $Id: scroll.cpp,v 1.48 2002-12-20 15:09:44 sandervl Exp $ */
 /*
  * Scrollbar control
  *
@@ -979,6 +979,14 @@ LRESULT SCROLL_HandleScrollEvent(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar,
             SCROLL_MovingThumb = TRUE;
             thumbTrackSent = FALSE;
             SCROLL_DrawMovingThumb(hdc, &rect, vertical, arrowSize, thumbSize);
+#ifdef __WIN32OS2__
+            //This message is sent in Windows when the user clicks on the 
+            //scroll thumb (even without moving) (NT4, SP6)
+            SendMessageA( hwndOwner, vertical ? WM_VSCROLL : WM_HSCROLL,
+                          MAKEWPARAM( SB_THUMBTRACK, SCROLL_TrackingVal),
+                          hwndCtl );
+            thumbTrackSent = TRUE;
+#endif
         } else if ((msg == WM_LBUTTONUP) || (msg == WM_CAPTURECHANGED))
         {
           UINT val;
