@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.169 2000-02-24 19:19:08 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.170 2000-02-29 19:16:12 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2568,18 +2568,13 @@ end:
 HWND Win32BaseWindow::SetActiveWindow()
 {
  HWND hwndActive;
- Win32BaseWindow  *win32wnd;
- ULONG         magic;
 
     dprintf(("SetActiveWindow %x", getWindowHandle()));
-    hwndActive = OSLibWinSetActiveWindow(OS2HwndFrame);
-    win32wnd = (Win32BaseWindow *)OSLibWinGetWindowULong(hwndActive, OFFSET_WIN32WNDPTR);
-    magic    = OSLibWinGetWindowULong(hwndActive, OFFSET_WIN32PM_MAGIC);
-    if(CheckMagicDword(magic) && win32wnd)
-    {
-        return win32wnd->getWindowHandle();
+    if(OSLibWinSetActiveWindow(OS2HwndFrame) == FALSE) {
+	dprintf(("OSLibWinSetActiveWindow %x returned FALSE!", OS2HwndFrame));
     }
-    return windowDesktop->getWindowHandle(); //pretend the desktop was active
+    hwndActive = GetActiveWindow();
+    return (hwndActive) ? hwndActive : windowDesktop->getWindowHandle(); //pretend the desktop was active
 }
 //******************************************************************************
 //WM_ENABLE is sent to hwnd, but not to it's children (as it should be)

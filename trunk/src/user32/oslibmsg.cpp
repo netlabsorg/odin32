@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.28 2000-02-16 14:34:26 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.29 2000-02-29 19:16:11 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -31,6 +31,7 @@
 #include <wprocess.h>
 #include "pmwindow.h"
 #include "oslibwin.h"
+#include <win\hook.h>
 
 #define DBG_LOCALLOG	DBG_oslibmsg
 #include "dbglocal.h"
@@ -247,6 +248,12 @@ continuegetmsg:
 
   OS2ToWinMsgTranslate((PVOID)thdb, &os2msg, pMsg, isUnicode, MSG_REMOVE);
   memcpy(MsgThreadPtr, &os2msg, sizeof(QMSG));
+
+  if(pMsg->message <= WINWM_KEYLAST && pMsg->message >= WINWM_KEYDOWN)
+  {
+    	if(ProcessKbdHook(pMsg, TRUE))
+      		goto continuegetmsg;
+  }
   return rc;
 }
 //******************************************************************************
@@ -314,6 +321,13 @@ continuepeekmsg:
   if(fRemove & PM_REMOVE_W) {
         memcpy(MsgThreadPtr, &os2msg, sizeof(QMSG));
   }
+
+  if(pMsg->message <= WINWM_KEYLAST && pMsg->message >= WINWM_KEYDOWN)
+  {
+    	if(ProcessKbdHook(pMsg, fRemove))
+      		goto continuepeekmsg;
+  }
+
   return rc;
 }
 //******************************************************************************
