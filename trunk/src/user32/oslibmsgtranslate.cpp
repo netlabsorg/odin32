@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.19 2000-03-01 13:30:04 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.20 2000-03-03 21:19:13 hugh Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -45,7 +45,7 @@ USHORT virtualKeyTable [66] = {
                0x08,    // VK_BACKSPACE     VK_BACK
                0x09,    // VK_TAB           VK_TAB
                0x00,    // VK_BACKTAB       No equivalent!
-               0x0A,    // VK_NEWLINE       0x0A (no VK_* def)
+               0x0D,    // VK_NEWLINE       VK_RETURN
                0x10,    // VK_SHIFT         VK_SHIFT
                0x11,    // VK_CTRL          VK_CONTROL
                0x12,    // VK_ALT           VK_MENU, best match I guess
