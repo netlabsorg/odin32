@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.8 2000-01-08 17:08:56 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.9 2000-01-09 14:14:23 cbratschi Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -143,7 +143,8 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
         goto dummymessage; //not a win32 client window
   }
   winMsg->time = os2Msg->time;
-  winMsg->pt.x = os2Msg->ptl.x;
+  //CB: PM bug or undocumented feature? ptl.x highword is set!
+  winMsg->pt.x = os2Msg->ptl.x & 0xFFFF;
   winMsg->pt.y = mapScreenY(os2Msg->ptl.y);
 
   if(win32wnd) //==0 for WM_CREATE/WM_QUIT

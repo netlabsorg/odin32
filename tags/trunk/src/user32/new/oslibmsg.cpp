@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.10 2000-01-08 17:08:55 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.11 2000-01-09 14:14:22 cbratschi Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -240,6 +240,7 @@ continuegetmsg:
             eaten = TIMER_HandleTimer(&os2msg);
     } while (eaten);
   }
+
   OS2ToWinMsgTranslate((PVOID)thdb, &os2msg, pMsg, isUnicode, MSG_REMOVE);
   memcpy(MsgThreadPtr, &os2msg, sizeof(QMSG));
   return rc;
@@ -277,6 +278,7 @@ BOOL OSLibWinPeekMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterM
         memcpy(pMsg, &thdb->msgWCHAR, sizeof(MSG));
         return TRUE;
   }
+
 continuepeekmsg:
   do {
         eaten = FALSE;
