@@ -1,4 +1,4 @@
-/* $Id: oleaut32.h,v 1.4 1999-09-05 22:44:36 davidr Exp $ */
+/* $Id: oleaut32.h,v 1.5 1999-09-08 15:23:23 davidr Exp $ */
 /*
  * Win32 OLE stubs for OS/2
  *
@@ -28,6 +28,7 @@
 // ><DJR 17.05.99 Prevent CALLCONV becoming _System
 #include <win/wtypes.h>
 #include <winbase.h>
+#include "oleauto.h"
 //#include <uconv.h>
 #undef CALLCONV
 
@@ -35,6 +36,7 @@
 #include <ole2ver.h>
 #include <ole.h>
 #include <winreg.h>
+
 
 #include "wine/obj_base.h"
 #include "wine/obj_oleview.h"
@@ -46,6 +48,9 @@
 #include "wine/obj_moniker.h"
 #include "wine/obj_clientserver.h"
 #include "wine/obj_dragdrop.h"
+#include "wine/obj_property.h"
+#include "wine/obj_olefont.h"
+#include "wine/obj_oleundo.h"
 #include <heapstring.h>
 
 #endif
