@@ -1710,6 +1710,11 @@ BOOL      WINAPI SetConsoleTitleA(LPCSTR);
 BOOL      WINAPI SetConsoleTitleW(LPCWSTR);
 #define     SetConsoleTitle WINELIB_NAME_AW(SetConsoleTitle)
 BOOL      WINAPI SetEndOfFile(HFILE);
+BOOL      WINAPI DeviceIoControl(HANDLE hDevice, DWORD dwIoControlCode,
+                                 LPVOID lpInBuffer, DWORD nInBufferSize,
+                                 LPVOID lpOutBuffer, DWORD nOutBufferSize,
+                                 LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped);
+
 BOOL      WINAPI SetEnvironmentVariableA(LPCSTR,LPCSTR);
 BOOL      WINAPI SetEnvironmentVariableW(LPCWSTR,LPCWSTR);
 #define     SetEnvironmentVariable WINELIB_NAME_AW(SetEnvironmentVariable)
