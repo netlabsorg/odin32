@@ -1,4 +1,4 @@
-/* $Id: winicon.cpp,v 1.9 2000-02-16 14:28:27 sandervl Exp $ */
+/* $Id: winicon.cpp,v 1.10 2000-03-23 23:06:54 sandervl Exp $ */
 /*
  * Win32 Icon Code for OS/2
  *
@@ -28,9 +28,7 @@
 //******************************************************************************
 HICON WIN32API CreateIcon( HINSTANCE arg1, INT arg2, INT arg3, BYTE arg4, BYTE arg5, LPCVOID arg6, LPCVOID arg7)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  CreateIcon\n");
-#endif
+    dprintf(("USER32:  CreateIcon\n"));
     return O32_CreateIcon(arg1, arg2, arg3, arg4, arg5, (const BYTE *)arg6, (const BYTE *)arg7);
 }
 //******************************************************************************
@@ -44,9 +42,7 @@ HICON WIN32API CreateIconFromResource(PBYTE presbits,  UINT dwResSize,
  PBYTE OS2Icon    = ConvertWin32Icon(presbits, dwResSize, &OS2ResSize);
 
     hicon = O32_CreateIconFromResource(OS2Icon, OS2ResSize, fIcon, dwVer);
-#ifdef DEBUG
-    WriteLog("USER32:  CreateIconFromResource returned %X (%X)\n", hicon, GetLastError());
-#endif
+    dprintf(("USER32:  CreateIconFromResource returned %X (%X)\n", hicon, GetLastError()));
     if(OS2Icon)
         FreeIcon(OS2Icon);
 
@@ -59,9 +55,7 @@ HICON WIN32API CreateIconFromResourceEx(PBYTE presbits,  UINT dwResSize,
                                         int   cxDesired, int cyDesired,
                                         UINT  Flags)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  CreateIconFromResourceEx %X %d %d %X %d %d %X, not completely supported!\n", presbits, dwResSize, fIcon, dwVer, cxDesired, cyDesired, Flags);
-#endif
+    dprintf(("USER32:  CreateIconFromResourceEx %X %d %d %X %d %d %X, not completely supported!\n", presbits, dwResSize, fIcon, dwVer, cxDesired, cyDesired, Flags));
     return CreateIconFromResource(presbits, dwResSize, fIcon, dwVer);
 }
 //******************************************************************************

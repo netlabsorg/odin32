@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.68 2000-03-06 23:39:12 bird Exp $
+# $Id: Makefile,v 1.69 2000-03-23 23:06:50 sandervl Exp $
 
 #
 # Odin32 API
@@ -74,7 +74,6 @@ $(OBJDIR)\dib.obj \
 $(OBJDIR)\oslibdos.obj \
 $(OBJDIR)\win32wmdichild.obj \
 $(OBJDIR)\winprop.obj \
-$(OBJDIR)\wingdi.obj \
 $(OBJDIR)\oslibgdi.obj \
 $(OBJDIR)\winaccel.obj \
 $(OBJDIR)\win32wbasepos.obj \
