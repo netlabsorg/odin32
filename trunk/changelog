@@ -1,10 +1,13 @@
-/* $Id: changelog,v 1.2384 2002-12-12 12:32:52 sandervl Exp $ */
+/* $Id: changelog,v 1.2385 2002-12-12 13:56:34 sandervl Exp $ */
 
  2002-12-12: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Fixed wrong access of global memory map critical section
                   (custom builds only)
     - USER32:   o Fixed wrong access of global window handle critical section
                   (custom builds only)
+                o Changed all system menu resources; manually append
+                  Odin menu items when building the system menu.
+                  (instead of removing them)
 
  2002-12-11: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Added custom build function to disable loading of LX dlls
