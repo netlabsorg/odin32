@@ -1,4 +1,4 @@
-/* $Id: flatsb.cpp,v 1.1 2000-02-23 17:09:41 cbratschi Exp $ */
+/* $Id: flatsb.cpp,v 1.2 2000-02-25 17:00:15 cbratschi Exp $ */
 /*
  * Flat Scrollbar control
  *
@@ -19,10 +19,11 @@
 
 #include "winbase.h"
 #include "commctrl.h"
+#include "ccbase.h"
 #include "flatsb.h"
 
 
-#define FlatSB_GetInfoPtr(hwnd) ((FLATSB_INFO*)GetWindowLongA (hwnd, 0))
+#define FlatSB_GetInfoPtr(hwnd) ((FLATSB_INFO*)getInfoPtr(hwnd))
 
 
 BOOL WINAPI
@@ -143,7 +144,7 @@ FlatSB_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 //          if (uMsg >= WM_USER)
 //              ERR_(datetime)("unknown msg %04x wp=%08x lp=%08lx\n",
 //                   uMsg, wParam, lParam);
-            return DefWindowProcA (hwnd, uMsg, wParam, lParam);
+            return defComCtl32ProcA (hwnd, uMsg, wParam, lParam);
     }
     return 0;
 }
@@ -153,9 +154,6 @@ VOID
 FLATSB_Register (VOID)
 {
     WNDCLASSA wndClass;
-
-//SvL: Don't check this now
-//    if (GlobalFindAtomA (FLATSB_CLASSA)) return;
 
     ZeroMemory (&wndClass, sizeof(WNDCLASSA));
     wndClass.style         = CS_GLOBALCLASS;
@@ -173,7 +171,6 @@ FLATSB_Register (VOID)
 VOID
 FLATSB_Unregister (VOID)
 {
-    if (GlobalFindAtomA (FLATSB_CLASSA))
-        UnregisterClassA (FLATSB_CLASSA, (HINSTANCE)NULL);
+    UnregisterClassA (FLATSB_CLASSA, (HINSTANCE)NULL);
 }
 

@@ -1,4 +1,4 @@
-/* $Id: ipaddress.cpp,v 1.1 2000-02-23 17:09:43 cbratschi Exp $ */
+/* $Id: ipaddress.cpp,v 1.2 2000-02-25 17:00:16 cbratschi Exp $ */
 /*
  * IP Address control
  *
@@ -29,15 +29,14 @@
 
 #include "winbase.h"
 #include "commctrl.h"
+#include "ccbase.h"
 #include "ipaddress.h"
 //#include "heap.h"
 
 
-#define IPADDRESS_GetInfoPtr(hwnd) ((IPADDRESS_INFO *)GetWindowLongA (hwnd, 0))
+#define IPADDRESS_GetInfoPtr(hwnd) ((IPADDRESS_INFO*)getInfoPtr(hwnd))
 
 
-static BOOL
-IPADDRESS_SendNotify (HWND hwnd, UINT command);
 static BOOL
 IPADDRESS_SendIPAddressNotify (HWND hwnd, UINT field, BYTE newValue);
 
@@ -88,8 +87,8 @@ IPADDRESS_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
         LPIP_SUBCLASS_INFO lpipsi;
 
 
-    infoPtr = (IPADDRESS_INFO *)COMCTL32_Alloc (sizeof(IPADDRESS_INFO));
-    SetWindowLongA (hwnd, 0, (DWORD)infoPtr);
+    infoPtr = (IPADDRESS_INFO*)initControl(hwnd,sizeof(IPADDRESS_INFO));
+    if (!infoPtr) return (LRESULT)-1;
 
     GetClientRect (hwnd, &rcClient);
 
@@ -134,9 +133,10 @@ IPADDRESS_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
 static LRESULT
 IPADDRESS_Destroy (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
-        int i;
+    int i;
     IPADDRESS_INFO *infoPtr = IPADDRESS_GetInfoPtr (hwnd);
-        LPIP_SUBCLASS_INFO lpipsi=(LPIP_SUBCLASS_INFO)
+    LPIP_SUBCLASS_INFO lpipsi=(LPIP_SUBCLASS_INFO)
+
             GetPropA ((HWND)hwnd, IP_SUBCLASS_PROP);
 
         for (i=0; i<=3; i++) {
@@ -144,7 +144,7 @@ IPADDRESS_Destroy (HWND hwnd, WPARAM wParam, LPARAM lParam)
                   (LONG)lpipsi->wpOrigProc[i]);
         }
 
-    COMCTL32_Free (infoPtr);
+    doneControl(hwnd);
     return 0;
 }
 
@@ -160,7 +160,7 @@ IPADDRESS_KillFocus (HWND hwnd, WPARAM wParam, LPARAM lParam)
     ReleaseDC (hwnd, hdc);
 
     IPADDRESS_SendIPAddressNotify (hwnd, 0, 0);  /* FIXME: should use -1 */
-    IPADDRESS_SendNotify (hwnd, EN_KILLFOCUS);
+    sendCommand(hwnd,EN_KILLFOCUS);
     InvalidateRect (hwnd, NULL, TRUE);
 
     return 0;
@@ -206,30 +206,14 @@ IPADDRESS_Size (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
 
 static BOOL
-IPADDRESS_SendNotify (HWND hwnd, UINT command)
-
-{
-//    TRACE (ipaddress, "%x\n",command);
-    return (BOOL)SendMessageA (GetParent (hwnd), WM_COMMAND,
-              MAKEWPARAM (GetWindowLongA (hwnd, GWL_ID),command), (LPARAM)hwnd);
-}
-
-
-static BOOL
 IPADDRESS_SendIPAddressNotify (HWND hwnd, UINT field, BYTE newValue)
 {
-        NMIPADDRESS nmip;
+  NMIPADDRESS nmip;
 
-//    TRACE (ipaddress, "%x %x\n",field,newValue);
-    nmip.hdr.hwndFrom = hwnd;
-    nmip.hdr.idFrom   = GetWindowLongA (hwnd, GWL_ID);
-    nmip.hdr.code     = IPN_FIELDCHANGED;
+  nmip.iField=field;
+  nmip.iValue=newValue;
 
-        nmip.iField=field;
-        nmip.iValue=newValue;
-
-    return (BOOL)SendMessageA (GetParent (hwnd), WM_NOTIFY,
-                               (WPARAM)nmip.hdr.idFrom, (LPARAM)&nmip);
+  return (BOOL)sendNotify(hwnd,IPN_FIELDCHANGED,&nmip.hdr);
 }
 
 
@@ -346,7 +330,7 @@ IPADDRESS_SetAddress (HWND hwnd, WPARAM wParam, LPARAM lParam)
                         {
                          sprintf (buf,"%d",value);
                          SetWindowTextA (lpipsi->hwndIP[i],buf);
-                         IPADDRESS_SendNotify (hwnd, EN_CHANGE);
+                         sendCommand(hwnd,EN_CHANGE);
                 }
                 ip_address/=256;
         }
@@ -385,7 +369,7 @@ IPADDRESS_LButtonDown (HWND hwnd, WPARAM wParam, LPARAM lParam)
 //    TRACE (ipaddress, "\n");
 
         SetFocus (hwnd);
-        IPADDRESS_SendNotify (hwnd, EN_SETFOCUS);
+        sendCommand(hwnd,EN_SETFOCUS);
         IPADDRESS_SetFocusToField (hwnd, 0, 0);
 
         return TRUE;
@@ -647,7 +631,7 @@ IPADDRESS_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 //          if (uMsg >= WM_USER)
 //              ERR (ipaddress, "unknown msg %04x wp=%08x lp=%08lx\n",
 //                   uMsg, wParam, lParam);
-            return DefWindowProcA (hwnd, uMsg, wParam, lParam);
+            return defComCtl32ProcA (hwnd, uMsg, wParam, lParam);
     }
     return 0;
 }
@@ -657,9 +641,6 @@ void
 IPADDRESS_Register (void)
 {
     WNDCLASSA wndClass;
-
-//SvL: Don't check this now
-//    if (GlobalFindAtomA (WC_IPADDRESSA)) return;
 
     ZeroMemory (&wndClass, sizeof(WNDCLASSA));
     wndClass.style         = CS_GLOBALCLASS;
@@ -676,7 +657,6 @@ IPADDRESS_Register (void)
 VOID
 IPADDRESS_Unregister (VOID)
 {
-    if (GlobalFindAtomA (WC_IPADDRESSA))
     UnregisterClassA (WC_IPADDRESSA, (HINSTANCE)NULL);
 }
 

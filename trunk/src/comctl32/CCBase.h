@@ -1,4 +1,4 @@
-/* $Id: CCBase.h,v 1.2 2000-02-23 17:09:40 cbratschi Exp $ */
+/* $Id: CCBase.h,v 1.3 2000-02-25 17:00:15 cbratschi Exp $ */
 /*
  * COMCTL32 Base Functions and Macros for all Controls
  *
@@ -23,6 +23,9 @@ VOID doneControl(HWND hwnd);
 
 LRESULT defComCtl32ProcA(HWND hwnd,UINT Msg,WPARAM wParam,LPARAM lParam);
 LRESULT defComCtl32ProcW(HWND hwnd,UINT Msg,WPARAM wParam,LPARAM lParam);
+
+BOOL isUnicodeNotify(COMCTL32_HEADER *infoPtr);
+BOOL isUnicodeNotify(HWND hwnd);
 
 LRESULT sendNotify(HWND hwnd,UINT code);
 LRESULT sendNotify(HWND hwnd,UINT code,LPNMHDR nmhdr);
