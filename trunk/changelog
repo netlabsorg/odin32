@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2088 2002-05-20 14:22:06 sandervl Exp $ */
+/* $Id: changelog,v 1.2089 2002-05-21 12:06:42 sandervl Exp $ */
+
+ 2002-05-21: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Round stack top & bottom (TIB) to page boundary
 
  2002-05-20: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Make sure LX dlls can never be unloaded (dll object deleted)
