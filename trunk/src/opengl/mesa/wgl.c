@@ -1,4 +1,4 @@
-/* $Id: wgl.c,v 1.2 2000-03-01 18:49:40 jeroen Exp $ */
+/* $Id: wgl.c,v 1.3 2000-03-02 23:09:21 sandervl Exp $ */
 
 /*
 * This library is free software; you can redistribute it and/or
@@ -395,7 +395,8 @@ GLAPI int GLWINAPI wglChoosePixelFormat(HDC hdc,
     int         i,best = -1,bestdelta = 0x7FFFFFFF,delta,qt_valid_pix;
 
     qt_valid_pix = qt_pix;
-    if(ppfd->nSize != sizeof(PIXELFORMATDESCRIPTOR) || ppfd->nVersion != 1)
+//    if(ppfd->nSize != sizeof(PIXELFORMATDESCRIPTOR) || ppfd->nVersion != 1)
+    if(ppfd->nSize != sizeof(PIXELFORMATDESCRIPTOR))
     {
         SetLastError(0);
         return(0);
@@ -465,7 +466,7 @@ GLAPI int GLWINAPI wglDescribePixelFormat(HDC hdc,int iPixelFormat,UINT nBytes,
 */
 GLAPI PROC GLWINAPI wglGetProcAddress(LPCSTR lpszProc)
 {
-    int         i;
+    int i;
     for(i = 0;i < qt_ext;i++)
         if(!strcmp(lpszProc,ext[i].name))
             return(ext[i].proc);
@@ -490,7 +491,11 @@ GLAPI BOOL GLWINAPI wglSetPixelFormat(HDC hdc, int iPixelFormat,
     int         qt_valid_pix;
 
     qt_valid_pix = qt_pix;
+#ifdef __WIN32OS2__
+    if(iPixelFormat < 1 || iPixelFormat > qt_valid_pix || (ppfd && ppfd->nSize != sizeof(PIXELFORMATDESCRIPTOR)))
+#else
     if(iPixelFormat < 1 || iPixelFormat > qt_valid_pix || ppfd->nSize != sizeof(PIXELFORMATDESCRIPTOR))
+#endif
     {
         SetLastError(0);
         return(FALSE);
