@@ -1,4 +1,4 @@
-/* $Id: win32wnd.h,v 1.11 1999-07-18 14:56:37 sandervl Exp $ */
+/* $Id: win32wnd.h,v 1.12 1999-07-18 17:12:03 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -122,6 +122,26 @@ virtual	 WORD   GetWindowWord(int index);
          void   NotifyParent(UINT Msg, WPARAM wParam, LPARAM lParam);
 
 Win32WndClass  *getClass()  { return windowClass; };
+
+static   HWND  Win32ToOS2Handle(HWND hwnd)
+{
+ Win32Window *window = GetWindowFromHandle(hwnd);
+
+  if(window) {
+	return window->getOS2WindowHandle();
+  }
+  else	return hwnd;	//OS/2 window handle
+}
+
+static   HWND  OS2ToWin32Handle(HWND hwnd)
+{
+ Win32Window *window = GetWindowFromOS2Handle(hwnd);
+
+  if(window) {
+	return window->getWindowHandle();
+  }
+  else	return hwnd;	//OS/2 window handle
+}
 
 static Win32Window *GetWindowFromHandle(HWND hwnd);
 static Win32Window *GetWindowFromOS2Handle(HWND hwnd);
