@@ -1,4 +1,4 @@
-/* $Id: typelib.cpp,v 1.11 2000-01-26 11:26:05 sandervl Exp $ */
+/* $Id: typelib.cpp,v 1.12 2000-03-24 08:34:14 davidr Exp $ */
 /* 
  * ITypelib interface
  * 
@@ -1023,7 +1023,7 @@ void TypeLibExtract::ParseCustomData(int offset, oList<TLBCustData *> * pCustomD
     TLBCDGuid *		pCDGuid;
     TLBCustData *	pNew;
 
-    while (offset != 0xffffffff)
+    while (offset >= 0)		// Some offsets in VBA are 0x8c000000 - Special meaning??
     {
 	pCDGuid = (TLBCDGuid *)((char *)m_pCDGuid + offset);
 	pNew = new TLBCustData;
