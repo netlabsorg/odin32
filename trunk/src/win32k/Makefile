@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.33 2000-02-29 10:48:51 bird Exp $
+# $Id: Makefile,v 1.34 2000-03-01 10:00:40 bird Exp $
 #
 # Copyright 1998-1999 knut st. osmundsen
 #
@@ -268,7 +268,7 @@ extract.exe: dev16\ProbKrnl.c dev16\vprntf16.c \
         $@, $(*B).map, $(TOOLKIT)\lib\os2286.lib + $(MSCPATH)\lib\clibcep.lib;
 
 d32init.exe: dev32\d32init.c
-    icc -Ss /Gr+ $(CINCLUDES) -DRING3 -DDEBUGR3 -DDEBUG \
+    icc -Ti+ -Ss /Gr+ $(CINCLUDES) -DRING3 -DDEBUGR3 -DDEBUG \
         -Fo$(WIN32KOBJ)\$(*B).r3obj -Fe$@ dev32\$(*B).c
 
 
