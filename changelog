@@ -1,10 +1,11 @@
-/* $Id: changelog,v 1.1370 2001-04-21 09:11:21 sandervl Exp $ */
+/* $Id: changelog,v 1.1371 2001-04-21 11:23:59 sandervl Exp $ */
 
  2001-04-21: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o DosWrite for stdout doesn't accept high addresses
                 o Rewrote EXC_CallHandler in assembly (copied compiler output
                   (opt. off))
                   No longer necessary to turn off optimizations for exceptions.cpp.
+                o Added partial implementation of GetLongPathNameA/W
 
  2001-04-20: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Commented out RestoreCursor call in user32 exitlist handler.
