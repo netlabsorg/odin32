@@ -1,8 +1,11 @@
-/* $Id: changelog,v 1.2704 2004-03-16 10:07:18 sandervl Exp $ */
+/* $Id: changelog,v 1.2705 2004-03-16 11:21:06 sandervl Exp $ */
 
  2004-03-16: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Changed SPI_ICONHORIZONTALSPACING & SPI_ICONHORIZONTALSPACING
                   to (75,75)
+    - WINMM:    o Check that we aren't overwriting existing data in case 
+                  we get a lot more audio data than fits in our internal DART 
+                  buffers.
 
  2004-03-15: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o GetKeyboardLayoutNameA; use only the low word returned by 
