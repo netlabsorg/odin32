@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1296 2001-03-06 21:44:38 mike Exp $ */
+/* $Id: changelog,v 1.1297 2001-03-07 23:09:43 bird Exp $ */
+
+ 2001-03-07: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - Win32k:   o Fixed trap in k32QuerySystemMemInfo when
+                  VIRTUALADDRESSLIMIT=512.
 
  2000-03-06: Michal Necasek <michalnec@volny.cz>
     - include   o More changes and fixes for Watcom
