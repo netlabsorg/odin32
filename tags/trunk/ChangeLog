@@ -1,8 +1,11 @@
- /* $Id: ChangeLog,v 1.1085 2000-08-24 11:59:13 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1086 2000-08-25 09:01:54 sandervl Exp $ */
+
+ 2000-08-25: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: Create DirectX registry keys during installation
 
  2000-08-24: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   Export wvsnprintfW
-    - SHLWAPI:  Merged with latest Wine code; separated added/changed
+    - SHLWAPI:  Merged with latest Wine code (20000801); separated added/changed
                 functions to ease resync in the future
                 Removed all AW exports; they belong in shell32
                 More functions exported (Wine additions)
