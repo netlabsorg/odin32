@@ -182,4 +182,7 @@ BOOL    WIN32API GetProcessAffinityMask(HANDLE  hProcess,
                                         LPDWORD lpProcessAffinityMask,
                                         LPDWORD lpSystemAffinityMask);
 
+HANDLE  WIN32API CreateEventA(LPSECURITY_ATTRIBUTES,BOOL,BOOL,LPCSTR);
+BOOL    WIN32API CloseHandle(HANDLE);
+
 #endif
