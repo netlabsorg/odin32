@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1350 2001-04-04 14:20:07 sandervl Exp $ */
+/* $Id: changelog,v 1.1351 2001-04-05 09:31:52 sandervl Exp $ */
+
+ 2001-04-05: Sander van Leeuwen <sandervl@xs4all.nl>   
+    - USER32:   o Rewrote ShowCursor
 
  2001-04-04: Sander van Leeuwen <sandervl@xs4all.nl>   
     - KERNEL32: o Removed AsciiToUnicode* & UnicodeToAscii* functions
