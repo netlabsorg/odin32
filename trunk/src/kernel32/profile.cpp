@@ -1,4 +1,4 @@
-/* $Id: profile.cpp,v 1.24 2000-08-27 03:25:42 bird Exp $ */
+/* $Id: profile.cpp,v 1.25 2000-10-01 21:16:04 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -46,7 +46,11 @@ ODINDEBUGCHANNEL(PROFILE)
 #endif
 
 #define SystemHeap               GetProcessHeap()
+
+#ifndef strcasecmp
 #define strcasecmp               stricmp
+#endif
+
 #define DOSFS_GetFullName(a,b,c) strcpy(c,a)
 #define CharLowerA(a)            (a)
 
@@ -74,6 +78,17 @@ typedef struct
     char            *fullname; //name with path
     time_t           mtime;
 } PROFILE;
+
+
+/****************************************************************************
+ * internal prototypes                                                      *
+ ****************************************************************************/
+UINT ODIN_INTERNAL ODIN_GetPrivateProfileIntA(LPCSTR, LPCSTR, INT, LPCSTR);
+UINT ODIN_INTERNAL ODIN_GetPrivateProfileIntW(LPCWSTR, LPCWSTR, INT, LPCWSTR);
+INT  ODIN_INTERNAL ODIN_GetPrivateProfileStringW(LPCWSTR, LPCWSTR, LPCWSTR, LPWSTR, UINT, LPCWSTR);
+BOOL ODIN_INTERNAL ODIN_WritePrivateProfileStringA(LPCSTR, LPCSTR, LPCSTR, LPCSTR);
+BOOL ODIN_INTERNAL ODIN_WritePrivateProfileStringW(LPCWSTR, LPCWSTR, LPCWSTR, LPCWSTR);
+
 
 
 #define N_CACHED_PROFILES 10
@@ -1076,7 +1091,7 @@ ODINFUNCTION3(UINT, GetProfileIntA,
               LPCSTR, entry,
               INT, def_val)
 {
-    return GetPrivateProfileIntA( section, entry, def_val, WINININAME );
+    return ODIN_GetPrivateProfileIntA( section, entry, def_val, WINININAME );
 }
 
 /***********************************************************************
@@ -1088,7 +1103,7 @@ ODINFUNCTION3(UINT, GetProfileIntW,
               INT, def_val)
 {
     if (!wininiW) wininiW = HEAP_strdupAtoW( SystemHeap, 0, WINININAME );
-    return GetPrivateProfileIntW( section, entry, def_val, wininiW );
+    return ODIN_GetPrivateProfileIntW( section, entry, def_val, wininiW );
 }
 
 /***********************************************************************
@@ -1101,7 +1116,7 @@ ODINFUNCTION5(INT, GetProfileStringA,
               LPSTR, buffer,
               UINT, len)
 {
-    return GetPrivateProfileStringA( section, entry, def_val,
+    return ODIN_GetPrivateProfileStringA( section, entry, def_val,
                  buffer, len, WINININAME );
 }
 
@@ -1116,7 +1131,7 @@ ODINFUNCTION5(INT, GetProfileStringW,
               UINT, len)
 {
     if (!wininiW) wininiW = HEAP_strdupAtoW( SystemHeap, 0, WINININAME );
-    return GetPrivateProfileStringW( section, entry, def_val,
+    return ODIN_GetPrivateProfileStringW( section, entry, def_val,
                  buffer, len, wininiW );
 }
 
@@ -1128,7 +1143,7 @@ ODINFUNCTION3(BOOL, WriteProfileStringA,
               LPCSTR, entry,
               LPCSTR, string)
 {
-    return WritePrivateProfileStringA( section, entry, string, WINININAME );
+    return ODIN_WritePrivateProfileStringA( section, entry, string, WINININAME );
 }
 
 /***********************************************************************
@@ -1140,7 +1155,7 @@ ODINFUNCTION3(BOOL, WriteProfileStringW,
               LPCWSTR, string)
 {
     if (!wininiW) wininiW = HEAP_strdupAtoW( SystemHeap, 0, WINININAME );
-    return WritePrivateProfileStringW( section, entry, string, wininiW );
+    return ODIN_WritePrivateProfileStringW( section, entry, string, wininiW );
 }
 
 /***********************************************************************
@@ -1156,7 +1171,7 @@ ODINFUNCTION4(UINT, GetPrivateProfileIntA,
     char *p;
     long result;
 
-    GetPrivateProfileStringA( section, entry, "",
+    ODIN_GetPrivateProfileStringA( section, entry, "",
                                 buffer, sizeof(buffer), filename );
     if (!buffer[0]) return (UINT)def_val;
     result = strtol( buffer, &p, 0 );
@@ -1176,7 +1191,7 @@ ODINFUNCTION4(UINT, GetPrivateProfileIntW,
     LPSTR sectionA  = HEAP_strdupWtoA( GetProcessHeap(), 0, section );
     LPSTR entryA    = HEAP_strdupWtoA( GetProcessHeap(), 0, entry );
     LPSTR filenameA = HEAP_strdupWtoA( GetProcessHeap(), 0, filename );
-    UINT res = GetPrivateProfileIntA(sectionA, entryA, def_val, filenameA);
+    UINT res = ODIN_GetPrivateProfileIntA(sectionA, entryA, def_val, filenameA);
     HeapFree( GetProcessHeap(), 0, sectionA );
     HeapFree( GetProcessHeap(), 0, filenameA );
     HeapFree( GetProcessHeap(), 0, entryA );
@@ -1229,7 +1244,7 @@ ODINFUNCTION6(INT, GetPrivateProfileStringW,
     LPSTR filenameA = HEAP_strdupWtoA( GetProcessHeap(), 0, filename );
     LPSTR def_valA  = HEAP_strdupWtoA( GetProcessHeap(), 0, def_val );
     LPSTR bufferA   = (LPSTR)HeapAlloc( GetProcessHeap(), 0, len );
-    INT ret = GetPrivateProfileStringA( sectionA, entryA, def_valA,
+    INT ret = ODIN_GetPrivateProfileStringA( sectionA, entryA, def_valA,
                                             bufferA, len, filenameA );
     lstrcpynAtoW( buffer, bufferA, len );
     HeapFree( GetProcessHeap(), 0, sectionA );
@@ -1276,7 +1291,7 @@ ODINFUNCTION4(INT, GetPrivateProfileSectionW,
     LPSTR sectionA  = HEAP_strdupWtoA( GetProcessHeap(), 0, section );
     LPSTR filenameA = HEAP_strdupWtoA( GetProcessHeap(), 0, filename );
     LPSTR bufferA   = (LPSTR)HeapAlloc( GetProcessHeap(), 0, len );
-    INT ret = GetPrivateProfileSectionA( sectionA, bufferA, len,
+    INT ret = ODIN_GetPrivateProfileSectionA( sectionA, bufferA, len,
                   filenameA );
     MultiByteToWideChar(CP_ACP,0,bufferA,ret,buffer,len);
     HeapFree( GetProcessHeap(), 0, sectionA );
@@ -1293,7 +1308,7 @@ ODINFUNCTION3(INT, GetProfileSectionA,
               LPSTR, buffer,
               DWORD, len)
 {
-    return GetPrivateProfileSectionA( section, buffer, len, WINININAME );
+    return ODIN_GetPrivateProfileSectionA( section, buffer, len, WINININAME );
 }
 
 /***********************************************************************
@@ -1305,7 +1320,7 @@ ODINFUNCTION3(INT, GetProfileSectionW,
               DWORD, len)
 {
     if (!wininiW) wininiW = HEAP_strdupAtoW( SystemHeap, 0, WINININAME );
-    return GetPrivateProfileSectionW( section, buffer, len, wininiW );
+    return ODIN_GetPrivateProfileSectionW( section, buffer, len, wininiW );
 }
 
 /***********************************************************************
@@ -1346,7 +1361,7 @@ ODINFUNCTION4(BOOL, WritePrivateProfileStringW,
     LPSTR entryA    = HEAP_strdupWtoA( GetProcessHeap(), 0, entry );
     LPSTR stringA   = HEAP_strdupWtoA( GetProcessHeap(), 0, string );
     LPSTR filenameA = HEAP_strdupWtoA( GetProcessHeap(), 0, filename );
-    BOOL res = WritePrivateProfileStringA( sectionA, entryA,
+    BOOL res = ODIN_WritePrivateProfileStringA( sectionA, entryA,
                   stringA, filenameA );
     HeapFree( GetProcessHeap(), 0, sectionA );
     HeapFree( GetProcessHeap(), 0, entryA );
@@ -1380,7 +1395,7 @@ ODINFUNCTION3(BOOL, WritePrivateProfileSectionW,
     LPSTR sectionA  = HEAP_strdupWtoA( GetProcessHeap(), 0, section );
     LPSTR stringA   = HEAP_strdupWtoA( GetProcessHeap(), 0, string );
     LPSTR filenameA = HEAP_strdupWtoA( GetProcessHeap(), 0, filename );
-    BOOL res = WritePrivateProfileSectionA( sectionA, stringA, filenameA );
+    BOOL res = ODIN_WritePrivateProfileSectionA( sectionA, stringA, filenameA );
     HeapFree( GetProcessHeap(), 0, sectionA );
     HeapFree( GetProcessHeap(), 0, stringA );
     HeapFree( GetProcessHeap(), 0, filenameA );
@@ -1394,7 +1409,7 @@ ODINFUNCTION2(BOOL, WriteProfileSectionA,
               LPCSTR, section,
               LPCSTR, keys_n_values)
 {
-    return WritePrivateProfileSectionA( section, keys_n_values, WINININAME);
+    return ODIN_WritePrivateProfileSectionA( section, keys_n_values, WINININAME);
 }
 
 /***********************************************************************
@@ -1406,7 +1421,7 @@ ODINFUNCTION2(BOOL, WriteProfileSectionW,
 {
    if (!wininiW) wininiW = HEAP_strdupAtoW( SystemHeap, 0, WINININAME);
 
-   return (WritePrivateProfileSectionW (section,keys_n_values, wininiW));
+   return (ODIN_WritePrivateProfileSectionW (section,keys_n_values, wininiW));
 }
 
 /***********************************************************************
@@ -1437,7 +1452,7 @@ ODINFUNCTION3(DWORD, GetPrivateProfileSectionNamesA,
               DWORD, size,
               LPCSTR, filename)
 {
- return (GetPrivateProfileSectionNames16 (buffer,size,filename));
+ return (ODIN_GetPrivateProfileSectionNames16 (buffer,size,filename));
 }
 
 /***********************************************************************
@@ -1451,7 +1466,7 @@ ODINFUNCTION3(DWORD, GetPrivateProfileSectionNamesW,
    LPSTR filenameA = HEAP_strdupWtoA( GetProcessHeap(), 0, filename );
    LPSTR bufferA   = (LPSTR)HeapAlloc( GetProcessHeap(), 0, size);
 
-   INT ret = GetPrivateProfileSectionNames16 (bufferA, size, filenameA);
+   INT ret = ODIN_GetPrivateProfileSectionNames16 (bufferA, size, filenameA);
    lstrcpynAtoW( buffer, bufferA, size);
    HeapFree( GetProcessHeap(), 0, bufferA);
    HeapFree( GetProcessHeap(), 0, filenameA );
@@ -1500,7 +1515,7 @@ ODINFUNCTION5(BOOL, GetPrivateProfileStructW,
     LPSTR filenameA = HEAP_strdupWtoA( GetProcessHeap(), 0, filename );
     LPSTR bufferA   = (LPSTR)HeapAlloc( GetProcessHeap(), 0, len );
 
-    INT ret = GetPrivateProfileStructA( sectionA, keyA, bufferA,
+    INT ret = ODIN_GetPrivateProfileStructA( sectionA, keyA, bufferA,
                len, filenameA );
     lstrcpynAtoW( (LPWSTR)buffer, bufferA, len );
     HeapFree( GetProcessHeap(), 0, bufferA);
@@ -1525,7 +1540,7 @@ ODINFUNCTION5(BOOL, WritePrivateProfileStructA,
     BOOL ret = FALSE;
 
     if (!section && !key && !buf)  /* flush the cache */
-        return WritePrivateProfileStringA( NULL, NULL, NULL, filename );
+        return ODIN_WritePrivateProfileStringA( NULL, NULL, NULL, filename );
 
     EnterCriticalSection( &PROFILE_CritSect );
 
@@ -1550,7 +1565,7 @@ ODINFUNCTION5(BOOL, WritePrivateProfileStructW,
     LPSTR sectionA  = HEAP_strdupWtoA( GetProcessHeap(), 0, section );
     LPSTR keyA      = HEAP_strdupWtoA( GetProcessHeap(), 0, key);
     LPSTR filenameA = HEAP_strdupWtoA( GetProcessHeap(), 0, filename );
-    INT ret = WritePrivateProfileStructA( sectionA, keyA, buf, bufsize,
+    INT ret = ODIN_WritePrivateProfileStructA( sectionA, keyA, buf, bufsize,
                  filenameA );
     HeapFree( GetProcessHeap(), 0, sectionA );
     HeapFree( GetProcessHeap(), 0, keyA );
@@ -1591,6 +1606,4 @@ ODINPROCEDURE0(WriteOutProfiles)
     }
     LeaveCriticalSection(&PROFILE_CritSect);
 }
-
-
 
