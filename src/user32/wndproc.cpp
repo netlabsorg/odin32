@@ -1,4 +1,4 @@
-/* $Id: wndproc.cpp,v 1.8 1999-06-26 08:25:22 sandervl Exp $ */
+/* $Id: wndproc.cpp,v 1.9 1999-06-26 13:21:11 sandervl Exp $ */
 
 /*
  * Win32 window procedure class for OS/2
@@ -14,15 +14,14 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
+#include <stdlib.h>
 #include <assert.h>
-#include "misc.h"
-#include "user32.h"
-#include "wndproc.h"
-#include "wndsubproc.h"
-#include "wndclass.h"
+#include <misc.h>
+#include <wndproc.h>
+#include <wndclass.h>
+#include <spy.h>
 #include "dlgconvert.h"
 #include "hooks.h"
-#include <spy.h>
 
 #ifdef DEBUG
 char *GetMsgText(int Msg);
@@ -40,21 +39,26 @@ void NotifyParent(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 	//SvL: Taken from Wine
 	if(dwStyle & WS_CHILD && !(dwExStyle & WS_EX_NOPARENTNOTIFY) )
 	{
+		//NOTE: Open32's SendMessage swallows a WM_PARENTNOTIFY, so call
+	 	//      the win32 callback handler directly!
 		hwndParent = GetParent(hwnd);
+		if(hwnd == hwndParent) {
+			break;
+		}
+
 		dprintf(("%s Send WM_PARENTNOTIFY from child %x to parent %x", GetMsgText(Msg), hwnd, hwndParent));
 		/* Notify the parent window only */
 		Win32WindowProc *parentwnd = Win32WindowProc::FindProc(hwndParent);
 		if(parentwnd) {
 			if(Msg == WM_CREATE || Msg == WM_DESTROY) {
 				//Todo: Set IdChild!!
-				parentwnd->GetWin32Callback()(hwndParent, WM_PARENTNOTIFY, MAKEWPARAM(Msg, 0), (LPARAM)hwnd );
+				parentwnd->SendMessageA(hwndParent, WM_PARENTNOTIFY, MAKEWPARAM(Msg, 0), (LPARAM)hwnd );
 			}
-			else	parentwnd->GetWin32Callback()(hwndParent, WM_PARENTNOTIFY, MAKEWPARAM(Msg, 0), lParam );
+			else	parentwnd->SendMessageA(hwndParent, WM_PARENTNOTIFY, MAKEWPARAM(Msg, 0), lParam );
 		}
 	}
-	if(hwnd == hwndParent) {
-		break;
-	}
+	else	break;
+
 	hwnd = hwndParent;
    }
 }
@@ -222,6 +226,13 @@ void Win32WindowProc::DeleteWindow(HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
+LRESULT Win32WindowProc::SendMessageA(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
+{
+  PostSpyMessage(hwnd, Msg, wParam, lParam);
+  return pCallback(hwnd, Msg, wParam, lParam);  
+}
+//******************************************************************************
+//******************************************************************************
 DWORD MapOEMToRealKey(DWORD wParam, DWORD lParam)
 {
   switch(wParam) {
@@ -299,7 +310,7 @@ LRESULT EXPENTRY_O32 WndCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPar
                 lParam = MapOEMToRealKey(wParam, lParam);
 		break;
 	case WM_CREATE:  //Open32 isn't sending WM_NCCREATE messages!!
-                if(curwnd->pCallback(hwnd, WM_NCCREATE, 0, lParam) == 0) {
+                if(curwnd->SendMessageA(hwnd, WM_NCCREATE, 0, lParam) == 0) {
                        dprintf(("WM_NCCREATE returned FALSE\n"));
                        return(-1); //don't create window
                 }
@@ -307,7 +318,7 @@ LRESULT EXPENTRY_O32 WndCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPar
 		NotifyParent(hwnd, WM_CREATE, wParam, lParam);
 //TODO
 #if 0
-                if(curwnd->pCallback(hwnd, WM_NCCALCSIZE, 0, lParam) == 0) {
+                if(curwnd->SendMessageA(hwnd, WM_NCCALCSIZE, 0, lParam) == 0) {
                         return(-1); //don't create window
                 }
 #endif
@@ -325,15 +336,21 @@ LRESULT EXPENTRY_O32 WndCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPar
         	{//SvL: Bugfix, Open32 is NOT sending this to the window (messes up Solitaire)
           	  HDC hdc = GetDC(hwnd);
 
-                 	curwnd->pCallback(hwnd, WM_ERASEBKGND, hdc, 0);
+                 	curwnd->SendMessageA(hwnd, WM_ERASEBKGND, hdc, 0);
                  	ReleaseDC(hwnd, hdc);
         	}
+		break;
+	case WM_MOUSEACTIVATE:
+		//Open32 sends an OS/2 window message for a button click
+		if(HIWORD(lParam) == 0x71)  //WM_BUTTONCLICKFIRST
+		{
+			lParam = (WM_LBUTTONDOWN << 16) | LOWORD(lParam);
+		}
 		break;
 	}
         rc = curwnd->pCallback(hwnd, Msg, wParam, lParam);
         if(Msg == WM_NCDESTROY) {
                 dprintf(("WM_NCDESTROY received for window/dialog %X\n", curwnd->hwnd));
-                Win32WindowSubProc::DeleteSubWindow(hwnd); //if present
                 delete curwnd;
         }
         return rc;

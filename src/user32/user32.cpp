@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.14 1999-06-23 16:36:56 achimha Exp $ */
+/* $Id: user32.cpp,v 1.15 1999-06-26 13:21:12 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -23,7 +23,6 @@
 
 #include "user32.h"
 #include "wndproc.h"
-#include "wndsubproc.h"
 #include "wndclass.h"
 #include "icon.h"
 #include "usrcall.h"
@@ -638,11 +637,11 @@ LRESULT WIN32API SendMessageA(HWND arg1, UINT arg2, WPARAM  arg3, LPARAM arg4)
 {
  LRESULT rc;
 
-#ifdef DEBUG
+#ifdef DEBUG1
     WriteLog("USER32:  SendMessage....\n");
 #endif
     rc = O32_SendMessage(arg1, arg2, arg3, arg4);
-#ifdef DEBUG
+#ifdef DEBUG1
     WriteLog("USER32:  *****SendMessage %X %X %X %X returned %d\n", arg1, arg2, arg3, arg4, rc);
 #endif
     return(rc);
@@ -951,24 +950,6 @@ BOOL WIN32API SetRect( PRECT arg1, int arg2, int arg3, int arg4, int  arg5)
 }
 //******************************************************************************
 //******************************************************************************
-LONG WIN32API GetWindowLongA(HWND hwnd, int nIndex)
-{
- LONG rc;
-
-    if(nIndex == GWL_WNDPROC || nIndex == DWL_DLGPROC) {
-#ifdef DEBUG
-	WriteLog("USER32:  GetWindowLong %X %d\n", hwnd, nIndex);
-#endif
-     	Win32WindowProc *window = Win32WindowProc::FindProc(hwnd);
-     	if(window && !(nIndex == DWL_DLGPROC && window->IsWindow() == TRUE)) {
-        	return (LONG)window->GetWin32Callback();
-     	}
-    }
-    rc = O32_GetWindowLong(hwnd, nIndex);
-    return(rc);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API SetDlgItemInt( HWND arg1, int arg2, UINT arg3, BOOL  arg4)
 {
 #ifdef DEBUG
@@ -1229,11 +1210,7 @@ LRESULT WIN32API CallWindowProcA(WNDPROC wndprcPrev,
 ////    WriteLog("USER32:  CallWindowProcA %X hwnd=%X, msg = %X\n", wndprcPrev, arg2, arg3);
 #endif
 
-    if(Win32WindowSubProc::FindSubProc((WNDPROC_O32)wndprcPrev) != NULL) {
-         WNDPROC_O32 orgprc = (WNDPROC_O32)wndprcPrev; //is original Open32 system class callback (_System)
-         return orgprc(arg2, arg3, arg4, arg5);
-    }
-    else return wndprcPrev(arg2, arg3, arg4, arg5);   //win32 callback (__stdcall)
+    return wndprcPrev(arg2, arg3, arg4, arg5);   //win32 callback (__stdcall)
 }
 //******************************************************************************
 //******************************************************************************
@@ -2316,15 +2293,6 @@ int WIN32API GetUpdateRgn( HWND arg1, HRGN arg2, BOOL  arg3)
 }
 //******************************************************************************
 //******************************************************************************
-LONG WIN32API GetWindowLongW( HWND arg1, int  arg2)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetWindowLongW\n");
-#endif
-    return GetWindowLongA(arg1, arg2);   //class procedures..
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API GetWindowPlacement( HWND arg1, LPWINDOWPLACEMENT arg2)
 {
 #ifdef DEBUG
@@ -2392,15 +2360,6 @@ DWORD WIN32API GetWindowThreadProcessId(HWND arg1, PDWORD  arg2)
     WriteLog("USER32:  GetWindowThreadProcessId\n");
 #endif
     return O32_GetWindowThreadProcessId(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-WORD WIN32API GetWindowWord( HWND arg1, int  arg2)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetWindowWord\n");
-#endif
-    return O32_GetWindowWord(arg1, arg2);
 }
 //******************************************************************************
 //******************************************************************************
@@ -2912,44 +2871,6 @@ BOOL WIN32API SetScrollRange( HWND arg1, int arg2, int arg3, int arg4, BOOL  arg
 }
 //******************************************************************************
 //******************************************************************************
-LONG WIN32API SetWindowLongA(HWND hwnd, int nIndex, LONG  arg3)
-{
- LONG rc;
-
-    dprintf(("USER32:  SetWindowLongA %X %d %X\n", hwnd, nIndex, arg3));
-    if(nIndex == GWL_WNDPROC || nIndex == DWL_DLGPROC) {
-        Win32WindowProc *wndproc = Win32WindowProc::FindProc(hwnd);
-        if(wndproc == NULL) {//created with system class and app wants to change the handler
-                dprintf(("USER32:  SetWindowLong new WindowProc for system class\n"));
-                wndproc = new Win32WindowProc((WNDPROC)arg3);
-                wndproc->SetWindowHandle(hwnd);
-                rc = O32_GetWindowLong(hwnd, nIndex);
-                Win32WindowSubProc *subwndproc = new Win32WindowSubProc(hwnd, (WNDPROC_O32)rc);
-                O32_SetWindowLong(hwnd, nIndex, (LONG)wndproc->GetOS2Callback());
-                return((LONG)subwndproc->GetWin32Callback());
-        }
-        else {
-                if(!(nIndex == DWL_DLGPROC && wndproc->IsWindow() == TRUE)) {
-                        rc = (LONG)wndproc->GetWin32Callback();
-                        dprintf(("USER32:  SetWindowLong change WindowProc %X to %X\n", rc, arg3));
-                        wndproc->SetWin32Callback((WNDPROC)arg3);
-                        return(rc);
-                }
-                //else window that accesses it's normal window data
-       }
-    }
-    return O32_SetWindowLong(hwnd, nIndex, arg3);
-}
-//******************************************************************************
-//TODO: Is this always correct? (GWL_ID: window identifier??)
-//******************************************************************************
-LONG WIN32API SetWindowLongW(HWND arg1, int arg2, LONG  arg3)
-{
-    dprintf(("USER32:  SetWindowLongW %X %d %X\n", arg1, arg2, arg3));
-    return SetWindowLongA(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API SetWindowPlacement( HWND arg1, const WINDOWPLACEMENT *  arg2)
 {
     dprintf(("USER32:  SetWindowPlacement\n"));
@@ -2966,13 +2887,6 @@ BOOL WIN32API SetWindowTextW( HWND arg1, LPCWSTR arg2)
    dprintf(("USER32:  SetWindowTextW %X %s returned %d\n", arg1, astring, rc));
    FreeAsciiString(astring);
    return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-WORD WIN32API SetWindowWord( HWND arg1, int arg2, WORD  arg3)
-{
-    dprintf(("USER32:  SetWindowWord\n"));
-    return O32_SetWindowWord(arg1, arg2, arg3);
 }
 //******************************************************************************
 //******************************************************************************

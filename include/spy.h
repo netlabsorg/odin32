@@ -1,4 +1,4 @@
-/* $Id: spy.h,v 1.3 1999-06-26 10:55:49 achimha Exp $ */
+/* $Id: spy.h,v 1.4 1999-06-26 13:21:53 sandervl Exp $ */
 
 /*
  *
@@ -24,7 +24,7 @@ BOOL InitSpyQueue();
 void CloseSpyQueue();
 
 #ifdef DEBUG
-VOID PostSpyMessage(HWND hwnd, ULONG Msg, ULONG wParam, ULONG lParam);
+BOOL PostSpyMessage(HWND hwnd, ULONG Msg, ULONG wParam, ULONG lParam);
 #else
 #define PostSpyMessage(a,b,c,d)	FALSE
 #endif
