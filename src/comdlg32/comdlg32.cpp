@@ -1,4 +1,4 @@
-/* $Id: comdlg32.cpp,v 1.13 1999-10-18 11:59:04 sandervl Exp $ */
+/* $Id: comdlg32.cpp,v 1.14 1999-10-23 16:43:50 cbratschi Exp $ */
 
 /*
  * COMDLG32 implementation
@@ -36,7 +36,7 @@ ODINDEBUGCHANNEL(COMDLG32)
                                             \
     a->lpfnHook = (c)Win32WindowProc::GetOS2Callback();\
   } \
-  a->hwndOwner = Win32ToOS2Handle(a->hwndOwner); 
+  a->hwndOwner = Win32ToOS2Handle(a->hwndOwner);
 
 #define COMDLG32_CHECKHOOK2(a,b,c,d)        \
   if(a->Flags & b)                          \
@@ -47,21 +47,21 @@ ODINDEBUGCHANNEL(COMDLG32)
                                             \
     a->d = (c)Win32WindowProc::GetOS2Callback();\
   } \
-  a->hwndOwner = Win32ToOS2Handle(a->hwndOwner); 
+  a->hwndOwner = Win32ToOS2Handle(a->hwndOwner);
 #else
 #define COMDLG32_CHECKHOOK(a,b,c)           \
   if(a->Flags & b)                          \
   {                                         \
     a->lpfnHook = 0; \
   } \
-  a->hwndOwner = Win32ToOS2Handle(a->hwndOwner); 
+  a->hwndOwner = Win32ToOS2Handle(a->hwndOwner);
 
 #define COMDLG32_CHECKHOOK2(a,b,c,d)        \
   if(a->Flags & b)                          \
   {                                         \
     a->d = 0; \
   } \
-  a->hwndOwner = Win32ToOS2Handle(a->hwndOwner); 
+  a->hwndOwner = Win32ToOS2Handle(a->hwndOwner);
 #endif
 /*****************************************************************************
  * Name      :
@@ -247,6 +247,13 @@ ODINFUNCTION1(BOOL, ChooseFontW,
   // NOTE: LOGFONTW/A is NOT converted !
   dprintf(("COMDLG32: ChooseFontW not correctly implemented.\n"));
 
+  if (!lpcf)
+  {
+    SetLastError(ERROR_INVALID_PARAMETER);
+
+    return FALSE;
+  }
+
   // convert to ASCII string
   memcpy(&asciicf,     // make binary copy of CHOOSEFONTW
          lpcf,         // to save the flags
@@ -264,10 +271,21 @@ ODINFUNCTION1(BOOL, ChooseFontW,
     if((int)asciicf.lpTemplateName >> 16 != 0)
       asciicf.lpTemplateName = UnicodeToAsciiString((LPWSTR)lpcf->lpTemplateName);
 
-  UnicodeToAsciiN(lpcf->lpszStyle,
-                  szAsciiStyle,
-                  sizeof(szAsciiStyle) - 1);
-  asciicf.lpszStyle = szAsciiStyle;
+  if (lpcf->lpszStyle)
+  {
+    //CB: NT's clock.exe sets this pointer, don't know why
+    //    it's not a pointer to a string!
+    if ((UINT)lpcf->lpszStyle == 0xAAAAAAAA)
+      asciicf.lpszStyle = NULL;
+    else
+    {
+      UnicodeToAsciiN(lpcf->lpszStyle,
+                      szAsciiStyle,
+                      sizeof(szAsciiStyle));
+
+      asciicf.lpszStyle = szAsciiStyle;
+    }
+  };
 
   UnicodeToAsciiN(lpcf->lpLogFont->lfFaceName,
                   asciilf.lfFaceName,
@@ -279,13 +297,15 @@ ODINFUNCTION1(BOOL, ChooseFontW,
   // switch strings
   bResult = O32_ChooseFont((LPCHOOSEFONTA)&asciicf);        // call ASCII version
 
-  // transfer BACK resulting strings !!!
-  AsciiToUnicodeN(asciicf.lpLogFont->lfFaceName,
-                  lpcf->lpLogFont->lfFaceName,
-                  LF_FACESIZE-1);
+  if (bResult)
+  {
+    // transfer BACK resulting strings !!!
+    AsciiToUnicodeN(asciicf.lpLogFont->lfFaceName,
+                    lpcf->lpLogFont->lfFaceName,
+                    LF_FACESIZE-1);
 
-  AsciiToUnicode(asciicf.lpszStyle,
-                 lpcf->lpszStyle);
+    if (lpcf->lpszStyle) AsciiToUnicode(asciicf.lpszStyle,lpcf->lpszStyle);
+  }
 
   if (lpcf->Flags & CF_ENABLETEMPLATE)
     if((int)asciicf.lpTemplateName >> 16 != 0)
