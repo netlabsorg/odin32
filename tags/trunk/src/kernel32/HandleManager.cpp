@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.59 2001-01-14 18:18:26 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.60 2001-01-22 18:26:49 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -252,6 +252,9 @@ static ULONG _HMHandleGetFree(void)
   {
                                                        /* free handle found ? */
     if (INVALID_HANDLE_VALUE == TabWin32Handles[ulLoop].hmHandleData.hHMHandle) {
+        //SvL: Mark handle as taken here. Doing it outside of this function
+        //     isn't thread safe. (and not very smart)
+        TabWin32Handles[ulLoop].hmHandleData.hHMHandle      = ulLoop; 
         TabWin32Handles[ulLoop].hmHandleData.dwUserData     = 0;
         TabWin32Handles[ulLoop].hmHandleData.dwInternalType = HMTYPE_UNKNOWN;
         TabWin32Handles[ulLoop].hmHandleData.lpDeviceData   = NULL;
@@ -1890,7 +1893,12 @@ DWORD HMWaitForSingleObject(HANDLE hObject,
    
                   while (pfnPeekMessageA(&msg, NULL, 0, 0, PM_REMOVE)) 
                   {
-                     if (msg.message == WM_QUIT)  return 1;
+                     if (msg.message == WM_QUIT) {
+                         dprintf(("ERROR: WaitForSingleObject call abandoned because WM_QUIT msg was received!!"));
+//                       teb->o.odin.fIgnoreMsgs = FALSE;
+                         FreeLibrary(hUser32);
+                         return WAIT_ABANDONED;
+                     }
    
                      /* otherwise dispatch it */
                      pfnDispatchMessageA(&msg);
@@ -2636,7 +2644,6 @@ HANDLE HMCreateFileMapping(HANDLE                hFile,
   HMDeviceHandler *pDeviceHandler;         /* device handler for this handle */
   PHMHANDLEDATA   pHMHandleData;
   DWORD           rc;                                     /* API return code */
-  HANDLE          hOldMemMap = -1;
 
   pDeviceHandler = HMGlobals.pHMFileMapping;         /* device is predefined */
 
@@ -2647,7 +2654,6 @@ HANDLE HMCreateFileMapping(HANDLE                hFile,
     return 0;                           /* signal error */
   }
 
-
                            /* initialize the complete HMHANDLEDATA structure */
   pHMHandleData = &TabWin32Handles[iIndexNew].hmHandleData;
   pHMHandleData->dwType     = FILE_TYPE_UNKNOWN;      /* unknown handle type */
@@ -2656,7 +2662,6 @@ HANDLE HMCreateFileMapping(HANDLE                hFile,
   pHMHandleData->dwCreation = 0;
   pHMHandleData->dwFlags    = 0;
   pHMHandleData->lpHandlerData = NULL;
-
 
       /* we've got to mark the handle as occupied here, since another device */
                    /* could be created within the device handler -> deadlock */
@@ -2675,16 +2680,17 @@ HANDLE HMCreateFileMapping(HANDLE                hFile,
                                          flProtect,
                                          dwMaximumSizeHigh,
                                          dwMaximumSizeLow,
-                                         lpName, &hOldMemMap);
+                                         lpName);
 
-  if (rc != NO_ERROR)     /* oops, creation failed within the device handler */
+  if(rc != NO_ERROR)     /* oops, creation failed within the device handler */
   {
-      TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
-      SetLastError(rc);          /* Hehe, OS/2 and NT are pretty compatible :) */
-    if(rc == ERROR_ALREADY_EXISTS) {
-    return hOldMemMap; //return handle of existing file mapping
-  }
-  else  return (NULL);                                           /* signal error */
+      if(rc != ERROR_ALREADY_EXISTS) {
+          TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
+          SetLastError(rc);          /* Hehe, OS/2 and NT are pretty compatible :) */
+          return (NULL);                                           /* signal error */
+      }
+      SetLastError(ERROR_ALREADY_EXISTS);
+      return iIndexNew;                                   /* return valid handle */
   }
   else
     SetLastError(ERROR_SUCCESS); //@@@PH 1999/10/27 rc5desg requires this?
@@ -4457,6 +4463,8 @@ BOOL HMCreatePipe(PHANDLE phRead,
   iIndexNewWrite = _HMHandleGetFree();              /* get free handle */
   if (-1 == iIndexNewWrite)                         /* oops, no free handles ! */
   {
+    //free handle
+    TabWin32Handles[iIndexNewRead].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
     SetLastError(ERROR_NOT_ENOUGH_MEMORY);      /* use this as error message */
     return 0;
   }

@@ -1,4 +1,4 @@
-/* $Id: hmdevice.h,v 1.24 2000-11-14 14:27:01 sandervl Exp $ */
+/* $Id: hmdevice.h,v 1.25 2001-01-22 18:26:50 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -291,8 +291,7 @@ public:
                                      DWORD                      flProtect,
                                      DWORD                      dwMaximumSizeHigh,
                                      DWORD                      dwMaximumSizeLow,
-                                     LPCSTR                     lpName,
-               HFILE                     *hOldMap);
+                                     LPCSTR                     lpName);
 
                   /* this is a handler method for calls to OpenFileMapping() */
   virtual DWORD OpenFileMapping     (PHMHANDLEDATA              pHMHandleData,
