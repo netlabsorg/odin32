@@ -1,4 +1,4 @@
-/* $Id: region.cpp,v 1.10 2000-07-19 19:05:06 sandervl Exp $ */
+/* $Id: region.cpp,v 1.11 2000-09-02 08:31:23 sandervl Exp $ */
 
 /*
  * GDI32 region code
@@ -621,7 +621,7 @@ ODINFUNCTIONNODBG2(int, GetClipRgn, HDC, hdc, HRGN, hrgn)
     }
     else lComplexity = RGN_NULL;
 
-    dprintf(("GetClipRgn %x %x returned %d", hdc, hrgn, lComplexity == RGN_NULL));
+    dprintf(("GetClipRgn %x %x returned %d", hdc, hrgn, lComplexity != RGN_NULL));
     SetLastError(ERROR_SUCCESS_W);
     if(lComplexity == RGN_NULL)
          return 0;
