@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.118 2004-01-30 22:10:06 bird Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.119 2004-02-11 15:38:11 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -907,42 +907,6 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             winMsg->lParam |= WIN_KEY_ALTHELD;
           }
         }
-#if 0
-        //
-        // AltGr needs special handling
-        //
-        // AltGr -> WM_KEYDOWN (VK_CONTROL), WM_KEYDOWN (VK_MENU)
-        //          WM_SYSKEYUP (VK_CONTROL)
-        //          WM_KEYUP (VK_MENU)
-        //
-        // Ctrl+AltGr -> WM_KEYDOWN (VK_CONTROL), WM_KEYUP (VK_CONTROL)
-        //               WM_KEYDOWN (VK_MENU)
-        //               WM_KEYUP (VK_MENU)
-        //               WM_KEYUP (VK_CONTROL)
-        //
-        // AltGr+Ctrl -> WM_KEYDOWN (VK_CONTROL), WM_KEYDOWN (VK_MENU)
-        //               WM_KEYDOWN (VK_CONTROL)
-        //               WM_SYSKEYUP (VK_CONTROL)
-        //               WM_SYSKEYUP (VK_CONTROL)
-        //               WM_KEYUP (VK_MENU)
-        //
-        // AltGr down -> if Ctrl down, send WM_KEYUP (VK_CONTROL)
-        //               endif
-        //               Send WM_KEYDOWN (VK_CONTROL)
-        //               Send WM_KEYDOWN (VK_MENU)
-        // AltGr up ->   if !(Ctrl down before AltGr was pressed || Ctrl up)
-        //                   Send WM_SYSKEYUP (VK_CONTROL)
-        //               endif
-        //               Send WM_KEYDOWN (VK_MENU)
-        //
-        if(winMsg->wParam == VK_MENU_W && (winMsg->lParam & WIN_KEY_EXTENDED))
-        {//AltGr
-            if(GetKeyState(VK_CONTROL_W) & 0x8000)
-            {//Ctrl key pressed, send WM_KEYUP
-
-            }
-        }
-#endif
 
         //After SetFocus(0), all keystrokes are converted in WM_SYS*
         if(fIgnoreKeystrokes) {
@@ -1227,6 +1191,7 @@ BOOL OSLibWinTranslateMessage(MSG *msg)
  * @returns True if the message should be forwarded.
  * @returns False if the message doesn't fall in to that group.
  * @param   pMsg    Message to examin.
+ * @remark  Are there more messages???
  */
 BOOL OSLibForwardableMessage(const MSG *pMsg)
 {
