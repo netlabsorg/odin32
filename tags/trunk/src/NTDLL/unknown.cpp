@@ -1,4 +1,4 @@
-/* $Id: unknown.cpp,v 1.7 1999-11-09 09:30:21 phaller Exp $ */
+/* $Id: unknown.cpp,v 1.8 2001-06-13 14:45:15 bird Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -418,5 +418,27 @@ DWORD WIN32API RtlRandom(DWORD x1)
            x1));
 
   return rand();
+}
+
+
+/**
+ * Opens a thread...
+ * @returns Error code?
+ * @param   pThreadHandle
+ * @param   dwFlags
+ * @param   pvAttribs           Pointer to some attribute structure.
+ * @param   padwOpenThreadParam Pointer to array of dword it seems. 2 entries?
+ * @status  stub
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @remark  http://www.windowsitlibrary.com/Content/356/08/6.html
+ *          Used by TaskMgr.exe.
+ */
+DWORD WIN32API NtOpenThread(PHANDLE phThreadHandle, DWORD dwFlags,
+                            POBJECT_ATTRIBUTES pAttribs, PDWORD padwOpenThreadParam)
+{
+    dprintf(("NTDLL: RtlRandom(%08xh,%08xh,%08xh,%08xh) not implemented.\n",
+             phThreadHandle, dwFlags, pAttribs, padwOpenThreadParam));
+
+    return ERROR_NOT_SUPPORTED;
 }
 
