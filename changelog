@@ -1,10 +1,12 @@
-/* $Id: changelog,v 1.1994 2002-02-20 11:58:04 sandervl Exp $ */
+/* $Id: changelog,v 1.1995 2002-02-20 13:54:07 sandervl Exp $ */
 
  2002-02-20: Platon Fomichev <platon@innotek.de>
     - IPHLPAPI  o Implemented GetAdaptersInfo & GetNetworkParams
 
  2002-02-20: Sander van Leeuwen <sandervl@xs4all.nl>
     - WSOCK32:  o Changed reported winsock version to 2.0 (from 1.1)
+    - COMCTL32: o Listview fix: update item width & height during WM_SIZE
+                  (fixes incorrect redraws when selecting items in CVP)
 
  2002-02-20: Dmitry Froloff <froloff@os2.ru>
     - PELDR:    o Added support for WINDOWSPATH environment variable; PE
