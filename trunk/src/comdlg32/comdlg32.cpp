@@ -1,4 +1,4 @@
-/* $Id: comdlg32.cpp,v 1.15 1999-10-23 17:29:30 cbratschi Exp $ */
+/* $Id: comdlg32.cpp,v 1.16 1999-11-02 19:09:42 sandervl Exp $ */
 
 /*
  * COMDLG32 implementation
@@ -75,16 +75,142 @@ ODINDEBUGCHANNEL(COMDLG32)
  * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
  *****************************************************************************/
 
-ODINFUNCTION1(BOOL, GetSaveFileNameA,
+ODINFUNCTION1(BOOL, GetSaveFileNameA32,
               LPOPENFILENAMEA, lpofn)
 {
   Win32WindowProc *wndproc;
+
+  if(lpofn->Flags & (OFN_ENABLETEMPLATE|OFN_ENABLETEMPLATEHANDLE)) {
+	return GetFileDialog95A(lpofn, SAVE_DIALOG);
+  }
 
   COMDLG32_CHECKHOOK(lpofn, OFN_ENABLEHOOK, WNDPROC)
 
   return(O32_GetSaveFileName(lpofn));
 }
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
+ *****************************************************************************/
+
+ODINFUNCTION1(BOOL, GetSaveFileNameW32,
+              LPOPENFILENAMEW, lpofn)
+{
+  Win32WindowProc *wndproc;
+  OPENFILENAMEA   ofn;
+  char*           szFile;
+  char*           szFileTitle;
+  char*           szCustFilter;
+  BOOL            bResult;
+
+  if(lpofn->Flags & (OFN_ENABLETEMPLATE|OFN_ENABLETEMPLATEHANDLE)) {
+	return GetFileDialog95W(lpofn, SAVE_DIALOG);
+  }
+
+  memcpy(&ofn,          // make binary copy first to save all the fields
+         lpofn,
+         sizeof(ofn));
+
+    // convert to ASCII string
+  if ((lpofn->Flags && OFN_ENABLETEMPLATE) &&
+      (lpofn->lpTemplateName != NULL))
+    ofn.lpTemplateName = UnicodeToAsciiString((WCHAR*)lpofn->lpTemplateName);
+  else
+    ofn.lpTemplateName = NULL;
+
+  if (lpofn->lpstrFilter != NULL)
+    ofn.lpstrFilter = UnicodeToAsciiString((WCHAR*)lpofn->lpstrFilter);
+
+  if (lpofn->lpstrInitialDir != NULL)
+    ofn.lpstrInitialDir = UnicodeToAsciiString((WCHAR*)lpofn->lpstrInitialDir);
+
+  if (lpofn->lpstrTitle != NULL)
+    ofn.lpstrTitle = UnicodeToAsciiString((WCHAR*)lpofn->lpstrTitle);
+
+  if (lpofn->lpstrDefExt != NULL)
+    ofn.lpstrDefExt = UnicodeToAsciiString((WCHAR*)lpofn->lpstrDefExt);
+
+  szFile             = (char*)malloc(lpofn->nMaxFile);
+  szFile[0]          = 0;
+
+  if (*lpofn->lpstrFile != 0)
+    UnicodeToAscii(lpofn->lpstrFile,
+                   szFile);
+
+  if (lpofn->lpstrFileTitle != NULL)
+  {
+    szFileTitle        = (char*)malloc(lpofn->nMaxFileTitle);
+    szFileTitle[0]     = 0;
+
+    if (*lpofn->lpstrFileTitle != 0)
+      UnicodeToAscii(lpofn->lpstrFileTitle,
+                     szFileTitle);
+  }
+  else
+    szFileTitle = NULL;
+
+  if (lpofn->lpstrCustomFilter != NULL)
+  {
+    szCustFilter       = (char*)malloc(lpofn->nMaxCustFilter);
+    szCustFilter[0]    = 0;
+
+
+    if (*lpofn->lpstrCustomFilter != 0)
+       UnicodeToAscii(lpofn->lpstrCustomFilter,
+                      szCustFilter);
+  }
+  else
+    szCustFilter = NULL;
+
+  ofn.lpstrFile         = szFile;
+  ofn.lpstrFileTitle    = szFileTitle;
+  ofn.lpstrCustomFilter = szCustFilter;
+
+  COMDLG32_CHECKHOOK((&ofn), OFN_ENABLEHOOK, WNDPROC)
+
+  bResult =  O32_GetSaveFileName(&ofn);
+
+  if (ofn.lpTemplateName    != NULL) FreeAsciiString((char*)ofn.lpTemplateName);
+  if (ofn.lpstrFilter       != NULL) FreeAsciiString((char*)ofn.lpstrFilter);
+  if (ofn.lpstrInitialDir   != NULL) FreeAsciiString((char*)ofn.lpstrInitialDir);
+  if (ofn.lpstrTitle        != NULL) FreeAsciiString((char*)ofn.lpstrTitle);
+  if (ofn.lpstrDefExt       != NULL) FreeAsciiString((char*)ofn.lpstrDefExt);
+
+  // transform back the result
+  AsciiToUnicode(ofn.lpstrFile,
+                 lpofn->lpstrFile);
+  free(szFile);
+
+  if (lpofn->lpstrFileTitle != NULL)
+  {
+    AsciiToUnicode(ofn.lpstrFileTitle,
+                   lpofn->lpstrFileTitle);
+    free(szFileTitle);
+  }
+
+  if (lpofn->lpstrCustomFilter != NULL)
+  {
+    AsciiToUnicode(ofn.lpstrCustomFilter,
+                   lpofn->lpstrCustomFilter);
+    free(szCustFilter);
+  }
+
+  // copy over some altered flags
+  lpofn->nFilterIndex   = ofn.nFilterIndex;
+  lpofn->Flags          = ofn.Flags;
+  lpofn->nFileOffset    = ofn.nFileOffset;
+  lpofn->nFileExtension = ofn.nFileExtension;
+
+  return bResult;
+}
 
 /*****************************************************************************
  * Name      :
@@ -98,16 +224,141 @@ ODINFUNCTION1(BOOL, GetSaveFileNameA,
  * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
  *****************************************************************************/
 
-ODINFUNCTION1(BOOL, GetOpenFileNameA,
+ODINFUNCTION1(BOOL, GetOpenFileNameA32,
               LPOPENFILENAMEA, lpofn)
 {
   Win32WindowProc *wndproc;
 
+  if(lpofn->Flags & (OFN_ENABLETEMPLATE|OFN_ENABLETEMPLATEHANDLE)) {
+	return GetFileDialog95A(lpofn, OPEN_DIALOG);
+  }
   COMDLG32_CHECKHOOK(lpofn, OFN_ENABLEHOOK, WNDPROC)
 
   return(O32_GetOpenFileName(lpofn));
 }
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
+ *****************************************************************************/
+
+ODINFUNCTION1(BOOL, GetOpenFileNameW32,
+              LPOPENFILENAMEW, lpofn)
+{
+  Win32WindowProc *wndproc;
+  OPENFILENAMEA   ofn;
+  char*           szFile;
+  char*           szFileTitle;
+  char*           szCustFilter;
+  BOOL            bResult;
+
+  if(lpofn->Flags & (OFN_ENABLETEMPLATE|OFN_ENABLETEMPLATEHANDLE)) {
+	return GetFileDialog95W(lpofn, OPEN_DIALOG);
+  }
+
+  memcpy(&ofn,          // make binary copy first to save all the fields
+         lpofn,
+         sizeof(ofn));
+
+    // convert to ASCII string
+  if ((lpofn->Flags && OFN_ENABLETEMPLATE) &&
+      (lpofn->lpTemplateName != NULL))
+    ofn.lpTemplateName = UnicodeToAsciiString((WCHAR*)lpofn->lpTemplateName);
+  else
+    ofn.lpTemplateName = NULL;
+
+  if (lpofn->lpstrFilter != NULL)
+    ofn.lpstrFilter = UnicodeToAsciiString((WCHAR*)lpofn->lpstrFilter);
+
+  if (lpofn->lpstrInitialDir != NULL)
+    ofn.lpstrInitialDir = UnicodeToAsciiString((WCHAR*)lpofn->lpstrInitialDir);
+
+  if (lpofn->lpstrTitle != NULL)
+    ofn.lpstrTitle = UnicodeToAsciiString((WCHAR*)lpofn->lpstrTitle);
+
+  if (lpofn->lpstrDefExt != NULL)
+    ofn.lpstrDefExt = UnicodeToAsciiString((WCHAR*)lpofn->lpstrDefExt);
+
+  szFile             = (char*)malloc(lpofn->nMaxFile);
+  szFile[0]          = 0;
+
+  if (*lpofn->lpstrFile != 0)
+    UnicodeToAscii(lpofn->lpstrFile,
+                   szFile);
+
+  if (lpofn->lpstrFileTitle != NULL)
+  {
+    szFileTitle        = (char*)malloc(lpofn->nMaxFileTitle);
+    szFileTitle[0]     = 0;
+
+    if (*lpofn->lpstrFileTitle != 0)
+      UnicodeToAscii(lpofn->lpstrFileTitle,
+                     szFileTitle);
+  }
+  else
+    szFileTitle = NULL;
+
+  if (lpofn->lpstrCustomFilter != NULL)
+  {
+    szCustFilter       = (char*)malloc(lpofn->nMaxCustFilter);
+    szCustFilter[0]    = 0;
+
+
+    if (*lpofn->lpstrCustomFilter != 0)
+       UnicodeToAscii(lpofn->lpstrCustomFilter,
+                      szCustFilter);
+  }
+  else
+    szCustFilter = NULL;
+
+  ofn.lpstrFile         = szFile;
+  ofn.lpstrFileTitle    = szFileTitle;
+  ofn.lpstrCustomFilter = szCustFilter;
+
+  COMDLG32_CHECKHOOK((&ofn), OFN_ENABLEHOOK, WNDPROC)
+
+  bResult =  O32_GetOpenFileName(&ofn);
+
+  if (ofn.lpTemplateName    != NULL) FreeAsciiString((char*)ofn.lpTemplateName);
+  if (ofn.lpstrFilter       != NULL) FreeAsciiString((char*)ofn.lpstrFilter);
+  if (ofn.lpstrInitialDir   != NULL) FreeAsciiString((char*)ofn.lpstrInitialDir);
+  if (ofn.lpstrTitle        != NULL) FreeAsciiString((char*)ofn.lpstrTitle);
+  if (ofn.lpstrDefExt       != NULL) FreeAsciiString((char*)ofn.lpstrDefExt);
+
+  // transform back the result
+  AsciiToUnicode(ofn.lpstrFile,
+                 lpofn->lpstrFile);
+  free(szFile);
+
+  if (lpofn->lpstrFileTitle != NULL)
+  {
+    AsciiToUnicode(ofn.lpstrFileTitle,
+                   lpofn->lpstrFileTitle);
+    free(szFileTitle);
+  }
+
+  if (lpofn->lpstrCustomFilter != NULL)
+  {
+    AsciiToUnicode(ofn.lpstrCustomFilter,
+                   lpofn->lpstrCustomFilter);
+    free(szCustFilter);
+  }
+
+  // copy over some altered flags
+  lpofn->nFilterIndex   = ofn.nFilterIndex;
+  lpofn->Flags          = ofn.Flags;
+  lpofn->nFileOffset    = ofn.nFileOffset;
+  lpofn->nFileExtension = ofn.nFileExtension;
+
+  return bResult;
+}
 
 /*****************************************************************************
  * Name      :
@@ -121,7 +372,7 @@ ODINFUNCTION1(BOOL, GetOpenFileNameA,
  * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
  *****************************************************************************/
 
-ODINFUNCTION3(INT16, GetFileTitleA,
+ODINFUNCTION3(INT16, GetFileTitleA32,
               LPCSTR, lpFile,
               LPSTR, lpTitle,
               UINT, cbBuf)
@@ -324,7 +575,7 @@ ODINFUNCTION1(BOOL, ChooseFontW,
  * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
  *****************************************************************************/
 
-ODINFUNCTION0(DWORD, CommDlgExtendedError)
+ODINFUNCTION0(DWORD, CommDlgExtendedError32)
 {
   return O32_CommDlgExtendedError();
 }
@@ -342,7 +593,7 @@ ODINFUNCTION0(DWORD, CommDlgExtendedError)
  * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
  *****************************************************************************/
 
-ODINFUNCTION1(HWND, FindTextA,
+ODINFUNCTION1(HWND, FindTextA32,
               LPFINDREPLACEA, lpfr)
 {
   Win32WindowProc *wndproc;
@@ -365,7 +616,7 @@ ODINFUNCTION1(HWND, FindTextA,
  * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
  *****************************************************************************/
 
-ODINFUNCTION1(HWND, FindTextW,
+ODINFUNCTION1(HWND, FindTextW32,
               LPFINDREPLACEW, lpfr)
 {
   Win32WindowProc *wndproc;
@@ -435,7 +686,7 @@ ODINFUNCTION1(HWND, FindTextW,
  * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
  *****************************************************************************/
 
-ODINFUNCTION3(INT16, GetFileTitleW,
+ODINFUNCTION3(INT16, GetFileTitleW32,
               LPCWSTR, lpFile,
               LPWSTR, lpTitle,
               UINT, cbBuf)
@@ -457,247 +708,6 @@ ODINFUNCTION3(INT16, GetFileTitleW,
 
   return iResult;
 }
-
-
-/*****************************************************************************
- * Name      :
- * Purpose   :
- * Parameters:
- * Variables :
- * Result    :
- * Remark    :
- * Status    :
- *
- * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
- *****************************************************************************/
-
-ODINFUNCTION1(BOOL, GetOpenFileNameW,
-              LPOPENFILENAMEW, lpofn)
-{
-  Win32WindowProc *wndproc;
-  OPENFILENAMEA   ofn;
-  char*           szFile;
-  char*           szFileTitle;
-  char*           szCustFilter;
-  BOOL            bResult;
-
-  memcpy(&ofn,          // make binary copy first to save all the fields
-         lpofn,
-         sizeof(ofn));
-
-    // convert to ASCII string
-  if ((lpofn->Flags && OFN_ENABLETEMPLATE) &&
-      (lpofn->lpTemplateName != NULL))
-    ofn.lpTemplateName = UnicodeToAsciiString((WCHAR*)lpofn->lpTemplateName);
-  else
-    ofn.lpTemplateName = NULL;
-
-  if (lpofn->lpstrFilter != NULL)
-    ofn.lpstrFilter = UnicodeToAsciiString((WCHAR*)lpofn->lpstrFilter);
-
-  if (lpofn->lpstrInitialDir != NULL)
-    ofn.lpstrInitialDir = UnicodeToAsciiString((WCHAR*)lpofn->lpstrInitialDir);
-
-  if (lpofn->lpstrTitle != NULL)
-    ofn.lpstrTitle = UnicodeToAsciiString((WCHAR*)lpofn->lpstrTitle);
-
-  if (lpofn->lpstrDefExt != NULL)
-    ofn.lpstrDefExt = UnicodeToAsciiString((WCHAR*)lpofn->lpstrDefExt);
-
-  szFile             = (char*)malloc(lpofn->nMaxFile);
-  szFile[0]          = 0;
-
-  if (*lpofn->lpstrFile != 0)
-    UnicodeToAscii(lpofn->lpstrFile,
-                   szFile);
-
-  if (lpofn->lpstrFileTitle != NULL)
-  {
-    szFileTitle        = (char*)malloc(lpofn->nMaxFileTitle);
-    szFileTitle[0]     = 0;
-
-    if (*lpofn->lpstrFileTitle != 0)
-      UnicodeToAscii(lpofn->lpstrFileTitle,
-                     szFileTitle);
-  }
-  else
-    szFileTitle = NULL;
-
-  if (lpofn->lpstrCustomFilter != NULL)
-  {
-    szCustFilter       = (char*)malloc(lpofn->nMaxCustFilter);
-    szCustFilter[0]    = 0;
-
-
-    if (*lpofn->lpstrCustomFilter != 0)
-       UnicodeToAscii(lpofn->lpstrCustomFilter,
-                      szCustFilter);
-  }
-  else
-    szCustFilter = NULL;
-
-  ofn.lpstrFile         = szFile;
-  ofn.lpstrFileTitle    = szFileTitle;
-  ofn.lpstrCustomFilter = szCustFilter;
-
-  COMDLG32_CHECKHOOK((&ofn), OFN_ENABLEHOOK, WNDPROC)
-
-  bResult =  O32_GetOpenFileName(&ofn);
-
-  if (ofn.lpTemplateName    != NULL) FreeAsciiString((char*)ofn.lpTemplateName);
-  if (ofn.lpstrFilter       != NULL) FreeAsciiString((char*)ofn.lpstrFilter);
-  if (ofn.lpstrInitialDir   != NULL) FreeAsciiString((char*)ofn.lpstrInitialDir);
-  if (ofn.lpstrTitle        != NULL) FreeAsciiString((char*)ofn.lpstrTitle);
-  if (ofn.lpstrDefExt       != NULL) FreeAsciiString((char*)ofn.lpstrDefExt);
-
-  // transform back the result
-  AsciiToUnicode(ofn.lpstrFile,
-                 lpofn->lpstrFile);
-  free(szFile);
-
-  if (lpofn->lpstrFileTitle != NULL)
-  {
-    AsciiToUnicode(ofn.lpstrFileTitle,
-                   lpofn->lpstrFileTitle);
-    free(szFileTitle);
-  }
-
-  if (lpofn->lpstrCustomFilter != NULL)
-  {
-    AsciiToUnicode(ofn.lpstrCustomFilter,
-                   lpofn->lpstrCustomFilter);
-    free(szCustFilter);
-  }
-
-  // copy over some altered flags
-  lpofn->nFilterIndex   = ofn.nFilterIndex;
-  lpofn->Flags          = ofn.Flags;
-  lpofn->nFileOffset    = ofn.nFileOffset;
-  lpofn->nFileExtension = ofn.nFileExtension;
-
-  return bResult;
-}
-
-
-/*****************************************************************************
- * Name      :
- * Purpose   :
- * Parameters:
- * Variables :
- * Result    :
- * Remark    :
- * Status    :
- *
- * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
- *****************************************************************************/
-
-ODINFUNCTION1(BOOL, GetSaveFileNameW,
-              LPOPENFILENAMEW, lpofn)
-{
-  Win32WindowProc *wndproc;
-  OPENFILENAMEA   ofn;
-  char*           szFile;
-  char*           szFileTitle;
-  char*           szCustFilter;
-  BOOL            bResult;
-
-  memcpy(&ofn,          // make binary copy first to save all the fields
-         lpofn,
-         sizeof(ofn));
-
-    // convert to ASCII string
-  if ((lpofn->Flags && OFN_ENABLETEMPLATE) &&
-      (lpofn->lpTemplateName != NULL))
-    ofn.lpTemplateName = UnicodeToAsciiString((WCHAR*)lpofn->lpTemplateName);
-  else
-    ofn.lpTemplateName = NULL;
-
-  if (lpofn->lpstrFilter != NULL)
-    ofn.lpstrFilter = UnicodeToAsciiString((WCHAR*)lpofn->lpstrFilter);
-
-  if (lpofn->lpstrInitialDir != NULL)
-    ofn.lpstrInitialDir = UnicodeToAsciiString((WCHAR*)lpofn->lpstrInitialDir);
-
-  if (lpofn->lpstrTitle != NULL)
-    ofn.lpstrTitle = UnicodeToAsciiString((WCHAR*)lpofn->lpstrTitle);
-
-  if (lpofn->lpstrDefExt != NULL)
-    ofn.lpstrDefExt = UnicodeToAsciiString((WCHAR*)lpofn->lpstrDefExt);
-
-  szFile             = (char*)malloc(lpofn->nMaxFile);
-  szFile[0]          = 0;
-
-  if (*lpofn->lpstrFile != 0)
-    UnicodeToAscii(lpofn->lpstrFile,
-                   szFile);
-
-  if (lpofn->lpstrFileTitle != NULL)
-  {
-    szFileTitle        = (char*)malloc(lpofn->nMaxFileTitle);
-    szFileTitle[0]     = 0;
-
-    if (*lpofn->lpstrFileTitle != 0)
-      UnicodeToAscii(lpofn->lpstrFileTitle,
-                     szFileTitle);
-  }
-  else
-    szFileTitle = NULL;
-
-  if (lpofn->lpstrCustomFilter != NULL)
-  {
-    szCustFilter       = (char*)malloc(lpofn->nMaxCustFilter);
-    szCustFilter[0]    = 0;
-
-
-    if (*lpofn->lpstrCustomFilter != 0)
-       UnicodeToAscii(lpofn->lpstrCustomFilter,
-                      szCustFilter);
-  }
-  else
-    szCustFilter = NULL;
-
-  ofn.lpstrFile         = szFile;
-  ofn.lpstrFileTitle    = szFileTitle;
-  ofn.lpstrCustomFilter = szCustFilter;
-
-  COMDLG32_CHECKHOOK((&ofn), OFN_ENABLEHOOK, WNDPROC)
-
-  bResult =  O32_GetSaveFileName(&ofn);
-
-  if (ofn.lpTemplateName    != NULL) FreeAsciiString((char*)ofn.lpTemplateName);
-  if (ofn.lpstrFilter       != NULL) FreeAsciiString((char*)ofn.lpstrFilter);
-  if (ofn.lpstrInitialDir   != NULL) FreeAsciiString((char*)ofn.lpstrInitialDir);
-  if (ofn.lpstrTitle        != NULL) FreeAsciiString((char*)ofn.lpstrTitle);
-  if (ofn.lpstrDefExt       != NULL) FreeAsciiString((char*)ofn.lpstrDefExt);
-
-  // transform back the result
-  AsciiToUnicode(ofn.lpstrFile,
-                 lpofn->lpstrFile);
-  free(szFile);
-
-  if (lpofn->lpstrFileTitle != NULL)
-  {
-    AsciiToUnicode(ofn.lpstrFileTitle,
-                   lpofn->lpstrFileTitle);
-    free(szFileTitle);
-  }
-
-  if (lpofn->lpstrCustomFilter != NULL)
-  {
-    AsciiToUnicode(ofn.lpstrCustomFilter,
-                   lpofn->lpstrCustomFilter);
-    free(szCustFilter);
-  }
-
-  // copy over some altered flags
-  lpofn->nFilterIndex   = ofn.nFilterIndex;
-  lpofn->Flags          = ofn.Flags;
-  lpofn->nFileOffset    = ofn.nFileOffset;
-  lpofn->nFileExtension = ofn.nFileExtension;
-
-  return bResult;
-}
-
 
 /*****************************************************************************
  * Name      :
@@ -793,7 +803,7 @@ ODINFUNCTION1(BOOL, PrintDlgW,
  * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
  *****************************************************************************/
 
-ODINFUNCTION1(HWND, ReplaceTextA,
+ODINFUNCTION1(HWND, ReplaceTextA32,
               LPFINDREPLACEA, lpfr)
 {
   Win32WindowProc *wndproc;
@@ -816,7 +826,7 @@ ODINFUNCTION1(HWND, ReplaceTextA,
  * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
  *****************************************************************************/
 
-ODINFUNCTION1(HWND, ReplaceTextW,
+ODINFUNCTION1(HWND, ReplaceTextW32,
               LPFINDREPLACEW, lpfr)
 {
   Win32WindowProc *wndproc;

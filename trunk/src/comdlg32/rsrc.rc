@@ -1,0 +1,28 @@
+/* $Id: rsrc.rc,v 1.1 1999-11-02 19:09:43 sandervl Exp $ */
+/*
+ * Top level resource file for Common Dialogs (990815)
+ *
+ */
+
+#include "winuser.h"
+#include "winnls.h"
+#include "dlgs.h"
+#include "cdlg.h"
+#include "winspool.h"
+
+/*
+ * Everything that does not depend on language,
+ * like textless bitmaps etc, go into the
+ * neutral language. This will prevent them from
+ * being duplicated for each language.
+ */
+#include "cdlg_xx.rc"
+
+/*
+ * Everything specific to any language goes
+ * in one of the specific files.
+ * Note that you can and may override resources
+ * which also have a neutral version. This is to
+ * get localized bitmaps for example.
+ */
+#include "cdlg_En.rc"
