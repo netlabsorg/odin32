@@ -1,18 +1,11 @@
+/* $Id: shellreg.c,v 1.1 2000-08-30 13:52:56 sandervl Exp $ */
 /*
 	Shell Registry Access
-        */
-/*****************************************************************************
- * Includes                                                                  *
- *****************************************************************************/
-
-#include <stdlib.h>
-#include <string.h>
-#include <odin.h>
-#include <odinwrap.h>
-#include <os2sel.h>
-
+*/
+#ifdef __WIN32OS2__
 #define ICOM_CINTERFACE 1
-
+#include <odin.h>
+#endif
 #include <string.h>
 #include <stdio.h>
 #include "winerror.h"
@@ -26,14 +19,7 @@
 #include "shell32_main.h"
 #include "wine/undocshell.h"
 
-
-
-/*****************************************************************************
- * Local Variables                                                           *
- *****************************************************************************/
-
-ODINDEBUGCHANNEL(shell32-shellreg)
-
+DEFAULT_DEBUG_CHANNEL(shell);
 
 /*************************************************************************
  * SHRegOpenKeyA				[SHELL32.506]
@@ -89,7 +75,7 @@ HRESULT WINAPI SHRegQueryValueW(
 {
 	WARN("0x%04x %s %p %p semi-stub\n",
 		hkey, debugstr_w(lpszSubKey), lpszData, lpcbData);
-	return RegQueryValueW( hkey, lpszSubKey, lpszData, (LPLONG)lpcbData );
+	return RegQueryValueW( hkey, lpszSubKey, lpszData, lpcbData );
 }
 
 /*************************************************************************
@@ -110,31 +96,33 @@ HRESULT WINAPI SHRegQueryValueExW (
 	DWORD ret;
 	WARN("0x%04x %s %p %p %p %p semi-stub\n",
 		hkey, debugstr_w(pszValue), pdwReserved, pdwType, pvData, pcbData);
-	ret = RegQueryValueExW ( hkey, pszValue, pdwReserved, pdwType, (LPBYTE)pvData, pcbData);
+	ret = RegQueryValueExW ( hkey, pszValue, pdwReserved, pdwType, pvData, pcbData);
 	return ret;
 }
 
-
-/*****************************************************************************
- * Name      : HRESULT SHRegDeleteKeyW
- * Purpose   :
- * Parameters:
- * Variables :
- * Result    :
- * Remark    : SHELL32.512
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1999/06/09 20:02]
- *****************************************************************************/
-
-ODINFUNCTION2(HRESULT, SHRegDeleteKeyW,
-              HKEY,    hkey,
-              LPWSTR,  lpszKey)
+#ifndef __WIN32OS2__
+/*************************************************************************
+ * SHRegDeleteKeyA   [SHELL32]
+ */
+HRESULT WINAPI SHRegDeleteKeyA(
+	HKEY hkey,
+	LPCSTR pszSubKey)
 {
-  return RegDeleteKeyW(hkey,
-                       lpszKey);
+	FIXME("hkey=0x%08x, %s\n", hkey, debugstr_a(pszSubKey));
+	return 0;
 }
+#endif
 
+/*************************************************************************
+ * SHRegDeleteKeyW   [SHELL32]
+ */
+HRESULT WINAPI SHRegDeleteKeyW(
+	HKEY hkey,
+	LPCWSTR pszSubKey)
+{
+	FIXME("hkey=0x%08x, %s\n", hkey, debugstr_w(pszSubKey));
+	return 0;
+}
 
 /*************************************************************************
  * SHRegCloseKey			[NT4.0:SHELL32.505]

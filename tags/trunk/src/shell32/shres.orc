@@ -1,4 +1,4 @@
-/* $Id: shres.orc,v 1.5 2000-08-24 12:01:09 sandervl Exp $ */
+/* $Id: shres.orc,v 1.6 2000-08-30 13:51:09 sandervl Exp $ */
 /*
  * Top level resource file for Common Dialogs
  *
@@ -33,67 +33,82 @@ BEGIN
         MENUITEM "&Details",            FCIDM_SHVIEW_REPORTVIEW
 END
 
+/*
+ shellview background menu
+*/
 MENU_002 MENU DISCARDABLE
 BEGIN
-        POPUP""
-        BEGIN
-          POPUP "&View"
-          BEGIN
-            MENUITEM "Lar&ge Icons",    FCIDM_SHVIEW_BIGICON
-            MENUITEM "S&mall Icons",    FCIDM_SHVIEW_SMALLICON
-            MENUITEM "&List",           FCIDM_SHVIEW_LISTVIEW
-            MENUITEM "&Details",        FCIDM_SHVIEW_REPORTVIEW
-          END
-          MENUITEM SEPARATOR
-          /* PATCH, the grayed items are unimplemented features */
-          POPUP "Arrange &Icons"
-          BEGIN
-            MENUITEM "By &Name",        0x30    /* column 0 */
-            MENUITEM "By &Type",        0x32    /* column 2 */
-            MENUITEM "By &Size",        0x31    /* ... */
-            MENUITEM "By &Date",        0x33
-            MENUITEM SEPARATOR
-            MENUITEM "&Auto Arrange",   FCIDM_SHVIEW_AUTOARRANGE, GRAYED
-          END
-          MENUITEM "Line up Icons",     FCIDM_SHVIEW_SNAPTOGRID, GRAYED
-          MENUITEM SEPARATOR
-          MENUITEM "Paste",             FCIDM_SHVIEW_INSERT, GRAYED
-          MENUITEM "Paste as Link",     FCIDM_SHVIEW_INSERTLINK, GRAYED
-          POPUP "New"
-          BEGIN
-            MENUITEM "New &Folder",     ID_NEWFOLDER
-            MENUITEM "New &Link",       0x7052, GRAYED
-            MENUITEM SEPARATOR
-          END
-          MENUITEM "Properties",        FCIDM_SHVIEW_PROPERTIES, GRAYED
-        END
+	POPUP""
+	BEGIN
+	  POPUP "&View"
+	  BEGIN
+	    MENUITEM "Lar&ge Icons",	FCIDM_SHVIEW_BIGICON
+	    MENUITEM "S&mall Icons",	FCIDM_SHVIEW_SMALLICON
+	    MENUITEM "&List",		FCIDM_SHVIEW_LISTVIEW
+	    MENUITEM "&Details",	FCIDM_SHVIEW_REPORTVIEW
+	  END
+	  MENUITEM SEPARATOR
+	  POPUP "Arrange &Icons"
+	  BEGIN
+	    MENUITEM "By &Name",	0x30	/* column 0 */
+	    MENUITEM "By &Type",	0x32	/* column 2 */
+	    MENUITEM "By &Size",	0x31	/* ... */
+	    MENUITEM "By &Date",	0x33
+	    MENUITEM SEPARATOR
+	    MENUITEM "&Auto Arrange",	FCIDM_SHVIEW_AUTOARRANGE
+	  END
+	  MENUITEM "Line up Icons",	FCIDM_SHVIEW_SNAPTOGRID
+	  MENUITEM SEPARATOR
+	  MENUITEM "Refresh",		FCIDM_SHVIEW_REFRESH
+	  MENUITEM SEPARATOR
+	  MENUITEM "Paste",		FCIDM_SHVIEW_INSERT
+	  MENUITEM "Paste as Link",	FCIDM_SHVIEW_INSERTLINK
+	  MENUITEM SEPARATOR
+	  POPUP "New"
+	  BEGIN
+	    MENUITEM "New &Folder",	FCIDM_SHVIEW_NEWFOLDER
+	    MENUITEM "New &Link",	FCIDM_SHVIEW_NEWLINK
+	    MENUITEM SEPARATOR	
+	  END
+	  MENUITEM SEPARATOR
+	  MENUITEM "Properties",	FCIDM_SHVIEW_PROPERTIES
+	END
 END
 
+/*
+ shellview item menu
+*/
 MENU_SHV_FILE MENU DISCARDABLE
 BEGIN
-        POPUP""
-        BEGIN
-          MENUITEM "C&ut",              FCIDM_SHVIEW_CUT
-          MENUITEM "&Copy",             FCIDM_SHVIEW_COPY
-          MENUITEM SEPARATOR
-          MENUITEM "&Link",             0x7051
-          MENUITEM "&Delete",           FCIDM_SHVIEW_DELETE
-          MENUITEM "&Rename",           0x7050
-          MENUITEM SEPARATOR
-          MENUITEM "&Properties",       FCIDM_SHVIEW_PROPERTIES
-        END
+	POPUP""
+	BEGIN
+	  MENUITEM "E&xplore",		FCIDM_SHVIEW_CUT
+	  MENUITEM "&Open",		FCIDM_SHVIEW_COPY
+	  MENUITEM SEPARATOR
+	  MENUITEM "C&ut",		FCIDM_SHVIEW_CUT
+	  MENUITEM "&Copy",		FCIDM_SHVIEW_COPY
+	  MENUITEM SEPARATOR
+	  MENUITEM "&Create Link",	FCIDM_SHVIEW_CREATELINK
+	  MENUITEM "&Delete",		FCIDM_SHVIEW_DELETE
+	  MENUITEM "&Rename",		FCIDM_SHVIEW_RENAME
+	  MENUITEM SEPARATOR
+	  MENUITEM "&Properties",	FCIDM_SHVIEW_PROPERTIES
+	END
 END
-SHBRSFORFOLDER_MSGBOX DIALOG 15, 40, 128, 152
-STYLE WS_THICKFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+
+SHBRSFORFOLDER_MSGBOX DIALOG LOADONCALL MOVEABLE DISCARDABLE 15, 40, 188, 192
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Choose a Directory:"
 FONT 8, "Helv"
 {
- DEFPUSHBUTTON "OK", 1, 4, 132, 50, 12
- PUSHBUTTON "Cancel", 2, 58, 132, 50, 12
- CONTROL "Tree1",99,"SysTreeView32",
-        TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT |
-        WS_BORDER | WS_TABSTOP,
-        4, 4, 120, 120
+ DEFPUSHBUTTON "OK", 1, 80, 176, 50, 12, BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP
+ PUSHBUTTON "Cancel", 2, 134, 176, 50, 12, WS_GROUP | WS_TABSTOP
+ LTEXT "", IDD_TITLE, 4, 4, 18, 12
+ LTEXT "", IDD_STATUS, 4, 25, 18, 12
+ CONTROL "Tree1",IDD_TREEVIEW,"SysTreeView32",
+ 	TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT |
+	WS_BORDER | WS_TABSTOP, 
+	4, 40, 180, 120
 }
 
 /*
@@ -117,6 +132,19 @@ STRINGTABLE DISCARDABLE
         IDS_SELECT              "Select"
         IDS_OPEN                "Open"
 }
+
+STRINGTABLE DISCARDABLE
+{
+	IDS_CREATEFOLDER_DENIED "Can not create new Folder: Permission denied."
+	IDS_CREATEFOLDER_CAPTION "Error during creating a new folder"
+	IDS_DELETEFOLDER_TEXT "Are you sure you want to delete %1 and all it's subfolders?"
+	IDS_DELETEFOLDER_CAPTION "Confirm file delete"
+}
+
+shv_accel ACCELERATORS
+BEGIN
+	VK_F5, FCIDM_SHVIEW_REFRESH, VIRTKEY
+END
 
 /////////////////////////////////////////////////////////////////////////////
 //

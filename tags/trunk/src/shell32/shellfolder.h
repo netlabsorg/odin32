@@ -1,3 +1,4 @@
+/* $Id: shellfolder.h,v 1.2 2000-08-30 13:50:58 sandervl Exp $ */
 /*
  * defines helperfunctions to manipulate the contents of a IShellFolder
  *

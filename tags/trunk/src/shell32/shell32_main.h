@@ -1,29 +1,11 @@
-/* $Id: shell32_main.h,v 1.5 2000-08-24 09:35:07 sandervl Exp $ */
-
+/* $Id: shell32_main.h,v 1.6 2000-08-30 13:50:57 sandervl Exp $ */
 /*
- * Win32 SHELL32 for OS/2
- *
- * Copyright 1999 Patrick Haller (haller@zebra.fh-weingarten.de)
- * Project Odin Software License can be found in LICENSE.TXT
- *
- * Note: Odin changes marked by #ifdef __WIN32OS2__ !
- *
- * Corel WINE 20000324 level
- */
-
-/*
- *      internal Shell32 Library definitions
+ * 	internal Shell32 Library definitions
  */
 
 #ifndef __WINE_SHELL_MAIN_H
 #define __WINE_SHELL_MAIN_H
 
-
-/*****************************************************************************
- * Includes                                                                  *
- *****************************************************************************/
-
-#include "imagelist.h"
 #include "commctrl.h"
 #include "shell.h"
 #include "docobj.h"
@@ -34,64 +16,56 @@
 #include "wine/obj_shellview.h"
 #include "wine/obj_shelllink.h"
 #include "wine/obj_extracticon.h"
-
-#ifdef __cplusplus
-  extern "C" {
-#endif /* defined(__cplusplus) */
-
-
-/**
- * WINE portability macro
- **/
-
+#ifdef __WIN32OS2__
+#include <heapstring.h>
+#endif
 /*******************************************
 *  global SHELL32.DLL variables
 */
-extern HMODULE          huser32;
-extern HINSTANCE        shell32_hInstance;
-extern LONG             shell32_ObjCount;
-extern HIMAGELIST       ShellSmallIconList;
-extern HIMAGELIST       ShellBigIconList;
-extern HDPA             sic_hdpa;
+extern HMODULE	huser32;
+extern HINSTANCE shell32_hInstance;
+extern LONG	  shell32_ObjCount;
+extern HIMAGELIST	ShellSmallIconList;
+extern HIMAGELIST	ShellBigIconList;
+#ifndef __WIN32OS2__
+extern HDPA		sic_hdpa;
+#endif
 
 /*******************************************
 * pointer to functions dynamically loaded
 */
-extern void     (* WINAPI  pDLLInitComctl)(LPVOID);
-extern INT      (* WINAPI  pImageList_AddIcon) (HIMAGELIST himl, HICON hIcon);
-extern INT      (* WINAPI  pImageList_ReplaceIcon) (HIMAGELIST, INT, HICON);
-extern HIMAGELIST (* WINAPI  pImageList_Create) (INT,INT,UINT,INT,INT);
-extern BOOL     (* WINAPI  pImageList_Draw) (HIMAGELIST himl, int i, HDC hdcDest, int x, int y, UINT fStyle);
-extern HICON    (* WINAPI  pImageList_GetIcon) (HIMAGELIST, INT, UINT);
-extern INT      (* WINAPI  pImageList_GetImageCount)(HIMAGELIST);
+extern void	(* WINAPI pDLLInitComctl)(LPVOID);
+extern INT	(* WINAPI pImageList_AddIcon) (HIMAGELIST himl, HICON hIcon);
+extern INT	(* WINAPI pImageList_ReplaceIcon) (HIMAGELIST, INT, HICON);
+extern HIMAGELIST (* WINAPI pImageList_Create) (INT,INT,UINT,INT,INT);
+extern BOOL	(* WINAPI pImageList_Draw) (HIMAGELIST himl, int i, HDC hdcDest, int x, int y, UINT fStyle);
+extern HICON	(* WINAPI pImageList_GetIcon) (HIMAGELIST, INT, UINT);
+extern INT	(* WINAPI pImageList_GetImageCount)(HIMAGELIST);
 extern COLORREF (* WINAPI pImageList_SetBkColor)(HIMAGELIST, COLORREF);
 
-extern LPVOID   (* WINAPI  pCOMCTL32_Alloc) (INT);
-extern BOOL     (* WINAPI  pCOMCTL32_Free) (LPVOID);
+extern LPVOID	(* WINAPI pCOMCTL32_Alloc) (INT);  
+extern BOOL	(* WINAPI pCOMCTL32_Free) (LPVOID);  
 
-extern HDPA     (* WINAPI  pDPA_Create) (INT);
-extern INT      (* WINAPI  pDPA_InsertPtr) (const HDPA, INT, LPVOID);
-extern BOOL     (* WINAPI  pDPA_Sort) (const HDPA, PFNDPACOMPARE, LPARAM);
-extern LPVOID   (* WINAPI  pDPA_GetPtr) (const HDPA, INT);
-extern BOOL     (* WINAPI  pDPA_Destroy) (const HDPA);
-extern INT      (* WINAPI  pDPA_Search) (const HDPA, LPVOID, INT, PFNDPACOMPARE, LPARAM, UINT);
-extern LPVOID   (* WINAPI  pDPA_DeletePtr) (const HDPA hdpa, INT i);
-#define pDPA_GetPtrCount(hdpa)  (*(INT*)(hdpa))
+extern HDPA	(* WINAPI pDPA_Create) (INT);  
+extern INT	(* WINAPI pDPA_InsertPtr) (const HDPA, INT, LPVOID); 
+extern BOOL	(* WINAPI pDPA_Sort) (const HDPA, PFNDPACOMPARE, LPARAM); 
+extern LPVOID	(* WINAPI pDPA_GetPtr) (const HDPA, INT);   
+extern BOOL	(* WINAPI pDPA_Destroy) (const HDPA); 
+extern INT	(* WINAPI pDPA_Search) (const HDPA, LPVOID, INT, PFNDPACOMPARE, LPARAM, UINT);
+extern LPVOID	(* WINAPI pDPA_DeletePtr) (const HDPA hdpa, INT i);
+#define pDPA_GetPtrCount(hdpa)  (*(INT*)(hdpa))   
 
 extern HICON (* WINAPI pLookupIconIdFromDirectoryEx)(LPBYTE dir, BOOL bIcon, INT width, INT height, UINT cFlag);
 extern HICON (* WINAPI pCreateIconFromResourceEx)(LPBYTE bits,UINT cbSize, BOOL bIcon, DWORD dwVersion, INT width, INT height,UINT cFlag);
 
 /* ole2 */
-extern HRESULT (* WINAPI  pOleInitialize)(LPVOID reserved);
-extern void    (* WINAPI  pOleUninitialize)(void);
-extern HRESULT (* WINAPI  pRegisterDragDrop)(HWND hwnd, IDropTarget* pDropTarget);
-extern HRESULT (* WINAPI  pRevokeDragDrop)(HWND hwnd);
-extern HRESULT (* WINAPI  pDoDragDrop)(LPDATAOBJECT,LPDROPSOURCE,DWORD,DWORD*);
-extern void (* WINAPI  pReleaseStgMedium)(STGMEDIUM* pmedium);
-extern HRESULT (* WINAPI  pOleSetClipboard)(IDataObject* pDataObj);
-extern HRESULT (* WINAPI  pOleGetClipboard)(IDataObject** ppDataObj);
-
-    
+/*
+extern HRESULT (* WINAPI pOleInitialize)(LPVOID reserved);
+extern void (* WINAPI pOleUninitialize)(void);
+extern HRESULT (* WINAPI pDoDragDrop)(IDataObject* pDataObject, IDropSource * pDropSource, DWORD dwOKEffect, DWORD * pdwEffect);
+extern HRESULT (* WINAPI pRegisterDragDrop)(HWND hwnd, IDropTarget* pDropTarget);
+extern HRESULT (* WINAPI pRevokeDragDrop)(HWND hwnd);
+*/
 BOOL WINAPI Shell_GetImageList(HIMAGELIST * lpBigList, HIMAGELIST * lpSmallList);
 
 HRESULT WINAPI StrRetToStrNA (LPVOID dest, DWORD len, LPSTRRET src, LPITEMIDLIST pidl);
@@ -111,31 +85,31 @@ BOOL HCR_GetDefaultIcon (LPCSTR szClass, LPSTR szDest, DWORD len, LPDWORD dwNr);
 BOOL HCR_GetClassName (REFIID riid, LPSTR szDest, DWORD len);
 BOOL HCR_GetFolderAttributes (REFIID riid, LPDWORD szDest);
 
-DWORD   WINAPI ParseFieldA(LPCSTR src,DWORD field,LPSTR dst,DWORD len);
+DWORD 	WINAPI ParseFieldA(LPCSTR src,DWORD field,LPSTR dst,DWORD len);
 
 /****************************************************************************
  * Class constructors
  */
-LPDATAOBJECT    IDataObject_Constructor(HWND hwndOwner, LPITEMIDLIST myPidl, LPITEMIDLIST * apidl, UINT cidl);
-LPENUMFORMATETC IEnumFORMATETC_Constructor(UINT, const FORMATETC []);
+LPDATAOBJECT	IDataObject_Constructor(HWND hwndOwner, LPITEMIDLIST myPidl, LPITEMIDLIST * apidl, UINT cidl);
+LPENUMFORMATETC	IEnumFORMATETC_Constructor(UINT, const FORMATETC []);
 
-LPCLASSFACTORY  IClassFactory_Constructor(REFCLSID);
-IContextMenu *  ISvItemCm_Constructor(LPSHELLFOLDER pSFParent, LPCITEMIDLIST pidl, LPCITEMIDLIST *aPidls, UINT uItemCount);
-IContextMenu *  ISvBgCm_Constructor(LPSHELLFOLDER pSFParent);
-LPSHELLVIEW     IShellView_Constructor(LPSHELLFOLDER);
-LPSHELLLINK     IShellLink_Constructor(BOOL);
+LPCLASSFACTORY	IClassFactory_Constructor(REFCLSID);
+IContextMenu *	ISvItemCm_Constructor(LPSHELLFOLDER pSFParent, LPCITEMIDLIST pidl, LPCITEMIDLIST *aPidls, UINT uItemCount);
+IContextMenu *	ISvBgCm_Constructor(LPSHELLFOLDER pSFParent);
+LPSHELLVIEW	IShellView_Constructor(LPSHELLFOLDER);
+LPSHELLLINK	IShellLink_Constructor(BOOL);
 
 IShellFolder * ISF_Desktop_Constructor(void);
 
 /* kind of enumidlist */
-#define EIDL_DESK       0
-#define EIDL_MYCOMP     1
-#define EIDL_FILE       2
+#define EIDL_DESK	0
+#define EIDL_MYCOMP	1
+#define EIDL_FILE	2
 
-LPENUMIDLIST    IEnumIDList_Constructor(LPCSTR,DWORD,DWORD);
+LPENUMIDLIST	IEnumIDList_Constructor(LPCSTR,DWORD,DWORD);
 
-LPEXTRACTICONA  IExtractIconA_Constructor(LPITEMIDLIST);
-HRESULT         CreateStreamOnFile (LPCSTR pszFilename, IStream ** ppstm);
+LPEXTRACTICONA	IExtractIconA_Constructor(LPITEMIDLIST);
+HRESULT		CreateStreamOnFile (LPCSTR pszFilename, IStream ** ppstm);	
 
 /* fixme: rename the functions when the shell32.dll has it's own exports namespace */
 HRESULT WINAPI  SHELL32_DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID * ppv);
@@ -151,38 +125,47 @@ HRESULT WINAPI Shell_MergeMenus (HMENU hmDst, HMENU hmSrc, UINT uInsert, UINT uI
 
 /* initialisation for FORMATETC */
 #define InitFormatEtc(fe, cf, med) \
-        {\
-        (fe).cfFormat=cf;\
-        (fe).dwAspect=DVASPECT_CONTENT;\
-        (fe).ptd=NULL;\
-        (fe).tymed=med;\
-        (fe).lindex=-1;\
-        };
+	{\
+	(fe).cfFormat=cf;\
+	(fe).dwAspect=DVASPECT_CONTENT;\
+	(fe).ptd=NULL;\
+	(fe).tymed=med;\
+	(fe).lindex=-1;\
+	};
 
 #define KeyStateToDropEffect(kst)\
-        (((kst) & MK_CONTROL) ?\
-        (((kst) & MK_SHIFT) ? DROPEFFECT_LINK : DROPEFFECT_COPY):\
-        DROPEFFECT_MOVE)
+	(((kst) & MK_CONTROL) ?\
+	(((kst) & MK_SHIFT) ? DROPEFFECT_LINK : DROPEFFECT_COPY):\
+	DROPEFFECT_MOVE)
 
 /* Systray */
 BOOL SYSTRAY_Init(void);
-    
+
 /* Clipboard */
 void InitShellOle(void);
 void FreeShellOle(void);
 BOOL GetShellOle(void);
-    
-/* PH: This creates an auto variable just in any importer...
-HRESULT (* WINAPI  pOleInitialize)(LPVOID reserved);
-void    (* WINAPI  pOleUninitialize)(void);
-HRESULT (* WINAPI  pRegisterDragDrop)(HWND hwnd, IDropTarget* pDropTarget);
-HRESULT (* WINAPI  pRevokeDragDrop)(HWND hwnd);
-HRESULT (* WINAPI  pDoDragDrop)(LPDATAOBJECT,LPDROPSOURCE,DWORD,DWORD*);
-void (* WINAPI  pReleaseStgMedium)(STGMEDIUM* pmedium);
-HRESULT (* WINAPI  pOleSetClipboard)(IDataObject* pDataObj);
-HRESULT (* WINAPI  pOleGetClipboard)(IDataObject** ppDataObj);
-*/
-    
+
+#ifdef __WIN32OS2__
+extern HRESULT (* WINAPI pOleInitialize)(LPVOID reserved);
+extern void    (* WINAPI pOleUninitialize)(void);
+extern HRESULT (* WINAPI pRegisterDragDrop)(HWND hwnd, IDropTarget* pDropTarget);
+extern HRESULT (* WINAPI pRevokeDragDrop)(HWND hwnd);
+extern HRESULT (* WINAPI pDoDragDrop)(LPDATAOBJECT,LPDROPSOURCE,DWORD,DWORD*); 
+extern void 	(* WINAPI pReleaseStgMedium)(STGMEDIUM* pmedium);
+extern HRESULT (* WINAPI pOleSetClipboard)(IDataObject* pDataObj);
+extern HRESULT (* WINAPI pOleGetClipboard)(IDataObject** ppDataObj);
+#else
+HRESULT (* WINAPI pOleInitialize)(LPVOID reserved);
+void    (* WINAPI pOleUninitialize)(void);
+HRESULT (* WINAPI pRegisterDragDrop)(HWND hwnd, IDropTarget* pDropTarget);
+HRESULT (* WINAPI pRevokeDragDrop)(HWND hwnd);
+HRESULT (* WINAPI pDoDragDrop)(LPDATAOBJECT,LPDROPSOURCE,DWORD,DWORD*); 
+void 	(* WINAPI pReleaseStgMedium)(STGMEDIUM* pmedium);
+HRESULT (* WINAPI pOleSetClipboard)(IDataObject* pDataObj);
+HRESULT (* WINAPI pOleGetClipboard)(IDataObject** ppDataObj);
+#endif
+
 HGLOBAL RenderHDROP(LPITEMIDLIST pidlRoot, LPITEMIDLIST * apidl, UINT cidl);
 HGLOBAL RenderSHELLIDLIST (LPITEMIDLIST pidlRoot, LPITEMIDLIST * apidl, UINT cidl);
 HGLOBAL RenderSHELLIDLISTOFFSET (LPITEMIDLIST pidlRoot, LPITEMIDLIST * apidl, UINT cidl);
@@ -199,17 +182,25 @@ void FreeChangeNotifications(void);
 BOOL SHELL_DeleteDirectoryA(LPCSTR pszDir, BOOL bShowUI);
 
 #ifdef __WIN32OS2__
+#ifdef __cplusplus
+extern "C" {
+#endif
 BOOL SHELL_OsIsUnicode(void);
+
+#include <peexe.h>
+PIMAGE_RESOURCE_DIRECTORY GetResDirEntryW(PIMAGE_RESOURCE_DIRECTORY resdirptr,
+                                           LPCWSTR name,DWORD root,
+                                           BOOL allowdefault);
+
+#ifdef __cplusplus
+}
+#endif
 #else
 inline static BOOL SHELL_OsIsUnicode(void)
 {
-/* if high-bit of version is 0, we are emulating NT */
-  return !(GetVersion() & 0x80000000);
+    /* if high-bit of version is 0, we are emulating NT */
+    return !(GetVersion() & 0x80000000);
 }
 #endif
-    
-#ifdef __cplusplus
-  }
-#endif /* defined(__cplusplus) */
 
 #endif

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.27 2000-08-18 02:01:16 phaller Exp $
+# $Id: makefile,v 1.28 2000-08-30 13:50:53 sandervl Exp $
 
 #
 # Odin32 API
@@ -29,7 +29,6 @@ $(OBJDIR)\brsfolder.obj \
 $(OBJDIR)\changenotify.obj \
 $(OBJDIR)\classes.obj \
 $(OBJDIR)\clipboard.obj \
-$(OBJDIR)\contmenu.obj \
 $(OBJDIR)\dataobject.obj \
 $(OBJDIR)\dialogs.obj \
 $(OBJDIR)\enumidlist.obj \
@@ -37,8 +36,8 @@ $(OBJDIR)\folders.obj \
 $(OBJDIR)\iconcache.obj \
 $(OBJDIR)\memorystream.obj \
 $(OBJDIR)\pidl.obj \
-$(OBJDIR)\regstream.obj \
 $(OBJDIR)\shell32_main.obj \
+$(OBJDIR)\shell32_odin.obj \
 $(OBJDIR)\shellguid.obj \
 $(OBJDIR)\shelllink.obj \
 $(OBJDIR)\shlmenu.obj \

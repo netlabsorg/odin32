@@ -1,18 +1,11 @@
+/* $Id: shlfileop.c,v 1.1 2000-08-30 13:52:57 sandervl Exp $ */
 /*
  * SHFileOperation
  */
-/*****************************************************************************
- * Includes                                                                  *
- *****************************************************************************/
-
-#include <stdlib.h>
-#include <string.h>
-#include <odin.h>
-#include <odinwrap.h>
-#include <os2sel.h>
-
+#ifdef __WIN32OS2__
 #define ICOM_CINTERFACE 1
- 
+#include <odin.h>
+#endif
 #include <string.h>
 #include "debugtools.h"
 #include "shellapi.h"
@@ -22,13 +15,7 @@
 #include "shresdef.h"
 #include "wine/undocshell.h"
 
-
-/*****************************************************************************
- * Local Variables                                                           *
- *****************************************************************************/
-
-ODINDEBUGCHANNEL(shell32-shlfileop)
-
+DEFAULT_DEBUG_CHANNEL(shell);
 
 #define ASK_DELETE_FILE 1
 #define ASK_DELETE_FOLDER 2
@@ -69,7 +56,7 @@ BOOL SHELL_DeleteDirectoryA(LPCSTR pszDir, BOOL bShowUI)
 	{
 	  do
 	  {
-	    if(strcmp(wfd.cFileName, ".") && strcmp(wfd.cFileName, ".."))
+	    if(strcasecmp(wfd.cFileName, ".") && strcasecmp(wfd.cFileName, ".."))
 	    {
 	      strcpy(szTemp, pszDir);
 	      PathAddBackslashA(szTemp);
@@ -158,8 +145,8 @@ DWORD WINAPI SHFileOperationW (LPSHFILEOPSTRUCTW lpFileOp)
 DWORD WINAPI SHFileOperationAW(LPVOID lpFileOp)
 {
 	if (SHELL_OsIsUnicode())
-	  return SHFileOperationW((LPSHFILEOPSTRUCTW)lpFileOp);
-	return SHFileOperationA((LPSHFILEOPSTRUCTA)lpFileOp);
+	  return SHFileOperationW(lpFileOp);
+	return SHFileOperationA(lpFileOp);
 }
 
 /*************************************************************************

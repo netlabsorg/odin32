@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.9 2000-08-24 09:35:06 sandervl Exp $ */
+/* $Id: misc.cpp,v 1.10 2000-08-30 13:50:53 sandervl Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -33,13 +33,22 @@
 //#include "winbase.h"
 #include <heapstring.h>
 
-
 /*****************************************************************************
  * Types & Defines                                                           *
  *****************************************************************************/
 
 ODINDEBUGCHANNEL(SHELL32-MISC)
 
+
+/* exported via shell32_main.h */
+HRESULT (WINAPI* pOleInitialize)(LPVOID reserved);
+void    (WINAPI* pOleUninitialize)(void);
+HRESULT (WINAPI* pRegisterDragDrop)(HWND hwnd, IDropTarget* pDropTarget);
+HRESULT (WINAPI* pRevokeDragDrop)(HWND hwnd);
+HRESULT (WINAPI* pDoDragDrop)(LPDATAOBJECT,LPDROPSOURCE,DWORD,DWORD*);
+void (WINAPI* pReleaseStgMedium)(STGMEDIUM* pmedium);
+HRESULT (WINAPI* pOleSetClipboard)(IDataObject* pDataObj);
+HRESULT (WINAPI* pOleGetClipboard)(IDataObject** ppDataObj);
 
 BOOL SHELL_OsIsUnicode(void)
 {
@@ -361,4 +370,5 @@ ODINFUNCTION1(DWORD, DuplicateIcon,
 
   return 0;
 }
+
 
