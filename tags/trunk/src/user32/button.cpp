@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.11 1999-10-16 11:05:37 sandervl Exp $ */
+/* $Id: button.cpp,v 1.12 1999-10-17 19:32:04 cbratschi Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
@@ -113,7 +113,7 @@ static LRESULT BUTTON_Enable(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
 
-//  PAINT_BUTTON(hwnd,dwStyle & 0x0f,ODA_DRAWENTIRE);
+  //PAINT_BUTTON(hwnd,dwStyle & 0x0f,ODA_DRAWENTIRE);
   //SvL: 09/10/99 Force it to redraw properly
   InvalidateRect( hwnd, NULL, FALSE );
 
@@ -166,7 +166,7 @@ static LRESULT BUTTON_EraseBkgnd(HWND hwnd,WPARAM wParam,LPARAM lParam)
   //     a box
   DWORD style = GetWindowLongA(hwnd,GWL_STYLE) & 0x0f;
 //  if(style == BS_GROUPBOX) {
-  	return DefWindowProcA(hwnd, WM_ERASEBKGND, wParam, lParam);
+        return DefWindowProcA(hwnd, WM_ERASEBKGND, wParam, lParam);
 //  }
 //  return 1;
 }
@@ -946,7 +946,7 @@ static void BUTTON_CheckAutoRadioButton(HWND hwnd)
     parent = GetParent(hwnd);
     /* assure that starting control is not disabled or invisible */
 //    start = sibling = GetNextDlgGroupItem( parent, hwnd, TRUE );
-    //@YD: bugfix	
+    //@YD: bugfix
     start = sibling = GetNextDlgGroupItem( parent, hwnd, FALSE );
     do
     {

@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.7 1999-10-17 12:17:44 cbratschi Exp $ */
+/* $Id: pmframe.cpp,v 1.8 1999-10-17 19:32:04 cbratschi Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -91,7 +91,7 @@ VOID DrawFrame(HPS hps,RECTL *rect,Win32BaseWindow *win32wnd)
 
 BOOL CanDrawSizeBox(Win32BaseWindow *win32wnd)
 {
-  return (!win32wnd->isChild() && WinQueryWindowULong(win32wnd->getOS2FrameWindowHandle(),QWL_STYLE) & FS_SIZEBORDER
+  return (win32wnd->getStyle() & WS_SIZEBOX_W && WinQueryWindowULong(win32wnd->getOS2FrameWindowHandle(),QWL_STYLE) & FS_SIZEBORDER
           && win32wnd->getVertScrollHandle() && WinQueryWindow(win32wnd->getVertScrollHandle(),QW_PARENT) == win32wnd->getOS2FrameWindowHandle()
           && win32wnd->getHorzScrollHandle() && WinQueryWindow(win32wnd->getHorzScrollHandle(),QW_PARENT) == win32wnd->getOS2FrameWindowHandle());
 }
@@ -271,7 +271,7 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
           SetWin32TIB();
 
           GetSizeBox(win32wnd,&rect);
-          hps = WinGetClipPS(hwnd,0,PSF_CLIPCHILDREN);
+          hps = WinGetClipPS(hwnd,0,PSF_CLIPCHILDREN | PSF_CLIPSIBLINGS);
           DrawSizeBox(hps,rect);
           WinReleasePS(hps);
 
@@ -292,7 +292,7 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
         rect.xRight = rect.xRight-rect.xLeft;
         rect.yTop = rect.yTop-rect.yBottom;
         rect.xLeft = rect.yBottom = 0;
-        hps = WinGetClipPS(hwnd,0,PSF_CLIPCHILDREN);
+        hps = WinGetClipPS(hwnd,0,PSF_CLIPCHILDREN | PSF_CLIPSIBLINGS);
         DrawFrame(hps,&rect,win32wnd);
         WinReleasePS(hps);
 
@@ -317,7 +317,7 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
           SetWin32TIB();
 
           GetSizeBox(win32wnd,&rect);
-          hps = WinGetClipPS(hwnd,0,PSF_CLIPCHILDREN);
+          hps = WinGetClipPS(hwnd,0,PSF_CLIPCHILDREN | PSF_CLIPSIBLINGS);
           DrawSizeBox(hps,rect);
           WinReleasePS(hps);
 
@@ -337,7 +337,7 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
         rect.xRight = rect.xRight-rect.xLeft;
         rect.yTop = rect.yTop-rect.yBottom;
         rect.xLeft = rect.yBottom = 0;
-        hps = WinGetClipPS(hwnd,0,PSF_CLIPCHILDREN);
+        hps = WinGetClipPS(hwnd,0,PSF_CLIPCHILDREN | PSF_CLIPSIBLINGS);
         DrawFrame(hps,&rect,win32wnd);
         WinReleasePS(hps);
 

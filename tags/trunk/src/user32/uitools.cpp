@@ -1,4 +1,4 @@
-/* $Id: uitools.cpp,v 1.13 1999-10-12 14:47:22 sandervl Exp $ */
+/* $Id: uitools.cpp,v 1.14 1999-10-17 19:32:05 cbratschi Exp $ */
 /*
  * User Interface Functions
  *
@@ -1761,23 +1761,139 @@ BOOL WIN32API DrawFocusRect( HDC arg1, const RECT *  arg2)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API DrawIcon( HDC arg1, int arg2, int arg3, HICON  arg4)
+BOOL WIN32API DrawIcon( HDC hDC, int X, int Y, HICON  hIcon)
 {
+  ICONINFO ii;
+  HDC hMemDC;
+  BITMAP bmp;
+  HBITMAP oldBmp;
+  COLORREF oldFg,oldBg;
+
 #ifdef DEBUG
-    WriteLog("USER32:  DrawIcon\n");
+  WriteLog("USER32:  DrawIcon\n");
 #endif
-    return O32_DrawIcon(arg1, arg2, arg3, arg4);
+
+  if (!hDC || !hIcon)
+  {
+    SetLastError(ERROR_INVALID_PARAMETER);
+
+    return FALSE;
+  }
+
+  if (!GetIconInfo(hIcon,&ii)) return FALSE;
+  GetObjectA(ii.hbmColor,sizeof(BITMAP),(LPVOID)&bmp);
+  oldFg = SetTextColor(hDC,RGB(0,0,0));
+  oldBg = SetBkColor(hDC,RGB(255,255,255));
+  hMemDC = CreateCompatibleDC(hDC);
+  oldBmp = SelectObject(hMemDC,ii.hbmMask);
+  BitBlt(hDC,X,Y,bmp.bmWidth,bmp.bmHeight,hMemDC,0,0,SRCAND);
+  SelectObject(hMemDC,ii.hbmColor);
+  BitBlt(hDC,X,Y,bmp.bmWidth,bmp.bmHeight,hMemDC,0,0,SRCPAINT);
+  SelectObject(hMemDC,ii.hbmMask);
+  BitBlt(hDC,X,Y,bmp.bmWidth,bmp.bmHeight,hMemDC,0,bmp.bmHeight,SRCINVERT);
+  SelectObject(hMemDC,oldBmp);
+  DeleteObject(hMemDC);
+  SetTextColor(hDC,oldFg);
+  SetBkColor(hDC,oldBg);
+
+  return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API DrawIconEx(HDC hdc, int xLeft, int xRight, HICON hIcon,
+BOOL WIN32API DrawIconEx(HDC hdc, int xLeft, int yTop, HICON hIcon,
                          int cxWidth, int cyWidth, UINT istepIfAniCur,
                          HBRUSH hbrFlickerFreeDraw, UINT diFlags)
 {
+  ICONINFO ii;
+  HDC hMemDC;
+  BITMAP bmp;
+  HBITMAP oldBmp;
+  COLORREF oldFg,oldBg;
+  INT oldStretchMode;
+
 #ifdef DEBUG
-    WriteLog("USER32:  DrawIcon, partially implemented\n");
+  WriteLog("USER32:  DrawIconEx\n");
 #endif
-    return O32_DrawIcon(hdc, xLeft, xRight, hIcon);
+
+  //CB: istepIfAniCur, DI_COMPAT ignored
+
+  if (!hdc || !hIcon)
+  {
+    SetLastError(ERROR_INVALID_PARAMETER);
+
+    return FALSE;
+  }
+
+  if (!GetIconInfo(hIcon,&ii)) return FALSE;
+  GetObjectA(ii.hbmColor,sizeof(BITMAP),(LPVOID)&bmp);
+
+  /* Calculate the size of the destination image.  */
+  if (cxWidth == 0)
+  {
+    if (diFlags & DI_DEFAULTSIZE)
+      cxWidth = GetSystemMetrics(SM_CXICON);
+    else
+      cxWidth = bmp.bmWidth;
+  }
+  if (cyWidth == 0)
+  {
+    if (diFlags & DI_DEFAULTSIZE)
+      cyWidth = GetSystemMetrics(SM_CYICON);
+    else
+      cyWidth = bmp.bmHeight;
+  }
+
+  if (hbrFlickerFreeDraw)
+  {
+    HDC hBmpDC = CreateCompatibleDC(hdc);
+    HBITMAP memBmp,oldMemBmp = CreateCompatibleBitmap(hdc,cxWidth,cyWidth);
+    RECT rect;
+
+    oldMemBmp = SelectObject(hBmpDC,memBmp);
+    rect.left = 0;
+    rect.top = 0;
+    rect.right = cxWidth;
+    rect.bottom = cyWidth;
+    FillRect(hBmpDC,&rect,hbrFlickerFreeDraw);
+    oldFg = SetTextColor(hBmpDC,RGB(0,0,0));
+    oldBg = SetBkColor(hBmpDC,RGB(255,255,255));
+    hMemDC = CreateCompatibleDC(hdc);
+    oldBmp = SelectObject(hMemDC,ii.hbmMask);
+    oldStretchMode = SetStretchBltMode(hBmpDC,STRETCH_DELETESCANS);
+    StretchBlt(hBmpDC,0,0,cxWidth,cyWidth,hMemDC,0,0,bmp.bmWidth,bmp.bmHeight,SRCAND);
+    SelectObject(hMemDC,ii.hbmColor);
+    StretchBlt(hBmpDC,0,0,cxWidth,cyWidth,hMemDC,0,0,bmp.bmWidth,bmp.bmHeight,SRCPAINT);
+    SelectObject(hMemDC,ii.hbmMask);
+    StretchBlt(hBmpDC,0,0,cxWidth,cyWidth,hMemDC,0,bmp.bmHeight,bmp.bmWidth,bmp.bmHeight,SRCINVERT);
+    BitBlt(hdc,xLeft,yTop,cxWidth,cyWidth,hBmpDC,0,0,SRCCOPY);
+    SelectObject(hMemDC,oldBmp);
+    DeleteObject(hMemDC);
+    SetTextColor(hdc,oldFg);
+    SetBkColor(hdc,oldBg);
+    SetStretchBltMode(hBmpDC,oldStretchMode);
+    SelectObject(hBmpDC,oldMemBmp);
+    DeleteObject(hBmpDC);
+    DeleteObject(memBmp);
+  } else
+  {
+    oldFg = SetTextColor(hdc,RGB(0,0,0));
+    oldBg = SetBkColor(hdc,RGB(255,255,255));
+    hMemDC = CreateCompatibleDC(hdc);
+    oldBmp = SelectObject(hMemDC,ii.hbmMask);
+    oldStretchMode = SetStretchBltMode(hdc,STRETCH_DELETESCANS);
+    StretchBlt(hdc,xLeft,yTop,cxWidth,cyWidth,hMemDC,0,0,bmp.bmWidth,bmp.bmHeight,SRCAND);
+    SelectObject(hMemDC,ii.hbmColor);
+    StretchBlt(hdc,xLeft,yTop,cxWidth,cyWidth,hMemDC,0,0,bmp.bmWidth,bmp.bmHeight,SRCPAINT);
+    SelectObject(hMemDC,ii.hbmMask);
+    StretchBlt(hdc,xLeft,yTop,cxWidth,cyWidth,hMemDC,0,bmp.bmHeight,bmp.bmWidth,bmp.bmHeight,SRCINVERT);
+    SelectObject(hMemDC,oldBmp);
+    DeleteObject(hMemDC);
+    SetTextColor(hdc,oldFg);
+    SetBkColor(hdc,oldBg);
+    SetStretchBltMode(hdc,oldStretchMode);
+  }
+
+  return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1788,7 +1904,7 @@ BOOL WIN32API DrawMenuBar(HWND hwnd)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("DrawMenuBar, window %x not found", hwnd));
-	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("DrawMenuBar\n"));
