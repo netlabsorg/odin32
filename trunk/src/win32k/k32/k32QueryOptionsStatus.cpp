@@ -1,4 +1,4 @@
-/* $Id: k32QueryOptionsStatus.cpp,v 1.6 2001-02-10 11:11:44 bird Exp $
+/* $Id: k32QueryOptionsStatus.cpp,v 1.7 2001-02-11 23:43:00 bird Exp $
  *
  * k32QueryOptionsStatus  - Queries the options and/or the status of
  *                          Win32k.sys driver.
@@ -136,6 +136,9 @@ APIRET k32QueryOptionsStatus(PK32OPTIONS pOptions, PK32STATUS pStatus)
         TmpOptions.fJava        = options.fJava;
         TmpOptions.fNoLoader    = options.fNoLoader;
         TmpOptions.fDllFixes    = options.fDllFixes;
+        TmpOptions.fExeFixes    = options.fExeFixes;
+        TmpOptions.fForcePreload= options.fForcePreload;
+        TmpOptions.fApiEnh      = options.fApiEnh;
         TmpOptions.cbSwpHeapMax = options.cbSwpHeapMax;
         TmpOptions.cbResHeapMax = options.cbResHeapMax;
 

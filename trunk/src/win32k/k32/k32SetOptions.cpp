@@ -1,4 +1,4 @@
-/* $Id: k32SetOptions.cpp,v 1.6 2001-02-10 11:11:44 bird Exp $
+/* $Id: k32SetOptions.cpp,v 1.7 2001-02-11 23:43:00 bird Exp $
  *
  * k32SetOptions - Sets the changable options of win32k.sys the options.
  *
@@ -129,6 +129,12 @@ APIRET k32SetOptions(PK32OPTIONS pOptions)
             return ERROR_INVALID_PARAMETER;
         if (TmpOptions.fDllFixes > 1)
             return ERROR_INVALID_PARAMETER;
+        if (TmpOptions.fExeFixes > 1)
+            return ERROR_INVALID_PARAMETER;
+        if (TmpOptions.fForcePreload > 1)
+            return ERROR_INVALID_PARAMETER;
+        if (TmpOptions.fApiEnh > 1)
+            return ERROR_INVALID_PARAMETER;
         if (TmpOptions.cbSwpHeapMax > (32768*1024) || TmpOptions.cbSwpHeapMax < options.cbSwpHeapInit)
             return ERROR_INVALID_PARAMETER;
         if (TmpOptions.cbResHeapMax > (32768*1024) || TmpOptions.cbResHeapMax < options.cbResHeapInit)
@@ -159,6 +165,9 @@ APIRET k32SetOptions(PK32OPTIONS pOptions)
         options.fJava       = TmpOptions.fJava;         /* Java flags. */
         options.fNoLoader   = TmpOptions.fNoLoader;     /* No loader stuff. !FIXME! We should import / functions even if this flag is set!!! */
         options.fDllFixes   = TmpOptions.fDllFixes;     /* Enables the long DLL name and non .DLL extention fixes. */
+        options.fExeFixes   = TmpOptions.fExeFixes;     /* Enables EXE files to export entry points. */
+        options.fForcePreload=TmpOptions.fForcePreload; /* Forces the loader to preload executable images. Handy for ICAT Ring-3 debugging. */
+        options.fApiEnh     = TmpOptions.fApiEnh;       /* Enables the API enhancements */
 
         options.cbSwpHeapMax = TmpOptions.cbSwpHeapMax; /* Maximum heapsize. */
         cbSwpHeapMax = (unsigned)options.cbSwpHeapMax;
@@ -169,7 +178,6 @@ APIRET k32SetOptions(PK32OPTIONS pOptions)
          * Release loader semaphore and return
          */
         LDRClearSem();
-
     }
 
     return rc;
