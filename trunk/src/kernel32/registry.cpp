@@ -1,4 +1,4 @@
-/* $Id: registry.cpp,v 1.19 2002-12-10 18:52:16 sandervl Exp $ */
+/* $Id: registry.cpp,v 1.20 2003-01-08 14:25:40 sandervl Exp $ */
 
 /*
  * Win32 registry API functions for OS/2
@@ -852,7 +852,7 @@ LONG WIN32API RegQueryValueW(HKEY    hkey,
   }
 
   if((rc == ERROR_SUCCESS || rc == ERROR_MORE_DATA) && 
-     lpszValue == NULL && pcbValue) 
+     pcbValue) 
   {
       *pcbValue = *pcbValue * sizeof(WCHAR); //size in bytes!!
   }
@@ -986,7 +986,7 @@ LONG WIN32API RegQueryValueExW(HKEY   hkey,
   }
 
   if((rc == ERROR_SUCCESS || rc == ERROR_MORE_DATA) && 
-     lpbData == NULL && lpcbData) 
+     lpcbData) 
   {
       switch(*lpdwType) {
       case REG_SZ:
