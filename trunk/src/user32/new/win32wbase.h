@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.17 2000-01-05 21:25:08 cbratschi Exp $ */
+/* $Id: win32wbase.h,v 1.18 2000-01-07 17:38:48 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -362,7 +362,6 @@ private:
         VOID  TrackMinMaxBox(WORD wParam);
         VOID  TrackCloseButton(WORD wParam);
         LONG  HandleNCLButtonDown(WPARAM wParam,LPARAM lParam);
-        LONG  HandleNCLButtonUp(WPARAM wParam,LPARAM lParam);
         LONG  HandleNCLButtonDblClk(WPARAM wParam,LPARAM lParam);
         BOOL  WindowNeedsWMBorder();
         VOID  AdjustRectOuter(LPRECT rect,BOOL menu);

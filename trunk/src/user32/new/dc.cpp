@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.9 2000-01-04 19:51:32 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.10 2000-01-07 17:38:46 cbratschi Exp $ */
 
 /*
  * DC functions for USER32
@@ -583,6 +583,29 @@ BOOL WIN32API GetUpdateRect (HWND hwnd, LPRECT pRect, BOOL erase)
       if (pRect)
          pRect->left = pRect->top = pRect->right = pRect->bottom = 0;
    }
+
+   return updateRegionExists;
+}
+
+//functions for WM_NCPAINT
+
+INT SYSTEM GetOS2UpdateRgn(HWND hwnd,HRGN hrgn)
+{
+  return O32_GetUpdateRgn(hwnd,hrgn,FALSE);
+}
+
+BOOL SYSTEM GetOS2UpdateRect(HWND hwnd,LPRECT pRect)
+{
+   RECTL rectl;
+   BOOL updateRegionExists = WinQueryUpdateRect(hwnd,pRect ? &rectl:NULL);
+
+   if (!pRect)
+     return (updateRegionExists);
+
+   if (updateRegionExists)
+     mapOS2ToWin32Rect(hwnd,(PRECTLOS2)&rectl,pRect);
+   else
+     pRect->left = pRect->top = pRect->right = pRect->bottom = 0;
 
    return updateRegionExists;
 }
@@ -1450,7 +1473,7 @@ int WIN32API GetWindowRgn(HWND hwnd, HRGN hRgn)
  *             operating system permits drawing. The operating system does not
  *             display any portion of a window that lies outside of the window region
  *             When this function is called, the system sends the WM_WINDOWPOSCHANGING and
- *             WM_WINDOWPOSCHANGED messages to the window. 
+ *             WM_WINDOWPOSCHANGED messages to the window.
  *
  * Parameters: HWND  hWnd    handle to window whose window region is to be set
  *             HRGN  hRgn    handle to region
@@ -1479,15 +1502,15 @@ int WIN32API SetWindowRgn(HWND hwnd,
     }
     dprintf(("USER32:SetWindowRgn (%x,%x,%d)", hwnd, hRgn, bRedraw));
     if(window->GetWindowRegion()) {
-	O32_DeleteObject(window->GetWindowRegion());
+        O32_DeleteObject(window->GetWindowRegion());
     }
     window->SetWindowRegion(hRgn);
     if(bRedraw) {
-	RedrawWindow(hwnd, 0, 0, RDW_UPDATENOW_W);	
+        RedrawWindow(hwnd, 0, 0, RDW_UPDATENOW_W);
     }
 //TODO:
 //  When this function is called, the system sends the WM_WINDOWPOSCHANGING and
-//  WM_WINDOWPOSCHANGED messages to the window. 
+//  WM_WINDOWPOSCHANGED messages to the window.
     return 1;
 }
 //******************************************************************************
