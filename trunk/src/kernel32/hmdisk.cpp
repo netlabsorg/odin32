@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.4 2000-11-14 14:27:02 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.5 2001-03-29 17:39:51 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -64,52 +64,66 @@ BOOL HMDeviceDiskClass::FindDevice(LPCSTR lpClassDevName, LPCSTR lpDeviceName, i
 //******************************************************************************
 //TODO: PHYSICALDRIVEn!!
 //******************************************************************************
-DWORD HMDeviceDiskClass::CreateFile (LPCSTR lpFileName,
-                          PHMHANDLEDATA pHMHandleData,
-                          PVOID         lpSecurityAttributes,
-                          PHMHANDLEDATA pHMHandleDataTemplate)
+DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
+                                     PHMHANDLEDATA pHMHandleData,
+                                     PVOID         lpSecurityAttributes,
+                                     PHMHANDLEDATA pHMHandleDataTemplate)
 {
-  HFILE hFile;
-  HFILE hTemplate;
+    HFILE hFile;
+    HFILE hTemplate;
 
-  dprintf2(("KERNEL32: HMDeviceDiskClass::CreateFile %s(%s,%08x,%08x,%08x)\n",
-           lpHMDeviceName,
-           lpFileName,
-           pHMHandleData,
-           lpSecurityAttributes,
-           pHMHandleDataTemplate));
+    dprintf2(("KERNEL32: HMDeviceDiskClass::CreateFile %s(%s,%08x,%08x,%08x)\n",
+             lpHMDeviceName,
+             lpFileName,
+             pHMHandleData,
+             lpSecurityAttributes,
+             pHMHandleDataTemplate));
 
-  if(strncmp(lpFileName,       // "support" for local unc names
+    //TODO: check in NT if CREATE_ALWAYS is allowed!!
+    if(pHMHandleData->dwCreation != OPEN_EXISTING) {
+        dprintf(("Invalid creation flags %x!!", pHMHandleData->dwCreation));
+        return ERROR_INVALID_PARAMETER;
+    }
+    if(strncmp(lpFileName,       // "support" for local unc names
              "\\\\.\\",
              4) == 0)
-  {
+    {
         lpFileName+=4;
-  }
+    }
 
-  hFile = OSLibDosCreateFile((LPSTR)lpFileName,
-                             pHMHandleData->dwAccess,
-                             pHMHandleData->dwShare,
-                             (LPSECURITY_ATTRIBUTES)lpSecurityAttributes,
-                             pHMHandleData->dwCreation,
-                             pHMHandleData->dwFlags,
-                             hTemplate);
+    //Disable error popus. NT allows an app to open a cdrom/dvd drive without a disk inside
+    //OS/2 fails in that case with error ERROR_NOT_READY
+    OSLibDosDisableHardError(TRUE);
+    hFile = OSLibDosCreateFile((LPSTR)lpFileName,
+                               pHMHandleData->dwAccess,
+                               pHMHandleData->dwShare,
+                               (LPSECURITY_ATTRIBUTES)lpSecurityAttributes,
+                               pHMHandleData->dwCreation,
+                               pHMHandleData->dwFlags,
+                               hTemplate);
+    OSLibDosDisableHardError(FALSE);
 
-  if (hFile != INVALID_HANDLE_ERROR)
-  {
+    if (hFile != INVALID_HANDLE_ERROR || GetLastError() == ERROR_NOT_READY)
+    {
+        if(hFile == INVALID_HANDLE_ERROR) SetLastError(NO_ERROR);
+
         pHMHandleData->hHMHandle  = hFile;
-    pHMHandleData->dwUserData = GetDriveTypeA(lpFileName);
+        pHMHandleData->dwUserData = GetDriveTypeA(lpFileName);
         return (NO_ERROR);
-  }
-  else {
-    dprintf(("CreateFile failed; error %d", GetLastError()));
+    }
+    else {
+        dprintf(("CreateFile failed; error %d", GetLastError()));
         return(GetLastError());
-  }
+    }
 }
 //******************************************************************************
 //******************************************************************************
 DWORD HMDeviceDiskClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
 {
-  return OSLibDosClose(pHMHandleData->hHMHandle);
+    if(pHMHandleData->hHMHandle) {
+        return OSLibDosClose(pHMHandleData->hHMHandle);
+    }
+    return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
@@ -118,8 +132,8 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
                              LPVOID lpOutBuffer, DWORD nOutBufferSize,
                              LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped)
 {
-   switch(dwIoControlCode)
-   {
+    switch(dwIoControlCode)
+    {
     case FSCTL_DELETE_REPARSE_POINT:
     case FSCTL_DISMOUNT_VOLUME:
     case FSCTL_GET_COMPRESSION:
@@ -160,17 +174,17 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
         break;
 
     case IOCTL_SCSI_GET_ADDRESS:
-        {
-         HINSTANCE hInstAspi;
-     DWORD (WIN32API *GetASPI32SupportInfo)();
-         DWORD (CDECL *SendASPI32Command)(LPSRB lpSRB);
-         DWORD numAdapters, rc;
-         SRB   srb;
-         int   i, j, k;
+    {
+        HINSTANCE hInstAspi;
+        DWORD (WIN32API *GetASPI32SupportInfo)();
+        DWORD (CDECL *SendASPI32Command)(LPSRB lpSRB);
+        DWORD numAdapters, rc;
+        SRB   srb;
+        int   i, j, k;
 
-            if(!lpOutBuffer || nOutBufferSize < 8) {
+        if(!lpOutBuffer || nOutBufferSize < 8) {
             SetLastError(ERROR_INSUFFICIENT_BUFFER);  //todo: right error?
-                    return(FALSE);
+            return(FALSE);
         }
         SCSI_ADDRESS *addr = (SCSI_ADDRESS *)lpOutBuffer;
         addr->Length = sizeof(SCSI_ADDRESS);
@@ -222,7 +236,7 @@ failure:
         FreeLibrary(hInstAspi);
         SetLastError(ERROR_INVALID_PARAMETER); //todo
         return FALSE;
-        }
+    }
 
     case IOCTL_SCSI_RESCAN_BUS:
     case IOCTL_SCSI_GET_DUMP_POINTERS:
@@ -230,10 +244,10 @@ failure:
     case IOCTL_IDE_PASS_THROUGH:
         break;
 
-   }
-   dprintf(("HMDeviceDiskClass::DeviceIoControl: unimplemented dwIoControlCode=%08lx\n", dwIoControlCode));
-   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-   return FALSE;
+    }
+    dprintf(("HMDeviceDiskClass::DeviceIoControl: unimplemented dwIoControlCode=%08lx\n", dwIoControlCode));
+    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+    return FALSE;
 }
 //******************************************************************************
 //******************************************************************************
