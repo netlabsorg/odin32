@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1949 2002-01-18 16:23:05 sandervl Exp $ */
+/* $Id: changelog,v 1.1950 2002-01-20 15:25:56 sandervl Exp $ */
+
+ 2002-01-20: Vitali Pelenyov <sunlover@anduin.net>
+    - USER32:   o Fix for position of fake window (CreateFakeWindowEx)
 
  2002-01-18: Vitali Pelenyov <sunlover@anduin.net>
     - KERNEL32: o GetDriveType fix for detection cdrom drives under certain
