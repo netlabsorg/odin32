@@ -1,4 +1,4 @@
-# $Id: pdwin32.tools,v 1.6 2000-02-26 13:27:51 bird Exp $
+# $Id: pdwin32.tools,v 1.7 2000-02-26 18:29:37 bird Exp $
 # ODIN / win32os2 Project
 #
 # makefile for the build system tools and standard rules
@@ -18,14 +18,15 @@ ECHO        = echo
 IMPDEF      = $(PDWIN32_TOOLS)\impdef.exe
 DEPEND      = $(PDWIN32_TOOLS)\fastdep.exe
 DOWITHDIRS  = $(PDWIN32_TOOLS)\dowithdirs.cmd
+MAKE_CMD    = nmake /nologo
 !ifdef DEBUG
-!ifdef NODEBUGINFO
-MAKE_CMD=nmake /nologo DEBUG=1 NODEBUGINFO=1
-!else
-MAKE_CMD=nmake /nologo DEBUG=1
+MAKE_CMD    = $(MAKE_CMD) DEBUG=1
 !endif
-!else
-MAKE_CMD=nmake /nologo
+!ifdef NODEBUGINFO
+MAKE_CMD    = $(MAKE_CMD) NODEBUGINFO=1
+!endif
+!ifdef NODEP
+MAKE_CMD    = $(MAKE_CMD) NODEP=1
 !endif
 
 
