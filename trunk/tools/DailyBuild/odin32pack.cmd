@@ -1,4 +1,4 @@
-/* $Id: odin32pack.cmd,v 1.6 2000-12-03 07:24:37 bird Exp $
+/* $Id: odin32pack.cmd,v 1.7 2001-01-08 19:54:22 bird Exp $
  *
  * Make the two zip files.
  *
@@ -112,12 +112,14 @@ ChDir: procedure expose sStartDir;
  * On error we will call failure.
  */
 Copy: procedure expose sStartDir
-    parse arg sSrc, sDst
+    parse arg sSrc, sDst, fNotFatal
 
     /* if no sDst set default */
     if (sDst = '') then sDst='.';
+    if (fNotFatal = '') then fNotFatal = 0;
+
     'copy' sSrc sDst
-    if (rc <> 0) then
+    if (rc <> 0 & \fNotFatal) then
     do
         call failure rc, 'Copying' sSrc 'to' sDst 'failed.'
         return rc;
