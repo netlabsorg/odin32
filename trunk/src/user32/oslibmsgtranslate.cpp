@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.62 2001-10-23 04:25:39 phaller Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.63 2001-10-23 06:00:45 phaller Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -100,7 +100,8 @@ USHORT pmscan2winkey [][2] = {
     0xBF, 0x35,     // 0x35 /
     0x10, 0x36,     // 0x36 RShift
     0x6A, 0x37,     // 0x37 * Pad
-    0x12, 0x38,     // 0x38 LAlt
+//  0x12, 0x38,     // 0x38 LAlt
+    VK_LMENU_W, 0x38,     // 0x38 LAlt
     0x20, 0x39,     // 0x39 Space
     0x14, 0x3A,     // 0x3A CapsLk
     0x70, 0x3B,     // 0x3B F1
@@ -119,7 +120,7 @@ USHORT pmscan2winkey [][2] = {
     0x26, 0x48,     // 0x48 8 Pad
     0x21, 0x49,     // 0x49 9 Pad
     0x6D, 0x4A,     // 0x4A - Pad
-    0x25, 0x4B,     // 0x4B 4 Pad
+    VK_LEFT_W, 0x4B,  // 0x4B Left Arrow (depends on NumLock State)
     0x0C, 0x4C,     // 0x4C 5 Pad
     0x27, 0x4D,     // 0x4D 6 Pad
     0x6B, 0x4E,     // 0x4E + Pad
@@ -602,9 +603,34 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
     }
       
     case WM_CHAR_SPECIAL:
+      {
         // @@@PH
         // special char message from the keyboard hook
         dprintf(("PM: WM_CHAR_SPECIAL\n"));
+        
+        // AltGr is a very, very strange key!
+        UCHAR ucPMScanCode = CHAR4FROMMP(os2Msg->mp1);
+        if (PMSCAN_ALTRIGHT == ucPMScanCode)
+        {
+          ULONG flags = SHORT1FROMMP(os2Msg->mp1);
+          
+          // we need very special treatment here for the
+          // poor, crippled AltGr key
+          
+          if (flags & KC_KEYUP)
+          {
+            // key up
+            // 1 - generate a virtual LCONTROL-keypress
+            // 2 - send LMENU-keypress (NT emulates ALtGr w/ Ctrl-Alt!)
+          }
+          else
+          {
+            // key down:
+            // 1 - generate a virtual LCONTROL-keypress
+            // 2 - send LMENU-keypress (NT emulates ALtGr w/ Ctrl-Alt!)
+          }
+        }
+      }
         // NO BREAK! FALLTHRU CASE!
       
     case WM_CHAR:
@@ -619,7 +645,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         scanCode = CHAR4FROMMP(os2Msg->mp1);
         keyWasPressed = ((SHORT1FROMMP (os2Msg->mp1) & KC_PREVDOWN) == KC_PREVDOWN);
 
-        dprintf(("PM: WM_CHAR: %x %x %d %x", SHORT1FROMMP(os2Msg->mp2), SHORT2FROMMP(os2Msg->mp2), repeatCount, scanCode));
+        dprintf(("PM: WM_CHAR: %x %x rep=%d scancode=%x", SHORT1FROMMP(os2Msg->mp2), SHORT2FROMMP(os2Msg->mp2), repeatCount, scanCode));
         dprintf(("PM: WM_CHAR: hwnd %x flags %x mp1 %x, mp2 %x", win32wnd->getWindowHandle(), flags, os2Msg->mp1, os2Msg->mp2));
 
         // vitali add begin
@@ -679,47 +705,66 @@ VirtualKeyFound:
 
         if (!(flags & KC_ALT))
         {
-            //
-            // the Alt key is not pressed
-            //
-            if ((flags & KC_KEYUP) == KC_KEYUP) {
-                // send WM_KEYUP message
-
-                winMsg->message = WINWM_KEYUP;
-                winMsg->lParam |= 1 << 30;                              // bit 30, previous state, always 1 for a WM_KEYUP message
-                winMsg->lParam |= 1 << 31;                              // bit 31, transition state, always 1 for WM_KEYUP
+          //
+          // the Alt key is not pressed
+          // or no more pressed
+          //
+          if (flags & KC_KEYUP)
+          {
+            // check for a lonesome ALT key ...
+            if ( (flags & KC_LONEKEY) &&
+                (winMsg->wParam == VK_LMENU_W) )
+            {
+              winMsg->message = WINWM_SYSKEYUP;
+              
+              // held ALT-key when current key is released
+              // generates additional flag 0x2000000
+              // Note: PM seems to do this differently, 
+              // KC_ALT is already reset
             }
-            else {
-                // send WM_KEYDOWN message
-                winMsg->message = WINWM_KEYDOWN;
-                if (keyWasPressed)
-                    winMsg->lParam |= 1 << 30;                          // bit 30, previous state, 1 means key was pressed
+            else
+            {
+              // send WM_KEYUP message
+              winMsg->message = WINWM_KEYUP;
             }
+            
+            winMsg->lParam |= 1 << 30;                              // bit 30, previous state, always 1 for a WM_KEYUP message
+            winMsg->lParam |= 1 << 31;                              // bit 31, transition state, always 1 for WM_KEYUP
+          }
+          else 
+          {
+            // send WM_KEYDOWN message
+            winMsg->message = WINWM_KEYDOWN;
+            if (keyWasPressed)
+              winMsg->lParam |= 1 << 30;                          // bit 30, previous state, 1 means key was pressed
+          }
         }
-        else {
-            //
-            // the Alt key is pressed
-            //
-            if ((flags & KC_KEYUP) == KC_KEYUP) {
-                // send WM_SYSKEYUP message
+        else 
+        {
+          //
+          // the Alt key is pressed
+          //
+          if (flags & KC_KEYUP)
+          {
+            // send WM_SYSKEYUP message
+            winMsg->message = WINWM_SYSKEYUP;
+            winMsg->lParam |= 1 << 30;                              // bit 30, previous state, always 1 for a WM_KEYUP message
+            winMsg->lParam |= 1 << 31;                              // bit 31, transition state, always 1 for WM_KEYUP
+          }
+          else 
+          {
+            // send WM_SYSKEYDOWN message
+            winMsg->message = WINWM_SYSKEYDOWN;
+            if (keyWasPressed)
+              winMsg->lParam |= 1 << 30;                          // bit 30, previous state, 1 means key was pressed
 
-                winMsg->message = WINWM_SYSKEYUP;
-                winMsg->lParam |= 1 << 30;                              // bit 30, previous state, always 1 for a WM_KEYUP message
-                winMsg->lParam |= 1 << 31;                              // bit 31, transition state, always 1 for WM_KEYUP
-            }
-            else {
-                // send WM_SYSKEYDOWN message
-                winMsg->message = WINWM_SYSKEYDOWN;
-                if (keyWasPressed)
-                    winMsg->lParam |= 1 << 30;                          // bit 30, previous state, 1 means key was pressed
-            }
-//NT sends WM_SYSKEYDOWN for single Alt key
-#if 0
-            if(winMsg->wParam == VK_MENU_W) {
-                winMsg->message = 0; //WM_SYS* already implies Alt
-            }
-#endif
+            // pressed ALT-key generates additional flag 0x2000000
+            // if the current window has keyboard focus
+            winMsg->lParam |= 1 << 29;
+          }
         }
+      
+      
         if (ISKDB_CAPTURED())
         {
             if (DInputKeyBoardHandler(winMsg)) {
