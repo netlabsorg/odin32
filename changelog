@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1976 2002-02-13 16:14:25 sandervl Exp $ */
+/* $Id: changelog,v 1.1977 2002-02-14 12:09:28 sandervl Exp $ */
+
+ 2002-02-13: Sander van Leeuwen <sandervl@xs4all.nl>
+    - SHELL32:  o Extended logging added
 
  2002-02-12: Sander van Leeuwen <sandervl@xs4all.nl>
     - SHLWAPI:  o StrFromTimeIntervalA/W takes 4 parameters, not 2
