@@ -1,7 +1,9 @@
-/* $Id: changelog,v 1.1594 2001-07-13 14:29:42 sandervl Exp $ */
+/* $Id: changelog,v 1.1595 2001-07-13 19:35:47 sandervl Exp $ */
 
  2001-07-13: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMDLG32: o Fix for windows 3.1 style file dialog
+    - COMCTL32: o Bad listview pointer checks cause crashes in details
+                  view of file dialogs
     - KERNEL32: o Check for NULL pointer in lstrlenA/W
                   (fixes crash during AutoCAD 14 install)
     - USER32:   o Removed very old check for negative x or y coordinates during
@@ -10,6 +12,8 @@
                    anymore and the MS Word 97 main window looks better now)
                 o RegisterClassA/W: check icon first before copying it 
                   (gets rid of some annoying warnings in the logfile)
+    - GDI32:    o Change BITMAPINFO height if negative
+                  (fixes failing StretchDIBits calls with Matrox display driver)
 
  2001-07-12: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Atom fixes
