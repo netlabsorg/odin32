@@ -1,4 +1,4 @@
-# $Id: makefile.gcc,v 1.5 2000-05-13 17:17:46 bird Exp $
+# $Id: makefile.gcc,v 1.6 2000-05-23 18:23:04 bird Exp $
 
 #
 # PD-Win32 API
@@ -91,7 +91,8 @@ OBJS = \
 $(OBJDIR)\kFilePe.$(O) \
 $(OBJDIR)\kFileDef.$(O) \
 $(OBJDIR)\kFileLx.$(O) \
-$(OBJDIR)\kFileFormatBase.$(O)
+$(OBJDIR)\kFileFormatBase.$(O)\
+$(OBJDIR)\kFile.$(O)
 
 
 #
