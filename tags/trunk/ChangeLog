@@ -1,4 +1,20 @@
- /* $Id: ChangeLog,v 1.752 2000-02-25 18:09:25 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.753 2000-02-26 13:27:49 bird Exp $ */
+
+ 2000-02-27: knut st. osmundsen <knut.stange.osmundse@pmsc.no>
+        - pdwin32.tools: "New" tool, MAKE_CMD. Passes on the DEBUG and
+                    NODEBUGINFO macros variables to the next make job.
+                    (It's better to have it here than to have it in nearly
+                    all makefiles. And we keep forgetting it...)
+
+ 2000-02-26: knut st. osmundsen <knut.stange.osmundse@pmsc.no>
+        - WIN32K: *Symbol Database is implemented. Contains symbols for most
+                   retail kernels. (see win32k.txt or readme.txt)
+                  *No scanning of the os2krnl file, the loaded image is now
+                    scanned to determin which build, debug/retail and smp/uni.
+                  *16-bit logging.
+                  *Extract.exe rule. Extract.exe program generates the
+                   SymDb.c source file found in dev16 from a collections of
+                   kernel symbol files.
 
  2000-02-25: Christoph Bratschi <cbratschi@datacomm.ch>
 	- COMCTL32: added listview unicode support
@@ -29,7 +45,7 @@
                     builds.
                     NOTE: I've fixed similar bugs before. Somebody should verify
                           all comctl32 handlers...
-                     
+
  2000-02-23: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: export 55AA pattern functions for COMCTL32
 		  fixed EN_CHANGED
@@ -40,7 +56,7 @@
 	- WINMM/GDI32/KERNEL32/USER32: Fixed compile problems for release build
 	- USER32: Fixed bug in window class ctor (windowProc not set to 0)
                   (only showed up in release build)
-	- KERNEL32: Fixed bug in commitPage (winimagepeldr.cpp) 
+	- KERNEL32: Fixed bug in commitPage (winimagepeldr.cpp)
                     (only showed up in release build)
                     Fixed wrong calling convention for SetLastError calls
                     in OSLibiGetModuleHandleA
