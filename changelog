@@ -1,15 +1,18 @@
- /* $Id: changelog,v 1.865 2000-04-05 22:25:47 davidr Exp $ */
+ /* $Id: changelog,v 1.866 2000-04-06 12:04:48 sandervl Exp $ */
+
+ 2000-04-06: Sander van Leeuwen <sandervl@xs4all.nl>
+	- WINMM: Fixed message callback once more (previous fix broke rp7)
 
  2000-04-05: David Raison <djr@lemur.co.uk>
         - OLEAUT32: Turned default DEBUG-info down.
 
  2000-04-05: Knut St. Osmundsen <knut.stange.osmundsen@pmsc.no>
         - Win32k: Added fixpack 13 symbols to the symbol database.
-                Using win32k.sys with fp13 works fine here.
+                  Using win32k.sys with fp13 works fine here.
 
  2000-04-05: Sander van Leeuwen <sandervl@xs4all.nl>
 	- WINMM: Smallest waveout buffer size = 128 bytes
-                Fixed callback bugs (reported by Michal Necasek)
+                 Fixed callback bugs (reported by Michal Necasek)
 
  2000-04-03: David Raison <djr@lemur.co.uk>
  	- OLE32: Added CoCreateGUID (calls RPCRT4.UuidCreate)
