@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2000-03-06 23:33:48 bird Exp $
+# $Id: makefile,v 1.13 2000-07-19 19:05:14 sandervl Exp $
 
 #
 # Odin32 API
@@ -76,7 +76,7 @@ nurbs\internals\$(OBJDIR)\internals.lib
 nurbs\nurbtess\$(OBJDIR)\nurbtess.lib
 tess\$(OBJDIR)\tess.lib
 util\$(OBJDIR)\util.lib
-$(PDWIN32_LIB)\ODINCRT.LIB
+$(PDWIN32_LIB)/$(ODINCRT).lib
 $(PDWIN32_LIB)\KERNEL32.LIB
 $(PDWIN32_LIB)\OPENGL32.LIB
 $(RTLLIB_O)

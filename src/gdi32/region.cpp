@@ -1,4 +1,4 @@
-/* $Id: region.cpp,v 1.9 2000-06-16 11:05:22 sandervl Exp $ */
+/* $Id: region.cpp,v 1.10 2000-07-19 19:05:06 sandervl Exp $ */
 
 /*
  * GDI32 region code
@@ -14,7 +14,7 @@
  */
 #define  INCL_GPI
 #define  INCL_WIN
-#include <os2wrap.h>
+#include <os2.h> //no wrappers required here!
 
 #include <win32type.h>
 #include <win32api.h>
@@ -23,6 +23,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <misc.h>
+#include <odinwrap.h>
 #include <objhandle.h>
 #include <dcdata.h>
 #include <winuser32.h>
@@ -293,8 +294,9 @@ BOOL interpretRegionAs(pDCData pHps, HRGN hrgnDest, HRGN hrgnSrc, InterpMode mod
     return success;
 }
 //******************************************************************************
+//exported (used by user32)
 //******************************************************************************
-BOOL setWinDeviceRegionFromPMDeviceRegion(HRGN winHrgn, HRGN pmHrgn, pDCData pHpsPmHrgn, HWND hwndPmHrgn)
+BOOL WIN32API setWinDeviceRegionFromPMDeviceRegion(HRGN winHrgn, HRGN pmHrgn, pDCData pHpsPmHrgn, HWND hwndPmHrgn)
 {
     BOOL    success;
     int     x;
@@ -357,7 +359,7 @@ BOOL setWinDeviceRegionFromPMDeviceRegion(HRGN winHrgn, HRGN pmHrgn, pDCData pHp
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API SelectClipRgn(HDC hdc, HRGN hrgn)
+ODINFUNCTIONNODBG2(int, SelectClipRgn, HDC, hdc, HRGN, hrgn)
 {
  LONG lComplexity = RGN_NULL;
  HRGN hrgnNewClip;
@@ -420,7 +422,7 @@ int WIN32API SelectClipRgn(HDC hdc, HRGN hrgn)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API ExtSelectClipRgn(HDC hdc, HRGN hrgn, int mode)
+ODINFUNCTIONNODBG3(int, ExtSelectClipRgn, HDC, hdc, HRGN, hrgn, int, mode)
 {
    pDCData    pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
    if (!pHps)
@@ -523,7 +525,7 @@ int WIN32API ExtSelectClipRgn(HDC hdc, HRGN hrgn, int mode)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API GetClipBox(HDC hdc, PRECT lpRect)
+ODINFUNCTIONNODBG2(int, GetClipBox, HDC, hdc, PRECT, lpRect)
 {
  pDCData  pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
  RECTL    rectl;
@@ -584,7 +586,7 @@ int WIN32API GetClipBox(HDC hdc, PRECT lpRect)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API GetClipRgn(HDC hdc, HRGN hrgn)
+ODINFUNCTIONNODBG2(int, GetClipRgn, HDC, hdc, HRGN, hrgn)
 {
    pDCData    pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
    BOOL       success;
@@ -627,7 +629,7 @@ int WIN32API GetClipRgn(HDC hdc, HRGN hrgn)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API ExcludeClipRect(HDC hdc, int left, int top, int right, int bottom)
+ODINFUNCTIONNODBG5(int, ExcludeClipRect, HDC, hdc, int, left, int, top, int, right, int, bottom)
 {
     pDCData  pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
     if(!pHps)
@@ -661,7 +663,7 @@ int WIN32API ExcludeClipRect(HDC hdc, int left, int top, int right, int bottom)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API IntersectClipRect(HDC hdc, int left, int top, int right, int bottom)
+ODINFUNCTIONNODBG5(int, IntersectClipRect, HDC, hdc, int, left, int, top, int, right, int, bottom)
 {
     pDCData  pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
     LONG      lComplexity;
@@ -691,7 +693,7 @@ int WIN32API IntersectClipRect(HDC hdc, int left, int top, int right, int bottom
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API OffsetClipRgn(HDC hdc, int nXOffset, int nYOffset )
+ODINFUNCTIONNODBG3(int, OffsetClipRgn, HDC, hdc, int, nXOffset, int, nYOffset )
 {
    BOOL      success;
    pDCData  pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
@@ -714,7 +716,7 @@ int WIN32API OffsetClipRgn(HDC hdc, int nXOffset, int nYOffset )
 }
 //******************************************************************************
 //******************************************************************************
-HRGN WIN32API CreatePolyPolygonRgn(const POINT * lppt, const int *pPolyCount, int nCount, int fnPolyFillMode)
+ODINFUNCTIONNODBG4(HRGN, CreatePolyPolygonRgn, const POINT * , lppt, const int *, pPolyCount, int,  nCount, int, fnPolyFillMode)
 {
  LONG  flMode;
 
@@ -772,7 +774,7 @@ HRGN WIN32API CreatePolyPolygonRgn(const POINT * lppt, const int *pPolyCount, in
 }
 //******************************************************************************
 //******************************************************************************
-HRGN WIN32API CreateRectRgn( int left, int top, int right, int bottom)
+ODINFUNCTIONNODBG4(HRGN, CreateRectRgn, int, left, int, top, int, right, int, bottom)
 {
  HRGN   hrgn;
  RECTL  rectl = { left, top < bottom ? top : bottom, right, top < bottom ? bottom : top };
@@ -794,13 +796,13 @@ HRGN WIN32API CreateRectRgn( int left, int top, int right, int bottom)
 }
 //******************************************************************************
 //******************************************************************************
-HRGN WIN32API CreateRectRgnIndirect(const RECT *lprc)
+ODINFUNCTIONNODBG1(HRGN, CreateRectRgnIndirect, const RECT *, lprc)
 {
    return CreateRectRgn(lprc->left, lprc->top, lprc->right, lprc->bottom);
 }
 //******************************************************************************
 //******************************************************************************
-HRGN WIN32API CreateRoundRectRgn(int left, int top, int right, int bottom, int nWidthEllipse, int nHeightEllipse)
+ODINFUNCTIONNODBG6(HRGN, CreateRoundRectRgn, int, left, int, top, int, right, int, bottom, int, nWidthEllipse, int, nHeightEllipse)
 {
  HRGN   hrgn;
  RECTL  rectl = { left, top < bottom ? top : bottom, right, top < bottom ? bottom : top };
@@ -826,7 +828,7 @@ HRGN WIN32API CreateRoundRectRgn(int left, int top, int right, int bottom, int n
 }
 //******************************************************************************
 //******************************************************************************
-HRGN WIN32API ExtCreateRegion(const XFORM_W *pXform, DWORD count, const RGNDATA *pData)
+ODINFUNCTIONNODBG3(HRGN, ExtCreateRegion, const XFORM_W *, pXform, DWORD, count, const RGNDATA *, pData)
 {
    HRGN hrgn;
 
@@ -935,7 +937,7 @@ HRGN WIN32API ExtCreateRegion(const XFORM_W *pXform, DWORD count, const RGNDATA 
 }
 //******************************************************************************
 //******************************************************************************
-HRGN WIN32API CreateEllipticRgn(int left, int top, int right, int bottom)
+ODINFUNCTIONNODBG4(HRGN, CreateEllipticRgn, int, left, int, top, int, right, int, bottom)
 {
  HRGN hrgn;
 
@@ -956,13 +958,13 @@ HRGN WIN32API CreateEllipticRgn(int left, int top, int right, int bottom)
 }
 //******************************************************************************
 //******************************************************************************
-HRGN WIN32API CreateEllipticRgnIndirect(const RECT *pRect)
+ODINFUNCTIONNODBG1(HRGN, CreateEllipticRgnIndirect, const RECT *, pRect)
 {
-   return CreateEllipticRgn(pRect->left, pRect->top, pRect->right, pRect->bottom);
+   return ODIN_CreateEllipticRgn(pRect->left, pRect->top, pRect->right, pRect->bottom);
 }
 //******************************************************************************
 //******************************************************************************
-HRGN WIN32API CreatePolygonRgn(const POINT *lppt, int cPoints, int fnPolyFillMode)
+ODINFUNCTIONNODBG3(HRGN, CreatePolygonRgn, const POINT *, lppt, int, cPoints, int, fnPolyFillMode)
 {
     HRGN hrgn;
     LONG flMode;
@@ -1006,7 +1008,7 @@ HRGN WIN32API CreatePolygonRgn(const POINT *lppt, int cPoints, int fnPolyFillMod
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API CombineRgn(HRGN hrgnDest, HRGN hrgnSrc1, HRGN hrgnSrc2, int combineMode)
+ODINFUNCTIONNODBG4(int, CombineRgn, HRGN, hrgnDest, HRGN, hrgnSrc1, HRGN, hrgnSrc2, int, combineMode)
 {
     ULONG lComplexity;
     LONG  mode;
@@ -1053,7 +1055,7 @@ int WIN32API CombineRgn(HRGN hrgnDest, HRGN hrgnSrc1, HRGN hrgnSrc2, int combine
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API EqualRgn(HRGN hrgn1, HRGN hrgn2)
+ODINFUNCTIONNODBG2(BOOL, EqualRgn, HRGN, hrgn1, HRGN, hrgn2)
 {
    LONG lEquality;
 
@@ -1080,7 +1082,7 @@ BOOL WIN32API EqualRgn(HRGN hrgn1, HRGN hrgn2)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetRectRgn(HRGN hrgn, int left, int top, int right, int bottom)
+ODINFUNCTIONNODBG5(BOOL, SetRectRgn, HRGN, hrgn, int, left, int, top, int, right, int, bottom)
 {
    BOOL    result = FALSE;
 
@@ -1100,7 +1102,7 @@ BOOL WIN32API SetRectRgn(HRGN hrgn, int left, int top, int right, int bottom)
 }
 //******************************************************************************
 //******************************************************************************
-ULONG WIN32API GetRegionData(HRGN hrgn, ULONG count, PRGNDATA pData)
+ODINFUNCTIONNODBG3(ULONG, GetRegionData, HRGN, hrgn, ULONG, count, PRGNDATA, pData)
 {
     if(!count && pData)
     {
@@ -1161,7 +1163,7 @@ ULONG WIN32API GetRegionData(HRGN hrgn, ULONG count, PRGNDATA pData)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API GetRgnBox(HRGN hrgn, PRECT pRect)
+ODINFUNCTIONNODBG2(int, GetRgnBox, HRGN, hrgn, PRECT, pRect)
 {
    BOOL      success;
    LONG      lComplexity;
@@ -1196,7 +1198,7 @@ int WIN32API GetRgnBox(HRGN hrgn, PRECT pRect)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API InvertRgn(HDC hdc, HRGN hrgn)
+ODINFUNCTIONNODBG2(BOOL, InvertRgn, HDC, hdc, HRGN, hrgn)
 {
     pDCData pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
 
@@ -1244,7 +1246,7 @@ BOOL WIN32API InvertRgn(HDC hdc, HRGN hrgn)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API OffsetRgn(HRGN hrgn, int xOffset, int yOffset)
+ODINFUNCTIONNODBG3(int, OffsetRgn, HRGN, hrgn, int, xOffset, int, yOffset)
 {
    LONG   lComplexity;
 
@@ -1288,7 +1290,7 @@ int WIN32API OffsetRgn(HRGN hrgn, int xOffset, int yOffset)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API FrameRgn(HDC hdc, HRGN hrgn, HBRUSH hBrush, int width, int height)
+ODINFUNCTIONNODBG5(BOOL, FrameRgn, HDC, hdc, HRGN, hrgn, HBRUSH, hBrush, int, width, int, height)
 {
     HBRUSH hbrushRestore = 0;
     pDCData  pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
@@ -1330,7 +1332,7 @@ BOOL WIN32API FrameRgn(HDC hdc, HRGN hrgn, HBRUSH hBrush, int width, int height)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API FillRgn(HDC hdc, HRGN hrgn, HBRUSH hBrush)
+ODINFUNCTIONNODBG3(BOOL, FillRgn, HDC, hdc, HRGN, hrgn, HBRUSH, hBrush)
 {
  BOOL   success;
  HBRUSH hbrushRestore = 0;
@@ -1370,7 +1372,7 @@ BOOL WIN32API FillRgn(HDC hdc, HRGN hrgn, HBRUSH hBrush)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API PaintRgn(HDC hdc, HRGN hrgn)
+ODINFUNCTIONNODBG2(BOOL, PaintRgn, HDC, hdc, HRGN, hrgn)
 {
    pDCData  pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
    if(!pHps)
@@ -1383,7 +1385,7 @@ BOOL WIN32API PaintRgn(HDC hdc, HRGN hrgn)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API PtInRegion( HRGN hrgn, int x, int y)
+ODINFUNCTIONNODBG3(BOOL, PtInRegion, HRGN, hrgn, int, x, int, y)
 {
    BOOL      success;
    LONG      lInside;
@@ -1413,7 +1415,7 @@ BOOL WIN32API PtInRegion( HRGN hrgn, int x, int y)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API RectInRegion(HRGN hrgn, const RECT *pRect)
+ODINFUNCTIONNODBG2(BOOL, RectInRegion, HRGN, hrgn, const RECT *, pRect)
 {
    BOOL      success;
    LONG      lInside;
@@ -1455,7 +1457,7 @@ BOOL WIN32API RectInRegion(HRGN hrgn, const RECT *pRect)
 //******************************************************************************
 //Returned region in device coordinates (undocumented behaviour)
 //******************************************************************************
-HRGN WIN32API PathToRegion(HDC hdc)
+ODINFUNCTIONNODBG1(HRGN, PathToRegion, HDC, hdc)
 {
     pDCData  pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
     if(!pHps)
@@ -1517,8 +1519,7 @@ void OSLibDeleteRegion(HANDLE hRegion)
  * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
  *****************************************************************************/
 
-int WIN32API GetMetaRgn(HDC  hdc,
-                        HRGN hrgn)
+ODINFUNCTIONNODBG2(int, GetMetaRgn, HDC,  hdc, HRGN, hrgn)
 {
   dprintf(("GDI32: GetMetaRgn(%08xh, %08xh) not implemented.\n",
            hdc,
@@ -1542,7 +1543,7 @@ int WIN32API GetMetaRgn(HDC  hdc,
  * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
  *****************************************************************************/
 
-BOOL WIN32API SetMetaRgn(HDC hdc)
+ODINFUNCTIONNODBG1(BOOL, SetMetaRgn, HDC, hdc)
 {
   dprintf(("GDI32: SetMetaRgn(%08xh) not implemented.\n",
            hdc));

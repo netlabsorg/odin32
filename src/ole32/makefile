@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.24 2000-04-02 22:07:34 davidr Exp $
+# $Id: makefile,v 1.25 2000-07-19 19:05:12 sandervl Exp $
 
 #
 # Odin32 API
@@ -92,7 +92,7 @@ $(PDWIN32_LIB)/comctl32.lib
 $(PDWIN32_LIB)/advapi32.lib
 $(PDWIN32_LIB)/kernel32.lib
 $(PDWIN32_LIB)/oleaut32.lib
-$(PDWIN32_LIB)/odincrt.lib
+$(PDWIN32_LIB)/$(ODINCRT).lib
 OS2386.LIB
 $(RTLLIB_O)
 $(ORGTARGET).def
@@ -111,7 +111,7 @@ $(OBJDIR)\regsvr32.exe:   $(OBJDIR)\regsvr32.obj regsvr32.def \
                 $(PDWIN32_LIB)/kernel32.lib \
                 $(PDWIN32_LIB)/ole32.lib
     $(LD) $(LDFLAGS) -Ge+ -Fm -Fe$@ $** \
-        $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
+        $(PDWIN32_LIB)/$(ODINCRT).lib OS2386.LIB $(RTLLIB_O)
 
 $(PDWIN32_BIN)\regsvr32.exe: $(OBJDIR)\regsvr32.exe
     $(CP) $** $@

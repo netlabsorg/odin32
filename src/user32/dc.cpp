@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.67 2000-07-18 18:35:38 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.68 2000-07-19 19:05:24 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -1002,7 +1002,7 @@ LRESULT WIN32API RedrawChildEnumProc(HWND hwnd, LPARAM lParam)
 // RDW_UPDATENOW
 // RDW_FRAME
 //
-//TODO: Work ok for RDW_FRAME??
+//TODO: Works ok for RDW_FRAME??
 //******************************************************************************
 BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw)
 {

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2000-03-06 23:38:49 bird Exp $
+# $Id: makefile,v 1.9 2000-07-19 19:05:11 sandervl Exp $
 
 #
 # Odin32 API
@@ -58,7 +58,7 @@ $(PDWIN32_LIB)/kernel32.lib
 $(PDWIN32_LIB)/user32.lib
 $(PDWIN32_LIB)/gdi32.lib
 $(PDWIN32_LIB)/winmm.lib
-$(PDWIN32_LIB)/odincrt.lib
+$(PDWIN32_LIB)/$(ODINCRT).lib
 OS2386.LIB
 $(RTLLIB_O)
 $(TARGET).def
