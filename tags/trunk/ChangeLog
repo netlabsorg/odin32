@@ -1,8 +1,10 @@
-/* $Id: ChangeLog,v 1.1250 2001-02-11 17:24:53 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1251 2001-02-11 23:47:10 bird Exp $ */
 
  2001-02-11: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Win32k:   o Added symbols for the 14062D kernels.
                 o Added a query API for getting memory information.
+                o Added force preload option - should be very useful when
+                  debugging Ring 3 apps with ICAT. (Option -F)
 
  2001-02-11: Sander van Leeuwen <sandervl@xs4all.nl>
     - ODINCRT:  o Completed runtime dll for VAC 3.6.5
@@ -10,7 +12,7 @@
                 o Compile fixes for VAC 3.6.5
     - RASAPI32: o Can't use LXLITE as it crashes on this binary
     - KERNEL32: o Check for valid pointer in LocalLock and return NULL if invalid
-                  (some apps use LocalLock to get access to GDI objects; doesn't 
+                  (some apps use LocalLock to get access to GDI objects; doesn't
                    work in Odin)
 
  2001-02-10: Sander van Leeuwen <sandervl@xs4all.nl>
