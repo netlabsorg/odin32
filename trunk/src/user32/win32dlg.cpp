@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.56 2001-02-08 18:17:16 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.57 2001-02-18 17:59:05 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -215,11 +215,14 @@ Win32Dialog::~Win32Dialog()
 //******************************************************************************
 ULONG Win32Dialog::MsgCreate(HWND hwndOS2)
 {
- CREATESTRUCTA  *cs = tmpcs;  //pointer to CREATESTRUCT used in CreateWindowExA method
- LPARAM       param = tmpParam;
- LPSTR  dlgTemplate = tmpDlgTemplate;
+ CREATESTRUCTA *cs = tmpcs;  //pointer to CREATESTRUCT used in CreateWindowExA method
+ LPARAM         param = tmpParam;
+ LPSTR          dlgTemplate = tmpDlgTemplate;
 
-    Win32BaseWindow::MsgCreate(hwndOS2);
+    if(Win32BaseWindow::MsgCreate(hwndOS2) == FALSE) {
+        dprintf(("********* DIALOG CREATION FAILED! (main dialog window) ************"));
+        return FALSE;
+    }
 
     if(!isUnicode) {
         if(cs->lpszName) FreeAsciiString((LPSTR)cs->lpszName);

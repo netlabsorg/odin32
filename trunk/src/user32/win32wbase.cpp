@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.236 2001-02-18 14:18:39 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.237 2001-02-18 17:59:05 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -96,6 +96,7 @@ void Win32BaseWindow::Init()
   fParentDC        = FALSE;
   fComingToTop     = FALSE;
   fCreateSetWindowPos = FALSE;
+  fCreationFinished= FALSE;
 
   windowNameA      = NULL;
   windowNameW      = NULL;
@@ -469,6 +470,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         return FALSE;
     }
     OSLibWinSetVisibleRegionNotify(OS2Hwnd, TRUE);
+    fCreationFinished = TRUE;   //creation done with success
     SetLastError(0);
     return TRUE;
 }
@@ -476,8 +478,9 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 //******************************************************************************
 BOOL Win32BaseWindow::MsgCreate(HWND hwndOS2)
 {
- CREATESTRUCTA  *cs = tmpcs;  //pointer to CREATESTRUCT used in CreateWindowExA method
- POINT maxSize, maxPos, minTrack, maxTrack;
+ CREATESTRUCTA *cs = tmpcs;  //pointer to CREATESTRUCT used in CreateWindowExA method
+ POINT          maxSize, maxPos, minTrack, maxTrack;
+ HWND           hwnd = getWindowHandle();
 
     OS2Hwnd      = hwndOS2;
 
@@ -706,17 +709,32 @@ if (!cs->hMenu) cs->hMenu = LoadMenuA(windowClass->getInstance(),"MYAPP");
                                 MAKELONG(rectClient.right-rectClient.left,
                                          rectClient.bottom-rectClient.top));
 
+                if(!::IsWindow(hwnd))
+                {
+                    dprintf(("Createwindow: WM_SIZE destroyed window"));
+                    goto end;
+                }
                 SendInternalMessageA(WM_MOVE,0,MAKELONG(rectClient.left,rectClient.top));
+                if(!::IsWindow(hwnd))
+                {
+                    dprintf(("Createwindow: WM_MOVE destroyed window"));
+                    goto end;
+                }
             }
             if (getStyle() & (WS_MINIMIZE | WS_MAXIMIZE))
             {
-                        RECT newPos;
-                        UINT swFlag = (getStyle() & WS_MINIMIZE) ? SW_MINIMIZE : SW_MAXIMIZE;
+                RECT newPos;
+                UINT swFlag = (getStyle() & WS_MINIMIZE) ? SW_MINIMIZE : SW_MAXIMIZE;
                 setStyle(getStyle() & ~(WS_MAXIMIZE | WS_MINIMIZE));
-                        MinMaximize(swFlag, &newPos);
+                MinMaximize(swFlag, &newPos);
                 swFlag = ((getStyle() & WS_CHILD) || GetActiveWindow()) ? SWP_NOACTIVATE | SWP_NOZORDER | SWP_FRAMECHANGED
                                                                         : SWP_NOZORDER | SWP_FRAMECHANGED;
                 SetWindowPos(0, newPos.left, newPos.top,  newPos.right, newPos.bottom, swFlag);
+                if(!::IsWindow(hwnd))
+                {
+                    dprintf(("Createwindow: min/max destroyed window"));
+                    goto end;
+                }
             }
 
             if( (getStyle() & WS_CHILD) && !(getExStyle() & WS_EX_NOPARENTNOTIFY) )
@@ -726,7 +744,7 @@ if (!cs->hMenu) cs->hMenu = LoadMenuA(windowClass->getInstance(),"MYAPP");
                 {
                     getParent()->SendInternalMessageA(WM_PARENTNOTIFY, MAKEWPARAM(WM_CREATE, getWindowId()), (LPARAM)getWindowHandle());
                 }
-                if(!::IsWindow(getWindowHandle()))
+                if(!::IsWindow(hwnd))
                 {
                     dprintf(("Createwindow: WM_PARENTNOTIFY destroyed window"));
                     goto end;
@@ -795,7 +813,7 @@ ULONG Win32BaseWindow::MsgDestroy()
 
     TIMER_KillTimerFromWindow(OS2Hwnd);
 
-    if(getFirstChild() == NULL) {
+    if(getFirstChild() == NULL && fCreationFinished) {
         delete this;
     }
     else {

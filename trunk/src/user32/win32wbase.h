@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.105 2001-02-17 14:49:26 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.106 2001-02-18 17:59:05 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -357,6 +357,9 @@ protected:
         BOOL    fIsDestroyed;
         BOOL    fDestroyWindowCalled;   //DestroyWindow was called for this window
         BOOL    fCreated;
+        BOOL    fCreationFinished;      //True when window or dialog has been created successfully
+                                        //Needed to prevent DestroyWindow from deleting the window
+                                        //object during construction
         BOOL    fTaskList;              //should be listed in PM tasklist or not
         BOOL    fXDefault;
         BOOL    fCXDefault;

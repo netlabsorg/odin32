@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.87 2001-02-18 17:03:47 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.88 2001-02-18 17:59:04 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -470,18 +470,18 @@ void selectClientArea(Win32BaseWindow *window, pDCData pHps)
 
 //testestest
    GpiQueryViewingLimits(pHps->hps, &rectWindowOS2);
-   dprintf(("view limits (%d,%d)(%d,%d)", rectWindowOS2.xLeft, rectWindowOS2.yBottom, rectWindowOS2.xRight, rectWindowOS2.yTop));
+   dprintf2(("view limits (%d,%d)(%d,%d)", rectWindowOS2.xLeft, rectWindowOS2.yBottom, rectWindowOS2.xRight, rectWindowOS2.yTop));
    GpiQueryDefViewingLimits(pHps->hps, &rectWindowOS2);
-   dprintf(("def view limits (%d,%d)(%d,%d)", rectWindowOS2.xLeft, rectWindowOS2.yBottom, rectWindowOS2.xRight, rectWindowOS2.yTop));
+   dprintf2(("def view limits (%d,%d)(%d,%d)", rectWindowOS2.xLeft, rectWindowOS2.yBottom, rectWindowOS2.xRight, rectWindowOS2.yTop));
    GpiQueryPageViewport(pHps->hps, &rectWindowOS2);
-   dprintf(("page viewport (%d,%d)(%d,%d)", rectWindowOS2.xLeft, rectWindowOS2.yBottom, rectWindowOS2.xRight, rectWindowOS2.yTop));
+   dprintf2(("page viewport (%d,%d)(%d,%d)", rectWindowOS2.xLeft, rectWindowOS2.yBottom, rectWindowOS2.xRight, rectWindowOS2.yTop));
 
    GpiQueryGraphicsField(pHps->hps, &rectWindowOS2);
-   dprintf(("graphics field (%d,%d)(%d,%d)", rectWindowOS2.xLeft, rectWindowOS2.yBottom, rectWindowOS2.xRight, rectWindowOS2.yTop));
+   dprintf2(("graphics field (%d,%d)(%d,%d)", rectWindowOS2.xLeft, rectWindowOS2.yBottom, rectWindowOS2.xRight, rectWindowOS2.yTop));
 
    SIZEL size;
    GpiQueryPickApertureSize(pHps->hps, &size);
-   dprintf(("page viewport (%d,%d)", size.cx, size.cy));
+   dprintf2(("page viewport (%d,%d)", size.cx, size.cy));
 //testestest
 
 }
