@@ -1,7 +1,10 @@
-/* $Id: ChangeLog,v 1.2550 2003-04-11 10:54:45 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2551 2003-04-11 12:08:09 sandervl Exp $ */
 
  2002-04-11: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Send WM_WINDOWPOSCHANGED for ShowWindow(SW_SHOWWINDOW)
+
+ 2003-04-11: Dmitry Froloff <froloff@os2   >
+    - KERNEL32: o Console updates
 
  2003-04-10: Platon Fomichev <stauff@innotek   >
     - MSVCRT  : o MSVCRT updates, forwarders to stdcall functions, lots of funcs
