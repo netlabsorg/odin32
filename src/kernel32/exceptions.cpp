@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.34 2000-02-16 14:25:39 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.35 2000-02-29 00:54:22 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -515,20 +515,12 @@ LPTOP_LEVEL_EXCEPTION_FILTER WIN32API SetUnhandledExceptionFilter(LPTOP_LEVEL_EX
 //******************************************************************************
 extern "C" ULONG getEAX();
 extern "C" ULONG getEBX();
+VOID WIN32API ExitProcess(DWORD exitcode);
 //******************************************************************************
 void KillWin32Process(void)
 {
- char  excptmsg[64];
- ULONG excptaddr, excptnr;
 
-  excptnr   = getEAX();
-  excptaddr = getEBX();
-
-  //Restore original OS/2 TIB selector
-  RestoreOS2FS();
-
-  SetExceptionChain((ULONG)-1);
-  DosExit(EXIT_PROCESS, 666);
+  ExitProcess(666);
 }
 
 
