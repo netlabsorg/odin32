@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2000-07-19 19:05:27 sandervl Exp $
+# $Id: makefile,v 1.11 2000-09-15 13:25:49 sandervl Exp $
 
 #
 # Odin32 API
@@ -26,7 +26,7 @@ OBJS = \
 $(OBJDIR)\aspilib.obj \
 $(OBJDIR)\winaspi32.obj \
 $(OBJDIR)\wnaspi32rsrc.obj \
-$(PDWIN32_LIB)\dllentry.obj
+$(OBJDIR)\initterm.obj
 
 
 # Target name - name of the dll without extention and path.
