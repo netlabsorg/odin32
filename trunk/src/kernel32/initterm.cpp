@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.11 1999-08-21 19:47:29 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.12 1999-08-22 08:33:14 sandervl Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -129,10 +129,11 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 static void APIENTRY cleanup(ULONG ulReason)
 {
     dprintf(("kernel32 exit %d\n", ulReason));
-    CloseLogFile();
     WriteOutProfiles();
-    _ctordtorTerm();
     DestroyTIB();
+    //NOTE: Must be done after DestroyTIB
+    CloseLogFile();
+    _ctordtorTerm();
     DosExitList(EXLST_EXIT, cleanup);
     return ;
 }

@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.7 1999-08-21 19:47:30 sandervl Exp $ */
+/* $Id: misc.cpp,v 1.8 1999-08-22 08:33:14 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -272,11 +272,11 @@ int SYSTEM EXPORT WriteLog(char *tekst, ...)
   return 1;
 }
 
+//NOTE: No need to save/restore FS, as our FS selectors have already been
+//      destroyed and FS == 0x150B.
 void CloseLogFile()
 {
-  USHORT  sel = RestoreOS2FS();
   fclose(flog);
-  SetFS(sel);
 }
 
 
