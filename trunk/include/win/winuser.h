@@ -1,4 +1,4 @@
-/* $Id: winuser.h,v 1.34 2000-02-14 17:27:55 cbratschi Exp $ */
+/* $Id: winuser.h,v 1.35 2000-02-20 18:26:08 cbratschi Exp $ */
 
 #ifndef __INCLUDE_WINUSER_H
 #define __INCLUDE_WINUSER_H
@@ -342,6 +342,10 @@ typedef struct
 #define OBM_OLD_UPARROW     32765
 #define OBM_SIZE            32766
 #define OBM_OLD_CLOSE       32767
+
+//CB: Odin bitmaps -> unknown ID
+#define OBM_HELP            32730 //help button
+#define OBM_HELPD           32729 //pressed help button
 
 #define OCR_BUMMER          100
 #define OCR_DRAGOBJECT      101

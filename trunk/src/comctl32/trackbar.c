@@ -1,4 +1,4 @@
-/* $Id: trackbar.c,v 1.25 2000-02-17 17:26:50 cbratschi Exp $ */
+/* $Id: trackbar.c,v 1.26 2000-02-20 18:29:57 cbratschi Exp $ */
 /*
  * Trackbar control
  *
@@ -1736,7 +1736,7 @@ TRACKBAR_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
       ti.uFlags   = TTF_TRACK | TTF_CENTERTIP | TTF_ABSOLUTE;
       ti.hwnd     = hwnd;
       ti.uId      = 0;
-      ti.lpszText = ""; /* LPSTR_TEXTCALLBACK */
+      ti.lpszText = "";
       SetRectEmpty(&ti.rect);
 
       SendMessageA(infoPtr->hwndToolTip,TTM_ADDTOOLA,0,(LPARAM)&ti);
@@ -1882,7 +1882,7 @@ TRACKBAR_LButtonDown (HWND hwnd, WPARAM wParam, LPARAM lParam)
            ti.cbSize   = sizeof(TTTOOLINFOA);
            ti.uId      = 0;
            ti.hwnd     = (UINT)hwnd;
-           ti.hinst = 0;
+           ti.hinst    = 0;
            sprintf (buf,"%d",infoPtr->nPos);
            ti.lpszText = (LPSTR)buf;
 

@@ -1,4 +1,4 @@
-/* $Id: tooltips.c,v 1.21 2000-02-16 17:22:18 cbratschi Exp $ */
+/* $Id: tooltips.c,v 1.22 2000-02-20 18:29:56 cbratschi Exp $ */
 /*
  * Tool tip control
  *
@@ -243,7 +243,6 @@ TOOLTIPS_CalcTipRect (HWND hwnd,TOOLTIPS_INFO *infoPtr,TTTOOL_INFO *toolPtr,LPRE
                         FALSE,GetWindowLongA(hwnd,GWL_EXSTYLE));
 
     *lpRect = rc;
-
 }
 
 static VOID
