@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2000-04-24 21:38:12 bird Exp $
+# $Id: makefile,v 1.4 2000-05-27 02:15:42 bird Exp $
 #
 # Makefile for debug info convertes - experimental.
 #
@@ -13,15 +13,17 @@ PDWIN32_INCLUDE = ..\..\include
 PDWIN32_LIB     = ..\..\lib
 PDWIN32_BIN     = ..\..\$(OBJDIR)
 PDWIN32_TOOLS   = ..\..\tools\bin
+PDWIN32_TCOMMON = ..\common
 
 
 # Compiler, tools, and interference rules.
 EXETARGET=1
-!include $(PDWIN32_INCLUDE)/pdwin32.mk
+!include $(PDWIN32_INCLUDE)\pdwin32.mk
+!include $(PDWIN32_TCOMMON)\common.mk
 
 
 # Flag overloads and local macros.
-CINCLUDES  = -I..\common
+CINCLUDES  = -I$(PDWIN32_TCOMMON)
 
 CFLAGS     = $(CINCLUDES) $(CFLAGS) -DRING3 \
              -Ge+ -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext- -Gm- -Gn- -Ti+ -Rn -Tm-
@@ -30,16 +32,21 @@ CXXFLAGS   = $(CINCLUDES) $(CXXFLAGS) -DRING3 \
 
 
 # All rule - build objs, target dll, copies dll to bin and makes libs.
-all: Sym2Hll.exe dbgLXDumper.exe
+all: kHll.exe # Sym2Hll.exe dbgLXDumper.exe
 
 
 #
 # Sym2Hll executable rule.
 #
 Sym2Hll:
-Sym2Hll.exe: Sym2Hll.obj kHll.obj ..\common\commonicc.lib
+Sym2Hll.exe: Sym2Hll.obj kHll.obj $(COMMONLIB)
     $(LD2) $(LD2FLAGS) /PMTYPE:vio /EXEC:$@ $** $(RTLLIB) os2386.lib
 
+#
+# New LX debug info dumper.
+#
+kHll.exe: kHll.obj $(COMMONLIB)
+    $(LD2) $(LD2FLAGS) /PMTYPE:vio /EXEC:$@ $** $(RTLLIB) os2386.lib
 
 #
 # LX debug info dumper (HLL only) executable rule.
@@ -68,6 +75,7 @@ dep:
 
 
 # Includes the common rules.
-!include $(PDWIN32_INCLUDE)/pdwin32.post
+!include $(PDWIN32_INCLUDE)\pdwin32.post
+!include $(PDWIN32_TCOMMON)\common.mk.post
 
 

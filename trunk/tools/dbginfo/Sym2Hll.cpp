@@ -1,4 +1,4 @@
-/* $Id: Sym2Hll.cpp,v 1.5 2000-04-24 21:38:11 bird Exp $
+/* $Id: Sym2Hll.cpp,v 1.6 2000-05-27 02:15:41 bird Exp $
  *
  * Sym2Hll - Symbol file to HLL debuginfo converter.
  *
@@ -27,12 +27,14 @@
 #include <string.h>
 #include <assert.h>
 
+#include <kList.h>
+#include <kFile.h>
+#include <kFileFormatBase.h>
+#include <kFileLX.h>
+
 #include "hll.h"
-#include "kList.h"
 #include "kHll.h"
 #include "sym.h"
-#include "kFileFormatBase.h"
-#include "kFileLX.h"
 
 /*******************************************************************************
 *   Internal Functions                                                         *
