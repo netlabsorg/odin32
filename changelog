@@ -1,4 +1,10 @@
- /* $Id: changelog,v 1.1141 2000-09-22 20:51:27 jeroen Exp $ */
+ /* $Id: changelog,v 1.1142 2000-09-25 00:06:41 hugh Exp $ */
+
+ 2000-09-24: Markus Montkowski <mmontkowski@gmx.de>
+    - DPLAYX
+      INCLUDE\win\dplay.h
+      INCLUDE\winpdlobby.h : Synced with latest WINE source,
+                             should fix some DX version checking via COM interfaces (like in AOE)
 
  2000-09-22: Jeroen van den Horn <J.vandenHorn@fibre.a2000.nl>
     - GLU32:    - Changed sorter.cpp to eliminate compiler error
@@ -172,7 +178,7 @@
     - KERNEL32: GetDiskFreeSpaceExA: added support for 64 bits disk size
                 Rewrote GetDiskFreeSpace (no longer uses Open32)
     - USER32:   SetWindowLong GWL_WNDPROC changes/fixes
-		Type of SetWindowLong determines new window proc type
+    Type of SetWindowLong determines new window proc type
                 UNLESS the new window proc has already been registered
                 (use the old type in that case) (VERIFIED in NT 4, SP6)
                 Return original window procedure if types match (SetWindowLongX & proc type)
