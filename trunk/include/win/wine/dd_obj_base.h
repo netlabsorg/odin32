@@ -1,4 +1,4 @@
-/* $Id: dd_obj_base.h,v 1.3 2000-02-04 23:12:19 hugh Exp $ */
+/* $Id: dd_obj_base.h,v 1.4 2001-03-06 21:44:39 mike Exp $ */
 /*
  * This file defines the macros and types necessary to define COM interfaces,
  * and the three most basic COM interfaces: IUnknown, IMalloc and IClassFactory.
@@ -7,6 +7,9 @@
 #ifndef __WINE_DD_OBJ_BASE_H
   #define __WINE_DD_OBJ_BASE_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*****************************************************************************
  * Defines the basic types
@@ -678,6 +681,9 @@ HRESULT WINAPI DllCanUnloadNow(void);
 HRESULT WINAPI WINE_StringFromCLSID(const CLSID *id, LPSTR);
 #endif
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __WINE_WINE_OBJ_BASE_H */
 

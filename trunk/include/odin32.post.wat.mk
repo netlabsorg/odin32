@@ -1,4 +1,4 @@
-# $Id: odin32.post.wat.mk,v 1.10 2001-01-20 18:18:56 bird Exp $
+# $Id: odin32.post.wat.mk,v 1.11 2001-03-06 21:44:39 mike Exp $
 
 #
 # Odin32 API
@@ -357,7 +357,7 @@ $(OBJDIR)\$(TARGET).sym: $(OBJDIR)\$(TARGET).map
 !ifndef LIBTARGET
 !ifndef NOTEXPDEF
 $(OBJDIR)\$(ORGTARGET).lib: $(OBJDIR)\$(ORGTARGET)exp.def
-    $(IMPLIB) $(IMPLIBFLAGS) $[@
+    $(IMPLIB) $(IMPLIBFLAGS) $@ $[@
 !else
 $(OBJDIR)\$(TARGET).lib: $(DEFFILE)
     $(IMPLIB) $(IMPLIBFLAGS) $@ $[@
@@ -381,8 +381,8 @@ $(OBJDIR)\$(ORGTARGET)exp.def: $(DEFFILE)
 #
 $(OBJDIR)\bldlevel.$(DEFFILE): $(DEFFILE)
     $(BLDLEVELINF) $(DEFFILE) $@ -R"$(DEFFILE)" \
-        -V"#define=ODIN32_VERSION,$(ODIN32_INCLUDE)\odinbuild.h" \
-        -M"#define=ODIN32_BUILD_NR,$(ODIN32_INCLUDE)\odinbuild.h"
+        -V"$#define=ODIN32_VERSION,$(ODIN32_INCLUDE)\odinbuild.h" \
+        -M"$#define=ODIN32_BUILD_NR,$(ODIN32_INCLUDE)\odinbuild.h"
 
 
 #
