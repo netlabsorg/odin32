@@ -1184,6 +1184,10 @@ DATETIME_Destroy (HWND hwnd, WPARAM wParam, LPARAM lParam)
 static LRESULT WINAPI
 DATETIME_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+#ifdef __WIN32OS2__
+    SYSTEMTIME *SyTiAr, *SyTiAr2;
+#endif
+
     if (!DATETIME_GetInfoPtr(hwnd) && (uMsg != WM_CREATE))
 	return DefWindowProcA( hwnd, uMsg, wParam, lParam );
     
@@ -1191,12 +1195,24 @@ DATETIME_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     {
 
     case DTM_GETSYSTEMTIME:
+#ifdef __WIN32OS2__
+		return DATETIME_GetSystemTime (hwnd, wParam, lParam);
+#else
 		DATETIME_GetSystemTime (hwnd, wParam, lParam);
+#endif
 
     case DTM_SETSYSTEMTIME:
+#ifdef __WIN32OS2__
+		return DATETIME_SetSystemTime (hwnd, wParam, lParam);
+#else
 		DATETIME_SetSystemTime (hwnd, wParam, lParam);
+#endif
 
     case DTM_GETRANGE:
+#ifdef __WIN32OS2__
+        SyTiAr = (SYSTEMTIME*) lParam;
+        SyTiAr2 = SyTiAr+1;
+#endif
         FIXME("Unimplemented msg DTM_GETRANGE\n");
         return 0;
 
@@ -1300,3 +1316,4 @@ DATETIME_Unregister (void)
     TRACE("\n");
     UnregisterClassA (DATETIMEPICK_CLASSA, (HINSTANCE)NULL);
 }
+
