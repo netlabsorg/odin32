@@ -89,7 +89,7 @@ DEBUGWRAP4(RemoveFontResourceW)
 
 DEBUGWRAP20(IntersectClipRect)
 DEBUGWRAP8(GetRgnBox)
-DEBUGWRAP8(GetRandomRgn)
+DEBUGWRAP12(GetRandomRgn)
 NODEF_DEBUGWRAP8(GetMetaRgn)
 DEBUGWRAP8(GetClipRgn)
 DEBUGWRAP20(FrameRgn)
