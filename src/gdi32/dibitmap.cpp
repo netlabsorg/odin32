@@ -1,4 +1,4 @@
-/* $Id: dibitmap.cpp,v 1.32 2002-07-15 11:19:05 sandervl Exp $ */
+/* $Id: dibitmap.cpp,v 1.33 2002-07-15 11:19:51 sandervl Exp $ */
 
 /*
  * GDI32 dib & bitmap code
@@ -45,7 +45,6 @@ HBITMAP WIN32API CreateDIBitmap(HDC hdc, const BITMAPINFOHEADER *lpbmih,
     }
 
     //TEMPORARY HACK TO PREVENT CRASH IN OPEN32 (WSeB GA)
-
     iHeight = lpbmih->biHeight;
     if(lpbmih->biHeight < 0)
     {
