@@ -1,4 +1,4 @@
-/* $Id: registry.cpp,v 1.21 2003-04-02 12:58:30 sandervl Exp $ */
+/* $Id: registry.cpp,v 1.22 2004-10-08 08:41:13 cinc Exp $ */
 
 /*
  * Win32 registry API functions for OS/2
@@ -711,6 +711,34 @@ LONG WIN32API RegOpenKeyExW(HKEY    arg1,
   return(rc);
 }
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Chris []
+ *****************************************************************************/
+
+LONG WIN32API RegOpenCurrentUser(REGSAM samDesired, PHKEY phkResult)
+{
+  LONG rc;
+
+  rc = O32_RegOpenKeyEx(ConvertKey(HKEY_CURRENT_USER),
+                        NULL,
+                        0,
+                        samDesired,
+                        phkResult);
+  if(rc)
+    *phkResult = 0;
+
+  dprintf(("RegOpenCurrentUser: rc=%d\n", rc));
+
+  return(rc);
+}
 
 /*****************************************************************************
  * Name      :
