@@ -1,4 +1,4 @@
-/* $Id: cpu.cpp,v 1.12 2001-06-27 13:35:45 sandervl Exp $ */
+/* $Id: cpu.cpp,v 1.13 2002-05-22 12:57:16 sandervl Exp $ */
 /*
  * Odin win32 CPU apis
  *
@@ -71,7 +71,6 @@ VOID WINAPI GetSystemInfo(LPSYSTEM_INFO si)	/* [out] system information */
 		SetLastError(ERROR_INVALID_PARAMETER);
 		return;
 	}
-	dprintf(("GetSystemInfo"));
 	if (cache) {
 		memcpy(si,&cachedsi,sizeof(*si));
 		return;
