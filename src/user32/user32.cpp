@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.70 2000-02-09 13:42:38 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.71 2000-02-10 18:49:51 cbratschi Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -2807,5 +2807,13 @@ DWORD WIN32API RegisterTasklist (DWORD x)
 
     return TRUE;
 }
+/***********************************************************************
+ *           SetLogonNotifyWindow   (USER32.486)
+ */
+DWORD WIN32API SetLogonNotifyWindow(HWINSTA hwinsta,HWND hwnd)
+{
+  dprintf(("USER32: SetLogonNotifyWindow - empty stub!"));
 
+  return 1;
+}
 

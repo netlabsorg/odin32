@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.9 2000-02-05 19:45:19 cbratschi Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.10 2000-02-10 18:49:52 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -931,8 +931,7 @@ VOID Win32BaseWindow::DrawCaption(HDC hdc,RECT *rect,BOOL active)
     SetTextColor(memDC,GetSysColor(active ? COLOR_CAPTIONTEXT:COLOR_INACTIVECAPTIONTEXT));
     SetBkMode(memDC, TRANSPARENT );
     r.left += 2;
-    DrawTextA(memDC, buffer, -1, &r,
-             DT_SINGLELINE | DT_VCENTER | DT_NOPREFIX | DT_LEFT );
+    DrawTextExA(memDC,buffer,-1,&r,DT_SINGLELINE | DT_VCENTER | DT_NOPREFIX | DT_LEFT | DT_END_ELLIPSIS,NULL);
     DeleteObject (SelectObject (memDC, hOldFont));
   }
 
