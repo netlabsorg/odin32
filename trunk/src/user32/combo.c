@@ -1251,6 +1251,21 @@ static void CBRollUp( LPHEADCOMBO lphc, BOOL ok, BOOL bButton )
 	   CB_NOTIFY( lphc, CBN_CLOSEUP );
        }
    }
+#ifdef __WIN32OS2__
+   //@PF Of course when we rollup box it is time to sync it with listview.
+   //Obvious Wine bug and even not fixed in latest versions.
+   if( CB_GETTYPE(lphc) == CBS_DROPDOWN )
+   {
+       lphc->droppedIndex = CBUpdateLBox( lphc,TRUE );
+   }
+   else
+   {
+       lphc->droppedIndex = SendMessageA( lphc->hWndLBox, LB_GETCURSEL, 0, 0 );
+
+       if( lphc->droppedIndex == LB_ERR )
+         lphc->droppedIndex = 0;
+   }
+#endif
 }
 
 /***********************************************************************
@@ -1269,6 +1284,23 @@ BOOL COMBO_FlipListbox( LPHEADCOMBO lphc, BOOL ok, BOOL bRedrawButton )
    CBDropDown( lphc );
    return TRUE;
 }
+
+#ifdef __WIN32OS2__
+/***********************************************************************
+ *           COMBO_RollupListbox
+ *
+ * @@PF Odin specific function. 
+ */
+BOOL COMBO_RollupListbox( LPHEADCOMBO lphc)
+{
+   if(lphc->wState & CBF_DROPPED)
+   {
+       CBRollUp( lphc, FALSE, FALSE);
+       return TRUE;
+   }
+   return FALSE;
+}
+#endif
 
 /***********************************************************************
  *           CBRepaintButton

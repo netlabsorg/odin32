@@ -1742,8 +1742,15 @@ static LRESULT LISTBOX_Directory( HWND hwnd, LB_DESCR *descr, UINT attrib,
                 }
                 else  /* not a directory */
                 {
+#ifdef __WIN32OS2__
+//SvL: Must check for FILE_ATTRIBUTE_NORMAL or else files are removed from 
+//     the directory listing in common file dialogs
+#define ATTRIBS (FILE_ATTRIBUTE_READONLY | FILE_ATTRIBUTE_HIDDEN | \
+                 FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_ARCHIVE | FILE_ATTRIBUTE_NORMAL)
+#else
 #define ATTRIBS (FILE_ATTRIBUTE_READONLY | FILE_ATTRIBUTE_HIDDEN | \
                  FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_ARCHIVE)
+#endif
 
                     if ((attrib & DDL_EXCLUSIVE) &&
                         ((attrib & ATTRIBS) != (entry.dwFileAttributes & ATTRIBS)))
@@ -2056,7 +2063,17 @@ static LRESULT LISTBOX_HandleLButtonDownCombo( HWND hwnd, LB_DESCR *pDescr,
         {
             LISTBOX_SetCaretIndex( hwnd, pDescr, pDescr->lphc->droppedIndex, FALSE );
             LISTBOX_SetSelection( hwnd, pDescr, pDescr->lphc->droppedIndex, FALSE, FALSE );
+#ifdef __WIN32OS2__
+            COMBO_RollupListbox(pDescr->lphc);
+ 
+             /* @@PF Previous code is all wrong here. Here we are supposed to close
+                and only close dropdown, instead flip, flips it. This happens because
+                previous code did not pay attention to the fact that combobox can be
+                closed with SendMessage by application, as MFC apps do     
+                COMBO_FlipListbox( pDescr->lphc, FALSE, FALSE ); */
+#else
             COMBO_FlipListbox( pDescr->lphc, FALSE, FALSE );
+#endif
             return 0;
         }
         else
