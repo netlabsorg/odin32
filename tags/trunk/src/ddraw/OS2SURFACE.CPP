@@ -1,4 +1,4 @@
-/* $Id: OS2SURFACE.CPP,v 1.39 2002-02-13 15:23:10 sandervl Exp $ */
+/* $Id: OS2SURFACE.CPP,v 1.40 2002-02-17 20:40:05 sandervl Exp $ */
 
 /*
  * DirectDraw Surface class implementaion
@@ -11,7 +11,11 @@
  *
  */
 
+#define _OS2WIN_H
+#define FAR
+
 #include <odin.h>
+#include <winbase.h>
 #include <stdlib.h>
 #include <string.h>
 #include <memory.h>
@@ -26,8 +30,6 @@
 #include "os2surface.h"
 #include "os2util.h"
 #include "rectangle.h"
-#define _OS2WIN_H
-#define FAR
 #include <misc.h>
 #include "asmutil.h"
 #include "bltFunc.h"

@@ -1,4 +1,4 @@
-/* $Id: ddrawclipper.cpp,v 1.1 2001-05-28 17:17:47 phaller Exp $ */
+/* $Id: ddrawclipper.cpp,v 1.2 2002-02-17 20:40:06 sandervl Exp $ */
 
 /*
  * DXDrawClipper DLL implementaion
@@ -10,7 +10,12 @@
  *
  */
 
+// define the following as we include winnt.h
+#define _OS2WIN_H
+#define FAR
+
 #include <odin.h>
+#include <winbase.h>
 #include <memory.h>
 #include <stdio.h>
 #define INITGUID
@@ -20,9 +25,6 @@
 #include "os2ddraw.h"
 #include "os2clipper.h"
 #include "winerror.h"
-// define the following as we include winnt.h
-#define _OS2WIN_H
-#define FAR
 
 #include <misc.h>
 

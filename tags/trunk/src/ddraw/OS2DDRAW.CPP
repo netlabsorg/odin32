@@ -1,4 +1,4 @@
-/* $Id: OS2DDRAW.CPP,v 1.32 2001-10-05 12:33:09 sandervl Exp $ */
+/* $Id: OS2DDRAW.CPP,v 1.33 2002-02-17 20:40:04 sandervl Exp $ */
 
 /*
  * DX Draw base class implementation
@@ -11,8 +11,11 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+#define _OS2WIN_H
+#define FAR
 
 #include <odin.h>
+#include <winbase.h>
 #include <stdlib.h>
 #include <string.h>
 #include <memory.h>
@@ -22,8 +25,6 @@
 #include "os2clipper.h"
 #include "os2palette.h"
 #include "os2surface.h"
-#define _OS2WIN_H
-#define FAR
 #include <misc.h>
 #include <string.h>
 #include <winreg.h>

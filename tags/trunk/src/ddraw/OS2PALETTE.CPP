@@ -1,4 +1,4 @@
-/* $Id: OS2PALETTE.CPP,v 1.15 2001-10-03 13:49:40 sandervl Exp $ */
+/* $Id: OS2PALETTE.CPP,v 1.16 2002-02-17 20:40:05 sandervl Exp $ */
 
 /*
  * DX palette class implementation
@@ -10,6 +10,11 @@
  *
  */
 
+#define _OS2WIN_H
+#define FAR
+
+#include <odin.h>
+#include <winbase.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -19,8 +24,6 @@
 #include "os2clipper.h"
 #include "os2palette.h"
 #include "os2surface.h"
-#define _OS2WIN_H
-#define FAR
 #include <misc.h>
 #include "os2palset.h"
 #include "os2fsdd.h"
