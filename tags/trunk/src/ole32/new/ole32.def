@@ -1,6 +1,6 @@
 ;Created by BLAST for IBM's compiler
 LIBRARY OLE32OS2 INITINSTANCE
-DESCRIPTION 'OLE for ODIN'
+DESCRIPTION 'Odin32 System DLL - OLE32'
 DATA MULTIPLE NONSHARED
 
 EXPORTS
@@ -11,7 +11,7 @@ EXPORTS
     CoCreateFreeThreadedMarshaler  = _CoCreateFreeThreadedMarshaler@8  @5
     CoCreateGuid               = _CoCreateGuid@4             @6
     CoCreateInstance           = _CoCreateInstance@20        @7
-    CoCreateInstanceEx         = _CoCreateInstanceEx@24	     @9999
+    CoCreateInstanceEx         = _CoCreateInstanceEx@24      @9999
     CoDisconnectObject         = _CoDisconnectObject@8       @8
     CoDosDateTimeToFileTime    = _CoDosDateTimeToFileTime@12 @9
     CoFileTimeNow              = _CoFileTimeNow@4            @10
@@ -169,14 +169,14 @@ EXPORTS
     WriteOleStg                = _WriteOleStg@0              @161
     WriteStringStream          = _WriteStringStream@0        @162
 
-    CoImpersonateClient        = _CoImpersonateClient@0	     @997	; suppress warning
-    CoInitializeSecurity       = _CoInitializeSecurity@36    @998	; suppress warning
-    CoRegisterSurrogate        = _CoRegisterSurrogate@4	     @999	; suppress warning
+    CoImpersonateClient        = _CoImpersonateClient@0      @997   ; suppress warning
+    CoInitializeSecurity       = _CoInitializeSecurity@36    @998   ; suppress warning
+    CoRegisterSurrogate        = _CoRegisterSurrogate@4      @999   ; suppress warning
 
 ;
 ;   Helper Functions
 ;
     WINE_StringFromCLSID       = _WINE_StringFromCLSID@8     @1000
     CLSIDFromStringA           = _CLSIDFromStringA@8         @1001
-    CLSIDFromString16          = _CLSIDFromString16@8        @1002	; COMPOBJ.19
+    CLSIDFromString16          = _CLSIDFromString16@8        @1002  ; COMPOBJ.19
 

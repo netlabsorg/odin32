@@ -1,51 +1,51 @@
-; $Id: msacm32.def,v 1.2 1999-09-18 15:57:10 sandervl Exp $
+; $Id: msacm32.def,v 1.3 2000-12-16 22:53:22 bird Exp $
 
-;Created by BLAST for IBM's compiler
 LIBRARY MSACM32 INITINSTANCE TERMINSTANCE
+DESCRIPTION 'Odin32 System DLL - MSAcm32'
 DATA MULTIPLE NONSHARED
 
 EXPORTS
-    acmDriverAddA		= _acmDriverAddA@20		@1
-    acmDriverAddW		= _acmDriverAddW@20		@2
-    acmDriverClose		= _acmDriverClose@8		@3
-    acmDriverDetailsA		= _acmDriverDetailsA@12		@4
-    acmDriverDetailsW		= _acmDriverDetailsW@12		@5
-    acmDriverEnum		= _acmDriverEnum@12		@6
-    acmDriverID			= _acmDriverID@12		@7
-    acmDriverMessage		= _acmDriverMessage@16		@8
-    acmDriverOpen		= _acmDriverOpen@12		@9
-    acmDriverPriority		= _acmDriverPriority@12		@10
-    acmDriverRemove		= _acmDriverRemove@8		@11
-    acmFilterChooseA		= _acmFilterChooseA@4		@12
-    acmFilterChooseW		= _acmFilterChooseW@4		@13
-    acmFilterDetailsA		= _acmFilterDetailsA@12		@14
-    acmFilterDetailsW		= _acmFilterDetailsW@12		@15
-    acmFilterEnumA		= _acmFilterEnumA@20		@16
-    acmFilterEnumW		= _acmFilterEnumW@20		@17
-    acmFilterTagDetailsA	= _acmFilterTagDetailsA@12	@18
-    acmFilterTagDetailsW	= _acmFilterTagDetailsW@12	@19
-    acmFilterTagEnumA		= _acmFilterTagEnumA@20		@20
-    acmFilterTagEnumW		= _acmFilterTagEnumW@20		@21
-    acmFormatChooseA		= _acmFormatChooseA@4		@22
-    acmFormatChooseW		= _acmFormatChooseW@4		@23
-    acmFormatDetailsA		= _acmFormatDetailsA@12		@24
-    acmFormatDetailsW		= _acmFormatDetailsW@12		@25
-    acmFormatEnumA		= _acmFormatEnumA@20		@26
-    acmFormatEnumW		= _acmFormatEnumW@20		@27
-    acmFormatSuggest		= _acmFormatSuggest@20		@28
-    acmFormatTagDetailsA	= _acmFormatTagDetailsA@12	@29
-    acmFormatTagDetailsW	= _acmFormatTagDetailsW@12	@30
-    acmFormatTagEnumA		= _acmFormatTagEnumA@20		@31
-    acmFormatTagEnumW		= _acmFormatTagEnumW@20		@32
-    acmGetVersion		= _acmGetVersion@0		@33
-;    acmMessage32		= _acmMessage32			@34
-    acmMetrics			= _acmMetrics@12		@35
-    acmStreamClose		= _acmStreamClose@8		@36
-    acmStreamConvert		= _acmStreamConvert@12		@37
-    acmStreamMessage		= _acmStreamMessage@16		@38
-    acmStreamOpen		= _acmStreamOpen@32		@39
-    acmStreamPrepareHeader	= _acmStreamPrepareHeader@12	@40
-    acmStreamReset		= _acmStreamReset@8		@41
-    acmStreamSize		= _acmStreamSize@16		@42
-    acmStreamUnprepareHeader	= _acmStreamUnprepareHeader@12	@43
-;    acmt32c_ThunkData32		= _acmt32c_ThunkData32		@44
+    acmDriverAddA       = _acmDriverAddA@20     @1
+    acmDriverAddW       = _acmDriverAddW@20     @2
+    acmDriverClose      = _acmDriverClose@8     @3
+    acmDriverDetailsA       = _acmDriverDetailsA@12     @4
+    acmDriverDetailsW       = _acmDriverDetailsW@12     @5
+    acmDriverEnum       = _acmDriverEnum@12     @6
+    acmDriverID         = _acmDriverID@12       @7
+    acmDriverMessage        = _acmDriverMessage@16      @8
+    acmDriverOpen       = _acmDriverOpen@12     @9
+    acmDriverPriority       = _acmDriverPriority@12     @10
+    acmDriverRemove     = _acmDriverRemove@8        @11
+    acmFilterChooseA        = _acmFilterChooseA@4       @12
+    acmFilterChooseW        = _acmFilterChooseW@4       @13
+    acmFilterDetailsA       = _acmFilterDetailsA@12     @14
+    acmFilterDetailsW       = _acmFilterDetailsW@12     @15
+    acmFilterEnumA      = _acmFilterEnumA@20        @16
+    acmFilterEnumW      = _acmFilterEnumW@20        @17
+    acmFilterTagDetailsA    = _acmFilterTagDetailsA@12  @18
+    acmFilterTagDetailsW    = _acmFilterTagDetailsW@12  @19
+    acmFilterTagEnumA       = _acmFilterTagEnumA@20     @20
+    acmFilterTagEnumW       = _acmFilterTagEnumW@20     @21
+    acmFormatChooseA        = _acmFormatChooseA@4       @22
+    acmFormatChooseW        = _acmFormatChooseW@4       @23
+    acmFormatDetailsA       = _acmFormatDetailsA@12     @24
+    acmFormatDetailsW       = _acmFormatDetailsW@12     @25
+    acmFormatEnumA      = _acmFormatEnumA@20        @26
+    acmFormatEnumW      = _acmFormatEnumW@20        @27
+    acmFormatSuggest        = _acmFormatSuggest@20      @28
+    acmFormatTagDetailsA    = _acmFormatTagDetailsA@12  @29
+    acmFormatTagDetailsW    = _acmFormatTagDetailsW@12  @30
+    acmFormatTagEnumA       = _acmFormatTagEnumA@20     @31
+    acmFormatTagEnumW       = _acmFormatTagEnumW@20     @32
+    acmGetVersion       = _acmGetVersion@0      @33
+;    acmMessage32       = _acmMessage32         @34
+    acmMetrics          = _acmMetrics@12        @35
+    acmStreamClose      = _acmStreamClose@8     @36
+    acmStreamConvert        = _acmStreamConvert@12      @37
+    acmStreamMessage        = _acmStreamMessage@16      @38
+    acmStreamOpen       = _acmStreamOpen@32     @39
+    acmStreamPrepareHeader  = _acmStreamPrepareHeader@12    @40
+    acmStreamReset      = _acmStreamReset@8     @41
+    acmStreamSize       = _acmStreamSize@16     @42
+    acmStreamUnprepareHeader    = _acmStreamUnprepareHeader@12  @43
+;    acmt32c_ThunkData32        = _acmt32c_ThunkData32      @44

@@ -1,11 +1,12 @@
-; $Id: twain_32.def,v 1.1 2000-01-04 22:19:01 sandervl Exp $
+; $Id: twain_32.def,v 1.2 2000-12-16 22:53:45 bird Exp $
 
 LIBRARY TWAIN_32 INITINSTANCE
+DESCRIPTION 'Odin32 System DLL - TWAIN_32'
 DATA MULTIPLE NONSHARED
 
 EXPORTS
     DSM_Entry                = _DSM_Entry@24               @1
-    ChooseDlgProc	     = _ODIN_ChooseDlgProc	   @3
-    AboutDlgProc	     = _ODIN_AboutDlgProc	   @4
-    WGDlgProc  		     = _ODIN_WGDlgProc		   @5
-    InfoHook		     = _ODIN_InfoHook		   @6
+    ChooseDlgProc        = _ODIN_ChooseDlgProc     @3
+    AboutDlgProc         = _ODIN_AboutDlgProc      @4
+    WGDlgProc            = _ODIN_WGDlgProc         @5
+    InfoHook             = _ODIN_InfoHook          @6

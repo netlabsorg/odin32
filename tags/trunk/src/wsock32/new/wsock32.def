@@ -1,7 +1,10 @@
-; $Id: wsock32.def,v 1.4 2000-03-22 20:01:09 sandervl Exp $
+; $Id: wsock32.def,v 1.5 2000-12-16 22:53:50 bird Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY WSOCK32 INITINSTANCE
+
+DESCRIPTION 'Odin32 System DLL - WSock32'
+
 DATA MULTIPLE NONSHARED
 
 

@@ -1,9 +1,8 @@
-; $Id: mciavi32.def,v 1.1 2000-01-03 10:29:03 sandervl Exp $
-
-;Created by BLAST for IBM's compiler
+; $Id: mciavi32.def,v 1.2 2000-12-16 22:53:47 bird Exp $
 LIBRARY MCIAVI32 INITINSTANCE
+DESCRIPTION 'Odin32 System DLL - MciAvi32'
 DATA MULTIPLE NONSHARED
 
 
 EXPORTS
-    DriverProc		= _MCIAVI_DriverProc@20		@1
+    DriverProc      = _MCIAVI_DriverProc@20     @1

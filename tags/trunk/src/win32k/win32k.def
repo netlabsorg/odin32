@@ -4,7 +4,7 @@
 ; Project Odin Software License can be found in LICENSE.TXT
 ;******************************************************************************
 PHYSICAL DEVICE Grace
-;DESCRIPTION "$@#knut st. osmundsen:v0.5.0alpha#@Grace - Odin32 and OS2NIX Ring-0 part - Copyright (c) 1998-2000 knut st. osmundsen"
+DESCRIPTION "Odin32 Ring-0 support driver - copyright (c) 1998-2000 knut st. osmundsen"
 
 CODE PRELOAD EXECUTEREAD
 DATA PRELOAD

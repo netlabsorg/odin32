@@ -1,10 +1,12 @@
-; $Id: wininet.def,v 1.1 1999-12-28 13:02:57 sandervl Exp $
+; $Id: wininet.def,v 1.2 2000-12-16 22:53:47 bird Exp $
 
 ;
 ; Based on NT 4.0 SP3: WININET.DLL
 ;
 LIBRARY WININET INITINSTANCE
+DESCRIPTION 'Odin32 System DLL - WinINet'
 DATA MULTIPLE NONSHARED
+
 EXPORTS
 
 ;  InternetInitializeAutoProxyDll    = _InternetInitializeAutoProxyDll@          @1
