@@ -1,3 +1,4 @@
+/* $Id: initterm.cpp,v 1.16 2001-09-05 13:46:56 bird Exp $ */
 /*
  * DLL entry point
  *
@@ -63,7 +64,7 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
 
       case 1 :
          inittermShell32(hModule, ulFlag);
- 	 ctordtorTerm();
+     ctordtorTerm();
          break;
       default  :
          return 0UL;

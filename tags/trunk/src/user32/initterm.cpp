@@ -1,3 +1,4 @@
+/* $Id: initterm.cpp,v 1.33 2001-09-05 13:53:50 bird Exp $ */
 /*
  * USER32 DLL entry point
  *
@@ -40,7 +41,7 @@
 #include <exitlist.h>
 #include <initdll.h>
 
-#define DBG_LOCALLOG	DBG_initterm
+#define DBG_LOCALLOG    DBG_initterm
 #include "dbglocal.h"
 
 /*-------------------------------------------------------------------*/
