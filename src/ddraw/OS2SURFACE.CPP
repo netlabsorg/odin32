@@ -276,7 +276,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
   Vtbl.SetColorKey           = SurfSetColorKey;
   Vtbl.SetOverlayPosition    = SurfSetOverlayPosition;
   Vtbl.SetPalette            = SurfSetPalette;
-  Vtbl.Unlock                = SurfUnlock;
+  Vtbl.Unlock                = SurfUnlock4;
   Vtbl.UpdateOverlay         = SurfUpdateOverlay4;
   Vtbl.UpdateOverlayDisplay  = SurfUpdateOverlayDisplay;
   Vtbl.UpdateOverlayZOrder   = SurfUpdateOverlayZOrder4;
@@ -350,33 +350,6 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
     return;
   }
 
-  /*
-  try
-  {
-    SurfaceCursorMipMap = SurfaceSequenceMipMap.newCursor();
-  }
-  catch(IOutOfMemory)
-  {
-    #ifdef DEBUG
-      WriteLog("Internal : Error creating Cursor\n");
-    #endif
-    lastError = DDERR_OUTOFMEMORY ;
-    return;
-  }
-
-  try
-  {
-    SurfaceCursorAttached = SurfaceSequenceAttached.newCursor();
-  }
-  catch(IOutOfMemory)
-  {
-    #ifdef DEBUG
-      WriteLog("Internal : Error creating Cursor\n");
-    #endif
-    lastError = DDERR_OUTOFMEMORY ;
-    return;
-  }
-  */
   if( lpDDSurfaceDesc->dwFlags & DDSD_CAPS )
   {
     // First check if we want to create a primary surface while the ddraw object already has one
@@ -569,6 +542,10 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
           return;
         } //endif Backbuffer
       } // endif DDSCAPS_COMPLEX
+
+      width  = DDSurfaceDesc.dwWidth;
+      height = DDSurfaceDesc.dwHeight;
+
       lastError = DD_OK;
       return;
     } // endif  DDSCAPS_PRIMARYSURFACE
@@ -750,6 +727,9 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
         }  // end of 3rd case
       } // End of alloc surfaces
 
+      width  = DDSurfaceDesc.dwWidth;
+      height = DDSurfaceDesc.dwHeight;
+
       if( dwCaps & DDSCAPS_COMPLEX)
       {
         // remove the flag
@@ -818,7 +798,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
 
             if(MipMapSurface->GetLastError() != DD_OK)
             {
-              lastError = AttachedSurface->GetLastError();
+              lastError = MipMapSurface->GetLastError();
               #ifdef DEBUG
                 WriteLog("Attached surface creation returned error %d\n",lastError);
               #endif
@@ -3598,14 +3578,17 @@ HRESULT __stdcall SurfIsLost(THIS)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfLock(THIS This, LPRECT lpRect, LPDDSURFACEDESC lpSurfaceDesc,
-         DWORD dwFlags, HANDLE hEvent)
+HRESULT __stdcall SurfLock( THIS This,
+                            LPRECT lpRect,
+                            LPDDSURFACEDESC lpSurfaceDesc,
+                            DWORD dwFlags,
+                            HANDLE hEvent)
 {
   DDSURFACEDESC2 SurfaceDesc4;
   HRESULT rc;
 
   #ifdef DEBUG
-    WriteLog("SurfLock %d %d %d %d\n", (int)lpRect, (int)lpSurfaceDesc, dwFlags, hEvent);
+    WriteLog("SurfLock %d %08X %d %d\n", (int)lpRect, (int)lpSurfaceDesc, dwFlags, hEvent);
   #endif
 
   if((NULL==lpSurfaceDesc)||(NULL!=hEvent))
@@ -3626,8 +3609,11 @@ HRESULT __stdcall SurfLock(THIS This, LPRECT lpRect, LPDDSURFACEDESC lpSurfaceDe
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfLock4(THIS This, LPRECT lpRect, LPDDSURFACEDESC2 lpSurfaceDesc,
-         DWORD dwFlags, HANDLE hEvent)
+HRESULT __stdcall SurfLock4( THIS This,
+                             LPRECT lpRect,
+                             LPDDSURFACEDESC2 lpSurfaceDesc,
+                             DWORD dwFlags,
+                             HANDLE hEvent)
 {
 
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
@@ -3640,7 +3626,7 @@ HRESULT __stdcall SurfLock4(THIS This, LPRECT lpRect, LPDDSURFACEDESC2 lpSurface
   static int times = 0;
 
   #ifdef DEBUG
-    WriteLog("SurfLock4 %d %d %d %d\n", (int)lpRect, (int)lpSurfaceDesc, dwFlags, hEvent);
+    WriteLog("SurfLock4 %d %08X %d %d\n", (int)lpRect, (int)lpSurfaceDesc, dwFlags, hEvent);
   #endif
 
   if( (NULL==lpSurfaceDesc) ||
@@ -3654,12 +3640,18 @@ HRESULT __stdcall SurfLock4(THIS This, LPRECT lpRect, LPDDSURFACEDESC2 lpSurface
     pIRectNew = new DDRectangle( 0, 0, me->height, me->width);
 
   // ToDo : the lockchecking should be done in a critcal seq.
+  WriteLog( "Lock Rectangle (%d/%d) x (%d/%d)\n",
+            pIRectNew->Top(),
+            pIRectNew->Left(),
+            pIRectNew->Bottom(),
+            pIRectNew->Right() );
 
   if(me->fLocked)
   {
     if (NULL==lpRect)
     {
       // If anything is locked we can't locke the complete surface
+      WriteLog("Surface has locked Rectangles, and we want to complete lock it");
       Found = TRUE;
     }
     else
@@ -3667,12 +3659,19 @@ HRESULT __stdcall SurfLock4(THIS This, LPRECT lpRect, LPDDSURFACEDESC2 lpSurface
       // If the new Rectangle intersects with any of the already locked rectangles it can't
       // be locked so check for this
 
+      WriteLog("Surface has locked Rectangles, check if the overlap");
+
       i=0;
       Found = FALSE;
 
       while(i<DPA_GetPtrCount(me->DPA_LockedRects) && !Found)
       {
         pIRectCurrent = (DDRectangle*) DPA_FastGetPtr(me->DPA_LockedRects,i);
+        WriteLog( "Test with Rectangle (%d/%d) x (%d/%d)\n",
+                  pIRectCurrent->Top(),
+                  pIRectCurrent->Left(),
+                  pIRectCurrent->Bottom(),
+                  pIRectCurrent->Right() );
         Found = pIRectCurrent->intersects(*pIRectNew);
         i++;
       }
@@ -3697,16 +3696,18 @@ HRESULT __stdcall SurfLock4(THIS This, LPRECT lpRect, LPDDSURFACEDESC2 lpSurface
                                 (lpRect->top * me->dwPitchFB) +
                                 (lpRect->left * (lpSurfaceDesc->ddpfPixelFormat.dwRGBBitCount>>3)));
     #ifdef DEBUG
-      WriteLog("SurfLock4 %d (x,y) = (%d,%d)\n", lpSurfaceDesc->lpSurface, lpRect->top, lpRect->left);
+      WriteLog("SurfLock4 %08X (x,y) = (%d,%d)\n", lpSurfaceDesc->lpSurface, lpRect->top, lpRect->left);
     #endif
   }
   else
   {
     #ifdef DEBUG
-      WriteLog("SurfLock4 %d \n", lpSurfaceDesc->lpSurface);
+      WriteLog("SurfLock4 %08X \n", lpSurfaceDesc->lpSurface);
     #endif
   }
   // Add the rectangle to the list of locked rectangles
+
+  pIRectNew->SetMemPtr(lpSurfaceDesc->lpSurface);
 
   DPA_InsertPtr( me->DPA_LockedRects,
                  DPA_GetPtrCount(me->DPA_LockedRects),
@@ -3954,17 +3955,188 @@ HRESULT __stdcall SurfSetPalette(THIS This, LPDIRECTDRAWPALETTE lpPalette)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfUnlock(THIS This, LPRECT lpSurfaceRect)
+HRESULT __stdcall SurfUnlock(THIS This, LPVOID lpSurfaceData)
 {
+
+  OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
+  int i;
+  DDRectangle *pIRectUnlock, *pIRectEnum;
+  BOOL Found = FALSE;
+  OS2RECTL CCRect;
+
+  #ifdef DEBUG
+    WriteLog("SurfUnlock at %08X\n",lpSurfaceData);
+  #endif
+
+  if(me->fLocked == FALSE)
+  {
+    #ifdef DEBUG
+      WriteLog("Surface not locked!\n");
+    #endif
+    return(DDERR_NOTLOCKED);
+  }
+
+  #ifdef DEBUG
+    WriteLog("Start Emuneration of Locked Rects\n");
+  #endif
+
+  i=0;
+  if(NULL!=lpSurfaceData)
+  {
+    WriteLog("Buffer Pointer Compare");
+
+    // We got a pinter to the surface memory so we must search for
+    // this pointer in the locked rects DPA to unlock the right rect.
+
+    while(i<DPA_GetPtrCount(me->DPA_LockedRects) && !Found)
+    {
+      pIRectEnum = (DDRectangle*)DPA_FastGetPtr(me->DPA_LockedRects,i);
+      WriteLog( "Test with Rectangle %d (%d/%d) x (%d/%d) Mem at %08X\n",
+                i,
+                pIRectEnum->Top(),
+                pIRectEnum->Left(),
+                pIRectEnum->Bottom(),
+                pIRectEnum->Right(),
+                pIRectEnum->GetMemPtr() );
+
+      Found = ( pIRectEnum->GetMemPtr() == lpSurfaceData);
+      if(!Found)
+      {
+        #ifdef DEBUG
+          WriteLog("Not Found, try Next rect\n");
+        #endif
+        i++;
+      }
+      #ifdef DEBUG
+      else
+      {
+        WriteLog("Found Rect\n");
+      }
+      #endif
+    }
+  }
+  else
+  {
+    // If a NULL pointer was passed in the SW tries to unlock the
+    // complete surface so we must compare the rects.
+    WriteLog("Rectangle compare");
+
+    pIRectUnlock = new DDRectangle( 0, 0, me->height, me->width);
+
+    while(i<DPA_GetPtrCount(me->DPA_LockedRects) && !Found)
+    {
+      pIRectEnum = (DDRectangle*)DPA_FastGetPtr(me->DPA_LockedRects,i);
+      WriteLog( "Test with Rectangle %d (%d/%d) x (%d/%d) Mem at %08X\n",
+                i,
+                pIRectEnum->Top(),
+                pIRectEnum->Left(),
+                pIRectEnum->Bottom(),
+                pIRectEnum->Right(),
+                pIRectEnum->GetMemPtr() );
+
+      Found = (*pIRectEnum == *pIRectUnlock);
+      if(!Found)
+      {
+        #ifdef DEBUG
+          WriteLog("Not Found, try Next rect\n");
+        #endif
+        i++;
+      }
+      #ifdef DEBUG
+      else
+      {
+        WriteLog("Found Rect\n");
+      }
+      #endif
+    }
+    delete pIRectUnlock;
+  }
+
+  if(!Found)
+  {
+    #ifdef DEBUG
+      WriteLog("Rectangle not locked, wrong Rect!\n\n");
+    #endif
+    return(DDERR_INVALIDRECT);
+  }
+
+  #ifdef DEBUG
+    WriteLog("Remove Rect %d from Seq.\n",i);
+  #endif
+
+  DPA_DeletePtr(me->DPA_LockedRects,i);
+
+  #ifdef DEBUG
+    WriteLog("Test if locked Rects main\n");
+  #endif
+
+  if(0==DPA_GetPtrCount(me->DPA_LockedRects))  // Do we have unlocked last rectangle
+  {
+    #ifdef DEBUG
+      WriteLog("No Locked Rects left for surface\n");
+    #endif
+    me->fLocked = FALSE;
+  }
+  #ifdef DEBUG
+  else
+    WriteLog( "%d Rects in Seq\n",
+              DPA_GetPtrCount(me->DPA_LockedRects));
+  #endif
+
+  if(me->pFrameBuffer != me->pDiveBuffer)
+  {
+    #ifdef DEBUG
+      WriteLog( "ColorConversion Needed %08X != %08X\n",
+                me->pFrameBuffer,
+                me->pDiveBuffer);
+    #endif
+    if(NULL!=lpSurfaceData)
+    {
+      CCRect.yTop    = pIRectEnum->Top();
+      CCRect.xLeft   = pIRectEnum->Left();
+      CCRect.xRight  = pIRectEnum->Right();
+      CCRect.yBottom = pIRectEnum->Bottom();
+
+      me->ColorConversion( (LPRECT)&CCRect);
+    }
+    else
+    {
+      me->ColorConversion(NULL);
+    }
+  }
+  #ifdef DEBUG
+  else
+    WriteLog( "No ColorConversion Needed");
+  #endif
+
+  // delete tne DDRectobject of the found rectangle
+  delete pIRectEnum;
+
+  me->lpVtbl->ChangeUniquenessValue(me);
+
+  WriteLog("Unlock OK\n\n");
+
+  return(DD_OK);
+}
+//******************************************************************************
+//******************************************************************************
+HRESULT __stdcall SurfUnlock4(THIS This, LPRECT lpSurfaceRect)
+{
+  // MS changed the parameter from LPVOID to LPRECT with DX6
+  // as DX-6 allways returns a DDSurface4 on create surface this
+  // is a problem i not NULL is passed in.
+  // Solution We first test with the pointer ns assuming a rectangle
+  // if we don't find a rect Which is very likely if we get a pointer
+  // SurfaceMemory we call SurfUnlock and test for the pointer there.
 
 
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
   int i;
-  DDRectangle *pIRectUnlock;
+  DDRectangle *pIRectUnlock, *pIRectEnum;
   BOOL Found = FALSE;
 
   #ifdef DEBUG
-    WriteLog("SurfUnlock\n");
+    WriteLog("SurfUnlock4\n");
   #endif
 
   if(me->fLocked == FALSE)
@@ -3989,14 +4161,27 @@ HRESULT __stdcall SurfUnlock(THIS This, LPRECT lpSurfaceRect)
     pIRectUnlock = new DDRectangle( 0, 0, me->height, me->width);
   }
 
+  WriteLog( "Try to Unlock Rectangle (%d/%d) x (%d/%d)\n",
+            pIRectUnlock->Top(),
+            pIRectUnlock->Left(),
+            pIRectUnlock->Bottom(),
+            pIRectUnlock->Right() );
+
   #ifdef DEBUG
-    WriteLog("StartEmuneration of Locked Rects\n");
+    WriteLog("Start Emuneration of Locked Rects\n");
   #endif
 
   i=0;
   while(i<DPA_GetPtrCount(me->DPA_LockedRects) && !Found)
   {
-    Found = (*((DDRectangle*)DPA_FastGetPtr(me->DPA_LockedRects,i)) == *pIRectUnlock);
+    pIRectEnum = (DDRectangle*)DPA_FastGetPtr(me->DPA_LockedRects,i);
+    WriteLog( "Test with Rectangle (%d/%d) x (%d/%d)\n",
+              pIRectEnum->Top(),
+              pIRectEnum->Left(),
+              pIRectEnum->Bottom(),
+              pIRectEnum->Right() );
+
+    Found = (*pIRectEnum == *pIRectUnlock);
     if(!Found)
     {
       #ifdef DEBUG
@@ -4014,10 +4199,16 @@ HRESULT __stdcall SurfUnlock(THIS This, LPRECT lpSurfaceRect)
 
   if(!Found)
   {
-    #ifdef DEBUG
-      WriteLog("Rectangle not locked, wrong Rect!\n\n");
-    #endif
-    return(DDERR_INVALIDRECT);
+
+    if(NULL==lpSurfaceRect)
+    {
+      #ifdef DEBUG
+        WriteLog("Rectangle not locked, wrong Rect!\n\n");
+      #endif
+      return(DDERR_INVALIDRECT);
+    }
+    else
+      return SurfUnlock(This, (LPVOID)lpSurfaceRect);
   }
 
   #ifdef DEBUG
