@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2000-02-05 02:16:24 sandervl Exp $
+# $Id: makefile,v 1.4 2000-02-06 20:52:35 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -9,6 +9,7 @@
 PDWIN32_INCLUDE = ..\..\..\include
 PDWIN32_LIB = ..\..\..\lib
 PDWIN32_BIN = ..\..\..\bin
+PDWIN32_TOOLS = ..\..\..\tools\bin
 
 
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
@@ -20,7 +21,7 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 TARGET = mciwave
 
-OBJS =  mciwave.obj  $(PDWIN32_LIB)/dllentry.obj
+OBJS =  mciwave.obj resource.obj $(PDWIN32_LIB)/dllentry.obj
 
 all: $(TARGET).dll $(TARGET).lib
 
@@ -36,6 +37,10 @@ $(TARGET).lib: $(TARGET).def
 	$(IMPLIB) $(IMPLIBFLAGS) $@ $**
 	$(CP) $@ $(PDWIN32_LIB)
 
+resource.asm: $(TARGET).rc
+    $(RC) $(RCFLAGS) -o resource.asm $(TARGET).rc
+
+resource.obj: resource.asm
 
 mciwave.obj: mciwave.cpp
 

@@ -1,14 +1,15 @@
-# $Id: makefile,v 1.2 2000-02-05 02:16:23 sandervl Exp $
+# $Id: makefile,v 1.3 2000-02-06 20:52:34 sandervl Exp $
 
 #
 # PD-Win32 API
 #
-#	mcicda.drv makefile
+#	mcicda.dll makefile
 #
 
 PDWIN32_INCLUDE = ..\..\..\include
 PDWIN32_LIB = ..\..\..\lib
 PDWIN32_BIN = ..\..\..\bin
+PDWIN32_TOOLS = ..\..\..\tools\bin
 
 
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
@@ -20,7 +21,7 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 TARGET = mcicda
 
-OBJS =  mcicda.obj cdrom.obj  $(PDWIN32_LIB)/dllentry.obj
+OBJS =  mcicda.obj cdrom.obj resource.obj $(PDWIN32_LIB)/dllentry.obj
 
 all: $(TARGET).dll $(TARGET).lib
 
@@ -36,12 +37,17 @@ $(TARGET).lib: $(TARGET).def
 	$(IMPLIB) $(IMPLIBFLAGS) $@ $**
 	$(CP) $@ $(PDWIN32_LIB)
 
+resource.asm: $(TARGET).rc
+    $(RC) $(RCFLAGS) -o resource.asm $(TARGET).rc
+
+resource.obj: resource.asm
 
 mcicda.obj: mcicda.cpp
+
 cdrom.obj: cdrom.cpp
 
 clean:
-	$(RM) *.obj *.lib *.dll *~ *.map *.pch
+	$(RM) *.obj *.lib *.dll *.map *.pch
 	$(RM) $(PDWIN32_BIN)\$(TARGET).dll
 	$(RM) $(PDWIN32_LIB)\$(TARGET).lib
 
