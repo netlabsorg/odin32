@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.1846 2001-11-22 11:55:58 phaller Exp $ */
+/* $Id: changelog,v 1.1847 2001-11-22 16:03:02 sandervl Exp $ */
+
+ 2001-11-22: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Check volume label during IOCTL_DISK_GET_DRIVE_GEOMETRY to
+                  see if the media has been changed or removed.
+                o Implemented WriteFile & GetFileType for disk handles
+                  (write currently only allowed for drive A)
 
  2001-11-22: Patrick Haller <patrick.haller@innotek.de>
     - ODINPROF: o initial version
