@@ -1,0 +1,81 @@
+# $Id: pdwin32.wat.rel,v 1.1 2000-08-29 21:39:01 sandervl Exp $
+# ODIN / win32os2 Project
+#
+# DEBUG makefile for the Watcom C/C++ compiler environment
+#
+#
+
+SOMLIB   = somtk.lib
+RTLLIB   = cppom30.lib
+RTLLIB_O = cppom30o.lib
+
+OBJDIR   = .\bin\release
+
+#
+# Tools
+#
+CXX    = WPP386
+CC     = WCC386
+AS     = alp
+LD     = wlink
+IMPLIB = implib
+ILIB   = ilib
+RC     = $(PDWIN32_TOOLS)\wrc
+OS2RC  = rc
+
+ODINCRT = odincrtd
+
+#
+# Tool Flags
+#
+
+# Watcom compiler flags:
+# w4            warning level 4
+# wcd=726       disable warning 726 (unreferened local variable or parameter)
+# e25           error limit
+# d2            generate symbolic debug information
+# od            no optimizations
+# bm            multithreaded environment
+# ez            generated OMF objects
+# mf            flat memory model
+# 5r            pentium register calling convention
+# br            use dll for runtime library functions
+# bt=os2        target os = OS/2
+# zq            operate quietly (display only errors)
+# fp5           optimize floating-point for pentium
+# fpi87         inline fpu instructions
+# hw            generate Watcom debug information
+CFLAGS           = -w4 -wcd=726 -e25 -od -bm -mf -s -5r -br -bt=os2 -zq -fp5 -fpi87 -i$(%WATCOM)\h -i$(PDWIN32_INCLUDE)\Win -i. -i$(PDWIN32_INCLUDE) -D__WIN32OS2__ -D__WINE__ -D__i386__ -DTCPV40HDRS -DCOMCTL32UNDOC
+CXXFLAGS         = -w4 -wcd=726 -e25 -od -bm -mf -s -5r -br -bt=os2 -zq -fp5 -fpi87 -i$(%WATCOM)\h -i$(PDWIN32_INCLUDE)\Win -i. -i$(PDWIN32_INCLUDE) -D__WIN32OS2__ -D__WINE__ -D__i386__ -DTCPV40HDRS -DCOMCTL32UNDOC
+CXXFLAGS_ODINCRT = -w4 -wcd=726 -e25 -od -bm -bd -s -mf -5r -bt=os2 -zq -fp5 -fpi87 -i$(%WATCOM)\h -i$(PDWIN32_INCLUDE)\Win -i. -i$(PDWIN32_INCLUDE) -D__WIN32OS2__ -D__i386__ -DTCPV40HDRS -DCOMCTL32UNDOC
+CFLAGS_WIN32APP  = -w4 -wcd=726 -e25 -od -bm -mf -5r -bt=os2 -zq -fp5 -fpi87 -i$(%WATCOM)\h -i$(PDWIN32_INCLUDE)\Win -i. -i$(PDWIN32_INCLUDE) -D__WIN32OS2__ -D__i386__
+CXXFLAGS_WIN32APP= -w4 -wcd=726 -e25 -od -bm -mf -5r -bt=os2 -zq -fp5 -fpi87 -i$(%WATCOM)\h -i$(PDWIN32_INCLUDE)\Win -i. -i$(PDWIN32_INCLUDE) -D__WIN32OS2__ -D__i386__
+
+LDFLAGS          = option map, nodefaultlibs, maxe=25, q, symf
+LDFLAGS_ODINCRT  = option map, maxe=25, q, symf
+
+ASFLAGS          = -Mb -Sc -Sv:ALP +Od
+IMPLIBFLAGS      = /nologo
+ILIBFLAGS        = /quiet /nologo
+RCFLAGS          = -s -I. -I$(%WATCOM)\include -I$(PDWIN32_INCLUDE) -I$(PDWIN32_INCLUDE)\win
+OS2RCFLAGS       = -r
+
+!ifndef NODEBUGINFO
+LDFLAGS          += d all
+LDFLAGS_ODINCRT  += d all
+!else
+CFLAGS          += -DDEFAULT_LOGGING_OFF
+CXXFLAGS        += -DDEFAULT_LOGGING_OFF
+!endif
+
+!ifdef EXETARGET
+CFLAGS           += -bg
+CXXFLAGS         += -bg
+LDFLAGS          += system os2v2
+LDFLAGS_ODINCRT  += system os2v2
+!else
+CFLAGS           += -bd
+CXXFLAGS         += -bd
+LDFLAGS          += system os2v2 dll initinstance terminstance
+LDFLAGS_ODINCRT  += system os2v2 dll initinstance terminstance
+!endif

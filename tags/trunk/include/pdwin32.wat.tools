@@ -1,4 +1,4 @@
-# $Id: pdwin32.wat.tools,v 1.1 2000-08-23 18:05:55 sandervl Exp $
+# $Id: pdwin32.wat.tools,v 1.2 2000-08-29 21:38:25 sandervl Exp $
 # ODIN / win32os2 Project
 #
 # makefile for the build system tools and standard rules
@@ -51,11 +51,11 @@ MAKE_CMD    = $(MAKE_CMDLINE) -f makefile.os2
 .asm.obj:
     $(AS) $(ASFLAGS) -Fdo:$(OBJDIR) $^&.asm
 
-.orc.asm:
-    $(RC) $(RCFLAGS) -o $(OBJDIR)\$^&.asm $^.
+#.orc.asm:
+#    $(RC) $(RCFLAGS) -o $(OBJDIR)\$^&.asm $^&.orc
 
 .orc.obj:
-    $(RC) $(RCFLAGS) -o $(OBJDIR)\$^&.asm &.orc
+    $(RC) $(RCFLAGS) -o $(OBJDIR)\$^&.asm $^&.orc
     $(AS) $(ASFLAGS) -Fdo:$(OBJDIR) $(OBJDIR)\$^&.asm
 
 .rc.res:
