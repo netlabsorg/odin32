@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.85 1999-11-17 17:04:55 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.86 1999-11-21 09:43:18 achimha Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2664,6 +2664,11 @@ BOOL Win32BaseWindow::SetWindowTextA(LPSTR lpsz)
     lstrcpyAtoW(windowNameW, windowNameA);
     wndNameLength = strlen(windowNameA)+1; //including 0 terminator
 
+    // Edit and static text controls also need a WM_SETTEXT message
+    if (getWindowClass()->hasClassName("EDIT", FALSE) ||
+        getWindowClass()->hasClassName("STATIC", FALSE))
+      SendInternalMessageA(WM_SETTEXT, 0, (LPARAM)windowNameA);
+
     if(OS2HwndFrame)
         return OSLibWinSetWindowText(OS2HwndFrame, (LPSTR)windowNameA);
 
@@ -2684,6 +2689,11 @@ BOOL Win32BaseWindow::SetWindowTextW(LPWSTR lpsz)
     windowNameA = (LPSTR)_smalloc(lstrlenW((LPWSTR)lpsz)+1);
     lstrcpyWtoA(windowNameA, windowNameW);
     wndNameLength = strlen(windowNameA)+1; //including 0 terminator
+
+    // Edit and static text controls also need a WM_SETTEXT message
+    if (getWindowClass()->hasClassName("EDIT", FALSE) ||
+        getWindowClass()->hasClassName("STATIC", FALSE))
+      SendInternalMessageA(WM_SETTEXT, 0, (LPARAM)windowNameA);
 
     if(OS2HwndFrame)
         return OSLibWinSetWindowText(OS2HwndFrame, (LPSTR)windowNameA);
