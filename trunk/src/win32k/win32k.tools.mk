@@ -1,4 +1,4 @@
-# $Id: win32k.tools.mk,v 1.6 2001-01-21 07:56:16 bird Exp $
+# $Id: win32k.tools.mk,v 1.7 2001-02-21 07:54:06 bird Exp $
 
 #
 # Win32k common tools makefile.
@@ -81,7 +81,7 @@ ILIB        = wlib /nobackup /nologo \
 #
 AS      = alp
 AFLAGS  = -Sv:ALP -Mb -Li +Od
-H2INC   = $(DDKPATH)\tools\h2inc.exe
+H2INC   = $(DDKPATH)\tools\h2inc.exe -c -w -f -d
 
 
 #
