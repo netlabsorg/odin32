@@ -1,4 +1,4 @@
-# $Id: pdwin32.post,v 1.5 2000-03-09 18:05:27 bird Exp $
+# $Id: pdwin32.post,v 1.6 2000-03-09 18:06:36 bird Exp $
 #
 # Odin32 API
 #
@@ -92,7 +92,7 @@ clean:  clean2
 !   if [$(EXISTS) .depend] == 0
 !       include .depend
 !   else
-!       if [$(ECHO) .depend don't exists]
+!       if [$(ECHO) .depend doesn't exist]
 !       endif
 !   endif
 !endif
