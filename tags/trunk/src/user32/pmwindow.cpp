@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.53 1999-11-09 19:23:16 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.54 1999-11-17 17:04:53 cbratschi Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -602,11 +602,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
             keystate |= WMMOVE_CTRL;
 
         //OS/2 Window coordinates -> Win32 Window coordinates
-        if(win32wnd->MsgMouseMove(keystate, SHORT1FROMMP(mp1), MapOS2ToWin32Y(win32wnd, SHORT2FROMMP(mp1))))
-        {
-                //Changes mouse cursor to default
-                goto RunDefWndProc;
-        }
+        win32wnd->MsgMouseMove(keystate, SHORT1FROMMP(mp1), MapOS2ToWin32Y(win32wnd, SHORT2FROMMP(mp1)));
         break;
     }
 
@@ -757,7 +753,7 @@ VirtualKeyFound:
         //NOTE: These actually need to be posted so that the next message retrieved by GetMessage contains
         //      the newly generated WM_CHAR message.
         if(fTranslated && !((flags & KC_KEYUP) == KC_KEYUP))
-	{//TranslatedMessage was called before DispatchMessage, so send WM_CHAR messages
+        {//TranslatedMessage was called before DispatchMessage, so send WM_CHAR messages
             ULONG keyflags = 0, vkey = 0;
             ULONG fl = SHORT1FROMMP(mp1);
             ULONG chCode = SHORT1FROMMP(mp2);

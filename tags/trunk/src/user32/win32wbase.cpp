@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.84 1999-11-14 16:35:56 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.85 1999-11-17 17:04:55 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1569,10 +1569,16 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
                 if(rc)  return rc;
             }
         }
-        return 1;
+        if (wParam == Win32Hwnd)
+        {
+          HCURSOR hCursor = windowClass ? windowClass->getCursor():LoadCursorA(0,IDC_ARROWA);
+
+          if (hCursor) SetCursor(hCursor);
+          return 1;
+        } else return 0;
     }
     case WM_MOUSEMOVE:
-        return 1; //Let OS/2 change the mouse cursor back to the default
+        return 0; //we do our own cursor handling
 
     case WM_WINDOWPOSCHANGED:
     {

@@ -1,4 +1,4 @@
-/* $Id: listbox.cpp,v 1.12 1999-11-13 16:42:41 cbratschi Exp $ */
+/* $Id: listbox.cpp,v 1.13 1999-11-17 17:04:53 cbratschi Exp $ */
 /*
  * Listbox controls
  *
@@ -2545,8 +2545,7 @@ LRESULT WINAPI ListBoxWndProc( HWND hwnd, UINT msg,
         if (GetCapture() == hwnd)
             LISTBOX_HandleMouseMove( hwnd, descr, (INT16)LOWORD(lParam),
                                      (INT16)HIWORD(lParam) );
-        return 1; //SvL: Bugfix -> PMWINDOW expects non-zero return value if
-                  //               we want to restore the default mouse cursor
+        return 0;
 
     case WM_LBUTTONUP:
         return LISTBOX_HandleLButtonUp( hwnd, descr );

@@ -1,4 +1,4 @@
-/* $Id: header.c,v 1.18 1999-10-24 22:49:43 sandervl Exp $ */
+/* $Id: header.c,v 1.19 1999-11-17 17:06:22 cbratschi Exp $ */
 /*
  *  Header control
  *
@@ -2303,7 +2303,7 @@ HEADER_SetCursor (HWND hwnd, WPARAM wParam, LPARAM lParam)
         else SetCursor(infoPtr->hcurDivider);
       } else SetCursor(infoPtr->hcurArrow);
 
-      return 0;
+      return TRUE;
     }
 
     if (flags == HHT_ONDIVIDER)
@@ -2313,7 +2313,7 @@ HEADER_SetCursor (HWND hwnd, WPARAM wParam, LPARAM lParam)
     else
         SetCursor (infoPtr->hcurArrow);
 
-    return 0;
+    return TRUE;
 }
 
 
