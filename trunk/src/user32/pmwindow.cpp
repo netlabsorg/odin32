@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.127 2001-05-11 19:21:46 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.128 2001-05-11 20:40:39 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -201,22 +201,14 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     if(msg == WIN32APP_POSTMSG) {
         //probably win32 app user message
         if((ULONG)mp1 == WIN32MSG_MAGICA) {
-            return (MRESULT)win32wnd->DispatchMsgA(pWinMsg);
+            rc = (MRESULT)win32wnd->DispatchMsgA(pWinMsg);
         }
         else
         if((ULONG)mp1 == WIN32MSG_MAGICW) {
-            return (MRESULT)win32wnd->DispatchMsgW(pWinMsg);
+            rc = (MRESULT)win32wnd->DispatchMsgW(pWinMsg);
         }
-    }
-    else
-    if(msg == WIN32APP_SETFOCUSMSG) {
-      //PM doesn't allow SetFocus calls during WM_SETFOCUS message processing;
-      //must delay this function call
-      //mp1 = win32 window handle
-      //mp2 = activate flag
-      dprintf(("USER32: Delayed SetFocus %x call!", mp1));
-      teb->o.odin.hwndFocus = 0;
-      WinFocusChange(HWND_DESKTOP, hwnd, mp2 ? FC_NOLOSEACTIVE : 0);
+        RestoreOS2TIB();
+        return rc;
     }
 
     switch( msg )
@@ -233,10 +225,12 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         teb->o.odin.newWindow = 0;
         if(win32wnd->MsgCreate(hwnd) == FALSE)
         {
-            return (MRESULT)TRUE; //discontinue window creation
+            rc = (MRESULT)TRUE; //discontinue window creation
+            break;
         }
     createfail:
-        return (MRESULT)FALSE;
+        rc = (MRESULT)FALSE;
+        break;
     }
 
     case WM_QUIT:
@@ -261,6 +255,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
     case WM_SHOW:
         dprintf(("OS2: WM_SHOW %x %d", hwnd, mp1));
+        win32wnd->MsgShow((ULONG)mp1);
         break;
 
     case WM_ACTIVATE:
@@ -434,7 +429,8 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
             wndpars->fsStatus = 0;
             wndpars->cbCtlData = 0;
             wndpars->cbPresParams = 0;
-            return (MRESULT)TRUE;
+            rc = (MRESULT)TRUE;
+            break;
         }
         goto RunDefWndProc;
     }
@@ -459,12 +455,14 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     case WM_ERASEBACKGROUND:
     {
         dprintf(("OS2: WM_ERASEBACKGROUND %x", win32wnd->getWindowHandle()));
-        return (MRESULT)FALSE;
+        rc = (MRESULT)FALSE;
+        break;
     }
 
     case WM_CALCVALIDRECTS:
-      dprintf(("OS2: WM_CALCVALIDRECTS %x", win32wnd->getWindowHandle()));
-      return (MRESULT)(CVR_ALIGNLEFT | CVR_ALIGNTOP);
+        dprintf(("OS2: WM_CALCVALIDRECTS %x", win32wnd->getWindowHandle()));
+        rc = (MRESULT)(CVR_ALIGNLEFT | CVR_ALIGNTOP);
+        break;
 
     case WM_REALIZEPALETTE:
     {
@@ -500,6 +498,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         dprintf2(("OS2: RunDefWndProc hwnd %x msg %x mp1 %x mp2 %x", hwnd, msg, mp1, mp2));
         goto RunDefWndProc;
     }
+    RestoreOS2TIB();
     return (MRESULT)rc;
 
 RunDefWndProc:
@@ -565,6 +564,22 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
         goto RunDefFrameWndProc;
     }
 
+    case WIN32APP_SETFOCUSMSG:
+        //PM doesn't allow SetFocus calls during WM_SETFOCUS message processing;
+        //must delay this function call
+        //mp1 = win32 window handle
+        //mp2 = activate flag
+        dprintf(("USER32: Delayed SetFocus %x %x call!", teb->o.odin.hwndFocus, mp1));
+        if(teb->o.odin.hwndFocus) {
+            win32wnd = Win32BaseWindow::GetWindowFromHandle(teb->o.odin.hwndFocus);
+            teb->o.odin.hwndFocus = 0;
+            if(win32wnd) {
+                 WinFocusChange(HWND_DESKTOP, win32wnd->getOS2FrameWindowHandle(), (mp2) ? FC_NOLOSEACTIVE : 0);
+            }
+            else DebugInt3();
+        }
+        break;
+
     case WM_PAINT:
     {
       RECTL rectl;
@@ -596,6 +611,7 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
     case WM_ERASEBACKGROUND:
     {
         dprintf(("PMFRAME:WM_ERASEBACKGROUND %x", win32wnd->getWindowHandle()));
+        RestoreOS2TIB();
         return (MRESULT)FALSE;
     }
 
@@ -694,6 +710,7 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
         if ((pswp->fl & SWP_ZORDER) && (pswp->hwndInsertBehind > HWND_BOTTOM))
         {
            Win32BaseWindow *wndAfter = Win32BaseWindow::GetWindowFromOS2Handle(pswp->hwndInsertBehind);
+           dprintf2(("SWP_ZORDER: %x %x", pswp->hwndInsertBehind, (wndAfter) ? wndAfter->getWindowHandle() : 0));
            if(wndAfter) {
                 wp.hwndInsertAfter = wndAfter->getWindowHandle();
            }
@@ -732,8 +749,10 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
             pswp->hwndInsertBehind = hwndAfter;
             pswp->hwnd = hwnd;
 
+            RestoreOS2TIB();
             return (MRESULT)0xf;
         }
+        RestoreOS2TIB();
         return (MRESULT)0;
     }
 
@@ -749,6 +768,13 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
 
         if ((pswp->fl & (SWP_SIZE | SWP_MOVE | SWP_ZORDER)) == 0)
         {
+            if(pswp->fl & SWP_SHOW) {
+                WinShowWindow(win32wnd->getOS2WindowHandle(), 1);
+            }
+            else
+            if(pswp->fl & SWP_HIDE) {
+                WinShowWindow(win32wnd->getOS2WindowHandle(), 0);
+            }
             if(pswp->fl & SWP_ACTIVATE)
             {
                 //Only send PM WM_ACTIVATE to top-level windows (frame windows)
@@ -791,6 +817,7 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
         if ((pswp->fl & SWP_ZORDER) && (pswp->hwndInsertBehind > HWND_BOTTOM))
         {
             Win32BaseWindow *wndAfter = Win32BaseWindow::GetWindowFromOS2Handle(pswp->hwndInsertBehind);
+            dprintf2(("SWP_ZORDER: %x %x", pswp->hwndInsertBehind, (wndAfter) ? wndAfter->getWindowHandle() : 0));
             if(wndAfter) {
                  wp.hwndInsertAfter = wndAfter->getWindowHandle();
             }
@@ -800,6 +827,11 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
         if(pswp->fl & SWP_SHOW) {
             WinShowWindow(win32wnd->getOS2WindowHandle(), 1);
         }
+        else
+        if(pswp->fl & SWP_HIDE) {
+            WinShowWindow(win32wnd->getOS2WindowHandle(), 0);
+        }
+
 #ifndef USE_CALCVALIDRECT
         if((pswp->fl & (SWP_MOVE | SWP_SIZE)))
         {
@@ -912,6 +944,7 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
         }
 
 PosChangedEnd:
+        RestoreOS2TIB();
         return (MRESULT)FALSE;
     }
 
@@ -998,10 +1031,12 @@ PosChangedEnd:
             newRect->xRight  -= newClientRect.xLeft;
             newRect->yBottom += newClientRect.yBottom;
         }
+        RestoreOS2TIB();
         return (MRESULT)res;
     }
 #else
         dprintf(("PMWINDOW: WM_CALCVALIDRECTS %x", win32wnd->getWindowHandle()));
+        RestoreOS2TIB();
         return (MRESULT)(CVR_ALIGNLEFT | CVR_ALIGNTOP);
 #endif
 
@@ -1020,12 +1055,12 @@ PosChangedEnd:
     case WM_QUERYFOCUSCHAIN:
         dprintf(("PMFRAME:WM_QUERYFOCUSCHAIN %x fsCmd %x parent %x", win32wnd->getWindowHandle(), SHORT1FROMMP(mp1), mp2));
 
-//        RestoreOS2TIB();
-//        rc = pfnFrameWndProc(hwnd, msg, mp1, mp2);
-//        SetWin32TIB();
-//        dprintf(("PMFRAME:WM_QUERYFOCUSCHAIN %x fsCmd %x parent %x returned %x", win32wnd->getWindowHandle(), SHORT1FROMMP(mp1), mp2, rc));
-//        break;
-        goto RunDefFrameWndProc;
+        RestoreOS2TIB();
+        rc = pfnFrameWndProc(hwnd, msg, mp1, mp2);
+        SetWin32TIB();
+        dprintf(("PMFRAME:WM_QUERYFOCUSCHAIN %x fsCmd %x parent %x returned %x", win32wnd->getWindowHandle(), SHORT1FROMMP(mp1), mp2, rc));
+        break;
+//        goto RunDefFrameWndProc;
 #endif
 
 #if 0
@@ -1063,9 +1098,10 @@ PosChangedEnd:
           }
           //SvL: Check if window is still valid
           win32wnd = Win32BaseWindow::GetWindowFromOS2Handle(hwnd);
-          if(win32wnd == NULL)
+          if(win32wnd == NULL) {
+            RestoreOS2TIB();
             return (MRESULT)rc;
-
+          }
           if(!(fsFocusChange & FC_NOSETACTIVE))
           {
             Win32BaseWindow *topparent = win32wnd->GetTopParent();
@@ -1087,8 +1123,9 @@ PosChangedEnd:
           }
           //SvL: Check if window is still valid
           win32wnd = Win32BaseWindow::GetWindowFromOS2Handle(hwnd);
-          if(win32wnd == NULL)
-            return (MRESULT)rc;
+          if(win32wnd == NULL) {
+            break;
+          }
 
       //TODO: Don't send WM_SETSELECTION to child window if frame already has selection
       if(!(fsFocusChange & FC_NOSETSELECTION)) {
@@ -1111,7 +1148,7 @@ PosChangedEnd:
           //SvL: Check if window is still valid
           win32wnd = Win32BaseWindow::GetWindowFromOS2Handle(hwnd);
           if(win32wnd == NULL) {
-                return (MRESULT)rc;
+            break;
           }
 
           Win32BaseWindow *winfocus = Win32BaseWindow::GetWindowFromOS2Handle(hwndGainFocus);
@@ -1130,7 +1167,7 @@ PosChangedEnd:
           //SvL: Check if window is still valid
           win32wnd = Win32BaseWindow::GetWindowFromOS2Handle(hwnd);
           if(win32wnd == NULL)
-            return (MRESULT)rc;
+            break;
 
           if(!(fsFocusChange & FC_NOSETACTIVE))
           {
@@ -1154,7 +1191,7 @@ PosChangedEnd:
 #ifdef DEBUG
         dprintf(("PMFRAME:WM_FOCUSCHANGE (end) %x %x %x", win32wnd->getWindowHandle(), mp1, mp2));
 #endif
-        return (MRESULT)rc;
+        break;
     }
 #endif
 
@@ -1194,24 +1231,24 @@ PosChangedEnd:
         {
             WinSetWindowUShort(hwnd,QWS_FLAGS,mp1 ? (flags | FF_ACTIVE):(flags & ~FF_ACTIVE));
         }
-        RestoreOS2TIB();
-        return 0;
+        rc = 0;
+        break;
     }
 
     case WM_ENABLE:
-        dprintf(("OS2: WM_ENABLE %x", hwnd));
+        dprintf(("PMFRAME: WM_ENABLE %x", hwnd));
         win32wnd->MsgEnable(SHORT1FROMMP(mp1));
         break;
 
     case WM_SHOW:
-        dprintf(("OS2: WM_SHOW %x %d", hwnd, mp1));
+        dprintf(("PMFRAME: WM_SHOW %x %d", hwnd, mp1));
         //show client window
         WinShowWindow(win32wnd->getOS2WindowHandle(), (BOOL)mp1);
-        win32wnd->MsgShow((ULONG)mp1);
         break;
 
     case WM_SETFOCUS:
     {
+        dprintf(("PMFRAME: WM_SETFOCUS %x %x", win32wnd->getWindowHandle(), hwnd));
         goto RunDefFrameWndProc;
     }
 
@@ -1223,7 +1260,8 @@ PosChangedEnd:
         trackInfo->cxBorder = 4;
         trackInfo->cyBorder = 4;
         win32wnd->AdjustTrackInfo((PPOINT)&trackInfo->ptlMinTrackSize,(PPOINT)&trackInfo->ptlMaxTrackSize);
-        return (MRESULT)TRUE;
+        rc = (MRESULT)TRUE;
+        break;
     }
 
     case WM_QUERYBORDERSIZE:
@@ -1234,7 +1272,8 @@ PosChangedEnd:
 
         size->x = 0;
         size->y = 0;
-        return (MRESULT)TRUE;
+        rc = (MRESULT)TRUE;
+        break;
     }
 
     case WM_QUERYFRAMEINFO:
@@ -1310,7 +1349,9 @@ RunDefFrameWndProc:
 
 RunDefWndProc:
     RestoreOS2TIB();
-    return WinDefWindowProc( hwnd, msg, mp1, mp2 );
+    //calling WinDefWindowProc here break Opera hotlist window (WM_ADJUSTWINDOWPOS)
+    return pfnFrameWndProc(hwnd, msg, mp1, mp2);
+//    return WinDefWindowProc( hwnd, msg, mp1, mp2 );
 }
 //******************************************************************************
 //TODO: Quickly moving a window two times doesn't force a repaint (1st time)

@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.95 2001-05-11 08:39:46 sandervl Exp $ */
+/* $Id: window.cpp,v 1.96 2001-05-11 20:40:40 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -714,6 +714,7 @@ end:
 //******************************************************************************
 HWND WIN32API SetFocus(HWND hwnd)
 {
+ Win32BaseWindow *window;
  HWND lastFocus, lastFocus_W, hwnd_O;
  BOOL activate;
  TEB *teb;
@@ -724,8 +725,19 @@ HWND WIN32API SetFocus(HWND hwnd)
         return 0;
     }
 
-    hwnd_O    = Win32ToOS2Handle (hwnd);
-    lastFocus = OSLibWinQueryFocus (OSLIB_HWND_DESKTOP);
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if(!window) {
+        dprintf(("SetFocus, window %x not found", hwnd));
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        return 0;
+    }
+
+    hwnd_O    = window->getOS2FrameWindowHandle();
+    if(teb->o.odin.hwndFocus) {
+         lastFocus = teb->o.odin.hwndFocus;
+    }
+    else lastFocus = OSLibWinQueryFocus (OSLIB_HWND_DESKTOP);
+
     activate  = ((hwnd_O == lastFocus) || OSLibWinIsChild (lastFocus, hwnd_O));
     lastFocus_W = OS2ToWin32Handle (lastFocus);
 
@@ -741,6 +753,7 @@ HWND WIN32API SetFocus(HWND hwnd)
         OSLibPostMessageDirect(hwnd_O, WIN32APP_SETFOCUSMSG, hwnd, activate);
         return lastFocus_W;
     }
+    teb->o.odin.hwndFocus = 0;
     return (OSLibWinSetFocus (OSLIB_HWND_DESKTOP, hwnd_O, activate)) ? lastFocus_W : 0;
 }
 //******************************************************************************
