@@ -1,9 +1,11 @@
- /* $Id: ChangeLog,v 1.769 2000-03-02 19:18:04 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.770 2000-03-02 23:07:30 sandervl Exp $ */
 
  2000-03-02: Sander van Leeuwen <sandervl@xs4all.nl>
 	- OPENGL\GLIDE: 	Use Odin OS/2 api wrappers in fxos2.cpp
 	- OPENGL\MESA: 		Reapplied TLS fixes
+                                Check for null pointer in wglSetPixelFormat
 	- OPENGL\MESA\3dfx: 	Use c files from Mesa dir
+                                Check for null pointer in wglSetPixelFormat
 	- WINMM: Fixed DartWaveOut::getPosition (overflow)
                  (fixes mp3 playback in RealPlayer 7)
 	- KERNEL32: Fixed SetCurrentDirectory (don't remove backslash
@@ -11,6 +13,7 @@
                     Create shell folders + shell keys
                     (NOTE: This has to be done in the odin install program
                            once we have one)
+	- ADVAPI32: Added crypt api stubs
 
  2000-03-01: Jeroen van den Horn <J.vandenHorn@fibre.a2000.nl>
         - OPENGL: Implemented DIVE support in Mesa
