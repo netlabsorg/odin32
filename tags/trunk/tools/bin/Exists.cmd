@@ -1,4 +1,4 @@
-/* $Id: Exists.cmd,v 1.2 2001-05-16 01:17:03 bird Exp $
+/* $Id: Exists.cmd,v 1.3 2002-05-16 11:50:23 bird Exp $
  *
  * Simple rexx util which checks if a file or directory exists.
  *
@@ -6,9 +6,9 @@
  * Return code: 0 - file exists
  *              1 - file doesn't exist.
  *
- * Copyright (c) 2000-2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 2000-2002 knut st. osmundsen (bird@anduin.net)
  *
- * Project Odin Software License can be found in LICENSE.TXT
+ * GPL
  *
  */
     parse arg sFile
@@ -20,7 +20,7 @@
     do  /* directory ? */
         if (RxFuncQuery('SysFileTree') = 1) then
             call RxFuncAdd 'SysFileTree', 'RexxUtil', 'SysFileTree';
-        rc = SysFileTree(sFile, sDirs, 'DO');
+        rc = SysFileTree(sFile, 'sDirs', 'DO');
         if (rc = 0 & sDirs.0 = 1) then
             exit(0);
         exit(1);
