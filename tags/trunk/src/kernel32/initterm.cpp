@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.29 1999-12-09 00:52:20 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.30 1999-12-09 11:59:28 sandervl Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -46,7 +46,7 @@
 #include "directory.h"
 #include "hmdevio.h"
 #include <windllbase.h>
-#include "cpuhlp.h"
+#include "initsystem.h"
 
 /*-------------------------------------------------------------------*/
 /* A clean up routine registered with DosExitList must be used if    */
@@ -147,8 +147,8 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
             rc = DosQuerySysInfo(QSV_NUMPROCESSORS, QSV_NUMPROCESSORS, &ulSysinfo, sizeof(ulSysinfo));
             if (rc != 0) 
 		ulSysinfo = 1;
-            InitSystemInfo(ulSysinfo);
-	    
+
+            InitSystemEnvironment(ulSysinfo);
             break;
 	}
         case 1 :

@@ -1,4 +1,4 @@
-/* $Id: cpu.cpp,v 1.3 1999-11-25 19:19:57 sandervl Exp $ */
+/* $Id: cpu.cpp,v 1.4 1999-12-09 11:59:27 sandervl Exp $ */
 /*
  * Odin win32 CPU apis
  *
@@ -20,29 +20,18 @@
 #include "winreg.h"
 #include "debugtools.h"
 #include "cpuhlp.h"
+#include "initsystem.h"
 
 DEFAULT_DEBUG_CHANNEL(CPU)
 
 static BYTE PF[64] = {0,};
 static nrCPUs = 1;
-static HINSTANCE hInstance = 0;
-
-LONG (WINAPI *ADVAPI32_RegCloseKey)(HKEY) = 0;
-LONG (WINAPI *ADVAPI32_RegCreateKeyA)(HKEY,LPCSTR,LPHKEY) = 0;
-LONG (WINAPI *ADVAPI32_RegSetValueExA)(HKEY,LPSTR,DWORD,DWORD,LPBYTE,DWORD) = 0;
 
 //******************************************************************************
 //******************************************************************************
 void InitSystemInfo(int nrcpus)
 {
   SYSTEM_INFO si;
-
-   hInstance = LoadLibraryA("ADVAPI32.DLL");
-   if(hInstance) {
-    	*(VOID **)&ADVAPI32_RegCloseKey=(void*)GetProcAddress(hInstance, (LPCSTR)"RegCloseKey");
-        *(VOID **)&ADVAPI32_RegCreateKeyA=(void*)GetProcAddress(hInstance, (LPCSTR)"RegCreateKeyA");
-        *(VOID **)&ADVAPI32_RegSetValueExA=(void*)GetProcAddress(hInstance, (LPCSTR)"RegSetValueExA");
-   }
 
    nrCPUs = nrcpus;
    GetSystemInfo(&si);
