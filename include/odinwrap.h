@@ -1,4 +1,4 @@
-/* $Id: odinwrap.h,v 1.6 1999-08-17 16:58:19 sandervl Exp $ */
+/* $Id: odinwrap.h,v 1.7 1999-08-17 17:19:28 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -19,7 +19,7 @@
  * Defines                                                                  *
  ****************************************************************************/
 
-#define ODIN_INTERNAL _Optlink _Export
+#define ODIN_INTERNAL _Optlink
 
 
 #ifdef DEBUG
