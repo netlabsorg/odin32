@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.65 2000-01-02 20:30:22 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.66 2000-01-03 21:37:17 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -38,8 +38,11 @@ typedef struct {
         ULONG            win32CreateStruct;      //or dialog create dword
 } CUSTOMWNDDATA;
 
-#define WIN32APP_USERMSGBASE      0x1000
-#define WIN32APP_POSTMSG          0x1000
+//PostThreadMessage is done through Open32; which means the message id will be translated
+//(0xc00 added)
+#define OPEN32_MSGDIFF		  0xC00
+#define WIN32APP_POSTMSG          (0x1000+OPEN32_MSGDIFF)
+
 #define WIN32MSG_MAGICA           0x12345678
 #define WIN32MSG_MAGICW           0x12345679
 
