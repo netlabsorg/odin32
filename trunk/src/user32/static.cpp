@@ -1,4 +1,4 @@
-/* $Id: static.cpp,v 1.11 1999-11-21 17:07:51 cbratschi Exp $ */
+/* $Id: static.cpp,v 1.12 1999-11-22 20:33:24 sandervl Exp $ */
 /*
  * Static control
  *
@@ -107,6 +107,9 @@ static HBITMAP STATIC_SetBitmap( HWND hwnd, HBITMAP hBitmap )
     HBITMAP hOldBitmap;
     STATICINFO *infoPtr = (STATICINFO *)GetInfoPtr(hwnd);
     DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
+
+    if (infoPtr == NULL)
+      return 0;
 
     if ((dwStyle & SS_TYPEMASK) != SS_BITMAP) return 0;
 

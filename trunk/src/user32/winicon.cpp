@@ -1,4 +1,4 @@
-/* $Id: winicon.cpp,v 1.4 1999-11-14 23:29:25 sandervl Exp $ */
+/* $Id: winicon.cpp,v 1.5 1999-11-22 20:33:25 sandervl Exp $ */
 /*
  * Win32 Icon Code for OS/2
  *
@@ -198,7 +198,7 @@ BOOL WIN32API GetIconInfo( HICON hIcon, LPICONINFO pIconInfo)
 
     dprintf(("USER32: GetIconInfo %x", hIcon));
     rc = O32_GetIconInfo(hIcon, pIconInfo);
-#if 1
+#if 0
     if(rc && pIconInfo->hbmColor) 
     {
 	HDC  hdcSrc, hdcDst;
