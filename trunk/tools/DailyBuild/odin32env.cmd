@@ -1,4 +1,4 @@
-/* $Id: odin32env.cmd,v 1.18 2001-04-02 01:54:11 bird Exp $
+/* $Id: odin32env.cmd,v 1.19 2001-06-02 19:15:23 bird Exp $
  *
  * Sets the build environment.
  *
@@ -385,6 +385,7 @@ VAC30: procedure
      * IBM Visual Age for C++ Version 3.08 main directory.
      */
     sCPPMain = 'c:\appl\os2\ibmcpp30'
+    call EnvVar_Set      fRM, 'CCENV',      'VAC30'
     call EnvVar_Set      fRM, 'CPPMAIN',        sCPPMain
     call EnvVar_AddFront fRM, 'beginlibpath',   sCPPMain'\DLL;'sCPPMain'\SAMPLES\TOOLKIT\DLL;'
     call EnvVar_AddFront fRM, 'path',           sCPPMain'\BIN;'sCPPMain'\SMARTS\SCRIPTS;'sCPPMain'\HELP;'
@@ -441,8 +442,8 @@ VAC36: procedure
      */
     sCxxMain    = 'e:\apps\ibmcxxo';
 
+    call EnvVar_Set      fRM, 'CCENV',      'VAC36'
     call EnvVar_Set      fRM, 'cxxmain', sCxxMain;
-
     call EnvVar_AddFront fRM, 'beginlibpath', sCxxMain'\dll;'sCxxMain'\runtime;'
     call EnvVar_AddFront fRM, 'dpath',       sCxxMain'\help;'sCxxMain'\local;'
     call EnvVar_AddFront fRM, 'path',        sCxxMain'\bin;'
@@ -498,8 +499,8 @@ Watcom: procedure
      */
     sWatcom = 'e:\apps\Watcom';
 
+    call EnvVar_Set      fRM, 'CCENV',      'WAT'
     call EnvVar_Set      fRM, 'watcom', sWatcom;
-
     call EnvVar_Set      fRM, 'edpath',      sWatcom'\eddat'
     call EnvVar_AddFront fRM, 'beginlibpath', sWatcom'\binp\dll;'
     call EnvVar_AddFront fRM, 'path',        sWatcom'\binp;'sWatcom'\binw;'
