@@ -1,4 +1,4 @@
-/* $Id: windef.h,v 1.23 2000-04-05 14:17:01 sandervl Exp $ */
+/* $Id: windef.h,v 1.24 2000-08-23 18:05:56 sandervl Exp $ */
 
 /*
  * Basic types definitions
@@ -224,7 +224,7 @@ typedef WORD            LANGID;
 typedef DWORD           LCTYPE;
 typedef float           FLOAT;
 #ifdef __WIN32OS2__
-#if (__IBMC__ < 400) && (__IBMCPP__ < 360)
+#if (__IBMC__ < 400) && (__IBMCPP__ < 360) && !defined(__WATCOMC__)
 typedef double	        __int64;
 #endif
 #else
