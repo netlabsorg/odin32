@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.14 2000-06-14 13:17:49 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.15 2000-06-17 11:58:07 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -37,7 +37,7 @@ BOOL WIN32API StretchBlt(HDC hdcDest, int nXOriginDest, int nYOriginDest,
            hdcDest, nXOriginDest, nYOriginDest, nWidthDest, nHeightDest));
   dprintf(("GDI32: StretchBlt Src : %x (%d, %d) size (%d, %d)\n",
            hdcSrc, nXOriginSrc, nYOriginSrc, nWidthSrc, nHeightSrc));
-  SetLastError(0);
+  SetLastError(ERROR_SUCCESS);
   if(DIBSection::getSection() != NULL)
   {
     DIBSection *dsect = DIBSection::findHDC(hdcSrc);
@@ -58,7 +58,7 @@ BOOL WIN32API BitBlt(HDC hdcDest, int arg2, int arg3, int arg4, int arg5, HDC hd
 {
  BOOL rc;
 
-    SetLastError(0);
+    SetLastError(ERROR_SUCCESS);
     if(DIBSection::getSection() != NULL) {
         DIBSection *dsect = DIBSection::findHDC(hdcSrc);
         if(dsect) {
@@ -80,7 +80,7 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
     ULONG compression = 0, iHeight, bmpsize;
     WORD *newbits = 0;
 
-    SetLastError(0);
+    SetLastError(ERROR_SUCCESS);
     if(info == NULL) {
         goto invalid_parameter;
     }
@@ -211,8 +211,8 @@ BOOL WIN32API MaskBlt( HDC arg1, int arg2, int arg3, int arg4, int arg5, HDC   a
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API PlgBlt(HDC hdcDest, CONST POINT *lpPoint, HDC hdcSrc, int nXSrc,
-                        int nYSrc, int nWidth, int nHeight, HBITMAP hbmMask,
-                        int xMast, int yMask)
+                     int nYSrc, int nWidth, int nHeight, HBITMAP hbmMask,
+                     int xMast, int yMask)
 {
   dprintf(("GDI32: PlgBlt, not implemented\n"));
   return(FALSE);
