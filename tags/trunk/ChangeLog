@@ -1,7 +1,9 @@
- /* $Id: ChangeLog,v 1.620 2000-01-08 12:08:56 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.621 2000-01-08 12:19:57 sandervl Exp $ */
 
  2000-01-08: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: ModifyMenuA bugfix (changing menu ids didn't work)
+	- OLE32/OLEAUT32/OLESVR32/OLEDLG/OLECLI32: 
+                  Added Wine-like license that supercedes the main Odin license
 
  2000-01-08: Patrick Haller <phaller@gmx.net>
 	- SHELL32:	Update: to WINE level 2000/01/08
