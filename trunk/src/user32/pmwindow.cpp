@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.185 2002-08-13 20:17:23 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.186 2002-08-14 10:37:43 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -1854,11 +1854,7 @@ PosChangedEnd:
     case WM_TRACKFRAME:
         dprintf(("PMFRAME: WM_TRACKFRAME %x %x %x", win32wnd->getWindowHandle(), mp1, mp2));
         if(fOS2Look) {//sent by titlebar control
-#ifdef CUSTOM_TRACKFRAME
             Frame_SysCommandSizeMove(win32wnd, SC_MOVE_W+HTCAPTION_W);
-#else
-            FrameTrackFrame(win32wnd, TF_MOVE);
-#endif
         }
         rc = 0;
         break;
@@ -1925,108 +1921,6 @@ void FrameSetFocus(HWND hwnd)
     ulFrameFlags &= ~FF_NOACTIVATESWP;
     WinSetWindowUShort(hwnd, QWS_FLAGS, ulFrameFlags);
 }
-#ifndef CUSTOM_TRACKFRAME
-//******************************************************************************
-//TODO: Quickly moving a window two times doesn't force a repaint (1st time)
-//
-//
-BOOL (APIENTRY *WinTrackWindow)(HWND hwndTrack, PTRACKINFO pti) = NULL;
-//
-//******************************************************************************
-VOID FrameTrackFrame(Win32BaseWindow *win32wnd,DWORD flags)
-{
-  TRACKINFO track;
-  RECTL     rcl;
-  PRECT     pWindowRect, pClientRect;
-  HWND      hwndTracking;
-  LONG      parentHeight, parentWidth;
-  static    BOOL fInit = FALSE;
-  APIRET    rc;
-  BOOL      ret;
-  HWND      hwnd = win32wnd->getWindowHandle();
-
-    if(!fInit) {
-        HMODULE hModule;
-        char    buf[CCHMAXPATH];
-        rc = DosLoadModule(buf, sizeof(buf), "PMMERGE", &hModule);
-        rc = DosQueryProcAddr(hModule, 5466, NULL, (PFN *)&WinTrackWindow);
-        if(rc) WinTrackWindow = NULL;
-        fInit = TRUE;
-    }
-    dprintf(("FrameTrackFrame: %x %x", hwnd, flags));
-    track.cxBorder = 4;
-    track.cyBorder = 4;  /* 4 pel wide lines used for rectangle */
-    track.cxGrid = 1;
-    track.cyGrid = 1;    /* smooth tracking with mouse */
-    track.cxKeyboard = 8;
-    track.cyKeyboard = 8; /* faster tracking using cursor keys */
-
-    pWindowRect = win32wnd->getWindowRect();
-    if(win32wnd->getParent()) {
-        parentHeight = win32wnd->getParent()->getClientHeight();
-        parentWidth  = win32wnd->getParent()->getClientWidth();
-        hwndTracking = win32wnd->getParent()->getOS2WindowHandle();
-    }
-    else {
-        parentHeight = OSLibQueryScreenHeight();
-        parentWidth  = OSLibQueryScreenWidth();
-        hwndTracking = HWND_DESKTOP;
-    }
-
-    mapWin32ToOS2Rect(parentHeight, pWindowRect, (PRECTLOS2)&track.rclTrack);
-    rcl = track.rclTrack;
-    WinQueryWindowRect(hwndTracking, &track.rclBoundary);
-
-    track.ptlMinTrackSize.x = 10;
-    track.ptlMinTrackSize.y = 10;  /* set smallest allowed size of rectangle */
-    track.ptlMaxTrackSize.x = parentWidth;
-    track.ptlMaxTrackSize.y = parentHeight; /* set largest allowed size of rectangle */
-
-    win32wnd->AdjustTrackInfo((PPOINT)&track.ptlMinTrackSize, (PPOINT)&track.ptlMaxTrackSize);
-
-    track.fs = flags;
-
-    BOOL fDynamicDrag = WinQuerySysValue(HWND_DESKTOP, SVOS_DYNAMICDRAG);
-
-    //TODO: send WM_QUERYDRAGICON to fetch icon (not really necessary)
-
-    SendMessageA( hwnd, WM_ENTERSIZEMOVE_W, 0, 0);
-
-    SEL sel = RestoreOS2FS();
-    if(fDynamicDrag && WinTrackWindow) {
-         ret = WinTrackWindow(win32wnd->getOS2FrameWindowHandle(), &track);
-    }
-    else ret = WinTrackRect(hwndTracking, NULL, &track);
-    SetFS(sel);
-
-//TODO:
-//    if (HOOK_CallHooksA( WH_CBT_W, HCBT_MOVESIZE_W, (WPARAM)hwnd, (LPARAM)&sizingRect )) moved = FALSE;
-
-    SendMessageA( hwnd, WM_EXITSIZEMOVE_W, 0, 0 );
-    SendMessageA( hwnd, WM_SETVISIBLE_W, !IsIconic(hwnd), 0L);
-
-    if(ret) {
-        /* if successful copy final position back */
-        if(!WinEqualRect(0, &rcl, &track.rclTrack)) {
-            dprintf(("FrameTrackFrame: new (os/2) window rect: (%d,%d)(%d,%d)", track.rclTrack.xLeft, track.rclTrack.yBottom, track.rclTrack.xRight - track.rclTrack.xLeft, track.rclTrack.yTop - track.rclTrack.yBottom));
-            if(flags == TF_MOVE) {
-                WinSetWindowPos(win32wnd->getOS2FrameWindowHandle(),
-                                0, track.rclTrack.xLeft, track.rclTrack.yBottom,
-                                0, 0, SWP_MOVE);
-            }
-            else {
-                WinSetWindowPos(win32wnd->getOS2FrameWindowHandle(),
-                                0, track.rclTrack.xLeft, track.rclTrack.yBottom,
-                                track.rclTrack.xRight - track.rclTrack.xLeft,
-                                track.rclTrack.yTop - track.rclTrack.yBottom,
-                                SWP_SIZE|SWP_MOVE);
-            }
-        }
-        return;
-   }
-   return;
-}
-#endif
 //******************************************************************************
 //******************************************************************************
 void FrameReplaceMenuItem(HWND hwndMenu, ULONG nIndex, ULONG idOld, ULONG   idNew,

@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.41 2002-08-12 15:05:43 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.42 2002-08-14 10:37:45 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -694,22 +694,22 @@ BOOL Win32BaseWindow::DrawSysButton(HDC hdc,RECT *rect)
 //******************************************************************************
 //Returns position of system menu in screen coordinates
 //******************************************************************************
-BOOL Win32BaseWindow::GetSysPopupPos(RECT* rect)
+BOOL Win32BaseWindow::GetSysPopupPos(RECT* lpRect)
 {
     if(hSysMenu)
     {
         if(dwStyle & WS_MINIMIZE) {
-            *rect = rectWindow;
+            GetWindowRect(getWindowHandle(), lpRect);
         }
         else
         {
-            GetInsideRect(rect );
-            OffsetRect( rect, rectWindow.left, rectWindow.top);
+            GetInsideRect(lpRect);
+            OffsetRect(lpRect, rectWindow.left, rectWindow.top);
             if(getStyle() & WS_CHILD)
-                ClientToScreen(getParent()->getWindowHandle(), (POINT *)rect);
+                ClientToScreen(getParent()->getWindowHandle(), (POINT *)lpRect);
 
-            rect->right = rect->left + GetSystemMetrics(SM_CYCAPTION) - 1;
-            rect->bottom = rect->top + GetSystemMetrics(SM_CYCAPTION) - 1;
+            lpRect->right  = lpRect->left + GetSystemMetrics(SM_CYCAPTION) - 1;
+            lpRect->bottom = lpRect->top + GetSystemMetrics(SM_CYCAPTION) - 1;
         }
         return TRUE;
     }
@@ -1270,6 +1270,13 @@ LONG Win32BaseWindow::HandleNCRButtonUp(WPARAM wParam,LPARAM lParam)
       }
       break;
 
+    case HTSYSMENU:
+      if (fOS2Look && (dwStyle & WS_SYSMENU))
+      {
+        SendMessageA( getWindowHandle(), WM_SYSCOMMAND,SC_MOUSEMENU+HTSYSMENU,lParam);
+      }
+      break;
+
     default:
       break;
   }
@@ -1290,63 +1297,12 @@ LONG Win32BaseWindow::HandleSysCommand(WPARAM wParam,POINT *pt32)
     {
     case SC_SIZE:
     {
-#ifdef CUSTOM_TRACKFRAME
       Frame_SysCommandSizeMove(this, wParam);
-#else
-      DWORD flags;
-
-      if (dwStyle & WS_MAXIMIZE) break;
-
-      switch ((wParam & 0xF)+2)
-      {
-        case HTLEFT:
-          flags = TFOS_LEFT;
-          break;
-
-        case HTRIGHT:
-          flags = TFOS_RIGHT;
-          break;
-
-        case HTTOP:
-          flags = TFOS_TOP;
-          break;
-
-        case HTTOPLEFT:
-          flags = TFOS_TOP | TFOS_LEFT;
-          break;
-
-        case HTTOPRIGHT:
-          flags = TFOS_TOP | TFOS_RIGHT;
-          break;
-
-        case HTBOTTOM:
-          flags = TFOS_BOTTOM;
-          break;
-
-        case HTBOTTOMLEFT:
-          flags = TFOS_BOTTOM | TFOS_LEFT;
-          break;
-
-        case HTBOTTOMRIGHT:
-          flags = TFOS_BOTTOM | TFOS_RIGHT;
-          break;
-
-        default:
-          flags = TFOS_BOTTOM | TFOS_RIGHT;
-          break;
-      }
-      if (flags) FrameTrackFrame(this,flags);
-#endif
       break;
     }
 
     case SC_MOVE:
-#ifdef CUSTOM_TRACKFRAME
         Frame_SysCommandSizeMove(this, wParam);
-#else
-        if (dwStyle & WS_MAXIMIZE) break;
-        FrameTrackFrame(this,TFOS_MOVE);
-#endif
         break;
 
     case SC_MINIMIZE:
