@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.29 1999-08-24 18:46:39 sandervl Exp $
+# $Id: makefile,v 1.30 1999-08-25 10:28:40 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -120,6 +120,7 @@ vmutex.OBJ: vmutex.cpp \
 
 exceptions.OBJ: \
     .\exceptions.cpp \
+    mmap.h \
     $(PDWIN32_INCLUDE)\exceptions.h \
     exceptutil.h
 
@@ -147,6 +148,7 @@ wprocess.OBJ: \
     $(PDWIN32_INCLUDE)\versionos2.h \
     $(PDWIN32_INCLUDE)\wprocess.h \
     console2.h \
+    mmap.h \
     cio.h \
     os2util.h
 

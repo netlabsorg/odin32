@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.27 1999-08-24 23:32:24 phaller Exp $ */
+/* $Id: wprocess.cpp,v 1.28 1999-08-25 10:28:41 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -29,6 +29,7 @@
 #include "cio.h"
 #include "versionos2.h"    /*PLF Wed  98-03-18 02:36:51*/
 #include <wprocess.h>
+#include "mmap.h"
 
 BOOL      fExeStarted = FALSE;
 BOOL      fFreeLibrary = FALSE;
@@ -330,6 +331,11 @@ VOID WIN32API ExitProcess(DWORD exitcode)
 
   SetOS2ExceptionChain(-1);
 
+  //Flush and delete all open memory mapped files
+  Win32MemMap::deleteAll();
+
+  Win32DllExitList(0);
+
   //Restore original OS/2 TIB selector
   DestroyTIB();
   SetExceptionChain((ULONG)-1);
@@ -339,8 +345,6 @@ VOID WIN32API ExitProcess(DWORD exitcode)
   /* @@@PH 1998/02/12 Added Console Support */
   if (iConsoleIsActive())
     iConsoleWaitClose();
-
-  Win32DllExitList(0);
 
   O32_ExitProcess(exitcode);
 }
@@ -604,7 +608,7 @@ DWORD WIN32API GetModuleFileNameW(HMODULE hModule, LPWSTR lpFileName, DWORD nSiz
     return(rc);
 }
 //******************************************************************************
-//NOTE: GetModuleHandleA does NOT support files with multiple dots (i.e.
+//NOTE: GetModuleHandleA does NOT support files with multiple dots (i.e. 
 //      very.weird.exe)
 //******************************************************************************
 HANDLE WIN32API GetModuleHandleA(LPCTSTR lpszModule)
@@ -625,7 +629,7 @@ HANDLE WIN32API GetModuleHandleA(LPCTSTR lpszModule)
 	}
 	else {
 		if(!strstr(szModule, ".")) {
-			//if there's no extension or trainling dot, we
+			//if there's no extension or trainling dot, we 
                         //assume it's a dll (see Win32 SDK docs)
 			fDllModule = TRUE;
 		}
