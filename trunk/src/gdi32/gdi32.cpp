@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.82 2002-07-15 10:02:29 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.83 2002-10-28 17:53:40 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -433,10 +433,10 @@ HDC WIN32API CreateDCW( LPCWSTR arg1, LPCWSTR arg2, LPCWSTR arg3, const DEVMODEW
       devmode.dmSize             = arg4->dmSize;
       devmode.dmDriverExtra      = arg4->dmDriverExtra;
       devmode.dmFields           = arg4->dmFields;
-      devmode.dmOrientation      = arg4->dmOrientation;
-      devmode.dmPaperSize        = arg4->dmPaperSize;
-      devmode.dmPaperLength      = arg4->dmPaperLength;
-      devmode.dmPaperWidth       = arg4->dmPaperWidth;
+      devmode.s1.dmOrientation   = arg4->s1.dmOrientation;
+      devmode.s1.dmPaperSize     = arg4->s1.dmPaperSize;
+      devmode.s1.dmPaperLength   = arg4->s1.dmPaperLength;
+      devmode.s1.dmPaperWidth    = arg4->s1.dmPaperWidth;
       devmode.dmScale            = arg4->dmScale;
       devmode.dmCopies           = arg4->dmCopies;
       devmode.dmDefaultSource    = arg4->dmDefaultSource;
@@ -526,10 +526,10 @@ HDC WIN32API CreateICW( LPCWSTR arg1, LPCWSTR arg2, LPCWSTR arg3, const DEVMODEW
       devmode.dmSize             = arg4->dmSize;
       devmode.dmDriverExtra      = arg4->dmDriverExtra;
       devmode.dmFields           = arg4->dmFields;
-      devmode.dmOrientation      = arg4->dmOrientation;
-      devmode.dmPaperSize        = arg4->dmPaperSize;
-      devmode.dmPaperLength      = arg4->dmPaperLength;
-      devmode.dmPaperWidth       = arg4->dmPaperWidth;
+      devmode.s1.dmOrientation   = arg4->s1.dmOrientation;
+      devmode.s1.dmPaperSize     = arg4->s1.dmPaperSize;
+      devmode.s1.dmPaperLength   = arg4->s1.dmPaperLength;
+      devmode.s1.dmPaperWidth    = arg4->s1.dmPaperWidth;
       devmode.dmScale            = arg4->dmScale;
       devmode.dmCopies           = arg4->dmCopies;
       devmode.dmDefaultSource    = arg4->dmDefaultSource;
