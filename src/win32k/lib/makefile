@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.14 2001-07-10 05:21:20 bird Exp $
+# $Id: makefile,v 1.14.2.1 2002-04-01 13:03:06 bird Exp $
 
 #
 # Odin32 API
@@ -8,12 +8,17 @@
 
 
 #
-# Tell build environment we're build a public library which should
-# work with both exe and dlls (hence EXETARGET).
+# Load the build setup.
 #
-LIBTARGET=1
-PUBLICLIB=1
-EXETARGET=1
+PATH_ROOT = ..\..\..
+!include $(PATH_ROOT)\tools\make\setup.mak
+
+
+#
+# Config.
+#
+TARGET_MODE = PUBLIB
+TARGET_NAME = Win32k
 
 
 #
@@ -25,40 +30,31 @@ EXETARGET=1
 #
 # Tools and Flags Addjustments
 #
-CDEFINES   = -DRING3 -DWIN32KLIB
-!if "$(VAC3)" == "1" | "$(VAC36)" == "1"
-CFLAGS     = $(CFLAGS)    -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext- -Rn
-!endif
+ALL_DEFINES = -DRING3 -DWIN32KLIB
 
 
 #
-# Object files. Prefix with OBJDIR and one space before the '\'.
+# Object files.
 #
-OBJS = \
-$(OBJDIR)\libInit.obj \
-$(OBJDIR)\libTerm.obj \
-$(OBJDIR)\libWin32kInstalled.obj \
-$(OBJDIR)\libWin32kQueryOptionsStatus.obj \
-$(OBJDIR)\libWin32kSetOptions.obj \
-$(OBJDIR)\libWin32kSetEnvironment.obj \
-$(OBJDIR)\libDosAllocMemEx.obj \
-$(OBJDIR)\libDosKillProcessEx.obj \
-$(OBJDIR)\libW32kHandleSystemEvent.obj \
-$(OBJDIR)\libW32kQueryOTEs.obj \
-$(OBJDIR)\libW32kQuerySystemMemInfo.obj \
-$(OBJDIR)\libW32kProcessReadWrite.obj \
-$(OBJDIR)\libGetCS.obj \
-$(OBJDIR)\libCallThruCallGate.obj
+TARGET_OBJS =\
+$(PATH_TARGET)\libInit.$(EXT_OBJ)\
+$(PATH_TARGET)\libTerm.$(EXT_OBJ)\
+$(PATH_TARGET)\libWin32kInstalled.$(EXT_OBJ)\
+$(PATH_TARGET)\libWin32kQueryOptionsStatus.$(EXT_OBJ)\
+$(PATH_TARGET)\libWin32kSetOptions.$(EXT_OBJ)\
+$(PATH_TARGET)\libWin32kSetEnvironment.$(EXT_OBJ)\
+$(PATH_TARGET)\libDosAllocMemEx.$(EXT_OBJ)\
+$(PATH_TARGET)\libDosKillProcessEx.$(EXT_OBJ)\
+$(PATH_TARGET)\libW32kHandleSystemEvent.$(EXT_OBJ)\
+$(PATH_TARGET)\libW32kQueryOTEs.$(EXT_OBJ)\
+$(PATH_TARGET)\libW32kQuerySystemMemInfo.$(EXT_OBJ)\
+$(PATH_TARGET)\libW32kProcessReadWrite.$(EXT_OBJ)\
+$(PATH_TARGET)\libGetCS.$(EXT_OBJ)\
+$(PATH_TARGET)\libCallThruCallGate.$(EXT_OBJ)\
 
 
 #
-# Target name - name of the lib without extention and path.
+# Load the build process rules.
 #
-TARGET  = win32k
-
-
-#
-# Includes the common rules.
-#
-!include $(ODIN32_POST_INC)
+!include $(MAKE_INCLUDE_PROCESS)
 
