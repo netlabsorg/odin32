@@ -1,4 +1,4 @@
-/* $Id: win32wmdiclient.cpp,v 1.3 1999-10-03 20:38:02 sandervl Exp $ */
+/* $Id: win32wmdiclient.cpp,v 1.4 1999-10-09 14:48:15 achimha Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -125,11 +125,14 @@ LRESULT Win32MDIClientWindow::MDIClientWndProc(UINT message, WPARAM wParam, LPAR
         goto END;
 
     case WM_MDIACTIVATE:
-        if( activeChild && activeChild->getWindowHandle() != (HWND)wParam )
+    case WM_MDIACTIVATE:
+        mdichild = 0;
+        if(activeChild && activeChild->getWindowHandle() != (HWND)wParam)
+           mdichild = (Win32MDIChildWindow*)GetWindowFromHandle((HWND)wParam);
 
-        mdichild = (Win32MDIChildWindow *)GetWindowFromHandle((HWND)wParam);
-        if(mdichild) {
-            mdichild->SetWindowPos(0,0,0,0,0, SWP_NOSIZE | SWP_NOMOVE);
+        if (mdichild)
+        {
+          mdichild->SetWindowPos(0,0,0,0,0, SWP_NOSIZE | SWP_NOMOVE);
         }
         retvalue = 0;
         goto END;
