@@ -494,7 +494,7 @@ BOOL  kFileDef::setModuleName(void)
         pszStart = ltrim(pszStart);
         pszEnd = strpbrk(pszStart, " \t");
         if (pszEnd == NULL)
-            pszEnd = pszStart + strlen(pszEnd);
+            pszEnd = pszStart + strlen(pszStart);
         pszModName = new char[pszEnd - pszStart + 1];
         memcpy(pszModName, pszStart, pszEnd - pszStart);
         pszModName[pszEnd - pszStart] = '\0';
