@@ -1,4 +1,4 @@
-/* $Id: dibitmap.cpp,v 1.33 2002-07-15 11:19:51 sandervl Exp $ */
+/* $Id: dibitmap.cpp,v 1.34 2002-10-28 13:24:44 sandervl Exp $ */
 
 /*
  * GDI32 dib & bitmap code
@@ -372,7 +372,7 @@ BOOL WIN32API SetBitmapDimensionEx( HBITMAP arg1, int arg2, int arg3, PSIZE  arg
 int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLines,
                        void *lpvBits, PBITMAPINFO lpbi, UINT uUsage)
 {
- int nrlines;
+    int nrlines;
 
     dprintf(("GDI32: GetDIBits %x %x %d %d %x %x (biBitCount %d) %d", hdc, hBitmap, uStartScan, cScanLines, lpvBits, lpbi, lpbi->bmiHeader.biBitCount, uUsage));
 
@@ -380,7 +380,18 @@ int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLine
     //     TODO: Fix in WGSS
     HDC hdcMem = CreateCompatibleDC(0);
 
-    nrlines = O32_GetDIBits(hdcMem, hBitmap, uStartScan, cScanLines, lpvBits, lpbi, uUsage);
+    if(lpbi->bmiHeader.biHeight < 0) {
+        //NOTE: workaround for WGSS bug; remove when fixed
+        LONG height = lpbi->bmiHeader.biHeight;
+
+        nrlines = O32_GetDIBits(hdcMem, hBitmap, uStartScan, cScanLines, lpvBits, lpbi, uUsage);
+
+        //NOTE: workaround for WGSS bug; remove when fixed
+        lpbi->bmiHeader.biHeight = height;
+    }
+    else {
+        nrlines = O32_GetDIBits(hdcMem, hBitmap, uStartScan, cScanLines, lpvBits, lpbi, uUsage);
+    }
 
     DeleteDC(hdcMem);
 
