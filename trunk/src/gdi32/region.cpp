@@ -1,4 +1,4 @@
-/* $Id: region.cpp,v 1.14 2000-10-02 17:43:32 sandervl Exp $ */
+/* $Id: region.cpp,v 1.15 2000-11-04 16:29:24 sandervl Exp $ */
 
 /*
  * GDI32 region code
@@ -561,14 +561,20 @@ ODINFUNCTIONNODBG2(int, GetClipBox, HDC, hdc, PRECT, lpRect)
             rc = NULLREGION_W;
         }
         else {
+#ifndef INVERT
+            //Convert coordinates from PM to win32
+            if (pHps->yInvert > 0) {
+   	         LONG temp     = pHps->yInvert - rectl.yBottom;
+                 rectl.yBottom = pHps->yInvert - rectl.yTop;
+	         rectl.yTop    = temp;
+            }
+#endif
             //Convert including/including to including/excluding
             includeBottomRightPoint(pHps, (PPOINTLOS2)&rectl);
 
             lpRect->left   = rectl.xLeft;
             lpRect->right  = rectl.xRight;
-            //No conversion required as GpiQueryClipBox is affected by
-            //the y-inversion of the window
-            //NOTE: YINVERSION dependancy
+
             if(rectl.yBottom > rectl.yTop) {
                 lpRect->top    = rectl.yTop;
                 lpRect->bottom = rectl.yBottom;
@@ -581,6 +587,8 @@ ODINFUNCTIONNODBG2(int, GetClipBox, HDC, hdc, PRECT, lpRect)
             rc = (lComplexity == RGN_RECT) ? SIMPLEREGION_W : COMPLEXREGION_W;
         }
     }
+//    if(lpRect->left == 0 && lpRect->top == 0 && lpRect->right == 0 && lpRect->bottom == 0)
+// 	DebugInt3();
     dprintf(("GDI32: GetClipBox of %X returned %d; (%d,%d)(%d,%d)", hdc, rc, lpRect->left, lpRect->top, lpRect->right, lpRect->bottom));
     return rc;
 }
@@ -649,6 +657,14 @@ ODINFUNCTIONNODBG5(int, ExcludeClipRect, HDC, hdc, int, left, int, top, int, rig
         rectl.yTop    = temp;
     }
 
+#ifndef INVERT
+    if (pHps->yInvert > 0) {
+        LONG temp     = pHps->yInvert - rectl.yBottom;
+        rectl.yBottom = pHps->yInvert - rectl.yTop;
+        rectl.yTop    = temp;
+    }
+#endif
+
     dprintf(("ExcludeClipRgn %x (%d,%d)(%d,%d)", hdc, left, top, right, bottom));
     lComplexity = GpiExcludeClipRectangle(pHps->hps, &rectl);
     if (lComplexity == RGN_ERROR) {
@@ -683,6 +699,15 @@ ODINFUNCTIONNODBG5(int, IntersectClipRect, HDC, hdc, int, left, int, top, int, r
         rectl.yTop    = temp;
     }
 
+#ifndef INVERT
+    //Convert coordinates from PM to win32
+    if (pHps->yInvert > 0) {
+         LONG temp     = pHps->yInvert - rectl.yBottom;
+         rectl.yBottom = pHps->yInvert - rectl.yTop;
+         rectl.yTop    = temp;
+    }
+#endif
+
     dprintf(("IntersectClipRgn %x (%d,%d)(%d,%d)", hdc, left, top, right, bottom));
     lComplexity = GpiIntersectClipRectangle(pHps->hps, &rectl);
 
@@ -707,6 +732,12 @@ ODINFUNCTIONNODBG3(int, OffsetClipRgn, HDC, hdc, int, nXOffset, int, nYOffset )
 
    dprintf(("OffsetClipRgn %x (%d,%d)", hdc, nXOffset, nYOffset));
    POINTL  pointl = { nXOffset, nYOffset };
+#ifndef INVERT
+   if (pHps->yInvert > 0) {
+        pointl.y = pHps->yInvert - pointl.y;
+   }
+#endif
+
    lComplexity = GpiOffsetClipRegion(pHps->hps, &pointl);
 
    //todo metafile recording
@@ -1261,11 +1292,12 @@ ODINFUNCTIONNODBG3(int, OffsetRgn, HRGN, hrgn, int, xOffset, int, yOffset)
     POINTL   ptlOffset = {xOffset, yOffset};
     GpiOffsetRegion(hpsRegion, hrgn, &ptlOffset);
 
+    RECTL    rectl[8];
     RGNRECT  rgnRect;
     rgnRect.ircStart    = 1;
-    rgnRect.crc         = 0;
+    rgnRect.crc         = 8;
     rgnRect.ulDirection = RECTDIR_LFRT_TOPBOT;     // doesn't make a difference
-    if(GpiQueryRegionRects(hpsRegion, hrgn, NULL, &rgnRect, NULL))
+    if(GpiQueryRegionRects(hpsRegion, hrgn, NULL, &rgnRect, &rectl[0]))
     {
         switch (rgnRect.crcReturned) {
         case 0:
@@ -1305,7 +1337,7 @@ ODINFUNCTIONNODBG5(BOOL, FrameRgn, HDC, hdc, HRGN, hrgn, HBRUSH, hBrush, int, wi
     width  = abs(width);
     height = abs(height);
 
-    if(pHps->lastBrushHandle != (UINT)hBrush)
+    if(pHps->lastBrushKey != (UINT)hBrush)
     {
         hbrushRestore = SelectObject(hdc, hBrush);
         if(!hbrushRestore)
@@ -1346,7 +1378,7 @@ ODINFUNCTIONNODBG3(BOOL, FillRgn, HDC, hdc, HRGN, hrgn, HBRUSH, hBrush)
         return FALSE;
     }
 
-    if(pHps->lastBrushHandle != (UINT)hBrush)
+    if(pHps->lastBrushKey != (UINT)hBrush)
     {
         hbrushRestore = SelectObject(hdc, hBrush);
         if (!hbrushRestore)
@@ -1381,7 +1413,7 @@ ODINFUNCTIONNODBG2(BOOL, PaintRgn, HDC, hdc, HRGN, hrgn)
       return FALSE;
    }
 
-   return FillRgn(hdc, hrgn, (HBRUSH) pHps->lastBrushHandle);
+   return FillRgn(hdc, hrgn, (HBRUSH) pHps->lastBrushKey);
 }
 //******************************************************************************
 //******************************************************************************

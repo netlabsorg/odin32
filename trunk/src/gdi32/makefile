@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.27 2000-07-19 19:05:06 sandervl Exp $
+# $Id: makefile,v 1.28 2000-11-04 16:29:24 sandervl Exp $
 
 #
 # Odin32 API
@@ -19,6 +19,12 @@ PDWIN32_TOOLS   = ..\..\tools\bin
 
 # Flag overloads and local macros.
 CLEANEXTRAS = gdi32rsrc.asm
+
+#CFLAGS   = $(CFLAGS) -DSTDCALL_ENUMPROCS -DINVERT
+#CXXFLAGS = $(CXXFLAGS) -DSTDCALL_ENUMPROCS -DINVERT
+
+CFLAGS   = $(CFLAGS) -DINVERT
+CXXFLAGS = $(CXXFLAGS) -DINVERT
 
 # Object files. All objects should be prefixed with $(OBJDIR)!
 OBJS = \
