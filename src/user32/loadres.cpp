@@ -1,4 +1,4 @@
-/* $Id: loadres.cpp,v 1.34 2000-11-12 10:58:12 sandervl Exp $ */
+/* $Id: loadres.cpp,v 1.35 2001-03-27 16:17:51 sandervl Exp $ */
 
 /*
  * Win32 resource API functions for OS/2
@@ -24,8 +24,8 @@
 #include <win\virtual.h>
 #include "dib.h"
 #include "initterm.h"
-#include <win\cursoricon.h>
 #include <winres.h>
+#include "pmwindow.h"
 
 #define DBG_LOCALLOG    DBG_loadres
 #include "dbglocal.h"
@@ -120,67 +120,6 @@ HICON WIN32API LoadIconW(HINSTANCE hinst, LPCWSTR lpszIcon)
 {
     dprintf(("LoadIconA %x %x", hinst, lpszIcon));
     return LoadImageW(hinst, lpszIcon, IMAGE_ICON, 0, 0, LR_SHARED | LR_DEFAULTSIZE);
-}
-//******************************************************************************
-//******************************************************************************
-HCURSOR LoadCursorW(HINSTANCE hinst, LPCWSTR lpszCursor, DWORD cxDesired,
-                    DWORD cyDesired, DWORD fuLoad)
-{
- HCURSOR    hCursor;
- HANDLE     hMapping = 0;
- char      *ptr = NULL;
- HRSRC      hRes;
- LPSTR      restype = RT_CURSORA;
- LPVOID     lpOS2Resdata = NULL;
-
-    if(fuLoad & LR_LOADFROMFILE)
-    {
-        hMapping = VIRTUAL_MapFileW( lpszCursor, (LPVOID *)&ptr, TRUE);
-        if(hMapping == INVALID_HANDLE_VALUE)
-            return 0;
-
-        lpOS2Resdata = ConvertCursorToOS2(ptr);
-        hCursor = OSLibWinCreatePointer(lpOS2Resdata, cxDesired, cyDesired);
-        FreeOS2Resource(lpOS2Resdata);
-
-        UnmapViewOfFile(ptr);
-        CloseHandle(hMapping);
-    }
-    else
-    {
-        if(!hinst)
-        {
-            hRes = FindResourceW(hInstanceUser32,lpszCursor,RT_CURSORW);
-            if(!hRes)  {
-                hRes = FindResourceW(hInstanceUser32,lpszCursor,RT_GROUP_CURSORW);
-                restype = RT_GROUP_CURSORA;
-            }
-            if(hRes)
-            {
-                 lpOS2Resdata = ConvertResourceToOS2(hInstanceUser32, restype, hRes);
-                 hCursor = OSLibWinCreatePointer(lpOS2Resdata, cxDesired, cyDesired);
-                 FreeOS2Resource(lpOS2Resdata);
-            }
-            else hCursor = OSLibWinQuerySysPointer((ULONG)lpszCursor, cxDesired, cyDesired);
-        }
-        else
-        { //not a system icon
-            hRes = FindResourceW(hinst,lpszCursor,RT_CURSORW);
-            if(!hRes)  {
-                hRes = FindResourceW(hinst,lpszCursor,RT_GROUP_CURSORW);
-                restype = RT_GROUP_CURSORA;
-            }
-            if(hRes) {
-                 lpOS2Resdata = ConvertResourceToOS2(hinst, restype, hRes);
-                 hCursor = OSLibWinCreatePointer(lpOS2Resdata, cxDesired, cyDesired);
-                 FreeOS2Resource(lpOS2Resdata);
-            }
-            else hCursor = 0;
-        }
-    }
-    dprintf(("LoadCursorA %x from %x returned %x\n", lpszCursor, hinst, hCursor));
-
-    return(hCursor);
 }
 //******************************************************************************
 //******************************************************************************
@@ -465,24 +404,26 @@ HANDLE WIN32API LoadImageW(HINSTANCE hinst, LPCWSTR lpszName, UINT uType,
         }
         case IMAGE_ICON:
         {
+#ifdef __WIN32OS2__
+            ULONG palEnts = (1 << ScreenBitsPerPel);
+#else
             HDC hdc = GetDC(0);
             UINT palEnts = GetSystemPaletteEntries(hdc, 0, 0, NULL);
             if (palEnts == 0)
                 palEnts = 256;
             ReleaseDC(0, hdc);
+#endif
 
             hRet = CURSORICON_Load(hinst, lpszName, cxDesired, cyDesired,  palEnts, FALSE, fuLoad);
             break;
         }
 
         case IMAGE_CURSOR:
-            hRet = (HANDLE)LoadCursorW(hinst, lpszName, cxDesired, cyDesired, fuLoad);
-            break;
-//            return CURSORICON_Load(hinst, name, desiredx, desiredy, 1, TRUE, loadflags);
+            return CURSORICON_Load(hinst, lpszName, cxDesired, cyDesired, 1, TRUE, fuLoad);
 
         default:
-                dprintf(("LoadImageW: unsupported type %d!!", uType));
-                return 0;
+            dprintf(("LoadImageW: unsupported type %d!!", uType));
+            return 0;
   }
   dprintf(("LoadImageW returned %x\n", (int)hRet));
 
@@ -517,11 +458,10 @@ HICON WINAPI CopyImage(HANDLE hnd, UINT type, INT desiredx,
         case IMAGE_ICON:
                 return (HANDLE)CURSORICON_ExtCopy(hnd, type, desiredx, desiredy, flags);
         case IMAGE_CURSOR:
-        /* Should call CURSORICON_ExtCopy but more testing
-         * needs to be done before we change this
-         */
-                return O32_CopyCursor(hnd);
-//              return CopyCursorIcon(hnd,type, desiredx, desiredy, flags);
+                /* Should call CURSORICON_ExtCopy but more testing
+                 * needs to be done before we change this
+                 */
+                return CURSORICON_ExtCopy(hnd,type, desiredx, desiredy, flags);
         default:
                 dprintf(("CopyImage: Unsupported type"));
     }

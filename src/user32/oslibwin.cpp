@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.88 2001-02-20 15:40:22 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.89 2001-03-27 16:17:52 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -205,6 +205,12 @@ BOOL OSLibWinSetDlgItemText(HWND hwndDlg,ULONG idItem,char* pszText)
 BOOL OSLibWinQueryPointerPos(PPOINT pptlPoint)
 {
   return WinQueryPointerPos(HWND_DESKTOP,(PPOINTL)pptlPoint);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinSetPointerPos(int x, int y)
+{
+  return WinSetPointerPos(HWND_DESKTOP, x, y);
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.93 2001-03-24 15:40:56 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.94 2001-03-27 16:17:52 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -333,95 +333,10 @@ BOOL WIN32API ClipCursor(const RECT * lpRect)
 }
 //******************************************************************************
 //******************************************************************************
-HCURSOR WIN32API CreateCursor( HINSTANCE hInst, int xHotSpot, int yHotSpot, int nWidth, int nHeight, const VOID *pvANDPlane, const VOID *pvXORPlane)
-{
-    dprintf(("USER32:  CreateCursor\n"));
-    return O32_CreateCursor(hInst,xHotSpot,yHotSpot,nWidth,nHeight,pvANDPlane,pvXORPlane);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API DestroyCursor( HCURSOR hCursor)
-{
-    dprintf(("USER32:  DestroyCursor\n"));
-    return O32_DestroyCursor(hCursor);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API GetClipCursor( LPRECT lpRect)
 {
     dprintf(("USER32:  GetClipCursor\n"));
     return O32_GetClipCursor(lpRect);
-}
-//******************************************************************************
-//******************************************************************************
-HCURSOR WIN32API GetCursor(void)
-{
-    dprintf2(("USER32:  GetCursor\n"));
-    return O32_GetCursor();
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetCursorPos( PPOINT lpPoint)
-{
-    dprintf2(("USER32:  GetCursorPos\n"));
-
-    if (!lpPoint) return FALSE;
-    if (OSLibWinQueryPointerPos(lpPoint)) //POINT == POINTL
-    {
-      mapScreenPoint((OSLIBPOINT*)lpPoint);
-      return TRUE;
-    } else return FALSE;
-}
-//******************************************************************************
-//******************************************************************************
-HCURSOR WIN32API SetCursor( HCURSOR hcur)
-{
- HCURSOR rc;
-
-    rc = O32_SetCursor(hcur);
-    dprintf(("USER32: SetCursor %x (prev %x (%x))\n", hcur, rc, O32_GetCursor()));
-    return rc;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SetCursorPos( int X, int Y)
-{
-    dprintf(("USER32:  SetCursorPos %d %d", X,Y));
-    return O32_SetCursorPos(X,Y);
-}
-/*****************************************************************************
- * Name      : BOOL WIN32API SetSystemCursor
- * Purpose   : The SetSystemCursor function replaces the contents of the system
- *             cursor specified by dwCursorId with the contents of the cursor
- *             specified by hCursor, and then destroys hCursor. This function
- *             lets an application customize the system cursors.
- * Parameters: HCURSOR  hCursor    set specified system cursor to this cursor's
- *                                 contents, then destroy this
- *             DWORD    dwCursorID system cursor specified by its identifier
- * Variables :
- * Result    : If the function succeeds, the return value is TRUE.
- *             If the function fails, the return value is FALSE. To get extended
- *             error information, call GetLastError.
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-BOOL WIN32API SetSystemCursor(HCURSOR hCursor,
-                                 DWORD   dwCursorId)
-{
-  dprintf(("USER32:SetSystemCursor (%08xh,%08x) not supported.\n",
-         hCursor,
-         dwCursorId));
-
-  return DestroyCursor(hCursor);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API ShowCursor( BOOL bShow)
-{
-    dprintf2(("USER32:  ShowCursor %d", bShow));
-    return O32_ShowCursor(bShow);
 }
 
 /* Mouse Input Functions */
