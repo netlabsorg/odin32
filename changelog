@@ -1,8 +1,13 @@
-/* $Id: changelog,v 1.2124 2002-06-03 07:24:51 sandervl Exp $ */
+/* $Id: changelog,v 1.2125 2002-06-03 12:49:36 sandervl Exp $ */
 
  2002-06-03: Sander van Leeuwen <sandervl@innotek.de>
     - USER32, OLE32:
                 o Drag and drop fixes
+    - BIN\ODINBUG:
+                o Update by Herwig Bauernfeind (0.5.6a)
+    - DOC\MANUAL:
+                o Users manual sources by Herwig Bauernfeind
+    - DOC:      o Added odinuser.inf by Herwig Bauernfeind
 
  2002-06-02: Sander van Leeuwen <sandervl@innotek.de>
     - USER32\CONTROLS:
