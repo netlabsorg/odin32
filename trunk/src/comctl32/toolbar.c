@@ -1,4 +1,4 @@
-/* $Id: toolbar.c,v 1.25 2000-01-26 18:04:30 cbratschi Exp $ */
+/* $Id: toolbar.c,v 1.26 2000-02-22 17:11:40 cbratschi Exp $ */
 /*
  * Toolbar control
  *
@@ -27,7 +27,10 @@
  *   - Microsofts controlspy examples.
  */
 
-/* WINE 991212 level */
+/*
+ - Corel 20000212 level
+ - WINE 991212 level
+*/
 
 /* CB: Odin32/WINE bugs
   - IMAGELIST_Draw draws a line too at the bottom of the bitmap (toolbar.exe)
@@ -615,7 +618,7 @@ TOOLBAR_CalcToolbar (HWND hwnd)
     /* nSepRows * (infoPtr->nBitmapHeight + 1) is the space following   */
     /* the last row.                                                    */
     infoPtr->nHeight = TOP_BORDER + (nRows + 1) * infoPtr->nButtonHeight +
-                        nSepRows * SEPARATOR_WIDTH * 2 / 3 +
+                        nSepRows * (SEPARATOR_WIDTH * 2 / 3) +
                         nSepRows * (infoPtr->nBitmapHeight + 1) +
                         BOTTOM_BORDER;
 //    TRACE (toolbar, "toolbar height %d\n", infoPtr->nHeight);
@@ -2196,12 +2199,13 @@ TOOLBAR_AutoSize (HWND hwnd)
     DWORD dwStyle = GetWindowLongA (hwnd, GWL_STYLE);
     RECT parent_rect;
     HWND parent;
-    /* INT32  x, y; */
+    INT  x, y;
     INT  cx, cy;
     UINT uPosFlags = 0;
 
-//    TRACE (toolbar, "resize forced!\n");
+    //TRACE (toolbar, "resize forced!\n");
 
+    x = y = 0;
     parent = GetParent (hwnd);
     GetClientRect(parent, &parent_rect);
 
@@ -2224,8 +2228,15 @@ TOOLBAR_AutoSize (HWND hwnd)
     if (!(dwStyle & CCS_NODIVIDER))
         cy += GetSystemMetrics(SM_CYEDGE);
 
+    if (dwStyle & WS_BORDER)
+    {
+        x = y = 1;
+        cy += GetSystemMetrics(SM_CYEDGE);
+        cx += GetSystemMetrics(SM_CYEDGE);
+    }
+
     infoPtr->bAutoSize = TRUE;
-    SetWindowPos (hwnd, HWND_TOP, parent_rect.left, parent_rect.top,
+    SetWindowPos (hwnd, HWND_TOP, parent_rect.left - x, parent_rect.top - y,
                     cx, cy, uPosFlags);
 
     return 0;
@@ -2289,6 +2300,7 @@ TOOLBAR_CheckButton (HWND hwnd, WPARAM wParam, LPARAM lParam)
     HDC hdc;
     INT nIndex;
     INT nOldIndex = -1;
+    BOOL bChecked = FALSE;
 
     nIndex = TOOLBAR_GetButtonIndex (infoPtr, (INT)wParam);
     if (nIndex == -1)
@@ -2298,6 +2310,8 @@ TOOLBAR_CheckButton (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     if (!(btnPtr->fsStyle & TBSTYLE_CHECK))
         return FALSE;
+
+    bChecked = (btnPtr->fsState & TBSTATE_CHECKED) ? TRUE : FALSE;
 
     if (LOWORD(lParam) == FALSE)
         btnPtr->fsState &= ~TBSTATE_CHECKED;
@@ -2313,11 +2327,14 @@ TOOLBAR_CheckButton (HWND hwnd, WPARAM wParam, LPARAM lParam)
         btnPtr->fsState |= TBSTATE_CHECKED;
     }
 
-    hdc = GetDC (hwnd);
-    if (nOldIndex != -1)
-        TOOLBAR_DrawButton (hwnd, &infoPtr->buttons[nOldIndex], hdc);
-    TOOLBAR_DrawButton (hwnd, btnPtr, hdc);
-    ReleaseDC (hwnd, hdc);
+    if( bChecked != LOWORD(lParam) )
+    {
+      hdc = GetDC (hwnd);
+      if (nOldIndex != -1)
+          TOOLBAR_DrawButton (hwnd, &infoPtr->buttons[nOldIndex], hdc);
+     TOOLBAR_DrawButton (hwnd, btnPtr, hdc);
+      ReleaseDC (hwnd, hdc);
+    }
 
     /* FIXME: Send a WM_NOTIFY?? */
 
@@ -2438,20 +2455,26 @@ TOOLBAR_EnableButton (HWND hwnd, WPARAM wParam, LPARAM lParam)
     TBUTTON_INFO *btnPtr;
     HDC hdc;
     INT nIndex;
+    BOOL bEnabled = FALSE;
 
     nIndex = TOOLBAR_GetButtonIndex (infoPtr, (INT)wParam);
     if (nIndex == -1)
         return FALSE;
 
     btnPtr = &infoPtr->buttons[nIndex];
+    bEnabled = (btnPtr->fsState & TBSTATE_ENABLED )? TRUE : FALSE ;
+
     if (LOWORD(lParam) == FALSE)
         btnPtr->fsState &= ~(TBSTATE_ENABLED | TBSTATE_PRESSED);
     else
         btnPtr->fsState |= TBSTATE_ENABLED;
 
-    hdc = GetDC (hwnd);
-    TOOLBAR_DrawButton (hwnd, btnPtr, hdc);
-    ReleaseDC (hwnd, hdc);
+    if( bEnabled !=  LOWORD(lParam) )
+    {
+      hdc = GetDC (hwnd);
+      TOOLBAR_DrawButton (hwnd, btnPtr, hdc);
+      ReleaseDC (hwnd, hdc);
+    }
 
     return TRUE;
 }
@@ -3229,6 +3252,11 @@ TOOLBAR_SetBitmapSize (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     if (((INT)LOWORD(lParam) <= 0) || ((INT)HIWORD(lParam) <= 0)) return FALSE;
 
+    /* Bitmap size can only be set before adding any button to the toolbar
+       according to the documentation.  */
+    if( infoPtr->nNumButtons != 0 )
+        return FALSE;
+
     infoPtr->nBitmapWidth = (INT)LOWORD(lParam);
     infoPtr->nBitmapHeight = (INT)HIWORD(lParam);
 
@@ -3337,6 +3365,11 @@ TOOLBAR_SetButtonSize (HWND hwnd, WPARAM wParam, LPARAM lParam)
     TOOLBAR_INFO *infoPtr = TOOLBAR_GetInfoPtr (hwnd);
 
     if (((INT)LOWORD(lParam) <= 0) || ((INT)HIWORD(lParam) <= 0)) return FALSE;
+
+    /* Button size can only be set before adding any button to the toolbar
+       according to the documentation.  */
+    if( infoPtr->nNumButtons != 0 )
+        return FALSE;
 
     infoPtr->nButtonWidth = (INT)LOWORD(lParam);
     infoPtr->nButtonHeight = (INT)HIWORD(lParam);
@@ -3669,7 +3702,7 @@ TOOLBAR_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     /* initialize info structure */
     infoPtr->nButtonHeight = 22;
-    infoPtr->nButtonWidth = 23;
+    infoPtr->nButtonWidth = 24;
     infoPtr->nBitmapHeight = 15;
     infoPtr->nBitmapWidth = 16;
 
@@ -4100,6 +4133,8 @@ TOOLBAR_NCPaint (HWND hwnd, WPARAM wParam, LPARAM lParam)
     {
         GetWindowRect (hwnd, &rcWindow);
         OffsetRect (&rcWindow, -rcWindow.left, -rcWindow.top);
+        if( dwStyle & WS_BORDER )
+            OffsetRect (&rcWindow, 1, 1);
         DrawEdge (hdc, &rcWindow, EDGE_ETCHED, BF_TOP);
     }
 
@@ -4161,7 +4196,7 @@ TOOLBAR_Size (HWND hwnd, WPARAM wParam, LPARAM lParam)
     DWORD dwStyle = GetWindowLongA (hwnd, GWL_STYLE);
     RECT parent_rect;
     HWND parent;
-    INT  x,y,cx,cy;
+    INT  x = 0,y = 0,cx,cy;
     INT  flags;
     UINT uPosFlags = 0;
 
@@ -4212,7 +4247,14 @@ TOOLBAR_Size (HWND hwnd, WPARAM wParam, LPARAM lParam)
         if (!(dwStyle & CCS_NODIVIDER))
             cy += GetSystemMetrics(SM_CYEDGE);
 
-        SetWindowPos (hwnd, 0, x, y,
+        if (dwStyle & WS_BORDER)
+        {
+            x = y = 1;
+            cy += GetSystemMetrics(SM_CYEDGE);
+            cx += GetSystemMetrics(SM_CYEDGE);
+        }
+
+        SetWindowPos (hwnd, 0, parent_rect.left - x, parent_rect.top - y,
                         cx, cy, uPosFlags | SWP_NOZORDER);
     }
     return 0;
@@ -4587,9 +4629,6 @@ TOOLBAR_Register (VOID)
 {
     WNDCLASSA wndClass;
 
-//SvL: Don't check this now
-//    if (GlobalFindAtomA (TOOLBARCLASSNAMEA)) return;
-
     ZeroMemory (&wndClass, sizeof(WNDCLASSA));
     wndClass.style         = CS_GLOBALCLASS | CS_DBLCLKS;
     wndClass.lpfnWndProc   = (WNDPROC)ToolbarWindowProc;
@@ -4606,7 +4645,6 @@ TOOLBAR_Register (VOID)
 VOID
 TOOLBAR_Unregister (VOID)
 {
-    if (GlobalFindAtomA (TOOLBARCLASSNAMEA))
-        UnregisterClassA (TOOLBARCLASSNAMEA, (HINSTANCE)NULL);
+    UnregisterClassA (TOOLBARCLASSNAMEA, (HINSTANCE)NULL);
 }
 

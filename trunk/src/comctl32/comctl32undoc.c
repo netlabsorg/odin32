@@ -1,4 +1,4 @@
-/* $Id: comctl32undoc.c,v 1.18 2000-02-18 17:13:37 cbratschi Exp $ */
+/* $Id: comctl32undoc.c,v 1.19 2000-02-22 17:11:38 cbratschi Exp $ */
 /*
  * Undocumented functions from COMCTL32.DLL
  *
@@ -11,7 +11,10 @@
  *
  */
 
-/* WINE 20000130 level */
+/*
+ - Corel 20000212 level
+ - WINE 20000130 level
+*/
 
 /* CB: todo
   - porting/implementing string functions
@@ -1484,23 +1487,48 @@ DPA_QuickSort (LPVOID *lpPtrs, INT l, INT r,
     LPVOID t, v;
     INT  i, j;
 
-//    TRACE (commctrl, "l=%i r=%i\n", l, r);
+    //TRACE("l=%i r=%i\n", l, r);
 
     i = l;
     j = r;
-    v = lpPtrs[(int)(l+r)/2];
-    do {
-        while ((pfnCompare)(lpPtrs[i], v, lParam) < 0) i++;
-        while ((pfnCompare)(lpPtrs[j], v, lParam) > 0) j--;
-        if (i <= j)
+
+    if ( i >= j )
+        return;
+    else if ( i == (j - 1) )
+    {
+        if ( (pfnCompare)( lpPtrs[i], lpPtrs[j], lParam ) > 0 )
         {
+            t = lpPtrs[i];
+            lpPtrs[i] = lpPtrs[j];
+            lpPtrs[j] = t;
+        }
+        return;
+    }
+
+    v = lpPtrs[(int)(l+r)/2];
+
+    while ( i < j)
+    {
+        while ( (pfnCompare)( lpPtrs[i], v, lParam ) <= 0 && i < j )
+            i++;
+
+        while ( (pfnCompare)( v, lpPtrs[j], lParam ) <= 0 && i < j )
+            j--;
+
+        if ( i < j )
+        {
+            /* Swap the values; increment i and decrement j to avoid
+               infinite conditions where i and j swap forever */
             t = lpPtrs[i];
             lpPtrs[i++] = lpPtrs[j];
             lpPtrs[j--] = t;
         }
-    } while (i <= j);
-    if (l < j) DPA_QuickSort (lpPtrs, l, j, pfnCompare, lParam);
-    if (i < r) DPA_QuickSort (lpPtrs, i, r, pfnCompare, lParam);
+    }
+
+    if ( i - 1 > l )
+        DPA_QuickSort (lpPtrs, l, i - 1, pfnCompare, lParam);
+    if ( j + 1 < r )
+        DPA_QuickSort (lpPtrs, j + 1, r, pfnCompare, lParam);
 }
 
 
