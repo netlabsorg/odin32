@@ -1,7 +1,7 @@
-/* $Id: changelog,v 1.2224 2002-07-17 21:10:42 achimha Exp $ */
+/* $Id: changelog,v 1.2225 2002-07-18 20:25:59 sandervl Exp $ */
 
- 2002-07-17: Achim Hasenmueller <achimha@innotek.de>
-    - KERNEL32: o improved PE loader documentation
+ 2002-07-18: Sander van Leeuwen <sandervl@innotek.de> 
+    - ODINCRT:  o DosInitializeCriticalSection bugfix
 
  2002-07-16: Sander van Leeuwen <sandervl@innotek.de> 
     - KERNEL32: o Fix for loading PE images in low memory (introduced yesterday)
