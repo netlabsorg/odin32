@@ -1,4 +1,4 @@
-/* $Id: win32wnd.cpp,v 1.32 1999-08-28 14:09:30 sandervl Exp $ */
+/* $Id: win32wnd.cpp,v 1.33 1999-08-28 17:24:45 dengert Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -971,10 +971,19 @@ ULONG Win32Window::MsgPaint(ULONG tmp1, ULONG tmp2)
 //******************************************************************************
 ULONG Win32Window::MsgEraseBackGround(HDC hdc)
 {
-    if(isIcon) {
-            return SendInternalMessageA(WM_ICONERASEBKGND, hdc, 0);
-    }
-    else    return SendInternalMessageA(WM_ERASEBKGND, hdc, 0);
+    ULONG rc;
+    HDC   hdcErase = hdc;
+
+    if (hdcErase == 0)
+        hdcErase = O32_GetDC(OS2Hwnd);
+
+    if(isIcon)
+        rc = SendInternalMessageA(WM_ICONERASEBKGND, hdcErase, 0);
+    else
+        rc = SendInternalMessageA(WM_ERASEBKGND, hdcErase, 0);
+    if (hdc == 0)
+        O32_ReleaseDC(OS2Hwnd, hdcErase);
+    return (rc);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1657,7 +1666,19 @@ BOOL Win32Window::UpdateWindow()
 
     if(OSLibWinQueryUpdateRect(OS2Hwnd, &rect))
     {//update region not empty
-        SendInternalMessageA((isIcon) ? WM_PAINTICON : WM_PAINT, 0, 0);
+        HDC hdc;
+
+        hdc = O32_GetDC(OS2Hwnd);
+        if (isIcon)
+        {
+            SendInternalMessageA(WM_ICONERASEBKGND, (WPARAM)hdc, 0);
+            SendInternalMessageA(WM_PAINTICON, 0, 0);
+        } else
+        {
+            SendInternalMessageA(WM_ERASEBKGND, (WPARAM)hdc, 0);
+            SendInternalMessageA(WM_PAINT, 0, 0);
+        }
+        O32_ReleaseDC(OS2Hwnd, hdc);
     }
     return TRUE;
 }

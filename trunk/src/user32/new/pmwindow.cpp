@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.22 1999-08-27 17:50:56 dengert Exp $ */
+/* $Id: pmwindow.cpp,v 1.23 1999-08-28 17:24:45 dengert Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -211,6 +211,8 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
       WINDOWPOS wp;
       ULONG     parentHeight = 0;
       HWND      hParent = NULLHANDLE, hFrame = NULLHANDLE;
+      LONG      yDelta = pswp->cy - pswpo->cy;
+      ULONG     classStyle;
 
         dprintf(("OS2: WM_WINDOWPOSCHANGED %x %x (%d,%d) (%d,%d)", hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
 
@@ -233,32 +235,69 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
            Win32Window *wndAfter = Win32Window::GetWindowFromOS2Handle(pswp->hwndInsertBehind);
            wp.hwndInsertAfter = wndAfter->getWindowHandle();
         }
+        classStyle = win32wnd->getClass()->getStyle();
+//        if (yDelta != 0)
+        if ((yDelta != 0) && ((classStyle & CS_VREDRAW_W) ||
+           ((classStyle & CS_HREDRAW_W) && (pswp->cx != pswpo->cx))))
+        {
+            HENUM henum = WinBeginEnumWindows(pswp->hwnd);
+            SWP swp[10];
+            int i = 0;
+            HWND hwnd;
+
+            dprintf(("move children"));
+            while ((hwnd = WinGetNextWindow(henum)) != NULLHANDLE)
+            {
+#if 0
+               /* Do not move MDI clients.  MDI clients are a special case,
+                * even though they are bottom aligned they are always supposed
+                * to be the same size as their parent.  This code is an
+                * optimization and will not work correctly if the this
+                * assumption is incorrect.
+                */
+               WinBase *pBase = (WinBase *)WinQueryDAXData( hwnd );
+               if ( pBase && pBase->typeOf() == mdiClient )
+               {
+                  continue;
+               }
+#endif
+               // We don't know how many children we have so we'll move ten
+               // at a time.  Not very nice, I know.
+               WinQueryWindowPos(hwnd, &(swp[i]));
+
+               // The SWP flags are all set but PM will ignore any
+               // superflous ones, so keep them as they contain useful
+               // minimise and maximise flags.
+               swp[i].y += yDelta;
+
+               if (i == 9)
+               {
+                  WinSetMultWindowPos(GetThreadHAB(), swp, 10);
+                  i = 0;
+               }
+               else
+               {
+                  i++;
+               }
+            }
+
+            WinEndEnumWindows(henum);
+
+            // Any remaining windows?
+            if (i)
+               WinSetMultWindowPos(GetThreadHAB(), swp, i);
+        }
         win32wnd->MsgPosChanged((LPARAM)&wp);
+
         break;
     }
 
     case WM_ERASEBACKGROUND:
     {
-        return (MRESULT) FALSE;
+        break;
     }
     case WM_SIZE:
     {
-     SWP swp;
-
-        rc = WinQueryWindowPos(hwnd, &swp);
-        if(rc == FALSE) {
-                dprintf(("WM_SIZE: WinQueryWindowPos failed!"));
-                break;
-        }
-        dprintf(("OS2: WM_SIZE %x %x (%d,%d) (%d,%d) (%d,%d)", hwnd, swp.fl, swp.x, swp.y, swp.cx, swp.cy, SHORT1FROMMP(mp2), SHORT2FROMMP(mp2)));
-#if 0
-        if(win32wnd->MsgSize(SHORT1FROMMP(mp2), SHORT2FROMMP(mp2),
-                                (swp.fl & SWP_MINIMIZE) != 0,
-                                (swp.fl & SWP_MAXIMIZE) != 0))
-        {
-                goto RunDefWndProc;
-        }
-#endif
         break;
     }
 
