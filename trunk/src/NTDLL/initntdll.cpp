@@ -36,30 +36,18 @@
 #include <initdll.h>
 #include <exitlist.h>
 
+
 extern "C" {
- void __ctordtorInit (void);
- void __ctordtorTerm (void);
- int _CRT_init (void);
- void _CRT_term (void);
+BOOL WIN32API NTDLL_LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved);
+extern DWORD _Resource_PEResTab;
 }
 
+static HMODULE dllHandle = 0;
 
-static void APIENTRY cleanup(ULONG reason);
-
-/****************************************************************************/
-/* _DLL_InitTerm is the function that gets called by the operating system   */
-/* loader when it loads and frees this DLL for each process that accesses   */
-/* this DLL.  However, it only gets called the first time the DLL is loaded */
-/* and the last time it is freed for a particular process.  The system      */
-/* linkage convention MUST be used because the operating system loader is   */
-/* calling this function.                                                   */
-/****************************************************************************/
-unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
-                                   ulFlag)
+//******************************************************************************
+//******************************************************************************
+ULONG APIENTRY inittermNTDLL(ULONG hModule, ULONG ulFlag)
 {
-   size_t i;
-   APIRET rc;
-
    /*-------------------------------------------------------------------------*/
    /* If ulFlag is zero then the DLL is being loaded so initialization should */
    /* be performed.  If ulFlag is 1 then the DLL is being freed so            */
@@ -68,19 +56,21 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
    switch (ulFlag) {
       case 0 :
-         if (_CRT_init () != 0)
-           return 0;
-         __ctordtorInit ();
 
-         rc = DosExitList(EXITLIST_NONCRITDLL|EXLST_ADD, cleanup);
-         if (rc)
-            return 0UL;
+         CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
+         dllHandle = RegisterLxDll(hModule, (WIN32DLLENTRY)NTDLL_LibMain, (PVOID)&_Resource_PEResTab,
+                                   0, 0, 0);
+         if(dllHandle == 0)
+             return 0UL;
 
-         return inittermNTDLL(hModule, ulFlag);
+         dprintf(("ntdll init %s %s (%x)", __DATE__, __TIME__, inittermNTDLL));
 
+         break;
       case 1 :
-         return inittermNTDLL(hModule, ulFlag);
-
+         if(dllHandle) {
+             UnregisterLxDll(dllHandle);
+         }
+         break;
       default  :
          return 0UL;
    }
@@ -89,17 +79,6 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
    /* A non-zero value must be returned to indicate success.  */
    /***********************************************************/
    return 1UL;
-}
-//******************************************************************************
-//******************************************************************************
-static void APIENTRY cleanup(ULONG ulReason)
-{
-    dprintf(("NTDLL exit"));
-    __ctordtorTerm();
-    _CRT_term ();
-
-    DosExitList(EXLST_EXIT, cleanup);
-    return ;
 }
 //******************************************************************************
 //******************************************************************************

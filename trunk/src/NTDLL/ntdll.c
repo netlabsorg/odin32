@@ -1,4 +1,4 @@
-/* $Id: ntdll.cpp,v 1.7 2003-01-16 15:22:37 sandervl Exp $ */
+/* $Id: ntdll.c,v 1.4 2003-01-22 12:56:08 sandervl Exp $ */
 
 /*
  *
@@ -30,7 +30,7 @@
  * Includes                                                                  *
  *****************************************************************************/
 
-#include <os2win.h>
+#include <windows.h>
 #include <winnt.h>
 #include <ntdef.h>
 #ifndef __EMX__
@@ -44,7 +44,7 @@
 
 #include "ntdll.h"
 #include <ntdllsec.h>
-
+#include <versionos2.h>
 /*****************************************************************************
  * Types & Defines                                                           *
  *****************************************************************************/
@@ -83,15 +83,15 @@ void __cdecl DbgPrint(LPCSTR lpcstrFormat,LPVOID args)
   //@@@PH raise debug exception if running in debugger
 }
 
-
-BOOL WINAPI NTDLL_LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
+//******************************************************************************
+BOOL WIN32API NTDLL_LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 {
     dprintf(("NTDLL_LibMain: 0x%x 0x%lx %p\n", hinstDLL, fdwReason, lpvReserved));
 
     switch (fdwReason) {
     case DLL_PROCESS_ATTACH:
     {
-     SID_IDENTIFIER_AUTHORITY sidIdAuth = {0};
+        SID_IDENTIFIER_AUTHORITY sidIdAuth = {0};
 
      	NTDLL_hHeap = HeapCreate(0, 0x10000, 0);
 
@@ -126,4 +126,3 @@ BOOL WINAPI NTDLL_LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserve
     }
     return TRUE;
 }
-
