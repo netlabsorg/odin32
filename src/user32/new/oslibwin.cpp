@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.24 1999-08-25 15:08:50 dengert Exp $ */
+/* $Id: oslibwin.cpp,v 1.25 1999-08-27 17:50:56 dengert Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -63,7 +63,7 @@ HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
         if(pszName)
                 dwFrameStyle |= FCF_TITLEBAR;
 
-        dwFrameStyle |= FCF_TASKLIST;
+        dwFrameStyle |= FCF_TASKLIST | FCF_NOMOVEWITHOWNER | FCF_NOBYTEALIGN;
         *hwndFrame = WinCreateStdWindow(hwndParent, dwWinStyle,
                                        &dwFrameStyle, WIN32_STDCLASS,
                                        "", dwClientStyle, 0, 0, &hwndClient);
@@ -402,7 +402,7 @@ BOOL OSLibWinQueryWindowPos (HWND hwnd, PSWP pswp)
 }
 //******************************************************************************
 //******************************************************************************
-void OSLibMapSWPtoWINDOWPOS(PSWP pswp, PWINDOWPOS pwpos, PSWP pswpOld, ULONG parentHeight)
+void OSLibMapSWPtoWINDOWPOS(PSWP pswp, PWINDOWPOS pwpos, PSWP pswpOld, HWND hParent, HWND hFrame)
 {
    HWND hWindow            = pswp->hwnd;
    HWND hWndInsertAfter    = pswp->hwndInsertBehind;
@@ -411,6 +411,7 @@ void OSLibMapSWPtoWINDOWPOS(PSWP pswp, PWINDOWPOS pwpos, PSWP pswpOld, ULONG par
    long cx                 = pswp->cx;
    long cy                 = pswp->cy;
    UINT fuFlags            = (UINT)pswp->fl;
+   ULONG parentHeight;
 
    HWND  hWinAfter;
    ULONG flags = 0;
@@ -456,6 +457,30 @@ void OSLibMapSWPtoWINDOWPOS(PSWP pswp, PWINDOWPOS pwpos, PSWP pswpOld, ULONG par
    //**************************************************************************
    if ( fuFlags & (SWP_MOVE | SWP_SIZE) )
    {
+      if (hParent == NULLHANDLE)
+      {
+        ULONG Offset;
+        POINTL pt = {0, 0};
+
+        Offset = OSLibGetWindowHeight(hFrame) - cy;
+        parentHeight = ScreenHeight;
+
+        cx += 2 * x;
+        cy += Offset;
+        WinMapWindowPoints (hFrame, HWND_DESKTOP, &pt, 1);
+        x = pt.x;
+        y = pt.y;
+
+        pswpOld->cx += 2 * pswpOld->x;
+        pswpOld->cy += Offset;
+        pswpOld->x   = pt.x;
+        pswpOld->y   = pt.y;
+      }
+      else
+      {
+        parentHeight = OSLibGetWindowHeight(hParent);
+      }
+
       if (fuFlags & SWP_SIZE)
       {
          // If height is changing we MUST move to maintain top-left alignment
@@ -484,9 +509,8 @@ void OSLibMapSWPtoWINDOWPOS(PSWP pswp, PWINDOWPOS pwpos, PSWP pswpOld, ULONG par
       // Y inversion here... old Y is top left corner of window
       // relative to top left of parent.
       //********************************************************
-      y = parentHeight - y - cy;
-
-      LONG oldY = parentHeight - pswpOld->y - pswpOld->cy;
+      y          = parentHeight - y - cy;
+      LONG oldY  = parentHeight - pswpOld->y - pswpOld->cy;
 
       // Set the SWP_NOMOVE_W flag if the window has not moved in windows
       // coordinates.
@@ -497,6 +521,21 @@ void OSLibMapSWPtoWINDOWPOS(PSWP pswp, PWINDOWPOS pwpos, PSWP pswpOld, ULONG par
       if ( ( pswpOld->cx == cx ) && ( pswpOld->cy == cy ) )
          flags |= SWP_NOSIZE_W;
    }
+
+   if (hParent == NULLHANDLE)
+   {
+       pswpOld->x  = x + pswp->x;
+       pswpOld->y  = y + cy - pswp->y - pswp->cy;
+   }
+   else {
+       pswpOld->x  = pswp->x;
+       pswpOld->y  = parentHeight - pswp->y - cy;
+   }
+   pswpOld->cx = pswp->cx;
+   pswpOld->cy = pswp->cy;
+
+dprintf(("window (%d,%d)(%d,%d)  client (%d,%d)(%d,%d)",
+         x,y,cx,cy, pswpOld->x,pswpOld->y,pswpOld->cx,pswpOld->cy));
 
    // Fill in the WINDOWPOS structure with the now calculated PM values.
    pwpos->flags            = (UINT)flags;
@@ -509,7 +548,7 @@ void OSLibMapSWPtoWINDOWPOS(PSWP pswp, PWINDOWPOS pwpos, PSWP pswpOld, ULONG par
 }
 //******************************************************************************
 //******************************************************************************
-void OSLibMapWINDOWPOStoSWP(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, ULONG parentHeight)
+void OSLibMapWINDOWPOStoSWP(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, HWND hParent, HWND hFrame)
 {
    HWND hWnd              = pwpos->hwnd;
    HWND hWndInsertAfter   = pwpos->hwndInsertAfter;
@@ -518,6 +557,7 @@ void OSLibMapWINDOWPOStoSWP(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, ULONG par
    long cx                = pwpos->cx;
    long cy                = pwpos->cy;
    UINT fuFlags           = pwpos->flags;
+   ULONG parentHeight;
 
    HWND  hWinAfter;
    ULONG flags = 0;
@@ -570,6 +610,11 @@ void OSLibMapWINDOWPOStoSWP(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, ULONG par
    //**************************************************************************
    if ( flags & (SWP_MOVE | SWP_SIZE) )
    {
+      if (hParent == NULLHANDLE)
+        parentHeight = ScreenHeight;
+      else
+        parentHeight = OSLibGetWindowHeight(hParent);
+
       //**********************************************************
       // We'll need both a y and cy for the Y inversion code.
       // If either wasn't passed in, calculate the current value.
@@ -616,7 +661,7 @@ void OSLibMapWINDOWPOStoSWP(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, ULONG par
          flags &= ~SWP_SIZE;
    }
 
-   // Fill in the WINDOWPOS structure with the now calculated PM values.
+   // Fill in the SWP structure with the now calculated PM values.
    pswp->fl               = flags;
    pswp->cy               = cy;
    pswp->cx               = cx;

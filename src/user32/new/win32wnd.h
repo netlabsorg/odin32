@@ -1,4 +1,4 @@
-/* $Id: win32wnd.h,v 1.25 1999-08-25 15:08:51 dengert Exp $ */
+/* $Id: win32wnd.h,v 1.26 1999-08-27 17:50:57 dengert Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -101,6 +101,15 @@ virtual  WORD   GetWindowWord(int index);
          BOOL   isChild();
          PRECT  getClientRect()                 { return &rectClient; };
          PRECT  getWindowRect()                 { return &rectWindow; };
+void   setClientRect(LONG left, LONG top, LONG right, LONG bottom)
+{ rectClient.left  = left;  rectClient.top    = top;
+  rectClient.right = right; rectClient.bottom = bottom;
+};
+void   setWindowRect(LONG left, LONG top, LONG right, LONG bottom)
+{ rectWindow.left  = left;  rectWindow.top    = top;
+  rectWindow.right = right; rectWindow.bottom = bottom;
+};
+         void   setWindowRect(PRECT rect)       { rectWindow = *rect; };
 
          DWORD  getFlags()                      { return flags; };
          void   setFlags(DWORD newflags)        { flags = newflags; };
