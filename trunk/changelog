@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2155 2002-06-12 14:27:47 sandervl Exp $ */
+/* $Id: changelog,v 1.2156 2002-06-13 13:45:06 sandervl Exp $ */
+
+ 2002-06-13: Platon Fomichev <platon@innotek.de>
+    - USER32:   o Only minimize or maximize window if appropriate style flag set
 
  2002-06-12: Sander van Leeuwen <sandervl@innotek.de>
     - KERNEL32: o If bytes present in COM device buffer, read them directly; 
