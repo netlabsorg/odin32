@@ -1,4 +1,4 @@
-# $Id: Dev16.mak,v 1.1 2002-03-10 02:45:48 bird Exp $
+# $Id: Dev16.mak,v 1.2 2002-03-10 04:26:17 bird Exp $
 
 #
 # kKrnlLib/dev16
@@ -25,6 +25,7 @@ TARGET_MODE = SYSLIB
 TARGET_NAME = kKrnlLib_dev16
 CC_INCLUDES = -I../include/kLib -I../include -I$(PATH_DDKBASE)/h -I$(PATH_MSC)/include -I$(PATH_TOOLKIT)/h
 ALL_DEFINES = -DKKRNLLIB
+CC_SEGS     = -NTCODE16 -NDDATA16
 
 
 #
