@@ -1,4 +1,4 @@
-# $Id: kernel32.mak,v 1.28 2002-04-30 09:36:09 sandervl Exp $
+# $Id: kernel32.mak,v 1.29 2002-05-09 13:55:33 sandervl Exp $
 
 #
 # Odin32 API
@@ -117,6 +117,7 @@ $(OBJDIR)\fileio.obj \
 $(OBJDIR)\hmtoken.obj \
 $(OBJDIR)\atom.obj \
 $(OBJDIR)\disk.obj \
+$(OBJDIR)\osliblvm.obj \
 $(OBJDIR)\directory.obj \
 $(OBJDIR)\hmmmap.obj \
 $(OBJDIR)\oslibexcept.obj \

@@ -1,4 +1,4 @@
-/* $Id: hmdisk.h,v 1.8 2001-12-05 14:16:01 sandervl Exp $ */
+/* $Id: hmdisk.h,v 1.9 2002-05-09 13:55:33 sandervl Exp $ */
 
 #ifndef __HMDISK_H__
 #define __HMDISK_H__
@@ -10,6 +10,8 @@
 #include <handlemanager.h>
 #include "HMDevice.h"
 #include "HMObjects.h"
+
+#define VOLUME_NAME_PREFIX  "\\\\?\\Volume\\"
 
 /*****************************************************************************
  * Structures                                                                *

@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.42 2002-04-13 06:21:39 bird Exp $ */
+/* $Id: hmdisk.cpp,v 1.43 2002-05-09 13:55:33 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -11,15 +11,17 @@
  */
 #include <os2win.h>
 #include <string.h>
+#include <versionos2.h>
 
 #include <misc.h>
 #include "hmdisk.h"
 #include "mmap.h"
-#include "oslibdos.h"
 #include <win\winioctl.h>
 #include <win\ntddscsi.h>
 #include <win\wnaspi32.h>
 #include <win\aspi.h>
+#include "oslibdos.h"
+#include "osliblvm.h"
 
 #define DBG_LOCALLOG    DBG_hmdisk
 #include "dbglocal.h"
@@ -49,6 +51,7 @@ typedef struct
 HMDeviceDiskClass::HMDeviceDiskClass(LPCSTR lpDeviceName) : HMDeviceKernelObjectClass(lpDeviceName)
 {
     HMDeviceRegisterEx("\\\\.\\PHYSICALDRIVE", this, NULL);
+    HMDeviceRegisterEx(VOLUME_NAME_PREFIX, this, NULL);
 }
 
 /*****************************************************************************
@@ -82,6 +85,11 @@ BOOL HMDeviceDiskClass::FindDevice(LPCSTR lpClassDevName, LPCSTR lpDeviceName, i
     //\\.\x:                -> length 6
     //\\.\PHYSICALDRIVEn    -> length 18
     if(namelength != 6 && namelength != 18) {
+        if(VERSION_IS_WIN2000_OR_HIGHER()) {
+            if(!strncmp(lpDeviceName, VOLUME_NAME_PREFIX, sizeof(VOLUME_NAME_PREFIX)-1)) {
+                return TRUE;
+            }
+        }
         return FALSE;
     }
 
@@ -123,9 +131,30 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
     }
 
     char szDrive[4];
-    szDrive[0] = *lpFileName;
     szDrive[1] = ':';
     szDrive[2] = '\0';
+
+    //if volume name, query 
+    if(VERSION_IS_WIN2000_OR_HIGHER() && !strncmp(lpFileName, VOLUME_NAME_PREFIX, sizeof(VOLUME_NAME_PREFIX)-1)) {
+        char *pszVolume;
+        int   length;
+
+        //strip volume name prefix (\\\\?\\Volume\\)
+        length = strlen(lpFileName);
+        pszVolume = (char *)alloca(length);
+
+        strcpy(pszVolume, &lpFileName[sizeof(VOLUME_NAME_PREFIX)-1+1]);  //-zero term + starting '{'
+        length -= sizeof(VOLUME_NAME_PREFIX)-1+1;
+        if(pszVolume[length-2] == '}') {
+            pszVolume[length-2] = 0;
+            szDrive[0] = OSLibLVMQueryDriveFromVolumeName(pszVolume);
+        }
+        else return ERROR_FILE_NOT_FOUND;
+
+    }
+    else {
+        szDrive[0] = *lpFileName;
+    }
     dwDriveType = GetDriveTypeA(szDrive);
 
     //Disable error popus. NT allows an app to open a cdrom/dvd drive without a disk inside
@@ -549,6 +578,9 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
     case IOCTL_CDROM_FIND_NEW_DEVICES:
         msg = "IOCTL_CDROM_FIND_NEW_DEVICES";
         break;
+    case IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS:
+        msg = "IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS";
+        break;
     }
     if(msg) {
         dprintf(("HMDeviceDiskClass::DeviceIoControl %s %x %d %x %d %x %x", msg, lpInBuffer, nInBufferSize,
@@ -712,6 +744,24 @@ writecheckfail:
     }
 
     case IOCTL_DISK_GET_PARTITION_INFO:
+    {
+        PPARTITION_INFORMATION pPartition = (PPARTITION_INFORMATION)lpOutBuffer;
+        if(nOutBufferSize < sizeof(PARTITION_INFORMATION) || !pPartition) {
+            SetLastError(ERROR_INSUFFICIENT_BUFFER);
+            return FALSE;
+        }
+        if(lpBytesReturned) {
+            *lpBytesReturned = sizeof(PARTITION_INFORMATION);
+        }
+        if(OSLibLVMGetPartitionInfo(drvInfo->driveLetter, pPartition)) {
+            SetLastError(ERROR_NOT_ENOUGH_MEMORY); //wrong error, but who cares
+            return FALSE;
+        }
+
+        SetLastError(ERROR_SUCCESS);
+        return TRUE;
+    }
+
     case IOCTL_DISK_LOAD_MEDIA:
     case IOCTL_DISK_MEDIA_REMOVAL:
     case IOCTL_DISK_PERFORMANCE:
@@ -722,6 +772,25 @@ writecheckfail:
     case IOCTL_SERIAL_LSRMST_INSERT:
         break;
 
+
+    case IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS:
+    {
+        PVOLUME_DISK_EXTENTS pVolExtent = (PVOLUME_DISK_EXTENTS)lpOutBuffer;
+        if(nOutBufferSize < sizeof(VOLUME_DISK_EXTENTS) || !pVolExtent) {
+            SetLastError(ERROR_INSUFFICIENT_BUFFER);
+            return FALSE;
+        }
+        if(OSLibLVMGetVolumeExtents(drvInfo->driveLetter, pVolExtent)) {
+            SetLastError(ERROR_NOT_ENOUGH_MEMORY); //wrong error, but who cares
+            return FALSE;
+        }
+
+        if(lpBytesReturned) {
+            *lpBytesReturned = sizeof(VOLUME_DISK_EXTENTS);
+        }
+        SetLastError(ERROR_SUCCESS);
+        return TRUE;
+    }
 
     // -----------
     // CDROM class
