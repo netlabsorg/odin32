@@ -1,4 +1,4 @@
-# $Id: setup.os2debvac308.mk,v 1.12 2002-08-20 19:14:32 bird Exp $
+# $Id: setup.os2debvac308.mk,v 1.13 2002-08-20 21:20:09 bird Exp $
 
 # ---OS2, DEBUG, VAC308-------------------------
 ENV_NAME="OS/2, Debug, IBM VisualAge for C++ 3.08"
@@ -79,11 +79,11 @@ CC_FLAGS_IFS=$(CXX_FLAGS_IFS) /Tdp
 !endif
 !if "$(CXX_AS_CC)" != ""
 CXX=$(CC)
-CXX_FLAGS_EXE=$(C_FLAGS_EXE) /Tdc
-CXX_FLAGS_DLL=$(C_FLAGS_DLL) /Tdc
-CXX_FLAGS_SYS=$(C_FLAGS_SYS) /Tdc
-CXX_FLAGS_VDD=$(C_FLAGS_VDD) /Tdc
-CXX_FLAGS_IFS=$(C_FLAGS_IFS) /Tdc
+CXX_FLAGS_EXE=$(CC_FLAGS_EXE) /Tdc
+CXX_FLAGS_DLL=$(CC_FLAGS_DLL) /Tdc
+CXX_FLAGS_SYS=$(CC_FLAGS_SYS) /Tdc
+CXX_FLAGS_VDD=$(CC_FLAGS_VDD) /Tdc
+CXX_FLAGS_IFS=$(CC_FLAGS_IFS) /Tdc
 !endif
 
 IMPLIB_FLAGS=/NOI /Nologo
