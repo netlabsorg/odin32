@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.4 2000-01-13 13:54:54 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.5 2000-01-13 20:11:39 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -356,43 +356,51 @@ LONG Win32BaseWindow::HandleNCCalcSize(BOOL calcValidRects,RECT *winRect)
   LONG result = WVR_ALIGNTOP | WVR_ALIGNLEFT;
   UINT style;
 
-  if (!calcValidRects) return 0;
+    if (!calcValidRects) return 0;
 
-  style = (UINT) GetClassLongA(Win32Hwnd,GCL_STYLE);
+    style = (UINT) GetClassLongA(Win32Hwnd,GCL_STYLE);
 
-  if (style & CS_VREDRAW) result |= WVR_VREDRAW;
-  if (style & CS_HREDRAW) result |= WVR_HREDRAW;
+    if (style & CS_VREDRAW) result |= WVR_VREDRAW;
+    if (style & CS_HREDRAW) result |= WVR_HREDRAW;
 
-  clientRect = &((NCCALCSIZE_PARAMS*)winRect)->rgrc[2];
-  *clientRect = rectWindow;
-  if (getParent()) mapWin32Rect(OSLIB_HWND_DESKTOP,getParent()->getOS2WindowHandle(),clientRect);
+    clientRect = &((NCCALCSIZE_PARAMS*)winRect)->rgrc[2];
+    *clientRect = rectWindow;
+#if 1
+    OffsetRect(clientRect, -clientRect->left, -clientRect->top);
+#else
+    if(getParent()) {//in parent coordinates
+        OffsetRect(clientRect, -clientRect->left, -clientRect->top);
+        MapWindowPoints(getWindowHandle(), getParent()->getWindowHandle(), (POINT *)clientRect, 2);
+    }
+    //else in screen coordinates (already in screen coordinates)
+#endif
 
-  if(!(dwStyle & WS_MINIMIZE))
-  {
-    AdjustRectOuter(&tmpRect,FALSE);
-
-    clientRect->left   -= tmpRect.left;
-    clientRect->top    -= tmpRect.top;
-    clientRect->right  -= tmpRect.right;
-    clientRect->bottom -= tmpRect.bottom;
-
-    if (HAS_MENU())
+    if(!(dwStyle & WS_MINIMIZE))
     {
-      clientRect->top +=
+        AdjustRectOuter(&tmpRect,FALSE);
+
+        clientRect->left   -= tmpRect.left;
+        clientRect->top    -= tmpRect.top;
+        clientRect->right  -= tmpRect.right;
+        clientRect->bottom -= tmpRect.bottom;
+
+        if (HAS_MENU())
+        {
+            clientRect->top +=
                 MENU_GetMenuBarHeight(Win32Hwnd,
                                        winRect->right - winRect->left,
                                        -tmpRect.left, -tmpRect.top ) + 1;
+        }
+
+        SetRect (&tmpRect, 0, 0, 0, 0);
+        AdjustRectInner(&tmpRect);
+        clientRect->left   -= tmpRect.left;
+        clientRect->top    -= tmpRect.top;
+        clientRect->right  -= tmpRect.right;
+        clientRect->bottom -= tmpRect.bottom;
     }
 
-    SetRect (&tmpRect, 0, 0, 0, 0);
-    AdjustRectInner(&tmpRect);
-    clientRect->left   -= tmpRect.left;
-    clientRect->top    -= tmpRect.top;
-    clientRect->right  -= tmpRect.right;
-    clientRect->bottom -= tmpRect.bottom;
-  }
-
-  return result;
+    return result;
 }
 //******************************************************************************
 //******************************************************************************
