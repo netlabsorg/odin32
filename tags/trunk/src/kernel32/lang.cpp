@@ -1,19 +1,20 @@
-/* $Id: lang.cpp,v 1.4 1999-06-10 20:47:52 phaller Exp $ */
+/* $Id: lang.cpp,v 1.5 1999-06-24 08:47:40 sandervl Exp $ */
 
-/*
- *
- * Project Odin Software License can be found in LICENSE.TXT
- *
- */
 /*
  * Win32 language API functions for OS/2
  *
  * Copyright 1998 Sander van Leeuwen
  * Copyright 1998 Patrick Haller
  *
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
  */
 #include <os2win.h>
 #include <winnls.h>
+#include <stdlib.h>
+#include <string.h>
+#include <winos2def.h>
 #include "unicode.h"
 
 
@@ -53,25 +54,177 @@ LANGID WIN32API GetSystemDefaultLangID(void)
   return(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US));
 }
 //******************************************************************************
-//TODO: Not complete (far from actually)!!
 //******************************************************************************
-int WIN32API GetLocaleInfoA(LCID lcid, LCTYPE LCType, LPSTR lpLCData, int cchData)
+int WIN32API GetLocaleInfoA(LCID lcid, LCTYPE LCType, LPSTR buf, int len)
 {
+  COUNTRYCODE  Country    = {0};
+  COUNTRYINFO  CtryInfo   = {0};
+  ULONG        ulInfoLen  = 0;
+
   dprintf(("KERNEL32:  OS2GetLocaleInfoA: Not complete!\n"));
-  if(cchData == 0)
-        return(1);
-  *lpLCData = '1';
-  return(1);
+  if (len && (! buf) )
+  {
+    SetLastError(ERROR_INSUFFICIENT_BUFFER);
+    return 0;
+  }
+  // Only standard. TODO: Use os2.ini PM_National section
+  DosQueryCtryInfo(sizeof(CtryInfo), &Country, &CtryInfo, &ulInfoLen);
+
+  LCType &= ~(LOCALE_NOUSEROVERRIDE|LOCALE_USE_CP_ACP);
+
+  switch(LCType)
+  {
+    case LOCALE_SDECIMAL:
+      *buf = CtryInfo.szDecimal[0];
+      return 1;
+    case LOCALE_SDATE:
+      *buf = CtryInfo.szDateSeparator[0];
+      return 1;
+    case LOCALE_STIME:
+      *buf = CtryInfo.szTimeSeparator[0];
+      return 1;
+    case LOCALE_STHOUSAND:
+      *buf = CtryInfo.szThousandsSeparator[0];
+      return 1;
+    case LOCALE_SCURRENCY:
+      if(len > strlen(CtryInfo.szCurrency))
+      {
+        strcpy(buf, CtryInfo.szCurrency);
+        return (strlen(buf) + 1);
+      }
+      else
+        break;
+    case LOCALE_SSHORTDATE:
+      if(CtryInfo.fsDateFmt == 0)
+      {
+        if(len > 8)
+        {
+          strcpy(buf, "MMXddXyy");
+          buf[2] = buf[5] = CtryInfo.szDateSeparator[0];
+          return 9;
+        }
+        else
+          break;
+      }
+      else if(CtryInfo.fsDateFmt == 1)
+      {
+        if(len > 8)
+        {
+          strcpy(buf, "ddXMMXyy");
+          buf[2] = buf[5] = CtryInfo.szDateSeparator[0];
+          return 9;
+        }
+        else
+          break;
+      }
+      else /* if(CtryInfo.fsDateFmt == 2) */
+      {
+        if(len > 8)
+        {
+          strcpy(buf, "yyXMMXdd");
+          buf[2] = buf[5] = CtryInfo.szDateSeparator[0];
+          return 9;
+        }
+        else
+          break;
+      }
+    case LOCALE_STIMEFORMAT:
+      if(CtryInfo.fsTimeFmt == 0)
+      {
+        if(len > 8)
+        {
+          strcpy(buf, "HHXmmXss");
+          buf[2] = buf[5] = CtryInfo.szTimeSeparator[0];
+          return 9;
+        }
+        else
+          break;
+      }
+      else /* if(CtryInfo.fsTimeFmt == 1) */
+      {
+        if(len > 8)
+        {
+          strcpy(buf, "HHXmmXss");
+          buf[2] = buf[5] = CtryInfo.szTimeSeparator[0];
+          return 9;
+        }
+        else
+          break;
+      }
+    case LOCALE_S1159:
+      if(CtryInfo.fsTimeFmt == 0)
+      {
+        if(len > 2)
+        {
+          strcpy(buf, "AM");
+          return 3;
+        }
+        else
+          break;
+      }
+      *buf = 0;
+      return 1;
+    case LOCALE_S2359:
+      if(CtryInfo.fsTimeFmt == 0)
+      {
+        if(len > 2)
+        {
+          strcpy(buf, "PM");
+          return 3;
+        }
+        else
+          break;
+      }
+      *buf = 0;
+      return 1;
+/***
+    LOCALE_SABBREVMONTHNAME11:
+    LOCALE_SABBREVMONTHNAME12:
+    LOCALE_SABBREVMONTHNAME13:
+    LOCALE_SPOSITIVESIGN:
+    LOCALE_SNEGATIVESIGN:
+    LOCALE_IPOSSIGNPOSN:
+    LOCALE_INEGSIGNPOSN:
+    LOCALE_IPOSSYMPRECEDES:
+    LOCALE_IPOSSEPBYSPACE:
+    LOCALE_INEGSYMPRECEDES:
+    LOCALE_INEGSEPBYSPACE:
+    LOCALE_FONTSIGNATURE:
+    LOCALE_SISO639LANGNAME:
+    LOCALE_SISO3166CTRYNAME:
+***/
+    default:
+      dprintf(("KERNEL32:  OS2GetLocaleInfoA: LCType %d not yet supported\n", LCType));
+      *buf = '1';
+      return(1);
+  }
+
+  // a 'break' in 'switch(LCType)': buffer too small
+  SetLastError(ERROR_INSUFFICIENT_BUFFER);
+  return 0;
+
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API GetLocaleInfoW(LCID lcid, LCTYPE LCType, LPWSTR lpLCData, int cchData)
+int WIN32API GetLocaleInfoW(LCID lcid, LCTYPE LCType, LPWSTR wbuf, int len)
 {
-  dprintf(("KERNEL32:  OS2GetLocaleInfoA: Not complete!\n"));
-  if(cchData == 0)
-        return(1*sizeof(USHORT));
-  *lpLCData = (USHORT)'1';
-  return(sizeof(USHORT));
+  WORD wlen;
+  char *abuf;
+
+  dprintf(("KERNEL32:  OS2GetLocaleInfoW\n"));
+  if (len && (! wbuf) )
+  {
+    SetLastError(ERROR_INSUFFICIENT_BUFFER);
+    return 0;
+  }
+  abuf = (char *) malloc(len);
+  wlen = GetLocaleInfoA(lcid, LCType, abuf, len);
+
+  if (wlen && len)  // no check of wbuf length !!
+    AsciiToUnicodeN(abuf, wbuf, wlen);
+
+  free(abuf);
+  return wlen;
 }
 //******************************************************************************
 //******************************************************************************
