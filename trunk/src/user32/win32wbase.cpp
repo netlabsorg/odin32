@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.143 2000-01-20 16:48:56 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.144 2000-01-21 13:30:35 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -104,7 +104,6 @@ void Win32BaseWindow::Init()
   magic            = WIN32PM_MAGIC;
   OS2Hwnd          = 0;
   OS2HwndFrame     = 0;
-  hMenu            = 0;
   hSysMenu         = 0;
   Win32Hwnd        = 0;
 
@@ -121,7 +120,7 @@ void Win32BaseWindow::Init()
   dwStyle          = 0;
   win32wndproc     = 0;
   hInstance        = 0;
-  windowId         = 0xFFFFFFFF;        //default = -1
+  dwIDMenu         = 0; //0xFFFFFFFF; //default -1
   userData         = 0;
   contextHelpId    = 0;
 
@@ -1054,7 +1053,6 @@ ULONG Win32BaseWindow::MsgFormatFrame(WINDOWPOS *lpWndPos)
   if(lpWndPos) {
     //set new window rectangle
     setWindowRect(lpWndPos->x, lpWndPos->y, lpWndPos->x + lpWndPos->cx, lpWndPos->y + lpWndPos->cy);
-    if (getParent()) mapWin32Rect(getParent()->getOS2WindowHandle(),OSLIB_HWND_DESKTOP,&rectWindow);
     newWindowRect= rectWindow;
   }
   else {
@@ -1413,20 +1411,19 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         {
             DWORD lParam;
 
-            if (dwStyle & WS_CHILD)
-            {
-              lParam = MAKELONG(rectClient.left,rectClient.top);
-            } else
-            {
-              POINT point;
+                if(getParent()) {//in parent coordinates
+                    POINT point;
 
-              point.x = rectClient.left;
-              point.y = rectClient.top;
-              if (getParent()) ClientToScreen(getParent()->getWindowHandle(),&point);
+                    point.x = rectClient.left;
+                    point.y = rectClient.top;
+                    MapWindowPoints(getWindowHandle(), getParent()->getWindowHandle(), &point, 1);
 
-              lParam = MAKELONG(point.x, point.y);
-            }
-            SendInternalMessageA(WM_MOVE, 0, lParam);
+                    lParam = MAKELONG(point.x, point.y);
+                }
+                else {//in screen coordinates
+                    lParam = MAKELONG(rectWindow.left+rectClient.left, rectWindow.top+rectClient.top);
+                }
+                SendInternalMessageA(WM_MOVE, 0, lParam);
         }
         if (!(wpos->flags & SWP_NOSIZE) && !(wpos->flags & SWP_NOCLIENTSIZE))
         {
@@ -2721,17 +2718,6 @@ BOOL Win32BaseWindow::SetWindowTextW(LPWSTR lpsz)
 }
 //******************************************************************************
 //******************************************************************************
-VOID Win32BaseWindow::updateWindowStyle(DWORD oldExStyle,DWORD oldStyle)
-{
-  if(IsWindowDestroyed()) return;
-
-  if ((dwStyle & 0xFFFF0000) != (oldStyle & 0xFFFF0000))
-  {
-        FrameUpdateClient(this);
-  }
-}
-//******************************************************************************
-//******************************************************************************
 LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value, BOOL fUnicode)
 {
  LONG oldval;
@@ -2750,7 +2736,6 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value, BOOL fUnicode)
                 dprintf(("SetWindowLong GWL_EXSTYLE %x old %x new style %x", getWindowHandle(), dwExStyle, value));
                 SendInternalMessageA(WM_STYLECHANGING,GWL_EXSTYLE,(LPARAM)&ss);
                 setExStyle(ss.styleNew);
-                updateWindowStyle(ss.styleOld,getStyle());
                 SendInternalMessageA(WM_STYLECHANGED,GWL_EXSTYLE,(LPARAM)&ss);
                 return ss.styleOld;
         }
@@ -2767,7 +2752,6 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value, BOOL fUnicode)
                 dprintf(("SetWindowLong GWL_STYLE %x old %x new style %x", getWindowHandle(), ss.styleOld, ss.styleNew));
                 SendInternalMessageA(WM_STYLECHANGING,GWL_STYLE,(LPARAM)&ss);
                 setStyle(ss.styleNew);
-                updateWindowStyle(dwExStyle,ss.styleOld);
                 SendInternalMessageA(WM_STYLECHANGED,GWL_STYLE,(LPARAM)&ss);
 #ifdef DEBUG
                 PrintWindowStyle(ss.styleNew, 0);
@@ -2877,9 +2861,7 @@ WORD Win32BaseWindow::GetWindowWord(int index)
 //******************************************************************************
 void Win32BaseWindow::setWindowId(DWORD id)
 {
-    windowId = id;
-    dprintf(("Set window ID to %x", id));
-    OSLibSetWindowID(OS2HwndFrame, id);
+    dwIDMenu = id;
 }
 //******************************************************************************
 //******************************************************************************

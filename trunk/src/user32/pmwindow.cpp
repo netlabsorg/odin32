@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.80 2000-01-20 21:45:07 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.81 2000-01-21 13:30:34 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -286,8 +286,29 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     }
 
     case WM_CALCVALIDRECTS:
+#if 1
+    {
+      PRECTL oldRect = (PRECTL)mp1,newRect = oldRect+1;
+      UINT res = CVR_ALIGNLEFT | CVR_ALIGNTOP;
+
+//CB: todo: use WM_NCCALCSIZE result
+      if (win32wnd->getWindowClass())
+      {
+        DWORD dwStyle = win32wnd->getWindowClass()->getClassLongA(GCL_STYLE_W);
+
+        if ((dwStyle & CS_HREDRAW_W) && (newRect->xRight-newRect->xLeft != oldRect->xRight-oldRect->xLeft))
+          res |= CVR_REDRAW;
+        else if ((dwStyle & CS_VREDRAW_W) && (newRect->yTop-newRect->yBottom != oldRect->yTop-oldRect->yBottom))
+          res |= CVR_REDRAW;
+      } else res |= CVR_REDRAW;
+
+      RestoreOS2TIB();
+      return (MRESULT)res;
+    }
+#else
       RestoreOS2TIB();
       return (MRESULT)(CVR_ALIGNLEFT | CVR_ALIGNTOP);
+#endif
 
     case WM_SETFOCUS:
     {
