@@ -796,7 +796,11 @@ BOOL GLAPIENTRY wglSetPixelFormat(HDC hdc,int iPixelFormat,
 
   qt_valid_pix = qt_pix;
 
+#ifdef __WIN32OS2__
+  if(iPixelFormat < 1 || iPixelFormat > qt_valid_pix || (ppfd && ppfd->nSize != sizeof(PIXELFORMATDESCRIPTOR))) {
+#else
   if(iPixelFormat < 1 || iPixelFormat > qt_valid_pix || ppfd->nSize != sizeof(PIXELFORMATDESCRIPTOR)) {
+#endif
     SetLastError(0);
     return(FALSE);
   }
