@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.3 1999-09-03 15:09:45 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.4 1999-09-04 17:56:41 dengert Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -16,6 +16,7 @@
 #ifdef __cplusplus
 
 #include <win32class.h>
+#include "open32wbase.h"
 #include <gen_object.h>
 #include <win32wndchild.h>
 #include <winres.h>
@@ -30,7 +31,7 @@ class Win32BaseWindow;
 #define WIN32PM_MAGIC           0x12345678
 #define CheckMagicDword(a)      (a==WIN32PM_MAGIC)
 
-#define WIN32APP_USERMSGBASE		0x1000
+#define WIN32APP_USERMSGBASE            0x1000
 
 typedef struct {
         USHORT           cb;
@@ -109,15 +110,15 @@ Win32BaseWindow *getParent()                    { return (Win32BaseWindow *)Chil
          void   setClientRect(PRECT rect)       { rectClient = *rect; };
          PRECT  getWindowRect()                 { return &rectWindow; };
          void   setClientRect(LONG left, LONG top, LONG right, LONG bottom)
-         { 
-		rectClient.left  = left;  rectClient.top    = top;
-  		rectClient.right = right; rectClient.bottom = bottom;
-	 };
-	 void   setWindowRect(LONG left, LONG top, LONG right, LONG bottom)
-	 { 
-		rectWindow.left  = left;  rectWindow.top    = top;
-  		rectWindow.right = right; rectWindow.bottom = bottom;
-	 };
+         {
+                rectClient.left  = left;  rectClient.top    = top;
+                rectClient.right = right; rectClient.bottom = bottom;
+         };
+         void   setWindowRect(LONG left, LONG top, LONG right, LONG bottom)
+         {
+                rectWindow.left  = left;  rectWindow.top    = top;
+                rectWindow.right = right; rectWindow.bottom = bottom;
+         };
          void   setWindowRect(PRECT rect)       { rectWindow = *rect; };
 
          DWORD  getFlags()                      { return flags; };
@@ -157,7 +158,7 @@ Win32BaseWindow *getParent()                    { return (Win32BaseWindow *)Chil
          BOOL   SetWindowText(LPSTR lpsz);
           BOOL  hasWindowName(LPSTR wndname, BOOL fUnicode = 0);
 Win32WndClass  *getClass()  { return windowClass; };
- 	char   *getWindowNameA()              { return windowNameA; };
+        char   *getWindowNameA()              { return windowNameA; };
 Win32BaseWindow *getOwner()                   { return owner; };
 
        LRESULT  SendMessageA(ULONG msg, WPARAM wParam, LPARAM lParam);
@@ -174,22 +175,22 @@ Win32BaseWindow *getOwner()                   { return owner; };
 
     static HWND Win32ToOS2Handle(HWND hwnd)
     {
-	Win32BaseWindow *window = GetWindowFromHandle(hwnd);
+        Win32BaseWindow *window = GetWindowFromHandle(hwnd);
 
-	if(window) {
-        	return window->getOS2WindowHandle();
-	}
-	else  return hwnd;    //OS/2 window handle 
+        if(window) {
+                return window->getOS2WindowHandle();
+        }
+        else  return hwnd;    //OS/2 window handle
     }
 
     static HWND OS2ToWin32Handle(HWND hwnd)
     {
-   	Win32BaseWindow *window = GetWindowFromOS2Handle(hwnd);
+        Win32BaseWindow *window = GetWindowFromOS2Handle(hwnd);
 
-	if(window) {
-        	return window->getWindowHandle();
-	}
-	else  return hwnd;    //OS/2 window handle
+        if(window) {
+                return window->getWindowHandle();
+        }
+        else  return hwnd;    //OS/2 window handle
     }
 
 static Win32BaseWindow *GetWindowFromHandle(HWND hwnd);
@@ -264,6 +265,12 @@ private:
         else    return SendInternalMessageA(msg, wParam, lParam);
      }
 #endif
+
+public:
+       void SetFakeOpen32()    { WinSetDAXData (OS2Hwnd, &fakeWinBase); }
+       void RemoveFakeOpen32() { WinSetDAXData (OS2Hwnd, NULL); }
+
+  fakeOpen32WinBaseClass fakeWinBase;
 };
 
 

@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.26 1999-08-30 11:59:53 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.27 1999-09-04 17:56:40 dengert Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -130,6 +130,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
     case WM_CLOSE:
         dprintf(("OS2: WM_CLOSE %x", hwnd));
+        win32wnd->RemoveFakeOpen32();
         if(win32wnd->MsgClose()) {
                 goto RunDefWndProc;
         }

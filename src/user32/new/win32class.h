@@ -1,4 +1,4 @@
-/* $Id: win32class.h,v 1.6 1999-08-28 17:24:45 dengert Exp $ */
+/* $Id: win32class.h,v 1.7 1999-09-04 17:56:41 dengert Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -54,7 +54,7 @@ public:
           DWORD GetWindowCount()        { return cWindows; };
 
           BOOL  hasClassName(LPSTR classname, BOOL fUnicode = 0);
-          
+
  static  void   UnregisterClassA(HINSTANCE hinst, LPSTR id);
 
  static Win32WndClass *FindClass(HINSTANCE hinst, LPSTR id);
@@ -63,6 +63,7 @@ private:
  BOOL           isUnicode;
 
  //Standard class words/longs
+ ULONG          windowStyle;            //GCL_STYLE     * must be offset 14h *
  ULONG          nrExtraClassWords;      //GCL_CBCLSEXTRA
  ULONG          nrExtraWindowWords;     //GCL_CBWNDEXTRA
  HBRUSH         backgroundBrush;        //GCL_HBRBACKGROUND
@@ -71,7 +72,6 @@ private:
  HINSTANCE      hInstance;              //GCL_HMODULE
  PCHAR          menuNameA;              //GCL_MENUNAME
  WCHAR         *menuNameW;              //GCL_MENUNAME
- ULONG          windowStyle;            //GCL_STYLE
  WNDPROC        windowProc;             //GCL_WNDPROC
  ULONG          classAtom;              //GCW_ATOM
 
