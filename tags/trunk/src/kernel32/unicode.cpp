@@ -1,4 +1,4 @@
-/* $Id: unicode.cpp,v 1.11 1999-06-30 21:19:42 sandervl Exp $ */
+/* $Id: unicode.cpp,v 1.12 1999-08-04 00:44:33 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "misc.h"
+#include <unicode.h>
 
 static UconvObject uconv_object = NULL;
 BOOL getUconvObject( void )
@@ -191,6 +192,22 @@ char * WIN32API UnicodeToAsciiString(WCHAR *ustring)
   UnicodeToAscii( ustring, astring );
   return(astring);
 }
+//******************************************************************************
+// Converts ascii string to unicode string
+// returns pointer to unicode string
+//******************************************************************************
+WCHAR * WIN32API AsciiToUnicodeString(char *astring)
+{
+  WCHAR *ustring;
+
+  if(astring == NULL)
+    return(NULL);
+
+  ustring = (WCHAR *)malloc( 1 + strlen(astring) << 1 );
+  AsciiToUnicode( astring, ustring );
+  return(ustring);
+}
+
 //******************************************************************************
 //SvL: 24-6-'97 - Added
 //******************************************************************************

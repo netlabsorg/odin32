@@ -1,4 +1,4 @@
-/* $Id: heap.cpp,v 1.8 1999-06-10 20:47:58 phaller Exp $ */
+/* $Id: heap.cpp,v 1.9 1999-08-04 00:46:14 phaller Exp $ */
 
 /*
  *
@@ -17,6 +17,7 @@
 #include <misc.h>
 #define  _WIN32
 #include "os2heap.h"
+#include "heap.h"
 
 static HANDLE processheap = NULL;
 OS2Heap *OS2ProcessHeap = NULL;
