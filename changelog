@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1669 2001-09-01 23:16:49 bird Exp $ */
+/* $Id: changelog,v 1.1670 2001-09-02 02:52:46 bird Exp $ */
 
  2001-09-01: knut st. osmundsen <kosmunds@csc.com>
     - Tools\CmdQd:
@@ -6,6 +6,7 @@
                   (It's not possible if multiple commands is specified in a job.)
                 o Path search result caching.
                 o Uses CMD.EXE nomatter what is in the COMSPEC.
+                o Corrected memory overwrite in output read loop.
 
  2001-08-31: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o Fix in MoveFileExW, MoveFileExA prevents stack corruption
