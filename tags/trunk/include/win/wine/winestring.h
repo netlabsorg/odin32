@@ -1,3 +1,4 @@
+/* $Id: winestring.h,v 1.6 1999-08-22 22:52:12 sandervl Exp $ */
 #ifndef __WINE_WINE_WINESTRING_H
 #define __WINE_WINE_WINESTRING_H
 

@@ -1,3 +1,4 @@
+/* $Id: obj_propertystorage.h,v 1.5 1999-08-22 22:52:10 sandervl Exp $ */
 /*
  * Defines the COM interfaces and APIs related to saving properties to file.
  */

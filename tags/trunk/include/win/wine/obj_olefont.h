@@ -1,3 +1,4 @@
+/* $Id: obj_olefont.h,v 1.5 1999-08-22 22:52:09 sandervl Exp $ */
 /*
  * Defines the COM interfaces and APIs related to OLE font support.
  *
