@@ -1,5 +1,3 @@
-/* $Id: wtypes.h,v 1.1 1999-05-24 20:19:23 ktk Exp $ */
-
 /*
  * Defines the basic types used by COM interfaces.
  */
@@ -53,20 +51,22 @@ typedef GUID  *LPGUID;
 typedef GUID  CLSID,*LPCLSID;
 typedef GUID	IID,*LPIID;
 typedef GUID	FMTID,*LPFMTID;
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(CINTERFACE)
 #define REFGUID             const GUID &
 #define REFCLSID            const CLSID &
 #define REFIID              const IID &
 #define REFFMTID            const FMTID &
-#else /* !defined(__cplusplus) */
+#else /* !defined(__cplusplus) && !defined(CINTERFACE) */
 #define REFGUID             const GUID* const
 #define REFCLSID            const CLSID* const
 #define REFIID              const IID* const
 #define REFFMTID            const FMTID* const
-#endif /* !defined(__cplusplus) */
+#endif /* !defined(__cplusplus) && !defined(CINTERFACE) */
 
 extern const IID GUID_NULL;
+#define IID_NULL            GUID_NULL
 #define CLSID_NULL GUID_NULL
+#define FMTID_NULL          GUID_NULL
    
 typedef enum tagDVASPECT
 { 
@@ -134,11 +134,16 @@ typedef unsigned short VARTYPE;
 
 typedef ULONG PROPID;
 
+#ifndef _tagBLOB_DEFINED
+#define _tagBLOB_DEFINED
+#define _BLOB_DEFINED
+#define _LPBLOB_DEFINED
 typedef struct tagBLOB
 {
     ULONG cbSize;
     BYTE *pBlobData;
-} BLOB;
+} BLOB, *LPBLOB;
+#endif
 
 #ifndef _tagCY_DEFINED
 #define _tagCY_DEFINED
