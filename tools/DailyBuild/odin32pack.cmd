@@ -1,4 +1,4 @@
-/* $Id: odin32pack.cmd,v 1.20 2001-07-19 19:58:22 sandervl Exp $
+/* $Id: odin32pack.cmd,v 1.21 2001-07-19 20:15:50 sandervl Exp $
  *
  * Make the two zip files.
  *
@@ -89,7 +89,6 @@ parse arg sDir, sType;
     call copy sRoot'\doc\ChangeLog-2001';
     call copy sRoot'\doc\ChangeLog-2000';
     call copy sRoot'\doc\ChangeLog-1999';
-    call copy sRoot'\doc\WGSS50.lic';
 
     /*
      * Move (=rename) the /bin/<release|debug> dir into /pack/system32
