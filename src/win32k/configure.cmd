@@ -1,4 +1,4 @@
-/* $Id: configure.cmd,v 1.25 2002-08-20 05:49:51 bird Exp $
+/* $Id: configure.cmd,v 1.26 2002-12-06 03:29:45 bird Exp $
  *
  * Configuration script.
  * Generates makefile.inc and an empty .depend file.
@@ -108,7 +108,7 @@
         call lineout sIncFile, '################################################################################'
         call lineout sIncFile, '# DDKPATH: base directory of ddk base (i.e. \DDK\BASE not \DDK for DDK v4.0+).'
         call lineout sIncFile, '################################################################################'
-        sDDK = SearchPaths('INCLUDE', '..\h\dhcalls.h', 'PATH', '..\h\dhcalls.h', 'BOOKSHELF', '..\base\.\h\dhcalls.h', 'Path to DDK "\BASE" directory (i.e. F:\DDK\BASE):');
+        sDDK = SearchPaths('PATH_DDKBASE', 'h\dhcalls.h', 'INCLUDE', '..\h\dhcalls.h', 'PATH', '..\h\dhcalls.h', 'BOOKSHELF', '..\base\.\h\dhcalls.h', 'Path to DDK "\BASE" directory (i.e. F:\DDK\BASE):');
         sDDK = ValidatePath(sDDK, 'h\devhdr.h', 'DDK Base Path');
         call lineout sIncFile, 'DDKPATH          =' sDDK
         call lineout sIncFile, ''
@@ -116,7 +116,7 @@
         call lineout sIncFile, '################################################################################'
         call lineout sIncFile, '# OS/2 TOOLKIT'
         call lineout sIncFile, '################################################################################'
-        sTLKT = SearchPaths('INCLUDE', '..\h\os2.h', 'PATH', '..\h\os2.h', 'BOOKSHELF', '..\h\os2.h', 'Path to OS/2 Toolkit directory:');
+        sTLKT = SearchPaths('PATH_TOOLKIT', 'h\os2.h', 'INCLUDE', '..\h\os2.h', 'PATH', '..\h\os2.h', 'BOOKSHELF', '..\h\os2.h', 'Path to OS/2 Toolkit directory:');
         sTLKT = ValidatePath(sTLKT, 'h\bsememf.h', 'OS/2 Toolkit Path');
         call lineout sIncFile, 'TOOLKIT          =' sTLKT
         call lineout sIncFile, ''
@@ -136,7 +136,7 @@
         call lineout sIncFile, '################################################################################'
         call lineout sIncFile, '# Microsoft C v6.0, v6.0a or v7.0'
         call lineout sIncFile, '################################################################################'
-        sMSC = SearchPaths('PATH', '..\binp\c3l.exe', 'INCLUDE', '..\binp\c3l.exe','LIB', '..\binp\c3l.exe', 'Path to Microsoft C v6.0, v6.0a or v7.0 directory:');
+        sMSC = SearchPaths('PATH_MSC','binp\c2l.exe','PATH', '..\binp\c3l.exe', 'INCLUDE', '..\binp\c3l.exe','LIB', '..\binp\c3l.exe', 'Path to Microsoft C v6.0, v6.0a or v7.0 directory:');
         sMSC = ValidatePath(sMSC, 'binp\cl.exe', 'Microsoft C Path');
         call lineout sIncFile, 'MSCPATH          =' sMSC
         call lineout sIncFile, ''
@@ -300,7 +300,7 @@ ValidatePath: procedure expose fWin32k
     rc = stream(sPath'\'sFile, 'c', 'query exists')
     if (rc <> '') then
         return sPath;
-    say 'Warning: Validatation of the' sPath 'failed. Win32k.sys will not be built.'
+    say 'Warning: Validatation of the' sDesc 'failed. Win32k.sys will not be built.'
     say '         path='sPath;
 return '';
 
