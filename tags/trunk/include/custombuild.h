@@ -146,5 +146,27 @@ BOOL WIN32API ODIN_QueryLoaders(LPSTR pszPECmdLoader, INT cchPECmdLoader,
 //Custom build function to disable loading of LX dlls
 void WIN32API ODIN_DisableLXDllLoading();
 
+
+//******************************************************************************
+//Install a handler that is called before the entrypoint of a dll (DLL_PROCESS_ATTACH)
+//******************************************************************************
+typedef void (* WIN32API ODINPROC_DLLLOAD)(HMODULE hModule);
+
+BOOL    WIN32API ODIN_SetDllLoadCallback(ODINPROC_DLLLOAD pfnMyDllLoad);
+
+//******************************************************************************
+// ODIN_SetProcAddress: Override a dll export
+// 
+// Parameters:
+//      HMODULE hModule		Module handle
+//      LPCSTR  lpszProc	Export name or ordinal
+//      FARPROC pfnNewProc	New export function address
+//
+// Returns: Success -> old address of export
+//          Failure -> -1
+//
+//******************************************************************************
+FARPROC WIN32API ODIN_SetProcAddress(HMODULE hModule, LPCSTR lpszProc, FARPROC pfnNewProc);
+
 #endif  /*__CUSTOMBUILD_H__*/
 
