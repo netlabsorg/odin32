@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.1146 2000-09-25 20:53:58 mike Exp $ */
+ /* $Id: ChangeLog,v 1.1147 2000-09-26 09:08:26 bird Exp $ */
+
+ 2000-09-26: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - Win32k: Corrected H2INC path in the makefile.
 
  2000-09-25: Michal Necasek <michalnec@volny.cz>
     - DDRAW, DDRAW\new: Fixed way too many bugs in asmutil.cpp. Both
