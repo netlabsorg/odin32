@@ -22,6 +22,7 @@
 /src/shell32                               sandervl phaller achimha bird
 /src/tapi32                                sandervl phaller achimha bird
 /src/user32                                sandervl phaller achimha bird
+/src/user32/new                            sandervl phaller achimha bird buerkle dengert cbratschi
 /src/version                               sandervl phaller achimha bird
 /src/winmm                                 sandervl phaller achimha jtroster
 /src/winspool                              sandervl phaller achimha bird
