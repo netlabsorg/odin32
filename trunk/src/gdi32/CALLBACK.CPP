@@ -1,4 +1,4 @@
-/* $Id: CALLBACK.CPP,v 1.4 2000-02-16 14:18:09 sandervl Exp $ */
+/* $Id: CALLBACK.CPP,v 1.5 2000-10-16 22:26:53 sandervl Exp $ */
 
 /*
  * GDI32 support code for Line DDA callbacks
@@ -12,6 +12,7 @@
 #include <stdarg.h>
 #include "misc.h"
 #include "callback.h"
+#include <wprocess.h>
 
 #define DBG_LOCALLOG	DBG_callback
 #include "dbglocal.h"
@@ -42,8 +43,10 @@ LINEDDAPROC_O32 LineDDAProcCallback::GetOS2Callback()
 static VOID OPEN32API Callback(int X, int Y, LPARAM lpData)
 {
  LineDDAProcCallback *me = (LineDDAProcCallback *)lpData;
+ USHORT selTIB = SetWin32TIB(); // save current FS selector and set win32 sel
 
   me->pCallback(X, Y, me->lpUserData);
+  SetFS(selTIB);           // switch back to the saved FS selector
   return;
 }
 //******************************************************************************
