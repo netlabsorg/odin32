@@ -1,4 +1,4 @@
-/* $Id: pe2lxmain.cpp,v 1.4 1999-11-10 01:45:38 bird Exp $
+/* $Id: pe2lxmain.cpp,v 1.5 2000-02-27 02:18:42 bird Exp $
  *
  * Pe2Lx main program. (Ring 3 only!)
  *
@@ -58,7 +58,7 @@ static void syntax();
  *            81 Fatal error: Failed to rename the Win32-file, <from> -> <to>
  *            82 Fatal error: Failed to open Win32-file, <filename>. rc=<rc>
  *            83 Fatal error: Failed to convertert the file. rc=<rc from init(..)>
- *            84 Fatal error: Failed to write the Lx-file. rc=<rc from writeLXFile(..)>
+ *            84 Fatal error: Failed to write the Lx-file. rc=<rc from writeFile(..)>
  * @param     argc  Count of arguments.
  * @param     argv  Array of argument pointers. argc entries.
  * @status    completely implemented.
@@ -199,7 +199,7 @@ int main(int argc, char **argv)
         rc = pe2lx.init(pszOdin32Filename);
         if (rc == NO_ERROR)
         {
-            rc = pe2lx.writeLxFile(pszOdin32Filename);
+            rc = pe2lx.writeFile(pszOdin32Filename);
             if (rc != NO_ERROR)
             {
                 printf("Fatal error: Failed to write the Lx-file. rc=%d\n", rc);
