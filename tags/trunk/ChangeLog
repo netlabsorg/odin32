@@ -1,6 +1,11 @@
- /* $Id: ChangeLog,v 1.911 2000-04-25 22:56:11 davidr Exp $ */
+ /* $Id: ChangeLog,v 1.912 2000-04-27 11:10:14 achimha Exp $ */
 
- 2000-04-10: David Raison <djr@lemur.co.uk>
+ 2000-04-27: Achim Hasenmueller <achimha@innotek.de>
+	- put back new wrc.exe, provide workarounds in
+	  header files, old one breaks comdlg32
+	  TODO: find bug in new wrc and really fix it
+
+ 2000-04-25: David Raison <djr@lemur.co.uk>
         - INCLUDE/WIN: Added RPC_E_* codes to winerror.h
         - OLE32: Fixed StringFromGUID2
 
