@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.2 1999-12-26 17:30:15 cbratschi Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.3 1999-12-27 14:41:42 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -282,7 +282,7 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
         //WM_NC*BUTTON* is posted when the cursor is in a non-client area of the window
         if(win32wnd->lastHitTestVal != HTCLIENT_W) {
             winMsg->message = WINWM_NCLBUTTONDOWN + (os2Msg->msg - WM_BUTTON1DOWN);
-            winMsg->wParam = win32wnd->lastHitTestVal;
+            winMsg->wParam  = win32wnd->lastHitTestVal;
             winMsg->lParam  = MAKELONG(winMsg->pt.x, winMsg->pt.y); //screen coordinates
         }
         else {

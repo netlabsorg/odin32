@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.12 1999-12-26 17:30:20 cbratschi Exp $ */
+/* $Id: windowmsg.cpp,v 1.13 1999-12-27 14:41:43 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -85,7 +85,7 @@ BOOL WIN32API PeekMessageW(LPMSG msg, HWND hwndOwner, UINT uMsgFilterMin,
  BOOL fFoundMsg;
 
     fFoundMsg = OSLibWinPeekMsg(msg, 0, uMsgFilterMin, uMsgFilterMax,
-                                (fuRemoveMsg & PM_REMOVE) ? 1 : 0, FALSE);
+                                fuRemoveMsg, FALSE);
     if(fFoundMsg) {
         if (msg->message == WM_QUIT && (fuRemoveMsg & (PM_REMOVE))) {
             //TODO: Post WM_QUERYENDSESSION message when WM_QUIT received and system is shutting down

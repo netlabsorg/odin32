@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.h,v 1.7 1999-12-24 18:39:10 sandervl Exp $ */
+/* $Id: oslibmsg.h,v 1.8 1999-12-27 14:41:42 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -11,9 +11,6 @@
  */
 #ifndef __OSLIBMSG_H__
 #define __OSLIBMSG_H__
-
-#define MSG_NOREMOVE  0
-#define MSG_REMOVE    1
 
 ULONG TranslateWinMsg(ULONG msg);
 

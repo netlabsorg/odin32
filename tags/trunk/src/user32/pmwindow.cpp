@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.70 1999-12-26 17:30:16 cbratschi Exp $ */
+/* $Id: pmwindow.cpp,v 1.71 1999-12-27 14:41:42 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -13,6 +13,7 @@
 #define INCL_GPI
 #define INCL_DEV                /* Device Function definitions  */
 #define INCL_GPICONTROL         /* GPI control Functions        */
+#define INCL_DOSPROCESS
 
 #include <os2wrap.h>
 #include <stdlib.h>

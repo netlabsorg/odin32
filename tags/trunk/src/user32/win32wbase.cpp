@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.119 1999-12-26 17:30:18 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.120 1999-12-27 14:41:42 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1017,10 +1017,11 @@ ULONG Win32BaseWindow::MsgButton(MSG *msg)
         }
         else    hwndTop = (GetTopParent()) ? GetTopParent()->getWindowHandle() : 0;
 
-        if (hwndTop && getWindowHandle() != GetActiveWindow())
+        HWND hwndActive = GetActiveWindow();
+        if (hwndTop && getWindowHandle() != hwndActive)
         {
                 LONG ret = SendInternalMessageA(WM_MOUSEACTIVATE, hwndTop,
-                                                MAKELONG( HTCLIENT, msg->message) );
+                                                MAKELONG( lastHitTestVal, msg->message) );
 
 #if 0
                 if ((ret == MA_ACTIVATEANDEAT) || (ret == MA_NOACTIVATEANDEAT))
@@ -2969,14 +2970,7 @@ HWND Win32BaseWindow::GetActiveWindow()
 
   hwndActive = OSLibWinQueryActiveWindow();
 
-  win32wnd = (Win32BaseWindow *)OSLibWinGetWindowULong(hwndActive, OFFSET_WIN32WNDPTR);
-  magic    = OSLibWinGetWindowULong(hwndActive, OFFSET_WIN32PM_MAGIC);
-  if(CheckMagicDword(magic) && win32wnd)
-  {
-        return win32wnd->getWindowHandle();
-  }
-  return 0;
-//  return hwndActive;
+  return OS2ToWin32Handle(hwndActive);
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.15 1999-12-24 18:39:10 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.16 1999-12-27 14:41:41 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -12,7 +12,8 @@
  *       -> Get/PeekMessage never gets them as we return a dummy message for non-client windows
  *       (i.e. menu WM_COMMAND messages)
  *
- * TODO: Filter translation isn't correct for posted messages
+ * TODO: Filter translation isn't correct! (for posted messages or messages that don't have
+ *       a PM version.
  *
  */
 #define  INCL_WIN
@@ -42,34 +43,40 @@ typedef struct
 // PFNTRANS toWIN32;
 } MSGTRANSTAB, *PMSGTRANSTAB;
 
+//NOTE: Must be ordered by win32 message id!!
 MSGTRANSTAB MsgTransTab[] = {
    WM_NULL,          WINWM_NULL,
    WM_CREATE,        WINWM_CREATE,
    WM_DESTROY,       WINWM_DESTROY,
-   WM_TIMER,         WINWM_TIMER,
-   WM_CLOSE,         WINWM_CLOSE,
-   WM_QUIT,          WINWM_QUIT,
-
-   WM_ENABLE,        WINWM_ENABLE,
-   WM_SHOW,          WINWM_SHOWWINDOW,
-   WM_MOVE,          WINWM_MOVE,
-   WM_SIZE,          WINWM_SIZE,
-   //
-   WM_HITTEST,       WINWM_NCHITTEST,
-   //
+   WM_MOVE,          WINWM_MOVE,            //TODO: Sent directly
+   WM_SIZE,          WINWM_SIZE,            //TODO: Sent directly
    WM_ACTIVATE,      WINWM_ACTIVATE,
    WM_SETFOCUS,      WINWM_SETFOCUS,
-   //
+   WM_SETFOCUS,      WINWM_KILLFOCUS,
+   WM_ENABLE,        WINWM_ENABLE,
+   WM_PAINT,         WINWM_PAINT,
+   WM_CLOSE,         WINWM_CLOSE,
+   WM_QUIT,          WINWM_QUIT,
+   WM_SHOW,          WINWM_SHOWWINDOW,
+
+   WM_HITTEST,       WINWM_NCHITTEST,
+
+   //TODO: Needs better translation!
+   WM_CHAR,          WINWM_KEYDOWN,
+   WM_CHAR,          WINWM_KEYUP,
+   WM_CHAR,          WINWM_CHAR,
+   WM_CHAR,          WINWM_DEADCHAR,
+   WM_CHAR,          WINWM_SYSKEYDOWN,
+   WM_CHAR,          WINWM_SYSKEYUP,
+   WM_CHAR,          WINWM_SYSCHAR,
+   WM_CHAR,          WINWM_SYSDEADCHAR,
+   WM_CHAR,          WINWM_KEYLAST,
+
    WM_COMMAND,       WINWM_COMMAND,
    WM_SYSCOMMAND,    WINWM_SYSCOMMAND,
    //
-   WM_PAINT,         WINWM_PAINT,
    WM_TIMER,         WINWM_TIMER,
-   //
-   WM_CLOSE,         WINWM_CLOSE,
-   WM_QUIT,          WINWM_QUIT,
-   //
-   WM_CONTROL,       WINWM_COMMAND,
+   WM_INITMENU,      WINWM_INITMENU,
    //
    WM_MOUSEMOVE,     WINWM_MOUSEMOVE,
    WM_BUTTON1DOWN,   WINWM_LBUTTONDOWN,
@@ -81,15 +88,8 @@ MSGTRANSTAB MsgTransTab[] = {
    WM_BUTTON3DOWN,   WINWM_MBUTTONDOWN,
    WM_BUTTON3UP,     WINWM_MBUTTONUP,
    WM_BUTTON3DBLCLK, WINWM_MBUTTONDBLCLK,
-   0x020a, 0x020a,   // WM_???,             WM_???
-   WM_CHAR,          WINWM_CHAR,
 
-   //TODO: Needs better translation!
-   WM_CHAR,          WINWM_KEYDOWN,
-   WM_CHAR,          WINWM_KEYUP,
-   WM_CHAR,          WINWM_SYSKEYDOWN,
-   WM_CHAR,          WINWM_SYSKEYUP,
-   WM_CHAR,          WINWM_KEYLAST
+   999999999,        999999999,
 };
 #define MAX_MSGTRANSTAB (sizeof(MsgTransTab)/sizeof(MsgTransTab[0]))
 
@@ -118,27 +118,33 @@ void WinToOS2MsgTranslate(MSG *winMsg, QMSG *os2Msg, BOOL isUnicode)
 //  os2Msg->reserved = 0;
 }
 //******************************************************************************
-//TODO!!!
-//Signal that the incoming messages in pmwindow need to be translated
-//(i.e. PM WM_CHAR when translated generates WM_CHAR messages, otherwise
-// WM_KEYUP/DOWN (etc))
+//TODO: NOT COMPLETE nor 100% CORRECT!!!
+//If both the minimum & maximum message are unknown, the result can be wrong (max > min)!
 //******************************************************************************
-ULONG TranslateWinMsg(ULONG msg)
+ULONG TranslateWinMsg(ULONG msg, BOOL fMinFilter)
 {
  POSTMSG_PACKET *packet;
 
-  if(msg >= WINWM_USER)
-    return WIN32APP_POSTMSG;
+    if(msg == 0)
+        return 0;
 
-  for(int i=0;i<MAX_MSGTRANSTAB;i++)
-  {
-    if(MsgTransTab[i].msgWin32 == msg)
+    if(msg >= WINWM_USER)
+        return WIN32APP_POSTMSG;
+
+    for(int i=0;i<MAX_MSGTRANSTAB;i++)
     {
-      return MsgTransTab[i].msgOS2;
+        if(fMinFilter && MsgTransTab[i].msgWin32 >= msg) {
+            return MsgTransTab[i].msgOS2;
+        }
+        else
+        if(!fMinFilter && MsgTransTab[i].msgWin32 >= msg) {
+            if(MsgTransTab[i].msgWin32 == msg)
+                    return MsgTransTab[i].msgOS2;
+            else    return MsgTransTab[i-1].msgOS2;
+        }
     }
-  }
 
-  return 0;
+    return 0;
 }
 //******************************************************************************
 //******************************************************************************
@@ -196,15 +202,25 @@ BOOL OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMa
   }
 
   if(thdb->fTranslated && (!hwnd || hwnd == thdb->msgWCHAR.hwnd)) {
+        if(uMsgFilterMin) {
+            if(thdb->msgWCHAR.message < uMsgFilterMin)
+                goto continuegetmsg;
+        }
+        if(uMsgFilterMax) {
+            if(thdb->msgWCHAR.message > uMsgFilterMax)
+                goto continuegetmsg;
+        }
         thdb->fTranslated = FALSE;
         memcpy(pMsg, &thdb->msgWCHAR, sizeof(MSG));
         MsgThreadPtr->msg  = 0;
         MsgThreadPtr->hwnd = 0;
         return TRUE;
   }
+
+continuegetmsg:
   if(hwnd) {
         do {
-            WinWaitMsg(thdb->hab, TranslateWinMsg(uMsgFilterMin), TranslateWinMsg(uMsgFilterMax));
+            WinWaitMsg(thdb->hab, TranslateWinMsg(uMsgFilterMin, TRUE), TranslateWinMsg(uMsgFilterMax, FALSE));
             rc = OSLibWinPeekMsg(pMsg, hwnd, uMsgFilterMin, uMsgFilterMax, PM_REMOVE_W, isUnicode);
         }
         while(rc == FALSE);
@@ -213,7 +229,7 @@ BOOL OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMa
   {
     do {
         eaten = FALSE;
-        rc = WinGetMsg(thdb->hab, MsgThreadPtr, TranslateWinMsg(uMsgFilterMin), TranslateWinMsg(uMsgFilterMax), 0);
+        rc = WinGetMsg(thdb->hab, MsgThreadPtr, TranslateWinMsg(uMsgFilterMin, TRUE), TranslateWinMsg(uMsgFilterMax, FALSE), 0);
         if (MsgThreadPtr->msg == WM_TIMER)
             eaten = TIMER_HandleTimer (MsgThreadPtr);
     } while (eaten);
@@ -237,7 +253,16 @@ BOOL OSLibWinPeekMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterM
   }
 
   if(thdb->fTranslated && (!hwnd || hwnd == thdb->msgWCHAR.hwnd)) {
-        if(fRemove == PM_REMOVE_W) {
+        if(uMsgFilterMin) {
+            if(thdb->msgWCHAR.message < uMsgFilterMin)
+                goto continuepeekmsg;
+        }
+        if(uMsgFilterMax) {
+            if(thdb->msgWCHAR.message > uMsgFilterMax)
+                goto continuepeekmsg;
+        }
+
+        if(fRemove & PM_REMOVE_W) {
             thdb->fTranslated = FALSE;
             MsgThreadPtr->msg  = 0;
             MsgThreadPtr->hwnd = 0;
@@ -245,20 +270,25 @@ BOOL OSLibWinPeekMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterM
         memcpy(pMsg, &thdb->msgWCHAR, sizeof(MSG));
         return TRUE;
   }
-
+continuepeekmsg:
   do {
         eaten = FALSE;
-        rc = WinPeekMsg(thdb->hab, &os2msg, Win32BaseWindow::OS2ToWin32Handle(hwnd), TranslateWinMsg(uMsgFilterMin),
-                        TranslateWinMsg(uMsgFilterMax), (fRemove == PM_REMOVE_W) ? PM_REMOVE : PM_NOREMOVE);
+        rc = WinPeekMsg(thdb->hab, &os2msg, Win32BaseWindow::OS2ToWin32Handle(hwnd), TranslateWinMsg(uMsgFilterMin, TRUE),
+                        TranslateWinMsg(uMsgFilterMax, FALSE), (fRemove & PM_REMOVE_W) ? PM_REMOVE : PM_NOREMOVE);
 
-        if (rc && fRemove == PM_REMOVE_W && os2msg.msg == WM_TIMER)
+        if (rc && (fRemove & PM_REMOVE_W) && os2msg.msg == WM_TIMER) {
             eaten = TIMER_HandleTimer(&os2msg);
+        }
   }
   while (eaten && rc);
 
+  if(rc == FALSE) {
+    return FALSE;
+  }
+
   OS2ToWinMsgTranslate((PVOID)thdb, &os2msg, pMsg, isUnicode);
   //TODO: This is not safe! There's no guarantee this message will be dispatched and it might overwrite a previous message
-  if(fRemove == PM_REMOVE_W) {
+  if(fRemove & PM_REMOVE_W) {
         memcpy(MsgThreadPtr, &os2msg, sizeof(QMSG));
   }
   return rc;
