@@ -1,4 +1,4 @@
-/* $Id: clipboard.cpp,v 1.18 2004-04-13 14:16:42 sandervl Exp $ */
+/* $Id: clipboard.cpp,v 1.19 2004-05-03 12:09:00 sandervl Exp $ */
 
 /*
  * Win32 Clipboard API functions for OS/2
@@ -275,8 +275,8 @@ static void        dbgDumpClipboardData(const char *pszPrefix, UINT uFormat, HAN
     #define     dbgDumpClipboardData(pszPrefix, uFormat, hClibObj) \
                 do { } while(0)
 #endif
-UINT            clipboardPMToOdinFormat(ULONG ulPMFormat);
-static ULONG    clipboardOdinToPMFormat(UINT  uOdinFormat);
+UINT WIN32API   clipboardPMToOdinFormat(ULONG ulPMFormat);
+ULONG WIN32API  clipboardOdinToPMFormat(UINT uOdinFormat);
 static ULONG    clipboardAddDynFormat(UINT uFormat, const char *pszFormatName);
 static BOOL     clipboardIsRWOwner(void);
 static BOOL     clipboardAddPM(UINT uOdinFormat, void *pv, unsigned cb);
