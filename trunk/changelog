@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2682 2004-02-19 13:03:30 sandervl Exp $ */
+/* $Id: changelog,v 1.2683 2004-02-19 15:04:17 sandervl Exp $ */
+
+ 2004-02-19: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o RedrawWindow; wrong check for update region when clearing
+                  WM_ERASEBKGND flag.
 
  2004-02-19: KO Myung-Hun <komh@chollian    >
     - KERNEL32: o DBCS fixes for console & resource functions
