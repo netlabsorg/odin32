@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.52 2000-04-02 09:24:56 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.53 2000-04-02 09:27:22 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -429,7 +429,7 @@ void releaseOwnDC (HDC hps)
 }
 //******************************************************************************
 //******************************************************************************
-#if 1
+#if 0
 HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
 {
    HWND     hwnd = hWnd ? hWnd : HWND_DESKTOP;
