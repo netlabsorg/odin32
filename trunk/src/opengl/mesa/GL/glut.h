@@ -1,4 +1,4 @@
-/* $Id: glut.h,v 1.3 2000-03-11 09:05:07 jeroen Exp $ */
+/* $Id: glut.h,v 1.4 2000-03-11 15:08:37 sandervl Exp $ */
 #ifndef __glut_h__
 #define __glut_h__
 
@@ -453,7 +453,7 @@ extern void GLAPIENTRY glutHideOverlay(void);
 #endif
 
 /* GLUT menu sub-API. */
-extern int GLAPIENTRY glutCreateMenu(void (*)(int));
+extern int GLAPIENTRY glutCreateMenu(void (* GLCALLBACK)(int));
 extern void GLAPIENTRY glutDestroyMenu(int menu);
 extern int GLAPIENTRY glutGetMenu(void);
 extern void GLAPIENTRY glutSetMenu(int menu);
