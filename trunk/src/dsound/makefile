@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.22 2001-04-16 06:39:35 bird Exp $
+# $Id: makefile,v 1.23 2001-04-27 17:39:49 sandervl Exp $
 
 #
 # Odin32 API
@@ -23,10 +23,13 @@ $(OBJDIR)\initterm.obj \
 $(OBJDIR)\os2sndbuffer.obj \
 $(OBJDIR)\os2primbuff.obj \
 $(OBJDIR)\os2notify.obj \
+$(OBJDIR)\daudiobuffer.obj \
+$(OBJDIR)\daudionotify.obj \
 $(OBJDIR)\os23dlistener.obj \
 $(OBJDIR)\os23dbuffer.obj \
 $(OBJDIR)\dart.obj \
 $(OBJDIR)\dsmixer.obj \
+$(OBJDIR)\waveoutdaud.obj \
 $(OBJDIR)\dsoundrsrc.obj
 
 
