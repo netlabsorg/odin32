@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.1264 2001-02-17 20:17:09 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1265 2001-02-17 20:27:16 bird Exp $ */
+
+ 2000-02-17: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - Win32kCC: o Rewrote to notebook. (fixes size problem)
+                o Added memoryinfo page which is refreshed every second.
 
  2000-02-17: Yuri Dario <mc6530@mclink.it>
     - INCLUDE:  o Header changes for compiling Opera
@@ -8,7 +12,7 @@
                   to be modified by PM somewhere.
                   (fixes WM_ACTIVATE loop in Opera when maximizing or restoring
                    the mdi window)
-                o Don't include RDW_NOERASE flag in InvalidateRect/Rgn 
+                o Don't include RDW_NOERASE flag in InvalidateRect/Rgn
                   (fixes background erase for mdi client window in Opera)
                 o IsChild only checked the direct parent of a window. Must
                   check all parents (parents of parents etc)
@@ -16,7 +20,7 @@
                 o Ported latest GetNextDlgTabItem from Wine
                   (fixes TAB handling in Opera dialogs)
                 o WM_ADJUSTWINDOWPOS bugfix (if app changes size/position)
-                  OSLibMapWINDOWPOStoSWP can add flags, but we must not let 
+                  OSLibMapWINDOWPOStoSWP can add flags, but we must not let
                   it remove flags.
                   (fixes resizing of Opera MDI windows)
                 o ScrollWindow(Ex) bugfixes
