@@ -1,4 +1,4 @@
-/* $Id: dev32hlp.h,v 1.1 1999-09-06 02:19:58 bird Exp $
+/* $Id: dev32hlp.h,v 1.2 1999-10-31 23:57:03 bird Exp $
  *
  * Dev32Hlp - 32-bit Device helpers.
  *
@@ -52,18 +52,22 @@ extern "C" {
 /*
  * D32Hlp_GetDOSVar
  */
-#define DHGETDOSV_SYSINFOSEG             1UL
-#define DHGETDOSV_LOCINFOSEG             2UL
-#define DHGETDOSV_VECTORSDF              4UL
-#define DHGETDOSV_VECTORREBOOT           5UL
-#define DHGETDOSV_YIELDFLAG              7UL
-#define DHGETDOSV_TCYIELDFLAG            8UL
-#define DHGETDOSV_DOSTABLES              9UL /* undocumented by IBM */
-#define DHGETDOSV_DOSCODEPAGE           11UL
-#define DHGETDOSV_INTERRUPTLEV          13UL
-#define DHGETDOSV_DEVICECLASSTABLE      14UL
-#define DHGETDOSV_DMQSSELECTOR          15UL
-#define DHGETDOSV_APMINFO               16UL
+/*                                       0  reserved */
+#define DHGETDOSV_SYSINFOSEG             1
+#define DHGETDOSV_LOCINFOSEG             2
+/*                                       3  reserved */
+#define DHGETDOSV_VECTORSDF              4
+#define DHGETDOSV_VECTORREBOOT           5
+#define DHGETDOSV_YIELDFLAG              7
+#define DHGETDOSV_TCYIELDFLAG            8
+#define DHGETDOSV_DOSTABLES              9  /* undocumented */
+#define DHGETDOSV_STRP_COMMON           10  /* undocumented */
+#define DHGETDOSV_DOSCODEPAGE           11
+#define DHGETDOSV_INTERRUPTLEV          13
+#define DHGETDOSV_DEVICECLASSTABLE      14
+#define DHGETDOSV_DMQSSELECTOR          15
+#define DHGETDOSV_APMINFO               16
+#define DHGETDOSV_APM_LENGTH            17  /* undocumented? */
 
 
 
@@ -93,7 +97,7 @@ PVOID  D32HLPCALL D32Hlp_VirtToLin2(USHORT usSelector,
 D32RET D32HLPCALL D32Hlp_VirtToLin3(USHORT usSelector,
                                     ULONG  ulOffset,
                                     PPVOID ppvLinAddress);
-PVOID  D32HLPCALL D32Hlp_GetDOSVar(ULONG ulVarNumber, ULONG ulVarMember);
+PVOID  D32HLPCALL D32Hlp_GetDOSVar(USHORT ulVarNumber, USHORT ulVarMember);
 VOID   D32HLPCALL D32Hlp_Yield(VOID);
 PVOID  D32HLPCALL D32Hlp_VMAlloc(ULONG  flFlags,
                                  ULONG  cbSize,

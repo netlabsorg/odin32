@@ -1,4 +1,5 @@
-/* $Id: yield.h,v 1.1 1999-09-06 02:20:00 bird Exp $
+/* $Id: yield.h,v 1.2 1999-10-31 23:57:05 bird Exp $
+ *
  * Yield - conversion may take some time. So it is necessary to
  *         check it's time to yield the processor to other processes.
  *
@@ -12,7 +13,13 @@
 extern "C" {
 #endif
 
-void Yield(void);
+
+#ifdef RING0
+    BOOL Yield(void);
+#else
+    #define Yield() FALSE
+#endif
+
 
 #ifdef __cplusplus
 }

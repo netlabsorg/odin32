@@ -1,14 +1,15 @@
-/* $Id: probkrnl.c,v 1.2 1999-10-27 02:02:53 bird Exp $
+/* $Id: probkrnl.c,v 1.3 1999-10-31 23:57:01 bird Exp $
  *
  * Description:   Autoprobes the os2krnl file and os2krnl[*].sym files.
  *                Another Hack!
  *
  *                16-bit inittime code.
  *
- *                All data has to be initiated because this file is to be compiled into assembly,
- *                automaticly modified and run thru an assembler to produce an object-file. This
- *                because there is no other known way to combine 32-bit and 16-bit C/C++ code into
- *                the same device driver which works.
+ *                All data has to be initiated because this is 16-bit C code
+ *                and is to be linked with 32-bit C/C++ code. Uninitiazlied
+ *                data ends up in the BSS segment, and that segment can't
+ *                both be 32-bit and 16-bit. I have not found any other way
+ *                around this problem that initiating all data.
  *
  *                How this works:
  *                1. parses the device-line parameters and collects some "SysInfo".
@@ -85,7 +86,6 @@ PROCS aProcTab[NUMBER_OF_PROCS] =
     {FALSE, -1, 12, "_LDRQAppType", -1,  -1, EPT_PROC},
 };
 
-unsigned long int   fInitSuccess = 0;
 unsigned long int   ulBuild      = 0;
 unsigned short      usVerMajor   = 0;
 unsigned short      usVerMinor   = 0;
@@ -95,7 +95,6 @@ unsigned short      usVerMinor   = 0;
  * privat data
  */
 static int      fQuiet = 0;
-
 static char     szUsrOS2Krnl[50] = {0};
 static char     szOS2Krnl[]      = {"c:\\os2krnl"};
 
@@ -916,10 +915,10 @@ static void ShowResult(int rc, int iSym)
 
 /**
  * "main" function.
+ * Note that the option -Noloader causes nothing to be done.
  * @returns   0 on success, something else on error.
  * @param     pReqPack  Pointer to init request packet
  * @remark
- * @result    init_success
  */
 int ProbeKernel(PRPINITIN pReqPack)
 {
@@ -942,19 +941,33 @@ int ProbeKernel(PRPINITIN pReqPack)
             if ((pReqPack->InitArgs[i] == '/' || pReqPack->InitArgs[i] == '-') && (i+1) < n)
             {
                 i++;
-                if (pReqPack->InitArgs[i] == 'V' || pReqPack->InitArgs[i] == 'v')
-                    fQuiet = 0;
-                else if (pReqPack->InitArgs[i] == 'Q' || pReqPack->InitArgs[i] == 'q')
-                    fQuiet = 1;
-                else if (pReqPack->InitArgs[i] == 'K' || pReqPack->InitArgs[i] == 'k')
-                {   /* kernel file */
-                    i++;
-                    i += kargncpy(szUsrOS2Krnl, &pReqPack->InitArgs[i], sizeof(szUsrOS2Krnl));
-                }
-                else if (pReqPack->InitArgs[i] == 'S' || pReqPack->InitArgs[i] == 's')
-                {   /* symbol file */
-                    i++;
-                    i += kargncpy(szUsrSym, &pReqPack->InitArgs[i], sizeof(szUsrSym));
+                switch (pReqPack->InitArgs[i])
+                {
+                    case 'k':
+                    case 'K': /* Kernel file */
+                        i++;
+                        i += kargncpy(szUsrOS2Krnl, &pReqPack->InitArgs[i], sizeof(szUsrOS2Krnl));
+                        break;
+
+                    case 'n':
+                    case 'N': /* NoLoader */
+                        return 0;
+
+                    case 'q':
+                    case 'Q': /* Quiet */
+                        fQuiet = 1;
+                        break;
+
+                    case 's':
+                    case 'S': /* Symbol file */
+                        i++;
+                        i += kargncpy(szUsrSym, &pReqPack->InitArgs[i], sizeof(szUsrSym));
+                        break;
+
+                    case 'v':
+                    case 'V': /* Verbose */
+                        fQuiet = 0;
+                        break;
                 }
             }
         }
@@ -1028,7 +1041,6 @@ int ProbeKernel(PRPINITIN pReqPack)
     /* show the result and set return-value */
     dprintf(("rc=%d; i=%d\n", rc, i));
     ShowResult(rc, i);
-    fInitSuccess = rc = 0;
 
     return rc;
 }

@@ -1,4 +1,4 @@
-/* $Id: yield.c,v 1.2 1999-10-14 01:20:34 bird Exp $
+/* $Id: yield.c,v 1.3 1999-10-31 23:57:08 bird Exp $
  *
  * Yield - conversion may take some time. So it is necessary to
  *         check it's time to yield the processor to other processes.
@@ -26,12 +26,16 @@
 /**
  * Checks if we have to yield the CPU. Yield it if we must.
  */
-void Yield(void)
+BOOL Yield(void)
 {
     PBYTE  pfbYield;
 
     pfbYield = D32Hlp_GetDOSVar(DHGETDOSV_YIELDFLAG, 0UL);
-
     if (pfbYield != NULL && *pfbYield)
+    {
         D32Hlp_Yield();
+        return TRUE;
+    }
+
+    return FALSE;
 }

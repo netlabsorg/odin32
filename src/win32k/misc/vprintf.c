@@ -1,4 +1,4 @@
-/* $Id: vprintf.c,v 1.2 1999-10-27 02:03:00 bird Exp $
+/* $Id: vprintf.c,v 1.3 1999-10-31 23:57:07 bird Exp $
  *
  * vprintf and printf
  *
@@ -35,6 +35,7 @@
 #ifdef RING0
     #include <builtin.h>
     #include "options.h"
+    #include "Yield.h"
 #endif
 
 
@@ -214,7 +215,7 @@ static char * numtostr(long lValue, unsigned int uiBase,
 int vprintf(const char *pszFormat, va_list args)
 {
     #ifdef RING0
-        if (options.fQuiet)
+        if (!options.fLogging)
             return 0;
     #else
         int cch = 0;
@@ -412,7 +413,7 @@ int printf(const char *pszFormat, ...)
     va_list arguments;
 
     #ifdef RING0
-        if (options.fQuiet)
+        if (!options.fLogging)
             return 0;
     #endif
 
@@ -431,7 +432,7 @@ int _printfieee(const char *pszFormat, ...)
     va_list arguments;
 
     #ifdef RING0
-        if (options.fQuiet)
+        if (!options.fLogging)
             return 0;
     #endif
 
@@ -449,7 +450,7 @@ int _printf_ansi(const char *pszFormat, ...)
     va_list arguments;
 
     #ifdef RING0
-        if (options.fQuiet)
+        if (!options.fLogging)
             return 0;
     #endif
 
@@ -489,6 +490,7 @@ static void chout(int ch)
         #ifdef RING0
             while (!(_inp(options.usCom + 5) & 0x20));  /* Waits for the port to be ready. */
             _outp(options.usCom, ch);                   /* Put the char. */
+            Yield();
         #else
             DosWrite(1, (void*)&ch, 1, &ulWrote);
         #endif
@@ -506,6 +508,7 @@ static void chout(int ch)
  */
 static char *strout(char *psz, signed cchMax)
 {
+    int cchYield = 0;
     while (cchMax > 0 && *psz != '\0')
     {
         ULONG cch = 0;
@@ -535,6 +538,7 @@ static char *strout(char *psz, signed cchMax)
                 _outp(options.usCom, chReturn);             /* Put the char. */
                 while (!(_inp(options.usCom + 5) & 0x20));  /* Waits for the port to be ready. */
                 _outp(options.usCom, chNewLine);            /* Put the char. */
+                cchYield ++;
             #else
                 DosWrite(1, (void*)&chReturn, 1, &ul);
                 DosWrite(1, (void*)&chNewLine, 1, &ul);
@@ -549,6 +553,10 @@ static char *strout(char *psz, signed cchMax)
         /* next */
         psz += cch;
         cchMax -= cch;
+        cchYield += cch;
+        if (cchYield > 3)
+            if (Yield())
+                cchYield = 0;
     }
     return psz;
 }
