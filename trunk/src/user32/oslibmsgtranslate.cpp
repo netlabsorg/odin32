@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.55 2001-06-25 20:52:03 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.56 2001-07-03 20:36:54 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -595,7 +595,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         keyWasPressed = ((SHORT1FROMMP (os2Msg->mp1) & KC_PREVDOWN) == KC_PREVDOWN);
 
         dprintf(("PM: WM_CHAR: %x %x %d %x", SHORT1FROMMP(os2Msg->mp2), SHORT2FROMMP(os2Msg->mp2), repeatCount, scanCode));
-        dprintf(("PM: WM_CHAR: hwnd %x flags %x", win32wnd->getWindowHandle(), flags));
+        dprintf(("PM: WM_CHAR: hwnd %x flags %x mp1 %x, mp2 %x", win32wnd->getWindowHandle(), flags, os2Msg->mp1, os2Msg->mp2));
 
         // vitali add begin
         if ( ( SHORT1FROMMP(os2Msg->mp2) & 0x0FF ) == 0x0E0 )

@@ -1,4 +1,4 @@
-/* $Id: winkeyboard.cpp,v 1.10 2001-07-03 18:33:28 sandervl Exp $ */
+/* $Id: winkeyboard.cpp,v 1.11 2001-07-03 20:36:54 sandervl Exp $ */
 /*
  * Win32 <-> PM key translation
  *
@@ -598,7 +598,7 @@ BOOL WIN32API GetKeyboardState(PBYTE lpKeyState)
             }
         }
         for(i=0;i<256;i++) {
-            if(lpKeyState[i] & 0x80) {
+            if(lpKeyState[i]) {
                 dprintf2(("Win key 0x%0x = %x", i, lpKeyState[i]));
             }
         }
@@ -715,14 +715,7 @@ INT WINAPI GetKeyboardLayoutList(INT nBuff,HKL *layouts)
  * Remark    :
  * Status    : UNTESTED STUB
  *
- * Author    : Partly based on Wine code (windows\x11drv\keyboard.c
- * Copyright 1993 Bob Amstadt
- * Copyright 1996 Albrecht Kleine 
- * Copyright 1997 David Faure
- * Copyright 1998 Morten Welinder
- * Copyright 1998 Ulrich Weigand
- * Copyright 1999 Ove Kåven
- *
+ * Author    : SvL
  *****************************************************************************/
 int WIN32API ToAscii(UINT   uVirtKey,
                      UINT   uScanCode,
@@ -730,7 +723,7 @@ int WIN32API ToAscii(UINT   uVirtKey,
                      LPWORD lpwTransKey,
                      UINT   fuState)
 {
-  dprintf(("USER32:ToAscii (%u,%u,%08xh,%08xh,%u) partially implemented",
+  dprintf(("USER32:ToAscii (%x,%x,%08xh,%08xh,%x) partially implemented",
            uVirtKey, uScanCode, lpbKeyState, lpwTransKey,  fuState));
 
   INT ret;
@@ -754,6 +747,12 @@ int WIN32API ToAscii(UINT   uVirtKey,
        *(char*)lpwTransKey = 0;
        ret = 0;
   }
+  else
+  if (uVirtKey == VK_ESCAPE) {
+       //NT returns VK_ESCAPE here
+       *(char*)lpwTransKey = VK_ESCAPE;
+       ret = 1;
+  }
   else {
        ULONG shiftstate = 0;
 
@@ -761,17 +760,46 @@ int WIN32API ToAscii(UINT   uVirtKey,
 
        if(lpbKeyState[VK_LSHIFT]   & 0x80) shiftstate |= TCF_LSHIFT;
        if(lpbKeyState[VK_RSHIFT]   & 0x80) shiftstate |= TCF_RSHIFT;
+       if(lpbKeyState[VK_SHIFT]    & 0x80) shiftstate |= TCF_SHIFT;
        if(lpbKeyState[VK_LCONTROL] & 0x80) shiftstate |= TCF_LCONTROL;
        if(lpbKeyState[VK_RCONTROL] & 0x80) shiftstate |= TCF_RCONTROL;
+       if(lpbKeyState[VK_CONTROL]  & 0x80) shiftstate |= TCF_CONTROL;
        if(lpbKeyState[VK_LMENU]    & 0x80) shiftstate |= TCF_ALT;
        if(lpbKeyState[VK_RMENU]    & 0x80) shiftstate |= TCF_ALTGR;
+       if(lpbKeyState[VK_MENU]     & 0x80) shiftstate |= TCF_ALT;
        if(lpbKeyState[VK_CAPITAL]  & 1)    shiftstate |= TCF_CAPSLOCK;
        if(lpbKeyState[VK_NUMLOCK]  & 1)    shiftstate |= TCF_NUMLOCK;
 
-       *(char*)lpwTransKey = OSLibWinTranslateChar(uScanCode, TC_SCANCODETOCHAR, shiftstate);
+       //NT only modifies the bytes it returns
+       *(char *)lpwTransKey = OSLibWinTranslateChar(uScanCode, TC_SCANCODETOCHAR, shiftstate);
 
-       ret = 1;
+       if(shiftstate & TCF_CONTROL) {
+           if(uVirtKey >= VK_A && uVirtKey <= VK_Z) {
+               //NT returns key-0x60 (or so it seems) for ctrl-(shift-)-a..z
+               if(shiftstate & TCF_SHIFT) {
+                    *(char *)lpwTransKey -= 0x40;
+               }
+               else *(char *)lpwTransKey -= 0x60;
+           }
+           else
+           if(uVirtKey == VK_SPACE) {
+               if(shiftstate & TCF_SHIFT) {
+                   //NT returns 0 for ctrl-shift-space
+                   *lpwTransKey = 0;
+               }
+           }
+           else {
+               //NT returns 0 for ctrl-0, ctrl-.
+               *lpwTransKey = 0;
+           }
+       }
+
+       if(*(char *)lpwTransKey == 0) {
+            ret = 0;
+       }
+       else ret = 1;
   }
+  dprintf2(("USER32:ToAscii returned %x, len %d", *lpwTransKey, ret));
   return ret;
 }
 /*****************************************************************************
