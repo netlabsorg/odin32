@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.209 2003-04-23 18:00:59 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.210 2003-04-24 14:32:02 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -1500,6 +1500,16 @@ adjustend:
             goto PosChangedEnd;
         }
 
+        // PF: MDI window is not a common OS/2 frame window so we just skipped all
+        // PM default processing for it that basicly moved this window to 0,0 point
+        // and changed frame controls. Now do our own processing.
+
+        if ((pswp->fl & SWP_MAXIMIZE) && (win32wnd->getExStyle() & WS_EX_MDICHILD_W)) 
+        {
+         SendMessageA(win32wnd->getWindowHandle(), WM_SYSCOMMAND_W, SC_MAXIMIZE_W, 0);
+         goto PosChangedEnd;
+        }
+
         //SvL: When a window is made visible, then we don't receive a
         //     WM_VRNENABLED message (for some weird reason)
         if(pswp->fl & SWP_SHOW) {
@@ -1980,6 +1990,15 @@ PosChangedEnd:
         dprintf(("PMFRAME:WM_MINMAXFRAME %x",hwnd));
         if ((swp->fl & SWP_MAXIMIZE) == SWP_MAXIMIZE)
         {
+            // MDI frame windows are not common PM windows so we need to
+            // drop-out WHOLE chain of WM_X commands with SWP_MAXIMIZE flag
+            // finally last WM_WINDOWPOSCHANGED will take care of maximization
+
+            if (win32wnd->getExStyle() & WS_EX_MDICHILD_W) {
+               rc = 0;
+               break;
+            }
+
             RECT rect;
             rect.left = rect.top = rect.right = rect.bottom = 0;
             win32wnd->AdjustMaximizedRect(&rect);
