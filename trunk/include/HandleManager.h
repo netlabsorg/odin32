@@ -1,4 +1,4 @@
-/* $Id: HandleManager.h,v 1.18 2000-03-17 16:06:01 sandervl Exp $ */
+/* $Id: HandleManager.h,v 1.19 2000-05-22 19:12:42 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -215,6 +215,11 @@ BOOL   HMGetFileInformationByHandle (HANDLE                     hFile,
 BOOL   HMSetEndOfFile               (HANDLE                     hFile);
 
 BOOL   HMSetFileTime                (HANDLE                     hFile,
+                                     const FILETIME             *pFT1,
+                                     const FILETIME             *pFT2,
+                                     const FILETIME             *pFT3);
+
+BOOL   HMGetFileTime                (HANDLE                     hFile,
                                      const FILETIME             *pFT1,
                                      const FILETIME             *pFT2,
                                      const FILETIME             *pFT3);
