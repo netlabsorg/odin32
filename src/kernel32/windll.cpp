@@ -1,4 +1,4 @@
-/* $Id: windll.cpp,v 1.9 1999-08-18 12:24:16 sandervl Exp $ */
+/* $Id: windll.cpp,v 1.10 1999-08-18 17:18:00 sandervl Exp $ */
 
 /*
  * Win32 DLL class
@@ -28,7 +28,6 @@
 #include <windll.h>
 #include <wprocess.h>
 #include "cio.h"
-#include "os2util.h"
 
 /***********************************
  * PH: fixups for missing os2win.h *
@@ -46,16 +45,6 @@ Win32Dll::Win32Dll(char *szDllName) : Win32Image(szDllName), referenced(0),
   next = head;
   head = this;
 
-  strcpy(szModule, StripPath(szFileName));
-  UpCase(szModule);
-  char *dot = strstr(szModule, ".");
-  while(dot) {
-	char *newdot = strstr(dot+1, ".");
-	if(newdot == NULL)	break;
-	dot = newdot;
-  }
-  if(dot)
-	*dot = 0;
   dprintf(("Win32Dll::Win32Dll %s %s", szFileName, szModule));
 }
 //******************************************************************************
@@ -70,18 +59,6 @@ Win32Dll::Win32Dll(HINSTANCE hinstance, int NameTableId, int Win32TableId,
   next = head;
   head = this;
 
-  char *name = OS2GetDllName(hinstance);
-  strcpy(szModule, name);
-  UpCase(szModule);
-  char *dot = strstr(szModule, ".");
-  while(dot) {
-	char *newdot = strstr(dot+1, ".");
-	if(newdot == NULL)	break;
-	dot = newdot;
-  }
-  if(dot)
-	*dot = 0;
-
   dprintf(("Win32Dll::Win32Dll %s", szModule));
 }
 //******************************************************************************
@@ -91,18 +68,6 @@ void Win32Dll::OS2DllInit(HINSTANCE hinstance, int NameTableId, int Win32TableId
 {
   dllEntryPoint = DllEntryPoint;
   fUnloaded     = FALSE;
-
-  char *name = OS2GetDllName(hinstance);
-  strcpy(szModule, name);
-  UpCase(szModule);
-  char *dot = strstr(szModule, ".");
-  while(dot) {
-	char *newdot = strstr(dot+1, ".");
-	if(newdot == NULL)	break;
-	dot = newdot;
-  }
-  if(dot)
-	*dot = 0;
 
   Win32Image::OS2ImageInit(hinstance, NameTableId, Win32TableId);
 }
@@ -207,7 +172,7 @@ BOOL Win32Dll::isSystemDll(char *szFileName)
  char szModule[CCHMAXPATH];
 
   strcpy(szModule, szFileName);
-  UpCase(szModule);
+  strupr(szModule);
   dot = strstr(szModule, ".");
   if(dot)
 	*dot = 0;
@@ -426,11 +391,12 @@ Win32Dll *Win32Dll::findModule(char *dllname)
 {
  Win32Dll *dll = head;
  char szDllName[CCHMAXPATH];
- char *dot;
+ char *dot, *temp;
 
   dprintf(("findModule %s", dllname));
-  strcpy(szDllName, dllname);
-  UpCase(szDllName);
+
+  strcpy(szDllName, StripPath(dllname));
+  strupr(szDllName);
   dot = strstr(szDllName, ".");
   if(dot)
 	*dot = 0;
@@ -475,36 +441,4 @@ Win32Dll *Win32Dll::findModule(HINSTANCE hinstance)
 }
 //******************************************************************************
 //******************************************************************************
-char *Win32Dll::StripPath(char *path)
-{
-  /* @@@PH what does this function do ? Strip the path from a FQFN name ? */
-  char *pszFilename;
-  
-  pszFilename = strrchr(path, '\\');                 /* find rightmost slash */
-  if (pszFilename != NULL)
-    return (pszFilename++);              /* return pointer to next character */
-  
-  pszFilename = strrchr(path, '/');                  /* find rightmost slash */
-  if (pszFilename != NULL)
-    return (pszFilename++);              /* return pointer to next character */
-  
-  return (path);                                     /* default return value */
-  
-#if 0
-  char *fname = path, *prevname = path-1;
-  
-  while(TRUE)
-  {
-    @@@PH causes endless loop here !
-    fname = strchr(fname, '\\');
-    if(fname == NULL)
-      break;
-    
-    prevname = fname;
-  }
-  return(prevname+1);
-#endif
-}
-/******************************************************************************/
-/******************************************************************************/
 Win32Dll *Win32Dll::head = NULL;

@@ -1,14 +1,12 @@
-/* $Id: nameid.cpp,v 1.5 1999-06-19 10:54:42 sandervl Exp $ */
+/* $Id: nameid.cpp,v 1.6 1999-08-18 17:18:00 sandervl Exp $ */
 
-/*
- *
- * Project Odin Software License can be found in LICENSE.TXT
- *
- */
 /*
  * Resource id to name id conversion procedures
  *
  * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
+ *
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #define INCL_BASE
@@ -26,8 +24,6 @@
 #include <winimage.h>
 #include <winexe.h>
 #include "os2util.h"
-
-void UpCase(char *mixedcase);
 
 /******************************************************************************/
 /******************************************************************************/
@@ -56,18 +52,23 @@ int SYSTEM EXPORT ConvertNameId(ULONG hmod, char *name)
 }
 //******************************************************************************
 //******************************************************************************
-void SYSTEM EXPORT UpCase(char *mixedcase)
+char *StripPath(char *path)
 {
- int i;
-
-  for(i=0;i<strlen(mixedcase);i++) {
-        if(mixedcase[i] >= 'a' && mixedcase[i] <= 'z') {
-                mixedcase[i] += 'A' - 'a';
-        }
-  }
+  /* @@@PH what does this function do ? Strip the path from a FQFN name ? */
+  char *pszFilename;
+  
+  pszFilename = strrchr(path, '\\');                 /* find rightmost slash */
+  if (pszFilename != NULL)
+    return (pszFilename++);              /* return pointer to next character */
+  
+  pszFilename = strrchr(path, '/');                  /* find rightmost slash */
+  if (pszFilename != NULL)
+    return (pszFilename++);              /* return pointer to next character */
+  
+  return (path);                                     /* default return value */
 }
-/******************************************************************************/
-/******************************************************************************/
+//******************************************************************************
+//******************************************************************************
 ULONG GetOS2ModuleHandle(ULONG hmod)
 {
  APIRET  rc;

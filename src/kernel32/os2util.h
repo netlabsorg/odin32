@@ -1,4 +1,4 @@
-/* $Id: os2util.h,v 1.5 1999-06-19 17:58:33 sandervl Exp $ */
+/* $Id: os2util.h,v 1.6 1999-08-18 17:18:00 sandervl Exp $ */
 
 /*
  *
@@ -31,6 +31,8 @@ void OS2ClearExitList();
 void OS2RemoveExitList(unsigned long handler);
 
 char *OS2GetDllName(ULONG hModule);
+
+char *StripPath(char *path);
 
 HMODULE OS2iGetModuleHandleA(PSZ pszModule);
 HMODULE OS2QueryModuleHandle(char *modname);

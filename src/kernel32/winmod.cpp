@@ -1,4 +1,4 @@
-/* $Id: winmod.cpp,v 1.5 1999-06-19 10:54:44 sandervl Exp $ */
+/* $Id: winmod.cpp,v 1.6 1999-08-18 17:18:01 sandervl Exp $ */
 
 /*
  * Win32 PE Image class
@@ -70,7 +70,7 @@ int Win32Image::convertNameId(char *lpszName)
 
   upname = (char *)malloc(strlen(lpszName)+1); //CB: Trap with MFC Toolbar/UpDown samples
   strcpy(upname, lpszName);
-  UpCase(upname);
+  strupr(upname);
   dprintf(("Convert %s to id\n", upname));
   curnid     = (NameId *)((int)NameTable + sizeof(USHORT));;
   for(i=0;i<nrcvtnames;i++) {
