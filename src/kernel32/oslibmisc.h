@@ -1,4 +1,4 @@
-/* $Id: oslibmisc.h,v 1.7 2000-09-12 04:27:45 bird Exp $ */
+/* $Id: oslibmisc.h,v 1.8 2002-02-19 11:49:20 sandervl Exp $ */
 /*
  * Misc util. procedures
  *
@@ -48,6 +48,7 @@ ULONG OSLibWinQueryMsgQueue(ULONG hab);
 #define CC_USA                         1
 #define CC_CANADA                      2
 #define CC_LATIN_AMERICA               3
+#define CC_RUSSIA                      7
 #define CC_GREECE                     30
 #define CC_NETHERLANDS                31
 #define CC_BELGIUM                    32
