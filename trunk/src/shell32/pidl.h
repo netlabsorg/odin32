@@ -169,8 +169,12 @@ REFIID		_ILGetGUIDPointer	(LPCITEMIDLIST pidl);
 /* 
  * debug helper 
  */
-void	pdump	(LPCITEMIDLIST pidl);
-BOOL	pcheck	(LPCITEMIDLIST pidl);
+#if defined(__WIN32OS2__) && defined(DEBUG)
+void pdump (LPCITEMIDLIST pidl);
+#else
+#define pdump(pidl)
+#endif
+BOOL pcheck (LPCITEMIDLIST pidl);
 
 /*
  * aPidl helper
