@@ -221,7 +221,7 @@ static VOID PROPSHEET_UnImplementedFlags(DWORD dwFlags)
     add_flag(PSH_WIZARD97_NEW);
     add_flag(PSH_NOCONTEXTHELP);
     if (string[0] != '\0')
-	FIXME("%s\n", string);
+    FIXME("%s\n", string);
 }
 #undef add_flag
 
@@ -293,16 +293,22 @@ static BOOL PROPSHEET_CollectSheetInfoA(LPCPROPSHEETHEADERA lppsh,
 
   memcpy(&psInfo->ppshheader,lppsh,dwSize);
   TRACE("\n** PROPSHEETHEADER **\ndwSize\t\t%ld\ndwFlags\t\t%08lx\nhwndParent\t%p\nhInstance\t%p\npszCaption\t'%s'\nnPages\t\t%d\npfnCallback\t%p\n",
-	lppsh->dwSize, lppsh->dwFlags, lppsh->hwndParent, lppsh->hInstance,
-	debugstr_a(lppsh->pszCaption), lppsh->nPages, lppsh->pfnCallback);
+    lppsh->dwSize, lppsh->dwFlags, lppsh->hwndParent, lppsh->hInstance,
+    debugstr_a(lppsh->pszCaption), lppsh->nPages, lppsh->pfnCallback);
 
   PROPSHEET_UnImplementedFlags(lppsh->dwFlags);
 
   if (HIWORD(lppsh->pszCaption))
   {
+#ifdef __WIN32OS2__
+     int len = MultiByteToWideChar( CP_ACP, 0, lppsh->pszCaption, -1, 0, 0 );
+     psInfo->ppshheader.pszCaption = HeapAlloc( GetProcessHeap(), 0, len*sizeof (WCHAR) );
+     MultiByteToWideChar(CP_ACP, 0, lppsh->pszCaption, -1, (LPWSTR) psInfo->ppshheader.pszCaption, len);
+#else
      int len = strlen(lppsh->pszCaption);
      psInfo->ppshheader.pszCaption = HeapAlloc( GetProcessHeap(), 0, (len+1)*sizeof (WCHAR) );
      MultiByteToWideChar(CP_ACP, 0, lppsh->pszCaption, -1, (LPWSTR) psInfo->ppshheader.pszCaption, len+1);
+#endif
      /* strcpy( (char *)psInfo->ppshheader.pszCaption, lppsh->pszCaption ); */
   }
   psInfo->nPages = lppsh->nPages;
@@ -506,7 +512,7 @@ BOOL PROPSHEET_CollectPageInfo(LPCPROPSHEETPAGEW lppsp,
       if (!LoadStringW( lppsp->hInstance, (UINT)lppsp->pszTitle,szTitle,sizeof szTitle ))
       {
         pTitle = pszNull;
-	FIXME("Could not load resource #%04x?\n",LOWORD(lppsp->pszTitle));
+    FIXME("Could not load resource #%04x?\n",LOWORD(lppsp->pszTitle));
       }
       else
         pTitle = szTitle;
@@ -537,7 +543,7 @@ BOOL PROPSHEET_CollectPageInfo(LPCPROPSHEETPAGEW lppsp,
     if ( hIcon )
     {
       if (psInfo->hImageList == 0 )
-	psInfo->hImageList = ImageList_Create(icon_cx, icon_cy, ILC_COLOR, 1, 1);
+    psInfo->hImageList = ImageList_Create(icon_cx, icon_cy, ILC_COLOR, 1, 1);
 
       ImageList_AddIcon(psInfo->hImageList, hIcon);
     }
@@ -825,7 +831,7 @@ static BOOL PROPSHEET_AdjustSizeWizard(HWND hwndDlg, PropSheetInfo* psInfo)
 
   TRACE("Biggest page %ld %ld %ld %ld\n", rc.left, rc.top, rc.right, rc.bottom);
   TRACE("   constants padx=%d, pady=%d, butH=%d, lH=%d\n",
-	padding.x, padding.y, buttonHeight, lineHeight);
+    padding.x, padding.y, buttonHeight, lineHeight);
 
   /* Make room */
   rc.right += (padding.x * 2);
@@ -1091,18 +1097,18 @@ static PADDING_INFO PROPSHEET_GetPaddingInfoWizard(HWND hwndDlg, const PropSheet
   TRACE("\n");
   if (psInfo->hasHelp)
   {
-	idButton = IDHELP;
+    idButton = IDHELP;
   }
   else
   {
     if (psInfo->ppshheader.dwFlags & INTRNL_ANY_WIZARD)
     {
-	idButton = IDC_NEXT_BUTTON;
+    idButton = IDC_NEXT_BUTTON;
     }
     else
     {
-	/* hopefully this is ok */
-	idButton = IDCANCEL;
+    /* hopefully this is ok */
+    idButton = IDCANCEL;
     }
   }
 
@@ -1126,7 +1132,7 @@ static PADDING_INFO PROPSHEET_GetPaddingInfoWizard(HWND hwndDlg, const PropSheet
   padding.y = ptButton.y - ptLine.y;
 
   if (padding.y < 0)
-	  ERR("padding negative ! Please report this !\n");
+      ERR("padding negative ! Please report this !\n");
 
   /* this is most probably not correct, but the best we have now */
   padding.x = padding.y;
@@ -1254,7 +1260,7 @@ static UINT GetTemplateSize(DLGTEMPLATE* pTemplate)
 
   /* font, if DS_SETFONT set */
   if ((DS_SETFONT & ((istemplateex)?  ((MyDLGTEMPLATEEX*)pTemplate)->style :
-		     pTemplate->style)))
+             pTemplate->style)))
     {
       p+=(istemplateex)?3:1;
       TRACE("font %s\n",debugstr_w((LPCWSTR)p));
@@ -1267,48 +1273,48 @@ static UINT GetTemplateSize(DLGTEMPLATE* pTemplate)
   while (nrofitems > 0)
     {
       p = (WORD*)(((DWORD)p + 3) & ~3); /* DWORD align */
-      
+
       /* skip header */
       p += (istemplateex ? sizeof(MyDLGITEMTEMPLATEEX) : sizeof(DLGITEMTEMPLATE))/sizeof(WORD);
-      
+
       /* check class */
       switch ((WORD)*p)
-	{
-	case 0x0000:
-	  p++;
-	  break;
-	case 0xffff:
-	  TRACE("class ordinal 0x%08lx\n",*(DWORD*)p);
-	  p += 2;
-	  break;
-	default:
-	  TRACE("class %s\n",debugstr_w((LPCWSTR)p));
-	  p += lstrlenW( (LPCWSTR)p ) + 1;
-	  break;
-	}
+    {
+    case 0x0000:
+      p++;
+      break;
+    case 0xffff:
+      TRACE("class ordinal 0x%08lx\n",*(DWORD*)p);
+      p += 2;
+      break;
+    default:
+      TRACE("class %s\n",debugstr_w((LPCWSTR)p));
+      p += lstrlenW( (LPCWSTR)p ) + 1;
+      break;
+    }
 
       /* check title text */
       switch ((WORD)*p)
-	{
-	case 0x0000:
-	  p++;
-	  break;
-	case 0xffff:
-	  TRACE("text ordinal 0x%08lx\n",*(DWORD*)p);
-	  p += 2;
-	  break;
-	default:
-	  TRACE("text %s\n",debugstr_w((LPCWSTR)p));
-	  p += lstrlenW( (LPCWSTR)p ) + 1;
-	  break;
-	}
+    {
+    case 0x0000:
+      p++;
+      break;
+    case 0xffff:
+      TRACE("text ordinal 0x%08lx\n",*(DWORD*)p);
+      p += 2;
+      break;
+    default:
+      TRACE("text %s\n",debugstr_w((LPCWSTR)p));
+      p += lstrlenW( (LPCWSTR)p ) + 1;
+      break;
+    }
       p += *p + 1;    /* Skip extra data */
       --nrofitems;
     }
-  
+
   TRACE("%p %p size 0x%08x\n",p, (WORD*)pTemplate,sizeof(WORD)*(p - (WORD*)pTemplate));
   return (p - (WORD*)pTemplate)*sizeof(WORD);
-  
+
 }
 
 /******************************************************************************
@@ -1351,13 +1357,13 @@ static BOOL PROPSHEET_CreatePage(HWND hwndParent,
                                     ppshpage->u.pszTemplate,
                                     RT_DIALOGW);
     if(!hResource)
-	return FALSE;
+    return FALSE;
 
     resSize = SizeofResource(ppshpage->hInstance, hResource);
 
     hTemplate = LoadResource(ppshpage->hInstance, hResource);
     if(!hTemplate)
-	return FALSE;
+    return FALSE;
 
     pTemplate = (LPDLGTEMPLATEW)LockResource(hTemplate);
     /*
@@ -1367,7 +1373,7 @@ static BOOL PROPSHEET_CreatePage(HWND hwndParent,
   temp = COMCTL32_Alloc(resSize);
   if (!temp)
     return FALSE;
-  
+
   TRACE("copying pTemplate %p into temp %p (%ld)\n", pTemplate, temp, resSize);
   memcpy(temp, pTemplate, resSize);
   pTemplate = temp;
@@ -1401,10 +1407,10 @@ static BOOL PROPSHEET_CreatePage(HWND hwndParent,
                                (LPPROPSHEETPAGEW)ppshpage);
 
   hwndPage = CreateDialogIndirectParamW(ppshpage->hInstance,
-					pTemplate,
-					hwndParent,
-					ppshpage->pfnDlgProc,
-					(LPARAM)ppshpage);
+                    pTemplate,
+                    hwndParent,
+                    ppshpage->pfnDlgProc,
+                    (LPARAM)ppshpage);
   /* Free a no more needed copy */
   if(temp)
       COMCTL32_Free(temp);
@@ -1427,12 +1433,12 @@ static BOOL PROPSHEET_CreatePage(HWND hwndParent,
 
       padding = PROPSHEET_GetPaddingInfoWizard(hwndParent, psInfo);
       TRACE("setting page %08lx, rc (%ld,%ld)-(%ld,%ld) w=%d, h=%d, padx=%d, pady=%d\n",
-	    (DWORD)hwndPage, rc.left, rc.top, rc.right, rc.bottom,
-	    pageWidth, pageHeight, padding.x, padding.y);
+        (DWORD)hwndPage, rc.left, rc.top, rc.right, rc.bottom,
+        pageWidth, pageHeight, padding.x, padding.y);
       SetWindowPos(hwndPage, HWND_TOP,
-		   rc.left + padding.x/2,
-		   rc.top + padding.y/2,
-		   pageWidth, pageHeight, 0);
+           rc.left + padding.x/2,
+           rc.top + padding.y/2,
+           pageWidth, pageHeight, 0);
   }
   else {
       /*
@@ -1443,11 +1449,11 @@ static BOOL PROPSHEET_CreatePage(HWND hwndParent,
       pageWidth = rc.right - rc.left;
       pageHeight = rc.bottom - rc.top;
       TRACE("setting page %08lx, rc (%ld,%ld)-(%ld,%ld) w=%d, h=%d\n",
-	    (DWORD)hwndPage, rc.left, rc.top, rc.right, rc.bottom,
-	    pageWidth, pageHeight);
+        (DWORD)hwndPage, rc.left, rc.top, rc.right, rc.bottom,
+        pageWidth, pageHeight);
       SetWindowPos(hwndPage, HWND_TOP,
-		   rc.left, rc.top,
-		   pageWidth, pageHeight, 0);
+           rc.left, rc.top,
+           pageWidth, pageHeight, 0);
   }
 
   return TRUE;
@@ -1896,9 +1902,9 @@ end:
  */
 static BOOL PROPSHEET_SetCurSel(HWND hwndDlg,
                                 int index,
-				int skipdir,
+                int skipdir,
                                 HPROPSHEETPAGE hpage
-				)
+                )
 {
   PropSheetInfo* psInfo = (PropSheetInfo*) GetPropW(hwndDlg, PropSheetInfoStr);
   HWND hwndHelp  = GetDlgItem(hwndDlg, IDHELP);
@@ -1920,7 +1926,7 @@ static BOOL PROPSHEET_SetCurSel(HWND hwndDlg,
     PSHNOTIFY psn;
 
     if (hwndTabControl)
-	SendMessageW(hwndTabControl, TCM_SETCURSEL, index, 0);
+    SendMessageW(hwndTabControl, TCM_SETCURSEL, index, 0);
 
     psn.hdr.code     = PSN_SETACTIVE;
     psn.hdr.hwndFrom = hwndDlg;
@@ -1938,14 +1944,14 @@ static BOOL PROPSHEET_SetCurSel(HWND hwndDlg,
     if (result == -1) {
       index+=skipdir;
       if (index < 0) {
-	index = 0;
-	FIXME("Tried to skip before first property sheet page!\n");
-	break;
+    index = 0;
+    FIXME("Tried to skip before first property sheet page!\n");
+    break;
       }
       if (index >= psInfo->nPages) {
-	FIXME("Tried to skip after last property sheet page!\n");
-	index = psInfo->nPages-1;
-	break;
+    FIXME("Tried to skip after last property sheet page!\n");
+    index = psInfo->nPages-1;
+    break;
       }
     }
     else if (result != 0)
@@ -1995,7 +2001,11 @@ static void PROPSHEET_SetTitleA(HWND hwndDlg, DWORD dwStyle, LPCSTR lpszText)
   {
      WCHAR szTitle[256];
      MultiByteToWideChar(CP_ACP, 0, lpszText, -1,
+#ifdef __WIN32OS2__
+                 szTitle, sizeof( szTitle ) / sizeof( WCHAR ));
+#else
 			     szTitle, sizeof szTitle);
+#endif
      PROPSHEET_SetTitleW(hwndDlg, dwStyle, szTitle);
   }
   else
@@ -2009,8 +2019,8 @@ static void PROPSHEET_SetTitleA(HWND hwndDlg, DWORD dwStyle, LPCSTR lpszText)
  */
 static void PROPSHEET_SetTitleW(HWND hwndDlg, DWORD dwStyle, LPCWSTR lpszText)
 {
-  PropSheetInfo*	psInfo = (PropSheetInfo*) GetPropW(hwndDlg, PropSheetInfoStr);
-  WCHAR			szTitle[256];
+  PropSheetInfo*    psInfo = (PropSheetInfo*) GetPropW(hwndDlg, PropSheetInfoStr);
+  WCHAR         szTitle[256];
 
   TRACE("'%s' (style %08lx)\n", debugstr_w(lpszText), dwStyle);
   if (HIWORD(lpszText) == 0) {
@@ -2414,10 +2424,10 @@ INT WINAPI PropertySheetA(LPCPROPSHEETHEADERA lppsh)
     if (!PROPSHEET_CollectPageInfo((LPCPROPSHEETPAGEW)psInfo->proppage[n].hpage,
                                psInfo, n))
     {
-	if (lppsh->dwFlags & PSH_PROPSHEETPAGE)
-	    DestroyPropertySheetPage(psInfo->proppage[n].hpage);
-	n--;
-	psInfo->nPages--;
+    if (lppsh->dwFlags & PSH_PROPSHEETPAGE)
+        DestroyPropertySheetPage(psInfo->proppage[n].hpage);
+    n--;
+    psInfo->nPages--;
     }
   }
 
@@ -2458,10 +2468,10 @@ INT WINAPI PropertySheetW(LPCPROPSHEETHEADERW lppsh)
     if (!PROPSHEET_CollectPageInfo((LPCPROPSHEETPAGEW)psInfo->proppage[n].hpage,
                                psInfo, n))
     {
-	if (lppsh->dwFlags & PSH_PROPSHEETPAGE)
-	    DestroyPropertySheetPage(psInfo->proppage[n].hpage);
-	n--;
-	psInfo->nPages--;
+    if (lppsh->dwFlags & PSH_PROPSHEETPAGE)
+        DestroyPropertySheetPage(psInfo->proppage[n].hpage);
+    n--;
+    psInfo->nPages--;
     }
   }
 
@@ -2622,55 +2632,55 @@ static BOOL PROPSHEET_DoCommand(HWND hwnd, WORD wID)
 
     case IDOK:
     case IDC_APPLY_BUTTON:
-	{
-	    HWND hwndApplyBtn = GetDlgItem(hwnd, IDC_APPLY_BUTTON);
+    {
+        HWND hwndApplyBtn = GetDlgItem(hwnd, IDC_APPLY_BUTTON);
 
-	    if (PROPSHEET_Apply(hwnd, wID == IDOK ? 1: 0) == FALSE)
-		break;
+        if (PROPSHEET_Apply(hwnd, wID == IDOK ? 1: 0) == FALSE)
+        break;
 
-	    if (wID == IDOK)
-		{
-		    PropSheetInfo* psInfo = (PropSheetInfo*) GetPropW(hwnd,
-								      PropSheetInfoStr);
-		    int result = TRUE;
+        if (wID == IDOK)
+        {
+            PropSheetInfo* psInfo = (PropSheetInfo*) GetPropW(hwnd,
+                                      PropSheetInfoStr);
+            int result = TRUE;
 
-		    if (psInfo->restartWindows)
-			result = ID_PSRESTARTWINDOWS;
+            if (psInfo->restartWindows)
+            result = ID_PSRESTARTWINDOWS;
 
-		    /* reboot system takes precedence over restart windows */
-		    if (psInfo->rebootSystem)
-			result = ID_PSREBOOTSYSTEM;
+            /* reboot system takes precedence over restart windows */
+            if (psInfo->rebootSystem)
+            result = ID_PSREBOOTSYSTEM;
 
-		    if (psInfo->isModeless)
-			psInfo->activeValid = FALSE;
-		    else
-			EndDialog(hwnd, result);
-		}
-	    else
-		EnableWindow(hwndApplyBtn, FALSE);
+            if (psInfo->isModeless)
+            psInfo->activeValid = FALSE;
+            else
+            EndDialog(hwnd, result);
+        }
+        else
+        EnableWindow(hwndApplyBtn, FALSE);
 
-	    break;
-	}
+        break;
+    }
 
     case IDC_BACK_BUTTON:
-	PROPSHEET_Back(hwnd);
-	break;
+    PROPSHEET_Back(hwnd);
+    break;
 
     case IDC_NEXT_BUTTON:
-	PROPSHEET_Next(hwnd);
-	break;
+    PROPSHEET_Next(hwnd);
+    break;
 
     case IDC_FINISH_BUTTON:
-	PROPSHEET_Finish(hwnd);
-	break;
+    PROPSHEET_Finish(hwnd);
+    break;
 
     case IDCANCEL:
-	PROPSHEET_Cancel(hwnd, 0);
-	break;
+    PROPSHEET_Cancel(hwnd, 0);
+    break;
 
     case IDHELP:
-	PROPSHEET_Help(hwnd);
-	break;
+    PROPSHEET_Help(hwnd);
+    break;
     }
 
     return TRUE;
@@ -2683,7 +2693,7 @@ INT_PTR CALLBACK
 PROPSHEET_DialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
   TRACE("hwnd=%p msg=0x%04x wparam=%x lparam=%lx\n",
-	hwnd, uMsg, wParam, lParam);
+    hwnd, uMsg, wParam, lParam);
 
   switch (uMsg)
   {
@@ -2756,7 +2766,7 @@ PROPSHEET_DialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
       if (psInfo->useCallback)
              (*(psInfo->ppshheader.pfnCallback))(hwnd,
-					      PSCB_INITIALIZED, (LPARAM)0);
+                          PSCB_INITIALIZED, (LPARAM)0);
 
       idx = psInfo->active_page;
       ppshpage = (LPCPROPSHEETPAGEW)psInfo->proppage[idx].hpage;
@@ -2858,7 +2868,7 @@ PROPSHEET_DialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
       {
         msgResult = PROPSHEET_SetCurSel(hwnd,
                                        (int)wParam,
-				       1,
+                       1,
                                        (HPROPSHEETPAGE)lParam);
       }
 
