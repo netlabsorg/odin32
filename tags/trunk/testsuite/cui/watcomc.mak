@@ -1,4 +1,4 @@
-# $Id: watcomc.mak,v 1.1 2002-06-20 01:54:38 bird Exp $
+# $Id: watcomc.mak,v 1.2 2002-06-20 02:28:07 bird Exp $
 
 #
 # This script contains the testcases for Doxygen version 1.2.16
@@ -38,7 +38,7 @@ WCC386 = $(WATCOM)\binnt\wcc386.exe
 WLINK = $(WATCOM)\binnt\wlink.exe
 WMAKE  = $(WATCOM)\binnt\wmake.exe
 
-BIN_FILES = $(WCL386) $(WMAKE)
+BIN_FILES = $(WCL386) $(WCC386) $(WLINK) $(WMAKE)
 
 
 #
@@ -57,8 +57,8 @@ testcase:   $(BIN_FILES)
 #
 testcase-wcl386-help: $(PATH_TARGET)\wcl386.help.stdout
     false - testcase is broken. Doesn't detect pipe.
-    set PATH=%WATCOM%\winnt;%PATH% && \
-        $(TS_PEC) $(WCL386) > $(PATH_TARGET)\stdout 2> $(PATH_TARGET)\stderr
+    SET PATH=$(WATCOM)\winnt;$(PATH)
+    $(TS_PEC) $(WCL386) > $(PATH_TARGET)\stdout 2> $(PATH_TARGET)\stderr
     $(TS_TEST_FILE_Z)   $(PATH_TARGET)\stderr
     $(TS_TEST_FILE_NZ)  $(PATH_TARGET)\stdout
     $(TS_CMP) $(PATH_TARGET)\stdout $(PATH_TARGET)\wcl386.help.stdout
@@ -168,14 +168,19 @@ testcase-helloworld: \
             $(PATH_TARGET)\helloworld.c \
             $(PATH_TARGET)\helloworld.stdout
     SET PATH=$(WATCOM)\winnt;$(PATH)
-    $(TS_PEC) $(WCC386) $(PATH_TARGET)\helloworld.c -Fo=$(PATH_TARGET)\helloworld.obj
+    $(TS_PEC) $(WCC386) -I$(WATCOM)\h\nt -I$(WATCOM)\h -Fo=$(PATH_TARGET)\helloworld.obj \
+        $(PATH_TARGET)\helloworld.c
     $(TS_TEST_FILE_NZ) $(PATH_TARGET)\helloworld.obj
-    $(TS_PEC) $(WLINK) FORMAT Window NT \
-                       FILE $(PATH_TARGET)\helloworld.obj \
-                       NAME $(PATH_TARGET)\helloworld.exe
+    echo . & SET LIB=$(WATCOM)\lib386\nt;$(WATCOM)\lib386; && \
+        $(TS_PEC) $(WLINK) FORMAT Window NT \
+            FILE $(PATH_TARGET)\helloworld.obj \
+            NAME $(PATH_TARGET)\helloworld.exe \
+            LIBPATH $(WATCOM)\lib386\nt;$(WATCOM)\lib386
     $(TS_TEST_FILE_NZ) $(PATH_TARGET)\helloworld.exe
-    $(TOOL_CP) $(PATH_TARGET)\helloworld.exe .\helloworld.exe
+    $(TOOL_COPY) $(PATH_TARGET)\helloworld.exe .\helloworld.exe
     $(TS_PEC) .\helloworld.exe > $(PATH_TARGET)\stdout 2> $(PATH_TARGET)\stderr
+    $(TS_TEST_FILE_NZ) $(PATH_TARGET)\stderr
+    $(TS_TEST_FILE_NZ) $(PATH_TARGET)\stdout
     $(TS_CMP) $(PATH_TARGET)\stderr <<
 Hello stderr
 <<
@@ -209,7 +214,7 @@ argc=1 argv0=HelloWorld.ExE
 # Clean rule
 #
 clean:
-    $(TOOL_RM) *.log $(PATH_TARGET)\*
+    $(TOOL_RM) *.log $(PATH_TARGET)\* .\helloworld.exe
 
 !else
 
