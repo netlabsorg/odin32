@@ -1,3 +1,5 @@
+/* $Id: devio.h,v 1.3 1999-06-10 19:11:30 phaller Exp $ */
+
 #ifndef __DEVIO_H__
 #define __DEVIO_H__
 
@@ -35,8 +37,8 @@
 #define IOCTL_MAPMEM_UNMAP_USER_PHYSICAL_MEMORY 0x801
 
 typedef struct  _GENPORT_WRITE_INPUT {
-    ULONG   PortNumber;     
-    union   {               
+    ULONG   PortNumber;
+    union   {
         ULONG   LongData;
         USHORT  ShortData;
         UCHAR   CharData;
@@ -88,22 +90,22 @@ typedef LARGE_INTEGER PHYSICAL_ADDRESS;
 
 typedef struct
 {
-    INTERFACE_TYPE   InterfaceType; 
-    ULONG            BusNumber;     
-    PHYSICAL_ADDRESS BusAddress;    
-    ULONG            AddressSpace;  
-    ULONG            Length;        
+    INTERFACE_TYPE   InterfaceType;
+    ULONG            BusNumber;
+    PHYSICAL_ADDRESS BusAddress;
+    ULONG            AddressSpace;
+    ULONG            Length;
 
 } PHYSICAL_MEMORY_INFO, *PPHYSICAL_MEMORY_INFO;
 
 typedef struct _MapDevRequest
 {
-    DWORD   mdr_ServiceID;          
-    LPVOID  mdr_PhysicalAddress;    
-    DWORD   mdr_SizeInBytes;        
-    LPVOID  mdr_LinearAddress;      
-    WORD    mdr_Selector;           
-    WORD    mdr_Status;             
+    DWORD   mdr_ServiceID;
+    LPVOID  mdr_PhysicalAddress;
+    DWORD   mdr_SizeInBytes;
+    LPVOID  mdr_LinearAddress;
+    WORD    mdr_Selector;
+    WORD    mdr_Status;
 } MAPDEVREQUEST, *PMAPDEVREQUEST;
 
 #endif

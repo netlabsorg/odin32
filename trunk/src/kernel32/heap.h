@@ -1,13 +1,9 @@
+/* $Id: heap.h,v 1.3 1999-06-10 19:11:30 phaller Exp $ */
+
 /*
- *
  * Project Odin Software License can be found in LICENSE.TXT
- *
- */
-/*
  * Win32 heap API functions for OS/2
- *
  * Copyright 1998 Sander van Leeuwen
- *
  */
 #ifndef __HEAP_H__
 #define __HEAP_H__

@@ -1,3 +1,5 @@
+/* $Id: os2heap.h,v 1.3 1999-06-10 19:11:30 phaller Exp $ */
+
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT

@@ -1,3 +1,5 @@
+/* $Id: mapos2.h,v 1.3 1999-06-10 19:11:30 phaller Exp $ */
+
 /* Copyright (C) 1995 by Holger Veit (Holger.Veit@gmd.de) */
 /* Use at your own risk! No Warranty! The author is not responsible for
  * any damage or loss of data caused by proper or improper use of this
