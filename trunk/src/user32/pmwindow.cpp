@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.79 2000-01-20 16:48:56 cbratschi Exp $ */
+/* $Id: pmwindow.cpp,v 1.80 2000-01-20 21:45:07 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -355,7 +355,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         break;
 
     case WM_CHAR:
-        win32wnd->DispatchMsgA(pWinMsg);
+        win32wnd->MsgChar(pWinMsg);
         break;
 
     case WM_TIMER:
