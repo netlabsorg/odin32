@@ -414,9 +414,10 @@ MRESULT EXPENTRY RelayWindowProc(HWND   hwnd,
     }
 
     return FALSE;                                   // OK, message sent
-  } else
+  } 
+  else
   {
-    dprintf(("WSOCK32:AsyncRelayWindowProc: Handle not found, message ignored\n"));
+    dprintf(("WSOCK32:AsyncRelayWindowProc: Handle not found, message ignored %x %x %x %x", hwnd, ulMsg, mp1, mp2));
   }
 
   // default message processing
