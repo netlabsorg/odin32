@@ -1,7 +1,11 @@
-/* $Id: ChangeLog,v 1.1605 2001-07-16 07:41:51 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1606 2001-07-16 19:33:35 sandervl Exp $ */
 
  2001-07-16: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o RegEnumKeyExW fix (lpszClass can be NULL)
+                o Faster resource lookup functions (Wine)
+    - USER32:   o Allocate more memory for icon bitmap before calling
+                  GpiCreateBitmap. This function seems to touch more bytes
+                  than necessary (??).
 
  2001-07-15: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMDLG32: o Ported Wine printer dialog code (inactive due to missing
