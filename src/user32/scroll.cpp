@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.13 1999-10-23 16:45:21 cbratschi Exp $ */
+/* $Id: scroll.cpp,v 1.14 1999-10-23 23:04:38 sandervl Exp $ */
 /*
  * Scrollbar control
  *
@@ -16,6 +16,7 @@
 #include "scroll.h"
 #include "win32wbase.h"
 #include "oslibwin.h"
+#include "initterm.h"
 
 static BOOL bitmapsLoaded = FALSE;
 
@@ -103,25 +104,20 @@ static void SCROLL_DrawInterior_9x( HWND hwnd, HDC hdc, INT nBar,
  */
 static void SCROLL_LoadBitmaps(void)
 {
-    HINSTANCE hinst;
-
     if (bitmapsLoaded) return;
 
-    //CB: Open32 hack to load our own bitmap
-    hinst = LoadLibraryA("USER32.DLL");
-    hUpArrow  = NativeLoadBitmap( hinst, MAKEINTRESOURCEA(OBM_UPARROW) );
-    hDnArrow  = NativeLoadBitmap( hinst, MAKEINTRESOURCEA(OBM_DNARROW) );
-    hLfArrow  = NativeLoadBitmap( hinst, MAKEINTRESOURCEA(OBM_LFARROW) );
-    hRgArrow  = NativeLoadBitmap( hinst, MAKEINTRESOURCEA(OBM_RGARROW) );
-    hUpArrowD = NativeLoadBitmap( hinst, MAKEINTRESOURCEA(OBM_UPARROWD) );
-    hDnArrowD = NativeLoadBitmap( hinst, MAKEINTRESOURCEA(OBM_DNARROWD) );
-    hLfArrowD = NativeLoadBitmap( hinst, MAKEINTRESOURCEA(OBM_LFARROWD) );
-    hRgArrowD = NativeLoadBitmap( hinst, MAKEINTRESOURCEA(OBM_RGARROWD) );
-    hUpArrowI = NativeLoadBitmap( hinst, MAKEINTRESOURCEA(OBM_UPARROWI) );
-    hDnArrowI = NativeLoadBitmap( hinst, MAKEINTRESOURCEA(OBM_DNARROWI) );
-    hLfArrowI = NativeLoadBitmap( hinst, MAKEINTRESOURCEA(OBM_LFARROWI) );
-    hRgArrowI = NativeLoadBitmap( hinst, MAKEINTRESOURCEA(OBM_RGARROWI) );
-    FreeLibrary(hinst);
+    hUpArrow  = LoadBitmapA( hInstanceUser32, MAKEINTRESOURCEA(OBM_UPARROW) );
+    hDnArrow  = LoadBitmapA( hInstanceUser32, MAKEINTRESOURCEA(OBM_DNARROW) );
+    hLfArrow  = LoadBitmapA( hInstanceUser32, MAKEINTRESOURCEA(OBM_LFARROW) );
+    hRgArrow  = LoadBitmapA( hInstanceUser32, MAKEINTRESOURCEA(OBM_RGARROW) );
+    hUpArrowD = LoadBitmapA( hInstanceUser32, MAKEINTRESOURCEA(OBM_UPARROWD) );
+    hDnArrowD = LoadBitmapA( hInstanceUser32, MAKEINTRESOURCEA(OBM_DNARROWD) );
+    hLfArrowD = LoadBitmapA( hInstanceUser32, MAKEINTRESOURCEA(OBM_LFARROWD) );
+    hRgArrowD = LoadBitmapA( hInstanceUser32, MAKEINTRESOURCEA(OBM_RGARROWD) );
+    hUpArrowI = LoadBitmapA( hInstanceUser32, MAKEINTRESOURCEA(OBM_UPARROWI) );
+    hDnArrowI = LoadBitmapA( hInstanceUser32, MAKEINTRESOURCEA(OBM_DNARROWI) );
+    hLfArrowI = LoadBitmapA( hInstanceUser32, MAKEINTRESOURCEA(OBM_LFARROWI) );
+    hRgArrowI = LoadBitmapA( hInstanceUser32, MAKEINTRESOURCEA(OBM_RGARROWI) );
 
     bitmapsLoaded = TRUE;
 }

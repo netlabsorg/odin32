@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.13 1999-10-20 06:38:08 sandervl Exp $ */
+/* $Id: button.cpp,v 1.14 1999-10-23 23:04:32 sandervl Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
@@ -16,6 +16,7 @@
 #include "controls.h"
 #include "button.h"
 #include <misc.h>
+#include "initterm.h"
 
 //Prototypes
 
@@ -127,12 +128,9 @@ static LRESULT BUTTON_Create(HWND hwnd,WPARAM wParam,LPARAM lParam)
   if (!hbitmapCheckBoxes)
   {
     BITMAP bmp;
-    HINSTANCE hinst;
 
-    //CB: Open32 hack to load our own bitmap
-    hinst = LoadLibraryA("USER32.DLL");
-    hbitmapCheckBoxes = NativeLoadBitmap(hinst,MAKEINTRESOURCEA(OBM_CHECKBOXES));
-    FreeLibrary(hinst);
+    hbitmapCheckBoxes = LoadBitmapA(hInstanceUser32, MAKEINTRESOURCEA(OBM_CHECKBOXES));
+    GetObjectA( hbitmapCheckBoxes, sizeof(bmp), &bmp );
     if (GetObjectA(hbitmapCheckBoxes,sizeof(bmp),&bmp))
     {
       checkBoxWidth  = bmp.bmWidth / 4;

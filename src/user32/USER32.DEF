@@ -1,4 +1,4 @@
-; $Id: USER32.DEF,v 1.15 1999-10-22 18:11:41 sandervl Exp $
+; $Id: USER32.DEF,v 1.16 1999-10-23 23:04:32 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
@@ -627,7 +627,5 @@ EXPORTS
 
 ; Wine helper function
     GetSysColorPen              = _GetSysColorPen@4              @2002
-; COMCTL32 helper functions
-    NativeLoadBitmap           = _NativeLoadBitmap@8         @2005
 
     Win32ToOS2Handle__FUl      = Win32ToOS2Handle__15Win32BaseWindowFUl @2006
