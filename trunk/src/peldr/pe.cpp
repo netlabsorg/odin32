@@ -1,4 +1,4 @@
-/* $Id: pe.cpp,v 1.23 2000-10-06 15:15:25 sandervl Exp $ */
+/* $Id: pe.cpp,v 1.24 2000-10-20 11:45:25 sandervl Exp $ */
 
 /*
  * PELDR main exe loader code
@@ -66,7 +66,7 @@ KRNL32EXCEPTPROC       Krnl32SetExceptionHandler = 0;
 KRNL32EXCEPTPROC       Krnl32UnsetExceptionHandler = 0;
 
 //should be the same as in ..\kernel32\winexepeldr.h
-typedef BOOL (* WIN32API WIN32CTOR)(char *, char *, char *, ULONG, BOOL);
+typedef BOOL (* WIN32API WIN32CTOR)(char *, char *, char *, ULONG, BOOL, BOOL);
 
 WIN32CTOR   CreateWin32Exe       = 0;
 ULONG       reservedMemory       = 0;
@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
  PTIB   ptib;
  PPIB   ppib;
  char  *cmdline, *win32cmdline, *peoptions, *newcmdline;
- BOOL   fQuote = FALSE;
+ BOOL   fQuote = FALSE, fVioConsole;
  int    nrTries = 1;
 
   if(argc >= 2) {
@@ -174,6 +174,14 @@ filenotfound:
 	AllocateExeMem(exeName);
   }
 
+#ifdef COMMAND_LINE_VERSION
+  if(DosGetInfoBlocks(&ptib, &ppib) == 0) {
+        //switch process type to PM so the command line app can create PM
+        //windows
+	ppib->pib_ultype = 3; 
+  }
+#endif
+
   rc = DosLoadModule(exeName, sizeof(exeName), "PMWIN.DLL", &hmodPMWin);
   rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32INITIALIZE, NULL, (PFN *)&MyWinInitialize);
   rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32TERMINATE, NULL, (PFN *)&MyWinTerminate);
@@ -197,9 +205,14 @@ filenotfound:
 	MyWinMessageBox(HWND_DESKTOP, NULL, exeName, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
         goto fail;
   }
-  rc = DosQueryProcAddr(hmodKernel32, 0, "_CreateWin32PeLdrExe@20", (PFN *)&CreateWin32Exe);
+  rc = DosQueryProcAddr(hmodKernel32, 0, "_CreateWin32PeLdrExe@24", (PFN *)&CreateWin32Exe);
 
-  if(CreateWin32Exe(exeName, win32cmdline, peoptions, reservedMemory, fConsoleApp) == FALSE) {
+#ifdef COMMAND_LINE_VERSION
+  fVioConsole = TRUE;
+#else
+  fVioConsole = FALSE;
+#endif
+  if(CreateWin32Exe(exeName, win32cmdline, peoptions, reservedMemory, fConsoleApp, fVioConsole) == FALSE) {
         goto fail;
   }
 
