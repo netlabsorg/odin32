@@ -1,4 +1,4 @@
-# $Id: ole32.mak,v 1.14 2001-09-30 09:24:01 bird Exp $
+# $Id: ole32.mak,v 1.15 2001-11-19 12:33:09 sandervl Exp $
 
 #
 # Odin32 API
@@ -39,7 +39,6 @@ $(OBJDIR)\datacache.obj \
 $(OBJDIR)\defaulthandler.obj \
 $(OBJDIR)\errorinfo.obj \
 $(OBJDIR)\filemoniker.obj \
-$(OBJDIR)\guid.obj \
 $(OBJDIR)\hglobalstream.obj \
 $(OBJDIR)\initialise.obj \
 $(OBJDIR)\itemmoniker.obj \
@@ -75,6 +74,7 @@ $(ODIN32_LIB)/comctl32.lib \
 $(ODIN32_LIB)/advapi32.lib \
 $(ODIN32_LIB)/kernel32.lib \
 $(ODIN32_LIB)/oleaut32.lib \
+$(ODIN32_LIB)/guidlib.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
 OS2386.LIB \
 $(RTLLIB_O)

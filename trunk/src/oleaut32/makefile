@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.30 2001-11-18 15:27:30 sandervl Exp $
+# $Id: makefile,v 1.31 2001-11-19 12:33:37 sandervl Exp $
 
 #
 # Odin32 API
@@ -18,9 +18,6 @@
 OBJS = \
 $(OBJDIR)\oleaut32.obj \
 $(OBJDIR)\oleaut.obj \
-!ifndef CUSTOMBUILD
-$(OBJDIR)\guid.obj \
-!endif
 $(OBJDIR)\oList.obj \
 $(OBJDIR)\initterm.obj \
 $(OBJDIR)\olefont.obj \
@@ -56,6 +53,7 @@ $(ODIN32_LIB)/kernel32.lib \
 $(ODIN32_LIB)/user32.lib \
 $(ODIN32_LIB)/ole32.lib \
 $(ODIN32_LIB)/gdi32.lib \
+$(ODIN32_LIB)/guidlib.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
 $(ODIN32_LIB)/pmwinx.lib \
 OS2386.LIB \

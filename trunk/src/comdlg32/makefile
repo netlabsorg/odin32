@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.30 2001-09-30 08:59:44 bird Exp $
+# $Id: makefile,v 1.31 2001-11-19 12:32:00 sandervl Exp $
 
 #
 # Odin32 API
@@ -38,7 +38,6 @@ $(OBJDIR)\filedlg95.obj \
 $(OBJDIR)\comdlg32.obj \
 $(OBJDIR)\filedlgbrowser.obj \
 ##$(OBJDIR)\printdlg.obj \
-$(OBJDIR)\comdlgguid.obj \
 $(OBJDIR)\rsrc.obj
 
 
@@ -55,6 +54,7 @@ $(ODIN32_LIB)/comctl32.lib \
 $(ODIN32_LIB)/gdi32.lib \
 $(ODIN32_LIB)/winspool.lib \
 $(ODIN32_LIB)/wgss50.lib \
+$(ODIN32_LIB)/guidlib.lib \
 os2386.lib \
 $(RTLLIB_O)
 
