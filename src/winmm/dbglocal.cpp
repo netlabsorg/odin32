@@ -1,4 +1,4 @@
-/* $Id: dbglocal.cpp,v 1.1 2000-02-17 14:10:18 sandervl Exp $ */
+/* $Id: dbglocal.cpp,v 1.2 2000-02-22 19:12:16 sandervl Exp $ */
 
 /*
  * debug logging functions for OS/2
@@ -7,6 +7,8 @@
  * Copyright 2000 Sander van Leeuwen
  * Project Odin Software License can be found in LICENSE.TXT
  */
+#ifdef DEBUG
+
 #include <os2wrap.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -75,3 +77,4 @@ void ParseLogStatus()
 //******************************************************************************
 //******************************************************************************
 
+#endif

@@ -1,4 +1,9 @@
- /* $Id: changelog,v 1.743 2000-02-22 17:04:24 cbratschi Exp $ */
+ /* $Id: changelog,v 1.744 2000-02-22 19:09:59 sandervl Exp $ */
+
+ 2000-02-22: Sander van Leeuwen <sandervl@xs4all.nl>
+	- WINMM/GDI32/KERNEL32/USER32: Fixed compile problems for release build
+	- USER32: Fixed bug in window class ctor (windowProc not set to 0)
+                  (only showed up in release build)
 
  2000-02-22: Christoph Bratschi <cbratschi@datacomm.ch>
 	- COMCTL32: merged with Corel WINE 20000212
