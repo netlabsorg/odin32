@@ -32,6 +32,7 @@
 #include <odin.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:29*/
 #include <win32type.h>
+#include <win32api.h>
 #include <winconst.h>
 #include <odinlx.h>
 #include <spy.h>
@@ -92,6 +93,8 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
          if(hInstanceUser32 == 0)
                 return 0UL;
 
+         dprintf(("user32 init %s %s (%x)", __DATE__, __TIME__, DLLENTRYPOINT_NAME));
+
          /*******************************************************************/
          /* A DosExitList routine must be used to clean up if runtime calls */
          /* are required and the runtime is dynamically linked.             */
@@ -135,6 +138,7 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
 static void APIENTRY cleanup(ULONG ulReason)
 {
    dprintf(("user32 exit\n"));
+   ShowCursor(TRUE);
    DestroyDesktopWindow();
    Win32BaseWindow::DestroyAll();
    UnregisterSystemClasses();
