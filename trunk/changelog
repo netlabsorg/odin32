@@ -1,4 +1,16 @@
-/* $Id: changelog,v 1.2233 2002-07-24 18:42:36 sandervl Exp $ */
+/* $Id: changelog,v 1.2234 2002-07-26 10:49:45 sandervl Exp $ */
+
+ 2002-07-26: Sander van Leeuwen <sandervl@innotek.de> 
+    - KERNEL32: o Keep suspend count per thread (Suspend/ResumeThread)
+                o Detach all dlls (LIFO order) before really unloading them; this
+                  should take care of circular dependencies (crash while accessing
+                  memory of a dll that has just been freed)
+                o Terminated & Resume suspended threads in ExitProcess to
+                  prevent the process from getting stuck in the exitlist handler.
+                  (OS/2 is allergic to suspended threads)
+                o Terminate thread when exception occurs after ExitProcess
+                o Protect larger part of on-demand page load handler
+                  (DosEnterCritSec)
 
  2002-07-24: Platon Fomichev <platon@innotek.de>
     - USER32:   o Pass on WM_PAINT of client window to default PM handler
