@@ -1,4 +1,4 @@
-; $Id: d32CallGate.asm,v 1.4 2001-07-08 02:54:40 bird Exp $
+; $Id: d32CallGate.asm,v 1.5 2001-07-10 05:19:33 bird Exp $
 ;
 ; 32-bit CallGate used to communitcate fast between Ring-3 and Ring-0.
 ; This module contains all assembly workers for this.
@@ -53,6 +53,7 @@
     extrn  k32QuerySystemMemInfo:near
     extrn  k32QueryCallGate:near
     extrn  k32SetEnvironment:near
+    extrn  k32KillProcessEx:near
 
 
 ;
@@ -84,6 +85,7 @@ acbK32Params:
     dd SIZE   K32QUERYSYSTEMMEMINFO     ; K32_QUERYSYSTEMMEMINFO  0x07
     dd SIZE   K32QUERYCALLGATE          ; K32_QUERYCALLGATE       0x08
     dd SIZE   K32SETENVIRONMENT         ; K32_SETENVIRONMENT      0x09
+    dd SIZE   K32KILLPROCESSEX          ; K32_KILLPROCESSEX       0x0a
 
 ;
 ; Structure containing the offsets of K32 API worker routines.
@@ -101,6 +103,7 @@ apfnK32APIs:
     dd  FLAT:k32QuerySystemMemInfo      ; K32_QUERYSYSTEMMEMINFO  0x07
     dd  FLAT:k32QueryCallGate           ; K32_QUERYCALLGATE       0x08
     dd  FLAT:k32SetEnvironment          ; K32_SETENVIRONMENT      0x09
+    dd  FLAT:k32KillProcessEx           ; K32_KILLPROCESSEX       0x0a
 DATA32 ends
 
 
@@ -126,6 +129,7 @@ InitCallGate proc near
     push    ebx
     push    ds
     push    es
+
 
     ;
     ; Allocate GDT selector for the call gate.
