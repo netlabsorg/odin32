@@ -1,4 +1,15 @@
-/* $Id: changelog,v 1.2182 2002-06-25 02:11:23 bird Exp $ */
+/* $Id: changelog,v 1.2183 2002-06-25 07:06:38 sandervl Exp $ */
+
+ 2002-06-25: knut st. osmundsen <bird@anduin.net>
+    - UNICODE:
+        o Fancy 16 step fallthru case isn't cool if the src length
+          is bad.
+    - SHELL32:
+        o Bad linked list walking. (accessed node after free)
+    - USER32:
+        o Allocate space the two missing RGB2 entries.
+        o Use "%.*s" and "%.*ls" when we have a string with a length.
+          (Crashing in logging is awfull. Creates zombies!)
 
  2002-06-24: knut st. osmundsen <bird@anduin.net>
     - Testsuite:
