@@ -1,4 +1,4 @@
-/* $Id: initwnaspi32.cpp,v 1.4 2001-10-26 19:51:57 sandervl Exp $
+/* $Id: initwnaspi32.cpp,v 1.5 2002-03-18 13:04:32 sandervl Exp $
  *
  * DLL entry point
  *
@@ -43,6 +43,14 @@ extern "C" {
 }
 scsiObj *aspi = NULL;
 static HMODULE dllHandle = 0;
+
+//******************************************************************************
+//******************************************************************************
+void WIN32API DisableASPI()
+{
+    if (aspi) delete aspi;
+    aspi = NULL;
+}
 //******************************************************************************
 //******************************************************************************
 BOOL WINAPI Wnaspi32LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
