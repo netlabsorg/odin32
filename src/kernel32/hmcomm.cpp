@@ -1,4 +1,4 @@
-/* $Id: hmcomm.cpp,v 1.7 2000-12-31 12:28:53 sandervl Exp $ */
+/* $Id: hmcomm.cpp,v 1.8 2001-01-10 20:38:51 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -678,7 +678,7 @@ BOOL HMDeviceCommClass::WriteFile(PHMHANDLEDATA pHMHandleData,
            lpNumberOfBytesWritten,
            lpOverlapped));
 
-  APIRET rc;
+  BOOL  ret;
   ULONG ulBytesWritten;
 
   if((pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && !lpOverlapped) {
@@ -690,13 +690,17 @@ BOOL HMDeviceCommClass::WriteFile(PHMHANDLEDATA pHMHandleData,
     dprintf(("Warning: lpOverlapped != NULL & !FILE_FLAG_OVERLAPPED; sync operation"));
   }
 
-  rc = OSLibDosWrite(pHMHandleData->hHMHandle, (LPVOID)lpBuffer, nNumberOfBytesToWrite, 
-                     &ulBytesWritten);
+  ret = OSLibDosWrite(pHMHandleData->hHMHandle, (LPVOID)lpBuffer, nNumberOfBytesToWrite, 
+                      &ulBytesWritten);
 
   if(lpNumberOfBytesWritten) {
-       *lpNumberOfBytesWritten = (rc) ? 0 : ulBytesWritten;
+       *lpNumberOfBytesWritten = (ret) ? ulBytesWritten : 0;
   }
-  return(rc==0);
+  if(ret == FALSE) {
+       dprintf(("ERROR: WriteFile failed with rc %d", GetLastError()));
+  }
+
+  return ret;
 }
 
 /*****************************************************************************
@@ -768,7 +772,7 @@ BOOL HMDeviceCommClass::ReadFile(PHMHANDLEDATA pHMHandleData,
            lpNumberOfBytesRead,
            lpOverlapped));
 
-  APIRET rc;
+  BOOL  ret;
   ULONG ulBytesRead;
 
   if((pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && !lpOverlapped) {
@@ -780,13 +784,16 @@ BOOL HMDeviceCommClass::ReadFile(PHMHANDLEDATA pHMHandleData,
     dprintf(("Warning: lpOverlapped != NULL & !FILE_FLAG_OVERLAPPED; sync operation"));
   }
 
-  rc = OSLibDosRead(pHMHandleData->hHMHandle, (LPVOID)lpBuffer, nNumberOfBytesToRead, 
-                    &ulBytesRead);
+  ret = OSLibDosRead(pHMHandleData->hHMHandle, (LPVOID)lpBuffer, nNumberOfBytesToRead, 
+                     &ulBytesRead);
 
   if(lpNumberOfBytesRead) {
-       *lpNumberOfBytesRead = (rc) ? 0 : ulBytesRead;
+       *lpNumberOfBytesRead = (ret) ? ulBytesRead : 0;
   }
-  return(rc==0);
+  if(ret == FALSE) {
+       dprintf(("ERROR: ReadFile failed with rc %d", GetLastError()));
+  }
+  return ret;
 }
 
 /*****************************************************************************
