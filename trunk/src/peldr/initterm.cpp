@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.5 2000-01-26 11:26:36 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.6 2000-01-30 12:56:02 sandervl Exp $ */
 
 /*
  * PELDR DLL entry point
@@ -123,7 +123,7 @@ ULONG SYSTEM ReserveMem()
 //******************************************************************************
 void AllocateExeMem(char *filename)
 {
- HFILE  dllfile;
+ HFILE  dllfile = 0;
  char   szFileName[CCHMAXPATH], *tmp;
  ULONG  action, ulRead, signature;
  APIRET rc;
@@ -134,7 +134,7 @@ void AllocateExeMem(char *filename)
  ULONG  *memallocs;
  ULONG  alloccnt = 0;
  ULONG  diff, i, baseAddress;
- ULONG  ulSysinfo, flAllocMem;
+ ULONG  ulSysinfo, flAllocMem = 0;
 
   strcpy(szFileName, filename);
   tmp = szFileName;
@@ -155,7 +155,7 @@ void AllocateExeMem(char *filename)
 
   rc = DosOpen(szFileName, &dllfile, &action, 0, FILE_READONLY, OPEN_ACTION_OPEN_IF_EXISTS|OPEN_ACTION_FAIL_IF_NEW, OPEN_SHARE_DENYNONE|OPEN_ACCESS_READONLY, NULL);
   if(rc) {
-	return; //oops
+	goto end; //oops
   }
 
   //read dos header
@@ -197,8 +197,13 @@ void AllocateExeMem(char *filename)
 	goto end; //oops
   }
 
-  if(oh.ImageBase < 512*1024*124) {
+  if(oh.ImageBase < 512*1024*1024) {
 	flAllocMem = 0;
+  }
+  else {
+	if(flAllocMem == 0) {
+		goto end; //no support for > 512 MB
+	}
   }
   while(TRUE) {
     	rc = DosAllocMem((PPVOID)&address, FALLOC_SIZE, PAG_READ | flAllocMem);
@@ -232,7 +237,7 @@ void AllocateExeMem(char *filename)
   }
 
 end:
-  DosClose(dllfile);
+  if(dllfile) DosClose(dllfile);
   return;
 }
 //******************************************************************************
