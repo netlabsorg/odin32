@@ -1,4 +1,4 @@
-/* $Id: winuser.h,v 1.13 1999-10-30 18:39:40 cbratschi Exp $ */
+/* $Id: winuser.h,v 1.14 1999-11-03 22:02:52 cbratschi Exp $ */
 
 #ifndef __INCLUDE_WINUSER_H
 #define __INCLUDE_WINUSER_H
@@ -3667,6 +3667,8 @@ WORD        WINAPI SYSTEM_KillSystemTimer( WORD );
 HPEN      WINAPI GetSysColorPen(INT);
 INT       WINAPI LoadMessageA(HMODULE,UINT,WORD,LPSTR,INT);
 INT       WINAPI LoadMessageW(HMODULE,UINT,WORD,LPWSTR,INT);
+
+VOID      WINAPI TrackWin32Window(HWND,BOOL);
 
 VOID        WINAPI ScreenSwitchEnable16(WORD);
 
