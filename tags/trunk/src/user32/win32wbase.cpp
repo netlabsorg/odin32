@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.29 1999-10-08 14:57:18 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.30 1999-10-08 16:13:08 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -37,6 +37,7 @@
 #include "win32wndhandle.h"
 #include "heapshared.h"
 #include "dc.h"
+#include "pmframe.h"
 
 #define HAS_DLGFRAME(style,exStyle) \
     (((exStyle) & WS_EX_DLGMODALFRAME) || \
@@ -108,6 +109,10 @@ void Win32BaseWindow::Init()
   hInstance        = 0;
   windowId         = 0xFFFFFFFF;        //default = -1
   userData         = 0;
+
+  pOldFrameProc = NULL;
+  borderWidth   = 0;
+  borderHeight  = 0;
 
   hwndLinkAfter    = HWND_BOTTOM;
   flags            = 0;
@@ -423,11 +428,10 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 
   DWORD dwOSWinStyle, dwOSFrameStyle;
 
-  OSLibWinConvertStyle(cs->style, cs->dwExStyle, &dwOSWinStyle, &dwOSFrameStyle);
+  OSLibWinConvertStyle(cs->style, cs->dwExStyle, &dwOSWinStyle, &dwOSFrameStyle, &borderWidth, &borderHeight);
 
 //CB: dwOSFrameStyle handled by OSLibWinConvertStyle
-//    todo: subclass frame WM_PAINT -> call DrawEdge() if HAS_3DFRAME (code below)
-//          OSLibWinCreateWindow: perhaps problems
+//    OSLibWinCreateWindow: perhaps problems
 //    shouldn't we always use a frame? -> no problems with scrollbars
 
   if(HIWORD(cs->lpszName))
@@ -526,10 +530,11 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
                      SWP_NOACTIVATE);
   }
   //Subclass frame
-  if (dwStyle & WS_CHILD && HAS_3DFRAME(dwExStyle))
+
+  if (isFrameWindow())
   {
-    //CB: use a win32 window procedure and call DrawEdge() or
-    //    emulate DrawEdge() in a OS/2 procedure
+    pOldFrameProc = FrameSubclassFrameWindow(this);
+    if (dwStyle & WS_CHILD && HAS_3DFRAME(dwExStyle)) FrameSetBorderSize(this);
   }
 
   //Get the client window rectangle
@@ -2396,10 +2401,9 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value)
                 ss.styleOld = dwExStyle;
                 ss.styleNew = value;
                 SendMessageA(WM_STYLECHANGING,GWL_EXSTYLE,(LPARAM)&ss);
-                oldval = dwExStyle;
-                setExStyle(value);
+                setExStyle(ss.styleNew);
                 SendMessageA(WM_STYLECHANGED,GWL_EXSTYLE,(LPARAM)&ss);
-                return oldval;
+                return ss.styleOld;
         }
         case GWL_STYLE:
         {
@@ -2408,11 +2412,10 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value)
                 ss.styleOld = dwStyle;
                 ss.styleNew = value;
                 SendMessageA(WM_STYLECHANGING,GWL_STYLE,(LPARAM)&ss);
-                oldval = dwStyle;
-                setStyle(value);
+                setStyle(ss.styleNew);
                 OSLibSetWindowStyle(OS2HwndFrame, dwStyle);
                 SendMessageA(WM_STYLECHANGED,GWL_STYLE,(LPARAM)&ss);
-                return oldval;
+                return ss.styleOld;
         }
         case GWL_WNDPROC:
                 oldval = (LONG)getWindowProc();
@@ -2532,6 +2535,26 @@ Win32BaseWindow *Win32BaseWindow::GetWindowFromOS2Handle(HWND hwnd)
         return win32wnd;
   }
   return 0;
+}
+//******************************************************************************
+//******************************************************************************
+Win32BaseWindow *Win32BaseWindow::GetWindowFromFrameHandle(HWND hwnd)
+{
+ Win32BaseWindow *win32wnd;
+ DWORD        magic;
+
+  return GetWindowFromOS2Handle(OSLibWinWindowFromID(hwnd,OSLIB_FID_CLIENT));
+
+  //CB: doesn't work with frame window words
+/*
+  win32wnd = (Win32BaseWindow *)OSLibWinGetWindowULong(hwnd, OFFSET_WIN32WNDPTR);
+  magic    = OSLibWinGetWindowULong(hwnd, OFFSET_WIN32PM_MAGIC);
+
+  if(win32wnd && CheckMagicDword(magic)) {
+        return win32wnd;
+  }
+  return 0;
+*/
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.16 1999-10-08 14:57:17 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.17 1999-10-08 16:13:07 cbratschi Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -89,10 +89,12 @@ HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle, ULONG *OSFrameStyle)
+BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle, ULONG *OSFrameStyle, ULONG *borderWidth, ULONG *borderHeight)
 {
   *OSWinStyle   = 0;
   *OSFrameStyle = 0;
+  *borderWidth  = 0;
+  *borderHeight = 0;
 
   /* Window styles */
   if(dwStyle & WS_MINIMIZE_W)
@@ -125,7 +127,10 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle, ULO
     if (dwExStyle & WS_EX_CLIENTEDGE_W ||
         dwExStyle & WS_EX_STATICEDGE_W ||
         dwExStyle & WS_EX_WINDOWEDGE_W)
-          *OSFrameStyle |= FCF_DLGBORDER;
+          {
+            *OSFrameStyle |= FCF_DLGBORDER;
+            *borderHeight = *borderWidth = 2; //CB: right?
+          }
 
     if(dwStyle & WS_VSCROLL_W)
           *OSFrameStyle |= FCF_VERTSCROLL;
@@ -833,9 +838,9 @@ void OSLibTranslateScrollCmdAndMsg(ULONG *msg, ULONG *scrollcmd)
 //******************************************************************************
 void OSLibSetWindowStyle(HWND hwnd, ULONG dwStyle)
 {
-  ULONG OSWinStyle, OSFrameStyle;
+  ULONG OSWinStyle, OSFrameStyle, borderWidth, borderHeight;
 
-  OSLibWinConvertStyle(dwStyle, 0, &OSWinStyle, &OSFrameStyle);
+  OSLibWinConvertStyle(dwStyle, 0, &OSWinStyle, &OSFrameStyle, &borderWidth, &borderHeight);
 
   WinSetWindowULong(hwnd, QWL_STYLE,
                     (WinQueryWindowULong(hwnd, QWL_STYLE) & ~0xffff0000) |
