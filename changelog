@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.337 1999-10-17 19:33:01 cbratschi Exp $ */
+ /* $Id: changelog,v 1.338 1999-10-17 20:17:18 sandervl Exp $ */
 
  99-10-17: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Ported AdjustWindowRectEx from Wine (990815)
@@ -18,6 +18,9 @@
                   client rectangle)
                   Fixed WM_MOUSEMOVE handler for scrollbars (return 1 to let
                   PM change the mouse cursor back to the default)
+                  Fixed GetDlgItem. According to SDK docs this api should work
+                  for any parent-child pair. (behaviour seen in VPBuddy)
+                  Added MFC message support for message printfs
 
  99-10-17: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: replaced OS/2 scrollbars by WINE scrollbars
