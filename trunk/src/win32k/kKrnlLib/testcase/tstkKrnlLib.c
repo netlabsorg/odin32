@@ -1,4 +1,4 @@
-/* $Id: kKrnlLibTst.c,v 1.3 2001-11-19 03:16:40 bird Exp $
+/* $Id: tstkKrnlLib.c,v 1.1 2002-03-30 17:05:47 bird Exp $
  *
  * kKrnlLib test module.
  *

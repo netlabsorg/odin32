@@ -1,4 +1,4 @@
-; $Id: FakeA.asm,v 1.2 2001-11-15 04:20:12 bird Exp $
+; $Id: tstFakeA.asm,v 1.1 2002-03-30 17:05:47 bird Exp $
 ;
 ; Fake assembly imports.
 ;
