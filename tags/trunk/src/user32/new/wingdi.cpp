@@ -1,4 +1,4 @@
-/* $Id: wingdi.cpp,v 1.8 1999-07-25 15:51:57 sandervl Exp $ */
+/* $Id: wingdi.cpp,v 1.9 1999-08-23 15:34:47 dengert Exp $ */
 /*
  * Win32 Window graphics apis for OS/2
  *
@@ -28,8 +28,8 @@ HDC WIN32API BeginPaint(HWND hwnd, PPAINTSTRUCT lps)
 
     window = Win32Window::GetWindowFromHandle(hwnd);
     if(!window) {
-        dprintf(("GetDC, window %x not found", hwnd));
-        return 0;
+	dprintf(("GetDC, window %x not found", hwnd));
+	return 0;
     }
 #ifdef OPEN32_GDI
     hdc = O32_BeginPaint(window->getOS2WindowHandle(),lps);
@@ -39,6 +39,8 @@ HDC WIN32API BeginPaint(HWND hwnd, PPAINTSTRUCT lps)
     lps->hdc = hdc;
 #endif
     dprintf(("BeginPaint %X returned %x\n", hwnd, hdc));
+
+    lps->fErase = !window->MsgEraseBackGround(hdc);
     return hdc;
 
 //    return lps->hdc;
@@ -64,10 +66,10 @@ HDC WIN32API GetDC(HWND hwnd)
 
    window = Win32Window::GetWindowFromHandle(hwnd);
    if(!window) {
-    	dprintf(("GetDC, window %x not found", hwnd));
+	dprintf(("GetDC, window %x not found", hwnd));
 #ifdef OPEN32_GDI
 	dprintf(("GetDC %x", hwnd));
-    	return O32_GetDC(0);
+	return O32_GetDC(0);
 #else
 	//desktop window?
 	dprintf(("GetDC %x", hwnd));
