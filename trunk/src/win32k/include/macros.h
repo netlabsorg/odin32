@@ -1,4 +1,4 @@
-/* $Id: macros.h,v 1.1 2000-01-22 16:34:24 bird Exp $
+/* $Id: macros.h,v 1.2 2000-05-03 10:46:07 bird Exp $
  *
  * Common macros for Win32k/Elf.
  *
@@ -22,5 +22,12 @@
  * Note: Aligment must be a 2**n number.
  */
 #define ALIGN(a, alignment) (((a) + (alignment - 1UL)) & ~(alignment - 1UL))
+
+
+/*
+ * Makes an unsigned long from 4 (unsigned or signed) chars.
+ */
+#define MAKEULONG4(ch1, ch2, ch3, ch4) \
+            ((ULONG)(MAKEULONG(MAKEUSHORT(ch1, ch2), MAKEUSHORT(ch3, ch4))))
 
 #endif
