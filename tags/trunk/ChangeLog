@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.1083 2000-08-24 09:29:09 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1084 2000-08-24 09:36:02 sandervl Exp $ */
 
  2000-08-24: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   Export wvsnprintfW
@@ -8,6 +8,7 @@
                 More functions exported (Wine additions)
     - SHELL32:  Merged Wine's shellpath.c
                 More exports (forwarders to shlwapi)
+                StrRetToStrNA fix
 
  2000-08-23: Michal Necasek <mike@mendelu.cz>
     - KERNEL32: (cpu.c) lpMinimumApplicationAddress should be 4 MB
