@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.24 2002-03-31 19:01:03 bird Exp $
+# $Id: Makefile,v 1.25 2002-03-31 19:40:12 bird Exp $
 
 #
 # kKrnlLib main file.
@@ -20,7 +20,7 @@ PATH_ROOT = ..\..\..
 TARGET_MODE = EMPTY
 TARGET_NAME = kKrnlLib_empty
 SUBDIRS     = tools include
-PREMAKEFILES= kKrnlLib.mak #kKrnlLibR3.mak
+PREMAKEFILES= kKrnlLib.mak kKrnlLibR3Tst.mak
 
 
 #
