@@ -1,4 +1,4 @@
-/* $Id: dev32.h,v 1.6 2001-10-19 01:49:06 bird Exp $
+/* $Id: dev32.h,v 1.7 2001-11-18 04:08:26 bird Exp $
  *
  * dev32 - header file for 32-bit part of the driver.
  *
@@ -57,12 +57,10 @@ extern "C" {
 /*
  * Function prototypes.
  */
-#if !defined(__cplusplus) && defined(RING0)
-USHORT _loadds _Far32 _Pascal GetKernelInfo32(PKRNLINFO pKrnlInfo);
-USHORT _loadds _Far32 _Pascal VerifyImportTab32(void);
-#endif
+ULONG _System GetKernelInfo32(PKRNLINFO pKrnlInfo);
+ULONG _System VerifyImportTab32(void);
 #ifdef _OS2KLDR_H_
-PMTE _System GetOS2KrnlMTE(void); /* (devfirst.asm) */
+PMTE _System  GetOS2KrnlMTE(void); /* (devfirst.asm) */
 #endif
 ULONG  _Optlink InitCallGate(void);
 ULONG  _Optlink x86DisableWriteProtect(void);
