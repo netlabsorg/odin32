@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.14 1999-10-12 18:14:56 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.15 1999-10-13 14:24:25 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -218,7 +218,7 @@ BOOL  OSLibWinQueryActiveWindow();
 #define RELATIVE_TO_WINDOW 0
 #define RELATIVE_TO_SCREEN 1
 BOOL  OSLibWinQueryWindowRect(HWND hwnd, PRECT pRect, int RelativeTo = RELATIVE_TO_WINDOW);
-BOOL  OSLibWinCalcFrameRect(HWND hwndFrame, RECTLOS2 *pRect, BOOL fClient);
+BOOL  OSLibWinCalcFrameRect(HWND hwnd, RECT *pRect, BOOL fClient);
 BOOL  OSLibGetMinMaxInfo(HWND hwndFrame, MINMAXINFO *pMinMax);
 
 #define QWOS_NEXT         0

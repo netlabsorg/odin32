@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.30 1999-10-12 18:14:53 sandervl Exp $
+# $Id: Makefile,v 1.31 1999-10-13 14:24:24 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -32,7 +32,7 @@ OBJS =  user32.obj loadres.obj \
         controls.obj button.obj static.obj scroll.obj listbox.obj \
         combo.obj edit.obj clipboard.obj winicon.obj win32wmdiclient.obj \
         oslibutil.obj oslibmsg.obj dib.obj oslibdos.obj win32wmdichild.obj \
-        winprop.obj wingdi.obj oslibgdi.obj winaccel.obj \
+        winprop.obj wingdi.obj oslibgdi.obj winaccel.obj win32wbasepos.obj \
         nativerc.obj oslibres.obj dummy.obj oslibmenu.obj dc.obj timer.obj \
         caret.obj \
         windlgmsg.obj windlg.obj win32wdesktop.obj
@@ -41,12 +41,28 @@ OBJS =  user32.obj loadres.obj \
 all: $(TARGET).dll $(TARGET).lib
 
 
-$(TARGET).dll: $(OBJS) $(TARGET).def $(TARGET).res
-        $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
-              $(PDWIN32_LIB)/pmwinx.lib $(PDWIN32_LIB)/gdi32.lib $(PDWIN32_LIB)/kernel32.lib $(PDWIN32_LIB)/libuls.lib \
-              $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
+$(TARGET).dll: $(OBJS) $(TARGET).def $(TARGET).res $(TARGET).lrf
+!ifdef DEBUG
+#	icc -Si -Ti -Ge- -Ss+ -W3 -Gm+ /B"/noe /NOD /NOFREE" @$(TARGET).lrf
+	ilink /de /map /noe /NOD /dbgpack /NoLogo /NOFREE @$(TARGET).lrf
+!else
+	ilink /map  /noe /NOD /NoLogo /FREE @$(TARGET).lrf
+!endif
         rc $(TARGET).res $(TARGET).dll
         $(CP) $@ $(PDWIN32_BIN)
+
+$(TARGET).lrf: makefile
+        @echo Creating file <<$(@B).lrf
+$(OBJS)
+$(PDWIN32_LIB)/pmwinx.lib 
+$(PDWIN32_LIB)/gdi32.lib 
+$(PDWIN32_LIB)/kernel32.lib 
+$(PDWIN32_LIB)/libuls.lib
+$(PDWIN32_LIB)/odincrt.lib 
+OS2386.LIB
+$(RTLLIB_O)
+$(TARGET).def
+<<keep
 
 $(TARGET).res:
         rc -r user32.rc user32.res
@@ -105,6 +121,7 @@ pmwindow.obj:   pmwindow.cpp win32class.h win32wbase.h win32dlg.h pmwindow.h win
 pmframe.obj: pmframe.cpp win32class.h win32wbase.h pmframe.h win32wndchild.h
 win32class.obj: win32class.cpp win32class.h win32wbase.h win32dlg.h gen_object.h heapshared.h oslibwin.h win32wndchild.h
 win32wbase.obj:   win32wbase.cpp win32class.h win32wbase.h win32dlg.h gen_object.h heapshared.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h win32wndhandle.h oslibdos.h dc.h pmframe.h win32wdesktop.h
+win32wbasepos.obj: win32wbasepos.cpp win32class.h win32wbase.h win32dlg.h gen_object.h heapshared.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h win32wndhandle.h oslibdos.h dc.h pmframe.h win32wdesktop.h
 win32wnd.obj:   win32wnd.cpp win32class.h win32wbase.h win32wnd.h win32dlg.h gen_object.h heapshared.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h win32wndhandle.h oslibdos.h oslibmenu.h
 win32dlg.obj:   win32dlg.cpp win32class.h win32wbase.h win32dlg.h gen_object.h heapshared.h oslibwin.h win32wndchild.h oslibmsg.h
 win32wndchild.obj: win32wndchild.cpp win32wndchild.h gen_object.h

@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.39 1999-10-08 21:29:50 cbratschi Exp $ */
+/* $Id: user32.cpp,v 1.40 1999-10-13 14:24:25 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -470,80 +470,6 @@ int WIN32API wvsprintfW(LPWSTR lpOutput, LPCWSTR lpFormat, va_list arglist)
   FreeAsciiString(lpFmtA);
   return(rc);
 }
-
-#if 0
-/* Caret Functions */
-
-BOOL WIN32API CreateCaret( HWND hWnd, HBITMAP hBitmap, int nWidth, int nHeight)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  CreateCaret\n");
-#endif
-    hWnd = Win32Window::Win32ToOS2Handle(hWnd);
-    return O32_CreateCaret(hWnd,hBitmap,nWidth,nHeight);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API DestroyCaret(void)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  DestroyCaret\n");
-#endif
-    return O32_DestroyCaret();
-}
-//******************************************************************************
-//******************************************************************************
-UINT WIN32API GetCaretBlinkTime(void)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetCaretBlinkTime\n");
-#endif
-    return O32_GetCaretBlinkTime();
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetCaretPos( LPPOINT lpPoint)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetCaretPos\n");
-#endif
-    return O32_GetCaretPos(lpPoint);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API HideCaret( HWND hWnd)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  HideCaret\n");
-#endif
-    hWnd = Win32Window::Win32ToOS2Handle(hWnd);
-    return O32_HideCaret(hWnd);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SetCaretBlinkTime( UINT wMSeconds)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  SetCaretBlinkTime\n");
-#endif
-    return O32_SetCaretBlinkTime(wMSeconds);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SetCaretPos( int nX, int nY)
-{
-    dprintf(("USER32:  SetCaretPos\n"));
-    return O32_SetCaretPos(nX,nY);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API ShowCaret( HWND hwnd)
-{
-    dprintf(("USER32:  ShowCaret\n"));
-    hwnd = Win32Window::Win32ToOS2Handle(hwnd);
-    return O32_ShowCaret(hwnd);
-}
-#endif
 
 /* Cursor Functions */
 
