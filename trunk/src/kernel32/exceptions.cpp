@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.57 2001-10-25 13:19:04 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.58 2002-04-30 09:36:09 sandervl Exp $ */
 
 /*
  * Win32 Exception functions for OS/2
@@ -71,6 +71,15 @@
 
 #define DBG_LOCALLOG    DBG_exceptions
 #include "dbglocal.h"
+
+#ifdef WITH_KLIB
+/* quick and dirty - don't wanna mess with includes. */
+typedef enum { enmRead, enmWrite, enmUnknown } ENMACCESS;
+BOOL  _Optlink      kHeapDbgException(void *    pvAccess,
+                                      ENMACCESS enmAccess,
+                                      void *    pvIP,
+                                      void *    pvOS);
+#endif
 
 /* Exception record for handling exceptions happening inside exception handlers */
 typedef struct
@@ -1163,9 +1172,31 @@ ULONG APIENTRY OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
 
   case XCPT_ACCESS_VIOLATION:
   {
-   Win32MemMap *map;
-   BOOL  fWriteAccess = FALSE;
-   ULONG offset, accessflag;
+        Win32MemMap *map;
+        BOOL  fWriteAccess = FALSE;
+        ULONG offset, accessflag;
+
+#ifdef WITH_KLIB
+        if (     pERepRec->ExceptionInfo[0] == XCPT_READ_ACCESS
+              || pERepRec->ExceptionInfo[0] == XCPT_WRITE_ACCESS
+              || pERepRec->ExceptionInfo[0] == XCPT_EXECUTE_ACCESS
+              || pERepRec->ExceptionInfo[0] == XCPT_UNKNOWN_ACCESS
+                )
+        {
+            ENMACCESS enmAccess = enmRead;
+            switch (pERepRec->ExceptionInfo[0])
+            {
+                case XCPT_WRITE_ACCESS:     enmAccess = enmWrite; break;
+                case XCPT_UNKNOWN_ACCESS:   enmAccess = enmUnknown; break;
+            }
+
+            if (kHeapDbgException((void*)pERepRec->ExceptionInfo[1],
+                                  enmAccess,
+                                  pERepRec->ExceptionAddress,
+                                  pERepRec))
+                goto continueexecution;
+        }
+#endif
 
         if(pERepRec->ExceptionInfo[1] == 0 && pERepRec->ExceptionInfo[1] == XCPT_DATA_UNKNOWN) {
                 goto continueFail;
