@@ -1,31 +1,36 @@
- /* $Id: ChangeLog,v 1.766 2000-03-01 21:59:05 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.767 2000-03-02 13:20:34 sandervl Exp $ */
+
+ 2000-03-02: Sander van Leeuwen <sandervl@xs4all.nl>
+	- OPENGL\GLIDE: 	Use Odin OS/2 api wrappers in fxos2.cpp
+	- OPENGL\MESA: 	Reapplied TLS fixes
+	- OPENGL\MESA\3dfx: 	Use c files from Mesa dir
 
  2000-03-01: Jeroen van den Horn <J.vandenHorn@fibre.a2000.nl>
         - OPENGL: Implemented DIVE support in Mesa
 
  2000-03-01: Sander van Leeuwen <sandervl@xs4all.nl>
-        - USER32: Fixes for FindWindow(ExA/W) - now more like Wine
-                  (FindWindowExW was not working correctly either)
-                  First send WM_NCACTIVATE, then WM_ACTIVATE
-                  Fixed focus problems with Odin apps
-                  (Call WinSetFocus in OSLibWinSetActiveWindow instead of
-                   WinSetActiveWindow when a user clicks on the titlebar
-                   of an inactive window & after sending WM_MOUSEACTIVATE)
-                  TODO: Does WinSetActiveWindow work properly or should we
-                        always call WinSetFocus???
-                  Call Dinput handler when translating mouse & keyboard
-                  messages (during Get/PeekMessage)
-        - OPENGL: Always build release version of glide, mesa, glu32 & glut
-                  Build mesa software & 3dfx dlls; don't build OS/2 opengl
-                  wrapper anymore
-        - OPENGL\GLIDE\CVG\GLIDE:
-                  Disable instruction scheduling in release build -> messed up
-                  colors when turned on (most likely VAC optimizer bug)
-                  TODO: Somebody should also check this for the voodoo 1 glide dll.
-        - OPENGL\GLIDE\CVG:
-		  Fixed makefile
+       - USER32: Fixes for FindWindow(ExA/W) - now more like Wine
+                 (FindWindowExW was not working correctly either)
+                 First send WM_NCACTIVATE, then WM_ACTIVATE
+                 Fixed focus problems with Odin apps
+                 (Call WinSetFocus in OSLibWinSetActiveWindow instead of
+                  WinSetActiveWindow when a user clicks on the titlebar
+                  of an inactive window & after sending WM_MOUSEACTIVATE)
+                 TODO: Does WinSetActiveWindow work properly or should we
+                       always call WinSetFocus???
+                 Call Dinput handler when translating mouse & keyboard
+                 messages (during Get/PeekMessage)
+       - OPENGL: Always build release version of glide, mesa, glu32 & glut
+                 Build mesa software & 3dfx dlls; don't build OS/2 opengl
+                 wrapper anymore
+       - OPENGL\GLIDE\CVG\GLIDE:
+                 Disable instruction scheduling in release build -> messed up
+                 colors when turned on (most likely VAC optimizer bug)
+                 TODO: Somebody should also check this for the voodoo 1 glide dll.
+	- OPENGL\GLIDE\CVG:
+		   Fixed makefile
 	- OPENGL\MESA\GL\gl.h
-		  Removed circular header dependency (breaks build)
+		   Removed circular header dependency (breaks build)
 	- OPENGL\MESA\3dfx:
 		  Copy 3dfx opengl32.dll to bin\glide
 	- OPENGL\MESA:
@@ -33,11 +38,11 @@
 
  2000-03-01: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- USER32: Fixed dprintf in CreateWindowExW
-                  Added left & right cursor keys to Win32BaseWindow::setExtendedKey
+                 Added left & right cursor keys to Win32BaseWindow::setExtendedKey
 
  2000-02-29: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- USER32: Added support for keyboard hooks (fixes Moorhuhn)
-                  in PeekMessage & GetMessage
+                 in PeekMessage & GetMessage
 
  2000-02-29: knut st. osmundsen <knut.stange.osmundse@pmsc.no>
         - TOOLS\FASTDEP: Restructured it a little. Support for multiple
@@ -51,25 +56,24 @@
 
  2000-02-29: Sander van Leeuwen <sandervl@xs4all.nl>
 	- OPENGL\MESA: Added Odin port of Mesa Opengl library
-                       (Ported by Jeroen van den Horn)
+                      (Ported by Jeroen van den Horn)
 	  NOTE: The Mesa 3D graphics library has a different license
-                (see LICENSE.TXT in the Mesa directory)
+               (see LICENSE.TXT in the Mesa directory)
 	- OPENGL\MESA\3DFX:
-		       Added Odin port of 3dfx Voodoo Mesa GL
-                       (tested with simple opengl samples only, but
-                        this is the first hardware accelerated Opengl
-                        implementation for OS/2!)
-                       NOTE: This is not yet included in the daily build
+	        Added Odin port of 3dfx Voodoo Mesa GL
+               (tested with simple opengl samples only, but
+                this is the first hardware accelerated Opengl
+                implementation for OS/2!)
 	  NOTE: The Mesa 3dfx graphics library has a different license
-                (see LICENSE.TXT in the Mesa\3dfx directory)
+               (see LICENSE.TXT in the Mesa\3dfx directory)
 	- KERNEL32: Only call ExitProcess the first time KillWin32Process
                     is executed. Call DosExit otherwise.
                     Fix for GpdDev device io (needed for native glide dll)
 
  2000-02-28: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Call ExitProcess in KillWin32Process to make sure
-                    the dll libmain handlers are called after a crash.
-                    (i.e. Glide needs this to restore the display)
+                   the dll libmain handlers are called after a crash.
+                   (i.e. Glide needs this to restore the display)
 	- INCLUDE\WIN: Added wgl definitions to wingdi.h
 
  2000-02-27: Sander van Leeuwen <sandervl@xs4all.nl>
@@ -108,54 +112,53 @@
 
  2000-02-25: Sander van Leeuwen <sandervl@xs4all.nl>
 	- OPENGL\GLIDE: Added Odin version of Glide based on the OS/2 port
-                        written by Craig Ballantyne. (Voodoo 1 & Voodoo 2)
-                        NOTE: Includes 3dfx Glide license
-                        NOTE: Both untested
+                       written by Craig Ballantyne. (Voodoo 1 & Voodoo 2)
+                       NOTE: Includes 3dfx Glide license
 
  2000-02-24: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: WS_MAXIMIZE & WS_MINIMIZE flags updated when necessary
-                  Changed/fixed RedrawWindow -> fixes lack of erase background
-                  msg in AbiWord rebar control & Papyrus start dialog
-                  TODO: Pingpong.exe broken again. Need to fix this correctly
-		  Hide caret in BeginPaint, show it in EndPaint
+                 Changed/fixed RedrawWindow -> fixes lack of erase background
+                 msg in AbiWord rebar control & Papyrus start dialog
+                 TODO: Pingpong.exe broken again. Need to fix this correctly
+ 	 	   Hide caret in BeginPaint, show it in EndPaint
 	- GDI32: CreateICA/W bugfix (Open32 tests lpszDriver for NULL even though it's ignored)
-                 (fixes Papyrus error message about CreateIC)
+                (fixes Papyrus error message about CreateIC)
 	- COMCTL32: Fixed wrong calling convention for property sheet handlers
-                    (prsht.h in include\win)
-		    This fixes crashes in VPBUDDY (preferences dialog) AND (!)
-                    fixes the empty preferences dialog in both debug & release
-                    builds.
-                    NOTE: I've fixed similar bugs before. Somebody should verify
-                          all comctl32 handlers...
+                   (prsht.h in include\win)
+		     This fixes crashes in VPBUDDY (preferences dialog) AND (!)
+                   fixes the empty preferences dialog in both debug & release
+                   builds.
+                   NOTE: I've fixed similar bugs before. Somebody should verify
+                         all comctl32 handlers...
 
  2000-02-23: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: export 55AA pattern functions for COMCTL32
-		  fixed EN_CHANGED
+		   fixed EN_CHANGED
 	- COMCTL32: converted to C++ -> needs nmake dep
-		    ported animate control
+		     ported animate control
 
  2000-02-22: Sander van Leeuwen <sandervl@xs4all.nl>
 	- WINMM/GDI32/KERNEL32/USER32: Fixed compile problems for release build
 	- USER32: Fixed bug in window class ctor (windowProc not set to 0)
-                  (only showed up in release build)
+                 (only showed up in release build)
 	- KERNEL32: Fixed bug in commitPage (winimagepeldr.cpp)
-                    (only showed up in release build)
-                    Fixed wrong calling convention for SetLastError calls
-                    in OSLibiGetModuleHandleA
-                    (only showed up in release build)
-                    Fixed wrong calling convention for SetLastError calls
-                    in oslibdos.cpp.
+                   (only showed up in release build)
+                   Fixed wrong calling convention for SetLastError calls
+                   in OSLibiGetModuleHandleA
+                   (only showed up in release build)
+                   Fixed wrong calling convention for SetLastError calls
+                   in oslibdos.cpp.
 
  2000-02-22: Christoph Bratschi <cbratschi@datacomm.ch>
 	- COMCTL32: merged with Corel WINE 20000212
-		    added common base functions
+		     added common base functions
 
  2000-02-21: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
 	- CRTDLL: Added wtol, wtoi, setsystime, getsystime
 
  2000-02-21: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: merged controls and nc code with Corel WINE 20000212
-		  added WS_EX_CONTEXTHELP button
+		   added WS_EX_CONTEXTHELP button
 
  2000-02-21: knut st. osmundsen <knut.stange.osmundse@pmsc.no>
         - WIN32K: *Initial support for UNIX-styled scripts
@@ -180,13 +183,13 @@
 
  2000-02-18: Sander van Leeuwen <sandervl@xs4all.nl>
 	- OPENGL\GLIDE: Added Odin version of Glide based on the OS/2 port
-                        written by Craig Ballantyne. (Voodoo 1)
-                        NOTE: Includes 3dfx Glide license
+                       written by Craig Ballantyne. (Voodoo 1)
+                       NOTE: Includes 3dfx Glide license
 
  2000-02-17: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Fixed memory map view bug (main map deleted when there
-                    were still views left) -> fixes crash when playing Realplayer
-                    video (.rm) files
+                   were still views left) -> fixes crash when playing Realplayer
+                   video (.rm) files
 	- WINMM: Added new logging feature + fixed waveout query format bug
 
  2000-02-16: Christoph Bratschi <cbratschi@datacomm.ch>
