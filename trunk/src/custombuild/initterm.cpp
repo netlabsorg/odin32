@@ -197,6 +197,11 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
          if(rc == 0) 
                 return 0UL;
 
+         SetCustomBuildName("RICHED32.DLL", 0);
+         rc = inittermRiched32(hModule, ulFlag);
+         if(rc == 0) 
+                return 0UL;
+         
          SetCustomBuildName(NULL, 0);
          break;
       }
