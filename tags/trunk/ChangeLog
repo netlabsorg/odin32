@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1767 2001-10-18 15:36:49 achimha Exp $ */
+/* $Id: ChangeLog,v 1.1768 2001-10-18 17:05:53 sandervl Exp $ */
 
  2001-10-18: Achim Hasenmueller <achimha@innotek.de>
     - USER32:   o temporarily backed out a change from earlier today
@@ -13,6 +13,7 @@
                   For some reason we don't receive a WM_VRNENABLED message
                   when a window is shown for the first time.
     - KERNEL32: o Check for NULL handler in RtlRaiseException/RtlUnwind
+    - GDI32:    o Removed wrong warnings about GpiQueryBitmapBits
 
  2001-10-17: knut stange osmundsen <kosmunds@csc.com>
     - common:   o Corrected bug in kFile buffering which caused impdef to
