@@ -1,4 +1,4 @@
-/* $Id: winreg.h,v 1.3 1999-10-20 17:18:30 phaller Exp $ */
+/* $Id: winreg.h,v 1.4 1999-12-21 00:29:31 sandervl Exp $ */
 
 /*
  * 				Shell Library definitions
@@ -110,24 +110,6 @@ typedef struct value_entW {
     DWORD	ve_type;
 } VALENTW, *PVALENTW;
 
-
-/* Used by: ControlService */
-typedef struct _SERVICE_STATUS {
-    DWORD dwServiceType;
-    DWORD dwCurrentState;
-    DWORD dwControlsAccepted;
-    DWORD dwWin32ExitCode;
-    DWORD dwServiceSpecificExitCode;
-    DWORD dwCheckPoint;
-    DWORD dwWaitHint;
-} SERVICE_STATUS, *LPSERVICE_STATUS;
-
-HANDLE    WINAPI OpenSCManagerA(LPCSTR,LPCSTR,DWORD);
-HANDLE    WINAPI OpenSCManagerW(LPCWSTR,LPCWSTR,DWORD);
-#define     OpenSCManager WINELIB_NAME_AW(OpenSCManager)
-HANDLE    WINAPI OpenServiceA(HANDLE,LPCSTR,DWORD);
-HANDLE    WINAPI OpenServiceW(HANDLE,LPCWSTR,DWORD);
-#define     OpenService WINELIB_NAME_AW(OpenService)
 BOOL      WINAPI LookupPrivilegeValueA(LPCSTR,LPCSTR,LPVOID);
 BOOL      WINAPI LookupPrivilegeValueW(LPCWSTR,LPCWSTR,LPVOID);
 #define     LookupPrivilegeValue WINELIB_NAME_AW(LookupPrivilegeValue)
@@ -143,9 +125,6 @@ LONG        WINAPI RegSaveKeyA(HKEY,LPCSTR,LPSECURITY_ATTRIBUTES);
 LONG        WINAPI RegSaveKeyW(HKEY,LPCWSTR,LPSECURITY_ATTRIBUTES);
 #define     RegSaveKey WINELIB_NAME_AW(RegSaveKey)
 LONG        WINAPI RegSetKeySecurity(HKEY,SECURITY_INFORMATION,PSECURITY_DESCRIPTOR);
-BOOL      WINAPI CloseServiceHandle(HANDLE);
-BOOL      WINAPI ControlService(HANDLE,DWORD,LPSERVICE_STATUS);
-BOOL      WINAPI DeleteService(HANDLE);
 BOOL      WINAPI DeregisterEventSource(HANDLE);
 BOOL      WINAPI GetFileSecurityA(LPCSTR,SECURITY_INFORMATION,PSECURITY_DESCRIPTOR,DWORD,LPDWORD);
 BOOL      WINAPI GetFileSecurityW(LPCWSTR,SECURITY_INFORMATION,PSECURITY_DESCRIPTOR,DWORD,LPDWORD);
@@ -189,9 +168,6 @@ LONG        WINAPI RegUnLoadKeyW(HKEY,LPCWSTR);
 BOOL      WINAPI SetFileSecurityA(LPCSTR,SECURITY_INFORMATION,PSECURITY_DESCRIPTOR);
 BOOL      WINAPI SetFileSecurityW(LPCWSTR,SECURITY_INFORMATION,PSECURITY_DESCRIPTOR);
 #define     SetFileSecurity WINELIB_NAME_AW(SetFileSecurity)
-BOOL      WINAPI StartServiceA(HANDLE,DWORD,LPCSTR*);
-BOOL      WINAPI StartServiceW(HANDLE,DWORD,LPCWSTR*);
-#define     StartService WINELIB_NAME_AW(StartService)
 
 /* Declarations for functions that are the same in Win16 and Win32 */
 
