@@ -1,4 +1,4 @@
-/* $Id: pe.cpp,v 1.9 1999-09-21 18:35:01 sandervl Exp $ */
+/* $Id: pe.cpp,v 1.10 1999-10-10 08:58:51 sandervl Exp $ */
 
 /*
  * PELDR main exe loader code
@@ -30,7 +30,7 @@
 
 char INFO_BANNER[]      = "Usage: PE winexe commandline";
 char szErrorTitle[]     = "Odin";
-char szMemErrorMsg[]    = "Memory allocation failure";
+char szLoadErrorMsg[]   = "Can't load executable";
 char szFileErrorMsg[]   = "File IO error";
 char szPEErrorMsg[]     = "Not a valid win32 exe. (perhaps 16 bits windows)";
 char szCPUErrorMsg[]    = "Executable doesn't run on x86 machines";
@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
         strcat(exeName, ".EXE");
   }
   if(CreateWin32Exe(exeName, ReserveMem()) == FALSE) {
-        MyWinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szMemErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
+        MyWinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szLoadErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
         goto fail;
   }
 
