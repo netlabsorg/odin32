@@ -1,4 +1,4 @@
-/* $Id: waveout.cpp,v 1.5 1999-10-22 18:09:16 sandervl Exp $ */
+/* $Id: waveout.cpp,v 1.6 1999-11-01 19:02:45 sandervl Exp $ */
 
 /*
  * Wave out MM apis
@@ -233,7 +233,13 @@ ODINFUNCTION3(MMRESULT, waveOutGetDevCapsA,
               LPWAVEOUTCAPSA, pwoc,
               UINT, cbwoc)
 {
-  dprintf(("WINMM:waveOutGetDevCapsA - not implemented\n"));
+  dprintf(("WINMM:waveOutGetDevCapsA"));
+
+  if(DartWaveOut::getNumDevices() == 0) {
+	memset(pwoc, 0, sizeof(*pwoc));
+	return MMSYSERR_NODRIVER;
+  }
+
   // we have to fill in this thing
   pwoc->wMid = 0;                  /* manufacturer ID */
   pwoc->wPid = 0;                  /* product ID */
@@ -259,7 +265,12 @@ ODINFUNCTION3(MMRESULT, waveOutGetDevCapsW,
               LPWAVEOUTCAPSW, pwoc,
               UINT, cbwoc)
 {
-  dprintf(("WINMM:waveOutGetDevCapsW - not implemented\n"));
+  dprintf(("WINMM:waveOutGetDevCapsW"));
+
+  if(DartWaveOut::getNumDevices() == 0) {
+	memset(pwoc, 0, sizeof(*pwoc));
+	return MMSYSERR_NODRIVER;
+  }
   // we have to fill in this thing
   pwoc->wMid = 0;                  /* manufacturer ID */
   pwoc->wPid = 0;                  /* product ID */
