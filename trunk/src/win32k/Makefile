@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.32 2000-02-27 02:19:05 bird Exp $
+# $Id: Makefile,v 1.33 2000-02-29 10:48:51 bird Exp $
 #
 # Copyright 1998-1999 knut st. osmundsen
 #
@@ -384,15 +384,8 @@ dep2:
         dev32\*.c* dev16\*.c* pe2lx\*.c* k32\*.c* lib\*.c elf2lx\*.c* \
         $(WIN32KINCLUDE)\*.h
     $(PDWIN32_TOOLS)\fastdep -a+ -o$(WIN32KOBJ) $(CINCLUDES16) dev16\*.c*
-
-
-$(WIN32KOBJ)\asmutils.obj:      misc\asmutils.asm     include\devsegdf.inc
-$(WIN32KOBJ)\buffer.obj:        misc\buffer.asm       include\devsegdf.inc
-$(WIN32KOBJ)\calltab.obj:       ldr\calltab.asm       include\devsegdf.inc
-$(WIN32KOBJ)\mytkExecPgm.obj:   ldr\mytkExecPgm.asm   include\devsegdf.inc
-$(WIN32KOBJ)\d32hlp.obj:        dev32\d32hlp.asm      include\devsegdf.inc
-$(WIN32KOBJ)\devfirst.obj:      dev32\devfirst.asm    include\devsegdf.inc
-$(WIN32KOBJ)\devlast.obj:       dev32\devlast.asm     include\devsegdf.inc
+    $(PDWIN32_TOOLS)\fastdep -a+ -o$(WIN32KOBJ) -I$(WIN32KINCLUDE) \
+        -I$(DDKPATH)\inc dev32\*.asm ldr\*.asm misc\*.asm include\*.inc
 
 !ifndef NODEP
 !include .depend
