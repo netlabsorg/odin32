@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.14 1999-07-26 20:03:49 sandervl Exp $ */
+/* $Id: window.cpp,v 1.15 1999-08-22 16:38:01 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -21,7 +21,7 @@
 #include <oslibwin.h>
 #include <oslibgdi.h>
 #include "user32.h"
-#include "icon.h"
+#include "winicon.h"
 #include "usrcall.h"
 
 //******************************************************************************
