@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.56 2002-09-27 14:35:56 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.57 2002-09-30 12:53:27 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -37,6 +37,8 @@
 //Converts BCD to decimal; doesn't check for illegal BCD nrs
 #define BCDToDec(a) ((a >> 4) * 10 + (a & 0xF))
 
+
+#define UNMOUNTED_VOLUME(a) (a->fPhysicalDisk && (a->StartingOffset.HighPart != 0 || a->StartingOffset.LowPart != 0))
 
 typedef struct
 {
@@ -306,6 +308,7 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
         drvInfo->fPhysicalDisk    = fPhysicalDisk;
         drvInfo->dwPhysicalDiskNr = dwPhysicalDiskNr;
         drvInfo->StartingOffset   = volext.Extents[0].StartingOffset;
+        drvInfo->CurrentFilePointer = drvInfo->StartingOffset;
         drvInfo->PartitionSize    = volext.Extents[0].ExtentLength;
 
         //save volume name for later (IOCtls)
@@ -1729,8 +1732,7 @@ BOOL HMDeviceDiskClass::ReadFile(PHMHANDLEDATA pHMHandleData,
 
     //if unmounted volume, check upper boundary as we're accessing the entire physical drive
     //instead of just the volume
-    if(drvInfo->fPhysicalDisk && (drvInfo->StartingOffset.HighPart != 0 ||
-       drvInfo->StartingOffset.LowPart != 0))
+    if(UNMOUNTED_VOLUME(drvInfo))
     {
         LARGE_INTEGER distance, result, endpos;
 
@@ -1770,8 +1772,7 @@ BOOL HMDeviceDiskClass::ReadFile(PHMHANDLEDATA pHMHandleData,
 
     //if unmounted volume, add starting offset to position as we're accessing the entire physical drive
     //instead of just the volume
-    if(drvInfo->fPhysicalDisk && (drvInfo->StartingOffset.HighPart != 0 ||
-       drvInfo->StartingOffset.LowPart != 0) && bRC == TRUE)
+    if(UNMOUNTED_VOLUME(drvInfo) && bRC == TRUE)
     {
         LARGE_INTEGER distance, result;
 
@@ -1831,8 +1832,7 @@ DWORD HMDeviceDiskClass::SetFilePointer(PHMHANDLEDATA pHMHandleData,
 
     //if unmounted volume, add starting offset to position as we're accessing the entire physical drive
     //instead of just the volume
-    if(drvInfo->fPhysicalDisk && (drvInfo->StartingOffset.HighPart != 0 ||
-       drvInfo->StartingOffset.LowPart != 0))
+    if(UNMOUNTED_VOLUME(drvInfo))
     {
         LARGE_INTEGER distance, result, endpos;
         LARGE_INTEGER position;
@@ -1850,9 +1850,6 @@ DWORD HMDeviceDiskClass::SetFilePointer(PHMHANDLEDATA pHMHandleData,
 
         //calculate end position in partition
         Add64(&drvInfo->StartingOffset, &drvInfo->PartitionSize, &endpos);
-        result.HighPart = 0;
-        result.LowPart  = 1;
-        Sub64(&endpos, &result, &endpos);
 
         switch(dwMoveMethod) {
         case FILE_BEGIN:
@@ -1885,11 +1882,15 @@ DWORD HMDeviceDiskClass::SetFilePointer(PHMHANDLEDATA pHMHandleData,
                                      result.LowPart,
                                      (DWORD *)&result.HighPart,
                                      FILE_BEGIN);
+        //save new file pointer
+        drvInfo->CurrentFilePointer.HighPart = result.HighPart;
+        drvInfo->CurrentFilePointer.LowPart  = ret;
 
-        Sub64(&result, &drvInfo->StartingOffset, &drvInfo->CurrentFilePointer);
-        ret = drvInfo->CurrentFilePointer.LowPart;
+        //subtract volume start to get relative offset
+        Sub64(&drvInfo->CurrentFilePointer, &drvInfo->StartingOffset, &result);
+        ret = result.LowPart;
         if(lpDistanceToMoveHigh) {
-            *lpDistanceToMoveHigh = drvInfo->CurrentFilePointer.HighPart;
+            *lpDistanceToMoveHigh = result.HighPart;
         }
     }
     else {
@@ -1996,8 +1997,7 @@ BOOL HMDeviceDiskClass::WriteFile(PHMHANDLEDATA pHMHandleData,
 
     //if unmounted volume, check upper boundary as we're accessing the entire physical drive
     //instead of just the volume
-    if(drvInfo->fPhysicalDisk && (drvInfo->StartingOffset.HighPart != 0 ||
-       drvInfo->StartingOffset.LowPart != 0))
+    if(UNMOUNTED_VOLUME(drvInfo))
     {
         LARGE_INTEGER distance, result, endpos;
 
@@ -2023,16 +2023,20 @@ BOOL HMDeviceDiskClass::WriteFile(PHMHANDLEDATA pHMHandleData,
         dprintf(("ERROR: Overlapped IO not yet implememented!!"));
     }
 //  else {
+#if 0
+    bRC = TRUE;
+    *lpNumberOfBytesWritten = nNumberOfBytesToWrite;
+#else
     bRC = OSLibDosWrite(pHMHandleData->hHMHandle,
                             (PVOID)lpRealBuf,
                             nNumberOfBytesToWrite,
                             lpNumberOfBytesWritten);
+#endif
 //  }
 
     //if unmounted volume, add starting offset to position as we're accessing the entire physical drive
     //instead of just the volume
-    if(drvInfo->fPhysicalDisk && (drvInfo->StartingOffset.HighPart != 0 ||
-       drvInfo->StartingOffset.LowPart != 0) && bRC == TRUE)
+    if(UNMOUNTED_VOLUME(drvInfo) && bRC == TRUE)
     {
         LARGE_INTEGER distance, result;
 
