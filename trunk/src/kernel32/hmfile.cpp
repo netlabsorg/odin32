@@ -1,4 +1,4 @@
-/* $Id: hmfile.cpp,v 1.7 2000-06-28 18:08:34 sandervl Exp $ */
+/* $Id: hmfile.cpp,v 1.8 2000-07-01 09:50:54 sandervl Exp $ */
 
 /*
  * File IO win32 apis
@@ -424,14 +424,13 @@ BOOL HMDeviceFileClass::ReadFile(PHMHANDLEDATA pHMHandleData,
 
   //SvL: DosRead doesn't like writing to memory addresses returned by 
   //     DosAliasMem -> search for original memory mapped pointer and use 
-  //     that one
-  map = Win32MemMapView::findMapByView((ULONG)lpBuffer, &offset, MEMMAP_ACCESS_READ);
+  //     that one + commit pages if not already present
+  map = Win32MemMapView::findMapByView((ULONG)lpBuffer, &offset, MEMMAP_ACCESS_WRITE);
   if(map) {
 	lpRealBuf = (LPVOID)((ULONG)map->getMappingAddr() + offset);
 	DWORD nrpages = nNumberOfBytesToRead/4096;
 	if(offset & 0xfff) 
 		nrpages++;
-	else
 	if(nNumberOfBytesToRead & 0xfff) 
 		nrpages++;
 
@@ -518,7 +517,10 @@ BOOL HMDeviceFileClass::WriteFile(PHMHANDLEDATA pHMHandleData,
                                     LPDWORD       lpNumberOfBytesWritten,
                                     LPOVERLAPPED  lpOverlapped)
 {
-  BOOL bRC;
+  LPVOID       lpRealBuf;
+  Win32MemMap *map;
+  DWORD        offset;
+  BOOL         bRC;
 
   dprintfl(("KERNEL32: HMDeviceFileClass::WriteFile %s(%08x,%08x,%08x,%08x,%08x) - stub?\n",
            lpHMDeviceName,
@@ -537,12 +539,28 @@ BOOL HMDeviceFileClass::WriteFile(PHMHANDLEDATA pHMHandleData,
 	dprintf(("Warning: lpOverlapped != NULL & !FILE_FLAG_OVERLAPPED; sync operation"));
   }
 
+  //SvL: DosWrite doesn't like reading from memory addresses returned by 
+  //     DosAliasMem -> search for original memory mapped pointer and use 
+  //     that one + commit pages if not already present
+  map = Win32MemMapView::findMapByView((ULONG)lpBuffer, &offset, MEMMAP_ACCESS_READ);
+  if(map) {
+	lpRealBuf = (LPVOID)((ULONG)map->getMappingAddr() + offset);
+	DWORD nrpages = nNumberOfBytesToWrite/4096;
+	if(offset & 0xfff) 
+		nrpages++;
+	if(nNumberOfBytesToWrite & 0xfff) 
+		nrpages++;
+
+	map->commitPage(offset & ~0xfff, TRUE, nrpages);
+  }
+  else  lpRealBuf = (LPVOID)lpBuffer;
+
   if(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) {
 	dprintf(("ERROR: Overlapped IO not yet implememented!!"));
   }
 //  else {
   	bRC = OSLibDosWrite(pHMHandleData->hHMHandle,
-                            (PVOID)lpBuffer,
+                            (PVOID)lpRealBuf,
                             nNumberOfBytesToWrite,
                             lpNumberOfBytesWritten);
 //  }
