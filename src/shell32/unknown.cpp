@@ -1,4 +1,4 @@
-/* $Id: unknown.cpp,v 1.8 1999-11-02 19:17:16 phaller Exp $ */
+/* $Id: unknown.cpp,v 1.9 2000-08-02 17:53:34 bird Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -45,7 +45,7 @@ ODINDEBUGCHANNEL(SHELL32-UNKNOWN)
  * Variables :
  * Result    :
  * Remark    : SHELL32.229
- * Status    : UNTESTED UNKNOWN
+ * Status    : STUB UNTESTED UNKNOWN
  *
  * Author    : Patrick Haller [Tue, 1999/06/01 09:00]
  *****************************************************************************/
@@ -76,7 +76,7 @@ ODINFUNCTION6(HINSTANCE, RealShellExecuteA,
  * Variables :
  * Result    :
  * Remark    : SHELL32.232
- * Status    : UNTESTED UNKNOWN
+ * Status    : COMPLETELY UNTESTED UNKNOWN
  *
  * Author    : Patrick Haller [Tue, 1999/06/01 09:00]
  *****************************************************************************/
