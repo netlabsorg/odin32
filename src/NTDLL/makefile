@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.26 2000-12-02 23:40:28 bird Exp $
+# $Id: makefile,v 1.27 2001-07-08 10:59:44 sandervl Exp $
 
 #
 # Odin32 API
@@ -41,7 +41,7 @@ $(OBJDIR)\ntdllrsrc.obj
 LIBS = \
 $(ODIN32_LIB)/kernel32.lib \
 $(ODIN32_LIB)/user32.lib \
-$(ODIN32_LIB)/crtdll.lib \
+$(ODIN32_LIB)/crtdll32.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
 OS2386.LIB \
 $(RTLLIB_O)
