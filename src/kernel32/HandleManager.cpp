@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.70 2001-08-25 10:38:50 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.71 2001-10-03 13:48:56 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -296,6 +296,29 @@ DWORD HMHandleGetUserData(ULONG  hHandle)
 }
 
 /*****************************************************************************
+ * Name      : HMHandleGetUserData
+ * Purpose   : Get the dwUserData dword for a specific handle
+ * Parameters: HANDLE hHandle
+ * Variables :
+ * Result    : -1 or dwUserData
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+DWORD HMHandleSetUserData(ULONG  hHandle, ULONG dwUserData)
+{
+  if (hHandle > MAX_OS2_HMHANDLES)                  /* check the table range */
+    return (-1);
+                                                   /* Oops, invalid handle ! */
+  if (INVALID_HANDLE_VALUE == TabWin32Handles[hHandle].hmHandleData.hHMHandle)
+    return (-1);              /* nope, ERROR_INVALID_HANDLE */
+
+  TabWin32Handles[hHandle].hmHandleData.dwUserData = dwUserData;
+  return NO_ERROR;
+}
+
+/*****************************************************************************
  * Name      : static int _HMHandleQuery
  * Purpose   : gets the index of handle table entry as fast as possible from
  *             the specified handle
@@ -518,26 +541,26 @@ DWORD HMHandleAllocate (PULONG phHandle16,
   handleMutex.enter();
 
   if(ulHandle == 0) {
-  ulHandle = 1; //SvL: Start searching from index 1
+        ulHandle = 1; //SvL: Start searching from index 1
   }
   do
   {
     /* check if handle is free */
     if (TabWin32Handles[ulHandle].hmHandleData.hHMHandle == INVALID_HANDLE_VALUE)
     {
-      *phHandle16 = ulHandle;
+        *phHandle16 = ulHandle;
         TabWin32Handles[ulHandle].hmHandleData.hHMHandle = hHandleOS2;
         TabWin32Handles[ulHandle].hmHandleData.lpDeviceData = NULL;
         HMGlobals.ulHandleLast = ulHandle;          /* to shorten search times */
 
-    handleMutex.leave();
+        handleMutex.leave();
         return (NO_ERROR);                                               /* OK */
     }
 
     ulHandle++;                                        /* skip to next entry */
 
     if (ulHandle >= MAX_OS2_HMHANDLES)                     /* check boundary */
-      ulHandle = 1;
+        ulHandle = 1;
   }
   while (ulHandle != HMGlobals.ulHandleLast);
 
