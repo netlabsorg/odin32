@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2078 2002-05-15 12:35:28 sandervl Exp $ */
+/* $Id: changelog,v 1.2079 2002-05-16 12:12:51 sandervl Exp $ */
+
+ 2002-05-16: Sander van Leeuwen <sandervl@xs4all.nl>
+    - NTDLL:    o Partial resync with Wine
 
  2002-05-15: Sander van Leeuwen <sandervl@xs4all.nl>
     - DINPUT:   o Made mouse code reentrant
