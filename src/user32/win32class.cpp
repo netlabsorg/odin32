@@ -1,4 +1,4 @@
-/* $Id: win32class.cpp,v 1.1 1999-09-15 23:19:00 sandervl Exp $ */
+/* $Id: win32class.cpp,v 1.2 1999-10-21 19:23:51 sandervl Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -120,12 +120,12 @@ Win32WndClass::~Win32WndClass()
 BOOL Win32WndClass::hasClassName(LPSTR classname, BOOL fUnicode)
 {
   if(HIWORD(classname) == 0) {
-	return classAtom == (DWORD)classname;
+    return classAtom == (DWORD)classname;
   }
   if(fUnicode) {
-	return (lstrcmpW(classNameW, (LPWSTR)classname) == 0);
+    return (lstrcmpW(classNameW, (LPWSTR)classname) == 0);
   }
-  else	return (strcmp(classNameA, classname) == 0);
+  else  return (strcmp(classNameA, classname) == 0);
 }
 //******************************************************************************
 //******************************************************************************
@@ -149,9 +149,15 @@ Win32WndClass *Win32WndClass::FindClass(HINSTANCE hInstance, LPSTR id)
         else {
                 wndclass = (Win32WndClass *)wndclass->GetNext();
                 while(wndclass != NULL) {
-                        if(stricmp(wndclass->classNameA, id) == 0 && wndclass->hInstance == hInstance) {
-                                leaveMutex(OBJTYPE_CLASS);
-                                return(wndclass);
+                        if(stricmp(wndclass->classNameA, id) == 0)
+                        {
+                                //SvL: According to Wine, if the instance handle is the one of the main exe, everything is ok
+                                if(hInstance == NULL || GetModuleHandleA(NULL) == hInstance ||
+                                   wndclass->hInstance == hInstance)
+                                {
+                                    leaveMutex(OBJTYPE_CLASS);
+                                    return(wndclass);
+                                }
                         }
                         wndclass = (Win32WndClass *)wndclass->GetNext();
                 }
