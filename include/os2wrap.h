@@ -1,10 +1,15 @@
-/* $Id: os2wrap.h,v 1.7 1999-07-13 10:39:16 sandervl Exp $ */
+/* $Id: os2wrap.h,v 1.8 1999-10-16 11:03:17 sandervl Exp $ */
 #ifndef __OS2WRAP_H__
 #define __OS2WRAP_H__
 
 #include <os2.h>
 #include <os2sel.h>
 #include <os2newapi.h>
+
+#if (__IBMC__ > 300)
+// VA3.6: inline is a C++ keywork, must be translated to _inline or _Inline or __inline in C code
+#define inline _inline
+#endif
 
 #ifdef INCL_DOSMEMMGR
 inline ULONG _DosAllocMem(PPVOID a, ULONG b, ULONG c)
