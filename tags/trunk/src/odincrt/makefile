@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.22 2001-02-11 10:32:51 sandervl Exp $
+# $Id: makefile,v 1.23 2001-07-20 15:40:29 sandervl Exp $
 
 #
 # Odin32 API
@@ -53,6 +53,9 @@ OBJS = \
 $(OBJDIR)\odincrt.obj \
 $(OBJDIR)\initterm.obj \
 !ifndef WAT
+!ifdef VAC3
+$(OBJDIR)\math64.obj \
+!endif
 $(OBJDIR)\malloc.obj \
 $(OBJDIR)\string.obj \
 $(OBJDIR)\file.obj
