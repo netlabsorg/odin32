@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.197 2004-12-20 18:11:28 sao2l02 Exp $ */
+/* $Id: wprocess.cpp,v 1.198 2004-12-25 16:39:10 sao2l02 Exp $ */
 
 /*
  * Win32 process functions
@@ -165,22 +165,8 @@ TEB *WIN32API CreateTEB(HANDLE hThread, DWORD dwThreadId)
     dprintf(("TIB selector %x; linaddr 0x%x", tibsel, winteb));
 
     threadListMutex.enter();
-#if 0
-    TEB *teblast   = threadList;
-    if(!teblast) {
-        threadList = winteb;
-        winteb->o.odin.next = NULL;
-    }
-    else {
-        while(teblast->o.odin.next) {
-            teblast = teblast->o.odin.next;
-        }
-        teblast->o.odin.next = winteb;
-    }
-#else
     winteb->o.odin.next = threadList;
     threadList = winteb;
-#endif
     threadListMutex.leave();
 
     winteb->except      = (PVOID)-1;               /* 00 Head of exception handling chain */
@@ -350,13 +336,125 @@ BOOL WIN32API InitializeThread(TEB *winteb, BOOL fMainThread)
     dprintf(("InitializeTIB: FS(%x):[0] = %x", GetFS(), QueryExceptionChain()));
     return TRUE;
 }
+
 //******************************************************************************
-//  if debug, returns the pointer to the debugstr_.. environment. otherwithe NULL
+// these two debugging functions allow access to a
+// calldepth counter inside the TEB block of each thread
+//******************************************************************************
+ULONG WIN32API dbg_GetThreadCallDepth()
+{
+#ifdef DEBUG
+  TEB *teb = GetThreadTEB();
+  if(teb == NULL)
+    return 0;
+  else
+    return teb->o.odin.dbgCallDepth;
+#else
+  return 0;
+#endif
+}
+//******************************************************************************
+//******************************************************************************
+void WIN32API dbg_IncThreadCallDepth()
+{
+#ifdef DEBUG
+  TEB *teb = GetThreadTEB();
+  if(teb != NULL)
+    teb->o.odin.dbgCallDepth++;
+#endif
+}
+//******************************************************************************
+#define MAX_CALLSTACK_SIZE 128
+#ifdef DEBUG
+static char *pszLastCaller = NULL;
+#endif
+//******************************************************************************
+void WIN32API dbg_ThreadPushCall(char *pszCaller)
+{
+#ifdef DEBUG
+  TEB *teb = GetThreadTEB();
+
+  // embedded dbg_IncThreadCallDepth
+  if(teb == NULL)
+    return;
+
+  // add caller name to call stack trace
+  int iIndex = teb->o.odin.dbgCallDepth;
+
+  // allocate callstack on demand
+  if (teb->o.odin.arrstrCallStack == NULL)
+    teb->o.odin.arrstrCallStack = (PVOID*)malloc( sizeof(LPSTR) * MAX_CALLSTACK_SIZE);
+
+  // insert entry
+  if (iIndex < MAX_CALLSTACK_SIZE)
+    teb->o.odin.arrstrCallStack[iIndex] = (PVOID)pszCaller;
+
+  teb->o.odin.dbgCallDepth++;
+
+  pszLastCaller = pszCaller;
+#endif
+}
+//******************************************************************************
+//******************************************************************************
+void WIN32API dbg_DecThreadCallDepth()
+{
+#ifdef DEBUG
+  TEB *teb = GetThreadTEB();
+  if(teb != NULL)
+    --(teb->o.odin.dbgCallDepth);
+#endif
+}
+//******************************************************************************
+//******************************************************************************
+void WIN32API dbg_ThreadPopCall()
+{
+#ifdef DEBUG
+  TEB *teb = GetThreadTEB();
+
+  // embedded dbg_DecThreadCallDepth
+  if(teb == NULL)
+    return;
+
+  --(teb->o.odin.dbgCallDepth);
+
+  // add caller name to call stack trace
+  int iIndex = teb->o.odin.dbgCallDepth;
+
+  // insert entry
+  if (teb->o.odin.arrstrCallStack)
+    if (iIndex < MAX_CALLSTACK_SIZE)
+      teb->o.odin.arrstrCallStack[iIndex] = NULL;
+#endif
+}
+//******************************************************************************
+//******************************************************************************
+char* WIN32API dbg_GetLastCallerName()
+{
+#ifdef DEBUG
+  // retrieve last caller name from stack
+  TEB *teb = GetThreadTEB();
+
+  // embedded dbg_DecThreadCallDepth
+  if(teb != NULL)
+  {
+    int iIndex = teb->o.odin.dbgCallDepth - 1;
+    if ( (iIndex > 0) &&
+         (iIndex < MAX_CALLSTACK_SIZE) )
+    {
+      return (char*)teb->o.odin.arrstrCallStack[iIndex];
+    }
+  }
+#endif
+
+  return NULL;
+}
+
+//******************************************************************************
+//  if debug, returns the pointer to the debugstr_.. environment. otherwise NULL
 //******************************************************************************
 /* ------------------------------------------------------------------------- *
  * CallBackHelperfunction for Alloc + Init the Debugstring Pointer Strukture *
  * ------------------------------------------------------------------------- */
-//debugstr_data* WIN32API GetDebugStrPtr(debugstr_data* (WIN32API *pInit)(debugstr_data* retData), int size);
 debugstr_data* WIN32API pInit(debugstr_data* retData);
 debugstr_data* WIN32API GetDebugStrPtr(debugstr_data* (WIN32API *pInit)(debugstr_data* retData), int size)
 {

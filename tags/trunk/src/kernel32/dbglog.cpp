@@ -1,4 +1,4 @@
-/* $Id: dbglog.cpp,v 1.12 2004-12-20 18:11:19 sao2l02 Exp $ */
+/* $Id: dbglog.cpp,v 1.13 2004-12-25 16:39:00 sao2l02 Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -35,6 +35,7 @@
 #include "odinbuild.h"
 #include <cpuhlp.h>
 
+ULONG WIN32API dbg_GetThreadCallDepth();
 /*****************************************************************************
  * PMPRINTF Version                                                          *
  *****************************************************************************/
@@ -364,12 +365,7 @@ int SYSTEM WriteLog(char *tekst, ...)
 #endif
     if(teb)
     {
-      ULONG ulCallDepth;
-#ifdef DEBUG
-      ulCallDepth = teb->o.odin.dbgCallDepth;
-#else
-      ulCallDepth = 0;
-#endif
+      ULONG ulCallDepth = dbg_GetThreadCallDepth();
 
       teb->o.odin.logfile = (DWORD)flog;
 
@@ -429,12 +425,7 @@ int SYSTEM WriteLog(char *tekst, ...)
 
         if(teb)
         {
-            ULONG ulCallDepth;
-#ifdef DEBUG
-            ulCallDepth = teb->o.odin.dbgCallDepth;
-#else
-            ulCallDepth = 0;
-#endif
+            ULONG ulCallDepth = dbg_GetThreadCallDepth();
 #ifdef LOG_TIME
             if(sel == 0x150b && fSwitchTIBSel)
                 sprintf(logbuffer, "t%02d (%3d): %x (FS=150B) ",
