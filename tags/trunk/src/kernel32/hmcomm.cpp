@@ -1,4 +1,4 @@
-/* $Id: hmcomm.cpp,v 1.31 2001-12-08 15:44:30 sandervl Exp $ */
+/* $Id: hmcomm.cpp,v 1.32 2001-12-09 21:19:28 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -635,6 +635,12 @@ BOOL HMDeviceCommClass::WaitCommEvent( PHMHANDLEDATA pHMHandleData,
         return FALSE;
     }
 
+    if(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED)
+    {
+        return pDevData->iohandler->WaitForEvent(pHMHandleData->hWin32Handle, pDevData->dwEventMask, lpfdwEvtMask,
+                                                 lpo, NULL, (DWORD)pDevData);
+    }
+
     ulLen = sizeof(CHAR);
 
     dwEvent = 0;
@@ -665,11 +671,6 @@ BOOL HMDeviceCommClass::WaitCommEvent( PHMHANDLEDATA pHMHandleData,
         }
         else break;
 
-        if(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED)
-        {
-            return pDevData->iohandler->WaitForEvent(pHMHandleData->hWin32Handle, pDevData->dwEventMask, lpfdwEvtMask,
-                                                     lpo, NULL, (DWORD)pDevData);
-        }
         DosSleep(TIMEOUT_COMM);
     }
     if(dwMask == pDevData->dwEventMask) {
@@ -724,7 +725,7 @@ BOOL HMDeviceCommClass::GetOverlappedResult(PHMHANDLEDATA pHMHandleData,
 {
   PHMDEVCOMDATA pDevData = (PHMDEVCOMDATA)pHMHandleData->lpHandlerData;
 
-    dprintf(("KERNEL32-WARNING: HMDeviceCommClass::GetOverlappedResult(%08xh,%08xh,%08xh,%08xh) partly implemented",
+    dprintf(("KERNEL32-WARNING: HMDeviceCommClass::GetOverlappedResult(%08xh,%08xh,%08xh,%08xh)",
              pHMHandleData->hHMHandle, lpOverlapped, lpcbTransfer, fWait));
 
     if(!(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED)) {
