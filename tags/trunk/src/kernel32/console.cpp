@@ -1,3 +1,5 @@
+/* $Id: console.cpp,v 1.5 1999-06-10 20:47:55 phaller Exp $ */
+
 /*
  * Win32 Console API Translation for OS/2
  *

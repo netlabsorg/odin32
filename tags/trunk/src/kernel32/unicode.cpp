@@ -1,3 +1,5 @@
+/* $Id: unicode.cpp,v 1.7 1999-06-10 20:47:54 phaller Exp $ */
+
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  * Unicode functions

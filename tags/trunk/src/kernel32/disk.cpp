@@ -1,3 +1,5 @@
+/* $Id: disk.cpp,v 1.4 1999-06-10 20:47:58 phaller Exp $ */
+
 /*
  * Win32 Disk API functions for OS/2
  *

@@ -1,3 +1,5 @@
+/* $Id: KERNEL32.CPP,v 1.3 1999-06-10 20:47:51 phaller Exp $ */
+
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT
