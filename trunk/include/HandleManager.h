@@ -419,6 +419,9 @@ DWORD  HMSuspendThread(HANDLE hThread);
 BOOL   HMSetThreadPriority(HANDLE hThread, int priority);
 BOOL   HMGetThreadContext(HANDLE hThread, CONTEXT *lpContext);
 BOOL   HMSetThreadContext(HANDLE hThread, const CONTEXT *lpContext);
+BOOL   HMGetThreadTimes(HANDLE hThread, FILETIME *lpCreationTime,
+                        FILETIME *lpExitTime, FILETIME *lpKernelTime,
+                        FILETIME *lpUserTime);
 BOOL   HMTerminateThread(HANDLE hThread, DWORD exitcode);
 DWORD  HMResumeThread(HANDLE hThread);
 BOOL   HMGetExitCodeThread(HANDLE hThread, LPDWORD lpExitCode);
