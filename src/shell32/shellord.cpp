@@ -1,4 +1,4 @@
-/* $Id: shellord.cpp,v 1.7 2000-03-29 15:24:05 cbratschi Exp $ */
+/* $Id: shellord.cpp,v 1.8 2000-05-28 16:42:54 sandervl Exp $ */
 /*
  * The parameters of many functions changes between different OS versions
  * (NT uses Unicode strings, 95 uses ASCII strings)
@@ -762,120 +762,153 @@ BOOL WINAPI ShellExecuteExAW (LPVOID sei)
         return ShellExecuteExA ((LPSHELLEXECUTEINFOA)sei);
 }
 /*************************************************************************
- * ShellExecuteExA                              [SHELL32.292]
+ * ShellExecuteExA				[SHELL32.292]
  *
+ * placeholder in the commandline:
+ *	%1 file
+ *	%2 printer
+ *	%3 driver
+ *	%4 port
+ *	%I adress of a global item ID (explorer switch /idlist)
+ *	%L ??? path/url/current file ???
+ *	%S ???
+ *	%* all following parameters (see batfile)
  */
+#include "process.h" /* we can get rid of it hopefully */
+#include "task.h"
 BOOL WINAPI ShellExecuteExA (LPSHELLEXECUTEINFOA sei)
-{       CHAR szApplicationName[MAX_PATH],szCommandline[MAX_PATH],szPidl[20];
-        LPSTR pos;
-        int gap, len;
-        STARTUPINFOA  startupinfo;
-        PROCESS_INFORMATION processinformation;
+{ 	CHAR szApplicationName[MAX_PATH],szCommandline[MAX_PATH],szPidl[20];
+	LPSTR pos;
+	int gap, len;
+	STARTUPINFOA  startup;
+	PROCESS_INFORMATION info;
+			
+	WARN("mask=0x%08lx hwnd=0x%04x verb=%s file=%s parm=%s dir=%s show=0x%08x class=%s incomplete\n",
+		sei->fMask, sei->hwnd, sei->lpVerb, sei->lpFile,
+		sei->lpParameters, sei->lpDirectory, sei->nShow, 
+		(sei->fMask & SEE_MASK_CLASSNAME) ? sei->lpClass : "not used");
 
-        WARN("mask=0x%08lx hwnd=0x%04x verb=%s file=%s parm=%s dir=%s show=0x%08x class=%s incomplete\n",
-                sei->fMask, sei->hwnd, sei->lpVerb, sei->lpFile,
-                sei->lpParameters, sei->lpDirectory, sei->nShow,
-                (sei->fMask & SEE_MASK_CLASSNAME) ? sei->lpClass : "not used");
+	ZeroMemory(szApplicationName,MAX_PATH);
+	if (sei->lpFile)
+	  strcpy(szApplicationName, sei->lpFile);
+	
+	ZeroMemory(szCommandline,MAX_PATH);
+	if (sei->lpParameters)
+	  strcpy(szCommandline, sei->lpParameters);
+			
+	if (sei->fMask & (SEE_MASK_CLASSKEY | SEE_MASK_INVOKEIDLIST | SEE_MASK_ICON | SEE_MASK_HOTKEY |
+			  SEE_MASK_CONNECTNETDRV | SEE_MASK_FLAG_DDEWAIT |
+			  SEE_MASK_DOENVSUBST | SEE_MASK_FLAG_NO_UI | SEE_MASK_UNICODE | 
+			  SEE_MASK_NO_CONSOLE | SEE_MASK_ASYNCOK | SEE_MASK_HMONITOR ))
+	{
+	  FIXME("flags ignored: 0x%08lx\n", sei->fMask);
+	}
+	
+	/* launch a document by fileclass like 'Wordpad.Document.1' */
+	if (sei->fMask & SEE_MASK_CLASSNAME)
+	{
+	  /* the commandline contains 'c:\Path\wordpad.exe "%1"' */
+	  HCR_GetExecuteCommand(sei->lpClass, (sei->lpVerb) ? sei->lpVerb : "open", szCommandline, 256);
+	  /* fixme: get the extension of lpFile, check if it fits to the lpClass */
+	  TRACE("SEE_MASK_CLASSNAME->'%s'\n", szCommandline);
+	}
 
-        ZeroMemory(szApplicationName,MAX_PATH);
-        if (sei->lpFile)
-          strcpy(szApplicationName, sei->lpFile);
+	/* process the IDList */
+	if ( (sei->fMask & SEE_MASK_INVOKEIDLIST) == SEE_MASK_INVOKEIDLIST) /*0x0c*/
+	{
+	  SHGetPathFromIDListA ((LPCITEMIDLIST)sei->lpIDList,szApplicationName);
+	  TRACE("-- idlist=%p (%s)\n", sei->lpIDList, szApplicationName);
+	}
+	else
+	{
+	  if (sei->fMask & SEE_MASK_IDLIST )
+	  {
+	    pos = strstr(szCommandline, "%I");
+	    if (pos)
+	    {
+	      LPVOID pv;
+	      HGLOBAL hmem = SHAllocShared ( (LPITEMIDLIST)sei->lpIDList, ILGetSize((LPITEMIDLIST)sei->lpIDList), 0);
+	      pv = SHLockShared(hmem,0);
+	      sprintf(szPidl,":%p",pv );
+	      SHUnlockShared((HANDLE)pv);
+	    
+	      gap = strlen(szPidl);
+	      len = strlen(pos)-2;
+	      memmove(pos+gap,pos+2,len);
+	      memcpy(pos,szPidl,gap);
 
-        ZeroMemory(szCommandline,MAX_PATH);
-        if (sei->lpParameters)
-          strcpy(szCommandline, sei->lpParameters);
+	    }
+	  }
+	}
 
-        if (sei->fMask & (SEE_MASK_CLASSKEY | SEE_MASK_INVOKEIDLIST | SEE_MASK_ICON | SEE_MASK_HOTKEY |
-                          SEE_MASK_NOCLOSEPROCESS | SEE_MASK_CONNECTNETDRV | SEE_MASK_FLAG_DDEWAIT |
-                          SEE_MASK_DOENVSUBST | SEE_MASK_FLAG_NO_UI | SEE_MASK_UNICODE |
-                          SEE_MASK_NO_CONSOLE | SEE_MASK_ASYNCOK | SEE_MASK_HMONITOR ))
-        { FIXME("flags ignored: 0x%08lx\n", sei->fMask);
-        }
+	TRACE("execute:'%s','%s'\n",szApplicationName, szCommandline);
 
-        if (sei->fMask & SEE_MASK_CLASSNAME)
-        { HCR_GetExecuteCommand(sei->lpClass, (sei->lpVerb) ? sei->lpVerb : "open", szCommandline, 256);
-        }
+	strcat(szApplicationName, " ");
+	strcat(szApplicationName, szCommandline);
 
-        /* process the IDList */
-        if ( (sei->fMask & SEE_MASK_INVOKEIDLIST) == SEE_MASK_INVOKEIDLIST) /*0x0c*/
-        { SHGetPathFromIDListA ((LPCITEMIDLIST)sei->lpIDList,szApplicationName);
-          TRACE("-- idlist=%p (%s)\n", sei->lpIDList, szApplicationName);
-        }
+	ZeroMemory(&startup,sizeof(STARTUPINFOA));
+	startup.cb = sizeof(STARTUPINFOA);
+
+	if (! CreateProcessA(NULL, szApplicationName,
+			 NULL, NULL, FALSE, 0, 
+			 NULL, NULL, &startup, &info))
+	{
+	  sei->hInstApp = GetLastError();
+	  return FALSE;
+	}
+
+        sei->hInstApp = 33;
+	
+    	/* Give 30 seconds to the app to come up */
+	if ( WaitForInputIdle ( info.hProcess, 30000 ) ==  0xFFFFFFFF )
+	  ERR("WaitForInputIdle failed: Error %ld\n", GetLastError() );
+ 
+	if(sei->fMask & SEE_MASK_NOCLOSEPROCESS)
+	  sei->hProcess = info.hProcess;	  
         else
-        { if (sei->fMask & SEE_MASK_IDLIST )
-          { /* %I is the adress of a global item ID*/
-            pos = strstr(szCommandline, "%I");
-            if (pos)
-            { HGLOBAL hmem = SHAllocShared ( sei->lpIDList, ILGetSize((LPCITEMIDLIST)sei->lpIDList), 0);
-              sprintf(szPidl,":%li",(DWORD)SHLockShared(hmem,0) );
-              SHUnlockShared(hmem);
-
-              gap = strlen(szPidl);
-              len = strlen(pos)-2;
-              memmove(pos+gap,pos+2,len);
-              memcpy(pos,szPidl,gap);
-
-            }
-          }
-        }
-
-        pos = strstr(szCommandline, ",%L");     /* dunno what it means: kill it*/
-        if (pos)
-        { len = strlen(pos)-2;
-          *pos=0x0;
-          memmove(pos,pos+3,len);
-        }
-
-        TRACE("execute: %s %s\n",szApplicationName, szCommandline);
-
-        ZeroMemory(&startupinfo,sizeof(STARTUPINFOA));
-        startupinfo.cb = sizeof(STARTUPINFOA);
-
-        return CreateProcessA(szApplicationName[0] ? szApplicationName:NULL,
-                         szCommandline[0] ? szCommandline : NULL,
-                         NULL, NULL, FALSE, 0,
-                         NULL, NULL, &startupinfo, &processinformation);
-
-
+          CloseHandle( info.hProcess );
+        CloseHandle( info.hThread );
+	return TRUE;
 }
+
 /*************************************************************************
- * ShellExecuteExW                              [SHELL32.293]
+ * ShellExecuteExW				[SHELL32.293]
  *
  */
 BOOL WINAPI ShellExecuteExW (LPSHELLEXECUTEINFOW sei)
-{       SHELLEXECUTEINFOA seiA;
-        DWORD ret;
+{	SHELLEXECUTEINFOA seiA;
+	DWORD ret;
 
-        TRACE("%p\n", sei);
+	TRACE("%p\n", sei);
 
-        memcpy(&seiA, sei, sizeof(SHELLEXECUTEINFOA));
-
+	memcpy(&seiA, sei, sizeof(SHELLEXECUTEINFOA));
+	
         if (sei->lpVerb)
-          seiA.lpVerb = HEAP_strdupWtoA( GetProcessHeap(), 0, sei->lpVerb);
+	  seiA.lpVerb = HEAP_strdupWtoA( GetProcessHeap(), 0, sei->lpVerb);
 
         if (sei->lpFile)
-          seiA.lpFile = HEAP_strdupWtoA( GetProcessHeap(), 0, sei->lpFile);
+	  seiA.lpFile = HEAP_strdupWtoA( GetProcessHeap(), 0, sei->lpFile);
 
         if (sei->lpParameters)
-          seiA.lpParameters = HEAP_strdupWtoA( GetProcessHeap(), 0, sei->lpParameters);
+	  seiA.lpParameters = HEAP_strdupWtoA( GetProcessHeap(), 0, sei->lpParameters);
 
-        if (sei->lpDirectory)
-          seiA.lpDirectory = HEAP_strdupWtoA( GetProcessHeap(), 0, sei->lpDirectory);
+	if (sei->lpDirectory)
+	  seiA.lpDirectory = HEAP_strdupWtoA( GetProcessHeap(), 0, sei->lpDirectory);
 
         if ((sei->fMask & SEE_MASK_CLASSNAME) && sei->lpClass)
-          seiA.lpClass = HEAP_strdupWtoA( GetProcessHeap(), 0, sei->lpClass);
-        else
-          seiA.lpClass = NULL;
+	  seiA.lpClass = HEAP_strdupWtoA( GetProcessHeap(), 0, sei->lpClass);
+	else
+	  seiA.lpClass = NULL;
+	  	  
+	ret = ShellExecuteExA(&seiA);
 
-        ret = ShellExecuteExA(&seiA);
+        if (seiA.lpVerb)	HeapFree( GetProcessHeap(), 0, (LPSTR) seiA.lpVerb );
+	if (seiA.lpFile)	HeapFree( GetProcessHeap(), 0, (LPSTR) seiA.lpFile );
+	if (seiA.lpParameters)	HeapFree( GetProcessHeap(), 0, (LPSTR) seiA.lpParameters );
+	if (seiA.lpDirectory)	HeapFree( GetProcessHeap(), 0, (LPSTR) seiA.lpDirectory );
+	if (seiA.lpClass)	HeapFree( GetProcessHeap(), 0, (LPSTR) seiA.lpClass );
 
-        if (seiA.lpVerb)        HeapFree( GetProcessHeap(), 0, (LPSTR) seiA.lpVerb );
-        if (seiA.lpFile)        HeapFree( GetProcessHeap(), 0, (LPSTR) seiA.lpFile );
-        if (seiA.lpParameters)  HeapFree( GetProcessHeap(), 0, (LPSTR) seiA.lpParameters );
-        if (seiA.lpDirectory)   HeapFree( GetProcessHeap(), 0, (LPSTR) seiA.lpDirectory );
-        if (seiA.lpClass)       HeapFree( GetProcessHeap(), 0, (LPSTR) seiA.lpClass );
-
-        return ret;
+ 	return ret;
 }
 
 static LPUNKNOWN SHELL32_IExplorerInterface=0;
