@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.30 2000-06-01 14:01:43 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.31 2000-06-16 00:04:30 phaller Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -521,22 +521,26 @@ DWORD OSLibDosSetFilePtr(DWORD hFile, DWORD offset, DWORD method)
  DWORD  newoffset;
  APIRET rc;
 
-  switch(method) {
-  case OSLIB_SETPTR_FILE_CURRENT:
-        os2method = FILE_CURRENT;
-        break;
-  case OSLIB_SETPTR_FILE_BEGIN:
-        os2method = FILE_BEGIN  ;
-        break;
-  case OSLIB_SETPTR_FILE_END:
-        os2method = FILE_END;
-        break;
-  default:
-        return OSLIB_ERROR_INVALID_PARAMETER;
+  switch(method) 
+  {
+    case OSLIB_SETPTR_FILE_CURRENT:
+      os2method = FILE_CURRENT;
+      break;
+    case OSLIB_SETPTR_FILE_BEGIN:
+      os2method = FILE_BEGIN  ;
+      break;
+    case OSLIB_SETPTR_FILE_END:
+      os2method = FILE_END;
+      break;
+    default:
+      return OSLIB_ERROR_INVALID_PARAMETER;
   }
+  
   rc = DosSetFilePtr(hFile, offset, os2method, &newoffset);
-  if(rc) {
-        return -1;
+  if(rc) 
+  {
+    SetLastError(error2WinError(rc));
+    return -1;
   }
   else  return newoffset;
 }
@@ -1020,25 +1024,30 @@ DWORD OSLibDosGetFileSize(DWORD hFile, LPDWORD lpdwFileSizeHigh)
 //******************************************************************************
 DWORD OSLibDosSetFilePointer(DWORD hFile, DWORD OffsetLow, DWORD *OffsetHigh, DWORD method)
 {
- LONGLONG offsetL;
- LONGLONG newoffsetL;
- APIRET   rc;
- DWORD    newoffset;
+  LONGLONG offsetL;
+  LONGLONG newoffsetL;
+  APIRET   rc;
+  DWORD    newoffset;
 
-   switch(method) {
-   case FILE_BEGIN_W:
-	method = FILE_BEGIN;
-	break;
-
-   case FILE_CURRENT_W:
-	method = FILE_CURRENT;
-	break;
-
-   case FILE_END_W:
-     	method = FILE_END;
-	break;
-   }
-   if(f64BitIO) {
+  switch(method) 
+  {
+    case FILE_BEGIN_W:
+      method = FILE_BEGIN;
+      break;
+  
+    case FILE_CURRENT_W:
+      method = FILE_CURRENT;
+      break;
+  
+    case FILE_END_W:
+      method = FILE_END;
+      break;
+  }
+  
+  // PH Note: for a negative 32-bit seek, the OS/2 64-bit version
+  // needs to be skipped.
+  if( (f64BitIO) && (OffsetHigh) )
+  {
 	offsetL.ulLo = OffsetLow;
 	offsetL.ulHi = (OffsetHigh) ? *OffsetHigh : 0;
 	rc = OdinDosSetFilePtrL(hFile, offsetL, method, &newoffsetL);
@@ -1047,13 +1056,16 @@ DWORD OSLibDosSetFilePointer(DWORD hFile, DWORD OffsetLow, DWORD *OffsetHigh, DW
 	}
 	newoffset = newoffsetL.ulLo;
    }
-   else	rc = DosSetFilePtr(hFile, OffsetLow, method, &newoffset);
-   if(rc) {
-   	SetLastError(error2WinError(rc));
-   	return -1;
-   }
-   SetLastError(ERROR_SUCCESS_W);
-   return newoffset;
+  else 
+    rc = DosSetFilePtr(hFile, OffsetLow, method, &newoffset);
+  
+  if(rc) 
+  {
+    SetLastError(error2WinError(rc));
+    return -1;
+  }
+  SetLastError(ERROR_SUCCESS_W);
+  return newoffset;
 }
 //******************************************************************************
 //******************************************************************************
