@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.11 1999-11-13 15:40:51 sandervl Exp $
+# $Id: makefile,v 1.12 2000-01-30 14:48:51 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -13,42 +13,27 @@ PDWIN32_BIN = ..\..\bin
 
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 
-
-CFLAGS = $(CFLAGS) /Ge+ -I$(PDWIN32_INCLUDE)
-CXXFLAGS = $(CXXFLAGS) /Ge+ -I$(PDWIN32_INCLUDE)
-LDFLAGSEXE = $(LDFLAGS) /Ge+ /B"/pmtype:pm /stack:0x100000 /NOBASE /Map" \
-             $(PDWIN32_LIB)\peldr.lib os2386.lib $(PDWIN32_LIB)\odincrt.lib $(RTLLIB_O)
+CFLAGS   = $(CFLAGS) /Ge+ -I$(PDWIN32_INCLUDE) -Gn-
+CXXFLAGS = $(CXXFLAGS) /Ge+ -I$(PDWIN32_INCLUDE) -Gn-
+LDFLAGS  = $(LDFLAGS_ODINCRT) /Ge+ /B"/pmtype:pm /stack:0x100000 /NOBASE /Map" \
+             os2386.lib
 
 
 TARGET = pe
-TARGETDLL = peldr
 
 OBJS =  pe.obj
-OBJSDLL =  initterm.obj
 
-all: $(TARGETDLL).dll $(TARGETDLL).lib $(TARGET).exe
+all: $(TARGET).exe
 
 
 $(TARGET).exe: $(OBJS) makefile
-        $(LD) $(LDFLAGSEXE) -Fe$@ $(OBJS)
+        $(LD) $(LDFLAGS) -Fe$@ $(OBJS)
         $(CP) $(TARGET).exe $(PDWIN32_BIN)
 	$(CP) $@ $(PDWIN32_BIN)
 
-$(TARGETDLL).dll: $(OBJSDLL) $(TARGETDLL).def 
-	$(LD) $(LDFLAGS) -Fe$@ $(OBJSDLL) sbsstub.obj $(TARGETDLL).def OS2386.LIB $(RTLLIB)
-	$(CP) $@ $(PDWIN32_BIN)
 
-$(TARGETDLL).lib: $(TARGETDLL).dll
-	$(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGETDLL).dll
-	$(CP) $@ $(PDWIN32_LIB)
-
-
-initterm.obj: initterm.cpp
-misc.obj: misc.cpp
-pe.obj: pe.cpp pe.h $(PDWIN32_INCLUDE)\winimagebase.h $(PDWIN32_INCLUDE)\winexebase.h $(PDWIN32_INCLUDE)\exceptions.h ..\kernel32\exceptutil.h
+pe.obj: pe.cpp pe.h $(PDWIN32_INCLUDE)\winimagebase.h $(PDWIN32_INCLUDE)\winexebase.h
 
 clean:
         $(RM) *.obj *.lib *.dll *.map *.pch *.exe
         $(RM) $(PDWIN32_BIN)\$(TARGET).exe
-	$(RM) $(PDWIN32_BIN)\$(TARGETDLL).dll
-	$(RM) $(PDWIN32_LIB)\$(TARGETDLL).lib
