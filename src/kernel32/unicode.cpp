@@ -1,4 +1,4 @@
-/* $Id: unicode.cpp,v 1.13 1999-08-19 10:25:27 sandervl Exp $ */
+/* $Id: unicode.cpp,v 1.14 1999-09-13 09:06:05 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -55,11 +55,12 @@ int WIN32API MultiByteToWideChar(UINT uCodePage, DWORD dwFlags, LPCSTR lpMultiBy
         return(FALSE);
   }
   if(cchWideChar == 0) {//return space required for conversion
-        if(cchMultiByte == -1)  cchMultiByte = strlen(lpMultiByteStr);
+        if(cchMultiByte == -1)
+            cchMultiByte = strlen(lpMultiByteStr) + 1;
         return(cchMultiByte);   //return length in wide chars
   }
   if(cchMultiByte == -1)
-        cchMultiByte = strlen(lpMultiByteStr);
+        cchMultiByte = strlen(lpMultiByteStr) + 1;
 
   len = min(cchWideChar, cchMultiByte);
   for(i=0;i<=len;i++) { //including 0 terminator
