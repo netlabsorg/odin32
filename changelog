@@ -1,4 +1,14 @@
-/* $Id: changelog,v 1.1923 2001-12-23 16:41:39 sandervl Exp $ */
+/* $Id: changelog,v 1.1924 2001-12-26 11:31:39 sandervl Exp $ */
+
+ 2001-12-27: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Use Wine version of DrawText(Ex)A/W
+                  (fixes underscore painting & positioning of text)
+                o (Auto)Check, (Auto)Radio & (Auto)3State buttons send 
+                  WM_CTLCOLORSTATIC instead of WM_CTLCOLORBTN (verified in NT4)
+                  (fixes opening dialog buttons in Opera 6 (choose interface))
+                o RedrawWindow change: call UpdateWindow if window has invalid
+                  rectangle and RDW_UPDATENOW flag set
+    - GDI32:    o Removed InternalDrawTextExA/W
 
  2001-12-23: Sander van Leeuwen <sandervl@xs4all.nl>
     - WINMM:    o DisableWaveAudio function added to disable wave audio (custom build)
