@@ -1,4 +1,4 @@
-/* $Id: char.cpp,v 1.3 1999-06-10 16:50:38 phaller Exp $ */
+/* $Id: char.cpp,v 1.4 1999-06-11 08:56:37 phaller Exp $ */
 
 /*
  * Win32 character API functions for OS/2
@@ -11,7 +11,10 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+
 #include "user32.h"
+
+#include <wctype.h> /* towupper, towlower support */
 
 
 //******************************************************************************
@@ -30,37 +33,66 @@ DWORD WIN32API CharLowerBuffA( LPSTR arg1, DWORD  arg2)
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API CharLowerBuffW( LPWSTR arg1, DWORD  arg2)
+DWORD WIN32API CharLowerBuffW(LPWSTR x,DWORD buflen)
 {
-    dprintf(("USER32:  OS2CharLowerBuffW DOESN'T WORK\n"));
-    // NOTE: This will not work as is (needs UNICODE support)
-    return 0;
-//    return O32_CharLowerBuff(arg1, arg2);
+  DWORD done=0;
+
+  dprintf(("USER32: CharLowerBuffW(%08xh,%08xh)\n",
+           x,
+           buflen));
+
+  if (!x)
+    return 0; /* YES */
+
+  while (*x && (buflen--))
+  {
+    *x=towlower(*x);
+    x++;
+    done++;
+  }
+
+  return done;
 }
 //******************************************************************************
 //******************************************************************************
-LPWSTR WIN32API CharLowerW( LPWSTR arg1)
+LPWSTR WIN32API CharLowerW( LPWSTR x)
 {
-    dprintf(("USER32:  OS2CharLowerW DOESN'T WORK\n"));
-    // NOTE: This will not work as is (needs UNICODE support)
-    return NULL;
-//    return O32_CharLower(arg1);
+  dprintf(("USER32: CharLowerW(%08xh)\n",
+           x));
+
+  if (HIWORD(x))
+  {
+      LPWSTR s = x;
+      while (*s)
+      {
+          *s=towlower(*s);
+          s++;
+      }
+      return x;
+  }
+  else
+    return (LPWSTR)((UINT)towlower(LOWORD(x)));
 }
 //******************************************************************************
 //******************************************************************************
 LPSTR WIN32API CharNextA( LPCSTR arg1)
 {
-    dprintf(("USER32:  OS2CharNextA\n"));
+    dprintf(("USER32: OS2CharNextA(%08xh)\n",
+             arg1));
+
     return O32_CharNext(arg1);
 }
 //******************************************************************************
 //******************************************************************************
-LPWSTR WIN32API CharNextW( LPCWSTR arg1)
+LPWSTR WIN32API CharNextW(LPCWSTR x)
 {
-    dprintf(("USER32:  OS2CharNextW DOESN'T WORK\n"));
-    // NOTE: This will not work as is (needs UNICODE support)
-    return 0;
-//    return O32_CharNext(arg1);
+  dprintf(("USER32: OS2CharNextW(%08xh)\n",
+           x));
+
+  if (*x)
+    return (LPWSTR)(x+1);
+  else
+    return (LPWSTR)x;
 }
 //******************************************************************************
 //******************************************************************************
@@ -71,12 +103,18 @@ LPSTR WIN32API CharPrevA( LPCSTR arg1, LPCSTR  arg2)
 }
 //******************************************************************************
 //******************************************************************************
-LPWSTR WIN32API CharPrevW( LPCWSTR arg1, LPCWSTR  arg2)
+LPWSTR WIN32API CharPrevW(LPCWSTR x,
+                          LPCWSTR start)
 {
-    dprintf(("USER32:  OS2CharPrevW DOESN'T WORK\n"));
-    // NOTE: This will not work as is (needs UNICODE support)
-    return 0;
- //   return O32_CharPrev(arg1, arg2);
+    dprintf(("USER32: OS2CharPrevW(%08xh,%08xh)\n",
+             x,
+             start));
+
+  /* FIXME: add DBCS / codepage stuff */
+  if (x>start)
+    return (LPWSTR)(x-1);
+  else
+    return (LPWSTR)x;
 }
 //******************************************************************************
 //******************************************************************************
@@ -117,19 +155,19 @@ LPSTR WIN32API CharUpperA( LPSTR arg1)
  LPSTR rc;
 
     if((int)arg1 >> 16 != 0) {
-     	 dprintf(("USER32:  OS2CharUpperA %s\n", arg1));
+       dprintf(("USER32:  OS2CharUpperA %s\n", arg1));
     }
     else {
-	dprintf(("USER32:  OS2CharUpperA %X\n", arg1));
+   dprintf(("USER32:  OS2CharUpperA %X\n", arg1));
     }
 
     rc = O32_CharUpper(arg1);
 
     if((int)rc >> 16 != 0) {
-     	 dprintf(("USER32:  OS2CharUpperA %s\n", rc));
+       dprintf(("USER32:  OS2CharUpperA %s\n", rc));
     }
     else {
-	 dprintf(("USER32:  OS2CharUpperA %X\n", rc));
+    dprintf(("USER32:  OS2CharUpperA %X\n", rc));
     }
 
     return(rc);
@@ -143,21 +181,46 @@ DWORD WIN32API CharUpperBuffA( LPSTR arg1, DWORD  arg2)
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API CharUpperBuffW( LPWSTR arg1, DWORD  arg2)
+DWORD WIN32API CharUpperBuffW(LPWSTR x, DWORD buflen)
 {
-    dprintf(("USER32:  OS2CharUpperBuffW DOESN'T WORK\n"));
-    // NOTE: This will not work as is (needs UNICODE support)
-    return 0;
-//    return O32_CharUpperBuff(arg1, arg2);
+  DWORD done=0;
+
+  dprintf(("USER32: OS2CharUpperBuffW(%08xh,%08xh)\n",
+           x,
+           buflen));
+
+  if (!x)
+    return 0; /* YES */
+
+  while (*x && (buflen--))
+  {
+    *x=towupper(*x);
+    x++;
+    done++;
+  }
+
+  return done;
 }
 //******************************************************************************
 //******************************************************************************
-LPWSTR WIN32API CharUpperW( LPWSTR arg1)
+LPWSTR WIN32API CharUpperW( LPWSTR x)
 {
-    dprintf(("USER32:  OS2CharUpperW  DOESN'T WORK\n"));
-    // NOTE: This will not work as is (needs UNICODE support)
-    return 0;
-//    return O32_CharUpper(arg1);
+  dprintf(("USER32: OS2CharUpperW(%08xh)\n",
+           x));
+
+  if (HIWORD(x))
+  {
+    LPWSTR s = x;
+
+    while (*s)
+    {
+      *s=towupper(*s);
+      s++;
+    }
+    return x;
+  }
+  else
+    return (LPWSTR)((UINT)towupper(LOWORD(x)));
 }
 //******************************************************************************
 //******************************************************************************
