@@ -1,4 +1,4 @@
-# $Id: setup.os2debvac365.mk,v 1.1.2.2 2002-03-10 05:31:18 bird Exp $
+# $Id: setup.os2debvac365.mk,v 1.1.2.3 2002-04-01 13:57:18 bird Exp $
 
 # ---OS2, DEBUG, VAC365-------------------------
 ENV_NAME="OS/2, Debug, IBM VisualAge for C++ 3.6.5"
@@ -62,13 +62,14 @@ CXX_PC_2_STDOUT=/Pd+ /P+
 
 IMPLIB_FLAGS=/NOI /Nologo
 
-LINK_FLAGS=/nologo /de /map /NOE /NOD /Optfunc /PACKCODE /PACKDATA
+LINK_FLAGS=/nofree /nologo /de /map /NOE /NOD /Optfunc /PACKCODE /PACKDATA
 LINK_FLAGS_EXE=$(LINK_FLAGS) /EXECutable /STACK:$(TARGET_STACKSIZE)
 LINK_FLAGS_DLL=$(LINK_FLAGS) /DLL
 LINK_FLAGS_SYS=$(LINK_FLAGS) /PDD /Align:16 /NOIgnorecase
 LINK_CMD_EXE=$(LINK) $(LINK_FLAGS_EXE) @$(TARGET_LNK)
 LINK_CMD_DLL=$(LINK) $(LINK_FLAGS_DLL) @$(TARGET_LNK)
 LINK_CMD_SYS=$(LINK) $(LINK_FLAGS_SYS) @$(TARGET_LNK)
+!if 0 # nofree works better for me (kso) when working with my drivers...
 LINK_LNK1=$(TARGET_OBJS: =^
 )
 LINK_LNK2=/OUT:$(TARGET)
@@ -76,6 +77,15 @@ LINK_LNK3=/MAP:$(TARGET_MAP)
 LINK_LNK4=$(TARGET_LIBS: =^
 )
 LINK_LNK5=$(TARGET_DEF)
+!else
+LINK_LNK1=$(TARGET_OBJS: =+^
+),
+LINK_LNK2=$(TARGET),
+LINK_LNK3=$(TARGET_MAP),
+LINK_LNK4=$(TARGET_LIBS: =+^
+),
+LINK_LNK5=$(TARGET_DEF)
+!endif
 
 RC_FLAGS=-r -n -i $(PATH_INCLUDE:;= -i ) $(RC_DEFINES) $(RC_INCLUDES)
 RL_FLAGS=-x2 -n
