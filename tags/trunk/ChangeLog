@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.1165 2000-10-03 17:30:19 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1166 2000-10-03 17:43:11 sandervl Exp $ */
 
  2000-10-03: Sander van Leeuwen <sandervl@xs4all.nl>
     - Include\uniconv.h
@@ -12,6 +12,7 @@
                 dlls (pe loader). Didn't fail properly before.
     - USER32:   Fix for EDIT_WM_Char (couldn't type in numbers anymore)
                 EnumDisplaySettingsA accepts negative indices
+    - ADVAPI32: Cleanup
 
  2000-10-03: Michal Necasek <mike@mendelu.cz>
     - KERNEL32: Fix for HMGetFileType. Must return FILE_TYPE_CHAR for standard
