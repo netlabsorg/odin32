@@ -1,4 +1,4 @@
-/* $Id: winconst.h,v 1.38 2000-12-07 11:58:59 sandervl Exp $ */
+/* $Id: winconst.h,v 1.39 2001-02-17 19:55:39 sandervl Exp $ */
 
 /*
  * Win32 constants
@@ -1460,3 +1460,12 @@
 /* Win32 additions */
 #define DRIVE_CDROM_W                5
 #define DRIVE_RAMDISK_W              6
+
+
+/* GetWindow() constants */
+#define GW_HWNDFIRST_W    0
+#define GW_HWNDLAST_W     1
+#define GW_HWNDNEXT_W     2
+#define GW_HWNDPREV_W     3
+#define GW_OWNER_W        4
+#define GW_CHILD_W        5
