@@ -1,15 +1,15 @@
-//***************************************************************************
-//*                                                                         *
-//*  ASPI Router Library                                                    *
-//*  for Odin WNASPI32.DLL                                                  *
-//*                                                                         *
-//*  This is a sample library which shows how to send SRB's to the          *
-//*  ASPI Router device driver. USE AT YOUR OWN RISK!!                      *
-//*                                                                         *
-//*  Copyright (C) 1997 Daniel Dorau                                        *
-//*  Copyright (C) 2000 Przemyslaw Dobrowolski <dobrawka@asua.org.pl>       *
-//*                                                                         *
-//***************************************************************************
+/* $Id: aspilib.cpp,v 1.3 2000-07-18 17:12:04 bird Exp $ */
+/*
+ *  ASPI Router Library
+ *  for Odin WNASPI32.DLL
+ *
+ *  This is a sample library which shows how to send SRB's to the
+ *  ASPI Router device driver. USE AT YOUR OWN RISK!!
+ *
+ *  Copyright (C) 1997 Daniel Dorau
+ *  Copyright (C) 2000 Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
+ *
+ */
 #define      INCL_DOSFILEMGR
 #define      INCL_DOSDEVICES
 #define      INCL_DOSDEVIOCTL
