@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.68 2002-08-22 14:21:26 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.69 2003-02-17 11:31:42 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -661,9 +661,11 @@ BOOL WIN32API DeleteFileW(LPCWSTR arg1)
 }
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API GetTempFileNameA(LPCSTR arg1, LPCSTR arg2, UINT arg3, LPSTR arg4)
+UINT WIN32API GetTempFileNameA(LPCSTR lpPathName, LPCSTR lpPrefixString, 
+                               UINT uUnique, LPSTR lpTempFileName)
 {
-  return O32_GetTempFileName(arg1, arg2, arg3, arg4);
+    dprintf(("GetTempFileNameA %s %s", lpPathName, lpPrefixString));
+    return O32_GetTempFileName(lpPathName, lpPrefixString, uUnique, lpTempFileName);
 }
 //******************************************************************************
 //******************************************************************************
@@ -676,7 +678,7 @@ UINT WIN32API GetTempFileNameW(LPCWSTR lpPathName, LPCWSTR lpPrefixString,
 
   asciipath   = UnicodeToAsciiString((LPWSTR)lpPathName);
   asciiprefix = UnicodeToAsciiString((LPWSTR)lpPrefixString);
-  rc = O32_GetTempFileName(asciipath, asciiprefix, uUnique, asciitemp);
+  rc = GetTempFileNameA(asciipath, asciiprefix, uUnique, asciitemp);
   if(rc)      AsciiToUnicode(asciitemp, lpTempFileName);
   FreeAsciiString(asciiprefix);
   FreeAsciiString(asciipath);
@@ -892,9 +894,9 @@ DWORD WIN32API GetFullPathNameW(LPCWSTR lpFileName, DWORD nBufferLength,
   rc = GetFullPathNameA(astring, nBufferLength,
                         asciibuffer, &asciipart);
 
-  dprintf(("KERNEL32: GetFullPathNameW %s returns %s\n",
+  dprintf(("KERNEL32: GetFullPathNameW %s returns %s\n%s",
            astring,
-           asciibuffer));
+           asciibuffer, asciipart));
 
   if(rc && asciibuffer)
     AsciiToUnicode(asciibuffer,

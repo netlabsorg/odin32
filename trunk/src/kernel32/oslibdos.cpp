@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.114 2003-01-20 10:46:27 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.115 2003-02-17 11:31:43 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -2218,7 +2218,7 @@ DWORD OSLibDosFindFirst(LPCSTR lpFileName,WIN32_FIND_DATAA* lpFindFileData)
     DosFindClose(hDir);
    
     //Windows returns ERROR_FILE_NOT_FOUND if the file/directory is not present
-    if(rc == ERROR_NO_MORE_FILES) {
+    if(rc == ERROR_NO_MORE_FILES || rc == ERROR_PATH_NOT_FOUND) {
          SetLastError(ERROR_FILE_NOT_FOUND_W); 
     } 
     else SetLastError(error2WinError(rc));
@@ -2339,6 +2339,10 @@ DWORD OSLibGetFileAttributes(LPSTR lpFileName)
    char        lOemFileName[CCHMAXPATH];
    char       *lpszBackslash, *lpszColon;
    APIRET      rc;
+
+//testestest
+   if(strlen(lpFileName) > CCHMAXPATH) DebugInt3();
+//testestset
 
    //Convert file name from Windows to OS/2 codepage
    CharToOemA(lpFileName, lOemFileName);
