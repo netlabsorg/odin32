@@ -1,4 +1,4 @@
-/* $Id: winconst.h,v 1.16 1999-12-17 16:55:13 sandervl Exp $ */
+/* $Id: winconst.h,v 1.17 1999-12-24 18:38:19 sandervl Exp $ */
 
 /*
  * Win32 constants
@@ -303,3 +303,83 @@
 #define UNLOAD_DLL_DEBUG_EVENT      7
 #define OUTPUT_DEBUG_STRING_EVENT   8
 #define RIP_EVENT                   9
+
+/* WM_ACTIVATE wParam values */
+#define WA_INACTIVE_W             0
+#define WA_ACTIVE_W               1
+#define WA_CLICKACTIVE_W          2
+
+
+/* WM_NCHITTEST return codes */
+#define HTERROR_W             (-2)
+#define HTTRANSPARENT_W       (-1)
+#define HTNOWHERE_W           0
+#define HTCLIENT_W            1
+#define HTCAPTION_W           2
+#define HTSYSMENU_W           3
+#define HTSIZE_W              4
+#define HTMENU_W              5
+#define HTHSCROLL_W           6
+#define HTVSCROLL_W           7
+#define HTMINBUTTON_W         8
+#define HTMAXBUTTON_W         9
+#define HTLEFT_W              10
+#define HTRIGHT_W             11
+#define HTTOP_W               12
+#define HTTOPLEFT_W           13
+#define HTTOPRIGHT_W          14
+#define HTBOTTOM_W            15
+#define HTBOTTOMLEFT_W        16
+#define HTBOTTOMRIGHT_W       17
+#define HTBORDER_W            18
+#define HTGROWBOX_W           HTSIZE_W
+#define HTREDUCE_W            HTMINBUTTON_W
+#define HTZOOM_W              HTMAXBUTTON_W
+#define HTOBJECT_W            19
+#define HTCLOSE_W             20
+#define HTHELP_W              21
+#define HTSIZEFIRST_W         HTLEFT_W
+#define HTSIZELAST_W          HTBOTTOMRIGHT_W
+
+
+//class styles
+#define CS_VREDRAW_W          0x0001
+#define CS_HREDRAW_W          0x0002
+#define CS_KEYCVTWINDOW_W     0x0004
+#define CS_DBLCLKS_W          0x0008
+#define CS_OWNDC_W            0x0020
+#define CS_CLASSDC_W          0x0040
+#define CS_PARENTDC_W         0x0080
+#define CS_NOKEYCVT_W         0x0100
+#define CS_NOCLOSE_W          0x0200
+#define CS_SAVEBITS_W         0x0800
+#define CS_BYTEALIGNCLIENT_W  0x1000
+#define CS_BYTEALIGNWINDOW_W  0x2000
+#define CS_GLOBALCLASS_W      0x4000
+
+
+/* Offsets for GetClassLong() and GetClassWord() */
+#define GCL_MENUNAME_W        (-8)
+#define GCW_HBRBACKGROUND_W   (-10)
+#define GCL_HBRBACKGROUND_W   GCW_HBRBACKGROUND_W
+#define GCW_HCURSOR_W         (-12)
+#define GCL_HCURSOR_W         GCW_HCURSOR_W
+#define GCW_HICON_W           (-14)
+#define GCL_HICON_W           GCW_HICON_W
+#define GCW_HMODULE_W         (-16)
+#define GCL_HMODULE_W         GCW_HMODULE_W
+#define GCW_CBWNDEXTRA_W      (-18)
+#define GCL_CBWNDEXTRA_W      GCW_CBWNDEXTRA_W
+#define GCW_CBCLSEXTRA_W      (-20)
+#define GCL_CBCLSEXTRA_W      GCW_CBCLSEXTRA_W
+#define GCL_WNDPROC_W         (-24)
+#define GCW_STYLE_W           (-26)
+#define GCL_STYLE_W           GCW_STYLE_W
+#define GCW_ATOM_W            (-32)
+#define GCW_HICONSM_W         (-34)
+#define GCL_HICONSM_W         GCW_HICONSM_W
+
+/* PeekMessage() options */
+#define PM_NOREMOVE_W     0x0000
+#define PM_REMOVE_W       0x0001
+#define PM_NOYIELD_W      0x0002
