@@ -1,4 +1,4 @@
-/* $Id: osliblvm.cpp,v 1.4 2002-09-27 14:35:56 sandervl Exp $ */
+/* $Id: osliblvm.cpp,v 1.5 2003-01-20 10:46:27 sandervl Exp $ */
 
 /*
  * OS/2 LVM (Logical Volume Management) functions
@@ -51,11 +51,73 @@ static void (* SYSTEM pfnWrite_Sectors) ( CARDINAL32          Drive_Number,
 static HMODULE hModLVM    = 0;
 static BOOL    fLVMOpened = FALSE;
 
+static void Close_LVM_Engine ( void );
+
+//******************************************************************************
+//******************************************************************************
+static BOOL OSLibLVMInit()
+{
+    APIRET rc;
+    CHAR   szModuleFailure[CCHMAXPATH];
+
+    rc = DosLoadModule(szModuleFailure, sizeof(szModuleFailure), "LVM.DLL", (HMODULE *)&hModLVM);
+    if(rc) {
+        return FALSE;
+    }
+    rc = DosQueryProcAddr(hModLVM, 0, "Open_LVM_Engine", (PFN *)&pfnOpen_LVM_Engine);
+    if(rc) goto fail;
+    rc = DosQueryProcAddr(hModLVM, 0, "Close_LVM_Engine", (PFN *)&pfnClose_LVM_Engine);
+    if(rc) goto fail;
+    rc = DosQueryProcAddr(hModLVM, 0, "Get_Drive_Control_Data", (PFN *)&pfnGet_Drive_Control_Data);
+    if(rc) goto fail;
+    rc = DosQueryProcAddr(hModLVM, 0, "Get_Drive_Status", (PFN *)&pfnGet_Drive_Status);
+    if(rc) goto fail;
+    rc = DosQueryProcAddr(hModLVM, 0, "Get_Partitions", (PFN *)&pfnGet_Partitions);
+    if(rc) goto fail;
+    rc = DosQueryProcAddr(hModLVM, 0, "Get_Partition_Handle", (PFN *)&pfnGet_Partition_Handle);
+    if(rc) goto fail;
+    rc = DosQueryProcAddr(hModLVM, 0, "Get_Partition_Information", (PFN *)&pfnGet_Partition_Information);
+    if(rc) goto fail;
+    rc = DosQueryProcAddr(hModLVM, 0, "Get_Volume_Control_Data", (PFN *)&pfnGet_Volume_Control_Data);
+    if(rc) goto fail;
+    rc = DosQueryProcAddr(hModLVM, 0, "Get_Volume_Information", (PFN *)&pfnGet_Volume_Information);
+    if(rc) goto fail;
+    rc = DosQueryProcAddr(hModLVM, 0, "Free_Engine_Memory", (PFN *)&pfnFree_Engine_Memory);
+    if(rc) goto fail;
+    rc = DosQueryProcAddr(hModLVM, 0, "Read_Sectors", (PFN *)&pfnRead_Sectors);
+    if(rc) goto fail;
+    rc = DosQueryProcAddr(hModLVM, 0, "Write_Sectors", (PFN *)&pfnWrite_Sectors);
+    if(rc) goto fail;
+    
+    return TRUE;
+
+fail:
+    if(hModLVM) {
+        DosFreeModule(hModLVM);
+        hModLVM = 0;
+    }
+    return FALSE;
+}
+//******************************************************************************
+//******************************************************************************
+void OSLibLVMExit()
+{
+    if(fLVMOpened) {
+        Close_LVM_Engine();
+    }
+    if(hModLVM) {
+        DosFreeModule(hModLVM);
+        hModLVM = 0;
+    }
+}
 //******************************************************************************
 //******************************************************************************
 static void Open_LVM_Engine( BOOLEAN Ignore_CHS, CARDINAL32 * Error_Code )
 {
     USHORT               sel;
+
+    //Load LVM dll
+    OSLibLVMInit();
 
     sel = RestoreOS2FS();
     pfnOpen_LVM_Engine(Ignore_CHS, Error_Code);
@@ -197,63 +259,6 @@ static void Write_Sectors ( CARDINAL32          Drive_Number,
     pfnWrite_Sectors(Drive_Number, Starting_Sector, Sectors_To_Write, Buffer, Error);
     SetFS(sel);
     return;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL OSLibLVMInit()
-{
-    APIRET rc;
-    CHAR   szModuleFailure[CCHMAXPATH];
-
-    rc = DosLoadModule(szModuleFailure, sizeof(szModuleFailure), "LVM.DLL", (HMODULE *)&hModLVM);
-    if(rc) {
-        return FALSE;
-    }
-    rc = DosQueryProcAddr(hModLVM, 0, "Open_LVM_Engine", (PFN *)&pfnOpen_LVM_Engine);
-    if(rc) goto fail;
-    rc = DosQueryProcAddr(hModLVM, 0, "Close_LVM_Engine", (PFN *)&pfnClose_LVM_Engine);
-    if(rc) goto fail;
-    rc = DosQueryProcAddr(hModLVM, 0, "Get_Drive_Control_Data", (PFN *)&pfnGet_Drive_Control_Data);
-    if(rc) goto fail;
-    rc = DosQueryProcAddr(hModLVM, 0, "Get_Drive_Status", (PFN *)&pfnGet_Drive_Status);
-    if(rc) goto fail;
-    rc = DosQueryProcAddr(hModLVM, 0, "Get_Partitions", (PFN *)&pfnGet_Partitions);
-    if(rc) goto fail;
-    rc = DosQueryProcAddr(hModLVM, 0, "Get_Partition_Handle", (PFN *)&pfnGet_Partition_Handle);
-    if(rc) goto fail;
-    rc = DosQueryProcAddr(hModLVM, 0, "Get_Partition_Information", (PFN *)&pfnGet_Partition_Information);
-    if(rc) goto fail;
-    rc = DosQueryProcAddr(hModLVM, 0, "Get_Volume_Control_Data", (PFN *)&pfnGet_Volume_Control_Data);
-    if(rc) goto fail;
-    rc = DosQueryProcAddr(hModLVM, 0, "Get_Volume_Information", (PFN *)&pfnGet_Volume_Information);
-    if(rc) goto fail;
-    rc = DosQueryProcAddr(hModLVM, 0, "Free_Engine_Memory", (PFN *)&pfnFree_Engine_Memory);
-    if(rc) goto fail;
-    rc = DosQueryProcAddr(hModLVM, 0, "Read_Sectors", (PFN *)&pfnRead_Sectors);
-    if(rc) goto fail;
-    rc = DosQueryProcAddr(hModLVM, 0, "Write_Sectors", (PFN *)&pfnWrite_Sectors);
-    if(rc) goto fail;
-    
-    return TRUE;
-
-fail:
-    if(hModLVM) {
-        DosFreeModule(hModLVM);
-        hModLVM = 0;
-    }
-    return FALSE;
-}
-//******************************************************************************
-//******************************************************************************
-void OSLibLVMExit()
-{
-    if(fLVMOpened) {
-        Close_LVM_Engine();
-    }
-    if(hModLVM) {
-        DosFreeModule(hModLVM);
-        hModLVM = 0;
-    }
 }
 //******************************************************************************
 //******************************************************************************

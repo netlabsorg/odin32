@@ -1,4 +1,4 @@
-/* $Id: oslibmisc.cpp,v 1.16 2003-01-16 00:44:31 sandervl Exp $ */
+/* $Id: oslibmisc.cpp,v 1.17 2003-01-20 10:46:28 sandervl Exp $ */
 /*
  * Misc OS/2 util. procedures
  *
@@ -279,16 +279,30 @@ ULONG OSLibWinInitialize()
 //******************************************************************************
 ULONG OSLibWinQueryMsgQueue(ULONG hab)
 {
-  ULONG hmq;
+  ULONG  hmq;
+  APIRET rc;
+  PTIB   ptib;
+  PPIB   ppib;
 
-  hmq = (ULONG)WinCreateMsgQueue((HAB)hab, 0);
+  rc = DosGetInfoBlocks(&ptib, &ppib);
+  if(rc != NO_ERROR) {
+      dprintf(("DosGetInfoBlocks failed with rc %d", rc));
+      DebugInt3();
+      return 0;
+  }
+  if(ppib->pib_ultype == 2) {
+      dprintf(("Warning: app type changed back to VIO!!"));
+      ppib->pib_ultype = 3;
+  }
+  hmq = WinQueueFromID(hab, ppib->pib_ulpid, ptib->tib_ptib2->tib2_ultid);
+
   if(!hmq) {
-      PTIB ptib;
-      PPIB ppib;
+      dprintf(("WinQueueFromID %x %x %x proc type %x failed with error %x", hab, ppib->pib_ulpid, ptib->tib_ptib2->tib2_ultid, ppib->pib_ultype, WinGetLastError(hab)));
 
-      DosGetInfoBlocks(&ptib, &ppib);
-
-      hmq = WinQueueFromID(hab, ppib->pib_ulpid, ptib->tib_ptib2->tib2_ultid);
+      hmq = (ULONG)WinCreateMsgQueue((HAB)hab, 0);
+      if(!hmq) {
+          dprintf(("WinCreateMsgQueue failed with error %x", WinGetLastError(hab)));
+      }
   }
   return hmq;
 }
