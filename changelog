@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.1683 2001-09-17 13:31:05 sandervl Exp $ */
+/* $Id: changelog,v 1.1684 2001-09-18 16:59:53 phaller Exp $ */
+
+ 2001-09-17: Patrick Haller <patrick.haller@innotek.de>
+    - WS2_32:   o added stub for WSAIoctl() (Parsec)
+    - WINMM:    o lowered minimum OS/2 timer resolution to 2ms
+                  (for the new CLOCKSCALE feature)
 
  2001-09-17: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Must return AWP_ACTIVATE/AWP_DEACTIVATE flags in
