@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.488 1999-11-30 19:45:26 sandervl Exp $ */
+ /* $Id: changelog,v 1.489 1999-11-30 20:42:39 sandervl Exp $ */
 
  99-11-29: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Ported Wine process apis (not done) (kernel32\process.cpp)
@@ -8,6 +8,7 @@
 
  99-11-29: Jens Wiessner <wiessnej@rfi.de>
 	- CRTDLL: Completed GetMainArgs
+                  Implemented several functions.
     	- MSVCRT: Made some changes and implemented new functions.
                   Now builds msvcrt, msvcrt20 & msvcrt40 dlls.
 
