@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.55 2001-02-02 19:04:02 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.56 2001-02-08 18:17:16 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -658,9 +658,22 @@ BOOL Win32Dialog::createControls(LPCSTR dlgtemplate, HINSTANCE hInst)
 
         dprintf(("Create CONTROL %d", info.id));
 
-        hwndCtrl = ::CreateWindowExW( info.exStyle | WS_EX_NOPARENTNOTIFY,
-                                      (LPCWSTR)info.className,
-                                      (LPCWSTR)info.windowName,
+        char *classNameA = NULL;
+        char *windowNameA = NULL;
+
+        if(HIWORD(info.className)) {
+             classNameA = UnicodeToAsciiString((LPWSTR)info.className);
+        }
+        else classNameA = (char *)info.className;
+
+        if(HIWORD(info.windowName)) {
+             windowNameA = UnicodeToAsciiString((LPWSTR)info.windowName);
+        }
+        else windowNameA = (char *)info.windowName;
+
+        hwndCtrl = ::CreateWindowExA( info.exStyle | WS_EX_NOPARENTNOTIFY,
+                                      classNameA,
+                                      windowNameA,
                                       info.style | WS_CHILD,
                                       MulDiv(info.x, xUnit, 4),
                                       MulDiv(info.y, yUnit, 8),
@@ -668,6 +681,12 @@ BOOL Win32Dialog::createControls(LPCSTR dlgtemplate, HINSTANCE hInst)
                                       MulDiv(info.cy, yUnit, 8),
                                       getWindowHandle(), (HMENU)info.id,
                                       hInst, info.data );
+        if(HIWORD(classNameA)) {
+            FreeAsciiString(classNameA);
+        }
+        if(HIWORD(windowNameA)) {
+            FreeAsciiString(windowNameA);
+        }
 
         if (!hwndCtrl) return FALSE;
 
