@@ -1,7 +1,17 @@
- /* $Id: changelog,v 1.777 2000-03-04 12:51:56 achimha Exp $ */
+ /* $Id: changelog,v 1.778 2000-03-04 19:11:15 bird Exp $ */
+
+ 2000-03-04: knut st. osmundsen <knut.stange.osmundse@pmsc.no>
+        - include\pdwin32.v*.*:
+                *Alternate linker tool, LD2. This is ilink for VAC.
+                 (See src\kernel32\makefile for hints how to use it).
+                *Synced configuration for the two VAC versions.
+
+                 NOTE that NODEBUGINFO and DEBUGALL is handled within these
+                 files. You don't have to test for them to set the correct
+                 compiler and linker flags, this is allready done!
 
  2000-03-04: Sander van Leeuwen <sandervl@xs4all.nl>
-	- WSOCK32: Fixed bug in setsockopt for SO_LINGER (options size wasn't 
+	- WSOCK32: Fixed bug in setsockopt for SO_LINGER (options size wasn't
 	           adjusted)
 
  2000-03-03: Markus Montkowski <mmontkowski@gmx.de>
