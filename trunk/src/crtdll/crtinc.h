@@ -1,4 +1,4 @@
-/* $Id: crtinc.h,v 1.9 1999-11-30 14:16:45 sandervl Exp $ */
+/* $Id: crtinc.h,v 1.10 1999-11-30 20:42:10 sandervl Exp $ */
 
 /* Definitions for the CRTDLL library (CRTDLL.DLL)
  *
@@ -107,6 +107,10 @@
 #define POP_FPU(x) DO_FPU("fstpl",x)
 #endif
 
+#if (__IBMCPP__ > 300)
+#define exception _exception
+#endif
+
 typedef struct
 {
     HANDLE handle;
@@ -128,7 +132,6 @@ struct _complex
 	double	x;	/* Real part */
 	double	y;	/* Imaginary part */
 };
-
 
 #ifndef _DISKFREE_T_DEFINED
 #define _DISKFREE_T_DEFINED
@@ -210,7 +213,7 @@ int 		CDECL CRTDLL__ismbbtrail( unsigned int c );
 int 		CDECL CRTDLL__ismbblead( unsigned int c );
 char * 		CDECL CRTDLL_getenv( const char *name );
 int 		CDECL CRTDLL__isnan( double __x );
-
+void * 		CDECL CRTDLL__get_osfhandle( int fileno );
 
 //
 // Definitions for internal functions
@@ -220,6 +223,23 @@ unsigned int 	_mbbtoupper(unsigned int c);
 unsigned int 	_mbbtolower(unsigned int c);
 size_t 		_mbclen2(const unsigned int s);
 int 		_isinf(double __x);
+void 		*filehnd(int fileno);
+
+
+//
+// Defs for filehnd
+//
+typedef struct _fileno_modes_type
+{
+	HANDLE hFile;
+	int mode;
+	int fd;
+} fileno_modes_type;
+
+fileno_modes_type *fileno_modes = NULL;
+
+int maxfno = 5;
+int minfno = 5;
 
 
 //
