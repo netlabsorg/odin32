@@ -1,4 +1,4 @@
-/* $Id: CCBase.cpp,v 1.6 2000-03-30 15:39:08 cbratschi Exp $ */
+/* $Id: CCBase.cpp,v 1.7 2000-04-12 16:38:58 cbratschi Exp $ */
 /*
  * COMCTL32 Base Functions and Macros for all Controls
  *
@@ -7,6 +7,8 @@
  * parts from WINE code
  */
 
+#include <string.h>
+#include <wcstr.h>
 #include "winbase.h"
 #include "comctl32.h"
 #include "ccbase.h"
@@ -318,4 +320,99 @@ INT lstrcmpAtoW(CHAR* textA,WCHAR* textW)
 
   if (tmp) COMCTL32_Free(tmp);
   return res;
+}
+
+INT lstrcmpAW(WCHAR *textA,BOOL textaunicode,WCHAR *textB,BOOL textbunicode)
+{
+  if (textaunicode)
+  {
+    if (textbunicode)
+    {
+      return lstrcmpW(textA,textB);
+    } else
+    {
+      return lstrcmpAtoW((LPSTR)textB,textA);
+    }
+  } else
+  {
+    if (textbunicode)
+    {
+      return lstrcmpAtoW((LPSTR)textA,textB);
+    } else
+    {
+      return lstrcmpA((LPSTR)textA,(LPSTR)textB);
+    }
+  }
+}
+
+CHAR* lstrstrA(CHAR *text,CHAR *subtext)
+{
+  return strstr(text,subtext);
+}
+
+WCHAR* lstrstrW(WCHAR *text,WCHAR *subtext)
+{
+  return (WCHAR*)wcswcs((const wchar_t*)text,(wchar_t*)subtext);
+}
+
+//NOTE: less information in ASCII subtext
+CHAR* lstrstrAtoW(CHAR *text,WCHAR *subtext)
+{
+  INT len;
+  CHAR *tmp,*res;
+
+  len = lstrlenW(subtext);
+  if (len > 0)
+  {
+    len++;
+    tmp = (CHAR*)COMCTL32_Alloc(len);
+    lstrcpyWtoA(tmp,subtext);
+  } else tmp = NULL;
+
+  res = strstr(text,tmp);
+
+  if (tmp) COMCTL32_Free(tmp);
+  return res;
+}
+
+WCHAR* lstrstrWtoA(WCHAR *text,CHAR *subtext)
+{
+  INT len;
+  WCHAR *tmp,*res;
+
+  len = lstrlenA(subtext);
+  if (len > 0)
+  {
+    len++;
+    tmp = (WCHAR*)COMCTL32_Alloc(len*sizeof(WCHAR));
+    lstrcpyAtoW(tmp,subtext);
+  } else tmp = NULL;
+
+  res = (WCHAR*)wcswcs((const wchar_t*)text,(wchar_t*)tmp);
+
+  if (tmp) COMCTL32_Free(tmp);
+  return res;
+}
+
+WCHAR* lstrstrAW(WCHAR *text,BOOL textunicode,WCHAR *subtext,BOOL subtextunicode)
+{
+  if (textunicode)
+  {
+    if (subtextunicode)
+    {
+      return lstrstrW(text,subtext);
+    } else
+    {
+      return lstrstrWtoA(text,(LPSTR)subtext);
+    }
+  } else
+  {
+    if (subtextunicode)
+    {
+      return (WCHAR*)lstrstrAtoW((LPSTR)text,subtext);
+    } else
+    {
+      return (WCHAR*)lstrstrA((LPSTR)text,(LPSTR)subtext);
+    }
+  }
 }
