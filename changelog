@@ -1,4 +1,9 @@
- /* $Id: changelog,v 1.899 2000-04-16 18:24:20 cbratschi Exp $ */
+ /* $Id: changelog,v 1.900 2000-04-18 11:11:13 sandervl Exp $ */
+
+ 2000-04-18: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32:   Added LR_LOADFROMFILE support for icon & cursor loading
+	- GDI32:    Dib section fixes (use height/width of window when
+                    dc belongs to a window; use correct stretchblit mode)
 
  2000-04-16: Christoph Bratschi <cbratschi@datacomm.ch>
 	- COMCTL32: added new resources: i.e. header cursors
