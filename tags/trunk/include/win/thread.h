@@ -1,4 +1,4 @@
-/* $Id: thread.h,v 1.16 2000-05-12 18:04:12 sandervl Exp $ */
+/* $Id: thread.h,v 1.17 2000-07-08 07:23:09 sandervl Exp $ */
 
 /*
  * Thread definitions
@@ -136,6 +136,7 @@ typedef struct _THDB
     DWORD          pidDebuggee;    // process id of debuggee
     DWORD          logfile;        // last FILE ptr used for logging (for exception handling in vfprintf)
     PROCESSTHREAD_SECURITYINFO threadinfo; //used to store security info for thread tokens
+    DWORD          lcid;           // thread lcid
 #endif
 } THDB;
 
