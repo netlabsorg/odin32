@@ -1,4 +1,4 @@
-/* $Id: kKrnlLib.h,v 1.3 2001-10-19 00:04:45 bird Exp $
+/* $Id: kKrnlLib.h,v 1.4 2001-10-19 01:47:56 bird Exp $
  *
  * Top level header file for kKrnlLib exports.
  *
@@ -57,20 +57,20 @@
 
 
 /*
+ * Avl tree.
+ */
+#ifdef INCL_KKL_AVL
+    #include "kAVL.h"
+#endif
+
+
+/*
  * Logging.
  */
 #ifdef INCL_KKL_LOG
     #include "kKLstdarg.h"
     #include "kLog.h"
     #include "kKLlog.h"
-#endif
-
-
-/*
- * Avl tree.
- */
-#ifdef INCL_KKL_AVL
-    #include "kAVL.h"
 #endif
 
 
