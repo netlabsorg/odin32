@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1531 2001-06-21 16:10:55 bird Exp $ */
+/* $Id: changelog,v 1.1532 2001-06-21 21:07:26 sandervl Exp $ */
+
+ 2001-06-21: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Semaphore updates (still not activated)
 
  2001-06-21: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - DDRAW:    o io_init1, io_init2 and io_exit1 forgot to save/restore EBX.
