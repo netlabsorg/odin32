@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.32 2000-02-05 19:45:14 cbratschi Exp $ */
+/* $Id: button.cpp,v 1.33 2000-02-16 14:34:03 sandervl Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
@@ -19,6 +19,9 @@
 #include "button.h"
 #include <misc.h>
 #include "initterm.h"
+
+#define DBG_LOCALLOG	DBG_button
+#include "dbglocal.h"
 
 #ifdef DEBUG
 char *GetMsgText(int Msg);

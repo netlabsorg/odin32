@@ -1,4 +1,4 @@
-/* $Id: char.cpp,v 1.11 2000-01-18 20:10:31 sandervl Exp $ */
+/* $Id: char.cpp,v 1.12 2000-02-16 14:34:05 sandervl Exp $ */
 
 /*
  * Win32 character API functions for OS/2
@@ -20,6 +20,9 @@
 #include "user32.h"
 
 #include <wctype.h> /* towupper, towlower support */
+
+#define DBG_LOCALLOG	DBG_char
+#include "dbglocal.h"
 
 
 ODINDEBUGCHANNEL(USER32-CHAR)

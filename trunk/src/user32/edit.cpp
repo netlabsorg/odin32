@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.32 2000-02-05 19:45:15 cbratschi Exp $ */
+/* $Id: edit.cpp,v 1.33 2000-02-16 14:34:17 sandervl Exp $ */
 /*
  *      Edit control
  *
@@ -26,6 +26,9 @@
 #include <string.h>
 #include "controls.h"
 #include "combo.h"
+
+#define DBG_LOCALLOG	DBG_edit
+#include "dbglocal.h"
 
 #ifdef DEBUG
 char *GetMsgText(int Msg);

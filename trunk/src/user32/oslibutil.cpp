@@ -1,4 +1,4 @@
-/* $Id: oslibutil.cpp,v 1.4 2000-01-18 20:10:42 sandervl Exp $ */
+/* $Id: oslibutil.cpp,v 1.5 2000-02-16 14:34:28 sandervl Exp $ */
 /*
  * Window API utility functions for OS/2
  *
@@ -13,6 +13,9 @@
 #include <misc.h>
 #include <wprocess.h>
 #include "oslibutil.h"
+
+#define DBG_LOCALLOG	DBG_oslibutil
+#include "dbglocal.h"
 
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: combo.cpp,v 1.25 2000-02-14 17:30:10 cbratschi Exp $ */
+/* $Id: combo.cpp,v 1.26 2000-02-16 14:34:06 sandervl Exp $ */
 /*
  * Combo controls
  *
@@ -29,6 +29,9 @@
 #ifdef DEBUG
 char *GetMsgText(int Msg);
 #endif
+
+#define DBG_LOCALLOG	DBG_combo
+#include "dbglocal.h"
 
   /* bits in the dwKeyData */
 #define KEYDATA_ALT             0x2000

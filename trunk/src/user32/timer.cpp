@@ -1,4 +1,4 @@
-/* $Id: timer.cpp,v 1.10 2000-01-18 20:10:46 sandervl Exp $ */
+/* $Id: timer.cpp,v 1.11 2000-02-16 14:34:36 sandervl Exp $ */
 
 /*
  * timer functions for USER32
@@ -21,6 +21,9 @@
 #include <win32wbase.h>
 #include "oslibutil.h"
 #include "timer.h"
+
+#define DBG_LOCALLOG	DBG_timer
+#include "dbglocal.h"
 
 #ifndef OPEN32API
 #define OPEN32API _System

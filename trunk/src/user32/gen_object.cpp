@@ -1,4 +1,4 @@
-/* $Id: gen_object.cpp,v 1.4 2000-01-18 20:10:36 sandervl Exp $ */
+/* $Id: gen_object.cpp,v 1.5 2000-02-16 14:34:19 sandervl Exp $ */
 /*
  * Generic Object Class for OS/2
  *
@@ -17,6 +17,9 @@
 #include <gen_object.h>
 #include <misc.h>
 #include <vmutex.h>
+
+#define DBG_LOCALLOG	DBG_gen_object
+#include "dbglocal.h"
 
 VMutex genMutex[OBJTYPE_MAX];
 

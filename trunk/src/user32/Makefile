@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.64 2000-02-09 23:47:03 bird Exp $
+# $Id: Makefile,v 1.65 2000-02-16 14:34:03 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -37,7 +37,7 @@ OBJS =  user32.obj loadres.obj \
         combo.obj edit.obj winswitch.obj icontitle.obj clipboard.obj winicon.obj \
         win32wmdiclient.obj oslibutil.obj oslibmsg.obj dib.obj oslibdos.obj \
         win32wmdichild.obj winprop.obj wingdi.obj oslibgdi.obj winaccel.obj \
-        win32wbasepos.obj oslibres.obj dc.obj timer.obj \
+        win32wbasepos.obj oslibres.obj dc.obj timer.obj dbglocal.obj \
         caret.obj resource.obj winproc.obj text.obj oslibmsgtranslate.obj \
         windlgmsg.obj windlg.obj win32wdesktop.obj win32wbasenonclient.obj
 

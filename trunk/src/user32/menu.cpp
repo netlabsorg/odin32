@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.16 2000-02-10 18:49:50 cbratschi Exp $*/
+/* $Id: menu.cpp,v 1.17 2000-02-16 14:34:22 sandervl Exp $*/
 /*
  * Menu functions
  *
@@ -28,6 +28,9 @@
 #include <heapstring.h>
 #include "controls.h"
 #include "menu.h"
+
+#define DBG_LOCALLOG	DBG_menu
+#include "dbglocal.h"
 
 //DEFAULT_DEBUG_CHANNEL(menu)
 

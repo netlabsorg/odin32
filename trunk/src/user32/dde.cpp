@@ -1,4 +1,4 @@
-/* $Id: dde.cpp,v 1.9 2000-01-18 20:10:34 sandervl Exp $ */
+/* $Id: dde.cpp,v 1.10 2000-02-16 14:34:14 sandervl Exp $ */
 
 /*
  * Win32 default window API functions for OS/2
@@ -11,6 +11,9 @@
  */
 #include <os2win.h>
 #include <misc.h>
+#define DBG_LOCALLOG	DBG_dde
+#include "dbglocal.h"
+
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API DdeAbandonTransaction( DWORD arg1, HCONV arg2, DWORD  arg3)

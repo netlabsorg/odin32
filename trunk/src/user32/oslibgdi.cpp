@@ -1,4 +1,4 @@
-/* $Id: oslibgdi.cpp,v 1.9 2000-01-18 20:10:39 sandervl Exp $ */
+/* $Id: oslibgdi.cpp,v 1.10 2000-02-16 14:34:25 sandervl Exp $ */
 /*
  * Window GDI wrapper functions for OS/2
  *
@@ -19,6 +19,9 @@
 #include <oslibgdi.h>
 #include <oslibwin.h>
 #include "win32wbase.h"
+
+#define DBG_LOCALLOG	DBG_oslibgdi
+#include "dbglocal.h"
 
 /*
 First letter is lower case to avoid conflicts with Win32 API names

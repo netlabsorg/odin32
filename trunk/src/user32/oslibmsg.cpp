@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.27 2000-01-27 21:50:01 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.28 2000-02-16 14:34:26 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -31,6 +31,9 @@
 #include <wprocess.h>
 #include "pmwindow.h"
 #include "oslibwin.h"
+
+#define DBG_LOCALLOG	DBG_oslibmsg
+#include "dbglocal.h"
 
 typedef BOOL (EXPENTRY FNTRANS)(MSG *, QMSG *);
 typedef FNTRANS *PFNTRANS;

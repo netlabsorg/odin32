@@ -1,4 +1,4 @@
-/* $Id: loadres.cpp,v 1.22 2000-01-18 20:10:37 sandervl Exp $ */
+/* $Id: loadres.cpp,v 1.23 2000-02-16 14:34:21 sandervl Exp $ */
 
 /*
  * Win32 resource API functions for OS/2
@@ -27,6 +27,9 @@
 #include "dib.h"
 #include "initterm.h"
 #include <win\cursoricon.h>
+
+#define DBG_LOCALLOG	DBG_loadres
+#include "dbglocal.h"
 
 //******************************************************************************
 //******************************************************************************
@@ -357,8 +360,17 @@ HANDLE LoadBitmapA(HINSTANCE hinst, LPCSTR lpszName, int cxDesired, int cyDesire
                     DIB_RGB_COLORS);
         }
         else {
-          hbitmap = CreateDIBitmap( hdc, &fix_info->bmiHeader, CBM_INIT,
-                                      bits, fix_info, DIB_RGB_COLORS );
+//	  if(fix_info->bmiHeader.biBitCount == 1) {
+//          	hbitmap = CreateBitmap(fix_info->bmiHeader.biWidth, 
+//                                       fix_info->bmiHeader.biHeight,
+//                                       fix_info->bmiHeader.biPlanes, 
+//                                       fix_info->bmiHeader.biBitCount, 
+//                                       (PVOID)bits);
+//	  }
+//	  else {
+          	hbitmap = CreateDIBitmap(hdc, &fix_info->bmiHeader, CBM_INIT,
+                                         bits, fix_info, DIB_RGB_COLORS );
+//	  }
         }
         ReleaseDC( 0, hdc );
       }

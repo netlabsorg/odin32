@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.16 2000-01-20 16:48:55 cbratschi Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.17 2000-02-16 14:34:27 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -30,6 +30,9 @@
 #include <wprocess.h>
 #include "pmwindow.h"
 #include "oslibwin.h"
+
+#define DBG_LOCALLOG	DBG_oslibmsgtranslate
+#include "dbglocal.h"
 
 //Used for key translation while processing WM_CHAR message
 USHORT virtualKeyTable [66] = {

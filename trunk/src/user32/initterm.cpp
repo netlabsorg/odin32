@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.20 2000-02-05 02:12:20 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.21 2000-02-16 14:34:20 sandervl Exp $ */
 
 /*
  * USER32 DLL entry point
@@ -43,6 +43,9 @@
 #include "initterm.h"
 #include <exitlist.h>
 
+#define DBG_LOCALLOG	DBG_initterm
+#include "dbglocal.h"
+
 /*-------------------------------------------------------------------*/
 /* A clean up routine registered with DosExitList must be used if    */
 /* runtime calls are required and the runtime is dynamically linked. */
@@ -84,6 +87,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
    switch (ulFlag) {
       case 0 :
          _ctordtorInit();
+         ParseLogStatus();
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 

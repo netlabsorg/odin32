@@ -1,4 +1,4 @@
-/* $Id: oslibres.cpp,v 1.8 2000-01-18 20:10:41 sandervl Exp $ */
+/* $Id: oslibres.cpp,v 1.9 2000-02-16 14:34:28 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -24,6 +24,8 @@
 #include "oslibgdi.h"
 #include "pmwindow.h"
 
+#define DBG_LOCALLOG	DBG_oslibres
+#include "dbglocal.h"
 
 //******************************************************************************
 //******************************************************************************
