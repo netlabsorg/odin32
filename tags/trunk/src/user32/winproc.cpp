@@ -1,4 +1,4 @@
-/* $Id: winproc.cpp,v 1.4 2000-02-16 14:28:28 sandervl Exp $ */
+/* $Id: winproc.cpp,v 1.5 2000-09-04 18:23:58 sandervl Exp $ */
 /*
  * Window procedure callbacks
  *
@@ -60,11 +60,12 @@ static WINDOWPROC *WINPROC_GetPtr( WNDPROC handle )
     BYTE *ptr;
     WINDOWPROC *proc;
 
+    ptr = (BYTE *)handle;
     if(ptr == NULL) {
+	DebugInt3();
         return NULL;
     }
 
-    ptr = (BYTE *)handle;
     /* First check if it is the jmp address */
 //    if (*ptr == 0xe9 /* jmp */) ptr -= (int)&((WINDOWPROC *)0)->jmp -
 //                                       (int)&((WINDOWPROC *)0)->thunk;
@@ -130,10 +131,16 @@ WNDPROC WINPROC_GetProc( HWINDOWPROC proc, WINDOWPROCTYPE type )
 {
  WINDOWPROC *lpProc = (WINDOWPROC *)proc;
 
-    if (!lpProc) return NULL;
+    if(!lpProc) {
+	DebugInt3();
+	return NULL;
+    }
 
-    /* We want a 32-bit address */
-    return (WNDPROC)&lpProc->jmp;
+    if(type != lpProc->type) {
+    	 /* Have to return the jmp address if types don't match */
+         return (WNDPROC)&lpProc->jmp;
+    }
+    else return WINPROC_THUNKPROC(lpProc); //return original window proc address if types match
 }
 
 
