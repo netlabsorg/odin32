@@ -1,4 +1,4 @@
-/* $Id: kobjects.cpp,v 1.3 1999-08-25 14:27:07 sandervl Exp $ */
+/* $Id: kobjects.cpp,v 1.4 1999-08-31 21:03:26 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -366,6 +366,16 @@ BOOL WIN32API DuplicateHandle(HANDLE  srcprocess,
                          arg5,
                          arg6,
                          arg7);
+  //@@@PH: (temporary) fix for non-HandleManager handles
+  if (rc == FALSE)
+    rc = O32_DuplicateHandle(srcprocess,
+                             srchandle,
+                             destprocess,
+                             desthandle,
+                             arg5,
+                             arg6,
+                             arg7);
+
   return(rc);
 }
 
