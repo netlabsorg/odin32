@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.84 2001-06-03 12:02:25 sandervl Exp $
+# $Id: Makefile,v 1.85 2001-06-09 14:50:15 sandervl Exp $
 
 #
 # Odin32 API
@@ -31,14 +31,10 @@ $(OBJDIR)\dc.obj \
 $(OBJDIR)\dcrgn.obj \
 $(OBJDIR)\dcscroll.obj \
 $(OBJDIR)\user32.obj \
-$(OBJDIR)\loadres.obj \
 $(OBJDIR)\dde.obj \
-$(OBJDIR)\win32wndhandle.obj \
 $(OBJDIR)\wsprintf.obj \
-$(OBJDIR)\winmouse.obj \
-$(OBJDIR)\icon.obj \
-$(OBJDIR)\hook.obj \
 $(OBJDIR)\winkeyboard.obj \
+$(OBJDIR)\winmouse.obj \
 $(OBJDIR)\defwndproc.obj \
 $(OBJDIR)\syscolor.obj \
 $(OBJDIR)\char.obj \
@@ -49,18 +45,31 @@ $(OBJDIR)\spy.obj \
 $(OBJDIR)\wndmsg.obj \
 $(OBJDIR)\display.obj \
 $(OBJDIR)\pmwindow.obj \
-$(OBJDIR)\win32class.obj \
-$(OBJDIR)\win32wnd.obj \
-$(OBJDIR)\win32dlg.obj \
+$(OBJDIR)\oslibmsgtranslate.obj \
 $(OBJDIR)\msgbox.obj \
 $(OBJDIR)\window.obj \
-$(OBJDIR)\windowmsg.obj \
-$(OBJDIR)\windowclass.obj \
-$(OBJDIR)\win32wbase.obj \
-$(OBJDIR)\windowword.obj \
 $(OBJDIR)\gen_object.obj \
-$(OBJDIR)\oslibwin.obj \
 $(OBJDIR)\win32wndchild.obj \
+$(OBJDIR)\win32wbase.obj \
+$(OBJDIR)\win32wbasenonclient.obj \
+$(OBJDIR)\win32wnd.obj \
+$(OBJDIR)\win32wbasepos.obj \
+$(OBJDIR)\win32wbaseprop.obj \
+$(OBJDIR)\win32wndhandle.obj \
+$(OBJDIR)\windowword.obj \
+$(OBJDIR)\windowmsg.obj \
+$(OBJDIR)\winproc.obj \
+$(OBJDIR)\oslibmsg.obj \
+$(OBJDIR)\hook.obj \
+$(OBJDIR)\win32wmdichild.obj \
+$(OBJDIR)\win32wmdiclient.obj \
+$(OBJDIR)\win32wdesktop.obj \
+$(OBJDIR)\win32dlg.obj \
+$(OBJDIR)\windlgmsg.obj \
+$(OBJDIR)\windlg.obj \
+$(OBJDIR)\win32class.obj \
+$(OBJDIR)\windowclass.obj \
+$(OBJDIR)\oslibwin.obj \
 $(OBJDIR)\controls.obj \
 $(OBJDIR)\button.obj \
 $(OBJDIR)\static.obj \
@@ -72,28 +81,19 @@ $(OBJDIR)\edit.obj \
 $(OBJDIR)\winswitch.obj \
 $(OBJDIR)\icontitle.obj \
 $(OBJDIR)\clipboard.obj \
-$(OBJDIR)\winicon.obj \
-$(OBJDIR)\win32wmdiclient.obj \
 $(OBJDIR)\oslibutil.obj \
-$(OBJDIR)\oslibmsg.obj \
 $(OBJDIR)\dib.obj \
 $(OBJDIR)\oslibdos.obj \
-$(OBJDIR)\win32wmdichild.obj \
 $(OBJDIR)\oslibgdi.obj \
-$(OBJDIR)\winaccel.obj \
-$(OBJDIR)\win32wbasepos.obj \
-$(OBJDIR)\win32wbaseprop.obj \
 $(OBJDIR)\oslibres.obj \
+$(OBJDIR)\loadres.obj \
+$(OBJDIR)\winaccel.obj \
+$(OBJDIR)\icon.obj \
+$(OBJDIR)\winicon.obj \
 $(OBJDIR)\timer.obj \
 $(OBJDIR)\dbglocal.obj \
 $(OBJDIR)\caret.obj \
-$(OBJDIR)\winproc.obj \
 $(OBJDIR)\text.obj \
-$(OBJDIR)\oslibmsgtranslate.obj \
-$(OBJDIR)\windlgmsg.obj \
-$(OBJDIR)\windlg.obj \
-$(OBJDIR)\win32wdesktop.obj \
-$(OBJDIR)\win32wbasenonclient.obj \
 $(OBJDIR)\oldnls32.obj \
 $(OBJDIR)\user32rsrc.obj
 

@@ -1,4 +1,4 @@
-/* $Id: defwndproc.cpp,v 1.14 2000-09-05 19:20:33 sandervl Exp $ */
+/* $Id: defwndproc.cpp,v 1.15 2001-06-09 14:50:17 sandervl Exp $ */
 
 /*
  * Win32 default window API functions for OS/2
@@ -30,6 +30,7 @@ char *GetMsgText(int Msg);
 LRESULT WIN32API DefWindowProcA(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
   Win32BaseWindow *window;
+  LRESULT result;
 
     dprintf2(("DefWindowProcA %x %x %x %x", hwnd, Msg, wParam, lParam));
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
@@ -37,13 +38,16 @@ LRESULT WIN32API DefWindowProcA(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPara
         dprintf(("DefWindowProcA, window %x not found", hwnd));
         return 0;
     }
-    return window->DefWindowProcA(Msg, wParam, lParam);
+    result = window->DefWindowProcA(Msg, wParam, lParam);
+    RELEASE_WNDOBJ(window);
+    return result;
 }
 //******************************************************************************
 //******************************************************************************
 LRESULT WIN32API DefWindowProcW(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
   Win32BaseWindow *window;
+  LRESULT result;
 
     dprintf2(("DefWindowProcW %x %x %x %x", hwnd, Msg, wParam, lParam));
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
@@ -51,13 +55,16 @@ LRESULT WIN32API DefWindowProcW(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPara
         dprintf(("DefWindowProcW, window %x not found", hwnd));
         return 0;
     }
-    return window->DefWindowProcW(Msg, wParam, lParam);
+    result = window->DefWindowProcW(Msg, wParam, lParam);
+    RELEASE_WNDOBJ(window);
+    return result;
 }
 //******************************************************************************
 //******************************************************************************
 LRESULT WIN32API DefDlgProcA(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
   Win32Dialog *dialog;
+  LRESULT result;
 
     dialog = (Win32Dialog *)Win32BaseWindow::GetWindowFromHandle(hwnd);
 //TODO: Wrong check?
@@ -67,14 +74,17 @@ LRESULT WIN32API DefDlgProcA(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
         return 0;
     }
     if(dialog->IsDialog()) 
-    	 return dialog->DefDlgProcA(Msg, wParam, lParam);
-    else return dialog->DefWindowProcA(Msg, wParam, lParam);
+    	 result = dialog->DefDlgProcA(Msg, wParam, lParam);
+    else result = dialog->DefWindowProcA(Msg, wParam, lParam);
+    RELEASE_WNDOBJ(dialog);
+    return result;
 }
 //******************************************************************************
 //******************************************************************************
 LRESULT WIN32API DefDlgProcW(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
   Win32Dialog *dialog;
+  LRESULT result;
 
     dialog = (Win32Dialog *)Win32BaseWindow::GetWindowFromHandle(hwnd);
 //TODO: Wrong check?
@@ -84,40 +94,49 @@ LRESULT WIN32API DefDlgProcW(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
         return 0;
     }
     if(dialog->IsDialog()) 
-    	 return dialog->DefDlgProcW(Msg, wParam, lParam);
-    else return dialog->DefWindowProcW(Msg, wParam, lParam);
+    	 result = dialog->DefDlgProcW(Msg, wParam, lParam);
+    else result = dialog->DefWindowProcW(Msg, wParam, lParam);
+    RELEASE_WNDOBJ(dialog);
+    return result;
 }
 //******************************************************************************
 //******************************************************************************
 LRESULT WIN32API DefFrameProcA(HWND hwndFrame, HWND hwndMDIClient, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
   Win32Window *window;
+  LRESULT result;
 
     window = (Win32Window *)Win32BaseWindow::GetWindowFromHandle(hwndFrame);
     if(!window) {
         dprintf(("DefFrameProcA, window %x not found", hwndFrame));
         return 0;
     }
-    return window->DefFrameProcA(hwndMDIClient, Msg, wParam, lParam);
+    result = window->DefFrameProcA(hwndMDIClient, Msg, wParam, lParam);
+    RELEASE_WNDOBJ(window);
+    return result;
 }
 //******************************************************************************
 //******************************************************************************
 LRESULT WIN32API DefFrameProcW(HWND hwndFrame, HWND hwndMDIClient, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
   Win32Window *window;
+  LRESULT result;
 
     window = (Win32Window *)Win32BaseWindow::GetWindowFromHandle(hwndFrame);
     if(!window) {
         dprintf(("DefFrameProcW, window %x not found", hwndFrame));
         return 0;
     }
-    return window->DefFrameProcW(hwndMDIClient, Msg, wParam, lParam);
+    result = window->DefFrameProcW(hwndMDIClient, Msg, wParam, lParam);
+    RELEASE_WNDOBJ(window);
+    return result;
 }
 //******************************************************************************
 //******************************************************************************
 LRESULT WIN32API DefMDIChildProcA(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
   Win32MDIChildWindow *window;
+  LRESULT result;
 
     window = (Win32MDIChildWindow *)Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
@@ -126,16 +145,18 @@ LRESULT WIN32API DefMDIChildProcA(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPa
     }
     if(!window->isMDIChild()) {
 	 dprintf(("App called DefMDIChildProcA for non-MDI window %x", hwnd));
- 	 return window->DefWindowProcA(Msg, wParam, lParam);
+ 	 result = window->DefWindowProcA(Msg, wParam, lParam);
     }
-    else return window->DefMDIChildProcA(Msg, wParam, lParam);
-    
+    else result = window->DefMDIChildProcA(Msg, wParam, lParam);
+    RELEASE_WNDOBJ(window);
+    return result;
 }
 //******************************************************************************
 //******************************************************************************
 LRESULT WIN32API DefMDIChildProcW(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
   Win32MDIChildWindow *window;
+  LRESULT result;
 
     window = (Win32MDIChildWindow *)Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
@@ -144,9 +165,11 @@ LRESULT WIN32API DefMDIChildProcW(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPa
     }
     if(!window->isMDIChild()) {
 	 dprintf(("App called DefMDIChildProcA for non-MDI window %x", hwnd));
- 	 return window->DefWindowProcW(Msg, wParam, lParam);
+ 	 result = window->DefWindowProcW(Msg, wParam, lParam);
     }
-    else return window->DefMDIChildProcW(Msg, wParam, lParam);
+    else result = window->DefMDIChildProcW(Msg, wParam, lParam);
+    RELEASE_WNDOBJ(window);
+    return result;
 }
 //******************************************************************************
 //******************************************************************************

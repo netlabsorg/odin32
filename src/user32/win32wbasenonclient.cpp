@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.30 2001-03-30 11:14:36 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.31 2001-06-09 14:50:22 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -24,7 +24,6 @@
 #include <heapstring.h>
 #include <win32wbase.h>
 #include "wndmsg.h"
-#include "pmframe.h"
 #include "oslibwin.h"
 #include "oslibmsg.h"
 #include "oslibutil.h"
@@ -36,6 +35,7 @@
 #include "dc.h"
 #include "win32wdesktop.h"
 #include "controls.h"
+#include "pmwindow.h"
 #include <menu.h>
 
 #define DBG_LOCALLOG    DBG_win32wbasenonclient
@@ -261,23 +261,23 @@ LONG Win32BaseWindow::HandleNCLButtonDown(WPARAM wParam,LPARAM lParam)
   {
     case HTCAPTION:
     {
-      Win32BaseWindow *topparent = GetTopParent();
+      HWND hwndTopParent = GetTopParent();
 
         if((getStyle() & WS_CHILD) && !(getExStyle() & WS_EX_MDICHILD))
         {
-            if (GetActiveWindow() != topparent->getWindowHandle())
+            if (GetActiveWindow() != hwndTopParent)
             {
                 //SvL: Calling topparent->SetActiveWindow() causes focus problems
-                topparent->SetActiveWindow();
+                ::SetActiveWindow(hwndTopParent);
 ////            OSLibWinSetFocus(topparent->getOS2WindowHandle());
             }
-            if (GetActiveWindow() == topparent->getWindowHandle())
+            if (GetActiveWindow() == hwndTopParent)
                  SendInternalMessageA(WM_SYSCOMMAND,SC_MOVE+HTCAPTION,lParam);
-            else dprintf(("ACtive window (%x) != toplevel wnd %x", OSLibWinQueryActiveWindow(), topparent->getWindowHandle()));
+            else dprintf(("ACtive window (%x) != toplevel wnd %x", OSLibWinQueryActiveWindow(), hwndTopParent));
         }
         else {
             SetActiveWindow();
-            if (GetActiveWindow() == topparent->getWindowHandle())
+            if (GetActiveWindow() == hwndTopParent)
                  SendInternalMessageA(WM_SYSCOMMAND,SC_MOVE+HTCAPTION,lParam);
             else dprintf(("ACtive window (%x) != wnd %x", OSLibWinQueryActiveWindow(), getWindowHandle()));
         }

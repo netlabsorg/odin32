@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.108 2001-06-03 12:02:26 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.109 2001-06-09 14:50:16 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -449,7 +449,9 @@ BOOL WIN32API changePageXForm(pDCData pHps, PPOINTL pValue, int x, int y, PPOINT
         wnd = Win32BaseWindow::GetWindowFromOS2Handle(pHps->hwnd);
    }
    else wnd = Win32BaseWindow::GetWindowFromOS2FrameHandle(pHps->hwnd);
-   return changePageXForm(wnd, pHps, pValue, x, y, pPrev);
+   BOOL ret = changePageXForm(wnd, pHps, pValue, x, y, pPrev);
+   if(wnd) RELEASE_WNDOBJ(wnd);
+   return ret;
 }
 //******************************************************************************
 //******************************************************************************
@@ -461,7 +463,9 @@ BOOL WIN32API setPageXForm(pDCData pHps)
         wnd = Win32BaseWindow::GetWindowFromOS2Handle(pHps->hwnd);
    }
    else wnd = Win32BaseWindow::GetWindowFromOS2FrameHandle(pHps->hwnd);
-   return setPageXForm(wnd, pHps);
+   BOOL ret = setPageXForm(wnd, pHps);
+   if(wnd) RELEASE_WNDOBJ(wnd);
+   return ret;
 }
 //******************************************************************************
 //******************************************************************************
@@ -475,6 +479,7 @@ VOID WIN32API removeClientArea(pDCData pHps)
    else wnd = Win32BaseWindow::GetWindowFromOS2FrameHandle(pHps->hwnd);
    if(wnd) {
       removeClientArea(wnd, pHps);
+      RELEASE_WNDOBJ(wnd);
    }
 }
 //******************************************************************************
@@ -489,6 +494,7 @@ VOID WIN32API selectClientArea(pDCData pHps)
    else wnd = Win32BaseWindow::GetWindowFromOS2FrameHandle(pHps->hwnd);
    if(wnd) {
       selectClientArea(wnd, pHps);
+      RELEASE_WNDOBJ(wnd);
    }
 }
 //******************************************************************************
@@ -504,6 +510,7 @@ VOID WIN32API checkOrigin(pDCData pHps)
    if(wnd) {
       if(pHps->isClient)
           selectClientArea(wnd, pHps);
+      RELEASE_WNDOBJ(wnd);
    }
 }
 //******************************************************************************
@@ -520,7 +527,9 @@ LONG WIN32API clientHeight(HWND hwnd, pDCData pHps)
         wnd = Win32BaseWindow::GetWindowFromOS2Handle(pHps->hwnd);
    }
    else wnd = Win32BaseWindow::GetWindowFromOS2FrameHandle(pHps->hwnd);
-   return clientHeight(wnd, hwnd, pHps);
+   LONG ret = clientHeight(wnd, hwnd, pHps);
+   if(wnd) RELEASE_WNDOBJ(wnd);
+   return ret;
 }
 //******************************************************************************
 //******************************************************************************
@@ -532,7 +541,9 @@ int WIN32API setMapMode(pDCData pHps, int mode)
         wnd = Win32BaseWindow::GetWindowFromOS2Handle(pHps->hwnd);
    }
    else wnd = Win32BaseWindow::GetWindowFromOS2FrameHandle(pHps->hwnd);
-   return setMapMode(wnd, pHps, mode);
+   int ret = setMapMode(wnd, pHps, mode);
+   if(wnd) RELEASE_WNDOBJ(wnd);
+   return ret;
 }
 //******************************************************************************
 //******************************************************************************
@@ -672,6 +683,7 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
             if (!pHps)
             {
                 dprintf (("USER32: BeginPaint %x invalid parameter %x", hWnd, lpps));
+                RELEASE_WNDOBJ(wnd);
                 SetLastError(ERROR_INVALID_PARAMETER_W);
                 return (HDC)NULLHANDLE;
             }
@@ -684,6 +696,7 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
         if (!pHps)
         {
             dprintf (("USER32: BeginPaint %x invalid parameter %x", hWnd, lpps));
+            RELEASE_WNDOBJ(wnd);
             SetLastError(ERROR_INVALID_PARAMETER_W);
             return (HDC)NULLHANDLE;
         }
@@ -772,6 +785,7 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
         lpps->rcPaint.bottom = lpps->rcPaint.top = 0;
         lpps->rcPaint.right = lpps->rcPaint.left = 0;
     }
+    RELEASE_WNDOBJ(wnd);
 
     SetLastError(0);
     dprintf(("USER32: BeginPaint %x -> hdc %x (%d,%d)(%d,%d)", hWnd, pHps->hps, lpps->rcPaint.left, lpps->rcPaint.top, lpps->rcPaint.right, lpps->rcPaint.bottom));
@@ -813,6 +827,7 @@ BOOL WIN32API EndPaint (HWND hWnd, const PAINTSTRUCT_W *pPaint)
     WinShowTrackRect(wnd->getOS2WindowHandle(), TRUE);
 
 exit:
+    if(wnd) RELEASE_WNDOBJ(wnd);
     SetLastError(0);
     return TRUE;
 }
@@ -849,6 +864,7 @@ int WIN32API ReleaseDC (HWND hwnd, HDC hdc)
         else {
             dprintf2(("ReleaseDC: CS_OWNDC, not released"));
         }
+        RELEASE_WNDOBJ(wnd);
     }
 
     if(isOwnDC) {
@@ -927,6 +943,8 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
 
             //TODO: intersect/exclude clip region?
             dprintf (("User32: GetDCEx hwnd %x (%x %x) -> wnd %x hdc %x", hwnd, hrgn, flags, wnd, hps));
+
+            RELEASE_WNDOBJ(wnd);
             return (HDC)hps;
         }
         else creatingOwnDC = TRUE;
@@ -1057,6 +1075,8 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
     GpiSetDrawControl (hps, DCTL_DISPLAY, drawingAllowed ? DCTL_ON : DCTL_OFF);
 
     dprintf (("User32: GetDCEx hwnd %x (%x %x) -> hdc %x", hwnd, hrgn, flags, pHps->hps));
+    RELEASE_WNDOBJ(wnd);
+
     return (HDC)pHps->hps;
 
 error:
@@ -1079,6 +1099,7 @@ error:
 
         O32_DeleteObject (pHps->nullBitmapHandle);
     }
+    if(wnd) RELEASE_WNDOBJ(wnd);
     SetLastError(ERROR_INVALID_PARAMETER_W);
     return NULL;
 }
@@ -1322,6 +1343,7 @@ error:
         dprintf(("RedrawWindow failure!"));
         SetLastError(ERROR_INVALID_PARAMETER_W);
     }
+    if(wnd) RELEASE_WNDOBJ(wnd);
     return (success);
 }
 //******************************************************************************
@@ -1357,6 +1379,7 @@ BOOL WIN32API UpdateWindow (HWND hwnd)
 
 //    if(!WinIsWindowShowing(wnd->getOS2FrameWindowHandle()) || !WinIsWindowShowing(wnd->getOS2WindowHandle())) {
 //        dprintf(("UpdateWindow: window not showing %d/%d", WinIsWindowShowing(wnd->getOS2FrameWindowHandle()), WinIsWindowShowing(wnd->getOS2WindowHandle()) ));
+//        RELEASE_WNDOBJ(wnd);
 //        return FALSE;
 //    }
     //Must use frame window here. If the frame window has a valid update region and we call
@@ -1370,6 +1393,7 @@ BOOL WIN32API UpdateWindow (HWND hwnd)
         dprintf (("ERROR: User32: UpdateWindow didn't send WM_PAINT messages!!"));
     }
 #endif
+    RELEASE_WNDOBJ(wnd);
     return rc;
 }
 //******************************************************************************
@@ -1550,6 +1574,7 @@ INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, cons
                                        hrgn, &rectlUpdate, scrollFlagsOS2);
     if (lComplexity == RGN_ERROR)
     {
+        RELEASE_WNDOBJ(window);
         return ERROR_W;
     }
 
@@ -1575,6 +1600,7 @@ INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, cons
                 child = Win32BaseWindow::GetWindowFromHandle(hwndChild);
                 if(!child) {
                     dprintf(("ERROR: ScrollWindowEx, child %x not found", hwnd));
+                    RELEASE_WNDOBJ(window);
                     return 0;
                 }
                 rectChild = *child->getWindowRect();
@@ -1583,7 +1609,8 @@ INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, cons
                      dprintf(("ScrollWindowEx: Scroll child window %x", hwndChild));
                      child->ScrollWindow(dx, orgdy);
                 }
-                hwndChild = GetWindow(hwndChild, GW_HWNDNEXT_W);
+                RELEASE_WNDOBJ(child);
+                hwndChild = GetWindow(hwndChild, GW_HWNDNEXT_W);        
             }
             dprintf(("***ScrollWindowEx: Scroll child windows DONE"));
     }
@@ -1615,6 +1642,7 @@ INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, cons
 //       rc = InvalidateRect (hwnd, &winRectUpdate, (scrollFlag & SW_ERASE_W) ? 1 : 0);
        if (rc == FALSE)
        {
+          RELEASE_WNDOBJ(window);
           return (0);
        }
     }
@@ -1636,19 +1664,13 @@ INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, cons
         break;
     }
 
+    RELEASE_WNDOBJ(window);
     return (regionType);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API ScrollWindow(HWND hwnd, int dx, int dy, const RECT *pScroll, const RECT *pClip)
 {
- Win32BaseWindow *window;
-
-    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
-    if(!window) {
-        dprintf(("ScrollWindow, window %x not found", hwnd));
-        return 0;
-    }
     dprintf(("ScrollWindow %x %d %d %x %x", hwnd, dx, dy, pScroll, pClip));
     return (ERROR_W != ScrollWindowEx(hwnd, dx, dy, pScroll, pClip, 0, NULL,
                                       (pScroll ? 0 : SW_SCROLLCHILDREN_W) |

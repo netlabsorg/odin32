@@ -1,4 +1,4 @@
-/* $Id: win32class.h,v 1.14 2001-02-22 10:37:30 sandervl Exp $ */
+/* $Id: win32class.h,v 1.15 2001-06-09 14:50:20 sandervl Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -11,6 +11,8 @@
 #define __WIN32CLASS_H__
 
 #include <gen_object.h>
+
+#define RELEASE_CLASSOBJ(a)       { a->release(); a = NULL; }
 
 class Win32WndClass : public GenericObject
 {
@@ -56,16 +58,14 @@ public:
 
           void  setMenuName(LPSTR newMenuName);
 
-          void  IncreaseWindowCount()   { cWindows++; };
-          void  DecreaseWindowCount()   { cWindows--; };
-          DWORD GetWindowCount()        { return cWindows; };
-
           BOOL  hasClassName(LPSTR classname, BOOL fUnicode = FALSE);
 
           BOOL  isAppClass(ULONG curProcessId);
 
  static   BOOL  UnregisterClassA(HINSTANCE hinst, LPSTR id);
 
+ //Locates class in linked list and increases reference count (if found)
+ //Class object must be unreferenced after usage
  static Win32WndClass *FindClass(HINSTANCE hinst, LPSTR id);
  static Win32WndClass *FindClass(HINSTANCE hinst, LPWSTR id);
 
@@ -96,10 +96,8 @@ private:
  char          *userClassBytes;
  ULONG          processId;
 
- //nr of windows created with this class
- ULONG          cWindows;
-
  static GenericObject *wndclasses;
+ static CRITICAL_SECTION critsect;
 };
 
 #endif //__WIN32CLASS_H__

@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.132 2001-05-25 19:59:29 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.133 2001-06-09 14:50:19 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -213,6 +213,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         else {//broadcasted message
             rc = (MRESULT)win32wnd->DispatchMsgA(pWinMsg);
         }
+        RELEASE_WNDOBJ(win32wnd);
         RestoreOS2TIB();
         return rc;
     }
@@ -228,6 +229,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         //Processing is done in after WinCreateWindow returns
         dprintf(("OS2: WM_CREATE %x", hwnd));
         win32wnd = (Win32BaseWindow *)teb->o.odin.newWindow;
+        win32wnd->addRef();
         teb->o.odin.newWindow = 0;
         if(win32wnd->MsgCreate(hwnd) == FALSE)
         {
@@ -301,6 +303,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                 //put window at the top of z order
                 WinSetWindowPos( hwnd, HWND_TOP, 0, 0, 0, 0, SWP_ZORDER );
             }
+            if(topwindow) RELEASE_WNDOBJ(topwindow);
 
             win32wnd->setComingToTop(FALSE);
             break;
@@ -318,6 +321,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         //mp2 = top parent if activation required
         dprintf(("USER32: Delayed SetFocus %x %x %x call!", teb->o.odin.hwndFocus, mp1, mp2));
         if(teb->o.odin.hwndFocus) {
+            RELEASE_WNDOBJ(win32wnd);
             win32wnd = Win32BaseWindow::GetWindowFromHandle(teb->o.odin.hwndFocus);
             if(win32wnd) {
                  if(mp2) {
@@ -372,6 +376,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     case WM_BUTTON3UP:
     case WM_BUTTON3DBLCLK:
         if(win32wnd->getWindowHandle() != pWinMsg->hwnd) {
+            RELEASE_WNDOBJ(win32wnd);
             win32wnd = Win32BaseWindow::GetWindowFromHandle(pWinMsg->hwnd);
         }
         if(win32wnd)
@@ -395,6 +400,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     case WM_MOUSEMOVE:
     {
         if(win32wnd->getWindowHandle() != pWinMsg->hwnd) {
+            RELEASE_WNDOBJ(win32wnd);
             win32wnd = Win32BaseWindow::GetWindowFromHandle(pWinMsg->hwnd);
         }
         if(win32wnd)
@@ -524,11 +530,13 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         dprintf2(("OS2: RunDefWndProc hwnd %x msg %x mp1 %x mp2 %x", hwnd, msg, mp1, mp2));
         goto RunDefWndProc;
     }
+    if(win32wnd) RELEASE_WNDOBJ(win32wnd);
     RestoreOS2TIB();
     return (MRESULT)rc;
 
 RunDefWndProc:
 //  dprintf(("OS2: RunDefWndProc msg %x for %x", msg, hwnd));
+    if(win32wnd) RELEASE_WNDOBJ(win32wnd);
     RestoreOS2TIB();
     return WinDefWindowProc( hwnd, msg, mp1, mp2 );
 } /* End of Win32WindowProc */
@@ -621,8 +629,8 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
     case WM_ERASEBACKGROUND:
     {
         dprintf(("PMFRAME:WM_ERASEBACKGROUND %x", win32wnd->getWindowHandle()));
-        RestoreOS2TIB();
-        return (MRESULT)FALSE;
+        rc = (MRESULT)FALSE;
+        break;
     }
 
     //**************************************************************************
@@ -639,6 +647,7 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
     case WM_BUTTON3UP:
     case WM_BUTTON3DBLCLK:
         if(win32wnd->getWindowHandle() != pWinMsg->hwnd) {
+            RELEASE_WNDOBJ(win32wnd);
             win32wnd = Win32BaseWindow::GetWindowFromHandle(pWinMsg->hwnd);
         }
         if(win32wnd)
@@ -662,6 +671,7 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
     case WM_MOUSEMOVE:
     {
         if(win32wnd->getWindowHandle() != pWinMsg->hwnd) {
+            RELEASE_WNDOBJ(win32wnd);
             win32wnd = Win32BaseWindow::GetWindowFromHandle(pWinMsg->hwnd);
         }
         if(win32wnd)
@@ -723,6 +733,7 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
            dprintf2(("SWP_ZORDER: %x %x", pswp->hwndInsertBehind, (wndAfter) ? wndAfter->getWindowHandle() : 0));
            if(wndAfter) {
                 wp.hwndInsertAfter = wndAfter->getWindowHandle();
+                RELEASE_WNDOBJ(wndAfter);
            }
            else wp.hwndInsertAfter = HWND_TOP_W;
         }
@@ -759,11 +770,11 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
             pswp->hwndInsertBehind = hwndAfter;
             pswp->hwnd = hwnd;
 
-            RestoreOS2TIB();
-            return (MRESULT)0xf;
+            rc = (MRESULT)0xf;
+            break;
         }
-        RestoreOS2TIB();
-        return (MRESULT)0;
+        rc = 0;
+        break;
     }
 
     case WM_WINDOWPOSCHANGED:
@@ -834,6 +845,7 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
             dprintf2(("SWP_ZORDER: %x %x", pswp->hwndInsertBehind, (wndAfter) ? wndAfter->getWindowHandle() : 0));
             if(wndAfter) {
                  wp.hwndInsertAfter = wndAfter->getWindowHandle();
+                 RELEASE_WNDOBJ(wndAfter);
             }
             else wp.hwndInsertAfter = HWND_TOP_W;
         }
@@ -958,8 +970,8 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
         }
 
 PosChangedEnd:
-        RestoreOS2TIB();
-        return (MRESULT)FALSE;
+        rc = (MRESULT)FALSE;
+        break;
     }
 
     case WM_CALCVALIDRECTS:
@@ -993,6 +1005,7 @@ PosChangedEnd:
             Win32BaseWindow *wndAfter = Win32BaseWindow::GetWindowFromOS2Handle(pswp->hwndInsertBehind);
             if(wndAfter) {
                  wp.hwndInsertAfter = wndAfter->getWindowHandle();
+                 RELEASE_WNDOBJ(wndAfter);
             }
             else wp.hwndInsertAfter = HWND_TOP_W;
         }
@@ -1045,13 +1058,13 @@ PosChangedEnd:
             newRect->xRight  -= newClientRect.xLeft;
             newRect->yBottom += newClientRect.yBottom;
         }
-        RestoreOS2TIB();
-        return (MRESULT)res;
+        rc = res;
+        break;
     }
 #else
         dprintf(("PMWINDOW: WM_CALCVALIDRECTS %x", win32wnd->getWindowHandle()));
-        RestoreOS2TIB();
-        return (MRESULT)(CVR_ALIGNLEFT | CVR_ALIGNTOP);
+        rc = (MRESULT)(CVR_ALIGNLEFT | CVR_ALIGNTOP);
+        break;
 #endif
 
     case WM_CALCFRAMERECT:
@@ -1075,138 +1088,6 @@ PosChangedEnd:
         dprintf(("PMFRAME:WM_QUERYFOCUSCHAIN %x fsCmd %x parent %x returned %x", win32wnd->getWindowHandle(), SHORT1FROMMP(mp1), mp2, rc));
         break;
 //        goto RunDefFrameWndProc;
-#endif
-
-#if 0
-    //is sent to both windows gaining and loosing the focus
-    case WM_FOCUSCHANGE:
-    {
-     HWND   hwndFocus = (HWND)mp1;
-     HWND   hwndLoseFocus, hwndGainFocus;
-     USHORT usSetFocus = SHORT1FROMMP(mp2);
-     USHORT fsFocusChange = SHORT2FROMMP(mp2);
-
-        rc = 0;
-        dprintf(("PMFRAME:WM_FOCUSCHANGE (start) %x %x %x %x", win32wnd->getWindowHandle(), hwndFocus, usSetFocus, fsFocusChange));
-        if(usSetFocus) {
-            hwndGainFocus = hwnd;
-            hwndLoseFocus = hwndFocus;
-        }
-        else {
-            hwndGainFocus = hwndFocus;
-            hwndLoseFocus = hwnd;
-        }
-
-        if(usSetFocus)
-        {
-          Win32BaseWindow *winfocus = Win32BaseWindow::GetWindowFromOS2Handle(hwndLoseFocus);
-          if(!(fsFocusChange & FC_NOSETACTIVE))
-          {
-            if(!winfocus || (winfocus->GetTopParent() != win32wnd->GetTopParent()))
-            {
-              if(winfocus)
-                WinSendMsg(winfocus->GetTopParent()->getOS2WindowHandle(), WM_ACTIVATE, (MPARAM)0, (MPARAM)hwndGainFocus);
-              else
-                WinSendMsg(hwndLoseFocus, WM_ACTIVATE, (MPARAM)0, (MPARAM)hwndGainFocus);
-            }
-          }
-          //SvL: Check if window is still valid
-          win32wnd = Win32BaseWindow::GetWindowFromOS2Handle(hwnd);
-          if(win32wnd == NULL) {
-            RestoreOS2TIB();
-            return (MRESULT)rc;
-          }
-          if(!(fsFocusChange & FC_NOSETACTIVE))
-          {
-            Win32BaseWindow *topparent = win32wnd->GetTopParent();
-            if(!winfocus || (winfocus->GetTopParent() != topparent))
-            {
-              if(!(fsFocusChange & FC_NOBRINGTOTOP))
-              {
-                if(topparent) {
-                  //put window at the top of z order
-                  WinSetWindowPos(topparent->getOS2WindowHandle(), HWND_TOP, 0, 0, 0, 0, SWP_ZORDER);
-                }
-              }
-
-              // PH 2000/09/01 Netscape 4.7
-              // check if topparent is valid
-              if (topparent)
-                WinSendMsg(topparent->getOS2WindowHandle(), WM_ACTIVATE, (MPARAM)1, (MPARAM)hwndLoseFocus);
-            }
-          }
-          //SvL: Check if window is still valid
-          win32wnd = Win32BaseWindow::GetWindowFromOS2Handle(hwnd);
-          if(win32wnd == NULL) {
-            break;
-          }
-
-      //TODO: Don't send WM_SETSELECTION to child window if frame already has selection
-      if(!(fsFocusChange & FC_NOSETSELECTION)) {
-            WinSendMsg(hwndGainFocus, WM_SETSELECTION, (MPARAM)1, (MPARAM)0);
-      }
-
-      if(!(fsFocusChange & FC_NOSETFOCUS)) {
-            WinSendMsg(hwndGainFocus, WM_SETFOCUS, (MPARAM)hwndLoseFocus, (MPARAM)1);
-      }
-        }
-        else /* no usSetFocus */
-        {
-      if(!(fsFocusChange & FC_NOLOSEFOCUS)) {
-            WinSendMsg(hwndLoseFocus, WM_SETFOCUS, (MPARAM)hwndGainFocus, (MPARAM)0);
-      }
-      //TODO: Don't send WM_SETSELECTION to child window if frame already has selection
-      if(!(fsFocusChange & FC_NOLOSESELECTION)) {
-            WinSendMsg(hwndLoseFocus, WM_SETSELECTION, (MPARAM)0, (MPARAM)0);
-      }
-          //SvL: Check if window is still valid
-          win32wnd = Win32BaseWindow::GetWindowFromOS2Handle(hwnd);
-          if(win32wnd == NULL) {
-            break;
-          }
-
-          Win32BaseWindow *winfocus = Win32BaseWindow::GetWindowFromOS2Handle(hwndGainFocus);
-          if(!(fsFocusChange & FC_NOLOSEACTIVE))
-          {
-            Win32BaseWindow *topparent = win32wnd->GetTopParent();
-
-            if(!winfocus || (winfocus->GetTopParent() != topparent))
-            {
-              // PH 2000/09/01 Netscape 4.7
-              // check if topparent is valid
-              if (topparent)
-                WinSendMsg(topparent->getOS2WindowHandle(), WM_ACTIVATE, (MPARAM)0, (MPARAM)hwndGainFocus);
-            }
-          }
-          //SvL: Check if window is still valid
-          win32wnd = Win32BaseWindow::GetWindowFromOS2Handle(hwnd);
-          if(win32wnd == NULL)
-            break;
-
-          if(!(fsFocusChange & FC_NOSETACTIVE))
-          {
-            if(!winfocus || (winfocus->GetTopParent() != win32wnd->GetTopParent()))
-            {
-              if(winfocus)
-              {
-                // PH 2000/09/01 Netscape 4.7
-                // check if topparent is valid
-                Win32BaseWindow *topparent = winfocus->GetTopParent();
-                if (topparent)
-                  WinSendMsg(topparent->getOS2WindowHandle(), WM_ACTIVATE, (MPARAM)1, (MPARAM)hwndLoseFocus);
-              }
-              else
-                WinSendMsg(hwndGainFocus, WM_ACTIVATE, (MPARAM)1, (MPARAM)hwndLoseFocus);
-            }
-          }
-        }
-
-
-#ifdef DEBUG
-        dprintf(("PMFRAME:WM_FOCUSCHANGE (end) %x %x %x", win32wnd->getWindowHandle(), mp1, mp2));
-#endif
-        break;
-    }
 #endif
 
 #ifdef DEBUG
@@ -1236,9 +1117,14 @@ PosChangedEnd:
             //CB: show owner behind the dialog
             if (win32wnd->IsModalDialog())
             {
-                Win32BaseWindow *topOwner = win32wnd->getOwner()->GetTopParent();
-
-                if (topOwner) WinSetWindowPos(topOwner->getOS2FrameWindowHandle(),hwnd,0,0,0,0,SWP_ZORDER);
+                if(win32wnd->getOwner()) {
+                    Win32BaseWindow *topOwner = Win32BaseWindow::GetWindowFromHandle(win32wnd->getOwner()->GetTopParent());
+ 
+                    if (topOwner) {
+                        WinSetWindowPos(topOwner->getOS2FrameWindowHandle(),hwnd,0,0,0,0,SWP_ZORDER);
+                        RELEASE_WNDOBJ(topOwner);
+                    }
+                }
             }
         }
         else
@@ -1355,13 +1241,16 @@ PosChangedEnd:
         goto RunDefFrameWndProc;
     }
     RestoreOS2TIB();
+    if(win32wnd) RELEASE_WNDOBJ(win32wnd);
     return (MRESULT)rc;
 
 RunDefFrameWndProc:
+    if(win32wnd) RELEASE_WNDOBJ(win32wnd);
     RestoreOS2TIB();
     return pfnFrameWndProc(hwnd, msg, mp1, mp2);
 
 RunDefWndProc:
+    if(win32wnd) RELEASE_WNDOBJ(win32wnd);
     RestoreOS2TIB();
     //calling WinDefWindowProc here breaks Opera hotlist window (WM_ADJUSTWINDOWPOS)
 //    return pfnFrameWndProc(hwnd, msg, mp1, mp2);

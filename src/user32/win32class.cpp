@@ -1,4 +1,4 @@
-/* $Id: win32class.cpp,v 1.24 2001-04-04 09:01:25 sandervl Exp $ */
+/* $Id: win32class.cpp,v 1.25 2001-06-09 14:50:20 sandervl Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -9,6 +9,12 @@
  * TODO: Global atoms of classes with CS_GLOBALCLASS flag are not deleted
  *       Must all be changed if we want to support global app classes
  *       that can be used by other apps. (low priority)
+ *
+ * NOTE: To access a class object, you must call FindClass. This method 
+ *       increases the reference count of the object. When you're done 
+ *       with the object, you MUST call the release method!
+ *       This mechanism prevents premature destruction of objects when there
+ *       are still clients using it.
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -33,7 +39,8 @@ static fDestroyAll = FALSE;
 //******************************************************************************
 //Win32WndClass methods:
 //******************************************************************************
-Win32WndClass::Win32WndClass(WNDCLASSEXA *wndclass, BOOL fUnicode) : GenericObject(&wndclasses, OBJTYPE_CLASS)
+Win32WndClass::Win32WndClass(WNDCLASSEXA *wndclass, BOOL fUnicode) 
+                  : GenericObject(&wndclasses, &critsect)
 {
   isUnicode = fUnicode;
   processId = 0;
@@ -133,7 +140,6 @@ Win32WndClass::Win32WndClass(WNDCLASSEXA *wndclass, BOOL fUnicode) : GenericObje
   }
   else  userClassBytes = NULL;
 
-  cWindows = 0;
   hIconSm  = wndclass->hIconSm;
 }
 //******************************************************************************
@@ -141,12 +147,12 @@ Win32WndClass::Win32WndClass(WNDCLASSEXA *wndclass, BOOL fUnicode) : GenericObje
 Win32WndClass::~Win32WndClass()
 {
   if(classNameA) {
-    dprintf(("Win32WndClass dtor, destroy class %s\n", classNameA));
+      dprintf(("Win32WndClass dtor, destroy class %s\n", classNameA));
   }
 
   //SvL: Don't delete global classes
   if(classNameA && !(windowStyle & CS_GLOBALCLASS)) {
-    GlobalDeleteAtom(classAtom);
+      GlobalDeleteAtom(classAtom);
   }
 
   WINPROC_FreeProc(windowProc, WIN_PROC_CLASS);
@@ -155,9 +161,9 @@ Win32WndClass::~Win32WndClass()
   if(classNameA)        free(classNameA);
   if(classNameW)        free(classNameW);
   if(menuNameA && HIWORD(menuNameA)) {
-        free(menuNameA);
-        assert(menuNameW);
-        free(menuNameW);
+      free(menuNameA);
+      assert(menuNameW);
+      free(menuNameW);
   }
 }
 //******************************************************************************
@@ -186,22 +192,25 @@ BOOL Win32WndClass::hasClassName(LPSTR classname, BOOL fUnicode)
   }
 }
 //******************************************************************************
+//Locates class in linked list and increases reference count (if found)
+//Class object must be unreferenced after usage
 //******************************************************************************
 Win32WndClass *Win32WndClass::FindClass(HINSTANCE hInstance, LPSTR id)
 {
-  enterMutex(OBJTYPE_CLASS);
+  lock(&critsect);
 
   Win32WndClass *wndclass = (Win32WndClass *)wndclasses;
 
   if(wndclass == NULL) {
-        leaveMutex(OBJTYPE_CLASS);
+        unlock(&critsect);
         return(NULL);
   }
 
   if(HIWORD(id) != 0) {
 //CB: read comment below!
         if(lstrcmpiA(wndclass->classNameA, id) == 0 && wndclass->hInstance == hInstance) {
-                leaveMutex(OBJTYPE_CLASS);
+                wndclass->addRef();
+                unlock(&critsect);
                 return(wndclass);
         }
         else {
@@ -213,7 +222,8 @@ Win32WndClass *Win32WndClass::FindClass(HINSTANCE hInstance, LPSTR id)
                                 if(hInstance == NULL || GetModuleHandleA(NULL) == hInstance ||
                                    wndclass->hInstance == hInstance)
                                 {
-                                    leaveMutex(OBJTYPE_CLASS);
+                                    wndclass->addRef();
+                                    unlock(&critsect);
                                     return(wndclass);
                                 }
                         }
@@ -225,25 +235,29 @@ Win32WndClass *Win32WndClass::FindClass(HINSTANCE hInstance, LPSTR id)
 //CB: without HInstance check, test program finds class
 //CB: need more code to compare instance; convert 0 to exe module handle
         if(wndclass->classAtom == (DWORD)id /*&& wndclass->hInstance == hInstance*/) {
-                leaveMutex(OBJTYPE_CLASS);
+                wndclass->addRef();
+                unlock(&critsect);
                 return(wndclass);
         }
         else {
                 wndclass = (Win32WndClass *)wndclass->GetNext();
                 while(wndclass != NULL) {
                         if(wndclass->classAtom == (DWORD)id /* && wndclass->hInstance == hInstance*/) {
-                                leaveMutex(OBJTYPE_CLASS);
+                                wndclass->addRef();
+                                unlock(&critsect);
                                 return(wndclass);
                         }
                         wndclass = (Win32WndClass *)wndclass->GetNext();
                 }
         }
   }
-  leaveMutex(OBJTYPE_CLASS);
+  unlock(&critsect);
   dprintf(("Class %X (inst %X) not found!", id, hInstance));
   return(NULL);
 }
 //******************************************************************************
+//Locates class in linked list and increases reference count (if found)
+//Class object must be unreferenced after usage
 //******************************************************************************
 Win32WndClass *Win32WndClass::FindClass(HINSTANCE hInstance, LPWSTR id)
 {
@@ -251,9 +265,9 @@ Win32WndClass *Win32WndClass::FindClass(HINSTANCE hInstance, LPWSTR id)
  Win32WndClass *winclass;
 
   if(HIWORD(id)) {
-    lpszClassName = UnicodeToAsciiString((LPWSTR)id);
+       lpszClassName = UnicodeToAsciiString((LPWSTR)id);
   }
-  else  lpszClassName = (LPSTR)id;
+  else lpszClassName = (LPSTR)id;
 
   winclass = FindClass(hInstance, lpszClassName);
 
@@ -550,11 +564,14 @@ BOOL Win32WndClass::UnregisterClassA(HINSTANCE hinst, LPSTR id)
 
   wndclass = FindClass(hinst, id);
   if(wndclass) {
-        if(wndclass->GetWindowCount() != 0) {
+        if(wndclass->getRefCount() != 1) {
+            wndclass->markDeleted();
+            RELEASE_CLASSOBJ(wndclass);
             dprintf2(("Win32WndClass::UnregisterClassA class %x still has windows!!", id));
             SetLastError(ERROR_CLASS_HAS_WINDOWS);
             return FALSE;
         }
+        RELEASE_CLASSOBJ(wndclass);
         delete wndclass;
         SetLastError(ERROR_SUCCESS);
         return TRUE;
@@ -565,4 +582,5 @@ BOOL Win32WndClass::UnregisterClassA(HINSTANCE hinst, LPSTR id)
 }
 //******************************************************************************
 //******************************************************************************
-GenericObject *Win32WndClass::wndclasses = NULL;
+GenericObject   *Win32WndClass::wndclasses = NULL;
+CRITICAL_SECTION Win32WndClass::critsect   = {0};

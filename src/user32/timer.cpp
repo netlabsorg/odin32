@@ -1,4 +1,4 @@
-/* $Id: timer.cpp,v 1.12 2000-03-13 13:10:48 sandervl Exp $ */
+/* $Id: timer.cpp,v 1.13 2001-06-09 14:50:20 sandervl Exp $ */
 
 /*
  * timer functions for USER32
@@ -112,9 +112,18 @@ static UINT TIMER_SetTimer (HWND hwnd, UINT id, UINT timeout, TIMERPROC proc, BO
 {
     int i;
     TIMER *pTimer;
+    HWND hwndOS2;
     Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
 
-    if (hwnd && !wnd) return 0;
+    if (hwnd && !wnd) {
+        dprintf(("TIMER_SetTimer invalid window handle %x", hwnd));
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
+        return 0;
+    }
+
+    hwndOS2 = hwnd ? wnd->getOS2WindowHandle() : 0;
+    if(wnd) RELEASE_WNDOBJ(wnd);
+    wnd = NULL;
 
     EnterCriticalSection ();
 
@@ -146,7 +155,7 @@ static UINT TIMER_SetTimer (HWND hwnd, UINT id, UINT timeout, TIMERPROC proc, BO
         pTimer->hwnd    = hwnd;
         pTimer->id      = id;
         pTimer->proc    = proc;
-        pTimer->PMhwnd  = hwnd ? wnd->getOS2WindowHandle() : NULLHANDLE;
+        pTimer->PMhwnd  = hwnd ? hwndOS2 : NULLHANDLE;
         pTimer->PMid    = WinStartTimer (GetThreadHAB(), pTimer->PMhwnd,
                                          i + 1, timeout);
 
@@ -198,11 +207,10 @@ static BOOL TIMER_KillTimer (HWND hwnd, UINT id, BOOL sys)
 
 VOID TIMER_KillTimerFromWindow(HWND hwnd)
 {
-    Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
     int i;
     TIMER * pTimer;
 
-    if (hwnd && !wnd) return;
+    if (!IsWindow(hwnd)) return;
 
     EnterCriticalSection();
 

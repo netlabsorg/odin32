@@ -1,4 +1,4 @@
-/* $Id: win32wndchild.cpp,v 1.6 2000-06-07 21:45:52 sandervl Exp $ */
+/* $Id: win32wndchild.cpp,v 1.7 2001-06-09 14:50:24 sandervl Exp $ */
 /*
  * Win32 Child/Parent window class for OS/2
  *
@@ -18,11 +18,12 @@
 
 //******************************************************************************
 //******************************************************************************
-ChildWindow::ChildWindow()
+ChildWindow::ChildWindow(CRITICAL_SECTION *pLock) 
 {
-  parent           = 0;
-  nextchild        = 0;
-  children         = 0;
+  parent     = 0;
+  nextchild  = 0;
+  children   = 0;
+  pLockChild = pLock;
 }
 //******************************************************************************
 //******************************************************************************
@@ -46,7 +47,7 @@ BOOL ChildWindow::addChild(ChildWindow *child)
 {
  ChildWindow *curchild;
 
-   mutex.enter();
+   Lock();
 
    curchild = children;
    if(curchild == NULL) {
@@ -60,7 +61,7 @@ BOOL ChildWindow::addChild(ChildWindow *child)
    }
    child->setNextChild(NULL);
 
-   mutex.leave();
+   Unlock();
    return TRUE;
 }
 //******************************************************************************
@@ -70,7 +71,7 @@ BOOL ChildWindow::removeChild(ChildWindow *child)
 {
  ChildWindow *curchild = children;
 
-   mutex.enter();
+   Lock();
 
    if(curchild == child) {
 	children = child->getNextChild();	
@@ -79,7 +80,7 @@ BOOL ChildWindow::removeChild(ChildWindow *child)
 	if(curchild == NULL) {
 		dprintf(("ChildWindow::RemoveChild, children == NULL"));
 		DebugInt3();
-		mutex.leave();
+                Unlock();
 		return FALSE;
 	}
 	while(curchild->getNextChild() != child) {
@@ -87,13 +88,13 @@ BOOL ChildWindow::removeChild(ChildWindow *child)
 		if(curchild == NULL) {
 			dprintf(("ChildWindow::RemoveChild, curchild == NULL"));
 			DebugInt3();
-			mutex.leave();
+                        Unlock();
 			return FALSE;
 		}	
 	}
 	curchild->setNextChild(child->getNextChild());
    }
-   mutex.leave();
+   Unlock();
    return TRUE;
 }
 //******************************************************************************

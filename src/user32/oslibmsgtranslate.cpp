@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.52 2001-05-25 19:59:29 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.53 2001-06-09 14:50:18 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -224,12 +224,14 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             winMsg->wParam  = packet->wParam;
             winMsg->lParam  = packet->lParam;
             if(fMsgRemoved == MSG_REMOVE) free(packet); //free the shared memory here
+            if(win32wnd) RELEASE_WNDOBJ(win32wnd);
             return TRUE;
         }
         else {//broadcasted message (no packet present)
             winMsg->message = os2Msg->msg - WIN32APP_POSTMSG;
             winMsg->wParam  = (UINT)os2Msg->mp1;
             winMsg->lParam  = (DWORD)os2Msg->mp2;
+            if(win32wnd) RELEASE_WNDOBJ(win32wnd);
             return TRUE;
         }
         goto dummymessage;
@@ -246,6 +248,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         }
 
         win32wnd = (Win32BaseWindow *)teb->o.odin.newWindow;
+        win32wnd->addRef();
 
         winMsg->message = WINWM_CREATE;
         winMsg->hwnd    = win32wnd->getWindowHandle();
@@ -310,8 +313,10 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
                 if ((pswp->fl & SWP_ZORDER) && (pswp->hwndInsertBehind > HWND_BOTTOM))
                 {
                         Win32BaseWindow *wndAfter = Win32BaseWindow::GetWindowFromOS2Handle(pswp->hwndInsertBehind);
-                        if(wndAfter)
+                        if(wndAfter) {
                               teb->o.odin.wp.hwndInsertAfter = wndAfter->getWindowHandle();
+                              RELEASE_WNDOBJ(wndAfter);
+                        }
                         else  teb->o.odin.wp.hwndInsertAfter = HWND_TOP_W;
                 }
         }
@@ -387,6 +392,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         {
             hwnd = WindowFromPoint(winMsg->pt);
             if(win32wnd->getWindowHandle() != hwnd) {
+                RELEASE_WNDOBJ(win32wnd);
                 win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
                 if(win32wnd == NULL) {
                     DebugInt3();
@@ -400,7 +406,10 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         //if a window is disabled, it's parent receives the mouse messages
         if(!IsWindowEnabled(win32wnd->getWindowHandle())) {
             if(win32wnd->getParent()) {
-                win32wnd = win32wnd->getParent();
+                Win32BaseWindow *parent = win32wnd->getParent();;
+                if(parent) parent->addRef();
+                RELEASE_WNDOBJ(win32wnd);
+                win32wnd = parent;
             }
             fWasDisabled = TRUE;
         }
@@ -462,6 +471,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         {
             hwnd = WindowFromPoint(winMsg->pt);
             if(win32wnd->getWindowHandle() != hwnd) {
+                RELEASE_WNDOBJ(win32wnd);
                 win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
                 if(win32wnd == NULL) {
                     DebugInt3();
@@ -475,7 +485,10 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         //if a window is disabled, it's parent receives the mouse messages
         if(!IsWindowEnabled(win32wnd->getWindowHandle())) {
             if(win32wnd->getParent()) {
-                win32wnd = win32wnd->getParent();
+                Win32BaseWindow *parent = win32wnd->getParent();;
+                if(parent) parent->addRef();
+                RELEASE_WNDOBJ(win32wnd);
+                win32wnd = parent;
             }
             fWasDisabled = TRUE;
         }
@@ -792,8 +805,10 @@ dummymessage:
         winMsg->message = 0;
         winMsg->wParam  = 0;
         winMsg->lParam  = 0;
+        if(win32wnd) RELEASE_WNDOBJ(win32wnd);
         return FALSE;
     }
+    if(win32wnd) RELEASE_WNDOBJ(win32wnd);
     return TRUE;
 }
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.95 2001-05-22 09:33:10 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.96 2001-06-09 14:50:19 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -18,7 +18,7 @@
 #include <string.h>
 
 #include <misc.h>
-#include "win32type.h"
+#include <win32type.h>
 #include <winconst.h>
 #include "oslibwin.h"
 #include "oslibutil.h"
