@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.754 2000-02-26 19:00:33 bird Exp $ */
+ /* $Id: changelog,v 1.755 2000-02-27 20:30:31 sandervl Exp $ */
+
+ 2000-02-27: Sander van Leeuwen <sandervl@xs4all.nl>
+	- WINMM: Implemented waveOutGetPosition
 
  2000-02-27: knut st. osmundsen <knut.stange.osmundse@pmsc.no>
         - pdwin32.tools: "New" tool, MAKE_CMD. Passes on the DEBUG and
