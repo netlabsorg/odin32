@@ -1,4 +1,4 @@
-/* $Id: win32class.cpp,v 1.27 2001-08-31 19:45:50 phaller Exp $ */
+/* $Id: win32class.cpp,v 1.28 2001-09-01 12:43:51 sandervl Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -570,12 +570,7 @@ BOOL Win32WndClass::UnregisterClassA(HINSTANCE hinst, LPSTR id)
             dprintf2(("Win32WndClass::UnregisterClassA class %x still has windows!!", id));
             SetLastError(ERROR_CLASS_HAS_WINDOWS);
             return FALSE;
-        }
-    
-        // 2001-08-31 PH
-        // Note: RELEASE_CLASSOBJ sets the pointer to NULL,
-        // and as delete verifies the object pointer to unequal NULL,
-        // the destrutor is NEVER called, the class atom is NEVER released.
+        }   
         wndclass->markDeleted();
         RELEASE_CLASSOBJ(wndclass);
     
