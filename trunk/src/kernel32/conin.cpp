@@ -1,4 +1,4 @@
-/* $Id: conin.cpp,v 1.17 2001-12-05 18:05:59 sandervl Exp $ */
+/* $Id: conin.cpp,v 1.18 2004-02-19 13:03:05 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -754,20 +754,21 @@ DWORD HMDeviceConsoleInClass::ReadConsoleW(PHMHANDLEDATA pHMHandleData,
 #endif
 
   // create ascii buffer
-  lpstrAscii = (LPSTR)HEAP_malloc(cchToRead);
+  lpstrAscii = (LPSTR)HEAP_malloc(cchToRead * sizeof( WCHAR ));
   if (lpstrAscii == NULL)
      return ERROR_NOT_ENOUGH_MEMORY;
 
                                /* simply forward the request to that routine */
+  // FIXME : if results of ReadFile() have MBCS string, some data might be lost on next call.
   dwResult = HMDeviceConsoleInClass::ReadFile(pHMHandleData,
                                               lpstrAscii,
-                                              cchToRead,
+                                              cchToRead * sizeof( WCHAR ),
                                               lpcchRead,
                                               NULL, NULL);
 
   /* Ascii -> unicode translation */
   if (dwResult == TRUE)
-    lstrcpynAtoW((LPWSTR)lpvBuffer, lpstrAscii, min(cchToRead, *lpcchRead+1));
+    *lpcchRead = MultiByteToWideChar( GetConsoleCP(), 0, lpstrAscii, *lpcchRead, ( LPWSTR )lpvBuffer, cchToRead );
 
   HEAP_free(lpstrAscii);
 
