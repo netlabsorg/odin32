@@ -1,4 +1,4 @@
-/* $Id: server.cpp,v 1.2 2001-09-06 22:56:40 phaller Exp $ */
+/* $Id: server.cpp,v 1.3 2001-09-06 23:14:53 phaller Exp $ */
 
 /*
  *
@@ -277,6 +277,7 @@ ODINFUNCTION9(NET_API_STATUS, OS2NetServerEnum,
           {
               // zero out the memory
               memset(psiw0, 0, ulAllocated);
+              *bufptr = (LPBYTE)psiw0;
   
                           // set data pointer "behind" the converted entries
               // that's where the strings are placed
@@ -353,6 +354,7 @@ ODINFUNCTION9(NET_API_STATUS, OS2NetServerEnum,
           {
               // zero out the memory
               memset(psiw1, 0, ulAllocated);
+              *bufptr = (LPBYTE)psiw1;
   
                           // set data pointer "behind" the converted entries
               // that's where the strings are placed
