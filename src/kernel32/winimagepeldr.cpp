@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.56 2000-10-06 11:04:02 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.57 2000-10-06 15:16:05 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -479,8 +479,9 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
    {
         char *pszName;
 
-	switch (i)
-        {
+	if(oh.DataDirectory[i].VirtualAddress && oh.DataDirectory[i].Size) {
+		switch (i)
+	        {
                 case IMAGE_DIRECTORY_ENTRY_EXPORT:      pszName = "Export Directory (IMAGE_DIRECTORY_ENTRY_EXPORT)"; break;
                 case IMAGE_DIRECTORY_ENTRY_IMPORT:      pszName = "Import Directory (IMAGE_DIRECTORY_ENTRY_IMPORT)"; break;
                 case IMAGE_DIRECTORY_ENTRY_RESOURCE:    pszName = "Resource Directory (IMAGE_DIRECTORY_ENTRY_RESOURCE)"; break;
@@ -496,10 +497,11 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
                 case IMAGE_DIRECTORY_ENTRY_IAT:         pszName = "Import Address Table (IMAGE_DIRECTORY_ENTRY_IAT)"; break;
                 default:
                     pszName = "unknown";
-        }
-	dprintf((LOG, "directory %s", pszName));
-	dprintf((LOG, "          Address    0x%08x", oh.DataDirectory[i].VirtualAddress));
-	dprintf((LOG, "          Size       0x%08x", oh.DataDirectory[i].Size));
+	        }
+		dprintf((LOG, "directory %s", pszName));
+		dprintf((LOG, "          Address    0x%08x", oh.DataDirectory[i].VirtualAddress));
+		dprintf((LOG, "          Size       0x%08x", oh.DataDirectory[i].Size));
+	}
    }
    dprintf((LOG, "\n\n"));
 #endif
