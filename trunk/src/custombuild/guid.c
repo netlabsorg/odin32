@@ -1,4 +1,4 @@
-/* $Id: guid.c,v 1.3 2001-08-04 15:29:20 sandervl Exp $ */
+/* $Id: guid.c,v 1.4 2001-08-04 17:19:20 sandervl Exp $ */
 #define ICOM_CINTERFACE 1
 #include <odin.h>
 
@@ -36,6 +36,8 @@
 #include <wine/obj_shellbrowser.h>
 #include <wine/obj_serviceprovider.h>
 #include <wine/unicode.h>
+
+#include <misc.h>
 
 /*********************************************************************
  *           CRTDLL__wcsnicmp	 (CRTDLL.321)
@@ -80,4 +82,64 @@ LONG __cdecl _wtol(LPWSTR string)
 INT __cdecl _wtoi(LPWSTR string)
 {
     return _wtol(string);
+}
+
+/******************************************************************************
+ *  RtlAllocateAndInitializeSid             [NTDLL.265]
+ *
+ */
+BOOLEAN WINAPI RtlAllocateAndInitializeSid ( PSID_IDENTIFIER_AUTHORITY pIdentifierAuthority,
+					     BYTE nSubAuthorityCount,
+					     DWORD nSubAuthority0,
+					     DWORD nSubAuthority1,
+					     DWORD nSubAuthority2,
+					     DWORD nSubAuthority3,
+					     DWORD nSubAuthority4,
+					     DWORD nSubAuthority5,
+					     DWORD nSubAuthority6,
+					     DWORD nSubAuthority7,
+					     PSID *pSid)
+{
+  dprintf(("NTDLL: RtlAllocateAndInitializeSid(%08xh,%08xh,%08xh,"
+           "%08xh,%08xh,%08xh,%08xh,%08xh,%08xh,%08xh,%08xh)",
+           pIdentifierAuthority,
+           nSubAuthorityCount,
+           nSubAuthority0,
+           nSubAuthority1,
+           nSubAuthority2,
+           nSubAuthority3,
+           nSubAuthority4,
+           nSubAuthority5,
+           nSubAuthority6,
+           nSubAuthority7,
+           pSid));
+
+  *pSid = (PSID)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(SID)+nSubAuthorityCount*sizeof(DWORD));
+  if(*pSid == NULL) {
+	SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+	return FALSE;
+  }
+  (*pSid)->Revision          = SID_REVISION;
+  (*pSid)->SubAuthorityCount = nSubAuthorityCount;
+
+  if (nSubAuthorityCount > 0)
+        (*pSid)->SubAuthority[0] = nSubAuthority0;
+  if (nSubAuthorityCount > 1)
+        (*pSid)->SubAuthority[1] = nSubAuthority1;
+  if (nSubAuthorityCount > 2)
+        (*pSid)->SubAuthority[2] = nSubAuthority2;
+  if (nSubAuthorityCount > 3)
+        (*pSid)->SubAuthority[3] = nSubAuthority3;
+  if (nSubAuthorityCount > 4)
+        (*pSid)->SubAuthority[4] = nSubAuthority4;
+  if (nSubAuthorityCount > 5)
+        (*pSid)->SubAuthority[5] = nSubAuthority5;
+  if (nSubAuthorityCount > 6)
+        (*pSid)->SubAuthority[6] = nSubAuthority6;
+  if (nSubAuthorityCount > 7)
+        (*pSid)->SubAuthority[7] = nSubAuthority7;
+
+  if(pIdentifierAuthority) 
+  	memcpy((PVOID)&(*pSid)->IdentifierAuthority, (PVOID)pIdentifierAuthority, sizeof(SID_IDENTIFIER_AUTHORITY));
+  return TRUE;
 }

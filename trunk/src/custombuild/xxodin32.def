@@ -1,4 +1,4 @@
-; $Id: xxodin32.def,v 1.4 2001-07-30 12:02:45 sandervl Exp $
+; $Id: xxodin32.def,v 1.5 2001-08-04 17:19:21 sandervl Exp $
 
 LIBRARY XXODIN32 INITINSTANCE
 DATA MULTIPLE NONSHARED
@@ -3157,3 +3157,9 @@ EXPORTS
 ;    VerQueryValueIndexA        = _VerQueryValueIndexA@16     @12312
 ;    VerQueryValueIndexW        = _VerQueryValueIndexW@16     @12313
 ;    VerQueryValueW             = _VerQueryValueW@16          @12314
+
+; NTDLL
+    RtlExtendedIntegerMultiply     = _RtlExtendedIntegerMultiply@12     @12400
+    RtlExtendedLargeIntegerDivide  = _RtlExtendedLargeIntegerDivide@16  @12401
+    RtlAllocateAndInitializeSid   = _RtlAllocateAndInitializeSid@44     @12402
+
