@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.29 1999-08-21 19:10:59 sandervl Exp $
+# $Id: makefile,v 1.30 1999-08-23 10:49:23 phaller Exp $
 
 #
 # PD-Win32 API
@@ -26,11 +26,11 @@ OBJS =  user32.obj dialog.obj loadres.obj \
         usrcall.obj defwndproc.obj syscolor.obj char.obj initterm.obj \
         uitools.obj unknown.obj spy.obj wndmsg.obj \
         pmwindow.obj win32class.obj win32wnd.obj win32dlg.obj \
-        msgbox.obj window.obj windowmsg.obj windowclass.obj windlgmsg.obj \
+        msgbox.obj window.obj windowmsg.obj windowclass.obj \
         windowword.obj gen_object.obj oslibwin.obj win32wndchild.obj \
         controls.obj button.obj static.obj scroll.obj listbox.obj \
         combo.obj edit.obj clipboard.obj winicon.obj \
-        oslibutil.obj oslibmsg.obj windlg.obj dib.obj \
+        oslibutil.obj oslibmsg.obj dib.obj \
         winprop.obj wingdi.obj oslibgdi.obj winaccel.obj winscrollbar.obj \
         nativerc.obj oslibres.obj
 
@@ -86,10 +86,8 @@ nativerc.obj: nativerc.cpp
 msgbox.obj:    msgbox.cpp
 window.obj:    window.cpp win32class.h win32wnd.h win32wndchild.h oslibwin.h
 windowmsg.obj: windowmsg.cpp win32class.h win32wnd.h win32wndchild.h
-windlg.obj:    windlg.cpp win32wnd.h win32dlg.h
 winprop.obj:   winprop.cpp
 wingdi.obj:    wingdi.cpp win32wnd.h oslibgdi.h
-windlgmsg.obj: windlgmsg.cpp win32class.h win32wnd.h win32dlg.h win32wndchild.h
 windowclass.obj: windowclass.cpp win32class.h win32wnd.h win32wndchild.h
 windowword.obj:  windowword.cpp win32class.h win32wnd.h win32dlg.h win32wndchild.h
 winaccel.obj:     winaccel.cpp  $(PDWIN32_INCLUDE)\winres.h
