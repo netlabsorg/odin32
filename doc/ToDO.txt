@@ -1,4 +1,4 @@
-/* $Id: ToDO.txt,v 1.16 2001-10-19 09:36:06 phaller Exp $ */
+/* $Id: ToDO.txt,v 1.17 2001-11-22 11:50:55 phaller Exp $ */
 
 To Do list for ODIN:
 
@@ -9,7 +9,7 @@ Assigned Status Topic -------------------------------------------------------
 
                 Eventually start porting over D3D support from WINE
 
-                Implement support for Parallel Port Devices
+PH       PART   Implement support for Parallel Port Devices
 
                 Fix wrong reference count after window creation
                 (unable to unregister window class)
@@ -31,14 +31,14 @@ SvL      DONE   Add HKLM\\SOFTWARE\Microsoft\WINDOWS\CurrentVersion
                 Key CommonFilesDir="?:\Program Files\Common Files" for
                 TogetherJ installation to the ODIN installer.
 
-PH              Sync NTDLL with WINE
+PH       DONE   Sync NTDLL with WINE
 
-JW              Put in correct FS:-wrappers in CRTDLL and MSVCRT
+JW       ----   Put in correct FS:-wrappers in CRTDLL and MSVCRT
 
 JW              Improve CRTDLL and MSVCRT as this is one major show stopper 
                 currently
 
-SvL             Remove GPI32 calls from the original FS: macros and replace
+SvL      ----   Remove GPI32 calls from the original FS: macros and replace
                 them with ODINFUNCTION wrappers. Internally call to ODIN_xxx
                 GPI functions to get much better performance.
 
@@ -68,16 +68,12 @@ NOONE           WINMM: Fix and finish MIDI in/out (using RTMIDI)
 
 NOONE	        KERNEL32: Async file io
 
-NOONE           KERNEL32: Vio support for console applications
-                        (partially done)
+NOONE     PART  KERNEL32: Vio support for console applications
 
-NOONE           WSOCK32: Winsock 2 implementation (WS2_32.DLL, WS2HELP.DLL)
+NOONE     DONE  WSOCK32: Winsock 2 implementation (WS2_32.DLL, WS2HELP.DLL)
 
 NOONE           GDI32: Rewrite using Gpi api (remove Open32 dependancy)
 
 NOONE           Setup a test /verification plan and freeze some modules such
                 as LZ32, VERSION which are considered complete.
                 Also ensure the source code is well documented and structured.
-
-NOONE		OLE32/COM: support (broker) for Out-of-process COM
-		objects
