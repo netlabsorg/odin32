@@ -1,4 +1,4 @@
-/* $Id: wsock32.c,v 1.1 1999-05-24 20:20:09 ktk Exp $ */
+/* $Id: wsock32.c,v 1.2 1999-05-31 14:09:47 phaller Exp $ */
 
 /*
  *
@@ -12,8 +12,13 @@
  *
  * @(#) wsock32.c     	1.0.0   1998/08/25 VV initial release
  *                      1.0.1   1999/04/27 VV cleanup and implement select.
+ *                      1.0.2   1999/05/31 PH support for TCP/IP 4.1 + 4.2 headers
  *
  */
+
+/* this is for IBM TCP/IP 5.0 headers as present in the current Warp 4 toolkit */
+#define TCPV40HDRS 1
+
 
 #define INCL_DOSPROCESS     /* Process and thread values */
 #define INCL_DOSFILEMGR     /* for DosRead and DosWrite */
