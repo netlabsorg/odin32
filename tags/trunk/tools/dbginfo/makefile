@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2000-08-31 03:02:28 bird Exp $
+# $Id: makefile,v 1.6 2000-08-31 03:05:05 bird Exp $
 #
 # Makefile for debug info convertes - experimental.
 #
@@ -32,7 +32,7 @@ CXXFLAGS   = $(CINCLUDES) $(CXXFLAGS) -DRING3 \
 
 
 # All rule - build objs, target dll, copies dll to bin and makes libs.
-all: kHll5.exe Sym2Hll.exe dbgLXDumper.exe
+all: kHll.exe # Sym2Hll.exe dbgLXDumper.exe
 
 
 #
@@ -45,7 +45,7 @@ Sym2Hll.exe: Sym2Hll.obj kHll.obj $(COMMONLIB)
 #
 # New LX debug info dumper.
 #
-kHll5.exe: kHll.obj kHllMain.obj $(COMMONLIB)
+kHll.exe: kHll.obj kHllMain.obj $(COMMONLIB)
     $(LD2) $(LD2FLAGS) /PMTYPE:vio /EXEC /OUT:$@ $** $(RTLLIB) os2386.lib
 
 #
