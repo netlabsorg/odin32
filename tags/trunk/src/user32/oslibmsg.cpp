@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.20 2000-01-03 21:37:16 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.21 2000-01-03 22:53:16 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -177,13 +177,8 @@ LONG OSLibWinDispatchMsg(MSG *msg, BOOL isUnicode)
             thdb->nrOfMsgs = 1;
             thdb->msgstate++; //odd -> next call to our PM window handler should dispatch the translated msg
             memcpy(&thdb->msg, msg, sizeof(MSG));
-	    return (LONG)WinDispatchMsg(thdb->hab, &os2msg);
         }
-	//SvL: TODO; What to do if messages posted by PostThreadMessage are
-        //     dispatched? Wine doesn't appear to do this.
-        //     If we call WinDispatchMsg, every window created by the thread
-        //     receives this message. Does this also happen in NT?
-        return 0;
+        return (LONG)WinDispatchMsg(thdb->hab, &os2msg);
   }
   else {//is this allowed?
 //        dprintf(("WARNING: OSLibWinDispatchMsg: called with own message!"));
