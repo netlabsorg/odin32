@@ -1,4 +1,4 @@
-# $Id: setup.mak,v 1.13 2002-08-24 22:31:24 bird Exp $
+# $Id: setup.mak,v 1.14 2002-08-25 04:23:39 bird Exp $
 
 #
 # Generic makefile system.
@@ -176,7 +176,11 @@ PATH_ROOT = $(PATH_ROOT_ABS)
 # -----------------------------------------------------------------------------
 
 # The default definitions.
-BUILD_DEFINES           = -D__WIN32OS2__ -D__WINE__ -DTCPV40HDRS -DCOMCTL32UNDOC
+!ifndef ODIN32_USERAPP
+BUILD_DEFINES           = -D__WIN32OS2__ -DTCPV40HDRS -DCOMCTL32UNDOC -D__WINE__
+!else
+BUILD_DEFINES           = -D__WIN32OS2__ #-DTCPV40HDRS -DCOMCTL32UNDOC -D__WINE__
+!endif
 BUILD_BLDLEVEL_FLAGS    = -V^"^#define=ODIN32_VERSION,$(PATH_ROOT)\include\odinbuild.h^" \
                           -M^"^#define=ODIN32_BUILD_NR,$(PATH_ROOT)\include\odinbuild.h^"
 BUILD_PROJECT           = Odin32
@@ -195,6 +199,7 @@ OBJ_DLLENTRY            =
 
 # This is the process file to include at end of the makefile.
 MAKE_INCLUDE_PROCESS    = $(PATH_MAKE)\process.mak
+
 
 
 # -----------------------------------------------------------------------------
