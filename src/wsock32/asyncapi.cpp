@@ -1,4 +1,4 @@
-/* $Id: asyncapi.cpp,v 1.15 2001-07-08 15:44:27 achimha Exp $ */
+/* $Id: asyncapi.cpp,v 1.16 2001-10-13 18:51:07 sandervl Exp $ */
 
 /*
  *
@@ -414,6 +414,7 @@ void AsyncSelectNotifyEvent(PASYNCTHREADPARM pThreadParm, ULONG event, ULONG soc
     if (pThreadParm->u.asyncselect.mode == WSA_SELECT_HEVENT)
     {
         dprintf(("AsyncSelectNotifyEvent: notifying event semaphore, socket: 0x%x, HEVENT: 0x%x, event: 0x%x", pThreadParm->u.asyncselect.s, pThreadParm->notifyHandle, event));
+        pThreadParm->u.asyncselect.lLastEvent |= event;
         SetEvent(pThreadParm->notifyHandle);
     }
     else
@@ -441,7 +442,7 @@ asyncloopstart:
 	noread = nowrite = noexcept = -1;
 
 	//break if user cancelled request
-      	if(pThreadParm->u.asyncselect.lEvents == 0) {
+      	if(pThreadParm->u.asyncselect.lEvents == 0 || pThreadParm->fCancelled) {
 		break;
       	}
 
@@ -699,6 +700,7 @@ int WSAAsyncSelectWorker(SOCKET s, int mode, int notifyHandle, int notifyData, l
    pThreadParm->u.asyncselect.mode           = mode;
    pThreadParm->u.asyncselect.lEvents        = lEventMask;
    pThreadParm->u.asyncselect.lEventsPending = lEventMask;
+   pThreadParm->u.asyncselect.lLastEvent     = 0;
    pThreadParm->u.asyncselect.s              = s;
    pThreadParm->u.asyncselect.asyncSem       = new VSemaphore;
    if(pThreadParm->u.asyncselect.asyncSem == NULL) {
@@ -733,12 +735,9 @@ int WSAEnumNetworkEventsWorker(SOCKET s, WSAEVENT hEvent, LPWSANETWORKEVENTS lpE
         {
            lpEvent->iErrorCode[i] = 0;
         }
-
-        lpEvent->lNetworkEvents = pThreadInfo->u.asyncselect.lEventsPending;
-
-        // TODO is this correct? API says they're cleared
-        pThreadInfo->u.asyncselect.lEventsPending = 0;
-   } else
+        lpEvent->lNetworkEvents = InterlockedExchange((LPLONG)&pThreadInfo->u.asyncselect.lLastEvent, 0);
+   } 
+   else
    {
       asyncThreadMutex.leave();
       dprintf(("no async registration for socket %x", s));
@@ -746,6 +745,7 @@ int WSAEnumNetworkEventsWorker(SOCKET s, WSAEVENT hEvent, LPWSANETWORKEVENTS lpE
       WSASetLastError(WSAEINVAL);
       return SOCKET_ERROR;
    }
+   asyncThreadMutex.leave();
 
    // reset event semaphore if present
    if (hEvent)
@@ -753,8 +753,6 @@ int WSAEnumNetworkEventsWorker(SOCKET s, WSAEVENT hEvent, LPWSANETWORKEVENTS lpE
 //      dprintf(("posting event semaphore 0x%x", hEvent));
       ResetEvent(hEvent);
    }
-
-   asyncThreadMutex.leave();
 
    WSASetLastError(NO_ERROR);
    return NO_ERROR;

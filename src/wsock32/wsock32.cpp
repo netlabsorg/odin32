@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.41 2001-10-11 19:24:07 sandervl Exp $ */
+/* $Id: wsock32.cpp,v 1.42 2001-10-13 18:51:08 sandervl Exp $ */
 
 /*
  *
@@ -734,6 +734,8 @@ ODINFUNCTION6(int,OS2sendto,
               int,tolen)
 {
    int ret;
+   int optlen;
+   int option;
 
    if(!fWSAInitialized) {
       	WSASetLastError(WSANOTINITIALISED);
@@ -749,13 +751,13 @@ ODINFUNCTION6(int,OS2sendto,
       	WSASetLastError(WSAEFAULT);
       	return SOCKET_ERROR;
    }
-//testestest
-#ifdef DEBUG
-   dprintf(("sending to %s", inet_ntoa(((sockaddr_in*)to)->sin_addr)));
-   for(int i=0;i<len;i++) {
-       dprintf(("%02x: %x", i, buf[i]));
+   optlen = sizeof(option);
+   option = 0;
+   ret = getsockopt(s, IPPROTO_IP, IP_HDRINCL_OS2, (char *)&option, &optlen);
+   if(ret == 0 && option != FALSE) {
+       *(u_short *)&buf[2] = len;
    }
-#endif
+   dprintf(("sending to %s", inet_ntoa(((sockaddr_in*)to)->sin_addr)));
    ret = sendto(s, (char *)buf, len, flags, (struct sockaddr *)to, tolen);
 
    if(ret == SOCKET_ERROR) {
@@ -763,7 +765,7 @@ ODINFUNCTION6(int,OS2sendto,
    }
    else WSASetLastError(NO_ERROR);
 
-   //Reset FD_WRITE event flagfor  WSAAsyncSelect thread if one was created for this socket
+   //Reset FD_WRITE event flag for WSAAsyncSelect thread if one was created for this socket
    EnableAsyncEvent(s, FD_WRITE);
    return ret;
 }
@@ -1314,6 +1316,9 @@ ODINFUNCTION5(int,OS2getsockopt,
                    return SOCKET_ERROR;
                }
                ret = getsockopt(s, IPPROTO_IP, IP_HDRINCL_OS2, (char *)optval, optlen);
+               if(ret == 0) {
+                   ret = (ret != FALSE) ? TRUE : FALSE;
+               }
                break;
 
            default:

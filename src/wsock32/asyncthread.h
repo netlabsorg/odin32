@@ -1,4 +1,4 @@
-/* $Id: asyncthread.h,v 1.7 2001-07-07 14:29:40 achimha Exp $ */
+/* $Id: asyncthread.h,v 1.8 2001-10-13 18:51:07 sandervl Exp $ */
 
 /*
  * Async thread help functions
@@ -70,6 +70,7 @@ typedef struct _ASYNCTHREADPARM
 			VSemaphore *asyncSem;
 			DWORD       lEvents;
                         DWORD       lEventsPending;
+                        DWORD       lLastEvent;
 			SOCKET      s;
 			int         mode;
 		} asyncselect;
@@ -85,6 +86,8 @@ void  RemoveFromQueue(PASYNCTHREADPARM pThreadParm);
 
 void  EnableAsyncEvent(SOCKET s, ULONG flags);
 BOOL  QueryAsyncEvent(SOCKET s, HWND *pHwnd, int *pMsg, ULONG *plEvent);
-BOOL FindAndSetAsyncEvent(SOCKET s, int mode, int notifyHandle, int notifyData, ULONG lEventMask);
+BOOL  FindAndSetAsyncEvent(SOCKET s, int mode, int notifyHandle, int notifyData, ULONG lEventMask);
+
+void  WSACancelAllAsyncRequests();
 
 #endif  //__ASYNCTHREAD_H__

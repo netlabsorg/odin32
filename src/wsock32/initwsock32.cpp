@@ -1,4 +1,4 @@
-/* $Id: initwsock32.cpp,v 1.3 2001-09-05 10:26:30 bird Exp $
+/* $Id: initwsock32.cpp,v 1.4 2001-10-13 18:51:08 sandervl Exp $
  *
  * DLL entry point
  *
@@ -45,6 +45,26 @@ extern "C" {
 }
 static HMODULE dllHandle = 0;
 
+INT WIN32API WSACleanup();
+//******************************************************************************
+//******************************************************************************
+BOOL WINAPI WinsockLibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
+{
+   switch (fdwReason)
+   {
+   case DLL_PROCESS_ATTACH:
+    return TRUE;
+
+   case DLL_THREAD_ATTACH:
+   case DLL_THREAD_DETACH:
+    return TRUE;
+
+   case DLL_PROCESS_DETACH:
+    WSACleanup();
+    return TRUE;
+   }
+   return FALSE;
+}
 /****************************************************************************/
 /* _DLL_InitTerm is the function that gets called by the operating system   */
 /* loader when it loads and frees this DLL for each process that accesses   */
@@ -68,14 +88,14 @@ ULONG APIENTRY inittermWsock32(ULONG hModule, ULONG ulFlag)
       case 0 :
          ParseLogStatusWSOCK32();
 
-     dllHandle = RegisterLxDll(hModule, NULL, (PVOID)&wsock32_PEResTab);
+         dllHandle = RegisterLxDll(hModule, WinsockLibMain, (PVOID)&wsock32_PEResTab);
          if(dllHandle == 0)
-        return 0UL;
+             return 0UL;
 
          break;
       case 1 :
          if(dllHandle) {
-        UnregisterLxDll(dllHandle);
+             UnregisterLxDll(dllHandle);
          }
          break;
       default  :
