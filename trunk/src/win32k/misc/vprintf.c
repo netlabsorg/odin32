@@ -1,4 +1,4 @@
-/* $Id: vprintf.c,v 1.8 2000-09-02 21:08:15 bird Exp $
+/* $Id: vprintf.c,v 1.9 2000-12-11 06:20:48 bird Exp $
  *
  * vprintf and printf
  *
@@ -104,7 +104,7 @@ static unsigned _strnlen(const char *psz, unsigned cchMax)
 {
     const char *pszC = psz;
 
-    while (*psz != '\0' && cchMax-- > 0)
+    while (cchMax-- > 0 &&  *psz != '\0')
         psz++;
 
     return psz - pszC;
