@@ -1,4 +1,4 @@
-# $Id: setup.os2debvac308.mk,v 1.19 2002-08-29 10:01:43 bird Exp $
+# $Id: setup.os2debvac308.mk,v 1.20 2002-08-30 18:27:24 bird Exp $
 
 # ---OS2, DEBUG, VAC308-------------------------
 ENV_NAME="OS/2, Debug, IBM VisualAge for C++ 3.08"
@@ -15,8 +15,8 @@ ENV_ENVS_FORCE=vac308
 # Include some shared standard stuff: ALP, WRC, VAC optional stuff.
 #
 !include $(PATH_MAKE)\setup.os2as.mk
-!include $(PATH_MAKE)\setup.os2debrc.mk
-!include $(PATH_MAKE)\setup.os2debwrc.mk
+!include $(PATH_MAKE)\setup.os2allrc.mk
+!include $(PATH_MAKE)\setup.os2allwrc.mk
 !include $(PATH_MAKE)\setup.os2ld.mk
 !include $(PATH_MAKE)\setup.os2ar.mk
 !include $(PATH_MAKE)\setup.optional.vac3xx.mk

@@ -1,4 +1,4 @@
-# $Id: setup.os2relemx.mk,v 1.10 2002-08-29 10:01:45 bird Exp $
+# $Id: setup.os2relemx.mk,v 1.11 2002-08-30 18:27:26 bird Exp $
 
 # ---OS2, DEBUG, EMX----------------------------
 ENV_NAME="OS/2, Debug, EMX/GCC Compiler"
@@ -23,8 +23,8 @@ SPACE=_
 # Include some shared standard stuff: ALP, VAC optional stuff.
 #
 !include $(PATH_MAKE)\setup.os2as.mk
-!include $(PATH_MAKE)\setup.os2relrc.mk
-!include $(PATH_MAKE)\setup.os2relwrc.mk
+!include $(PATH_MAKE)\setup.os2allrc.mk
+!include $(PATH_MAKE)\setup.os2allwrc.mk
 _LD_LAST_LIB = end.$(EXT_LIB)
 !include $(PATH_MAKE)\setup.os2ld.mk
 !include $(PATH_MAKE)\setup.os2ar.mk

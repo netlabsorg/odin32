@@ -1,4 +1,4 @@
-# $Id: setup.os2relwat11-16.mk,v 1.13 2002-08-29 10:01:46 bird Exp $
+# $Id: setup.os2relwat11-16.mk,v 1.14 2002-08-30 18:27:28 bird Exp $
 
 #
 # Note! Watcom is unable to do debug info release builds.
@@ -23,8 +23,8 @@ ENV_16BIT = 16
 #
 AS_DEBUG_TYPE   = Codeview
 !include $(PATH_MAKE)\setup.os2as.mk
-!include $(PATH_MAKE)\setup.os2relrc.mk
-!include $(PATH_MAKE)\setup.os2relwrc.mk
+!include $(PATH_MAKE)\setup.os2allrc.mk
+!include $(PATH_MAKE)\setup.os2allwrc.mk
 _LD_LIBPATH     = $(PATH_WATCOM)\lib286\os2;$(PATH_WATCOM)\lib286;
 LD_OLDCPP       = 1
 !include $(PATH_MAKE)\setup.os2ld.mk

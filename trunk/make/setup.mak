@@ -1,4 +1,4 @@
-# $Id: setup.mak,v 1.16 2002-08-29 10:01:40 bird Exp $
+# $Id: setup.mak,v 1.17 2002-08-30 18:27:21 bird Exp $
 
 #
 # Generic makefile system.
@@ -222,10 +222,10 @@ MAKE_INCLUDE_PROCESS    = $(PATH_MAKE)\process.mak
 # These strings are passed on to the BuildEnv.cmd script to setup the correct
 # shell environment.
 # TODO   Should these be overridable by setup.[w]xyz.mak ? (kso)
-BUILD_ENVS_BASE_POST    = toolkit40
+BUILD_ENVS_BASE_POST    = toolkit452
 BUILD_ENVS_BASE_POST_16 =
 BUILD_ENVS_BASE_PRE     = buildsetup emx cvs
-BUILD_ENVS_BASE_PRE_16  = buildsetup emx cvs toolkit40 ddkbase
+BUILD_ENVS_BASE_PRE_16  = buildsetup emx cvs toolkit452 ddkbase
 
 
 # -----------------------------------------------------------------------------
