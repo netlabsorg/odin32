@@ -1,4 +1,4 @@
-# $Id: odin32.dbg.vac36.mk,v 1.9 2003-01-23 12:32:34 sandervl Exp $
+# $Id: odin32.dbg.vac36.mk,v 1.10 2003-02-02 14:24:21 sandervl Exp $
 
 #
 # Odin32 API.
@@ -32,6 +32,10 @@ ILIB   = ilib
 RC     = $(ODIN32_TOOLS)\wrc
 OS2RC  = rc
 
+
+!ifdef EXETARGET
+STATIC_CRT=1
+!endif
 
 #
 # Tool Flags
