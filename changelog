@@ -1,4 +1,22 @@
-/* $Id: changelog,v 1.1243 2001-02-08 18:16:53 sandervl Exp $ */
+/* $Id: changelog,v 1.1244 2001-02-09 18:32:24 sandervl Exp $ */
+
+ 2001-02-09: Sander van Leeuwen <sandervl@xs4all.nl>
+    - COMCTL32: o Register controls in LibMain, not in DLL_InitTerm
+    - KERNEL32: o Re-register dll if DosFreeModule failed with ERROR_INVALID_ACCESS
+                  Dll refuses to unload if it has an active exitlist handler
+                  or depends on a dll that registered an exitlist handler.
+                  In this case the handle remains valid and the entrypoint of
+                  the dll is NOT called for DLL_PROCESS_DETACH. The next time
+                  DosLoadModule is called, the entrypoint (and RegisterLXDll)
+                  isn't called (DLL_PROCESS_ATTACH).
+                  WORKAROUND: Re-register the dll so future functions that
+                              use this dll calls don't fail.
+                  (fixes crash in shell32 in TextPad 4)
+                o shared & code heap umalloc changed (now more meaningful debug
+                  messages in case of heap corruption)
+    - USER32:   o WM_MINIMIZE/WS_MAXIMIZE support added to CreateWindow
+                  (fixes size of main InstallShield window for Microsoft Visual 
+                   C++ 4.2)
 
  2001-02-08: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Standard in/out/error handle fix. Disable change during
