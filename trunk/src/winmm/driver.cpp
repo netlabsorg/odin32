@@ -1,4 +1,4 @@
-/* $Id: driver.cpp,v 1.5 2000-02-17 14:09:30 sandervl Exp $ */
+/* $Id: driver.cpp,v 1.6 2000-11-19 12:46:50 sandervl Exp $ */
 
 /*
  * Driver multimedia apis
@@ -76,7 +76,7 @@ ODINFUNCTION3(HDRVR, OpenDriver,
               LPCWSTR, lpSectionName,
               LONG, lParam)
 {
-  dprintf(("WINMM: OpenDriver not implemented.\n"));
+  dprintf(("WINMM: OpenDriver %x %x %x not implemented, lpDriverName, lpSectionName"));
   return 0; /* unsuccessful return */
 }
 
@@ -97,11 +97,11 @@ ODINFUNCTION3(HDRVR, OpenDriver,
  *****************************************************************************/
 
 ODINFUNCTION3(HDRVR, OpenDriverA,
-              LPTSTR, lpDriverName,
-              LPTSTR, lpSectionName,
+              LPCSTR, lpDriverName,
+              LPCSTR, lpSectionName,
               LONG, lParam)
 {
-  dprintf(("WINMM: OpenDriverA not implemented.\n"));
+  dprintf(("WINMM: OpenDriverA %s %s %x not implemented, lpDriverName, lpSectionName"));
   return 0; /* unsuccessful return */
 }
 
