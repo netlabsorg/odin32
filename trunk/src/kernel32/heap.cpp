@@ -1,4 +1,4 @@
-/* $Id: heap.cpp,v 1.17 1999-12-09 00:52:20 sandervl Exp $ */
+/* $Id: heap.cpp,v 1.18 2000-01-29 10:42:38 sandervl Exp $ */
 
 /*
  * Win32 heap API functions for OS/2
@@ -384,6 +384,32 @@ BOOL WIN32API GlobalUnlock(HGLOBAL arg1)
     dprintf(("KERNEL32:  GlobalUnlock\n"));
 
     return O32_GlobalUnlock(arg1);
+}
+/***********************************************************************
+ *           GlobalWire
+ *
+ * The GlobalWire function is obsolete. It is provided only for compatibility 
+ * with 16-bit versions of Windows. Applications that need to lock a global 
+ * memory object should use the GlobalLock and GlobalUnlock functions. 
+ *
+ */
+LPVOID WIN32API GlobalWire(HGLOBAL hmem)
+{
+   return GlobalLock( hmem );
+}
+
+
+/***********************************************************************
+ *           GlobalUnWire
+ *
+ * The GlobalUnWire function is obsolete. It is provided only for compatibility 
+ * with 16-bit versions of Windows. Applications that need to lock a global 
+ * memory object should use the GlobalLock and GlobalUnlock functions. 
+ *
+ */
+BOOL WIN32API GlobalUnWire(HGLOBAL hmem)
+{
+   return GlobalUnlock( hmem);
 }
 //******************************************************************************
 //******************************************************************************
