@@ -1,4 +1,4 @@
-/*
+/*		
  * Common controls functions
  *
  * Copyright 1997 Dimitrie O. Paun
@@ -98,7 +98,7 @@ COMCTL32_LibMain (HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
     TRACE("%x,%lx,%p\n", hinstDLL, fdwReason, lpvReserved);
 
     switch (fdwReason) {
-    case DLL_PROCESS_ATTACH:
+	case DLL_PROCESS_ATTACH:
             COMCTL32_hModule = (HMODULE)hinstDLL;
 
             /* create private heap */
@@ -129,7 +129,7 @@ COMCTL32_LibMain (HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
             UPDOWN_Register ();
             break;
 
-    case DLL_PROCESS_DETACH:
+	case DLL_PROCESS_DETACH:
             /* unregister all common control classes */
             ANIMATE_Unregister ();
             COMBOEX_Unregister ();
@@ -203,63 +203,63 @@ COMCTL32_LibMain (HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 
 VOID WINAPI
 MenuHelp (UINT uMsg, WPARAM wParam, LPARAM lParam, HMENU hMainMenu,
-      HINSTANCE hInst, HWND hwndStatus, LPUINT lpwIDs)
+	  HINSTANCE hInst, HWND hwndStatus, LPUINT lpwIDs)
 {
     UINT uMenuID = 0;
 
     if (!IsWindow (hwndStatus))
-    return;
+	return;
 
     switch (uMsg) {
-    case WM_MENUSELECT:
-        TRACE("WM_MENUSELECT wParam=0x%X lParam=0x%lX\n",
-           wParam, lParam);
+	case WM_MENUSELECT:
+	    TRACE("WM_MENUSELECT wParam=0x%X lParam=0x%lX\n",
+		   wParam, lParam);
 
             if ((HIWORD(wParam) == 0xFFFF) && (lParam == 0)) {
                 /* menu was closed */
-        TRACE("menu was closed!\n");
+		TRACE("menu was closed!\n");
                 SendMessageA (hwndStatus, SB_SIMPLE, FALSE, 0);
             }
-        else {
-        /* menu item was selected */
-        if (HIWORD(wParam) & MF_POPUP)
-            uMenuID = (UINT)*(lpwIDs+1);
-        else
-            uMenuID = (UINT)LOWORD(wParam);
-        TRACE("uMenuID = %u\n", uMenuID);
+	    else {
+		/* menu item was selected */
+		if (HIWORD(wParam) & MF_POPUP)
+		    uMenuID = (UINT)*(lpwIDs+1);
+		else
+		    uMenuID = (UINT)LOWORD(wParam);
+		TRACE("uMenuID = %u\n", uMenuID);
 
-        if (uMenuID) {
-            CHAR szText[256];
+		if (uMenuID) {
+		    CHAR szText[256];
 
-            if (!LoadStringA (hInst, uMenuID, szText, 256))
-            szText[0] = '\0';
+		    if (!LoadStringA (hInst, uMenuID, szText, 256))
+			szText[0] = '\0';
 
-            SendMessageA (hwndStatus, SB_SETTEXTA,
-                    255 | SBT_NOBORDERS, (LPARAM)szText);
-            SendMessageA (hwndStatus, SB_SIMPLE, TRUE, 0);
-        }
-        }
-        break;
+		    SendMessageA (hwndStatus, SB_SETTEXTA,
+				    255 | SBT_NOBORDERS, (LPARAM)szText);
+		    SendMessageA (hwndStatus, SB_SIMPLE, TRUE, 0);
+		}
+	    }
+	    break;
 
         case WM_COMMAND :
-        TRACE("WM_COMMAND wParam=0x%X lParam=0x%lX\n",
-           wParam, lParam);
-        /* WM_COMMAND is not invalid since it is documented
-         * in the windows api reference. So don't output
+	    TRACE("WM_COMMAND wParam=0x%X lParam=0x%lX\n",
+		   wParam, lParam);
+	    /* WM_COMMAND is not invalid since it is documented
+	     * in the windows api reference. So don't output
              * any FIXME for WM_COMMAND
              */
-        WARN("We don't care about the WM_COMMAND\n");
-        break;
+	    WARN("We don't care about the WM_COMMAND\n");
+	    break;
 
-    default:
-        FIXME("Invalid Message 0x%x!\n", uMsg);
-        break;
+	default:
+	    FIXME("Invalid Message 0x%x!\n", uMsg);
+	    break;
     }
 }
 
 
 /***********************************************************************
- * ShowHideMenuCtl [COMCTL32.3]
+ * ShowHideMenuCtl [COMCTL32.3] 
  *
  * Shows or hides controls and updates the corresponding menu item.
  *
@@ -296,33 +296,33 @@ ShowHideMenuCtl (HWND hwnd, UINT uFlags, LPINT lpInfo)
     TRACE("%x, %x, %p\n", hwnd, uFlags, lpInfo);
 
     if (lpInfo == NULL)
-    return FALSE;
+	return FALSE;
 
     if (!(lpInfo[0]) || !(lpInfo[1]))
-    return FALSE;
+	return FALSE;
 
     /* search for control */
     lpMenuId = &lpInfo[2];
     while (*lpMenuId != uFlags)
-    lpMenuId += 2;
+	lpMenuId += 2;
 
     if (GetMenuState (lpInfo[1], uFlags, MF_BYCOMMAND) & MFS_CHECKED) {
-    /* uncheck menu item */
-    CheckMenuItem (lpInfo[0], *lpMenuId, MF_BYCOMMAND | MF_UNCHECKED);
+	/* uncheck menu item */
+	CheckMenuItem (lpInfo[0], *lpMenuId, MF_BYCOMMAND | MF_UNCHECKED);
 
-    /* hide control */
-    lpMenuId++;
-    SetWindowPos (GetDlgItem (hwnd, *lpMenuId), 0, 0, 0, 0, 0,
-            SWP_HIDEWINDOW);
+	/* hide control */
+	lpMenuId++;
+	SetWindowPos (GetDlgItem (hwnd, *lpMenuId), 0, 0, 0, 0, 0,
+			SWP_HIDEWINDOW);
     }
     else {
-    /* check menu item */
-    CheckMenuItem (lpInfo[0], *lpMenuId, MF_BYCOMMAND | MF_CHECKED);
+	/* check menu item */
+	CheckMenuItem (lpInfo[0], *lpMenuId, MF_BYCOMMAND | MF_CHECKED);
 
-    /* show control */
-    lpMenuId++;
-    SetWindowPos (GetDlgItem (hwnd, *lpMenuId), 0, 0, 0, 0, 0,
-            SWP_SHOWWINDOW);
+	/* show control */
+	lpMenuId++;
+	SetWindowPos (GetDlgItem (hwnd, *lpMenuId), 0, 0, 0, 0, 0,
+			SWP_SHOWWINDOW);
     }
 
     return TRUE;
@@ -356,24 +356,24 @@ GetEffectiveClientRect (HWND hwnd, LPRECT lpRect, LPINT lpInfo)
     HWND hwndCtrl;
 
     TRACE("(0x%08lx 0x%08lx 0x%08lx)\n",
-       (DWORD)hwnd, (DWORD)lpRect, (DWORD)lpInfo);
+	   (DWORD)hwnd, (DWORD)lpRect, (DWORD)lpInfo);
 
     GetClientRect (hwnd, lpRect);
     lpRun = lpInfo;
 
     do {
-    lpRun += 2;
-    if (*lpRun == 0)
-        return;
-    lpRun++;
-    hwndCtrl = GetDlgItem (hwnd, *lpRun);
-    if (GetWindowLongA (hwndCtrl, GWL_STYLE) & WS_VISIBLE) {
-        TRACE("control id 0x%x\n", *lpRun);
-        GetWindowRect (hwndCtrl, &rcCtrl);
-        MapWindowPoints ((HWND)0, hwnd, (LPPOINT)&rcCtrl, 2);
-        SubtractRect (lpRect, lpRect, &rcCtrl);
-    }
-    lpRun++;
+	lpRun += 2;
+	if (*lpRun == 0)
+	    return;
+	lpRun++;
+	hwndCtrl = GetDlgItem (hwnd, *lpRun);
+	if (GetWindowLongA (hwndCtrl, GWL_STYLE) & WS_VISIBLE) {
+	    TRACE("control id 0x%x\n", *lpRun);
+	    GetWindowRect (hwndCtrl, &rcCtrl);
+	    MapWindowPoints ((HWND)0, hwnd, (LPPOINT)&rcCtrl, 2);
+	    SubtractRect (lpRect, lpRect, &rcCtrl);
+	}
+	lpRun++;
     } while (*lpRun);
 }
 
@@ -415,9 +415,9 @@ DrawStatusTextA (HDC hdc, LPRECT lprc, LPCSTR text, UINT style)
       int oldbkmode = SetBkMode (hdc, TRANSPARENT);
       r.left += 3;
       DrawTextA (hdc, text, lstrlenA(text),
-           &r, DT_LEFT|DT_VCENTER|DT_SINGLELINE);
+		   &r, DT_LEFT|DT_VCENTER|DT_SINGLELINE);  
       if (oldbkmode != TRANSPARENT)
-    SetBkMode(hdc, oldbkmode);
+	SetBkMode(hdc, oldbkmode);
     }
 }
 
@@ -465,10 +465,10 @@ DrawStatusTextW (HDC hdc, LPRECT lprc, LPCWSTR text, UINT style)
 HWND WINAPI
 CreateStatusWindowA (INT style, LPCSTR text, HWND parent, UINT wid)
 {
-    return CreateWindowA(STATUSCLASSNAMEA, text, style,
-               CW_USEDEFAULT, CW_USEDEFAULT,
-               CW_USEDEFAULT, CW_USEDEFAULT,
-               parent, wid, 0, 0);
+    return CreateWindowA(STATUSCLASSNAMEA, text, style, 
+			   CW_USEDEFAULT, CW_USEDEFAULT,
+			   CW_USEDEFAULT, CW_USEDEFAULT, 
+			   parent, wid, 0, 0);
 }
 
 
@@ -490,9 +490,9 @@ HWND WINAPI
 CreateStatusWindowW (INT style, LPCWSTR text, HWND parent, UINT wid)
 {
     return CreateWindowW(STATUSCLASSNAMEW, text, style,
-               CW_USEDEFAULT, CW_USEDEFAULT,
-               CW_USEDEFAULT, CW_USEDEFAULT,
-               parent, wid, 0, 0);
+			   CW_USEDEFAULT, CW_USEDEFAULT,
+			   CW_USEDEFAULT, CW_USEDEFAULT,
+			   parent, wid, 0, 0);
 }
 
 
@@ -520,16 +520,16 @@ CreateStatusWindowW (INT style, LPCWSTR text, HWND parent, UINT wid)
 
 HWND WINAPI
 CreateUpDownControl (DWORD style, INT x, INT y, INT cx, INT cy,
-             HWND parent, INT id, HINSTANCE inst,
-             HWND buddy, INT maxVal, INT minVal, INT curVal)
+		     HWND parent, INT id, HINSTANCE inst,
+		     HWND buddy, INT maxVal, INT minVal, INT curVal)
 {
     HWND hUD =
-    CreateWindowA (UPDOWN_CLASSA, 0, style, x, y, cx, cy,
-             parent, id, inst, 0);
+	CreateWindowA (UPDOWN_CLASSA, 0, style, x, y, cx, cy,
+			 parent, id, inst, 0);
     if (hUD) {
-    SendMessageA (hUD, UDM_SETBUDDY, buddy, 0);
-    SendMessageA (hUD, UDM_SETRANGE, 0, MAKELONG(maxVal, minVal));
-    SendMessageA (hUD, UDM_SETPOS, 0, MAKELONG(curVal, 0));
+	SendMessageA (hUD, UDM_SETBUDDY, buddy, 0);
+	SendMessageA (hUD, UDM_SETRANGE, 0, MAKELONG(maxVal, minVal));
+	SendMessageA (hUD, UDM_SETPOS, 0, MAKELONG(curVal, 0));     
     }
 
     return hUD;
@@ -583,59 +583,59 @@ InitCommonControlsEx (LPINITCOMMONCONTROLSEX lpInitCtrls)
     DWORD dwMask;
 
     if (!lpInitCtrls)
-    return FALSE;
+	return FALSE;
     if (lpInitCtrls->dwSize != sizeof(INITCOMMONCONTROLSEX))
-    return FALSE;
+	return FALSE;
 
     TRACE("(0x%08lx)\n", lpInitCtrls->dwICC);
 
     for (cCount = 0; cCount < 32; cCount++) {
-    dwMask = 1 << cCount;
-    if (!(lpInitCtrls->dwICC & dwMask))
-        continue;
+	dwMask = 1 << cCount;
+	if (!(lpInitCtrls->dwICC & dwMask))
+	    continue;
 
-    switch (lpInitCtrls->dwICC & dwMask) {
-        /* dummy initialization */
-        case ICC_ANIMATE_CLASS:
-        case ICC_BAR_CLASSES:
-        case ICC_LISTVIEW_CLASSES:
-        case ICC_TREEVIEW_CLASSES:
-        case ICC_TAB_CLASSES:
-        case ICC_UPDOWN_CLASS:
-        case ICC_PROGRESS_CLASS:
-        case ICC_HOTKEY_CLASS:
-        break;
+	switch (lpInitCtrls->dwICC & dwMask) {
+	    /* dummy initialization */
+	    case ICC_ANIMATE_CLASS:
+	    case ICC_BAR_CLASSES:
+	    case ICC_LISTVIEW_CLASSES:
+	    case ICC_TREEVIEW_CLASSES:
+	    case ICC_TAB_CLASSES:
+	    case ICC_UPDOWN_CLASS:
+	    case ICC_PROGRESS_CLASS:
+	    case ICC_HOTKEY_CLASS:
+		break;
 
-        /* advanced classes - not included in Win95 */
-        case ICC_DATE_CLASSES:
-        MONTHCAL_Register ();
-        DATETIME_Register ();
-        break;
+	    /* advanced classes - not included in Win95 */
+	    case ICC_DATE_CLASSES:
+		MONTHCAL_Register ();
+		DATETIME_Register ();
+		break;
 
-        case ICC_USEREX_CLASSES:
-        COMBOEX_Register ();
-        break;
+	    case ICC_USEREX_CLASSES:
+		COMBOEX_Register ();
+		break;
 
-        case ICC_COOL_CLASSES:
-        REBAR_Register ();
-        break;
+	    case ICC_COOL_CLASSES:
+		REBAR_Register ();
+		break;
 
-        case ICC_INTERNET_CLASSES:
-        IPADDRESS_Register ();
-        break;
+	    case ICC_INTERNET_CLASSES:
+		IPADDRESS_Register ();
+		break;
 
-        case ICC_PAGESCROLLER_CLASS:
-        PAGER_Register ();
-        break;
+	    case ICC_PAGESCROLLER_CLASS:
+		PAGER_Register ();
+		break;
 
-        case ICC_NATIVEFNTCTL_CLASS:
-        NATIVEFONT_Register ();
-        break;
+	    case ICC_NATIVEFNTCTL_CLASS:
+		NATIVEFONT_Register ();
+		break;
 
-        default:
-        FIXME("Unknown class! dwICC=0x%lX\n", dwMask);
-        break;
-    }
+	    default:
+		FIXME("Unknown class! dwICC=0x%lX\n", dwMask);
+		break;
+	}
     }
 
     return TRUE;
@@ -680,12 +680,12 @@ CreateToolbarEx (HWND hwnd, DWORD style, UINT wID, INT nBitmaps,
 
     hwndTB =
         CreateWindowExA (0, TOOLBARCLASSNAMEA, "", style|WS_CHILD, 0, 0, 0, 0,
-               hwnd, (HMENU)wID, 0, NULL);
+			   hwnd, (HMENU)wID, 0, NULL);
     if(hwndTB) {
-    TBADDBITMAP tbab;
+	TBADDBITMAP tbab;
 
         SendMessageA (hwndTB, TB_BUTTONSTRUCTSIZE,
-            (WPARAM)uStructSize, 0);
+			(WPARAM)uStructSize, 0);
 
        /* set bitmap and button size */
        /*If CreateToolbarEx receives 0, windows sets default values*/
@@ -704,19 +704,19 @@ CreateToolbarEx (HWND hwnd, DWORD style, UINT wID, INT nBitmaps,
                        MAKELPARAM((WORD)dxButton, (WORD)dyButton));
 
 
-    /* add bitmaps */
-    if (nBitmaps > 0)
-    {
-    tbab.hInst = hBMInst;
-    tbab.nID   = wBMID;
+	/* add bitmaps */
+	if (nBitmaps > 0)
+	{
+	tbab.hInst = hBMInst;
+	tbab.nID   = wBMID;
 
-    SendMessageA (hwndTB, TB_ADDBITMAP,
-            (WPARAM)nBitmaps, (LPARAM)&tbab);
-    }
-    /* add buttons */
-    if(iNumButtons > 0)
-    SendMessageA (hwndTB, TB_ADDBUTTONSA,
-            (WPARAM)iNumButtons, (LPARAM)lpButtons);
+	SendMessageA (hwndTB, TB_ADDBITMAP,
+			(WPARAM)nBitmaps, (LPARAM)&tbab);
+	}
+	/* add buttons */
+	if(iNumButtons > 0)
+	SendMessageA (hwndTB, TB_ADDBUTTONSA,
+			(WPARAM)iNumButtons, (LPARAM)lpButtons);
     }
 
     return hwndTB;
@@ -740,7 +740,7 @@ CreateToolbarEx (HWND hwnd, DWORD style, UINT wID, INT nBitmaps,
 
 HBITMAP WINAPI
 CreateMappedBitmap (HINSTANCE hInstance, INT idBitmap, UINT wFlags,
-            LPCOLORMAP lpColorMap, INT iNumMaps)
+		    LPCOLORMAP lpColorMap, INT iNumMaps)
 {
     HGLOBAL hglb;
     HRSRC hRsrc;
@@ -753,75 +753,75 @@ CreateMappedBitmap (HINSTANCE hInstance, INT idBitmap, UINT wFlags,
     LPCOLORMAP sysColorMap;
     COLORREF cRef;
     COLORMAP internalColorMap[4] =
-    {{0x000000, 0}, {0x808080, 0}, {0xC0C0C0, 0}, {0xFFFFFF, 0}};
+	{{0x000000, 0}, {0x808080, 0}, {0xC0C0C0, 0}, {0xFFFFFF, 0}};
 
     /* initialize pointer to colortable and default color table */
     if (lpColorMap) {
-    iMaps = iNumMaps;
-    sysColorMap = lpColorMap;
+	iMaps = iNumMaps;
+	sysColorMap = lpColorMap;
     }
     else {
-    internalColorMap[0].to = GetSysColor (COLOR_BTNTEXT);
-    internalColorMap[1].to = GetSysColor (COLOR_BTNSHADOW);
-    internalColorMap[2].to = GetSysColor (COLOR_BTNFACE);
-    internalColorMap[3].to = GetSysColor (COLOR_BTNHIGHLIGHT);
-    iMaps = 4;
-    sysColorMap = (LPCOLORMAP)internalColorMap;
+	internalColorMap[0].to = GetSysColor (COLOR_BTNTEXT);
+	internalColorMap[1].to = GetSysColor (COLOR_BTNSHADOW);
+	internalColorMap[2].to = GetSysColor (COLOR_BTNFACE);
+	internalColorMap[3].to = GetSysColor (COLOR_BTNHIGHLIGHT);
+	iMaps = 4;
+	sysColorMap = (LPCOLORMAP)internalColorMap;
     }
 
     hRsrc = FindResourceA (hInstance, (LPSTR)idBitmap, RT_BITMAPA);
     if (hRsrc == 0)
-    return 0;
+	return 0;
     hglb = LoadResource (hInstance, hRsrc);
     if (hglb == 0)
-    return 0;
+	return 0;
     lpBitmap = (LPBITMAPINFOHEADER)LockResource (hglb);
     if (lpBitmap == NULL)
-    return 0;
+	return 0;
 
     nColorTableSize = (1 << lpBitmap->biBitCount);
     nSize = lpBitmap->biSize + nColorTableSize * sizeof(RGBQUAD);
     lpBitmapInfo = (LPBITMAPINFOHEADER)GlobalAlloc (GMEM_FIXED, nSize);
     if (lpBitmapInfo == NULL)
-    return 0;
+	return 0;
     RtlMoveMemory (lpBitmapInfo, lpBitmap, nSize);
 
     pColorTable = (RGBQUAD*)(((LPBYTE)lpBitmapInfo)+(UINT)lpBitmapInfo->biSize);
 
     for (iColor = 0; iColor < nColorTableSize; iColor++) {
-    for (i = 0; i < iMaps; i++) {
+	for (i = 0; i < iMaps; i++) {
             cRef = RGB(pColorTable[iColor].rgbRed,
                        pColorTable[iColor].rgbGreen,
                        pColorTable[iColor].rgbBlue);
-        if ( cRef  == sysColorMap[i].from) {
+	    if ( cRef  == sysColorMap[i].from) {
 #if 0
-        if (wFlags & CBS_MASKED) {
-            if (sysColorMap[i].to != COLOR_BTNTEXT)
-            pColorTable[iColor] = RGB(255, 255, 255);
-        }
-        else
+		if (wFlags & CBS_MASKED) {
+		    if (sysColorMap[i].to != COLOR_BTNTEXT)
+			pColorTable[iColor] = RGB(255, 255, 255);
+		}
+		else
 #endif
                     pColorTable[iColor].rgbBlue  = GetBValue(sysColorMap[i].to);
                     pColorTable[iColor].rgbGreen = GetGValue(sysColorMap[i].to);
                     pColorTable[iColor].rgbRed   = GetRValue(sysColorMap[i].to);
-        break;
-        }
-    }
+		break;
+	    }
+	}
     }
     nWidth  = (INT)lpBitmapInfo->biWidth;
     nHeight = (INT)lpBitmapInfo->biHeight;
     hdcScreen = GetDC ((HWND)0);
     hbm = CreateCompatibleBitmap (hdcScreen, nWidth, nHeight);
     if (hbm) {
-    HDC hdcDst = CreateCompatibleDC (hdcScreen);
-    HBITMAP hbmOld = SelectObject (hdcDst, hbm);
-    LPBYTE lpBits = (LPBYTE)(lpBitmap + 1);
-    lpBits += (1 << (lpBitmapInfo->biBitCount)) * sizeof(RGBQUAD);
-    StretchDIBits (hdcDst, 0, 0, nWidth, nHeight, 0, 0, nWidth, nHeight,
-                 lpBits, (LPBITMAPINFO)lpBitmapInfo, DIB_RGB_COLORS,
-                 SRCCOPY);
-    SelectObject (hdcDst, hbmOld);
-    DeleteDC (hdcDst);
+	HDC hdcDst = CreateCompatibleDC (hdcScreen);
+	HBITMAP hbmOld = SelectObject (hdcDst, hbm);
+	LPBYTE lpBits = (LPBYTE)(lpBitmap + 1);
+	lpBits += (1 << (lpBitmapInfo->biBitCount)) * sizeof(RGBQUAD);
+	StretchDIBits (hdcDst, 0, 0, nWidth, nHeight, 0, 0, nWidth, nHeight,
+		         lpBits, (LPBITMAPINFO)lpBitmapInfo, DIB_RGB_COLORS,
+		         SRCCOPY);
+	SelectObject (hdcDst, hbmOld);
+	DeleteDC (hdcDst);
     }
     ReleaseDC ((HWND)0, hdcScreen);
     GlobalFree ((HGLOBAL)lpBitmapInfo);
@@ -854,12 +854,12 @@ CreateMappedBitmap (HINSTANCE hInstance, INT idBitmap, UINT wFlags,
 
 HWND WINAPI
 CreateToolbar (HWND hwnd, DWORD style, UINT wID, INT nBitmaps,
-           HINSTANCE hBMInst, UINT wBMID,
-           LPCOLDTBBUTTON lpButtons,INT iNumButtons)
+	       HINSTANCE hBMInst, UINT wBMID,
+	       LPCOLDTBBUTTON lpButtons,INT iNumButtons)
 {
     return CreateToolbarEx (hwnd, style | CCS_NODIVIDER, wID, nBitmaps,
-                hBMInst, wBMID, (LPCTBBUTTON)lpButtons,
-                iNumButtons, 0, 0, 0, 0, sizeof (OLDTBBUTTON));
+			    hBMInst, wBMID, (LPCTBBUTTON)lpButtons,
+			    iNumButtons, 0, 0, 0, 0, sizeof (OLDTBBUTTON));
 }
 
 
@@ -884,7 +884,7 @@ COMCTL32_DllGetVersion (DLLVERSIONINFO *pdvi)
 {
     if (pdvi->cbSize != sizeof(DLLVERSIONINFO)) {
         WARN("wrong DLLVERSIONINFO size from app");
-    return E_INVALIDARG;
+	return E_INVALIDARG;
     }
 
     pdvi->dwMajorVersion = COMCTL32_VERSION;
@@ -893,19 +893,19 @@ COMCTL32_DllGetVersion (DLLVERSIONINFO *pdvi)
     pdvi->dwPlatformID = 6304;
 
     TRACE("%lu.%lu.%lu.%lu\n",
-       pdvi->dwMajorVersion, pdvi->dwMinorVersion,
-       pdvi->dwBuildNumber, pdvi->dwPlatformID);
+	   pdvi->dwMajorVersion, pdvi->dwMinorVersion,
+	   pdvi->dwBuildNumber, pdvi->dwPlatformID);
 
     return S_OK;
 }
 
 /***********************************************************************
- *      DllInstall (COMCTL32.@)
+ *		DllInstall (COMCTL32.@)
  */
 HRESULT WINAPI COMCTL32_DllInstall(BOOL bInstall, LPCWSTR cmdline)
 {
-  FIXME("(%s, %s): stub\n", bInstall?"TRUE":"FALSE",
-    debugstr_w(cmdline));
+  FIXME("(%s, %s): stub\n", bInstall?"TRUE":"FALSE", 
+	debugstr_w(cmdline));
 
   return S_OK;
 }
@@ -915,7 +915,7 @@ typedef struct __TRACKINGLIST {
     TRACKMOUSEEVENT tme;
     POINT pos; /* center of hover rectangle */
     INT iHoverTime; /* elapsed time the cursor has been inside of the hover rect */
-} _TRACKINGLIST;
+} _TRACKINGLIST; 
 
 static _TRACKINGLIST TrackingList[10];
 static int iTrackMax = 0;
@@ -954,8 +954,8 @@ static void CALLBACK TrackMouseEventProc(HWND hwndUnused, UINT uMsg, UINT_PTR id
         /* see if we are tracking hovering for this hwnd */
         if(TrackingList[i].tme.dwFlags & TME_HOVER) {
             /* add the timer interval to the hovering time */
-            TrackingList[i].iHoverTime+=iTimerInterval;
-
+            TrackingList[i].iHoverTime+=iTimerInterval;  
+     
             /* has the cursor moved outside the rectangle centered around pos? */
             if((abs(pos.x - TrackingList[i].pos.x) > (hoverwidth / 2.0))
               || (abs(pos.y - TrackingList[i].pos.y) > (hoverheight / 2.0)))
@@ -984,7 +984,7 @@ static void CALLBACK TrackMouseEventProc(HWND hwndUnused, UINT uMsg, UINT_PTR id
             TrackingList[i] = TrackingList[--iTrackMax];
         }
     }
-
+	
     /* stop the timer if the tracking list is empty */
     if(iTrackMax == 0) {
         KillTimer(0, timer);
@@ -1035,24 +1035,24 @@ _TrackMouseEvent (TRACKMOUSEEVENT *ptme)
     }
 
     flags = ptme->dwFlags;
-
+    
     /* if HOVER_DEFAULT was specified replace this with the systems current value */
     if(ptme->dwHoverTime == HOVER_DEFAULT)
         SystemParametersInfoA(SPI_GETMOUSEHOVERTIME, 0, &(ptme->dwHoverTime), 0);
 
     GetCursorPos(&pos);
-    hwnd = WindowFromPoint(pos);
+    hwnd = WindowFromPoint(pos);    
 
     if ( flags & TME_CANCEL ) {
         flags &= ~ TME_CANCEL;
         cancel = 1;
     }
-
+    
     if ( flags & TME_HOVER  ) {
         flags &= ~ TME_HOVER;
         hover = 1;
     }
-
+    
     if ( flags & TME_LEAVE ) {
         flags &= ~ TME_LEAVE;
         leave = 1;
@@ -1074,7 +1074,7 @@ _TrackMouseEvent (TRACKMOUSEEVENT *ptme)
             *ptme = TrackingList[i].tme;
         else
             ptme->dwFlags = 0;
-
+    
         return TRUE; /* return here, TME_QUERY is retrieving information */
     }
 
@@ -1097,7 +1097,7 @@ _TrackMouseEvent (TRACKMOUSEEVENT *ptme)
                  (TrackingList[i].tme.dwFlags & TME_LEAVE)))
             {
                 TrackingList[i] = TrackingList[--iTrackMax];
-
+        
                 if(iTrackMax == 0) {
                     KillTimer(0, timer);
                     timer = 0;
@@ -1118,16 +1118,16 @@ _TrackMouseEvent (TRACKMOUSEEVENT *ptme)
                         TrackingList[i].tme.dwFlags |= TME_HOVER;
                         TrackingList[i].tme.dwHoverTime = ptme->dwHoverTime;
                     }
-
+ 
                     if(leave)
                         TrackingList[i].tme.dwFlags |= TME_LEAVE;
 
                     /* reset iHoverTime as per winapi specs */
-                    TrackingList[i].iHoverTime = 0;
-
+                    TrackingList[i].iHoverTime = 0;                  
+  
                     return TRUE;
                 }
-            }
+            } 		
 
             /* if the tracking list is full return FALSE */
             if (iTrackMax == sizeof (TrackingList) / sizeof(*TrackingList)) {
@@ -1197,24 +1197,24 @@ COMCTL32_CreateToolTip(HWND hwndOwner)
     HWND hwndToolTip;
 
     hwndToolTip = CreateWindowExA(0, TOOLTIPS_CLASSA, NULL, 0,
-                  CW_USEDEFAULT, CW_USEDEFAULT,
-                  CW_USEDEFAULT, CW_USEDEFAULT, hwndOwner,
-                  0, 0, 0);
+				  CW_USEDEFAULT, CW_USEDEFAULT,
+				  CW_USEDEFAULT, CW_USEDEFAULT, hwndOwner,
+				  0, 0, 0);
 
     /* Send NM_TOOLTIPSCREATED notification */
     if (hwndToolTip)
     {
-    NMTOOLTIPSCREATED nmttc;
+	NMTOOLTIPSCREATED nmttc;
         /* true owner can be different if hwndOwner is a child window */
         HWND hwndTrueOwner = GetWindow(hwndToolTip, GW_OWNER);
         nmttc.hdr.hwndFrom = hwndTrueOwner;
         nmttc.hdr.idFrom = GetWindowLongA(hwndTrueOwner, GWL_ID);
-    nmttc.hdr.code = NM_TOOLTIPSCREATED;
-    nmttc.hwndToolTips = hwndToolTip;
+	nmttc.hdr.code = NM_TOOLTIPSCREATED;
+	nmttc.hwndToolTips = hwndToolTip;
 
        SendMessageA(GetParent(hwndTrueOwner), WM_NOTIFY,
                     (WPARAM)GetWindowLongA(hwndTrueOwner, GWL_ID),
-             (LPARAM)&nmttc);
+		     (LPARAM)&nmttc);
     }
 
     return hwndToolTip;
