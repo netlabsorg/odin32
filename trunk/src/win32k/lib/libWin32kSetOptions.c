@@ -1,4 +1,4 @@
-/* $Id: libWin32kSetOptions.c,v 1.2 2000-09-02 21:08:12 bird Exp $
+/* $Id: libWin32kSetOptions.c,v 1.3 2001-02-14 12:46:56 bird Exp $
  *
  * libWin32kSetOptions - Sets the changable options of win32k.sys the options.
  *
@@ -30,7 +30,6 @@
 extern BOOL     fInited;
 extern HFILE    hWin32k;
 
-#include "log.h"
 
 /**
  * Gets the options settings and/or the status of win32k.sys.
