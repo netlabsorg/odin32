@@ -1,4 +1,4 @@
-/* $Id: changenotify.c,v 1.7 2002-06-26 06:55:29 sandervl Exp $ */
+/* $Id: changenotify.c,v 1.8 2002-11-13 14:42:27 sandervl Exp $ */
 /*
  *	shell change notification
  *
@@ -19,7 +19,7 @@
 
 DEFAULT_DEBUG_CHANNEL(shell);
 
-static CRITICAL_SECTION SHELL32_ChangenotifyCS = CRITICAL_SECTION_INIT;
+static CRITICAL_SECTION SHELL32_ChangenotifyCS = CRITICAL_SECTION_INIT("SHELL32_ChangenotifyCS");
 
 /* internal list of notification clients (internal) */
 typedef struct _NOTIFICATIONLIST
