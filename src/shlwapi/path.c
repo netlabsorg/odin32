@@ -1,4 +1,4 @@
-/* $Id: path.c,v 1.7 2000-08-20 15:16:35 phaller Exp $ */
+/* $Id: path.c,v 1.8 2000-08-21 18:33:53 sandervl Exp $ */
 
 /*
  * Path Functions
@@ -42,12 +42,10 @@
 #include <heapstring.h>
 #include <misc.h>
 #include <win\shell.h>
-#include <win/shlobj.h>
 #include <win\winerror.h>
 #include <win\crtdll.h>
 #include <win\winversion.h>
 #include <winuser.h>
-#include <win/wine/undocshell.h>
 
 #include <win\shlwapi.h>
 #include <win\shlobj.h>
