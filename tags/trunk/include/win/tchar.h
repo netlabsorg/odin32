@@ -1,5 +1,3 @@
-/* $Id: tchar.h,v 1.4 2000-07-18 18:30:37 sandervl Exp $ */
-
 #ifndef __WINE_TCHAR_H
 #define __WINE_TCHAR_H
 
@@ -12,6 +10,8 @@ extern "C" {
 /* FIXME: this should be in direct.h but since it's a standard C library include (on some systems)... */
 #define _chdir chdir
 #define _rmdir rmdir
+
+#ifndef __WIN32OS2__
 
 /* FIXME: this should be in io.h but I believe it's a standard include on some systems... */
 /* would need unistd.h */
@@ -38,8 +38,6 @@ extern "C" {
 /* FIXME: _makepath is not implemented */
 /* FIXME: _searchenv is not implemented */
 /* FIXME: _splitpath is not implemented */
-
-#ifndef __WIN32OS2__
 
 /* FIXME: this should be in string.h but since it's a standard C library include... */
 #define _stricmp strcasecmp

@@ -1,4 +1,3 @@
-/* $Id: richedit.h,v 1.1 2000-05-10 13:11:50 sandervl Exp $ */
 #ifndef __WINE_RICHEDIT_H
 #define __WINE_RICHEDIT_H
 
@@ -57,6 +56,14 @@ extern "C" {
 #define EM_FINDTEXTEX		(WM_USER + 79)
 #define EM_GETWORDBREAKPROCEX	(WM_USER + 80)
 #define EM_SETWORDBREAKPROCEX	(WM_USER + 81)
+
+// new edit styles
+#define ES_SAVESEL			0x00008000
+#define ES_SUNKEN			0x00004000
+#define ES_DISABLENOSCROLL		0x00002000
+#define ES_SELECTIONBAR			0x01000000
+#define ES_NOOLEDRAGDROP		0x00000008
+
 
 typedef DWORD (* CALLBACK EDITSTREAMCALLBACK)( DWORD, LPBYTE, LONG, LONG );
 
