@@ -40,7 +40,7 @@
 #include "ole2disp.h"
 #include "typelib.h"
 #include "wine/debug.h"
-#include "ntddk.h"
+#include "winternl.h"
 
 static const WCHAR riidW[5] = {'r','i','i','d',0};
 static const WCHAR pdispparamsW[] = {'p','d','i','s','p','p','a','r','a','m','s',0};
@@ -366,7 +366,7 @@ static ICOM_VTABLE(IRpcProxyBuffer) tmproxyvtable = {
 };
 
 /* how much space do we use on stack in DWORD steps. */
-static int const
+int const
 _argsize(DWORD vt) {
     switch (vt) {
     case VT_DATE:

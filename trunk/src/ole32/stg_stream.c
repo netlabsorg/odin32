@@ -29,7 +29,7 @@
 
 #include "winbase.h"
 #include "winerror.h"
-#include "ntddk.h"
+#include "winternl.h"
 #include "wine/debug.h"
 
 #include "storage32.h"
@@ -564,7 +564,6 @@ HRESULT WINAPI StgStreamImpl_Seek(
 #else
   plibNewPosition->QuadPart = RtlLargeIntegerAdd( plibNewPosition->QuadPart, dlibMove.QuadPart );
 #endif
-
   /*
    * tell the caller what we calculated
    */

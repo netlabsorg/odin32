@@ -2320,13 +2320,14 @@ HRESULT StorageImpl_Construct(
   /*
    * Create the block chain abstractions.
    */
-  This->rootBlockChain =
-    BlockChainStream_Construct(This, &This->rootStartBlock, PROPERTY_NULL);
+  if(!(This->rootBlockChain =
+       BlockChainStream_Construct(This, &This->rootStartBlock, PROPERTY_NULL)))
+    return STG_E_READFAULT;
 
-  This->smallBlockDepotChain = BlockChainStream_Construct(
-                                 This,
-                                 &This->smallBlockDepotStart,
-                                 PROPERTY_NULL);
+  if(!(This->smallBlockDepotChain =
+       BlockChainStream_Construct(This, &This->smallBlockDepotStart,
+				  PROPERTY_NULL)))
+    return STG_E_READFAULT;
 
   /*
    * Write the root property
@@ -2380,16 +2381,15 @@ HRESULT StorageImpl_Construct(
   if (!readSuccessful)
   {
     /* TODO CLEANUP */
-    return E_FAIL;
+    return STG_E_READFAULT;
   }
 
   /*
    * Create the block chain abstraction for the small block root chain.
    */
-  This->smallBlockRootChain = BlockChainStream_Construct(
-                                This,
-                                NULL,
-                                This->rootPropertySetIndex);
+  if(!(This->smallBlockRootChain =
+       BlockChainStream_Construct(This, NULL, This->rootPropertySetIndex)))
+    return STG_E_READFAULT;
 
   return hr;
 }
@@ -2730,6 +2730,7 @@ void  StorageImpl_FreeBigBlock(
  * Params:  This       - Pointer to the Storage object.
  *          blockIndex - Index of the block to retrieve the chain
  *                       for.
+ *          nextBlockIndex - receives the return value.
  *
  * Returns: This method returns the index of the next block in the chain.
  *          It will return the constants:
@@ -2744,18 +2745,26 @@ void  StorageImpl_FreeBigBlock(
  *
  * See Windows documentation for more details on IStorage methods.
  */
-ULONG StorageImpl_GetNextBlockInChain(
+HRESULT StorageImpl_GetNextBlockInChain(
   StorageImpl* This,
-  ULONG          blockIndex)
+  ULONG        blockIndex,
+  ULONG*       nextBlockIndex)
 {
   ULONG offsetInDepot    = blockIndex * sizeof (ULONG);
   ULONG depotBlockCount  = offsetInDepot / This->bigBlockSize;
   ULONG depotBlockOffset = offsetInDepot % This->bigBlockSize;
-  ULONG nextBlockIndex   = BLOCK_SPECIAL;
   void* depotBuffer;
   ULONG depotBlockIndexPos;
+  int index;
 
-  assert(depotBlockCount < This->bigBlockDepotCount);
+  *nextBlockIndex   = BLOCK_SPECIAL;
+
+  if(depotBlockCount >= This->bigBlockDepotCount)
+  {
+    WARN("depotBlockCount %ld, bigBlockDepotCount %ld\n", depotBlockCount,
+	 This->bigBlockDepotCount);
+    return STG_E_READFAULT;
+  }
 
   /*
    * Cache the currently accessed depot block.
@@ -2778,23 +2787,20 @@ ULONG StorageImpl_GetNextBlockInChain(
 
     depotBuffer = StorageImpl_GetROBigBlock(This, depotBlockIndexPos);
 
-    if (depotBuffer!=0)
+    if (!depotBuffer)
+      return STG_E_READFAULT;
+
+    for (index = 0; index < NUM_BLOCKS_PER_DEPOT_BLOCK; index++)
     {
-      int index;
-
-      for (index = 0; index < NUM_BLOCKS_PER_DEPOT_BLOCK; index++)
-      {
-        StorageUtl_ReadDWord(depotBuffer, index*sizeof(ULONG), &nextBlockIndex);
-        This->blockDepotCached[index] = nextBlockIndex;
-      }
-
-      StorageImpl_ReleaseBigBlock(This, depotBuffer);
+      StorageUtl_ReadDWord(depotBuffer, index*sizeof(ULONG), nextBlockIndex);
+      This->blockDepotCached[index] = *nextBlockIndex;
     }
+    StorageImpl_ReleaseBigBlock(This, depotBuffer);
   }
 
-  nextBlockIndex = This->blockDepotCached[depotBlockOffset/sizeof(ULONG)];
+  *nextBlockIndex = This->blockDepotCached[depotBlockOffset/sizeof(ULONG)];
 
-  return nextBlockIndex;
+  return S_OK;
 }
 
 /******************************************************************************
@@ -3043,56 +3049,58 @@ void StorageImpl_SaveFileHeader(
     StorageUtl_WriteWord(headerBigBlock,  0x1a, 0x3);
     StorageUtl_WriteWord(headerBigBlock,  0x1c, (WORD)-2);
     StorageUtl_WriteDWord(headerBigBlock, 0x38, (DWORD)0x1000);
-    StorageUtl_WriteDWord(headerBigBlock, 0x40, (DWORD)0x0001);
   }
 
   /*
    * Write the information to the header.
    */
-  if (headerBigBlock!=0)
+  StorageUtl_WriteWord(
+    headerBigBlock,
+    OFFSET_BIGBLOCKSIZEBITS,
+    This->bigBlockSizeBits);
+
+  StorageUtl_WriteWord(
+    headerBigBlock,
+    OFFSET_SMALLBLOCKSIZEBITS,
+    This->smallBlockSizeBits);
+
+  StorageUtl_WriteDWord(
+    headerBigBlock,
+    OFFSET_BBDEPOTCOUNT,
+    This->bigBlockDepotCount);
+
+  StorageUtl_WriteDWord(
+    headerBigBlock,
+    OFFSET_ROOTSTARTBLOCK,
+    This->rootStartBlock);
+
+  StorageUtl_WriteDWord(
+    headerBigBlock,
+    OFFSET_SBDEPOTSTART,
+    This->smallBlockDepotStart);
+
+  StorageUtl_WriteDWord(
+    headerBigBlock,
+    OFFSET_SBDEPOTCOUNT,
+    This->smallBlockDepotChain ?
+     BlockChainStream_GetCount(This->smallBlockDepotChain) : 0);
+
+  StorageUtl_WriteDWord(
+    headerBigBlock,
+    OFFSET_EXTBBDEPOTSTART,
+    This->extBigBlockDepotStart);
+
+  StorageUtl_WriteDWord(
+    headerBigBlock,
+    OFFSET_EXTBBDEPOTCOUNT,
+    This->extBigBlockDepotCount);
+
+  for (index = 0; index < COUNT_BBDEPOTINHEADER; index ++)
   {
-    StorageUtl_WriteWord(
-      headerBigBlock,
-      OFFSET_BIGBLOCKSIZEBITS,
-      This->bigBlockSizeBits);
-
-    StorageUtl_WriteWord(
-      headerBigBlock,
-      OFFSET_SMALLBLOCKSIZEBITS,
-      This->smallBlockSizeBits);
-
     StorageUtl_WriteDWord(
       headerBigBlock,
-      OFFSET_BBDEPOTCOUNT,
-      This->bigBlockDepotCount);
-
-    StorageUtl_WriteDWord(
-      headerBigBlock,
-      OFFSET_ROOTSTARTBLOCK,
-      This->rootStartBlock);
-
-    StorageUtl_WriteDWord(
-      headerBigBlock,
-      OFFSET_SBDEPOTSTART,
-      This->smallBlockDepotStart);
-
-    StorageUtl_WriteDWord(
-      headerBigBlock,
-      OFFSET_EXTBBDEPOTSTART,
-      This->extBigBlockDepotStart);
-
-    StorageUtl_WriteDWord(
-      headerBigBlock,
-      OFFSET_EXTBBDEPOTCOUNT,
-      This->extBigBlockDepotCount);
-
-    for (index = 0; index < COUNT_BBDEPOTINHEADER; index ++)
-    {
-      StorageUtl_WriteDWord(
-        headerBigBlock,
-        OFFSET_BBDEPOTSTART + (sizeof(ULONG)*index),
-        (This->bigBlockDepotStart[index]));
-    }
+      OFFSET_BBDEPOTSTART + (sizeof(ULONG)*index),
+      (This->bigBlockDepotStart[index]));
   }
 
   /*
@@ -3381,7 +3389,7 @@ BlockChainStream* Storage32Impl_SmallBlocksToBigBlocks(
   bbTempChain = BlockChainStream_Construct(This,
                                            &bbHeadOfChain,
                                            PROPERTY_NULL);
-
+  if(!bbTempChain) return NULL;
   /*
    * Grow the big block chain.
    */
@@ -4162,9 +4170,14 @@ BlockChainStream* BlockChainStream_Construct(
     newStream->numBlocks++;
     newStream->tailIndex = blockIndex;
 
-    blockIndex = StorageImpl_GetNextBlockInChain(
-                   parentStorage,
-                   blockIndex);
+    if(FAILED(StorageImpl_GetNextBlockInChain(
+	      parentStorage,
+	      blockIndex,
+	      &blockIndex)))
+    {
+      HeapFree(GetProcessHeap(), 0, newStream);
+      return NULL;
+    }
   }
 
   return newStream;
@@ -4225,9 +4238,11 @@ ULONG BlockChainStream_GetCount(BlockChainStream* This)
   {
     count++;
 
-    blockIndex = StorageImpl_GetNextBlockInChain(
+    if(FAILED(StorageImpl_GetNextBlockInChain(
                    This->parentStorage,
-                   blockIndex);
+                   blockIndex,
+		   &blockIndex)))
+      return 0;
   }
 
   return count;
@@ -4274,9 +4289,8 @@ BOOL BlockChainStream_ReadAt(BlockChainStream* This,
 
   while ( (blockNoInSequence > 0) &&  (blockIndex != BLOCK_END_OF_CHAIN))
   {
-    blockIndex =
-      StorageImpl_GetNextBlockInChain(This->parentStorage, blockIndex);
-
+    if(FAILED(StorageImpl_GetNextBlockInChain(This->parentStorage, blockIndex, &blockIndex)))
+      return FALSE;
     blockNoInSequence--;
   }
 
@@ -4309,8 +4323,8 @@ BOOL BlockChainStream_ReadAt(BlockChainStream* This,
     /*
      * Step to the next big block.
      */
-    blockIndex    =
-      StorageImpl_GetNextBlockInChain(This->parentStorage, blockIndex);
+    if(FAILED(StorageImpl_GetNextBlockInChain(This->parentStorage, blockIndex, &blockIndex)))
+      return FALSE;
 
     bufferWalker += bytesToReadInBuffer;
     size         -= bytesToReadInBuffer;
@@ -4363,9 +4377,9 @@ BOOL BlockChainStream_WriteAt(BlockChainStream* This,
 
   while ( (blockNoInSequence > 0) &&  (blockIndex != BLOCK_END_OF_CHAIN))
   {
-    blockIndex =
-      StorageImpl_GetNextBlockInChain(This->parentStorage, blockIndex);
-
+    if(FAILED(StorageImpl_GetNextBlockInChain(This->parentStorage, blockIndex,
+					      &blockIndex)))
+      return FALSE;
     blockNoInSequence--;
   }
 
@@ -4398,9 +4412,9 @@ BOOL BlockChainStream_WriteAt(BlockChainStream* This,
     /*
      * Step to the next big block.
      */
-    blockIndex    =
-      StorageImpl_GetNextBlockInChain(This->parentStorage, blockIndex);
-
+    if(FAILED(StorageImpl_GetNextBlockInChain(This->parentStorage, blockIndex,
+					      &blockIndex)))
+      return FALSE;
     bufferWalker  += bytesToWrite;
     size          -= bytesToWrite;
     *bytesWritten += bytesToWrite;
@@ -4443,15 +4457,16 @@ BOOL BlockChainStream_Shrink(BlockChainStream* This,
    */
   while (count < numBlocks)
   {
-    blockIndex =
-      StorageImpl_GetNextBlockInChain(This->parentStorage, blockIndex);
-
+    if(FAILED(StorageImpl_GetNextBlockInChain(This->parentStorage, blockIndex,
+					      &blockIndex)))
+      return FALSE;
     count++;
   }
 
   /* Get the next block before marking the new end */
-  extraBlock =
-    StorageImpl_GetNextBlockInChain(This->parentStorage, blockIndex);
+  if(FAILED(StorageImpl_GetNextBlockInChain(This->parentStorage, blockIndex,
+					    &extraBlock)))
+    return FALSE;
 
   /* Mark the new end of chain */
   StorageImpl_SetNextBlockInChain(
@@ -4467,9 +4482,9 @@ BOOL BlockChainStream_Shrink(BlockChainStream* This,
    */
   while (extraBlock != BLOCK_END_OF_CHAIN)
   {
-    blockIndex =
-      StorageImpl_GetNextBlockInChain(This->parentStorage, extraBlock);
-
+    if(FAILED(StorageImpl_GetNextBlockInChain(This->parentStorage, extraBlock,
+					      &blockIndex)))
+      return FALSE;
     StorageImpl_FreeBigBlock(This->parentStorage, extraBlock);
     extraBlock = blockIndex;
   }
@@ -4547,8 +4562,9 @@ BOOL BlockChainStream_Enlarge(BlockChainStream* This,
       This->numBlocks++;
       currentBlock = blockIndex;
 
-      blockIndex =
-        StorageImpl_GetNextBlockInChain(This->parentStorage, currentBlock);
+      if(FAILED(StorageImpl_GetNextBlockInChain(This->parentStorage, currentBlock,
+						&blockIndex)))
+	return FALSE;
     }
 
     This->tailIndex = currentBlock;
@@ -4735,15 +4751,17 @@ ULONG SmallBlockChainStream_GetHeadOfChain(
  *    - BLOCK_END_OF_CHAIN: end of this chain
  *    - BLOCK_UNUSED: small block 'blockIndex' is free
  */
-ULONG SmallBlockChainStream_GetNextBlockInChain(
+HRESULT SmallBlockChainStream_GetNextBlockInChain(
   SmallBlockChainStream* This,
-  ULONG                  blockIndex)
+  ULONG                  blockIndex,
+  ULONG*                 nextBlockInChain)
 {
   ULARGE_INTEGER offsetOfBlockInDepot;
   DWORD  buffer;
-  ULONG  nextBlockInChain = BLOCK_END_OF_CHAIN;
   ULONG  bytesRead;
   BOOL success;
+
+  *nextBlockInChain = BLOCK_END_OF_CHAIN;
 
   offsetOfBlockInDepot.s.HighPart = 0;
   offsetOfBlockInDepot.s.LowPart  = blockIndex * sizeof(ULONG);
@@ -4760,10 +4778,11 @@ ULONG SmallBlockChainStream_GetNextBlockInChain(
 
   if (success)
   {
-    StorageUtl_ReadDWord(&buffer, 0, &nextBlockInChain);
+    StorageUtl_ReadDWord(&buffer, 0, nextBlockInChain);
+    return S_OK;
   }
 
-  return nextBlockInChain;
+  return STG_E_READFAULT;
 }
 
 /******************************************************************************
@@ -4868,8 +4887,7 @@ ULONG SmallBlockChainStream_GetNextFreeBlock(
       while (nextBlock != BLOCK_END_OF_CHAIN)
       {
         sbdIndex = nextBlock;
-        nextBlock =
-          StorageImpl_GetNextBlockInChain(This->parentStorage, sbdIndex);
+	StorageImpl_GetNextBlockInChain(This->parentStorage, sbdIndex, &nextBlock);
       }
 
       newsbdIndex = StorageImpl_GetNextFreeBigBlock(This->parentStorage);
@@ -5006,8 +5024,9 @@ BOOL SmallBlockChainStream_ReadAt(
 
   while ( (blockNoInSequence > 0) &&  (blockIndex != BLOCK_END_OF_CHAIN))
   {
-    blockIndex = SmallBlockChainStream_GetNextBlockInChain(This, blockIndex);
-
+    if(FAILED(SmallBlockChainStream_GetNextBlockInChain(This, blockIndex,
+							&blockIndex)))
+      return FALSE;
     blockNoInSequence--;
   }
 
@@ -5048,7 +5067,8 @@ BOOL SmallBlockChainStream_ReadAt(
     /*
      * Step to the next big block.
      */
-    blockIndex    = SmallBlockChainStream_GetNextBlockInChain(This, blockIndex);
+    if(FAILED(SmallBlockChainStream_GetNextBlockInChain(This, blockIndex, &blockIndex)))
+      return FALSE;
     bufferWalker += bytesToReadInBuffer;
     size         -= bytesToReadInBuffer;
     *bytesRead   += bytesToReadInBuffer;
@@ -5094,8 +5114,8 @@ BOOL SmallBlockChainStream_WriteAt(
 
   while ( (blockNoInSequence > 0) &&  (blockIndex != BLOCK_END_OF_CHAIN))
   {
-    blockIndex = SmallBlockChainStream_GetNextBlockInChain(This, blockIndex);
-
+    if(FAILED(SmallBlockChainStream_GetNextBlockInChain(This, blockIndex, &blockIndex)))
+      return FALSE;
     blockNoInSequence--;
   }
 
@@ -5138,7 +5158,9 @@ BOOL SmallBlockChainStream_WriteAt(
     /*
      * Step to the next big block.
      */
-    blockIndex    = SmallBlockChainStream_GetNextBlockInChain(This, blockIndex);
+    if(FAILED(SmallBlockChainStream_GetNextBlockInChain(This, blockIndex,
+							&blockIndex)))
+      return FALSE;
     bufferWalker  += bytesToWriteInBuffer;
     size          -= bytesToWriteInBuffer;
     *bytesWritten += bytesToWriteInBuffer;
@@ -5173,7 +5195,9 @@ BOOL SmallBlockChainStream_Shrink(
    */
   while (count < numBlocks)
   {
-    blockIndex = SmallBlockChainStream_GetNextBlockInChain(This, blockIndex);
+    if(FAILED(SmallBlockChainStream_GetNextBlockInChain(This, blockIndex,
+							&blockIndex)))
+      return FALSE;
     count++;
   }
 
@@ -5203,7 +5227,9 @@ BOOL SmallBlockChainStream_Shrink(
   else
   {
     /* Get the next block before marking the new end */
-    extraBlock = SmallBlockChainStream_GetNextBlockInChain(This, blockIndex);
+    if(FAILED(SmallBlockChainStream_GetNextBlockInChain(This, blockIndex,
+							&extraBlock)))
+      return FALSE;
 
     /* Mark the new end of chain */
     SmallBlockChainStream_SetNextBlockInChain(
@@ -5217,7 +5243,9 @@ BOOL SmallBlockChainStream_Shrink(
    */
   while (extraBlock != BLOCK_END_OF_CHAIN)
   {
-    blockIndex = SmallBlockChainStream_GetNextBlockInChain(This, extraBlock);
+    if(FAILED(SmallBlockChainStream_GetNextBlockInChain(This, extraBlock,
+							&blockIndex)))
+      return FALSE;
     SmallBlockChainStream_FreeBlock(This, extraBlock);
     extraBlock = blockIndex;
   }
@@ -5280,7 +5308,8 @@ BOOL SmallBlockChainStream_Enlarge(
   {
     oldNumBlocks++;
     currentBlock = blockIndex;
-    blockIndex = SmallBlockChainStream_GetNextBlockInChain(This, currentBlock);
+    if(FAILED(SmallBlockChainStream_GetNextBlockInChain(This, currentBlock, &blockIndex)))
+      return FALSE;
   }
 
   /*
@@ -5320,7 +5349,8 @@ ULONG SmallBlockChainStream_GetCount(SmallBlockChainStream* This)
   {
     count++;
 
-    blockIndex = SmallBlockChainStream_GetNextBlockInChain(This, blockIndex);
+    if(FAILED(SmallBlockChainStream_GetNextBlockInChain(This, blockIndex, &blockIndex)))
+      return 0;
   }
 
   return count;
@@ -5743,7 +5773,7 @@ HRESULT WINAPI StgOpenStorageOnILockBytes(
   hr = StorageImpl_Construct(
          newStorage,
          0,
-        0,
+         0,
          plkbyt,
          grfMode,
          FALSE,

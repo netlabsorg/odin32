@@ -1,4 +1,4 @@
-# $Id: ole32.mak,v 1.20 2002-05-16 19:26:29 sandervl Exp $
+# $Id: ole32.mak,v 1.21 2002-11-12 17:06:02 sandervl Exp $
 
 #
 # Odin32 API
@@ -38,10 +38,12 @@ $(OBJDIR)\ole32.obj \
 $(OBJDIR)\antimoniker.obj \
 $(OBJDIR)\bindctx.obj \
 $(OBJDIR)\compositemoniker.obj \
+$(OBJDIR)\compobj.obj \
 $(OBJDIR)\datacache.obj \
 $(OBJDIR)\defaulthandler.obj \
 $(OBJDIR)\errorinfo.obj \
 $(OBJDIR)\filemoniker.obj \
+$(OBJDIR)\ftmarshal.obj \
 $(OBJDIR)\hglobalstream.obj \
 $(OBJDIR)\initialise.obj \
 $(OBJDIR)\itemmoniker.obj \
@@ -51,7 +53,6 @@ $(OBJDIR)\oString.obj \
 $(OBJDIR)\ole2impl.obj \
 $(OBJDIR)\ole2.obj \
 $(OBJDIR)\oleobj.obj \
-$(OBJDIR)\compobj.obj \
 $(OBJDIR)\clipboard.obj \
 $(OBJDIR)\ole2stubs.obj \
 $(OBJDIR)\ole32_main.obj \

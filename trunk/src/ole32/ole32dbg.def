@@ -168,7 +168,7 @@ EXPORTS
     WriteStringStream          = _DbgWriteStringStream@0        @162
 
     CoInitializeEx             = _DbgCoInitializeEx@8           @163
-;164 stub CoInitializeSecurity       # stdcall (ptr long ptr ptr long long ptr long ptr) return 0,ERR_NOTIMPLEMENTED
+    CoInitializeSecurity       = _DbgCoInitializeSecurity@36    @164
     CoCreateInstanceEx         = _DbgCoCreateInstanceEx@24      @165
     PropVariantClear           = _DbgPropVariantClear@4         @166
 ;167 stub CoCopyProxy                # stdcall (ptr ptr) return 0,ERR_NOTIMPLEMENTED

@@ -167,7 +167,7 @@ EXPORTS
     WriteOleStg                = _WriteOleStg@0              @161
     WriteStringStream          = _WriteStringStream@0        @162
     CoInitializeEx             = _CoInitializeEx@8           @163
-;164 stub CoInitializeSecurity       # stdcall (ptr long ptr ptr long long ptr long ptr) return 0,ERR_NOTIMPLEMENTED
+    CoInitializeSecurity       = _CoInitializeSecurity@36    @164
     CoCreateInstanceEx         = _CoCreateInstanceEx@24      @165
     PropVariantClear           = _PropVariantClear@4         @166
 ;167 stub CoCopyProxy                # stdcall (ptr ptr) return 0,ERR_NOTIMPLEMENTED
