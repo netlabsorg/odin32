@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.159 2001-10-26 09:10:12 phaller Exp $ */
+/* $Id: pmwindow.cpp,v 1.160 2001-10-26 12:46:16 phaller Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -45,6 +45,8 @@
 #include "options.h"
 #include "menu.h"
 #include <pmkbdhk.h>
+#include <pmscan.h>
+#include <winscan.h>
 
 #define DBG_LOCALLOG    DBG_pmwindow
 #include "dbglocal.h"
@@ -63,6 +65,14 @@ HBITMAP hbmFrameMenu[3] = {0};
 
 static PFNWP pfnFrameWndProc = NULL;
 static HWND  hwndFocusChange = 0;
+
+// Note:
+// For a "lonekey"-press of AltGr, we only receive WM_KEYUP
+// messages. If the key is pressed longer and starts to repeat,
+// WM_KEYDOWN messages come in properly.
+static BOOL fKeyAltGrDown = FALSE;
+
+
 
 MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
 MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);

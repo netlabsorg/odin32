@@ -1,4 +1,4 @@
-/* $Id: HOOK.CPP,v 1.31 2001-10-26 10:03:33 phaller Exp $ */
+/* $Id: HOOK.CPP,v 1.32 2001-10-26 12:46:16 phaller Exp $ */
 
 /*
  * Windows hook functions
@@ -44,6 +44,7 @@
 #include <vmutex.h>
 #include <wprocess.h>
 #include "menu.h"
+#include <winscan.h>
 
 #include "win32wbase.h"
 
@@ -824,10 +825,11 @@ BOOL ProcessKbdHook(LPMSG msg, BOOL remove )
     }
   
     // this undoc (don't care) bit isn't passed through to this hook
-    DWORD lParam = msg->lParam & ~0x02000000;
+    // DWORD lParam = msg->lParam & ~0x02000000;
+    msg->lParam &= ~0x02000000;
   
     return (HOOK_CallHooksA( WH_KEYBOARD, remove ? HC_ACTION : HC_NOREMOVE,
-                             LOWORD (msg->wParam), lParam )
+                             LOWORD (msg->wParam), msg->lParam )
                              ? TRUE : FALSE);
 }
 
@@ -842,33 +844,30 @@ BOOL ProcessKbdHook(LPMSG msg, BOOL remove )
  */
 BOOL ProcessKbdHookLL(LPMSG msg, BOOL flagRemove, BOOL flagInjected )
 {
-  // @@@PH
   // format KBDLLHOOKSTRUCT and pass it in as msg->lParam
   KBDLLHOOKSTRUCT kbhs;
   
-  // check if alt is currently pressed
-  // Note: ALT seems to stick sometimes
-  // BOOL fAltDown = GetKeyState(VK_LMENU);
-  BOOL fAltDown = GetAsyncKeyState(VK_LMENU);
-  
   kbhs.vkCode      = msg->wParam;
-  kbhs.scanCode    = ( (msg->lParam & 0x03ff0000) >> 16);
+  
+  // Note: the "extended" bit seems to be filtered
+  kbhs.scanCode    = ( (msg->lParam & 0x02ff0000) >> 16);
   
   BOOL fKeyUp      = (msg->message == WM_KEYUP) ||
                      (msg->message == WM_SYSKEYUP);
+  
+  // check if alt is currently pressed
+  // Note: ALT seems to stick sometimes
+  // Note: ALTGR can't be queried
+  BOOL fAltDown; // = GetAsyncKeyState(VK_LMENU);
+  
+  // this bit indicates if ALT was held
+  fAltDown = msg->lParam & 0x20000000;
+  
   kbhs.flags       = fKeyUp ? LLKHF_UP : 0;
   
-  // @@@PH seems not to work properly
   kbhs.flags      |= fAltDown ? LLKHF_ALTDOWN : 0;
   kbhs.flags      |= flagInjected ? LLKHF_INJECTED : 0;
   kbhs.flags      |= (msg->lParam & (1 << 24)) ? LLKHF_EXTENDED : 0;
-  
-/*
-  kbhs.flags       = ( (msg->lParam & (1 << 24)) ? LLKHF_EXTENDED : 0 ) |
-                     ( flagInjected ? LLKHF_INJECTED : 0) |
-                     fAltDown ? LLKHF_ALTDOWN : 0 |
-                     ( (msg->lParam & (1 << 31)) ? LLKHF_UP : 0);
-                     */
   kbhs.time        = msg->time;
   kbhs.dwExtraInfo = 0; // @@@PH not supported?
   
