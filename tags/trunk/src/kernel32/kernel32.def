@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.110 2001-06-23 07:38:51 bird Exp $
+; $Id: kernel32.def,v 1.111 2001-06-26 00:25:18 bird Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -124,8 +124,8 @@ EXPORTS
 ;  Ordinal0096 = _OS2Ordinal0096@??           @96
 ;  Ordinal0097 = _OS2Ordinal0097@??           @97
 ;  Ordinal0098 = _OS2Ordinal0098@??           @98
-   KERNEL32_99 = _KERNEL32_99@4               @99	NONAME
-   KERNEL32_100 = _KERNEL32_100@12            @100     	NONAME
+   KERNEL32_99 = _KERNEL32_99@4               @99   NONAME
+   KERNEL32_100 = _KERNEL32_100@12            @100      NONAME
 ;  Ordinal0101 = _OS2Ordinal0101@??           @101
 
 
@@ -1145,7 +1145,7 @@ EXPORTS
 
     _toupperW@4                                                   @2006 NONAME
     _tolowerW@4                                                   @2007 NONAME
-    get_char_typeW__FUs                                           @2008 NONAME
+    get_char_typeW                                                @2008 NONAME
 
     _InitializeTIB@4                                              @2010 NONAME
     _DestroyTIB@0                                                 @2011 NONAME
