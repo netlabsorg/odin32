@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.145 2002-02-18 21:33:29 phaller Exp $ */
+/* $Id: wprocess.cpp,v 1.146 2002-02-18 21:38:05 phaller Exp $ */
 
 /*
  * Win32 process functions
@@ -1565,7 +1565,12 @@ HANDLE WIN32API GetModuleHandleA(LPCTSTR lpszModule)
     {
         if(WinExe)
                 hMod = WinExe->getInstanceHandle();
-        else    hMod = -1;
+        else    
+        {
+          // Just fail this API
+          hMod = 0;
+          SetLastError(ERROR_INVALID_HANDLE);
+        }
     }
     else
     {
