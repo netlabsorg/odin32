@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.608 2000-01-04 22:19:25 sandervl Exp $ */
+ /* $Id: changelog,v 1.609 2000-01-05 18:30:45 davidr Exp $ */
+
+ 2000-01-05: David Raison <djr@lemur.co.uk>
+        - OLEAUT32: LHashValOfNameSys(A)
 
  2000-01-04: Jens Wiessner <wiessnej@rfi.de>
 	- TWAIN_32: Created twain dll for usage with CFM Twain for OS/2.

@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.3 2000-01-02 21:29:57 davidr Exp $ */
+/* $Id: initterm.cpp,v 1.4 2000-01-05 18:29:53 davidr Exp $ */
 
 /*
  * DLL entry point
@@ -47,6 +47,8 @@ int globLoadNr = 0;
 
 char  oleaut32Path[CCHMAXPATH] = "";
 int   loadNr = 0;
+
+void Hash_Initialise(void);
 
 /*-------------------------------------------------------------------*/
 /* A clean up routine registered with DosExitList must be used if    */
@@ -105,6 +107,8 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
                 return 0UL;
 
          OpenPrivateLogFiles();
+
+         Hash_Initialise();
 
 
          break;

@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.4 1999-12-08 20:03:26 davidr Exp $ */
+/* $Id: stubs.cpp,v 1.5 2000-01-05 18:29:54 davidr Exp $ */
 /* 
  * Win32 COM/OLE stubs for OS/2
  * 
@@ -298,22 +298,6 @@ HRESULT WIN32API CreateTypeLib2
     ICreateTypeLib2 **	ppctlib)
 {
     dprintf(("OLEAUT32: CreateTypeLib2 - stub"));
-    return S_OK;
-}
-
-//*****************************************************************************
-//*****************************************************************************
-ULONG WIN32API LHashValOfNameSys(SYSKIND syskind, LCID lcid, const OLECHAR * szName)
-{
-    dprintf(("OLEAUT32: LHashValOfNameSys - stub"));
-    return S_OK;
-}
-
-//*****************************************************************************
-//*****************************************************************************
-ULONG WIN32API LHashValOfNameSysA (SYSKIND syskind, LCID lcid, LPCSTR szName)
-{
-    dprintf(("OLEAUT32: LHashValOfNameSysA - stub"));
     return S_OK;
 }
 
