@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.37 2000-01-12 17:37:29 cbratschi Exp $ */
+/* $Id: pmwindow.cpp,v 1.38 2000-01-12 19:43:58 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -294,6 +294,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         goto RunDefWndProc;
     }
 
+#if 0
     case WM_CALCVALIDRECTS:
     {
       PRECTL oldRect = (PRECTL)mp1,newRect = oldRect+1;
@@ -315,6 +316,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
       RestoreOS2TIB();
       return (MRESULT)res;
     }
+#endif
 
     case WM_SETFOCUS:
     {
