@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.6 2000-01-14 13:16:58 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.7 2000-01-14 17:48:33 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -788,8 +788,9 @@ VOID Win32BaseWindow::DrawMinButton(HDC hdc,BOOL down,BOOL bGrayed)
   }
 }
 //******************************************************************************
+// redrawText: only redraws text
 //******************************************************************************
-VOID Win32BaseWindow::DrawCaption(HDC hdc,RECT *rect,BOOL active)
+VOID Win32BaseWindow::DrawCaption(HDC hdc,RECT *rect,BOOL active,BOOL redrawText)
 {
   RECT  r = *rect;
   char  buffer[256];
@@ -849,7 +850,7 @@ VOID Win32BaseWindow::DrawCaption(HDC hdc,RECT *rect,BOOL active)
 
   if ((dwStyle & WS_SYSMENU) && !(dwExStyle & WS_EX_TOOLWINDOW))
   {
-    if (DrawSysButton(hdc,FALSE))
+    if (redrawText || DrawSysButton(hdc,FALSE))
       r.left += GetSystemMetrics(SM_CYCAPTION) - 1;
   }
 
@@ -857,12 +858,15 @@ VOID Win32BaseWindow::DrawCaption(HDC hdc,RECT *rect,BOOL active)
   {
     UINT state;
 
-    /* Go get the sysmenu */
-    state = GetMenuState(hSysMenu, SC_CLOSE, MF_BYCOMMAND);
+    if (!redrawText)
+    {
+      /* Go get the sysmenu */
+      state = GetMenuState(hSysMenu, SC_CLOSE, MF_BYCOMMAND);
 
-    /* Draw a grayed close button if disabled and a normal one if SC_CLOSE is not there */
-    DrawCloseButton(hdc, FALSE,
-                    ((((state & MF_DISABLED) || (state & MF_GRAYED))) && (state != 0xFFFFFFFF)));
+      /* Draw a grayed close button if disabled and a normal one if SC_CLOSE is not there */
+      DrawCloseButton(hdc, FALSE,
+                      ((((state & MF_DISABLED) || (state & MF_GRAYED))) && (state != 0xFFFFFFFF)));
+    }
     r.right -= GetSystemMetrics(SM_CYCAPTION) - 1;
 
     if ((dwStyle & WS_MAXIMIZEBOX) || (dwStyle & WS_MINIMIZEBOX))
@@ -870,11 +874,13 @@ VOID Win32BaseWindow::DrawCaption(HDC hdc,RECT *rect,BOOL active)
       /* In win95 the two buttons are always there */
       /* But if the menu item is not in the menu they're disabled*/
 
-      DrawMaxButton(hdc, FALSE, (!(dwStyle & WS_MAXIMIZEBOX)));
+      if (!redrawText)
+        DrawMaxButton(hdc, FALSE, (!(dwStyle & WS_MAXIMIZEBOX)));
       r.right -= GetSystemMetrics(SM_CXSIZE) + 1;
 
-      DrawMinButton(hdc, FALSE,  (!(dwStyle & WS_MINIMIZEBOX)));
-            r.right -= GetSystemMetrics(SM_CXSIZE) + 1;
+      if (!redrawText)
+        DrawMinButton(hdc, FALSE,  (!(dwStyle & WS_MINIMIZEBOX)));
+      r.right -= GetSystemMetrics(SM_CXSIZE) + 1;
     }
   }
 
@@ -889,13 +895,90 @@ VOID Win32BaseWindow::DrawCaption(HDC hdc,RECT *rect,BOOL active)
     else
       hFont = CreateFontIndirectA (&nclm.lfCaptionFont);
     hOldFont = SelectObject (hdc, hFont);
-    if (active) SetTextColor( hdc, GetSysColor( COLOR_CAPTIONTEXT ) );
-    else SetTextColor( hdc, GetSysColor( COLOR_INACTIVECAPTIONTEXT ) );
+    SetTextColor(hdc,GetSysColor(active ? COLOR_CAPTIONTEXT:COLOR_INACTIVECAPTIONTEXT));
     SetBkMode( hdc, TRANSPARENT );
     r.left += 2;
     DrawTextA( hdc, buffer, -1, &r,
              DT_SINGLELINE | DT_VCENTER | DT_NOPREFIX | DT_LEFT );
     DeleteObject (SelectObject (hdc, hOldFont));
+  }
+}
+//******************************************************************************
+//******************************************************************************
+VOID Win32BaseWindow::UpdateCaptionText()
+{
+  BOOL active = flags & WIN_NCACTIVATED;
+  HDC hdc;
+  RECT rect,r;
+  HRGN hrgn;
+
+  if (!((dwStyle & WS_CAPTION) == WS_CAPTION)) return;
+
+  rect.top = rect.left = 0;
+  rect.right  = rectWindow.right - rectWindow.left;
+  rect.bottom = rectWindow.bottom - rectWindow.top;
+  if(!(flags & WIN_MANAGED))
+  {
+    if (HAS_BIGFRAME( dwStyle, dwExStyle))
+    {
+      InflateRect(&rect,-2,-2);
+    }
+
+    if (HAS_THICKFRAME(dwStyle,dwExStyle))
+    {
+      INT width = GetSystemMetrics(SM_CXFRAME) - GetSystemMetrics(SM_CXEDGE);
+      INT height = GetSystemMetrics(SM_CYFRAME) - GetSystemMetrics(SM_CYEDGE);
+
+      InflateRect(&rect,-width,-height);
+    }
+    else if (HAS_DLGFRAME(dwStyle,dwExStyle))
+    {
+      INT width = GetSystemMetrics(SM_CXDLGFRAME) - GetSystemMetrics(SM_CXEDGE);
+      INT height = GetSystemMetrics(SM_CYDLGFRAME) - GetSystemMetrics(SM_CYEDGE);
+
+      InflateRect(&rect,-width,-height);
+    }
+    else if (HAS_THINFRAME(dwStyle))
+    {
+    }
+
+    r = rect;
+    if (dwExStyle & WS_EX_TOOLWINDOW)
+    {
+      r.bottom = rect.top + GetSystemMetrics(SM_CYSMCAPTION);
+    }
+    else
+    {
+      r.bottom = rect.top + GetSystemMetrics(SM_CYCAPTION);
+    }
+
+    //clip the buttons
+    if ((dwStyle & WS_SYSMENU) && !(dwExStyle & WS_EX_TOOLWINDOW))
+    {
+      HICON hIcon;
+
+      hIcon = (HICON) GetClassLongA(Win32Hwnd, GCL_HICONSM);
+      if(!hIcon) hIcon = (HICON) GetClassLongA(Win32Hwnd, GCL_HICON);
+      if (hIcon)
+        rect.left += GetSystemMetrics(SM_CYCAPTION) - 1;
+    }
+    if (dwStyle & WS_SYSMENU)
+    {
+      rect.right -= GetSystemMetrics(SM_CYCAPTION) - 1;
+
+      if ((dwStyle & WS_MAXIMIZEBOX) || (dwStyle & WS_MINIMIZEBOX))
+      {
+        rect.right -= GetSystemMetrics(SM_CXSIZE) + 1;
+        rect.right -= GetSystemMetrics(SM_CXSIZE) + 1;
+      }
+    }
+
+    hrgn = CreateRectRgnIndirect(&rect);
+    hdc = GetDCEx(Win32Hwnd,hrgn,DCX_USESTYLE | DCX_WINDOW | DCX_INTERSECTRGN);
+    SelectObject(hdc,GetSysColorPen(COLOR_WINDOWFRAME));
+    DrawCaption(hdc,&r,active,TRUE);
+    DeleteObject(hrgn);
+    ReleaseDC(Win32Hwnd,hdc);
   }
 }
 //******************************************************************************
@@ -921,8 +1004,10 @@ VOID Win32BaseWindow::DoNCPaint(HRGN clip,BOOL suppress_menupaint)
   rect.bottom = rectWindow.bottom - rectWindow.top;
 
   if( clip > 1 )
+  {
+    //CB: unknown WINE handling (clip == 1), clip client?
     GetRgnBox( clip, &rectClip );
-  else
+  } else
   {
     clip = 0;
     rectClip = rect;
@@ -960,7 +1045,7 @@ VOID Win32BaseWindow::DoNCPaint(HRGN clip,BOOL suppress_menupaint)
         rect.top += GetSystemMetrics(SM_CYCAPTION);
       }
       if( !clip || IntersectRect( &rfuzz, &r, &rectClip ) )
-        DrawCaption(hdc, &r, active);
+        DrawCaption(hdc,&r,active,FALSE);
     }
   }
   if (HAS_MENU())
