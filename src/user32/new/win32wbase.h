@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.5 1999-09-04 19:42:29 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.6 1999-09-04 19:51:47 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -16,7 +16,7 @@
 #ifdef __cplusplus
 
 #include <win32class.h>
-#include "open32wbase.h"
+//#include "open32wbase.h"
 #include <gen_object.h>
 #include <win32wndchild.h>
 #include <winres.h>
@@ -270,10 +270,10 @@ private:
 #endif
 
 public:
-       void SetFakeOpen32()    { WinSetDAXData (OS2Hwnd, &fakeWinBase); }
-       void RemoveFakeOpen32() { WinSetDAXData (OS2Hwnd, NULL); }
+//       void SetFakeOpen32()    { WinSetDAXData (OS2Hwnd, &fakeWinBase); }
+//       void RemoveFakeOpen32() { WinSetDAXData (OS2Hwnd, NULL); }
 
-  fakeOpen32WinBaseClass fakeWinBase;
+//  fakeOpen32WinBaseClass fakeWinBase;
 };
 
 
