@@ -1023,6 +1023,7 @@ function Odin32DBFunctionInfo($db, $iRefcode)
                    "    f.sketch        AS sketch,\n".
                    "    f.equiv         AS equiv,\n".
                    "    f.time          AS time,\n".
+                   "    f.line          AS line,\n".
                    "    g.name          AS apigroupname,\n".
                    "    g.refcode       AS apigrouprefcode,\n".
                    "    a.name          AS aliasname,\n".
@@ -1067,6 +1068,10 @@ function Odin32DBFunctionInfo($db, $iRefcode)
         if (isset($array["apigroupname"]))
             Odin32DBInfoRow1("API Group", $array, "apigroupname", "apigrouprefcode", "apigrouprefcode","","");
         Odin32DBInfoRow1("File", $array, "filename", "filerefcode", "filerefcode","not available","");
+        if ($array["line"] > 0)
+            Odin32DBInfoRow1("Line", $array, "line", "", "","","");
+        else
+            Odin32DBInfoRow1("Line", $array, "unavailable", "", "","not available","");
         if (isset($array["aliasrefcode"]))
             Odin32DBInfoRow2("Forwards", $array, "aliasdllname", "aliasdllrefcode", "dllrefcode","",".",
                                                  "aliasname", "aliasrefcode", "functionrefcode");
@@ -2102,14 +2107,14 @@ function Odin32DBAPIGroupInfo($db, $iRefcode, $fFunctions, $fFiles, $fAuthors, $
          * States
          */
         $sql = sprintf("SELECT\n".
-                       "    f.state,\n".
-                       "    COUNT(f.state)\n".
+                       "    state,\n".
+                       "    COUNT(state)\n".
                        "FROM\n".
                        "    function\n".
                        "WHERE\n".
-                       "    f.apigroup = %d\n".
-                       "GROUP BY f.state\n".
-                       "ORDER BY f.state",
+                       "    apigroup = %d\n".
+                       "GROUP BY state\n".
+                       "ORDER BY state",
                         $iRefcode);
         Odin32DBWriteStates($cFunctions, $sql, $db);
 
