@@ -1,4 +1,4 @@
-/* $Id: syscolor.cpp,v 1.15 2000-01-18 20:10:46 sandervl Exp $ */
+/* $Id: syscolor.cpp,v 1.16 2000-01-18 20:21:29 sandervl Exp $ */
 
 /*
  * Win32 system color API functions for OS/2
@@ -28,7 +28,7 @@
 
 #define NUM_SYS_COLORS     (COLOR_GRADIENTINACTIVECAPTION+1)
 
-BOOL USEWINCOLORS = PROFILE_GetOdinIniBool(ODINCOLORS,"UseWinColors",FALSE);
+BOOL USEWINCOLORS = 1;
 
 /* Win98 colors */
 
@@ -161,6 +161,8 @@ void SYSCOLOR_Save(void)
 void SYSCOLOR_Init(void)
 {
   INT x;
+
+  USEWINCOLORS = PROFILE_GetOdinIniBool(ODINCOLORS,"UseWinColors",TRUE);
 
   SYSCOLOR_Load();
   if (USEWINCOLORS)
