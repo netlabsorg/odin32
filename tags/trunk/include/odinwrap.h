@@ -249,6 +249,7 @@ extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
              a1,a2,a3));                      \
     FNPROLOGUE(#cName)                       \
     ODIN_##cName(a1,a2,a3);              \
+    dprintf(("%s: void "#cName"() leave\n",   \
              pszOdinDebugChannel));           \
     FNEPILOGUE(#cName)            \
   }                               \
@@ -284,7 +285,7 @@ extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
              a1,a2,a3,a4));                    \
     FNPROLOGUE(#cName)                       \
     ODIN_##cName(a1,a2,a3,a4); \
-    dprintf(("%s: void "#cName"() leave\n",    \
+    dprintf(("%s: void "#cName"() leave\n",   \
              pszOdinDebugChannel));           \
     FNEPILOGUE       \
   }                               \
@@ -322,6 +323,7 @@ extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
              a1,a2,a3,a4,a5));                \
     FNPROLOGUE(#cName)                       \
     ODIN_##cName(a1,a2,a3,a4,a5); \
+    dprintf(("%s: void "#cName"() leave\n",   \
              pszOdinDebugChannel));           \
     FNEPILOGUE       \
   }                               \
@@ -697,6 +699,12 @@ extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
  * General Wrapper Macros                                                   *
  ****************************************************************************/
 
+#define FNPROLOGUE(a)   \
+  USHORT sel = GetFS(); 
+
+#define FNEPILOGUE(a)   \
+  SetFS(sel);
+
 #define ODINFUNCTION0   ODINFUNCTIONNODBG0
 #define ODINFUNCTION1   ODINFUNCTIONNODBG1
 #define ODINFUNCTION2   ODINFUNCTIONNODBG2
@@ -735,71 +743,380 @@ extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
  * General Wrapper Macros                                                   *
  ****************************************************************************/
 
+
 /* ---------- 0 parameters ---------- */
-#define ODINFUNCTIONNODBG0(cRet,cName) cRet WINAPI cName(void)
-#define ODINPROCEDURENODBG0(cName)     void WINAPI cName(void)
+#define ODINFUNCTIONNODBG0(cRet,cName)             \
+  cRet ODIN_INTERNAL ODIN_##cName (void);     \
+  cRet WINAPI cName(void)                     \
+  {                                           \
+    FNPROLOGUE(#cName)                        \
+    cRet   rc  = ODIN_##cName();              \
+    FNEPILOGUE(#cName)                        \
+    return rc;                                \
+  }                                           \
+                                              \
+  cRet ODIN_INTERNAL ODIN_##cName (void)
+
+
+#define ODINPROCEDURENODBG0(cName)                 \
+  void ODIN_INTERNAL ODIN_##cName (void);     \
+  void WINAPI cName(void)                     \
+  {                                           \
+    FNPROLOGUE(#cName)                       \
+    ODIN_##cName();                           \
+    FNEPILOGUE(#cName)                        \
+  }                                           \
+                                              \
+  void ODIN_INTERNAL ODIN_##cName (void)
+
 
 /* ---------- 1 parameters ---------- */
-#define ODINFUNCTIONNODBG1(cRet,cName,t1,a1) cRet WINAPI cName(t1 a1)
-#define ODINPROCEDURENODBG1(cName,t1,a1)     void WINAPI cName(t1 a1)
+#define ODINFUNCTIONNODBG1(cRet,cName,t1,a1)       \
+  cRet ODIN_INTERNAL ODIN_##cName (t1 a1);    \
+  cRet WINAPI cName(t1 a1)                    \
+  {                                           \
+    FNPROLOGUE(#cName)                       \
+    cRet   rc  = ODIN_##cName(a1);            \
+    FNEPILOGUE(#cName)                        \
+    return rc;                                \
+  }                                           \
+                                              \
+  cRet ODIN_INTERNAL ODIN_##cName (t1 a1)
+
+#define ODINPROCEDURENODBG1(cName,t1,a1)           \
+  void ODIN_INTERNAL ODIN_##cName (t1 a1);    \
+  void WINAPI cName(t1 a1)                    \
+  {                                           \
+    FNPROLOGUE(#cName)                       \
+    ODIN_##cName(a1);                         \
+    FNEPILOGUE(#cName)                        \
+  }                                           \
+                                              \
+  void ODIN_INTERNAL ODIN_##cName (t1 a1)
+
 
 /* ---------- 2 parameters ---------- */
-#define ODINFUNCTIONNODBG2(cRet,cName,t1,a1,t2,a2) cRet WINAPI cName(t1 a1,t2 a2)
-#define ODINPROCEDURENODBG2(cName,t1,a1,t2,a2)     void WINAPI cName(t1 a1,t2 a2)
+#define ODINFUNCTIONNODBG2(cRet,cName,t1,a1,t2,a2)  \
+  cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2); \
+  cRet WINAPI cName(t1 a1,t2 a2)               \
+  {                                            \
+    FNPROLOGUE(#cName)                        \
+    cRet   rc  = ODIN_##cName(a1,a2);          \
+    FNEPILOGUE(#cName)                         \
+    return rc;                                 \
+  }                                            \
+                                               \
+  cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2)
+
+#define ODINPROCEDURENODBG2(cName,t1,a1,t2,a2)     \
+  void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2);     \
+  void WINAPI cName(t1 a1,t2 a2)              \
+  {                                           \
+    FNPROLOGUE(#cName)                       \
+    ODIN_##cName(a1,a2);                      \
+    FNEPILOGUE(#cName)                        \
+  }                                           \
+                                              \
+  void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2)
+
 
 /* ---------- 3 parameters ---------- */
-#define ODINFUNCTIONNODBG3(cRet,cName,t1,a1,t2,a2,t3,a3)  cRet WINAPI cName(t1 a1,t2 a2,t3 a3)
-#define ODINPROCEDURENODBG3(cName,t1,a1,t2,a2,t3,a3)      void WINAPI cName(t1 a1,t2 a2,t3 a3)
+#define ODINFUNCTIONNODBG3(cRet,cName,t1,a1,t2,a2,t3,a3)  \
+  cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3);      \
+  cRet WINAPI cName(t1 a1,t2 a2,t3 a3)        \
+  {                                           \
+    FNPROLOGUE(#cName)                       \
+    cRet   rc  = ODIN_##cName(a1,a2,a3);      \
+    FNEPILOGUE(#cName)            \
+    return rc;                    \
+  }                               \
+                                  \
+  cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3)
+
+#define ODINPROCEDURENODBG3(cName,t1,a1,t2,a2,t3,a3)  \
+  void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3);  \
+  void WINAPI cName(t1 a1,t2 a2,t3 a3)    \
+  {                               \
+    FNPROLOGUE(#cName)                       \
+    ODIN_##cName(a1,a2,a3);              \
+    FNEPILOGUE(#cName)            \
+  }                               \
+                                  \
+  void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3)
+
 
 /* ---------- 4 parameters ---------- */
-#define ODINFUNCTIONNODBG4(cRet,cName,t1,a1,t2,a2,t3,a3,t4,a4)  cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4)
-#define ODINPROCEDURENODBG4(cName,t1,a1,t2,a2,t3,a3,t4,a4)      void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4)
+#define ODINFUNCTIONNODBG4(cRet,cName,t1,a1,t2,a2,t3,a3,t4,a4)  \
+  cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4);      \
+  cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4)        \
+  {                               \
+    FNPROLOGUE(#cName)                       \
+    cRet   rc  = ODIN_##cName(a1,a2,a3,a4); \
+    FNEPILOGUE(#cName)            \
+    return rc;                    \
+  }                               \
+                                  \
+  cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4)
+
+#define ODINPROCEDURENODBG4(cName,t1,a1,t2,a2,t3,a3,t4,a4)  \
+  void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4);  \
+  void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4)    \
+  {                               \
+    FNPROLOGUE(#cName)                       \
+    ODIN_##cName(a1,a2,a3,a4); \
+    FNEPILOGUE       \
+  }                               \
+                                  \
+  void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4)
+
 
 /* ---------- 5 parameters ---------- */
-#define ODINFUNCTIONNODBG5(cRet,cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5)  cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5)
-#define ODINPROCEDURENODBG5(cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5)      void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5)
+#define ODINFUNCTIONNODBG5(cRet,cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5)  \
+  cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5);      \
+  cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5)        \
+  {                               \
+    FNPROLOGUE(#cName)                       \
+    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5); \
+    FNEPILOGUE(#cName)            \
+    return rc;                    \
+  }                               \
+                                  \
+  cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5)
+
+#define ODINPROCEDURENODBG5(cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5)  \
+  void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5);  \
+  void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5)    \
+  {                               \
+    FNPROLOGUE(#cName)                       \
+    ODIN_##cName(a1,a2,a3,a4,a5); \
+    FNEPILOGUE       \
+  }                               \
+                                  \
+  void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5)
+
 
 /* ---------- 6 parameters ---------- */
-#define ODINFUNCTIONNODBG6(cRet,cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6)  cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6)
-#define ODINPROCEDURENODBG6(cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6)      void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6)
+#define ODINFUNCTIONNODBG6(cRet,cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6)  \
+  cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6);      \
+  cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6)        \
+  {                               \
+    FNPROLOGUE(#cName)                       \
+    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6); \
+    FNEPILOGUE(#cName)            \
+    return rc;                    \
+  }                               \
+                                  \
+  cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6)
+
+#define ODINPROCEDURENODBG6(cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6)  \
+  void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6);  \
+  void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6)    \
+  {                               \
+    FNPROLOGUE(#cName)                       \
+    ODIN_##cName(a1,a2,a3,a4,a5,a6); \
+    FNEPILOGUE       \
+  }                               \
+                                  \
+  void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6)
+
 
 /* ---------- 7 parameters ---------- */
-#define ODINFUNCTIONNODBG7(cRet,cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7)  cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7)
-#define ODINPROCEDURENODBG7(cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7)      void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7)
+#define ODINFUNCTIONNODBG7(cRet,cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7)  \
+  cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7);      \
+  cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7)        \
+  {                               \
+    FNPROLOGUE(#cName)                       \
+    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7); \
+    FNEPILOGUE(#cName)            \
+    return rc;                    \
+  }                               \
+                                  \
+  cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7)
+
+#define ODINPROCEDURENODBG7(cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7)  \
+  void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7);  \
+  void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7)    \
+  {                               \
+    FNPROLOGUE(#cName)                       \
+    ODIN_##cName(a1,a2,a3,a4,a5,a6,a7); \
+    FNEPILOGUE       \
+  }                               \
+                                  \
+  void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7)
+
 
 /* ---------- 8 parameters ---------- */
-#define ODINFUNCTIONNODBG8(cRet,cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8)  cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8)
-#define ODINPROCEDURENODBG8(cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8)      void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8)
+#define ODINFUNCTIONNODBG8(cRet,cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8)  \
+  cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8);      \
+  cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8)        \
+  {                               \
+    FNPROLOGUE(#cName)                       \
+    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8); \
+    FNEPILOGUE(#cName)            \
+    return rc;                    \
+  }                               \
+                                  \
+  cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8)
+
+#define ODINPROCEDURENODBG8(cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8)  \
+  void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8);  \
+  void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8)    \
+  {                               \
+    FNPROLOGUE(#cName)                       \
+    ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8); \
+    FNEPILOGUE       \
+  }                               \
+                                  \
+  void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8)
+
 
 /* ---------- 9 parameters ---------- */
-#define ODINFUNCTIONNODBG9(cRet,cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8,t9,a9)   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9)
-#define ODINPROCEDURENODBG9(cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8,t9,a9)       void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9)
+#define ODINFUNCTIONNODBG9(cRet,cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8,t9,a9)  \
+  cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9);      \
+  cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9)        \
+  {                               \
+    FNPROLOGUE(#cName)                       \
+    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9); \
+    FNEPILOGUE(#cName)            \
+    return rc;                    \
+  }                               \
+                                  \
+  cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9)
+
+#define ODINPROCEDURENODBG9(cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8,t9,a9)  \
+  void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9);  \
+  void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9)    \
+  {                               \
+    FNPROLOGUE(#cName)                       \
+    ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9); \
+    FNEPILOGUE       \
+  }                               \
+                                  \
+  void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9)
+
 
 /* ---------- 10 parameters ---------- */
-#define ODINFUNCTIONNODBG10(cRet,cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8,t9,a9,t10,a10)   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10)
-#define ODINPROCEDURENODBG10(cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8,t9,a9,t10,a10)       void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10)
+#define ODINFUNCTIONNODBG10(cRet,cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8,t9,a9,t10,a10)  \
+  cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10);      \
+  cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10)        \
+  {                               \
+    FNPROLOGUE(#cName)                       \
+    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10); \
+    FNEPILOGUE(#cName)            \
+    return rc;                    \
+  }                               \
+                                  \
+  cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10)
+
+#define ODINPROCEDURENODBG10(cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8,t9,a9,t10,a10)  \
+  void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10);  \
+  void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10)    \
+  {                               \
+    FNPROLOGUE(#cName)                       \
+    ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10); \
+    FNEPILOGUE       \
+  }                               \
+                                  \
+  void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10)
+
 
 /* ---------- 11 parameters ---------- */
-#define ODINFUNCTIONNODBG11(cRet,cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8,t9,a9,t10,a10,t11,a11)  cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11)
-#define ODINPROCEDURENODBG11(cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8,t9,a9,t10,a10,t11,a11)      void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11)
+#define ODINFUNCTIONNODBG11(cRet,cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8,t9,a9,t10,a10,t11,a11)  \
+  cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11);      \
+  cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11)        \
+  {                               \
+    FNPROLOGUE(#cName)                       \
+    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11); \
+    FNEPILOGUE(#cName)            \
+    return rc;                    \
+  }                               \
+                                  \
+  cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11)
+
+#define ODINPROCEDURENODBG11(cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8,t9,a9,t10,a10,t11,a11)  \
+  void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11);  \
+  void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11)    \
+  {                               \
+    FNPROLOGUE(#cName)                       \
+    ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11); \
+    FNEPILOGUE       \
+  }                               \
+                                  \
+  void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11)
+
 
 /* ---------- 12 parameters ---------- */
-#define ODINFUNCTIONNODBG12(cRet,cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8,t9,a9,t10,a10,t11,a11,t12,a12)  cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12)
-#define ODINPROCEDURENODBG12(cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8,t9,a9,t10,a10,t11,a11,t12,a12)      void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12)
+#define ODINFUNCTIONNODBG12(cRet,cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8,t9,a9,t10,a10,t11,a11,t12,a12)  \
+  cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12);      \
+  cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12)        \
+  {                               \
+    FNPROLOGUE(#cName)                       \
+    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12); \
+    FNEPILOGUE(#cName)            \
+    return rc;                    \
+  }                               \
+                                  \
+  cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12)
+
+#define ODINPROCEDURENODBG12(cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8,t9,a9,t10,a10,t11,a11,t12,a12)  \
+  void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12);  \
+  void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12)    \
+  {                               \
+    FNPROLOGUE(#cName)                       \
+    ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12); \
+    FNEPILOGUE       \
+  }                               \
+                                  \
+  void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12)
+
 
 /* ---------- 13 parameters ---------- */
 #define ODINFUNCTIONNODBG13(cRet,cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8,t9,a9,t10,a10,t11,a11,t12,a12,t13,a13)  \
-  cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13)
+  cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13);      \
+  cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13)        \
+  {                               \
+    FNPROLOGUE(#cName)                       \
+    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13); \
+    FNEPILOGUE(#cName)            \
+    return rc;                    \
+  }                               \
+                                  \
+  cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13)
 
 #define ODINPROCEDURENODBG13(cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8,t9,a9,t10,a10,t11,a11,t12,a12,t13,a13)  \
-  void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13)
+  void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13);  \
+  void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13)    \
+  {                               \
+    FNPROLOGUE(#cName)                       \
+    ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13); \
+    FNEPILOGUE       \
+  }                               \
+                                  \
+  void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13)
+
 
 /* ---------- 14 parameters ---------- */
 #define ODINFUNCTIONNODBG14(cRet,cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8,t9,a9,t10,a10,t11,a11,t12,a12,t13,a13,t14,a14)  \
-  cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13,t14 a14)
+  cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13,t14 a14);      \
+  cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13,t14 a14)        \
+  {                               \
+    FNPROLOGUE(#cName)                       \
+    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14); \
+    FNEPILOGUE(#cName)            \
+    return rc;                    \
+  }                               \
+                                  \
+  cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13,t14 a14)
 
 #define ODINPROCEDURENODBG14(cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8,t9,a9,t10,a10,t11,a11,t12,a12,t13,a13,t14,a14)  \
-  void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13,t14 a14)
-
+  void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13,t14 a14);  \
+  void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13,t14 a14)    \
+  {                               \
+    FNPROLOGUE(#cName)                       \
+    ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14); \
+    FNEPILOGUE       \
+  }                               \
+                                  \
+  void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13,t14 a14)
 
 #endif /* _ODINWRAP_H_ */
