@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.1191 2000-10-10 21:28:28 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1192 2000-10-11 07:22:58 sandervl Exp $ */
+
+ 2000-10-11: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: TLS callback fix + modify TLS callback pointers for new base address
 
  2000-10-10: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: Print date and time of build during init (log)
