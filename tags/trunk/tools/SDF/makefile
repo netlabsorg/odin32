@@ -1,9 +1,9 @@
-# $Id: makefile,v 1.3 2000-02-09 23:50:13 bird Exp $
+# $Id: makefile,v 1.1 2000-02-09 23:49:29 bird Exp $
 
 #
 # PD-Win32 API
 #
-# Makefile for the ImpDef utility.
+# Makefile for the SDF utility.
 #
 #
 
@@ -27,20 +27,14 @@ LDFLAGS  = $(LDFLAGS)  -Ge+ -Fe$@ /B"/MAP:full"
 
 
 
-all: ImpDef.exe ..\bin\ImpDef.exe
+all: sdf.exe ..\bin\sdf.exe
 
 
-ImpDef.exe: ImpDef.obj ..\common\commonicc.lib
+sdf.exe: sdf.obj ..\common\commonicc.lib
    $(LD) $(LDFLAGS) $** $(RTLLIB) os2386.lib
 
-..\bin\ImpDef.exe: ImpDef.exe
+..\bin\sdf.exe: sdf.exe
    $(CP) $** $@
-
-..\common\commonicc.lib:
-   @cd ..\common
-   @nmake /nologo commonicc.lib
-   @cd ..\impdef
-
 
 dep:
     $(DEPEND) $(CINCLUDES) -I *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h \
@@ -53,5 +47,4 @@ dep:
 
 clean:
     @$(RM) *.obj *.exe *.map *.pch *.log
-
 
