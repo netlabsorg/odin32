@@ -86,6 +86,8 @@ ULONG APIENTRY inittermUser32(ULONG hModule, ULONG ulFlag)
       case 0 :
          ParseLogStatusUSER32();
 
+         InitializeKernel32();
+
          hInstanceUser32 = RegisterLxDll(hModule, 0, (PVOID)&_Resource_PEResTab,
                                          USER32_MAJORIMAGE_VERSION, USER32_MINORIMAGE_VERSION,
                                          IMAGE_SUBSYSTEM_WINDOWS_GUI);

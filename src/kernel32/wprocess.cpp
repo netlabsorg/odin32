@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.130 2001-07-15 15:18:58 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.131 2001-07-28 18:03:38 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -1418,7 +1418,7 @@ DWORD WIN32API GetModuleFileNameA(HMODULE hModule, LPTSTR lpszPath, DWORD cchPat
         SetLastError(ERROR_INVALID_HANDLE);
         //only needed for call inside kernel32's initterm (profile init)
         //(console init only it seems...)
-        cch = O32_GetModuleFileName(hModule, lpszPath, cchPath);
+        cch = OSLibDosGetModuleFileName(hModule, lpszPath, cchPath);
         if (cch > 0)    cch++;          /* Open32 doesn't count the terminator. */
     }
 
@@ -1873,14 +1873,40 @@ HINSTANCE WIN32API WinExec(LPCSTR lpCmdLine, UINT nCmdShow)
         Sleep(1000); //WaitForInputIdle not available in Warp 3
     }
     else {
-        rc = O32_WaitForInputIdle(procinfo.hProcess, 15000);
+        dprintf(("Calling WaitForInputIdle %x %d", procinfo.hProcess, 15000));
+        rc = WaitForInputIdle(procinfo.hProcess, 15000);
+#ifdef DEBUG
         if(rc != 0) {
             dprintf(("WinExec: WaitForInputIdle %x returned %x", procinfo.hProcess, rc));
         }
+        else dprintf(("WinExec: WaitForInputIdle successfull"));
+#endif
     }
     CloseHandle(procinfo.hThread);
     CloseHandle(procinfo.hProcess);
     return 33;
+}
+//******************************************************************************
+//DWORD idAttach;   /* thread to attach */
+//DWORD idAttachTo; /* thread to attach to  */
+//BOOL fAttach; /* attach or detach */
+//******************************************************************************
+BOOL WIN32API AttachThreadInput(DWORD idAttach, DWORD idAttachTo, BOOL fAttach)
+{
+  dprintf(("USER32: AttachThreadInput, not implemented\n"));
+  return(TRUE);
+}
+//******************************************************************************
+//******************************************************************************
+DWORD WIN32API WaitForInputIdle(HANDLE hProcess, DWORD dwTimeOut)
+{
+  dprintf(("USER32: WaitForInputIdle %x %d\n", hProcess, dwTimeOut));
+
+  if(fVersionWarp3) {
+        Sleep(1000);
+        return 0;        
+  }
+  else  return O32_WaitForInputIdle(hProcess, dwTimeOut);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1950,7 +1976,7 @@ HINSTANCE WINAPI LoadModule( LPCSTR name, LPVOID paramBlock )
                         params->lpEnvAddress, NULL, &startup, &info ))
     {
         /* Give 15 seconds to the app to come up */
-        if ( O32_WaitForInputIdle ( info.hProcess, 15000 ) ==  0xFFFFFFFF )
+        if ( WaitForInputIdle ( info.hProcess, 15000 ) ==  0xFFFFFFFF )
             dprintf(("ERROR: WaitForInputIdle failed: Error %ld\n", GetLastError() ));
         hInstance = 33;
         /* Close off the handles */
@@ -1999,7 +2025,7 @@ FARPROC WIN32API GetProcAddress(HMODULE hModule, LPCSTR lpszProc)
         else    dprintf(("KERNEL32:  GetProcAddress %x from %X returned %X\n", lpszProc, hModule, proc));
         return proc;
   }
-  proc = O32_GetProcAddress(hModule, lpszProc);
+  proc = (FARPROC)OSLibDosGetProcAddress(hModule, lpszProc);
   if(HIWORD(lpszProc))
         dprintf(("KERNEL32:  GetProcAddress %s from %X returned %X\n", lpszProc, hModule, proc));
   else  dprintf(("KERNEL32:  GetProcAddress %x from %X returned %X\n", lpszProc, hModule, proc));
