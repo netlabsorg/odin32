@@ -1,4 +1,4 @@
-/* $Id: HOOK.CPP,v 1.27 2001-10-22 23:14:32 phaller Exp $ */
+/* $Id: HOOK.CPP,v 1.28 2001-10-23 06:22:52 phaller Exp $ */
 
 /*
  * Windows hook functions
@@ -779,6 +779,14 @@ BOOL ProcessKbdHook(LPMSG msg, BOOL remove )
 {
   // call the low level hook first
   ProcessKbdHookLL(msg, remove, FALSE);
+  
+  // ALT-Key comes in with different scan code (0xa4 == VK_LMENU_W),
+  // then gets translated to 0x12
+  if ( (msg->wParam == VK_LMENU) ||
+       (msg->wParam == VK_RMENU) )
+  {
+    msg->wParam = VK_MENU; // 0x12
+  }
   
     /* Handle F1 key by sending out WM_HELP message */
     if ((msg->message == WM_KEYUP) && 
