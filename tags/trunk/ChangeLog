@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1493 2001-06-10 01:44:47 bird Exp $ */
+/* $Id: ChangeLog,v 1.1494 2001-06-10 02:41:20 bird Exp $ */
 
  2001-06-09: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Win32API.h:
@@ -6,6 +6,8 @@
     - src/makefile:
                 o Relaxed the locks a little.
     - Win32k:   o Separated VAC3 and VAC36 output. (Please re-run configure!)
+    - makefiles/VAC36:
+                o Ignore ILIB warnings. (like those in the opengl tree)
 
  2001-06-09: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Keep reference count for window and class objects.
