@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.359 1999-10-24 09:42:32 sandervl Exp $ */
+ /* $Id: changelog,v 1.360 1999-10-24 12:29:50 sandervl Exp $ */
+
+ 99-10-24: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: MDI window fixes (mdi children correctly activated; menus inserted)
 
  99-10-24: Daniela Engert <dani@ngrt.de>
 	- KERNEL32: Fixed cursor in VPBuddy (invalid size)
