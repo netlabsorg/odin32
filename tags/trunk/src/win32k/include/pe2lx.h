@@ -1,4 +1,4 @@
-/* $Id: pe2lx.h,v 1.6 1999-11-10 01:45:33 bird Exp $
+/* $Id: pe2lx.h,v 1.7 2000-01-22 18:21:01 bird Exp $
  *
  * Pe2Lx class declarations. Ring 0 and Ring 3
  *
@@ -65,6 +65,9 @@ public:
     /** @cat Public Main methods */
     ULONG  init(PCSZ pszFilename);
     ULONG  read(ULONG offLXFile, PVOID pvBuffer, ULONG cbToRead, ULONG flFlags, PMTE pMTE);
+    ULONG  applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID pvPage,
+                       ULONG ulPageAddress, PVOID pvPTDA); /*(ldrEnum32bitRelRecs)*/
+
     #ifndef RING0
     ULONG  writeLxFile(PCSZ pszLXFilename);
     #endif

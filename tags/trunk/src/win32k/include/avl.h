@@ -1,4 +1,4 @@
-/* $Id: avl.h,v 1.1 1999-10-27 02:02:55 bird Exp $
+/* $Id: avl.h,v 1.2 2000-01-22 18:20:59 bird Exp $
  *
  * AVL-Tree (lookalike) declaration.
  *
@@ -14,6 +14,11 @@
 extern "C" {
 #endif
 
+/*
+ * AVL configuration. PRIVATE!
+ */
+#define AVL_MAX_HEIGHT      19          /* Up to 2^16 nodes. */
+
 /**
  * AVL key type
  */
@@ -24,17 +29,41 @@ typedef unsigned long AVLKEY;
  */
 typedef struct _AVLNodeCore
 {
-    unsigned char           uchHeight; /* Height of this tree: max(heigth(left), heigth(right)) + 1 */
+    AVLKEY                  Key;       /* Key value. */
     struct  _AVLNodeCore *  pLeft;     /* Pointer to left leaf node. */
     struct  _AVLNodeCore *  pRight;    /* Pointer to right leaf node. */
-    AVLKEY                  Key;       /* Key value. */
+    unsigned char           uchHeight; /* Height of this tree: max(heigth(left), heigth(right)) + 1 */
 } AVLNODECORE, *PAVLNODECORE, **PPAVLNODECORE;
 
+/**
+ * AVL Enum data - All members are PRIVATE! Don't touch!
+ */
+typedef struct _AVLEnumData
+{
+    char         fFromLeft;
+    char         cEntries;
+    char         achFlags[AVL_MAX_HEIGHT];
+    PAVLNODECORE aEntries[AVL_MAX_HEIGHT];
+} AVLENUMDATA, *PAVLENUMDATA;
 
-void AVLInsert(PPAVLNODECORE ppTree, PAVLNODECORE pNode);
-PAVLNODECORE AVLRemove(PPAVLNODECORE ppTree, AVLKEY Key);
-PAVLNODECORE AVLGet(PPAVLNODECORE ppTree, AVLKEY Key);
-PAVLNODECORE AVLGetWithAdjecentNodes(PPAVLNODECORE ppTree, AVLKEY Key, PPAVLNODECORE ppLeft, PPAVLNODECORE ppRight);
+
+/*
+ * callback type
+ */
+typedef unsigned ( _PAVLCALLBACK)(PAVLNODECORE, void*);
+typedef _PAVLCALLBACK *PAVLCALLBACK;
+
+
+void            AVLInsert(PPAVLNODECORE ppTree, PAVLNODECORE pNode);
+PAVLNODECORE    AVLRemove(PPAVLNODECORE ppTree, AVLKEY Key);
+PAVLNODECORE    AVLGet(PPAVLNODECORE ppTree, AVLKEY Key);
+PAVLNODECORE    AVLGetWithParent(PPAVLNODECORE ppTree, PPAVLNODECORE ppParent, AVLKEY Key);
+PAVLNODECORE    AVLGetWithAdjecentNodes(PPAVLNODECORE ppTree, AVLKEY Key, PPAVLNODECORE ppLeft, PPAVLNODECORE ppRight);
+unsigned        AVLDoWithAll(PPAVLNODECORE ppTree, int fFromLeft, PAVLCALLBACK pfnCallBack, void *pvParam);
+PAVLNODECORE    AVLBeginEnumTree(PPAVLNODECORE ppTree, PAVLENUMDATA pEnumData, int fFromLeft);
+PAVLNODECORE    AVLGetNextNode(PAVLENUMDATA pEnumData);
+PAVLNODECORE    AVLGetBestFit(PPAVLNODECORE ppTree, AVLKEY Key, int fAbove);
+
 
 
 /*

@@ -1,4 +1,4 @@
-/* $Id: ModuleBase.cpp,v 1.1 1999-11-10 01:45:35 bird Exp $
+/* $Id: ModuleBase.cpp,v 1.2 2000-01-22 18:21:01 bird Exp $
  *
  * ModuleBase - Implementetation.
  *
@@ -131,6 +131,33 @@ ULONG ModuleBase::init(PCSZ pszFilename)
     /* return successfully */
     return NO_ERROR;
 }
+
+
+
+/**
+ * Applies relocation fixups to a page which is being loaded.
+ * @returns    NO_ERROR on success?
+ *             error code on error?
+ * @param      pMTE           Pointer Module Table Entry.
+ * @param      iObject        Index into the object table. (0-based)
+ * @param      iPageTable     Index into the page table. (0-based)
+ * @param      pvPage         Pointer to the page which is being loaded.
+ * @param      ulPageAddress  Address of page.
+ * @param      pvPTDA         Pointer to Per Task Data Aera
+ * @remark     Stub.
+ */
+ULONG  ModuleBase::applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID pvPage,
+                               ULONG ulPageAddress, PVOID pvPTDA)
+{
+    NOREF(pMTE);
+    NOREF(iObject);
+    NOREF(iPageTable);
+    NOREF(pvPage);
+    NOREF(ulPageAddress);
+    NOREF(pvPTDA);
+    return NO_ERROR;
+}
+
 
 
 #ifndef RING0

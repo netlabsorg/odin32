@@ -1,6 +1,6 @@
-/* $Id: myldrRead.cpp,v 1.5 1999-11-10 01:45:36 bird Exp $
+/* $Id: myldrRead.cpp,v 1.6 2000-01-22 18:21:02 bird Exp $
  *
- * myldrRead - _ldrRead.
+ * myldrRead - ldrRead.
  *
  * Copyright (c) 1998-1999 knut st. osmundsen
  *
@@ -49,36 +49,36 @@ ULONG LDRCALL myldrRead(
     if (GetState(hFile) == HSTATE_OUR)
     {
         PMODULE pMod;
-        kprintf(("_ldrRead+: hF=%+04x off=%+08x pB=%+08x fl=%+08x cb=%+04x pMTE=%+08x\n",hFile,ulOffset,pBuffer,ulFlags,ulBytesToRead,pMTE));
+        kprintf(("ldrRead+: hF=%+04x off=%+08x pB=%+08x fl=%+08x cb=%+04x pMTE=%+08x\n",hFile,ulOffset,pBuffer,ulFlags,ulBytesToRead,pMTE));
 
         pMod = getModuleBySFN(hFile);
         if (pMod != NULL)
         {
             /* I would love to have a pointer to the MTE */
             if (pMod->pMTE == NULL && pMTE != NULL)
-                pMod->pMTE == pMTE;
+                pMod->pMTE = pMTE;
 
             /* debug */
             if (ulFlags != 0)
-                kprintf(("_ldrRead: Warning ulFlags = 0x%x (!= 0)\n", ulFlags));
+                kprintf(("ldrRead: Warning ulFlags = 0x%x (!= 0)\n", ulFlags));
 
             if ((pMod->fFlags & MOD_TYPE_MASK) == MOD_TYPE_PE2LX)
                 rc = pMod->Data.pModule->read(ulOffset, pBuffer, ulBytesToRead, ulFlags, pMTE);
             else
             {
-                kprintf(("_ldrRead: Invalid module type, %#x\n", pMod->fFlags & MOD_TYPE_MASK));
+                kprintf(("ldrRead: Invalid module type, %#x\n", pMod->fFlags & MOD_TYPE_MASK));
                 rc = ERROR_READ_FAULT;
             }
             return rc;
         }
         else
-            kprintf(("_ldrRead:  DON'T PANIC! - but I can't get Node ptr! - This is really an IPE!\n"));
+            kprintf(("ldrRead:  DON'T PANIC! - but I can't get Node ptr! - This is really an IPE!\n"));
     }
 
-    rc = _ldrRead(hFile, ulOffset, pBuffer, ulFlags, ulBytesToRead, pMTE);
+    rc = ldrRead(hFile, ulOffset, pBuffer, ulFlags, ulBytesToRead, pMTE);
 
     #if 0
-    kprintf(("_ldrRead:  hF=%+04x off=%+08x pB=%+08x fl=%+08x cb=%+04x pMTE=%+08x rc=%d\n",
+    kprintf(("ldrRead:  hF=%+04x off=%+08x pB=%+08x fl=%+08x cb=%+04x pMTE=%+08x rc=%d\n",
              hFile,ulOffset,pBuffer,ulFlags,ulBytesToRead,pMTE,rc));
     #endif
 

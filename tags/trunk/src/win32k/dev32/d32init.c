@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.4 1999-11-10 01:45:30 bird Exp $
+/* $Id: d32init.c,v 1.5 2000-01-22 18:20:57 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -18,6 +18,7 @@
 #define INCL_DOSERRORS
 #define INCL_NOPMAPI
 #define LDR_INCL_INITONLY
+
 
 /*******************************************************************************
 *   Header Files                                                               *
@@ -42,18 +43,18 @@
 *   Internal Functions                                                         *
 *******************************************************************************/
 static ULONG    readnum(const char *pszNum);
-static int      interpretFunctionProlog(char *p);
+static int      interpretFunctionProlog(char *p, BOOL fOverload);
 static int      procInit(void);
 
 
 /* externs located in 16-bit data segement */
-extern ULONG  _TKSSBase16;
-extern USHORT _R0FlatCS16;
-extern USHORT _R0FlatDS16;
+extern ULONG    _TKSSBase16;
+extern USHORT   _R0FlatCS16;
+extern USHORT   _R0FlatDS16;
 
 
 /* extern(s) located in calltab.asm */
-extern char callTab[NUMBER_OF_PROCS][MAXSIZE_PROLOG];
+extern char     callTab[NUMBER_OF_PROCS][MAXSIZE_PROLOG];
 
 
 /**
@@ -87,7 +88,7 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
     pszTmp = strpbrk(pRpInit->InitArgs, "-/");
     while (pszTmp != NULL)
     {
-        char cch;
+        int cch;
         pszTmp++; //skip [-/]
         cch = strlen(pszTmp);
         switch (*pszTmp)
@@ -308,12 +309,12 @@ static ULONG    readnum(const char *pszNum)
     if (*pszNum == '0')
         if (pszNum[1] == 'x' || pszNum[1] == 'X')
         {
-            ulBase == 16;
+            ulBase = 16;
             pszNum += 2;
         }
         else
         {
-            ulBase == 8;
+            ulBase = 8;
             i = 1;
         }
 
@@ -363,19 +364,22 @@ USHORT _loadds _Far32 _Pascal VerifyProcTab32(void)
             return STATUS_DONE | STERR | 2;
         }
 
-        /* verify known function prolog. (only EPT_PROC) */
-        if (_aProcTab[i].fType == EPT_PROC)
+        switch (_aProcTab[i].fType)
         {
-            if ((cb = interpretFunctionProlog((char*)_aProcTab[i].ulAddress)) <= 0 && cb + 5 >= MAXSIZE_PROLOG)
-            {
-                kprintf(("VerifyProcTab32: verify failed for procedure no.%d\n",i));
-                return STATUS_DONE | STERR | 3;
-            }
-        }
-        else
-        {
-            kprintf(("VerifyProcTab32: only EPT_PROC is implemented\n",i));
-            return STATUS_DONE | STERR | 4;
+            case EPT_PROC:
+            case EPT_PROCIMPORT:
+                /* verify known function prolog. */
+                if ((cb = interpretFunctionProlog((char*)_aProcTab[i].ulAddress, _aProcTab[i].fType == EPT_PROC))
+                    <= 0 && cb + 5 >= MAXSIZE_PROLOG)
+                {
+                    kprintf(("VerifyProcTab32: verify failed for procedure no.%d\n",i));
+                    return STATUS_DONE | STERR | 3;
+                }
+                break;
+
+            default:
+                kprintf(("VerifyProcTab32: only EPT_PROC is implemented\n",i));
+                return STATUS_DONE | STERR | 4;
         }
     }
 
@@ -407,7 +411,7 @@ USHORT _loadds _Far32 _Pascal GetOTEs32(PKRNLOBJTABLE pOTEBuf)
         pSMTE = pMTE->mte_swapmte;
         if (pSMTE != NULL)
         {
-            pOTEBuf->cObjects = pSMTE->smte_objcnt;
+            pOTEBuf->cObjects = (unsigned char)pSMTE->smte_objcnt;
             if (pSMTE->smte_objcnt <= MAXKRNLOBJECTS)
             {
                 pOTE = pSMTE->smte_objtab;
@@ -432,7 +436,7 @@ USHORT _loadds _Far32 _Pascal GetOTEs32(PKRNLOBJTABLE pOTEBuf)
     if (usRc != 0)
         kprintf(("GetOTEs32: failed. usRc = %d\n", usRc));
 
-    return usRc | (usRc != 0 ? STATUS_DONE | STERR : STATUS_DONE);
+    return (USHORT)(usRc | (usRc != NO_ERROR ? STATUS_DONE | STERR : STATUS_DONE));
 }
 
 
@@ -441,11 +445,12 @@ USHORT _loadds _Far32 _Pascal GetOTEs32(PKRNLOBJTABLE pOTEBuf)
  * @returns   Length of prolog need to be copied - which is also the offset of
  *            where the jmp instr should be placed.
  *            On error it returns 0.
- * @param     p  Pointer to prolog.
+ * @param     pach       Pointer to prolog.
+ * @param     fOverload  TRUE:  Function is to be overloaded.
+ *                       FALSE: Function is to be imported.
  */
-static int interpretFunctionProlog(char *p)
+static int interpretFunctionProlog(char *pach, BOOL fOverload)
 {
-    int length;
     int rc;
 
     /*
@@ -458,9 +463,9 @@ static int interpretFunctionProlog(char *p)
      *     mov ecx, dword ptr [xxxxxxxx]
      */
 
-    if (p[0] == 0x55 && p[1] == 0x8b)
+    if (pach[0] == 0x55 && pach[1] == 0x8b)
     {
-        if (p[2] == 0xec)
+        if (pach[2] == 0xec)
             rc = 3;
         else
             rc = 1;
@@ -471,13 +476,13 @@ static int interpretFunctionProlog(char *p)
              * for the current functions.
              * There will never be any doubt when something goes wrong!
              */
-            switch(p[rc])
+            switch(pach[rc])
             {
                 case 0x33: /* xor (ldrClose, ldrOpen) */
                     rc +=2;
                     break;
                 case 0x8b:
-                    if (p[rc+1] == 0x0d)
+                    if (pach[rc+1] == 0x0d)
                         rc += 6;
                     else
                         rc += 2; /*????!*/
@@ -489,13 +494,19 @@ static int interpretFunctionProlog(char *p)
                     rc += 3;
                     break;
                 default:
-                    kprintf(("interpretFunctionProlog: unknown instruction 0x%x \n", p[rc]));
+                    kprintf(("interpretFunctionProlog: unknown instruction 0x%x\n", pach[rc]));
                     return 0;
             }
         }
     }
     else
-        rc = 0;
+    {
+        /* special case for IOSftReadAt and IOSftWriteAt */
+        if (fOverload == FALSE && pach[0] == 0xB8 && (pach[5] == 0xEB || pach[5] == 0x55))
+            rc = 5;
+        else
+            rc = 0;
+    }
 
     return rc;
 }
@@ -511,56 +522,95 @@ static int procInit(void)
     int i;
     int cb;
 
-    /* verify */
+    /*
+     * verify proctable
+     */
     for (i = 0; i < NUMBER_OF_PROCS; i++)
     {
-        cb = interpretFunctionProlog((char*)_aProcTab[i].ulAddress);
+        if (_aProcTab[i].fType != EPT_PROC && _aProcTab[i].fType != EPT_PROCIMPORT)
+        {
+            kprintf(("procInit: EPT_VAR is not supported. (procedure no.%d, cb=%d)\n", i, cb));
+            return 1;
+        }
+        cb = interpretFunctionProlog((char*)_aProcTab[i].ulAddress, _aProcTab[i].fType == EPT_PROC);
         if (cb <= 0 || cb + 5 >= MAXSIZE_PROLOG)
         {
-            kprintf(("rehookFunctions: verify failed for procedure no.%d, cb=%d\n", i, cb));
+            kprintf(("procInit: verify failed for procedure no.%d, cb=%d\n", i, cb));
             return 1;
         }
     }
 
-    /* rehook */
+    /*
+     * rehook / import
+     */
     for (i = 0; i < NUMBER_OF_PROCS; i++)
     {
-        cb = interpretFunctionProlog((char*)_aProcTab[i].ulAddress);
-        if (cb > 0 && cb + 5 < MAXSIZE_PROLOG)
+        switch (_aProcTab[i].fType)
         {
-            char *pMy;
-            switch (i)
+            case EPT_PROC:
             {
-                case iLDRREAD:          pMy = (char*)myldrRead; break;
-                case iLDROPEN:          pMy = (char*)myldrOpen; break;
-                case iLDRCLOSE:         pMy = (char*)myldrClose; break;
-                case iLDRQAPPTYPE:      pMy = (char*)myLDRQAppType; break;
+                cb = interpretFunctionProlog((char*)_aProcTab[i].ulAddress, TRUE);
+                if (cb > 0 && cb + 5 < MAXSIZE_PROLOG)
+                {
+                    static unsigned auFuncs[NUMBER_OF_PROCS] = /* This table must be updated with the overloading functions. */
+                    {
+                        (unsigned)myldrRead,
+                        (unsigned)myldrOpen,
+                        (unsigned)myldrClose,
+                        (unsigned)myLDRQAppType,
+                        (unsigned)myldrEnum32bitRelRecs,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                    };
 
-                default:
-                    kprintf(("rehookFunctions: Someone has added function without updating the switch! i=%d\n", i));
-                    Int3();
-                    return 2;
+                    /* copy function prolog */
+                    memcpy(callTab[i], (void*)_aProcTab[i].ulAddress, (size_t)cb);
+
+                    /* jump from calltab to original function */
+                    callTab[i][cb] = 0xE9; /* jmp */
+                    *(unsigned*)(void*)&callTab[i][cb+1] = _aProcTab[i].ulAddress + cb - (unsigned)&callTab[i][cb+5];
+
+
+                    /* jump from original function to my function - an cli(?) could be needed here */
+                    *(char*)_aProcTab[i].ulAddress = 0xE9; /* jmp */
+                    *(unsigned*)(_aProcTab[i].ulAddress + 1) = auFuncs[i] - (_aProcTab[i].ulAddress + 5);
+                }
+                else
+                {   /* !fatal! - this could never happen really... */
+                    kprintf(("procInit: FATAL verify failed for procedure no.%d when rehooking it!\n",i));
+                    Int3(); /* ipe - later! */
+                    return 1;
+                }
+                break;
             }
 
-            /* copy function prolog */
-            memcpy(callTab[i], (void*)_aProcTab[i].ulAddress, (size_t)cb);
+            case EPT_PROCIMPORT:
+            {
+                cb = interpretFunctionProlog((char*)_aProcTab[i].ulAddress, FALSE);
+                if (cb > 0 && cb + 5 < MAXSIZE_PROLOG)
+                {
+                    /* jump from calltab to original function */
+                    callTab[i][0] = 0xE9; /* jmp */
+                    *(unsigned*)(void*)&callTab[i][1] = _aProcTab[i].ulAddress - (unsigned)&callTab[i][cb+5];
+                }
+                else
+                {   /* !fatal! - this could never happen really... */
+                    kprintf(("procInit: FATAL verify failed for procedure no.%d when importing it!\n",i));
+                    Int3(); /* ipe - later! */
+                    return 1;
+                }
+                break;
+            }
 
-            /* jump from calltab to original function */
-            callTab[i][cb] = 0xE9; /* jmp */
-            *(unsigned*)&callTab[i][cb+1] = _aProcTab[i].ulAddress + cb - (unsigned)&callTab[i][cb+5];
-
-            /* jump from original function to my function - an cli could be needed here */
-            *(char*)_aProcTab[i].ulAddress = 0xE9; /* jmp */
-            *(unsigned*)(_aProcTab[i].ulAddress + 1) = (unsigned)pMy - (_aProcTab[i].ulAddress + 5);
-        }
-        else
-        {
-            /* !fatal! - this could never happen really... */
-            kprintf(("rehookFunctions: FATAL verify failed for procedure no.%d when rehooking it!\n",i));
-            Int3(); /* ipe - later! */
-            return 1;
-        }
-    }
+            default:
+                kprintf(("procInit: EPT_VAR is not supported. (procedure no.%d, cb=%d)\n", i, cb));
+                Int3(); /* ipe - later! */
+                return 1;
+        } /* switch - type */
+    }   /* for */
 
     return NO_ERROR;
 }

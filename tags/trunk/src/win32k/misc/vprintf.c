@@ -1,4 +1,4 @@
-/* $Id: vprintf.c,v 1.6 1999-11-10 09:11:28 bird Exp $
+/* $Id: vprintf.c,v 1.7 2000-01-22 18:21:03 bird Exp $
  *
  * vprintf and printf
  *
@@ -487,15 +487,19 @@ static void chout(int ch)
         if (ch == '\n')
         {
             #ifdef RING0
+                #pragma info(noeff)
                 while (!(_inp(options.usCom + 5) & 0x20));  /* Waits for the port to be ready. */
                 _outp(options.usCom, chReturn);             /* Put the char. */
+                #pragma info(restore)
             #else
                 DosWrite(1, (void*)&chReturn, 1, &ulWrote);
             #endif
         }
         #ifdef RING0
+            #pragma info(noeff)
             while (!(_inp(options.usCom + 5) & 0x20));  /* Waits for the port to be ready. */
             _outp(options.usCom, ch);                   /* Put the char. */
+            #pragma info(restore)
             Yield();
         #else
             DosWrite(1, (void*)&ch, 1, &ulWrote);
@@ -527,8 +531,10 @@ static char *strout(char *psz, signed cchMax)
         #ifdef RING0
             for (ul = 0; ul < cch; ul++)
             {
+                #pragma info(noeff)
                 while (!(_inp(options.usCom + 5) & 0x20));  /* Waits for the port to be ready. */
                 _outp(options.usCom, psz[ul]);              /* Put the char. */
+                #pragma info(restore)
             }
         #else
             DosWrite(1, (void*)psz, cch, &ul);
@@ -540,11 +546,13 @@ static char *strout(char *psz, signed cchMax)
             if (psz[cch] == '\n')
             {
             #ifdef RING0
+                #pragma info(noeff)
                 while (!(_inp(options.usCom + 5) & 0x20));  /* Waits for the port to be ready. */
                 _outp(options.usCom, chReturn);             /* Put the char. */
                 while (!(_inp(options.usCom + 5) & 0x20));  /* Waits for the port to be ready. */
                 _outp(options.usCom, chNewLine);            /* Put the char. */
                 cchYield ++;
+                #pragma info(restore)
             #else
                 DosWrite(1, (void*)&chReturn, 1, &ul);
                 DosWrite(1, (void*)&chNewLine, 1, &ul);
