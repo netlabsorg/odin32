@@ -1,4 +1,4 @@
-/* $Id: winimagepe2lx.cpp,v 1.17 2000-10-02 13:35:23 bird Exp $ */
+/* $Id: winimagepe2lx.cpp,v 1.18 2001-07-10 20:19:25 bird Exp $ */
 
 /*
  * Win32 PE2LX Image base class
@@ -690,6 +690,9 @@ VOID  Win32Pe2LxImage::cleanup()
         paSections = NULL;
         cSections = 0;
     }
+
+    if (fDll)
+        DosFreeModule(hmod);
 }
 
 
