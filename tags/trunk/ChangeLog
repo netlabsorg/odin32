@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.1757 2001-10-17 08:08:27 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1758 2001-10-17 09:16:33 phaller Exp $ */
+
+ 2001-10-17: Patrick Haller <patrick.haller@innotek.de>
+    - SHELL32:  o WINE resync 20011017
 
  2001-10-17: Sander van Leeuwen <sandervl@xs4all.nl>
     - DDRAW:    o Fixes for DDBLT_COLORFILL
