@@ -196,62 +196,10 @@ typedef struct
 } FILETIME, *LPFILETIME;
 #endif /* _FILETIME_ */
 
-#ifndef _SECURITY_DEFINED
-#define _SECURITY_DEFINED
-
-typedef DWORD ACCESS_MASK, *PACCESS_MASK;
-
-typedef struct _GENERIC_MAPPING {
-    ACCESS_MASK GenericRead;
-    ACCESS_MASK GenericWrite;
-    ACCESS_MASK GenericExecute;
-    ACCESS_MASK GenericAll;
-} GENERIC_MAPPING, *PGENERIC_MAPPING;
-
-typedef struct {
-    BYTE Value[6];
-} SID_IDENTIFIER_AUTHORITY,*PSID_IDENTIFIER_AUTHORITY;
-
-typedef struct _SID {
-    BYTE Revision;
-    BYTE SubAuthorityCount;
-    SID_IDENTIFIER_AUTHORITY IdentifierAuthority;
-    DWORD SubAuthority[1];
-} SID,*PSID;
-
-/*
- * ACL 
- */
-
-typedef struct _ACL {
-    BYTE AclRevision;
-    BYTE Sbz1;
-    WORD AclSize;
-    WORD AceCount;
-    WORD Sbz2;
-} ACL, *PACL;
-
-typedef DWORD SECURITY_INFORMATION;
-typedef WORD SECURITY_DESCRIPTOR_CONTROL;
-
-/* The security descriptor structure */
-typedef struct {
-    BYTE Revision;
-    BYTE Sbz1;
-    SECURITY_DESCRIPTOR_CONTROL Control;
-    PSID Owner;
-    PSID Group;
-    PACL Sacl;
-    PACL Dacl;
-} SECURITY_DESCRIPTOR, *PSECURITY_DESCRIPTOR;
-
 #ifndef _ROTFLAGS_DEFINED
 #define _ROTFLAGS_DEFINED
 #define ROTFLAGS_REGISTRATIONKEEPSALIVE 0x1
 #define ROTFLAGS_ALLOWANYCLIENT 0x2
 #endif /* !defined(_ROTFLAGS_DEFINED) */
-
-#endif /* _SECURITY_DEFINED */
-
 
 #endif /* __WINE_WTYPES_H */
