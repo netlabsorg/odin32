@@ -1,4 +1,4 @@
-# $Id: kernel32.mak,v 1.36 2002-10-03 12:49:50 sandervl Exp $
+# $Id: kernel32.mak,v 1.37 2002-12-20 10:38:57 sandervl Exp $
 
 #
 # Odin32 API
@@ -66,14 +66,12 @@ $(OBJDIR)\dbglog.obj \
 $(OBJDIR)\exceptutil.obj \
 $(OBJDIR)\asmutil.obj \
 $(OBJDIR)\lang.obj \
-$(OBJDIR)\iccio.obj \
 $(OBJDIR)\map.obj \
 $(OBJDIR)\win32util.obj \
 $(OBJDIR)\heap.obj \
 $(OBJDIR)\heapstring.obj \
 $(OBJDIR)\os2heap.obj \
 $(OBJDIR)\vmutex.obj \
-####$(OBJDIR)\vsemaphore.obj \
 $(OBJDIR)\initterm.obj \
 $(OBJDIR)\initkernel32.obj \
 $(OBJDIR)\handlemanager.obj \
