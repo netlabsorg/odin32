@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.187 2003-04-11 14:21:53 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.188 2003-04-29 10:27:18 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -266,9 +266,22 @@ TEB *WIN32API InitializeMainThread()
     ProcessConCtrlData.pHead->flFlags = ODIN32_CONCTRL_FLAGS_INIT;
     InitializeCriticalSection(&ProcessENVDB.section);
 
-//         ProcessPDB.startup_info    = &StartupInfo;
     ProcessPDB.unknown10       = (PVOID)&unknownPDBData[0];
+
+    //initialize the startup info part of the db entry.
+////    O32_GetStartupInfo(&StartupInfo);
     StartupInfo.cb             = sizeof(StartupInfo);
+    /* Set some defaults as GetStartupInfo() used to set... */
+    if (!(StartupInfo.dwFlags & STARTF_USESHOWWINDOW))
+        StartupInfo.wShowWindow= SW_NORMAL;
+    /* must be NULL for VC runtime */
+    StartupInfo.lpReserved     = NULL;
+    StartupInfo.cbReserved2     = NULL;
+    if (!StartupInfo.lpDesktop)
+        StartupInfo.lpDesktop  = "Desktop";
+    if (!StartupInfo.lpTitle)
+        StartupInfo.lpTitle    = "Title";
+
     ProcessENVDB.hStdin  = StartupInfo.hStdInput  = GetStdHandle(STD_INPUT_HANDLE);
     ProcessENVDB.hStdout = StartupInfo.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
     ProcessENVDB.hStderr = StartupInfo.hStdError  = GetStdHandle(STD_ERROR_HANDLE);
@@ -2228,8 +2241,10 @@ HINSTANCE WIN32API WinExec(LPCSTR lpCmdLine, UINT nCmdShow)
  DWORD               rc;
  HINSTANCE           hInstance;
 
-    dprintf(("KERNEL32: WinExec %s\n", lpCmdLine));
-    startinfo.dwFlags = nCmdShow;
+    dprintf(("KERNEL32: WinExec lpCmdLine='%s' nCmdShow=%d\n", lpCmdLine));
+    startinfo.cb = sizeof(startinfo);
+    startinfo.dwFlags = STARTF_USESHOWWINDOW;
+    startinfo.wShowWindow = nCmdShow;
     if(CreateProcessA(NULL, (LPSTR)lpCmdLine, NULL, NULL, FALSE, 0, NULL, NULL,
                       &startinfo, &procinfo) == FALSE)
     {
@@ -2521,3 +2536,69 @@ BOOL WIN32API DisableThreadLibraryCalls(HMODULE hModule)
 }
 //******************************************************************************
 //******************************************************************************
+
+
+/**
+ * Gets the startup info which was passed to CreateProcess when
+ * this process was created.
+ *
+ * @param   lpStartupInfo   Where to put the startup info.
+ *                          Please don't change the strings :)
+ * @status  Partially Implemented.
+ * @author  knut st. osmundsen <bird@anduin.net>
+ * @remark  The three pointers of the structure is just fake.
+ * @remark  Pretty much identical to current wine code.
+ */
+void WIN32API GetStartupInfoA(LPSTARTUPINFOA lpStartupInfo)
+{
+    dprintf2(("KERNEL32: GetStartupInfoA %x\n", lpStartupInfo));
+    *lpStartupInfo = StartupInfo;
+}
+
+
+/**
+ * Gets the startup info which was passed to CreateProcess when
+ * this process was created.
+ *
+ * @param   lpStartupInfo   Where to put the startup info.
+ *                          Please don't change the strings :)
+ * @status  Partially Implemented.
+ * @author  knut st. osmundsen <bird@anduin.net>
+ * @remark  The three pointers of the structure is just fake.
+ * @remark  Similar to wine code, but they use RtlCreateUnicodeStringFromAsciiz
+ *          for creating the UNICODE strings and are doing so for each call.
+ *          As I don't wanna call NTDLL code from kernel32 I take the easy path.
+ */
+void WIN32API GetStartupInfoW(LPSTARTUPINFOW lpStartupInfo)
+{
+    /*
+     * Converted once, this information shouldn't change...
+     */
+
+    dprintf2(("KERNEL32: GetStartupInfoW %x\n", lpStartupInfo));
+
+    //assumes the structs are identical but for the strings pointed to.
+    memcpy(lpStartupInfo, &StartupInfo, sizeof(STARTUPINFOA));
+    lpStartupInfo->cb = sizeof(STARTUPINFOW); /* this really should be the same size else we're in for trouble.. :) */
+
+    /*
+     * First time conversion only as this should be pretty static.
+     * See remark!
+     */
+    static LPWSTR pwcReserved = NULL;
+    static LPWSTR pwcDesktop = NULL;
+    static LPWSTR pwcTitle = NULL;
+
+    if (lpStartupInfo->lpReserved && pwcReserved)
+        pwcReserved = AsciiToUnicodeString((LPCSTR)lpStartupInfo->lpReserved);
+    lpStartupInfo->lpReserved = pwcReserved;
+
+    if (lpStartupInfo->lpDesktop && pwcDesktop)
+        pwcDesktop = AsciiToUnicodeString((LPCSTR)lpStartupInfo->lpDesktop);
+    lpStartupInfo->lpDesktop = pwcDesktop;
+
+    if (lpStartupInfo->lpTitle && pwcTitle)
+        pwcTitle = AsciiToUnicodeString((LPCSTR)lpStartupInfo->lpTitle);
+    lpStartupInfo->lpTitle = pwcTitle;
+}
+
