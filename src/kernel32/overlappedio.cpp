@@ -1,4 +1,4 @@
-/* $Id: overlappedio.cpp,v 1.10 2001-12-10 11:29:01 sandervl Exp $ */
+/* $Id: overlappedio.cpp,v 1.11 2001-12-10 12:55:12 sandervl Exp $ */
 
 /*
  * Win32 overlapped IO class
@@ -54,10 +54,11 @@ OverlappedIOHandler::OverlappedIOHandler(LPOVERLAPPED_HANDLER lpReadHandler,
 
     dprintf(("OverlappedIOThread: hEventRead %x hEventWrite %x hEventPoll %x", hEventRead, hEventWrite, hEventPoll));
 
-    //the exit event semaphore is manual reset, because this event
+    //the exit & cancel event semaphores are manual reset, because these events
     //must be able to wake up multiple threads
     hEventExit   = ::CreateEventA(NULL, TRUE, FALSE, NULL);
-    if(!hEventPoll || !hEventRead || !hEventWrite || !hEventExit)
+    hEventCancel = ::CreateEventA(NULL, TRUE, FALSE, NULL);
+    if(!hEventPoll || !hEventRead || !hEventWrite || !hEventExit || !hEventCancel)
     {
         DebugInt3();
         errcode = EventCreationFailed;
@@ -253,7 +254,7 @@ DWORD OverlappedIOHandler::threadHandler(DWORD dwOperation)
                 break;
 
             case ASYNCIO_POLL:
-                hEventsWait[0] = lpRequest->hEventCancel;
+                hEventsWait[0] = hEventCancel;
                 hEventsWait[1] = hEventExit;
                 ret = WAIT_TIMEOUT;
                 while(TRUE)
@@ -348,7 +349,7 @@ BOOL OverlappedIOHandler::WriteFile(HANDLE        hHandle,
     else pending[index] = lpRequest;
     ::LeaveCriticalSection(&critsect);
 
-    lpOverlapped->Internal     = ERROR_IO_PENDING;
+    lpOverlapped->Internal     = STATUS_PENDING;
     lpOverlapped->InternalHigh = 0;
     lpOverlapped->Offset       = 0;
     lpOverlapped->OffsetHigh   = 0;
@@ -406,7 +407,7 @@ BOOL OverlappedIOHandler::ReadFile(HANDLE        hHandle,
     else pending[ASYNC_INDEX_READ] = lpRequest;
     ::LeaveCriticalSection(&critsect);
 
-    lpOverlapped->Internal     = ERROR_IO_PENDING;
+    lpOverlapped->Internal     = STATUS_PENDING;
     lpOverlapped->InternalHigh = 0;
     lpOverlapped->Offset       = 0;
     lpOverlapped->OffsetHigh   = 0;
@@ -458,7 +459,7 @@ BOOL OverlappedIOHandler::WaitForEvent(HANDLE        hHandle,
     lpRequest->dwEventMask         = dwEventMask;
     lpRequest->next                = NULL;
 
-    lpOverlapped->Internal     = ERROR_IO_PENDING;
+    lpOverlapped->Internal     = STATUS_PENDING;
     lpOverlapped->InternalHigh = 0;
     lpOverlapped->Offset       = 0;
     lpOverlapped->OffsetHigh   = 0;
@@ -508,11 +509,15 @@ BOOL OverlappedIOHandler::CancelIo(HANDLE hHandle)
 
     for(int i=ASYNC_INDEX_READ;i<NR_ASYNC_OPERATIONS;i++)
     {
-        while(TRUE) {
+        while(TRUE) 
+        {
             lpRequest = findAndRemoveRequest(i, hHandle);
 
             if(lpRequest) {
-                 ::SetEvent(lpRequest->hEventCancel);   //cancel pending operation
+                 //TODO: This doesn't work if multiple handles share the
+                 //      same OverlappedIOHandler
+                 lpRequest->fCancelled = TRUE;
+                 ::SetEvent(hEventCancel);   //cancel pending operation
                  if(i != ASYNC_INDEX_BUSY) {//thread that handles the request will delete it
                     delete lpRequest;
                  }
