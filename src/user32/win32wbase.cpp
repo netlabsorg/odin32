@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.107 1999-12-07 20:43:39 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.108 1999-12-09 00:53:37 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -267,6 +267,12 @@ BOOL Win32BaseWindow::isChild()
 }
 //******************************************************************************
 //******************************************************************************
+BOOL Win32BaseWindow::IsWindowUnicode()
+{
+    return (WINPROC_GetProcType(getWindowProc()) == WIN_PROC_32W);
+}
+//******************************************************************************
+//******************************************************************************
 BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 {
  char  buffer[256];
@@ -433,7 +439,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         }
   }
 
-  setWindowProc(windowClass->getWindowProc());
+  WINPROC_SetProc((HWINDOWPROC *)&win32wndproc, windowClass->getWindowProc(), (isUnicode) ? WIN_PROC_32W : WIN_PROC_32A, WIN_PROC_WINDOW);
   hInstance = cs->hInstance;
   dwStyle   = cs->style & ~WS_VISIBLE;
   dwExStyle = cs->dwExStyle;
@@ -626,18 +632,18 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
 
   /* Get class or window DC if needed */
   if(windowClass->getStyle() & CS_OWNDC) {
-	dprintf(("Class with CS_OWNDC style"));
-//	ownDC = GetWindowDC(getWindowHandle());
+    dprintf(("Class with CS_OWNDC style"));
+//  ownDC = GetWindowDC(getWindowHandle());
   }
-  else 
+  else
   if (windowClass->getStyle() & CS_PARENTDC)  {
-	dprintf(("ERROR: Class with CS_PARENTDC style -> NOT IMPLEMENTED!"));
-	ownDC = 0;
+    dprintf(("ERROR: Class with CS_PARENTDC style -> NOT IMPLEMENTED!"));
+    ownDC = 0;
   }
   else
   if (windowClass->getStyle() & CS_CLASSDC)  {
-	dprintf(("ERROR: Class with CS_CLASSDC style -> NOT IMPLEMENTED!"));
-	ownDC = 0;
+    dprintf(("ERROR: Class with CS_CLASSDC style -> NOT IMPLEMENTED!"));
+    ownDC = 0;
   }
   /* Set the window menu */
   if ((dwStyle & (WS_CAPTION | WS_CHILD)) == WS_CAPTION )
@@ -1518,12 +1524,8 @@ LRESULT Win32BaseWindow::DefWndControlColor(UINT ctlType, HDC hdc)
 }
 //******************************************************************************
 //******************************************************************************
-LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam, BOOL fReentered)
+LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 {
-    //Lotus Notes v5.0.1 calls SetWindowTextA for unicode static window -> calls DefWindowProcA
-    if(IsUnicode() && !fReentered) {
-        return DefWindowProcW(Msg, wParam, lParam);
-    }
     switch(Msg)
     {
     case WM_CLOSE:
@@ -1776,7 +1778,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam, 
         return 1;
 
     case WM_NOTIFYFORMAT:
-        if (IsUnicode()) return NFR_UNICODE;
+        if (IsWindowUnicode()) return NFR_UNICODE;
         else return NFR_ANSI;
 
     case WM_SETICON:
@@ -1850,7 +1852,7 @@ LRESULT Win32BaseWindow::DefWindowProcW(UINT Msg, WPARAM wParam, LPARAM lParam)
     }
 
     default:
-        return DefWindowProcA(Msg, wParam, lParam, TRUE);
+        return DefWindowProcA(Msg, wParam, lParam);
     }
 }
 //******************************************************************************
@@ -2949,13 +2951,6 @@ int Win32BaseWindow::GetWindowTextW(LPWSTR lpsz, int cch)
 //******************************************************************************
 BOOL Win32BaseWindow::SetWindowTextA(LPSTR lpsz)
 {
-    //hmm. Notes v5.0.1 creates static window with CreateWindowExW and calls this...
-    if(IsUnicode() && lpsz) {
-        LPWSTR lpWindowNameW = (LPWSTR)alloca((strlen(lpsz)+1)*sizeof(WCHAR));
-        lstrcpyAtoW(lpWindowNameW, lpsz);
-
-        return SendInternalMessageW(WM_SETTEXT,0,(LPARAM)lpWindowNameW);
-    }
     return SendInternalMessageA(WM_SETTEXT,0,(LPARAM)lpsz);
 }
 //******************************************************************************
@@ -2974,7 +2969,7 @@ VOID Win32BaseWindow::updateWindowStyle(DWORD oldExStyle,DWORD oldStyle)
 }
 //******************************************************************************
 //******************************************************************************
-LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value)
+LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value, BOOL fUnicode)
 {
  LONG oldval;
 
@@ -3017,8 +3012,8 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value)
                 return ss.styleOld;
         }
         case GWL_WNDPROC:
-                oldval = (LONG)getWindowProc();
-                setWindowProc((WNDPROC)value);
+                oldval = (LONG)WINPROC_GetProc(win32wndproc, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A);
+                WINPROC_SetProc((HWINDOWPROC *)&win32wndproc, (WNDPROC)value, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A, WIN_PROC_WINDOW);
                 return oldval;
         case GWL_HINSTANCE:
                 oldval = hInstance;
@@ -3047,7 +3042,7 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value)
 }
 //******************************************************************************
 //******************************************************************************
-ULONG Win32BaseWindow::GetWindowLongA(int index)
+ULONG Win32BaseWindow::GetWindowLongA(int index, BOOL fUnicode)
 {
  ULONG value;
 
@@ -3059,7 +3054,7 @@ ULONG Win32BaseWindow::GetWindowLongA(int index)
         value = dwStyle;
         break;
     case GWL_WNDPROC:
-        value = (ULONG)getWindowProc();
+        value = (LONG)WINPROC_GetProc(win32wndproc, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A);
         break;
     case GWL_HINSTANCE:
         value = hInstance;

@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.35 1999-11-17 17:04:54 cbratschi Exp $ */
+/* $Id: win32dlg.cpp,v 1.36 1999-12-09 00:53:37 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -17,6 +17,7 @@
 #include <string.h>
 #include <misc.h>
 #include <win32dlg.h>
+#include <win\winproc.h>
 #include "oslibmsg.h"
 #include "oslibwin.h"
 #include "win32wdesktop.h"
@@ -173,7 +174,7 @@ Win32Dialog::Win32Dialog(HINSTANCE hInst, LPCSTR dlgTemplate, HWND owner,
     cs.dwExStyle      = dlgInfo.exStyle;
 
     fIsDialog = TRUE;
-    Win32DlgProc = dlgProc;
+    WINPROC_SetProc((HWINDOWPROC *)&Win32DlgProc, (WNDPROC)dlgProc, (isUnicode) ? WIN_PROC_32W : WIN_PROC_32A, WIN_PROC_WINDOW);
 
     this->tmpParam       = param;
     this->tmpDlgTemplate = (LPSTR)dlgTemplate;
@@ -194,6 +195,8 @@ Win32Dialog::~Win32Dialog()
 {
     if (hUserFont) DeleteObject( hUserFont );
     if (hMenu) DestroyMenu( hMenu );
+
+    WINPROC_FreeProc(Win32DlgProc, WIN_PROC_WINDOW);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1018,7 +1021,7 @@ BOOL Win32Dialog::endDialog(int retval)
 }
 //******************************************************************************
 //******************************************************************************
-LONG Win32Dialog::SetWindowLongA(int index, ULONG value)
+LONG Win32Dialog::SetWindowLongA(int index, ULONG value, BOOL fUnicode)
 {
     LONG oldval;
 
@@ -1026,8 +1029,8 @@ LONG Win32Dialog::SetWindowLongA(int index, ULONG value)
     switch(index)
     {
     case DWL_DLGPROC:
-        oldval = (LONG)Win32DlgProc;
-        Win32DlgProc = (DLGPROC)value;
+  	    oldval = (LONG)WINPROC_GetProc(Win32DlgProc, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A);
+        WINPROC_SetProc((HWINDOWPROC *)&Win32DlgProc, (WNDPROC)value, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A, WIN_PROC_WINDOW);
         return oldval;
     case DWL_MSGRESULT:
         oldval = msgResult;
@@ -1043,13 +1046,13 @@ LONG Win32Dialog::SetWindowLongA(int index, ULONG value)
 }
 //******************************************************************************
 //******************************************************************************
-ULONG Win32Dialog::GetWindowLongA(int index)
+ULONG Win32Dialog::GetWindowLongA(int index, BOOL fUnicode)
 {
     dprintf2(("Win32Dialog::GetWindowLongA %x %d", getWindowHandle(), index));
     switch(index)
     {
     case DWL_DLGPROC:
-        return (ULONG)Win32DlgProc;
+	    return (ULONG)WINPROC_GetProc(Win32DlgProc, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A);
     case DWL_MSGRESULT:
         return msgResult;
     case DWL_USER:

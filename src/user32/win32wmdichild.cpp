@@ -1,4 +1,4 @@
-/* $Id: win32wmdichild.cpp,v 1.9 1999-10-30 09:19:46 sandervl Exp $ */
+/* $Id: win32wmdichild.cpp,v 1.10 1999-12-09 00:53:38 sandervl Exp $ */
 /*
  * Win32 MDI Child Window Class for OS/2
  *
@@ -42,10 +42,10 @@
 
 //******************************************************************************
 //******************************************************************************
-Win32MDIChildWindow::Win32MDIChildWindow(CREATESTRUCTA *lpCreateStructA, ATOM classAtom, BOOL isUnicode)
+Win32MDIChildWindow::Win32MDIChildWindow(CREATESTRUCTA *lpCreateStructA, ATOM classAtom, BOOL fUnicode)
                     : Win32BaseWindow(OBJTYPE_WINDOW)
 {
-    this->isUnicode = isUnicode;
+    isUnicode = fUnicode;
     CreateWindowExA(lpCreateStructA, classAtom);
 }
 //******************************************************************************

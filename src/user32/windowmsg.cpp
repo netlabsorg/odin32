@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.8 1999-12-05 00:31:50 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.9 1999-12-09 00:53:38 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -929,9 +929,9 @@ void WINPROC_UnmapMsg32WTo32A( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
  *
  * Call a window procedure, translating args from Ansi to Unicode.
  */
-static LRESULT WINPROC_CallProc32ATo32W( WNDPROC func, HWND hwnd,
-                                         UINT msg, WPARAM wParam,
-                                         LPARAM lParam )
+LRESULT WINPROC_CallProc32ATo32W( WNDPROC func, HWND hwnd,
+                                  UINT msg, WPARAM wParam,
+                                  LPARAM lParam )
 {
     LRESULT result;
 
@@ -946,9 +946,9 @@ static LRESULT WINPROC_CallProc32ATo32W( WNDPROC func, HWND hwnd,
  *
  * Call a window procedure, translating args from Unicode to Ansi.
  */
-static LRESULT WINPROC_CallProc32WTo32A( WNDPROC func, HWND hwnd,
-                                         UINT msg, WPARAM wParam,
-                                         LPARAM lParam )
+LRESULT WINPROC_CallProc32WTo32A( WNDPROC func, HWND hwnd,
+                                  UINT msg, WPARAM wParam,
+                                  LPARAM lParam )
 {
     LRESULT result;
 
@@ -957,64 +957,6 @@ static LRESULT WINPROC_CallProc32WTo32A( WNDPROC func, HWND hwnd,
     result = func( hwnd, msg, wParam, lParam );
     WINPROC_UnmapMsg32WTo32A( hwnd, msg, wParam, lParam );
     return result;
-}
-/**********************************************************************
- *	     CallWindowProc32A    
- */
-LRESULT WIN32API CallWindowProcA(
-    WNDPROC func, /* window procedure */
-    HWND hwnd, /* target window */
-    UINT msg,  /* message */
-    WPARAM wParam, /* message dependent parameter */
-    LPARAM lParam    /* message dependent parameter */
-) 
-{
-
-    Win32BaseWindow *window = Win32BaseWindow::GetWindowFromHandle(hwnd);
-    if(!window) {
-        dprintf(("CallWindowProcA, window %x not found", hwnd));
-        // return func( hwnd, msg, wParam, lParam );
-        return 0;
-    }
-   
-//    dprintf(("CallWindowProcA(wndproc=%p,hwnd=%08x,msg=%08x,wp=%08x,lp=%08lx)",
-  //                 func, hwnd, msg, wParam, lParam ));
-
-#if testing
-    return func( hwnd, msg, wParam, lParam );
-#endif
-
-    if(window->IsUnicode())
-        return WINPROC_CallProc32ATo32W( func, hwnd, msg, wParam, lParam);
-    else
-        return func( hwnd, msg, wParam, lParam );
-}
-
-
-/**********************************************************************
- *	     CallWindowProc32W    (USER32.19)
- */
-LRESULT WIN32API CallWindowProcW( WNDPROC func, HWND hwnd, UINT msg,
-                                  WPARAM wParam, LPARAM lParam )
-{
-    Win32BaseWindow *window = Win32BaseWindow::GetWindowFromHandle(hwnd);
-    if(!window) {
-        dprintf(("CallWindowProcW, window %x not found", hwnd));
-        // return func( hwnd, msg, wParam, lParam );
-        return 0;
-    }
-   
-//    dprintf(("CallWindowProcW(wndproc=%p,hwnd=%08x,msg=%08x,wp=%08x,lp=%08lx)",
-//             func, hwnd, msg, wParam, lParam ));
-
-#if testing
-    return func( hwnd, msg, wParam, lParam );
-#endif
-
-    if(window->IsUnicode())
-        return func( hwnd, msg, wParam, lParam );
-    else
-        return WINPROC_CallProc32WTo32A( func, hwnd, msg, wParam, lParam);
 }
 //******************************************************************************
 //TODO: QS_HOTKEY (oslibmsg.cpp) & low word bits
