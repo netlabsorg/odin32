@@ -10,7 +10,7 @@
 #include "winuser.h"
 #include "imagelist.h"
 #include "winnls.h"
-//#include "prsht.h"
+#include "prsht.h"
 
 
 #ifdef __cplusplus

@@ -1,4 +1,3 @@
-/* $Id: obj_control.h,v 1.7 1999-11-30 20:19:03 sandervl Exp $ */
 /*
  * Defines the COM interfaces and APIs related to structured data storage.
  *
@@ -8,9 +7,7 @@
 #ifndef __WINE_WINE_OBJ_CONTROL_H
 #define __WINE_WINE_OBJ_CONTROL_H
 
-
-#include "winbase.h"
-#include "wine/obj_oleaut.h" /* for DISPID */
+struct tagMSG;
 
 #ifdef __cplusplus
 extern "C" {
@@ -168,7 +165,7 @@ typedef struct IProvideClassInfo2 IProvideClassInfo2, *LPPROVIDECLASSINFO2;
 #define ICOM_INTERFACE IOleControl
 #define IOleControl_METHODS \
 	ICOM_METHOD1(HRESULT,GetControlInfo, CONTROLINFO*,pCI) \
-	ICOM_METHOD1(HRESULT,OnMnemonic, MSG*,pMsg) \
+	ICOM_METHOD1(HRESULT,OnMnemonic, struct tagMSG*,pMsg) \
 	ICOM_METHOD1(HRESULT,OnAmbientPropertyChange, DISPID,dispID) \
 	ICOM_METHOD1(HRESULT,FreezeEvents, BOOL,bFreeze)
 #define IOleControl_IMETHODS \
@@ -177,8 +174,7 @@ typedef struct IProvideClassInfo2 IProvideClassInfo2, *LPPROVIDECLASSINFO2;
 ICOM_DEFINE(IOleControl,IUnknown)
 #undef ICOM_INTERFACE
 
-#ifdef ICOM_CINTERFACE
-/*** IUnknwon methods ***/
+/*** IUnknown methods ***/
 #define IOleControl_QueryInterface(p,a,b)        ICOM_CALL2(QueryInterface,p,a,b)
 #define IOleControl_AddRef(p)                    ICOM_CALL (AddRef,p)
 #define IOleControl_Release(p)                   ICOM_CALL (Release,p)
@@ -187,7 +183,6 @@ ICOM_DEFINE(IOleControl,IUnknown)
 #define IOleControl_OnMnemonic(p,a)              ICOM_CALL1(OnMnemonic,p,a)
 #define IOleControl_OnAmbientPropertyChange(p,a) ICOM_CALL1(OnAmbientPropertyChange,p,a)
 #define IOleControl_FreezeEvents(p,a)            ICOM_CALL1(FreezeEvents,p,a)
-#endif
 				
 
 /*****************************************************************************
@@ -199,7 +194,7 @@ ICOM_DEFINE(IOleControl,IUnknown)
 	ICOM_METHOD1(HRESULT,LockInPlaceActive, BOOL,fLock) \
 	ICOM_METHOD1(HRESULT,GetExtendedControl, IDispatch**,ppDisp) \
 	ICOM_METHOD3(HRESULT,TransformCoords, POINTL*,pPtlHimetric, POINTF*,pPtfContainer, DWORD,dwFlags) \
-	ICOM_METHOD2(HRESULT,TranslateAccelerator, MSG*,pMsg, DWORD,grfModifiers) \
+	ICOM_METHOD2(HRESULT,TranslateAccelerator, struct tagMSG*,pMsg, DWORD,grfModifiers) \
 	ICOM_METHOD1(HRESULT,OnFocus, BOOL,fGotFocus) \
 	ICOM_METHOD (HRESULT,ShowPropertyFrame)
 #define IOleControlSite_IMETHODS \
@@ -208,8 +203,7 @@ ICOM_DEFINE(IOleControl,IUnknown)
 ICOM_DEFINE(IOleControlSite,IUnknown)
 #undef ICOM_INTERFACE
 
-#ifdef ICOM_CINTERFACE
-/*** IUnknwon methods ***/
+/*** IUnknown methods ***/
 #define IOleControlSite_QueryInterface(p,a,b)        ICOM_CALL2(QueryInterface,p,a,b)
 #define IOleControlSite_AddRef(p)                    ICOM_CALL (AddRef,p)
 #define IOleControlSite_Release(p)                   ICOM_CALL (Release,p)
@@ -221,7 +215,6 @@ ICOM_DEFINE(IOleControlSite,IUnknown)
 #define IOleControlSite_TranslateAccelerator(p,a,b)  ICOM_CALL1(TranslateAccelerator,p,a,b)
 #define IOleControlSite_OnFocus(p,a)                 ICOM_CALL1(OnFocus,p,a)
 #define IOleControlSite_ShowPropertyFrame(p)         ICOM_CALL1(ShowPropertyFrame,p)
-#endif
 				
 				
 /*****************************************************************************
@@ -238,7 +231,6 @@ ICOM_DEFINE(IOleControlSite,IUnknown)
 ICOM_DEFINE(IOleInPlaceSiteEx,IOleInPlaceSite)
 #undef ICOM_INTERFACE
 
-#ifdef ICOM_CINTERFACE
 /*** IUnknown methods ***/
 #define IOleInPlaceSiteEx_QueryInterface(p,a,b)      ICOM_CALL2(QueryInterface,p,a,b)
 #define IOleInPlaceSiteEx_AddRef(p)                  ICOM_CALL (AddRef,p)
@@ -261,7 +253,6 @@ ICOM_DEFINE(IOleInPlaceSiteEx,IOleInPlaceSite)
 #define IOleInPlaceSiteEx_OnInPlaceActivateEx(p,a,b) ICOM_CALL2(OnInPlaceActivateEx,p,a,b)
 #define IOleInPlaceSiteEx_OnInPlaceDeactivateEx(p,a) ICOM_CALL1(OnInPlaceDeactivateEx,p,a)
 #define IOleInPlaceSiteEx_RequestUIActivate(p)       ICOM_CALL (RequestUIActivate,p)
-#endif
 				 
 
 /*****************************************************************************
@@ -287,7 +278,6 @@ ICOM_DEFINE(IOleInPlaceSiteEx,IOleInPlaceSite)
 ICOM_DEFINE(IOleInPlaceSiteWindowless,IOleInPlaceSite)
 #undef ICOM_INTERFACE
 
-#ifdef ICOM_CINTERFACE
 /*** IUnknown methods ***/
 #define IOleInPlaceSiteWindowless_QueryInterface(p,a,b)      ICOM_CALL2(QueryInterface,p,a,b)
 #define IOleInPlaceSiteWindowless_AddRef(p)                  ICOM_CALL (AddRef,p)
@@ -319,7 +309,6 @@ ICOM_DEFINE(IOleInPlaceSiteWindowless,IOleInPlaceSite)
 #define IOleInPlaceSiteWindowless_ScrollRect(p,a,b,c,d)    ICOM_CALL4(OnPosRectChange,p,a,b,c,d)
 #define IOleInPlaceSiteWindowless_AdjustRect(p,a)          ICOM_CALL1(OnPosRectChange,p,a)
 #define IOleInPlaceSiteWindowless_OnDefWindowMessage(p,a,b,c,d) ICOM_CALL4(OnPosRectChange,p,a,b,c,d)
-#endif
 
 
 /*****************************************************************************
@@ -335,7 +324,6 @@ ICOM_DEFINE(IOleInPlaceSiteWindowless,IOleInPlaceSite)
 ICOM_DEFINE(IOleInPlaceObjectWindowless,IOleInPlaceObject)
 #undef ICOM_INTERFACE
 
-#ifdef ICOM_CINTERFACE
 /*** IUnknown methods ***/
 #define IOleInPlaceObjectWindowless_QueryInterface(p,a,b) ICOM_CALL2(QueryInterface,p,a,b)
 #define IOleInPlaceObjectWindowless_AddRef(p)             ICOM_CALL (AddRef,p)
@@ -351,7 +339,6 @@ ICOM_DEFINE(IOleInPlaceObjectWindowless,IOleInPlaceObject)
 /*** IOleInPlaceObjectWindowless methods ***/
 #define IOleInPlaceObjectWindowless_OnWindowMessage(p,a,b,c,d) ICOM_CALL4(OnWindowMessage,p,a,b,c,d)
 #define IOleInPlaceObjectWindowless_GetDropTarget(p,a)         ICOM_CALL1(GetDropTarget,p,a)
-#endif
 				 
 
 /*****************************************************************************
@@ -368,8 +355,7 @@ ICOM_DEFINE(IOleInPlaceObjectWindowless,IOleInPlaceObject)
 ICOM_DEFINE(IClassFactory2,IClassFactory)
 #undef ICOM_INTERFACE
 
-#ifdef ICOM_CINTERFACE
-/*** IUnknwon methods ***/
+/*** IUnknown methods ***/
 #define IClassFactory2_QueryInterface(p,a,b)      ICOM_CALL2(QueryInterface,p,a,b)
 #define IClassFactory2_AddRef(p)                  ICOM_CALL (AddRef,p)
 #define IClassFactory2_Release(p)                 ICOM_CALL (Release,p)
@@ -380,7 +366,6 @@ ICOM_DEFINE(IClassFactory2,IClassFactory)
 #define IClassFactory2_GetLicInfo(p,a)            ICOM_CALL1(GetLicInfo,p,a)
 #define IClassFactory2_RequestLicKey(p,a,b)       ICOM_CALL2(RequestLicKey,p,a,b)
 #define IClassFactory2_CreateInstanceLic(p,a,b,c,d,e) ICOM_CALL5(CreateInstanceLic,p,a,b,c,d,e)
-#endif
 
 
 /*****************************************************************************
@@ -399,8 +384,7 @@ ICOM_DEFINE(IClassFactory2,IClassFactory)
 ICOM_DEFINE(IViewObjectEx,IViewObject2)
 #undef ICOM_INTERFACE
 
-#ifdef ICOM_CINTERFACE
-/*** IUnknwon methods ***/
+/*** IUnknown methods ***/
 #define IViewObjectEx_QueryInterface(p,a,b)        ICOM_CALL2(QueryInterface,p,a,b)
 #define IViewObjectEx_AddRef(p)                    ICOM_CALL (AddRef,p)
 #define IViewObjectEx_Release(p)                   ICOM_CALL (Release,p)
@@ -419,12 +403,15 @@ ICOM_DEFINE(IViewObjectEx,IViewObject2)
 #define IViewObjectEx_QueryHitPoint(p,a,b,c,d,e)      ICOM_CALL5(QueryHitPoint,p,a,b,c,d,e)
 #define IViewObjectEx_QueryHitRect(p,a,b,c,d,e)       ICOM_CALL5(QueryHitRect,p,a,b,c,d,e)
 #define IViewObjectEx_GetNaturalExtent(p,a,b,c,d,e,f) ICOM_CALL6(GetNaturalExtent,p,a,b,c,d,e,f)
-#endif
 
 
 /*****************************************************************************
  * IProvideClassInfo interface
  */
+#ifdef __WINE__
+#undef GetClassInfo
+#endif
+
 #define ICOM_INTERFACE IProvideClassInfo
 #define IProvideClassInfo_METHODS \
 	ICOM_METHOD1(HRESULT,GetClassInfo, ITypeInfo**,ppTI) 
@@ -434,14 +421,12 @@ ICOM_DEFINE(IViewObjectEx,IViewObject2)
 ICOM_DEFINE(IProvideClassInfo,IUnknown)
 #undef ICOM_INTERFACE
 
-#ifdef ICOM_CINTERFACE
-/*** IUnknwon methods ***/
+/*** IUnknown methods ***/
 #define IProvideClassInfo_QueryInterface(p,a,b)        ICOM_CALL2(QueryInterface,p,a,b)
 #define IProvideClassInfo_AddRef(p)                    ICOM_CALL (AddRef,p)
 #define IProvideClassInfo_Release(p)                   ICOM_CALL (Release,p)
 /*** IProvideClassInfo methods ***/
 #define IProvideClassInfo_GetClassInfo(p,a)            ICOM_CALL1(GetClassInfo,p,a)
-#endif
 
 
 				
@@ -457,8 +442,7 @@ ICOM_DEFINE(IProvideClassInfo,IUnknown)
 ICOM_DEFINE(IProvideClassInfo2,IProvideClassInfo)
 #undef ICOM_INTERFACE
 
-#ifdef ICOM_CINTERFACE
-/*** IUnknwon methods ***/
+/*** IUnknown methods ***/
 #define IProvideClassInfo2_QueryInterface(p,a,b)   ICOM_CALL2(QueryInterface,p,a,b)
 #define IProvideClassInfo2_AddRef(p)               ICOM_CALL (AddRef,p)
 #define IProvideClassInfo2_Release(p)              ICOM_CALL (Release,p)
@@ -466,7 +450,6 @@ ICOM_DEFINE(IProvideClassInfo2,IProvideClassInfo)
 #define IProvideClassInfo2_GetClassInfo(p,a)       ICOM_CALL1(GetClassInfo,p,a) 
 /*** IProvideClassInfo2 methods ***/
 #define IProvideClassInfo2_GetGUID(p,a,b)          ICOM_CALL2(GetGUID,p,a,b)
-#endif
 
 #ifdef __cplusplus
 } /* extern "C" */
