@@ -1,4 +1,4 @@
-/* $Id: bindctx.cpp,v 1.3 2000-05-05 18:21:36 sandervl Exp $ */
+/* $Id: bindctx.cpp,v 1.4 2000-09-14 14:57:00 davidr Exp $ */
 /* 
  * BindCtx implementation
  * 
@@ -299,19 +299,20 @@ HRESULT WINAPI BindCtxImpl_ReleaseBoundObjects(IBindCtx* iface)
  ******************************************************************************/
 HRESULT WINAPI BindCtxImpl_SetBindOptions(IBindCtx* iface,LPBIND_OPTS2 pbindopts)
 {
+    DWORD size = sizeof(BIND_OPTS2);
+
     ICOM_THIS(BindCtxImpl,iface);
 
     TRACE("(%p,%p)\n",This,pbindopts);
 
     if (pbindopts==NULL)
         return E_POINTER;
+
+    /* make sure we don't copy more bytes than we can */
+    if (pbindopts->cbStruct < size)
+	size = pbindopts->cbStruct;
     
-    if (pbindopts->cbStruct > sizeof(BIND_OPTS2))
-    {
-        WARN("invalid size");
-        return E_INVALIDARG; /* FIXME : not verified */
-    }
-    memcpy(&This->bindOption2, pbindopts, pbindopts->cbStruct);
+    memcpy(&This->bindOption2, pbindopts, size);
 
     return S_OK;
 }
@@ -321,6 +322,8 @@ HRESULT WINAPI BindCtxImpl_SetBindOptions(IBindCtx* iface,LPBIND_OPTS2 pbindopts
  ******************************************************************************/
 HRESULT WINAPI BindCtxImpl_GetBindOptions(IBindCtx* iface,LPBIND_OPTS2 pbindopts)
 {
+    DWORD size = sizeof(BIND_OPTS2);
+
     ICOM_THIS(BindCtxImpl,iface);
 
     TRACE("(%p,%p)\n",This,pbindopts);
@@ -328,12 +331,11 @@ HRESULT WINAPI BindCtxImpl_GetBindOptions(IBindCtx* iface,LPBIND_OPTS2 pbindopts
     if (pbindopts==NULL)
         return E_POINTER;
 
-    if (pbindopts->cbStruct > sizeof(BIND_OPTS2))
-    {
-        WARN("invalid size");
-        return E_INVALIDARG; /* FIXME : not verified */
-    }
-    memcpy(pbindopts, &This->bindOption2, pbindopts->cbStruct);
+    /* make sure we don't copy more bytes than we can */
+    if (pbindopts->cbStruct < size)
+	size = pbindopts->cbStruct;
+
+    memcpy(pbindopts, &This->bindOption2, size);
     
     return S_OK;
 }
