@@ -1,4 +1,9 @@
- /* $Id: changelog,v 1.1032 2000-07-15 17:11:26 sandervl Exp $ */
+ /* $Id: changelog,v 1.1033 2000-07-16 23:18:14 bird Exp $ */
+
+ 2000-07-16: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - Win32k:   Created a development branch called "Grace" and checked my
+                current code in into it. (This is the reason why there are
+                some new files in the src/win32k tree.)
 
  2000-07-15: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   XWing vs Tie Fighter fix broke RealPlayer 7 setup (missing buttons)
@@ -38,7 +43,7 @@
     - ODINCRT:  Fixed wrong implementation of strncpy; do not 0 terminate
                 string unless length < length parameter
                 (this is correct behaviour according to C library manual)
- 
+
  2000-07-04: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: Unstubbed CopyFileExA/W (calls CopyFileA/W; not properly implemented)
                 Unstubbed CreateDirectoryExA/W (calls CreateDirectoryA/W; not properly implemented)
