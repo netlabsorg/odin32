@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.36 1999-08-29 14:56:02 sandervl Exp $
+# $Id: makefile,v 1.37 1999-08-31 14:36:45 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -18,21 +18,20 @@ CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE) /Tm+
 CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE) /Tm+
 
 
-OBJS = KERNEL32.OBJ KOBJECTS.OBJ CONSOLE.OBJ CONIN.OBJ CONBUFFER.OBJ \
- CONOUT.OBJ UNICODE.OBJ network.OBJ DEVIO.OBJ profile.obj \
- THREAD.OBJ virtual.obj THUNK.OBJ OBSOLETE.OBJ COMM.OBJ \
- MESSAGE.OBJ RESOURCE.OBJ NAMEID.OBJ WINRES.OBJ WINMOD.OBJ \
- EXCEPTIONS.OBJ LFILE.OBJ NPIPE.OBJ oslibdos.obj oslibmisc.obj \
- MISC.OBJ EXCEPTUTIL.OBJ LANG.OBJ ICCIO.OBJ MAP.OBJ \
- WIN32UTIL.OBJ heap.OBJ heapstring.obj os2heap.OBJ \
- vmutex.OBJ initterm.OBJ handlemanager.OBJ \
- hmdevice.obj hmopen32.obj hmobjects.obj hmevent.obj \
- hmmutex.obj hmsemaphore.obj wprocess.OBJ conprop.OBJ \
- winimage.OBJ windll.OBJ winexe.OBJ time.obj mmap.obj \
- pefile.OBJ winimgres.OBJ wintls.obj async.OBJ fileio.obj \
- atom.obj disk.obj directory.obj cvtbitmap.obj hmmmap.obj \
- cvtmenu.obj cvtaccel.obj cvticon.obj cvticongrp.obj \
- cvtcursor.obj cvtcursorgrp.obj stubs.obj interlock.obj
+OBJS = KERNEL32.OBJ KOBJECTS.OBJ CONSOLE.OBJ CONIN.OBJ \
+CONBUFFER.OBJ CONOUT.OBJ UNICODE.OBJ network.OBJ DEVIO.OBJ \
+profile.obj THREAD.OBJ virtual.obj THUNK.OBJ OBSOLETE.OBJ COMM.OBJ\
+MESSAGE.OBJ RESOURCE.OBJ NAMEID.OBJ WINRES.OBJ WINMOD.OBJ EXCEPTIONS.OBJ \
+LFILE.OBJ NPIPE.OBJ oslibdos.obj oslibmisc.obj MISC.OBJ EXCEPTUTIL.OBJ \
+LANG.OBJ ICCIO.OBJ MAP.OBJ WIN32UTIL.OBJ heap.OBJ heapstring.obj \
+os2heap.OBJ vmutex.OBJ initterm.OBJ handlemanager.OBJ winresmenu.obj \
+hmdevice.obj hmopen32.obj hmobjects.obj hmevent.obj hmmutex.obj \
+hmsemaphore.obj wprocess.OBJ conprop.OBJ \
+winimage.OBJ windll.OBJ winexe.OBJ time.obj mmap.obj \
+pefile.OBJ winimgres.OBJ wintls.obj async.OBJ fileio.obj \
+atom.obj disk.obj directory.obj cvtbitmap.obj hmmmap.obj \
+cvtmenu.obj cvtaccel.obj cvticon.obj cvticongrp.obj \
+cvtcursor.obj cvtcursorgrp.obj stubs.obj interlock.obj
 
 
 TARGET = kernel32
@@ -40,11 +39,29 @@ TARGET = kernel32
 all: $(PDWIN32_LIB)\pmwinx.lib $(TARGET).dll $(TARGET).LIB
 
 
-$(TARGET).dll: $(OBJS) $(TARGET).def
-        $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def $(PDWIN32_LIB)\PMWINX.LIB $(PDWIN32_LIB)\LIBULS.LIB $(PDWIN32_LIB)\LIBCONV.LIB $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
+$(TARGET).dll: $(OBJS) $(TARGET).def $(TARGET).lrf
+#        $(LD) $(LDFLAGS) /Fm /Fe$@ /B"/FREE" @$(TARGET).lrf
+!ifdef DEBUG
+#	icc -Si -Ti -Ge- -Ss+ -W3 -Gm+ /B"/noe /NOD /NOFREE" @$(TARGET).lrf
+	ilink /de /map  /noe /NOD /dbgpack /NoLogo /NOFREE @$(TARGET).lrf
+!else
+	ilink /map  /noe /NOD /NoLogo /FREE @$(TARGET).lrf
+!endif
         rc -r console.rc console.res
         rc console.res $@
         $(CP) $@ $(PDWIN32_BIN)
+
+$(TARGET).lrf: makefile
+        @echo Creating file <<$(@B).lrf
+$(OBJS) 
+$(PDWIN32_LIB)\PMWINX.LIB 
+$(PDWIN32_LIB)\LIBULS.LIB 
+$(PDWIN32_LIB)\LIBCONV.LIB 
+$(PDWIN32_LIB)\odincrt.lib 
+OS2386.LIB 
+$(RTLLIB_O) 
+$(TARGET).def
+<<keep
 
 $(TARGET).LIB: $(TARGET)exp.def
         $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
@@ -233,6 +250,7 @@ iccio.OBJ: \
 
 winres.OBJ: \
     .\winres.cpp \
+    $(PDWIN32_INCLUDE)\winresmenu.h \
     $(PDWIN32_INCLUDE)\winres.h \
     $(PDWIN32_INCLUDE)\nameid.h \
     $(PDWIN32_INCLUDE)\winimage.h \
@@ -316,6 +334,8 @@ winimgres.OBJ: winimgres.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\wi
 windll.OBJ:    windll.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h oslibmisc.h
 winexe.OBJ:    winexe.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h $(PDWIN32_INCLUDE)\winexe.h
 stubs.obj:     stubs.cpp stubs.h
+
+winresmenu.obj: winresmenu.cpp $(PDWIN32_INCLUDE)\winresmenu.h $(PDWIN32_INCLUDE)\winres.h
 
 cvtbitmap.obj: cvtbitmap.cpp $(PDWIN32_INCLUDE)\winicon.h $(PDWIN32_INCLUDE)\misc.h cvtresource.h
 cvtmenu.obj: cvtmenu.cpp $(PDWIN32_INCLUDE)\winmenu.h $(PDWIN32_INCLUDE)\misc.h cvtresource.h
