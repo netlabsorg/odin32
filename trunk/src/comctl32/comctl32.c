@@ -1,4 +1,4 @@
-/* $Id: comctl32.c,v 1.8 1999-08-20 18:30:57 achimha Exp $ */
+/* $Id: comctl32.c,v 1.9 1999-09-13 18:49:02 cbratschi Exp $ */
 /*
  * Win32 common controls implementation
  *
@@ -32,6 +32,7 @@
 #include "tooltips.h"
 #include "toolbar.h"
 #include "treeview.h"
+#include "listview.h"
 
 HANDLE COMCTL32_hHeap = (HANDLE)NULL;
 HMODULE COMCTL32_hModule = 0;
@@ -66,7 +67,8 @@ void CDECL RegisterCOMCTL32WindowClasses(unsigned long hinstDLL)
   TOOLTIPS_Register();
   TOOLBAR_Register();
   TREEVIEW_Register();
-} 
+  LISTVIEW_Register();
+}
 
 void CDECL UnregisterCOMCTL32WindowClasses(void)
 {
@@ -90,6 +92,7 @@ void CDECL UnregisterCOMCTL32WindowClasses(void)
   TOOLTIPS_Unregister();
   TOOLBAR_Unregister();
   TREEVIEW_Unregister();
+  LISTVIEW_Unregister();
 
   /* destroy private heap */
   HeapDestroy(COMCTL32_hHeap);
@@ -125,52 +128,52 @@ void CDECL UnregisterCOMCTL32WindowClasses(void)
 
 VOID WINAPI
 MenuHelp (UINT uMsg, WPARAM wParam, LPARAM lParam, HMENU hMainMenu,
-	  HINSTANCE hInst, HWND hwndStatus, LPUINT lpwIDs)
+          HINSTANCE hInst, HWND hwndStatus, LPUINT lpwIDs)
 {
     UINT uMenuID = 0;
 
     if (!IsWindow (hwndStatus))
-	return;
+        return;
 
     switch (uMsg) {
-	case WM_MENUSELECT:
-//	    TRACE (commctrl, "WM_MENUSELECT wParam=0x%X lParam=0x%lX\n",
-//		   wParam, lParam);
+        case WM_MENUSELECT:
+//          TRACE (commctrl, "WM_MENUSELECT wParam=0x%X lParam=0x%lX\n",
+//                 wParam, lParam);
 
             if ((HIWORD(wParam) == 0xFFFF) && (lParam == 0)) {
                 /* menu was closed */
-//		TRACE (commctrl, "menu was closed!\n");
+//              TRACE (commctrl, "menu was closed!\n");
                 SendMessageA (hwndStatus, SB_SIMPLE, FALSE, 0);
             }
-	    else {
-		/* menu item was selected */
-		if (HIWORD(wParam) & MF_POPUP)
-		    uMenuID = (UINT)*(lpwIDs+1);
-		else
-		    uMenuID = (UINT)LOWORD(wParam);
-//		TRACE (commctrl, "uMenuID = %u\n", uMenuID);
+            else {
+                /* menu item was selected */
+                if (HIWORD(wParam) & MF_POPUP)
+                    uMenuID = (UINT)*(lpwIDs+1);
+                else
+                    uMenuID = (UINT)LOWORD(wParam);
+//              TRACE (commctrl, "uMenuID = %u\n", uMenuID);
 
-		if (uMenuID) {
-		    CHAR szText[256];
+                if (uMenuID) {
+                    CHAR szText[256];
 
-		    if (!LoadStringA (hInst, uMenuID, szText, 256))
-			szText[0] = '\0';
+                    if (!LoadStringA (hInst, uMenuID, szText, 256))
+                        szText[0] = '\0';
 
-		    SendMessageA (hwndStatus, SB_SETTEXTA,
-				    255 | SBT_NOBORDERS, (LPARAM)szText);
-		    SendMessageA (hwndStatus, SB_SIMPLE, TRUE, 0);
-		}
-	    }
-	    break;
+                    SendMessageA (hwndStatus, SB_SETTEXTA,
+                                    255 | SBT_NOBORDERS, (LPARAM)szText);
+                    SendMessageA (hwndStatus, SB_SIMPLE, TRUE, 0);
+                }
+            }
+            break;
 
-	default:
-//	    FIXME (commctrl, "Invalid Message 0x%x!\n", uMsg);
-	    break;
+        default:
+//          FIXME (commctrl, "Invalid Message 0x%x!\n", uMsg);
+            break;
     }
 }
 
 /***********************************************************************
- * ShowHideMenuCtl [COMCTL32.3] 
+ * ShowHideMenuCtl [COMCTL32.3]
  *
  * Shows or hides controls and updates the corresponding menu item.
  *
@@ -207,33 +210,33 @@ ShowHideMenuCtl (HWND hwnd, UINT uFlags, LPINT lpInfo)
 //    TRACE (commctrl, "%x, %x, %p\n", hwnd, uFlags, lpInfo);
 
     if (lpInfo == NULL)
-	return FALSE;
+        return FALSE;
 
     if (!(lpInfo[0]) || !(lpInfo[1]))
-	return FALSE;
+        return FALSE;
 
     /* search for control */
     lpMenuId = &lpInfo[2];
     while (*lpMenuId != uFlags)
-	lpMenuId += 2;
+        lpMenuId += 2;
 
     if (GetMenuState (lpInfo[1], uFlags, MF_BYCOMMAND) & MFS_CHECKED) {
-	/* uncheck menu item */
-	CheckMenuItem (lpInfo[0], *lpMenuId, MF_BYCOMMAND | MF_UNCHECKED);
+        /* uncheck menu item */
+        CheckMenuItem (lpInfo[0], *lpMenuId, MF_BYCOMMAND | MF_UNCHECKED);
 
-	/* hide control */
-	lpMenuId++;
-	SetWindowPos (GetDlgItem (hwnd, *lpMenuId), 0, 0, 0, 0, 0,
-			SWP_HIDEWINDOW);
+        /* hide control */
+        lpMenuId++;
+        SetWindowPos (GetDlgItem (hwnd, *lpMenuId), 0, 0, 0, 0, 0,
+                        SWP_HIDEWINDOW);
     }
     else {
-	/* check menu item */
-	CheckMenuItem (lpInfo[0], *lpMenuId, MF_BYCOMMAND | MF_CHECKED);
+        /* check menu item */
+        CheckMenuItem (lpInfo[0], *lpMenuId, MF_BYCOMMAND | MF_CHECKED);
 
-	/* show control */
-	lpMenuId++;
-	SetWindowPos (GetDlgItem (hwnd, *lpMenuId), 0, 0, 0, 0, 0,
-			SWP_SHOWWINDOW);
+        /* show control */
+        lpMenuId++;
+        SetWindowPos (GetDlgItem (hwnd, *lpMenuId), 0, 0, 0, 0, 0,
+                        SWP_SHOWWINDOW);
     }
 
     return TRUE;
@@ -266,24 +269,24 @@ GetEffectiveClientRect (HWND hwnd, LPRECT lpRect, LPINT lpInfo)
     HWND hwndCtrl;
 
 //    TRACE (commctrl, "(0x%08lx 0x%08lx 0x%08lx)\n",
-//	   (DWORD)hwnd, (DWORD)lpRect, (DWORD)lpInfo);
+//         (DWORD)hwnd, (DWORD)lpRect, (DWORD)lpInfo);
 
     GetClientRect (hwnd, lpRect);
     lpRun = lpInfo;
 
     do {
-	lpRun += 2;
-	if (*lpRun == 0)
-	    return;
-	lpRun++;
-	hwndCtrl = GetDlgItem (hwnd, *lpRun);
-	if (GetWindowLongA (hwndCtrl, GWL_STYLE) & WS_VISIBLE) {
-//	    TRACE (commctrl, "control id 0x%x\n", *lpRun);
-	    GetWindowRect (hwndCtrl, &rcCtrl);
-	    MapWindowPoints ((HWND)0, hwnd, (LPPOINT)&rcCtrl, 2);
-	    SubtractRect (lpRect, lpRect, &rcCtrl);
-	}
-	lpRun++;
+        lpRun += 2;
+        if (*lpRun == 0)
+            return;
+        lpRun++;
+        hwndCtrl = GetDlgItem (hwnd, *lpRun);
+        if (GetWindowLongA (hwndCtrl, GWL_STYLE) & WS_VISIBLE) {
+//          TRACE (commctrl, "control id 0x%x\n", *lpRun);
+            GetWindowRect (hwndCtrl, &rcCtrl);
+            MapWindowPoints ((HWND)0, hwnd, (LPPOINT)&rcCtrl, 2);
+            SubtractRect (lpRect, lpRect, &rcCtrl);
+        }
+        lpRun++;
     } while (*lpRun);
 }
 
@@ -324,9 +327,9 @@ DrawStatusTextA (HDC hdc, LPRECT lprc, LPCSTR text, UINT style)
       int oldbkmode = SetBkMode (hdc, TRANSPARENT);
       r.left += 3;
       DrawTextA (hdc, text, lstrlenA(text),
-		   &r, DT_LEFT|DT_VCENTER|DT_SINGLELINE);  
+                   &r, DT_LEFT|DT_VCENTER|DT_SINGLELINE);
       if (oldbkmode != TRANSPARENT)
-	SetBkMode(hdc, oldbkmode);
+        SetBkMode(hdc, oldbkmode);
     }
 }
 
@@ -376,10 +379,10 @@ LPSTR p;
 HWND WINAPI
 CreateStatusWindowA (INT style, LPCSTR text, HWND parent, UINT wid)
 {
-    return CreateWindowA(STATUSCLASSNAMEA, text, style, 
-			   CW_USEDEFAULT, CW_USEDEFAULT,
-			   CW_USEDEFAULT, CW_USEDEFAULT, 
-			   parent, wid, 0, 0);
+    return CreateWindowA(STATUSCLASSNAMEA, text, style,
+                           CW_USEDEFAULT, CW_USEDEFAULT,
+                           CW_USEDEFAULT, CW_USEDEFAULT,
+                           parent, wid, 0, 0);
 }
 
 
@@ -401,9 +404,9 @@ HWND WINAPI
 CreateStatusWindowW (INT style, LPCWSTR text, HWND parent, UINT wid)
 {
     return CreateWindowW(STATUSCLASSNAMEW, text, style,
-			   CW_USEDEFAULT, CW_USEDEFAULT,
-			   CW_USEDEFAULT, CW_USEDEFAULT,
-			   parent, wid, 0, 0);
+                           CW_USEDEFAULT, CW_USEDEFAULT,
+                           CW_USEDEFAULT, CW_USEDEFAULT,
+                           parent, wid, 0, 0);
 }
 
 
@@ -431,16 +434,16 @@ CreateStatusWindowW (INT style, LPCWSTR text, HWND parent, UINT wid)
 
 HWND WINAPI
 CreateUpDownControl (DWORD style, INT x, INT y, INT cx, INT cy,
-		     HWND parent, INT id, HINSTANCE inst,
-		     HWND buddy, INT maxVal, INT minVal, INT curVal)
+                     HWND parent, INT id, HINSTANCE inst,
+                     HWND buddy, INT maxVal, INT minVal, INT curVal)
 {
     HWND hUD =
-	CreateWindowA (UPDOWN_CLASSA, 0, style, x, y, cx, cy,
-			 parent, id, inst, 0);
+        CreateWindowA (UPDOWN_CLASSA, 0, style, x, y, cx, cy,
+                         parent, id, inst, 0);
     if (hUD) {
-	SendMessageA (hUD, UDM_SETBUDDY, buddy, 0);
-	SendMessageA (hUD, UDM_SETRANGE, 0, MAKELONG(maxVal, minVal));
-	SendMessageA (hUD, UDM_SETPOS, 0, MAKELONG(curVal, 0));     
+        SendMessageA (hUD, UDM_SETBUDDY, buddy, 0);
+        SendMessageA (hUD, UDM_SETRANGE, 0, MAKELONG(maxVal, minVal));
+        SendMessageA (hUD, UDM_SETPOS, 0, MAKELONG(curVal, 0));
     }
 
     return hUD;
@@ -491,59 +494,59 @@ InitCommonControlsEx (LPINITCOMMONCONTROLSEX lpInitCtrls)
     DWORD dwMask;
 
     if (!lpInitCtrls)
-	return FALSE;
+        return FALSE;
     if (lpInitCtrls->dwSize != sizeof(INITCOMMONCONTROLSEX))
-	return FALSE;
+        return FALSE;
 
 //    TRACE(commctrl,"(0x%08lx)\n", lpInitCtrls->dwICC);
 
     for (cCount = 0; cCount < 32; cCount++) {
-	dwMask = 1 << cCount;
-	if (!(lpInitCtrls->dwICC & dwMask))
-	    continue;
+        dwMask = 1 << cCount;
+        if (!(lpInitCtrls->dwICC & dwMask))
+            continue;
 
-	switch (lpInitCtrls->dwICC & dwMask) {
-	    /* dummy initialization */
-	    case ICC_ANIMATE_CLASS:
-	    case ICC_BAR_CLASSES:
-	    case ICC_LISTVIEW_CLASSES:
-	    case ICC_TREEVIEW_CLASSES:
-	    case ICC_TAB_CLASSES:
-	    case ICC_UPDOWN_CLASS:
-	    case ICC_PROGRESS_CLASS:
-	    case ICC_HOTKEY_CLASS:
-		break;
+        switch (lpInitCtrls->dwICC & dwMask) {
+            /* dummy initialization */
+            case ICC_ANIMATE_CLASS:
+            case ICC_BAR_CLASSES:
+            case ICC_LISTVIEW_CLASSES:
+            case ICC_TREEVIEW_CLASSES:
+            case ICC_TAB_CLASSES:
+            case ICC_UPDOWN_CLASS:
+            case ICC_PROGRESS_CLASS:
+            case ICC_HOTKEY_CLASS:
+                break;
 
-	    /* advanced classes - not included in Win95 */
-	    case ICC_DATE_CLASSES:
-		MONTHCAL_Register ();
-		DATETIME_Register ();
-		break;
+            /* advanced classes - not included in Win95 */
+            case ICC_DATE_CLASSES:
+                MONTHCAL_Register ();
+                DATETIME_Register ();
+                break;
 
-	    case ICC_USEREX_CLASSES:
-		COMBOEX_Register ();
-		break;
+            case ICC_USEREX_CLASSES:
+                COMBOEX_Register ();
+                break;
 
-	    case ICC_COOL_CLASSES:
-		REBAR_Register ();
-		break;
+            case ICC_COOL_CLASSES:
+                REBAR_Register ();
+                break;
 
-	    case ICC_INTERNET_CLASSES:
-		IPADDRESS_Register ();
-		break;
+            case ICC_INTERNET_CLASSES:
+                IPADDRESS_Register ();
+                break;
 
-	    case ICC_PAGESCROLLER_CLASS:
-		PAGER_Register ();
-		break;
+            case ICC_PAGESCROLLER_CLASS:
+                PAGER_Register ();
+                break;
 
-	    case ICC_NATIVEFNTCTL_CLASS:
-		NATIVEFONT_Register ();
-		break;
+            case ICC_NATIVEFNTCTL_CLASS:
+                NATIVEFONT_Register ();
+                break;
 
-	    default:
-//		FIXME (commctrl, "Unknown class! dwICC=0x%lX\n", dwMask);
-		break;
-	}
+            default:
+//              FIXME (commctrl, "Unknown class! dwICC=0x%lX\n", dwMask);
+                break;
+        }
     }
 
     return TRUE;
@@ -580,39 +583,39 @@ CreateToolbarEx (HWND hwnd, DWORD style, UINT wID, INT nBitmaps,
 {
     HWND hwndTB =
         CreateWindowExA (0, TOOLBARCLASSNAMEA, "", style, 0, 0, 0, 0,
-			   hwnd, (HMENU)wID, 0, NULL);
+                           hwnd, (HMENU)wID, 0, NULL);
     if(hwndTB) {
-	TBADDBITMAP tbab;
+        TBADDBITMAP tbab;
 
         SendMessageA (hwndTB, TB_BUTTONSTRUCTSIZE,
-			(WPARAM)uStructSize, 0);
+                        (WPARAM)uStructSize, 0);
 
-	/* set bitmap and button size */
-	/*If CreateToolbarEx receive 0, windows set default values*/
-	if (dyBitmap < 0)
-	    dyBitmap = 16;
-	if (dxBitmap < 0)
-	    dxBitmap = 16;
+        /* set bitmap and button size */
+        /*If CreateToolbarEx receive 0, windows set default values*/
+        if (dyBitmap < 0)
+            dyBitmap = 16;
+        if (dxBitmap < 0)
+            dxBitmap = 16;
 
-	    SendMessageA (hwndTB, TB_SETBITMAPSIZE, 0,
-			    MAKELPARAM((WORD)dyBitmap, (WORD)dxBitmap));
-	    SendMessageA (hwndTB, TB_SETBUTTONSIZE, 0,
-			    MAKELPARAM((WORD)dyButton, (WORD)dxButton));
+            SendMessageA (hwndTB, TB_SETBITMAPSIZE, 0,
+                            MAKELPARAM((WORD)dyBitmap, (WORD)dxBitmap));
+            SendMessageA (hwndTB, TB_SETBUTTONSIZE, 0,
+                            MAKELPARAM((WORD)dyButton, (WORD)dxButton));
 
 
-	/* add bitmaps */
-	if (nBitmaps > 0)
-	{
-	tbab.hInst = hBMInst;
-	tbab.nID   = wBMID;
+        /* add bitmaps */
+        if (nBitmaps > 0)
+        {
+        tbab.hInst = hBMInst;
+        tbab.nID   = wBMID;
 
-	SendMessageA (hwndTB, TB_ADDBITMAP,
-			(WPARAM)nBitmaps, (LPARAM)&tbab);
-	}
-	/* add buttons */
-	if(iNumButtons > 0)
-	SendMessageA (hwndTB, TB_ADDBUTTONSA,
-			(WPARAM)iNumButtons, (LPARAM)lpButtons);
+        SendMessageA (hwndTB, TB_ADDBITMAP,
+                        (WPARAM)nBitmaps, (LPARAM)&tbab);
+        }
+        /* add buttons */
+        if(iNumButtons > 0)
+        SendMessageA (hwndTB, TB_ADDBUTTONSA,
+                        (WPARAM)iNumButtons, (LPARAM)lpButtons);
     }
 
     return hwndTB;
@@ -636,7 +639,7 @@ CreateToolbarEx (HWND hwnd, DWORD style, UINT wID, INT nBitmaps,
 
 HBITMAP WINAPI
 CreateMappedBitmap (HINSTANCE hInstance, INT idBitmap, UINT wFlags,
-		    LPCOLORMAP lpColorMap, INT iNumMaps)
+                    LPCOLORMAP lpColorMap, INT iNumMaps)
 {
     HGLOBAL hglb;
     HRSRC hRsrc;
@@ -648,55 +651,55 @@ CreateMappedBitmap (HINSTANCE hInstance, INT idBitmap, UINT wFlags,
     HBITMAP hbm;
     LPCOLORMAP sysColorMap;
     COLORMAP internalColorMap[4] =
-	{{0x000000, 0}, {0x808080, 0}, {0xC0C0C0, 0}, {0xFFFFFF, 0}};
+        {{0x000000, 0}, {0x808080, 0}, {0xC0C0C0, 0}, {0xFFFFFF, 0}};
 
     /* initialize pointer to colortable and default color table */
     if (lpColorMap) {
-	iMaps = iNumMaps;
-	sysColorMap = lpColorMap;
+        iMaps = iNumMaps;
+        sysColorMap = lpColorMap;
     }
     else {
-	internalColorMap[0].to = GetSysColor (COLOR_BTNTEXT);
-	internalColorMap[1].to = GetSysColor (COLOR_BTNSHADOW);
-	internalColorMap[2].to = GetSysColor (COLOR_BTNFACE);
-	internalColorMap[3].to = GetSysColor (COLOR_BTNHIGHLIGHT);
-	iMaps = 4;
-	sysColorMap = (LPCOLORMAP)internalColorMap;
+        internalColorMap[0].to = GetSysColor (COLOR_BTNTEXT);
+        internalColorMap[1].to = GetSysColor (COLOR_BTNSHADOW);
+        internalColorMap[2].to = GetSysColor (COLOR_BTNFACE);
+        internalColorMap[3].to = GetSysColor (COLOR_BTNHIGHLIGHT);
+        iMaps = 4;
+        sysColorMap = (LPCOLORMAP)internalColorMap;
     }
 
     hRsrc = FindResourceA (hInstance, (LPSTR)idBitmap, RT_BITMAPA);
     if (hRsrc == 0)
-	return 0;
+        return 0;
     hglb = LoadResource (hInstance, hRsrc);
     if (hglb == 0)
-	return 0;
+        return 0;
     lpBitmap = (LPBITMAPINFOHEADER)LockResource (hglb);
     if (lpBitmap == NULL)
-	return 0;
+        return 0;
 
     nColorTableSize = (1 << lpBitmap->biBitCount);
     nSize = lpBitmap->biSize + nColorTableSize * sizeof(RGBQUAD);
     lpBitmapInfo = (LPBITMAPINFOHEADER)GlobalAlloc (GMEM_FIXED, nSize);
     if (lpBitmapInfo == NULL)
-	return 0;
+        return 0;
     RtlMoveMemory (lpBitmapInfo, lpBitmap, nSize);
 
     pColorTable = (DWORD*)(((LPBYTE)lpBitmapInfo)+(UINT)lpBitmapInfo->biSize);
 
     for (iColor = 0; iColor < nColorTableSize; iColor++) {
-	for (i = 0; i < iMaps; i++) {
-	    if (pColorTable[iColor] == sysColorMap[i].from) {
+        for (i = 0; i < iMaps; i++) {
+            if (pColorTable[iColor] == sysColorMap[i].from) {
 #if 0
-		if (wFlags & CBS_MASKED) {
-		    if (sysColorMap[i].to != COLOR_BTNTEXT)
-			pColorTable[iColor] = RGB(255, 255, 255);
-		}
-		else
+                if (wFlags & CBS_MASKED) {
+                    if (sysColorMap[i].to != COLOR_BTNTEXT)
+                        pColorTable[iColor] = RGB(255, 255, 255);
+                }
+                else
 #endif
-		    pColorTable[iColor] = sysColorMap[i].to;
-		break;
-	    }
-	}
+                    pColorTable[iColor] = sysColorMap[i].to;
+                break;
+            }
+        }
     }
 
     nWidth  = (INT)lpBitmapInfo->biWidth;
@@ -704,15 +707,15 @@ CreateMappedBitmap (HINSTANCE hInstance, INT idBitmap, UINT wFlags,
     hdcScreen = GetDC ((HWND)0);
     hbm = CreateCompatibleBitmap (hdcScreen, nWidth, nHeight);
     if (hbm) {
-	HDC hdcDst = CreateCompatibleDC (hdcScreen);
-	HBITMAP hbmOld = SelectObject (hdcDst, hbm);
-	LPBYTE lpBits = (LPBYTE)(lpBitmap + 1);
-	lpBits += (1 << (lpBitmapInfo->biBitCount)) * sizeof(RGBQUAD);
-	StretchDIBits (hdcDst, 0, 0, nWidth, nHeight, 0, 0, nWidth, nHeight,
-		         lpBits, (LPBITMAPINFO)lpBitmapInfo, DIB_RGB_COLORS,
-		         SRCCOPY);
-	SelectObject (hdcDst, hbmOld);
-	DeleteDC (hdcDst);
+        HDC hdcDst = CreateCompatibleDC (hdcScreen);
+        HBITMAP hbmOld = SelectObject (hdcDst, hbm);
+        LPBYTE lpBits = (LPBYTE)(lpBitmap + 1);
+        lpBits += (1 << (lpBitmapInfo->biBitCount)) * sizeof(RGBQUAD);
+        StretchDIBits (hdcDst, 0, 0, nWidth, nHeight, 0, 0, nWidth, nHeight,
+                         lpBits, (LPBITMAPINFO)lpBitmapInfo, DIB_RGB_COLORS,
+                         SRCCOPY);
+        SelectObject (hdcDst, hbmOld);
+        DeleteDC (hdcDst);
     }
     ReleaseDC ((HWND)0, hdcScreen);
     GlobalFree ((HGLOBAL)lpBitmapInfo);
@@ -745,12 +748,12 @@ CreateMappedBitmap (HINSTANCE hInstance, INT idBitmap, UINT wFlags,
 
 HWND WINAPI
 CreateToolbar (HWND hwnd, DWORD style, UINT wID, INT nBitmaps,
-	       HINSTANCE hBMInst, UINT wBMID,
-	       LPCOLDTBBUTTON lpButtons,INT iNumButtons)
+               HINSTANCE hBMInst, UINT wBMID,
+               LPCOLDTBBUTTON lpButtons,INT iNumButtons)
 {
     return CreateToolbarEx (hwnd, style | CCS_NODIVIDER, wID, nBitmaps,
-			    hBMInst, wBMID, (LPCTBBUTTON)lpButtons,
-			    iNumButtons, 0, 0, 0, 0, sizeof (OLDTBBUTTON));
+                            hBMInst, wBMID, (LPCTBBUTTON)lpButtons,
+                            iNumButtons, 0, 0, 0, 0, sizeof (OLDTBBUTTON));
 }
 
 
@@ -775,7 +778,7 @@ COMCTL32_DllGetVersion (DLLVERSIONINFO *pdvi)
 {
     if (pdvi->cbSize != sizeof(DLLVERSIONINFO)) {
 //        WARN (commctrl, "wrong DLLVERSIONINFO size from app");
-	return E_INVALIDARG;
+        return E_INVALIDARG;
     }
 
     pdvi->dwMajorVersion = 4;
@@ -784,8 +787,8 @@ COMCTL32_DllGetVersion (DLLVERSIONINFO *pdvi)
     pdvi->dwPlatformID = 1;
 
 //    TRACE (commctrl, "%lu.%lu.%lu.%lu\n",
-//	   pdvi->dwMajorVersion, pdvi->dwMinorVersion,
-//	   pdvi->dwBuildNumber, pdvi->dwPlatformID);
+//         pdvi->dwMajorVersion, pdvi->dwMinorVersion,
+//         pdvi->dwBuildNumber, pdvi->dwPlatformID);
 
     return S_OK;
 }
