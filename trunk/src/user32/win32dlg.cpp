@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.45 2000-02-22 17:07:41 cbratschi Exp $ */
+/* $Id: win32dlg.cpp,v 1.46 2000-02-24 19:19:08 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -237,7 +237,7 @@ ULONG Win32Dialog::MsgCreate(HWND hwndFrame, HWND hwndClient)
         if (dlgInfo.style & WS_VISIBLE && !(getStyle() & WS_VISIBLE))
         {
             ShowWindow( SW_SHOWNORMAL );    /* SW_SHOW doesn't always work */
-            ::UpdateWindow( getWindowHandle() );
+            UpdateWindow( getWindowHandle() );
         }
         SetLastError(0);
         dprintf(("********* DIALOG CREATED ************"));
@@ -971,7 +971,7 @@ BOOL Win32Dialog::saveFocus()
  */
 BOOL Win32Dialog::restoreFocus()
 {
-    if (!hwndFocus || IsIconic()) return FALSE;
+    if (!hwndFocus || IsWindowIconic()) return FALSE;
 
     if (!::IsWindow( hwndFocus )) return FALSE;
 

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.168 2000-02-23 17:05:17 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.169 2000-02-24 19:19:08 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -130,7 +130,6 @@ void Win32BaseWindow::Init()
 
   hwndLinkAfter    = HWND_BOTTOM;
   flags            = 0;
-  isIcon           = FALSE;
   lastHitTestVal   = HTOS_NORMAL;
   owner            = NULL;
   windowClass      = 0;
@@ -139,8 +138,6 @@ void Win32BaseWindow::Init()
   hIconSm            = 0;
 
   EraseBkgndFlag     = TRUE;
-  PSEraseFlag        = FALSE;
-  SuppressEraseFlag  = FALSE;
 
   horzScrollInfo     = NULL;
   vertScrollInfo     = NULL;
@@ -980,8 +977,8 @@ ULONG Win32BaseWindow::MsgButton(MSG *msg)
 //******************************************************************************
 ULONG Win32BaseWindow::MsgPaint(ULONG tmp1, BOOL select)
 {
-    if (select && isIcon)
-        return SendInternalMessageA(WM_PAINTICON, 0, 0);
+    if (select && IsWindowIconic())
+        return SendInternalMessageA(WM_PAINTICON, 1, 0);
     else
         return SendInternalMessageA(WM_PAINT, 0, 0);
 }
@@ -997,7 +994,7 @@ ULONG Win32BaseWindow::MsgEraseBackGround(HDC hdc)
     if (hdcErase == 0)
         hdcErase = O32_GetDC(OS2Hwnd);
 
-    if(isIcon)
+    if(IsWindowIconic())
         rc = SendInternalMessageA(WM_ICONERASEBKGND, hdcErase, 0);
     else
         rc = SendInternalMessageA(WM_ERASEBKGND, hdcErase, 0);
@@ -1145,6 +1142,12 @@ BOOL Win32BaseWindow::isFrameWindow()
         return TRUE;
 
     return FALSE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32BaseWindow::IsWindowIconic()
+{
+    return ((getStyle() & WS_MINIMIZE) && windowClass->getIcon());
 }
 //******************************************************************************
 //******************************************************************************
@@ -2308,40 +2311,6 @@ Win32BaseWindow *Win32BaseWindow::GetTopParent()
     return window;
 }
 //******************************************************************************
-//Don't call WinUpdateWindow as that one also updates the child windows
-//Also need to send WM_PAINT directly to the window procedure, which doesn't
-//always happen with WinUpdateWindow (could be posted if thread doesn't own window)
-//******************************************************************************
-BOOL Win32BaseWindow::UpdateWindow()
-{
- RECT rect;
-
-    if(OSLibWinQueryUpdateRect(OS2Hwnd, &rect))
-    {//update region not empty
-        HDC hdc;
-
-        hdc = O32_GetDC(OS2Hwnd);
-        if (isIcon)
-        {
-            SendInternalMessageA(WM_ICONERASEBKGND, (WPARAM)hdc, 0);
-            SendInternalMessageA(WM_PAINTICON, 0, 0);
-        }
-        else
-        {
-            SendInternalMessageA(WM_ERASEBKGND, (WPARAM)hdc, 0);
-            SendInternalMessageA(WM_PAINT, 0, 0);
-        }
-        O32_ReleaseDC(OS2Hwnd, hdc);
-    }
-    return TRUE;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL Win32BaseWindow::IsIconic()
-{
-    return OSLibWinIsIconic(OS2Hwnd);
-}
-//******************************************************************************
 //TODO: Should not enumerate children that are created during the enumeration!
 //******************************************************************************
 BOOL Win32BaseWindow::EnumChildWindows(WNDENUMPROC lpfn, LPARAM lParam)
@@ -2772,6 +2741,8 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value, BOOL fUnicode)
         case GWL_STYLE:
         {
            STYLESTRUCT ss;
+
+                //SvL: TODO: Can you change minimize or maximize status here too?
 
                 if(dwStyle == value)
                     return value;

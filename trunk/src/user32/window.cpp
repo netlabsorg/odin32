@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.56 2000-02-21 17:25:33 cbratschi Exp $ */
+/* $Id: window.cpp,v 1.57 2000-02-24 19:19:10 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -404,7 +404,7 @@ BOOL WIN32API IsIconic( HWND hwnd)
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return FALSE;
     }
-    rc = window->IsIconic();
+    rc = window->IsWindowIconic();
     dprintf(("IsIconic %x returned %d", hwnd, rc));
     return rc;
 }

@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.48 2000-02-16 14:34:13 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.49 2000-02-24 19:19:07 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -37,7 +37,7 @@
 #undef SEVERITY_ERROR
 #include <winerror.h>
 
-#define DBG_LOCALLOG	DBG_dc
+#define DBG_LOCALLOG    DBG_dc
 #include "dbglocal.h"
 
 #ifndef DEVESC_SETPS
@@ -487,13 +487,15 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
       setPageXForm (wnd, pHps);
 
    pHps->hdcType = TYPE_3;
-   lpps->hdc = (HDC)hps;
 
-   if(!wnd->isSuppressErase()) {
-        wnd->setSuppressErase(TRUE);
-        wnd->setEraseBkgnd (FALSE, !wnd->MsgEraseBackGround(lpps->hdc));
+   HideCaret(hwnd);
+
+   if(wnd->needsEraseBkgnd()) {
+        wnd->setEraseBkgnd(FALSE);
+        lpps->fErase = (wnd->MsgEraseBackGround(pHps->hps) != 0);
    }
-   lpps->fErase = wnd->isPSErase();
+   else lpps->fErase = TRUE;
+   lpps->hdc = (HDC)hps;
 
    if (!hPS_ownDC)
    {
@@ -521,6 +523,7 @@ BOOL WIN32API EndPaint (HWND hwnd, const PAINTSTRUCT_W *pPaint)
 
    dprintf (("USER32: EndPaint(%x)", hwnd));
 
+   ShowCaret(hwnd);
    if (!pPaint || !pPaint->hdc )
       return TRUE;
 
@@ -533,7 +536,7 @@ BOOL WIN32API EndPaint (HWND hwnd, const PAINTSTRUCT_W *pPaint)
    if (pHps && (pHps->hdcType == TYPE_3)) {
           WinEndPaint (pHps->hps);
    }
-   wnd->setSuppressErase(FALSE);
+   wnd->setEraseBkgnd(TRUE);
 
 exit:
    O32_SetLastError(0);
@@ -617,11 +620,12 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
         wnd->SetClipRegion(hrgnOld);
    }
 
-   if(!wnd->isSuppressErase() && lComplexity != RGN_NULL) {
-        wnd->setSuppressErase(TRUE);
-        wnd->setEraseBkgnd (FALSE, !wnd->MsgEraseBackGround(pHps->hps));
+   if(wnd->needsEraseBkgnd() && lComplexity != RGN_NULL) {
+        wnd->setEraseBkgnd(FALSE);
+        lpps->fErase = (wnd->MsgEraseBackGround(pHps->hps) != 0);
    }
-   lpps->fErase = wnd->isPSErase(); //correct ??
+   else lpps->fErase = TRUE;
+
    lpps->hdc    = (HDC)pHps->hps;
 
    if(lComplexity != RGN_NULL) {
@@ -682,7 +686,7 @@ BOOL WIN32API EndPaint (HWND hWnd, const PAINTSTRUCT_W *pPaint)
    else {
         dprintf(("EndPaint: wrong hdc %x!!", pPaint->hdc));
    }
-   wnd->setSuppressErase(FALSE);
+   wnd->setEraseBkgnd(TRUE);
    ShowCaret(hwnd);
 
 exit:
@@ -1044,8 +1048,8 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
 
    if (redraw & (RDW_FRAME_W | RDW_NOFRAME_W))
    {
-      O32_SetLastError (ERROR_NOT_SUPPORTED);
-      return FALSE;
+        O32_SetLastError (ERROR_NOT_SUPPORTED);
+        return FALSE;
    }
 
    if (hwnd == NULLHANDLE)
@@ -1055,30 +1059,30 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
          O32_SetLastError (ERROR_INVALID_PARAMETER);
          return FALSE;
 #else
-      hwnd = HWND_DESKTOP;
-      wnd  = Win32BaseWindow::GetWindowFromOS2Handle(OSLIB_HWND_DESKTOP);
+        hwnd = HWND_DESKTOP;
+        wnd  = Win32BaseWindow::GetWindowFromOS2Handle(OSLIB_HWND_DESKTOP);
 
-      if (!wnd)
-      {
-         dprintf(("USER32:dc: RedrawWindow can't find desktop window %08xh\n",
-                  hwnd));
-         O32_SetLastError (ERROR_INVALID_PARAMETER);
-         return FALSE;
-      }
+        if (!wnd)
+        {
+            dprintf(("USER32:dc: RedrawWindow can't find desktop window %08xh\n",
+                      hwnd));
+            O32_SetLastError (ERROR_INVALID_PARAMETER);
+            return FALSE;
+        }
 #endif
    }
    else
    {
-      wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
+        wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
 
-      if (!wnd)
-      {
-         dprintf(("USER32:dc: RedrawWindow can't find window %08xh\n",
+        if (!wnd)
+        {
+            dprintf(("USER32:dc: RedrawWindow can't find window %08xh\n",
                   hwnd));
-         O32_SetLastError (ERROR_INVALID_PARAMETER);
-         return FALSE;
-      }
-      hwnd = wnd->getOS2WindowHandle();
+            O32_SetLastError (ERROR_INVALID_PARAMETER);
+            return FALSE;
+        }
+        hwnd = wnd->getOS2WindowHandle();
    }
 
    BOOL  IncludeChildren = redraw & RDW_ALLCHILDREN_W ? TRUE : FALSE;
@@ -1086,15 +1090,6 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
    HPS   hpsTemp = NULLHANDLE;
    HRGN  hrgnTemp = NULLHANDLE;
    RECTL rectl;
-
-   if (redraw & RDW_UPDATENOW_W) redraw &= ~RDW_ERASENOW_W;
-
-   //SvL: Should we check if there is already an invalidated window part before
-   //     deciding to skip erase?
-   if(redraw & RDW_NOERASE_W || ((redraw & (RDW_INVALIDATE_W|RDW_ERASE_W|RDW_ERASENOW_W)) == RDW_INVALIDATE_W)) {
-        wnd->setSuppressErase(TRUE);
-   }
-   else wnd->setSuppressErase(FALSE);
 
    if (hrgn)
    {
@@ -1135,39 +1130,48 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
 
    if (redraw & RDW_INVALIDATE_W)
    {
-      if (redraw & RDW_ERASE_W)
-         wnd->setEraseBkgnd (TRUE, TRUE);
+        //TODO: SvL: pingpong.exe doesn't have RDW_NOERASE, but doesn't want WM_ERASEBKGND msgs
+        if (redraw & RDW_ERASE_W)
+            wnd->setEraseBkgnd (TRUE);
 
-      if (!pRect && !hrgn)
-         success = WinInvalidateRect (hwnd, NULL, IncludeChildren);
-      else if (hrgn)
-         success = WinInvalidateRegion (hwnd, hrgnTemp, IncludeChildren);
-      else
-         success = WinInvalidateRect (hwnd, &rectl, IncludeChildren);
-      if (!success) goto error;
+        if (!pRect && !hrgn)
+            success = WinInvalidateRect (hwnd, NULL, IncludeChildren);
+        else
+        if (hrgn)
+            success = WinInvalidateRegion (hwnd, hrgnTemp, IncludeChildren);
+        else
+            success = WinInvalidateRect (hwnd, &rectl, IncludeChildren);
+
+        if (!success) goto error;
    }
    else if (redraw & RDW_VALIDATE_W)
    {
-      if (WinQueryUpdateRect (hwnd, NULL))
-      {
-         if (!pRect && !hrgn)
-            success = WinValidateRect (hwnd, NULL, IncludeChildren);
-         else if (hrgn)
-            success = WinValidateRegion (hwnd, hrgnTemp, IncludeChildren);
-         else
-            success = WinValidateRect (hwnd, &rectl, IncludeChildren);
-         if (!success) goto error;
-      }
+        if (redraw & RDW_NOERASE_W)
+            wnd->setEraseBkgnd(FALSE);
+
+        if (WinQueryUpdateRect (hwnd, NULL))
+        {
+            if (!pRect && !hrgn)
+                success = WinValidateRect (hwnd, NULL, IncludeChildren);
+            else
+            if (hrgn)
+                success = WinValidateRegion (hwnd, hrgnTemp, IncludeChildren);
+            else
+                success = WinValidateRect (hwnd, &rectl, IncludeChildren);
+            if (!success) goto error;
+        }
    }
 
    if(WinQueryUpdateRect(hwnd, NULL))
    {
+        //TODO: Does this work if RDW_ALLCHILDREN is set??
         if(redraw & RDW_UPDATENOW_W) {
                 wnd->MsgPaint (0, FALSE);
         }
         else
-        if((redraw & RDW_ERASE_W) && (redraw & RDW_ERASENOW_W))
-                wnd->setEraseBkgnd (FALSE, !sendEraseBkgnd (wnd));
+//        if((redraw & RDW_ERASE_W) && (redraw & RDW_ERASENOW_W))
+        if(redraw & RDW_ERASENOW_W && wnd->needsEraseBkgnd())
+                wnd->setEraseBkgnd(sendEraseBkgnd(wnd) == 0);
    }
    else if((redraw & RDW_INTERNALPAINT_W) && !(redraw & RDW_INVALIDATE_W))
    {
@@ -1183,12 +1187,6 @@ error:
 
    if (hpsTemp)
       WinReleasePS (hpsTemp);
-
-//SvL: Test
-//   if ((redraw & RDW_INVALIDATE_W) == 0)
-//      wnd->setSuppressErase (FALSE);
-//   else if ((redraw & RDW_ERASENOW_W) == RDW_ERASENOW_W)
-//      wnd->setSuppressErase (TRUE);
 
    if (!success)
       O32_SetLastError (ERROR_INVALID_PARAMETER);
@@ -1207,8 +1205,9 @@ BOOL WIN32API UpdateWindow (HWND hwnd)
    }
 
    dprintf (("User32: UpdateWindow hwnd %x", hwnd));
-////SvL: This doesn't work right (it's what Wine does) -> TODO
-////   return RedrawWindow( hwnd, NULL, 0, RDW_UPDATENOW_W | RDW_NOCHILDREN_W);
+////SvL: This doesn't work right (Wine uses RDW_NOCHILDREN_W -> doesn't work here)
+////     Breaks vpbuddy
+////   return RedrawWindow( hwnd, NULL, 0, RDW_UPDATENOW_W | RDW_ALLCHILDREN_W);
    WinUpdateWindow(wnd->getOS2WindowHandle());
    return TRUE;
 }
