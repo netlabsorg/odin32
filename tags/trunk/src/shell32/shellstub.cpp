@@ -1,4 +1,4 @@
-/* $Id: shellstub.cpp,v 1.3 2001-04-28 13:33:47 sandervl Exp $ */
+/* $Id: shellstub.cpp,v 1.4 2001-10-17 09:15:22 phaller Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -40,12 +40,6 @@
 ODINDEBUGCHANNEL(SHELL32-SHELLSTUB)
 
 ODINFUNCTION3(DWORD, SHCreateStdEnumFmtEtc, DWORD, x1, DWORD, x2, DWORD, x3)
-{
-  dprintf(("STUB!"));
-  return 0;
-}
-
-ODINFUNCTION4(DWORD, CIDLData_CreateFromIDArray, DWORD, x1, DWORD, x2, DWORD, x3, DWORD, x4)
 {
   dprintf(("STUB!"));
   return 0;
