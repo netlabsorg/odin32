@@ -1,4 +1,11 @@
-/* $Id: ChangeLog,v 1.2722 2004-04-07 09:14:18 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2723 2004-04-13 14:12:36 sandervl Exp $ */
+
+ 2004-04-08: knut st. osmundsen <bird-changelog@innotek    >
+    - INCLUDE:  o Merged wingdi.h from current WINE CVS.
+                o Added prototypes for new WGSS APIs.
+    - GDI32:    o Corrected a few problems due to wingdi.h merge.
+                o Corrected GetDIBits query mode.
+    - USER32:   o Rewrote clipboard code completely.
 
  2004-04-07: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Profile: flush ini file after write actions
