@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.71 2003-01-03 16:35:56 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.72 2003-02-16 15:31:11 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -301,31 +301,6 @@ PVOID OSLibWinSubclassWindow(HWND hwnd,PVOID newWndProc);
 
 BOOL OSLibSetWindowRestoreRect(HWND hwnd, PRECT pRect);
 BOOL OSLibSetWindowMinPos(HWND hwnd, ULONG x, ULONG y);
-
-BOOL   OSLibWinGetKeyboardStateTable(unsigned char * PMKeyState);
-BOOL   OSLibWinSetKeyboardStateTable(unsigned char * PMKeyState);
-
-#define TCF_LSHIFT                 0x0001
-#define TCF_RSHIFT                 0x0002
-#define TCF_SHIFT                  (TCF_LSHIFT | TCF_RSHIFT)
-#define TCF_LCONTROL               0x0004
-#define TCF_RCONTROL               0x0008
-#define TCF_CONTROL                (TCF_LCONTROL | TCF_RCONTROL)
-#define TCF_ALT                    0x0010
-#define TCF_ALTGR                  0x0020
-#define TCF_CAPSLOCK               0x0040
-#define TCF_NUMLOCK                0x0080
-#define TCF_OEMSCANCODE            0x0100
-#define TCF_EXTENDEDKEY            0x0200
-
-#define TC_CHARTOSCANCODE          0
-#define TC_SCANCODETOCHAR          1
-#define TC_VIRTUALKEYTOSCANCODE    2
-#define TC_SCANCODETOVIRTUALKEY    3
-#define TC_SCANTOOEMSCAN           4
-#define TC_OEMSCANTOSCAN           5
-
-USHORT OSLibWinTranslateChar(USHORT usScanCode, ULONG type, USHORT shiftstate);
 
 #define HTOS_NORMAL                   0
 #define HTOS_TRANSPARENT              (-1)

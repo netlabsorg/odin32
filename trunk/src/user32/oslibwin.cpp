@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.138 2003-01-20 12:09:47 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.139 2003-02-16 15:31:10 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -311,12 +311,6 @@ HWND OSLibWinQueryFocus(HWND hwndDeskTop)
 HWND OSLibWinWindowFromID(HWND hwndParent,ULONG id)
 {
     return WinWindowFromID(hwndParent,id);
-}
-//******************************************************************************
-//******************************************************************************
-LONG OSLibWinGetPhysKeyState(LONG scan)
-{
-    return WinGetPhysKeyState(HWND_DESKTOP,scan); 	
 }
 //******************************************************************************
 //******************************************************************************
@@ -951,37 +945,6 @@ BOOL OSLibSetWindowMinPos(HWND hwnd, ULONG x, ULONG y)
                     ( 2 * WinQuerySysValue( HWND_DESKTOP, SV_CYSIZEBORDER)) -
                       WinQuerySysValue( HWND_DESKTOP, SV_CYICON)));
   return TRUE;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL OSLibWinGetKeyboardStateTable(unsigned char *PMKeyState)
-{
-  return WinSetKeyboardStateTable(HWND_DESKTOP, (PBYTE)PMKeyState, FALSE );
-}
-//******************************************************************************
-//******************************************************************************
-BOOL OSLibWinSetKeyboardStateTable(unsigned char *PMKeyState)
-{
-  return WinSetKeyboardStateTable(HWND_DESKTOP, (PBYTE)PMKeyState, TRUE );
-}
-//******************************************************************************
-//******************************************************************************
-USHORT APIENTRY WinTranslateChar2( USHORT  /* Codepage (currently ignored) */
-                                 , PUSHORT /* Ptr to char to translate     */
-                                 , PULONG  /* Ptr to deadkey save info     */
-                                 , USHORT  /* Translation option (TC_xxx)  */
-                                 , PUSHORT /* Ptr to shift state (TCF_xxx) */
-                                 );
-//******************************************************************************
-//******************************************************************************
-USHORT OSLibWinTranslateChar(USHORT usScanCode, ULONG type, USHORT shiftstate)
-{
-  USHORT usResult;
-  USHORT sel = GetFS();
-
-  usResult = WinTranslateChar2(0, &usScanCode, NULL, type, &shiftstate);
-  SetFS(sel);
-  return usScanCode;
 }
 //******************************************************************************
 //******************************************************************************

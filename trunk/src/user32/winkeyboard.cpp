@@ -1,4 +1,4 @@
-/* $Id: winkeyboard.cpp,v 1.38 2003-01-17 16:35:38 sandervl Exp $ */
+/* $Id: winkeyboard.cpp,v 1.39 2003-02-16 15:31:12 sandervl Exp $ */
 /*
  * Win32 <-> PM key translation
  *
@@ -16,7 +16,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <winkeyboard.h>
-#include "oslibwin.h"
+#include "oslibkbd.h"
 #include <heapstring.h>
 #include <pmscan.h>
 #include <winscan.h>
@@ -414,7 +414,7 @@ static WINVKEYTOPMSCAN abWinVKeyToPMScan[256] =
 /* 0x54 VK_T              */ , PMSCAN_T               , "T"
 /* 0x55 VK_U              */ , PMSCAN_U               , "U"
 /* 0x56 VK_V              */ , PMSCAN_V               , "V"
-/* 0x57 VK                */ , PMSCAN_W               , "W"
+/* 0x57 VK_W              */ , PMSCAN_W               , "W"
 /* 0x58 VK_X              */ , PMSCAN_X               , "X"
 /* 0x59 VK_Y              */ , PMSCAN_Y               , "Y"
 /* 0x5A VK_Z              */ , PMSCAN_Z               , "Z"
@@ -860,10 +860,24 @@ static BYTE abPMScanToWinScan[256][2] =
 VOID WIN32API KeyTranslatePMToWinBuf(BYTE *pmkey, BYTE *winkey,
                                      int nrkeys)
 {
+   int pmvkey;
+
+#ifdef DEBUG
+   for(int j=1;j<nrkeys;j++) {
+       if(pmkey[j])
+           dprintf2(("PM vkey %x state %x", j, pmkey[j]));
+   }
+#endif
+
    for(int i=1;i<nrkeys;i++) {
        if(abWinVKeyToPMScan[i].bPMScanCode) {
-            winkey[i] = pmkey[OSLibWinTranslateChar(abWinVKeyToPMScan[i].bPMScanCode, TC_SCANCODETOVIRTUALKEY, 0)];
+            pmvkey = OSLibWinTranslateChar(abWinVKeyToPMScan[i].bPMScanCode, TC_SCANCODETOVIRTUALKEY, 0);
+            if(pmvkey == 0) {
+                dprintf2(("WinTranslateChar %x (%x) FAILED!!", i, abWinVKeyToPMScan[i].bPMScanCode));
+            }
+            winkey[i] = pmkey[pmvkey];
        }
+       else dprintf2(("key %x has no PM scancode", i));
    }
    winkey[VK_SHIFT]   = winkey[VK_LSHIFT] | winkey[VK_RSHIFT];
    winkey[VK_CONTROL] = winkey[VK_LCONTROL] | winkey[VK_RCONTROL];
@@ -969,6 +983,65 @@ INT WIN32API GetKeyboardType(INT nTypeFlag)
 //******************************************************************************
 BOOL WIN32API GetKeyboardState(PBYTE lpKeyState)
 {
+#if 1
+   int state;
+   for(int i=0;i<256;i++) {
+       state = GetKeyState(i);
+       lpKeyState[i] = ((state & 0x8000) >> 8) | (state & 1);
+       if(lpKeyState[i] & 0x80) {
+           dprintf2(("Win key 0x%0x = %x", i, lpKeyState[i]));
+       }
+   }
+   return TRUE;
+#if 1
+#else
+   BYTE PMScanState[256];
+   BOOL rc;
+   int  state;
+
+   memset(PMScanState, 0, sizeof(PMScanState));
+   memset(lpKeyState, 0, 256);
+
+   //
+   //OSLibWinGetKeyboardStateTable returns the state of PM virtual keys only and
+   //there are far fewer PM vkeys. (e.g. 0-9, A-Z are not included)
+   //So we need to use OSLibWinGetScanStateTable (WinSetScanState)
+   //
+   rc = OSLibWinGetScanStateTable((PBYTE)&PMScanState[0] );
+   if(!rc) {
+//       DebugInt3();
+       dprintf(("OSLibWinGetScanStateTable FAILED"));
+       return FALSE;
+   }
+   for(int i=0;i<256;i++) {
+       if(abWinVKeyToPMScan[i].bPMScanCode) {
+           lpKeyState[i] = PMScanState[abWinVKeyToPMScan[i].bPMScanCode];
+       }
+       if(lpKeyState[i] & 0x80) {
+           dprintf2(("Win key 0x%0x = %x", i, lpKeyState[i]));
+       }
+   }
+   //now process the mouse buttons (left, middle, right)
+   state = GetKeyState(VK_LBUTTON);
+   lpKeyState[VK_LBUTTON] = ((state & 0x8000) >> 8) | (state & 1);
+   state = GetKeyState(VK_MBUTTON);
+   lpKeyState[VK_MBUTTON] = ((state & 0x8000) >> 8) | (state & 1);
+   state = GetKeyState(VK_RBUTTON);
+   lpKeyState[VK_RBUTTON] = ((state & 0x8000) >> 8) | (state & 1);
+#ifdef DEBUG
+   if(lpKeyState[VK_LBUTTON]) {
+      dprintf2(("Win key 0x%0x = %x", VK_LBUTTON, lpKeyState[VK_LBUTTON]));
+   }
+   if(lpKeyState[VK_MBUTTON]) {
+      dprintf2(("Win key 0x%0x = %x", VK_MBUTTON, lpKeyState[VK_MBUTTON]));
+   }
+   if(lpKeyState[VK_RBUTTON]) {
+      dprintf2(("Win key 0x%0x = %x", VK_RBUTTON, lpKeyState[VK_RBUTTON]));
+   }
+#endif
+   return TRUE;
+#endif
+#else
  BYTE   PMKeyState[256];
  BOOL   rc;
 
@@ -998,6 +1071,7 @@ BOOL WIN32API GetKeyboardState(PBYTE lpKeyState)
         return TRUE;
   }
   return FALSE;
+#endif
 }
 //******************************************************************************
 //******************************************************************************
@@ -1151,13 +1225,10 @@ int WIN32API ToAscii(UINT uVirtKey, UINT uScanCode, PBYTE lpbKeyState,
 
        if(lpbKeyState[VK_LSHIFT]   & 0x80) shiftstate |= TCF_LSHIFT;
        if(lpbKeyState[VK_RSHIFT]   & 0x80) shiftstate |= TCF_RSHIFT;
-       if(lpbKeyState[VK_SHIFT]    & 0x80) shiftstate |= TCF_SHIFT;
        if(lpbKeyState[VK_LCONTROL] & 0x80) shiftstate |= TCF_LCONTROL;
        if(lpbKeyState[VK_RCONTROL] & 0x80) shiftstate |= TCF_RCONTROL;
-       if(lpbKeyState[VK_CONTROL]  & 0x80) shiftstate |= TCF_CONTROL;
        if(lpbKeyState[VK_LMENU]    & 0x80) shiftstate |= TCF_ALT;
        if(lpbKeyState[VK_RMENU]    & 0x80) shiftstate |= TCF_ALTGR;
-       if(lpbKeyState[VK_MENU]     & 0x80) shiftstate |= TCF_ALT;
        if(lpbKeyState[VK_CAPITAL]  & 1)    shiftstate |= TCF_CAPSLOCK;
        if(lpbKeyState[VK_NUMLOCK]  & 1)    shiftstate |= TCF_NUMLOCK;
 
@@ -1396,7 +1467,36 @@ SHORT WIN32API GetKeyState(int nVirtKey)
     case KEYOVERLAYSTATE_UP:
       return 0x0000;
   } 
-  if (nVirtKey == VK_MENU)  return O32_GetKeyState(VK_LMENU) | O32_GetKeyState(VK_RMENU);
+
+  //If there's a PM scancode for this virtual key, then call WinGetScanState
+  //O32_GetKeyState converts windows virtual keys to PM virtual keys and there
+  //are far fewer PM vkeys. (e.g. 0-9, A-Z will fail)
+  if(nVirtKey < 256 && abWinVKeyToPMScan[nVirtKey].bPMScanCode) 
+  {
+      INT  nVirtKey2 = 0;
+      WORD result;
+
+      if (nVirtKey == VK_MENU)  {
+          nVirtKey  = VK_LMENU;
+          nVirtKey2 = VK_RMENU;
+      }
+      else 
+      if (nVirtKey == VK_CONTROL) {
+          nVirtKey  = VK_LCONTROL;
+          nVirtKey2 = VK_RCONTROL;
+      }
+      else
+      if (nVirtKey == VK_SHIFT) {
+          nVirtKey  = VK_LSHIFT;
+          nVirtKey2 = VK_RSHIFT;
+      }
+      result = OSLibWinGetScanState(abWinVKeyToPMScan[nVirtKey].bPMScanCode);
+      if(nVirtKey2) {
+          result |= OSLibWinGetScanState(abWinVKeyToPMScan[nVirtKey2].bPMScanCode);
+      }
+      return result;
+  }
+  
   return O32_GetKeyState(nVirtKey);
 }
 //******************************************************************************
@@ -1418,14 +1518,44 @@ WORD WIN32API GetAsyncKeyState(INT nVirtKey)
     case KEYOVERLAYSTATE_UP:
       return 0x0000;
   } 
-  if (nVirtKey == VK_MENU)  return O32_GetAsyncKeyState(VK_LMENU) | O32_GetAsyncKeyState(VK_RMENU);
+
+  //If there's a PM scancode for this virtual key, then call WinGetPhysKeyState
+  //O32_GetAsyncKeyState converts windows virtual keys to PM virtual keys and there
+  //are far fewer PM vkeys. (e.g. 0-9, A-Z will fail)
+  if(nVirtKey < 256 && abWinVKeyToPMScan[nVirtKey].bPMScanCode) 
+  {
+      INT  nVirtKey2 = 0;
+      WORD result;
+
+      if (nVirtKey == VK_MENU)  {
+          nVirtKey  = VK_LMENU;
+          nVirtKey2 = VK_RMENU;
+      }
+      else 
+      if (nVirtKey == VK_CONTROL) {
+          nVirtKey  = VK_LCONTROL;
+          nVirtKey2 = VK_RCONTROL;
+      }
+      else
+      if (nVirtKey == VK_SHIFT) {
+          nVirtKey  = VK_LSHIFT;
+          nVirtKey2 = VK_RSHIFT;
+      }
+
+      result = OSLibWinGetPhysKeyState(abWinVKeyToPMScan[nVirtKey].bPMScanCode);
+      if(nVirtKey2) {
+          result |= OSLibWinGetPhysKeyState(abWinVKeyToPMScan[nVirtKey2].bPMScanCode);
+      }
+      return result;
+  }
+
   return O32_GetAsyncKeyState(nVirtKey);
 }
 //******************************************************************************
 //******************************************************************************
 UINT WIN32API MapVirtualKeyA(UINT uCode,  UINT uMapType)
 {
-  dprintf(("imcompletely implemented"));
+  dprintf(("incompletely implemented"));
   
   /* A quick fix for Commandos, very incomplete */
   switch (uMapType) 
@@ -1450,10 +1580,10 @@ UINT WIN32API MapVirtualKeyA(UINT uCode,  UINT uMapType)
 //******************************************************************************
 UINT WIN32API MapVirtualKeyW(UINT uCode, UINT uMapType)
 {
-  dprintf(("incorrectly implemented\n"));
+  dprintf(("incorrectly implemented"));
   
   // NOTE: This will not work as is (needs UNICODE support)
-  return O32_MapVirtualKey(uCode,uMapType);
+  return MapVirtualKeyA(uCode,uMapType);
 }
 /*****************************************************************************
  * Name      : UINT WIN32API MapVirtualKeyExA
