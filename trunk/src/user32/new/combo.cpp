@@ -1,4 +1,4 @@
-/* $Id */
+/* $Id: combo.cpp,v 1.2 1999-07-24 17:10:24 cbratschi Exp $ */
 /*
  * Combo controls
  *
@@ -1962,12 +1962,12 @@ BOOL COMBOBOX_Register()
     if (GlobalFindAtomA(COMBOBOXCLASSNAME)) return FALSE;
 
     ZeroMemory(&wndClass,sizeof(WNDCLASSA));
-    wndClass.style         = CS_GLOBALCLASS | CS_HREDRAW | CS_VREDRAW | CS_PARENTDC;
+    wndClass.style         = CS_GLOBALCLASS | CS_PARENTDC;
     wndClass.lpfnWndProc   = (WNDPROC)ComboWndProc;
     wndClass.cbClsExtra    = 0;
     wndClass.cbWndExtra    = sizeof(VOID*);
     wndClass.hCursor       = LoadCursorA(0,IDC_ARROWA);
-    wndClass.hbrBackground = (HBRUSH)(COLOR_3DFACE+1);
+    wndClass.hbrBackground = (HBRUSH)0;
     wndClass.lpszClassName = COMBOBOXCLASSNAME;
 
     return RegisterClassA(&wndClass);

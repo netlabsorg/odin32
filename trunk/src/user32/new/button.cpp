@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.8 1999-07-24 12:40:20 cbratschi Exp $ */
+/* $Id: button.cpp,v 1.9 1999-07-24 17:10:24 cbratschi Exp $ */
 /* File: button.c -- Button type widgets
  *
  * Copyright (c) 1999 Christoph Bratschi (ported from WINE)
@@ -914,7 +914,7 @@ BOOL BUTTON_Register()
     wndClass.cbClsExtra    = 0;
     wndClass.cbWndExtra    = sizeof(BUTTONINFO);
     wndClass.hCursor       = LoadCursorA(0,IDC_ARROWA);
-    wndClass.hbrBackground = (HBRUSH)(COLOR_3DFACE+1);
+    wndClass.hbrBackground = (HBRUSH)0;
     wndClass.lpszClassName = BUTTONCLASSNAME;
 
     return RegisterClassA(&wndClass);

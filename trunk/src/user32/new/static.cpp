@@ -1,4 +1,4 @@
-/* $Id: static.cpp,v 1.3 1999-07-23 16:46:29 cbratschi Exp $ */
+/* $Id: static.cpp,v 1.4 1999-07-24 17:10:26 cbratschi Exp $ */
 /*
  * Static control
  *
@@ -588,12 +588,12 @@ BOOL STATIC_Register()
     if (GlobalFindAtomA(STATICCLASSNAME)) return FALSE;
 
     ZeroMemory(&wndClass,sizeof(WNDCLASSA));
-    wndClass.style         = CS_GLOBALCLASS | CS_HREDRAW | CS_VREDRAW | CS_PARENTDC;
+    wndClass.style         = CS_GLOBALCLASS | CS_HREDRAW | CS_PARENTDC;
     wndClass.lpfnWndProc   = (WNDPROC)StaticWndProc;
     wndClass.cbClsExtra    = 0;
     wndClass.cbWndExtra    = sizeof(STATICINFO);
     wndClass.hCursor       = LoadCursorA (0,IDC_ARROWA);
-    wndClass.hbrBackground = (HBRUSH)(COLOR_3DFACE+1);
+    wndClass.hbrBackground = (HBRUSH)0;
     wndClass.lpszClassName = STATICCLASSNAME;
 
     return RegisterClassA(&wndClass);
