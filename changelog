@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.2119 2002-06-01 17:24:22 sandervl Exp $ */
+/* $Id: changelog,v 1.2120 2002-06-02 10:11:34 sandervl Exp $ */
+
+ 2002-06-02: Sander van Leeuwen <sandervl@innotek.de>
+    - USER32\CONTROLS:
+                o New dll for user32 controls (latest Wine)
+                  (not activated, not finished (resync))
+    - USER32:   o Moved drag & drop code to seperate file
 
  2002-06-01: Sander van Leeuwen <sandervl@innotek.de>
     - SHELL32:  o IShellFolder_fnCompareIDs shortcut added to improve
