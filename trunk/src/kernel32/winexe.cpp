@@ -1,4 +1,4 @@
-/* $Id: winexe.cpp,v 1.6 1999-06-19 10:54:43 sandervl Exp $ */
+/* $Id: winexe.cpp,v 1.7 1999-06-20 10:55:36 sandervl Exp $ */
 
 /*
  * Win32 exe class
@@ -20,18 +20,16 @@
 #include <stdlib.h>
 #include <iostream.h>
 #include <fstream.h>
-#include "misc.h"
-#include "nameid.h"
-#include "win32type.h"
+#include <misc.h>
+#include <nameid.h>
+#include <win32type.h>
 #include <winexe.h>
-#include "wprocess.h"
-#include "pefile.h"
+#include <wprocess.h>
+#include <pefile.h>
 #include "cio.h"
 
 #include "conwin.h"          // Windows Header for console only
 #include "console.h"
-#include "handlemanager.h"
-
 
 Win32Exe *WinExe = NULL;
 
@@ -45,8 +43,6 @@ Win32Exe::Win32Exe(char *szFileName) : Win32Image(szFileName), fConsoleApp(FALSE
 
   dprintf(("Win32Exe ctor: %s", szFileName));
 
-  HMInitialize();             /* store standard handles within HandleManager */
-  dprintf(("KERNEL32/WINEXE: HandleManager Initialized.\n"));
   if(fConsoleApp) {
    dprintf(("Console application!\n"));
 
@@ -61,9 +57,6 @@ Win32Exe::Win32Exe(HINSTANCE hinstance, int NameTableId, int Win32TableId) :
          Win32Image(hinstance, NameTableId, Win32TableId),
          fConsoleApp(FALSE), cmdline(NULL), OS2InstanceHandle(-1)
 {
-  HMInitialize();             /* store standard handles within HandleManager */
-  dprintf(("KERNEL32/WINEXE: HandleManager Initialized.\n"));
-
   if(GET_CONSOLE(Win32TableId) == 1) {//console app
    dprintf(("Console application!\n"));
 
@@ -85,13 +78,18 @@ Win32Exe::~Win32Exe()
 //******************************************************************************
 ULONG Win32Exe::start()
 {
+ ULONG rc;
+
   if(getenv("WIN32_IOPL2")) {
    io_init1();
   }
   dprintf(("Start executable %X\n", WinExe));
 
   fExeStarted  = TRUE;
-  return ((WIN32EXEENTRY)entryPoint)();
+  SetWin32TIB();
+  rc = ((WIN32EXEENTRY)entryPoint)();
+  RestoreOS2TIB();
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************

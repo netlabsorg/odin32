@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.10 1999-06-19 17:58:33 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.11 1999-06-20 10:55:36 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -27,9 +27,7 @@
 #include "console.h"
 #include "cio.h"
 #include "versionos2.h"    /*PLF Wed  98-03-18 02:36:51*/
-
-#include <winprocess.h>
-#include <thread.h>
+#include <wprocess.h>
 
 BOOL      fExeStarted = FALSE;
 BOOL      fFreeLibrary = FALSE;
@@ -42,7 +40,7 @@ DWORD    *TIBFlatPtr    = 0;
 //******************************************************************************
 // Set up the TIB selector and memory for the current thread
 //******************************************************************************
-void InitializeTIB(BOOL fMainThread)
+TEB *InitializeTIB(BOOL fMainThread)
 {
 #ifdef WIN32_TIBSEL
   TEB   *winteb;
@@ -55,24 +53,24 @@ void InitializeTIB(BOOL fMainThread)
    if(TIBFlatPtr == 0) {
 	dprintf(("InitializeTIB: local thread memory alloc failed!!"));
 	DebugInt3();
-	return;
+	return NULL;
    }
    if(OS2AllocSel(PAGE_SIZE, &tibsel) == FALSE)
    {
 	dprintf(("InitializeTIB: selector alloc failed!!"));
 	DebugInt3();
-	return;
+	return NULL;
    }
    winteb = (TEB *)OS2SelToFlat(tibsel);
    if(winteb == NULL) 
    {
 	dprintf(("InitializeTIB: DosSelToFlat failed!!"));
 	DebugInt3();
-	return;
+	return NULL;
    }
    memset(winteb, 0, PAGE_SIZE);
    thdb       = (THDB *)(winteb+1);
-   TIBFlatPtr = (DWORD)winteb;
+   TIBFlatPtr = (DWORD *)winteb;
 
    winteb->except      = (PVOID)-1;               /* 00 Head of exception handling chain */
    winteb->stack_top   = (PVOID)OS2GetTIB(TIB_STACKTOP); /* 04 Top of thread stack */
@@ -104,9 +102,10 @@ void InitializeTIB(BOOL fMainThread)
         //TLS in executable always TLS index 0?
 	ProcessTIBSel = tibsel;
    }
-   SetFS(tibsel);
-   dprintf(("InitializeTIB set up TEB with selector %x", tibsel));
-   return;
+   dprintf(("InitializeTIB setup TEB with selector %x", tibsel));
+   return winteb;
+#else
+   return 0;
 #endif
 }
 //******************************************************************************
@@ -132,9 +131,49 @@ void DestroyTIB()
    	//And free our own
    	OS2FreeSel(thdb->teb_sel);
    }
-   else	DebugInt3();
+   else dprintf(("Already destroyed TIB"));
 
+   TIBFlatPtr = NULL;
    return;
+#endif
+}
+/******************************************************************************/
+/******************************************************************************/
+void WIN32API RestoreOS2TIB()
+{
+#ifdef WIN32_TIBSEL
+ SHORT  orgtibsel;
+ TEB   *winteb;
+ THDB  *thdb;
+
+   winteb = (TEB *)TIBFlatPtr;
+   if(winteb) {
+	thdb = (THDB *)(winteb+1);
+	orgtibsel = thdb->OrgTIBSel;
+
+	//Restore our original FS selector
+   	SetFS(orgtibsel);
+   }
+#endif
+}
+/******************************************************************************/
+/******************************************************************************/
+void WIN32API SetWin32TIB()
+{
+#ifdef WIN32_TIBSEL
+ SHORT  win32tibsel;
+ TEB   *winteb;
+ THDB  *thdb;
+
+   winteb = (TEB *)TIBFlatPtr;
+   if(winteb) {
+	thdb = (THDB *)(winteb+1);
+	win32tibsel = thdb->teb_sel;
+
+	//Restore our win32 FS selector
+   	SetFS(win32tibsel);
+   }
+   else DebugInt3();
 #endif
 }
 /******************************************************************************/
@@ -174,9 +213,7 @@ VOID WIN32API RegisterResourceUsage(LONG Win32TableId, LONG NameTableId,
                     LONG VersionResId, LONG Pe2lxVersion,
                     HINSTANCE hinstance)
 {
-#ifdef WIN32_TIBSEL
-  SetFS(ProcessTIBSel);
-#endif
+  SetWin32TIB();
 
   if(getenv("WIN32_IOPL2")) {
     io_init1();
@@ -216,8 +253,8 @@ void CreateDll(LONG Win32TableId, LONG NameTableId, LONG VersionResId,
 //******************************************************************************
 //******************************************************************************
 VOID WIN32API RegisterDll(LONG Win32TableId, LONG NameTableId,
-                  LONG VersionResId, LONG Pe2lxVersion,
-              HINSTANCE hinstance)
+                          LONG VersionResId, LONG Pe2lxVersion,
+                          HINSTANCE hinstance)
 {
  WIN32DLLENTRY  pfnDllEntry;
  char *name;
@@ -236,6 +273,9 @@ VOID WIN32API RegisterDll(LONG Win32TableId, LONG NameTableId,
 
   /* @@@PH 1998/03/17 console devices initialization */
   iConsoleDevicesRegister();
+
+  SetWin32TIB();
+  dprintf(("RegisterDll: FS = %x", GetFS()));
 }
 //******************************************************************************
 //******************************************************************************
