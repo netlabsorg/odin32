@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.1 1999-07-14 08:35:37 sandervl Exp $ */
+/* $Id: window.cpp,v 1.2 1999-07-14 21:05:59 cbratschi Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -36,10 +36,10 @@ HWND WIN32API CreateWindowExA(DWORD exStyle, LPCSTR className,
     {
         dprintf(("CreateWindowEx32A: bad class name "));
         if (!HIWORD(className)) {
-		dprintf(("CreateWindowEx32A: bad class name %04x\n", LOWORD(className)));
-	}
-        else 	dprintf(("CreateWindowEx32A: bad class name '%s'\n", className ));
-	SetLastError(ERROR_INVALID_PARAMETER);
+                dprintf(("CreateWindowEx32A: bad class name %04x\n", LOWORD(className)));
+        }
+        else    dprintf(("CreateWindowEx32A: bad class name '%s'\n", className ));
+        SetLastError(ERROR_INVALID_PARAMETER);
         return 0;
     }
 
@@ -57,15 +57,16 @@ HWND WIN32API CreateWindowExA(DWORD exStyle, LPCSTR className,
     cs.lpszClass      = className;
     cs.dwExStyle      = exStyle;
     window = new Win32Window( &cs, classAtom, FALSE );
-    if(window == NULL) 
+    if(window == NULL)
     {
-	dprintf(("Win32Window creation failed!!"));
-	return 0;
+        dprintf(("Win32Window creation failed!!"));
+        return 0;
     }
     if(GetLastError() != 0)
     {
-	delete window;
-	return 0;
+        dprintf(("Win32Window error found!!"));
+        delete window;
+        return 0;
     }
     return window->getWindowHandle();
 }
