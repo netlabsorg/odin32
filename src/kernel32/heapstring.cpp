@@ -1,4 +1,4 @@
-/* $Id: heapstring.cpp,v 1.53 2003-07-16 18:07:01 sandervl Exp $ */
+/* $Id: heapstring.cpp,v 1.54 2003-07-31 15:59:49 sandervl Exp $ */
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -485,7 +485,11 @@ int WIN32API lstrcpynWtoA(LPSTR astring, LPCWSTR ustring, int length)
     //string size to apis that use this function (i.e. GetMenuStringW (Notes))
     //-> overwrites stack
     if(ret == length) {
+#if 1
+         lstrtrunc( astring, length );
+#else
          astring[length-1] = 0;
+#endif
     }
     else astring[ret] = 0;
 
@@ -618,6 +622,8 @@ int WIN32API lstrlenWtoA( LPCWSTR ustring, int ulen )
     if( ulen < 0 )
         ulen = lstrlenW( ustring );
 
+    if( !IsDBCSEnv() ) return ulen;
+
     ret = WideCharToMultiByte( CP_ACP, 0, ustring, ulen, 0, 0, 0, 0 );
     if(ret == 0) {
          SetLastError(ERROR_SUCCESS); //WideCharToMultiByte sets it to ERROR_INSUFFICIENT_BUFFER
@@ -662,6 +668,8 @@ int WIN32API lstrlenAtoW( LPCSTR astring, int alen )
     if( alen < 0 )
         alen = strlen( astring );
 
+    if( !IsDBCSEnv() ) return alen;
+
     ret = MultiByteToWideChar( CP_ACP, 0, astring, alen, 0, 0 );
     if(ret == 0) {
          SetLastError(ERROR_SUCCESS); //MultiByteToWideChar sets it to ERROR_INSUFFICIENT_BUFFER
@@ -669,6 +677,51 @@ int WIN32API lstrlenAtoW( LPCSTR astring, int alen )
     }
 
     return ret;
+}
+
+/*****************************************************************************
+ * NAME
+ *      lstrtrunc
+ *
+ * PURPOSE
+ *      truncate ansi string
+ *
+ * PARAMETERS
+ *      max - max length of truncated string including null-terminator
+ *
+ * RESULT
+ *   Success
+ *      return the length of truncated string not including null-terminator
+ *
+ *   Failure
+ *      return 0.
+ *
+ * REMARK
+ *      this function is not Win32 API but helper for convenient.
+ *
+ * AUTHOR    : KO Myung-Hun
+ *****************************************************************************/
+
+int WIN32API lstrtrunc( LPSTR astring, int max )
+{
+    int i;
+
+    if( !astring || ( max < 1 ))
+        return 0;
+
+    astring[ max - 1 ] = 0;
+
+    if( !IsDBCSEnv() ) return max;
+
+    max = strlen( astring );
+    for( i = 0; i < max; i++ )
+        if( IsDBCSLeadByte( astring[ i ]))
+            i++;
+
+    if( i > max )               // broken DBCS lead byte ?
+        astring[ --max ] = 0;   // then remove DBCS lead byte
+
+    return max;
 }
 
 /*****************************************************************************
