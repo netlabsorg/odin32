@@ -1,4 +1,4 @@
-; $Id: d32hlp.asm,v 1.4 2000-09-02 21:07:57 bird Exp $
+; $Id: d32hlp.asm,v 1.5 2001-02-20 05:00:53 bird Exp $
 ;
 ; d32hlp - 32-bit Device Driver Helper Function.
 ;
@@ -15,6 +15,7 @@
     include devsegdf.inc
     include devhlp.inc
 
+
 ;
 ; Exported symbols
 ;
@@ -30,12 +31,13 @@
     public D32Hlp_VMLock2
     public D32Hlp_VMUnLock
 
+
 ;
 ; extrns
 ;
     extrn _Device_Help:dword
 
-;CODE32 segment
+
 CODE32 segment
     assume cs:CODE32, ds:flat, ss:nothing, es:nothing
     .386p
@@ -131,6 +133,7 @@ D32Hlp_Yield proc near
 Thunk32_Yield::
     ret
 D32Hlp_Yield endp
+
 
 
 ;PVOID  D32HLPCALL D32Hlp_VMAlloc(ULONG  flFlags,    /* eax */
@@ -328,4 +331,5 @@ Thunk16_VMSetMem:
     jmp far ptr FLAT:Thunk32_VMSetMem
 
 CODE16 ends
+
 end
