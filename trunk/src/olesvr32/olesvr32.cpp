@@ -1,11 +1,11 @@
+/* $Id: olesvr32.cpp,v 1.4 2000-08-02 16:32:43 bird Exp $ */
 /*
  *	OLESVR32 library
  *
  *	Copyright 1995	Martin von Loewis
  *	Copyright 1999  Jens Wiessner
- */
-
-/*	At the moment, these are only empty stubs.
+ *
+ *	At the moment, these are only empty stubs.
  */
 
 #include <os2win.h>

@@ -1,3 +1,4 @@
+/* $Id: msvfw32.cpp,v 1.5 2000-08-02 16:27:41 bird Exp $ */
 /*
  * Copyright 1998 Marcus Meissner
  * Copyright 1999 Jens Wiessner
@@ -8,7 +9,7 @@
 #include <odin.h>
 
 #define ICOM_CINTERFACE 1
-#define strcasecmp               strcmp 
+#define strcasecmp               strcmp
 
 #include <os2win.h>
 #include "winerror.h"
@@ -92,7 +93,7 @@ ICOpen(DWORD fccType,DWORD fccHandler,UINT wMode) {
 	TRACE("(%s,%s,0x%08lx)\n",type,handler,(DWORD)wMode);
 	sprintf(codecname,"%s.%s",type,handler);
 
-	/* Well, lParam2 is in fact a LPVIDEO_OPEN_PARMS, but it has the 
+	/* Well, lParam2 is in fact a LPVIDEO_OPEN_PARMS, but it has the
 	 * same layout as ICOPEN
 	 */
 	icopen.fccType		= fccType;
@@ -154,7 +155,7 @@ ICLocate(
 
 	switch (wMode) {
 	case ICMODE_FASTCOMPRESS:
-	case ICMODE_COMPRESS: 
+	case ICMODE_COMPRESS:
 		querymsg = ICM_COMPRESS_QUERY;
 		break;
 	case ICMODE_DECOMPRESS:
@@ -191,7 +192,7 @@ HIC VFWAPI ICGetDisplayFormat(
 	HIC hic,LPBITMAPINFOHEADER lpbiIn,LPBITMAPINFOHEADER lpbiOut,
 	INT depth,INT dx,INT dy
 ) {
-	HIC	tmphic = hic; 
+	HIC	tmphic = hic;
 	LRESULT	lres;
 
 	dprintf(("(0x%08lx,%p,%p,%d,%d,%d),stub!\n",(DWORD)hic,lpbiIn,lpbiOut,depth,dx,dy));
@@ -222,7 +223,7 @@ HIC VFWAPI ICGetDisplayFormat(
 	}
 	if (lpbiIn->biBitCount == 8)
 		depth = 8;
-	
+
 	return hic;
 errout:
 	if (hic!=tmphic)
@@ -256,7 +257,7 @@ ICCompress(
 	return ICSendMessage(hic,ICM_COMPRESS,(LPARAM)&iccmp,sizeof(iccmp));
 }
 
-DWORD VFWAPIV 
+DWORD VFWAPIV
 ICDecompress(HIC hic,DWORD dwFlags,LPBITMAPINFOHEADER lpbiFormat,LPVOID lpData,LPBITMAPINFOHEADER  lpbi,LPVOID lpBits) {
 	ICDECOMPRESS	icd;
 
@@ -667,7 +668,7 @@ HANDLE VFWAPI ICImageCompress(
         LPBITMAPINFO        lpbiOut,    // compress to this (NULL ==> default)
         LONG                lQuality,   // quality to use
         LONG                plSize)     // compress to this size (0=whatever)
-{	
+{
 #ifdef DEBUG
     dprintf(("MSVFW32: ICImageCompress not implemented\n"));
 #endif
@@ -684,7 +685,7 @@ HANDLE VFWAPI ICImageDecompress(
         LPBITMAPINFO        lpbiIn,     // format to decompress from
         LPVOID              lpBits,     // data to decompress
         LPBITMAPINFO        lpbiOut)    // decompress to this (NULL ==> default)
-{	
+{
 #ifdef DEBUG
     dprintf(("MSVFW32: ICImageDecompress not implemented\n"));
 #endif
@@ -696,7 +697,7 @@ HANDLE VFWAPI ICImageDecompress(
  *		ICInstall			[MSVFW.34]
  */
 BOOL    VFWAPI ICInstall(DWORD fccType, DWORD fccHandler, LPARAM lParam, LPSTR szDesc, UINT wFlags)
-{	
+{
 #ifdef DEBUG
     dprintf(("MSVFW32: ICInstall not implemented\n"));
 #endif
@@ -708,7 +709,7 @@ BOOL    VFWAPI ICInstall(DWORD fccType, DWORD fccHandler, LPARAM lParam, LPSTR s
  *		ICRemove			[MSVFW.39]
  */
 BOOL    VFWAPI ICRemove(DWORD fccType, DWORD fccHandler, UINT wFlags)
-{	
+{
 #ifdef DEBUG
     dprintf(("MSVFW32: ICRemove not implemented\n"));
 #endif
