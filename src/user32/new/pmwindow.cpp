@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.6 1999-07-17 15:23:38 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.7 1999-07-17 18:30:51 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -163,56 +163,19 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
     case WM_MOVE:
     {
-     RECTL  rectl, rectl2;
-     POINTL point;
-     HWND   hwndParent;
-     ULONG  xScreen, yScreen, yParent, xParent;
+      RECTL rectChild;
+      ULONG xParent, yParent;
 
 	dprintf(("OS2: WM_MOVE %x", hwnd));
-        rc = WinQueryWindowRect(hwnd, &rectl);
-        if(rc == TRUE) {
-                point.x = rectl.xLeft;
-                point.y = rectl.yBottom;
 
-                //If the window has a parent, calculate position relative to that window
-                if((hwndParent = WinQueryWindow(hwnd, QW_PARENT)) != WinQueryDesktopWindow(hab, NULLHANDLE)) {
-                        rc = WinMapWindowPoints(hwnd, hwndParent, &point, 1);
-                        if(rc == FALSE) {
-                                dprintf(("WM_MOVE: WinMapWindowPoints (parent) failed!"));
-                                break;
-                        }
-                        rc = WinQueryWindowRect(hwndParent, &rectl2);
-                        if(rc == FALSE) {
-                                dprintf(("WM_MOVE: WinQueryWindowRect(HWND_DESKTOP, &rectl) failed!"));
-                                break;
-                        }
-                        xParent = point.x;
-                        yParent = OS2TOWIN32POINT(rectl2.yTop - rectl2.yBottom, point.y);
-                }
-                else    xParent = yParent = -1;
+	WinQueryWindowRect(hwnd, &rectChild);
 
-                point.x = rectl.xLeft;
-                point.y = rectl.yBottom;
+        //Calculate position relative to parent window (real window or desktop)
+        xParent = rectChild.xLeft;
+        yParent = MapOS2ToWin32Y(hwnd, &rectChild, rectChild.yBottom);
 
-                rc = WinMapWindowPoints(hwnd, HWND_DESKTOP, &point, 1);
-                if(rc == FALSE) {
-                        dprintf(("WM_MOVE: WinMapWindowPoints (desktop) failed!"));
-                        break;
-                }
-                rc = WinQueryWindowRect(HWND_DESKTOP, &rectl);
-                if(rc == FALSE) {
-                        dprintf(("WM_MOVE: WinQueryWindowRect(HWND_DESKTOP, &rectl) failed!"));
-                        break;
-                }
-                xScreen = point.x;
-                yScreen = OS2TOWIN32POINT(rectl.yTop - rectl.yBottom, point.y);
-
-                if(win32wnd->MsgMove(xScreen, yScreen, xParent, yParent)) {
-                        goto RunDefWndProc;
-                }
-        }
-        else {
-                dprintf(("WM_MOVE: WinQueryWindowRect failed!"));
+       	if(win32wnd->MsgMove(xParent, yParent)) {
+           	goto RunDefWndProc;
         }
         break;
     }
@@ -265,7 +228,6 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         {
                 goto RunDefWndProc;
         }
-
         break;
     }
 
