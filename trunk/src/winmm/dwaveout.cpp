@@ -1,4 +1,4 @@
-/* $Id: dwaveout.cpp,v 1.21 2000-04-06 21:11:10 sandervl Exp $ */
+/* $Id: dwaveout.cpp,v 1.22 2000-04-07 10:01:59 sandervl Exp $ */
 
 /*
  * Wave playback class
@@ -502,6 +502,9 @@ MMRESULT DartWaveOut::restart()
  int i, curbuf;
 
     dprintf(("DartWaveOut::restart"));
+    if(State == STATE_PLAYING) {
+	return(MMSYSERR_NOERROR);
+    }
     wmutex->enter(VMUTEX_WAIT_FOREVER);
     State = STATE_PLAYING;
     wmutex->leave();
