@@ -1,10 +1,19 @@
-/* $Id: changelog,v 1.1617 2001-07-28 13:44:25 sandervl Exp $ */
+/* $Id: changelog,v 1.1618 2001-07-28 18:05:27 sandervl Exp $ */
 
  2001-07-28: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Set/GetWindowWord changes (must handle GWW_ID, GWW_HINSTANCE 
                   and GWW_HWNDPARENT
                 o Ported ArrangeIconicWindows from Wine (not complete yet)
                 o Rewrote Get/SetDoubleClickTime & SwapMouseButton
+                o Don't call O32_GetLastActivePopup
+                  (TODO: must rewrite it)
+    - KERNEL32: o Rewrote FatalAppExitA/W, FatalExit, Beep, IsBadHugeReadPtr,
+                  IsBadHugeWritePtr
+                o Removed O32_HeapCreate/Destroy calls; return rtl heap handle
+                o No longer use Open32's GetProcAddress or GetModuleFileName
+    - USER32/KERNEL32:
+                o Moved WaitForInputIdle & AttachThreadInput from user32 to 
+                  kernel32
 
  2001-07-22: Sander van Leeuwen <sandervl@xs4all.nl>
     - TOOLS\INSTALL: 
