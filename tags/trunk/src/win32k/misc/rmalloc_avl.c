@@ -1,4 +1,4 @@
-/* $Id: rmalloc_avl.c,v 1.1 2000-01-22 18:21:03 bird Exp $
+/* $Id: rmalloc_avl.c,v 1.2 2000-01-23 03:20:53 bird Exp $
  *
  * Resident Heap - AVL.
  *
@@ -17,7 +17,7 @@
 *******************************************************************************/
 #ifdef DEBUG
     #define DEBUG_ALLOC
-    #define ALLWAYS_HEAPCHECK
+    #undef ALLWAYS_HEAPCHECK
 #endif
 
 #define HEAPANCHOR_SIGNATURE    0xBEEFFEEB
@@ -30,7 +30,7 @@
 #define MEMBLOCKFREE_FROM_FREESIZENODE(a) \
                             ((PMEMBLOCKFREE)((unsigned)(a) - CB_HDR + 4))
 #define BLOCKSIZE (1024*256)            /* 256KB */
-
+#define ALIGNMENT 4
 
 #define INCL_DOS
 #define INCL_DOSERRORS
@@ -138,6 +138,8 @@ static void         resInsertFree(PHEAPANCHOR pha, PMEMBLOCK pmb);
 static PMEMBLOCK    resGetFreeMemblock(PHEAPANCHOR *ppha, unsigned cbUserSize);
 static PMEMBLOCK    resFindUsedBlock(PHEAPANCHOR *ppha, void *pvUser);
 static PMEMBLOCK    resFindWithinUsedBlock(PHEAPANCHOR *ppha, void *pvUser);
+static int          resCheckAVLTree(PMEMBLOCK pmb);
+static int          resCheckAVLTreeFree(PAVLNODECORE pNode);
 static unsigned     _res_dump_subheaps_callback(PMEMBLOCK pmb, PSUBHEAPS_CALLBACK_PARAM pCb);
 static unsigned     _res_dump_allocated_callback(PMEMBLOCK pmb, PALLOCATED_CALLBACK_PARAM pParam);
 
@@ -192,18 +194,17 @@ static void resRemoveFromFreeSize(PHEAPANCHOR pha, PMEMBLOCKFREE pmbf)
             }
             else
             {   /* other nodes of this size: replace pmbf with the first node in the chain. */
-                memcpy((void*)&pmbfTmp->pmbfNext->coreFree, (void*)&pmbfTmp->coreFree,
-                       sizeof(pmbfTmp->coreFree));
+                memcpy((void*)&pmbfTmp->pmbfNext->coreFree, (void*)&pmbfTmp->coreFree, sizeof(pmbfTmp->coreFree));
                 if (pmbfParent != NULL)
                 {
                     pmbfParent = MEMBLOCKFREE_FROM_FREESIZENODE(pmbfParent);
-                    if (pmbfTmp->coreFree.Key > pmbfParent->coreFree.Key)
-                        pmbfParent->coreFree.pLeft = (PAVLNODECORE)pmbf->pmbfNext;
+                    if (pmbfTmp->coreFree.Key < pmbfParent->coreFree.Key)
+                        pmbfParent->coreFree.pLeft = (PAVLNODECORE)&pmbf->pmbfNext->coreFree;
                     else
-                        pmbfParent->coreFree.pRight = (PAVLNODECORE)pmbf->pmbfNext;
+                        pmbfParent->coreFree.pRight = (PAVLNODECORE)&pmbf->pmbfNext->coreFree;
                 }
                 else
-                    pha->pcoreFreeSize = (PAVLNODECORE)pmbf->pmbfNext;
+                    pha->pcoreFreeSize = (PAVLNODECORE)&pmbf->pmbfNext->coreFree;
             }
         }
     }
@@ -230,7 +231,10 @@ static void resInsertIntoFreeSize(PHEAPANCHOR pha, PMEMBLOCKFREE pmbf)
         pmbfTmp->pmbfNext = pmbf;
     }
     else
+    {
+        pmbf->pmbfNext = NULL;
         AVLInsert((PPAVLNODECORE)&pha->pcoreFreeSize, &pmbf->coreFree);
+    }
 }
 
 
@@ -270,21 +274,21 @@ static void resInsertFree(PHEAPANCHOR pha, PMEMBLOCK pmb)
 
     if (pmbfLeft == NULL && pmbfRight == NULL)
     {   /* 1 - insert no merge */
+        pmbf->core.Key = (AVLKEY)pmbf;
         AVLInsert((PPAVLNODECORE)&pha->pmbFree, (PAVLNODECORE)pmbf);
         resInsertIntoFreeSize(pha, pmbf);
     }
     else if (pmbfLeft != NULL && pmbfRight == NULL)
-    {   /* 2 - insert left merge */
+    {   /* 2 - insert left merge: just add pmbf to pmbfLeft. */
         resRemoveFromFreeSize(pha, pmbfLeft);
         pmbfLeft->coreFree.Key += CB_HDR + pmbf->coreFree.Key;
         pha->cbFree += CB_HDR;
         resInsertIntoFreeSize(pha, pmbfLeft);
     }
     else if (pmbfLeft == NULL && pmbfRight != NULL)
-    {   /* 3 - insert right merge */
+    {   /* 3 - insert right merge: replace pmbfRight with pmbf in the pmbfFree tree; */
         resRemoveFromFreeSize(pha, pmbfRight);
-        memcpy((void*)&pmbf->pmbfNext->core, (void*)&pmbfRight->core,
-               sizeof(pmbf->core));
+        memcpy((void*)&pmbf->core, (void*)&pmbfRight->core, sizeof(pmbf->core));
         pmbf->core.Key = (AVLKEY)pmbf;
         pmbf->coreFree.Key += CB_HDR + pmbfRight->coreFree.Key;
         pha->cbFree += CB_HDR;
@@ -301,10 +305,13 @@ static void resInsertFree(PHEAPANCHOR pha, PMEMBLOCK pmb)
     }
     else
     {   /* 4 -insert both left and right merge */
+        if (AVLRemove((PPAVLNODECORE)&pha->pmbFree, (AVLKEY)pmbfRight) != (PAVLNODECORE)pmbfRight)
+        {
+            kprintf(("resInsertFree: AVLRemove on pmbfRight failed.\n"));
+            return;
+        }
         resRemoveFromFreeSize(pha, pmbfLeft);
         resRemoveFromFreeSize(pha, pmbfRight);
-        pmbfRight = (PMEMBLOCKFREE)AVLRemove((PPAVLNODECORE)&pha->pmbFree,
-                                             (AVLKEY)PNEXT_BLOCK(pmb));
         pmbfLeft->coreFree.Key += CB_HDR*2 + pmbf->coreFree.Key + pmbfRight->coreFree.Key;
         pha->cbFree += CB_HDR*2;
         resInsertIntoFreeSize(pha, pmbfLeft);
@@ -327,47 +334,43 @@ static PMEMBLOCK resGetFreeMemblock(PHEAPANCHOR *ppha, unsigned cbUserSize)
     unsigned cbBlockSize;
     unsigned cbTotalSize = 0;
 
-    cbUserSize = MAX(ALIGN(cbUserSize, 4), sizeof(MEMBLOCKFREE) - CB_HDR);
+    cbUserSize = MAX(ALIGN(cbUserSize, ALIGNMENT), sizeof(MEMBLOCKFREE) - CB_HDR);
 
     *ppha = phaFirst;
     while (*ppha != NULL)
     {
         if ((*ppha)->cbFree >= cbUserSize + CB_HDR)
         {
-            PMEMBLOCKFREE pmbfTmp;
             PMEMBLOCKFREE pmbf;
 
             pmbf = (PMEMBLOCKFREE)AVLGetBestFit(&(*ppha)->pcoreFreeSize, cbUserSize, TRUE);
             if (pmbf != NULL)
             {
                 pmbf = MEMBLOCKFREE_FROM_FREESIZENODE(pmbf);
-                if (pmbf->pmbfNext == NULL)
-                {
-                    if (AVLRemove(&(*ppha)->pcoreFreeSize, pmbf->coreFree.Key) == NULL)
-                    {
-                        kprintf(("resGetFreeMemblock: internal error AVLRemove from the free-size list failed.\n"));
-                        continue;
-                    }
-                }
-                else
-                {
-                    pmbfTmp = pmbf;
-                    pmbf = pmbf->pmbfNext;
-                    pmbfTmp->pmbfNext = pmbf->pmbfNext;
-                }
-                AVLRemove((PPAVLNODECORE)&(*ppha)->pmbFree, (AVLKEY)pmbf);
+                resRemoveFromFreeSize(*ppha, pmbf);
                 (*ppha)->cbFree -= pmbf->coreFree.Key;
 
                 /* pmbf is now the block which we are to return, but do we have to split it? */
                 if (pmbf->coreFree.Key > sizeof(MEMBLOCKFREE) + cbUserSize)
                 {
-                    pmbfTmp = (PMEMBLOCKFREE)((unsigned)pmbf + CB_HDR + cbUserSize);
+                    PMEMBLOCKFREE pmbfTmp = pmbf;
+                    pmbf = (PMEMBLOCKFREE)((unsigned)pmbfTmp + pmbfTmp->coreFree.Key - cbUserSize);
                     #ifdef DEBUG_ALLOC
-                        pmbfTmp->ulSignature = MEMBLOCK_SIGNATURE;
+                        pmbf->ulSignature = MEMBLOCK_SIGNATURE;
                     #endif
-                    pmbfTmp->coreFree.Key = pmbf->coreFree.Key - CB_HDR - cbUserSize;
+                    pmbfTmp->coreFree.Key -= CB_HDR + cbUserSize;
                     pmbf->coreFree.Key = cbUserSize;
-                    resInsertFree(*ppha, (PMEMBLOCK)pmbfTmp);
+                    (*ppha)->cbFree += pmbfTmp->coreFree.Key;
+                    resInsertIntoFreeSize(*ppha, pmbfTmp);
+                }
+                else
+                {
+                    PMEMBLOCKFREE pmbfTmp = (PMEMBLOCKFREE)AVLRemove((PPAVLNODECORE)&(*ppha)->pmbFree, (AVLKEY)pmbf);
+                    if (pmbfTmp != pmbf)
+                    {
+                        kprintf(("resGetFreeMemblock: Internal heap error - failed to Remove best fit block!\n"));
+                        return NULL;
+                    }
                 }
                 return (PMEMBLOCK)pmbf;
             }
@@ -652,6 +655,7 @@ void * rmalloc(unsigned cbSize)
  * Reallocate a heapblock.
  * @returns   Pointer to new heapblock.
  * @param     pv     Pointer to the block to realloc.
+ *                   If pv is NULL, this call is equal to malloc.
  * @param     cbNew  The new block size.
  */
 void *rrealloc(void *pv, unsigned cbNew)
@@ -659,36 +663,62 @@ void *rrealloc(void *pv, unsigned cbNew)
     PMEMBLOCK pmb;
     PHEAPANCHOR pha;
 
+    #ifdef ALLWAYS_HEAPCHECK
+        if (!_res_heap_check())
+        {
+            kprintf(("rmalloc: _res_heap_check failed!\n"));
+            return NULL;
+        }
+    #endif
     pmb = resFindUsedBlock(SSToDS(&pha), pv);
     if (pmb != NULL)
     {
         void *pvRet;
 
-        cbNew = ALIGN(cbNew, 4);
+        cbNew = MAX(ALIGN(cbNew, ALIGNMENT), sizeof(MEMBLOCKFREE) - CB_HDR);
         if (cbNew <= pmb->cbSize)
         {   /* shrink block */
             pvRet = pv;
             if (cbNew + sizeof(MEMBLOCKFREE) <= pmb->cbSize)
             {   /* split block */
-                PMEMBLOCK pmbNew = (PMEMBLOCK)((unsigned)pmb + CB_HDR + cbNew);
+                PMEMBLOCKFREE pmbfNew = (PMEMBLOCKFREE)((unsigned)pmb + CB_HDR + cbNew);
                 #ifdef DEBUG_ALLOC
-                    pmbNew->ulSignature = MEMBLOCK_SIGNATURE;
+                    pmbfNew->ulSignature = MEMBLOCK_SIGNATURE;
                 #endif
-                pmbNew->cbSize = pmb->cbSize - cbNew - CB_HDR;
+                pha->cbUsed -= pmb->cbSize - cbNew;
+                pmbfNew->coreFree.Key = pmb->cbSize - cbNew - CB_HDR;
                 pmb->cbSize = cbNew;
-                resInsertFree(pha, pmbNew);
+                resInsertFree(pha, (PMEMBLOCK)pmbfNew);
+                #ifdef ALLWAYS_HEAPCHECK
+                    if (!_res_heap_check())
+                    {
+                        kprintf(("rrealloc: _res_heap_check failed!\n"));
+                        return NULL;
+                    }
+                #endif
             }
         }
         else
         {   /* expand block - this code may be more optimized... */
-            pvRet = rmalloc(cbNew);
-            if (pvRet != NULL)
-            {
-                memcpy(pvRet, pv, pmb->cbSize);
-                rfree(pv);
-            }
+            #if 1
+                pvRet = rmalloc(cbNew);
+                if (pvRet != NULL)
+                {
+                    memcpy(pvRet, pv, pmb->cbSize);
+                    rfree(pv);
+                }
+            #else
+                /* optimized */
+                PMEMBLOCK pmb
+            #endif
         }
         return pvRet;
+    }
+    else
+    {
+        if (pv == NULL)
+            return rmalloc(cbNew);
+        kprintf(("rrealloc: invalid user pointer, pv=0x%08x\n", pv));
     }
     return NULL;
 }
@@ -854,18 +884,21 @@ int _res_heap_check(void)
         if (pha->ulSignature != HEAPANCHOR_SIGNATURE)
         {
             kprintf(("_res_heap_check: invalid signature for pha=0x%08x\n", pha));
+            Int3();
             return FALSE;
         }
 
         if (pha->cbFree + pha->cbUsed >= pha->cbSize || pha->cbSize == 0)
         {
             kprintf(("_res_heap_check: cbFree + cbUsed >= cbSize for pha=0x%08x\n", pha));
+            Int3();
             return FALSE;
         }
 
         if (pha->pPrev != phaPrev)
         {
             kprintf(("_res_heap_check: error in heap anchor chain.\n"));
+            Int3();
             return FALSE;
         }
 
@@ -874,6 +907,29 @@ int _res_heap_check(void)
             kprintf(("_res_heap_check: The first free/used block don't start at start of memory\n"
                      "    block. pmbFree=0x%08x, pmbUsed=0x%08x, pha+1=0x%08x\n",
                      pmbFree, pmbUsed, pha+1));
+            Int3();
+            return FALSE;
+        }
+
+        /*
+         * Check the tree AVL-trees - !extra debug test!
+         */
+        if (resCheckAVLTree(pha->pmbUsed) != 0)
+        {
+            kprintf(("_res_heap_check: the Used tree is invalid.\n"));
+            Int3();
+            return FALSE;
+        }
+        if (resCheckAVLTree(pha->pmbFree) != 0)
+        {
+            kprintf(("_res_heap_check: the Free tree is invalid.\n"));
+            Int3();
+            return FALSE;
+        }
+        if (resCheckAVLTreeFree(pha->pcoreFreeSize) != 0)
+        {
+            kprintf(("_res_heap_check: the free-size tree is invalid.\n"));
+            Int3();
             return FALSE;
         }
 
@@ -904,6 +960,7 @@ int _res_heap_check(void)
                 {
                 /* error hole */
                 kprintf(("_res_heap_check: internal error - memory hole!\n"));
+                Int3();
                 return FALSE;
                 }
 
@@ -913,17 +970,57 @@ int _res_heap_check(void)
                 cbSize += CB_HDR + pmbUsed->cbSize;
                 cbUsed += pmbUsed->cbSize;
                 if (pmbUsed->ulSignature != MEMBLOCK_SIGNATURE)
+                {
+                    kprintf(("_res_heap_check: invalid signature on used block, pmbUsed=0x%08x\n", pmbUsed));
+                    Int3();
                     return FALSE;
+                }
+                if (pmbUsed->cbSize < sizeof(MEMBLOCKFREE) - CB_HDR)
+                {
+                    kprintf(("_res_heap_check: internal error - cbSize is to small! (used), cbSize=%d\n", pmbUsed->cbSize));
+                    Int3();
+                    return FALSE;
+                }
                 pmbLast = pmbUsed;
                 pmbUsed = pmbUsedNext;
                 pmbUsedNext = (PMEMBLOCK)AVLGetNextNode(&UsedEnumData);
             }
             else
             {
+                PMEMBLOCKFREE pmbf = (PMEMBLOCKFREE)AVLGet((PPAVLNODECORE)&pha->pcoreFreeSize, pmbFree->cbSize);
+                if (pmbf != NULL)
+                {
+                    pmbf = MEMBLOCKFREE_FROM_FREESIZENODE(pmbf);
+                    while (pmbf != NULL && pmbf != (PMEMBLOCKFREE)pmbFree)
+                        pmbf = pmbf->pmbfNext;
+                    if (pmbf == NULL)
+                    {
+                        kprintf(("_res_heap_check: pmbFree=0x%08 is not found in the free-size-tree.\n", pmbFree));
+                        Int3();
+                        return FALSE;
+                    }
+                }
+                else
+                {
+                    kprintf(("_res_heap_check: pmbFree=0x%08 is not found in the free-size-tree.\n", pmbFree));
+                    Int3();
+                    return FALSE;
+                }
+
                 cbSize += CB_HDR + pmbFree->cbSize;
                 cbFree += pmbFree->cbSize;
                 if (pmbFree->ulSignature != MEMBLOCK_SIGNATURE)
+                {
+                    kprintf(("_res_heap_check: invalid signature on free block, pmbUsed=0x%08x\n", pmbFree));
+                    Int3();
                     return FALSE;
+                }
+                if (pmbFree->cbSize < sizeof(MEMBLOCKFREE) - CB_HDR)
+                {
+                    kprintf(("_res_heap_check: internal error - cbSize is to small! (free), cbSize=%d\n", pmbFree->cbSize));
+                    Int3();
+                    return FALSE;
+                }
                 pmbLast = pmbFree;
                 pmbFree = pmbFreeNext;
                 pmbFreeNext = (PMEMBLOCK)AVLGetNextNode(&FreeEnumData);
@@ -937,18 +1034,21 @@ int _res_heap_check(void)
         if (cbFree != pha->cbFree)
         {
             kprintf(("_res_heap_check: cbFree(%d) != pha->cbFree(%d)\n", cbFree, pha->cbFree));
+            Int3();
             return FALSE;
         }
 
         if (cbUsed != pha->cbUsed)
         {
             kprintf(("_res_heap_check: cbUsed(%d) != pha->cbUsed(%d)\n", cbUsed, pha->cbUsed));
+            Int3();
             return FALSE;
         }
 
         if (cbSize != pha->cbSize)
         {
             kprintf(("_res_heap_check: cbTotal(%d) != pha->cbSize(%d)\n", cbSize, pha->cbSize));
+            Int3();
             return FALSE;
         }
         /*
@@ -959,6 +1059,7 @@ int _res_heap_check(void)
             kprintf(("_res_heap_check: The last free/used block dont end at the end of memory block.\n"
                      "    pmbLast(end)=0x%08x, pha+pha->cbSize=0x%08x\n",
                      pmbLast != NULL ? PNEXT_BLOCK(pmbLast) : NULL, (unsigned)pha + pha->cbSize));
+            Int3();
             return FALSE;
         }
 
@@ -974,6 +1075,7 @@ int _res_heap_check(void)
     if (phaPrev != phaLast)
     {
         kprintf(("_res_heap_check: internal error - heap anchor chain didn't end on phaLast\n"));
+        Int3();
         return FALSE;
     }
 
@@ -982,6 +1084,97 @@ int _res_heap_check(void)
     return TRUE;
 }
 
+
+/**
+ * Check the integrity of the a Free/Used AVL tree where Key == node pointer.
+ */
+static int resCheckAVLTree(PMEMBLOCK pmb)
+{
+    if (pmb == NULL)
+        return 0;
+    if (pmb->core.Key != (AVLKEY)pmb)
+    {
+        kprintf(("resCheckAVLTree: Invalid Key!\n"));
+        Int3();
+        return -1;
+    }
+    if (pmb->core.pLeft != NULL && (pmb->core.pLeft < (PAVLNODECORE)0x10000 || pmb->core.Key <= (AVLKEY)pmb->core.pLeft))
+    {
+        kprintf(("resCheckAVLTree: Invalid pLeft!\n"));
+        Int3();
+        return -1;
+    }
+    if (pmb->core.pRight != NULL && (pmb->core.pRight < (PAVLNODECORE)0x10000 || pmb->core.Key >= (AVLKEY)pmb->core.pRight))
+    {
+        kprintf(("resCheckAVLTree: Invalid pRight!\n"));
+        Int3();
+        return -1;
+    }
+    if (pmb->core.pLeft != NULL && resCheckAVLTree((PMEMBLOCK)pmb->core.pLeft) != 0)
+        return -1;
+    if (pmb->core.pRight != NULL && resCheckAVLTree((PMEMBLOCK)pmb->core.pRight) != 0)
+        return -1;
+    return 0;
+}
+
+
+/**
+ * Check the integrity of the a Free/Used AVL tree where Key == node pointer.
+ */
+static int resCheckAVLTreeFree(PAVLNODECORE pNode)
+{
+    PMEMBLOCKFREE pmbf;
+    if (pNode == NULL)
+        return 0;
+    if (pNode->Key < 4 || (pNode->Key % 4) != 0)
+    {
+        kprintf(("resCheckAVLTreeFree: Invalid Key! 0x%08x\n", pNode->Key));
+        Int3();
+        return -1;
+    }
+    if (pNode->pLeft != NULL && (pNode->pLeft < (PAVLNODECORE)0x10000 || pNode->Key <= pNode->pLeft->Key))
+    {
+        kprintf(("resCheckAVLTreeFree: Invalid pLeft!\n"));
+        Int3();
+        return -1;
+    }
+    if (pNode->pRight != NULL && (pNode->pRight < (PAVLNODECORE)0x10000 || pNode->Key >= pNode->pRight->Key))
+    {
+        kprintf(("resCheckAVLTreeFree: Invalid pRight!\n"));
+        Int3();
+        return -1;
+    }
+    pmbf = MEMBLOCKFREE_FROM_FREESIZENODE(pNode);
+    if (pmbf->pmbfNext != NULL && pmbf->pmbfNext < (PMEMBLOCKFREE)0x10000)
+    {
+        kprintf(("resCheckAVLTreeFree: invalid pmbfNext pointer, pmbfNext=0x%08x\n", pmbf->pmbfNext));
+        Int3();
+        return -1;
+    }
+    while (pmbf->pmbfNext != NULL)
+    {
+        if (pmbf->pmbfNext < (PMEMBLOCKFREE)0x10000)
+        {
+            kprintf(("resCheckAVLTreeFree: invalid pmbfNext pointer, pmbfNext=0x%08x\n", pmbf->pmbfNext));
+            Int3();
+            return -1;
+        }
+        if (pmbf->coreFree.Key != pNode->Key)
+        {
+            kprintf(("resCheckAVLTreeFree: invalid key, pmbf->coreFree.Key=%d, pNode->Key=%d\n", pmbf->coreFree.Key, pNode->Key));
+            Int3();
+            return -1;
+        }
+        /* next */
+        pmbf = pmbf->pmbfNext;
+    }
+
+    if (pNode->pLeft != NULL && resCheckAVLTreeFree(pNode->pLeft) != 0)
+        return -1;
+    if (pNode->pRight != NULL && resCheckAVLTreeFree(pNode->pRight) != 0)
+        return -1;
+    return 0;
+}
 
 
 /**
