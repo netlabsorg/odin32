@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.39 1999-07-04 19:02:36 sandervl Exp $ */
+ /* $Id: changelog,v 1.40 1999-07-05 07:59:45 phaller Exp $ */
+ 99-07-05: Patrick Haller <phaller@gmx.net>
+	- KERNEL32: HandleManager fixes as suggested by Edgar Buerkle
+
  99-07-04: Christoph Bratschi <cbratschi@datacomm.ch>
 	- PE2LX/USER32: Dialog default font set to WarpSans + fixes
 
