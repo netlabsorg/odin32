@@ -3580,6 +3580,7 @@ static BOOL LISTVIEW_DrawItem(LISTVIEW_INFO *infoPtr, HDC hdc, INT nItem, INT nS
     DWORD dwTextColor;
     INT   iBkMode = -1;
     INT nMixMode;
+    UINT  textoutOptions = ETO_OPAQUE | ETO_CLIPPED;
 #endif
 
     TRACE("(hdc=%p, nItem=%d, nSubItem=%d, pos=%s)\n", hdc, nItem, nSubItem, debugpoint(&pos));
@@ -3672,6 +3673,7 @@ static BOOL LISTVIEW_DrawItem(LISTVIEW_INFO *infoPtr, HDC hdc, INT nItem, INT nS
       {
         dwBkColor = GetBkColor(hdc);
         iBkMode = SetBkMode(hdc, TRANSPARENT);
+        textoutOptions &= ~ETO_OPAQUE;
       }
       else
       {
@@ -3693,7 +3695,11 @@ static BOOL LISTVIEW_DrawItem(LISTVIEW_INFO *infoPtr, HDC hdc, INT nItem, INT nS
 	    rcSelect.right = rcBox.right;
    
     	if (nmlvcd.clrTextBk != CLR_NONE) 
+#ifdef __WIN32OS2__
+            ExtTextOutW(hdc, rcSelect.left, rcSelect.top, textoutOptions, &rcSelect, 0, 0, 0);
+#else
             ExtTextOutW(hdc, rcSelect.left, rcSelect.top, ETO_OPAQUE, &rcSelect, 0, 0, 0);
+#endif
     	if(lprcFocus) *lprcFocus = rcSelect;
     }
    
