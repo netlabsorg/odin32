@@ -1,4 +1,4 @@
-/* $Id: bindctx.cpp,v 1.2 1999-11-12 12:00:14 davidr Exp $ */
+/* $Id: bindctx.cpp,v 1.3 2000-05-05 18:21:36 sandervl Exp $ */
 /* 
  * BindCtx implementation
  * 
@@ -306,7 +306,12 @@ HRESULT WINAPI BindCtxImpl_SetBindOptions(IBindCtx* iface,LPBIND_OPTS2 pbindopts
     if (pbindopts==NULL)
         return E_POINTER;
     
-    This->bindOption2=*pbindopts;
+    if (pbindopts->cbStruct > sizeof(BIND_OPTS2))
+    {
+        WARN("invalid size");
+        return E_INVALIDARG; /* FIXME : not verified */
+    }
+    memcpy(&This->bindOption2, pbindopts, pbindopts->cbStruct);
 
     return S_OK;
 }
@@ -323,7 +328,12 @@ HRESULT WINAPI BindCtxImpl_GetBindOptions(IBindCtx* iface,LPBIND_OPTS2 pbindopts
     if (pbindopts==NULL)
         return E_POINTER;
 
-    *pbindopts=This->bindOption2;
+    if (pbindopts->cbStruct > sizeof(BIND_OPTS2))
+    {
+        WARN("invalid size");
+        return E_INVALIDARG; /* FIXME : not verified */
+    }
+    memcpy(pbindopts, &This->bindOption2, pbindopts->cbStruct);
     
     return S_OK;
 }
