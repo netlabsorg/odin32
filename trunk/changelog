@@ -1,10 +1,13 @@
-/* $Id: changelog,v 1.2481 2003-02-13 12:44:42 sandervl Exp $ */
+/* $Id: changelog,v 1.2482 2003-02-13 15:29:18 sandervl Exp $ */
 
  2003-02-13: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Handle SetFocus(0) correctly: keystrokes are converted into
                   WM_SYSKEYDOWN/(WM_SYSCHAR)/WM_SYSKEYUP messages
                 o DrawFocusRect: conflict between SetROP2(R2_XORPEN) and 
                   SetBkMode(TRANSPARENT); commenting out the latter for now.
+    - SHELL32:  o Control panel Wine resync
+    - KERNEL32: o Added ODIN_SetTIBSwitch function to override TIB selector
+                  switching.
 
  2003-02-11: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o When a window is activated by a mouse click, we must set
