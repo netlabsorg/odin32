@@ -11,6 +11,10 @@ OS/2 bugs:
   attributes and then access the memory with a 16 bit API (such as DosRead),
   it will have the old (alloc time) attributes
 
+- If you allocate memory without PAG_EXECUTE and use DosSetMem to commit and
+  set that flag, then DosQueryMem does not return that flag.
+  If you allocate it with PAG_EXECUTE set, then DosQueryMem does what it's supposed to.
+
 FP13:
 - DosQuerySysState bug when object information is requested. Probably a
   problem which occurs in _LDRSysMteInfo when qsCheckCache is calle before
