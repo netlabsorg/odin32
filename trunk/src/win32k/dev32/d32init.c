@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.10 2000-02-19 08:40:29 bird Exp $
+/* $Id: d32init.c,v 1.11 2000-02-19 23:51:59 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -53,7 +53,7 @@ extern USHORT   _R0FlatCS16;
 extern USHORT   _R0FlatDS16;
 
 /* extern(s) located in calltab.asm */
-extern char     callTab[NUMBER_OF_PROCS][MAXSIZE_PROLOG];
+extern char     callTab[NBR_OF_KRNLIMPORTS][MAXSIZE_PROLOG];
 
 /* extern(s) located in mytkExecPgm.asm  */
 extern char     mytkExecPgm;
@@ -341,7 +341,7 @@ static ULONG    readnum(const char *pszNum)
 
 
 /**
- * Verifies the aProcTab.
+ * Verifies the aImportTab.
  * @returns   0 if ok. !0 if not ok.
  * @remark    Called from IOCtl.
  */
@@ -351,29 +351,29 @@ USHORT _loadds _Far32 _Pascal VerifyProcTab32(void)
     int cb;
 
     /* verify */
-    for (i = 0; i < NUMBER_OF_PROCS; i++)
+    for (i = 0; i < NBR_OF_KRNLIMPORTS; i++)
     {
         /* verify that it is found */
-        if (!_aProcTab[i].fFound)
+        if (!_aImportTab[i].fFound)
         {
             kprintf(("VerifyProcTab32: procedure no.%d was not found!\n", i));
             return STATUS_DONE | STERR | 1;
         }
 
         /* verify read/writeable. - FIXME */
-        if (_aProcTab[i].ulAddress < 0xffe00000UL)
+        if (_aImportTab[i].ulAddress < 0xffe00000UL)
         {
             kprintf(("VerifyProcTab32: procedure no.%d has an invlalid address, %#08x!\n",
-                     i, _aProcTab[i].ulAddress));
+                     i, _aImportTab[i].ulAddress));
             return STATUS_DONE | STERR | 2;
         }
 
-        switch (_aProcTab[i].fType)
+        switch (_aImportTab[i].fType)
         {
             case EPT_PROC:
             case EPT_PROCIMPORT:
                 /* verify known function prolog. */
-                if ((cb = interpretFunctionProlog((char*)_aProcTab[i].ulAddress, _aProcTab[i].fType == EPT_PROC))
+                if ((cb = interpretFunctionProlog((char*)_aImportTab[i].ulAddress, _aImportTab[i].fType == EPT_PROC))
                     <= 0 && cb + 5 >= MAXSIZE_PROLOG)
                 {
                     kprintf(("VerifyProcTab32: verify failed for procedure no.%d\n",i));
@@ -533,14 +533,14 @@ static int procInit(void)
     /*
      * verify proctable
      */
-    for (i = 0; i < NUMBER_OF_PROCS; i++)
+    for (i = 0; i < NBR_OF_KRNLIMPORTS; i++)
     {
-        if (_aProcTab[i].fType != EPT_PROC && _aProcTab[i].fType != EPT_PROCIMPORT)
+        if (_aImportTab[i].fType != EPT_PROC && _aImportTab[i].fType != EPT_PROCIMPORT)
         {
             kprintf(("procInit: EPT_VAR is not supported. (procedure no.%d, cb=%d)\n", i, cb));
             return 1;
         }
-        cb = interpretFunctionProlog((char*)_aProcTab[i].ulAddress, _aProcTab[i].fType == EPT_PROC);
+        cb = interpretFunctionProlog((char*)_aImportTab[i].ulAddress, _aImportTab[i].fType == EPT_PROC);
         if (cb <= 0 || cb + 5 >= MAXSIZE_PROLOG)
         {
             kprintf(("procInit: verify failed for procedure no.%d, cb=%d\n", i, cb));
@@ -551,16 +551,16 @@ static int procInit(void)
     /*
      * rehook / import
      */
-    for (i = 0; i < NUMBER_OF_PROCS; i++)
+    for (i = 0; i < NBR_OF_KRNLIMPORTS; i++)
     {
-        switch (_aProcTab[i].fType)
+        switch (_aImportTab[i].fType)
         {
             case EPT_PROC:
             {
-                cb = interpretFunctionProlog((char*)_aProcTab[i].ulAddress, TRUE);
+                cb = interpretFunctionProlog((char*)_aImportTab[i].ulAddress, TRUE);
                 if (cb > 0 && cb + 5 < MAXSIZE_PROLOG)
                 {
-                    static unsigned auFuncs[NUMBER_OF_PROCS] = /* This table must be updated with the overloading functions. */
+                    static unsigned auFuncs[NBR_OF_KRNLIMPORTS] = /* This table must be updated with the overloading functions. */
                     {
                         (unsigned)myldrRead,
                         (unsigned)myldrOpen,
@@ -579,16 +579,16 @@ static int procInit(void)
                     };
 
                     /* copy function prolog */
-                    memcpy(callTab[i], (void*)_aProcTab[i].ulAddress, (size_t)cb);
+                    memcpy(callTab[i], (void*)_aImportTab[i].ulAddress, (size_t)cb);
 
                     /* jump from calltab to original function */
                     callTab[i][cb] = 0xE9; /* jmp */
-                    *(unsigned*)(void*)&callTab[i][cb+1] = _aProcTab[i].ulAddress + cb - (unsigned)&callTab[i][cb+5];
+                    *(unsigned*)(void*)&callTab[i][cb+1] = _aImportTab[i].ulAddress + cb - (unsigned)&callTab[i][cb+5];
 
 
                     /* jump from original function to my function - an cli(?) could be needed here */
-                    *(char*)_aProcTab[i].ulAddress = 0xE9; /* jmp */
-                    *(unsigned*)(_aProcTab[i].ulAddress + 1) = auFuncs[i] - (_aProcTab[i].ulAddress + 5);
+                    *(char*)_aImportTab[i].ulAddress = 0xE9; /* jmp */
+                    *(unsigned*)(_aImportTab[i].ulAddress + 1) = auFuncs[i] - (_aImportTab[i].ulAddress + 5);
                 }
                 else
                 {   /* !fatal! - this could never happen really... */
@@ -601,12 +601,12 @@ static int procInit(void)
 
             case EPT_PROCIMPORT:
             {
-                cb = interpretFunctionProlog((char*)_aProcTab[i].ulAddress, FALSE);
+                cb = interpretFunctionProlog((char*)_aImportTab[i].ulAddress, FALSE);
                 if (cb > 0 && cb + 5 < MAXSIZE_PROLOG)
                 {
                     /* jump from calltab to original function */
                     callTab[i][0] = 0xE9; /* jmp */
-                    *(unsigned*)(void*)&callTab[i][1] = _aProcTab[i].ulAddress - (unsigned)&callTab[i][cb+5];
+                    *(unsigned*)(void*)&callTab[i][1] = _aImportTab[i].ulAddress - (unsigned)&callTab[i][cb+5];
                 }
                 else
                 {   /* !fatal! - this could never happen really... */

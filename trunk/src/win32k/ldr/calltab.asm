@@ -1,4 +1,4 @@
-; $Id: calltab.asm,v 1.6 2000-02-19 08:40:30 bird Exp $
+; $Id: calltab.asm,v 1.7 2000-02-19 23:52:00 bird Exp $
 ;
 ; callTab - Call back again table - table with entry for each function which is overrided.
 ;           It holds the part of the prolog which was replaced by a jmp instruction.
@@ -49,7 +49,7 @@ CALLTAB segment
 ; callTab is an array of evt. function prologs with a jump to the real function.
 ; Imported and Overrided OS/2 kernel functions are called tru this table.
 ;
-; This array of near procedures are parallel to the aProcTab array in dev16\ProbKrnl.c.
+; This array of near procedures are parallel to the aImportTab array in dev16\ProbKrnl.c.
 ; Remember to update both!.
 ;
 callTab:

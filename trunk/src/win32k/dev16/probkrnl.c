@@ -1,4 +1,4 @@
-/* $Id: probkrnl.c,v 1.10 2000-02-19 08:40:29 bird Exp $
+/* $Id: probkrnl.c,v 1.11 2000-02-19 23:51:59 bird Exp $
  *
  * Description:   Autoprobes the os2krnl file and os2krnl[*].sym files.
  *                Another Hack!
@@ -82,28 +82,31 @@
  */
 
 /*
- * aProcTab defines the imported and overloaded OS/2 kernel functions.
- * IMPORTANT: aProcTab has a sibling array in d32init.c, aulProc, which must
- *            match entry by entry. Adding/removing/shuffling aProcTab, aulProc
+ * aImportTab defines the imported and overloaded OS/2 kernel functions.
+ * IMPORTANT: aImportTab has a sibling array in d32init.c, aulProc, which must
+ *            match entry by entry. Adding/removing/shuffling aImportTab, aulProc
  *            has to be updated immediately!
  */
-PROCS aProcTab[NUMBER_OF_PROCS] =
-{/* iFound     cchName                  offObject     fType */
- /*      iObject      achName                 ulAddress     */
-    {FALSE, -1,  8, "_ldrRead",             -1,  -1, EPT_PROC},        /* 0 */
-    {FALSE, -1,  8, "_ldrOpen",             -1,  -1, EPT_PROC},        /* 1 */
-    {FALSE, -1,  9, "_ldrClose",            -1,  -1, EPT_PROC},        /* 2 */
-    {FALSE, -1, 12, "_LDRQAppType",         -1,  -1, EPT_PROCIMPORT},  /* 3 */ /* to be removed? */
-    {FALSE, -1, 20, "_ldrEnum32bitRelRecs", -1,  -1, EPT_PROC},        /* 4 */
-    {FALSE, -1, 10, "_IOSftOpen",           -1,  -1, EPT_PROCIMPORT},  /* 5 */
-    {FALSE, -1, 11, "_IOSftClose",          -1,  -1, EPT_PROCIMPORT},  /* 6 */
-    {FALSE, -1, 15, "_IOSftTransPath",      -1,  -1, EPT_PROCIMPORT},  /* 7 */
-    {FALSE, -1, 12, "_IOSftReadAt",         -1,  -1, EPT_PROCIMPORT},  /* 8 */
-    {FALSE, -1, 13, "_IOSftWriteAt",        -1,  -1, EPT_PROCIMPORT},  /* 9 */
-    {FALSE, -1, 12, "_SftFileSize",         -1,  -1, EPT_PROCIMPORT},  /* 10 */
-    {FALSE, -1, 11, "_VMAllocMem",          -1,  -1, EPT_PROCIMPORT},  /* 11 */
-    {FALSE, -1, 11, "_VMGetOwner",          -1,  -1, EPT_PROCIMPORT},  /* 12 */
-    {FALSE, -1, 11, "g_tkExecPgm",          -1,  -1, EPT_PROC}         /* 13 */
+IMPORTKRNLSYM aImportTab[NBR_OF_KRNLIMPORTS] =
+{/* iFound     cchName                  offObject    usSel        */
+ /*      iObject      achName                 ulAddress  fType    */
+    {FALSE, -1,  8, "_ldrRead",             -1,  -1, -1, EPT_PROC32},        /* 0 */
+    {FALSE, -1,  8, "_ldrOpen",             -1,  -1, -1, EPT_PROC32},        /* 1 */
+    {FALSE, -1,  9, "_ldrClose",            -1,  -1, -1, EPT_PROC32},        /* 2 */
+    {FALSE, -1, 12, "_LDRQAppType",         -1,  -1, -1, EPT_PROCIMPORT32},  /* 3 */ /* to be removed? */
+    {FALSE, -1, 20, "_ldrEnum32bitRelRecs", -1,  -1, -1, EPT_PROC32},        /* 4 */
+    {FALSE, -1, 10, "_IOSftOpen",           -1,  -1, -1, EPT_PROCIMPORT32},  /* 5 */
+    {FALSE, -1, 11, "_IOSftClose",          -1,  -1, -1, EPT_PROCIMPORT32},  /* 6 */
+    {FALSE, -1, 15, "_IOSftTransPath",      -1,  -1, -1, EPT_PROCIMPORT32},  /* 7 */
+    {FALSE, -1, 12, "_IOSftReadAt",         -1,  -1, -1, EPT_PROCIMPORT32},  /* 8 */
+    {FALSE, -1, 13, "_IOSftWriteAt",        -1,  -1, -1, EPT_PROCIMPORT32},  /* 9 */
+    {FALSE, -1, 12, "_SftFileSize",         -1,  -1, -1, EPT_PROCIMPORT32},  /* 10 */
+    {FALSE, -1, 11, "_VMAllocMem",          -1,  -1, -1, EPT_PROCIMPORT32},  /* 11 */
+    {FALSE, -1, 11, "_VMGetOwner",          -1,  -1, -1, EPT_PROCIMPORT32},  /* 12 */
+    {FALSE, -1, 11, "g_tkExecPgm",          -1,  -1, -1, EPT_PROC32},        /* 13 */
+    {FALSE, -1, 11, "f_FuStrLenZ",          -1,  -1, -1, EPT_PROCIMPORT16},  /* 14 */
+    {FALSE, -1,  8, "f_FuBuff",             -1,  -1, -1, EPT_PROCIMPORT16}   /* 15 */
+/*    {FALSE, -1, 11, "",          -1,  -1, -1, EPT_PROCIMPORT16} */ /* 16 */
 };
 
 unsigned long int   ulBuild          = 0;
@@ -155,6 +158,7 @@ static char szMsgfailed[]= "failed!   ";
 *******************************************************************************/
 static void  kmemcpy(char *p1, const char *p2, int len);
 static int   kstrcmp(const char *p1, const char *p2);
+static char *kstrstr(const char *psz1, const char *psz2);
 static int   kstrncmp(const char *p1, const char *p2, int len);
 static int   kstrlen(const char *p);
 static HFILE fopen(char * filename, char * ignored);
@@ -176,6 +180,11 @@ static void  ShowHexNumber(unsigned long int n);
 static void  ShowResult(int rc, int iSym);
 
 
+
+
+/*******************************************************************************
+*   Implementation of Internal Helper Functions                                *
+*******************************************************************************/
 
 /**
  * Quick implementation of fopen.
@@ -308,6 +317,36 @@ static int kstrcmp(const char * p1, const char * p2)
 }
 #endif
 
+
+
+/**
+ * Finds psz2 in psz2.
+ * @returns   Pointer to occurence of psz2 in psz1.
+ * @param     psz1  String to be search.
+ * @param     psz2  Substring to search for.
+ * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ */
+static char *kstrstr(const char *psz1, const char *psz2)
+{
+    while (*psz1 != '\0')
+    {
+        register int i = 0;
+        while (psz2[i] != '\0' && psz1[i] == psz2[i])
+            i++;
+
+        /* found it? */
+        if (psz2[i] == '\0')
+            return (char*)psz1;
+        if (psz1[i] == '\0' )
+            break;
+        psz1++;
+    }
+
+    return NULL;
+}
+
+
+
 /**
  * kstrncmp - String 'n' compare.
  * @returns
@@ -399,8 +438,13 @@ static int kargncpy(char * pszTarget, const char * pszArg, unsigned cchMaxlen)
 }
 
 
+
+/*******************************************************************************
+*   Implementation Of The Important Function                                   *
+*******************************************************************************/
+
 /**
- * Verifies the that the addresses in aProcTab are valid.
+ * Verifies the that the addresses in aImportTab are valid.
  * This is done at Ring-0 of course.
  * @returns   0 if ok, not 0 if not ok.
  */
@@ -429,7 +473,7 @@ static int VerifyPrologs(void)
 
 
 /**
- * Check a symbole file. Searches for the wanted entry-point addresses.
+ * Check a symbol file. Searches for the wanted entry-point addresses.
  * @returns   0 on success - something else on failiure.
  * @param     pszFilename  Name of file to probe.
  * @precond   Must be called after kernel-file is found and processed.
@@ -437,141 +481,236 @@ static int VerifyPrologs(void)
  */
 static int ProbeSymFile(char * pszFilename)
 {
-    HFILE          SymFile;
-    MAPDEF         MapDef;
-    SEGDEF         SegDef;
-    SYMDEF32       SymDef32;
-    SYMDEF16       SymDef16;
-    char           Buffer[256];
-    unsigned long  SymNum;
-    unsigned long  SegOffset, SymOffset, SymPtrOffset;
-    unsigned long  i;
-    unsigned long  ulSegments;
-    int            LeftToFind;
+    HFILE          hSym;                /* Filehandle */
+    int            cLeftToFind;         /* Symbols left to find */
+    unsigned long  iSeg;                /* Outer search loop:  Segment number */
+    unsigned       iSym;                /* Middle search loop: Symbol number */
+    unsigned       i;                   /* Inner search loop:  ProcTab index */
     int            rc;
 
-    /* open symbole file */
-    SymFile = fopen(pszFilename, "rb");
-    if (SymFile==0)
+    MAPDEF         MapDef;              /* Mapfile header */
+    SEGDEF         SegDef;              /* Segment header */
+    SYMDEF32       SymDef32;            /* Symbol definition 32-bit */
+    SYMDEF16       SymDef16;            /* Symbol definition 16-bit */
+    char           achBuffer[256];      /* Name buffer */
+    unsigned long  offSegment;          /* Segment definition offset */
+    unsigned long  offSymPtr;           /* Symbol pointer(offset) offset */
+    unsigned short offSym;              /* Symbol definition offset */
+
+
+    /*
+     * Open the symbol file
+     */
+    hSym = fopen(pszFilename, "rb");
+    if (hSym==0)
     {
         dprintf(("Error opening file %s\n", pszFilename));
         return -50;
     }
 
-    /* read header and display it */
-    rc = fread(&MapDef, sizeof(MAPDEF), 1, SymFile);
-    if (rc)
-    {
-        Buffer[0] = MapDef.achModName[0];
-        fread(&Buffer[1], 1, MapDef.cbModName, SymFile);
-        Buffer[MapDef.cbModName] = '\0';
-        dprintf(("*Module name: %s\n", Buffer));
-        dprintf(("*Segments: %d\n*MaxSymbolLength: %d\n", MapDef.cSegs, MapDef.cbMaxSym));
-        dprintf(("*ppNextMap: 0x%x\n\n", MapDef.ppNextMap ));
-    }
-    else
-    {
-        fclose(SymFile);
+
+    /*
+     * (Open were successfully.)
+     * Now read header and display it.
+     */
+    rc = fread(&MapDef, sizeof(MAPDEF), 1, hSym);
+    if (!rc)
+    {   /* oops! read failed, close file and fail. */
+        fclose(hSym);
         return -51;
     }
+    achBuffer[0] = MapDef.achModName[0];
+    fread(&achBuffer[1], 1, MapDef.cbModName, hSym);
+    achBuffer[MapDef.cbModName] = '\0';
+    dprintf(("*Module name: %s\n", achBuffer));
+    dprintf(("*Segments: %d\n*MaxSymbolLength: %d\n", MapDef.cSegs, MapDef.cbMaxSym));
+    dprintf(("*ppNextMap: 0x%x\n\n", MapDef.ppNextMap ));
 
-    /* verify module name */
-    if (MapDef.cbModName == 7 && kstrncmp(Buffer, "OS2KRNL", 7) != 0)
-    {
+
+    /*
+     * Verify that the modulename of the symbol file is OS2KRNL.
+     */
+    if (MapDef.cbModName == 7 && kstrncmp(achBuffer, "OS2KRNL", 7) != 0)
+    {   /* modulename was not OS2KRNL, fail. */
         dprintf(("Modulename verify failed\n"));
-        fclose(SymFile);
+        fclose(hSym);
         return -51;
     }
 
-    /* verify correct number of segments */
-    ulSegments = MapDef.cSegs;
-    if (ulSegments != KrnlOTEs.cObjects)
-    {
+
+    /*
+     * Verify that the number of segments is equal to the number objects in OS2KRNL.
+     */
+    if (MapDef.cSegs != KrnlOTEs.cObjects)
+    {   /* incorrect count of segments. */
         dprintf(("Segment No. verify failed\n"));
-        fclose(SymFile);
+        fclose(hSym);
         return -52;
     }
 
-    SegOffset= SEGDEFOFFSET(MapDef);
-    /* skip to last segment - ASSUMES all imports located in 32-bit code segment. */
-    for (i = 0; i < ulSegments; i++ )
+
+    /*
+     * Reset ProcTab
+     */
+    for (i = 0; i < NBR_OF_KRNLIMPORTS; i++)
+        aImportTab[i].fFound = 0;
+
+
+    /*
+     * Fileoffset of the first segment.
+     * And set cLeftToFind.
+     */
+    offSegment = SEGDEFOFFSET(MapDef);
+    cLeftToFind = NBR_OF_KRNLIMPORTS;
+
+    /*
+     * Search thru the entire file, segment by segment.
+     *
+     * ASSUME: last segment is the only 32-bit code segment.
+     *
+     */
+    for (iSeg = 0; iSeg < MapDef.cSegs; iSeg++, offSegment = NEXTSEGDEFOFFSET(SegDef))
     {
-        if (fseek(SymFile, SegOffset, SEEK_SET))
-        {
-            fclose(SymFile);
+        int     fSegEPTBitType;         /* Type of segment, 16 or 32 bit, expressed in EPT_XXBIT flags */
+        int     fCode;                  /* Set if this is a code segment, else clear. */
+
+        /*
+         * Read the segment definition.
+         */
+        if (fseek(hSym, offSegment, SEEK_SET))
+        {   /* Failed to seek to the segment definition, fail! */
+            fclose(hSym);
             return -53;
         }
-        rc = fread(&SegDef, sizeof(SEGDEF), 1, SymFile);
-        if (i+1 < ulSegments)
-            SegOffset = NEXTSEGDEFOFFSET(SegDef);
-    }
-
-    Buffer[0] = SegDef.achSegName[0];
-    rc = fread(&Buffer[1], 1, SegDef.cbSegName, SymFile);
-
-    /* verify that this is DOSHIGH32CODE */
-    if (SegDef.cbSegName != 13 && kstrncmp(Buffer, "DOSHIGH32CODE", 13) != 0)
-    {
-        dprintf(("DOSHIGH32CODE verify failed \n"));
-        fclose(SymFile);
-        return -54;
-    }
-
-    for (i = 0; i < NUMBER_OF_PROCS; i++)
-        aProcTab[i].fFound = 0 ;
-
-    /* search for the entry-point names */
-    for (LeftToFind = NUMBER_OF_PROCS, SymNum = 0; SymNum < SegDef.cSymbols && LeftToFind; SymNum++)
-    {
-        SymPtrOffset = SYMDEFOFFSET(SegOffset, SegDef, SymNum);
-        rc = fseek(SymFile, SymPtrOffset, SEEK_SET);
-        rc = fread(&SymOffset, sizeof(unsigned short int), 1, SymFile);
-        SymOffset &=0xffff;
-        rc = fseek(SymFile, SymOffset+SegOffset, SEEK_SET);
-
-        if (SegDef.bFlags & 0x01)
-        {
-            rc = fread(&SymDef32, sizeof(SYMDEF32), 1, SymFile);
-            Buffer[0] = SymDef32.achSymName[0];
-            rc = fread(&Buffer[1], 1, SymDef32.cbSymName, SymFile);
-            Buffer[SymDef32.cbSymName] = '\0';
-        } else
-        {
-            rc = fread(&SymDef16, sizeof(SYMDEF16), 1, SymFile);
-            Buffer[0] = SymDef16.achSymName[0];
-            rc = fread(&Buffer[1], 1, SymDef16.cbSymName, SymFile);
-            Buffer[SymDef16.cbSymName] = '\0';
+        rc = fread(&SegDef, sizeof(SEGDEF), 1, hSym);
+        if (!rc)
+        {   /* Failed to read the segment definition, fail! */
+            fclose(hSym);
+            return -53;
         }
 
-        /* search proctable */
-        for (i = 0; i < NUMBER_OF_PROCS; i++)
-        {
-            if (!aProcTab[i].fFound && aProcTab[i].cchName == (SegDef.bFlags & 0x01 ? SymDef32.cbSymName : SymDef16.cbSymName))
-            {
-                if (kstrncmp(aProcTab[i].achName, Buffer, aProcTab[i].cchName) == 0)
-                {
-                    aProcTab[i].offObject = (SegDef.bFlags & 0x01 ? SymDef32.wSymVal : SymDef16.wSymVal);
-                    aProcTab[i].ulAddress= aProcTab[i].offObject + KrnlOTEs.aObjects[KrnlOTEs.cObjects-1].ote_base;
+        /*
+         * Some debugging info.
+         */
+        achBuffer[0] = SegDef.achSegName[0];
+        fread(&achBuffer[1], 1, SegDef.cbSegName, hSym);
+        achBuffer[SegDef.cbSegName] = '\0';
+        dprintf(("Segment %.2li Flags=0x%02x cSymbols=0x%04x Name=%s\n",
+                 iSeg, SegDef.bFlags, SegDef.cSymbols, &achBuffer[0]));
 
-                    if (aProcTab[i].offObject < KrnlOTEs.aObjects[KrnlOTEs.cObjects-1].ote_size)
-                    {
-                        aProcTab[i].fFound = TRUE;
-                        LeftToFind--;
-                        dprintf(("Found: %s at off 0x%lx addr 0x%lx\n", aProcTab[i].achName, aProcTab[i].offObject, aProcTab[i].ulAddress));
-                        break;
-                    }
-                    else
-                    {
-                        fclose(SymFile);
-                        return -56;
-                    }
-                }
+        /*
+         * Determin segment bit type.
+         */
+        fSegEPTBitType = SEG32BitSegment(SegDef) ? EPT_32BIT : EPT_16BIT;
+        fCode = kstrstr(achBuffer, "CODE") != NULL;
+
+        /*
+         * Search thru all the symbols in this segment
+         * while we look for the requested symbols in aImportTab.
+         */
+        for (iSym = 0; iSym < SegDef.cSymbols && cLeftToFind; iSym++)
+        {
+            unsigned cchName;
+            /*
+             * Fileoffset of the current symbol.
+             * Set filepointer to that position.
+             * Read word (which is the offset of the symbol).
+             */
+            offSymPtr = SYMDEFOFFSET(offSegment, SegDef, iSym);
+            rc = fseek(hSym, offSymPtr, SEEK_SET);
+            if (rc)
+            {   /* Symboloffset seek failed, try read next symbol. */
+                dprintf(("Warning: Seek failed (offSymPtr=%d, rc=%d)\n", offSymPtr, rc));
+                continue;
             }
-        }
-    }
+            rc = fread(&offSym, sizeof(unsigned short int), 1, hSym);
+            if (!rc)
+            {   /* Symboloffset read failed, try read next symbol. */
+                dprintf(("Warning: read failed (offSymPtr=%d, rc=%d)\n", offSymPtr, rc));
+                continue;
+            }
+            rc = fseek(hSym, offSym + offSegment, SEEK_SET);
+            if (rc)
+            {   /* Symbol Seek failed, try read next symbol. */
+                dprintf(("Warning: Seek failed (offSym=%d, rc=%d)\n", offSym, rc));
+                continue;
+            }
 
-    fclose(SymFile);
-    return LeftToFind == 0 ? VerifyPrologs() : -57;
+
+            /*
+             * Read symbol and symbolname.
+             */
+            if (SegDef.bFlags & 0x01)
+                rc = fread(&SymDef32, sizeof(SYMDEF32), 1, hSym);
+            else
+                rc = fread(&SymDef16, sizeof(SYMDEF16), 1, hSym);
+            if (!rc)
+            {   /* Symbol read failed, try read next symbol */
+                dprintf(("Warning: Read(1) failed (offSym=%d, rc=%d)\n", offSym, rc));
+                continue;
+            }
+            achBuffer[0] = (SegDef.bFlags & 0x01) ? SymDef32.achSymName[0] : SymDef16.achSymName[0];
+            cchName = (SegDef.bFlags & 0x01) ? SymDef32.cbSymName : SymDef16.cbSymName;
+            rc = fread(&achBuffer[1], 1, cchName, hSym);
+            if (!rc)
+            {   /* Symbol read failed, try read next symbol */
+                dprintf(("Warning: Read(2) failed (offSym=%d, rc=%d)\n", offSym, rc));
+                continue;
+            }
+            achBuffer[cchName] = '\0';
+
+
+            /*
+             * Search proctable.
+             */
+            for (i = 0; i < NBR_OF_KRNLIMPORTS; i++)
+            {
+                if (!aImportTab[i].fFound                                     /* Not allready found */
+                    && (aImportTab[i].fType & EPT_BIT_MASK) == fSegEPTBitType /* Equal bittype */
+                    && (fCode || (aImportTab[i].fType & EPT_VARIMPORT))       /* Don't look for code in a data segment and vice versa */
+                    && aImportTab[i].cchName == cchName                       /* Equal name length */
+                    && kstrncmp(aImportTab[i].achName, achBuffer, cchName) == 0  /* Equal name */
+                    )
+                {   /* Symbol was found */
+                    aImportTab[i].offObject = (SegDef.bFlags & 0x01 ? SymDef32.wSymVal : SymDef16.wSymVal);
+                    aImportTab[i].ulAddress = aImportTab[i].offObject + KrnlOTEs.aObjects[iSeg].ote_base;
+                    aImportTab[i].usSel     = KrnlOTEs.aObjects[iSeg].ote_sel;
+
+                    /* Paranoia test! */
+                    if (aImportTab[i].offObject < KrnlOTEs.aObjects[iSeg].ote_size)
+                    {
+                        aImportTab[i].fFound = TRUE;
+                        cLeftToFind--;
+                        dprintf(("Found: %s at off 0x%lx addr 0x%lx, sel=0x%x\n",
+                                 aImportTab[i].achName, aImportTab[i].offObject,
+                                 aImportTab[i].ulAddress, aImportTab[i].usSel));
+                    }
+                    else/* test failed, continue on next symbol*/
+                        dprintf(("Error: Paranoia test failed for %s\n", aImportTab[i].achName));;
+                    break;
+                }
+
+            } /* aImportTab for-loop */
+
+        } /* Symbol for-loop */
+
+    } /* Segment for-loop */
+
+    /*
+     * Close symbol file.
+     */
+    fclose(hSym);
+
+    /*
+     * If not all procedures were found fail.
+     */
+    if (cLeftToFind != 0)
+        return -57;
+
+    /*
+     * Verify function prologs and return.
+     */
+    return VerifyPrologs();
 }
 
 
@@ -597,21 +736,21 @@ static int VerifyKernelVer(void)
  * @param     filename   Filename of the OS/2 kernel.
  * @result    ulBuild is set.
  */
-static int ReadOS2Krnl(char * filename)
+static int ReadOS2Krnl(char * pszFilename)
 {
-    HFILE          krnl;
+    HFILE          hKrnl;
     unsigned long  cbKrnl;
     int            rc;
 
-    krnl = fopen(filename, "rb");
-    if (krnl != 0)
+    hKrnl = fopen(pszFilename, "rb");
+    if (hKrnl != 0)
     {
-        cbKrnl = fsize(krnl);
-        if (!fseek(krnl, 0, SEEK_SET))
-            rc = ReadOS2Krnl2(krnl, cbKrnl);
+        cbKrnl = fsize(hKrnl);
+        if (!fseek(hKrnl, 0, SEEK_SET))
+            rc = ReadOS2Krnl2(hKrnl, cbKrnl);
         else
             rc = -2;
-        fclose(krnl);
+        fclose(hKrnl);
     }
     else
     {
@@ -625,6 +764,7 @@ static int ReadOS2Krnl(char * filename)
  * Worker function for ReadOS2Krnl
  * @returns   0 on success.
  *            errorcodes on failure. (-1 >= rc >= -14)
+ * @param     hKrnl
  * @param
  * @equiv
  * @time
@@ -633,21 +773,21 @@ static int ReadOS2Krnl(char * filename)
  * @author    knut st. osmundsen
  * @remark
  */
-static int ReadOS2Krnl2(HFILE krnl, unsigned long  cbKrnl)
+static int ReadOS2Krnl2(HFILE hKrnl, unsigned long  cbKrnl)
 {
     int            i, j;
     int            rc = 0;
-    char           Buffer[KERNEL_ID_STRING_LENGTH + KERNEL_READ_SIZE];
+    char           achBuffer[KERNEL_ID_STRING_LENGTH + KERNEL_READ_SIZE];
     unsigned long  offLXHdr;
     struct e32_exe *pLXHdr;
 
 
     /* find bldlevel string - "@#IBM:14.020#@  IBM OS/2 Kernel - 14.020F" */
-    cbKrnl = fsize(krnl);
-    if (fseek(krnl, 0, SEEK_SET))
+    cbKrnl = fsize(hKrnl);
+    if (fseek(hKrnl, 0, SEEK_SET))
         return -2;
 
-    if (!fread(&Buffer[KERNEL_ID_STRING_LENGTH], 1, KERNEL_READ_SIZE, krnl))
+    if (!fread(&achBuffer[KERNEL_ID_STRING_LENGTH], 1, KERNEL_READ_SIZE, hKrnl))
         return -3;
 
     i = KERNEL_ID_STRING_LENGTH;
@@ -656,14 +796,14 @@ static int ReadOS2Krnl2(HFILE krnl, unsigned long  cbKrnl)
         if (i == KERNEL_READ_SIZE)
         {
 
-            kmemcpy(Buffer, &Buffer[KERNEL_READ_SIZE], KERNEL_ID_STRING_LENGTH);
-            if (!fread(&Buffer[KERNEL_ID_STRING_LENGTH], 1, cbKrnl > KERNEL_READ_SIZE ? KERNEL_READ_SIZE : (int)cbKrnl, krnl))
+            kmemcpy(achBuffer, &achBuffer[KERNEL_READ_SIZE], KERNEL_ID_STRING_LENGTH);
+            if (!fread(&achBuffer[KERNEL_ID_STRING_LENGTH], 1, cbKrnl > KERNEL_READ_SIZE ? KERNEL_READ_SIZE : (int)cbKrnl, hKrnl))
                 return -3;
 
             i = 0;
         }
 
-        if (kstrncmp("@#IBM:", &Buffer[i], 6) == 0)
+        if (kstrncmp("@#IBM:", &achBuffer[i], 6) == 0)
             break;
 
         /* next */
@@ -673,32 +813,32 @@ static int ReadOS2Krnl2(HFILE krnl, unsigned long  cbKrnl)
 
     if (cbKrnl == 0)
     {
-        fclose(krnl);
+        fclose(hKrnl);
         return -4;
     }
 
     /* displacement */
     j = 0;
-    while (j < 6 && Buffer[i+10+j] != '#')
+    while (j < 6 && achBuffer[i+10+j] != '#')
         j++;
 
     /* verify signature */
-    if (kstrncmp(&Buffer[i+10+j], "#@  IBM OS/2 Kernel", 19) != 0)
+    if (kstrncmp(&achBuffer[i+10+j], "#@  IBM OS/2 Kernel", 19) != 0)
         return -5;
 
     /* read ulBuild */
-    ulBuild  = (char)(Buffer[i+6] - '0') * 1000;
-    if (Buffer[i+7] != '.')
+    ulBuild  = (char)(achBuffer[i+6] - '0') * 1000;
+    if (achBuffer[i+7] != '.')
     {
         /* this code is for Warp5 */
         ulBuild *= 10;
-        ulBuild += (char)(Buffer[i+7] - '0') * 1000;
+        ulBuild += (char)(achBuffer[i+7] - '0') * 1000;
         i++;
         j--;
-        if (Buffer[i+7] != '.')
+        if (achBuffer[i+7] != '.')
         {
             ulBuild = ulBuild * 10;
-            ulBuild = ulBuild + (unsigned long)(Buffer[i+7] - '0') * 1000;
+            ulBuild = ulBuild + (unsigned long)(achBuffer[i+7] - '0') * 1000;
             i++;
             j--;
         }
@@ -706,15 +846,15 @@ static int ReadOS2Krnl2(HFILE krnl, unsigned long  cbKrnl)
 
     if (j == 0)
     {
-        ulBuild += (Buffer[i+ 8] - '0') * 10;
-        ulBuild += (Buffer[i+ 9] - '0') * 1;
+        ulBuild += (achBuffer[i+ 8] - '0') * 10;
+        ulBuild += (achBuffer[i+ 9] - '0') * 1;
     } else
     {
         if (j == 3)
             return -9;
-        ulBuild += (Buffer[i+ 8] - '0') * 100;
-        ulBuild += (Buffer[i+ 9] - '0') * 10;
-        ulBuild += (Buffer[i+10] - '0');
+        ulBuild += (achBuffer[i+ 8] - '0') * 100;
+        ulBuild += (achBuffer[i+ 9] - '0') * 10;
+        ulBuild += (achBuffer[i+10] - '0');
     }
 
     if (VerifyKernelVer())
@@ -723,30 +863,30 @@ static int ReadOS2Krnl2(HFILE krnl, unsigned long  cbKrnl)
 
     /* get segment number */
     /* read-MZheader */
-    if (fseek(krnl,0,SEEK_SET))
+    if (fseek(hKrnl,0,SEEK_SET))
         return -2;
 
-    if (!fread(Buffer, 1, 0x40, krnl))
+    if (!fread(achBuffer, 1, 0x40, hKrnl))
         return -3;
 
-    offLXHdr = *(unsigned long int *)&Buffer[0x3c];
+    offLXHdr = *(unsigned long int *)&achBuffer[0x3c];
 
     if (offLXHdr > 0x2000 && offLXHdr < 0x80) /* just to detect garbage */
         return -6;
 
-    if (fseek(krnl, offLXHdr, SEEK_SET))
+    if (fseek(hKrnl, offLXHdr, SEEK_SET))
         return -2;
 
-    if (!fread(Buffer, 1, sizeof(struct e32_exe), krnl))
+    if (!fread(achBuffer, 1, sizeof(struct e32_exe), hKrnl))
         return -3;
 
     /* check LX-magic */
-    if (Buffer[0] != 'L' || Buffer[1] != 'X')
+    if (achBuffer[0] != 'L' || achBuffer[1] != 'X')
         return -7;
 
 #ifndef DEBUGR3
     /* check object count - match it with what we got from the kernel. */
-    pLXHdr = (struct e32_exe *)Buffer;
+    pLXHdr = (struct e32_exe *)achBuffer;
     if ((UCHAR)pLXHdr->e32_objcnt != KrnlOTEs.cObjects)
         return -8;
 
@@ -754,12 +894,12 @@ static int ReadOS2Krnl2(HFILE krnl, unsigned long  cbKrnl)
         return -9;
 
     /* check objects (sizes and flags(?)) */
-    if (!fseek(krnl, (LONG)offLXHdr + (LONG)pLXHdr->e32_objtab, SEEK_SET))
+    if (!fseek(hKrnl, (LONG)offLXHdr + (LONG)pLXHdr->e32_objtab, SEEK_SET))
     {
-        struct o32_obj *pObj = (struct o32_obj *)Buffer;
+        struct o32_obj *pObj = (struct o32_obj *)achBuffer;
         for (i = 0; i < (int)KrnlOTEs.cObjects; i++)
         {
-            if (!fread(Buffer, 1, sizeof(OTE), krnl))
+            if (!fread(achBuffer, 1, sizeof(OTE), hKrnl))
                 return -11;
             if (pObj->o32_size < KrnlOTEs.aObjects[i].ote_size)
                 return -12;
@@ -778,15 +918,15 @@ static int ReadOS2Krnl2(HFILE krnl, unsigned long  cbKrnl)
      */
 
     /*  object count */
-    pLXHdr = (struct e32_exe *)Buffer;
+    pLXHdr = (struct e32_exe *)achBuffer;
     KrnlOTEs.cObjects = (UCHAR)pLXHdr->e32_objcnt;
 
     /* get OTEs */
-    if (!fseek(krnl, (LONG)offLXHdr + (LONG)pLXHdr->e32_objtab, SEEK_SET))
+    if (!fseek(hKrnl, (LONG)offLXHdr + (LONG)pLXHdr->e32_objtab, SEEK_SET))
     {
-        struct o32_obj *pObj = (struct o32_obj *)Buffer;
+        struct o32_obj *pObj = (struct o32_obj *)achBuffer;
         for (i = 0; i < (int)KrnlOTEs.cObjects; i++)
-            if (!fread(&KrnlOTEs.aObjects[i], 1, sizeof(struct o32_obj), krnl))
+            if (!fread(&KrnlOTEs.aObjects[i], 1, sizeof(struct o32_obj), hKrnl))
                 return -11;
     }
     else
@@ -910,19 +1050,19 @@ static void ShowResult(int rc, int iSym)
             else
                 puts(szUsrSym);
 
-            for (i = 0; i < NUMBER_OF_PROCS; i++)
+            for (i = 0; i < NBR_OF_KRNLIMPORTS; i++)
             {
                 if ((i % 2) == 0)
                     puts("\n\r    ");
                 else
                     puts("    ");
-                puts(aProcTab[i].achName);
-                for (j = aProcTab[i].cchName; j < 20; j++)
+                puts(aImportTab[i].achName);
+                for (j = aImportTab[i].cchName; j < 20; j++)
                     puts(" ");
 
                 puts(" at ");
-                if (aProcTab[i].fFound)
-                    ShowHexNumber(aProcTab[i].ulAddress);
+                if (aImportTab[i].fFound)
+                    ShowHexNumber(aImportTab[i].ulAddress);
                 else
                     puts(szMsgfailed);
             }

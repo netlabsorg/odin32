@@ -1,4 +1,4 @@
-/* $Id: probkrnl.h,v 1.7 2000-02-19 08:40:30 bird Exp $
+/* $Id: probkrnl.h,v 1.8 2000-02-19 23:52:00 bird Exp $
  *
  * Include file for ProbKrnl.
  *
@@ -15,29 +15,45 @@
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
 *******************************************************************************/
-#define NUMBER_OF_PROCS      14
-#define MAX_LENGTH_NAME      32
+#define NBR_OF_KRNLIMPORTS      16      /* When this is changed make sure to   */
+                                        /* update the arrays in d32init.c and  */
+                                        /* probkrnl32.c */
+#define MAX_LENGTH_NAME         32      /* Max length for the function. */
 
-/* entry-point type flag */
-#define EPT_PROC              0 /* procedure - overload procedure*/
-#define EPT_PROCIMPORT        1 /* procedure - import only */
-#define EPT_VAR               2 /* variable/non-procedure - not implemented yet */
+/* Entry-Point Type flag */
+#define EPT_PROC                0x00    /* procedure - overload procedure*/
+#define EPT_PROCIMPORT          0x01    /* procedure 32bit - import only */
+#define EPT_VARIMPORT           0x02    /* variable/non-procedure 32bit - not implemented yet */
+#define EPT_32BIT               0x00    /* 16 bit entry-point  */
+#define EPT_16BIT               0x80    /* 32 bit entry-point */
+#define EPT_BIT_MASK            0x80    /* Mask bit entry-point */
+#define EPT16BitEntry(a)    (((a).fType & EPT_BIT_MASK) == EPT_16BIT)
+#define EPT32BitEntry(a)    (((a).fType & EPT_BIT_MASK) == EPT_32BIT)
+
+/* 32bit types */
+#define EPT_PROC32              (EPT_PROC | EPT_32BIT)
+#define EPT_PROCIMPORT32        (EPT_PROCIMPORT | EPT_32BIT)
+
+/* 16bit types */
+#define EPT_PROC16              (EPT_PROC | EPT_16BIT)        /* no implemented yet! */
+#define EPT_PROCIMPORT16        (EPT_PROCIMPORT | EPT_16BIT)  /* far proc in calltab with a far jmp. */
 
 
 /*******************************************************************************
 *   Structures and Typedefs                                                    *
 *******************************************************************************/
 #pragma pack(1)
-typedef struct tagPROCS
+typedef struct tagIMPORTKRNLSYM
 {
-   unsigned char       fFound;
-   unsigned char       iObject;
-   unsigned short int  cchName;
-   unsigned char       achName[MAX_LENGTH_NAME];
-   unsigned long  int  offObject;
-   unsigned long  int  ulAddress;
-   unsigned char       fType;
-} PROCS;
+   unsigned char       fFound;          /* This is set when name is found */
+   unsigned char       iObject;         /* Object number the name was found in*/
+   unsigned short int  cchName;         /* Length of the name (optmize search) (INPUT) */
+   unsigned char       achName[MAX_LENGTH_NAME]; /* Name (INPUT) */
+   unsigned long  int  offObject;       /* Offset into the object */
+   unsigned long  int  ulAddress;       /* 32-bit flat address */
+   unsigned short int  usSel;           /* Select of the object */
+   unsigned char       fType;           /* Entry-Point Type Flags */
+} IMPORTKRNLSYM;
 #pragma pack()
 
 
@@ -46,10 +62,10 @@ typedef struct tagPROCS
 *   Global Variables                                                           *
 *   NOTE! These are only available at init time!                               *
 *******************************************************************************/
-extern PROCS _aProcTab[NUMBER_OF_PROCS];    /* 'aProcTab'        in PrbKrnl.c */
-extern unsigned long int  _ulBuild;         /* 'ulBuild'         in PrbKrnl.c */
-extern unsigned short int _usVerMajor;      /* 'usVerMajor'      in PrbKrnl.c */
-extern unsigned short int _usVerMinor;      /* 'usVerMinor'      in PrbKrnl.c */
+extern IMPORTKRNLSYM _aImportTab[NBR_OF_KRNLIMPORTS]; /* 'aImportTab' in PrbKrnl.c */
+extern unsigned long int  _ulBuild;     /* 'ulBuild'         in PrbKrnl.c */
+extern unsigned short int _usVerMajor;  /* 'usVerMajor'      in PrbKrnl.c */
+extern unsigned short int _usVerMinor;  /* 'usVerMinor'      in PrbKrnl.c */
 
 #ifdef INCL_16 /* 16-bit only */
 int ProbeKernel(PRPINITIN pReqPack);
