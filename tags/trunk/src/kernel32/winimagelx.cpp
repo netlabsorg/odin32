@@ -1,4 +1,4 @@
-/* $Id: winimagelx.cpp,v 1.16 2002-07-17 21:09:20 achimha Exp $ */
+/* $Id: winimagelx.cpp,v 1.17 2002-07-18 12:01:34 achimha Exp $ */
 
 /*
  * Win32 LX Image base class
@@ -148,7 +148,7 @@ LPVOID Win32LxImage::buildHeader(DWORD MajorImageVersion, DWORD MinorImageVersio
     if(rc) {
     	dprintf(("ERROR: buildHeader DosAllocMem failed!! (rc=%x)", rc));
         DebugInt3();
-	    return NULL;
+        return NULL;
     }
     memcpy(header, dosHeader, sizeof(dosHeader));
     ntsig  = (DWORD *)((LPBYTE)header + sizeof(dosHeader));
