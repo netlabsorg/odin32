@@ -1,4 +1,4 @@
-/* $Id: windlgmsg.cpp,v 1.14 2002-06-28 19:46:28 sandervl Exp $ */
+/* $Id: windlgmsg.cpp,v 1.15 2002-07-01 11:33:09 sandervl Exp $ */
 /*
  * Win32 dialog message APIs for OS/2
  *
@@ -220,7 +220,14 @@ static BOOL DIALOG_IsDialogMessage( HWND hwndDlg, BOOL *translate, BOOL *dispatc
     if ((msg->message != WM_KEYDOWN) &&
         (msg->message != WM_SYSCHAR) &&
         (msg->message != WM_CHAR))
+    {
+#ifdef __WIN32OS2__
+        *translate = *dispatch = TRUE;
+        return TRUE;
+#else
         return FALSE;
+#endif
+    }
 
     if (dlgCode & DLGC_WANTMESSAGE)
     {
