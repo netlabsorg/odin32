@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.25 2002-02-06 20:18:27 sandervl Exp $
+# $Id: makefile,v 1.26 2002-02-13 16:15:07 sandervl Exp $
 
 #
 # Odin32 API
@@ -10,6 +10,11 @@
 #
 # Compiler, tools, and interference rules.
 #
+!if "$(DEBUG)" == "1"
+DEFFILE    = shlwapidbg.def
+ORGDEFFILE = shlwapi.def
+!endif
+
 !include ../../makefile.inc
 
 
@@ -31,6 +36,9 @@ $(OBJDIR)\string_odin.obj \
 $(OBJDIR)\string.obj \
 $(OBJDIR)\ordinal.obj \
 $(OBJDIR)\ordinal_odin.obj \
+!if "$(DEBUG)" == "1"
+$(OBJDIR)\dbgwrap.obj \
+!endif
 $(OBJDIR)\shlwapirsrc.obj \
 $(DLLENTRY)
 
