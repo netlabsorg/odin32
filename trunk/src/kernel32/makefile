@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.50 1999-10-28 12:01:12 sandervl Exp $
+# $Id: makefile,v 1.51 1999-10-28 15:22:09 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -45,8 +45,11 @@ all: $(PDWIN32_LIB)\pmwinx.lib $(TARGET).dll $(TARGET).LIB
 $(TARGET).dll: $(OBJS) $(TARGET).def $(TARGET).lrf
 #        $(LD) $(LDFLAGS) /Fm /Fe$@ /B"/FREE" @$(TARGET).lrf
 !ifdef DEBUG
-#	icc -Si -Ti -Ge- -Ss+ -W3 -Gm+ /B"/noe /NOD /NOFREE" @$(TARGET).lrf
+!ifdef NODEBUGINFO
+	ilink /nodeb /map /noe /NOD /NoLogo /NOFREE @$(TARGET).lrf
+!else
 	ilink /de /map  /noe /NOD /dbgpack /NoLogo /NOFREE @$(TARGET).lrf
+!endif
 !else
 	ilink /map  /noe /NOD /NoLogo /FREE @$(TARGET).lrf
 !endif

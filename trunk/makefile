@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 1999-09-14 15:58:42 sandervl Exp $
+# $Id: makefile,v 1.6 1999-10-28 15:23:05 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -6,9 +6,10 @@
 #	Top of the tree makefile
 #
 #
-#	Usage: nmake ( debug | release | all | clean )
+#	Usage: nmake ( debug | nodebuginfo | release | all | clean )
 #
 #            debug: Change to a debug build.
+#            nodebuginfo: Change to a debug build without debug info in binaries
 #            release: Change to a release build.
 #            all: Build the entire tree.
 #            clean: Bring tree back to a "virgin" state.
@@ -31,6 +32,10 @@ clean:
 debug:		odin_libraries  needed_tools
 		cd src
 		nmake -nologo all DEBUG=1
+
+nodebuginfo:	odin_libraries  needed_tools
+		cd src
+		nmake -nologo all DEBUG=1 NODEBUGINFO=1
 
 release:	odin_libraries  needed_tools
 		cd src

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.27 1999-10-23 12:35:36 sandervl Exp $
+# $Id: makefile,v 1.28 1999-10-28 15:22:35 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -18,6 +18,11 @@ MAKE_CMD = nmake -nologo DEBUG=1
 !else
 MAKE_CMD = nmake -nologo
 !endif
+
+!ifdef NODEBUGINFO
+MAKE_CMD = $(MAKE_CMD) NODEBUGINFO=1
+!endif
+
 
 all:
         cd odincrt
