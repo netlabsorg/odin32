@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.15 1999-10-08 12:10:27 cbratschi Exp $ */
+/* $Id: oslibwin.cpp,v 1.16 1999-10-08 14:57:17 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -642,6 +642,21 @@ void OSLibMapWINDOWPOStoSWP(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, HWND hPar
 BOOL OSLibWinCalcFrameRect(HWND hwndFrame, RECTLOS2 *pRect, BOOL fClient)
 {
    return WinCalcFrameRect(hwndFrame, (PRECTL)pRect, fClient);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibGetMinMaxInfo(HWND hwndFrame, MINMAXINFO *pMinMax)
+{
+ TRACKINFO tinfo;
+
+   memset(&tinfo, 0, sizeof(TRACKINFO));
+   WinSendMsg(hwndFrame, WM_QUERYTRACKINFO, (MPARAM)0,(MPARAM)&tinfo);
+   
+   pMinMax->ptMinTrackSize.x = tinfo.ptlMinTrackSize.x;
+   pMinMax->ptMinTrackSize.y = tinfo.ptlMinTrackSize.y;
+   pMinMax->ptMaxTrackSize.x = tinfo.ptlMaxTrackSize.x;
+   pMinMax->ptMaxTrackSize.y = tinfo.ptlMaxTrackSize.y;
+   return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
