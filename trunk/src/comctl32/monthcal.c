@@ -1,4 +1,4 @@
-
+/* $Id: monthcal.c,v 1.6 1999-11-17 17:06:22 cbratschi Exp $ */
 /* Month calendar control
 
 

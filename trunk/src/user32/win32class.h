@@ -1,4 +1,4 @@
-/* $Id: win32class.h,v 1.4 1999-11-01 19:11:43 sandervl Exp $ */
+/* $Id: win32class.h,v 1.5 1999-11-17 17:04:54 cbratschi Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -44,6 +44,7 @@ public:
          DWORD  getExtraWndWords()      { return nrExtraWindowWords; };
 
          HICON  getIcon()               { return hIcon; };
+        HCURSOR getCursor()             { return hCursor; };
 
         HBRUSH  getBackgroundBrush()    { return backgroundBrush; };
          ULONG  getStyle()              { return windowStyle; };
@@ -56,7 +57,7 @@ public:
 
           BOOL  hasClassName(LPSTR classname, BOOL fUnicode = 0);
 
-	  BOOL  isAppClass(ULONG curProcessId);
+          BOOL  isAppClass(ULONG curProcessId);
 
  static  void   UnregisterClassA(HINSTANCE hinst, LPSTR id);
 

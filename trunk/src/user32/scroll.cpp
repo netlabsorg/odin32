@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.22 1999-11-13 16:42:42 cbratschi Exp $ */
+/* $Id: scroll.cpp,v 1.23 1999-11-17 17:04:54 cbratschi Exp $ */
 /*
  * Scrollbar control
  *
@@ -712,7 +712,7 @@ LRESULT SCROLL_HandleScrollEvent(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar,
     RECT rect;
     HDC hdc;
     POINT pt;
-    LRESULT res = (msg == WM_MOUSEMOVE) ? 1:0;
+    LRESULT res = 0;
 
     SCROLLBAR_INFO *infoPtr = SCROLL_GetInfoPtr(hwnd,nBar);
     if (!infoPtr) return res;
@@ -725,19 +725,21 @@ LRESULT SCROLL_HandleScrollEvent(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar,
       {
         if (!(dwStyle & SBS_SIZEGRIP)) return res;
 
-        if (msg == WM_MOUSEMOVE)
+        if (msg == WM_SETCURSOR)
         {
           RECT rect;
 
           SCROLL_GetSizeBox(hwnd,dwStyle,&rect);
-          pt.x = (SHORT)LOWORD(lParam);
-          pt.y = (SHORT)HIWORD(lParam);
+          GetCursorPos(&pt);
+          ScreenToClient(hwnd,&pt);
 
           if (PtInRect(&rect,pt))
           {
             SetCursor(LoadCursorA(0,IDC_SIZENWSEA));
-            return 0;
+            return TRUE;
           }
+
+          return DefWindowProcA(hwnd,WM_SETCURSOR,wParam,lParam);
         } else if (msg == WM_LBUTTONDOWN)
         {
           if (dwStyle & SBS_SIZEGRIP)
@@ -765,6 +767,7 @@ LRESULT SCROLL_HandleScrollEvent(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar,
       }
     }
 
+    if (msg == WM_SETCURSOR) return DefWindowProcA(hwnd,WM_SETCURSOR,wParam,lParam);
     if (!SCROLL_Scrolling && msg != WM_LBUTTONDOWN) return res;
 
     vertical = SCROLL_GetScrollBarRect( hwnd, nBar, &rect,
@@ -1125,6 +1128,7 @@ LRESULT WINAPI ScrollBarWndProc( HWND hwnd, UINT message, WPARAM wParam,
     case WM_LBUTTONUP:
     case WM_CAPTURECHANGED:
     case WM_MOUSEMOVE:
+    case WM_SETCURSOR:
     case WM_SYSTIMER:
     case WM_SETFOCUS:
     case WM_KILLFOCUS:
@@ -1202,6 +1206,7 @@ LRESULT WINAPI HorzScrollBarWndProc(HWND hwnd,UINT message,WPARAM wParam,LPARAM 
     case WM_LBUTTONUP:
     case WM_CAPTURECHANGED:
     case WM_MOUSEMOVE:
+    case WM_SETCURSOR:
     case WM_SYSTIMER:
     case WM_SETFOCUS:
     case WM_KILLFOCUS:
@@ -1256,6 +1261,7 @@ LRESULT WINAPI VertScrollBarWndProc(HWND hwnd,UINT message,WPARAM wParam,LPARAM 
     case WM_LBUTTONUP:
     case WM_CAPTURECHANGED:
     case WM_MOUSEMOVE:
+    case WM_SETCURSOR:
     case WM_SYSTIMER:
     case WM_SETFOCUS:
     case WM_KILLFOCUS:
@@ -1541,7 +1547,8 @@ INT WINAPI GetScrollPos(
     return infoPtr->CurVal;
 }
 
-// CB: functions to get 32bit SB_THUMBTRACK position, for internal use
+// CB: functions to get 32bit SB_THUMBTRACK position, for internal use (controls)
+//     not supported by Windows, Windows only delivers the 16bit value
 
 BOOL IsScrollBarTracking(HWND hwnd,INT nBar)
 {
@@ -1550,7 +1557,7 @@ BOOL IsScrollBarTracking(HWND hwnd,INT nBar)
   return (SCROLL_MovingThumb && SCROLL_TrackingWin == hwnd && SCROLL_TrackingBar == nBar);
 }
 
-INT GetScrollTrackPos(HWND hwnd,INT nBar)
+INT WINAPI GetScrollTrackPos(HWND hwnd,INT nBar)
 {
   SCROLLBAR_INFO *infoPtr;
 

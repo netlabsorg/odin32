@@ -1,4 +1,4 @@
-/* $Id: combo.cpp,v 1.12 1999-11-13 16:42:41 cbratschi Exp $ */
+/* $Id: combo.cpp,v 1.13 1999-11-17 17:04:52 cbratschi Exp $ */
 /*
  * Combo controls
  *
@@ -1672,6 +1672,7 @@ static void COMBO_LButtonDown( LPHEADCOMBO lphc, LPARAM lParam )
        (bButton && (CB_GETTYPE(lphc) == CBS_DROPDOWN)) )
    {
        lphc->wState |= CBF_BUTTONDOWN;
+MessageBeep(MB_OK); //CB:
        if( lphc->wState & CBF_DROPPED )
        {
            /* got a click to cancel selection */
@@ -1850,13 +1851,13 @@ LRESULT WINAPI ComboWndProc( HWND hwnd, UINT message,
                 if (j == -1) return 0;
                 return SendMessageA( lphc->hWndLBox, LB_GETTEXTLEN, j, 0);
                 }
-		else if( lphc->wState & CBF_EDIT )
-		{
-		    lphc->wState |= CBF_NOEDITNOTIFY;
+                else if( lphc->wState & CBF_EDIT )
+                {
+                    lphc->wState |= CBF_NOEDITNOTIFY;
 
-		    return SendMessageA( lphc->hWndEdit, message, wParam, lParam );
-		}
-		else return  CB_ERR;
+                    return SendMessageA( lphc->hWndEdit, message, wParam, lParam );
+                }
+                else return  CB_ERR;
         case WM_DRAWITEM:
         case WM_DELETEITEM:
         case WM_COMPAREITEM:
@@ -1902,7 +1903,7 @@ LRESULT WINAPI ComboWndProc( HWND hwnd, UINT message,
         case WM_MOUSEMOVE:
                 if( lphc->wState & CBF_CAPTURE )
                     COMBO_MouseMove( lphc, wParam, lParam );
-                return  TRUE;
+                return  0;
         /* Combo messages */
 
         case CB_ADDSTRING:

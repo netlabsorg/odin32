@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.14 1999-11-13 16:42:41 cbratschi Exp $ */
+/* $Id: edit.cpp,v 1.15 1999-11-17 17:04:52 cbratschi Exp $ */
 /*
  *      Edit control
  *
@@ -2626,9 +2626,9 @@ static void EDIT_WM_Char(HWND hwnd, EDITSTATE *es, CHAR c, DWORD key_data)
         BOOL control = GetKeyState(VK_CONTROL) & 0x8000;
         switch (c) {
         case '\r':
-	    /* If the edit doesn't want the return and it's not a multiline edit, do nothing */
-	    if(!(es->style & ES_MULTILINE) && !(es->style & ES_WANTRETURN))
-		break;
+            /* If the edit doesn't want the return and it's not a multiline edit, do nothing */
+            if(!(es->style & ES_MULTILINE) && !(es->style & ES_WANTRETURN))
+                break;
         case '\n':
                 if (es->style & ES_MULTILINE) {
                         if (es->style & ES_READONLY) {
@@ -3284,8 +3284,7 @@ static LRESULT EDIT_WM_MouseMove(HWND hwnd, EDITSTATE *es, DWORD keys, INT x, IN
         e = EDIT_CharFromPos(hwnd, es, x, y, &after_wrap);
         EDIT_EM_SetSel(hwnd, es, es->selection_start, e, after_wrap);
 
-        return 1; //SvL: Bugfix -> PMWINDOW expects non-zero return value if
-                  //               we want to restore the default mouse cursor
+        return 0;
 }
 
 
