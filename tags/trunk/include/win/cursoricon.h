@@ -1,4 +1,4 @@
-/* $Id: cursoricon.h,v 1.1 1999-05-24 20:19:10 ktk Exp $ */
+/* $Id: cursoricon.h,v 1.2 1999-11-28 12:33:11 sandervl Exp $ */
 
 /*
  * Cursor and icon definitions
@@ -84,5 +84,9 @@ extern HGLOBAL CURSORICON_Load( HINSTANCE hInstance, LPCWSTR name,
 extern WORD WINAPI CURSORICON_Destroy( HGLOBAL16 handle, UINT16 flags );
 
 extern void CURSORICON_FreeModuleIcons( HMODULE hModule );
+
+HGLOBAL CopyCursorIcon(HGLOBAL Handle, UINT nType, 
+  	 	       INT iDesiredCX, INT iDesiredCY, 
+		       UINT nFlags);
 				    
 #endif /* __WINE_CURSORICON_H */
