@@ -3888,6 +3888,19 @@ static VOID LISTVIEW_RefreshReport(HWND hwnd, HDC hdc, DWORD cdmode)
     }
     nDrawPosY += infoPtr->nItemHeight;
   }
+
+#ifdef __WIN32OS2__
+  /* we have to fill leftovers of what was NOT filled by application, otherwise
+     we will have gaps */
+  if ((lStyle & LVS_OWNERDRAWFIXED))
+  {
+    RECT tempRect;
+    CopyRect(&tempRect, &infoPtr->rcList);
+    tempRect.top = nDrawPosY;
+    if (tempRect.top < tempRect.bottom)
+      LISTVIEW_FillBackground(hwnd, hdc, &tempRect);
+  }
+#endif
 }
 
 /***
@@ -8597,7 +8610,6 @@ static LRESULT LISTVIEW_EraseBackground(HWND hwnd, WPARAM wParam,
     DeleteObject(hBrush);
     bResult = TRUE;
   }
-
   return bResult;
 }
 
