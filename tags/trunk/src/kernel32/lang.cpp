@@ -1,4 +1,4 @@
-/* $Id: lang.cpp,v 1.8 1999-06-29 12:06:46 sandervl Exp $ */
+/* $Id: lang.cpp,v 1.9 1999-06-29 17:23:47 sandervl Exp $ */
 
 /*
  * Win32 language API functions for OS/2
@@ -163,7 +163,7 @@ int WIN32API GetLocaleInfoA(LCID lcid, LCTYPE LCType, LPSTR buf, int len)
         else
           break;
       }
-      *buf = 0;
+      if(buf) *buf = 0;
       return 1;
     case LOCALE_S2359:
       if(CtryInfo.fsTimeFmt == 0)
