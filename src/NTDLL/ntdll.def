@@ -1,4 +1,4 @@
-; $Id: ntdll.def,v 1.42 2002-02-21 22:52:42 sandervl Exp $
+; $Id: ntdll.def,v 1.43 2002-05-16 09:35:45 sandervl Exp $
 
 ;
 ; Based on NT 4.0 SP6: NTDLL.DLL
@@ -352,7 +352,7 @@ EXPORTS
     RtlCreateSecurityDescriptor   = _RtlCreateSecurityDescriptor@8      @337
 ;   RtlCreateTagHeap                            @338
 ;   RtlCreateUnicodeString                      @339
-;   RtlCreateUnicodeStringFromAsciiz                    @340
+    RtlCreateUnicodeStringFromAsciiz = _RtlCreateUnicodeStringFromAsciiz@8  @340
 ;   RtlCreateUserProcess                        @341
 ;   RtlCreateUserSecurityObject                     @342
 ;   RtlCreateUserThread                         @343
