@@ -1,4 +1,4 @@
-/* $Id: dwaveout.h,v 1.7 1999-12-31 13:55:51 sandervl Exp $ */
+/* $Id: dwaveout.h,v 1.8 2000-02-27 20:29:47 sandervl Exp $ */
 
 /*
  * Wave playback class
@@ -41,13 +41,19 @@ public:
      MMRESULT pause();
      MMRESULT restart();
      MMRESULT setVolume(ULONG ulVol);
-     ULONG    getVolume() {return volume; };
-     int      getState() { return State; };
+     ULONG    getVolume() 		{ return volume; };
+     int      getState() 		{ return State; };
      MMRESULT reset();
+     ULONG    getPosition();
+
+     ULONG    getSampleRate() 		{ return SampleRate; };
+     ULONG    getBitsPerSample()        { return BitsPerSample; };
+     ULONG    getnumChannels()          { return nChannels; };
+     ULONG    getAvgBytesPerSecond()    { return (BitsPerSample/8) * nChannels * SampleRate; };
 
   static BOOL queryFormat(ULONG formatTag, ULONG nChannels,
-              ULONG nSamplesPerSec, ULONG sampleSize);
-
+                          ULONG nSamplesPerSec, ULONG sampleSize);
+ 
   static BOOL find(DartWaveOut *dwave);
   static int  getNumDevices();
 

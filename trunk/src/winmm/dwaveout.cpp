@@ -1,4 +1,4 @@
-/* $Id: dwaveout.cpp,v 1.14 2000-02-17 14:09:30 sandervl Exp $ */
+/* $Id: dwaveout.cpp,v 1.15 2000-02-27 20:29:46 sandervl Exp $ */
 
 /*
  * Wave playback class
@@ -30,7 +30,7 @@
 #include "misc.h"
 #include "dwaveout.h"
 
-#define DBG_LOCALLOG	DBG_dwaveout
+#define DBG_LOCALLOG    DBG_dwaveout
 #include "dbglocal.h"
 
 #ifndef min
@@ -64,7 +64,7 @@ DartWaveOut::DartWaveOut(LPWAVEFORMATEX pwfx, ULONG nCallback, ULONG dwInstance,
    this->dwInstance = dwInstance;
 
    if(!ulError)
-   	callback((ULONG)this, WOM_OPEN, dwInstance, 0, 0);
+    callback((ULONG)this, WOM_OPEN, dwInstance, 0, 0);
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -75,7 +75,7 @@ DartWaveOut::DartWaveOut(LPWAVEFORMATEX pwfx, HWND hwndCallback)
    this->hwndCallback = hwndCallback;
 
    if(!ulError)
-   	PostMessageA(hwndCallback, WOM_OPEN, 0, 0);
+    PostMessageA(hwndCallback, WOM_OPEN, 0, 0);
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -156,9 +156,7 @@ void DartWaveOut::Init(LPWAVEFORMATEX pwfx)
                        0);
    DeviceId = AmpOpenParms.usDeviceID;
    if(rc) {
-#ifdef DEBUG
-    WriteLog("MCI_OPEN failed\n");
-#endif
+    dprintf(("MCI_OPEN failed\n"));
     mciError(rc);
     ulError = MMSYSERR_NODRIVER;
    }
@@ -168,9 +166,7 @@ void DartWaveOut::Init(LPWAVEFORMATEX pwfx)
     rc = mciSendCommand(DeviceId, MCI_ACQUIREDEVICE, MCI_EXCLUSIVE_INSTANCE,
                         (PVOID)&GenericParms, 0);
     if(rc) {
-#ifdef DEBUG
-        WriteLog("MCI_ACQUIREDEVICE failed\n");
-#endif
+        dprintf(("MCI_ACQUIREDEVICE failed\n"));
         mciError(rc);
         ulError = MMSYSERR_NOTENABLED;
     }
@@ -208,62 +204,62 @@ DartWaveOut::~DartWaveOut()
    MCI_GENERIC_PARMS    GenericParms;
 
    if(!ulError) {
-	// Generic parameters
-   	GenericParms.hwndCallback = 0;   //hwndFrame
+    // Generic parameters
+    GenericParms.hwndCallback = 0;   //hwndFrame
 
-   	// Stop the playback.
-   	mciSendCommand(DeviceId, MCI_STOP,MCI_WAIT, (PVOID)&GenericParms,0);
+    // Stop the playback.
+    mciSendCommand(DeviceId, MCI_STOP,MCI_WAIT, (PVOID)&GenericParms,0);
 
-   	mciSendCommand(DeviceId,
+    mciSendCommand(DeviceId,
                   MCI_BUFFER,
                   MCI_WAIT | MCI_DEALLOCATE_MEMORY,
                   (PVOID)&BufferParms,
                   0);
 
-   	// Generic parameters
-   	GenericParms.hwndCallback = 0;   //hwndFrame
+    // Generic parameters
+    GenericParms.hwndCallback = 0;   //hwndFrame
 
-   	// Close the device
-   	mciSendCommand(DeviceId, MCI_CLOSE, MCI_WAIT, (PVOID)&GenericParms, 0);
+    // Close the device
+    mciSendCommand(DeviceId, MCI_CLOSE, MCI_WAIT, (PVOID)&GenericParms, 0);
    }
 
    if(wmutex)
-    	wmutex->enter(VMUTEX_WAIT_FOREVER);
+        wmutex->enter(VMUTEX_WAIT_FOREVER);
 
    State = STATE_STOPPED;
 
    if(waveout == this) {
-    waveout = this->next;
+        waveout = this->next;
    }
    else {
-    DartWaveOut *dwave = waveout;
+        DartWaveOut *dwave = waveout;
 
-    while(dwave->next != this) {
-        dwave = dwave->next;
-    }
-    dwave->next = this->next;
+        while(dwave->next != this) {
+            dwave = dwave->next;
+        }
+        dwave->next = this->next;
    }
    if(wmutex)
-    wmutex->leave();
+        wmutex->leave();
 
    if(!ulError) {
-   	if(mthdCallback) {
-    		callback((ULONG)this, WOM_CLOSE, dwInstance, 0, 0);
-   	}
-   	else
-   	if(hwndCallback)
-    		PostMessageA(hwndCallback, WOM_CLOSE, 0, 0);
+        if(mthdCallback) {
+            callback((ULONG)this, WOM_CLOSE, dwInstance, 0, 0);
+        }
+        else
+        if(hwndCallback)
+            PostMessageA(hwndCallback, WOM_CLOSE, 0, 0);
    }
 
    if(wmutex)
-    delete wmutex;
+        delete wmutex;
 
    if(MixBuffer)
-    free(MixBuffer);
+        free(MixBuffer);
    if(MixSetupParms)
-    free(MixSetupParms);
+        free(MixSetupParms);
    if(BufferParms)
-    free(BufferParms);
+        free(BufferParms);
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -291,7 +287,7 @@ int DartWaveOut::getNumDevices()
                        0);
 
    if(rc) {
-	return 0; //no devices present
+        return 0; //no devices present
    }
 
    // Generic parameters
@@ -310,27 +306,24 @@ MMRESULT DartWaveOut::write(LPWAVEHDR pwh, UINT cbwh)
  APIRET rc;
  int i, buflength;
 
-  if(fMixerSetup == FALSE) {
-#ifdef DEBUG
-    WriteLog("device acquired\n");
-#endif
-    /* Set the MixSetupParms data structure to match the loaded file.
-     * This is a global that is used to setup the mixer.
-     */
-    memset(MixSetupParms, 0, sizeof( MCI_MIXSETUP_PARMS ) );
+  if(fMixerSetup == FALSE)
+  {
+        dprintf(("device acquired\n"));
+        /* Set the MixSetupParms data structure to match the loaded file.
+         * This is a global that is used to setup the mixer.
+         */
+        memset(MixSetupParms, 0, sizeof( MCI_MIXSETUP_PARMS ) );
 
-    MixSetupParms->ulBitsPerSample = BitsPerSample;
-    MixSetupParms->ulSamplesPerSec = SampleRate;
-    MixSetupParms->ulFormatTag     = MCI_WAVE_FORMAT_PCM;
-    MixSetupParms->ulChannels      = nChannels;
+        MixSetupParms->ulBitsPerSample = BitsPerSample;
+        MixSetupParms->ulSamplesPerSec = SampleRate;
+        MixSetupParms->ulFormatTag     = MCI_WAVE_FORMAT_PCM;
+        MixSetupParms->ulChannels      = nChannels;
 
-#ifdef DEBUG
-    WriteLog("bps %d, sps %d chan %d\n", BitsPerSample, SampleRate, nChannels);
-#endif
+        dprintf(("bps %d, sps %d chan %d\n", BitsPerSample, SampleRate, nChannels));
 
         /* Setup the mixer for playback of wave data
          */
-    MixSetupParms->ulFormatMode = MCI_PLAY;
+        MixSetupParms->ulFormatMode = MCI_PLAY;
         MixSetupParms->ulDeviceType = MCI_DEVTYPE_WAVEFORM_AUDIO;
         MixSetupParms->pmixEvent    = WaveOutHandler;
 
@@ -340,36 +333,35 @@ MMRESULT DartWaveOut::write(LPWAVEHDR pwh, UINT cbwh)
                             (PVOID)MixSetupParms,
                             0);
 
-    if ( rc != MCIERR_SUCCESS ) {
-        mciError(rc);
-        mciSendCommand(DeviceId, MCI_RELEASEDEVICE, MCI_WAIT,
-                   (PVOID)&GenericParms, 0);
-        return(MMSYSERR_NOTSUPPORTED);
-    }
+        if ( rc != MCIERR_SUCCESS ) {
+            mciError(rc);
+            mciSendCommand(DeviceId, MCI_RELEASEDEVICE, MCI_WAIT,
+                           (PVOID)&GenericParms, 0);
+            return(MMSYSERR_NOTSUPPORTED);
+        }
 
         /*
          * Set up the BufferParms data structure and allocate
          * device buffers from the Amp-Mixer
          */
-#ifdef DEBUG
-    WriteLog("mix setup %d, %d\n", pwh->dwBufferLength, pwh->dwBufferLength);
-#endif
+        dprintf(("mix setup %d, %d\n", pwh->dwBufferLength, pwh->dwBufferLength));
+
 #if 1
-    ulBufSize = pwh->dwBufferLength/2;
+        ulBufSize = pwh->dwBufferLength/2;
 #else
-    if(pwh->dwBufferLength >= 512 && pwh->dwBufferLength <= 1024)
-        ulBufSize = pwh->dwBufferLength;
-    else    ulBufSize = 1024;
+        if(pwh->dwBufferLength >= 512 && pwh->dwBufferLength <= 1024)
+                ulBufSize = pwh->dwBufferLength;
+        else    ulBufSize = 1024;
 #endif
 
-    MixSetupParms->ulBufferSize = ulBufSize;
+        MixSetupParms->ulBufferSize = ulBufSize;
 
         BufferParms->ulNumBuffers = PREFILLBUF_DART;
         BufferParms->ulBufferSize = MixSetupParms->ulBufferSize;
         BufferParms->pBufList     = MixBuffer;
 
         for(i=0;i<PREFILLBUF_DART;i++) {
-        MixBuffer[i].ulUserParm = (ULONG)this;
+            MixBuffer[i].ulUserParm = (ULONG)this;
         }
 
         rc = mciSendCommand(DeviceId,
@@ -379,86 +371,78 @@ MMRESULT DartWaveOut::write(LPWAVEHDR pwh, UINT cbwh)
                             0);
 
         if(ULONG_LOWD(rc) != MCIERR_SUCCESS) {
-        mciError(rc);
-        mciSendCommand(DeviceId, MCI_RELEASEDEVICE, MCI_WAIT,
-                   (PVOID)&GenericParms, 0);
-        return(MMSYSERR_NOTSUPPORTED);
-    }
+            mciError(rc);
+            mciSendCommand(DeviceId, MCI_RELEASEDEVICE, MCI_WAIT,
+                          (PVOID)&GenericParms, 0);
+            return(MMSYSERR_NOTSUPPORTED);
+        }
 
-    wmutex->enter(VMUTEX_WAIT_FOREVER);
-    fMixerSetup = TRUE;
+        wmutex->enter(VMUTEX_WAIT_FOREVER);
+        fMixerSetup = TRUE;
 
-    curPlayBuf = curFillBuf = curFillPos = curPlayPos = 0;
+        curPlayBuf = curFillBuf = curFillPos = curPlayPos = 0;
 
         for(i=0;i<PREFILLBUF_DART;i++) {
-        memset(MixBuffer[i].pBuffer, 0, MixBuffer[i].ulBufferLength);
-    }
-#ifdef DEBUG
-    WriteLog("Dart opened, bufsize = %d\n", MixBuffer[i].ulBufferLength);
-#endif
-
-    wavehdr     = pwh;
-    curhdr      = pwh;
-    pwh->lpNext = NULL;
-
-    while(TRUE) {
-        buflength = min((ULONG)MixBuffer[curFillBuf].ulBufferLength - curPlayPos,
-                (ULONG)wavehdr->dwBufferLength - curFillPos);
-#ifdef DEBUG
-        WriteLog("Copying %d data; curPlayPos = %d curFillPos = %d\n", buflength, curPlayPos, curFillPos);
-#endif
-        memcpy((char *)MixBuffer[curFillBuf].pBuffer + curPlayPos,
-               wavehdr->lpData + curFillPos,
-               buflength);
-
-        curPlayPos  += buflength;
-        curFillPos += buflength;
-        if(curFillPos == wavehdr->dwBufferLength) {
-#ifdef DEBUG
-            WriteLog("Processed first win32 buffer\n");
-#endif
-            curFillPos        = 0;
-            wavehdr->dwFlags |= WHDR_DONE;
-            curhdr            = NULL;
+            memset(MixBuffer[i].pBuffer, 0, MixBuffer[i].ulBufferLength);
         }
-        if(curPlayPos == MixBuffer[curPlayBuf].ulBufferLength) {
-            if(++curPlayBuf == PREFILLBUF_DART) {
-                curPlayBuf = 0;
-                break;
+        dprintf(("Dart opened, bufsize = %d\n", MixBuffer[i].ulBufferLength));
+
+        wavehdr     = pwh;
+        curhdr      = pwh;
+        pwh->lpNext = NULL;
+
+        while(TRUE) {
+            buflength = min((ULONG)MixBuffer[curFillBuf].ulBufferLength - curPlayPos,
+                            (ULONG)wavehdr->dwBufferLength - curFillPos);
+            dprintf(("Copying %d data; curPlayPos = %d curFillPos = %d\n", buflength, curPlayPos, curFillPos));
+
+            memcpy((char *)MixBuffer[curFillBuf].pBuffer + curPlayPos,
+                   wavehdr->lpData + curFillPos,
+                   buflength);
+
+            curPlayPos  += buflength;
+            curFillPos += buflength;
+            if(curFillPos == wavehdr->dwBufferLength) {
+                dprintf(("Processed first win32 buffer\n"));
+                curFillPos        = 0;
+                wavehdr->dwFlags |= WHDR_DONE;
+                curhdr            = NULL;
             }
-            curPlayPos = 0;
+            if(curPlayPos == MixBuffer[curPlayBuf].ulBufferLength) {
+                if(++curPlayBuf == PREFILLBUF_DART) {
+                    curPlayBuf = 0;
+                    break;
+                }
+                curPlayPos = 0;
+            }
+            if(curFillPos == 0)
+                break;
         }
-        if(curFillPos == 0)
-            break;
-    }
-#ifdef DEBUG
-    WriteLog("MixSetupParms = %X\n", MixSetupParms);
-#endif
-    State = STATE_PLAYING;
-    wmutex->leave();
+        dprintf(("MixSetupParms = %X\n", MixSetupParms));
+        State = STATE_PLAYING;
+        wmutex->leave();
 
-    MixSetupParms->pmixWrite(MixSetupParms->ulMixHandle,
-                             MixBuffer,
-                             PREFILLBUF_DART);
-#ifdef DEBUG
-    WriteLog("Dart playing\n");
-#endif
+        MixSetupParms->pmixWrite(MixSetupParms->ulMixHandle,
+                                 MixBuffer,
+                                 PREFILLBUF_DART);
+        dprintf(("Dart playing\n"));
   }
-  else {
-    wmutex->enter(VMUTEX_WAIT_FOREVER);
-    pwh->lpNext   = NULL;
-    if(wavehdr) {
-        WAVEHDR *chdr = wavehdr;
-        while(chdr->lpNext) {
-            chdr = chdr->lpNext;
+  else
+  {
+        wmutex->enter(VMUTEX_WAIT_FOREVER);
+        pwh->lpNext   = NULL;
+        if(wavehdr) {
+            WAVEHDR *chdr = wavehdr;
+            while(chdr->lpNext) {
+                chdr = chdr->lpNext;
+            }
+            chdr->lpNext = pwh;
         }
-        chdr->lpNext = pwh;
-    }
-    else    wavehdr = pwh;
-    wmutex->leave();
-    if(State != STATE_PLAYING) {//continue playback
-        restart();
-    }
+        else    wavehdr = pwh;
+        wmutex->leave();
+        if(State != STATE_PLAYING) {//continue playback
+            restart();
+        }
   }
 
   return(MMSYSERR_NOERROR);
@@ -470,7 +454,7 @@ MMRESULT DartWaveOut::pause()
  MCI_GENERIC_PARMS Params;
 
   if(State != STATE_PLAYING)
-    return(MMSYSERR_HANDLEBUSY);
+        return(MMSYSERR_NOERROR);
 
   wmutex->enter(VMUTEX_WAIT_FOREVER);
   State = STATE_PAUSED;
@@ -491,16 +475,14 @@ MMRESULT DartWaveOut::reset()
 
   dprintf(("DartWaveOut::reset %s", (State == STATE_PLAYING) ? "playing" : "stopped"));
   if(State != STATE_PLAYING)
-    return(MMSYSERR_HANDLEBUSY);
+        return(MMSYSERR_HANDLEBUSY);
 
   memset(&Params, 0, sizeof(Params));
 
   // Stop the playback.
   mciSendCommand(DeviceId, MCI_STOP, MCI_WAIT, (PVOID)&Params, 0);
 
-#ifdef DEBUG
-  WriteLog("Nr of threads blocked on mutex = %d\n", wmutex->getNrBlocked());
-#endif
+  dprintf(("Nr of threads blocked on mutex = %d\n", wmutex->getNrBlocked()));
 
   wmutex->enter(VMUTEX_WAIT_FOREVER);
   while(wavehdr) {
@@ -509,10 +491,10 @@ MMRESULT DartWaveOut::reset()
     if(mthdCallback) {
         callback((ULONG)this, WOM_DONE, dwInstance, wavehdr->dwUser, (ULONG)wavehdr);
     }
-    else
+    else {
         if(hwndCallback)
-        PostMessageA(hwndCallback, WOM_DONE, wavehdr->dwUser, (ULONG)wavehdr);
-
+            PostMessageA(hwndCallback, WOM_DONE, wavehdr->dwUser, (ULONG)wavehdr);
+    }
     wmutex->enter(VMUTEX_WAIT_FOREVER);
     wavehdr = wavehdr->lpNext;
   }
@@ -526,14 +508,33 @@ MMRESULT DartWaveOut::reset()
 /******************************************************************************/
 MMRESULT DartWaveOut::restart()
 {
-  dprintf(("DartWaveOut::restart"));
-  wmutex->enter(VMUTEX_WAIT_FOREVER);
-  State = STATE_PLAYING;
-  wmutex->leave();
-  MixSetupParms->pmixWrite(MixSetupParms->ulMixHandle,
-                          &MixBuffer[curPlayBuf],
-                          PREFILLBUF_DART);
-  return(MMSYSERR_NOERROR);
+    dprintf(("DartWaveOut::restart"));
+    wmutex->enter(VMUTEX_WAIT_FOREVER);
+    State = STATE_PLAYING;
+    wmutex->leave();
+    MixSetupParms->pmixWrite(MixSetupParms->ulMixHandle,
+                             &MixBuffer[curPlayBuf],
+                             PREFILLBUF_DART);
+    return(MMSYSERR_NOERROR);
+}
+/******************************************************************************/
+/******************************************************************************/
+ULONG DartWaveOut::getPosition()
+{
+ MCI_STATUS_PARMS mciStatus = {0};
+ ULONG rc, nrbytes;
+
+    if(State != STATE_PLAYING)
+        return 0;
+
+    mciStatus.ulItem = MCI_STATUS_POSITION;
+    rc = mciSendCommand(DeviceId, MCI_STATUS, MCI_STATUS_ITEM|MCI_WAIT, (PVOID)&mciStatus, 0);
+    if((rc & 0xFFFF) == MCIERR_SUCCESS) {
+        nrbytes = (mciStatus.ulReturn * getAvgBytesPerSecond())/1000;
+        return nrbytes;;
+    }
+    mciError(rc);
+    return 0xFFFFFFFF;
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -559,7 +560,7 @@ BOOL DartWaveOut::queryFormat(ULONG formatTag, ULONG nChannels,
                        (PVOID) &mciOpenParms,
                        0);
   if (rc != 0) {
-    return(FALSE);
+        return(FALSE);
   }
   DeviceId = mciOpenParms.usDeviceID;
 
@@ -590,10 +591,10 @@ BOOL DartWaveOut::queryFormat(ULONG formatTag, ULONG nChannels,
                       (PVOID) &mciAudioCaps,
                       0);
   if((rc & 0xFFFF) != MCIERR_SUCCESS) {
-    	mciError(rc);
-    	winrc = FALSE;
+        mciError(rc);
+        winrc = FALSE;
   }
-  else 	winrc = TRUE;
+  else  winrc = TRUE;
 
   // Close the device
   mciSendCommand(DeviceId,MCI_CLOSE,MCI_WAIT,(PVOID)&GenericParms,0);
@@ -607,7 +608,7 @@ void DartWaveOut::mciError(ULONG ulError)
  char szError[256] = "";
 
   mciGetErrorString(ulError, szError, sizeof(szError));
-  WriteLog("WINMM: DartWaveOut: %s\n", szError);
+  dprintf(("WINMM: DartWaveOut: %s\n", szError));
 #endif
 }
 //******************************************************************************
@@ -636,7 +637,7 @@ void DartWaveOut::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags
  WAVEHDR *whdr = wavehdr, *prevhdr = NULL;
 
 #ifdef DEBUG1
-  WriteLog("WINMM: handler %d\n", curPlayBuf);
+  dprintf(("WINMM: handler %d\n", curPlayBuf));
 #endif
   if(ulFlags == MIX_STREAM_ERROR) {
     if(ulStatus == ERROR_DEVICE_UNDERRUN) {
@@ -652,7 +653,7 @@ void DartWaveOut::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags
   while(whdr) {
     if(whdr->dwFlags & WHDR_DONE) {
 #ifdef DEBUG1
-        WriteLog("WINMM: handler buf %X done\n", whdr);
+        dprintf(("WINMM: handler buf %X done\n", whdr));
 #endif
         whdr->dwFlags &= ~WHDR_INQUEUE;
 
@@ -680,7 +681,7 @@ void DartWaveOut::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags
     curhdr = wavehdr;
 
 #ifdef DEBUG1
-  WriteLog("WINMM: handler cur (%d,%d), fill (%d,%d)\n", curPlayBuf, curPlayPos, curFillBuf, curFillPos);
+  dprintf(("WINMM: handler cur (%d,%d), fill (%d,%d)\n", curPlayBuf, curPlayPos, curFillBuf, curFillPos));
 #endif
 
   while(curhdr) {
@@ -692,11 +693,11 @@ void DartWaveOut::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags
     curPlayPos += buflength;
     curFillPos += buflength;
 #ifdef DEBUG1
-    WriteLog("WINMM: copied %d bytes, cufFillPos = %d, dwBufferLength = %d\n", buflength, curFillPos, curhdr->dwBufferLength);
+    dprintf(("WINMM: copied %d bytes, cufFillPos = %d, dwBufferLength = %d\n", buflength, curFillPos, curhdr->dwBufferLength));
 #endif
     if(curFillPos == curhdr->dwBufferLength) {
 #ifdef DEBUG1
-        WriteLog("Buffer %d done\n", curFillBuf);
+        dprintf(("Buffer %d done\n", curFillBuf));
 #endif
         curFillPos = 0;
         curhdr->dwFlags |= WHDR_DONE;
@@ -746,8 +747,8 @@ LONG APIENTRY WaveOutHandler(ULONG ulStatus,
 /******************************************************************************/
 /******************************************************************************/
 MMRESULT DartWaveOut::setVolume(ULONG ulVol)
-{  
-  ULONG ulVolR     = (((ulVol & 0xffff0000) >> 16 )*100)/0xFFFF; // Right Volume 
+{
+  ULONG ulVolR     = (((ulVol & 0xffff0000) >> 16 )*100)/0xFFFF; // Right Volume
   ULONG ulVolL      = ((ulVol& 0x0000ffff)*100)/0xFFFF;          // Left Volume
   MCI_SET_PARMS msp = {0};
 
@@ -756,7 +757,7 @@ MMRESULT DartWaveOut::setVolume(ULONG ulVol)
 // PD: My card (ESS 1868 PnP) driver can't change only
 //     one channel Left or Right :-(
 //
-#ifdef GOOD_AUDIO_CARD_DRIVER  
+#ifdef GOOD_AUDIO_CARD_DRIVER
 
   msp.ulAudio = MCI_SET_AUDIO_LEFT;
   msp.ulLevel = ulVolL;
