@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.103 2001-04-04 09:00:57 sandervl Exp $
+; $Id: KERNEL32.DEF,v 1.104 2001-04-04 14:20:32 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -1088,8 +1088,6 @@ EXPORTS
     HEAP_strdupAtoW            = _HEAP_strdupAtoW@12              @1246 NONAME
     HEAP_strdupA               = _HEAP_strdupA@12                 @1247 NONAME
     HEAP_strdupW               = _HEAP_strdupW@12                 @1248 NONAME
-    WideCharToLocal            = _WideCharToLocal@12              @1249 NONAME
-    LocalToWideChar            = _LocalToWideChar@12              @1250 NONAME
 
     _VIRTUAL_MapFileA@12                                          @1251 NONAME
     _VIRTUAL_MapFileW@12                                          @1252 NONAME

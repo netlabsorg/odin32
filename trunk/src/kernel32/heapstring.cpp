@@ -1,4 +1,4 @@
-/* $Id: heapstring.cpp,v 1.38 2001-04-04 10:48:05 sandervl Exp $ */
+/* $Id: heapstring.cpp,v 1.39 2001-04-04 14:20:32 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -812,70 +812,6 @@ LPSTR WIN32API HEAP_strdupWtoA( HANDLE heap, DWORD flags, LPCWSTR str )
     return ret;
 }
 
-
-/*****************************************************************************
- * Name      : WideCharToLocal
- * Purpose   : similar lstrcpyWtoA, should handle codepages properly
- * Parameters:
- * Variables :
- * Result    : strlen of the destination string
- * Remark    :
- * Status    :
- *
- * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
- *****************************************************************************/
-
-INT WIN32API WideCharToLocal(LPSTR pLocal, LPWSTR pWide, INT dwChars)
-{
-  dprintf2(("KERNEL32: WideCharToLocal(%08xh,%08xh,%08xh)\n",
-           pLocal,
-           pWide,
-           dwChars));
-
-  *pLocal = 0;
-  WideCharToMultiByte(CP_ACP,
-                      0,
-                      pWide,
-                      -1,
-                      pLocal,
-                      dwChars,
-                      NULL,
-                      NULL);
-
-  return strlen(pLocal);
-}
-
-
-/*****************************************************************************
- * Name      : LocalToWideChar
- * Purpose   : similar lstrcpyAtoW, should handle codepages properly
- * Parameters:
- * Variables :
- * Result    : strlen of the destination string
- * Remark    :
- * Status    :
- *
- * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
- *****************************************************************************/
-
-INT WIN32API LocalToWideChar(LPWSTR pWide, LPSTR pLocal, INT dwChars)
-{
-  *pWide = 0;
-
-  dprintf2(("KERNEL32: LocalToWideChar(%08xh,%08xh,%08xh)\n",
-           pLocal,
-           pWide,
-           dwChars));
-
-  MultiByteToWideChar(CP_ACP,
-                      0,
-                      pLocal,
-                      -1,
-                      pWide,
-                      dwChars);
-
-  return lstrlenW(pWide);
-}
 
 
 
