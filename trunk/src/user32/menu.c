@@ -1233,18 +1233,16 @@ static void MENU_DrawMenuItem( HWND hwnd, HMENU hmenu, HWND hwndOwner, HDC hdc, 
     {
 	if (lpitem->fState & MF_HILITE)
 	{
+#ifdef __WIN32OS2__
+            if(!fOS2Look) 
+#else
 	    if(TWEAK_WineLook == WIN98_LOOK)
+#endif
 	    {
 		if(menuBar)
 		    DrawEdge(hdc, &rect, BDR_SUNKENOUTER, BF_RECT);
 		else
-#if 0 //def __WIN32OS2__
-                    if(!fOS2Look) 
-                         FillRect( hdc, &rect, GetOS2ColorBrush(PMSYSCLR_MENUHILITEBGND) );
-                    else FillRect( hdc, &rect, GetSysColorBrush(COLOR_HIGHLIGHT) );
-#else
 		    FillRect(hdc, &rect, GetSysColorBrush(COLOR_HIGHLIGHT));
-#endif
 	    }
 	    else /* Not Win98 Look */
 	    {
@@ -1303,7 +1301,11 @@ static void MENU_DrawMenuItem( HWND hwnd, HMENU hmenu, HWND hwndOwner, HDC hdc, 
 
     if (lpitem->fState & MF_HILITE)
     {
+#ifdef __WIN32OS2__
+        if(!fOS2Look) 
+#else
 	if(TWEAK_WineLook == WIN98_LOOK)
+#endif
 	{
             if(menuBar) {
 		SetTextColor(hdc, GetSysColor(COLOR_MENUTEXT));
@@ -1313,13 +1315,7 @@ static void MENU_DrawMenuItem( HWND hwnd, HMENU hmenu, HWND hwndOwner, HDC hdc, 
 		    SetTextColor(hdc, GetSysColor(COLOR_GRAYTEXT));
 		else
 		    SetTextColor(hdc, GetSysColor(COLOR_HIGHLIGHTTEXT));
-#if 0 //def __WIN32OS2__
-                if(!fOS2Look) 
-                     SetBkColor(hdc, GetOS2Color(PMSYSCLR_MENUHILITEBGND));
-                else SetBkColor(hdc, GetSysColor(COLOR_HIGHLIGHT));
-#else
                 SetBkColor(hdc, GetSysColor(COLOR_HIGHLIGHT));
-#endif
 	    }
 	}
 	else /* Not Win98 Look */

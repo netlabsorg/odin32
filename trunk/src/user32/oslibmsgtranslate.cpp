@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.97 2003-01-03 16:35:54 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.98 2003-01-04 12:21:44 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -645,54 +645,6 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             winMsg->wParam = virtualKey + 0x30;
 #endif
 
-#ifdef ALTGR_HACK
-    
-
-        if (usPMScanCode == PMSCAN_ALTRIGHT)
-        {
-          // Turn message into CTRL-event
-          // The original PM message is still saved inside
-          // the TEB, the next call to TranslateMessage()
-          // will then generate the required additional message
-          // for the ALTGR-event.
-          winMsg->wParam = VK_LCONTROL_W;
-          winMsg->lParam = repeatCount & 0x0FFFF;
-          winMsg->lParam |= WINSCAN_CTRLLEFT << 16
-                            |  WIN_KEY_DONTCARE;
-          
-          if (flags & KC_KEYUP)
-          {
-            winMsg->message = WINWM_SYSKEYUP;
-            winMsg->lParam |= WIN_KEY_ALTHELD;                      // bit 29, alt was pressed
-            winMsg->lParam |= WIN_KEY_PREVSTATE;                    // bit 30, previous state, always 1 for a WM_KEYUP message
-            winMsg->lParam |= 1 << 31;                              // bit 31, transition state, always 1 for WM_KEYUP
-            
-            // Note: altgr affects the alt-key state in windows!
-            // The overlay causes GetKeyState/GetAsyncKeyState to return
-            // the correct states
-            KeySetOverlayKeyState(VK_LCONTROL_W, KEYOVERLAYSTATE_DONTCARE);
-            KeySetOverlayKeyState(VK_CONTROL_W, KEYOVERLAYSTATE_DONTCARE);
-          }
-          else
-          {
-            winMsg->lParam |= WIN_KEY_ALTHELD;
-            if (keyWasPressed)
-              winMsg->lParam |= WIN_KEY_PREVSTATE;     // bit 30, previous state, 1 means key was pressed
-            winMsg->message = WINWM_KEYDOWN;
-            
-            // Note: altgr affects the alt-key state in windows!
-            // The overlay causes GetKeyState/GetAsyncKeyState to return
-            // the correct states
-            KeySetOverlayKeyState(VK_LCONTROL_W, KEYOVERLAYSTATE_DOWN);
-            KeySetOverlayKeyState(VK_CONTROL_W, KEYOVERLAYSTATE_DOWN);
-            KeySetOverlayKeyState(VK_RMENU_W, KEYOVERLAYSTATE_DOWN);
-            KeySetOverlayKeyState(VK_MENU_W, KEYOVERLAYSTATE_DOWN);
-            
-            // Note: when CTRL comes up, windows keeps ALTGR still down!
-            // KeySetOverlayKeyState(VK_RMENU_W, KEYOVERLAYSTATE_DOWN);
-          }
-        }     
-#endif
 
         //@PF This looks ugly but this is just what we have in win32 both in win98/win2k
         //what happens is that lParam is tweaked in win32 to contain some illegal codes
@@ -810,39 +762,6 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             winMsg->lParam |= WIN_KEY_ALTHELD;
           }
         }
-
-#ifdef ALTGR_HACK
-        // it's a PMSCAN_ALTRIGHT WM_CHAR message?
-        // and not previously translated?
-        if(fMsgRemoved && usPMScanCode == PMSCAN_ALTRIGHT && !(teb->o.odin.fTranslated))
-        {
-            dprintf(("Queue ALTRIGHT message"));
-            // special ALTRIGHT treatment:
-            // we try to insert another WM_KEYDOWN or WM_KEYUP instead of
-            // the usual WM_CHAR which is expected here.
-            // -> experimental
-            // it's really an OS/2-style WM_CHAR message?
-            MSG extramsg;
-            memcpy(&extramsg, winMsg, sizeof(MSG));
-    
-            // AltGr is not released with WINWM_SYSKEYUP, but WINWM_KEYUP
-            if(flags & KC_KEYUP)
-            {
-                extramsg.message = WINWM_KEYUP;
-            }
-            extramsg.wParam = VK_RMENU_W;
-    
-            // mask out message bits and scan code
-            extramsg.lParam &= (0xDC00FFFF);
-            extramsg.lParam |= (WINSCAN_ALTRIGHT & 0x1FF) << 16;
-////            extramsg.lParam |= WIN_KEY_EXTENDED;
-            if (!(flags & KC_KEYUP))
-                extramsg.lParam |= WIN_KEY_ALTHELD;
-  
-            // insert message into the queue
-            setThreadQueueExtraCharMessage(teb, &extramsg);
-        }
-#endif
         break;
     }
 
