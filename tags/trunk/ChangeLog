@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.1120 2000-09-12 04:43:03 bird Exp $ */
+ /* $Id: ChangeLog,v 1.1121 2000-09-12 19:01:30 sandervl Exp $ */
+
+ 2000-09-12: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: GetCommandLine changes broke LX executable support. Fixed now.
 
  2000-09-12: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - KERNEL32: Rewrote GetCommandLineA/W. Don't depend on Open32 any longer.
