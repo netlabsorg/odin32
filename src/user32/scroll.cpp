@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.46 2001-11-07 15:36:10 sandervl Exp $ */
+/* $Id: scroll.cpp,v 1.47 2001-11-16 16:11:01 sandervl Exp $ */
 /*
  * Scrollbar control
  *
@@ -1523,7 +1523,15 @@ BOOL WINAPI SetScrollRange(
     info.nMin   = MinVal;
     info.nMax   = MaxVal;
     info.fMask  = SIF_RANGE;
-    SetScrollInfo( hwnd, nBar, &info, bRedraw );
+//testestset
+    static int nestlevel = 0;
+    
+    //NOTE: This is an ugly workaround for an endless loop in CVP
+    //      Need to make sure there isn't a better fix.
+    if(++nestlevel == 1) 
+        SetScrollInfo( hwnd, nBar, &info, bRedraw );
+    nestlevel--;
+//testestset
     return TRUE;
 }
 
