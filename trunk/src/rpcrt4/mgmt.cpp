@@ -1,8 +1,8 @@
-/* $Id: stubs.cpp,v 1.2 2000-04-04 19:49:03 davidr Exp $ */
+/* $Id: mgmt.cpp,v 1.1 2000-04-04 19:49:03 davidr Exp $ */
 
 /*
  * RPCRT4 library
- * Stubs
+ * Mgmt Stubs
  *
  * 2000/04/03
  * 
@@ -14,75 +14,57 @@
 
 #include "rpcrt4.h"
 
-
 // ----------------------------------------------------------------------
-// RpcIfInqId
+// RpcMgmtInqDefaultProtectLevel
 // ----------------------------------------------------------------------
 RPCRTAPI RPC_STATUS RPC_ENTRY
-RpcIfInqId (
-    IN RPC_IF_HANDLE RpcIfHandle,
-    OUT RPC_IF_ID __RPC_FAR * RpcIfId
+RpcMgmtInqDefaultProtectLevel(
+    IN  unsigned long AuthnSvc,
+    OUT unsigned long __RPC_FAR *AuthnLevel
     )
 {
     dprintf(("RPCRT4: %s - Stub", __FUNCTION__));
     return RPC_S_OUT_OF_MEMORY;
 }
 
+
+/* client */
 // ----------------------------------------------------------------------
-// RpcNetworkIsProtseqValidA
+// RpcMgmtInqComTimeout
 // ----------------------------------------------------------------------
 RPCRTAPI RPC_STATUS RPC_ENTRY
-RpcNetworkIsProtseqValidA (
-    IN unsigned char __RPC_FAR * Protseq
+RpcMgmtInqComTimeout (
+    IN RPC_BINDING_HANDLE Binding,
+    OUT unsigned int __RPC_FAR * Timeout
     )
 {
     dprintf(("RPCRT4: %s - Stub", __FUNCTION__));
     return RPC_S_OUT_OF_MEMORY;
 }
 
+
+/* client */
 // ----------------------------------------------------------------------
-// RpcNetworkIsProtseqValidW
+// RpcMgmtSetComTimeout
 // ----------------------------------------------------------------------
 RPCRTAPI RPC_STATUS RPC_ENTRY
-RpcNetworkIsProtseqValidW (
-    IN unsigned short __RPC_FAR * Protseq
+RpcMgmtSetComTimeout (
+    IN RPC_BINDING_HANDLE Binding,
+    IN unsigned int Timeout
     )
 {
     dprintf(("RPCRT4: %s - Stub", __FUNCTION__));
     return RPC_S_OUT_OF_MEMORY;
 }
 
-// ----------------------------------------------------------------------
-// RpcNetworkInqProtseqsA
-// ----------------------------------------------------------------------
-RPCRTAPI RPC_STATUS RPC_ENTRY
-RpcNetworkInqProtseqsA (
-    OUT RPC_PROTSEQ_VECTORA __RPC_FAR * __RPC_FAR * ProtseqVector
-    )
-{
-    dprintf(("RPCRT4: %s - Stub", __FUNCTION__));
-    return RPC_S_OUT_OF_MEMORY;
-}
 
+/* client */
 // ----------------------------------------------------------------------
-// RpcNetworkInqProtseqsW
-// ----------------------------------------------------------------------
-RPCRTAPI RPC_STATUS RPC_ENTRY
-RpcNetworkInqProtseqsW (
-    OUT RPC_PROTSEQ_VECTORW __RPC_FAR * __RPC_FAR * ProtseqVector
-    )
-{
-    dprintf(("RPCRT4: %s - Stub", __FUNCTION__));
-    return RPC_S_OUT_OF_MEMORY;
-}
-
-// ----------------------------------------------------------------------
-// RpcObjectInqType
+// RpcMgmtSetCancelTimeout
 // ----------------------------------------------------------------------
 RPCRTAPI RPC_STATUS RPC_ENTRY
-RpcObjectInqType (
-    IN UUID __RPC_FAR * ObjUuid,
-    OUT UUID __RPC_FAR * TypeUuid OPTIONAL
+RpcMgmtSetCancelTimeout(
+    long Timeout
     )
 {
     dprintf(("RPCRT4: %s - Stub", __FUNCTION__));
@@ -92,11 +74,11 @@ RpcObjectInqType (
 
 /* server */
 // ----------------------------------------------------------------------
-// RpcObjectSetInqFn
+// RpcMgmtStatsVectorFree
 // ----------------------------------------------------------------------
 RPCRTAPI RPC_STATUS RPC_ENTRY
-RpcObjectSetInqFn (
-    IN RPC_OBJECT_INQ_FN __RPC_FAR * InquiryFn
+RpcMgmtStatsVectorFree (
+    IN RPC_STATS_VECTOR ** StatsVector
     )
 {
     dprintf(("RPCRT4: %s - Stub", __FUNCTION__));
@@ -106,12 +88,12 @@ RpcObjectSetInqFn (
 
 /* server */
 // ----------------------------------------------------------------------
-// RpcObjectSetType
+// RpcMgmtInqStats
 // ----------------------------------------------------------------------
 RPCRTAPI RPC_STATUS RPC_ENTRY
-RpcObjectSetType (
-    IN UUID __RPC_FAR * ObjUuid,
-    IN UUID __RPC_FAR * TypeUuid OPTIONAL
+RpcMgmtInqStats (
+    IN RPC_BINDING_HANDLE Binding,
+    OUT RPC_STATS_VECTOR ** Statistics
     )
 {
     dprintf(("RPCRT4: %s - Stub", __FUNCTION__));
@@ -120,70 +102,81 @@ RpcObjectSetType (
 
 
 /* server */
-
 // ----------------------------------------------------------------------
-// RpcProtseqVectorFreeA
+// RpcMgmtIsServerListening
 // ----------------------------------------------------------------------
 RPCRTAPI RPC_STATUS RPC_ENTRY
-RpcProtseqVectorFreeA (
-    IN OUT RPC_PROTSEQ_VECTORA __RPC_FAR * __RPC_FAR * ProtseqVector
+RpcMgmtIsServerListening (
+    IN RPC_BINDING_HANDLE Binding
     )
 {
     dprintf(("RPCRT4: %s - Stub", __FUNCTION__));
     return RPC_S_OUT_OF_MEMORY;
 }
-
-
-// ----------------------------------------------------------------------
-// RpcProtseqVectorFreeW
-// ----------------------------------------------------------------------
-RPCRTAPI RPC_STATUS RPC_ENTRY
-RpcProtseqVectorFreeW (
-    IN OUT RPC_PROTSEQ_VECTORW __RPC_FAR * __RPC_FAR * ProtseqVector
-    )
-{
-    dprintf(("RPCRT4: %s - Stub", __FUNCTION__));
-    return RPC_S_OUT_OF_MEMORY;
-}
-
 
 
 /* server */
 // ----------------------------------------------------------------------
-// RpcSsDontSerializeContext
+// RpcMgmtStopServerListening
 // ----------------------------------------------------------------------
-RPCRTAPI void RPC_ENTRY
-RpcSsDontSerializeContext (
+RPCRTAPI RPC_STATUS RPC_ENTRY
+RpcMgmtStopServerListening (
+    IN RPC_BINDING_HANDLE Binding
+    )
+{
+    dprintf(("RPCRT4: %s - Stub", __FUNCTION__));
+    return RPC_S_OUT_OF_MEMORY;
+}
+
+
+/* server */
+// ----------------------------------------------------------------------
+// RpcMgmtWaitServerListen
+// ----------------------------------------------------------------------
+RPCRTAPI RPC_STATUS RPC_ENTRY
+RpcMgmtWaitServerListen (
     void
     )
 {
     dprintf(("RPCRT4: %s - Stub", __FUNCTION__));
+    return RPC_S_OUT_OF_MEMORY;
 }
 
 
-
+/* server */
 // ----------------------------------------------------------------------
-// RpcIfIdVectorFree
+// RpcMgmtSetServerStackSize
 // ----------------------------------------------------------------------
 RPCRTAPI RPC_STATUS RPC_ENTRY
-RpcIfIdVectorFree (
-    IN OUT RPC_IF_ID_VECTOR __RPC_FAR * __RPC_FAR * IfIdVector
+RpcMgmtSetServerStackSize (
+    IN unsigned long ThreadStackSize
     )
 {
     dprintf(("RPCRT4: %s - Stub", __FUNCTION__));
     return RPC_S_OUT_OF_MEMORY;
 }
-
-
 
 /* client */
 // ----------------------------------------------------------------------
-// RpcEpResolveBinding
+// RpcMgmtEnableIdleCleanup
 // ----------------------------------------------------------------------
 RPCRTAPI RPC_STATUS RPC_ENTRY
-RpcEpResolveBinding (
+RpcMgmtEnableIdleCleanup (
+    void
+    )
+{
+    dprintf(("RPCRT4: %s - Stub", __FUNCTION__));
+    return RPC_S_OUT_OF_MEMORY;
+}
+
+
+// ----------------------------------------------------------------------
+// RpcMgmtInqIfIds
+// ----------------------------------------------------------------------
+RPCRTAPI RPC_STATUS RPC_ENTRY
+RpcMgmtInqIfIds (
     IN RPC_BINDING_HANDLE Binding,
-    IN RPC_IF_HANDLE IfSpec
+    OUT RPC_IF_ID_VECTOR __RPC_FAR * __RPC_FAR * IfIdVector
     )
 {
     dprintf(("RPCRT4: %s - Stub", __FUNCTION__));
@@ -191,16 +184,14 @@ RpcEpResolveBinding (
 }
 
 
-/* client */
-
 // ----------------------------------------------------------------------
-// RpcNsBindingInqEntryNameA
+// RpcMgmtInqServerPrincNameA
 // ----------------------------------------------------------------------
 RPCRTAPI RPC_STATUS RPC_ENTRY
-RpcNsBindingInqEntryNameA (
+RpcMgmtInqServerPrincNameA (
     IN RPC_BINDING_HANDLE Binding,
-    IN unsigned long EntryNameSyntax,
-    OUT unsigned char __RPC_FAR * __RPC_FAR * EntryName
+    IN unsigned long AuthnSvc,
+    OUT unsigned char __RPC_FAR * __RPC_FAR * ServerPrincName
     )
 {
     dprintf(("RPCRT4: %s - Stub", __FUNCTION__));
@@ -209,40 +200,30 @@ RpcNsBindingInqEntryNameA (
 
 
 // ----------------------------------------------------------------------
-// RpcNsBindingInqEntryNameW
+// RpcMgmtInqServerPrincNameW
 // ----------------------------------------------------------------------
 RPCRTAPI RPC_STATUS RPC_ENTRY
-RpcNsBindingInqEntryNameW (
+RpcMgmtInqServerPrincNameW (
     IN RPC_BINDING_HANDLE Binding,
-    IN unsigned long EntryNameSyntax,
-    OUT unsigned short __RPC_FAR * __RPC_FAR * EntryName
+    IN unsigned long AuthnSvc,
+    OUT unsigned short __RPC_FAR * __RPC_FAR * ServerPrincName
     )
 {
     dprintf(("RPCRT4: %s - Stub", __FUNCTION__));
     return RPC_S_OUT_OF_MEMORY;
 }
 
-
-
-
-
 // ----------------------------------------------------------------------
-// RpcRaiseException
-// ----------------------------------------------------------------------
-RPCRTAPI void RPC_ENTRY
-RpcRaiseException (
-    IN RPC_STATUS exception
-    )
-{
-    dprintf(("RPCRT4: %s - Stub", __FUNCTION__));
-}
-
-
-// ----------------------------------------------------------------------
-// RpcTestCancel
+// RpcMgmtEpEltInqBegin
 // ----------------------------------------------------------------------
 RPCRTAPI RPC_STATUS RPC_ENTRY
-RpcTestCancel(
+RpcMgmtEpEltInqBegin (
+    IN RPC_BINDING_HANDLE EpBinding OPTIONAL,
+    IN unsigned long InquiryType,
+    IN RPC_IF_ID __RPC_FAR * IfId OPTIONAL,
+    IN unsigned long VersOption OPTIONAL,
+    IN UUID __RPC_FAR * ObjectUuid OPTIONAL,
+    OUT RPC_EP_INQ_HANDLE __RPC_FAR * InquiryContext
     )
 {
     dprintf(("RPCRT4: %s - Stub", __FUNCTION__));
@@ -251,28 +232,11 @@ RpcTestCancel(
 
 
 // ----------------------------------------------------------------------
-// RpcCancelThread
+// RpcMgmtEpEltInqDone
 // ----------------------------------------------------------------------
 RPCRTAPI RPC_STATUS RPC_ENTRY
-RpcCancelThread(
-    IN void * Thread
-    )
-{
-    dprintf(("RPCRT4: %s - Stub", __FUNCTION__));
-    return RPC_S_OUT_OF_MEMORY;
-}
-
-
-
-// ----------------------------------------------------------------------
-// RpcEpRegisterNoReplaceA
-// ----------------------------------------------------------------------
-RPCRTAPI RPC_STATUS RPC_ENTRY
-RpcEpRegisterNoReplaceA (
-    IN RPC_IF_HANDLE IfSpec,
-    IN RPC_BINDING_VECTOR * BindingVector,
-    IN UUID_VECTOR * UuidVector OPTIONAL,
-    IN unsigned char * Annotation
+RpcMgmtEpEltInqDone (
+    IN OUT RPC_EP_INQ_HANDLE __RPC_FAR * InquiryContext
     )
 {
     dprintf(("RPCRT4: %s - Stub", __FUNCTION__));
@@ -281,14 +245,15 @@ RpcEpRegisterNoReplaceA (
 
 
 // ----------------------------------------------------------------------
-// RpcEpRegisterNoReplaceW
+// RpcMgmtEpEltInqNextA
 // ----------------------------------------------------------------------
 RPCRTAPI RPC_STATUS RPC_ENTRY
-RpcEpRegisterNoReplaceW (
-    IN RPC_IF_HANDLE IfSpec,
-    IN RPC_BINDING_VECTOR * BindingVector,
-    IN UUID_VECTOR * UuidVector OPTIONAL,
-    IN unsigned short  * Annotation
+RpcMgmtEpEltInqNextA (
+    IN RPC_EP_INQ_HANDLE InquiryContext,
+    OUT RPC_IF_ID __RPC_FAR * IfId,
+    OUT RPC_BINDING_HANDLE __RPC_FAR * Binding OPTIONAL,
+    OUT UUID __RPC_FAR * ObjectUuid OPTIONAL,
+    OUT unsigned char __RPC_FAR * __RPC_FAR * Annotation OPTIONAL
     )
 {
     dprintf(("RPCRT4: %s - Stub", __FUNCTION__));
@@ -297,14 +262,15 @@ RpcEpRegisterNoReplaceW (
 
 
 // ----------------------------------------------------------------------
-// RpcEpRegisterA
+// RpcMgmtEpEltInqNextW
 // ----------------------------------------------------------------------
 RPCRTAPI RPC_STATUS RPC_ENTRY
-RpcEpRegisterA (
-    IN RPC_IF_HANDLE IfSpec,
-    IN RPC_BINDING_VECTOR * BindingVector,
-    IN UUID_VECTOR * UuidVector OPTIONAL,
-    IN unsigned char * Annotation
+RpcMgmtEpEltInqNextW (
+    IN RPC_EP_INQ_HANDLE InquiryContext,
+    OUT RPC_IF_ID __RPC_FAR * IfId,
+    OUT RPC_BINDING_HANDLE __RPC_FAR * Binding OPTIONAL,
+    OUT UUID __RPC_FAR * ObjectUuid OPTIONAL,
+    OUT unsigned short __RPC_FAR * __RPC_FAR * Annotation OPTIONAL
     )
 {
     dprintf(("RPCRT4: %s - Stub", __FUNCTION__));
@@ -313,14 +279,14 @@ RpcEpRegisterA (
 
 
 // ----------------------------------------------------------------------
-// RpcEpRegisterW
+// RpcMgmtEpUnregister
 // ----------------------------------------------------------------------
 RPCRTAPI RPC_STATUS RPC_ENTRY
-RpcEpRegisterW (
-    IN RPC_IF_HANDLE IfSpec,
-    IN RPC_BINDING_VECTOR * BindingVector,
-    IN UUID_VECTOR * UuidVector OPTIONAL,
-    IN unsigned short * Annotation
+RpcMgmtEpUnregister (
+    IN RPC_BINDING_HANDLE EpBinding OPTIONAL,
+    IN RPC_IF_ID __RPC_FAR * IfId,
+    IN RPC_BINDING_HANDLE Binding,
+    IN UUID __RPC_FAR * ObjectUuid OPTIONAL
     )
 {
     dprintf(("RPCRT4: %s - Stub", __FUNCTION__));
@@ -329,13 +295,11 @@ RpcEpRegisterW (
 
 
 // ----------------------------------------------------------------------
-// RpcEpUnregister
+// RpcMgmtSetAuthorizationFn
 // ----------------------------------------------------------------------
 RPCRTAPI RPC_STATUS RPC_ENTRY
-RpcEpUnregister(
-    IN RPC_IF_HANDLE IfSpec,
-    IN RPC_BINDING_VECTOR * BindingVector,
-    IN UUID_VECTOR * UuidVector
+RpcMgmtSetAuthorizationFn (
+    IN RPC_MGMT_AUTHORIZATION_FN AuthorizationFn
     )
 {
     dprintf(("RPCRT4: %s - Stub", __FUNCTION__));
@@ -344,12 +308,12 @@ RpcEpUnregister(
 
 
 // ----------------------------------------------------------------------
-// DceErrorInqTextA
+// RpcMgmtInqParameter
 // ----------------------------------------------------------------------
 RPCRTAPI RPC_STATUS RPC_ENTRY
-DceErrorInqTextA (
-    IN RPC_STATUS RpcStatus,
-    OUT unsigned char __RPC_FAR * ErrorText
+RpcMgmtInqParameter (
+    IN unsigned Parameter,
+    IN unsigned long __RPC_FAR * Value
     )
 {
     dprintf(("RPCRT4: %s - Stub", __FUNCTION__));
@@ -358,12 +322,41 @@ DceErrorInqTextA (
 
 
 // ----------------------------------------------------------------------
-// DceErrorInqTextW
+// RpcMgmtSetParameter
+// ----------------------------------------------------------------------
+RPCRTAPI RPC_STATUS RPC_ENTRY RpcMgmtSetParameter (
+    IN unsigned Parameter,
+    IN unsigned long Value
+    )
+{
+    dprintf(("RPCRT4: %s - Stub", __FUNCTION__));
+    return RPC_S_OUT_OF_MEMORY;
+}
+
+
+// ----------------------------------------------------------------------
+// RpcMgmtBindingInqParameter
 // ----------------------------------------------------------------------
 RPCRTAPI RPC_STATUS RPC_ENTRY
-DceErrorInqTextW (
-    IN RPC_STATUS RpcStatus,
-    OUT unsigned short __RPC_FAR * ErrorText
+RpcMgmtBindingInqParameter (
+    IN RPC_BINDING_HANDLE Handle,
+    IN unsigned Parameter,
+    IN unsigned long __RPC_FAR * Value
+    )
+{
+    dprintf(("RPCRT4: %s - Stub", __FUNCTION__));
+    return RPC_S_OUT_OF_MEMORY;
+}
+
+
+// ----------------------------------------------------------------------
+// RpcMgmtBindingSetParameter
+// ----------------------------------------------------------------------
+RPCRTAPI RPC_STATUS RPC_ENTRY
+RpcMgmtBindingSetParameter (
+    IN RPC_BINDING_HANDLE Handle,
+    IN unsigned Parameter,
+    IN unsigned long Value
     )
 {
     dprintf(("RPCRT4: %s - Stub", __FUNCTION__));
