@@ -1,9 +1,12 @@
-/* $Id: changelog,v 1.2116 2002-05-31 09:53:17 sandervl Exp $ */
+/* $Id: changelog,v 1.2117 2002-05-31 09:57:59 sandervl Exp $ */
 
  2002-05-31: Sander van Leeuwen <sandervl@innotek.de>
     - DINPUT:   o Ignore injected mouse messages (hook; LLMHF_INJECTED flag)
     - USER32:   o Generate injected WH_MOUSE_LL hook event in SetCursorPos
                   (with LLMHF_INJECTED flag set)
+
+ 2002-05-31: Platon Fomichev <platon@innotek.de>
+    - COMCTL32: o Correct scrollbar range for listview control (LISTVIEW_EnsureVisible)
 
  2002-05-30: Sander van Leeuwen <sandervl@innotek.de>
     - WINMM:    o Mixer fixes
