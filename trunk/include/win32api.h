@@ -1,4 +1,4 @@
-/* $Id: win32api.h,v 1.19 2000-10-06 15:14:11 sandervl Exp $ */
+/* $Id: win32api.h,v 1.20 2000-10-20 14:28:26 sandervl Exp $ */
 
 /*
  *
@@ -123,5 +123,8 @@ LPCWSTR WIN32API GetCommandLineW(VOID);
 
 BOOL    WIN32API SetCurrentDirectoryA(LPCSTR lpstrDirectory);
 UINT    WIN32API GetCurrentDirectoryA(UINT nBufferLength, LPSTR lpBuffer);
+
+HANDLE  WIN32API GetStdHandle(DWORD a);
+DWORD   WIN32API GetFileType(HANDLE hFile);
 
 #endif
