@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1736 2001-10-10 22:07:39 phaller Exp $ */
+/* $Id: changelog,v 1.1737 2001-10-11 01:00:57 phaller Exp $ */
+
+ 2001-10-11: Patrick Haller <patrick.haller@innotek.de>
+    - KERNEL32: o added ODIN performance profiler 
+                  (perf_0.log for PROFILE builds)
 
  2001-10-10: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Do not blindly add ODIN_FUNCTION macros to functions that
