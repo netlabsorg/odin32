@@ -1,9 +1,8 @@
-/* $Id: changelog,v 1.2033 2002-03-28 16:53:19 sandervl Exp $ */
+/* $Id: changelog,v 1.2034 2002-03-28 16:54:26 sandervl Exp $ */
 
  2002-03-28: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Customization changes
-    - WNASPI32: o Check System\\CustomBuild\DisableASPI key to disable
-                  ASPI by default
+    - WNASPI32: o Fix for disabling aspi by default in custom build
 
  2002-03-28: Platon Fomichev <platon@innotek.de>
     - USER32:   o Gracefully handle WM_QUIT message sent by window list:
