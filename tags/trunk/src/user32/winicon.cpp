@@ -1,4 +1,4 @@
-/* $Id: winicon.cpp,v 1.11 2000-11-09 18:15:23 sandervl Exp $ */
+/* $Id: winicon.cpp,v 1.12 2000-11-09 20:20:33 sandervl Exp $ */
 /*
  * Win32 Icon Code for OS/2
  *
@@ -469,7 +469,7 @@ static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, HGLOBAL hObj,
     BITMAPINFO *bmi;
     HDC hdc = 0;
     BOOL DoStretch;
-    INT size, colortablesize;
+    INT size, colortablesize, bwsize, colorsize;
 
     hotspot.x = ICON_HOTSPOT;
     hotspot.y = ICON_HOTSPOT;
@@ -496,10 +496,13 @@ static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, HGLOBAL hObj,
 
     DoStretch = (bmi->bmiHeader.biHeight/2 != height) || (bmi->bmiHeader.biWidth != width);
 
+    colorsize = DIB_GetDIBImageBytes(bmi->bmiHeader.biWidth, bmi->bmiHeader.biHeight/2, bmi->bmiHeader.biBitCount);
+    bwsize    = (bmi->bmiHeader.biWidth * bmi->bmiHeader.biHeight/2)/8;
+
     /* Check bitmap header */
-    if ( (bmi->bmiHeader.biSize != sizeof(BITMAPCOREHEADER)) &&
-     (bmi->bmiHeader.biSize != sizeof(BITMAPINFOHEADER)  ||
-      bmi->bmiHeader.biCompression != BI_RGB) )
+    if((bmi->bmiHeader.biSize != sizeof(BITMAPCOREHEADER)) &&
+       (bmi->bmiHeader.biSize != sizeof(BITMAPINFOHEADER)  ||
+        bmi->bmiHeader.biCompression != BI_RGB) )
     {
         return 0;
     }
@@ -589,6 +592,11 @@ static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, HGLOBAL hObj,
                 /* Create the AND bitmap */
                 if (DoStretch)
                 {
+                    //TODO: rearrange mask if and & xor mask present!!!!!
+                    if(cbSize - size - colorsize - bwsize == bwsize)
+                    {
+                        dprintf(("TODO: rearrange mask because and & xor mask present!!!!!"));
+                    }
                     if ((hAndBits = CreateBitmap(width, height, 1, 1, NULL)))
                     {
                         HBITMAP hOld;
@@ -618,10 +626,20 @@ static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, HGLOBAL hObj,
 
                     newpix += ((height-1)*linewidth);
 
-                    for(int i=0;i<height;i++) {
-                        memcpy(newpix, xbits, linewidth);
-                        newpix -= linewidth;
-                        xbits  += linewidth;
+                    if(cbSize - size - colorsize - bwsize == bwsize)
+                    {//this means an AND and XOR mask is present (interleaved; and/xor)
+                        for(int i=0;i<height;i++) {
+                            memcpy(newpix, xbits, linewidth);
+                            newpix -= linewidth;
+                            xbits  += linewidth*2;
+                        }
+                    }
+                    else {
+                        for(int i=0;i<height;i++) {
+                            memcpy(newpix, xbits, linewidth);
+                            newpix -= linewidth;
+                            xbits  += linewidth;
+                        }
                     }
                     newpix += linewidth;
                     hAndBits = CreateBitmap(width, height, 1, 1, newpix);
