@@ -1,3 +1,4 @@
+/* $Id: string.c,v 1.2 2001-09-05 14:16:46 bird Exp $ */
 /*
  * Copyright 2001 Hidenori TAKESHIMA <hidenori@a2.ctktv.ne.jp>
  */
@@ -23,72 +24,72 @@ DEFAULT_DEBUG_CHANNEL(avifile);
 
 INT AVIFILE_strlenAtoW( LPCSTR lpstr )
 {
-	INT	len;
+    INT len;
 
-	len = MultiByteToWideChar( CP_ACP, 0, lpstr, -1, NULL, 0 );
-	return ( len > 0 ) ? (len-1) : 0;
+    len = MultiByteToWideChar( CP_ACP, 0, lpstr, -1, NULL, 0 );
+    return ( len > 0 ) ? (len-1) : 0;
 }
 
 INT AVIFILE_strlenWtoA( LPCWSTR lpwstr )
 {
-	INT	len;
+    INT len;
 
-	len = WideCharToMultiByte( CP_ACP, 0, lpwstr, -1,
-				   NULL, 0, NULL, NULL );
-	return ( len > 0 ) ? (len-1) : 0;
+    len = WideCharToMultiByte( CP_ACP, 0, lpwstr, -1,
+                   NULL, 0, NULL, NULL );
+    return ( len > 0 ) ? (len-1) : 0;
 }
 
 LPWSTR AVIFILE_strncpyAtoW( LPWSTR lpwstr, LPCSTR lpstr, INT wbuflen )
 {
-	INT	len;
+    INT len;
 
-	len = MultiByteToWideChar( CP_ACP, 0, lpstr, -1, lpwstr, wbuflen );
-	if ( len == 0 )
-		*lpwstr = 0;
-	return lpwstr;
+    len = MultiByteToWideChar( CP_ACP, 0, lpstr, -1, lpwstr, wbuflen );
+    if ( len == 0 )
+        *lpwstr = 0;
+    return lpwstr;
 }
 
 LPSTR AVIFILE_strncpyWtoA( LPSTR lpstr, LPCWSTR lpwstr, INT abuflen )
 {
-	INT	len;
+    INT len;
 
-	len = WideCharToMultiByte( CP_ACP, 0, lpwstr, -1,
-				   lpstr, abuflen, NULL, NULL );
-	if ( len == 0 )
-		*lpstr = 0;
-	return lpstr;
+    len = WideCharToMultiByte( CP_ACP, 0, lpwstr, -1,
+                   lpstr, abuflen, NULL, NULL );
+    if ( len == 0 )
+        *lpstr = 0;
+    return lpstr;
 }
 
 LPWSTR AVIFILE_strdupAtoW( LPCSTR lpstr )
 {
-	INT len;
-	LPWSTR lpwstr = NULL;
+    INT len;
+    LPWSTR lpwstr = NULL;
 
-	len = AVIFILE_strlenAtoW( lpstr );
-	if ( len > 0 )
-	{
-		lpwstr = (LPWSTR)HeapAlloc( AVIFILE_data.hHeap, 0, sizeof(WCHAR)*(len+1) );
-		if ( lpwstr != NULL )
-			(void)AVIFILE_strncpyAtoW( lpwstr, lpstr, len+1 );
-	}
+    len = AVIFILE_strlenAtoW( lpstr );
+    if ( len > 0 )
+    {
+        lpwstr = (LPWSTR)HeapAlloc( AVIFILE_data.hHeap, 0, sizeof(WCHAR)*(len+1) );
+        if ( lpwstr != NULL )
+            (void)AVIFILE_strncpyAtoW( lpwstr, lpstr, len+1 );
+    }
 
-	return lpwstr;
+    return lpwstr;
 }
 
 LPSTR AVIFILE_strdupWtoA( LPCWSTR lpwstr )
 {
-	INT len;
-	LPSTR lpstr = NULL;
+    INT len;
+    LPSTR lpstr = NULL;
 
-	len = AVIFILE_strlenWtoA( lpwstr );
-	if ( len > 0 )
-	{
-		lpstr = (LPSTR)HeapAlloc( AVIFILE_data.hHeap, 0, sizeof(CHAR)*(len+1) );
-		if ( lpstr != NULL )
-			(void)AVIFILE_strncpyWtoA( lpstr, lpwstr, len+1 );
-	}
+    len = AVIFILE_strlenWtoA( lpwstr );
+    if ( len > 0 )
+    {
+        lpstr = (LPSTR)HeapAlloc( AVIFILE_data.hHeap, 0, sizeof(CHAR)*(len+1) );
+        if ( lpstr != NULL )
+            (void)AVIFILE_strncpyWtoA( lpstr, lpwstr, len+1 );
+    }
 
-	return lpstr;
+    return lpstr;
 }
 
 

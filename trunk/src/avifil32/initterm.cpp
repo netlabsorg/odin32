@@ -1,3 +1,4 @@
+/* $Id: initterm.cpp,v 1.5 2001-09-05 14:16:45 bird Exp $ */
 /*
  * WINMM DLL entry point
  *
