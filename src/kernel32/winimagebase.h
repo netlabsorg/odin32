@@ -1,4 +1,4 @@
-/* $Id: winimagebase.h,v 1.20 2001-10-09 20:25:20 sandervl Exp $ */
+/* $Id: winimagebase.h,v 1.21 2002-02-06 16:33:39 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -122,7 +122,8 @@ virtual ULONG getApi(int ordinal) = 0;
 
 virtual ULONG getImageSize();
 
-virtual BOOL  isDll() = 0;
+virtual BOOL  isDll()     = 0;
+        BOOL  isPEImage() { return fIsPEImage; };
 
 static Win32ImageBase * findModule(HMODULE hModule);
     BOOL  matchModName(const char *pszFilename) const;
@@ -144,6 +145,7 @@ protected:
     char                    szFileName[CCHMAXPATH];
 
     HINSTANCE               hinstance;
+    BOOL                    fIsPEImage;
 
     LPVOID                  tlsAddress;         //address of TLS data
     LPDWORD                 tlsIndexAddr;       //address of DWORD that receives the TLS index

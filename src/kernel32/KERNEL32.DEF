@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.128 2002-02-03 13:16:22 sandervl Exp $
+; $Id: KERNEL32.DEF,v 1.129 2002-02-06 16:33:38 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -1095,7 +1095,7 @@ EXPORTS
    SetFS               = SetFS                                    @1227 NONAME
 
    RestoreOS2TIB        = _RestoreOS2TIB@0                        @1228 NONAME
-   SetWin32TIB          = _SetWin32TIB@0                          @1229 NONAME
+   SetWin32TIB          = _SetWin32TIB@4                          @1229 NONAME
    RestoreOS2FS         = RestoreOS2FS                            @1230 NONAME
 
    ;SvL: HandleManager functions
