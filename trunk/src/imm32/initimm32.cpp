@@ -40,7 +40,7 @@
 
 extern "C" {
  //Win32 resource table (produced by wrc)
- extern DWORD imm32_PEResTab;
+ extern DWORD imm32os2_PEResTab;
 }
 
 static HMODULE dllHandle = 0;
@@ -88,7 +88,7 @@ ULONG APIENTRY inittermImm32(ULONG hModule, ULONG ulFlag)
             dprintf(("IM32Init failed"));
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule);
-         dllHandle = RegisterLxDll(hModule, ImmLibMain, (PVOID)&imm32_PEResTab,
+         dllHandle = RegisterLxDll(hModule, ImmLibMain, (PVOID)&imm32os2_PEResTab,
                                    IMM32_MAJORIMAGE_VERSION, IMM32_MINORIMAGE_VERSION,
                                    IMAGE_SUBSYSTEM_WINDOWS_GUI);
          if(dllHandle == 0)
