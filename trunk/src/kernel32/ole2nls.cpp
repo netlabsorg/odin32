@@ -1,4 +1,4 @@
-/* $Id: ole2nls.cpp,v 1.7 2001-02-17 19:37:16 sandervl Exp $ */
+/* $Id: ole2nls.cpp,v 1.8 2001-02-17 19:44:59 sandervl Exp $ */
 
 /*
  *	National Language Support library
@@ -4146,7 +4146,7 @@ static LCID OLE2NLS_CheckLocale (LCID locale)
 INT WINAPI 
 GetTimeFormatA(LCID locale,        /* in  */
 		 DWORD flags,        /* in  */
-		 CONST SYSTEMTIME (*xtime, /* in  */ 
+		 CONST SYSTEMTIME *xtime, /* in  */ 
 		 LPCSTR format,      /* in  */
 		 LPSTR timestr,      /* out */
 		 INT timelen       /* in  */) 
