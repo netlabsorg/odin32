@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.13 2001-10-10 10:21:31 phaller Exp $ */
+/* $Id: hmdisk.cpp,v 1.14 2001-10-10 11:01:17 phaller Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -176,6 +176,88 @@ BOOL HMDeviceDiskClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
 }
 //******************************************************************************
 //******************************************************************************
+
+// this helper function just calls the specified
+// ioctl function for the CDROM manager with no
+// parameter packet other than the CD01 signature
+// and no data packet.
+static BOOL ioctlCDROMSimple(PHMHANDLEDATA pHMHandleData,
+                             DWORD dwCategory,
+                             DWORD dwFunction,
+                             LPDWORD lpBytesReturned)
+{
+  DWORD dwParameterSize = 4;
+  DWORD dwDataSize      = 0;
+  DWORD ret;
+
+  if(lpBytesReturned)
+    *lpBytesReturned = 0;
+
+  ret = OSLibDosDevIOCtl(pHMHandleData->hHMHandle,
+                         dwCategory,
+                         dwFunction,
+                         "CD01",
+                         4,
+                         &dwParameterSize,
+                         NULL,
+                         0,
+                         &dwDataSize);
+  if(ret)
+  {
+    SetLastError(error2WinError(ret));
+    return FALSE;
+  }
+  SetLastError(ERROR_SUCCESS);
+  return TRUE;
+}
+
+
+// this helper function just calls the specified
+// ioctl function for the DISK manager with the
+// specified function codes
+static BOOL ioctlDISKUnlockEject(PHMHANDLEDATA pHMHandleData,
+                                 DWORD dwCommand,
+                                 DWORD dwDiskHandle,
+                                 LPDWORD lpBytesReturned)
+{
+#pragma pack(1)
+  struct
+  {
+    BYTE ucCommand;
+    BYTE ucHandle;
+  } ParameterBlock;
+#pragma pack()
+  
+  DWORD dwParameterSize = sizeof( ParameterBlock );
+  DWORD dwDataSize      = 0;
+  DWORD ret;
+  
+  ParameterBlock.ucCommand = dwCommand;
+  ParameterBlock.ucHandle  = dwDiskHandle;
+  
+  if(lpBytesReturned)
+    *lpBytesReturned = 0;
+
+  ret = OSLibDosDevIOCtl(pHMHandleData->hHMHandle,
+                         0x08,       // IOCTL_DISK
+                         0x40,       // DSK_UNLOCKEJECTMEDIA
+                         &ParameterBlock,
+                         sizeof( ParameterBlock ),
+                         &dwParameterSize,
+                         NULL,
+                         0,
+                         &dwDataSize);
+  if(ret)
+  {
+    SetLastError(error2WinError(ret));
+    return FALSE;
+  }
+  SetLastError(ERROR_SUCCESS);
+  return TRUE;
+}
+
+
+
 BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoControlCode,
                              LPVOID lpInBuffer, DWORD nInBufferSize,
                              LPVOID lpOutBuffer, DWORD nOutBufferSize,
@@ -441,16 +523,40 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
     case IOCTL_DISK_VERIFY:
     case IOCTL_SERIAL_LSRMST_INSERT:
         break;
+      
+      
+    // -----------
+    // CDROM class
+    // -----------
 
     case IOCTL_CDROM_UNLOAD_DRIVER:
     case IOCTL_CDROM_READ_TOC:
     case IOCTL_CDROM_GET_CONTROL:
     case IOCTL_CDROM_PLAY_AUDIO_MSF:
     case IOCTL_CDROM_SEEK_AUDIO_MSF:
-    case IOCTL_CDROM_STOP_AUDIO:
-    case IOCTL_CDROM_PAUSE_AUDIO:
-    case IOCTL_CDROM_RESUME_AUDIO:
         break;
+
+    case IOCTL_CDROM_PAUSE_AUDIO:
+      // NO BREAK CASE
+      // Note: for OS/2, pause and stop seems to be the same!
+      
+    case IOCTL_CDROM_STOP_AUDIO:
+    {
+      dprintf(("Stop / pause CDROM audio playback"));
+      return ioctlCDROMSimple(pHMHandleData, 
+                              0x81,   // IOCTL_CDROMAUDIO
+                              0x51,   // CDROMAUDIO_STOPAUDIO
+                              lpBytesReturned);
+    }
+      
+    case IOCTL_CDROM_RESUME_AUDIO:
+    {
+      dprintf(("Resume CDROM audio playback"));
+      return ioctlCDROMSimple(pHMHandleData, 
+                              0x81,   // IOCTL_CDROMAUDIO
+                              0x52,   // CDROMAUDIO_RESUMEAUDIO
+                              lpBytesReturned);
+    }
 
     case IOCTL_CDROM_GET_VOLUME:
     {
@@ -530,38 +636,32 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
       
     case IOCTL_CDROM_EJECT_MEDIA:
     {
-      DWORD dwParameterSize = 4;
-      DWORD dwDataSize      = 0;
-      DWORD ret;
-      
-      if(lpBytesReturned)
-        *lpBytesReturned = 0;
-
-      dprintf(("Eject CD media"));
-      ret = OSLibDosDevIOCtl(pHMHandleData->hHMHandle, 
-                             0x80,   // IOCTL_CDROM
-                             0x44,   // CDROMDISK_EJECTDISK
-                             "CD01", 
-                             4,
-                             &dwParameterSize,
-                             NULL,
-                             0,
-                             &dwDataSize);
-      if(ret) 
-      {
-        SetLastError(error2WinError(ret));
-        return FALSE;
-      }
-      SetLastError(ERROR_SUCCESS);
-      return TRUE;
+      dprintf(("Eject CDROM media"));
+      return ioctlCDROMSimple(pHMHandleData, 
+                              0x80,   // IOCTL_CDROM
+                              0x44,   // CDROMDISK_EJECTDISK
+                              lpBytesReturned);
     }
       
     case IOCTL_CDROM_LOAD_MEDIA:
+    {
+      dprintf(("Loading CDROM media"));
+      return ioctlCDROMSimple(pHMHandleData, 
+                              0x80,   // IOCTL_CDROM
+                              0x45,   // CDROMDISK_CLOSETRAY
+                              lpBytesReturned);
+    }
+      
     case IOCTL_CDROM_RESERVE:
     case IOCTL_CDROM_RELEASE:
     case IOCTL_CDROM_FIND_NEW_DEVICES:
         break;
-
+      
+      
+    // -------------
+    // STORAGE class
+    // -------------
+      
     case IOCTL_STORAGE_CHECK_VERIFY:
         if(lpBytesReturned) {
             *lpBytesReturned = 0;
@@ -575,12 +675,36 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
         return TRUE;
 
     case IOCTL_STORAGE_EJECT_MEDIA:
-         break;
+    {
+      dprintf(("Ejecting storage media"));
+      return ioctlDISKUnlockEject(pHMHandleData,
+                                  0x02, // EJECT media
+                                  -1,
+                                  lpBytesReturned);
+    }
       
     case IOCTL_STORAGE_GET_MEDIA_TYPES:
+         break;
+      
     case IOCTL_STORAGE_LOAD_MEDIA:
+    // case IOCTL_STORAGE_LOAD_MEDIA2:
+    {
+      dprintf(("Loading storage media"));
+      return ioctlDISKUnlockEject(pHMHandleData,
+                                  0x03, // LOAD media
+                                  -1,
+                                  lpBytesReturned);
+    }
+      
+    // case IOCTL_STORAGE_EJECTION_CONTROL:
     case IOCTL_STORAGE_MEDIA_REMOVAL:
-        break;
+         break;
+      
+      
+    // -------------------
+    // SCSI passthru class
+    // -------------------
+      
     case IOCTL_SCSI_PASS_THROUGH:
     case IOCTL_SCSI_MINIPORT:
     case IOCTL_SCSI_GET_INQUIRY_DATA:
