@@ -1,4 +1,4 @@
-/* $Id: ddrawclipper.cpp,v 1.2 2002-02-17 20:40:06 sandervl Exp $ */
+/* $Id: ddclipper.cpp,v 1.1 2002-12-04 10:34:57 sandervl Exp $ */
 
 /*
  * DXDrawClipper DLL implementaion
@@ -22,13 +22,11 @@
 #define ICOM_CINTERFACE 1
 #define CINTERFACE
 
-#include "os2ddraw.h"
-#include "os2clipper.h"
+#include "ddraw2d.h"
+#include "clipper.h"
 #include "winerror.h"
 
 #include <misc.h>
-
-extern "C" {
 
 //******************************************************************************
 //******************************************************************************
@@ -76,4 +74,3 @@ HRESULT WIN32API OS2DirectDrawCreateClipper(DWORD dwFlags,
 }
 
 
-} /* extern "C" */

@@ -1,4 +1,4 @@
-/* $Id: OS2CLIPPER.H,v 1.11 2001-10-05 12:33:08 sandervl Exp $ */
+/* $Id: clipper.h,v 1.1 2002-12-04 10:34:57 sandervl Exp $ */
 
 /*
  * DX clipper class definition

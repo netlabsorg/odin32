@@ -1,4 +1,4 @@
-/* $Id: OS2CLIPPER.CPP,v 1.18 2002-02-17 20:40:04 sandervl Exp $ */
+/* $Id: clipper.cpp,v 1.1 2002-12-04 10:34:57 sandervl Exp $ */
 
 /*
  * DX clipper class routines
@@ -20,8 +20,8 @@
 #include <memory.h>
 
 #define INITGUID
-#include "os2ddraw.h"
-#include "os2clipper.h"
+#include "ddraw2d.h"
+#include "clipper.h"
 #include <misc.h>
 #include <winerror.h>
 #include <winuser.h>

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.29 2001-09-30 22:23:45 sandervl Exp $
+# $Id: makefile,v 1.30 2002-12-04 10:35:01 sandervl Exp $
 
 #
 # Odin32 API
@@ -17,16 +17,18 @@
 # Object files. Prefix with OBJDIR and one space before the '\'.
 #
 OBJS = \
-$(OBJDIR)\ddraw.obj \
-$(OBJDIR)\ddrawclipper.obj \
-$(OBJDIR)\os2ddraw.obj \
-$(OBJDIR)\os2clipper.obj \
+$(OBJDIR)\ddmain.obj \
+$(OBJDIR)\ddclipper.obj \
+$(OBJDIR)\ddraw2d.obj \
+$(OBJDIR)\clipper.obj \
 $(OBJDIR)\oslibgpi.obj \
-$(OBJDIR)\os2d3d.obj \
+$(OBJDIR)\ddraw3d.obj \
 $(OBJDIR)\iccio1.obj \
 $(OBJDIR)\asmutil.obj \
-$(OBJDIR)\os2surface.obj \
-$(OBJDIR)\os2palette.obj \
+$(OBJDIR)\surface.obj \
+$(OBJDIR)\surfacehlp.obj \
+$(OBJDIR)\wndproc.obj \
+$(OBJDIR)\palette.obj \
 $(OBJDIR)\os2palset.obj \
 $(OBJDIR)\os2fsdd.obj \
 $(OBJDIR)\rectangle.obj \

@@ -1,4 +1,4 @@
-/* $Id: ddraw.CPP,v 1.21 2002-02-17 20:40:06 sandervl Exp $ */
+/* $Id: ddmain.cpp,v 1.1 2002-12-04 10:34:58 sandervl Exp $ */
 
 /*
  * DXDraw DLL implementaion
@@ -25,7 +25,7 @@
 #define ICOM_CINTERFACE 1
 #define CINTERFACE
 
-#include "os2ddraw.h"
+#include "ddraw2d.h"
 #include "winerror.h"
 
 #include <misc.h>
