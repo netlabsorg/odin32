@@ -1,7 +1,7 @@
-/* $Id: ChangeLog,v 1.1752 2001-10-15 17:05:45 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1753 2001-10-15 17:21:27 sandervl Exp $ */
 
  2001-10-15: Sander van Leeuwen <sandervl@xs4all.nl>
-    - KERNEL32, USER32, WNASPI32:
+    - KERNEL32, USER32, WNASPI32, DDRAW:
                 o Custom build updates
 
  2001-10-14: Sander van Leeuwen <sandervl@xs4all.nl>
