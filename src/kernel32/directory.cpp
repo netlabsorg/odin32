@@ -1,4 +1,4 @@
-/* $Id: directory.cpp,v 1.33 2000-10-25 19:46:59 sandervl Exp $ */
+/* $Id: directory.cpp,v 1.34 2000-12-28 18:17:56 sandervl Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
@@ -95,6 +95,8 @@ void InitDirectories()
 	}
    	else DebugInt3();
    }
+   dprintf(("Windows  dir: %s", DIR_Windows));
+   dprintf(("System32 dir: %s", DIR_System));
 }
 /*****************************************************************************
  * Name      : GetCurrentDirectoryA
