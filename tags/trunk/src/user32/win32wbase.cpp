@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.51 1999-10-17 16:59:58 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.52 1999-10-17 20:18:45 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2174,6 +2174,19 @@ BOOL Win32BaseWindow::IsIconic()
     return OSLibWinIsIconic(OS2Hwnd);
 }
 //******************************************************************************
+//******************************************************************************
+Win32BaseWindow *Win32BaseWindow::FindWindowById(int id)
+{
+    for (Win32BaseWindow *child = (Win32BaseWindow *)getFirstChild(); child; child = (Win32BaseWindow *)child->getNextChild())
+    {
+        if (child->getWindowId() == id)
+        {
+            return child;
+        }
+    }
+    return 0;
+}
+//******************************************************************************
 //TODO:
 //We assume (for now) that if hwndParent or hwndChildAfter are real window handles, that
 //the current process owns them.
@@ -2378,7 +2391,11 @@ BOOL Win32BaseWindow::IsWindowEnabled()
 //******************************************************************************
 BOOL Win32BaseWindow::IsWindowVisible()
 {
+#if 1
+    return (dwStyle & WS_VISIBLE) == WS_VISIBLE;
+#else
     return OSLibWinIsWindowVisible(OS2Hwnd);
+#endif
 }
 //******************************************************************************
 //******************************************************************************
