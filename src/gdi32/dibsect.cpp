@@ -1,15 +1,41 @@
-/* $Id: dibsect.cpp,v 1.67 2003-07-16 10:46:17 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.68 2004-01-11 11:42:10 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
  *
  * Copyright 1998-2000 Sander van Leeuwen (sandervl@xs4all.nl)
  * Copyright 1998 Patrick Haller
+ * Copyright 2002-2003 Innotek Systemberatung GmbH (sandervl@innotek.de)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
- * NOTE:
- * This is not a complete solution for CreateDIBSection, but enough for Quake 2!
+ * Basic GPI object and bitmap data synchronization:
+ *
+ * - CreateDIBSection:
+ *      register a memory range for exception notification
+ *      set to read/commit during creation
+ *
+ * - if(exception)
+ *      if(invalid)
+ *         sync and set to commit/read, clear invalid flag
+ *      if(write violation) 
+ *         make as dirty and set range to read/write
+ *
+ * - before GDI operation
+ *       if(dirty) 
+ *           flush (set bitmap bits), clear dirty flag, set range to readonly
+ *
+ * - after GDI operation
+ *       set invalid flag, set range to invalid
+ *
+ * - GdiFlush: 
+ *       NOP
+ *
+ * Should probably detect partial changes to avoid having to sync the entire
+ * DIB section each time something minor changes.
+ *
+ * Might get a little bit more complicated when the application gives us a memory
+ * mapped file handle. (although we can change the protection flags of aliased pages)
  *
  */
 #define  INCL_GPI
@@ -26,16 +52,20 @@
 #include "dibsect.h"
 #include "oslibgpi.h"
 #include "rgbcvt.h"
+#include <memmap.h>
 
 #define DBG_LOCALLOG  DBG_dibsect
 #include "dbglocal.h"
 
+static BOOL WIN32API DIBExceptionNotify(LPVOID lpBase, ULONG offset, BOOL fWriteAccess, 
+                                        DWORD dwSize, DWORD dwUserData);
+
 
 //******************************************************************************
 //******************************************************************************
-DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DWORD hSection, DWORD dwOffset, DWORD handle, int fFlip)
+DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DWORD hSection, DWORD dwOffset, HBITMAP hBitmap, int fFlip)
                 : bmpBits(NULL), pOS2bmp(NULL), next(NULL), bmpBitsDblBuffer(NULL),
-                  hdc(0), hwndParent(0)
+                  hdc(0), hwndParent(0), fDirty(FALSE), fInvalid(FALSE), dwSize(0)
 {
  int  palsize=0;
 
@@ -89,9 +119,19 @@ DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DW
         }
    }
    if(!bmpBits) {
-        DosAllocMem((PPVOID)&bmpBits, bmpsize*pbmi->biHeight, PAG_READ|PAG_WRITE|PAG_COMMIT);
+        APIRET rc = DosAllocMem((PPVOID)&bmpBits, bmpsize*pbmi->biHeight, PAG_READ|PAG_COMMIT);
+        if(rc) {
+            dprintf(("DosAllocMem failed with %d", rc));
+            DebugInt3();
+        }
+        if(MMAP_RegisterMemoryRange(DIBExceptionNotify, bmpBits, bmpsize*pbmi->biHeight, hBitmap) == FALSE) 
+        {
+            dprintf(("MMAP_RegisterMemoryRange failed!!"));
+            DebugInt3();
+        }
+        dwSize = bmpsize*pbmi->biHeight;
    }
-   memset(bmpBits, 0, bmpsize*pbmi->biHeight);
+   else memset(bmpBits, 0, bmpsize*pbmi->biHeight);
 
    pOS2bmp = (BITMAPINFO2 *)malloc(os2bmphdrsize);
 
@@ -110,7 +150,7 @@ DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DW
         pOS2bmp->ulCompression = 0;
    }
    pOS2bmp->cbImage       = pbmi->biSizeImage;
-   dprintf(("handle                 %x", handle));
+   dprintf(("hBitmap                %x", hBitmap));
    dprintf(("pOS2bmp->cx            %d\n", pOS2bmp->cx));
    dprintf(("pOS2bmp->cy            %d\n", pOS2bmp->cy));
    dprintf(("pOS2bmp->cPlanes       %d\n", pOS2bmp->cPlanes));
@@ -168,7 +208,7 @@ DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DW
         DosAllocMem((PPVOID)&bmpBitsDblBuffer, bmpsize*pbmi->biHeight, PAG_READ|PAG_WRITE|PAG_COMMIT);
    }
 
-   this->handle = handle;
+   this->hBitmap = hBitmap;
    this->iUsage = iUsage;
 
    lock();
@@ -196,176 +236,44 @@ DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DW
 //******************************************************************************
 DIBSection::~DIBSection()
 {
-   dprintf(("Delete DIBSection %x", handle));
+   dprintf(("Delete DIBSection %x", hBitmap));
 
    if(hSection) {
-        UnmapViewOfFile(bmpBits);
+       UnmapViewOfFile(bmpBits);
    }
-   else
-   if(bmpBits)
-        DosFreeMem(bmpBits);
+   else 
+   {
+       if(MMAP_UnregisterMemoryRange(bmpBits) == FALSE) 
+       {
+           dprintf(("MMAP_UnregisterMemoryRange failed!!"));
+           DebugInt3();
+       }
+       if(bmpBits)
+           DosFreeMem(bmpBits);
+   }
 
    if(bmpBitsDblBuffer)
-        DosFreeMem(bmpBitsDblBuffer);
+       DosFreeMem(bmpBitsDblBuffer);
 
    if(pOS2bmp)
-        free(pOS2bmp);
+       free(pOS2bmp);
 
    lock();
    if(section == this)
    {
-     section = this->next;
+       section = this->next;
    }
    else
    {
-     DIBSection *dsect = section;
+       DIBSection *dsect = section;
 
-     while(dsect->next != this)
-     {
-       dsect = dsect->next;
-     }
-     dsect->next = this->next;
+       while(dsect->next != this)
+       {
+           dsect = dsect->next;
+       }
+       dsect->next = this->next;
    }
    unlock();
-}
-//******************************************************************************
-//******************************************************************************
-int DIBSection::SetDIBits(HDC hdc, HBITMAP hbitmap, UINT startscan, UINT
-                          lines, const VOID *bits, BITMAPINFOHEADER_W *pbmi,
-                          UINT coloruse)
-{
-  lines = (int)lines >= 0 ? (int)lines : (int)-lines;
-  int  palsize=0;
-
-  bmpsize = pbmi->biWidth;
-  os2bmphdrsize = sizeof(BITMAPINFO2);
-
-  switch(pbmi->biBitCount)
-  {
-    case 1:
-      bmpsize = ((bmpsize + 31) & ~31) / 8;
-      palsize = ((1 << pbmi->biBitCount))*sizeof(RGB2);
-      os2bmphdrsize += palsize;
-      break;
-    case 4:
-      bmpsize = ((bmpsize + 7) & ~7) / 2;
-      palsize = ((1 << pbmi->biBitCount))*sizeof(RGB2);
-      os2bmphdrsize += palsize;
-      break;
-    case 8:
-      palsize = ((1 << pbmi->biBitCount))*sizeof(RGB2);
-      os2bmphdrsize += palsize;
-      bmpsize = (bmpsize + 3) & ~3;
-      break;
-    case 16:
-      bmpsize *= 2;
-      bmpsize = (bmpsize + 3) & ~3;
-      break;
-    case 24:
-      bmpsize *= 3;
-      bmpsize = (bmpsize + 3) & ~3;
-      break;
-    case 32:
-      bmpsize *= 4;
-      break;
-   }
-
-   //SvL: TODO: Correct??
-   if(!hSection && pOS2bmp->cx != pbmi->biWidth && pOS2bmp->cy != pbmi->biHeight &&
-      pOS2bmp->cBitCount != pbmi->biBitCount)
-   {
-        char *oldbits = bmpBits;
-        int oldsize = dibinfo.dsBm.bmWidthBytes * dibinfo.dsBm.bmHeight;
-
-        DosAllocMem((PPVOID)&bmpBits, bmpsize*pbmi->biHeight, PAG_READ|PAG_WRITE|PAG_COMMIT);
-        memcpy(bmpBits, oldbits, min(oldsize, bmpsize*pbmi->biHeight));
-        DosFreeMem(oldbits);
-   }
-   pOS2bmp    = (BITMAPINFO2 *)realloc(pOS2bmp, os2bmphdrsize);
-   pOS2bmp->cbFix         = sizeof(BITMAPINFO2) - sizeof(RGB2);
-   pOS2bmp->cx            = pbmi->biWidth;
-   pOS2bmp->cy            = pbmi->biHeight;
-   pOS2bmp->cPlanes       = pbmi->biPlanes;
-   pOS2bmp->cBitCount     = pbmi->biBitCount;
-   pOS2bmp->ulCompression = pbmi->biCompression; //same as OS/2 (uncompressed, rle8, rle4)
-   //SvL: Ignore BI_BITFIELDS_W type (GpiDrawBits fails otherwise)
-   if(pOS2bmp->ulCompression == BI_BITFIELDS_W) {
-        pOS2bmp->ulCompression = 0;
-   }
-   pOS2bmp->cbImage       = pbmi->biSizeImage;
-
-   // clear DIBSECTION structure
-   memset(&dibinfo, 0, sizeof(dibinfo));
-
-   // copy BITMAPINFOHEADER data into DIBSECTION structure
-   memcpy(&dibinfo.dsBmih, pbmi, sizeof(*pbmi));
-   dibinfo.dsBm.bmType      = 0;
-   dibinfo.dsBm.bmWidth     = pbmi->biWidth;
-   dibinfo.dsBm.bmHeight    = pbmi->biHeight;
-   dibinfo.dsBm.bmWidthBytes= bmpsize;
-   dibinfo.dsBm.bmPlanes    = pbmi->biPlanes;
-   dibinfo.dsBm.bmBitsPixel = pbmi->biBitCount;
-   dibinfo.dsBm.bmBits      = bmpBits;
-
-   dibinfo.dshSection       = hSection;
-   dibinfo.dsOffset         = dwOffset;
-
-   if(coloruse == DIB_PAL_COLORS || pbmi->biBitCount <= 8)
-   {
-        dibinfo.dsBitfields[0] = dibinfo.dsBitfields[1] = dibinfo.dsBitfields[2] = 0;
-   }
-   else {
-        char *pColors = (char *)pbmi + 1;
-
-        switch(pbmi->biBitCount)
-        {
-           case 16:
-                dibinfo.dsBitfields[0] = (pbmi->biCompression == BI_BITFIELDS_W) ? *(DWORD *)pColors : 0x7c00;
-                dibinfo.dsBitfields[1] = (pbmi->biCompression == BI_BITFIELDS_W) ? *((DWORD *)pColors + 1) : 0x03e0;
-                dibinfo.dsBitfields[2] = (pbmi->biCompression == BI_BITFIELDS_W) ? *((DWORD *)pColors + 2) : 0x001f;
-                break;
-
-           case 24:
-           case 32:
-                dibinfo.dsBitfields[0] = (pbmi->biCompression == BI_BITFIELDS_W) ? *(DWORD *)pColors       : 0xff0000;
-                dibinfo.dsBitfields[1] = (pbmi->biCompression == BI_BITFIELDS_W) ? *((DWORD *)pColors + 1) : 0x00ff00;
-                dibinfo.dsBitfields[2] = (pbmi->biCompression == BI_BITFIELDS_W) ? *((DWORD *)pColors + 2) : 0x0000ff;
-                if(dibinfo.dsBitfields[0] != 0xff0000 && dibinfo.dsBitfields[1] != 0xff00 && dibinfo.dsBitfields[2] != 0xff) {
-                    dprintf(("DIBSection: unsupported bitfields for 32 bits bitmap!!"));
-                }
-                break;
-        }
-        dprintf(("BI_BITFIELDS_W %x %x %x", dibinfo.dsBitfields[0], dibinfo.dsBitfields[1], dibinfo.dsBitfields[2]));
-   }
-
-   //double buffer for rgb 555 dib sections (for conversion) or flipped sections
-   if(dibinfo.dsBitfields[1] == 0x03e0 || (fFlip & FLIP_VERT)) {
-        if(bmpBitsDblBuffer) {
-            DosFreeMem(bmpBitsDblBuffer);
-        }
-        DosAllocMem((PPVOID)&bmpBitsDblBuffer, dibinfo.dsBm.bmWidthBytes*pbmi->biHeight, PAG_READ|PAG_WRITE|PAG_COMMIT);
-   }
-
-   dprintf(("DIBSection::SetDIBits (%d,%d), %d %d", pbmi->biWidth, pbmi->biHeight, pbmi->biBitCount, pbmi->biCompression));
-   if(palsize) {
-        SetDIBColorTable(0, (pbmi->biClrUsed) ? pbmi->biClrUsed : (1 << pbmi->biBitCount), (RGBQUAD *)(pbmi+1));
-   }
-
-   if(bits)
-   {
-      if(pOS2bmp->ulCompression == BCA_UNCOMP) {
-          int size = bmpsize*lines;
-          memcpy(bmpBits+bmpsize*startscan, bits, size);
-      }
-      else {
-          dprintf(("Compressed image!!"));
-          if(startscan != 0) {
-               dprintf(("WARNING: Compressed image & startscan != 0!!!!"));
-          }
-          memcpy(bmpBits, bits, pbmi->biSizeImage);
-      }
-   }
-   return(lines);
 }
 //******************************************************************************
 //******************************************************************************
@@ -471,8 +379,14 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
   }
 
   dprintf(("DIBSection::BitBlt %x %X (hps %x) %x to(%d,%d)(%d,%d) from (%d,%d)(%d,%d) rop %x flip %x",
-          handle, hdcDest, hps, hwndDest, nXdest, nYdest, nDestWidth, nDestHeight,
+          hBitmap, hdcDest, hps, hwndDest, nXdest, nYdest, nDestWidth, nDestHeight,
           nXsrc, nYsrc, nSrcWidth, nSrcHeight, Rop, fFlip));
+
+  //shortcut; better to sync it here instead of in the exception handler
+  //(pages touched inside PMGPI)
+  if(isInvalid()) {
+      sync();
+  }
 
   if(hwndDest) {
         RECT rect;
@@ -636,10 +550,6 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
 	rc = GpiDrawBits(hps, bitmapBits, pOS2bmp, 4, &point[0], Rop, os2mode);
   }
   if(rc == GPI_OK) {
-        DIBSection *destdib = DIBSection::findHDC(hdcDest);
-        if(destdib) {
-            destdib->sync(hps, nYdest, nDestHeight, FALSE);
-        }
 #ifdef INVERT
         //restore old y inversion height
         if(fRestoryYInversion) GpiEnableYInversion(hps, oldyinversion);
@@ -663,7 +573,7 @@ void DIBSection::sync(HDC hdc, DWORD nYdest, DWORD nDestHeight, BOOL orgYInversi
  APIRET rc;
  char  *destBuf;
 
-  dprintf(("Sync destination dibsection %x (%x) (%d,%d) flip %d", handle, hdc, nYdest, nDestHeight, fFlip));
+  dprintf(("Sync destination dibsection %x (%x) (%d,%d) flip %d", hBitmap, hdc, nYdest, nDestHeight, fFlip));
 
   BITMAPINFO2 *tmphdr = (BITMAPINFO2 *)malloc(os2bmphdrsize);
   memcpy(tmphdr, pOS2bmp, os2bmphdrsize);
@@ -691,6 +601,7 @@ void DIBSection::sync(HDC hdc, DWORD nYdest, DWORD nDestHeight, BOOL orgYInversi
 #else
   if(fFlip & FLIP_VERT) {
 #endif
+        //origin is top left, so no y conversion is necessary
         destBuf = bmpBitsDblBuffer + nYdest*dibinfo.dsBm.bmWidthBytes;
 
         //SvL: cbImage can be too small for compressed images; GpiQueryBitmapBits
@@ -728,14 +639,16 @@ void DIBSection::sync(HDC hdc, DWORD nYdest, DWORD nDestHeight, BOOL orgYInversi
         //     NOTE: The correct size will be returned by GpiQueryBitmapBits
         tmphdr->cbImage = dibinfo.dsBm.bmHeight*dibinfo.dsBm.bmWidthBytes;
 
-        destBuf = GetDIBObject() + nYdest*dibinfo.dsBm.bmWidthBytes;
-
+        //origin is bottom left, nYdest is based on top left coordinate system
 #ifdef INVERT
         int dest = dibinfo.dsBm.bmHeight - nYdest - nDestHeight;
 #else
         int dest = nYdest;
 #endif
-        rc = GpiQueryBitmapBits(hdc, nYdest, nDestHeight, destBuf,
+
+        destBuf = GetDIBObject() + dest*dibinfo.dsBm.bmWidthBytes;
+
+        rc = GpiQueryBitmapBits(hdc, dest, nDestHeight, destBuf,
                                 tmphdr);
         if(rc == GPI_ALTERROR) {
             dprintf(("ERROR: GpiQueryBitmapBits failed with %x", WinGetLastError(0)));
@@ -770,6 +683,230 @@ void DIBSection::sync(HDC hdc, DWORD nYdest, DWORD nDestHeight, BOOL orgYInversi
 
 }
 //******************************************************************************
+//******************************************************************************
+void DIBSection::flush(HDC hdc, DWORD nYdest, DWORD nDestHeight, BOOL orgYInversion)
+{
+ APIRET rc;
+ char  *destBuf;
+
+  dprintf(("flush destination dibsection %x (%x) (%d,%d) flip %d", hBitmap, hdc, nYdest, nDestHeight, fFlip));
+
+#ifdef INVERT
+  int oldyinversion = 0;
+  if(orgYInversion == TRUE) {
+      oldyinversion = GpiQueryYInversion(hdc);
+      dprintf(("Flush destination dibsection: hdc y inversion = %d", oldyinversion));
+      if(oldyinversion != 0) {
+#ifdef DEBUG
+          POINT point;
+          GetViewportOrgEx(hdc, &point);
+          dprintf(("Viewport origin (%d,%d)", point.x, point.y));
+#endif
+          GpiEnableYInversion(hdc, 0);
+      }
+  }
+#else
+  dprintf(("flush destination dibsection: hdc y inversion = %d", GpiQueryYInversion(hdc)));
+#endif
+
+#ifndef INVERT
+  if(!(fFlip & FLIP_VERT)) {
+#else
+  if(fFlip & FLIP_VERT) {
+#endif
+        //origin is top left, so no y conversion is necessary
+        destBuf = bmpBitsDblBuffer + nYdest*dibinfo.dsBm.bmWidthBytes;
+
+        //SvL: cbImage can be too small for compressed images; GpiQueryBitmapBits
+        //     will fail in that case (CoolEdit 2000). Perhaps because the returned
+        //     compressed image is larger than the original.
+        //     Use uncompressed size instead
+        //     NOTE: The correct size will be returned by GpiQueryBitmapBits
+        pOS2bmp->cbImage = dibinfo.dsBm.bmHeight*dibinfo.dsBm.bmWidthBytes;
+
+        //manually reverse bitmap data
+        char *src = GetDIBObject() + (nYdest+nDestHeight-1)*dibinfo.dsBm.bmWidthBytes;
+        char *dst = destBuf;
+        for(int i=0;i<nDestHeight;i++) {
+            memcpy(dst, src, dibinfo.dsBm.bmWidthBytes);
+            dst += dibinfo.dsBm.bmWidthBytes;
+            src -= dibinfo.dsBm.bmWidthBytes;
+        }
+
+        if(dibinfo.dsBitfields[1] == 0x3E0) {//RGB 555?
+            dprintf(("DIBSection::flush: convert RGB 565 to RGB 555"));
+
+            pRGB565to555((WORD *)destBuf, (WORD *)destBuf, (nDestHeight*dibinfo.dsBm.bmWidthBytes)/sizeof(WORD));
+        }
+
+#ifdef INVERT
+        int dest = dibinfo.dsBm.bmHeight - nYdest - nDestHeight;
+#else
+        int dest = nYdest;
+#endif
+        rc = GpiSetBitmapBits(hdc, dest, nDestHeight, destBuf,
+                              pOS2bmp);
+        if(rc == GPI_ALTERROR) {
+            dprintf(("ERROR: GpiQueryBitmapBits failed with %x", WinGetLastError(0)));
+        }
+
+  }
+  else {
+        //SvL: cbImage can be too small for compressed images; GpiQueryBitmapBits
+        //     will fail in that case (CoolEdit 2000). Perhaps because the returned
+        //     compressed image is larger than the original.
+        //     Use uncompressed size instead
+        //     NOTE: The correct size will be returned by GpiQueryBitmapBits
+        pOS2bmp->cbImage = dibinfo.dsBm.bmHeight*dibinfo.dsBm.bmWidthBytes;
+
+        //origin is bottom left, nYdest is based on top left coordinate system
+#ifdef INVERT
+        int dest = dibinfo.dsBm.bmHeight - nYdest - nDestHeight;
+#else
+        int dest = nYdest;
+#endif
+
+        destBuf = GetDIBObject() + dest*dibinfo.dsBm.bmWidthBytes;
+
+        if(dibinfo.dsBitfields[1] == 0x3E0) {//RGB 555?
+            dprintf(("DIBSection::flush: convert RGB 565 to RGB 555"));
+
+            pRGB565to555((WORD *)bmpBitsDblBuffer, (WORD *)destBuf, (nDestHeight*dibinfo.dsBm.bmWidthBytes)/sizeof(WORD));
+            destBuf = bmpBitsDblBuffer;
+        }
+
+        rc = GpiSetBitmapBits(hdc, dest, nDestHeight, destBuf,
+                              pOS2bmp);
+        if(rc == GPI_ALTERROR) {
+            dprintf(("ERROR: GpiQueryBitmapBits failed with %x", WinGetLastError(0)));
+        }
+#ifdef DEBUG_PALETTE
+        if(rc != GPI_ALTERROR && pOS2bmp->cBitCount <= 8) {
+            for(int i=0;i<(1<<pOS2bmp->cBitCount);i++)
+            {
+                dprintf2(("Index %d : 0x%08X\n",i, *((ULONG*)(&pOS2bmp->argbColor[i])) ));
+            }
+        }
+#endif
+  }
+  if(rc != nDestHeight) {
+      dprintf(("!WARNING!: GpiQueryBitmapBits returned %d instead of %d scanlines", rc, nDestHeight));
+  }
+
+#ifdef INVERT
+  if(oldyinversion) GpiEnableYInversion(hdc, oldyinversion);
+#endif
+
+}
+//******************************************************************************
+//Mark the DIB section as invalid; a subsequent read or write access must
+//cause a pagefault
+//******************************************************************************
+void DIBSection::setInvalid()
+{
+    if(!fInvalid) {
+        dprintf(("DIBSection::setInvalid %x (%x)", GetBitmapHandle(), GetDIBObject()));
+        APIRET rc = DosSetMem(bmpBits, dwSize, PAG_DECOMMIT);
+        if(rc) {
+            dprintf(("DIBSection::setInvalid: DosSetMem failed with %d!!", rc));
+            DebugInt3();
+        }
+        fInvalid = TRUE;
+    }
+}
+//******************************************************************************
+//******************************************************************************
+void DIBSection::flush()
+{ 
+    if(pOS2bmp == NULL) {
+        DebugInt3();
+        return;
+    }
+    if(hdc == 0) {
+         HBITMAP hOldBmp;
+         HDC hdcFlush = CreateCompatibleDC(0);
+
+         hOldBmp = SelectObject(hdcFlush, hBitmap);
+         flush(hdcFlush, 0, pOS2bmp->cy); 
+
+         SelectObject(hdcFlush, hOldBmp);
+         DeleteDC(hdcFlush);
+    }
+    else flush(hdc, 0, pOS2bmp->cy); 
+
+    APIRET rc = DosSetMem(bmpBits, dwSize, PAG_READ);
+    if(rc) {
+        dprintf(("DIBSection::flush: DosSetMem failed with %d!!", rc));
+        DebugInt3();
+    }
+    fDirty = FALSE;
+}
+//******************************************************************************
+//******************************************************************************
+void DIBSection::sync() 
+{ 
+    if(pOS2bmp == NULL) {
+        DebugInt3();
+        return;
+    }
+    APIRET rc = DosSetMem(bmpBits, dwSize, PAG_COMMIT|PAG_READ|PAG_WRITE);
+    if(rc) {
+        //might already be committed
+        rc = DosSetMem(bmpBits, dwSize, PAG_READ|PAG_WRITE);
+        if(rc) {
+            dprintf(("DIBSection::sync: DosSetMem failed with %d!!", rc));
+            DebugInt3();
+        }
+    }
+    if(hdc == 0) {
+         HBITMAP hOldBmp;
+         HDC hdcFlush = CreateCompatibleDC(0);
+
+         hOldBmp = SelectObject(hdcFlush, hBitmap);
+         sync(hdcFlush, 0, pOS2bmp->cy); 
+
+         SelectObject(hdcFlush, hOldBmp);
+         DeleteDC(hdcFlush);
+    }
+    else sync(hdc, 0, pOS2bmp->cy); 
+   
+    fInvalid = FALSE;
+
+    //Set bitmap memory to readonly again to detect updates
+    rc = DosSetMem(bmpBits, dwSize, PAG_READ);
+    if(rc) {
+        dprintf(("DosSetMem failed with %d!!", rc));
+        DebugInt3();
+    }
+}
+//******************************************************************************
+//******************************************************************************
+void DIBSection::syncAll()
+{
+  if (!section)
+      return;
+
+  lock();
+  DIBSection *dsect = section;
+
+  do
+  {
+      if(dsect->isDirty() && dsect->isInvalid()) {
+          DebugInt3();
+      }
+      if(dsect->isInvalid())
+      {
+          dsect->sync();
+      }
+      dsect = dsect->next;
+  }
+  while(dsect);
+
+  unlock();
+
+  return;
+}
+//******************************************************************************
 //manual sync if no stretching and bpp is the same
 //WARNING: this also assumes the colortables are the same
 //******************************************************************************
@@ -795,22 +932,22 @@ void DIBSection::SelectDIBObject(HDC hdc)
 {
   this->hdc  = hdc;
   hwndParent = WindowFromDC(hdc);
-  dprintf(("SelectDIBObject %x into %x hwndParent = %x", handle, hdc, hwndParent));
+  dprintf(("SelectDIBObject %x into %x hwndParent = %x", hBitmap, hdc, hwndParent));
 }
 //******************************************************************************
 //******************************************************************************
-DIBSection *DIBSection::findObj(HANDLE handle)
+DIBSection *DIBSection::findObj(HBITMAP hBitmap)
 {
   // PH 2001-08-18 shortcut for performance optimization
   if (!section)
       return NULL;
 
-  DIBSection *dsect = section;
   lock();
+  DIBSection *dsect = section;
 
   do
   {
-    if(dsect->handle == handle)
+    if(dsect->hBitmap == hBitmap)
     {
         unlock();
         return(dsect);
@@ -831,9 +968,9 @@ DIBSection *DIBSection::findHDC(HDC hdc)
   if (!section)
       return NULL;
   
+  lock();
   DIBSection *dsect = section;
   
-  lock();
   do
   {
         if(dsect->hdc == hdc)
@@ -850,9 +987,9 @@ DIBSection *DIBSection::findHDC(HDC hdc)
 }
 //******************************************************************************
 //******************************************************************************
-void DIBSection::deleteSection(HANDLE handle)
+void DIBSection::deleteSection(HBITMAP hBitmap)
 {
- DIBSection *dsect = findObj(handle);
+ DIBSection *dsect = findObj(hBitmap);
 
   if(dsect)
         delete dsect;
@@ -864,7 +1001,7 @@ int DIBSection::GetDIBSection(int iSize, void *lpBuffer)
  DIBSECTION *pDIBSection = (DIBSECTION *)lpBuffer;
  LPBITMAP_W  dsBm        = (LPBITMAP_W)lpBuffer;
 
-  dprintf2(("GetDIBSection %x %d %x", handle, iSize, lpBuffer));
+  dprintf2(("GetDIBSection %x %d %x", hBitmap, iSize, lpBuffer));
   if(iSize == sizeof(DIBSECTION))
   {
         memcpy(pDIBSection, &dibinfo, sizeof(dibinfo));
@@ -916,3 +1053,51 @@ void DIBSection::initDIBSection()
 //******************************************************************************
 DIBSection      *DIBSection::section = NULL;
 CRITICAL_SECTION DIBSection::dibcritsect;
+
+
+//******************************************************************************
+//******************************************************************************
+static BOOL WIN32API DIBExceptionNotify(LPVOID lpBase, ULONG offset, BOOL fWriteAccess, 
+                                        DWORD dwSize, DWORD dwUserData)
+{
+    DIBSection *dsect;
+    HBITMAP hBitmap = (HBITMAP)dwUserData;
+
+    dprintf(("DIBExceptionNotify %x %x %d %d %x", lpBase, offset, fWriteAccess, dwSize, dwUserData));
+
+    dsect = DIBSection::findObj(hBitmap);
+    if(dsect == NULL) {
+        dprintf(("dib section not found!!"));
+        DebugInt3();
+        return FALSE;
+    }
+    if(dsect->isInvalid()) 
+    {//implies read or write to reserved pages
+        //synchronize bitmap memory and bitmap object
+        dsect->sync();
+    }
+    else
+    if(!fWriteAccess) {
+        APIRET rc = DosSetMem(lpBase, dwSize, PAG_READ|PAG_COMMIT);
+        if(rc) {
+            dprintf(("DosSetMem failed with %d!!", rc));
+            DebugInt3();
+            return FALSE;
+        }
+    }
+
+    if(fWriteAccess) {
+        APIRET rc = DosSetMem(lpBase, dwSize, PAG_READ|PAG_WRITE);
+        if(rc) {
+            dprintf(("DosSetMem failed with %d!!", rc));
+            DebugInt3();
+            return FALSE;
+        }
+        dsect->setDirty();
+    }
+
+
+    return TRUE;
+}
+//******************************************************************************
+//******************************************************************************

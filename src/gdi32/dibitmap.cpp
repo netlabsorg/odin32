@@ -1,10 +1,11 @@
-/* $Id: dibitmap.cpp,v 1.41 2003-07-16 10:46:17 sandervl Exp $ */
+/* $Id: dibitmap.cpp,v 1.42 2004-01-11 11:42:10 sandervl Exp $ */
 
 /*
  * GDI32 dib & bitmap code
  *
  * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
  * Copyright 1998 Patrick Haller
+ * Copyright 2002-2003 Innotek Systemberatung GmbH (sandervl@innotek.de)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -319,23 +320,32 @@ UINT WIN32API SetDIBColorTable(HDC hdc, UINT uStartIndex, UINT cEntries,
     dprintf(("GDI32: SetDIBColorTable %x %d,%d %x", hdc, uStartIndex, cEntries, pColors));
     if(dsect)
     {
-        return(dsect->SetDIBColorTable(uStartIndex, cEntries, pColors));
+         return(dsect->SetDIBColorTable(uStartIndex, cEntries, pColors));
     }
     else return(0);
 }
 //******************************************************************************
 //******************************************************************************
-LONG WIN32API GetBitmapBits( HBITMAP hBitmap, LONG arg2, PVOID  arg3)
+LONG WIN32API GetBitmapBits( HBITMAP hBitmap, LONG arg2, PVOID lpvBits)
 {
     dprintf(("GDI32: GetBitmapBits %x", hBitmap));
-    return O32_GetBitmapBits(hBitmap, arg2, arg3);
+
+    if(lpvBits)
+    {
+        DIBSECTION_CHECK_IF_DIRTY_BMP(hBitmap);
+    }
+    return O32_GetBitmapBits(hBitmap, arg2, lpvBits);
 }
 //******************************************************************************
 //******************************************************************************
 LONG WIN32API SetBitmapBits( HBITMAP hBitmap, LONG arg2, const VOID *  arg3)
 {
+    LONG ret;
+
     dprintf(("GDI32: SetBitmapBits %x", hBitmap));
-    return O32_SetBitmapBits(hBitmap, (DWORD)arg2, arg3);
+    ret = O32_SetBitmapBits(hBitmap, (DWORD)arg2, arg3);
+    DIBSECTION_MARK_INVALID_BMP(hBitmap);
+    return ret;
 }
 //******************************************************************************
 //******************************************************************************
@@ -363,29 +373,10 @@ int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLine
 
     dprintf(("GDI32: GetDIBits %x %x %d %d %x %x (biBitCount %d) %d", hdc, hBitmap, uStartScan, cScanLines, lpvBits, lpbi, lpbi->bmiHeader.biBitCount, uUsage));
 
-#if 0
-    if(lpvBits && DIBSection::getSection() != NULL)
+    if(lpvBits)
     {
-        DIBSection *dsect;
-
-        dsect = DIBSection::findObj(hBitmap);
-        if(dsect) {
-             char *bmpBits = dsect->GetDIBObject();
-
-             if(lpbi->bmiHeader.biBitCount == dsect->GetBitCount() && 
-                lpbi->bmiHeader.biWidth > 0) 
-             {
-                 LONG lLineByte;
-
-                 dprintf(("Quick copy from DIB section memory"));
-                 lLineByte = DIB_GetDIBWidthBytes(lpbi->bmiHeader.biWidth, lpbi->bmiHeader.biBitCount);
-                 
-                 memcpy(lpvBits, bmpBits+(uStartScan*lLineByte), cScanLines*lLineByte);
-                 return cScanLines;
-             }
-        }
+        DIBSECTION_CHECK_IF_DIRTY_BMP(hBitmap);
     }
-#endif
 
     //SvL: WGSS screws up the DC if it's a memory DC
     //     TODO: Fix in WGSS (tries to select another bitmap in the DC which fails)
@@ -396,9 +387,9 @@ int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLine
         return 0;
     }
     if(pHps->isMemoryPS) {
-          hdcMem = CreateCompatibleDC(0);
+         hdcMem = CreateCompatibleDC(0);
     }
-    else  hdcMem = hdc;
+    else hdcMem = hdc;
 
     if(lpvBits) {
         biCompression = lpbi->bmiHeader.biCompression;
@@ -546,6 +537,8 @@ int WIN32API SetDIBits(HDC hdc, HBITMAP hBitmap, UINT startscan, UINT numlines, 
         newpix += bmpwidth;
         ret = O32_SetBitmapBits(hBitmap, pBitmapInfo->bmiHeader.biSizeImage, newpix);
 
+        DIBSECTION_MARK_INVALID_BMP(hBitmap);
+
         free(newpix);
         return ret;
     }
@@ -623,17 +616,7 @@ int WIN32API SetDIBits(HDC hdc, HBITMAP hBitmap, UINT startscan, UINT numlines, 
     }
     if(newbits) free(newbits);
 
-    if(DIBSection::getSection() != NULL)
-    {
-        DIBSection *dsect;
-
-        dsect = DIBSection::findObj(hBitmap);
-        if(dsect) {
-             HBITMAP hBmpOld = SelectObject(hdc, hBitmap);
-             dsect->sync(hdc, 0, dsect->GetHeight());
-             SelectObject(hdc, hBmpOld);
-        }
-    }
+    DIBSECTION_MARK_INVALID_BMP(hBitmap);
 
     return ret;
 }
