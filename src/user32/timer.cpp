@@ -1,4 +1,4 @@
-/* $Id: timer.cpp,v 1.14 2001-07-09 18:09:13 sandervl Exp $ */
+/* $Id: timer.cpp,v 1.15 2003-05-16 09:21:00 sandervl Exp $ */
 
 /*
  * timer functions for USER32
@@ -22,6 +22,7 @@
 #include <win32wbase.h>
 #include "oslibutil.h"
 #include "timer.h"
+#include <odincrt.h>
 
 #define DBG_LOCALLOG	DBG_timer
 #include "dbglocal.h"
@@ -51,19 +52,19 @@ typedef struct tagTIMER
 
 static TIMER TimersArray[NB_TIMERS];
 
-HMTX hSemTimer;
+static CRITICAL_SECTION_OS2 timercritsect = {0};
 
 inline void EnterCriticalSection (void)
 {
-   if (hSemTimer == NULLHANDLE)
-      DosCreateMutexSem (NULL, &hSemTimer, 0L, 1);
-   else
-      DosRequestMutexSem (hSemTimer, SEM_INDEFINITE_WAIT);
+   if (timercritsect.hmtxLock == 0)
+      DosInitializeCriticalSection(&timercritsect, NULL);
+
+   DosEnterCriticalSection(&timercritsect);
 }
 
 inline void LeaveCriticalSection (void)
 {
-   DosReleaseMutexSem (hSemTimer);
+   DosLeaveCriticalSection(&timercritsect);
 }
 
 BOOL TIMER_GetTimerInfo(HWND PMhwnd,ULONG PMid,PBOOL sys,PULONG id)
