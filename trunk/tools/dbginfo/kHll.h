@@ -1,4 +1,4 @@
-/* $Id: kHll.h,v 1.4 2000-03-26 21:56:38 bird Exp $
+/* $Id: kHll.h,v 1.5 2000-03-31 15:47:38 bird Exp $
  *
  * kHll - Declarations of the class kHll.
  *        That class is used to create HLL debuginfo.
@@ -61,6 +61,15 @@ public:
     ~kHllPubSymEntry();
 
     int             write(FILE *phFile);
+};
+
+
+class kHllSrcEntry
+{
+private:
+
+public:
+
 };
 
 
