@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.350 2003-01-02 17:02:05 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.351 2003-01-04 12:21:44 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1890,6 +1890,10 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         return HandleSysCommand(wParam,&point);
     }
 
+    case WM_KEYDOWN:
+	if(wParam == VK_F10) iF10Key = VK_F10;
+	break;
+
     case WM_SYSKEYDOWN:
     {
 	if( HIWORD(lParam) & KEYDATA_ALT )
@@ -1998,7 +2002,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 	/* Press and release F10 or ALT */
 	if (((wParam == VK_MENU) && iMenuSysKey) ||
             ((wParam == VK_F10) && iF10Key))
-              ::SendMessageW( GetTopWindow(), WM_SYSCOMMAND, SC_KEYMENU, 0L );
+              ::SendMessageW( GetTopParent(), WM_SYSCOMMAND, SC_KEYMENU, 0L );
 	iMenuSysKey = iF10Key = 0;
         break;
 
