@@ -2027,7 +2027,11 @@ MONTHCAL_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
   default:
     if(uMsg >= WM_USER)
       ERR( "unknown msg %04x wp=%08x lp=%08lx\n", uMsg, wParam, lParam);
+#ifdef __WIN32OS2__
+    return defComCtl32ProcA(hwnd, uMsg, wParam, lParam);
+#else
     return DefWindowProcA(hwnd, uMsg, wParam, lParam);
+#endif
   }
   return 0;
 }
