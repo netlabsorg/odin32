@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.23 1999-10-04 09:55:53 sandervl Exp $
+# $Id: makefile,v 1.24 1999-10-14 13:17:55 bird Exp $
 
 #
 # PD-Win32 API
@@ -60,9 +60,9 @@ all:
         $(MAKE_CMD)
         cd ..\peldr
         $(MAKE_CMD)
-        cd ..\pe2lx
+        cd ..\win32k\pe2lx
         $(MAKE_CMD)
-        cd ..\ddraw
+        cd ..\..\ddraw
         $(MAKE_CMD)
         cd ..\ole32
         $(MAKE_CMD)
