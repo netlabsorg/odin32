@@ -1,4 +1,4 @@
-/* $Id: systray.cpp,v 1.2 2000-05-09 19:01:51 sandervl Exp $ */
+/* $Id: systray.cpp,v 1.3 2000-06-03 07:18:54 sandervl Exp $ */
 /*
  *      Systray
  *
@@ -47,6 +47,7 @@ typedef struct Systray {
 static Systray systray;
 static int nNumberTrayElements;
 
+#define SYSTRAY_CLASS "OdinSysTray"
 
 static BOOL SYSTRAY_Delete(PNOTIFYICONDATAW pnid,BOOL unicode);
 
@@ -166,7 +167,7 @@ BOOL SYSTRAY_RegisterClass(void)
   wc.hCursor       = LoadCursorA(0, IDC_ARROWA);
   wc.hbrBackground = (HBRUSH)(COLOR_WINDOW);
   wc.lpszMenuName  = NULL;
-  wc.lpszClassName = "WineSystray";
+  wc.lpszClassName = SYSTRAY_CLASS;
 
   if (!RegisterClassA(&wc)) {
     ERR("RegisterClass(WineSystray) failed\n");
@@ -198,7 +199,7 @@ BOOL SYSTRAY_Create(SystrayData *ptrayItem)
 
   /* Create tray window for icon. */
   ptrayItem->hWnd = CreateWindowExA( WS_EX_TRAYWINDOW,
-                                "OdinSystray", "Odin-Systray",
+                                SYSTRAY_CLASS, "Odin-Systray",
                                 WS_VISIBLE | WS_POPUP,
                                 CW_USEDEFAULT, CW_USEDEFAULT,
                                 rect.right-rect.left, rect.bottom-rect.top,
