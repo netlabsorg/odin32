@@ -1,4 +1,4 @@
-/* $Id: fillfunc.cpp,v 1.4 2001-04-04 09:02:15 sandervl Exp $ */
+/* $Id: fillfunc.cpp,v 1.5 2002-07-01 16:02:05 sandervl Exp $ */
 
 /*
  * ColorFill functions
@@ -39,6 +39,7 @@ void __cdecl Fill8( char* pDst,
 
   if(dwWidth % 4)
   {
+    if(i==0) i = 1;	//or else next line will corrupt heap
     pFillPos = (char*) (&pColor[i-1]);
     for(i=0;i<dwWidth % 4;i++)
       pFillPos[i] = (UCHAR) dwColor;
@@ -80,6 +81,7 @@ void __cdecl Fill16( char* pDst,
 
   if(dwWidth % 2)
   {
+     if(i==0) i = 1;	//or else next line will corrupt heap
      pFillPos = (char*)(&pColor[i-1]);
     *((USHORT*)pFillPos) = (USHORT)dwColor;
   }
@@ -221,7 +223,7 @@ void __cdecl Fill32( char* pDst,
                           VOID  *pPalette
                         )
 {
-  dprintf(("Fill16on16\n"));
+  dprintf(("Fill16on16 %x (%d,%d)(%d,%d) %d %x", pDB+(dwTop*dwPitchDB)+(dwLeft*2), dwLeft, dwTop, dwWidth, dwHeight, dwPitchDB, dwColor));
   dwColor = (dwColor&0xFFFF)+((dwColor&0xFFFF)<<16);
 
   Fill16( pDB+(dwTop*dwPitchDB)+(dwLeft*2),
