@@ -1,3 +1,4 @@
+/* $Id: antimoniker.cpp,v 1.2 1999-09-24 21:49:42 davidr Exp $ */
 /* 
  * AntiMonikers functions.
  * 
