@@ -1,4 +1,32 @@
-/* $Id: ChangeLog,v 1.2610 2003-07-31 12:25:22 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2611 2003-07-31 16:00:46 sandervl Exp $ */
+
+ 2003-07-31: KO Myung-Hun <komh@chollian    >
+    - USER32:   o fixed GetMenuStringA() to truncate DBCS string correctly.
+                o fixed GetMenuItemInfo_common() to truncate DBCS string correctly.
+                o fixed WM_GETTEXT of Win32BaseWindow::DefWindowProcA() and 
+                   Win32BaseWindow::DefWindowProcW() to ensure null-terminator.
+                o fixed Win32BaseWindow::GetWindowTextA() and Win32BaseWindow::GetWindowTextW()
+                  to ensure null-terminator.
+                o fixed memory allocation for windowNameW. When open 'Open common dialog box'
+                  memory block of windowNameW is overwritten.
+                o fixed MessageBoxIndirectW() to support unicode correctly.
+                o fixed OSLibWinDispatchMsg() to distinguish ascii message from 
+                  unicode message in case of the message being sent directly 
+                o fixed OS2ToWinMsgTranslate() to process DBCS input.
+                o fixed Win32BaseWindow::MsgChar() to distinguish ascii from unicode message.
+                o fixed Win32BaseWindow::MsgCreate(), Win32BaseWindow::DefWindowProcA(),
+                  Win32BaseWindow::DefWindowProcW() to process messages related to
+                  window name such as WM_GETTEXT, WM_GETTEXTLENGTH, WM_SETTEXT, and so on.
+                o fixed Win32BaseWindow::GetWindowTxtLength(), Win32BaseWindow::GetWindowTextA(),
+                  and Win32BaseWindow::GetWindowTextW() to process window name correctly.
+                o fixed DispatchMessageW() to call CallWindowProcW() not CallWindowProcA().
+                o fixed WINPROC_UnmapMsg32ATo32W(). len is first word of ptr not lParam on EM_GETLINE.
+                o changed a parameter WPARAC wParam to WPARAC *wParam of WINPROC_MapMsg32WTo32A() and
+                  WINPROC_UnmapMsg32WTo32A() to process WM_GETTEXT.
+                o fixed WINPROC_MapMsg32WTo32A(). When EM_GETLINE mapped, first word of lParam
+                  is ascii length not unicode length.
+                o improved WINPROC_CallProc32ATo32W() and WINPROC_CallProc32WTo32A() to process WM_CHAR
+                  and WM_GETTEXTLENGTH, LB-GETTEXTLEN, CB_GETLBTEXTLEN.
 
  2002-07-31: Dmitry Froloff <froloff@os2   >
     - USER32:   o Convert WM_CHAR characters to UTF-16 for unicode windows
