@@ -1,4 +1,10 @@
- /* $Id: ChangeLog,v 1.214 1999-09-20 10:21:58 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.215 1999-09-20 19:17:10 sandervl Exp $ */
+
+ 99-09-20: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Fix background of button, group & static text
+                  NOTE: Changed default behaviour of WM_CTLCOLOR* handling.
+                        Don't know if this is correct, but it fixes problems
+                        in dialogs (text with white instead of gray background)
 
  99-09-20: Markus Montkowski
         - WNASPI32: full implementation via ASPIROUT$ device driver.
