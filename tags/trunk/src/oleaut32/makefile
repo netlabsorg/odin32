@@ -1,4 +1,4 @@
-#/* $Id: makefile,v 1.8 1999-11-23 21:47:06 davidr Exp $ */
+#/* $Id: makefile,v 1.9 1999-12-06 21:31:19 sandervl Exp $ */
 #
 # PD-Win32 API 
 #
@@ -18,7 +18,8 @@ CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE)
 CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 
-TARGET = oleaut32
+TARGET = olautos2
+ORGTARGET = oleaut32
 
 OBJS =  oleaut32.obj guid.obj \
 	initterm.obj olefont.obj \
@@ -33,11 +34,11 @@ OBJS =  oleaut32.obj guid.obj \
 	iPictureEmf.obj \
 	safearray.obj stubs.obj
 
-all: $(TARGET).dll $(TARGET).lib
+all: $(TARGET).dll $(ORGTARGET).lib
 
 
-$(TARGET).dll: $(OBJS) $(TARGET).def 
-	$(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
+$(TARGET).dll: $(OBJS) $(ORGTARGET).def 
+	$(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(ORGTARGET).def \
               $(PDWIN32_LIB)\pmwinx.lib \
               $(PDWIN32_LIB)\advapi32.lib \
               $(PDWIN32_LIB)\kernel32.lib \
@@ -48,11 +49,11 @@ $(TARGET).dll: $(OBJS) $(TARGET).def
 	$(CP) $@ $(PDWIN32_BIN)
 
 
-$(TARGET).lib: $(TARGET)exp.def
-        $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
+$(ORGTARGET).lib: $(ORGTARGET)exp.def
+        $(IMPLIB) $(IMPLIBFLAGS) $@ $(ORGTARGET)exp.def
         $(CP) $@ $(PDWIN32_LIB)
 
-$(TARGET)exp.def: $(TARGET).def
+$(ORGTARGET)exp.def: $(ORGTARGET).def
         $(IMPDEF) $** $@
 
 oleaut32.obj:		oleaut32.cpp oleaut32.h
