@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.19 2001-09-30 05:28:07 bird Exp $
+# $Id: makefile,v 1.20 2002-04-11 22:41:16 bird Exp $
 
 #
 # Odin32 API
@@ -28,6 +28,7 @@
 #
 ALL_DIRS = \
 .\cmdqd \
+.\profilerfix \
 .\common \
 .\fastdep \
 .\impdef \
@@ -56,7 +57,7 @@ $(COMMONRULES):
 # compile tools needed to compile rest of the tree.
 #
 needed:
-    @$(DODIRS) "cmdqd fastdep common impdef wrc" $(MAKE_CMD)
+    @$(DODIRS) "cmdqd profilerfix fastdep common impdef wrc" $(MAKE_CMD)
 
 
 #
