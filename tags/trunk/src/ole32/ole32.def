@@ -178,3 +178,8 @@ EXPORTS
     CoInitializeSecurity       = _CoInitializeSecurity@36
     CoRegisterSurrogate        = _CoRegisterSurrogate@4
 
+;
+;   Helper Functions
+;
+    WINE_StringFromCLSID       = _WINE_StringFromCLSID@8     @1000
+
