@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.35 2000-12-29 18:39:58 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.36 2001-02-15 00:33:01 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -454,6 +454,13 @@ BOOL OSLibPostMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam, BOOL fUn
     packet->wParam = wParam;
     packet->lParam = lParam;
     return WinPostMsg(hwnd, WIN32APP_POSTMSG, (MPARAM)((fUnicode) ? WIN32MSG_MAGICW : WIN32MSG_MAGICA), (MPARAM)packet);
+}
+//******************************************************************************
+//Direct posting of messages that must remain invisible to the win32 app
+//******************************************************************************
+BOOL OSLibPostMessageDirect(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam)
+{
+    return WinPostMsg(hwnd, msg, (MPARAM)wParam, (MPARAM)lParam);
 }
 //******************************************************************************
 BOOL    _System _O32_PostThreadMessage( DWORD, UINT, WPARAM, LPARAM );
