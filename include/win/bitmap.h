@@ -1,4 +1,4 @@
-/* $Id: bitmap.h,v 1.1 1999-05-24 20:19:08 ktk Exp $ */
+/* $Id: bitmap.h,v 1.2 2000-11-09 18:23:22 sandervl Exp $ */
 
 /*
  * GDI bitmap definitions
@@ -9,7 +9,7 @@
 #ifndef __WINE_BITMAP_H
 #define __WINE_BITMAP_H
 
-#include "gdi.h"
+////#include "gdi.h"
 
 struct tagGDI_BITMAP_DRIVER;
 
@@ -25,6 +25,7 @@ typedef struct {
     void	 *physBitmap; /* ptr to device specific data */
 } DDBITMAP;
 
+#if 0
   /* GDI logical bitmap object */
 typedef struct tagBITMAPOBJ
 {
@@ -51,6 +52,8 @@ extern BITMAP_DRIVER *BITMAP_Driver;
 extern INT16   BITMAP_GetObject16( BITMAPOBJ * bmp, INT16 count, LPVOID buffer );
 extern INT   BITMAP_GetObject( BITMAPOBJ * bmp, INT count, LPVOID buffer );
 extern BOOL  BITMAP_DeleteObject( HBITMAP16 hbitmap, BITMAPOBJ * bitmap );
+#endif
+
 extern INT   BITMAP_GetWidthBytes( INT width, INT depth );
 extern HBITMAP BITMAP_Load( HINSTANCE instance, LPCWSTR name, UINT loadflags );
 extern HBITMAP BITMAP_CopyBitmap( HBITMAP hbitmap );
@@ -61,9 +64,9 @@ extern int DIB_GetDIBImageBytes( int width, int height, int depth );
 extern int DIB_BitmapInfoSize( const BITMAPINFO * info, WORD coloruse );
 extern int DIB_GetBitmapInfo( const BITMAPINFOHEADER *header, DWORD *width,
                               int *height, WORD *bpp, WORD *compr );
-extern void DIB_UpdateDIBSection( DC *dc, BOOL toDIB );
-extern void DIB_DeleteDIBSection( BITMAPOBJ *bmp );
-extern void DIB_SelectDIBSection( DC *dc, BITMAPOBJ *bmp );
+//extern void DIB_UpdateDIBSection( DC *dc, BOOL toDIB );
+//extern void DIB_DeleteDIBSection( BITMAPOBJ *bmp );
+//extern void DIB_SelectDIBSection( DC *dc, BITMAPOBJ *bmp );
 extern void DIB_FixColorsToLoadflags(BITMAPINFO * bmi, UINT loadflags,
   BYTE pix);
 
