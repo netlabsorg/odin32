@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.1027 2000-07-09 22:38:25 phaller Exp $ */
+ /* $Id: changelog,v 1.1028 2000-07-10 18:42:02 sandervl Exp $ */
+
+ 2000-07-10: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: Don't try to search for resources if the module doesn't contain any
 
  2000-07-09: Patrick Haller <phaller@gmx.net>
     - doc:      Moved several documents to the new doc directory and
@@ -21,7 +24,6 @@
     - ODINCRT:  Fixed wrong implementation of strncpy; do not 0 terminate
                 string unless length < length parameter
                 (this is correct behaviour according to C library manual)
-                TODO: Check lstrcpyn* functions in kernel32\heapstring.cpp!
  
  2000-07-04: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: Unstubbed CopyFileExA/W (calls CopyFileA/W; not properly implemented)
