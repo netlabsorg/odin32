@@ -1,11 +1,19 @@
 /*
- * Window position related functions.
+ * Window tracking related functions.
+ *
+ * Copyright 2001 Sander van Leeuwen
+ *
+ * Changes from Wine code: (20011004)
+ * - Only draw changed track frame instead of clearing the old one and
+ *   drawing the new one (less flickering)
+ * - Send WM_MOVING when moving a window (not done in Wine)
+ * - Send WM_SIZING only when sizing a window 
+ * - Fixed handling of rectangles changed by WM_SIZING/MOVING
+ *
+ * Based on Wine code: (dlls\x11drv\winpos.c)
  *
  * Copyright 1993, 1994, 1995, 2001 Alexandre Julliard
  * Copyright 1995, 1996, 1999 Alex Korobka
- *
- * TODO: too much flickering when drawing sizing border.
- *       should be rewritten to only draw changed borders
  *
  */
 #include <os2win.h>
@@ -36,22 +44,283 @@
  *
  * FIXME:  This causes problems in Win95 mode.  (why?)
  */
-static void draw_moving_frame( HDC hdc, RECT *rect, BOOL thickframe )
+static void draw_moving_frame( HDC hdc, RECT *rect, BOOL thickframe, DWORD hittest, BOOL fRedraw)
 {
     if (thickframe)
     {
         const int width = GetSystemMetrics(SM_CXFRAME);
         const int height = GetSystemMetrics(SM_CYFRAME);
 
+        static RECT oldRect = {0};
+
+        if(fRedraw && EqualRect(&oldRect, rect)) {
+            return;
+        }
+
         HBRUSH hbrush = SelectObject( hdc, GetStockObject( GRAY_BRUSH ) );
-        PatBlt( hdc, rect->left, rect->top,
-                rect->right - rect->left - width, height, PATINVERT );
-        PatBlt( hdc, rect->left, rect->top + height, width,
-                rect->bottom - rect->top - height, PATINVERT );
-        PatBlt( hdc, rect->left + width, rect->bottom - 1,
-                rect->right - rect->left - width, -height, PATINVERT );
-        PatBlt( hdc, rect->right - 1, rect->top, -width,
-                rect->bottom - rect->top - height, PATINVERT );
+        if(fRedraw && hittest != HTCAPTION) 
+        {
+             int x, y, linewidth, lineheight;
+
+             //This should be done in a better way (less code), but at least
+             //it works.
+             switch(hittest) {
+             case HTLEFT:
+                 //clear old edge
+                 PatBlt( hdc, oldRect.left, oldRect.top + height,
+                         width, RECT_HEIGHT(&oldRect) - 2*height, PATINVERT );
+                 //and draw new one
+                 PatBlt( hdc, rect->left, rect->top + height,
+                         width, RECT_HEIGHT(rect) - 2*height, PATINVERT );
+
+                 if(oldRect.left > rect->left) {
+                     x = rect->left;
+                     linewidth = oldRect.left - rect->left;
+                 }
+                 else {
+                     x = oldRect.left;
+                     linewidth = rect->left - oldRect.left;
+                 }
+                 PatBlt(hdc, x, oldRect.top,      linewidth, height,  PATINVERT);
+                 PatBlt(hdc, x, oldRect.bottom-1, linewidth, -height, PATINVERT);
+                 break;
+             case HTRIGHT:
+                 //clear old edge
+                 PatBlt( hdc, oldRect.right-1, oldRect.top + height,
+                         -width, RECT_HEIGHT(&oldRect) - 2*height, PATINVERT );
+                 //and draw new one
+                 PatBlt( hdc, rect->right-1, rect->top + height,
+                         -width, RECT_HEIGHT(rect) - 2*height, PATINVERT );
+
+                 if(oldRect.right > rect->right) {
+                     x = rect->right;
+                     linewidth = oldRect.right - rect->right;
+                 }
+                 else {
+                     x = oldRect.right;
+                     linewidth = rect->right - oldRect.right;
+                 }
+                 PatBlt( hdc, x, oldRect.top,      linewidth,  height, PATINVERT );
+                 PatBlt( hdc, x, oldRect.bottom-1, linewidth, -height, PATINVERT );
+                 break;
+
+             case HTTOP:
+                 //clear old edge
+                 PatBlt( hdc, oldRect.left + width, oldRect.top,
+                         RECT_WIDTH(&oldRect) - 2*width, height, PATINVERT );
+                 //and draw new one
+                 PatBlt( hdc, rect->left + width, rect->top,
+                         RECT_WIDTH(rect) - 2*width, height, PATINVERT );
+
+                 if(oldRect.top > rect->top) {
+                     y = rect->top;
+                     lineheight = oldRect.top - rect->top;
+                 }
+                 else {
+                     y = oldRect.top;
+                     lineheight = rect->top - oldRect.top;
+                 }
+
+                 PatBlt( hdc, oldRect.left,      y,  width, lineheight, PATINVERT );
+                 PatBlt( hdc, oldRect.right - 1, y, -width, lineheight, PATINVERT );
+                 break;
+
+             case HTBOTTOM:
+                 //clear old edge
+                 PatBlt( hdc, oldRect.left + width, oldRect.bottom-1,
+                         RECT_WIDTH(&oldRect) - 2*width, -height, PATINVERT );
+                 //and draw new one
+                 PatBlt( hdc, rect->left + width, rect->bottom-1,
+                         RECT_WIDTH(rect) - 2*width, -height, PATINVERT );
+
+                 if(oldRect.bottom > rect->bottom) {
+                     y = rect->bottom;
+                     lineheight = oldRect.bottom - rect->bottom;
+                 }
+                 else {
+                     y = oldRect.bottom;
+                     lineheight = rect->bottom - oldRect.bottom;
+                 }
+
+                 PatBlt( hdc, oldRect.left,      y,  width, lineheight, PATINVERT );
+                 PatBlt( hdc, oldRect.right - 1, y, -width, lineheight, PATINVERT );
+                 break;
+
+             case HTBOTTOMLEFT:
+                 //clear old edge (bottom)
+                 PatBlt( hdc, oldRect.left, oldRect.bottom-1,
+                         RECT_WIDTH(&oldRect) - width, -height, PATINVERT );
+                 //and draw new one
+                 PatBlt( hdc, rect->left, rect->bottom-1,
+                         RECT_WIDTH(rect) - width, -height, PATINVERT );
+
+                 //clear old edge (left)
+                 PatBlt( hdc, oldRect.left, oldRect.top + height,
+                         width, RECT_HEIGHT(&oldRect) - 2*height, PATINVERT );
+                 //and draw new one
+                 PatBlt( hdc, rect->left, rect->top + height,
+                         width, RECT_HEIGHT(rect) - 2*height, PATINVERT );
+
+                 //right
+                 if(oldRect.bottom > rect->bottom) {
+                     y = rect->bottom;
+                     lineheight = oldRect.bottom - rect->bottom;
+                 }
+                 else {
+                     y = oldRect.bottom;
+                     lineheight = rect->bottom - oldRect.bottom;
+                 }
+                 PatBlt( hdc, oldRect.right-1, y,  -width, lineheight, PATINVERT );
+
+                 //top
+                 if(oldRect.left > rect->left) {
+                     x = rect->left;
+                     linewidth = oldRect.left - rect->left;
+                 }
+                 else {
+                     x = oldRect.left;
+                     linewidth = rect->left - oldRect.left;
+                 }
+                 PatBlt(hdc, x, oldRect.top, linewidth, height,  PATINVERT);
+                 break;
+
+             case HTBOTTOMRIGHT:
+                 //clear old edge (bottom)
+                 PatBlt( hdc, oldRect.left + width, oldRect.bottom-1,
+                         RECT_WIDTH(&oldRect) - width, -height, PATINVERT );
+                 //and draw new one
+                 PatBlt( hdc, rect->left + width, rect->bottom-1,
+                         RECT_WIDTH(rect) - width, -height, PATINVERT );
+
+                 //clear old edge (right)
+                 PatBlt( hdc, oldRect.right-1, oldRect.top + height,
+                         -width, RECT_HEIGHT(&oldRect) - 2*height, PATINVERT );
+                 //and draw new one
+                 PatBlt( hdc, rect->right-1, rect->top + height,
+                         -width, RECT_HEIGHT(rect) - 2*height, PATINVERT );
+
+                 //left
+                 if(oldRect.bottom > rect->bottom) {
+                     y = rect->bottom;
+                     lineheight = oldRect.bottom - rect->bottom;
+                 }
+                 else {
+                     y = oldRect.bottom;
+                     lineheight = rect->bottom - oldRect.bottom;
+                 }
+                 PatBlt( hdc, oldRect.left, y, width, lineheight, PATINVERT );
+
+                 //top
+                 if(oldRect.right > rect->right) {
+                     x = rect->right;
+                     linewidth = oldRect.right - rect->right;
+                 }
+                 else {
+                     x = oldRect.right;
+                     linewidth = rect->right - oldRect.right;
+                 }
+                 PatBlt(hdc, x, oldRect.top, linewidth, height,  PATINVERT);
+                 break;
+
+             case HTTOPLEFT:
+                 //clear old edge (top)
+                 PatBlt( hdc, oldRect.left, oldRect.top,
+                         RECT_WIDTH(&oldRect) - width, height, PATINVERT );
+                 //and draw new one
+                 PatBlt( hdc, rect->left, rect->top,
+                         RECT_WIDTH(rect) - width, height, PATINVERT );
+
+                 //clear old edge (left)
+                 PatBlt( hdc, oldRect.left, oldRect.top + height,
+                         width, RECT_HEIGHT(&oldRect) - 2*height, PATINVERT );
+                 //and draw new one
+                 PatBlt( hdc, rect->left, rect->top + height,
+                         width, RECT_HEIGHT(rect) - 2*height, PATINVERT );
+
+                 //right
+                 if(oldRect.top > rect->top) {
+                     y = rect->top;
+                     lineheight = oldRect.top - rect->top;
+                 }
+                 else {
+                     y = oldRect.top;
+                     lineheight = rect->top - oldRect.top;
+                 }
+                 PatBlt( hdc, oldRect.right-1, y,  -width, lineheight, PATINVERT );
+
+                 //bottom
+                 if(oldRect.left > rect->left) {
+                     x = rect->left;
+                     linewidth = oldRect.left - rect->left;
+                 }
+                 else {
+                     x = oldRect.left;
+                     linewidth = rect->left - oldRect.left;
+                 }
+                 PatBlt(hdc, x, oldRect.bottom-1, linewidth, -height,  PATINVERT);
+                 break;
+
+             case HTTOPRIGHT:
+                 //clear old edge (top)
+                 PatBlt( hdc, oldRect.left+width, oldRect.top,
+                         RECT_WIDTH(&oldRect) - width, height, PATINVERT );
+                 //and draw new one
+                 PatBlt( hdc, rect->left+width, rect->top,
+                         RECT_WIDTH(rect) - width, height, PATINVERT );
+
+                 //clear old edge (right)
+                 PatBlt( hdc, oldRect.right-1, oldRect.top + height,
+                         -width, RECT_HEIGHT(&oldRect) - 2*height, PATINVERT );
+                 //and draw new one
+                 PatBlt( hdc, rect->right-1, rect->top + height,
+                         -width, RECT_HEIGHT(rect) - 2*height, PATINVERT );
+
+                 //left
+                 if(oldRect.top > rect->top) {
+                     y = rect->top;
+                     lineheight = oldRect.top - rect->top;
+                 }
+                 else {
+                     y = oldRect.top;
+                     lineheight = rect->top - oldRect.top;
+                 }
+                 PatBlt( hdc, oldRect.left, y,  width, lineheight, PATINVERT);
+
+                 //bottom
+                 if(oldRect.right > rect->right) {
+                     x = rect->right;
+                     linewidth = oldRect.right - rect->right;
+                 }
+                 else {
+                     x = oldRect.right;
+                     linewidth = rect->right - oldRect.right;
+                 }
+                 PatBlt(hdc, x, oldRect.bottom-1, linewidth, -height,  PATINVERT);
+                 break;
+             }
+             oldRect = *rect;
+        }
+        else { 
+             if(fRedraw) {
+                 PatBlt( hdc, oldRect.left, oldRect.top,
+                         RECT_WIDTH(&oldRect) - width, height, PATINVERT );
+                 PatBlt( hdc, oldRect.left, oldRect.top + height, width,
+                         RECT_HEIGHT(&oldRect) - height, PATINVERT );
+                 PatBlt( hdc, oldRect.left + width, oldRect.bottom - 1,
+                         RECT_WIDTH(&oldRect) - width, -height, PATINVERT );
+                 PatBlt( hdc, oldRect.right - 1, oldRect.top, -width,
+                         RECT_HEIGHT(&oldRect) - height, PATINVERT );
+             }
+             oldRect = *rect;
+             PatBlt( hdc, rect->left, rect->top,
+                     rect->right - rect->left - width, height, PATINVERT );
+             PatBlt( hdc, rect->left, rect->top + height, width,
+                     rect->bottom - rect->top - height, PATINVERT );
+             PatBlt( hdc, rect->left + width, rect->bottom - 1,
+                     rect->right - rect->left - width, -height, PATINVERT );
+             PatBlt( hdc, rect->right - 1, rect->top, -width,
+                     rect->bottom - rect->top - height, PATINVERT );
+        }
         SelectObject( hdc, hbrush );
     }
     else DrawFocusRect( hdc, rect );
@@ -157,7 +426,7 @@ void Frame_SysCommandSizeMove(Win32BaseWindow *win32wnd, WPARAM wParam )
 {
     HWND hwnd = win32wnd->getWindowHandle();
     MSG msg;
-    RECT sizingRect, mouseRect, origRect;
+    RECT sizingRect, mouseRect, origRect, lastsizingRect;
     HDC hdc;
     HWND parent;
     LONG hittest = (LONG)(wParam & 0x0f);
@@ -320,7 +589,7 @@ void Frame_SysCommandSizeMove(Win32BaseWindow *win32wnd, WPARAM wParam )
 //                    WINPOS_ShowIconTitle( hwnd, FALSE );
                 }
                 else if(!DragFullWindows)
-                    draw_moving_frame( hdc, &sizingRect, thickframe );
+                    draw_moving_frame( hdc, &sizingRect, thickframe, hittest, FALSE );
             }
 
             if (msg.message == WM_KEYDOWN) SetCursorPos( pt.x, pt.y );
@@ -339,7 +608,7 @@ void Frame_SysCommandSizeMove(Win32BaseWindow *win32wnd, WPARAM wParam )
                 else 
                 if (ON_BOTTOM_BORDER(hittest)) newRect.bottom += dy;
 
-                if(!iconic && !DragFullWindows) draw_moving_frame( hdc, &sizingRect, thickframe );
+////                if(!iconic && !DragFullWindows) draw_moving_frame( hdc, &sizingRect, thickframe, hittest, TRUE);
 
                 /* determine the hit location */
                 if (hittest >= HTLEFT && hittest <= HTBOTTOMRIGHT)
@@ -359,20 +628,15 @@ void Frame_SysCommandSizeMove(Win32BaseWindow *win32wnd, WPARAM wParam )
 
                 dprintf(("WM_SIZING rect (%d,%d)(%d,%d)", newRect.left, newRect.top, newRect.right, newRect.bottom));
 
-#ifdef __WIN32OS2__
-                if(RECT_EQUAL(&newRect, &tempRect) || 
-                   (dy > 0 && RECT_HEIGHT(&newRect) > RECT_HEIGHT(&tempRect)) ||
-                   (dx > 0 && RECT_WIDTH(&newRect) > RECT_WIDTH(&tempRect)) )
-                {
-                    dprintf(("update capture point dx %d dy %d", dx, dy));
-                    capturePoint = pt;
-                    sizingRect = newRect;
-                }
-#endif
+                dprintf(("update capture point dx %d dy %d", dx, dy));
+                capturePoint   = pt;
+                sizingRect     = tempRect;
+                lastsizingRect = newRect;
+
                 if (!iconic)
                 {
                     if(!DragFullWindows)
-                        draw_moving_frame( hdc, &newRect, thickframe );
+                        draw_moving_frame( hdc, &newRect, thickframe, hittest, TRUE );
                     else {
                         /* To avoid any deadlocks, all the locks on the windows
 			   structures must be suspended before the SetWindowPos */
@@ -403,7 +667,7 @@ void Frame_SysCommandSizeMove(Win32BaseWindow *win32wnd, WPARAM wParam )
         DestroyCursor( hDragCursor );
     }
     else if (moved && !DragFullWindows)
-        draw_moving_frame( hdc, &sizingRect, thickframe );
+        draw_moving_frame( hdc, &lastsizingRect, thickframe, hittest, FALSE);
 
     ReleaseDC( parent, hdc );
 
@@ -418,7 +682,7 @@ void Frame_SysCommandSizeMove(Win32BaseWindow *win32wnd, WPARAM wParam )
 //    }
 //    wine_tsx11_unlock();
 
-    if (HOOK_CallHooksA( WH_CBT, HCBT_MOVESIZE, (WPARAM)hwnd, (LPARAM)&sizingRect )) moved = FALSE;
+    if (HOOK_CallHooksA( WH_CBT, HCBT_MOVESIZE, (WPARAM)hwnd, (LPARAM)&lastsizingRect )) moved = FALSE;
 
     SendMessageA( hwnd, WM_EXITSIZEMOVE, 0, 0 );
     SendMessageA( hwnd, WM_SETVISIBLE, !IsIconic(hwnd), 0L);
@@ -437,9 +701,9 @@ void Frame_SysCommandSizeMove(Win32BaseWindow *win32wnd, WPARAM wParam )
         {
             /* NOTE: SWP_NOACTIVATE prevents document window activation in Word 6 */
             if(!DragFullWindows)
-                SetWindowPos( hwnd, 0, sizingRect.left, sizingRect.top,
-                              sizingRect.right - sizingRect.left,
-                              sizingRect.bottom - sizingRect.top,
+                SetWindowPos( hwnd, 0, lastsizingRect.left, lastsizingRect.top,
+                              lastsizingRect.right - lastsizingRect.left,
+                              lastsizingRect.bottom - lastsizingRect.top,
                               ( hittest == HTCAPTION ) ? SWP_NOSIZE : 0 );
         }
         else

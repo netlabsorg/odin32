@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.96 2001-10-03 18:37:51 sandervl Exp $
+# $Id: Makefile,v 1.97 2001-10-07 11:48:27 sandervl Exp $
 
 #
 # Odin32 API
@@ -63,7 +63,6 @@ $(OBJDIR)\windowword.obj \
 $(OBJDIR)\windowmsg.obj \
 $(OBJDIR)\winproc.obj \
 $(OBJDIR)\oslibmsg.obj \
-$(OBJDIR)\wintrack.obj \
 $(OBJDIR)\hook.obj \
 $(OBJDIR)\win32wmdiclient.obj \
 $(OBJDIR)\mdi.obj \
@@ -98,6 +97,7 @@ $(OBJDIR)\timer.obj \
 $(OBJDIR)\dbglocal.obj \
 $(OBJDIR)\caret.obj \
 $(OBJDIR)\text.obj \
+$(OBJDIR)\wintrack.obj \
 $(OBJDIR)\oldnls32.obj \
 $(OBJDIR)\user32rsrc.obj \
 $(OBJDIR)\oslibprf.obj

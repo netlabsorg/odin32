@@ -1,4 +1,4 @@
-/* $Id: uitools.cpp,v 1.29 2001-02-02 19:04:02 sandervl Exp $ */
+/* $Id: uitools.cpp,v 1.30 2001-10-07 11:48:28 sandervl Exp $ */
 /*
  * User Interface Functions
  *
@@ -1615,11 +1615,37 @@ BOOL WIN32API DrawStateW(HDC hdc, HBRUSH hbc, DRAWSTATEPROC lpOutputFunc, LPARAM
 //******************************************************************************
 BOOL WIN32API DrawFocusRect( HDC hdc, const RECT *lpRect)
 {
+#if 0
+    //TODO: This doens't work. Find out why
+
+    HBRUSH hOldBrush;
+    HPEN hOldPen, hNewPen;
+    INT oldDrawMode, oldBkMode;
+
+    dprintf(("USER32: DrawFocusRect %x %x", hdc, lpRect));
+
+    hOldBrush = SelectObject(hdc, GetStockObject(NULL_BRUSH));
+    hNewPen = CreatePen(PS_ALTERNATE, 1, GetSysColor(COLOR_WINDOWTEXT));
+    hOldPen = SelectObject(hdc, hNewPen);
+    oldDrawMode = SetROP2(hdc, R2_XORPEN);
+    oldBkMode = SetBkMode(hdc, TRANSPARENT);
+
+    Rectangle(hdc, lpRect->left, lpRect->top, lpRect->right, lpRect->bottom);
+
+    SetBkMode(hdc, oldBkMode);
+    SetROP2(hdc, oldDrawMode);
+    SelectObject(hdc, hOldPen);
+    DeleteObject(hNewPen);
+    SelectObject(hdc, hOldBrush);
+
+    return TRUE;
+#else
  BOOL rc;
 
     rc = O32_DrawFocusRect(hdc, lpRect);
     dprintf(("USER32:  DrawFocusRect %x %x returned %d", hdc, lpRect, rc));
     return rc;
+#endif
 }
 //******************************************************************************
 //******************************************************************************
