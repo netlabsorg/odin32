@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.37 2001-09-20 12:57:15 sandervl Exp $*/
+/* $Id: menu.cpp,v 1.38 2001-10-16 14:49:45 sandervl Exp $*/
 /*
  * Menu functions
  *
@@ -197,6 +197,10 @@ static BOOL fEndMenu = FALSE;
 static UINT mouseOverMenuID          = -1;
 static BOOL isTimerSet               = FALSE;
 
+#ifdef __WIN32OS2__
+static BOOL fDisableOdinSysMenuItems = FALSE;
+#endif
+
 /***********************************************************************
  *           debug_print_menuitem
  *
@@ -363,6 +367,22 @@ static HMENU MENU_CopySysPopup(void)
 #endif
         menu->wFlags |= MF_SYSMENU | MF_POPUP;
         SetMenuDefaultItem(hMenu, SC_CLOSE, FALSE);
+#ifdef __WIN32OS2__
+        if(fDisableOdinSysMenuItems) {
+            RemoveMenu(hMenu, 9, MF_BYPOSITION);
+            RemoveMenu(hMenu, 9, MF_BYPOSITION);
+            RemoveMenu(hMenu, 9, MF_BYPOSITION);
+            RemoveMenu(hMenu, 9, MF_BYPOSITION);
+            RemoveMenu(hMenu, 9, MF_BYPOSITION);
+        }
+#ifndef DEBUG
+        else {
+            RemoveMenu(hMenu, SC_PUTMARK, MF_BYCOMMAND);
+            RemoveMenu(hMenu, SC_DEBUGINT3, MF_BYCOMMAND);
+            RemoveMenu(hMenu, 11, MF_BYPOSITION);	//separator
+        }
+#endif
+#endif
     }
     else {
         hMenu = 0;
@@ -4881,4 +4901,11 @@ BOOL POPUPMENU_Unregister()
 }
 //******************************************************************************
 //******************************************************************************
-
+#ifdef __WIN32OS2__
+void DisableOdinSysMenuItems()
+{
+    fDisableOdinSysMenuItems = TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+#endif
