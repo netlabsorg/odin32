@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.21 1999-11-08 13:43:12 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.22 1999-11-08 15:45:19 sandervl Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -42,7 +42,7 @@
 #include "oslibmisc.h"
 #include <heapshared.h>
 #include "mmap.h"
-#include "fileio.h"
+#include "directory.h"
 
 /*-------------------------------------------------------------------*/
 /* A clean up routine registered with DosExitList must be used if    */
