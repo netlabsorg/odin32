@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.46 1999-11-25 19:22:03 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.47 1999-12-01 16:58:29 achimha Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -215,7 +215,7 @@ static BOOL     PostThreadMessageW(ULONG threadid, UINT msg, WPARAM wParam, LPAR
 static LRESULT  BroadcastMessageA(int type, UINT msg, WPARAM wParam, LPARAM lParam);
 static LRESULT  BroadcastMessageW(int type, UINT msg, WPARAM wParam, LPARAM lParam);
 
-       LRESULT  DefWindowProcA(UINT msg, WPARAM wParam, LPARAM lParam);
+       LRESULT  DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam, BOOL fReentered = FALSE);
        LRESULT  DefWindowProcW(UINT msg, WPARAM wParam, LPARAM lParam);
 
        LRESULT  DefWndControlColor(UINT ctlType, HDC hdc);
