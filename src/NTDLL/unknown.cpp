@@ -1,4 +1,4 @@
-/* $Id: unknown.cpp,v 1.1 1999-06-28 08:08:19 phaller Exp $ */
+/* $Id: unknown.cpp,v 1.2 1999-08-05 23:28:33 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -54,5 +54,97 @@ NTSTATUS WIN32API NtAllocateUuids(DWORD x1,
 
   return 0;
 }
+
+
+/*****************************************************************************
+ * Name      : _alldiv
+ * Purpose   : unknown
+ * Parameters: unknown, probably wrong
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.?
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1999/06/01 09:00]
+ *****************************************************************************/
+
+DWORD CDECL OS2_alldiv(DWORD x1,
+                       DWORD x2)
+{
+  dprintf(("NTDLL: _alldiv(%08xh,%08xh) not implemented.\n",
+           x1,
+           x2));
+
+  return (x1 / x2);
+}
+
+
+/*****************************************************************************
+ * Name      : _allmul
+ * Purpose   : unknown
+ * Parameters: unknown, probably wrong
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.?
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1999/06/01 09:00]
+ *****************************************************************************/
+
+DWORD CDECL OS2_allmul(DWORD x1,
+                       DWORD x2)
+{
+  dprintf(("NTDLL: _allmul(%08xh,%08xh) not implemented.\n",
+           x1,
+           x2));
+
+  return (x1 * x2);
+}
+
+
+/*****************************************************************************
+ * Name      : _chkstk
+ * Purpose   : unknown
+ * Parameters: unknown, probably wrong
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.?
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1999/06/01 09:00]
+ *****************************************************************************/
+
+void CDECL OS2_chkstk(void)
+{
+  dprintf(("NTDLL: _chkstk(%08xh,%08xh) not implemented.\n"));
+}
+
+
+/*****************************************************************************
+ * Name      : RtlLargeIntegerToChar
+ * Purpose   : unknown
+ * Parameters: unknown, probably wrong
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.?
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1999/06/01 09:00]
+ *****************************************************************************/
+
+DWORD WIN32API RtlLargeIntegerToChar(LARGE_INTEGER li,
+                                     LPWSTR        retstr,
+                                     DWORD         retlen)
+{
+  dprintf(("NTDLL: RtlLargeIntegerToChar(%08xh,%08xh,%08xh) not implemented.\n",
+           li,
+           retstr,
+           retlen));
+
+  return 0;
+}
+
+
+
 
 
