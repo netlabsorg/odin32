@@ -1,4 +1,4 @@
-/* $Id: Win32kCC.c,v 1.8 2000-12-12 15:32:16 bird Exp $
+/* $Id: Win32kCC.c,v 1.9 2000-12-12 15:34:17 bird Exp $
  *
  * Win32CC - Win32k Control Center.
  *
@@ -77,6 +77,7 @@ BOOL    fNotExit;                       /* Global variable used to stop WM_QUITS
                                          * loop will never exit, but ignore all
                                          * WM_QUITs.
                                          */
+
 
 /*******************************************************************************
 *   Internal Functions                                                         *
