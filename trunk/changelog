@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.576 1999-12-27 14:45:11 sandervl Exp $ */
+ /* $Id: changelog,v 1.577 1999-12-27 17:06:23 cbratschi Exp $ */
+
+ 99-12-27: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32: fixed SetWindowPos
 
  99-12-27: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Fixed GetActiveWindow (also fixes problem with mouse messages
