@@ -1,4 +1,4 @@
-/* $Id: kHll.cpp,v 1.9 2000-03-31 15:35:09 bird Exp $
+/* $Id: kHll.cpp,v 1.10 2000-04-07 02:47:00 bird Exp $
  *
  * kHll - Implementation of the class kHll.
  *        That class is used to create HLL debuginfo.
@@ -145,8 +145,12 @@ kHllPubSymEntry::~kHllPubSymEntry()
 
 /**
  * Write this entry to file.
- * @returns   Number of bytes written.
- * @param     phFile    File handle.
+ * @returns   Count of bytes written (on success).
+ *            -3    Invalid offsets.
+ *            -2    Seek error.
+ *            -1    Write error.
+ *            0     No data written. Concidered as an error!
+ * @param     phFile    Filehandle.
  */
 int kHllPubSymEntry::write(FILE *phFile)
 {
@@ -155,6 +159,336 @@ int kHllPubSymEntry::write(FILE *phFile)
                   1,
                   offsetof(HLLPUBLICSYM, achName) + pPubSym->cchName,
                   phFile);
+}
+
+
+
+
+
+
+
+/*******************************************************************************
+*                                                                              *
+*   kHllLineNumberChunk                                                        *
+*                                                                              *
+*   kHllLineNumberChunk                                                        *
+*                                                                              *
+*******************************************************************************/
+
+
+
+
+    int                 cLines;
+    PHLLLINENUMBERENTRY paLines;
+    HLLFIRSTENTRY       FirstEntry;
+
+/**
+ * Constructor.
+ * @param     iSeg      Segment number for these linenumbers.
+ * @param     offBase   Base offset for all line number offsets. (defaults to 0)
+ */
+kHllLineNumberChunk::kHllLineNumberChunk(
+    unsigned short int iSeg,
+    unsigned long int offBase /*= 0*/
+    )
+{
+    memset(&FirstEntry, 0, sizeof(FirstEntry));
+    FirstEntry.hll04.iSeg = iSeg;
+    FirstEntry.hll04.u1.offBase = offBase;
+    FirstEntry.hll04.uchType = 0;
+}
+
+
+
+/**
+ * Destructor.
+ */
+kHllLineNumberChunk::~kHllLineNumberChunk()
+{
+    if (paLines != NULL)
+        free(paLines);
+    paLines = 0;
+    FirstEntry.hll04.cEntries = 0;
+}
+
+
+
+/**
+ * Adds a line information.
+ * @returns   Success indicator.
+ * @param     iusFile       File index.
+ * @param     usLine        Line number
+ * @param     off           Offset into object.
+ */
+BOOL                kHllLineNumberChunk::addLineInfo(
+                        unsigned short int  iusFile,
+                        unsigned short int  usLine,
+                        unsigned long int   off
+                        )
+{
+    /*
+     * Allocate more memory?
+     */
+    if (FirstEntry.hll04.cEntries % 20 == 0)
+        {
+        void *pv = realloc(paLines, (FirstEntry.hll04.cEntries + 20) * sizeof(paLines[0].hll04));
+        assert(pv != NULL);
+        if (pv == NULL)
+            return FALSE;
+        paLines = (PHLLLINENUMBERENTRY)pv;
+        }
+
+    /*
+     * Add line info entry.
+     */
+    paLines[FirstEntry.hll04.cEntries].hll04.iusSourceFile  = iusFile;
+    paLines[FirstEntry.hll04.cEntries].hll04.off            = off;
+    paLines[FirstEntry.hll04.cEntries].hll04.usLine         = usLine;
+    FirstEntry.hll04.cEntries++;
+
+    return FALSE;
+}
+
+
+/**
+ * Write this entry to file.
+ * @returns   Count of bytes written (on success).
+ *            -3    Invalid offsets.
+ *            -2    Seek error.
+ *            -1    Write error.
+ *            0     No data written. Concidered as an error!
+ * @param     phFile    Filehandle.
+ */
+int     kHllLineNumberChunk::write(FILE *phFile)
+{
+    int cb;
+    int cbWritten;
+
+    /*
+     * First entry
+     */
+    cb = sizeof(paLines[0])*FirstEntry.hll04.cEntries;
+    cbWritten = fwrite(&FirstEntry, 1, cb, phFile);
+    if (cbWritten != cb)
+        return -1;
+
+    /*
+     * Line array.
+     */
+    cb = sizeof(paLines[0])*FirstEntry.hll04.cEntries;
+    cbWritten = fwrite(paLines, 1, cb, phFile);
+    if (cbWritten != cb)
+        return -1;
+
+    return cbWritten + sizeof(FirstEntry.hll04);
+}
+
+
+
+
+
+/*******************************************************************************
+*                                                                              *
+*   kHllSrcEntry                                                               *
+*                                                                              *
+*   kHllSrcEntry                                                               *
+*                                                                              *
+*******************************************************************************/
+
+
+
+
+
+/**
+ * Constructor.
+ */
+kHllSrcEntry::kHllSrcEntry()
+    :
+    cFilenames(0),
+    pachFilenames(NULL),
+    cbFilenames(0),
+    cbFilenamesAllocated(0)
+{
+}
+
+
+/**
+ * Destructor.
+ */
+kHllSrcEntry::~kHllSrcEntry()
+{
+    if (pachFilenames != NULL)
+        free(pachFilenames);
+    pachFilenames = NULL;
+    cFilenames = cbFilenames = cbFilenamesAllocated = 0;
+}
+
+
+
+/**
+ * Add/queries a Linenumber chunk.
+ * A linenumber chunk is a collection of linenumber information for a
+ * module segement.
+ * @returns   Pointer to linenumber chunk which you may add linenumber info to.
+ *            NULL on failiure.
+ * @param     iSeg      Segment number for these linenumbers.
+ * @param     offBase   Base offset for all line number offsets. (defaults to 0)
+ */
+kHllLineNumberChunk *
+                    kHllSrcEntry::addLineNumberChunk(
+                        unsigned short int  iSeg,
+                        unsigned long int   offBase/* = 0*/
+                        )
+{
+    kHllLineNumberChunk *pChunk;
+
+    /*
+     * Try find existing chunk.
+     */
+    pChunk = Lines.getFirst();
+    while (pChunk != NULL && pChunk->getSeg() != iSeg)
+        pChunk = (kHllLineNumberChunk*)pChunk->getNext();
+
+    /*
+     * If not found, then create a new one and add it to the list.
+     */
+    if (pChunk != NULL)
+    {
+        pChunk = new kHllLineNumberChunk(iSeg, offBase);
+        assert(pChunk != NULL);
+        if (pChunk != NULL)
+            Lines.insert(pChunk);
+    }
+
+    return pChunk;
+}
+
+
+
+/**
+ * Adds a file for this module.
+ * @returns   Filename index used when adding linenumbers.
+ * @param     pszFilename  Pointer to filaname string.
+ */
+unsigned short      kHllSrcEntry::addFile(
+                        const char *        pszFilename
+                        )
+{
+    return addFile(pszFilename, strlen(pszFilename));
+}
+
+
+
+/**
+ * Adds a file for this module.
+ * @returns   Filename index used when adding linenumbers.
+ *            0 on error.
+ * @param     pachFilename  Pointer to filaname string (not zero terminated).
+ * @param     cchFilename   Length of filename.
+ */
+unsigned short      kHllSrcEntry::addFile(
+                        const char *        pachFilename,
+                        int                 cchFilename
+                        )
+{
+    assert(pachFilename != NULL);
+    assert(cchFilename < 256);
+    if (cchFilename >= 256)
+        cchFilename = 255;
+
+    /*
+     * Allocate more memory?
+     */
+    if ((cbFilenames + cchFilename + 1) >= cbFilenamesAllocated)
+    {
+        void *pv = realloc(pachFilenames, cbFilenamesAllocated + 256);
+        assert(pv != NULL);
+        if (pv == NULL)
+            return 0;
+        pachFilenames = (char*)pv;
+        cbFilenamesAllocated += 256;
+    }
+
+
+    /*
+     * Add filename
+     */
+    pachFilenames[cbFilenames++] = cchFilename;
+    memcpy(&pachFilenames[cbFilenames], pachFilename, cchFilename);
+    cbFilenames += cchFilename;
+
+    return ++cFilenames;
+}
+
+
+
+/**
+ * Write this entry to file.
+ * @returns   Count of bytes written (on success).
+ *            -3    Invalid offsets.
+ *            -2    Seek error.
+ *            -1    Write error.
+ *            0     No data written. Concidered as an error!
+ * @param     phFile    Filehandle.
+ */
+int                 kHllSrcEntry::write(FILE *phFile)
+{
+    HLLFIRSTENTRY       FirstEntry;
+    HLLFILENAMEENTRY    FilenameEntry;
+    int                 cb;
+    int                 cbWrote;
+    int                 cbWritten;
+
+    /*
+     *  Filenames - if no filename present we'll add a dummy filename!
+     *      First entry for the filenames.
+     *      Filename entry header.
+     *      Write filename entries.
+     */
+    FirstEntry.hll04.usLine = 0;
+    FirstEntry.hll04.uchType = 3;       /* filename */
+    FirstEntry.hll04.uchReserved = 0;
+    FirstEntry.hll04.cEntries = max(cFilenames, 1);
+    FirstEntry.hll04.iSeg = 0;
+    FirstEntry.hll04.u1.cbFileNameTable = cbFilenames > 0 ? cbFilenames : 8;
+    cb = sizeof(FirstEntry.hll04);
+    cbWritten = cbWrote = fwrite(&FirstEntry, 1, cb, phFile);
+    if (cb != cbWrote)
+        return -1;
+
+    FilenameEntry.cSourceFiles = max(cFilenames, 1);
+    FilenameEntry.offSource = 0;
+    FilenameEntry.cSourceRecords = 0;
+    cb = offsetof(HLLFILENAMEENTRY, cchName);
+    cbWritten += cbWrote = fwrite(&FilenameEntry, 1, cb, phFile);
+    if (cbWrote != cb)
+        return -1;
+
+    if (cbFilenames > 0)
+    {
+        cbWritten += cbWrote = fwrite(pachFilenames, 1, cbFilenames, phFile);
+        if (cbWrote != cbFilenames)
+            return -1;
+    }
+    else
+    {   /* no filename - write dummy empty */
+        cbWritten += cbWrote = fwrite("\07dummy.c", 1, 8, phFile);
+        if (cbWrote != 8)
+            return -1;
+    }
+
+
+    /*
+     * Write linenumbers.
+     */
+    if (Lines.getFirst() != NULL)
+    {
+        cbWritten += cbWrote = kHllBaseEntry::writeList(phFile, Lines.getFirst());
+        if (cbWrote < 0)
+            return cbWrote;
+    }
+
+    return cbWritten;
 }
 
 
@@ -368,7 +702,10 @@ const void *    kHllModuleEntry::addPublicSymbol(
 
 /**
  * Write this HLL entry to file.
- * @returns   Count of bytes written. -1 on error.
+ * @returns   Count of bytes written.
+ *            -3    Invalid offsets.
+ *            -2    Seek error.
+ *            -1    Write error.
  * @param     phFile    Filehandle.
  * @param     off       Current offset into the HLL data.
  *                      This is stored and used when making the directory
@@ -424,14 +761,14 @@ int         kHllModuleEntry::write(FILE *phFile, unsigned long off)
         return cch;
     cchWritten += cch;
     off += cch;
+    */
 
     offSource = off;
-    cbSource = cch = kHllBaseEntry::writeList(phFile, Source.getFirst());
+    cbSource = cch = Source.write(phFile);
     if (cch < 0)
         return cch;
     cchWritten += cch;
     off += cch;
-    */
 
     /*
      * Marks offsets and sizes valid and returns succesfully.
@@ -518,6 +855,7 @@ int         kHllModuleEntry::writeDirEntries(FILE *phFile, unsigned short iMod)
             return -1;
         cchWritten += cch;
     }
+    */
 
     if (cbSource > 0)
     {
@@ -531,7 +869,6 @@ int         kHllModuleEntry::writeDirEntries(FILE *phFile, unsigned short iMod)
         cchWritten += cch;
     }
 
-    */
 
     return cchWritten;
 }
