@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.29 2002-01-02 18:36:01 sandervl Exp $ */
+/* $Id: text.cpp,v 1.30 2002-06-25 07:21:03 sandervl Exp $ */
 
 /*
  * GDI32 text apis
@@ -281,21 +281,14 @@ BOOL WIN32API ExtTextOutW(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LP
 //******************************************************************************
 BOOL WIN32API TextOutA(HDC hdc,int nXStart,int nYStart,LPCSTR lpszString,int cbString)
 {
-   dprintf(("GDI32: TextOutA %x (%d,%d) %d %*s", hdc, nXStart, nYStart, cbString, cbString, lpszString));
+   dprintf(("GDI32: TextOutA %x (%d,%d) %d %.*s", hdc, nXStart, nYStart, cbString, cbString, lpszString));
    return InternalTextOutA(hdc,nXStart,nYStart,0,NULL,lpszString,cbString,NULL,FALSE);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API TextOutW(HDC hdc,int nXStart,int nYStart,LPCWSTR lpszString,int cbString)
 {
-#ifdef DEBUG
-   //runtime lib ignores width specifier and also prints string until terminator is found
-   LPWSTR buggyrtl = (LPWSTR)malloc((cbString+1)*2);
-   memcpy(buggyrtl, lpszString, cbString*2);
-   buggyrtl[cbString] = 0;
-   dprintf(("GDI32: TextOutW %x (%d,%d) %d %ls", hdc, nXStart, nYStart, cbString, buggyrtl));
-   free(buggyrtl);
-#endif
+   dprintf(("GDI32: TextOutW %x (%d,%d) %d %.*ls", hdc, nXStart, nYStart, cbString, cbString, lpszString));
    return InternalTextOutW(hdc,nXStart,nYStart,0,NULL,lpszString,cbString,NULL,FALSE);
 }
 //******************************************************************************
@@ -336,7 +329,7 @@ BOOL WIN32API GetTextExtentPointA(HDC hdc, LPCTSTR lpsz, int cbString,
                                   LPSIZE lpsSize)
 {
 #if 1
-   dprintf(("GDI32: GetTextExtentPointA %x %*s %d", hdc, cbString, lpsz, cbString));
+   dprintf(("GDI32: GetTextExtentPointA %x %.*s %d", hdc, cbString, lpsz, cbString));
 
    if(lpsz == NULL || cbString < 0 || lpsSize == NULL)
    {
@@ -467,7 +460,7 @@ BOOL WIN32API GetTextExtentPointW(HDC    hdc,
       return TRUE;
    }
 
-   dprintf(("GDI32: GetTextExtentPointW %x %x %d %x", hdc, lpString, cbString, lpSize));
+   dprintf(("GDI32: GetTextExtentPointW %x %.*ls %d %x", hdc, cbString, lpString, cbString, lpSize));
 
    astring = (char *)malloc((cbString+1)*sizeof(WCHAR));
    UnicodeToAsciiN(lpString, astring, cbString+1);
