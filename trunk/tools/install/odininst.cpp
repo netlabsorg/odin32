@@ -1,4 +1,4 @@
-/* $Id: odininst.cpp,v 1.7 2001-07-23 19:15:50 sandervl Exp $ */
+/* $Id: odininst.cpp,v 1.8 2001-07-28 18:48:10 sandervl Exp $ */
 /*
  * Odin WarpIn installation app
  *
@@ -24,6 +24,7 @@
  *  - WINDOWSDIR\ShellNew
  *      - x:\Program Files
  *      - x:\Program Files\Common Files
+ *  - WINDOWSDIR\Temp
  *  - and a minimal system registry
  *
  * Copyright 1999-2001 Sander van Leeuwen (sandervl@xs4all.nl)
@@ -773,6 +774,12 @@ BOOL CreateSystemDirectories()
     strcat(dirname, "\\Start Menu");
     CreateDirectory(dirname, NULL);
     RegSetValueEx(hkey,"Start Menu",0,REG_SZ, (LPBYTE)dirname, strlen(dirname)+1);
+
+    //Temp directory
+    strcpy(dirname, InternalGetWindowsDirectory());
+    strcat(dirname, "\\Temp");
+    CreateDirectory(dirname, NULL);
+
     //Programs
     strcpy(dirname, InternalGetWindowsDirectory());
     strcat(dirname, "\\Start Menu\\Programs");
