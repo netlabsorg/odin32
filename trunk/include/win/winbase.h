@@ -1,4 +1,4 @@
-/* $Id: winbase.h,v 1.8 1999-12-17 16:55:13 sandervl Exp $ */
+/* $Id: winbase.h,v 1.9 1999-12-21 00:29:30 sandervl Exp $ */
 
 #ifndef __WINE_WINBASE_H
 #define __WINE_WINBASE_H
@@ -828,27 +828,6 @@ typedef struct tagSYSTEM_INFO
     WORD	wProcessorLevel;
     WORD	wProcessorRevision;
 } SYSTEM_INFO, *LPSYSTEM_INFO;
-
-/* service main function prototype */
-typedef VOID (* CALLBACK LPSERVICE_MAIN_FUNCTIONA)(DWORD,LPSTR);
-typedef VOID (* CALLBACK LPSERVICE_MAIN_FUNCTIONW)(DWORD,LPWSTR);
-DECL_WINELIB_TYPE_AW(LPSERVICE_MAIN_FUNCTION)
-
-/* service start table */
-typedef struct
-{
-    LPSTR			lpServiceName;
-    LPSERVICE_MAIN_FUNCTIONA	lpServiceProc;
-} *LPSERVICE_TABLE_ENTRYA, SERVICE_TABLE_ENTRYA;
-
-typedef struct
-{
-    LPWSTR			lpServiceName;
-    LPSERVICE_MAIN_FUNCTIONW	lpServiceProc;
-} *LPSERVICE_TABLE_ENTRYW, SERVICE_TABLE_ENTRYW;
-
-DECL_WINELIB_TYPE_AW(SERVICE_TABLE_ENTRY)
-DECL_WINELIB_TYPE_AW(LPSERVICE_TABLE_ENTRY)
 
 /* {G,S}etPriorityClass */
 #define	NORMAL_PRIORITY_CLASS	0x00000020
