@@ -1,4 +1,4 @@
-/* $Id: oslibdos.h,v 1.21 2000-09-04 18:24:43 sandervl Exp $ */
+/* $Id: oslibdos.h,v 1.22 2000-09-12 04:27:45 bird Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -84,6 +84,19 @@ DWORD OSLibDosSetFilePtr(DWORD hFile, DWORD offset, DWORD method);
 
 DWORD OSLibDosSearchPath(DWORD cmd, char *path, char *name, char *full_name, DWORD length_fullname);
 
+#ifndef FIL_QUERYFULLNAME
+    #define FIL_QUERYFULLNAME  5
+#else
+    #if FIL_QUERYFULLNAME != 5
+        #error "Hmm! FIL_QUERYFULLNAME isn't 5"
+    #endif
+#endif
+
+DWORD OSLibDosQueryPathInfo(CHAR *pszPathName,
+                            ULONG ulInfoLevel,
+                            PVOID pInfoBuf,
+                            ULONG cbInfoBuf);
+
 DWORD OSLibDosCreateFile(CHAR *lpFileName, DWORD dwAccess,
                          DWORD dwShare, LPSECURITY_ATTRIBUTES lpSecurityAttributes,
                          DWORD dwCreation, DWORD dwFlags, HANDLE hTemplate);
@@ -108,12 +121,12 @@ BOOL  OSLibDosWrite(DWORD hFile, LPVOID lpBuffer, DWORD size, DWORD *nrBytesWrit
 
 BOOL  OSLibDosGetFileInformationByHandle(DWORD hFile, BY_HANDLE_FILE_INFORMATION* pHFI);
 
-BOOL  OSLibDosSetFileTime(DWORD hFile, WORD creationdate, WORD creationtime, 
-                          WORD lastaccessdate, WORD lastaccesstime, 
+BOOL  OSLibDosSetFileTime(DWORD hFile, WORD creationdate, WORD creationtime,
+                          WORD lastaccessdate, WORD lastaccesstime,
                           WORD lastwritedate, WORD lastwritetime);
 
-BOOL  OSLibDosGetFileTime(DWORD hFile, WORD *creationdate, WORD *creationtime, 
-                          WORD *lastaccessdate, WORD *lastaccesstime, 
+BOOL  OSLibDosGetFileTime(DWORD hFile, WORD *creationdate, WORD *creationtime,
+                          WORD *lastaccessdate, WORD *lastaccesstime,
                           WORD *lastwritedate, WORD *lastwritetime);
 
 DWORD OSLibDosSetFilePointer(DWORD hFile, DWORD OffsetLow, DWORD *OffsetHigh, DWORD method);
@@ -263,3 +276,7 @@ BOOL OSLibGetDiskFreeSpace(LPSTR lpRootPathName, LPDWORD lpSectorsPerCluster,
 #endif
 
 #endif
+
+ULONG OSLibDosQueryModuleName(ULONG hModule, int cchName, char *pszName);
+
+
