@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.50 1999-11-09 19:22:32 sandervl Exp $
+; $Id: KERNEL32.DEF,v 1.51 1999-11-10 23:25:50 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -1030,7 +1030,9 @@ EXPORTS
     OS2SetExceptionHandler                                        @1253
     OS2UnsetExceptionHandler                                      @1254
 
+; -------------------
 ; Odin ini management
+; -------------------
 
     _PROFILE_GetOdinIniString@20     @1264
     _PROFILE_SetOdinIniString@12     @1265
