@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.54 2000-04-07 12:55:15 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.55 2000-05-02 20:50:48 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -802,6 +802,32 @@ int WIN32API GetUpdateRgn (HWND hwnd, HRGN hrgn, BOOL erase)
    return Complexity;
 }
 //******************************************************************************
+//******************************************************************************
+int WIN32API ReleaseDC (HWND hwnd, HDC hdc)
+{
+   BOOL isOwnDC = FALSE;
+   int rc;
+
+   if (hwnd)
+   {
+        Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
+        if(wnd == NULL) {
+                dprintf(("ERROR: ReleaseDC %x %x failed", hwnd, hdc));
+                return 0;
+        }
+        //SvL: Hack for memory.exe (doesn't get repainted properly otherwise)
+//      isOwnDC = wnd->isOwnDC() && wnd->getOwnDC();
+        isOwnDC = wnd->isOwnDC() && (wnd->getOwnDC() == hdc);
+   }
+   if (isOwnDC)
+      rc = TRUE;
+   else
+      rc = O32_ReleaseDC (0, hdc);
+
+   dprintf(("ReleaseDC %x %x", hwnd, hdc));
+   return (rc);
+}
+//******************************************************************************
 // This implementation of GetDCEx supports
 // DCX_WINDOW
 // DCX_CACHE
@@ -960,6 +986,8 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
 error:
    /* Something went wrong; clean up
     */
+   dprintf(("ERROR: GetDCEx hwnd %x (%x %x) FAILED!", hwnd, hrgn, flags));
+   DebugInt3();
    if (pHps)
    {
       if (pHps->hps)
@@ -994,32 +1022,6 @@ HDC WIN32API GetWindowDC (HWND hwnd)
   return GetDCEx (hwnd, NULL, DCX_USESTYLE_W | DCX_WINDOW_W);
 }
 //******************************************************************************
-//******************************************************************************
-int WIN32API ReleaseDC (HWND hwnd, HDC hdc)
-{
-   BOOL isOwnDC = FALSE;
-   int rc;
-
-   if (hwnd)
-   {
-        Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
-        if(wnd == NULL) {
-                dprintf(("ERROR: ReleaseDC %x %x failed", hwnd, hdc));
-                return 0;
-        }
-        //SvL: Hack for memory.exe (doesn't get repainted properly otherwise)
-//      isOwnDC = wnd->isOwnDC() && wnd->getOwnDC();
-        isOwnDC = wnd->isOwnDC() && (wnd->getOwnDC() == hdc);
-   }
-   if (isOwnDC)
-      rc = TRUE;
-   else
-      rc = O32_ReleaseDC (0, hdc);
-
-   dprintf(("ReleaseDC %x %x", hwnd, hdc));
-   return (rc);
-}
-//******************************************************************************
 // This implementation of RedrawWindow supports
 // RDW_ERASE
 // RDW_NOERASE
@@ -1038,12 +1040,6 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
           dprintf(("RedrawWindow %x (%d,%d)(%d,%d) %x %x", hwnd, pRect->left, pRect->top, pRect->right, pRect->bottom, hrgn, redraw));
    }
    else   dprintf(("RedrawWindow %x %x %x %x", hwnd, pRect, hrgn, redraw));
-
-   if (redraw & (RDW_FRAME_W | RDW_NOFRAME_W))
-   {
-        SetLastError(ERROR_NOT_SUPPORTED_W);
-        return FALSE;
-   }
 
    if (hwnd == NULLHANDLE)
    {
@@ -1075,7 +1071,12 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
             SetLastError(ERROR_INVALID_PARAMETER_W);
             return FALSE;
         }
-        hwnd = wnd->getOS2WindowHandle();
+	//TODO: If frame, exclude client window from update
+        if(redraw & RDW_FRAME_W) {
+		hwnd = wnd->getOS2FrameWindowHandle();
+	}
+	else   	hwnd = wnd->getOS2WindowHandle();
+
    }
 
    BOOL  IncludeChildren = redraw & RDW_ALLCHILDREN_W ? TRUE : FALSE;

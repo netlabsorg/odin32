@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.77 2000-04-07 10:01:16 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.78 2000-05-02 20:50:50 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -150,9 +150,10 @@ BOOL WIN32API IntersectRect( PRECT lprcDst, const RECT * lprcSrc1, const RECT * 
        (lprcSrc1->left >= lprcSrc2->right) || (lprcSrc2->left >= lprcSrc1->right) ||
        (lprcSrc1->top >= lprcSrc2->bottom) || (lprcSrc2->top >= lprcSrc1->bottom))
     {
-      SetLastError(ERROR_INVALID_PARAMETER);
-      if (lprcDst) SetRectEmpty(lprcDst);
-      return FALSE;
+	//SvL: NT doesn't set the last error here
+      	//SetLastError(ERROR_INVALID_PARAMETER);
+      	if (lprcDst) SetRectEmpty(lprcDst);
+      	return FALSE;
     }
     if (lprcDst)
     {
@@ -1221,7 +1222,6 @@ int WIN32API GetKeyNameTextW( LPARAM lParam, LPWSTR lpString, int  nSize)
 //******************************************************************************
 SHORT WIN32API GetKeyState( int nVirtKey)
 {
-//SvL: Hehe. 32 MB logfile for Opera after a minute.
     dprintf2(("USER32:  GetKeyState %d\n", nVirtKey));
     return O32_GetKeyState(nVirtKey);
 }

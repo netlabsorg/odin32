@@ -1,4 +1,4 @@
-/* $Id: loadres.cpp,v 1.27 2000-04-29 18:28:36 sandervl Exp $ */
+/* $Id: loadres.cpp,v 1.28 2000-05-02 20:50:48 sandervl Exp $ */
 
 /*
  * Win32 resource API functions for OS/2
@@ -467,6 +467,9 @@ HANDLE LoadBitmapA(HINSTANCE hinst, LPCSTR lpszName, int cxDesired, int cyDesire
 //        else {
                 hbitmap = CreateDIBitmap(hdc, &fix_info->bmiHeader, CBM_INIT,
                                          bits, fix_info, DIB_RGB_COLORS );
+		if(hbitmap == 0) {
+			dprintf(("LoadBitmapA: CreateDIBitmap failed!!"));
+		}
 //        }
         }
         ReleaseDC( 0, hdc );

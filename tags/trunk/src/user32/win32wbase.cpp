@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.181 2000-04-29 18:28:39 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.182 2000-05-02 20:50:51 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2112,6 +2112,43 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
         dprintf(("SetWindowPos; window already destroyed"));
         return TRUE;
     }
+#if 0
+    /* Fix redundant flags */
+    if(getStyle() & WS_VISIBLE) {
+        fuFlags &= ~SWP_SHOWWINDOW;
+    }
+    else
+    {
+	if (!(fuFlags & SWP_SHOWWINDOW)) 
+	      fuFlags |= SWP_NOREDRAW;
+	fuFlags &= ~SWP_HIDEWINDOW;
+    }
+
+    if(cx < 0) cx = 0; 
+    if(cy < 0) cy = 0;
+
+    if((rectWindow.right - rectWindow.left == cx) && (rectWindow.bottom - rectWindow.top == cy)) {
+        fuFlags |= SWP_NOSIZE;    /* Already the right size */
+    }
+
+    if((rectWindow.left == x) && (rectWindow.top == y)) {
+        fuFlags |= SWP_NOMOVE;    /* Already the right position */
+    }
+
+    if(getWindowHandle() == GetActiveWindow()) {
+        fuFlags |= SWP_NOACTIVATE;   /* Already active */
+    }
+    else 
+    if((getStyle() & (WS_POPUP | WS_CHILD)) != WS_CHILD )
+    {
+        if(!(fuFlags & SWP_NOACTIVATE)) /* Bring to the top when activating */
+        {
+            fuFlags &= ~SWP_NOZORDER;
+ 	    hwndInsertAfter = HWND_TOP;           
+        }
+    }
+#endif
+
     WINDOWPOS wpos;
     SWP swp, swpOld;
 #if 0 //CB: breaks trackbar tooltip: must call SetWindowPos twice to change the size
@@ -2195,7 +2232,6 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
     {
         FrameUpdateClient(this);
     }
-
     return (rc);
 }
 //******************************************************************************
