@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.8 2000-01-02 20:20:02 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.9 2000-01-04 19:51:32 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -1478,6 +1478,9 @@ int WIN32API SetWindowRgn(HWND hwnd,
         return 0;
     }
     dprintf(("USER32:SetWindowRgn (%x,%x,%d)", hwnd, hRgn, bRedraw));
+    if(window->GetWindowRegion()) {
+	O32_DeleteObject(window->GetWindowRegion());
+    }
     window->SetWindowRegion(hRgn);
     if(bRedraw) {
 	RedrawWindow(hwnd, 0, 0, RDW_UPDATENOW_W);	
