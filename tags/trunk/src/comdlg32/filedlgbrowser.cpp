@@ -1,18 +1,22 @@
-/* $Id: filedlgbrowser.cpp,v 1.1 1999-11-02 19:09:42 sandervl Exp $ */
 /*
- *  Implementation of IShellBrowser for the File Open common dialog (990815)
+ *  Implementation of IShellBrowser for the File Open common dialog
  * 
  *
  */
-// ><DJR 17.05.99 Force to use C-interfaces for now to prevent CALLBACK definition compiler error
-#define CINTERFACE 1
 
 #include <stdio.h>
-#include "unknwn.h"
+#ifdef __WIN32OS2__
+// ><DJR 17.05.99 Force to use C-interfaces for now to prevent CALLBACK definition compiler error
+#define CINTERFACE 1
 #include <os2win.h>
+#include "unknwn.h"
 #include "filedlgbrowser.h"
+#else
+#include "unknwn.h"
+#include "filedlgbrowser.h"
+#include "winuser.h"
+#endif
 #include "heap.h"
-#include "commctrl.h"
 #include "wine/obj_dataobject.h"
 #include "debugtools.h"
 #include "cdlg.h"
@@ -76,7 +80,9 @@ static ICOM_VTABLE(ICommDlgBrowser) IShellBrowserImpl_ICommDlgBrowser_Vtbl =
 */
 
 HRESULT IShellBrowserImpl_ICommDlgBrowser_OnSelChange(ICommDlgBrowser *iface, IShellView *ppshv);
+#if 0
 LPITEMIDLIST GetSelectedPidl(IShellView *ppshv);
+#endif
 
 /**************************************************************************
 *   External Prototypes
@@ -115,7 +121,7 @@ IShellBrowser * IShellBrowserImpl_Construct(HWND hwndOwner)
     sb->lpVtbl = &IShellBrowserImpl_Vtbl;
     sb->lpVtbl2 = &IShellBrowserImpl_ICommDlgBrowser_Vtbl;
 
-    SHGetSpecialFolderLocation(hwndOwner,
+    COMDLG32_SHGetSpecialFolderLocation(hwndOwner,
                                CSIDL_DESKTOP,
                                &fodInfos->ShellInfos.pidlAbsCurrent);
 
@@ -193,7 +199,7 @@ ULONG WINAPI IShellBrowserImpl_Release(IShellBrowser * iface)
 
     if (!--(This->ref)) 
     { 
-      SHFree(This);
+      COMDLG32_SHFree(This);
       return 0;
     }
     return This->ref;
@@ -286,7 +292,7 @@ HRESULT WINAPI IShellBrowserImpl_BrowseObject(IShellBrowser *iface,
             return hRes;
         }
         /* create an absolute pidl */
-        pidlTmp = ILCombine(fodInfos->ShellInfos.pidlAbsCurrent,
+        pidlTmp = COMDLG32_PIDL_ILCombine(fodInfos->ShellInfos.pidlAbsCurrent,
                                                         (LPITEMIDLIST)pidl);
         
     }
@@ -301,13 +307,23 @@ HRESULT WINAPI IShellBrowserImpl_BrowseObject(IShellBrowser *iface,
     else
     {
         /* An absolute pidl (relative from the desktop) */
-        pidlTmp = ILClone((LPITEMIDLIST)pidl);
+        pidlTmp =  COMDLG32_PIDL_ILClone((LPITEMIDLIST)pidl);
         psfTmp = GetShellFolderFromPidl(pidlTmp);
     }
 
+    
     /* Retrieve the IShellFolder interface of the pidl specified folder */
     if(!psfTmp)
         return E_FAIL;
+
+    /* If the pidl to browse to is equal to the actual pidl ... 
+       do nothing and pretend you did it*/
+    if(COMDLG32_PIDL_ILIsEqual(pidlTmp,fodInfos->ShellInfos.pidlAbsCurrent))
+    {
+        IShellFolder_Release(psfTmp);
+	COMDLG32_SHFree(pidlTmp);
+        return NOERROR;
+    }
 
     /* Release the current fodInfos->Shell.FOIShellFolder and update its value */
     IShellFolder_Release(fodInfos->Shell.FOIShellFolder);
@@ -348,7 +364,7 @@ HRESULT WINAPI IShellBrowserImpl_BrowseObject(IShellBrowser *iface,
             FILEDLG95_LOOKIN_SelectItem(fodInfos->DlgInfos.hwndLookInCB,pidlTmp);
 
             /* Release old pidlAbsCurrent memory and update its value */
-            SHFree((LPVOID)fodInfos->ShellInfos.pidlAbsCurrent);
+            COMDLG32_SHFree((LPVOID)fodInfos->ShellInfos.pidlAbsCurrent);
             fodInfos->ShellInfos.pidlAbsCurrent = pidlTmp;
 
             /* Release the current fodInfos->Shell.FOIShellView and update its value */
@@ -625,18 +641,18 @@ HRESULT WINAPI IShellBrowserImpl_ICommDlgBrowser_OnDefaultCommand(ICommDlgBrowse
     {
         HRESULT hRes;
 
-        /* Selected item is a directory so browse to it */
-
         ULONG  ulAttr = SFGAO_FOLDER | SFGAO_HASSUBFOLDER;
         IShellFolder_GetAttributesOf(fodInfos->Shell.FOIShellFolder, 1, &pidl, &ulAttr);
 	if (ulAttr)
             hRes = IShellBrowser_BrowseObject((IShellBrowser *)This,pidl,SBSP_RELATIVE);
         /* Tell the dialog that the user selected a file */
         else
+	{
             hRes = FILEDLG95_OnOpen(This->hwndOwner);
+	}
 
         /* Free memory used by pidl */
-        SHFree((LPVOID)pidl);
+        COMDLG32_SHFree((LPVOID)pidl);
 
         return hRes;
     }
@@ -661,6 +677,11 @@ HRESULT WINAPI IShellBrowserImpl_ICommDlgBrowser_OnStateChange(ICommDlgBrowser *
         case CDBOSC_SETFOCUS:
             break;
         case CDBOSC_KILLFOCUS: 
+	    {
+		FileOpenDlgInfos *fodInfos = (FileOpenDlgInfos *) GetPropA(This->hwndOwner,FileOpenDlgInfosStr);
+		if(fodInfos->DlgInfos.dwDlgProp & FODPROP_SAVEDLG)
+		    SetDlgItemTextA(fodInfos->ShellInfos.hwndOwner,IDOK,"&Save");
+            }
             break;
         case CDBOSC_SELCHANGE:
             return IShellBrowserImpl_ICommDlgBrowser_OnSelChange(iface,ppshv);
@@ -704,9 +725,9 @@ HRESULT WINAPI IShellBrowserImpl_ICommDlgBrowser_IncludeObject(ICommDlgBrowser *
         return S_OK;
 
     if (SUCCEEDED(IShellFolder_GetDisplayNameOf(fodInfos->Shell.FOIShellFolder, pidl, SHGDN_FORPARSING, &str)))
-    { if (SUCCEEDED(StrRetToStrNW(szPathW, MAX_PATH, &str, pidl)))
+    { if (SUCCEEDED(StrRetToBufW(&str, pidl,szPathW, MAX_PATH)))
       {
-        if (PathMatchSpecW(szPathW, fodInfos->ShellInfos.lpstrCurrentFilter))
+	  if (COMDLG32_PathMatchSpecW(szPathW, fodInfos->ShellInfos.lpstrCurrentFilter))
           return S_OK;
       }
     }
@@ -720,9 +741,10 @@ HRESULT WINAPI IShellBrowserImpl_ICommDlgBrowser_IncludeObject(ICommDlgBrowser *
 HRESULT IShellBrowserImpl_ICommDlgBrowser_OnSelChange(ICommDlgBrowser *iface, IShellView *ppshv)
 {
     LPITEMIDLIST pidl;
-
+    FileOpenDlgInfos *fodInfos;
     _ICOM_THIS_FromICommDlgBrowser(IShellBrowserImpl,iface);
 
+    fodInfos = (FileOpenDlgInfos *) GetPropA(This->hwndOwner,FileOpenDlgInfosStr);
     TRACE("(%p)\n", This);
 
     if((pidl = GetSelectedPidl(ppshv)))
@@ -730,20 +752,27 @@ HRESULT IShellBrowserImpl_ICommDlgBrowser_OnSelChange(ICommDlgBrowser *iface, IS
         HRESULT hRes = E_FAIL;
         char lpstrFileName[MAX_PATH];
     
-        FileOpenDlgInfos *fodInfos = (FileOpenDlgInfos *) GetPropA(This->hwndOwner,FileOpenDlgInfosStr);
-
         ULONG  ulAttr = SFGAO_FOLDER | SFGAO_HASSUBFOLDER;
         IShellFolder_GetAttributesOf(fodInfos->Shell.FOIShellFolder, 1, &pidl, &ulAttr);
         if (!ulAttr)
         {
             if(SUCCEEDED(hRes = GetName(fodInfos->Shell.FOIShellFolder,pidl,SHGDN_NORMAL,lpstrFileName)))
                 SetWindowTextA(fodInfos->DlgInfos.hwndFileName,lpstrFileName);
+	    if(fodInfos->DlgInfos.dwDlgProp & FODPROP_SAVEDLG)
+		    SetDlgItemTextA(fodInfos->ShellInfos.hwndOwner,IDOK,"&Save");
         }
+	else
+	    SetDlgItemTextA(fodInfos->ShellInfos.hwndOwner,IDOK,"&Open");
 
-        SHFree((LPVOID)pidl);
+	fodInfos->DlgInfos.dwDlgProp |= FODPROP_USEVIEW;
+
+        COMDLG32_SHFree((LPVOID)pidl);
         return hRes;
     }
+    if(fodInfos->DlgInfos.dwDlgProp & FODPROP_SAVEDLG)
+	SetDlgItemTextA(fodInfos->ShellInfos.hwndOwner,IDOK,"&Save");
 
+    fodInfos->DlgInfos.dwDlgProp &= ~FODPROP_USEVIEW;
     return E_FAIL;
 }
 
@@ -779,7 +808,7 @@ LPITEMIDLIST GetSelectedPidl(IShellView *ppshv)
         {
             LPIDA cida = (LPIDA)GlobalLock(medium.u.hGlobal);
 	    TRACE("cida=%p\n", cida);
-            pidlSelected = ILClone((LPITEMIDLIST)(&((LPBYTE)cida)[cida->aoffset[1]]));
+            pidlSelected =  COMDLG32_PIDL_ILClone((LPITEMIDLIST)(&((LPBYTE)cida)[cida->aoffset[1]]));
 
             if(medium.pUnkForRelease)
                 IUnknown_Release(medium.pUnkForRelease);

@@ -1,4 +1,4 @@
-; $Id: comdlg32.def,v 1.3 1999-11-02 19:09:42 sandervl Exp $
+; $Id: comdlg32.def,v 1.4 1999-11-02 20:37:42 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY COMDLG32 INITINSTANCE
@@ -14,10 +14,10 @@ EXPORTS
     FindTextW                  = _FindTextW@4                @7
     GetFileTitleA              = _GetFileTitleA32@12           @8
     GetFileTitleW              = _GetFileTitleW32@12           @9
-    GetOpenFileNameA           = _GetOpenFileNameA32@4         @10
-    GetOpenFileNameW           = _GetOpenFileNameW32@4         @11
-    GetSaveFileNameA           = _GetSaveFileNameA32@4         @12
-    GetSaveFileNameW           = _GetSaveFileNameW32@4         @13
+    GetOpenFileNameA           = _GetOpenFileNameA@4         @10
+    GetOpenFileNameW           = _GetOpenFileNameW@4         @11
+    GetSaveFileNameA           = _GetSaveFileNameA@4         @12
+    GetSaveFileNameW           = _GetSaveFileNameW@4         @13
     PageSetupDlgA              = _PageSetupDlgA@4            @14
     PageSetupDlgW              = _PageSetupDlgW@4            @15
     PrintDlgA                  = _PrintDlgA@4                @16
