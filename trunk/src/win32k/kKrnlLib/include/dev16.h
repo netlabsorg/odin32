@@ -1,4 +1,4 @@
-/* $Id: dev16.h,v 1.1 2001-09-11 01:27:27 bird Exp $
+/* $Id: dev16.h,v 1.2 2001-11-18 04:07:29 bird Exp $
  * dev16 - 16-bit specific. Should not be used in 32-bit C/C++.
  *
  * Copyright (c) 1999 knut st. osmundsen
@@ -19,27 +19,6 @@ typedef void   FAR *PRPINITOUT;
 typedef void   FAR *PRP_GENIOCTL;
 typedef ULONG       DDHDR;
 #endif
-
-/*
- * Ring 0 init IOCtl (dev1 -> dev0)
- */
-#define D16_IOCTL_CAT               0xC0
-
-/*
- * Get Kernel OTEs. No params. Data is KRNLOBJTABLE (dev1632.h).
- */
-#define D16_IOCTL_GETKRNLINFO       0x40
-
-
-/*
- * Verify aImportTab. No params. No data (aImportTab is used).
- */
-#define D16_IOCTL_VERIFYIMPORTTAB   0x41
-typedef struct _D16VERIFYIMPORTTABDATA
-{
-    USHORT usRc;
-} D16VERIFYIMPORTTABDATA;
-typedef D16VERIFYIMPORTTABDATA FAR *PD16VERIFYIMPORTTABDATA;
 
 
 /**
@@ -104,14 +83,13 @@ USHORT NEAR devInit(PRPINITIN pRpIn, PRPINITOUT pRpOut);
 USHORT NEAR R0Init16(PRP_GENIOCTL pRp);
 USHORT NEAR initGetDosTableData(void);
 ULONG  NEAR GetR0InitPtr(void);
+ULONG  NEAR GetVerifyImportTab32Ptr(void);
+ULONG  NEAR GetGetKernelInfo32Ptr(void);
 
 /*
  * Thunking "functions" prototypes
  */
 ULONG  NEAR CallR0Addr32bit(LIN ulAddr, ULONG ulParam);
-USHORT NEAR CallGetKernelInfo32(ULONG addressKrnlInfoBuf);
-USHORT NEAR CallVerifyImportTab32(void);
-
 
 /*
  * These are only for use in the 'aDevHdrs'.
@@ -173,6 +151,8 @@ extern char PASCAL BSS32END       ;
 extern char PASCAL CONST32_ROEND  ;
 extern char PASCAL _VFTEND        ;
 extern char PASCAL EH_DATAEND     ;
+
+extern unsigned long DATA16Base;
 
 
 #endif
