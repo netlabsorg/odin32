@@ -1,4 +1,4 @@
-/* $Id: treeview.h,v 1.15 2000-02-23 17:03:00 cbratschi Exp $ */
+/* $Id: treeview.h,v 1.16 2000-03-21 17:28:20 cbratschi Exp $ */
 /*
  * Treeview class extra info
  *
@@ -117,7 +117,6 @@ typedef struct tagTREEVIEW_INFO
 #define TV_REFRESH_TIMER_SET 1
 #define TV_EDIT_TIMER_SET    2
 #define TV_ISEARCH_TIMER_SET 3
-
 
 extern VOID TREEVIEW_Register (VOID);
 extern VOID TREEVIEW_Unregister (VOID);
