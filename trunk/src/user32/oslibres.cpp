@@ -1,4 +1,4 @@
-/* $Id: oslibres.cpp,v 1.21 2001-10-02 17:14:09 sandervl Exp $ */
+/* $Id: oslibres.cpp,v 1.22 2001-10-14 20:15:15 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -232,6 +232,139 @@ HANDLE OSLibWinCreatePointer(PVOID cursorbitmap, ULONG cxDesired, ULONG cyDesire
 }
 #endif
 //******************************************************************************
+//******************************************************************************
+BOOL isMonoBitmap(BITMAP_W *pXorBmp, PBYTE os2rgb)
+{
+  ULONG pixel, color[2];
+  char *bmpdata;
+  int i, j, nrcolors = 0, increment;
+
+    increment = pXorBmp->bmBitsPixel/8;
+
+    for(i=0;i<pXorBmp->bmHeight;i++) {
+        bmpdata = (char *)os2rgb;
+        for(j=0;j<pXorBmp->bmWidth;j++) {
+            pixel = 0;
+            memcpy(&pixel, os2rgb, increment);
+            if(nrcolors == 0) { 
+                color[0] = pixel;
+                nrcolors = 1;
+            }
+            else
+            if(nrcolors == 1 && color[0] != pixel) {
+                color[1] = pixel;
+                nrcolors = 2;
+            }
+            else {
+                if(color[0] != pixel && color[1] != pixel) 
+                {
+                    return FALSE;
+                }
+            }
+            os2rgb += increment;
+        }
+        os2rgb = bmpdata + pXorBmp->bmWidthBytes;
+    }
+    return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+char *colorToMonoBitmap(HBITMAP bmpsrc, BITMAPINFO2 *pBmpDest)
+{ 
+    HDC hdcDest = 0;            /* device context handle                */
+    HPS hpsDest = 0;
+    SIZEL sizl = { 0, 0 };  /* use same page size as device         */
+    DEVOPENSTRUC dop = {0L, "DISPLAY", NULL, 0L, 0L, 0L, 0L, 0L, 0L};
+    LONG lHits; 
+    char *bmpbuffer = 0;
+    BITMAPINFO2 *bmpinfo = NULL;
+    HAB hab;
+
+    hab = GetThreadHAB();
+
+    /* create memory device context */
+    hdcDest = DevOpenDC(hab, OD_MEMORY, "*", 5L, (PDEVOPENDATA)&dop, NULLHANDLE);
+ 
+    /* Create the presentation and associate the memory device
+       context. */
+    hpsDest = GpiCreatePS(hab, hdcDest, &sizl, PU_PELS |
+                          GPIT_MICRO | GPIA_ASSOC);
+    if(!hpsDest) goto fail; 
+
+    GpiSetBitmap(hpsDest, bmpsrc);
+
+    bmpinfo   = (BITMAPINFO2 *)malloc(2*sizeof(BITMAPINFOHEADER2) + sizeof(RGB2));
+    bmpbuffer = (char *)malloc(pBmpDest->cy*pBmpDest->cx);
+    memset(bmpinfo, 0, sizeof(BITMAPINFOHEADER2) + sizeof(RGB2));
+    bmpinfo->cbFix            = sizeof(BITMAPINFOHEADER2);
+    bmpinfo->cx               = pBmpDest->cx;
+    bmpinfo->cy               = pBmpDest->cy;
+    bmpinfo->cPlanes          = 1;
+    bmpinfo->cBitCount        = 1;
+    bmpinfo->ulCompression    = BCA_UNCOMP;
+    bmpinfo->ulColorEncoding  = BCE_RGB;
+
+    lHits = GpiQueryBitmapBits(hpsDest, 0, pBmpDest->cy, bmpbuffer, bmpinfo);
+    if(lHits == GPI_ERROR) goto fail;
+
+ {
+    dprintf(("colorToMonoBitmap %d %d (%x,%x,%x)(%x,%x,%x)", pBmpDest->cx, pBmpDest->cy, bmpinfo->argbColor[0].bRed, bmpinfo->argbColor[0].bGreen, bmpinfo->argbColor[0].bBlue, bmpinfo->argbColor[1].bRed, bmpinfo->argbColor[1].bGreen, bmpinfo->argbColor[1].bBlue));
+    for(int i=pBmpDest->cy-1;i>=0;i--) {
+        for(int j=0;j<pBmpDest->cx;j++) {
+            if(j<8) {
+                if((*(bmpbuffer+i*4)) & (1<<(7-j))) {
+                    WriteLogNoEOL("X");
+                }
+                else WriteLogNoEOL(".");
+            }
+            else 
+            if(j<16) {
+                if((*(bmpbuffer+1+i*4)) & (1<<(15-j))) {
+                    WriteLogNoEOL("X");
+                }
+                else WriteLogNoEOL(".");
+            }
+            else
+            if(j<24) {
+                if((*(bmpbuffer+2+i*4)) & (1<<(23-j))) {
+                    WriteLogNoEOL("X");
+                }
+                else WriteLogNoEOL(".");
+            }
+            else {
+                if((*(bmpbuffer+3+i*4)) & (1<<(31-j))) {
+                    WriteLogNoEOL("X");
+                }
+                else WriteLogNoEOL(".");
+            }
+        }
+        WriteLogNoEOL("\n");
+    }
+}
+
+    GpiSetBitmap(hpsDest, NULL);
+
+    GpiAssociate(hpsDest, NULLHANDLE); /* disassociate device context */
+    GpiDestroyPS(hpsDest);       /* destroys presentation space */
+    DevCloseDC(hdcDest);         /* closes device context       */
+    free(bmpinfo);
+
+    return bmpbuffer; 
+
+fail:
+    if(bmpinfo)   free(bmpinfo);
+    if(bmpbuffer) free(bmpbuffer);
+
+    if(hpsDest) {
+        GpiSetBitmap(hpsDest, NULL);
+        GpiAssociate(hpsDest, NULLHANDLE); /* disassociate device context */
+        GpiDestroyPS(hpsDest);       /* destroys presentation space */
+    }
+    if(hdcDest) DevCloseDC(hdcDest);         /* closes device context       */
+    return 0;
+}
+//******************************************************************************
+//******************************************************************************
 //NOTE: Depends on origin of bitmap data!!!
 //      Assumes 1 bpp bitmaps have a top left origin and all others have a bottom left origin
 //******************************************************************************
@@ -241,48 +374,13 @@ HANDLE OSLibWinCreatePointer(CURSORICONINFO *pInfo, char *pAndBits, BITMAP_W *pA
  POINTERINFO  pointerInfo = {0};
  HANDLE       hPointer;
  HBITMAP      hbmColor = 0, hbmMask = 0;
- BITMAPINFO2 *pBmpColor, *pBmpMask;
+ BITMAPINFO2 *pBmpColor = 0, *pBmpMask = 0;
  int          masksize, colorsize, rgbsize, i;
  HPS          hps;
- char        *dest, *src;
+ char        *dest, *src, *pOS2XorBits = 0;
 
     hps = WinGetScreenPS(HWND_DESKTOP);
-    //SvL: 2*sizeof(RGB2) is enough, but GpiCreateBitmap seems to touch more
-    //     memory. (Adobe Photoshop 6 running in the debugger)
-    masksize = sizeof(BITMAPINFO2) + (pAndBmp->bmHeight * 2 * pAndBmp->bmWidthBytes) + 16*sizeof(RGB2);
-    pBmpMask = (BITMAPINFO2 *)malloc(masksize);
-    if(pBmpMask == NULL) {
-        DebugInt3();
-        return 0;
-    }
-    memset(pBmpMask, 0, masksize);
-    pBmpMask->cbFix             = sizeof(BITMAPINFOHEADER2);
-    pBmpMask->cx                = (USHORT)pAndBmp->bmWidth;
-    pBmpMask->cy                = (USHORT)pAndBmp->bmHeight*2;
-    pBmpMask->cPlanes           = pAndBmp->bmPlanes;
-    pBmpMask->cBitCount         = 1;
-    pBmpMask->ulCompression     = BCA_UNCOMP;
-    pBmpMask->ulColorEncoding   = BCE_RGB;
-    memset(&pBmpMask->argbColor[0], 0, sizeof(RGB2));
-    memset(&pBmpMask->argbColor[1], 0xff, sizeof(RGB)); //not the reserved byte
-    //Xor bits are already 0
-    //copy And bits (must reverse scanlines because origin is top left instead of bottom left)
-    src  = pAndBits;
-    dest = ((char *)&pBmpMask->argbColor[2]) + (pAndBmp->bmHeight * 2 - 1) * (pAndBmp->bmWidthBytes);
-    for(i=0;i<pAndBmp->bmHeight;i++) {
-        memcpy(dest, src, pAndBmp->bmWidthBytes);
-        dest -= pAndBmp->bmWidthBytes;
-        src  += pAndBmp->bmWidthBytes;
-    }
-    hbmMask = GpiCreateBitmap(hps, (BITMAPINFOHEADER2 *)pBmpMask, CBM_INIT,
-                              (PBYTE)&pBmpMask->argbColor[2], pBmpMask);
 
-    if(hbmMask == GPI_ERROR) {
-        dprintf(("OSLibWinCreatePointer: GpiCreateBitmap failed!"));
-        WinReleasePS(hps);
-        free(pBmpMask);
-        return 0;
-    }
     if(pXorBits)
     {//color bitmap present
         RGBQUAD *rgb;
@@ -341,11 +439,62 @@ HANDLE OSLibWinCreatePointer(CURSORICONINFO *pInfo, char *pAndBits, BITMAP_W *pA
 
         if(hbmColor == GPI_ERROR) {
                 dprintf(("OSLibWinCreateIcon: GpiCreateBitmap failed!"));
-                GpiDeleteBitmap(hbmMask);
-                WinReleasePS(hps);
-                free(pBmpMask);
-                return 0;
+                goto fail;
         }
+        if(pXorBmp->bmBitsPixel >= 8) 
+        {
+            if(isMonoBitmap(pXorBmp, (PBYTE)os2rgb) == TRUE) 
+            {
+                pOS2XorBits = colorToMonoBitmap(hbmColor, pBmpColor);
+                if(pOS2XorBits) {
+                    GpiDeleteBitmap(hbmColor);
+                    hbmColor = 0;
+                }
+            }
+        }
+        //testestest
+    }
+
+    //SvL: 2*sizeof(RGB2) is enough, but GpiCreateBitmap seems to touch more
+    //     memory. (Adobe Photoshop 6 running in the debugger)
+    masksize = sizeof(BITMAPINFO2) + (pAndBmp->bmHeight * 2 * pAndBmp->bmWidthBytes) + 16*sizeof(RGB2);
+    pBmpMask = (BITMAPINFO2 *)malloc(masksize);
+    if(pBmpMask == NULL) {
+        DebugInt3();
+        return 0;
+    }
+    memset(pBmpMask, 0, masksize);
+    pBmpMask->cbFix             = sizeof(BITMAPINFOHEADER2);
+    pBmpMask->cx                = (USHORT)pAndBmp->bmWidth;
+    pBmpMask->cy                = (USHORT)pAndBmp->bmHeight*2;
+    pBmpMask->cPlanes           = pAndBmp->bmPlanes;
+    pBmpMask->cBitCount         = 1;
+    pBmpMask->ulCompression     = BCA_UNCOMP;
+    pBmpMask->ulColorEncoding   = BCE_RGB;
+    memset(&pBmpMask->argbColor[0], 0, sizeof(RGB2));
+    memset(&pBmpMask->argbColor[1], 0xff, sizeof(RGB)); //not the reserved byte
+    if(pOS2XorBits) {
+         dest = ((char *)&pBmpMask->argbColor[2]);
+         memcpy(dest, pOS2XorBits, pAndBmp->bmWidthBytes*pAndBmp->bmHeight);
+         free(pOS2XorBits);
+         pOS2XorBits = NULL;
+    }
+    // else Xor bits are already 0
+
+    //copy And bits (must reverse scanlines because origin is top left instead of bottom left)
+    src  = pAndBits;
+    dest = ((char *)&pBmpMask->argbColor[2]) + (pAndBmp->bmHeight * 2 - 1) * (pAndBmp->bmWidthBytes);
+    for(i=0;i<pAndBmp->bmHeight;i++) {
+        memcpy(dest, src, pAndBmp->bmWidthBytes);
+        dest -= pAndBmp->bmWidthBytes;
+        src  += pAndBmp->bmWidthBytes;
+    }
+    hbmMask = GpiCreateBitmap(hps, (BITMAPINFOHEADER2 *)pBmpMask, CBM_INIT,
+                              (PBYTE)&pBmpMask->argbColor[2], pBmpMask);
+
+    if(hbmMask == GPI_ERROR) {
+        dprintf(("OSLibWinCreatePointer: GpiCreateBitmap failed!"));
+        goto fail;
     }
 
     pointerInfo.fPointer   = fCursor; //FALSE = icon
@@ -365,6 +514,14 @@ HANDLE OSLibWinCreatePointer(CURSORICONINFO *pInfo, char *pAndBits, BITMAP_W *pA
     free(pBmpMask);
     free(pBmpColor);
     return hPointer;
+
+fail:
+    if(hbmMask) GpiDeleteBitmap(hbmMask);
+    if(hbmColor) GpiDeleteBitmap(hbmColor);
+    WinReleasePS(hps);
+    if(pBmpMask)  free(pBmpMask);
+    if(pBmpColor) free(pBmpColor);
+    return 0;
 }
 //******************************************************************************
 //******************************************************************************
