@@ -1,4 +1,4 @@
-/* $Id: dbglocal.cpp,v 1.14 2002-09-03 12:34:01 sandervl Exp $ */
+/* $Id: dbglocal.cpp,v 1.15 2003-02-16 15:31:09 sandervl Exp $ */
 
 /*
  * debug logging functions for OS/2
@@ -95,7 +95,8 @@ static char  *DbgFileNames[DBG_MAXFILES] =
 "rect",
 "paint",
 "dragdrop",
-"oslibclip"
+"oslibclip",
+"oslibkbd"
 };
 //******************************************************************************
 //******************************************************************************
