@@ -1,4 +1,4 @@
-; $Id: odincrtp.def,v 1.8 2003-07-28 11:30:20 sandervl Exp $
+; $Id: odincrtp.def,v 1.9 2004-03-16 17:24:54 sandervl Exp $
 ; Odin VAC++ 3.08 shared multithreaded runtime
 LIBRARY ODINCRTP INITINSTANCE TERMINSTANCE
 DESCRIPTION 'Odin32 System DLL - VAC++ 3.08 Profile OdinCRT'
@@ -986,3 +986,4 @@ EXPORTS
     _DosInterlockedExchange@8                          @1207 NONAME
     _DosInterlockedExchangeAdd@8                       @1208 NONAME
     _DosInterlockedIncrement@4                         @1209 NONAME
+    _DosValidateCriticalSection@4                      @1210 NONAME
