@@ -1,4 +1,4 @@
-; $Id: ntdll.def,v 1.9 1999-08-05 23:28:33 phaller Exp $
+; $Id: ntdll.def,v 1.10 1999-08-18 18:43:54 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is NT4.0's NTDLL.DLL
@@ -247,6 +247,8 @@ EXPORTS
     RtlxAnsiStringToUnicodeSize   = _RtlxAnsiStringToUnicodeSize@4    @548
     RtlIsTextUnicode              = _RtlIsTextUnicode@12              @417
     RtlCompareUnicodeString       = _RtlCompareUnicodeString@12
+    RtlUpcaseUnicodeStringToOemString = _RtlUpcaseUnicodeStringToOemString@12
+
 
     RtlInitializeResource         = _RtlInitializeResource@4          @409
     RtlDeleteResource             = _RtlDeleteResource@4              @330
