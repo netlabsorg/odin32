@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.80 2000-05-03 22:33:36 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.81 2000-05-09 18:56:57 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -121,7 +121,7 @@ BOOL WIN32API EqualRect( const RECT *lprc1, const RECT *lprc2)
 //******************************************************************************
 BOOL WIN32API InflateRect( PRECT lprc, int dx, int  dy)
 {
-    dprintf2(("USER32:  InflateRect\n"));
+    dprintf2(("USER32: InflateRect (%d,%d)(%d,%d) %d,%d", lprc->left, lprc->top, lprc->right, lprc->bottom, dx, dy));
     if (!lprc)
     {
       SetLastError(ERROR_INVALID_PARAMETER);
@@ -139,11 +139,11 @@ BOOL WIN32API InflateRect( PRECT lprc, int dx, int  dy)
 //******************************************************************************
 BOOL WIN32API IntersectRect( PRECT lprcDst, const RECT * lprcSrc1, const RECT * lprcSrc2)
 {
-    dprintf2(("USER32:  IntersectRect\n"));
+    dprintf2(("USER32:  IntersectRect (%d,%d)(%d,%d) (%d,%d)(%d,%d)", lprcSrc1->left, lprcSrc1->top, lprcSrc1->right, lprcSrc1->bottom, lprcSrc2->left, lprcSrc2->top, lprcSrc2->right, lprcSrc2->bottom));
     if (!lprcSrc1 || !lprcSrc2)
     {
-      SetLastError(ERROR_INVALID_PARAMETER);
-      return FALSE;
+      	SetLastError(ERROR_INVALID_PARAMETER);
+      	return FALSE;
     }
 
     if (IsRectEmpty(lprcSrc1) || IsRectEmpty(lprcSrc2) ||
@@ -181,11 +181,11 @@ BOOL WIN32API IsRectEmpty( const RECT * lprc)
 //******************************************************************************
 BOOL WIN32API OffsetRect( PRECT lprc, int x, int  y)
 {
-    dprintf2(("USER32:  OffsetRect\n"));
+    dprintf2(("USER32: OffsetRect (%d,%d)(%d,%d) %d %d", lprc->left, lprc->top, lprc->right, lprc->bottom, x, y));
     if (!lprc)
     {
-      SetLastError(ERROR_INVALID_PARAMETER);
-      return FALSE;
+      	SetLastError(ERROR_INVALID_PARAMETER);
+      	return FALSE;
     }
 
     lprc->left   += x;
@@ -199,7 +199,7 @@ BOOL WIN32API OffsetRect( PRECT lprc, int x, int  y)
 //******************************************************************************
 BOOL WIN32API PtInRect( const RECT *lprc, POINT pt)
 {
-    dprintf2(("USER32:  PtInRect\n"));
+    dprintf2(("USER32: PtInRect (%d,%d)(%d,%d) (%d,%d)", lprc->left, lprc->top, lprc->right, lprc->bottom, pt.x, pt.y));
     if (!lprc)
     {
       SetLastError(ERROR_INVALID_PARAMETER);

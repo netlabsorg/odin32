@@ -1,4 +1,4 @@
-/* $Id: lang.cpp,v 1.18 2000-05-02 20:53:13 sandervl Exp $ */
+/* $Id: lang.cpp,v 1.19 2000-05-09 18:56:09 sandervl Exp $ */
 /*
  * Win32 language API functions for OS/2
  *
@@ -19,13 +19,115 @@
 #include <win\winreg.h>
 #include <winos2def.h>
 #include "unicode.h"
+#include "oslibmisc.h"
 
 #define DBG_LOCALLOG	DBG_lang
 #include "dbglocal.h"
 
 ODINDEBUGCHANNEL(KERNEL32-LANG)
 
+//******************************************************************************
+//******************************************************************************
+ULONG GetLanguageId()
+{
+ static ULONG defaultLanguage = 0;
 
+  if(defaultLanguage == 0) {
+	switch(OSLibQueryCountry()) {
+	case CC_USA:
+		defaultLanguage = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US);
+		break;
+        case CC_CANADA:
+		defaultLanguage = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US);
+		break;
+        case CC_LATIN_AMERICA:
+		defaultLanguage = MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH);
+		break;
+        case CC_GREECE:
+		defaultLanguage = MAKELANGID(LANG_GREEK, SUBLANG_DEFAULT);
+		break;
+        case CC_NETHERLANDS:
+		defaultLanguage = MAKELANGID(LANG_DUTCH, SUBLANG_DUTCH);
+		break;
+        case CC_BELGIUM:
+		defaultLanguage = MAKELANGID(LANG_DUTCH, SUBLANG_DUTCH_BELGIAN);
+		break;
+        case CC_FRANCE:
+		defaultLanguage = MAKELANGID(LANG_FRENCH, SUBLANG_FRENCH);
+		break;
+        case CC_SPAIN:
+		defaultLanguage = MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH);
+		break;
+        case CC_ITALY:
+		defaultLanguage = MAKELANGID(LANG_ITALIAN, SUBLANG_ITALIAN);
+		break;
+        case CC_SWITZERLAND:
+		defaultLanguage = MAKELANGID(LANG_GERMAN, SUBLANG_GERMAN_SWISS);
+		break;
+        case CC_AUSTRIA:
+		defaultLanguage = MAKELANGID(LANG_GERMAN, SUBLANG_GERMAN_AUSTRIAN);
+		break;
+        case CC_UNITED_KINGDOM:
+		defaultLanguage = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_UK);
+		break;
+        case CC_DENMARK:
+		defaultLanguage = MAKELANGID(LANG_DANISH, SUBLANG_DEFAULT);
+		break;
+        case CC_SWEDEN:
+		defaultLanguage = MAKELANGID(LANG_SWEDISH, SUBLANG_DEFAULT);
+		break;
+        case CC_NORWAY:
+		defaultLanguage = MAKELANGID(LANG_NORWEGIAN, SUBLANG_DEFAULT);
+		break;
+        case CC_WEST_GERMANY:
+		defaultLanguage = MAKELANGID(LANG_GERMAN, SUBLANG_GERMAN);
+		break;
+        case CC_MEXICO:
+		defaultLanguage = MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_MEXICAN);
+		break;
+        case CC_BRAZIL:
+		defaultLanguage = MAKELANGID(LANG_PORTUGUESE, SUBLANG_PORTUGUESE_BRAZILIAN);
+		break;
+        case CC_AUSTRALIA:
+		defaultLanguage = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_AUS);
+		break;
+        case CC_NEW_ZEALAND:
+		defaultLanguage = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_NZ);
+		break;
+        case CC_JAPAN:
+		defaultLanguage = MAKELANGID(LANG_JAPANESE, SUBLANG_DEFAULT);
+		break;
+        case CC_KOREA:
+		defaultLanguage = MAKELANGID(LANG_KOREAN, SUBLANG_DEFAULT);
+		break;
+        case CC_CHINA:
+		defaultLanguage = MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_TRADITIONAL);
+		break;
+        case CC_TAIWAN:
+		defaultLanguage = MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_TRADITIONAL);
+		break;
+        case CC_TURKEY:
+		defaultLanguage = MAKELANGID(LANG_TURKISH, SUBLANG_DEFAULT);
+		break;
+        case CC_PORTUGAL:
+		defaultLanguage = MAKELANGID(LANG_PORTUGUESE, SUBLANG_DEFAULT);
+		break;
+        case CC_LUXEMBOURG:
+		defaultLanguage = MAKELANGID(LANG_GERMAN, SUBLANG_GERMAN_LUXEMBOURG);
+		break;
+        case CC_ICELAND:
+		defaultLanguage = MAKELANGID(LANG_ICELANDIC, SUBLANG_DEFAULT);
+		break;
+        case CC_FINLAND:
+		defaultLanguage = MAKELANGID(LANG_FINNISH, SUBLANG_DEFAULT);
+		break;
+	default:
+		defaultLanguage = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_UK);
+		break;
+	}
+  }
+  return defaultLanguage;
+}
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API IsValidCodePage(UINT CodePage)
@@ -37,28 +139,28 @@ BOOL WIN32API IsValidCodePage(UINT CodePage)
 //******************************************************************************
 LCID WIN32API GetUserDefaultLCID(void)
 {
-  dprintf(("KERNEL32:  OS2GetUserDefaultLCID: always retuns US English!\n"));
-  return(0x409);        //US English
+  dprintf(("KERNEL32:  OS2GetUserDefaultLCID: returns %x", MAKELCID(GetLanguageId(), SORT_DEFAULT)));
+  return(MAKELCID(GetLanguageId(), SORT_DEFAULT));        //US English
 }
 //******************************************************************************
 //******************************************************************************
 LCID WIN32API GetSystemDefaultLCID(void)
 {
-  dprintf(("KERNEL32:  OS2GetSystemDefaultLCID: always retuns US English!\n"));
-  return(0x409);        //US English
+  dprintf(("KERNEL32:  OS2GetSystemDefaultLCID: returns %x", MAKELCID(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US), SORT_DEFAULT)));
+  return(MAKELCID(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US), SORT_DEFAULT));        //US English
 }
 //******************************************************************************
 //******************************************************************************
 LANGID WIN32API GetUserDefaultLangID()
 {
-  dprintf(("KERNEL32:  OS2GetUserDefaultLangID, always returns US English\n"));
-  return(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US));
+  dprintf(("KERNEL32:  OS2GetUserDefaultLangID, returns %x", GetLanguageId()));
+  return(GetLanguageId());
 }
 //******************************************************************************
 //******************************************************************************
 LANGID WIN32API GetSystemDefaultLangID(void)
 {
-  dprintf(("KERNEL32:  OS2GetSystemDefaultLangID, always returns US English\n"));
+  dprintf(("KERNEL32:  OS2GetSystemDefaultLangID returns %x", MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US)));
   return(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US));
 }
 
@@ -922,6 +1024,8 @@ ODINFUNCTION3(DWORD,VerLanguageNameA,DWORD,  wLang,
   char    buffer[80];
   LPCSTR  name;
   DWORD   result;
+
+  dprintf(("KERNEL32: VerLanguageNameA not implemented"));
 
   /*
    * First, check \System\CurrentControlSet\control\Nls\Locale\<langid>
