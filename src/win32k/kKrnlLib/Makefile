@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.5 2001-09-17 01:18:02 bird Exp $
+# $Id: Makefile,v 1.6 2001-09-17 01:44:24 bird Exp $
 
 #
 # kKrnlLib.sys makefile.
@@ -194,7 +194,7 @@ TSTLIBS = $(LIBS)
 $(NAME)tst.exe: $(WIN32KBIN)\$(NAME)tst.exe
     $(CP) $(WIN32KBIN)\$@ $@
 $(WIN32KBIN)\$(NAME)tst.exe:    $(WIN32KBIN)\clfix.exe \
-                                Test\TstFakers.c \
+                                testcase\TstFakers.c \
                                 $(NAME)tst.def \
                                 $(TSTOBJS:. = ) \
                                 $(TSTLIBS) \
@@ -235,8 +235,8 @@ $(NAME)tst.def
 # kKrnlLib Import library.
 #
 $(NAME).lib: $(ODIN32_LIB)\$(NAME).lib
-$(ODIN32_LIB)\$(NAME).lib: $(WIN32KBIN)\mkcalltab.exe
-    $(WIN32KBIN)\mkcalltab.exe deffile > $(WIN32KOBJ)\$(NAME)implib.def
+$(ODIN32_LIB)\$(NAME).lib: $(WIN32KBIN)\MkCallTab.exe
+    $(WIN32KBIN)\MkCallTab.exe deffile > $(WIN32KOBJ)\$(NAME)implib.def
     $(IMPLIB) $(IMPLIB_FLAGS) $@ $(WIN32KOBJ)\$(NAME)implib.def
 
 
@@ -312,16 +312,16 @@ $(WIN32KOBJ)\last.lib: $(WIN32KOBJ)\devlast.obj
 # Generate calltaba.asm
 #
 dev32\calltaba.asm \
-$(WIN32KBASE)\dev32\calltaba.asm : dev16\probkrnl.c $(WIN32KBIN)\mkcalltab.exe
-    $(WIN32KBIN)\mkcalltab.exe calltab > $@
+$(WIN32KBASE)\dev32\calltaba.asm : dev16\probkrnl.c $(WIN32KBIN)\MkCallTab.exe
+    $(WIN32KBIN)\MkCallTab.exe calltab > $@
 
 
 #
 # Generate TstFakers.c
 #
-test\TstFakers.c \
-$(WIN32KBASE)\test\TstFakers.c: dev16\probkrnl.c include\probkrnl.h $(WIN32KBIN)\mkcalltab.exe
-    $(WIN32KBIN)\mkcalltab.exe tstfakers > $@
+testcase\TstFakers.c \
+$(WIN32KBASE)\testcase\TstFakers.c: $(WIN32KBIN)\MkCallTab.exe
+    $(WIN32KBIN)\MkCallTab.exe tstfakers > $@
 
 
 #
@@ -352,14 +352,14 @@ $(WIN32KBIN)\libconv.exe: Tools\libconv.c
 
 # MkCallTab objects.
 MKCALLTABOBJS = \
-    $(WIN32KOBJ)\mkcalltab.obj_c \
+    $(WIN32KOBJ)\MkCallTab.obj_c \
     $(WIN32KOBJ)\probkrnl.obj_c \
     $(WIN32KOBJ)\d16globl.obj_c \
     $(WIN32KOBJ)\vprntf16.obj_c
 
 # Rule to build MkCallTab.exe
-mkcalltab.exe mkcalltab: $(WIN32KBIN)\mkcalltab.exe
-$(WIN32KBIN)\mkcalltab.exe: $(WIN32KBIN)\clfix.exe $(MKCALLTABOBJS)
+MkCallTab.exe MkCallTab: $(WIN32KBIN)\MkCallTab.exe
+$(WIN32KBIN)\MkCallTab.exe: $(WIN32KBIN)\clfix.exe $(MKCALLTABOBJS)
     $(LD) $(LFLAGS) /pmtype:vio @<<$(WIN32KOBJ)\$(@B).lnk
         /OUT:$@
         /MAP:$(WIN32KBIN)\$(@B).map
@@ -370,7 +370,7 @@ $(WIN32KBIN)\mkcalltab.exe: $(WIN32KBIN)\clfix.exe $(MKCALLTABOBJS)
 
 # Inference rule to make the MkCallTab objects.
 {dev16}.c.obj_c:
-    @$(ECHO) compiling 16bit (mkcalltab): $<
+    @$(ECHO) compiling 16bit (MkCallTab): $<
     @$(CC16) -c -W3 -Asfw -G2s -Zp -Zl -nologo -Fa -Zi -Od -Lp -DDEBUG -DEXTRACT \
         -Fa$(WIN32KLIST)\$(*B)_c.s -Fo$(WIN32KOBJ)\$(@B).obj_c $(CINCLUDES16) $<
 
