@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.119 2001-04-26 13:22:49 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.120 2001-05-07 10:07:40 phaller Exp $ */
 
 /*
  * Win32 process functions
@@ -1601,6 +1601,26 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
 
       return(TRUE);
     }
+
+    // PH 2001-05-07
+    // verify why O32_CreateProcess actually failed.
+    // If GetLastError() == 191 (ERROR_INVALID_EXE_SIGNATURE)
+    // we can continue to call "PE.EXE".
+    // Note: Open32 does not translate ERROR_INVALID_EXE_SIGNATURE,
+    // it is also valid in Win32.
+    DWORD dwError = GetLastError();
+    if (ERROR_INVALID_EXE_SIGNATURE != dwError)
+    {
+        dprintf(("CreateProcess: O32_CreateProcess failed with rc=%d, not PE-executable !",
+                dwError));
+
+        // the current value of GetLastError() is still valid.
+
+        return FALSE;
+    }
+
+    // else ...
+
     //probably a win32 exe, so run it in the pe loader
     if(lpApplicationName) {
         if(lpCommandLine) {

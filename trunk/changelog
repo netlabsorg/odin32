@@ -1,8 +1,10 @@
-/* $Id: changelog,v 1.1398 2001-05-07 08:23:24 phaller Exp $ */
+/* $Id: changelog,v 1.1399 2001-05-07 10:07:29 phaller Exp $ */
 
  2001-05-07: Patrick Haller <patrick.haller@innotek.de>
     - WS2_32:   o created skeleton
     - WS2HELP:  o created skeleton
+    - KERNEL32: o CreateProcess error handling corrected, if
+    		  O32_CreateProcess fails with specific reason
 
  2001-05-04: Dietrich Teickner <Dietrich_Teickner@t-online.de>
     - SHELL32:  o Update for SHFileOperationA (FO_MOVE)
