@@ -1,4 +1,4 @@
-/* $Id: winimagelx.cpp,v 1.18 2002-11-18 13:53:54 sandervl Exp $ */
+/* $Id: winimagelx.cpp,v 1.19 2002-11-18 14:03:56 sandervl Exp $ */
 
 /*
  * Win32 LX Image base class
@@ -70,6 +70,7 @@ Win32LxImage::Win32LxImage(HINSTANCE hInstance, PVOID pResData)
 
     szFileName[0] = 0;
 
+    this->lpszExportPrefix = NULL;
     if(lpszCustomDllName) {
        name = lpszCustomDllName;
        this->dwOrdinalBase    = ::dwOrdinalBase;
@@ -81,7 +82,6 @@ Win32LxImage::Win32LxImage(HINSTANCE hInstance, PVOID pResData)
     else {
        name = OSLibGetDllName(hinstance);
        this->dwOrdinalBase    = 0;
-       this->lpszExportPrefix = NULL;
     }
 
     strcpy(szFileName, name);
