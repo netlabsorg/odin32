@@ -1,4 +1,4 @@
-/* $Id: rtl.cpp,v 1.12 2001-04-22 10:38:59 sandervl Exp $ */
+/* $Id: rtl.cpp,v 1.13 2001-07-20 15:39:47 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -516,23 +516,6 @@ BOOLEAN WINAPI RtlGetNtProductType(LPDWORD type)
 extern INT WINAPI RtlEnlargedIntegerMultiply(INT factor1,
                                              INT factor2);
 
-
-/******************************************************************************
- * RtlExtendedLargeIntegerDivide [NTDLL.359]
- */
-extern INT WINAPI RtlExtendedLargeIntegerDivide(LARGE_INTEGER dividend,
-                                                DWORD         divisor,
-                                                LPDWORD       rest);
-
-/******************************************************************************
- * RtlExtendedLargeIntegerMultiply [NTDLL.358]
- * Note: This even works, since gcc returns 64bit values in eax/edx just like
- * the caller expects. However... The relay code won't grok this I think.
- */
-/* longlong in VAC++ ? */
-
-extern LARGE_INTEGER WINAPI RtlExtendedIntegerMultiply(LARGE_INTEGER factor1,
-                                                       INT           factor2);
 
 /******************************************************************************
  *  RtlFormatCurrentUserKeyPath             [NTDLL.371]
