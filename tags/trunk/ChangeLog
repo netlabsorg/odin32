@@ -1,4 +1,6 @@
- /* $Id: ChangeLog,v 1.75 1999-08-09 20:28:48 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.76 1999-08-10 10:01:36 phaller Exp $ */
+ 99-08-10: Patrick Haller <phaller@gmx.net>
+	- LZ32: added preliminary support for independend LZ32 library
 
  99-08-09: Patrick Haller <phaller@gmx.net>, Achim Hasenmueller <achimha@innotek.de>, Markus Montkowski
 	- ODINCRT: providing a extensible wrapping layer for VAC++ runtime functions
