@@ -1,4 +1,14 @@
-/* $Id: ChangeLog,v 1.1677 2001-09-09 20:43:12 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1678 2001-09-10 11:02:19 sandervl Exp $ */
+
+ 2001-09-10: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o VirtualQuery fix; DosQueryMem doesn't always return region
+                  size in pages, so round up size to next page boundary
+                  (fixes loop during Netscape 4.7 startup)
+    - GDI32:    o DPtoLP fix; signed/unsigned comparison failed
+                  (fixes huge fonts in Netscape 4.7)
+                o StretchDIBits fix; clear ulCompression for BI_BITFIELDS
+                  or else WGSS blit will fail
+                  (fixes black pictures in Netscape 4.7)
 
  2001-09-09: Sander van Leeuwen <sandervl@xs4all.nl>
     - TAPI32:   o Some updates
