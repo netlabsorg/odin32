@@ -1,4 +1,11 @@
-/* $Id: changelog,v 1.2240 2002-07-30 12:09:38 sandervl Exp $ */
+/* $Id: changelog,v 1.2241 2002-07-31 13:48:51 sandervl Exp $ */
+
+ 2002-07-31: Sander van Leeuwen <sandervl@innotek.de> 
+    - WINMM:    o Custom build function SetFixedWaveBufferSize added
+                  (Call to tell winmm to expect simple fixed size buffers, so
+                   it doesn't have to use very small DART buffers; this will
+                   only work in very specific cases; it is not a good general
+                   purpose solution)
 
  2002-07-30: Platon Fomichev <platon@innotek.de>
     - KERNEL32: o Unicode update
