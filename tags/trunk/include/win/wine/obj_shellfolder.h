@@ -1,4 +1,4 @@
-/* $Id: obj_shellfolder.h,v 1.5 1999-08-22 22:52:10 sandervl Exp $ */
+/* $Id: obj_shellfolder.h,v 1.6 1999-11-10 23:35:15 phaller Exp $ */
 /*
  * Defines the COM interfaces and APIs related to IShellFolder
  *
@@ -11,6 +11,7 @@
 #include "wine/obj_base.h"
 #include "wine/obj_moniker.h"		/* for LPBC */
 #include "wine/obj_enumidlist.h"
+#include "wine/obj_oleaut.h"
 #include "winbase.h"
 #include "shell.h"
 
@@ -49,9 +50,52 @@ typedef struct IShellFolder IShellFolder, *LPSHELLFOLDER;
 DEFINE_SHLGUID(IID_IPersistFolder,      0x000214EAL, 0, 0);
 typedef struct IPersistFolder IPersistFolder, *LPPERSISTFOLDER;
 
+DEFINE_GUID(IID_IShellFolder2,  0xB82C5AA8, 0xA41B, 0x11D2, 0xBE, 0x32, 0x0, 0xc0, 0x4F, 0xB9, 0x36, 0x61);
+typedef struct IShellFolder2 IShellFolder2, *LPSHELLFOLDER2;
+
+DEFINE_GUID(IID_IEnumExtraSearch,  0xE700BE1, 0x9DB6, 0x11D1, 0xA1, 0xCE, 0x0, 0xc0, 0x4F, 0xD7, 0x5D, 0x13);
+typedef struct IEnumExtraSearch IEnumExtraSearch, *LPENUMEXTRASEARCH;
 
 /*****************************************************************************
- * IShellFolder::GetDisplayNameOf/SetNameOf uFlags 
+ * IEnumExtraSearch interface
+ */
+
+typedef struct
+{
+  GUID	guidSearch;
+  WCHAR wszFriendlyName[80];
+  WCHAR	wszMenuText[80];
+  WCHAR wszHelpText[MAX_PATH];
+  WCHAR wszUrl[2084];
+  WCHAR wszIcon[MAX_PATH+10];
+  WCHAR wszGreyIcon[MAX_PATH+10];
+  WCHAR wszClrIcon[MAX_PATH+10];
+} EXTRASEARCH,* LPEXTRASEARCH;
+
+#define ICOM_INTERFACE IEnumExtraSearch
+#define IEnumExtraSearch_METHODS \
+    ICOM_METHOD3(HRESULT, Next, ULONG, celt, LPEXTRASEARCH*, rgelt, ULONG*, pceltFetched) \
+    ICOM_METHOD1(HRESULT, Skip, ULONG, celt) \
+    ICOM_METHOD (HRESULT, Reset) \
+    ICOM_METHOD1(HRESULT, Clone, IEnumExtraSearch**, ppenum)
+#define IEnumExtraSearch_IMETHODS \
+    IUnknown_IMETHODS \
+    IEnumExtraSearch_METHODS
+ICOM_DEFINE(IEnumExtraSearch,IUnknown)
+#undef ICOM_INTERFACE
+
+/*** IUnknown methods ***/
+#define IEnumIDList_QueryInterface(p,a,b)	ICOM_CALL2(QueryInterface,p,a,b)
+#define IEnumIDList_AddRef(p)			ICOM_CALL (AddRef,p)
+#define IEnumIDList_Release(p)			ICOM_CALL (Release,p)
+/*** IEnumIDList methods ***/
+#define IEnumIDList_Next(p,a,b,c)		ICOM_CALL3(Next,p,a,b,c)
+#define IEnumIDList_Skip(p,a)			ICOM_CALL1(Skip,p,a)
+#define IEnumIDList_Reset(p)			ICOM_CALL(Reset,p)
+#define IEnumIDList_Clone(p,a)			ICOM_CALL1(Clone,p,a)
+
+/*****************************************************************************
+ * IShellFolder::GetDisplayNameOf/SetNameOf uFlags
  */
 typedef enum
 {	SHGDN_NORMAL		= 0,		/* default (display purpose) */
@@ -60,7 +104,7 @@ typedef enum
 } SHGNO;
 
 /*****************************************************************************
- * IShellFolder::EnumObjects 
+ * IShellFolder::EnumObjects
  */
 typedef enum tagSHCONTF
 {	SHCONTF_FOLDERS		= 32,	/* for shell browser */
@@ -69,7 +113,7 @@ typedef enum tagSHCONTF
 } SHCONTF;
 
 /*****************************************************************************
- * IShellFolder::GetAttributesOf flags 
+ * IShellFolder::GetAttributesOf flags
  */
 #define SFGAO_CANCOPY		DROPEFFECT_COPY /* Objects can be copied */
 #define SFGAO_CANMOVE		DROPEFFECT_MOVE /* Objects can be moved */
@@ -157,15 +201,13 @@ DWORD WINAPI SHGetDesktopFolder(IShellFolder * *);
     ICOM_METHOD3( HRESULT, GetAttributesOf, UINT, cidl, LPCITEMIDLIST *, apidl, ULONG *, rgfInOut)\
     ICOM_METHOD6( HRESULT, GetUIObjectOf, HWND, hwndOwner, UINT, cidl, LPCITEMIDLIST *, apidl, REFIID, riid, UINT *, prgfInOut, LPVOID *, ppvOut)\
     ICOM_METHOD3( HRESULT, GetDisplayNameOf, LPCITEMIDLIST, pidl, DWORD, uFlags, LPSTRRET, lpName)\
-    ICOM_METHOD5( HRESULT, SetNameOf, HWND, hwndOwner, LPCITEMIDLIST, pidl,LPCOLESTR, lpszName, DWORD, uFlags,LPITEMIDLIST *, ppidlOut)\
-    ICOM_METHOD2( HRESULT, GetFolderPath, LPSTR, lpszOut, DWORD, dwOutSize)
+    ICOM_METHOD5( HRESULT, SetNameOf, HWND, hwndOwner, LPCITEMIDLIST, pidl,LPCOLESTR, lpszName, DWORD, uFlags,LPITEMIDLIST *, ppidlOut)
 #define IShellFolder_IMETHODS \
     IUnknown_IMETHODS \
     IShellFolder_METHODS
 ICOM_DEFINE(IShellFolder,IUnknown)
 #undef ICOM_INTERFACE
 
-#ifdef ICOM_CINTERFACE
 /*** IUnknown methods ***/
 #define IShellFolder_QueryInterface(p,a,b)		ICOM_CALL2(QueryInterface,p,a,b)
 #define IShellFolder_AddRef(p)				ICOM_CALL (AddRef,p)
@@ -181,14 +223,90 @@ ICOM_DEFINE(IShellFolder,IUnknown)
 #define IShellFolder_GetUIObjectOf(p,a,b,c,d,e,f)	ICOM_CALL6(GetUIObjectOf,p,a,b,c,d,e,f)
 #define IShellFolder_GetDisplayNameOf(p,a,b,c)		ICOM_CALL3(GetDisplayNameOf,p,a,b,c)
 #define IShellFolder_SetNameOf(p,a,b,c,d,e)		ICOM_CALL5(SetNameOf,p,a,b,c,d,e)
-#define IShellFolder_GetFolderPath(p,a,b)		ICOM_CALL2(GetFolderPath,p,a,b)
-#endif
+
+/*****************************************************************************
+ * IShellFolder2 interface
+ */
+/* IShellFolder2 */
+
+/* GetDefaultColumnState */
+typedef enum
+{
+	SHCOLSTATE_TYPE_STR	= 0x00000001,
+	SHCOLSTATE_TYPE_INT	= 0x00000002,
+	SHCOLSTATE_TYPE_DATE	= 0x00000003,
+	SHCOLSTATE_TYPEMASK	= 0x0000000F,
+	SHCOLSTATE_ONBYDEFAULT	= 0x00000010,
+	SHCOLSTATE_SLOW		= 0x00000020,
+	SHCOLSTATE_EXTENDED	= 0x00000040,
+	SHCOLSTATE_SECONDARYUI	= 0x00000080,
+	SHCOLSTATE_HIDDEN	= 0x00000100
+} SHCOLSTATE;
+
+typedef struct
+{
+	GUID	fmtid;
+	DWORD	pid;
+} SHCOLUMNID, *LPSHCOLUMNID;
+typedef const SHCOLUMNID* LPCSHCOLUMNID;
+
+/* GetDetailsEx */
+#define PID_FINDDATA		0
+#define PID_NETRESOURCE		1
+#define PID_DESCRIPTIONID	2
+
+typedef struct
+{
+	int	fmt;
+	int	cxChar;
+	STRRET	str;
+} SHELLDETAILS, *LPSHELLDETAILS;
+
+#define ICOM_INTERFACE IShellFolder2
+#define IShellFolder2_METHODS \
+    ICOM_METHOD1( HRESULT, GetDefaultSearchGUID, LPGUID, lpguid)\
+    ICOM_METHOD1( HRESULT, EnumSearches, LPENUMEXTRASEARCH *, ppEnum) \
+    ICOM_METHOD3( HRESULT, GetDefaultColumn, DWORD, dwReserved, ULONG *, pSort, ULONG *, pDisplay)\
+    ICOM_METHOD2( HRESULT, GetDefaultColumnState, UINT, iColumn, DWORD *, pcsFlags)\
+    ICOM_METHOD3( HRESULT, GetDetailsEx, LPCITEMIDLIST, pidl, const SHCOLUMNID *, pscid, VARIANT *, pv)\
+    ICOM_METHOD3( HRESULT, GetDetailsOf, LPCITEMIDLIST, pidl, UINT, iColumn, LPSHELLDETAILS, pDetails)\
+    ICOM_METHOD2( HRESULT, MapNameToSCID, LPCWSTR, pwszName, SHCOLUMNID *, pscid)
+#define IShellFolder2_IMETHODS \
+    IShellFolder_METHODS \
+    IShellFolder2_METHODS
+ICOM_DEFINE(IShellFolder2, IShellFolder)
+#undef ICOM_INTERFACE
+
+/*** IUnknown methods ***/
+#define IShellFolder2_QueryInterface(p,a,b)		ICOM_CALL2(QueryInterface,p,a,b)
+#define IShellFolder2_AddRef(p)				ICOM_CALL (AddRef,p)
+#define IShellFolder2_Release(p)			ICOM_CALL (Release,p)
+/*** IShellFolder methods ***/
+#define IShellFolder2_ParseDisplayName(p,a,b,c,d,e,f)	ICOM_CALL6(ParseDisplayName,p,a,b,c,d,e,f)
+#define IShellFolder2_EnumObjects(p,a,b,c)		ICOM_CALL3(EnumObjects,p,a,b,c)
+#define IShellFolder2_BindToObject(p,a,b,c,d)		ICOM_CALL4(BindToObject,p,a,b,c,d)
+#define IShellFolder2_BindToStorage(p,a,b,c,d)		ICOM_CALL4(BindToStorage,p,a,b,c,d)
+#define IShellFolder2_CompareIDs(p,a,b,c)		ICOM_CALL3(CompareIDs,p,a,b,c)
+#define IShellFolder2_CreateViewObject(p,a,b,c)		ICOM_CALL3(CreateViewObject,p,a,b,c)
+#define IShellFolder2_GetAttributesOf(p,a,b,c)		ICOM_CALL3(GetAttributesOf,p,a,b,c)
+#define IShellFolder2_GetUIObjectOf(p,a,b,c,d,e,f)	ICOM_CALL6(GetUIObjectOf,p,a,b,c,d,e,f)
+#define IShellFolder2_GetDisplayNameOf(p,a,b,c)		ICOM_CALL3(GetDisplayNameOf,p,a,b,c)
+#define IShellFolder2_SetNameOf(p,a,b,c,d,e)		ICOM_CALL5(SetNameOf,p,a,b,c,d,e)
+/*** IShellFolder2 methods ***/
+#define IShellFolder2_GetDefaultSearchGUID(p,a)		ICOM_CALL1(GetDefaultSearchGUID,p,a)
+#define IShellFolder2_EnumSearches(p,a)			ICOM_CALL1(EnumSearches,p,a)
+#define IShellFolder2_GetDefaultColumn(p,a,b,c)		ICOM_CALL3(GetDefaultColumn,p,a,b,c)
+#define IShellFolder2_GetDefaultColumnState(p,a,b)	ICOM_CALL2(GetDefaultColumnState,p,a,b)
+#define IShellFolder2_GetDetailsEx(p,a,b,c)		ICOM_CALL3(GetDetailsEx,p,a,b,c)
+#define IShellFolder2_GetDetailsOf(p,a,b,c)		ICOM_CALL3(GetDetailsOf,p,a,b,c)
+#define IShellFolder2_MapNameToSCID(p,a,b)		ICOM_CALL2(MapNameToSCID,p,a,b)
 
 /*****************************************************************************
  * IPersistFolder interface
  */
 
-DEFINE_GUID (CLSID_SFMyComp,0x20D04FE0,0x3AEA,0x1069,0xA2,0xD8,0x08,0x00,0x2B,0x30,0x30,0x9D); 
+/* ClassID's */
+DEFINE_GUID (CLSID_SFMyComp,0x20D04FE0,0x3AEA,0x1069,0xA2,0xD8,0x08,0x00,0x2B,0x30,0x30,0x9D);
 DEFINE_GUID (CLSID_SFINet,  0x871C5380,0x42A0,0x1069,0xA2,0xEA,0x08,0x00,0x2B,0x30,0x30,0x9D);
 DEFINE_GUID (CLSID_SFFile,  0xF3364BA0,0x65B9,0x11CE,0xA9,0xBA,0x00,0xAA,0x00,0x4A,0xE8,0x37);
 
@@ -201,16 +319,14 @@ DEFINE_GUID (CLSID_SFFile,  0xF3364BA0,0x65B9,0x11CE,0xA9,0xBA,0x00,0xAA,0x00,0x
 ICOM_DEFINE(IPersistFolder, IPersist)
 #undef ICOM_INTERFACE
 
-#ifdef ICOM_CINTERFACE
 /*** IUnknown methods ***/
-#define IPersistFolder_QueryInterface(p,a,b)	ICOM_CALL2(QueryInterface,p,a,b) 
+#define IPersistFolder_QueryInterface(p,a,b)	ICOM_CALL2(QueryInterface,p,a,b)
 #define IPersistFolder_AddRef(p)		ICOM_CALL (AddRef,p)
 #define IPersistFolder_Release(p)		ICOM_CALL (Release,p)
 /*** IPersist methods ***/
 #define IPersistFolder_GetClassID(p,a)		ICOM_CALL1(GetClassID,p,a)
 /*** IPersistFolder methods ***/
 #define IPersistFolder_Initialize(p,a)		ICOM_CALL1(Initialize,p,a)
-#endif
 
 #ifdef __cplusplus
 } /* extern "C" */
