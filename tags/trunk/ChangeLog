@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.773 2000-03-03 19:19:18 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.774 2000-03-03 20:48:31 hugh Exp $ */
+
+ 2000-03-02: Markus Montkowski <mmontkowski@gmx.de>
+        - DDRAW:  Fixed bug in CreateSurface and QueryInterface
+                  (Moorhuhn now starts fine with ddraw)
 
  2000-03-02: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Create shell dirs in odin\bin directory
