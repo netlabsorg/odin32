@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.40 2001-06-14 12:56:51 sandervl Exp $ */
+/* $Id: button.cpp,v 1.41 2001-08-25 10:28:44 sandervl Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
@@ -128,7 +128,7 @@ static LRESULT BUTTON_Enable(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
 
-  if ((dwStyle & BS_NOTIFY) && !wParam) BUTTON_SendNotify(hwnd,BN_DISABLE);
+////  if ((dwStyle & BS_NOTIFY) && !wParam) BUTTON_SendNotify(hwnd,BN_DISABLE);
 
   //PAINT_BUTTON(hwnd,dwStyle & 0x0f,ODA_DRAWENTIRE);
   //SvL: 09/10/99 Force it to redraw properly
@@ -189,7 +189,7 @@ static LRESULT BUTTON_Paint(HWND hwnd,WPARAM wParam,LPARAM lParam)
   DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
   DWORD style = dwStyle & 0x0f;
 
-  if (dwStyle & BS_NOTIFY) BUTTON_SendNotify(hwnd,BN_PAINT);
+////  if (dwStyle & BS_NOTIFY) BUTTON_SendNotify(hwnd,BN_PAINT);
 
   if (btnPaintFunc[style])
   {
@@ -229,7 +229,7 @@ static LRESULT BUTTON_LButtonDown(HWND hwnd,WPARAM wParam,LPARAM lParam)
   SendMessageA(hwnd,BM_SETSTATE,TRUE,0);
   infoPtr->state |= BUTTON_BTNPRESSED;
 
-  if (dwStyle & BS_NOTIFY) BUTTON_SendNotify(hwnd,BN_HILITE);
+////  if (dwStyle & BS_NOTIFY) BUTTON_SendNotify(hwnd,BN_HILITE);
 
   return 0;
 }
@@ -274,7 +274,7 @@ static LRESULT BUTTON_LButtonUp(HWND hwnd,WPARAM wParam,LPARAM lParam)
     BUTTON_SendNotify(hwnd,BN_CLICKED);
   }
 
-  if (dwStyle & BS_NOTIFY) BUTTON_SendNotify(hwnd,BN_UNHILITE);
+////  if (dwStyle & BS_NOTIFY) BUTTON_SendNotify(hwnd,BN_UNHILITE);
 
   return 0;
 }
@@ -291,7 +291,7 @@ static LRESULT BUTTON_CaptureChanged(HWND hwnd,WPARAM wParam,LPARAM lParam)
       SendMessageA( hwnd, BM_SETSTATE, FALSE, 0 );
   }
 
-  if (dwStyle & BS_NOTIFY) BUTTON_SendNotify(hwnd,BN_UNHILITE);
+////  if (dwStyle & BS_NOTIFY) BUTTON_SendNotify(hwnd,BN_UNHILITE);
 
   return 0;
 }
@@ -436,7 +436,7 @@ static LRESULT BUTTON_SetFocus(HWND hwnd,WPARAM wParam,LPARAM lParam)
   DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
   DWORD style = dwStyle & 0x0f;
 
-  if (dwStyle & BS_NOTIFY) BUTTON_SendNotify(hwnd,BN_SETFOCUS);
+////  if (dwStyle & BS_NOTIFY) BUTTON_SendNotify(hwnd,BN_SETFOCUS);
 
   if (((style == BS_AUTORADIOBUTTON) || (style == BS_RADIOBUTTON)) &&
       (GetCapture() != hwnd) && !(SendMessageA(hwnd,BM_GETCHECK,0,0) & BST_CHECKED))
@@ -459,7 +459,7 @@ static LRESULT BUTTON_KillFocus(HWND hwnd,WPARAM wParam,LPARAM lParam)
   DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
   DWORD style = dwStyle & 0x0f;
 
-  if (dwStyle & BS_NOTIFY) BUTTON_SendNotify(hwnd,BN_KILLFOCUS);
+////  if (dwStyle & BS_NOTIFY) BUTTON_SendNotify(hwnd,BN_KILLFOCUS);
 
   if (infoPtr->state & BUTTON_HASFOCUS)
   {
