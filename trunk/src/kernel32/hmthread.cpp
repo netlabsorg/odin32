@@ -1,4 +1,4 @@
-/* $Id: hmthread.cpp,v 1.4 2000-03-30 10:52:04 sandervl Exp $ */
+/* $Id: hmthread.cpp,v 1.5 2000-11-17 14:34:06 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -44,7 +44,11 @@ HANDLE HMDeviceThreadClass::CreateThread(PHMHANDLEDATA          pHMHandleData,
                                          BOOL                   fFirstThread)
 {
   Win32Thread *winthread;
+  DWORD threadid;
 
+  if(lpIDThread == NULL) { 
+        lpIDThread = &threadid;
+  }
   pHMHandleData->dwInternalType = HMTYPE_THREAD;
   pHMHandleData->dwUserData     = THREAD_ALIVE;
 
