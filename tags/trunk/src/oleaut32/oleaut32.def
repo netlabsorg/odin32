@@ -1,4 +1,4 @@
-;/* $Id: oleaut32.def,v 1.5 2000-12-16 22:53:31 bird Exp $ */
+;/* $Id: oleaut32.def,v 1.6 2001-06-01 07:50:02 sandervl Exp $ */
 LIBRARY OLAUTOS2 INITINSTANCE
 DESCRIPTION 'Odin32 System DLL - OleAut32'
 DATA MULTIPLE NONSHARED
@@ -289,7 +289,8 @@ OleCreatePropertyFrame = _OleCreatePropertyFrame@44  @417
 OleLoadPicture = _OleLoadPicture@20  @418
 OleCreatePictureIndirect = _OleCreatePictureIndirect@16  @419
 OleCreateFontIndirect = _OleCreateFontIndirect@12  @420
-OleTranslateColor = _OleTranslateColor@12  @421
+OleTranslateColor = _OleTranslateColor@12    @421
 OleLoadPictureFile = _OleLoadPictureFile@20  @422
-OleSavePictureFile = _OleSavePictureFile@8  @423
+OleSavePictureFile = _OleSavePictureFile@8   @423
 OleLoadPicturePath = _OleLoadPicturePath@24  @424
+OleLoadPictureEx   = _OleLoadPictureEx@32    @425
