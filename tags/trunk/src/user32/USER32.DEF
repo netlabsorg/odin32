@@ -1,4 +1,4 @@
-; $Id: USER32.DEF,v 1.83 2004-04-14 11:04:56 sandervl Exp $
+; $Id: USER32.DEF,v 1.84 2004-05-03 12:08:59 sandervl Exp $
 
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
 DESCRIPTION 'Odin32 System Dll - User32'
@@ -742,3 +742,5 @@ EXPORTS
     _OSLibDragDrop@16                                            @2040 NONAME
     _OSLibCreateDragStruct@16                                    @2041 NONAME
     _OSLibFreeDragStruct@4                                       @2042 NONAME
+    _clipboardPMToOdinFormat@4                                   @2043 NONAME
+    _clipboardOdinToPMFormat@4                                   @2044 NONAME

@@ -1,4 +1,4 @@
-/* $Id: inituser32.cpp,v 1.18 2003-11-14 13:44:10 sandervl Exp $ */
+/* $Id: inituser32.cpp,v 1.19 2004-05-03 12:09:01 sandervl Exp $ */
 /*
  * USER32 DLL entry point
  *
@@ -81,7 +81,7 @@ void MigrateWindowsFonts()
   HKEY  hkFonts,hkOS2Fonts;
   char  buffer[512];
   UINT  len;
-  
+
   if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, REGPATH ,0, KEY_ALL_ACCESS, &hkFonts) == 0)
   {
       DWORD dwIndex, dwType;
@@ -94,16 +94,16 @@ void MigrateWindowsFonts()
            ++dwIndex, sizeOfSubKeyName = 254, sizeOfDataArray = 511)
       {
          HDIR          hdirFindHandle = HDIR_CREATE;
-         FILEFINDBUF3  FindBuffer     = {0};      
+         FILEFINDBUF3  FindBuffer     = {0};
          ULONG         ulResultBufLen = sizeof(FILEFINDBUF3);
-         ULONG         ulFindCount    = 1, ret;       
-         APIRET        rc             = NO_ERROR; 
+         ULONG         ulFindCount    = 1, ret;
+         APIRET        rc             = NO_ERROR;
 
          GetWindowsDirectoryA( buffer, sizeof(buffer) );
          wsnprintfA( buffer, sizeof(buffer), "%s\\%s\\%s", buffer, FONTSDIRECTORY, dataArray );
 
          rc = DosFindFirst( buffer, &hdirFindHandle, FILE_NORMAL,&FindBuffer, ulResultBufLen, &ulFindCount, FIL_STANDARD);
-         //Check that file actaully exist 
+         //Check that file actaully exist
          if ( rc == NO_ERROR  && !(FindBuffer.attrFile & FILE_DIRECTORY))
          {
             //Check OS/2 INI profile for font entry
@@ -120,7 +120,7 @@ void MigrateWindowsFonts()
                   dprintf(("GpiLoadFonts %s failed with %x", buffer, WinGetLastError(0)));
               }
             }
-         } 
+         }
          DosFindClose(hdirFindHandle);
       }
       RegCloseKey(hkFonts);
@@ -181,6 +181,7 @@ ULONG APIENTRY inittermUser32(ULONG hModule, ULONG ulFlag)
          //PF: migrate windows fonts
          MigrateWindowsFonts();
 
+         InitClipboardFormats();
          break;
 
 
