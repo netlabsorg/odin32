@@ -3693,6 +3693,18 @@ static BOOL LISTVIEW_DrawItem(LISTVIEW_INFO *infoPtr, HDC hdc, INT nItem, INT nS
 postpaint:
     if (cditemmode & CDRF_NOTIFYPOSTPAINT)
         notify_postpaint(infoPtr, &nmlvcd);
+
+#ifdef __WIN32OS2__
+  if (nMixMode != 0)
+  {
+    SetROP2(hdc, R2_COPYPEN);
+    SetBkColor(hdc, dwBkColor);
+    SetTextColor(hdc, dwTextColor);
+    if (iBkMode != -1)
+      SetBkMode(hdc, iBkMode);
+  }
+#endif
+
     return TRUE;
 }
 
