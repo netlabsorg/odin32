@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.3 1999-09-12 15:44:20 dengert Exp $ */
+/* $Id: dc.cpp,v 1.4 1999-09-13 16:13:46 dengert Exp $ */
 
 /*
  * DC functions for USER32
@@ -267,6 +267,11 @@ BOOL    OPEN32API _O32_EndPaint (HWND hwnd, const PAINTSTRUCT_W *lpps);
 int     OPEN32API _O32_GetUpdateRgn (HWND hwnd, HRGN hrgn, BOOL erase);
 ULONG   OPEN32API _O32_GetRegionData (HRGN hrgn, ULONG count, PRGNDATA_W pData);
 BOOL    OPEN32API _O32_DeleteObject (LHANDLE hgdiobj);
+int     OPEN32API _O32_ReleaseDC (HWND hwnd, HDC hdc);
+
+#ifndef DEVESC_SETPS
+  #define DEVESC_SETPS  49149L
+#endif
 
 #define FLOAT_TO_FIXED(x) ((FIXED) ((x) * 65536.0))
 #define MICRO_HPS_TO_HDC(x) ((x) & 0xFFFFFFFE)
@@ -648,6 +653,26 @@ HDC sendEraseBkgnd (Win32BaseWindow *wnd)
    return erased;
 }
 
+void releaseOwnDC (HDC hps)
+{
+   pDCData pHps = (pDCData)GpiQueryDCData ((HPS)hps);
+
+   if (pHps) {
+      if (pHps->hrgnHDC)
+         GpiDestroyRegion (pHps->hps, pHps->hrgnHDC);
+
+      GpiSetBitmap (pHps->hps, NULL);
+      _O32_DeleteObject (pHps->nullBitmapHandle);
+      GpiDestroyPS(pHps->hps);
+
+      if (pHps->hdc)
+         DevCloseDC(pHps->hdc);
+
+// how can a memory chunk allocated by GpiAllocateDCData freed by delete?
+//      delete pHps;
+   }
+}
+
 HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
 {
    HWND     hwnd = hWnd ? hWnd : HWND_DESKTOP;
@@ -915,6 +940,7 @@ dprintf (("User32: GetDCEx hwnd %x (%x %x) -> wnd %x", hwnd, hrgn, flags, wnd));
       PRGNDATA_W RgnData;
       PRECTL pr;
       int i;
+      LONG height = OSLibQueryScreenHeight();
 
       if (!hrgn)
          goto error;
@@ -930,11 +956,21 @@ dprintf (("User32: GetDCEx hwnd %x (%x %x) -> wnd %x", hwnd, hrgn, flags, wnd));
 
       success = TRUE;
       if (flags & DCX_EXCLUDERGN_W)
-         for (; (i > 0) && success; i--, pr++)
+         for (; (i > 0) && success; i--, pr++) {
+            LONG y = pr->yBottom;
+
+            pr->yBottom = height - pr->yTop;
+            pr->yTop    = height - y;
             success &= GpiExcludeClipRectangle (pHps->hps, pr);
+         }
       else
-         for (; (i > 0) && success; i--, pr++)
+         for (; (i > 0) && success; i--, pr++) {
+            LONG y = pr->yBottom;
+
+            pr->yBottom = height - pr->yTop;
+            pr->yTop    = height - y;
             success &= GpiIntersectClipRectangle (pHps->hps, pr);
+         }
       if (!success)
          goto error;
    }
@@ -977,7 +1013,30 @@ HDC WIN32API GetDC (HWND hwnd)
   return GetDCEx (hwnd, NULL, 0);
 }
 
+HDC WIN32API GetWindowDC (HWND hwnd)
+{
+  return GetDCEx (hwnd, NULL, DCX_WINDOW_W);
+}
 
+int WIN32API ReleaseDC (HWND hwnd, HDC hdc)
+{
+   USHORT sel = RestoreOS2FS();
+   BOOL isOwnDC = FALSE;
+   int rc;
+
+   if (hwnd)
+   {
+      Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
+      isOwnDC = wnd->isOwnDC();
+   }
+   if (isOwnDC)
+      rc = TRUE;
+   else
+      rc = _O32_ReleaseDC (0, hdc);
+
+   SetFS(sel);
+   return (rc);
+}
 //******************************************************************************
 //******************************************************************************
 
