@@ -1,4 +1,4 @@
-/* $Id: shlfolder.cpp,v 1.13 2000-04-02 15:12:48 cbratschi Exp $ */
+/* $Id: shlfolder.cpp,v 1.14 2000-06-01 14:01:10 sandervl Exp $ */
 /*
  * Shell Folder stuff
  *
@@ -30,6 +30,7 @@
 #include "wine/undocshell.h"
 #include "shell32_main.h"
 #include "shresdef.h"
+#include "shlwapi.h"
 
 #include <heapstring.h>
 #include <misc.h>
@@ -208,6 +209,70 @@ static HRESULT SHELL32_GetDisplayNameOfChild(
    TRACE("-- ret=0x%08lx %s\n", hr, szOut);
 
    return hr;
+}
+
+/***********************************************************************
+ *  SHELL32_GetItemAttributes
+ *
+ * NOTES
+ * observerd values:
+ *  folder:	0xE0000177	FILESYSTEM | HASSUBFOLDER | FOLDER
+ *  file:	0x40000177	FILESYSTEM
+ *  drive:	0xf0000144	FILESYSTEM | HASSUBFOLDER | FOLDER | FILESYSANCESTOR
+ *  mycomputer:	0xb0000154	HASSUBFOLDER | FOLDER | FILESYSANCESTOR
+ *  (seems to be default for shell extensions if no registry entry exists)
+ *
+ * This functions does not set flags!! It only resets flags when nessesary.
+ */
+static HRESULT SHELL32_GetItemAttributes(
+	IShellFolder * psf,
+	LPITEMIDLIST pidl,
+	LPDWORD pdwAttributes)
+{
+        GUID const * clsid;
+	DWORD dwAttributes;
+	
+	TRACE("0x%08lx\n", *pdwAttributes);
+
+	if (*pdwAttributes & (0xcff3fe88))
+	  WARN("attribute 0x%08lx not implemented\n", *pdwAttributes);
+	*pdwAttributes &= ~SFGAO_LINK; /* FIXME: for native filedialogs */
+
+	if (_ILIsDrive(pidl))
+	{
+	  *pdwAttributes &= 0xf0000144;
+	}
+	else if ((clsid=_ILGetGUIDPointer(pidl)))
+	{
+	  if (HCR_GetFolderAttributes(clsid, &dwAttributes))
+	  {
+	    *pdwAttributes &= dwAttributes;
+	  }
+	  else
+	  {
+	    *pdwAttributes &= 0xb0000154;
+	  }	  
+	}
+	else if (_ILGetDataPointer(pidl))
+	{
+	  dwAttributes = _ILGetFileAttributes(pidl, NULL, 0);
+	  *pdwAttributes &= ~SFGAO_FILESYSANCESTOR;
+
+	  if(( SFGAO_FOLDER & *pdwAttributes) && !(dwAttributes & FILE_ATTRIBUTE_DIRECTORY))
+	      *pdwAttributes &= ~(SFGAO_FOLDER|SFGAO_HASSUBFOLDER);
+
+	  if(( SFGAO_HIDDEN & *pdwAttributes) && !(dwAttributes & FILE_ATTRIBUTE_HIDDEN))
+	      *pdwAttributes &= ~SFGAO_HIDDEN;
+
+	  if(( SFGAO_READONLY & *pdwAttributes) && !(dwAttributes & FILE_ATTRIBUTE_READONLY))
+	      *pdwAttributes &= ~SFGAO_READONLY;
+	}
+	else
+	{
+	  *pdwAttributes &= 0xb0000154;
+	}
+	TRACE("-- 0x%08lx\n", *pdwAttributes);
+	return S_OK;
 }
 
 /***********************************************************************
@@ -1855,22 +1920,28 @@ static HRESULT WINAPI ISF_MyComputer_fnParseDisplayName(
    *ppidl = 0;
    if (pchEaten) *pchEaten = 0;          /* strange but like the original */
 
-   if (PathIsRootW(lpszDisplayName))
-   {
-     szNext = GetNextElementW(lpszDisplayName, szElement, MAX_PATH);
-     WideCharToLocal(szTempA, szElement, lstrlenW(szElement) + 1);
-     pidlTemp = _ILCreateDrive(szTempA);
+	/* do we have an absolute path name ? */
+	if (PathGetDriveNumberW(lpszDisplayName) >= 0 &&
+	    lpszDisplayName[2] == (WCHAR)'\\')
+	{
+	  szNext = GetNextElementW(lpszDisplayName, szElement, MAX_PATH);
+	  lstrcpynWtoA(szTempA, szElement, lstrlenW(szElement) + 1);
+	  pidlTemp = _ILCreateDrive(szTempA);
 
-     if (szNext && *szNext)
-     {
-       hr = SHELL32_ParseNextElement(hwndOwner,iface, &pidlTemp, (LPOLESTR)szNext, pchEaten, pdwAttributes);
-     }
-     else
-     {
-       hr = S_OK;
-     }
-     *ppidl = pidlTemp;
-   }
+	  if (szNext && *szNext)
+	  {
+	    hr = SHELL32_ParseNextElement(hwndOwner, iface, &pidlTemp, (LPOLESTR)szNext, pchEaten, pdwAttributes);
+	  }
+	  else
+	  {
+	    if (pdwAttributes && *pdwAttributes)
+	    {
+	      SHELL32_GetItemAttributes(_IShellFolder_(This), pidlTemp, pdwAttributes);
+	    }
+	    hr = S_OK;
+	  }
+	  *ppidl = pidlTemp;
+	}
 
    TRACE("(%p)->(-- ret=0x%08lx)\n", This, hr);
 
