@@ -1,4 +1,4 @@
-/* $Id: hmmmap.h,v 1.5 2001-01-22 18:26:51 sandervl Exp $ */
+/* $Id: hmmmap.h,v 1.6 2001-04-26 13:22:46 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -56,7 +56,7 @@ public:
                                      DWORD                      dwNumberOfBytesToMap,
 		                     LPVOID                     lpBaseAddress);
 
-  virtual DWORD  CloseHandle(PHMHANDLEDATA pHMHandleData);
+  virtual BOOL CloseHandle(PHMHANDLEDATA pHMHandleData);
 };
 
 

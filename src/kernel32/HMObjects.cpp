@@ -1,4 +1,4 @@
-/* $Id: HMObjects.cpp,v 1.2 2000-02-16 14:24:00 sandervl Exp $ */
+/* $Id: HMObjects.cpp,v 1.3 2001-04-26 13:22:42 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -59,7 +59,7 @@
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-DWORD HMDeviceKernelObjectClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
+BOOL HMDeviceKernelObjectClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
 {
   BOOL bRC;
 
@@ -71,6 +71,6 @@ DWORD HMDeviceKernelObjectClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
   dprintf(("KERNEL32: HandleManager::KernelObject::CloseHandle returned %08xh\n",
           bRC));
 
-  return (DWORD)bRC;
+  return bRC;
 }
 

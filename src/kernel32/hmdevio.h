@@ -1,4 +1,4 @@
-/* $Id: hmdevio.h,v 1.1 1999-11-12 14:57:15 sandervl Exp $ */
+/* $Id: hmdevio.h,v 1.2 2001-04-26 13:22:44 sandervl Exp $ */
 
 #ifndef __DEVIO_H__
 #define __DEVIO_H__
@@ -125,7 +125,7 @@ public:
                              PVOID         lpSecurityAttributes,
                              PHMHANDLEDATA pHMHandleDataTemplate);
 
-  virtual DWORD  CloseHandle(PHMHANDLEDATA pHMHandleData);
+  virtual BOOL  CloseHandle(PHMHANDLEDATA pHMHandleData);
 
                     /* this is a handler method for calls to DeviceIoControl() */
   virtual BOOL   DeviceIoControl    (PHMHANDLEDATA pHMHandleData, DWORD dwIoControlCode,

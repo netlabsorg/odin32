@@ -1,4 +1,4 @@
-# $Id: kernel32.mak,v 1.3 2001-04-21 09:10:14 sandervl Exp $
+# $Id: kernel32.mak,v 1.4 2001-04-26 13:22:48 sandervl Exp $
 
 #
 # Odin32 API
@@ -114,6 +114,8 @@ $(OBJDIR)\version.obj \
 $(OBJDIR)\exceptstackdump.obj \
 !endif
 $(OBJDIR)\module.obj \
+$(OBJDIR)\hmmailslot.obj \
+$(OBJDIR)\mailslot.obj \
 $(OBJDIR)\kernelrsrc.obj
 
 

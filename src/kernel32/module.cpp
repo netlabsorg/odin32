@@ -12,6 +12,9 @@
 #include <heapstring.h>
 #include <misc.h>
 
+#define DBG_LOCALLOG	DBG_module
+#include "dbglocal.h"
+
 #define FILE_strcasecmp  strcmpi
 
 /* Check whether a file is an OS/2 or a very old Windows executable

@@ -1,4 +1,4 @@
-/* $Id: hmobjects.h,v 1.1 1999-07-06 15:48:47 phaller Exp $ */
+/* $Id: hmobjects.h,v 1.2 2001-04-26 13:22:46 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -33,7 +33,7 @@ public:
   HMDeviceKernelObjectClass(LPCSTR lpDeviceName) : HMDeviceHandler(lpDeviceName) {}
 
                       /* this is a handler method for calls to CloseHandle() */
-  virtual DWORD  CloseHandle(PHMHANDLEDATA pHMHandleData);
+  virtual BOOL  CloseHandle(PHMHANDLEDATA pHMHandleData);
 };
 
 

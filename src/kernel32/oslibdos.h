@@ -1,4 +1,4 @@
-/* $Id: oslibdos.h,v 1.27 2000-12-07 12:00:24 sandervl Exp $ */
+/* $Id: oslibdos.h,v 1.28 2001-04-26 13:22:49 sandervl Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -174,6 +174,15 @@ DWORD OSLibDosCreateNamedPipe(LPCTSTR lpName,
                               DWORD   nInBufferSize,
                               DWORD   nDefaultTimeOut,
                               LPSECURITY_ATTRIBUTES lpSecurityAttributes);
+
+BOOL  OSLibSetNamedPipeState(DWORD hNamedPipe, DWORD dwPipeMode);
+
+DWORD OSLibDosOpenPipe(LPCTSTR lpName,
+                       DWORD fuAccess,
+                       DWORD fuShare,
+                       LPSECURITY_ATTRIBUTES lpSecurityAttributes,
+                       DWORD fuCreate,
+                       DWORD fuAttrFlags);
 
 BOOL OSLibDosWaitNamedPipe(LPCSTR lpszNamedPipeName,
                             DWORD   dwTimeout);

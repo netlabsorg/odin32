@@ -582,72 +582,6 @@ HANDLE WIN32API CreateIoCompletionPort( HANDLE FileHandle,
 
   return (NULL);
 }
-/*****************************************************************************
- * Name      : HANDLE WIN32API CreateMailslotA
- * Purpose   : The CreateMailslot function creates a mailslot with the specified
- *             name and returns a handle that a mailslot server can use to
- *             perform operations on the mailslot. The mailslot is local to the
- *             computer that creates it. An error occurs if a mailslot with
- *             the specified name already exists.
- * Parameters: LPCSTR lpName              pointer to string for mailslot name
- *             DWORD nMaxMessageSize      maximum message size
- *             DWORD lReadTimeout         milliseconds before read time-out
- *             LPSECURITY_ATTRIBUTES lpSecurityAttributes pointer to security structure
- * Variables :
- * Result    : If the function succeeds, the return value is a handle to
- *             the mailslot, for use in server mailslot operations.
- *             If the function fails, the return value is INVALID_HANDLE_VALUE.
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Markus Montkowski [Tha, 1998/05/21 17:46]
- *****************************************************************************/
-
-HANDLE WIN32API CreateMailslotA(LPCSTR lpName, DWORD nMaxMessageSize,
-                                   DWORD lReadTimeout,
-                                   LPSECURITY_ATTRIBUTES lpSecurityAttributes)
-{
-
-  dprintf(("KERNEL32: CreateMailslotA(%08x,%08x,%08x,%08x) not implemented - INVALID_HANDLE_VALUE\n",
-           lpName, nMaxMessageSize, lReadTimeout, lpSecurityAttributes
-          ));
-
-  return (INVALID_HANDLE_VALUE);
-}
-
-/*****************************************************************************
- * Name      : HANDLE WIN32API CreateMailslotW
- * Purpose   : The CreateMailslot function creates a mailslot with the specified
- *             name and returns a handle that a mailslot server can use to
- *             perform operations on the mailslot. The mailslot is local to the
- *             computer that creates it. An error occurs if a mailslot with
- *             the specified name already exists.
- * Parameters: LPCWSTR lpName             pointer to string for mailslot name
- *             DWORD nMaxMessageSize      maximum message size
- *             DWORD lReadTimeout         milliseconds before read time-out
- *             LPSECURITY_ATTRIBUTES lpSecurityAttributes  pointer to security
- *                                                         structure
- * Variables :
- * Result    : If the function succeeds, the return value is a handle to
- *             the mailslot, for use in server mailslot operations.
- *             If the function fails, the return value is INVALID_HANDLE_VALUE.
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Markus Montkowski [Tha, 1998/05/21 17:46]
- *****************************************************************************/
-
-HANDLE WIN32API CreateMailslotW(LPCWSTR lpName, DWORD nMaxMessageSize,
-                                   DWORD lReadTimeout,
-                                   LPSECURITY_ATTRIBUTES lpSecurityAttributes)
-{
-
-  dprintf(("KERNEL32: CreateMailslotW(%08x,%08x,%08x,%08x) not implemented - INVALID_HANDLE_VALUE\n",
-           lpName, nMaxMessageSize, lReadTimeout, lpSecurityAttributes
-          ));
-
-  return (INVALID_HANDLE_VALUE);
-}
 
 /*****************************************************************************
  * Name      : HANDLE WIN32API CreateRemoteThread
@@ -1148,35 +1082,6 @@ int WIN32API FoldStringW( DWORD dwMapFlags, LPCWSTR lpSrcStr,
 
 
 /*****************************************************************************
- * Name      : VOID WIN32API FreeLibraryAndExitThread
- * Purpose   : The FreeLibraryAndExitThread function decrements the reference
- *             count of a loaded dynamic-link library (DLL) by one, and then
- *             calls ExitThread to terminate the calling thread.
- *             The function does not return.
- *
- *             The FreeLibraryAndExitThread function gives threads that are
- *             created and executed within a dynamic-link library an opportunity
- *             to safely unload the DLL and terminate themselves.
- * Parameters:
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Markus Montkowski [Tha, 1998/05/21 20:57]
- *****************************************************************************/
-
-VOID WIN32API FreeLibraryAndExitThread( HMODULE hLibModule, DWORD dwExitCode)
-{
-
-  dprintf(("KERNEL32:  FreeLibraryAndExitThread(%08x,%08x) not implemented\n",
-           hLibModule, dwExitCode
-          ));
-
-}
-
-
-/*****************************************************************************
  * Name      : DWORD GetHandleInformation
  * Purpose   : The GetHandleInformation function obtains information about certain
  *             properties of an object handle. The information is obtained as a set of bit flags.
@@ -1200,39 +1105,6 @@ BOOL WIN32API GetHandleInformation(HANDLE  hObject,
   return (FALSE);
 }
 
-
-/*****************************************************************************
- * Name      : BOOL GetMailslotInfo
- * Purpose   : The GetMailslotInfo function retrieves information about the
- *             specified mailslot.
- * Parameters: HANDLE  hMailslot        mailslot handle
- *             LPDWORD lpMaxMessageSize address of maximum message size
- *             LPDWORD lpNextSize       address of size of next message
- *             LPDWORD lpMessageCount   address of number of messages
- *             LPDWORD lpReadTimeout    address of read time-out
- * Variables :
- * Result    : TRUE / FALSE
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-
-BOOL WIN32API GetMailslotInfo(HANDLE  hMailslot,
-                                 LPDWORD lpMaxMessageSize,
-                                 LPDWORD lpNextSize,
-                                 LPDWORD lpMessageCount,
-                                 LPDWORD lpReadTimeout)
-{
-  dprintf(("KERNEL32: GetMailslotInfo(%08xh,%08xh,%08xh,%08xh,%08xh) not implemented\n",
-           hMailslot,
-           lpMaxMessageSize,
-           lpNextSize,
-           lpMessageCount,
-           lpReadTimeout));
-
-  return (FALSE);
-}
 
 
 
@@ -1796,32 +1668,6 @@ BOOL WIN32API SetHandleInformation(HANDLE hObject,
 
   return (FALSE);
 }
-
-
-/*****************************************************************************
- * Name      : BOOL SetMailslotInfo
- * Purpose   : The SetMailslotInfo function sets the time-out value used by the
- *             specified mailslot for a read operation.
- * Parameters: HANDLE hObject       handle to a mailslot object
- *             DWORD  dwReadTimeout read time-out
- * Variables :
- * Result    : TRUE / FALSE
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-
-BOOL WIN32API SetMailslotInfo(HANDLE hObject,
-                                 DWORD  dwReadTimeout)
-{
-  dprintf(("KERNEL32: SetMailslotInfo(%08xh,%08xh) not implemented.\n",
-           hObject,
-           dwReadTimeout));
-
-  return (FALSE);
-}
-
 
 /*****************************************************************************
  * Name      : BOOL SetSystemPowerState

@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.118 2001-04-16 08:31:46 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.119 2001-04-26 13:22:49 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -457,6 +457,28 @@ BOOL WIN32API FreeLibrary(HINSTANCE hinstance)
     }
     dprintf(("WARNING: KERNEL32: FreeLibrary %s %x NOT FOUND!", OSLibGetDllName(hinstance), hinstance));
     return(TRUE);
+}
+/*****************************************************************************
+ * Name      : VOID WIN32API FreeLibraryAndExitThread
+ * Purpose   : The FreeLibraryAndExitThread function decrements the reference
+ *             count of a loaded dynamic-link library (DLL) by one, and then
+ *             calls ExitThread to terminate the calling thread.
+ *             The function does not return.
+ *
+ *             The FreeLibraryAndExitThread function gives threads that are
+ *             created and executed within a dynamic-link library an opportunity
+ *             to safely unload the DLL and terminate themselves.
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ *****************************************************************************/
+VOID WIN32API FreeLibraryAndExitThread( HMODULE hLibModule, DWORD dwExitCode)
+{
+
+  dprintf(("KERNEL32:  FreeLibraryAndExitThread(%08x,%08x)", hLibModule, dwExitCode));
+  FreeLibrary(hLibModule);
+  ExitThread(dwExitCode);
 }
 /******************************************************************************/
 /******************************************************************************/
