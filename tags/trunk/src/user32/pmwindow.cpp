@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.31 1999-10-16 10:28:31 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.32 1999-10-16 18:56:51 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -855,7 +855,6 @@ VirtualKeyFound:
     case WM_PAINT:
         dprintf(("OS2: WM_PAINT %x", hwnd));
 
-#if 0
         if (WinQueryUpdateRect (hwnd, NULL)) {
             if (!win32wnd->isSupressErase()) {
                 BOOL erased = sendEraseBkgnd (win32wnd);
@@ -863,7 +862,7 @@ VirtualKeyFound:
             }
         }
         win32wnd->setSupressErase (FALSE);
-#endif
+
         if(win32wnd->MsgPaint(0, 0)) {
                 goto RunDefWndProc;
         }
