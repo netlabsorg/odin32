@@ -1,6 +1,6 @@
-/* $Id: changelog,v 1.2045 2002-04-13 06:38:53 bird Exp $ */
+/* $Id: changelog,v 1.2046 2002-04-13 07:44:08 bird Exp $ */
 
- 2002-04-12: knut st. osmundsen <bird@anduin.net>
+ 2002-04-13: knut st. osmundsen <bird@anduin.net>
     - Windefs.h:
                 o _MAX_PATH, _MAX_DIR, _MAX_EXT crashes withc Watcom C.
     - KERNEL32: o GetDriveType optimizations.
@@ -10,6 +10,7 @@
                 o Corrected a call to GetDirveTypeA in hmdisk.cpp. (paranoia)
                 o Made (stupid) test program which is placed in the testcase
                   subdir. This is compilable for both OS/2 and NT.
+                o Hot fix for 0 CDROM issue. (To be removed)
 
     - USER32:   o Corrected a call to GetDriveTypeA. (missing ':')
 
