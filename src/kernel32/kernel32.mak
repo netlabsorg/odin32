@@ -1,4 +1,4 @@
-# $Id: kernel32.mak,v 1.34 2002-07-21 09:20:56 sandervl Exp $
+# $Id: kernel32.mak,v 1.35 2002-07-26 10:48:19 sandervl Exp $
 
 #
 # Odin32 API
@@ -62,7 +62,7 @@ $(OBJDIR)\oslibdos.obj \
 $(OBJDIR)\char.obj \
 $(OBJDIR)\oslibmisc.obj \
 $(OBJDIR)\ole2nls.obj \
-$(OBJDIR)\misc.obj \
+$(OBJDIR)\dbglog.obj \
 $(OBJDIR)\exceptutil.obj \
 $(OBJDIR)\asmutil.obj \
 $(OBJDIR)\lang.obj \
