@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2028 2002-03-22 13:49:25 sandervl Exp $ */
+/* $Id: changelog,v 1.2029 2002-03-24 12:00:05 sandervl Exp $ */
+
+ 2002-03-24: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o OpenFileMapping fix
+                  (Notes replication seems to work now)
 
  2002-03-22: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Removed FindResource hooks
