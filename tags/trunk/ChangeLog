@@ -1,7 +1,8 @@
-/* $Id: ChangeLog,v 1.2658 2004-01-11 11:44:50 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2659 2004-01-11 12:16:08 sandervl Exp $ */
 
  2003-01-11: Sander van Leeuwen <sandervl@innotek   >
-    - GDI32:    o Major update.
+    - GDI32, USER32, KERNEL32:
+                o Major updates.
 
  2004-01-08: KO Myung-Hun <komh@chollian    >
     - GDI32:    o Fixed FONT_mbtowc(). If charset is 0, CP must not be 1252 in DBCS country.
