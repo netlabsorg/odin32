@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.94 2000-06-14 13:15:24 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.95 2000-06-14 14:25:57 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -688,10 +688,12 @@ PosChangedEnd:
     case WM_PAINT:
     {
       RECTL rectl;
+      BOOL  rc;
 
-   	WinQueryUpdateRect(hwnd, &rectl);
+   	rc = WinQueryUpdateRect(hwnd, &rectl);
         dprintf(("OS2: WM_PAINT (%d,%d) (%d,%d)", rectl.xLeft, rectl.yBottom, rectl.xRight, rectl.yTop));
-        if(win32wnd->IsWindowCreated()) 
+        if(rc && win32wnd->IsWindowCreated() && (rectl.xLeft != rectl.xRight &&
+           rectl.yBottom != rectl.yTop)) 
 	{
    	  	PRECT pClient = win32wnd->getClientRectPtr();
    	  	PRECT pWindow = win32wnd->getWindowRect();
@@ -704,6 +706,8 @@ PosChangedEnd:
 		}
         	win32wnd->DispatchMsgA(pWinMsg);
         }
+	else	goto RunDefWndProc;
+
 	//SvL: Not calling the default window procedure causes all sorts of
         //     strange problems (redraw & hanging app)
         //     -> check what WinBeginPaint does what we're forgetting in BeginPaint
@@ -713,8 +717,8 @@ PosChangedEnd:
 //        	return (MRESULT)FALSE;
 //	}
 //	dprintf(("Update rectangle (%d,%d)(%d,%d) not empty, msg %x", rectl.xLeft, rectl.yTop, rectl.xRight, rectl.yBottom, pWinMsg->message));
-	goto RunDefWndProc;
-//        break;
+//	goto RunDefWndProc;
+        break;
     }
 
     case WM_ERASEBACKGROUND:

@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.60 2000-06-08 18:10:09 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.61 2000-06-14 14:25:56 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -624,16 +624,6 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
 	lComplexity = RGN_NULL;
    }
    else {
-#if 0
-   	HRGN hrgnTmp = GpiCreateRegion(pHps->hps, 1, &rectl);
-
-   	WinQueryUpdateRegion(hwndClient, hrgnTmp);
-
-   	RGNRECT rgnrect = {0, 12, 0, RECTDIR_LFRT_TOPBOT};
-   	RECTL   rectls[12], rcltemp;
-   	GpiQueryRegionRects(pHps->hps, hrgnTmp, &rcltemp, &rgnrect, &rectls[0]);
-	GpiDestroyRegion(pHps->hps, hrgnTmp);
-#endif
         WinValidateRect(hwndClient, &rectl, FALSE);
 
 	mapWin32ToOS2Rect(wnd->getWindowHeight(), wnd->getClientRectPtr(), (PRECTLOS2)&rectlClient);
@@ -1109,6 +1099,9 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
         if (redraw & RDW_ERASE_W) {
              wnd->setEraseBkgnd(TRUE);
         }
+	else
+        if (redraw & RDW_NOERASE_W)
+            wnd->setEraseBkgnd(FALSE);
 
         if (!pRect && !hrgn)
             success = WinInvalidateRect (hwnd, NULL, IncludeChildren);
@@ -1202,7 +1195,7 @@ BOOL WIN32API InvalidateRect (HWND hwnd, const RECT *pRect, BOOL erase)
    else dprintf(("InvalidateRect %x NULL erase=%d", hwnd, erase));
    result = RedrawWindow (hwnd, pRect, NULLHANDLE,
                           RDW_ALLCHILDREN_W | RDW_INVALIDATE_W |
-                          (erase ? RDW_ERASE_W : 0) |
+                          (erase ? RDW_ERASE_W : RDW_NOERASE_W) |
                           (hwnd == NULLHANDLE ? RDW_UPDATENOW_W : 0));
    return (result);
 }
@@ -1215,7 +1208,7 @@ BOOL WIN32API InvalidateRgn (HWND hwnd, HRGN hrgn, BOOL erase)
    dprintf(("InvalidateRgn %x %x erase=%d", hwnd, hrgn, erase));
    result = RedrawWindow (hwnd, NULL, hrgn,
                           RDW_ALLCHILDREN_W | RDW_INVALIDATE_W |
-                          (erase ? RDW_ERASE_W : 0) |
+                          (erase ? RDW_ERASE_W : RDW_NOERASE_W) |
                           (hwnd == NULLHANDLE ? RDW_UPDATENOW_W : 0));
    return (result);
 }
