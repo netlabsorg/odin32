@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2183 2002-06-25 07:06:38 sandervl Exp $ */
+/* $Id: changelog,v 1.2184 2002-06-25 07:14:32 sandervl Exp $ */
 
  2002-06-25: knut st. osmundsen <bird@anduin.net>
     - UNICODE:
@@ -10,6 +10,9 @@
         o Allocate space the two missing RGB2 entries.
         o Use "%.*s" and "%.*ls" when we have a string with a length.
           (Crashing in logging is awfull. Creates zombies!)
+    - ODINCRT:
+        o Reserve low 32MB of address space before initializing
+          the CRT IF we compile with the debug heap (kLib).
 
  2002-06-24: knut st. osmundsen <bird@anduin.net>
     - Testsuite:
