@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.356 2003-02-10 19:10:22 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.357 2003-02-11 14:20:01 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1181,7 +1181,8 @@ ULONG Win32BaseWindow::MsgButton(MSG *msg)
 
                     //SvL: Calling OSLibSetActiveWindow(hwndTop); causes focus problems
                     if (win32top) {
-                        OSLibWinSetFocus(win32top->getOS2FrameWindowHandle());
+                        //Must use client window handle (not frame!!)
+                        OSLibWinSetFocus(win32top->getOS2WindowHandle());
                         RELEASE_WNDOBJ(win32top);
                     }
                 }
