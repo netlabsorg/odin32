@@ -1,4 +1,4 @@
-/* $Id: ADVAPI32.CPP,v 1.4 1999-06-11 13:00:21 phaller Exp $ */
+/* $Id: ADVAPI32.CPP,v 1.5 1999-06-11 13:19:52 phaller Exp $ */
 
 /*
  * Win32 advanced API functions for OS/2
@@ -194,7 +194,7 @@ DWORD WIN32API RegDeleteKeyA(HKEY   arg1,
 DWORD WIN32API RegDeleteValueA(HKEY  arg1,
                                LPSTR arg2)
 {
-  dprintf(("ADVAPI32: RegDeleteValueA(%08xh,%s)\n";
+  dprintf(("ADVAPI32: RegDeleteValueA(%08xh,%s)\n",
            arg1,
            arg2));
 
@@ -470,61 +470,117 @@ DWORD WIN32API RegQueryValueExW(HKEY arg1, LPWSTR arg2, LPDWORD arg3, LPDWORD ar
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API RegSetValueA(HKEY hkey, LPCSTR lpSubKey, DWORD dwType, LPCSTR lpData, DWORD cbData)
+DWORD WIN32API RegSetValueA(HKEY   hkey,
+                            LPCSTR lpSubKey,
+                            DWORD  dwType,
+                            LPCSTR lpData,
+                            DWORD  cbData)
 {
-#ifdef DEBUG
-   WriteLog("ADVAPI32: RegSetValueA %d, %s, %d, %s, %d\n", hkey, lpSubKey, dwType, lpData, cbData);
-#endif
-   //SvL: 8-11-'97: Bugfix: crash in pmwinx if size == 0 and string is large
-   if(cbData == 0)
-   cbData = strlen(lpData);
+  dprintf(("ADVAPI32: RegSetValueA(%08xh,%s,%08xh,%s,%08xh)\n",
+           hkey,
+           lpSubKey,
+           dwType,
+           lpData,
+           cbData));
 
-   return(O32_RegSetValue(ConvertKey(hkey), lpSubKey, dwType, lpData, cbData));
+
+  //SvL: 8-11-'97: Bugfix: crash in pmwinx if size == 0 and string is large
+  if(cbData == 0)
+    cbData = strlen(lpData);
+
+  return(O32_RegSetValue(ConvertKey(hkey),
+                         lpSubKey,
+                         dwType,
+                         lpData,
+                         cbData));
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API RegSetValueW(HKEY hkey, LPCWSTR lpSubKey, DWORD dwType, LPCWSTR lpData, DWORD cbData)
+DWORD WIN32API RegSetValueW(HKEY    hkey,
+                            LPCWSTR lpSubKey,
+                            DWORD   dwType,
+                            LPCWSTR lpData,
+                            DWORD   cbData)
 {
- char *astring1 = UnicodeToAsciiString((LPWSTR)lpSubKey);
- char *astring2 = UnicodeToAsciiString((LPWSTR)lpData);
- LONG  rc;
+  char *astring1 = UnicodeToAsciiString((LPWSTR)lpSubKey);
+  char *astring2 = UnicodeToAsciiString((LPWSTR)lpData);
+  LONG  rc;
 
-#ifdef DEBUG
-    WriteLog("ADVAPI32: RegSetValue\n");
-#endif
-   //SvL: 8-11-'97: Bugfix: crash in pmwinx if size == 0 and string is large
-   if(cbData == 0)
-   cbData = strlen(astring2);
+  dprintf(("ADVAPI32: RegSetValueW(%08xh,%s,%08xh,%s,%08xh)\n",
+           hkey,
+           astring1,
+           dwType,
+           astring2,
+           cbData));
 
-   rc = O32_RegSetValue(ConvertKey(hkey), astring1, dwType, astring2, cbData);
-   FreeAsciiString(astring1);
-   FreeAsciiString(astring2);
-   return(rc);
+  //SvL: 8-11-'97: Bugfix: crash in pmwinx if size == 0 and string is large
+  if(cbData == 0)
+    cbData = strlen(astring2);
+
+  rc = O32_RegSetValue(ConvertKey(hkey),
+                       astring1,
+                       dwType,
+                       astring2,
+                       cbData);
+
+  FreeAsciiString(astring1);
+  FreeAsciiString(astring2);
+  return(rc);
 }
 //******************************************************************************
 //TODO:Check for string length here too?
 //******************************************************************************
-DWORD WIN32API RegSetValueExA(HKEY arg1, LPSTR arg2, DWORD arg3, DWORD arg4, BYTE * arg5, DWORD  arg6)
+DWORD WIN32API RegSetValueExA(HKEY   arg1,
+                              LPSTR  arg2,
+                              DWORD  arg3,
+                              DWORD  arg4,
+                              BYTE  *arg5,
+                              DWORD  arg6)
 {
-#ifdef DEBUG
-    WriteLog("ADVAPI32: RegSetValueEx\n");
-#endif
-    return O32_RegSetValueEx(ConvertKey(arg1), arg2, arg3, arg4, arg5, arg6);
+  dprintf(("ADVAPI32: RegSetValueExA(%08xh,%s,%08xh,%08xh,%08xh,%08xh)\n",
+           arg1,
+           arg2,
+           arg3,
+           arg4,
+           arg5,
+           arg6));
+
+  return O32_RegSetValueEx(ConvertKey(arg1),
+                           arg2,
+                           arg3,
+                           arg4,
+                           arg5,
+                           arg6);
 }
 //******************************************************************************
 //TODO:Check for string length here too?
 //******************************************************************************
-DWORD WIN32API RegSetValueExW(HKEY arg1, LPWSTR arg2, DWORD arg3, DWORD arg4, BYTE * arg5, DWORD  arg6)
+DWORD WIN32API RegSetValueExW(HKEY   arg1,
+                              LPWSTR arg2,
+                              DWORD  arg3,
+                              DWORD  arg4,
+                              BYTE   *arg5,
+                              DWORD  arg6)
 {
- char *astring = UnicodeToAsciiString(arg2);
- LONG  rc;
+  char *astring = UnicodeToAsciiString(arg2);
+  LONG  rc;
 
-#ifdef DEBUG
-    WriteLog("ADVAPI32: RegSetValueExW, NOT COMPLETE!!\n");
-#endif
-    rc = O32_RegSetValueEx(ConvertKey(arg1), astring, arg3, arg4, arg5, arg6);
-    FreeAsciiString(astring);
-    return(rc);
+  dprintf(("ADVAPI32: RegSetValueExW(%08xh,%s,%08xh,%08xh,%08xh,%08xh)\n",
+           arg1,
+           astring,
+           arg3,
+           arg4,
+           arg5,
+           arg6));
+
+  rc = O32_RegSetValueEx(ConvertKey(arg1),
+                         astring,
+                         arg3,
+                         arg4,
+                         arg5,
+                         arg6);
+  FreeAsciiString(astring);
+  return(rc);
 }
 //******************************************************************************
 //******************************************************************************
