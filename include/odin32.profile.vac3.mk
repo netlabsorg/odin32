@@ -1,4 +1,4 @@
-# $Id: odin32.profile.vac3.mk,v 1.11 2002-04-11 23:08:11 bird Exp $
+# $Id: odin32.profile.vac3.mk,v 1.12 2002-04-12 02:37:01 bird Exp $
 
 #
 # Odin32 API
@@ -75,11 +75,11 @@ CXXTARGETFLAGS   = -Ge-
 !endif
 CXXEXCEPTIONS    = -Gx-
 
-CFLAGS           = -c -Q -Si -G5 -O+ -Oi- -Ss+ -W3 -Gm+ /Gn+ -Ti+ $(PROFILEFLAGS) $(CTARGETFLAGS)
-CXXFLAGS         = -c -Q -Si -G5 -O+ -Oi- -Ss+ -W3 -Gm+ /Gn+ -Ti+ $(PROFILEFLAGS) $(CXXTARGETFLAGS) -Gx+
-CXXFLAGS_ODINCRT = -c -Q -Si -G5 -O+ -Oi- -Ss+ -W3 -Gm+ /Gn- -Ti+ $(PROFILEFLAGS) $(CXXTARGETFLAGS) -Gx+
-CFLAGS_WIN32APP  = -c -Q -Si -G5 -O+ -Oi- -Ss+ -W3 -Gm+ /Gn+ -Ti+ $(PROFILEFLAGS) $(CTARGETFLAGS)
-CXXFLAGS_WIN32APP= -c -Q -Si -G5 -O+ -Oi- -Ss+ -W3 -Gm+ /Gn+ -Ti+ $(PROFILEFLAGS) $(CXXTARGETFLAGS)
+CFLAGS           = -c -Q -Si -G5 -O- -Oi- -Ss+ -W3 -Gm+ /Gn+ -Ti+ $(PROFILEFLAGS) $(CTARGETFLAGS)
+CXXFLAGS         = -c -Q -Si -G5 -O- -Oi- -Ss+ -W3 -Gm+ /Gn+ -Ti+ $(PROFILEFLAGS) $(CXXTARGETFLAGS) -Gx+
+CXXFLAGS_ODINCRT = -c -Q -Si -G5 -O- -Oi- -Ss+ -W3 -Gm+ /Gn- -Ti+ $(PROFILEFLAGS) $(CXXTARGETFLAGS) -Gx+
+CFLAGS_WIN32APP  = -c -Q -Si -G5 -O- -Oi- -Ss+ -W3 -Gm+ /Gn+ -Ti+ $(PROFILEFLAGS) $(CTARGETFLAGS)
+CXXFLAGS_WIN32APP= -c -Q -Si -G5 -O- -Oi- -Ss+ -W3 -Gm+ /Gn+ -Ti+ $(PROFILEFLAGS) $(CXXTARGETFLAGS)
 CINCLUDES        = -I$(ODIN32_INCLUDE)\Win -I. -I$(ODIN32_INCLUDE)
 CDEFINES         = -D__WIN32OS2__ -D__WINE__ -D__i386__ -DTCPV40HDRS -DCOMCTL32UNDOC
 CDEFINES_ODINCRT = -D__WIN32OS2__ -D__WINE__ -D__i386__
@@ -108,8 +108,8 @@ LD2TARGETFLAGS   = /EXEC /pmtype:pm   /stack:$(STACKSIZE)
 LDTARGETFLAGS    = -Ge-
 LD2TARGETFLAGS   = /DLL
 !endif
-LDFLAGS          = -Q   -B"/noe /map /linenumbers  /nod" -Ti -Si -W3 -Gm+ $(PROFILEFLAGS) $(LDTARGETFLAGS)
-LDFLAGS_ODINCRT  = -Q   -B"/noe /map /linenumbers  "     -Ti -Si -W3 -Gm+ $(PROFILEFLAGS) $(LDTARGETFLAGS)
+LDFLAGS          = -Q   -B"/noe /map /linenumbers  /nod" -Ti+ -Si -W3 -Gm+ $(PROFILEFLAGS) $(LDTARGETFLAGS)
+LDFLAGS_ODINCRT  = -Q   -B"/noe /map /linenumbers  "     -Ti+ -Si -W3 -Gm+ $(PROFILEFLAGS) $(LDTARGETFLAGS)
 LD2FLAGS         = /nologo /noe /map /linenumbers  /nod /debug $(LD2TARGETFLAGS)
 LD2FLAGS_ODINCRT = /nologo /noe /map /linenumbers       /debug $(LD2TARGETFLAGS)
 
