@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.384 2004-01-15 10:28:42 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.385 2004-01-19 12:39:02 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -672,7 +672,7 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndOS2)
         //not a good solution, but it's a bit difficult to share a single
         //DC among different windows... DevOpenDC apparently can't be used
         //for window DCs and WinOpenWindowDC must be associated with a window
-        ownDC = 0; //GetDCEx(getWindowHandle(), NULL, DCX_USESTYLE);
+        ownDC = GetDCEx(getWindowHandle(), NULL, DCX_USESTYLE);
     }
     /* Set the window menu */
     if ((dwStyle & (WS_CAPTION | WS_CHILD)) == WS_CAPTION )
