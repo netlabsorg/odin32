@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.211 2003-04-25 11:13:16 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.212 2003-04-28 08:41:07 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -1679,6 +1679,10 @@ adjustend:
 #ifndef USE_CALCVALIDRECT
         }
 #endif
+        //PF This is the final step of PM restoration - should end up
+        //in default handler.
+        if (win32wnd->getOldStyle() & WS_MINIMIZE_W && pswp->fl & SWP_RESTORE)
+              goto RunDefFrameWndProc;
 
 PosChangedEnd:
         rc = (MRESULT)FALSE;
