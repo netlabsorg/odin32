@@ -1,4 +1,4 @@
- /* $Id */
+ /* $Id: ChangeLog,v 1.13 1999-06-20 14:07:38 sandervl Exp $ */
  99-20-06: Sander van Leeuwen
 	- KERNEL32: Call HMInitialize from initterm, not winexe object creation
 	- KERNEL32: Added comctl to list of system dlls (windll.cpp)
