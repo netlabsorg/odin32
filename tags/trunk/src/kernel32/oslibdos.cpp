@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.56 2001-01-23 11:59:45 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.57 2001-02-19 17:25:14 bird Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -30,6 +30,7 @@
 #include "initterm.h"
 #include "oslibdos.h"
 #include "dosqss.h"
+#include "win32k.h"
 
 #define DBG_LOCALLOG    DBG_oslibdos
 #include "dbglocal.h"
@@ -292,33 +293,51 @@ DWORD OSLibDosAliasMem(LPVOID pb, ULONG cb, LPVOID *ppbAlias, ULONG fl)
 //******************************************************************************
 //NT returns addresses aligned at 64k, so we do too.
 //******************************************************************************
-DWORD OSLibDosAllocMem(LPVOID *lplpMemAddr, DWORD size, DWORD flags)
+DWORD OSLibDosAllocMem(LPVOID *lplpMemAddr, DWORD cb, DWORD flFlags)
 {
- LPVOID memaddr;
- DWORD  offset;
- APIRET rc;
+    PVOID   pvMemAddr;
+    DWORD   offset;
+    APIRET  rc;
 
-  rc = DosAllocMem(&memaddr, size, PAG_READ | flAllocMem);
-  if(rc) {
+    /*
+     * Let's try use the exteneded DosAllocMem API of Win32k.sys.
+     */
+    if (libWin32kInstalled())
+    {
+        rc = DosAllocMemEx(&pvMemAddr, cb, flFlags | flAllocMem | OBJ_ALIGN64K);
+        if (rc != ERROR_NOT_SUPPORTED)  /* This call was stubbed until recently. */
+            return rc;
+    }
+
+    /*
+     * If no or old Win32k fall back to old method.
+     */
+    rc = DosAllocMem(&pvMemAddr, cb, PAG_READ | flAllocMem);
+    if (rc)
+    {
         return rc;
-  }
-  DosEnterCritSec();
-  DosFreeMem(memaddr);
-  offset = (DWORD)memaddr & 0xFFFF;
-  if(offset) {
-        DosAllocMem(&memaddr, 64*1024 - offset, PAG_READ | flAllocMem);
-  }
-  rc = DosAllocMem(lplpMemAddr, size, flags | flAllocMem);
-  DosExitCritSec();
-  if((DWORD)*lplpMemAddr & 0xFFFF) {//still not at 64k boundary?
+    }
+    DosEnterCritSec();
+    DosFreeMem(pvMemAddr);
+    offset = (DWORD)pvMemAddr & 0xFFFF;
+    if (offset)
+    {
+        DosAllocMem(&pvMemAddr, 64*1024 - offset, PAG_READ | flAllocMem);
+    }
+    rc = DosAllocMem(lplpMemAddr, cb, flFlags | flAllocMem);
+    DosExitCritSec();
+    if ((DWORD)*lplpMemAddr & 0xFFFF)
+    {   //still not at 64k boundary?
         DosFreeMem(*lplpMemAddr);
-        rc = OSLibDosAllocMem(lplpMemAddr, size, flags);
-  }
-  if(offset) {
-        DosFreeMem(memaddr);
-  }
+        rc = OSLibDosAllocMem(lplpMemAddr, cb, flFlags);
+    }
+    if (offset)
+    {
+        DosFreeMem(pvMemAddr);
+    }
 
-  return rc;
+
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -590,7 +609,7 @@ BOOL pmDateTimeToFileTime(FDATE *pDate,FTIME *pTime,FILETIME *pFT)
 
   dosTime = *(USHORT*)pTime;
   dosDate = *(USHORT*)pDate;
-  
+
   // PH: probably replace with faster implementation than calling Open32
   // through the external interface!
   return DosDateTimeToFileTime(dosDate,dosTime,pFT);
@@ -1699,7 +1718,7 @@ VOID long2ShortName(CHAR* longName, CHAR* shortName)
       shortName[1] = 0;
       return;
     }
-    
+
     if (longName[1] == '.' && longName[2] == 0) // ".."
     {
       shortName[0] = '.';
@@ -1715,17 +1734,17 @@ VOID long2ShortName(CHAR* longName, CHAR* shortName)
       shortName[0] = 0;
       return;
     }
-  
+
   INT x;
   CHAR *source = longName;
 
   // Test if longName is 8:3 compliant and simply copy
   // the filename.
   BOOL flag83 = TRUE;
-  
+
   // verify forbidden characters
-  for (x = 0; 
-       (x < 8) && 
+  for (x = 0;
+       (x < 8) &&
        (flag83 == TRUE);
        x++)
   {
@@ -1734,7 +1753,7 @@ VOID long2ShortName(CHAR* longName, CHAR* shortName)
       case '.': // a period will cause the loop to abort!
         x=1000;
         break;
-      
+
       case '/':      case '?':
       case '*':      case ':':
       case '\\':     case '"':
@@ -1746,13 +1765,13 @@ VOID long2ShortName(CHAR* longName, CHAR* shortName)
         break;
     }
   }
-  
+
   // verify we're on a period now
   if (flag83 == TRUE)
     if (*source != '.')
          flag83 = FALSE;
     else source++;
-  
+
   // verify extension
   if (flag83 == TRUE)
     for (INT y = 0;
@@ -1770,12 +1789,12 @@ VOID long2ShortName(CHAR* longName, CHAR* shortName)
       }
       source++;
     }
-  
+
   // verify we're at the end of the string now
   if (flag83 == TRUE)
     if (*source != 0)
       flag83 = FALSE;
-  
+
   // OK, done
   if (flag83 == TRUE)
   {
@@ -1783,18 +1802,18 @@ VOID long2ShortName(CHAR* longName, CHAR* shortName)
     // an app opening a specific file with an 8:3 "alias",
     // would surely fail.
     strcpy(shortName, longName);
-    
+
     return; // Done
   }
-  
-  
+
+
   // @@@PH
   shortName[0] = 0; // this function is disabled anyway ...
   return;
-  
+
   CHAR *dest = shortName;
   CHAR *ext = strrchr(longName,'.');
-  
+
   //CB: quick and dirty, real FILE~12.EXT is too slow
   //PH: We'd have to count the number of non-8:3-compliant files
   //    within a directory. Or simpler: the number of files within
@@ -1858,10 +1877,10 @@ VOID translateFileResults(FILESTATUS3 *pResult,LPWIN32_FIND_DATAA pFind,CHAR* ac
   {
     name++;
     strcpy(pFind->cFileName,name);
-  } 
-  else 
+  }
+  else
     pFind->cFileName[0] = 0;
-  
+
   long2ShortName(pFind->cFileName,pFind->cAlternateFileName);
 }
 
@@ -1921,7 +1940,7 @@ DWORD OSLibDosFindFirst(LPCSTR lpFileName,WIN32_FIND_DATAA* lpFindFileData)
   // enable i/o kernel exceptions again
   DosError(FERR_ENABLEHARDERR | FERR_ENABLEEXCEPTION);
 
-  if(rc) 
+  if(rc)
   {
     DosFindClose(hDir);
     SetLastError(error2WinError(rc));
