@@ -1,4 +1,4 @@
-/* $Id: myldrOpen.cpp,v 1.10.4.8 2000-08-28 22:44:24 bird Exp $
+/* $Id: myldrOpen.cpp,v 1.10.4.9 2000-08-29 13:02:27 bird Exp $
  *
  * myldrOpen - ldrOpen.
  *
@@ -380,12 +380,18 @@ ULONG LDRCALL myldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl)
                         rc = AddArgsToFront(1, psz);
                         if (rc == NO_ERROR)
                         {
-                            rc = SetExecName(u1.pach);
-                            if (rc != NO_ERROR)
-                                kprintf(("myldrOpen-%d: java - failed to set java.exe as execname. rc=%d\n", cNesting, rc));
+                            rc = AddArgsToFront(1, u1.pach);
+                            if (rc == NO_ERROR)
+                            {
+                                rc = SetExecName(u1.pach);
+                                if (rc != NO_ERROR)
+                                    kprintf(("myldrOpen-%d: java - failed to set java.exe as execname. rc=%d\n", cNesting, rc));
+                            }
+                            else
+                                kprintf(("myldrOpen-%d: java - failed to add programname as argument. rc=%d\n", cNesting, rc));
                         }
                         else
-                            kprintf(("myldrOpen-%d: java - failed to add programname as argument. rc=%d\n", cNesting, rc));
+                            kprintf(("myldrOpen-%d: java - failed to add class file as argument. rc=%d\n", cNesting, rc));
                         goto cleanup_noerror;
                     }
                 }
