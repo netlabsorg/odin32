@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.1 1999-09-15 23:19:00 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.2 1999-09-19 18:33:31 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -69,17 +69,10 @@ Win32Dialog::Win32Dialog(HINSTANCE hInst, LPCSTR dlgTemplate, HWND owner,
     {
         /* The font height must be negative as it is a point size */
         /* (see CreateFont() documentation in the Windows SDK).   */
-#if 0
-        hUserFont = CreateFontA(dlgInfo.pointSize, 0, 0, 0,
-                            dlgInfo.weight, dlgInfo.italic, FALSE,
-                            FALSE, DEFAULT_CHARSET, 0, 0, PROOF_QUALITY,
-                            FF_DONTCARE, DEFAULT_DLGFONT);
-#else
-        hUserFont = CreateFontW(dlgInfo.pointSize, 0, 0, 0,
+        hUserFont = CreateFontW(dlgInfo.pointSize*2, 0, 0, 0,
                             dlgInfo.weight, dlgInfo.italic, FALSE,
                             FALSE, DEFAULT_CHARSET, 0, 0, PROOF_QUALITY,
                             FF_DONTCARE, (LPCWSTR)dlgInfo.faceName );
-#endif
         if (hUserFont)
         {
             SIZE charSize;
@@ -924,12 +917,14 @@ BOOL Win32Dialog::setDefButton(HWND hwndNew )
     return TRUE;
 }
 //******************************************************************************
+//TODO:
 //******************************************************************************
 HWND Win32Dialog::getNextDlgTabItem(HWND hwndCtrl, BOOL fPrevious)
 {
     return 0;
 }
 //******************************************************************************
+//TODO
 //******************************************************************************
 Win32BaseWindow *Win32Dialog::getDlgItem(int id)
 {
@@ -1002,7 +997,7 @@ BOOL DIALOG_Register()
     wndClass.cbClsExtra    = 0;
     wndClass.cbWndExtra    = 0;
     wndClass.hCursor       = (HCURSOR)IDC_ARROWA;
-    wndClass.hbrBackground = LTGRAY_BRUSH;
+    wndClass.hbrBackground = GetSysColorBrush(COLOR_BTNFACE);
     wndClass.lpszClassName = DIALOG_CLASS_NAMEA;
 
     return RegisterClassA(&wndClass);

@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.1 1999-09-15 23:18:55 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.2 1999-09-19 18:33:31 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -279,6 +279,9 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
     case WM_ERASEBACKGROUND:
     {
+        if(win32wnd->MsgEraseBackGround(0)) {
+                goto RunDefWndProc;
+        }
         break;
     }
     case WM_SIZE:
