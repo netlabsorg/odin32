@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2000-12-17 03:37:33 bird Exp $
+# $Id: makefile,v 1.10 2001-08-16 04:07:46 bird Exp $
 
 #
 # Odin32 API
@@ -49,6 +49,7 @@ lib: all
 
 # Build objs and copies obj to lib.
 $(ODIN32_LIB)\$(TARGET).obj: $(OBJS)
+    $(CMDQD_WAIT)
     $(CP) $(OBJS) $@
 
 
