@@ -1,4 +1,4 @@
-# $Id: win32k.tools.mk,v 1.10 2001-06-10 01:38:09 bird Exp $
+# $Id: win32k.tools.mk,v 1.11 2001-10-01 01:42:09 bird Exp $
 
 #
 # Win32k common tools makefile.
@@ -66,7 +66,11 @@ CCPP        = wpp386
 LD          = wlink
 ILIB        = wlib /nobackup /nologo \
 
-!error "Compiler is not yet supported!"
+#!error "Compiler is not yet supported!"
+# need to get win32k.lib compiled...
+DDKPATH=
+TOOLKIT=
+MSCPATH=
 !else
 #
 # Other compilers

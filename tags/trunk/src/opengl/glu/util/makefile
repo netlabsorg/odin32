@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2000-12-02 23:59:06 bird Exp $
+# $Id: makefile,v 1.7 2001-10-01 01:40:57 bird Exp $
 
 #
 # Odin32 API
@@ -21,15 +21,19 @@ ADDITIONAL_DEP = mydep
 
 
 #
-# Flag overloads.
+# Overrides.
 #
 CINCLUDES   = $(CINCLUDES) -I.. -I..\..\mesa -I..\include -I..\..\mesa\GL
 CDEFINES    = $(CDEFINES) -DNDEBUG
 !if "$(VAC3)" == "1" || "$(VAC36)" == "1"
 CFLAGS      = $(CFLAGS) -Tdp
-CXXFLAGS    = $(CXXFLAGS) -Tdp
 !else
-!error "Compiler not supported yet!"
+!ifdef WAT
+C           = $(CXX)
+CFLAGS      = $(CXXFLAGS)
+!else
+!error "Compiler is not yet supported."
+!endif
 !endif
 
 
