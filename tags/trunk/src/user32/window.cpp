@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.32 1999-11-01 19:11:45 sandervl Exp $ */
+/* $Id: window.cpp,v 1.33 1999-11-05 09:16:22 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -1422,12 +1422,10 @@ Abort:
 }
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API ArrangeIconicWindows( HWND arg1)
+UINT WIN32API ArrangeIconicWindows( HWND hwnd)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  ArrangeIconicWindows\n");
-#endif
-    return O32_ArrangeIconicWindows(arg1);
+    dprintf(("USER32:  ArrangeIconicWindows %x", hwnd));
+    return O32_ArrangeIconicWindows(Win32BaseWindow::Win32ToOS2FrameHandle(hwnd));
 }
 //******************************************************************************
 //restores iconized window to previous size/position
@@ -1444,10 +1442,10 @@ BOOL WIN32API OpenIcon(HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API ShowOwnedPopups( HWND arg1, BOOL  arg2)
+BOOL WIN32API ShowOwnedPopups( HWND hwnd, BOOL  arg2)
 {
-    dprintf(("USER32:  ShowOwnedPopups\n"));
-    return O32_ShowOwnedPopups(arg1, arg2);
+    dprintf(("USER32:  ShowOwnedPopups %x", hwnd));
+    return O32_ShowOwnedPopups(Win32BaseWindow::Win32ToOS2FrameHandle(hwnd), arg2);
 }
 //******************************************************************************
 //******************************************************************************
