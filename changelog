@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1469 2001-06-02 07:25:28 sandervl Exp $ */
+/* $Id: changelog,v 1.1470 2001-06-02 07:32:07 achimha Exp $ */
 
  2001-06-01: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Send WM_HELP if F1 pressed & no menu active
@@ -10,7 +10,6 @@
                   WGSS returns 0, but we should return the nr of scan lines requested
                 o GetDIBits fix for memory dcs. WGSS messes things up if
                   it's a memory DC.
-                  TODO: fix in WGSS
                   (fixes lower right button in AIM's logon window when typing
                    in new name)
                 o ExtTextOutA/W fix for filling rectangle with background color
