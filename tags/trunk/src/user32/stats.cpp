@@ -23,7 +23,7 @@ void STATS_ReleaseDC(HWND hwnd, HDC hdc)
 }
 //******************************************************************************
 //******************************************************************************
-void STATS_DumpStats()
+void STATS_DumpStatsUSER32()
 {
     dprintf(("*************  USER32 STATISTICS BEGIN *****************"));
     dprintf(("Total nr of GetDCEx   calls %d", nrcalls_GetDCEx));
