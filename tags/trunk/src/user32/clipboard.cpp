@@ -1,4 +1,4 @@
-/* $Id: clipboard.cpp,v 1.14 2002-01-07 14:32:21 sandervl Exp $ */
+/* $Id: clipboard.cpp,v 1.15 2002-09-03 12:34:01 sandervl Exp $ */
 
 /*
  * Win32 Clipboard API functions for OS/2
@@ -22,55 +22,12 @@
 #define DBG_LOCALLOG    DBG_clipboard
 #include "dbglocal.h"
 
-#ifdef USING_OPEN32CLIPBOARD
-
-#define FLAG_TO_OPEN32	     0
-#define FLAG_FROM_OPEN32     1
-
-//******************************************************************************
-//******************************************************************************
-HGLOBAL GlobalCopy(HGLOBAL hDest, HGLOBAL hSource, BOOL fToOpen32)
-{
- LPVOID src;
- LPVOID dest;
- ULONG  size;
-
-      if(fToOpen32 == FLAG_TO_OPEN32) {
-          src = GlobalLock(hSource);
-          if(src) {
-              size = GlobalSize(hSource);
-              if(hDest == NULL) {
-                  hDest = O32_GlobalAlloc(GHND, size);
-              }
-              dest  = O32_GlobalLock(hDest);
-              memcpy(dest, src, size);
-              O32_GlobalUnlock(hDest);
-          }
-          GlobalUnlock(hSource);
-      }
-      else {
-          src = O32_GlobalLock(hSource);
-          if(src) {
-              size = O32_GlobalSize(hSource);
-              if(hDest == NULL) {
-                  hDest = GlobalAlloc(GHND, size);
-              }
-              dest  = GlobalLock(hDest);
-              memcpy(dest, src, size);
-              GlobalUnlock(hDest);
-          }
-          O32_GlobalUnlock(hSource);
-      }
-      return hDest;
-}
-#endif
-
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API ChangeClipboardChain( HWND hwndRemove, HWND hwndNext)
 {
-  Win32BaseWindow *wndRemove, *wndNext;
-  HWND hwndOS2Remove, hwndOS2Next;
+    Win32BaseWindow *wndRemove, *wndNext;
+    HWND hwndOS2Remove, hwndOS2Next;
 
     wndRemove = Win32BaseWindow::GetWindowFromHandle(hwndRemove);
     if(!wndRemove) {
@@ -95,79 +52,52 @@ BOOL WIN32API ChangeClipboardChain( HWND hwndRemove, HWND hwndNext)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API CloseClipboard(void)
-{
-    dprintf(("USER32:  CloseClipboard\n"));
-    return O32_CloseClipboard();
-}
-//******************************************************************************
-//******************************************************************************
 int WIN32API CountClipboardFormats(void)
 {
-    dprintf(("USER32:  CountClipboardFormats\n"));
+    dprintf(("USER32: CountClipboardFormats"));
     return O32_CountClipboardFormats();
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API EmptyClipboard(void)
 {
-    dprintf(("USER32:  EmptyClipboard\n"));
+    dprintf(("USER32: EmptyClipboard"));
     return O32_EmptyClipboard();
 }
 //******************************************************************************
 //******************************************************************************
 UINT WIN32API EnumClipboardFormats(UINT arg1)
 {
-    dprintf(("USER32:  EnumClipboardFormats\n"));
+    dprintf(("USER32: EnumClipboardFormats %d", arg1));
     return O32_EnumClipboardFormats(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-HANDLE WIN32API GetClipboardData( UINT uFormat)
-{
-#ifdef USING_OPEN32CLIPBOARD
-    HANDLE hClipObj = 0, hClipObjOpen32 = 0;
-
-    dprintf(("USER32: GetClipboardData %x", uFormat));
-    hClipObjOpen32 = O32_GetClipboardData(uFormat);
-    //memory leak
-    if(hClipObjOpen32) {
-        hClipObj = GlobalCopy(NULL, hClipObjOpen32, FLAG_FROM_OPEN32);
-    }
-    return hClipObj;
-#else
-    dprintf(("USER32: GetClipboardData %x", uFormat));
-    return O32_GetClipboardData(uFormat);
-#endif
 }
 //******************************************************************************
 //******************************************************************************
 int WIN32API GetClipboardFormatNameA(UINT format,LPSTR lpszFormatName,int cchMaxCount)
 {
-  dprintf(("USER32:  GetClipboardFormatNameA %d\n",format));
-  return O32_GetClipboardFormatName(format,lpszFormatName,cchMaxCount);
+    dprintf(("USER32: GetClipboardFormatNameA %d\n",format));
+    return O32_GetClipboardFormatName(format,lpszFormatName,cchMaxCount);
 }
 //******************************************************************************
 //******************************************************************************
 int WIN32API GetClipboardFormatNameW(UINT format,LPWSTR lpszFormatName,int cchMaxCount)
 {
-  int   rc;
-  char *astring = (CHAR*)malloc(cchMaxCount);
+    int   rc;
+    char *astring = (CHAR*)malloc(cchMaxCount);
 
-  dprintf(("USER32:  GetClipboardFormatNameW %d\n",format));
-  rc = O32_GetClipboardFormatName(format,astring,cchMaxCount);
-  if (rc) AsciiToUnicode(astring,lpszFormatName);
-  free(astring);
-  return(rc);
+    rc = GetClipboardFormatNameA(format,astring,cchMaxCount);
+    if (rc) AsciiToUnicode(astring,lpszFormatName);
+    free(astring);
+    return(rc);
 }
 //******************************************************************************
 //******************************************************************************
 HWND WIN32API GetClipboardOwner(void)
 {
- HWND hwndOwner;
- Win32BaseWindow *window;
+    HWND hwndOwner;
+    Win32BaseWindow *window;
 
-    dprintf(("USER32:  GetClipboardOwner\n"));
+    dprintf(("USER32: GetClipboardOwner\n"));
     hwndOwner = O32_GetClipboardOwner();
 
     window = Win32BaseWindow::GetWindowFromOS2Handle(hwndOwner);
@@ -183,10 +113,10 @@ HWND WIN32API GetClipboardOwner(void)
 //******************************************************************************
 HWND WIN32API GetClipboardViewer(void)
 {
- Win32BaseWindow *window;
- HWND hwndViewer;
+    Win32BaseWindow *window;
+    HWND hwndViewer;
 
-    dprintf(("USER32:  GetClipboardViewer\n"));
+    dprintf(("USER32: GetClipboardViewer"));
     hwndViewer = O32_GetClipboardViewer();
 
     window = Win32BaseWindow::GetWindowFromOS2Handle(hwndViewer);
@@ -200,135 +130,11 @@ HWND WIN32API GetClipboardViewer(void)
 }
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API GetOpenClipboardWindow(void)
-{
- Win32BaseWindow *window;
- HWND hwnd;
-
-    dprintf(("USER32:  GetOpenClipboardWindow\n"));
-    hwnd = O32_GetOpenClipboardWindow();
-
-    window = Win32BaseWindow::GetWindowFromOS2Handle(hwnd);
-    if(!window) {
-        //probably an OS/2 window, we pretend it's nobody
-        return NULL;
-    }
-    hwnd = window->getWindowHandle();
-    RELEASE_WNDOBJ(window);
-    return hwnd;
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API GetPriorityClipboardFormat( PUINT arg1, int arg2)
-{
-    dprintf(("USER32:  GetPriorityClipboardFormat\n"));
-    return O32_GetPriorityClipboardFormat(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API IsClipboardFormatAvailable( UINT arg1)
-{
-    dprintf(("USER32: IsClipboardFormatAvailable %x", arg1));
-    return O32_IsClipboardFormatAvailable(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API OpenClipboard( HWND hwnd)
-{
-  Win32BaseWindow *window;
-
-    if (hwnd) {
-        window = Win32BaseWindow::GetWindowFromHandle(hwnd);
-        if(!window) {
-            dprintf(("OpenClipboard, window %x not found", hwnd));
-            SetLastError(ERROR_INVALID_WINDOW_HANDLE);
-            return 0;
-        }
-        hwnd = window->getOS2WindowHandle();
-        RELEASE_WNDOBJ(window);
-    }
-    dprintf(("USER32: OpenClipboard %x", hwnd));
-    return O32_OpenClipboard(hwnd);
-}
-//******************************************************************************
-//******************************************************************************
-UINT WIN32API RegisterClipboardFormatA( LPCSTR arg1)
-{
-    dprintf(("USER32:  RegisterClipboardFormatA %s", arg1));
-    return O32_RegisterClipboardFormat(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-UINT WIN32API RegisterClipboardFormatW(LPCWSTR arg1)
-{
- UINT  rc;
- char *astring = UnicodeToAsciiString((LPWSTR)arg1);
-
-    dprintf(("USER32:  RegisterClipboardFormatW %s\n", astring));
-    rc = O32_RegisterClipboardFormat(astring);
-    FreeAsciiString(astring);
-    dprintf(("USER32:  RegisterClipboardFormatW returned %d\n", rc));
-    return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-HANDLE WIN32API SetClipboardData( UINT uFormat, HANDLE hClipObj)
-{
-#ifdef USING_OPEN32CLIPBOARD
-    HANDLE hClipObjOpen32 = 0;
-
-    dprintf(("USER32: SetClipboardData %x %x", uFormat, hClipObj));
-    //memory leak
-    if(hClipObj) {
-        hClipObjOpen32 = GlobalCopy(NULL, hClipObj, FLAG_TO_OPEN32);
-    }
-    O32_SetClipboardData(uFormat, hClipObjOpen32);
-
-    return hClipObj;
-#else
-    dprintf(("USER32: SetClipboardData %x %x", uFormat, hClipObj));
-
-    if(uFormat == CF_UNICODETEXT) 
-    {
-        //have to translate to CF_TEXT, because WGSS doesn't understand
-        //unicode text
-        LPWSTR lpTextUnicode;
-        LPSTR  lpTextAscii;
-        DWORD  length;
-        HANDLE hClipObjAscii;
-
-        lpTextUnicode = (LPWSTR)GlobalLock(hClipObj);
-        if(lpTextUnicode == NULL) {
-            dprintf(("!ERROR!: Invalid handle!!"));
-            SetLastError(ERROR_INVALID_HANDLE);
-            return 0;
-        }
-        length = GlobalSize(hClipObj)/sizeof(WCHAR);
-       	hClipObjAscii = GlobalAlloc(GMEM_DDESHARE | GMEM_MOVEABLE, length);
-        lpTextAscii = (LPSTR)GlobalLock(hClipObjAscii);
-        if(!hClipObjAscii || lpTextAscii == NULL || length == 0) {
-            dprintf(("!ERROR!: GlobalAlloc %d failed!!", length));
-            SetLastError(ERROR_INVALID_HANDLE);
-            return 0;
-        }
-        WideCharToMultiByte(CP_ACP, 0, lpTextUnicode, -1, lpTextAscii, length, 0, NULL);
-        
-        GlobalUnlock(hClipObjAscii);
-        GlobalUnlock(hClipObj);
-        HANDLE ret = O32_SetClipboardData(CF_TEXT, hClipObjAscii);
-        //hClipObjAscii will be freed when the clipboard is closed
-        return ret;
-    }
-    return O32_SetClipboardData(uFormat, hClipObj);
-#endif
-}
-//******************************************************************************
-//******************************************************************************
 HWND WIN32API SetClipboardViewer( HWND hwndNew)
 {
-  Win32BaseWindow *wndnew, *wndold;
-  HWND hwndOld;
-  HWND hwndOS2New;
+    Win32BaseWindow *wndnew, *wndold;
+    HWND hwndOld;
+    HWND hwndOS2New;
 
     wndnew = Win32BaseWindow::GetWindowFromHandle(hwndNew);
     if(!wndnew) {
@@ -350,6 +156,100 @@ HWND WIN32API SetClipboardViewer( HWND hwndNew)
     hwndOld = wndold->getWindowHandle();
     RELEASE_WNDOBJ(wndold);
     return hwndOld;
+}
+//******************************************************************************
+//******************************************************************************
+HWND WIN32API GetOpenClipboardWindow(void)
+{
+    Win32BaseWindow *window;
+    HWND hwnd;
+
+    dprintf(("USER32: GetOpenClipboardWindow"));
+    hwnd = O32_GetOpenClipboardWindow();
+
+    window = Win32BaseWindow::GetWindowFromOS2Handle(hwnd);
+    if(!window) {
+        //probably an OS/2 window, we pretend it's nobody
+        return NULL;
+    }
+    hwnd = window->getWindowHandle();
+    RELEASE_WNDOBJ(window);
+    return hwnd;
+}
+//******************************************************************************
+//******************************************************************************
+int WIN32API GetPriorityClipboardFormat( PUINT arg1, int arg2)
+{
+    dprintf(("USER32: GetPriorityClipboardFormat"));
+    return O32_GetPriorityClipboardFormat(arg1, arg2);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API IsClipboardFormatAvailable( UINT arg1)
+{
+    dprintf(("USER32: IsClipboardFormatAvailable %x", arg1));
+    return O32_IsClipboardFormatAvailable(arg1);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API OpenClipboard( HWND hwnd)
+{
+    Win32BaseWindow *window;
+
+    if (hwnd) {
+        window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+        if(!window) {
+            dprintf(("OpenClipboard, window %x not found", hwnd));
+            SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+            return 0;
+        }
+        hwnd = window->getOS2WindowHandle();
+        RELEASE_WNDOBJ(window);
+    }
+    dprintf(("USER32: OpenClipboard %x", hwnd));
+    return O32_OpenClipboard(hwnd);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API CloseClipboard(void)
+{
+    dprintf(("USER32: CloseClipboard"));
+    return O32_CloseClipboard();
+}
+//******************************************************************************
+//******************************************************************************
+UINT WIN32API RegisterClipboardFormatA( LPCSTR arg1)
+{
+    dprintf(("USER32:  RegisterClipboardFormatA %s", arg1));
+    return O32_RegisterClipboardFormat(arg1);
+}
+//******************************************************************************
+//******************************************************************************
+UINT WIN32API RegisterClipboardFormatW(LPCWSTR arg1)
+{
+    UINT  rc;
+    char *astring = UnicodeToAsciiString((LPWSTR)arg1);
+
+    dprintf(("USER32:  RegisterClipboardFormatW %s\n", astring));
+    rc = O32_RegisterClipboardFormat(astring);
+    FreeAsciiString(astring);
+    dprintf(("USER32:  RegisterClipboardFormatW returned %d\n", rc));
+    return(rc);
+}
+//******************************************************************************
+//******************************************************************************
+HANDLE WIN32API GetClipboardData(UINT uFormat)
+{
+    HANDLE hRet = O32_GetClipboardData(uFormat);
+    dprintf(("GetClipboardData %x returned %x", uFormat, hRet));
+    return hRet;
+}
+//******************************************************************************
+//******************************************************************************
+HANDLE WIN32API SetClipboardData( UINT uFormat, HANDLE hClipObj)
+{
+    dprintf(("SetClipboardData %x %x", uFormat, hClipObj));
+    return O32_SetClipboardData(uFormat, hClipObj);
 }
 //******************************************************************************
 //******************************************************************************
