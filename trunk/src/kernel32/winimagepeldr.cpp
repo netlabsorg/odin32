@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.65 2000-12-05 20:41:43 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.66 2001-01-22 18:26:51 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -12,6 +12,7 @@
  * TODO: Make resource section readonly when GDI32 is fixed
  * TODO: Loading of forwarder dlls before handling imports might not be correct
  *       (circular dependencies; have to check what NT does)
+ * TODO: Two LoadLibrary calls in two threads at the same time won't be handled properly (rare but possible)
  *
  * NOTE: FLAG_PELDR_LOADASDATAFILE is a special flag to only load the resource directory
  *       of a PE image. Processing imports, sections etc is not done.
@@ -55,7 +56,9 @@
 //Define COMMIT_ALL to let the pe loader commit all sections of the image
 //This is very useful during debugging as you'll get lots of exceptions
 //otherwise.
+//#ifdef DEBUG
 #define COMMIT_ALL
+//#endif
 
 char szErrorTitle[]     = "Odin";
 char szMemErrorMsg[]    = "Memory allocation failure";
@@ -103,7 +106,7 @@ void ClosePrivateLogFilePE()
 //******************************************************************************
 Win32PeLdrImage::Win32PeLdrImage(char *pszFileName, BOOL isExe) :
     Win32ImageBase(-1),
-    nrsections(0), imageSize(0), dwFlags(0),
+    nrsections(0), imageSize(0), dwFlags(0), section(NULL),
     imageVirtBase(-1), realBaseAddress(0), imageVirtEnd(0),
     nrNameExports(0), nrOrdExports(0), nameexports(NULL), ordexports(NULL),
     memmap(NULL), pFixups(NULL), dwFixupSize(0), curnameexport(NULL), curordexport(NULL)
@@ -139,22 +142,25 @@ Win32PeLdrImage::Win32PeLdrImage(char *pszFileName, BOOL isExe) :
 //******************************************************************************
 Win32PeLdrImage::~Win32PeLdrImage()
 {
-  if(memmap)
-    delete memmap;
+    if(memmap)
+        delete memmap;
 
-  if(hFile) {
-    OSLibDosClose(hFile);
-    hFile = 0;
-  }
+    if(hFile) {
+        OSLibDosClose(hFile);
+        hFile = 0;
+    }
 
-  if(realBaseAddress)
+    if(realBaseAddress)
         DosFreeMem((PVOID)realBaseAddress);
 
-  if(nameexports)
+    if(nameexports)
         free(nameexports);
 
-  if(ordexports)
+    if(ordexports)
         free(ordexports);
+
+    if(section)
+        free(section);
 }
 //******************************************************************************
 //******************************************************************************
@@ -170,327 +176,311 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
  IMAGE_DOS_HEADER doshdr;
  ULONG  signature;
 
-  hFile = OSLibDosOpen(szFileName, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
+    hFile = OSLibDosOpen(szFileName, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
 
-  //default error:
-  strcpy(szErrorModule, OSLibStripPath(szFileName));
-  if(hFile == NULL) {
+    //default error:
+    strcpy(szErrorModule, OSLibStripPath(szFileName));
+    if(hFile == NULL) {
         goto failure;
-  }
-  //read dos header
-  if(DosRead(hFile, (LPVOID)&doshdr, sizeof(doshdr), &ulRead)) {
+    }
+    //read dos header
+    if(DosRead(hFile, (LPVOID)&doshdr, sizeof(doshdr), &ulRead)) {
         goto failure;
-  }
-  if(OSLibDosSetFilePtr(hFile, doshdr.e_lfanew, OSLIB_SETPTR_FILE_BEGIN) == -1) {
+    }
+    if(OSLibDosSetFilePtr(hFile, doshdr.e_lfanew, OSLIB_SETPTR_FILE_BEGIN) == -1) {
         goto failure;
-  }
-  //read signature dword
-  if(DosRead(hFile, (LPVOID)&signature, sizeof(signature), &ulRead)) {
+    }
+    //read signature dword
+    if(DosRead(hFile, (LPVOID)&signature, sizeof(signature), &ulRead)) {
         goto failure;
-  }
-  //read pe header
-  if(DosRead(hFile, (LPVOID)&fh, sizeof(fh), &ulRead)) {
+    }
+    //read pe header
+    if(DosRead(hFile, (LPVOID)&fh, sizeof(fh), &ulRead)) {
         goto failure;
-  }
-  //read optional header
-  if(DosRead(hFile, (LPVOID)&oh, sizeof(oh), &ulRead)) {
+    }
+    //read optional header
+    if(DosRead(hFile, (LPVOID)&oh, sizeof(oh), &ulRead)) {
         goto failure;
-  }
-  if(doshdr.e_magic != IMAGE_DOS_SIGNATURE || signature != IMAGE_NT_SIGNATURE) {
+    }
+    if(doshdr.e_magic != IMAGE_DOS_SIGNATURE || signature != IMAGE_NT_SIGNATURE) {
         dprintf((LOG, "Not a valid PE file (probably a 16 bits windows exe/dll)!"));
         WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szPEErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
         goto failure;
-  }
+    }
 
-  if(oh.SizeOfImage == 0) {//just in case
-    oh.SizeOfImage = OSLibDosGetFileSize(hFile, NULL);
-  }
+    if(oh.SizeOfImage == 0) {//just in case
+        oh.SizeOfImage = OSLibDosGetFileSize(hFile, NULL);
+    }
 
-  imageSize = oh.SizeOfImage;
-  //Allocate memory to hold the entire image
-  if(allocSections(reservedMem) == FALSE) {
+    imageSize = oh.SizeOfImage;
+    //Allocate memory to hold the entire image
+    if(allocSections(reservedMem) == FALSE) {
         dprintf((LOG, "Failed to allocate image memory for %s at %x, rc %d", szFileName, oh.ImageBase, errorState));;
         goto failure;
-  }
+    }
 
-  memmap = new Win32MemMap(this, realBaseAddress, imageSize);
-  if(memmap == NULL || !memmap->Init(0)) {
+    memmap = new Win32MemMap(this, realBaseAddress, imageSize);
+    if(memmap == NULL || !memmap->Init()) {
         goto failure;
-  }
-  win32file = memmap->mapViewOfFile(0, 0, 2);
+    }
+    win32file = memmap->mapViewOfFile(0, 0, 2);
 
-  if(DosQueryPathInfo(szFileName, FIL_QUERYFULLNAME, szFullPath, sizeof(szFullPath)) == 0) {
-    setFullPath(szFullPath);
-  }
+    if(DosQueryPathInfo(szFileName, FIL_QUERYFULLNAME, szFullPath, sizeof(szFullPath)) == 0) {
+        setFullPath(szFullPath);
+    }
 
-  if(!(fh.Characteristics & IMAGE_FILE_EXECUTABLE_IMAGE)) {//not valid
+    if(!(fh.Characteristics & IMAGE_FILE_EXECUTABLE_IMAGE)) {//not valid
         dprintf((LOG, "Not a valid PE file!"));
         WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szPEErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
         goto failure;
-  }
-  if(fh.Machine != IMAGE_FILE_MACHINE_I386) {
+    }
+    if(fh.Machine != IMAGE_FILE_MACHINE_I386) {
         dprintf((LOG, "Doesn't run on x86 processors!"));
         WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szCPUErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
         goto failure;
-  }
-  //IMAGE_FILE_SYSTEM == only drivers (device/file system/video etc)?
-  if(fh.Characteristics & IMAGE_FILE_SYSTEM) {
+    }
+    //IMAGE_FILE_SYSTEM == only drivers (device/file system/video etc)?
+    if(fh.Characteristics & IMAGE_FILE_SYSTEM) {
         dprintf((LOG, "Can't convert system files"));
         WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szExeErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
         goto failure;
-  }
+    }
 
-  if(fh.Characteristics & IMAGE_FILE_RELOCS_STRIPPED) {
+    if(fh.Characteristics & IMAGE_FILE_RELOCS_STRIPPED) {
         dprintf((LOG, "No fixups, might not run!"));
-  }
+    }
 
-  dprintf((LOG, "PE file           : %s", szFileName));
-  dprintf((LOG, "PE Optional header: "));
-  dprintf((LOG, "Preferred address : %d", oh.ImageBase ));
-  dprintf((LOG, "Base Of Code      : %d", oh.BaseOfCode ));
-  dprintf((LOG, "CodeSize          : %d", oh.SizeOfCode ));
-  dprintf((LOG, "Base Of Data      : %d", oh.BaseOfData ));
-  dprintf((LOG, "Data Size (uninit): %d", oh.SizeOfUninitializedData ));
-  dprintf((LOG, "Data Size (init)  : %d", oh.SizeOfInitializedData ));
-  dprintf((LOG, "Entry Point       : %d", oh.AddressOfEntryPoint ));
-  dprintf((LOG, "Section Alignment : %d", oh.SectionAlignment ));
-  dprintf((LOG, "Stack Reserve size: %d", oh.SizeOfStackReserve ));
-  dprintf((LOG, "Stack Commit size : %d", oh.SizeOfStackCommit ));
-  dprintf((LOG, "SizeOfHeapReserve : %d", oh.SizeOfHeapReserve ));
-  dprintf((LOG, "SizeOfHeapCommit  : %d", oh.SizeOfHeapCommit ));
-  dprintf((LOG, "FileAlignment     : %d", oh.FileAlignment ));
-  dprintf((LOG, "Subsystem         : %d", oh.Subsystem ));
-  dprintf((LOG, "Image Size        : %d", oh.SizeOfImage ));
-  dprintf((LOG, "Header Size       : %d", oh.SizeOfHeaders ));
-  dprintf((LOG, "MajorImageVersion : %d", oh.MajorImageVersion ));
-  dprintf((LOG, "MinorImageVersion : %d", oh.MinorImageVersion ));
+    dprintf((LOG, "PE file           : %s", szFileName));
+    dprintf((LOG, "PE Optional header: "));
+    dprintf((LOG, "Preferred address : %d", oh.ImageBase ));
+    dprintf((LOG, "Base Of Code      : %d", oh.BaseOfCode ));
+    dprintf((LOG, "CodeSize          : %d", oh.SizeOfCode ));
+    dprintf((LOG, "Base Of Data      : %d", oh.BaseOfData ));
+    dprintf((LOG, "Data Size (uninit): %d", oh.SizeOfUninitializedData ));
+    dprintf((LOG, "Data Size (init)  : %d", oh.SizeOfInitializedData ));
+    dprintf((LOG, "Entry Point       : %d", oh.AddressOfEntryPoint ));
+    dprintf((LOG, "Section Alignment : %d", oh.SectionAlignment ));
+    dprintf((LOG, "Stack Reserve size: %d", oh.SizeOfStackReserve ));
+    dprintf((LOG, "Stack Commit size : %d", oh.SizeOfStackCommit ));
+    dprintf((LOG, "SizeOfHeapReserve : %d", oh.SizeOfHeapReserve ));
+    dprintf((LOG, "SizeOfHeapCommit  : %d", oh.SizeOfHeapCommit ));
+    dprintf((LOG, "FileAlignment     : %d", oh.FileAlignment ));
+    dprintf((LOG, "Subsystem         : %d", oh.Subsystem ));
+    dprintf((LOG, "Image Size        : %d", oh.SizeOfImage ));
+    dprintf((LOG, "Header Size       : %d", oh.SizeOfHeaders ));
+    dprintf((LOG, "MajorImageVersion : %d", oh.MajorImageVersion ));
+    dprintf((LOG, "MinorImageVersion : %d", oh.MinorImageVersion ));
 
-  //get header page
-  commitPage(realBaseAddress, FALSE);
+    //get header page
+    commitPage(realBaseAddress, FALSE);
 
-  nSections = NR_SECTIONS(win32file);
+    nSections = NR_SECTIONS(win32file);
+    section = (Section *)malloc(nSections*sizeof(Section));
+    if(section == NULL) {
+        DebugInt3();
+        goto failure;
+    }
+    memset(section, 0, nSections*sizeof(Section));
 
-  if(!(dwFlags & FLAG_PELDR_LOADASDATAFILE))
-  {
-    imageSize = 0;
-    if ((psh = (PIMAGE_SECTION_HEADER)SECTIONHDROFF (win32file)) != NULL)
+    if(!(dwFlags & FLAG_PELDR_LOADASDATAFILE))
     {
-        dprintf((LOG, "*************************PE SECTIONS START**************************" ));
-        for (i=0; i<nSections; i++)
+        imageSize = 0;
+        if ((psh = (PIMAGE_SECTION_HEADER)SECTIONHDROFF (win32file)) != NULL)
         {
-            dprintf((LOG, "Raw data size:        %x", psh[i].SizeOfRawData ));
-            dprintf((LOG, "Virtual Address:      %x", psh[i].VirtualAddress ));
-            dprintf((LOG, "Virtual Address Start:%x", psh[i].VirtualAddress+oh.ImageBase ));
-            dprintf((LOG, "Virtual Address End:  %x", psh[i].VirtualAddress+oh.ImageBase+psh[i].Misc.VirtualSize ));
-            dprintf((LOG, "Virtual Size:         %x", psh[i].Misc.VirtualSize ));
-            dprintf((LOG, "Pointer to raw data:  %x", psh[i].PointerToRawData ));
-            dprintf((LOG, "Section flags:        %x\n\n", psh[i].Characteristics ));
+            dprintf((LOG, "*************************PE SECTIONS START**************************" ));
+            for (i=0; i<nSections; i++)
+            {
+                dprintf((LOG, "Raw data size:        %x", psh[i].SizeOfRawData ));
+                dprintf((LOG, "Virtual Address:      %x", psh[i].VirtualAddress ));
+                dprintf((LOG, "Virtual Address Start:%x", psh[i].VirtualAddress+oh.ImageBase ));
+                dprintf((LOG, "Virtual Address End:  %x", psh[i].VirtualAddress+oh.ImageBase+psh[i].Misc.VirtualSize ));
+                dprintf((LOG, "Virtual Size:         %x", psh[i].Misc.VirtualSize ));
+                dprintf((LOG, "Pointer to raw data:  %x", psh[i].PointerToRawData ));
+                dprintf((LOG, "Section flags:        %x\n\n", psh[i].Characteristics ));
 
-            if(IsSectionType(win32file, &psh[i], IMAGE_DIRECTORY_ENTRY_BASERELOC))
-            {
-                dprintf((LOG, ".reloc" ));
-                addSection(SECTION_RELOC, psh[i].PointerToRawData,
-                       psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
-                       psh[i].Misc.VirtualSize, psh[i].Characteristics);
-                continue;
-            }
-            if(IsSectionType(win32file, &psh[i], IMAGE_DIRECTORY_ENTRY_EXPORT))
-            {
-                //SvL: Angus.exe has empty export section that's really an
-                //     uninitialized data section
-                if(psh[i].SizeOfRawData) {
-                     dprintf((LOG, ".edata" ));
-                     addSection(SECTION_EXPORT, psh[i].PointerToRawData,
-                          psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
-                          psh[i].Misc.VirtualSize, psh[i].Characteristics);
-                     continue;
+                if(IsSectionType(win32file, &psh[i], IMAGE_DIRECTORY_ENTRY_BASERELOC))
+                {
+                    dprintf((LOG, ".reloc" ));
+                    addSection(SECTION_RELOC, psh[i].PointerToRawData,
+                               psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
+                               psh[i].Misc.VirtualSize, psh[i].Characteristics);
+                    continue;
                 }
-            }
-            if(IsSectionType(win32file, &psh[i], IMAGE_DIRECTORY_ENTRY_RESOURCE))
-            {
-                dprintf((LOG, ".rsrc" ));
-                addSection(SECTION_RESOURCE, psh[i].PointerToRawData,
-                       psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
-                       psh[i].Misc.VirtualSize, psh[i].Characteristics);
-                continue;
-            }
-            if(IsSectionType(win32file, &psh[i], IMAGE_DIRECTORY_ENTRY_TLS))
-            {
-                dprintf((LOG, "TLS section"));
-                tlsDir = (IMAGE_TLS_DIRECTORY *)ImageDirectoryOffset(win32file, IMAGE_DIRECTORY_ENTRY_TLS);
-                if(tlsDir) {
+                if(IsSectionType(win32file, &psh[i], IMAGE_DIRECTORY_ENTRY_EXPORT))
+                {
+                    //SvL: Angus.exe has empty export section that's really an
+                    //     uninitialized data section
+                    if(psh[i].SizeOfRawData) {
+                         dprintf((LOG, ".edata" ));
+                         addSection(SECTION_EXPORT, psh[i].PointerToRawData,
+                                    psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
+                                    psh[i].Misc.VirtualSize, psh[i].Characteristics);
+                        continue;
+                    }
+                }
+                if(IsSectionType(win32file, &psh[i], IMAGE_DIRECTORY_ENTRY_RESOURCE))
+                {
+                    dprintf((LOG, ".rsrc" ));
+                    addSection(SECTION_RESOURCE, psh[i].PointerToRawData,
+                               psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
+                               psh[i].Misc.VirtualSize, psh[i].Characteristics);
+                    continue;
+                }
+                if(IsSectionType(win32file, &psh[i], IMAGE_DIRECTORY_ENTRY_TLS))
+                {
+                    dprintf((LOG, "TLS section"));
+                    tlsDir = (IMAGE_TLS_DIRECTORY *)ImageDirectoryOffset(win32file, IMAGE_DIRECTORY_ENTRY_TLS);
+                    if(tlsDir) {
                         addSection(SECTION_TLS, psh[i].PointerToRawData,
                                    psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
                                    psh[i].Misc.VirtualSize, psh[i].Characteristics);
+                    }
+                    continue;
                 }
-                continue;
-            }
-            if(IsSectionType(win32file, &psh[i], IMAGE_DIRECTORY_ENTRY_DEBUG))
-            {
-                dprintf((LOG, ".rdebug" ));
-                addSection(SECTION_DEBUG,  psh[i].PointerToRawData,
-                           psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
-                           psh[i].Misc.VirtualSize, psh[i].Characteristics);
-                continue;
-            }
-            if(IsSectionType(win32file, &psh[i], IMAGE_DIRECTORY_ENTRY_IMPORT))
-            {
-                int type = SECTION_IMPORT;
-
-                dprintf((LOG, "Import Data Section" ));
-                if(psh[i].Characteristics & IMAGE_SCN_CNT_CODE) {
-                    dprintf((LOG, "Also Code Section"));
-                    type |= SECTION_CODE;
+                if(IsSectionType(win32file, &psh[i], IMAGE_DIRECTORY_ENTRY_DEBUG))
+                {
+                    dprintf((LOG, ".rdebug" ));
+                    addSection(SECTION_DEBUG,  psh[i].PointerToRawData,
+                               psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
+                               psh[i].Misc.VirtualSize, psh[i].Characteristics);
+                    continue;
                 }
-                addSection(type, psh[i].PointerToRawData,
-                       psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
-                       psh[i].Misc.VirtualSize, psh[i].Characteristics);
-                continue;
-            }
+                if(IsSectionType(win32file, &psh[i], IMAGE_DIRECTORY_ENTRY_IMPORT))
+                {
+                    int type = SECTION_IMPORT;
 
-            //KSO Sun 1998-08-09: Borland does not alway set the CODE flag for its "CODE" section
-            if(psh[i].Characteristics & IMAGE_SCN_CNT_CODE ||
-               (psh[i].Characteristics & IMAGE_SCN_MEM_EXECUTE &&
-               !(psh[i].Characteristics & (IMAGE_SCN_CNT_UNINITIALIZED_DATA | IMAGE_SCN_CNT_INITIALIZED_DATA))) //KSO: make sure its not marked as a datasection
-                )
-            {
-                dprintf((LOG, "Code Section"));
-                addSection(SECTION_CODE, psh[i].PointerToRawData,
-                       psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
-                       psh[i].Misc.VirtualSize, psh[i].Characteristics);
-                continue;
+                    dprintf((LOG, "Import Data Section" ));
+                    if(psh[i].Characteristics & IMAGE_SCN_CNT_CODE) {
+                        dprintf((LOG, "Also Code Section"));
+                        type |= SECTION_CODE;
+                    }
+                    addSection(type, psh[i].PointerToRawData,
+                               psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
+                               psh[i].Misc.VirtualSize, psh[i].Characteristics);
+                    continue;
+                }
+
+                //KSO Sun 1998-08-09: Borland does not alway set the CODE flag for its "CODE" section
+                if(psh[i].Characteristics & IMAGE_SCN_CNT_CODE ||
+                   (psh[i].Characteristics & IMAGE_SCN_MEM_EXECUTE &&
+                   !(psh[i].Characteristics & (IMAGE_SCN_CNT_UNINITIALIZED_DATA | IMAGE_SCN_CNT_INITIALIZED_DATA))) //KSO: make sure its not marked as a datasection
+                  )
+                {
+                    dprintf((LOG, "Code Section"));
+                    addSection(SECTION_CODE, psh[i].PointerToRawData,
+                               psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
+                               psh[i].Misc.VirtualSize, psh[i].Characteristics);
+                    continue;
+                }
+                if(!(psh[i].Characteristics & IMAGE_SCN_MEM_WRITE)) { //read only data section
+                    dprintf((LOG, "Read Only Data Section" ));
+                    addSection(SECTION_READONLYDATA, psh[i].PointerToRawData,
+                               psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
+                               psh[i].Misc.VirtualSize, psh[i].Characteristics);
+                    continue;
+                }
+                if(psh[i].Characteristics & IMAGE_SCN_CNT_UNINITIALIZED_DATA) {
+                    dprintf((LOG, "Uninitialized Data Section" ));
+                    addSection(SECTION_UNINITDATA, psh[i].PointerToRawData,
+                               psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
+                               psh[i].Misc.VirtualSize, psh[i].Characteristics);
+                    continue;
+                }
+                if(psh[i].Characteristics & IMAGE_SCN_CNT_INITIALIZED_DATA) {
+                    dprintf((LOG, "Initialized Data Section" ));
+                    addSection(SECTION_INITDATA, psh[i].PointerToRawData,
+                               psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
+                               psh[i].Misc.VirtualSize, psh[i].Characteristics);
+                    continue;
+                }
+                if(psh[i].Characteristics & (IMAGE_SCN_MEM_WRITE | IMAGE_SCN_MEM_READ)) {
+                    dprintf((LOG, "Other Section, stored as read/write uninit data" ));
+                    addSection(SECTION_UNINITDATA, psh[i].PointerToRawData,
+                               psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
+                               psh[i].Misc.VirtualSize, psh[i].Characteristics);
+                    continue;
+                }
+                dprintf((LOG, "Unknown section" ));
+                goto failure;
             }
-            if(!(psh[i].Characteristics & IMAGE_SCN_MEM_WRITE)) { //read only data section
-                dprintf((LOG, "Read Only Data Section" ));
-                addSection(SECTION_READONLYDATA, psh[i].PointerToRawData,
-                       psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
-                       psh[i].Misc.VirtualSize, psh[i].Characteristics);
-                continue;
-            }
-            if(psh[i].Characteristics & IMAGE_SCN_CNT_UNINITIALIZED_DATA) {
-                dprintf((LOG, "Uninitialized Data Section" ));
-                addSection(SECTION_UNINITDATA, psh[i].PointerToRawData,
-                       psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
-                       psh[i].Misc.VirtualSize, psh[i].Characteristics);
-                continue;
-            }
-            if(psh[i].Characteristics & IMAGE_SCN_CNT_INITIALIZED_DATA) {
-                dprintf((LOG, "Initialized Data Section" ));
-                addSection(SECTION_INITDATA, psh[i].PointerToRawData,
-                       psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
-                       psh[i].Misc.VirtualSize, psh[i].Characteristics);
-                continue;
-            }
-            if(psh[i].Characteristics & (IMAGE_SCN_MEM_WRITE | IMAGE_SCN_MEM_READ)) {
-                dprintf((LOG, "Other Section, stored as read/write uninit data" ));
-                addSection(SECTION_UNINITDATA, psh[i].PointerToRawData,
-                       psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
-                       psh[i].Misc.VirtualSize, psh[i].Characteristics);
-                continue;
-            }
-            dprintf((LOG, "Unknown section" ));
-            goto failure;
-         }
+        }
     }
-  }
-  else {
+    else {
         if(GetSectionHdrByImageDir(win32file, IMAGE_DIRECTORY_ENTRY_RESOURCE, &sh))
         {
             addSection(SECTION_RESOURCE, sh.PointerToRawData,
                        sh.SizeOfRawData, sh.VirtualAddress + oh.ImageBase,
                        sh.Misc.VirtualSize, sh.Characteristics);
         }
-  }
-  dprintf((LOG, "*************************PE SECTIONS END **************************" ));
+    }
+    dprintf((LOG, "*************************PE SECTIONS END **************************" ));
 
-  imageSize += imageVirtBase - oh.ImageBase;
-  dprintf((LOG, "Total size of Image %x", imageSize ));
-  dprintf((LOG, "imageVirtBase       %x", imageVirtBase ));
-  dprintf((LOG, "imageVirtEnd        %x", imageVirtEnd ));
+    imageSize += imageVirtBase - oh.ImageBase;
+    dprintf((LOG, "Total size of Image %x", imageSize ));
+    dprintf((LOG, "imageVirtBase       %x", imageVirtBase ));
+    dprintf((LOG, "imageVirtEnd        %x", imageVirtEnd ));
 
-  //In case there are any gaps between sections, adjust size
-  if(imageSize != imageVirtEnd - oh.ImageBase)
-  {
-    dprintf((LOG, "imageSize != imageVirtEnd - oh.ImageBase!" ));
-    imageSize = imageVirtEnd - oh.ImageBase;
-  }
-  if(imageSize < oh.SizeOfImage) {
-    imageSize = oh.SizeOfImage;
-  }
-
-  dprintf((LOG, "OS/2 base address %x", realBaseAddress ));
-  if(oh.AddressOfEntryPoint) {
-    entryPoint = realBaseAddress + oh.AddressOfEntryPoint;
-  }
-  else {
-    dprintf((LOG, "EntryPoint == NULL" ));
-    entryPoint = NULL;
-  }
-
-  //set memory protection flags
-  if(setMemFlags() == FALSE) {
-    dprintf((LOG, "Failed to set memory protection" ));
-    goto failure;
-  }
-
-  if(realBaseAddress != oh.ImageBase) {
-    pFixups     = (PIMAGE_BASE_RELOCATION)ImageDirectoryOffset(win32file, IMAGE_DIRECTORY_ENTRY_BASERELOC);
-    dwFixupSize = ImageDirectorySize(win32file, IMAGE_DIRECTORY_ENTRY_BASERELOC);
-    commitPage((ULONG)pFixups, FALSE);
-  }
-
-  if(!(dwFlags & FLAG_PELDR_LOADASDATAFILE))
-  {
-    if(tlsDir = (IMAGE_TLS_DIRECTORY *)ImageDirectoryOffset(win32file, IMAGE_DIRECTORY_ENTRY_TLS))
+    //In case there are any gaps between sections, adjust size
+    if(imageSize != imageVirtEnd - oh.ImageBase)
     {
-        Section *sect;
-        BOOL     fTLSFixups = FALSE;
+        dprintf((LOG, "imageSize != imageVirtEnd - oh.ImageBase!" ));
+        imageSize = imageVirtEnd - oh.ImageBase;
+    }
+    if(imageSize < oh.SizeOfImage) {
+        imageSize = oh.SizeOfImage;
+    }
 
-        sect = findSectionByAddr(tlsDir->StartAddressOfRawData);
-        //There might be fixups for the TLS structure, so search the sections
-        //by the OS/2 virtual address too
-        if(sect == NULL) {
-            sect = findSectionByOS2Addr(tlsDir->StartAddressOfRawData);
-            fTLSFixups = TRUE;
-        }
+    dprintf((LOG, "OS/2 base address %x", realBaseAddress ));
+    if(oh.AddressOfEntryPoint) {
+        entryPoint = realBaseAddress + oh.AddressOfEntryPoint;
+    }
+    else {
+        dprintf((LOG, "EntryPoint == NULL" ));
+        entryPoint = NULL;
+    }
 
-        dprintf((LOG, "TLS Directory" ));
-        dprintf((LOG, "TLS Address of Index     %x", tlsDir->AddressOfIndex ));
-        dprintf((LOG, "TLS Address of Callbacks %x", tlsDir->AddressOfCallBacks ));
-        dprintf((LOG, "TLS SizeOfZeroFill       %x", tlsDir->SizeOfZeroFill ));
-        dprintf((LOG, "TLS Characteristics      %x", tlsDir->Characteristics ));
-        if(sect == NULL) {
-            dprintf((LOG, "Couldn't find TLS section!!" ));
-            goto failure;
-        }
-        setTLSAddress((char *)sect->realvirtaddr);
-        setTLSInitSize(tlsDir->EndAddressOfRawData - tlsDir->StartAddressOfRawData);
-        setTLSTotalSize(tlsDir->EndAddressOfRawData - tlsDir->StartAddressOfRawData + tlsDir->SizeOfZeroFill);
+    //set memory protection flags
+    if(setMemFlags() == FALSE) {
+        dprintf((LOG, "Failed to set memory protection" ));
+        goto failure;
+    }
 
-        fTLSFixups = FALSE;
-        sect = findSectionByAddr((ULONG)tlsDir->AddressOfIndex);
-        //There might be fixups for the TLS structure, so search the sections
-        //by the OS/2 virtual address too
-        if(sect == NULL) {
-            sect = findSectionByOS2Addr((ULONG)tlsDir->AddressOfIndex);
-            fTLSFixups = TRUE;
-        }
-        if(sect == NULL) {
-            dprintf((LOG, "Couldn't find TLS AddressOfIndex section!!" ));
-            goto failure;
-        }
-        if(fTLSFixups) {
-            setTLSIndexAddr((LPDWORD)tlsDir->AddressOfIndex);  //no fixup required
-        }
-        else {//need to add a manual fixup
-            setTLSIndexAddr((LPDWORD)(sect->realvirtaddr + ((ULONG)tlsDir->AddressOfIndex - sect->virtaddr)));
-        }
+    if(realBaseAddress != oh.ImageBase) {
+        pFixups     = (PIMAGE_BASE_RELOCATION)ImageDirectoryOffset(win32file, IMAGE_DIRECTORY_ENTRY_BASERELOC);
+        dwFixupSize = ImageDirectorySize(win32file, IMAGE_DIRECTORY_ENTRY_BASERELOC);
+        commitPage((ULONG)pFixups, FALSE);
+    }
 
-        if((ULONG)tlsDir->AddressOfCallBacks != 0)
+    if(!(dwFlags & FLAG_PELDR_LOADASDATAFILE))
+    {
+        if(tlsDir = (IMAGE_TLS_DIRECTORY *)ImageDirectoryOffset(win32file, IMAGE_DIRECTORY_ENTRY_TLS))
         {
-            fTLSFixups = FALSE;
+            Section *sect;
+            BOOL     fTLSFixups = FALSE;
 
-            sect = findSectionByAddr((ULONG)tlsDir->AddressOfCallBacks);
+            sect = findSectionByAddr(tlsDir->StartAddressOfRawData);
+            //There might be fixups for the TLS structure, so search the sections
+            //by the OS/2 virtual address too
+            if(sect == NULL) {
+                sect = findSectionByOS2Addr(tlsDir->StartAddressOfRawData);
+                fTLSFixups = TRUE;
+            }
+
+            dprintf((LOG, "TLS Directory" ));
+            dprintf((LOG, "TLS Address of Index     %x", tlsDir->AddressOfIndex ));
+            dprintf((LOG, "TLS Address of Callbacks %x", tlsDir->AddressOfCallBacks ));
+            dprintf((LOG, "TLS SizeOfZeroFill       %x", tlsDir->SizeOfZeroFill ));
+            dprintf((LOG, "TLS Characteristics      %x", tlsDir->Characteristics ));
+            if(sect == NULL) {
+                dprintf((LOG, "Couldn't find TLS section!!" ));
+                goto failure;
+            }
+            setTLSAddress((char *)sect->realvirtaddr);
+            setTLSInitSize(tlsDir->EndAddressOfRawData - tlsDir->StartAddressOfRawData);
+            setTLSTotalSize(tlsDir->EndAddressOfRawData - tlsDir->StartAddressOfRawData + tlsDir->SizeOfZeroFill);
+
+            fTLSFixups = FALSE;
+            sect = findSectionByAddr((ULONG)tlsDir->AddressOfIndex);
             //There might be fixups for the TLS structure, so search the sections
             //by the OS/2 virtual address too
             if(sect == NULL) {
@@ -498,140 +488,189 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
                 fTLSFixups = TRUE;
             }
             if(sect == NULL) {
-                dprintf((LOG, "Couldn't find TLS AddressOfCallBacks section!!" ));
+                dprintf((LOG, "Couldn't find TLS AddressOfIndex section!!" ));
                 goto failure;
             }
             if(fTLSFixups) {
-                setTLSCallBackAddr((PIMAGE_TLS_CALLBACK *)tlsDir->AddressOfCallBacks); //no fixup required
+                setTLSIndexAddr((LPDWORD)tlsDir->AddressOfIndex);  //no fixup required
             }
             else {//need to add a manual fixup
-                setTLSCallBackAddr((PIMAGE_TLS_CALLBACK *)(sect->realvirtaddr + ((ULONG)tlsDir->AddressOfCallBacks - sect->virtaddr)));
+                setTLSIndexAddr((LPDWORD)(sect->realvirtaddr + ((ULONG)tlsDir->AddressOfIndex - sect->virtaddr)));
             }
-            //modify tls callback pointers for new image base address
-            int i = 0;
-            while(tlsCallBackAddr[i])
+
+            if((ULONG)tlsDir->AddressOfCallBacks != 0)
             {
                 fTLSFixups = FALSE;
 
-                sect = findSectionByAddr((ULONG)tlsCallBackAddr[i]);
+                sect = findSectionByAddr((ULONG)tlsDir->AddressOfCallBacks);
                 //There might be fixups for the TLS structure, so search the sections
                 //by the OS/2 virtual address too
                 if(sect == NULL) {
-                    sect = findSectionByOS2Addr((ULONG)tlsCallBackAddr[i]);
+                    sect = findSectionByOS2Addr((ULONG)tlsDir->AddressOfIndex);
                     fTLSFixups = TRUE;
                 }
                 if(sect == NULL) {
-                    dprintf((LOG, "Couldn't find TLS callback section!!" ));
+                    dprintf((LOG, "Couldn't find TLS AddressOfCallBacks section!!" ));
                     goto failure;
                 }
                 if(fTLSFixups) {
-                        tlsCallBackAddr[i] = tlsCallBackAddr[i];
+                    setTLSCallBackAddr((PIMAGE_TLS_CALLBACK *)tlsDir->AddressOfCallBacks); //no fixup required
                 }
-                else    tlsCallBackAddr[i] = (PIMAGE_TLS_CALLBACK)(realBaseAddress + ((ULONG)tlsCallBackAddr[i] - oh.ImageBase));
-                i++;
+                else {//need to add a manual fixup
+                    setTLSCallBackAddr((PIMAGE_TLS_CALLBACK *)(sect->realvirtaddr + ((ULONG)tlsDir->AddressOfCallBacks - sect->virtaddr)));
+                }
+                //modify tls callback pointers for new image base address
+                int i = 0;
+                while(tlsCallBackAddr[i])
+                {
+                    fTLSFixups = FALSE;
+
+                    sect = findSectionByAddr((ULONG)tlsCallBackAddr[i]);
+                    //There might be fixups for the TLS structure, so search the sections
+                    //by the OS/2 virtual address too
+                    if(sect == NULL) {
+                        sect = findSectionByOS2Addr((ULONG)tlsCallBackAddr[i]);
+                        fTLSFixups = TRUE;
+                    }
+                    if(sect == NULL) {
+                        dprintf((LOG, "Couldn't find TLS callback section!!" ));
+                        goto failure;
+                    }
+                    if(fTLSFixups) {
+                            tlsCallBackAddr[i] = tlsCallBackAddr[i];
+                    }
+                    else    tlsCallBackAddr[i] = (PIMAGE_TLS_CALLBACK)(realBaseAddress + ((ULONG)tlsCallBackAddr[i] - oh.ImageBase));
+                    i++;
+                }
             }
         }
-   }
 
 #ifdef DEBUG
-   dprintf((LOG, "Image directories: "));
-   for (i = 0; i < IMAGE_NUMBEROF_DIRECTORY_ENTRIES; i++)
-   {
-        char *pszName;
-
-        if(oh.DataDirectory[i].VirtualAddress && oh.DataDirectory[i].Size) {
-            switch (i)
-            {
-            case IMAGE_DIRECTORY_ENTRY_EXPORT:      pszName = "Export Directory (IMAGE_DIRECTORY_ENTRY_EXPORT)"; break;
-            case IMAGE_DIRECTORY_ENTRY_IMPORT:      pszName = "Import Directory (IMAGE_DIRECTORY_ENTRY_IMPORT)"; break;
-            case IMAGE_DIRECTORY_ENTRY_RESOURCE:    pszName = "Resource Directory (IMAGE_DIRECTORY_ENTRY_RESOURCE)"; break;
-            case IMAGE_DIRECTORY_ENTRY_EXCEPTION:   pszName = "Exception Directory (IMAGE_DIRECTORY_ENTRY_EXCEPTION)"; break;
-            case IMAGE_DIRECTORY_ENTRY_SECURITY:    pszName = "Security Directory (IMAGE_DIRECTORY_ENTRY_SECURITY)"; break;
-            case IMAGE_DIRECTORY_ENTRY_BASERELOC:   pszName = "Base Relocation Table (IMAGE_DIRECTORY_ENTRY_BASERELOC)"; break;
-            case IMAGE_DIRECTORY_ENTRY_DEBUG:       pszName = "Debug Directory (IMAGE_DIRECTORY_ENTRY_DEBUG)"; break;
-            case IMAGE_DIRECTORY_ENTRY_COPYRIGHT:   pszName = "Description String (IMAGE_DIRECTORY_ENTRY_COPYRIGHT)"; break;
-            case IMAGE_DIRECTORY_ENTRY_GLOBALPTR:   pszName = "Machine Value (MIPS GP) (IMAGE_DIRECTORY_ENTRY_GLOBALPTR)"; break;
-            case IMAGE_DIRECTORY_ENTRY_TLS:         pszName = "TLS Directory (IMAGE_DIRECTORY_ENTRY_TLS)"; break;
-            case IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG: pszName = "Load Configuration Directory (IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG)"; break;
-            case IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT:pszName = "Bound Import Directory in headers (IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT)"; break;
-            case IMAGE_DIRECTORY_ENTRY_IAT:         pszName = "Import Address Table (IMAGE_DIRECTORY_ENTRY_IAT)"; break;
-            default:
-                pszName = "unknown";
-            }
-            dprintf((LOG, "directory %s", pszName));
-            dprintf((LOG, "          Address    0x%08x", oh.DataDirectory[i].VirtualAddress));
-            dprintf((LOG, "          Size       0x%08x", oh.DataDirectory[i].Size));
-        }
-    }
-    dprintf((LOG, "\n\n"));
-#endif
-
-#ifdef COMMIT_ALL
-    for (i=0; i<nSections; i++) {
-        commitPage((ULONG)section[i].realvirtaddr, FALSE, COMPLETE_SECTION);
-    }
-#else
-    for (i=0; i<nSections; i++) {
-        switch(section[i].type)
+        dprintf((LOG, "Image directories: "));
+        for (i = 0; i < IMAGE_NUMBEROF_DIRECTORY_ENTRIES; i++)
         {
-        case SECTION_IMPORT:
-        case SECTION_RELOC:
-        case SECTION_EXPORT:
+            char *pszName;
+
+            if(oh.DataDirectory[i].VirtualAddress && oh.DataDirectory[i].Size) {
+                switch (i)
+                {
+                case IMAGE_DIRECTORY_ENTRY_EXPORT:      pszName = "Export Directory (IMAGE_DIRECTORY_ENTRY_EXPORT)"; break;
+                case IMAGE_DIRECTORY_ENTRY_IMPORT:      pszName = "Import Directory (IMAGE_DIRECTORY_ENTRY_IMPORT)"; break;
+                case IMAGE_DIRECTORY_ENTRY_RESOURCE:    pszName = "Resource Directory (IMAGE_DIRECTORY_ENTRY_RESOURCE)"; break;
+                case IMAGE_DIRECTORY_ENTRY_EXCEPTION:   pszName = "Exception Directory (IMAGE_DIRECTORY_ENTRY_EXCEPTION)"; break;
+                case IMAGE_DIRECTORY_ENTRY_SECURITY:    pszName = "Security Directory (IMAGE_DIRECTORY_ENTRY_SECURITY)"; break;
+                case IMAGE_DIRECTORY_ENTRY_BASERELOC:   pszName = "Base Relocation Table (IMAGE_DIRECTORY_ENTRY_BASERELOC)"; break;
+                case IMAGE_DIRECTORY_ENTRY_DEBUG:       pszName = "Debug Directory (IMAGE_DIRECTORY_ENTRY_DEBUG)"; break;
+                case IMAGE_DIRECTORY_ENTRY_COPYRIGHT:   pszName = "Description String (IMAGE_DIRECTORY_ENTRY_COPYRIGHT)"; break;
+                case IMAGE_DIRECTORY_ENTRY_GLOBALPTR:   pszName = "Machine Value (MIPS GP) (IMAGE_DIRECTORY_ENTRY_GLOBALPTR)"; break;
+                case IMAGE_DIRECTORY_ENTRY_TLS:         pszName = "TLS Directory (IMAGE_DIRECTORY_ENTRY_TLS)"; break;
+                case IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG: pszName = "Load Configuration Directory (IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG)"; break;
+                case IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT:pszName = "Bound Import Directory in headers (IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT)"; break;
+                case IMAGE_DIRECTORY_ENTRY_IAT:         pszName = "Import Address Table (IMAGE_DIRECTORY_ENTRY_IAT)"; break;
+                default:
+                    pszName = "unknown";
+                }
+                dprintf((LOG, "directory %s", pszName));
+                dprintf((LOG, "          Address    0x%08x", oh.DataDirectory[i].VirtualAddress));
+                dprintf((LOG, "          Size       0x%08x", oh.DataDirectory[i].Size));
+            }
+        }
+        dprintf((LOG, "\n\n"));
+#endif
+
+#ifdef COMMIT_ALL
+        for (i=0; i<nSections; i++) {
             commitPage((ULONG)section[i].realvirtaddr, FALSE, COMPLETE_SECTION);
-            break;
+        }
+#else
+        for (i=0; i<nSections; i++) {
+            switch(section[i].type)
+            {
+            case SECTION_IMPORT:
+            case SECTION_RELOC:
+            case SECTION_EXPORT:
+                commitPage((ULONG)section[i].realvirtaddr, FALSE, COMPLETE_SECTION);
+                break;
+            }
+        }
+#endif
+        if(processExports((char *)win32file) == FALSE) {
+            dprintf((LOG, "Failed to process exported apis" ));
+            goto failure;
         }
     }
-#endif
-    if(processExports((char *)win32file) == FALSE) {
-        dprintf((LOG, "Failed to process exported apis" ));
-        goto failure;
-    }
-  }
 #ifdef COMMIT_ALL
-  else {
+    else {
         commitPage((ULONG)section[0].realvirtaddr, FALSE, COMPLETE_SECTION);
-  }
+    }
 #endif
 
-  //SvL: Use pointer to image header as module handle now. Some apps needs this
-  hinstance = (HINSTANCE)realBaseAddress;
-
-  //SvL: Set instance handle in process database structure
-  SetPDBInstance(hinstance);
-
-  //PH: get pResRootDir pointer correct first, since processImports may
-  //    implicitly call functions depending on it.
-  if(oh.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress && oh.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].Size) 
-  {
-    //get offset in resource object of directory entry
-    pResRootDir = (PIMAGE_RESOURCE_DIRECTORY)(oh.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress + realBaseAddress);
-    ulRVAResourceSection = oh.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress;
-  }
-
-  if(!(dwFlags & (FLAG_PELDR_LOADASDATAFILE | FLAG_PELDR_SKIPIMPORTS)))
-  {
-    if(processImports((char *)win32file) == FALSE) {
-        dprintf((LOG, "Failed to process imports!" ));
-        goto failure;
+#ifndef COMMIT_ALL
+    if(entryPoint) {
+        //commit code at entrypoint, since we going to call it anyway
+        commitPage((ULONG)entryPoint, FALSE);
     }
-  }
-  return(TRUE);
+#endif
+
+    //SvL: Use pointer to image header as module handle now. Some apps needs this
+    hinstance = (HINSTANCE)realBaseAddress;
+
+    //SvL: Set instance handle in process database structure
+    SetPDBInstance(hinstance);
+
+    //PH: get pResRootDir pointer correct first, since processImports may
+    //    implicitly call functions depending on it.
+    if(oh.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress && oh.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].Size)
+    {
+        //get offset in resource object of directory entry
+        pResRootDir = (PIMAGE_RESOURCE_DIRECTORY)(oh.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress + realBaseAddress);
+        ulRVAResourceSection = oh.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress;
+    }
+
+    if(!(dwFlags & (FLAG_PELDR_LOADASDATAFILE | FLAG_PELDR_SKIPIMPORTS)))
+    {
+        if(processImports((char *)win32file) == FALSE) {
+            dprintf((LOG, "Failed to process imports!" ));
+            goto failure;
+        }
+    }
+    return(TRUE);
 
 failure:
-  if(memmap) {
-    delete memmap;
-    memmap = NULL;
-  }
-  if(hFile) {
-    OSLibDosClose(hFile);
-    hFile = 0;
-  }
-  errorState = ERROR_INTERNAL;
-  return FALSE;
+    if(memmap) {
+        delete memmap;
+        memmap = NULL;
+    }
+    if(hFile) {
+        OSLibDosClose(hFile);
+        hFile = 0;
+    }
+    errorState = ERROR_INTERNAL;
+    return FALSE;
 }
 //******************************************************************************
-//commits image page(s) when an access violation exception is dispatched
-//virtAddress = address of exception (rounded down to page boundary)
+//  commitPage:
+//      commits image page(s) when an access violation exception is received
+//      (usually called from exception.cpp; also from other methods in this file)
+//
+//  Parameters:
+//      virtAddress     - address of exception (rounded down to page boundary)
+//      fWriteAccess    - type of access violation (read or write)
+//      fPageCmd        - SINGLE_PAGE       -> commit single page
+//                        SECTION_PAGES     -> commit default nr of pages
+//                        COMPLETE_SECTION  -> commit entire section
+//
+//  Remarks:
+//      DosEnterCritSec/DosExitCritSec is used to make sure the other threads in
+//      the application can't touch the pages before they are loaded from disk and
+//      fixups are applied.
+//
+//  TODO:
+//      SECTION_PAGES:  - don't load pages starting at access violation address, but
+//                        a region surrounding it (e.g. -32k -> + 32k)
+//                        this will prevent many pagefaults when the app uses
+//                        pages with a lower addr.
+//
 //******************************************************************************
 BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPageCmd)
 {
@@ -640,133 +679,157 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
  ULONG    ulNewPos, ulRead;
  APIRET   rc;
 
-  //Round down to nearest page boundary
-  virtAddress = virtAddress & ~0xFFF;
+    //Round down to nearest page boundary
+    virtAddress = virtAddress & ~0xFFF;
 
-  section = findSectionByOS2Addr(virtAddress);
-  if(section == NULL) {
-    size        = 4096;
-    sectionsize = 4096;
-    protflags   = PAG_READ|PAG_WRITE; //readonly?
-    section = findPreviousSectionByOS2Addr(virtAddress);
-    if(section == NULL) {//access to header
-        offset     = 0;
-        fileoffset = virtAddress - realBaseAddress;
+    section = findSectionByOS2Addr(virtAddress);
+    if(section == NULL) {
+        size        = 4096;
+        sectionsize = 4096;
+        protflags   = PAG_READ|PAG_WRITE; //readonly?
+        section = findPreviousSectionByOS2Addr(virtAddress);
+        if(section == NULL) {//access to header
+            offset     = 0;
+            fileoffset = virtAddress - realBaseAddress;
+        }
+        else {
+            offset     = virtAddress - (section->realvirtaddr + section->virtualsize);
+            fileoffset = section->rawoffset + section->rawsize + offset;
+        }
     }
     else {
-        offset     = virtAddress - (section->realvirtaddr + section->virtualsize);
-        fileoffset = section->rawoffset + section->rawsize + offset;
-    }
-  }
-  else {
-    protflags   = section->pageflags;
-    offset      = virtAddress - section->realvirtaddr;
-    sectionsize = section->virtualsize - offset;
+        protflags   = section->pageflags;
+        offset      = virtAddress - section->realvirtaddr;
+        sectionsize = section->virtualsize - offset;
 
-    if(offset > section->rawsize || section->type == SECTION_UNINITDATA) {
-        //unintialized data (set to 0)
-        size = 0;
-        fileoffset = -1;
+        if(offset > section->rawsize || section->type == SECTION_UNINITDATA) {
+            //unintialized data (set to 0)
+            size = 0;
+            fileoffset = -1;
+        }
+        else {
+            size = section->rawsize-offset;
+            fileoffset = section->rawoffset + offset;
+        }
+        if(fWriteAccess & !(section->pageflags & PAG_WRITE)) {
+            dprintf((LOG, "Win32PeLdrImage::commitPage: No write access to 0%x!", virtAddress));
+            return FALSE;
+        }
+    }
+    //Check range of pages with the same attributes starting at virtAddress
+    //(some pages might already have been loaded)
+    range = sectionsize;
+    rc = DosQueryMem((PVOID)virtAddress, &range, &attr);
+    if(rc) {
+        dprintf((LOG, "Win32PeLdrImage::commitPage: DosQueryMem for %x returned %d", virtAddress, rc));
+        return FALSE;
+    }
+    if(attr & PAG_COMMIT) {
+        dprintf((LOG, "Win32PeLdrImage::commitPage: Memory at 0x%x already committed!", virtAddress));
+        return FALSE;
+    }
+
+    if(fPageCmd == SINGLE_PAGE) {
+        size = min(size, PAGE_SIZE);
+        sectionsize = min(sectionsize, PAGE_SIZE);
+    }
+    else
+    if(fPageCmd == SECTION_PAGES) {
+        size = min(size, DEFAULT_NR_PAGES*PAGE_SIZE);
+        sectionsize = min(sectionsize, DEFAULT_NR_PAGES*PAGE_SIZE);
+    }
+    //else complete section
+
+    size = min(size, range);
+    sectionsize = min(sectionsize, range);
+
+    if(fileoffset != -1) {
+        rc = DosEnterCritSec();
+        if(rc) {
+            dprintf((LOG, "DosEnterCritSec failed with rc %d", rc));
+            goto fail;
+        }
+        rc = DosSetMem((PVOID)virtAddress, sectionsize, PAG_READ|PAG_WRITE|PAG_COMMIT);
+        if(rc) {
+            DosExitCritSec();
+            dprintf((LOG, "Win32PeLdrImage::commitPage: DosSetMem failed (%d)!", rc));
+            goto fail;
+        }
+
+        if(DosSetFilePtr(hFile, fileoffset, FILE_BEGIN, &ulNewPos) == -1) {
+            DosExitCritSec();
+            dprintf((LOG, "Win32PeLdrImage::commitPage: DosSetFilePtr failed for 0x%x!", fileoffset));
+            goto fail;
+        }
+        rc = DosRead(hFile, (PVOID)virtAddress, size, &ulRead);
+        if(rc) {
+            DosExitCritSec();
+            dprintf((LOG, "Win32PeLdrImage::commitPage: DosRead failed for 0x%x %x %x %x (rc=%d)!", virtAddress, size, ulRead, fileoffset, rc));
+            goto fail;
+        }
+        if(ulRead != size) {
+            DosExitCritSec();
+            dprintf((LOG, "Win32PeLdrImage::commitPage: DosRead failed to read %x (%x) bytes at %x for 0x%x!", size, ulRead, fileoffset, virtAddress));
+            goto fail;
+        }
+        setFixups(virtAddress, sectionsize);
+
+        rc = DosSetMem((PVOID)virtAddress, sectionsize, protflags);
+        DosExitCritSec();
+        if(rc) {
+            dprintf((LOG, "Win32PeLdrImage::commitPage: DosSetMem failed (%d)!", rc));
+            goto fail;
+        }
     }
     else {
-        size = section->rawsize-offset;
-        fileoffset = section->rawoffset + offset;
+        rc = DosEnterCritSec();
+        if(rc) {
+            dprintf((LOG, "DosEnterCritSec failed with rc %d", rc));
+            goto fail;
+        }
+
+        rc = DosSetMem((PVOID)virtAddress, sectionsize, PAG_READ|PAG_WRITE|PAG_COMMIT);
+        if(rc) {
+            DosExitCritSec();
+            dprintf((LOG, "Win32PeLdrImage::commitPage: DosSetMem failed (%d)!", rc));
+            goto fail;
+        }
+        setFixups(virtAddress, sectionsize);
+
+        rc = DosSetMem((PVOID)virtAddress, sectionsize, protflags);
+        DosExitCritSec();
+        if(rc) {
+            dprintf((LOG, "Win32PeLdrImage::commitPage: DosSetMem failed (%d)!", rc));
+            goto fail;
+        }
     }
-    if(fWriteAccess & !(section->pageflags & PAG_WRITE)) {
-        dprintf((LOG, "Win32PeLdrImage::commitPage: No write access to 0%x!", virtAddress));
-        return FALSE;
-    }
-  }
-  //Check range of pages with the same attributes starting at virtAddress
-  //(some pages might already have been loaded)
-  range = sectionsize;
-  rc = DosQueryMem((PVOID)virtAddress, &range, &attr);
-  if(rc) {
-    dprintf((LOG, "Win32PeLdrImage::commitPage: DosQueryMem for %x returned %d", virtAddress, rc));
+    return TRUE;
+
+fail:
     return FALSE;
-  }
-  if(attr & PAG_COMMIT) {
-    dprintf((LOG, "Win32PeLdrImage::commitPage: Memory at 0x%x already committed!", virtAddress));
-    return FALSE;
-  }
-
-  if(fPageCmd == SINGLE_PAGE) {
-    size = min(size, PAGE_SIZE);
-    sectionsize = min(sectionsize, PAGE_SIZE);
-  }
-  else
-  if(fPageCmd == SECTION_PAGES) {
-    size = min(size, DEFAULT_NR_PAGES*PAGE_SIZE);
-    sectionsize = min(sectionsize, DEFAULT_NR_PAGES*PAGE_SIZE);
-  }
-  size = min(size, range);
-  sectionsize = min(sectionsize, range);
-
-  if(fileoffset != -1) {
-    rc = DosSetMem((PVOID)virtAddress, sectionsize, PAG_READ|PAG_WRITE|PAG_COMMIT);
-    if(rc) {
-        dprintf((LOG, "Win32PeLdrImage::commitPage: DosSetMem failed (%d)!", rc));
-            return FALSE;
-    }
-
-    if(DosSetFilePtr(hFile, fileoffset, FILE_BEGIN, &ulNewPos) == -1) {
-        dprintf((LOG, "Win32PeLdrImage::commitPage: DosSetFilePtr failed for 0x%x!", fileoffset));
-            return FALSE;
-    }
-    if(DosRead(hFile, (PVOID)virtAddress, size, &ulRead)) {
-        dprintf((LOG, "Win32PeLdrImage::commitPage: DosRead failed for 0x%x!", virtAddress));
-            return FALSE;
-    }
-    if(ulRead != size) {
-        dprintf((LOG, "Win32PeLdrImage::commitPage: DosRead failed to read %x (%x) bytes at %x for 0x%x!", size, ulRead, fileoffset, virtAddress));
-            return FALSE;
-    }
-    setFixups(virtAddress, sectionsize);
-
-    rc = DosSetMem((PVOID)virtAddress, sectionsize, protflags);
-    if(rc) {
-        dprintf((LOG, "Win32PeLdrImage::commitPage: DosSetMem failed (%d)!", rc));
-        return FALSE;
-    }
-  }
-  else {
-    rc = DosSetMem((PVOID)virtAddress, sectionsize, PAG_READ|PAG_WRITE|PAG_COMMIT);
-    if(rc) {
-        dprintf((LOG, "Win32PeLdrImage::commitPage: DosSetMem failed (%d)!", rc));
-            return FALSE;
-    }
-    setFixups(virtAddress, sectionsize);
-
-    rc = DosSetMem((PVOID)virtAddress, sectionsize, protflags);
-    if(rc) {
-        dprintf((LOG, "Win32PeLdrImage::commitPage: DosSetMem failed (%d)!", rc));
-        return FALSE;
-    }
-  }
-  return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
 void Win32PeLdrImage::addSection(ULONG type, ULONG rawoffset, ULONG rawsize, ULONG virtaddress, ULONG virtsize, ULONG flags)
 {
-  virtsize = max(rawsize, virtsize);
+    virtsize = max(rawsize, virtsize);
 
-  section[nrsections].rawoffset      = rawoffset;
-  section[nrsections].type           = type;
-  section[nrsections].rawsize        = rawsize;
-  section[nrsections].virtaddr       = virtaddress;
-  section[nrsections].flags          = flags;
+    section[nrsections].rawoffset      = rawoffset;
+    section[nrsections].type           = type;
+    section[nrsections].rawsize        = rawsize;
+    section[nrsections].virtaddr       = virtaddress;
+    section[nrsections].flags          = flags;
 
-  virtsize   = ((virtsize - 1) & ~0xFFF) + PAGE_SIZE;
-  imageSize += virtsize;
-  section[nrsections].virtualsize = virtsize;
+    virtsize   = ((virtsize - 1) & ~0xFFF) + PAGE_SIZE;
+    imageSize += virtsize;
+    section[nrsections].virtualsize = virtsize;
 
-  if(virtaddress < imageVirtBase)
+    if(virtaddress < imageVirtBase)
         imageVirtBase = virtaddress;
-  if(virtaddress + virtsize > imageVirtEnd)
+    if(virtaddress + virtsize > imageVirtEnd)
         imageVirtEnd  = virtaddress + virtsize;
 
-  nrsections++;
+    nrsections++;
 }
 //******************************************************************************
 //******************************************************************************
@@ -775,59 +838,59 @@ BOOL Win32PeLdrImage::allocSections(ULONG reservedMem)
  APIRET rc;
  ULONG  baseAddress;
 
-  realBaseAddress = 0;
+    realBaseAddress = 0;
 
-  //Allocated in by pe.exe
-  if(reservedMem && reservedMem == oh.ImageBase) {
-    realBaseAddress = oh.ImageBase;
-    return TRUE;
-  }
+    //Allocated in by pe.exe
+    if(reservedMem && reservedMem == oh.ImageBase) {
+        realBaseAddress = oh.ImageBase;
+        return TRUE;
+    }
 
-  //SvL: We don't care where the image is loaded for resource lookup
-  if(fh.Characteristics & IMAGE_FILE_RELOCS_STRIPPED && !(dwFlags & FLAG_PELDR_LOADASDATAFILE)) {
+    //SvL: We don't care where the image is loaded for resource lookup
+    if(fh.Characteristics & IMAGE_FILE_RELOCS_STRIPPED && !(dwFlags & FLAG_PELDR_LOADASDATAFILE)) {
         return allocFixedMem(reservedMem);
-  }
-  rc = DosAllocMem((PPVOID)&baseAddress, imageSize, PAG_READ | PAG_WRITE | flAllocMem);
-  if(rc) {
-    dprintf((LOG, "Win32PeLdrImage::allocSections, DosAllocMem returned %d", rc));
+    }
+    rc = DosAllocMem((PPVOID)&baseAddress, imageSize, PAG_READ | PAG_WRITE | flAllocMem);
+    if(rc) {
+        dprintf((LOG, "Win32PeLdrImage::allocSections, DosAllocMem returned %d", rc));
         errorState = rc;
         return(FALSE);
-  }
-  realBaseAddress = baseAddress;
-  return(TRUE);
+    }
+    realBaseAddress = baseAddress;
+    return(TRUE);
 }
 //******************************************************************************
 //******************************************************************************
 Section *Win32PeLdrImage::findSection(ULONG type)
 {
-  for(int i=0;i<nrsections;i++) {
-    if(section[i].type == type) {
-        return &section[i];
+    for(int i=0;i<nrsections;i++) {
+        if(section[i].type == type) {
+            return &section[i];
+        }
     }
-  }
-  return NULL;
+    return NULL;
 }
 //******************************************************************************
 //******************************************************************************
 Section *Win32PeLdrImage::findSectionByAddr(ULONG addr)
 {
-  for(int i=0;i<nrsections;i++) {
-    if(section[i].virtaddr <= addr && section[i].virtaddr + section[i].virtualsize > addr) {
-        return &section[i];
+    for(int i=0;i<nrsections;i++) {
+        if(section[i].virtaddr <= addr && section[i].virtaddr + section[i].virtualsize > addr) {
+            return &section[i];
+        }
     }
-  }
-  return NULL;
+    return NULL;
 }
 //******************************************************************************
 //******************************************************************************
 Section *Win32PeLdrImage::findSectionByOS2Addr(ULONG addr)
 {
-  for(int i=0;i<nrsections;i++) {
-    if(section[i].realvirtaddr <= addr && section[i].realvirtaddr + section[i].virtualsize > addr) {
-        return &section[i];
+    for(int i=0;i<nrsections;i++) {
+        if(section[i].realvirtaddr <= addr && section[i].realvirtaddr + section[i].virtualsize > addr) {
+            return &section[i];
+        }
     }
-  }
-  return NULL;
+    return NULL;
 }
 //******************************************************************************
 //******************************************************************************
@@ -836,18 +899,18 @@ Section *Win32PeLdrImage::findPreviousSectionByOS2Addr(ULONG addr)
  ULONG lowestAddr = 0xffffffff;
  ULONG index = -1;
 
-  for(int i=0;i<nrsections;i++) {
-    if(section[i].realvirtaddr > addr) {
-        if(section[i].realvirtaddr < lowestAddr) {
-            lowestAddr = section[i].realvirtaddr;
-            index = i;
+    for(int i=0;i<nrsections;i++) {
+        if(section[i].realvirtaddr > addr) {
+            if(section[i].realvirtaddr < lowestAddr) {
+                lowestAddr = section[i].realvirtaddr;
+                index = i;
+            }
         }
     }
-  }
-  if(index == -1)
-    return NULL;
+    if(index == -1)
+        return NULL;
 
-  return &section[index];
+    return &section[index];
 }
 //******************************************************************************
 #define FALLOC_SIZE (1024*1024)
@@ -863,33 +926,33 @@ BOOL Win32PeLdrImage::allocFixedMem(ULONG reservedMem)
  APIRET rc;
  BOOL   allocFlags = flAllocMem;
 
-  //Reserve enough space to store 4096 pointers to 1MB memory chunks
-  memallocs = (ULONG *)malloc(4096*sizeof(ULONG *));
-  if(memallocs == NULL) {
-    dprintf((LOG, "allocFixedMem: MALLOC FAILED for memallocs" ));
-    return FALSE;
-  }
+    //Reserve enough space to store 4096 pointers to 1MB memory chunks
+    memallocs = (ULONG *)malloc(4096*sizeof(ULONG *));
+    if(memallocs == NULL) {
+        dprintf((LOG, "allocFixedMem: MALLOC FAILED for memallocs" ));
+        return FALSE;
+    }
 
-  if(oh.ImageBase < 512*1024*1024) {
-    allocFlags = 0;
-  }
-  while(TRUE) {
+    if(oh.ImageBase < 512*1024*1024) {
+        allocFlags = 0;
+    }
+    while(TRUE) {
         rc = DosAllocMem((PPVOID)&address, FALLOC_SIZE, PAG_READ | allocFlags);
         if(rc) break;
 
         dprintf((LOG, "DosAllocMem returned %x", address ));
         if(address + FALLOC_SIZE >= oh.ImageBase) {
             if(address > oh.ImageBase) {//we've passed it!
-                    DosFreeMem((PVOID)address);
-                    break;
+                DosFreeMem((PVOID)address);
+                break;
             }
             //found the right address
             DosFreeMem((PVOID)address);
 
             diff = oh.ImageBase - address;
             if(diff) {
-                    rc = DosAllocMem((PPVOID)&address, diff, PAG_READ | allocFlags);
-                    if(rc) break;
+                rc = DosAllocMem((PPVOID)&address, diff, PAG_READ | allocFlags);
+                if(rc) break;
             }
             rc = DosAllocMem((PPVOID)&baseAddress, imageSize, PAG_READ | PAG_WRITE | allocFlags);
             if(rc) break;
@@ -899,17 +962,17 @@ BOOL Win32PeLdrImage::allocFixedMem(ULONG reservedMem)
             realBaseAddress = baseAddress;
             break;
         }
-    memallocs[alloccnt++] = address;
-  }
-  for(i=0;i<alloccnt;i++) {
+        memallocs[alloccnt++] = address;
+    }
+    for(i=0;i<alloccnt;i++) {
         DosFreeMem((PVOID)memallocs[i]);
-  }
-  free(memallocs);
+    }
+    free(memallocs);
 
-  if(realBaseAddress == 0) //Let me guess.. MS Office app?
+    if(realBaseAddress == 0) //Let me guess.. MS Office app?
         return(FALSE);
 
-  return(TRUE);
+    return(TRUE);
 }
 //******************************************************************************
 //******************************************************************************
@@ -930,39 +993,38 @@ BOOL Win32PeLdrImage::setMemFlags()
 
   for(i=0;i<nrsections;i++) {
         switch(section[i].type)
-    {
+        {
         case SECTION_CODE:
         case (SECTION_CODE | SECTION_IMPORT):
-                section[i].pageflags = PAG_EXECUTE | PAG_READ;
-        if(section[i].flags & IMAGE_SCN_MEM_WRITE)
-            section[i].pageflags |= PAG_WRITE;
-                break;
+            section[i].pageflags = PAG_EXECUTE | PAG_READ;
+            if(section[i].flags & IMAGE_SCN_MEM_WRITE)
+                section[i].pageflags |= PAG_WRITE;
+            break;
         case SECTION_INITDATA:
         case SECTION_UNINITDATA:
         case SECTION_IMPORT:
-    case SECTION_TLS:
-                section[i].pageflags = PAG_WRITE | PAG_READ;
-                break;
+        case SECTION_TLS:
+            section[i].pageflags = PAG_WRITE | PAG_READ;
+            break;
 
         case SECTION_RESOURCE:
-        //TODO: GDI32 changes some bitmap structures to avoid problems in Open32
-                //      -> causes crashes if resource section is readonly
-                //      -> make it readonly again when gdi32 has been rewritten
-                section[i].pageflags = PAG_WRITE | PAG_READ;
-        break;
+            //TODO: GDI32 changes some bitmap structures to avoid problems in Open32
+            //      -> causes crashes if resource section is readonly
+            //      -> make it readonly again when gdi32 has been rewritten
+            section[i].pageflags = PAG_WRITE | PAG_READ;
+            break;
 
         case SECTION_READONLYDATA:
         case SECTION_EXPORT:
         default:
-                section[i].pageflags = PAG_READ;
-                break;
+            section[i].pageflags = PAG_READ;
+            break;
         }
-    if(section[i].flags & (IMAGE_SCN_CNT_INITIALIZED_DATA|IMAGE_SCN_CNT_UNINITIALIZED_DATA)) {
-        //SvL: sometimes i.e. import/export sections also contain data
-                //     must make them read/write
-                section[i].pageflags = PAG_WRITE;
+        if(section[i].flags & (IMAGE_SCN_CNT_INITIALIZED_DATA|IMAGE_SCN_CNT_UNINITIALIZED_DATA)) {
+            //SvL: sometimes i.e. import/export sections also contain data
+            //     must make them read/write
+            section[i].pageflags = PAG_WRITE;
         }
-
   }
   return(TRUE);
 }
@@ -986,14 +1048,14 @@ BOOL Win32PeLdrImage::setFixups(ULONG virtAddress, ULONG size)
   size += PAGE_SIZE;
 
   if(prel) {
-    j = 1;
-    while(((ULONG)prel < (ULONG)pFixups+dwFixupSize) &&
+        j = 1;
+        while(((ULONG)prel < (ULONG)pFixups+dwFixupSize) &&
               prel->VirtualAddress && prel->VirtualAddress < virtAddress)
         {
             prel = (PIMAGE_BASE_RELOCATION)((char*)prel + prel->SizeOfBlock);
-    }
-    while(((ULONG)prel < (ULONG)pFixups+dwFixupSize) &&
-              prel->VirtualAddress && prel->VirtualAddress < virtAddress + size)
+        }
+        while(((ULONG)prel < (ULONG)pFixups+dwFixupSize) &&
+               prel->VirtualAddress && prel->VirtualAddress < virtAddress + size)
         {
             page = (char *)((char *)prel + (ULONG)prel->VirtualAddress);
             count  = (prel->SizeOfBlock - 8)/2;
@@ -1001,67 +1063,67 @@ BOOL Win32PeLdrImage::setFixups(ULONG virtAddress, ULONG size)
             for(i=0;i<count;i++) {
                 int type   = prel->TypeOffset[i] >> 12;
                 int offset = prel->TypeOffset[i] & 0xFFF;
-            int fixupsize = 0;
+                int fixupsize = 0;
 
                 switch(type)
-            {
+                {
                 case IMAGE_REL_BASED_HIGHLOW:
-                fixupsize = 4;
-                break;
-                    case IMAGE_REL_BASED_HIGH:
-                    case IMAGE_REL_BASED_LOW:
-                fixupsize = 2;
-                break;
-            }
-            //If the fixup crosses the final page boundary,
-            //then we have to load another page
-            if(prel->VirtualAddress + offset + fixupsize > virtAddress + size)
-            {
-                newpage  = realBaseAddress + prel->VirtualAddress + offset + fixupsize;
-                newpage &= ~0xFFF;
+                    fixupsize = 4;
+                    break;
+                case IMAGE_REL_BASED_HIGH:
+                case IMAGE_REL_BASED_LOW:
+                    fixupsize = 2;
+                    break;
+                }
+                //If the fixup crosses the final page boundary,
+                //then we have to load another page
+                if(prel->VirtualAddress + offset + fixupsize > virtAddress + size)
+                {
+                    newpage  = realBaseAddress + prel->VirtualAddress + offset + fixupsize;
+                    newpage &= ~0xFFF;
 
                     section  = findSectionByOS2Addr(newpage);
                     if(section == NULL) {
-                    //should never happen
-                    dprintf((LOG, "::setFixups -> section == NULL!!"));
-                    return FALSE;
+                        //should never happen
+                        dprintf((LOG, "::setFixups -> section == NULL!!"));
+                        return FALSE;
                     }
-                //SvL: Read page from disk
-                commitPage(newpage, FALSE, SINGLE_PAGE);
+                    //SvL: Read page from disk
+                    commitPage(newpage, FALSE, SINGLE_PAGE);
 
-                    //SvL: Enable write access
+                    //SvL: Enable write access (TODO: may need to prevent other threads from being active)
                     DosSetMem((PVOID)newpage, PAGE_SIZE, PAG_READ|PAG_WRITE);
-            }
+                }
 
                 switch(type)
-            {
+                {
                 case IMAGE_REL_BASED_ABSOLUTE:
                     break;  //skip
                 case IMAGE_REL_BASED_HIGHLOW:
-                        AddOff32Fixup(prel->VirtualAddress + offset);
-                        break;
-                    case IMAGE_REL_BASED_HIGH:
-                AddOff16Fixup(prel->VirtualAddress + offset, TRUE);
-                break;
-                    case IMAGE_REL_BASED_LOW:
-                AddOff16Fixup(prel->VirtualAddress + offset, FALSE);
-                break;
-                    case IMAGE_REL_BASED_HIGHADJ:
-                    case IMAGE_REL_BASED_MIPS_JMPADDR:
+                    AddOff32Fixup(prel->VirtualAddress + offset);
+                    break;
+                case IMAGE_REL_BASED_HIGH:
+                    AddOff16Fixup(prel->VirtualAddress + offset, TRUE);
+                    break;
+                case IMAGE_REL_BASED_LOW:
+                    AddOff16Fixup(prel->VirtualAddress + offset, FALSE);
+                    break;
+                case IMAGE_REL_BASED_HIGHADJ:
+                case IMAGE_REL_BASED_MIPS_JMPADDR:
                 default:
                         break;
                 }
-            if(prel->VirtualAddress + offset + fixupsize > virtAddress + size)
-            {
-                    //SvL: Restore original page protection flags
+                if(prel->VirtualAddress + offset + fixupsize > virtAddress + size)
+                {
+                    //SvL: Restore original page protection flags (TODO: may need to prevent other threads from being active)
                     DosSetMem((PVOID)newpage, PAGE_SIZE, section->pageflags);
-            }
+                }
             }
             prel = (PIMAGE_BASE_RELOCATION)((char*)prel + prel->SizeOfBlock);
         }//while
   }
   else {
-    dprintf((LOG, "Win32PeLdrImage::setFixups, no fixups at %x, %d", virtAddress, size));
+        dprintf((LOG, "Win32PeLdrImage::setFixups, no fixups at %x, %d", virtAddress, size));
         return(FALSE);
   }
   return(TRUE);
@@ -1080,42 +1142,42 @@ BOOL Win32PeLdrImage::setFixups(PIMAGE_BASE_RELOCATION prel)
 
   if(prel) {
         j = 1;
-    while(prel->VirtualAddress) {
-      page = (char *)((char *)prel + (ULONG)prel->VirtualAddress);
-      count  = (prel->SizeOfBlock - 8)/2;
-      dprintf((LOG, "Page %d Address %x Count %d", j, prel->VirtualAddress, count ));
-      j++;
-      for(i=0;i<count;i++) {
-        int type   = prel->TypeOffset[i] >> 12;
-        int offset = prel->TypeOffset[i] & 0xFFF;
-        switch(type) {
-            case IMAGE_REL_BASED_ABSOLUTE:
+        while(prel->VirtualAddress) {
+            page = (char *)((char *)prel + (ULONG)prel->VirtualAddress);
+            count  = (prel->SizeOfBlock - 8)/2;
+            dprintf((LOG, "Page %d Address %x Count %d", j, prel->VirtualAddress, count ));
+            j++;
+            for(i=0;i<count;i++) {
+                int type   = prel->TypeOffset[i] >> 12;
+                int offset = prel->TypeOffset[i] & 0xFFF;
+                switch(type) {
+                case IMAGE_REL_BASED_ABSOLUTE:
 ////                dprintf((LOG, "absolute fixup; unused" ));
-                break;  //skip
-            case IMAGE_REL_BASED_HIGHLOW:
+                    break;  //skip
+                case IMAGE_REL_BASED_HIGHLOW:
 ////                dprintf((LOG, "address ", offset << " type ", type ));
-                AddOff32Fixup(prel->VirtualAddress + offset);
-                break;
-            case IMAGE_REL_BASED_HIGH:
-        AddOff16Fixup(prel->VirtualAddress + offset, TRUE);
-        break;
-            case IMAGE_REL_BASED_LOW:
-        AddOff16Fixup(prel->VirtualAddress + offset, FALSE);
-        break;
-            case IMAGE_REL_BASED_HIGHADJ:
-            case IMAGE_REL_BASED_MIPS_JMPADDR:
-            default:
-                dprintf((LOG, "Unknown/unsupported fixup type!" ));
-                break;
-        }
-      }
-      prel = (PIMAGE_BASE_RELOCATION)((char*)prel + prel->SizeOfBlock);
-    }//while
+                    AddOff32Fixup(prel->VirtualAddress + offset);
+                    break;
+                case IMAGE_REL_BASED_HIGH:
+                    AddOff16Fixup(prel->VirtualAddress + offset, TRUE);
+                    break;
+                case IMAGE_REL_BASED_LOW:
+                    AddOff16Fixup(prel->VirtualAddress + offset, FALSE);
+                    break;
+                case IMAGE_REL_BASED_HIGHADJ:
+                case IMAGE_REL_BASED_MIPS_JMPADDR:
+                default:
+                    dprintf((LOG, "Unknown/unsupported fixup type!" ));
+                    break;
+                }
+            }
+            prel = (PIMAGE_BASE_RELOCATION)((char*)prel + prel->SizeOfBlock);
+        }//while
   }
   else {
-    dprintf((LOG, "No internal fixups found!" ));
-    errorState = ERROR_INTERNAL;
-    return(FALSE);
+        dprintf((LOG, "No internal fixups found!" ));
+        errorState = ERROR_INTERNAL;
+        return(FALSE);
   }
   return(TRUE);
 }

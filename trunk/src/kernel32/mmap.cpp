@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.48 2001-01-14 17:16:55 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.49 2001-01-22 18:26:51 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -54,8 +54,7 @@ Win32MemMapView *Win32MemMapView::mapviews = NULL;
 //TODO: sharing between processes
 //******************************************************************************
 Win32MemMap::Win32MemMap(HFILE hfile, ULONG size, ULONG fdwProtect, LPSTR lpszName)
-               : nrMappings(0), pMapping(NULL), mMapAccess(0), referenced(0), image(0),
-                 fClosed(FALSE)
+               : nrMappings(0), pMapping(NULL), mMapAccess(0), referenced(0), image(0)
 {
     globalmapMutex.enter(VMUTEX_WAIT_FOREVER, &hGlobalMapMutex);
     next    = memmaps;
@@ -78,8 +77,7 @@ Win32MemMap::Win32MemMap(HFILE hfile, ULONG size, ULONG fdwProtect, LPSTR lpszNa
 //Map constructor used for executable image maps (only used internally)
 //******************************************************************************
 Win32MemMap::Win32MemMap(Win32PeLdrImage *pImage, ULONG baseAddress, ULONG size)
-               : nrMappings(0), pMapping(NULL), mMapAccess(0), referenced(0), image(0),
-                 fClosed(FALSE)
+               : nrMappings(0), pMapping(NULL), mMapAccess(0), referenced(0), image(0)
 {
     globalmapMutex.enter(VMUTEX_WAIT_FOREVER, &hGlobalMapMutex);
     next    = memmaps;
@@ -99,7 +97,7 @@ Win32MemMap::Win32MemMap(Win32PeLdrImage *pImage, ULONG baseAddress, ULONG size)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL Win32MemMap::Init(HANDLE hMemMap)
+BOOL Win32MemMap::Init()
 {
     mapMutex.enter();
     if(hMemFile != -1)
@@ -137,7 +135,6 @@ BOOL Win32MemMap::Init(HANDLE hMemMap)
     }
 
     dprintf(("CreateFileMappingA for file %x, prot %x size %d, name %s", hMemFile, mProtFlags, mSize, lpszMapName));
-    this->hMemMap = hMemMap;
     mapMutex.leave();
     return TRUE;
 fail:
@@ -194,13 +191,13 @@ Win32MemMap::~Win32MemMap()
 //If memory map has no more views left, then we can safely delete it when
 //it's handle is closed
 //******************************************************************************
-void Win32MemMap::close()
+void Win32MemMap::Release()
 {
 #ifdef DEBUG
-    dprintf(("Win32MemMap::close %s", lpszMapName));
+    dprintf(("Win32MemMap::Release %s (%d)", lpszMapName, referenced-1));
 #endif
-    fClosed = TRUE;
-    if(nrMappings == 0) {
+    --referenced;
+    if(nrMappings == 0 && referenced == 0) {
         delete this;
     }
 }
@@ -326,13 +323,13 @@ BOOL Win32MemMap::unmapViewOfFile(Win32MemMapView *view)
 
     //if there are no more mappings left and the memory map's handle has been
     //closed, then delete the object
-    if(nrMappings == 0 && fClosed) {
+    if(nrMappings == 0 && referenced == 0) {
         delete this;
     }
     return TRUE;
 fail:
     mapMutex.leave();
-    if(nrMappings == 0 && fClosed) {
+    if(nrMappings == 0 && referenced == 0) {
         delete this;
     }
     return FALSE;
@@ -567,9 +564,7 @@ void Win32MemMap::deleteAll()
             delete map;
         }
         else {
-            if(!map->isClosed())
-                 CloseHandle(memmaps->hMemMap);
-            else delete map;
+            delete map;
         }
     }
     else {

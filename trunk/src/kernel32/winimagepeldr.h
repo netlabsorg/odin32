@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.h,v 1.6 2000-10-10 17:14:09 sandervl Exp $ */
+/* $Id: winimagepeldr.h,v 1.7 2001-01-22 18:26:52 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -42,8 +42,6 @@
 #define SECTION_TLS             512
 
 #define PAGE_SIZE               4096
-
-#define MAX_SECTION             64  /*PLF Mon  98-02-09 23:47:16*/
 
 typedef struct {
   ULONG  rawoffset;
@@ -138,7 +136,7 @@ Win32DllBase *loadDll(char *pszCurModule);
         ULONG                 nrsections, imageSize, imageVirtBase, imageVirtEnd;
         //OS/2 virtual base address
         ULONG                 realBaseAddress;
-        Section               section[MAX_SECTION];
+        Section               *section;
 
         //internal flags (see FLAGS_PELDR_*)
 	DWORD                 dwFlags;

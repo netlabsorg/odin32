@@ -1,4 +1,4 @@
-/* $Id: mmap.h,v 1.18 2000-12-12 23:57:16 sandervl Exp $ */
+/* $Id: mmap.h,v 1.19 2001-01-22 18:26:51 sandervl Exp $ */
 
 /*
  * Memory mapped class
@@ -42,12 +42,11 @@ public:
    Win32MemMap(Win32PeLdrImage *pImage, ULONG lpImageMem, ULONG size);
   ~Win32MemMap();
 
-   BOOL   Init(HANDLE hMemMap);
+   BOOL   Init();
    BOOL   flushView(ULONG offset, ULONG cbFlush);
    LPVOID mapViewOfFile(ULONG size, ULONG offset, ULONG fdwAccess);
    BOOL   unmapViewOfFile(Win32MemMapView *view);
 
-   HFILE  getMapHandle()                 { return hMemMap; };
    HFILE  getFileHandle()                { return hMemFile; };
    LPSTR  getMemName()                   { return lpszMapName; };
    DWORD  getProtFlags()                 { return mProtFlags; };
@@ -58,10 +57,7 @@ Win32PeLdrImage *getImage()              { return image; };
    BOOL   isImageMap()                   { return image != NULL; };
 
    void   AddRef()                       { ++referenced; };
-   void   Release()                      { if(--referenced == 0) delete this; };
-
-   void   close();
-   BOOL   isClosed()                     { return fClosed; };
+   void   Release();
 
    BOOL   commitPage(ULONG offset, BOOL fWriteAccess, int nrpages = NRPAGES_TOCOMMIT);
 
@@ -92,14 +88,13 @@ static void deleteAll();
 #endif
 
 protected:
-   HFILE  hMemMap, hMemFile;
+   HFILE  hMemFile;
    ULONG  mSize;
    ULONG  mProtFlags;
    ULONG  mProcessId;
    ULONG  mMapAccess;
    LPSTR  lpszMapName;
    void  *pMapping;
-   BOOL   fClosed;  //handle is removed by CloseHandle
 
    ULONG  nrMappings;
 
