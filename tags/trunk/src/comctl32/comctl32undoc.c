@@ -1,4 +1,4 @@
-/* $Id: comctl32undoc.c,v 1.8 1999-07-12 15:58:46 cbratschi Exp $ */
+/* $Id: comctl32undoc.c,v 1.9 1999-08-03 15:49:58 cbratschi Exp $ */
 /*
  * Undocumented functions from COMCTL32.DLL
  *
@@ -815,7 +815,7 @@ DSA_DeleteItem (const HDSA hdsa, INT nIndex)
 
     /* free memory ? */
     if ((hdsa->nMaxCount - hdsa->nItemCount) >= hdsa->nGrow) {
-        nSize = hdsa->nItemSize * hdsa->nItemCount;
+        nSize = MAX(2*hdsa->nGrow,hdsa->nItemSize)*hdsa->nItemCount;
 
         lpDest = (LPVOID)COMCTL32_ReAlloc (hdsa->pData, nSize);
         if (!lpDest)
@@ -1249,7 +1249,8 @@ DPA_DeletePtr (const HDPA hdpa, INT i)
 
     /* free memory ?*/
     if ((hdpa->nMaxCount - hdpa->nItemCount) >= hdpa->nGrow) {
-        INT nNewItems = MIN(hdpa->nGrow * 2, hdpa->nItemCount);
+        INT nNewItems = MAX(hdpa->nGrow*2,hdpa->nItemCount);
+
         nSize = nNewItems * sizeof(LPVOID);
         lpDest = (LPVOID)HeapReAlloc (hdpa->hHeap, HEAP_ZERO_MEMORY,
                                       hdpa->ptrs, nSize);
