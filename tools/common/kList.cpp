@@ -1,4 +1,4 @@
-/* $Id: kList.cpp,v 1.3 2000-08-31 03:00:13 bird Exp $ */
+/* $Id: kList.cpp,v 1.4 2002-02-24 02:47:28 bird Exp $ */
 /*
  * Simple list and sorted list template class.
  * Note: simple list is not implemented yet, as it is not yet needed.
@@ -48,10 +48,7 @@ void kSortedList<kEntry>::destroy()
         #endif
     }
     #ifdef DEBUG
-        if (cEntries != 0)
-            fprintf(stderr,
-                    "%s(%d, %s)internal processing warning - cEntires was incorrect upon list destruction.",
-                    __FILE__, __LINE__, __FUNCTION__);
+        kASSERT(cEntries == 0);
     #endif
     cEntries = 0;
     pLast = NULL;
@@ -194,10 +191,7 @@ void kList<kEntry>::destroy()
         #endif
     }
     #ifdef DEBUG
-        if (cEntries != 0)
-            fprintf(stderr,
-                    "%s(%d, %s)internal processing warning - cEntires was incorrect upon list destruction.",
-                    __FILE__, __LINE__, __FUNCTION__);
+        kASSERT(cEntries == 0);
     #endif
     cEntries = 0;
     pLast = NULL;

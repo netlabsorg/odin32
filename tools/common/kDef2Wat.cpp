@@ -1,4 +1,4 @@
-/* $Id: kDef2Wat.cpp,v 1.2 2001-04-17 00:26:10 bird Exp $
+/* $Id: kDef2Wat.cpp,v 1.3 2002-02-24 02:47:23 bird Exp $
  *
  * Converter for IBM/MS linker definition files (.DEF) to Watcom linker directives and options.
  *
@@ -13,11 +13,11 @@
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
-#include <os2.h>
-
+#include "kTypes.h"
+#include "kError.h"
 #include "kFile.h"
+#include "kFileInterfaces.h"
 #include "kFileFormatBase.h"
-#include "kInterfaces.h"
 #include "kFileDef.h"
 
 /*******************************************************************************
@@ -57,8 +57,7 @@ int main(int argc, char **argv)
      */
     try
     {
-        kFile    InFile(pszInput);
-        kFileDef def(&InFile);
+        kFileDef def(new kFile(pszInput));
         try
         {
             kFile   OutFile(pszOutput, FALSE);
@@ -74,22 +73,22 @@ int main(int argc, char **argv)
                     OutFile += AppendFile;
                     kFile::StdOut.printf("Successfully converted %s to %s\n", pszInput, pszOutput);
                 }
-                catch (int errorcode)
+                catch (kError err)
                 {
-                    kFile::StdErr.printf("Append file %s to %s, errorcode=%d\n", pszAppend, pszInput, errorcode);
+                    kFile::StdErr.printf("Append file %s to %s, errorcode=%d\n", pszAppend, pszInput, err.getErrno());
                     return -3;
                 }
             }
         }
-        catch (int errorcode)
+        catch (kError err)
         {
-            kFile::StdErr.printf("Failed to read .DEF file (%s), errorcode=%d\n", pszInput, errorcode);
+            kFile::StdErr.printf("Failed to read .DEF file (%s), errorcode=%d\n", pszInput, err.getErrno());
             return -3;
         }
     }
-    catch (int errorcode)
+    catch (kError err)
     {
-        kFile::StdErr.printf("Failed to read .DEF file (%s), errorcode=%d\n", pszInput, errorcode);
+        kFile::StdErr.printf("Failed to read .DEF file (%s), errorcode=%d\n", pszInput, err.getErrno());
         return -2;
     }
 

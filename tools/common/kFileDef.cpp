@@ -1,7 +1,8 @@
-/*
+/* $Id: kFileDef.cpp,v 1.8 2002-02-24 02:47:25 bird Exp $
+ *
  * kFileDef - Definition files.
  *
- * Copyright (c) 1999 knut st. osmundsen
+ * Copyright (c) 1999-2001 knut st. osmundsen
  *
  */
 
@@ -20,16 +21,17 @@
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
-#include <os2.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <assert.h>
 
+#include "kTypes.h"
+#include "kError.h"
 #include "kFile.h"
 #include "kFileFormatBase.h"
-#include "kInterfaces.h"
+#include "kFileInterfaces.h"
 #include "kFileDef.h"
+
 
 /*******************************************************************************
 *   Global Variables                                                           *
@@ -42,7 +44,7 @@ static kFileDef tst((kFile*)NULL);
 /*******************************************************************************
 *   Internal Functions                                                         *
 *******************************************************************************/
-static char *dupeString(const char *psz, BOOL fSkipFirstWord = FALSE);
+static char *dupeString(const char *psz, KBOOL fSkipFirstWord = FALSE);
 static char *trim(char *psz);
 static char *ltrim(const char *psz);
 static char *removeFnutts(char *pszStr);
@@ -56,7 +58,7 @@ static char *stristr(const char *pszStr, const char *pszSubStr);
  * @param   psz             Pointer to string to duplicate.
  * @param   fSkipFirstWord  Skips the first word before duplicating the string.
  */
-static char *dupeString(const char *psz, BOOL fSkipFirstWord/* = FALSE*/)
+static char *dupeString(const char *psz, KBOOL fSkipFirstWord/* = FALSE*/)
 {
     char *pszDupe;
     if (psz == NULL)
@@ -116,30 +118,19 @@ static char *ltrim(const char *psz)
 
 
 
-kFileDef::kFileDef(kFile *pFile) throw(int)
-    :pszType(NULL), pszModName(NULL), pszBase(NULL), pszCode(NULL), pszData(NULL), pszDescription(NULL),
+kFileDef::kFileDef(kFile *pFile) :
+    kFileFormatBase(pFile),
+    pszType(NULL), pszModName(NULL), pszBase(NULL), pszCode(NULL), pszData(NULL), pszDescription(NULL),
     pszExeType(NULL), pszHeapSize(NULL), pszOld(NULL), pszProtmode(NULL), pszStackSize(NULL),
     pszStub(NULL), pSegments(NULL), pImports(NULL), pExports(NULL),
     fProgram(FALSE), fLibrary(FALSE), fPhysicalDevice(FALSE), fVirtualDevice(FALSE),
     fInitInstance(FALSE), fTermInstance(FALSE), fInitGlobal(FALSE), fTermGlobal(FALSE),
     chAppType(kFileDef::unknown)
 {
-    /* determin file size */
-
-    if (pFile->start())
-    {
-        try
-        {
-            this->read(pFile);
+    pFile->setThrowOnErrors();
+    pFile->start();
+    read(pFile);
         }
-        catch (int err)
-        {
-            throw (err);
-        }
-    }
-    else
-        throw (0x001);
-}
 
 
 /**
@@ -190,7 +181,7 @@ kFileDef::~kFileDef()
  * @param   pFile   Pointer to fileobject.
  * @remark  throws errorcode on error (TODO: errorhandling)
  */
-void kFileDef::read(kFile *pFile) throw (int)
+void kFileDef::read(kFile *pFile)
 {
     char *pszTmp;
     char *psz;
@@ -200,16 +191,16 @@ void kFileDef::read(kFile *pFile) throw (int)
     psz = readln(pFile, &szBuffer[0], sizeof(szBuffer));
     while (psz != NULL)
     {
-        BOOL fNext = TRUE;
+        KBOOL   fNext = TRUE;
 
         /* if-switch */
         if (StringCase(psz, "LIBRARY"))
         {
-            if (pszType != NULL) throw (0x101);
+            if (pszType != NULL) throw (kError(kError::DEF_MULIPLE_MODULE_STATEMENT));
             pszType = dupeString(psz);
             fLibrary = TRUE;
             if (!setModuleName())
-                throw (0x107);
+                throw (kError(kError::DEF_BAD_LIBRARY_STATEMENT));
             fInitInstance = stristr(pszType, "INITINSTANCE") != NULL;
             fInitGlobal   = stristr(pszType, "INITGLOBAL")   != NULL || !fInitInstance;
             fTermInstance = stristr(pszType, "TERMINSTANCE") != NULL;
@@ -217,7 +208,7 @@ void kFileDef::read(kFile *pFile) throw (int)
         }
         else if (StringCase(psz, "NAME"))
         {
-            if (pszType != NULL) throw (0x101);
+            if (pszType != NULL) throw (kError(kError::DEF_MULIPLE_MODULE_STATEMENT));
             pszType = dupeString(psz);
             fProgram = TRUE;
             setModuleName();
@@ -232,14 +223,14 @@ void kFileDef::read(kFile *pFile) throw (int)
         }
         else if (StringCase(psz, "PHYSICAL DEVICE")) //gap is fixed to one space, this may be fixed in readln.
         {
-            if (pszType != NULL) throw (0x101);
+            if (pszType != NULL) throw (kError(kError::DEF_MULIPLE_MODULE_STATEMENT));
             pszType = dupeString(psz);
             fPhysicalDevice = TRUE;
             setModuleName();
         }
         else if (StringCase(psz, "VIRTUAL DEVICE")) //gap is fixed to one space, this may be fixed in readln.
         {
-            if (pszType != NULL) throw (0x101);
+            if (pszType != NULL) throw (kError(kError::DEF_MULIPLE_MODULE_STATEMENT));
             pszType = dupeString(psz);
             fVirtualDevice = TRUE;
             setModuleName();
@@ -300,7 +291,7 @@ void kFileDef::read(kFile *pFile) throw (int)
                 if (*psz >= '0' && *psz <= '9')
                 {
                     (**ppi).ulOrdinal = strtol(psz, &pszTmp, 0);
-                    if (psz ==pszTmp) throw(0x102);
+                    if (psz ==pszTmp) throw (kError(kError::DEF_BAD_IMPORT));
                 }
                 else
                     (**ppi).pszName = dupeString(psz);
@@ -354,7 +345,7 @@ void kFileDef::read(kFile *pFile) throw (int)
                     {   /* @1234 RESIDENTNAME 2 */
                         psz = pszTmp + 1;
                         (**ppe).ulOrdinal = strtol(psz, &pszTmp, 0);
-                        if (pszTmp == psz) throw (0x103);
+                        if (pszTmp == psz) throw (kError(kError::DEF_BAD_EXPORT));
                         psz = trim(pszTmp);
 
                         if (*psz != '\0')
@@ -379,7 +370,7 @@ void kFileDef::read(kFile *pFile) throw (int)
                     if (*psz != '\0')
                     {   /* 2 */
                         (**ppe).cParam = strtol(psz, &pszTmp, 0);
-                        if (pszTmp == psz) throw (0x104);
+                        if (pszTmp == psz) throw (kError(kError::DEF_BAD_EXPORT));
                     }
                 }
 
@@ -390,7 +381,7 @@ void kFileDef::read(kFile *pFile) throw (int)
             fNext = FALSE;
         }
         else
-            throw(0x105);
+            throw (kError(kError::DEF_UNKOWN_VERB));
 
         /* next ? */
         if (fNext)
@@ -399,7 +390,7 @@ void kFileDef::read(kFile *pFile) throw (int)
 
     /* sanity check */
     if (pszType == NULL)
-        throw ((int)0x106);
+        throw (kError(kError::DEF_NO_MODULE_STATEMENT));
 }
 
 
@@ -411,7 +402,7 @@ void kFileDef::read(kFile *pFile) throw (int)
  * @param     cbBuffer   Size of buffer.
  * @remark    tabs are expanded. string is trimmed. comments removed.
  */
-char *kFileDef::readln(kFile *pFile, char *pszBuffer, int cbBuffer) throw (int)
+char *kFileDef::readln(kFile *pFile, char *pszBuffer, int cbBuffer)
 {
     int i;
     int cch;
@@ -419,11 +410,11 @@ char *kFileDef::readln(kFile *pFile, char *pszBuffer, int cbBuffer) throw (int)
     do
     {
         /* read line */
-        if (!pFile->readln(pszBuffer, cbBuffer))
+        if (pFile->readln(pszBuffer, cbBuffer))
         {
             if (!pFile->isEOF())
-                throw (0x201);
-            return FALSE;
+                throw (kError(pFile->getLastError()));
+            return NULL;
         }
 
         /* check for and remove comments, and get string length. */
@@ -471,7 +462,7 @@ char *kFileDef::readln(kFile *pFile, char *pszBuffer, int cbBuffer) throw (int)
  * @param     psz  Pointer to word/string to check.
  * @remark    TODO - we are going to check WORDS.
  */
-BOOL kFileDef::isKeyword(const char *psz)
+KBOOL kFileDef::isKeyword(const char *psz)
 {
     return  psz != NULL
         &&
@@ -502,12 +493,12 @@ BOOL kFileDef::isKeyword(const char *psz)
  * @param     pszBuffer  Pointer to string buffer which is to hold the module name upon return.
  * @remark    Assumes that pszBuffer is large enough.
  */
-BOOL  kFileDef::setModuleName(void)
+KBOOL  kFileDef::setModuleName(void)
 {
     char *pszEnd;
     char *pszStart;
 
-    assert(pszType);
+    kASSERT(pszType);
 
     /* skip the first word */
     pszStart = strpbrk(pszType, " \t");
@@ -533,7 +524,7 @@ BOOL  kFileDef::setModuleName(void)
  * @param   pszBuffer   Pointer to buffer which to put the name into.
  * @param   cchBuffer   Size of the buffer (defaults to 260 chars).
  */
-BOOL  kFileDef::moduleGetName(char *pszBuffer, int cchSize/* = 260*/)
+KBOOL  kFileDef::moduleGetName(char *pszBuffer, int cchSize/* = 260*/)
 {
     int cch;
     if (pszModName == NULL)
@@ -553,7 +544,7 @@ BOOL  kFileDef::moduleGetName(char *pszBuffer, int cchSize/* = 260*/)
  * @returns   Success indicator. TRUE / FALSE.
  * @param     pExport  Pointer to export structure.
  */
-BOOL  kFileDef::exportFindFirst(kExportEntry *pExport)
+KBOOL kFileDef::exportFindFirst(kExportEntry *pExport)
 {
     if (pExports != NULL && pExport != NULL)
     {
@@ -580,7 +571,7 @@ BOOL  kFileDef::exportFindFirst(kExportEntry *pExport)
  * @returns   Success indicator. TRUE / FALSE.
  * @param     pExport  Pointer to export structure.
  */
-BOOL  kFileDef::exportFindNext(kExportEntry *pExport)
+KBOOL kFileDef::exportFindNext(kExportEntry *pExport)
 {
     if (pExport != NULL && pExport->pv != NULL)
     {
@@ -623,9 +614,9 @@ void kFileDef::exportFindClose(kExportEntry *pExport)
  *                      on successful return.
  * @remark  stub
  */
-BOOL kFileDef::exportLookup(unsigned long ulOrdinal, kExportEntry *pExport)
+KBOOL kFileDef::exportLookup(unsigned long ulOrdinal, kExportEntry *pExport)
 {
-    assert(!"not implemented.");
+    kASSERT(!"not implemented.");
     ulOrdinal = ulOrdinal;
     pExport = pExport;
     return FALSE;
@@ -638,9 +629,9 @@ BOOL kFileDef::exportLookup(unsigned long ulOrdinal, kExportEntry *pExport)
  *                      on successful return.
  * @remark  stub
  */
-BOOL kFileDef::exportLookup(const char *  pszName, kExportEntry *pExport)
+KBOOL kFileDef::exportLookup(const char *  pszName, kExportEntry *pExport)
 {
-    assert(!"not implemented.");
+    kASSERT(!"not implemented.");
     pszName = pszName;
     pExport = pExport;
     return FALSE;
@@ -657,20 +648,20 @@ BOOL kFileDef::exportLookup(const char *  pszName, kExportEntry *pExport)
  * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  * @remark
  */
-BOOL  kFileDef::makeWatcomLinkFileAddtion(kFile *pFile) throw(int)
+KBOOL kFileDef::makeWatcomLinkFileAddtion(kFile *pOut)
 {
     PDEFSEGMENT pSeg;
     PDEFIMPORT  pImp;
     PDEFEXPORT  pExp;
-    pFile->setThrowOnErrors();
+    pOut->setThrowOnErrors();
 
     /*
      * Write a little remark first to tell that converted stuff starts here.
      */
-    pFile->printf("#\n# Directives generated from .DEF-file.\n#\n");
+    pOut->printf("#\n# Directives generated from .DEF-file.\n#\n");
 
     /* Format - Module type */
-    pFile->printf("FORMAT OS2 LX %s %s %s\n",
+    pOut->printf("FORMAT OS2 LX %s %s %s\n",
                   fLibrary                               ? "DLL" :
                     (fProgram ? (chAppType == pm         ? "PM"
                               : (chAppType == fullscreen ? "FULLSCREEN"
@@ -683,35 +674,35 @@ BOOL  kFileDef::makeWatcomLinkFileAddtion(kFile *pFile) throw(int)
 
     /* Module name */
     if (pszModName)
-        pFile->printf("OPTION MODNAME=%s\n", pszModName);
+        pOut->printf("OPTION MODNAME=%s\n", pszModName);
 
     /* Description */
     if (pszDescription)
-        pFile->printf("OPTION DESCRIPTION '%s'\n", pszDescription);
+        pOut->printf("OPTION DESCRIPTION '%s'\n", pszDescription);
 
     /* Base */
     if (pszBase)
-        pFile->printf("OPTION OFFSET=%s\n", pszBase);
+        pOut->printf("OPTION OFFSET=%s\n", pszBase);
 
     /* Stub */
     if (pszStub)
-        pFile->printf("OPTION STUB='%s'\n", pszStub);
+        pOut->printf("OPTION STUB='%s'\n", pszStub);
 
     /* Old */
     if (pszOld)
-        pFile->printf("OPTION OLDLIBRARY=%s\n", pszOld);
+        pOut->printf("OPTION OLDLIBRARY=%s\n", pszOld);
 
     /* Protected mode */
     if (pszProtmode)
-        pFile->printf("OPTION PROTMODE\n", pszProtmode);
+        pOut->printf("OPTION PROTMODE\n", pszProtmode);
 
     /* Stacksize */
     if (pszStackSize)
-        pFile->printf("OPTION STACK=%s\n", pszStackSize);
+        pOut->printf("OPTION STACK=%s\n", pszStackSize);
 
     /* HeapSize */
     if (pszHeapSize)
-        pFile->printf("OPTION HEAPSIZE=%s\n", pszHeapSize);
+        pOut->printf("OPTION HEAPSIZE=%s\n", pszHeapSize);
 
     /* Code  -  not supported */
 
@@ -723,7 +714,7 @@ BOOL  kFileDef::makeWatcomLinkFileAddtion(kFile *pFile) throw(int)
     pSeg = pSegments;
     while (pSeg != NULL)
     {
-        pFile->printf("SEGMENT %s\n", pSeg->psz);
+        pOut->printf("SEGMENT %s\n", pSeg->psz);
         pSeg = pSeg->pNext;
     }
 
@@ -734,9 +725,9 @@ BOOL  kFileDef::makeWatcomLinkFileAddtion(kFile *pFile) throw(int)
     while (pImp != NULL)
     {
         if (pImp->pszName == NULL)
-            pFile->printf("IMPORT '%s' '%s'.%d\n", pImp->pszIntName, pImp->pszDll, pImp->ulOrdinal);
+            pOut->printf("IMPORT '%s' '%s'.%d\n", pImp->pszIntName, pImp->pszDll, pImp->ulOrdinal);
         else
-            pFile->printf("IMPORT '%s' '%s'.'%s'\n", pImp->pszIntName, pImp->pszDll, pImp->pszName);
+            pOut->printf("IMPORT '%s' '%s'.'%s'\n", pImp->pszIntName, pImp->pszDll, pImp->pszName);
         pImp = pImp->pNext;
     }
 
@@ -746,16 +737,16 @@ BOOL  kFileDef::makeWatcomLinkFileAddtion(kFile *pFile) throw(int)
     pExp = pExports;
     while (pExp != NULL)
     {
-        pFile->printf("EXPORT '%s'", pExp->pszName);
+        pOut->printf("EXPORT '%s'", pExp->pszName);
         if (pExp->ulOrdinal != ~0UL)
-            pFile->printf(".%d", pExp->ulOrdinal);
+            pOut->printf(".%d", pExp->ulOrdinal);
         if (pExp->pszIntName)
-            pFile->printf("='%s'", pExp->pszIntName);
+            pOut->printf("='%s'", pExp->pszIntName);
         if (pExp->fResident)
-            pFile->printf(" RESIDENT");
+            pOut->printf(" RESIDENT");
         if (pExp->cParam != ~0UL)
-            pFile->printf(" %d", pExp->cParam * 2); /* .DEFs this is number of words. Watcom should have bytes. */
-        pFile->printf("\n");
+            pOut->printf(" %d", pExp->cParam * 2); /* .DEFs this is number of words. Watcom should have bytes. */
+        pOut->printf("\n");
         pExp = pExp->pNext;
     }
 

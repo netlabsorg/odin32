@@ -1,4 +1,4 @@
-/* $Id: kFileSDF.h,v 1.1 2001-04-17 04:16:03 bird Exp $
+/* $Id: kFileSDF.h,v 1.2 2002-02-24 02:47:27 bird Exp $
  *
  * kFileSDF- Structure Defintion File class declaration.
  *
@@ -67,20 +67,29 @@ typedef struct _SDFHeader
  * Structure Definition File Class.
  * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
-class kFileSDF : public kFileFormatBase
+class kFileSDF : public kFileFormatBase, public kDbgTypeI
 {
 private:
     PSDFHEADER  pHdr;
     PSDFSTRUCT* papStructs;
     PSDFTYPE    paTypes;
 
-    void        parseSDFFile(void *pvFile) throw(int);
+    void        parseSDFFile(void *pvFile) throw (kError);
     PSDFTYPE    getType(const char *pszType);
     PSDFSTRUCT  getStruct(const char *pszStruct);
 
 public:
-    kFileSDF(kFile *pFile) throw(int);
+    kFileSDF(kFile *pFile) throw (kError);
     ~kFileSDF();
 
-    BOOL        dump(kFile *pOut);
+    /** @cat Debug Type information methods. */
+    kDbgTypeEntry * dbgtypeFindFirst(int flFlags);
+    kDbgTypeEntry * dbgtypeFindNext(kDbgTypeEntry *kDbgTypeEntry);
+    void            dbgtypeFindClose(kDbgTypeEntry *kDbgTypeEntry);
+
+    kDbgTypeEntry * dbgtypeLookup(const char *pszName, int flFlags);
+
+    /** @cat Generic dump */
+    KBOOL       dump(kFile *pOut);
 };
+
