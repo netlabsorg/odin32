@@ -1,4 +1,4 @@
-/* $Id: clipboard.cpp,v 1.6 2000-03-24 17:12:19 cbratschi Exp $ */
+/* $Id: clipboard.cpp,v 1.7 2000-04-29 18:28:34 sandervl Exp $ */
 
 /*
  * Win32 Clipboard API functions for OS/2
@@ -181,7 +181,7 @@ BOOL WIN32API OpenClipboard( HWND hwnd)
 //******************************************************************************
 UINT WIN32API RegisterClipboardFormatA( LPCSTR arg1)
 {
-    dprintf(("USER32:  RegisterClipboardFormatA\n"));
+    dprintf(("USER32:  RegisterClipboardFormatA %s", arg1));
     return O32_RegisterClipboardFormat(arg1);
 }
 //******************************************************************************
