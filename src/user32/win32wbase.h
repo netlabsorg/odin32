@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.78 2000-02-03 17:13:02 cbratschi Exp $ */
+/* $Id: win32wbase.h,v 1.79 2000-02-05 14:08:54 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -288,8 +288,6 @@ static Win32BaseWindow *GetWindowFromOS2FrameHandle(HWND hwnd);
 
        PVOID getOldFrameProc() { return pOldFrameProc; };
        VOID  setOldFrameProc(PVOID aOldFrameProc) { pOldFrameProc = aOldFrameProc; };
-       ULONG getBorderWidth() { return borderWidth; };
-       ULONG getBorderHeight() { return borderHeight; };
 
        PVOID getOldWndProc() { return pOldWndProc; }
        VOID  setOldWndProc(PVOID aOldWndProc) { pOldWndProc = aOldWndProc; }
@@ -346,8 +344,6 @@ protected:
         DWORD   dwThreadId;             //id of thread that created this window
         DWORD   dwProcessId;            //id of process that created this window
         PVOID   pOldFrameProc;
-        ULONG   borderWidth;
-        ULONG   borderHeight;
 
         PVOID   pOldWndProc;
 
