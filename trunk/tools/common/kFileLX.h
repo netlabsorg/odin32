@@ -1,4 +1,4 @@
-/* $Id: kFileLX.h,v 1.1 2000-03-27 10:18:41 bird Exp $
+/* $Id: kFileLX.h,v 1.2 2000-08-31 03:00:13 bird Exp $
  *
  * kFileLX - Linear Executable file reader.
  *
@@ -22,16 +22,19 @@ protected:
     struct e32_exe *    pe32;
     struct o32_obj *    paObject;
 
+    BOOL                queryExportName(int iOrdinal, char *pszBuffer);
+
 public:
     kFileLX(const char *pszFilename);
     ~kFileLX();
 
-    virtual BOOL queryModuleName(char *pszBuffer);
-    virtual BOOL findFirstExport(PEXPORTENTRY pExport);
-    virtual BOOL findNextExport(PEXPORTENTRY pExport);
-    virtual BOOL isLx() const {return TRUE;};
+    virtual BOOL        queryModuleName(char *pszBuffer);
+    virtual BOOL        findFirstExport(PEXPORTENTRY pExport);
+    virtual BOOL        findNextExport(PEXPORTENTRY pExport);
+    virtual BOOL        isLx() const {return TRUE;};
 
-    struct o32_obj * getObject(int iObject);
+    struct o32_obj *    getObject(int iObject);
+    int                 getObjectCount();
 
 
 };

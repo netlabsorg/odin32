@@ -1,13 +1,13 @@
-/* $Id: kList.h,v 1.2 2000-03-25 23:17:47 bird Exp $ */
+/* $Id: kList.h,v 1.3 2000-08-31 03:00:13 bird Exp $ */
 /*
  * Simple list and sorted list template class.
- * Note: simple list is not implemented yet, as it is not yet needed.
  *
  * Copyright (c) 1999 knut st. osmundsen
  *
  */
 #ifndef _lkList_h_
 #define _lkList_h_
+
 
     /**
      * List entry parent function.
@@ -39,15 +39,49 @@
             {
                 return pNext;
             }
+    };
 
-            #if 0
-                /* !MUST IMPLEMENT! */
-                BOOL operator==(const k... &entry) const;
-                BOOL operator!=(const k... &entry) const;
-                BOOL operator< (const k... &entry) const;
-                BOOL operator<=(const k... &entry) const;
-                BOOL operator> (const k... &entry) const;
-                BOOL operator>=(const k... &entry) const;
+
+
+    /**
+     * List template. Not Implemented yet.
+     * @author      knut st. osmundsen
+     */
+    template <class kEntry>
+    class kList
+    {
+        private:
+            kEntry        *pFirst;
+            kEntry        *pLast;
+            unsigned long  cEntries;
+
+        public:
+            kList(void);
+            ~kList(void);
+
+            void            destroy(void);
+            void            insert(kEntry *pEntry);
+            kEntry *        getFirst(void) const;
+            kEntry *        getLast(void) const;
+            unsigned long   getCount(void) const;
+    };
+
+
+    /**
+     * List entry parent function.
+     * @purpose     Serve as a base class for list sorted entries.
+     * @author      knut st. osmundsen
+     */
+    class kSortedListEntry : public kListEntry
+    {
+        public:
+            #if 0 //MUST BE IMPLEMENTED!
+            virtual BOOL operator==(const k..Entry &entry) const = 0;
+            virtual BOOL operator!=(const k..Entry &entry) const = 0;
+            virtual BOOL operator< (const k..Entry &entry) const = 0;
+            virtual BOOL operator<=(const k..Entry &entry) const = 0;
+            virtual BOOL operator> (const k..Entry &entry) const = 0;
+            virtual BOOL operator>=(const k..Entry &entry) const = 0;
             #endif
     };
 
@@ -76,29 +110,6 @@
             unsigned long   getCount(void) const;
     };
 
-
-    /**
-     * List template. Not Implemented yet.
-     * @author      knut st. osmundsen
-     */
-    template <class kEntry>
-    class kList
-    {
-        private:
-            kEntry        *pFirst;
-            kEntry        *pLast;
-            unsigned long  cEntries;
-
-        public:
-            kList(void);
-            ~kList(void);
-
-            void            destroy(void);
-            void            insert(kEntry *pEntry);
-            kEntry *        getFirst(void) const;
-            kEntry *        getLast(void) const;
-            unsigned long   getCount(void) const;
-    };
 
 #endif
 

@@ -1,4 +1,4 @@
-/* $Id: kFile.h,v 1.3 2000-05-29 19:45:58 bird Exp $
+/* $Id: kFile.h,v 1.4 2000-08-31 03:00:13 bird Exp $
  *
  * kFile - Simple (for the time being) file class.
  *
@@ -25,10 +25,11 @@ protected:
     /** @cat Main datamembers */
     HFILE           hFile;              /* Pointer to stdio filehandle */
     BOOL            fReadOnly;          /* True if readonly access, False is readwrite. */
-    int             rc;                 /* Last error (return code). */
+    APIRET          rc;                 /* Last error (return code). */
     FILESTATUS4     filestatus;         /* Filestatus data. */
     BOOL            fStatusClean;       /* True if filestatus is clean. False is not clean */
     BOOL            fThrowErrors;       /* When true we'll throw the rc on errors, else return FALSE. */
+    PSZ             pszFilename;        /* Pointer to filename. */
 
     /** @cat Position datamembers */
     unsigned long   offVirtual;         /* Virtual file position - lazy set. */
@@ -48,11 +49,14 @@ public:
     /** @cat File I/O methods */
     BOOL            read(void *pvBuffer, long cbBuffer) throw(int);
     BOOL            readAt(void *pvBuffer, long cbBuffer, long off) throw(int);
+    void *          readFile() throw(int);
 
     BOOL            write(void *pvBuffer, long cbBuffer) throw(int);
     BOOL            writeAt(void *pvBuffer, long cbBuffer, long off) throw(int);
 
     int             printf(const char *pszFormat, ...) throw (int);
+
+    BOOL            setSize(unsigned long cbFile = ~0UL);
 
     /** @cat File seek methods */
     BOOL            move(long off) throw(int);
@@ -64,6 +68,7 @@ public:
     long            getSize() throw(int);
     long            getPos() const throw(int);
     BOOL            isEOF() throw(int);
+    const char *    getFilename()       { return pszFilename; }
 
     /** @cat Error handling */
     BOOL            setThrowOnErrors();
