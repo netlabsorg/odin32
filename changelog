@@ -1,9 +1,10 @@
- /* $Id: changelog,v 1.774 2000-03-03 20:48:31 hugh Exp $ */
+ /* $Id: changelog,v 1.775 2000-03-03 21:21:30 hugh Exp $ */
 
- 2000-03-02: Markus Montkowski <mmontkowski@gmx.de>
+ 2000-03-03: Markus Montkowski <mmontkowski@gmx.de>
         - DDRAW:  Fixed bug in CreateSurface and QueryInterface
                   (Moorhuhn now starts fine with ddraw)
-
+        - USER32: Changed VirtualKey for VK_NEWLINE from 0x0A to 0x0D
+                  in the virtualKeyTable
  2000-03-02: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Create shell dirs in odin\bin directory
                     Cleanup (never call Open32 apis directly if the proc
