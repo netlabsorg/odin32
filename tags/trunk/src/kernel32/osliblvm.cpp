@@ -1,4 +1,4 @@
-/* $Id: osliblvm.cpp,v 1.3 2002-09-26 16:06:07 sandervl Exp $ */
+/* $Id: osliblvm.cpp,v 1.4 2002-09-27 14:35:56 sandervl Exp $ */
 
 /*
  * OS/2 LVM (Logical Volume Management) functions
@@ -304,7 +304,7 @@ void OSLibLVMFreeVolumeControlData(HANDLE hVolumeControlData)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibLVMQueryVolumeName(HANDLE hVolumeControlData, ULONG volindex, 
+BOOL OSLibLVMQueryVolumeName(HANDLE hVolumeControlData, ULONG *pVolIndex, 
                              LPSTR lpszVolumeName, DWORD cchBufferLength)
 {
     Volume_Control_Array      *volctrl = (Volume_Control_Array *)hVolumeControlData;
@@ -315,11 +315,11 @@ BOOL OSLibLVMQueryVolumeName(HANDLE hVolumeControlData, ULONG volindex,
         DebugInt3();
         return FALSE;
     }
-    if(volindex >= volctrl->Count) {
+    if(*pVolIndex >= volctrl->Count) {
         return FALSE;   //no more volumes
     }
-    while(volindex < volctrl->Count) {
-        volinfo = Get_Volume_Information(volctrl->Volume_Control_Data[volindex].Volume_Handle, &lasterror);
+    while(*pVolIndex < volctrl->Count) {
+        volinfo = Get_Volume_Information(volctrl->Volume_Control_Data[*pVolIndex].Volume_Handle, &lasterror);
         if(lasterror != LVM_ENGINE_NO_ERROR) {
             DebugInt3();
             return FALSE;
@@ -328,9 +328,9 @@ BOOL OSLibLVMQueryVolumeName(HANDLE hVolumeControlData, ULONG volindex,
         //fancy features (like spanned volumes)
         if(volinfo.Compatibility_Volume == TRUE) break;
         dprintf(("Ignoring LVM volume %s", volinfo.Volume_Name));
-        volindex++;
+        (*pVolIndex)++;
     }
-    if(volindex >= volctrl->Count) {
+    if(*pVolIndex >= volctrl->Count) {
         return FALSE;   //no more volumes
     }
     strncpy(lpszVolumeName, volinfo.Volume_Name, min(sizeof(volinfo.Volume_Name), cchBufferLength)-1);

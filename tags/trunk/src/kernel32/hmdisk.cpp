@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.55 2002-09-27 13:58:24 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.56 2002-09-27 14:35:56 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -2068,7 +2068,7 @@ DWORD HMDeviceDiskClass::GetFileSize(PHMHANDLEDATA pHMHandleData,
 {
 #if 1
     //Verified in NT4
-    dprintf(("GetFileSize doesn't work for drive objects"));
+    dprintf(("WARNING: GetFileSize doesn't work for drive objects; returning error (same as Windows)"));
     SetLastError(ERROR_INVALID_PARAMETER);
     return -1; //INVALID_SET_FILE_POINTER
 #else
