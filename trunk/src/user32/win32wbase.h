@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.22 1999-10-14 09:22:42 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.23 1999-10-15 13:52:55 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -162,6 +162,7 @@ Win32BaseWindow *GetTopParent();
          BOOL   IsWindow()                    { return TRUE; };
          BOOL   IsDialog()                    { return fIsDialog; };
 
+	 BOOL   IsWindowDestroyed()           { return fIsDestroyed; };
          BOOL   IsWindowEnabled();
          BOOL   IsWindowVisible();
          BOOL   IsUnicode()  { return isUnicode; };
@@ -246,6 +247,7 @@ protected:
         BOOL    fInternalMsg;           //Used to distinguish between messages
                                         //sent by PM and those sent by apps
 	BOOL    fNoSizeMsg;
+	BOOL    fIsDestroyed;
 
         PVOID   pOldFrameProc;
         ULONG   borderWidth;

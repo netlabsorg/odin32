@@ -1,4 +1,4 @@
-/* $Id: win32wndchild.cpp,v 1.1 1999-09-15 23:19:02 sandervl Exp $ */
+/* $Id: win32wndchild.cpp,v 1.2 1999-10-15 13:52:56 sandervl Exp $ */
 /*
  * Win32 Child/Parent window class for OS/2
  *
@@ -28,10 +28,13 @@ ChildWindow::~ChildWindow()
   if(parent) {
 	parent->RemoveChild(this);
   }
+//SvL: PM sends WM_DESTROY for all the children
+#if 0
   if(children != 0) {
 	dprintf(("ChildWindow::~ChildWindow children not yet destroyed!!"));
 	DestroyChildren();
   }
+#endif
 }
 //******************************************************************************
 //FIFO insertion
