@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.303 2001-11-27 12:33:48 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.304 2001-12-02 12:22:01 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -507,6 +507,13 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         }
     }
     if (cs->dwExStyle & WS_EX_DLGMODALFRAME) dwStyle &= ~WS_THICKFRAME;
+
+    //WinZip 8.0 crashes when a dialog created after opening a zipfile receives
+    //the WM_SIZE message (before WM_INITDIALOG)
+    //Opera doesn't like this either.
+    if(IsDialog()) {
+        flags |= WIN_NEED_SIZE;
+    }
 
     //copy pointer of CREATESTRUCT for usage in MsgCreate method
     tmpcs = cs;
