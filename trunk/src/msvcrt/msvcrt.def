@@ -9,6 +9,8 @@ IMPORTS
   KERNEL32_GetProcAddress = KERNEL32.372
   KERNEL32_GetLogicalDrives = KERNEL32.346
   NTDLL_memicmp = NTDLL.956
+  NTDLL_wcsicmp = NTDLL._wcsicmp
+  NTDLL_wcsupr = NTDLL._wcsupr
   WriteLog = KERNEL32.1202
   GetCurrentThreadId = KERNEL32.309
   ; Due to problem with _stdcall convention here is a large import table
@@ -134,6 +136,7 @@ IMPORTS
 
   ; Other exports
   CRTDLL_ecvt = ODINCRT.274
+  ODINCRT_fcvt = ODINCRT.277 
   RtlTimeToSecondsSince1970 = NTDLL.559
   RtlSecondsSince1970ToTime = NTDLL.526
   RtlUnwind  = NTDLL.575
@@ -356,7 +359,7 @@ EXPORTS
  _exit = MSVCRT__exit	@186
  _expand	@187
  _fcloseall	@188
-; _fcvt = _fcvt	@189
+ _fcvt = ODINCRT_fcvt    	@189
  _fdopen	@190
  _fgetchar	@191
  _fgetwchar	@192
@@ -634,7 +637,7 @@ EXPORTS
   _wcmdln = MSVCRT__wcmdln	@464
   _wcreat	@465
   _wcsdup	@466
-;#   _wcsicmp ntdll._wcsicmp	@467
+  _wcsicmp = NTDLL_wcsicmp	@467
   _wcsicoll	@468
   _wcslwr = _wcslwr	@469
 ;# stub _wcsncoll #(wstr wstr long)	@470
@@ -643,7 +646,7 @@ EXPORTS
   _wcsnset	@473
   _wcsrev	@474
   _wcsset	@475
-;#   _wcsupr ntdll._wcsupr	@476
+  _wcsupr = NTDLL_wcsupr	@476
 ;# stub _wctime #(ptr)	@477
   _wenviron = MSVCRT__wenviron	@478
 ;# stub _wexecl #(wstr wstr) varargs	@479
@@ -759,7 +762,7 @@ EXPORTS
   ftell = MSVCRT_ftell	@589
   fwprintf = MSVCRT_fwprintf	@590
   fwrite = MSVCRT_fwrite	@591
-;# stub fwscanf #(ptr wstr) varargs	@592
+  fwscanf = MSVCRT_fwscanf	@592
   getc = MSVCRT_getc	@593
   getchar = MSVCRT_getchar	@594
   getenv = MSVCRT_getenv	@595
@@ -860,7 +863,7 @@ EXPORTS
   strtoul	@690
   strxfrm	@691
   swprintf	@692
-;# stub swscanf #(wstr wstr) varargs	@693
+  swscanf = MSVCRT_swscanf	@693
   system = MSVCRT_system	@694
   tan	@695
   tanh	@696
