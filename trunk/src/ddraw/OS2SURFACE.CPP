@@ -310,9 +310,9 @@ static void _dump_DDBLTFX(DWORD flagmask) {
   };
   for (i=0;i<sizeof(flags)/sizeof(flags[0]);i++)
      if (flags[i].mask & flagmask) {
-        dprintf(("%s ",flags[i].name));
+        dprintf(("DDRAW: %s ",flags[i].name));
      };
-  dprintf(("\n"));
+  dprintf(("DDRAW: \n"));
 
 }
 
@@ -330,8 +330,8 @@ static void _dump_DDBLTFAST(DWORD flagmask) {
   };
   for (i=0;i<sizeof(flags)/sizeof(flags[0]);i++)
     if (flags[i].mask & flagmask)
-      dprintf(("%s ",flags[i].name));
-  dprintf(("\n"));
+      dprintf(("DDRAW: %s ",flags[i].name));
+  dprintf(("DDRAW: \n"));
 }
 
 static void _dump_DDBLT(DWORD flagmask) {
@@ -370,8 +370,8 @@ static void _dump_DDBLT(DWORD flagmask) {
   };
   for (i=0;i<sizeof(flags)/sizeof(flags[0]);i++)
     if (flags[i].mask & flagmask)
-      dprintf(("%s ",flags[i].name));
-  dprintf(("\n"));
+      dprintf(("DDRAW: %s ",flags[i].name));
+  dprintf(("DDRAW: \n"));
 }
 
 static void _dump_DDSCAPS(DWORD flagmask) {
@@ -414,8 +414,8 @@ static void _dump_DDSCAPS(DWORD flagmask) {
   };
   for (i=0;i<sizeof(flags)/sizeof(flags[0]);i++)
     if (flags[i].mask & flagmask)
-      dprintf(("%s ",flags[i].name));
-  dprintf(("\n"));
+      dprintf(("DDRAW: %s ",flags[i].name));
+  dprintf(("DDRAW: \n"));
 }
 
 static void _dump_DDSCAPS2(DWORD flagmask) {
@@ -434,8 +434,8 @@ static void _dump_DDSCAPS2(DWORD flagmask) {
   };
   for (i=0;i<sizeof(flags)/sizeof(flags[0]);i++)
     if (flags[i].mask & flagmask)
-      dprintf(("%s ",flags[i].name));
-  dprintf(("\n"));
+      dprintf(("DDRAW: %s ",flags[i].name));
+  dprintf(("DDRAW: \n"));
 }
 
 
@@ -465,8 +465,8 @@ static void _dump_DDSD(DWORD flagmask) {
   };
   for (i=0;i<sizeof(flags)/sizeof(flags[0]);i++)
     if (flags[i].mask & flagmask)
-      dprintf(("%s ",flags[i].name));
-  dprintf(("\n"));
+      dprintf(("DDRAW: %s ",flags[i].name));
+  dprintf(("DDRAW: \n"));
 }
 
 static void _dump_DDCOLORKEY(DWORD flagmask) {
@@ -493,15 +493,15 @@ static void _dump_DDCOLORKEY(DWORD flagmask) {
   };
   for (i=0;i<sizeof(flags)/sizeof(flags[0]);i++)
     if (flags[i].mask & flagmask)
-      dprintf(("%s ",flags[i].name));
-  dprintf(("\n"));
+      dprintf(("DDRAW: %s ",flags[i].name));
+  dprintf(("DDRAW: \n"));
 }
 
 static void _dump_pixelformat(LPDDPIXELFORMAT pf) {
   _dump_DDCOLORKEY(pf->dwFlags);
-  dprintf(("dwFourCC : %ld\n", pf->dwFourCC));
-  dprintf(("RBG bit cbout : %ld\n", pf->dwRGBBitCount));
-  dprintf(("Masks : R %08lx  G %08lx  B %08lx  A %08lx\n",
+  dprintf(("DDRAW: dwFourCC : %ld\n", pf->dwFourCC));
+  dprintf(("DDRAW: RBG bit cbout : %ld\n", pf->dwRGBBitCount));
+  dprintf(("DDRAW: Masks : R %08lx  G %08lx  B %08lx  A %08lx\n",
        pf->dwRBitMask, pf->dwGBitMask, pf->dwBBitMask, pf->dwRGBAlphaBitMask));
 }
 
@@ -685,7 +685,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
   if(NULL==DPA_SurfaceMipMaps)
   {
     #ifdef DEBUG
-      dprintf(("Internal : Error creating DPA for MipMaps\n"));
+      dprintf(("DDRAW: Internal : Error creating DPA for MipMaps\n"));
     #endif
     lastError = DDERR_OUTOFMEMORY ;
     return;
@@ -695,7 +695,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
   if(NULL==DPA_SurfaceAttached)
   {
     #ifdef DEBUG
-      dprintf(("Internal : Error creating DPA for attached surfaces\n"));
+      dprintf(("DDRAW: Internal : Error creating DPA for attached surfaces\n"));
     #endif
     lastError = DDERR_OUTOFMEMORY ;
     return;
@@ -705,7 +705,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
   if(NULL==DPA_LockedRects)
   {
     #ifdef DEBUG
-      dprintf(("Internal : Error creating DPA for Locked Rectangles\n"));
+      dprintf(("DDRAW: Internal : Error creating DPA for Locked Rectangles\n"));
     #endif
     lastError = DDERR_OUTOFMEMORY ;
     return;
@@ -715,7 +715,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
   if(NULL==DPA_SurfacePrivateData)
   {
     #ifdef DEBUG
-      dprintf(("Internal : Error creating DPA for priva surface Data\n"));
+      dprintf(("DDRAW: Internal : Error creating DPA for priva surface Data\n"));
     #endif
     lastError = DDERR_OUTOFMEMORY ;
     return;
@@ -729,13 +729,13 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
     if( surfaceType & DDSCAPS_PRIMARYSURFACE)
     {
       #ifdef DEBUG
-        dprintf(("Primary surface!\n"));
+        dprintf(("DDRAW: Primary surface!\n"));
       #endif
 
       if( lpDraw->HasPrimarySurface())
       {
         #ifdef DEBUG
-          dprintf(("Primary surface already exits!\n"));
+          dprintf(("DDRAW: Primary surface already exits!\n"));
         #endif
         lastError = DDERR_PRIMARYSURFACEALREADYEXISTS;
         return;
@@ -747,7 +747,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
         )
       {
         // Dx doc says passing width,height etc. for primary surface in not permitted!!
-        dprintf(("Invalid parameters\n\n"));
+        dprintf(("DDRAW: Invalid parameters\n\n"));
         lastError = DDERR_INVALIDPARAMS;
         return;
       }
@@ -757,7 +757,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
       diveBufNr    = DIVE_BUFFER_SCREEN;
       if( lpDraw->dCaps.ulDepth == lpDraw->GetScreenBpp() )
       {
-        dprintf(("DirectScreenAccess possible\n"));
+        dprintf(("DDRAW: DirectScreenAccess possible\n"));
 
         // Yes so direct access to framebuffer is possible
 
@@ -794,7 +794,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
       // Update passed in and local Surface description
 
       #ifdef DEBUG
-        dprintf(("Setting up Surface\n"));
+        dprintf(("DDRAW: Setting up Surface\n"));
       #endif
       DDSurfaceDesc.dwFlags     |= DDSD_WIDTH | DDSD_HEIGHT |
                                    DDSD_PITCH | DDSD_LPSURFACE |
@@ -854,25 +854,25 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
           lpDDSurfaceDesc->dwFlags &= ~DDSD_PIXELFORMAT;
           DDSurfaceDesc.dwFlags    &= ~DDSD_PIXELFORMAT;
           #ifdef DEBUG
-            dprintf(("Unexpected BitDepth : %d\n",lpDraw->GetScreenBpp()));
+            dprintf(("DDRAW: Unexpected BitDepth : %d\n",lpDraw->GetScreenBpp()));
           #endif
           break;
       } // end switch
 
       #ifdef DEBUG
-        dprintf(("Surface set up, checking other Caps\n"));
+        dprintf(("DDRAW: Surface set up, checking other Caps\n"));
       #endif
 
       if( DDSurfaceDesc.ddsCaps.dwCaps & DDSCAPS_COMPLEX)
       {
         #ifdef DEBUG
-          dprintf(("Complex Surface\n"));
+          dprintf(("DDRAW: Complex Surface\n"));
         #endif
 
         if(lpDDSurfaceDesc->dwFlags & DDSD_BACKBUFFERCOUNT)
         {
           #ifdef DEBUG
-            dprintf(("Backbuffer # = %d\n",lpDDSurfaceDesc->dwBackBufferCount));
+            dprintf(("DDRAW: Backbuffer # = %d\n",lpDDSurfaceDesc->dwBackBufferCount));
           #endif
           memset( &ComplexSurfaceDesc,
                   0,
@@ -904,7 +904,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
 
           if (BackBuffer->GetLastError()==DD_OK)
           {
-            dprintf(("created backbuffer"));
+            dprintf(("DDRAW: created backbuffer"));
             // Our Primary Buffer is also the frontbuffer of a flipchain
             DDSurfaceDesc.ddsCaps.dwCaps    |= DDSCAPS_FRONTBUFFER | DDSCAPS_FLIP;
             lpDDSurfaceDesc->ddsCaps.dwCaps |= DDSCAPS_FRONTBUFFER | DDSCAPS_FLIP;
@@ -912,13 +912,13 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
           }
           else
           {
-            dprintf(("Error creating backbuffer"));
+            dprintf(("DDRAW: Error creating backbuffer"));
           }
         }
         else
         {
           #ifdef DEBUG
-            dprintf(("Unsupported Complex Surface\n"));
+            dprintf(("DDRAW: Unsupported Complex Surface\n"));
             _dump_DDSCAPS(lpDDSurfaceDesc->dwFlags);
           #endif
           lastError = DDERR_OUTOFMEMORY;
@@ -952,7 +952,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
 
       if(DDSurfaceDesc.dwFlags & DDSD_PIXELFORMAT)         // Pixelformat passed in ?
       {
-        dprintf((" Pixelformat requested :"));
+        dprintf(("DDRAW:  Pixelformat requested :"));
         // YES use it
         if(DDSurfaceDesc.ddpfPixelFormat.dwFlags & DDPF_RGB)
         {
@@ -968,7 +968,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
       }
       else
       {
-        dprintf((" Use Screen Format :"));
+        dprintf(("DDRAW:  Use Screen Format :"));
         dwBpp = lpDraw->GetScreenBpp(); // No use Screenformat
         lpDDSurfaceDesc->ddpfPixelFormat.dwSize = sizeof(DDPIXELFORMAT);
         lpDDSurfaceDesc->ddpfPixelFormat.dwFourCC = (DWORD) lpDraw->GetScreenFourCC();
@@ -1012,14 +1012,14 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
             lpDDSurfaceDesc->dwFlags &= ~DDSD_PIXELFORMAT;
             DDSurfaceDesc.dwFlags    &= ~DDSD_PIXELFORMAT;
             #ifdef DEBUG
-              dprintf(("Unexpected BitDepth : %d\n",lpDraw->GetScreenBpp()));
+              dprintf(("DDRAW: Unexpected BitDepth : %d\n",lpDraw->GetScreenBpp()));
             #endif
             break;
         } // end switch
 
       }
 
-      dprintf(("%d Bits\n",dwBpp));
+      dprintf(("DDRAW: %d Bits\n",dwBpp));
 
       // three possible situaltions
       // 1. User supplied pointer to surface -> use it
@@ -1033,7 +1033,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
       {
         // 1.
 
-        dprintf((" Usersupplied Surface\n"));
+        dprintf(("DDRAW:  Usersupplied Surface\n"));
 
         if(NULL==DDSurfaceDesc.lpSurface)
         {
@@ -1085,7 +1085,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
         {
           // 2.
 
-          dprintf((" Alloc on Load Texture?!\n"));
+          dprintf(("DDRAW:  Alloc on Load Texture?!\n"));
 
           dwCaps &= ~DDSCAPS_ALLOCONLOAD; // remove flag
 
@@ -1102,7 +1102,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
 
           // This surface isn't allocated yet, but when the texture is loaded
           #ifdef DEBUG
-            dprintf(("Warning : Delayed memory allocation on request\n"));
+            dprintf(("DDRAW: Warning : Delayed memory allocation on request\n"));
           #endif
           DDSurfaceDesc.lpSurface = NULL;
           lpDDSurfaceDesc->lpSurface = NULL;
@@ -1111,7 +1111,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
         {
           // 3.
 
-          dprintf((" Alloc now!\n"));
+          dprintf(("DDRAW:  Alloc now!\n"));
 
           lpDDSurfaceDesc->dwFlags  |= DDSD_PITCH|DDSD_LPSURFACE;
           DDSurfaceDesc.dwFlags      = lpDDSurfaceDesc->dwFlags;
@@ -1124,7 +1124,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
           #ifdef DEBUG
             if(dwBpp<8)
             {
-              dprintf(("1 or 4 Bit Surface encountered may not work !"));
+              dprintf(("DDRAW: 1 or 4 Bit Surface encountered may not work !"));
             }
           #endif
 
@@ -1141,7 +1141,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
 
           pFrameBuffer = (char*)(((int)pFBreal + 7) & ~7); // align to QWORD
 
-          dprintf((" Framebuffer @ %08X QWAligned @ %08X with a Pitch of %d\n",
+          dprintf(("DDRAW:  Framebuffer @ %08X QWAligned @ %08X with a Pitch of %d\n",
                     pFBreal, pFrameBuffer, dwPitchFB));
 
           lpDDSurfaceDesc->lpSurface = pFrameBuffer;
@@ -1150,17 +1150,17 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
 
           if( (lpDraw->dCaps.ulDepth ) == dwBpp )
           {
-            dprintf((" No CC_Buffer needed\n"));
+            dprintf(("DDRAW:  No CC_Buffer needed\n"));
             // Yes => No Colorconversion is needed so point to the same buffer
             pDiveBuffer  = pFrameBuffer;
           }
           else
           {
-            dprintf((" Alloc CCBuf "));
+            dprintf(("DDRAW:  Alloc CCBuf "));
             dwPitchDB = (lpDDSurfaceDesc->dwWidth * (lpDraw->dCaps.ulDepth/8) +7) & ~7;
             if(Mainchain)
             {
-              dprintf(("with DIVE\n"));
+              dprintf(("DDRAW: with DIVE\n"));
               // This surface is part of flipchain with the primary surface use dive to assoc memory
               pDiveBuffer = (char*)malloc( lpDDSurfaceDesc->dwHeight *
                                            dwPitchDB);
@@ -1172,7 +1172,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
                                          lpDDSurfaceDesc->dwHeight,
                                          dwPitchDB,
                                          (PBYTE)pDiveBuffer);
-               dprintf(("rc = 0x%08X\n",rc));
+               dprintf(("DDRAW: rc = 0x%08X\n",rc));
             }
             else
             {
@@ -1199,14 +1199,14 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
         // remove the flag
         dwCaps &= ~DDSCAPS_COMPLEX;
         #ifdef DEBUG
-          dprintf(("Complex Surface\n"));
+          dprintf(("DDRAW: Complex Surface\n"));
         #endif
 
         if(lpDDSurfaceDesc->dwFlags & DDSD_BACKBUFFERCOUNT)
         {
           lpDDSurfaceDesc->dwFlags &= ~DDSD_BACKBUFFERCOUNT;
           #ifdef DEBUG
-            dprintf(("Backbuffer # = %d\n",lpDDSurfaceDesc->dwBackBufferCount));
+            dprintf(("DDRAW: Backbuffer # = %d\n",lpDDSurfaceDesc->dwBackBufferCount));
           #endif
           memcpy(&ComplexSurfaceDesc,lpDDSurfaceDesc,sizeof(DDSURFACEDESC2));
           ComplexSurfaceDesc.ddsCaps.dwCaps |= DDSCAPS_FLIP;        // set flip
@@ -1242,7 +1242,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
 
           lpDDSurfaceDesc->dwFlags &= ~DDSD_MIPMAPCOUNT;
           #ifdef DEBUG
-            dprintf(("Mipmpa # = %d\n",lpDDSurfaceDesc->dwMipMapCount));
+            dprintf(("DDRAW: Mipmpa # = %d\n",lpDDSurfaceDesc->dwMipMapCount));
           #endif
           memcpy(&ComplexSurfaceDesc,lpDDSurfaceDesc,sizeof(DDSURFACEDESC2));
           ComplexSurfaceDesc.dwMipMapCount = 0;
@@ -1250,7 +1250,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
           for(int i =0; i < lpDDSurfaceDesc->dwMipMapCount; i++)
           {
             #ifdef DEBUG
-              dprintf(("Creating MipMap %d\n",i));
+              dprintf(("DDRAW: Creating MipMap %d\n",i));
             #endif
             // Mpmaps shirnk by 2
             ComplexSurfaceDesc.dwWidth  /= 2;
@@ -1267,7 +1267,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
             {
               lastError = MipMapSurface->GetLastError();
               #ifdef DEBUG
-                dprintf(("Attached surface creation returned error %d\n",lastError));
+                dprintf(("DDRAW: Attached surface creation returned error %d\n",lastError));
               #endif
               return;
             } // Endif Errorcheck
@@ -1276,7 +1276,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
 
         #ifdef DEBUG
           if(lpDDSurfaceDesc->dwFlags)
-            dprintf(("Unsupported Complex Surface\n"));
+            dprintf(("DDRAW: Unsupported Complex Surface\n"));
         #endif
       } // Endif DDSCAPS_COMPLEX
     }
@@ -1287,15 +1287,15 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
   } // Endif DDCAPS is valid
   else
   {
-    dprintf(("CAPS not valid\n"));
+    dprintf(("DDRAW: CAPS not valid\n"));
     lastError = DDERR_INVALIDPARAMS;
   }
   #ifdef DEBUG
-    dprintf(("Buf %X Screen Caps (%d,%d), bitcount %d\n\n", this, lpDraw->GetScreenHeight(), lpDraw->GetScreenWidth(),
+    dprintf(("DDRAW: Buf %X Screen Caps (%d,%d), bitcount %d\n\n", this, lpDraw->GetScreenHeight(), lpDraw->GetScreenWidth(),
     lpDraw->dCaps.ulDepth));
     if(DD_OK!=lastError)
     {
-      dprintf(("Some Error Check Flags\n"));
+      dprintf(("DDRAW: Some Error Check Flags\n"));
       _dump_DDSCAPS(lpDDSurfaceDesc->dwFlags);
     }
   #endif
@@ -1312,13 +1312,13 @@ HRESULT OS2IDirectDrawSurface::ColorFill(LPRECT lpDestRect,DWORD dwFillColor)
   DWORD *pPal24;
   WORD  *pPal16;
   #ifdef DEBUG
-    dprintf(("ColorFill with %08X\n", dwFillColor));
+    dprintf(("DDRAW: ColorFill with %08X\n", dwFillColor));
   #endif
 
   if(NULL!=lpDestRect)
   {
     #ifdef DEBUG
-      dprintf(("Fill only Rect(%d,%d)(%d,%d)\n", lpDestRect->left, lpDestRect->top,
+      dprintf(("DDRAW: Fill only Rect(%d,%d)(%d,%d)\n", lpDestRect->left, lpDestRect->top,
                lpDestRect->right, lpDestRect->bottom));
     #endif
     FillWidth  = lpDestRect->right - lpDestRect->left;
@@ -1329,12 +1329,12 @@ HRESULT OS2IDirectDrawSurface::ColorFill(LPRECT lpDestRect,DWORD dwFillColor)
   }
   else
   {
-    dprintf(("Fill all at addr "));
+    dprintf(("DDRAW: Fill all at addr "));
     FillWidth  = width;
     FillHeight = height -1;
     pLine = pDiveBuffer;
   }
-  dprintf(("0x%08X (%d/%d) at\n", pLine,FillWidth,FillHeight));
+  dprintf(("DDRAW: 0x%08X (%d/%d) at\n", pLine,FillWidth,FillHeight));
 
   if(pDiveBuffer!=pFrameBuffer)
   {
@@ -1372,7 +1372,7 @@ HRESULT OS2IDirectDrawSurface::ColorFill(LPRECT lpDestRect,DWORD dwFillColor)
   switch(dwBytesPPDive)
   {
     case 1:
-      dprintf(("8 Bit\n"));
+      dprintf(("DDRAW: 8 Bit\n"));
       dwColor = (dwFillColor<<24) + (dwFillColor<<16) +
                 (dwFillColor<<8)  + (dwFillColor);
       for(i=0,pColor = (DWORD*)pLine;i<(FillWidth/4);i++)
@@ -1385,14 +1385,14 @@ HRESULT OS2IDirectDrawSurface::ColorFill(LPRECT lpDestRect,DWORD dwFillColor)
       }
       break;
     case 2:
-      dprintf(("16 Bit\n"));
+      dprintf(("DDRAW: 16 Bit\n"));
       if(pDiveBuffer!=pFrameBuffer)
       {
         if(8==lpDraw->GetScreenBpp())
           dwFillColor = pPal16[dwFillColor];
       }
       dwColor = (dwFillColor<<16) + (dwFillColor);
-      dprintf(("Fill with 0x%08X\n",dwColor));
+      dprintf(("DDRAW: Fill with 0x%08X\n",dwColor));
       for(i=0,pColor = (DWORD*)pLine;i<(FillWidth/2);i++)
         pColor[i] = dwColor;
       if(FillWidth % 2)
@@ -1402,7 +1402,7 @@ HRESULT OS2IDirectDrawSurface::ColorFill(LPRECT lpDestRect,DWORD dwFillColor)
       }
       break;
     case 3:
-      dprintf(("24 Bit\n"));
+      dprintf(("DDRAW: 24 Bit\n"));
 
       dwColor = (dwFillColor<<8);
       for(i=0 ; i<FillWidth ; i++)
@@ -1412,14 +1412,14 @@ HRESULT OS2IDirectDrawSurface::ColorFill(LPRECT lpDestRect,DWORD dwFillColor)
       }
       break;
     case 4:
-      dprintf(("32 Bit\n"));
+      dprintf(("DDRAW: 32 Bit\n"));
       dwColor = dwFillColor;
       for(i=0,pColor = (DWORD*)pLine;i<FillWidth;i++)
         pColor[i] = dwColor;
       break;
     default:
       #ifdef DEBUG
-        dprintf(("Unexpected Bitdepth\n"));
+        dprintf(("DDRAW: Unexpected Bitdepth\n"));
       #endif
       return DDERR_GENERIC;
   } // end switch(dest->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount)
@@ -1447,7 +1447,7 @@ HRESULT OS2IDirectDrawSurface::ColorFill(LPRECT lpDestRect,DWORD dwFillColor)
   {
     // Yeah! Color conversion needed ;)
     #ifdef DEBUG
-       dprintf(("Color converion ! Urks, may not work \n"));
+       dprintf(("DDRAW: Color converion ! Urks, may not work \n"));
     #endif
 
     switch(dest->lpDraw->dCaps.ulDepth)
@@ -1476,7 +1476,7 @@ HRESULT OS2IDirectDrawSurface::ColorFill(LPRECT lpDestRect,DWORD dwFillColor)
         else
         {
           #ifdef DEBUG
-            dprintf(("Error creating Palette default to 0"));
+            dprintf(("DDRAW: Error creating Palette default to 0"));
           #endif
           ulColor = 0;
         }
@@ -1576,7 +1576,7 @@ HRESULT OS2IDirectDrawSurface::ColorFill(LPRECT lpDestRect,DWORD dwFillColor)
         break;
       default:
         #ifdef DEBUG
-          dprintf(("Unexpected Bitdepth\n"));
+          dprintf(("DDRAW: Unexpected Bitdepth\n"));
         #endif
         return DDERR_GENERIC;
     } // end switch (dest->lpDraw->dCaps.ulDepth)
@@ -1658,14 +1658,14 @@ void OS2IDirectDrawSurface::ColorConversion(LPRECT lpRect)
   switch(lpDraw->dCaps.ulDepth)
   {
     case 8:
-      dprintf((" 8Bit target CC not implemented\n"));
+      dprintf(("DDRAW:  8Bit target CC not implemented\n"));
       break;
     case 15:
-      dprintf((" 15 Bit not implemented using 16bit might look ugly\n"));
+      dprintf(("DDRAW:  15 Bit not implemented using 16bit might look ugly\n"));
     case 16:
       if(8==lpDraw->GetScreenBpp())
       {
-        dprintf(("8->16Bit CC\n"));
+        dprintf(("DDRAW: 8->16Bit CC\n"));
         for(y=0;CCheight;CCheight--,y++)
         {
           for(x=0;x<width;x++)
@@ -1679,27 +1679,27 @@ void OS2IDirectDrawSurface::ColorConversion(LPRECT lpRect)
       }
       else
       {
-        dprintf(("%d ->16Bit Not implemented",lpDraw->GetScreenBpp()));
+        dprintf(("DDRAW: %d ->16Bit Not implemented",lpDraw->GetScreenBpp()));
       }
       break;
     case 24:
       if(8==lpDraw->GetScreenBpp())
       {
-        dprintf(("8->24Bit CC"));
+        dprintf(("DDRAW: 8->24Bit CC"));
       }
       else
       {
-        dprintf(("%d ->24Bit Not implemented",lpDraw->GetScreenBpp()));
+        dprintf(("DDRAW: %d ->24Bit Not implemented",lpDraw->GetScreenBpp()));
       }
       break;
     case 32:
       if(8==lpDraw->GetScreenBpp())
       {
-        dprintf(("8->32Bit CC"));
+        dprintf(("DDRAW: 8->32Bit CC"));
       }
       else
       {
-        dprintf(("%d ->32Bit Not implemented",lpDraw->GetScreenBpp()));
+        dprintf(("DDRAW: %d ->32Bit Not implemented",lpDraw->GetScreenBpp()));
       }
       break;
     default:
@@ -1760,26 +1760,26 @@ void OS2IDirectDrawSurface::ColorConversion(LPRECT lpRect)
                              height,
                              dwPitchDB,
                              (PBYTE)pDiveBuffer);
-  dprintf(("AllocDiveDst Buffer rc= 0x%08X\n",rc));
+  dprintf(("DDRAW: AllocDiveDst Buffer rc= 0x%08X\n",rc));
 
   rc = DiveSetupBlitter( hDiveCC,
                          &sBlt);
-  dprintf(("SetupBlitter rc= %X\n",rc));
+  dprintf(("DDRAW: SetupBlitter rc= %X\n",rc));
 
   rc = DiveBlitImage( hDiveCC,
                       ulDN1,
                       ulDN2);
 
-  dprintf(("Blit rc= %X\n",rc));
+  dprintf(("DDRAW: Blit rc= %X\n",rc));
 
   rc = DiveFreeImageBuffer( hDiveCC,
                             ulDN1);
-  dprintf(("Free Src rc= %X\n",rc));
+  dprintf(("DDRAW: Free Src rc= %X\n",rc));
 
   rc = DiveFreeImageBuffer( hDiveCC,
                             ulDN2);
 
-  dprintf(("Free dst rc= %X\n",rc));
+  dprintf(("DDRAW: Free dst rc= %X\n",rc));
 */
 }
 //******************************************************************************
@@ -1891,12 +1891,12 @@ inline  void OS2IDirectDrawSurface::SetFrontBuffer( OS2IDirectDrawSurface* NewFB
   if (NULL==NewFBuffer)
   {
 
-    dprintf(("Remove Frontbuffer\n"));
+    dprintf(("DDRAW: Remove Frontbuffer\n"));
 
     // The real Frontbuffer was removed check if I'm now the one
     if(NULL!=BackBuffer)
     {
-      dprintf(("We have the a backbuffer so we're the Frontbuffer\n"));
+      dprintf(("DDRAW: We have the a backbuffer so we're the Frontbuffer\n"));
       NextFlip = BackBuffer;
       DDSurfaceDesc.ddsCaps.dwCaps &= ~DDSCAPS_BACKBUFFER;
       DDSurfaceDesc.ddsCaps.dwCaps |=  DDSCAPS_FRONTBUFFER;
@@ -1905,22 +1905,22 @@ inline  void OS2IDirectDrawSurface::SetFrontBuffer( OS2IDirectDrawSurface* NewFB
     else
     {
       // Flipchain is destroyed
-      dprintf(("No longer part of a flipchain\n"));
+      dprintf(("DDRAW: No longer part of a flipchain\n"));
       DDSurfaceDesc.ddsCaps.dwCaps &= ~(DDSCAPS_BACKBUFFER | DDSCAPS_FLIP);
     }
   }
   else
   {
-    dprintf(("Set new Frontbuffer to 0x%08X\n",NewFBuffer));
+    dprintf(("DDRAW: Set new Frontbuffer to 0x%08X\n",NewFBuffer));
     if(NULL==NewFBuffer->GetFrontBuffer())
     {
-      dprintf(("We're the 1st backbuffer\n"));
+      dprintf(("DDRAW: We're the 1st backbuffer\n"));
       DDSurfaceDesc.ddsCaps.dwCaps |=  DDSCAPS_BACKBUFFER | DDSCAPS_FLIP;
       FrontBuffer->NextFlip = this;
     }
     else
     {
-      dprintf(("We are oe of many buffers\n"));
+      dprintf(("DDRAW: We are oe of many buffers\n"));
       DDSurfaceDesc.ddsCaps.dwCaps &=  ~DDSCAPS_BACKBUFFER ;
       DDSurfaceDesc.ddsCaps.dwCaps |=  DDSCAPS_FLIP;
     }
@@ -1939,7 +1939,7 @@ HRESULT __stdcall SurfQueryInterface(THIS This, REFIID riid, LPVOID FAR * ppvObj
   HRESULT rc;
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
 
-  dprintf(("OS2IDirectDrawSurface::SurfQueryInterface\n"));
+  dprintf(("DDRAW: OS2IDirectDrawSurface::SurfQueryInterface\n"));
 
   if(NULL==ppvObj)
   {
@@ -1990,7 +1990,7 @@ ULONG __stdcall SurfAddRef(THIS This)
  OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
 
   #ifdef DEBUG
-    dprintf(("OS2IDirectDrawSurface::SurfAddRef %d\n", me->Referenced+1));
+    dprintf(("DDRAW: OS2IDirectDrawSurface::SurfAddRef %d\n", me->Referenced+1));
   #endif
 
   return ++me->Referenced;
@@ -2002,8 +2002,8 @@ ULONG __stdcall SurfRelease(THIS This)
  OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
 
   #ifdef DEBUG
-    dprintf(("OS2IDirectDrawSurface::SurfRelease %d\n", me->Referenced-1));
-    dprintf(("OS2IDirectDrawSurface::Surface %X\n", me));
+    dprintf(("DDRAW: OS2IDirectDrawSurface::SurfRelease %d\n", me->Referenced-1));
+    dprintf(("DDRAW: OS2IDirectDrawSurface::Surface %X\n", me));
   #endif
   if(me->Referenced)
   {
@@ -2028,7 +2028,7 @@ HRESULT __stdcall SurfAddAttachedSurface(THIS This, LPDIRECTDRAWSURFACE2 lpDDSur
 {
 
   #ifdef DEBUG
-    dprintf(("SurfAddAttachedSurface\n"));
+    dprintf(("DDRAW: SurfAddAttachedSurface\n"));
   #endif
   return SurfAddAttachedSurface4(This, (LPDIRECTDRAWSURFACE4)lpDDSurface);
 }
@@ -2038,7 +2038,7 @@ HRESULT __stdcall SurfAddAttachedSurface3(THIS This, LPDIRECTDRAWSURFACE3 lpDDSu
 {
 
   #ifdef DEBUG
-    dprintf(("SurfAddAttachedSurface\n"));
+    dprintf(("DDRAW: SurfAddAttachedSurface\n"));
   #endif
   return SurfAddAttachedSurface4(This, (LPDIRECTDRAWSURFACE4)lpDDSurface);
 }
@@ -2052,7 +2052,7 @@ HRESULT __stdcall SurfAddAttachedSurface4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSu
   int rc;
 
   #ifdef DEBUG
-    dprintf(("SurfAddAttachedSurface4\n"));
+    dprintf(("DDRAW: SurfAddAttachedSurface4\n"));
   #endif
 
   if (NULL==lpDDSurface)
@@ -2063,7 +2063,7 @@ HRESULT __stdcall SurfAddAttachedSurface4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSu
   if(AttachedSurface->IsImplicitSurface())
   {
     #ifdef DEBUG
-     dprintf(("Internal : Can't attach an implicit created surface to an other surface\n"));
+     dprintf(("DDRAW: Internal : Can't attach an implicit created surface to an other surface\n"));
     #endif
     return(DDERR_CANNOTATTACHSURFACE);
   }
@@ -2071,7 +2071,7 @@ HRESULT __stdcall SurfAddAttachedSurface4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSu
   if(This == AttachedSurface)
   {
     #ifdef DEBUG
-     dprintf(("Can't attach an surface to itself\n"));
+     dprintf(("DDRAW: Can't attach an surface to itself\n"));
     #endif
     return(DDERR_CANNOTATTACHSURFACE);
   }
@@ -2096,7 +2096,7 @@ HRESULT __stdcall SurfAddAttachedSurface4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSu
         else
         {
           #ifdef DEBUG
-            dprintf(("Internal : Error attaching to MipMap\n"));
+            dprintf(("DDRAW: Internal : Error attaching to MipMap\n"));
           #endif
           return(DDERR_CANNOTATTACHSURFACE);
         }
@@ -2104,7 +2104,7 @@ HRESULT __stdcall SurfAddAttachedSurface4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSu
       else
       {
         #ifdef DEBUG
-          dprintf(("Target Surface isn't a MipMap\n"));
+          dprintf(("DDRAW: Target Surface isn't a MipMap\n"));
         #endif
         return(DDERR_CANNOTATTACHSURFACE);
       }
@@ -2122,7 +2122,7 @@ HRESULT __stdcall SurfAddAttachedSurface4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSu
       else
       {
         #ifdef DEBUG
-          dprintf(("Internal : Error attaching to general Set\n"));
+          dprintf(("DDRAW: Internal : Error attaching to general Set\n"));
         #endif
         return(DDERR_CANNOTATTACHSURFACE);
       }
@@ -2137,7 +2137,7 @@ HRESULT __stdcall SurfAddAttachedSurface4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSu
        )
     {
       #ifdef DEBUG
-        dprintf(("Surfaces don't have same dimensions\n"));
+        dprintf(("DDRAW: Surfaces don't have same dimensions\n"));
       #endif
       return(DDERR_CANNOTATTACHSURFACE);
     }
@@ -2148,7 +2148,7 @@ HRESULT __stdcall SurfAddAttachedSurface4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSu
         if( (AttachedSurface->GetFrontBuffer()!=NULL) || (AttachedSurface->BackBuffer!= NULL))
         {
           #ifdef DEBUG
-            dprintf(("Surfaces already has a front/backbuffer\n"));
+            dprintf(("DDRAW: Surfaces already has a front/backbuffer\n"));
           #endif
           return(DDERR_SURFACEALREADYATTACHED);
         }
@@ -2183,7 +2183,7 @@ HRESULT __stdcall SurfAddAttachedSurface4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSu
         else
         {
           #ifdef DEBUG
-            dprintf(("Can't attach backbuffer to anything but a frontbuffer\n"));
+            dprintf(("DDRAW: Can't attach backbuffer to anything but a frontbuffer\n"));
           #endif
          return(DDERR_CANNOTATTACHSURFACE);
         }
@@ -2207,7 +2207,7 @@ HRESULT __stdcall SurfAddAttachedSurface4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSu
             else
             {
               #ifdef DEBUG
-                dprintf(("Internal : Error attaching to MipMap\n"));
+                dprintf(("DDRAW: Internal : Error attaching to MipMap\n"));
               #endif
               return(DDERR_CANNOTATTACHSURFACE);
             }
@@ -2215,7 +2215,7 @@ HRESULT __stdcall SurfAddAttachedSurface4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSu
           else
           {
             #ifdef DEBUG
-              dprintf(("Tagget Surface isn't a MipMap\n"));
+              dprintf(("DDRAW: Tagget Surface isn't a MipMap\n"));
             #endif
            return(DDERR_CANNOTATTACHSURFACE);
           }
@@ -2231,7 +2231,7 @@ HRESULT __stdcall SurfAddAttachedSurface4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSu
           else
           {
             #ifdef DEBUG
-              dprintf(("Internal : Error attaching to general Set\n"));
+              dprintf(("DDRAW: Internal : Error attaching to general Set\n"));
             #endif
             return(DDERR_CANNOTATTACHSURFACE);
           }
@@ -2239,7 +2239,7 @@ HRESULT __stdcall SurfAddAttachedSurface4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSu
       }// End if not DDSCAPS_BACKBUFFER
     }
   }
-  dprintf(("Surface attached\n"));
+  dprintf(("DDRAW: Surface attached\n"));
   return(DD_OK);
 }
 //******************************************************************************
@@ -2247,7 +2247,7 @@ HRESULT __stdcall SurfAddAttachedSurface4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSu
 HRESULT __stdcall SurfAddOverlayDirtyRect(THIS, LPRECT)
 {
   #ifdef DEBUG
-    dprintf(("SurfAddOverlayDirtyRect Not implemented by M$ in V 6.0! \n"));
+    dprintf(("DDRAW: SurfAddOverlayDirtyRect Not implemented by M$ in V 6.0! \n"));
   #endif
 
   return(DD_OK);
@@ -2312,7 +2312,7 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
 
   #ifdef DEBUG
     if ( (NULL!=lpDestRect)&& (NULL!=lpSrcRect))
-      dprintf(("SurfBlt4 to (%d,%d)(%d,%d) at %08X from (%d,%d)(%d,%d) at %08X\n", lpDestRect->left, lpDestRect->top,
+      dprintf(("DDRAW: SurfBlt4 to (%d,%d)(%d,%d) at %08X from (%d,%d)(%d,%d) at %08X\n", lpDestRect->left, lpDestRect->top,
                lpDestRect->right, lpDestRect->bottom, dest, lpSrcRect->left, lpSrcRect->top,
                lpSrcRect->right, lpSrcRect->bottom, src));
 
@@ -2415,7 +2415,7 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
     {
       delete pIRectDest;
       #ifdef DEBUG
-        dprintf(("Blt: Dest Surface partly locked\n"));
+        dprintf(("DDRAW: Blt: Dest Surface partly locked\n"));
       #endif
       return(DDERR_SURFACEBUSY);
     }
@@ -2430,7 +2430,7 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
 
   if(dwFlags & DDBLT_COLORFILL)
   {
-    dprintf(("ColorFill\n"));
+    dprintf(("DDRAW: ColorFill\n"));
     if((NULL==lpDDBltFx)||(lpDDBltFx->dwSize!=sizeof(DDBLTFX)) )
       return DDERR_INVALIDPARAMS;
 
@@ -2444,12 +2444,12 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
 
   if (dwFlags & DDBLT_DEPTHFILL)
   {
-    dprintf(("DepthFill\n"));
+    dprintf(("DDRAW: DepthFill\n"));
   #ifdef USE_OPENGL
     GLboolean ztest;
     // Todo support more than one Z-Buffer
     // Clears the screen
-    dprintf(("Filling depth buffer with %ld\n", lpbltfx->b.dwFillDepth));
+    dprintf(("DDRAW: Filling depth buffer with %ld\n", lpbltfx->b.dwFillDepth));
     glClearDepth(lpDDBltFx->b.dwFillDepth / 65535.0); // We suppose a 16 bit Z Buffer
     glGetBooleanv(GL_DEPTH_TEST, &ztest);
     glDepthMask(GL_TRUE); // Enables Z writing to be sure to delete also the Z buffer
@@ -2502,7 +2502,7 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
   if(NULL==src)
   {
     #ifdef DEBUG
-      dprintf(("Unsupported sourceless FX operation. Flags = 0x%04X\n",dwFlags));
+      dprintf(("DDRAW: Unsupported sourceless FX operation. Flags = 0x%04X\n",dwFlags));
     #endif
     return DD_OK;
   }
@@ -2601,7 +2601,7 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
     {
       delete pIRectSrc;
       #ifdef DEBUG
-        dprintf(("Blt: Src Surface partly locked\n"));
+        dprintf(("DDRAW: Blt: Src Surface partly locked\n"));
       #endif
       return(DDERR_SURFACEBUSY);
     }
@@ -2611,7 +2611,7 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
       ( (NULL==lpSrcRect) && (NULL!=lpDestRect) ) )
   {
     #ifdef DEBUG
-      dprintf(("Blitting with scaleing\n Not supported.\n"));
+      dprintf(("DDRAW: Blitting with scaleing\n Not supported.\n"));
     #endif
     return DDERR_NOSTRETCHHW;
   }
@@ -2621,19 +2621,19 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
     )
   {
     // Stretching not supported
-    dprintf(("No stretched blits\n"));
+    dprintf(("DDRAW: No stretched blits\n"));
 
     return DDERR_NOSTRETCHHW;
   }
 
   if (dest->DDSurfaceDesc.ddsCaps.dwCaps & DDSCAPS_PRIMARYSURFACE)
   {
-    dprintf(("Dest is Primary Surface\n"));
+    dprintf(("DDRAW: Dest is Primary Surface\n"));
     if(src->DDSurfaceDesc.ddsCaps.dwCaps & DDSCAPS_PRIMARYSURFACE)
     {
       // special Type 1 : Bliting between parts of the screen
 
-      dprintf(("Src is Primary Surface\n"));
+      dprintf(("DDRAW: Src is Primary Surface\n"));
 
       if( *pIRectDest == *pIRectSrc)
         return DD_OK; // rects are the same => no blit needed
@@ -2652,7 +2652,7 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
     {
       if( src->diveBufNr>0)
       {
-
+        dprintf(("DDRAW: DIVE Blit of all"));
         if( (NULL==lpSrcRect)&&( NULL== lpDestRect))
         {
           // No Rectangles so use Dive to blit everything
@@ -2680,6 +2680,8 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
 
       if(!dwFlags)
       {
+        dprintf(("DDRAW: Solid Blit\n"));
+
         BlitWidth *= dest->dwBytesPPDive;
 
         #ifdef USE_ASM
@@ -2697,17 +2699,47 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
             break;
         }
         #endif
+
+        if(dest->pFrameBuffer != dest->pDiveBuffer)
+        {
+          // Copy Framebuffer also ...
+          pBltPos = (char*) dest->pFrameBuffer + (DestRect.top * dest->dwPitchFB) +
+                    (DestRect.left * dest->lpDraw->GetScreenBpp());
+
+          pSrcPos = (char*) src->pFrameBuffer + (SrcRect.top * src->dwPitchFB) +
+                    (SrcRect.left * dest->lpDraw->GetScreenBpp());
+
+          BlitHeight = pIRectDest->height();
+          BlitWidth  = pIRectDest->width();
+          BlitWidth *= dest->lpDraw->GetScreenBpp();
+
+          #ifdef USE_ASM
+          BltRec(pBltPos, pSrcPos, BlitWidth, BlitHeight,
+                 dest->dwPitchDB,
+                 src->dwPitchDB);
+          #else
+          // Solid Blit
+          while(1)
+          {
+            memcpy(pBltPos,pSrcPos,BlitWidth);
+            pBltPos += dest->dwPitchFB;
+            pSrcPos += src->dwPitchFB;
+            if(! (--BlitHeight))
+              break;
+          }
+          #endif
+        }
       }
       else
       {
         // Transparent Blit
         if( (dwFlags &DDBLT_KEYSRC) || (dwFlags & DDBLT_KEYSRCOVERRIDE) )
         {
-          dprintf(("Transparent src blit not done yet for primary!!"));
+          dprintf(("DDRAW: Transparent src blit not done yet for primary!!"));
         }
         else
         {
-          dprintf(("Unhandled Flags Destination colorkey ? 0x%04X",dwFlags));
+          dprintf(("DDRAW: Unhandled Flags Destination colorkey ? 0x%04X",dwFlags));
         }
       }
     } // end of handling blitting to primary
@@ -2762,7 +2794,7 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
         }
         else
         {
-          dprintf(("Transblt not done yet"));
+          dprintf(("DDRAW: Transblt not done yet"));
           if(dwFlags & DDBLT_KEYSRC)
           {
             if(!(src->DDSurfaceDesc.dwFlags & DDCKEY_SRCBLT))
@@ -3228,7 +3260,7 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
 HRESULT __stdcall SurfBltBatch(THIS, LPDDBLTBATCH, DWORD, DWORD )
 {
   #ifdef DEBUG
-    dprintf(("SurfBltBatch Not implemented by M$\n"));
+    dprintf(("DDRAW: SurfBltBatch Not implemented by M$\n"));
   #endif
 
   return(DD_OK);
@@ -3242,7 +3274,7 @@ HRESULT __stdcall SurfBltFast( THIS This ,
                                LPRECT lpSrcRect,
                                DWORD dwTrans)
 {
-  dprintf(("SurfBltFast=>"));
+  dprintf(("DDRAW: SurfBltFast=>"));
   return SurfBltFast4( This,
                        dwX,
                        dwY,
@@ -3259,7 +3291,7 @@ HRESULT __stdcall SurfBltFast3(THIS This ,
                                LPRECT lpSrcRect,
                                DWORD dwTrans)
 {
-  dprintf(("SurfBltFast3=>"));
+  dprintf(("DDRAW: SurfBltFast3=>"));
   return SurfBltFast4( This,
                        dwX,
                        dwY,
@@ -3283,7 +3315,7 @@ HRESULT __stdcall SurfBltFast4( THIS This,
   DWORD dwDestColor, dwSrcColor, BlitWidth, BlitHeight,x,y;
 
   #ifdef DEBUG
-    dprintf(("SurfBltFast4 %08X at(%d/%d) onto %08X with flags %08X\n",src, dwX,dwY, dest, dwTrans));
+    dprintf(("DDRAW: SurfBltFast4 %08X at(%d/%d) onto %08X with flags %08X\n",src, dwX,dwY, dest, dwTrans));
   #endif
 
   if( (NULL==lpDDSrcSurface) ||
@@ -3291,7 +3323,7 @@ HRESULT __stdcall SurfBltFast4( THIS This,
       (dwX>dest->width) ||
       (dwY>dest->height))
   {
-    dprintf(("Invalid Parameters %08X, %d %d", lpDDSrcSurface ,dest->width , dest->height));
+    dprintf(("DDRAW: Invalid Parameters %08X, %d %d", lpDDSrcSurface ,dest->width , dest->height));
     return DDERR_INVALIDPARAMS;
   }
 
@@ -3345,16 +3377,16 @@ HRESULT __stdcall SurfBltFast4( THIS This,
   }
   else
   {
-    dprintf(("TransBlit\n"));
+    dprintf(("DDRAW: TransBlit\n"));
 
     if(dwTrans & DDBLTFAST_SRCCOLORKEY)
     {
-      dprintf(("Trans SRC\n"));
+      dprintf(("DDRAW: Trans SRC\n"));
       // transparent source
       dwSrcColor = src->DDSurfaceDesc.ddckCKSrcBlt.dwColorSpaceLowValue;
       if(dwTrans & DDBLTFAST_DESTCOLORKEY)
       {
-        dprintf(("And Dest Colorkey"));
+        dprintf(("DDRAW: And Dest Colorkey"));
         dwDestColor = dest->DDSurfaceDesc.ddckCKDestBlt.dwColorSpaceLowValue;
         // Source and dest colorkeying
         switch(dest->dwBytesPPDive)
@@ -3451,7 +3483,7 @@ HRESULT __stdcall SurfBltFast4( THIS This,
       {
         // This MMX detection should be moved into OS2Draw
         // and into the surface constructor a setup for blitting pointers
-        dprintf(("Only Src ColorKey"));
+        dprintf(("DDRAW: Only Src ColorKey"));
         switch(dest->dwBytesPPDive)
         {
           case 1:
@@ -3522,7 +3554,7 @@ HRESULT __stdcall SurfBltFast4( THIS This,
     {
       if(dwTrans & DDBLTFAST_DESTCOLORKEY)
       {
-        dprintf(("DestColorKey\n"));
+        dprintf(("DDRAW: DestColorKey\n"));
 
         dwDestColor = dest->DDSurfaceDesc.ddckCKDestBlt.dwColorSpaceLowValue;
         switch(dest->dwBytesPPDive)
@@ -3602,7 +3634,7 @@ HRESULT __stdcall SurfBltFast4( THIS This,
       }
       else
       {
-        dprintf(("Unexpected Flags"));
+        dprintf(("DDRAW: Unexpected Flags"));
       }
     }
   }
@@ -3618,7 +3650,7 @@ HRESULT __stdcall SurfDeleteAttachedSurface(THIS This, DWORD dwFlags, LPDIRECTDR
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
   #ifdef DEBUG
-    dprintf(("SurfDeleteAttachedSurface\n"));
+    dprintf(("DDRAW: SurfDeleteAttachedSurface\n"));
   #endif
 
   return(SurfDeleteAttachedSurface4(me, dwFlags, (LPDIRECTDRAWSURFACE4)lpDDSurface));
@@ -3629,7 +3661,7 @@ HRESULT __stdcall SurfDeleteAttachedSurface3(THIS This, DWORD dwFlags, LPDIRECTD
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
   #ifdef DEBUG
-    dprintf(("SurfDeleteAttachedSurface\n"));
+    dprintf(("DDRAW: SurfDeleteAttachedSurface\n"));
   #endif
 
   return(SurfDeleteAttachedSurface4(me, dwFlags, (LPDIRECTDRAWSURFACE4)lpDDSurface));
@@ -3646,7 +3678,7 @@ HRESULT __stdcall SurfDeleteAttachedSurface4(THIS This, DWORD dwFlags , LPDIRECT
 
   BOOL Found = FALSE;
   #ifdef DEBUG
-    dprintf(("SurfDeleteAttachedSurface\n"));
+    dprintf(("DDRAW: SurfDeleteAttachedSurface\n"));
   #endif
 
   if((0!=dwFlags)||(NULL==lpDDSurface))
@@ -3788,7 +3820,7 @@ HRESULT __stdcall SurfEnumAttachedSurfaces(THIS This, LPVOID lpContext, LPDDENUM
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
   #ifdef DEBUG
-    dprintf(("SurfEnumAttachedSurfaces\n"));
+    dprintf(("DDRAW: SurfEnumAttachedSurfaces\n"));
   #endif
 
   return(SurfEnumAttachedSurfaces4(me,lpContext, (LPDDENUMSURFACESCALLBACK2) lpCallBack));
@@ -3804,7 +3836,7 @@ HRESULT __stdcall SurfEnumAttachedSurfaces4(THIS This, LPVOID lpContext ,LPDDENU
   HRESULT rc;
 
   #ifdef DEBUG
-    dprintf(("SurfEnumAttachedSurfaces\n"));
+    dprintf(("DDRAW: SurfEnumAttachedSurfaces\n"));
   #endif
   if (NULL==lpCallBack)
     return (DDERR_INVALIDPARAMS);
@@ -3857,7 +3889,7 @@ HRESULT __stdcall SurfEnumAttachedSurfaces4(THIS This, LPVOID lpContext ,LPDDENU
 //******************************************************************************
 HRESULT __stdcall SurfEnumOverlayZOrders(THIS, DWORD,LPVOID,LPDDENUMSURFACESCALLBACK)
 {
-  dprintf(("SurfEnumOverlayZOrders\n"));
+  dprintf(("DDRAW: SurfEnumOverlayZOrders\n"));
 
   return(DD_OK);
 }
@@ -3865,7 +3897,7 @@ HRESULT __stdcall SurfEnumOverlayZOrders(THIS, DWORD,LPVOID,LPDDENUMSURFACESCALL
 //******************************************************************************
 HRESULT __stdcall SurfEnumOverlayZOrders4(THIS, DWORD,LPVOID,LPDDENUMSURFACESCALLBACK2)
 {
-  dprintf(("SurfEnumOverlayZOrders\n"));
+  dprintf(("DDRAW: SurfEnumOverlayZOrders\n"));
 
   return(DD_OK);
 }
@@ -3875,7 +3907,7 @@ HRESULT __stdcall SurfFlip(THIS This, LPDIRECTDRAWSURFACE2 lpDDSurf, DWORD dwFla
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
 
-  dprintf(("SurfFlip\n"));
+  dprintf(("DDRAW: SurfFlip\n"));
 
   return(SurfFlip4(me, (LPDIRECTDRAWSURFACE4) lpDDSurf, dwFlags));
 }
@@ -3885,7 +3917,7 @@ HRESULT __stdcall SurfFlip3(THIS This, LPDIRECTDRAWSURFACE3 lpDDSurf, DWORD dwFl
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
 
-  dprintf(("SurfFlip\n"));
+  dprintf(("DDRAW: SurfFlip\n"));
 
   return(SurfFlip4(me, (LPDIRECTDRAWSURFACE4) lpDDSurf, dwFlags));
 }
@@ -3900,23 +3932,23 @@ HRESULT __stdcall SurfFlip4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSurf, DWORD dwFl
   char *pcrFB,*pcFB,*pcrDB,*pcDB;
   ULONG rc;
 
-  dprintf(("SurfFlip4\n"));
+  dprintf(("DDRAW: SurfFlip4\n"));
 
   if(!((me->DDSurfaceDesc.ddsCaps.dwCaps & DDSCAPS_FRONTBUFFER) &&
        (me->DDSurfaceDesc.ddsCaps.dwCaps & DDSCAPS_FLIP))
     )
   {
     #ifdef DEBUG
-      dprintf(("Flip called on none Frontbuffer/Flip surface\n Flags:\n"));
+      dprintf(("DDRAW: Flip called on none Frontbuffer/Flip surface\n Flags:\n"));
       _dump_DDSCAPS(me->DDSurfaceDesc.ddsCaps.dwCaps);
-      dprintf(("\n"));
+      dprintf(("DDRAW: \n"));
     #endif
     return(DDERR_NOTFLIPPABLE);
   }
 
   if(NULL!=lpDDSurf)
   {
-    dprintf(("Check if Surface is in Flipchain!\n"));
+    dprintf(("DDRAW: Check if Surface is in Flipchain!\n"));
 
     // We got an override surface check if it is in the flipchain
     FlipSurface = (OS2IDirectDrawSurface*) lpDDSurf;
@@ -3928,7 +3960,7 @@ HRESULT __stdcall SurfFlip4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSurf, DWORD dwFl
 
     if(FlipCursor!=FlipSurface)
     {
-      dprintf(("Surface not in Flipchain!\n"));
+      dprintf(("DDRAW: Surface not in Flipchain!\n"));
 
       return (DDERR_INVALIDPARAMS); // Not sure if the returnvalue is right
     }
@@ -3936,19 +3968,19 @@ HRESULT __stdcall SurfFlip4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSurf, DWORD dwFl
   else
   {
     FlipSurface = me->NextFlip; // Take the next Surface in the Flipchain
-    dprintf(("Next Surface @ 0x%08X\n",FlipSurface));
+    dprintf(("DDRAW: Next Surface @ 0x%08X\n",FlipSurface));
   }
 
   if((me->fLocked)||(FlipSurface->fLocked))
   {
-    dprintf(("Locked surface(s) Dest %d Src %d\n",me->fLocked,FlipSurface->fLocked));
+    dprintf(("DDRAW: Locked surface(s) Dest %d Src %d\n",me->fLocked,FlipSurface->fLocked));
 
     return(DDERR_SURFACEBUSY);
   }
 
   if(-1 != me->diveBufNr)
   {
-    dprintf(("DIVE Flipchain"));
+    dprintf(("DDRAW: DIVE Flipchain"));
 
     // we got some DIVE surfaces
     // On Dive Buffers More then Double buffering won't get any perf. gain
@@ -3958,7 +3990,7 @@ HRESULT __stdcall SurfFlip4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSurf, DWORD dwFl
     rc = DiveBlitImage(me->hDive, FlipSurface->diveBufNr, me->diveBufNr);
 
     #ifdef DEBUG
-      dprintf(("DiveBlitImage rc = 0x%08X\n"));
+      dprintf(("DDRAW: DiveBlitImage rc = 0x%08X\n"));
     #endif
 
     if(NULL==lpDDSurf)
@@ -3970,7 +4002,7 @@ HRESULT __stdcall SurfFlip4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSurf, DWORD dwFl
   else
   {
     #ifdef DEBUG
-      dprintf(("Memory Flipchain"));
+      dprintf(("DDRAW: Memory Flipchain"));
     #endif
     // Memory Flipchain
     //
@@ -4023,7 +4055,7 @@ HRESULT __stdcall SurfGetAttachedSurface(THIS This, LPDDSCAPS lpDDCaps,
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
   #ifdef DEBUG
-    dprintf(("SurfGetAttachedSurface\n"));
+    dprintf(("DDRAW: SurfGetAttachedSurface\n"));
   #endif
 
   return(SurfGetAttachedSurface4(me, (LPDDSCAPS2)lpDDCaps , (LPDIRECTDRAWSURFACE4*)lpDDSurf));
@@ -4035,7 +4067,7 @@ HRESULT __stdcall SurfGetAttachedSurface3(THIS This, LPDDSCAPS lpDDCaps,
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
   #ifdef DEBUG
-    dprintf(("SurfGetAttachedSurface3\n"));
+    dprintf(("DDRAW: SurfGetAttachedSurface3\n"));
   #endif
 
   return(SurfGetAttachedSurface4(me, (LPDDSCAPS2)lpDDCaps , (LPDIRECTDRAWSURFACE4*)lpDDSurf));
@@ -4052,14 +4084,14 @@ HRESULT __stdcall SurfGetAttachedSurface4(THIS This, LPDDSCAPS2 lpDDCaps,
   int i;
 
   #ifdef DEBUG
-    dprintf(("SurfGetAttachedSurface4\n>Requested Caps: "));
+    dprintf(("DDRAW: SurfGetAttachedSurface4\n>Requested Caps: "));
     _dump_DDSCAPS(lpDDCaps->dwCaps);
-    dprintf(("\n"));
+    dprintf(("DDRAW: \n"));
   #endif
 
   if( (NULL==lpDDCaps)||(NULL==lpDDSurf))
   {
-    dprintf(("Invalid params\n\n"));
+    dprintf(("DDRAW: Invalid params\n\n"));
     return (DDERR_INVALIDPARAMS);
   }
 
@@ -4069,7 +4101,7 @@ HRESULT __stdcall SurfGetAttachedSurface4(THIS This, LPDDSCAPS2 lpDDCaps,
   if( (me->BackBuffer!=NULL) &&
       (me->BackBuffer->DDSurfaceDesc.ddsCaps.dwCaps & lpDDCaps->dwCaps) )
   {
-    dprintf(("Return Backbuffer\n"));
+    dprintf(("DDRAW: Return Backbuffer\n"));
     AttachedSurface = me->BackBuffer;
   }
 
@@ -4132,7 +4164,7 @@ HRESULT __stdcall SurfGetAttachedSurface4(THIS This, LPDDSCAPS2 lpDDCaps,
 HRESULT __stdcall SurfGetBltStatus(THIS This, DWORD)
 {
   #ifdef DEBUG
-    dprintf(("SurfGetBltStatus\n"));
+    dprintf(("DDRAW: SurfGetBltStatus\n"));
   #endif
 
   return(DD_OK);
@@ -4144,7 +4176,7 @@ HRESULT __stdcall SurfGetCaps(THIS This, LPDDSCAPS lpDDCaps)
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
 
   #ifdef DEBUG
-    dprintf(("SurfGetCaps\n"));
+    dprintf(("DDRAW: SurfGetCaps\n"));
   #endif
 
   if(NULL==lpDDCaps)
@@ -4162,7 +4194,7 @@ HRESULT __stdcall SurfGetCaps4(THIS This, LPDDSCAPS2 lpDDCaps)
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
   #ifdef DEBUG
-    dprintf(("SurfGetCaps4\n"));
+    dprintf(("DDRAW: SurfGetCaps4\n"));
   #endif
 
   if(NULL==lpDDCaps)
@@ -4184,7 +4216,7 @@ HRESULT __stdcall SurfGetClipper(THIS This, LPDIRECTDRAWCLIPPER FAR *lplpClipper
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
 
   #ifdef DEBUG
-    dprintf(("SurfGetClipper\n"));
+    dprintf(("DDRAW: SurfGetClipper\n"));
   #endif
 
   if(me->lpClipper)
@@ -4202,7 +4234,7 @@ HRESULT __stdcall SurfGetColorKey(THIS This, DWORD dwFlags, LPDDCOLORKEY lpDDCol
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
 
 #ifdef DEBUG
-  dprintf(("SurfGetColorKey\n"));
+  dprintf(("DDRAW: SurfGetColorKey\n"));
 #endif
 
   if ((0==dwFlags) || (NULL==lpDDColKey))
@@ -4241,7 +4273,7 @@ HRESULT __stdcall SurfGetDC(THIS This, HDC FAR *hdc)
  } BitmapInfo;
 
   #ifdef DEBUG
-    dprintf(("SurfGetDC\n"));
+    dprintf(("DDRAW: SurfGetDC\n"));
   #endif
 
   if (NULL==hdc)
@@ -4263,7 +4295,7 @@ HRESULT __stdcall SurfGetDC(THIS This, HDC FAR *hdc)
     if(me->hdcImage == NULL)
     {
       #ifdef DEBUG
-        dprintf(("Can't create compatible DC!\n"));
+        dprintf(("DDRAW: Can't create compatible DC!\n"));
       #endif
       me->Vtbl.Unlock(me,NULL);
       rc = DDERR_GENERIC;
@@ -4297,7 +4329,7 @@ HRESULT __stdcall SurfGetDC(THIS This, HDC FAR *hdc)
     {
       case 1:
       case 4:
-        dprintf(("1/4 Bit Not yet supported\n"));
+        dprintf(("DDRAW: 1/4 Bit Not yet supported\n"));
         break;
       case 8:
         #if 0
@@ -4316,7 +4348,7 @@ HRESULT __stdcall SurfGetDC(THIS This, HDC FAR *hdc)
         break;
       case 16:
       case 32:
-        dprintf(("16/32 Bit not supported by OS/2"));
+        dprintf(("DDRAW: 16/32 Bit not supported by OS/2"));
         break;
       case 24:
         #if 0
@@ -4343,7 +4375,7 @@ HRESULT __stdcall SurfGetDC(THIS This, HDC FAR *hdc)
     if(me->hbmImage == NULL)
     {
       #ifdef DEBUG
-        dprintf(("Can't create bitmap!\n"));
+        dprintf(("DDRAW: Can't create bitmap!\n"));
       #endif
       DeleteDC(me->hdcImage);
       me->hdcImage = NULL;
@@ -4357,7 +4389,7 @@ HRESULT __stdcall SurfGetDC(THIS This, HDC FAR *hdc)
         (me->dwLastDCUnique != me->dwUniqueValue) )
     {
       #ifdef DEBUG
-        dprintf(("The Surface was locked/unlocked after the last DC was created =>Update Bitmap!\n"));
+        dprintf(("DDRAW: The Surface was locked/unlocked after the last DC was created =>Update Bitmap!\n"));
       #endif
 
       memset(&BitmapInfo,0, sizeof(BitmapInfo));
@@ -4394,7 +4426,7 @@ HRESULT __stdcall SurfGetDC(THIS This, HDC FAR *hdc)
           break;
         default:
           #ifdef DEBUG
-            dprintf(("Unexptected BitCount %d => Bitmap not updated!\n",LockedSurfaceDesc.ddpfPixelFormat.dwRGBBitCount));
+            dprintf(("DDRAW: Unexptected BitCount %d => Bitmap not updated!\n",LockedSurfaceDesc.ddpfPixelFormat.dwRGBBitCount));
           #endif
           break;
       } // end switch (me->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount)
@@ -4409,7 +4441,7 @@ HRESULT __stdcall SurfGetDC(THIS This, HDC FAR *hdc)
     if((me->hgdiOld = SelectObject(me->hdcImage, me->hbmImage)) == NULL)
     {
       #ifdef DEBUG
-        dprintf(("Can't select bitmap into dc!\n"));
+        dprintf(("DDRAW: Can't select bitmap into dc!\n"));
       #endif
       DeleteDC(me->hdcImage);
       me->hdcImage = NULL;
@@ -4431,7 +4463,7 @@ HRESULT __stdcall SurfGetDC(THIS This, HDC FAR *hdc)
 HRESULT __stdcall SurfGetFlipStatus(THIS This, DWORD dwFlags)
 {
   #ifdef DEBUG
-    dprintf(("SurfGetFlipStatus\n"));
+    dprintf(("DDRAW: SurfGetFlipStatus\n"));
   #endif
 
   if( (DDGFS_CANFLIP!=dwFlags) && (DDGFS_ISFLIPDONE!=dwFlags) )
@@ -4445,7 +4477,7 @@ HRESULT __stdcall SurfGetOverlayPosition(THIS This, LPLONG lplX, LPLONG lplY)
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
   #ifdef DEBUG
-    dprintf(("SurfGetOverlayPosition\n"));
+    dprintf(("DDRAW: SurfGetOverlayPosition\n"));
   #endif
 
   // Maybe simply return dderr_notsupported as we retun a max overlay value of 0 in the caps ?
@@ -4474,7 +4506,7 @@ HRESULT __stdcall SurfGetPalette(THIS This, LPDIRECTDRAWPALETTE FAR *lplpPalette
  OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
 
   #ifdef DEBUG
-    dprintf(("SurfGetPalette\n"));
+    dprintf(("DDRAW: SurfGetPalette\n"));
   #endif
 
   if(me->lpPalette)
@@ -4492,7 +4524,7 @@ HRESULT __stdcall SurfGetPixelFormat(THIS This, LPDDPIXELFORMAT lpPixelFormat)
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
 
   #ifdef DEBUG
-    dprintf(("SurfGetPixelFormat\n"));
+    dprintf(("DDRAW: SurfGetPixelFormat\n"));
   #endif
 
   if(NULL==lpPixelFormat)
@@ -4511,7 +4543,7 @@ HRESULT __stdcall SurfGetSurfaceDesc(THIS This, LPDDSURFACEDESC lpSurface)
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
 
   #ifdef DEBUG
-    dprintf(("SurfGetSurfaceDesc\n"));
+    dprintf(("DDRAW: SurfGetSurfaceDesc\n"));
   #endif
 
   if((lpSurface == NULL)||(lpSurface->dwSize != sizeof(DDSURFACEDESC)) )
@@ -4530,7 +4562,7 @@ HRESULT __stdcall SurfGetSurfaceDesc4(THIS This, LPDDSURFACEDESC2 lpSurface)
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
 
   #ifdef DEBUG
-    dprintf(("SurfGetSurfaceDesc4\n"));
+    dprintf(("DDRAW: SurfGetSurfaceDesc4\n"));
   #endif
 
   if((lpSurface == NULL)||(lpSurface->dwSize != sizeof(DDSURFACEDESC2)) )
@@ -4547,7 +4579,7 @@ HRESULT __stdcall SurfGetSurfaceDesc4(THIS This, LPDDSURFACEDESC2 lpSurface)
 HRESULT __stdcall SurfInitialize(THIS, LPDIRECTDRAW, LPDDSURFACEDESC)
 {
   #ifdef DEBUG
-    dprintf(("SurfInitialize\n"));
+    dprintf(("DDRAW: SurfInitialize\n"));
   #endif
 
   return(DDERR_ALREADYINITIALIZED); // Init is done during creation see M$ Doc
@@ -4557,7 +4589,7 @@ HRESULT __stdcall SurfInitialize(THIS, LPDIRECTDRAW, LPDDSURFACEDESC)
 HRESULT __stdcall SurfInitialize4(THIS, LPDIRECTDRAW, LPDDSURFACEDESC2)
 {
   #ifdef DEBUG
-    dprintf(("SurfInitialize\n"));
+    dprintf(("DDRAW: SurfInitialize\n"));
   #endif
 
   return(DDERR_ALREADYINITIALIZED); // Init is done during creation see M$ Doc
@@ -4571,7 +4603,7 @@ HRESULT __stdcall SurfIsLost(THIS)
   // if  they are preserved if switching to a FS DOS/OS2 session
   //
   #ifdef DEBUG
-    dprintf(("SurfIsLost\n"));
+    dprintf(("DDRAW: SurfIsLost\n"));
   #endif
 
   return(DD_OK);
@@ -4588,7 +4620,7 @@ HRESULT __stdcall SurfLock( THIS This,
   HRESULT rc;
 
   #ifdef DEBUG
-    dprintf(("SurfLock %d %08X %d %d\n", (int)lpRect, (int)lpSurfaceDesc, dwFlags, hEvent));
+    dprintf(("DDRAW: SurfLock %d %08X %d %d\n", (int)lpRect, (int)lpSurfaceDesc, dwFlags, hEvent));
   #endif
 
   if((NULL==lpSurfaceDesc)||(NULL!=hEvent))
@@ -4666,7 +4698,7 @@ HRESULT __stdcall SurfLock4( THIS This,
     if (NULL==lpRect)
     {
       // If anything is locked we can't locke the complete surface
-      dprintf(("Surface has locked Rectangles, and we want to complete lock it\n"));
+      dprintf(("DDRAW: Surface has locked Rectangles, and we want to complete lock it\n"));
       Found = TRUE;
     }
     else
@@ -4674,7 +4706,7 @@ HRESULT __stdcall SurfLock4( THIS This,
       // If the new Rectangle intersects with any of the already locked rectangles it can't
       // be locked so check for this
 
-      dprintf(("Surface has locked Rectangles, check if the overlap\n"));
+      dprintf(("DDRAW: Surface has locked Rectangles, check if the overlap\n"));
 
       i=0;
       Found = FALSE;
@@ -4697,7 +4729,7 @@ HRESULT __stdcall SurfLock4( THIS This,
     {
       delete pIRectNew;
       #ifdef DEBUG
-        dprintf(("SurfLock4: Surface already locked\n\n"));
+        dprintf(("DDRAW: SurfLock4: Surface already locked\n\n"));
       #endif
       rc = DDERR_SURFACEBUSY;
     }
@@ -4714,13 +4746,13 @@ HRESULT __stdcall SurfLock4( THIS This,
                                   (lpRect->top * me->dwPitchFB) +
                                   (lpRect->left * (lpSurfaceDesc->ddpfPixelFormat.dwRGBBitCount>>3)));
       #ifdef DEBUG
-        dprintf(("SurfLock4 %08X (x,y) = (%d,%d)\n\n", lpSurfaceDesc->lpSurface, lpRect->top, lpRect->left));
+        dprintf(("DDRAW: SurfLock4 %08X (x,y) = (%d,%d)\n\n", lpSurfaceDesc->lpSurface, lpRect->top, lpRect->left));
       #endif
     }
     else
     {
       #ifdef DEBUG
-        dprintf(("SurfLock4 %08X \n\n", lpSurfaceDesc->lpSurface));
+        dprintf(("DDRAW: SurfLock4 %08X \n\n", lpSurfaceDesc->lpSurface));
       #endif
     }
     // Add the rectangle to the list of locked rectangles
@@ -4752,7 +4784,7 @@ HRESULT __stdcall SurfReleaseDC(THIS This, HDC hdc)
  int i,rc;
 
   #ifdef DEBUG
-    dprintf(("SurfReleaseDC\n"));
+    dprintf(("DDRAW: SurfReleaseDC\n"));
   #endif
 
   if(hdc != me->hdcImage)
@@ -4822,7 +4854,7 @@ HRESULT __stdcall SurfReleaseDC(THIS This, HDC hdc)
       break;
     default:
       #ifdef DEBUG
-        dprintf(("Unexptected BitCount %d => Surface unlocked but no data copied back\n",me->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount));
+        dprintf(("DDRAW: Unexptected BitCount %d => Surface unlocked but no data copied back\n",me->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount));
       #endif
       // we might could keep the surface locked and return an error but this is more "safe"
       break;
@@ -4849,7 +4881,7 @@ HRESULT __stdcall SurfReleaseDC(THIS This, HDC hdc)
 HRESULT __stdcall SurfRestore(THIS)
 {
   #ifdef DEBUG
-    dprintf(("SurfRestore\n"));
+    dprintf(("DDRAW: SurfRestore\n"));
   #endif
 
   return(DD_OK);
@@ -4861,7 +4893,7 @@ HRESULT __stdcall SurfSetClipper(THIS This, LPDIRECTDRAWCLIPPER lpClipper)
  OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
 
   #ifdef DEBUG
-    dprintf(("SurfSetClipper\n"));
+    dprintf(("DDRAW: SurfSetClipper\n"));
   #endif
 
   if(lpClipper == NULL)
@@ -4898,7 +4930,7 @@ HRESULT __stdcall SurfSetColorKey(THIS  This, DWORD dwFlags, LPDDCOLORKEY lpDDCo
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
   HRESULT rc;
   #ifdef DEBUG
-    dprintf(("SurfSetColorKey\n"));
+    dprintf(("DDRAW: SurfSetColorKey\n"));
   #endif
 
   if (0==dwFlags)
@@ -4938,7 +4970,7 @@ HRESULT __stdcall SurfSetOverlayPosition(THIS This, LONG lX, LONG lY)
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
 
   #ifdef DEBUG
-    dprintf(("SurfSetOverlayPosition\n"));
+    dprintf(("DDRAW: SurfSetOverlayPosition\n"));
   #endif
 
   if( (me->DDSurfaceDesc.dwFlags & DDSD_CAPS) &&
@@ -4967,7 +4999,7 @@ HRESULT __stdcall SurfSetPalette(THIS This, LPDIRECTDRAWPALETTE lpPalette)
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
 
   #ifdef DEBUG
-    dprintf(("SurfSetPalette\n"));
+    dprintf(("DDRAW: SurfSetPalette\n"));
   #endif
 
   if(lpPalette == NULL)
@@ -5030,25 +5062,25 @@ HRESULT __stdcall SurfUnlock(THIS This, LPVOID lpSurfaceData)
   HRESULT rc;
 
   #ifdef DEBUG
-    dprintf(("SurfUnlock at %08X\n",lpSurfaceData));
+    dprintf(("DDRAW: SurfUnlock at %08X\n",lpSurfaceData));
   #endif
 
   if(me->fLocked == FALSE)
   {
     #ifdef DEBUG
-      dprintf(("Surface not locked!\n"));
+      dprintf(("DDRAW: Surface not locked!\n"));
     #endif
     return(DDERR_NOTLOCKED);
   }
 
   #ifdef DEBUG
-    dprintf(("Start Emuneration of Locked Rects\n"));
+    dprintf(("DDRAW: Start Emuneration of Locked Rects\n"));
   #endif
 
   i=0;
   if(NULL!=lpSurfaceData)
   {
-    dprintf(("Buffer Pointer Compare"));
+    dprintf(("DDRAW: Buffer Pointer Compare"));
 
     // We got a pinter to the surface memory so we must search for
     // this pointer in the locked rects DPA to unlock the right rect.
@@ -5068,14 +5100,14 @@ HRESULT __stdcall SurfUnlock(THIS This, LPVOID lpSurfaceData)
       if(!Found)
       {
         #ifdef DEBUG
-          dprintf(("Not Found, try Next rect\n"));
+          dprintf(("DDRAW: Not Found, try Next rect\n"));
         #endif
         i++;
       }
       #ifdef DEBUG
       else
       {
-        dprintf(("Found Rect\n"));
+        dprintf(("DDRAW: Found Rect\n"));
       }
       #endif
     }
@@ -5084,7 +5116,7 @@ HRESULT __stdcall SurfUnlock(THIS This, LPVOID lpSurfaceData)
   {
     // If a NULL pointer was passed in the SW tries to unlock the
     // complete surface so we must compare the rects.
-    dprintf(("Rectangle compare"));
+    dprintf(("DDRAW: Rectangle compare"));
 
     pIRectUnlock = new DDRectangle( 0, 0, me->height, me->width);
 
@@ -5103,14 +5135,14 @@ HRESULT __stdcall SurfUnlock(THIS This, LPVOID lpSurfaceData)
       if(!Found)
       {
         #ifdef DEBUG
-          dprintf(("Not Found, try Next rect\n"));
+          dprintf(("DDRAW: Not Found, try Next rect\n"));
         #endif
         i++;
       }
       #ifdef DEBUG
       else
       {
-        dprintf(("Found Rect\n"));
+        dprintf(("DDRAW: Found Rect\n"));
       }
       #endif
     }
@@ -5120,26 +5152,26 @@ HRESULT __stdcall SurfUnlock(THIS This, LPVOID lpSurfaceData)
   if(!Found)
   {
     #ifdef DEBUG
-      dprintf(("Rectangle not locked, wrong Rect!\n\n"));
+      dprintf(("DDRAW: Rectangle not locked, wrong Rect!\n\n"));
     #endif
     rc = DDERR_INVALIDRECT;
   }
   else
   {
     #ifdef DEBUG
-      dprintf(("Remove Rect %d from Seq.\n",i));
+      dprintf(("DDRAW: Remove Rect %d from Seq.\n",i));
     #endif
 
     DPA_DeletePtr(me->DPA_LockedRects,i);
 
     #ifdef DEBUG
-      dprintf(("Test if locked Rects main\n"));
+      dprintf(("DDRAW: Test if locked Rects main\n"));
     #endif
 
     if(0==DPA_GetPtrCount(me->DPA_LockedRects))  // Do we have unlocked last rectangle
     {
       #ifdef DEBUG
-        dprintf(("No Locked Rects left for surface\n"));
+        dprintf(("DDRAW: No Locked Rects left for surface\n"));
       #endif
       me->fLocked = FALSE;
     }
@@ -5180,7 +5212,7 @@ HRESULT __stdcall SurfUnlock(THIS This, LPVOID lpSurfaceData)
 
     // me->lpVtbl->ChangeUniquenessValue(me);
 
-    dprintf(("Unlock OK\n\n"));
+    dprintf(("DDRAW: Unlock OK\n\n"));
 
     rc = DD_OK;
   }
@@ -5206,20 +5238,20 @@ HRESULT __stdcall SurfUnlock4(THIS This, LPRECT lpSurfaceRect)
   HRESULT rc;
 
   #ifdef DEBUG
-    dprintf(("SurfUnlock4\n"));
+    dprintf(("DDRAW: SurfUnlock4\n"));
   #endif
 
   if(me->fLocked == FALSE)
   {
     #ifdef DEBUG
-      dprintf(("Surface not locked!\n"));
+      dprintf(("DDRAW: Surface not locked!\n"));
     #endif
     return(DDERR_NOTLOCKED);
   }
 
   if(NULL!=lpSurfaceRect)
   {
-    dprintf(("Unlock rectangle\n"));
+    dprintf(("DDRAW: Unlock rectangle\n"));
     pIRectUnlock = new DDRectangle( lpSurfaceRect->top,
                                     lpSurfaceRect->left,
                                     lpSurfaceRect->bottom,
@@ -5227,7 +5259,7 @@ HRESULT __stdcall SurfUnlock4(THIS This, LPRECT lpSurfaceRect)
   }
   else
   {
-    dprintf(("Unlock complete surface\n"));
+    dprintf(("DDRAW: Unlock complete surface\n"));
     pIRectUnlock = new DDRectangle( 0, 0, me->height, me->width);
   }
 
@@ -5238,7 +5270,7 @@ HRESULT __stdcall SurfUnlock4(THIS This, LPRECT lpSurfaceRect)
             pIRectUnlock->Right() ));
 
   #ifdef DEBUG
-    dprintf(("Start Emuneration of Locked Rects\n"));
+    dprintf(("DDRAW: Start Emuneration of Locked Rects\n"));
   #endif
 
   i=0;
@@ -5255,14 +5287,14 @@ HRESULT __stdcall SurfUnlock4(THIS This, LPRECT lpSurfaceRect)
     if(!Found)
     {
       #ifdef DEBUG
-        dprintf(("Not Found, try Next rect\n"));
+        dprintf(("DDRAW: Not Found, try Next rect\n"));
       #endif
       i++;
     }
     #ifdef DEBUG
     else
     {
-      dprintf(("Found Rect\n"));
+      dprintf(("DDRAW: Found Rect\n"));
     }
     #endif
   }
@@ -5273,7 +5305,7 @@ HRESULT __stdcall SurfUnlock4(THIS This, LPRECT lpSurfaceRect)
     if(NULL==lpSurfaceRect)
     {
       #ifdef DEBUG
-        dprintf(("Rectangle not locked, wrong Rect!\n\n"));
+        dprintf(("DDRAW: Rectangle not locked, wrong Rect!\n\n"));
       #endif
       return(DDERR_INVALIDRECT);
     }
@@ -5283,7 +5315,7 @@ HRESULT __stdcall SurfUnlock4(THIS This, LPRECT lpSurfaceRect)
   else
   {
     #ifdef DEBUG
-      dprintf(("Remove Rect from Seq.\n"));
+      dprintf(("DDRAW: Remove Rect from Seq.\n"));
     #endif
 
     DPA_DeletePtr(me->DPA_LockedRects,i);
@@ -5291,7 +5323,7 @@ HRESULT __stdcall SurfUnlock4(THIS This, LPRECT lpSurfaceRect)
     if(0==DPA_GetPtrCount(me->DPA_LockedRects))  // Do we have unlocked last rectangle
     {
       #ifdef DEBUG
-        dprintf(("No Locked Rects left for surface\n"));
+        dprintf(("DDRAW: No Locked Rects left for surface\n"));
       #endif
       me->fLocked = FALSE;
     }
@@ -5308,7 +5340,7 @@ HRESULT __stdcall SurfUnlock4(THIS This, LPRECT lpSurfaceRect)
 
     // me->lpVtbl->ChangeUniquenessValue(me);
 
-    dprintf(("Unlock OK\n\n"));
+    dprintf(("DDRAW: Unlock OK\n\n"));
     rc = DD_OK;
   }
 
@@ -5319,7 +5351,7 @@ HRESULT __stdcall SurfUnlock4(THIS This, LPRECT lpSurfaceRect)
 HRESULT __stdcall SurfUpdateOverlay(THIS This, LPRECT, LPDIRECTDRAWSURFACE2,LPRECT,DWORD, LPDDOVERLAYFX)
 {
   #ifdef DEBUG
-    dprintf(("SurfUpdateOverlay\n"));
+    dprintf(("DDRAW: SurfUpdateOverlay\n"));
   #endif
   return(DD_OK);
 }
@@ -5328,7 +5360,7 @@ HRESULT __stdcall SurfUpdateOverlay(THIS This, LPRECT, LPDIRECTDRAWSURFACE2,LPRE
 HRESULT __stdcall SurfUpdateOverlay3(THIS This, LPRECT, LPDIRECTDRAWSURFACE3,LPRECT,DWORD, LPDDOVERLAYFX)
 {
   #ifdef DEBUG
-    dprintf(("SurfUpdateOverlay\n"));
+    dprintf(("DDRAW: SurfUpdateOverlay\n"));
   #endif
   return(DD_OK);
 }
@@ -5337,7 +5369,7 @@ HRESULT __stdcall SurfUpdateOverlay3(THIS This, LPRECT, LPDIRECTDRAWSURFACE3,LPR
 HRESULT __stdcall SurfUpdateOverlay4(THIS, LPRECT, LPDIRECTDRAWSURFACE4,LPRECT,DWORD, LPDDOVERLAYFX)
 {
   #ifdef DEBUG
-    dprintf(("SurfUpdateOverlay\n"));
+    dprintf(("DDRAW: SurfUpdateOverlay\n"));
   #endif
   return(DD_OK);
 }
@@ -5346,7 +5378,7 @@ HRESULT __stdcall SurfUpdateOverlay4(THIS, LPRECT, LPDIRECTDRAWSURFACE4,LPRECT,D
 HRESULT __stdcall SurfUpdateOverlayDisplay(THIS, DWORD)
 {
   #ifdef DEBUG
-    dprintf(("SurfUpdateOverlayDisplay\n"));
+    dprintf(("DDRAW: SurfUpdateOverlayDisplay\n"));
   #endif
   return(DD_OK);
 }
@@ -5355,7 +5387,7 @@ HRESULT __stdcall SurfUpdateOverlayDisplay(THIS, DWORD)
 HRESULT __stdcall SurfUpdateOverlayZOrder(THIS, DWORD, LPDIRECTDRAWSURFACE2)
 {
   #ifdef DEBUG
-    dprintf(("SurfUpdateOverlayZOrder\n"));
+    dprintf(("DDRAW: SurfUpdateOverlayZOrder\n"));
   #endif
   return(DD_OK);
 }
@@ -5364,7 +5396,7 @@ HRESULT __stdcall SurfUpdateOverlayZOrder(THIS, DWORD, LPDIRECTDRAWSURFACE2)
 HRESULT __stdcall SurfUpdateOverlayZOrder3(THIS, DWORD, LPDIRECTDRAWSURFACE3)
 {
   #ifdef DEBUG
-    dprintf(("SurfUpdateOverlayZOrder\n"));
+    dprintf(("DDRAW: SurfUpdateOverlayZOrder\n"));
   #endif
   return(DD_OK);
 }
@@ -5373,7 +5405,7 @@ HRESULT __stdcall SurfUpdateOverlayZOrder3(THIS, DWORD, LPDIRECTDRAWSURFACE3)
 HRESULT __stdcall SurfUpdateOverlayZOrder4(THIS, DWORD, LPDIRECTDRAWSURFACE4)
 {
   #ifdef DEBUG
-    dprintf(("SurfUpdateOverlayZOrder4\n"));
+    dprintf(("DDRAW: SurfUpdateOverlayZOrder4\n"));
   #endif
   return(DD_OK);
 }
@@ -5384,7 +5416,7 @@ HRESULT __stdcall SurfGetDDInterface(THIS This, LPVOID FAR *lplpDirectDraw)
  OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
 
   #ifdef DEBUG
-    dprintf(("SurfGetDDInterface\n"));
+    dprintf(("DDRAW: SurfGetDDInterface\n"));
   #endif
   *lplpDirectDraw = (LPVOID FAR *)me->lpDraw;
   return(DD_OK);
@@ -5397,7 +5429,7 @@ HRESULT __stdcall SurfPageLock(THIS, DWORD)
   // If we implement this for the None dive buffers with a pdd the we must change
   // from malloc to DosAllocMem and use OBJ_TILE flag
   #ifdef DEBUG
-    dprintf(("SurfPageLock\n"));
+    dprintf(("DDRAW: SurfPageLock\n"));
   #endif
   return(DD_OK);
 }
@@ -5406,7 +5438,7 @@ HRESULT __stdcall SurfPageLock(THIS, DWORD)
 HRESULT __stdcall SurfPageUnlock(THIS, DWORD)
 {
   #ifdef DEBUG
-    dprintf(("SurfPageUnlock\n"));
+    dprintf(("DDRAW: SurfPageUnlock\n"));
   #endif
   return(DD_OK);
 }
@@ -5417,7 +5449,7 @@ HRESULT __stdcall SurfPageUnlock(THIS, DWORD)
 HRESULT __stdcall SurfSetSurfaceDesc(THIS This, LPDDSURFACEDESC lpSurfDesc, DWORD dwFlags)
 {
   #ifdef DEBUG
-    dprintf(("SurfSetSurfaceDesc\n"));
+    dprintf(("DDRAW: SurfSetSurfaceDesc\n"));
   #endif
 
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
@@ -5448,7 +5480,7 @@ HRESULT __stdcall SurfSetSurfaceDesc(THIS This, LPDDSURFACEDESC lpSurfDesc, DWOR
 HRESULT __stdcall SurfSetSurfaceDesc4(THIS This, LPDDSURFACEDESC2 lpSurfDesc, DWORD dwFlags)
 {
   #ifdef DEBUG
-    dprintf(("SurfSetSurfaceDesc4\n"));
+    dprintf(("DDRAW: SurfSetSurfaceDesc4\n"));
   #endif
 
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
@@ -5489,7 +5521,7 @@ HRESULT __stdcall SurfSetPrivateData(THIS This, REFGUID refGUID, LPVOID lpData,
   HRESULT rc;
 
   #ifdef DEBUG
-    dprintf(("SurfSetPrivateData\n"));
+    dprintf(("DDRAW: SurfSetPrivateData\n"));
   #endif
 
   if(NULL==me)
@@ -5672,7 +5704,7 @@ HRESULT __stdcall SurfGetPrivateData(THIS This, REFGUID refGUID, LPVOID lpData, 
   BOOL bFound = FALSE;
 
   #ifdef DEBUG
-    dprintf(("SurfGetPrivateData\n"));
+    dprintf(("DDRAW: SurfGetPrivateData\n"));
   #endif
 
   if(NULL==me)
@@ -5732,7 +5764,7 @@ HRESULT __stdcall SurfFreePrivateData(THIS This, REFGUID refGUID)
   BOOL bFound = FALSE;
 
   #ifdef DEBUG
-    dprintf(("SurfFreePrivateData\n"));
+    dprintf(("DDRAW: SurfFreePrivateData\n"));
   #endif
 
   if(NULL==me)
@@ -5777,7 +5809,7 @@ HRESULT __stdcall SurfFreePrivateData(THIS This, REFGUID refGUID)
 HRESULT __stdcall SurfGetUniquenessValue(THIS This, LPDWORD lpValue)
 {
   #ifdef DEBUG
-    dprintf(("SurfGetUniquenessValue\n"));
+    dprintf(("DDRAW: SurfGetUniquenessValue\n"));
   #endif
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
   if (NULL==lpValue)
@@ -5796,7 +5828,7 @@ HRESULT __stdcall SurfChangeUniquenessValue(THIS This)
 
 
   #ifdef DEBUG
-    dprintf(("SurfChangeUniquenessValue\n"));
+    dprintf(("DDRAW: SurfChangeUniquenessValue\n"));
   #endif
   me->dwUniqueValue++;
 

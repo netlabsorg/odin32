@@ -18,7 +18,7 @@ HRESULT WIN32API OS2DirectDrawCreate( GUID FAR *lpGUID,
   OS2IDirectDraw *newdraw;
   HRESULT         rc;
 
-  dprintf(("DirectDrawCreate %X %X %X\n", lpGUID, lplpDD, pUnkOuter));
+  dprintf(("DDRAW: DirectDrawCreate %X %X %X\n", lpGUID, lplpDD, pUnkOuter));
 
   newdraw = new OS2IDirectDraw(lpGUID);
 
@@ -47,25 +47,25 @@ typedef BOOL (FAR PASCAL * LPDDENUMCALLBACKA)(GUID FAR *, LPSTR, LPSTR, LPVOID);
 HRESULT WIN32API OS2DirectDrawEnumerateA(LPDDENUMCALLBACKA lpCallback,
                LPVOID lpContext)
 {
-  dprintf(("DirectDrawEnumerateA\n Callback for DIVE\n"));
+  dprintf(("DDRAW: DirectDrawEnumerateA\n Callback for DIVE\n"));
   //call it twice for the DirectDraw & Direct3D classes
  if(lpCallback(NULL, "DIVE DirectDraw for OS/2",
                 "DirectDraw/2 v0.2", lpContext) == DDENUMRET_CANCEL)
   {
-    dprintf(("Cancel Callback\n"));
+    dprintf(("DDRAW: Cancel Callback\n"));
     return(DD_OK);
   }
   else //now for Direct3D
   {
-    dprintf(("Callback for 3Dfx Voodoo"));
+    dprintf(("DDRAW: Callback for 3Dfx Voodoo"));
     if(lpCallback((GUID *)&IID_IDirect3D, "3Dfx Voodoo Direct3D/2",
       "Direct3D/2 v0.2", lpContext) == DDENUMRET_CANCEL)
     {
-      dprintf(("Cancel Callback\n"));
+      dprintf(("DDRAW: Cancel Callback\n"));
       return(DD_OK);
     }
   }
-  dprintf(("Done Enumeration\n\n"));
+  dprintf(("DDRAW: Done Enumeration\n\n"));
 
   return(DD_OK);
 }
@@ -85,7 +85,7 @@ BOOL FAR PASCAL SimpleEnum ( GUID FAR *lpGUID,
   BOOL rc;
   PENUMDATA pData;
 
-  dprintf(("SimpleEnum\n"));
+  dprintf(("DDRAW: SimpleEnum\n"));
 
   pData = (PENUMDATA)lpContext;
   rc = pData->lpCallbackEx( lpGUID,
@@ -94,7 +94,7 @@ BOOL FAR PASCAL SimpleEnum ( GUID FAR *lpGUID,
                             pData->lpContext,
                             NULL);
 
-  dprintf(("Callback returned\n"));
+  dprintf(("DDRAW: Callback returned\n"));
   return rc;
 }
 
@@ -105,7 +105,7 @@ HRESULT WIN32API OS2DirectDrawEnumerateExA( LPDDENUMCALLBACKEXA lpCallbackEx,
 {
   ENUMDATA data;
 
-  dprintf(("DirectDrawEnumerateExA\n"));
+  dprintf(("DDRAW: DirectDrawEnumerateExA\n"));
 
   data.lpCallbackEx = lpCallbackEx;
   data.lpContext    = lpContext;
@@ -118,14 +118,14 @@ HRESULT WIN32API OS2DirectDrawEnumerateExA( LPDDENUMCALLBACKEXA lpCallbackEx,
 //******************************************************************************
 DWORD WIN32API DDHAL32_VidMemFree(DWORD address)
 {
-  dprintf(("DDHAL32_VidMemFree, not supported\n"));
+  dprintf(("DDRAW: DDHAL32_VidMemFree, not supported\n"));
   return(0);
 }
 //******************************************************************************
 //******************************************************************************
 DWORD WIN32API DDHAL32_VidMemAlloc(DWORD size)
 {
-  dprintf(("DDHAL32_VidMemAlloc, not supported\n"));
+  dprintf(("DDRAW: DDHAL32_VidMemAlloc, not supported\n"));
   return(0);
 }
 //******************************************************************************
