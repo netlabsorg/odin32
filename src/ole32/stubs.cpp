@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.19 2002-02-16 11:39:34 sandervl Exp $ */
+/* $Id: stubs.cpp,v 1.20 2002-02-18 23:24:09 phaller Exp $ */
 /* 
  * Win32 COM/OLE stubs for OS/2
  * 
@@ -224,7 +224,7 @@ HRESULT WIN32API OleDoAutoConvert(IStorage *pStg, LPCLSID pClsidNew)
 //*******************************************************************************
 //*******************************************************************************
 HRESULT WIN32API OleDraw(IUnknown *pUnk, DWORD dwAspect, HDC hdcDraw,
-                            LPCRECT lprcBounds)
+                         LPCRECT lprcBounds)
 {
     dprintf(("OLE32: OleDraw - stub"));
     return(E_INVALIDARG);
