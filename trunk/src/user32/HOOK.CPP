@@ -1,4 +1,4 @@
-/* $Id: HOOK.CPP,v 1.9 2000-01-18 20:10:30 sandervl Exp $ */
+/* $Id: HOOK.CPP,v 1.10 2000-02-12 18:09:49 cbratschi Exp $ */
 
 /*
  * Windows hook functions
@@ -26,7 +26,6 @@
 
 #include <os2win.h>
 #include "hook.h"
-#include "win.h"
 #include "queue.h"
 #include "task.h"
 #include "winproc.h"
@@ -69,40 +68,40 @@ static VMutex threadHookMutex;
 
 typedef VOID (*HOOK_MapFunc)(INT, INT, WPARAM *, LPARAM *);
 typedef VOID (*HOOK_UnMapFunc)(INT, INT, WPARAM, LPARAM, WPARAM,
-			       LPARAM);
+                               LPARAM);
 
 /***********************************************************************
  *           HOOK_Map32ATo32W
  */
 static void HOOK_Map32ATo32W(INT id, INT code, WPARAM *pwParam,
-			     LPARAM *plParam)
+                             LPARAM *plParam)
 {
     if (id == WH_CBT && code == HCBT_CREATEWND)
     {
-	LPCBT_CREATEWNDA lpcbtcwA = (LPCBT_CREATEWNDA)*plParam;
-	LPCBT_CREATEWNDW lpcbtcwW = (LPCBT_CREATEWNDW)HeapAlloc(GetProcessHeap(), 0,
-					  	                sizeof(*lpcbtcwW) );
-	lpcbtcwW->lpcs = (CREATESTRUCTW*)HeapAlloc( GetProcessHeap(), 0, sizeof(*lpcbtcwW->lpcs) );
+        LPCBT_CREATEWNDA lpcbtcwA = (LPCBT_CREATEWNDA)*plParam;
+        LPCBT_CREATEWNDW lpcbtcwW = (LPCBT_CREATEWNDW)HeapAlloc(GetProcessHeap(), 0,
+                                                                sizeof(*lpcbtcwW) );
+        lpcbtcwW->lpcs = (CREATESTRUCTW*)HeapAlloc( GetProcessHeap(), 0, sizeof(*lpcbtcwW->lpcs) );
 
-	lpcbtcwW->hwndInsertAfter = lpcbtcwA->hwndInsertAfter;
-	*lpcbtcwW->lpcs = *(LPCREATESTRUCTW)lpcbtcwA->lpcs;
+        lpcbtcwW->hwndInsertAfter = lpcbtcwA->hwndInsertAfter;
+        *lpcbtcwW->lpcs = *(LPCREATESTRUCTW)lpcbtcwA->lpcs;
 
-	if (HIWORD(lpcbtcwA->lpcs->lpszName))
-	{
-	    lpcbtcwW->lpcs->lpszName = HEAP_strdupAtoW( GetProcessHeap(), 0,
+        if (HIWORD(lpcbtcwA->lpcs->lpszName))
+        {
+            lpcbtcwW->lpcs->lpszName = HEAP_strdupAtoW( GetProcessHeap(), 0,
                                                     lpcbtcwA->lpcs->lpszName );
-	}
-	else
-	  lpcbtcwW->lpcs->lpszName = (LPWSTR)lpcbtcwA->lpcs->lpszName;
+        }
+        else
+          lpcbtcwW->lpcs->lpszName = (LPWSTR)lpcbtcwA->lpcs->lpszName;
 
-	if (HIWORD(lpcbtcwA->lpcs->lpszClass))
-	{
-	    lpcbtcwW->lpcs->lpszClass = HEAP_strdupAtoW( GetProcessHeap(), 0,
+        if (HIWORD(lpcbtcwA->lpcs->lpszClass))
+        {
+            lpcbtcwW->lpcs->lpszClass = HEAP_strdupAtoW( GetProcessHeap(), 0,
                                                    lpcbtcwA->lpcs->lpszClass );
-	}
-	else
-	  lpcbtcwW->lpcs->lpszClass = (LPCWSTR)lpcbtcwA->lpcs->lpszClass;
-	*plParam = (LPARAM)lpcbtcwW;
+        }
+        else
+          lpcbtcwW->lpcs->lpszClass = (LPCWSTR)lpcbtcwA->lpcs->lpszClass;
+        *plParam = (LPARAM)lpcbtcwW;
     }
     return;
 }
@@ -112,18 +111,18 @@ static void HOOK_Map32ATo32W(INT id, INT code, WPARAM *pwParam,
  *           HOOK_UnMap32ATo32W
  */
 static void HOOK_UnMap32ATo32W(INT id, INT code, WPARAM wParamOrig,
-			       LPARAM lParamOrig, WPARAM wParam,
-			       LPARAM lParam)
+                               LPARAM lParamOrig, WPARAM wParam,
+                               LPARAM lParam)
 {
     if (id == WH_CBT && code == HCBT_CREATEWND)
     {
-	LPCBT_CREATEWNDW lpcbtcwW = (LPCBT_CREATEWNDW)lParam;
-	if (HIWORD(lpcbtcwW->lpcs->lpszName))
+        LPCBT_CREATEWNDW lpcbtcwW = (LPCBT_CREATEWNDW)lParam;
+        if (HIWORD(lpcbtcwW->lpcs->lpszName))
             HeapFree( GetProcessHeap(), 0, (LPWSTR)lpcbtcwW->lpcs->lpszName );
-	if (HIWORD(lpcbtcwW->lpcs->lpszClass))
+        if (HIWORD(lpcbtcwW->lpcs->lpszClass))
             HeapFree( GetProcessHeap(), 0, (LPWSTR)lpcbtcwW->lpcs->lpszClass );
-	HeapFree( GetProcessHeap(), 0, lpcbtcwW->lpcs );
-	HeapFree( GetProcessHeap(), 0, lpcbtcwW );
+        HeapFree( GetProcessHeap(), 0, lpcbtcwW->lpcs );
+        HeapFree( GetProcessHeap(), 0, lpcbtcwW );
     }
     return;
 }
@@ -133,30 +132,30 @@ static void HOOK_UnMap32ATo32W(INT id, INT code, WPARAM wParamOrig,
  *           HOOK_Map32WTo32A
  */
 static void HOOK_Map32WTo32A(INT id, INT code, WPARAM *pwParam,
-			     LPARAM *plParam)
+                             LPARAM *plParam)
 {
     if (id == WH_CBT && code == HCBT_CREATEWND)
     {
-	LPCBT_CREATEWNDW lpcbtcwW = (LPCBT_CREATEWNDW)*plParam;
-	LPCBT_CREATEWNDA lpcbtcwA = (LPCBT_CREATEWNDA)HeapAlloc(GetProcessHeap(), 0,
-						                sizeof(*lpcbtcwA) );
-	lpcbtcwA->lpcs = (CREATESTRUCTA*)HeapAlloc( GetProcessHeap(), 0, sizeof(*lpcbtcwA->lpcs) );
+        LPCBT_CREATEWNDW lpcbtcwW = (LPCBT_CREATEWNDW)*plParam;
+        LPCBT_CREATEWNDA lpcbtcwA = (LPCBT_CREATEWNDA)HeapAlloc(GetProcessHeap(), 0,
+                                                                sizeof(*lpcbtcwA) );
+        lpcbtcwA->lpcs = (CREATESTRUCTA*)HeapAlloc( GetProcessHeap(), 0, sizeof(*lpcbtcwA->lpcs) );
 
-	lpcbtcwA->hwndInsertAfter = lpcbtcwW->hwndInsertAfter;
-	*lpcbtcwA->lpcs = *(LPCREATESTRUCTA)lpcbtcwW->lpcs;
+        lpcbtcwA->hwndInsertAfter = lpcbtcwW->hwndInsertAfter;
+        *lpcbtcwA->lpcs = *(LPCREATESTRUCTA)lpcbtcwW->lpcs;
 
-	if (HIWORD(lpcbtcwW->lpcs->lpszName))
-	  lpcbtcwA->lpcs->lpszName = HEAP_strdupWtoA( GetProcessHeap(), 0,
+        if (HIWORD(lpcbtcwW->lpcs->lpszName))
+          lpcbtcwA->lpcs->lpszName = HEAP_strdupWtoA( GetProcessHeap(), 0,
                                                     lpcbtcwW->lpcs->lpszName );
-	else
-	  lpcbtcwA->lpcs->lpszName = (LPSTR)lpcbtcwW->lpcs->lpszName;
+        else
+          lpcbtcwA->lpcs->lpszName = (LPSTR)lpcbtcwW->lpcs->lpszName;
 
-	if (HIWORD(lpcbtcwW->lpcs->lpszClass))
-	  lpcbtcwA->lpcs->lpszClass = HEAP_strdupWtoA( GetProcessHeap(), 0,
+        if (HIWORD(lpcbtcwW->lpcs->lpszClass))
+          lpcbtcwA->lpcs->lpszClass = HEAP_strdupWtoA( GetProcessHeap(), 0,
                                                    lpcbtcwW->lpcs->lpszClass );
-	else
-	  lpcbtcwA->lpcs->lpszClass = (LPSTR)lpcbtcwW->lpcs->lpszClass;
-	*plParam = (LPARAM)lpcbtcwA;
+        else
+          lpcbtcwA->lpcs->lpszClass = (LPSTR)lpcbtcwW->lpcs->lpszClass;
+        *plParam = (LPARAM)lpcbtcwA;
     }
     return;
 }
@@ -166,18 +165,18 @@ static void HOOK_Map32WTo32A(INT id, INT code, WPARAM *pwParam,
  *           HOOK_UnMap32WTo32A
  */
 static void HOOK_UnMap32WTo32A(INT id, INT code, WPARAM wParamOrig,
-			       LPARAM lParamOrig, WPARAM wParam,
-			       LPARAM lParam)
+                               LPARAM lParamOrig, WPARAM wParam,
+                               LPARAM lParam)
 {
     if (id == WH_CBT && code == HCBT_CREATEWND)
     {
-	LPCBT_CREATEWNDA lpcbtcwA = (LPCBT_CREATEWNDA)lParam;
-	if (HIWORD(lpcbtcwA->lpcs->lpszName))
+        LPCBT_CREATEWNDA lpcbtcwA = (LPCBT_CREATEWNDA)lParam;
+        if (HIWORD(lpcbtcwA->lpcs->lpszName))
             HeapFree( GetProcessHeap(), 0, (LPSTR)lpcbtcwA->lpcs->lpszName );
-	if (HIWORD(lpcbtcwA->lpcs->lpszClass))
+        if (HIWORD(lpcbtcwA->lpcs->lpszClass))
             HeapFree( GetProcessHeap(), 0, (LPSTR)lpcbtcwA->lpcs->lpszClass );
-	HeapFree( GetProcessHeap(), 0, lpcbtcwA->lpcs );
-	HeapFree( GetProcessHeap(), 0, lpcbtcwA );
+        HeapFree( GetProcessHeap(), 0, lpcbtcwA->lpcs );
+        HeapFree( GetProcessHeap(), 0, lpcbtcwA );
     }
     return;
 }
@@ -186,14 +185,14 @@ static void HOOK_UnMap32WTo32A(INT id, INT code, WPARAM wParamOrig,
 /***********************************************************************
  *           Map Function Tables
  */
-static const HOOK_MapFunc HOOK_MapFuncs[3][3] = 
+static const HOOK_MapFunc HOOK_MapFuncs[3][3] =
 {
     { NULL, NULL,             NULL },
     { NULL, NULL,             HOOK_Map32ATo32W },
     { NULL, HOOK_Map32WTo32A, NULL }
 };
 
-static const HOOK_UnMapFunc HOOK_UnMapFuncs[3][3] = 
+static const HOOK_UnMapFunc HOOK_UnMapFuncs[3][3] =
 {
     { NULL, NULL,               NULL },
     { NULL, NULL,               HOOK_UnMap32ATo32W },
@@ -233,10 +232,10 @@ static HANDLE HOOK_GetHook( INT id, DWORD threadId )
   MESSAGEQUEUE *queue;
   HANDLE hook = 0;
   THDB *thdb;
-    
+
     thdb = GetTHDBFromThreadId(threadId);
     if(thdb) {
-	hook = thdb->hooks[id - WH_MINHOOK];
+        hook = thdb->hooks[id - WH_MINHOOK];
     }
     if (!hook) hook = HOOK_systemHooks[id - WH_MINHOOK];
 
@@ -250,14 +249,14 @@ static HANDLE HOOK_GetHook( INT id, DWORD threadId )
  * Install a given hook.
  */
 static HHOOK HOOK_SetHook( INT id, LPVOID proc, INT type,
-		           HMODULE hModule, DWORD dwThreadId )
+                           HMODULE hModule, DWORD dwThreadId )
 {
   HOOKDATA *data;
   THDB     *thdb;
-  
+
     if ((id < WH_MINHOOK) || (id > WH_MAXHOOK) || !proc )
     {
-	SetLastError(ERROR_INVALID_PARAMETER);
+        SetLastError(ERROR_INVALID_PARAMETER);
         return 0;
     }
 
@@ -274,11 +273,11 @@ static HHOOK HOOK_SetHook( INT id, LPVOID proc, INT type,
 
     if (dwThreadId)  /* Task-specific hook */
     {
-	if ((id == WH_JOURNALRECORD) || (id == WH_JOURNALPLAYBACK) ||
-	    (id == WH_SYSMSGFILTER)) {
-		SetLastError(ERROR_INVALID_PARAMETER);
-		return 0;  /* System-only hooks */
-	}
+        if ((id == WH_JOURNALRECORD) || (id == WH_JOURNALPLAYBACK) ||
+            (id == WH_SYSMSGFILTER)) {
+                SetLastError(ERROR_INVALID_PARAMETER);
+                return 0;  /* System-only hooks */
+        }
     }
 
     /* Create the hook structure */
@@ -294,22 +293,22 @@ static HHOOK HOOK_SetHook( INT id, LPVOID proc, INT type,
     /* Insert it in the correct linked list */
     if(dwThreadId)
     {
-	thdb = GetTHDBFromThreadId(dwThreadId);
-	if(!thdb) {
-		dprintf(("HOOK_SetHook: can't find thread database for thread %x", dwThreadId));
-		return 0;
-	}
-	threadHookMutex.enter();
+        thdb = GetTHDBFromThreadId(dwThreadId);
+        if(!thdb) {
+                dprintf(("HOOK_SetHook: can't find thread database for thread %x", dwThreadId));
+                return 0;
+        }
+        threadHookMutex.enter();
         data->next = thdb->hooks[id - WH_MINHOOK];
         thdb->hooks[id - WH_MINHOOK] = (DWORD)data;
-	threadHookMutex.leave();
+        threadHookMutex.leave();
     }
     else
     {
-	systemHookMutex.enter();
+        systemHookMutex.enter();
         data->next = HOOK_systemHooks[id - WH_MINHOOK];
         HOOK_systemHooks[id - WH_MINHOOK] = (HANDLE)data;
-	systemHookMutex.leave();
+        systemHookMutex.leave();
     }
 
     return (HHOOK)data;
@@ -328,7 +327,7 @@ static BOOL HOOK_RemoveHook( HOOKDATA *data )
   VMutex   *hookMutex;
 
     dprintf(("Removing hook %08x\n", data));
-   
+
     if (data->flags & HOOK_INUSE)
     {
         /* Mark it for deletion later on */
@@ -340,31 +339,31 @@ static BOOL HOOK_RemoveHook( HOOKDATA *data )
 #ifndef __WIN32OS2__
     if (data->id == WH_JOURNALPLAYBACK) EnableHardwareInput16(TRUE);
 #endif
-     
+
     /* Remove it from the linked list */
 
     if (data->ownerThread)
     {
-	thdb = GetTHDBFromThreadId(data->ownerThread);
-	if(!thdb) {
-		dprintf(("HOOK_RemoveHook: can't find thread database for thread %x", data->ownerThread));
-		return FALSE;
-	}
-	hookMutex = &threadHookMutex;
-    	hookMutex->enter();
+        thdb = GetTHDBFromThreadId(data->ownerThread);
+        if(!thdb) {
+                dprintf(("HOOK_RemoveHook: can't find thread database for thread %x", data->ownerThread));
+                return FALSE;
+        }
+        hookMutex = &threadHookMutex;
+        hookMutex->enter();
         prevHook = (HOOKDATA **)&thdb->hooks[data->id - WH_MINHOOK];
     }
     else {
-	hookMutex = &systemHookMutex;
-    	hookMutex->enter();
-	prevHook = (HOOKDATA **)&HOOK_systemHooks[data->id - WH_MINHOOK];
+        hookMutex = &systemHookMutex;
+        hookMutex->enter();
+        prevHook = (HOOKDATA **)&HOOK_systemHooks[data->id - WH_MINHOOK];
     }
     while (*prevHook && *prevHook != data)
         prevHook = (HOOKDATA **)&(*prevHook)->next;
 
     if (!prevHook) {
-    	hookMutex->leave();
-	return FALSE;
+        hookMutex->leave();
+        return FALSE;
     }
     *prevHook = (HOOKDATA *)data->next;
     hookMutex->leave();
@@ -383,9 +382,9 @@ static HANDLE HOOK_FindValidHook( HANDLE hook )
 
     for (;;)
     {
-	if (!(data = (HOOKDATA *)hook)) return 0;
-	if (data->proc) return hook;
-	hook = data->next;
+        if (!(data = (HOOKDATA *)hook)) return 0;
+        if (data->proc) return hook;
+        hook = data->next;
     }
 }
 
@@ -443,7 +442,7 @@ static LRESULT HOOK_CallHook( HANDLE hook, INT fromtype, INT code,
  */
 BOOL HOOK_IsHooked( INT id )
 {
-    /* Hmmm. Use GetThreadQueue(0) instead of GetFastQueue() here to 
+    /* Hmmm. Use GetThreadQueue(0) instead of GetFastQueue() here to
        avoid queue being created if someone wants to merely check ... */
 
     return HOOK_GetHook( id, GetCurrentThreadId() ) != 0;
@@ -457,7 +456,7 @@ BOOL HOOK_IsHooked( INT id )
 LRESULT HOOK_CallHooksA( INT id, INT code, WPARAM wParam,
                            LPARAM lParam )
 {
-    HANDLE hook; 
+    HANDLE hook;
 
     if (!(hook = HOOK_GetHook( id, GetCurrentThreadId() ))) return 0;
     if (!(hook = HOOK_FindValidHook(hook))) return 0;
@@ -472,12 +471,12 @@ LRESULT HOOK_CallHooksA( INT id, INT code, WPARAM wParam,
 LRESULT HOOK_CallHooksW( INT id, INT code, WPARAM wParam,
                            LPARAM lParam )
 {
-    HANDLE hook; 
+    HANDLE hook;
 
     if (!(hook = HOOK_GetHook( id, GetCurrentThreadId() ))) return 0;
     if (!(hook = HOOK_FindValidHook(hook))) return 0;
     return HOOK_CallHook( hook, HOOK_WIN32W, code, wParam,
-			  lParam );
+                          lParam );
 }
 
 
@@ -491,21 +490,21 @@ void HOOK_ResetQueueHooks( HQUEUE hQueue )
 
     if ((queue = (MESSAGEQUEUE *)QUEUE_Lock( hQueue )) != NULL)
     {
-	HOOKDATA*	data;
-	HHOOK		hook;
-	int		id;
-	for( id = WH_MINHOOK; id <= WH_MAXHOOK; id++ )
-	{
-	    hook = queue->hooks[id - WH_MINHOOK];
-	    while( hook )
-	    {
-	        if( (data = (HOOKDATA *)hook) )
-	        {
-		  data->ownerQueue = hQueue;
-		  hook = data->next;
-		} else break;
-	    }
-	}
+        HOOKDATA*       data;
+        HHOOK           hook;
+        int             id;
+        for( id = WH_MINHOOK; id <= WH_MAXHOOK; id++ )
+        {
+            hook = queue->hooks[id - WH_MINHOOK];
+            while( hook )
+            {
+                if( (data = (HOOKDATA *)hook) )
+                {
+                  data->ownerQueue = hQueue;
+                  hook = data->next;
+                } else break;
+            }
+        }
 
         QUEUE_Unlock( queue );
     }
@@ -513,7 +512,7 @@ void HOOK_ResetQueueHooks( HQUEUE hQueue )
 #endif
 
 /***********************************************************************
- *	     HOOK_FreeModuleHooks
+ *           HOOK_FreeModuleHooks
  */
 void HOOK_FreeModuleHooks( HMODULE hModule )
 {
@@ -527,46 +526,49 @@ void HOOK_FreeModuleHooks( HMODULE hModule )
     {
        hook = HOOK_systemHooks[id - WH_MINHOOK];
        while( hook )
-          if( (hptr = (HOOKDATA *)hook) )
-	    {
-	      next = hptr->next;
-	      if( hptr->ownerModule == hModule )
+       {
+          hptr = (HOOKDATA *)hook;
+          if (hptr)
+            {
+              next = hptr->next;
+              if( hptr->ownerModule == hModule )
                 {
                   hptr->flags &= HOOK_MAPTYPE;
                   HOOK_RemoveHook(hptr);
                 }
-	      hook = next;
-	    }
-	  else hook = 0;
+              hook = next;
+            }
+          else hook = 0;
+       }
     }
 }
 
 /***********************************************************************
- *	     HOOK_FreeQueueHooks
+ *           HOOK_FreeQueueHooks
  */
 void HOOK_FreeQueueHooks( DWORD threadId )
 {
   /* remove all hooks registered by this queue */
 
-  HOOKDATA*	hptr = NULL;
-  HHOOK 	hook, next;
-  int 		id;
+  HOOKDATA*     hptr = NULL;
+  HHOOK         hook, next;
+  int           id;
 
   for( id = WH_MINHOOK; id <= WH_MAXHOOK; id++ )
     {
        hook = HOOK_GetHook( id, threadId );
        while( hook )
-	{
-	  next = HOOK_GetNextHook(hook);
+        {
+          next = HOOK_GetNextHook(hook);
 
-	  hptr = (HOOKDATA *)hook;
-	  if( hptr && hptr->ownerThread == threadId )
-	    {
-	      hptr->flags &= HOOK_MAPTYPE;
-	      HOOK_RemoveHook(hptr);
-	    }
-	  hook = next;
-	}
+          hptr = (HOOKDATA *)hook;
+          if( hptr && hptr->ownerThread == threadId )
+            {
+              hptr->flags &= HOOK_MAPTYPE;
+              HOOK_RemoveHook(hptr);
+            }
+          hook = next;
+        }
     }
 }
 
@@ -631,7 +633,7 @@ BOOL WINAPI UnhookWindowsHook( INT id, HOOKPROC proc )
 BOOL WINAPI UnhookWindowsHookEx( HHOOK hhook )
 {
     if (CHECK_MAGIC(hhook) == FALSE)
-	return FALSE;
+        return FALSE;
 
     return HOOK_RemoveHook( (HOOKDATA *)hhook );
 }
@@ -645,11 +647,11 @@ LRESULT WINAPI CallNextHookEx( HHOOK hhook, INT code, WPARAM wParam,
                                  LPARAM lParam )
 {
     HANDLE next;
-    INT fromtype;	/* figure out Ansi/Unicode */
+    INT fromtype;       /* figure out Ansi/Unicode */
     HOOKDATA *oldhook;
 
     if (CHECK_MAGIC(hhook) == FALSE)
-	return FALSE;
+        return FALSE;
 
     if (!(next = HOOK_GetNextHook( hhook ))) return 0;
 
@@ -669,7 +671,9 @@ LRESULT WINAPI CallNextHookEx( HHOOK hhook, INT code, WPARAM wParam,
  */
 BOOL WINAPI CallMsgFilterA( LPMSG msg, INT code )
 {
-    if (GetSysModalWindow()) return FALSE;	/* ??? */
+#if 0 //CB: not a Win32 API and unimplemented
+    if (GetSysModalWindow()) return FALSE;      /* ??? */
+#endif
     if (HOOK_CallHooksA( WH_SYSMSGFILTER, code, 0, (LPARAM)msg ))
       return TRUE;
     return HOOK_CallHooksA( WH_MSGFILTER, code, 0, (LPARAM)msg );
@@ -681,7 +685,9 @@ BOOL WINAPI CallMsgFilterA( LPMSG msg, INT code )
  */
 BOOL WINAPI CallMsgFilterW( LPMSG msg, INT code )
 {
-    if (GetSysModalWindow()) return FALSE;	/* ??? */
+#if 0 //CB: not a Win32 API and unimplemented
+    if (GetSysModalWindow()) return FALSE;      /* ??? */
+#endif
     if (HOOK_CallHooksW( WH_SYSMSGFILTER, code, 0, (LPARAM)msg ))
       return TRUE;
     return HOOK_CallHooksW( WH_MSGFILTER, code, 0, (LPARAM)msg );
