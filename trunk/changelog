@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.1662 2001-08-26 19:05:47 sandervl Exp $ */
+/* $Id: changelog,v 1.1663 2001-08-27 08:42:37 sandervl Exp $ */
+
+ 2001-08-27: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o FillRect fix: brush 0 means currently selected brush 
+                  (verified in NT4)
+                  (fixes background in registration dialog of CVP)
 
  2001-08-26: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Convert icon & cursor to OS/2 format in CreateIconIndirect,
