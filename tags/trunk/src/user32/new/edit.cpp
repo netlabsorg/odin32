@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.2 1999-07-25 16:31:44 cbratschi Exp $ */
+/* $Id: edit.cpp,v 1.3 1999-08-15 19:11:00 cbratschi Exp $ */
 /*
  *      Edit control
  *
@@ -16,20 +16,11 @@
    - OS/2 menu not implemented (WM_CONTEXTMENU)
  */
 
-//#include "config.h"
 #include "winuser.h"
 #include "winbase.h"
 #include <string.h>
-//#include "winnt.h"
-//#include "win.h"
-//#include "wine/winbase16.h"
 #include "controls.h"
 #include "combo.h"
-//#include "local.h"
-//#include "resource.h"
-//#include "debugtools.h"
-//#include "callback.h"
-//#include "tweak.h"
 
 #define BUFLIMIT_MULTI          65534   /* maximum buffer size (not including '\0')
                                            FIXME: BTW, new specs say 65535 (do you dare ???) */
@@ -97,6 +88,7 @@ typedef struct
         EDITWORDBREAKPROCA word_break_procA;
         INT line_count;         /* number of lines */
         INT y_offset;                   /* scroll offset in number of lines */
+        BOOL bCaptureState; /* flag indicating whether mouse was captured */
         /*
          *      only for multi line controls
          */
@@ -3155,6 +3147,7 @@ static LRESULT EDIT_WM_LButtonDown(HWND hwnd, EDITSTATE *es, DWORD keys, INT x, 
         if (!(es->flags & EF_FOCUSED))
                 return 0;
 
+        es->bCaptureState = TRUE;
         SetCapture(hwnd);
         EDIT_ConfinePoint(hwnd, es, &x, &y);
         e = EDIT_CharFromPos(hwnd, es, x, y, &after_wrap);
@@ -3173,11 +3166,13 @@ static LRESULT EDIT_WM_LButtonDown(HWND hwnd, EDITSTATE *es, DWORD keys, INT x, 
  */
 static LRESULT EDIT_WM_LButtonUp(HWND hwnd, EDITSTATE *es, DWORD keys, INT x, INT y)
 {
-        if (GetCapture() == hwnd) {
-                KillTimer(hwnd, 0);
-                ReleaseCapture();
-        }
-        return 0;
+	if (es->bCaptureState && GetCapture() == hwnd) {
+		KillTimer(hwnd, 0);
+		ReleaseCapture();
+	}
+	es->bCaptureState = FALSE;
+
+	return 0;
 }
 
 
@@ -3232,9 +3227,19 @@ static LRESULT EDIT_WM_NCCreate(HWND hwnd, LPCREATESTRUCTA cs)
                 return FALSE;
         es->style = cs->style;
 
-        if ((es->style & WS_BORDER) && !(es->style & WS_DLGFRAME))
-                SetWindowLongA(hwnd,GWL_STYLE,GetWindowLongA(hwnd,GWL_STYLE) & ~WS_BORDER);
 
+	/*
+	 * In Win95 look and feel, the WS_BORDER style is replaced by the
+	 * WS_EX_CLIENTEDGE style for the edit control. This gives the edit
+	 * control a non client area.
+	 */
+        if (es->style & WS_BORDER)
+	{
+	  es->style      &= ~WS_BORDER;
+	  SetWindowLongA(hwnd,GWL_STYLE,GetWindowLongA(hwnd,GWL_STYLE) & ~WS_BORDER);
+	  SetWindowLongA(hwnd,GWL_EXSTYLE,GetWindowLongA(hwnd,GWL_EXSTYLE) | WS_EX_CLIENTEDGE);
+	}
+	
         if (es->style & ES_MULTILINE) {
                 es->buffer_size = BUFSTART_MULTI;
                 es->buffer_limit = BUFLIMIT_MULTI;
@@ -3315,7 +3320,7 @@ static void EDIT_WM_Paint(HWND hwnd, EDITSTATE *es)
                         if(es->style & WS_HSCROLL) rc.bottom++;
                         if(es->style & WS_VSCROLL) rc.right++;
                 }
-                DrawEdge(dc, &rc, EDGE_SUNKEN, BF_RECT);
+                Rectangle(dc, rc.left, rc.top, rc.right, rc.bottom);
         }
         IntersectClipRect(dc, es->format_rect.left,
                                 es->format_rect.top,

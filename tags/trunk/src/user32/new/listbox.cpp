@@ -1,4 +1,4 @@
-/* $Id: listbox.cpp,v 1.2 1999-07-24 17:10:25 cbratschi Exp $ */
+/* $Id: listbox.cpp,v 1.3 1999-08-15 19:11:01 cbratschi Exp $ */
 /*
  * Listbox controls
  *
@@ -87,6 +87,9 @@ typedef struct
 
 #define HAS_STRINGS(descr) \
     (!IS_OWNERDRAW(descr) || ((descr)->style & LBS_HASSTRINGS))
+
+#define IS_MULTISELECT(descr) \
+    ((descr)->style & LBS_MULTIPLESEL || ((descr)->style & LBS_EXTENDEDSEL))
 
 #define SEND_NOTIFICATION(hwnd,descr,code) \
     (SendMessageA( (descr)->owner, WM_COMMAND, \
@@ -1224,7 +1227,7 @@ static LRESULT LISTBOX_SetSelection( HWND hwnd, LB_DESCR *descr, INT index,
         descr->selected_item = index;
         if (oldsel != -1) LISTBOX_RepaintItem( hwnd, descr, oldsel, ODA_SELECT);
         if (index != -1) LISTBOX_RepaintItem( hwnd, descr, index, ODA_SELECT );
-        if (send_notify) SEND_NOTIFICATION( hwnd, descr,
+        if (send_notify && descr->nb_items) SEND_NOTIFICATION( hwnd, descr,
                                (index != -1) ? LBN_SELCHANGE : LBN_SELCANCEL );
         else
             if( descr->lphc ) /* set selection change flag for parent combo */
@@ -1271,6 +1274,7 @@ static LRESULT LISTBOX_InsertItem( HWND hwnd, LB_DESCR *descr, INT index,
 {
     LB_ITEMDATA *item;
     INT max_items;
+    INT oldfocus = descr->focus_item;
 
     if (index == -1) index = descr->nb_items;
     else if ((index < 0) || (index > descr->nb_items)) return LB_ERR;
@@ -1325,17 +1329,18 @@ static LRESULT LISTBOX_InsertItem( HWND hwnd, LB_DESCR *descr, INT index,
     LISTBOX_InvalidateItems( hwnd, descr, index );
 
     /* Move selection and focused item */
-
-    if (index <= descr->selected_item) descr->selected_item++;
-    if (index <= descr->focus_item)
-    {
-        descr->focus_item++;
-        LISTBOX_MoveCaret( hwnd, descr, descr->focus_item, FALSE );
-    }
-
     /* If listbox was empty, set focus to the first item */
-
-    if (descr->nb_items == 1) LISTBOX_SetCaretIndex( hwnd, descr, 0, FALSE );
+    if (descr->nb_items == 1)
+         LISTBOX_SetCaretIndex( hwnd, descr, 0, FALSE );
+    /* single select don't change selection index in win31 */
+    else
+    {
+        if (index <= descr->selected_item)
+        {
+           descr->selected_item++;
+           descr->focus_item = oldfocus; /* focus not changed */
+        }
+    }
     return LB_OKAY;
 }
 
@@ -1362,6 +1367,7 @@ static LRESULT LISTBOX_InsertString( HWND hwnd, LB_DESCR *descr, INT index,
 
     if (HAS_STRINGS(descr))
     {
+        if (!str) str="";
         if (!(new_str = HEAP_strdupA( descr->heap, 0, str )))
         {
             SEND_NOTIFICATION( hwnd, descr, LBN_ERRSPACE );
@@ -1449,15 +1455,26 @@ static LRESULT LISTBOX_RemoveItem( HWND hwnd, LB_DESCR *descr, INT index )
     /* Repaint the items */
 
     LISTBOX_UpdateScroll( hwnd, descr );
-    LISTBOX_InvalidateItems( hwnd, descr, index );
+    /* if we removed the scrollbar, reset the top of the list
+      (correct for owner-drawn ???) */
+    if (descr->nb_items == descr->page_size)
+        LISTBOX_SetTopItem( hwnd, descr, 0, TRUE );
 
     /* Move selection and focused item */
-
-    if (index <= descr->selected_item) descr->selected_item--;
-    if (index <= descr->focus_item)
+    if (!IS_MULTISELECT(descr))
     {
-        descr->focus_item--;
-        LISTBOX_MoveCaret( hwnd, descr, descr->focus_item, FALSE );
+        if (index == descr->selected_item)
+            descr->selected_item = -1;
+        else if (index < descr->selected_item)
+      {
+            descr->selected_item--;
+      }
+    }
+    LISTBOX_InvalidateItems( hwnd, descr, index );
+    if (descr->focus_item >= descr->nb_items)
+    {
+          descr->focus_item = descr->nb_items - 1;
+          if (descr->focus_item < 0) descr->focus_item = 0;
     }
     return LB_OKAY;
 }
@@ -1779,7 +1796,7 @@ static LRESULT LISTBOX_HandleLButtonUp( HWND hwnd, LB_DESCR *descr )
     {
         descr->captured = FALSE;
         if (GetCapture() == hwnd) ReleaseCapture();
-        if (descr->style & LBS_NOTIFY)
+        if ((descr->style & LBS_NOTIFY) && descr->nb_items)
             SEND_NOTIFICATION( hwnd, descr, LBN_SELCHANGE );
     }
     return 0;
@@ -1902,6 +1919,11 @@ static void LISTBOX_HandleMouseMove( HWND hwnd, LB_DESCR *descr,
 static LRESULT LISTBOX_HandleKeyDown( HWND hwnd, LB_DESCR *descr, WPARAM wParam )
 {
     INT caret = -1;
+    BOOL bForceSelection = TRUE; /* select item pointed to by focus_item */
+
+    if ((IS_MULTISELECT(descr)) || (descr->selected_item == descr->focus_item))
+       bForceSelection = FALSE; /* only for single select list */
+
     if (descr->style & LBS_WANTKEYBOARDINPUT)
     {
         caret = SendMessageA( descr->owner, WM_VKEYTOITEM,
@@ -1914,6 +1936,7 @@ static LRESULT LISTBOX_HandleKeyDown( HWND hwnd, LB_DESCR *descr, WPARAM wParam 
     case VK_LEFT:
         if (descr->style & LBS_MULTICOLUMN)
         {
+            bForceSelection = FALSE;
             if (descr->focus_item >= descr->page_size)
                 caret = descr->focus_item - descr->page_size;
             break;
@@ -1926,6 +1949,7 @@ static LRESULT LISTBOX_HandleKeyDown( HWND hwnd, LB_DESCR *descr, WPARAM wParam 
     case VK_RIGHT:
         if (descr->style & LBS_MULTICOLUMN)
         {
+            bForceSelection = FALSE;
             if (descr->focus_item + descr->page_size < descr->nb_items)
                 caret = descr->focus_item + descr->page_size;
             break;
@@ -1969,19 +1993,19 @@ static LRESULT LISTBOX_HandleKeyDown( HWND hwnd, LB_DESCR *descr, WPARAM wParam 
                                   !descr->items[descr->focus_item].selected,
                                   (descr->style & LBS_NOTIFY) != 0 );
         }
-        else if (descr->selected_item == -1)
-        {
-            LISTBOX_SetSelection( hwnd, descr, descr->focus_item, TRUE,
-                                  (descr->style & LBS_NOTIFY) != 0 );
-        }
         break;
+    default:
+        bForceSelection = FALSE;
     }
+    if (bForceSelection) /* focused item is used instead of key */
+        caret = descr->focus_item;
     if (caret >= 0)
     {
         if ((descr->style & LBS_EXTENDEDSEL) &&
             !(GetKeyState( VK_SHIFT ) & 0x8000))
             descr->anchor_item = caret;
         LISTBOX_MoveCaret( hwnd, descr, caret, TRUE );
+        LISTBOX_SetSelection( hwnd, descr, caret, TRUE, FALSE);
         if (descr->style & LBS_NOTIFY)
         {
             if( descr->lphc && CB_GETTYPE(descr->lphc) != CBS_SIMPLE )
@@ -1989,7 +2013,7 @@ static LRESULT LISTBOX_HandleKeyDown( HWND hwnd, LB_DESCR *descr, WPARAM wParam 
                 /* make sure that combo parent doesn't hide us */
                 descr->lphc->wState |= CBF_NOROLLUP;
             }
-            SEND_NOTIFICATION( hwnd, descr, LBN_SELCHANGE );
+            if (descr->nb_items) SEND_NOTIFICATION( hwnd, descr, LBN_SELCHANGE );
         }
     }
     return 0;
@@ -2019,8 +2043,10 @@ static LRESULT LISTBOX_HandleChar( HWND hwnd, LB_DESCR *descr,
         caret = LISTBOX_FindString( hwnd, descr, descr->focus_item, str, FALSE);
     if (caret != -1)
     {
+        if ((!IS_MULTISELECT(descr)) && descr->selected_item == -1)
+           LISTBOX_SetSelection( hwnd, descr, caret, TRUE, FALSE);
         LISTBOX_MoveCaret( hwnd, descr, caret, TRUE );
-        if (descr->style & LBS_NOTIFY)
+        if ((descr->style & LBS_NOTIFY) && descr->nb_items)
             SEND_NOTIFICATION( hwnd, descr, LBN_SELCHANGE );
     }
     return 0;
@@ -2133,14 +2159,32 @@ LRESULT WINAPI ListBoxWndProc( HWND hwnd, UINT msg,
 
     if (!(descr = (LB_DESCR*)GetInfoPtr(hwnd)))
     {
-        if (msg == WM_CREATE)
-        {
-            if (!LISTBOX_Create( hwnd, NULL ))
-                return -1;
-            //TRACE("creating wnd=%04x descr=%p\n",
-            //             hwnd, *(LB_DESCR **)wnd->wExtra );
-            return 0;
-        }
+        switch (msg)
+	{
+	    case WM_CREATE:
+	    {
+                if (!LISTBOX_Create( hwnd, NULL ))
+		     return -1;
+		//TRACE("creating wnd=%04x descr=%p\n",
+		//      hwnd, *(LB_DESCR **)wnd->wExtra );
+		return 0;
+	    }
+	    case WM_NCCREATE:
+	    {
+	        DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
+	
+	        /*
+		 * When a listbox is not in a combobox and the look
+		 * is win95,  the WS_BORDER style is replaced with
+		 * the WS_EX_CLIENTEDGE style.
+		 */
+	        if (dwStyle & WS_BORDER)
+		{
+	            SetWindowLongA(hwnd,GWL_EXSTYLE,GetWindowLongA(hwnd,GWL_EXSTYLE) | WS_EX_CLIENTEDGE);
+		    SetWindowLongA(hwnd,GWL_STYLE,GetWindowLongA(hwnd,GWL_STYLE)  & ~ WS_BORDER);
+		}
+	    }
+	}
         /* Ignore all other messages before we get a WM_CREATE */
         return DefWindowProcA( hwnd, msg, wParam, lParam );
     }
@@ -2165,7 +2209,10 @@ LRESULT WINAPI ListBoxWndProc( HWND hwnd, UINT msg,
         return LISTBOX_InsertString( hwnd, descr, wParam, (LPCSTR)lParam );
 
     case LB_DELETESTRING:
-        return LISTBOX_RemoveItem( hwnd, descr, wParam );
+        if (LISTBOX_RemoveItem( hwnd, descr, wParam) != LB_ERR)
+           return descr->nb_items;
+        else
+           return LB_ERR;	
 
     case LB_GETITEMDATA:
         if (((INT)wParam < 0) || ((INT)wParam >= descr->nb_items))
@@ -2193,6 +2240,8 @@ LRESULT WINAPI ListBoxWndProc( HWND hwnd, UINT msg,
     case LB_GETCURSEL:
         if (descr->nb_items==0)
           return LB_ERR;
+        if (!IS_MULTISELECT(descr))
+          return descr->selected_item;
         /* else */
         if (descr->selected_item!=-1)
           return descr->selected_item;
@@ -2226,7 +2275,11 @@ LRESULT WINAPI ListBoxWndProc( HWND hwnd, UINT msg,
         }
 
     case LB_SETCARETINDEX:
-        return LISTBOX_SetCaretIndex( hwnd, descr, wParam, !lParam );
+        if ((!IS_MULTISELECT(descr)) && (descr->selected_item != -1)) return LB_ERR;
+        if (LISTBOX_SetCaretIndex( hwnd, descr, wParam, !lParam ) == LB_ERR)
+            return LB_ERR;
+        else
+             return LB_OKAY;
 
     case LB_GETCARETINDEX:
         return descr->focus_item;
@@ -2265,6 +2318,7 @@ LRESULT WINAPI ListBoxWndProc( HWND hwnd, UINT msg,
         return LISTBOX_SetSelection( hwnd, descr, lParam, wParam, FALSE );
 
     case LB_SETCURSEL:
+        if (IS_MULTISELECT(descr)) return LB_ERR;
         LISTBOX_SetCaretIndex( hwnd, descr, wParam, TRUE );
         return LISTBOX_SetSelection( hwnd, descr, wParam, TRUE, FALSE );
 
@@ -2434,9 +2488,6 @@ LRESULT WINAPI ListBoxWndProc( HWND hwnd, UINT msg,
         }
         break;
 
-    case WM_NCCREATE:
-        SetWindowLongA(hwnd,GWL_EXSTYLE,GetWindowLongA(hwnd,GWL_EXSTYLE) | WS_EX_CLIENTEDGE);
-        return DefWindowProcA( hwnd, msg, wParam, lParam );
     default:
         //if ((msg >= WM_USER) && (msg < 0xc000))
         //    WARN("[%04x]: unknown msg %04x wp %08x lp %08lx\n",
