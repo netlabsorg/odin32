@@ -1,4 +1,4 @@
-/* $Id: codepage.cpp,v 1.17 2001-09-05 12:57:58 bird Exp $
+/* $Id: codepage.c,v 1.1 2002-02-07 16:34:52 sandervl Exp $
  *
  * Code page functions
  *
@@ -167,11 +167,10 @@ BOOL WINAPI IsValidCodePage( UINT codepage )
  */
 BOOL WINAPI IsDBCSLeadByteEx( UINT codepage, BYTE testchar )
 {
+    const union cptable *table = get_codepage_table( codepage );
 #ifdef __WIN32OS2__
     dprintf2(("IsDBCSLeadByteEx %d %x", codepage, testchar));
 #endif
-
-    const union cptable *table = get_codepage_table( codepage );
     return table && is_dbcs_leadbyte( table, testchar );
 }
 
@@ -471,22 +470,67 @@ BOOL WINAPI GetStringTypeExW( LCID locale, DWORD type, LPCWSTR src, INT count, L
     return GetStringTypeW( type, src, count, chartype );
 }
 
+/******************************************************************************
+ *		GetStringTypeA	[KERNEL32.@]
+ */
+BOOL WINAPI GetStringTypeA(LCID locale, DWORD type, LPCSTR src, INT count, LPWORD chartype)
+{
+    char buf[20];
+    UINT cp;
+    INT countW;
+    LPWSTR srcW;
+    BOOL ret = FALSE;
+
+    if(count == -1) count = strlen(src) + 1;
+
+    if(!GetLocaleInfoA(locale, LOCALE_IDEFAULTANSICODEPAGE | LOCALE_NOUSEROVERRIDE,
+		   buf, sizeof(buf)))
+    {
+	FIXME("For locale %04lx using current ANSI code page\n", locale);
+	cp = GetACP();
+    }
+    else
+	cp = atoi(buf);
+
+    countW = MultiByteToWideChar(cp, 0, src, count, NULL, 0);
+    if((srcW = HeapAlloc(GetProcessHeap(), 0, countW * sizeof(WCHAR))))
+    {
+	MultiByteToWideChar(cp, 0, src, count, srcW, countW);
+	ret = GetStringTypeW(type, srcW, count, chartype);
+	HeapFree(GetProcessHeap(), 0, srcW);
+    }
+    return ret;
+}
+
+/******************************************************************************
+ *		GetStringTypeExA	[KERNEL32.@]
+ */
+BOOL WINAPI GetStringTypeExA(LCID locale, DWORD type, LPCSTR src, INT count, LPWORD chartype)
+{
+    return GetStringTypeA(locale, type, src, count, chartype);
+}
+//******************************************************************************
+//******************************************************************************
 WCHAR WIN32API tolowerW( WCHAR ch )
 {
     extern const WCHAR casemap_lower[];
     return ch + casemap_lower[casemap_lower[ch >> 8] + (ch & 0xff)];
 }
-
+//******************************************************************************
+//******************************************************************************
 WCHAR WIN32API toupperW( WCHAR ch )
 {
     extern const WCHAR casemap_upper[];
     return ch + casemap_upper[casemap_upper[ch >> 8] + (ch & 0xff)];
 }
-
+//******************************************************************************
 /* the character type contains the C1_* flags in the low 12 bits */
 /* and the C2_* type in the high 4 bits */
+//******************************************************************************
 unsigned short get_char_typeW( WCHAR ch )
 {
     extern const unsigned short wctype_table[];
     return wctype_table[wctype_table[ch >> 8] + (ch & 0xff)];
 }
+//******************************************************************************
+//******************************************************************************

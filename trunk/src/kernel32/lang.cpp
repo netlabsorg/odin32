@@ -1,4 +1,4 @@
-/* $Id: lang.cpp,v 1.38 2001-10-28 17:15:33 sandervl Exp $ */
+/* $Id: lang.cpp,v 1.39 2002-02-07 16:34:53 sandervl Exp $ */
 /*
  * Win32 language API functions for OS/2
  *
@@ -181,8 +181,8 @@ static BOOL LocaleFromUniStr(LPWSTR lpUniStr, LPWSTR wbuf, ULONG *pLen)
 {
   if (wbuf)
   {
-    if (*pLen > UniStrlen(lpUniStr))
-      UniStrcpy(wbuf,lpUniStr);
+    if (*pLen > lstrlenW(lpUniStr))
+      lstrcpyW(wbuf,lpUniStr);
     else
     {
       SetLastError(ERROR_INSUFFICIENT_BUFFER);
@@ -191,10 +191,12 @@ static BOOL LocaleFromUniStr(LPWSTR lpUniStr, LPWSTR wbuf, ULONG *pLen)
     }
   }
 
-  *pLen=UniStrlen(lpUniStr)+1; // + null terminator
+  *pLen=lstrlenW(lpUniStr)+1; // + null terminator
 
   return TRUE;
 }
+//replaced by Wine functions in ole2nls.c
+#if 0
 //******************************************************************************
 //******************************************************************************
 static BOOL LocaleFromUniChar(WCHAR wcUniChar, LPWSTR wbuf, ULONG *pLen)
@@ -893,6 +895,7 @@ ODINFUNCTION4(int, GetLocaleInfoA, LCID, lcid, LCTYPE, LCType, LPSTR, buf,
 
   return (ret_len);
 }
+#endif
 //******************************************************************************
 //******************************************************************************
 LCID WIN32API GetThreadLocale()
