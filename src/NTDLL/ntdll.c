@@ -1,4 +1,4 @@
-/* $Id: ntdll.c,v 1.4 2003-01-22 12:56:08 sandervl Exp $ */
+/* $Id: ntdll.c,v 1.5 2003-01-23 20:21:59 sandervl Exp $ */
 
 /*
  *

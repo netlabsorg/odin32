@@ -1,4 +1,4 @@
-; $Id: ntdll-vac.def,v 1.1 2003-01-16 15:22:37 sandervl Exp $
+; $Id: ntdll-vac.def,v 1.2 2003-01-23 20:21:59 sandervl Exp $
 
 ;
 ; Based on NT 4.0 SP6: NTDLL.DLL
@@ -315,8 +315,8 @@ EXPORTS
 ;   RtlApplyRXactNoFlush                        @296
 ;   RtlAreAllAccessesGranted                        @297
 ;   RtlAreAnyAccessesGranted                        @298
-;   RtlAreBitsClear                         @299
-;   RtlAreBitsSet                           @300
+    RtlAreBitsClear                         @299
+    RtlAreBitsSet                           @300
 
     RtlAssert                     = _RtlAssert@16                       @301
 ;   RtlCaptureStackBackTrace                        @302
