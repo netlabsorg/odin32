@@ -1,4 +1,4 @@
-/* $Id: shellapi.h,v 1.7 1999-11-02 19:06:42 sandervl Exp $ */
+/* $Id: shellapi.h,v 1.8 2000-01-26 23:17:49 sandervl Exp $ */
 
 #ifndef _WINE_SHELLAPI_H
 #define _WINE_SHELLAPI_H
@@ -128,9 +128,11 @@ typedef struct tagSHFILEINFOW
 	WCHAR	szTypeName[80];		/* type name */
 } SHFILEINFOW;
 
+DECL_WINELIB_TYPE_AW(SHFILEINFO)
+
 DWORD	WINAPI SHGetFileInfoA(LPCSTR,DWORD,SHFILEINFOA*,UINT,UINT);
 DWORD	WINAPI SHGetFileInfoW(LPCWSTR,DWORD,SHFILEINFOW*,UINT,UINT);
-
+#define SHGetFileInfo WINELIB_NAME_AW(SHGetFileInfo)
 
 /******************************************
  * SHSetFileInfo
