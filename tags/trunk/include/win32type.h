@@ -1,4 +1,4 @@
-/* $Id: win32type.h,v 1.10 1999-07-18 10:36:54 sandervl Exp $ */
+/* $Id: win32type.h,v 1.11 1999-07-19 18:39:43 sandervl Exp $ */
 
 #ifndef __WIN32TYPE_H__
 #define __WIN32TYPE_H__
@@ -251,10 +251,10 @@ typedef struct
 
 typedef struct tagRECT
 {
-    INT  xLeft;
-    INT  yTop;
-    INT  xRight;
-    INT  yBottom;
+    INT  left;
+    INT  top;
+    INT  right;
+    INT  bottom;
 } RECT, *PRECT, *LPRECT;
 typedef const RECT *LPCRECT;
 
