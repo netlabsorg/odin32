@@ -1,4 +1,4 @@
-# $Id: mini.mak,v 1.1.2.1 2001-08-14 03:32:08 bird Exp $
+# $Id: mini.mak,v 1.1.2.2 2001-08-14 19:17:41 bird Exp $
 
 #
 # Odin32 API
@@ -71,9 +71,16 @@ TARGET  = mini
 # Main rule
 #
 !ifdef NORMAL
+#OBJS = $(OBJDIR)\entry.obj $(OBJS)
 $(OBJDIR)\$(TARGET).exe: $(OBJS)  $(DEFFILE) $(OBJDIR)\$(TARGET).lrf
-    -4 $(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lrf
-    $(LXLITE) $@
+    wlink system os2v2 file {$(OBJS)} name $(OBJDIR)\.exe import DosPutMessage MSG.5 \
+        option offset=0x10000 option alignment=1 option stack=4060
+    mv $(OBJDIR)\.exe $@
+#    link386 /ALIGNMENT:1 /NONULLSDOSSEG /NOSECTORALIGNCODE /BASE:0x10000 /PACKCODE /PACKDATA \
+#        $(OBJS), $(OBJDIR)\$(TARGET).exe, $(OBJDIR)\$(TARGET).map, os2386.lib, mini.def;
+#    -8 ilink /NOFREE /FORCE /ALIGNMENT:1 /Map /BASE:0x10000 /PACKCODE /PACKDATA /EXEPACK:1 \
+#        $(OBJS), $(OBJDIR)\$(TARGET).exe, $(OBJDIR)\$(TARGET).map, os2386.lib, mini.def;
+    $(LXLITE) /AN:1 /ZS:1024 /ZX:1024 /MF3 /YXD /YND $@
 
 !else
 
