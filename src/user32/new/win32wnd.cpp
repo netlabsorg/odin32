@@ -1,4 +1,4 @@
-/* $Id: win32wnd.cpp,v 1.23 1999-07-26 09:01:34 sandervl Exp $ */
+/* $Id: win32wnd.cpp,v 1.24 1999-07-26 20:03:49 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -43,6 +43,9 @@
 #define HAS_BORDER(style, exStyle) \
     ((style & WS_BORDER) || HAS_THICKFRAME(style) || HAS_DLGFRAME(style,exStyle))
 
+#define IS_OVERLAPPED(style) \
+    !(style & (WS_CHILD | WS_POPUP))
+
 //******************************************************************************
 //******************************************************************************
 Win32Window::Win32Window(DWORD objType) : GenericObject(&windows, objType)
@@ -64,6 +67,7 @@ void Win32Window::Init()
 {
   isUnicode        = FALSE;
   fCreated         = FALSE;
+  fFirstShow       = TRUE;
 
   memset(windowNameA, 0, MAX_WINDOW_NAMELENGTH);
   memset(windowNameW, 0, MAX_WINDOW_NAMELENGTH*sizeof(WCHAR));
@@ -430,9 +434,10 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
    */
   maxPos.x = rectWindow.left; maxPos.y = rectWindow.top;
 
+  fCreated = TRUE; //Allow WM_SIZE messages now
   if(SendInternalMessage(WM_NCCREATE, 0, (LPARAM)cs) )
   {
-  //doesn't work right, messes up client rectangle
+        //doesn't work right, messes up client rectangle
 #if 0
         SendNCCalcSize(FALSE, &rectWindow, NULL, NULL, 0, &rectClient );
 #endif
@@ -454,11 +459,11 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
             if (!(dwStyle & WS_CHILD) && !owner)
                 HOOK_CallHooks16( WH_SHELL, HSHELL_WINDOWCREATED, hwnd, 0 );
 #endif
-            fCreated = TRUE;
             SetLastError(0);
             return TRUE;
         }
   }
+  fCreated = FALSE;
   OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32WNDPTR, 0);
   OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32PM_MAGIC, 0);
   DestroyWindow();
@@ -472,7 +477,7 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
  * This function assumes that 'cmd' is different from the current window
  * state.
  */
-UINT Win32Window::MinMaximize(UINT16 cmd, LPRECT16 lpRect )
+UINT Win32Window::MinMaximize(UINT cmd, LPRECT lpRect )
 {
     UINT swpFlags = 0;
     POINT pt, size;
@@ -515,9 +520,7 @@ UINT Win32Window::MinMaximize(UINT16 cmd, LPRECT16 lpRect )
          break;
 
         case SW_MAXIMIZE:
-                CONV_POINT16TO32( &lpPos->ptMaxPos, &pt );
                 WINPOS_GetMinMaxInfo( wndPtr, &size, &pt, NULL, NULL );
-                CONV_POINT32TO16( &pt, &lpPos->ptMaxPos );
 
          if( dwStyle & WS_MINIMIZE )
          {
@@ -778,6 +781,12 @@ ULONG Win32Window::MsgSize(ULONG width, ULONG height, BOOL fMinimize, BOOL fMaxi
 //******************************************************************************
 ULONG Win32Window::MsgActivate(BOOL fActivate, HWND hwnd)
 {
+    if(SendInternalMessageA(WM_NCACTIVATE, fActivate, 0) == FALSE)
+    {
+        if(!fActivate) {
+            return 1;
+        }
+    }
     return SendInternalMessageA(WM_ACTIVATE, (fActivate) ? WA_ACTIVE : WA_INACTIVE, hwnd);
 }
 //******************************************************************************
@@ -814,12 +823,20 @@ ULONG Win32Window::MsgChar(ULONG cmd, ULONG repeatcnt, ULONG scancode, ULONG vke
 //******************************************************************************
 ULONG Win32Window::MsgSetFocus(HWND hwnd)
 {
+    if(hwnd == 0) {
+        //other app lost focus
+        SendInternalMessageA(WM_ACTIVATEAPP, TRUE, 0); //TODO: Need thread id from hwnd app
+    }
     return SendInternalMessageA(WM_SETFOCUS, hwnd, 0);
 }
 //******************************************************************************
 //******************************************************************************
 ULONG Win32Window::MsgKillFocus(HWND hwnd)
 {
+    if(hwnd == 0) {
+        //other app lost focus
+        SendInternalMessageA(WM_ACTIVATEAPP, FALSE, 0); //TODO: Need thread id from hwnd app
+    }
     return SendInternalMessageA(WM_KILLFOCUS, hwnd, 0);
 }
 //******************************************************************************
@@ -870,6 +887,11 @@ ULONG Win32Window::MsgButton(ULONG msg, ULONG x, ULONG y)
         default:
                 dprintf(("Win32Window::Button: invalid msg!!!!"));
                 return 1;
+    }
+    if(win32msg == WM_MBUTTONDBLCLK || win32msg == WM_RBUTTONDBLCLK || win32msg == WM_LBUTTONDBLCLK) {
+        if(!(windowClass->getClassLongA(GCL_STYLE) & CS_DBLCLKS)) {
+            return 1;
+        }
     }
     SendInternalMessageA(win32ncmsg, lastHitTestVal, MAKELONG(x, y)); //TODO:
     return SendInternalMessageA(win32msg, 0, MAKELONG(x, y));
@@ -1342,9 +1364,19 @@ BOOL Win32Window::ShowWindow(ULONG nCmdShow)
 {
  ULONG showstate = 0;
 
-  dprintf(("ShowWindow %x", nCmdShow));
-  switch(nCmdShow)
-  {
+    dprintf(("ShowWindow %x", nCmdShow));
+    if(fFirstShow) {
+        if(isFrameWindow() && IS_OVERLAPPED(getStyle())) {
+                SendMessageA(WM_SIZE, SIZE_RESTORED,
+                                MAKELONG(rectClient.right-rectClient.left,
+                                         rectClient.bottom-rectClient.top));
+                SendMessageA(WM_MOVE, 0, MAKELONG( rectClient.left, rectClient.top ) );
+
+        }
+        fFirstShow = FALSE;
+    }
+    switch(nCmdShow)
+    {
     case SW_SHOW:
     case SW_SHOWDEFAULT: //todo
         showstate = SWPOS_SHOW | SWPOS_ACTIVATE;
@@ -1376,8 +1408,8 @@ BOOL Win32Window::ShowWindow(ULONG nCmdShow)
     case SW_SHOWNORMAL:
         showstate = SWPOS_RESTORE | SWPOS_ACTIVATE | SWPOS_SHOW;
         break;
-  }
-  return OSLibWinShowWindow(OS2HwndFrame, showstate);
+    }
+    return OSLibWinShowWindow(OS2HwndFrame, showstate);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1390,7 +1422,7 @@ BOOL Win32Window::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, int c
     case HWND_BOTTOM:
         hwndInsertAfter = HWNDOS_BOTTOM;
         break;
-    case HWND_TOPMOST: //TODO:
+    case HWND_TOPMOST: //TODO
     case HWND_NOTOPMOST: //TODO:
     case HWND_TOP:
         hwndInsertAfter = HWNDOS_TOP;
@@ -1401,31 +1433,37 @@ BOOL Win32Window::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, int c
             hwndInsertAfter = window->getOS2WindowHandle();
             PRECT clientRect = window->getClientRect();
 
-#if 0
+#if 1
             if(x+cx > clientRect->right - clientRect->left) {
+                dprintf(("Adjusting cx from %d to %d", cx, (clientRect->right - clientRect->left) - x));
                 cx = (clientRect->right - clientRect->left) - x;
             }
             if(y+cy > clientRect->bottom - clientRect->top) {
+                dprintf(("Adjusting cy from %d to %d", cy, (clientRect->bottom - clientRect->top) - y));
                 cy = (clientRect->bottom - clientRect->top) - y;
             }
 #endif
+            //Correct coordinates if parent is a frame window (border adjustment)
             //TODO: Not quite right (Solitaire child window placement slightly wrong)
-            if (HAS_DLGFRAME(window->getStyle(), window->getExStyle() ))
-            {
-                x += GetSystemMetrics(SM_CXDLGFRAME);
-                y -= GetSystemMetrics(SM_CYDLGFRAME);
-            }
-            else
-            {
-                if (HAS_THICKFRAME(window->getStyle()))
+            if (window->isFrameWindow() && !(fuFlags & SWP_NOMOVE)) {
+                if (HAS_DLGFRAME(window->getStyle(), window->getExStyle() ))
                 {
-                    x += GetSystemMetrics(SM_CXFRAME);
-                    y -= GetSystemMetrics(SM_CYFRAME);
+                    x += GetSystemMetrics(SM_CXDLGFRAME);
+                    y -= GetSystemMetrics(SM_CYDLGFRAME);
                 }
-                if (window->getStyle() & WS_BORDER)
+                else
                 {
-                    x += GetSystemMetrics(SM_CXBORDER);
-                    y -= GetSystemMetrics(SM_CYBORDER);
+                    if (HAS_THICKFRAME(window->getStyle()))
+                    {
+                        x += GetSystemMetrics(SM_CXFRAME);
+                        y -= GetSystemMetrics(SM_CYFRAME);
+                    }
+                    else
+                    if (window->getStyle() & WS_BORDER)
+                    {
+                        x += GetSystemMetrics(SM_CXBORDER);
+                        y -= GetSystemMetrics(SM_CYBORDER);
+                    }
                 }
             }
         }
@@ -1611,12 +1649,6 @@ BOOL Win32Window::EnableWindow(BOOL fEnable)
 BOOL Win32Window::CloseWindow()
 {
   return OSLibWinMinimizeWindow(OS2Hwnd);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL Win32Window::BringWindowToTop()
-{
-  return SetWindowPos(HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE );
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.18 1999-07-26 09:01:34 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.19 1999-07-26 20:03:49 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -11,6 +11,7 @@
  */
 #ifndef __OSLIBWIN_H__
 #define __OSLIBWIN_H__
+#include <oslibgdi.h>
 
 #define OSLIB_HWND_DESKTOP      0
 BOOL  OSLibWinSetParent(HWND hwnd, HWND hwndParent, ULONG fRedraw = TRUE);
@@ -207,5 +208,7 @@ BOOL  OSLibWinSetWindowText(HWND hwnd, LPSTR lpsz);
 BOOL  OSLibWinFlashWindow(HWND hwnd, BOOL fFlash);
 HWND  OSLibWinWindowFromPoint(HWND hwnd, PVOID ppoint);
 BOOL  OSLibWinMinimizeWindow(HWND hwnd);
+
+BOOL  OSLibWinGetBorderSize(HWND hwnd, OSLIBPOINT *pointl);
 
 #endif //__OSLIBWIN_H__
