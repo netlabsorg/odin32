@@ -1,4 +1,4 @@
-/* $Id: win32k.h,v 1.1 2000-09-02 21:11:22 bird Exp $
+/* $Id: win32k.h,v 1.2 2000-10-01 02:59:18 bird Exp $
  *
  * Top level make file for the Win32k library.
  * Contains library and 32-bit IOCtl definition.
@@ -27,6 +27,7 @@
 #define K32_QUERYOTES           0x02
 #define K32_QUERYOPTIONSSTATUS  0x03
 #define K32_SETOPTIONS          0x04
+#define K32_PROCESSREADWRITE    0x05
 
 /*
  * Elf category
@@ -183,6 +184,18 @@ typedef struct _k32SetOptions
     ULONG           rc;                 /* Return code. */
 } K32SETOPTIONS, *PK32SETOPTIONS;
 
+typedef struct _k32ProcessReadWrite
+{
+    PID         pid;                    /* Process ID of the process to access memory in. */
+    ULONG       cb;                     /* Number of bytes to read or write. */
+    PVOID       pvSource;               /* Pointer to source data. */
+    PVOID       pvTarget;               /* Pointer to target area. */
+    BOOL        fRead;                  /* TRUE:   pvSource is within pid while pvTarget is ours. */
+                                        /* FALSE:  pvTarget is within pid while pvSource is ours. */
+    ULONG       rc;                     /* Return code. */
+} K32PROCESSREADWRITE, *PK32PROCESSREADWRITE;
+
+
 
 #pragma pack()
 
@@ -196,10 +209,12 @@ APIRET APIENTRY  libWin32kTerm(void);
 BOOL   APIENTRY  libWin32kInstalled(void);
 APIRET APIENTRY  libWin32kQueryOptionsStatus(PK32OPTIONS pOptions, PK32STATUS pStatus);
 APIRET APIENTRY  libWin32kSetOptions(PK32OPTIONS pOptions);
+APIRET APIENTRY  libWin32kSetOption(PK32OPTIONS pOptions);
 
 /* "Extra OS2 APIs" */
 APIRET APIENTRY  DosAllocMemEx(PPVOID ppv, ULONG cb, ULONG flag);
 APIRET APIENTRY  W32kQueryOTEs(HMODULE hMTE, PQOTEBUFFER pQOte, ULONG cbQOte);
+APIRET APIENTRY  W32kProcessReadWrite(PID pid, ULONG cb, PVOID pvSource, PVOID pvTarget, BOOL fRead);
 
 /* Helper function */
 USHORT APIENTRY  libHelperGetCS(void);
