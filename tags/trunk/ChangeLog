@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1341 2001-04-02 17:31:30 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1342 2001-04-02 18:24:56 sandervl Exp $ */
 
  2001-04-02: Sander van Leeuwen <sandervl@xs4all.nl>   
     - USER32:   o Mouse message translation fix (check capture)
@@ -15,6 +15,14 @@
                   TODO: find real cause
     - MSACM32:  o Ported latest Wine version
     - WINMM:    o Ported latest Wine driver.c (necessary for msacm32 update)
+    - DDRAW:    o Back buffer fix; setup surface descriptor structure and
+                  don't clear DDSCAPS_BACKBUFFER flag
+                  (fix for WinDVD)
+                o SurfLock:  hEvent can be 0 as long as the DDLOCK_EVENT flag 
+                  isn't set.
+                  Size of lpSurfaceDesc can be sizeof(DDSURFACEDESC2).
+                  (fix for WinDVD)
+
 
  2001-04-02: Michal Necasek <michalnec@volny.cz>
     - KERNEL32: o Fix for importing from executable
