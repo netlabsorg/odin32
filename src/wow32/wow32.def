@@ -1,0 +1,12 @@
+; $Id: wow32.def,v 1.1 2001-05-28 18:13:48 phaller Exp $
+
+;
+; Based on NT 4.0 SP1: WOW32.DLL 
+;
+LIBRARY WOW32 INITINSTANCE
+DATA MULTIPLE NONSHARED
+
+DESCRIPTION "WOW32"
+
+EXPORTS
+    WOWHandle16                = _WOWHandle16@8
