@@ -173,4 +173,6 @@ BOOL    WIN32API IsIconic( HWND hwnd);
 INT     WIN32API GetSystemMetrics(INT);
 UINT    WIN32API GetDoubleClickTime(void);
 
+UINT      WINAPI SetErrorMode(UINT);
+
 #endif
