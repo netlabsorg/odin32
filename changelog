@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.602 2000-01-02 21:32:50 davidr Exp $ */
+ /* $Id: changelog,v 1.603 2000-01-02 22:12:25 sandervl Exp $ */
 
  2000-01-02: David Raison <djr@lemur.co.uk>
         - OLEAUT32: Typelib fixes - Custom Data & Default values.
@@ -12,6 +12,8 @@
 
  2000-01-02: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Implemented Set/GetWindowRgn (not activated)
+	- KERNEL32: Fixed Odin zombie processes when there's a trap inside
+                    vfprintf during logging.
 
  2000-01-01: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Workaround for crash in Lotus Notes when switching to a new
