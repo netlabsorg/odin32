@@ -1,4 +1,4 @@
-; $Id: interlock.asm,v 1.8 2001-05-19 11:14:38 sandervl Exp $
+; $Id: interlock.asm,v 1.9 2001-05-28 12:39:33 phaller Exp $
 
 ;/*
 ; * Interlocked apis
@@ -33,8 +33,12 @@ CODE32         SEGMENT DWORD PUBLIC USE32 'CODE'
 _InterlockedIncrement@4 proc near
 	mov	eax, dword ptr [esp+4] ; LPLONG lpAddend
   	lock 	inc dword ptr [eax] 
-       	mov 	eax, 0
-       	je   	@end                  ; not incremented?
+       	mov 	eax, 0                 ; Note: must be "MOV eax,0"
+                                       ; instead of faster "XOR eax,eax"
+                                       ; because MOV doesn't tough any
+                                       ; flag register.
+                                       
+       	je   	@end                   ; not incremented?
        	jl   	@decr
        	inc 	eax                    ; ?
        	jmp  	@end
@@ -56,7 +60,10 @@ _InterlockedIncrement@4 endp
 _InterlockedDecrement@4 proc near
 	mov	eax, dword ptr [esp+4] ; LPLONG lpAddend
   	lock 	dec dword ptr [eax] 
-       	mov 	eax, 0
+       	mov 	eax, 0                 ; Note: must be "MOV eax,0"
+                                       ; instead of faster "XOR eax,eax"
+                                       ; because MOV doesn't tough any
+                                       ; flag register.
        	je   	@end                   ; not decremented?
        	jl   	@decr
        	inc 	eax                    ; ?
