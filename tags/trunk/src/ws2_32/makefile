@@ -1,9 +1,9 @@
-# $Id: makefile,v 1.4 2001-10-10 17:19:33 sandervl Exp $
+# $Id: makefile,v 1.5 2001-11-22 20:50:52 bird Exp $
 
 #
 # Odin32 API
 #
-#       wsock32.dll makefile
+#       ws2_32.dll makefile
 #
 
 

@@ -1,9 +1,9 @@
-# $Id: makefile,v 1.4 2000-12-02 23:57:15 bird Exp $
+# $Id: makefile,v 1.5 2001-11-22 20:47:38 bird Exp $
 
 #
 # Odin32 API
 #
-#       shlwapi.dll makefile
+#       shfolder.dll makefile
 #
 
 
