@@ -1,4 +1,4 @@
-/* $Id: HOOK.CPP,v 1.11 2000-02-16 14:34:02 sandervl Exp $ */
+/* $Id: HOOK.CPP,v 1.12 2000-02-29 19:16:11 sandervl Exp $ */
 
 /*
  * Windows hook functions
@@ -696,3 +696,10 @@ BOOL WINAPI CallMsgFilterW( LPMSG msg, INT code )
     return HOOK_CallHooksW( WH_MSGFILTER, code, 0, (LPARAM)msg );
 }
 
+
+BOOL ProcessKbdHook(LPMSG msg, BOOL remove )
+{
+    return (HOOK_CallHooksA( WH_KEYBOARD, remove ? HC_ACTION : HC_NOREMOVE,
+                             LOWORD (msg->wParam), msg->lParam )
+                             ? TRUE : FALSE);
+}
