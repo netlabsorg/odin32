@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.314 2002-02-12 18:07:20 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.315 2002-03-04 10:45:30 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2275,8 +2275,11 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
     case SW_SHOWNORMAL:  /* same as SW_NORMAL: */
     case SW_SHOWDEFAULT: /* FIXME: should have its own handler */
     case SW_RESTORE:
-         swp |= SWP_SHOWWINDOW | SWP_FRAMECHANGED;
+         dprintf(("ShowWindow:restoring window"));
+         //Set client rectangle to 0 (contains negative values)
+         setClientRect(0,0,0,0);
 
+         swp |= SWP_SHOWWINDOW | SWP_FRAMECHANGED;
          if( getStyle() & (WS_MINIMIZE | WS_MAXIMIZE) ) {
               swp |= MinMaximize(SW_RESTORE, &newPos );
               fMinMaxChange = TRUE; //-> invalidate entire window in WM_CALCINVALIDRECT
