@@ -56,9 +56,9 @@ DEFAULT_DEBUG_CHANNEL(crtdll);
 
 
 extern void __CRTDLL__set_errno(ULONG err);
-extern LPVOID __cdecl CRTDLL_calloc(DWORD size, DWORD count);
-extern VOID __cdecl CRTDLL_free(void *ptr);
-extern VOID __cdecl CRTDLL__exit(LONG ret);
+extern LPVOID CDECL CRTDLL_calloc(DWORD size, DWORD count);
+extern VOID CDECL CRTDLL_free(void *ptr);
+extern VOID CDECL CRTDLL__exit(LONG ret);
 extern INT CRTDLL_doserrno;
 
 
@@ -153,7 +153,7 @@ static LPSTR __CRTDLL__argvtos(LPSTR *arg, CHAR delim)
  * Spawn a process.
  *
  */
-HANDLE __cdecl CRTDLL__spawnve(INT flags, LPSTR name, LPSTR *argv, LPSTR *envv)
+HANDLE CDECL CRTDLL__spawnve(INT flags, LPSTR name, LPSTR *argv, LPSTR *envv)
 {
   // return (_spawnve(i, s1, s2, s3));
   
@@ -182,7 +182,7 @@ HANDLE __cdecl CRTDLL__spawnve(INT flags, LPSTR name, LPSTR *argv, LPSTR *envv)
 /*********************************************************************
  *                  system       (CRTDLL.485)
  */
-INT __cdecl CRTDLL_system(LPSTR x)
+INT CDECL CRTDLL_system(LPSTR x)
 {
   // return system(string);
   

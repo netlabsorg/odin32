@@ -1,4 +1,4 @@
-/* $Id: crt_string.cpp,v 1.3 2000-11-21 23:48:49 phaller Exp $ */
+/* $Id: string.c,v 1.1 2000-11-22 01:11:01 phaller Exp $ */
 
 /*
  * The C RunTime DLL
@@ -16,14 +16,15 @@
  * MT Safe.
  */
 
-#include <odin.h>
-#include <os2win.h>
-#include <ctype.h>
-#include <heapstring.h>
+//#include <odin.h>
+//#include <os2win.h>
+//#include <ctype.h>
+//#include <heapstring.h>
 #include <string.h>
 
 
 #include "crtdll.h"
+#include "winuser.h"
 
 
 DEFAULT_DEBUG_CHANNEL(crtdll);
@@ -126,10 +127,10 @@ char * CDECL CRTDLL__strtime( char *buf )
  */
 LPSTR CDECL CRTDLL__strupr(LPSTR x)
 {
+  LPSTR y=x;
+  
   dprintf2(("CRTDLL: _strupr(%s)\n",
            x));
-
-  LPSTR y=x;
 
   while (*y)
   {
@@ -393,7 +394,6 @@ size_t CDECL CRTDLL_strxfrm( char *s1, const char *s2, size_t n )
 
 
 /* INTERNAL: CRTDLL_malloc() based strndup */
-LPSTR __CRTDLL__strndup(LPSTR buf, INT size);
 LPSTR __CRTDLL__strndup(LPSTR buf, INT size)
 {
   char* ret;

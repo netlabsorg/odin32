@@ -59,7 +59,7 @@ static void __CRTDLL__fttofd(LPWIN32_FIND_DATAA fd, find_t* ft)
  * 
  * Failure: -1
  */
-INT __cdecl CRTDLL__chdir(LPCSTR newdir)
+INT CDECL CRTDLL__chdir(LPCSTR newdir)
 {
   if (!SetCurrentDirectoryA(newdir))
   {
@@ -83,7 +83,7 @@ INT __cdecl CRTDLL__chdir(LPCSTR newdir)
  * 
  * Failure: 1 
  */
-BOOL __cdecl CRTDLL__chdrive(INT newdrive)
+BOOL CDECL CRTDLL__chdrive(INT newdrive)
 {
   char buffer[3] = "A:";
   buffer[0] += newdrive - 1;
@@ -111,7 +111,7 @@ BOOL __cdecl CRTDLL__chdrive(INT newdrive)
  *
  * Failure:  -1
  */
-INT __cdecl CRTDLL__findclose(DWORD hand)
+INT CDECL CRTDLL__findclose(DWORD hand)
 {
   TRACE(":handle %ld\n",hand);
   if (!FindClose((HANDLE)hand))
@@ -141,7 +141,7 @@ INT __cdecl CRTDLL__findclose(DWORD hand)
  *
  * Failure:  -1.
  */
-DWORD __cdecl CRTDLL__findfirst(LPCSTR fspec, find_t* ft)
+DWORD CDECL CRTDLL__findfirst(LPCSTR fspec, find_t* ft)
 {
   WIN32_FIND_DATAA find_data;
   HANDLE hfind;
@@ -174,7 +174,7 @@ DWORD __cdecl CRTDLL__findfirst(LPCSTR fspec, find_t* ft)
  *
  * Failure:  -1
  */
-INT __cdecl CRTDLL__findnext(DWORD hand, find_t * ft)
+INT CDECL CRTDLL__findnext(DWORD hand, find_t * ft)
 {
   WIN32_FIND_DATAA find_data;
 
@@ -205,7 +205,7 @@ INT __cdecl CRTDLL__findnext(DWORD hand, find_t * ft)
  *
  * Failure: NULL
  */
-CHAR* __cdecl CRTDLL__getcwd(LPSTR buf, INT size)
+CHAR* CDECL CRTDLL__getcwd(LPSTR buf, INT size)
 {
   // return (_getcwd(buf, size));
   
@@ -237,7 +237,7 @@ CHAR* __cdecl CRTDLL__getcwd(LPSTR buf, INT size)
  * Get the current directory on a drive. A: =1, B: =2, etc.
  * Passing drive 0 means the current drive.
  */
-CHAR* __cdecl CRTDLL__getdcwd(INT drive,LPSTR buf, INT size)
+CHAR* CDECL CRTDLL__getdcwd(INT drive,LPSTR buf, INT size)
 {
   // return (_getdcwd(drive, buffer, maxlen));
   
@@ -280,7 +280,7 @@ CHAR* __cdecl CRTDLL__getdcwd(INT drive,LPSTR buf, INT size)
  * Get free disk space on given drive or the current drive.
  *
  */
-UINT __cdecl CRTDLL__getdiskfree(UINT disk, diskfree_t* d)
+UINT CDECL CRTDLL__getdiskfree(UINT disk, diskfree_t* d)
 {
   char drivespec[4] = {'@', ':', '\\', 0};
   DWORD ret[4];
@@ -310,7 +310,7 @@ UINT __cdecl CRTDLL__getdiskfree(UINT disk, diskfree_t* d)
  *
  *  Return current drive, A: =1, B: =2, etc
  */
-INT __cdecl CRTDLL__getdrive(VOID)
+INT CDECL CRTDLL__getdrive(VOID)
 {
   // return DRIVE_GetCurrentDrive() + 1;
   
@@ -326,7 +326,7 @@ INT __cdecl CRTDLL__getdrive(VOID)
  *
  * Create a directory.
  */
-INT __cdecl CRTDLL__mkdir(LPCSTR newdir)
+INT CDECL CRTDLL__mkdir(LPCSTR newdir)
 {
   if (CreateDirectoryA(newdir,NULL))
     return 0;
@@ -341,7 +341,7 @@ INT __cdecl CRTDLL__mkdir(LPCSTR newdir)
  * Delete a directory 
  *
  */
-INT __cdecl CRTDLL__rmdir(LPSTR dir)
+INT CDECL CRTDLL__rmdir(LPSTR dir)
 {
   if (RemoveDirectoryA(dir))
     return 0;
