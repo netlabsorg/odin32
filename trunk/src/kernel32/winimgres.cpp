@@ -1,4 +1,4 @@
-/* $Id: winimgres.cpp,v 1.46 2000-09-08 18:07:52 sandervl Exp $ */
+/* $Id: winimgres.cpp,v 1.47 2000-10-05 19:38:45 sandervl Exp $ */
 
 /*
  * Win32 PE Image class (resource methods)
@@ -423,6 +423,7 @@ BOOL Win32ImageBase::enumResourceNamesA(HMODULE hmod,
                     pszASCII = (char*)pszTmp;
                 }
 		lstrcpynWtoA(pszASCII, pResDirString->NameString, pResDirString->Length+1);
+		pszASCII[pResDirString->Length] = 0;
                 lpszName = pszASCII;
             }
             else
