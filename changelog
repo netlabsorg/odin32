@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.1313 2001-03-20 23:18:54 mike Exp $ */
+/* $Id: changelog,v 1.1314 2001-03-21 12:35:13 sandervl Exp $ */
+
+ 2001-03-21: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Added support for disabling logging for a specific thread
+    - WINMM:    o Pause playback after underrun & restart it properly when
+                  new buffers arrive.
 
  2001-03-20: Michal Necasek <michalnec@volny.cz>
     - include/DDRAW:
@@ -7,7 +12,7 @@
 
  2001-03-21: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Odin32Api:
-                 o Added sample makefile (from the Generic SDK sample)
+                o Added sample makefile (from the Generic SDK sample)
                    (Just remeber to rename the generic.rc to resource.orc.)
 
  2001-03-20: Sander van Leeuwen <sandervl@xs4all.nl>
