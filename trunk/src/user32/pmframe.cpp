@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.47 2000-04-01 10:01:53 sandervl Exp $ */
+/* $Id: pmframe.cpp,v 1.48 2000-04-10 19:40:45 sandervl Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -473,9 +473,31 @@ PosChangedEnd:
 
     case WM_DESTROY:
       dprintf(("PMFRAME: WM_DESTROY %x",hwnd));
+      WinSetVisibleRegionNotify(hwnd, FALSE);
       WinSubclassWindow(hwnd,OldFrameProc);
       win32wnd->setOldFrameProc(NULL);
       goto RunDefFrameProc;
+
+    case WM_VRNENABLED:
+      	if(!win32wnd->isComingToTop() && ((win32wnd->getStyle() & WS_EX_TOPMOST_W) == WS_EX_TOPMOST_W))
+	{
+ 	 	HWND hwndrelated;
+		Win32BaseWindow *topwindow;
+
+		win32wnd->setComingToTop(TRUE);
+
+		hwndrelated = WinQueryWindow(hwnd, QW_PREV);
+		dprintf(("WM_VRNENABLED hwndrelated = %x (hwnd=%x)", hwndrelated, hwnd));
+		topwindow = Win32BaseWindow::GetWindowFromOS2FrameHandle(hwndrelated);
+		if(topwindow == NULL || ((win32wnd->getStyle() & WS_EX_TOPMOST_W) == 0)) {
+			//put window at the top of z order
+			WinSetWindowPos( hwnd, HWND_TOP, 0, 0, 0, 0, SWP_ZORDER );
+		}
+
+		win32wnd->setComingToTop(FALSE);
+		break;
+	}
+	goto RunDefFrameProc;
 
     default:
       RestoreOS2TIB();

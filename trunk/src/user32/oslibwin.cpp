@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.72 2000-03-27 15:06:29 cbratschi Exp $ */
+/* $Id: oslibwin.cpp,v 1.73 2000-04-10 19:40:44 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -927,6 +927,12 @@ void OSLibSetWindowStyle(HWND hwnd, ULONG dwStyle, ULONG dwExStyle, BOOL saveBit
   WinSetWindowULong(hwnd, QWL_STYLE,
                     (WinQueryWindowULong(hwnd, QWL_STYLE) & ~0xffff0000) |
                      dwWinStyle);
+}
+//******************************************************************************
+//******************************************************************************
+void OSLibWinSetVisibleRegionNotify(HWND hwnd, BOOL fNotify)
+{
+  WinSetVisibleRegionNotify(hwnd, fNotify);
 }
 //******************************************************************************
 //******************************************************************************
