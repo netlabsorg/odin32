@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.44 2002-02-02 14:19:01 sandervl Exp $ */
+/* $Id: misc.cpp,v 1.45 2002-02-03 10:59:23 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -364,7 +364,7 @@ int SYSTEM WriteLog(char *tekst, ...)
       if(sel == 0x150b && !fIsOS2Image) 
         fprintf(flog, 
 #ifdef SHOW_FPU_CONTROLREG
-                "t%02d (%3d)(%3x) : ",
+                "t%02d (%3d)(%3x): ",
                 teb->o.odin.threadId,
                 ulCallDepth,
                 CONTROL87(0,0));
@@ -376,12 +376,12 @@ int SYSTEM WriteLog(char *tekst, ...)
       else 
         fprintf(flog, 
 #ifdef SHOW_FPU_CONTROLREG
-                "t%02d (%3d)(%3x) : ",
+                "t%02d (%3d)(%3x): ",
                 teb->o.odin.threadId,
                 ulCallDepth,
                 CONTROL87(0,0));
 #else
-                "t%02d (%3d) : ",
+                "t%02d (%3d): ",
                 teb->o.odin.threadId,
                 ulCallDepth);
 #endif
