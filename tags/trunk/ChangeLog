@@ -1,4 +1,10 @@
- /* $Id: ChangeLog,v 1.379 1999-10-28 18:24:55 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.380 1999-10-28 19:09:48 sandervl Exp $ */
+
+ 99-10-28: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+	- USER32: LoadBitmapW fix
+                  ModifyMenuW/InsertMenuW fixes.
+                  Call CallWindowProcA/W in Send(Internal)MessageA/W
+                  (in preparation of Wine unicode msg translation port)
 
  99-10-28: Sander van Leeuwen <sandervl@xs4all.nl>
 	- ADVAPI32: Fixed dprintf bugs in OpenSCManagerA/W (%s instead of %d)
