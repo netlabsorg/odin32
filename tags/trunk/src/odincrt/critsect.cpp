@@ -1,4 +1,4 @@
-/* $Id: critsect.cpp,v 1.3 2002-07-18 20:26:28 sandervl Exp $ */
+/* $Id: critsect.cpp,v 1.4 2002-07-19 11:06:45 sandervl Exp $ */
 /*
  * Critical sections
  * 
@@ -73,7 +73,7 @@ VOID WIN32API DosInitializeCriticalSection(CRITICAL_SECTION_OS2 *crit, PSZ pszSe
     crit->RecursionCount = 0;
     crit->OwningThread   = 0;
 
-    rc = DosCreateMutexSem(pszSemName, &crit->hmtxLock, (pszSemName) ? DC_SEM_SHARED : 0, TRUE);
+    rc = DosCreateEventSem(pszSemName, &crit->hmtxLock, (pszSemName) ? DC_SEM_SHARED : 0, 0);
     if(rc != NO_ERROR) {
         DebugInt3();
         crit->hmtxLock = 0;
@@ -95,7 +95,7 @@ VOID WIN32API DosAccessCriticalSection(CRITICAL_SECTION_OS2 *, PSZ pszSemName)
         return;
     }
 
-    rc = DosOpenMutexSem(pszSemName, &hmtxLock);
+    rc = DosOpenEventSem(pszSemName, &hmtxLock);
     if(rc != NO_ERROR) {
         DebugInt3();
     }
@@ -114,7 +114,7 @@ void WIN32API DosDeleteCriticalSection( CRITICAL_SECTION_OS2 *crit )
         crit->LockCount      = -1;
         crit->RecursionCount = 0;
         crit->OwningThread   = 0;
-        DosCloseMutexSem(crit->hmtxLock);
+        DosCloseEventSem(crit->hmtxLock);
         crit->hmtxLock       = 0;
         crit->Reserved       = (DWORD)-1;
     }
@@ -127,6 +127,7 @@ void WIN32API DosDeleteCriticalSection( CRITICAL_SECTION_OS2 *crit )
 void WIN32API DosEnterCriticalSection( CRITICAL_SECTION_OS2 *crit )
 {
     DWORD res;
+    DWORD threadid = GetCurrentThreadId();
 
     if (!crit->hmtxLock)
     {
@@ -134,14 +135,26 @@ void WIN32API DosEnterCriticalSection( CRITICAL_SECTION_OS2 *crit )
     }
     if (DosInterlockedIncrement( &crit->LockCount ))
     {
-        if (crit->OwningThread == GetCurrentThreadId())
+testenter:
+        if (crit->OwningThread == threadid)
         {
             crit->RecursionCount++;
             return;
         }
 
-        /* Now wait for it */
-        APIRET rc = DosRequestMutexSem(crit->hmtxLock, SEM_INDEFINITE_WAIT);
+        if(DosInterlockedCompareExchange((PLONG)&crit->OwningThread, threadid, 0)) 
+        {
+            ULONG ulnrposts;
+
+            /* Now wait for it */
+            APIRET rc = DosWaitEventSem(crit->hmtxLock, SEM_INDEFINITE_WAIT);
+            if(rc != NO_ERROR) {
+                DebugInt3();
+                return;
+            }
+            DosResetEventSem(crit->hmtxLock, &ulnrposts);
+            goto testenter;
+        }
     }
     crit->OwningThread   = GetCurrentThreadId();
     crit->RecursionCount = 1;
@@ -160,7 +173,6 @@ BOOL WIN32API DosTryEnterCriticalSection( CRITICAL_SECTION_OS2 *crit )
             crit->RecursionCount++;
             return TRUE;
         }
-        /* FIXME: this doesn't work */
         DosInterlockedDecrement( &crit->LockCount );
         return FALSE;
     }
@@ -186,7 +198,7 @@ void WIN32API DosLeaveCriticalSection( CRITICAL_SECTION_OS2 *crit )
     if (DosInterlockedDecrement( &crit->LockCount ) >= 0)
     {
         /* Someone is waiting */
-        DosReleaseMutexSem(crit->hmtxLock);
+        DosPostEventSem(crit->hmtxLock);
     }
 }
 
