@@ -1,4 +1,4 @@
-/* $Id: region.cpp,v 1.15 2000-11-04 16:29:24 sandervl Exp $ */
+/* $Id: region.cpp,v 1.16 2000-11-05 18:48:22 sandervl Exp $ */
 
 /*
  * GDI32 region code
@@ -66,11 +66,11 @@ BOOL InitRegionSpace()
 }
 //******************************************************************************
 //******************************************************************************
-static LONG clientHeight(HWND hwnd, pDCData pHps)
+static LONG hdcHeight(HWND hwnd, pDCData pHps)
 {
     if(hwnd == 0 && pHps != 0)
         hwnd = pHps->hwnd;
-  
+
     if(hwnd != 0 || pHps == 0)
     {
         RECT rect;
@@ -111,11 +111,11 @@ static LONG clientHeight(HWND hwnd, pDCData pHps)
 }
 //******************************************************************************
 //******************************************************************************
-static LONG clientWidth(HWND hwnd, pDCData pHps)
+static LONG hdcWidth(HWND hwnd, pDCData pHps)
 {
     if(hwnd == 0 && pHps != 0)
         hwnd = pHps->hwnd;
-  
+
     if(hwnd != 0 || pHps == 0)
     {
         RECT rect;
@@ -175,8 +175,8 @@ static void convertDeviceRect(HWND hwnd, pDCData pHps, PRECTL pRectl, ULONG coun
         wWidth  = OSLibGetScreenWidth();
     }
     else {
-        wHeight = clientHeight(hwnd, pHps);
-        wWidth  = clientWidth(hwnd, pHps);
+        wHeight = hdcHeight(hwnd, pHps);
+        wWidth  = hdcWidth(hwnd, pHps);
     }
 
     if(pHps)
@@ -564,9 +564,9 @@ ODINFUNCTIONNODBG2(int, GetClipBox, HDC, hdc, PRECT, lpRect)
 #ifndef INVERT
             //Convert coordinates from PM to win32
             if (pHps->yInvert > 0) {
-   	         LONG temp     = pHps->yInvert - rectl.yBottom;
+             LONG temp     = pHps->yInvert - rectl.yBottom;
                  rectl.yBottom = pHps->yInvert - rectl.yTop;
-	         rectl.yTop    = temp;
+             rectl.yTop    = temp;
             }
 #endif
             //Convert including/including to including/excluding
@@ -588,7 +588,7 @@ ODINFUNCTIONNODBG2(int, GetClipBox, HDC, hdc, PRECT, lpRect)
         }
     }
 //    if(lpRect->left == 0 && lpRect->top == 0 && lpRect->right == 0 && lpRect->bottom == 0)
-// 	DebugInt3();
+//  DebugInt3();
     dprintf(("GDI32: GetClipBox of %X returned %d; (%d,%d)(%d,%d)", hdc, rc, lpRect->left, lpRect->top, lpRect->right, lpRect->bottom));
     return rc;
 }

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.28 2000-11-04 16:29:24 sandervl Exp $
+# $Id: makefile,v 1.29 2000-11-05 18:48:22 sandervl Exp $
 
 #
 # Odin32 API
@@ -41,6 +41,7 @@ $(OBJDIR)\palette.obj \
 $(OBJDIR)\line.obj \
 $(OBJDIR)\oslibgpi.obj \
 $(OBJDIR)\region.obj \
+$(OBJDIR)\transform.obj \
 $(OBJDIR)\metafile.obj \
 $(OBJDIR)\dibitmap.obj \
 $(OBJDIR)\blit.obj \
