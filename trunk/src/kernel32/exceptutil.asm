@@ -1,4 +1,4 @@
-; $Id: exceptutil.asm,v 1.22 2003-02-05 14:04:33 sandervl Exp $
+; $Id: exceptutil.asm,v 1.23 2003-02-10 16:05:39 sandervl Exp $
 
 ;/*
 ; * Project Odin Software License can be found in LICENSE.TXT
@@ -160,15 +160,32 @@ _AsmCallThreadHandler proc near
         mov	ebp, esp
 
 ;We're asking for problems if our stack start near a 64kb boundary
-;Some OS/2 thunking procedures can choke on misaligned stack addresses
+;Some OS/2 thunking procedures can choke if there's not enough stack left
         mov     eax, esp
         and     eax, 0FFFFh
         cmp     eax, 0E000h
         jge     @goodthreadstack
 
-        ;set ESP to the top of the next 64kb block
-        add     eax, 16
-        sub     esp, eax
+        ;set ESP to the top of the next 64kb block and touch each
+        ;page to make sure the guard page exception handler commits
+        ;those pages
+        mov     edx, esp
+        sub     edx, eax
+
+        and     esp, 0FFFFF000h
+        dec     esp
+
+@touchthreadstackpages:
+        mov     al, byte ptr [esp]
+
+        sub     esp, 1000h
+
+        cmp     esp, edx
+        jg      @touchthreadstackpages
+
+        mov     esp, edx
+        sub     esp, 16
+
 @goodthreadstack:
 
         push    dword ptr [ebp+12]
@@ -186,15 +203,33 @@ _CallEntryPoint proc near
         mov	ebp, esp
 
 ;We're asking for problems if our stack start near a 64kb boundary
-;Some OS/2 thunking procedures can choke on misaligned stack addresses
+;Some OS/2 thunking procedures can choke if there's not enough stack left
         mov     eax, esp
         and     eax, 0FFFFh
         cmp     eax, 0E000h
-        jge     @goodstack
+        jge     @goodmainstack
 
-        add     eax, 1000h
-        sub     esp, eax
-@goodstack:
+        ;set ESP to the top of the next 64kb block and touch each
+        ;page to make sure the guard page exception handler commits
+        ;those pages
+        mov     edx, esp
+        sub     edx, eax
+
+        and     esp, 0FFFFF000h
+        dec     esp
+
+@touchmainstackpages:
+        mov     al, byte ptr [esp]
+
+        sub     esp, 1000h
+
+        cmp     esp, edx
+        jg      @touchmainstackpages
+
+        mov     esp, edx
+        sub     esp, 16
+
+@goodmainstack:
 
         mov     eax, esp
         sub     eax, 16
