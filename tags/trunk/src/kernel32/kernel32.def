@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.22 1999-08-18 17:18:00 sandervl Exp $
+; $Id: kernel32.def,v 1.23 1999-08-18 21:54:27 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -556,10 +556,10 @@ EXPORTS
     InitAtomTable              = _InitAtomTable@4             @471
     InitializeCriticalSection  = _InitializeCriticalSection@4 @472
 ;   InitializeCriticialSectionAndSpinCount = _InitializeCriticalSectionAndSpinCount@?? ;NT
-;   InterlockedCompareExchange = _InterlockedCompareExchange@??         ;NT
+    InterlockedCompareExchange = _InterlockedCompareExchange@12 @785        ;NT
     InterlockedDecrement       = _InterlockedDecrement@4     @473
     InterlockedExchange        = _InterlockedExchange@8      @474
-;   InterlockedExchangeAdd     = _InterlockedExchangeAdd@??             ;NT
+    InterlockedExchangeAdd     = _InterlockedExchangeAdd@8      @786        ;NT
     InterlockedIncrement       = _InterlockedIncrement@4     @475
 ;   InvalidateNLSCache         = _InvalidateNLSCache@??      @476       ;W95
 ;   InvalidateConsoleDIBits    = _InvalidateConsoleDIBits@??            ;NT
