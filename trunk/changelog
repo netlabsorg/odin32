@@ -1,14 +1,18 @@
-/* $Id: changelog,v 1.2042 2002-04-11 23:08:27 bird Exp $ */
+/* $Id: changelog,v 1.2043 2002-04-12 11:45:33 bird Exp $ */
 
  2002-04-11: knut st. osmundsen <bird@anduin.net>
     - Makefiles:
                 o Output linenumbers to the map file when linking.
                 o Attempt at VAC308 profiling (icsperf.exe).
                   This is only enabled if you set PROFILE without DEBUG.
-
     - ProfileFix:
                 o Hack to prevent the app which is profiled to crash
                   on Warp 4.5+.
+    - Install:  o Changed it to work with 0.9.18+. Not that this fix
+                  requires a bugfix over the 0.9.18 warping release.
+    - DailyBuild:
+                o Updated scripts so I can run the daily build on my
+                  workstaion at home.
 
  2002-04-10: knut st. osmundsen <bird@anduin.net>
     - UXTHEME:  o Stubbed the DLL as some apps keeps trying to load it.
