@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2357 2002-11-13 12:15:45 sandervl Exp $ */
+/* $Id: changelog,v 1.2358 2002-11-18 13:54:34 sandervl Exp $ */
+
+ 2002-11-18: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Added support for renaming of exported functions.
+                  (to resolve duplicate name exports in custom build dlls)
 
  2002-11-13: Sander van Leeuwen <sandervl@innotek   >
     - SETUPAPI, RICHED32: 
