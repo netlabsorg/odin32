@@ -1,4 +1,4 @@
-/* $Id: oslibgpi.h,v 1.10 2001-05-19 19:43:54 sandervl Exp $ */
+/* $Id: oslibgpi.h,v 1.11 2002-11-29 13:46:04 sandervl Exp $ */
 
 /*
  * GPI interface code
@@ -103,6 +103,8 @@ ULONG getMapMode(PVOID pHps);
 
 BOOL OSLibGpiQueryCurrentPosition(PVOID pHps,PPOINTLOS2 ptl);
 BOOL OSLibGpiSetCurrentPosition(PVOID pHps,PPOINTLOS2 ptl);
+
+BOOL OSLibGpiLoadFonts(LPSTR lpszFontFile);
 
 #define CHSOS_OPAQUE                 0x0001L
 #define CHSOS_VECTOR                 0x0002L
