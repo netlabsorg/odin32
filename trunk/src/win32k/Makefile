@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.6 1999-10-14 01:25:37 bird Exp $
+# $Id: Makefile,v 1.7 1999-10-16 11:05:02 sandervl Exp $
 #
 # Copyright 1998-1999 knut st. osmundsen
 #
@@ -20,7 +20,7 @@ CC          = icc
 !if "$(CCENV)" == "VAC36"
 ILIB        = ilib /nofree
 !else
-ILIB        = ilib
+ILIB        = ilib3
 !endif
 LD          = ilink
 AS          = alp
@@ -139,7 +139,7 @@ AINCLUDES  = -Fdi:$(WIN32KBASE)\include             \
 ################################################################################
 # TARGETS
 ################################################################################
-all: ProbKrnl.exe $(NAME).sys
+all: $(NAME).sys ProbKrnl.exe
 #all:$(NAME).sys
 
 
@@ -210,7 +210,7 @@ ProbKrnl.exe: dev16\ProbKrnl.c $(WIN32KBASE)\include\sym.h \
     $(CC16) -c -W4 -Asfw -G2s -Zp -Zl -nologo -Fo$@ -Fa -Zi -Od -Lp \
         $(CDEFINES16) -DDEBUGR3 -Fa$(WIN32KLIST)\$(*B).s     \
         -Foprobkrnl.obj $(CINCLUDES16) dev16\probkrnl.c
-    link /NOD /MAP:FULL /CO /pmtype:vio probkrnl.obj, probkrnl.exe, probkrnl.map, f:\toolkit\lib\os2286.lib + $(MSCPATH)\lib\clibcep.lib;
+    link /NOD /MAP:FULL /CO /pmtype:vio probkrnl.obj, probkrnl.exe, probkrnl.map, $(TOOLKIT)\lib\os2286.lib + $(MSCPATH)\lib\clibcep.lib;
 #     $(MSCPATH)\binb\link /NOD /MAP:FULL /CO /pmtype:vio probkrnl.obj, probkrnl.exe, probkrnl.map, $(TOOLKIT)\lib\os2286.lib + $(MSCPATH)\lib\clibcr.lib;
 
 
