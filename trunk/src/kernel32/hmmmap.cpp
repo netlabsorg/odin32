@@ -1,4 +1,4 @@
-/* $Id: hmmmap.cpp,v 1.7 1999-10-24 22:51:21 sandervl Exp $ */
+/* $Id: hmmmap.cpp,v 1.8 1999-12-01 10:47:51 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -59,7 +59,7 @@ DWORD HMDeviceMemMapClass::CreateFileMapping(PHMHANDLEDATA         pHMHandleData
   if((hFile == -1 && size_low == 0) || size_high ||
      protect & ~(PAGE_READONLY|PAGE_READWRITE|PAGE_WRITECOPY|SEC_COMMIT|SEC_IMAGE|SEC_RESERVE|SEC_NOCACHE) ||
      (protect & (PAGE_READONLY|PAGE_READWRITE|PAGE_WRITECOPY)) == 0 ||
-     (hFile == -1 && (protect & SEC_COMMIT)) ||
+//     (hFile == -1 && (protect & SEC_COMMIT)) ||
      ((protect & SEC_COMMIT) && (protect & SEC_RESERVE))) 
   {
 

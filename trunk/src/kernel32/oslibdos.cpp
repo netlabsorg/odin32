@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.10 1999-11-26 00:05:18 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.11 1999-12-01 10:47:51 sandervl Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -13,6 +13,7 @@
 #define INCL_DOSEXCEPTIONS
 #define INCL_DOSMEMMGR
 #define INCL_DOSPROCESS
+#define INCL_DOSERRORS
 #include <os2wrap.h>                     //Odin32 OS/2 api wrappers
 #include <stdlib.h>
 #include <stdio.h>
@@ -199,6 +200,7 @@ DWORD OSLibDosOpen(char *lpszFileName, DWORD flags)
   if(flags & OSLIB_ACCESS_SHAREDENYWRITE)
 	os2flags |= OPEN_SHARE_DENYWRITE;
 
+tryopen:
   rc = DosOpen(lpszFileName,                     /* File path name */
                &hFile,                   /* File handle */
                &ulAction,                      /* Action taken */
@@ -210,6 +212,18 @@ DWORD OSLibDosOpen(char *lpszFileName, DWORD flags)
                0L);                            /* No extended attribute */
 
   if(rc) {
+	if(rc == ERROR_TOO_MANY_OPEN_FILES) {
+	 ULONG CurMaxFH;
+         LONG  ReqCount = 32;
+
+		rc = DosSetRelMaxFH(&ReqCount, &CurMaxFH);
+		if(rc) {
+			dprintf(("DosSetRelMaxFH returned %d", rc));
+			return 0;
+		}
+		dprintf(("DosOpen failed -> increased nr open files to %d", CurMaxFH));
+		goto tryopen;
+	}
 	return 0;
   }
   else	return hFile;
@@ -525,6 +539,12 @@ DWORD OSLibDosDupHandle(DWORD hFile, DWORD *hNew)
 {
   *hNew = -1;
   return DosDupHandle(hFile, hNew);
+}
+//******************************************************************************
+//******************************************************************************
+void OSLibDosDisableHardError(BOOL fTurnOff)
+{
+  DosError((fTurnOff) ? FERR_DISABLEHARDERR : FERR_ENABLEHARDERR);
 }
 //******************************************************************************
 //******************************************************************************
