@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.14 2000-07-19 19:05:26 sandervl Exp $
+# $Id: makefile,v 1.15 2000-10-23 13:41:45 sandervl Exp $
 
 #
 # Odin32 API
@@ -12,6 +12,8 @@ PDWIN32_LIB     = ..\..\lib
 PDWIN32_BIN     = ..\..\$(OBJDIR)
 PDWIN32_TOOLS   = ..\..\tools\bin
 
+
+TARGET_EXTENSION = drv
 
 # Compiler, tools, and interference rules.
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
@@ -34,8 +36,8 @@ TARGET = winspool
 
 # All rule - build objs, target dll, copies dll to bin and makes libs.
 all:    $(OBJDIR) \
-        $(OBJDIR)\$(TARGET).dll \
-        $(PDWIN32_BIN)\$(TARGET).dll \
+        $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION) \
+        $(PDWIN32_BIN)\$(TARGET).$(TARGET_EXTENSION) \
         lib
 
 
@@ -44,14 +46,14 @@ lib: $(TARGET).lib $(PDWIN32_LIB)\$(TARGET).lib
 
 
 # Dll rule - builds the target dll.
-$(OBJDIR)\$(TARGET).dll: $(OBJS) $(TARGET).def $(OBJDIR)\$(TARGET).lrf
-    $(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lrf
+$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS) $(TARGET).def $(OBJDIR)\$(TARGET).lrf
+    -4 $(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lrf
 
 
 # Linker file - creates the parameter file passed on to the linker.
 $(OBJDIR)\$(TARGET).lrf: makefile
     @echo Creating file <<$@
-/OUT:$(OBJDIR)\$(TARGET).dll
+/OUT:$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
 /MAP:$(OBJDIR)\$(TARGET).map
 $(OBJS)
 $(PDWIN32_LIB)/kernel32.lib
