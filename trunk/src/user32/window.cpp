@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.80 2000-10-09 17:26:55 sandervl Exp $ */
+/* $Id: window.cpp,v 1.81 2000-10-18 17:10:50 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -485,23 +485,23 @@ void WIN32API SetInternalWindowPos(HWND    hwnd,
 
     if( IsWindow(hwnd) )
     {
-    WINDOWPLACEMENT wndpl;
-    UINT flags;
+        WINDOWPLACEMENT wndpl;
+        UINT flags;
 
         GetWindowPlacement(hwnd, &wndpl);
-    wndpl.length  = sizeof(wndpl);
-    wndpl.showCmd = showCmd;
-    wndpl.flags = 0;
+        wndpl.length  = sizeof(wndpl);
+        wndpl.showCmd = showCmd;
+        wndpl.flags = 0;
 
-    if(lpPoint)
-    {
+        if(lpPoint)
+        {
             wndpl.flags |= WPF_SETMINPOSITION;
-        wndpl.ptMinPosition = *lpPoint;
-    }
-    if(lpRect)
-    {
+            wndpl.ptMinPosition = *lpPoint;
+        }
+        if(lpRect)
+        {
             wndpl.rcNormalPosition = *lpRect;
-    }
+        }
         SetWindowPlacement( hwnd, &wndpl);
     }
 
@@ -592,6 +592,7 @@ BOOL WIN32API SetWindowPos(HWND hwnd, HWND hwndInsertAfter, int x, int y, int cx
     return window->SetWindowPos(hwndInsertAfter, x, y, cx, cy, fuFlags);
 }
 //******************************************************************************
+//NOTE: length must equal structure size or else api fails (verified in NT4, SP6)
 //******************************************************************************
 BOOL WIN32API SetWindowPlacement(HWND hwnd, const WINDOWPLACEMENT *winpos)
 {
@@ -603,7 +604,7 @@ BOOL WIN32API SetWindowPlacement(HWND hwnd, const WINDOWPLACEMENT *winpos)
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return FALSE;
     }
-    if(!winpos) {
+    if(!winpos || winpos->length != sizeof(WINDOWPLACEMENT)) {
         dprintf(("SetWindowPlacement %x invalid parameter", hwnd));
         SetLastError(ERROR_INVALID_PARAMETER);
         return FALSE;
@@ -612,6 +613,8 @@ BOOL WIN32API SetWindowPlacement(HWND hwnd, const WINDOWPLACEMENT *winpos)
     return window->SetWindowPlacement((WINDOWPLACEMENT *)winpos);
 }
 //******************************************************************************
+//NOTE: Length does not need to be correct (even though the SDK docs claim otherwise)
+//      (Verified in NT4, SP6)
 //******************************************************************************
 BOOL WIN32API GetWindowPlacement(HWND hwnd, LPWINDOWPLACEMENT winpos)
 {
@@ -1629,9 +1632,8 @@ HWND WIN32API GetLastActivePopup( HWND hWnd)
 {
  HWND hwnd;
 
-    hWnd = Win32BaseWindow::Win32ToOS2Handle(hWnd);
-
-    hwnd = Win32BaseWindow::OS2ToWin32Handle(O32_GetLastActivePopup(hWnd));
+    hwnd = Win32BaseWindow::Win32ToOS2Handle(hWnd);
+    hwnd = Win32BaseWindow::OS2ToWin32Handle(O32_GetLastActivePopup(hwnd));
 
     dprintf(("GetLastActivePopup %x returned %x NOT CORRECTLY IMPLEMENTED", hWnd, hwnd));
     return hwnd;
