@@ -2,6 +2,7 @@
 #define INVALID_PARMS 1
 #define OUT_OF_MEMORY 2
 
+
 #ifdef DART_DSOUND
 
   #define E_NOTIMPL                   0x80004001
@@ -28,6 +29,7 @@
   #define DSERR_UNINITIALIZED         170
 
 #endif
+
 
 #define BUFFER_SIZE 32768
 

@@ -182,9 +182,9 @@ void MixFunc (OS2IDirectSoundBuffer *firstBuf, OS2IDirectSoundBuffer *outBuf,
    } else {
       data8b = (unsigned char *) outBuf->lpBuffer;
       for (i = 0; i < tomix * outnch; i++) {
-         if (mixbuf[i] <= -32768) data16b[outpos] = 0;
-         else if (mixbuf[i] >= 32767) data16b[outpos] = 255;
-         else data16b[outpos] = mixbuf[i] / 256 + 128;
+         if (mixbuf[i] <= -32768) data8b[outpos] = 0;
+         else if (mixbuf[i] >= 32767) data8b[outpos] = 255;
+         else data8b[outpos] = mixbuf[i] / 256 + 128;
          outpos++;
          if (outpos >= outlen) outpos = 0;
       }

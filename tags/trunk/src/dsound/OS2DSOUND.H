@@ -1,4 +1,4 @@
-/* $Id: OS2DSOUND.H,v 1.5 2000-03-13 12:47:46 sandervl Exp $ */
+/* $Id: OS2DSOUND.H,v 1.6 2000-05-18 20:37:08 mike Exp $ */
 
 /*
  * DirectSound main class
@@ -17,6 +17,9 @@
 #undef THIS_
 #define THIS_ VOID*This,
 
+// A forward declaration is need here!
+class OS2PrimBuff;
+
 class OS2IDirectSound
 {
  public:
@@ -32,6 +35,9 @@ class OS2IDirectSound
     static  BOOL          fDSExists;
     inline  HRESULT       GetLastError()    { return lastError;    };
     inline  DWORD         GetCoopLevel()    { return CoopLevel;    };
+
+    OS2PrimBuff*     primary;                // Primary Buffer..Created on construct of DSound (KL)
+                                             // (Public so that the Secondary buffer instances can access this.. Maybe a GetPrimary function would eb better?)
 
  private:
 
