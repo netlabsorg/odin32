@@ -1,4 +1,4 @@
-/* $Id: StateUpd.cpp,v 1.9 2000-02-11 23:54:24 bird Exp $
+/* $Id: StateUpd.cpp,v 1.10 2000-02-12 17:55:02 bird Exp $
  *
  * StateUpd - Scans source files for API functions and imports data on them.
  *
@@ -284,14 +284,15 @@ int main(int argc, char **argv)
         }
 
         /* write status to log */
+        ul2 = dbGetNumberOfUpdatedFunction(options.lDllRefcode);
+        ul1 = dbCountFunctionInDll(options.lDllRefcode);
         fprintf(phLog, "-------------------------------------------------\n");
         fprintf(phLog, "-------- Functions which was not updated --------\n");
         dbGetNotUpdatedFunction(options.lDllRefcode, dbNotUpdatedCallBack);
         fprintf(phLog, "-------------------------------------------------\n");
         fprintf(phLog, "-------------------------------------------------\n\n");
-        ul1 = dbCountFunctionInDll(options.lDllRefcode);
         fprintf(phLog,"Number of function in this DLL:        %4ld\n", ul1);
-        fprintf(phLog,"Number of successfully processed APIs: %4ld\n", (long)(0x0000FFFF & ulRc));
+        fprintf(phLog,"Number of successfully processed APIs: %4ld (%ld)\n", (long)(0x0000FFFF & ulRc), ul2);
         fprintf(phLog,"Number of signals:                     %4ld\n", (long)(ulRc >> 16));
 
         /* close the logs */
@@ -302,7 +303,7 @@ int main(int argc, char **argv)
 
         /* warn if error during processing. */
         fprintf(stdout,"Number of function in this DLL:        %4ld\n", ul1);
-        fprintf(stdout,"Number of successfully processed APIs: %4ld\n", (long)(0x0000FFFF & ulRc));
+        fprintf(stdout,"Number of successfully processed APIs: %4ld (%ld)\n", (long)(0x0000FFFF & ulRc), ul2);
         fprintf(stdout,"Number of signals:                     %4ld\n", (long)(ulRc >> 16));
         if ((int)(ulRc >> 16) > 0)
             fprintf(stderr, "Check signal file 'Signals.Log'.\n");
@@ -1371,12 +1372,44 @@ static BOOL isFunction(char **papszLines, int i, POPTIONS pOptions)
  */
 static long _System dbNotUpdatedCallBack(const char *pszValue, const char *pszFieldName, void *pvUser)
 {
-    if (stricmp(pszFieldName, "name") == 0)
-        fprintf(phLog, "%s ", pszValue);
-    else if (stricmp(pszFieldName, "updated") == 0)
-        fprintf(phLog, "update=%s ", pszValue);
-    else if (stricmp(pszFieldName, "intname") == 0)
-        fprintf(phLog, "(%s)\n", pszValue);
+    static i = 0;
+    switch (i++)
+    {
+        case 0:
+            fprintf(phLog, "%s", pszValue);
+            break;
+        case 1:
+            fprintf(phLog, "(%s)", pszValue);
+            break;
+        case 2: /* updated */
+            fprintf(phLog, " %s=%s", pszFieldName, pszValue);
+            break;
+        case 3: /* aliasfn */
+            fprintf(phLog, " %s=%s", pszFieldName, pszValue);
+            break;
+        case 4:
+            if (pszValue != NULL)
+                fprintf(phLog, " --> %s.", pszValue);
+            break;
+        case 5:
+            if (pszValue != NULL)
+                fprintf(phLog, "%s", pszValue);
+            break;
+        case 6:
+            if (pszValue != NULL)
+                fprintf(phLog, "(%s)", pszValue);
+            break;
+
+        default:
+            i = 0;
+            fprintf(phLog, "\n");
+    }
+
+    if (stricmp(pszFieldName, "last") == 0)
+    {
+        i = 0;
+        fprintf(phLog, "\n");
+    }
 
     pvUser = pvUser;
     return 0;

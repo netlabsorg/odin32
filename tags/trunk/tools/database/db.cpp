@@ -1,4 +1,4 @@
-/* $Id: db.cpp,v 1.6 2000-02-11 23:54:25 bird Exp $ *
+/* $Id: db.cpp,v 1.7 2000-02-12 17:55:03 bird Exp $ *
  *
  * DB - contains all database routines.
  *
@@ -359,7 +359,7 @@ static long getvalue(int iField, MYSQL_ROW papszRow)
     return -1;
 }
 
-#if 0
+#if 1
 /**
  * Find occurences of a function, given by internal name.
  * @returns   success indicator, TRUE / FALSE.
@@ -435,11 +435,11 @@ BOOL _System dbFindFunction(const char *pszFunctionName, PFNFINDBUF pFnFindBuf, 
                         if (rc >= 0)
                         {
                             /* get the functions aliases to the functions we have allready found. */
-                            strcpy(&szQuery[0], "SELECT refcode, dll, aliasfn FROM function WHERE (");
+                            strcpy(&szQuery[0], "SELECT refcode, dll, aliasfn FROM function WHERE aliasfn IN (");
                             for (i = 0; i < pFnFindBuf->cFns; i++)
                             {
-                                if (i != 0) strcat(&szQuery[0], "OR ");
-                                sprintf(&szQuery[strlen(szQuery)], "aliasfn = %ld ", pFnFindBuf->alRefCode[i]);
+                                if (i != 0) strcat(&szQuery[0], ", ");
+                                sprintf(&szQuery[strlen(szQuery)], "%ld", pFnFindBuf->alRefCode[i]);
                             }
                             sprintf(&szQuery[strlen(szQuery)], ") AND dll <> %ld", lDll);
 
@@ -715,10 +715,11 @@ unsigned long _System dbUpdateFunction(PFNDESC pFnDesc, signed long lDll, char *
     long  lCurrentState;
     int   i,k,rc;
     unsigned long ulRc = 0;
-    BOOL          f = FALSE;
 
     for (k = 0; k < pFnDesc->cRefCodes; k++)
     {
+        BOOL    f = FALSE;
+
         /* set updated flag */
         sprintf(pszQuery, "UPDATE function SET updated = updated + 1 WHERE refcode = %ld",
                 pFnDesc->alRefCode[k]);
@@ -1419,10 +1420,13 @@ BOOL _System dbGetNotUpdatedFunction(signed long lDll, DBCALLBACKFETCH dbFetchCa
 {
     BOOL        fRet = FALSE;
     void       *pres;
-    char        szQuery[128];
+    char        szQuery[256];
 
     /* not updated names */
-    sprintf(&szQuery[0], "SELECT name, intname FROM function WHERE dll = %ld AND updated = 0",
+    sprintf(&szQuery[0], "SELECT f1.name, f1.intname, f1.updated, f1.aliasfn, d.name, f2.name, f2.intname AS last "
+                         "FROM function f1 LEFT OUTER JOIN function f2 ON f1.aliasfn = f2.refcode "
+                         "     LEFT JOIN dll d ON f2.dll = d.refcode "
+                         "WHERE f1.dll = %ld AND f1.updated = 0",
             lDll);
     pres = dbExecuteQuery(szQuery);
     if (pres != NULL)
@@ -1437,7 +1441,10 @@ BOOL _System dbGetNotUpdatedFunction(signed long lDll, DBCALLBACKFETCH dbFetchCa
     }
 
     /* warn about updated > 1 too */
-    sprintf(&szQuery[0], "SELECT updated, name, intname FROM function WHERE dll = %ld AND updated > 1",
+    sprintf(&szQuery[0], "SELECT f1.name, f1.intname, f1.updated, f1.aliasfn, d.name, f2.name, f2.intname AS last "
+                         "FROM function f1 LEFT OUTER JOIN function f2 ON f1.aliasfn = f2.refcode "
+                         "     LEFT JOIN dll d ON f2.dll = d.refcode "
+                         "WHERE f1.dll = %ld AND f1.updated > 1",
             lDll);
     pres = dbExecuteQuery(szQuery);
     if (pres != NULL)
@@ -1455,6 +1462,29 @@ BOOL _System dbGetNotUpdatedFunction(signed long lDll, DBCALLBACKFETCH dbFetchCa
     mysql_query(pmysql, &szQuery[0]);
 
     return fRet;
+}
+
+
+/**
+ * Counts the function for the given DLL which has been updated.
+ * @returns   -1 on error, number of updated function on success.
+ * @param     lDll         Dll reference number.
+ */
+signed long _System dbGetNumberOfUpdatedFunction(signed long lDll)
+{
+    int         rc;
+    char        szQuery[128];
+    MYSQL_RES * pres;
+
+    sprintf(&szQuery[0], "SELECT count(*) FROM function WHERE dll = (%ld) AND updated > 0\n", lDll);
+    rc   = mysql_query(pmysql, &szQuery[0]);
+    pres = mysql_store_result(pmysql);
+    if (rc >= 0 && pres != NULL && mysql_num_rows(pres) == 1)
+        rc = (int)getvalue(0, mysql_fetch_row(pres));
+    else
+        rc = -1;
+    mysql_free_result(pres);
+    return (signed long)rc;
 }
 
 
