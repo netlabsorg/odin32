@@ -1,4 +1,4 @@
-/* $Id: odin32env.cmd,v 1.12 2000-11-22 13:07:59 bird Exp $
+/* $Id: odin32env.cmd,v 1.13 2000-11-23 15:47:14 bird Exp $
  *
  * Sets the build environment.
  *
@@ -488,6 +488,7 @@ WarpIn: procedure
     sWarpInMain = 'd:\knut\tools\WarpIn';
     call EnvVar_Set      fRM, 'sWarpInMain', sWarpInMain;
     call EnvVar_AddFront fRM, 'path',        sWarpInMain';'
+    call EnvVar_AddFront fRM, 'beginlibpath', sWarpInMain';'
     call EnvVar_AddFront fRM, 'bookshelf',   sWarpInMain';'
     return 0;
 
