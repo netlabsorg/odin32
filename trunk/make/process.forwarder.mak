@@ -1,4 +1,4 @@
-# $Id: process.forwarder.mak,v 1.14 2002-08-30 19:45:29 bird Exp $
+# $Id: process.forwarder.mak,v 1.15 2002-09-12 03:22:12 bird Exp $
 
 #
 # Generic makefile system.
@@ -186,7 +186,8 @@ $(TARGET) \
 !endif
 $(TARGET_ILIB) \
 $(RULES_FORWARD) \
-publish publish_target testcase nothing target packing:
+publish publish_target testcase nothing target packing \
+pass1 pass2 pass3 pass4 pass5 pass6 quick:
     \
 !ifndef BUILD_VERBOSE
     @ \
@@ -195,7 +196,6 @@ publish publish_target testcase nothing target packing:
     echo . && SET _BUILD_PROJECT=$(BUILD_PROJECT) && \
 !endif
     $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
-
 
 
 # -----------------------------------------------------------------------------
