@@ -1,4 +1,4 @@
-/* $Id: async.cpp,v 1.3 1999-10-20 10:09:49 phaller Exp $ */
+/* $Id: async.cpp,v 1.4 1999-10-20 11:04:12 phaller Exp $ */
 
 /*
  *
@@ -113,27 +113,6 @@ int  _System GetLastError(void);
 
 class WSAAsyncWorker
 {
-  // public members
-  public:
-    WSAAsyncWorker(void);                         // constructor
-    ~WSAAsyncWorker();                            // destructor
-
-    PASYNCREQUEST createRequest  (ULONG ulType,
-                                  HWND  hwnd,
-                                  ULONG ulMessage,
-                                  PVOID pBuffer,
-                                  ULONG ulBufferLength,
-                                  ULONG ul1 = 0,
-                                  ULONG ul2 = 0,
-                                  ULONG ul3 = 0);
-
-    void          pushRequest    (PASYNCREQUEST pRequest); // put request on queue
-    BOOL          cancelAsyncRequest   (PASYNCREQUEST pRequest);
-
-    // the thread procedure
-    friend void _Optlink WorkerThreadProc(void* pParam);
-
-
   // protected members
   protected:
     PASYNCREQUEST pRequestHead;        // chain root
@@ -142,6 +121,7 @@ class WSAAsyncWorker
     HEV           hevRequest;          // fired upon new request
     HMTX          hmtxRequestQueue;    // request queue protection
     BOOL          fTerminate;          // got to die ?
+    BOOL          fBlocking;           // currently busy ?
 
     TID           startWorker    (void);                   // start worker thread
     void          processingLoop (void);                   // "work"
@@ -159,6 +139,27 @@ class WSAAsyncWorker
     void          asyncGetProtoByNumber(PASYNCREQUEST pRequest);
     void          asyncGetServByName   (PASYNCREQUEST pRequest);
     void          asyncGetServByPort   (PASYNCREQUEST pRequest);
+
+  // public members
+  public:
+    WSAAsyncWorker(void);                         // constructor
+    ~WSAAsyncWorker();                            // destructor
+
+    PASYNCREQUEST createRequest  (ULONG ulType,
+                                  HWND  hwnd,
+                                  ULONG ulMessage,
+                                  PVOID pBuffer,
+                                  ULONG ulBufferLength,
+                                  ULONG ul1 = 0,
+                                  ULONG ul2 = 0,
+                                  ULONG ul3 = 0);
+
+    void          pushRequest    (PASYNCREQUEST pRequest); // put request on queue
+    BOOL          cancelAsyncRequest   (PASYNCREQUEST pRequest);
+    BOOL          isBlocking     (void) {return fBlocking;}
+
+    // the thread procedure
+    friend void _Optlink WorkerThreadProc(void* pParam);
 };
 
 
@@ -166,7 +167,8 @@ class WSAAsyncWorker
  * Local variables                                                           *
  *****************************************************************************/
 
-static WSAAsyncWorker* wsaWorker = NULL;
+//static WSAAsyncWorker* wsaWorker = NULL;
+static WSAAsyncWorker* wsaWorker = new WSAAsyncWorker();
 
 
 /*****************************************************************************
@@ -277,13 +279,13 @@ TID WSAAsyncWorker::startWorker(void)
     // create thread
 #if defined(__IBMCPP__)
     tidWorker = _beginthread(WorkerThreadProc,
-                             (PVOID)this,
-                             4096,
-                             NULL);
+                             NULL,
+                             16384,
+                             (PVOID)this);
 #else
     tidWorker = _beginthread(WorkerThreadProc,
-                             (PVOID)this,
-                             4096);
+                             16384,
+                             (PVOID)this);
 #endif
     if (tidWorker == -1)
     {
@@ -356,11 +358,19 @@ PASYNCREQUEST WSAAsyncWorker::popRequest(void)
   pLast = pRequestTail;
 
   if (pRequestTail != NULL)
+  {
     if (pRequestTail->pPrev)
     {
       pRequestTail->pPrev->pNext = NULL;  // cut off element
       pRequestTail = pRequestTail->pPrev; // unlink previous element
     }
+    else
+    {
+      // this is the last request on the queue
+      pRequestTail = NULL;
+      pRequestHead = NULL;
+    }
+  }
 
   unlockQueue();  // unlock queue
 
@@ -904,6 +914,8 @@ void WSAAsyncWorker::asyncGetServByPort(PASYNCREQUEST pRequest)
 // process one request
 int WSAAsyncWorker::dispatchRequest(PASYNCREQUEST pRequest)
 {
+  int rc;
+
   dprintf(("WSOCK32-ASYNC: WSAAsyncWorker::dispatchRequest (%08xh, %08xh)\n",
            this,
            pRequest));
@@ -926,6 +938,7 @@ int WSAAsyncWorker::dispatchRequest(PASYNCREQUEST pRequest)
 
   // OK, servicing request
   pRequest->ulState = RS_BUSY;
+  fBlocking         = TRUE;
 
   switch(pRequest->ulType)
   {
@@ -933,12 +946,12 @@ int WSAAsyncWorker::dispatchRequest(PASYNCREQUEST pRequest)
       fTerminate = TRUE;
       return 1;
 
-    case WSAASYNC_GETHOSTBYADDR:    asyncGetHostByAddr   (pRequest); return 1;
-    case WSAASYNC_GETHOSTBYNAME:    asyncGetHostByName   (pRequest); return 1;
-    case WSAASYNC_GETPROTOBYNAME:   asyncGetProtoByName  (pRequest); return 1;
-    case WSAASYNC_GETPROTOBYNUMBER: asyncGetProtoByNumber(pRequest); return 1;
-    case WSAASYNC_GETSERVBYNAME:    asyncGetServByName   (pRequest); return 1;
-    case WSAASYNC_GETSERVBYPORT:    asyncGetServByPort   (pRequest); return 1;
+    case WSAASYNC_GETHOSTBYADDR:    asyncGetHostByAddr   (pRequest); rc = 1; break;
+    case WSAASYNC_GETHOSTBYNAME:    asyncGetHostByName   (pRequest); rc = 1; break;
+    case WSAASYNC_GETPROTOBYNAME:   asyncGetProtoByName  (pRequest); rc = 1; break;
+    case WSAASYNC_GETPROTOBYNUMBER: asyncGetProtoByNumber(pRequest); rc = 1; break;
+    case WSAASYNC_GETSERVBYNAME:    asyncGetServByName   (pRequest); rc = 1; break;
+    case WSAASYNC_GETSERVBYPORT:    asyncGetServByPort   (pRequest); rc = 1; break;
 
 //    case WSAASYNC_SELECT:
 //      break;
@@ -946,11 +959,12 @@ int WSAAsyncWorker::dispatchRequest(PASYNCREQUEST pRequest)
     default:
       dprintf(("WSOCK32: WSAAsyncWorker::dispatchRequest - invalid request type %d\n",
                 pRequest->ulType));
-      return 1;
+      rc = 1; break;
   }
 
   pRequest->ulState = RS_DONE;
-  return 0;
+  fBlocking         = FALSE;
+  return rc;
 }
 
 
@@ -1228,4 +1242,22 @@ ODINFUNCTION1(int, WSACancelAsyncRequest, HANDLE, hAsyncTaskHandle)
     WSASetLastError(WSAEINVAL);
     return (SOCKET_ERROR);
   }
+}
+
+
+/*****************************************************************************
+ * Name      : WSAIsBlocking
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION0(BOOL, WSAIsBlocking)
+{
+  return(wsaWorker->isBlocking());
 }

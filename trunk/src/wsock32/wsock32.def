@@ -1,4 +1,4 @@
-; $Id: wsock32.def,v 1.6 1999-10-20 10:03:53 phaller Exp $
+; $Id: wsock32.def,v 1.7 1999-10-20 11:04:13 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY WSOCK32 INITINSTANCE
@@ -75,7 +75,9 @@ EXPORTS
    WSAGetLastError =           _OS2WSAGetLastError@0                   @111
    WSASetLastError =           _OS2WSASetLastError@4                   @112
    WSACancelBlockingCall =   _OS2WSACancelBlockingCall@0       @113
-   WSAIsBlocking =             _OS2WSAIsBlocking@0                     @114
+
+   WSAIsBlocking               = _WSAIsBlocking@0                      @114
+
    WSAStartup =        _OS2WSAStartup@8                        @115
    WSACleanup =        _OS2WSACleanup@0                        @116
 
