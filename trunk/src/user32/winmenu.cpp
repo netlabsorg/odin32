@@ -1,4 +1,4 @@
-/* $Id: winmenu.cpp,v 1.15 1999-11-08 13:44:17 sandervl Exp $ */
+/* $Id: winmenu.cpp,v 1.16 1999-11-09 20:15:11 sandervl Exp $ */
 
 /*
  * Win32 menu API functions for OS/2
@@ -307,7 +307,7 @@ ODINFUNCTION1(HMENU, LoadMenuIndirectW,
 {
   HMENU hMenu;
 
-    hMenu = O32_LoadMenuIndirect(menuTemplate);
+    hMenu = myLoadMenuIndirect(menuTemplate);
     if(hMenu) {
             SetInternalMenuInfo(hMenu);
     }
