@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2721 2004-04-06 14:20:41 sandervl Exp $ */
+/* $Id: changelog,v 1.2722 2004-04-07 09:14:18 sandervl Exp $ */
+
+ 2004-04-07: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Profile: flush ini file after write actions
 
  2004-04-06: Sander van Leeuwen <sandervl@innotek   >
     - WINMM:    o Automatically disable audio support when any Crystal driver
