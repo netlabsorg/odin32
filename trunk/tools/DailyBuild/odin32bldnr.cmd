@@ -1,4 +1,4 @@
-/* $Id: odin32bldnr.cmd,v 1.4 2001-01-20 18:22:47 bird Exp $
+/* $Id: odin32bldnr.cmd,v 1.5 2002-06-26 22:07:15 bird Exp $
  *
  * Build number update script.
  *
@@ -8,7 +8,7 @@
  *
  * Assumes that current directory is the root.
  *
- * Copyright (c) 2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 2001-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -16,6 +16,11 @@
 
 call RxFuncAdd 'SysLoadFuncs', 'RexxUtil', 'SysLoadFuncs';
 call SysLoadFuncs;
+
+/* get build settings */
+sDate = value('BUILD_DATE',, 'OS2ENVIRONMENT');
+sType = value('BUILD_TYPE',, 'OS2ENVIRONMENT');
+if ((sDate = '') | (sType = '')) then do say 'BUILD_DATE/BUILD_TYPE unset, you didn''t start job.cmd.'; exit(16); end
 
 
 /*
@@ -83,7 +88,10 @@ do
     /*
      * Commit the build nr. file.
      */
-    'cvs commit -m "Daily build - 'Date('S')'" odinbuild.h';
+    if (sType = 'W') then
+        'cvs commit -m "Weekly build - 'sDate'" odinbuild.h';
+    else
+        'cvs commit -m "Daily build - 'sDate'" odinbuild.h';
     if (rc <> 0) then call failed rc, 'failed to commit odinbuild.h'
 end
 else

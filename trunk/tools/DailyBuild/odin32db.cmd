@@ -1,12 +1,18 @@
-/* $Id: odin32db.cmd,v 1.6 2002-02-26 17:25:37 bird Exp $
+/* $Id: odin32db.cmd,v 1.7 2002-06-26 22:09:59 bird Exp $
  *
  * Updates the Odin32 API database.
  *
- * Copyright (c) 1999-2002 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 1999-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+    /* get build settings */
+    sDate = value('BUILD_DATE',, 'OS2ENVIRONMENT');
+    sType = value('BUILD_TYPE',, 'OS2ENVIRONMENT');
+    if ((sDate = '') | (sType = '')) then do say 'BUILD_DATE/BUILD_TYPE unset, you didn''t start job.cmd.'; exit(16); end
+
+
     /* load rexxutils functions and Ftp Utils. */
     call RxFuncAdd 'SysLoadFuncs', 'RexxUtil', 'SysLoadFuncs';
     call SysloadFuncs;
@@ -36,7 +42,7 @@
     'cd' getMySqlDataDir()||'\odin32';
     if rc <> 0 then call failure rc, 'cd <> failed';
     'mysqladmin refresh';
-    'rar a -m5 ' || sScriptDir || 'dbbackup\db'||date(S)||'.rar *'
+    'rar a -m5 ' || sScriptDir || 'dbbackup\db'||sDate||'.rar *'
     if rc <> 0 then call failure rc, 'rar db failed';
     'cd \';
     'd:';
@@ -72,12 +78,12 @@
 failure: procedure
 parse arg rc, sText;
     say 'rc='rc sText
-    exit(rc);
+exit(rc);
 
 failure2: procedure
 parse arg rc, sText;
     say 'rc='rc sText
-    return 0;
+return 0;
 
 
 /*
@@ -109,7 +115,7 @@ getMySqlDataDir: procedure
     /* If failure set default directory. */
     if (sDataDir = '') then
         sDataDir = 'd:\knut\Apps\MySql\data\';
-    return sDataDir;
+return sDataDir;
 
 /*
  *
@@ -166,7 +172,7 @@ GetPassword: procedure;
         end
     end
     call stream sPasswd, 'c', 'close';
-    return sRet;
+return sRet;
 
 
 /*
@@ -217,6 +223,6 @@ putRexxFtp: procedure
     end
     else
         rc = 0;
-    return 0;
+return 0;
 
 

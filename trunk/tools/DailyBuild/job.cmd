@@ -1,8 +1,8 @@
-/* $Id: job.cmd,v 1.7 2001-06-27 08:34:43 bird Exp $
+/* $Id: job.cmd,v 1.8 2002-06-26 22:06:57 bird Exp $
  *
  * Main job for building OS/2.
  *
- * Copyright (c) 1999-2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 1999-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -13,12 +13,48 @@
     call SysloadFuncs;
 
     /*
+     * Get and set the build date.
+     */
+    parse arg sDate sType sDummy
+    fOk = 1;
+    if (sDate <> '') then
+    do
+        parse var sDate sYear'-'sMonth'-'sDay
+        sType = substr(translate(sType), 1, 1);
+        if (  (length(sYear) <> 4) | (strip(translate(sYear, '','0123456789')) <> ''),
+            | (length(sMonth) <>2) | (strip(translate(sMonth, '','0123456789')) <> ''),
+            | (length(sDay)  <> 2) | (strip(translate(sDay, '','0123456789')) <> ''),
+            | ((sType <> 'W') & (sType <> 'D'))) then
+            fOk = 0;
+        else
+            sDate = sYear||sMonth||sDay;
+    end
+    else
+    do
+        sDate = date('S');
+        sType = 'D';
+        if (Date('B')//7 = 3) then  /* weekly on Thursdays */
+            sType = 'W';
+    end
+
+    if (\fOk) then
+    do
+        say 'Hey mister! you''ve given me a bad date or build type!!!';
+        say 'Date='sYear'-'sMonth'-'sDay
+        say 'Buildtype='sType;
+        exit(16);
+    end
+    call value 'BUILD_DATE', sDate, 'OS2ENVIRONMENT';
+    call value 'BUILD_TYPE', sType, 'OS2ENVIRONMENT';
+
+
+    /*
      * Get source directory of this script
      */
     parse source sd1 sd2 sScript
     sScriptDir = filespec('drive', sScript) || filespec('path', sScript);
-    sLogFile = sScriptDir || '\logs\' || Date('S') || '.log';
-    sTree    = sScriptDir || '..\tree' || Date('S');
+    sLogFile = sScriptDir || '\logs\' || sDate || '.log';
+    sTree    = sScriptDir || '..\tree' || sDate;
 
     /*
      * Clean tree, get it and build it.
@@ -57,6 +93,7 @@
     /*
      * Update local installation at d:\odin...
      */
+/*
     'd:';
     if (rc <> 0) then call failure rc, 'd: failed.';
     'cd d:\odin';
@@ -65,7 +102,7 @@
     if (rc <> 0) then call failure rc, 'unzip failed.';
     'd:'
     if (rc <> 0) then call failure rc, 'd: failed.';
-
+*/
     /* successfull exit */
     exit(0);
 
