@@ -1,8 +1,13 @@
- /* $Id: changelog,v 1.52 1999-07-20 11:16:32 sandervl Exp $ */
+ /* $Id: changelog,v 1.53 1999-07-20 15:45:34 sandervl Exp $ */
+ 99-07-20: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32/NEW: Added support for window icons and accelerators. 
+		      Both don't work correctly yet. (need new pe2lx changes
+                      which break old apps)
+           
  99-07-19: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Added method for retrieving converted OS/2 resource
                     (which will be changed later on)
-	- USER32: CreateWindowEx now works and menus are displayed
+	- USER32/NEW: CreateWindowEx now works and menus are displayed
 
  99-07-17: Sander van Leeuwen <sandervl@xs4all.nl>
         - KERNEL32: Exports for getting TEB & THDB added

@@ -1,4 +1,4 @@
-/* $Id: winres.h,v 1.2 1999-07-20 07:41:23 sandervl Exp $ */
+/* $Id: winres.h,v 1.3 1999-07-20 15:45:47 sandervl Exp $ */
 
 /*
  * Win32 resource class
@@ -72,13 +72,18 @@ public:
     virtual  PVOID lockResource();	//get original win32 resource
     virtual  PVOID lockOS2Resource();	//get converted OS/2 resource
 
-             ULONG sizeofResource() { return ressize; };
+             ULONG sizeofResource() 		{ return ressize; };
+
+  	     ULONG getOS2Handle()   		{ return OS2ResHandle; };
+	      void setOS2Handle(ULONG handle) 	{ OS2ResHandle = handle; };
 
     static    void destroyAll(Win32Image *module);
 
 protected:
 
 private:
+             PVOID ConvertBitmap(void *bmpdata);
+
        Win32Image *module;
 
              HRSRC hres;
@@ -89,12 +94,12 @@ private:
              PVOID os2resdata;
              PVOID winresdata;
 
-                     PVOID ConvertBitmap(void *bmpdata);
+	     ULONG OS2ResHandle;
 
              ULONG ressize;
 
                                // Linked list management
-              Win32Resource*   next;               // Next Resource in module
+  Win32Resource*   next;               // Next Resource in module
 
     friend    class Win32Image;
 };
