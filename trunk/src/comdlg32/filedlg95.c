@@ -1,4 +1,4 @@
-/* $Id: filedlg95.c,v 1.8 2000-04-10 17:48:06 cbratschi Exp $*/
+/* $Id: filedlg95.c,v 1.9 2000-05-10 13:12:46 sandervl Exp $*/
 /*
  * COMMDLG - File Open Dialogs Win95 look and feel
  *
@@ -349,6 +349,9 @@ BOOL  WINAPI GetFileDialog95W(LPOPENFILENAMEW ofn,UINT iDlgType)
   HINSTANCE hInstance;
   LPCSTR lpstrFilter = NULL;
   LPSTR lpstrCustomFilter = NULL;
+  LPWSTR lpstrFile = NULL;
+  LPWSTR lpstrInitialDir = NULL;
+  LPWSTR lpstrTitle = NULL;
   DWORD dwFlags;
 
   /* Initialise FileOpenDlgInfos structure*/
@@ -419,6 +422,22 @@ BOOL  WINAPI GetFileDialog95W(LPOPENFILENAMEW ofn,UINT iDlgType)
   /* Initialise the dialog property */
   fodInfos->DlgInfos.dwDlgProp = 0;
 
+  /* allocate ansi filename buffer */
+  lpstrFile = ofn->lpstrFile;  
+  ofn->lpstrFile = MemAlloc(ofn->nMaxFile);
+
+  // convert initial dir & title (if necessary)
+  lpstrInitialDir = (LPWSTR)ofn->lpstrInitialDir;
+  if(lpstrInitialDir) {
+	ofn->lpstrInitialDir = MemAlloc(lstrlenW(ofn->lpstrInitialDir)+1);
+	lstrcpyWtoA((LPSTR)ofn->lpstrInitialDir, lpstrInitialDir);
+  }
+  lpstrTitle = (LPWSTR)ofn->lpstrTitle;
+  if(lpstrTitle) {
+	ofn->lpstrTitle = MemAlloc(lstrlenW(ofn->lpstrTitle)+1);
+	lstrcpyWtoA((LPSTR)ofn->lpstrTitle, lpstrTitle);
+  }
+
   switch(iDlgType)
   {
   case OPEN_DIALOG :
@@ -451,6 +470,21 @@ BOOL  WINAPI GetFileDialog95W(LPOPENFILENAMEW ofn,UINT iDlgType)
   /* Restore hInstance */
   fodInfos->ofnInfos->hInstance = hInstance;
   MemFree((LPVOID)(fodInfos));
+
+  /* filename */
+  lstrcpynAtoW(lpstrFile, (LPCSTR)ofn->lpstrFile, ofn->nMaxFile);
+  MemFree(ofn->lpstrFile);
+  ofn->lpstrFile = lpstrFile;
+
+  //free converted initial dir & title strings
+  if(lpstrInitialDir) {
+	MemFree((LPVOID)ofn->lpstrInitialDir);
+	ofn->lpstrInitialDir = (LPCWSTR)lpstrInitialDir;
+  }
+  if(lpstrTitle) {
+	MemFree((LPVOID)ofn->lpstrTitle);
+	ofn->lpstrTitle = (LPCWSTR)lpstrTitle;
+  }
   return ret;
 }
 
