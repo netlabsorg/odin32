@@ -1,4 +1,4 @@
-/* $Id: APIImport.cmd,v 1.6 2001-01-22 20:25:01 phaller Exp $
+/* $Id: APIImport.cmd,v 1.7 2001-01-26 21:33:13 phaller Exp $
  *
  * Helper script which invokes APIImport.exe with the correct .def file.
  *
@@ -6,10 +6,10 @@
  *
  */
 
-if RxFuncQuery('SysFileDelete')=0 THEN
+if RxFuncQuery('SysFileDelete')=1 THEN
   call RxFuncAdd 'SysFileDelete', 'RexxUtil', 'SysFileDelete';
 
-if RxFuncQuery('SysFileFree')=0 THEN
+if RxFuncQuery('SysFileFree')=1 THEN
     call RxFuncAdd 'SysFileTree', 'RexxUtil', 'SysFileTree';
 
     sDllName = filespec('name', directory());

@@ -1,4 +1,4 @@
-/* $Id: CreatePath.cmd,v 1.2 2001-01-22 20:25:01 phaller Exp $
+/* $Id: CreatePath.cmd,v 1.3 2001-01-26 21:33:13 phaller Exp $
  *
  * Createpath.cmd <pathname>
  *
@@ -6,7 +6,7 @@
  *
  */
 
-if RxFuncQuery('SysMkDir')=0 THEN
+if RxFuncQuery('SysMkDir')=1 THEN
     call RxFuncAdd 'SysMkDir', 'RexxUtil', 'SysMkDir'
 
     parse arg sArgs
