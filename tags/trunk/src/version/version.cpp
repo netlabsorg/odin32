@@ -1,4 +1,4 @@
-/* $Id: version.cpp,v 1.7 1999-10-04 20:53:08 sandervl Exp $ */
+/* $Id: version.cpp,v 1.8 1999-10-23 23:01:53 sandervl Exp $ */
 
 /*
  * Win32 Version resource APIs for OS/2
@@ -351,7 +351,7 @@ ODINFUNCTION2(DWORD,GetFileVersionInfoSizeA,LPSTR,   lpszFile,
                                             LPDWORD, lpdwHandle)
 {
   if(lpdwHandle)
-    lpdwHandle = 0;
+    *lpdwHandle = 0; //SvL: Set contents to 0
 
   return GetVersionSize(lpszFile);
 }
@@ -377,7 +377,7 @@ ODINFUNCTION2(DWORD,GetFileVersionInfoSizeW,LPWSTR,  lpszFile,
 
 
   if(lpdwHandle)
-    lpdwHandle = 0;
+    *lpdwHandle = 0; //SvL: Set contents to 0
 
   rc = GetVersionSize(astring);
   FreeAsciiString(astring);
