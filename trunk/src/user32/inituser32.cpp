@@ -1,4 +1,4 @@
-/* $Id: inituser32.cpp,v 1.11 2002-04-07 14:36:59 sandervl Exp $ */
+/* $Id: inituser32.cpp,v 1.12 2003-09-11 12:57:53 sandervl Exp $ */
 /*
  * USER32 DLL entry point
  *
@@ -96,11 +96,11 @@ void WIN32API SetCustomPMHookDll(LPSTR pszKbdDllName)
 void pmkbdhk_initialize(HAB _hab)
 {
   APIRET rc;
-  
-  if (pmkbdhk_installed == FALSE)
+
+  if (pmkbdhk_installed == FALSE && PMKBDHK_MODULE[0])
   {
     CHAR szBuf[260];
-    
+
     // load the DLL
     rc = DosLoadModule(szBuf,
                        sizeof(szBuf),
@@ -111,10 +111,10 @@ void pmkbdhk_initialize(HAB _hab)
       dprintf(("USER32: pmkbdhk_initalize(%08xh) failed rc=%d\n",
                _hab,
                rc));
-      
+
       return;
     }
-    
+
     // get the entry points
     rc = DosQueryProcAddr(hmodPMKBDHK,
                           0,
@@ -125,23 +125,23 @@ void pmkbdhk_initialize(HAB _hab)
                             0,
                             PMKBDHK_HOOK_TERM,
                             (PFN*)&pfnHookTerm);
-    
+
     if (NO_ERROR != rc)
     {
       dprintf(("USER32: pmkbdhk_initalize(%08xh) failed importing functions, rc=%d\n",
                _hab,
                rc));
-      
+
       // free the DLL again
       DosFreeModule(hmodPMKBDHK);
       hmodPMKBDHK = NULLHANDLE;
-      
+
       return;
     }
-    
+
     // now finally call the initializer function
     pfnHookInit(_hab);
-    
+
     // OK, hook is armed
     pmkbdhk_installed = TRUE;
   }
@@ -154,11 +154,11 @@ void pmkbdhk_terminate(void)
   {
     // call the terminator function
     pfnHookTerm();
-    
+
     // OK, hook is disarmed
-    pmkbdhk_installed = TRUE;
+    pmkbdhk_installed = FALSE;
   }
-  
+
   // unload the dll
   if (NULLHANDLE != hmodPMKBDHK)
   {
@@ -167,7 +167,7 @@ void pmkbdhk_terminate(void)
     {
       dprintf(("USER32: pmkbdhk_terminate() failed rc=%d\n",
                rc));
-    
+
       hmodPMKBDHK = NULLHANDLE;
     }
   }
@@ -214,7 +214,7 @@ ULONG APIENTRY inittermUser32(ULONG hModule, ULONG ulFlag)
          //PH:  initializes HAB!
          if (FALSE == InitPM())
            return 0UL;
-     
+
          // try to install the keyboard hook
          pmkbdhk_initialize(hab);
 
@@ -228,8 +228,8 @@ ULONG APIENTRY inittermUser32(ULONG hModule, ULONG ulFlag)
          MONITOR_Initialize(&MONITOR_PrimaryMonitor);
 
          break;
-     
-     
+
+
        case 1 :
          if(hInstanceUser32) {
             UnregisterLxDll(hInstanceUser32);
@@ -249,7 +249,7 @@ ULONG APIENTRY inittermUser32(ULONG hModule, ULONG ulFlag)
 void APIENTRY cleanupUser32(ULONG ulReason)
 {
   dprintf(("user32 exit\n"));
-  
+
   // try to unistall the keyboard hook
   pmkbdhk_terminate();
 
