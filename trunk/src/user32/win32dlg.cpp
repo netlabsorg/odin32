@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.57 2001-02-18 17:59:05 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.58 2001-03-25 08:50:42 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -287,6 +287,7 @@ INT Win32Dialog::doDialogBox()
   MSG msg;
   INT retval;
 
+    dprintf(("doDialogBox %x", getWindowHandle()));
     /* Owner must be a top-level window */
     if(getOwner() == NULL) {
          topOwner = windowDesktop;

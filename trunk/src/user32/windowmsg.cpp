@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.22 2001-02-13 19:59:13 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.23 2001-03-25 08:50:42 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -230,34 +230,27 @@ BOOL WIN32API InSendMessage(void)
 }
 //******************************************************************************
 //******************************************************************************
-//******************************************************************************
 BOOL WIN32API ReplyMessage(LRESULT result)
 {
     dprintf(("USER32: ReplyMessage %x", result));
     return OSLibWinReplyMessage(result);
 }
 //******************************************************************************
-//SvL: 24-6-'97 - Added
 //******************************************************************************
-UINT WIN32API RegisterWindowMessageA(LPCSTR arg1)
+UINT WIN32API RegisterWindowMessageA(LPCSTR lpString)
 {
  UINT rc;
 
-    rc = O32_RegisterWindowMessage(arg1);
-    dprintf(("USER32:  RegisterWindowMessageA %s returned %X\n", arg1, rc));
+    rc = GlobalAddAtomA(lpString);
+    dprintf(("USER32:  RegisterWindowMessageA %s returned %X\n", lpString, rc));
     return(rc);
 }
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API RegisterWindowMessageW( LPCWSTR arg1)
+UINT WIN32API RegisterWindowMessageW( LPCWSTR lpString)
 {
- char *astring = UnicodeToAsciiString((LPWSTR)arg1);
- UINT  rc;
-
     dprintf(("USER32:  RegisterWindowMessageW\n"));
-    rc = O32_RegisterWindowMessage(astring);
-    FreeAsciiString(astring);
-    return rc;
+    return GlobalAddAtomW(lpString);
 }
 //******************************************************************************
 //No need to support this (obsolete, not implemented by Win32)

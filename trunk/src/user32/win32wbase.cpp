@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.244 2001-02-23 14:52:41 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.245 2001-03-25 08:50:42 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2554,6 +2554,9 @@ void Win32BaseWindow::NotifyFrameChanged(WINDOWPOS *wpos, RECT *oldClientRect)
 //******************************************************************************
 BOOL Win32BaseWindow::SetWindowPlacement(WINDOWPLACEMENT *wndpl)
 {
+   dprintf(("SetWindowPlacement %x min  (%d,%d)", getWindowHandle(), wndpl->ptMinPosition.x, wndpl->ptMinPosition.y));
+   dprintf(("SetWindowPlacement %x max  (%d,%d)", getWindowHandle(), wndpl->ptMaxPosition.x, wndpl->ptMaxPosition.y));
+   dprintf(("SetWindowPlacement %x norm (%d,%d)(%d,%d)", getWindowHandle(), wndpl->rcNormalPosition.left, wndpl->rcNormalPosition.top, wndpl->rcNormalPosition.right, wndpl->rcNormalPosition.bottom));
    windowpos.ptMinPosition    = wndpl->ptMinPosition;
    windowpos.ptMaxPosition    = wndpl->ptMaxPosition;
    windowpos.rcNormalPosition = wndpl->rcNormalPosition;
