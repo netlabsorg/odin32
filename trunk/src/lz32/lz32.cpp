@@ -1,4 +1,4 @@
-/* $Id: lz32.cpp,v 1.6 1999-08-17 19:30:49 phaller Exp $ */
+/* $Id: lz32.cpp,v 1.7 1999-12-05 10:03:16 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -26,8 +26,6 @@
 
 ODINDEBUGCHANNEL(LZ32)
 
-// @@@PH WINE compatibility macros
-LPWSTR WINAPI lstrcpyAtoW    (LPWSTR unicode, LPSTR ascii);
 #define SystemHeap GetProcessHeap()
 #define dprintf(a)
 
