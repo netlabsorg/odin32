@@ -1,4 +1,4 @@
-/* $Id: winimagebase.cpp,v 1.32 2001-06-10 22:32:17 sandervl Exp $ */
+/* $Id: winimagebase.cpp,v 1.33 2001-07-30 12:01:25 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -29,6 +29,7 @@
 #include <winimagebase.h>
 #include <windllbase.h>
 #include <winexebase.h>
+#include <windlllx.h>
 #include <pefile.h>
 #include <unicode.h>
 #include "oslibmisc.h"
@@ -49,20 +50,30 @@ Win32ImageBase::Win32ImageBase(HINSTANCE hInstance) :
     tlsCallBackAddr(0), tlsIndex(-1), pResRootDir(NULL),
     ulRVAResourceSection(0)
 {
+  char *name;
+
   magic = MAGIC_WINIMAGE;
 
   if(hInstance != -1) {
     this->hinstance = hInstance;
 
-    char *name = OSLibGetDllName(hinstance);
+    if(lpszCustomDllName) {
+         name = lpszCustomDllName;
+    }
+    else name = OSLibGetDllName(hinstance);
+
     strcpy(szFileName, name);
     strupr(szFileName);
 
-    //rename dll (os/2 -> win32) if necessary (i.e. OLE32OS2 -> OLE32)
-    Win32DllBase::renameDll(szFileName, FALSE);
-
-    name = strrchr(szFileName, '\\')+1;
-    strcpy(szModule, name);
+    if(lpszCustomDllName) {
+        strcpy(szModule, name);
+    }
+    else {
+        //rename dll (os/2 -> win32) if necessary (i.e. OLE32OS2 -> OLE32)
+        Win32DllBase::renameDll(szFileName, FALSE);
+        name = strrchr(szFileName, '\\')+1;
+        strcpy(szModule, name);
+    }
   }
   else {
     szModule[0] = 0;

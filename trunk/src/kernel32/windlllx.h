@@ -1,4 +1,4 @@
-/* $Id: windlllx.h,v 1.4 2001-06-15 09:42:48 bird Exp $ */
+/* $Id: windlllx.h,v 1.5 2001-07-30 12:01:25 sandervl Exp $ */
 
 /*
  * Win32 LX Dll class (compiled in OS/2 using Odin32 api)
@@ -43,5 +43,7 @@ protected:
         DWORD     Subsystem;
 private:
 };
+
+extern char *lpszCustomDllName;
 
 #endif //__WINDLLLX_H__

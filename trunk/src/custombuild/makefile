@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2001-07-30 08:18:18 sandervl Exp $
+# $Id: makefile,v 1.3 2001-07-30 12:02:45 sandervl Exp $
 
 #
 # Odin32 API
@@ -15,10 +15,10 @@ NOINTERNALFUNCTIONS=1
 #
 # Overrides.
 #
-CXXFLAGS    = $(CXXFLAGS_ODINCRT)
-LD2FLAGS    = $(LD2FLAGS_ODINCRT)
-CDEFINES    = $(CDEFINES_ODINCRT)
-IMPLIBFLAGS = $(IMPLIBFLAGS) /NOIgnoreCase
+#CXXFLAGS    = $(CXXFLAGS_ODINCRT)
+#LD2FLAGS    = $(LD2FLAGS_ODINCRT)
+#CDEFINES    = $(CDEFINES_ODINCRT)
+#IMPLIBFLAGS = $(IMPLIBFLAGS) /NOIgnoreCase
 
 
 #
@@ -50,8 +50,8 @@ $(ODIN32_LIB)/versiono.lib \
 $(ODIN32_LIB)/lz32o.lib \
 $(ODIN32_LIB)\LIBULS.LIB \
 $(ODIN32_LIB)\LIBCONV.LIB \
+$(ODIN32_LIB)/$(ODINCRT).lib \
 $(ODIN32_LIB)/wgss50.lib \
-$(ODIN32_LIB)/pmwinx.lib \
 OS2386.LIB \
 mmpm2.lib \
 so32dll.lib \

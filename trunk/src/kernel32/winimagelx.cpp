@@ -1,4 +1,4 @@
-/* $Id: winimagelx.cpp,v 1.10 2001-07-29 19:00:32 sandervl Exp $ */
+/* $Id: winimagelx.cpp,v 1.11 2001-07-30 12:01:25 sandervl Exp $ */
 
 /*
  * Win32 LX Image base class
@@ -32,6 +32,7 @@
 #include <windllbase.h>
 #include <winexebase.h>
 #include <winexelx.h>
+#include <windlllx.h>
 #include <pefile.h>
 #include <unicode.h>
 #include "oslibmisc.h"
@@ -40,8 +41,6 @@
 
 #define DBG_LOCALLOG	DBG_winimagelx
 #include "dbglocal.h"
-
-extern char *lpszCustomDllName; //windlllx.cpp
 
 static BYTE dosHeader[] = {
  0x4D, 0x5A, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x0B, 0x00,
