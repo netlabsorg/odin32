@@ -1,4 +1,4 @@
-/* $Id: winexepe2lx.h,v 1.1 2000-03-09 19:03:22 sandervl Exp $ */
+/* $Id: winexepe2lx.h,v 1.2 2000-04-14 22:35:28 sandervl Exp $ */
 
 /*
  * Win32 PE2LX Exe class
@@ -30,7 +30,5 @@ public:
     virtual ~Win32Pe2LxExe();
     BOOL init();
 };
-
-extern BOOL fPe2Lx;
 
 #endif //__WINEXEPE2LX_H__

@@ -1,4 +1,4 @@
-/* $Id: winimagebase.h,v 1.1 2000-03-09 19:03:22 sandervl Exp $ */
+/* $Id: winimagebase.h,v 1.2 2000-04-14 22:35:28 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -81,6 +81,7 @@ virtual ULONG getVersionSize();
 virtual BOOL  getVersionStruct(char *verstruct, ULONG bufLength);
 
 static  BOOL  isPEImage(char *szFileName);
+static  void  findDll(char *szFileName, char *szFullName, int cchFullFileName);
 
 	void  setEntryPoint(ULONG startAddress) { entryPoint = startAddress; };
 

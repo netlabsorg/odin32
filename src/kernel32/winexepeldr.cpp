@@ -1,4 +1,4 @@
-/* $Id: winexepeldr.cpp,v 1.7 2000-02-16 14:22:11 sandervl Exp $ */
+/* $Id: winexepeldr.cpp,v 1.8 2000-04-14 22:35:28 sandervl Exp $ */
 
 /*
  * Win32 PE loader Exe class
@@ -41,17 +41,21 @@
 extern char szErrorTitle[];
 extern char szErrorModule[];
 
+BOOL fPeLoader = FALSE;
+
 //******************************************************************************
 //Called by ring 3 pe loader to create win32 executable
 //******************************************************************************
-BOOL WIN32API CreateWin32PeLdrExe(char *szFileName, ULONG reservedMem) 
+BOOL WIN32API CreateWin32PeLdrExe(char *szFileName, char *szCmdLine, ULONG reservedMem) 
 {
  APIRET  rc;
  PPIB   ppib;
  PTIB   ptib;
  WINEXCEPTION_FRAME exceptFrame;
  Win32PeLdrExe *WinExe;
- char  *szCmdLine;
+ char   *szFullCmdLine;
+
+  fPeLoader = TRUE;
 
   WinExe = new Win32PeLdrExe(szFileName);
 
@@ -61,13 +65,14 @@ BOOL WIN32API CreateWin32PeLdrExe(char *szFileName, ULONG reservedMem)
         delete WinExe;
         return FALSE;
   }
-  //TODO: Create full path for executable?
-  szCmdLine = ppib->pib_pchcmd + strlen(ppib->pib_pchcmd) + 1;
-  while(*szCmdLine != 0 && *szCmdLine == ' ')
-    szCmdLine++;
 
-  WinExe->setCommandLine(szCmdLine);
-  dprintf(("Cmd line: %s", szCmdLine));
+  szFullCmdLine = (char *)malloc(strlen(szFileName) + 1 + strlen(szCmdLine) + 1);
+  strcpy(szFullCmdLine, szFileName);
+  strcat(szFullCmdLine, " ");
+  strcat(szFullCmdLine, szCmdLine);
+  WinExe->setCommandLine(szFullCmdLine);
+  dprintf(("Cmd line: %s", szFullCmdLine));
+  free(szFullCmdLine);
 
   if(getenv("WIN32_IOPL2")) {
     io_init1();
