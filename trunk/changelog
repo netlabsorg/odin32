@@ -1,7 +1,8 @@
-/* $Id: changelog,v 1.2005 2002-02-26 11:14:12 sandervl Exp $ */
+/* $Id: changelog,v 1.2006 2002-02-26 11:15:03 sandervl Exp $ */
 
  2002-02-25: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Rewrote GetWindowThreadProcessId (no longer uses WGSS)
+                o WindowFromPoint change; enumerate z-order, not parent-children
     - KERNEL32: o Changed GetCurrentThreadId to return unique global thread id
                   ((processid << 16) | threadid)
                   Thread ids return by WGSS are unique to the process only.
