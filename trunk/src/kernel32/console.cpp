@@ -1,4 +1,4 @@
-/* $Id: console.cpp,v 1.20 2000-07-25 18:22:47 sandervl Exp $ */
+/* $Id: console.cpp,v 1.21 2000-08-10 02:19:54 phaller Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -2767,8 +2767,6 @@ DWORD WIN32API GetConsoleTitleW(LPWSTR lpConsoleTitle,
                ConsoleGlobals.pszWindowTitle,
                nSize);
 
-  /* @@@PH Ascii2Unicode */
-
   return (nSize < ulLength) ? nSize : ulLength;
 }
 
@@ -3699,19 +3697,27 @@ BOOL WIN32API SetConsoleTitleA(LPTSTR lpszTitle)
  * Author    : Patrick Haller [Tue, 1998/02/12 23:28]
  *****************************************************************************/
 
-BOOL WIN32API SetConsoleTitleW(LPTSTR lpszTitle)
+BOOL WIN32API SetConsoleTitleW(LPWSTR lpszTitle)
 {
 #ifdef DEBUG_LOCAL2
   WriteLog("KERNEL32/CONSOLE: OS2SetConsoleTitleW(%s) not implemented.\n",
            lpszTitle);
 #endif
 
-  /* @@@PH Unicode2Ascii */
-
+  if (lpszTitle == NULL)                                 /* check parameters */
+    return FALSE;
+  
   if (ConsoleGlobals.pszWindowTitle != NULL)           /* previously set name */
     free (ConsoleGlobals.pszWindowTitle);                     /* then free it */
-
-  ConsoleGlobals.pszWindowTitle = strdup(lpszTitle);     /* copy the new name */
+  
+  /* create an ascii copy of the lpszTitle */
+  int iLength = UniStrlen(lpszTitle);
+  
+  ConsoleGlobals.pszWindowTitle = (PSZ)malloc(iLength+1);
+  ConsoleGlobals.pszWindowTitle[iLength] = 0;
+  lstrcpynWtoA(ConsoleGlobals.pszWindowTitle,
+               lpszTitle,
+               iLength);
 
   WinSetWindowText(ConsoleGlobals.hwndFrame,           /* set new title text */
                    ConsoleGlobals.pszWindowTitle);

@@ -1,4 +1,4 @@
-/* $Id: conin.cpp,v 1.9 2000-03-03 11:15:57 sandervl Exp $ */
+/* $Id: conin.cpp,v 1.10 2000-08-10 02:19:53 phaller Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -148,11 +148,16 @@ BOOL HMDeviceConsoleInClass::ReadFile(PHMHANDLEDATA pHMHandleData,
           if (pConsoleInput->dwConsoleMode & ENABLE_LINE_INPUT)
           {
             // continue until buffer full or CR entered
+            // Note: CRLF is actually returned at the end of the buffer!
             if (InputRecord.Event.KeyEvent.uChar.AsciiChar == 0x0d)
               fLoop = FALSE;
           }
           else
-            fLoop = FALSE; // return on any single key in buffer :)
+            // return on any single key in buffer :)
+            // fLoop = FALSE;
+            // @@@PH 2000/08/10 changed behaviour to return ALL input events
+            // recorded in the console.
+            fLoop = (iConsoleInputQueryEvents() != 0);
 
           // record key stroke
           if (pConsoleInput->dwConsoleMode & ENABLE_PROCESSED_INPUT)
@@ -161,9 +166,32 @@ BOOL HMDeviceConsoleInClass::ReadFile(PHMHANDLEDATA pHMHandleData,
             switch (InputRecord.Event.KeyEvent.uChar.AsciiChar)
             {
               case 0x03: // ctrl-c is filtered!
-              case 0x0a: // LF
+                // @@@PH we're supposed to call a ctrl-c break handler here!
+                break;
+              
               case 0x0d: // CR
-                // do NOT insert those keys into the resulting buffer
+                // CR is automatically expanded to CRLF if in line input mode!
+                if (pConsoleInput->dwConsoleMode & ENABLE_LINE_INPUT)
+                {
+                  *pszTarget = 0x0d; // CR
+                  pszTarget++;
+                  ulCounter++;
+                  if (ulCounter < nNumberOfBytesToRead)  // check for room
+                  {
+                    *pszTarget = 0x0a; // LF
+                    pszTarget++;
+                    ulCounter++;
+                  }
+                  
+                  if (pConsoleInput->dwConsoleMode & ENABLE_ECHO_INPUT)
+                    HMWriteFile(pConsoleGlobals->hConsoleBuffer,
+                        pszTarget-2,
+                        2,
+                        &ulPostCounter,                      /* dummy result */
+                        NULL);
+                  
+                }
+              
                 break;
 
               case 0x08: // backspace

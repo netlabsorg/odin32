@@ -1,4 +1,12 @@
- /* $Id: changelog,v 1.1056 2000-08-09 18:58:42 sandervl Exp $ */
+ /* $Id: changelog,v 1.1057 2000-08-10 02:18:40 phaller Exp $ */
+
+ 2000-08-10: Patrick Haller <phaller@gmx.net>
+    - KERNEL32: OSLibDosQueryVolumeFS does no more return an error if
+                the caller is not interested in the volume name.
+                Console Input handling improved, some correction.
+          NOTE! lstrcpynAtoW and lstrcpynWtoA do no more enforce (erroneous)
+                string termination.
+                NT4's CMD.EXE is quite working now.
 
  2000-08-09: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: TLS changes (now updates THDB array instead of calling

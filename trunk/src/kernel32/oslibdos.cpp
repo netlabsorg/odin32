@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.35 2000-07-12 18:21:45 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.36 2000-08-10 02:19:58 phaller Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -1856,10 +1856,19 @@ DWORD OSLibDosQueryVolumeFS(int drive, LPSTR lpFileSystemNameBuffer, DWORD nFile
    }
 
    fsname = (char *)&fsinfo->szName[0] + fsinfo->cbName + 1;
+  
+  /* @@@PH 2000/08/10 CMD.EXE querys with nFileSystemNameSize == 0
+   * however does NOT expect to receive an error.
+   */
+   strncpy(lpFileSystemNameBuffer,
+           fsname,
+           nFileSystemNameSize);
+  /*
    if(strlen(fsname) < nFileSystemNameSize) {
  	strcpy(lpFileSystemNameBuffer, fsname);
    }
    else	return ERROR_BUFFER_OVERFLOW_W;
+   */
    return 0;
 }
 //******************************************************************************
