@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1353 2001-04-06 14:36:59 sandervl Exp $ */
+/* $Id: changelog,v 1.1354 2001-04-10 17:08:15 sandervl Exp $ */
+
+ 2001-04-10: Sander van Leeuwen <sandervl@xs4all.nl>   
+    - PELDR:    o Print module name that contributed to the failure of
+                  loading kernel32.
 
  2001-04-06: Sander van Leeuwen <sandervl@xs4all.nl>   
     - WINMM:    o Clean up DirectAudio thread properly.
