@@ -1,4 +1,4 @@
-/* $Id: vprntf16.c,v 1.4 2000-12-11 06:20:49 bird Exp $
+/* $Id: vprntf16.c,v 1.5 2001-03-11 16:47:28 bird Exp $
  *
  * vprintf and printf - 16-bit.
  *
@@ -545,9 +545,7 @@ static char *strout(char *psz, signed cchMax)
                     outp(options.usCom, chNewLine);            /* Put the char. */
                     cchYield ++;
                 }
-
-                while (cchMax - cch > 0 && (psz[cch] == '\r' || psz[cch] == '\n'))
-                    cch++;
+                cch++;
             }
 
             /* next */
