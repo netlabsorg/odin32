@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.48 2002-07-12 19:49:21 sandervl Exp $*/
+/* $Id: menu.cpp,v 1.49 2002-07-15 10:16:28 sandervl Exp $*/
 /*
  * Menu functions
  *
@@ -312,10 +312,10 @@ static void do_debug_print_menuitem(const char *prefix, MENUITEM * mp,
 POPUPMENU *MENU_GetMenu(HMENU hMenu)
 {
 #ifdef __WIN32OS2__
-    if(ObjGetHandleType(hMenu) == USEROBJ_MENU) {
+    if(ObjQueryHandleType(hMenu) == HNDL_MENU) {
         POPUPMENU *menu;
 
-        menu = (POPUPMENU *)ObjGetHandleData(hMenu, USEROBJ_MENU);
+        menu = (POPUPMENU *)ObjQueryHandleData(hMenu, HNDL_MENU);
         return menu;
     }
     return NULL;
@@ -4003,7 +4003,7 @@ HMENU WINAPI CreateMenu(void)
 
 #ifdef __WIN32OS2__
     if (!(menu = (LPPOPUPMENU)HeapAlloc(GetProcessHeap(),0,sizeof(POPUPMENU)))) return 0;
-    if(ObjAllocateHandle(&hMenu, (DWORD)menu, USEROBJ_MENU) == FALSE) return 0;
+    if(ObjAllocateHandle(&hMenu, (DWORD)menu, HNDL_MENU) == FALSE) return 0;
 #else
     if (!(hMenu = (HMENU)HeapAlloc(GetProcessHeap(),0,sizeof(POPUPMENU)))) return 0;
     menu = (LPPOPUPMENU)hMenu;
@@ -4060,7 +4060,7 @@ BOOL WINAPI DestroyMenu( HMENU hMenu )
             }
 #ifdef __WIN32OS2__
             HeapFree(GetProcessHeap(),0,(LPVOID)lppop);
-            ObjFreeHandle(hMenu);
+            ObjDeleteHandle(hMenu, HNDL_MENU);
 #else
             HeapFree(GetProcessHeap(),0,(LPVOID)hMenu);
 #endif
