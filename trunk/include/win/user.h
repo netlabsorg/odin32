@@ -1,4 +1,4 @@
-/* $Id: user.h,v 1.1 1999-05-24 20:19:20 ktk Exp $ */
+/* $Id: user.h,v 1.2 2001-09-19 15:37:47 sandervl Exp $ */
 
 /*
  * USER definitions
@@ -12,18 +12,11 @@
 #include "ldt.h"
 #include "local.h"
 
-extern WORD USER_HeapSel;
-
-#define USER_HEAP_ALLOC(size) \
-            LOCAL_Alloc( USER_HeapSel, LMEM_FIXED, (size) )
-#define USER_HEAP_REALLOC(handle,size) \
-            LOCAL_ReAlloc( USER_HeapSel, (handle), (size), LMEM_FIXED )
-#define USER_HEAP_FREE(handle) \
-            LOCAL_Free( USER_HeapSel, (handle) )
-#define USER_HEAP_LIN_ADDR(handle)  \
-         ((handle) ? PTR_SEG_OFF_TO_LIN(USER_HeapSel, (handle)) : NULL)
-#define USER_HEAP_SEG_ADDR(handle)  \
-         ((handle) ? PTR_SEG_OFF_TO_SEGPTR(USER_HeapSel, (handle)) : (SEGPTR)0)
+#define USER_HEAP_ALLOC(size) HeapAlloc(GetProcessHeap(),0,size)
+#define USER_HEAP_FREE(handle) HeapFree(GetProcessHeap(),0,(LPVOID)handle)
+#define USER_HEAP_REALLOC(handle,size) HeapRealloc(GetProcessHeap(),0,(LPVOID)handle, size)
+#define USER_HEAP_LIN_ADDR(handle)  (PVOID)handle
+#define USER_HEAP_SEG_ADDR(handle)  (PVOID)handle
 
 #define USUD_LOCALALLOC        0x0001
 #define USUD_LOCALFREE         0x0002
