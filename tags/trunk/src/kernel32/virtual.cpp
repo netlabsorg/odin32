@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.16 1999-10-09 22:28:59 phaller Exp $ */
+/* $Id: virtual.cpp,v 1.17 1999-10-14 17:15:50 phaller Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -279,28 +279,31 @@ ODINFUNCTION4(LPVOID, VirtualAlloc, LPVOID, lpvAddress,
         return NULL;
   }
 
-  if(fdwAllocationType & MEM_COMMIT) {
+  if(fdwAllocationType & MEM_COMMIT)
+  {
         dprintf(("VirtualAlloc: commit\n"));
         flag = PAG_COMMIT;
   }
-  if(fdwProtect & PAGE_READONLY)     	  flag |= PAG_READ;
-  if(fdwProtect & PAGE_READWRITE)    	  flag |= (PAG_READ | PAG_WRITE);
-  if(fdwProtect & PAGE_WRITECOPY)    	  flag |= (PAG_READ | PAG_WRITE);
+
+  if(fdwProtect & PAGE_READONLY)     flag |= PAG_READ;
+  if(fdwProtect & PAGE_READWRITE)    flag |= (PAG_READ | PAG_WRITE);
+  if(fdwProtect & PAGE_WRITECOPY)    flag |= (PAG_READ | PAG_WRITE);
 
   if(fdwProtect & PAGE_EXECUTE_READWRITE) flag |= (PAG_EXECUTE | PAG_WRITE | PAG_READ);
-  if(fdwProtect & PAGE_EXECUTE_READ) 	  flag |= (PAG_EXECUTE | PAG_READ);
-  if(fdwProtect & PAGE_EXECUTE)           flag |= PAG_EXECUTE;
+  if(fdwProtect & PAGE_EXECUTE_READ) flag |= (PAG_EXECUTE | PAG_READ);
+  if(fdwProtect & PAGE_EXECUTE)      flag |= PAG_EXECUTE;
 
-  if(fdwProtect & PAGE_GUARD)        	  flag |= PAG_GUARD;
+  if(fdwProtect & PAGE_GUARD)        flag |= PAG_GUARD;
 
   //just do this if other options are used
   if(!(flag & (PAG_READ | PAG_WRITE | PAG_EXECUTE)) || flag == 0)
   {
-    	dprintf(("VirtualAlloc: Unknown protection flags, default to read/write"));
-      	flag |= PAG_READ | PAG_WRITE;
+    dprintf(("VirtualAlloc: Unknown protection flags, default to read/write"));
+    flag |= PAG_READ | PAG_WRITE;
   }
 
-  if(fdwAllocationType & MEM_COMMIT && lpvAddress != NULL)
+  // commit memory
+  if(fdwAllocationType & MEM_COMMIT)
   {
     Address = lpvAddress;
 
@@ -371,26 +374,44 @@ ODINFUNCTION3(BOOL, VirtualFree, LPVOID, lpvAddress,
   DWORD rc;
 
   // verify parameters
-  if ( (lpvAddress == NULL) ||
-       ( (FreeType & MEM_RELEASE) &&
-         (cbSize   != 0) )
-     )
+  if ( (FreeType & MEM_RELEASE) && (cbSize   != 0) )
   {
     SetLastError(ERROR_INVALID_PARAMETER);
     return(FALSE);
   }
 
-  if(FreeType & MEM_DECOMMIT)
-    rc = OSLibDosSetMem(lpvAddress, cbSize, PAG_DECOMMIT);
-  else
-    rc = OSLibDosFreeMem(lpvAddress);    //MEM_RELEASE, cbSize == 0 (or should be)
-
-  if(rc)
+  if ( (FreeType & MEM_DECOMMIT) &&
+       (FreeType & MEM_RELEASE) )
   {
-    dprintf(("KERNEL32:VirtualFree rc = #%d\n",
-             rc));
-    SetLastError(ERROR_GEN_FAILURE);
+    SetLastError(ERROR_INVALID_PARAMETER);
     return(FALSE);
+  }
+
+  // decommit memory
+  if (FreeType &  MEM_DECOMMIT)
+  {
+    // decommit memory block
+    rc = OSLibDosSetMem(lpvAddress, cbSize, PAG_DECOMMIT);
+    if(rc)
+    {
+      dprintf(("KERNEL32:VirtualFree:OsLibSetMem rc = #%d\n",
+               rc));
+      SetLastError(ERROR_INVALID_ADDRESS);
+      return(FALSE);
+    }
+  }
+
+  // release memory
+  if (FreeType &  MEM_RELEASE)
+  {
+    rc = OSLibDosFreeMem(lpvAddress); // free the memory block
+    if(rc)
+    {
+      dprintf(("KERNEL32:VirtualFree:OsLibFreeMem rc = #%d\n",
+               rc));
+      SetLastError(ERROR_INVALID_ADDRESS);
+      return(FALSE);
+    }
   }
 
   return(TRUE);
@@ -409,11 +430,10 @@ ODINFUNCTION4(BOOL, VirtualProtect, LPVOID, lpvAddress,
                                     DWORD,  fdwNewProtect,
                                     DWORD*, pfdwOldProtect)
 {
- DWORD rc;
- ULONG  pageFlags = 0;
- int npages;
+  DWORD rc;
+  ULONG  pageFlags = 0;
+  int npages;
 
-  dprintf(("VirtualProtect %X; %d bytes, new flags %X (%X)\n", (int)lpvAddress, cbSize, fdwNewProtect, pfdwOldProtect));
   if(pfdwOldProtect == NULL)
         return(FALSE);
 
@@ -479,67 +499,91 @@ ODINFUNCTION3(DWORD, VirtualQuery, LPCVOID, lpvAddress,
                                    LPMEMORY_BASIC_INFORMATION, pmbiBuffer,
                                    DWORD,   cbLength)
 {
-  ULONG  cbRangeSize, dAttr;
-  DWORD rc;
+  ULONG  cbRangeSize,
+         dAttr;
+  DWORD  rc;
+  LPVOID lpBase;
 
-  if(lpvAddress == NULL || pmbiBuffer == NULL || cbLength == 0) {
-   	return 0;
+  if(pmbiBuffer == NULL || cbLength == 0) // check parameters
+  {
+    return 0;                             // nothing to return
   }
 
-  cbRangeSize = cbLength & ~0xFFF;
-  if(cbLength & 0xFFF) {
-	cbRangeSize += PAGE_SIZE;
+  // determine exact page range
+  lpBase = (LPVOID)((ULONG)lpvAddress & 0xFFFFF000);
+  cbRangeSize = cbLength & ~0x00000FFF;   // assuming intel page sizes :)
+  if(cbLength & 0x00000FFF)
+    cbRangeSize += PAGE_SIZE;
+
+  rc = OSLibDosQueryMem(lpBase,
+                        &cbRangeSize,
+                        &dAttr);
+  if(rc)
+  {
+    dprintf(("VirtualQuery - OSLibDosQueryMem %x %x returned %d\n",
+             lpBase,
+             cbLength,
+             rc));
+    return 0;
   }
-  rc = OSLibDosQueryMem((LPVOID)lpvAddress, &cbRangeSize, &dAttr);
-  if(rc) {
-   	dprintf(("VirtualQuery - DosQueryMem %x %x returned %d\n", lpvAddress, cbLength, rc));
-   	return 0;
-  }
-  memset(pmbiBuffer, 0, sizeof(MEMORY_BASIC_INFORMATION));
-  pmbiBuffer->BaseAddress = (LPVOID)lpvAddress;
+
+  memset(pmbiBuffer,
+         0,
+         sizeof(MEMORY_BASIC_INFORMATION));
+
+  pmbiBuffer->BaseAddress = lpBase;
   pmbiBuffer->RegionSize  = cbRangeSize;
+
   if(dAttr & PAG_READ && !(dAttr & PAG_WRITE))
-        pmbiBuffer->Protect |= PAGE_READONLY;
+    pmbiBuffer->Protect |= PAGE_READONLY;
+
   if(dAttr & PAG_WRITE)
-        pmbiBuffer->Protect |= PAGE_READWRITE;
+    pmbiBuffer->Protect |= PAGE_READWRITE;
 
   if((dAttr & (PAG_WRITE | PAG_EXECUTE)) == (PAG_WRITE | PAG_EXECUTE))
-        pmbiBuffer->Protect |= PAGE_EXECUTE_READWRITE;
+    pmbiBuffer->Protect |= PAGE_EXECUTE_READWRITE;
   else
-  if(dAttr & PAG_EXECUTE)
-        pmbiBuffer->Protect |= PAGE_EXECUTE_READ;
+    if(dAttr & PAG_EXECUTE)
+      pmbiBuffer->Protect |= PAGE_EXECUTE_READ;
 
   if(dAttr & PAG_GUARD)
-        pmbiBuffer->Protect |= PAGE_GUARD;
+    pmbiBuffer->Protect |= PAGE_GUARD;
 
   if(dAttr & PAG_FREE)
-   	pmbiBuffer->State = MEM_FREE;
+    pmbiBuffer->State = MEM_FREE;
   else
-  if(dAttr & PAG_COMMIT)
-   	pmbiBuffer->State = MEM_COMMIT;
-  else  pmbiBuffer->State = MEM_RESERVE;
+    if(dAttr & PAG_COMMIT)
+      pmbiBuffer->State = MEM_COMMIT;
+    else
+      pmbiBuffer->State = MEM_RESERVE;
 
   if(!(dAttr & PAG_SHARED))
-   	pmbiBuffer->Type = MEM_PRIVATE;
+    pmbiBuffer->Type = MEM_PRIVATE;
 
   //TODO: This is not correct: AllocationProtect should contain the protection
   //      flags used in the initial call to VirtualAlloc
   pmbiBuffer->AllocationProtect = pmbiBuffer->Protect;
-  if(dAttr & PAG_BASE) {
-   	pmbiBuffer->AllocationBase = (LPVOID)lpvAddress;
-  }
-  else {
-   while(lpvAddress > 0) {
-      rc = OSLibDosQueryMem((LPVOID)lpvAddress, &cbRangeSize, &dAttr);
-      if(rc) {
-         dprintf(("VirtualQuery - OSLibDosQueryMem %x %x returned %d\n", lpvAddress, cbLength, rc));
+  if(dAttr & PAG_BASE)
+    pmbiBuffer->AllocationBase = lpBase;
+  else
+  {
+    while(lpvAddress > 0)
+    {
+      rc = OSLibDosQueryMem(lpBase, &cbRangeSize, &dAttr);
+      if(rc)
+      {
+         dprintf(("VirtualQuery - OSLibDosQueryMem %x %x returned %d\n",
+                  lpvAddress,
+                  cbLength,
+                  rc));
          break;
       }
-      if(dAttr & PAG_BASE) {
-         pmbiBuffer->AllocationBase = (LPVOID)lpvAddress;
+      if(dAttr & PAG_BASE)
+      {
+         pmbiBuffer->AllocationBase = lpBase;
          break;
       }
-      lpvAddress = (LPVOID)((ULONG)lpvAddress - PAGE_SIZE);
+      lpvAddress = (LPVOID)((ULONG)lpBase - PAGE_SIZE);
    }
   }
   return sizeof(MEMORY_BASIC_INFORMATION);
@@ -586,7 +630,14 @@ ODINFUNCTION5(BOOL, VirtualProtectEx, HANDLE,  hProcess,
                                       DWORD,   fdwNewProtect,
                                       LPDWORD, pfdwOldProtect)
 {
-  return VirtualProtect(lpvAddress, cbSize, fdwNewProtect, pfdwOldProtect);
+  // only execute API, if this is the current process !
+  if (GetCurrentProcess() == hProcess)
+    return VirtualProtect(lpvAddress, cbSize, fdwNewProtect, pfdwOldProtect);
+  else
+  {
+    SetLastError(ERROR_ACCESS_DENIED); // deny access to other processes
+    return FALSE;
+  }
 }
 
 
@@ -611,5 +662,12 @@ ODINFUNCTION4(DWORD, VirtualQueryEx, HANDLE,  hProcess,
                                      LPMEMORY_BASIC_INFORMATION, pmbiBuffer,
                                      DWORD,   cbLength)
 {
-  return VirtualQuery(lpvAddress, pmbiBuffer, cbLength);
+  // only execute API, if this is the current process !
+  if (GetCurrentProcess() == hProcess)
+    return VirtualQuery(lpvAddress, pmbiBuffer, cbLength);
+  else
+  {
+    SetLastError(ERROR_ACCESS_DENIED); // deny access to other processes
+    return FALSE;
+  }
 }
