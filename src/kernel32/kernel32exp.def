@@ -1,4 +1,4 @@
-; $Id: kernel32exp.def,v 1.15 1999-08-25 12:30:47 sandervl Exp $
+; $Id: kernel32exp.def,v 1.16 1999-08-25 14:27:06 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -861,3 +861,6 @@ _HEAP_strdupWtoA@12              @1245
 _HEAP_strdupAtoW@12              @1246
 _HEAP_strdupA@12                 @1247
 _HEAP_strdupW@12                 @1248
+
+    OS2SetExceptionHandler   @1251
+    OS2UnsetExceptionHandler @1252

@@ -1,4 +1,4 @@
-/* $Id: hmdevice.cpp,v 1.6 1999-08-25 10:28:40 sandervl Exp $ */
+/* $Id: hmdevice.cpp,v 1.7 1999-08-25 14:27:05 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -90,6 +90,35 @@ DWORD  HMDeviceHandler::_DeviceRequest (PHMHANDLEDATA pHMHandleData,
   return(ERROR_INVALID_FUNCTION);
 }
 
+
+/*****************************************************************************
+ * Name      : HMDeviceHandler::DuplicateHandle
+ * Purpose   : dummy version
+ * Parameters: 
+ *             various parameters as required
+ * Variables :
+ * Result    :
+ * Remark    : the standard behaviour is to return an error code for non-
+ *             existant request codes
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
+ *****************************************************************************/
+BOOL HMDeviceHandler::DuplicateHandle(PHMHANDLEDATA pHMHandleData, HANDLE  srcprocess,
+                               PHMHANDLEDATA pHMSrcHandle,
+                               HANDLE  destprocess,
+                               PHANDLE desthandle,
+                       		DWORD   fdwAccess,
+                       		BOOL    fInherit,
+                       		DWORD   fdwOptions)
+{
+  dprintf(("KERNEL32:HandleManager::DuplicateHandle %s(%08x,%08x,%08x,%08x,%08x) - NOT IMPLEMENTED!!!!!!!!\n",
+           lpHMDeviceName,
+           pHMHandleData,
+           srcprocess, pHMSrcHandle, destprocess, desthandle));
+
+  return(ERROR_INVALID_FUNCTION);
+}
 
 /*****************************************************************************
  * Name      : DWORD HMDeviceHandler::CreateFile

@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.29 1999-08-25 12:30:47 sandervl Exp $
+; $Id: KERNEL32.DEF,v 1.30 1999-08-25 14:27:06 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -1005,3 +1005,6 @@ EXPORTS
 
     VIRTUAL_MapFileA           = _VIRTUAL_MapFileA@8              @1249
     VIRTUAL_MapFileW           = _VIRTUAL_MapFileW@8              @1250
+
+    OS2SetExceptionHandler   @1251
+    OS2UnsetExceptionHandler @1252

@@ -1,4 +1,4 @@
-/* $Id: hmdevice.h,v 1.7 1999-08-25 10:28:40 sandervl Exp $ */
+/* $Id: hmdevice.h,v 1.8 1999-08-25 14:27:06 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -76,6 +76,14 @@ public:
                                  ULONG         arg2,
                                  ULONG         arg3,
                                  ULONG         arg4);
+
+  virtual BOOL DuplicateHandle(PHMHANDLEDATA pHMHandleData, HANDLE  srcprocess,
+                               PHMHANDLEDATA pHMSrcHandle,
+                               HANDLE  destprocess,
+                               PHANDLE desthandle,
+                               DWORD   fdwAccess,
+                               BOOL    fInherit,
+                               DWORD   fdwOptions);
 
                        /* this is a handler method for calls to CreateFile() */
   virtual DWORD  CreateFile (LPCSTR        lpFileName,

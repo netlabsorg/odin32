@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.15 1999-08-25 10:28:39 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.16 1999-08-25 14:27:04 sandervl Exp $ */
 
 /*
  *
@@ -56,6 +56,7 @@
 #include "HMMutex.h"
 #include "HMSemaphore.h"
 #include "HMMMap.h"
+#include <winconst.h>
 
 /*****************************************************************************
  * Defines                                                                   *
@@ -630,6 +631,91 @@ BOOL    HMSetStdHandle(DWORD  nStdHandle,
   }
 }
 
+
+/*****************************************************************************
+ * Name      : HANDLE  HMDuplicateHandle
+ * Purpose   : replacement for Open32's HMDuplicateHandle function
+ * Parameters: 
+ *             
+ * Variables :
+ * Result    : BOOL fSuccess
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1998/02/12 20:44]
+ *****************************************************************************/
+BOOL HMDuplicateHandle(HANDLE  srcprocess,
+                       HANDLE  srchandle,
+                       HANDLE  destprocess,
+                       PHANDLE desthandle,
+                       DWORD   fdwAccess,
+                       BOOL    fInherit,
+                       DWORD   fdwOptions)
+{
+  int             iIndex;                     /* index into the handle table */
+  int             iIndexNew;                  /* index into the handle table */
+  HMDeviceHandler *pDeviceHandler;         /* device handler for this handle */
+  PHMHANDLEDATA   pHMHandleData;
+  DWORD           rc;                                     /* API return code */
+
+  if(HMHandleValidate(srchandle) != NO_ERROR) {
+	dprintf(("HMDuplicateHandle: invalid handle %x", srchandle));
+    	SetLastError(ERROR_INVALID_HANDLE);      /* use this as error message */
+	return FALSE;
+  }
+
+  pDeviceHandler = TabWin32Handles[srchandle].pDeviceHandler;         /* device is predefined */
+
+  iIndexNew = _HMHandleGetFree();                         /* get free handle */
+  if (-1 == iIndexNew)                            /* oops, no free handles ! */
+  {
+    SetLastError(ERROR_NOT_ENOUGH_MEMORY);      /* use this as error message */
+    return FALSE;                           /* signal error */
+  }
+
+  /* initialize the complete HMHANDLEDATA structure */
+  pHMHandleData = &TabWin32Handles[iIndexNew].hmHandleData;
+  pHMHandleData->dwType     = TabWin32Handles[srchandle].hmHandleData.dwType;
+  if (fdwOptions & DUPLICATE_SAME_ACCESS) {
+	pHMHandleData->dwAccess   = TabWin32Handles[srchandle].hmHandleData.dwAccess;
+  }
+  else	pHMHandleData->dwAccess   = fdwAccess;
+
+  pHMHandleData->dwShare       = TabWin32Handles[srchandle].hmHandleData.dwShare;
+  pHMHandleData->dwCreation    = TabWin32Handles[srchandle].hmHandleData.dwCreation;
+  pHMHandleData->dwFlags       = TabWin32Handles[srchandle].hmHandleData.dwFlags;
+  pHMHandleData->lpHandlerData = TabWin32Handles[srchandle].hmHandleData.lpHandlerData;
+
+
+  /* we've got to mark the handle as occupied here, since another device */
+  /* could be created within the device handler -> deadlock */
+
+  /* write appropriate entry into the handle table if open succeeded */
+  TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = iIndexNew;
+  TabWin32Handles[iIndexNew].pDeviceHandler         = pDeviceHandler;
+
+                                                  /* call the device handler */
+  rc = pDeviceHandler->DuplicateHandle(&TabWin32Handles[iIndexNew].hmHandleData,
+				       srcprocess, 
+				       &TabWin32Handles[srchandle].hmHandleData, 
+                                       destprocess, desthandle,
+                                       fdwAccess, fInherit, fdwOptions & ~DUPLICATE_CLOSE_SOURCE);
+
+  //Don't let Open32 close it for us, but do it manually (regardless of error; see SDK docs))
+  if (fdwOptions & DUPLICATE_CLOSE_SOURCE) 
+  {
+	CloseHandle(srchandle);
+  }
+
+  if (rc != NO_ERROR)     /* oops, creation failed within the device handler */
+  {
+    TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
+    SetLastError(rc);          /* Hehe, OS/2 and NT are pretty compatible :) */
+    return FALSE;                           /* signal error */
+  }
+  *desthandle = iIndexNew;
+  return TRUE;                                   /* return valid handle */
+}
 
 /*****************************************************************************
  * Name      : HANDLE  HMCreateFile

@@ -1,4 +1,4 @@
-/* $Id: kobjects.cpp,v 1.2 1999-07-06 15:48:48 phaller Exp $ */
+/* $Id: kobjects.cpp,v 1.3 1999-08-25 14:27:07 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -39,7 +39,7 @@
 //#define HMFlushFileBuffers         O32_FlushFileBuffers
 #define HMSetHandleCount           O32_SetHandleCount
 #define HMGetHandleCount           O32_GetHandleCount
-#define HMDuplicateHandle          O32_DuplicateHandle
+//#define HMDuplicateHandle          O32_DuplicateHandle
 
 
 

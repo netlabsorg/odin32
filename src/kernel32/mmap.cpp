@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.10 1999-08-25 11:40:18 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.11 1999-08-25 14:27:07 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file class
@@ -39,8 +39,8 @@ Win32MemMap::Win32MemMap(HFILE hfile, ULONG size, ULONG fdwProtect, LPSTR lpszNa
                : fMapped(FALSE), pMapping(NULL), mMapAccess(0), referenced(0)
 {
   globalmapMutex.enter();
-  memmaps = this;
   next    = memmaps;
+  memmaps = this;
   globalmapMutex.leave();
 
   hMemFile   = hfile;
@@ -67,6 +67,11 @@ BOOL Win32MemMap::Init(HANDLE hMemMap)
 		dprintf(("Win32MemMap::Init: DuplicateHandle failed!"));
 		goto fail;
      	}
+	mSize = SetFilePointer(hMemFile, 0, NULL, FILE_END);
+	if(mSize == -1) {
+		dprintf(("Win32MemMap::init: SetFilePointer failed to set pos end"));
+		goto fail;
+	}
   }
   this->hMemMap = hMemMap;
   mapMutex.leave();
@@ -142,10 +147,9 @@ BOOL Win32MemMap::commitPage(LPVOID lpPageFaultAddr, ULONG nrpages)
  
 //  mapMutex.enter();
   newProt  = mProtFlags & (PAGE_READONLY | PAGE_READWRITE | PAGE_WRITECOPY);
-  newProt |= MEM_COMMIT;
 
   dprintf(("Win32MemMap::commitPage %x (faultaddr %x), nr of pages %d", pageAddr, lpPageFaultAddr, nrpages));
-  if(VirtualProtect((LPVOID)pageAddr, nrpages*PAGE_SIZE, newProt, &oldProt) == FALSE) {
+  if(VirtualAlloc((LPVOID)pageAddr, nrpages*PAGE_SIZE, MEM_COMMIT, newProt) == FALSE) {
 	goto fail;
   }
   if(hMemFile != -1) {
@@ -200,11 +204,11 @@ LPVOID Win32MemMap::mapViewOfFile(ULONG size, ULONG offset, ULONG fdwAccess)
   ULONG fAlloc   = 0;
   LPVOID mapview;
 
-  if(fdwAccess & (FILE_MAP_WRITE|FILE_MAP_ALL_ACCESS) && !(mProtFlags & PAGE_READWRITE)) 
+  if((fdwAccess & FILE_MAP_WRITE) && !(mProtFlags & PAGE_READWRITE)) 
 	goto parmfail;
-  if(fdwAccess & FILE_MAP_READ && !(mProtFlags & (PAGE_READWRITE|PAGE_READONLY))) 
+  if((fdwAccess & FILE_MAP_READ) && !(mProtFlags & (PAGE_READWRITE|PAGE_READONLY))) 
 	goto parmfail;
-  if(fdwAccess & FILE_MAP_COPY && !(mProtFlags & PAGE_WRITECOPY)) 
+  if((fdwAccess & FILE_MAP_COPY) && !(mProtFlags & PAGE_WRITECOPY)) 
 	goto parmfail;
 
 //TODO: If committed, read file into memory
