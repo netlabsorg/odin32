@@ -1,4 +1,4 @@
-/* $Id: rmalloc_avl.c,v 1.6 2000-09-02 21:08:14 bird Exp $
+/* $Id: rmalloc_avl.c,v 1.7 2001-07-10 16:39:51 bird Exp $
  *
  * Resident Heap - AVL.
  *
@@ -333,7 +333,11 @@ static PMEMBLOCK resGetFreeMemblock(PHEAPANCHOR *ppha, unsigned cbUserSize)
     unsigned cbBlockSize;
     unsigned cbTotalSize = 0;
 
+    #ifdef DEBUG
     cbUserSize = MAX(ALIGN(cbUserSize, ALIGNMENT), sizeof(MEMBLOCKFREE) - CB_HDR);
+    #else
+    cbUserSize = MAX(ALIGN(cbUserSize + 16, ALIGNMENT), sizeof(MEMBLOCKFREE) - CB_HDR); /* add 16 bytes for safety... */
+    #endif
 
     *ppha = phaFirst;
     while (*ppha != NULL)
