@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.197 2003-02-11 14:20:01 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.198 2003-02-12 09:39:44 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -256,6 +256,7 @@ BOOL InitPM()
     return TRUE;
 } /* End of main */
 //******************************************************************************
+#ifdef NEW_WGSS
 HBITMAP OPEN32API _O32_CreateBitmapFromPMHandle(HBITMAP hPMBitmap);
 
 inline HBITMAP O32_CreateBitmapFromPMHandle(HBITMAP hPMBitmap)
@@ -268,6 +269,7 @@ inline HBITMAP O32_CreateBitmapFromPMHandle(HBITMAP hPMBitmap)
 
     return yyrc;
 }
+#endif
 //******************************************************************************
 static void QueryPMMenuBitmaps()
 {
@@ -297,6 +299,7 @@ static void QueryPMMenuBitmaps()
         hbmFrameMenu[PMMENU_CLOSEBUTTON] = GpiLoadBitmap(hdc, hModDisplay, SBMP_CLOSE, 0, 0);
         hbmFrameMenu[PMMENU_CLOSEBUTTONDOWN] = GpiLoadBitmap(hdc, hModDisplay, SBMP_CLOSEDEP, 0, 0);
 
+#ifdef NEW_WGSS
         //Create win32 bitmap handles of the OS/2 min, max and restore buttons
         hBmpMinButton     = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_MINBUTTON]);
         hBmpMinButtonDown = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_MINBUTTONDOWN]);
@@ -306,6 +309,7 @@ static void QueryPMMenuBitmaps()
         hBmpRestoreButtonDown = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_RESTOREBUTTONDOWN]);
         hBmpCloseButton   = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_CLOSEBUTTON]);
         hBmpCloseButtonDown   = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_CLOSEBUTTONDOWN]);
+#endif
         DevCloseDC(hdc);
     }
 }
