@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.36 2001-09-19 15:39:48 sandervl Exp $*/
+/* $Id: menu.cpp,v 1.37 2001-09-20 12:57:15 sandervl Exp $*/
 /*
  * Menu functions
  *
@@ -2518,16 +2518,21 @@ static LRESULT MENU_DoNextMenu( MTRACKER* pmt, UINT vk )
     if( (vk == VK_LEFT &&  menu->FocusedItem == 0 ) ||
         (vk == VK_RIGHT && menu->FocusedItem == menu->nItems - 1))
     {
+        MDINEXTMENU next_menu;
         HMENU hNewMenu;
         HWND  hNewWnd;
         UINT  id = 0;
-        LRESULT l = SendMessageA( pmt->hOwnerWnd, WM_NEXTMENU, vk,
-                (IS_SYSTEM_MENU(menu)) ? GetSubMenu(pmt->hTopMenu,0) : pmt->hTopMenu );
 
-        //TRACE("%04x [%04x] -> %04x [%04x]\n",
-        //             (UINT16)pmt->hCurrentMenu, (UINT16)pmt->hOwnerWnd, LOWORD(l), HIWORD(l) );
+        next_menu.hmenuIn = (IS_SYSTEM_MENU(menu)) ? GetSubMenu(pmt->hTopMenu,0) : pmt->hTopMenu;
+        next_menu.hmenuNext = 0;
+        next_menu.hwndNext = 0;
 
-        if( l == 0 )
+        SendMessageW( pmt->hOwnerWnd, WM_NEXTMENU, vk, (LPARAM)&next_menu );
+
+        dprintf(("%04x [%04x] -> %04x [%04x]\n",
+              pmt->hCurrentMenu, pmt->hOwnerWnd, next_menu.hmenuNext, next_menu.hwndNext ));
+
+        if (!next_menu.hmenuNext || !next_menu.hwndNext)
         {
             hNewWnd = pmt->hOwnerWnd;
             if( IS_SYSTEM_MENU(menu) )
@@ -2558,7 +2563,8 @@ static LRESULT MENU_DoNextMenu( MTRACKER* pmt, UINT vk )
         }
         else    /* application returned a new menu to switch to */
         {
-            hNewMenu = LOWORD(l); hNewWnd = HIWORD(l);
+            hNewMenu = next_menu.hmenuNext;
+            hNewWnd = next_menu.hwndNext;
 
             if( IsMenu(hNewMenu) && IsWindow(hNewWnd) )
             {

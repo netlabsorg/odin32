@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.282 2001-09-19 15:39:50 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.283 2001-09-20 12:57:15 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1076,11 +1076,15 @@ ULONG Win32BaseWindow::MsgButton(MSG *msg)
                 LONG ret = SendInternalMessageA(WM_MOUSEACTIVATE, hwndTop,
                                                 MAKELONG( lastHitTestVal, msg->message) );
 
+                dprintf2(("WM_MOUSEACTIVATE returned %d", ret));
 #if 0
                 if ((ret == MA_ACTIVATEANDEAT) || (ret == MA_NOACTIVATEANDEAT))
                          eatMsg = TRUE;
 #endif
-                if(((ret == MA_ACTIVATE) || (ret == MA_ACTIVATEANDEAT))
+                //SvL: 0 is not documented, but experiments in NT4 show that
+                //     the window will get activated when it returns this.
+                //     (FreeCell is an example)
+                if(((ret == MA_ACTIVATE) || (ret == MA_ACTIVATEANDEAT) || (ret == 0))
                    && (hwndTop != GetForegroundWindow()) )
                 {
                     Win32BaseWindow *win32top = Win32BaseWindow::GetWindowFromHandle(hwndTop);
