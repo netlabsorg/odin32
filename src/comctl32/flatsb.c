@@ -1,4 +1,3 @@
-/* $Id: flatsb.c,v 1.10 2001-09-05 12:04:58 bird Exp $ */
 /*
  * Flat Scrollbar control
  *

@@ -1,4 +1,3 @@
-/* $Id: imagelist.c,v 1.15 2001-09-05 12:04:58 bird Exp $ */
 /*
  *  ImageList implementation
  *
