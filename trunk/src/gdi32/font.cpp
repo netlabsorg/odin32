@@ -1,4 +1,4 @@
-/* $Id: font.cpp,v 1.28 2002-11-29 13:46:03 sandervl Exp $ */
+/* $Id: font.cpp,v 1.29 2003-04-02 12:58:58 sandervl Exp $ */
 
 /*
  * GDI32 font apis
@@ -371,10 +371,10 @@ int  EXPENTRY_O32 EnumFontProcExA(LPENUMLOGFONTA lpLogFont, LPNEWTEXTMETRICA
 
   memcpy(&logFont, lpLogFont, sizeof(ENUMLOGFONTA));
   memset(logFont.elfScript, 0, sizeof(logFont.elfScript));
-  memcpy(&textM.ntmetm, lpTextM, sizeof(textM.ntmetm));
-  memset(&textM.ntmeFontSignature, 0, sizeof(textM.ntmeFontSignature));
+  memcpy(&textM.ntmTm, lpTextM, sizeof(textM.ntmTm));
+  memset(&textM.ntmFontSig, 0, sizeof(textM.ntmFontSig));
 
-  dprintf(("EnumFontProcExA %s height %d", logFont.elfLogFont.lfFaceName, textM.ntmetm.tmHeight));
+  dprintf(("EnumFontProcExA %s height %d", logFont.elfLogFont.lfFaceName, textM.ntmTm.tmHeight));
 
   int rc = proc(&logFont, &textM, arg3, lpEnumData->userData);
   SetFS(selTIB);           // switch back to the saved FS selector
@@ -399,33 +399,33 @@ int EXPENTRY_O32 EnumFontProcExW(LPENUMLOGFONTA lpLogFont, LPNEWTEXTMETRICA lpTe
   AsciiToUnicodeN((char *) lpLogFont->elfFullName, LogFont.elfFullName, LF_FULLFACESIZE-1);
   AsciiToUnicodeN((char *) lpLogFont->elfStyle, LogFont.elfStyle, LF_FACESIZE-1);
 
-  textM.ntmetm.tmHeight = lpTextM->tmHeight;
-  textM.ntmetm.tmAscent = lpTextM->tmAscent;
-  textM.ntmetm.tmDescent = lpTextM->tmDescent;
-  textM.ntmetm.tmInternalLeading = lpTextM->tmInternalLeading;
-  textM.ntmetm.tmExternalLeading = lpTextM->tmExternalLeading;
-  textM.ntmetm.tmAveCharWidth = lpTextM->tmAveCharWidth;
-  textM.ntmetm.tmMaxCharWidth = lpTextM->tmMaxCharWidth;
-  textM.ntmetm.tmWeight = lpTextM->tmWeight;
-  textM.ntmetm.tmOverhang = lpTextM->tmOverhang;
-  textM.ntmetm.tmDigitizedAspectX = lpTextM->tmDigitizedAspectX;
-  textM.ntmetm.tmDigitizedAspectY = lpTextM->tmDigitizedAspectY;
-  textM.ntmetm.tmFirstChar = lpTextM->tmFirstChar;
-  textM.ntmetm.tmLastChar = lpTextM->tmLastChar;
-  textM.ntmetm.tmDefaultChar = lpTextM->tmDefaultChar;
-  textM.ntmetm.tmBreakChar = lpTextM->tmBreakChar;
-  textM.ntmetm.tmItalic = lpTextM->tmItalic;
-  textM.ntmetm.tmUnderlined = lpTextM->tmUnderlined;
-  textM.ntmetm.tmStruckOut = lpTextM->tmStruckOut;
-  textM.ntmetm.tmPitchAndFamily = lpTextM->tmPitchAndFamily;
-  textM.ntmetm.tmCharSet = lpTextM->tmCharSet;
-  textM.ntmetm.ntmFlags = 0;
-  textM.ntmetm.ntmSizeEM = 0;
-  textM.ntmetm.ntmCellHeight = 0;
-  textM.ntmetm.ntmAvgWidth = 0;
-  memset(&textM.ntmeFontSignature, 0, sizeof(textM.ntmeFontSignature));
+  textM.ntmTm.tmHeight = lpTextM->tmHeight;
+  textM.ntmTm.tmAscent = lpTextM->tmAscent;
+  textM.ntmTm.tmDescent = lpTextM->tmDescent;
+  textM.ntmTm.tmInternalLeading = lpTextM->tmInternalLeading;
+  textM.ntmTm.tmExternalLeading = lpTextM->tmExternalLeading;
+  textM.ntmTm.tmAveCharWidth = lpTextM->tmAveCharWidth;
+  textM.ntmTm.tmMaxCharWidth = lpTextM->tmMaxCharWidth;
+  textM.ntmTm.tmWeight = lpTextM->tmWeight;
+  textM.ntmTm.tmOverhang = lpTextM->tmOverhang;
+  textM.ntmTm.tmDigitizedAspectX = lpTextM->tmDigitizedAspectX;
+  textM.ntmTm.tmDigitizedAspectY = lpTextM->tmDigitizedAspectY;
+  textM.ntmTm.tmFirstChar = lpTextM->tmFirstChar;
+  textM.ntmTm.tmLastChar = lpTextM->tmLastChar;
+  textM.ntmTm.tmDefaultChar = lpTextM->tmDefaultChar;
+  textM.ntmTm.tmBreakChar = lpTextM->tmBreakChar;
+  textM.ntmTm.tmItalic = lpTextM->tmItalic;
+  textM.ntmTm.tmUnderlined = lpTextM->tmUnderlined;
+  textM.ntmTm.tmStruckOut = lpTextM->tmStruckOut;
+  textM.ntmTm.tmPitchAndFamily = lpTextM->tmPitchAndFamily;
+  textM.ntmTm.tmCharSet = lpTextM->tmCharSet;
+  textM.ntmTm.ntmFlags = 0;
+  textM.ntmTm.ntmSizeEM = 0;
+  textM.ntmTm.ntmCellHeight = 0;
+  textM.ntmTm.ntmAvgWidth = 0;
+  memset(&textM.ntmFontSig, 0, sizeof(textM.ntmFontSig));
 
-  dprintf(("EnumFontProcExW %s height %d", lpLogFont->elfLogFont.lfFaceName, textM.ntmetm.tmHeight));
+  dprintf(("EnumFontProcExW %s height %d", lpLogFont->elfLogFont.lfFaceName, textM.ntmTm.tmHeight));
   rc = proc(&LogFont, &textM, arg3, lpEnumData->userData);
   SetFS(selTIB);           // switch back to the saved FS selector
   return rc;

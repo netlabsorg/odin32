@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.97 2003-04-02 11:03:30 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.98 2003-04-02 12:58:27 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -1867,7 +1867,7 @@ BOOL HMLockFileEx(HANDLE        hFile,
                   LPOVERLAPPED  lpOverlapped)
 {
   int       iIndex;                           /* index into the handle table */
-  DWORD     dwResult;                /* result from the device handler's API */
+  BOOL      dwResult;                /* result from the device handler's API */
   PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
 
                                                           /* validate handle */
@@ -1910,7 +1910,7 @@ BOOL HMUnlockFile (HANDLE        hFile,
                    DWORD         arg5)
 {
   int       iIndex;                           /* index into the handle table */
-  DWORD     dwResult;                /* result from the device handler's API */
+  BOOL      dwResult;                /* result from the device handler's API */
   PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
 
                                                           /* validate handle */
@@ -1951,7 +1951,7 @@ BOOL HMUnlockFileEx(HANDLE        hFile,
                     LPOVERLAPPED  lpOverlapped)
 {
   int       iIndex;                           /* index into the handle table */
-  DWORD     dwResult;                /* result from the device handler's API */
+  BOOL      dwResult;                /* result from the device handler's API */
   PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
 
                                                           /* validate handle */
@@ -1989,7 +1989,7 @@ DWORD HMWaitForSingleObject(HANDLE hObject,
                             DWORD  dwTimeout)
 {
   int       iIndex;                           /* index into the handle table */
-  DWORD     dwResult;                /* result from the device handler's API */
+  BOOL      dwResult;                /* result from the device handler's API */
   PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
 
                                                           /* validate handle */
@@ -4655,16 +4655,16 @@ BOOL HMGetNamedPipeInfo(HANDLE hPipe,
  *
  * Author    : Przemyslaw Dobrowolski
  *****************************************************************************/
-DWORD HMTransactNamedPipe(HANDLE hPipe,
-                          LPVOID       lpvWriteBuf,
-                          DWORD        cbWriteBuf,
-                          LPVOID       lpvReadBuf,
-                          DWORD        cbReadBuf,
-                          LPDWORD      lpcbRead,
-                          LPOVERLAPPED lpo)
+BOOL HMTransactNamedPipe(HANDLE hPipe,
+                         LPVOID       lpvWriteBuf,
+                         DWORD        cbWriteBuf,
+                         LPVOID       lpvReadBuf,
+                         DWORD        cbReadBuf,
+                         LPDWORD      lpcbRead,
+                         LPOVERLAPPED lpo)
 {
   int       iIndex;                           /* index into the handle table */
-  DWORD     lpResult;                /* result from the device handler's API */
+  BOOL      lpResult;                /* result from the device handler's API */
   PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
 
   SetLastError(ERROR_SUCCESS);

@@ -1,4 +1,4 @@
-/* $Id: conbuffer.cpp,v 1.17 2001-12-05 18:05:59 sandervl Exp $ */
+/* $Id: conbuffer.cpp,v 1.18 2003-04-02 12:58:28 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -181,7 +181,7 @@ DWORD HMDeviceConsoleBufferClass::GetFileType(PHMHANDLEDATA pHMHandleData)
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-DWORD HMDeviceConsoleBufferClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
+BOOL HMDeviceConsoleBufferClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
 {
 
 #ifdef DEBUG_LOCAL
@@ -202,7 +202,7 @@ DWORD HMDeviceConsoleBufferClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
     pHMHandleData->lpHandlerData = NULL;
   }
 
-  return(NO_ERROR);
+  return TRUE;
 }
 
 

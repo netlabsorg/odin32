@@ -1,4 +1,4 @@
-/* $Id: windllpeldr.cpp,v 1.11 2002-07-23 13:51:48 sandervl Exp $ */
+/* $Id: windllpeldr.cpp,v 1.12 2003-04-02 12:58:31 sandervl Exp $ */
 
 /*
  * Win32 PE loader Dll class
@@ -52,18 +52,19 @@ Win32PeLdrDll::~Win32PeLdrDll()
 }
 //******************************************************************************
 //******************************************************************************
-BOOL Win32PeLdrDll::init(ULONG reservedMem, ULONG ulPEOffset)
+DWORD Win32PeLdrDll::init(ULONG reservedMem, ULONG ulPEOffset)
 {
  char   modname[CCHMAXPATH];
  char  *syspath;
  HFILE  dllfile;
  APIRET rc;
- BOOL   fRet;
+ DWORD  dwRet;
 
   strupr(szFileName);
   if(!strchr(szFileName, (int)'.')) {
     strcat(szFileName, DLL_EXTENSION);
   }
+
   dllfile = OSLibDosOpen(szFileName, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
   if(dllfile == NULL) {//search in libpath for dll
     syspath = getenv("WIN32LIBPATH");
@@ -77,7 +78,8 @@ BOOL Win32PeLdrDll::init(ULONG reservedMem, ULONG ulPEOffset)
     }
   }
   else  OSLibDosClose(dllfile);
-  fRet = Win32PeLdrImage::init(0);
+
+  dwRet = Win32PeLdrImage::init(0);
   dllEntryPoint = (WIN32DLLENTRY)entryPoint;
 
   if(!(fh.Characteristics & IMAGE_FILE_DLL)) {
@@ -85,7 +87,7 @@ BOOL Win32PeLdrDll::init(ULONG reservedMem, ULONG ulPEOffset)
     dprintf(("WARNING: Exe %s loaded as dll; entrypoint not called", szFileName));
     dllEntryPoint = NULL;
   }
-  return fRet;
+  return dwRet;
 }
 //******************************************************************************
 //******************************************************************************

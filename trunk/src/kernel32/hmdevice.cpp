@@ -1,4 +1,4 @@
-/* $Id: hmdevice.cpp,v 1.34 2003-02-04 11:28:56 sandervl Exp $ */
+/* $Id: hmdevice.cpp,v 1.35 2003-04-02 12:58:29 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -487,7 +487,7 @@ DWORD HMDeviceHandler::SetFilePointer(PHMHANDLEDATA pHMHandleData,
 
 
 /*****************************************************************************
- * Name      : DWORD HMDeviceHandler::LockFile
+ * Name      : BOOL HMDeviceHandler::LockFile
  * Purpose   : file locking
  * Parameters: PHMHANDLEDATA pHMHandleData
  *             DWORD arg2
@@ -502,27 +502,28 @@ DWORD HMDeviceHandler::SetFilePointer(PHMHANDLEDATA pHMHandleData,
  * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
  *****************************************************************************/
 
-DWORD HMDeviceHandler::LockFile(PHMHANDLEDATA pHMHandleData,
-                                    DWORD         arg2,
-                                    DWORD         arg3,
-                                    DWORD         arg4,
-                                    DWORD         arg5)
+BOOL HMDeviceHandler::LockFile(PHMHANDLEDATA pHMHandleData,
+                               DWORD         arg2,
+                               DWORD         arg3,
+                               DWORD         arg4,
+                               DWORD         arg5)
 {
-  dprintf(("KERNEL32: HandleManager::DeviceHandler::LockFile %s(%08xh,%08xh,%08xh,%08xh,%08xh)\n",
-           lpHMDeviceName,
-           pHMHandleData,
-           arg2,
-           arg3,
-           arg4,
-           arg5));
+    dprintf(("KERNEL32: HandleManager::DeviceHandler::LockFile %s(%08xh,%08xh,%08xh,%08xh,%08xh)\n",
+             lpHMDeviceName,
+             pHMHandleData,
+             arg2,
+             arg3,
+             arg4,
+             arg5));
 
-  return(ERROR_INVALID_FUNCTION);
+    SetLastError(ERROR_INVALID_FUNCTION);
+    return FALSE;
 }
 
 
 
 /*****************************************************************************
- * Name      : DWORD HMDeviceHandler::LockFileEx
+ * Name      : BOOL HMDeviceHandler::LockFileEx
  * Purpose   : file locking
  * Parameters: PHMHANDLEDATA pHMHandleData
  *             DWORD dwFlags
@@ -538,7 +539,7 @@ DWORD HMDeviceHandler::LockFile(PHMHANDLEDATA pHMHandleData,
  * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
  *****************************************************************************/
 
-DWORD HMDeviceHandler::LockFileEx(PHMHANDLEDATA pHMHandleData,
+BOOL HMDeviceHandler::LockFileEx(PHMHANDLEDATA pHMHandleData,
                                       DWORD         dwFlags,
                                       DWORD         dwReserved,
                                       DWORD         nNumberOfBytesToLockLow,
@@ -555,12 +556,13 @@ DWORD HMDeviceHandler::LockFileEx(PHMHANDLEDATA pHMHandleData,
            nNumberOfBytesToLockHigh,
            lpOverlapped));
 
-  return(ERROR_INVALID_FUNCTION);
+    SetLastError(ERROR_INVALID_FUNCTION);
+    return FALSE;
 }
 
 
 /*****************************************************************************
- * Name      : DWORD HMDeviceHandler::OpenFile
+ * Name      : BOOL HMDeviceHandler::OpenFile
  * Purpose   : this is called from the handle manager if a OpenFile() is
  *             performed on a handle
  * Parameters: LPCSTR        lpFileName            name of the file / device
@@ -576,7 +578,7 @@ DWORD HMDeviceHandler::LockFileEx(PHMHANDLEDATA pHMHandleData,
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-DWORD HMDeviceHandler::OpenFile (LPCSTR        lpFileName,
+BOOL HMDeviceHandler::OpenFile (LPCSTR        lpFileName,
                                  PHMHANDLEDATA pHMHandleData,
                                  OFSTRUCT      *pOFStruct,
                                  UINT          arg3)
@@ -588,12 +590,13 @@ DWORD HMDeviceHandler::OpenFile (LPCSTR        lpFileName,
            pOFStruct,
            arg3));
 
-  return(ERROR_INVALID_FUNCTION);
+    SetLastError(ERROR_INVALID_FUNCTION);
+    return FALSE;
 }
 
 
 /*****************************************************************************
- * Name      : DWORD HMDeviceHandler::UnlockFile
+ * Name      : BOOL HMDeviceHandler::UnlockFile
  * Purpose   : file locking
  * Parameters: PHMHANDLEDATA pHMHandleData
  *             DWORD arg2
@@ -608,7 +611,7 @@ DWORD HMDeviceHandler::OpenFile (LPCSTR        lpFileName,
  * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
  *****************************************************************************/
 
-DWORD HMDeviceHandler::UnlockFile(PHMHANDLEDATA pHMHandleData,
+BOOL HMDeviceHandler::UnlockFile(PHMHANDLEDATA pHMHandleData,
                                       DWORD         arg2,
                                       DWORD         arg3,
                                       DWORD         arg4,
@@ -622,7 +625,8 @@ DWORD HMDeviceHandler::UnlockFile(PHMHANDLEDATA pHMHandleData,
            arg4,
            arg5));
 
-  return(ERROR_INVALID_FUNCTION);
+    SetLastError(ERROR_INVALID_FUNCTION);
+    return FALSE;
 }
 
 

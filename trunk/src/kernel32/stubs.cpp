@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.38 2003-02-04 11:29:02 sandervl Exp $
+/* $Id: stubs.cpp,v 1.39 2003-04-02 12:58:31 sandervl Exp $
  *
  * Win32 KERNEL32 Subsystem for OS/2
  *
@@ -1126,7 +1126,7 @@ DWORD WIN32API PrepareTape(HANDLE hDevice,
 
 
 /*****************************************************************************
- * Name      : DWORD ReadProcessMemory
+ * Name      : BOOL ReadProcessMemory
  * Purpose   : The ReadProcessMemory function reads memory in a specified process.
  *             The entire area to be read must be accessible, or the operation fails.
  * Parameters: HANDLE  hProcess            handle of the process whose memory is read
@@ -1142,11 +1142,11 @@ DWORD WIN32API PrepareTape(HANDLE hDevice,
  * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
  *****************************************************************************/
 
-DWORD WIN32API ReadProcessMemory(HANDLE  hProcess,
-                                 LPCVOID lpBaseAddress,
-                                 LPVOID  lpBuffer,
-                                 DWORD   cbRead,
-                                 LPDWORD lpNumberOfBytesRead)
+BOOL WIN32API ReadProcessMemory(HANDLE  hProcess,
+                                LPCVOID lpBaseAddress,
+                                LPVOID  lpBuffer,
+                                DWORD   cbRead,
+                                LPDWORD lpNumberOfBytesRead)
 {
   dprintf(("Kernel32: ReadProcessMemory(%08xh,%08xh,%08xh,%08xh,%08xh) not completely implemented",
            hProcess,
@@ -1354,7 +1354,7 @@ BOOL WIN32API SetSystemTimeAdjustment(DWORD dwTimeAdjustment,
 
 
 /*****************************************************************************
- * Name      : DWORD SetTapeParameters
+ * Name      : BOOL SetTapeParameters
  * Purpose   : The SetTapeParameters function either specifies the block size
  *             of a tape or configures the tape device.
  * Parameters: HANDLE hDevice           handle of open device
@@ -1377,7 +1377,8 @@ BOOL WIN32API SetTapeParameters(HANDLE hDevice,
            dwOperation,
            lpTapeInformation));
 
-  return (ERROR_NOT_SUPPORTED);
+  SetLastError(ERROR_NOT_SUPPORTED);
+  return FALSE;
 }
 
 
@@ -1566,24 +1567,3 @@ DWORD WIN32API GetVDMCurrentDirectories(DWORD x1)
 }
 
 
-/*****************************************************************************
- * Name      : DWORD SetThreadPriorityBoost
- * Purpose   : Unknown
- * Parameters: Unknown (wrong)
- * Variables :
- * Result    : Unknown
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1999/06/08 21:44]
- *****************************************************************************/
-
-DWORD WIN32API SetThreadPriorityBoost(DWORD x1,
-                                      DWORD x2)
-{
-  dprintf(("KERNEL32: SetThreadPriorityBoost(%08xh, %08xh) not implemented\n",
-           x1,
-           x2));
-
-  return (0);
-}
