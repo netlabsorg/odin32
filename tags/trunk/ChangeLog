@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1473 2001-06-02 11:33:14 achimha Exp $ */
+/* $Id: ChangeLog,v 1.1474 2001-06-02 14:27:41 sandervl Exp $ */
 
  2001-06-02: Achim Hasenmueller <achimha@innotek.de>
     - COMDLG32: o fix crash due to uninitialized COM object pointer in
@@ -12,6 +12,8 @@
     - WINMM:    o Default waveout volume can be controlled by a key in odin.ini:
                   [WINMM]
                   DefVolume=50[0-100] Default waveout volume (default = 100)
+    - USER32:   o ScrollDC fix for translating clip & scroll rectangles
+                  (fixes scrolling in Adobe Framemaker 5.5)
 
  2001-06-01: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Send WM_HELP if F1 pressed & no menu active
