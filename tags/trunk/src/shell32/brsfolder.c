@@ -1,4 +1,4 @@
-/* $Id: brsfolder.c,v 1.8 2002-06-06 06:55:55 sandervl Exp $ */
+/* $Id: brsfolder.c,v 1.9 2002-06-09 12:38:17 sandervl Exp $ */
 
 /*
  * Win32 compatibility SHELL32 BRSFOLDER for OS/2
@@ -22,7 +22,7 @@ ODINDEBUGCHANNEL(SHELL32-BRSFOLDER)
 #include <string.h>
 
 #include "debugtools.h"
-#include "wine/undocshell.h"
+#include "undocshell.h"
 #include "shlguid.h"
 #include "pidl.h"
 #include "shell32_main.h"
