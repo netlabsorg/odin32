@@ -1,4 +1,4 @@
-/* $Id: environ.cpp,v 1.3 2000-05-09 18:56:08 sandervl Exp $ */
+/* $Id: environ.cpp,v 1.4 2000-05-10 13:13:32 sandervl Exp $ */
 
 /*
  * Win32 environment file functions for OS/2
@@ -141,16 +141,6 @@ DWORD WIN32API GetEnvironmentVariableW(LPCWSTR lpName, LPWSTR lpBuffer,
  */
 static LPCSTR ENV_FindVariable( LPCSTR env, LPCSTR name, INT len )
 {
-//temporary hack for MS Office 2000 install
-#if 1
-    char tempvar[] = "tmp";
-
-    if(len == 4 && !lstrncmpiA(name, "TEMP", 4)) {
-	name = tempvar;
-	len = 3;
-    }
-#endif
-
     while (*env)
     {
         if (!lstrncmpiA( name, env, len ) && (env[len] == '='))
