@@ -213,6 +213,27 @@ VOID WINAPI RtlInitAnsiString(PANSI_STRING target,
 
 
 /**************************************************************************
+ *                 RtlInitOemString           
+ */
+VOID WINAPI RtlInitOemString(POEM_STRING target,
+                              LPCSTR       source)
+{
+  dprintf(("NTDLL: RtlInitOemString(%08xh, %08xh)\n",
+           target,
+           source));
+
+  target->Length        = target->MaximumLength = 0;
+  target->Buffer        = (LPSTR)source;
+  if (!source)
+     return;
+
+  target->MaximumLength = lstrlenA(target->Buffer);
+  target->Length        = target->MaximumLength+1;
+}
+
+
+
+/**************************************************************************
  *                 RtlInitString               [NTDLL.402]
  */
 VOID WINAPI RtlInitString(PSTRING target,
@@ -280,6 +301,22 @@ VOID WINAPI RtlFreeAnsiString(PANSI_STRING AnsiString)
                0,
                AnsiString->Buffer);
 }
+
+
+/**************************************************************************
+ * RtlFreeOemString
+ */
+VOID WINAPI RtlFreeOemString(POEM_STRING OemString)
+{
+  dprintf(("NTDLL: RtlFreeOemString(%08xh)\n",
+           OemString));
+
+  if( OemString->Buffer )
+      HeapFree(GetProcessHeap(),
+               0,
+               OemString->Buffer);
+}
+
 
 
 /**************************************************************************

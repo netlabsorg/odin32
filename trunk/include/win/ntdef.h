@@ -1,4 +1,4 @@
-/* $Id: ntdef.h,v 1.1 1999-05-24 20:19:15 ktk Exp $ */
+/* $Id: ntdef.h,v 1.2 1999-06-08 15:49:37 phaller Exp $ */
 
 #ifndef __WINE_NTDEF_H
 #define __WINE_NTDEF_H
@@ -44,7 +44,8 @@ typedef struct _STRING {
 	USHORT	Length;
 	USHORT	MaximumLength;
 	PSTR	Buffer;
-} STRING,*PSTRING,ANSI_STRING,*PANSI_STRING;
+} STRING,*PSTRING,ANSI_STRING,*PANSI_STRING, OEM_STRING, *POEM_STRING;
+/* @@@PH 1999/06/08 OEM-String support is experimental */
 
 typedef struct _CSTRING {
 	USHORT	Length;
