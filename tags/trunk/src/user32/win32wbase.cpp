@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.173 2000-03-17 17:12:08 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.174 2000-03-18 16:13:38 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -251,6 +251,12 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
                     dprintf(("Bad parent %04x\n", cs->hwndParent ));
                     SetLastError(ERROR_INVALID_PARAMETER);
                     return FALSE;
+            }
+            /* Windows does this for overlapped windows
+             * (I don't know about other styles.) */
+            if (cs->hwndParent == GetDesktopWindow() && (!(cs->style & WS_CHILD) || (cs->style & WS_POPUP)))
+            {
+	            cs->hwndParent = 0;
             }
     }
     else
@@ -926,7 +932,7 @@ ULONG Win32BaseWindow::MsgButton(MSG *msg)
 
     if(fClick)
     {
-     HWND hwndTop;
+      HWND hwndTop;
 
         /* Activate the window if needed */
         hwndTop = (GetTopParent()) ? GetTopParent()->getWindowHandle() : 0;
@@ -944,8 +950,10 @@ ULONG Win32BaseWindow::MsgButton(MSG *msg)
                 if(((ret == MA_ACTIVATE) || (ret == MA_ACTIVATEANDEAT))
                    && (hwndTop != GetForegroundWindow()) )
                 {
+                    Win32BaseWindow *win32top = Win32BaseWindow::GetWindowFromHandle(hwndTop);
+
                     //SvL: Calling OSLibSetActiveWindow(hwndTop); causes focus problems
-                    OSLibWinSetFocus(getOS2FrameWindowHandle());
+                    if (win32top) OSLibWinSetFocus(win32top->getOS2FrameWindowHandle());
                 }
         }
     }
@@ -1658,7 +1666,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
     case WM_GETICON:
         {
           LRESULT result = 0;
-          if (!windowClass) return result;
+
           /* Set the appropriate icon members in the window structure. */
           if (wParam == ICON_SMALL)
           {
@@ -1672,9 +1680,13 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
             if (Msg == WM_SETICON)
             {
               hIcon = (HICON)lParam;
-              OSLibWinSetIcon(OS2HwndFrame,hIcon);
+              if ((dwStyle & WS_CAPTION) == WS_CAPTION)
+                OSLibWinSetIcon(OS2HwndFrame,hIcon);
             }
           }
+          if ((Msg == WM_SETICON) && ((dwStyle & WS_CAPTION) == WS_CAPTION))
+            HandleNCPaint((HRGN)1);
+
           return result;
         }
 
@@ -1949,6 +1961,34 @@ void Win32BaseWindow::NotifyParent(UINT Msg, WPARAM wParam, LPARAM lParam)
 
         window = parentwindow;
    }
+}
+//******************************************************************************
+// Returns the big or small icon for the window, falling back to the
+// class as windows does.
+//******************************************************************************
+HICON Win32BaseWindow::IconForWindow(WPARAM fType)
+{
+  HICON hWndIcon;
+
+  if (fType == ICON_BIG)
+  {
+    if (hIcon) hWndIcon = hIcon;
+    else if (windowClass && windowClass->getIcon()) hWndIcon = windowClass->getIcon();
+    else if (!(dwStyle & DS_MODALFRAME))
+      hWndIcon = LoadImageA(0,MAKEINTRESOURCEA(OIC_ODINICON),IMAGE_ICON,0,0,LR_DEFAULTCOLOR);
+    else hWndIcon = 0;
+  } else
+  {
+    if (hIconSm) hWndIcon = hIconSm;
+    else if (hIcon) hWndIcon = hIcon;
+    else if (windowClass && windowClass->getIconSm()) hWndIcon = windowClass->getIconSm();
+    else if (windowClass && windowClass->getIcon()) hWndIcon = windowClass->getIcon();
+    else if (!(dwStyle & DS_MODALFRAME))
+      hWndIcon = LoadImageA(0,MAKEINTRESOURCEA(OIC_ODINICON),IMAGE_ICON,0,0,LR_DEFAULTCOLOR);
+    else hWndIcon = 0;
+  }
+
+  return hWndIcon;
 }
 //******************************************************************************
 //******************************************************************************
@@ -2699,9 +2739,9 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value, BOOL fUnicode)
                 if(dwStyle == value)
                     return value;
 
-                value &= ~(WS_VISIBLE | WS_CHILD);      /* Some bits can't be changed this way (WINE) */
+                value &= ~WS_CHILD;      /* Some bits can't be changed this way (WINE) */
                 ss.styleOld = getStyle();
-                ss.styleNew = value | (ss.styleOld & (WS_VISIBLE | WS_CHILD));
+                ss.styleNew = value | (ss.styleOld & WS_CHILD);
                 dprintf(("SetWindowLong GWL_STYLE %x old %x new style %x", getWindowHandle(), ss.styleOld, ss.styleNew));
                 SendInternalMessageA(WM_STYLECHANGING,GWL_STYLE,(LPARAM)&ss);
                 setStyle(ss.styleNew);

@@ -1,12 +1,12 @@
-/* $Id: listbox.cpp,v 1.23 2000-03-17 17:12:07 cbratschi Exp $ */
+/* $Id: listbox.cpp,v 1.24 2000-03-18 16:13:30 cbratschi Exp $ */
 /*
  * Listbox controls
  *
  * Copyright 1996 Alexandre Julliard
  * Copyright 1999 Christoph Bratschi (ported from WINE)
  *
- * Corel version: 20000212
- * WINE version: 991212
+ * Corel version: 20000317
+ * (WINE version: 991212)
  *
  * Status: ???
  * Version: ???
@@ -25,7 +25,7 @@
 #define DBG_LOCALLOG    DBG_listbox
 #include "dbglocal.h"
 
-/* Unimplemented yet:
+/* bugs:
  - LBS_NOSEL
  - LBS_USETABSTOPS
  - Locale handling
@@ -33,6 +33,8 @@
  - WS_EX_NOPARENTNOTIFY
  - VK_LINEDOWN -> bottom most item not always visible
  - performance not optimized
+ - ownerdraw is broken -> toolbar customize dialog
+ - first item selection mark not redrawn on new selection
  */
 
 //CB: drive funtions (… la wine drive.c)
@@ -338,7 +340,7 @@ static void LISTBOX_UpdateSize( HWND hwnd, LB_DESCR *descr )
     //CB: todo: doesn't works in ShellAbout dialog
     descr->width  = rect.right - rect.left;
     descr->height = rect.bottom - rect.top;
-    if (!(descr->style & LBS_NOINTEGRALHEIGHT) && !IS_OWNERDRAW(descr))
+    if (!(descr->style & LBS_NOINTEGRALHEIGHT) && !(descr->style & LBS_OWNERDRAWVARIABLE))
     {
         if ((descr->height > descr->item_height) &&
             (descr->height % descr->item_height))
@@ -478,7 +480,7 @@ static void LISTBOX_DrawItem( HWND hwnd, LB_DESCR *descr, HDC hdc,
     if (IS_OWNERDRAW(descr))
     {
         DRAWITEMSTRUCT dis;
-        UINT             id = (descr->lphc) ? ID_CB_LISTBOX : GetWindowLongA(hwnd,GWL_ID);
+        UINT           id = (descr->lphc) ? ID_CB_LISTBOX : GetWindowLongA(hwnd,GWL_ID);
 
         if (!item)
         {
@@ -877,9 +879,11 @@ static LRESULT LISTBOX_Draw( HWND hwnd, LB_DESCR *descr, HDC hdc )
 {
     INT i, col_pos = descr->page_size - 1;
     RECT rect;
+    RECT focusRect = {-1, -1, -1, -1};
     HFONT oldFont = 0;
     HBRUSH hbrush, oldBrush = 0;
     DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
+    INT focusItem;
 
     SetRect( &rect, 0, 0, descr->width, descr->height );
     if (descr->style & LBS_NOREDRAW) return 0;
@@ -908,6 +912,11 @@ static LRESULT LISTBOX_Draw( HWND hwnd, LB_DESCR *descr, HDC hdc )
         rect.top = rect.bottom;
     }
 
+    /* Paint all the item, regarding the selection
+       Focus state will be painted after  */
+    focusItem = descr->focus_item;
+    descr->focus_item = -1;
+
     for (i = descr->top_item; i < descr->nb_items; i++)
     {
         if (!(descr->style & LBS_OWNERDRAWVARIABLE))
@@ -915,6 +924,14 @@ static LRESULT LISTBOX_Draw( HWND hwnd, LB_DESCR *descr, HDC hdc )
         else
             rect.bottom = rect.top + descr->items[i].height;
 
+        if (i == focusItem)
+        {
+            /* keep the focus rect, to paint the focus item after */
+            focusRect.left = rect.left;
+            focusRect.right = rect.right;
+            focusRect.top = rect.top;
+            focusRect.bottom = rect.bottom;
+        }
         LISTBOX_DrawItem( hwnd, descr, hdc, &rect, i, ODA_DRAWENTIRE );
         rect.top = rect.bottom;
 
@@ -944,6 +961,11 @@ static LRESULT LISTBOX_Draw( HWND hwnd, LB_DESCR *descr, HDC hdc )
             if (rect.top >= descr->height) break;
         }
     }
+
+    /* Paint the focus item now */
+    descr->focus_item = focusItem;
+    if (focusRect.top != focusRect.bottom)
+        LISTBOX_DrawItem( hwnd, descr, hdc, &focusRect, descr->focus_item, ODA_FOCUS );
 
     if (!IS_OWNERDRAW(descr))
     {
@@ -1283,13 +1305,31 @@ static LRESULT LISTBOX_SetSelection( HWND hwnd, LB_DESCR *descr, INT index,
 static void LISTBOX_MoveCaret( HWND hwnd, LB_DESCR *descr, INT index,
                                BOOL fully_visible )
 {
-    LISTBOX_SetCaretIndex( hwnd, descr, index, fully_visible );
+    INT oldfocus = descr->focus_item;
+
+    if ((index <  0) || (index >= descr->nb_items) || (oldfocus == index))
+        return;
+
+    /* Important, repaint need ot be done in this order if
+       you want to mimic Windows behavior:
+       1. Remove the focus and paint the item
+       2. Remove the selection and paint the item(s)
+       3. Set the selection and repaint the item(s)
+       4. Set the focus to 'index' and repaint the item */
+
+    /* 1. remove the focus and repaint the item */
+    descr->focus_item = -1;
+    if ((oldfocus != -1) && descr->caret_on && (descr->in_focus))
+        LISTBOX_RepaintItem( hwnd, descr, oldfocus, ODA_FOCUS );
+
+    /* 2. then turn off the previous selection */
+    /* 3. repaint the new selected item */
     if (descr->style & LBS_EXTENDEDSEL)
     {
         if (descr->anchor_item != -1)
         {
-            INT first = MIN( descr->focus_item, descr->anchor_item );
-            INT last  = MAX( descr->focus_item, descr->anchor_item );
+            INT first = MIN( index, descr->anchor_item );
+            INT last  = MAX( index, descr->anchor_item );
             if (first > 0)
                 LISTBOX_SelectItemRange( hwnd, descr, 0, first - 1, FALSE );
             LISTBOX_SelectItemRange( hwnd, descr, last + 1, -1, FALSE );
@@ -1301,6 +1341,12 @@ static void LISTBOX_MoveCaret( HWND hwnd, LB_DESCR *descr, INT index,
         /* Set selection to new caret item */
         LISTBOX_SetSelection( hwnd, descr, index, TRUE, FALSE );
     }
+
+    /* 4. repaint the new item with the focus */
+    descr->focus_item = index;
+    LISTBOX_MakeItemVisible( hwnd, descr, index, fully_visible );
+    if (descr->caret_on && (descr->in_focus))
+        LISTBOX_RepaintItem( hwnd, descr, index, ODA_FOCUS );
 }
 
 

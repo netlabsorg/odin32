@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.18 2000-02-21 17:25:28 cbratschi Exp $*/
+/* $Id: menu.cpp,v 1.19 2000-03-18 16:13:34 cbratschi Exp $*/
 /*
  * Menu functions
  *
@@ -8,8 +8,8 @@
  *
  * Copyright 1999 Christoph Bratschi
  *
- * Corel version: 20000212
- * WINE version: 20000130
+ * Corel version: 20000317
+ * (WINE version: 20000130)
  *
  * Status:  ???
  * Version: ???
@@ -613,6 +613,7 @@ static MENUITEM *MENU_FindItem( HMENU *hmenu, UINT *nPos, UINT wFlags )
     UINT i;
 
     if (((*hmenu)==0xffff) || (!(menu = MENU_GetMenu(*hmenu)))) return NULL;
+    if (!menu) return NULL;
     if (wFlags & MF_BYPOSITION)
     {
         if (*nPos >= menu->nItems) return NULL;
@@ -1629,6 +1630,7 @@ static BOOL MENU_ShowPopup( HWND hwndOwner, HMENU hmenu, UINT id,
 
         SetWindowPos( menu->hWnd, HWND_TOP, 0, 0, 0, 0,
                         SWP_SHOWWINDOW | SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE );
+        EnableWindow(menu->hWnd,TRUE);
         UpdateWindow( menu->hWnd );
         return TRUE;
     }
@@ -2369,25 +2371,25 @@ static BOOL MENU_MouseMove( MTRACKER* pmt, HMENU hPtMenu, UINT wFlags )
        POPUPMENU *menu;
        MENUITEM *item;
 
-	    MENU_SwitchTracking( pmt, hPtMenu, id );
+            MENU_SwitchTracking( pmt, hPtMenu, id );
 
 
        /*
           Test to see if we are trying to popup a submenu or not.
           If we aren't, don't change the current menu pointer
-	  and return.
+          and return.
        */
        if (!(menu = (POPUPMENU *)MENU_GetMenu( hPtMenu )))
        {
           pmt->hCurrentMenu = hPtMenu;
-	  return TRUE;
+          return TRUE;
        }
 
        if (!IsWindow( menu->hWnd ) ||
            (menu->FocusedItem == NO_SELECTED_ITEM))
        {
           pmt->hCurrentMenu = hPtMenu;
-	  return TRUE;
+          return TRUE;
        }
 
        item = &menu->items[menu->FocusedItem];
@@ -2395,28 +2397,38 @@ static BOOL MENU_MouseMove( MTRACKER* pmt, HMENU hPtMenu, UINT wFlags )
            (item->fState & (MF_GRAYED | MF_DISABLED)))
        {
           pmt->hCurrentMenu =  hPtMenu;
-	  return TRUE;
+          return TRUE;
        }
 
-
-       /*
-         If we made it this far, we want to pop up a submenu.  Before we pop it up,
-	 we want a slight delay.  This is implemented by remembering the ID of the menu
-	 where the mouse is currently positioned, and setting up a timer.  When the
-	 timer fires (handled in MENU_TrackMenu() ), if the mouse is over the same
-	 submenu item, we popup it up.  Otherwise, we do nothing.
+       /* Check to see if we are trying to popup a toplevel menu or a
+          submenu.  Only the submenu has a delay.
        */
-       KillTimer (pmt->hOwnerWnd, SUBMENU_POPUP_TIMERID); /* Just in case another timer was set up and not fired yet... */
-       if ( (SetTimer (pmt->hOwnerWnd, SUBMENU_POPUP_TIMERID, POPUP_MENU_DELAY, NULL)) != SUBMENU_POPUP_TIMERID)
+       if (uSubPWndLevel)
        {
-          /*
-	    For some reason the timer wasn't set up properly... Revert to old
-	    functionality.
-	  */
-	
-	  pmt->hCurrentMenu = MENU_ShowSubPopup(pmt->hOwnerWnd, hPtMenu, FALSE, wFlags,&pmt->pt);
+         /*
+           If we made it here, we want to pop up a submenu.  Before we pop it up,
+           we want a slight delay.  This is implemented by remembering the ID of the menu
+           where the mouse is currently positioned, and setting up a timer.  When the
+           timer fires (handled in MENU_TrackMenu() ), if the mouse is over the same
+           submenu item, we popup it up.  Otherwise, we do nothing.
+         */
+         KillTimer (pmt->hOwnerWnd, SUBMENU_POPUP_TIMERID); /* Just in case another timer was set up and not fired yet... */
+         if ( (SetTimer (pmt->hOwnerWnd, SUBMENU_POPUP_TIMERID, POPUP_MENU_DELAY, NULL)) != SUBMENU_POPUP_TIMERID)
+         {
+            /*
+              For some reason the timer wasn't set up properly... Revert to old
+              functionality.
+            */
+	    pmt->hCurrentMenu = MENU_ShowSubPopup(pmt->hOwnerWnd,hPtMenu,FALSE,wFlags,&pmt->pt);
+            return TRUE;
+         }
+       } else
+       {
+         /* We are trying to popup a top level menu... so no delay */
+
+          pmt->hCurrentMenu = MENU_ShowSubPopup(pmt->hOwnerWnd, hPtMenu, FALSE, wFlags,&pmt->pt);
           return TRUE;
-    }
+       }
 
        mouseOverMenuID = id;
        isTimerSet = TRUE;
@@ -2694,6 +2706,7 @@ static INT MENU_TrackMenu(HMENU hmenu,UINT wFlags,INT x,INT y,HWND hwnd,BOOL inM
     INT executedMenuId = -1;
     MTRACKER mt;
     BOOL enterIdleSent = FALSE;
+    BOOL bSysMenu;
 
     mt.trackFlags = 0;
     mt.hCurrentMenu = hmenu;
@@ -2708,6 +2721,8 @@ static INT MENU_TrackMenu(HMENU hmenu,UINT wFlags,INT x,INT y,HWND hwnd,BOOL inM
 
     fEndMenu = FALSE;
     if (!(menu = MENU_GetMenu(hmenu))) return FALSE;
+
+    bSysMenu = IS_SYSTEM_MENU(menu);
 
     if (wFlags & TPM_BUTTONDOWN)
     {
@@ -2753,11 +2768,21 @@ static INT MENU_TrackMenu(HMENU hmenu,UINT wFlags,INT x,INT y,HWND hwnd,BOOL inM
                 case WM_RBUTTONDBLCLK:
                 case WM_RBUTTONDOWN:
                     if (!(wFlags & TPM_RIGHTBUTTON)) break;
-                    /* fall through */
+                    goto buttondown;
                 case WM_LBUTTONDBLCLK:
+		    if (bSysMenu && (hmenu == mt.hTopMenu))
+		    {
+			fEndMenu = TRUE;
+			break;
+		    }
+		    /* fall through */
                 case WM_LBUTTONDOWN:
                     /* If the message belongs to the menu, removes it from the queue */
                     /* Else, end menu tracking */
+
+		 buttondown:
+                    /* Forcing mouse popup NOW - Ensure timer doesn't popup menu also */
+		    mouseOverMenuID = -1;
                     fRemove = MENU_ButtonDown( &mt, hmenu, wFlags );
                     fEndMenu = !fRemove;
                     break;
@@ -2769,6 +2794,8 @@ static INT MENU_TrackMenu(HMENU hmenu,UINT wFlags,INT x,INT y,HWND hwnd,BOOL inM
                     /* Check if a menu was selected by the mouse */
                     if (hmenu)
                     {
+                        /* Forcing mouse popup NOW - Ensure timer doesn't popup menu also */
+			mouseOverMenuID = -1;
                         executedMenuId = MENU_ButtonUp( &mt, hmenu, wFlags);
 
                         /* End the loop if executedMenuId is an item ID */
@@ -2790,42 +2817,41 @@ static INT MENU_TrackMenu(HMENU hmenu,UINT wFlags,INT x,INT y,HWND hwnd,BOOL inM
                     fEndMenu |= !MENU_MouseMove( &mt, hmenu, wFlags );
             } /* switch(msg.message) - mouse */
         }
-	else if (msg.message == WM_TIMER)
-	{
-	   UINT id = -1;
+        else if (msg.message == WM_TIMER)
+        {
+           UINT id = -1;
            POPUPMENU *ptmenu = NULL;
 
            if (isTimerSet)
-	   {
+           {
               /*
-	        If we get here, an attempt was made to pop up a submenu.
-	        (See MENU_MouseMove() )
-	      */
+                If we get here, an attempt was made to pop up a submenu.
+                (See MENU_MouseMove() )
+              */
 
-	      /* Get the ID of the menu item the mouse is over now. */
-	      if( hmenu )
+              /* Get the ID of the menu item the mouse is over now. */
+              if( hmenu )
               {
                  ptmenu = (POPUPMENU *)MENU_GetMenu( hmenu );
                  if( IS_SYSTEM_MENU(ptmenu) )
                    id = 0;
                  else
                    MENU_FindItemByCoords( ptmenu, mt.pt, &id );
+
+	         /* If it is over the same item that set up the timer originally .... */
+	         if (mouseOverMenuID != -1 && mouseOverMenuID == id)
+	         {
+	           /* .... Pop up the menu */
+                   mt.hCurrentMenu = MENU_ShowSubPopup(mt.hOwnerWnd, hmenu, FALSE, wFlags,&mt.pt);
+	          }
               }
-	
-	      /* If it is over the same item that set up the timer
-	         originally .... */
-	      if (mouseOverMenuID == id)
-	      {
-	         /* .... Pop up the menu */
-                 mt.hCurrentMenu = MENU_ShowSubPopup(mt.hOwnerWnd, hmenu, FALSE, wFlags,&mt.pt);
-	      }
-	
-	      /* Reset the timer so it doesn't fire again. (So we are ready for the next
-	         attempt to popup a submenu... ) */
-	      KillTimer (mt.hOwnerWnd, 100);
-	      isTimerSet = FALSE;
-	   }
-	}
+
+              /* Reset the timer so it doesn't fire again. (So we are ready for the next
+                 attempt to popup a submenu... ) */
+              KillTimer(mt.hOwnerWnd,SUBMENU_POPUP_TIMERID);
+              isTimerSet = FALSE;
+           }
+        }
         else if ((msg.message >= WM_KEYFIRST) && (msg.message <= WM_KEYLAST))
         {
             fRemove = TRUE;  /* Keyboard messages are always removed */
@@ -2865,22 +2891,22 @@ static INT MENU_TrackMenu(HMENU hmenu,UINT wFlags,INT x,INT y,HWND hwnd,BOOL inM
                     fEndMenu = TRUE;
                     break;
 
-		case VK_F1:
-		    {
-			HELPINFO hi;
-			hi.cbSize = sizeof(HELPINFO);
-			hi.iContextType = HELPINFO_MENUITEM;
-			if (menu->FocusedItem == NO_SELECTED_ITEM)
-			    hi.iCtrlId = 0;
-		        else	
-			    hi.iCtrlId = menu->items[menu->FocusedItem].wID;
-			hi.hItemHandle = hmenu;
-			hi.dwContextId = menu->dwContextHelpID;
-			hi.MousePos = msg.pt;
-			//TRACE_(winhelp)("Sending HELPINFO_MENUITEM to 0x%08x\n", hwnd);
-			SendMessageA(hwnd, WM_HELP, 0, (LPARAM)&hi);
-			break;
-		    }
+                case VK_F1:
+                    {
+                        HELPINFO hi;
+                        hi.cbSize = sizeof(HELPINFO);
+                        hi.iContextType = HELPINFO_MENUITEM;
+                        if (menu->FocusedItem == NO_SELECTED_ITEM)
+                            hi.iCtrlId = 0;
+                        else
+                            hi.iCtrlId = menu->items[menu->FocusedItem].wID;
+                        hi.hItemHandle = hmenu;
+                        hi.dwContextId = menu->dwContextHelpID;
+                        hi.MousePos = msg.pt;
+                        //TRACE_(winhelp)("Sending HELPINFO_MENUITEM to 0x%08x\n", hwnd);
+                        SendMessageA(hwnd, WM_HELP, 0, (LPARAM)&hi);
+                        break;
+                    }
 
                 default:
                     break;
@@ -2928,6 +2954,12 @@ static INT MENU_TrackMenu(HMENU hmenu,UINT wFlags,INT x,INT y,HWND hwnd,BOOL inM
                 break;
             }  /* switch(msg.message) - kbd */
         }
+	else if (msg.message == WM_SYSCOMMAND)
+	{
+		/* The user clicked on the system menu/button */
+        fEndMenu = TRUE;
+        break;
+	}
         else
         {
             DispatchMessageA( &msg );
