@@ -75,5 +75,5 @@
 /src/opengl                                sandervl
 /src/opengl/glut                           sandervl
 /make                                      bird sandervl
-/make/testcase                             bird
+/make/testcase                             bird sandervl
 
