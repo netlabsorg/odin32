@@ -1,4 +1,4 @@
-/* $Id: profile.cpp,v 1.10 1999-08-17 19:30:49 phaller Exp $ */
+/* $Id: profile.cpp,v 1.11 1999-08-18 08:35:38 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -157,12 +157,12 @@ static void PROFILE_Save( FILE *file, PROFILESECTION *section )
 
     for ( ; section; section = section->next)
     {
-        if (section->name) fprintf( file, "\r\n[%s]\r\n", section->name );
+        if (section->name) fprintf( file, "\n[%s]\n", section->name );
         for (key = section->key; key; key = key->next)
         {
             fprintf( file, "%s", key->name );
             if (key->value) fprintf( file, "=%s", key->value );
-            fprintf( file, "\r\n" );
+            fprintf( file, "\n" );
         }
     }
 }
@@ -505,8 +505,8 @@ static BOOL PROFILE_Open( LPCSTR filename )
 
     /* check for path */
 
-    if (!strchr( filename,'/') ||
-        !strchr( filename,'\\') ||
+    if (!strchr( filename,'/') &&
+        !strchr( filename,'\\') &&
         !strchr( filename,':'))
     {
       char fullname[MAX_PATHNAME_LEN];
