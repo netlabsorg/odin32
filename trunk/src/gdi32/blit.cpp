@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.24 2001-02-23 10:37:42 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.25 2001-05-10 17:03:17 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -90,7 +90,7 @@ BOOL WIN32API BitBlt(HDC hdcDest,
 }
 //******************************************************************************
 //******************************************************************************
-INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
+static INT SetDIBitsToDevice_(HDC hdc, INT xDest, INT yDest, DWORD cx,
                                DWORD cy, INT xSrc, INT ySrc,
                                UINT startscan, UINT lines, LPCVOID bits,
                                const BITMAPINFO *info, UINT coloruse)
@@ -197,6 +197,106 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
 invalid_parameter:
     SetLastError(ERROR_INVALID_PARAMETER);
     return 0;
+}
+//******************************************************************************
+//******************************************************************************
+INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
+                               DWORD cy, INT xSrc, INT ySrc,
+                               UINT startscan, UINT lines, LPCVOID bits,
+                               const BITMAPINFO *info, UINT coloruse)
+{
+    if(info->bmiHeader.biHeight < 0 && info->bmiHeader.biBitCount != 8 && info->bmiHeader.biCompression == 0) {
+        // upside down
+        INT rc = 0;
+        BITMAPINFO newInfo;
+        newInfo.bmiHeader = info->bmiHeader;
+        long lLineByte = ((newInfo.bmiHeader.biWidth * (info->bmiHeader.biBitCount == 15 ? 16 : info->bmiHeader.biBitCount) + 31) / 32) * 4;
+        long lHeight   = -newInfo.bmiHeader.biHeight;
+        newInfo.bmiHeader.biHeight = -info->bmiHeader.biHeight;
+
+        char *newBits = (char *)malloc( lLineByte * lHeight );
+        if(newBits) {
+            unsigned char *pbSrc = (unsigned char *)bits + lLineByte * (lHeight - 1);
+            unsigned char *pbDst = (unsigned char *)newBits;
+            for(int y = 0; y < lHeight; y++) {
+                memcpy( pbDst, pbSrc, lLineByte );
+                pbDst += lLineByte;
+                pbSrc -= lLineByte;
+            }
+            rc = SetDIBitsToDevice_( hdc, xDest, yDest, cx, cy, xSrc, ySrc, startscan, lines, (void *)newBits, &newInfo, DIB_RGB_COLORS );
+            free( newBits );
+        }
+        return rc;
+    }
+    else
+    if(info->bmiHeader.biBitCount == 8 && info->bmiHeader.biCompression == 0 && !(GetDeviceCaps( hdc, RASTERCAPS ) & RC_PALETTE)) {
+        INT rc = 0;
+        // convert 8bit to 24bit
+
+        BITMAPINFO newInfo;
+        newInfo.bmiHeader = info->bmiHeader;
+        newInfo.bmiHeader.biBitCount = 24;
+        long lLineByte24 = ((newInfo.bmiHeader.biWidth * 24 + 31) / 32) * 4;
+        long lLineByte8  = ((newInfo.bmiHeader.biWidth *  8 + 31) / 32) * 4;
+        long lHeight   = newInfo.bmiHeader.biHeight;
+        if(lHeight < 0) lHeight = -lHeight;
+
+        char *newBits = (char *)malloc( lLineByte24 * lHeight );
+        if(newBits) {
+            //
+            // Get Palette Entries
+            //
+            PALETTEENTRY aEntries[256];
+            LOGPALETTE *pLog = (LOGPALETTE *)malloc( sizeof(LOGPALETTE) + sizeof(PALETTEENTRY) * 256 );
+            pLog->palVersion = 0x300;
+            pLog->palNumEntries = 256;
+
+            HPALETTE hPaletteDummy = CreatePalette( pLog );
+            free( pLog );
+            HPALETTE hPalette = SelectPalette( hdc, hPaletteDummy, FALSE );
+            GetPaletteEntries( hPalette, 0, 255, aEntries  );
+            SelectPalette( hdc, hPalette, FALSE );
+            DeleteObject( hPaletteDummy );
+
+            //
+            // convert 8bit to 24bit
+            //
+            if(newInfo.bmiHeader.biHeight > 0) {
+                unsigned char *pbSrc = (unsigned char *)bits;
+                unsigned char *pbDst = (unsigned char *)newBits;
+                for(int y = 0; y < lHeight; y++) {
+                    for(int x = 0; x < newInfo.bmiHeader.biWidth; x++) {
+                        PALETTEENTRY src = aEntries[pbSrc[x]];
+                        pbDst[x * 3 + 0] = src.peBlue;
+                        pbDst[x * 3 + 1] = src.peGreen;
+                        pbDst[x * 3 + 2] = src.peRed;
+                    }
+                    pbDst += lLineByte24;
+                    pbSrc += lLineByte8;
+                }
+            } else {
+                // upside down
+                newInfo.bmiHeader.biHeight = -info->bmiHeader.biHeight;
+                unsigned char *pbSrc = (unsigned char *)bits + lLineByte8 * (lHeight - 1);
+                unsigned char *pbDst = (unsigned char *)newBits;
+                for(int y = 0; y < lHeight; y++) {
+                    for(int x = 0; x < newInfo.bmiHeader.biWidth; x++) {
+                        PALETTEENTRY src = aEntries[pbSrc[x]];
+                        pbDst[x * 3 + 0] = src.peBlue;
+                        pbDst[x * 3 + 1] = src.peGreen;
+                        pbDst[x * 3 + 2] = src.peRed;
+                    }
+                    pbDst += lLineByte24;
+                    pbSrc -= lLineByte8;
+                }
+            }
+            rc = SetDIBitsToDevice_( hdc, xDest, yDest, cx, cy, xSrc, ySrc, startscan, lines, (void *)newBits, &newInfo, DIB_RGB_COLORS );
+            free( newBits );
+        }
+        return rc;
+    } else {
+        return SetDIBitsToDevice_( hdc, xDest, yDest, cx, cy, xSrc, ySrc, startscan, lines, bits, info, coloruse );
+    }
 }
 //******************************************************************************
 //******************************************************************************
