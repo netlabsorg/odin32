@@ -1,4 +1,4 @@
-/* $Id: winimagepe2lx.cpp,v 1.4 1999-11-16 18:27:01 bird Exp $ */
+/* $Id: winimagepe2lx.cpp,v 1.5 1999-11-18 08:55:06 bird Exp $ */
 
 /*
  * Win32 PE2LX Image base class
@@ -124,6 +124,7 @@ Win32Pe2LxImage::Win32Pe2LxImage(HINSTANCE hinstance, BOOL fWin32k)
     : Win32ImageBase(hinstance),
     paSections(NULL), cSections(0), pNtHdrs(NULL), fWin32k(fWin32k)
 {
+    setFullPath(szFileName);
 }
 
 
