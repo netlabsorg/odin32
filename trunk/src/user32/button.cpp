@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.38 2000-11-22 13:44:49 sandervl Exp $ */
+/* $Id: button.cpp,v 1.39 2001-05-03 18:13:10 sandervl Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
@@ -336,6 +336,34 @@ static LRESULT BUTTON_SetFont(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   BUTTONINFO* infoPtr = (BUTTONINFO*)GetInfoPtr(hwnd);
   DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
+
+#ifdef __WIN32OS2__
+  if ((dwStyle & 0x0f) == BS_GROUPBOX) {
+    RECT rc;
+    TEXTMETRICA tm;
+    HDC  hdc = GetDC(hwnd);
+    int  fh1 = 0, fh2 = 0;
+
+    // select old font (if exists)
+    if (infoPtr->hFont) {
+       SelectObject (hdc, infoPtr->hFont);
+       GetTextMetricsA (hdc, &tm);
+       fh1 = tm.tmHeight;
+    }
+    // select new font (if exists)
+    if (wParam) {
+       SelectObject (hdc, wParam);
+       GetTextMetricsA (hdc, &tm);
+       fh2 = tm.tmHeight;
+    }
+    // Erases top border line and (old) text background
+    GetClientRect(hwnd, &rc);
+    rc.bottom = rc.top + max( fh1, fh2) + 1;
+    HBRUSH hbr = GetControlBrush( hwnd, hdc, CTLCOLOR_STATIC );
+    FillRect(hdc, &rc, hbr);
+    ReleaseDC(hwnd,hdc);
+  }
+#endif
 
   infoPtr->hFont = (HFONT)wParam;
   if (lParam && (dwStyle & WS_VISIBLE)) PAINT_BUTTON(hwnd,dwStyle & 0x0f,ODA_DRAWENTIRE);
