@@ -1,4 +1,12 @@
-/* $Id: changelog,v 1.1785 2001-10-24 11:20:40 sandervl Exp $ */
+/* $Id: changelog,v 1.1786 2001-10-24 13:26:38 phaller Exp $ */
+
+ 2001-10-24: Patrick Haller <patrick.haller@innotek.de>
+    - USER32:   o added translation between PM Scancodes and
+                  Windows Scancodes
+                  Note: Open32 uses always PM Scancodes!
+                o fixed GetKeyNameText as far as possible
+                Despite we'll have to implement a flexible keyboard
+                layout scheme in the future.
 
  2001-10-24: Achim Hasenmueller <achimha@innotek.de>
     - PMKBDHK:  o link statically with C runtime
