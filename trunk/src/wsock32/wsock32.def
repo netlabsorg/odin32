@@ -1,4 +1,4 @@
-; $Id: wsock32.def,v 1.12 1999-11-04 00:58:03 phaller Exp $
+; $Id: wsock32.def,v 1.13 1999-11-04 01:13:42 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY WSOCK32 INITINSTANCE
@@ -10,7 +10,6 @@ IMPORTS
     GetLastError           = KERNEL32.340
     bsd_select             = SO32DLL.32
     os2_select             = SO32DLL.12
-
 
 EXPORTS
 ;   _WSAFDIsSet =       _OS2_WSAFDIsSet@8
