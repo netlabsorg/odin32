@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.23 1999-09-05 12:03:34 sandervl Exp $ */
+/* $Id: window.cpp,v 1.24 1999-09-10 19:00:11 dengert Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -72,10 +72,10 @@ HWND WIN32API CreateWindowExA(DWORD exStyle, LPCSTR className,
     //TODO: According to the docs className can be a 16 bits atom
     //      Wine seems to assume it's a string though...
     if(!stricmp(className, MDICLIENTCLASSNAMEA)) {
-	window = (Win32BaseWindow *) new Win32MDIClientWindow(&cs, classAtom, FALSE);
+        window = (Win32BaseWindow *) new Win32MDIClientWindow(&cs, classAtom, FALSE);
     }
     else {
-    	window = new Win32BaseWindow( &cs, classAtom, FALSE );
+        window = new Win32BaseWindow( &cs, classAtom, FALSE );
     }
     if(window == NULL)
     {
@@ -136,10 +136,10 @@ HWND WIN32API CreateWindowExW(DWORD exStyle, LPCWSTR className,
     //TODO: According to the docs className can be a 16 bits atom
     //      Wine seems to assume it's a string though...
     if(!lstrcmpW(className, (LPWSTR)MDICLIENTCLASSNAMEW)) {
-	window = (Win32BaseWindow *) new Win32MDIClientWindow(&cs, classAtom, TRUE);
+        window = (Win32BaseWindow *) new Win32MDIClientWindow(&cs, classAtom, TRUE);
     }
     else {
-    	window = new Win32BaseWindow( &cs, classAtom, TRUE );
+        window = new Win32BaseWindow( &cs, classAtom, TRUE );
     }
     if(window == NULL)
     {
@@ -820,7 +820,7 @@ HWND WIN32API ChildWindowFromPoint( HWND arg1, POINT  arg2)
  * Author    : Rene Pronk [Sun, 1999/08/08 23:30]
  *****************************************************************************/
 
-HWND WIN32API ChildWindowFromPointEx (HWND hwndParent, POINT pt, UINT uFlags) 
+HWND WIN32API ChildWindowFromPointEx (HWND hwndParent, POINT pt, UINT uFlags)
 {
         RECT rect;
         HWND hWnd;
@@ -994,6 +994,7 @@ BOOL WIN32API EnumThreadWindows(DWORD dwThreadId, WNDENUMPROC lpfn, LPARAM lPara
 }
 //******************************************************************************
 //******************************************************************************
+#if 0
 BOOL WIN32API GetUpdateRect( HWND hwnd, PRECT lpRect, BOOL  bErase)
 {
     dprintf(("GetUpdateRect %x %d\n", hwnd, bErase));
@@ -1001,6 +1002,7 @@ BOOL WIN32API GetUpdateRect( HWND hwnd, PRECT lpRect, BOOL  bErase)
 
     return OSLibWinQueryUpdateRect(Win32BaseWindow::Win32ToOS2Handle(hwnd), lpRect);
 }
+#endif
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API InvalidateRect(HWND hWnd, const RECT *lpRect, BOOL bErase)

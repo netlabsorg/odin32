@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.1 1999-09-09 18:05:45 dengert Exp $ */
+/* $Id: dc.cpp,v 1.2 1999-09-10 19:00:10 dengert Exp $ */
 
 /*
  * DC functions for USER32
@@ -249,6 +249,7 @@ PVOID   APIENTRY GpiQueryDCData (HPS hps);
 HDC     OPEN32API HPSToHDC (HWND hwnd, HPS hps, HDC hdc, PVOID);
 void    OPEN32API DeleteHDC (HDC hdc);
 BOOL    OPEN32API _O32_EndPaint (HWND hwnd, const PAINTSTRUCT_W *lpps);
+int     OPEN32API _O32_GetUpdateRgn (HWND hwnd, HRGN hrgn, BOOL erase);
 
 #define FLOAT_TO_FIXED(x) ((FIXED) ((x) * 65536.0))
 #define MICRO_HPS_TO_HDC(x) ((x) & 0xFFFFFFFE)
@@ -727,6 +728,77 @@ exit:
    SetFS(sel);
    return TRUE;
 }
+
+BOOL WIN32API GetUpdateRect (HWND hwnd, LPRECT pRect, BOOL erase)
+{
+   if (hwnd)
+   {
+//      SET_ERROR_WIN( ERROR_INVALID_HANDLE_W );
+      return FALSE;
+   }
+
+   RECTL rectl;
+   USHORT sel = RestoreOS2FS();
+   Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
+
+   BOOL updateRegionExists = WinQueryUpdateRect (hwnd, pRect ? &rectl : NULL);
+   if (!pRect) {
+      SetFS(sel);
+      return (updateRegionExists);
+   }
+
+   if (updateRegionExists)
+   {
+      if (wnd->isOwnDC())
+      {
+         pDCData pHps = NULL;
+         pHps = (pDCData)GpiQueryDCData(wnd->getOwnDC());
+         if (!pHps)
+         {
+//            SET_ERROR_WIN(ERROR_INVALID_HANDLE_W);
+            SetFS(sel);
+            return FALSE;
+         }
+         GpiConvert (pHps->hps, CVTC_DEVICE, CVTC_WORLD, 2, (PPOINTL)&rectl);
+      }
+      else
+      {
+         long height   = wnd->getWindowHeight();
+         rectl.yTop    = height - rectl.yTop;
+         rectl.yBottom = height - rectl.yBottom;
+      }
+
+      if (pRect)
+         WINRECT_FROM_PMRECT (*pRect, rectl);
+
+      if (erase)
+         sendEraseBkgnd (wnd);
+   }
+   else
+   {
+      if (pRect)
+         pRect->left = pRect->top = pRect->right = pRect->bottom = 0;
+   }
+
+   SetFS(sel);
+   return updateRegionExists;
+}
+
+int WIN32API GetUpdateRgn (HWND hwnd, HRGN hrgn, BOOL erase)
+{
+   USHORT sel = RestoreOS2FS();
+   LONG Complexity;
+
+   Complexity = _O32_GetUpdateRgn (hwnd, hrgn, FALSE);
+   if (erase && (Complexity > NULLREGION_W)) {
+       Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
+       sendEraseBkgnd (wnd);
+   }
+
+   SetFS(sel);
+   return Complexity;
+}
+
 //******************************************************************************
 //******************************************************************************
 
