@@ -1209,7 +1209,7 @@ typedef struct {
 }CRITICAL_SECTION;
 
 #ifdef __WINE__
-#define CRITICAL_SECTION_INIT { 0, -1, 0, 0, 0, 0 }
+#define CRITICAL_SECTION_INIT(name) { (void *)(__FILE__ ": " name), -1, 0, 0, 0, 0 }
 #endif
 
 typedef struct {
