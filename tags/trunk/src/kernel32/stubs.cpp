@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.35 2001-11-29 10:31:07 phaller Exp $
+/* $Id: stubs.cpp,v 1.36 2001-12-06 10:14:45 sandervl Exp $
  *
  * Win32 KERNEL32 Subsystem for OS/2
  *
@@ -86,27 +86,10 @@
 
 
 
-// For FindFirstFileEx
-
-#define FIND_FIRST_EX_CASE_SENSITIVE   0x00000001
 
 /*****************************************************************************
  * Structures                                                                *
  *****************************************************************************/
-
- // For FindFirstFileEx
-
-typedef enum _FINDEX_INFO_LEVELS {
-    FindExInfoStandard,
-    FindExInfoMaxInfoLevel
-} FINDEX_INFO_LEVELS;
-
-typedef enum _FINDEX_SEARCH_OPS {
-    FindExSearchNameMatch,
-    FindExSearchLimitToDirectories,
-    FindExSearchLimitToDevices,
-    FindExSearchMaxSearchOp
-} FINDEX_SEARCH_OPS;
 
  // For Backup funtions
 
@@ -817,93 +800,6 @@ DWORD WIN32API EraseTape( HANDLE hDevice, DWORD dwEraseType, BOOL bImmediate)
           ));
 
   return (ERROR_NOT_SUPPORTED);
-}
-
-
-/*****************************************************************************
- * Name      : HANDLE WIN32API FindFirstFileExA
- * Purpose   : The FindFirstFileExA function searches a directory for a file
- *             whose name and attributes match those specified in the
- *             function call.
- * Parameters: LPCSTR lpFileName                 pointer to the name of the file
- *                                               to search for
- *             FINDEX_INFO_LEVELS fInfoLevelId   information level of the returned data
- *             LPVOID lpFindFileData             pointer to the returned information
- *             FINDEX_SEARCH_OPS fSearchOp       type of filtering to perform
- *             LPVOID lpSearchFilter             pointer to search criteria
- *             DWORD dwAdditionalFlags           additional search control flags
- * Variables :
- * Result    : If the function succeeds, the return value is a search handle
- *             that can be used in a subsequent call to the FindNextFile or
- *             FindClose functions.
- *             If the function fails, the return value is INVALID_HANDLE_VALUE
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Markus Montkowski [Tha, 1998/05/21 20:57]
- *****************************************************************************/
-
-HANDLE WIN32API FindFirstFileExA( LPCSTR lpFileName,
-                                     FINDEX_INFO_LEVELS fInfoLevelId,
-                                     LPVOID lpFindFileData,
-                                     FINDEX_SEARCH_OPS fSearchOp,
-                                     LPVOID lpSearchFilter,
-                                     DWORD dwAdditionalFlags)
-{
-
-  dprintf(("KERNEL32:  FindFirstFileExA(%08x,%08x,%08x,%08x,%08x,%08x)not implemented - INVALID_HANDLE_VALUE\n",
-           lpFileName,
-           fInfoLevelId,
-           lpFindFileData,
-           fSearchOp,
-           lpSearchFilter,
-           dwAdditionalFlags
-          ));
-
-  return (INVALID_HANDLE_VALUE);
-}
-
-/*****************************************************************************
- * Name      : HANDLE WIN32API FindFirstFileExW
- * Purpose   : The FindFirstFileExW function searches a directory for a file
- *             whose name and attributes match those specified in the
- *             function call.
- * Parameters: LPCWSTR lpFileName                pointer to the name of the file
- *                                               to search for
- *             FINDEX_INFO_LEVELS fInfoLevelId   information level of the returned data
- *             LPVOID lpFindFileData             pointer to the returned information
- *             FINDEX_SEARCH_OPS fSearchOp       type of filtering to perform
- *             LPVOID lpSearchFilter             pointer to search criteria
- *             DWORD dwAdditionalFlags           additional search control flags
- * Variables :
- * Result    : If the function succeeds, the return value is a search handle
- *             that can be used in a subsequent call to the FindNextFile or
- *             FindClose functions.
- *             If the function fails, the return value is INVALID_HANDLE_VALUE
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Markus Montkowski [Tha, 1998/05/21 20:57]
- *****************************************************************************/
-
-HANDLE WIN32API FindFirstFileExW( LPCWSTR lpFileName,
-                                     FINDEX_INFO_LEVELS fInfoLevelId,
-                                     LPVOID lpFindFileData,
-                                     FINDEX_SEARCH_OPS fSearchOp,
-                                     LPVOID lpSearchFilter,
-                                     DWORD dwAdditionalFlags)
-{
-
-  dprintf(("KERNEL32:  FindFirstFileExW(%08x,%08x,%08x,%08x,%08x,%08x)not implemented - INVALID_HANDLE_VALUE\n",
-           lpFileName,
-           fInfoLevelId,
-           lpFindFileData,
-           fSearchOp,
-           lpSearchFilter,
-           dwAdditionalFlags
-          ));
-
-  return (INVALID_HANDLE_VALUE);
 }
 
 /*****************************************************************************
