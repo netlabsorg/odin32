@@ -493,6 +493,12 @@ HRESULT WINAPI OleRun(LPUNKNOWN pUnknown)
   ICOM_THIS(IRunnableObject,pUnknown);
   LRESULT		ret;
 
+#ifdef __WIN32OS2__
+  if(!IsValidInterface(pUnknown)) {
+      return E_INVALIDARG;
+  }
+#endif
+
   ret = IRunnableObject_QueryInterface(This,&IID_IRunnableObject,(LPVOID*)&runable);
   if (ret) 
 	return 0; /* Appears to return no error. */
