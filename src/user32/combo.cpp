@@ -1,4 +1,4 @@
-/* $Id: combo.cpp,v 1.19 1999-11-24 18:21:35 cbratschi Exp $ */
+/* $Id: combo.cpp,v 1.20 1999-12-21 17:03:43 cbratschi Exp $ */
 /*
  * Combo controls
  *
@@ -7,7 +7,7 @@
  *
  * FIXME: roll up in Netscape 3.01.
  *
- * WINE version: 991031
+ * WINE version: 991212
  *
  * Status:  in progress
  * Version: ?.??
@@ -117,37 +117,6 @@ static LRESULT COMBO_NCDestroy(HWND hwnd,WPARAM wParam,LPARAM lParam)
 }
 
 /***********************************************************************
- *           CBForceDummyResize
- *
- * The dummy resize is used for listboxes that have a popup to trigger
- * a re-arranging of the contents of the combobox and the recalculation
- * of the size of the "real" control window.
- */
-static void CBForceDummyResize(
-  LPHEADCOMBO lphc)
-{
-  RECT windowRect;
-
-  GetWindowRect(CB_HWND(lphc), &windowRect);
-
-  /*
-   * We have to be careful, resizing a combobox also has the meaning that the
-   * dropped rect will be resized. In this case, we want to trigger a resize
-   * to recalculate layout but we don't want to change the dropped rectangle
-   * So, we add the size of the dropped rectangle to the size of the control.
-   * this will cancel-out in the processing of the WM_WINDOWPOSCHANGING
-   * message.
-   */
-  SetWindowPos( CB_HWND(lphc),
-                (HWND)NULL,
-                0, 0,
-                windowRect.right  - windowRect.left,
-                windowRect.bottom - windowRect.top +
-                lphc->droppedRect.bottom - lphc->droppedRect.top,
-                SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE );
-}
-
-/***********************************************************************
  *           CBGetTextAreaHeight
  *
  * This method will calculate the height of the text area of the
@@ -254,6 +223,38 @@ static INT CBGetTextAreaHeight(
   return iTextItemHeight;
 }
 
+/***********************************************************************
+ *           CBForceDummyResize
+ *
+ * The dummy resize is used for listboxes that have a popup to trigger
+ * a re-arranging of the contents of the combobox and the recalculation
+ * of the size of the "real" control window.
+ */
+static void CBForceDummyResize(
+  LPHEADCOMBO lphc)
+{
+  RECT windowRect;
+  int newComboHeight;
+
+  newComboHeight = CBGetTextAreaHeight(CB_HWND(lphc),lphc) + 2*COMBO_YBORDERSIZE();
+
+  GetWindowRect(CB_HWND(lphc), &windowRect);
+
+  /*
+   * We have to be careful, resizing a combobox also has the meaning that the
+   * dropped rect will be resized. In this case, we want to trigger a resize
+   * to recalculate layout but we don't want to change the dropped rectangle
+   * So, we pass the height of text area of control as the height.
+   * this will cancel-out in the processing of the WM_WINDOWPOSCHANGING
+   * message.
+   */
+  SetWindowPos( CB_HWND(lphc),
+                (HWND)0,
+                0, 0,
+                windowRect.right  - windowRect.left,
+                newComboHeight,
+                SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE );
+}
 
 /***********************************************************************
  *           CBCalcPlacement
@@ -957,10 +958,10 @@ static LRESULT COMBO_PrintClient(HWND hwnd,WPARAM wParam,LPARAM lParam)
  */
 static INT CBUpdateLBox( LPHEADCOMBO lphc )
 {
-   INT  length, idx, ret;
+   INT  length, idx;
    LPSTR        pText = NULL;
 
-   idx = ret = LB_ERR;
+   idx = LB_ERR;
    length = CB_GETEDITTEXTLENGTH( lphc );
 
    if( length > 0 )
@@ -974,14 +975,8 @@ static INT CBUpdateLBox( LPHEADCOMBO lphc )
        else pText[0] = '\0';
        idx = SendMessageA( lphc->hWndLBox, LB_FINDSTRING,
                              (WPARAM)(-1), (LPARAM)pText );
-       if( idx == LB_ERR ) idx = 0;     /* select first item */
-       else ret = idx;
        HeapFree( GetProcessHeap(), 0, pText );
    }
-
-   /* select entry */
-
-   SendMessageA( lphc->hWndLBox, LB_SETCURSEL, (WPARAM)idx, 0 );
 
    if( idx >= 0 )
    {
@@ -989,7 +984,7 @@ static INT CBUpdateLBox( LPHEADCOMBO lphc )
        /* probably superfluous but Windows sends this too */
        SendMessageA( lphc->hWndLBox, LB_SETCARETINDEX, (WPARAM)idx, 0 );
    }
-   return ret;
+   return idx;
 }
 
 /***********************************************************************
@@ -1004,22 +999,6 @@ static void CBUpdateEdit( LPHEADCOMBO lphc , INT index )
 
    //TRACE("\t %i\n", index );
 
-   if( index == -1 )
-   {
-       length = CB_GETEDITTEXTLENGTH( lphc );
-       if( length )
-       {
-           pText = (LPSTR) HeapAlloc( GetProcessHeap(), 0, length + 1);
-           if(pText)
-           {
-                GetWindowTextA( lphc->hWndEdit, pText, length + 1 );
-                index = SendMessageA( lphc->hWndLBox, LB_FINDSTRING,
-                                        (WPARAM)(-1), (LPARAM)pText );
-                HeapFree( GetProcessHeap(), 0, pText );
-           }
-       }
-   }
-
    if( index >= 0 ) /* got an entry */
    {
        length = SendMessageA( lphc->hWndLBox, LB_GETTEXTLEN, (WPARAM)index, 0);
@@ -1030,15 +1009,15 @@ static void CBUpdateEdit( LPHEADCOMBO lphc , INT index )
            {
                 SendMessageA( lphc->hWndLBox, LB_GETTEXT,
                                 (WPARAM)index, (LPARAM)pText );
-
-                lphc->wState |= CBF_NOEDITNOTIFY;
-
-                SendMessageA( lphc->hWndEdit, WM_SETTEXT, 0, (LPARAM)pText );
-                SendMessageA( lphc->hWndEdit, EM_SETSEL, 0, (LPARAM)(-1) );
-                HeapFree( GetProcessHeap(), 0, pText );
            }
        }
    }
+   lphc->wState |= CBF_NOEDITNOTIFY;
+
+   SendMessageA( lphc->hWndEdit, WM_SETTEXT, 0, pText ? (LPARAM)pText : (LPARAM)"" );
+
+   if( pText )
+       HeapFree( GetProcessHeap(), 0, pText );
 }
 
 /***********************************************************************
@@ -1144,19 +1123,12 @@ static void CBRollUp( LPHEADCOMBO lphc, BOOL ok, BOOL bButton )
        {
            RECT rect;
 
-           /*
-            * It seems useful to send the WM_LBUTTONUP with (-1,-1) when cancelling
-            * and with (0,0) (anywhere in the listbox) when Oking.
-            */
-           SendMessageA( lphc->hWndLBox, WM_LBUTTONUP, 0, ok ? (LPARAM)0 : (LPARAM)(-1) );
-
            lphc->wState &= ~CBF_DROPPED;
            ShowWindow( lphc->hWndLBox, SW_HIDE );
            if(GetCapture() == lphc->hWndLBox)
            {
                ReleaseCapture();
            }
-
 
            if( CB_GETTYPE(lphc) == CBS_DROPDOWN )
            {
@@ -1232,13 +1204,10 @@ static VOID COMBO_EditSetFocus(LPHEADCOMBO lphc)
     if( CB_GETTYPE(lphc) == CBS_DROPDOWNLIST )
       SendMessageA( lphc->hWndLBox, LB_CARETON, 0, 0 );
 
-    if( lphc->wState & CBF_EDIT )
-      SendMessageA( lphc->hWndEdit, EM_SETSEL, 0, (LPARAM)(-1) );
     lphc->wState |= CBF_FOCUSED;
+
     if( !(lphc->wState & CBF_EDIT) )
-    {
       InvalidateRect(CB_HWND(lphc), &lphc->textRect, TRUE);
-    }
 
     CB_NOTIFY( lphc, CBN_SETFOCUS );
   }
@@ -1263,8 +1232,6 @@ static VOID COMBO_EditKillFocus(LPHEADCOMBO lphc)
 {
   if( lphc->wState & CBF_FOCUSED )
   {
-    SendMessageA( lphc->hwndself, WM_LBUTTONUP, 0, (LPARAM)(-1) );
-
     CBRollUp( lphc, FALSE, TRUE );
     if( IsWindow( lphc->hwndself ) )
     {
@@ -1274,12 +1241,8 @@ static VOID COMBO_EditKillFocus(LPHEADCOMBO lphc)
       lphc->wState &= ~CBF_FOCUSED;
 
       /* redraw text */
-      if( lphc->wState & CBF_EDIT )
-        SendMessageA( lphc->hWndEdit, EM_SETSEL, (WPARAM)(-1), 0 );
-      else
-      {
+      if( !(lphc->wState & CBF_EDIT) )
         InvalidateRect(CB_HWND(lphc), &lphc->textRect, TRUE);
-      }
 
       CB_NOTIFY( lphc, CBN_KILLFOCUS );
     }
@@ -1319,7 +1282,7 @@ static LRESULT COMBO_Command(HWND hwnd,WPARAM wParam,LPARAM lParam)
                 //TRACE("[%04x]: edit [%04x] got focus\n",
                 //             CB_HWND(lphc), lphc->hWndEdit );
 
-                if( !(lphc->wState & CBF_FOCUSED) ) COMBO_EditSetFocus(lphc);
+                COMBO_EditSetFocus(lphc);
                 break;
 
            case (EN_KILLFOCUS >> 8):
@@ -1390,8 +1353,17 @@ static LRESULT COMBO_Command(HWND hwnd,WPARAM wParam,LPARAM lParam)
                      CBRollUp( lphc, (HIWORD(wParam) == LBN_SELCHANGE), TRUE );
                 else lphc->wState &= ~CBF_NOROLLUP;
 
+                if( lphc->wState & CBF_EDIT )
+                {
+                    INT index = SendMessageA(lphc->hWndLBox, LB_GETCURSEL, 0, 0);
+                    CBUpdateEdit( lphc, index );
+                    /* select text in edit, as Windows does */
+                    SendMessageA( lphc->hWndEdit, EM_SETSEL, 0, (LPARAM)(-1) );
+                }
+                else
+                    InvalidateRect(CB_HWND(lphc), &lphc->textRect, TRUE);
+
                 CB_NOTIFY( lphc, CBN_SELCHANGE );
-                InvalidateRect(CB_HWND(lphc), &lphc->textRect, TRUE);
                 /* fall through */
 
            case LBN_SETFOCUS:
@@ -2052,7 +2024,11 @@ static LRESULT COMBO_SetCurSel(HWND hwnd,WPARAM wParam,LPARAM lParam)
   if( lphc->wState & CBF_SELCHANGE )
   {
     /* no LBN_SELCHANGE in this case, update manually */
-    InvalidateRect(CB_HWND(lphc), &lphc->textRect, TRUE);
+    if( lphc->wState & CBF_EDIT )
+        CBUpdateEdit( lphc, (INT)wParam );
+    else
+        InvalidateRect(CB_HWND(lphc), &lphc->textRect, TRUE);
+
     lphc->wState &= ~CBF_SELCHANGE;
   }
 

@@ -1,4 +1,4 @@
-/* $Id: win32wmdichild.cpp,v 1.15 1999-12-18 16:31:51 cbratschi Exp $ */
+/* $Id: win32wmdichild.cpp,v 1.16 1999-12-21 17:03:45 cbratschi Exp $ */
 /*
  * Win32 MDI Child Window Class for OS/2
  *
@@ -196,9 +196,8 @@ LRESULT Win32MDIChildWindow::DefMDIChildProcA(UINT Msg, WPARAM wParam, LPARAM lP
             client->setMaximizedChild(this);
             client->setActiveChild(this);
 
-#if 0
-            MDI_AugmentFrameMenu( ci, clientWnd->parent, hwnd);
-#endif
+            client->augmentFrameMenu(this);
+
             client->updateFrameText(MDI_REPAINTFRAME, NULL );
         }
 
@@ -401,9 +400,9 @@ HWND Win32MDIChildWindow::createChild(Win32MDIClientWindow *client, LPMDICREATES
                 if((newchild->getStyle() & WS_MAXIMIZE) && !client->getMaximizedChild() )
                 {
                     client->setMaximizedChild(newchild);
-#if 0
-                    MDI_AugmentFrameMenu( ci, w->parent, newchild->getWindowHandle() );
-#endif
+
+                    client->augmentFrameMenu(newchild);
+
                     client->updateFrameText(MDI_REPAINTFRAME, NULL );
                 }
             }
