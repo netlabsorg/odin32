@@ -1,4 +1,4 @@
-/* $Id: button.h,v 1.2 1999-07-16 17:30:47 sandervl Exp $ */
+/* $Id: button.h,v 1.3 1999-07-20 16:22:54 sandervl Exp $ */
 
 /*
  * Button-class extra info
@@ -11,6 +11,9 @@
 #define __WINE_BUTTON_H
 
 #include "wingdi.h"
+
+#define ODINBUTTONCLASSNAME  "ODIN_BUTTON"
+#define WIN32BUTTONCLASSNAME "BUTTON"
 
   /* Extra info for BUTTON windows */
   /* Note: under MS-Windows, state is a BYTE and this structure is */
@@ -35,8 +38,8 @@ typedef struct
 extern LRESULT WINAPI ButtonWndProc( HWND hWnd, UINT uMsg,
                                      WPARAM wParam, LPARAM lParam );
 
-void BUTTON_Register();
-void BUTTON_Unregister();
+BOOL BUTTON_Register();
+BOOL BUTTON_Unregister();
 
 #endif  /* __WINE_BUTTON_H */
 
