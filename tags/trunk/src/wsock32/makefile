@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 1999-10-25 23:17:19 phaller Exp $
+# $Id: makefile,v 1.13 1999-11-12 15:46:19 bird Exp $
 
 #
 # PD-Win32 API
@@ -33,19 +33,20 @@ $(TARGET).dll: $(OBJS) $(TARGET).def
 	$(CP) $@ $(PDWIN32_BIN)
 
 $(TARGET).lib: $(TARGET)exp.def
-        $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
-        $(CP) $@ $(PDWIN32_LIB)
+    $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
+    $(CP) $@ $(PDWIN32_LIB)
 
 $(TARGET)exp.def: $(TARGET).def
-        $(IMPDEF) $** $@
+    $(IMPDEF) $** $@
 
 wsock32.obj: wsock32.cpp wsock32.h wsock32const.h
 unknown.obj: unknown.cpp wsock32.h
 async.obj:   async.cpp wsock32const.h
 initterm.obj: initterm.cpp
 
+
 clean:
-	$(RM) *.obj *.lib *.dll *~ *.map *.pch	
+	$(RM) *.obj *.lib *.dll *~ *.map *.pch
 	$(RM) $(PDWIN32_BIN)\$(TARGET).dll
 	$(RM) $(PDWIN32_LIB)\$(TARGET).lib
 
