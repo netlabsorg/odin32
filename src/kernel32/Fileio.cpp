@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.39 2000-09-15 13:24:28 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.40 2000-09-18 19:26:15 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -673,6 +673,7 @@ ODINFUNCTION4(DWORD, GetFullPathNameA,
     dprintf(("KERNEL32:  GetFullPathName %s\n", arg1));
       while((ptr = strchr(arg1, '/')) != NULL)
         *ptr = '\\';
+
     return O32_GetFullPathName(arg1, arg2, arg3, arg4);
 }
 //******************************************************************************
