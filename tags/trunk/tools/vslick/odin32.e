@@ -1,4 +1,4 @@
-/* $Id: odin32.e,v 1.12 2001-11-09 07:45:08 bird Exp $
+/* $Id: odin32.e,v 1.13 2001-11-23 01:04:35 bird Exp $
  *
  * Visual SlickEdit Documentation Macros.
  *
@@ -59,7 +59,7 @@ def  'C-S-T' = odin32_maketagfile
 /* Remeber to change these! */
 static _str sOdin32UserInitials = "kso";
 static _str sOdin32UserName     = "knut st. osmundsen";
-static _str sOdin32UserEmail    = "knut.stange.osmundsen@mynd.no";
+static _str sOdin32UserEmail    = "kosmunds@csc.com";
 
 
 
@@ -357,7 +357,7 @@ void odin32_modulebox()
     _begin_line();
     if (file_eq(p_extension, 'asm'))
     {
-        _insert_text("; $Id: odin32.e,v 1.12 2001-11-09 07:45:08 bird Exp $\n");
+        _insert_text("; $Id: odin32.e,v 1.13 2001-11-23 01:04:35 bird Exp $\n");
         _insert_text("; \n");
         _insert_text("; \n");
         _insert_text("; \n");
@@ -370,7 +370,7 @@ void odin32_modulebox()
     }
     else
     {
-        _insert_text("/* $Id: odin32.e,v 1.12 2001-11-09 07:45:08 bird Exp $\n");
+        _insert_text("/* $Id: odin32.e,v 1.13 2001-11-23 01:04:35 bird Exp $\n");
         _insert_text(" * \n");
         _insert_text(" * \n");
         _insert_text(" * \n");
