@@ -1,4 +1,4 @@
-; $Id: USER32.DEF,v 1.39 2000-11-04 16:28:24 sandervl Exp $
+; $Id: USER32.DEF,v 1.40 2000-11-05 18:49:06 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
@@ -629,14 +629,6 @@ EXPORTS
     EnumDisplayDevicesA        = _EnumDisplayDevicesA@16        @1006
     EnumDisplayDevicesW        = _EnumDisplayDevicesW@16        @1007
 
-;
-; These are also APIs.
-;
-    _SetMapMode@8                                                @1050
-    _GetMapMode@4                                                @1051
-    _SetViewportExtEx@16                                         @1052
-    _GetViewportExtEx@8                                          @1053
-
 
 ; Wine/Odin helper function
     GetSysColorPen              = _GetSysColorPen@4              @2002
@@ -661,7 +653,10 @@ EXPORTS
 
     _wvsnprintfW@16                                              @2015
 
-    _WGSS_setPageXForm@4                                         @2016
-    _WGSS_clientHeight@8                                         @2017
-    _WGSS_changePageXForm@20                                     @2018
-    _WGSS_removeClientArea@4                                     @2019
+    _setPageXForm@4                                              @2016
+    _clientHeight@8                                              @2017
+    _changePageXForm@20                                          @2018
+    _removeClientArea@4                                          @2019
+    _setMapMode@8                                                @2020
+    _TestWideLine@4                                              @2021
+    _Calculate1PixelDelta@4                                      @2022

@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.75 2000-11-04 16:28:25 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.76 2000-11-05 18:49:07 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -92,7 +92,7 @@ void dprintfRegion1(HPS hps, HWND hWnd, HRGN hrgnClip)
 
 //******************************************************************************
 //******************************************************************************
-void TestWideLine (pDCData pHps)
+void WIN32API TestWideLine (pDCData pHps)
 {
    const LOGPEN_W *pLogPen;
 
@@ -116,7 +116,7 @@ void TestWideLine (pDCData pHps)
 }
 //******************************************************************************
 //******************************************************************************
-void Calculate1PixelDelta(pDCData pHps)
+void WIN32API Calculate1PixelDelta(pDCData pHps)
 {
    POINTL aptl[2] = {0, 0, 1, 1};
 
@@ -434,6 +434,9 @@ void selectClientArea(Win32BaseWindow *window, pDCData pHps)
    // And the visible region of the frame with the client rectangle
    // to get the new visible region
    GreCombineRegion(pHps->hps, hrgnRect, pHps->hrgnVis, hrgnRect, CRGN_AND);
+#ifdef DEBUG
+   dprintfRegion1(pHps->hps, window->getWindowHandle(), hrgnRect);
+#endif
       
    // Set the new origin plus visible region in the DC
    GreSetupDC(pHps->hps,
@@ -484,7 +487,7 @@ LONG clientHeight(Win32BaseWindow *wnd, HWND hwnd, pDCData pHps)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL   WIN32API WGSS_changePageXForm(pDCData pHps, PPOINTL pValue, int x, int y, PPOINTL pPrev)
+BOOL   WIN32API changePageXForm(pDCData pHps, PPOINTL pValue, int x, int y, PPOINTL pPrev)
 {
  Win32BaseWindow *wnd;
 
@@ -493,7 +496,7 @@ BOOL   WIN32API WGSS_changePageXForm(pDCData pHps, PPOINTL pValue, int x, int y,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL   WIN32API WGSS_setPageXForm(pDCData pHps)
+BOOL   WIN32API setPageXForm(pDCData pHps)
 {
  Win32BaseWindow *wnd;
 
@@ -502,7 +505,7 @@ BOOL   WIN32API WGSS_setPageXForm(pDCData pHps)
 }
 //******************************************************************************
 //******************************************************************************
-VOID   WIN32API WGSS_removeClientArea(pDCData pHps)
+VOID   WIN32API removeClientArea(pDCData pHps)
 {
  Win32BaseWindow *wnd;
 
@@ -511,12 +514,21 @@ VOID   WIN32API WGSS_removeClientArea(pDCData pHps)
 }
 //******************************************************************************
 //******************************************************************************
-LONG   WIN32API WGSS_clientHeight(HWND hwnd, pDCData pHps)
+LONG   WIN32API clientHeight(HWND hwnd, pDCData pHps)
 {
  Win32BaseWindow *wnd;
 
    wnd = Win32BaseWindow::GetWindowFromOS2Handle(pHps->hwnd);
    return clientHeight(wnd, hwnd, pHps);
+}
+//******************************************************************************
+//******************************************************************************
+int  WIN32API setMapMode(pDCData pHps, int mode)
+{
+ Win32BaseWindow *wnd;
+
+   wnd = Win32BaseWindow::GetWindowFromOS2Handle(pHps->hwnd);
+   return setMapMode(wnd, pHps, mode);
 }
 //******************************************************************************
 //******************************************************************************
@@ -728,6 +740,10 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
    HideCaret(hwnd);
    WinShowTrackRect(wnd->getOS2WindowHandle(), FALSE);
 
+   //testestest
+   if(hwnd == 0x68000019) {
+	lpps->fErase = 1;
+   }
    if(wnd->needsEraseBkgnd() && lComplexity != RGN_NULL) {
         wnd->setEraseBkgnd(FALSE);
         lpps->fErase = (wnd->MsgEraseBackGround(pHps->hps) != 0);
@@ -1741,113 +1757,6 @@ HWND WIN32API WindowFromDC(HDC hdc)
       return Win32BaseWindow::OS2ToWin32Handle(pHps->hwnd);
    else
       return 0;
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API SetMapMode(HDC hdc, int mode)
-{
-  Win32BaseWindow *wnd;
-  pDCData          pHps = (pDCData)GpiQueryDCData((HPS)hdc);
-  if(!pHps)
-  {
-      SetLastError(ERROR_INVALID_HANDLE_W);
-      dprintf(("GDI32: SetMapMode %x %x -> invalid hdc!!", hdc, mode));
-      return 0;
-  }
-  wnd = Win32BaseWindow::GetWindowFromHandle(WindowFromDC(hdc));
-  //todo: metafile recording
-
-  dprintf(("GDI32: SetMapMode %x %x", hdc, mode));
-  return setMapMode(wnd, pHps, mode);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API GetMapMode(HDC hdc)
-{
-   pDCData pHps = (pDCData)GpiQueryDCData((HPS)hdc);
-   if(pHps) {
-      dprintf(("GDI32: GetMapMode %x -> %x", hdc, pHps->MapMode));
-      return pHps->MapMode;
-   }
-   dprintf(("GDI32: GetMapMode: invalid hdc %x!!!", hdc));
-   SetLastError(ERROR_INVALID_HANDLE_W);
-   return 0;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SetViewportExtEx(HDC hdc, int xExt, int yExt, LPSIZE pSize)
-{
-  Win32BaseWindow *wnd;
-  pDCData          pHps = (pDCData)GpiQueryDCData((HPS)hdc);
-
-   if(!pHps)
-   {
-      dprintf(("GDI32: SetViewportExtEx %x %d %d %x -> INVALID HDC", hdc, xExt, yExt, pSize));
-      SetLastError(ERROR_INVALID_HANDLE_W);
-      return FALSE;
-   }
-
-   if(pSize) {
-   	dprintf(("GDI32: SetViewportExtEx %x %d %d (%d,%d)", hdc, xExt, yExt, pSize->cx, pSize->cy));
-   }
-   else dprintf(("GDI32: SetViewportExtEx %x %d %d NULL", hdc, xExt, yExt));
-
-   if (xExt && yExt )
-   {
-      //todo: Metafile recording!! (done for any map mode)
-
-      if(pHps->MapMode == MM_ISOTROPIC_W || pHps->MapMode == MM_ANISOTROPIC_W)
-      {
-         wnd = Win32BaseWindow::GetWindowFromHandle(WindowFromDC(hdc));
-         if(changePageXForm(wnd, pHps, NULL, xExt, yExt, (PPOINTL) pSize))
-         {
-            SetLastError(ERROR_SUCCESS_W);
-            return TRUE;
-         }
-      }
-      else
-      {
-         pHps->lVwpXExtSave = xExt;
-         pHps->lVwpYExtSave = yExt;
-
-         //if map mode is not ISOTROPIC nor ANISOTROPIC, this function does
-         //nothing and returns TRUE (NT)
-         SetLastError(ERROR_SUCCESS_W);
-         return TRUE;
-      }
-
-      SetLastError(ERROR_SUCCESS_W);
-      return FALSE;
-   }
-
-   SetLastError(ERROR_INVALID_PARAMETER_W);
-   return FALSE;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetViewportExtEx(HDC hdc, LPSIZE pSize)
-{
-   pDCData pHps = (pDCData)GpiQueryDCData((HPS)hdc);
-   if(!pHps)
-   {
-      dprintf(("GDI32: GetViewportExtEx %x %x -> INVALID HDC", hdc, pSize));
-      SetLastError(ERROR_INVALID_HANDLE_W);
-      return FALSE;
-   }
-
-   if(!pSize)
-   {
-      dprintf(("GDI32: GetViewportExtEx %x NULL -> INVALID parameter", hdc));
-      SetLastError(ERROR_INVALID_PARAMETER_W);
-      return FALSE;
-   }
-
-   pSize->cx = (LONG)pHps->viewportXExt;
-   pSize->cy = (LONG)pHps->viewportYExt;
-   dprintf(("GDI32: GetViewportExtEx %x -> (%d,%d)", hdc, pSize->cx, pSize->cy));
-
-   SetLastError(ERROR_SUCCESS_W);
-   return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
