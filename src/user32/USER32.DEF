@@ -1,4 +1,4 @@
-; $Id: USER32.DEF,v 1.20 1999-11-10 14:16:44 sandervl Exp $
+; $Id: USER32.DEF,v 1.21 1999-11-23 19:34:18 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
@@ -608,6 +608,9 @@ EXPORTS
     wsprintfW                  = _wsprintfW                   @578
     wvsprintfA                 = _wvsprintfA@12              @579
     wvsprintfW                 = _wvsprintfW@12              @580
+
+    ChangeDisplaySettingsExA   = _ChangeDisplaySettingsExA@20 @604
+    ChangeDisplaySettingsExW   = _ChangeDisplaySettingsExW@20 @605
 
 ;------------
 ; Windows 98

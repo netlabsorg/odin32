@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.43 1999-11-09 19:23:16 sandervl Exp $
+# $Id: Makefile,v 1.44 1999-11-23 19:34:19 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -32,7 +32,7 @@ OBJS =  user32.obj loadres.obj \
         dde.obj win32wndhandle.obj wsprintf.obj winmouse.obj \
         icon.obj hook.obj hooks.obj winmenu.obj winkeyboard.obj \
         defwndproc.obj syscolor.obj char.obj initterm.obj \
-        uitools.obj unknown.obj spy.obj wndmsg.obj \
+        uitools.obj unknown.obj spy.obj wndmsg.obj display.obj \
         pmwindow.obj pmframe.obj win32class.obj win32wnd.obj win32dlg.obj \
         msgbox.obj window.obj windowmsg.obj windowclass.obj win32wbase.obj \
         windowword.obj gen_object.obj oslibwin.obj win32wndchild.obj \
@@ -155,6 +155,7 @@ wsprintf.obj:   wsprintf.cpp
 
 winmouse.obj:   winmouse.cpp winmouse.h oslibmsg.h pmwindow.h win32wbase.h
 winkeyboard.obj: winkeyboard.cpp $(PDWIN32_INCLUDE)\winkeyboard.h
+display.obj: display.cpp pmwindow.h
 
 clean:
         $(RM) *.obj *.lib *.dll *.map *.pch *.res *.lrf resource.asm

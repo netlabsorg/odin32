@@ -564,6 +564,8 @@ EXPORTS
     _wsprintfW                                @578
     _wvsprintfA@12                            @579
     _wvsprintfW@12                            @580
+    _ChangeDisplaySettingsExA@20              @604
+    _ChangeDisplaySettingsExW@20              @605
     _GetMenuInfo@8                            @800
     _SetMenuInfo@8                            @801
     _GetMonitorInfoW@8                        @1000
