@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.914 2000-04-27 18:24:26 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.915 2000-04-27 22:12:42 davidr Exp $ */
+
+ 2000-04-27: David Raison <djr@lemur.co.uk>
+        - OLE32/NEW: Work-in-progress on adding apartment handling.
+	  Added here for backup until ready for release.
 
  2000-04-27: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - tools/DailyBuild: Checked in the scripts used for the daily build.
