@@ -1,4 +1,10 @@
- /* $Id: changelog,v 1.1106 2000-09-04 18:47:28 sandervl Exp $ */
+ /* $Id: changelog,v 1.1107 2000-09-05 19:21:52 sandervl Exp $ */
+
+ 2000-09-05: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   WM_PARENTNOTIFY during WM_CREATE was sent to the wrong window
+                WM_FOCUSCHANGE fix; set & kill focus was sent twice
+                Added more logging.
+                Activate window after resizing (WM_WINDOWPOSCHANGED in pmwindow.cpp)
 
  2000-09-04: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: GetDiskFreeSpaceExA: added support for 64 bits disk size
