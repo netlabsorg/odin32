@@ -1,4 +1,4 @@
-/* $Id: odin.cmd,v 1.23 2000-12-30 10:18:36 sandervl Exp $
+/* $Id: odin.cmd,v 1.24 2001-01-06 16:42:45 sandervl Exp $
  *
  * Odin32 API WarpIn installation script generator.
  *
@@ -93,6 +93,8 @@ call SysFileDelete sInstFile;
 
 /* create warpin installation script */
 rc = lineout(sInstFile, '<WARPIN>', 1);
+rc = lineout(sInstFile, 'VERSION=0.9.6');
+rc = lineout(sInstFile, 'OS=OS2_3x');
 rc = lineout(sInstFile, '<HEAD>');
 rc = lineout(sInstFile, '<PCK INDEX=1');
 rc = lineout(sInstFile, '     PACKAGEID="Odin\Odin\Odin Core Files\0\0\5"');
@@ -113,6 +115,8 @@ rc = lineout(sInstFile, '     CONFIGSYS="LIBPATH=$(1)\SYSTEM32 | ADDRIGHT"');
 rc = lineout(sInstFile, '     CONFIGSYS="SET PATH=$(1)\SYSTEM32 | ADDRIGHT"');
 rc = lineout(sInstFile, '     >Installation of Odin System files .</PCK>');
 rc = lineout(sInstFile, '');
+/* Win32k installation temporarily disabled due to a WarpIn bug (config.sys lines
+ removed)
 rc = lineout(sInstFile, '<PCK INDEX=3');
 rc = lineout(sInstFile, '     PACKAGEID="Odin\Odin\Add Win32k.sys to Config.sys\0\0\5"');
 rc = lineout(sInstFile, '     TARGET="C:\ODIN\SYSTEM32"');
@@ -129,6 +133,7 @@ rc = lineout(sInstFile, '     CONFIGSYS="DEVICE=WIN32K.SYS | REMOVELINE"');
 rc = lineout(sInstFile, '     CONFIGSYS="DEVICE=$(1)\SYSTEM32\Win32k.sys -pe:pe -Dllfixes:D | UNIQUE ADDTOP"');
 rc = lineout(sInstFile, '     >Add Win32k.sys to Config.sys .</PCK>');
 rc = lineout(sInstFile, '');
+*/
 rc = lineout(sInstFile, '</HEAD>');
 rc = lineout(sInstFile, '<BODY>');
 rc = lineout(sInstFile, '<PAGE INDEX=1 TYPE=TEXT>');
@@ -364,8 +369,12 @@ end
 /*
  * Packet 3 is only win32k.sys config.sys line but it seems like we have to add something.
  */
+/* Win32k installation temporarily disabled due to a WarpIn bug (config.sys lines
+ removed) */
+/*
 sWICCmd '3 -c'||sDllDir '*.ddp';
 if (rc <> 0) then return rc;
+*/
 
 return rc;
 
