@@ -1,4 +1,4 @@
-/* $Id: lang.cpp,v 1.24 2000-07-06 21:18:43 sandervl Exp $ */
+/* $Id: lang.cpp,v 1.25 2000-07-07 19:05:10 sandervl Exp $ */
 /*
  * Win32 language API functions for OS/2
  *
@@ -129,6 +129,9 @@ ULONG GetLanguageId()
         case CC_SLOVAK_REPUBLIC:
 		defaultLanguage = MAKELANGID(LANG_SLOVAK, SUBLANG_DEFAULT);
 		break;
+	case CC_POLAND:
+                defaultLanguage = MAKELANGID(LANG_POLISH, SUBLANG_DEFAULT);
+                break;
 	default:
 		defaultLanguage = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_UK);
 		break;
