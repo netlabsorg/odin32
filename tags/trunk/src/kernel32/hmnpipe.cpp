@@ -1,4 +1,4 @@
-/* $Id: hmnpipe.cpp,v 1.7 2001-12-05 14:16:02 sandervl Exp $ */
+/* $Id: hmnpipe.cpp,v 1.8 2002-02-15 19:14:51 sandervl Exp $ */
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -186,9 +186,9 @@ BOOL HMDeviceNamedPipeClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
 //******************************************************************************
 //******************************************************************************
 BOOL HMDeviceNamedPipeClass::CreatePipe(PHMHANDLEDATA pHMHandleDataRead,
-                                         PHMHANDLEDATA pHMHandleDataWrite,
-                                         LPSECURITY_ATTRIBUTES lpsa, 
-                                         DWORD         cbPipe)
+                                        PHMHANDLEDATA pHMHandleDataWrite,
+                                        LPSECURITY_ATTRIBUTES lpsa, 
+                                        DWORD         cbPipe)
 { 
   pHMHandleDataRead->dwInternalType  = HMTYPE_PIPE;
   pHMHandleDataWrite->dwInternalType = HMTYPE_PIPE;
@@ -203,8 +203,6 @@ BOOL HMDeviceNamedPipeClass::CreatePipe(PHMHANDLEDATA pHMHandleDataRead,
   else
     return(FALSE);
 }
-
-
 //******************************************************************************
 //******************************************************************************
 BOOL HMDeviceNamedPipeClass::ConnectNamedPipe( PHMHANDLEDATA pHMHandleData, 
@@ -266,7 +264,6 @@ BOOL HMDeviceNamedPipeClass::GetNamedPipeInfo(PHMHANDLEDATA pHMHandleData,
 
   return (FALSE);
 }
-
 //******************************************************************************
 //******************************************************************************
 DWORD HMDeviceNamedPipeClass::TransactNamedPipe(PHMHANDLEDATA pHMHandleData,
@@ -289,7 +286,8 @@ DWORD HMDeviceNamedPipeClass::TransactNamedPipe(PHMHANDLEDATA pHMHandleData,
                                     lpcbRead,
                                     lpo));
 }
-
+//******************************************************************************
+//******************************************************************************
 BOOL HMDeviceNamedPipeClass::SetNamedPipeHandleState(PHMHANDLEDATA pHMHandleData,
                                                 LPDWORD lpdwMode,
                                                 LPDWORD lpcbMaxCollect,
@@ -308,8 +306,8 @@ BOOL HMDeviceNamedPipeClass::SetNamedPipeHandleState(PHMHANDLEDATA pHMHandleData
   }
   return ret;
 }
-
-
+//******************************************************************************
+//******************************************************************************
 BOOL HMDeviceNamedPipeClass::GetOverlappedResult(PHMHANDLEDATA pHMHandleData,
                                                  LPOVERLAPPED  arg2,
                                                  LPDWORD       arg3,
@@ -317,3 +315,137 @@ BOOL HMDeviceNamedPipeClass::GetOverlappedResult(PHMHANDLEDATA pHMHandleData,
 {
    return (FALSE); 
 }
+/*****************************************************************************
+ * Name      : BOOL HMDeviceNamedPipeClass::ReadFile
+ * Purpose   : read data from handle / device
+ * Parameters: PHMHANDLEDATA pHMHandleData,
+ *             LPCVOID       lpBuffer,
+ *             DWORD         nNumberOfBytesToRead,
+ *             LPDWORD       lpNumberOfBytesRead,
+ *             LPOVERLAPPED  lpOverlapped
+ * Variables :
+ * Result    : Boolean
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+
+BOOL HMDeviceNamedPipeClass::ReadFile(PHMHANDLEDATA pHMHandleData,
+                                      LPCVOID       lpBuffer,
+                                      DWORD         nNumberOfBytesToRead,
+                                      LPDWORD       lpNumberOfBytesRead,
+                                      LPOVERLAPPED  lpOverlapped,
+                                      LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
+{
+  DWORD        bytesread;
+  BOOL         bRC;
+
+  dprintfl(("KERNEL32: HMDeviceNamedPipeClass::ReadFile %s(%08x,%08x,%08x,%08x,%08x) - stub?\n",
+           lpHMDeviceName,
+           pHMHandleData,
+           lpBuffer,
+           nNumberOfBytesToRead,
+           lpNumberOfBytesRead,
+           lpOverlapped));
+
+  //This pointer can to be NULL
+  if(lpNumberOfBytesRead)
+    *lpNumberOfBytesRead = 0;
+  else
+    lpNumberOfBytesRead = &bytesread;
+
+  if((pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && !lpOverlapped) {
+    dprintf(("FILE_FLAG_OVERLAPPED flag set, but lpOverlapped NULL!!"));
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
+  }
+  if(!(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && lpOverlapped) {
+    dprintf(("Warning: lpOverlapped != NULL & !FILE_FLAG_OVERLAPPED; sync operation"));
+  }
+  if(lpCompletionRoutine) {
+      dprintf(("!WARNING!: lpCompletionRoutine not supported -> fall back to sync IO"));
+  }
+
+  if(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) {
+    dprintf(("ERROR: Overlapped IO not yet implememented!!"));
+  }
+
+  bRC = HMDeviceFileClass::WriteFile(pHMHandleData,
+                                     lpBuffer,
+                                     nNumberOfBytesToRead,
+                                     lpNumberOfBytesRead,
+                                     lpOverlapped, lpCompletionRoutine);
+
+  dprintf(("KERNEL32: HMDeviceNamedPipeClass::ReadFile returned %08xh; bytes written %d",
+           bRC, *lpNumberOfBytesRead));
+
+  return bRC;
+}
+
+
+/*****************************************************************************
+ * Name      : BOOL HMDeviceNamedPipeClass::WriteFile
+ * Purpose   : write data to handle / device
+ * Parameters: PHMHANDLEDATA pHMHandleData,
+ *             LPCVOID       lpBuffer,
+ *             DWORD         nNumberOfBytesToWrite,
+ *             LPDWORD       lpNumberOfBytesWritten,
+ *             LPOVERLAPPED  lpOverlapped
+ * Variables :
+ * Result    : Boolean
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+
+BOOL HMDeviceNamedPipeClass::WriteFile(PHMHANDLEDATA pHMHandleData,
+                                       LPCVOID       lpBuffer,
+                                       DWORD         nNumberOfBytesToWrite,
+                                       LPDWORD       lpNumberOfBytesWritten,
+                                       LPOVERLAPPED  lpOverlapped,
+                                       LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
+{
+  DWORD        byteswritten;
+  BOOL         bRC;
+
+  dprintfl(("KERNEL32: HMDeviceNamedPipeClass::WriteFile %s(%08x,%08x,%08x,%08x,%08x) - stub?\n",
+           lpHMDeviceName,
+           pHMHandleData,
+           lpBuffer,
+           nNumberOfBytesToWrite,
+           lpNumberOfBytesWritten,
+           lpOverlapped));
+
+  //This pointer can to be NULL
+  if(lpNumberOfBytesWritten)
+    *lpNumberOfBytesWritten = 0;
+  else
+    lpNumberOfBytesWritten = &byteswritten;
+
+  if((pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && !lpOverlapped) {
+    dprintf(("FILE_FLAG_OVERLAPPED flag set, but lpOverlapped NULL!!"));
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
+  }
+  if(!(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && lpOverlapped) {
+    dprintf(("Warning: lpOverlapped != NULL & !FILE_FLAG_OVERLAPPED; sync operation"));
+  }
+
+  if(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) {
+    dprintf(("ERROR: Overlapped IO not yet implememented!!"));
+  }
+  bRC = HMDeviceFileClass::WriteFile(pHMHandleData,
+                                     lpBuffer,
+                                     nNumberOfBytesToWrite,
+                                     lpNumberOfBytesWritten,
+                                     lpOverlapped, lpCompletionRoutine);
+
+  dprintf(("KERNEL32: HMDeviceNamedPipeClass::WriteFile returned %08xh; bytes written %d",
+           bRC, *lpNumberOfBytesWritten));
+
+  return bRC;
+}
+//******************************************************************************
+//******************************************************************************

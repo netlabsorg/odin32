@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.86 2001-12-09 16:00:30 bird Exp $ */
+/* $Id: HandleManager.cpp,v 1.87 2002-02-15 19:14:50 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -4347,8 +4347,6 @@ DWORD HMCreateNamedPipe(LPCTSTR lpName,
       TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
       return 0;                                           /* signal error */
   }
-
-  dprintf(("Win32 Handle -> %08x",iIndexNew));
 
   return iIndexNew;
 }
