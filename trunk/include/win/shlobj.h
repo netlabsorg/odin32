@@ -77,8 +77,6 @@ extern UINT cfFileContents;
 * IShellView interface
 */
 
-
-
 typedef GUID SHELLVIEWID;
 #define SV_CLASS_NAME   ("SHELLDLL_DefView")
 
@@ -102,6 +100,16 @@ ICOM_DEFINE(IShellIcon, IUnknown)
 #define IShellIcon_Release(p)                 ICOM_CALL (Release,p)
 /*** IShellIcon methods ***/
 #define IShellIcon_GetIconOf(p,a,b,c)         ICOM_CALL3(GetIconOf,p,a,b,c)
+
+/****************************************************************************
+* SHAddToRecentDocs API
+*/
+#define SHARD_PIDL      0x00000001L
+#define SHARD_PATHA     0x00000002L
+#define SHARD_PATHW     0x00000003L
+#define SHARD_PATH WINELIB_NAME_AW(SHARD_PATH)
+
+DWORD WINAPI SHAddToRecentDocs(UINT uFlags, LPCVOID pv);
 #endif
 
 /****************************************************************************
@@ -392,7 +400,7 @@ typedef struct
 #endif
 } SHELLFLAGSTATE, * LPSHELLFLAGSTATE;
 
-void WINAPI SHGetSettings(LPSHELLFLAGSTATE lpsfs, DWORD dwMask);
+VOID WINAPI SHGetSettings(LPSHELLFLAGSTATE lpsfs, DWORD dwMask);
 
 #define SSF_SHOWALLOBJECTS		0x0001
 #define SSF_SHOWEXTENSIONS		0x0002
@@ -471,6 +479,9 @@ HRESULT WINAPI SHGetSpecialFolderLocation(HWND, INT, LPITEMIDLIST *);
 #define	CSIDL_SENDTO		0x0009
 #define	CSIDL_BITBUCKET		0x000a
 #define	CSIDL_STARTMENU		0x000b
+#define CSIDL_MYDOCUMENTS       0x000c
+#define CSIDL_MYMUSIC           0x000d
+#define CSIDL_MYVIDEO           0x000e
 #define	CSIDL_DESKTOPDIRECTORY	0x0010
 #define	CSIDL_DRIVES		0x0011
 #define	CSIDL_NETWORK		0x0012
@@ -483,6 +494,7 @@ HRESULT WINAPI SHGetSpecialFolderLocation(HWND, INT, LPITEMIDLIST *);
 #define CSIDL_COMMON_DESKTOPDIRECTORY	0x0019
 #define CSIDL_APPDATA		0x001a
 #define CSIDL_PRINTHOOD		0x001b
+#define CSIDL_LOCAL_APPDATA     0x001c
 #define CSIDL_ALTSTARTUP	0x001d
 #define CSIDL_COMMON_ALTSTARTUP	0x001e
 #define CSIDL_COMMON_FAVORITES  0x001f
@@ -504,6 +516,17 @@ HRESULT WINAPI SHGetSpecialFolderLocation(HWND, INT, LPITEMIDLIST *);
 #define CSIDL_COMMON_ADMINTOOLS	0x002f
 #define CSIDL_ADMINTOOLS	0x0030
 #define CSIDL_CONNECTIONS	0x0031
+#define CSIDL_COMMON_MUSIC      0x0035
+#define CSIDL_COMMON_PICTURES   0x0036
+#define CSIDL_COMMON_VIDEO      0x0037
+#define CSIDL_RESOURCES         0x0038
+#define CSIDL_RESOURCES_LOCALIZED 0x0039
+#define CSIDL_COMMON_OEM_LINKS  0x003a
+#define CSIDL_CDBURN_AREA       0x003b
+#define CSIDL_COMPUTERSNEARME   0x003d
+#define CSIDL_FOLDER_MASK       0x00ff
+#define CSIDL_FLAG_PER_USER_INIT 0x0800
+#define CSIDL_FLAG_NO_ALIAS     0x1000
 #define CSIDL_FOLDER_MASK	0x00ff
 
 #define CSIDL_FLAG_DONT_VERIFY	0x4000
