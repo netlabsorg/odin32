@@ -1,4 +1,4 @@
-# $Id: setup.os2debvac308.mk,v 1.22 2002-10-04 04:32:41 bird Exp $
+# $Id: setup.os2debvac308.mk,v 1.23 2003-06-30 13:17:00 bird Exp $
 
 # ---OS2, DEBUG, VAC308-------------------------
 ENV_NAME="OS/2, Debug, IBM VisualAge for C++ 3.08"
@@ -36,8 +36,8 @@ CXX=icc.exe
 CC_FLAGS=/Q /DDEBUG /DOS2 /D__32BIT__ /D__i386__ /DMODEL=FLAT /Ti+ /O- /Ss+ /C+ $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES) $(ALL_INCLUDES) /I$(PATH_INCLUDES)
 CC_FLAGS_EXE=$(CC_FLAGS) /Gm+ /Ge+
 CC_FLAGS_DLL=$(CC_FLAGS) /Gm+ /Ge-
-CC_FLAGS_SYS=$(CC_FLAGS) /Tm- /Rn  /Ge+ /DRING0 /Gr+ /Gs- /Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext-
-CC_FLAGS_VDD=$(CC_FLAGS_SYS)
+CC_FLAGS_SYS=$(CC_FLAGS) /Tm- /Rn /Ge+ /DRING0 /Gr+ /Gs+ /Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext-
+CC_FLAGS_VDD=$(CC_FLAGS_SYS) /DM_I386
 CC_FLAGS_IFS=$(CC_FLAGS_SYS)
 CC_OBJ_OUT=/Fo
 CC_LST_OUT=/Fa
@@ -47,8 +47,8 @@ CC_PC_2_STRIPPED_STDOUT=/Pd+ /P+ /Pc- /Pe+
 CXX_FLAGS=/Q /DDEBUG /DOS2 /D__i386__ /DMODEL=FLAT /Ti+ /O- /Ss+ /C+ $(_CXX_OPTIONAL) $(CXX_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CXX_INCLUDES) $(ALL_INCLUDES) /I$(PATH_INCLUDES)
 CXX_FLAGS_EXE=$(CXX_FLAGS) /Gm+ /Ge+
 CXX_FLAGS_DLL=$(CXX_FLAGS) /Gm+ /Ge-
-CXX_FLAGS_SYS=$(CXX_FLAGS) /Tm- /Rn  /Ge+ /DRING0 /Gr+ /Gs- /Wall+ppt-ppc-inl-cnv-gnr-vft- /Gx+
-CXX_FLAGS_VDD=$(CXX_FLAGS_SYS)
+CXX_FLAGS_SYS=$(CXX_FLAGS) /Tm- /Rn /Ge+ /DRING0 /Gr+ /Gs+ /Wall+ppt-ppc-inl-cnv-gnr-vft- /Gx+
+CXX_FLAGS_VDD=$(CXX_FLAGS_SYS) /DM_I386
 CXX_FLAGS_IFS=$(CXX_FLAGS_SYS)
 CXX_OBJ_OUT=/Fo
 CXX_LST_OUT=/Fa
