@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.74 2000-02-21 17:25:29 cbratschi Exp $ */
+/* $Id: user32.cpp,v 1.75 2000-03-23 23:06:52 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -577,9 +577,7 @@ HWND WIN32API GetCapture(void)
 //******************************************************************************
 HWND WIN32API SetCapture( HWND hwnd)
 {
-#ifdef DEBUG
-    WriteLog("USER32: SetCapture %x", hwnd);
-#endif
+    dprintf(("USER32: SetCapture %x", hwnd));
     hwnd = Win32Window::Win32ToOS2Handle(hwnd);
     return Win32Window::OS2ToWin32Handle(O32_SetCapture(hwnd));
 }
@@ -587,18 +585,14 @@ HWND WIN32API SetCapture( HWND hwnd)
 //******************************************************************************
 BOOL WIN32API SetDoubleClickTime( UINT uInterval)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  SetDoubleClickTime\n");
-#endif
+    dprintf(("USER32:  SetDoubleClickTime\n"));
     return O32_SetDoubleClickTime(uInterval);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API SwapMouseButton( BOOL fSwap)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  SwapMouseButton\n");
-#endif
+    dprintf(("USER32:  SwapMouseButton\n"));
     return O32_SwapMouseButton(fSwap);
 }
 
@@ -643,9 +637,7 @@ BOOL WIN32API MessageBeep( UINT uType)
 {
     INT flStyle;
 
-#ifdef DEBUG
-    WriteLog("USER32:  MessageBeep\n");
-#endif
+    dprintf(("USER32:  MessageBeep\n"));
 
     switch (uType)
     {
@@ -674,9 +666,7 @@ BOOL WIN32API MessageBeep( UINT uType)
 //******************************************************************************
 VOID WIN32API SetLastErrorEx(DWORD dwErrCode, DWORD dwType)
 {
-#ifdef DEBUG
-  WriteLog("USER32:  SetLastErrorEx\n");
-#endif
+  dprintf(("USER32:  SetLastErrorEx\n"));
   SetLastError(dwErrCode);
 }
 
@@ -1055,9 +1045,7 @@ BOOL WIN32API SystemParametersInfoW(UINT uiAction, UINT uiParam, PVOID pvParam, 
         ConvertFontAW(&clientMetricsA.lfMessageFont, &clientMetricsW->lfMessageFont);
         break;
     }
-#ifdef DEBUG
-    WriteLog("USER32:  SystemParametersInfoW %d, returned %d\n", uiAction, rc);
-#endif
+    dprintf(("USER32:  SystemParametersInfoW %d, returned %d\n", uiAction, rc));
     return(rc);
 }
 
@@ -1070,9 +1058,7 @@ BOOL WIN32API SystemParametersInfoW(UINT uiAction, UINT uiParam, PVOID pvParam, 
 //******************************************************************************
 BOOL WIN32API AttachThreadInput(DWORD idAttach, DWORD idAttachTo, BOOL fAttach)
 {
-#ifdef DEBUG
-  WriteLog("USER32:  AttachThreadInput, not implemented\n");
-#endif
+  dprintf(("USER32:  AttachThreadInput, not implemented\n"));
   return(TRUE);
 }
 //******************************************************************************
@@ -1191,9 +1177,7 @@ BOOL WIN32API WinHelpW( HWND hwnd, LPCWSTR lpszHelp, UINT uCommand, DWORD  dwDat
 
 BOOL WIN32API ActivateKeyboardLayout(HKL hkl, UINT fuFlags)
 {
-#ifdef DEBUG
-  WriteLog("USER32:  ActivateKeyboardLayout, not implemented\n");
-#endif
+  dprintf(("USER32:  ActivateKeyboardLayout, not implemented\n"));
   return(TRUE);
 }
 //******************************************************************************
@@ -1230,18 +1214,14 @@ UINT WIN32API GetKBCodePage(VOID)
 //******************************************************************************
 int WIN32API GetKeyNameTextA( LPARAM lParam, LPSTR lpString, int  nSize)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  GetKeyNameTextA\n");
-#endif
+    dprintf(("USER32:  GetKeyNameTextA\n"));
     return O32_GetKeyNameText(lParam,lpString,nSize);
 }
 //******************************************************************************
 //******************************************************************************
 int WIN32API GetKeyNameTextW( LPARAM lParam, LPWSTR lpString, int  nSize)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  GetKeyNameTextW DOES NOT WORK\n");
-#endif
+    dprintf(("USER32:  GetKeyNameTextW DOES NOT WORK\n"));
     // NOTE: This will not work as is (needs UNICODE support)
     return 0;
 //    return O32_GetKeyNameText(arg1, arg2, arg3);
@@ -1340,18 +1320,14 @@ HKL WIN32API LoadKeyboardLayoutW(LPCWSTR pwszKLID,
 //******************************************************************************
 UINT WIN32API MapVirtualKeyA( UINT uCode, UINT  uMapType)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  MapVirtualKeyA\n");
-#endif
+    dprintf(("USER32:  MapVirtualKeyA\n"));
     return O32_MapVirtualKey(uCode,uMapType);
 }
 //******************************************************************************
 //******************************************************************************
 UINT WIN32API MapVirtualKeyW( UINT uCode, UINT  uMapType)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  MapVirtualKeyW\n");
-#endif
+    dprintf(("USER32:  MapVirtualKeyW\n"));
     // NOTE: This will not work as is (needs UNICODE support)
     return O32_MapVirtualKey(uCode,uMapType);
 }
@@ -1437,9 +1413,7 @@ DWORD WIN32API OemKeyScan(WORD wOemChar)
 //******************************************************************************
 BOOL WIN32API RegisterHotKey(HWND hwnd, int idHotKey, UINT fuModifiers, UINT uVirtKey)
 {
-#ifdef DEBUG
-  WriteLog("USER32:  RegisterHotKey, not implemented\n");
-#endif
+  dprintf(("USER32:  RegisterHotKey, not implemented\n"));
   hwnd = Win32Window::Win32ToOS2Handle(hwnd);
   return(TRUE);
 }
@@ -1594,9 +1568,7 @@ BOOL WIN32API UnloadKeyboardLayout (HKL hkl)
 //******************************************************************************
 BOOL WIN32API UnregisterHotKey(HWND hwnd, int idHotKey)
 {
-#ifdef DEBUG
-  WriteLog("USER32:  UnregisterHotKey, not implemented\n");
-#endif
+  dprintf(("USER32:  UnregisterHotKey, not implemented\n"));
   hwnd = Win32Window::Win32ToOS2Handle(hwnd);
 
   return(TRUE);
@@ -1606,18 +1578,14 @@ BOOL WIN32API UnregisterHotKey(HWND hwnd, int idHotKey)
 //******************************************************************************
 WORD WIN32API VkKeyScanA( char ch)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  VkKeyScanA\n");
-#endif
+    dprintf(("USER32:  VkKeyScanA\n"));
     return O32_VkKeyScan(ch);
 }
 //******************************************************************************
 //******************************************************************************
 WORD WIN32API VkKeyScanW( WCHAR wch)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  VkKeyScanW\n");
-#endif
+    dprintf(("USER32:  VkKeyScanW\n"));
     // NOTE: This will not work as is (needs UNICODE support)
     return O32_VkKeyScan((char)wch);
 }
@@ -1730,18 +1698,14 @@ int WIN32API FillRect(HDC hDC, const RECT * lprc, HBRUSH hbr)
 //******************************************************************************
 int WIN32API FrameRect( HDC hDC, const RECT * lprc, HBRUSH  hbr)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  FrameRect\n");
-#endif
+    dprintf(("USER32:  FrameRect"));
     return O32_FrameRect(hDC,lprc,hbr);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API InvertRect( HDC hDC, const RECT * lprc)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  InvertRect\n");
-#endif
+    dprintf(("USER32:  InvertRect\n"));
     return O32_InvertRect(hDC,lprc);
 }
 
@@ -1749,9 +1713,7 @@ BOOL WIN32API InvertRect( HDC hDC, const RECT * lprc)
 
 int WIN32API GetKeyboardType( int nTypeFlag)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  GetKeyboardType\n");
-#endif
+    dprintf(("USER32:  GetKeyboardType\n"));
     return O32_GetKeyboardType(nTypeFlag);
 }
 

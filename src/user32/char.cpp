@@ -1,4 +1,4 @@
-/* $Id: char.cpp,v 1.12 2000-02-16 14:34:05 sandervl Exp $ */
+/* $Id: char.cpp,v 1.13 2000-03-23 23:06:51 sandervl Exp $ */
 
 /*
  * Win32 character API functions for OS/2
@@ -313,27 +313,21 @@ LPWSTR WIN32API CharPrevExW(WORD CodePage,
 //******************************************************************************
 BOOL WIN32API IsCharAlphaA( CHAR arg1)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  OS2IsCharAlphaA\n");
-#endif
+    dprintf(("USER32:  OS2IsCharAlphaA\n"));
     return O32_IsCharAlpha(arg1);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API IsCharAlphaNumericA( CHAR arg1)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  OS2IsCharAlphaNumericA\n");
-#endif
+    dprintf(("USER32:  OS2IsCharAlphaNumericA\n"));
     return O32_IsCharAlphaNumeric(arg1);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API IsCharAlphaNumericW( WCHAR arg1)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  OS2IsCharAlphaNumericW\n");
-#endif
+    dprintf(("USER32:  OS2IsCharAlphaNumericW\n"));
     // NOTE: This will not work as is (needs UNICODE support)
     return O32_IsCharAlphaNumeric((CHAR)arg1);
 }
@@ -341,9 +335,7 @@ BOOL WIN32API IsCharAlphaNumericW( WCHAR arg1)
 //******************************************************************************
 BOOL WIN32API IsCharAlphaW( WCHAR arg1)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  OS2IsCharAlphaW\n");
-#endif
+    dprintf(("USER32:  OS2IsCharAlphaW\n"));
     // NOTE: This will not work as is (needs UNICODE support)
     return O32_IsCharAlpha((CHAR)arg1);
 }
@@ -351,18 +343,14 @@ BOOL WIN32API IsCharAlphaW( WCHAR arg1)
 //******************************************************************************
 BOOL WIN32API IsCharLowerA( CHAR arg1)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  OS2IsCharLowerA\n");
-#endif
+    dprintf(("USER32:  OS2IsCharLowerA\n"));
     return O32_IsCharLower(arg1);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API IsCharLowerW( WCHAR arg1)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  OS2IsCharLowerW\n");
-#endif
+    dprintf(("USER32:  OS2IsCharLowerW\n"));
     // NOTE: This will not work as is (needs UNICODE support)
     return O32_IsCharLower((CHAR)arg1);
 }
@@ -370,18 +358,14 @@ BOOL WIN32API IsCharLowerW( WCHAR arg1)
 //******************************************************************************
 BOOL WIN32API IsCharUpperA( CHAR arg1)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  OS2IsCharUpperA\n");
-#endif
+    dprintf(("USER32:  OS2IsCharUpperA\n"));
     return O32_IsCharUpper(arg1);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API IsCharUpperW( WCHAR arg1)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  OS2IsCharUpperW\n");
-#endif
+    dprintf(("USER32:  OS2IsCharUpperW\n"));
     // NOTE: This will not work as is (needs UNICODE support)
     return O32_IsCharUpper((CHAR)arg1);
 }
@@ -389,27 +373,21 @@ BOOL WIN32API IsCharUpperW( WCHAR arg1)
 //******************************************************************************
 BOOL WIN32API OemToCharA( LPCSTR arg1, LPSTR  arg2)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  OS2OemToCharA\n");
-#endif
+    dprintf(("USER32:  OS2OemToCharA\n"));
     return O32_OemToChar(arg1, arg2);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API OemToCharBuffA( LPCSTR arg1, LPSTR arg2, DWORD  arg3)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  OS2OemToCharBuffA\n");
-#endif
+    dprintf(("USER32:  OS2OemToCharBuffA\n"));
     return O32_OemToCharBuff(arg1, arg2, arg3);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API OemToCharBuffW(LPCSTR arg1, LPWSTR arg2, DWORD  arg3)
 {
-#ifdef DEBUG
-    WriteLog("USER32: OemToCharBuffW DOESN'T WORK \n");
-#endif
+    dprintf(("USER32: OemToCharBuffW DOESN'T WORK \n"));
     // NOTE: This will not work as is (needs UNICODE support)
     return 0;
 //    return O32_OemToCharBuff(arg1, arg2, arg3);
@@ -418,9 +396,7 @@ BOOL WIN32API OemToCharBuffW(LPCSTR arg1, LPWSTR arg2, DWORD  arg3)
 //******************************************************************************
 BOOL WIN32API OemToCharW( LPCSTR arg1, LPWSTR  arg2)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  OS2OemToCharW DOESN'T WORK\n");
-#endif
+    dprintf(("USER32:  OS2OemToCharW DOESN'T WORK\n"));
     // NOTE: This will not work as is (needs UNICODE support)
     return 0;
 //    return O32_OemToChar(arg1, arg2);
