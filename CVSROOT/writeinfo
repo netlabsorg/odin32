@@ -42,6 +42,7 @@
 /src/winspool                              sandervl phaller achimha bird
 /src/wnetap32                              sandervl phaller achimha bird
 /src/wsock32                               sandervl phaller achimha vince
+/src/win32k                                bird sandervl
 /src/win32k/dev16                          bird sandervl
 /src/win32k/dev32                          bird sandervl
 /src/win32k/include                        bird sandervl
