@@ -1,4 +1,4 @@
-/* $Id: OS2KPG.h,v 1.2 2001-09-26 03:52:35 bird Exp $
+/* $Id: OS2KPG.h,v 1.3 2001-09-27 03:04:12 bird Exp $
  *
  * OS/2 kernel page manager stuff.
  *
@@ -9,6 +9,33 @@
  */
 #ifndef _OS2KPG_H_
 #define _OS2KPG_H_
+
+/*******************************************************************************
+*   Global Variables                                                           *
+*******************************************************************************/
+#ifndef KKRNLLIB
+    #if defined(__IBMC__) || defined(__IBMCPP__)
+        #pragma map(PGSwapEnabled       , "_PGSwapEnabled")
+        #pragma map(pgPhysPages         , "_pgPhysPages")
+        #pragma map(pgPhysMax           , "_pgPhysMax")
+        #pragma map(pgResidentPages     , "_pgResidentPages")
+        #pragma map(pgSwappablePages    , "_pgSwappablePages")
+        #pragma map(pgDiscardableInmem  , "_pgDiscardableInmem")
+        #pragma map(pgDiscardablePages  , "_pgDiscardablePages")
+        #pragma map(pgcPageFaults       , "_pgcPageFaults")
+        #pragma map(pgcPageFaultsActive , "_pgcPageFaultsActive")
+    #else
+        #pragma PGSwapEnabled            _PGSwapEnabled
+        #pragma pgPhysPages              _pgPhysPages
+        #pragma pgPhysMax                _pgPhysMax
+        #pragma pgResidentPages          _pgResidentPages
+        #pragma pgSwappablePages         _pgSwappablePages
+        #pragma pgDiscardableInmem       _pgDiscardableInmem
+        #pragma pgDiscardablePages       _pgDiscardablePages
+        #pragma pgcPageFaults            _pgcPageFaults
+        #pragma pgcPageFaultsActive      _pgcPageFaultsActive
+    #endif
+#endif
 
 /**
  * Paging enabled flag.
