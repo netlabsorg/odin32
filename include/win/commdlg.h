@@ -1,4 +1,3 @@
-/* $Id: commdlg.h,v 1.10 2001-04-24 20:36:39 sandervl Exp $ */
 /* 
  * COMMDLG - Common Wine Dialog ... :-)
  */
@@ -539,6 +538,7 @@ DECL_WINELIB_TYPE_AW(LPPRINTDLG)
 #define PD_USEDEVMODECOPIESANDCOLLATE 0x00040000
 #define PD_DISABLEPRINTTOFILE        0x00080000
 #define PD_HIDEPRINTTOFILE           0x00100000
+#define PD_NONETWORKBUTTON           0x00200000
 
 typedef struct {
 	UINT16 	wDriverOffset;
