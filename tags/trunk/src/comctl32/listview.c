@@ -2153,7 +2153,11 @@ static BOOL LISTVIEW_RemoveSubItem(HDPA hdpaSubItems, INT nSubItem)
  *   SUCCCESS : TRUE (EQUAL)
  *   FAILURE : FALSE (NOT EQUAL)
  */
+#ifdef __WIN32OS2__
+static UINT LISTVIEW_GetItemChanges(LISTVIEW_ITEM *lpItem, LPLVITEMA lpLVItem, DWORD lStyle)
+#else
 static UINT LISTVIEW_GetItemChanges(LISTVIEW_ITEM *lpItem, LPLVITEMA lpLVItem)
+#endif
 {
   UINT uChanged = 0;
 
@@ -2212,11 +2216,16 @@ static UINT LISTVIEW_GetItemChanges(LISTVIEW_ITEM *lpItem, LPLVITEMA lpLVItem)
       if (lpLVItem->pszText)
       {
 #ifdef __WIN32OS2__
-        //SvL: NT's COMCTL32 seems to always update the item, regardless of
-        //     whether the string is different or not.
-        //     Some apps depends on this (CVP)
-        uChanged |= LVIF_TEXT;
-#else
+        if(lStyle & LVS_OWNERDRAWFIXED) {
+            //SvL: NT's COMCTL32 seems to always update the item, regardless of
+            //     whether the string is different or not.
+            //     Some apps depends on this (CVP)
+            //TODO: Might need to send some kind of notification to determine
+            //      if a redraw is really necessary
+            uChanged |= LVIF_TEXT;
+        }
+        else
+#endif
         if (lpItem->pszText)
         {
           if (strcmp(lpLVItem->pszText, lpItem->pszText) != 0)
@@ -2228,7 +2237,6 @@ static UINT LISTVIEW_GetItemChanges(LISTVIEW_ITEM *lpItem, LPLVITEMA lpLVItem)
         {
           uChanged |= LVIF_TEXT;
         }
-#endif
       }
       else
       {
@@ -2626,7 +2634,11 @@ static BOOL LISTVIEW_SetItem(HWND hwnd, LPLVITEMA lpLVItem)
           nmlv.hdr.idFrom = lCtrlId;
           nmlv.hdr.code = LVN_ITEMCHANGING;
           nmlv.lParam = lpItem->lParam;
+#ifdef __WIN32OS2__
+          uChanged = LISTVIEW_GetItemChanges(lpItem, lpLVItem, lStyle);
+#else
           uChanged = LISTVIEW_GetItemChanges(lpItem, lpLVItem);
+#endif
           if (uChanged != 0)
           {
             if (uChanged & LVIF_STATE)
