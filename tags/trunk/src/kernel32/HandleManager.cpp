@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.51 2000-10-03 17:28:26 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.52 2000-10-05 13:48:08 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -924,7 +924,7 @@ HFILE HMCreateFile(LPCSTR lpFileName,
     pDevData       = _HMDeviceGetData((LPSTR)lpFileName);
 
     if(pDeviceHandler == HMGlobals.pHMOpen32) {
-  pDeviceHandler = HMGlobals.pHMFile;
+        pDeviceHandler = HMGlobals.pHMFile;
     }
   }
 
