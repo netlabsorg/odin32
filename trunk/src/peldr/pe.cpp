@@ -1,4 +1,4 @@
-/* $Id: pe.cpp,v 1.5 1999-08-16 13:54:07 sandervl Exp $ */
+/* $Id: pe.cpp,v 1.6 1999-08-18 12:24:32 sandervl Exp $ */
 
 /*
  * PELDR main exe loader code
@@ -71,8 +71,6 @@ int main(int argc, char *argv[])
  APIRET  rc;
  HMODULE hmodPMWin, hmodKernel32;
 
-  printf("memory allocated at %X\n", ReserveMem());
-
   rc = DosLoadModule(exeName, sizeof(exeName), "PMWIN.DLL", &hmodPMWin);
   rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32INITIALIZE, NULL, (PFN *)&MyWinInitialize);
   rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32TERMINATE, NULL, (PFN *)&MyWinTerminate);
@@ -129,7 +127,7 @@ int main(int argc, char *argv[])
   WinExe->setFullPath(fullpath);
   WinExe->setCommandLine(szCmdLine);
 
-  if(WinExe->init() == FALSE) {
+  if(WinExe->init(ReserveMem()) == FALSE) {
         delete WinExe;
         return(1);
   }

@@ -1,4 +1,4 @@
-/* $Id: windll.h,v 1.3 1999-07-07 08:11:09 sandervl Exp $ */
+/* $Id: windll.h,v 1.4 1999-08-18 12:24:52 sandervl Exp $ */
 
 /*
  *
@@ -44,7 +44,7 @@ public:
 	void      OS2DllInit(HINSTANCE hinstance, int NameTableId, int Win32TableId,
 	  	             WIN32DLLENTRY DllEntryPoint);
 
-        BOOL      init();
+        BOOL      init(ULONG reservedMem);
 
 	ULONG     AddRef() 	     { return ++referenced; };
 	//ASSUMPTION: called by FreeLibrary only

@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.1 1999-08-16 13:54:06 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.2 1999-08-18 12:24:32 sandervl Exp $ */
 
 /*
  * PELDR DLL entry point
@@ -31,6 +31,7 @@
 #include <string.h>
 #include <odin.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
+#include <winimage.h>
 
 /*-------------------------------------------------------------------*/
 /* A clean up routine registered with DosExitList must be used if    */
@@ -74,7 +75,7 @@ unsigned long _System _DLL_InitTerm(unsigned long hModule, unsigned long
 	 //SvL: Reserve memory for win32 exes without fixups
          //     This is done before any Odin or PMWIN dll is loaded, so we'll get
          //     a very low virtual address. (which is exactly what we want)
-	 rc = DosAllocMem((PPVOID)&reservedMemory, 16*1024*1024, PAG_WRITE | PAG_READ);
+	 rc = DosAllocMem((PPVOID)&reservedMemory, PELDR_RESERVEDMEMSIZE, PAG_WRITE | PAG_READ);
 
          /*******************************************************************/
          /* A DosExitList routine must be used to clean up if runtime calls */
