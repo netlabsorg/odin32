@@ -1,4 +1,4 @@
-/* $Id: resource.cpp,v 1.18 2002-02-25 12:02:17 sandervl Exp $ */
+/* $Id: resource.cpp,v 1.19 2002-03-22 12:51:35 sandervl Exp $ */
 
 /*
  * Misc resource procedures
@@ -15,24 +15,11 @@
 #include <winimagebase.h>
 #include <winexebase.h>
 #include <windllbase.h>
-#include <custombuild.h>
 
 #define DBG_LOCALLOG	DBG_resource
 #include "dbglocal.h"
 
 
-static PFNFINDRESOURCEEXA pfnCustomFindResourceA = NULL;
-static PFNFINDRESOURCEEXW pfnCustomFindResourceW = NULL;
-
-//******************************************************************************
-//Called by custom Odin builds to hook FindReource(Ex)A/W calls
-//******************************************************************************
-BOOL WIN32API SetCustomFindResource(PFNFINDRESOURCEEXA pfnFindResourceA, PFNFINDRESOURCEEXW pfnFindResourceW)
-{
-    pfnCustomFindResourceA = pfnFindResourceA;
-    pfnCustomFindResourceW = pfnFindResourceW;
-    return TRUE;
-}
 //******************************************************************************
 //lpszName = integer id (high word 0), else string (name or "#237")
 //Can lpszType contain a pointer to a default resource type name?
@@ -42,9 +29,6 @@ HRSRC WIN32API FindResourceA(HINSTANCE hModule, LPCSTR lpszName, LPCSTR lpszType
  Win32ImageBase *module;
  WORD wLanguage = MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL);
 
-    if(pfnCustomFindResourceA) {
-        pfnCustomFindResourceA(&hModule, (LPSTR *)&lpszName, (LPSTR *)&lpszType, &wLanguage);
-    }
     module = Win32ImageBase::findModule(hModule);
     if(module == NULL) {
 	  dprintf(("FindResourceA Module %X not found (%x %d)", hModule, lpszName, lpszType));
@@ -60,9 +44,6 @@ HRSRC WIN32API FindResourceW(HINSTANCE hModule, LPCWSTR lpszName,
  Win32ImageBase *module;
  WORD wLanguage = MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL);
 
-    if(pfnCustomFindResourceW) {
-        pfnCustomFindResourceW(&hModule, (LPWSTR *)&lpszName, (LPWSTR *)&lpszType, &wLanguage);
-    }
     module = Win32ImageBase::findModule(hModule);
     if(module == NULL) {
 	  dprintf(("FindResourceW Module %X not found (%x %d)", hModule, lpszName, lpszType));
@@ -94,10 +75,6 @@ HRSRC WIN32API FindResourceExA( HMODULE hModule, LPCSTR lpType,
                                 LPCSTR lpName, WORD wLanguage)
 {
  Win32ImageBase *module;
-
-    if(pfnCustomFindResourceA) {
-        pfnCustomFindResourceA(&hModule, (LPSTR *)&lpName, (LPSTR *)&lpType, &wLanguage);
-    }
 
     module = Win32ImageBase::findModule(hModule);
     if(module == NULL) {
@@ -133,10 +110,6 @@ HRSRC WIN32API FindResourceExW(HMODULE hModule, LPCWSTR lpType,
 {
  Win32ImageBase *module;
 
-    if(pfnCustomFindResourceW) {
-        pfnCustomFindResourceW(&hModule, (LPWSTR *)&lpName, (LPWSTR *)&lpType, &wLanguage);
-    }
-
     module = Win32ImageBase::findModule(hModule);
     if(module == NULL) {
 	  dprintf(("FindResourceExW Module %X not found (%x %d)", hModule, lpName, lpType));
@@ -160,8 +133,8 @@ HGLOBAL WIN32API LoadResource(HINSTANCE hModule, HRSRC hRes)
 
   /* @@@PH */
   if(HIWORD(hRes) == NULL) {
-   	dprintf(("ERROR: LoadResource %x: invalid hRes %x", hModule, hRes));
-   	return 0;
+      dprintf(("ERROR: LoadResource %x: invalid hRes %x", hModule, hRes));
+      return 0;
   }
 
   dprintf(("LoadResource %x %X\n", hModule, hRes));
