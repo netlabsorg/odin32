@@ -1,8 +1,8 @@
-/* $Id: db.cpp,v 1.18 2000-08-02 02:18:04 bird Exp $ *
+/* $Id: db.cpp,v 1.19 2000-08-02 14:43:26 bird Exp $ *
  *
  * DB - contains all database routines.
  *
- * Copyright (c) 1999 knut st. osmundsen
+ * Copyright (c) 1999-2000 knut st. osmundsen
  *
  */
 
@@ -1285,7 +1285,7 @@ unsigned long _System dbCreateHistory(char *pszError)
             CheckLogContinue((pszError, "error inserting: %s - (sql=%s) ", dbGetLastErrorDesc(), pszQuery));
 
             sprintf(pszQuery, "INSERT INTO historyapigroup(apigroup, state, date, count) "
-                    "SELECT dll, state, '%s', count(*) FROM function WHERE apigroup IS NOT NULL "
+                    "SELECT apigroup, state, '%s', count(*) FROM function WHERE apigroup IS NOT NULL "
                     "GROUP BY apigroup, state",
                     &szCurDt[0]);
             rc = mysql_query(pmysql, pszQuery);
