@@ -1,4 +1,4 @@
-/* $Id: winkeyboard.cpp,v 1.15 2001-09-24 16:24:59 phaller Exp $ */
+/* $Id: winkeyboard.cpp,v 1.16 2001-09-25 00:05:27 phaller Exp $ */
 /*
  * Win32 <-> PM key translation
  *
@@ -569,6 +569,7 @@ BYTE abWinVKeyToPMScan[256] =
 /* 0xFF                   */ , 0x00
                              };
 
+
 //******************************************************************************
 //******************************************************************************
 
@@ -1067,16 +1068,31 @@ ODINFUNCTION3(UINT, MapVirtualKeyExW,
  * Variables :
  * Result    :
  * Remark    :
- * Status    : UNTESTED STUB
+ * Status    : Borrowed from NT
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
 ODINFUNCTION1(DWORD, OemKeyScan,
               WORD,  wOemChar)
 {
-  dprintf(("not implemented.\n"));
-
-  return (wOemChar);
+  int nVirtKey;
+  
+  OemToCharBuffA((LPCSTR)&wOemChar,
+                 (LPSTR) &nVirtKey,
+                 1);
+  if (nVirtKey != 0)
+  {
+    SHORT sScan = VkKeyScanA(nVirtKey);
+    nVirtKey = MapVirtualKeyA( (sScan & 0xff), 0);
+    if (nVirtKey != 0)
+    {
+      return ( (nVirtKey & 0x00FF) ||
+               ( (nVirtKey & 0xFF00) << 8) );
+    }
+  }
+  
+  // if not found ...
+  return 0xffffffff;
 }
 //******************************************************************************
 //******************************************************************************
