@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.57 2002-09-30 12:53:27 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.58 2002-10-03 10:36:36 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -1415,9 +1415,75 @@ writecheckfail:
         }
         return (ret == ERROR_SUCCESS);
     }
-
-    case IOCTL_CDROM_GET_LAST_SESSION:
+   
     case IOCTL_CDROM_RAW_READ:
+    {
+#pragma pack(1)
+       struct 
+       {
+        ULONG       ID_code;
+        UCHAR       address_mode;
+        USHORT      transfer_count;
+        ULONG       start_sector;
+        UCHAR       reserved;
+        UCHAR       interleave_size;
+        UCHAR       interleave_skip_factor;
+       } ParameterBlock;
+
+       struct OutputBlock
+       {
+         BYTE Sync[12];
+         BYTE Header[4];
+         BYTE DataArea[2048];
+         BYTE EDCECC[288];
+       } *PWinOutput;
+
+#pragma pack()
+
+        PRAW_READ_INFO rInfo = (PRAW_READ_INFO)lpInBuffer;
+        PWinOutput = (struct OutputBlock*)lpOutBuffer;
+
+        if( (nOutBufferSize < (sizeof(OutputBlock)*rInfo->SectorCount))
+            || !lpOutBuffer) {
+            SetLastError(ERROR_INSUFFICIENT_BUFFER);
+            return FALSE;
+        }
+
+        // setup the parameter block
+        memcpy(&ParameterBlock.ID_code, drvInfo->signature, 4);
+        ParameterBlock.address_mode = 0;
+        ParameterBlock.transfer_count = rInfo->SectorCount;
+        ParameterBlock.start_sector = rInfo->DiskOffset.LowPart / 2048;
+        ParameterBlock.reserved = 0;
+        ParameterBlock.interleave_size = 0;
+        ParameterBlock.interleave_skip_factor = 0;
+
+        DWORD dwParameterSize = sizeof( ParameterBlock );
+        DWORD dwDataSize      = ParameterBlock.transfer_count * sizeof(struct OutputBlock);
+        DWORD ret;
+
+        ret = OSLibDosDevIOCtl(pHMHandleData->hHMHandle,
+                             0x80,  // IOCTL_CDROMAUDIO
+                             0x72,  // CDROMDISK_READLONG
+                             &ParameterBlock,
+                             sizeof( ParameterBlock ),
+                             &dwParameterSize,
+                             PWinOutput,
+                             ParameterBlock.transfer_count * sizeof(struct OutputBlock),
+                             &dwDataSize);
+
+        if(lpBytesReturned) {
+            *lpBytesReturned = dwDataSize; 
+        }
+
+       if(ret != ERROR_SUCCESS) {
+          dprintf(("CDROMDISK_READLONG, CDROMDISK_READLONG failed with %x!!", ret));
+          SetLastError(ERROR_IO_DEVICE);
+          return FALSE;
+      }
+      return TRUE;
+    }
+    case IOCTL_CDROM_GET_LAST_SESSION:
     case IOCTL_CDROM_DISK_TYPE:
     case IOCTL_CDROM_GET_DRIVE_GEOMETRY:
     case IOCTL_CDROM_MEDIA_REMOVAL:
