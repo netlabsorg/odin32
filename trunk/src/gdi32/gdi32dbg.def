@@ -1,4 +1,4 @@
-; $Id: gdi32dbg.def,v 1.3 2003-11-15 12:18:07 sandervl Exp $
+; $Id: gdi32dbg.def,v 1.4 2004-01-11 11:42:15 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY GDI32 INITINSTANCE
@@ -184,7 +184,7 @@ EXPORTS
     GetICMProfileW             = _DbgGetICMProfileW@12          @265
     GetKerningPairs            = _DbgGetKerningPairsA@12        @266
     GetKerningPairsA           = _DbgGetKerningPairsA@12        @267
-    GetKerningPairsW           = _DbgGetKerningPairsW@12        @268
+    GetKerningPairsW           = _DbgGetKerningPairsA@12        @268
     GetLogColorSpaceA          = _DbgGetLogColorSpaceA@12       @269
     GetLogColorSpaceW          = _DbgGetLogColorSpaceW@12       @270
     GetMapMode                 = _DbgGetMapMode@4               @271
@@ -351,8 +351,8 @@ EXPORTS
 ;    gdiPlaySpoolStream         = _DbggdiPlaySpoolStream@??      @432
 ;    pfnRealizePalette          = _DbgpfnRealizePalette@??       @433
 ;    pfnSelectPalette           = _DbgpfnSelectPalette@??        @434
-;    GetGlyphIndicesA           = _GetGlyphIndicesA@20            @435
-;    GetGlyphIndicesW           = _GetGlyphIndicesW@20            @436
+    GetGlyphIndicesA           = _GetGlyphIndicesA@20            @435
+    GetGlyphIndicesW           = _GetGlyphIndicesW@20            @436
 
 ;
 ; ENDOFEXPORTS

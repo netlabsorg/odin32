@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.90 2003-12-01 13:27:38 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.91 2004-01-11 11:42:15 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -26,12 +26,20 @@
 #include "font.h"
 #include <stats.h>
 #include <objhandle.h>
+#include <winspool.h>
 
 #define DBG_LOCALLOG    DBG_gdi32
 #include "dbglocal.h"
 
 ODINDEBUGCHANNEL(GDI32-GDI32)
 
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GdiFlush()
+{
+    //NOP: DIB synchronization is done using exceptions
+    return TRUE;
+}
 //******************************************************************************
 //******************************************************************************
 int WIN32API FillRect(HDC hDC, const RECT * lprc, HBRUSH hbr)
@@ -77,6 +85,24 @@ BOOL WIN32API InvertRect( HDC hDC, const RECT * lprc)
     DIBSECTION_CHECK_IF_DIRTY(hDC);
     ret = O32_InvertRect(hDC,lprc);
     DIBSECTION_MARK_INVALID(hDC);
+    return ret;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API StrokeAndFillPath(HDC hdc)
+{
+    DIBSECTION_CHECK_IF_DIRTY(hdc);
+    BOOL ret = O32_StrokeAndFillPath(hdc);
+    DIBSECTION_MARK_INVALID(hdc);
+    return ret;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API StrokePath(HDC hdc)
+{
+    DIBSECTION_CHECK_IF_DIRTY(hdc);
+    BOOL ret = O32_StrokePath(hdc);
+    DIBSECTION_MARK_INVALID(hdc);
     return ret;
 }
 //******************************************************************************
@@ -253,65 +279,6 @@ HBRUSH WIN32API CreateDIBPatternBrush( HGLOBAL hglbDIBPacked,
 }
 //******************************************************************************
 //******************************************************************************
-HDC WIN32API CreateCompatibleDC( HDC hdc)
-{
- HDC newHdc;
-
-    newHdc = O32_CreateCompatibleDC(hdc);
-    ULONG oldcp = OSLibGpiQueryCp(hdc);
-    if (!oldcp) /* If new DC is to be created */
-        oldcp = GetDisplayCodepage();
-
-    if(newHdc) STATS_CreateCompatibleDC(hdc, newHdc);
-    OSLibGpiSetCp(newHdc, oldcp);
-    //PF Open32 seems not to move coordinates to 0,0 in newHdc
-    MoveToEx(newHdc, 0, 0 , NULL);
-
-    return newHdc;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API DeleteDC(HDC hdc)
-{
-  pDCData  pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
-  if(!pHps)
-  {
-      dprintf(("WARNING: DeleteDC %x; invalid hdc!", hdc));
-      SetLastError(ERROR_INVALID_HANDLE);
-      return 0;
-  }
-  SetLastError(ERROR_SUCCESS);
-
-  DIBSection *dsect = DIBSection::findHDC(hdc);
-  if(dsect)
-  {
-      //remove previously selected dibsection
-      dprintf(("DeleteDC %x, unselect DIB section %x", hdc, dsect->GetBitmapHandle()));
-      dsect->UnSelectDIBObject();
-  }
-
-  //Must call ReleaseDC for window dcs
-  if(pHps->hdcType == TYPE_1) {
-      return ReleaseDC(OS2ToWin32Handle(pHps->hwnd), hdc);
-  }
-
-  STATS_DeleteDC(hdc);
-  return O32_DeleteDC(hdc);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API StrokeAndFillPath(HDC hdc)
-{
-    return O32_StrokeAndFillPath(hdc);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API StrokePath(HDC hdc)
-{
-    return O32_StrokePath(hdc);
-}
-//******************************************************************************
-//******************************************************************************
 int WIN32API SetBkMode( HDC hdc, int mode)
 {
     return O32_SetBkMode(hdc, mode);
@@ -392,208 +359,6 @@ BOOL WIN32API Chord( HDC arg1, int arg2, int arg3, int arg4, int arg5, int  arg6
 BOOL WIN32API CloseFigure(HDC hdc)
 {
     return O32_CloseFigure(hdc);
-}
-//******************************************************************************
-//******************************************************************************
-HDC WIN32API CreateDCA(LPCSTR lpszDriver, LPCSTR lpszDevice, LPCSTR lpszOutput, const DEVMODEA *lpInitData)
-{
-    HDC hdc;
-
-    // 2001-05-28 PH
-    // Ziff Davis Benchmarks come in here with "display".
-    // Obviously, Windows does accept case-insensitive driver names,
-    // whereas Open32 doesn't.
-    if (*lpszDriver == 'd') // quick check
-    {
-        // then do a double-check and use the uppercase constant
-        // instead
-        if (stricmp(lpszDriver, "DISPLAY") == 0)
-            lpszDriver = "DISPLAY";
-    }
-
-    hdc = O32_CreateDC(lpszDriver, lpszDevice, lpszOutput, lpInitData);
-    if(hdc) {
-        OSLibGpiSetCp(hdc, GetDisplayCodepage());
-        STATS_CreateDCA(hdc, lpszDriver, lpszDevice, lpszOutput, lpInitData);
-    }
-
-    dprintf(("GDI32: CreateDCA %s %s %s %x returned %x", lpszDriver, lpszDevice, lpszOutput, lpInitData, hdc));
-    return hdc;
-}
-//******************************************************************************
-//******************************************************************************
-HDC WIN32API CreateDCW( LPCWSTR arg1, LPCWSTR arg2, LPCWSTR arg3, const DEVMODEW * arg4)
-{
-    char *astring4, *astring5;
-
-    char *astring1 = UnicodeToAsciiString((LPWSTR)arg1);
-    char *astring2 = UnicodeToAsciiString((LPWSTR)arg2);
-    char *astring3 = UnicodeToAsciiString((LPWSTR)arg3);
-
-    if(arg4)
-    {
-      astring4 = UnicodeToAsciiString((LPWSTR)(arg4->dmDeviceName));
-      astring5 = UnicodeToAsciiString((LPWSTR)(arg4->dmFormName));
-    }
-
-    HDC   rc;
-    DEVMODEA devmode;
-
-    if(arg4)
-    {
-      strcpy((char*)devmode.dmDeviceName, astring4);
-      strcpy((char*)devmode.dmFormName, astring5);
-
-      devmode.dmSpecVersion      = arg4->dmSpecVersion;
-      devmode.dmDriverVersion    = arg4->dmDriverVersion;
-      devmode.dmSize             = arg4->dmSize;
-      devmode.dmDriverExtra      = arg4->dmDriverExtra;
-      devmode.dmFields           = arg4->dmFields;
-#if (__IBMCPP__ == 360)
-      devmode.dmOrientation   = arg4->dmOrientation;
-      devmode.dmPaperSize     = arg4->dmPaperSize;
-      devmode.dmPaperLength   = arg4->dmPaperLength;
-      devmode.dmPaperWidth    = arg4->dmPaperWidth; 
-#else
-      devmode.s1.dmOrientation   = arg4->s1.dmOrientation;
-      devmode.s1.dmPaperSize     = arg4->s1.dmPaperSize;
-      devmode.s1.dmPaperLength   = arg4->s1.dmPaperLength;
-      devmode.s1.dmPaperWidth    = arg4->s1.dmPaperWidth; 
-#endif
-      devmode.dmScale            = arg4->dmScale;
-      devmode.dmCopies           = arg4->dmCopies;
-      devmode.dmDefaultSource    = arg4->dmDefaultSource;
-      devmode.dmPrintQuality     = arg4->dmPrintQuality;
-      devmode.dmColor            = arg4->dmColor;
-      devmode.dmDuplex           = arg4->dmDuplex;
-      devmode.dmYResolution      = arg4->dmYResolution;
-      devmode.dmTTOption         = arg4->dmTTOption;
-      devmode.dmCollate          = arg4->dmCollate;
-      devmode.dmLogPixels        = arg4->dmLogPixels;
-      devmode.dmBitsPerPel       = arg4->dmBitsPerPel;
-      devmode.dmPelsWidth        = arg4->dmPelsWidth;
-      devmode.dmPelsHeight       = arg4->dmPelsHeight;
-      devmode.dmDisplayFlags     = arg4->dmDisplayFlags;
-      devmode.dmDisplayFrequency = arg4->dmDisplayFrequency;
-      devmode.dmICMMethod        = arg4->dmICMMethod;
-      devmode.dmICMIntent        = arg4->dmICMIntent;
-      devmode.dmMediaType        = arg4->dmMediaType;
-      devmode.dmDitherType       = arg4->dmDitherType;
-      devmode.dmReserved1        = arg4->dmReserved1;
-      devmode.dmReserved2        = arg4->dmReserved2;
-      rc = CreateDCA(astring1,astring2,astring3,&devmode);
-    }
-    else
-      rc = CreateDCA(astring1,astring2,astring3, NULL);
-
-    FreeAsciiString(astring1);
-    FreeAsciiString(astring2);
-    FreeAsciiString(astring3);
-
-    if(arg4)
-    {
-      FreeAsciiString(astring4);
-      FreeAsciiString(astring5);
-    }
-
-    return rc;
-}
-//******************************************************************************
-//******************************************************************************
-HDC WIN32API CreateICA(LPCSTR lpszDriver, LPCSTR lpszDevice, LPCSTR lpszOutput,
-                       const DEVMODEA *lpdvmInit)
-{
- static char *szDisplay = "DISPLAY";
- HDC          hdc;
-
-    //SvL: Open32 tests for "DISPLAY"
-    if(lpszDriver && !strcmp(lpszDriver, "display")) {
-        lpszDriver = szDisplay;
-    }
-    //SvL: Open32 tests lpszDriver for NULL even though it's ignored
-    if(lpszDriver == NULL) {
-        lpszDriver = lpszDevice;
-    }
-    hdc = O32_CreateIC(lpszDriver, lpszDevice, lpszOutput, lpdvmInit);
-    if(hdc) STATS_CreateICA(hdc, lpszDriver, lpszDevice, lpszOutput, lpdvmInit);
-    return hdc;
-}
-//******************************************************************************
-//******************************************************************************
-HDC WIN32API CreateICW( LPCWSTR arg1, LPCWSTR arg2, LPCWSTR arg3, const DEVMODEW * arg4)
-{
-    char *astring4, *astring5;
-
-    char *astring1 = UnicodeToAsciiString((LPWSTR)arg1);
-    char *astring2 = UnicodeToAsciiString((LPWSTR)arg2);
-    char *astring3 = UnicodeToAsciiString((LPWSTR)arg3);
-    if(arg4)
-    {
-      astring4 = UnicodeToAsciiString((LPWSTR)(arg4->dmDeviceName));
-      astring5 = UnicodeToAsciiString((LPWSTR)(arg4->dmFormName));
-    }
-
-    HDC   rc;
-    DEVMODEA devmode;
-
-    if(arg4)
-    {
-      strcpy((char*)devmode.dmDeviceName, astring4);
-      strcpy((char*)devmode.dmFormName, astring5);
-
-      devmode.dmSpecVersion      = arg4->dmSpecVersion;
-      devmode.dmDriverVersion    = arg4->dmDriverVersion;
-      devmode.dmSize             = arg4->dmSize;
-      devmode.dmDriverExtra      = arg4->dmDriverExtra;
-      devmode.dmFields           = arg4->dmFields;
-#if (__IBMCPP__ == 360)
-      devmode.dmOrientation      = arg4->dmOrientation;
-      devmode.dmPaperSize        = arg4->dmPaperSize;
-      devmode.dmPaperLength      = arg4->dmPaperLength;
-      devmode.dmPaperWidth       = arg4->dmPaperWidth; 
-#else
-      devmode.s1.dmOrientation   = arg4->s1.dmOrientation;
-      devmode.s1.dmPaperSize     = arg4->s1.dmPaperSize;
-      devmode.s1.dmPaperLength   = arg4->s1.dmPaperLength;
-      devmode.s1.dmPaperWidth    = arg4->s1.dmPaperWidth;
-#endif
-      devmode.dmScale            = arg4->dmScale;
-      devmode.dmCopies           = arg4->dmCopies;
-      devmode.dmDefaultSource    = arg4->dmDefaultSource;
-      devmode.dmPrintQuality     = arg4->dmPrintQuality;
-      devmode.dmColor            = arg4->dmColor;
-      devmode.dmDuplex           = arg4->dmDuplex;
-      devmode.dmYResolution      = arg4->dmYResolution;
-      devmode.dmTTOption         = arg4->dmTTOption;
-      devmode.dmCollate          = arg4->dmCollate;
-      devmode.dmLogPixels        = arg4->dmLogPixels;
-      devmode.dmBitsPerPel       = arg4->dmBitsPerPel;
-      devmode.dmPelsWidth        = arg4->dmPelsWidth;
-      devmode.dmPelsHeight       = arg4->dmPelsHeight;
-      devmode.dmDisplayFlags     = arg4->dmDisplayFlags;
-      devmode.dmDisplayFrequency = arg4->dmDisplayFrequency;
-      devmode.dmICMMethod        = arg4->dmICMMethod;
-      devmode.dmICMIntent        = arg4->dmICMIntent;
-      devmode.dmMediaType        = arg4->dmMediaType;
-      devmode.dmDitherType       = arg4->dmDitherType;
-      devmode.dmReserved1        = arg4->dmReserved1;
-      devmode.dmReserved2        = arg4->dmReserved2;
-
-      rc = CreateICA(astring1,astring2,astring3,&devmode);
-    }
-    else
-      rc = CreateICA(astring1,astring2,astring3, NULL);
-
-    FreeAsciiString(astring1);
-    FreeAsciiString(astring2);
-    FreeAsciiString(astring3);
-    if(arg4)
-    {
-      FreeAsciiString(astring4);
-      FreeAsciiString(astring5);
-    }
-
-    return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -707,28 +472,6 @@ int WIN32API SetROP2( HDC hdc, int rop2)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API Escape( HDC hdc, int nEscape, int cbInput, LPCSTR lpvInData, PVOID lpvOutData)
-{
- int rc;
-
-#ifdef DEBUG
-  if(cbInput && lpvInData) {
-        ULONG *tmp = (ULONG *)lpvInData;
-        for(int i=0;i<cbInput/4;i++) {
-                dprintf(("GDI32: Escape par %d: %x", i, *tmp++));
-        }
-  }
-#endif
-    rc = O32_Escape(hdc, nEscape, cbInput, lpvInData, lpvOutData);
-    if(rc == 0) {
-         dprintf(("GDI32: Escape %x %d %d %x %x returned %d (WARNING: might not be implemented!!) ", hdc, nEscape, cbInput, lpvInData, lpvOutData, rc));
-    }
-    else dprintf(("GDI32: Escape %x %d %d %x %x returned %d ", hdc, nEscape, cbInput, lpvInData, lpvOutData, rc));
-
-    return rc;
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API ExtFloodFill( HDC arg1, int arg2, int arg3, COLORREF arg4, UINT  arg5)
 {
     return O32_ExtFloodFill(arg1, arg2, arg3, arg4, arg5);
@@ -789,49 +532,6 @@ BOOL WIN32API GetBrushOrgEx( HDC arg1, PPOINT  arg2)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GetCharABCWidthsA( HDC arg1, UINT arg2, UINT arg3, LPABC arg4)
-{
-    return O32_GetCharABCWidths(arg1, arg2, arg3, arg4);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetCharABCWidthsW( HDC arg1, UINT arg2, UINT arg3, LPABC arg4)
-{
-    dprintf(("GDI32: GetCharABCWidthsW not properly implemented."));
-    // NOTE: This will not work as is (needs UNICODE support)
-    return O32_GetCharABCWidths(arg1, arg2, arg3, arg4);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetCharWidth32A( HDC hdc, UINT iFirstChar, UINT iLastChar, PINT pWidthArray)
-{
- BOOL ret;
-
-    dprintf(("GDI32: GetCharWidth32A %x %x %x %x", hdc, iFirstChar, iLastChar, pWidthArray));
-    ret = O32_GetCharWidth(hdc, iFirstChar, iLastChar, pWidthArray);
-    dprintf(("GDI32: GetCharWidth32A returned %d", ret));
-#ifdef DEBUG
-    if(ret) {
-      for(int i=iFirstChar;i<iLastChar;i++) {
-          if((i >= 'a' && i <= 'z') || (i >= 'A' && i <= 'Z')) {
-                dprintf2(("Char %c -> width %d", i, pWidthArray[i]));
-          } 
-          else  dprintf2(("Char %x -> width %d", i, pWidthArray[i]));
-      }
-    }
-#endif
-    return ret;
-}
-//******************************************************************************
-//TODO: Cut off Unicode chars?
-//******************************************************************************
-BOOL WIN32API GetCharWidth32W(HDC hdc, UINT iFirstChar, UINT iLastChar, PINT pWidthArray)
-{
-    dprintf(("GDI32: GetCharWidth32W might not work properly %x %x %x %x", hdc, iFirstChar, iLastChar, pWidthArray));
-    return O32_GetCharWidth(hdc, iFirstChar, iLastChar, pWidthArray);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API GetCurrentPositionEx( HDC hdc, PPOINT lpPoint)
 {
  BOOL rc;
@@ -840,6 +540,84 @@ BOOL WIN32API GetCurrentPositionEx( HDC hdc, PPOINT lpPoint)
     dprintf(("GDI32: GetCurrentPositionEx returned %d (%d,%d)", rc, lpPoint->x, lpPoint->y));
     return rc;
 }
+#ifdef DEBUG
+//******************************************************************************
+//******************************************************************************
+char *GetDeviceCapsString(int nIndex)
+{
+    switch(nIndex) {
+    case DRIVERVERSION:
+        return "DRIVERVERSION";
+    case TECHNOLOGY:
+        return "TECHNOLOGY";
+    case HORZSIZE:
+        return "HORZSIZE";
+    case VERTSIZE:
+        return "VERTSIZE";
+    case HORZRES:
+        return "HORZRES";
+    case VERTRES:
+        return "VERTRES";
+    case BITSPIXEL:
+        return "BITSPIXEL";
+    case PLANES:
+        return "PLANES";
+    case NUMBRUSHES:
+        return "NUMBRUSHES";
+    case NUMPENS:
+        return "NUMPENS";
+    case NUMMARKERS:
+        return "NUMMARKERS";
+    case NUMFONTS:
+        return "NUMFONTS";
+    case NUMCOLORS:
+        return "NUMCOLORS";
+    case PDEVICESIZE:
+        return "PDEVICESIZE";
+    case CURVECAPS:
+        return "CURVECAPS";
+    case LINECAPS:
+        return "LINECAPS";
+    case POLYGONALCAPS:
+        return "POLYGONALCAPS";
+    case TEXTCAPS:
+        return "TEXTCAPS";
+    case CLIPCAPS:
+        return "CLIPCAPS";
+    case RASTERCAPS:
+        return "RASTERCAPS";
+    case ASPECTX:
+        return "ASPECTX";
+    case ASPECTY:
+        return "ASPECTY";
+    case ASPECTXY:
+        return "ASPECTXY";
+    case LOGPIXELSX:
+        return "LOGPIXELSX";
+    case LOGPIXELSY:
+        return "LOGPIXELSY";
+    case SIZEPALETTE:
+        return "SIZEPALETTE";
+    case NUMRESERVED:
+        return "NUMRESERVED";
+    case COLORRES:
+        return "COLORRES";
+    case PHYSICALWIDTH:
+        return "PHYSICALWIDTH";
+    case PHYSICALHEIGHT:
+        return "PHYSICALHEIGHT";
+    case PHYSICALOFFSETX:
+        return "PHYSICALOFFSETX";
+    case PHYSICALOFFSETY:
+        return "PHYSICALOFFSETY";
+    case SCALINGFACTORX:
+        return "SCALINGFACTORX";
+    case SCALINGFACTORY:
+        return "SCALINGFACTORY";
+    }
+    return "unknown";
+}
+#endif
 //******************************************************************************
 //******************************************************************************
 int WIN32API GetDeviceCaps(HDC hdc, int nIndex)
@@ -847,26 +625,12 @@ int WIN32API GetDeviceCaps(HDC hdc, int nIndex)
  int rc;
 
     rc = O32_GetDeviceCaps(hdc, nIndex);
-    dprintf(("GDI32: GetDeviceCaps %X, %d returned %d\n", hdc, nIndex, rc));
+    dprintf(("GDI32: GetDeviceCaps %x %s returned %d\n", hdc, GetDeviceCapsString(nIndex), rc));
     //SvL: 13-9-'98: NT returns -1 when using 16 bits colors, NOT 65536!
     if(nIndex == NUMCOLORS && rc > 256)
         return -1;
 
     return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API GetKerningPairsA( HDC arg1, DWORD arg2, LPKERNINGPAIR  arg3)
-{
-    return O32_GetKerningPairs(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API GetKerningPairsW( HDC arg1, DWORD arg2, LPKERNINGPAIR  arg3)
-{
-    dprintf(("GDI32: GetKerningPairsW; might not work"));
-    // NOTE: This will not work as is (needs UNICODE support)
-    return O32_GetKerningPairs(arg1, arg2, arg3);
 }
 //******************************************************************************
 //******************************************************************************
@@ -951,15 +715,15 @@ BOOL WIN32API PolyBezierTo( HDC arg1, const POINT * arg2, DWORD  arg3)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API PolyDraw( HDC arg1, const POINT * arg2, const BYTE * arg3, DWORD  arg4)
+BOOL WIN32API PolyDraw( HDC hdc, const POINT * arg2, const BYTE * arg3, DWORD  arg4)
 {
-    return O32_PolyDraw(arg1, arg2, arg3, arg4);
+    return O32_PolyDraw(hdc, arg2, arg3, arg4);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API PolyPolygon( HDC arg1, const POINT * arg2, const INT * arg3, UINT  arg4)
+BOOL WIN32API PolyPolygon( HDC hdc, const POINT * arg2, const INT * arg3, UINT  arg4)
 {
-    return O32_PolyPolygon(arg1, arg2, arg3, arg4);
+    return O32_PolyPolygon(hdc, arg2, arg3, arg4);
 }
 //******************************************************************************
 //******************************************************************************
@@ -971,6 +735,14 @@ BOOL WIN32API PolyPolyline( HDC hdc, const POINT * lppt, const DWORD * lpdwPolyP
 //******************************************************************************
 BOOL WIN32API Polygon( HDC hdc, const POINT *lpPoints, int count)
 {
+    BOOL ret = FALSE;
+#ifdef DEBUG
+    if(lpPoints && count) {
+        for(int i=0;i<count;i++) {
+            dprintf(("Point (%d,%d)", lpPoints[i].x, lpPoints[i].y));
+        }
+    }
+#endif
     return O32_Polygon(hdc, lpPoints, count);
 }
 //******************************************************************************
@@ -993,49 +765,9 @@ BOOL WIN32API RectVisible( HDC hdc, const RECT *lpRect)
 }
 //******************************************************************************
 //******************************************************************************
-HDC WIN32API ResetDCA( HDC arg1, const DEVMODEA *  arg2)
-{
-    return (HDC)O32_ResetDC(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-HDC WIN32API ResetDCW( HDC arg1, const DEVMODEW *  arg2)
-{
-    dprintf(("GDI32: ResetDCW: not properly implemented"));
-    DebugInt3();
-    // NOTE: This will not work as is (needs UNICODE support)
-    return (HDC)O32_ResetDC(arg1, (const DEVMODEA *)arg2);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API RestoreDC(HDC hdc, int id)
-{
- BOOL ret;
-
-    ret = O32_RestoreDC(hdc, id);
-    if(ret == FALSE) {
-        dprintf(("ERROR: GDI32: RestoreDC %x %d FAILED", hdc, id));
-    }
-    return ret;
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API RoundRect( HDC arg1, int arg2, int arg3, int arg4, int arg5, int arg6, int  arg7)
 {
     return O32_RoundRect(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API SaveDC( HDC hdc)
-{
- int id;
-
-    id = O32_SaveDC(hdc);
-    if(id == 0) {
-         dprintf(("ERROR: GDI32: SaveDC %x FAILED", hdc));
-    }
-    else dprintf(("GDI32: SaveDC %x returned %d", hdc, id));
-    return id;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1127,65 +859,11 @@ BOOL WIN32API UpdateColors(HDC hdc)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GdiFlush()
-{
-  dprintf(("GDI32: GdiFlush, not implemented (TRUE)\n"));
-  return(TRUE);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API GdiComment(HDC hdc, UINT cbSize, CONST BYTE *lpData)
 {
   dprintf(("GDI32: GdiComment %x %d %x NOT IMPLEMENTED", hdc, cbSize, lpData));
 //  return O32_GdiComment(hdc, cbSize, lpData);
   return TRUE;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetCharWidthFloatA(HDC hdc, UINT iFirstChar, UINT iLastChar, PFLOAT pxBUffer)
-{
-  dprintf(("GDI32: GetCharWidthFloatA, not implemented\n"));
-  return(FALSE);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetCharWidthFloatW(HDC hdc, UINT iFirstChar, UINT iLastChar, PFLOAT pxBUffer)
-{
-  dprintf(("GDI32: GetCharWidthFloatW, not implemented\n"));
-  return(FALSE);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetCharABCWidthsFloatA(HDC hdc, UINT iFirstChar, UINT iLastChar, LPABCFLOAT pxBUffer)
-{
-  dprintf(("GDI32: GetCharABCWidthsFloatA, not implemented\n"));
-  return(FALSE);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetCharABCWidthsFloatW(HDC hdc,
-                                     UINT iFirstChar,
-                                     UINT iLastChar,
-                                     LPABCFLOAT pxBUffer)
-{
-  dprintf(("GDI32: GetCharABCWidthsFloatA, not implemented\n"));
-  return(FALSE);
-}
-//******************************************************************************
-//******************************************************************************
-INT WIN32API ExtEscape(HDC hdc, INT nEscape, INT cbInput, LPCSTR lpszInData,
-                       INT cbOutput, LPSTR lpszOutData)
-{
-  dprintf(("GDI32: ExtEscape, %x %x %d %x %d %x not implemented", hdc, nEscape, cbInput, lpszInData, cbOutput, lpszOutData));
-#ifdef DEBUG
-  if(cbInput && lpszInData) {
-        ULONG *tmp = (ULONG *)lpszInData;
-        for(int i=0;i<cbInput/4;i++) {
-                dprintf(("GDI32: ExtEscape par %d: %x", i, *tmp++));
-        }
-  }
-#endif
-  return(0);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1203,25 +881,7 @@ BOOL WIN32API GetColorAdjustment(HDC hdc, COLORADJUSTMENT *lpca)
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API GetGlyphOutlineA(HDC hdc, UINT uChar, UINT uFormat, LPGLYPHMETRICS lpgm,
-                                   DWORD cbBuffer, LPVOID lpvBuffer, CONST MAT2 *lpmat2)
-{
-  dprintf(("GDI32: GetGlyphOutLineA, not implemented (GDI_ERROR)\n"));
-  return(GDI_ERROR);
-}
-//******************************************************************************
 
-//******************************************************************************
-/*KSO Thu 21.05.1998*/
-DWORD WIN32API GetGlyphOutlineW(HDC hdc, UINT uChar, UINT uFormat, LPGLYPHMETRICS lpgm,
-                                   DWORD cbBuffer, LPVOID lpvBuffer, CONST MAT2 *lpmat2)
-{
-  dprintf(("GDI32: GetGlyphOutLineW, not implemented\n"));
-  return(GDI_ERROR);
-}
-//******************************************************************************
-
-//******************************************************************************
 
 /*****************************************************************************
  * Name      : BOOL CancelDC
@@ -1371,85 +1031,3 @@ DWORD WIN32API GdiSetBatchLimit(DWORD dwLimit)
 }
 
 
-/*****************************************************************************
- * Name      : DWORD GetCharacterPlacementA
- * Purpose   : The GetCharacterPlacementA function retrieves information about
- *             a character string, such as character widths, caret positioning,
- *             ordering within the string, and glyph rendering. The type of
- *             information returned depends on the dwFlags parameter and is
- *             based on the currently selected font in the given display context.
- *             The function copies the information to the specified GCP_RESULTSA
- *             structure or to one or more arrays specified by the structure.
- * Parameters: HDC     hdc        handle to device context
- *             LPCSTR lpString   pointer to string
- *             int     nCount     number of characters in string
- *             int     nMaxExtent maximum extent for displayed string
- *             LPGCP_RESULTSA *lpResults  pointer to buffer for placement result
- *             DWORD   dwFlags    placement flags
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-
-DWORD WIN32API GetCharacterPlacementA(HDC           hdc,
-                                         LPCSTR       lpString,
-                                         int           nCount,
-                                         int           nMaxExtent,
-                                         GCP_RESULTSA * lpResults,
-                                         DWORD         dwFlags)
-{
-  dprintf(("GDI32: GetCharacterPlacementA(%08xh,%s,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
-           hdc,
-           lpString,
-           nCount,
-           nMaxExtent,
-           lpResults,
-           dwFlags));
-
-  return (0);
-}
-
-
-/*****************************************************************************
- * Name      : DWORD GetCharacterPlacementW
- * Purpose   : The GetCharacterPlacementW function retrieves information about
- *             a character string, such as character widths, caret positioning,
- *             ordering within the string, and glyph rendering. The type of
- *             information returned depends on the dwFlags parameter and is
- *             based on the currently selected font in the given display context.
- *             The function copies the information to the specified GCP_RESULTSW
- *             structure or to one or more arrays specified by the structure.
- * Parameters: HDC     hdc        handle to device context
- *             LPCSTR lpString   pointer to string
- *             int     nCount     number of characters in string
- *             int     nMaxExtent maximum extent for displayed string
- *             GCP_RESULTSW *lpResults  pointer to buffer for placement result
- *             DWORD   dwFlags    placement flags
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-
-DWORD WIN32API GetCharacterPlacementW(HDC           hdc,
-                                         LPCWSTR       lpString,
-                                         int           nCount,
-                                         int           nMaxExtent,
-                                         GCP_RESULTSW *lpResults,
-                                         DWORD         dwFlags)
-{
-  dprintf(("GDI32: GetCharacterPlacementW(%08xh,%s,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
-           hdc,
-           lpString,
-           nCount,
-           nMaxExtent,
-           lpResults,
-           dwFlags));
-
-  return (0);
-}

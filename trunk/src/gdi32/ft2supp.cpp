@@ -95,9 +95,6 @@ void CFT2Module::init()
        if(!pfnFt2EnableFontEngine) dprintf(("Ft2EnableFontEngine not found!!"));
        else pfnFt2EnableFontEngine(bEnabled);
 
-       pfnGetGlyphIndices = (PFN_FT2GETGLYPHINDICES)QueryProcAddress("Ft2GetGlyphIndices");
-       if(!pfnGetGlyphIndices) dprintf(("Ft2GetGlyphIndices not found!!"));
-
        pfnFt2GetTextExtentW  = (PFN_FT2GETTEXTEXTENTW)QueryProcAddress("Ft2GetTextExtentW");
        if(!pfnFt2GetTextExtentW) dprintf(("Ft2GetTextExtentW not found!!"));
 
@@ -105,12 +102,6 @@ void CFT2Module::init()
        if(!pfnFt2CharStringPosAtA) dprintf(("Ft2CharStringPosAtA not found!!"));
        pfnFt2CharStringPosAtW = (PFN_FT2CHARSTRINGPOSATW)QueryProcAddress("Ft2CharStringPosAtW");
        if(!pfnFt2CharStringPosAtW) dprintf(("Ft2CharStringPosAtW not found!!"));
-
-       pfnFt2GetGlyphOutline = (PFN_FT2GETGLYPHOUTLINE)QueryProcAddress("Ft2GetGlyphOutline");
-       if(!pfnFt2GetGlyphOutline) dprintf(("Ft2GetGlyphOutline not found!!"));
-
-       pfnFt2GetFontData = (PFN_FT2GETFONTDATA)QueryProcAddress("Ft2GetFontData");
-       if(!pfnFt2GetFontData) dprintf(("Ft2GetFontData not found!!"));
 
        pfnFt2QueryFontType = (PFN_FT2QUERYFONTTYPE)QueryProcAddress("Ft2QueryFontType");
        if(!pfnFt2QueryFontType) dprintf(("Ft2QueryFontType not found!!"));

@@ -1,4 +1,4 @@
-/* $Id: opengl.cpp,v 1.9 2002-11-26 10:53:11 sandervl Exp $ */
+/* $Id: opengl.cpp,v 1.10 2004-01-11 11:42:19 sandervl Exp $ */
 
 /*
  * GDI32 OpenGl stubs

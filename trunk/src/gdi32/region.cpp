@@ -1,4 +1,4 @@
-/* $Id: region.cpp,v 1.35 2003-11-14 17:31:47 sandervl Exp $ */
+/* $Id: region.cpp,v 1.36 2004-01-11 11:42:21 sandervl Exp $ */
 
 /*
  * GDI32 region code
@@ -696,6 +696,57 @@ failure:
     if(hrgnNewClip) GpiDestroyRegion(pHps->hps, hrgnNewClip);
 
     return ERROR_W;
+}
+//******************************************************************************
+// GdiCopyClipRgn
+//
+// Duplicate the GPI region
+//
+// Parameters:
+// 
+// pDCData pHps		- presentation space structure
+//
+// Returns:  	- NULL     -> failure
+//      	- <> NULL  -> GPI handle of copied region
+//
+//******************************************************************************
+HRGN GdiCopyClipRgn(pDCData pHps)
+{
+    HRGN hrgnNewClip;
+    LONG lComplexity;
+    RECTL rectl = {0, 0, 1, 1};
+
+    hrgnNewClip = GpiCreateRegion(pHps->hps, 1, &rectl);
+    if(hrgnNewClip == NULLHANDLE) {
+        dprintf(("ERROR: GdiCopyClipRgn: GpiCreateRegion failed!!"));
+        DebugInt3();
+        return 0;
+    }
+    lComplexity = GpiCombineRegion(pHps->hps, hrgnNewClip, pHps->hrgnWin32Clip, NULLHANDLE, CRGN_COPY);
+    if (lComplexity != RGN_ERROR)
+    {
+        return TRUE;
+    }
+    DebugInt3();
+    return FALSE;
+}
+//******************************************************************************
+// GdiDestroyRgn
+//
+// Destroy the GPI region
+//
+// Parameters:
+// 
+// pDCData pHps		- presentation space structure
+// HRGN hrgn		- region handle (GPI)
+//
+// Returns:  	- FALSE -> failure
+//      	- TRUE  -> success
+//
+//******************************************************************************
+BOOL GdiDestroyRgn(pDCData pHps, HRGN hrgn)
+{
+    return GpiDestroyRegion(pHps->hps, hrgn);
 }
 //******************************************************************************
 //******************************************************************************

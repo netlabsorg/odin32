@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.44 2003-08-12 08:22:41 sandervl Exp $
+# $Id: makefile,v 1.45 2004-01-11 11:42:18 sandervl Exp $
 
 #
 # Odin32 API
@@ -43,7 +43,9 @@ $(OBJDIR)\initterm.obj \
 $(OBJDIR)\initgdi32.obj \
 $(OBJDIR)\oslibgdi.obj \
 $(OBJDIR)\font.obj \
+$(OBJDIR)\fontres.obj \
 $(OBJDIR)\text.obj \
+$(OBJDIR)\devcontext.obj \
 $(OBJDIR)\palette.obj \
 $(OBJDIR)\line.obj \
 $(OBJDIR)\oslibgpi.obj \
@@ -57,6 +59,7 @@ $(OBJDIR)\objhandle.obj \
 $(OBJDIR)\printer.obj \
 $(OBJDIR)\gdistats.obj \
 $(OBJDIR)\dbglocal.obj \
+$(OBJDIR)\ft2supp.obj \
 !ifdef DEBUG
 $(OBJDIR)\dbgwrap.obj \
 !endif

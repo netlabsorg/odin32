@@ -1,4 +1,4 @@
-/* $Id: oslibgpi.h,v 1.11 2002-11-29 13:46:04 sandervl Exp $ */
+/* $Id: oslibgpi.h,v 1.12 2004-01-11 11:42:20 sandervl Exp $ */
 
 /*
  * GPI interface code
@@ -104,7 +104,12 @@ ULONG getMapMode(PVOID pHps);
 BOOL OSLibGpiQueryCurrentPosition(PVOID pHps,PPOINTLOS2 ptl);
 BOOL OSLibGpiSetCurrentPosition(PVOID pHps,PPOINTLOS2 ptl);
 
+BOOL ReallySetCharAttrs(PVOID pHps);
+
 BOOL OSLibGpiLoadFonts(LPSTR lpszFontFile);
+BOOL OSLibGpiUnloadFonts(LPSTR lpszFontFile);
+
+BOOL OSLibGpiQueryFontName(LPSTR lpszFileName, LPSTR lpszFamily, LPSTR lpszFace, int cbString);
 
 #define CHSOS_OPAQUE                 0x0001L
 #define CHSOS_VECTOR                 0x0002L
@@ -200,7 +205,7 @@ LONG OSLibWinDrawTabbedText(PVOID pHps,LONG cchText,LONG lTabs,LPCSTR lpchText,P
 int OSLibGpiQueryFontMaxHeight(HDC hdc);
 
 BOOL OSLibGpiMove(PVOID pHps,PPOINTLOS2 pptlPoint);
-LONG OSLibGpiLine(PVOID pHps,PPOINTLOS2 pptlEndPoint);
+BOOL OSLibGpiLine(PVOID pHps,PPOINTLOS2 pptlEndPoint);
 
 BOOL OSLibGpiEndPath(PVOID pHps);
 
