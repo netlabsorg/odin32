@@ -1,4 +1,4 @@
-/* $Id: socket.cpp,v 1.15 2003-02-24 10:03:58 sandervl Exp $ */
+/* $Id: socket.cpp,v 1.16 2003-02-24 11:14:30 sandervl Exp $ */
 /*
  * based on Windows Sockets 1.1 specs
  * (ftp.microsoft.com:/Advsys/winsock/spec11/WINSOCK.TXT)
@@ -204,12 +204,16 @@ INT WINAPI WSASend( SOCKET s, LPWSABUF lpBuffers, DWORD dwBufferCount,
         for(int i=0;i<dwBufferCount;i++) {
             tmpret = send(s, lpBuffers[i].buf, lpBuffers[i].len,  dwFlags);
             if(tmpret != SOCKET_ERROR) {
-                *lpNumberOfBytesSent += ret;
+                *lpNumberOfBytesSent += tmpret;
             }
             else {
                 ret = SOCKET_ERROR;
                 break;
             }
+        }
+        if(*lpNumberOfBytesSent) {
+            WSASetLastError(NO_ERROR);
+            ret = NO_ERROR;
         }
         return ret;
     }
@@ -258,13 +262,18 @@ int WINAPI WSARecv (SOCKET s, LPWSABUF lpBuffers, DWORD dwBufferCount,
         for(int i=0;i<dwBufferCount;i++) {
             tmpret = recv(s, lpBuffers[i].buf, lpBuffers[i].len,  *lpFlags);
             if(tmpret != SOCKET_ERROR) {
-                *lpNumberOfBytesReceived += ret;
+                *lpNumberOfBytesReceived += tmpret;
             }
             else {
                 ret = SOCKET_ERROR;
                 break;
             }
         }
+        if(*lpNumberOfBytesReceived) {
+            WSASetLastError(NO_ERROR);
+            ret = NO_ERROR;
+        }
+        dprintf(("WSARecv returned %d (read %x)", ret, *lpNumberOfBytesReceived));
         *lpFlags = 0; //what to do with this?
         return ret;
     }
