@@ -1,4 +1,4 @@
-/* $Id: registry.cpp,v 1.9 2001-02-17 19:37:17 sandervl Exp $ */
+/* $Id: registry.cpp,v 1.10 2001-04-15 09:06:50 sandervl Exp $ */
 
 /*
  * Win32 registry API functions for OS/2
@@ -863,8 +863,8 @@ ODINFUNCTION4(LONG,RegQueryValueW,HKEY,   hkey,
 
 ODINFUNCTION6(LONG,RegQueryValueExA,HKEY,   hkey,
                                     LPSTR,  lpszValueName,
-                                    LPDWORD,lpdwType,
                                     LPDWORD,lpdwReserved,
+                                    LPDWORD,lpdwType,
                                     LPBYTE, lpbData,
                                     LPDWORD,lpcbData)
 {
@@ -872,8 +872,8 @@ ODINFUNCTION6(LONG,RegQueryValueExA,HKEY,   hkey,
 
   return O32_RegQueryValueEx(ConvertKey(hkey),
                              lpszValueName,
-                             lpdwType,
                              lpdwReserved,
+                             lpdwType,
                              lpbData,
                              lpcbData);
 }
@@ -893,14 +893,15 @@ ODINFUNCTION6(LONG,RegQueryValueExA,HKEY,   hkey,
 
 ODINFUNCTION6(LONG,RegQueryValueExW,HKEY,   hkey,
                                     LPWSTR, lpszValueName,
-                                    LPDWORD,lpdwType,
                                     LPDWORD,lpdwReserved,
+                                    LPDWORD,lpdwType,
                                     LPBYTE, lpbData,
                                     LPDWORD,lpcbData)
 {
   char *astring = UnicodeToAsciiString(lpszValueName);
   char *akeydata = NULL;
   LONG  rc;
+  DWORD dwType;
 
   if(lpbData && lpcbData)
   {
@@ -908,34 +909,33 @@ ODINFUNCTION6(LONG,RegQueryValueExW,HKEY,   hkey,
     akeydata[*lpcbData] = 0;
   }
 
+  if(lpdwType == NULL) {
+    lpdwType = &dwType;
+  }
+
   rc = CALL_ODINFUNC(RegQueryValueExA)(hkey,
                                        astring,
-                                       lpdwType,
                                        lpdwReserved,
+                                       lpdwType,
                                        (LPBYTE)akeydata,
                                        lpcbData);
   //could also query key type (without returning data), call it again and only allocate translation
   //buffer if string type
   if(rc == ERROR_SUCCESS && lpbData && lpcbData)
   {
-    if(lpdwType == NULL) {//NULL apparently means REG_SZ
-        lstrcpyAtoW((LPWSTR)lpbData, akeydata);
-    }
-    else {
-        switch(*lpdwType) {
-        case REG_SZ:
-        case REG_EXPAND_SZ:
-            lstrcpyAtoW((LPWSTR)lpbData, akeydata);
-            break;
-        case REG_MULTI_SZ:
-        case REG_LINK: //???
-            dprintf(("ERROR: key data must be translated from Unicode to Ascii!!"));
-            break;
-        default:
-            memcpy(lpbData, akeydata, *lpcbData);
-            break;
-        }
-    }
+      switch(*lpdwType) {
+      case REG_SZ:
+      case REG_EXPAND_SZ:
+          lstrcpyAtoW((LPWSTR)lpbData, akeydata);
+          break;
+      case REG_MULTI_SZ:
+      case REG_LINK: //???
+          dprintf(("ERROR: key data must be translated from Unicode to Ascii!!"));
+          break;
+      default:
+          memcpy(lpbData, akeydata, *lpcbData);
+          break;
+      }
   }
   FreeAsciiString(astring);
   if(akeydata) {
