@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.21 2001-10-26 17:47:21 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.22 2001-10-26 19:22:15 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -149,6 +149,11 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
             }
             *(FARPROC *)&drvInfo->GetASPI32SupportInfo = GetProcAddress(drvInfo->hInstAspi, "GetASPI32SupportInfo");
             *(FARPROC *)&drvInfo->SendASPI32Command    = GetProcAddress(drvInfo->hInstAspi, "SendASPI32Command");
+
+            if(drvInfo->GetASPI32SupportInfo() == 0) {
+                FreeLibrary(drvInfo->hInstAspi);
+                drvInfo->hInstAspi = 0;
+            }
    
             //get cdrom signature
             DWORD parsize = 4;
@@ -596,7 +601,7 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
             SetLastError(ERROR_INSUFFICIENT_BUFFER);
             return FALSE;
         }
-
+        memset(pTOC, 0, nOutBufferSize);
         //IOCTL_CDROMAUDIO (0x81), CDROMAUDIO_GETAUDIODISK (0x61)
         datasize = sizeof(diskinfo);
         rc = OSLibDosDevIOCtl(pHMHandleData->hHMHandle, 0x81, 0x61, &drvInfo->signature[0], 4, &parsize,
@@ -610,16 +615,17 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
         numtracks = pTOC->LastTrack - pTOC->FirstTrack + 1;
         dprintf(("first %d, last %d, num %d", pTOC->FirstTrack, pTOC->LastTrack, numtracks));
 
-        int len = 4 + numtracks*sizeof(TRACK_DATA) - 2; //minus length itself;
+        //numtracks+1, because we have to add a track at the end
+        int length = 4 + (numtracks+1)*sizeof(TRACK_DATA); 
         //big endian format
-        pTOC->Length[0] = HIBYTE(len);
-        pTOC->Length[1] = LOBYTE(len);
+        pTOC->Length[0] = HIBYTE((length-2));  //minus length itself;
+        pTOC->Length[1] = LOBYTE((length-2));  //minus length itself;
 
-        if(nOutBufferSize < 4+numtracks*sizeof(TRACK_DATA)) {
+        if(nOutBufferSize < length) {
             SetLastError(ERROR_INSUFFICIENT_BUFFER);
             return FALSE;
         }
-
+        
         for(int i=0;i<numtracks;i++) 
         {
             parsize = sizeof(parm);
@@ -645,9 +651,23 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
             pTOC->TrackData[i].Address[1]  = HIWORD(LOBYTE(trackinfo.ulTrackAddr));
             pTOC->TrackData[i].Address[2]  = LOWORD(HIBYTE(trackinfo.ulTrackAddr));
             pTOC->TrackData[i].Address[3]  = LOWORD(LOBYTE(trackinfo.ulTrackAddr));
-        }        
+        }
+        //Add a track at the end (presumably so the app can determine the size of the 1st track)
+        //That is what NT4, SP6 does anyway
+        pTOC->TrackData[numtracks].TrackNumber = 0xAA;
+        pTOC->TrackData[numtracks].Reserved    = 0;
+        pTOC->TrackData[numtracks].Control     = pTOC->TrackData[numtracks-1].Control;
+        pTOC->TrackData[numtracks].Adr         = pTOC->TrackData[numtracks-1].Adr;
+        pTOC->TrackData[numtracks].Reserved1   = 0;
+        //big endian format
+        //Address of pseudo track is the address of the lead-out track
+        pTOC->TrackData[numtracks].Address[0]  = HIWORD(HIBYTE(diskinfo.ulLeadOutAddr));
+        pTOC->TrackData[numtracks].Address[1]  = HIWORD(LOBYTE(diskinfo.ulLeadOutAddr));
+        pTOC->TrackData[numtracks].Address[2]  = LOWORD(HIBYTE(diskinfo.ulLeadOutAddr));
+        pTOC->TrackData[numtracks].Address[3]  = LOWORD(LOBYTE(diskinfo.ulLeadOutAddr));
+
         if(lpBytesReturned)
-            *lpBytesReturned = 4 + numtracks*sizeof(TRACK_DATA);
+            *lpBytesReturned = length;
 
         SetLastError(ERROR_SUCCESS);
         return TRUE;
@@ -1014,13 +1034,16 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
         addr->Length = sizeof(SCSI_ADDRESS);
         addr->PortNumber = 0;
         addr->PathId     = 0;
-        numAdapters = drvInfo->GetASPI32SupportInfo();
 
-        if(LOBYTE(numAdapters) == 0) {
-            //testestest
-            i=j=k=0;
-            goto done; //failure;
+        if(drvInfo->hInstAspi == NULL) {
+            //Don't fail if wnaspi32 not loaded
+            addr->TargetId   = 0;
+            addr->Lun        = 0;
+            SetLastError(ERROR_SUCCESS);
+            return TRUE;
         }
+
+        numAdapters = drvInfo->GetASPI32SupportInfo();
 
         memset(&srb, 0, sizeof(srb));
         srb.common.SRB_Cmd = SC_HA_INQUIRY;
