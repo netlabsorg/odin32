@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.180 2002-06-20 14:25:49 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.181 2002-07-18 21:54:59 achimha Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -98,7 +98,11 @@ void FrameSetFocus(HWND hwnd);
 VOID APIENTRY DspInitSystemDriverName(PSZ pszDriverName, ULONG lenDriverName);
 
 //******************************************************************************
-//Initialize PM; create hab, message queue and register special Win32 window classes
+// Initialize PM; create hab, message queue and register special Win32 window classes
+//
+// This is called from the initterm, so we call it only once for each process.
+// We make sure PM is up and running for our purposes and init the existing
+// thread 0.
 //******************************************************************************
 BOOL InitPM()
 {
@@ -135,6 +139,9 @@ BOOL InitPM()
             }
         }
     }
+
+    // store our HAB and HMQ in the TEB - we need it quite often
+    // and they don't map 1:1 to Windows entities
     SetThreadHAB(hab);
     dprintf(("InitPM: hmq = %x", hmq));
     SetThreadMessageQueue(hmq);
@@ -175,6 +182,7 @@ BOOL InitPM()
 
     dprintf(("WC_FRAME style %x", FrameClassInfo.flClassStyle));
 
+    // this is our OS/2 window class for frame windows
     if(!WinRegisterClass(                 /* Register window class        */
         hab,                               /* Anchor block handle          */
         (PSZ)WIN32_STDFRAMECLASS,          /* Window class name            */
@@ -186,6 +194,7 @@ BOOL InitPM()
         return(FALSE);
     }
 
+    // get the screen dimensions and store them
     WinQueryWindowRect(HWND_DESKTOP, &desktopRectl);
     ScreenWidth  = desktopRectl.xRight;
     ScreenHeight = desktopRectl.yTop;
@@ -195,9 +204,10 @@ BOOL InitPM()
     DEVOPENSTRUC dop = {NULL, "DISPLAY", NULL, NULL, NULL, NULL,
                         NULL, NULL, NULL};
 
-    /* create memory device context */
+    /* create memory device context - it's temporary to query some information */
     hdc = DevOpenDC(hab, OD_MEMORY, "*", 5L, (PDEVOPENDATA)&dop, NULLHANDLE);
 
+    // check if we have the OS/2 Look and Feel enabled
     fOS2Look = PROFILE_GetOdinIniBool(ODINSYSTEM_SECTION, "OS2Look", FALSE);
     if(fOS2Look)
     {
@@ -206,6 +216,8 @@ BOOL InitPM()
 
         SYSCOLOR_Init(FALSE); //use OS/2 colors
 
+        // query the name of the display driver resource DLL to load
+        // some standard bitmaps from it
         DspInitSystemDriverName(szDisplay, sizeof(szDisplay));
         DosQueryModuleHandle(szDisplay, &hModDisplay);
 
@@ -214,6 +226,7 @@ BOOL InitPM()
         hbmFrameMenu[2] = GpiLoadBitmap(hdc, hModDisplay, SBMP_RESTOREBUTTON, 0, 0);
     }
 
+    // find out which colordepth we're running
     DevQueryCaps(hdc, CAPS_COLOR_BITCOUNT, 1, (PLONG)&ScreenBitsPerPel);
 
     // query the font height to find out whether we have small or large fonts
@@ -227,6 +240,10 @@ BOOL InitPM()
 //******************************************************************************
 //menu.cpp
 BOOL MENU_Init();
+//******************************************************************************
+// AH TODO 2002-07-18
+// Note: this looks a lot like unnecessary code duplication. We should call this
+// function from InitPM...
 //******************************************************************************
 void WIN32API SetWindowAppearance(int fLooks)
 {
@@ -411,7 +428,8 @@ MRESULT EXPENTRY Win32CDWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     return (MRESULT)rc;
 }
 //******************************************************************************
-//Win32 window message handler
+// Win32 window message handler
+// The PM window procedure for our client window class (non frame)
 //******************************************************************************
 MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 {
@@ -422,15 +440,19 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
  POSTMSG_PACKET  *postmsg;
  OSLIBPOINT       point, ClientPoint;
 
-    //Restore our FS selector
+    // restore our FS selector
     SetWin32TIB();
 
-    //NOTE-------------->>>>>> If this is changed, also change Win32WindowProc!! <<<<<<<<<<<-------------------- BEGIN
+    // BEGIN NOTE-------------->>>>>> If this is changed, also change Win32WindowProc!! <<<<<<<<<<<-------------------- BEGIN
     teb = GetThreadTEB();
     win32wnd = Win32BaseWindow::GetWindowFromOS2Handle(hwnd);
 
 ////    dprintf(("window %x msg %x", (win32wnd) ? win32wnd->getWindowHandle() : 0, msg));
 
+    // do some sanity checking here:
+    // - we need to have a TEB handle
+    // - unless this is WM_CREATE (the very first message), there has to be
+    //   a USER32 window object for this window handle
     if(!teb || (msg != WM_CREATE && win32wnd == NULL)) {
         dprintf(("OS2: Invalid win32wnd pointer for window %x msg %x", hwnd, msg));
         goto RunDefWndProc;
@@ -439,8 +461,11 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 ////        goto RunDefWndProc;
 ////    }
 
+    // check if the message state counter in the TEB is odd
+    // this means that DispatchMessage has been called
     if((teb->o.odin.msgstate & 1) == 0)
-    {//message that was sent directly to our window proc handler; translate it here
+    {
+        // message that was sent directly to our window proc handler; translate it here
         QMSG qmsg;
 
         qmsg.msg  = msg;
@@ -461,7 +486,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         pWinMsg = &teb->o.odin.msg;
         teb->o.odin.msgstate++;
     }
-    //NOTE-------------->>>>>> If this is changed, also change Win32WindowProc!! <<<<<<<<<<<-------------------- END
+    // END NOTE-------------->>>>>> If this is changed, also change Win32WindowProc!! <<<<<<<<<<<-------------------- END
 
     if(msg >= WIN32APP_POSTMSG) {
         //probably win32 app user message
@@ -975,10 +1000,14 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
     //Restore our FS selector
     SetWin32TIB();
 
-    //NOTE-------------->>>>>> If this is changed, also change Win32WindowProc!! <<<<<<<<<<<-------------------- BEGIN
+    // BEGIN NOTE-------------->>>>>> If this is changed, also change Win32WindowProc!! <<<<<<<<<<<-------------------- BEGIN
     teb = GetThreadTEB();
     win32wnd = Win32BaseWindow::GetWindowFromOS2FrameHandle(hwnd);
 
+    // do some sanity checking here:
+    // - we need to have a TEB handle
+    // - unless this is WM_CREATE (the very first message), there has to be
+    //   a USER32 window object for this window handle
     if(!teb || (msg != WM_CREATE && win32wnd == NULL)) {
         dprintf(("PMFRAME: Invalid win32wnd pointer for window %x msg %x", hwnd, msg));
         goto RunDefFrameWndProc;
@@ -987,6 +1016,7 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
 ////        goto RunDefWndProc;
 ////    }
 
+    // check if the message state counter in the TEB is odd
     if((teb->o.odin.msgstate & 1) == 0)
     {//message that was sent directly to our window proc handler; translate it here
         QMSG qmsg;
@@ -1009,7 +1039,7 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
         pWinMsg = &teb->o.odin.msg;
         teb->o.odin.msgstate++;
     }
-    //NOTE-------------->>>>>> If this is changed, also change Win32WindowProc!! <<<<<<<<<<<-------------------- END
+    // END NOTE-------------->>>>>> If this is changed, also change Win32WindowProc!! <<<<<<<<<<<-------------------- END
 
     switch( msg )
     {
