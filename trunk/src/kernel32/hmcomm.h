@@ -1,4 +1,4 @@
-/* $Id: hmcomm.h,v 1.13 2001-12-07 11:28:10 sandervl Exp $ */
+/* $Id: hmcomm.h,v 1.14 2002-06-11 16:36:06 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -14,12 +14,12 @@
 
 #include <handlemanager.h>
 #include "hmdevice.h"
-#include "overlappedio.h"
+#include <overlappedio.h>
 
 #define MAX_COMPORTS        8
 #define MAGIC_COM           0x12abcd34
 
-#define TIMEOUT_COMM        50
+#define TIMEOUT_COMM        10
 
 typedef struct
 {
