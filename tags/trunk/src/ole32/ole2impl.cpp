@@ -1,17 +1,17 @@
-/* $Id: ole2impl.cpp,v 1.1 2000-03-21 00:28:32 davidr Exp $ */
+/* $Id: ole2impl.cpp,v 1.2 2000-08-02 20:18:22 bird Exp $ */
 /*
  * Ole 2 Create functions implementation
  *
  * Copyright (C) 1999-2000 Abey George
  */
-/* 
- * 
+/*
+ *
  * Project Odin Software License can be found in LICENSE.TXT
- * 
+ *
  */
-/* 
+/*
  * Ported from Wine 20/03/00
- * 
+ *
  * Copyright 1999 David J. Raison
  *
  */
@@ -24,14 +24,14 @@
 
 #define MAX_CLIPFORMAT_NAME   80
 
-/******************************************************************************
- * Function : OleQueryCreateFromData [OLE32.117]
- * Author   : Abey George
+/**
+ * [OLE32.117]
  * Checks whether an object can become an embedded object.
  * the clipboard or OLE drag and drop.
- * Returns  : S_OK - Format that supports Embedded object creation are present.
- *            OLE_E_STATIC - Format that supports static object creation are present.
- *            S_FALSE - No acceptable format is available.
+ * @author      Abey George
+ * @returns     S_OK - Format that supports Embedded object creation are present.
+ *              OLE_E_STATIC - Format that supports static object creation are present.
+ *              S_FALSE - No acceptable format is available.
  */
 
 HRESULT WINAPI OleQueryCreateFromData(LPDATAOBJECT pSrcDataObject)
@@ -71,15 +71,15 @@ HRESULT WINAPI OleQueryCreateFromData(LPDATAOBJECT pSrcDataObject)
   return S_FALSE;
 }
 
-/******************************************************************************
- * Function : OleCreateFromData        [OLE32.92]
- * Author   : Abey George
+/**
  * Creates an embedded object from data transfer object retrieved from
  * the clipboard or OLE drag and drop.
- * Returns  : S_OK - Embedded object was created successfully.
- *            OLE_E_STATIC - OLE can create only a static object
- *            DV_E_FORMATETC - No acceptable format is available (only error return code)
- * TODO : CF_FILENAME, CF_EMBEDEDOBJECT formats. Parameter renderopt is currently ignored.
+ * [OLE32.92]
+ * @author      Abey George
+ * @returns     S_OK - Embedded object was created successfully.
+ *              OLE_E_STATIC - OLE can create only a static object
+ *              DV_E_FORMATETC - No acceptable format is available (only error return code)
+ * @remark      TODO : CF_FILENAME, CF_EMBEDEDOBJECT formats. Parameter renderopt is currently ignored.
  */
 
 HRESULT WINAPI OleCreateFromData(LPDATAOBJECT pSrcDataObject, REFIID riid,

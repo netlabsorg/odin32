@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.71 2000-06-28 18:11:19 sandervl Exp $ */
+/* $Id: window.cpp,v 1.72 2000-08-02 20:18:25 bird Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -366,7 +366,7 @@ HWND WIN32API SetParent( HWND hwndChild, HWND hwndNewParent)
     }
     if(hwndNewParent == HWND_DESKTOP) {
 	hwndNewParent = GetDesktopWindow();
-    } 
+    }
     else {
     	parent = Win32BaseWindow::GetWindowFromHandle(hwndNewParent);
     	if(!window) {
@@ -1080,7 +1080,7 @@ HWND WIN32API FindWindowExA(HWND hwndParent, HWND hwndChildAfter, LPCSTR lpszCla
     {
         /* If the atom doesn't exist, then no class */
         /* with this name exists either. */
-        if (!(atom = GlobalFindAtomA( lpszClass ))) 
+        if (!(atom = GlobalFindAtomA( lpszClass )))
         {
             SetLastError(ERROR_CANNOT_FIND_WND_CLASS);
             return 0;
@@ -1208,7 +1208,7 @@ HDWP WIN32API BeginDeferWindowPos(int count)
 }
 /***********************************************************************
  *           DeferWindowPos   (USER32.128)
- * 
+ *
  * TODO: SvL: Does this need to be thread safe?
  *
  */
@@ -1355,7 +1355,7 @@ HWND WIN32API ChildWindowFromPoint( HWND hwnd, POINT pt)
  * Result    : If the function succeeds, the return value is the window handle.
  *             If the function fails, the return value is zero
  * Remark    :
- * Status    : FULLY IMPLEMENTED AND TESTED
+ * Status    : COMPLETELY IMPLEMENTED AND TESTED
  *
  * Author    : Rene Pronk [Sun, 1999/08/08 23:30]
  *****************************************************************************/
