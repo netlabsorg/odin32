@@ -1,4 +1,4 @@
-/* $Id: pe.cpp,v 1.14 2000-03-09 19:01:55 sandervl Exp $ */
+/* $Id: pe.cpp,v 1.15 2000-04-13 18:54:41 sandervl Exp $ */
 
 /*
  * PELDR main exe loader code
@@ -140,6 +140,7 @@ void AllocateExeMem(char *filename)
 {
  HFILE  dllfile = 0;
  char   szFileName[CCHMAXPATH], *tmp;
+ char   szResult[CCHMAXPATH];
  ULONG  action, ulRead, signature;
  APIRET rc;
  IMAGE_DOS_HEADER doshdr;
@@ -170,7 +171,14 @@ void AllocateExeMem(char *filename)
 
   rc = DosOpen(szFileName, &dllfile, &action, 0, FILE_READONLY, OPEN_ACTION_OPEN_IF_EXISTS|OPEN_ACTION_FAIL_IF_NEW, OPEN_SHARE_DENYNONE|OPEN_ACCESS_READONLY, NULL);
   if(rc) {
-	goto end; //oops
+        if(DosSearchPath(SEARCH_IGNORENETERRS|SEARCH_ENVIRONMENT, "PATH",
+                         szFileName, szResult, sizeof(szResult)) != 0) {
+		goto end; //oops
+        }
+	rc = DosOpen(szResult, &dllfile, &action, 0, FILE_READONLY, OPEN_ACTION_OPEN_IF_EXISTS|OPEN_ACTION_FAIL_IF_NEW, OPEN_SHARE_DENYNONE|OPEN_ACCESS_READONLY, NULL);
+  	if(rc) {
+		goto end; //oops
+        }
   }
 
   //read dos header
