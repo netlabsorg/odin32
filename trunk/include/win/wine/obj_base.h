@@ -1,4 +1,4 @@
-/* $Id: obj_base.h,v 1.17 2000-04-27 11:09:38 achimha Exp $ */
+/* $Id: obj_base.h,v 1.18 2001-04-26 19:23:33 sandervl Exp $ */
 /*
  * This file defines the macros and types necessary to define COM interfaces,
  * and the three most basic COM interfaces: IUnknown, IMalloc and IClassFactory.
@@ -840,7 +840,7 @@ void WINAPI CoFreeUnusedLibraries(void);
 
 HRESULT WINAPI CoCreateInstance(REFCLSID rclsid, LPUNKNOWN pUnkOuter, DWORD dwClsContext, REFIID iid, LPVOID *ppv);
 
-HRESULT WINAPI CoGetClassObject(REFCLSID rclsid, DWORD dwClsContext, LPVOID pvReserved, REFIID iid, LPVOID *ppv);
+HRESULT WINAPI CoGetClassObject(REFCLSID rclsid, DWORD dwClsContext, COSERVERINFO *pServerInfo, REFIID iid, LPVOID *ppv);
 
 HRESULT WINAPI CoInitialize16(LPVOID lpReserved);
 HRESULT WINAPI CoInitialize(LPVOID lpReserved);
@@ -861,7 +861,7 @@ typedef enum tagCOINIT
 /* FIXME: not implemented */
 BOOL WINAPI CoIsOle1Class(REFCLSID rclsid);
 
-HINSTANCE WINAPI CoLoadLibrary(LPOLESTR16 lpszLibName, BOOL bAutoFree);
+HINSTANCE WINAPI CoLoadLibrary(LPOLESTR lpszLibName, BOOL bAutoFree);
 
 HRESULT WINAPI CoLockObjectExternal16(LPUNKNOWN pUnk, BOOL16 fLock, BOOL16 fLastUnlockReleases);
 HRESULT WINAPI CoLockObjectExternal(LPUNKNOWN pUnk, BOOL fLock, BOOL fLastUnlockReleases);

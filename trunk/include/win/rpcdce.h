@@ -10,17 +10,11 @@ extern "C" {
 #define OUT
 #define OPTIONAL
 
-#       define __RPC_FAR
-#       define __RPC_API 
-#       define __RPC_USER 
-#       define __RPC_STUB 
-#       define  RPC_ENTRY	WIN32API
-
 #define DECLSPEC_IMPORT extern
 #define RPCRTAPI DECLSPEC_IMPORT
 #define RPCNSAPI DECLSPEC_IMPORT
 
-
+#include <rpc.h>
 
 /*typedef char small;*/
 /*typedef unsigned char byte;*/
@@ -1184,8 +1178,10 @@ RpcNsBindingInqEntryName (
 
 #endif /* RPC_UNICODE_SUPPORTED */
 
+#ifndef __WINE_WTYPES_H
 typedef void __RPC_FAR * RPC_AUTH_IDENTITY_HANDLE;
 typedef void __RPC_FAR * RPC_AUTHZ_HANDLE;
+#endif
 
 #define RPC_C_AUTHN_LEVEL_DEFAULT       0
 #define RPC_C_AUTHN_LEVEL_NONE          1
@@ -1964,6 +1960,11 @@ RpcMgmtBindingSetParameter (
 #define RPC_X_INVALID_BUFFER              ERROR_INVALID_USER_BUFFER
 #define RPC_X_PIPE_APP_MEMORY             ERROR_OUTOFMEMORY
 #define RPC_X_INVALID_PIPE_OPERATION      RPC_X_WRONG_PIPE_ORDER
+
+RPC_STATUS RPC_ENTRY RpcImpersonateClient(RPC_BINDING_HANDLE BindingHandle);
+RPC_STATUS RPC_ENTRY RpcRevertToSelfEx(RPC_BINDING_HANDLE BindingHandle);
+RPC_STATUS RPC_ENTRY RpcRevertToSelf();
+long       RPC_ENTRY I_RpcMapWin32Status(RPC_STATUS Status);
 
 #ifdef __cplusplus
 }
