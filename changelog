@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.1829 2001-11-14 15:27:57 bird Exp $ */
+/* $Id: changelog,v 1.1830 2001-11-14 18:55:30 sandervl Exp $ */
+
+ 2001-11-14: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32, USER32, COMCTL32, SHELL32, OLE32:
+                o Removed unnecessary string copy operation changes (heap -> stack)
+                  Performance improvement is minimal at best and stack
+                  corruption is MUCH harder to locate than heap corruption.
 
  2001-11-13: Patrick Haller <patrick.haller@innotek.de>
     - fastdep:  o IPF support.
