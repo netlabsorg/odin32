@@ -1,4 +1,4 @@
-/* $Id: pmtitlebar.cpp,v 1.3 2000-01-09 15:56:03 sandervl Exp $ */
+/* $Id: pmtitlebar.cpp,v 1.4 2000-01-09 19:46:25 sandervl Exp $ */
 /*
  * Win32 Titlebar Managment Code for OS/2
  *
@@ -107,6 +107,8 @@ MRESULT EXPENTRY Win32TitleBarProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
   }
 
   default:
+	if(msg == TBM_SETHILITE || msg == WM_ERASEBACKGROUND)
+		goto RunDefWndProc;
       	goto RunDefTitleBarProc;
   }
 
