@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.44 2000-02-22 19:11:49 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.45 2000-02-24 19:17:15 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -495,6 +495,10 @@ HDC WIN32API CreateICA(LPCSTR lpszDriver, LPCSTR lpszDevice, LPCSTR lpszOutput,
     //SvL: Open32 tests for "DISPLAY"
     if(lpszDriver && !strcmp(lpszDriver, "display")) {
         lpszDriver = szDisplay;
+    }
+    //SvL: Open32 tests lpszDriver for NULL even though it's ignored
+    if(lpszDriver == NULL) {
+	lpszDriver = lpszDevice;
     }
     return O32_CreateIC(lpszDriver, lpszDevice, lpszOutput, lpdvmInit);
 }
