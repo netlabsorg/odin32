@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1422 2001-05-18 20:13:46 sandervl Exp $ */
+/* $Id: changelog,v 1.1423 2001-05-19 08:24:20 sandervl Exp $ */
+
+ 2001-05-19: Dietrich Teickner <Dietrich_Teickner@t-online.de>
+    - KERNEL32: o LOCALE_IFIRSTDAYOFWEEK fix (GetLocaleInfo)
 
  2001-05-18: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Fixed FS corruption in LCMapStringA/W
