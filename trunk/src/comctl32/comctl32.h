@@ -1,4 +1,4 @@
-/* $Id: comctl32.h,v 1.16 2000-11-17 14:37:50 sandervl Exp $ */
+/* $Id: comctl32.h,v 1.17 2000-11-20 02:51:37 bird Exp $ */
 /*
  * Win32 common controls implementation
  *
@@ -69,6 +69,8 @@ extern HMODULE COMCTL32_hModule;
 #define IDC_SUNKEN_LINE   12326
 
 #define IDS_CLOSE 4160
+/* temp fix kso Mon 20.11.2000 */
+#define IDS_SEPARATOR 4161
 
 /* Toolbar customization dialog */
 #define IDD_TBCUSTOMIZE     200
