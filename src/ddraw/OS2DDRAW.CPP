@@ -9,7 +9,7 @@
 #include "os2surface.h"
 #define _OS2WIN_H
 #define FAR
-#include "misc.h"
+#include <misc.h>
 #include <string.h>
 #include <winreg.h>
 #include <winuser.h>
@@ -112,7 +112,7 @@ OS2IDirectDraw::OS2IDirectDraw(GUID *lpGUID) :
 
   if(lpGUID && *lpGUID == IID_IDirect3D)
   {
-    WriteLog("D3D Interface\n");
+    dprintf(("D3D Interface\n"));
 
     lpVtbl = (IDirectDraw4Vtbl *)&Vtbl3D;
   }
@@ -120,12 +120,12 @@ OS2IDirectDraw::OS2IDirectDraw(GUID *lpGUID) :
   {
     if(lpGUID && *lpGUID == IID_IDirectDraw4)
     {
-      WriteLog("V4 Interface\n");
+      dprintf(("V4 Interface\n"));
       lpVtbl = &Vtbl4;
     }
     else
     {
-      WriteLog("<V4 Interface\n");
+      dprintf(("<V4 Interface\n"));
       lpVtbl = (IDirectDraw4Vtbl *) &Vtbl;
     }
   }
@@ -141,13 +141,13 @@ OS2IDirectDraw::OS2IDirectDraw(GUID *lpGUID) :
                  &pFrameBuffer);
   if(rc)
   {
-    WriteLog("ERROR: DiveOpen returned %d\n", rc);
+    dprintf(("ERROR: DiveOpen returned %d\n", rc));
     lastError = DDERR_GENERIC;
     hDive     = NULL;
   }
   else
   {
-    WriteLog("DiveOpen OK Framebuufer at 0x%08X\n",pFrameBuffer);
+    dprintf(("DiveOpen OK Framebuufer at 0x%08X\n",pFrameBuffer));
   }
   memset( &dCaps,
           0,
@@ -159,7 +159,7 @@ OS2IDirectDraw::OS2IDirectDraw(GUID *lpGUID) :
   rc = DiveQueryCaps( &dCaps,
                       DIVE_BUFFER_SCREEN);
 
-  WriteLog("DiveQueryCaps rc=0x%08X\n",rc);
+  dprintf(("DiveQueryCaps rc=0x%08X\n",rc));
 
   pdwUnknownData[235] = dCaps.ulHorizontalResolution;
   pdwUnknownData[236] = dCaps.ulVerticalResolution;
@@ -200,7 +200,7 @@ HRESULT __stdcall DrawQueryInterface(THIS This, REFIID riid, LPVOID FAR * ppvObj
 {
  OS2IDirectDraw *me = (OS2IDirectDraw *)This;
   #ifdef DEBUG
-    WriteLog("OS2IDirectDraw::QueryInterface\n");
+    dprintf(("OS2IDirectDraw::QueryInterface\n"));
   #endif
 
   *ppvObj = NULL;
@@ -216,12 +216,12 @@ HRESULT __stdcall DrawQueryInterface(THIS This, REFIID riid, LPVOID FAR * ppvObj
 
   if(IsEqualGUID(riid, IID_IDirectDraw4))
   {
-    WriteLog("IID_IDirectDraw4 Interface\n");
+    dprintf(("IID_IDirectDraw4 Interface\n"));
     me->lpVtbl = &me->Vtbl4;
   }
   else
   {
-    WriteLog("No IID_IDirectDraw4 Interface\n");
+    dprintf(("No IID_IDirectDraw4 Interface\n"));
     me->lpVtbl = (IDirectDraw4Vtbl *) &me->Vtbl;
   }
   *ppvObj = This;
@@ -236,7 +236,7 @@ ULONG __stdcall DrawAddRef(THIS This)
  OS2IDirectDraw *me = (OS2IDirectDraw *)This;
 
   #ifdef DEBUG
-    WriteLog("OS2IDirectDraw::AddRef %d\n", me->Referenced+1);
+    dprintf(("OS2IDirectDraw::AddRef %d\n", me->Referenced+1));
   #endif
 
   return ++me->Referenced;
@@ -249,8 +249,8 @@ ULONG __stdcall DrawRelease(THIS This)
  ULONG rc;
 
   #ifdef DEBUG
-    WriteLog("OS2IDirectDraw::Release %d\n", me->Referenced-1);
-    WriteLog("OS2IDirectDraw::%X \n", me);
+    dprintf(("OS2IDirectDraw::Release %d\n", me->Referenced-1));
+    dprintf(("OS2IDirectDraw::%X \n", me));
   #endif
 
   if(me->Referenced)
@@ -275,7 +275,7 @@ ULONG __stdcall DrawRelease(THIS This)
 HRESULT __stdcall DrawCompact(THIS)
 {
   #ifdef DEBUG
-    WriteLog("Compact\n");
+    dprintf(("Compact\n"));
   #endif
 
   return(DD_OK);
@@ -291,7 +291,7 @@ HRESULT __stdcall DrawCreateClipper(THIS This, DWORD, LPDIRECTDRAWCLIPPER FAR *l
   newclip = new OS2IDirectDrawClipper(me);
 
   #ifdef DEBUG
-    WriteLog("CreateClipper\n");
+    dprintf(("CreateClipper\n"));
   #endif
 
   if(newclip == NULL)
@@ -347,7 +347,7 @@ HRESULT __stdcall DrawCreatePalette(THIS This, DWORD dwFlags,
   if(DD_OK == rc)
   {
     #ifdef DEBUG
-      WriteLog("CreatePalette with %d colors\n", palsize);
+      dprintf(("CreatePalette with %d colors\n", palsize));
     #endif
 
     newpal = new OS2IDirectDrawPalette((VOID*)me, palsize, lpColorTable, dwFlags);
@@ -384,16 +384,16 @@ HRESULT __stdcall DrawCreateSurface(THIS This, LPDDSURFACEDESC lpDDSurfaceDesc,
  HRESULT                rc;
 
   #ifdef DEBUG
-    WriteLog("CreateSurface\n");
-    WriteLog("dwSize %d\n", lpDDSurfaceDesc->dwSize);
-    WriteLog("dwFlags %X\n", lpDDSurfaceDesc->dwFlags);
-    WriteLog("dwHeight %d\n", lpDDSurfaceDesc->dwHeight);
-    WriteLog("dwWidth %d\n", lpDDSurfaceDesc->dwWidth);
-    WriteLog("lPitch %d\n", lpDDSurfaceDesc->lPitch);
-    WriteLog("dwBackBufferCount %d\n", lpDDSurfaceDesc->dwBackBufferCount);
-    WriteLog("dwMipMapCount %d\n", lpDDSurfaceDesc->dwMipMapCount);
-    WriteLog("dwAlphaBitDepth %d\n", lpDDSurfaceDesc->dwAlphaBitDepth);
-    WriteLog("ddsCaps.dwCaps %X\n", lpDDSurfaceDesc->ddsCaps.dwCaps);
+    dprintf(("CreateSurface\n"));
+    dprintf(("dwSize %d\n", lpDDSurfaceDesc->dwSize));
+    dprintf(("dwFlags %X\n", lpDDSurfaceDesc->dwFlags));
+    dprintf(("dwHeight %d\n", lpDDSurfaceDesc->dwHeight));
+    dprintf(("dwWidth %d\n", lpDDSurfaceDesc->dwWidth));
+    dprintf(("lPitch %d\n", lpDDSurfaceDesc->lPitch));
+    dprintf(("dwBackBufferCount %d\n", lpDDSurfaceDesc->dwBackBufferCount));
+    dprintf(("dwMipMapCount %d\n", lpDDSurfaceDesc->dwMipMapCount));
+    dprintf(("dwAlphaBitDepth %d\n", lpDDSurfaceDesc->dwAlphaBitDepth));
+    dprintf(("ddsCaps.dwCaps %X\n", lpDDSurfaceDesc->ddsCaps.dwCaps));
   #endif
 
   newsurf = new OS2IDirectDrawSurface(me, (LPDDSURFACEDESC2)lpDDSurfaceDesc);
@@ -407,14 +407,14 @@ HRESULT __stdcall DrawCreateSurface(THIS This, LPDDSURFACEDESC lpDDSurfaceDesc,
     rc = newsurf->GetLastError();
     if(rc != DD_OK)
     {
-      WriteLog("Error createing Surface\n\n");
+      dprintf(("Error createing Surface\n\n"));
       *lplpDD = NULL;
       delete newsurf;
     }
     else
       *lplpDD = (IDirectDrawSurface *)newsurf;
 
-    WriteLog("New Surface created at %08X\n\n", newsurf);
+    dprintf(("New Surface created at %08X\n\n", newsurf));
   }
 
   return(rc);
@@ -430,15 +430,15 @@ HRESULT __stdcall DrawCreateSurface4(THIS This, LPDDSURFACEDESC2 lpDDSurfaceDesc
  HRESULT                rc;
 
   #ifdef DEBUG
-    WriteLog("CreateSurface4\n");
-    WriteLog("dwSize %d\n", lpDDSurfaceDesc2->dwSize);
-    WriteLog("dwHeight %d\n", lpDDSurfaceDesc2->dwHeight);
-    WriteLog("dwWidth %d\n", lpDDSurfaceDesc2->dwWidth);
-    WriteLog("lPitch %d\n", lpDDSurfaceDesc2->lPitch);
-    WriteLog("dwBackBufferCount %d\n", lpDDSurfaceDesc2->dwBackBufferCount);
-    WriteLog("dwMipMapCount %d\n", lpDDSurfaceDesc2->dwMipMapCount);
-    WriteLog("dwAlphaBitDepth %d\n", lpDDSurfaceDesc2->dwAlphaBitDepth);
-    WriteLog("ddsCaps.dwCaps %X\n", lpDDSurfaceDesc2->ddsCaps.dwCaps);
+    dprintf(("CreateSurface4\n"));
+    dprintf(("dwSize %d\n", lpDDSurfaceDesc2->dwSize));
+    dprintf(("dwHeight %d\n", lpDDSurfaceDesc2->dwHeight));
+    dprintf(("dwWidth %d\n", lpDDSurfaceDesc2->dwWidth));
+    dprintf(("lPitch %d\n", lpDDSurfaceDesc2->lPitch));
+    dprintf(("dwBackBufferCount %d\n", lpDDSurfaceDesc2->dwBackBufferCount));
+    dprintf(("dwMipMapCount %d\n", lpDDSurfaceDesc2->dwMipMapCount));
+    dprintf(("dwAlphaBitDepth %d\n", lpDDSurfaceDesc2->dwAlphaBitDepth));
+    dprintf(("ddsCaps.dwCaps %X\n", lpDDSurfaceDesc2->ddsCaps.dwCaps));
   #endif
 
   newsurf = new OS2IDirectDrawSurface(me, lpDDSurfaceDesc2);
@@ -453,7 +453,7 @@ HRESULT __stdcall DrawCreateSurface4(THIS This, LPDDSURFACEDESC2 lpDDSurfaceDesc
     rc = newsurf->GetLastError();
     if(rc != DD_OK)
     {
-      WriteLog("Error createing Surface\n\n");
+      dprintf(("Error createing Surface\n\n"));
       *lplpDD = NULL;
 
       delete newsurf;
@@ -461,7 +461,7 @@ HRESULT __stdcall DrawCreateSurface4(THIS This, LPDDSURFACEDESC2 lpDDSurfaceDesc
     else
       *lplpDD = (IDirectDrawSurface4 *)newsurf;
 
-    WriteLog("New Surface created at %08X\n\n", newsurf);
+    dprintf(("New Surface created at %08X\n\n", newsurf));
   }
 
   return(rc);
@@ -471,7 +471,7 @@ HRESULT __stdcall DrawCreateSurface4(THIS This, LPDDSURFACEDESC2 lpDDSurfaceDesc
 HRESULT __stdcall DrawDuplicateSurface(THIS, LPDIRECTDRAWSURFACE, LPDIRECTDRAWSURFACE FAR * )
 {
   #ifdef DEBUG
-    WriteLog("DuplicateSurface NIY\n");
+    dprintf(("DuplicateSurface NIY\n"));
   #endif
   return(DD_OK);
 }
@@ -480,7 +480,7 @@ HRESULT __stdcall DrawDuplicateSurface(THIS, LPDIRECTDRAWSURFACE, LPDIRECTDRAWSU
 HRESULT __stdcall DrawDuplicateSurface4(THIS, LPDIRECTDRAWSURFACE4, LPDIRECTDRAWSURFACE4 FAR * )
 {
   #ifdef DEBUG
-    WriteLog("DuplicateSurface4 NIY\n");
+    dprintf(("DuplicateSurface4 NIY\n"));
   #endif
 
   return(DD_OK);
@@ -499,14 +499,14 @@ HRESULT __stdcall DrawEnumDisplayModes( THIS This,
   OS2IDirectDraw        *me = (OS2IDirectDraw *)This;
 
   #ifdef DEBUG
-    WriteLog("EnumDisplayModes\n");
+    dprintf(("EnumDisplayModes\n"));
   #endif
 
   // Check for Pointer to callback function
   if (NULL == lpDDEnumModesCallback)
   {
     #ifdef DEBUG
-      WriteLog("EnumDisplayModes : Error NO EnumFunction passed in\n");
+      dprintf(("EnumDisplayModes : Error NO EnumFunction passed in\n"));
     #endif
 
     return(DDERR_GENERIC);
@@ -529,7 +529,7 @@ HRESULT __stdcall DrawEnumDisplayModes( THIS This,
     // DIVE modes
 
     #ifdef DEBUG
-      WriteLog("EnumDisplayModes : DIVE modes\n");
+      dprintf(("EnumDisplayModes : DIVE modes\n"));
     #endif
 
     // Enumerate all modes ?
@@ -538,13 +538,13 @@ HRESULT __stdcall DrawEnumDisplayModes( THIS This,
       // Check if we shall report 320x200 mode
 
       #ifdef DEBUG
-        WriteLog("EnumDisplayModes : ALL modes\n");
+        dprintf(("EnumDisplayModes : ALL modes\n"));
       #endif
 
       if(dwFlags && DDEDM_STANDARDVGAMODES)
       {
         #ifdef DEBUG
-          WriteLog("EnumDisplayModes : STANDARDVGAMODES\n");
+          dprintf(("EnumDisplayModes : STANDARDVGAMODES\n"));
         #endif
         DDSurfAct.dwHeight = ModesDive[0].iYRes;
         DDSurfAct.dwWidth  = ModesDive[0].iXRes;
@@ -553,7 +553,7 @@ HRESULT __stdcall DrawEnumDisplayModes( THIS This,
         if(!lpDDEnumModesCallback(&DDSurfAct,lpContext))
         {
           #ifdef DEBUG
-            WriteLog("EnumDisplayModes : Enum done\n");
+            dprintf(("EnumDisplayModes : Enum done\n"));
           #endif
           return (DD_OK);
         }
@@ -596,15 +596,15 @@ HRESULT __stdcall DrawEnumDisplayModes( THIS This,
               break;
           }
           #ifdef DEBUG
-            WriteLog( "EnumDisplayModes : Enum Mode %dx%d @ %d\n",
+            dprintf( ("EnumDisplayModes : Enum Mode %dx%d @ %d\n",
                       DDSurfAct.dwHeight,
                       DDSurfAct.dwWidth,
-                      DDSurfAct.ddpfPixelFormat.dwRGBBitCount);
+                      DDSurfAct.ddpfPixelFormat.dwRGBBitCount));
           #endif
           fCallAgain = lpDDEnumModesCallback(&DDSurfAct,lpContext);
           #ifdef DEBUG
-            WriteLog( "EnumDisplayModes : Callback returned with %d\n",
-                      fCallAgain);
+            dprintf( ("EnumDisplayModes : Callback returned with %d\n",
+                      fCallAgain));
           #endif
         }
         iMode++;
@@ -790,7 +790,7 @@ HRESULT __stdcall DrawEnumDisplayModes4(THIS This, DWORD dwFlags, LPDDSURFACEDES
   OS2IDirectDraw        *me = (OS2IDirectDraw *)This;
 
   #ifdef DEBUG
-    WriteLog("EnumDisplayModes4 NIY\n");
+    dprintf(("EnumDisplayModes4 NIY\n"));
   #endif
   return(DD_OK);
 }
@@ -799,7 +799,7 @@ HRESULT __stdcall DrawEnumDisplayModes4(THIS This, DWORD dwFlags, LPDDSURFACEDES
 HRESULT __stdcall DrawEnumSurfaces(THIS, DWORD, LPDDSURFACEDESC, LPVOID,LPDDENUMSURFACESCALLBACK )
 {
   #ifdef DEBUG
-    WriteLog("EnumSurfaces NIY\n");
+    dprintf(("EnumSurfaces NIY\n"));
   #endif
 
   return(DD_OK);
@@ -809,7 +809,7 @@ HRESULT __stdcall DrawEnumSurfaces(THIS, DWORD, LPDDSURFACEDESC, LPVOID,LPDDENUM
 HRESULT __stdcall DrawEnumSurfaces4(THIS, DWORD, LPDDSURFACEDESC2, LPVOID,LPDDENUMSURFACESCALLBACK2 )
 {
   #ifdef DEBUG
-    WriteLog("EnumSurfaces4 NIY\n");
+    dprintf(("EnumSurfaces4 NIY\n"));
   #endif
 
   return(DD_OK);
@@ -819,7 +819,7 @@ HRESULT __stdcall DrawEnumSurfaces4(THIS, DWORD, LPDDSURFACEDESC2, LPVOID,LPDDEN
 HRESULT __stdcall DrawFlipToGDISurface(THIS)
 {
   #ifdef DEBUG
-    WriteLog("FlipToGDISurface NIY\n");
+    dprintf(("FlipToGDISurface NIY\n"));
   #endif
 
   return(DD_OK);
@@ -831,7 +831,7 @@ HRESULT __stdcall DrawGetCaps(THIS, LPDDCAPS lpDDDriverCaps, LPDDCAPS lpDDHELCap
   DWORD dwSize;
 
   #ifdef DEBUG
-    WriteLog("DDGetCaps of ");
+    dprintf(("DDGetCaps of "));
   #endif
 
   if( (NULL==lpDDDriverCaps) && (NULL==lpDDHELCaps) )
@@ -841,14 +841,14 @@ HRESULT __stdcall DrawGetCaps(THIS, LPDDCAPS lpDDDriverCaps, LPDDCAPS lpDDHELCap
   {
     // Caller want Driver Caps
 
-    WriteLog("Driver\n");
+    dprintf(("Driver\n"));
 
     if( (sizeof(DDCAPS)!=lpDDDriverCaps->dwSize)     &&
         (sizeof(DDCAPS_DX5)!=lpDDDriverCaps->dwSize) &&
         (sizeof(DDCAPS_DX3)!=lpDDDriverCaps->dwSize) )
     {
-      WriteLog( "Size %d Not supported ",
-                lpDDDriverCaps->dwSize);
+      dprintf( ("Size %d Not supported ",
+                lpDDDriverCaps->dwSize));
       return(DDERR_INVALIDPARAMS);
     }
     // Clear structure so we only have to set the supported flags
@@ -987,11 +987,11 @@ HRESULT __stdcall DrawGetCaps(THIS, LPDDCAPS lpDDDriverCaps, LPDDCAPS lpDDHELCap
   if(NULL!=lpDDHELCaps)
   {
     // Caller wants HEL Caps
-    WriteLog(" HEL\n");
+    dprintf((" HEL\n"));
 
     if(sizeof(DDCAPS)!=lpDDHELCaps->dwSize)
     {
-      WriteLog("Size Not Set\n");
+      dprintf(("Size Not Set\n"));
       return(DDERR_INVALIDPARAMS);
     }
     // Clear structure so we only have to set the supported flags
@@ -1075,7 +1075,7 @@ HRESULT __stdcall DrawGetDisplayMode(THIS This, LPDDSURFACEDESC lpDDSurfaceDesc)
 {
   OS2IDirectDraw        *me = (OS2IDirectDraw *)This;
   #ifdef DEBUG
-    WriteLog("GetDisplayMode\n");
+    dprintf(("GetDisplayMode\n"));
   #endif
 
   // Check Parameter
@@ -1178,7 +1178,7 @@ HRESULT __stdcall DrawGetDisplayMode(THIS This, LPDDSURFACEDESC lpDDSurfaceDesc)
       break;
     default:
       #ifdef DEBUG
-        WriteLog("Unsupported mode\n");
+        dprintf(("Unsupported mode\n"));
       #endif
       return(DDERR_UNSUPPORTEDMODE);
   }
@@ -1191,7 +1191,7 @@ HRESULT __stdcall DrawGetDisplayMode4(THIS This, LPDDSURFACEDESC2 lpDDSurfaceDes
 {
   OS2IDirectDraw        *me = (OS2IDirectDraw *)This;
   #ifdef DEBUG
-    WriteLog("GetDisplayMode\n");
+    dprintf(("GetDisplayMode\n"));
   #endif
 
   // Check Parameter
@@ -1294,7 +1294,7 @@ HRESULT __stdcall DrawGetDisplayMode4(THIS This, LPDDSURFACEDESC2 lpDDSurfaceDes
       break;
     default:
       #ifdef DEBUG
-        WriteLog("Unsupported mode\n");
+        dprintf(("Unsupported mode\n"));
       #endif
       return(DDERR_UNSUPPORTEDMODE);
   }
@@ -1307,7 +1307,7 @@ HRESULT __stdcall DrawGetFourCCCodes(THIS, LPDWORD lpNumCodes, LPDWORD lpCodes)
 {
   DWORD dwFCC[3] = {FOURCC_LUT8,FOURCC_R565,FOURCC_RGB3};
   #ifdef DEBUG
-    WriteLog("GetFourCCCodes\n");
+    dprintf(("GetFourCCCodes\n"));
   #endif
 
   if(NULL==lpNumCodes)
@@ -1334,7 +1334,7 @@ HRESULT __stdcall DrawGetFourCCCodes(THIS, LPDWORD lpNumCodes, LPDWORD lpCodes)
 HRESULT __stdcall DrawGetGDISurface(THIS, LPDIRECTDRAWSURFACE FAR *)
 {
   #ifdef DEBUG
-    WriteLog("GetGDISurface NYI\n");
+    dprintf(("GetGDISurface NYI\n"));
   #endif
 
   return(DD_OK);
@@ -1344,7 +1344,7 @@ HRESULT __stdcall DrawGetGDISurface(THIS, LPDIRECTDRAWSURFACE FAR *)
 HRESULT __stdcall DrawGetGDISurface4(THIS, LPDIRECTDRAWSURFACE4 FAR *)
 {
   #ifdef DEBUG
-    WriteLog("GetGDISurface NYI\n");
+    dprintf(("GetGDISurface NYI\n"));
   #endif
 
   return(DD_OK);
@@ -1356,7 +1356,7 @@ HRESULT __stdcall DrawGetMonitorFrequency(THIS This, LPDWORD lpdwFreq)
   ULONG ulTime1, ulTime2;
   DWORD dwFlags = DDWAITVB_BLOCKBEGIN;
   #ifdef DEBUG
-    WriteLog("GetMonitorFrequency\n");
+    dprintf(("GetMonitorFrequency\n"));
   #endif
   if(NULL==lpdwFreq)
     return(DDERR_INVALIDPARAMS);
@@ -1394,7 +1394,7 @@ HRESULT __stdcall DrawGetScanLine(THIS, LPDWORD lpdwLine)
 {
   BOOL bVertBlank;
   #ifdef DEBUG
-    WriteLog("GetScanLine\n");
+    dprintf(("GetScanLine\n"));
   #endif
   // ToDO find a way to get this position, so for now simply return DDERR_UNSUPPORTED
   // as we indicated in DDCAPS we don't support this.
@@ -1418,7 +1418,7 @@ HRESULT __stdcall DrawGetVerticalBlankStatus(THIS , LPBOOL lpbIsInVB)
 {
   int rc;
   #ifdef DEBUG
-    WriteLog("GetVerticalBlankStatus\n");
+    dprintf(("GetVerticalBlankStatus\n"));
   #endif
   if(NULL==lpbIsInVB)
     return(DDERR_INVALIDPARAMS);
@@ -1443,7 +1443,7 @@ HRESULT __stdcall DrawGetVerticalBlankStatus(THIS , LPBOOL lpbIsInVB)
 HRESULT __stdcall DrawInitialize(THIS, GUID FAR *)
 {
   #ifdef DEBUG
-    WriteLog("Initialize\n");
+    dprintf(("Initialize\n"));
   #endif
 
   return(DD_OK);
@@ -1453,7 +1453,7 @@ HRESULT __stdcall DrawInitialize(THIS, GUID FAR *)
 HRESULT __stdcall DrawRestoreDisplayMode(THIS)
 {
   #ifdef DEBUG
-    WriteLog("RestoreDisplayMod\n");
+    dprintf(("RestoreDisplayMod\n"));
   #endif
 
   return(DD_OK);
@@ -1465,7 +1465,7 @@ HRESULT __stdcall DrawSetCooperativeLevel(THIS This, HWND hwndClient, DWORD dwFl
  OS2IDirectDraw        *me = (OS2IDirectDraw *)This;
 
   #ifdef DEBUG
-    WriteLog("SetCooperativeLevel: hwnd %X, Flags %X\n", hwndClient, dwFlags);
+    dprintf(("SetCooperativeLevel: hwnd %X, Flags %X\n", hwndClient, dwFlags));
   #endif
 
   me->hwndClient = hwndClient;
@@ -1486,7 +1486,7 @@ HRESULT __stdcall DrawSetDisplayMode2(THIS This, DWORD dwWidth, DWORD dwHeight,
  SETUP_BLITTER sBlt;
 
   #ifdef DEBUG
-    WriteLog("SetDisplayMode2 to %dx%d with %d bits colors\n", dwWidth, dwHeight, dwBPP);
+    dprintf(("SetDisplayMode2 to %dx%d with %d bits colors\n", dwWidth, dwHeight, dwBPP));
   #endif
 
   me->screenwidth  = dwWidth;
@@ -1524,7 +1524,7 @@ HRESULT __stdcall DrawSetDisplayMode(THIS This, DWORD dwWidth, DWORD dwHeight,
  SETUP_BLITTER sBlt;
 
 #ifdef DEBUG
-  WriteLog("SetDisplayMode to %dx%d with %d bits colors\n", dwWidth, dwHeight, dwBPP);
+  dprintf(("SetDisplayMode to %dx%d with %d bits colors\n", dwWidth, dwHeight, dwBPP));
 #endif
   me->screenwidth  = dwWidth;
   me->screenheight = dwHeight;
@@ -1559,7 +1559,7 @@ HRESULT __stdcall DrawWaitForVerticalBlank(THIS, DWORD dwFlags, HANDLE hEvent)
   int rci;
 
   #ifdef DEBUG
-    WriteLog("WaitForVerticalBlank\n");
+    dprintf(("WaitForVerticalBlank\n"));
   #endif
 
   if(DDWAITVB_BLOCKBEGINEVENT == dwFlags) // This parameter isn't support in DX
@@ -1612,7 +1612,7 @@ HRESULT __stdcall DrawGetAvailableVidMem(THIS, LPDDSCAPS lpDDSCaps,
                                          LPDWORD lpdwTotal, LPDWORD lpdwFree)
 {
   #ifdef DEBUG
-    WriteLog("GetAvailableVidMem\n");
+    dprintf(("GetAvailableVidMem\n"));
   #endif
 
   // Check parameters
@@ -1637,7 +1637,7 @@ HRESULT __stdcall DrawGetAvailableVidMem4(THIS, LPDDSCAPS2 lpDDSCaps2,
                                          LPDWORD lpdwTotal, LPDWORD lpdwFree)
 {
   #ifdef DEBUG
-    WriteLog("GetAvailableVidMem\n");
+    dprintf(("GetAvailableVidMem\n"));
   #endif
 
   // Check parameters
@@ -1661,7 +1661,7 @@ HRESULT __stdcall DrawGetAvailableVidMem4(THIS, LPDDSCAPS2 lpDDSCaps2,
 HRESULT __stdcall DrawGetSurfaceFromDC(THIS, HDC hdc, LPDIRECTDRAWSURFACE4 *)
 {
   #ifdef DEBUG
-    WriteLog("GetSurfaceFromDC NYI\n");
+    dprintf(("GetSurfaceFromDC NYI\n"));
   #endif
 
   return(DD_OK);
@@ -1671,7 +1671,7 @@ HRESULT __stdcall DrawGetSurfaceFromDC(THIS, HDC hdc, LPDIRECTDRAWSURFACE4 *)
 HRESULT __stdcall DrawRestoreAllSurfaces(THIS)
 {
   #ifdef DEBUG
-    WriteLog("RestoreAllSurfaces\n");
+    dprintf(("RestoreAllSurfaces\n"));
   #endif
 
   return(DD_OK);
@@ -1681,7 +1681,7 @@ HRESULT __stdcall DrawRestoreAllSurfaces(THIS)
 HRESULT __stdcall DrawTestCooperativeLevel(THIS)
 {
   #ifdef DEBUG
-    WriteLog("TestCooperativeLevel\n");
+    dprintf(("TestCooperativeLevel\n"));
   #endif
 
   return(DD_OK);
@@ -1692,7 +1692,7 @@ HRESULT __stdcall DrawGetDeviceIdentifier( THIS, LPDDDEVICEIDENTIFIER lpdddi,
                                            DWORD dwFlags)
 {
   #ifdef DEBUG
-    WriteLog("GetDeviceIdentifier Flags = %d\n",dwFlags);
+    dprintf(("GetDeviceIdentifier Flags = %d\n",dwFlags));
   #endif
   if(NULL==lpdddi)
     return DDERR_INVALIDPARAMS;
