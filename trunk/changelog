@@ -1,7 +1,9 @@
-/* $Id: changelog,v 1.2212 2002-07-11 15:18:53 sandervl Exp $ */
+/* $Id: changelog,v 1.2213 2002-07-11 18:16:41 achimha Exp $ */
 
  2002-07-11: Platon Fomichev <platon@innotek.de>
     - COMCTL32: o Listview: clear background for area without items (ownerdrawn)
+    - USER32:   o OSLibWinShowTaskList must query task list window
+                  handle from OS/2 and not assume a constant handle value
 
  2002-07-08: Sander van Leeuwen <sandervl@innotek.de> 
     - USER32:   o Changed SetFocus fix; only disallow focus change for minimized
