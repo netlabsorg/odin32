@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.19 2000-01-31 22:30:51 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.20 2000-02-05 02:12:20 sandervl Exp $ */
 
 /*
  * USER32 DLL entry point
@@ -41,6 +41,7 @@
 #include "win32wdesktop.h"
 #include "syscolor.h"
 #include "initterm.h"
+#include <exitlist.h>
 
 /*-------------------------------------------------------------------*/
 /* A clean up routine registered with DosExitList must be used if    */
@@ -95,7 +96,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          /* are required and the runtime is dynamically linked.             */
          /*******************************************************************/
 
-         rc = DosExitList(0x00008000|EXLST_ADD, cleanup);
+         rc = DosExitList(EXITLIST_USER32|EXLST_ADD, cleanup);
          if(rc)
                 return 0UL;
 

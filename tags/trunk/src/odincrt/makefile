@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 1999-12-21 12:28:07 sandervl Exp $
+# $Id: makefile,v 1.14 2000-02-05 02:05:38 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -37,7 +37,7 @@ $(TARGET).lib: $(TARGET).def
         $(IMPLIB) $(IMPLIBFLAGS) $@ $**
         $(CP) $@ $(PDWIN32_LIB)
 
-initterm.obj: initterm.cpp
+initterm.obj: initterm.cpp $(PDWIN32_INCLUDE)\exitlist.h
 
 string.obj: string.cpp
 
