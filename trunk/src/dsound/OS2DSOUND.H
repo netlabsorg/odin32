@@ -1,4 +1,4 @@
-/* $Id: OS2DSOUND.H,v 1.3 1999-06-10 17:09:29 phaller Exp $ */
+/* $Id: OS2DSOUND.H,v 1.4 1999-10-23 23:00:49 sandervl Exp $ */
 
 /*
  * DirectSound main class
@@ -11,10 +11,11 @@
 #ifndef __OS2DSOUND_H__
 #define __OS2DSOUND_H__
 
-/* KSO Apr 19 1999: Set correct interface.           *
- * (INTERFACE is used in the THIS and THIS_ macros)  */
-#undef  INTERFACE
-#define INTERFACE   IDirectSound
+#undef THIS
+#define THIS VOID*This
+
+#undef THIS_
+#define THIS_ VOID*This,
 
 class OS2IDirectSound
 {
@@ -42,46 +43,30 @@ class OS2IDirectSound
               OS2IDirectSound* next;                   // Next OS2IDirectSound
     static    OS2IDirectSound* dsound;                 // List of OS2IDirectSound
 
-    friend    HRESULT __stdcall SoundQueryInterface(THIS, REFIID riid, LPVOID FAR * ppvObj);
+    friend    HRESULT __stdcall SoundQueryInterface(THIS, REFIID riid, LPVOID * ppvObj);
     friend    ULONG   __stdcall SoundAddRef(THIS);
     friend    ULONG   __stdcall SoundRelease(THIS);
-    #if 0 //KSO Apr 13 1999: some parameter incompabilities between newer and older SDKs.
-       friend HRESULT __stdcall SoundCreateSoundBuffer(THIS_ LPDSBUFFERDESC, LPLPDIRECTSOUNDBUFFER, IUnknown FAR *);
-    #else
-       friend HRESULT __stdcall SoundCreateSoundBuffer(THIS_ LPCDSBUFFERDESC, LPDIRECTSOUNDBUFFER*,LPUNKNOWN);
-    #endif
+    friend    HRESULT __stdcall SoundCreateSoundBuffer(THIS_ LPDSBUFFERDESC, LPDIRECTSOUNDBUFFER*,LPUNKNOWN);
     friend    HRESULT __stdcall SoundGetCaps(THIS_ LPDSCAPS );
     friend    HRESULT __stdcall SoundDuplicateSoundBuffer(THIS_ LPDIRECTSOUNDBUFFER, LPLPDIRECTSOUNDBUFFER );
-    friend    HRESULT __stdcall SoundSetCooperativeLevel(THIS_ W32_HWND, DWORD );
+    friend    HRESULT __stdcall SoundSetCooperativeLevel(THIS_ HWND, DWORD );
     friend    HRESULT __stdcall SoundCompact(THIS );
     friend    HRESULT __stdcall SoundGetSpeakerConfig(THIS_ LPDWORD );
     friend    HRESULT __stdcall SoundSetSpeakerConfig(THIS_ DWORD );
-    #if 0 //KSO Apr 13 1999: parameter declaration has changed in later SDKs
-       friend HRESULT __stdcall SoundInitialize(THIS_ const GUID * );
-    #else
-       friend HRESULT __stdcall SoundInitialize(THIS_ LPGUID);
-    #endif
+    friend    HRESULT __stdcall SoundInitialize(THIS_ LPGUID);
 };
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SoundQueryInterface(THIS, REFIID riid, LPVOID FAR * ppvObj);
+HRESULT __stdcall SoundQueryInterface(THIS, REFIID riid, LPVOID * ppvObj);
 ULONG   __stdcall SoundAddRef(THIS);
 ULONG   __stdcall SoundRelease(THIS);
-#if 0 //KSO Apr 13 1999: some parameter incompabilities between newer and older SDKs.
-    HRESULT __stdcall SoundCreateSoundBuffer(THIS_ LPDSBUFFERDESC, LPLPDIRECTSOUNDBUFFER, IUnknown FAR *);
-#else
-    HRESULT __stdcall SoundCreateSoundBuffer(THIS_ LPCDSBUFFERDESC, LPDIRECTSOUNDBUFFER*,LPUNKNOWN);
-#endif
+HRESULT __stdcall SoundCreateSoundBuffer(THIS_ LPDSBUFFERDESC, LPDIRECTSOUNDBUFFER*,LPUNKNOWN);
 HRESULT __stdcall SoundGetCaps(THIS_ LPDSCAPS );
 HRESULT __stdcall SoundDuplicateSoundBuffer(THIS_ LPDIRECTSOUNDBUFFER, LPLPDIRECTSOUNDBUFFER );
-HRESULT __stdcall SoundSetCooperativeLevel(THIS_ W32_HWND, DWORD );
+HRESULT __stdcall SoundSetCooperativeLevel(THIS_ HWND, DWORD );
 HRESULT __stdcall SoundCompact(THIS );
 HRESULT __stdcall SoundGetSpeakerConfig(THIS_ LPDWORD );
 HRESULT __stdcall SoundSetSpeakerConfig(THIS_ DWORD );
-#if 0 //KSO Apr 13 1999: parameter declaration has changed in later SDKs
-   HRESULT __stdcall SoundInitialize(THIS_ const GUID * );
-#else
-   HRESULT __stdcall SoundInitialize(THIS_ LPGUID);
-#endif
+HRESULT __stdcall SoundInitialize(THIS_ LPGUID);
 
 #endif

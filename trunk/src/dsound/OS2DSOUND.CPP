@@ -1,4 +1,4 @@
-/* $Id: OS2DSOUND.CPP,v 1.3 1999-06-10 17:09:29 phaller Exp $ */
+/* $Id: OS2DSOUND.CPP,v 1.4 1999-10-23 23:00:49 sandervl Exp $ */
 
 /*
  * DirectSound main class
@@ -9,14 +9,6 @@
  *
  */
 
-/*@Const************************************************************************
-*   Defined Constants                                                          *
-*******************************************************************************/
-#define INITGUID
-#define INCL_DIRECTSOUND_GUID
-#define WIN32SDK_NOPOSTWRAPPER
-
-
 /*@Header***********************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
@@ -24,21 +16,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "no.h" /* NO* defines for windows.h */
-#include <w_windows.h>
+#define INITGUID
 #include <dsound.h>
-#include <Win32SDKPostWrapper.h>
 
 #include "os2dsound.h"
 #include "os2sndbuffer.h"
 #include "misc.h"
-
-
-/* KSO Apr 19 1999: INTERFACE set again, since os2sndbuffer changed it.  *
- * (INTERFACE is used in the THIS and THIS_ macros)                      */
-#undef  INTERFACE
-#define INTERFACE   IDirectSound
-
 
 //******************************************************************************
 //******************************************************************************
@@ -70,7 +53,7 @@ OS2IDirectSound::~OS2IDirectSound()
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT WIN32API SoundQueryInterface(THIS, REFIID riid, LPVOID FAR * ppvObj)
+HRESULT WIN32API SoundQueryInterface(THIS, REFIID riid, LPVOID * ppvObj)
 {
   dprintf(("OS2IDirectSound::QueryInterface\n"));
   if(This == NULL) {
@@ -122,17 +105,10 @@ HRESULT WIN32API SoundCompact(THIS)
 }
 //******************************************************************************
 //******************************************************************************
-#if 0 //KSO Apr 13 1999: some parameter incompabilities between newer and older SDKs.
 HRESULT WIN32API SoundCreateSoundBuffer(THIS_
-                    LPDSBUFFERDESC lpDSBufferDesc, //old, non const
-                    LPLPDIRECTSOUNDBUFFER lplpDirectSoundBuffer,
-                    IUnknown FAR *pUnkOuter)
-#else
-HRESULT WIN32API SoundCreateSoundBuffer(THIS_
-                    LPCDSBUFFERDESC lpDSBufferDesc, //new, const
+                    LPDSBUFFERDESC lpDSBufferDesc, //new, const
                     LPDIRECTSOUNDBUFFER *lplpDirectSoundBuffer,
                     LPUNKNOWN pUnkOuter)
-#endif
 {
  OS2IDirectSound *me = (OS2IDirectSound *)This;
  OS2IDirectSoundBuffer *sndbuf;
@@ -169,7 +145,7 @@ HRESULT WIN32API SoundDuplicateSoundBuffer(THIS_ LPDIRECTSOUNDBUFFER, LPLPDIRECT
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT WIN32API SoundSetCooperativeLevel(THIS_ W32_HWND hwndClient, DWORD level)
+HRESULT WIN32API SoundSetCooperativeLevel(THIS_ HWND hwndClient, DWORD level)
 {
  OS2IDirectSound *me = (OS2IDirectSound *)This;
 
@@ -210,11 +186,7 @@ HRESULT WIN32API SoundSetSpeakerConfig(THIS_ DWORD speakerCfg)
 }
 //******************************************************************************
 //******************************************************************************
-#if 0 //KSO Apr 13 1999: parameter declaration has changed in later SDKs
-    HRESULT WIN32API SoundInitialize(THIS_ const GUID * )
-#else
-    HRESULT WIN32API SoundInitialize(THIS_ LPGUID)
-#endif
+HRESULT WIN32API SoundInitialize(THIS_ LPGUID)
 {
   dprintf(("OS2IDirectSound::Initialize UNSUPPORTED\n"));
   return(DS_OK);
