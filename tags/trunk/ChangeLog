@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1406 2001-05-11 14:59:00 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1407 2001-05-11 17:10:10 sandervl Exp $ */
 
  2001-05-11: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Rewrote window handling. Back to using frame and client windows
@@ -36,7 +36,7 @@
  2001-05-10: Shingo Tsuda <sofiya@din.or.jp>
     - GDI32:    o Rop conversion for DIB Section blits
                 o Support for negative height (origin top left) in
-                  SetDIBitsToDevice
+                  SetDIBitsToDevice + StretchDIBits
 
  2001-05-10: Sander van Leeuwen <sandervl@xs4all.nl>
     - GDI32:    o includeBottomRightPoint bugfix; if left == right or top == bottom
