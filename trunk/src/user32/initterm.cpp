@@ -138,7 +138,7 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
 static void APIENTRY cleanup(ULONG ulReason)
 {
    dprintf(("user32 exit\n"));
-   ShowCursor(TRUE);
+   RestoreCursor();
    DestroyDesktopWindow();
    Win32BaseWindow::DestroyAll();
    UnregisterSystemClasses();
