@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.80 2000-02-03 18:56:39 sandervl Exp $
+# $Id: makefile,v 1.81 2000-02-05 02:01:04 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -160,7 +160,7 @@ os2heap.OBJ: \
     os2heap.h \
     initterm.h
 
-initterm.OBJ: .\initterm.cpp initterm.h  $(PDWIN32_INCLUDE)\heapshared.h  mmap.h directory.h hmdevio.h initsystem.h $(PDWIN32_INCLUDE)\heapcode.h
+initterm.OBJ: .\initterm.cpp initterm.h  $(PDWIN32_INCLUDE)\heapshared.h  mmap.h directory.h hmdevio.h initsystem.h $(PDWIN32_INCLUDE)\heapcode.h $(PDWIN32_INCLUDE)\exitlist.h
 initsystem.obj: initsystem.cpp $(PDWIN32_INCLUDE)\cpuhlp.h initsystem.h $(PDWIN32_INCLUDE)\misc.h directory.h $(PDWIN32_INCLUDE)\versionos2.h
 
 

@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.2 1999-11-29 00:11:47 bird Exp $ */
+/* $Id: initterm.cpp,v 1.3 2000-02-05 02:05:37 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -32,6 +32,7 @@
 #include <string.h>
 #include <odin.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
+#include <exitlist.h>
 
 extern "C" {
 /*-------------------------------------------------------------------*/
@@ -96,7 +97,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          /* are required and the runtime is dynamically linked.             */
          /*******************************************************************/
 
-         rc = DosExitList(0x0000FF00|EXLST_ADD, cleanup);
+         rc = DosExitList(EXITLIST_ODINCRT|EXLST_ADD, cleanup);
          if(rc)
                 return 0UL;
          #if 1 /*

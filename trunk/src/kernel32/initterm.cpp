@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.33 2000-01-25 20:27:16 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.34 2000-02-05 02:01:04 sandervl Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -47,6 +47,7 @@
 #include "hmdevio.h"
 #include <windllbase.h>
 #include "initsystem.h"
+#include <exitlist.h>
 
 /*-------------------------------------------------------------------*/
 /* A clean up routine registered with DosExitList must be used if    */
@@ -128,7 +129,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
             /* are required and the runtime is dynamically linked.             */
             /*******************************************************************/
 
-            rc = DosExitList(0x0000F000|EXLST_ADD, cleanup);
+            rc = DosExitList(EXITLIST_KERNEL32|EXLST_ADD, cleanup);
             if (rc)
                 return 0UL;
 

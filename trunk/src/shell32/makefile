@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.18 2000-01-18 22:27:55 sandervl Exp $
+# $Id: makefile,v 1.19 2000-02-05 02:10:16 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -17,10 +17,6 @@ PDWIN32_TOOLS = ..\..\tools\bin
 
 CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE)
 CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
-
-
-RC = $(PDWIN32_TOOLS)\wrc
-RCFLAGS = -s -I. -I$(CPPMAIN)\include -I$(PDWIN32_INCLUDE) -I$(PDWIN32_INCLUDE)\win
 
 TARGET = shell32
 
@@ -59,7 +55,7 @@ resource.asm: shres.rc shell32_en.rc
 resource.obj: resource.asm
 
 
-initterm.obj:     initterm.cpp
+initterm.obj:     initterm.cpp $(PDWIN32_INCLUDE)\exitlist.h
 brsfolder.obj:    brsfolder.cpp
 classes.obj:      classes.cpp
 contmenu.obj:     contmenu.cpp
