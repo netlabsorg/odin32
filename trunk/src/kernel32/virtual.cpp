@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.37 2000-11-14 21:16:26 sandervl Exp $ */
+/* $Id: virtual.cpp,v 1.38 2000-12-12 23:57:16 sandervl Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -452,6 +452,7 @@ ODINFUNCTION3(BOOL, VirtualFree, LPVOID, lpvAddress,
   // verify parameters
   if ( (FreeType & MEM_RELEASE) && (cbSize   != 0) )
   {
+    dprintf(("WARNING: VirtualFree: invalid parameter!!"));
     SetLastError(ERROR_INVALID_PARAMETER);
     return(FALSE);
   }
@@ -459,6 +460,7 @@ ODINFUNCTION3(BOOL, VirtualFree, LPVOID, lpvAddress,
   if ( (FreeType & MEM_DECOMMIT) &&
        (FreeType & MEM_RELEASE) )
   {
+    dprintf(("WARNING: VirtualFree: invalid parameter!!"));
     SetLastError(ERROR_INVALID_PARAMETER);
     return(FALSE);
   }

@@ -1,4 +1,4 @@
-/* $Id: disk.cpp,v 1.23 2000-12-07 12:00:23 sandervl Exp $ */
+/* $Id: disk.cpp,v 1.24 2000-12-12 23:57:15 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -303,7 +303,7 @@ ODINFUNCTION8(BOOL,    GetVolumeInformationA,
             dprintf2(("Volume name: %s", lpVolumeNameBuffer));
         }
     }
-    if(lpFileSystemNameBuffer || lpMaximumComponentLength) {
+    if(lpFileSystemNameBuffer || lpMaximumComponentLength || lpFileSystemFlags) {
         if(!lpFileSystemNameBuffer) {
             lpFileSystemNameBuffer = tmpstring;
             nFileSystemNameSize    = sizeof(tmpstring);
