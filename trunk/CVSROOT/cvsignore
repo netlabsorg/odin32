@@ -17,8 +17,10 @@ resource.asm
 *.vpj
 *.vtg
 bin
+obj
 *.sym
 *.err
 *.*obj
 makefile.inc
 dummy.c
+
