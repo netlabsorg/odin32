@@ -112,7 +112,7 @@
 #define PMSCAN_ERASEEOF        0x6d  
 #define PMSCAN_BREAK           0x6e  
 #define PMSCAN_MOVEWIN         0x6f  
-#define PMSCAN_NLS3            0x70  
+#define PMSCAN_NLS3            0x70  //VK_DBE_HIRAGANA
 #define PMSCAN_HELP            0x71  
 #define PMSCAN_TASKMAN         0x72  
 #define PMSCAN_JEXTRA          0x73  
@@ -146,5 +146,8 @@
 #define PMSCAN_F20             0x8d  
 #define PMSCAN_F21             0x8e  
 #define PMSCAN_F22             0x8f  
+
+#define PMSCAN_DBE_CONV        0x95  //VK_DBE_CONV
+#define PMSCAN_DBE_NOCONV      0x96  //VK_DBE_NOCONV
 
 #endif
