@@ -2,3 +2,6 @@ makefile.inc
 .depend
 *.sym
 *.sys
+*.vpj
+*.vtg
+*.v*
