@@ -1,12 +1,10 @@
-/* $Id: fastdep.c,v 1.36 2002-03-14 13:31:10 bird Exp $
+/* $Id: fastdep.c,v 1.37 2002-08-20 18:16:20 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
  * Copyright (c) 1999-2002 knut st. osmundsen (bird@anduin.net)
  *
- * PH 2001-03-01 added optional support for a super-dependency
- *
- * Project Odin Software License can be found in LICENSE.TXT
+ * GPL
  *
  */
 
@@ -133,7 +131,6 @@ typedef struct _Options
     BOOL            fCheckCyclic;       /* allways check for cylic dependency before inserting an dependent. */
     BOOL            fCacheSearchDirs;   /* cache entire search dirs. */
     const char *    pszExcludeFiles;    /* List of excluded files. */
-    const char *    pszSuperDependency; /* Name for super dependency rule. */
     BOOL            fForceScan;         /* Force scan of all files. */
 } OPTIONS, *POPTIONS;
 
@@ -245,8 +242,9 @@ static char *textbufferGetNextLine(void *pvBuffer, void **ppv, char *pszLineBuff
 static BOOL  depReadFile(const char *pszFilename, BOOL fAppend);
 static BOOL  depWriteFile(const char *pszFilename, BOOL fWriteUpdatedOnly);
 static void  depRemoveAll(void);
-static void *depAddRule(const char *pszRulePath, const char *pszName, const char *pszExt, const char *pszTS);
-static BOOL  depAddDepend(void *pvRule, const char *pszDep, BOOL fCheckCyclic);
+static void *depAddRule(const char *pszRulePath, const char *pszName, const char *pszExt, const char *pszTS, BOOL fConvertName);
+static BOOL  depAddDepend(void *pvRule, const char *pszDep, BOOL fCheckCyclic, BOOL fConvertName);
+static int   depConvertName(char *pszName, int cchName, BOOL fFromMake);
 static void  depMarkNotFound(void *pvRule);
 static BOOL  depCheckCyclic(PDEPRULE pdepRule, const char *pszDep);
 static BOOL  depValidate(PDEPRULE pdepRule);
@@ -358,10 +356,8 @@ OPTIONS options =
     TRUE,            /* fCheckCyclic */
     TRUE,            /* fCacheSearchDirs */
     szExcludeFiles,  /* pszExcludeFiles */
-    NULL,            /* pszSuperDependency */
     FALSE            /* fForceScan */
 };
-
 
 
 /**
@@ -692,25 +688,6 @@ int main(int argc, char **argv)
                     }
                     break;
 
-                case 's': /* insert super-dependency on top of tree */
-                case 'S': /* -s <name for super-dependency>" */
-                    {
-                        if (strlen(argv[argi]) > 2)
-                            /* syntax was /s:name */
-                            options.pszSuperDependency = &argv[argi][2];
-                        else
-                        {
-                            argi++;
-                            if (argi < argc)
-                                /* take next parameter */
-                                options.pszSuperDependency = argv[argi];
-                            else
-                                /* take default */
-                                options.pszSuperDependency = "alltargets";
-                        }
-                    }
-                    break;
-
                 case 'h':
                 case 'H':
                 case '?':
@@ -882,7 +859,7 @@ int main(int argc, char **argv)
 void syntax(void)
 {
     printf(
-        "FastDep v0.42 (build %d)\n"
+        "FastDep v0.43 (build %d)\n"
         "Dependency scanner. Creates a makefile readable depend file.\n"
         " - was quick and dirty, now it's just quick -\n"
         "\n"
@@ -916,11 +893,6 @@ void syntax(void)
         "   -obr<[+]|->     -obr+: Object rule.\n"
         "                   -obr-: No object rule, rule for source filename is generated.\n"
         "   -obj[ ]<objext> Object extention.                     Default: obj\n"
-        "   -s[ ][name]     Insert super-dependency on top of tree.\n"
-        "                   If not specified name defaults to 'alltargets'.\n"
-        "                   You can specify a '=' at the end and a macro will\n"
-        "                   be created instead of a rule.\n"
-        "                   Default: disabled\n"
         "   -r[ ]<rsrcext>  Resource binary extention.            Default: res\n"
         "   -x[ ]<f1[;f2]>  Files to exclude. Only exact filenames.\n"
         "   <files>         Files to scan. Wildchars are allowed.\n"
@@ -1029,24 +1001,24 @@ int langC_CPP(const char *pszFilename, const char *pszNormFilename,
     if (options.fObjRule && !fHeader)
     {
         if (options.fNoObjectPath)
-            pvRule = depAddRule(fileNameNoExt(pszFilename, szBuffer), NULL, options.pszObjectExt, pszTS);
+            pvRule = depAddRule(fileNameNoExt(pszFilename, szBuffer), NULL, options.pszObjectExt, pszTS, FALSE);
         else
             pvRule = depAddRule(options.fObjectDir ?
                                     options.pszObjectDir :
                                     filePathSlash(pszFilename, szBuffer),
                                 fileNameNoExt(pszFilename, szBuffer + CCHMAXPATH),
-                                options.pszObjectExt,
-                                pszTS);
+                                options.pszObjectExt, pszTS, FALSE);
 
         if (options.fSrcWhenObj && pvRule)
             depAddDepend(pvRule,
                          options.fExcludeAll || pathlistFindFile2(options.pszExclude, pszNormFilename) ?
                             fileName(pszFilename, szBuffer) : pszNormFilename,
-                         options.fCheckCyclic);
+                         options.fCheckCyclic,
+                         FALSE);
     }
     else
         pvRule = depAddRule(options.fExcludeAll || pathlistFindFile2(options.pszExclude, pszNormFilename) ?
-                            fileName(pszFilename, szBuffer) : pszNormFilename, NULL, NULL, pszTS);
+                            fileName(pszFilename, szBuffer) : pszNormFilename, NULL, NULL, pszTS, FALSE);
 
     /* duplicate rule? */
     if (pvRule == NULL)
@@ -1166,13 +1138,13 @@ int langC_CPP(const char *pszFilename, const char *pszNormFilename,
                         if (options.fExcludeAll || pathlistFindFile2(options.pszExclude, szBuffer))
                         {   /* #include <sys/stats.h> makes trouble, check for '/' and '\'. */
                             if (!strchr(szFullname, '/') && !strchr(szFullname, '\\'))
-                                depAddDepend(pvRule, szFullname, options.fCheckCyclic);
+                                depAddDepend(pvRule, szFullname, options.fCheckCyclic, FALSE);
                             else
                                 fprintf(stderr, "%s(%d): warning include '%s' is ignored.\n",
                                         pszFilename, iLine, szFullname);
                         }
                         else
-                            depAddDepend(pvRule, szBuffer, options.fCheckCyclic);
+                            depAddDepend(pvRule, szBuffer, options.fCheckCyclic, FALSE);
                     }
                     else
                     {
@@ -1324,24 +1296,23 @@ int langAsm(const char *pszFilename, const char *pszNormFilename,
     if (options.fObjRule && !fHeader)
     {
         if (options.fNoObjectPath)
-            pvRule = depAddRule(fileNameNoExt(pszFilename, szBuffer), NULL, options.pszObjectExt, pszTS);
+            pvRule = depAddRule(fileNameNoExt(pszFilename, szBuffer), NULL, options.pszObjectExt, pszTS, FALSE);
         else
             pvRule = depAddRule(options.fObjectDir ?
                                     options.pszObjectDir :
                                     filePathSlash(pszFilename, szBuffer),
                                 fileNameNoExt(pszFilename, szBuffer + CCHMAXPATH),
-                                options.pszObjectExt,
-                                pszTS);
+                                options.pszObjectExt, pszTS, FALSE);
 
         if (options.fSrcWhenObj && pvRule)
             depAddDepend(pvRule,
                          options.fExcludeAll || pathlistFindFile2(options.pszExclude, pszNormFilename) ?
                             fileName(pszFilename, szBuffer) : pszNormFilename,
-                         options.fCheckCyclic);
+                         options.fCheckCyclic, FALSE);
     }
     else
         pvRule = depAddRule(options.fExcludeAll || pathlistFindFile2(options.pszExclude, pszNormFilename) ?
-                            fileName(pszFilename, szBuffer) : pszNormFilename, NULL, NULL, pszTS);
+                            fileName(pszFilename, szBuffer) : pszNormFilename, NULL, NULL, pszTS, FALSE);
 
     /* duplicate rule? */
     if (pvRule == NULL)
@@ -1417,13 +1388,13 @@ int langAsm(const char *pszFilename, const char *pszNormFilename,
                 if (options.fExcludeAll || pathlistFindFile2(options.pszExclude, szBuffer))
                 {   /* include sys/stats.inc makes trouble, check for '/' and '\'. */
                     if (!strchr(szFullname, '/') && !strchr(szFullname, '\\'))
-                        depAddDepend(pvRule, szFullname, options.fCheckCyclic);
+                        depAddDepend(pvRule, szFullname, options.fCheckCyclic, FALSE);
                     else
                         fprintf(stderr, "%s(%d): warning include '%s' is ignored.\n",
                                 pszFilename, iLine, szFullname);
                 }
                 else
-                    depAddDepend(pvRule, szBuffer, options.fCheckCyclic);
+                    depAddDepend(pvRule, szBuffer, options.fCheckCyclic, FALSE);
             }
             else
             {
@@ -1468,25 +1439,24 @@ int langRC(const char *pszFilename, const char *pszNormFilename, void *pvFile, B
     if (options.fObjRule && !fHeader)
     {
         if (options.fNoObjectPath)
-            pvRule = depAddRule(fileNameNoExt(pszFilename, szBuffer), NULL, options.pszRsrcExt, pszTS);
+            pvRule = depAddRule(fileNameNoExt(pszFilename, szBuffer), NULL, options.pszRsrcExt, pszTS, FALSE);
         else
             pvRule = depAddRule(options.fObjectDir ?
                                     options.pszObjectDir :
                                     filePathSlash(pszFilename, szBuffer),
                                 fileNameNoExt(pszFilename, szBuffer + CCHMAXPATH),
-                                options.pszRsrcExt,
-                                pszTS);
+                                options.pszRsrcExt, pszTS, FALSE);
 
         if (options.fSrcWhenObj && pvRule)
             depAddDepend(pvRule,
                          options.fExcludeAll || pathlistFindFile2(options.pszExclude, pszNormFilename) ?
                             fileName(pszFilename, szBuffer) : fileNormalize2(pszFilename, szBuffer),
-                         options.fCheckCyclic);
+                         options.fCheckCyclic,
+                         FALSE);
     }
     else
         pvRule = depAddRule(options.fExcludeAll || pathlistFindFile2(options.pszExclude, pszNormFilename) ?
-                            fileName(pszFilename, szBuffer) : pszNormFilename, NULL, NULL,
-                            pszTS);
+                            fileName(pszFilename, szBuffer) : pszNormFilename, NULL, NULL, pszTS, FALSE);
 
     /* duplicate rule? */
     if (pvRule == NULL)
@@ -1591,13 +1561,13 @@ int langRC(const char *pszFilename, const char *pszNormFilename, void *pvFile, B
                 if (options.fExcludeAll || pathlistFindFile2(options.pszExclude, szBuffer))
                 {   /* #include <sys/stats.h> makes trouble, check for '/' and '\'. */
                     if (!strchr(szFullname, '/') && !strchr(szFullname, '\\'))
-                        depAddDepend(pvRule, szFullname, options.fCheckCyclic);
+                        depAddDepend(pvRule, szFullname, options.fCheckCyclic, FALSE);
                     else
                         fprintf(stderr, "%s(%d): warning include '%s' is ignored.\n",
                                 pszFilename, iLine, szFullname);
                 }
                 else
-                    depAddDepend(pvRule, szBuffer, options.fCheckCyclic);
+                    depAddDepend(pvRule, szBuffer, options.fCheckCyclic, FALSE);
             }
             else
             {
@@ -1642,24 +1612,24 @@ int langRC(const char *pszFilename, const char *pszNormFilename,
     if (options.fObjRule && !fHeader)
     {
         if (options.fNoObjectPath)
-            pvRule = depAddRule(fileNameNoExt(pszFilename, szBuffer), NULL, options.pszRsrcExt, pszTS);
+            pvRule = depAddRule(fileNameNoExt(pszFilename, szBuffer), NULL, options.pszRsrcExt, pszTS, FALSE);
         else
             pvRule = depAddRule(options.fObjectDir ?
                                     options.pszObjectDir :
                                     filePathSlash(pszFilename, szBuffer),
                                 fileNameNoExt(pszFilename, szBuffer + CCHMAXPATH),
-                                options.pszRsrcExt,
-                                pszTS);
+                                options.pszRsrcExt, pszTS, FALSE);
 
         if (options.fSrcWhenObj && pvRule)
             depAddDepend(pvRule,
                          options.fExcludeAll || pathlistFindFile2(options.pszExclude, pszNormFilename) ?
                             fileName(pszFilename, szBuffer) : pszNormFilename,
-                         options.fCheckCyclic);
+                         options.fCheckCyclic,
+                         FALSE);
     }
     else
         pvRule = depAddRule(options.fExcludeAll || pathlistFindFile2(options.pszExclude, pszNormFilename) ?
-                            fileName(pszFilename, szBuffer) : pszNormFilename, NULL, NULL, pszTS);
+                            fileName(pszFilename, szBuffer) : pszNormFilename, NULL, NULL, pszTS, FALSE);
 
     /* duplicate rule? */
     if (pvRule == NULL)
@@ -1775,13 +1745,13 @@ int langRC(const char *pszFilename, const char *pszNormFilename,
                         if (options.fExcludeAll || pathlistFindFile2(options.pszExclude, szBuffer))
                         {   /* #include <sys/stats.h> makes trouble, check for '/' and '\'. */
                             if (!strchr(szFullname, '/') && !strchr(szFullname, '\\'))
-                                depAddDepend(pvRule, szFullname, options.fCheckCyclic);
+                                depAddDepend(pvRule, szFullname, options.fCheckCyclic, FALSE);
                             else
                                 fprintf(stderr, "%s(%d): warning include '%s' is ignored.\n",
                                         pszFilename, iLine, szFullname);
                         }
                         else
-                            depAddDepend(pvRule, szBuffer, options.fCheckCyclic);
+                            depAddDepend(pvRule, szBuffer, options.fCheckCyclic, FALSE);
                     }
                     else
                     {
@@ -1899,7 +1869,7 @@ int langRC(const char *pszFilename, const char *pszNormFilename,
 
             /* Add filename to the dependencies. */
             if (i1)
-                depAddDepend(pvRule, pszFile, options.fCheckCyclic);
+                depAddDepend(pvRule, pszFile, options.fCheckCyclic, FALSE);
             else
             {
                 char *psz;
@@ -1914,13 +1884,13 @@ int langRC(const char *pszFilename, const char *pszNormFilename,
                     if (options.fExcludeAll || pathlistFindFile2(options.pszExclude, szFullname))
                     {   /* #include <sys/stats.h> makes trouble, check for '/' and '\'. */
                         if (!strchr(pszFile, '/') && !strchr(pszFile, '\\'))
-                            depAddDepend(pvRule, pszFile, options.fCheckCyclic);
+                            depAddDepend(pvRule, pszFile, options.fCheckCyclic, FALSE);
                         else
                             fprintf(stderr, "%s(%d): warning include '%s' is ignored.\n",
                                     pszFilename, iLine, pszFile);
                     }
                     else
-                        depAddDepend(pvRule, szFullname, options.fCheckCyclic);
+                        depAddDepend(pvRule, szFullname, options.fCheckCyclic, FALSE);
                 }
                 else
                 {
@@ -2004,24 +1974,24 @@ int langCOBOL(const char *pszFilename, const char *pszNormFilename,
     if (options.fObjRule && !fHeader)
     {
         if (options.fNoObjectPath)
-            pvRule = depAddRule(fileNameNoExt(pszFilename, szBuffer), NULL, options.pszObjectExt, pszTS);
+            pvRule = depAddRule(fileNameNoExt(pszFilename, szBuffer), NULL, options.pszObjectExt, pszTS, FALSE);
         else
             pvRule = depAddRule(options.fObjectDir ?
                                     options.pszObjectDir :
                                     filePathSlash(pszFilename, szBuffer),
                                 fileNameNoExt(pszFilename, szBuffer + CCHMAXPATH),
-                                options.pszObjectExt,
-                                pszTS);
+                                options.pszObjectExt, pszTS, FALSE);
 
         if (options.fSrcWhenObj && pvRule)
             depAddDepend(pvRule,
                          options.fExcludeAll || pathlistFindFile2(options.pszExclude, pszNormFilename)
                             ? fileName(pszFilename, szBuffer) : fileNormalize2(pszFilename, szBuffer),
-                         options.fCheckCyclic);
+                         options.fCheckCyclic,
+                         FALSE);
     }
     else
         pvRule = depAddRule(options.fExcludeAll || pathlistFindFile2(options.pszExclude, pszNormFilename) ?
-                            fileName(pszFilename, szBuffer) : pszNormFilename, NULL, NULL, pszTS);
+                            fileName(pszFilename, szBuffer) : pszNormFilename, NULL, NULL, pszTS, FALSE);
 
     /* duplicate rule? */
     if (pvRule == NULL)
@@ -2132,9 +2102,9 @@ int langCOBOL(const char *pszFilename, const char *pszNormFilename,
             if (psz != NULL)
             {
                 if (options.fExcludeAll || pathlistFindFile2(options.pszExclude, szBuffer))
-                    depAddDepend(pvRule, szFullname, options.fCheckCyclic);
+                    depAddDepend(pvRule, szFullname, options.fCheckCyclic, FALSE);
                 else
-                    depAddDepend(pvRule, szBuffer, options.fCheckCyclic);
+                    depAddDepend(pvRule, szBuffer, options.fCheckCyclic, FALSE);
             }
             else
             {
@@ -2180,24 +2150,24 @@ int langIPF(  const char *pszFilename, const char *pszNormFilename,
     /*if (options.fObjRule && !fHeader)
     {
         if (options.fNoObjectPath)
-            pvRule = depAddRule(fileNameNoExt(pszFilename, szBuffer), NULL, options.pszObjectExt, pszTS);
+            pvRule = depAddRule(fileNameNoExt(pszFilename, szBuffer), NULL, options.pszObjectExt, pszTS, FALSE);
         else
             pvRule = depAddRule(options.fObjectDir ?
                                     options.pszObjectDir :
                                     filePathSlash(pszFilename, szBuffer),
                                 fileNameNoExt(pszFilename, szBuffer + CCHMAXPATH),
-                                options.pszObjectExt,
-                                pszTS);
+                                options.pszObjectExt, pszTS, FALSE);
 
         if (options.fSrcWhenObj && pvRule)
             depAddDepend(pvRule,
                          options.fExcludeAll || pathlistFindFile2(options.pszExclude, pszNormFilename)
                             ? fileName(pszFilename, szBuffer) : fileNormalize2(pszFilename, szBuffer),
-                         options.fCheckCyclic);
+                         options.fCheckCyclic,
+                         FALSE);
     }
     else */
         pvRule = depAddRule(options.fExcludeAll || pathlistFindFile2(options.pszExclude, pszNormFilename) ?
-                            fileName(pszFilename, szBuffer) : pszNormFilename, NULL, NULL, pszTS);
+                            fileName(pszFilename, szBuffer) : pszNormFilename, NULL, NULL, pszTS, FALSE);
 
     /* duplicate rule? */
     if (pvRule == NULL)
@@ -2273,9 +2243,9 @@ int langIPF(  const char *pszFilename, const char *pszNormFilename,
             if (psz != NULL)
             {
                 if (options.fExcludeAll || pathlistFindFile2(options.pszExclude, szBuffer))
-                    depAddDepend(pvRule, fileName(szFullname, szBuffer), options.fCheckCyclic);
+                    depAddDepend(pvRule, fileName(szFullname, szBuffer), options.fCheckCyclic, FALSE);
                 else
-                    depAddDepend(pvRule, szBuffer, options.fCheckCyclic);
+                    depAddDepend(pvRule, szBuffer, options.fCheckCyclic, FALSE);
             }
             else
             {
@@ -2288,10 +2258,9 @@ int langIPF(  const char *pszFilename, const char *pszNormFilename,
 
     textbufferDestroy(pvFile);
 
+    fHeader = fHeader;
     return 0;
 }
-
-
 
 
 #define upcase(ch)   \
@@ -2630,7 +2599,6 @@ BOOL filecacheAddFile(const char *pszFilename)
 }
 
 
-
 /**
  * Adds a file to the cache.
  * @returns   Success indicator.
@@ -2879,7 +2847,6 @@ char *pathlistFindFile(const char *pszPathList, const char *pszFilename, char *p
 }
 
 
-
 /**
  * Checks if the given filename may exist within any of the given paths.
  * This check only matches the filename path agianst the paths in the pathlist.
@@ -3019,7 +2986,6 @@ signed long fsize(FILE *phFile)
         cb = -1;
     return cb;
 }
-
 
 
 /**
@@ -3369,7 +3335,7 @@ BOOL  depReadFile(const char *pszFilename, BOOL fAppend)
                             strcpy(szTS, pszPrev + 2);
 
                         psz[i] = '\0';
-                        pvRule = depAddRule(trimQuotes(trimR(psz)), NULL, NULL, szTS);
+                        pvRule = depAddRule(trimQuotes(trimR(psz)), NULL, NULL, szTS, TRUE);
                         if (pvRule)
                             ((PDEPRULE)pvRule)->fUpdated = fAppend;
                         psz += i + 1;
@@ -3399,7 +3365,7 @@ BOOL  depReadFile(const char *pszFilename, BOOL fAppend)
             {
                 psz = trimQuotes(trim(psz));
                 if (*psz != '\0')
-                    depAddDepend(pvRule, psz, options.fCheckCyclic);
+                    depAddDepend(pvRule, psz, options.fCheckCyclic, TRUE);
             }
         }
     } /* while */
@@ -3424,7 +3390,7 @@ BOOL  depWriteFile(const char *pszFilename, BOOL fWriteUpdatedOnly)
     {
         AVLENUMDATA EnumData;
         PDEPRULE    pdep;
-        char        szBuffer[32678];
+        static char szBuffer[0x10000];
         int         iBuffer = 0;
         int         cch;
 
@@ -3443,53 +3409,6 @@ BOOL  depWriteFile(const char *pszFilename, BOOL fWriteUpdatedOnly)
               "\n",
               phFile);
 
-
-        /* @@@PH 2001-03-01
-         * If option is selected to generate a parent
-         * "super" dependency, enter this scope.
-         */
-        if (options.pszSuperDependency != NULL)
-        {
-            iBuffer = sprintf(szBuffer,
-                              strrchr(options.pszSuperDependency, '=') ? "%s" : "%s:",
-                              options.pszSuperDependency);
-
-            pdep = (PDEPRULE)(void*)AVLBeginEnumTree((PPAVLNODECORE)(void*)&pdepTree, &EnumData, TRUE);
-            while (pdep != NULL)
-            {
-                if (!fWriteUpdatedOnly || pdep->fUpdated)
-                {
-                    char *psz = pdep->pszRule;
-
-                    /* flush buffer? */
-                    if (iBuffer + strlen(psz) + 20 >= sizeof(szBuffer))
-                    {
-                        fwrite(szBuffer, iBuffer, 1, phFile);
-                        iBuffer = 0;
-                    }
-
-                    /* write rule title as dependant */
-                    iBuffer += sprintf(szBuffer + iBuffer,
-                                       " \\\n    %s",psz);
-                }
-
-                /* next rule */
-                pdep = (PDEPRULE)(void*)AVLGetNextNode(&EnumData);
-            }
-
-            /* Add two new lines. Flush buffer first if necessary. */
-            if (iBuffer + CBNEWLINE*2 >= sizeof(szBuffer))
-            {
-                fwrite(szBuffer, iBuffer, 1, phFile);
-                iBuffer = 0;
-            }
-
-            /* add 2 linefeeds */
-            strcpy(szBuffer + iBuffer, "\n\n");
-            iBuffer += CBNEWLINE*2;
-        }
-
-
         /* normal dependency output */
         pdep = (PDEPRULE)(void*)AVLBeginEnumTree((PPAVLNODECORE)(void*)&pdepTree, &EnumData, TRUE);
         while (pdep != NULL)
@@ -3501,7 +3420,7 @@ BOOL  depWriteFile(const char *pszFilename, BOOL fWriteUpdatedOnly)
 
                 /* Write rule. Flush the buffer first if necessary. */
                 cch = strlen(pdep->pszRule);
-                if (iBuffer + cch + fQuoted * 2 + cchTS + 9 >= sizeof(szBuffer))
+                if (iBuffer + cch*2 + fQuoted * 2 + cchTS + 9 >= sizeof(szBuffer))
                 {
                     fwrite(szBuffer, iBuffer, 1, phFile);
                     iBuffer = 0;
@@ -3514,7 +3433,7 @@ BOOL  depWriteFile(const char *pszFilename, BOOL fWriteUpdatedOnly)
 
                 if (fQuoted) szBuffer[iBuffer++] = '"';
                 strcpy(szBuffer + iBuffer, pdep->pszRule);
-                iBuffer += cch;
+                iBuffer += depConvertName(szBuffer + iBuffer, sizeof(szBuffer) - iBuffer, FALSE);
                 if (fQuoted) szBuffer[iBuffer++] = '"';
                 strcpy(szBuffer + iBuffer++, ":");
 
@@ -3527,7 +3446,7 @@ BOOL  depWriteFile(const char *pszFilename, BOOL fWriteUpdatedOnly)
                         /* flush buffer? */
                         fQuoted = strpbrk(*ppsz, " \t") != NULL; /* TODO/BUGBUG/FIXME: are there more special chars to look out for?? */
                         cch = strlen(*ppsz);
-                        if (iBuffer + cch + fQuoted * 2 + 20 >= sizeof(szBuffer))
+                        if (iBuffer + cch*2 + fQuoted * 2 + 20 >= sizeof(szBuffer))
                         {
                             fwrite(szBuffer, iBuffer, 1, phFile);
                             iBuffer = 0;
@@ -3536,7 +3455,7 @@ BOOL  depWriteFile(const char *pszFilename, BOOL fWriteUpdatedOnly)
                         iBuffer += 7;
                         if (fQuoted) szBuffer[iBuffer++] = '"';
                         strcpy(szBuffer + iBuffer, *ppsz);
-                        iBuffer += cch;
+                        iBuffer += depConvertName(szBuffer + iBuffer, sizeof(szBuffer) - iBuffer, FALSE);
                         if (fQuoted) szBuffer[iBuffer++] = '"';
 
                         /* next dependant */
@@ -3609,8 +3528,9 @@ void  depRemoveAll(void)
  *                          NULL if pszRulePath contains the entire rule.
  * @param     pszExt        Extention (without '.')
  *                          NULL if pszRulePath or pszRulePath and pszName contains the entire rule.
+ * @param     fConvertName  If set we'll convert from makefile name to realname.
  */
-void *depAddRule(const char *pszRulePath, const char *pszName, const char *pszExt, const char *pszTS)
+void *depAddRule(const char *pszRulePath, const char *pszName, const char *pszExt, const char *pszTS, BOOL fConvertName)
 {
     char     szRule[CCHMAXPATH*2];
     PDEPRULE pNew;
@@ -3630,7 +3550,8 @@ void *depAddRule(const char *pszRulePath, const char *pszName, const char *pszEx
         strcat(szRule + cch, pszExt);
         cch += strlen(szRule + cch);
     }
-
+    if (fConvertName)
+        cch = depConvertName(szRule, sizeof(szRule), TRUE);
 
     /*
      * Allocate a new rule structure and fill in data
@@ -3685,7 +3606,6 @@ void *depAddRule(const char *pszRulePath, const char *pszName, const char *pszEx
 }
 
 
-
 /**
  * Adds a dependant to a rule.
  * @returns   Successindicator. TRUE = success.
@@ -3693,10 +3613,12 @@ void *depAddRule(const char *pszRulePath, const char *pszName, const char *pszEx
  * @param     pvRule        Rule handle.
  * @param     pszDep        Pointer to dependant name
  * @param     fCheckCyclic  When set we'll check that we're not creating an cyclic dependency.
+ * @param     fConvertName  If set we'll convert from makefile name to realname.
  */
-BOOL  depAddDepend(void *pvRule, const char *pszDep, BOOL fCheckCyclic)
+BOOL  depAddDepend(void *pvRule, const char *pszDep, BOOL fCheckCyclic, BOOL fConvertName)
 {
-    PDEPRULE pdep = (PDEPRULE)pvRule;
+    PDEPRULE    pdep = (PDEPRULE)pvRule;
+    int         cchDep;
 
     if (pszDep[0] == '\0')
     {
@@ -3726,18 +3648,99 @@ BOOL  depAddDepend(void *pvRule, const char *pszDep, BOOL fCheckCyclic)
     }
 
     /* allocate string space and copy pszDep */
-    if ((pdep->papszDep[pdep->cDeps] = malloc(strlen(pszDep) + 1)) == NULL)
+    cchDep = strlen(pszDep) + 1;
+    if ((pdep->papszDep[pdep->cDeps] = malloc(cchDep)) == NULL)
     {
         fprintf(stderr, "error: out of memory, (line=%d)\n", __LINE__);
         return FALSE;
     }
     strcpy(pdep->papszDep[pdep->cDeps], pszDep);
 
+    /* convert ^# and other stuff */
+    if (fConvertName)
+        depConvertName(pdep->papszDep[pdep->cDeps], cchDep, TRUE);
+
     /* terminate array and increment dep count */
     pdep->papszDep[++pdep->cDeps] = NULL;
 
     /* successful! */
     return TRUE;
+}
+
+
+/**
+ * Converts to and from makefile filenames.
+ * @returns New name length.
+ *          -1 on error.
+ * @param   pszName     Double pointer to the string.
+ * @param   cchName     Size of name buffer.
+ * @param   fFromMake   TRUE: Convert from makefile name to real name.
+ *                      FALSE: Convert from real name to makefile name.
+ */
+int depConvertName(char *pszName, int cchName, BOOL fFromMake)
+{
+    int cchNewName = strlen(pszName);
+
+    if (cchNewName >= cchName)
+    {
+        fprintf(stderr, "error: buffer on input is too small, (line=%d)\n", __LINE__);
+        return -1;
+    }
+
+    if (fFromMake)
+    {
+        /*
+         * Convert from makefile to real name.
+         */
+        int iDisplacement = 0;
+
+        while (*pszName)
+        {
+            if (    *pszName == '^'
+                ||  (*pszName == '$' && pszName[1] == '$'))
+            {
+                iDisplacement--;
+                pszName++;
+                cchNewName--;
+            }
+            if (iDisplacement)
+                pszName[iDisplacement] = *pszName;
+            pszName++;
+        }
+        pszName[iDisplacement] = '\0';
+    }
+    else
+    {
+        /*
+         * Convert real name to makefile name.
+         */
+        while (*pszName)
+        {
+            if (    *pszName == '#'
+                ||  *pszName == '!'
+                ||  *pszName == '$'
+                ||  *pszName == '@'
+                ||  *pszName == '-'
+                ||  *pszName == '^'
+                ||  *pszName == '('
+                ||  *pszName == ')'
+                ||  *pszName == '{'
+                ||  *pszName == '}')
+            {
+                char *  psz = pszName + strlen(pszName) + 1;
+                if (++cchNewName >= cchName)
+                {
+                    fprintf(stderr, "error: buffer too small, (line=%d)\n", __LINE__);
+                    return -1;
+                }
+                while (--psz > pszName)
+                    *psz = psz[-1];
+                *pszName++ = '^';
+            }
+            pszName++;
+        }
+    }
+    return cchNewName;
 }
 
 
