@@ -14,6 +14,7 @@
 /src/gdi32                                 sandervl phaller achimha bird
 /src/kernel32                              sandervl phaller achimha bird
 /src/kernel32/new                          sandervl phaller achimha bird buerkle dengert cbratschi
+/src/lz32                                  sandervl achimha phaller
 /src/mpr                                   sandervl phaller achimha bird
 /src/NTDLL                                 sandervl phaller achimha
 /src/ole32                                 sandervl davidr achimha
