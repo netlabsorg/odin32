@@ -1,4 +1,4 @@
-/* $Id: oslibmem.cpp,v 1.3 2002-07-15 14:28:52 sandervl Exp $ */
+/* $Id: oslibmem.cpp,v 1.4 2002-07-16 08:16:47 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -93,18 +93,23 @@ DWORD OSLibDosAliasMem(LPVOID pb, ULONG cb, LPVOID *ppbAlias, ULONG fl)
 //******************************************************************************
 //Allocate memory aligned at 64kb boundary
 //******************************************************************************
-DWORD OSLibDosAllocMem(LPVOID *lplpMemAddr, DWORD cbSize, DWORD flFlags)
+DWORD OSLibDosAllocMem(LPVOID *lplpMemAddr, DWORD cbSize, DWORD flFlags, BOOL fLowMemory)
 {
     PVOID   pvMemAddr;
     DWORD   offset;
     APIRET  rc;
+    BOOL    fMemFlags = flAllocMem;
 
+    //Override low/high memory flag if necessary
+    if(fLowMemory) {
+        fMemFlags = 0;
+    }
     /*
      * Let's try use the extended DosAllocMem API of Win32k.sys.
      */
     if (libWin32kInstalled())
     {
-        rc = DosAllocMemEx(lplpMemAddr, cbSize, flFlags | flAllocMem | OBJ_ALIGN64K);
+        rc = DosAllocMemEx(lplpMemAddr, cbSize, flFlags | fMemFlags | OBJ_ALIGN64K);
         if (rc != ERROR_NOT_SUPPORTED)  /* This call was stubbed until recently. */
             return rc;
     }
@@ -113,7 +118,7 @@ DWORD OSLibDosAllocMem(LPVOID *lplpMemAddr, DWORD cbSize, DWORD flFlags)
      * If no or old Win32k fall back to old method.
      */
 
-    rc = DosAllocMem(&pvMemAddr, cbSize, flFlags | flAllocMem);
+    rc = DosAllocMem(&pvMemAddr, cbSize, flFlags | fMemFlags);
     if(rc) {
         dprintf(("!ERROR!: DosAllocMem failed with rc %d", rc));
         return rc;
@@ -127,7 +132,7 @@ DWORD OSLibDosAllocMem(LPVOID *lplpMemAddr, DWORD cbSize, DWORD flFlags)
         DosFreeMem(pvMemAddr);
 
         //Allocate 64kb more so we can round the address to a 64kb aligned value
-        rc = DosAllocMem((PPVOID)&addr64kb, cbSize + 64*1024,  (flFlags & ~PAG_COMMIT) | flAllocMem);
+        rc = DosAllocMem((PPVOID)&addr64kb, cbSize + 64*1024,  (flFlags & ~PAG_COMMIT) | fMemFlags);
         if(rc) {
             dprintf(("!ERROR!: DosAllocMem failed with rc %d", rc));
             return rc;

@@ -1,4 +1,4 @@
-/* $Id: oslibmem.h,v 1.1 2002-07-15 14:28:52 sandervl Exp $ */
+/* $Id: oslibmem.h,v 1.2 2002-07-16 08:16:48 sandervl Exp $ */
 /*
  * OS/2 Memory management procedures
  *
@@ -41,7 +41,7 @@
 #define MEM_TILED_CEILING   0x1fffffff
                
 DWORD OSLibDosAliasMem(LPVOID pb, ULONG cb, LPVOID *ppbAlias, ULONG fl);
-DWORD OSLibDosAllocMem(LPVOID *lplpMemAddr, DWORD size, DWORD flags);
+DWORD OSLibDosAllocMem(LPVOID *lplpMemAddr, DWORD size, DWORD flags, BOOL fLowMemory = FALSE);
 DWORD OSLibDosFreeMem(LPVOID lpMemAddr);
 DWORD OSLibDosQueryMem(LPVOID lpMemAddr, DWORD *lpRangeSize, DWORD *lpAttr);
 DWORD OSLibDosSetMem(LPVOID lpMemAddr, DWORD size, DWORD flags);

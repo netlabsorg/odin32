@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.96 2002-07-15 14:28:53 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.97 2002-07-16 08:16:48 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -430,7 +430,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
         imageSize = oh.SizeOfImage;
     }
 
-    dprintf((LOG, "OS/2 base address %x", realBaseAddress ));
+    dprintf((LOG, "OS/2 base address   %x", realBaseAddress ));
     if(oh.AddressOfEntryPoint) {
         entryPoint = realBaseAddress + oh.AddressOfEntryPoint;
     }
@@ -998,7 +998,7 @@ BOOL Win32PeLdrImage::allocFixedMem(ULONG reservedMem)
  ULONG  alloccnt = 0;
  ULONG  diff, i, baseAddress;
  APIRET rc;
- BOOL   allocFlags = flAllocMem;
+ BOOL   fLowMemory = FALSE;
 
     //Reserve enough space to store 4096 pointers to 1MB memory chunks
     memallocs = (ULONG *)malloc(4096*sizeof(ULONG *));
@@ -1008,10 +1008,10 @@ BOOL Win32PeLdrImage::allocFixedMem(ULONG reservedMem)
     }
 
     if(oh.ImageBase < 512*1024*1024) {
-        allocFlags = 0;
+        fLowMemory = TRUE;
     }
     while(TRUE) {
-        rc = OSLibDosAllocMem((PPVOID)&address, FALLOC_SIZE, PAG_READ | allocFlags);
+        rc = OSLibDosAllocMem((PPVOID)&address, FALLOC_SIZE, PAG_READ, fLowMemory);
         if(rc) break;
 
         dprintf((LOG, "DosAllocMem returned %x", address ));
@@ -1025,10 +1025,10 @@ BOOL Win32PeLdrImage::allocFixedMem(ULONG reservedMem)
 
             diff = oh.ImageBase - address;
             if(diff) {
-                rc = OSLibDosAllocMem((PPVOID)&address, diff, PAG_READ | allocFlags);
+                rc = OSLibDosAllocMem((PPVOID)&address, diff, PAG_READ, fLowMemory);
                 if(rc) break;
             }
-            rc = OSLibDosAllocMem((PPVOID)&baseAddress, imageSize, PAG_READ | PAG_WRITE | allocFlags);
+            rc = OSLibDosAllocMem((PPVOID)&baseAddress, imageSize, PAG_READ | PAG_WRITE, fLowMemory);
             if(rc) break;
 
             if(diff) OSLibDosFreeMem((PVOID)address);
