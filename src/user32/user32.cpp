@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.108 2001-07-14 09:21:46 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.109 2001-07-15 14:58:07 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -48,6 +48,7 @@
 //#include <oslibwin.h>
 #include <win32wnd.h>
 #include <winuser.h>
+#include "initterm.h"
 
 #define DBG_LOCALLOG    DBG_user32
 #include "dbglocal.h"
@@ -989,7 +990,11 @@ DWORD WIN32API WaitForInputIdle(HANDLE hProcess, DWORD dwTimeOut)
 {
   dprintf(("USER32: WaitForInputIdle %x %d\n", hProcess, dwTimeOut));
 
-  return O32_WaitForInputIdle(hProcess, dwTimeOut);
+  if(fVersionWarp3) {
+        Sleep(1000);
+        return 0;        
+  }
+  else  return O32_WaitForInputIdle(hProcess, dwTimeOut);
 }
 
 /* Help Functions */
