@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.62 2001-06-02 18:48:27 achimha Exp $ */
+/* $Id: oslibdos.cpp,v 1.63 2001-06-03 08:59:48 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -196,6 +196,9 @@ DWORD error2WinError(APIRET rc,DWORD defaultCode = ERROR_NOT_ENOUGH_MEMORY_W)
 
     case ERROR_SEM_TIMEOUT: //121
         return ERROR_SEM_TIMEOUT_W;
+
+    case ERROR_INVALID_NAME:
+        return ERROR_INVALID_NAME_W;
 
     case ERROR_DIRECT_ACCESS_HANDLE: //130
         return ERROR_DIRECT_ACCESS_HANDLE_W;
