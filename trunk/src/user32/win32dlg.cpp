@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.66 2001-06-09 14:50:20 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.67 2001-06-10 09:19:58 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -339,8 +339,6 @@ INT Win32Dialog::doDialogBox()
         //    is WM_ENTERIDLE used and leaving away breaks an application?
         //    this style was useful for Win3.1 but today there are threads
         // solution: send only few WM_ENTERIDLE messages
-
-#if 1
         while (TRUE)
         {
           if (!PeekMessageA(&msg,0,0,0,PM_NOREMOVE))
@@ -387,36 +385,11 @@ INT Win32Dialog::doDialogBox()
           if (dialogFlags & DF_END)
                 break;
         }
-#else
-        while (TRUE) {
-//        while (OSLibWinPeekMsg(&msg, getWindowHandle(), owner, MSGF_DIALOGBOX,
-//                                       MSG_REMOVE, !(getStyle() & DS_NOIDLEMSG), NULL ))
-//            if(OSLibWinPeekMsg(&msg, topOwner->getOS2FrameWindowHandle(), 0, 0, MSG_REMOVE))
-            if(OSLibWinPeekMsg(&msg, 0, 0, 0, PM_REMOVE))
-            {
-                if(msg.message == WM_QUIT) {
-                    dprintf(("Win32Dialog::doDialogBox: received  WM_QUIT"));
-                    break;
-                }
-                if (!IsDialogMessageA( getWindowHandle(), &msg))
-                {
-                    TranslateMessage( &msg );
-                    DispatchMessageA( &msg );
-                }
-                if (dialogFlags & DF_END) break;
-            }
-            else {
-                if(!(getStyle() & DS_NOIDLEMSG)) {
-                    topOwner->SendInternalMessageA(WM_ENTERIDLE, MSGF_DIALOGBOX, getWindowHandle());
-                }
-            }
-        }
-#endif
         topOwner->setModalDialogOwner(bOldOwner);
         topOwner->setOS2HwndModalDialog(hwndOldDialog);
         if (!bOldOwner) topOwner->EnableWindow(TRUE);
-        RELEASE_WNDOBJ(topOwner);
     }
+    RELEASE_WNDOBJ(topOwner);
     retval = idResult;
     DestroyWindow();
     return retval;

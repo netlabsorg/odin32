@@ -1,4 +1,4 @@
-/* $Id: gen_object.h,v 1.6 2001-06-09 14:50:17 sandervl Exp $ */
+/* $Id: gen_object.h,v 1.7 2001-06-10 09:19:57 sandervl Exp $ */
 /*
  * Generic Object Class for OS/2
  *
@@ -28,7 +28,11 @@ GenericObject *GetNext()	{ return next;  };
          void  link();
          void  unlink();
 
+#ifdef DEBUG
+         LONG  addRef();
+#else
          LONG  addRef()         { return InterlockedIncrement(&refCount); };
+#endif
          LONG  getRefCount()    { return refCount; };
          LONG  release();
 
