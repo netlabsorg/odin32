@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.285 1999-10-08 12:11:27 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.286 1999-10-08 14:57:51 sandervl Exp $ */
 
  99-10-08: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: added WM_STYLECHANGING/WM_STYLECHANGED.
@@ -11,6 +11,9 @@
  99-10-08: Sander van Leeuwen <sandervl@xs4all.nl>
  	- USER32: Bugfix for SetWindowPos; take frame size into account
                   Removed WM_MOVE notification class flag for Odin PM windows
+                  Removed SetWindowPos frame size bugfix
+                  Removed WM_WINDOWPOSCHANGED cy bugfix
+                  Set WS_DISABLED window style bit when receiving PM WM_ENABLE
 
  99-10-07: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: GetCaretPos() fix
