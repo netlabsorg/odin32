@@ -1,4 +1,4 @@
-/* $Id: mixerdata.cpp,v 1.1 2002-05-23 13:50:15 sandervl Exp $ */
+/* $Id: mixerdata.cpp,v 1.2 2002-05-24 18:02:48 sandervl Exp $ */
 
 /*
  * Mixer multimedia
@@ -17,6 +17,10 @@
 /******************************************************************************/
 /******************************************************************************/
 char *szCtrlName[MIX_CTRL_MAX][2] = {
+    { 
+        "PlayMix",
+        "Playback Mixer for LineOut"
+    },
     { 
         "MasterVol",
         "Master Volume Control for LineOut"
