@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.77 2001-11-27 17:31:15 phaller Exp $ */
+/* $Id: HandleManager.cpp,v 1.78 2001-11-28 15:45:45 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -453,8 +453,12 @@ DWORD HMInitialize(void)
     HMGlobals.pHMMailslot   = new HMMailslotClass("\\MAILSLOT\\");
     HMGlobals.pHMParPort    = new HMDeviceParPortClass("\\\\LPT\\");
     
+#if 0
+    //This is a very bad idea. \\\\.\\NTICE -> NTICE, if the file exits, then 
+    //it will open the file instead of the device driver
     /* add standard symbolic links */
     HandleNamesAddSymbolicLink("\\\\.\\", "");
+#endif
   }
   return (NO_ERROR);
 }
