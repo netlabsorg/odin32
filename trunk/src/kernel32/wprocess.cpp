@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.26 1999-08-22 22:11:23 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.27 1999-08-24 23:32:24 phaller Exp $ */
 
 /*
  * Win32 process functions
@@ -330,6 +330,10 @@ VOID WIN32API ExitProcess(DWORD exitcode)
 
   SetOS2ExceptionChain(-1);
 
+  //Restore original OS/2 TIB selector
+  DestroyTIB();
+  SetExceptionChain((ULONG)-1);
+
   //avoid crashes since win32 & OS/2 exception handler aren't identical
   //(terminate process generates two exceptions)
   /* @@@PH 1998/02/12 Added Console Support */
@@ -337,10 +341,6 @@ VOID WIN32API ExitProcess(DWORD exitcode)
     iConsoleWaitClose();
 
   Win32DllExitList(0);
-
-  //Restore original OS/2 TIB selector
-  DestroyTIB();
-  SetExceptionChain((ULONG)-1);
 
   O32_ExitProcess(exitcode);
 }
@@ -604,7 +604,7 @@ DWORD WIN32API GetModuleFileNameW(HMODULE hModule, LPWSTR lpFileName, DWORD nSiz
     return(rc);
 }
 //******************************************************************************
-//NOTE: GetModuleHandleA does NOT support files with multiple dots (i.e. 
+//NOTE: GetModuleHandleA does NOT support files with multiple dots (i.e.
 //      very.weird.exe)
 //******************************************************************************
 HANDLE WIN32API GetModuleHandleA(LPCTSTR lpszModule)
@@ -625,7 +625,7 @@ HANDLE WIN32API GetModuleHandleA(LPCTSTR lpszModule)
 	}
 	else {
 		if(!strstr(szModule, ".")) {
-			//if there's no extension or trainling dot, we 
+			//if there's no extension or trainling dot, we
                         //assume it's a dll (see Win32 SDK docs)
 			fDllModule = TRUE;
 		}
