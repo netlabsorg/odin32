@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.854 2000-04-01 10:02:16 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.855 2000-04-01 11:34:01 cbratschi Exp $ */
+
+ 2000-04-01: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32: added WYSIWYGOFOA interface
 
  2000-04-01: Edgar Buerkle <Edgar.Buerkle@gmx.net>
         - USER32: Fixed track frame width & height (now you can see actually
