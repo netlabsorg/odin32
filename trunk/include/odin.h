@@ -1,4 +1,4 @@
-/* $Id: odin.h,v 1.8 1999-09-08 07:46:53 sandervl Exp $ */
+/* $Id: odin.h,v 1.9 1999-09-08 19:34:51 sandervl Exp $ */
 /*
  * ODIN - Build Environment Definition
  *
@@ -79,6 +79,9 @@
   #if (__IBMCPP__ == 300) || (__IBMC__ == 300)
   #define NONAMELESSUNION
   #endif
+
+  #include <builtin.h>
+
 #else
 
 /* ---------- ??? ---------- */
@@ -87,8 +90,6 @@
 #endif
 #endif
 
-
-#include <builtin.h>
 
 
 #endif /* _ODIN_H_*/
