@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.171 2002-03-28 11:26:00 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.172 2002-04-13 06:19:31 bird Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -192,7 +192,7 @@ BOOL InitPM()
     hdc = DevOpenDC(hab, OD_MEMORY, "*", 5L, (PDEVOPENDATA)&dop, NULLHANDLE);
 
     fOS2Look = PROFILE_GetOdinIniBool(ODINSYSTEM_SECTION, "OS2Look", FALSE);
-    if(fOS2Look) 
+    if(fOS2Look)
     {
         CHAR szDisplay[30];
         HMODULE hModDisplay;
@@ -223,14 +223,14 @@ BOOL MENU_Init();
 //******************************************************************************
 void WIN32API SetWindowAppearance(int fLooks)
 {
-    if(fLooks == OS2_APPEARANCE || fLooks == OS2_APPEARANCE_SYSMENU) 
+    if(fLooks == OS2_APPEARANCE || fLooks == OS2_APPEARANCE_SYSMENU)
     {
         CHAR szDisplay[30];
         HMODULE hModDisplay;
 
         SYSCOLOR_Init(FALSE); //use OS/2 colors
 
-        if(hbmFrameMenu[0] == 0) 
+        if(hbmFrameMenu[0] == 0)
         {
             CHAR szDisplay[30];
             HMODULE hModDisplay;
@@ -281,15 +281,16 @@ MRESULT EXPENTRY Win32CDWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     //OS/2 msgs
     case WM_CREATE:
     {
-        char drive[2];
+        char drive[4];
 
         //skip floppy drives
         drive[0] = 'C';
-        drive[1] = 0;
+        drive[1] = ':';
+        drive[2] = '\0';
 
         for(int i=2;i<26;i++) {
            drives[i] = GetDriveTypeA(drive);
-           if(drives[i] == DRIVE_CDROM_W) 
+           if(drives[i] == DRIVE_CDROM_W)
            {
                 DWORD parsize = sizeof(ParameterBlock);
                 DWORD datasize = 2;
@@ -321,10 +322,10 @@ MRESULT EXPENTRY Win32CDWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     }
     case WM_TIMER:
     {
-        for(int i=0;i<26;i++) 
+        for(int i=0;i<26;i++)
         {
             //for now only cdrom/dvd drives
-            if(drives[i] == DRIVE_CDROM_W) 
+            if(drives[i] == DRIVE_CDROM_W)
             {
                 DWORD parsize = sizeof(ParameterBlock);
                 DWORD datasize = 2;
@@ -341,7 +342,7 @@ MRESULT EXPENTRY Win32CDWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                     return FALSE;
                 }
                 //Send WM_DEVICECHANGE message when CD status changes
-                if((status & 4) != drivestatus[i]) 
+                if((status & 4) != drivestatus[i])
                 {
                     PID pidThis, pidTemp;
                     HENUM henum;
@@ -357,11 +358,11 @@ MRESULT EXPENTRY Win32CDWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                     volchange.dbcv_flags      = DBTF_MEDIA;
 
                     WinQueryWindowProcess(hwnd, &pidThis, NULL);
-  
+
                     //Iterate over all child windows of the desktop
                     henum = WinBeginEnumWindows(HWND_DESKTOP);
 
-                    SetWin32TIB();   
+                    SetWin32TIB();
                     while(hwndEnum = WinGetNextWindow(henum))
                     {
                         WinQueryWindowProcess(hwndEnum, &pidTemp, NULL);
@@ -369,9 +370,9 @@ MRESULT EXPENTRY Win32CDWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                         {
                             HWND hwndWin32 = OS2ToWin32Handle(hwndEnum);
                             if(hwndWin32) {
-                                SendMessageA(hwndWin32, 
-                                             WM_DEVICECHANGE_W, 
-                                             (status & 4) ? DBT_DEVICEARRIVAL : DBT_DEVICEREMOVECOMPLETE, 
+                                SendMessageA(hwndWin32,
+                                             WM_DEVICECHANGE_W,
+                                             (status & 4) ? DBT_DEVICEARRIVAL : DBT_DEVICEREMOVECOMPLETE,
                                              (LPARAM)&volchange);
                             }
                         }
@@ -690,10 +691,10 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     case WM_DESTROYCLIPBOARD:
         win32wnd->DispatchMsgA(pWinMsg);
         break;
-      
+
     case WM_CHAR_SPECIAL:
       /* NO BREAK! FALLTHRU CASE! */
-      
+
     case WM_CHAR:
         dprintf(("OS2: WM_CHAR %x %x %x, %x %x", win32wnd->getWindowHandle(), mp1, mp2, pWinMsg->wParam, pWinMsg->lParam));
         win32wnd->MsgChar(pWinMsg);
@@ -1053,7 +1054,7 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
         wpOld = wp;
         win32wnd->MsgPosChanging((LPARAM)&wp);
 
-        if(win32wnd->getOldStyle() != win32wnd->getStyle()) 
+        if(win32wnd->getOldStyle() != win32wnd->getStyle())
         {
              OSLibSetWindowStyle(win32wnd->getOS2FrameWindowHandle(), win32wnd->getOS2WindowHandle(), win32wnd->getStyle(), win32wnd->getExStyle());
              if(fOS2Look) {
@@ -1125,13 +1126,13 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
         }
 adjustend:
         //The next part needs to be done for top-level windows only
-        if(!((win32wnd->getStyle() & (WS_POPUP_W|WS_CHILD_W)) == WS_CHILD_W)) 
+        if(!((win32wnd->getStyle() & (WS_POPUP_W|WS_CHILD_W)) == WS_CHILD_W))
         {
             //Setting these flags is necessary to avoid activation/focus problems
             if(ulFlags & SWP_DEACTIVATE) {
                 ret |= AWP_DEACTIVATE;
             }
-            if(ulFlags & SWP_ACTIVATE) 
+            if(ulFlags & SWP_ACTIVATE)
             {
                 if(ulFlags & SWP_ZORDER) {
                     dprintf(("Set FF_NOACTIVATESWP"));
@@ -1150,7 +1151,7 @@ adjustend:
             }
         }
         else {
-            if(ulFlags & (SWP_ACTIVATE|SWP_FOCUSACTIVATE)) 
+            if(ulFlags & (SWP_ACTIVATE|SWP_FOCUSACTIVATE))
             {
                 win32wnd->MsgChildActivate(TRUE);
                 if(fOS2Look) {
@@ -1158,8 +1159,8 @@ adjustend:
                     WinSendDlgItemMsg(hwnd, FID_TITLEBAR, TBM_SETHILITE, (MPARAM)1, 0);
                 }
             }
-            else 
-            if(ulFlags & (SWP_DEACTIVATE|SWP_FOCUSDEACTIVATE)) 
+            else
+            if(ulFlags & (SWP_DEACTIVATE|SWP_FOCUSDEACTIVATE))
             {
                 win32wnd->MsgChildActivate(FALSE);
                 if(fOS2Look) {
@@ -1192,7 +1193,7 @@ adjustend:
         if(pswp->fl & SWP_SHOW) {
             win32wnd->callVisibleRgnNotifyProc(TRUE);
         }
-        else 
+        else
         if(pswp->fl & SWP_HIDE) {
             win32wnd->callVisibleRgnNotifyProc(FALSE);
         }
@@ -1209,7 +1210,7 @@ adjustend:
             else
             if(pswp->fl & SWP_HIDE) {
                 WinShowWindow(win32wnd->getOS2WindowHandle(), 0);
-            } 
+            }
             //MUST call the old frame window proc!
             goto RunDefFrameWndProc;
         }
@@ -1546,7 +1547,7 @@ PosChangedEnd:
             {
                 if(win32wnd->getOwner()) {
                     Win32BaseWindow *topOwner = Win32BaseWindow::GetWindowFromHandle(win32wnd->getOwner()->GetTopParent());
- 
+
                     if (topOwner) {
                         WinSetWindowPos(topOwner->getOS2FrameWindowHandle(),hwnd,0,0,0,0,SWP_ZORDER);
                         RELEASE_WNDOBJ(topOwner);
@@ -1738,7 +1739,7 @@ void FrameSetFocus(HWND hwnd)
     ulFrameFlags &= ~FF_NOACTIVATESWP;
     WinSetWindowUShort(hwnd, QWS_FLAGS, ulFrameFlags);
 }
-#ifndef CUSTOM_TRACKFRAME 
+#ifndef CUSTOM_TRACKFRAME
 //******************************************************************************
 //TODO: Quickly moving a window two times doesn't force a repaint (1st time)
 //
