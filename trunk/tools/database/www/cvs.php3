@@ -10,6 +10,7 @@ $sCVSROOT = "e:/netlabs.cvs/odin";
 $sIconsUrl = "/icons";
 $sIconsUrl = "http://www.netlabs.org/icons";
 
+echo '\n<!-- $sCVSROOT -->\n';
 
 /**
  * Quick and dirty CVS file parser.
