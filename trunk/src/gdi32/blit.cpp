@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.17 2000-08-30 18:05:24 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.18 2000-09-13 21:00:22 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -255,10 +255,13 @@ INT WIN32API StretchDIBits(HDC hdc, INT xDst, INT yDst, INT widthDst,
                                widthSrc, heightSrc, (void *)bits,
                                (PBITMAPINFO)infoLoc, DIB_RGB_COLORS, dwRop);
 
-      	if(rc != heightSrc) {
+        //Open32 always returns height of bitmap (regardless of how many scanlines were copied)
+      	if(rc != heightSrc && rc != infoLoc->bmiHeader.biHeight) {
 		dprintf(("StretchDIBits failed with rc %x", rc));
       	}
 	else {
+		rc = heightSrc;
+
   		DIBSection *destdib = DIBSection::findHDC(hdc);
   		if(destdib) {
 			if(widthDst == widthSrc && heightDst == heightSrc &&
@@ -276,10 +279,14 @@ INT WIN32API StretchDIBits(HDC hdc, INT xDst, INT yDst, INT widthDst,
     rc = O32_StretchDIBits(hdc, xDst, yDst, widthDst, heightDst, xSrc, ySrc,
                              widthSrc, heightSrc, (void *)bits,
                              (PBITMAPINFO)info, wUsage, dwRop);
-    if(rc != heightSrc) {
+    //Open32 always returns height of bitmap (regardless of how many scanlines were copied)
+    if(rc != heightSrc && rc != info->bmiHeader.biHeight) {
 	dprintf(("StretchDIBits failed with rc %x", rc));
     }
-    else {
+    else 
+    {
+	rc = heightSrc;
+
   	DIBSection *destdib = DIBSection::findHDC(hdc);
  	if(destdib) {
 		if(widthDst == widthSrc && heightDst == heightSrc &&
