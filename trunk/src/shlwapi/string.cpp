@@ -1,4 +1,4 @@
- /* $Id: string.cpp,v 1.4 2000-06-12 08:09:46 phaller Exp $ */
+ /* $Id: string.cpp,v 1.5 2000-06-13 18:14:21 phaller Exp $ */
 
 /*
  * Win32 Lightweight SHELL32 for OS/2
@@ -168,7 +168,8 @@ HRESULT WINAPI StrRetToStrNA (LPVOID dest, DWORD len, LPSTRRET src, LPITEMIDLIST
         {
           case STRRET_WSTR:
             WideCharToMultiByte(CP_ACP, 0, src->u.pOleStr, -1, (LPSTR)dest, len, NULL, NULL);
-            SHFree(src->u.pOleStr);
+            //SHFree(src->u.pOleStr);
+            HeapFree( GetProcessHeap(), 0, src->u.pOleStr);
             break;
 
           case STRRET_CSTRA:
@@ -203,7 +204,8 @@ HRESULT WINAPI StrRetToStrNW (LPVOID dest, DWORD len, LPSTRRET src, LPITEMIDLIST
         {
           case STRRET_WSTR:
             lstrcpynW((LPWSTR)dest, src->u.pOleStr, len);
-            SHFree(src->u.pOleStr);
+            //SHFree(src->u.pOleStr);
+            HeapFree( GetProcessHeap(), 0, src->u.pOleStr);
             break;
 
           case STRRET_CSTRA:

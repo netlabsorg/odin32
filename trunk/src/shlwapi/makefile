@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.15 2000-06-11 08:44:53 phaller Exp $
+# $Id: makefile,v 1.16 2000-06-13 18:14:17 phaller Exp $
 
 #
 # Odin32 API
@@ -25,7 +25,6 @@ CLEANEXTRAS = shlwapirsrc.asm
 OBJS = \
 $(OBJDIR)\shlwapi.obj \
 $(OBJDIR)\shlstub.obj \
-$(OBJDIR)\mem.obj \
 $(OBJDIR)\url.obj \
 $(OBJDIR)\reg.obj \
 $(OBJDIR)\pathcpp.obj \
