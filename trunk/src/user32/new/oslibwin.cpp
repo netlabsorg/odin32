@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.7 1999-07-17 12:49:40 cbratschi Exp $ */
+/* $Id: oslibwin.cpp,v 1.8 1999-07-17 15:23:38 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -37,17 +37,16 @@ BOOL OSLibWinSetParent(HWND hwnd, HWND hwndParent, ULONG fRedraw)
 //******************************************************************************
 //******************************************************************************
 HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
-                          char *pszName, ULONG x, ULONG y, ULONG cx, ULONG cy,
-                          HWND Owner, ULONG fHWND_BOTTOM, HWND *hwndFrame)
+                          char *pszName, HWND Owner, ULONG fHWND_BOTTOM, HWND *hwndFrame)
 {
  HWND  hwndClient;
  RECTL rectl;
 
+  if(pszName && *pszName == 0) {
+	pszName = NULL;
+  }
   if(hwndParent == 0) {
         hwndParent = HWND_DESKTOP;
-  }
-  if(WinQueryWindowRect(hwndParent, &rectl) == TRUE) {
-        y = OS2TOWIN32POINT(rectl.yTop - rectl.yBottom, y);
   }
   if(dwFrameStyle) {
         dwWinStyle &= ~WS_CLIPCHILDREN; //invalid style according to docs
@@ -58,15 +57,12 @@ HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
                 if(pszName) {
                         WinSetWindowText(*hwndFrame, pszName);
                 }
-                WinSetWindowPos(*hwndFrame, (fHWND_BOTTOM) ? HWND_BOTTOM :HWND_TOP,
-                                x, y, cx, cy, SWP_SIZE | SWP_MOVE);
-
                 return hwndClient;
         }
         dprintf(("OSLibWinCreateWindow: WinCreateStdWindow failed (%x)", WinGetLastError(GetThreadHAB())));
         return 0;
   }
-  hwndClient = WinCreateWindow(hwndParent, WIN32_STDCLASS, pszName, dwWinStyle, x, y, cx, cy,
+  hwndClient = WinCreateWindow(hwndParent, WIN32_STDCLASS, pszName, dwWinStyle, 0, 0, 0, 0,
                                Owner, (fHWND_BOTTOM) ? HWND_BOTTOM :HWND_TOP, 0, NULL,
                                NULL);
   *hwndFrame = hwndClient;
@@ -82,8 +78,11 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG *OSWinStyle, ULONG *OSFrameStyle)
   /* Window styles */
   if(dwStyle & WINWS_MINIMIZE)
         *OSWinStyle |= WS_MINIMIZED;
+//Done explicitely in CreateWindowExA
+#if 0
   if(dwStyle & WINWS_VISIBLE)
         *OSWinStyle |= WS_VISIBLE;
+#endif
   if(dwStyle & WINWS_DISABLED)
         *OSWinStyle |= WS_DISABLED;
   if(dwStyle & WINWS_CLIPSIBLINGS)
@@ -177,13 +176,32 @@ HWND OSLibWinQueryWindow(HWND hwnd, ULONG lCode)
 BOOL OSLibWinSetWindowPos(HWND hwnd, HWND hwndInsertBehind, LONG x, LONG y, LONG cx,
                           LONG cy, ULONG fl)
 {
+ RECTL rectl;
+ HWND  hwndParent;
+
+  if(fl & SWP_MOVE) {
+        hwndParent = WinQueryWindow(hwnd, QW_PARENT);
+        if(WinQueryWindowRect(hwnd, &rectl)) {
+                y = OS2TOWIN32POINT(rectl.yTop - rectl.yBottom, y);
+	}
+  }
   return WinSetWindowPos(hwnd, hwndInsertBehind, x, y, cx, cy, fl);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL OSLibWinShowWindow(HWND hwnd, ULONG fl)
 {
-  return WinSetWindowPos(hwnd, 0, 0, 0, 0, 0, fl);
+ BOOL rc;
+
+  if(fl & SWP_SHOW) {
+	 rc = WinShowWindow(hwnd, TRUE);
+  }
+  if(rc == 0)
+	dprintf(("WinShowWindow %x failed %x", hwnd, WinGetLastError(GetThreadHAB())));
+  rc = WinSetWindowPos(hwnd, 0, 0, 0, 0, 0, fl);
+  if(rc == 0)
+	dprintf(("WinShowWindow %x failed %x", hwnd, WinGetLastError(GetThreadHAB())));
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************
