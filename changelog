@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2146 2002-06-09 19:52:11 sandervl Exp $ */
+/* $Id: changelog,v 1.2147 2002-06-09 19:52:53 sandervl Exp $ */
 
  2002-06-09: knut st. osmundsen <bird@anduin.net>
     - Makefiles:
@@ -14,8 +14,8 @@
                 o Skip window handle 0x68000000 (otherwise more difficult
                   to compare logs with old builds)
                 o Logging changes for comparing source file names
-                o WS_CHILD style change in SetWindowLong (GWL_STYLE) *is*
-                  allowed
+                o WS_CHILD style change in SetWindowLong (GWL_STYLE) *is* allowed
+                  (fixes Java 1.4 installation (first dialog))
     - COMDLG32: o GetFileDialog95W fix (check if template name is string or
                   numeric id)
                   (fixes OpenOffice 1.0 file open dialog crash)
