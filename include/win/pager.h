@@ -1,4 +1,4 @@
-/* $Id: pager.h,v 1.2 2000-03-17 17:10:52 cbratschi Exp $ */
+/* $Id: pager.h,v 1.3 2001-03-31 13:23:33 sandervl Exp $ */
 
 /*
  * Pager class extra info
@@ -25,8 +25,5 @@ typedef struct tagPAGER_INFO
 
 } PAGER_INFO;
 
-
-extern VOID PAGER_Register (VOID);
-extern VOID PAGER_Unregister (VOID);
 
 #endif  /* __WINE_PAGER_H */

@@ -1,4 +1,4 @@
-/* $Id: rebar.h,v 1.4 2000-03-18 16:10:55 cbratschi Exp $ */
+/* $Id: rebar.h,v 1.5 2001-03-31 13:23:34 sandervl Exp $ */
 
 /*
  * Rebar class extra info
@@ -65,7 +65,5 @@ typedef struct tagREBAR_INFO
 } REBAR_INFO;
 
 
-extern VOID REBAR_Register (VOID);
-extern VOID REBAR_Unregister (VOID);
 
 #endif  /* __WINE_REBAR_H */

@@ -1,4 +1,4 @@
-/* $Id: tooltips.h,v 1.5 2000-08-06 20:31:01 sandervl Exp $ */
+/* $Id: tooltips.h,v 1.6 2001-03-31 13:23:34 sandervl Exp $ */
 
 /*
  * Tool tips class extra info
@@ -58,7 +58,5 @@ typedef struct tagTOOLTIPS_INFO
 } TOOLTIPS_INFO;
 
 
-extern VOID TOOLTIPS_Register (VOID);
-extern VOID TOOLTIPS_Unregister (VOID);
 
 #endif  /* __WINE_TOOLTIPS_H */

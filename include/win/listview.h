@@ -99,7 +99,5 @@ typedef struct
 
 #define IF_NOREDRAW     1
 
-extern VOID LISTVIEW_Register (VOID);
-extern VOID LISTVIEW_Unregister (VOID);
 
 #endif  /* __WINE_LISTVIEW_H */

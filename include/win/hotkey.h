@@ -1,4 +1,4 @@
-/* $Id: hotkey.h,v 1.5 2000-02-25 16:58:33 cbratschi Exp $ */
+/* $Id: hotkey.h,v 1.6 2001-03-31 13:23:33 sandervl Exp $ */
 
 /*
  * Hotkey class extra info
@@ -26,7 +26,5 @@ typedef struct tagHOTKEY_INFO
 } HOTKEY_INFO;
 
 
-extern VOID HOTKEY_Register (VOID);
-extern VOID HOTKEY_Unregister (VOID);
 
 #endif  /* __WINE_HOTKEY_H */
