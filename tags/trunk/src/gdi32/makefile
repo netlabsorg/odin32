@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.14 1999-12-09 16:49:45 cbratschi Exp $
+# $Id: makefile,v 1.15 1999-12-29 18:51:45 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -18,10 +18,13 @@ PDWIN32_TOOLS = ..\..\tools\bin
 CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE)
 CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
+RC = $(PDWIN32_TOOLS)\wrc
+RCFLAGS = -s -I. -I$(CPPMAIN)\include -I$(PDWIN32_INCLUDE) -I$(PDWIN32_INCLUDE)\win
+
 
 TARGET = gdi32
 
-OBJS =  gdi32.obj opengl.obj callback.obj dibsect.obj initterm.obj \
+OBJS =  gdi32.obj opengl.obj callback.obj dibsect.obj initterm.obj resource.obj \
         oslibgdi.obj font.obj text.obj palette.obj line.obj oslibgpi.obj
 
 
@@ -42,6 +45,10 @@ $(TARGET).lib: $(TARGET)exp.def
 $(TARGET)exp.def: $(TARGET).def
     $(IMPDEF) $** $@
 
+resource.asm: gdi32.rc
+    $(RC) $(RCFLAGS) -o resource.asm gdi32.rc
+
+resource.obj: resource.asm
 
 
 gdi32.obj: gdi32.cpp \
@@ -80,7 +87,7 @@ initterm.obj: initterm.cpp
 
 
 clean:
-        $(RM) *.obj *.lib *.dll *.map *.pch
+        $(RM) *.obj *.lib *.dll *.map *.pch resource.asm
         $(RM) $(PDWIN32_BIN)\$(TARGET).dll
         $(RM) $(PDWIN32_LIB)\$(TARGET).lib
     $(RM) $(TARGET)exp.def
