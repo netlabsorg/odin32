@@ -1,4 +1,4 @@
-/* $Id: iconcache.c,v 1.4 2001-04-28 13:33:44 sandervl Exp $ */
+/* $Id: iconcache.c,v 1.5 2001-06-01 01:13:23 phaller Exp $ */
 /*
  *	shell icon cache (SIC)
  *
@@ -783,7 +783,10 @@ static INT SIC_IconAppend (LPCSTR sSourceFile, INT dwSourceIndex, HICON hSmallIc
 
 	index = pDPA_InsertPtr(sic_hdpa, 0x7fff, lpsice);
 	if ( INVALID_INDEX == index )
-	{
+        {
+          // 2001-06-01 PH memory leak in WINE
+          HeapFree(GetProcessHeap(),0,lpsice->sSourceFile);
+          
 	  SHFree(lpsice);
 	  ret = INVALID_INDEX;
 	}
@@ -916,7 +919,11 @@ BOOL SIC_Initialize(void)
 
 	ImageList_SetBkColor(ShellSmallIconList, GetSysColor(COLOR_WINDOW));
 	ImageList_SetBkColor(ShellBigIconList, GetSysColor(COLOR_WINDOW));
-
+  
+  /* 2001-06-01 PH pre-initializing the list takes
+   * a long time. On-demand loading of the icons should
+   * be sufficient! (7 secs on P133)
+   *
 	for (index=1; index<46; index++)
 	{
 	  hSm = LoadImageA(shell32_hInstance, MAKEINTRESOURCEA(index), IMAGE_ICON, 16, 16,LR_SHARED);
@@ -928,7 +935,8 @@ BOOL SIC_Initialize(void)
 	    hLg = LoadImageA(shell32_hInstance, MAKEINTRESOURCEA(0), IMAGE_ICON, 32, 32,LR_SHARED);
 	  }
 	  SIC_IconAppend ("shell32.dll", index, hSm, hLg);
-	}
+          }
+   */
 
 	TRACE("hIconSmall=%p hIconBig=%p\n",ShellSmallIconList, ShellBigIconList);
 
