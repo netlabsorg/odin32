@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.4 2001-09-17 00:14:15 bird Exp $
+# $Id: Makefile,v 1.5 2001-09-17 01:18:02 bird Exp $
 
 #
 # kKrnlLib.sys makefile.
@@ -149,55 +149,32 @@ TSTOBJS =\
     $(WIN32KOBJ)\fakea.obj \
     $(WIN32KOBJ)\TstFakers.obj \
     $(WIN32KOBJ)\d16strat.obj \
-    $(WIN32KOBJ)\d32CallGate.obj \
     $(WIN32KOBJ)\d32hlp.obj \
     $(WIN32KOBJ)\d32globals.obj \
     $(WIN32KOBJ)\d16globl.obj \
-    $(WIN32KOBJ)\abort.obj \
-    $(WIN32KOBJ)\asmutils.obj \
     $(WIN32KOBJ)\calltaba.obj \
-    $(WIN32KOBJ)\locks.obj \
+    $(WIN32KOBJ)\krnlInit.obj \
+    $(WIN32KOBJ)\krnlLockedWrite.obj \
+    $(WIN32KOBJ)\krnlOverloading.obj \
+    $(WIN32KOBJ)\krnlPrologs.obj \
+    $(WIN32KOBJ)\krnlStubs.obj \
+    $(WIN32KOBJ)\asmutils.obj \
+    $(WIN32KOBJ)\kAssert.obj \
+    $(WIN32KOBJ)\kAVLPV.obj \
+    $(WIN32KOBJ)\kAVLStr.obj \
+    $(WIN32KOBJ)\kAVLStrI.obj \
+    $(WIN32KOBJ)\kAVLULM.obj \
     $(WIN32KOBJ)\malloc.obj_tst. \
-    $(WIN32KOBJ)\smalloc_avl.obj \
-    $(WIN32KOBJ)\avl.obj \
-    $(WIN32KOBJ)\rmalloc_avl.obj \
+    $(WIN32KOBJ)\smalloc.obj \
+    $(WIN32KOBJ)\rmalloc.obj \
     $(WIN32KOBJ)\new.obj \
-    $(WIN32KOBJ)\env.obj \
-    $(WIN32KOBJ)\PerTaskW32kData.obj \
     $(WIN32KOBJ)\stricmp.obj \
     $(WIN32KOBJ)\vsprintf.obj \
     $(WIN32KOBJ)\vprintf.obj_tst. \
-    $(WIN32KOBJ)\ldr.obj \
-    $(WIN32KOBJ)\myldrClose.obj \
-    $(WIN32KOBJ)\myldrOpen.obj \
-    $(WIN32KOBJ)\myldrRead.obj \
-    $(WIN32KOBJ)\myLDRQAppType.obj \
-    $(WIN32KOBJ)\myldrEnum32bitRelRecs.obj \
-    $(WIN32KOBJ)\myldrOpenPath.obj \
-    $(WIN32KOBJ)\myldrOpenPatha.obj \
-    $(WIN32KOBJ)\myldrFindModule.obj \
-    $(WIN32KOBJ)\myldrCheckInternalName.obj \
-    $(WIN32KOBJ)\myldrGetFileName.obj \
-    $(WIN32KOBJ)\d32Events.obj \
+    $(WIN32KOBJ)\abort.obj \
     $(WIN32KOBJ)\OS2KTCB.obj \
     $(WIN32KOBJ)\OS2KPTDA.obj \
-    $(WIN32KOBJ)\pe2lx.obj \
-    $(WIN32KOBJ)\ModuleBase.obj \
-    $(WIN32KOBJ)\d32ElfIOCtl.obj \
-    $(WIN32KOBJ)\d32Win32kIOCtl.obj \
-    $(WIN32KOBJ)\d32Win32kOpenClose.obj \
-    $(WIN32KOBJ)\k32AllocMemEx.obj \
-    $(WIN32KOBJ)\k32KillProcessEx.obj \
-    $(WIN32KOBJ)\k32HandleSystemEvent.obj \
-    $(WIN32KOBJ)\k32ProcessReadWrite.obj \
-    $(WIN32KOBJ)\k32QueryCallGate.obj \
-    $(WIN32KOBJ)\k32QueryOTEs.obj \
-    $(WIN32KOBJ)\k32QueryOptionsStatus.obj \
-    $(WIN32KOBJ)\k32QuerySystemMemInfo.obj \
-    $(WIN32KOBJ)\k32SetEnvironment.obj \
-    $(WIN32KOBJ)\k32SetOptions.obj \
-    $(WIN32KOBJ)\mytkExecPgm.obj \
-    $(WIN32KOBJ)\mytkStartProcess.obj \
+    $(WIN32KOBJ)\env.obj \
     $(WIN32KOBJ)\vprntf16.obj_tst. \
     $(WIN32KOBJ)\d32init.obj_tst. \
     $(WIN32KOBJ)\d16init.obj_tst_init. \
