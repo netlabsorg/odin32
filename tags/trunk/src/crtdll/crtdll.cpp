@@ -1,4 +1,4 @@
-/* $Id: crtdll.cpp,v 1.7 1999-10-04 09:55:54 sandervl Exp $ */
+/* $Id: crtdll.cpp,v 1.8 1999-10-07 09:28:48 sandervl Exp $ */
 
 /*
  * The C RunTime DLL
@@ -266,9 +266,8 @@ double CDECL CRTDLL__CItanh( double x )
 
 /*********************************************************************
  *                  _XcptFilter    (CRTDLL.21)
- *	FIXME - Could not find anything about it
  */
-INT CDECL CRTDLL__XcptFilter(DWORD ret)
+INT CDECL CRTDLL__XcptFilter(DWORD ret, struct _EXCEPTION_POINTERS *  ExceptionInfo )
 {
   dprintf(("CRTDLL: XcptFilter not implemented.\n"));
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
@@ -370,6 +369,17 @@ long * CDECL CRTDLL___doserrno()
 
 
 /*********************************************************************
+ *                  __fpecode            (CRTDLL.27)
+ */
+int * CDECL CRTDLL___fpecode ( void )
+{	
+	dprintf(("__fpecode not implemented.\n"));
+	SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+	return FALSE;
+}
+
+
+/*********************************************************************
  *           CRTDLL___isascii   (CRTDLL.28)
  */
 int CDECL CRTDLL___isascii(int i)
@@ -403,30 +413,29 @@ int CDECL CRTDLL___iscsymf(int i)
 
 
 /*********************************************************************
- *                  __mb_cur_max_dll    (CRTDLL.31)
- *	FIXME - Could not find anything about it
+ *           CRTDLL___pxcptinfoptrs   (CRTDLL.32)
  */
-INT CDECL CRTDLL___mb_cur_max_dll(DWORD ret)
+void ** CDECL CRTDLL___pxcptinfoptrs (void)
 {
-  dprintf(("CRTDLL: __mb_cur_max_dll not implemented.\n"));
+  dprintf(("CRTDLL: __pxcptinfoptrs not implemented.\n"));
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
+  return NULL;
 }
 
 
 /*********************************************************************
- *           CRTDLL___threadhandle   (CRTDLL.32)
+ *           CRTDLL___threadhandle   (CRTDLL.33)
  */
 unsigned long CDECL CRTDLL___threadhandle( void )
 {
-  dprintf(("CRTDLL: __threadhandle  not implemented.\n"));
+  dprintf(("CRTDLL: __threadhandle not implemented.\n"));
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
 
 /*********************************************************************
- *           CRTDLL___threadid   (CRTDLL.33)
+ *           CRTDLL___threadid   (CRTDLL.34)
  */
 int * CDECL CRTDLL___threadid(void)
 {
@@ -458,25 +467,33 @@ int CDECL CRTDLL__access(const char *path,int mode)
 
 
 /*********************************************************************
- *                  _aexit_rtn_dll    (CRTDLL.39)
- *	FIXME - Could not find anything about it
+ *           CRTDLL___toascii   (CRTDLL.38)
  */
-INT CDECL CRTDLL__aexit_rtn_dll(DWORD ret)
+int CDECL CRTDLL___toascii(int c)
 {
-  dprintf(("CRTDLL: _aexit_rtn_dll not implemented.\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
+  dprintf(("CRTDLL: __toascii\n"));
+  return ((unsigned)(c) & 0x7F );
+}
+
+
+/*********************************************************************
+ *                  _aexit_rtn_dll    (CRTDLL.39)
+ */
+VOID CDECL CRTDLL__aexit_rtn_dll(int exitcode)
+{
+  dprintf(("CRTDLL: _aexit_rtn_dll\n"));
+  ExitProcess(exitcode);
 }
 
 
 /*********************************************************************
  *                  _amsg_exit    (CRTDLL.40)
- *	FIXME - Could not find anything about it
  */
-INT CDECL CRTDLL__amsg_exit(DWORD ret)
+VOID CDECL CRTDLL__amsg_exit(int errnum)
 {
-        dprintf(("CRTDLL: _amsg_exit not implemented.\n"));
-	return 0;
+  dprintf(("CRTDLL: _amsg_exit\n"));
+  fprintf(stderr,strerror(errnum));
+  ExitProcess(-1);
 }
 
 
@@ -633,6 +650,17 @@ int CDECL CRTDLL__close(int handle)
 
 
 /*********************************************************************
+ *                  CRTDLL__commit    (CRTDLL.58)
+ */
+int CDECL CRTDLL__commit( int handle )
+{
+  dprintf(("CRTDLL: _commit not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
  *           CRTDLL__control87   (CRTDLL.60)
  */
 unsigned CDECL CRTDLL__control87(unsigned i1,unsigned i2)
@@ -752,6 +780,24 @@ void CDECL CRTDLL__endthread(void)
 {
   dprintf(("CRTDLL: _endthread\n"));
   _endthread ();
+}
+
+
+/*********************************************************************
+ *           CRTDLL___eof   (CRTDLL.76)
+ */
+int CDECL CRTDLL__eof( int _fd )
+{
+  dprintf(("CRTDLL: _eof\n"));
+  int cur_pos = CRTDLL__lseek(_fd, 0, SEEK_CUR);
+  int end_pos = CRTDLL__filelength( _fd );
+  if ( cur_pos == -1 || end_pos == -1)
+	return -1;
+
+  if ( cur_pos == end_pos )
+	return 1;
+
+  return 0;
 }
 
 
@@ -1232,6 +1278,20 @@ unsigned CDECL CRTDLL__getdiskfree( unsigned drive, struct _diskfree_t *diskspac
 
 
 /*********************************************************************
+ *                  _getdllprocaddr     (CRTDLL.123)
+ */
+FARPROC CDECL  CRTDLL__getdllprocaddr(HMODULE hModule,char * lpProcName, int iOrdinal)
+{
+  dprintf(("CRTDLL: _getdllprocaddr\n"));   
+  if ( lpProcName != NULL ) 
+	return GetProcAddress(hModule, lpProcName);
+  else
+	return GetProcAddress(hModule, (LPSTR)iOrdinal);
+  return (NULL);
+}
+
+
+/*********************************************************************
  *                  _getdrive    (CRTDLL.124)
  */
 unsigned CDECL CRTDLL__getdrive( void )
@@ -1259,6 +1319,17 @@ int CDECL CRTDLL__getpid( void )
 {
   dprintf(("CRTDLL: _getpid\n"));
   return (_getpid());
+}
+
+
+/*********************************************************************
+ *                  _getsystime    (CRTDLL.127)
+ */
+unsigned int CDECL CRTDLL__getsystime(struct tm *tp)
+{
+  dprintf(("CRTDLL: _getsystime not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
 }
 
 
@@ -1720,6 +1791,17 @@ void * CDECL CRTDLL__lfind(const void *v1, const void *v2, unsigned int *i1, uns
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 //  return (_lfind(v1,v2,i1,i2,i3(v3,v4)));
+}
+
+
+/*********************************************************************
+ *                  _loaddll    (CRTDLL.171)
+ */
+void * CDECL CRTDLL__loaddll (char *name)
+{
+  dprintf(("CRTDLL: _loaddll not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
 }
 
 
@@ -2505,17 +2587,6 @@ INT CDECL CRTDLL__pclose( FILE *fp )
 
 
 /*********************************************************************
- *                  _pctype_dll    (CRTDLL.245)
- *	FIXME - Could not find anything about it
- */
-INT CDECL CRTDLL__pctype_dll(DWORD ret)
-{
-        dprintf(("CRTDLL: _pctype_dll not implemented.\n"));
-	return 0;
-}
-
-
-/*********************************************************************
  *                  _pipe     (CRTDLL.247)
  */
 INT CDECL CRTDLL__pipe( int *phandles, unsigned psize, int textmode )
@@ -2534,6 +2605,15 @@ FILE * CDECL CRTDLL__popen( const char *command, const char *mode )
   dprintf(("CRTDLL: _popen not implemented.\n"));
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _purecall     (CRTDLL.249)
+ */
+void CDECL CRTDLL__purecall(void)
+{
+  dprintf(("CRTDLL: _purecall\n"));
 }
 
 
@@ -2669,6 +2749,17 @@ INT CDECL CRTDLL__setmode( INT fh,INT mode)
 {
 	dprintf(("CRTDLL: _setmode\n"));
 	return (_setmode(fh, mode));
+}
+
+
+/*********************************************************************
+ *                  _setsystime    (CRTDLL.264)
+ */
+unsigned int CDECL CRTDLL__setsystime(struct tm *tp, unsigned int ms)
+{
+  dprintf(("CRTDLL: _setsystime not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
 }
 
 
@@ -3044,6 +3135,17 @@ INT CDECL CRTDLL__unlink(LPCSTR pathname)
       dprintf((" Failed!\n"));
 
     return ret;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__unloaddll	 (CRTDLL.313)
+ */
+int CDECL CRTDLL__unloaddll(void *handle)
+{
+  dprintf(("CRTDLL: _unloaddll not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
 }
 
 
