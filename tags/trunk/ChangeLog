@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1383 2001-04-27 17:34:19 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1384 2001-04-27 19:31:16 sandervl Exp $ */
 
  2001-04-27: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Call WH_GETMESSAGE hook handler from GetMessage and PeekMessage
@@ -12,6 +12,12 @@
                    Begin/EndPaint))
     - KERNEL32: o HeapReAlloc: return old pointer if new size is smaller or
                                equal to old size.
+    - GDI32:    o Limit length of converted strings in InternalDrawTextExW,
+                  InternalGetTabbedTextExtentW, InternalTabbedTextOutW &
+                  InternalTextOutW. (cbCount might be smaller than string 
+                  length)
+                  (fixes crash in MS Word when it tries to display the about
+                   dialog)
     - INCLUDE\win\unicode: 
                 o strcpyW bugfix (didn't terminate string -> heap corruption)
     - DSOUND:   o Preliminary code added for DirectAudio interface. 
