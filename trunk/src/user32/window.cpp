@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.106 2001-09-19 15:39:52 sandervl Exp $ */
+/* $Id: window.cpp,v 1.107 2001-09-22 18:21:01 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -426,6 +426,7 @@ BOOL WIN32API EnableWindow( HWND hwnd, BOOL fEnable)
 //******************************************************************************
 BOOL WIN32API BringWindowToTop(HWND hwnd)
 {
+    dprintf(("BringWindowToTop %x", hwnd));
     return SetWindowPos( hwnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE );
 }
 /***********************************************************************

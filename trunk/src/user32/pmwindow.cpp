@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.147 2001-09-19 15:39:49 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.148 2001-09-22 18:20:59 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -802,10 +802,6 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
             }
         }
 
-        if ((pswp->fl & (SWP_SIZE | SWP_MOVE | SWP_ZORDER)) == 0)
-//            goto RunDefWndProc;
-            goto RunDefFrameWndProc;
-
         if(!win32wnd->CanReceiveSizeMsgs())
             break;
 
@@ -898,6 +894,11 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
             pswp->hwnd = hwnd;
 
             ret = 0xf;
+        }
+adjustend:
+        //The next part needs to be done for top-level windows only
+        if(!((win32wnd->getStyle() & (WS_POPUP_W|WS_CHILD_W)) == WS_CHILD_W)) 
+        {
             //Setting these flags is necessary to avoid activation/focus problems
             if(ulFlags & SWP_DEACTIVATE) {
                 ret |= AWP_DEACTIVATE;
@@ -917,42 +918,40 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
                 }
                 else
                 {
-                    WinSetFocus(HWND_DESKTOP, WinWindowFromID(hwnd, FID_CLIENT));
-    
+                    HWND hwndFocusSave = WinQueryWindowULong(hwnd, QWL_HWNDFOCUSSAVE);
+                    if(!WinIsWindow(hab, hwndFocusSave)) {
+                        hwndFocusSave = WinWindowFromID(hwnd, FID_CLIENT);
+                        WinSetWindowULong(hwnd, QWL_HWNDFOCUSSAVE, hwndFocusSave);
+                    }
+                    dprintf(("WM_ADJUSTWINDOWPOS: hwndFocusSave %x %x", OS2ToWin32Handle(hwndFocusSave), hwndFocusSave));
+                    WinSetFocus(HWND_DESKTOP, hwndFocusSave);
+
                     ulFrameFlags  = WinQueryWindowUShort(hwnd, QWS_FLAGS);
                     ulFrameFlags &= ~FF_NOACTIVATESWP;
                     WinSetWindowUShort(hwnd, QWS_FLAGS, ulFrameFlags);
                 }
             }
-            rc = (MRESULT)ret;
-            break;
         }
-        //Setting these flags is necessary to avoid activation/focus problems
-        if(ulFlags & SWP_DEACTIVATE) {
-            ret |= AWP_DEACTIVATE;
-        }
-        if(ulFlags & SWP_ACTIVATE) 
-        {
-            ULONG ulFrameFlags;
-
-            if(ulFlags & SWP_ZORDER) {
-                ulFrameFlags = WinQueryWindowUShort(hwnd, QWS_FLAGS);
-                WinSetWindowUShort(hwnd, QWS_FLAGS, ulFrameFlags | FF_NOACTIVATESWP);
-            }
-
-            if(!(ulFlags & SWP_SHOW))
+        else {
+            if(ulFlags & (SWP_ACTIVATE|SWP_FOCUSACTIVATE)) 
             {
-                ret |= AWP_ACTIVATE;
+                win32wnd->MsgChildActivate(TRUE);
+                if(fOS2Look) {
+                    dprintf(("TBM_QUERYHILITE returned %d", WinSendDlgItemMsg(hwnd, FID_TITLEBAR, TBM_QUERYHILITE, 0, 0)));
+                    WinSendDlgItemMsg(hwnd, FID_TITLEBAR, TBM_SETHILITE, (MPARAM)1, 0);
+                }
             }
-            else
+            else 
+            if(ulFlags & (SWP_DEACTIVATE|SWP_FOCUSDEACTIVATE)) 
             {
-                WinSetFocus(HWND_DESKTOP, WinWindowFromID(hwnd, FID_CLIENT));
-
-                ulFrameFlags  = WinQueryWindowUShort(hwnd, QWS_FLAGS);
-                ulFrameFlags &= ~FF_NOACTIVATESWP;
-                WinSetWindowUShort(hwnd, QWS_FLAGS, ulFrameFlags);
+                win32wnd->MsgChildActivate(FALSE);
+                if(fOS2Look) {
+                    dprintf(("TBM_QUERYHILITE returned %d", WinSendDlgItemMsg(hwnd, FID_TITLEBAR, TBM_QUERYHILITE, 0, 0)));
+                    WinSendDlgItemMsg(hwnd, FID_TITLEBAR, TBM_SETHILITE, 0, 0);
+                }
             }
         }
+        dprintf(("WM_ADJUSTWINDOWPOS ret %x", ret));
         rc = (MRESULT)ret;
         break;
     }
@@ -982,7 +981,7 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
             else
             if(pswp->fl & SWP_HIDE) {
                 WinShowWindow(win32wnd->getOS2WindowHandle(), 0);
-            }
+            } 
             goto RunDefFrameWndProc;
         }
 
