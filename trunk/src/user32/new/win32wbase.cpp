@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.35 2000-01-12 12:40:47 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.36 2000-01-12 15:14:16 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2027,6 +2027,11 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
         return FALSE;
     }
 
+    if(IsWindowDestroyed()) {
+        //changing the position of a window that's being destroyed can cause crashes in PMMERGE
+        dprintf(("SetWindowPos; window already destroyed"));
+        return TRUE;
+    }
     WINDOWPOS wpos;
     SWP swp, swpOld;
 
@@ -2052,8 +2057,13 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
     }
 
     OSLibMapWINDOWPOStoSWP(&wpos, &swp, &swpOld, hParent, OS2HwndFrame);
-    if (swp.fl == 0)
-      return TRUE;
+    if (swp.fl == 0) {
+        if (fuFlags & SWP_FRAMECHANGED)
+        {
+            FrameUpdateClient(this);
+        }
+        return TRUE;
+    }
 
 //   if ((swp.fl & SWPOS_ZORDER) && (swp.hwndInsertBehind > HWNDOS_BOTTOM))
     if ((swp.hwndInsertBehind > HWNDOS_BOTTOM))
@@ -2097,10 +2107,9 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
         dprintf(("OSLibWinSetMultWindowPos failed! Error %x",OSLibWinGetLastError()));
     }
 
-    if (fuFlags == SWP_FRAMECHANGED)
+    if(fuFlags & SWP_FRAMECHANGED && (fuFlags & (SWP_NOMOVE | SWP_NOSIZE) == (SWP_NOMOVE | SWP_NOSIZE)))
     {
-      //CB: optimize: if frame size has changed not necessary!
-      FrameUpdateFrame(this,0);
+        FrameUpdateClient(this);
     }
 
     return (rc);
