@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.984 2000-06-12 14:58:01 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.985 2000-06-13 06:42:56 phaller Exp $ */
+
+ 2000-06-12: Patrick Haller <phaller@gmx.net>
+    - LZ32:         - updated to current WINE level (minor changes)
 
  2000-06-11: Patrick Haller <phaller@gmx.net>
     - KERNEL32:     - moved GetNumberFormat to different source file and enhanced
