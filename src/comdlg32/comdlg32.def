@@ -1,4 +1,4 @@
-; $Id: comdlg32.def,v 1.5 1999-12-28 10:30:59 sandervl Exp $
+; $Id: comdlg32.def,v 1.6 2000-10-21 18:42:13 sandervl Exp $
 
 ;
 ; Based on NT 4.0 SP6: COMDLG32.DLL 
@@ -11,11 +11,11 @@ EXPORTS
     ChooseColorW               = _ChooseColorW@4             @102
     ChooseFontA                = _ChooseFontA@4              @103
     ChooseFontW                = _ChooseFontW@4              @104
-    CommDlgExtendedError       = _CommDlgExtendedError32@0   @105
+    CommDlgExtendedError       = _CommDlgExtendedError@0     @105
     FindTextA                  = _FindTextA@4                @106
     FindTextW                  = _FindTextW@4                @107
-    GetFileTitleA              = _GetFileTitleA32@12         @108
-    GetFileTitleW              = _GetFileTitleW32@12         @109
+    GetFileTitleA              = _GetFileTitleA@12           @108
+    GetFileTitleW              = _GetFileTitleW@12           @109
     GetOpenFileNameA           = _GetOpenFileNameA@4         @110
     GetOpenFileNameW           = _GetOpenFileNameW@4         @111
     GetSaveFileNameA           = _GetSaveFileNameA@4         @112
