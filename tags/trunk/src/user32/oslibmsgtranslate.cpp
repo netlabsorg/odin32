@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.45 2001-03-31 10:48:41 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.46 2001-04-02 09:52:01 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -390,15 +390,18 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         HWND hwnd;
 
         DisableLogging();
-        hwnd = WindowFromPoint(winMsg->pt);
-        if(win32wnd->getWindowHandle() != hwnd) {
-            win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
-            if(win32wnd == NULL) {
-                DebugInt3();
-                EnableLogging();
-                goto dummymessage;
+        if(GetCapture() != winMsg->hwnd) 
+        {
+            hwnd = WindowFromPoint(winMsg->pt);
+            if(win32wnd->getWindowHandle() != hwnd) {
+                win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
+                if(win32wnd == NULL) {
+                    DebugInt3();
+                    EnableLogging();
+                    goto dummymessage;
+                }
+                winMsg->hwnd = hwnd;
             }
-            winMsg->hwnd = hwnd;
         }
 #endif
 
@@ -472,15 +475,18 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         HWND hwnd;
 
         DisableLogging();
-        hwnd = WindowFromPoint(winMsg->pt);
-        if(win32wnd->getWindowHandle() != hwnd) {
-            win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
-            if(win32wnd == NULL) {
-                DebugInt3();
-                EnableLogging();
-                goto dummymessage;
+        if(GetCapture() != winMsg->hwnd) 
+        {
+            hwnd = WindowFromPoint(winMsg->pt);
+            if(win32wnd->getWindowHandle() != hwnd) {
+                win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
+                if(win32wnd == NULL) {
+                    DebugInt3();
+                    EnableLogging();
+                    goto dummymessage;
+                }
+                winMsg->hwnd = hwnd;
             }
-            winMsg->hwnd = hwnd;
         }
 #endif
 
