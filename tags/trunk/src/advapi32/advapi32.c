@@ -1,4 +1,4 @@
-/* $Id: advapi32.c,v 1.1 1999-05-24 20:19:32 ktk Exp $ */
+/* $Id: advapi32.c,v 1.2 1999-06-01 21:59:16 phaller Exp $ */
 
 /*
  * Win32 advanced API functions for OS/2
@@ -399,7 +399,11 @@ DWORD WIN32API RegSetValueA(HKEY hkey, LPCSTR lpSubKey, DWORD dwType, LPCSTR lpD
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API RegSetValueW(HKEY hkey, LPCWSTR lpSubKey, DWORD dwType, LPCWSTR lpData, DWORD cbData)
+DWORD WIN32API RegSetValueW(HKEY    hkey, 
+                            LPCWSTR lpSubKey, 
+                            DWORD   dwType, 
+                            LPCWSTR lpData, 
+                            DWORD cbData)
 {
  char *astring1 = UnicodeToAsciiString((LPWSTR)lpSubKey);
  char *astring2 = UnicodeToAsciiString((LPWSTR)lpData);
@@ -4960,7 +4964,7 @@ LONG WIN32API RegSetKeySecurity(HKEY                 hKey,
  *****************************************************************************/
 
 LONG WIN32API RegUnLoadKeyA(HKEY    hKey,
-                               LPCSTR lpszSubKey)
+                            LPCSTR lpszSubKey)
 {
   dprintf(("ADVAPI32: RegUnLoadKeyA(%08xh,%s) not implemented.\n",
            hKey,
