@@ -1,3 +1,4 @@
+// $Id: dplaysp.h,v 1.2 2000-09-24 22:47:39 hugh Exp $
 #ifndef __WINE_DIRECT_PLAY_SP_H
 #define __WINE_DIRECT_PLAY_SP_H
 

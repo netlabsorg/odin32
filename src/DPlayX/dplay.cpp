@@ -1,3 +1,4 @@
+// $Id: dplay.cpp,v 1.2 2000-09-24 22:47:36 hugh Exp $
 /* Direct Play 2,3,4 Implementation
  *
  * Copyright 1998,1999,2000 - Peter Hunnisett

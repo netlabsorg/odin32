@@ -1,3 +1,4 @@
+// $Id: dplayx_global.cpp,v 1.2 2000-09-24 22:47:37 hugh Exp $
 /* dplayx.dll global data implementation.
  *
  * Copyright 1999,2000 - Peter Hunnisett

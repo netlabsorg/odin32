@@ -1,3 +1,4 @@
+// $Id: dplayx_messages.h,v 1.2 2000-09-24 22:47:39 hugh Exp $
 
 #ifndef __WINE_DPLAYX_MESSAGES__
 #define __WINE_DPLAYX_MESSAGES__

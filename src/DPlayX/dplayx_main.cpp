@@ -1,3 +1,4 @@
+// $Id: dplayx_main.cpp,v 1.2 2000-09-24 22:47:37 hugh Exp $
 /*
  * DPLAYX.DLL LibMain
  *

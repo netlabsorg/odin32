@@ -1,5 +1,6 @@
+// $Id: dplayx_queue.h,v 1.2 2000-09-24 22:47:39 hugh Exp $
 /* A queue definition based on sys/queue.h TAILQ definitions
- * 
+ *
  * Blame any implementation mistakes on Peter Hunnisett
  * <hunnise@nortelnetworks.com>
  */
@@ -39,7 +40,7 @@ do{                                          \
 #define DPQ_FIRST( head ) ( (head).lpQHFirst )
 
 /* Check if the queue has any elements */
-#define DPQ_IS_EMPTY( head ) ( DPQ_FIRST(head) == NULL ) 
+#define DPQ_IS_EMPTY( head ) ( DPQ_FIRST(head) == NULL )
 
 /* Next entry -- FIXME: Convert everything over to this macro ... */
 #define DPQ_NEXT( elem ) (elem).lpQNext
@@ -72,7 +73,7 @@ do {                                                    \
  * field - to be concatenated to rc to compare with fieldToCompare
  * fieldToCompare - The value that we're comparing against
  * fieldCompareOperator - The logical operator to compare field and
- *                        fieldToCompare. 
+ *                        fieldToCompare.
  * rc - Variable to put the return code. Same type as (head).lpQHFirst
  */
 #define DPQ_FIND_ENTRY( head, elm, field, fieldCompareOperator, fieldToCompare, rc )\
@@ -115,7 +116,7 @@ do {                                                           \
   }                                                            \
 } while(0)
 
-/* Delete the entire queue 
+/* Delete the entire queue
  * head - pointer to the head of the queue
  * field - field to access the next elements of the queue
  * type - type of the pointer to the element element
