@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.25 1999-12-01 18:23:28 cbratschi Exp $ */
+/* $Id: pmframe.cpp,v 1.26 1999-12-05 00:31:47 sandervl Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -320,17 +320,19 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
       HWND      hParent = NULLHANDLE;
       LONG      yDelta = pswp->cy - swpOld.cy;
       LONG      xDelta = pswp->cx - swpOld.cx;
+      LONG      clientHeight;
 
         dprintf(("PMFRAME: WM_WINDOWPOSCHANGED (%x) %x %x (%d,%d) (%d,%d)", mp2, win32wnd->getWindowHandle(), pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
+
+ 	//Save height so WM_WINDOWPOSCHANGED handler in pmwindow.cpp 
+        //(for client) doesn't overwrite the client rectangle (breaks ydelta calculation)
+	clientHeight = win32wnd->getWindowHeight();
 
         RestoreOS2TIB();
         rc = OldFrameProc(hwnd,msg,mp1,mp2);
         SetWin32TIB();
 
         if ((pswp->fl & (SWP_SIZE | SWP_MOVE | SWP_ZORDER)) == 0)
-            goto PosChangedEnd;
-
-        if(!win32wnd->CanReceiveSizeMsgs())
             goto PosChangedEnd;
 
         if(pswp->fl & (SWP_MOVE | SWP_SIZE)) {
@@ -344,10 +346,13 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
         OSLibMapSWPtoWINDOWPOSFrame(pswp, &wp, &swpOld, hParent, hwnd);
 
         //delta is difference between old and new client height
-        yDelta = swpOld.cy - win32wnd->getWindowHeight();
+        yDelta = swpOld.cy - clientHeight;
 
         win32wnd->setWindowRect(wp.x, wp.y, wp.x+wp.cx, wp.y+wp.cy);
         win32wnd->setClientRect(swpOld.x, swpOld.y, swpOld.x + swpOld.cx, swpOld.y + swpOld.cy);
+
+        if(!win32wnd->CanReceiveSizeMsgs())
+            goto PosChangedEnd;
 
         wp.hwnd = win32wnd->getWindowHandle();
         if ((pswp->fl & SWP_ZORDER) && (pswp->hwndInsertBehind > HWND_BOTTOM))
@@ -384,7 +389,7 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
                     swp[i].y  += yDelta;
                     swp[i].fl &= ~(SWP_NOREDRAW);
                 }
-                //else child window with the same start coorindates as the client area
+                //else child window with the same start coordinates as the client area
                 //The app should resize it.
 
                if (i == 9)

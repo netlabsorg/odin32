@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.45 1999-11-24 19:32:21 sandervl Exp $
+# $Id: Makefile,v 1.46 1999-12-05 00:31:46 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -158,8 +158,8 @@ winkeyboard.obj: winkeyboard.cpp $(PDWIN32_INCLUDE)\winkeyboard.h
 display.obj: display.cpp pmwindow.h
 
 clean:
-        $(RM) *.obj *.lib *.dll *.map *.pch *.res *.lrf resource.asm
+        $(RM) *.obj *.lib *.dll *.map *.pch *.res *.lrf resource.asm *.lrf
         $(RM) $(PDWIN32_BIN)\$(TARGET).dll
         $(RM) $(PDWIN32_LIB)\$(TARGET).lib
-#        $(RM) $(TARGET)exp.def
+        $(RM) $(TARGET)exp.def
 

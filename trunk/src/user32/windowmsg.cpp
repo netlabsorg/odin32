@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.7 1999-11-27 00:10:22 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.8 1999-12-05 00:31:50 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -10,6 +10,7 @@
  *
  * TODO: GetQueueStatus: QS_HOTKEY (oslibmsg.cpp) & low word bits
  * TODO: MsgWaitForMultipleObjects: timeout isn't handled correctly (can return too late)
+ * TODO: GetMessageExtraInfo
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -94,25 +95,26 @@ BOOL WIN32API PeekMessageW(LPMSG msg, HWND hwndOwner, UINT uMsgFilterMin,
     return fFoundMsg;
 }
 //******************************************************************************
+//TODO: 
 //******************************************************************************
-LONG WIN32API GetMessageExtraInfo(void)
+LONG WIN32API GetMessageExtraInfo()
 {
-    dprintf(("USER32:  GetMessageExtraInfo\n"));
-    return O32_GetMessageExtraInfo();
+    dprintf(("USER32: GetMessageExtraInfo NOT SUPPORTED"));
+    return 0;
 }
 //******************************************************************************
 //******************************************************************************
 DWORD WIN32API GetMessagePos(void)
 {
-    dprintf(("USER32:  GetMessagePos\n"));
-    return O32_GetMessagePos();
+    dprintf(("USER32: GetMessagePos"));
+    return OSLibWinGetMessagePos();
 }
 //******************************************************************************
 //******************************************************************************
 LONG WIN32API GetMessageTime(void)
 {
-    dprintf(("USER32:  GetMessageTime\n"));
-    return O32_GetMessageTime();
+    dprintf(("USER32: GetMessageTime"));
+    return OSLibWinGetMessageTime();
 }
 //******************************************************************************
 //******************************************************************************
@@ -209,20 +211,16 @@ BOOL WIN32API WaitMessage(void)
 //******************************************************************************
 BOOL WIN32API InSendMessage(void)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  InSendMessage\n");
-#endif
-    return O32_InSendMessage();
+    dprintf(("USER32:  InSendMessage"));
+    return OSLibWinInSendMessage();
 }
 //******************************************************************************
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API ReplyMessage( LRESULT arg1)
+BOOL WIN32API ReplyMessage(LRESULT result)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  ReplyMessage\n");
-#endif
-    return O32_ReplyMessage(arg1);
+    dprintf(("USER32: ReplyMessage %x", result));
+    return OSLibWinReplyMessage(result);
 }
 //******************************************************************************
 //******************************************************************************

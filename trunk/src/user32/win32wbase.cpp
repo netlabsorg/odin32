@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.103 1999-12-04 00:04:19 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.104 1999-12-05 00:31:48 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -10,6 +10,8 @@
  * Copyright 1993, 1994 Alexandre Julliard
  *
  * TODO: Not thread/process safe
+ * TODO: Calling window handler directly from SendMessageA/W can cause problems
+ *       for GetMessageTime/Pos & InSendMessage
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -715,6 +717,7 @@ ULONG Win32BaseWindow::MsgQuit()
 ULONG Win32BaseWindow::MsgClose()
 {
   if(SendInternalMessageA(WM_CLOSE, 0, 0) == 0) {
+	dprintf(("Win32BaseWindow::MsgClose, app handles msg"));
         return 0; //app handles this message
   }
   return 1;
