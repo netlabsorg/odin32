@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.361 2003-02-28 09:56:00 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.362 2003-03-20 13:20:45 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -91,44 +91,6 @@ Win32BaseWindow::Win32BaseWindow()
 }
 //******************************************************************************
 //******************************************************************************
-Win32BaseWindow::Win32BaseWindow(HWND hwndOS2, ATOM classAtom)
-                     : GenericObject(&windows, &critsect), ChildWindow(&critsect)
-{
-    Init();
-    OS2Hwnd = OS2HwndFrame = hwndOS2;
-
-    /* Find the window class */
-    windowClass = Win32WndClass::FindClass(NULL, (LPSTR)classAtom);
-    if (!windowClass)
-    {
-        char buffer[32];
-        GlobalGetAtomNameA( classAtom, buffer, sizeof(buffer) );
-        dprintf(("Bad class '%s'", buffer ));
-        DebugInt3();
-    }
-
-    //Allocate window words
-    nrUserWindowBytes = windowClass->getExtraWndBytes();
-    if(nrUserWindowBytes) {
-        userWindowBytes = (char *)_smalloc(nrUserWindowBytes);
-        memset(userWindowBytes, 0, nrUserWindowBytes);
-    }
-
-    WINPROC_SetProc((HWINDOWPROC *)&win32wndproc, windowClass->getWindowProc((isUnicode) ? WNDPROC_UNICODE : WNDPROC_ASCII), WINPROC_GetProcType(windowClass->getWindowProc((isUnicode) ? WNDPROC_UNICODE : WNDPROC_ASCII)), WIN_PROC_WINDOW);
-    hInstance  = NULL;
-    dwStyle    = WS_VISIBLE;
-    dwOldStyle = dwStyle;
-    dwExStyle  = 0;
-
-    //We pretend this window has no parent and won't change size
-    //(dangerous assumption!!)
-    OSLibWinQueryWindowClientRect(OS2Hwnd, &rectClient);
-    OSLibQueryWindowRectAbsolute (OS2Hwnd, &rectWindow);
-
-    fFakeWindow = TRUE;
-}
-//******************************************************************************
-//******************************************************************************
 Win32BaseWindow::Win32BaseWindow(CREATESTRUCTA *lpCreateStructA, ATOM classAtom, BOOL isUnicode)
                      : GenericObject(&windows, &critsect), ChildWindow(&critsect)
 {
@@ -155,7 +117,6 @@ void Win32BaseWindow::Init()
   fMinMaxChange    = FALSE;
   fVisibleRegionChanged = FALSE;
   fEraseBkgndFlag  = TRUE;
-  fFakeWindow      = FALSE;
   fIsDragDropActive= FALSE;
 
   state            = STATE_INIT;
@@ -231,6 +192,8 @@ void Win32BaseWindow::Init()
 
   lpVisRgnNotifyProc  = NULL;
   dwVisRgnNotifyParam = NULL;
+
+  pfnOldPMWndProc     = NULL;
 }
 //******************************************************************************
 //todo get rid of resources (menu, icon etc)
@@ -3508,6 +3471,12 @@ HWND Win32BaseWindow::GetWindow(UINT uCmd)
 end:
     dprintf(("GetWindow %x %d returned %x", getWindowHandle(), uCmd, hwndRelated));
     return hwndRelated;
+}
+//******************************************************************************
+//******************************************************************************
+PRECT Win32BaseWindow::getWindowRect()
+{ 
+    return &rectWindow; 
 }
 //******************************************************************************
 //******************************************************************************
