@@ -1,4 +1,4 @@
-/* $Id: dibitmap.cpp,v 1.11 2000-11-09 18:16:56 sandervl Exp $ */
+/* $Id: dibitmap.cpp,v 1.12 2000-11-14 14:28:22 sandervl Exp $ */
 
 /*
  * GDI32 dib & bitmap code
@@ -13,16 +13,17 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
-#include "misc.h"
+#include <misc.h>
+#include <winuser32.h>
 #include "dibsect.h"
 
-#define DBG_LOCALLOG	DBG_dibitmap
+#define DBG_LOCALLOG    DBG_dibitmap
 #include "dbglocal.h"
 
 //******************************************************************************
 //******************************************************************************
-HBITMAP WIN32API CreateDIBitmap(HDC hdc, const BITMAPINFOHEADER *lpbmih, 
-                                DWORD fdwInit, const void *lpbInit, 
+HBITMAP WIN32API CreateDIBitmap(HDC hdc, const BITMAPINFOHEADER *lpbmih,
+                                DWORD fdwInit, const void *lpbInit,
                                 const BITMAPINFO *lpbmi, UINT fuUsage)
 {
   int iHeight;
@@ -31,9 +32,9 @@ HBITMAP WIN32API CreateDIBitmap(HDC hdc, const BITMAPINFOHEADER *lpbmih,
   //SvL: Completely wrong result when creating a 1bpp bitmap here (converted
   //     to 8bpp by Open32)
   if(lpbmih->biBitCount == 1) {
-	dprintf(("WARNING: CreateDIBitmap doesn't handle 1bpp bitmaps very well!!!!!"));
+    dprintf(("WARNING: CreateDIBitmap doesn't handle 1bpp bitmaps very well!!!!!"));
   }
-  
+
   //TEMPORARY HACK TO PREVENT CRASH IN OPEN32 (WSeB GA)
 
   iHeight = lpbmih->biHeight;
@@ -48,19 +49,19 @@ HBITMAP WIN32API CreateDIBitmap(HDC hdc, const BITMAPINFOHEADER *lpbmih,
   // Open32 will crash since it won't allocate any palette color memory,
   // however wants to copy it later on ...
   int biBitCount = lpbmih->biBitCount;
-  
+
   if (lpbmih->biBitCount != lpbmi->bmiHeader.biBitCount)
   {
     dprintf(("GDI32: CreateDIBitmap: color depths of bitmaps differ! (%d,%d\n",
              lpbmih->biBitCount,
              lpbmi->bmiHeader.biBitCount));
-             
+
     ((BITMAPINFOHEADER *)lpbmih)->biBitCount = lpbmi->bmiHeader.biBitCount;
   }
 
   rc = O32_CreateDIBitmap(hdc, lpbmih, fdwInit, lpbInit, lpbmi, fuUsage);
 
-  dprintf(("GDI32: CreateDIBitmap %x %x %x %x returned %x", hdc, fdwInit, lpbInit, fuUsage, rc));
+  dprintf(("GDI32: CreateDIBitmap %x %x %x %x returned %x (%d,%d, bps %d)", hdc, fdwInit, lpbInit, fuUsage, rc, lpbmih->biWidth, lpbmih->biHeight, lpbmih->biBitCount));
 
   ((BITMAPINFOHEADER *)lpbmih)->biHeight   = iHeight;
   ((BITMAPINFOHEADER *)lpbmih)->biBitCount = biBitCount;
@@ -119,22 +120,22 @@ HBITMAP WIN32API CreateDIBSection( HDC hdc, BITMAPINFO *pbmi, UINT iUsage,
   iWidth = pbmi->bmiHeader.biWidth;
   if(pbmi->bmiHeader.biWidth < 0)
   {
-	dprintf(("CreateDIBSection: width %d", pbmi->bmiHeader.biWidth));
-    	pbmi->bmiHeader.biWidth = -pbmi->bmiHeader.biWidth;
-    	fFlip = FLIP_HOR;
+    dprintf(("CreateDIBSection: width %d", pbmi->bmiHeader.biWidth));
+        pbmi->bmiHeader.biWidth = -pbmi->bmiHeader.biWidth;
+        fFlip = FLIP_HOR;
   }
   iHeight = pbmi->bmiHeader.biHeight;
   if(pbmi->bmiHeader.biHeight < 0)
   {
-	dprintf(("CreateDIBSection: height %d", pbmi->bmiHeader.biHeight));
-    	pbmi->bmiHeader.biHeight = -pbmi->bmiHeader.biHeight;
-    	fFlip |= FLIP_VERT;
+    dprintf(("CreateDIBSection: height %d", pbmi->bmiHeader.biHeight));
+        pbmi->bmiHeader.biHeight = -pbmi->bmiHeader.biHeight;
+        fFlip |= FLIP_VERT;
   }
 
   //SvL: RP7 (update) calls this api with hdc == 0
   if(hdc == 0) {
-	hdc = GetWindowDC(GetDesktopWindow());
-	fCreateDC = TRUE;
+    hdc = GetWindowDC(GetDesktopWindow());
+    fCreateDC = TRUE;
   }
   res = O32_CreateDIBitmap(hdc, &pbmi->bmiHeader, 0, NULL, pbmi, iUsage);
   if (res)
@@ -180,11 +181,11 @@ HBITMAP WIN32API CreateDIBSection( HDC hdc, BITMAPINFO *pbmi, UINT iUsage,
       pbmi->bmiHeader.biWidth = iWidth;
       pbmi->bmiHeader.biHeight = iHeight;
 
-      if(fCreateDC)	ReleaseDC(GetDesktopWindow(), hdc);
+      if(fCreateDC) ReleaseDC(GetDesktopWindow(), hdc);
       return(res);
     }
   }
-  if(fCreateDC)	ReleaseDC(GetDesktopWindow(), hdc);
+  if(fCreateDC) ReleaseDC(GetDesktopWindow(), hdc);
 
   /* Error.  */
   if (res)
@@ -270,7 +271,7 @@ BOOL WIN32API SetBitmapDimensionEx( HBITMAP arg1, int arg2, int arg3, PSIZE  arg
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLines, 
+int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLines,
                        void *lpvBits, PBITMAPINFO lpbi, UINT uUsage)
 {
  int rc;
@@ -288,7 +289,7 @@ int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLine
        ((DWORD*)(lpbi->bmiColors))[0] = 0x0000FF;
        ((DWORD*)(lpbi->bmiColors))[1] = 0x00FF00;
        ((DWORD*)(lpbi->bmiColors))[2] = 0xFF0000;
-       break; 
+       break;
     }
 
     dprintf(("GDI32: GetDIBits %x %x %d %d %x %x %d returned %d", hdc, hBitmap, uStartScan, cScanLines, lpvBits, lpbi, uUsage, rc));
@@ -296,20 +297,48 @@ int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLine
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API SetDIBits( HDC arg1, HBITMAP arg2, UINT arg3, UINT arg4, const VOID * arg5, const BITMAPINFO * arg6, UINT  arg7)
+int WIN32API SetDIBits(HDC hdc, HBITMAP hBitmap, UINT startscan, UINT numlines, const VOID *pBits,
+                       const BITMAPINFO *pBitmapInfo, UINT usage)
 {
-    dprintf(("GDI32: SetDIBits %x %x %x %x %x %x %x\n", arg1, arg2, arg3, arg4, arg5, arg6, arg7));
+    dprintf(("GDI32: SetDIBits %x %x %x %x %x %x %x", hdc, hBitmap, startscan, numlines, pBits, pBitmapInfo, usage));
 
-    if(DIBSection::getSection() != NULL) 
+    if(DIBSection::getSection() != NULL)
     {
         DIBSection *dsect;
 
-        dsect = DIBSection::find((DWORD)arg2);
+        dsect = DIBSection::find((DWORD)hBitmap);
         if(dsect) {
-           return dsect->SetDIBits(arg1, arg2, arg3, arg4, arg5, (BITMAPINFOHEADER_W *)&arg6->bmiHeader, arg7);
+           return dsect->SetDIBits(hdc, hBitmap, startscan, numlines, pBits, (BITMAPINFOHEADER_W *)&pBitmapInfo->bmiHeader, usage);
         }
     }
-    return O32_SetDIBits(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+    //SvL: Open32's SetDIBits really messes things up for 1 bpp bitmaps, must use SetBitmapBits
+    if(pBitmapInfo->bmiHeader.biBitCount == 1 && startscan == 0 && numlines == pBitmapInfo->bmiHeader.biHeight)
+    {
+        int   linewidth = DIB_GetDIBWidthBytes(pBitmapInfo->bmiHeader.biWidth, 1);
+        char *newpix    = (char *)malloc(linewidth*pBitmapInfo->bmiHeader.biHeight);
+        char *orgpix    = (char *)pBits;
+        int   ret;
+
+        newpix += ((pBitmapInfo->bmiHeader.biHeight-1)*linewidth);
+
+        //flip bitmap here; SetDIBits assumes origin is left bottom, SetBitmapBits left top
+        for(int i=0;i<pBitmapInfo->bmiHeader.biHeight;i++) {
+            memcpy(newpix, orgpix, linewidth);
+            newpix -= linewidth;
+            orgpix += linewidth;
+        }
+        newpix += linewidth;
+        ret = O32_SetBitmapBits(hBitmap, pBitmapInfo->bmiHeader.biSizeImage, newpix);
+
+        free(newpix);
+        return ret;
+    }
+#ifdef DEBUG
+    if(pBitmapInfo->bmiHeader.biBitCount == 1) {
+        dprintf(("ERROR: SetDIBits does NOT work well for 1 bpp bitmaps!!!!!"));
+    }
+#endif
+    return O32_SetDIBits(hdc, hBitmap, startscan, numlines, pBits, pBitmapInfo, usage);
 }
 //******************************************************************************
 //******************************************************************************
