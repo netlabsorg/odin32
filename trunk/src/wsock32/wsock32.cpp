@@ -1,19 +1,23 @@
-/* $Id: wsock32.cpp,v 1.3 1999-06-19 10:54:48 sandervl Exp $ */
+/* $Id: wsock32.cpp,v 1.4 1999-08-16 20:18:40 phaller Exp $ */
 
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
- */
-/*
  * Win32 SOCK32 for OS/2
  *
  * 1998/08/25 Vince Vielhaber
  *
- * @(#) wsock32.c     	1.0.0   1998/08/25 VV initial release
+ * @(#) wsock32.c                        1.0.0   1998/08/25 VV initial release
  *                      1.0.1   1999/04/27 VV cleanup and implement select.
  *
  */
+
+
+/*****************************************************************************
+ * Includes                                                                  *
+ *****************************************************************************/
+
 
 #define INCL_DOSPROCESS     /* Process and thread values */
 #define INCL_DOSFILEMGR     /* for DosRead and DosWrite */
@@ -31,13 +35,14 @@
 # define BSD_SELECT
 #endif
 
-#include <os2wrap.h>	//Odin32 OS/2 api wrappers
+#include <os2wrap.h>                     //Odin32 OS/2 api wrappers
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
 #include <string.h>
 #include <ctype.h>
 #include <types.h>
+#include <odinwrap.h>
 #include <netdb.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
@@ -53,85 +58,12 @@
 #include "misc.h"
 
 
-#define FAR
-//#define WIN32API APIENTRY
-
-static WHOSTENT whsnt;
-static WSERVENT wsvnt;
-static WPROTOENT wptnt;
-
- /*+-------------------------------------------------------------------+*/
- /*| _CRT_init is the C run-time environment initialization function.  |*/
- /*|It will return 0 to indicate success and -1 to indicate failure.   |*/
- /*+-------------------------------------------------------------------+*/
- 
-int _CRT_init (void);
- 
- /*+-------------------------------------------------------------------+*/
- /*| _CRT_term is the C run-time environment termination function.     |*/
- /*+-------------------------------------------------------------------+*/
- 
-void _CRT_term (unsigned long);
-
-void _System AsyncLoop(ULONG);
-void CheckThreads(AsyncStatus *);
-void NotifyApp(int,AsyncStatus *);
-int Notify(AsyncStatus *,int);
-
-int NotifyWSA(HWND hw,u_int msg,UINT wp,LONG lp);
-
-void _System WSAFunct(ULONG); // for the wsa database calls
-void SetErrForDatabaseCalls(void);
+ODINDEBUGCHANNEL(WSOCK32-WSOCK32)
 
 
-size_t nSize;
-int *pArray;
-
-int MsgSent;
-int LocalErrorNumber = 0;
-
-
-TID tidAsyncLoop = 0;     /* ID of AsyncSelect (AsyncLoop) thread */
-
-/*
-
- 
-typedef struct AsyncStatus {
-    HWND hwnd;     // owner's hwindow
-    u_int msg;     // message to send when event occurs
-    long event;    // event that may occur
-    SOCKET socket; // the socket
-    int status;    // blocking yes/no
-    TID threadID;  // Thread ID for async
-    int MsgStat;   // has message been sent yet?
-    struct AsyncStatus *Next; // pointer to next AsyncStatus in the list
-    struct AsyncStatus *Prev; // pointer to previous AsyncStatus in the list
-} AsyncStatus;
- 
- 
- 
-*/
-
-AsyncStatus *TopASY = 0;
-
-
-#define BLOCKING 0
-#define NONBLOCKING 1
-
-
-
-typedef struct WSAStruct {
-    int CallingWhat;
-    HWND hw;
-    u_int msg;
-    char *carg1;
-    char *carg2;
-    int iarg1;
-    int iarg2;
-    char *buf;
-    int buflen;
-} WSAStruct;
-
+/*****************************************************************************
+ * Defines                                                                   *
+ *****************************************************************************/
 
 #define GETSERVBYNAME    1
 #define GETSERVBYPORT    2
@@ -140,19 +72,8 @@ typedef struct WSAStruct {
 #define GETHOSTBYNAME    5
 #define GETHOSTBYADDR    6
 
-
-
-
-typedef struct PipeStruct {
-    AsyncStatus as;
-    int MsgLoop;
-    HFILE rcv;
-    HFILE snd;
-} PipeStruct;
-
-PipeStruct PS;
-
-
+#define BLOCKING 0
+#define NONBLOCKING 1
 
 #ifdef FD_CLR
 #undef FD_CLR
@@ -166,593 +87,1232 @@ PipeStruct PS;
 #endif
 
 
+/*****************************************************************************
+ * Structures                                                                *
+ *****************************************************************************/
 
-
-
-
-int WIN32API OS2__WSAFDIsSet(SOCKET fd, Wfd_set FAR *set) 
+typedef struct WSAStruct
 {
-int i = set->fd_count;
+  int CallingWhat;
+  HWND hw;
+  u_int msg;
+  char *carg1;
+  char *carg2;
+  int iarg1;
+  int iarg2;
+  char *buf;
+  int buflen;
+} WSAStruct;
 
-#ifdef DEBUG
-    WriteLog("WSOCK32: __WSAFDIsSet\n");
-#endif
- 
-     while (i--)
-         if (set->fd_array[i] == fd)
-             return 1;
- 
-return 0;
-}
-
-
-
-AsyncStatus * FindASY(SOCKET s)
+typedef struct PipeStruct
 {
-AsyncStatus *as;
+  AsyncStatus as;
+  int MsgLoop;
+  HFILE rcv;
+  HFILE snd;
+} PipeStruct;
 
-    for(as = TopASY; as; as = as->Next)
-        if(as->socket == s)
-            return as;
+typedef struct sockaddr* PSOCKADDR;
 
-return 0;
-}
+//typedef struct _TRANSMIT_FILE_BUFFERS {
+//    PVOID Head;
+//    DWORD HeadLength;
+//    PVOID Tail;
+//    DWORD TailLength;
+//} TRANSMIT_FILE_BUFFERS, *PTRANSMIT_FILE_BUFFERS, *LPTRANSMIT_FILE_BUFFERS;
+//
+//BOOL, OS2TransmitFile, //, IN, SOCKET, hSocket, //, IN, HANDLE, hFile, //, IN, DWORD, nNumberOfBytesToWrite, //, IN DWORD nNumberOfBytesPerSend,
+//    IN LPOVERLAPPED lpOverlapped,
+//    IN LPTRANSMIT_FILE_BUFFERS lpTransmitBuffers,
+//    IN DWORD dwReserved)
+//{
+//    return FALSE;
+//}
 
 
+/*****************************************************************************
+ * Prototypes                                                                *
+ *****************************************************************************/
 
-SOCKET WIN32API OS2accept (SOCKET s, struct sockaddr *addr,
-                        int *addrlen) {
-#ifdef DEBUG
-    WriteLog("WSOCK32: accept\n");
-#endif
+void _System AsyncLoop             (ULONG);
+void         CheckThreads          (AsyncStatus *);
+void         NotifyApp             (int,AsyncStatus *);
+int          Notify                (AsyncStatus *,int);
+int          NotifyWSA             (HWND hw,u_int msg,UINT wp,LONG lp);
+void _System WSAFunct              (ULONG); // for the wsa database calls
+void         SetErrForDatabaseCalls(void);
 
-    return accept(s,addr,addrlen);
-}
 
-int WIN32API OS2bind (SOCKET s, const struct sockaddr *addr, int namelen)
+/*****************************************************************************
+ * Local variables                                                           *
+ *****************************************************************************/
+
+static WHOSTENT whsnt;
+static WSERVENT wsvnt;
+static WPROTOENT wptnt;
+size_t nSize;
+int *pArray;
+
+int MsgSent;
+int LocalErrorNumber = 0;
+
+TID tidAsyncLoop = 0;     /* ID of AsyncSelect (AsyncLoop) thread */
+
+PipeStruct PS;
+
+AsyncStatus *TopASY = 0;
+
+
+/*
+typedef struct AsyncStatus {
+    HWND hwnd;     // owner's hwindow
+    u_int msg;     // message to send when event occurs
+    long event;    // event that may occur
+    SOCKET socket; // the socket
+    int status;    // blocking yes/no
+    TID threadID;  // Thread ID for async
+    int MsgStat;   // has message been sent yet?
+    struct AsyncStatus *Next; // pointer to next AsyncStatus in the list
+    struct AsyncStatus *Prev; // pointer to previous AsyncStatus in the list
+} AsyncStatus;
+*/
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+void _System AsyncLoop(ULONG ASP)
 {
- int rc;
+  int socks[1],r,w,e,rc,ii;
+  AsyncStatus *as;
 
-#ifdef DEBUG
-    WriteLog("WSOCK32: bind\n");
-#endif
+  as = (AsyncStatus *)ASP;
 
-    rc = bind(s,(struct sockaddr *)addr,namelen);
-    dprintf(("bind returned %X\n", rc));
-    return(rc);
-}
+  r = w = e = 0;
+  if(as->event & FD_READ) r = 1;
+  if(as->event & FD_WRITE) w = 1;
+  if(as->event & FD_OOB) e = 1;
 
-int WIN32API OS2closesocket (SOCKET s)
-{
-AsyncStatus *as;
-#ifdef DEBUG
-    WriteLog("WSOCK32: closesocket\n");
-#endif
+  socks[0] = (int)as->socket;
 
-    as = FindASY(s);
-    if(as == NULL) {
-        LocalErrorNumber = 10038;
-        return -1;
+  if((r+w+e) == 0)
+  {
+    dprintf(("WSOCK32: Turning off async\n"));
+
+    ii = 0;
+    rc = ioctl(socks[0],FIONBIO,(char *)&ii,sizeof(ii));
+    as->threadID = 0;
+    as->hwnd = 0;
+    as->msg = 0;
+    as->event = 0;
+    as->status = BLOCKING;
+    return;
+  } // end if
+  else
+  {
+    dprintf(("WSOCK32: Setting up non-blocking sockets\n"));
+    ii = 1;
+    rc = ioctl(socks[0],FIONBIO,(char *)&ii,sizeof(ii));
+    if(rc != 0)
+    {
+      dprintf(("WSOCK32: ioctl failed trying to non-block.\n"));
+      return;
+    }
+    as->status = NONBLOCKING;
+  } // end else
+
+  do
+  {
+    rc = select(socks[0],(fd_set*)&r,0,0,0); // ioctl may be better for this.
+    if(rc > 0)
+    {
+      rc = ioctl(socks[0],FIONREAD,(char *)&ii,sizeof(ii));
+      if(rc == 0 && ii > 0)
+      {
+        /* data is ready */
+        NotifyApp(FD_READ,as);
+      }
     }
 
-    CheckThreads(as);
+    if(rc < 0)
+    {
+      rc = sock_errno();
+      /* something ain't right */
+      if(rc == 10038)
+      { // Connection closed
+        NotifyApp(FD_CLOSE,as);
+        DosSleep(500);
+        return;
+      }
 
-#ifdef DEBUG
-    WriteLog("WSOCK32: closesocket\n");
-#endif
-    if(as->Prev && as->Next)
-        as->Prev->Prev = as->Next->Next; // I SURE HOPE THIS IS RIGHT!!!!!!!!
-    free(as);
-    
-    return soclose((int)s);
+      dprintf(("WSOCK32: Select error: %d\n",
+               rc));
+    } // end if
+    DosSleep(50);
+  }
+  while(1);
 }
 
-int WIN32API OS2connect (SOCKET s, const struct sockaddr *name, int namelen)
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+void CheckThreads(AsyncStatus *as)
 {
-#ifdef DEBUG
-//char message[512];
-//struct Wsockaddr_in *xname;
+  AsyncStatus *asy;
 
-  WriteLog("WSOCK32: connect\n");
+  if(as != NULL)
+    if(as->threadID != 0) DosKillThread(as->threadID);
 
-
-#endif
-
-    return connect(s,(struct sockaddr *)name,namelen);
+  for(asy = TopASY; asy; asy = asy->Next)
+    if(asy->threadID != 0)
+      DosKillThread(asy->threadID);
 }
 
-int WIN32API OS2ioctlsocket (SOCKET s, long cmd, u_long *argp)
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+void NotifyApp(int xx,AsyncStatus *as)
 {
- int rc;
+  BOOL    fResult;        /* message-posted indicator             */
+  unsigned long ii;
 
-#ifdef DEBUG
-    WriteLog("WSOCK32: ioctlsocket unimplemented\n");
-#endif
 
-    rc = ioctl(s, cmd, (char *)argp, 4);
-    dprintf(("ioctl returned %X\n", rc));
-    return(rc);
+//#ifdef DEBUG
+//    WriteLog("WSOCK32: Notifying the caller.  rc = %d\n",xx);
+//#endif
+
+  if(as->MsgStat == 0)
+  {
+   fResult = Notify(as,xx);
+   dprintf(("WSOCK32: Notify returns: %d\n",
+            fResult));
+  } // end if
+
+  if(as->MsgStat == 2)
+    as->MsgStat = 0;
+  else
+    as->MsgStat = 1;
 }
 
-int WIN32API OS2getpeername (SOCKET s, struct sockaddr *name,
-                          int * namelen)
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+void _System WSAFunct(ULONG xx)
 {
+  WSAStruct *wsa;
+  WSERVENT *ooo;
+  char *yy;
+  int ii;
+  size_t ss;
+  UINT wp;
+  LONG lp;
+  int id = *_threadid;
+
+  wsa = (WSAStruct *)xx;
+
+  dprintf(("WSOCK32: WSAFunct: xx = %p, hwnd = %p\n",
+           xx,
+           wsa->hw));
+
+  dprintf(("WSOCK32: WSAFunct info carg1 = %s, carg2 = %s\n",
+           wsa->carg1,
+           wsa->carg2));
+
+  dprintf(("WSOCK32: WSAFunct info buf = %p, %d\n",
+           wsa->buf,
+           wsa->buflen));
+
+  switch (wsa->CallingWhat)
+  {
+    case GETSERVBYNAME:
+      yy = (char *)OS2getservbyname(wsa->carg1,wsa->carg2);
+      ss = sizeof(WSERVENT);
+      break;
+    case GETSERVBYPORT:
+      yy = (char *)OS2getservbyport(wsa->iarg1,wsa->carg1);
+      break;
+    case GETPROTOBYNUMBER:
+      yy = (char *)OS2getprotobynumber(wsa->iarg1);
+      break;
+    case GETPROTOBYNAME:
+      yy = (char *)OS2getprotobyname(wsa->carg1);
+      break;
+    case GETHOSTBYNAME:
+      yy = (char *)OS2gethostbyname(wsa->carg1);
+      break;
+    case GETHOSTBYADDR:
+      yy = (char *)OS2gethostbyaddr(wsa->carg1,wsa->iarg1,wsa->iarg2);
+      break;
+    default:
+      yy = (char *)NULL;
+      OS2WSASetLastError(-5000);
+      break;
+  } // end switch
+
 #ifdef DEBUG
-    WriteLog("WSOCK32: getpeername\n");
+  if(yy)
+  {
+    ooo = (WSERVENT *)yy;
+    dprintf(("WSOCK32: WSAFunct service name = %s, port = %d\n",
+             ooo->s_name,
+             (int)ooo->s_port));
+  }
 #endif
 
-    return getpeername(s,name,namelen);
-}
+  wp = id;
 
-int WIN32API OS2getsockname (SOCKET s, struct sockaddr *name,
-                          int * namelen)
-{
-#ifdef DEBUG
-    WriteLog("WSOCK32: getsockname\n");
-#endif
+  if(yy == (char *)NULL)
+  {
+    dprintf(("WSOCK32: WSAFunct error carg1 = %s, carg2 = %s\n",
+             wsa->carg1,
+             wsa->carg2));
 
-    return getsockname(s,name,namelen);
-}
+   ii = OS2WSAGetLastError();
+   lp = OS2WSAMAKEASYNCREPLY(0,ii);
+  } // end if
+  else
+  {
+    if(wsa->buflen < ss)
+      ii = WSAENOBUFS;
+    else
+      ii = 0;
 
-int WIN32API OS2getsockopt (SOCKET s, int level, int optname,
-                         char * optval, int *optlen)
-{
-#ifdef DEBUG
-    WriteLog("WSOCK32: getsockopt\n");
-#endif
+    lp = OS2WSAMAKEASYNCREPLY(ss,ii);
+    if(ii == 0)
+      memmove(wsa->buf,yy,ss);
+  }
 
-    return getsockopt(s,level,optname,optval,optlen);
-}
+  do
+  {
+    if(WinQueryAnchorBlock(wsa->hw))
+          ii = NotifyWSA(wsa->hw,wsa->msg,wp,lp);
+  } while(ii != TRUE);
 
-u_long WIN32API OS2htonl (u_long hostlong)
-{
-#ifdef DEBUG
-    WriteLog("WSOCK32: htonl\n");
-#endif
-
-    return htonl(hostlong);
-}
-
-u_short WIN32API OS2htons (u_short hostshort)
-{
-#ifdef DEBUG
-    WriteLog("WSOCK32: htons\n");
-#endif
-
-    return htons(hostshort);
-}
-
-unsigned long WIN32API OS2inet_addr (const char * cp)
-{
-#ifdef DEBUG
-    WriteLog("WSOCK32: inet_addr\n");
-#endif
-
-    return inet_addr((char *)cp);
-}
-
-char * WIN32API OS2inet_ntoa (struct in_addr in)
-{
-#ifdef DEBUG
-    WriteLog("WSOCK32: inet_ntoa\n");
-#endif
-
-    return inet_ntoa(in);
-}
-
-int WIN32API OS2listen (SOCKET s, int backlog)
-{
-#ifdef DEBUG
-    WriteLog("WSOCK32: listen\n");
-#endif
-
-    return listen(s,backlog);
-}
-
-u_long WIN32API OS2ntohl (u_long netlong)
-{
-#ifdef DEBUG
-    WriteLog("WSOCK32: ntohl\n");
-#endif
-
-    return ntohl(netlong);
-}
-
-u_short WIN32API OS2ntohs (u_short netshort)
-{
-#ifdef DEBUG
-    WriteLog("WSOCK32: ntohs\n");
-#endif
-
-    return ntohs(netshort);
-}
-
-int WIN32API OS2recv (SOCKET s, char * buf, int len, int flags)
-{
-unsigned long ii;
-int xx,yy;
-char buff[200];
-AsyncStatus *as;
-#ifdef DEBUG
-    WriteLog("WSOCK32: recv socket: %u\n",(unsigned int)s);
-    WriteLog("WSOCK32: recv len: %d\n",len);
-    WriteLog("WSOCK32: recv flags: %d\n",flags);
-
-#endif
-
-    PS.MsgLoop = 0;
-
-    as = FindASY(s);
-
-    if(as != NULL) as->MsgStat = 2;
-
-    
-    xx = recv(s,buf,len,flags);
-
-return xx;
+  free(wsa);
 }
 
 
-
-int WIN32API OS2recvfrom (SOCKET s, char * buf, int len, int flags,
-                       struct sockaddr *from, int * fromlen)
-{
- int rc;
-
-#ifdef DEBUG
-    WriteLog("WSOCK32: recvfrom\n");
-#endif
-
-    rc = recvfrom(s,buf,len,flags,from,fromlen);
-    dprintf(("recvfrom returned %X\n", rc));
-    return(rc);
-}
-
-
-
-#ifdef VV_BSD_SELECT
-
-
-int WIN32API OS2select (int nfds, Wfd_set *readfds, Wfd_set *writefds,
-                     Wfd_set *exceptfds, const struct Wtimeval *timeout)
-{
-#ifdef DEBUG
-    WriteLog("WSOCK32: select\n");
-#endif
-
-
-    return select(nfds,(fd_set *)readfds,(fd_set *)writefds,(fd_set *)exceptfds,(timeval *)timeout);
-    
-}
-
-
-
-#else
-
-
-int WIN32API OS2select (int nfds, Wfd_set *readfds, Wfd_set *writefds,
-                     Wfd_set *exceptfds, const struct Wtimeval *timeout)
-{
-#ifdef DEBUG
-    WriteLog("WSOCK32: select\n");
-#endif
-
-    // NEED TO DO THIS ONE!!!!!
-    
-    return 0;
-}
-#endif
-
-
-
-int WIN32API OS2send (SOCKET s, const char * buf, int len, int flags)
-{
-#ifdef DEBUG
-    WriteLog("WSOCK32: send socket: %u\n",(unsigned int)s);
-//    WriteLog("WSOCK32: send buf: %s\n",buf);
-    WriteLog("WSOCK32: send len: %d\n",len);
-    WriteLog("WSOCK32: send flags: %d\n",flags);
-#endif
-
-    return send(s,(char *)buf,len,flags);
-}
-
-int WIN32API OS2sendto (SOCKET s, const char * buf, int len, int flags,
-                     const struct sockaddr *to, int tolen)
-{
- int rc;
-
-#ifdef DEBUG
-    WriteLog("WSOCK32: sendto\n");
-#endif
-
-    rc = sendto(s,(char *)buf,len,flags,(struct sockaddr *)to,tolen);
-    dprintf(("sendto returned %X\n", rc));
-    return(rc);
-}
-
-int WIN32API OS2setsockopt (SOCKET s, int level, int optname,
-                         const char * optval, int optlen)
-{
-struct Wlinger *yy;
-struct linger xx;
-
-#ifdef DEBUG
-    WriteLog("WSOCK32: setsockopt\n");
-#endif
-
-    if(level == SOL_SOCKET && optname == SO_LINGER) {
-	yy = (struct Wlinger *)optval;
-	xx.l_onoff = (int)yy->l_onoff;
-	xx.l_linger = (int)yy->l_linger;
-
-        return setsockopt(s,level,optname,(char *)&xx,optlen);
-    } 
-
-    else return setsockopt(s,level,optname,(char *)optval,optlen);
-
-}
-
-int WIN32API OS2shutdown (SOCKET s, int how)
-{
-#ifdef DEBUG
-    WriteLog("WSOCK32: shutdown\n");
-#endif
-
-    return shutdown(s,how);
-}
-
-SOCKET WIN32API OS2socket (int af, int type, int protocol)
-{
-SOCKET s;
-AsyncStatus *as;
-#ifdef DEBUG
-    WriteLog("WSOCK32: socket\n");
-#endif
-
-    s = (SOCKET)socket(af,type,protocol);
-
-    if(s > 0) {
-        as = (AsyncStatus *)malloc(sizeof(AsyncStatus));
-        if(as != NULL) {
-           as->hwnd = (HWND)0;
-           as->msg = 0;
-           as->event = 0L;
-           as->socket = s;
-           as->status = BLOCKING;
-           as->threadID = 0;
-           as->MsgStat = 0;
-           as->Next = TopASY;
-           as->Prev = NULL;
-           if(TopASY) TopASY->Prev = as;
-           TopASY = as;
-        } else {
-            soclose(s);
-            return -1;
-        }
-    }
-    dprintf(("WSOCK32: socket returned %X\n", s));
-
-return s;
-}
-
-/* Database function prototypes */
-
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
 
 void SetErrForDatabaseCalls(void)
 {
+  switch(h_errno)
+  {
+    case 1:
+      OS2WSASetLastError(11001); // host not found
+      break;
+    case 2:
+      OS2WSASetLastError(11002); // try again later
+      break;
+    case 3:
+      OS2WSASetLastError(11003); // No recovery
+      break;
+    case 4:
+      OS2WSASetLastError(11004); // No address or no data
+      break;
+    default:
+      OS2WSASetLastError(0); // unknown error and should never get here
+      dprintf(("WSOCK32: Unknown error condition: %d\n",
+               h_errno));
+      break;
+  }
+}
 
-    switch(h_errno) {
-        case 1:
-            OS2WSASetLastError(11001); // host not found
-            break;
-        case 2:
-            OS2WSASetLastError(11002); // try again later
-            break;
-        case 3:
-            OS2WSASetLastError(11003); // No recovery
-            break;
-        case 4:
-            OS2WSASetLastError(11004); // No address or no data
-            break;
-        default:
-            OS2WSASetLastError(0); // unknown error and should never get here
-#ifdef DEBUG
-WriteLog("WSOCK32: Unknown error condition: %d\n",h_errno);
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+AsyncStatus * FindASY(SOCKET s)
+{
+  AsyncStatus *as;
+
+  for(as = TopASY; as; as = as->Next)
+    if(as->socket == s)
+      return as;
+
+  return 0;
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION2(int, OS2__WSAFDIsSet, SOCKET,       fd,
+                                    Wfd_set FAR*, set)
+{
+  int i = set->fd_count;
+
+  while (i--)
+    if (set->fd_array[i] == fd)
+      return 1;
+
+  return 0;
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION3(SOCKET,OS2accept,SOCKET,    s,
+                               PSOCKADDR, addr,
+                               int*,      addrlen)
+{
+  return accept(s,addr,addrlen);
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION3(int,OS2bind,SOCKET,          s,
+                          const struct sockaddr *, addr,
+                          int,             namelen)
+{
+  return bind(s,(PSOCKADDR)addr,namelen);
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION1(int,OS2closesocket,SOCKET,s)
+{
+  AsyncStatus *as;
+
+  as = FindASY(s);
+  if(as == NULL)
+  {
+    LocalErrorNumber = 10038;
+    return -1;
+  }
+
+  CheckThreads(as);
+
+  if(as->Prev && as->Next)
+    as->Prev->Prev = as->Next->Next; // I SURE HOPE THIS IS RIGHT!!!!!!!!
+
+  free(as);
+
+  return soclose((int)s);
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION3(int,OS2connect,SOCKET,          s,
+                             const struct sockaddr*, name,
+                             int,             namelen)
+{
+  return connect(s,
+                 (PSOCKADDR)name,
+                 namelen);
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION3(int,OS2ioctlsocket,SOCKET,  s,
+                                 long,    cmd,
+                                 u_long*, argp)
+{
+  return ioctl(s, cmd, (char *)argp, 4);
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION3(int,OS2getpeername,SOCKET,   s,
+                                 PSOCKADDR,name,
+                                 int*,     namelen)
+{
+  return getpeername(s,name,namelen);
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION3(int,OS2getsockname,SOCKET,   s,
+                                 PSOCKADDR,name,
+                                 int*,     namelen)
+{
+  return getsockname(s,name,namelen);
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION5(int,OS2getsockopt,SOCKET,s,
+                                int,   level,
+                                int,   optname,
+                                char*, optval,
+                                int*,  optlen)
+{
+  return getsockopt(s,level,optname,optval,optlen);
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION1(u_long,OS2htonl,u_long,hostlong)
+{
+  return htonl(hostlong);
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION1(u_short,OS2htons,u_short,hostshort)
+{
+  return htons(hostshort);
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION1(u_long,OS2inet_addr,const char*, cp)
+{
+  return inet_addr((char *)cp);
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION1(char*,OS2inet_ntoa,struct in_addr,in)
+{
+  return inet_ntoa(in);
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION2(int,OS2listen,SOCKET,s,
+                            int,   backlog)
+{
+  return listen(s,backlog);
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION1(u_long,OS2ntohl,u_long,netlong)
+{
+  return ntohl(netlong);
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION1(u_short,OS2ntohs,u_short,netshort)
+{
+  return ntohs(netshort);
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION4(int,OS2recv,SOCKET,s,
+                          char*, buf,
+                          int,   len,
+                          int,   flags)
+{
+  unsigned long ii;
+  int           xx,
+                yy;
+  char          buff[200];
+  AsyncStatus   *as;
+
+  PS.MsgLoop = 0;
+
+  as = FindASY(s);
+
+  if(as != NULL)
+    as->MsgStat = 2;
+
+  xx = recv(s,buf,len,flags);
+
+  return xx;
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION6(int,OS2recvfrom,SOCKET,    s,
+                              char*,     buf,
+                              int,       len,
+                              int,       flags,
+                              PSOCKADDR, from,
+                              int*,      fromlen)
+{
+  return recvfrom(s,buf,len,flags,from,fromlen);
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+#ifdef VV_BSD_SELECT
+
+ODINFUNCTION5(int,OS2select,int,      nfds,
+                            Wfd_set*, readfds,
+                            Wfd_set*, writefds,
+                            Wfd_set*, exceptfds,
+                            const struct Wtimeval*, timeout)
+{
+  return select(nfds,
+                (fd_set *)readfds,
+                (fd_set *)writefds,
+                (fd_set *)exceptfds,
+                (timeval *)timeout);
+}
+
+#else
+#  error OS/2-style select not implemented!
 #endif
-            break;
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION4(int,OS2send,SOCKET,      s,
+                          const char*, buf,
+                          int,         len,
+                          int,         flags)
+{
+  return send(s,(char *)buf,len,flags);
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION6(int,OS2sendto,SOCKET,          s,
+                            const char*,     buf,
+                            int,             len,
+                            int,             flags,
+                            const struct sockaddr*, to,
+                            int,             tolen)
+{
+  return sendto(s,(char *)buf,len,flags,(PSOCKADDR)to,tolen);
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION5(int,OS2setsockopt,SOCKET,      s,
+                                int,         level,
+                                int,         optname,
+                                const char*, optval,
+                                int,         optlen)
+{
+  struct Wlinger *yy;
+  struct linger xx;
+
+  if(level   == SOL_SOCKET &&
+     optname == SO_LINGER)
+  {
+    yy = (struct Wlinger *)optval;
+    xx.l_onoff = (int)yy->l_onoff;
+    xx.l_linger = (int)yy->l_linger;
+
+    return setsockopt(s,level,optname,(char *)&xx,optlen);
+  }
+  else
+    return setsockopt(s,level,optname,(char *)optval,optlen);
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION2(int,OS2shutdown,SOCKET,s,
+                              int,   how)
+{
+  return shutdown(s,how);
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION3(SOCKET,OS2socket,int,af,
+                               int,type,
+                               int,protocol)
+{
+  SOCKET s;
+  AsyncStatus *as;
+
+  s = (SOCKET)socket(af,type,protocol);
+  if(s > 0)
+  {
+    as = (AsyncStatus *)malloc(sizeof(AsyncStatus));
+    if(as != NULL)
+    {
+      as->hwnd = (HWND)0;
+      as->msg = 0;
+      as->event = 0L;
+      as->socket = s;
+      as->status = BLOCKING;
+      as->threadID = 0;
+      as->MsgStat = 0;
+      as->Next = TopASY;
+      as->Prev = NULL;
+
+      if(TopASY)
+        TopASY->Prev = as;
+
+      TopASY = as;
     }
-
-return;
-}
-
-
-
-
-WHOSTENT * WIN32API OS2gethostbyaddr(const char * addr,
-                                        int len, int type)
-{
-WHOSTENT *yy;
-struct hostent *xx;
-#ifdef DEBUG
-    WriteLog("WSOCK32: gethostbyaddr\n");
-#endif
-
-    xx = gethostbyaddr((char *)addr,len,type);
-
-    if(xx == NULL) {
-        SetErrForDatabaseCalls();
-        return (WHOSTENT *)NULL;
+    else
+    {
+      soclose(s);
+      return -1;
     }
+  }
 
-    whsnt.h_name = xx->h_name;
-    whsnt.h_aliases = xx->h_aliases;
-    whsnt.h_addrtype = (short)xx->h_addrtype;
-    whsnt.h_length = (short)xx->h_length;
-    whsnt.h_addr_list = xx->h_addr_list;
-
-return &whsnt;
+  return s;
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
 
-
-WHOSTENT * WIN32API OS2gethostbyname(const char * name)
+ODINFUNCTION3(WHOSTENT*,OS2gethostbyaddr,const char*, addr,
+                                         int,         len,
+                                         int,         type)
 {
-WHOSTENT *yy;
-struct hostent *xx;
-#ifdef DEBUG
-    WriteLog("WSOCK32: gethostbyname: %s\n",name);
-#endif
+  WHOSTENT *yy;
+  struct hostent *xx;
 
-    xx = gethostbyname((char *)name);
+  xx = gethostbyaddr((char *)addr,len,type);
 
-    if(xx == NULL) {
-        SetErrForDatabaseCalls();
-        return (WHOSTENT *)NULL;
-    }
+  if(xx == NULL)
+  {
+     SetErrForDatabaseCalls();
+     return (WHOSTENT *)NULL;
+  }
 
-    whsnt.h_name = xx->h_name;
-    whsnt.h_aliases = xx->h_aliases;
-    whsnt.h_addrtype = (short)xx->h_addrtype;
-    whsnt.h_length = (short)xx->h_length;
-    whsnt.h_addr_list = xx->h_addr_list;
-  
-return &whsnt;    
+  whsnt.h_name = xx->h_name;
+  whsnt.h_aliases = xx->h_aliases;
+  whsnt.h_addrtype = (short)xx->h_addrtype;
+  whsnt.h_length = (short)xx->h_length;
+  whsnt.h_addr_list = xx->h_addr_list;
+
+  return &whsnt;
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
 
-
-
-
-int WIN32API _OS2gethostname (char * name, int namelen)
+ODINFUNCTION1(WHOSTENT*,OS2gethostbyname,const char*,name)
 {
-#ifdef DEBUG
-    WriteLog("WSOCK32: _gethostname\n");
-#endif
+  WHOSTENT *yy;
+  struct hostent *xx;
 
-    return gethostname(name,namelen);
+  xx = gethostbyname((char *)name);
+  if(xx == NULL)
+  {
+    SetErrForDatabaseCalls();
+    return (WHOSTENT *)NULL;
+  }
+
+  whsnt.h_name = xx->h_name;
+  whsnt.h_aliases = xx->h_aliases;
+  whsnt.h_addrtype = (short)xx->h_addrtype;
+  whsnt.h_length = (short)xx->h_length;
+  whsnt.h_addr_list = xx->h_addr_list;
+
+  return &whsnt;
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
 
-int WIN32API OS2gethostname (char * name, int namelen)
+ODINFUNCTION2(int,OS2gethostname,char *,name,
+                                 int,   namelen)
 {
-#ifdef DEBUG
-    WriteLog("WSOCK32: gethostname\n");
-#endif
-
-    return gethostname(name,namelen);
-}
-
-WSERVENT * WIN32API OS2getservbyport(int port, const char * proto)
-{
-struct servent *xx;
-#ifdef DEBUG
-    WriteLog("WSOCK32: getservbyport\n");
-#endif
-
-    xx = getservbyport(port,(char *)proto);
-
-    if(xx == NULL) { // this call doesn't generate an error message
-        return (WSERVENT *)NULL;
-    }
-
-    wsvnt.s_name = xx->s_name;
-    wsvnt.s_aliases = xx->s_aliases;
-    wsvnt.s_port = (short)xx->s_port;
-    wsvnt.s_proto = xx->s_proto;
-
-return &wsvnt;
-}
-
-WSERVENT * WIN32API OS2getservbyname(const char * name,
-                                        const char * proto)
-{
-WSERVENT *yy;
-struct servent *xx;
-#ifdef DEBUG
-    WriteLog("WSOCK32: getservbyname\n");
-#endif
-
-    xx = getservbyname((char *)name,(char *)proto);
-
-    if(xx == NULL) { // this call doesn't generate an error message
-      return (WSERVENT *)NULL;
-    }
-
-    wsvnt.s_name = xx->s_name;
-    wsvnt.s_aliases = xx->s_aliases;
-    wsvnt.s_port = (short)xx->s_port;
-    wsvnt.s_proto = xx->s_proto;
-
-return &wsvnt;
-}
-
-WPROTOENT * WIN32API OS2getprotobynumber(int proto)
-{
-struct protoent *xx;
-#ifdef DEBUG
-    WriteLog("WSOCK32: getprotobynumber\n");
-#endif
-
-    xx = getprotobynumber(proto);
-
-    if(xx == NULL) { // this call doesn't generate an error message
-        return (WPROTOENT *)NULL;
-    }
-
-    wptnt.p_name = xx->p_name;
-    wptnt.p_aliases = xx->p_aliases;
-    wptnt.p_proto = (short)xx->p_proto;
-
-return &wptnt;
-}
-
-WPROTOENT * WIN32API OS2getprotobyname(const char * name)
-{
-struct protoent *xx;
-#ifdef DEBUG
-    WriteLog("WSOCK32: getprotobyname\n");
-#endif
-
-    xx = getprotobyname((char *)name);
-
-    if(xx == NULL) { // this call doesn't generate an error message
-        return (WPROTOENT *)NULL;
-    }
-
-    wptnt.p_name = xx->p_name;
-    wptnt.p_aliases = xx->p_aliases;
-    wptnt.p_proto = (short)xx->p_proto;
-
-return &wptnt;
+  return gethostname(name,namelen);
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
 
-
-int WIN32API OS2WSAStartup(USHORT wVersionRequired, LPWSADATA lpWsaData)
+ODINFUNCTION2(WSERVENT*,OS2getservbyport, int,         port,
+                                          const char*, proto)
 {
-APIRET rc;
-int ii;
-#ifdef DEBUG
-    WriteLog("WSOCK32: WSAStartup\n");
-#endif
+  struct servent *xx;
+
+  xx = getservbyport(port,(char *)proto);
+
+  if(xx == NULL)
+  { // this call doesn't generate an error message
+    return (WSERVENT *)NULL;
+  }
+
+  wsvnt.s_name = xx->s_name;
+  wsvnt.s_aliases = xx->s_aliases;
+  wsvnt.s_port = (short)xx->s_port;
+  wsvnt.s_proto = xx->s_proto;
+
+  return &wsvnt;
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION2(WSERVENT*,OS2getservbyname,const char*,name,
+                                         const char*,proto)
+{
+  WSERVENT *yy;
+  struct servent *xx;
+
+  xx = getservbyname((char *)name,(char *)proto);
+
+  if(xx == NULL)
+  { // this call doesn't generate an error message
+    return (WSERVENT *)NULL;
+  }
+
+  wsvnt.s_name = xx->s_name;
+  wsvnt.s_aliases = xx->s_aliases;
+  wsvnt.s_port = (short)xx->s_port;
+  wsvnt.s_proto = xx->s_proto;
+
+  return &wsvnt;
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION1(WPROTOENT*,OS2getprotobynumber,int,proto)
+{
+  struct protoent *xx;
+
+  xx = getprotobynumber(proto);
+
+  if(xx == NULL)
+  {
+     // this call doesn't generate an error message
+    return (WPROTOENT *)NULL;
+  }
+
+  wptnt.p_name = xx->p_name;
+  wptnt.p_aliases = xx->p_aliases;
+  wptnt.p_proto = (short)xx->p_proto;
+
+  return &wptnt;
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION1(WPROTOENT*,OS2getprotobyname,const char*,name)
+{
+  struct protoent *xx;
+
+  xx = getprotobyname((char *)name);
+
+  if(xx == NULL)
+  { // this call doesn't generate an error message
+    return (WPROTOENT *)NULL;
+  }
+
+  wptnt.p_name = xx->p_name;
+  wptnt.p_aliases = xx->p_aliases;
+  wptnt.p_proto = (short)xx->p_proto;
+
+  return &wptnt;
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION2(int,OS2WSAStartup,USHORT,   wVersionRequired,
+                                LPWSADATA,lpWsaData)
+{
+  APIRET rc;
+  int ii;
+
   /* Make sure that the version requested is >= 1.1.   */
   /* The low byte is the major version and the high    */
   /* byte is the minor version.                        */
-  
+
   if ( LOBYTE( wVersionRequired ) < 1 ||
        ( LOBYTE( wVersionRequired ) == 1 &&
          HIBYTE( wVersionRequired ) < 1 )) {
       return WSAVERNOTSUPPORTED;
   }
-  
+
   /* Since we only support 1.1, set both wVersion and  */
   /* wHighVersion to 1.1.                              */
-  
+
   lpWsaData->wVersion = MAKEWORD( 1, 1 );
   lpWsaData->wHighVersion = MAKEWORD( 1, 1 );
   strcpy(lpWsaData->szDescription,"Win32OS2 WSOCK32.DLL Ver. 1.1");
@@ -762,568 +1322,501 @@ int ii;
 
   LocalErrorNumber = 0;
 
-  if(sock_init() == 0) {
+  if(sock_init() == 0)
+  {
 #ifdef DEBUG
     WriteLog("WSOCK32: WSAStartup sock_init returned 0\n");
 #endif
       return 0;
   }
-  else ii = sock_errno();
-#ifdef DEBUG
-    WriteLog("WSOCK32: WSAStartup exiting: %d\n",ii);
-#endif
-return ii;
+  else
+    ii = sock_errno();
+
+  return ii;
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
 
-
-
-
-int WIN32API OS2WSACleanup(void)
+ODINFUNCTION0(int,OS2WSACleanup)
 {
-#ifdef DEBUG
-    WriteLog("WSOCK32: WSACleanup\n");
-#endif
+  CheckThreads((AsyncStatus *)NULL);
 
-    CheckThreads((AsyncStatus *)NULL);
-    
-    return 0;
+  return 0;
 }
 
-void WIN32API OS2WSASetLastError(int iError)
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINPROCEDURE1(OS2WSASetLastError,int,iError)
 {
-#ifdef DEBUG
-    WriteLog("WSOCK32: WSASetLastError(%d)\n",iError);
-#endif
-
-    LocalErrorNumber = iError;
-    
-    return; 
+  LocalErrorNumber = iError;
 }
 
-int WIN32API OS2WSAGetLastError(void)
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION0(int,OS2WSAGetLastError)
 {
-int ii;
-#ifdef DEBUG
-    WriteLog("WSOCK32: WSAGetLastError\n");
-#endif
+  int ii;
 
-    if(LocalErrorNumber == 0) {
-        ii = sock_errno(); // WSAGetLastError();
-#ifdef DEBUG
-    WriteLog("WSOCK32: WSAGetLastError: %d\n",ii);
-#endif
-	return ii;
-    }
-    else {
-#ifdef DEBUG
-    WriteLog("WSOCK32: WSAGetLastError: %d\n",LocalErrorNumber);
-#endif
-	return LocalErrorNumber;
-    }
+  if(LocalErrorNumber == 0)
+  {
+    ii = sock_errno(); // WSAGetLastError();
+    return ii;
+  }
+  else
+  {
+    return LocalErrorNumber;
+  }
 }
 
-BOOL WIN32API OS2WSAIsBlocking(void)
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION0(BOOL,OS2WSAIsBlocking)
 {
-#ifdef DEBUG
-    WriteLog("WSOCK32: WSAIsBlocking unimplemented\n");
-#endif
+  dprintf(("WSOCK32: WSAIsBlocking unimplemented\n"));
 
-    return -5000; //WSAIsBlocking();
+  return -5000; //WSAIsBlocking();
 }
 
-int WIN32API OS2WSAUnhookBlockingHook(void)
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION0(int,OS2WSAUnhookBlockingHook)
 {
-#ifdef DEBUG
-    WriteLog("WSOCK32: WSAUnhookBlockingHook unimplemented\n");
-#endif
+  dprintf(("WSOCK32: WSAUnhookBlockingHook unimplemented\n"));
 
-    return -5000; //WSAUnhookBlockingHook();
+  return -5000; //WSAUnhookBlockingHook();
 }
 
-FARPROC WIN32API OS2WSASetBlockingHook(FARPROC lpBlockFunc)
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION1(PROC,OS2WSASetBlockingHook,PROC,lpBlockFund)
 {
-#ifdef DEBUG
-    WriteLog("WSOCK32: WSASetBlockingHook Unimplemented\n");
-#endif
-
-    return (FARPROC)NULL;
+  dprintf(("WSOCK32: WSASetBlockingHook Unimplemented\n"));
+  return (PROC)NULL;
 }
 
-int WIN32API OS2WSACancelBlockingCall(void)
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION0(int,OS2WSACancelBlockingCall)
 {
-#ifdef DEBUG
-    WriteLog("WSOCK32: WSACancelBlockingCall unimplemented\n");
-#endif
+  dprintf(("WSOCK32: WSACancelBlockingCall unimplemented\n"));
 
-    return -5000; //WSACancelBlockingCall();
+  return -5000; //WSACancelBlockingCall();
 }
-
-
-
 
 
 // The following 6 calls need to start a new thread, perform
 // the operation, copy ALL the info to the buffer provided then
 // notify the sender.
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
 
-LHANDLE WIN32API OS2WSAAsyncGetServByName(HWND hWnd, u_int wMsg,
-                                        const char * name,
-                                        const char * proto,
-                                        char * buf, int buflen)
+ODINFUNCTION6(LHANDLE,OS2WSAAsyncGetServByName,HWND,        hWnd,
+                                               u_int,       wMsg,
+                                               const char*, name,
+                                               const char*, proto,
+                                               char*,       buf,
+                                               int,         buflen)
 {
-WSAStruct *wsa;
-PFNTHREAD   pfnAsyncThread = &WSAFunct; /* Address of thread program   */
-ULONG       ulThreadParm = 100;          /* Parameter to thread routine     */
-APIRET      rc           = NO_ERROR;     /* Return code */
-TID         tid;
+  WSAStruct *wsa;
+  PFNTHREAD   pfnAsyncThread = &WSAFunct; /* Address of thread program   */
+  ULONG       ulThreadParm = 100;          /* Parameter to thread routine     */
+  APIRET      rc           = NO_ERROR;     /* Return code */
+  TID         tid;
 
 
-OS2WSASetLastError(WSAEWOULDBLOCK);
-return 0;
+  OS2WSASetLastError(WSAEWOULDBLOCK);
+  return 0;
 
-#ifdef DEBUG
-WriteLog("WSOCK32: WSAAsyncGetServByName.  name: %s, proto: %s \n",name,proto);
-#endif
+  dprintf(("WSOCK32: WSAAsyncGetServByName.  name: %s, proto: %s \n",
+           name,
+           proto));
 
-    wsa = (WSAStruct *)malloc(sizeof(WSAStruct));
-    if(wsa == NULL) {
-        OS2WSASetLastError(WSAEWOULDBLOCK);
-        return 0;
-    }
+  wsa = (WSAStruct *)malloc(sizeof(WSAStruct));
+  if(wsa == NULL)
+  {
+    OS2WSASetLastError(WSAEWOULDBLOCK);
+    return 0;
+  }
 
-    wsa->CallingWhat = GETSERVBYNAME;
-    wsa->hw = hWnd;
-    wsa->msg = wMsg;
-    wsa->carg1 = strdup(name);
-    wsa->carg2 = strdup(proto);
-    wsa->buf = buf;
-    wsa->buflen = buflen;
+  wsa->CallingWhat = GETSERVBYNAME;
+  wsa->hw = hWnd;
+  wsa->msg = wMsg;
+  wsa->carg1 = strdup(name);
+  wsa->carg2 = strdup(proto);
+  wsa->buf = buf;
+  wsa->buflen = buflen;
 
-    ulThreadParm = (ULONG)wsa;
-    
-    rc = DosCreateThread(&tid,           /* Thread ID (returned by function)  */
-                         pfnAsyncThread, /* Address of thread program         */
-                         ulThreadParm,   /* Parameter passed to ThreadProc    */
-                         CREATE_READY |  /* Thread is ready when created      */
-                         STACK_SPARSE,   /* Do not pre-commit stack pages     */
-                         8192L);         /* Stack size, rounded to page bdy   */
-    if (rc != NO_ERROR) {
-#ifdef DEBUG
-        WriteLog("WSOCK32: DosCreateThread error in WSAAsyncGetServByName: return code = %u\n", rc);
-#endif
-        OS2WSASetLastError(rc);
-        free(wsa);
-        return 0;
-    }
+  ulThreadParm = (ULONG)wsa;
 
-#ifdef DEBUG
-    WriteLog("WSOCK32 THREAD: DosCreateThread's tid: %lu, ThreadParm = %p\n",(unsigned long)tid,ulThreadParm);
-    WriteLog("WSOCK32 THREAD: hwnd: %p\n",wsa->hw);
-#endif
-
-    return (LHANDLE)tid; //WSAAsyncGetServByName(hWnd,wMsg,name,proto,buf,buflen);
-}
-
-LHANDLE WIN32API OS2WSAAsyncGetServByPort(HWND hWnd, u_int wMsg, int port,
-                                        const char * proto, char * buf,
-                                        int buflen)
-{
-#ifdef DEBUG
-    WriteLog("WSOCK32: WSAAsyncGetServByPort unimplemented\n");
-#endif
-
-    return -5000; //WSAAsyncGetServByPort(hWnd,wMsg,port,proto,buf,buflen);
-}
-
-LHANDLE WIN32API OS2WSAAsyncGetProtoByName(HWND hWnd, u_int wMsg,
-                                         const char * name, char * buf,
-                                         int buflen)
-{
-#ifdef DEBUG
-    WriteLog("WSOCK32: WSAAsyncGetProtoByName unimplemented\n");
-#endif
-
-    return -5000; //WSAAsyncGetProtoByName(hWnd,wMsg,name,buf,buflen);
-}
-
-LHANDLE WIN32API OS2WSAAsyncGetProtoByNumber(HWND hWnd, u_int wMsg,
-                                           int number, char * buf,
-                                           int buflen)
-{
-#ifdef DEBUG
-    WriteLog("WSOCK32: WSAAsyncGetProtoByNumber unimplemented\n");
-#endif
-
-    return -5000; //WSAAsyncGetProtoByNumber(hWnd,wMsg,number,buf,buflen);
-}
-
-LHANDLE WIN32API OS2WSAAsyncGetHostByName(HWND hWnd, u_int wMsg,
-                                        const char * name, char * buf,
-                                        int buflen)
-{
-#ifdef DEBUG
-    WriteLog("WSOCK32: WSAAsyncGetHostByName unimplemented\n");
-#endif
-
-    return -5000; //WSAAsyncGetHostByName(hWnd,wMsg,name,buf,buflen);
-}
-
-LHANDLE WIN32API OS2WSAAsyncGetHostByAddr(HWND hWnd, u_int wMsg,
-                                        const char * addr, int len, int type,
-                                        char * buf, int buflen)
-{
-#ifdef DEBUG
-    WriteLog("WSOCK32: WSAAsyncGetHostByAddr unimplemented\n");
-#endif
-
-
-
-
-    
-    return -5000; //WSAAsyncGetHostByAddr(hWnd,wMsg,addr,len,type,buf,buflen);
-}
-
-
-
-
-
-
-
-int WIN32API OS2WSACancelAsyncRequest(LHANDLE hAsyncTaskHandle)
-{
-TID tid;
-APIRET rc;
-#ifdef DEBUG
-    WriteLog("WSOCK32: WSACancelAsyncRequest unimplemented\n");
-#endif
-
-    rc = 0;
-    
-    tid = (LHANDLE)hAsyncTaskHandle;
-
-    if(tid == 0) rc = WSAEINVAL;
-
-    if(!rc) rc = DosKillThread(tid);
-
-    switch(rc) {
-        case 0: // SUCCESS!!
-            return 0;
-        case 170:
-            rc = WSAEINPROGRESS;
-            break;
-        case 309:
-            rc = WSAEINVAL;
-            break;
-        default:
-            rc = -5000;
-            break;
-    } // end switch
-
+  rc = DosCreateThread(&tid,           /* Thread ID (returned by function)  */
+                       pfnAsyncThread, /* Address of thread program         */
+                       ulThreadParm,   /* Parameter passed to ThreadProc    */
+                       CREATE_READY |  /* Thread is ready when created      */
+                       STACK_SPARSE,   /* Do not pre-commit stack pages     */
+                       8192L);         /* Stack size, rounded to page bdy   */
+  if (rc != NO_ERROR)
+  {
+    dprintf(("WSOCK32: DosCreateThread error in WSAAsyncGetServByName: return code = %u\n",
+            rc));
     OS2WSASetLastError(rc);
-    return SOCKET_ERROR; // ERROR!
-}
-
-
-
-
-
-int WIN32API OS2WSAAsyncSelect(SOCKET s, HWND hWnd, u_int wMsg,
-                            long lEvent)
-{
-PFNTHREAD   pfnAsyncThread = &AsyncLoop; /* Address of thread program   */
-ULONG       ulThreadParm = 100;          /* Parameter to thread routine     */
-APIRET      rc           = NO_ERROR;     /* Return code                     */
-unsigned long ii;
-AsyncStatus *as;
-#ifdef DEBUG
-char buf[150];
-sprintf(buf,"WSOCK32: WSAAsyncSelect\n         Message: %x\n         Event: %ld\n         hwindow: %x\n",
-        wMsg,lEvent,(HWND)hWnd);
-    WriteLog(buf);
-#endif
-
-    as = FindASY(s);
-
-    if(as == NULL) return 0;
-    
-    CheckThreads(as);
-
-    as->hwnd = hWnd;
-    as->msg = wMsg;
-    as->event = lEvent;
-
-    ulThreadParm = (ULONG)as;
-    
-    rc = DosCreateThread(&(as->threadID),  /* Thread ID (returned by function)  */
-                         pfnAsyncThread, /* Address of thread program         */
-                         ulThreadParm,   /* Parameter passed to ThreadProc    */
-                         CREATE_READY |  /* Thread is ready when created      */
-                         STACK_SPARSE,   /* Do not pre-commit stack pages     */
-                         8192L);         /* Stack size, rounded to page bdy   */
-    if (rc != NO_ERROR) {
-#ifdef DEBUG
-        WriteLog("WSOCK32: DosCreateThread error: return code = %u\n", rc);
-#endif
-        OS2WSASetLastError(rc);
-        return 0;
-    }
-
-    return 1; //WSAAsyncSelect(s,hWnd,wMsg,lEvent);
-}
-
-
-
-void _System AsyncLoop(ULONG ASP)
-{
-int socks[1],r,w,e,rc,ii;
-AsyncStatus *as;
-
-    as = (AsyncStatus *)ASP;
-
-    r = w = e = 0;
-    if(as->event & FD_READ) r = 1;
-    if(as->event & FD_WRITE) w = 1;
-    if(as->event & FD_OOB) e = 1;
-
-    socks[0] = (int)as->socket;
-
-    if((r+w+e) == 0) {
-#ifdef DEBUG
-        WriteLog("WSOCK32: Turning off async\n");
-#endif
-        ii = 0;
-        rc = ioctl(socks[0],FIONBIO,(char *)&ii,sizeof(ii));
-        as->threadID = 0;
-        as->hwnd = 0;
-        as->msg = 0;
-        as->event = 0;
-        as->status = BLOCKING;
-        return;
-    } // end if
-    else
-    {
-#ifdef DEBUG
-        WriteLog("WSOCK32: Setting up non-blocking sockets\n");
-#endif
-        ii = 1;
-        rc = ioctl(socks[0],FIONBIO,(char *)&ii,sizeof(ii));
-        if(rc != 0) {
-#ifdef DEBUG
-	    WriteLog("WSOCK32: ioctl failed trying to non-block.\n");
-#endif
-	    return;
-        } 
-        as->status = NONBLOCKING;
-    } // end else
-
-    do {
-        rc = select(socks[0],(fd_set*)&r,0,0,0); // ioctl may be better for this.
-        if(rc > 0) {
-            rc = ioctl(socks[0],FIONREAD,(char *)&ii,sizeof(ii));
-            if(rc == 0 && ii > 0) {
-            /* data is ready */
-                NotifyApp(FD_READ,as);
-//#ifdef DEBUG
-//                WriteLog("WSOCK32: Data Waiting\n");
-//#endif
-            }
-        }
-        if(rc < 0) {
-            rc = sock_errno();
-            /* something ain't right */
-            if(rc == 10038) { // Connection closed
-                NotifyApp(FD_CLOSE,as);
-                DosSleep(500);
-                return;
-            }
-#ifdef DEBUG
-            WriteLog("WSOCK32: Select error: %d\n",rc);
-#endif
-        } // end if
-        DosSleep(50);
-    } while(1);
-
-return;
-}
-
-
-
-void CheckThreads(AsyncStatus *as)
-{
-AsyncStatus *asy;
-
-    if(as != NULL)
-        if(as->threadID != 0) DosKillThread(as->threadID);
-
-    for(asy = TopASY; asy; asy = asy->Next)
-        if(asy->threadID != 0) DosKillThread(asy->threadID);
-    
-return;
-}
-
-
-
-void NotifyApp(int xx,AsyncStatus *as)
-{
-    BOOL    fResult;        /* message-posted indicator             */
-    unsigned long ii;
-
-
-//#ifdef DEBUG
-//    WriteLog("WSOCK32: Notifying the caller.  rc = %d\n",xx);
-//#endif
-
-    if(as->MsgStat == 0) {
-        fResult = Notify(as,xx);
-#ifdef DEBUG
-    WriteLog("WSOCK32: Notify returns: %d\n",fResult);
-#endif
-    } // end if
-
-    if(as->MsgStat == 2) as->MsgStat = 0;
-    else as->MsgStat = 1;
-
-return;
-}
-
-
-
-void _System WSAFunct(ULONG xx)
-{
-WSAStruct *wsa;
-WSERVENT *ooo;
-char *yy;
-int ii;
-size_t ss;
-UINT wp;
-LONG lp;
-int id = *_threadid;
-
-    wsa = (WSAStruct *)xx;
-
-#ifdef DEBUG
-    WriteLog("WSOCK32: WSAFunct: xx = %p, hwnd = %p\n",xx,wsa->hw);
-    WriteLog("WSOCK32: WSAFunct info carg1 = %s, carg2 = %s\n",wsa->carg1,wsa->carg2);
-    WriteLog("WSOCK32: WSAFunct info buf = %p, %d\n",wsa->buf,wsa->buflen);
-#endif
-
-    switch (wsa->CallingWhat) {
-        case GETSERVBYNAME:
-            yy = (char *)OS2getservbyname(wsa->carg1,wsa->carg2);
-            ss = sizeof(WSERVENT);
-            break;
-        case GETSERVBYPORT:
-            yy = (char *)OS2getservbyport(wsa->iarg1,wsa->carg1);
-            break;
-        case GETPROTOBYNUMBER:
-            yy = (char *)OS2getprotobynumber(wsa->iarg1);
-            break;
-        case GETPROTOBYNAME:
-            yy = (char *)OS2getprotobyname(wsa->carg1);
-            break;
-        case GETHOSTBYNAME:
-            yy = (char *)OS2gethostbyname(wsa->carg1);
-            break;
-        case GETHOSTBYADDR:
-            yy = (char *)OS2gethostbyaddr(wsa->carg1,wsa->iarg1,wsa->iarg2);
-            break;
-        default:
-            yy = (char *)NULL;
-            OS2WSASetLastError(-5000);
-            break;
-    } // end switch
-
-#ifdef DEBUG
-    WriteLog("WSOCK32: THREAD id = %lu\n",(unsigned long)id);
-    if(yy) {
-        ooo = (WSERVENT *)yy;
-        WriteLog("WSOCK32: WSAFunct service name = %s\n",ooo->s_name);
-        WriteLog("WSOCK32: WSAFunct service port = %d\n",(int)ooo->s_port);
-    }
-#endif
-
-    wp = id;
-
-    if(yy == (char *)NULL) {
-#ifdef DEBUG
-        WriteLog("WSOCK32: WSAFunct error\n");
-        WriteLog("WSOCK32: WSAFunct error carg1 = %s, carg2 = %s\n",wsa->carg1,wsa->carg2);
-#endif
-        ii = OS2WSAGetLastError();
-        lp = OS2WSAMAKEASYNCREPLY(0,ii);
-    } // end if
-
-    else {
-        if(wsa->buflen < ss) ii = WSAENOBUFS;
-        else ii = 0;
-        lp = OS2WSAMAKEASYNCREPLY(ss,ii);
-        if(ii == 0) memmove(wsa->buf,yy,ss);
-    }
-
-#ifdef DEBUG
-#endif
-
-    
-    do {
-        if(WinQueryAnchorBlock(wsa->hw))
-            ii = NotifyWSA(wsa->hw,wsa->msg,wp,lp);
-    } while(ii != TRUE);
-
     free(wsa);
+    return 0;
+  }
 
-return;
+  dprintf(("WSOCK32 THREAD: DosCreateThread's tid: %lu, ThreadParm = %p\n",
+           (unsigned long)tid,
+           ulThreadParm));
+  dprintf(("WSOCK32 THREAD: hwnd: %p\n",wsa->hw));
+
+  return (LHANDLE)tid; //WSAAsyncGetServByName(hWnd,wMsg,name,proto,buf,buflen);
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
 
-    
-
-int WIN32API OS2WSARecvEx (SOCKET s, char FAR * buf, int len, int FAR *flags)
+ODINFUNCTION6(LHANDLE,OS2WSAAsyncGetServByPort,HWND,        hWnd,
+                                               u_int,       wMsg,
+                                               int,         port,
+                                               const char*, proto,
+                                               char*,       buf,
+                                               int,         buflen)
 {
-#ifdef DEBUG
-    WriteLog("WSOCK32: WSARecvEx not implemented.\n");
-#endif
+  dprintf(("WSOCK32: WSAAsyncGetServByPort unimplemented\n"));
+
+  return -5000; //WSAAsyncGetServByPort(hWnd,wMsg,port,proto,buf,buflen);
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION5(LHANDLE,OS2WSAAsyncGetProtoByName,HWND,        hWnd,
+                                                u_int,       wMsg,
+                                                const char*, name,
+                                                char *,      buf,
+                                                int,         buflen)
+{
+  dprintf(("WSOCK32: WSAAsyncGetProtoByName unimplemented\n"));
+  return -5000; //WSAAsyncGetProtoByName(hWnd,wMsg,name,buf,buflen);
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION5(LHANDLE,OS2WSAAsyncGetProtoByNumber,HWND,   hWnd,
+                                                  u_int,  wMsg,
+                                                  int,    number,
+                                                  char *, buf,
+                                                  int,    buflen)
+{
+  dprintf(("WSOCK32: WSAAsyncGetProtoByNumber unimplemented\n"));
+  return -5000; //WSAAsyncGetProtoByNumber(hWnd,wMsg,number,buf,buflen);
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION5(LHANDLE,OS2WSAAsyncGetHostByName,HWND,         hWnd,
+                                               u_int,        wMsg,
+                                               const char *, name,
+                                               char *,       buf,
+                                               int,          buflen)
+{
+  dprintf(("WSOCK32: WSAAsyncGetHostByName unimplemented\n"));
+  return -5000; //WSAAsyncGetHostByName(hWnd,wMsg,name,buf,buflen);
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION7(LHANDLE, OS2WSAAsyncGetHostByAddr, HWND,        hWnd,
+                                                 u_int,       wMsg,
+                                                 const char*, addr,
+                                                 int,         len,
+                                                 int,         type,
+                                                 char*,       buf,
+                                                 int,         buflen)
+{
+  dprintf(("WSOCK32: WSAAsyncGetHostByAddr unimplemented\n"));
+
+  return -5000; //WSAAsyncGetHostByAddr(hWnd,wMsg,addr,len,type,buf,buflen);
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION1(int, OS2WSACancelAsyncRequest,LHANDLE,hAsyncTaskHandle)
+{
+  TID    tid;
+  APIRET rc;
+
+  dprintf(("WSOCK32: WSACancelAsyncRequest unimplemented\n"));
+
+  tid = (LHANDLE)hAsyncTaskHandle;
+  if(tid == 0)
+    rc = WSAEINVAL;
+  else
+    rc = DosKillThread(tid);
+
+  switch(rc)
+  {
+    case 0: // SUCCESS!!
+      return 0;
+    case 170:
+      rc = WSAEINPROGRESS;
+      break;
+    case 309:
+      rc = WSAEINVAL;
+      break;
+    default:
+      rc = -5000;
+      break;
+  } // end switch
+
+  OS2WSASetLastError(rc);
+  return SOCKET_ERROR; // ERROR!
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION4(int, OS2WSAAsyncSelect, SOCKET, s,
+                                      HWND,   hWnd,
+                                      u_int,  wMsg,
+                                      long,   lEvent)
+{
+  PFNTHREAD   pfnAsyncThread = &AsyncLoop; /* Address of thread program   */
+  ULONG       ulThreadParm = 100;          /* Parameter to thread routine     */
+  APIRET      rc           = NO_ERROR;     /* Return code                     */
+  unsigned long ii;
+  AsyncStatus *as;
+
+  as = FindASY(s);
+  if(as == NULL)
+    return 0;
+
+  CheckThreads(as);
+
+  as->hwnd = hWnd;
+  as->msg = wMsg;
+  as->event = lEvent;
+
+  ulThreadParm = (ULONG)as;
+
+  rc = DosCreateThread(&(as->threadID),  /* Thread ID (returned by function)  */
+                       pfnAsyncThread, /* Address of thread program         */
+                       ulThreadParm,   /* Parameter passed to ThreadProc    */
+                       CREATE_READY |  /* Thread is ready when created      */
+                       STACK_SPARSE,   /* Do not pre-commit stack pages     */
+                       8192L);         /* Stack size, rounded to page bdy   */
+  if (rc != NO_ERROR)
+  {
+    dprintf(("WSOCK32: DosCreateThread error: return code = %u\n",
+             rc));
+    OS2WSASetLastError(rc);
+    return 0;
+  }
+
+  return 1; //WSAAsyncSelect(s,hWnd,wMsg,lEvent);
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION4(int, OS2WSARecvEx, SOCKET,    s,
+                                 char FAR*, buf,
+                                 int,       len,
+                                 int FAR *,flags)
+{
+  dprintf(("WSOCK32: WSARecvEx not implemented.\n"));
 
 //    return WSARecvEx(s,buf,len,flags);
-    return 0;
+  return 0;
 }
 
-void WIN32API OS2s_perror(char *pszMessage,
-                          void *pUnknown)
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINPROCEDURE2(OS2s_perror, char*, pszMessage,
+                            void*, pUnknown)
 {
   perror(pszMessage);
 }
-
-
-//typedef struct _TRANSMIT_FILE_BUFFERS {
-//    PVOID Head;
-//    DWORD HeadLength;
-//    PVOID Tail;
-//    DWORD TailLength;
-//} TRANSMIT_FILE_BUFFERS, *PTRANSMIT_FILE_BUFFERS, *LPTRANSMIT_FILE_BUFFERS;
-//
-//BOOL WIN32API OS2TransmitFile (
-//    IN SOCKET hSocket,
-//    IN HANDLE hFile,
-//    IN DWORD nNumberOfBytesToWrite,
-//    IN DWORD nNumberOfBytesPerSend,
-//    IN LPOVERLAPPED lpOverlapped,
-//    IN LPTRANSMIT_FILE_BUFFERS lpTransmitBuffers,
-//    IN DWORD dwReserved)
-//{
-//    return FALSE;
-//}
-
-
-
-
-
-
-
-
-
 
 

@@ -1,4 +1,4 @@
-/* $Id: unknown.cpp,v 1.1 1999-07-07 12:18:04 phaller Exp $ */
+/* $Id: unknown.cpp,v 1.2 1999-08-16 20:18:40 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -13,7 +13,10 @@
 
 #include <os2wrap.h>
 #include <misc.h>
+#include <odinwrap.h>
 
+
+ODINDEBUGCHANNEL(WSOCK32-UNKNOWN)
 
 /*****************************************************************************
  * Prototypes & Types & Defines                                              *
@@ -24,8 +27,8 @@ int _System rcmd (char **, int, const char *, const char *, const char *, int *)
 
 
 /*****************************************************************************
- * Name      : int WIN32API OS2rexec
- * Purpose   :
+ *
+ * Purpose,  :
  * Parameters:
  * Variables :
  * Result    :
@@ -35,20 +38,14 @@ int _System rcmd (char **, int, const char *, const char *, const char *, int *)
  * Author    : Patrick Haller [Tue, 1999/06/01 09:00]
  *****************************************************************************/
 
-int WIN32API OS2rexec(LPSTR *lppArg1,
-                      int   iArg2,
-                      LPSTR lpArg3,
-                      LPSTR lpArg4,
-                      LPSTR lpArg5,
-                      int   *lpiArg6)
+ODINFUNCTION6(int, OS2rexec, LPSTR*, lppArg1,
+                             int,    iArg2,
+                             LPSTR,  lpArg3,
+                             LPSTR,  lpArg4,
+                             LPSTR,  lpArg5,
+                             int*,   lpiArg6)
 {
-  dprintf(("WSOCK32: OS2rexec(%08xh,%08xh,%s,%s,%s,%08xh) not implemented correctly.\n",
-           lppArg1,
-           iArg2,
-           lpArg3,
-           lpArg4,
-           lpArg5,
-           lpiArg6));
+  dprintf(("WSOCK32: OS2rexec not implemented correctly.\n"));
 
   return rexec(lppArg1,
                iArg2,
@@ -60,10 +57,10 @@ int WIN32API OS2rexec(LPSTR *lppArg1,
 
 
 /*****************************************************************************
- * Name      : int WIN32API OS2rcmd
- * Purpose   :
- * Parameters:
- * Variables :
+ * ODINFUNCTION6( :, int, WIN32API, OS2rcmd,
+ * Purpose, :,
+ * Parameters:,
+ * Variables, :,
  * Result    :
  * Remark    : WSOCK32.1103
  * Status    : UNTESTED
@@ -71,20 +68,14 @@ int WIN32API OS2rexec(LPSTR *lppArg1,
  * Author    : Patrick Haller [Tue, 1999/06/01 09:00]
  *****************************************************************************/
 
-int WIN32API OS2rcmd(LPSTR      *lppArg1,
-                     int        iArg2,
-                     const char *lpArg3,
-                     const char *lpArg4,
-                     const char *lpArg5,
-                     int        *lpiArg6)
+ODINFUNCTION6(int, OS2rcmd, LPSTR*,     lppArg1,
+                            int,        iArg2,
+                            const char*,lpArg3,
+                            const char*,lpArg4,
+                            const char*,lpArg5,
+                            int       *,lpiArg6)
 {
-  dprintf(("WSOCK32: OS2rcmd(%08xh,%08xh,%s,%s,%s,%08xh) not implemented.\n",
-           lppArg1,
-           iArg2,
-           lpArg3,
-           lpArg4,
-           lpArg5,
-           lpiArg6));
+  dprintf(("WSOCK32: rcmd not implemented.\n"));
 
   //@@@PH actually it exists in TCP/IP 5.0 headers. Unknown which OS/2 function to link to.
   return 0;
@@ -97,4 +88,5 @@ int WIN32API OS2rcmd(LPSTR      *lppArg1,
               lpiArg6);
 */
 }
+
 
