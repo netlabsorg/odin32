@@ -1,4 +1,4 @@
-/* $Id: CCBase.cpp,v 1.1 2000-02-23 17:09:39 cbratschi Exp $ */
+/* $Id: CCBase.cpp,v 1.2 2000-02-25 17:00:15 cbratschi Exp $ */
 /*
  * COMCTL32 Base Functions and Macros for all Controls
  *
@@ -29,6 +29,7 @@ PVOID initControl(HWND hwnd,DWORD dwSize)
   if (!infoPtr) return NULL;
 
   setInfoPtr(hwnd,infoPtr);
+  ZeroMemory(infoPtr,dwSize);
   infoPtr->dwSize        = dwSize;
   infoPtr->iVersion      = 0;
   infoPtr->fUnicode      = IsWindowUnicode(hwnd);
@@ -89,7 +90,7 @@ LRESULT defComCtl32Proc(HWND hwnd,UINT Msg,WPARAM wParam,LPARAM lParam,BOOL unic
         return oldFormat;
       } else return IsWindowUnicode(hwnd);
 
-    case WM_NOTIFY:
+    case WM_NOTIFYFORMAT:
     {
       infoPtr = getInfoPtr(hwnd);
 
@@ -127,6 +128,20 @@ LRESULT defComCtl32ProcW(HWND hwnd,UINT Msg,WPARAM wParam,LPARAM lParam)
 
 //Notifications
 
+BOOL isUnicodeNotify(COMCTL32_HEADER *infoPtr)
+{
+  if (!infoPtr) return FALSE;
+
+  return infoPtr->uNotifyFormat == NFR_UNICODE;
+}
+
+BOOL isUnicodeNotify(HWND hwnd)
+{
+  COMCTL32_HEADER *infoPtr = getInfoPtr(hwnd);
+
+  return isUnicodeNotify(infoPtr);
+}
+
 LRESULT sendNotify(HWND hwnd,UINT code)
 {
   NMHDR nmhdr;
@@ -135,7 +150,7 @@ LRESULT sendNotify(HWND hwnd,UINT code)
   nmhdr.idFrom   = GetWindowLongA(hwnd,GWL_ID);
   nmhdr.code     = code;
 
-  return SendMessageA(hwnd,WM_NOTIFY,nmhdr.idFrom,(LPARAM)&nmhdr);
+  return SendMessageA(GetParent(hwnd),WM_NOTIFY,nmhdr.idFrom,(LPARAM)&nmhdr);
 }
 
 LRESULT sendNotify(HWND hwnd,UINT code,LPNMHDR nmhdr)
@@ -146,7 +161,7 @@ LRESULT sendNotify(HWND hwnd,UINT code,LPNMHDR nmhdr)
   nmhdr->idFrom   = GetWindowLongA(hwnd,GWL_ID);
   nmhdr->code     = code;
 
-  return SendMessageA(hwnd,WM_NOTIFY,nmhdr->idFrom,(LPARAM)nmhdr);
+  return SendMessageA(GetParent(hwnd),WM_NOTIFY,nmhdr->idFrom,(LPARAM)nmhdr);
 }
 
 LRESULT sendNotifyFormat(HWND hwnd,HWND hwndFrom,LPARAM command)

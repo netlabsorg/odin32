@@ -1,4 +1,4 @@
-/* $Id: datetime.cpp,v 1.1 2000-02-23 17:09:41 cbratschi Exp $ */
+/* $Id: datetime.cpp,v 1.2 2000-02-25 17:00:15 cbratschi Exp $ */
 /*
  * Date and time picker control
  *
@@ -18,16 +18,14 @@
 
 #include "winbase.h"
 #include "commctrl.h"
+#include "ccbase.h"
 #include "datetime.h"
 #include "monthcal.h"
 #include <string.h>
 #include <stdio.h>
 
 
-#define DATETIME_GetInfoPtr(hwnd) ((DATETIME_INFO *)GetWindowLongA (hwnd, 0))
-static BOOL
-
-DATETIME_SendSimpleNotify (HWND hwnd, UINT code);
+#define DATETIME_GetInfoPtr(hwnd) ((DATETIME_INFO*)getInfoPtr(hwnd))
 
 static char *days[] = {"Sunday", "Monday", "Tuesday", "Wednesday",
                        "Thursday", "Friday", "Saturday", NULL};
@@ -281,7 +279,7 @@ DATETIME_LButtonDown (HWND hwnd, WPARAM wParam, LPARAM lParam)
                       //GetParent (GetParent (infoPtr->hMonthCal)));
 
                         SetFocus (hwnd);
-                        DATETIME_SendSimpleNotify (hwnd, DTN_DROPDOWN);
+                        sendNotify(hwnd,DTN_DROPDOWN);
         }
     return 0;
 }
@@ -334,7 +332,7 @@ DATETIME_KillFocus (HWND hwnd, WPARAM wParam, LPARAM lParam)
     //TRACE ("\n");
 
         if (infoPtr->select) {
-                        DATETIME_SendSimpleNotify (hwnd, NM_KILLFOCUS);
+                        sendNotify(hwnd,NM_KILLFOCUS);
                         infoPtr->select&= ~DTHT_GOTFOCUS;
         }
     hdc = GetDC (hwnd);
@@ -355,7 +353,7 @@ DATETIME_SetFocus (HWND hwnd, WPARAM wParam, LPARAM lParam)
     //TRACE ("\n");
 
         if (infoPtr->select) {
-                        DATETIME_SendSimpleNotify (hwnd, NM_SETFOCUS);
+                        sendNotify(hwnd,NM_SETFOCUS);
                         infoPtr->select|=DTHT_GOTFOCUS;
         }
     hdc = GetDC (hwnd);
@@ -366,25 +364,6 @@ DATETIME_SetFocus (HWND hwnd, WPARAM wParam, LPARAM lParam)
 }
 
 
-static BOOL
-DATETIME_SendSimpleNotify (HWND hwnd, UINT code)
-{
-    NMHDR nmhdr;
-
-    //TRACE("%x\n",code);
-    nmhdr.hwndFrom = hwnd;
-    nmhdr.idFrom   = GetWindowLongA( hwnd, GWL_ID);
-    nmhdr.code     = code;
-
-    return (BOOL) SendMessageA (GetParent (hwnd), WM_NOTIFY,
-                                   (WPARAM)nmhdr.idFrom, (LPARAM)&nmhdr);
-}
-
-
-
-
-
-
 static LRESULT
 DATETIME_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
@@ -392,13 +371,11 @@ DATETIME_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
   DWORD dwStyle = GetWindowLongA (hwnd, GWL_STYLE);
 
     /* allocate memory for info structure */
-    infoPtr = (DATETIME_INFO *)COMCTL32_Alloc (sizeof(DATETIME_INFO));
+    infoPtr = (DATETIME_INFO*)initControl(hwnd,sizeof(DATETIME_INFO));
     if (infoPtr == NULL) {
         //ERR("could not allocate info memory!\n");
         return 0;
     }
-
-    SetWindowLongA (hwnd, 0, (DWORD)infoPtr);
 
         if (dwStyle & DTS_SHOWNONE) {
                 infoPtr->hwndCheckbut=CreateWindowExA (0,"button", 0,
@@ -430,9 +407,8 @@ DATETIME_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
 static LRESULT
 DATETIME_Destroy (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
-    DATETIME_INFO *infoPtr = DATETIME_GetInfoPtr (hwnd);
+    doneControl(hwnd);
 
-    COMCTL32_Free (infoPtr);
     return 0;
 }
 
@@ -512,7 +488,7 @@ DATETIME_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             //if (uMsg >= WM_USER)
                 //ERR("unknown msg %04x wp=%08x lp=%08lx\n",
                 //     uMsg, wParam, lParam);
-            return DefWindowProcA (hwnd, uMsg, wParam, lParam);
+            return defComCtl32ProcA (hwnd, uMsg, wParam, lParam);
     }
     return 0;
 }
@@ -522,9 +498,6 @@ VOID
 DATETIME_Register (void)
 {
     WNDCLASSA wndClass;
-
-//SvL: Don't check this now
-//    if (GlobalFindAtomA (DATETIMEPICK_CLASSA)) return;
 
     ZeroMemory (&wndClass, sizeof(WNDCLASSA));
     wndClass.style         = CS_GLOBALCLASS;
@@ -542,7 +515,6 @@ DATETIME_Register (void)
 VOID
 DATETIME_Unregister (void)
 {
-    if (GlobalFindAtomA (DATETIMEPICK_CLASSA))
-        UnregisterClassA (DATETIMEPICK_CLASSA, (HINSTANCE)NULL);
+    UnregisterClassA (DATETIMEPICK_CLASSA, (HINSTANCE)NULL);
 }
 

@@ -1,4 +1,4 @@
-/* $Id: treeview.cpp,v 1.1 2000-02-23 17:09:50 cbratschi Exp $ */
+/* $Id: treeview.cpp,v 1.2 2000-02-25 17:00:18 cbratschi Exp $ */
 /* Treeview control
  *
  * Copyright 1998 Eric Kohl <ekohl@abo.rhein-zeitung.de>
@@ -31,6 +31,7 @@
 
 /* CB: todo
  - bug in SetScrollInfo/ShowScrollBar: WM_SIZE and WM_NCPAINT problems (i.e. RegEdit)
+ - VK_LEFT in WinHlp32 displays expanded icon
  - tooltips not finished
  - expand not finished
  - TVS_FULLROWSELECT
@@ -324,6 +325,7 @@ static void TREEVIEW_RemoveAllChildren(
     killItem=& infoPtr->items[kill];
     if (killItem->pszText != LPSTR_TEXTCALLBACKW)
       COMCTL32_Free (killItem->pszText);
+    killItem->pszText = NULL;
     TREEVIEW_SendTreeviewNotify (hwnd, TVN_DELETEITEM, 0, (HTREEITEM)kill, 0);
     if (killItem->firstChild)
       TREEVIEW_RemoveAllChildren (hwnd, killItem);
@@ -350,6 +352,7 @@ TREEVIEW_RemoveItem (HWND hwnd, TREEVIEW_ITEM *wineItem)
  parentItem=NULL;
  if (wineItem->pszText != LPSTR_TEXTCALLBACKW)
    COMCTL32_Free (wineItem->pszText);
+ wineItem->pszText = NULL;
 
  TREEVIEW_SendTreeviewNotify (hwnd, TVN_DELETEITEM, 0, (HTREEITEM)iItem, 0);
 
@@ -396,6 +399,8 @@ static void TREEVIEW_RemoveTree (HWND hwnd)
                 killItem=& infoPtr->items [i];
                 if (killItem->pszText != LPSTR_TEXTCALLBACKW)
                   COMCTL32_Free (killItem->pszText);
+                killItem->pszText = NULL;
+
                 TREEVIEW_SendTreeviewNotify
                                         (hwnd, TVN_DELETEITEM, 0, killItem->hItem, 0);
                 }
@@ -2846,25 +2851,21 @@ TREEVIEW_SendTreeviewNotify (HWND hwnd, UINT code, UINT action,
   TREEVIEW_INFO *infoPtr = TREEVIEW_GetInfoPtr(hwnd);
   NMTREEVIEWW nmhdr;
   TREEVIEW_ITEM  *wineItem;
-  HWND parent = GetParent(hwnd);
   CHAR *oldText = NULL,*newText = NULL;
   BOOL rc;
 
   ZeroMemory(&nmhdr,sizeof(NMTREEVIEWW));
 
-  nmhdr.hdr.hwndFrom = hwnd;
-  nmhdr.hdr.idFrom =  GetWindowLongW( hwnd, GWL_ID);
-  nmhdr.hdr.code = code;
   nmhdr.action = action;
   if (oldItem)
   {
-    wineItem=& infoPtr->items[(INT)oldItem];
-    nmhdr.itemOld.mask              = wineItem->mask;
-    nmhdr.itemOld.hItem             = wineItem->hItem;
-    nmhdr.itemOld.state             = wineItem->state;
+    wineItem = &infoPtr->items[(INT)oldItem];
+    nmhdr.itemOld.mask      = wineItem->mask;
+    nmhdr.itemOld.hItem     = wineItem->hItem;
+    nmhdr.itemOld.state     = wineItem->state;
     nmhdr.itemOld.stateMask = wineItem->stateMask;
     nmhdr.itemOld.iImage    = wineItem->iImage;
-    if (infoPtr->header.uNotifyFormat == NFR_ANSI)
+    if (!isUnicodeNotify(&infoPtr->header))
     {
       if (!wineItem->pszText) nmhdr.itemOld.pszText = NULL; else
       {
@@ -2884,21 +2885,21 @@ TREEVIEW_SendTreeviewNotify (HWND hwnd, UINT code, UINT action,
 
   if (newItem)
   {
-    wineItem=& infoPtr->items[(INT)newItem];
+    wineItem = &infoPtr->items[(INT)newItem];
     nmhdr.itemNew.mask              = wineItem->mask;
     nmhdr.itemNew.hItem             = wineItem->hItem;
     nmhdr.itemNew.state             = wineItem->state;
     nmhdr.itemNew.stateMask = wineItem->stateMask;
     nmhdr.itemNew.iImage    = wineItem->iImage;
-    if (infoPtr->header.uNotifyFormat == NFR_ANSI)
+    if (!isUnicodeNotify(&infoPtr->header))
     {
-      if (!wineItem->pszText) nmhdr.itemOld.pszText = NULL; else
+      if (!wineItem->pszText) nmhdr.itemNew.pszText = NULL; else
       {
         INT len = lstrlenW(wineItem->pszText)+1;
 
         newText = (CHAR*)COMCTL32_Alloc(len);
         lstrcpyWtoA(newText,wineItem->pszText);
-        nmhdr.itemOld.pszText = (WCHAR*)newText;
+        nmhdr.itemNew.pszText = (WCHAR*)newText;
       }
     } else nmhdr.itemNew.pszText   = wineItem->pszText;
     nmhdr.itemNew.cchTextMax= wineItem->cchTextMax;
@@ -2911,7 +2912,7 @@ TREEVIEW_SendTreeviewNotify (HWND hwnd, UINT code, UINT action,
   nmhdr.ptDrag.x = 0;
   nmhdr.ptDrag.y = 0;
 
-  rc = (BOOL)SendMessageA(parent,WM_NOTIFY,(WPARAM)nmhdr.hdr.idFrom,(LPARAM)&nmhdr);
+  rc = (BOOL)sendNotify(hwnd,code,&nmhdr.hdr);
 
   if (oldText) COMCTL32_Free(oldText);
   if (newText) COMCTL32_Free(newText);
@@ -2927,9 +2928,6 @@ TREEVIEW_SendTreeviewDnDNotify (HWND hwnd, UINT code, HTREEITEM dragItem,
   NMTREEVIEWA nmhdr;
   TREEVIEW_ITEM  *wineItem;
 
-  nmhdr.hdr.hwndFrom = hwnd;
-  nmhdr.hdr.idFrom =  GetWindowLongA( hwnd, GWL_ID);
-  nmhdr.hdr.code = code;
   nmhdr.action = 0;
   wineItem=& infoPtr->items[(INT)dragItem];
   nmhdr.itemNew.mask    = wineItem->mask;
@@ -2940,8 +2938,7 @@ TREEVIEW_SendTreeviewDnDNotify (HWND hwnd, UINT code, HTREEITEM dragItem,
   nmhdr.ptDrag.x = pt.x;
   nmhdr.ptDrag.y = pt.y;
 
-  return (BOOL)SendMessageA (GetParent (hwnd), WM_NOTIFY,
-                                   (WPARAM) GetWindowLongA( hwnd, GWL_ID), (LPARAM)&nmhdr);
+  return (BOOL)sendNotify(hwnd,code,&nmhdr.hdr);
 
 }
 
@@ -2952,20 +2949,16 @@ TREEVIEW_SendDispInfoNotify (HWND hwnd, TREEVIEW_ITEM *wineItem, UINT code, UINT
   NMTVDISPINFOW tvdi;
   BOOL retval;
   WCHAR *buf;
-  HWND parent = GetParent(hwnd);
 
-  tvdi.hdr.hwndFrom     = hwnd;
-  tvdi.hdr.idFrom       = GetWindowLongA( hwnd, GWL_ID);
-  tvdi.hdr.code         = code;
   tvdi.item.mask        = what;
   tvdi.item.hItem       = wineItem->hItem;
   tvdi.item.state       = wineItem->state;
   tvdi.item.lParam      = wineItem->lParam;
-  tvdi.item.pszText     = (WCHAR*)COMCTL32_Alloc(128*((infoPtr->header.uNotifyFormat == NFR_UNICODE) ? sizeof(WCHAR):sizeof(char)));
+  tvdi.item.pszText     = (WCHAR*)COMCTL32_Alloc(128*(isUnicodeNotify(&infoPtr->header) ? sizeof(WCHAR):sizeof(char)));
   tvdi.item.cchTextMax = 128;
   buf = tvdi.item.pszText;
 
-  retval = (BOOL)SendMessageA(parent,WM_NOTIFY,(WPARAM)tvdi.hdr.idFrom,(LPARAM)&tvdi);
+  retval = (BOOL)sendNotify(hwnd,code,&tvdi.hdr);
 
   /* Ignore posible changes */
   if (code == TVN_BEGINLABELEDIT)
@@ -2973,7 +2966,7 @@ TREEVIEW_SendDispInfoNotify (HWND hwnd, TREEVIEW_ITEM *wineItem, UINT code, UINT
 
   if (what & TVIF_TEXT)
   {
-    if (infoPtr->header.uNotifyFormat == NFR_UNICODE)
+    if (isUnicodeNotify(&infoPtr->header))
     {
       wineItem->pszText = tvdi.item.pszText;
       if (buf == tvdi.item.pszText)
@@ -3021,10 +3014,7 @@ TREEVIEW_SendCustomDrawNotify (HWND hwnd, DWORD dwDrawStage, HDC hdc,
   NMTVCUSTOMDRAW nmcdhdr;
   LPNMCUSTOMDRAW nmcd;
 
-  nmcd =& nmcdhdr.nmcd;
-  nmcd->hdr.hwndFrom = hwnd;
-  nmcd->hdr.idFrom =  GetWindowLongA( hwnd, GWL_ID);
-  nmcd->hdr.code   = NM_CUSTOMDRAW;
+  nmcd = &nmcdhdr.nmcd;
   nmcd->dwDrawStage= dwDrawStage;
   nmcd->hdc        = hdc;
   nmcd->rc.left    = rc.left;
@@ -3038,8 +3028,7 @@ TREEVIEW_SendCustomDrawNotify (HWND hwnd, DWORD dwDrawStage, HDC hdc,
   nmcdhdr.clrTextBk= infoPtr->clrBk;
   nmcdhdr.iLevel   = 0;
 
-  return (BOOL)SendMessageA (GetParent (hwnd), WM_NOTIFY,
-                               (WPARAM) GetWindowLongA( hwnd, GWL_ID), (LPARAM)&nmcdhdr);
+  return (BOOL)sendNotify(hwnd,NM_CUSTOMDRAW,&nmcdhdr.nmcd.hdr);
 }
 
 /* FIXME: need to find out when the flags in uItemState need to be set */
@@ -3066,9 +3055,6 @@ TREEVIEW_SendCustomDrawItemNotify (HWND hwnd, HDC hdc,
   if (wineItem->hItem==infoPtr->hotItem)      uItemState|=CDIS_HOT;
 
   nmcd= & nmcdhdr.nmcd;
-  nmcd->hdr.hwndFrom = hwnd;
-  nmcd->hdr.idFrom =  GetWindowLongA( hwnd, GWL_ID);
-  nmcd->hdr.code   = NM_CUSTOMDRAW;
   nmcd->dwDrawStage= dwDrawStage;
   nmcd->hdc                = hdc;
   nmcd->rc.left    = wineItem->rect.left;
@@ -3086,8 +3072,7 @@ TREEVIEW_SendCustomDrawItemNotify (HWND hwnd, HDC hdc,
   //TRACE (treeview,"drawstage:%lx hdc:%x item:%lx, itemstate:%x\n",
   //               dwDrawStage, hdc, dwItemSpec, uItemState);
 
-  retval=SendMessageA (GetParent (hwnd), WM_NOTIFY,
-                 (WPARAM) GetWindowLongA( hwnd, GWL_ID), (LPARAM)&nmcdhdr);
+  retval = sendNotify(hwnd,NM_CUSTOMDRAW,&nmcdhdr.nmcd.hdr);
 
   infoPtr->clrText=nmcdhdr.clrText;
   infoPtr->clrBk  =nmcdhdr.clrTextBk;
@@ -3099,13 +3084,10 @@ static VOID TREEVIEW_SendKeyDownNotify(HWND hwnd,UINT code,WORD wVKey)
 {
   NMTVKEYDOWN nmkdhdr;
 
-  nmkdhdr.hdr.hwndFrom = hwnd;
-  nmkdhdr.hdr.idFrom   =  GetWindowLongA( hwnd, GWL_ID);
-  nmkdhdr.hdr.code     = code;
   nmkdhdr.wVKey = wVKey;
   nmkdhdr.flags = 0;
 
-  SendMessageA(GetParent(hwnd),WM_NOTIFY,(WPARAM)nmkdhdr.hdr.idFrom,(LPARAM)&nmkdhdr);
+  sendNotify(hwnd,code,&nmkdhdr.hdr);
 }
 
 /* Note:If the specified item is the child of a collapsed parent item,
@@ -3386,7 +3368,6 @@ TREEVIEW_EndEditLabelNow (HWND hwnd, BOOL bCancel)
   TREEVIEW_ITEM *editedItem = TREEVIEW_ValidItem (infoPtr, infoPtr->editItem);
   NMTVDISPINFOW tvdi;
   DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
-  HWND parent = GetParent(hwnd);
   BOOL bCommit;
   WCHAR *textW = NULL;
   CHAR *textA = NULL;
@@ -3395,9 +3376,6 @@ TREEVIEW_EndEditLabelNow (HWND hwnd, BOOL bCancel)
   if (!infoPtr->hwndEdit)
      return FALSE;
 
-  tvdi.hdr.hwndFrom     = hwnd;
-  tvdi.hdr.idFrom       = GetWindowLongA(hwnd, GWL_ID);
-  tvdi.hdr.code         = TVN_ENDLABELEDIT;
   tvdi.item.mask        = 0;
   tvdi.item.hItem       = editedItem->hItem;
   tvdi.item.state       = editedItem->state;
@@ -3413,7 +3391,7 @@ TREEVIEW_EndEditLabelNow (HWND hwnd, BOOL bCancel)
     //  ERR("Insuficient space to retrieve new item label.");
     //}
 
-    if (infoPtr->header.uNotifyFormat == NFR_UNICODE) tvdi.item.pszText = textW; else
+    if (isUnicodeNotify(&infoPtr->header)) tvdi.item.pszText = textW; else
     {
       INT len = iLength+1;
 
@@ -3429,11 +3407,11 @@ TREEVIEW_EndEditLabelNow (HWND hwnd, BOOL bCancel)
       tvdi.item.cchTextMax  = 0;
   }
 
-  bCommit = (BOOL)SendMessageA(parent,WM_NOTIFY,(WPARAM)tvdi.hdr.idFrom,(LPARAM)&tvdi);
+  bCommit = (BOOL)sendNotify(hwnd,TVN_ENDLABELEDIT,&tvdi.hdr);
 
   if (!bCancel && bCommit) /* Apply the changes */
   {
-    if (infoPtr->header.uNotifyFormat == NFR_ANSI)
+    if (!isUnicodeNotify(&infoPtr->header))
       lstrcpynAtoW(textW,textA,iLength+1);
     if (lstrcmpW(textW,editedItem->pszText) != 0)
     {
@@ -3576,18 +3554,14 @@ static LRESULT TREEVIEW_MouseMove(HWND hwnd,WPARAM wParam,LPARAM lParam)
       if(dwStyle & TVS_INFOTIP)
       {
         NMTVGETINFOTIPW tvgit;
-        HWND parent = GetParent(hwnd);
 
-        tvgit.hdr.hwndFrom = hwnd;
-        tvgit.hdr.idFrom   =  GetWindowLongA(hwnd,GWL_ID);
-        tvgit.hdr.code     = (infoPtr->header.uNotifyFormat == NFR_UNICODE) ? TVN_GETINFOTIPW:TVN_GETINFOTIPA;
-        tvgit.pszText    = (WCHAR*)COMCTL32_Alloc((infoPtr->header.uNotifyFormat == NFR_UNICODE) ? INFOTIPSIZE*sizeof(WCHAR):INFOTIPSIZE*sizeof(CHAR));
+        tvgit.pszText    = (WCHAR*)COMCTL32_Alloc(isUnicodeNotify(&infoPtr->header) ? INFOTIPSIZE*sizeof(WCHAR):INFOTIPSIZE*sizeof(CHAR));
         tvgit.cchTextMax = INFOTIPSIZE;
         tvgit.hItem      = item->hItem;
         tvgit.lParam     = item->lParam;
 
-        SendMessageA(parent,WM_NOTIFY,(WPARAM)tvgit.hdr.idFrom,(LPARAM)&tvgit);
-        if (infoPtr->header.uNotifyFormat == NFR_UNICODE)
+        sendNotify(hwnd,isUnicodeNotify(&infoPtr->header) ? TVN_GETINFOTIPW:TVN_GETINFOTIPA,&tvgit.hdr);
+        if (isUnicodeNotify(&infoPtr->header))
         {
           text = tvgit.pszText;
         } else
@@ -4009,12 +3983,12 @@ TREEVIEW_VScroll (HWND hwnd, WPARAM wParam, LPARAM lParam)
       break;
 
     case SB_PAGEUP:
-      newY = infoPtr->lefttop.y-MAX(((INT)(infoPtr->uVisibleHeight/infoPtr->uVScrollStep))*infoPtr->uVScrollStep,infoPtr->uVisibleHeight);
+      newY = infoPtr->lefttop.y-MAX(((INT)(infoPtr->uVisibleHeight/infoPtr->uVScrollStep))*infoPtr->uVScrollStep,infoPtr->uVScrollStep);
       if (newY < 0) newY = 0;
       break;
 
     case SB_PAGEDOWN:
-      newY = infoPtr->lefttop.y+MAX(((INT)(infoPtr->uVisibleHeight/infoPtr->uVScrollStep))*infoPtr->uVScrollStep,infoPtr->uVisibleHeight);
+      newY = infoPtr->lefttop.y+MAX(((INT)(infoPtr->uVisibleHeight/infoPtr->uVScrollStep))*infoPtr->uVScrollStep,infoPtr->uVScrollStep);
       if (newY > maxY) newY = maxY;
       break;
 
