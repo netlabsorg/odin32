@@ -1,4 +1,4 @@
-/* $Id: vprntf16.c,v 1.3 2000-09-02 21:07:56 bird Exp $
+/* $Id: vprntf16.c,v 1.4 2000-12-11 06:20:49 bird Exp $
  *
  * vprintf and printf - 16-bit.
  *
@@ -92,7 +92,7 @@ static unsigned _strnlen(const char *psz, unsigned cchMax)
 {
     const char *pszC = psz;
 
-    while (*psz != '\0' && cchMax-- > 0)
+    while (cchMax-- > 0 &&  *psz != '\0')
         psz++;
 
     return psz - pszC;
