@@ -1,12 +1,15 @@
-/* $Id: ChangeLog,v 1.1439 2001-05-23 11:24:46 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1440 2001-05-23 17:01:19 sandervl Exp $ */
 
  2001-05-23: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o RedrawWindow with desktop window handle no longer returns
                   an error.
                   (fixes RealPlayer Auto Size window)
     - Odin.ini  o Added font mapping for MS Shell Dlg to WarpSans
-                  (gets rid of ugly fonts in dialogs which also have the wrong
+                  (gets rid of ugly fonts (in dialogs) which also have the wrong
                    size (text clipping))
+    - KERNEL32: o CreateFile for partitions; handle lookup fails if 
+                  OS/2 handle is set to -1 (happens if disk not inserted)
+                  -> set to 0 instead
 
  2001-05-22: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMCTL32: o Partial merge of listview control with latest Wine
