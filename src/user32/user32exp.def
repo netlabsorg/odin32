@@ -596,4 +596,4 @@ _EnumDisplayMonitors@16        @1005
 CreateWindowProc     			@2000
 GetOS2Callback__15Win32WindowProcFv 	@2001
 
-
+_GetSysColorPen@4                       @2002

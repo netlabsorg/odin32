@@ -22,63 +22,72 @@
 #include "nativefont.h"
 #include "pager.h"
 #include "tab.h"
+#include "status.h"
+#include "header.h"
+#include "updown.h"
+#include "rebar.h"
+#include "trackbar.h"
+#include "tooltips.h"
+#include "toolbar.h"
+#include "treeview.h"
 
 HANDLE COMCTL32_hHeap = (HANDLE)NULL;
+HMODULE COMCTL32_hModule = 0;
+LPSTR    COMCTL32_aSubclass = (LPSTR)NULL;
 
-
-void RegisterCOMCTL32WindowClasses(void)
+void RegisterCOMCTL32WindowClasses(unsigned long hinstDLL)
 {
   /* create private heap */
   COMCTL32_hHeap = HeapCreate(0, 0x10000, 0);
+  /* add global subclassing atom (used by 'tooltip' and 'updown') */
+  COMCTL32_aSubclass = (LPSTR)(DWORD)GlobalAddAtomA ("CC32SubclassInfo");
+  /* This will be wrong for any other process attching in this address-space! */
+  COMCTL32_hModule = (HMODULE)hinstDLL;
 
-  /* register progress control */
+  /* register controls */
   PROGRESS_Register();
-  /* register extended combobox control */
   COMBOEX_Register();
-  /* register animation control */
   ANIMATE_Register();
-  /* register date time control */
   DATETIME_Register();
-  /* register the flat scrollbar control */
   FLATSB_Register();
-  /* register hotkey control */
   HOTKEY_Register();
-  /* register IP address control */
 //  IPADDRESS_Register();
-  /* register month calender control */
   MONTHCAL_Register();
-  /* register native font control */
   NATIVEFONT_Register();
-  /* register pager control */
   PAGER_Register();
-  /* register tab control */
   TAB_Register();
+  STATUS_Register();
+  HEADER_Register();
+  UPDOWN_Register();
+  REBAR_Register();
+  TRACKBAR_Register();
+  TOOLTIPS_Register();
+  TOOLBAR_Register();
+  TREEVIEW_Register();
 } 
 
 void UnregisterCOMCTL32WindowClasses(void)
 {
-  /* unregister progress control */
+  /* unregister controls */
   PROGRESS_Unregister();
-  /* unregister extended combobox control */
   COMBOEX_Unregister();
-  /* unregister animation control */
   ANIMATE_Unregister();
-  /* unregister date time control */
   DATETIME_Unregister();
-  /* unregister flat scrollbar control */
   FLATSB_Unregister();
-  /* unregister hotkey control */
   HOTKEY_Unregister();
-  /* unregister IP address control */
 //  IPADDRESS_Unregister();
-  /* unregister month calendar control */
   MONTHCAL_Unregister();
-  /* unregister native font control */
   NATIVEFONT_Unregister();
-  /* unregister pager control */
   PAGER_Unregister();
-  /* unregister tab control */
   TAB_Unregister();
+  STATUS_Unregister();
+  HEADER_Unregister();
+  UPDOWN_Unregister();
+  REBAR_Unregister();
+  TRACKBAR_Unregister();
+  TOOLTIPS_Unregister();
+  TOOLBAR_Unregister();
+  TREEVIEW_Unregister();
 
   /* destroy private heap */
   HeapDestroy(COMCTL32_hHeap);

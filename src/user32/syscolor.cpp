@@ -1,4 +1,4 @@
-/* $Id: syscolor.cpp,v 1.1 1999-05-24 20:20:02 ktk Exp $ */
+/* $Id: syscolor.cpp,v 1.2 1999-06-07 15:37:34 achimha Exp $ */
 
 /*
  * Win32 system color API functions for OS/2
@@ -48,13 +48,18 @@ static const char * const DefSysColors[] =
     "3DDarkShadow", "32 32 32",      /* COLOR_3DDKSHADOW          */
     "3DLight", "192 192 192",        /* COLOR_3DLIGHT             */
     "InfoText", "0 0 0",             /* COLOR_INFOTEXT            */
-    "InfoBackground", "255 255 192"  /* COLOR_INFOBK              */
+    "InfoBackground", "255 255 192", /* COLOR_INFOBK              */
+    "AlternateButtonFace", "184 180 184",  /* COLOR_ALTERNATEBTNFACE */
+    "HotTrackingColor", "0 0 255",         /* COLOR_HOTLIGHT */
+    "GradientActiveTitle", "16 132 208",   /* COLOR_GRADIENTACTIVECAPTION */
+    "GradientInactiveTitle", "184 180 184" /* COLOR_GRADIENTINACTIVECAPTION */
 };
 
 
-#define NUM_SYS_COLORS     (COLOR_INFOBK+1)
+#define NUM_SYS_COLORS     (COLOR_GRADIENTINACTIVECAPTION+1)
 
 static HBRUSH SysColors[NUM_SYS_COLORS] = {0};
+static HPEN   SysColorPens[NUM_SYS_COLORS] = {0};
 static BOOL   fColorInit = FALSE;
 
 #define MAKE_SOLID(color) \
@@ -66,6 +71,9 @@ static void SYSCOLOR_SetColor( int index, COLORREF color )
 {
     if (index < 0 || index >= NUM_SYS_COLORS) return;
     SysColors[index] = color;
+    /* set pen */
+    if (SysColorPens[index]) DeleteObject(SysColorPens[index]);
+    SysColorPens[index] = CreatePen(PS_SOLID, 1, color);
     switch(index)
     {
     case COLOR_SCROLLBAR:
@@ -174,6 +182,22 @@ static void SYSCOLOR_SetColor( int index, COLORREF color )
 	DeleteObject( sysColorObjects.hbrushInfoBk );
 	sysColorObjects.hbrushInfoBk = CreateSolidBrush( color );
 	break;
+    case COLOR_ALTERNATEBTNFACE:
+	DeleteObject(sysColorObjects.hbrushAlternateBtnFace);
+        sysColorObjects.hbrushAlternateBtnFace = CreateSolidBrush(color);
+        break;
+    case COLOR_HOTLIGHT:
+	DeleteObject(sysColorObjects.hbrushHotLight);
+        sysColorObjects.hbrushHotLight = CreateSolidBrush(color);
+        break;
+    case COLOR_GRADIENTACTIVECAPTION:
+	DeleteObject(sysColorObjects.hbrushGradientActiveCaption);
+        sysColorObjects.hbrushGradientActiveCaption = CreateSolidBrush(color);
+        break;
+    case COLOR_GRADIENTINACTIVECAPTION:
+	DeleteObject(sysColorObjects.hbrushGradientInactiveCaption);
+        sysColorObjects.hbrushGradientInactiveCaption = CreateSolidBrush(color);
+        break;
     }
 }
 //******************************************************************************
@@ -271,6 +295,17 @@ HBRUSH WIN32API GetSysColorBrush(int nIndex)
   WriteLog(" unknown index!\n");
 #endif
   return(GetStockObject(LTGRAY_BRUSH));
+}
+//******************************************************************************
+//******************************************************************************
+/***********************************************************************
+ * This function is new to the Wine lib -- it does not exist in 
+ * Windows. However, it is a natural complement for GetSysColorBrush
+ * in the Win32 API and is needed quite a bit inside Wine.
+ */
+HPEN WIN32API GetSysColorPen(INT index)
+{
+    return SysColorPens[index];
 }
 //******************************************************************************
 //******************************************************************************
