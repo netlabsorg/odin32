@@ -1,4 +1,4 @@
-# $Id: process.mak,v 1.10 2002-04-30 06:19:13 bird Exp $
+# $Id: process.mak,v 1.11 2002-04-30 19:50:40 bird Exp $
 
 #
 # Unix-like tools for OS/2
@@ -199,14 +199,10 @@ TARGET_IGNORE_LINKER_WARNINGS = 1
 
 
 # Default stacksize
-#
-# BUGBUG/TODO/FIXME
-# kso:  Not sure if this is the *right* way to represent it!
-#       It can't be when we start changing it based on the
-#       current build environment.
+# If 16bit:      8KB
+# Else (32bit): 64KB
 !ifndef TARGET_STACKSIZE
-# check if 16-bit target compiler
-! if "$(BUILD_ENV)" == "MSCV6"
+! ifdef ENV_16BIT
 TARGET_STACKSIZE=0x2000
 ! else
 TARGET_STACKSIZE=0x10000
@@ -723,6 +719,9 @@ $(LINK_LNK3)
 $(LINK_LNK4)
 $(LINK_LNK5)
 <<KEEP
+!ifdef BUILD_VERBOSE
+    @type $@
+!endif
 
 
 #
