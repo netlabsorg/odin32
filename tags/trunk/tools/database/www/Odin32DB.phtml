@@ -15,8 +15,8 @@ $rc = mysql_select_db("odin32", $db);
  * Global Variables
  */
 $iRefcode       = -1;                   /* Reference number. (< 0 is all members in the category) */
-$sCategory      = "dll";                /* Category name for internal use (equal to table name). */
-$sCategoryName  = "Dll";                /* Category name for presentation. */
+$sCategory      = "";                   /* Category name for internal use (equal to table name). */
+$sCategoryName  = "";                   /* Category name for presentation. */
 $fNoData        = 0;                    /* Flag which is set if refcode don't give matches in the DB. */
 
 
@@ -59,6 +59,10 @@ else if (isset($apigrouprefcode))
     $sCategoryName  = "API Group";
     if ($apigrouprefcode != "")
         $iRefcode = (int)$apigrouprefcode;
+    $fFunctions = (isset($fFunctions)   && $fFunctions  != '0');
+    $fFiles     = (isset($fFiles)       && $fFiles      != '0');
+    $fAuthors   = (isset($fAuthors)     && $fAuthors    != '0');
+    $fSortByState=(isset($fSortByState) && $fSortByState!= '0');
 }
 else if (isset($authorrefcode))
 {   /* Author by refcode */
@@ -66,14 +70,21 @@ else if (isset($authorrefcode))
     $sCategoryName  = "Author";
     if ($authorrefcode != "")
         $iRefcode = (int)$authorrefcode;
-} /* else: defaults are set above (All dlls) */
+    $fDlls      = (isset($fDlls)        && $fDlls  != '0');
+    $fFunctions = (isset($fFunctions)   && $fFunctions  != '0');
+    $fFiles     = (isset($fFiles)       && $fFiles      != '0');
+    $fAPIGroups = (isset($fAPIGroups)   && $fAPIGroups  != '0');
+    $fSortByState=(isset($fSortByState) && $fSortByState!= '0');
+    if (!(isset($authordll) && $authordll != "" && @(int)$authordll >= 0))
+        $authordll = -1;
+} /* else: initial page */
 
 
 /*
  * Get name of the item we're to display data on.
  */
 if ($iRefcode < 0)
-    $sName = "All";
+    $sName = "All"; //FIXME
 else
 {
     $sql = sprintf("SELECT name FROM %s WHERE refcode = %d",
@@ -118,36 +129,36 @@ if (!$fNoData)
     {
         case "dll":
             {
-            Odin32DBDllInfoAll($aContent, $db, $iRefcode, $fFunctions, $fFiles, $fAPIGroups, $fAuthors, $fSortByState);
+            Odin32DBDllInfo($aContent, $db, $iRefcode, $fFunctions, $fFiles, $fAPIGroups, $fAuthors, $fSortByState);
             break;
             }
 
         case "file":
             {
-            Odin32DBFileInfoAll($aContent, $db, $iRefcode, $fFunctions, $fAPIGroups, $fAuthors, $fSortByState);
+            Odin32DBFileInfo($aContent, $db, $iRefcode, $fFunctions, $fAPIGroups, $fAuthors, $fSortByState);
             break;
             }
 
         case "function":
             {
-            Odin32DBFunctionInfoAll($aContent, $db, $iRefcode);
+            Odin32DBFunctionInfo($aContent, $db, $iRefcode);
             break;
             }
 
         case "apigroup":
             {
-            echo $sCategoryName;
+            Odin32DBAPIGroupInfo(&$aContent, $db, $iRefcode, $fFunctions, $fFiles, $fAuthors, $fSortByState);
             break;
             }
 
         case "author":
             {
-            echo $sCategoryName;
+            Odin32DBAuthorInfo($aContent, $db, $iRefcode, $fDlls, $fFunctions, $fFiles, $fAPIGroups, $fSortByState, $authordll);
             break;
             }
 
         default:
-            echo "!IPE!";
+            echo "!IPE!"; //FIXME
     }
 }
 else
@@ -169,3 +180,4 @@ require "12-OdinBanner.php3";
 
 require "13-Closing.php3";
 ?>
+

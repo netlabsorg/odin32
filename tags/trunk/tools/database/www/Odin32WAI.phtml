@@ -178,7 +178,7 @@ else
         if (@mysql_num_rows($result2) > 0)
         {
             while ($dll = @mysql_fetch_array($result2))
-                Odin32DBCompletionBar($dll["refcode"], $dll["name"], $db);
+                Odin32DBCompletionBarDll($dll["refcode"], $dll["name"], $db);
         }
         else
             printf("  <font color=ff0000> <b>Huh! NO DLLs?</b> </font>");
@@ -294,9 +294,9 @@ Naslov("Summary", "summary");
         if (@mysql_num_rows($result) > 0)
         {
             while ($dll = @mysql_fetch_array($result))
-                Odin32DBCompletionBar($dll["refcode"], $dll["name"],  $db);
+                Odin32DBCompletionBarDll($dll["refcode"], $dll["name"],  $db);
 
-            Odin32DBCompletionBar(-1, "Total",  $db);
+            Odin32DBCompletionBarDll(-1, "Total",  $db);
         }
         else
             printf("  <li> <font color=ff0000> <b>NOBODY</b> </font>");
