@@ -1,4 +1,4 @@
-; $Id: ntdll.def,v 1.34 2000-08-20 15:16:56 phaller Exp $
+; $Id: ntdll.def,v 1.35 2000-09-24 09:51:14 sandervl Exp $
 
 ;
 ; Based on NT 4.0 SP6: NTDLL.DLL 
@@ -333,7 +333,7 @@ EXPORTS
     RtlConvertUlongToLargeInteger = _RtlConvertUlongToLargeInteger@4    @320
     RtlCopyLuid                   = _RtlCopyLuid@8                      @321
 ;   RtlCopyLuidAndAttributesArray					@322
-    RtlCopyMemory                 = _RtlCopyMemory@12
+    RtlCopyMemory                 = _RtlCopyMemory@12                   @1100
 ;   RtlCopySecurityDescriptor						@323
     RtlCopySid                    = _RtlCopySid@12                      @324
 ;   RtlCopySidAndAttributesArray					@325
