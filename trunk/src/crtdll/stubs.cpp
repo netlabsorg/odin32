@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.2 2000-02-21 10:34:02 sandervl Exp $ */
+/* $Id: stubs.cpp,v 1.3 2000-02-21 23:11:31 sandervl Exp $ */
 
 /*
  * The C RunTime DLL
@@ -260,17 +260,6 @@ unsigned int CDECL CRTDLL__getdiskfree( unsigned int drive, struct _diskfree_t *
 FARPROC CDECL  CRTDLL__getdllprocaddr(HMODULE hModule,char * lpProcName, int iOrdinal)
 {
   dprintf(("CRTDLL: _getdllprocaddr not implemented.\n"));   
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return 0;
-}
-
-
-/*********************************************************************
- *                  _getsystime    (CRTDLL.127)
- */
-unsigned int CDECL CRTDLL__getsystime(struct tm *tp)
-{
-  dprintf(("CRTDLL: _getsystime not implemented.\n"));
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return 0;
 }
@@ -1092,17 +1081,6 @@ double CDECL CRTDLL__scalb( double x, long e )
 
 
 /*********************************************************************
- *                  _setsystime    (CRTDLL.264)
- */
-unsigned int CDECL CRTDLL__setsystime(struct tm *tp, unsigned int ms)
-{
-  dprintf(("CRTDLL: _setsystime not implemented.\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return 0;
-}
-
-
-/*********************************************************************
  *	_snprintf				(CRTDLL.266)
  */
 int  CDECL CRTDLL__snprintf( char *buf, size_t bufsize, const char *fmt, ... )
@@ -1148,28 +1126,6 @@ int CDECL CRTDLL__vsnwprintf( wchar_t *s1, size_t n, const wchar_t *s2, va_list 
   dprintf(("CRTDLL: _vsnwprintf not implemented.\n"));
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
-}
-
-			
-/*********************************************************************
- *      _wtoi			 		(CRTDLL.330)
- */
-int CDECL CRTDLL__wtoi( const wchar_t *s )
-{
-  dprintf(("CRTDLL: _wtoi(%08xh) not implemented.\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return 0;
-}
-
-						
-/*********************************************************************
- *	_wtol			 		(CRTDLL.331)
- */
-long int CDECL CRTDLL__wtol( const wchar_t *s )
-{
-  dprintf(("CRTDLL: _wtol(%08xh) not implemented.\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return 0;
 }
 
 

@@ -1,4 +1,4 @@
-/* $Id: crt_wc.cpp,v 1.1 2000-02-03 21:37:48 sandervl Exp $ */
+/* $Id: crt_wc.cpp,v 1.2 2000-02-21 23:11:30 sandervl Exp $ */
 
 /*
  * The C RunTime DLL
@@ -11,6 +11,7 @@
  * Copyright 1996 Jukka Iivonen
  * Copyright 1997 Uwe Bonnes
  * Copyright 1999-2000 Jens Wiessner
+ * Copyright 2000 Przemyslaw Dobrowolski
  *
  * CRTDLL - widechar functions
  *
@@ -179,6 +180,49 @@ LPWSTR CDECL CRTDLL__wcsupr(LPWSTR str)
   }
 
   return (str);
+}
+
+
+/*********************************************************************
+ *      _wtoi			 		(CRTDLL.330)
+ */
+int CDECL CRTDLL__wtoi( const wchar_t *s )
+{
+  // int -32768-32768 = size 6 + null-terminatedstr
+  char tempstr[7];
+
+  WideCharToMultiByte(0, // = CP_ACP
+                      0,
+                      (LPCWSTR)s,
+                      -1,
+                      tempstr,
+                      7,
+                      NULL,
+                      NULL);
+
+  return (atoi(tempstr));
+}
+
+
+/*********************************************************************
+ *	_wtol			 		(CRTDLL.331)
+ */
+long int CDECL CRTDLL__wtol( const wchar_t *s )
+{
+  // long int -2147483647-2147483647 = size 10 + null-terminatedstr
+  char tempstr[11];
+  WideCharToMultiByte(0, // = CP_ACP
+                      0,
+                      (LPCWSTR)s,
+                      -1,
+                      tempstr,
+                      11,
+                      NULL,
+                      NULL);
+
+  return (atol(tempstr));
+
+  return 0;
 }
 
 

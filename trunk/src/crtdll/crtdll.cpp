@@ -1,4 +1,4 @@
-/* $Id: crtdll.cpp,v 1.23 2000-02-21 10:34:01 sandervl Exp $ */
+/* $Id: crtdll.cpp,v 1.24 2000-02-21 23:11:30 sandervl Exp $ */
 
 /*
  * The C RunTime DLL
@@ -13,6 +13,7 @@
  * Copyright 1996 Jukka Iivonen
  * Copyright 1997 Uwe Bonnes
  * Copyright 1999-2000 Jens Wiessner
+ * Copyright 2000 Przemyslaw Dobrowolski
  */
 
 #include <os2win.h>
@@ -1124,6 +1125,31 @@ int CDECL CRTDLL__getpid( void )
 
 
 /*********************************************************************
+ *                  _getsystime    (CRTDLL.127)
+ */
+unsigned int CDECL CRTDLL__getsystime(struct tm *tp)
+{
+  SYSTEMTIME  systemtime;
+
+  GetLocalTime(&systemtime);
+
+  tp->tm_isdst = -1; // FIXME: I don't know is there a correct value
+  tp->tm_sec   = systemtime.wSecond;
+  tp->tm_min   = systemtime.wMinute;
+  tp->tm_hour  = systemtime.wHour;
+  tp->tm_mday  = systemtime.wDay;
+  tp->tm_mon   = systemtime.wMonth - 1;
+  // struct tm has time from 1900  -> 2000 = 100
+  tp->tm_year  = systemtime.wYear - 1900;
+  tp->tm_wday  = systemtime.wDayOfWeek;
+
+  mktime(tp);
+
+  return (0); // FIXME: What Can we return??
+}
+
+
+/*********************************************************************
  *                  _getw     (CRTDLL.128)
  */
 int CDECL CRTDLL__getw( FILE *stream )
@@ -1696,6 +1722,30 @@ INT CDECL CRTDLL__setmode( INT fh,INT mode)
 {
 	dprintf2(("CRTDLL: _setmode\n"));
 	return (_setmode(fh, mode));
+}
+
+
+/*********************************************************************
+ *                  _setsystime    (CRTDLL.264)
+ */
+unsigned int CDECL CRTDLL__setsystime(struct tm *tp, unsigned int ms)
+{
+  SYSTEMTIME  systemtime;
+
+  mktime(tp);
+
+  systemtime.wMilliseconds = ms;
+  systemtime.wSecond       = tp->tm_sec;
+  systemtime.wMinute       = tp->tm_min;
+  systemtime.wHour         = tp->tm_hour;
+  systemtime.wDay          = tp->tm_mday;
+  systemtime.wMonth        = tp->tm_mon + 1;
+  // struct tm has time from 1900 -> 2000 = 100
+  systemtime.wYear         = tp->tm_year + 1900;
+
+  if (SetLocalTime(&systemtime) != 0) return GetLastError();
+
+  return (0);
 }
 
 
