@@ -33,7 +33,7 @@
 #include <misc.h>
 #include <wprocess.h>
 #include "handlemanager.h"
-//#include "profile.h"
+#include "profile.h"
 #include <options.h>
 #include "initterm.h"
 #include <win32type.h>
@@ -158,6 +158,10 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
                 flAllocMem = PAG_ANY;      // high memory support. Let's use it!
                 ulMaxAddr = ulSysinfo * (1024*1024);
                 OSLibInitWSeBFileIO();
+    		if(PROFILE_GetOdinIniInt(ODINSYSTEM_SECTION, HIGHMEM_KEY, 1) == 0) {
+                    dprintf(("WARNING: OS/2 kernel supports high memory, but support is DISABLED because of HIGHMEM odin.ini key"));
+                    flAllocMem = 0;
+                }
             }
             else
                 flAllocMem = 0;        // no high memory support
