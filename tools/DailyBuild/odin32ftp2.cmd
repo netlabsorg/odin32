@@ -1,4 +1,4 @@
-/* $Id: odin32ftp2.cmd,v 1.14 2001-04-19 16:49:17 bird Exp $
+/* $Id: odin32ftp2.cmd,v 1.15 2001-05-07 08:46:32 bird Exp $
  *
  * Uploads the relase and debug builds to the FTP sites.
  *
@@ -62,7 +62,10 @@ do i = 1 to 5 /* (Retries 5 times) */
     do
         rc = cleanFtp('os2-delete', '/daily', 'www.os2.org');
         do j = 1 to asUploads.0
-            rc = forwardSF(asUploads.j, 'os2-'||asUploads.j, '/'||sDirectory, 'www.os2.org');
+            if (1) then
+                rc = putFtp(asUploads.j, 'os2-'||asUploads.j, '/'||sDirectory, 'www.os2.org');
+            else
+                rc = forwardSF(asUploads.j, 'os2-'||asUploads.j, '/'||sDirectory, 'www.os2.org');
         end
     end
 
