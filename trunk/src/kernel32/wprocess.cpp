@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.60 1999-12-17 16:56:30 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.61 1999-12-19 19:54:32 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -743,25 +743,31 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API CreateProcessW(LPCWSTR arg1, LPWSTR arg2,
-                             PSECURITY_ATTRIBUTES arg3,
-                             PSECURITY_ATTRIBUTES arg4,
-                             BOOL arg5, DWORD arg6, PVOID arg7,
-                             LPCWSTR arg8, LPSTARTUPINFOW arg9,
-                             LPPROCESS_INFORMATION  arg10)
+BOOL WIN32API CreateProcessW(LPCWSTR lpApplicationName, LPWSTR lpCommandLine,
+                             PSECURITY_ATTRIBUTES lpProcessAttributes,
+                             PSECURITY_ATTRIBUTES lpThreadAttributes,
+                             BOOL bInheritHandles, DWORD dwCreationFlags,
+                             LPVOID lpEnvironment, 
+                             LPCWSTR lpCurrentDirectory, LPSTARTUPINFOW lpStartupInfo,
+                             LPPROCESS_INFORMATION lpProcessInfo)
 {
  BOOL rc;
- char *astring1, *astring2, *astring3;
+ char *astring1 = 0, *astring2 = 0, *astring3 = 0;
 
-    dprintf(("KERNEL32:  OS2CreateProcessW DOESN't WORK"));
-    astring1 = UnicodeToAsciiString((LPWSTR)arg1);
-    astring2 = UnicodeToAsciiString(arg2);
-    astring3 = UnicodeToAsciiString((LPWSTR)arg8);
-    rc = CreateProcessA(astring1, astring2, arg3, arg4, arg5, arg6, arg7,
-                           astring3, (LPSTARTUPINFOA)arg9, arg10);
-    FreeAsciiString(astring3);
-    FreeAsciiString(astring2);
-    FreeAsciiString(astring1);
+    dprintf(("KERNEL32: CreateProcessW"));
+    if(lpApplicationName)
+    	astring1 = UnicodeToAsciiString((LPWSTR)lpApplicationName);
+    if(lpCommandLine)
+    	astring2 = UnicodeToAsciiString(lpCommandLine);
+    if(lpCurrentDirectory)
+    	astring3 = UnicodeToAsciiString((LPWSTR)lpCurrentDirectory);
+    rc = CreateProcessA(astring1, astring2, lpProcessAttributes, lpThreadAttributes,
+                        bInheritHandles, dwCreationFlags, lpEnvironment,
+                        astring3, (LPSTARTUPINFOA)lpStartupInfo, 
+                        lpProcessInfo);
+    if(astring3)	FreeAsciiString(astring3);
+    if(astring2)	FreeAsciiString(astring2);
+    if(astring1)	FreeAsciiString(astring1);
     return(rc);
 }
 //******************************************************************************

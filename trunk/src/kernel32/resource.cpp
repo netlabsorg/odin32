@@ -1,4 +1,4 @@
-/* $Id: resource.cpp,v 1.12 1999-11-30 14:15:54 sandervl Exp $ */
+/* $Id: resource.cpp,v 1.13 1999-12-19 19:54:30 sandervl Exp $ */
 
 /*
  * Misc resource procedures
@@ -46,6 +46,75 @@ HRSRC WIN32API FindResourceW(HINSTANCE hModule, LPCWSTR lpszName,
     }
 
     return module->findResourceW((LPWSTR)lpszName, (LPWSTR)lpszType);
+}
+/*****************************************************************************
+ * Name      : HRSRC WIN32API FindResourceExA
+ * Purpose   : The FindResourceExA function determines the location of the
+ *             resource with the specified type, name, and language in the
+ *             specified module.
+ * Parameters: HMODULE hModule  resource-module handle
+ *             LPCSTR lpType    pointer to resource type
+ *             LPCSTR lpName    pointer to resource name
+ *             WORD wLanguage   resource language
+ * Variables :
+ * Result    : If the function succeeds, the return value is a handle to the
+ *             specified resource's info block. To obtain a handle to the
+ *             resource, pass this handle to the LoadResource function.
+ *             If the function fails, the return value is NULL
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : SvL
+ *****************************************************************************/
+
+HRSRC  WIN32API FindResourceExA( HMODULE hModule, LPCSTR lpType,
+                                    LPCSTR lpName, WORD wLanguage)
+{
+ Win32ImageBase *module;
+
+    module = Win32ImageBase::findModule(hModule);
+    if(module == NULL) {
+	  dprintf(("FindResourceExA Module %X not found (%x %d)", hModule, lpName, lpType));
+          return(NULL);
+    }
+
+    return module->findResourceA((LPSTR)lpName, (LPSTR)lpType, wLanguage);
+}
+
+/*****************************************************************************
+ * Name      : HRSRC WIN32API FindResourceExA
+ * Purpose   : The FindResourceExA function determines the location of the
+ *             resource with the specified type, name, and language in the
+ *             specified module.
+ * Parameters: HMODULE hModule  resource-module handle
+ *             LPCSTR lpType    pointer to resource type
+ *             LPCSTR lpName    pointer to resource name
+ *             WORD wLanguage   resource language
+ * Variables :
+ * Result    : If the function succeeds, the return value is a handle to the
+ *             specified resource's info block. To obtain a handle to the
+ *             resource, pass this handle to the LoadResource function.
+ *             If the function fails, the return value is NULL
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : SvL
+ *****************************************************************************/
+
+HRSRC  WIN32API FindResourceExW(HMODULE hModule,
+                                LPCWSTR lpType,
+                                LPCWSTR lpName,
+                                WORD    wLanguage)
+{
+ Win32ImageBase *module;
+
+    module = Win32ImageBase::findModule(hModule);
+    if(module == NULL) {
+	  dprintf(("FindResourceExW Module %X not found (%x %d)", hModule, lpName, lpType));
+          return(NULL);
+    }
+
+    return module->findResourceW((LPWSTR)lpName, (LPWSTR)lpType, wLanguage);
 }
 //******************************************************************************
 //hRes returned by LoadResource

@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.14 1999-12-18 17:17:55 sandervl Exp $ */
+/* $Id: stubs.cpp,v 1.15 1999-12-19 19:54:31 sandervl Exp $ */
 
 /*
  * Win32 KERNEL32 Subsystem for OS/2
@@ -1666,71 +1666,6 @@ HANDLE WIN32API FindFirstFileExW( LPCWSTR lpFileName,
 
   return (INVALID_HANDLE_VALUE);
 }
-
-/*****************************************************************************
- * Name      : HRSRC WIN32API FindResourceExA
- * Purpose   : The FindResourceExA function determines the location of the
- *             resource with the specified type, name, and language in the
- *             specified module.
- * Parameters: HMODULE hModule  resource-module handle
- *             LPCSTR lpType    pointer to resource type
- *             LPCSTR lpName    pointer to resource name
- *             WORD wLanguage   resource language
- * Variables :
- * Result    : If the function succeeds, the return value is a handle to the
- *             specified resource's info block. To obtain a handle to the
- *             resource, pass this handle to the LoadResource function.
- *             If the function fails, the return value is NULL
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Markus Montkowski [Tha, 1998/05/21 20:57]
- *****************************************************************************/
-
-HRSRC  WIN32API FindResourceExA( HMODULE hModule, LPCSTR lpType,
-                                    LPCSTR lpName, WORD wLanguage)
-{
-
-  dprintf(("KERNEL32:  FindResourceExA(%08x,%08x,%08x,%08x) not implemented\n",
-            hModule, lpType, lpName, wLanguage
-          ));
-
-  return (NULL);
-}
-
-/*****************************************************************************
- * Name      : HRSRC WIN32API FindResourceExA
- * Purpose   : The FindResourceExA function determines the location of the
- *             resource with the specified type, name, and language in the
- *             specified module.
- * Parameters: HMODULE hModule  resource-module handle
- *             LPCSTR lpType    pointer to resource type
- *             LPCSTR lpName    pointer to resource name
- *             WORD wLanguage   resource language
- * Variables :
- * Result    : If the function succeeds, the return value is a handle to the
- *             specified resource's info block. To obtain a handle to the
- *             resource, pass this handle to the LoadResource function.
- *             If the function fails, the return value is NULL
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Markus Montkowski [Tha, 1998/05/21 20:57]
- *****************************************************************************/
-
-HRSRC  WIN32API FindResourceExW(HMODULE hModule,
-                                   LPCWSTR lpType,
-                                   LPCWSTR lpName,
-                                   WORD    wLanguage)
-{
-
-  dprintf(("KERNEL32:  FindResourceExW(%08x,%08x,%08x,%08x) not implemented\n",
-            hModule, lpType, lpName, wLanguage
-          ));
-
-  return (NULL);
-}
-
 
 /*****************************************************************************
  * Name      : int WIN32API FoldStringA
