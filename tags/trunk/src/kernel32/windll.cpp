@@ -1,4 +1,4 @@
-/* $Id: windll.cpp,v 1.16 1999-08-26 12:55:37 sandervl Exp $ */
+/* $Id: windll.cpp,v 1.17 1999-08-27 16:51:01 sandervl Exp $ */
 
 /*
  * Win32 DLL class
@@ -31,6 +31,7 @@
 #include "cio.h"
 #include "vmutex.h"
 #include "oslibmisc.h"
+#include "oslibdos.h"
 
 VMutex dlllistmutex;   //protects linked lists of heaps
 
@@ -164,7 +165,7 @@ BOOL Win32Dll::init(ULONG reservedMem)
 {
  char   modname[CCHMAXPATH];
  char  *syspath;
- FILE  *dllfile;
+ HFILE  dllfile;
  APIRET rc;
  BOOL   fRet;
 
@@ -174,7 +175,7 @@ BOOL Win32Dll::init(ULONG reservedMem)
 	if(!strstr(szFileName, ".DLL")) {
 		strcat(szFileName,".DLL");
 	}
-	dllfile = fopen(szFileName, "r");
+	dllfile = OSLibDosOpen(szFileName, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
 	if(dllfile == NULL) {//search in libpath for dll
 		syspath = getenv("WIN32LIBPATH");
 		if(syspath) {
@@ -186,7 +187,7 @@ BOOL Win32Dll::init(ULONG reservedMem)
 			strcpy(szFileName, modname);
 		}
 	}
-	else	fclose(dllfile);
+	else	OSLibDosClose(dllfile);
 	if(isPEImage(szFileName) == TRUE) {
 		fRet = Win32Image::init(0);
 		dllEntryPoint = (WIN32DLLENTRY)entryPoint;

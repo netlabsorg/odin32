@@ -1,4 +1,4 @@
-/* $Id: mmap.h,v 1.8 1999-08-25 17:05:57 sandervl Exp $ */
+/* $Id: mmap.h,v 1.9 1999-08-27 16:51:00 sandervl Exp $ */
 
 /*
  * Memory mapped class
@@ -18,6 +18,17 @@
 #define PAGE_SIZE   4096
 #endif
 
+//commit 4 pages at once when the app accesses it
+#define NRPAGES_TOCOMMIT	200
+
+#define MEMMAP_ACCESS_READ	1
+#define MEMMAP_ACCESS_WRITE	2
+#define MEMMAP_ACCESS_EXECUTE	4
+
+class Win32MemMapView;
+
+//******************************************************************************
+//******************************************************************************
 class Win32MemMap
 {
 public:
@@ -25,22 +36,19 @@ public:
   ~Win32MemMap();
 
    BOOL   Init(HANDLE hMemMap);
-   BOOL   flushView(LPVOID lpvBase, ULONG cbFlush);
+   BOOL   flushView(ULONG offset, ULONG cbFlush);
    LPVOID mapViewOfFile(ULONG size, ULONG offset, ULONG fdwAccess);
-   BOOL   unmapViewOfFile();
+   BOOL   unmapViewOfFile(Win32MemMapView *view);
 
    HFILE  getMapHandle()                 { return hMemMap; };
    LPSTR  getMemName()                   { return lpszMapName; };
    DWORD  getProtFlags()                 { return mProtFlags; };
+   LPVOID getMappingAddr()               { return pMapping; };
 
    void   AddRef()                       { ++referenced; };
    void   Release()                      { if(--referenced == 0) delete this; };
 
-   BOOL   hasReadAccess();
-   BOOL   hasWriteAccess();
-   BOOL   hasExecuteAccess();
- 
-   BOOL   commitPage(LPVOID lpPageFaultAddr, ULONG nrpages, BOOL fWriteAccess);
+   BOOL   commitPage(ULONG offset, BOOL fWriteAccess);
 
 static Win32MemMap *findMap(LPSTR lpszName);
 static Win32MemMap *findMap(ULONG address);
@@ -55,7 +63,8 @@ protected:
    ULONG  mMapAccess;
    LPSTR  lpszMapName;
    void  *pMapping;
-   BOOL   fMapped;
+
+   ULONG  nrMappings;
 
    ULONG  referenced;
 
@@ -65,5 +74,42 @@ private:
    static Win32MemMap *memmaps;
 	  Win32MemMap *next;
 };
+//******************************************************************************
+//Memory mapped file View Class
+//******************************************************************************
+class Win32MemMapView
+{
+public:
+   Win32MemMapView(Win32MemMap *map, ULONG offset, ULONG size, ULONG fdwAccess);
+  ~Win32MemMapView();
+
+   DWORD  getAccessFlags()               { return mfAccess; };
+   DWORD  getSize()                      { return mSize;    };
+   LPVOID getViewAddr()                  { return pMapView; };
+   ULONG  getOffset()                    { return mOffset;  };
+
+   BOOL   everythingOk()                 { return errorState == 0; };
+
+Win32MemMap *getParentMap()              { return mParentMap;};
+
+static void             deleteView(Win32MemMap *map);
+static Win32MemMap     *findMapByView(ULONG address, ULONG *offset, ULONG accessType, Win32MemMapView **pView=NULL);
+static Win32MemMapView *findView(LPVOID address);
+
+protected:
+   ULONG  mSize, errorState;
+   ULONG  mfAccess, mOffset;
+   void  *pMapView;
+
+   Win32MemMap *mParentMap;
+
+private:
+   static Win32MemMapView *mapviews;
+          Win32MemMapView *next;
+
+   friend class Win32MemMap;
+};
+//******************************************************************************
+//******************************************************************************
 
 #endif //__MMAP_H__

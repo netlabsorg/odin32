@@ -1,4 +1,4 @@
-/* $Id: winimage.cpp,v 1.17 1999-08-26 12:55:37 sandervl Exp $ */
+/* $Id: winimage.cpp,v 1.18 1999-08-27 16:51:01 sandervl Exp $ */
 
 /*
  * Win32 PE Image class
@@ -199,6 +199,7 @@ BOOL Win32Image::init(ULONG reservedMem)
  PIMAGE_SECTION_HEADER psh;
  IMAGE_TLS_DIRECTORY *tlsDir = NULL;
  int    nSections, i;
+ char   szFullPath[CCHMAXPATH] = "";
 
   fImgMapping = VIRTUAL_MapFileA(szFileName, &win32file);
 
@@ -206,6 +207,10 @@ BOOL Win32Image::init(ULONG reservedMem)
     	sprintf(szErrorMsg, "Unable to open %32s\n", szFileName);
         WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
     	goto failure;
+  }
+
+  if(DosQueryPathInfo(szFileName, FIL_QUERYFULLNAME, szFullPath, sizeof(szFullPath)) == 0) {
+	setFullPath(szFullPath);
   }
 
   if(GetPEFileHeader (win32file, &fh) == FALSE) {
@@ -424,18 +429,18 @@ BOOL Win32Image::init(ULONG reservedMem)
 	    	goto failure;
 	}
   }
-
-  if(processImports((char *)win32file) == FALSE) {
-    	fout << "Failed to process imports!" << endl;
-    	goto failure;
-  }
-
   if(fh.Characteristics & IMAGE_FILE_DLL) {
     	if(processExports((char *)win32file) == FALSE) {
         	fout << "Failed to process exported apis" << endl;
 	    	goto failure;
     	}
   }
+
+  if(processImports((char *)win32file) == FALSE) {
+    	fout << "Failed to process imports!" << endl;
+    	goto failure;
+  }
+
   IMAGE_SECTION_HEADER sh;
   if(GetSectionHdrByName (win32file, &sh, ".rsrc")) {
     	//get offset in resource object of directory entry
@@ -796,8 +801,8 @@ void Win32Image::StoreImportByOrd(Win32Dll *WinDll, ULONG ordinal, ULONG impaddr
   import  = (ULONG *)(impaddr - oh.ImageBase + realBaseAddress);
   apiaddr = WinDll->getApi(ordinal);
   if(apiaddr == 0) {
-    fout << "--->>> NOT FOUND!";
-    *import = (ULONG)MissingApi;
+    	fout << "--->>> NOT FOUND!";
+    	*import = (ULONG)MissingApi;
   }
   else  *import = apiaddr;
 }
@@ -811,8 +816,8 @@ void Win32Image::StoreImportByName(Win32Dll *WinDll, char *impname, ULONG impadd
   import = (ULONG *)(impaddr - oh.ImageBase + realBaseAddress);
   apiaddr = WinDll->getApi(impname);
   if(apiaddr == 0) {
-    fout << "--->>> NOT FOUND!";
-    *import = (ULONG)MissingApi;
+    	fout << "--->>> NOT FOUND!";
+    	*import = (ULONG)MissingApi;
   }
   else  *import = apiaddr;
 }
