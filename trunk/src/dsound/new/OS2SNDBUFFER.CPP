@@ -1,4 +1,4 @@
-/* $Id: OS2SNDBUFFER.CPP,v 1.3 2000-03-08 20:44:09 mike Exp $ */
+/* $Id: OS2SNDBUFFER.CPP,v 1.4 2000-03-09 16:18:00 mike Exp $ */
 
 /*
  * DirectSound SoundBuffer class
@@ -19,7 +19,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 
 #define INITGUID
 #include <dsound.h>
@@ -32,6 +31,7 @@
 #include "OS2Notify.h"
 #include <misc.h>
 
+#include "DSVolume.h"
 
 WAVEFORMATEX wfxDefaultPrimaryBuf = { WAVE_FORMAT_PCM,
                                       2,
@@ -517,14 +517,24 @@ HRESULT __stdcall SoundBufSetVolume(THIS_ LONG lVolume)
    OS2IDirectSoundBuffer *me = (OS2IDirectSoundBuffer *)This;
 
    dprintf(("DSOUND-OS2IDirectSoundBuffer::SoundBufSetVolume (%d, buf=%X)", lVolume, me));
-   if (me == NULL) {
+   if (me == NULL || lVolume < -10000) {
       return DSERR_INVALIDPARAM;
    }
+   // some apps pass positive values in lVolume, that's wrong right?!?
    me->DSvolume = (lVolume > 0) ? 0 : lVolume;
 
    /* = (10 ^ (1/10)) = 1dB - but the formula below gives results _very_ similar */
    /* to 'real' DirectSound, indistinguishable for all practical purposes        */
-   me->volume = 255.0 * pow(4, me->DSvolume / 1000.0);
+   //me->volume = 255.0 * pow(4, me->DSvolume / 1000.0);
+
+   /* Note: for some strange reason the above code sometimes gives erroneous     */
+   /* results, hence we now use a simple conversion table (in steps of 4/100 dB) */
+
+   if (me->DSvolume < -4000)
+      me->volume = 0;
+   else
+      me->volume = VolTable[-me->DSvolume / 4];
+
    dprintf(("  New volume: %d", me->volume));
 
    return DS_OK;
@@ -536,7 +546,7 @@ HRESULT __stdcall SoundBufSetPan(THIS_ LONG lPan)
    OS2IDirectSoundBuffer *me = (OS2IDirectSoundBuffer *)This;
 
    dprintf(("DSOUND-OS2IDirectSoundBuffer::SoundBufSetPan (%d, buf=%X)", lPan, me));
-   if (me == NULL) {
+   if (me == NULL || lPan < -10000 || lPan > 10000) {
       return DSERR_INVALIDPARAM;
    }
    me->DSpan = lPan;
@@ -545,12 +555,19 @@ HRESULT __stdcall SoundBufSetPan(THIS_ LONG lPan)
       return DS_OK;
    }
 
-   /* Note: the formula below is not necessarily mathematically correct but is */
-   /* experimentally proven to give very good results                          */
-   me->pan = 255.0 * pow(4, -abs(lPan) / 1000.0);
-   me->pan = 255 - me->pan;
+   /* Note: we use very similar code as for volume above   */
    if (lPan < 0)
-      me->pan = -me->pan;
+      if (lPan < -4000)
+         me->pan = -255;
+      else
+         me->pan = VolTable[-lPan / 4] - 255;
+   else
+      if (lPan > 4000)
+         me->pan = 255;
+      else
+         me->pan = 255 - VolTable[lPan / 4];
+
+   dprintf(("  New pan: %d", me->pan));
 
    return DS_OK;
 }

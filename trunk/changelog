@@ -1,4 +1,9 @@
- /* $Id: changelog,v 1.789 2000-03-09 10:12:33 mike Exp $ */
+ /* $Id: changelog,v 1.790 2000-03-09 16:17:57 mike Exp $ */
+
+ 2000-03-08: Michal Necasek <mike@mendelu.cz>
+        - dsound\new: Fixed volume and panning calculation that
+                      sometimes caused ugly noise
+
 
  2000-03-08: Michal Necasek <mike@mendelu.cz>
         - dsound\new: Completely new DART-based DirectSound. Works fine

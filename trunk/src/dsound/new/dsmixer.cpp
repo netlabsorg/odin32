@@ -56,6 +56,7 @@ void MixOneBuffer(OS2IDirectSoundBuffer *inBuf, int tomix, int outrate)
       vol2 = inBuf->volume;
    else
       vol2 = inBuf->volume * (256 + inBuf->pan) / 256;
+
    len = inBuf->bufferdesc.dwBufferBytes / bytespersample * 1024;
    if ((inBuf->lpfxFormat->nChannels == 2) && (inBuf->lpfxFormat->wBitsPerSample == 16)) {
       data16b = (signed short *) inBuf->lpBuffer;
