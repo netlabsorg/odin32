@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.3 1999-08-29 20:05:07 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.4 1999-09-05 15:53:08 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -74,11 +74,24 @@ LONG OSLibWinDispatchMsg(MSG *msg, BOOL isUnicode)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax, BOOL isUnicode)
+BOOL OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax, 
+                    BOOL isUnicode)
 {
  BOOL rc;
 
   rc = WinGetMsg(GetThreadHAB(), MsgThreadPtr, TranslateWinMsg(uMsgFilterMin), TranslateWinMsg(uMsgFilterMax), 0);
+  OS2ToWinMsgTranslate(MsgThreadPtr, pMsg, isUnicode);
+  return rc;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL  OSLibWinPeekMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax, 
+                      BOOL fRemove, BOOL isUnicode)
+{
+ BOOL rc;
+
+  rc = WinPeekMsg(GetThreadHAB(), MsgThreadPtr, hwnd, TranslateWinMsg(uMsgFilterMin), 
+                  TranslateWinMsg(uMsgFilterMax), (fRemove == MSG_REMOVE) ? PM_REMOVE : PM_NOREMOVE);
   OS2ToWinMsgTranslate(MsgThreadPtr, pMsg, isUnicode);
   return rc;
 }

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.44 1999-09-05 12:03:32 sandervl Exp $
+# $Id: makefile,v 1.45 1999-09-05 15:53:08 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -86,7 +86,7 @@ nativerc.obj: nativerc.cpp
 
 msgbox.obj:    msgbox.cpp
 window.obj:    window.cpp win32class.h win32wbase.h win32wndchild.h oslibwin.h win32wmdiclient.h
-windowmsg.obj: windowmsg.cpp win32class.h win32wbase.h win32wndchild.h
+windowmsg.obj: windowmsg.cpp win32class.h win32wbase.h win32wndchild.h oslibmsg.h
 winprop.obj:   winprop.cpp
 wingdi.obj:    wingdi.cpp win32wbase.h oslibgdi.h
 windowclass.obj: windowclass.cpp win32class.h win32wbase.h win32wndchild.h
@@ -102,7 +102,7 @@ pmwindow.obj:   pmwindow.cpp win32class.h win32wbase.h win32dlg.h pmwindow.h win
 win32class.obj: win32class.cpp win32class.h win32wbase.h win32dlg.h gen_object.h heapshared.h oslibwin.h win32wndchild.h
 win32wbase.obj:   win32wbase.cpp win32class.h win32wbase.h win32dlg.h gen_object.h heapshared.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h win32wndhandle.h oslibdos.h 
 win32wnd.obj:   win32wnd.cpp win32class.h win32wbase.h win32wnd.h win32dlg.h gen_object.h heapshared.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h win32wndhandle.h oslibdos.h oslibmenu.h
-win32dlg.obj:   win32dlg.cpp win32class.h win32wbase.h win32dlg.h gen_object.h heapshared.h oslibwin.h win32wndchild.h
+win32dlg.obj:   win32dlg.cpp win32class.h win32wbase.h win32dlg.h gen_object.h heapshared.h oslibwin.h win32wndchild.h oslibmsg.h
 win32wndchild.obj: win32wndchild.cpp win32wndchild.h
 win32wmdiclient.obj: win32wmdiclient.cpp win32wbase.h win32wmdiclient.h win32wmdichild.h
 win32wmdichild.obj: win32wmdichild.cpp win32wbase.h win32wmdiclient.h win32wmdichild.h
