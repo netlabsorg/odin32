@@ -84,7 +84,6 @@ extern "C"
   void   _System _O32_SetLastError(DWORD  dwError);
   DWORD  _System _O32_GetLastError(void);
   LPSTR  _System _O32_GetCommandLine(void);
-  void   _System _O32_ReplaceExceptionHandler(void);
   void   _System _O32_ExitProcess(UINT exitcode);
   HANDLE _System _O32_GetStdHandle(DWORD dwDevice);
   DWORD  _System _O32_GetFileType(HANDLE hFile);
@@ -117,14 +116,6 @@ inline LPSTR GetCommandLine()
     SetFS(sel);
 
     return yyrc;
-} 
-
-inline void ReplaceExceptionHandler()
-{
- USHORT sel = GetFS();
-
-    _O32_ReplaceExceptionHandler();
-    SetFS(sel);
 } 
 
 inline void ExitProcess(UINT a)
