@@ -1,4 +1,4 @@
-/* $Id: odin.cmd,v 1.17 2000-12-03 08:06:36 bird Exp $
+/* $Id: odin.cmd,v 1.18 2000-12-03 08:12:59 bird Exp $
  *
  * Odin32 API WarpIn installation script generator.
  *
@@ -53,7 +53,7 @@ do while ((asArg.i <> '') & (i < 9))
      * The argument specifies a dlldirectory under bin.
      * Make distribution.
      */
-    if (CreateWarpInScript('odininst.wis', asArg.i) <> 0) then
+    if (CreateWarpInScript('Odin32Inst.wis', asArg.i) <> 0) then
     do
         say 'failed to create WarpIn script.'
         exit(2);
