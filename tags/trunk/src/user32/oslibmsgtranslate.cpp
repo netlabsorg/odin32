@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.35 2000-06-23 19:04:11 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.36 2000-07-20 18:08:12 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -250,7 +250,8 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
                 {
                         Win32BaseWindow *wndAfter = Win32BaseWindow::GetWindowFromOS2Handle(pswp->hwndInsertBehind);
                         if(wndAfter)
-                        thdb->wp.hwndInsertAfter = wndAfter->getWindowHandle();
+                  	      thdb->wp.hwndInsertAfter = wndAfter->getWindowHandle();
+			else  thdb->wp.hwndInsertAfter = HWND_TOP_W;
                 }
         }
         winMsg->message = WINWM_WINDOWPOSCHANGED;

@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.99 2000-07-19 19:05:24 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.100 2000-07-20 18:08:12 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -292,7 +292,10 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         if ((pswp->fl & SWP_ZORDER) && (pswp->hwndInsertBehind > HWND_BOTTOM))
         {
            Win32BaseWindow *wndAfter = Win32BaseWindow::GetWindowFromOS2Handle(pswp->hwndInsertBehind);
-           if(wndAfter) wp.hwndInsertAfter = wndAfter->getWindowHandle();
+           if(wndAfter) {
+                wp.hwndInsertAfter = wndAfter->getWindowHandle();
+           }
+           else wp.hwndInsertAfter = HWND_TOP_W;
         }
 
         wpOld = wp;
@@ -362,6 +365,16 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                                      hwnd);
         } 
         else  OSLibMapSWPtoWINDOWPOS(pswp, &wp, &swpOld, OSLibQueryScreenHeight(), 0, 0, hwnd);
+
+        wp.hwnd = win32wnd->getWindowHandle();
+        if ((pswp->fl & SWP_ZORDER) && (pswp->hwndInsertBehind > HWND_BOTTOM))
+        {
+           Win32BaseWindow *wndAfter = Win32BaseWindow::GetWindowFromOS2Handle(pswp->hwndInsertBehind);
+           if(wndAfter) {
+                wp.hwndInsertAfter = wndAfter->getWindowHandle();
+           }
+           else wp.hwndInsertAfter = HWND_TOP_W;
+        }
 
         if(pswp->fl & SWP_ACTIVATE)
         {
