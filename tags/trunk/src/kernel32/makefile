@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.44 1999-10-14 09:21:42 sandervl Exp $
+# $Id: makefile,v 1.45 1999-10-23 12:34:47 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -32,7 +32,7 @@ winimagebase.OBJ windllbase.OBJ winexebase.OBJ time.obj mmap.obj \
 winimagepe2lx.obj winimagepeldr.obj windllpe2lx.obj windlllx.obj windllpeldr.obj \
 winexepe2lx.obj winexelx.obj winexepeldr.obj WINRES.OBJ \
 pefile.OBJ winimgres.OBJ wintls.obj async.OBJ fileio.obj \
-atom.obj disk.obj directory.obj cvtbitmap.obj hmmmap.obj \
+atom.obj disk.obj directory.obj cvtbitmap.obj hmmmap.obj winfakepeldr.obj \
 cvtmenu.obj cvtaccel.obj cvticon.obj cvticongrp.obj oslibexcept.obj \
 cvtcursor.obj cvtcursorgrp.obj stubs.obj interlock.obj toolhelp.obj
 
@@ -92,7 +92,8 @@ profile.obj: profile.cpp \
     $(PDWIN32_INCLUDE)\unicode.h
 
 directory.obj: directory.cpp \
-    $(PDWIN32_INCLUDE)\unicode.h
+    $(PDWIN32_INCLUDE)\unicode.h \
+    initterm.h
 
 disk.obj: disk.cpp \
     $(PDWIN32_INCLUDE)\unicode.h
@@ -173,6 +174,7 @@ wprocess.OBJ: \
     $(PDWIN32_INCLUDE)\winexepeldr.h \
     $(PDWIN32_INCLUDE)\windllpeldr.h \
     $(PDWIN32_INCLUDE)\winimagebase.h \
+    $(PDWIN32_INCLUDE)\winfakepeldr.h \
     $(PDWIN32_INCLUDE)\versionos2.h \
     $(PDWIN32_INCLUDE)\wprocess.h \
     $(PDWIN32_INCLUDE)\win\thread.h \
@@ -341,6 +343,7 @@ winexepe2lx.obj:   winexepe2lx.cpp $(PDWIN32_INCLUDE)\winexebase.h $(PDWIN32_INC
 winexelx.obj:      winexelx.cpp $(PDWIN32_INCLUDE)\winexebase.h $(PDWIN32_INCLUDE)\winexelx.h \
                    $(PDWIN32_INCLUDE)\winimagelx.h $(PDWIN32_INCLUDE)\odinlx.h $(PDWIN32_INCLUDE)\winimagebase.h $(PDWIN32_INCLUDE)\winimagelx.h
 winexepeldr.obj:   winexepeldr.cpp $(PDWIN32_INCLUDE)\winexebase.h $(PDWIN32_INCLUDE)\winexepeldr.h $(PDWIN32_INCLUDE)\winimagepeldr.h $(PDWIN32_INCLUDE)\winimagebase.h
+winfakepeldr.obj:  winfakepeldr.cpp $(PDWIN32_INCLUDE)\winimagepeldr.h $(PDWIN32_INCLUDE)\winimagebase.h $(PDWIN32_INCLUDE)\winfakepeldr.h
 
 winimgres.OBJ: winimgres.cpp $(PDWIN32_INCLUDE)\winimagebase.h $(PDWIN32_INCLUDE)\pefile.h $(PDWIN32_INCLUDE)\winimagepe2lx.h $(PDWIN32_INCLUDE)\winimagepeldr.h $(PDWIN32_INCLUDE)\winimagelx.h $(PDWIN32_INCLUDE)\winres.h
 stubs.obj:     stubs.cpp stubs.h
