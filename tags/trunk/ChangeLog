@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.458 1999-11-19 17:14:48 achimha Exp $ */
+ /* $Id: ChangeLog,v 1.459 1999-11-19 17:58:08 cbratschi Exp $ */
+
+ 99-11-19: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32: fixed listbox scrolling
 
  99-11-14: Achim Hasenmueller <achimha@innotek.de>
         - COMCTL32: Merged with WINE 991114
