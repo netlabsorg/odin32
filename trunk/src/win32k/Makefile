@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.57 2000-10-16 20:47:59 bird Exp $
+# $Id: Makefile,v 1.58 2000-10-17 12:07:22 bird Exp $
 #
 # Win32k makefile.
 #
@@ -717,23 +717,33 @@ clean:
 #                asm deps must be updated by hand
 ################################################################################
 dep:
-    $(PDWIN32_TOOLS)\fastdep -o$$(WIN32KOBJ) $(CINCLUDES) misc\*.c* ldr\*.c* \
-        dev32\*.c* pe2lx\*.c* k32\*.c* lib\*.c elf2lx\*.c* test\*.c* \
-        $(WIN32KINCLUDE)\*.h
-    $(PDWIN32_TOOLS)\fastdep -a+ -objobj_tst -o$$(WIN32KOBJ) $(CINCLUDES) misc\*.c* ldr\*.c* \
+    $(PDWIN32_TOOLS)\fastdep @<<
+        -o$$(WIN32KOBJ) $(CINCLUDES) misc\*.c* ldr\*.c*
         dev32\*.c* pe2lx\*.c* k32\*.c* lib\*.c elf2lx\*.c* test\*.c*
-    $(PDWIN32_TOOLS)\fastdep -a+ -o$$(WIN32KOBJ) -I$(WIN32KINCLUDE) \
+        $(WIN32KINCLUDE)\*.h
+<<
+    $(PDWIN32_TOOLS)\fastdep @<<
+        -a+ -objobj_tst -o$$(WIN32KOBJ) $(CINCLUDES) misc\*.c* ldr\*.c*
+        dev32\*.c* pe2lx\*.c* k32\*.c* lib\*.c elf2lx\*.c* test\*.c*
+<<
+    $(PDWIN32_TOOLS)\fastdep @<<
+        -a+ -o$$(WIN32KOBJ) -I$(WIN32KINCLUDE)
         -I$(DDKPATH)\inc dev32\*.asm ldr\*.asm misc\*.asm test\*.asm include\*.inc
-    $(PDWIN32_TOOLS)\fastdep -a+ -o$$(WIN32KOBJ) \
-        $(CINCLUDES16) dev16\*.c* \
-        -objobj_e $(CINCLUDES16) dev16\*.c* \
-        -objobj_c $(CINCLUDES16) dev16\*.c* \
-        -objobj_tst $(CINCLUDES16) dev16\*.c* \
-        -objobj_init $(CINCLUDES16) dev16\*.c* \
+<<
+    $(PDWIN32_TOOLS)\fastdep @<<
+        -a+ -o$$(WIN32KOBJ)
+        $(CINCLUDES16) dev16\*.c*
+        -objobj_e $(CINCLUDES16) dev16\*.c*
+        -objobj_c $(CINCLUDES16) dev16\*.c*
+        -objobj_tst $(CINCLUDES16) dev16\*.c*
+        -objobj_init $(CINCLUDES16) dev16\*.c*
         -objobj_tst_init $(CINCLUDES16) dev16\*.c*
+<<
     cd pe2lx
     $(MAKE_CMD) dep
     cd ..\lib
+    $(MAKE_CMD) dep
+    cd ..\utils
     $(MAKE_CMD) dep
     cd ..
 
