@@ -1,9 +1,13 @@
-/* $Id: changelog,v 1.2273 2002-08-19 15:08:45 bird Exp $ */
- 
+/* $Id: changelog,v 1.2274 2002-08-20 07:10:28 bird Exp $ */
+
  2002-08-19: knut st. osmundsen <bird@anduin   >
     - MAKE:     o New TARGET_MODE: DEPEND.
-                o Some polish.
+                o ilib+dashes and some other bugfixing.
+                o VAC debug memory management option.
+                o Implemented structured make passes.
+                o Polish.
     - TOOLS:    o Did some polish and help on BuildEnv.cmd.
+                o Show make pass number while traversing the tree. (Do*.cmd)
 
  2002-08-19: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Don't send queued WM_CHAR messages for windows that have
@@ -44,9 +48,9 @@
  2002-08-13: Sander van Leeuwen <sandervl@innotek   >
     - GDI32:    o SelectObject bugfix for region handles. (fixes crash in
                   Freecell)
-    - USER32:   o Added more logging for PM SWP & QFC flags 
+    - USER32:   o Added more logging for PM SWP & QFC flags
                 o Enable owner of window destroyed by DestroyWindow. Disabled
-                  owners will never be activated by PM. 
+                  owners will never be activated by PM.
 
  2002-08-13: Yuri Dario <mc6530@mclink   >
     - USER32:   o Resync WM_RBUTTONUP & WM_CONTEXTMENU default window handlers
@@ -81,10 +85,10 @@
  2002-08-08: Sander van Leeuwen <sandervl@innotek   >
     - ChangeLog:o Obfuscated email addresses because people continue to
                   post the ChangeLog file in mailinglists/newsgroups.
-    - KERNEL32: o CreateFile now fails earlier if used for non-existing drive 
-                  letter. 
+    - KERNEL32: o CreateFile now fails earlier if used for non-existing drive
+                  letter.
     - OLE32:    o Disabled mouse cursor changes in drag 'n drop code.
-                  (causes mouse cursor changes when clicking on item in 
+                  (causes mouse cursor changes when clicking on item in
                    file open dialog)
 
  2002-08-07: Platon Fomichev <platon@innotek   >
@@ -103,11 +107,11 @@
     - WINMM:    o Keep filling DART buffers during WaveOutWrite until there's
                   no more room.
                 o Fill DART buffers during resume
-    - KERNEL32: o Create event semaphore during TEB setup. Used for 
+    - KERNEL32: o Create event semaphore during TEB setup. Used for
                   Post(Thread)Message in combination with MsgWaitForMultipleObjects
     - USER32:   o MsgWaitForMultipleObjects; change for waiting for object &
                   message (timeout != 0, fWaitAll == FALSE, nCount > 0)
-                  If dwWakeMsg & QS_POSTMESSAGE, also wait for post msg event 
+                  If dwWakeMsg & QS_POSTMESSAGE, also wait for post msg event
                   semaphore.
                 o Signal post message event semaphore in PostMessageA/W &
                   PostThreadMessage
