@@ -1,4 +1,4 @@
-/* $Id: typelib.cpp,v 1.3 1999-09-06 20:13:23 davidr Exp $ */
+/* $Id: typelib.cpp,v 1.4 1999-09-12 21:51:03 davidr Exp $ */
 /*
  *	TYPELIB
  *
@@ -932,73 +932,130 @@ TLBTypeInfo * TLB_DoTypeInfo(TLBContext *pcx, int count, TLBLibInfo* pLibInfo)
     return ptiRet;
 }
 
+// ----------------------------------------------------------------------
+// TLB_FindMagic
+// ----------------------------------------------------------------------
+static	int	TLB_FindMagic(TLBContext *pcx, char * pMagic)
+{
+    long	lBlkSize = 1024;	// Block size
+    long	lCurrentPos = 0;	// Current search pos in file.
+    DWORD	lFileSize;		// Size of file to be searched.
+    long	lDataSize;		// Bytes last read.
+    long	lNoBlocks;		// Remaining blocks to scan.
+    long	ll;
+    int		fFound;			// Found flag
+    char *	pBuf;			// Allow room for a trailing '\0'
+    HANDLE	hHeap;			// Heap Handle
+    int		iLen = strlen(pMagic);	// Length of search string
 
+    // Get a search buffer...
+    hHeap = GetProcessHeap();
+    pBuf = (char *)HeapAlloc(hHeap, 0, lBlkSize * 2);
+
+    // Calc search params...
+    lFileSize = GetFileSize(pcx->hFile, NULL);
+    lNoBlocks = lFileSize / lBlkSize;
+    fFound = FALSE;
+
+    // Read first block...
+    lDataSize = TLB_Read(pBuf, lBlkSize, pcx, 0);
+
+    // Loop through blocks searching for target string...
+    // Two blocks are stored to simplify boundary checking.
+    // NB lNoBlocks is zero where the file fits into one block,
+    //    so this is skipped
+    while((lNoBlocks > 0) && !fFound)
+    {
+	lNoBlocks -= 1;
+	lDataSize = TLB_Read(pBuf + lBlkSize, lBlkSize, pcx, DO_NOT_SEEK);
+
+	for (ll = 0; ll < lBlkSize; ll++)
+	{
+	    if (strncmp(pBuf + ll, pMagic, iLen) == 0)
+	    {
+		fFound = TRUE;
+		break;
+	    }
+	    lCurrentPos += 1;	// Keep track of posn.
+	}
+	// Copy block2 to block1
+	memcpy(pBuf, pBuf + lBlkSize, lDataSize);
+    }
+
+    // Now search last block...
+    if (!fFound)
+    {
+	for (ll = 0; ll < (lDataSize - iLen); ll++)
+	{
+	    if (strncmp(pBuf + ll, pMagic, iLen) == 0)
+	    {
+		fFound = TRUE;
+		break;
+	    }
+	    lCurrentPos += 1;	// Keep track of posn.
+	}
+    }
+
+    // Loose buffer.
+    HeapFree(hHeap, 0, pBuf);
+
+    if (fFound)
+	return lCurrentPos;
+
+   return 0;
+}
+
+// ----------------------------------------------------------------------
+// TLB_FindTlb
+// ----------------------------------------------------------------------
 long TLB_FindTlb(TLBContext *pcx)
-{/* FIXME: should parse the file properly
-  * hack to find our tlb data
-  */
-#define TLBBUFSZ 1024
-    char buff[TLBBUFSZ+1]; /* room for a trailing '\0' */
-    long ret=0,found=0;
-    int count;
-    char *pChr;
+{
+    long	lPosn;
 
-#define LOOK_FOR_MAGIC(magic)				\
-    count=TLB_Read(buff, TLBBUFSZ, pcx, 0);		\
-    do {						\
-        buff[count]='\0';				\
-	pChr = buff;					\
-	while (pChr) {					\
-	    pChr = (char *)memchr(pChr,magic[0],count-(pChr-buff));\
-	    if (pChr) {					\
-		if (!memcmp(pChr,magic,4)) {		\
-		    ret+= pChr-buff;			\
-		    found = 1;				\
-		    break;				\
-		}					\
-		pChr++;					\
-	    }						\
-	}						\
-	if (found) break;				\
-        ret+=count;					\
-	count=TLB_Read(buff, TLBBUFSZ, pcx, DO_NOT_SEEK);\
-    } while(count>0);
+    lPosn = TLB_FindMagic(pcx, TLBMAGIC2 );
+    if (lPosn != 0)
+    {
+	dprintf(("OLEAUT32: TLB_FindTlb - Located MAGIC2 @%lx", lPosn));
+        return lPosn;
+    }
 
+    lPosn = TLB_FindMagic(pcx, TLBMAGIC1 );
+    if (lPosn != 0)
+    {
+	dprintf(("OLEAUT32: TLB_FindTlb - Located MAGIC1 @%lx", lPosn));
+	dprintf(("OLEAUT32: ERROR UNSUPPORTED TYPELIB!"));
+        return -1;
+    }
 
-    LOOK_FOR_MAGIC(TLBMAGIC2);
-    if(count)
-        return ret;
-
-    LOOK_FOR_MAGIC(TLBMAGIC1);
-    if(count)
-        ERR_(ole)("type library format not (yet) implemented\n");
-    else
-        ERR_(ole)("not type library found in this file\n");
+    dprintf(("OLEAUT32: TLB_FindTlb ERROR: NO TYPELIB FOUND"));
     return -1;
 }
-#undef LOOK_FOR_MAGIC
 
+// ----------------------------------------------------------------------
+// TLB_ReadTypeLib
+// ----------------------------------------------------------------------
 int TLB_ReadTypeLib(PCHAR file, ITypeLib **ppTypeLib)
 {
-    TLBContext cx;
-    OFSTRUCT ofStruct;
-    long oStart,lPSegDir;
-    TLBLibInfo* pLibInfo=NULL;
-    TLB2Header tlbHeader;
-    TLBSegDir tlbSegDir;
-    if((cx.hFile=OpenFile(file, &ofStruct, OF_READ))==HFILE_ERROR) {
-	ERR_(typelib)("cannot open %s error 0x%lx\n",file, GetLastError());
+    TLBContext		cx;
+    OFSTRUCT		ofStruct;
+    long		oStart , lPSegDir;
+    TLBLibInfo *	pLibInfo = NULL;
+    TLB2Header		tlbHeader;
+    TLBSegDir		tlbSegDir;
+
+    if((cx.hFile = OpenFile(file, &ofStruct, OF_READ))==HFILE_ERROR)
+    {
+	ERR_(typelib)("cannot open %s error0x%lx\n",file, GetLastError());
 	return E_FAIL;
     }
     /* get pointer to beginning of typelib data */
-    if((oStart=TLB_FindTlb(&cx))<0){
-        if(oStart==-1)
-            ERR_(typelib)("cannot locate typelib in  %s\n",file);
-        else
-            ERR_(typelib)("unsupported typelib format in  %s\n",file);
-        return E_FAIL;
+    oStart = TLB_FindTlb( & cx);
+    if(oStart < 0)
+    {
+	ERR_(typelib)("cannot locate typelib in  %s\n",file);
+	return E_FAIL;
     }
-    cx.oStart=oStart;
+    cx.oStart = oStart;
     pLibInfo=(TLBLibInfo*)HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,sizeof(TLBLibInfo));
     if (!pLibInfo){
 	CloseHandle(cx.hFile);
@@ -1008,7 +1065,7 @@ int TLB_ReadTypeLib(PCHAR file, ITypeLib **ppTypeLib)
     pLibInfo->ref=1;
     cx.pLibInfo=pLibInfo;
     /* read header */
-    TLB_Read((void*)&tlbHeader, sizeof(tlbHeader), &cx, 0);
+    TLB_Read((void*)&tlbHeader, sizeof(tlbHeader), &cx, oStart);
     /* there is a small number of information here until the next important
      * part:
      * the segment directory . Try to calculate the amount of data */
@@ -1016,7 +1073,7 @@ int TLB_ReadTypeLib(PCHAR file, ITypeLib **ppTypeLib)
             (tlbHeader.nrtypeinfos)*4+
             (tlbHeader.varflags & HELPDLLFLAG? 4 :0);
     /* now read the segment directory */
-    TLB_Read((void*)&tlbSegDir, sizeof(tlbSegDir), &cx, lPSegDir);  
+    TLB_Read((void*)&tlbSegDir, sizeof(tlbSegDir), &cx, oStart + lPSegDir);  
     cx.pTblDir=&tlbSegDir;
     /* just check two entries */
     if (	tlbSegDir.pTypeInfoTab.res0c != 0x0F ||
