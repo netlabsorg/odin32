@@ -1,4 +1,4 @@
-/* $Id: fillfunc.cpp,v 1.2 2000-02-04 19:31:23 hugh Exp $ */
+/* $Id: fillfunc.cpp,v 1.3 2001-03-18 21:44:44 mike Exp $ */
 
 /*
  * ColorFill functions

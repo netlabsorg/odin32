@@ -1,4 +1,4 @@
-/* $Id: rectangle.cpp,v 1.3 1999-12-21 01:28:17 hugh Exp $ */
+/* $Id: rectangle.cpp,v 1.4 2001-03-18 21:44:46 mike Exp $ */
 
 /*
  * Rectangle class Implementaion

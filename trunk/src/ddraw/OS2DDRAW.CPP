@@ -1,10 +1,12 @@
-/* $Id: OS2DDRAW.CPP,v 1.25 2001-03-09 22:48:46 mike Exp $ */
+/* $Id: OS2DDRAW.CPP,v 1.26 2001-03-18 21:44:42 mike Exp $ */
 
 /*
  * DX Draw base class implementation
  *
- * Copyright 1998 Sander va Leeuwen
+ * Copyright 1998 Sander van Leeuwen
  * Copyright 1999 Markus Montkowski
+ * Copyright 2000 Przemyslaw Dobrowolski
+ * Copyright 2001 Michal Necasek
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -26,8 +28,10 @@
 #include <winreg.h>
 #include <winuser.h>
 #include <winerror.h>
+#include <options.h>
 #include "cio2.h"
 #include "os2util.h"
+#include "os2fsdd.h"
 // include with the videomodes we support
 // better would be to get these modes from the card
 // But for now we use standard VESA 2.0 modes with 70Hz
@@ -37,6 +41,9 @@
 
 #define KEY_DIRECT2 "\\Software\\Win32OS2\\Direct2"
 #define KEY_DIRECT2DRAW "\\Software\\Win32OS2\\Direct2\\Draw"
+
+
+BOOL bUseFSDD = FALSE;
 
 FOURCC  SupportedFourCCs[] = {FOURCC_SCRN,FOURCC_LUT8,FOURCC_R565,FOURCC_RGB3,FOURCC_RGB4};
 //******************************************************************************
@@ -215,24 +222,47 @@ OS2IDirectDraw::OS2IDirectDraw(GUID *lpGUID) :
 
   if(rc)  // try to get IOPL for the thread
   {
-    dprintf(("DDRAW: No IOPL\n"));
+    dprintf(("DDRAW: No IOPL"));
   }
   else
   {
-    dprintf(("DDRAW: IOPL 3!\n"));
+    dprintf(("DDRAW: IOPL 3!"));
   }
+
+
+	// Check to see if FS DDraw is enabled in ODIN.INI
+	if (PROFILE_GetOdinIniBool(ODINDDRAW_SECTION, "Fullscreen", FALSE)) {
+		rc = LoadPMIService();
+		dprintf(("DDRAW: LoadPMIService() rc=0x%08X",rc));
+		
+		if (!rc) {
+			SetUpModeTable();
+			
+			bUseFSDD = TRUE;
+			dprintf(("DDRAW: Fullscreen enabled",rc));
+		}	
+	}	
 }
 //******************************************************************************
 //******************************************************************************
 OS2IDirectDraw::~OS2IDirectDraw()
 {
-  dprintf(("DDRAW: OS2IDirectDraw::~OS2IDirectDraw()\n"));
-  if(hDive)
+  dprintf(("DDRAW: OS2IDirectDraw::~OS2IDirectDraw()"));
+
+  if (hDive)
     DiveClose(hDive);
 
-  // Safty call in case the program did set the pal to all black
+  // Safety call in case the program did set the pal to all black
   // so if the destructor gets called we might be able change this back
   OS2ResetPhysPalette();
+
+  // FSDDRAW additions
+  // we need this in Full Screen, but don't do anything in windowed
+  // session.
+  if (bUseFSDD) {
+    RestorePM();
+    FreeModeTable();
+  }
 }
 //******************************************************************************
 //******************************************************************************
@@ -272,19 +302,19 @@ HRESULT WIN32API DrawQueryInterface(THIS This, REFIID riid, LPVOID FAR * ppvObj)
   {
     if(IsEqualGUID(riid, IID_IDirectDraw4))
     {
-      dprintf(("DDRAW: IID_IDirectDraw4 Interface\n"));
+      dprintf(("DDRAW: IID_IDirectDraw4 Interface"));
       me->lpVtbl = &me->Vtbl4;
     }
     else
     {
       if(IsEqualGUID(riid, IID_IDirectDraw2))
       {
-        dprintf(("DDRAW: IID_IDirectDraw2 Interface\n"));
+        dprintf(("DDRAW: IID_IDirectDraw2 Interface"));
         me->lpVtbl = (IDirectDraw4Vtbl *) &me->Vtbl2;
       }
       else
       {
-        dprintf(("DDRAW: IID_IDirectDraw Interface\n"));
+        dprintf(("DDRAW: IID_IDirectDraw Interface"));
         me->lpVtbl = (IDirectDraw4Vtbl *) &me->Vtbl;
       }
     }
@@ -301,7 +331,7 @@ ULONG WIN32API DrawAddRef(THIS This)
 {
  OS2IDirectDraw *me = (OS2IDirectDraw *)This;
 
-  dprintf(("DDRAW: OS2IDirectDraw::AddRef %d\n", me->Referenced+1));
+  dprintf(("DDRAW: OS2IDirectDraw::AddRef %d", me->Referenced+1));
 
   return ++me->Referenced;
 }
@@ -312,8 +342,8 @@ ULONG WIN32API DrawRelease(THIS This)
  OS2IDirectDraw *me = (OS2IDirectDraw *)This;
  ULONG rc;
 
-  dprintf(("DDRAW: OS2IDirectDraw::Release %d\n", me->Referenced-1));
-  dprintf(("DDRAW: OS2IDirectDraw::%X \n", me));
+  dprintf(("DDRAW: OS2IDirectDraw::Release %d", me->Referenced-1));
+  dprintf(("DDRAW: OS2IDirectDraw::%X", me));
 
   if(me->Referenced)
   {
@@ -336,7 +366,7 @@ ULONG WIN32API DrawRelease(THIS This)
 //******************************************************************************
 HRESULT WIN32API DrawCompact(THIS)
 {
-  dprintf(("DDRAW: Compact\n"));
+  dprintf(("DDRAW: Compact"));
 
   return(DD_OK);
 }
@@ -350,7 +380,7 @@ HRESULT WIN32API DrawCreateClipper(THIS This, DWORD, LPDIRECTDRAWCLIPPER FAR *lp
 
   newclip = new OS2IDirectDrawClipper(me);
 
-  dprintf(("DDRAW: CreateClipper\n"));
+  dprintf(("DDRAW: CreateClipper"));
 
   if(newclip == NULL)
   {
@@ -404,7 +434,7 @@ HRESULT WIN32API DrawCreatePalette(THIS This, DWORD dwFlags,
 
   if(DD_OK == rc)
   {
-    dprintf(("DDRAW: CreatePalette with %d colors\n", palsize));
+    dprintf(("DDRAW: CreatePalette with %d colors", palsize));
 
     newpal = new OS2IDirectDrawPalette((VOID*)me, palsize, lpColorTable, dwFlags);
 
@@ -1023,7 +1053,7 @@ HRESULT WIN32API DrawGetCaps(THIS This, LPDDCAPS lpDDDriverCaps, LPDDCAPS lpDDHE
   if(NULL!=lpDDHELCaps)
   {
     // Caller wants HEL Caps
-    dprintf(("DDRAW:  HEL\n"));
+    dprintf(("DDRAW: CHEL\n"));
 
     //SvL: PowerDVD uses size 316
     if( (sizeof(DDCAPS)     != lpDDHELCaps->dwSize) &&
@@ -1484,9 +1514,25 @@ HRESULT WIN32API DrawInitialize(THIS, GUID FAR *)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT WIN32API DrawRestoreDisplayMode(THIS)
+HRESULT WIN32API DrawRestoreDisplayMode(THIS This)
 {
-  dprintf(("DDRAW: RestoreDisplayMod\n"));
+  OS2IDirectDraw        *me = (OS2IDirectDraw *)This;
+
+  dprintf(("DDRAW: RestoreDisplayMode"));
+
+  // FSDDRAW additions
+  ULONG  ulModeInd;
+  /* restore previous screen mode */
+  if ((bUseFSDD) && (me->bInFullScreen))
+  {
+    SetSVGAMode(me->oldwidth, me->oldheight, me->oldbpp, 0xFF, &ulModeInd, NULL);
+    RestorePM();
+    /* restore DIVE caps entries */
+    me->dCaps.ulScanLineBytes        = me->oldscanlines;
+    me->dCaps.ulHorizontalResolution = me->oldwidth;
+    me->dCaps.ulVerticalResolution   = me->oldheight;
+    me->dCaps.ulDepth                = me->oldbpp;
+  }
 
   return(DD_OK);
 }
@@ -1529,7 +1575,37 @@ HRESULT WIN32API DrawSetDisplayMode2(THIS This, DWORD dwWidth, DWORD dwHeight,
 
   if(me->dwCoopMode & DDSCL_FULLSCREEN)
   {
+    // FSDDRAW additions
+    ULONG  ulModeInd;
+
     SetWindowPos(me->hwndClient, HWND_TOP,0,0,dwWidth,dwHeight,0);
+    SetCursorPos(dwWidth / 2, dwHeight / 2);
+
+    if ((bUseFSDD) && (ModeInSVGAModeTable(dwWidth,dwHeight,dwBPP)))
+    {
+      KillPM();
+
+      rc = SetSVGAMode(dwWidth, dwHeight, dwBPP, 0xFF, &ulModeInd, NULL);
+
+      if (!rc) // When mode switched successfully
+      {
+        /* save old screen values */
+        me->bInFullScreen=TRUE;
+        me->oldwidth     = me->dCaps.ulHorizontalResolution;
+        me->oldheight    = me->dCaps.ulVerticalResolution;
+        me->oldscanlines = me->dCaps.ulScanLineBytes;
+        me->oldbpp       = me->dCaps.ulDepth;
+
+        /* now 'fix' some DIVE caps entries */
+        me->dCaps.ulScanLineBytes        = dwWidth * (dwBPP >> 3); /* FIX: use real value */
+        me->dCaps.ulHorizontalResolution = dwWidth;
+        me->dCaps.ulVerticalResolution   = dwHeight;
+        me->dCaps.ulDepth                = dwBPP;
+      }
+      else
+      // Display must be return to PM Session
+      RestorePM();
+    }
   }
 
   memset(&sBlt,0,sizeof(sBlt));
@@ -1571,7 +1647,37 @@ HRESULT WIN32API DrawSetDisplayMode(THIS This, DWORD dwWidth, DWORD dwHeight,
 
   if(me->dwCoopMode & DDSCL_FULLSCREEN)
   {
+    // FSDDRAW additions
+    ULONG  ulModeInd;
+
     SetWindowPos(me->hwndClient, HWND_TOP,0,0,dwWidth,dwHeight,0);
+    SetCursorPos(dwWidth / 2, dwHeight / 2);
+
+    if ((bUseFSDD) && (ModeInSVGAModeTable(dwWidth,dwHeight,dwBPP)))
+    {
+      KillPM();
+
+      rc = SetSVGAMode(dwWidth, dwHeight, dwBPP, 0xFF, &ulModeInd, NULL);
+
+      if (!rc) // When mode switched successfully
+      {
+        /* save old screen values */
+        me->bInFullScreen=TRUE;
+        me->oldwidth     = me->dCaps.ulHorizontalResolution;
+        me->oldheight    = me->dCaps.ulVerticalResolution;
+        me->oldscanlines = me->dCaps.ulScanLineBytes;
+        me->oldbpp       = me->dCaps.ulDepth;
+
+        /* now 'fix' some DIVE caps entries */
+        me->dCaps.ulScanLineBytes        = dwWidth * (dwBPP >> 3); /* FIX: use real value */
+        me->dCaps.ulHorizontalResolution = dwWidth;
+        me->dCaps.ulVerticalResolution   = dwHeight;
+        me->dCaps.ulDepth                = dwBPP;
+      }
+      else
+      // Display must be return to PM Session
+      RestorePM();
+    }
   }
 
   memset(&sBlt,0,sizeof(sBlt));

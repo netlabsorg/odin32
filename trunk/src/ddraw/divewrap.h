@@ -1,4 +1,4 @@
-/* $Id: divewrap.h,v 1.3 1999-12-21 01:28:18 hugh Exp $ */
+/* $Id: divewrap.h,v 1.4 2001-03-18 21:44:44 mike Exp $ */
 
 /*
  * Wrapper for DIVE functions calls

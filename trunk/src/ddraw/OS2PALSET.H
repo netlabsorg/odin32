@@ -1,4 +1,4 @@
-/* $Id: OS2PALSET.H,v 1.5 1999-12-21 01:28:19 hugh Exp $ */
+/* $Id: OS2PALSET.H,v 1.6 2001-03-18 21:44:43 mike Exp $ */
 
 /*
  * Defintions for OS/2 Palette functions

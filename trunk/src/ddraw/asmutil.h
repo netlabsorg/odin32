@@ -1,4 +1,4 @@
-/* $Id: asmutil.h,v 1.5 1999-12-21 01:28:17 hugh Exp $ */
+/* $Id: asmutil.h,v 1.6 2001-03-18 21:44:44 mike Exp $ */
 
 /*
  * asmutil.asm function definition

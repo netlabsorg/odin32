@@ -1,4 +1,4 @@
-/* $Id: OS2PALSET.CPP,v 1.9 2001-03-09 22:48:47 mike Exp $ */
+/* $Id: OS2PALSET.CPP,v 1.10 2001-03-18 21:44:43 mike Exp $ */
 
 /*
  * Functions used to Set the Physical Palette in OS/2 when in 8 Bit mode

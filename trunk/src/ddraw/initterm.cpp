@@ -32,8 +32,11 @@
 #include <win32type.h>
 #include <winconst.h>
 #include <odinlx.h>
+#include <exitlist.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
 #include <initdll.h>
+#include "os2fsdd.h"    // For RestorePM()
+
 
 extern "C" {
  //Win32 resource table (produced by wrc)
@@ -43,9 +46,11 @@ extern "C" {
 char ddrawPath[CCHMAXPATH] = "";
 static HMODULE dllHandle = 0;
 
+static void APIENTRY cleanup(ULONG ulReason);
+
 //******************************************************************************
 //******************************************************************************
-BOOL WINAPI OdinLibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
+BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 {
    switch (fdwReason)
    {
@@ -57,7 +62,9 @@ BOOL WINAPI OdinLibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
         return TRUE;
 
    case DLL_PROCESS_DETACH:
+#ifdef __IBMCPP__
         ctordtorTerm();
+#endif
         return TRUE;
    }
    return FALSE;
@@ -70,7 +77,8 @@ BOOL WINAPI OdinLibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 /* linkage convention MUST be used because the operating system loader is   */
 /* calling this function.                                                   */
 /****************************************************************************/
-ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
+unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
+                                   ulFlag)
 {
 
    /*-------------------------------------------------------------------------*/
@@ -82,25 +90,33 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
    switch (ulFlag) {
       case 0 :
       {
+	     APIRET rc;
+		
+#ifdef __IBMCPP__
+         ctordtorInit();
+#endif
          DosQueryModuleName(hModule, CCHMAXPATH, ddrawPath);
          char *endofpath = strrchr(ddrawPath, '\\');
-         if(endofpath) *(endofpath+1) = 0;
-
-         ctordtorInit();
+         if (endofpath)
+			*(endofpath+1) = '\0';
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
-         dllHandle = RegisterLxDll(hModule, OdinLibMain, (PVOID)&_Resource_PEResTab,
+         dllHandle = RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab,
                                    DDRAW_MAJORIMAGE_VERSION, DDRAW_MINORIMAGE_VERSION,
                                    IMAGE_SUBSYSTEM_WINDOWS_GUI);
-         if(dllHandle == 0)
-                return 0UL;
+         if (dllHandle == 0)
+			return 0UL;
+
+         rc = DosExitList(EXITLIST_NONCOREDLL | EXLST_ADD, cleanup);
+         if (rc)
+			return 0UL;
 
          break;
       }
       case 1 :
          if(dllHandle) {
-                UnregisterLxDll(dllHandle);
+		 	UnregisterLxDll(dllHandle);
          }
          break;
       default  :
@@ -111,6 +127,17 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
    /* A non-zero value must be returned to indicate success.  */
    /***********************************************************/
    return 1UL;
+}
+//******************************************************************************
+//******************************************************************************
+
+static void APIENTRY cleanup(ULONG ulReason)
+{
+   dprintf(("DDRAW processing exitlist"));
+   RestorePM();
+   dprintf(("DDRAW exitlist done"));
+
+   DosExitList(EXLST_EXIT, cleanup);
 }
 //******************************************************************************
 //******************************************************************************

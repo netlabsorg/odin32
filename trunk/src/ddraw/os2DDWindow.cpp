@@ -1,4 +1,4 @@
-/* $Id: os2DDWindow.cpp,v 1.4 1999-12-21 01:28:16 hugh Exp $ */
+/* $Id: os2DDWindow.cpp,v 1.5 2001-03-18 21:44:45 mike Exp $ */
 
 /*
  * Functions to subclass the games windowproc to be used for
