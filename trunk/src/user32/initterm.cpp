@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.9 1999-09-15 23:18:51 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.10 1999-09-23 10:33:59 sandervl Exp $ */
 
 /*
  * USER32 DLL entry point
@@ -37,6 +37,7 @@
 #include <spy.h>
 #include "pmwindow.h"
 #include "heapshared.h"
+#include "win32wdesktop.h"
 
 /*-------------------------------------------------------------------*/
 /* A clean up routine registered with DosExitList must be used if    */
@@ -110,6 +111,11 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          //CB: register internal classes
          RegisterSystemClasses(hModule);
 
+	 //SvL: Create Desktop Window
+	 if(CreateWin32Desktop() == FALSE) {
+                return 0UL;
+	 }
+
          break;
       case 1 :
 	 UnregisterLxDll(hModule);
@@ -133,6 +139,7 @@ static void APIENTRY cleanupQueue(ULONG ulReason)
 static void APIENTRY cleanup(ULONG ulReason)
 {
    dprintf(("user32 exit\n"));
+   DestroyDesktopWindow();
    UnregisterSystemClasses();
    DestroySharedHeap();
    _ctordtorTerm();

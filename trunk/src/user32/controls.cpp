@@ -1,4 +1,4 @@
-/* $Id: controls.cpp,v 1.2 1999-09-20 16:19:55 cbratschi Exp $ */
+/* $Id: controls.cpp,v 1.3 1999-09-23 10:33:59 sandervl Exp $ */
 /* File: controls.cpp -- Win32 common controls
  *
  * Copyright (c) 1999 Christoph Bratschi
@@ -16,6 +16,7 @@
 #include "combo.h" //listbox,combo,edit
 #include "win32wmdiclient.h"
 #include "win32dlg.h"
+#include "win32wdesktop.h"
 
 /* registration */
 
@@ -69,6 +70,9 @@ void CONTROLS_Register()
 
   dprintf(("Register DIALOG class"));
   if (!DIALOG_Register()) dprintf(("failed!!!"));
+
+  dprintf(("Register DESKTOP class"));
+  if (!DESKTOP_Register()) dprintf(("failed!!!")); 
 }
 
 void CONTROLS_Unregister()
@@ -99,6 +103,9 @@ void CONTROLS_Unregister()
 
   dprintf(("Unregister DIALOG class"));
   if (!DIALOG_Unregister()) dprintf(("failed!!!"));
+
+  dprintf(("Unregister DESKTOP class"));
+  if (!DESKTOP_Unregister()) dprintf(("failed!!!"));
 }
 
 
