@@ -1,4 +1,4 @@
-/* $Id: ccollection.h,v 1.6 2001-10-11 01:00:00 phaller Exp $ */
+/* $Id: ccollection.h,v 1.7 2001-11-21 16:01:48 phaller Exp $ */
 
 /*
  * Collection class:
@@ -162,6 +162,7 @@ class CHashtableLookup : public CCollection
         void  rehash();
         void  setSize(int iNewSize);
         int   getElementMap(PHASHTABLEENTRY pBuffer);
+        int   getSize() { return iElements; }
   
     protected:
         void          setSize0(int iNewSize);
