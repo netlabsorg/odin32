@@ -1,7 +1,9 @@
-/* $Id: changelog,v 1.1852 2001-11-24 13:56:18 sandervl Exp $ */
+/* $Id: changelog,v 1.1853 2001-11-24 14:58:46 sandervl Exp $ */
 
  2001-11-24: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Custom build fix; check for double call for inittermKernel32
+                o More informative message when non-existing api is called.
+                  Now displays dll + function name or ordinal.
 
  2001-11-23: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o minor work in parallel port support (ioctls)
