@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.37 2002-11-01 19:40:59 bird Exp $
+/* $Id: buildenv.cmd,v 1.38 2002-11-03 00:30:23 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -26,7 +26,7 @@
     /*
      * Version
      */
-    sVersion = '1.0.10 [2002-11-01]';
+    sVersion = '1.0.11 [2002-11-02]';
 
     /*
      * Create argument array with lowercase arguments.
@@ -109,6 +109,7 @@
     aCfg.i.sId = 'ddk';             aCfg.i.sGrp = 'ddk';        aCfg.i.sSet = 'DDK';                    aCfg.i.sDesc = 'OS/2 DDK (recent)';         i = i + 1;
     aCfg.i.sId = 'ddkbase';         aCfg.i.sGrp = 'ddk';        aCfg.i.sSet = 'DDKBase';                aCfg.i.sDesc = 'DDK Base (recent)';         i = i + 1;
     aCfg.i.sId = 'ddkvideo';        aCfg.i.sGrp = 'ddk';        aCfg.i.sSet = 'DDKVideo';               aCfg.i.sDesc = 'DDK Video (recent)';        i = i + 1;
+    aCfg.i.sId = 'doxygen';         aCfg.i.sGrp = 'doc';        aCfg.i.sSet = 'DoxyGen';                aCfg.i.sDesc = 'Doxygen v1.2.11 for OS/2';        i = i + 1;
     aCfg.i.sId = 'emx';             aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'EMX';                    aCfg.i.sDesc = 'EMX v0.9d fixpack 04';      i = i + 1;
     aCfg.i.sId = 'emxpgcc';         aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'EMXPGCC';                aCfg.i.sDesc = 'Pentium Optimized GCC/EMX v1.1.1 r2 with binutils 2.9.1'; i = i + 1;
     aCfg.i.sId = 'gcc302';          aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'GCC30x,''gcc302''';      aCfg.i.sDesc = 'GCC/EMX v3.0.2beta with binutils 2.11.2'; i = i + 1;
@@ -846,6 +847,7 @@ PathSetDefault: procedure expose aCfg. aPath. sPathFile
         aPath.i.sPId = 'ddk';                       aPath.i.sPath = 'f:\ddk\april02';               i = i + 1;
         aPath.i.sPId = 'ddkbase';                   aPath.i.sPath = 'f:\ddk\april02\base';          i = i + 1;
         aPath.i.sPId = 'ddkvideo';                  aPath.i.sPath = 'f:\ddk\april02\video';         i = i + 1;
+        aPath.i.sPId = 'doxygen';                   aPath.i.sPath = 'f:\doxygen\v1.2.11-OS2';       i = i + 1;
         aPath.i.sPId = 'home';                      aPath.i.sPath = 'e:\user\kso';                  i = i + 1;
         aPath.i.sPId = 'mscv6-16';                  aPath.i.sPath = 'f:\ddktools\toolkits\msc60';   i = i + 1;
         aPath.i.sPId = 'mscv7-16';                  aPath.i.sPath = 'f:\msc\v7.0';                  i = i + 1;
@@ -1902,7 +1904,38 @@ return rc;
 
 
 /*
- * EMX/GCC 3.0.x - this environment must be use 'on' the ordinary EMX.
+ * Doxygen v1.2.11.1 for OS/2.
+ */
+DoxyGen: procedure expose aCfg. aPath. sPathFile
+    parse arg sToolId,sOperation,fRM,fQuiet
+
+    /*
+     * Get base directory.
+     */
+    sPathDoxyGen   = PathQuery('doxygen', sToolId, sOperation);
+    if (sPathDoxyGen = '') then
+        return 1;
+    /* If config operation we're done now. */
+    if (pos('config', sOperation) > 0) then
+        return 0;
+    call EnvSet      fRM, 'PATH_DOXYGEN',sPathDoxyGen;
+    call EnvAddFront fRM, 'path',        sPathDoxyGen'\bin;'
+
+    /*
+     * Verify.
+     */
+    if (pos('verify', sOperation) <= 0) then
+        return 0;
+    if (    \CfgVerifyFile(sPathDoxyGen'\bin\dot.exe', fQuiet),
+        |   \CfgVerifyFile(sPathDoxyGen'\bin\doxygen.exe', fQuiet),
+        ) then
+        return 2;
+    rc = CheckCmdOutput('doxygen', 1, fQuiet, 'Doxygen version 1.2.11.1');
+return rc;
+
+
+/*
+ * EMX/GCC 3.0.x - this environment must be used 'on' the ordinary EMX.
  * Note! bin.new has been renamed to bin!
  * Note! make .lib of every .a! in 4OS2: for /R %i in (*.a) do if not exist %@NAME[%i].lib emxomf %i
  */
