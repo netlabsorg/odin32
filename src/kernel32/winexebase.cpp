@@ -1,4 +1,4 @@
-/* $Id: winexebase.cpp,v 1.10 2000-09-12 04:29:58 bird Exp $ */
+/* $Id: winexebase.cpp,v 1.11 2000-09-12 19:01:59 sandervl Exp $ */
 
 /*
  * Win32 exe base class
@@ -49,8 +49,7 @@ BOOL IsExeStarted()
 //******************************************************************************
 Win32ExeBase::Win32ExeBase(HINSTANCE hInstance)
                  : Win32ImageBase(hInstance),
-                   fConsoleApp(FALSE),
-                   cmdLineA(NULL), cmdLineW(NULL)
+                   fConsoleApp(FALSE)
 {
   WinExe = this;
 }
@@ -89,10 +88,6 @@ Win32ExeBase::~Win32ExeBase()
   Win32DllBase::deleteAll();
 
   WinExe = NULL;
-  if(cmdLineA)
-	free(cmdLineA);
-  if(cmdLineW)
-	free(cmdLineW);
 }
 //******************************************************************************
 //******************************************************************************
