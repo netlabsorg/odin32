@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.32 1999-08-24 19:15:54 phaller Exp $
+# $Id: makefile,v 1.33 1999-08-25 15:08:50 dengert Exp $
 
 #
 # PD-Win32 API
@@ -98,7 +98,7 @@ winicon.obj:    winicon.cpp $(PDWIN32_INCLUDE)\winicon.h
 windlg.obj:    windlg.cpp win32wnd.h win32dlg.h
 windlgmsg.obj: windlgmsg.cpp win32class.h win32wnd.h win32dlg.h win32wndchild.h
 
-pmwindow.obj:   pmwindow.cpp win32class.h win32wnd.h win32dlg.h pmwindow.h win32wndchild.h $(PDWIN32_INCLUDE)\wprocess.h  oslibgdi.h
+pmwindow.obj:   pmwindow.cpp win32class.h win32wnd.h win32dlg.h pmwindow.h win32wndchild.h $(PDWIN32_INCLUDE)\wprocess.h oslibgdi.h oslibwin.h
 win32class.obj: win32class.cpp win32class.h win32wnd.h win32dlg.h gen_object.h oslibwin.h win32wndchild.h
 win32wnd.obj:   win32wnd.cpp win32class.h win32wnd.h win32dlg.h gen_object.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h
 win32dlg.obj:   win32dlg.cpp win32class.h win32wnd.h win32dlg.h gen_object.h oslibwin.h win32wndchild.h
