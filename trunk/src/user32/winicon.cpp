@@ -1,4 +1,4 @@
-/* $Id: winicon.cpp,v 1.1 1999-09-15 23:19:03 sandervl Exp $ */
+/* $Id: winicon.cpp,v 1.2 1999-11-03 19:51:44 sandervl Exp $ */
 /*
  * Win32 Icon Code for OS/2
  *
@@ -54,12 +54,48 @@ HICON WIN32API CreateIconFromResourceEx(PBYTE presbits,  UINT dwResSize,
 }
 //******************************************************************************
 //******************************************************************************
-HICON WIN32API CreateIconIndirect(LPICONINFO arg1)
+HICON WIN32API CreateIconIndirect(LPICONINFO pIcon)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  CreateIconIndirect\n");
-#endif
-    return O32_CreateIconIndirect(arg1);
+ HICON   hIcon;
+ HDC     hdcSrc, hdcDst;
+
+    dprintf(("USER32:  CreateIconIndirect\n"));
+    if(pIcon->hbmMask && pIcon->hbmColor) 
+    {
+	ICONINFO iconinfo;
+	SIZE bmpsize;
+
+	iconinfo = *pIcon;
+	if(GetBitmapDimensionEx(pIcon->hbmColor, &bmpsize) == FALSE) {
+		return 0;
+	}
+	//if there's a color bitmap, the mask bitmap contains only the AND bits
+        //Open32 calls WinCreatePointerIndirect which expects AND & XOR bits
+        //To solve this we create a bitmap that's 2x height of the mask, copy
+        //the AND bits and set the XOR bits to 0
+    	hdcSrc = CreateCompatibleDC(0);
+    	hdcDst = CreateCompatibleDC(0);
+
+	iconinfo.hbmMask  = CreateCompatibleBitmap (hdcDst, bmpsize.cx, bmpsize.cy*2);
+    	SelectObject (hdcDst, iconinfo.hbmMask);
+	SelectObject (hdcSrc, pIcon->hbmMask);
+	BitBlt (hdcDst, 0, 0, bmpsize.cx, bmpsize.cy,
+                hdcSrc, bmpsize.cx, 0, SRCCOPY);
+	PatBlt (hdcDst, bmpsize.cx, bmpsize.cy, bmpsize.cx, bmpsize.cy, BLACKNESS);
+    	
+	hIcon = O32_CreateIconIndirect(&iconinfo);
+
+    	DeleteObject(iconinfo.hbmMask);
+    	DeleteDC(hdcSrc);
+    	DeleteDC(hdcDst);
+
+	return hIcon;
+    }
+    hIcon = O32_CreateIconIndirect(pIcon);
+    if(hIcon == 0) {
+	dprintf(("CreateIconIndirect %d (%d,%d) %x %x failed with %x", pIcon->fIcon, pIcon->xHotspot, pIcon->yHotspot, pIcon->hbmMask, pIcon->hbmColor, GetLastError()));
+    }
+    return hIcon;
 }
 //******************************************************************************
 //******************************************************************************
