@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.18 2000-02-05 02:05:00 sandervl Exp $
+# $Id: makefile,v 1.19 2000-02-09 23:40:41 bird Exp $
 
 #
 # PD-Win32 API
@@ -42,57 +42,38 @@ all: $(TARGET).dll $(TARGET).lib
 
 
 $(TARGET).dll: $(OBJS) $(TARGET).def
-        $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) sbsstub.obj $(TARGET).def $(PDWIN32_LIB)\kernel32.lib $(PDWIN32_LIB)\user32.lib $(PDWIN32_LIB)/kernel32.lib $(PDWIN32_LIB)/crtdll.lib $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
-        $(CP) $@ $(PDWIN32_BIN)
+    $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) sbsstub.obj $(TARGET).def $(PDWIN32_LIB)\kernel32.lib $(PDWIN32_LIB)\user32.lib $(PDWIN32_LIB)/kernel32.lib $(PDWIN32_LIB)/crtdll.lib $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
+    $(CP) $@ $(PDWIN32_BIN)
 
-$(TARGET).LIB: $(TARGET)exp.def
-        $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
-        $(CP) $@ $(PDWIN32_LIB)
+
+lib: $(TARGET).lib $(PDWIN32_LIB)\$(TARGET).lib
+
+$(PDWIN32_LIB)\$(TARGET).lib: $(TARGET).lib
+    $(CP) $** $@
+
+$(TARGET).lib: $(TARGET)exp.def
+    $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
+    $(CP) $@ $(PDWIN32_LIB)
 
 $(TARGET)exp.def: $(TARGET).def
-        $(IMPDEF) $** $@
+    $(IMPDEF) $** $@
+
 
 resource.asm: $(TARGET).rc
     $(RC) $(RCFLAGS) -o resource.asm $(TARGET).rc
 
-resource.obj: resource.asm
 
-ntdll.obj:  .\ntdll.cpp  .\ntdll.h
+dep:
+    $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
+    *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
 
-file.obj:   .\file.cpp   .\ntdll.h
+!ifndef NODEP
+!include .depend
+!endif
 
-nt.obj:     .\nt.cpp     .\ntdll.h
-
-om.obj:     .\om.cpp     .\ntdll.h
-
-reg.obj:    .\reg.cpp    .\ntdll.h
-
-rtl.obj:    .\rtl.cpp    .\ntdll.h
-
-rtlstr.obj: .\rtlstr.cpp .\ntdll.h
-
-sec.obj:    .\sec.cpp    .\ntdll.h
-
-sync.obj:   .\sync.cpp   .\ntdll.h
-
-time.obj:   .\time.cpp   .\ntdll.h
-
-initterm.obj: .\initterm.cpp
-
-crt.obj:    .\crt.cpp    .\ntdll.h
-
-unknown.obj: .\unknown.cpp .\ntdll.h
-
-exception.obj: .\exception.cpp .\ntdll.h
-
-arith64.obj: .\arith64.asm
-
-regfunc.obj: .\regfunc.asm
-
-qsort.obj: qsort.c
 
 clean:
-        $(RM) *.obj *.lib *.dll *.map *.pch
-        $(RM) $(PDWIN32_LIB)\$(TARGET).lib
-        $(RM) $(PDWIN32_BIN)\$(TARGET).dll
+    $(RM) *.obj *.lib *.dll *.map *.pch \
+        $(PDWIN32_LIB)\$(TARGET).lib $(PDWIN32_BIN)\$(TARGET).dll \
+        resource.asm $(TARGET)exp.def
 

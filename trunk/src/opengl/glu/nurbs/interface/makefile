@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2000-02-09 08:49:03 jeroen Exp $
+# $Id: makefile,v 1.2 2000-02-09 23:40:51 bird Exp $
 #
 # PD-Win32 API
 #
@@ -13,10 +13,10 @@ PDWIN32_TOOLS = ..\..\..\..\..\tools\bin
 
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 
-CINCLUDE=-I..\.. -I..\internals -I..\nurbtess -I..\..\..\mesa
+CINCLUDE=-I..\.. -I..\internals -I..\nurbtess -I..\..\..\mesa -I$(PDWIN32_INCLUDE) -I..\..\include
 
-CFLAGS = $(CFLAGS) $(CINCLUDE) -I$(PDWIN32_INCLUDE) -I..\..\include -DNDEBUG
-CXXFLAGS = $(CXXFLAGS) $(CINCLUDE) -I$(PDWIN32_INCLUDE) -I..\..\include -DNDEBUG
+CFLAGS = $(CFLAGS) $(CINCLUDE)  -DNDEBUG
+CXXFLAGS = $(CXXFLAGS) $(CINCLUDE) -DNDEBUG
 
 OBJS = glcurveval.obj glinterface.obj glrenderer.obj glsurfeval.obj \
        insurfeval.obj bezierPatch.obj bezierEval.obj bezierPatchMesh.obj \
@@ -24,19 +24,16 @@ OBJS = glcurveval.obj glinterface.obj glrenderer.obj glsurfeval.obj \
 
 all: $(OBJS)
 
-#
-# Dependencies
-#
-glcurveval.obj: glcurveval.cpp glimports.h glrenderer.h glcurveval.h
-glinterface.obj: glinterface.cpp glimports.h glrenderer.h
-glrenderer.obj: glrenderer.cpp glimports.h glrenderer.h
-glsurfeval.obj: glsurfeval.cpp glimports.h glrenderer.h glsurfeval.h bezierPatchMesh.h
-insurfeval.obj: insurfeval.cpp glsurfeval.h
-bezierPatch.obj: bezierPatch.cpp bezierPatch.h bezierEval.h
-bezierEval.obj: bezierEval.cpp bezierEval.h
-bezierPatchMeshobj: bezierPatchMesh.cpp bezierPatchMesh.h bezierEval.h
-incurveeval.obj: incurveeval.cpp glcurveval.h
+
+dep:
+    $(DEPEND) $(CINCLUDE) *.c *.cpp *.h *.asm *.inc \
+        ..\internals\*.h ..\nurbtess\*.h ..\..\..\mesa\*.h
+
+!ifndef NODEP
+!include .depend
+!endif
+
 
 clean:
-    $(RM) *.obj
+    $(RM) *.obj *.pch
 

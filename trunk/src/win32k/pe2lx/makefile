@@ -1,5 +1,5 @@
 ##############################################################################
-# $Id: makefile,v 1.16 2000-02-01 07:26:50 bird Exp $
+# $Id: makefile,v 1.17 2000-02-09 23:40:55 bird Exp $
 #
 # PD-Win32 API
 #
@@ -13,13 +13,14 @@
 PDWIN32_INCLUDE = ..\..\..\include
 PDWIN32_LIB     = ..\..\..\lib
 PDWIN32_BIN     = ..\..\..\bin
+PDWIN32_TOOLS   = ..\..\..\tools\bin
 PE2LXOBJ        = ..\object
 PE2LXLIST       = ..\list
 WIN32KBASE      = ..
 WIN32K_INCLUDE  = $(WIN32KBASE)\include
 WIN32K_MISC     = $(WIN32KBASE)\misc
 WIN32K_LDR      = $(WIN32KBASE)\ldr
-OBJEXT = pe_obj
+OBJEXT          = pe_obj
 
 ##############################################################################
 # Include
@@ -107,9 +108,7 @@ OBJS     =  $(PE2LXOBJ)\pe2lx.$(OBJEXT)         \
 
 
 
-#all: $(TARGET).exe
-all: depend
-    $(MAKE) /nologo DEPENDEXISTS=1 $(TARGET).exe
+all: $(TARGET).exe
 
 $(TARGET).exe: $(OBJS)
     @echo linking $@
@@ -117,14 +116,12 @@ $(TARGET).exe: $(OBJS)
     $(CP) $@ $(PDWIN32_BIN)
 
 
-..\fastdep.exe:
-    @cd ..
-    @$(ECHO) making fastdep.exe
-    @icc -Q+ -Ti+ fastdep.c
-    @cd pe2lx
+dep:
+    $(DEPEND) -obj$(OBJEXT) -o..\Object $(CINCLUDES) ..\misc\*.c* ..\include\*.h
 
-depend: ..\fastdep.exe
-    ..\fastdep.exe -obj$(OBJEXT) -o..\Object $(CINCLUDES) ..\misc\*.c* ..\include\*.h
+!ifndef NODEP
+!include .depend
+!endif
 
 ##############################################################################
 # Cleanup
@@ -134,6 +131,4 @@ clean:
     @$(ECHO) #do nmake depend > .depend
 
 
-!ifdef DEPENDEXISTS
-!include .depend
-!endif
+

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 2000-02-05 02:16:21 sandervl Exp $
+# $Id: makefile,v 1.14 2000-02-09 23:40:55 bird Exp $
 
 #
 # PD-Win32 API
@@ -31,49 +31,42 @@ all: $(TARGET).dll $(TARGET).lib
 
 
 $(TARGET).dll: $(OBJS) $(TARGET).def
-        $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
-              $(PDWIN32_LIB)/pmwinx.lib mmpm2.lib  \
-              $(PDWIN32_LIB)/kernel32.lib \
-              $(PDWIN32_LIB)/user32.lib $(PDWIN32_LIB)/odincrt.lib \
-              OS2386.LIB \
-              $(RTLLIB_O)
-        $(CP) $@ $(PDWIN32_BIN)
+    $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
+          $(PDWIN32_LIB)/pmwinx.lib mmpm2.lib  \
+          $(PDWIN32_LIB)/kernel32.lib \
+          $(PDWIN32_LIB)/user32.lib $(PDWIN32_LIB)/odincrt.lib \
+          OS2386.LIB \
+          $(RTLLIB_O)
+    $(CP) $@ $(PDWIN32_BIN)
 
 
-$(TARGET).LIB: $(TARGET)exp.def
-        $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
-        $(CP) $@ $(PDWIN32_LIB)
+lib: $(TARGET).lib $(PDWIN32_LIB)\$(TARGET).lib
+
+$(PDWIN32_LIB)\$(TARGET).lib: $(TARGET).lib
+    $(CP) $** $@
+
+$(TARGET).lib: $(TARGET)exp.def
+    $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
+    $(CP) $@ $(PDWIN32_LIB)
 
 $(TARGET)exp.def: $(TARGET).def
-        $(IMPDEF) $** $@
+    $(IMPDEF) $** $@
 
 
 resource.asm: $(TARGET).rc
     $(RC) $(RCFLAGS) -o resource.asm $(TARGET).rc
 
-resource.obj: resource.asm
 
-driver.obj:     driver.cpp
-os2timer.obj:   os2timer.cpp os2timer.h time.h
-waveout.obj:    waveout.cpp  dwaveout.h
-wavein.obj:     wavein.cpp
-mixer.obj:      mixer.cpp  midi.hpp
-mci.obj:        mci.cpp
-joy.obj:        joy.cpp joyos2.h
-mmio.obj:       mmio.cpp
-auxiliary.obj:  auxiliary.cpp  auxiliary.h
-auxos2.obj:     auxos2.cpp auxiliary.h
-midi.obj:       midi.cpp midi.hpp  irtmidi.hpp
-midistrm.obj:   midistrm.cpp midi.hpp   irtmidi.hpp
-irtmidi.obj:    irtmidi.cpp irtmidi.hpp
-dwaveout.obj:   dwaveout.cpp dwaveout.h $(PDWIN32_INCLUDE)\vmutex.h
-time.obj:       time.cpp
-initterm.obj:   initterm.cpp auxiliary.h
-playsound.obj:  playsound.cpp
-joyos2.obj:     joyos2.cpp joyos2.h
+dep:
+    $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
+    *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
+
+!ifndef NODEP
+!include .depend
+!endif
+
 
 clean:
-        $(RM) *.obj *.lib *.dll *.map *.pch
-        $(RM) $(PDWIN32_BIN)\$(TARGET).dll
-        $(RM) $(PDWIN32_LIB)\$(TARGET).lib
-
+    $(RM) *.obj *.lib *.dll *.map *.pch \
+        $(PDWIN32_BIN)\$(TARGET).dll $(PDWIN32_LIB)\$(TARGET).lib \
+        resource.asm $(TARGET)exp.def

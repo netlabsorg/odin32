@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.14 2000-02-05 02:05:38 sandervl Exp $
+# $Id: makefile,v 1.15 2000-02-09 23:40:47 bird Exp $
 
 #
 # PD-Win32 API
@@ -9,7 +9,7 @@
 PDWIN32_INCLUDE = ..\..\include
 PDWIN32_LIB = ..\..\lib
 PDWIN32_BIN = ..\..\bin
-
+PDWIN32_TOOLS = ..\..\tools\bin
 
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 
@@ -29,24 +29,30 @@ OBJS =  odincrt.obj initterm.obj malloc.obj string.obj file.obj
 all: $(TARGET).dll $(TARGET).lib
 
 $(TARGET).dll: $(OBJS) $(RUNTIMELIBDEF)
-        $(LD) $(LDFLAGS_ODINCRT) -Fm -Fe$@ $(OBJS) $(RUNTIMELIBDEF) $(SOMLIB)
-        $(CP) $@ $(PDWIN32_BIN)
+    $(LD) $(LDFLAGS_ODINCRT) -Fm -Fe$@ $(OBJS) $(RUNTIMELIBDEF) $(SOMLIB)
+    $(CP) $@ $(PDWIN32_BIN)
 
+
+lib: $(TARGET).lib $(PDWIN32_LIB)\$(TARGET).lib
+
+$(PDWIN32_LIB)\$(TARGET).lib: $(TARGET).lib
+    $(CP) $** $@
 
 $(TARGET).lib: $(TARGET).def
-        $(IMPLIB) $(IMPLIBFLAGS) $@ $**
-        $(CP) $@ $(PDWIN32_LIB)
+    $(IMPLIB) $(IMPLIBFLAGS) $@ $**
+    $(CP) $@ $(PDWIN32_LIB)
 
-initterm.obj: initterm.cpp $(PDWIN32_INCLUDE)\exitlist.h
 
-string.obj: string.cpp
+dep:
+    $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
+    *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
 
-odincrt.obj: odincrt.asm
+!ifndef NODEP
+!include .depend
+!endif
 
-file.obj: file.cpp
 
 clean:
-        $(RM) *.obj *.lib *.dll *.map *.pch
-        $(RM) $(PDWIN32_BIN)\$(TARGET).dll
-        $(RM) $(PDWIN32_LIB)\$(TARGET).lib
+    $(RM) *.obj *.lib *.dll *.map *.pch \
+        $(PDWIN32_BIN)\$(TARGET).dll $(PDWIN32_LIB)\$(TARGET).lib
 

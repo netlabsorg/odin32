@@ -1,4 +1,5 @@
-# $Id: makefile,v 1.7 2000-02-09 14:49:36 sandervl Exp $
+# $Id: makefile,v 1.8 2000-02-09 23:40:50 bird Exp $
+
 #
 # PD-Win32
 #
@@ -313,6 +314,7 @@ OBJS = \
   util\quad.obj \
   util\registry.obj
 
+
 $(TARGET).DLL: $(SOURCES) initterm.obj resource.obj $(TARGET).lrf $(TARGET).def
     cd util
     $(MAKE_CMD)
@@ -324,8 +326,9 @@ $(TARGET).DLL: $(SOURCES) initterm.obj resource.obj $(TARGET).lrf $(TARGET).def
     ILINK /FREE /NOE $(L) @$(TARGET).lrf
     $(CP) $@ $(PDWIN32_BIN)
 
+
 $(TARGET).lrf: makefile
-  @echo Creating file <<$(@B).lrf
+    @echo Creating file <<$(@B).lrf
 $(OBJS)
 /OUT:$(TARGET).DLL
 $(PDWIN32_LIB)\ODINCRT.LIB
@@ -336,6 +339,7 @@ OS2386.LIB
 $(TARGET).def
 <<keep
 
+
 $(TARGET).lib: $(TARGET)exp.def
         $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
         $(CP) $@ $(PDWIN32_LIB)
@@ -343,22 +347,35 @@ $(TARGET).lib: $(TARGET)exp.def
 $(TARGET)exp.def: $(TARGET).def
         $(IMPDEF) $** $@
 
+
 resource.asm: $(TARGET).rc
     $(RC) $(RCFLAGS) -o resource.asm $(TARGET).rc
 
-resource.obj: resource.asm
 
-initterm.obj: initterm.cpp
+dep:
+    $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
+    *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
+    cd util
+    $(MAKE_CMD) NODEP=1 dep
+    cd ..\tess
+    $(MAKE_CMD) NODEP=1 dep
+    cd ..\nurbs
+    $(MAKE_CMD) NODEP=1 dep
+    cd ..
+
+!ifndef NODEP
+!include .depend
+!endif
+
 
 clean:
-        $(RM) *.obj *.dll *.lib *.lrf *exp.def resource.asm
-        $(RM) $(PDWIN32_BIN)\$(TARGET).dll
-        $(RM) $(PDWIN32_LIB)\$(TARGET).lib
-        cd util
-        $(MAKE_CMD) clean
-        cd ..\tess
-        $(MAKE_CMD) clean
-        cd ..\nurbs
-        $(MAKE_CMD) clean
-        cd ..
+    $(RM) *.obj *.dll *.lib *.lrf *exp.def resource.asm \
+      $(PDWIN32_BIN)\$(TARGET).dll $(PDWIN32_LIB)\$(TARGET).lib \
+    cd util
+    $(MAKE_CMD) clean
+    cd ..\tess
+    $(MAKE_CMD) clean
+    cd ..\nurbs
+    $(MAKE_CMD) clean
+    cd ..
 

@@ -1,9 +1,9 @@
-# $Id: makefile,v 1.19 2000-02-05 01:59:25 sandervl Exp $
+# $Id: makefile,v 1.20 2000-02-09 23:40:45 bird Exp $
 
 #
 # PD-Win32 API
 #
-#	gdi32.dll makefile
+#       gdi32.dll makefile
 #
 
 PDWIN32_INCLUDE = ..\..\include
@@ -20,80 +20,49 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 TARGET = gdi32
 
-OBJS =	gdi32.obj opengl.obj callback.obj dibsect.obj initterm.obj resource.obj \
-	oslibgdi.obj font.obj text.obj palette.obj line.obj oslibgpi.obj region.obj \
-	metafile.obj dibitmap.obj blit.obj rgbcvt.obj
+OBJS =  gdi32.obj opengl.obj callback.obj dibsect.obj initterm.obj resource.obj \
+        oslibgdi.obj font.obj text.obj palette.obj line.obj oslibgpi.obj region.obj \
+        metafile.obj dibitmap.obj blit.obj rgbcvt.obj
 
 
 all: $(TARGET).dll $(TARGET).lib
 
 
 $(TARGET).dll: $(OBJS) $(TARGET).def
-	$(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
-	      $(PDWIN32_LIB)/pmwinx.lib $(PDWIN32_LIB)/kernel32.lib $(PDWIN32_LIB)/user32.lib \
-	      $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
-	$(CP) $@ $(PDWIN32_BIN)
+    $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
+          $(PDWIN32_LIB)/pmwinx.lib $(PDWIN32_LIB)/kernel32.lib $(PDWIN32_LIB)/user32.lib \
+          $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
+    $(CP) $@ $(PDWIN32_BIN)
 
+
+lib: $(TARGET).lib $(PDWIN32_LIB)\$(TARGET).lib
+
+$(PDWIN32_LIB)\$(TARGET).lib: $(TARGET).lib
+    $(CP) $** $@
 
 $(TARGET).lib: $(TARGET)exp.def
-	$(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
-	$(CP) $@ $(PDWIN32_LIB)
+    $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
+    $(CP) $@ $(PDWIN32_LIB)
 
 $(TARGET)exp.def: $(TARGET).def
     $(IMPDEF) $** $@
 
+
 resource.asm: gdi32.rc
     $(RC) $(RCFLAGS) -o resource.asm gdi32.rc
 
-resource.obj: resource.asm
 
-rgbcvt.obj: rgbcvt.asm
+dep:
+    $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
+    *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
 
-gdi32.obj: gdi32.cpp \
-    callback.h \
-    dibsect.h \
-    $(PDWIN32_INCLUDE)\misc.h \
-
-region.obj: region.cpp $(PDWIN32_INCLUDE)\misc.h
-
-metafile.obj: metafile.cpp $(PDWIN32_INCLUDE)\misc.h
-
-dibitmap.obj: dibitmap.cpp dibsect.h $(PDWIN32_INCLUDE)\misc.h
-blit.obj: blit.cpp dibsect.h $(PDWIN32_INCLUDE)\misc.h rgbcvt.h
-
-font.obj: font.cpp \
-    $(PDWIN32_INCLUDE)\misc.h \
-
-text.obj: text.cpp \
-    $(PDWIN32_INCLUDE)\misc.h \
-
-palette.obj: palette.cpp \
-    $(PDWIN32_INCLUDE)\misc.h dibsect.h \
-
-dibsect.obj: dibsect.cpp \
-    dibsect.h \
-    $(PDWIN32_INCLUDE)\misc.h \
-
-opengl.obj: opengl.cpp \
-    $(PDWIN32_INCLUDE)\misc.h \
-
-callback.obj: callback.cpp \
-    callback.h \
-    $(PDWIN32_INCLUDE)\misc.h \
-
-oslibgdi.obj: oslibgdi.cpp oslibgdi.h
-
-line.obj: line.cpp \
-    $(PDWIN32_INCLUDE)\misc.h \
-
-oslibgpi.obj: oslibgpi.cpp oslibgpi.h
-
-initterm.obj: initterm.cpp
+!ifndef NODEP
+!include .depend
+!endif
 
 
 clean:
-	$(RM) *.obj *.lib *.dll *.map *.pch resource.asm
-	$(RM) $(PDWIN32_BIN)\$(TARGET).dll
-	$(RM) $(PDWIN32_LIB)\$(TARGET).lib
-    $(RM) $(TARGET)exp.def
+    $(RM) *.obj *.lib *.dll *.map *.pch resource.asm \
+        $(PDWIN32_BIN)\$(TARGET).dll $(PDWIN32_LIB)\$(TARGET).lib \
+        $(TARGET)exp.def
 

@@ -1,9 +1,9 @@
-# $Id: makefile,v 1.10 2000-02-05 02:03:45 sandervl Exp $
+# $Id: makefile,v 1.11 2000-02-09 23:40:47 bird Exp $
 
 #
 # PD-Win32 API
 #
-#	msvcrt.dll makefile
+#       msvcrt.dll makefile
 #
 
 PDWIN32_INCLUDE = ..\..\include
@@ -34,62 +34,77 @@ all: $(TARGET).dll $(TARGET).lib $(TARGET20).dll $(TARGET20).lib \
 
 
 $(TARGET).dll: $(OBJS) $(TARGET).def
-	$(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
-              $(PDWIN32_LIB)/kernel32.lib \
-              $(PDWIN32_LIB)/crtdll.lib  \
-	      $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
-	$(CP) $@ $(PDWIN32_BIN)
+    $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
+          $(PDWIN32_LIB)/kernel32.lib \
+          $(PDWIN32_LIB)/crtdll.lib  \
+          $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
+    $(CP) $@ $(PDWIN32_BIN)
 
 $(TARGET20).dll: $(OBJS20) $(TARGET20).def
-	$(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS20) $(TARGET20).def \
-              $(PDWIN32_LIB)/kernel32.lib \
-              $(PDWIN32_LIB)/crtdll.lib \
-	      $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
-	$(CP) $@ $(PDWIN32_BIN)
+    $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS20) $(TARGET20).def \
+          $(PDWIN32_LIB)/kernel32.lib \
+          $(PDWIN32_LIB)/crtdll.lib \
+          $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
+    $(CP) $@ $(PDWIN32_BIN)
 
 $(TARGET40).dll: $(OBJS40) $(TARGET40).def
-	$(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS40) $(TARGET40).def \
-              $(PDWIN32_LIB)/kernel32.lib \
-              $(PDWIN32_LIB)/crtdll.lib  \
-	      $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
-	$(CP) $@ $(PDWIN32_BIN)
+    $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS40) $(TARGET40).def \
+          $(PDWIN32_LIB)/kernel32.lib \
+          $(PDWIN32_LIB)/crtdll.lib  \
+          $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
+    $(CP) $@ $(PDWIN32_BIN)
 
+
+lib: $(TARGET).lib  $(PDWIN32_LIB)\$(TARGET).lib \
+                    $(PDWIN32_LIB)\$(TARGET20).lib \
+                    $(PDWIN32_LIB)\$(TARGET40).lib
+
+$(PDWIN32_LIB)\$(TARGET).lib: $(TARGET).lib
+    $(CP) $** $@
+
+$(PDWIN32_LIB)\$(TARGET20).lib: $(TARGET20).lib
+    $(CP) $** $@
+
+$(PDWIN32_LIB)\$(TARGET40).lib: $(TARGET40).lib
+    $(CP) $** $@
 
 $(TARGET).lib: $(TARGET).def
-	$(IMPLIB) $(IMPLIBFLAGS) $@ $**
-	$(CP) $@ $(PDWIN32_LIB)
+    $(IMPLIB) $(IMPLIBFLAGS) $@ $**
+    $(CP) $@ $(PDWIN32_LIB)
 
 $(TARGET20).lib: $(TARGET20).def
-	$(IMPLIB) $(IMPLIBFLAGS) $@ $**
-	$(CP) $@ $(PDWIN32_LIB)
+    $(IMPLIB) $(IMPLIBFLAGS) $@ $**
+    $(CP) $@ $(PDWIN32_LIB)
 
 $(TARGET40).lib: $(TARGET40).def
-	$(IMPLIB) $(IMPLIBFLAGS) $@ $**
-	$(CP) $@ $(PDWIN32_LIB)
+    $(IMPLIB) $(IMPLIBFLAGS) $@ $**
+    $(CP) $@ $(PDWIN32_LIB)
 
 resource.asm: msvcrt.rc
     $(RC) $(RCFLAGS) -o resource.asm msvcrt.rc
 
-resource.obj: resource.asm
-
 resource20.asm: msvcrt20.rc
     $(RC) $(RCFLAGS) -o resource20.asm msvcrt20.rc
-
-resource20.obj: resource20.asm
 
 resource40.asm: msvcrt40.rc
     $(RC) $(RCFLAGS) -o resource40.asm msvcrt40.rc
 
-resource40.obj: resource40.asm
 
-msvcrt.obj: msvcrt.cpp
+dep:
+    $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
+    *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
+
+!ifndef NODEP
+!include .depend
+!endif
+
 
 clean:
-	$(RM) *.obj *.lib *.dll *.map *.pch resource*.asm
-	$(RM) $(PDWIN32_BIN)\$(TARGET).dll
-	$(RM) $(PDWIN32_LIB)\$(TARGET).lib
-
-
-
-
+    $(RM) *.obj *.lib *.dll *.map *.pch resource*.asm \
+        $(PDWIN32_BIN)\$(TARGET).dll \
+        $(PDWIN32_BIN)\$(TARGET20).dll \
+        $(PDWIN32_BIN)\$(TARGET40).dll \
+        $(PDWIN32_LIB)\$(TARGET).lib
+        $(PDWIN32_LIB)\$(TARGET20).lib
+        $(PDWIN32_LIB)\$(TARGET40).lib
 

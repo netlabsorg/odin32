@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2000-02-09 13:44:31 sandervl Exp $
+# $Id: makefile,v 1.6 2000-02-09 23:40:50 bird Exp $
 #
 # PD-Win32 API
 #
@@ -41,24 +41,24 @@ all: $(TARGET1).dll $(TARGET1).lib \
      $(TARGET3).dll $(TARGET3).lib
 
 $(TARGET1).dll: $(OBJS1) $(TARGET1).def
-        $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS1) $(TARGET1).def \
-              $(PDWIN32_LIB)/gdi32.lib $(PDWIN32_LIB)/kernel32.lib \
-              $(PDWIN32_LIB)/user32.lib $(PDWIN32_LIB)/odincrt.lib \
-              OS2386.LIB $(RTLLIB_O)
-        $(CP) $@ $(PDWIN32_BIN)
+    $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS1) $(TARGET1).def \
+          $(PDWIN32_LIB)/gdi32.lib $(PDWIN32_LIB)/kernel32.lib \
+          $(PDWIN32_LIB)/user32.lib $(PDWIN32_LIB)/odincrt.lib \
+          OS2386.LIB $(RTLLIB_O)
+    $(CP) $@ $(PDWIN32_BIN)
 
 
 $(TARGET1).lib: $(TARGET1)exp.def
-        $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET1)exp.def
-        $(CP) $@ $(PDWIN32_LIB)
+    $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET1)exp.def
+    $(CP) $@ $(PDWIN32_LIB)
 
 $(TARGET1)exp.def: $(TARGET1).def
-        $(IMPDEF) $** $@
+    $(IMPDEF) $** $@
+
 
 resource.asm: $(TARGET1).rc
     $(RC) $(RCFLAGS) -o resource.asm $(TARGET1).rc
 
-resource.obj: resource.asm
 
 $(TARGET2).dll:
     cd glu
@@ -70,16 +70,52 @@ $(TARGET3).dll:
     $(MAKE_CMD)
     cd ..
 
-opengl32.obj: opengl32.cpp pglos2.h glos2.h initterm.h
-initterm.obj: initterm.cpp initterm.h
+
+$(TARGET2).lib:
+    cd glu
+    $(MAKE_CMD) $(@F)
+    cd ..
+
+
+$(TARGET3).lib:
+    cd glut
+    $(MAKE_CMD) $(@F)
+    cd ..
+
+
+lib: $(TARGET1).lib $(PDWIN32_LIB)\$(TARGET1).lib \
+     $(TARGET2).lib $(PDWIN32_LIB)\$(TARGET2).lib \
+     $(TARGET3).lib $(PDWIN32_LIB)\$(TARGET3).lib
+
+$(PDWIN32_LIB)\$(TARGET1).lib: $(TARGET1).lib
+    $(CP) $** $@
+
+$(PDWIN32_LIB)\$(TARGET2).lib: $(TARGET2).lib
+    $(CP) $** $@
+
+$(PDWIN32_LIB)\$(TARGET3).lib: $(TARGET3).lib
+    $(CP) $** $@
+
+dep:
+    $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
+    *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
+    cd glut
+    $(MAKE_CMD) NODEP=1 dep
+    cd ..\glu
+    $(MAKE_CMD) NODEP=1 dep
+    cd ..
+
+!ifndef NODEP
+!include .depend
+!endif
+
 
 clean:
-        $(RM) *.obj *.lib *.dll *.map resource.asm *exp.def
-        $(RM) $(PDWIN32_BIN)\$(TARGET1).dll
-        $(RM) $(PDWIN32_LIB)\$(TARGET1).lib
-        cd glut
-        $(MAKE_CMD) clean
-        cd ..\glu
-        $(MAKE_CMD) clean
-        cd ..
+    $(RM) *.obj *.lib *.dll *.map resource.asm *exp.def \
+        $(RM) $(PDWIN32_BIN)\$(TARGET1).dll $(PDWIN32_LIB)\$(TARGET1).lib \
+    cd glut
+    $(MAKE_CMD) clean
+    cd ..\glu
+    $(MAKE_CMD) clean
+    cd ..
 
