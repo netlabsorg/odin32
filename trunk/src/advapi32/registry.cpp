@@ -1,4 +1,4 @@
-/* $Id: registry.cpp,v 1.4 1999-10-14 17:21:14 phaller Exp $ */
+/* $Id: registry.cpp,v 1.5 1999-10-20 17:18:17 phaller Exp $ */
 
 /*
  * Win32 registry API functions for OS/2
@@ -75,14 +75,14 @@ static HKEY ConvertKey(HKEY winkey)
  * Variables :
  * Result    :
  * Remark    :
- * Status    : UNTESTED STUB
+ * Status    : CORRECTED UNTESTED
  *
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION1(DWORD,RegCloseKey,HKEY,arg1)
+ODINFUNCTION1(LONG,RegCloseKey,HKEY,hKey)
 {
-  return _O32_RegCloseKey(ConvertKey(arg1));
+  return _O32_RegCloseKey(ConvertKey(hKey));
 }
 
 
@@ -93,18 +93,18 @@ ODINFUNCTION1(DWORD,RegCloseKey,HKEY,arg1)
  * Variables :
  * Result    :
  * Remark    :
- * Status    : UNTESTED STUB
+ * Status    : CORRECTED UNTESTED
  *
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION3(DWORD,RegCreateKeyA,HKEY,  arg1,
-                                  LPCSTR,arg2,
-                                  PHKEY, arg3)
+ODINFUNCTION3(LONG,RegCreateKeyA,HKEY,  hKey,
+                                 LPCSTR,lpszSubKey,
+                                 PHKEY, phkResult)
 {
-  return _O32_RegCreateKey(ConvertKey(arg1),
-                          arg2,
-                          arg3);
+  return _O32_RegCreateKey(ConvertKey(hKey),
+                          lpszSubKey,
+                          phkResult);
 }
 
 
@@ -115,21 +115,21 @@ ODINFUNCTION3(DWORD,RegCreateKeyA,HKEY,  arg1,
  * Variables :
  * Result    :
  * Remark    :
- * Status    : UNTESTED STUB
+ * Status    : CORRECTED UNTESTED
  *
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION3(DWORD,RegCreateKeyW,HKEY,   arg1,
-                                  LPCWSTR,arg2,
-                                  PHKEY,  arg3)
+ODINFUNCTION3(LONG,RegCreateKeyW,HKEY,   hKey,
+                                 LPCWSTR,lpszSubKey,
+                                 PHKEY,  phkResult)
 {
-  char *astring = UnicodeToAsciiString((LPWSTR)arg2);
+  char *astring = UnicodeToAsciiString((LPWSTR)lpszSubKey);
   LONG  rc;
 
-  rc = _O32_RegCreateKey(ConvertKey(arg1),
+  rc = _O32_RegCreateKey(ConvertKey(hKey),
                         astring,
-                        arg3);
+                        phkResult);
 
   FreeAsciiString(astring);
   return(rc);
@@ -143,30 +143,30 @@ ODINFUNCTION3(DWORD,RegCreateKeyW,HKEY,   arg1,
  * Variables :
  * Result    :
  * Remark    :
- * Status    : UNTESTED STUB
+ * Status    : CORRECTED UNTESTED
  *
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION9(DWORD,RegCreateKeyExA,HKEY,                 arg1,
-                                    LPCSTR,               arg2,
-                                    DWORD,                arg3,
-                                    LPSTR,                arg4,
-                                    DWORD,                arg5,
-                                    REGSAM,               arg6,
-                                    LPSECURITY_ATTRIBUTES,arg7,
-                                    PHKEY,                arg8,
-                                    LPDWORD,              arg9)
+ODINFUNCTION9(LONG,RegCreateKeyExA,HKEY,                 hKey,
+                                   LPCSTR,               lpszSubKey,
+                                   DWORD,                dwReserved,
+                                   LPSTR,                lpszClass,
+                                   DWORD,                fdwOptions,
+                                   REGSAM,               samDesired,
+                                   LPSECURITY_ATTRIBUTES,lpSecurityAttributes,
+                                   PHKEY,                phkResult,
+                                   LPDWORD,              lpdwDisposition)
 {
-  return _O32_RegCreateKeyEx(ConvertKey(arg1),
-                            arg2,
-                            arg3,
-                            arg4,
-                            arg5,
-                            arg6 | KEY_READ,
-                            arg7,
-                            arg8,
-                            arg9);
+  return _O32_RegCreateKeyEx(ConvertKey(hKey),
+                             lpszSubKey,
+                             dwReserved,
+                             lpszClass,
+                             fdwOptions,
+                             samDesired, //  | KEY_READ
+                             lpSecurityAttributes,
+                             phkResult,
+                             lpdwDisposition);
 }
 
 
@@ -177,34 +177,34 @@ ODINFUNCTION9(DWORD,RegCreateKeyExA,HKEY,                 arg1,
  * Variables :
  * Result    :
  * Remark    :
- * Status    : UNTESTED STUB
+ * Status    : CORRECTED UNTESTED
  *
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION9(DWORD,RegCreateKeyExW,HKEY,                 arg1,
-                                    LPCWSTR,              arg2,
-                                    DWORD,                arg3,
-                                    LPWSTR,               arg4,
-                                    DWORD,                arg5,
-                                    REGSAM,               arg6,
-                                    LPSECURITY_ATTRIBUTES,arg7,
-                                    PHKEY,                arg8,
-                                    LPDWORD,              arg9)
+ODINFUNCTION9(LONG,RegCreateKeyExW,HKEY,                 hKey,
+                                   LPCWSTR,              lpszSubKey,
+                                   DWORD,                dwReserved,
+                                   LPWSTR,               lpszClass,
+                                   DWORD,                fdwOptions,
+                                   REGSAM,               samDesired,
+                                   LPSECURITY_ATTRIBUTES,lpSecurityAttributes,
+                                   PHKEY,                phkResult,
+                                   LPDWORD,              lpdwDisposition)
 {
-  char *astring1 = UnicodeToAsciiString((LPWSTR)arg2);
-  char *astring2 = UnicodeToAsciiString(arg4);
+  char *astring1 = UnicodeToAsciiString((LPWSTR)lpszSubKey);
+  char *astring2 = UnicodeToAsciiString(lpszClass);
   LONG  rc;
 
-  rc = _O32_RegCreateKeyEx(ConvertKey(arg1),
+  rc = _O32_RegCreateKeyEx(ConvertKey(hKey),
                           astring1,
-                          arg3,
+                          dwReserved,
                           astring2,
-                          arg5,
-                          arg6 | KEY_READ,
-                          arg7,
-                          arg8,
-                          arg9);
+                          fdwOptions,
+                          samDesired, //  | KEY_READ
+                          lpSecurityAttributes,
+                          phkResult,
+                          lpdwDisposition);
 
   FreeAsciiString(astring1);
   FreeAsciiString(astring2);
@@ -219,18 +219,18 @@ ODINFUNCTION9(DWORD,RegCreateKeyExW,HKEY,                 arg1,
  * Variables :
  * Result    :
  * Remark    :
- * Status    : UNTESTED STUB
+ * Status    : CORRECTED UNTESTED
  *
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION2(DWORD,RegDeleteKeyW,HKEY,  arg1,
-                                  LPWSTR,arg2)
+ODINFUNCTION2(LONG,RegDeleteKeyW,HKEY,  hKey,
+                                 LPWSTR,lpszSubKey)
 {
-  char *astring = UnicodeToAsciiString(arg2);
+  char *astring = UnicodeToAsciiString(lpszSubKey);
   LONG  rc;
 
-  rc = _O32_RegDeleteKey(ConvertKey(arg1),
+  rc = _O32_RegDeleteKey(ConvertKey(hKey),
                         astring);
   FreeAsciiString(astring);
   return(rc);
@@ -244,16 +244,16 @@ ODINFUNCTION2(DWORD,RegDeleteKeyW,HKEY,  arg1,
  * Variables :
  * Result    :
  * Remark    :
- * Status    : UNTESTED STUB
+ * Status    : CORRECTED UNTESTED
  *
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION2(DWORD,RegDeleteKeyA,HKEY,  arg1,
-                                  LPCSTR,arg2)
+ODINFUNCTION2(LONG,RegDeleteKeyA,HKEY,  hKey,
+                                 LPCSTR,lpszSubKey)
 {
-  return _O32_RegDeleteKey(ConvertKey(arg1),
-                          arg2);
+  return _O32_RegDeleteKey(ConvertKey(hKey),
+                          lpszSubKey);
 }
 
 
@@ -264,16 +264,16 @@ ODINFUNCTION2(DWORD,RegDeleteKeyA,HKEY,  arg1,
  * Variables :
  * Result    :
  * Remark    :
- * Status    : UNTESTED STUB
+ * Status    : CORRECTED UNTESTED
  *
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION2(DWORD,RegDeleteValueA,HKEY, arg1,
-                                    LPSTR,arg2)
+ODINFUNCTION2(LONG,RegDeleteValueA,HKEY, hKey,
+                                   LPSTR,lpszValue)
 {
-  return _O32_RegDeleteValue(ConvertKey(arg1),
-                            arg2);
+  return _O32_RegDeleteValue(ConvertKey(hKey),
+                            lpszValue);
 }
 
 
@@ -284,18 +284,18 @@ ODINFUNCTION2(DWORD,RegDeleteValueA,HKEY, arg1,
  * Variables :
  * Result    :
  * Remark    :
- * Status    : UNTESTED STUB
+ * Status    : CORRECTED UNTESTED
  *
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION2(DWORD,RegDeleteValueW,HKEY,  arg1,
-                                    LPWSTR,arg2)
+ODINFUNCTION2(LONG,RegDeleteValueW,HKEY,  hKey,
+                                   LPWSTR,lpszValue)
 {
-  char *astring = UnicodeToAsciiString(arg2);
+  char *astring = UnicodeToAsciiString(lpszValue);
   LONG  rc;
 
-  rc = _O32_RegDeleteValue(ConvertKey(arg1),
+  rc = _O32_RegDeleteValue(ConvertKey(hKey),
                           astring);
   FreeAsciiString(astring);
   return(rc);
@@ -314,15 +314,15 @@ ODINFUNCTION2(DWORD,RegDeleteValueW,HKEY,  arg1,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION4(DWORD,RegEnumKeyA,HKEY, arg1,
-                                DWORD,arg2,
-                                LPSTR,arg3,
-                                DWORD,arg4)
+ODINFUNCTION4(LONG,RegEnumKeyA,HKEY, hKey,
+                               DWORD,iSubKey,
+                               LPSTR,lpszName,
+                               DWORD,cchName)
 {
-  return _O32_RegEnumKey(ConvertKey(arg1),
-                        arg2,
-                        arg3,
-                        arg4);
+  return _O32_RegEnumKey(ConvertKey(hKey),
+                        iSubKey,
+                        lpszName,
+                        cchName);
 }
 
 
@@ -338,23 +338,23 @@ ODINFUNCTION4(DWORD,RegEnumKeyA,HKEY, arg1,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION4(DWORD,RegEnumKeyW,HKEY,  arg1,
-                                DWORD, arg2,
-                                LPWSTR,arg3,
-                                DWORD, arg4)
+ODINFUNCTION4(LONG,RegEnumKeyW,HKEY,  hKey,
+                               DWORD, iSubKey,
+                               LPWSTR,lpszName,
+                               DWORD, cchName)
 {
   char *astring;
   LONG  rc;
 
-  rc = _O32_RegEnumKey(ConvertKey(arg1),
-                      arg2,
-                      (char *)arg3,
-                      arg4);
+  rc = _O32_RegEnumKey(ConvertKey(hKey),
+                      iSubKey,
+                      (char *)lpszName,
+                      cchName);
   if(rc == ERROR_SUCCESS)
   {
-    astring = (char *)malloc(arg4);
-    strcpy(astring, (char *)arg3);
-    AsciiToUnicode(astring, arg3);
+    astring = (char *)malloc(cchName);
+    strcpy(astring, (char *)lpszName);
+    AsciiToUnicode(astring, lpszName);
     free(astring);
   }
   return(rc);
@@ -373,14 +373,14 @@ ODINFUNCTION4(DWORD,RegEnumKeyW,HKEY,  arg1,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION8(DWORD,RegEnumKeyExA,HKEY,      arg1,
-                                  DWORD,     arg2,
-                                  LPSTR,     arg3,
-                                  LPDWORD,   arg4,
-                                  LPDWORD,   arg5,
-                                  LPSTR,     arg6,
-                                  LPDWORD,   arg7,
-                                  LPFILETIME,arg8)
+ODINFUNCTION8(LONG,RegEnumKeyExA,HKEY,      arg1,
+                                 DWORD,     arg2,
+                                 LPSTR,     arg3,
+                                 LPDWORD,   arg4,
+                                 LPDWORD,   arg5,
+                                 LPSTR,     arg6,
+                                 LPDWORD,   arg7,
+                                 LPFILETIME,arg8)
 {
   return _O32_RegEnumKeyEx(ConvertKey(arg1),
                           arg2,
@@ -405,14 +405,14 @@ ODINFUNCTION8(DWORD,RegEnumKeyExA,HKEY,      arg1,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION8(DWORD,RegEnumKeyExW,HKEY,      arg1,
-                                  DWORD,     arg2,
-                                  LPWSTR,    arg3,
-                                  LPDWORD,   arg4,
-                                  LPDWORD,   arg5,
-                                  LPWSTR,    arg6,
-                                  LPDWORD,   arg7,
-                                  LPFILETIME,arg8)
+ODINFUNCTION8(LONG,RegEnumKeyExW,HKEY,      arg1,
+                                 DWORD,     arg2,
+                                 LPWSTR,    arg3,
+                                 LPDWORD,   arg4,
+                                 LPDWORD,   arg5,
+                                 LPWSTR,    arg6,
+                                 LPDWORD,   arg7,
+                                 LPFILETIME,arg8)
 {
   char *astring;
   LONG  rc;
@@ -453,14 +453,14 @@ ODINFUNCTION8(DWORD,RegEnumKeyExW,HKEY,      arg1,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION8(DWORD,RegEnumValueA,HKEY,   arg1,
-                                  DWORD,  arg2,
-                                  LPSTR,  arg3,
-                                  LPDWORD,arg4,
-                                  LPDWORD,arg5,
-                                  LPDWORD,arg6,
-                                  LPBYTE, arg7,
-                                  LPDWORD,arg8)
+ODINFUNCTION8(LONG,RegEnumValueA,HKEY,   arg1,
+                                 DWORD,  arg2,
+                                 LPSTR,  arg3,
+                                 LPDWORD,arg4,
+                                 LPDWORD,arg5,
+                                 LPDWORD,arg6,
+                                 LPBYTE, arg7,
+                                 LPDWORD,arg8)
 {
   return _O32_RegEnumValue(ConvertKey(arg1),
                           arg2,
@@ -485,14 +485,14 @@ ODINFUNCTION8(DWORD,RegEnumValueA,HKEY,   arg1,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION8(DWORD,RegEnumValueW,HKEY,   arg1,
-                                  DWORD,  arg2,
-                                  LPWSTR, arg3,
-                                  LPDWORD,arg4,
-                                  LPDWORD,arg5,
-                                  LPDWORD,arg6,
-                                  LPBYTE, arg7,
-                                  LPDWORD,arg8)
+ODINFUNCTION8(LONG,RegEnumValueW,HKEY,   arg1,
+                                 DWORD,  arg2,
+                                 LPWSTR, arg3,
+                                 LPDWORD,arg4,
+                                 LPDWORD,arg5,
+                                 LPDWORD,arg6,
+                                 LPBYTE, arg7,
+                                 LPDWORD,arg8)
 {
   char *astring;
   LONG  rc;
@@ -528,9 +528,9 @@ ODINFUNCTION8(DWORD,RegEnumValueW,HKEY,   arg1,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION3(DWORD,RegOpenKeyA,HKEY,  arg1,
-                                LPCSTR,arg2,
-                                PHKEY, arg3)
+ODINFUNCTION3(LONG,RegOpenKeyA,HKEY,  arg1,
+                               LPCSTR,arg2,
+                               PHKEY, arg3)
 {
   LONG rc;
 
@@ -556,9 +556,9 @@ ODINFUNCTION3(DWORD,RegOpenKeyA,HKEY,  arg1,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION3(DWORD,RegOpenKeyW,HKEY,   arg1,
-                                LPCWSTR,arg2,
-                                PHKEY,  arg3)
+ODINFUNCTION3(LONG,RegOpenKeyW,HKEY,   arg1,
+                               LPCWSTR,arg2,
+                               PHKEY,  arg3)
 {
   char *astring = UnicodeToAsciiString((LPWSTR)arg2);
   LONG  rc;
@@ -586,7 +586,7 @@ ODINFUNCTION3(DWORD,RegOpenKeyW,HKEY,   arg1,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION5(DWORD,RegOpenKeyExA,HKEY,  arg1,
+ODINFUNCTION5(LONG,RegOpenKeyExA,HKEY,  arg1,
                                   LPCSTR,arg2,
                                   DWORD, arg3,
                                   REGSAM,arg4,
@@ -621,7 +621,7 @@ ODINFUNCTION5(DWORD,RegOpenKeyExA,HKEY,  arg1,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION5(DWORD,RegOpenKeyExW,HKEY,   arg1,
+ODINFUNCTION5(LONG,RegOpenKeyExW,HKEY,   arg1,
                                   LPCWSTR,arg2,
                                   DWORD,  arg3,
                                   REGSAM, arg4,
@@ -657,7 +657,7 @@ ODINFUNCTION5(DWORD,RegOpenKeyExW,HKEY,   arg1,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION12(DWORD,RegQueryInfoKeyA,HKEY,       arg1,
+ODINFUNCTION12(LONG,RegQueryInfoKeyA,HKEY,       arg1,
                                       LPSTR,      arg2,
                                       LPDWORD,    arg3,
                                       LPDWORD,    arg4,
@@ -697,7 +697,7 @@ ODINFUNCTION12(DWORD,RegQueryInfoKeyA,HKEY,       arg1,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION12(DWORD,RegQueryInfoKeyW,HKEY,       arg1,
+ODINFUNCTION12(LONG,RegQueryInfoKeyW,HKEY,       arg1,
                                       LPWSTR,     arg2,
                                       LPDWORD,    arg3,
                                       LPDWORD,    arg4,
@@ -748,7 +748,7 @@ ODINFUNCTION12(DWORD,RegQueryInfoKeyW,HKEY,       arg1,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION4(DWORD,RegQueryValueA,HKEY,  arg1,
+ODINFUNCTION4(LONG,RegQueryValueA,HKEY,  arg1,
                                    LPCSTR,arg2,
                                    LPSTR, arg3,
                                    PLONG, arg4)
@@ -774,7 +774,7 @@ ODINFUNCTION4(DWORD,RegQueryValueA,HKEY,  arg1,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION4(DWORD,RegQueryValueW,HKEY,   hkey,
+ODINFUNCTION4(LONG,RegQueryValueW,HKEY,   hkey,
                                    LPCWSTR,lpszSubKey,
                                    LPWSTR, lpszValue,
                                    PLONG,  pcbValue)
@@ -873,7 +873,7 @@ ODINFUNCTION6(LONG,RegQueryValueExW,HKEY,   arg1,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION5(DWORD,RegSetValueA,HKEY,  hkey,
+ODINFUNCTION5(LONG,RegSetValueA,HKEY,  hkey,
                                  LPCSTR,lpSubKey,
                                  DWORD, dwType,
                                  LPCSTR,lpData,
@@ -903,7 +903,7 @@ ODINFUNCTION5(DWORD,RegSetValueA,HKEY,  hkey,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION5(DWORD,RegSetValueW,HKEY,   hkey,
+ODINFUNCTION5(LONG,RegSetValueW,HKEY,   hkey,
                                  LPCWSTR,lpSubKey,
                                  DWORD,  dwType,
                                  LPCWSTR,lpData,
@@ -941,7 +941,7 @@ ODINFUNCTION5(DWORD,RegSetValueW,HKEY,   hkey,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION6(DWORD,RegSetValueExA,HKEY,  arg1,
+ODINFUNCTION6(LONG,RegSetValueExA,HKEY,  arg1,
                                    LPSTR, arg2,
                                    DWORD, arg3,
                                    DWORD, arg4,
@@ -969,7 +969,7 @@ ODINFUNCTION6(DWORD,RegSetValueExA,HKEY,  arg1,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION6(DWORD,RegSetValueExW,HKEY,  arg1,
+ODINFUNCTION6(LONG,RegSetValueExW,HKEY,  arg1,
                                    LPWSTR,arg2,
                                    DWORD, arg3,
                                    DWORD, arg4,
@@ -1010,7 +1010,7 @@ ODINFUNCTION6(DWORD,RegSetValueExW,HKEY,  arg1,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION1(DWORD,RegFlushKey,HKEY,hkey)
+ODINFUNCTION1(LONG,RegFlushKey,HKEY,hkey)
 {
   dprintf(("ADVAPI32: RegFlushKey not implemented yet."));
 
