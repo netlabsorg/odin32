@@ -1,4 +1,4 @@
-/* $Id: tab.c,v 1.10 1999-08-14 16:13:13 cbratschi Exp $ */
+/* $Id: tab.c,v 1.11 1999-08-21 12:10:02 cbratschi Exp $ */
 /*
  * Tab control
  *
@@ -388,7 +388,8 @@ TAB_LButtonUp (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
   TAB_INFO *infoPtr = TAB_GetInfoPtr(hwnd);
   POINT pt;
-  INT newItem,dummy;
+  INT newItem;
+  UINT dummy;
 
   if (infoPtr->hwndToolTip)
     TAB_RelayEvent (infoPtr->hwndToolTip, hwnd,
@@ -1794,6 +1795,8 @@ TAB_Destroy (HWND hwnd, WPARAM wParam, LPARAM lParam)
 static LRESULT WINAPI
 TAB_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+//if (uMsg == WM_CREATE) MessageBoxA(hwnd,"wm_create!",NULL,MB_OK);//CB:bug!!!
+//CB: WM_CREATE never send!!!
     switch (uMsg)
     {
     case TCM_GETIMAGELIST:
