@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.37 1999-11-30 20:19:34 sandervl Exp $ */
+/* $Id: KERNEL32.CPP,v 1.38 1999-12-09 11:00:40 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -177,54 +177,6 @@ UINT WIN32API GetACP(VOID)
 }
 //******************************************************************************
 //******************************************************************************
-//******************************************************************************
-//******************************************************************************
-LPWSTR WIN32API GetEnvironmentStringsW(VOID)
-{
- char *envstrings = (char *)O32_GetEnvironmentStrings();
- char *tmp;
- LPWSTR wenvstrings;
- int len, i;
-
-  dprintf(("KERNEL32:  GetEnvironmentStringsW\n"));
-
-  if(envstrings == NULL)
-    return(NULL);
-
-  tmp = envstrings;
-  len = 0;
-  while(*tmp != 0)
-  {
-    len += strlen(tmp)+1;
-    tmp = envstrings + len;
-  }
-  len++;        //terminating 0
-  wenvstrings = (LPWSTR)malloc(len*sizeof(WCHAR));
-  for(i=0;
-      i<len;
-      i++)
-  {
-     wenvstrings[i] = envstrings[i];
-  }
-  return(wenvstrings);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API FreeEnvironmentStringsA(LPSTR envstrings)
-{
-  dprintf(("KERNEL32:  FreeEnvironmentStringsA\n"));
-  return(TRUE);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API FreeEnvironmentStringsW(LPWSTR envstrings)
-{
-  dprintf(("KERNEL32:  FreeEnvironmentStringsW\n"));
-  free(envstrings);
-  return(TRUE);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API GetStringTypeW(DWORD fdwInfoType, LPCWSTR lpSrcStr, int cchSrc, LPWORD lpCharType)
 {
  int i;
@@ -313,28 +265,6 @@ BOOL WIN32API GetStringTypeExA(LCID Locale, DWORD fdwInfoType, LPCSTR lpSrcStr, 
   return(GetStringTypeA(Locale, fdwInfoType, lpSrcStr, cchSrc, lpCharType));
 }
 //******************************************************************************
-//******************************************************************************
-BOOL WIN32API SetEnvironmentVariableA(LPCSTR arg1, LPCSTR arg2)
-{
-    dprintf(("KERNEL32:  SetEnvironmentVariable %s to %s\n", arg1, arg2));
-    return O32_SetEnvironmentVariable(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SetEnvironmentVariableW(LPCWSTR lpName, LPCWSTR lpValue)
-{
- char *asciiname, *asciivalue;
- BOOL  rc;
-
-    dprintf(("KERNEL32:  OS2SetEnvironmentVariableW\n"));
-    asciiname  = UnicodeToAsciiString((LPWSTR)lpName);
-    asciivalue = UnicodeToAsciiString((LPWSTR)lpValue);
-    rc = O32_SetEnvironmentVariable(asciiname, asciivalue);
-    FreeAsciiString(asciivalue);
-    FreeAsciiString(asciiname);
-    return(rc);
-}
-//******************************************************************************
 VOID WIN32API GlobalMemoryStatus( MEMORYSTATUS *arg1)
 {
     dprintf(("KERNEL32:  GlobalMemoryStatus\n"));
@@ -346,32 +276,6 @@ VOID WIN32API GlobalMemoryStatus( MEMORYSTATUS *arg1)
     dprintf(("dwAvailPageFile %X\n", arg1->dwAvailPageFile));
     dprintf(("dwTotalVirtual  %X\n", arg1->dwTotalVirtual));
     dprintf(("dwAvailVirtual  %X\n", arg1->dwAvailVirtual));
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API GetEnvironmentVariableA(LPCSTR arg1, LPSTR arg2, DWORD  arg3)
-{
-    dprintf(("KERNEL32:  GetEnvironmentVariable %s\n", arg1));
-    return O32_GetEnvironmentVariable(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API GetEnvironmentVariableW(LPCWSTR lpName, LPWSTR lpBuffer,
-                                       DWORD nSize)
-{
-  char *astring, *asciibuffer;
-  DWORD rc;
-
-    dprintf(("KERNEL32:  OS2GetEnvironmentVariableW\n"));
-    asciibuffer = (char *)malloc(nSize+1);
-    *asciibuffer = 0;
-    astring     = UnicodeToAsciiString((LPWSTR)lpName);
-
-    rc = O32_GetEnvironmentVariable(astring, asciibuffer, nSize);
-    AsciiToUnicode(asciibuffer, lpBuffer);
-    FreeAsciiString(astring);
-    free(asciibuffer);
-    return(rc);
 }
 VOID WIN32API Sleep(DWORD arg1)
 {
@@ -463,13 +367,6 @@ VOID WIN32API FatalExit( UINT arg1)
 {
     dprintf(("KERNEL32:  OS2FatalExit\n"));
     O32_FatalExit(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-LPSTR WIN32API GetEnvironmentStringsA(void)
-{
-    dprintf(("KERNEL32:  OS2GetEnvironmentStringsA\n"));
-    return (LPSTR) O32_GetEnvironmentStrings();
 }
 //******************************************************************************
 //******************************************************************************
