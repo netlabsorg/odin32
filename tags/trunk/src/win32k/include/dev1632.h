@@ -1,4 +1,4 @@
-/* $Id: dev1632.h,v 1.4 2000-02-25 18:15:04 bird Exp $
+/* $Id: dev1632.h,v 1.5 2000-04-05 18:40:41 bird Exp $
  * dev1632.h - Common header file for 16-bit and 32-bit C
  *
  * Copyright (c) 1999 knut st. osmundsen
@@ -51,7 +51,7 @@ typedef struct _KRNLINFO
 {
     unsigned char   cObjects;
     unsigned char   fDebug;
-    unsigned char   fSMP;
+    unsigned char   fchType;             /* TYPE_SMP, TYPE_UNI, TYPE_W4 */
     unsigned short  usBuild;
     OTE             aObjects[MAXKRNLOBJECTS];
 } KRNLINFO, FAR * PKRNLINFO;
