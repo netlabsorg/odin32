@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.50 2004-03-12 18:13:51 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.51 2004-03-24 16:55:35 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -258,8 +258,8 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
         goto invalid_parameter;
     }
     
-    dprintf(("BITMAP: (%d,%d) %d bytes",
-             info->bmiHeader.biWidth, info->bmiHeader.biHeight, info->bmiHeader.biSizeImage));
+    dprintf(("BITMAP: (%d,%d) %d bpp %d bytes",
+             info->bmiHeader.biWidth, info->bmiHeader.biHeight, info->bmiHeader.biBitCount, info->bmiHeader.biSizeImage));
     
     height = info->bmiHeader.biHeight;
     width  = info->bmiHeader.biWidth;
