@@ -1,4 +1,4 @@
-# $Id: odin32.profile.vac3.mk,v 1.10 2002-04-11 22:45:28 bird Exp $
+# $Id: odin32.profile.vac3.mk,v 1.11 2002-04-11 23:08:11 bird Exp $
 
 #
 # Odin32 API
@@ -85,6 +85,34 @@ CDEFINES         = -D__WIN32OS2__ -D__WINE__ -D__i386__ -DTCPV40HDRS -DCOMCTL32U
 CDEFINES_ODINCRT = -D__WIN32OS2__ -D__WINE__ -D__i386__
 CDEFINES_WIN32APP= -D__WIN32OS2__ -D__i386__
 
+
+#
+# Linker flags.
+#   This may look a bit like a mess but, there is usually a reason behind
+#   every line and the way it is done. We have some problems with nmake
+#   when we add new flags to for example LD2FLAGS too many times.
+#
+!ifdef EXETARGET
+!ifndef STACKSIZE
+STACKSIZE = 0x50000
+!endif
+
+!   ifdef VIO
+LDTARGETFLAGS    = -Ge+ -B"/pmtype:vio /stack:$(STACKSIZE)"
+LD2TARGETFLAGS   = /EXEC /pmtype:vio   /stack:$(STACKSIZE)
+!   else
+LDTARGETFLAGS    = -Ge+ -B"/pmtype:pm /stack:$(STACKSIZE)"
+LD2TARGETFLAGS   = /EXEC /pmtype:pm   /stack:$(STACKSIZE)
+!   endif
+!else
+LDTARGETFLAGS    = -Ge-
+LD2TARGETFLAGS   = /DLL
+!endif
+LDFLAGS          = -Q   -B"/noe /map /linenumbers  /nod" -Ti -Si -W3 -Gm+ $(PROFILEFLAGS) $(LDTARGETFLAGS)
+LDFLAGS_ODINCRT  = -Q   -B"/noe /map /linenumbers  "     -Ti -Si -W3 -Gm+ $(PROFILEFLAGS) $(LDTARGETFLAGS)
+LD2FLAGS         = /nologo /noe /map /linenumbers  /nod /debug $(LD2TARGETFLAGS)
+LD2FLAGS_ODINCRT = /nologo /noe /map /linenumbers       /debug $(LD2TARGETFLAGS)
+
 !else
 #
 # This is Patricks take at profiling.
@@ -138,8 +166,6 @@ CDEFINES         = -DDEBUG -DPROFILE -D__WIN32OS2__ -D__i386__ -D__WINE__ -DTCPV
                    -DDEFAULT_LOGGING_OFF
 !endif
 
-!endif #profile type
-
 
 #
 # Linker flags.
@@ -164,14 +190,18 @@ LDTARGETFLAGS    = -Ge-
 LD2TARGETFLAGS   = /DLL
 !endif
 !ifdef NODEBUGINFO
-LDFLAGS          = -Q   -B"/noe /map /packcode /packdata /exepack:2 /nodebug /nodbgpack /nod" -Si -W3 -Gm+ $(LDTARGETFLAGS)
-LDFLAGS_ODINCRT  = -Q   -B"/noe /map /packcode /packdata /exepack:2 /nodebug /nodbgpack"      -Si -W3 -Gm+ $(LDTARGETFLAGS)
-LD2FLAGS         = /nologo /noe /map /packcode /packdata /exepack:2 /nodebug /nodbgpack /nod $(LD2TARGETFLAGS)
-LD2FLAGS_ODINCRT = /nologo /noe /map /packcode /packdata /exepack:2 /nodebug /nodbgpack      $(LD2TARGETFLAGS)
+LDFLAGS          = -Q   -B"/noe /map /packcode /packdata /exepack:2 /linenumbers /nodebug /nodbgpack /nod" -Si -W3 -Gm+ $(LDTARGETFLAGS)
+LDFLAGS_ODINCRT  = -Q   -B"/noe /map /packcode /packdata /exepack:2 /linenumbers /nodebug /nodbgpack"      -Si -W3 -Gm+ $(LDTARGETFLAGS)
+LD2FLAGS         = /nologo /noe /map /packcode /packdata /exepack:2 /linenumbers /nodebug /nodbgpack /nod $(LD2TARGETFLAGS)
+LD2FLAGS_ODINCRT = /nologo /noe /map /packcode /packdata /exepack:2 /linenumbers /nodebug /nodbgpack      $(LD2TARGETFLAGS)
 !else
-LDFLAGS          = -Q   -B"/noe /map /packcode /packdata /exepack:2 /dbgpack /nod" -Ti -Si -W3 -Gm+ $(LDTARGETFLAGS)
-LDFLAGS_ODINCRT  = -Q   -B"/noe /map /packcode /packdata /exepack:2 /dbgpack "     -Ti -Si -W3 -Gm+ $(LDTARGETFLAGS)
-LD2FLAGS         = /nologo /noe /map /packcode /packdata /exepack:2 /dbgpack /nod /debug $(LD2TARGETFLAGS)
-LD2FLAGS_ODINCRT = /nologo /noe /map /packcode /packdata /exepack:2 /dbgpack      /debug $(LD2TARGETFLAGS)
+LDFLAGS          = -Q   -B"/noe /map /packcode /packdata /exepack:2 /linenumbers /dbgpack /nod" -Ti -Si -W3 -Gm+ $(LDTARGETFLAGS)
+LDFLAGS_ODINCRT  = -Q   -B"/noe /map /packcode /packdata /exepack:2 /linenumbers /dbgpack "     -Ti -Si -W3 -Gm+ $(LDTARGETFLAGS)
+LD2FLAGS         = /nologo /noe /map /packcode /packdata /exepack:2 /linenumbers /dbgpack /nod /debug $(LD2TARGETFLAGS)
+LD2FLAGS_ODINCRT = /nologo /noe /map /packcode /packdata /exepack:2 /linenumbers /dbgpack      /debug $(LD2TARGETFLAGS)
 !endif
+
+!endif #profile type
+
+
 
