@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.262 2001-06-10 12:05:40 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.263 2001-06-11 14:37:46 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -202,7 +202,16 @@ Win32BaseWindow::~Win32BaseWindow()
         dprintf(("Destroying window %x %s", getWindowHandle(), windowNameA));
         setParent(NULL);  //or else we'll crash in the dtor of the ChildWindow class
     }
-
+    else
+    if(getParent() && getParent()->getFirstChild() == this && getNextChild() == NULL)
+    {
+        //if we're the last child that's being destroyed and our
+        //parent window was also destroyed, then we 
+        if(getParent()->IsWindowDestroyed())
+        {
+            setParent(NULL);  //or else we'll crash in the dtor of the ChildWindow class
+        }
+    }
     /* Decrement class window counter */
     if(windowClass) {
         RELEASE_CLASSOBJ(windowClass);
@@ -237,10 +246,10 @@ Win32BaseWindow::~Win32BaseWindow()
         removeWindowProps();
     }
     Win32BaseWindow *wndparent = (Win32BaseWindow *)ChildWindow::getParentOfChild();
-    if(wndparent) {
+    if(wndparent && !fDestroyAll) {
         RELEASE_WNDOBJ(wndparent);
     }
-    if(owner) {
+    if(owner && !fDestroyAll) {
         RELEASE_WNDOBJ(owner);
     }
     if(windowClass) {
@@ -426,7 +435,13 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         }
         else
         {
-            owner = GetWindowFromHandle(GetWindowFromHandle(cs->hwndParent)->GetTopParent());
+            Win32BaseWindow *wndparent = GetWindowFromHandle(cs->hwndParent); 
+            if(wndparent) {
+                 owner = GetWindowFromHandle(wndparent->GetTopParent());
+                 RELEASE_WNDOBJ(wndparent);
+            }
+            else owner = NULL;        
+
             if(owner == NULL)
             {
                 dprintf(("HwGetWindowHandleData couldn't find owner window %x!!!", cs->hwndParent));
