@@ -1,4 +1,4 @@
-; $Id: exceptutil.asm,v 1.1 1999-08-22 12:55:57 sandervl Exp $
+; $Id: exceptutil.asm,v 1.2 1999-08-29 14:56:02 sandervl Exp $
 
 ;/*
 ; * Project Odin Software License can be found in LICENSE.TXT
@@ -11,7 +11,6 @@
                 NAME    except
 
 CODE32          SEGMENT DWORD PUBLIC USE32 'CODE'
-                ASSUME  CS:FLAT ,DS:FLAT,SS:FLAT
         public  RaiseExceptionAsm
         extrn   OS2RAISEEXCEPTION : near
 
