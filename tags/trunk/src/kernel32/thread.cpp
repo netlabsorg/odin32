@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.40 2002-01-13 14:29:57 sandervl Exp $ */
+/* $Id: thread.cpp,v 1.41 2002-01-13 21:42:43 sandervl Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -199,9 +199,9 @@ VOID WIN32API ExitThread(DWORD exitcode)
   else  DebugInt3();
 
   HMSetThreadTerminated(GetCurrentThread());
-  Win32DllBase::detachThreadFromAllDlls(); 	//send DLL_THREAD_DETACH message to all dlls
+  Win32DllBase::detachThreadFromAllDlls();    //send DLL_THREAD_DETACH message to all dlls
   Win32DllBase::tlsDetachThreadFromAllDlls(); //destroy TLS structures of all dlls
-  WinExe->tlsDetachThread();			//destroy TLS structure of main exe
+  if(WinExe)  WinExe->tlsDetachThread();      //destroy TLS structure of main exe
   DestroyTIB();
 
   if(exceptFrame) OS2UnsetExceptionHandler((void *)exceptFrame);
