@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2092 2002-05-22 20:18:35 sandervl Exp $ */
+/* $Id: changelog,v 1.2093 2002-05-23 07:12:37 sandervl Exp $ */
+
+ 2002-05-23: Platon Fomichev <platon@innotek.de>
+    - USER32:   o Keyboard fixes for right alt & right shift
 
  2002-05-22: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o CreateThread bugfix (returned thread id incorrect)
