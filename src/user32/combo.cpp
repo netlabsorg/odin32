@@ -1,4 +1,4 @@
-/* $Id: combo.cpp,v 1.29 2000-03-26 16:30:29 cbratschi Exp $ */
+/* $Id: combo.cpp,v 1.30 2000-03-28 17:13:46 sandervl Exp $ */
 /*
  * Combo controls
  *
@@ -1145,7 +1145,9 @@ static void CBDropDown( LPHEADCOMBO lphc )
                            RDW_ERASE | RDW_UPDATENOW | RDW_NOCHILDREN );
 
    EnableWindow( lphc->hWndLBox, TRUE );
-   ShowWindow( lphc->hWndLBox, SW_SHOW);
+   //SvL: Don't activate combo listbox window or else focus will change
+   //     (this window's parent is the desktop)
+   ShowWindow( lphc->hWndLBox, SW_SHOWNOACTIVATE);
 
 }
 
