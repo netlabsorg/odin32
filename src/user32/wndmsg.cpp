@@ -1,4 +1,4 @@
-/* $Id: wndmsg.cpp,v 1.20 2004-01-30 22:10:25 bird Exp $ */
+/* $Id: wndmsg.cpp,v 1.21 2004-03-12 16:48:17 sandervl Exp $ */
 /*
  * Win32 window message text function for OS/2
  *
@@ -791,12 +791,6 @@ void DebugPrintMessage(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam, BOOL f
         }
         else    dprintf2(("SendMessage%c %s for %x %x %x", unicode, GetMsgText(Msg), hwnd, wParam, lParam));
   }
-//testestest
-  if(Msg == WM_NOTIFY && (hwnd == 0x6800000a || hwnd == 0x6800000c)) {
-      LPNMLISTVIEW pHdr = (LPNMLISTVIEW)lParam;
-      dprintf(("WM_NOTIFY %x %x %x", pHdr->hdr.hwndFrom, pHdr->hdr.idFrom, pHdr->hdr.code));
-  }
-//testestest
 }
 
 #endif
