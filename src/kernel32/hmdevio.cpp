@@ -1,4 +1,4 @@
-/* $Id: hmdevio.cpp,v 1.23 2001-12-14 10:22:38 sandervl Exp $ */
+/* $Id: hmdevio.cpp,v 1.24 2001-12-14 12:44:56 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -431,7 +431,7 @@ DWORD HMCustomDriver::CreateFile (LPCSTR lpFileName,
                                   PVOID         lpSecurityAttributes,
                                   PHMHANDLEDATA pHMHandleDataTemplate)
 {
-   pHMHandleData->hHMHandle = pfnDriverOpen(pHMHandleData->dwAccess, pHMHandleData->dwShare);
+   pHMHandleData->hHMHandle = pfnDriverOpen(pHMHandleData->dwAccess, pHMHandleData->dwShare, pHMHandleData->dwFlags);
    if(pHMHandleData->hHMHandle == INVALID_HANDLE_VALUE_W) {
        return GetLastError();
    }
@@ -442,7 +442,7 @@ DWORD HMCustomDriver::CreateFile (LPCSTR lpFileName,
 BOOL HMCustomDriver::CloseHandle(PHMHANDLEDATA pHMHandleData)
 {
    if(pHMHandleData->hHMHandle) {
-	pfnDriverClose(pHMHandleData->hHMHandle);
+	pfnDriverClose(pHMHandleData->hHMHandle, pHMHandleData->dwFlags);
    }
    pHMHandleData->hHMHandle = 0;
    return TRUE;
@@ -462,7 +462,7 @@ BOOL HMCustomDriver::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoCont
        return FALSE;
    }
 
-   ret = pfnDriverIOCtl(pHMHandleData->hHMHandle, dwIoControlCode, lpInBuffer, nInBufferSize,
+   ret = pfnDriverIOCtl(pHMHandleData->hHMHandle, pHMHandleData->dwFlags, dwIoControlCode, lpInBuffer, nInBufferSize,
                         lpOutBuffer, nOutBufferSize, lpBytesReturned, lpOverlapped);
    dprintf(("DeviceIoControl %x returned %d", dwIoControlCode, ret));
    return ret;
@@ -498,7 +498,7 @@ BOOL HMCustomDriver::ReadFile(PHMHANDLEDATA pHMHandleData,
        ::SetLastError(ERROR_INVALID_FUNCTION_W);
        return FALSE;
    }
-   ret = pfnDriverRead(pHMHandleData->hHMHandle, lpBuffer, nNumberOfBytesToRead,
+   ret = pfnDriverRead(pHMHandleData->hHMHandle, pHMHandleData->dwFlags, lpBuffer, nNumberOfBytesToRead,
                       lpNumberOfBytesRead, lpOverlapped, lpCompletionRoutine);
    dprintf(("pfnDriverRead %x %x %x %x %x %x returned %x", pHMHandleData->hHMHandle, lpBuffer, nNumberOfBytesToRead,
              lpNumberOfBytesRead, lpOverlapped, lpCompletionRoutine, ret));
@@ -535,7 +535,7 @@ BOOL HMCustomDriver::WriteFile(PHMHANDLEDATA pHMHandleData,
        ::SetLastError(ERROR_INVALID_FUNCTION_W);
        return FALSE;
    }
-   ret = pfnDriverWrite(pHMHandleData->hHMHandle, lpBuffer, nNumberOfBytesToWrite,
+   ret = pfnDriverWrite(pHMHandleData->hHMHandle, pHMHandleData->dwFlags, lpBuffer, nNumberOfBytesToWrite,
                         lpNumberOfBytesWritten, lpOverlapped, lpCompletionRoutine);
    dprintf(("pfnDriverWrite %x %x %x %x %x %x returned %x", pHMHandleData->hHMHandle, lpBuffer, nNumberOfBytesToWrite,
             lpNumberOfBytesWritten, lpOverlapped, lpCompletionRoutine, ret));
@@ -560,7 +560,7 @@ BOOL HMCustomDriver::CancelIo(PHMHANDLEDATA pHMHandleData)
        ::SetLastError(ERROR_INVALID_FUNCTION_W);
        return FALSE;
    }
-   ret = pfnDriverCancelIo(pHMHandleData->hHMHandle);
+   ret = pfnDriverCancelIo(pHMHandleData->hHMHandle, pHMHandleData->dwFlags);
    dprintf(("pfnDriverCancelIo %x returned %x", pHMHandleData->hHMHandle, ret));
    return ret;
 }
@@ -599,7 +599,7 @@ BOOL HMCustomDriver::GetOverlappedResult(PHMHANDLEDATA pHMHandleData,
         ::SetLastError(ERROR_INVALID_FUNCTION_W);
         return FALSE;
     }
-    return pfnDriverGetOverlappedResult(pHMHandleData->hHMHandle, lpOverlapped, lpcbTransfer, fWait);
+    return pfnDriverGetOverlappedResult(pHMHandleData->hHMHandle, pHMHandleData->dwFlags, lpOverlapped, lpcbTransfer, fWait);
 }
 //******************************************************************************
 //******************************************************************************

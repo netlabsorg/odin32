@@ -1,4 +1,4 @@
-/* $Id: overlappedio.h,v 1.9 2001-12-10 14:04:25 sandervl Exp $ */
+/* $Id: overlappedio.h,v 1.1 2001-12-14 12:45:49 sandervl Exp $ */
 
 /*
  * Win32 overlapped IO class
