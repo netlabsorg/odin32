@@ -124,14 +124,14 @@ HCDIO OSLibCdIoGetDevice(int SRB_HaId, int SRB_Target, int SRB_Lun)
     ULONG		ulAction, ulCDSig;
     char        pszDisk[4];
 
-    if(SRB_HaId != 0 && SRB_Target != 0 || SRB_Lun > (nrCDROMDrives - 1)) {
+    if(SRB_HaId != 0 || SRB_Lun != 0 || SRB_Target > (nrCDROMDrives - 1)) {
         return (HCDIO) -1;
     }
     
-    if(hCDHandles[SRB_Lun]) {
-        return hCDHandles[SRB_Lun];
+    if(hCDHandles[SRB_Target]) {
+        return hCDHandles[SRB_Target];
     }
-    pszDisk[0] = 'A' + ulCDDriveNr[SRB_Lun];
+    pszDisk[0] = 'A' + ulCDDriveNr[SRB_Target];
     pszDisk[1] = ':';
     pszDisk[2] = 0;
 
@@ -149,7 +149,7 @@ HCDIO OSLibCdIoGetDevice(int SRB_HaId, int SRB_Target, int SRB_Lun)
 		                &ulCDSig, sizeof(ulCDSig), NULL) == 0 &&
 	        ulCDSig == (('C') | ('D' << 8) | ('0' << 16) | ('1' << 24)) )
         {
-            hCDHandles[SRB_Lun] = hDisk;
+            hCDHandles[SRB_Target] = hDisk;
             return (HCDIO)hDisk;
         }
     

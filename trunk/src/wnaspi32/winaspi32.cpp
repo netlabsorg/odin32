@@ -1,4 +1,4 @@
-/* $Id: winaspi32.cpp,v 1.14 2002-06-08 11:42:02 sandervl Exp $ */
+/* $Id: winaspi32.cpp,v 1.15 2002-07-28 15:38:09 sandervl Exp $ */
 /*
  * WNASPI routines
  *
@@ -178,6 +178,7 @@ static WORD ASPI_ExecScsiCmd(SRB_ExecSCSICmd *lpPRB)
     HCDIO hCDIO = OSLibCdIoGetDevice(lpPRB->SRB_HaId, lpPRB->SRB_Target, lpPRB->SRB_Lun);
     if(hCDIO == -1) {
         dprintf(("Failed: invalid device %d %d %d", lpPRB->SRB_HaId, lpPRB->SRB_Target, lpPRB->SRB_Lun));
+        ASPI_DebugPrintCmd(lpPRB);
         return WNASPI32_DoPosting( lpPRB, SS_NO_DEVICE );
     }
 
