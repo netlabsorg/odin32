@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2326 2002-09-30 09:40:18 sandervl Exp $ */
+/* $Id: changelog,v 1.2327 2002-09-30 11:56:19 sandervl Exp $ */
+
+ 2002-09-30: Sander van Leeuwen <sandervl@innotek   >
+    - SHELL32:  o Fixed crash when deleting a file in the file dialog
 
  2002-09-30: Platon Fomichev <platon@innotek   >
     - COMDLG32: o File dialogs: if lpstrInitialDir is not a dir but a filename
