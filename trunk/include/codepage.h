@@ -17,12 +17,20 @@
 
 #define CODEPAGE_SECTION    "Codepages"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 ULONG GetDisplayCodepage();
 ULONG GetWindowsCodepage();
 UconvObject GetDisplayUconvObject();
 UconvObject GetWindowsUconvObject();
 
 void CODEPAGE_Init(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  /*__CODEPAGE_H*/
 
