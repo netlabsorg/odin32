@@ -1,4 +1,4 @@
-/* $Id: odin32pack.cmd,v 1.14 2001-03-24 19:22:02 bird Exp $
+/* $Id: odin32pack.cmd,v 1.15 2001-04-02 01:55:42 bird Exp $
  *
  * Make the two zip files.
  *
@@ -11,7 +11,7 @@
  */
     sStartDir = directory();
 
-    if (DATE('B')//7 = 4) then  /* weekly on Thursdays */
+    if (DATE('B')//7 = 3) then  /* weekly on Thursdays */
         sType = '-Weekly';
     else
         sType = '-Daily';
