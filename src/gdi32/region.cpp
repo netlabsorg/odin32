@@ -1,4 +1,4 @@
-/* $Id: region.cpp,v 1.38 2004-02-10 15:35:39 sandervl Exp $ */
+/* $Id: region.cpp,v 1.39 2004-02-12 12:44:13 sandervl Exp $ */
 
 /*
  * GDI32 region code
@@ -2010,8 +2010,10 @@ BOOL WIN32API RectInRegion( HRGN  hrgn, const RECT * pRect)
 //******************************************************************************
 //Returned region in device coordinates (undocumented behaviour)
 //******************************************************************************
-HRGN WIN32API PathToRegion( HDC  hdc)
+HRGN WIN32API PathToRegion(HDC hdc)
 {
+    HRGN hrgn = 0, hrgnTemp = 0, hrgnwin = 0;
+
     pDCData  pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
     if(!pHps)
     {
@@ -2019,14 +2021,13 @@ HRGN WIN32API PathToRegion( HDC  hdc)
         SetLastError(ERROR_INVALID_HANDLE_W);
         return NULLHANDLE;
     }
-
-    HRGN hrgn, hrgnTemp, hrgnwin;
-
     dprintf(("GDI32: PathToRegion %x", hdc));
 
     hrgnTemp = GpiPathToRegion(pHps->hps, 1, (pHps->polyFillMode == ALTERNATE_W) ? FPATH_ALTERNATE : FPATH_WINDING);
-    if(hrgnTemp == NULLHANDLE)
+    if(hrgnTemp == NULLHANDLE) {
+        dprintf(("GpiPathToRegion failed with %x", WinGetLastError(0)));
         goto error;
+    }
 
     hrgnwin = CreateRectRgn(1, 1, 2, 2);
     hrgn = ObjQueryHandleData(hrgnwin, HNDL_REGION);
@@ -2047,13 +2048,15 @@ error:
     if(hrgnwin)
         DeleteObject(hrgnwin);
 
+    if(hrgnTemp)
+        GpiDestroyRegion(pHps->hps, hrgnTemp);
+
     SetLastError(ERROR_INVALID_HANDLE_W);       //todo right error
     return NULLHANDLE;
 }
 //******************************************************************************
 //Selects the current path as a clipping region for a device context, combining
 //any existing clipping region by using the specified mode
-//TODO: Can be emulated with SelectClipRegion??
 //******************************************************************************
 BOOL WIN32API SelectClipPath(HDC hdc, int iMode)
 {
@@ -2068,7 +2071,8 @@ BOOL WIN32API SelectClipPath(HDC hdc, int iMode)
     }
 
     if(hrgn == NULLHANDLE || ret == FALSE) {
-        dprintf(("GDI32: SelectClipPath FAILED %x %d", hrgn, ret));
+        dprintf(("GDI32: SelectClipPath FAILED %x %d PRETEND success", hrgn, ret));
+        ret = TRUE;
     }
     return ret;
 }
