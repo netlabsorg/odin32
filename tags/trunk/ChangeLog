@@ -1,7 +1,10 @@
-/* $Id: ChangeLog,v 1.1431 2001-05-19 21:31:39 bird Exp $ */
+/* $Id: ChangeLog,v 1.1432 2001-05-20 08:18:51 sandervl Exp $ */
+
+ 2001-05-20: Dietrich Teickner <Dietrich_Teickner@t-online.de>
+    - KERNEL32: o LOCALE_IFIRSTDAYOFWEEK fixes (Get/SetLocaleInfo)
 
  2001-05-19: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
-    - win32k:   o Added improovments from Rafal, better validation of the
+    - win32k:   o Added improvements from Rafal, better validation of the
                   paths which are found. Might cause some warnings for
                   some of you, but just read and ignore them.
                   Run configure.cmd (one of them)!
