@@ -1,4 +1,4 @@
-/* $Id: rtl.c,v 1.3 2003-01-16 15:22:39 sandervl Exp $ */
+/* $Id: rtl.c,v 1.4 2003-01-23 20:22:00 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -529,45 +529,8 @@ DWORD WINAPI RtlInitializeGenericTable(void)
 	return 0;
 }
 
-/******************************************************************************
- *  RtlInitializeBitMap			[NTDLL] 
- * 
- */
-NTSTATUS WINAPI RtlInitializeBitMap(DWORD x1,DWORD x2,DWORD x3)
-{
-	FIXME("(0x%08lx,0x%08lx,0x%08lx),stub\n",x1,x2,x3);
-	return 0;
-}
 
-/******************************************************************************
- *  RtlSetBits				[NTDLL] 
- * 
- */
-NTSTATUS WINAPI RtlSetBits(DWORD x1,DWORD x2,DWORD x3)
-{
-	FIXME("(0x%08lx,0x%08lx,0x%08lx),stub\n",x1,x2,x3);
-	return 0;
-}
 
-/******************************************************************************
- *  RtlFindClearBits			[NTDLL] 
- * 
- */
-NTSTATUS WINAPI RtlFindClearBits(DWORD x1,DWORD x2,DWORD x3)
-{
-	FIXME("(0x%08lx,0x%08lx,0x%08lx),stub\n",x1,x2,x3);
-	return 0;
-}
-
-/******************************************************************************
- *  RtlClearBits			[NTDLL] 
- * 
- */
-NTSTATUS WINAPI RtlClearBits(DWORD x1,DWORD x2,DWORD x3)
-{
-	FIXME("(0x%08lx,0x%08lx,0x%08lx),stub\n",x1,x2,x3);
-	return 0;
-}
 
 /******************************************************************************
  *  RtlCopyMemory   [NTDLL] 
