@@ -1,4 +1,4 @@
-/* $Id: wnetap32.cpp,v 1.9 2000-10-02 13:58:26 phaller Exp $ */
+/* $Id: wnetap32.cpp,v 1.10 2000-10-02 14:02:28 phaller Exp $ */
 
 /*
  *
@@ -2830,11 +2830,11 @@ ODINFUNCTION3(NET_API_STATUS, OS2NetWkstaGetInfo,
         int iSize = sizeof(WKSTA_INFO_100) + iSizeComputername + iSizeLangroup;
 
         // pointer to the data area
-        PBYTE pData = (PBYTE)pwki100 + sizeof(WKSTA_INFO_100);
-        
         rc = OS2NetApiBufferAllocate(iSize, (LPVOID*)&pwki100);
         if (!rc)
         {
+          PBYTE pData = (PBYTE)pwki100 + sizeof(WKSTA_INFO_100);
+          
           pwki100->wki100_platform_id = 0; //@@@PH dummy
           pwki100->wki100_computername = lstrcpyAtoW( (LPWSTR)pData, (LPCSTR)pOS2wki10->wki10_computername);
           pData += iSizeComputername;
@@ -2862,11 +2862,11 @@ ODINFUNCTION3(NET_API_STATUS, OS2NetWkstaGetInfo,
         int iSize = sizeof(WKSTA_INFO_101) + iSizeComputername + iSizeLangroup + iSizeLanroot;
 
         // pointer to the data area
-        PBYTE pData = (PBYTE)pwki101 + sizeof(WKSTA_INFO_101);
-        
         rc = OS2NetApiBufferAllocate(iSize, (LPVOID*)&pwki101);
         if (!rc)
         {
+          PBYTE pData = (PBYTE)pwki101 + sizeof(WKSTA_INFO_101);
+        
           pwki101->wki101_platform_id = 0; //@@@PH dummy
           pwki101->wki101_computername = lstrcpyAtoW( (LPWSTR)pData, (LPCSTR)pOS2wki1->wki1_computername);
           pData += iSizeComputername;
@@ -2896,11 +2896,11 @@ ODINFUNCTION3(NET_API_STATUS, OS2NetWkstaGetInfo,
         int iSize = sizeof(WKSTA_INFO_102) + iSizeComputername + iSizeLangroup + iSizeLanroot;
 
         // pointer to the data area
-        PBYTE pData = (PBYTE)pwki102 + sizeof(WKSTA_INFO_102);
-        
         rc = OS2NetApiBufferAllocate(iSize, (LPVOID*)&pwki102);
         if (!rc)
         {
+          PBYTE pData = (PBYTE)pwki102 + sizeof(WKSTA_INFO_102);
+        
           pwki102->wki102_platform_id = 0; //@@@PH dummy
           pwki102->wki102_computername = lstrcpyAtoW( (LPWSTR)pData, (LPCSTR)pOS2wki1->wki1_computername);
           pData += iSizeComputername;
