@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.15 1999-07-25 15:51:56 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.16 1999-07-25 17:47:24 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -552,7 +552,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     case WM_SAVEAPPLICATION:
     case WM_SEMANTICEVENT:
     default:
-        dprintf(("OS2: RunDefWndProc msg %x for %x", msg, hwnd));
+//        dprintf(("OS2: RunDefWndProc msg %x for %x", msg, hwnd));
         RestoreOS2TIB();
         return WinDefWindowProc( hwnd, msg, mp1, mp2 );
   }
@@ -560,7 +560,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
   return (MRESULT)FALSE;
 
 RunDefWndProc:
-  dprintf(("OS2: RunDefWndProc msg %x for %x", msg, hwnd));
+//  dprintf(("OS2: RunDefWndProc msg %x for %x", msg, hwnd));
   RestoreOS2TIB();
   return WinDefWindowProc( hwnd, msg, mp1, mp2 );
 } /* End of Win32WindowProc */

@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.11 1999-07-25 15:51:57 sandervl Exp $ */
+/* $Id: window.cpp,v 1.12 1999-07-25 17:47:25 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -620,7 +620,6 @@ BOOL WIN32API GetClientRect( HWND hwnd, PRECT pRect)
 #endif
     hwnd = Win32Window::Win32ToOS2Handle(hwnd);
     return OSLibWinQueryWindowRect(hwnd, pRect);
-//    return O32_GetClientRect(hwnd, arg2);
 }
 //******************************************************************************
 //******************************************************************************
