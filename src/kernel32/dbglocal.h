@@ -1,4 +1,4 @@
-/* $Id: dbglocal.h,v 1.11 2000-10-02 13:38:56 sandervl Exp $ */
+/* $Id: dbglocal.h,v 1.12 2000-10-10 17:14:03 sandervl Exp $ */
 
 /*
  * debug logging functions for OS/2
@@ -96,32 +96,31 @@ void ParseLogStatus();
 #define DBG_directory      74
 #define DBG_cvtbitmap      75
 #define DBG_hmmmap         76
-#define DBG_winfakepeldr   77
-#define DBG_cvtaccel       78
-#define DBG_cvticon        79
-#define DBG_cvticongrp     80
-#define DBG_oslibexcept    81
-#define DBG_cpu            82
-#define DBG_process        83
-#define DBG_cvtcursor      84
-#define DBG_cvtcursorgrp   85
-#define DBG_stubs          86
-#define DBG_interlock      87
-#define DBG_toolhelp       88
-#define DBG_codepage       89
-#define DBG_debug          90
-#define DBG_oslibdebug     91
-#define DBG_registry       92
-#define DBG_queue          93
-#define DBG_hmthread       94
-#define DBG_hmprocess      95
-#define DBG_VSemaphore     96
-#define DBG_exceptstackdump 97
-#define DBG_hmfile         98
-#define DBG_hmnpipe        99
-#define DBG_hmdisk         100
-#define DBG_version        101
-#define DBG_MAXFILES       102
+#define DBG_cvtaccel       77
+#define DBG_cvticon        78
+#define DBG_cvticongrp     79
+#define DBG_oslibexcept    80
+#define DBG_cpu            81
+#define DBG_process        82
+#define DBG_cvtcursor      83
+#define DBG_cvtcursorgrp   84
+#define DBG_stubs          85
+#define DBG_interlock      86
+#define DBG_toolhelp       87
+#define DBG_codepage       88
+#define DBG_debug          89
+#define DBG_oslibdebug     90
+#define DBG_registry       91
+#define DBG_queue          92
+#define DBG_hmthread       93
+#define DBG_hmprocess      94
+#define DBG_VSemaphore     95
+#define DBG_exceptstackdump 96
+#define DBG_hmfile         97
+#define DBG_hmnpipe        98
+#define DBG_hmdisk         99
+#define DBG_version        100
+#define DBG_MAXFILES       101
 
 extern USHORT DbgEnabled[DBG_MAXFILES];
 extern USHORT DbgEnabledLvl2[DBG_MAXFILES];

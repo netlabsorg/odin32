@@ -1,4 +1,4 @@
-/* $Id: winimagebase.h,v 1.16 2000-09-12 22:45:19 bird Exp $ */
+/* $Id: winimagebase.h,v 1.17 2000-10-10 17:14:07 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -94,8 +94,9 @@ virtual void  setFullPath(char *name);
     char *getResourceAddr(HRSRC hResource);
     ULONG getResourceSize(HRSRC hResource);
 
-    //returns ERROR_SUCCESS or error code
-static  ULONG isPEImage(char *szFileName);
+//returns ERROR_SUCCESS or error code (Characteristics will contain
+//the Characteristics member of the file header structure)
+static  ULONG isPEImage(char *szFileName, DWORD *Characteristics = NULL);
 static  BOOL  findDll(const char *pszFileName, char *pszFullName,
                       int cchFullName, const char *pszAltPath = NULL);
 

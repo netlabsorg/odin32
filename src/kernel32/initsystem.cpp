@@ -1,4 +1,4 @@
-/* $Id: initsystem.cpp,v 1.17 2000-10-03 17:28:30 sandervl Exp $ */
+/* $Id: initsystem.cpp,v 1.18 2000-10-10 17:14:04 sandervl Exp $ */
 /*
  * Odin system initialization (registry, directories & environment)
  *
@@ -6,6 +6,7 @@
  * to setup the registry
  *
  * InitSystemAndRegistry creates:
+ *      - SYSTEMDIR\drivers
  *	- WINDOWSDIR\SYSTEM
  *      - WINDOWSDIR\AppData
  *      - WINDOWSDIR\Cache
@@ -191,6 +192,11 @@ BOOL InitSystemAndRegistry()
    }
 //   if(RegOpenKeyA(HKEY_CURRENT_USER, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders", &hkey) != ERROR_SUCCESS) 
 //   {
+        //system32\drivers dir
+   	strcpy(shellpath, InternalGetSystemDirectoryA());
+   	strcat(shellpath, "\\Drivers");
+   	CreateDirectoryA(shellpath, NULL);
+
 	//SYSTEM dir
    	strcpy(shellpath, InternalGetWindowsDirectoryA());
    	strcat(shellpath, "\\SYSTEM");
