@@ -1,4 +1,4 @@
--- $Id: Authors.sql,v 1.8 2000-08-02 01:01:35 bird Exp $
+-- $Id: Authors.sql,v 1.9 2000-08-02 18:09:24 bird Exp $
 --
 -- Insert authors.
 --
@@ -67,6 +67,7 @@ INSERT INTO author VALUES (53,  'omurata@ga2.so-net.ne.jp', '','omurata@ga2.so-n
 INSERT INTO author VALUES (54,  'rprice@wdn.com',           '','rprice@wdn.com',            'RPi',  NULL,       NULL,                           NULL,               NULL,                         NULL);
 INSERT INTO author VALUES (55,  'Samuel Audet',             'Samuel', 'Audet',              'SA',   NULL,       NULL,                           NULL,               NULL,                         NULL);
 INSERT INTO author VALUES (56,  'Timothy J. Massey',        'Timothy J.', 'Massey',         'TJM',  NULL,       NULL,                           NULL,               NULL,                         NULL);
+INSERT INTO author VALUES (57,  'Abey George',              'Abey', 'George',               'AbB',  NULL,       NULL,                           NULL,               NULL,                         'Wine?');
 --INSERT INTO author VALUES (,  '', '', NULL, NULL, NULL,    NULL);
 --INSERT INTO author VALUES (,  '', '', NULL, NULL, NULL,    NULL);
 
