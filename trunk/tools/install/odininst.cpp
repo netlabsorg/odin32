@@ -1,4 +1,4 @@
-/* $Id: odininst.cpp,v 1.10 2001-08-16 21:34:21 sandervl Exp $ */
+/* $Id: odininst.cpp,v 1.11 2001-12-08 15:36:30 sandervl Exp $ */
 /*
  * Odin WarpIn installation app
  *
@@ -469,6 +469,10 @@ BOOL InitSystemAndRegistry()
    RegCloseKey(hkey1);
    RegCloseKey(hkey);
 
+//#
+//# Entries for quartz.dll
+//#
+
    //Quartz.dll keys
    //[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{CDA42200-BD88-11d0-BD4E-00A0C911CE86}]
    //@="Filter Mapper2"
@@ -543,6 +547,37 @@ BOOL InitSystemAndRegistry()
    RegSetValueEx(hkey1, COM_THREADMODEL, 0,REG_SZ, (LPBYTE)THREAD_BOTH, sizeof(THREAD_BOTH));
    RegCloseKey(hkey1);
    RegCloseKey(hkey);
+
+
+#if 0
+   if(RegCreateKey(HKEY_LOCAL_MACHINE, "Software\\CLASSES\\CLSID\\E436EBB3-524F-11CE-9F53-0020AF0BA770" ,&hkey)!=ERROR_SUCCESS) {
+    goto initreg_error;
+   }
+   RegSetValueEx(hkey,"",0,REG_SZ, (LPBYTE)QUARTZ_FILTERGRAPHDIST_DEFAULT, sizeof(QUARTZ_FILTERGRAPHDIST_DEFAULT));
+   if(RegCreateKey(hkey,COM_INPROCSERVER, &hkey1)!=ERROR_SUCCESS) {
+    RegCloseKey(hkey);
+    goto initreg_error;
+   }
+   RegSetValueEx(hkey1,"",0,REG_SZ, (LPBYTE)QUARTZ_DLL, sizeof(QUARTZ_DLL));
+   RegSetValueEx(hkey1, COM_THREADMODEL, 0,REG_SZ, (LPBYTE)THREAD_BOTH, sizeof(THREAD_BOTH));
+   RegCloseKey(hkey1);
+   RegCloseKey(hkey);
+
+# CLSID_FilterGraph
+[HKEY_CLASSES_ROOT\CLSID\{E436EBB3-524F-11CE-9F53-0020AF0BA770}\InprocServer32]
+@="quartz.dll"
+"ThreadingModel"="Both"
+
+# CLSID_SystemClock
+[HKEY_CLASSES_ROOT\CLSID\{E436EBB1-524F-11CE-9F53-0020AF0BA770}\InprocServer32]
+@="quartz.dll"
+"ThreadingModel"="Both"
+
+# CLSID_MemoryAllocator
+[HKEY_CLASSES_ROOT\CLSID\{1E651CC0-B199-11D0-8212-00C04FC32C45}\InprocServer32]
+@="quartz.dll"
+"ThreadingModel"="Both"
+#endif
 
    //[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion]
    //"ProgramFilesDir"="C:\Program Files"
@@ -745,6 +780,13 @@ BOOL InitSystemAndRegistry()
    {
        PROFILE_SetOdinIniString(ODINFONTSECTION, "MS Sans Serif", "WarpSans");
    }
+   //Add MS Shell Dlg 2 (win2k and up) too
+   if(PROFILE_GetOdinIniString(ODINFONTSECTION, "MS Shell Dlg 2", "", &temp,
+                               0) <= 1)
+   {
+       PROFILE_SetOdinIniString(ODINFONTSECTION, "MS Shell Dlg 2", "WarpSans");
+   }
+
    //Create system.ini with [mci] section
    strcpy(shellpath, InternalGetWindowsDirectory());
    strcat(shellpath, "\\system.ini");
