@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.90 1999-08-17 12:43:57 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.91 1999-08-17 13:30:11 phaller Exp $ */
  99-08-17: Sander van Leeuwen <sandervl@xs4all.nl>
 	- ODINCRT: Rewrote __threadid Clib function to get rid of crashes
                    (restores OS/2 FS selector before accessing PIB ptr and
@@ -7,6 +7,9 @@
 	- DDRAW: Removed ODIN_FS_BEGIN/ODIN_FS_END calls
 	         Fixed bugs in divewrap.h. Incorrect wrappers called themselves
                  instead of the original Dive apis.
+
+ 99-08-17: Patrick Haller <phaller@gmx.net>
+        - LZ32:    can't export LZCopy as ID0, changed to alphanumeric export
 
  99-08-16: Sander van Leeuwen <sandervl@xs4all.nl>
 	- PE loader: Started with rewrite
