@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.847 2000-03-28 19:10:36 sandervl Exp $ */
+ /* $Id: changelog,v 1.848 2000-03-29 15:14:46 cbratschi Exp $ */
+
+ 2000-03-29: Christoph Bratschi <cbratschi@datacomm.ch>
+	- KERNEL32: added FindFileFirstMultiA for internal usage
 
  2000-03-12: Markus Montkowski <mmontkowski@gmx.de>
         - KERNEL32: Added workaround for GetDiskFreeSpaceA; Open32 api doesn't
