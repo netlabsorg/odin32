@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.177 2000-04-07 12:55:16 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.178 2000-04-10 19:40:45 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -93,6 +93,7 @@ void Win32BaseWindow::Init()
   fCreated         = FALSE;
   fTaskList        = FALSE;
   fParentDC        = FALSE;
+  fComingToTop     = FALSE;
 
   windowNameA      = NULL;
   windowNameW      = NULL;
@@ -157,6 +158,7 @@ void Win32BaseWindow::Init()
 //******************************************************************************
 Win32BaseWindow::~Win32BaseWindow()
 {
+    OSLibWinSetVisibleRegionNotify(OS2HwndFrame, FALSE);
     OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32WNDPTR, 0);
     OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32PM_MAGIC, 0);
 
@@ -493,7 +495,13 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   DWORD dwOSWinStyle;
 
   OSLibWinConvertStyle(dwStyle,dwExStyle,&dwOSWinStyle);
+#if 0
+  if(((dwStyle & (WS_CAPTION|WS_POPUP)) == WS_CAPTION) && (getParent() == NULL || getParent() == windowDesktop)) {
+	fTaskList = TRUE;
+  }
+#else
   if (((dwStyle & (WS_CAPTION | WS_SYSMENU | 0xC0000000)) == (WS_CAPTION | WS_SYSMENU))) fTaskList = TRUE;
+#endif
 
   OS2Hwnd = OSLibWinCreateWindow((getParent()) ? getParent()->getOS2WindowHandle() : OSLIB_HWND_DESKTOP,
                                  dwOSWinStyle,(char *)windowNameA,
@@ -505,6 +513,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         SetLastError(ERROR_OUTOFMEMORY); //TODO: Better error
         return FALSE;
   }
+  OSLibWinSetVisibleRegionNotify(OS2HwndFrame, TRUE);
 
   SetLastError(0);
   return TRUE;
