@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2002-08-20 21:30:17 bird Exp $
+# $Id: makefile,v 1.13 2002-08-23 19:29:14 bird Exp $
 
 #
 # Odin32 API
@@ -26,9 +26,14 @@ PATH_ROOT = ..\..
 TARGET_NAME = fastdep
 TARGET_PUBLIC = 1
 TARGET_PUBNAME = $(PATH_TOOLS)\fastdep.$(EXT_EXE)
+
 TARGET_OBJS =\
 $(PATH_TARGET)\fastdep.$(EXT_OBJ)\
 $(PATH_TARGET)\avl.$(EXT_OBJ)\
+
+TARGET_LIBS =\
+$(LIB_OS)\
+$(LIB_C_OBJ)
 
 #
 # Rules config
@@ -99,12 +104,12 @@ TARGET = FastDep
 #
 !include $(ODIN32_POST_INC)
 
-!endif
 
 #
 # We need all.
 #
 needed: all
+!endif
 
 
 #
