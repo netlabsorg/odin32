@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.6 1999-12-01 01:10:55 phaller Exp $ */
+/* $Id: wsock32.cpp,v 1.7 1999-12-02 07:47:26 phaller Exp $ */
 
 /*
  *
@@ -1342,7 +1342,7 @@ ODINFUNCTION4(int,OS2WSAAsyncSelect,
               long,lEvent)
 {
   int   rc;
-  int   iError;
+//  int   iError;
   HWND  hwndOS2 = Win32ToOS2Handle(hWnd);
   ULONG ulNewID;
 
@@ -1384,9 +1384,9 @@ ODINFUNCTION4(int,OS2WSAAsyncSelect,
                       ulNewID,
                       lEvent);
 
-  iError = WSAGetLastError();
-  dprintf(("res=%d, err=%d\n",
-           rc,
-           iError));
+//  iError = WSAGetLastError();
+//  dprintf(("res=%d, err=%d\n",
+//           rc,
+//           iError));
   return (rc);
 }

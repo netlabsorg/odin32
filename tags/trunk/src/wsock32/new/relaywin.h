@@ -1,4 +1,4 @@
-/* $Id: relaywin.h,v 1.1 1999-12-01 01:12:54 phaller Exp $ */
+/* $Id: relaywin.h,v 1.2 1999-12-02 07:47:26 phaller Exp $ */
 
 /*
  *
@@ -49,7 +49,7 @@ ULONG        RelayAlloc     (HWND  hwnd, ULONG ulMsg);
 ULONG        RelayFree      (ULONG ulID);
 ULONG        RelayFreeByHwnd(HWND  hwnd);
 PHWNDMSGPAIR RelayQuery     (ULONG ulID);
-MRESULT      RelayWindowProc(HWND  hwnd, ULONG  ulMsg, MPARAM mp1, MPARAM mp2);
+MRESULT EXPENTRY RelayWindowProc(HWND  hwnd, ULONG  ulMsg, MPARAM mp1, MPARAM mp2);
 HWND         RelayInitialize(HWND  hwndPost);
 BOOL         RelayTerminate (HWND  hwndRelay);
 

@@ -1,4 +1,4 @@
-/* $Id: relaywin.cpp,v 1.2 1999-12-01 20:29:39 phaller Exp $ */
+/* $Id: relaywin.cpp,v 1.3 1999-12-02 07:47:26 phaller Exp $ */
 
 /*
  *
@@ -158,8 +158,11 @@ PHWNDMSGPAIR RelayQuery(ULONG ulID)
   if ( (ulID < 0) ||  // check range
        (ulID >= MAX_ASYNC_SOCKETS) )
     return NULL; // error
-
-  return (&arrHwndMsgPair[ulID]);
+  
+  if (arrHwndMsgPair[ulID].hwnd == 0)
+    return NULL; // error, free entry
+  else
+    return (&arrHwndMsgPair[ulID]);
 }
 
 
@@ -175,10 +178,10 @@ PHWNDMSGPAIR RelayQuery(ULONG ulID)
  * Author    : Patrick Haller [Tue, 1999/11/30 23:00]
  *****************************************************************************/
 
-MRESULT RelayWindowProc(HWND   hwnd,
-                        ULONG  ulMsg,
-                        MPARAM mp1,
-                        MPARAM mp2)
+MRESULT EXPENTRY RelayWindowProc(HWND   hwnd,
+                                 ULONG  ulMsg,
+                                 MPARAM mp1,
+                                 MPARAM mp2)
 {
   PHWNDMSGPAIR pHM;
 
