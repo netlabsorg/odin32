@@ -1,4 +1,4 @@
-; $Id: ddraw.DEF,v 1.9 2001-05-28 17:17:14 phaller Exp $
+; $Id: ddraw.DEF,v 1.10 2001-09-25 18:23:41 sandervl Exp $
 
 ;
 ; Based on Windows 98 DirectX7: DDRAW.DLL
@@ -28,8 +28,8 @@ EXPORTS
  DirectDrawEnumerateExA   = _OS2DirectDrawEnumerateExA@12       @13
 ; DirectDrawEnumerateExW          @14
 ; DirectDrawEnumerateW            @15
-DllCanUnloadNow   = _DllCanUnloadNow@0                          @16
-DllGetClassObject = _DllGetClassObject@12                       @17
+DllCanUnloadNow   = _DDrawDllCanUnloadNow@0                     @16
+DllGetClassObject = _DDrawDllGetClassObject@12                  @17
 ; GetAliasedVidMem          @18
 ; GetDDSurfaceLocal         @19
 ; GetNextMipMap             @20

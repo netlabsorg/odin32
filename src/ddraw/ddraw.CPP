@@ -1,4 +1,4 @@
-/* $Id: ddraw.CPP,v 1.19 2001-04-04 09:02:15 sandervl Exp $ */
+/* $Id: ddraw.CPP,v 1.20 2001-09-25 18:23:41 sandervl Exp $ */
 
 /*
  * DXDraw DLL implementaion
@@ -246,7 +246,7 @@ static ICOM_VTABLE(IClassFactory) DDCF_Vtbl =
 static IClassFactoryImpl DDRAW_CF = {&DDCF_Vtbl, 1 };
 
 
-HRESULT WINAPI DllGetClassObject( REFCLSID rclsid,
+HRESULT WINAPI DDrawDllGetClassObject( REFCLSID rclsid,
                                   REFIID riid,
                                   LPVOID *ppv)
 {
@@ -281,7 +281,7 @@ HRESULT WINAPI DllGetClassObject( REFCLSID rclsid,
  *    Success: S_OK
  *    Failure: S_FALSE
  */
-HRESULT WINAPI DllCanUnloadNow(void)
+HRESULT WINAPI DDrawDllCanUnloadNow(void)
 {
   dprintf(("DllCanUnloadNow(void) stub"));
   return S_FALSE;
