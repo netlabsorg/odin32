@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.11 1999-11-24 19:32:21 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.12 1999-11-24 20:11:36 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -164,7 +164,7 @@ ULONG TranslateWinMsg(ULONG msg)
 	thdb->fMsgTranslated = TRUE;
   }
 
-  if(msg >= WIN32APP_USERMSGBASE) 
+  if(msg >= WINWM_USER)
     return WIN32APP_POSTMSG;
 
   for(int i=0;i<MAX_MSGTRANSTAB;i++)
