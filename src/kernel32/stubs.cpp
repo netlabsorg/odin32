@@ -3472,6 +3472,8 @@ DWORD WIN32API WriteProcessMemory(HANDLE  hProcess,
 
   return (FALSE);
 }
+
+
 /*****************************************************************************
  * Name      : BOOL WriteTapemark
  * Purpose   : The WriteTapemark function writes a specified number of filemarks,
@@ -3503,5 +3505,46 @@ DWORD WIN32API WriteTapemark(HANDLE hDevice,
   return (ERROR_NOT_SUPPORTED);
 }
 
+
+/*****************************************************************************
+ * Name      : DWORD CmdBatNotification
+ * Purpose   : Unknown, used by /winnt/cmd.exe
+ * Parameters: Unknown (wrong)
+ * Variables :
+ * Result    : Unknown
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1999/06/08 21:44]
+ *****************************************************************************/
+
+DWORD WIN32API CmdBatNotification(DWORD x1)
+{
+  dprintf(("KERNEL32: CmdBatNotification(%08xh) not implemented\n",
+           x1));
+
+  return (0);
+}
+
+
+/*****************************************************************************
+ * Name      : DWORD GetVDMCurrentDirectories
+ * Purpose   : Unknown, used by /winnt/cmd.exe
+ * Parameters: Unknown (wrong)
+ * Variables :
+ * Result    : Unknown
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1999/06/08 21:44]
+ *****************************************************************************/
+
+DWORD WIN32API GetVDMCurrentDirectories(DWORD x1)
+{
+  dprintf(("KERNEL32: GetVDMCurrentDirectories(%08xh) not implemented\n",
+           x1));
+
+  return (0);
+}
 
 
