@@ -1,4 +1,4 @@
-/* $Id: elf.h,v 1.3 2000-01-22 00:47:59 bird Exp $
+/* $Id: elf.h,v 1.4 2000-02-18 20:52:35 bird Exp $
  *
  * ELF stuff.
  *
@@ -236,5 +236,22 @@ typedef struct                          /* 0x0c */
 #define R_386_GOTPC     10
 #define R_386_NUM       11
 
-//#pragma pack()
+
+
+/*
+ * ELF Program Header
+ */
+typedef struct
+{
+    Elf32_Word      p_type;
+    Elf32_Off       p_offset;
+    Elf32_Addr      p_vaddr;
+    Elf32_Addr      p_paddr;
+    Elf32_Word      p_filesz;
+    Elf32_Word      p_memsz;
+    Elf32_Word      p_flags;
+    Elf32_Word      p_align;
+} Elf32_Phdr;
+
+#pragma pack()
 #endif /*_elf_h_*/
