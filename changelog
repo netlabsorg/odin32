@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2491 2003-02-20 09:47:46 sandervl Exp $ */
+/* $Id: changelog,v 1.2492 2003-02-22 09:44:57 sandervl Exp $ */
+
+ 2003-02-22: Dietrich Teickner <Dietrich_Teickner@t-online   >
+    - SHELL32:  o Shell file operation updates
 
  2003-02-20: knut st. osmundsen <Knut.Osmundsen@innotek   >
     - KERNEL32: o Added custombuild API for registering a callback for LX Dll 
