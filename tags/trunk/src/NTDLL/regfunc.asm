@@ -1,4 +1,4 @@
-; $Id: regfunc.asm,v 1.1 1999-11-09 09:30:35 phaller Exp $
+; $Id: regfunc.asm,v 1.2 1999-11-09 09:54:47 phaller Exp $
 
 ;/*
 ; * register functions in NTDLL
@@ -34,7 +34,7 @@ CODE32         SEGMENT DWORD PUBLIC USE32 'CODE'
 ; Variables :
 ; Result    :
 ; Remark    : NTDLL.938, NTDLL.946
-; Status    :
+; Status    : VERIFIED
 ;
 ; Author    : Patrick Haller [Mon, 1999/11/08 23:44]
 ; ----------------------------------------------------------------------------
@@ -73,7 +73,7 @@ _chkstk        endp
 ; Variables :
 ; Result    :
 ; Remark    : NTDLL.20
-; Status    :
+; Status    : VERIFIED
 ;
 ; Author    : Patrick Haller [Mon, 1999/11/08 23:44]
 ; ----------------------------------------------------------------------------
@@ -90,7 +90,7 @@ DbgBreakPoint  endp
 ; Variables :
 ; Result    :
 ; Remark    : NTDLL.28
-; Status    :
+; Status    : VERIFIED
 ;
 ; Author    : Patrick Haller [Mon, 1999/11/08 23:44]
 ; ----------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-; $Id: ntdll.def,v 1.21 1999-11-09 09:30:21 phaller Exp $
+; $Id: ntdll.def,v 1.22 1999-11-09 09:54:46 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is NT4.0's NTDLL.DLL
@@ -328,6 +328,11 @@ EXPORTS
 
     RtlTimeToElapsedTimeFields    = _RtlTimeToElapsedTimeFields@8
 
+; ------------------
+; Verified Functions
+; ------------------
+
+    RtlCopyLuid                   = _RtlCopyLuid@8                    @321
 
 ; ------------------
 ; Integer Arithmetic

@@ -1,4 +1,4 @@
-/* $Id: rtl.cpp,v 1.8 1999-11-09 00:44:02 phaller Exp $ */
+/* $Id: rtl.cpp,v 1.9 1999-11-09 09:54:47 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -616,3 +616,24 @@ DWORD WINAPI RtlQueryEnvironmentVariable_U(DWORD           x1,
   return 0;
 }
 
+
+/*****************************************************************************
+ * Name      : RtlCopyLuid
+ * Purpose   : copy local unique identifier?
+ * Parameters: PLUID pluid1
+ *             PLUID pluid2
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.321
+ * Status    : VERIFIED
+ *
+ * Author    : Patrick Haller [Tue, 1999/11/09 09:00]
+ *****************************************************************************/
+
+PLUID WINAPI RtlCopyLuid(PLUID pluid1,
+                         PLUID pluid2)
+{
+  pluid2->LowPart  = pluid1->LowPart;
+  pluid2->HighPart = pluid1->HighPart;
+  return (pluid1);
+}
