@@ -1,4 +1,4 @@
-/* $Id: mixeros2.cpp,v 1.5 2002-05-26 10:52:31 sandervl Exp $ */
+/* $Id: mixeros2.cpp,v 1.6 2002-05-28 13:35:02 sandervl Exp $ */
 
 /*
  * OS/2 Mixer multimedia
@@ -31,6 +31,7 @@ static BOOL  mixerapiIOCTL90 (HFILE hPdd, ULONG ulFunc, PVOID pData, ULONG cbDat
 
 static HFILE hPDDMix = 0;
 static char  mixerApiMap[256] = {0};
+static int   szVolumeLevels[MIX_CTRL_MAX][2] = {0};
 
 /******************************************************************************/
 /******************************************************************************/
@@ -55,6 +56,7 @@ BOOL OSLibMixerOpen()
         return FALSE;
     }
 
+    memset(szVolumeLevels, -1, sizeof(szVolumeLevels));
     return TRUE;
 }
 /******************************************************************************/
@@ -125,7 +127,6 @@ static DWORD OSLibMixGetIndex(DWORD dwControl)
     case MIX_CTRL_VOL_IN_W_PCM:
         idx = RECORDGAINSET;
         break;
-
     default:
         return -1;
     }
@@ -146,29 +147,67 @@ BOOL OSLibMixIsControlPresent(DWORD dwControl)
 }
 /******************************************************************************/
 /******************************************************************************/
-BOOL OSLibMixSetVolume(DWORD dwControl, BOOL fMute, DWORD dwVolLeft, DWORD dwVolRight)
+BOOL OSLibMixSetVolume(DWORD dwControl, DWORD dwVolLeft, DWORD dwVolRight)
 {
-    DWORD     dwFunc;
+    DWORD     dwFunc, dwIOCT90VolLeft, dwIOCT90VolRight;
     MIXSTRUCT mixstruct;
 
     //TODO: implement master volume with MMPM2
-    if(dwControl == MIX_CTRL_VOL_OUT_LINE || dwControl == MIX_CTRL_MUTE_OUT_LINE) {
+    if(dwControl == MIX_CTRL_VOL_OUT_LINE) {
         return TRUE;
     }
 
+    //wave in recording levels are virtual controls as there is only
+    //one control for recording gain
+    switch(dwControl) {
+    case MIX_CTRL_VOL_IN_W_MONO:
+    case MIX_CTRL_VOL_IN_W_PHONE:
+    case MIX_CTRL_VOL_IN_W_MIC:
+    case MIX_CTRL_VOL_IN_W_LINE:
+    case MIX_CTRL_VOL_IN_W_CD:
+    case MIX_CTRL_VOL_IN_W_VIDEO:
+    case MIX_CTRL_VOL_IN_W_AUX:
+    case MIX_CTRL_VOL_IN_W_PCM:
+        szVolumeLevels[dwControl][0] = dwVolLeft;
+        szVolumeLevels[dwControl][1] = dwVolRight;
+        break;
+    }
     dwFunc = OSLibMixGetIndex(dwControl);
     if(dwFunc == -1) {
         return FALSE;
     }
     dwFunc += MONOINSET;
 
-    if(dwVolLeft > MIXER_IOCTL90_MAX_VOLUME || dwVolRight > MIXER_IOCTL90_MAX_VOLUME) {
+    //first get current mute value
+    if(mixerapiIOCTL90(hPDDMix, dwFunc-MONOINSET+MONOINQUERY, &mixstruct, sizeof(mixstruct)) == FALSE) {
+        return FALSE;
+    }
+
+    if(dwVolLeft > MIXER_WIN32_MAX_VOLUME || dwVolRight > MIXER_WIN32_MAX_VOLUME) {
         dprintf(("OSLibMixSetVolume: Volume (%d,%d) out of RANGE!!", dwVolLeft, dwVolRight));
         return FALSE;
     }
-    mixstruct.Mute    = fMute;
-    mixstruct.VolumeL = WIN32_TO_IOCTL90_VOLUME(dwVolLeft);
-    mixstruct.VolumeR = WIN32_TO_IOCTL90_VOLUME(dwVolRight);
+    if(dwControl == MIX_CTRL_OUT_L_TREBLE) {
+        //get bass value (right = treble, left = bass)
+        OSLibMixGetVolume(MIX_CTRL_OUT_L_BASS, &dwVolLeft, NULL);
+    }
+    else 
+    if(dwControl == MIX_CTRL_OUT_L_BASS) {
+        //get treble value (right = treble, left = bass)
+        OSLibMixGetVolume(MIX_CTRL_OUT_L_TREBLE, &dwVolRight, NULL);
+    }
+
+    dwIOCT90VolLeft  = WIN32_TO_IOCTL90_VOLUME(dwVolLeft);
+    dwIOCT90VolRight = WIN32_TO_IOCTL90_VOLUME(dwVolRight);
+
+    if(mixstruct.VolumeL == dwIOCT90VolLeft && 
+       mixstruct.VolumeR == dwIOCT90VolRight) 
+    {
+        return TRUE; //nothing to do
+    }
+    //change volume levels
+    mixstruct.VolumeL = dwIOCT90VolLeft;
+    mixstruct.VolumeR = dwIOCT90VolRight;
 
     if(mixerapiIOCTL90(hPDDMix, dwFunc, &mixstruct, sizeof(mixstruct)) == TRUE) {
         return TRUE;
@@ -178,17 +217,71 @@ BOOL OSLibMixSetVolume(DWORD dwControl, BOOL fMute, DWORD dwVolLeft, DWORD dwVol
 }
 /******************************************************************************/
 /******************************************************************************/
-BOOL OSLibMixGetVolume(DWORD dwControl, BOOL *pfMute, DWORD *pdwVolLeft, DWORD *pdwVolRight)
+BOOL OSLibMixSetMute(DWORD dwControl, BOOL fMute)
 {
     DWORD     dwFunc;
     MIXSTRUCT mixstruct;
 
     //TODO: implement master volume with MMPM2
-    if(dwControl == MIX_CTRL_VOL_OUT_LINE || dwControl == MIX_CTRL_MUTE_OUT_LINE) {
-        if(pfMute)      *pfMute      = 0;
+    if(dwControl == MIX_CTRL_MUTE_OUT_LINE) {
+        return TRUE;
+    }
+
+    dwFunc = OSLibMixGetIndex(dwControl);
+    if(dwFunc == -1) {
+        return FALSE;
+    }
+    dwFunc += MONOINSET;
+
+    //first get current volume levels
+    if(mixerapiIOCTL90(hPDDMix, dwFunc-MONOINSET+MONOINQUERY, &mixstruct, sizeof(mixstruct)) == FALSE) {
+        return FALSE;
+    }
+
+    if(mixstruct.Mute == fMute) {
+        return TRUE; //nothing to do
+    }
+    
+    //change mute
+    mixstruct.Mute = fMute;
+
+    if(mixerapiIOCTL90(hPDDMix, dwFunc, &mixstruct, sizeof(mixstruct)) == TRUE) {
+        return TRUE;
+    }
+    dprintf(("OSLibMixSetVolume: mixerapiIOCTL90 %d failed!!", dwFunc));
+    return FALSE;
+}
+/******************************************************************************/
+/******************************************************************************/
+BOOL OSLibMixGetVolume(DWORD dwControl, DWORD *pdwVolLeft, DWORD *pdwVolRight)
+{
+    DWORD     dwFunc;
+    MIXSTRUCT mixstruct;
+
+    //TODO: implement master volume with MMPM2
+    if(dwControl == MIX_CTRL_VOL_OUT_LINE) {
         if(pdwVolLeft)  *pdwVolLeft  = 50000;
         if(pdwVolRight) *pdwVolRight = 50000;
         return TRUE;
+    }
+
+    //wave in recording levels are virtual controls as there is only
+    //one control for recording gain
+    switch(dwControl) {
+    case MIX_CTRL_VOL_IN_W_MONO:
+    case MIX_CTRL_VOL_IN_W_PHONE:
+    case MIX_CTRL_VOL_IN_W_MIC:
+    case MIX_CTRL_VOL_IN_W_LINE:
+    case MIX_CTRL_VOL_IN_W_CD:
+    case MIX_CTRL_VOL_IN_W_VIDEO:
+    case MIX_CTRL_VOL_IN_W_AUX:
+    case MIX_CTRL_VOL_IN_W_PCM:
+        if(szVolumeLevels[dwControl][0] != -1) {
+            if(pdwVolLeft)  *pdwVolLeft  = szVolumeLevels[dwControl][0];
+            if(pdwVolRight) *pdwVolRight = szVolumeLevels[dwControl][1];
+            return TRUE;
+        }
+        break;
     }
 
     dwFunc = OSLibMixGetIndex(dwControl);
@@ -206,10 +299,45 @@ BOOL OSLibMixGetVolume(DWORD dwControl, BOOL *pfMute, DWORD *pdwVolLeft, DWORD *
     mixstruct.VolumeL = min(MIXER_IOCTL90_MAX_VOLUME, mixstruct.VolumeL);
     mixstruct.VolumeR = min(MIXER_IOCTL90_MAX_VOLUME, mixstruct.VolumeR);
 
-    if(pfMute)      *pfMute      = mixstruct.Mute;
-    if(pdwVolLeft)  *pdwVolLeft  = IOCTL90_TO_WIN32_VOLUME(mixstruct.VolumeL);
-    if(pdwVolRight) *pdwVolRight = IOCTL90_TO_WIN32_VOLUME(mixstruct.VolumeR);
+    if(dwControl == MIX_CTRL_OUT_L_TREBLE) {
+        mixstruct.VolumeL = mixstruct.VolumeR;  //right = treble, left = bass 
+    }
+    else 
+    if(dwControl == MIX_CTRL_OUT_L_BASS) {
+        mixstruct.VolumeR = mixstruct.VolumeL;  //right = treble, left = bass 
+    }
 
+    //save volume levels
+    szVolumeLevels[dwControl][0] = IOCTL90_TO_WIN32_VOLUME(mixstruct.VolumeL);
+    szVolumeLevels[dwControl][1] = IOCTL90_TO_WIN32_VOLUME(mixstruct.VolumeR);
+
+    if(pdwVolLeft)  *pdwVolLeft  = szVolumeLevels[dwControl][0];
+    if(pdwVolRight) *pdwVolRight = szVolumeLevels[dwControl][1];
+
+    return TRUE;
+}
+/******************************************************************************/
+/******************************************************************************/
+BOOL OSLibMixGetMute(DWORD dwControl, BOOL *pfMute)
+{
+    DWORD     dwFunc;
+    MIXSTRUCT mixstruct;
+
+    //TODO: implement master volume with MMPM2
+    if(dwControl == MIX_CTRL_MUTE_OUT_LINE) {
+        if(pfMute)      *pfMute      = 0;
+        return TRUE;
+    }
+    dwFunc = OSLibMixGetIndex(dwControl);
+    if(dwFunc == -1) {
+        return FALSE;
+    }
+    dwFunc += MONOINQUERY;
+
+    if(mixerapiIOCTL90(hPDDMix, dwFunc, &mixstruct, sizeof(mixstruct)) == FALSE) {
+        return FALSE;
+    }
+    if(pfMute) *pfMute = mixstruct.Mute;
     return TRUE;
 }
 /******************************************************************************/
@@ -272,42 +400,43 @@ BOOL OSLibMixGetCtrlCaps(DWORD dwControl, LONG *plMinimum, LONG *plMaximum, DWOR
 /******************************************************************************/
 BOOL OSLibMixIsRecSourcePresent(DWORD dwRecSrc)
 {
-    DWORD dwOldRecSrc, dwVolL, dwVolR;
-
-    if(OSLibMixGetRecSource(&dwOldRecSrc, &dwVolL, &dwVolR) == FALSE) {
+    if(OSLibMixSetRecSource(dwRecSrc) == FALSE) {
         return FALSE;
     }
-    if(OSLibMixSetRecSource(dwRecSrc, dwVolL, dwVolR) == FALSE) {
-        return FALSE;
-    }
-    OSLibMixSetRecSource(dwOldRecSrc, dwVolL, dwVolR);
     return TRUE;
 }
 /******************************************************************************/
 /******************************************************************************/
-BOOL OSLibMixSetRecSource(DWORD dwRecSrc, DWORD dwVolL, DWORD dwVolR)
+BOOL OSLibMixSetRecSource(DWORD dwRecSrc)
 {
-    DWORD idx;
+    DWORD     idx, volidx;
     MIXSTRUCT mixstruct;
+    DWORD     dwVolL, dwVolR;
 
     switch(dwRecSrc) {
     case MIXER_SRC_IN_W_MIC:
         idx = I90SRC_MIC;
+        volidx = MIX_CTRL_VOL_IN_W_MIC;
         break;
     case MIXER_SRC_IN_W_CD:
         idx = I90SRC_CD;
+        volidx = MIX_CTRL_VOL_IN_W_CD;
         break;
     case MIXER_SRC_IN_W_VIDEO:
         idx = I90SRC_VIDEO;
+        volidx = MIX_CTRL_VOL_IN_W_VIDEO;
         break;
     case MIXER_SRC_IN_W_AUX:
         idx = I90SRC_AUX;
+        volidx = MIX_CTRL_VOL_IN_W_AUX;
         break;
     case MIXER_SRC_IN_W_LINE:
         idx = I90SRC_LINE;
+        volidx = MIX_CTRL_VOL_IN_W_LINE;
         break;
     case MIXER_SRC_IN_W_PHONE:
         idx = I90SRC_PHONE;
+        volidx = MIX_CTRL_VOL_IN_W_PHONE;
         break;
     default:
         return FALSE;
@@ -315,14 +444,19 @@ BOOL OSLibMixSetRecSource(DWORD dwRecSrc, DWORD dwVolL, DWORD dwVolR)
     mixstruct.Mute    = 0;
     mixstruct.VolumeL = idx;
 
+    //select recording source
     if(mixerapiIOCTL90(hPDDMix, RECORDSRCSET, &mixstruct, sizeof(mixstruct)) == FALSE) {
         dprintf(("OSLibMixSetRecSource: mixerapiIOCTL90 RECORDSRCSET failed!!"));
         return FALSE;
     }
 
-    mixstruct.Mute    = 0;
+    dwVolL = szVolumeLevels[volidx][0];
+    dwVolR = szVolumeLevels[volidx][1];
     mixstruct.VolumeL = WIN32_TO_IOCTL90_VOLUME(dwVolL);
     mixstruct.VolumeR = WIN32_TO_IOCTL90_VOLUME(dwVolR);
+    mixstruct.Mute    = 0;
+
+    //set recording gain to that of the selected source
     if(mixerapiIOCTL90(hPDDMix, RECORDGAINSET, &mixstruct, sizeof(mixstruct)) == FALSE) {
         dprintf(("OSLibMixSetRecSource: mixerapiIOCTL90 RECORDGAINSET failed!!"));
         return FALSE;
@@ -331,7 +465,7 @@ BOOL OSLibMixSetRecSource(DWORD dwRecSrc, DWORD dwVolL, DWORD dwVolR)
 }
 /******************************************************************************/
 /******************************************************************************/
-BOOL OSLibMixGetRecSource(DWORD *pdwRecSrc, DWORD *pdwVolL, DWORD *pdwVolR)
+BOOL OSLibMixGetRecSource(DWORD *pdwRecSrc)
 {
     DWORD idx;
     MIXSTRUCT mixstruct;
@@ -365,16 +499,6 @@ BOOL OSLibMixGetRecSource(DWORD *pdwRecSrc, DWORD *pdwVolL, DWORD *pdwVolR)
     }
     if(pdwRecSrc) {
         *pdwRecSrc = idx;
-    }
-    if(mixerapiIOCTL90(hPDDMix, RECORDGAINQUERY, &mixstruct, sizeof(mixstruct)) == FALSE) {
-        dprintf(("OSLibMixSetRecSource: mixerapiIOCTL90 RECORDGAINQUERY failed!!"));
-        return FALSE;
-    }
-    if(pdwVolL) {
-        *pdwVolL = IOCTL90_TO_WIN32_VOLUME(mixstruct.VolumeL);
-    }
-    if(pdwVolR) {
-        *pdwVolR = IOCTL90_TO_WIN32_VOLUME(mixstruct.VolumeR);
     }
     return TRUE;
 }

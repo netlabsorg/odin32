@@ -1,4 +1,4 @@
-/* $Id: mixeros2.h,v 1.6 2002-05-26 10:52:31 sandervl Exp $ */
+/* $Id: mixeros2.h,v 1.7 2002-05-28 13:35:02 sandervl Exp $ */
 
 /*
  * Mixer multimedia
@@ -112,10 +112,12 @@ BOOL OSLibMixerOpen();
 void OSLibMixerClose();
 
 BOOL OSLibMixIsControlPresent(DWORD dwControl);
-BOOL OSLibMixSetVolume(DWORD dwControl, BOOL fMute, DWORD dwVolLeft, DWORD dwVolRight);
-BOOL OSLibMixGetVolume(DWORD dwControl, BOOL *pfMute, DWORD *pdwVolLeft, DWORD *pdwVolRight);
-BOOL OSLibMixSetRecSource(DWORD dwRecSrc, DWORD dwVolL, DWORD dwVolR);
-BOOL OSLibMixGetRecSource(DWORD *pdwRecSrc, DWORD *pdwVolL, DWORD *pdwVolR);
+BOOL OSLibMixSetVolume(DWORD dwControl, DWORD dwVolLeft, DWORD dwVolRight);
+BOOL OSLibMixGetVolume(DWORD dwControl, DWORD *pdwVolLeft, DWORD *pdwVolRight);
+BOOL OSLibMixSetMute(DWORD dwControl, BOOL fMute);
+BOOL OSLibMixGetMute(DWORD dwControl, BOOL *pfMute);
+BOOL OSLibMixSetRecSource(DWORD dwRecSrc);
+BOOL OSLibMixGetRecSource(DWORD *pdwRecSrc);
 BOOL OSLibMixIsRecSourcePresent(DWORD dwRecSrc);
 BOOL OSLibMixGetCtrlCaps(DWORD dwControl, LONG *plMinimum, LONG *plMaximum, DWORD *pcSteps);
 
