@@ -1,4 +1,4 @@
-/* $Id: win32k.h,v 1.1 2000-02-15 16:26:06 bird Exp $
+/* $Id: win32k.h,v 1.2 2000-02-15 23:39:19 bird Exp $
  *
  * Top level make file for the Win32k library.
  * Contains library and 32-bit IOCtl definition.
@@ -23,7 +23,7 @@
 /*
  * K32 category - these are the functions found in the k32 directory.
  */
-#define K32_DOSALLOCMEMEX       0x01
+#define K32_ALLOCMEMEX          0x01
 
 
 /*
@@ -32,12 +32,32 @@
 #define ELF_DUMMY               0x01
 
 
+/*******************************************************************************
+*   Structures and Typedefs                                                    *
+*******************************************************************************/
+/*
+ * K32 category parameter structs
+ */
+typedef struct _k32AllocMemEx
+{
+    PVOID   pv;                         /* Pointer to allocated memory block */
+                                        /* On input this holds the suggested */
+                                        /* location of the block. */
+    ULONG   cb;                         /* Blocksize (bytes) */
+    ULONG   flFlags;                    /* Flags (equal to DosAllocMem flags) */
+    ULONG   ulCS;                       /* Call CS */
+    ULONG   ulEIP;                      /* Call EIP */
+    ULONG   rc;                         /* Return code. */
+} K32ALLOCMEMEX, *PK32ALLOCMEMEX;
+
+
+
 
 #ifdef INCL_WIN32K_LIB
 /*******************************************************************************
 *   External Functions                                                         *
 *******************************************************************************/
-APIRET APIENTRY  DosAllocMemEx(PPVOID ppb, ULONG cb, ULONG flag);
+APIRET APIENTRY  DosAllocMemEx(PPVOID ppv, ULONG cb, ULONG flag);
 
 #endif
 

@@ -1,4 +1,4 @@
-/* $Id: dev1632.h,v 1.1 1999-09-06 02:19:57 bird Exp $
+/* $Id: dev1632.h,v 1.2 2000-02-15 23:39:19 bird Exp $
  * dev1632.h - Common header file for 16-bit and 32-bit C
  *
  * Copyright (c) 1999 knut st. osmundsen
@@ -30,6 +30,19 @@ typedef struct _RP32INIT
     UCHAR       DriveNum;
 } RP32INIT;
 
+typedef struct _RP32GENIOCTL
+{
+    RPH32       rph;
+    UCHAR       Category;
+    UCHAR       Function;
+    PVOID       ParmPacket;
+    PVOID       DataPacket;
+    USHORT      sfn;
+    USHORT      ParmLen;
+    USHORT      DataLen;
+} RP32GENIOCTL, *PRP32GENIOCTL;
+
+
 #ifdef _OS2Krnl_h_
 
 #define MAXKRNLOBJECTS 24
@@ -38,6 +51,11 @@ typedef struct _KRNLOBJTABLE
     unsigned char   cObjects;
     OTE             aObjects[MAXKRNLOBJECTS];
 } KRNLOBJTABLE, FAR * PKRNLOBJTABLE;
+
+#else
+
+#define PKRNLOBJTABLE void *
+
 #endif
 
 #pragma pack()

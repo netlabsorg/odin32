@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.22 2000-02-10 01:21:34 bird Exp $
+# $Id: Makefile,v 1.23 2000-02-15 23:39:18 bird Exp $
 #
 # Copyright 1998-1999 knut st. osmundsen
 #
@@ -108,6 +108,16 @@ AINCLUDES  = -Fdi:$(WIN32KBASE)\include \
     @$(ECHO) compiling 32bit: $<
     @$(CC) -c $(CPPFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
 
+{k32}.asm{object}.obj:
+    @$(ECHO) assembling:      $<
+    @$(AS) $(ASFLAGS) $(ADEFINES) $(AINCLUDES) $< -Fo:$@ -Fl:$(WIN32KLIST)\$(*B).lst
+{k32}.c{object}.obj:
+    @$(ECHO) compiling 32bit: $<
+    @$(CC) -c $(CFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
+{k32}.cpp{object}.obj:
+    @$(ECHO) compiling 32bit: $<
+    @$(CC) -c $(CPPFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
+
 {ldr}.asm{object}.obj:
     @$(ECHO) assembling:      $<
     @$(AS) $(ASFLAGS) $(ADEFINES) $(AINCLUDES) $< -Fo:$@ -Fl:$(WIN32KLIST)\$(*B).lst
@@ -170,7 +180,10 @@ OBJS  = object\devfirst.obj \
         object\myLDRQAppType.obj \
         object\myldrEnum32bitRelRecs.obj \
         object\pe2lx.obj \
-        object\ModuleBase.obj
+        object\ModuleBase.obj \
+        object\d32ElfIOCtl.obj \
+        object\d32Win32kIOCtl.obj \
+        object\k32AllocMemEx.obj
 
 
 OBJSINIT = \
@@ -275,7 +288,8 @@ clean:
 #                asm deps must be updated by hand
 ################################################################################
 dep:
-    $(PDWIN32_TOOLS)\fastdep -oObject $(CINCLUDES) misc\*.c* ldr\*.c* dev32\*.c* dev16\*.c* pe2lx\*.c* include\*.h
+    $(PDWIN32_TOOLS)\fastdep -oObject $(CINCLUDES) misc\*.c* ldr\*.c* dev32\*.c* \
+        dev16\*.c* pe2lx\*.c* k32\*.c* lib\*.c include\*.h
 
 object\asmutils.obj:            misc\asmutils.asm     include\devsegdf.inc
 object\calltab.obj:             ldr\calltab.asm

@@ -1,4 +1,4 @@
-/* $Id: dev32.h,v 1.4 1999-11-10 01:45:32 bird Exp $
+/* $Id: dev32.h,v 1.5 2000-02-15 23:39:19 bird Exp $
  *
  * dev32 - header file for 32-bit part of the driver.
  *
@@ -18,9 +18,13 @@ extern "C" {
  * Wrapper for declaration from dev1632.h used in this file.
  */
 #ifndef _dev1632_h_
-    #define RP32INIT void
-    #define PKRNLOBJTABLE void *
+    #define RP32INIT        void
+    #define PRP32INIT       void *
+    #define RP32GENIOCTL    void
+    #define PRP32GENIOCTL   void *
+    #define PKRNLOBJTABLE   void *
 #endif
+
 
 /*
  * Defines from reqpkt.h.
@@ -53,6 +57,8 @@ extern "C" {
 USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit);
 USHORT _loadds _Far32 _Pascal GetOTEs32(PKRNLOBJTABLE pOTEBuf);
 USHORT _loadds _Far32 _Pascal VerifyProcTab32(void);
+USHORT _loadds _Far32 _Pascal ElfIOCtl(PRP32GENIOCTL pRpIOCtl);
+USHORT _loadds _Far32 _Pascal Win32kIOCtl(PRP32GENIOCTL pRpIOCtl);
 #endif
 #ifdef _OS2Krnl_h_
 PMTE _System GetOS2KrnlMTE(void); /* (devfirst.asm) */

@@ -1,6 +1,8 @@
-/* $Id: OS2Krnl.h,v 1.6 2000-02-03 21:22:30 bird Exp $
+/* $Id: OS2Krnl.h,v 1.7 2000-02-15 23:39:19 bird Exp $
  *
  * OS/2 kernel structures, typedefs and macros.
+ *
+ * Top-level include file.
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -148,7 +150,7 @@ typedef struct MTE
    SFN            mte_sfn;       /*"filehandle"*/
    USHORT         mte_usecnt;    /* (.EXE only) - use count */
    CHAR           mte_modname[8];
-}MTE,*PMTE,**PPMTE;
+} MTE,*PMTE,**PPMTE;
 
 
 
@@ -231,10 +233,15 @@ typedef struct MTE
  */
 #ifdef INCL_OS2KRNL_ALL
     #define INCL_OS2KRNL_IO
+    #define INCL_OS2KRNL_VM
 #endif
 
 #ifdef INCL_OS2KRNL_IO
     #include <OS2KIO.h>
+#endif
+
+#ifdef INCL_OS2KRNL_VM
+    #include <OS2KVM.h>
 #endif
 
 #endif
