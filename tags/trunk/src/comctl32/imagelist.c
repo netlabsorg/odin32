@@ -1,4 +1,4 @@
-/* $Id: imagelist.c,v 1.8 1999-11-09 17:09:26 cbratschi Exp $ */
+/* $Id: imagelist.c,v 1.9 1999-11-21 11:04:36 achimha Exp $ */
 /*
  *  ImageList implementation
  *
@@ -1907,12 +1907,12 @@ ImageList_Merge (HIMAGELIST himl1, INT i1, HIMAGELIST himl2, INT i2,
  */
 
 //HIMAGELIST WINAPI ImageList_Read (LPSTREAM pstm)
-//{
-//    FIXME (imagelist, "empty stub!\n");
-//
-//
-//    return NULL;
-//}
+HIMAGELIST WINAPI ImageList_Read (PVOID pstm)
+{
+    dprintf(("ImageList_Read empty stub!\n"));
+
+    return NULL;
+}
 
 
 /*************************************************************************
@@ -2496,14 +2496,16 @@ ImageList_SetOverlayImage (HIMAGELIST himl, INT iImage, INT iOverlay)
  *     empty stub.
  */
 
-//BOOL WINAPI
+BOOL WINAPI
 //ImageList_Write (HIMAGELIST himl, LPSTREAM pstm)
-//{
-//    if (!himl)
-//      return FALSE;
-//
-//    FIXME (imagelist, "empty stub!\n");
-//
-//    return FALSE;
-//}
+ImageList_Write (HIMAGELIST himl, PVOID pstm)
+{
+    if (!himl)
+      return FALSE;
+
+    dprintf(("ImageList_Write empty stub!\n"));
+
+
+    return FALSE;
+}
 
