@@ -1,4 +1,4 @@
-/* $Id: options.h,v 1.16 2001-01-19 02:28:53 bird Exp $
+/* $Id: options.h,v 1.17 2001-01-20 23:50:45 bird Exp $
  *
  * Options.
  *
@@ -70,6 +70,7 @@
             FALSE,                  /* fNoLoader     */     \
             TRUE,                   /* fDllFixes     */     \
             TRUE,                   /* fExeFixes     */     \
+            FALSE,                  /* fApiEnh       */     \
             CB_SWP_INIT,            /* cbSwpHeapInit */     \
             CB_SWP_MAX,             /* cbSwpHeapMax  */     \
             CB_RES_INIT,            /* cbResHeapInit */     \
@@ -99,6 +100,9 @@
 
 #define isExeFixesEnabled()         (options.fExeFixes)
 #define isExeFixesDisabled()        (!options.fExeFixes)
+
+#define isApiEnhEnabled()           (options.fApiEnh)
+#define isApiEnhDisabled()          (!options.fApiEnh)
 
 /* INC */
 
@@ -144,6 +148,7 @@ struct options
     /** @cat Options affecting the behaviour changes in the OS/2 loader */
     ULONG       fDllFixes;              /* Enables the long DLL name and non .DLL extention fixes. */
     ULONG       fExeFixes;              /* Enables EXE files to export entry points. */
+    ULONG       fApiEnh;                /* Enables the API enhancements */
 
     /** @cat Options affecting the heap. */
     ULONG       cbSwpHeapInit;          /* Initial heapsize. */
@@ -158,8 +163,10 @@ struct options
 *******************************************************************************/
 /* NOINC */
 extern struct options DATA16_GLOBAL options;    /* defined in d16globals.c */
+extern char   szWin32kIni[CCHMAXPATH];          /* defined in d16globals.c */
 #if defined(__IBMC__) || defined(__IBMCPP__)
     #pragma map( options , "_options"  )
+    #pragma map( szWin32kIni, "_szWin32kIni" )
 #endif
 /* INC */
 
