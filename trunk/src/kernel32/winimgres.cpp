@@ -1,4 +1,4 @@
-/* $Id: winimgres.cpp,v 1.15 1999-09-18 17:47:10 sandervl Exp $ */
+/* $Id: winimgres.cpp,v 1.16 1999-09-23 13:53:38 phaller Exp $ */
 
 /*
  * Win32 PE Image class (resource methods)
@@ -10,7 +10,7 @@
  *
  * TODO: Check created resource objects before loading the resource!
  * TODO: Is the name id of the version resource always 1?
- * TODO: Once the resource handling in PE2LX/win32k is changed, 
+ * TODO: Once the resource handling in PE2LX/win32k is changed,
  *       getVersionStruct/Size can be moved into the Win32ImageBase class
  *
  */
@@ -35,7 +35,7 @@
 //Assuming names are case insensitive
 //PE spec says names & ids are sorted; keep on searching just to be sure
 //******************************************************************************
-PIMAGE_RESOURCE_DATA_ENTRY 
+PIMAGE_RESOURCE_DATA_ENTRY
  Win32ImageBase::getPEResourceEntry(ULONG id, ULONG type, ULONG lang)
 {
  PIMAGE_RESOURCE_DIRECTORY       prdType;
@@ -72,7 +72,7 @@ PIMAGE_RESOURCE_DATA_ENTRY
     /* locate directory or each resource type */
     prdType = (PIMAGE_RESOURCE_DIRECTORY)((int)pResDir + (int)prde->u2.OffsetToData);
 
-    if(i < pResDir->NumberOfNamedEntries) 
+    if(i < pResDir->NumberOfNamedEntries)
     {//name or id entry?
         //SvL: 30-10-'97, high bit is set, so clear to get real offset
 	nameOffset = prde->u1.Name & ~0x80000000;
@@ -81,7 +81,7 @@ PIMAGE_RESOURCE_DATA_ENTRY
 	char *typename = (char *)malloc(pstring->Length+1);
        	lstrcpynWtoA(typename, pstring->NameString, pstring->Length+1);
 	typename[pstring->Length] = 0;
-        
+
         if(!fNumType) {
             if(stricmp(typename, (char *)type) == 0) {
                 fFound = TRUE;
@@ -380,21 +380,19 @@ HRSRC Win32Pe2LxImage::findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang
 HRSRC Win32ImageBase::findResourceW(LPWSTR lpszName, LPWSTR lpszType, ULONG lang)
 {
  HRSRC hres;
- char *astring1 = NULL, *astring2 = NULL;
+ char *astring1 = NULL,
+      *astring2 = NULL;
 
-    if(HIWORD(lpszType) != 0) {
-       		astring1 = UnicodeToAsciiString(lpszType);
-    } 
-    else	astring1 = (char *)lpszType;
-
-    if(HIWORD(lpszName) != 0) {
-       		astring2 = UnicodeToAsciiString(lpszName);
-    }
-    else	astring2 = (char *)lpszName;
+    if(HIWORD(lpszType) != 0) astring1 = UnicodeToAsciiString(lpszType);
+    else                      astring1 = (char *)lpszType;
+    if(HIWORD(lpszName) != 0) astring2 = UnicodeToAsciiString(lpszName);
+    else                      astring2 = (char *)lpszName;
 
     hres = (HRSRC) findResourceA(astring1, astring2);
-    if(astring1) FreeAsciiString(astring1);
-    if(astring2) FreeAsciiString(astring2);
+
+    /* do NOT free untranslated numerical Resource IDs */
+    if(HIWORD(astring1)) FreeAsciiString(astring1);
+    if(HIWORD(astring2)) FreeAsciiString(astring2);
 
     return(hres);
 }
@@ -421,7 +419,7 @@ ULONG Win32ImageBase::getResourceSizeW(LPCWSTR lpszName, LPWSTR lpszType, ULONG 
 
     if(HIWORD(lpszType) != 0) {
          	char *resname = UnicodeToAsciiString(lpszType);
-    } 
+    }
     else	astring1 = (char *)lpszType;
 
     if(HIWORD(lpszName) != 0) {
