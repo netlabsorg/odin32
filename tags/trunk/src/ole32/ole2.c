@@ -2271,7 +2271,7 @@ static struct ICOM_VTABLE(IEnumFORMATETC) efvt =
     IEnumFORMATETC_fnClone
 };
 
-LPENUMFORMATETC IEnumFORMATETC_Constructor(UINT cfmt, const FORMATETC afmt[])
+static LPENUMFORMATETC IEnumFORMATETC_Constructor(UINT cfmt, const FORMATETC afmt[])
 {
 	IEnumFORMATETCImpl* ef;
 	DWORD size=cfmt * sizeof(FORMATETC);
@@ -2420,7 +2420,7 @@ static struct ICOM_VTABLE(IDataObject) dtovt;
 /**************************************************************************
 *  IDataObject_Constructor
 */
-LPDATAOBJECT IDataObject_Constructor()
+static LPDATAOBJECT IDataObject_Constructor()
 {
 	IDataObjectImpl* dto;
 
