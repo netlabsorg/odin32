@@ -1,4 +1,4 @@
-
+/* $Id: wing32.cpp,v 1.2 2000-08-02 15:51:35 bird Exp $ */
 #include <memory.h>
 #include <wingdi.h>
 #include <winuser.h>

@@ -1,3 +1,4 @@
+/* $Id: OS23DBuffer.cpp,v 1.2 2000-08-02 15:48:26 bird Exp $ */
 /*
  * DirectSound OS2IDirectSound3DBuffer class
  *
