@@ -1,9 +1,13 @@
-# $Id: setup.optional.alp.mk,v 1.4 2002-08-29 10:01:40 bird Exp $
+# $Id: setup.os2allalp.mk,v 1.1 2002-08-30 18:27:22 bird Exp $
 
 #
-#  Helper file for all the optional stuff for the ALP assembler.
+# The tool(s)
 #
+AS          = alp
 
+#
+# Options
+#
 !ifdef AS_MODE
 _AS_MODE =
 ! if "$(AS_MODE)" == "ALP"
@@ -38,3 +42,18 @@ _AS_DEBUG_TYPE = +Ods:MS16
 !endif
 
 _AS_OPTIONAL = $(_AS_MODE) $(_AS_DEBUG_TYPE)
+
+
+#
+# The flags
+#
+AS_FLAGS    = -D:OS2 \
+!if "$(BUILD_MODE)" != "RELEASE"
+              -D:DEBUG \
+!endif         
+               -Mb $(_AS_OPTIONAL) \
+               $(BUILD_DEFINES:-D=-D:) $(ALL_DEFINES:-D=-D:) $(AS_DEFINES:-D=-D:)\
+               $(AS_INCLUDES:-I=-i:) $(ALL_INCLUDES:-I=-i:) -i:$(PATH_INCLUDES)
+AS_FLAGS_SYS= $(AS_FLAGS) -D:RING0
+AS_OBJ_OUT  = -Fo:
+
