@@ -1,4 +1,4 @@
-/* $Id: win32wdesktop.cpp,v 1.2 1999-10-07 23:21:31 sandervl Exp $ */
+/* $Id: win32wdesktop.cpp,v 1.3 1999-10-09 19:12:03 sandervl Exp $ */
 /*
  * Win32 Desktop Window for OS/2
  *
@@ -50,6 +50,8 @@ Win32Desktop::Win32Desktop() : Win32BaseWindow(OBJTYPE_WINDOW)
 
   /* Find the window class */
   windowClass = Win32WndClass::FindClass(-1, (LPSTR)DESKTOP_CLASS_ATOM);
+
+  setWindowProc(windowClass->getWindowProc());
 }
 //******************************************************************************
 //******************************************************************************
