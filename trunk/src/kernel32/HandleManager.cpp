@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.78 2001-11-28 15:45:45 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.79 2001-11-28 23:33:34 phaller Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -431,7 +431,42 @@ DWORD HMInitialize(void)
            sizeof(HMGlobals));
 
     HMGlobals.fIsInitialized = TRUE;                             /* OK, done */
-
+    
+#if 1
+    //This is a very bad idea. \\\\.\\NTICE -> NTICE, if the file exits, then 
+    //it will open the file instead of the device driver
+    /* add standard symbolic links first, so local symbolic links in the
+     * device handlers get precedence over the default here.
+     *
+     * Device handlers are supposed to place the appropriate
+     * symbolic links such as "\\.\\COM1", "COM1"
+     *
+     * - "\\.\f:\temp\readme.txt" is a valid file
+     * - "com1" is a valid device in case serial port 1 exists,
+     *   otherwise it'd be a valid file.
+     * - "\\.\filename" is the only misleading case (to be verified)
+     *
+     * Note:
+     * the Open32 "device" definately MUST be the last device to be
+     * asked to accept the specified name.
+     */
+    {
+      // strings are placed in read-only segment
+      PSZ pszDrive  = strdup("\\\\.\\x:");
+      PSZ pszDrive2 = strdup("\\\\.\\x:");
+      for (char ch = 'A'; ch <= 'Z'; ch++)
+      {
+        pszDrive[4] = ch;
+        pszDrive2[4] = ch;
+        HandleNamesAddSymbolicLink(pszDrive, pszDrive+4);
+        HandleNamesAddSymbolicLink(pszDrive2, pszDrive2+4);
+      }
+      free(pszDrive);
+      free(pszDrive2);
+      HandleNamesAddSymbolicLink("\\\\?\\UNC\\", "\\\\");
+    }
+#endif
+    
     /* copy standard handles from OS/2's Open32 Subsystem */
     HMGlobals.pHMStandard   = new HMDeviceStandardClass("\\\\STANDARD_HANDLE\\");
     HMSetStdHandle(STD_INPUT_HANDLE,  O32_GetStdHandle(STD_INPUT_HANDLE));
@@ -452,13 +487,6 @@ DWORD HMInitialize(void)
     HMGlobals.pHMNamedPipe  = new HMDeviceNamedPipeClass("\\\\PIPE\\");
     HMGlobals.pHMMailslot   = new HMMailslotClass("\\MAILSLOT\\");
     HMGlobals.pHMParPort    = new HMDeviceParPortClass("\\\\LPT\\");
-    
-#if 0
-    //This is a very bad idea. \\\\.\\NTICE -> NTICE, if the file exits, then 
-    //it will open the file instead of the device driver
-    /* add standard symbolic links */
-    HandleNamesAddSymbolicLink("\\\\.\\", "");
-#endif
   }
   return (NO_ERROR);
 }
@@ -1069,7 +1097,12 @@ HFILE HMCreateFile(LPCSTR lpFileName,
   if (rc != NO_ERROR)     /* oops, creation failed within the device handler */
   {
     TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
-    SetLastError(rc);          /* Hehe, OS/2 and NT are pretty compatible :) */
+    
+    
+    // Note:
+    // device handlers have to return an Win32-style error code
+    // from CreateFile() !
+    SetLastError(rc);
     return (INVALID_HANDLE_VALUE);                           /* signal error */
   }
   else

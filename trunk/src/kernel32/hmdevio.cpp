@@ -1,4 +1,4 @@
-/* $Id: hmdevio.cpp,v 1.17 2001-11-26 17:16:24 sandervl Exp $ */
+/* $Id: hmdevio.cpp,v 1.18 2001-11-28 23:33:35 phaller Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -29,6 +29,7 @@
 #include "cio.h"
 #include "map.h"
 #include "exceptutil.h"
+#include "oslibdos.h"
 
 #define DBG_LOCALLOG	DBG_hmdevio
 #include "dbglocal.h"
@@ -110,13 +111,18 @@ void RegisterDevices()
                 if(rc == 0 && dwType == REG_SZ)
                 {
                     HINSTANCE hDrvDll = LoadLibraryA(szDllName);
-                    if(hDrvDll) {
+                    if(hDrvDll)
+                    {
                         sprintf(szDrvName, "\\\\.\\%s", szKeyName);
                         driver = new HMCustomDriver(hDrvDll, szDrvName);
 
                         rc = HMDeviceRegister(szDrvName, driver);
                         if (rc != NO_ERROR)                                  /* check for errors */
-                              dprintf(("KERNEL32:RegisterDevices: registering %s failed with %u.\n", szDrvName, rc));
+                          dprintf(("KERNEL32:RegisterDevices: registering %s failed with %u.\n", szDrvName, rc));
+                      
+                        // @@@PH
+                        // there should be an symbolic link:
+                        // "\\.\drvname$" -> "drvname$"
                     }
                 }
                 rc = 0;
@@ -216,7 +222,7 @@ tryopen:
 	rc = DosSetRelMaxFH(&ReqCount, &CurMaxFH);
 	if(rc) {
 		dprintf(("DosSetRelMaxFH returned %d", rc));
-		return rc;
+		return error2WinError(rc);
 	}
 	dprintf(("DosOpen failed -> increased nr open files to %d", CurMaxFH));
 	goto tryopen;
@@ -224,11 +230,13 @@ tryopen:
 
   dprintf(("DosOpen %s returned %d\n", szOS2Name, rc));
 
-  if(rc == NO_ERROR) {
-     	pHMHandleData->hHMHandle = hfFileHandle;
-     	return (NO_ERROR);
+  if(rc == NO_ERROR) 
+  {
+    pHMHandleData->hHMHandle = hfFileHandle;
+    return (NO_ERROR);
   }
-  else  return(rc);
+  else  
+    return(error2WinError(rc));
 }
 //******************************************************************************
 //******************************************************************************

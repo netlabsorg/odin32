@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.29 2001-11-26 14:54:01 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.30 2001-11-28 23:33:36 phaller Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -66,6 +66,11 @@ HMDeviceDiskClass::HMDeviceDiskClass(LPCSTR lpDeviceName) : HMDeviceKernelObject
  *****************************************************************************/
 BOOL HMDeviceDiskClass::FindDevice(LPCSTR lpClassDevName, LPCSTR lpDeviceName, int namelength)
 {
+  // @@@PH
+  // this is broken:
+  // "\\.\C:" and "C:" is a LOGICAL drive
+  // \\.\PHYSICALDRIVEx is a PHYSICAL drive!
+  
     //\\.\x:                -> length 6
     //\\.\PHYSICALDRIVEn    -> length 18
     if(namelength != 6 && namelength != 18) {
@@ -107,12 +112,6 @@ DWORD HMDeviceDiskClass::CreateFile (HANDLE        hHandle,
     if(pHMHandleData->dwCreation != OPEN_EXISTING) {
         dprintf(("Invalid creation flags %x!!", pHMHandleData->dwCreation));
         return ERROR_INVALID_PARAMETER;
-    }
-    if(strncmp(lpFileName,       // "support" for local unc names
-             "\\\\.\\",
-             4) == 0)
-    {
-        lpFileName+=4;
     }
 
     //Disable error popus. NT allows an app to open a cdrom/dvd drive without a disk inside
@@ -205,7 +204,7 @@ DWORD HMDeviceDiskClass::OpenDisk(PVOID pDrvInfo)
     filename[1] = ':';
     filename[2] = 0;
 
-    //Disable error popus. NT allows an app to open a cdrom/dvd drive without a disk inside
+    //Disable error popups. NT allows an app to open a cdrom/dvd drive without a disk inside
     //OS/2 fails in that case with error ERROR_NOT_READY
     ULONG oldmode = SetErrorMode(SEM_FAILCRITICALERRORS);
     hFile = OSLibDosCreateFile(filename,

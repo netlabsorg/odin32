@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.85 2001-11-19 13:02:58 phaller Exp $ */
+/* $Id: oslibdos.cpp,v 1.86 2001-11-28 23:33:37 phaller Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -177,6 +177,9 @@ DWORD error2WinError(APIRET rc,DWORD defaultCode)
 
     case ERROR_WRITE_PROTECT: //19
         return ERROR_WRITE_PROTECT_W;
+  
+    case ERROR_BAD_UNIT: //20
+        return ERROR_BAD_UNIT_W;
 
     case ERROR_NOT_READY: //21
         return ERROR_NOT_READY_W;
@@ -603,23 +606,30 @@ tryopen:
                OPEN_ACTION_OPEN_IF_EXISTS,     /* Open function type */
                os2flags,
                0L);                            /* No extended attribute */
+  if(rc) 
+  {
+    if(rc == ERROR_TOO_MANY_OPEN_FILES) 
+    {
+      ULONG CurMaxFH;
+      LONG  ReqCount = 32;
 
-  if(rc) {
-        if(rc == ERROR_TOO_MANY_OPEN_FILES) {
-         ULONG CurMaxFH;
-         LONG  ReqCount = 32;
-
-                rc = DosSetRelMaxFH(&ReqCount, &CurMaxFH);
-                if(rc) {
-                        dprintf(("DosSetRelMaxFH returned %d", rc));
-                        return 0;
-                }
-                dprintf(("DosOpen failed -> increased nr open files to %d", CurMaxFH));
-                goto tryopen;
-        }
+      rc = DosSetRelMaxFH(&ReqCount, &CurMaxFH);
+      if(rc) 
+      {
+        dprintf(("DosSetRelMaxFH returned %d", rc));
         return 0;
+      }
+      dprintf(("DosOpen failed -> increased nr open files to %d", CurMaxFH));
+      goto tryopen;
+    }
+    
+    SetLastError(error2WinError(rc));
+    return 0;
   }
-  else  return hFile;
+  
+  // OK, file was opened
+  SetLastError(ERROR_SUCCESS_W);
+  return hFile;
 }
 //******************************************************************************
 //******************************************************************************
