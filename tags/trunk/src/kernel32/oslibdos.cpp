@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.55 2000-12-31 12:28:54 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.56 2001-01-23 11:59:45 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -1686,6 +1686,7 @@ inline CHAR system2DOSCharacter(CHAR ch)
   }
 }
 
+// TODO: not finished nor correct!!!!
 VOID long2ShortName(CHAR* longName, CHAR* shortName)
 {
   // check for uplink / root: "." and ".."
@@ -1728,7 +1729,7 @@ VOID long2ShortName(CHAR* longName, CHAR* shortName)
        (flag83 == TRUE);
        x++)
   {
-    switch (*source++)
+    switch (*source)
     {
       case '.': // a period will cause the loop to abort!
         x=1000;
@@ -1740,13 +1741,17 @@ VOID long2ShortName(CHAR* longName, CHAR* shortName)
       case ' ':
         flag83 = FALSE;
         break;
+      default:
+        source++;
+        break;
     }
   }
   
   // verify we're on a period now
   if (flag83 == TRUE)
     if (*source != '.')
-      flag83 = FALSE;
+         flag83 = FALSE;
+    else source++;
   
   // verify extension
   if (flag83 == TRUE)
@@ -1763,6 +1768,7 @@ VOID long2ShortName(CHAR* longName, CHAR* shortName)
           flag83 = FALSE;
           break;
       }
+      source++;
     }
   
   // verify we're at the end of the string now
@@ -1776,8 +1782,7 @@ VOID long2ShortName(CHAR* longName, CHAR* shortName)
     // we might not alter any character here, since
     // an app opening a specific file with an 8:3 "alias",
     // would surely fail.
-    strcpy(longName,
-           shortName);
+    strcpy(shortName, longName);
     
     return; // Done
   }
@@ -1839,6 +1844,7 @@ VOID translateFileResults(FILESTATUS3 *pResult,LPWIN32_FIND_DATAA pFind,CHAR* ac
 {
   CHAR* name;
 
+  pFind->dwReserved0 = pFind->dwReserved1 = 0;
   pFind->dwFileAttributes = pm2WinFileAttributes(pResult->attrFile);
 
   pmDateTimeToFileTime(&pResult->fdateCreation,&pResult->ftimeCreation,&pFind->ftCreationTime);
@@ -1862,6 +1868,7 @@ VOID translateFileResults(FILESTATUS3 *pResult,LPWIN32_FIND_DATAA pFind,CHAR* ac
 VOID translateFindResults(FILEFINDBUF3 *pResult,LPWIN32_FIND_DATAA pFind)
 {
   pFind->dwFileAttributes = pm2WinFileAttributes(pResult->attrFile);
+  pFind->dwReserved0 = pFind->dwReserved1 = 0;
 
   pmDateTimeToFileTime(&pResult->fdateCreation,&pResult->ftimeCreation,&pFind->ftCreationTime);
   pmDateTimeToFileTime(&pResult->fdateLastAccess,&pResult->ftimeLastAccess,&pFind->ftLastAccessTime);

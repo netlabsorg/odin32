@@ -1,4 +1,4 @@
-/* $Id: conbuffervio.cpp,v 1.2 2000-10-23 13:42:40 sandervl Exp $ */
+/* $Id: conbuffervio.cpp,v 1.3 2001-01-23 11:59:45 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -219,6 +219,7 @@ BOOL HMDeviceConsoleVioBufferClass::WriteFile(PHMHANDLEDATA pHMHandleData,
         {
             dprintf(("LF"));
             pConsoleBuffer->coordCursorPosition.Y++;
+            pConsoleBuffer->coordCursorPosition.X = 0;
             if(pConsoleBuffer->coordCursorPosition.Y >= pConsoleBuffer->coordWindowSize.Y) {
                 dprintf(("scrollup"));
                 VioScrollUp(0, 0, pConsoleBuffer->coordWindowSize.Y-1, pConsoleBuffer->coordWindowSize.X-1,

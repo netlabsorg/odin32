@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.111 2001-01-14 17:16:55 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.112 2001-01-23 11:59:45 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -397,6 +397,16 @@ VOID WIN32API ExitProcess(DWORD exitcode)
     //Note: Needs to be done after deleting WinExe (destruction of exe + dll objects)
     //Flush and delete all open memory mapped files
     Win32MemMap::deleteAll();
+
+    //SvL: We must make sure no threads are still suspended (with SuspendThread)
+    //     OS/2 seems to be unable to terminate the process otherwise (exitlist hang)
+    TEB *teb = threadList;
+    threadListMutex.enter();
+    while(teb) {
+        ResumeThread(teb->o.odin.hThread);
+        teb = teb->o.odin.next;
+    }
+    threadListMutex.leave();
 
     //Restore original OS/2 TIB selector
     DestroyTIB();
@@ -1587,7 +1597,6 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
         BOOL fTerminate = FALSE;
         DWORD fileAttr;
 
-        //TODO: doesn't work for directories with spaces!
         while(*exename != 0) {
              while(*exename != 0 && *exename != ' ')
                   exename++;
