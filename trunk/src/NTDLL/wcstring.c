@@ -3,6 +3,20 @@
  *
  * Copyright 2000 Alexandre Julliard
  * Copyright 2000 Jon Griffiths
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #include "config.h"
@@ -13,19 +27,11 @@
 #include <string.h>
 #include <stdio.h>
 
-#ifdef __WIN32OS2__
-#include <stdarg.h>
-#include <heapstring.h>
-#endif
-
-#include "windef.h"
-#include "winbase.h"
-#include "winnls.h"
+#include "ntddk.h"
 #include "wine/unicode.h"
-#include "heap.h"
-#include "debugtools.h"
+#include "wine/debug.h"
 
-DEFAULT_DEBUG_CHANNEL(ntdll);
+WINE_DEFAULT_DEBUG_CHANNEL(ntdll);
 
 
 /*********************************************************************
@@ -257,11 +263,20 @@ LPWSTR __cdecl NTDLL_wcstok( LPWSTR str, LPCWSTR delim )
  */
 INT __cdecl NTDLL_wcstombs( LPSTR dst, LPCWSTR src, INT n )
 {
-    INT ret;
-    if (n <= 0) return 0;
-    ret = WideCharToMultiByte( CP_ACP, 0, src, -1, dst, dst ? n : 0, NULL, NULL );
-    if (!ret) return n;  /* overflow */
-    return ret - 1;  /* do not count terminating NULL */
+    DWORD len;
+
+    if (!dst)
+    {
+        RtlUnicodeToMultiByteSize( &len, src, strlenW(src)*sizeof(WCHAR) );
+        return len;
+    }
+    else
+    {
+        if (n <= 0) return 0;
+        RtlUnicodeToMultiByteN( dst, n, &len, src, strlenW(src)*sizeof(WCHAR) );
+        if (len < n) dst[len] = 0;
+    }
+    return len;
 }
 
 
@@ -270,11 +285,19 @@ INT __cdecl NTDLL_wcstombs( LPSTR dst, LPCWSTR src, INT n )
  */
 INT __cdecl NTDLL_mbstowcs( LPWSTR dst, LPCSTR src, INT n )
 {
-    INT ret;
-    if (n <= 0) return 0;
-    ret = MultiByteToWideChar( CP_ACP, 0, src, -1, dst, dst ? n : 0 );
-    if (!ret) return n;  /* overflow */
-    return ret - 1;  /* do not count terminating NULL */
+    DWORD len;
+
+    if (!dst)
+    {
+        RtlMultiByteToUnicodeSize( &len, src, strlen(src) );
+    }
+    else
+    {
+        if (n <= 0) return 0;
+        RtlMultiByteToUnicodeN( dst, n*sizeof(WCHAR), &len, src, strlen(src) );
+        if (len / sizeof(WCHAR) < n) dst[len / sizeof(WCHAR)] = 0;
+    }
+    return len / sizeof(WCHAR);
 }
 
 
@@ -282,13 +305,48 @@ INT __cdecl NTDLL_mbstowcs( LPWSTR dst, LPCSTR src, INT n )
  *                  wcstol  (NTDLL.@)
  * Like strtol, but for wide character strings.
  */
-INT __cdecl NTDLL_wcstol(LPWSTR s,LPWSTR *end,INT base)
+INT __cdecl NTDLL_wcstol(LPCWSTR s,LPWSTR *end,INT base)
 {
-    LPSTR sA = HEAP_strdupWtoA(GetProcessHeap(),0,s),endA;
-    INT	ret = strtol(sA,&endA,base);
+    UNICODE_STRING uni;
+    ANSI_STRING ansi;
+    INT ret;
+    LPSTR endA;
 
-    HeapFree(GetProcessHeap(),0,sA);
-    if (end) *end = s+(endA-sA); /* pointer magic checked. */
+    RtlInitUnicodeString( &uni, s );
+    RtlUnicodeStringToAnsiString( &ansi, &uni, TRUE );
+    ret = strtol( ansi.Buffer, &endA, base );
+    if (end)
+    {
+        DWORD len;
+        RtlMultiByteToUnicodeSize( &len, ansi.Buffer, endA - ansi.Buffer );
+        *end = (LPWSTR)s + len/sizeof(WCHAR);
+    }
+    RtlFreeAnsiString( &ansi );
+    return ret;
+}
+
+
+/*********************************************************************
+ *                  wcstoul  (NTDLL.@)
+ * Like strtoul, but for wide character strings.
+ */
+INT __cdecl NTDLL_wcstoul(LPCWSTR s,LPWSTR *end,INT base)
+{
+    UNICODE_STRING uni;
+    ANSI_STRING ansi;
+    INT ret;
+    LPSTR endA;
+
+    RtlInitUnicodeString( &uni, s );
+    RtlUnicodeStringToAnsiString( &ansi, &uni, TRUE );
+    ret = strtoul( ansi.Buffer, &endA, base );
+    if (end)
+    {
+        DWORD len;
+        RtlMultiByteToUnicodeSize( &len, ansi.Buffer, endA - ansi.Buffer );
+        *end = (LPWSTR)s + len/sizeof(WCHAR);
+    }
+    RtlFreeAnsiString( &ansi );
     return ret;
 }
 

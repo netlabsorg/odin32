@@ -33,6 +33,7 @@ WINE_DEFAULT_DEBUG_CHANNEL(ntdll);
 #define POP_FPU(x) DO_FPU("fstpl",x)
 #endif
 
+#ifdef DEBUG
 void dump_ObjectAttributes (const OBJECT_ATTRIBUTES *oa)
 {
 	if (oa)
@@ -46,6 +47,7 @@ LPCSTR debugstr_us( const UNICODE_STRING *us )
     if (!us) return "<null>";
     return debugstr_wn(us->Buffer, us->Length);
 }
+#endif
 
 /*********************************************************************
  *                  _ftol   (NTDLL.@)

@@ -1,4 +1,4 @@
-/* $Id: reg.cpp,v 1.4 2000-08-20 15:16:58 phaller Exp $ */
+/* $Id: reg.cpp,v 1.5 2002-05-16 12:16:47 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -431,3 +431,4 @@ NTSTATUS WINAPI NtUnloadKey(HANDLE KeyHandle)
 
   return 0;
 }
+

@@ -1,4 +1,4 @@
-/* $Id: rtl.cpp,v 1.14 2002-02-21 22:52:42 sandervl Exp $ */
+/* $Id: rtl.cpp,v 1.15 2002-05-16 12:16:47 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -269,92 +269,6 @@ void WINAPI RtlDumpResource(LPRTL_RWLOCK rwl)
  * heap functions
  */
 
-/******************************************************************************
- *  RtlCreateHeap                        [NTDLL]
- */
-HANDLE WINAPI RtlCreateHeap(ULONG                Flags,
-                            PVOID                BaseAddress,
-                            ULONG                SizeToReserve,
-                            ULONG                SizeToCommit,
-                            PVOID                Unknown,
-                            PRTL_HEAP_DEFINITION Definition)
-{
-  dprintf(("NTDLL: RtlCreateHeap(%08xh,%08xh,%08xh,%08xh,%08xh,%08xh).\n",
-           Flags,
-           BaseAddress,
-           SizeToReserve,
-           SizeToCommit,
-           Unknown,
-           Definition));
-
-  return HeapCreate(Flags,
-                    SizeToCommit,
-                    SizeToReserve);
-}
-
-
-/******************************************************************************
- *  RtlAllocateHeap                         [NTDLL]
- */
-PVOID WINAPI RtlAllocateHeap(HANDLE Heap,
-                             ULONG  Flags,
-                             ULONG  Size)
-{
-  dprintf(("NTDLL: RtlAllocateHeap(%08xh,%08xh,%08xh).\n",
-           Heap,
-           Flags,
-           Size));
-
-  return HeapAlloc(Heap,
-                   Flags,
-                   Size);
-}
-
-
-/******************************************************************************
- *  RtlFreeHeap                          [NTDLL]
- */
-BOOLEAN WINAPI RtlFreeHeap(HANDLE Heap,
-                           ULONG Flags,
-                           PVOID Address)
-{
-  dprintf(("NTDLL: RtlFreeHeap(%08xh,%08xh,%08xh)\n",
-           Heap,
-           Flags,
-           Address));
-
-  return HeapFree(Heap, Flags, Address);
-}
-
-
-/******************************************************************************
- *  RtlDestroyHeap                          [NTDLL]
- *
- * FIXME: prototype guessed
- */
-HANDLE WINAPI RtlDestroyHeap( HANDLE Heap )
-{
-  dprintf(("NTDLL: RtlDestroyHeap(%08xh)\n",
-           Heap));
-
-  return HeapDestroy(Heap);
-}
-
-
-
-/******************************************************************************
- *  RtlSizeHeap                             [NTDLL]
- */
-
-ODINFUNCTION3(DWORD,RtlSizeHeap,HANDLE,hHeap,
-                                DWORD, dwFlags,
-                                PVOID, pAddress)
-{
-  return HeapSize(hHeap,
-                  dwFlags,
-                  pAddress);
-}
-
 
 
 /*
@@ -463,31 +377,6 @@ LPVOID WINAPI RtlNormalizeProcessParams(LPVOID x)
   return x;
 }
 
-
-/**************************************************************************
- *                 RtlNtStatusToDosError       [NTDLL.442]
- */
-DWORD WINAPI RtlNtStatusToDosError(DWORD error)
-{
-  dprintf(("NTDLL: RtlNtStatusToDosError(%08xh) partially implemented.\n",
-           error));
-
-  switch (error)
-  {
-    case STATUS_SUCCESS:                return ERROR_SUCCESS;
-    case STATUS_INVALID_PARAMETER:      return ERROR_BAD_ARGUMENTS;
-    case STATUS_BUFFER_TOO_SMALL:       return ERROR_INSUFFICIENT_BUFFER;
-/*   case STATUS_INVALID_SECURITY_DESCR: return ERROR_INVALID_SECURITY_DESCR;*/
-    case STATUS_NO_MEMORY:              return ERROR_NOT_ENOUGH_MEMORY;
-/*   case STATUS_UNKNOWN_REVISION:
-     case STATUS_BUFFER_OVERFLOW:*/
-  }
-
-  dprintf(("NTDLL: RtlNtStatusToDosError(%08xh is unknown !)\n",
-           error));
-
-  return ERROR_SUCCESS;
-}
 
 
 /**************************************************************************
