@@ -1,34 +1,37 @@
- /* $Id: changelog,v 1.340 1999-10-18 11:58:39 sandervl Exp $ */
+ /* $Id: changelog,v 1.341 1999-10-19 12:32:12 dengert Exp $ */
+
+ 99-10-19: Daniela Engert <dani@ngrt.de>
+	- USER32: excessive background erases tamed
 
  99-10-18: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Set/clear WS_VISIBLE flag in ShowWindow
-                  Fix for scrollbar redraw
-                  Rewrote EnumChildWindows (winzip works quite well now!)
+		  Fix for scrollbar redraw
+		  Rewrote EnumChildWindows (winzip works quite well now!)
 
  99-10-18: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- COMDLG32: Disable comdlg hooks for now. They don't anyway.
 
  99-10-17: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Ported AdjustWindowRectEx from Wine (990815)
-                  Changed GetClientRect to return rectangle stored in 
-                  window object.
-                  Ported (Begin/End)DeferWindowPos from Wine (990815)
-                  Ported GetWindow from Wine (990815)
-                  Fixed dialog control creation bug (create ascii controls when
-                  parent window is ascii)
-                  Implemented SetWindowPlacement (not complete done)
-                  Fixed GetWindowPlacement (handle translation), still
-                  needs to be implemented though.
-                  Don't change PM window style in WM_DESTROY handler -> crash in PMMERGE
-                  Bugfixes for Enum(Thread/Child)Window (wrong call to get object ptr)
-                  Fixed FindWindowEx method to map frame window to object ptr.
-                  Fixed WM_WINDOWPOSCHANGED handler for scrollbars (set window &
-                  client rectangle)
-                  Fixed WM_MOUSEMOVE handler for scrollbars (return 1 to let
-                  PM change the mouse cursor back to the default)
-                  Fixed GetDlgItem. According to SDK docs this api should work
-                  for any parent-child pair. (behaviour seen in VPBuddy)
-                  Added MFC message support for message printfs
+		  Changed GetClientRect to return rectangle stored in
+		  window object.
+		  Ported (Begin/End)DeferWindowPos from Wine (990815)
+		  Ported GetWindow from Wine (990815)
+		  Fixed dialog control creation bug (create ascii controls when
+		  parent window is ascii)
+		  Implemented SetWindowPlacement (not complete done)
+		  Fixed GetWindowPlacement (handle translation), still
+		  needs to be implemented though.
+		  Don't change PM window style in WM_DESTROY handler -> crash in PMMERGE
+		  Bugfixes for Enum(Thread/Child)Window (wrong call to get object ptr)
+		  Fixed FindWindowEx method to map frame window to object ptr.
+		  Fixed WM_WINDOWPOSCHANGED handler for scrollbars (set window &
+		  client rectangle)
+		  Fixed WM_MOUSEMOVE handler for scrollbars (return 1 to let
+		  PM change the mouse cursor back to the default)
+		  Fixed GetDlgItem. According to SDK docs this api should work
+		  for any parent-child pair. (behaviour seen in VPBuddy)
+		  Added MFC message support for message printfs
 
  99-10-17: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: replaced OS/2 scrollbars by WINE scrollbars
@@ -41,12 +44,12 @@
 		  pmframe: added PSF_CLIPSIBLINGS
 
  99-10-17: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
-     	- KERNEL32: Removed exception throwing from Pe2Lx classes.
-                    Implemented TLS support in Pe2Lx classes.
+	- KERNEL32: Removed exception throwing from Pe2Lx classes.
+		    Implemented TLS support in Pe2Lx classes.
 
  99-10-16: Yuri Dario <mc6530@mclink.it>
 	- USER32: Button bugfix (BUTTON_CheckAutoRadioButton)
-	          Win32dlg.cpp: cosmetic changes
+		  Win32dlg.cpp: cosmetic changes
 	- include\os2wrap.h: define inline as _inline in C mode
 	- include\win\winsock.h: Added prototypes
 	- src\makefile: shell32 depends on ole32 & version, build it after those two dlls
@@ -56,54 +59,54 @@
 
  99-10-16: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Don't process size messages before sending WM_NCCREATE
-                  message when creating a window. (can mess up our window
-                  and client rectangle)
-                  Erase background for buttons. (fixes groupbox redraw problems)
-                  isFrameWindow bugfix + MDI creation & WM_NCCALCSIZE bugfix
+		  message when creating a window. (can mess up our window
+		  and client rectangle)
+		  Erase background for buttons. (fixes groupbox redraw problems)
+		  isFrameWindow bugfix + MDI creation & WM_NCCALCSIZE bugfix
 
  99-10-15: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: CBT Hook bugfix. Only respond to WM_NCCREATE msg to send
-                  HCBT_CREATEWND.
-                  Scrollbar bugfix. Pass all msgs we don't use to default
-                  window handler. (used to do this only for > WM_USER -->
-                  return value of 0 for WM_NCCREATE cancels window creation)
+		  HCBT_CREATEWND.
+		  Scrollbar bugfix. Pass all msgs we don't use to default
+		  window handler. (used to do this only for > WM_USER -->
+		  return value of 0 for WM_NCCREATE cancels window creation)
 		  GetWindow bugfix. (related window can be frame window)
-                  Fixed window & child destruction process.
+		  Fixed window & child destruction process.
 	- KERNEL32: Fixed VirtualQuery bug.
 
  99-10-15: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- USER32: Basic message translation to fix problems in win apps
-                  that wait for a specific message. (NOT COMPLETE)
+		  that wait for a specific message. (NOT COMPLETE)
 
  99-10-14: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Fixed WM_WINDOWPOSCHANGED (frame window rectangle)
 		  Partly implemented CopyImage (only simple copies of icons
-                  and cursors; FAR FROM COMPLETE!)
-                  Removed FillRect during WM_PAINT in subclassed frame handler.
-                  (still some redraw problems with i.e. button.exe; a little
-                   worse than before)
+		  and cursors; FAR FROM COMPLETE!)
+		  Removed FillRect during WM_PAINT in subclassed frame handler.
+		  (still some redraw problems with i.e. button.exe; a little
+		   worse than before)
 
  99-10-14: Patrick Haller <phaller@gmx.net>
 	- KERNEL32:	Fix: threads might need more memory in debug mode (thread.cpp)
-		        Fix: a little cleanup (virtual.cpp)
+			Fix: a little cleanup (virtual.cpp)
 			Fix: lstrcpyAW taking NULL parameters (broken WINE controls?) (heapstring.cpp)
 	- ADVAPI32:	Fix: RegConnectRegistryA slightly improved
 
  99-10-14: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
-    	- PE2LX:    New implementation in src\win32k\pe2lx.
-                    No resource conversion. I have tested it, but do expect to
-                    find some bugs. And when you find, please give me a hint.
-                    The new Pe2Lx uses much support code,(heap, printf..)
-                    from win32k. It also uses the sub-system CRT library (as
-                    win32k does). This way more of the win32k code will be
-                    tested in Ring 3, so there'll simply be less bugs to track
-                    down in Ring 0 and kernel debugger/ICAT.
-    	- KERNEL32: Win32???Pe2Lx classes is updated to match the new Pe2lX.
-                    Note that TLS is not implemented yet - it's in the line.
-                    Fix: Made a temporary fix in atom.cpp for some of the W
-                    functions. The string isn't allways a string... I do a
-                    permanent fix some other day.
-    	- WIN32K:   Compiles and links. But Not Tested!
+	- PE2LX:    New implementation in src\win32k\pe2lx.
+		    No resource conversion. I have tested it, but do expect to
+		    find some bugs. And when you find, please give me a hint.
+		    The new Pe2Lx uses much support code,(heap, printf..)
+		    from win32k. It also uses the sub-system CRT library (as
+		    win32k does). This way more of the win32k code will be
+		    tested in Ring 3, so there'll simply be less bugs to track
+		    down in Ring 0 and kernel debugger/ICAT.
+	- KERNEL32: Win32???Pe2Lx classes is updated to match the new Pe2lX.
+		    Note that TLS is not implemented yet - it's in the line.
+		    Fix: Made a temporary fix in atom.cpp for some of the W
+		    functions. The string isn't allways a string... I do a
+		    permanent fix some other day.
+	- WIN32K:   Compiles and links. But Not Tested!
 
  99-10-14: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- USER32: lstrcmpW: check for null pointers
@@ -111,38 +114,38 @@
 
  99-10-14: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Fixed shrinking listbox in shell about dialog.
-                  (add border size to size during window creation & SetWindowPos)
-                  Support for WM_NCCALCSIZE. Not completely working yet.
-                  Fixed crash in Winhlp32 (annotate creates multiline edit
-                  control that received PM messages too early -> divide by 0)
-                  -> Don't allow WM_WINDOWPOSCHANGED messages until after WM_NCCREATE.
-                  Removed previous OSLibMapWINDOWPOStoSWP bugfix.
-                  Default dialog xBaseUnit = 10, yBaseUnit = 20.
-                  Only set FCF_TASKLIST bit when parent == desktop & window
-                  has titlebar. (too many Opera windows in tasklist)
+		  (add border size to size during window creation & SetWindowPos)
+		  Support for WM_NCCALCSIZE. Not completely working yet.
+		  Fixed crash in Winhlp32 (annotate creates multiline edit
+		  control that received PM messages too early -> divide by 0)
+		  -> Don't allow WM_WINDOWPOSCHANGED messages until after WM_NCCREATE.
+		  Removed previous OSLibMapWINDOWPOStoSWP bugfix.
+		  Default dialog xBaseUnit = 10, yBaseUnit = 20.
+		  Only set FCF_TASKLIST bit when parent == desktop & window
+		  has titlebar. (too many Opera windows in tasklist)
 		  Clear unsupported frame styles (i.e. no titlebar & minimize/maximize button)
-                  Fixed MapOS2ToWin32Rectl & GetWindowRect. 
-                  Removed code that adds bordersize during SetWindowPos & window
-                  creation. Fixed listbox code instead. (use window rectangle
-                  for SetWindowPos call, not client rectangle)
+		  Fixed MapOS2ToWin32Rectl & GetWindowRect.
+		  Removed code that adds bordersize during SetWindowPos & window
+		  creation. Fixed listbox code instead. (use window rectangle
+		  for SetWindowPos call, not client rectangle)
 
 	- USER32: Rewrote window creation. All Odin windows are OS/2 frames.
-                  2nd half of window/dialog creation carried out during OS/2
-                  WM_CREATE message.
-                  Don't call default frame handler during WM_ADJUSTWINDOWPOS
-                  for child windows. Fixes incorrect position.
-                  Probably needs to be fixed again.
-          NOTE: NOT WORKING CORRECTLY JUST YET!!
+		  2nd half of window/dialog creation carried out during OS/2
+		  WM_CREATE message.
+		  Don't call default frame handler during WM_ADJUSTWINDOWPOS
+		  for child windows. Fixes incorrect position.
+		  Probably needs to be fixed again.
+	  NOTE: NOT WORKING CORRECTLY JUST YET!!
 
 	- COMCTL32: Check infoPtr in toolbar during WM_ERASEBKGND
 	- KERNEL32: Added wprocess.cpp dependency for include\win\thread.h
-                    Bugfix for loading dlls in pe loader -> increase reference count
-                    In iLoadLibrary first check if the dll has already been loaded.
-                    Fixed console initalization for pe loader apps.
-                    Fixed SetWin32TIB. Return current FS selector for Odin32 apps.
+		    Bugfix for loading dlls in pe loader -> increase reference count
+		    In iLoadLibrary first check if the dll has already been loaded.
+		    Fixed console initalization for pe loader apps.
+		    Fixed SetWin32TIB. Return current FS selector for Odin32 apps.
 		    Removed generic.exe fix in OS2UnsetExceptionHandler.
-                    (creates problems when loading multiple PE dlls with pe loader
-                     and generic.exe still works fine now)
+		    (creates problems when loading multiple PE dlls with pe loader
+		     and generic.exe still works fine now)
 	- SHELL32: use wrc from tools directory
 
  99-10-13: Patrick Haller <phaller@gmx.net>
@@ -153,55 +156,55 @@
 
  99-10-12: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: DrawMenuBar & DrawCaptionTempA bugfix (window handle translation)
-                  Added Win32ToOS2FrameHandle method
-                  Set default mouse pointer back if app doesn't process WM_MOUSEMOVE
-                  message.
-                  Bugfix in button control -> return non-zero if WM_MOUSEMOVE
-                  message doesn't change the cursor.
-                  Same fix in edit & listbox control.
-                  Looks like the same bug is in the scrollbar code.
-                  Preliminary listbox fixes (scrollbar related)
-                  Don't show scrollbars when window is created.
+		  Added Win32ToOS2FrameHandle method
+		  Set default mouse pointer back if app doesn't process WM_MOUSEMOVE
+		  message.
+		  Bugfix in button control -> return non-zero if WM_MOUSEMOVE
+		  message doesn't change the cursor.
+		  Same fix in edit & listbox control.
+		  Looks like the same bug is in the scrollbar code.
+		  Preliminary listbox fixes (scrollbar related)
+		  Don't show scrollbars when window is created.
 
-        - USER32: Added support for extra messages in default window handler.
-                  Partial support for WM_SYSCOMMAND in default window handler.
-                  MDI child bugfix (window now displayed correctly)
-                  Only subclass frame when it has a 3d border OR *only* the
-                  WS_BORDER borderstyle.
-                  Fixed y mapping bug in OSLibMapWINDOWPOStoSWP (converted
-                  twice (win32 -> os2 -> win32))
+	- USER32: Added support for extra messages in default window handler.
+		  Partial support for WM_SYSCOMMAND in default window handler.
+		  MDI child bugfix (window now displayed correctly)
+		  Only subclass frame when it has a 3d border OR *only* the
+		  WS_BORDER borderstyle.
+		  Fixed y mapping bug in OSLibMapWINDOWPOStoSWP (converted
+		  twice (win32 -> os2 -> win32))
 	- USER32: Set focus to edit control when receiving WM_LBUTTONDOWN
 
-        - USER32: Don't send WM_COMMAND during WM_SETFOCUS in edit control when
-                  dialog hasn't been completely created. (crashes VPBuddy; can't
-                  find dialog control that hasn't been created yet)
-                  NOTE: EXPERIMENTAL FIX. NEEDS TO BE CHANGED.
+	- USER32: Don't send WM_COMMAND during WM_SETFOCUS in edit control when
+		  dialog hasn't been completely created. (crashes VPBuddy; can't
+		  find dialog control that hasn't been created yet)
+		  NOTE: EXPERIMENTAL FIX. NEEDS TO BE CHANGED.
 
  99-10-11: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: pmframe finished
 
  99-10-11: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Disabling the desktop window is a very bad idea.
-                  (desktop no longer responds to mouse clicks)
-                  Enable method in desktop window class that does nothing.
-                  Added support for extra messages in msg printf code
+		  (desktop no longer responds to mouse clicks)
+		  Enable method in desktop window class that does nothing.
+		  Added support for extra messages in msg printf code
 		  Ported almost all Wine code for CTLCOLOR messages.
-                  Return -1 in DefWindowProc for WM_VKEYTOITEM & WM_CHARTOITEM
-                  Fix for MDI child window. They're now displayed, but it's
-                  still not right.
+		  Return -1 in DefWindowProc for WM_VKEYTOITEM & WM_CHARTOITEM
+		  Fix for MDI child window. They're now displayed, but it's
+		  still not right.
 	- SHELL32: Fixed Shell32 about dialog.
-                   Compile Wine resource with WRC and link with dll.
-                   Added version resource
-                   Call Wine dll entrypoint in initterm.cpp.
+		   Compile Wine resource with WRC and link with dll.
+		   Added version resource
+		   Call Wine dll entrypoint in initterm.cpp.
 	- INCLUDE: Only include stdlib.h when wrc is not active
-                   Extra definitions for compiling win32 apps in OS/2
+		   Extra definitions for compiling win32 apps in OS/2
 
  99-10-11: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- GDI32: GetTextFaceW bugfix
 	- USER32: Init ownDC to 0
 		  Create empty dialog in CreateWindowExA/W if class == dialog
-                  Support for class atoms in CreateWindowExA/W
-                  Win32Dialog::getNextDlgGroupItem() bugfix
+		  Support for class atoms in CreateWindowExA/W
+		  Win32Dialog::getNextDlgGroupItem() bugfix
 
  99-10-11: Christoph Bratschi <cbratschi@datacomm.ch>
 	- GDI32: Bugfix for Pie Open32 api
@@ -211,38 +214,38 @@
 
  99-10-10: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Ported GetNextDlgGroupItem & GetDlgItemInt from Wine
-                  Window handle translation fix for MessageBoxW
-                  Don't create frame windows for windows with a 3d border.
-                  (fixes crash in VPBuddy; don't know why)
+		  Window handle translation fix for MessageBoxW
+		  Don't create frame windows for windows with a 3d border.
+		  (fixes crash in VPBuddy; don't know why)
 	- COMDLG32: Fix for most unicode functions (window handle translation
-                    missing as reported by Edgar Buerkle)
+		    missing as reported by Edgar Buerkle)
 
  99-10-10: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- KERNEL32: Bugfix for GetFullPathNameW (NULL ptr check)
 
  99-10-09: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Clipboard fixes (window handle translation)
-                  Fixed button redraw when receiving a WM_ENABLE msg
-                  Use the supported Open32 system colors and only use
-                  those from Wine for the new (9x) colors
-        - SHELL32: Moved old to current, current to old dir
+		  Fixed button redraw when receiving a WM_ENABLE msg
+		  Use the supported Open32 system colors and only use
+		  those from Wine for the new (9x) colors
+	- SHELL32: Moved old to current, current to old dir
 	- KERNEL32: Don't switch FS selectors for Odin32 OS/2 apps (win32
-                    apps compiled in OS/2).
-                    Fixed reversed stack top & bottom in TEB structure.
+		    apps compiled in OS/2).
+		    Fixed reversed stack top & bottom in TEB structure.
 	- KERNEL32  Added code to dispatch OS exceptions to win32 apps.
-                    Doesn't seem to be necessary though, so it's inactive for now.
+		    Doesn't seem to be necessary though, so it's inactive for now.
 	- USER32:   Fixed resizing in winhlp32. Doesn't seem to break anything
-                    else. (needs more testing though)
-                    Only increase y position of window if it's initial y <> 0.
-                    Fixed desktop window lookup (GetWindowFromHandle)
-                    Set dummy desktop window handler;
-                    Mdi client bugfix (reported by Yuri Dario)
+		    else. (needs more testing though)
+		    Only increase y position of window if it's initial y <> 0.
+		    Fixed desktop window lookup (GetWindowFromHandle)
+		    Set dummy desktop window handler;
+		    Mdi client bugfix (reported by Yuri Dario)
 
  99-10-09: Jens Wiessner <wiessnej@rfi.de>
 	- CRTDLL: Implemented functions; only 62 stubs left
 
  99-10-09: Edgar Buerkle <Edgar.Buerkle@gmx.net>
-        - USER32: Enabled accelerator WM_COMMANDs
+	- USER32: Enabled accelerator WM_COMMANDs
 	- COMDLG32: Fix for GetOpenFileNameW (owner hwnd translation)
 
  99-10-08: Daniela Engert <dani@ngrt.de>
@@ -261,19 +264,19 @@
 	- KERNEL32: Accelerator conversion fixes + changes
 
  99-10-08: Sander van Leeuwen <sandervl@xs4all.nl>
- 	- USER32: Bugfix for SetWindowPos; take frame size into account
-                  Removed WM_MOVE notification class flag for Odin PM windows
-                  Removed SetWindowPos frame size bugfix
-                  Removed WM_WINDOWPOSCHANGED cy bugfix
-                  Set WS_DISABLED window style bit when receiving PM WM_ENABLE
-                  GetClassInfoA bugfix
-                  Window property bugfixes (no handle translation)
-                  Set last error when window creation fails.
-                  In DefDlgProcA/W, call DefWindowProcA/W if window is not
-                  a dialog. Fixed problems in VPBuddy.
-                  Unknown if that's a bug in the app or something else goes wrong.
-        - KERNEL32: Bugfix for loading winspool
-                    Ported latest Wine exception code (RtlRaiseException/RtlUnwind)
+	- USER32: Bugfix for SetWindowPos; take frame size into account
+		  Removed WM_MOVE notification class flag for Odin PM windows
+		  Removed SetWindowPos frame size bugfix
+		  Removed WM_WINDOWPOSCHANGED cy bugfix
+		  Set WS_DISABLED window style bit when receiving PM WM_ENABLE
+		  GetClassInfoA bugfix
+		  Window property bugfixes (no handle translation)
+		  Set last error when window creation fails.
+		  In DefDlgProcA/W, call DefWindowProcA/W if window is not
+		  a dialog. Fixed problems in VPBuddy.
+		  Unknown if that's a bug in the app or something else goes wrong.
+	- KERNEL32: Bugfix for loading winspool
+		    Ported latest Wine exception code (RtlRaiseException/RtlUnwind)
 
  99-10-07: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: GetCaretPos() fix
