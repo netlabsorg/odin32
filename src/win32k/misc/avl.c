@@ -1,4 +1,4 @@
-/* $Id: avl.c,v 1.2 2000-01-22 18:21:02 bird Exp $
+/* $Id: avl.c,v 1.3 2000-01-24 01:45:19 bird Exp $
  *
  * AVL-Tree (lookalike) implementation.
  *
@@ -435,7 +435,7 @@ PAVLNODECORE AVLBeginEnumTree(PPAVLNODECORE ppTree, PAVLENUMDATA pEnumData, int 
 {
     if (*ppTree != NULL)
     {
-        pEnumData->fFromLeft = fFromLeft;
+        pEnumData->fFromLeft = (char)fFromLeft;
         pEnumData->cEntries = 1;
         pEnumData->aEntries[0] = *ppTree;
         pEnumData->achFlags[0] = 0;
