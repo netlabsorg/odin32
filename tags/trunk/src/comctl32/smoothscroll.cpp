@@ -1,10 +1,9 @@
-/* $Id: smoothscroll.cpp,v 1.1 2000-09-29 07:38:53 achimha Exp $ */
+/* $Id: smoothscroll.cpp,v 1.2 2000-09-30 13:43:21 achimha Exp $ */
 
 /*
  * Undocumented SmoothScrollWindow function from COMCTL32.DLL
  *
  * Copyright 2000 Marcus Meissner <marcus@jet.franken.de>
- * Copyright 2000 Achim Hasenmueller <achimha@innotek.de>
  *
  * TODO
  *     - actually add smooth scrolling
