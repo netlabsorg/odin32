@@ -655,9 +655,7 @@ LPVOID HEAP_malloc(DWORD size )
   LPVOID p = HeapAlloc( GetProcessHeap(), 0, size );
   if (!p)
   {
-    dprintf(("KERNEL32: HEAP_malloc(%08xh,%08xh,%08xh) out of memory.\n",
-             heap,
-             flags,
+    dprintf(("KERNEL32: HEAP_malloc(%08xh) out of memory.\n",
              size));
   }
   return p;
@@ -681,9 +679,7 @@ LPVOID HEAP_realloc(LPVOID lpMem, DWORD size )
   LPVOID p = HeapReAlloc( GetProcessHeap(), 0, lpMem, size );
   if (!p)
   {
-    dprintf(("KERNEL32: HEAP_realloc(%08xh,%08xh,%08xh,%08xh) out of memory.\n",
-             heap,
-             flags,
+    dprintf(("KERNEL32: HEAP_realloc(%08xh,%08xh) out of memory.\n",
              lpMem,
              size));
   }
