@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.5 1999-10-08 16:27:48 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.6 1999-10-14 09:21:42 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -1067,6 +1067,7 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
 	            errorState = ERROR_INTERNAL;
 	            return(FALSE);
 	        }
+	    	WinDll->AddRef();
 	}
 	fout << "**********************************************************************" << endl;
 	fout << "**********************  Finished Loading Module  *********************" << endl;
