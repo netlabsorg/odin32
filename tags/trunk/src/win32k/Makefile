@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.14 2000-01-22 18:20:55 bird Exp $
+# $Id: Makefile,v 1.15 2000-01-24 18:18:59 bird Exp $
 #
 # Copyright 1998-1999 knut st. osmundsen
 #
@@ -153,12 +153,14 @@ OBJS  = object\devfirst.obj \
         object\asmutils.obj \
         object\calltab.obj \
         object\malloc.obj \
+        object\smalloc_avl.obj \
+        object\avl.obj \
+        object\rmalloc_avl.obj \
         object\new.obj \
         object\stricmp.obj \
         object\yield.obj \
         object\vsprintf.obj \
         object\vprintf.obj \
-        object\avl.obj \
         object\ldr.obj \
         object\myldrClose.obj \
         object\myldrOpen.obj \
