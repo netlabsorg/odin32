@@ -1,4 +1,4 @@
-/* $Id: winproc.cpp,v 1.6 2000-09-05 19:20:38 sandervl Exp $ */
+/* $Id: winproc.cpp,v 1.7 2001-06-09 14:50:26 sandervl Exp $ */
 /*
  * Window procedure callbacks
  *
@@ -306,8 +306,7 @@ LRESULT WINAPI CallWindowProcA(
     }
     else  dprintf2(("CallWindowProcA %x %x %x %x %x (unknown proc)", func, hwnd, msg, wParam, lParam));
    
-    Win32BaseWindow *window = Win32BaseWindow::GetWindowFromHandle(hwnd);
-    if(!window) {
+    if(!IsWindow(hwnd)) {
         dprintf(("CallWindowProcA, window %x not found", hwnd));
         // return func( hwnd, msg, wParam, lParam );
         return 0;
@@ -341,8 +340,7 @@ LRESULT WINAPI CallWindowProcW( WNDPROC func, HWND hwnd, UINT msg,
     }
     else  dprintf2(("CallWindowProcW %x %x %x %x %x (unknown proc)", func, hwnd, msg, wParam, lParam));
 
-    Win32BaseWindow *window = Win32BaseWindow::GetWindowFromHandle(hwnd);
-    if(!window) {
+    if(!IsWindow(hwnd)) {
         dprintf(("CallWindowProcW, window %x not found", hwnd));
         // return func( hwnd, msg, wParam, lParam );
         return 0;

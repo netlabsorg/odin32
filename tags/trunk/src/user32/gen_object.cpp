@@ -1,4 +1,4 @@
-/* $Id: gen_object.cpp,v 1.7 2001-02-10 10:31:31 sandervl Exp $ */
+/* $Id: gen_object.cpp,v 1.8 2001-06-09 14:50:17 sandervl Exp $ */
 /*
  * Generic Object Class for OS/2
  *
@@ -15,22 +15,35 @@
 #include <misc.h>
 #include <win32type.h>
 #include <gen_object.h>
-#include <vmutex.h>
 
 #define DBG_LOCALLOG	DBG_gen_object
 #include "dbglocal.h"
 
-VMutex genMutex[OBJTYPE_MAX];
-
 //******************************************************************************
 //******************************************************************************
-GenericObject::GenericObject(GenericObject **head, DWORD objType)
+GenericObject::GenericObject(GenericObject **head, CRITICAL_SECTION *pLock)
 {
-  this->objType = objType;
-  this->head    = head;
-  this->next    = NULL;
+  this->pLock = pLock;
+  this->head  = head;
+  this->next  = NULL;
+  refCount    = 1;
+  
+  fLinked     = FALSE;
+  fDeletePending = FALSE;
 
-  genMutex[objType].enter();
+  link();
+}
+//******************************************************************************
+//******************************************************************************
+GenericObject::~GenericObject()
+{
+  unlink();
+}
+//******************************************************************************
+//******************************************************************************
+void GenericObject::link()
+{
+  lock();
   if(*head == NULL) {
 	*head = this;	
   }
@@ -42,14 +55,17 @@ GenericObject::GenericObject(GenericObject **head, DWORD objType)
 	}
 	cur->next = this;
   }
-  genMutex[objType].leave();
+  fLinked = TRUE;
+  unlock();
 }
 //******************************************************************************
 //******************************************************************************
-GenericObject::~GenericObject()
+void GenericObject::unlink()
 {
+  if(!fLinked)   return;
+
   //remove from linked list
-  genMutex[objType].enter();
+  lock();
   if(*head == this) {
 	*head = next;	
   }
@@ -60,12 +76,30 @@ GenericObject::~GenericObject()
 		cur = cur->next;
 		if(cur == NULL) {
 			dprintf(("GenericObject dtor: cur == NULL!!"));
+                        unlock();
 			DebugInt3();
+                        return;
 		}
 	}
 	cur->next = next;
   }
-  genMutex[objType].leave();
+  unlock();
+}
+//******************************************************************************
+//******************************************************************************
+LONG GenericObject::release()
+{
+////  dprintf(("release -> refcount %x", refCount));
+#ifdef DEBUG
+  if(refCount-1 < 0) {
+      DebugInt3();
+  }
+#endif
+  if(InterlockedDecrement(&refCount) == 0 && fDeletePending) {
+      delete this;
+      return 0;
+  }
+  return refCount;
 }
 //******************************************************************************
 //******************************************************************************
@@ -76,33 +110,12 @@ void GenericObject::DestroyAll(GenericObject *head)
   cur = head;
   while(cur) {
 	next = cur->next;
+        if(cur->getRefCount() != 0) {
+            dprintf(("Refcount %d for object %x", cur->getRefCount(), cur));
+        }
 	delete cur;
 	cur = next;
   }
-}
-//******************************************************************************
-//******************************************************************************
-void GenericObject::enterMutex()
-{
-  genMutex[objType].enter();
-}
-//******************************************************************************
-//******************************************************************************
-void GenericObject::leaveMutex()
-{
-  genMutex[objType].leave();
-}
-//******************************************************************************
-//******************************************************************************
-void GenericObject::enterMutex(DWORD objType)
-{
-  genMutex[objType].enter();
-}
-//******************************************************************************
-//******************************************************************************
-void GenericObject::leaveMutex(DWORD objType)
-{
-  genMutex[objType].leave();
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.25 2001-05-25 19:59:30 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.26 2001-06-09 14:50:26 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -145,6 +145,7 @@ LONG WIN32API GetMessageTime(void)
 LRESULT WIN32API SendMessageA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
   Win32BaseWindow *window;
+  LRESULT result;
 
     if (hwnd == HWND_BROADCAST|| hwnd == HWND_TOPMOST)
     {
@@ -157,13 +158,16 @@ LRESULT WIN32API SendMessageA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         dprintf(("SendMessageA, %x %x %x window %x not found", msg, wParam, lParam, hwnd));
         return 0;
     }
-    return window->SendMessageA(msg, wParam, lParam);
+    result = window->SendMessageA(msg, wParam, lParam);
+    RELEASE_WNDOBJ(window);
+    return result;
 }
 //******************************************************************************
 //******************************************************************************
 LRESULT WIN32API SendMessageW(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
   Win32BaseWindow *window;
+  LRESULT result;
 
     if (hwnd == HWND_BROADCAST|| hwnd == HWND_TOPMOST)
     {
@@ -176,13 +180,16 @@ LRESULT WIN32API SendMessageW(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         dprintf(("SendMessageW, window %x not found", hwnd));
         return 0;
     }
-    return window->SendMessageW(msg, wParam, lParam);
+    result = window->SendMessageW(msg, wParam, lParam);
+    RELEASE_WNDOBJ(window);
+    return result;
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API PostMessageA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
   Win32BaseWindow *window;
+  HWND hwndOS2;
 
     if (hwnd == HWND_BROADCAST) //Not HWND_TOPMOST???
     {
@@ -198,14 +205,17 @@ BOOL WIN32API PostMessageA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         dprintf(("PostMessageA, window %x not found", hwnd));
         return 0;
     }
+    hwndOS2 = window->getOS2WindowHandle();
+    RELEASE_WNDOBJ(window);
     dprintf(("PostMessageA, %x %x %x %x", hwnd, msg, wParam, lParam));
-    return OSLibPostMessage(window->getOS2WindowHandle(), msg, wParam, lParam, FALSE);
+    return OSLibPostMessage(hwndOS2, msg, wParam, lParam, FALSE);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API PostMessageW(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
   Win32BaseWindow *window;
+  HWND hwndOS2;
 
     if (hwnd == HWND_BROADCAST) //Not HWND_TOPMOST???
     {
@@ -221,8 +231,10 @@ BOOL WIN32API PostMessageW(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         dprintf(("PostMessageW, window %x not found", hwnd));
         return 0;
     }
+    hwndOS2 = window->getOS2WindowHandle();
+    RELEASE_WNDOBJ(window);
     dprintf(("PostMessageW, %x %x %x %x", hwnd, msg, wParam, lParam));
-    return OSLibPostMessage(window->getOS2WindowHandle(), msg, wParam, lParam, TRUE);
+    return OSLibPostMessage(hwndOS2, msg, wParam, lParam, TRUE);
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: win32wbasepos.cpp,v 1.25 2001-05-22 09:33:16 sandervl Exp $ */
+/* $Id: win32wbasepos.cpp,v 1.26 2001-06-09 14:50:22 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (nonclient/position methods)
  *
@@ -34,7 +34,6 @@
 #include "syscolor.h"
 #include "win32wndhandle.h"
 #include "dc.h"
-#include "pmframe.h"
 #include "win32wdesktop.h"
 #include <win\hook.h>
 
@@ -255,6 +254,7 @@ static void WINPOS_FindIconPos( HWND hwnd, POINT &pt )
                         (pRectWindow->bottom > y - yspacing))
                         break;  /* There's a window in there */
                 }
+                RELEASE_WNDOBJ(child);
                 hwndChild = GetWindow(hwndChild, GW_HWNDNEXT);
             }
 

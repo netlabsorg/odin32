@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.38 2001-05-20 10:44:04 sandervl Exp $ */
+/* $Id: scroll.cpp,v 1.39 2001-06-09 14:50:19 sandervl Exp $ */
 /*
  * Scrollbar control
  *
@@ -20,7 +20,6 @@
 #include "win32wbase.h"
 #include "oslibwin.h"
 #include "initterm.h"
-#include "pmframe.h"
 
 #define DBG_LOCALLOG    DBG_scroll
 #include "dbglocal.h"
@@ -83,9 +82,15 @@ static SCROLLBAR_INFO *SCROLL_GetInfoPtr( HWND hwnd, INT nBar )
     {
         case SB_HORZ:
         case SB_VERT:
-          win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
-          if (!win32wnd) return NULL;
-          return win32wnd->getScrollInfo(nBar);
+        {
+            SCROLLBAR_INFO *pInfo;
+            win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
+
+            if (!win32wnd) return NULL;
+            pInfo = win32wnd->getScrollInfo(nBar);
+            RELEASE_WNDOBJ(win32wnd);
+            return pInfo;
+        }
 
         case SB_CTL:
           return (SCROLLBAR_INFO*)GetInfoPtr(hwnd);
@@ -132,8 +137,11 @@ static BOOL SCROLL_GetScrollBarRect( HWND hwnd, INT nBar, RECT *lprect,
         {
           lprect->left--;
           lprect->right++;
-        } else if (win32wnd->getStyle() & WS_VSCROLL)
+        } 
+        else 
+        if (win32wnd->getStyle() & WS_VSCROLL)
             lprect->right++;
+        RELEASE_WNDOBJ(win32wnd);
         vertical = FALSE;
         break;
       }
@@ -153,8 +161,11 @@ static BOOL SCROLL_GetScrollBarRect( HWND hwnd, INT nBar, RECT *lprect,
         {
           lprect->top--;
           lprect->bottom++;
-        } else if (win32wnd->getStyle() & WS_HSCROLL)
+        } 
+        else 
+        if (win32wnd->getStyle() & WS_HSCROLL)
           lprect->bottom++;
+        RELEASE_WNDOBJ(win32wnd);
         vertical = TRUE;
         break;
       }
@@ -1491,12 +1502,14 @@ BOOL WINAPI ShowScrollBar(
                     INT nBar,   /* [I] One of SB_HORZ, SB_VERT, SB_BOTH or SB_CTL */
                     BOOL fShow  /* [I] TRUE = show, FALSE = hide  */)
 {
-    Win32BaseWindow *win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
     BOOL fShowH = (nBar == SB_HORZ) ? fShow : 0;
     BOOL fShowV = (nBar == SB_VERT) ? fShow : 0;
+    DWORD dwStyle;
 
     dprintf(("ShowScrollBar %04x %d %d\n", hwnd, nBar, fShow));
-    if (!win32wnd) return FALSE;
+    if (!IsWindow(hwnd)) return FALSE;
+
+    dwStyle = GetWindowLongA(hwnd, GWL_STYLE);
 
     //CB: does Win32 send a WM_STYLECHANGED message?
     switch(nBar)
@@ -1509,13 +1522,13 @@ BOOL WINAPI ShowScrollBar(
       case SB_HORZ:
         if (fShow)
         {
-            fShowH = !(win32wnd->getStyle() & WS_HSCROLL);
-            win32wnd->setStyle(win32wnd->getStyle() | WS_HSCROLL);
+            fShowH = !(dwStyle & WS_HSCROLL);
+            SetWindowLongA(hwnd, GWL_STYLE, dwStyle | WS_HSCROLL);
         }
         else  /* hide it */
         {
-            fShowH = (win32wnd->getStyle() & WS_HSCROLL);
-            win32wnd->setStyle(win32wnd->getStyle() & ~WS_HSCROLL);
+            fShowH = (dwStyle & WS_HSCROLL);
+            SetWindowLongA(hwnd, GWL_STYLE, dwStyle & ~WS_HSCROLL);
         }
         if( nBar == SB_HORZ )
         {
@@ -1527,13 +1540,13 @@ BOOL WINAPI ShowScrollBar(
     case SB_VERT:
         if (fShow)
         {
-            fShowV = !(win32wnd->getStyle() & WS_VSCROLL);
-            win32wnd->setStyle(win32wnd->getStyle() | WS_VSCROLL);
+            fShowV = !(dwStyle & WS_VSCROLL);
+            SetWindowLongA(hwnd, GWL_STYLE, dwStyle | WS_VSCROLL);
         }
         else  /* hide it */
         {
-            fShowV = (win32wnd->getStyle() & WS_VSCROLL);
-            win32wnd->setStyle(win32wnd->getStyle() & ~WS_VSCROLL);
+            fShowV = (dwStyle & WS_VSCROLL);
+            SetWindowLongA(hwnd, GWL_STYLE, dwStyle & ~WS_VSCROLL);
         }
         if ( nBar == SB_VERT )
            fShowH = FALSE;

@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.31 2001-05-20 08:49:49 sandervl Exp $*/
+/* $Id: menu.cpp,v 1.32 2001-06-09 14:50:18 sandervl Exp $*/
 /*
  * Menu functions
  *
@@ -297,29 +297,45 @@ static void do_debug_print_menuitem(const char *prefix, MENUITEM * mp,
 HMENU getMenu(HWND hwnd)
 {
   Win32BaseWindow *win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
-
-  return win32wnd ? win32wnd->GetMenu():(HMENU)0;
+  
+  if(win32wnd) {
+      HMENU hmenu = win32wnd->GetMenu();
+      RELEASE_WNDOBJ(win32wnd);
+      return hmenu;
+  }
+  return (HMENU)0;
 }
 
 VOID setMenu(HWND hwnd,HMENU hMenu)
 {
   Win32BaseWindow *win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
 
-  if (win32wnd) win32wnd->SetMenu(hMenu);
+  if (win32wnd) {
+      win32wnd->SetMenu(hMenu);
+      RELEASE_WNDOBJ(win32wnd);
+  }
 }
 
 HMENU getSysMenu(HWND hwnd)
 {
   Win32BaseWindow *win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
 
-  return win32wnd ? win32wnd->GetSysMenu():(HMENU)0;
+  if(win32wnd) {
+      HMENU hmenu = win32wnd->GetSysMenu();
+      RELEASE_WNDOBJ(win32wnd);
+      return hmenu;
+  }
+  return (HMENU)0;
 }
 
 VOID setSysMenu(HWND hwnd,HMENU hMenu)
 {
   Win32BaseWindow *win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
 
-  win32wnd->SetSysMenu(hMenu);
+  if(win32wnd) {
+      win32wnd->SetSysMenu(hMenu);
+      RELEASE_WNDOBJ(win32wnd);
+  }
 }
 
 /***********************************************************************
@@ -2173,6 +2189,7 @@ static HMENU MENU_ShowSubPopup( HWND hwndOwner, HMENU hmenu,
           rect.right = GetSystemMetrics(SM_CXSIZE);
           rect.bottom = GetSystemMetrics(SM_CYSIZE);
         }
+        if(win32wnd) RELEASE_WNDOBJ(win32wnd);
     }
     else
     {
@@ -2231,6 +2248,7 @@ static HMENU MENU_PtMenu(HMENU hMenu,POINT pt,BOOL inMenuBar)
         }
 
         ht = win32wnd->HandleNCHitTest(pt);
+        RELEASE_WNDOBJ(win32wnd);
         if( menu->wFlags & MF_POPUP )
             ht =  (ht != (UINT)HTNOWHERE &&
                    ht != (UINT)HTERROR) ? (UINT)hMenu : 0;
@@ -3994,11 +4012,10 @@ BOOL WINAPI DestroyMenu( HMENU hMenu )
 HMENU WINAPI GetSystemMenu( HWND hWnd, BOOL bRevert )
 {
     HMENU retvalue = 0;
-    Win32BaseWindow *win32wnd = Win32BaseWindow::GetWindowFromHandle(hWnd);
 
-    dprintf(("USER32: GetSystemMenu"));
+    dprintf(("USER32: GetSystemMenu %x %d", hWnd, bRevert));
 
-    if (win32wnd)
+    if (IsWindow(hWnd))
     {
         HMENU hSysMenu = getSysMenu(hWnd);
         if(hSysMenu)
@@ -4062,6 +4079,7 @@ BOOL WINAPI SetSystemMenu( HWND hwnd, HMENU hMenu )
     {
         if (win32wnd->GetSysMenu()) DestroyMenu(win32wnd->GetSysMenu());
         win32wnd->SetSysMenu(MENU_GetSysMenu( hwnd, hMenu ));
+        RELEASE_WNDOBJ(win32wnd);
         return TRUE;
     }
     return FALSE;

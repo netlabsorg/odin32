@@ -1,4 +1,4 @@
-/* $Id: windowclass.cpp,v 1.20 2001-04-04 09:01:25 sandervl Exp $ */
+/* $Id: windowclass.cpp,v 1.21 2001-06-09 14:50:26 sandervl Exp $ */
 /*
  * Win32 Window Class Code for OS/2
  *
@@ -51,7 +51,9 @@ ATOM WIN32API RegisterClassA(CONST WNDCLASSA *lpWndClass)
     memcpy(&wc.style, lpWndClass, sizeof(WNDCLASSA));
     wc.hIconSm = 0;
  
-    if(Win32WndClass::FindClass(wc.hInstance, (LPSTR)wc.lpszClassName)) {
+    wclass = Win32WndClass::FindClass(wc.hInstance, (LPSTR)wc.lpszClassName);
+    if(wclass) {
+        RELEASE_CLASSOBJ(wclass);
         if(HIWORD(wc.lpszClassName)) {
                 dprintf(("RegisterClassA %x %s already exists", wc.hInstance, wc.lpszClassName));
         }
@@ -74,7 +76,9 @@ ATOM WIN32API RegisterClassA(CONST WNDCLASSA *lpWndClass)
         DebugInt3();
         return(0);
     }
-    return(wclass->getAtom());
+    ATOM atom = wclass->getAtom();
+    RELEASE_CLASSOBJ(wclass);
+    return atom;
 }
 //******************************************************************************
 //Note: RegisterClassA does NOT change the last error if successful! (verified in NT 4, SP6)
@@ -83,7 +87,9 @@ ATOM WIN32API RegisterClassExA(CONST WNDCLASSEXA *lpWndClass)
 {
  Win32WndClass *wclass;
 
-    if(Win32WndClass::FindClass(lpWndClass->hInstance, (LPSTR)lpWndClass->lpszClassName)) {
+    wclass = Win32WndClass::FindClass(lpWndClass->hInstance, (LPSTR)lpWndClass->lpszClassName);
+    if(wclass) {
+        RELEASE_CLASSOBJ(wclass);
         if(HIWORD(lpWndClass->lpszClassName)) {
                 dprintf(("RegisterClassExA %x %s already exists", lpWndClass->hInstance, lpWndClass->lpszClassName));
         }
@@ -99,7 +105,9 @@ ATOM WIN32API RegisterClassExA(CONST WNDCLASSEXA *lpWndClass)
         DebugInt3();
         return(0);
     }
-    return(wclass->getAtom());
+    ATOM atom = wclass->getAtom();
+    RELEASE_CLASSOBJ(wclass);
+    return atom;
 }
 //******************************************************************************
 //Note: RegisterClassA does NOT change the last error if successful! (verified in NT 4, SP6)
@@ -114,7 +122,9 @@ WORD WIN32API RegisterClassW(CONST WNDCLASSW *lpwc)
     wc.cbSize = sizeof(wc);
     memcpy(&wc.style, lpwc, sizeof(WNDCLASSA));
 
-    if(Win32WndClass::FindClass(wc.hInstance, (LPWSTR)wc.lpszClassName)) {
+    winclass = Win32WndClass::FindClass(wc.hInstance, (LPWSTR)wc.lpszClassName);
+    if(winclass) {
+        RELEASE_CLASSOBJ(winclass);
         if(HIWORD(wc.lpszClassName)) {
                 dprintf(("RegisterClassW %x %ls already exists", wc.hInstance, wc.lpszClassName));
         }
@@ -138,7 +148,7 @@ WORD WIN32API RegisterClassW(CONST WNDCLASSW *lpwc)
         return 0;
     }
     rc = winclass->getAtom();
-
+    RELEASE_CLASSOBJ(winclass);
     return(rc);
 }
 //******************************************************************************
@@ -152,7 +162,9 @@ ATOM WIN32API RegisterClassExW(CONST WNDCLASSEXW *lpwc)
 
     memcpy(&wc, lpwc, sizeof(WNDCLASSEXA));
 
-    if(Win32WndClass::FindClass(wc.hInstance, (LPWSTR)wc.lpszClassName)) {
+    winclass = Win32WndClass::FindClass(wc.hInstance, (LPWSTR)wc.lpszClassName);
+    if(winclass) {
+        RELEASE_CLASSOBJ(winclass);
         if(HIWORD(wc.lpszClassName)) {
                 dprintf(("RegisterClassExW %x %ls already exists", wc.hInstance, wc.lpszClassName));
         }
@@ -169,6 +181,7 @@ ATOM WIN32API RegisterClassExW(CONST WNDCLASSEXW *lpwc)
         return(0);
     }
     rc = winclass->getAtom();
+    RELEASE_CLASSOBJ(winclass);
 
     return(rc);
 }
@@ -179,12 +192,7 @@ BOOL WIN32API UnregisterClassA(LPCSTR lpszClassName, HINSTANCE hinst)
  BOOL ret;
 
    ret = Win32WndClass::UnregisterClassA(hinst, (LPSTR)lpszClassName);
-#if 1
    return ret;
-#else
-  //Spintest returns FALSE in dll termination, so pretend it succeeded
-//  return(TRUE);
-#endif
 }
 //******************************************************************************
 //******************************************************************************
@@ -203,12 +211,7 @@ BOOL WIN32API UnregisterClassW(LPCWSTR lpszClassName, HINSTANCE hinst)
   if(HIWORD(astring) != 0)
         FreeAsciiString((char *)astring);
 
-#if 1
   return ret;
-#else
-  //Spintest returns FALSE in dll termination, so pretend it succeeded
-//  return(TRUE);
-#endif
 }
 //******************************************************************************
 //******************************************************************************
@@ -226,6 +229,7 @@ BOOL WIN32API GetClassInfoA(HINSTANCE hInstance, LPCSTR lpszClass, WNDCLASSA *lp
   wndclass = Win32WndClass::FindClass(hInstance, (LPSTR)lpszClass);
   if(wndclass) {
         wndclass->getClassInfo(&wc);
+        RELEASE_CLASSOBJ(wndclass);
         memcpy(lpwc, &wc.style, sizeof(WNDCLASSA));
         SetLastError(ERROR_SUCCESS);
         return(TRUE);
@@ -255,6 +259,7 @@ BOOL WIN32API GetClassInfoW(HINSTANCE  hinst, LPCWSTR lpszClass, WNDCLASSW *lpwc
 
   if(wndclass) {
         wndclass->getClassInfo(&wc);
+        RELEASE_CLASSOBJ(wndclass);
         memcpy(lpwc, &wc.style, sizeof(WNDCLASSW));
         SetLastError(ERROR_SUCCESS);
         return(TRUE);
@@ -294,6 +299,7 @@ BOOL WIN32API GetClassInfoExA(HINSTANCE     hInstance,
   wndclass = Win32WndClass::FindClass(hInstance, (LPSTR)lpszClass);
   if(wndclass) {
         wndclass->getClassInfo(lpwcx);
+        RELEASE_CLASSOBJ(wndclass);
         lpwcx->cbSize = sizeof(WNDCLASSEXA);
         SetLastError(ERROR_SUCCESS);
         return(TRUE);
@@ -343,6 +349,7 @@ BOOL WIN32API GetClassInfoExW(HINSTANCE     hInstance,
 
   if(wndclass) {
         wndclass->getClassInfo(lpwcx);
+        RELEASE_CLASSOBJ(wndclass);
         lpwcx->cbSize = sizeof(WNDCLASSEXW);
         SetLastError(ERROR_SUCCESS);
         return(TRUE);
@@ -364,6 +371,7 @@ int WIN32API GetClassNameA(HWND hwnd, LPSTR lpszClassName, int cchClassName)
     }
     *lpszClassName = 0;
     rc = (wnd->getClass())->getClassName(lpszClassName, cchClassName);
+    RELEASE_WNDOBJ(wnd);
     dprintf(("USER32: GetClassNameA %x %s (%d)", hwnd, lpszClassName, rc));
     return rc;
 }
@@ -372,6 +380,7 @@ int WIN32API GetClassNameA(HWND hwnd, LPSTR lpszClassName, int cchClassName)
 int WIN32API GetClassNameW(HWND hwnd, LPWSTR lpszClassName, int cchClassName)
 {
  Win32BaseWindow *wnd;
+ int              ret;
 
     dprintf(("USER32: GetClassNameW\n"));
     wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
@@ -379,39 +388,48 @@ int WIN32API GetClassNameW(HWND hwnd, LPWSTR lpszClassName, int cchClassName)
         dprintf(("GetClassNameA wnd == NULL"));
         return(0);
     }
-    return (wnd->getClass())->getClassName(lpszClassName, cchClassName);
+    ret = (wnd->getClass())->getClassName(lpszClassName, cchClassName);
+    RELEASE_WNDOBJ(wnd);
+    return ret;
 }
 //******************************************************************************
 //******************************************************************************
 LONG WIN32API SetClassLongA(HWND hwnd, int nIndex, LONG lNewVal)
 {
  Win32BaseWindow *wnd;
+ LONG             ret;
 
     wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!wnd) {
         dprintf(("SetClassLongA %x %d %x wnd == NULL", hwnd, nIndex, lNewVal));
         return(0);
     }
-    return (wnd->getClass())->setClassLongA(nIndex, lNewVal);
+    ret = (wnd->getClass())->setClassLongA(nIndex, lNewVal);
+    RELEASE_WNDOBJ(wnd);
+    return ret;
 }
 //******************************************************************************
 //******************************************************************************
 LONG WIN32API SetClassLongW(HWND hwnd, int nIndex, LONG lNewVal)
 {
  Win32BaseWindow *wnd;
+ LONG             ret;
 
     wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!wnd) {
         dprintf(("SetClassLongW %x %d %x wnd == NULL", hwnd, nIndex, lNewVal));
         return(0);
     }
-    return (wnd->getClass())->setClassLongW(nIndex, lNewVal);
+    ret = (wnd->getClass())->setClassLongW(nIndex, lNewVal);
+    RELEASE_WNDOBJ(wnd);
+    return ret;
 }
 //******************************************************************************
 //******************************************************************************
 WORD WIN32API SetClassWord(HWND hwnd, int nIndex, WORD  wNewVal)
 {
  Win32BaseWindow *wnd;
+ LONG             ret;
 
     dprintf(("USER32: SetClassWord %x %d %x", hwnd, nIndex, (ULONG)wNewVal));
     wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
@@ -419,7 +437,9 @@ WORD WIN32API SetClassWord(HWND hwnd, int nIndex, WORD  wNewVal)
         dprintf(("SetClassWordA %x %d %x wnd == NULL", hwnd, nIndex, wNewVal));
         return(0);
     }
-    return (wnd->getClass())->setClassWord(nIndex, wNewVal);
+    ret = (wnd->getClass())->setClassWord(nIndex, wNewVal);
+    RELEASE_WNDOBJ(wnd);
+    return ret;
 }
 //******************************************************************************
 //******************************************************************************
@@ -434,6 +454,7 @@ WORD WIN32API GetClassWord(HWND hwnd, int nIndex)
         return(0);
     }
     ret = (wnd->getClass())->getClassWord(nIndex);
+    RELEASE_WNDOBJ(wnd);
     dprintf(("USER32: GetClassWord %x %d returned %x", hwnd, nIndex, (ULONG)ret));
     return ret;
 }
@@ -450,6 +471,7 @@ LONG WIN32API GetClassLongA(HWND hwnd, int nIndex)
         return(0);
     }
     ret = (wnd->getClass())->getClassLongA(nIndex);
+    RELEASE_WNDOBJ(wnd);
     dprintf(("USER32: GetClassLongA %x %d returned %x", hwnd, nIndex, ret));
     return ret;
 }
@@ -466,6 +488,7 @@ LONG WIN32API GetClassLongW(HWND hwnd, int nIndex)
         return(0);
     }
     ret = (wnd->getClass())->getClassLongW(nIndex);
+    RELEASE_WNDOBJ(wnd);
     dprintf(("USER32: GetClassLongW %x %d returned %x", hwnd, nIndex, ret));
     return ret;
 }

@@ -1,4 +1,4 @@
-/* $Id: pmwindow.h,v 1.9 2000-06-07 14:51:27 sandervl Exp $ */
+/* $Id: pmwindow.h,v 1.10 2001-06-09 14:50:19 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -7,6 +7,8 @@
  */
 #ifndef __PMWINDOW_H__
 #define __PMWINDOW_H__
+
+#include <win32wbase.h>
 
 #define WIN32_STDCLASS      "Win32WindowClass"
 #define WIN32_STDFRAMECLASS "Win32FrameClass"
@@ -19,5 +21,14 @@ void UnregisterSystemClasses();
 extern ULONG ScreenWidth;
 extern ULONG ScreenHeight;
 extern ULONG ScreenBitsPerPel;
+
+#define TFOS_LEFT                    0x0001
+#define TFOS_TOP                     0x0002
+#define TFOS_RIGHT                   0x0004
+#define TFOS_BOTTOM                  0x0008
+/* TF_MOVE = TF_LEFT | TF_TOP | TF_RIGHT | TF_BOTTOM */
+#define TFOS_MOVE                    0x000F
+
+VOID FrameTrackFrame(Win32BaseWindow *win32wnd,DWORD flags);
 
 #endif
