@@ -1,4 +1,4 @@
-/* $Id: odininst.cpp,v 1.11 2001-12-08 15:36:30 sandervl Exp $ */
+/* $Id: odininst.cpp,v 1.12 2002-06-15 12:33:46 sandervl Exp $ */
 /*
  * Odin WarpIn installation app
  *
@@ -779,6 +779,12 @@ BOOL InitSystemAndRegistry()
                                0) <= 1)
    {
        PROFILE_SetOdinIniString(ODINFONTSECTION, "MS Sans Serif", "WarpSans");
+   }
+   //Add MS Shell Dlg
+   if(PROFILE_GetOdinIniString(ODINFONTSECTION, "MS Shell Dlg", "", &temp,
+                               0) <= 1)
+   {
+       PROFILE_SetOdinIniString(ODINFONTSECTION, "MS Shell Dlg", "WarpSans");
    }
    //Add MS Shell Dlg 2 (win2k and up) too
    if(PROFILE_GetOdinIniString(ODINFONTSECTION, "MS Shell Dlg 2", "", &temp,
