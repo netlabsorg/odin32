@@ -1,4 +1,4 @@
-/* $Id: probkrnl.h,v 1.9 2002-12-16 00:28:37 bird Exp $
+/* $Id: krnlImportTable.h,v 1.1 2002-12-16 00:28:03 bird Exp $
  *
  * krnlImportTable definitions.
  *
