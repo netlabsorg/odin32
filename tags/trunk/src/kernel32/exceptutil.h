@@ -1,4 +1,4 @@
-/* $Id: exceptutil.h,v 1.4 1999-12-18 20:03:14 sandervl Exp $ */
+/* $Id: exceptutil.h,v 1.5 1999-12-19 17:49:38 sandervl Exp $ */
 
 /*
  * Exception + misc functions for OS/2
@@ -33,6 +33,10 @@ ULONG  getEBX();
 USHORT getSS();
 USHORT getDS();
 USHORT getCS();
+USHORT getSS();
+USHORT getES();
+USHORT getFS();
+USHORT getGS();
 
 #ifdef __cplusplus
 }

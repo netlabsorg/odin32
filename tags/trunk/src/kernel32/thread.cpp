@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.19 1999-12-18 17:17:55 sandervl Exp $ */
+/* $Id: thread.cpp,v 1.20 1999-12-19 17:49:38 sandervl Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -142,20 +142,16 @@ BOOL WIN32API SetThreadPriority(HANDLE hThread, int priority)
 //******************************************************************************
 BOOL WIN32API GetThreadContext(HANDLE hThread, PCONTEXT lpContext)
 {
- USHORT cs, ds;
-
   dprintf(("GetThreadContext NOT IMPLEMENTED!! (TRUE)\n"));
   memset(lpContext, 0, sizeof(CONTEXT));
 
   /* make up some plausible values for segment registers */
-  cs = getCS();
-  ds = getDS();
-  lpContext->SegCs   = cs;
-  lpContext->SegDs   = ds;
-  lpContext->SegEs   = ds;
-  lpContext->SegGs   = ds;
-  lpContext->SegSs   = ds;
-  lpContext->SegFs   = ds;
+  lpContext->SegCs   = getCS();
+  lpContext->SegDs   = getDS();
+  lpContext->SegSs   = getSS();
+  lpContext->SegEs   = getES();
+  lpContext->SegGs   = getGS();
+  lpContext->SegFs   = GetFS();
 
   return TRUE;
 }
