@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.81 2001-10-29 20:08:40 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.82 2001-10-30 18:46:45 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -39,6 +39,7 @@
 static PROC_DosSetFileSizeL  DosSetFileSizeLProc = 0;
 static PROC_DosSetFilePtrL   DosSetFilePtrLProc   = 0;
 static PROC_DosSetFileLocksL DosSetFileLocksLProc = 0;
+static PROC_DosOpenL         DosOpenLProc = 0;
 static BOOL f64BitIO = FALSE;
 //******************************************************************************
 //******************************************************************************
@@ -56,6 +57,9 @@ void OSLibInitWSeBFileIO()
     return;
   }
   if(DosQueryProcAddr(hDoscalls, 986, NULL, (PFN *)&DosSetFileLocksLProc) != NO_ERROR) {
+    return;
+  }
+  if(DosQueryProcAddr(hDoscalls, 981, NULL, (PFN *)&DosOpenLProc) != NO_ERROR) {
     return;
   }
   f64BitIO = TRUE;
@@ -93,6 +97,26 @@ APIRET OdinDosSetFileLocksL(HFILE hFile, PFILELOCKL pflUnlock, PFILELOCKL pflLoc
  USHORT sel = RestoreOS2FS();
 
     yyrc = DosSetFileLocksLProc(hFile, pflUnlock, pflLock, timeout, flags);
+    SetFS(sel);
+
+    return yyrc;
+}
+//******************************************************************************
+//******************************************************************************
+APIRET APIENTRY OdinDosOpenL(PCSZ  pszFileName,
+                             PHFILE phf,
+                             PULONG pulAction,
+                             LONGLONG cbFile,
+                             ULONG ulAttribute,
+                             ULONG fsOpenFlags,
+                             ULONG fsOpenMode,
+                             PEAOP2 peaop2)
+{
+ APIRET yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = DosOpenLProc(pszFileName, phf, pulAction, cbFile, ulAttribute, fsOpenFlags,
+                        fsOpenMode, peaop2);
     SetFS(sel);
 
     return yyrc;
@@ -911,7 +935,7 @@ DWORD OSLibDosCreateFile(CHAR *lpszFile,
 {
    HFILE   hFile;
    ULONG   actionTaken = 0;
-   ULONG   fileSize = 0;
+   LONGLONG fileSize = {0};
    ULONG   fileAttr = FILE_NORMAL;
    ULONG   openFlag = 0;
    ULONG   openMode = 0;
@@ -1008,14 +1032,14 @@ DWORD OSLibDosCreateFile(CHAR *lpszFile,
    while (retry < 3)
    {
         dprintf(("DosOpen %s openFlag=%x openMode=%x", lpszFile, openFlag, openMode));
-        rc = DosOpen((PSZ)lpszFile,
-                      &hFile,
-                      &actionTaken,
-                      fileSize,
-                      fileAttr,
-                      openFlag,
-                      openMode,
-                      NULL);
+        rc = OdinDosOpenL((PSZ)lpszFile,
+                           &hFile,
+                           &actionTaken,
+                           fileSize,
+                           fileAttr,
+                           openFlag,
+                           openMode,
+                           NULL);
     if (rc == ERROR_TOO_MANY_OPEN_FILES)
     {
         ULONG CurMaxFH;
@@ -1081,7 +1105,7 @@ DWORD OSLibDosCreateFile(CHAR *lpszFile,
 DWORD OSLibDosOpenFile(CHAR *lpszFile, UINT fuMode)
 {
    ULONG   actionTaken = 0;
-   ULONG   fileSize = 0;
+   LONGLONG fileSize = {0};
    ULONG   fileAttr = FILE_NORMAL;
    ULONG   openFlag = 0;
    ULONG   openMode = 0;
@@ -1124,14 +1148,14 @@ DWORD OSLibDosOpenFile(CHAR *lpszFile, UINT fuMode)
    if (fuMode & OF_SHARE_EXCLUSIVE_W)
         openMode |= OPEN_SHARE_DENYREADWRITE;
 
-   rc = DosOpen((PSZ)lpszFile,
-                &hFile,
-                &actionTaken,
-                fileSize,
-                fileAttr,
-                openFlag,
-                openMode,
-                NULL);
+   rc = OdinDosOpenL((PSZ)lpszFile,
+                     &hFile,
+                     &actionTaken,
+                     fileSize,
+                     fileAttr,
+                     openFlag,
+                     openMode,
+                     NULL);
 
    if(rc != NO_ERROR)
    {
@@ -1145,9 +1169,9 @@ DWORD OSLibDosOpenFile(CHAR *lpszFile, UINT fuMode)
         }
         if((rc == ERROR_OPEN_FAILED) && (openFlag & OPEN_ACTION_OPEN_IF_EXISTS))
         {
-            SetLastError(ERROR_FILE_NOT_FOUND_W);
+             SetLastError(ERROR_FILE_NOT_FOUND_W);
         }
-        else    SetLastError(error2WinError(rc));
+        else SetLastError(error2WinError(rc));
 
         return HFILE_ERROR_W;
    }
