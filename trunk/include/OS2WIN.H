@@ -20,9 +20,9 @@
 
 #include "misc.h"
 
-#define OPEN32API       _System
-#define EXPENTRY_O32    _System
-#define APIENTRY_O32    _System
+#define OPEN32API       SYSTEM
+#define EXPENTRY_O32    SYSTEM
+#define APIENTRY_O32    SYSTEM
 
 /* WinMain/WinProcs/TimerProcs
  */

@@ -1,4 +1,4 @@
-# $Id: odin32.dbg.watn.mk,v 1.2 2002-02-23 23:51:49 bird Exp $
+# $Id: odin32.dbg.watn.mk,v 1.3 2002-05-17 10:13:20 sandervl Exp $
 
 #
 # Odin32 API
@@ -91,11 +91,11 @@ CTARGET          = -bd
 CXXTARGET        = -bd
 !endif
 
-CFLAGS           = -w4 -wcd=726 -e25 -od -d2 -hw -bm -mf -5r -bt=os2 -zq -fp5 -fpi87     $(CTARGET)   $(DLLRTL)
-CXXFLAGS         = -w4 -wcd=726 -e25 -od -d2 -hw -bm -mf -5r -bt=os2 -zq -fp5 -fpi87 -xd $(CXXTARGET) $(DLLRTL)
-CXXFLAGS_ODINCRT = -w4 -wcd=726 -e25 -od -d2 -hw -bm -mf -5r -bt=os2 -zq -fp5 -fpi87 -xd $(CXXTARGET)
-CFLAGS_WIN32APP  = -w4 -wcd=726 -e25 -od -d2 -hw -bm -mf -5r -bt=os2 -zq -fp5 -fpi87     $(CTARGET)
-CXXFLAGS_WIN32APP= -w4 -wcd=726 -e25 -od -d2 -hw -bm -mf -5r -bt=os2 -zq -fp5 -fpi87     $(CXXTARGET)
+CFLAGS           = -w4 -wcd=726 -wcd=14 -e25 -od -d2 -hw -bm -mf -5r -bt=os2 -zq -fp5 -fpi87     $(CTARGET)   $(DLLRTL)
+CXXFLAGS         = -w4 -wcd=726 -wcd=14 -e25 -od -d2 -hw -bm -mf -5r -bt=os2 -zq -fp5 -fpi87 -xd $(CXXTARGET) $(DLLRTL)
+CXXFLAGS_ODINCRT = -w4 -wcd=726 -wcd=14 -e25 -od -d2 -hw -bm -mf -5r -bt=os2 -zq -fp5 -fpi87 -xd $(CXXTARGET)
+CFLAGS_WIN32APP  = -w4 -wcd=726 -wcd=14 -e25 -od -d2 -hw -bm -mf -5r -bt=os2 -zq -fp5 -fpi87     $(CTARGET)
+CXXFLAGS_WIN32APP= -w4 -wcd=726 -wcd=14 -e25 -od -d2 -hw -bm -mf -5r -bt=os2 -zq -fp5 -fpi87     $(CXXTARGET)
 
 CINCLUDES        = -I$(WATCOM)\h -I$(ODIN32_INCLUDE)\Win -I. -I$(ODIN32_INCLUDE)
 CDEFINES_WIN32APP= -DDEBUG -D__WIN32OS2__ -D__i386__

@@ -1,4 +1,4 @@
-# $Id: odin32.dbg.wat.mk,v 1.8 2002-05-16 12:13:35 sandervl Exp $
+# $Id: odin32.dbg.wat.mk,v 1.9 2002-05-17 10:13:20 sandervl Exp $
 
 #
 # Odin32 API
@@ -76,11 +76,11 @@ CXXEXCEPTIONS    = -xs
 !ifndef STATIC_CRT
 DLLRTL = -br
 !endif
-CFLAGS           = -w4 -wcd=726 -e25 -od -d2 -hw -bm -mf -5r -bt=os2 -zq -fp5 -fpi87     $(DLLRTL)
-CXXFLAGS         = -w4 -wcd=726 -e25 -od -d2 -hw -bm -mf -5r -bt=os2 -zq -fp5 -fpi87 -xd $(DLLRTL)
-CXXFLAGS_ODINCRT = -w4 -wcd=726 -e25 -od -d2 -hw -bm -mf -5r -bt=os2 -zq -fp5 -fpi87 -xd
-CFLAGS_WIN32APP  = -w4 -wcd=726 -e25 -od -d2 -hw -bm -mf -5r -bt=os2 -zq -fp5 -fpi87
-CXXFLAGS_WIN32APP= -w4 -wcd=726 -e25 -od -d2 -hw -bm -mf -5r -bt=os2 -zq -fp5 -fpi87
+CFLAGS           = -w4 -wcd=726 -wcd=14 -e25 -od -d2 -hw -bm -mf -5r -bt=os2 -zq -fp5 -fpi87     $(DLLRTL)
+CXXFLAGS         = -w4 -wcd=726 -wcd=14 -e25 -od -d2 -hw -bm -mf -5r -bt=os2 -zq -fp5 -fpi87 -xd $(DLLRTL)
+CXXFLAGS_ODINCRT = -w4 -wcd=726 -wcd=14 -e25 -od -d2 -hw -bm -mf -5r -bt=os2 -zq -fp5 -fpi87 -xd
+CFLAGS_WIN32APP  = -w4 -wcd=726 -wcd=14 -e25 -od -d2 -hw -bm -mf -5r -bt=os2 -zq -fp5 -fpi87
+CXXFLAGS_WIN32APP= -w4 -wcd=726 -wcd=14 -e25 -od -d2 -hw -bm -mf -5r -bt=os2 -zq -fp5 -fpi87
 
 CINCLUDES        = -I$(%WATCOM)\h -I$(ODIN32_INCLUDE)\Win -I. -I$(ODIN32_INCLUDE)
 CDEFINES_WIN32APP= -DDEBUG -D__WIN32OS2__ -D__i386__
