@@ -1,4 +1,4 @@
-/* $Id: async.cpp,v 1.10 1999-10-27 08:38:03 phaller Exp $ */
+/* $Id: async.cpp,v 1.11 1999-11-04 00:58:03 phaller Exp $ */
 
 /*
  *
@@ -31,6 +31,7 @@
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <sys/select.h>
+#include <sys/time.h>
 
 #include <wsock32const.h>
 
@@ -59,7 +60,7 @@ int _System bsd_select(int,
                        fd_set *,
                        fd_set *,
                        fd_set *,
-                       struct timeval);
+                       struct timeval*);
 
 // wsock32.cpp: error code translation
 int iTranslateSockErrToWSock(int iError);
@@ -1001,11 +1002,38 @@ void WSAAsyncWorker::asyncSelect(PASYNCREQUEST pRequest)
   //@@@PH how to implement other events?
 
   // finally do the select!
+#ifndef BSDSELECT
   irc = os2_select(&sockWin,
                    (ulEvent & FD_READ)  ? 1 : 0,
                    (ulEvent & FD_WRITE) ? 1 : 0,
                    (ulEvent & FD_OOB)   ? 1 : 0,
                    10000);              // @@@PH timeout
+#else
+
+  // BSD implementation
+  fd_set fds_read,     *pfds_read      = &fds_read;
+  fd_set fds_write,    *pfds_write     = &fds_write;
+  fd_set fds_exception,*pfds_exception = &fds_exception;
+  struct timeval tv;
+
+  FD_ZERO(&fds_read);      FD_SET(sockWin,&fds_read);
+  FD_ZERO(&fds_write);     FD_SET(sockWin,&fds_write);
+  FD_ZERO(&fds_exception); FD_SET(sockWin,&fds_exception);
+
+  tv.tv_sec  = 10;
+  tv.tv_usec = 0;
+
+  if (!(ulEvent & FD_READ))  pfds_read      = NULL;
+  if (!(ulEvent & FD_WRITE)) pfds_write     = NULL;
+  if (!(ulEvent & FD_OOB))   pfds_exception = NULL;
+
+  irc = bsd_select(sockWin+1,
+                   pfds_read,
+                   pfds_write,
+                   pfds_exception,
+                   &tv);
+#endif
+
   if (irc < 0)                                          /* an error occurred */
   {
     lParam = sock_errno();                          /* raise error condition */
@@ -1028,7 +1056,7 @@ void WSAAsyncWorker::asyncSelect(PASYNCREQUEST pRequest)
       // readiness for reading bytes ?
       irc = ioctl(sockWin, FIONREAD, (char *)&iUnknown, sizeof(iUnknown));
       if ( (irc == 0) && (iUnknown > 0))
-         usResult |= FD_READ;
+         usResult |= FD_READ | FD_CONNECT;
     }
 
   // post result
