@@ -1,4 +1,4 @@
-/* $Id: service.cpp,v 1.2 1999-12-19 22:05:40 sandervl Exp $ */
+/* $Id: service.cpp,v 1.3 1999-12-21 00:31:38 sandervl Exp $ */
 
 /*
  * Win32 advanced API functions for OS/2
@@ -20,16 +20,36 @@
 #include <stdarg.h>
 #include <string.h>
 #include <odinwrap.h>
-#include "misc.h"
+#include <misc.h>
 #include "advapi32.h"
-#include "unicode.h"
-#include "winreg.h"
+#include <unicode.h>
+#include <win\winreg.h>
+#include <win\winsvc.h>
 #include <heapstring.h>
 
 ODINDEBUGCHANNEL(ADVAPI32-SERVICE)
 
-#define SC_HANDLE HANDLE
-#define SC_LOCK DWORD
+#define REG_SERVICE_TYPE      		"Start"
+#define REG_SERVICE_TYPE_W      	(LPWSTR)L"Start"
+#define REG_SERVICE_STARTTYPE 		"Type"
+#define REG_SERVICE_STARTTYPE_W 	(LPWSTR)L"Type"
+#define REG_SERVICE_ERRORCONTROL	"ErrorControl"
+#define REG_SERVICE_ERRORCONTROL_W	(LPWSTR)L"ErrorControl"
+#define REG_SERVICE_DISPLAYNAME		"DisplayName"
+#define REG_SERVICE_DISPLAYNAME_W	(LPWSTR)L"DisplayName"
+#define REG_SERVICE_LOADORDERGROUP	"Group" 	//???
+#define REG_SERVICE_LOADORDERGROUP_W	(LPWSTR)L"Group" 	//???
+#define REG_SERVICE_DEPENDENCIES        "DependOnGroup"
+#define REG_SERVICE_DEPENDENCIES_W      (LPWSTR)L"DependOnGroup"
+#define REG_SERVICE_IMAGEPATH		"ImagePath"
+#define REG_SERVICE_IMAGEPATH_W		(LPWSTR)L"ImagePath"
+#define REG_SERVICE_TAG			"Tag"
+#define REG_SERVICE_TAG_W		(LPWSTR)L"Tag"
+//Odin key
+#define REG_SERVICE_STATUS		"ServiceStatus"
+#define REG_SERVICE_STATUS_W		(LPWSTR)L"ServiceStatus"
+//This key exists if DeleteService has been called for a specific service
+#define REG_SERVICE_DELETEPENDING	"DeletePending"
 
 //*****************************************************************************
 //TODO: Faster way to checking this
@@ -218,7 +238,6 @@ SC_HANDLE WIN32API OpenServiceW(SC_HANDLE schSCManager,
  * Author    : SvL
  *****************************************************************************/
 
-#define LPQUERY_SERVICE_CONFIG LPVOID
 BOOL WIN32API QueryServiceConfigA(SC_HANDLE              schService,
                                      LPQUERY_SERVICE_CONFIG lpqscServConfig,
                                      DWORD                  cbBufSize,
@@ -281,9 +300,8 @@ BOOL WIN32API QueryServiceConfigW(SC_HANDLE              schService,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-#define LPQUERY_SERVICE_LOCK_STATUS LPVOID
 BOOL WIN32API QueryServiceLockStatusA(SC_HANDLE                   schSCManager,
-                                         LPQUERY_SERVICE_LOCK_STATUS lpqslsLockStat,
+                                         LPQUERY_SERVICE_LOCK_STATUSA lpqslsLockStat,
                                          DWORD                       cbBufSize,
                                          LPDWORD                     lpcbBytesNeeded)
 {
@@ -314,7 +332,7 @@ BOOL WIN32API QueryServiceLockStatusA(SC_HANDLE                   schSCManager,
  *****************************************************************************/
 
 BOOL WIN32API QueryServiceLockStatusW(SC_HANDLE                   schSCManager,
-                                         LPQUERY_SERVICE_LOCK_STATUS lpqslsLockStat,
+                                         LPQUERY_SERVICE_LOCK_STATUSW lpqslsLockStat,
                                          DWORD                       cbBufSize,
                                          LPDWORD                     lpcbBytesNeeded)
 {
@@ -378,6 +396,8 @@ BOOL WIN32API QueryServiceObjectSecurity(SC_HANDLE             schService,
 BOOL WIN32API QueryServiceStatus(SC_HANDLE         schService,
                                  LPSERVICE_STATUS  lpssServiceStatus)
 {
+ DWORD size, keytype;
+
   dprintf(("ADVAPI32: QueryServiceStatus(%08xh,%08xh) not correctly implemented.\n",
            schService,
            lpssServiceStatus));
@@ -388,6 +408,17 @@ BOOL WIN32API QueryServiceStatus(SC_HANDLE         schService,
   }
 
   memset(lpssServiceStatus, 0, sizeof(SERVICE_STATUS));
+
+  size = sizeof(DWORD);
+  keytype = REG_DWORD;
+  RegQueryValueExA((HKEY)schService, REG_SERVICE_TYPE, 0, &keytype, (LPBYTE)&lpssServiceStatus->dwServiceType, &size);
+
+  size = sizeof(DWORD);
+  keytype = REG_DWORD;
+  RegQueryValueExA((HKEY)schService, REG_SERVICE_STATUS, 0, &keytype, (LPBYTE)&lpssServiceStatus->dwCurrentState, &size);
+
+  //TODO: Should this be set by the service once it has started?
+  lpssServiceStatus->dwControlsAccepted = SERVICE_ACCEPT_STOP|SERVICE_ACCEPT_PAUSE_CONTINUE|SERVICE_ACCEPT_SHUTDOWN;
   return TRUE;
 }
 
@@ -547,6 +578,26 @@ BOOL WIN32API CloseServiceHandle(SC_HANDLE hSCObject)
 	return FALSE;
   }
 
+  DWORD deletepending, keytype = REG_DWORD, size = sizeof(DWORD);
+  if(!RegQueryValueExA((HKEY)hSCObject, REG_SERVICE_DELETEPENDING, 0, &keytype, (LPBYTE)&deletepending, &size)) {
+   FILETIME filetime;
+   DWORD bla, classsize;
+   CHAR szClassName[64];
+
+	HKEY keyServices;
+  	if(RegCreateKeyA(HKEY_LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Services", &keyServices) != 0) {
+		SetLastError(ERROR_INTERNAL_ERROR);
+		return FALSE;
+	}
+
+	//NOTE: Assumes for now there are no subkeys
+	//TODO: DOes not work
+	classsize = sizeof(szClassName);
+	RegQueryValueA((HKEY)hSCObject, NULL, szClassName, (LPLONG)&classsize);
+  	RegCloseKey((HKEY)hSCObject);
+	RegDeleteKeyA(keyServices, szClassName);
+  }
+
   RegCloseKey((HKEY)hSCObject);
   return TRUE;
 }
@@ -653,18 +704,35 @@ SC_HANDLE WIN32API CreateServiceA(SC_HANDLE hSCManager,
 	SetLastError(ERROR_INTERNAL_ERROR);
 	return 0;
   }
-  RegSetValueExA(keyThisService, "Start", 0, REG_DWORD, (LPBYTE)&dwServiceType, sizeof(DWORD));
-  RegSetValueExA(keyThisService, "Type", 0, REG_DWORD, (LPBYTE)&dwStartType, sizeof(DWORD));
-  RegSetValueExA(keyThisService, "ErrorControl", 0, REG_DWORD, (LPBYTE)&dwErrorControl, sizeof(DWORD));
+  RegSetValueExA(keyThisService, REG_SERVICE_TYPE, 0, REG_DWORD, (LPBYTE)&dwServiceType, sizeof(DWORD));
+  RegSetValueExA(keyThisService, REG_SERVICE_STARTTYPE, 0, REG_DWORD, (LPBYTE)&dwStartType, sizeof(DWORD));
+  RegSetValueExA(keyThisService, REG_SERVICE_ERRORCONTROL, 0, REG_DWORD, (LPBYTE)&dwErrorControl, sizeof(DWORD));
   if(lpDisplayName) 
-	RegSetValueExA(keyThisService, "DisplayName", 0, REG_SZ, (LPBYTE)lpDisplayName, strlen(lpDisplayName)+1);
+	RegSetValueExA(keyThisService, REG_SERVICE_DISPLAYNAME, 0, REG_SZ, (LPBYTE)lpDisplayName, strlen(lpDisplayName)+1);
   if(lpLoadOrderGroup) 
-	RegSetValueExA(keyThisService, "lpLoadOrderGroup", 0, REG_SZ, (LPBYTE)lpDisplayName, strlen(lpLoadOrderGroup)+1);
-  if(lpLoadOrderGroup) 
-	RegSetValueExA(keyThisService, "lpLoadOrderGroup", 0, REG_SZ, (LPBYTE)lpDisplayName, strlen(lpLoadOrderGroup)+1);
+	RegSetValueExA(keyThisService, REG_SERVICE_LOADORDERGROUP, 0, REG_SZ, (LPBYTE)lpDisplayName, strlen(lpLoadOrderGroup)+1);
+  if(lpDependencies) {
+	//seems to need an extra terminating '0'
+	int size = strlen(lpDependencies)+2;
+	char *dependencies = (char *)malloc(size);
+	memset(dependencies, 0, size);
+	strcpy(dependencies, lpDependencies);
+	RegSetValueExA(keyThisService, REG_SERVICE_DEPENDENCIES, 0, REG_BINARY, (LPBYTE)dependencies, size);
+	free(dependencies);
+  }
   //TODO: %SystemRoot%
-  RegSetValueExA(keyThisService, "ImagePath", 0, REG_SZ, (LPBYTE)lpBinaryPathName, strlen(lpBinaryPathName)+1);
-  
+  RegSetValueExA(keyThisService, REG_SERVICE_IMAGEPATH, 0, REG_SZ, (LPBYTE)lpBinaryPathName, strlen(lpBinaryPathName)+1);
+
+  //Pointer to a variable that receives a tag value that is unique in the group specified in the
+  //lpLoadOrderGroup parameter. Specify NULL if you are not changing the existing tag. 
+  DWORD tag = 1; //TODO!!
+  RegSetValueExA(keyThisService, REG_SERVICE_TAG, 0, REG_DWORD, (LPBYTE)&tag, sizeof(DWORD));
+  if(lpdwTagId)
+	*lpdwTagId = tag;
+
+  DWORD state = SERVICE_STOPPED;
+  RegSetValueExA(keyThisService, REG_SERVICE_STATUS, 0, REG_DWORD, (LPBYTE)&state, sizeof(DWORD));
+
   //TODO: What else?
 
   RegCloseKey(keyServices);
@@ -766,6 +834,77 @@ SC_HANDLE WIN32API CreateServiceW(SC_HANDLE hSCManager,
 }
 
 /*****************************************************************************
+ * Name      : StartServiceA
+ * Purpose   : The StartService function starts the execution of a service.
+ * Parameters: SC_HANDLE schService        handle of service
+ *             DWORD     dwNumServiceArgs  number of arguments
+ *             LPCSTR   *lpszServiceArgs  address of array of argument string pointers
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+BOOL WIN32API StartServiceA(SC_HANDLE schService,
+                            DWORD     dwNumServiceArgs,
+                            LPCSTR   *lpszServiceArgs)
+{
+  dprintf(("ADVAPI32: StartServiceA(%08xh,%08xh,%s) not implemented.\n",
+           schService,
+           dwNumServiceArgs,
+           lpszServiceArgs));
+
+  if(CheckServiceHandle(schService) == FALSE) {
+	SetLastError(ERROR_INVALID_PARAMETER);
+	return FALSE;
+  }
+
+  DWORD state = SERVICE_RUNNING;
+  if(!RegSetValueExA((HKEY)schService, REG_SERVICE_STATUS, 0, REG_DWORD, (LPBYTE)&state, sizeof(DWORD))) {
+	return TRUE;
+  }
+
+  return (FALSE); /* signal failure */
+}
+
+/*****************************************************************************
+ * Name      : StartServiceW
+ * Purpose   : The StartService function starts the execution of a service.
+ * Parameters: SC_HANDLE schService        handle of service
+ *             DWORD     dwNumServiceArgs  number of arguments
+ *             LPCWSTR   *lpszServiceArgs  address of array of argument string pointers
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+BOOL WIN32API StartServiceW(SC_HANDLE schService,
+                            DWORD     dwNumServiceArgs,
+                            LPCWSTR   *lpszServiceArgs)
+{
+  dprintf(("ADVAPI32: StartServiceW(%08xh,%08xh,%s) not implemented.\n",
+           schService,
+           dwNumServiceArgs,
+           lpszServiceArgs));
+
+  if(CheckServiceHandle(schService) == FALSE) {
+	SetLastError(ERROR_INVALID_PARAMETER);
+	return FALSE;
+  }
+
+  DWORD state = SERVICE_RUNNING;
+  if(!RegSetValueExW((HKEY)schService, REG_SERVICE_STATUS_W, 0, REG_DWORD, (LPBYTE)&state, sizeof(DWORD))) {
+	return TRUE;
+  }
+  return (FALSE); /* signal failure */
+}
+
+/*****************************************************************************
  * Name      : DeleteService
  * Purpose   : The DeleteService function marks the specified service for
  *             deletion from the service control manager database.
@@ -780,10 +919,132 @@ SC_HANDLE WIN32API CreateServiceW(SC_HANDLE hSCManager,
 
 BOOL WIN32API DeleteService(SC_HANDLE hService)
 {
-  dprintf(("ADVAPI32: DeleteService(%08xh) not implemented.\n",
-           hService));
+  dprintf(("ADVAPI32: DeleteService(%08xh)", hService));
 
+  if(CheckServiceHandle(hService) == FALSE) {
+	SetLastError(ERROR_INVALID_PARAMETER);
+	return FALSE;
+  }
+  DWORD deletepending = 1;
+  if(!RegSetValueExA((HKEY)hService, REG_SERVICE_DELETEPENDING, 0, REG_DWORD, (LPBYTE)&deletepending, sizeof(DWORD))) {
+	return TRUE;
+  }
   return FALSE;
+}
+
+/*****************************************************************************
+ * Name      : GetServiceDisplayNameA
+ * Purpose   : The GetServiceDisplayName function obtains the display name that
+ *             is associated with a particular service name. The service name
+ *             is the same as the service's registry key name.
+ * Parameters: SC_HANDLE hSCManager     handle to a service control manager database
+ *             LPCSTR   lpServiceName  the service name
+ *             LPTSTR    lpDisplayName  buffer to receive the service's display name
+ *             LPDWORD   lpcchBuffer    size of display name buffer and display name
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+BOOL WIN32API GetServiceDisplayNameA(SC_HANDLE hSCManager,
+                                     LPCSTR    lpServiceName,
+                                     LPTSTR    lpDisplayName,
+                                     LPDWORD   lpcchBuffer)
+{
+ HKEY keyThisService;
+ DWORD size, type;
+
+  dprintf(("ADVAPI32: GetServiceDisplayNameA(%08xh,%08xh,%08xh,%08xh) not implemented.\n",
+           hSCManager,
+           lpServiceName,
+           lpDisplayName,
+           lpcchBuffer));
+
+  if(!lpServiceName || !lpDisplayName) {
+	SetLastError(ERROR_INVALID_PARAMETER);
+	return FALSE;
+  }
+  if(CheckServiceHandle(hSCManager) == FALSE) {
+	SetLastError(ERROR_INVALID_PARAMETER);
+	return FALSE;
+  }
+
+  if(RegOpenKeyA((HKEY)hSCManager, lpServiceName, &keyThisService) != 0) {
+	SetLastError(ERROR_SERVICE_DOES_NOT_EXIST);
+	return FALSE;
+  }
+  size = *lpcchBuffer;
+  type = REG_SZ;
+  if(RegQueryValueExA(keyThisService, REG_SERVICE_DISPLAYNAME, 0, &type, (LPBYTE)lpDisplayName, &size) == ERROR_MORE_DATA)
+  {
+	SetLastError(ERROR_MORE_DATA);
+  	*lpcchBuffer = size;
+	return FALSE;
+  }
+  *lpcchBuffer = size;
+  RegCloseKey(keyThisService);
+  return TRUE;
+}
+
+
+/*****************************************************************************
+ * Name      : GetServiceDisplayNameW
+ * Purpose   : The GetServiceDisplayName function obtains the display name that
+ *             is associated with a particular service name. The service name
+ *             is the same as the service's registry key name.
+ * Parameters: SC_HANDLE hSCManager     handle to a service control manager database
+ *             LPCWSTR   lpServiceName  the service name
+ *             LPWSTR    lpDisplayName  buffer to receive the service's display name
+ *             LPDWORD   lpcchBuffer    size of display name buffer and display name
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+BOOL WIN32API GetServiceDisplayNameW(SC_HANDLE hSCManager,
+                                     LPCWSTR   lpServiceName,
+                                     LPWSTR    lpDisplayName,
+                                     LPDWORD   lpcchBuffer)
+{
+ HKEY keyThisService;
+ DWORD size, type;
+
+  dprintf(("ADVAPI32: GetServiceDisplayNameW(%08xh,%08xh,%08xh,%08xh) not implemented.\n",
+           hSCManager,
+           lpServiceName,
+           lpDisplayName,
+           lpcchBuffer));
+
+  if(!lpServiceName || !lpDisplayName) {
+	SetLastError(ERROR_INVALID_PARAMETER);
+	return FALSE;
+  }
+  if(CheckServiceHandle(hSCManager) == FALSE) {
+	SetLastError(ERROR_INVALID_PARAMETER);
+	return FALSE;
+  }
+
+  if(RegOpenKeyW((HKEY)hSCManager, lpServiceName, &keyThisService) != 0) {
+	SetLastError(ERROR_SERVICE_DOES_NOT_EXIST);
+	return FALSE;
+  }
+  size = *lpcchBuffer;
+  type = REG_SZ;
+  if(RegQueryValueExW(keyThisService, REG_SERVICE_DISPLAYNAME_W, 0, &type, (LPBYTE)lpDisplayName, &size) == ERROR_MORE_DATA)
+  {
+	SetLastError(ERROR_MORE_DATA);
+  	*lpcchBuffer = size;
+	return FALSE;
+  }
+  *lpcchBuffer = size;
+  RegCloseKey(keyThisService);
+  return TRUE;
 }
 
 /*****************************************************************************
@@ -806,10 +1067,9 @@ BOOL WIN32API DeleteService(SC_HANDLE hService)
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-#define LPENUM_SERVICE_STATUS LPVOID
 BOOL WIN32API EnumDependentServicesA(SC_HANDLE             hService,
                                         DWORD                 dwServiceState,
-                                        LPENUM_SERVICE_STATUS lpServices,
+                                        LPENUM_SERVICE_STATUSA lpServices,
                                         DWORD                 cbBufSize,
                                         LPDWORD               pcbBytesNeeded,
                                         LPDWORD               lpServicesReturned)
@@ -848,7 +1108,7 @@ BOOL WIN32API EnumDependentServicesA(SC_HANDLE             hService,
 
 BOOL WIN32API EnumDependentServicesW(SC_HANDLE             hService,
                                         DWORD                 dwServiceState,
-                                        LPENUM_SERVICE_STATUS lpServices,
+                                        LPENUM_SERVICE_STATUSW lpServices,
                                         DWORD                 cbBufSize,
                                         LPDWORD               pcbBytesNeeded,
                                         LPDWORD               lpServicesReturned)
@@ -888,7 +1148,7 @@ BOOL WIN32API EnumDependentServicesW(SC_HANDLE             hService,
 BOOL WIN32API EnumServicesStatusA(SC_HANDLE             hSCManager,
                                      DWORD                 dwServiceType,
                                      DWORD                 dwServiceState,
-                                     LPENUM_SERVICE_STATUS lpServices,
+                                     LPENUM_SERVICE_STATUSA lpServices,
                                      DWORD                 cbBufSize,
                                      LPDWORD               pcbBytesNeeded,
                                      LPDWORD               lpServicesReturned,
@@ -931,7 +1191,7 @@ BOOL WIN32API EnumServicesStatusA(SC_HANDLE             hSCManager,
 BOOL WIN32API EnumServicesStatusW(SC_HANDLE             hSCManager,
                                      DWORD                 dwServiceType,
                                      DWORD                 dwServiceState,
-                                     LPENUM_SERVICE_STATUS lpServices,
+                                     LPENUM_SERVICE_STATUSW lpServices,
                                      DWORD                 cbBufSize,
                                      LPDWORD               pcbBytesNeeded,
                                      LPDWORD               lpServicesReturned,
@@ -946,69 +1206,6 @@ BOOL WIN32API EnumServicesStatusW(SC_HANDLE             hSCManager,
            pcbBytesNeeded,
            lpServicesReturned,
            lpResumeHandle));
-
-  return (FALSE); /* signal failure */
-}
-
-/*****************************************************************************
- * Name      : GetServiceDisplayNameA
- * Purpose   : The GetServiceDisplayName function obtains the display name that
- *             is associated with a particular service name. The service name
- *             is the same as the service's registry key name.
- * Parameters: SC_HANDLE hSCManager     handle to a service control manager database
- *             LPCSTR   lpServiceName  the service name
- *             LPTSTR    lpDisplayName  buffer to receive the service's display name
- *             LPDWORD   lpcchBuffer    size of display name buffer and display name
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-BOOL WIN32API GetServiceDisplayNameA(SC_HANDLE hSCManager,
-                                     LPCSTR    lpServiceName,
-                                     LPTSTR    lpDisplayName,
-                                     LPDWORD   lpcchBuffer)
-{
-  dprintf(("ADVAPI32: GetServiceDisplayNameA(%08xh,%08xh,%08xh,%08xh) not implemented.\n",
-           hSCManager,
-           lpServiceName,
-           lpDisplayName,
-           lpcchBuffer));
-
-  return (FALSE); /* signal failure */
-}
-
-
-/*****************************************************************************
- * Name      : GetServiceDisplayNameW
- * Purpose   : The GetServiceDisplayName function obtains the display name that
- *             is associated with a particular service name. The service name
- *             is the same as the service's registry key name.
- * Parameters: SC_HANDLE hSCManager     handle to a service control manager database
- *             LPCWSTR   lpServiceName  the service name
- *             LPWSTR    lpDisplayName  buffer to receive the service's display name
- *             LPDWORD   lpcchBuffer    size of display name buffer and display name
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-BOOL WIN32API GetServiceDisplayNameW(SC_HANDLE hSCManager,
-                                     LPCWSTR   lpServiceName,
-                                     LPWSTR    lpDisplayName,
-                                     LPDWORD   lpcchBuffer)
-{
-  dprintf(("ADVAPI32: GetServiceDisplayNameW(%08xh,%08xh,%08xh,%08xh) not implemented.\n",
-           hSCManager,
-           lpServiceName,
-           lpDisplayName,
-           lpcchBuffer));
 
   return (FALSE); /* signal failure */
 }
@@ -1093,7 +1290,7 @@ SC_LOCK WIN32API LockServiceDatabase(SC_HANDLE hSCManager)
   dprintf(("ADVAPI32: LockServiceDatabase(%08xh) not implemented.\n",
            hSCManager));
 
-  return (ERROR_ACCESS_DENIED); /* signal failure */
+  return 0; /* signal failure */
 }
 
 /*****************************************************************************
@@ -1118,55 +1315,4 @@ BOOL WIN32API UnlockServiceDatabase(SC_LOCK sclLock)
   return (FALSE); /* signal failure */
 }
 
-/*****************************************************************************
- * Name      : StartServiceA
- * Purpose   : The StartService function starts the execution of a service.
- * Parameters: SC_HANDLE schService        handle of service
- *             DWORD     dwNumServiceArgs  number of arguments
- *             LPCSTR   *lpszServiceArgs  address of array of argument string pointers
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-BOOL WIN32API StartServiceA(SC_HANDLE schService,
-                            DWORD     dwNumServiceArgs,
-                            LPCSTR   *lpszServiceArgs)
-{
-  dprintf(("ADVAPI32: StartServiceA(%08xh,%08xh,%s) not implemented.\n",
-           schService,
-           dwNumServiceArgs,
-           lpszServiceArgs));
-
-  return (FALSE); /* signal failure */
-}
-
-/*****************************************************************************
- * Name      : StartServiceW
- * Purpose   : The StartService function starts the execution of a service.
- * Parameters: SC_HANDLE schService        handle of service
- *             DWORD     dwNumServiceArgs  number of arguments
- *             LPCWSTR   *lpszServiceArgs  address of array of argument string pointers
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-BOOL WIN32API StartServiceW(SC_HANDLE schService,
-                            DWORD     dwNumServiceArgs,
-                            LPCWSTR   *lpszServiceArgs)
-{
-  dprintf(("ADVAPI32: StartServiceW(%08xh,%08xh,%s) not implemented.\n",
-           schService,
-           dwNumServiceArgs,
-           lpszServiceArgs));
-
-  return (FALSE); /* signal failure */
-}
 
