@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.10 2000-12-17 15:04:11 sandervl Exp $ */
+/* $Id: text.cpp,v 1.11 2001-05-24 19:26:59 sandervl Exp $ */
 
 /*
  * Font and Text Functions
@@ -29,7 +29,7 @@ INT WIN32API DrawTextA(HDC hDC,LPCSTR lpString,INT nCount,PRECT lpRect,UINT nFor
 //******************************************************************************
 INT WIN32API DrawTextW(HDC hDC,LPCWSTR lpString,INT nCount,PRECT lpRect,UINT nFormat)
 {
-  dprintf(("USER32: DrawTextW %x",hDC));
+  dprintf(("USER32: DrawTextA %x %ls %d (%d,%d)(%d,%d) %x",hDC, lpString, nCount, lpRect->left, lpRect->top, lpRect->right, lpRect->bottom, nFormat));
 
   return InternalDrawTextExW(hDC,lpString,nCount,lpRect,nFormat,NULL,FALSE);
 }
@@ -45,7 +45,7 @@ INT WIN32API DrawTextExA(HDC hdc,LPCSTR lpchText,INT cchText,LPRECT lprc,UINT dw
 //******************************************************************************
 int WIN32API DrawTextExW(HDC hdc,LPWSTR lpchText,INT cchText,LPRECT lprc,UINT dwDTFormat,LPDRAWTEXTPARAMS lpDTParams)
 {
-  dprintf(("USER32: DrawTextExW %x",hdc));
+  dprintf(("USER32: DrawTextExA %x %ls %d (%d,%d)(%d,%d) %x",hdc, lpchText, cchText, lprc->left, lprc->top, lprc->right, lprc->bottom, dwDTFormat));
 
   return InternalDrawTextExW(hdc,lpchText,cchText,lprc,dwDTFormat,lpDTParams,TRUE);
 }
