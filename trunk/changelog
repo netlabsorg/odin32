@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2003 2002-02-24 20:21:57 sandervl Exp $ */
+/* $Id: changelog,v 1.2004 2002-02-25 12:04:09 sandervl Exp $ */
+
+ 2002-02-25: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Added hooks for FindResource(Ex)A/W (custom build)
 
  2002-02-24: Sander van Leeuwen <sandervl@xs4all.nl>
     - OLE32:    o Added some missing exports
