@@ -1,4 +1,4 @@
-# $Id: GetDriveType.mak,v 1.3 2002-04-16 00:17:42 bird Exp $
+# $Id: GetDriveType.mak,v 1.4 2002-06-26 07:11:03 sandervl Exp $
 #
 # GetDriveType.exe makefile.
 #
@@ -18,7 +18,9 @@
 # Include Setup.
 #
 PATH_ROOT=..\..\..
-!include $(PATH_ROOT)\make\setup.mak
+!include $(PATH_ROOT)\$(BUILD_SETUP_MAK)
+!include $(PATH_MAKE)\testsuite.tools.mk
+
 
 #
 # Post Setup Config
@@ -33,7 +35,9 @@ BUILD_OWN_TESTCASE_RULE = 1
 #
 TARGET_LIBS = \
 $(LIB_OS)\
+!if "$(BUILD_PLATFORM)" == "OS2"
 $(PATH_LIB)\kernel32.lib\
+!endif
 $(LIB_C_OBJ)
 
 
@@ -45,12 +49,12 @@ $(LIB_C_OBJ)
 
 
 #
-# The testcase Rule.
+# The testcase Rules.
 #
 !if "$(ODIN32_TESTCASE_DRIVE_FIXED)" == "" || "$(ODIN32_TESTCASE_DRIVE_FLOPPY)" == "" || "$(ODIN32_TESTCASE_DRIVE_UNUSED)" == ""
 testcase:
     @$(TOOL_TYPE)  <<
-Can't run testcases as no ODIN32_TESTACSE_DRIVE_* environment variables are configured.
+Can't run testcases as no ODIN32_TESTCASE_DRIVE_* environment variables are configured.
     ODIN32_TESTCASE_DRIVE_UNUSED=<letter of unused drive>
     ODIN32_TESTCASE_DRIVE_FLOPPY=<letter of floppy drive>
     ODIN32_TESTCASE_DRIVE_FIXED=<letter of a fixed disk drive>
@@ -61,8 +65,15 @@ Can't run testcases as no ODIN32_TESTACSE_DRIVE_* environment variables are conf
 Note: No colon!
 <<
 !else
+
 testcase:
     @$(ECHO) $(CLRFIL)GetDriveType$(CLRTXT) - Running testcases.$(CLRRST)
+    $(TS_EXEC_1) "Plain" $(TS_EXEC_2) testcase-1
+    $(TS_EXEC_1) "Complex" $(TS_EXEC_2) testcase-2
+    $(TS_EXEC_1) "Negative" $(TS_EXEC_2) testcase-2
+    @$(ECHO) $(CLRFIL)GetDriveType$(CLRTXT) - Testcases Completed.$(CLRRST)
+
+testcase-1:
 # plain 'c:' styled input. check trice in case of buffering bugs.
     $(TARGET) $(ODIN32_TESTCASE_DRIVE_UNUSED):=DRIVE_NO_ROOT_DIR $(ODIN32_TESTCASE_DRIVE_UNUSED):=DRIVE_NO_ROOT_DIR $(ODIN32_TESTCASE_DRIVE_UNUSED):=DRIVE_NO_ROOT_DIR
     $(TARGET) $(ODIN32_TESTCASE_DRIVE_FLOPPY):=DRIVE_REMOVABLE   $(ODIN32_TESTCASE_DRIVE_FLOPPY):=DRIVE_REMOVABLE   $(ODIN32_TESTCASE_DRIVE_FLOPPY):=DRIVE_REMOVABLE
@@ -82,6 +93,8 @@ testcase:
 # plain 'c:/' styled input (don't test all)
     $(TARGET) $(ODIN32_TESTCASE_DRIVE_UNUSED):/=DRIVE_NO_ROOT_DIR
     $(TARGET) $(ODIN32_TESTCASE_DRIVE_FIXED):/=DRIVE_FIXED
+
+testcase-2:
 # complex input (but still ok)
     $(TARGET) $(ODIN32_TESTCASE_DRIVE_UNUSED):/\/\/\...=DRIVE_NO_ROOT_DIR
     $(TARGET) $(ODIN32_TESTCASE_DRIVE_FIXED):/\/\/\...=DRIVE_FIXED
@@ -93,6 +106,7 @@ testcase:
     $(TARGET) "$(ODIN32_TESTCASE_DRIVE_FIXED):..............\\.\\\\"=DRIVE_FIXED
     $(TARGET) "$(ODIN32_TESTCASE_DRIVE_FIXED):\\\........\\.\\\\"=DRIVE_FIXED
 
+testcase-3:
 # negative testcases
     $(TARGET) "."=DRIVE_NO_ROOT_DIR "9"=DRIVE_NO_ROOT_DIR "+"=DRIVE_NO_ROOT_DIR "-"=DRIVE_NO_ROOT_DIR
     $(TARGET) "$(ODIN32_TESTCASE_DRIVE_FIXED)"=DRIVE_NO_ROOT_DIR
