@@ -1,4 +1,4 @@
-/* $Id: comctl32.c,v 1.6 1999-06-23 19:45:00 achimha Exp $ */
+/* $Id: comctl32.c,v 1.7 1999-06-25 15:49:01 achimha Exp $ */
 /*
  * Win32 common controls implementation
  *
@@ -53,7 +53,7 @@ void CDECL RegisterCOMCTL32WindowClasses(unsigned long hinstDLL)
   DATETIME_Register();
   FLATSB_Register();
   HOTKEY_Register();
-//  IPADDRESS_Register();
+  IPADDRESS_Register();
   MONTHCAL_Register();
   NATIVEFONT_Register();
   PAGER_Register();
@@ -77,7 +77,7 @@ void CDECL UnregisterCOMCTL32WindowClasses(void)
   DATETIME_Unregister();
   FLATSB_Unregister();
   HOTKEY_Unregister();
-//  IPADDRESS_Unregister();
+  IPADDRESS_Unregister();
   MONTHCAL_Unregister();
   NATIVEFONT_Unregister();
   PAGER_Unregister();
