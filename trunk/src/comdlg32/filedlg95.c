@@ -1082,14 +1082,33 @@ static LRESULT FILEDLG95_InitControls(HWND hwnd)
 static LRESULT FILEDLG95_FillControls(HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
   LPITEMIDLIST pidlItemId = NULL;
-  
+  CHAR *dopstr = NULL;
+
   FileOpenDlgInfos *fodInfos = (FileOpenDlgInfos *) lParam;
 
   TRACE("dir=%s file=%s\n", 
   fodInfos->ofnInfos->lpstrInitialDir, fodInfos->ofnInfos->lpstrFile);
 
-  /* Get the initial directory pidl */
+#ifdef __WIN32OS2__
+  /*@PF 
+  How can Wine miss this?? Very common situation for Windows apps!
+  If InitialDir is NULL and we have full blown path in lpstrFile we set
+  directory to it.
 
+  Q: What about Unicode?
+  */
+
+  if (fodInfos->ofnInfos->lpstrInitialDir == NULL && fodInfos->ofnInfos->lpstrFile && 
+    !PathIsRelativeA(fodInfos->ofnInfos->lpstrFile) &&
+    PathGetDriveNumberA(fodInfos->ofnInfos->lpstrFile) != -1)
+  {
+   dopstr = HEAP_strdupA(GetProcessHeap(), 0,fodInfos->ofnInfos->lpstrFile);      
+   *strrchr(dopstr,'\\') = '\0';
+   fodInfos->ofnInfos->lpstrInitialDir = dopstr;
+  }
+#endif
+
+  /* Get the initial directory pidl */
   if(!(pidlItemId = GetPidlFromName(fodInfos->Shell.FOIShellFolder,fodInfos->ofnInfos->lpstrInitialDir)))
   {
     char path[MAX_PATH];
@@ -1097,7 +1116,7 @@ static LRESULT FILEDLG95_FillControls(HWND hwnd, WPARAM wParam, LPARAM lParam)
     GetCurrentDirectoryA(MAX_PATH,path);
     pidlItemId = GetPidlFromName(fodInfos->Shell.FOIShellFolder, path);
   }
-
+  
   /* Initialise shell objects */
   FILEDLG95_SHELL_Init(hwnd);
 
@@ -1113,6 +1132,14 @@ static LRESULT FILEDLG95_FillControls(HWND hwnd, WPARAM wParam, LPARAM lParam)
   /* Free pidlItem memory */
   COMDLG32_SHFree(pidlItemId);
 
+#ifdef __WIN32OS2__
+  /* Free dopstr */
+  if (dopstr)
+  {
+   fodInfos->ofnInfos->lpstrInitialDir = NULL;
+   HEAP_free(dopstr);
+  }  
+#endif
   return TRUE;
 }
 /***********************************************************************
