@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.352 2003-01-06 15:38:17 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.353 2003-01-06 16:15:13 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2266,8 +2266,10 @@ HICON Win32BaseWindow::IconForWindow(WPARAM fType)
     if (windowClass && windowClass->getIcon())
         hWndIcon = windowClass->getIcon();
     else
-    if (!(dwStyle & DS_MODALFRAME))
-         hWndIcon = LoadImageA(0,MAKEINTRESOURCEA(OIC_ODINICON),IMAGE_ICON,0,0,LR_DEFAULTCOLOR);
+    if (!(dwStyle & DS_MODALFRAME)) 
+    {//SvL: load it as shared or else we'll leak icons
+         hWndIcon = LoadImageA(0,MAKEINTRESOURCEA(OIC_ODINICON),IMAGE_ICON,0,0,LR_DEFAULTCOLOR|LR_SHARED);
+    }
     else hWndIcon = 0;
   }
   else
@@ -2284,8 +2286,10 @@ HICON Win32BaseWindow::IconForWindow(WPARAM fType)
     if (windowClass && windowClass->getIcon())
         hWndIcon = windowClass->getIcon();
     else
-    if (!(dwStyle & DS_MODALFRAME))
-         hWndIcon = LoadImageA(0,MAKEINTRESOURCEA(OIC_ODINICON),IMAGE_ICON,0,0,LR_DEFAULTCOLOR);
+    if (!(dwStyle & DS_MODALFRAME)) 
+    {//SvL: load it as shared or else we'll leak icons
+         hWndIcon = LoadImageA(0,MAKEINTRESOURCEA(OIC_ODINICON),IMAGE_ICON,0,0,LR_DEFAULTCOLOR|LR_SHARED);
+    }
     else hWndIcon = 0;
   }
 
