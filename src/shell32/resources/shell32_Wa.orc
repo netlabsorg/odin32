@@ -1,4 +1,4 @@
-/* $Id: shell32_Wa.orc,v 1.2 2000-03-26 16:34:49 cbratschi Exp $ */
+/* $Id: shell32_Wa.orc,v 1.1 2002-06-08 07:27:02 sandervl Exp $ */
 LANGUAGE LANG_WALON, SUBLANG_DEFAULT
 
 /*
