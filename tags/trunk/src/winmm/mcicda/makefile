@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2000-12-02 23:53:56 bird Exp $
+# $Id: makefile,v 1.6 2000-12-03 10:15:01 sandervl Exp $
 
 #
 # Odin32 API
@@ -19,7 +19,7 @@
 OBJS = \
 $(OBJDIR)\mcicda.obj \
 $(OBJDIR)\cdrom.obj \
-$(OBJDIR)\mcicdos2rsrc.obj \
+$(OBJDIR)\mcicdarsrc.obj \
 $(OBJDIR)\os2cdrom.obj \
 $(DLLENTRY) \
 
@@ -39,7 +39,7 @@ $(RTLLIB_O)
 #
 # Target name - name of the dll without extention and path.
 #
-TARGET = mcicdos2
+TARGET = mcicda
 
 
 #
