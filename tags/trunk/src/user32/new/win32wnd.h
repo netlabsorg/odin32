@@ -1,4 +1,4 @@
-/* $Id: win32wnd.h,v 1.13 1999-07-18 18:04:30 sandervl Exp $ */
+/* $Id: win32wnd.h,v 1.14 1999-07-19 13:58:39 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -63,6 +63,7 @@ virtual  ULONG  MsgCreate(HWND hwndOS2, ULONG initParam);
          ULONG  MsgActivate(BOOL fActivate, HWND hwnd);
 	 ULONG  MsgSetFocus(HWND hwnd);
 	 ULONG  MsgKillFocus(HWND hwnd);
+	 ULONG  MsgCommand(ULONG cmd, ULONG Id, HWND hwnd);
 	 ULONG  MsgButton(ULONG msg, ULONG x, ULONG y);
 	 ULONG  MsgMouseMove(ULONG keystate, ULONG x, ULONG y);
 	 ULONG  MsgPaint(ULONG tmp1, ULONG tmp2);
@@ -232,6 +233,10 @@ private:
 #define WMMOVE_CTRL		8
 #define WMMOVE_SHIFT		16
 
+
+#define CMD_MENU		1
+#define CMD_CONTROL		2
+#define CMD_ACCELERATOR		3
 
 #endif //__cplusplus
 
