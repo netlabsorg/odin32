@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.185 2000-05-09 18:56:58 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.186 2000-05-10 13:14:43 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2694,6 +2694,9 @@ BOOL Win32BaseWindow::CloseWindow()
   return OSLibWinMinimizeWindow(OS2HwndFrame);
 }
 //******************************************************************************
+//TODO: Not be 100% correct; should return active window of current thread
+//      or NULL when there is none -> WinQueryActiveWindow just returns
+//      the current active window
 //******************************************************************************
 HWND Win32BaseWindow::GetActiveWindow()
 {
