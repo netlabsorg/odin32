@@ -1,4 +1,4 @@
-# $Id: pdwin32.tools,v 1.7 2000-02-26 18:29:37 bird Exp $
+# $Id: pdwin32.tools,v 1.8 2000-03-04 23:45:30 sandervl Exp $
 # ODIN / win32os2 Project
 #
 # makefile for the build system tools and standard rules
@@ -16,7 +16,13 @@ CP          = copy
 MKDIR       = mkdir
 ECHO        = echo
 IMPDEF      = $(PDWIN32_TOOLS)\impdef.exe
-DEPEND      = $(PDWIN32_TOOLS)\fastdep.exe
+#SvL: Remove this when everything has been converted to the new build rules
+!ifdef NEWBUILD
+DEPEND      = $(PDWIN32_TOOLS)\fastdep.exe -o$$(OBJDIR)
+!else
+DEPEND      = $(PDWIN32_TOOLS)\fastdep.exe 
+!endif
+
 DOWITHDIRS  = $(PDWIN32_TOOLS)\dowithdirs.cmd
 MAKE_CMD    = nmake /nologo
 !ifdef DEBUG
@@ -33,6 +39,16 @@ MAKE_CMD    = $(MAKE_CMD) NODEP=1
 #
 # Targets
 #
+.c{$(OBJDIR)}.obj:
+    $(CC) $(CFLAGS) -c -Fo$(OBJDIR)\$(@B).obj $<
+
+.cpp{$(OBJDIR)}.obj:
+    $(CXX) $(CXXFLAGS) -Fo$(OBJDIR)\$(@B).obj -c $<
+
+.asm{$(OBJDIR)}.obj:
+    $(AS) $(ASFLAGS) -Fdo:$(OBJDIR) $<
+
+
 .c.obj:
     $(CC) $(CFLAGS) -c $<
 
@@ -41,6 +57,5 @@ MAKE_CMD    = $(MAKE_CMD) NODEP=1
 
 .asm.obj:
     $(AS) $(ASFLAGS) $<
-
 
 

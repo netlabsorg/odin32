@@ -1,0 +1,37 @@
+# $Id: pdwin32.post,v 1.1 2000-03-04 23:46:24 sandervl Exp $
+#
+# PD-Win32 Project
+#
+# Common dll makefile rules (must be included at the last line of the makefile
+#
+
+!ifndef NODEP
+!include .depend
+!endif
+
+$(PDWIN32_LIB)\$(TARGET).lib: $(TARGET).lib
+    $(CP) $** $@
+
+$(TARGET).LIB: $(TARGET)exp.def
+    $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
+    $(CP) $@ $(PDWIN32_LIB)
+
+$(TARGET)exp.def: $(TARGET).def
+    $(IMPDEF) $** $@
+
+$(OBJDIR):
+    @if not exist bin mkdir bin
+    @if not exist $(OBJDIR) mkdir $(OBJDIR)
+
+clean:
+    $(RM) $(OBJDIR)\*.OBJ 
+    $(RM) $(OBJDIR)\*.lrf 
+    $(RM) *.LIB 
+    $(RM) *.dll 
+    $(RM) *.res 
+    $(RM) *.map 
+    $(RM) *.pch 
+    $(RM) $(RESOURCES).asm 
+    $(RM) $(PDWIN32_LIB)\$(TARGET).LIB
+    $(RM) $(PDWIN32_BIN)\$(TARGET).dll 
+    $(RM) $(TARGET)exp.def

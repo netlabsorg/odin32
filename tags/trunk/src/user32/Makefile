@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.66 2000-03-04 20:13:26 bird Exp $
+# $Id: Makefile,v 1.67 2000-03-04 23:47:19 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -11,51 +11,95 @@ PDWIN32_LIB     = ..\..\lib
 PDWIN32_BIN     = ..\..\bin
 PDWIN32_TOOLS   = ..\..\tools\bin
 
+#SvL: Remove this when everything has been converted to the new build rules
+NEWBUILD=1
 
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 
-
+RESOURCES= resource
 CFLAGS   = $(CFLAGS)   -I$(PDWIN32_INCLUDE)
 CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 TARGET = user32
 
-OBJS =  user32.obj loadres.obj \
-        dde.obj win32wndhandle.obj wsprintf.obj winmouse.obj \
-        icon.obj hook.obj winkeyboard.obj \
-        defwndproc.obj syscolor.obj char.obj initterm.obj \
-        uitools.obj unknown.obj spy.obj wndmsg.obj display.obj \
-        pmwindow.obj pmframe.obj win32class.obj win32wnd.obj win32dlg.obj \
-        msgbox.obj window.obj windowmsg.obj windowclass.obj win32wbase.obj \
-        windowword.obj gen_object.obj oslibwin.obj win32wndchild.obj \
-        controls.obj button.obj static.obj scroll.obj listbox.obj menu.obj\
-        combo.obj edit.obj winswitch.obj icontitle.obj clipboard.obj winicon.obj \
-        win32wmdiclient.obj oslibutil.obj oslibmsg.obj dib.obj oslibdos.obj \
-        win32wmdichild.obj winprop.obj wingdi.obj oslibgdi.obj winaccel.obj \
-        win32wbasepos.obj oslibres.obj dc.obj timer.obj dbglocal.obj \
-        caret.obj resource.obj winproc.obj text.obj oslibmsgtranslate.obj \
-        windlgmsg.obj windlg.obj win32wdesktop.obj win32wbasenonclient.obj
+OBJS = \
+$(OBJDIR)\user32.obj \
+$(OBJDIR)\loadres.obj \
+$(OBJDIR)\dde.obj \
+$(OBJDIR)\win32wndhandle.obj \
+$(OBJDIR)\wsprintf.obj \
+$(OBJDIR)\winmouse.obj \
+$(OBJDIR)\icon.obj \
+$(OBJDIR)\hook.obj \
+$(OBJDIR)\winkeyboard.obj \
+$(OBJDIR)\defwndproc.obj \
+$(OBJDIR)\syscolor.obj \
+$(OBJDIR)\char.obj \
+$(OBJDIR)\initterm.obj \
+$(OBJDIR)\uitools.obj \
+$(OBJDIR)\unknown.obj \
+$(OBJDIR)\spy.obj \
+$(OBJDIR)\wndmsg.obj \
+$(OBJDIR)\display.obj \
+$(OBJDIR)\pmwindow.obj \
+$(OBJDIR)\pmframe.obj \
+$(OBJDIR)\win32class.obj \
+$(OBJDIR)\win32wnd.obj \
+$(OBJDIR)\win32dlg.obj \
+$(OBJDIR)\msgbox.obj \
+$(OBJDIR)\window.obj \
+$(OBJDIR)\windowmsg.obj \
+$(OBJDIR)\windowclass.obj \
+$(OBJDIR)\win32wbase.obj \
+$(OBJDIR)\windowword.obj \
+$(OBJDIR)\gen_object.obj \
+$(OBJDIR)\oslibwin.obj \
+$(OBJDIR)\win32wndchild.obj \
+$(OBJDIR)\controls.obj \
+$(OBJDIR)\button.obj \
+$(OBJDIR)\static.obj \
+$(OBJDIR)\scroll.obj \
+$(OBJDIR)\listbox.obj \
+$(OBJDIR)\menu.obj \
+$(OBJDIR)\combo.obj \
+$(OBJDIR)\edit.obj \
+$(OBJDIR)\winswitch.obj \
+$(OBJDIR)\icontitle.obj \
+$(OBJDIR)\clipboard.obj \
+$(OBJDIR)\winicon.obj \
+$(OBJDIR)\win32wmdiclient.obj \
+$(OBJDIR)\oslibutil.obj \
+$(OBJDIR)\oslibmsg.obj \
+$(OBJDIR)\dib.obj \
+$(OBJDIR)\oslibdos.obj \
+$(OBJDIR)\win32wmdichild.obj \
+$(OBJDIR)\winprop.obj \
+$(OBJDIR)\wingdi.obj \
+$(OBJDIR)\oslibgdi.obj \
+$(OBJDIR)\winaccel.obj \
+$(OBJDIR)\win32wbasepos.obj \
+$(OBJDIR)\oslibres.obj \
+$(OBJDIR)\dc.obj \
+$(OBJDIR)\timer.obj \
+$(OBJDIR)\dbglocal.obj \
+$(OBJDIR)\caret.obj \
+$(OBJDIR)\$(RESOURCES).obj \
+$(OBJDIR)\winproc.obj \
+$(OBJDIR)\text.obj \
+$(OBJDIR)\oslibmsgtranslate.obj \
+$(OBJDIR)\windlgmsg.obj \
+$(OBJDIR)\windlg.obj \
+$(OBJDIR)\win32wdesktop.obj \
+$(OBJDIR)\win32wbasenonclient.obj
 
+all: $(OBJDIR) $(TARGET).dll $(TARGET).lib
 
-all: $(TARGET).dll $(TARGET).lib
-
-
-$(TARGET).dll: $(OBJS) $(TARGET).def $(TARGET).lrf
-        $(LD2) $(LD2FLAGS) @$(TARGET).lrf
+$(TARGET).dll: $(OBJS) $(TARGET).def $(OBJDIR)\$(TARGET).lrf
+        $(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lrf
         $(CP) $@ $(PDWIN32_BIN)
 
-#!ifdef DEBUG
-#!ifdef NODEBUGINFO
-#        ilink /nodeb /map /noe /NOD /NoLogo /NOFREE @$(TARGET).lrf
-#!else
-#        ilink /de /map  /noe /NOD /dbgpack /NoLogo /NOFREE @$(TARGET).lrf
-#!endif
-#!else
-#        ilink /map  /noe /NOD /NoLogo /FREE @$(TARGET).lrf
-#!endif
-
-$(TARGET).lrf: makefile
-        @echo Creating file <<$(@B).lrf
+$(OBJDIR)\$(TARGET).lrf: makefile
+        @echo Creating file <<$(OBJDIR)\$(@B).lrf
 $(OBJS)
 $(PDWIN32_LIB)/pmwinx.lib
 $(PDWIN32_LIB)/gdi32.lib
@@ -70,32 +114,13 @@ $(TARGET).def
 
 lib: $(TARGET).lib $(PDWIN32_LIB)\$(TARGET).lib
 
-$(PDWIN32_LIB)\$(TARGET).lib: $(TARGET).lib
-    $(CP) $** $@
 
-$(TARGET).lib: $(TARGET)exp.def
-    $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
-    $(CP) $@ $(PDWIN32_LIB)
-
-$(TARGET)exp.def: $(TARGET).def
-    $(IMPDEF) $** $@
-
-
-resource.asm: user32.rc
-    $(RC) $(RCFLAGS) -o resource.asm user32.rc
-
+$(RESOURCES).asm: user32.rc
+    $(RC) $(RCFLAGS) -o $(RESOURCES).asm user32.rc
 
 dep:
     $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
         *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
 
-!ifndef NODEP
-!include .depend
-!endif
-
-
-clean:
-    $(RM) *.obj *.lib *.dll *.map *.pch *.res *.lrf resource.asm *.lrf \
-        $(PDWIN32_BIN)\$(TARGET).dll $(PDWIN32_LIB)\$(TARGET).lib \
-        $(TARGET)exp.def
+!include $(PDWIN32_INCLUDE)/pdwin32.post
 
