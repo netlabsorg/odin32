@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2000-12-16 23:31:08 bird Exp $
+# $Id: makefile,v 1.9 2000-12-17 03:37:33 bird Exp $
 
 #
 # Odin32 API
@@ -54,7 +54,7 @@ $(ODIN32_LIB)\$(TARGET).obj: $(OBJS)
 
 # Create lib directory.
 $(ODIN32_LIB):
-    $(CREATEPATH) $(ODIN32_LIB)
+    @if not exist $(ODIN32_LIB) $(CREATEPATH) $(ODIN32_LIB)
 
 
 #
