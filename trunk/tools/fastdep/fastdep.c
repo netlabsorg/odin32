@@ -1,4 +1,4 @@
-/* $Id: fastdep.c,v 1.38 2002-08-20 22:29:43 bird Exp $
+/* $Id: fastdep.c,v 1.39 2002-08-21 01:51:56 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
@@ -244,7 +244,8 @@ static BOOL  depWriteFile(const char *pszFilename, BOOL fWriteUpdatedOnly);
 static void  depRemoveAll(void);
 static void *depAddRule(const char *pszRulePath, const char *pszName, const char *pszExt, const char *pszTS, BOOL fConvertName);
 static BOOL  depAddDepend(void *pvRule, const char *pszDep, BOOL fCheckCyclic, BOOL fConvertName);
-static int   depConvertName(char *pszName, int cchName, BOOL fFromMake);
+static int   depNameToReal(char *pszName);
+static int   depNameToMake(char *pszName, int cchName, const char *pszSrc);
 static void  depMarkNotFound(void *pvRule);
 static BOOL  depCheckCyclic(PDEPRULE pdepRule, const char *pszDep);
 static BOOL  depValidate(PDEPRULE pdepRule);
@@ -859,7 +860,7 @@ int main(int argc, char **argv)
 void syntax(void)
 {
     printf(
-        "FastDep v0.44 (build %d)\n"
+        "FastDep v0.45 (build %d)\n"
         "Dependency scanner. Creates a makefile readable depend file.\n"
         " - was quick and dirty, now it's just quick -\n"
         "\n"
@@ -3420,7 +3421,7 @@ BOOL  depWriteFile(const char *pszFilename, BOOL fWriteUpdatedOnly)
 
                 /* Write rule. Flush the buffer first if necessary. */
                 cch = strlen(pdep->pszRule);
-                if (iBuffer + cch*2 + fQuoted * 2 + cchTS + 9 >= sizeof(szBuffer))
+                if (iBuffer + cch*3 + fQuoted * 2 + cchTS + 9 >= sizeof(szBuffer))
                 {
                     fwrite(szBuffer, iBuffer, 1, phFile);
                     iBuffer = 0;
@@ -3432,8 +3433,7 @@ BOOL  depWriteFile(const char *pszFilename, BOOL fWriteUpdatedOnly)
                 szBuffer[iBuffer++] = '\n';
 
                 if (fQuoted) szBuffer[iBuffer++] = '"';
-                strcpy(szBuffer + iBuffer, pdep->pszRule);
-                iBuffer += depConvertName(szBuffer + iBuffer, sizeof(szBuffer) - iBuffer, FALSE);
+                iBuffer += depNameToMake(szBuffer + iBuffer, sizeof(szBuffer) - iBuffer, pdep->pszRule);
                 if (fQuoted) szBuffer[iBuffer++] = '"';
                 strcpy(szBuffer + iBuffer++, ":");
 
@@ -3446,7 +3446,7 @@ BOOL  depWriteFile(const char *pszFilename, BOOL fWriteUpdatedOnly)
                         /* flush buffer? */
                         fQuoted = strpbrk(*ppsz, " \t") != NULL; /* TODO/BUGBUG/FIXME: are there more special chars to look out for?? */
                         cch = strlen(*ppsz);
-                        if (iBuffer + cch*2 + fQuoted * 2 + 20 >= sizeof(szBuffer))
+                        if (iBuffer + cch*3 + fQuoted * 2 + 20 >= sizeof(szBuffer))
                         {
                             fwrite(szBuffer, iBuffer, 1, phFile);
                             iBuffer = 0;
@@ -3454,8 +3454,7 @@ BOOL  depWriteFile(const char *pszFilename, BOOL fWriteUpdatedOnly)
                         strcpy(szBuffer + iBuffer, " \\\n    ");
                         iBuffer += 7;
                         if (fQuoted) szBuffer[iBuffer++] = '"';
-                        strcpy(szBuffer + iBuffer, *ppsz);
-                        iBuffer += depConvertName(szBuffer + iBuffer, sizeof(szBuffer) - iBuffer, FALSE);
+                        iBuffer += depNameToMake(szBuffer + iBuffer, sizeof(szBuffer) - iBuffer, *ppsz);
                         if (fQuoted) szBuffer[iBuffer++] = '"';
 
                         /* next dependant */
@@ -3551,7 +3550,7 @@ void *depAddRule(const char *pszRulePath, const char *pszName, const char *pszEx
         cch += strlen(szRule + cch);
     }
     if (fConvertName)
-        cch = depConvertName(szRule, sizeof(szRule), TRUE);
+        cch = depNameToReal(szRule);
 
     /*
      * Allocate a new rule structure and fill in data
@@ -3658,7 +3657,7 @@ BOOL  depAddDepend(void *pvRule, const char *pszDep, BOOL fCheckCyclic, BOOL fCo
 
     /* convert ^# and other stuff */
     if (fConvertName)
-        depConvertName(pdep->papszDep[pdep->cDeps], cchDep, TRUE);
+        depNameToReal(pdep->papszDep[pdep->cDeps]);
 
     /* terminate array and increment dep count */
     pdep->papszDep[++pdep->cDeps] = NULL;
@@ -3669,79 +3668,83 @@ BOOL  depAddDepend(void *pvRule, const char *pszDep, BOOL fCheckCyclic, BOOL fCo
 
 
 /**
- * Converts to and from makefile filenames.
+ * Converts from makefile filename to real filename.
  * @returns New name length.
- *          -1 on error.
- * @param   pszName     Double pointer to the string.
- * @param   cchName     Size of name buffer.
- * @param   fFromMake   TRUE: Convert from makefile name to real name.
- *                      FALSE: Convert from real name to makefile name.
+ * @param   pszName     Pointer to the string to make real.
  */
-int depConvertName(char *pszName, int cchName, BOOL fFromMake)
+int depNameToReal(char *pszName)
 {
     int cchNewName = strlen(pszName);
+    int iDisplacement = 0;
 
-    if (cchNewName >= cchName)
+    /*
+     * Look for '^' and '$$'.
+     */
+    while (*pszName)
     {
-        fprintf(stderr, "error: buffer on input is too small, (line=%d)\n", __LINE__);
-        return -1;
-    }
-
-    if (fFromMake)
-    {
-        /*
-         * Convert from makefile to real name.
-         */
-        int iDisplacement = 0;
-
-        while (*pszName)
+        if (    *pszName == '^'
+            ||  (*pszName == '$' && pszName[1] == '$'))
         {
-            if (    *pszName == '^'
-                ||  (*pszName == '$' && pszName[1] == '$'))
-            {
-                iDisplacement--;
-                pszName++;
-                cchNewName--;
-            }
-            if (iDisplacement)
-                pszName[iDisplacement] = *pszName;
+            iDisplacement--;
             pszName++;
+            cchNewName--;
         }
-        pszName[iDisplacement] = '\0';
+        if (iDisplacement)
+            pszName[iDisplacement] = *pszName;
+        pszName++;
     }
-    else
-    {
-        /*
-         * Convert real name to makefile name.
-         */
-        while (*pszName)
-        {
-            if (    *pszName == '#'
-                ||  *pszName == '!'
-                ||  (*pszName == '$' && pszName[1] != '(')
-                ||  *pszName == '@'
-                ||  *pszName == '-'
-                ||  *pszName == '^'
-               /* ||  *pszName == '('
-                ||  *pszName == ')'*/
-                ||  *pszName == '{'
-                ||  *pszName == '}')
-            {
-                char *  psz = pszName + strlen(pszName) + 1;
-                if (++cchNewName >= cchName)
-                {
-                    fprintf(stderr, "error: buffer too small, (line=%d)\n", __LINE__);
-                    return -1;
-                }
-                while (--psz > pszName)
-                    *psz = psz[-1];
-                *pszName++ = '^';
-            }
-            pszName++;
-        }
-    }
+    pszName[iDisplacement] = '\0';
+
     return cchNewName;
 }
+
+
+/**
+ * Converts from real filename to makefile filename.
+ * @returns New name length.
+ * @param   pszName     Output name buffer.
+ * @param   cchName     Size of name buffer.
+ * @param   pszSrc      Input name.
+ */
+int   depNameToMake(char *pszName, int cchName, const char *pszSrc)
+{
+    char *pszNameOrg = pszName;
+
+    /*
+     * Convert real name to makefile name.
+     */
+    while (*pszSrc)
+    {
+        if (    *pszSrc == '#'
+            ||  *pszSrc == '!'
+            ||  (*pszSrc == '$' && pszSrc[1] != '(')
+            ||  *pszSrc == '@'
+            ||  *pszSrc == '-'
+            ||  *pszSrc == '^'
+           /* ||  *pszSrc == '('
+            ||  *pszSrc == ')'
+            ||  *pszSrc == '{'
+            ||  *pszSrc == '}'*/)
+        {
+            if (!cchName--)
+            {
+                fprintf(stderr, "error: buffer too small, (line=%d)\n", __LINE__);
+                return pszName - pszNameOrg + strlen(pszName);
+            }
+            *pszName++ = '^';
+        }
+        if (!cchName--)
+        {
+            fprintf(stderr, "error: buffer too small, (line=%d)\n", __LINE__);
+            return pszName - pszNameOrg + strlen(pszName);
+        }
+        *pszName++ = *pszSrc++;
+    }
+    *pszName = '\0';
+
+    return pszName - pszNameOrg;
+}
+
 
 
 /**
@@ -3756,7 +3759,7 @@ void  depMarkNotFound(void *pvRule)
 
 
 /**
- * Checks if adding this dependent will create a cylic dependency.
+ * Checks if adding this dependent will create a cyclic dependency.
  * @returns   TRUE: Cyclic.
  *            FALSE: Non-cylic.
  * @param     pdepRule  Rule pszDep is to be inserted in.
@@ -3764,11 +3767,22 @@ void  depMarkNotFound(void *pvRule)
  */
 BOOL depCheckCyclic(PDEPRULE pdepRule, const char *pszDep)
 {
+#define DEPTH_FIRST 1
+#ifdef DEPTH_FIRST
     #define DEPTH 32
-    char *   pszRule = pdepRule->pszRule;
-    char **  appsz[DEPTH];
+#else
+    #define DEPTH 128
+#endif
+    #define HISTORY 256
+    char *  pszRule = pdepRule->pszRule;
+    char ** appsz[DEPTH];
+#if HISTORY
+    char *  apszHistory[HISTORY];
+    int     iHistory;
+    int     j;
+#endif
     PDEPRULE pdep;
-    int      i;
+    int     i;
 
     /* self check */
     if (strcmp(pdepRule->pszRule, pszDep) == 0)
@@ -3779,11 +3793,16 @@ BOOL depCheckCyclic(PDEPRULE pdepRule, const char *pszDep)
         || pdep->papszDep == NULL)
         return FALSE; /* no rule, or no dependents, not cyclic */
 
-    i = 0;
+    i = 1;
     appsz[0] = pdep->papszDep;
-    while (i >= 0)
+#ifdef HISTORY
+    iHistory = 1;
+    apszHistory[0] = pdep->pszRule;
+#endif
+    while (i > 0)
     {
-        register char **  ppsz = appsz[i];
+        /* pop off element */
+        register char **  ppsz = appsz[--i];
 
         while (*ppsz != NULL)
         {
@@ -3797,17 +3816,39 @@ BOOL depCheckCyclic(PDEPRULE pdepRule, const char *pszDep)
             {
                 if (i >= DEPTH)
                 {
-                    fprintf(stderr, "error: too deap chain (%d). pszRule=%s  pszDep=%s\n",
+                    fprintf(stderr, "error: too deep chain (%d). pszRule=%s  pszDep=%s\n",
                             i, pszRule, pszDep);
                     return FALSE;
                 }
-                appsz[i++] = ppsz; /* save next */
-                ppsz = pdep->papszDep; /* start processing new node */
+#ifdef HISTORY
+                /*
+                 * Check if in history, if so we'll skip it.
+                 */
+                for (j = 0;  j < iHistory; j++)
+                    if (!strcmp(apszHistory[j], pdep->pszRule))
+                        break;
+                if (j != iHistory)
+                    continue;
+
+                /*
+                 * Push into history - might concider make this binary sorted one day.
+                 */
+                if (iHistory < HISTORY)
+                    apszHistory[iHistory++] = pdep->pszRule;
+#endif
+                /*
+                 * Push on to the stack.
+                 */
+                #ifdef DEPTH_FIRST
+                /* dept first */
+                appsz[i++] = ppsz;      /* save current posistion */
+                ppsz = pdep->papszDep;  /* process new node */
+                #else
+                /* complete current node first. */
+                appsz[i++] = pdep->papszDep;
+                #endif
             }
         }
-
-        /* pop stack */
-        i--;
     }
 
     return FALSE;
