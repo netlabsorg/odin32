@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.133 2003-01-01 18:15:04 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.134 2003-01-01 18:46:15 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -1069,7 +1069,8 @@ void OSLibSetWindowStyle(HWND hwndFrame, HWND hwndClient, ULONG dwStyle,
                     else {
                         if(WinIsMenuItemValid(hwndMinMax, SC_MINIMIZE) == FALSE) {
                             //recreate mimize button
-                            OSFrameStyle |= FCF_MINBUTTON;
+//TODO: this method doesn't work (hang during destruction probably)
+//                            OSFrameStyle |= FCF_MINBUTTON;
                         }
                     }
                 }
@@ -1085,7 +1086,8 @@ void OSLibSetWindowStyle(HWND hwndFrame, HWND hwndClient, ULONG dwStyle,
                     else {
                         if(WinIsMenuItemValid(hwndMinMax, SC_MAXIMIZE) == FALSE) {
                             //recreate maximize button
-                            OSFrameStyle |= FCF_MAXBUTTON;
+//TODO: this method doesn't work (hang during destruction probably)
+//                            OSFrameStyle |= FCF_MAXBUTTON;
                         }
                     }
                 }
