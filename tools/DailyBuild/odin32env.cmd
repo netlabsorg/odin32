@@ -1,4 +1,4 @@
-/* $Id: odin32env.cmd,v 1.10 2000-10-20 17:56:50 bird Exp $
+/* $Id: odin32env.cmd,v 1.11 2000-11-21 18:28:02 bird Exp $
  *
  * Sets the build environment.
  *
@@ -7,6 +7,8 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+
+parse arg sCompiler
 
     /*
      * To use this script you'll have to adjust some paths to match your local
@@ -31,7 +33,25 @@
     call CVS 0;
     call DDKBase 0;
     call MSC60 0;
-    call VAC30 0;
+    if (sCompiler = 'watcom') then
+    do /* watcom */
+        call VAC30 1;
+        call VAC36 1;
+        call Watcom 0;
+    end
+    else if (sCompiler = 'vac36') then
+    do /* vac36 */
+        call VAC30 1;
+        call Watcom 1;
+        call NetQOS2 0;
+        call VAC36 0;
+    end
+    else
+    do /* default is vac30 */
+        call VAC36 1;
+        call Watcom 1;
+        call VAC30 0;
+    end
     call Toolkit40 0;
     call EnvVar_Set 0, 'DEBUG',      '1'
 
@@ -160,11 +180,13 @@ mySQL: procedure
  * NetQOS2 - help subsystem++ for VAC 3.6.5 and VAC 4.0
  */
 NetQOS2: procedure
-    sNetQ11Main = 'd:\knut\tools\netqos2';
+    parse arg fRM
+    sNetQ11Main = 'e:\apps\imnnq';
     call EnvVar_Set      fRM, 'netq11main',     sNetQ11Main
+    call EnvVar_AddFront fRM, 'beginlibpath',   sNetQ11Main';'
     call EnvVar_AddFront fRM, 'path',           sNetQ11Main';'
     call EnvVar_AddFront fRM, 'dpath',          sNetQ11Main';'
-    call EnvVar_AddFront fRM, 'beginlibpath',   sNetQ11Main';'
+    call EnvVar_AddEnd   fRM, 'nlspath',        sNetQ11Main'\%N;'
     call EnvVar_Set      fRM, 'imndatasrv',     sNetQ11Main'\DATA'
     call EnvVar_Set      fRM, 'imndatacl',      sNetQ11Main'\DATA'
     call EnvVar_Set      fRM, 'imnworksrv',     sNetQ11Main'\WORK'
@@ -175,6 +197,7 @@ NetQOS2: procedure
     call EnvVar_Set      fRM, 'imncscfgfile',   'NETQ.CFG'
     call EnvVar_Set      fRM, 'imqconfigsrv',   sNetQ11Main'\instance'
     call EnvVar_Set      fRM, 'imqconfigcl',    sNetQ11Main'\instance\dbcshelp'
+    call EnvVar_Set      fRM, 'lite_locales',   sNetQ11Main
     return 0;
 
 
@@ -378,19 +401,47 @@ VAC36: procedure
     /*
      * IBM C/C++ Compiler and Tools Version 3.6.5 main directory.
      */
-    sCxxMain    = 'd:\knut\tools\ibmcxxo';
+    sCxxMain    = 'e:\apps\ibmcxxo';
 
     call EnvVar_Set      fRM, 'cxxmain', sCxxMain;
 
-    call EnvVar_AddFront fRM, 'path',        sCxxMain'\bin;'
-    call EnvVar_AddFront fRM, 'dpath',       sCxxMain'\local;'sCxxMain'\help;'
     call EnvVar_AddFront fRM, 'beginlibpath', sCxxMain'\dll;'sCxxMain'\runtime;'
+    call EnvVar_AddFront fRM, 'dpath',       sCxxMain'\help;'sCxxMain'\local;'
+    call EnvVar_AddFront fRM, 'path',        sCxxMain'\bin;'
+    call EnvVar_AddFront fRM, 'help',        sCxxMain'\help;'
+    call EnvVar_AddFront fRM, 'locpath',     sCxxMain'\locale;'
     call EnvVar_AddFront fRM, 'nlspath',     sCxxMain'\msg\%N;'
     call EnvVar_AddFront fRM, 'include',     sCxxMain'\include;'
     call EnvVar_AddFront fRM, 'lib',         sCxxMain'\lib;'
-    call EnvVar_AddFront fRM, 'ipfc',        sCxxMain'\ipfc;'
+    call EnvVar_AddFront fRM, 'ipfc',        sCxxMain'\bin;'
     call EnvVar_Set      fRM, 'LANG',        'en_us'
     call EnvVar_Set      fRM, 'CPP_DBG_LANG', 'CPP'
+    return 0;
+
+/*
+ * Watcom C/C++ 11.0
+ */
+Watcom: procedure
+    parse arg fRM
+
+    /*
+     * Watcom C/C++ 11.0 Main directory.
+     */
+    sWatcom = 'e:\apps\Watcom';
+
+    call EnvVar_Set      fRM, 'watcom', sWatcom;
+
+    call EnvVar_Set      fRM, 'edpath',      sWatcom'\eddat'
+    call EnvVar_AddFront fRM, 'beginlibpath', sWatcom'\binp\dll;'
+    call EnvVar_AddFront fRM, 'path',        sWatcom'\binp;'sWatcom'\binw;'
+    call EnvVar_AddFront fRM, 'help',        sWatcom'\binp\help;'
+    call EnvVar_AddFront fRM, 'bookshelf',   sWatcom'\binp\help;'
+    call EnvVar_AddFront fRM, 'include',     sWatcom'\h;'
+  /*call EnvVar_AddFront fRM, 'include',     sWatcom'\h\os2;'sWatcom'\h;'*/ /* h\os2 ? */
+/*
+    'detach' sWatcom'\binp\batserv.exe'
+    'detach' sWatcom'\binp\nmpbind.exe'
+*/
     return 0;
 
 
