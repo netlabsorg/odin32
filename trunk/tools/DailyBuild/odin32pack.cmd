@@ -1,4 +1,4 @@
-/* $Id: odin32pack.cmd,v 1.8 2001-01-09 18:43:19 bird Exp $
+/* $Id: odin32pack.cmd,v 1.9 2001-01-09 18:46:28 bird Exp $
  *
  * Make the two zip files.
  *
@@ -58,8 +58,6 @@ parse arg sDir, sType;
     'del /Q /Y /Z /X .\Voodoo2 > nul 2>&1'
     'rmdir .\Voodoo2 > nul 2>&1'
     'rmdir .\Voodoo1 > nul 2>&1'
-    call copy '..\odin.ini'
-    call copy '..\..\doc\odin.ini.txt'
 
     /*
      * Create a pack directory in /bin and go into it.
@@ -70,6 +68,9 @@ parse arg sDir, sType;
     'del /Q /Y /Z *' /* Perform some cleanup */
 
     /* Copy root files into the pack directory. */
+    call copy '..\wgss50.dll', 'system32\wgss50.dll';
+    call copy '..\odin.ini'
+    call copy '..\..\doc\odin.ini.txt'
     call copy '..\..\LICENSE.txt';
     call copy '..\..\ChangeLog';
     call copy '..\..\doc\Readme.txt';
