@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.152 2000-02-05 14:08:53 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.153 2000-02-05 16:24:59 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -144,6 +144,7 @@ void Win32BaseWindow::Init()
 
   ownDC              = 0;
   hWindowRegion      = 0;
+  hUpdateRegion      = CreateRectRgn(0, 0, 0, 0);
 
   if(currentProcessId == -1)
   {
@@ -177,14 +178,20 @@ Win32BaseWindow::~Win32BaseWindow()
         setParent(NULL);  //or else we'll crash in the dtor of the ChildWindow class
     }
 
-    if (isOwnDC())
-        releaseOwnDC (ownDC);
+    if(hUpdateRegion) {
+        DeleteObject(hUpdateRegion);
+        hUpdateRegion = 0;
+    }
+
+    if(isOwnDC())
+        releaseOwnDC(ownDC);
 
     if(Win32Hwnd)
         HwFreeWindowHandle(Win32Hwnd);
 
     if(userWindowLong)
         free(userWindowLong);
+
     if(windowNameA) {
         free(windowNameA);
         windowNameA = NULL;
@@ -1432,14 +1439,17 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 
         if (!windowClass || !windowClass->getBackgroundBrush()) return 0;
 
-        rc = GetClipBox( (HDC)wParam, &rect );
+//        rc = GetClipBox( (HDC)wParam, &rect );
+        rc = GetRgnBox(hUpdateRegion, &rect);
         if ((rc == SIMPLEREGION) || (rc == COMPLEXREGION))
         {
-          HBRUSH hBrush = windowClass->getBackgroundBrush();
+            HBRUSH hBrush = windowClass->getBackgroundBrush();
 
-          if (hBrush <= (HBRUSH)(SYSCOLOR_GetLastColor()+1)) hBrush = GetSysColorBrush(hBrush-1);
+            if (hBrush <= (HBRUSH)(SYSCOLOR_GetLastColor()+1))
+                hBrush = GetSysColorBrush(hBrush-1);
 
-          FillRect( (HDC)wParam, &rect, hBrush);
+//          FillRect( (HDC)wParam, &rect, hBrush);
+                FillRgn((HDC)wParam, hUpdateRegion, hBrush);
         }
 
         return 1;
@@ -2723,15 +2733,15 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value, BOOL fUnicode)
                 if(dwStyle == value)
                     return value;
 
-                        value &= ~(WS_VISIBLE | WS_CHILD);      /* Some bits can't be changed this way (WINE) */
+                value &= ~(WS_VISIBLE | WS_CHILD);      /* Some bits can't be changed this way (WINE) */
                 ss.styleOld = getStyle();
-                        ss.styleNew = value | (ss.styleOld & (WS_VISIBLE | WS_CHILD));
+                ss.styleNew = value | (ss.styleOld & (WS_VISIBLE | WS_CHILD));
                 dprintf(("SetWindowLong GWL_STYLE %x old %x new style %x", getWindowHandle(), ss.styleOld, ss.styleNew));
                 SendInternalMessageA(WM_STYLECHANGING,GWL_STYLE,(LPARAM)&ss);
                 setStyle(ss.styleNew);
                 SendInternalMessageA(WM_STYLECHANGED,GWL_STYLE,(LPARAM)&ss);
-    		OSLibSetWindowStyle(getOS2FrameWindowHandle(), getStyle(), getExStyle(),
-                                    windowClass->getStyle() & CS_SAVEBITS);
+////                OSLibSetWindowStyle(getOS2FrameWindowHandle(), getStyle(), getExStyle(),
+////                                    windowClass->getStyle() & CS_SAVEBITS);
 #ifdef DEBUG
                 PrintWindowStyle(ss.styleNew, 0);
 #endif
