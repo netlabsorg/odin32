@@ -1,4 +1,4 @@
-/* $Id: region.cpp,v 1.8 2000-06-16 00:05:49 phaller Exp $ */
+/* $Id: region.cpp,v 1.9 2000-06-16 11:05:22 sandervl Exp $ */
 
 /*
  * GDI32 region code
@@ -70,9 +70,7 @@ static LONG clientHeight(HWND hwnd, pDCData pHps)
     if(hwnd == 0 && pHps != 0)
         hwnd = pHps->hwnd;
   
-    // @@@pH Note: hwnd == 0 == HWND_DESKTOP !
-    // if(hwnd != 0 || pHps == 0)
-    if (pHps == 0)
+    if(hwnd != 0 || pHps == 0)
     {
         RECT rect;
         RECTL rectl;
@@ -117,9 +115,7 @@ static LONG clientWidth(HWND hwnd, pDCData pHps)
     if(hwnd == 0 && pHps != 0)
         hwnd = pHps->hwnd;
   
-    // @@@pH Note: hwnd == 0 == HWND_DESKTOP !
-    // if(hwnd != 0 || pHps == 0)
-    if (pHps == 0)
+    if(hwnd != 0 || pHps == 0)
     {
         RECT rect;
         RECTL rectl;
@@ -137,8 +133,8 @@ static LONG clientWidth(HWND hwnd, pDCData pHps)
 
         return x;
    }
-   else
-     DebugInt3();
+//   else
+//     DebugInt3();
    return 0;
 }
 //******************************************************************************
@@ -992,6 +988,7 @@ HRGN WIN32API CreatePolygonRgn(const POINT *lppt, int cPoints, int fnPolyFillMod
     }
 
     dprintf(("CreatePolygonRgn %x %d %d", lppt, cPoints, fnPolyFillMode));
+
 
     POLYGON  polygon;
     polygon.ulPoints = cPoints - 1;
