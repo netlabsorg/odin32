@@ -1,15 +1,38 @@
-/* qsort.c (emx+gcc) -- Copyright (c) 1990-1994 by Eberhard Mattes */
+/* $Id: internal.cpp,v 1.1 2000-02-03 21:37:49 sandervl Exp $ */
+
+/*
+ * The C RunTime DLL
+ * 
+ * Implements C run-time functionality as known from UNIX.
+ *
+ * Partialy based on Wine
+ *
+ * Copyright 1996,1998 Marcus Meissner
+ * Copyright 1996 Jukka Iivonen
+ * Copyright 1997 Uwe Bonnes
+ * Copyright 1999-2000 Jens Wiessner
+ *
+ * CRTDLL - internal functions
+ *
+ */
 
 #include <odin.h>
+#include <os2win.h>
+#include <ctype.h>
 #include <memory.h>
-#include <string.h>
+#include <stdio.h>
+#include <wchar.h>
 
- void _memswap (void *s1, void *s2, size_t n)
- {
+
+/*********************************************************************
+ *	_memswap				(INTERNAL-#1)
+ */
+void _memswap (void *s1, void *s2, size_t n)
+{
    char *c1, *c2, c;
    int *i1, *i2, i;
  
-   i1 = s1; i2 = s2;
+   i1 = (int*)s1; i2 = (int*)s2;
    while (n >= sizeof (int))
      {
        i = *i1; *i1++ = *i2; *i2++ = i;
@@ -23,18 +46,11 @@
      }
  }
 
-static void qsort1 (char *l, char *r, size_t width,
-                    int (* CDECL compare)(const void *x1, const void *x2));
 
-void CDECL CRTDLL_qsort (void *base, size_t num, size_t width,
-                         int (*CDECL compare)(const void *x1, const void *x2))
-{
-  if (width > 0 && num > 1 && base != 0)
-    qsort1 ((char *)base, (char *)base+(num-1)*width, width, compare);
-}
-
-
-static void qsort1 (char *l, char *r, size_t width,
+/*********************************************************************
+ *	qsort1 					(INTERNAL-#2)
+ */
+void qsort1 (char *l, char *r, size_t width,
                     int (* CDECL compare)(const void *x1, const void *x2))
 {
   char *i, *j, *x;
