@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.25 1999-10-15 22:28:09 sandervl Exp $
+# $Id: makefile,v 1.26 1999-10-16 11:03:49 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -50,8 +50,6 @@ all:
         $(MAKE_CMD)
         cd ..\winspool
         $(MAKE_CMD)
-        cd ..\shell32
-        $(MAKE_CMD)
         cd ..\NTDLL
         $(MAKE_CMD)
         cd ..\LZ32
@@ -73,6 +71,8 @@ all:
         cd ..\olecli32
         $(MAKE_CMD)
         cd ..\oledlg
+        $(MAKE_CMD)
+        cd ..\shell32
         $(MAKE_CMD)
         cd ..\imm32
         $(MAKE_CMD)
@@ -100,9 +100,11 @@ all:
 clean:
         cd odincrt
         $(MAKE_CMD) clean
+	cd ..\peldr
+        $(MAKE_CMD) clean
         cd ..\win32k\pe2lx
         $(MAKE_CMD) clean
-        cd ..\kernel32
+        cd ..\..\kernel32
         $(MAKE_CMD) clean
         cd ..\user32
         $(MAKE_CMD) clean
