@@ -1,4 +1,4 @@
-/* $Id: winbase.h,v 1.22 2000-11-21 11:53:38 sandervl Exp $ */
+/* $Id: winbase.h,v 1.23 2000-11-22 00:25:48 phaller Exp $ */
 
 #ifndef __WINE_WINBASE_H
 #define __WINE_WINBASE_H
@@ -1568,6 +1568,7 @@ LPVOID      WINAPI HeapReAlloc(HANDLE,DWORD,LPVOID,DWORD);
 DWORD       WINAPI HeapSize(HANDLE,DWORD,LPVOID);
 BOOL      WINAPI HeapUnlock(HANDLE);
 BOOL      WINAPI HeapValidate(HANDLE,DWORD,LPCVOID);
+BOOL    WIN32API HeapWalk      (HANDLE, LPVOID);
 BOOL        WINAPI InitializeSid(PSID,PSID_IDENTIFIER_AUTHORITY,BYTE);
 BOOL        WINAPI IsValidSecurityDescriptor(PSECURITY_DESCRIPTOR);
 BOOL        WINAPI IsValidSid(PSID);
@@ -1984,6 +1985,9 @@ INT       WINAPI lstrcmpW(LPCWSTR,LPCWSTR);
 INT       WINAPI lstrcmpiA(LPCSTR,LPCSTR);
 INT       WINAPI lstrcmpiW(LPCWSTR,LPCWSTR);
 #define     lstrcmpi WINELIB_NAME_AW(lstrcmpi)
+int    WIN32API lstrncmpiA     (LPCSTR, LPCSTR, int);
+int    WIN32API lstrncmpiW     (LPCWSTR, LPCWSTR, int);
+#define     lstrncmpi WINELIB_NAME_AW(lstrncmpi)
 
 VOID        WINAPI SetLastError(DWORD);
 
