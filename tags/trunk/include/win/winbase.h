@@ -1,4 +1,4 @@
-/* $Id: winbase.h,v 1.11 2000-03-29 15:16:10 cbratschi Exp $ */
+/* $Id: winbase.h,v 1.12 2000-06-01 11:26:15 sandervl Exp $ */
 
 #ifndef __WINE_WINBASE_H
 #define __WINE_WINBASE_H
@@ -634,6 +634,16 @@ typedef struct {
         DWORD OffsetHigh;
         HANDLE hEvent;
 } OVERLAPPED, *LPOVERLAPPED;
+
+typedef VOID (WINAPI *LPOVERLAPPED_COMPLETION_ROUTINE)(DWORD dwErrorCode,
+                                                       DWORD dwNumberOfBytesTransfered,
+                                                       LPOVERLAPPED lpOverlapped);
+
+// LockFileEx flags
+
+#define LOCKFILE_FAIL_IMMEDIATELY   0x00000001
+#define LOCKFILE_EXCLUSIVE_LOCK     0x00000002
+
 
 /* Process startup information.
  */
@@ -1524,6 +1534,9 @@ BOOL        WINAPI ReadEventLogA(HANDLE,DWORD,DWORD,LPVOID,DWORD,DWORD *,DWORD *
 BOOL        WINAPI ReadEventLogW(HANDLE,DWORD,DWORD,LPVOID,DWORD,DWORD *,DWORD *);
 #define     ReadEventLog WINELIB_NAME_AW(ReadEventLog)
 BOOL      WINAPI ReadFile(HANDLE,LPVOID,DWORD,LPDWORD,LPOVERLAPPED);
+BOOL      WINAPI ReadFileEx(HANDLE hFile, LPVOID lpBuffer, DWORD nNumberOfBytesToRead,
+                            LPOVERLAPPED lpOverlapped, LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine);
+
 HANDLE      WINAPI RegisterEventSourceA(LPCSTR,LPCSTR);
 HANDLE      WINAPI RegisterEventSourceW(LPCWSTR,LPCWSTR);
 #define     RegisterEventSource WINELIB_NAME_AW(RegisterEventSource)
@@ -1615,6 +1628,8 @@ BOOL      WINAPI WriteConsoleA(HANDLE,LPCVOID,DWORD,LPDWORD,LPVOID);
 BOOL      WINAPI WriteConsoleW(HANDLE,LPCVOID,DWORD,LPDWORD,LPVOID);
 #define     WriteConsole WINELIB_NAME_AW(WriteConsole)
 BOOL      WINAPI WriteFile(HANDLE,LPCVOID,DWORD,LPDWORD,LPOVERLAPPED);
+BOOL      WINAPI WriteeFileEx(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite,
+                              LPOVERLAPPED lpOverlapped, LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine);
 DWORD       WINAPI GetLastError(void);
 LANGID      WINAPI GetSystemDefaultLangID(void);
 LCID        WINAPI GetSystemDefaultLCID(void);

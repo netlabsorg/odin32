@@ -1,4 +1,4 @@
-/* $Id: win32type.h,v 1.38 2000-05-05 11:33:39 sandervl Exp $ */
+/* $Id: win32type.h,v 1.39 2000-06-01 11:26:14 sandervl Exp $ */
 
 /*
  * Win32 type definitions for OS/2
@@ -421,6 +421,17 @@ typedef struct
 } FILETIME, *LPFILETIME;
 #endif /* _FILETIME_ */
 
+typedef struct {
+        WORD wYear;
+        WORD wMonth;
+        WORD wDayOfWeek;
+        WORD wDay;
+        WORD wHour;
+        WORD wMinute;
+        WORD wSecond;
+        WORD wMilliseconds;
+} SYSTEMTIME, *LPSYSTEMTIME;
+
 typedef struct
 {
     DWORD     dwFileAttributes;
@@ -670,6 +681,10 @@ typedef struct {
         DWORD OffsetHigh;
         HANDLE hEvent;
 } OVERLAPPED, *LPOVERLAPPED;
+
+typedef VOID (WIN32API *LPOVERLAPPED_COMPLETION_ROUTINE)(DWORD dwErrorCode,
+                                                         DWORD dwNumberOfBytesTransfered,
+                                                         LPOVERLAPPED lpOverlapped);
 
 #endif
 

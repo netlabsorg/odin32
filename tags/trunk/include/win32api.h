@@ -1,4 +1,4 @@
-/* $Id: win32api.h,v 1.11 2000-05-28 16:40:23 sandervl Exp $ */
+/* $Id: win32api.h,v 1.12 2000-06-01 11:26:14 sandervl Exp $ */
 
 /*
  *
@@ -98,5 +98,9 @@ HRSRC   WIN32API FindResourceW(HINSTANCE hModule, LPCSTR lpszName, LPCSTR lpszTy
 HGLOBAL WIN32API LoadResource(HINSTANCE hModule, HRSRC hRes);
 DWORD   WIN32API SizeofResource(HINSTANCE hModule, HRSRC hRes);
 PVOID   WIN32API LockResource(HGLOBAL hRes);
+
+BOOL    WIN32API SetWindowOrgEx(HDC hdc, int X, int Y, LPPOINT lpPoint);
+BOOL    WIN32API SetWindowExtEx(HDC hdc, int nXExtent, int nYExtent, LPPOINT lpSize);
+int     WIN32API GetDeviceCaps(HDC hdc, int nIndex);
 
 #endif
