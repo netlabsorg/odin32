@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.16 2000-01-02 22:09:01 sandervl Exp $ */
+/* $Id: misc.cpp,v 1.17 2000-01-13 20:09:09 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -243,6 +243,7 @@ int printf_(struct perthread *tp)  /* pointer to per-thread data */
 static FILE *flog = NULL;   /*PLF Mon  97-09-08 20:00:15*/
 static BOOL init = FALSE;
 static BOOL fLogging = TRUE;
+static int  dwEnableLogging = 1;
 
 int SYSTEM EXPORT WriteLog(char *tekst, ...)
 {
@@ -271,7 +272,7 @@ int SYSTEM EXPORT WriteLog(char *tekst, ...)
       fLogging = FALSE;
   }
 
-  if(fLogging && flog)
+  if(fLogging && flog && (dwEnableLogging > 0))
   {
     THDB *thdb = GetThreadTHDB();
 
@@ -284,9 +285,20 @@ int SYSTEM EXPORT WriteLog(char *tekst, ...)
     if(tekst[strlen(tekst)-1] != '\n')
       fprintf(flog, "\n");
   }
-  fflush(flog);
   SetFS(sel);
   return 1;
+}
+//******************************************************************************
+//******************************************************************************
+void SYSTEM DecreaseLogCount()
+{
+  dwEnableLogging--;
+}
+//******************************************************************************
+//******************************************************************************
+void SYSTEM IncreaseLogCount()
+{
+  dwEnableLogging++;
 }
 //******************************************************************************
 //******************************************************************************
