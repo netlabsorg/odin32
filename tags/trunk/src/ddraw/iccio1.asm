@@ -243,7 +243,7 @@ io_init1 ENDP
 PUBLIC  io_init2
   ALIGN  04H
 io_init2  PROC
-
+  MOV  EAX, dword ptr [ESP+4]
   MOV  gdt, AX    ; store in ioentry address selector part
   XOR  EAX, EAX  ; EAX = 0
   MOV  DWORD PTR [ioentry], EAX ; clear ioentry offset part
