@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.25 1999-10-24 22:56:11 sandervl Exp $ */
+/* $Id: window.cpp,v 1.26 1999-10-27 18:25:24 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -47,7 +47,7 @@ HWND WIN32API CreateWindowExA(DWORD exStyle, LPCSTR className,
         return CreateMDIWindowA(className, windowName, style, x, y, width, height, parent, instance, (LPARAM)data);
 
     /* Find the class atom */
-    if (!(classAtom = GlobalFindAtomA(className)))
+    if (!HIWORD(className) || !(classAtom = GlobalFindAtomA(className)))
     {
         if (!HIWORD(className))
         {
@@ -141,7 +141,7 @@ HWND WIN32API CreateWindowExW(DWORD exStyle, LPCWSTR className,
         return CreateMDIWindowW(className, windowName, style, x, y, width, height, parent, instance, (LPARAM)data);
 
     /* Find the class atom */
-    if (!(classAtom = GlobalFindAtomW(className)))
+    if (!HIWORD(className) || !(classAtom = GlobalFindAtomW(className)))
     {
         if (!HIWORD(className))
         {
