@@ -1,4 +1,4 @@
-/* $Id: tooltips.c,v 1.6 1999-06-24 16:37:45 cbratschi Exp $ */
+/* $Id: tooltips.c,v 1.7 1999-06-26 14:20:31 cbratschi Exp $ */
 /*
  * Tool tip control
  *
@@ -18,7 +18,6 @@
  */
 
 /* CB: Odin32 problems
- - not defined colors: COLOR_INFOBK, COLOR_INFOTEXT
  - WM_NCCREATE not handled first -> title bar visible if WS_POPUP wasn't set before
 */
 
@@ -1857,8 +1856,8 @@ TOOLTIPS_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
     /* initialize info structure */
     infoPtr->bActive = TRUE;
     infoPtr->bTrackActive = FALSE;
-    infoPtr->clrBk   = RGB(0,0,0);//GetSysColor(COLOR_INFOBK);//CB: to change
-    infoPtr->clrText = RGB(255,255,255);//GetSysColor(COLOR_INFOTEXT);//CB: to change
+    infoPtr->clrBk   = GetSysColor(COLOR_INFOBK);
+    infoPtr->clrText = GetSysColor(COLOR_INFOTEXT);
 
     nclm.cbSize = sizeof(NONCLIENTMETRICSA);
     SystemParametersInfoA(SPI_GETNONCLIENTMETRICS,0,&nclm,0);

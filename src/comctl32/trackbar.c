@@ -1,4 +1,4 @@
-/* $Id: trackbar.c,v 1.7 1999-06-24 16:37:45 cbratschi Exp $ */
+/* $Id: trackbar.c,v 1.8 1999-06-26 14:20:32 cbratschi Exp $ */
 /*
  * Trackbar control
  *
@@ -10,8 +10,9 @@
  *
  * TODO:
  *
- *   - more notifications.
- *   - Fix Odin32/WINE DrawEdge() bugs
+ *   - more notifications. (CB: should be complete)
+ *   - TRACKBAR_UpdateThumb, TRACKBAR_UpdateThumbPosition:
+ *     use a memory dc to avoid flickering by short movements
  */
 
 #include "winbase.h"
@@ -448,8 +449,8 @@ static VOID TRACKBAR_DrawThumb(TRACKBAR_INFO *infoPtr,HDC hdc,DWORD dwStyle)
 
       if (dwStyle & TBS_BOTH)
       {
-        DrawEdge (hdc,&thumb,EDGE_RAISED,BF_RECT | BF_ADJUST);
-        FillRect (hdc,&thumb,hbr);
+        DrawEdge(hdc,&thumb,EDGE_RAISED,BF_RECT | BF_ADJUST);
+        FillRect(hdc,&thumb,hbr);
       } else
       {
 
@@ -461,6 +462,8 @@ static VOID TRACKBAR_DrawThumb(TRACKBAR_INFO *infoPtr,HDC hdc,DWORD dwStyle)
 
           if (dwStyle & TBS_LEFT)
           {
+            HPEN oldPen,pen;
+
             //Outline
 
             SetPolyFillMode(hdc,WINDING);
@@ -476,7 +479,7 @@ static VOID TRACKBAR_DrawThumb(TRACKBAR_INFO *infoPtr,HDC hdc,DWORD dwStyle)
             points[4].y = thumb.top;
             points[5].x = points[0].x;
             points[5].y = points[0].y;
-            Polygon (hdc,points,6);
+            Polygon(hdc,points,6);
 
             //Edge
 
@@ -486,20 +489,27 @@ static VOID TRACKBAR_DrawThumb(TRACKBAR_INFO *infoPtr,HDC hdc,DWORD dwStyle)
 
             //Draw notch
 
-            triangle.right = points[0].x-1;
-            triangle.top = points[0].y+1+1;
+            triangle.right = points[0].x;
+            triangle.top = points[0].y;
             triangle.left = points[1].x;
-            triangle.bottom = points[1].y+1; //Odin32 fix
-            DrawEdge(hdc,&triangle,EDGE_SUNKEN,BF_DIAGONAL | BF_DIAGONAL_ENDBOTTOMLEFT);
-            triangle.right = points[2].x;
-            triangle.bottom = points[2].y;
-            triangle.left = points[1].x;
-            triangle.top = points[1].y; //Odin32 bug: wrong lines
-            DrawEdge(hdc,&triangle,EDGE_SUNKEN,BF_DIAGONAL | BF_DIAGONAL_ENDTOPLEFT);
+            triangle.bottom = points[1].y;
+            DrawEdge(hdc,&triangle,EDGE_RAISED,BF_DIAGONAL | BF_DIAGONAL_ENDTOPRIGHT);
 
+            //draw this line direct, DrawEdge not useful
+            pen = GetSysColorPen(COLOR_3DDKSHADOW);
+            oldPen = SelectObject(hdc,pen);
+            MoveToEx(hdc,points[1].x,points[1].y,NULL);
+            LineTo(hdc,points[2].x-1,points[2].y-1);
+            pen = GetSysColorPen(COLOR_BTNSHADOW);
+            SelectObject(hdc,pen);
+            MoveToEx(hdc,points[1].x+1,points[1].y,NULL);
+            LineTo(hdc,points[2].x,points[2].y-1);
+            SelectObject(hdc,oldPen);
 
           } else //Right
           {
+            HPEN oldPen,pen;
+
             //Outline
 
             SetPolyFillMode(hdc,WINDING);
@@ -515,7 +525,7 @@ static VOID TRACKBAR_DrawThumb(TRACKBAR_INFO *infoPtr,HDC hdc,DWORD dwStyle)
             points[4].y = thumb.top;
             points[5].x = points[0].x;
             points[5].y = points[0].y;
-            Polygon (hdc,points,6);
+            Polygon(hdc,points,6);
 
             //Edge
 
@@ -524,16 +534,22 @@ static VOID TRACKBAR_DrawThumb(TRACKBAR_INFO *infoPtr,HDC hdc,DWORD dwStyle)
 
             //Draw notch
 
-            triangle.left = points[4].x;
-            triangle.top = points[4].y;
+            //draw this line direct, DrawEdge not useful
+            pen = GetSysColorPen(COLOR_3DLIGHT);
+            oldPen = SelectObject(hdc,pen);
+            MoveToEx(hdc,points[4].x,points[4].y,NULL);
+            LineTo(hdc,points[3].x-1,points[3].y-1);
+            pen = GetSysColorPen(COLOR_BTNHIGHLIGHT);
+            SelectObject(hdc,pen);
+            MoveToEx(hdc,points[4].x,points[4].y+1,NULL);
+            LineTo(hdc,points[3].x-2,points[3].y-1);
+            SelectObject(hdc,oldPen);
+
             triangle.right = points[3].x;
-            triangle.bottom = points[3].y;
-            DrawEdge(hdc,&triangle,EDGE_SUNKEN,BF_DIAGONAL | BF_DIAGONAL_ENDBOTTOMRIGHT);
+            triangle.top = points[3].y;
             triangle.left = points[2].x;
             triangle.bottom = points[2].y;
-            triangle.right = points[3].x;
-            triangle.top = points[3].y; //Odin32: pixel bug
-            DrawEdge(hdc,&triangle,EDGE_SUNKEN,BF_DIAGONAL | BF_DIAGONAL_ENDTOPRIGHT);
+            DrawEdge(hdc,&triangle,EDGE_RAISED,BF_DIAGONAL | BF_DIAGONAL_ENDBOTTOMLEFT);
           }
         } else
         { //Horizontal
@@ -555,7 +571,7 @@ static VOID TRACKBAR_DrawThumb(TRACKBAR_INFO *infoPtr,HDC hdc,DWORD dwStyle)
             points[4].y = thumb.bottom;
             points[5].x = points[0].x;
             points[5].y = points[0].y;
-            Polygon (hdc,points,6);
+            Polygon(hdc,points,6);
 
             //Edge
 
@@ -570,11 +586,13 @@ static VOID TRACKBAR_DrawThumb(TRACKBAR_INFO *infoPtr,HDC hdc,DWORD dwStyle)
             triangle.right = points[1].x;
             triangle.top = points[1].y;
             DrawEdge(hdc,&triangle,EDGE_RAISED,BF_DIAGONAL | BF_DIAGONAL_ENDTOPRIGHT);
-            triangle.right = points[1].x;
-            triangle.bottom = points[1].y;
-            triangle.left = points[2].x-1;
-            triangle.top = points[2].y-1;
-            DrawEdge(hdc,&triangle,EDGE_SUNKEN,BF_DIAGONAL | BF_DIAGONAL_ENDTOPLEFT);
+
+
+            triangle.left = points[1].x;
+            triangle.top = points[1].y;
+            triangle.right = points[2].x;
+            triangle.bottom = points[2].y;
+            DrawEdge(hdc,&triangle,EDGE_RAISED,BF_DIAGONAL | BF_DIAGONAL_ENDBOTTOMRIGHT);
 
           } else //Bottom
           {
@@ -594,7 +612,7 @@ static VOID TRACKBAR_DrawThumb(TRACKBAR_INFO *infoPtr,HDC hdc,DWORD dwStyle)
             points[4].y = thumb.bottom;
             points[5].x = points[0].x;
             points[5].y = points[0].y;
-            Polygon (hdc,points,6);
+            Polygon(hdc,points,6);
 
             //Edge
 
@@ -604,16 +622,16 @@ static VOID TRACKBAR_DrawThumb(TRACKBAR_INFO *infoPtr,HDC hdc,DWORD dwStyle)
 
             //Draw notch
 
-            triangle.left = points[4].x;
-            triangle.top = points[4].y; //Odin32: wrong pixel at .y-1!
+            triangle.right = points[2].x;
+            triangle.top = points[2].y;
+            triangle.left = points[3].x;
+            triangle.bottom = points[3].y;
+            DrawEdge(hdc,&triangle,EDGE_RAISED,BF_DIAGONAL | BF_DIAGONAL_ENDBOTTOMLEFT);
             triangle.right = points[3].x;
             triangle.bottom = points[3].y;
-            DrawEdge(hdc,&triangle,EDGE_SUNKEN,BF_DIAGONAL | BF_DIAGONAL_ENDBOTTOMRIGHT);
-            triangle.left = points[3].x-1; //Odin32: wrong pixel at .x-2!
-            triangle.bottom = points[3].y+1;
-            triangle.right = points[2].x-1;
-            triangle.top = points[2].y+1;
-            DrawEdge(hdc,&triangle,EDGE_SUNKEN,BF_DIAGONAL | BF_DIAGONAL_ENDTOPRIGHT);
+            triangle.left = points[4].x;
+            triangle.top = points[4].y;
+            DrawEdge(hdc,&triangle,EDGE_RAISED,BF_DIAGONAL | BF_DIAGONAL_ENDTOPLEFT);
 
           }
         }
@@ -628,12 +646,12 @@ static VOID TRACKBAR_DrawThumb(TRACKBAR_INFO *infoPtr,HDC hdc,DWORD dwStyle)
 static VOID TRACKBAR_Draw(HWND hwnd,HDC hdc)
 {
     TRACKBAR_INFO *infoPtr = TRACKBAR_GetInfoPtr (hwnd);
-    DWORD dwStyle = GetWindowLongA (hwnd, GWL_STYLE);
-    RECT rcClient, rcChannel, rcSelection;
-    HBRUSH hBrush = CreateSolidBrush (infoPtr->clrBk);
+    DWORD dwStyle = GetWindowLongA(hwnd, GWL_STYLE);
+    RECT rcClient,rcChannel,rcSelection;
+    HBRUSH hBrush = CreateSolidBrush(infoPtr->clrBk);
     int i;
 
-    GetClientRect (hwnd, &rcClient);
+    GetClientRect(hwnd,&rcClient);
 
     //Background
     hBrush = CreateSolidBrush(infoPtr->clrBk);
@@ -658,7 +676,7 @@ static VOID TRACKBAR_Draw(HWND hwnd,HDC hdc)
 
     rcChannel = infoPtr->rcChannel;
     rcSelection = infoPtr->rcSelection;
-    DrawEdge (hdc,&rcChannel,EDGE_SUNKEN,BF_RECT | BF_ADJUST);
+    DrawEdge(hdc,&rcChannel,EDGE_SUNKEN,BF_RECT | BF_ADJUST);
 
     if (dwStyle & TBS_ENABLESELRANGE)           /* fill the channel */
     {
@@ -679,7 +697,7 @@ static VOID TRACKBAR_Draw(HWND hwnd,HDC hdc)
     if (!(dwStyle & TBS_NOTICKS))
     {
       int ticFlags = dwStyle & 0x0f;
-      COLORREF clrTic = RGB(0,0,0);//CB: black instead of GetSysColor(COLOR_3DDKSHADOW);
+      COLORREF clrTic = GetSysColor(COLOR_3DDKSHADOW);
 
       for (i = 0;i < infoPtr->uNumTics;i++)
           TRACKBAR_DrawTics(infoPtr,hdc,infoPtr->tics[i],ticFlags,clrTic);
@@ -736,11 +754,6 @@ static VOID TRACKBAR_UpdateThumbPosition(HWND hwnd,INT lastPos)
    lastRect.bottom++;
    newRect.right++;
    newRect.bottom++;
-   //Odin32 pixel bugs
-   lastRect.top--;
-   lastRect.left--;
-   newRect.top--;
-   newRect.left--;
 
    hdc = GetDC(hwnd);
    hrgnLast = CreateRectRgnIndirect(&lastRect);
@@ -1774,9 +1787,9 @@ TRACKBAR_Paint (HWND hwnd, WPARAM wParam)
     HDC hdc;
     PAINTSTRUCT ps;
 
-    hdc = wParam==0 ? BeginPaint (hwnd, &ps) : (HDC)wParam;
+    hdc = wParam == 0 ? BeginPaint(hwnd,&ps) : (HDC)wParam;
     TRACKBAR_Draw(hwnd,hdc);
-    if (!wParam) EndPaint (hwnd, &ps);
+    if (!wParam) EndPaint(hwnd,&ps);
     return 0;
 }
 
