@@ -1,4 +1,4 @@
-/* $Id: StateUpd.cpp,v 1.12 2000-02-14 13:49:13 bird Exp $
+/* $Id: StateUpd.cpp,v 1.13 2000-02-14 17:18:31 bird Exp $
  *
  * StateUpd - Scans source files for API functions and imports data on them.
  *
@@ -69,7 +69,7 @@ int main(int argc, char **argv)
     BOOL           fFatal = FALSE;
     unsigned long  ulRc = 0;
     char           szDLLName[64];
-    OPTIONS        options = {TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, &szDLLName[0], -1};
+    OPTIONS        options = {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, &szDLLName[0], -1};
     unsigned long  ulRc2;
     char          *pszErrorDesc = NULL;
     char          *pszHost     = "localhost";
@@ -232,7 +232,7 @@ int main(int argc, char **argv)
         openLogs();
 
         /* check db integrity */
-        if (options.fIntegrityBefore)
+        if (options.fIntegrityBefore || options.fIntegrityOnly)
         {
             pszErrorDesc = (char*)malloc(1048768); assert(pszErrorDesc != NULL);
             *pszErrorDesc = '\0';
@@ -330,8 +330,8 @@ static void syntax()
            "syntax: StateUpd.exe  [-h|-?] [options] [FileOrDir1 [FileOrDir2 [...]]]\n"
            "\n"
            "    -h or -?      Syntax help. (this)\n"
-           "    -ib<[+]|->    Integrity check at start.     default: enabled\n"
-           "    -ie<[+]|->    Integrity check at end.       default: enabled\n"
+           "    -ib<[+]|->    Integrity check at start.     default: disabled\n"
+           "    -ie<[+]|->    Integrity check at end.       default: disabled\n"
            "    -io           Integrity check only.         default: disabled\n"
            "    -s            Scan subdirectories.          default: disabled\n"
            "    -Old          Use old API style.            default: disabled\n"
@@ -917,9 +917,11 @@ static unsigned long analyseFnDcl2(PFNDESC pFnDesc, char **papszLines, int i, in
         copy(pszEnd, pszReturn, iReturn, pszFn-1, iFn, papszLines);
         if (strlen(pszEnd) > 128)
         {
-            fprintf(phSignal,"Fatal error! return statement is too larget. len=%d", strlen(pszEnd));
-            fprintf(phLog,   "Fatal error! return statement is too larget. len=%d", strlen(pszEnd));
-            fprintf(stderr,  "Fatal error! return statement is too larget. len=%d", strlen(pszEnd));
+            /* FIXME LATER! Some constructors calling baseclass constructors "breaks" this rule. Win32MDIChildWindow in /src/user32/win32wmdichild.cpp for example. */
+            fprintf(phSignal,"Fatal error? return statement is too larget. len=%d", strlen(pszEnd));
+            fprintf(phLog,   "Fatal error? return statement is too larget. len=%d", strlen(pszEnd));
+            if (strlen(pszEnd) > 512)
+                fprintf(stderr,  "Fatal error? return statement is too larget. len=%d", strlen(pszEnd));
             fflush(phLog);
             fflush(phSignal);
             fflush(stderr);
@@ -929,9 +931,21 @@ static unsigned long analyseFnDcl2(PFNDESC pFnDesc, char **papszLines, int i, in
         pszEnd = strlen(pszEnd) + pszEnd + 1;
         *pszEnd = '\0';
 
+        /* !BugFix! some function occur more than once, usually as inline functions */
+        if (pFnDesc->pszReturnType != NULL
+            && strstr(pFnDesc->pszReturnType, "inline ") != NULL)
+        {
+            fprintf(phLog, "Not an API. Inlined functions can't be exported!\n");
+            return 0;
+        }
+
         /* function name */
         if (pFnDesc->pszReturnType != NULL
-            && stristr(pFnDesc->pszReturnType, "cdecl") != NULL)
+            && (stristr(pFnDesc->pszReturnType, "cdecl") != NULL
+                || strstr(pFnDesc->pszReturnType, "VFWAPIV") != NULL
+                || strstr(pFnDesc->pszReturnType, "WINAPIV") != NULL
+                )
+            )
         {   /* cdecl function is prefixed with an '_' */
             strcpy(pszEnd, "_");
         }
@@ -950,13 +964,49 @@ static unsigned long analyseFnDcl2(PFNDESC pFnDesc, char **papszLines, int i, in
         pFnDesc->cParams = cArgs;
         for (j = 0; j < cArgs; j++)
         {
+            int cch = strlen(apszArgs[j]);
             if ((psz = strchr(apszArgs[j], ')')) == NULL)
             {   /* Common argument */
-                if (apszArgs[j][strlen(apszArgs[j]-1)] != '*')
-                {   /* Normal case, Type [moretype] Name.*/
-                    pFnDesc->apszParamName[j] = findStartOfWord(apszArgs[j] + strlen(apszArgs[j]) - 1,
-                                                            apszArgs[j]);
-                    pFnDesc->apszParamName[j][-1] = '\0';
+                if (apszArgs[j][cch-1] != '*' || (apszArgs[j][cch - 1] == ']' && cch < 5))
+                {   /* nearly Normal case, Type [moretype] Name.*/
+                    if (apszArgs[j][cch - 1] != ']')
+                    {   /* Normal case! */
+                        pFnDesc->apszParamName[j] = findStartOfWord(apszArgs[j] + cch - 1,
+                                                                    apszArgs[j]);
+                        pFnDesc->apszParamName[j][-1] = '\0';
+                    }
+                    else
+                    {   /* arg yet another special case! 'fn(int argc, char *argv[])' */
+                        char *pszP2;
+                        cch = strlen(apszArgs[j]);
+                        psz = &apszArgs[j][cch-2];
+                        while (psz > apszArgs[j] && ((*psz >= '0' && *psz <= '9') || *psz == ' '))
+                            psz--;
+
+                        if (psz > apszArgs[j] && *psz == '[')
+                        {
+                            pszP2 = psz--;
+                            while (psz >= apszArgs[j] && *psz == ' ')
+                                psz--;
+                        }
+
+                        if (psz <= apszArgs[j])
+                        {   /* funny case - no name? */
+                            sprintf(pszEnd, "arg%i", j);
+                            pFnDesc->apszParamName[j] = pszEnd;
+                            pszEnd = strlen(pszEnd) + pszEnd + 1;
+                            *pszEnd = '\0';
+                        }
+                        else
+                        {   /* *pszP2 = '[' and psz = end of name */
+                            psz = findStartOfWord(psz, apszArgs[j]);
+                            strncat(pszEnd, psz, pszP2 - psz);
+                            pFnDesc->apszParamName[j] = pszEnd;
+                            pszEnd = strlen(pszEnd) + pszEnd + 1;
+                            *pszEnd = '\0';
+                            memset(psz, ' ', pszP2 - psz);
+                        }
+                    }
                 }
                 else
                 {   /* No argument name only type - make a dummy one: 'arg[1..n]' */
@@ -1045,9 +1095,12 @@ static unsigned long analyseFnHdr(PFNDESC pFnDesc, char **papszLines, int i, con
     else
         j -= 2;
     fFound = 0;
-    while (iStart >= 0 &&
-           !(fFound = (papszLines[iStart][j] == '/' && papszLines[iStart][j+1] == '*')))
-        if (j-- == 0)
+    while (iStart >= 0
+           && (j < 0
+               || !(fFound = (papszLines[iStart][j] == '/' && papszLines[iStart][j+1] == '*'))
+               )
+           )
+        if (j-- <= 0)
             if (iStart-- > 0)
             {
                 j = strlen(papszLines[iStart]);
@@ -1288,8 +1341,8 @@ static BOOL isFunction(char **papszLines, int i, POPTIONS pOptions)
         char *pszP1 = papszLines[i];
 
         while (*pszP1 != '\0' && *pszP1 == ' ')
-            pszP1--;
-        if (*pszP1 != '\0' && *pszP1 != '\\' && pszP1[1] != '\\'
+            pszP1++;
+        if (*pszP1 != '\0' && *pszP1 != '/' && pszP1[1] != '/'
             && *pszP1 != '{' && *pszP1 != '}')
         {
             pszP1 = strchr(papszLines[i], '(');
@@ -1569,6 +1622,7 @@ static char *readFileIntoMemory(const char *pszFilename)
 
 /**
  * Creates an array of lines from a "memory" file. The last entry in the array contains NULL.
+ * It also replaces '\t' with ' '.
  * @returns   Pointer to the array of lines.
  * @param     pszFile  Pointer to "memory" file.
  */
@@ -1598,6 +1652,8 @@ static char **createLineArray(char *pszFile)
         papszLines[0] = psz = pszFile;
         while (*psz != '\0')
         {
+            if (*psz == '\t')
+                *psz = ' ';
             if (*psz == '\r')
             {
                 if (psz[1] == '\n')
@@ -1637,7 +1693,7 @@ static char *findEndOfWord(char *psz)
 }
 
 
-/** staring char of word */
+/** starting char of word */
 static char *findStartOfWord(char *psz, const char *pszStart)
 {
     char *pszR = psz;
