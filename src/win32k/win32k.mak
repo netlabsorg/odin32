@@ -1,4 +1,4 @@
-# $Id: win32k.mak,v 1.6 2001-02-20 05:08:49 bird Exp $
+# $Id: win32k.mak,v 1.7 2001-02-21 07:53:25 bird Exp $
 
 #
 # Win32k.sys makefile.
@@ -76,6 +76,7 @@ OBJS  =\
     $(WIN32KOBJ)\k32AllocMemEx.obj \
 #    $(WIN32KOBJ)\k32HandleSystemEvent.obj \
     $(WIN32KOBJ)\k32ProcessReadWrite.obj \
+    $(WIN32KOBJ)\k32QueryCallGate.obj \
     $(WIN32KOBJ)\k32QueryOTEs.obj \
     $(WIN32KOBJ)\k32QueryOptionsStatus.obj \
     $(WIN32KOBJ)\k32QuerySystemMemInfo.obj \
@@ -106,6 +107,7 @@ $(NAME).sys: $(WIN32KBIN)\$(NAME).sys
 $(WIN32KBIN)\$(NAME).sys:   clfix.exe \
                             $(WIN32KINCLUDE)\options.inc \
                             $(WIN32KINCLUDE)\api.inc \
+                            $(WIN32KINCLUDE)\win32k.inc \
                             $(OBJS) \
                             $(LIBS) \
                             $(WIN32KOBJ)\$(NAME)bldlevel.def \
@@ -207,6 +209,7 @@ TSTOBJS =\
     $(WIN32KOBJ)\k32AllocMemEx.obj \
 #    $(WIN32KOBJ)\k32HandleSystemEvent.obj \
     $(WIN32KOBJ)\k32ProcessReadWrite.obj \
+    $(WIN32KOBJ)\k32QueryCallGate.obj \
     $(WIN32KOBJ)\k32QueryOTEs.obj \
     $(WIN32KOBJ)\k32QueryOptionsStatus.obj \
     $(WIN32KOBJ)\k32QuerySystemMemInfo.obj \
@@ -366,6 +369,12 @@ $(WIN32KINCLUDE)\api.inc:  $(WIN32KINCLUDE)\api.h
     @$(ECHO) H2Inc: $**
     $(H2INC) $** > $@
 
+#
+# Make assembly version of win32k.h; win32k.inc
+#
+$(WIN32KINCLUDE)\win32k.inc:  $(ODIN32_INCLUDE)\win32k.h
+    @$(ECHO) H2Inc: $**
+    $(H2INC) $** > $@
 
 
 #
