@@ -1,4 +1,4 @@
-/* $Id: listbox.cpp,v 1.15 1999-12-21 17:03:44 cbratschi Exp $ */
+/* $Id: listbox.cpp,v 1.16 1999-12-28 22:15:53 sandervl Exp $ */
 /*
  * Listbox controls
  *
@@ -1226,7 +1226,7 @@ static LRESULT LISTBOX_SetSelection( HWND hwnd, LB_DESCR *descr, INT index,
     else
     {
         INT oldsel = descr->selected_item;
-        if (index == oldsel) return LB_OKAY;
+////        if (index == oldsel) return LB_OKAY;
         if (oldsel != -1) descr->items[oldsel].selected = FALSE;
         if (index != -1) descr->items[index].selected = TRUE;
         descr->selected_item = index;
