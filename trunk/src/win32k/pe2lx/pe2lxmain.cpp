@@ -1,4 +1,4 @@
-/* $Id: pe2lxmain.cpp,v 1.7 2001-02-10 11:11:48 bird Exp $
+/* $Id: pe2lxmain.cpp,v 1.8 2001-09-28 07:43:03 sandervl Exp $
  *
  * Pe2Lx main program. (Ring 3 only!)
  *
@@ -31,6 +31,9 @@
 #include <malloc.h>
 #include <string.h>
 #include <stdlib.h>
+#include <io.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 #include "OS2Krnl.h"
 #include "modulebase.h"
 #include "pe2lx.h"
@@ -124,6 +127,32 @@ int main(int argc, char **argv)
                         return 5;
                     }
                     break;
+
+                case 'f': //ignore internal fixups
+                case 'F':
+                    options.fSkipFixups = TRUE;
+                    break;
+
+                case 'c':
+                case 'C': //custom odin dll name
+                    if(!hasCustomExports()) {
+                        printf("Syntax error: export table file not specified (/O).\n\n");
+                        return 5;
+                    }
+                    options.pszCustomDll = &argv[argi][3];
+                    break;
+                case 'o':
+                case 'O':
+                {
+                    int fileIn = open(&argv[argi][3], O_RDONLY, S_IREAD);
+                    int sizein = (int)_filelength(fileIn);
+
+                    options.pszCustomExports = (PSZ)malloc(sizein+1);
+                    memset(options.pszCustomExports, 0, sizein+1);
+                    read(fileIn, options.pszCustomExports, sizein);
+                    close(fileIn);
+                    break;
+                }
 
                 default:
                     printf("Syntax error: Invalid argument, '%s'\n", argv[argi]);
