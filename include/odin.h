@@ -35,6 +35,7 @@
   #define EXPORT    _Export
   #define WIN32API  __stdcall
   #define SYSTEM    _System
+  #define PASCAL    _Pascal
   #define UNALIGNED
 #else
 
