@@ -1,8 +1,9 @@
- /* $Id: ChangeLog,v 1.36 1999-06-30 13:24:24 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.37 1999-06-30 16:07:59 sandervl Exp $ */
  99-06-30: Christoph Bratschi <cbratschi@datacomm.ch>
 	- KERNEL32: Unicode changes (unicode.cpp)
 		    lstrcpynA/W (kernel32.cpp
 	- USER32: LoadStringA unicode conversion bugfix
+	- USER32: Changed SystemParameterInfo for default font (now 9.WarpSans)
 
  99-06-30: Przemysˆaw Dobrowolski <dobrawka@asua.org.pl>
 	- WINMM: Implemented remaining joystick apis + bugfixes
