@@ -1,4 +1,4 @@
-/* $Id: winuser.h,v 1.11 1999-10-12 14:47:58 sandervl Exp $ */
+/* $Id: winuser.h,v 1.12 1999-10-23 22:59:40 sandervl Exp $ */
 
 #ifndef __INCLUDE_WINUSER_H
 #define __INCLUDE_WINUSER_H
@@ -3591,10 +3591,6 @@ INT       WINAPI LoadMessageA(HMODULE,UINT,WORD,LPSTR,INT);
 INT       WINAPI LoadMessageW(HMODULE,UINT,WORD,LPWSTR,INT);
 
 VOID        WINAPI ScreenSwitchEnable16(WORD);
-
-INT     WINAPI NativeDlgBoxIP(HMODULE,HINSTANCE,LPCSTR,HWND,DLGPROC,LPARAM);
-INT     WINAPI NativeCreateDlgIP(HMODULE,HINSTANCE,LPCSTR,HWND,DLGPROC,LPARAM);
-HBITMAP WINAPI NativeLoadBitmap(HINSTANCE hInstance,LPCTSTR lpBitmapName);
 
 #define WC_DIALOG    (LPSTR)((DWORD)((WORD)( 0x8002)))
 
