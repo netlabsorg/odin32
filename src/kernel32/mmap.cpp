@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.24 1999-12-06 21:31:43 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.25 1999-12-07 12:28:41 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -326,6 +326,9 @@ LPVOID Win32MemMap::mapViewOfFile(ULONG size, ULONG offset, ULONG fdwAccess)
 		dprintf(("Win32MemMap::mapFileView: VirtualAlloc %x %x %x failed!", mSize, fAlloc, memFlags));
 		goto fail;
   	}
+	if(hMemFile == -1 && !image) {//commit memory
+		VirtualAlloc(pMapping, mSize, MEM_COMMIT, PAGE_READWRITE);
+	}
   }
   mapview = new Win32MemMapView(this, offset, (size == 0) ? mSize : size, fdwAccess);
   if(mapview == NULL) {
