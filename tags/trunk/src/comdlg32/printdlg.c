@@ -1777,7 +1777,15 @@ static LRESULT PRINTDLG_WMCommandA(HWND hDlg, WPARAM wParam,
         SendMessageA(lppd->hwndOwner, PrintStructures->HelpMessageID,
         			(WPARAM) hDlg, (LPARAM) lppd);
         break;
-
+#ifdef __WIN32OS2__
+     //PF Surely we need to clear/set this flag during runtime as well!
+     case chx1:
+	if (IsDlgButtonChecked(hDlg, chx1) == BST_CHECKED)
+	    lppd->Flags |= PD_PRINTTOFILE;
+        else
+	    lppd->Flags &= ~PD_PRINTTOFILE;
+        break;    
+#endif
      case chx2:                         /* collate pages checkbox */
         if (IsDlgButtonChecked(hDlg, chx2) == BST_CHECKED)
             SendDlgItemMessageA(hDlg, ico3, STM_SETIMAGE, (WPARAM) IMAGE_ICON,
@@ -1851,6 +1859,9 @@ static LRESULT PRINTDLG_WMCommandA(HWND hDlg, WPARAM wParam,
     case rad1: /* Paperorientation */
         if (lppd->Flags & PD_PRINTSETUP)
         {
+#ifdef __WIN32OS2__
+              lpdm->dmFields |= DM_ORIENTATION;
+#endif
               lpdm->u1.s1.dmOrientation = DMORIENT_PORTRAIT;
               SendDlgItemMessageA(hDlg, ico1, STM_SETIMAGE, (WPARAM) IMAGE_ICON,
                           (LPARAM)(PrintStructures->hPortraitIcon));
@@ -1860,6 +1871,9 @@ static LRESULT PRINTDLG_WMCommandA(HWND hDlg, WPARAM wParam,
     case rad2: /* Paperorientation */
         if (lppd->Flags & PD_PRINTSETUP)
         {
+#ifdef __WIN32OS2__
+              lpdm->dmFields |= DM_ORIENTATION;
+#endif
               lpdm->u1.s1.dmOrientation = DMORIENT_LANDSCAPE;
               SendDlgItemMessageA(hDlg, ico1, STM_SETIMAGE, (WPARAM) IMAGE_ICON,
                           (LPARAM)(PrintStructures->hLandscapeIcon));
@@ -2018,6 +2032,9 @@ static LRESULT PRINTDLG_WMCommandW(HWND hDlg, WPARAM wParam,
     case rad1: /* Paperorientation */
         if (lppd->Flags & PD_PRINTSETUP)
         {
+#ifdef __WIN32OS2__
+              lpdm->dmFields |= DM_ORIENTATION;
+#endif
               lpdm->u1.s1.dmOrientation = DMORIENT_PORTRAIT;
               SendDlgItemMessageA(hDlg, ico1, STM_SETIMAGE, (WPARAM) IMAGE_ICON,
                           (LPARAM)(PrintStructures->hPortraitIcon));
@@ -2027,6 +2044,9 @@ static LRESULT PRINTDLG_WMCommandW(HWND hDlg, WPARAM wParam,
     case rad2: /* Paperorientation */
         if (lppd->Flags & PD_PRINTSETUP)
         {
+#ifdef __WIN32OS2__
+              lpdm->dmFields |= DM_ORIENTATION;
+#endif
               lpdm->u1.s1.dmOrientation = DMORIENT_LANDSCAPE;
               SendDlgItemMessageA(hDlg, ico1, STM_SETIMAGE, (WPARAM) IMAGE_ICON,
                           (LPARAM)(PrintStructures->hLandscapeIcon));
@@ -3125,6 +3145,12 @@ PRINTDLG_PS_UpdateDlgStructA(HWND hDlg, PageSetupDataA *pda) {
 	tmp = pda->dlga->ptPaperSize.x;
 	pda->dlga->ptPaperSize.x = pda->dlga->ptPaperSize.y;
 	pda->dlga->ptPaperSize.y = tmp;
+
+#ifdef __WIN32OS2__
+        dm->dmFields |= DM_ORIENTATION;
+        dm->u1.s1.dmOrientation = DMORIENT_LANDSCAPE;
+#endif
+
     }
     GlobalUnlock(pda->pdlg.hDevNames);
     GlobalUnlock(pda->pdlg.hDevMode);
@@ -3166,6 +3192,12 @@ PRINTDLG_PS_UpdateDlgStructW(HWND hDlg, PageSetupDataW *pda) {
 	tmp = pda->dlga->ptPaperSize.x;
 	pda->dlga->ptPaperSize.x = pda->dlga->ptPaperSize.y;
 	pda->dlga->ptPaperSize.y = tmp;
+
+#ifdef __WIN32OS2__
+        dm->dmFields |= DM_ORIENTATION;
+        dm->u1.s1.dmOrientation = DMORIENT_LANDSCAPE;
+#endif
+
     }
     GlobalUnlock(pda->pdlg.hDevNames);
     GlobalUnlock(pda->pdlg.hDevMode);
@@ -3496,6 +3528,12 @@ BOOL WINAPI PageSetupDlgA(LPPAGESETUPDLGA setupdlg) {
 		PageDlgProcA,
 		(LPARAM)pda)
     );
+#ifdef __WIN32OS2__
+    //On return we should overwrite the input devmode & devnames with the one
+    //set up by the dialog
+    setupdlg->hDevMode	= pdlg.hDevMode;
+    setupdlg->hDevNames	= pdlg.hDevNames;
+#endif
     return bRet;
 }
 /***********************************************************************
@@ -3563,6 +3601,12 @@ BOOL WINAPI PageSetupDlgW(LPPAGESETUPDLGW setupdlg) {
 		PageDlgProcW,
 		(LPARAM)pdw)
     );
+#ifdef __WIN32OS2__
+    //On return we should overwrite the input devmode & devnames with the one
+    //set up by the dialog
+    setupdlg->hDevMode	= pdlg.hDevMode;
+    setupdlg->hDevNames	= pdlg.hDevNames;
+#endif
     return bRet;
 }
 
