@@ -1,4 +1,4 @@
-/* $Id: dev32.h,v 1.7 2001-11-18 04:08:26 bird Exp $
+/* $Id: dev32.h,v 1.8 2001-11-19 03:08:35 bird Exp $
  *
  * dev32 - header file for 32-bit part of the driver.
  *
@@ -59,6 +59,9 @@ extern "C" {
  */
 ULONG _System GetKernelInfo32(PKRNLINFO pKrnlInfo);
 ULONG _System VerifyImportTab32(void);
+#ifdef _dev1632_h_
+ULONG _System LookupKrnlEntry32(PLKE32PARAM plke32Param);
+#endif
 #ifdef _OS2KLDR_H_
 PMTE _System  GetOS2KrnlMTE(void); /* (devfirst.asm) */
 #endif
