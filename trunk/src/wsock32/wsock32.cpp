@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.40 2001-10-10 20:59:23 phaller Exp $ */
+/* $Id: wsock32.cpp,v 1.41 2001-10-11 19:24:07 sandervl Exp $ */
 
 /*
  *
@@ -749,6 +749,13 @@ ODINFUNCTION6(int,OS2sendto,
       	WSASetLastError(WSAEFAULT);
       	return SOCKET_ERROR;
    }
+//testestest
+#ifdef DEBUG
+   dprintf(("sending to %s", inet_ntoa(((sockaddr_in*)to)->sin_addr)));
+   for(int i=0;i<len;i++) {
+       dprintf(("%02x: %x", i, buf[i]));
+   }
+#endif
    ret = sendto(s, (char *)buf, len, flags, (struct sockaddr *)to, tolen);
 
    if(ret == SOCKET_ERROR) {
@@ -1020,21 +1027,30 @@ tryagain:
                    return SOCKET_ERROR;
                }
                //TODO convert common interface names!
-               ret = setsockopt(s, level, optname, (char *)optval, optlen);
+               ret = setsockopt(s, IPPROTO_IP, IP_MULTICAST_IF_OS2, (char *)optval, optlen);
                break;
            }
 
            case IP_ADD_MEMBERSHIP:
-           case IP_DROP_MEMBERSHIP:
            case WS2_IPPROTO_OPT(IP_ADD_MEMBERSHIP_WS2):
-           case WS2_IPPROTO_OPT(IP_DROP_MEMBERSHIP_WS2):
                if (optlen < sizeof(struct ip_mreq))
                {
-                   dprintf(("IPPROTO_IP, IP_ADD_MEMBERSHIP/IP_DROP_MEMBERSHIP, optlen too small"));
+                   dprintf(("IPPROTO_IP, IP_ADD_MEMBERSHIP, optlen too small"));
                    WSASetLastError(WSAEFAULT);
                    return SOCKET_ERROR;
                }
-               ret = setsockopt(s, level, optname, (char *)optval, optlen);
+               ret = setsockopt(s, IPPROTO_IP, IP_ADD_MEMBERSHIP_OS2, (char *)optval, optlen);
+               break;
+
+           case IP_DROP_MEMBERSHIP:
+           case WS2_IPPROTO_OPT(IP_DROP_MEMBERSHIP_WS2):
+               if (optlen < sizeof(struct ip_mreq))
+               {
+                   dprintf(("IPPROTO_IP, IP_DROP_MEMBERSHIP, optlen too small"));
+                   WSASetLastError(WSAEFAULT);
+                   return SOCKET_ERROR;
+               }
+               ret = setsockopt(s, IPPROTO_IP, IP_DROP_MEMBERSHIP_OS2, (char *)optval, optlen);
                break;
 
            case IP_MULTICAST_LOOP:
@@ -1048,8 +1064,8 @@ tryagain:
                    return SOCKET_ERROR;
                }
                flLoop = (*optval == 0) ? 0 : 1;
-               dprintf(("IP_MULTICAST_LOOP/IP_MULTICAST_TTL %d", *optval));
-               ret = setsockopt(s, level, optname, (char *)&flLoop, optlen);
+               dprintf(("IP_MULTICAST_LOOP %d", *optval));
+               ret = setsockopt(s, IPPROTO_IP, IP_MULTICAST_LOOP_OS2, (char *)&flLoop, optlen);
                break;
            }
 
@@ -1061,7 +1077,42 @@ tryagain:
                    WSASetLastError(WSAEFAULT);
                    return SOCKET_ERROR;
                }
-               ret = setsockopt(s, level, optname, (char *)optval, optlen);
+               ret = setsockopt(s, IPPROTO_IP, IP_MULTICAST_TTL_OS2, (char *)optval, optlen);
+               break;
+
+           case IP_TTL:
+           case WS2_IPPROTO_OPT(IP_TTL_WS2):
+               if (optlen < sizeof(u_int))
+               {
+                   dprintf(("IPPROTO_IP, IP_TTL_WS2, optlen too small"));
+                   WSASetLastError(WSAEFAULT);
+                   return SOCKET_ERROR;
+               }
+               dprintf(("IPPROTO_IP, IP_TTL 0x%x", *optval));
+               ret = setsockopt(s, IPPROTO_IP, IP_TTL_OS2, (char *)optval, optlen);
+               break;
+
+           case IP_TOS:
+           case WS2_IPPROTO_OPT(IP_TOS_WS2):
+               if (optlen < sizeof(u_int))
+               {
+                   dprintf(("IPPROTO_IP, IP_TOS_WS2, optlen too small"));
+                   WSASetLastError(WSAEFAULT);
+                   return SOCKET_ERROR;
+               }
+               dprintf(("IPPROTO_IP, IP_TOS 0x%x", *optval));
+               ret = setsockopt(s, IPPROTO_IP, IP_TOS_OS2, (char *)optval, optlen);
+               break;
+
+           case WS2_IPPROTO_OPT(IP_HDRINCL_WS2):
+               if (optlen < sizeof(u_int))
+               {
+                   dprintf(("IPPROTO_IP, IP_HDRINCL_WS2, optlen too small"));
+                   WSASetLastError(WSAEFAULT);
+                   return SOCKET_ERROR;
+               }
+               dprintf(("IPPROTO_IP, IP_HDRINCL 0x%x", *optval));
+               ret = setsockopt(s, IPPROTO_IP, IP_HDRINCL_OS2, (char *)optval, optlen);
                break;
 
            default:
@@ -1168,6 +1219,108 @@ ODINFUNCTION5(int,OS2getsockopt,
        		WSASetLastError(WSAENOPROTOOPT);
       		return SOCKET_ERROR;
         }
+   }
+   else
+   if(level == IPPROTO_IP) {
+       switch (optname)
+       {
+           case IP_MULTICAST_IF:
+           case WS2_IPPROTO_OPT(IP_MULTICAST_IF_WS2):
+           {
+               if (*optlen < sizeof(in_addr))
+               {
+                   dprintf(("IPPROTO_IP, IP_MULTICAST_IP, optlen too small"));
+                   WSASetLastError(WSAEFAULT);
+                   return SOCKET_ERROR;
+               }
+               //TODO convert common interface names!
+               ret = getsockopt(s, IPPROTO_IP, IP_MULTICAST_IF_OS2, (char *)optval, optlen);
+               break;
+           }
+
+           case IP_ADD_MEMBERSHIP:
+           case WS2_IPPROTO_OPT(IP_ADD_MEMBERSHIP_WS2):
+               if (*optlen < sizeof(struct ip_mreq))
+               {
+                   dprintf(("IPPROTO_IP, IP_ADD_MEMBERSHIP, optlen too small"));
+                   WSASetLastError(WSAEFAULT);
+                   return SOCKET_ERROR;
+               }
+               ret = getsockopt(s, IPPROTO_IP, IP_ADD_MEMBERSHIP_OS2, (char *)optval, optlen);
+               break;
+
+           case IP_DROP_MEMBERSHIP:
+           case WS2_IPPROTO_OPT(IP_DROP_MEMBERSHIP_WS2):
+               if (*optlen < sizeof(struct ip_mreq))
+               {
+                   dprintf(("IPPROTO_IP, IP_DROP_MEMBERSHIP, optlen too small"));
+                   WSASetLastError(WSAEFAULT);
+                   return SOCKET_ERROR;
+               }
+               ret = getsockopt(s, IPPROTO_IP, IP_DROP_MEMBERSHIP_OS2, (char *)optval, optlen);
+               break;
+
+           case IP_MULTICAST_LOOP:
+           case WS2_IPPROTO_OPT(IP_MULTICAST_LOOP_WS2):
+           {
+               if (*optlen < sizeof(u_char))
+               {
+                   dprintf(("IPPROTO_IP, IP_MULTICAST_LOOP/IP_MULTICAST_TTL, optlen too small"));
+                   WSASetLastError(WSAEFAULT);
+                   return SOCKET_ERROR;
+               }
+               ret = getsockopt(s, IPPROTO_IP, IP_MULTICAST_LOOP_OS2, (char *)optval, optlen);
+               break;
+           }
+
+           case IP_MULTICAST_TTL:
+           case WS2_IPPROTO_OPT(IP_MULTICAST_TTL_WS2):
+               if (*optlen < sizeof(u_char))
+               {
+                   dprintf(("IPPROTO_IP, IP_MULTICAST_TTL, optlen too small"));
+                   WSASetLastError(WSAEFAULT);
+                   return SOCKET_ERROR;
+               }
+               ret = getsockopt(s, IPPROTO_IP, IP_MULTICAST_TTL_OS2, (char *)optval, optlen);
+               break;
+
+           case IP_TTL:
+           case WS2_IPPROTO_OPT(IP_TTL_WS2):
+               if (*optlen < sizeof(u_int))
+               {
+                   dprintf(("IPPROTO_IP, IP_TTL_WS2, optlen too small"));
+                   WSASetLastError(WSAEFAULT);
+                   return SOCKET_ERROR;
+               }
+               ret = getsockopt(s, IPPROTO_IP, IP_TTL_OS2, (char *)optval, optlen);
+               break;
+
+           case IP_TOS:
+           case WS2_IPPROTO_OPT(IP_TOS_WS2):
+               if (*optlen < sizeof(u_int))
+               {
+                   dprintf(("IPPROTO_IP, IP_TOS_WS2, optlen too small"));
+                   WSASetLastError(WSAEFAULT);
+                   return SOCKET_ERROR;
+               }
+               ret = getsockopt(s, IPPROTO_IP, IP_TOS_OS2, (char *)optval, optlen);
+               break;
+
+           case WS2_IPPROTO_OPT(IP_HDRINCL_WS2):
+               if (*optlen < sizeof(u_int))
+               {
+                   dprintf(("IPPROTO_IP, IP_HDRINCL_WS2, optlen too small"));
+                   WSASetLastError(WSAEFAULT);
+                   return SOCKET_ERROR;
+               }
+               ret = getsockopt(s, IPPROTO_IP, IP_HDRINCL_OS2, (char *)optval, optlen);
+               break;
+
+           default:
+		dprintf(("getsockopt: IPPROTO_IP, unknown option %x", optname));
+       		WSASetLastError(WSAENOPROTOOPT);
+      		return SOCKET_ERROR;
+       }
    }
    else {
        	WSASetLastError(WSAEINVAL);

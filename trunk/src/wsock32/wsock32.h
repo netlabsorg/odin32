@@ -1,4 +1,4 @@
-/* $Id: wsock32.h,v 1.18 2001-07-07 14:29:41 achimha Exp $ */
+/* $Id: wsock32.h,v 1.19 2001-10-11 19:24:07 sandervl Exp $ */
 
 /* WSOCK32.H--definitions & conversions for Odin's wsock32.dll.
  * Unused/unneeded Microsoft declarations removed.
@@ -24,6 +24,11 @@
 #include <sys\time.h>
 
 #include <odinwrap.h>
+
+#ifndef IP_TTL
+#define IP_TTL              7
+#define IP_TOS              8
+#endif
 
 /*
  * Socket state bits.
