@@ -239,6 +239,24 @@ ok:
   RET      ; exit
 io_init1 ENDP
 
+; void in_init(short)
+PUBLIC  io_init2
+  ALIGN  04H
+io_init2  PROC
+
+  MOV  gdt, AX    ; store in ioentry address selector part
+  XOR  EAX, EAX  ; EAX = 0
+  MOV  DWORD PTR [ioentry], EAX ; clear ioentry offset part
+        ; return code = 0 (in EAX)
+
+        ; now use this function to raise the IOPL
+  MOV  EBX,13    ; special function code
+  CALL  FWORD PTR [ioentry]  ; CALL intersegment indirect 16:32
+
+  XOR  EAX, EAX  ; return code = 0
+  ret
+io_init2  ENDP
+
   PUBLIC  io_exit1
   ALIGN  04H
 io_exit1  PROC
@@ -262,6 +280,8 @@ exerr:  XOR  EAX, EAX  ; not ok, RETurn code = ffffffff
   LEAVE
   RET
 io_exit1  ENDP
+
+
 
 ; for diagnostic only
 
