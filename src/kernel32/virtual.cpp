@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.39 2001-09-10 11:03:13 sandervl Exp $ */
+/* $Id: virtual.cpp,v 1.40 2001-10-09 20:25:20 sandervl Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -651,6 +651,7 @@ ODINFUNCTION3(DWORD, VirtualQuery, LPCVOID, lpvAddress,
     else
       pmbiBuffer->State = MEM_RESERVE;
 
+  //TODO: MEM_MAPPED & MEM_IMAGE (==SEC_IMAGE)
   if(!(dAttr & PAG_SHARED))
         pmbiBuffer->Type = MEM_PRIVATE;
 
