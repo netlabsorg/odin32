@@ -1,10 +1,11 @@
- /* $Id: changelog,v 1.346 1999-10-20 10:11:00 phaller Exp $ */
+ /* $Id: changelog,v 1.347 1999-10-20 16:37:26 cbratschi Exp $ */
 
  99-10-20: Patrick Haller <phaller@gmx.net>
 	- WSOCK32:  Partial rewrite of WSA async sockets completed.
 
  99-10-20: Christoph Bratschi <cbratschi@datacomm.ch>
 	- KERNEL32: Ini file for Odin settings (i.e. windows & system dir)
+		    Added Odin.ini.txt
 
  99-10-19: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: FindResource bugfix: "DIB" type is the same as "BITMAP"
