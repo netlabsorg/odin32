@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.27 2000-12-12 14:50:09 bird Exp $
+/* $Id: d32init.c,v 1.28 2000-12-17 22:45:50 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -162,14 +162,20 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
                 break;
 
             case 'e':
-            case 'E':/* ELF */
+            case 'E':/* Elf or EXe */
                 pszTmp2 = strpbrk(pszTmp, ":=/- ");
-                if (pszTmp2 != NULL
-                    && (pszTmp2[1] == 'N' ||pszTmp2[1] == 'n' || pszTmp2[1] == 'D' || pszTmp2[1] == 'd')
-                    )
-                    options.fElf = FALSE;
+                if (pszTmp[1] != 'x' && pszTmp != 'X')
+                {
+                    options.fElf = !(pszTmp2 != NULL
+                                     && (   pszTmp2[1] == 'N' || pszTmp2[1] == 'n'
+                                         || pszTmp2[1] == 'D' || pszTmp2[1] == 'd'));
+                }
                 else
-                    options.fElf = TRUE;
+                {
+                    options.fExeFixes = !(pszTmp2 != NULL
+                                          && (   pszTmp2[1] == 'N' || pszTmp2[1] == 'n'
+                                              || pszTmp2[1] == 'D' || pszTmp2[1] == 'd'));
+                }
                 break;
 
             case 'h':
