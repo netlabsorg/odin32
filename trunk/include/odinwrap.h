@@ -1,4 +1,4 @@
-/* $Id: odinwrap.h,v 1.22 2000-05-02 20:49:26 sandervl Exp $ */
+/* $Id: odinwrap.h,v 1.23 2000-08-30 13:56:37 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -34,8 +34,10 @@
 
 #ifdef DEBUG
 #  define ODINDEBUGCHANNEL(a) static char* pszOdinDebugChannel=#a;
+#  define ODINDEBUGCHANNEL1(a) static char* pszOdinDebugChannel1=#a;
 #else
 #  define ODINDEBUGCHANNEL(a)
+#  define ODINDEBUGCHANNEL1(a)
 #endif
 
 

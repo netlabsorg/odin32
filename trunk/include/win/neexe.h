@@ -1,4 +1,4 @@
-/* $Id: neexe.h,v 1.1 1999-05-24 20:19:15 ktk Exp $ */
+/* $Id: neexe.h,v 1.2 2000-08-30 13:56:38 sandervl Exp $ */
 
 /*
  * Copyright  Robert J. Amstadt, 1993
@@ -56,37 +56,35 @@ typedef struct
 typedef struct 
 {
     WORD  ne_magic;             /* 00 NE signature 'NE' */
-    BYTE  linker_version;	/* 02 Linker version number */
-    BYTE  linker_revision;	/* 03 Linker revision number */
-    WORD  entry_tab_offset;	/* 04 Offset to entry table relative to NE */
-    WORD  entry_tab_length;	/* 06 Length of entry table in bytes */
-    DWORD reserved1;		/* 08 Reserved by Microsoft */
-    WORD  format_flags;         /* 0c Flags about segments in this file */
-    WORD  auto_data_seg;	/* 0e Automatic data segment number */
-    WORD  local_heap_length;	/* 10 Initial size of local heap */
-    WORD  stack_length;         /* 12 Initial size of stack */
-    WORD  ip;			/* 14 Initial IP */
-    WORD  cs;			/* 16 Initial CS */
-    WORD  sp;			/* 18 Initial SP */
-    WORD  ss;			/* 1a Initial SS */
-    WORD  n_segment_tab;	/* 1c # of entries in segment table */
-    WORD  n_mod_ref_tab;	/* 1e # of entries in module reference tab. */
-    WORD  nrname_tab_length; 	/* 20 Length of nonresident-name table     */
-    WORD  segment_tab_offset;	/* 22 Offset to segment table */
-    WORD  resource_tab_offset;  /* 24 Offset to resource table */
-    WORD  rname_tab_offset;	/* 26 Offset to resident-name table */
-    WORD  moduleref_tab_offset; /* 28 Offset to module reference table */
-    WORD  iname_tab_offset;	/* 2a Offset to imported name table */
-    DWORD nrname_tab_offset;	/* 2c Offset to nonresident-name table */
-    WORD  n_mov_entry_points;	/* 30 # of movable entry points */
-    WORD  align_shift_count;	/* 32 Logical sector alignment shift count */
-    WORD  n_resource_seg;	/* 34 # of resource segments */
-    BYTE  operating_system;	/* 36 Flags indicating target OS */
-    BYTE  additional_flags;	/* 37 Additional information flags */
-    WORD  fastload_offset;	/* 38 Offset to fast load area */
-    WORD  fastload_length;	/* 3a Length of fast load area */
-    WORD  reserved2;		/* 3c Reserved by Microsoft */
-    WORD  expect_version;	/* 3e Expected Windows version number */
+    BYTE  ne_ver;               /* 02 Linker version number */
+    BYTE  ne_rev;               /* 03 Linker revision number */
+    WORD  ne_enttab;            /* 04 Offset to entry table relative to NE */
+    WORD  ne_cbenttab;          /* 06 Length of entry table in bytes */
+    LONG  ne_crc;               /* 08 Checksum */
+    WORD  ne_flags;             /* 0c Flags about segments in this file */
+    WORD  ne_autodata;          /* 0e Automatic data segment number */
+    WORD  ne_heap;              /* 10 Initial size of local heap */
+    WORD  ne_stack;             /* 12 Initial size of stack */
+    DWORD ne_csip;              /* 14 Initial CS:IP */
+    DWORD ne_sssp;              /* 18 Initial SS:SP */
+    WORD  ne_cseg;              /* 1c # of entries in segment table */
+    WORD  ne_cmod;              /* 1e # of entries in module reference tab. */
+    WORD  ne_cbnrestab;         /* 20 Length of nonresident-name table     */
+    WORD  ne_segtab;            /* 22 Offset to segment table */
+    WORD  ne_rsrctab;           /* 24 Offset to resource table */
+    WORD  ne_restab;            /* 26 Offset to resident-name table */
+    WORD  ne_modtab;            /* 28 Offset to module reference table */
+    WORD  ne_imptab;            /* 2a Offset to imported name table */
+    DWORD ne_nrestab;           /* 2c Offset to nonresident-name table */
+    WORD  ne_cmovent;           /* 30 # of movable entry points */
+    WORD  ne_align;             /* 32 Logical sector alignment shift count */
+    WORD  ne_cres;              /* 34 # of resource segments */
+    BYTE  ne_exetyp;            /* 36 Flags indicating target OS */
+    BYTE  ne_flagsothers;       /* 37 Additional information flags */
+    WORD  fastload_offset;      /* 38 Offset to fast load area (should be ne_pretthunks)*/
+    WORD  fastload_length;      /* 3a Length of fast load area (should be ne_psegrefbytes) */
+    WORD  ne_swaparea;          /* 3c Reserved by Microsoft */
+    WORD  ne_expver;            /* 3e Expected Windows version number */
 } IMAGE_OS2_HEADER,*PIMAGE_OS2_HEADER;
 
 /*

@@ -1,8 +1,8 @@
-/* $Id: winuser16.h,v 1.5 1999-08-22 22:52:12 sandervl Exp $ */
+/* $Id: winuser16.h,v 1.6 2000-08-30 13:56:39 sandervl Exp $ */
 #ifndef __WINE_WINE_WINUSER16_H
 #define __WINE_WINE_WINUSER16_H
 
-#include "winuser.h" /* winuser.h needed for MSGBOXCALLBACK */
+#include "winuser.h" /* winuser.h needed for MSGBOX* CALLBACK /
                      /* wingdi.h needed for COLORREF */
 #include "wine/wingdi16.h"
 
@@ -157,7 +157,7 @@ typedef struct {
 } MENUITEMINFO16, *LPMENUITEMINFO16;
 
 /* DrawState defines ... */
-typedef BOOL16 (CALLBACK *DRAWSTATEPROC16)(HDC16,LPARAM,WPARAM16,INT16,INT16);
+typedef BOOL16 (* CALLBACK DRAWSTATEPROC16)(HDC16,LPARAM,WPARAM16,INT16,INT16);
 
 /* Listbox messages */
 #define LB_ADDSTRING16           (WM_USER+1)
