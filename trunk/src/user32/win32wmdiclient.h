@@ -1,4 +1,4 @@
-/* $Id: win32wmdiclient.h,v 1.2 1999-10-03 20:38:02 sandervl Exp $ */
+/* $Id: win32wmdiclient.h,v 1.3 1999-10-19 18:02:08 sandervl Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -57,6 +57,8 @@ Win32MDIChildWindow *getChildByID(INT id);
 	   LONG childActivate(Win32MDIChildWindow *child);
            void switchActiveChild(Win32MDIChildWindow *nextActiveChild, BOOL bNextWindow );
         LRESULT destroyChild(Win32MDIChildWindow *child, BOOL flagDestroy );
+
+	LRESULT setMDIMenu(HMENU hmenuFrame, HMENU hmenuWindow);
 
        LRESULT  MDIClientWndProc(UINT message, WPARAM wParam, LPARAM lParam);
 
