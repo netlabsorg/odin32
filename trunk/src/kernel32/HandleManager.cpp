@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.18 1999-08-31 23:14:02 phaller Exp $ */
+/* $Id: HandleManager.cpp,v 1.19 1999-08-31 23:48:36 phaller Exp $ */
 
 /*
  *
@@ -2312,7 +2312,7 @@ HANDLE HMCreateFileMapping(HANDLE                hFile,
   {
     TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
     SetLastError(rc);          /* Hehe, OS/2 and NT are pretty compatible :) */
-    return (INVALID_HANDLE_VALUE);                           /* signal error */
+    return (NULL);                                           /* signal error */
   }
 
   return iIndexNew;                                   /* return valid handle */
@@ -2324,7 +2324,8 @@ HANDLE HMCreateFileMapping(HANDLE                hFile,
  * Purpose   : Wrapper for the OpenFileMapping() API
  * Parameters:
  * Variables :
- * Result    :
+ * Result    : HANDLE if succeeded,
+ *             NULL   if failed.
  * Remark    :
  * Status    :
  *
@@ -2348,7 +2349,7 @@ HANDLE HMOpenFileMapping(DWORD   fdwAccess,
   if (-1 == iIndexNew)                            /* oops, no free handles ! */
   {
     SetLastError(ERROR_NOT_ENOUGH_MEMORY);      /* use this as error message */
-    return (INVALID_HANDLE_VALUE);                           /* signal error */
+    return (NULL);                                           /* signal error */
   }
 
   /* initialize the complete HMHANDLEDATA structure */
@@ -2370,14 +2371,14 @@ HANDLE HMOpenFileMapping(DWORD   fdwAccess,
 
                                                   /* call the device handler */
   rc = pDeviceHandler->OpenFileMapping(&TabWin32Handles[iIndexNew].hmHandleData,
-				       fdwAccess,
+                                       fdwAccess,
                                        fInherit,
                                        lpName);
   if (rc != NO_ERROR)     /* oops, creation failed within the device handler */
   {
     TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
     SetLastError(rc);          /* Hehe, OS/2 and NT are pretty compatible :) */
-    return (INVALID_HANDLE_VALUE);                           /* signal error */
+    return (NULL);                                           /* signal error */
   }
 
   return iIndexNew;                                   /* return valid handle */
