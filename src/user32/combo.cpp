@@ -1,4 +1,4 @@
-/* $Id: combo.cpp,v 1.21 1999-12-27 18:43:41 sandervl Exp $ */
+/* $Id: combo.cpp,v 1.22 1999-12-30 21:28:06 sandervl Exp $ */
 /*
  * Combo controls
  *
@@ -1220,9 +1220,16 @@ static LRESULT COMBO_SetFocus(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
    LPHEADCOMBO lphc = (LPHEADCOMBO)GetInfoPtr(hwnd);
 
-   if(lphc->wState & CBF_EDIT)
-     SetFocus(lphc->hWndEdit);
-   else
+//SvL: This doesn't work. Example:
+//     Click on combo box in Abiword (when it doesn't have the focus)
+//     COMBO_LButtonDown checks focus, not set -> SetFocus to combo box
+//     Next thing it does is check if it has the focus (CBF_FOCUSED flag).
+//     This check fails as SetFocus(lphc->hWndEdit) doesn't change this flag.
+//     Removing this check doesn't work as the listbox is not removed after it
+//     loses the focus.
+//   if(lphc->wState & CBF_EDIT)
+//     SetFocus(lphc->hWndEdit);
+//   else
      COMBO_EditSetFocus(lphc);
 
    return 0;
