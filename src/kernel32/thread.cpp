@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.47 2003-01-02 11:50:46 sandervl Exp $ */
+/* $Id: thread.cpp,v 1.48 2003-01-13 16:51:40 sandervl Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -301,7 +301,7 @@ DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
 	    DebugInt3();
 	    return 0;
     }
-    dprintf(("Win32ThreadProc %x\n", GetCurrentThreadId()));
+    dprintf(("Win32ThreadProc: Thread handle 0x%x, thread id %d", GetCurrentThread(), GetCurrentThreadId()));
 
     winteb->flags = me->dwFlags;
 
