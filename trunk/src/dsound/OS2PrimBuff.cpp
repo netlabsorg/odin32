@@ -1,4 +1,4 @@
-/* $Id: OS2PrimBuff.cpp,v 1.4 2000-08-02 15:48:26 bird Exp $ */
+/* $Id: OS2PrimBuff.cpp,v 1.5 2001-03-06 20:11:16 mike Exp $ */
 /*
  *  DirectSound Primary Buffer
  *
@@ -53,8 +53,6 @@
 //******************************************************************************
 OS2PrimBuff::OS2PrimBuff(OS2IDirectSound *DSound, const DSBUFFERDESC *lpDSBufferDesc )
 {
-   LONG rc;
-
    lpVtbl = &Vtbl;
    Vtbl.AddRef               = PrimBufAddRef;
    Vtbl.Release              = PrimBufRelease;
@@ -223,7 +221,6 @@ HRESULT __stdcall PrimBufGetCurrentPosition(THIS_ LPDWORD lpdwCurrentPlayCursor,
 {
    OS2PrimBuff *me = (OS2PrimBuff *)This;
    LONG lDartPos;
-   LONG lBytesPerSec;
 
    dprintf(("DSOUND-PrimBuff: GetCurrentPosition"));
 
@@ -265,7 +262,7 @@ HRESULT __stdcall PrimBufGetFormat(THIS_ LPWAVEFORMATEX lpfxFormat, DWORD dwSize
       return DSERR_INVALIDPARAM;
    }
 
-   copysize = min(dwSizeAllocated, (me->lpfxFormat->cbSize + sizeof(WAVEFORMATEX)));
+   copysize = MIN(dwSizeAllocated, (me->lpfxFormat->cbSize + sizeof(WAVEFORMATEX)));
    memcpy(lpfxFormat, me->lpfxFormat, copysize);
 
    if(lpdwSizeWritten)

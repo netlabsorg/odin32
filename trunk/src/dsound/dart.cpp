@@ -1,4 +1,4 @@
-/* $Id: dart.cpp,v 1.3 2000-08-02 15:48:26 bird Exp $ */
+/* $Id: dart.cpp,v 1.4 2001-03-06 20:11:16 mike Exp $ */
 /*
  *  Dart Interface..
  *
@@ -344,8 +344,6 @@ long Dart_SetFormat(USHORT *pusDeviceID, void *vpMixSetup, void *vpBufferParms, 
 
 long Dart_Stop(USHORT usDeviceID)
 {
-   ULONG   rc;
-
    dprintf(("DSOUND-DART: Dart_Stop"));
 
    if (!fIsPlaying)
