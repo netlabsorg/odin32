@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.54 2000-02-27 13:16:52 bird Exp $
+# $Id: makefile,v 1.55 2000-03-04 20:46:56 bird Exp $
 
 #
 # PD-Win32 API
@@ -145,10 +145,10 @@ all: libs
 #           It builds the dlls in reverse (directory) order.
 #
 build: libs
-    $(DOWITHDIRS) -e$(NOTHAVELIBS)    -cp $(MAKE_CMD)
+    $(DOWITHDIRS) -e$(NOTTOBEMADE)    -cp $(MAKE_CMD)
 
 revbuild:
-    $(DOWITHDIRS) -e$(NOTHAVELIBS) -r -cp $(MAKE_CMD)
+    $(DOWITHDIRS) -e$(NOTTOBEMADE) -r -cp $(MAKE_CMD)
 
 
 libs:
