@@ -1,4 +1,4 @@
-/* $Id: win.h,v 1.1 1999-05-24 20:19:21 ktk Exp $ */
+/* $Id: win.h,v 1.2 1999-07-04 15:34:18 sandervl Exp $ */
 
 /*
  * Window definitions
@@ -62,7 +62,7 @@ typedef struct tagWND
     struct tagWND *child;         /* First child */
     struct tagWND *parent;        /* Window parent (from CreateWindow) */
     struct tagWND *owner;         /* Window owner */
-    struct tagCLASS *class;       /* Window class */
+    struct tagCLASS *Class;       /* Window class */
     HWINDOWPROC    winproc;       /* Window procedure */
     DWORD          dwMagic;       /* Magic number (must be WND_MAGIC) */
     HWND         hwndSelf;      /* Handle of this window */
