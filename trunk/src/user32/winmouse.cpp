@@ -1,4 +1,4 @@
-/* $Id: winmouse.cpp,v 1.7 2000-03-04 19:54:03 sandervl Exp $ */
+/* $Id: winmouse.cpp,v 1.8 2000-03-09 21:50:11 sandervl Exp $ */
 /*
  * Mouse handler for DINPUT
  *
@@ -61,31 +61,40 @@ BOOL DInputMouseHandler(HWND hwnd, ULONG msg, ULONG x, ULONG y)
   mouseEvent.hWnd  = hwnd;
   mouseEvent.time  = OSLibWinQueryMsgTime();
   mouseEvent.keyState = 0; //not used in dinput right now
-  if(msg == MOUSEMSG_BUTTON) 
+  switch(msg) 
   {
-	switch(msg) 
-        {
-        case WM_LBUTTONDOWN:
-		dwFlags |= MOUSEEVENTF_LEFTDOWN;
-                break;
-        case WM_LBUTTONUP:
-		dwFlags |= MOUSEEVENTF_LEFTUP;
-                break;
-        case WM_RBUTTONUP:
-		dwFlags |= MOUSEEVENTF_RIGHTUP;
-                break;
-        case WM_RBUTTONDOWN:
-		dwFlags |= MOUSEEVENTF_RIGHTDOWN;
-                break;
-        case WM_MBUTTONUP:
-		dwFlags |= MOUSEEVENTF_MIDDLEUP;
-                break;
-        case WM_MBUTTONDOWN:
-		dwFlags |= MOUSEEVENTF_MIDDLEDOWN;
-                break;
-	}
+  case WM_NCLBUTTONDOWN:
+  case WM_LBUTTONDOWN:
+	dwFlags |= MOUSEEVENTF_LEFTDOWN;
+        break;
+  case WM_NCLBUTTONUP:
+  case WM_LBUTTONUP:
+	dwFlags |= MOUSEEVENTF_LEFTUP;
+        break;
+  case WM_NCRBUTTONUP:
+  case WM_RBUTTONUP:
+	dwFlags |= MOUSEEVENTF_RIGHTUP;
+        break;
+  case WM_NCRBUTTONDOWN:
+  case WM_RBUTTONDOWN:
+	dwFlags |= MOUSEEVENTF_RIGHTDOWN;
+        break;
+  case WM_NCMBUTTONUP:
+  case WM_MBUTTONUP:
+	dwFlags |= MOUSEEVENTF_MIDDLEUP;
+        break;
+  case WM_NCMBUTTONDOWN:
+  case WM_MBUTTONDOWN:
+	dwFlags |= MOUSEEVENTF_MIDDLEDOWN;
+        break;
+  case WM_MOUSEMOVE:
+  case WM_NCMOUSEMOVE:
+	dwFlags |= MOUSEEVENTF_MOVE;
+ 	break;
+  default:
+	//TODO: handle double clicks???
+	return FALSE;
   }
-  else  dwFlags |= MOUSEEVENTF_MOVE;
 
   x = (((long)x << 16) + ScreenWidth-1)  / ScreenWidth;
   y = (((long)y << 16) + ScreenHeight-1) / ScreenHeight;
