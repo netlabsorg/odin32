@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.526 1999-12-09 11:59:53 sandervl Exp $ */
+ /* $Id: changelog,v 1.527 1999-12-09 16:48:14 cbratschi Exp $ */
+
+ 99-12-09: Christoph Bratschi <cbratschi@datacomm.ch>
+	- GDI32: fixed TextOut and ExtTextOut bugs
 
  99-12-09: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Fixes in lstrcpynWtoA
