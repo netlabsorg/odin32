@@ -7,7 +7,6 @@
 
 #include "windef.h"
 #include "winbase.h"
-#include "wingdi.h"
 #include "winuser.h"
 #include "ole2.h"
 #include "debugtools.h"
@@ -58,15 +57,6 @@ HRESULT WINAPI OleTranslateAccelerator (LPOLEINPLACEFRAME lpFrame,
 }
 
 /******************************************************************************
- *              CoTreatAsClass        [OLE32.46]
- */
-HRESULT WINAPI CoTreatAsClass(REFCLSID clsidOld, REFCLSID clsidNew)
-{
-  FIXME("(%p,%p), stub!\n", clsidOld, clsidNew);
-  return S_OK;
-}
-
-/******************************************************************************
  *              SetConvertStg        [OLE32.142]
  */
 HRESULT WINAPI SetConvertStg(LPSTORAGE pStg, BOOL fConvert)
@@ -76,7 +66,7 @@ HRESULT WINAPI SetConvertStg(LPSTORAGE pStg, BOOL fConvert)
 }
 
 /******************************************************************************
- *              OleCreate        [OLE32.80]
+ *              OleCreate        [OLE32.89]
  *
  */
 HRESULT WINAPI OleCreate(
@@ -251,7 +241,7 @@ HRESULT WINAPI FreePropVariantArray(ULONG cVariants, /* [in] */
 }
 
 /***********************************************************************
- *           CoIsOle1Class                              [OLE32]
+ *           CoIsOle1Class                              [OLE32.29]
  */
 BOOL WINAPI CoIsOle1Class(REFCLSID clsid)
 {

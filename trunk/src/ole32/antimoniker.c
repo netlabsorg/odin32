@@ -3,6 +3,7 @@
  *
  *               Copyright 1999  Noomen Hamza
  ***************************************************************************************/
+
 #include <assert.h>
 #include <string.h>
 #include "winbase.h"
@@ -13,7 +14,6 @@
 #include "wine/obj_storage.h"
 #include "wine/obj_moniker.h"
 #include "debugtools.h"
-
 
 DEFAULT_DEBUG_CHANNEL(ole);
 
@@ -619,7 +619,7 @@ HRESULT WINAPI AntiMonikerROTDataImpl_GetComparaisonData(IROTData* iface,
 }
 
 /******************************************************************************
- *        CreateAntiMoniker	[OLE.55]
+ *        CreateAntiMoniker	[OLE32.51]
  ******************************************************************************/
 HRESULT WINAPI CreateAntiMoniker(LPMONIKER * ppmk)
 {

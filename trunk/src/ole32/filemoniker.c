@@ -84,7 +84,7 @@ static HRESULT WINAPI FileMonikerROTDataImpl_GetComparaisonData(IROTData* iface,
 /* Local function used by filemoniker implementation */
 HRESULT WINAPI FileMonikerImpl_Construct(FileMonikerImpl* iface, LPCOLESTR lpszPathName);
 HRESULT WINAPI FileMonikerImpl_Destroy(FileMonikerImpl* iface);
-int     WINAPI FileMonikerImpl_DecomposePath(LPOLESTR str, LPOLESTR** tabStr);
+int     WINAPI FileMonikerImpl_DecomposePath(LPCOLESTR str, LPOLESTR** tabStr);
 
 
 /********************************************************************************/
@@ -321,15 +321,23 @@ HRESULT WINAPI FileMonikerImpl_Save(IMoniker* iface,
                                     IStream* pStm,/* pointer to the stream where the object is to be saved */
                                     BOOL fClearDirty)/* Specifies whether to clear the dirty flag */
 {
-    /* this function saves data of this object. In the begining I thougth that I have just to write
-     * the filePath string on Stream. But, when I tested this function whith windows programs samples !
-     * I noted that it was not the case. So I analysed data written by this function on Windows system and 
-     * what did this function do exactly ! but I have no idear a bout its logic !
-     * I guessed data who must be written on stream wich is:
-     * 1) WORD constant:zero 2) length of the path string ("\0" included) 3) path string type A
-     * 4) DWORD constant : 0xDEADFFFF 5) ten WORD constant: zero  6) DWORD: double-length of the the path
-     * string type W ("\0" not included) 7) WORD constant: 0x3 8) filePath unicode string.
-     *  if the length(filePath) > 8 or.length(filePath) == 8 stop at step 5)
+    /* this function saves data of this object. In the beginning I thougth 
+     * that I have just to write the filePath string on Stream. But, when I 
+     * tested this function whith windows programs samples, I noticed that it 
+     * was not the case. So I analysed data written by this function on 
+     * Windows and what this did function exactly ! But I have no idea about 
+     * its logic !
+     * I guessed data which must be written on stream is:
+     * 1) WORD constant:zero
+     * 2) length of the path string ("\0" included)
+     * 3) path string type A
+     * 4) DWORD constant : 0xDEADFFFF
+     * 5) ten WORD constant: zero
+     * 6) DWORD: double-length of the the path string type W ("\0" not 
+     *    included)
+     * 7) WORD constant: 0x3
+     * 8) filePath unicode string.
+     *    if the length(filePath) > 8 or length(filePath) == 8 stop at step 5)
      */
 
     ICOM_THIS(FileMonikerImpl,iface);        
@@ -595,7 +603,7 @@ HRESULT WINAPI FileMonikerImpl_BindToObject(IMoniker* iface,
         }
         if (pca!=NULL){
 
-            FIXME("()");
+            FIXME("()\n");
             
             /*res=GetClassFile(This->filePathName,&clsID);
 
@@ -610,7 +618,7 @@ HRESULT WINAPI FileMonikerImpl_BindToObject(IMoniker* iface,
                 }
             }*/
         }
-}
+    }
 
     if (pObj!=NULL){
         /* get the requested interface from the loaded class */
@@ -688,8 +696,8 @@ HRESULT WINAPI FileMonikerImpl_BindToStorage(IMoniker* iface,
 
         FIXME("(%p,%p,%p,%p,%p)\n",iface,pbc,pmkToLeft,riid,ppvObject);
 
-    return E_NOTIMPL;
-}
+        return E_NOTIMPL;
+    }
     return res;
 }
 
@@ -892,7 +900,7 @@ HRESULT WINAPI FileMonikerImpl_Hash(IMoniker* iface,DWORD* pdwHash)
  	for (i = len ; i > 0; i -= skip, off += skip) {
             h = (h * 39) + val[off];
  	}
-}
+    }
 
     *pdwHash=h;
 
@@ -964,7 +972,7 @@ HRESULT WINAPI FileMonikerImpl_GetTimeOfLastChange(IMoniker* iface,
             return MK_E_NOOBJECT;
         
         *pFileTime=info.ftLastWriteTime;
-}
+    }
 
     return S_OK;
 }
@@ -1035,7 +1043,7 @@ HRESULT WINAPI FileMonikerImpl_CommonPrefixWith(IMoniker* iface,IMoniker* pmkOth
                 if( (*stringTable1[i]=='\\') && (i+1 < sameIdx) && (*stringTable1[i+1]=='\\') ){
                     machimeNameCase=FALSE;
                     break;
-}
+            }
         }
 
         if (machimeNameCase && *stringTable1[sameIdx-1]=='\\')
@@ -1068,7 +1076,7 @@ HRESULT WINAPI FileMonikerImpl_CommonPrefixWith(IMoniker* iface,IMoniker* pmkOth
 /******************************************************************************
  *        DecomposePath (local function)
  ******************************************************************************/
-int WINAPI FileMonikerImpl_DecomposePath(LPOLESTR str, LPOLESTR** stringTable)
+int WINAPI FileMonikerImpl_DecomposePath(LPCOLESTR str, LPOLESTR** stringTable)
 {
     WCHAR bSlash[] = {'\\',0};
     WCHAR word[MAX_PATH];
@@ -1301,7 +1309,7 @@ HRESULT WINAPI FileMonikerROTDataImpl_GetComparaisonData(IROTData* iface,
 }
 
 /******************************************************************************
- *        CreateFileMoniker16
+ *        CreateFileMoniker (OLE2.28)
  ******************************************************************************/
 HRESULT WINAPI CreateFileMoniker16(LPCOLESTR16 lpszPathName,LPMONIKER* ppmk)
 {
@@ -1311,7 +1319,7 @@ HRESULT WINAPI CreateFileMoniker16(LPCOLESTR16 lpszPathName,LPMONIKER* ppmk)
 }
 
 /******************************************************************************
- *        CreateFileMoniker
+ *        CreateFileMoniker (OLE32.55)
  ******************************************************************************/
 HRESULT WINAPI CreateFileMoniker(LPCOLESTR lpszPathName, LPMONIKER * ppmk)
 {

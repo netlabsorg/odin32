@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.16 2001-04-26 19:32:52 sandervl Exp $ */
+/* $Id: stubs.cpp,v 1.17 2002-02-15 17:18:52 sandervl Exp $ */
 /* 
  * Win32 COM/OLE stubs for OS/2
  * 
@@ -37,13 +37,6 @@ HRESULT WIN32API DllGetClassObjectWOW()
 }
 //*****************************************************************************
 //*****************************************************************************
-HRESULT WIN32API CoDisconnectObject(IUnknown *pUnk, DWORD dwReserved)
-{
-    dprintf(("OLE32: CoDisconnectObject - stub"));
-    return S_OK;
-}
-//*******************************************************************************
-//*******************************************************************************
 HRESULT WIN32API CoGetCallerTID()
 {
     dprintf(("OLE32: CoGetCallerTID, UNKNOWN API - stub"));
@@ -55,32 +48,6 @@ HRESULT WIN32API CoGetCurrentLogicalThreadId()
 {
     dprintf(("OLE32: CoGetCurrentLogicalThreadId, UNKNOWN API - stub"));
     return 0;
-}
-//*******************************************************************************
-//*******************************************************************************
-HRESULT WIN32API CoGetInterfaceAndReleaseStream(LPSTREAM pStm, REFIID riid,
-                                                   LPVOID *ppv)
-{
-    dprintf(("OLE32: CoGetInterfaceAndReleaseStream - stub"));
-    return E_INVALIDARG;
-}
-//*******************************************************************************
-//*******************************************************************************
-HRESULT WIN32API CoGetMarshalSizeMax(ULONG *pulSize, REFIID riid, IUnknown *pUnk,
-                                        DWORD dwDestContext, LPVOID pvDestContext,
-                                        DWORD mshlflags)
-{
-    dprintf(("OLE32: CoGetMarshalSizeMax - stub"));
-    return CO_E_NOTINITIALIZED;
-}
-//*******************************************************************************
-//*******************************************************************************
-HRESULT WIN32API CoGetStandardMarshal(REFIID riid, IUnknown *pUnk, DWORD dwDestContext,
-                                         LPVOID pvDestContext, DWORD mshlflags,
-                                         LPMARSHAL *ppMarshal)
-{
-    dprintf(("OLE32: CoGetStandardMarshal - stub"));
-    return E_OUTOFMEMORY;
 }
 //*******************************************************************************
 //*******************************************************************************
@@ -119,24 +86,6 @@ HRESULT WIN32API CoMarshalHresult(IStream *pStm, HRESULT hresult)
 }
 //*******************************************************************************
 //*******************************************************************************
-HRESULT WIN32API CoMarshalInterThreadInterfaceInStream(REFIID riid,
-                                                          LPUNKNOWN pUnk,
-                                                          LPSTREAM *ppStm)
-{
-    dprintf(("OLE32: CoMarshalInterThreadInterfaceInStream - stub"));
-    return E_OUTOFMEMORY;
-}
-//*******************************************************************************
-//*******************************************************************************
-HRESULT WIN32API CoMarshalInterface(IStream *pStm, REFIID riid, IUnknown *pUnk,
-                                       DWORD dwDestContext, void *pvDestContext,
-                                       DWORD mshlflags)
-{
-    dprintf(("OLE32: CoMarshalInterface - stub"));
-    return E_OUTOFMEMORY;
-}
-//*******************************************************************************
-//*******************************************************************************
 HRESULT WIN32API CoQueryReleaseObject()
 {
     dprintf(("OLE32: CoQueryReleaseObject, UNKNOWN API - stub"));
@@ -165,15 +114,6 @@ HRESULT WIN32API CoRevokeMallocSpy()
 }
 //*******************************************************************************
 //*******************************************************************************
-HRESULT WIN32API CoSetState(LPDWORD state)
-{
-    dprintf(("OLE32: CoSetState (%p),stub!\n", state));
-    if (state) *state = 0;
-    return S_OK;
-}
-
-//*******************************************************************************
-//*******************************************************************************
 void WIN32API CoUnloadingWOW()
 {
     dprintf(("OLE32: CoUnloadingWOW, UNKNOWN API - stub"));
@@ -184,13 +124,6 @@ void WIN32API CoUnloadingWOW()
 HRESULT WIN32API CoUnmarshalHresult(LPSTREAM pStm, HRESULT *phresult)
 {
     dprintf(("OLE32: CoUnmarshalHresult - stub"));
-    return S_OK;
-}
-//*******************************************************************************
-//*******************************************************************************
-HRESULT WIN32API CoUnmarshalInterface(IStream *pSTm, REFIID riid, void **ppv)
-{
-    dprintf(("OLE32: CoUnmarshalInterface - stub"));
     return S_OK;
 }
 

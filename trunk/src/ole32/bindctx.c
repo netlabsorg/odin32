@@ -14,8 +14,6 @@
 #include "wine/obj_storage.h"
 #include "wine/obj_moniker.h"
 #include "debugtools.h"
-#include "heap.h"
-
 
 DEFAULT_DEBUG_CHANNEL(ole);
 
@@ -238,7 +236,7 @@ HRESULT WINAPI BindCtxImpl_RegisterObjectBound(IBindCtx* iface,IUnknown* punk)
         if (This->bindCtxTableSize > (MAX_TAB_SIZE-BLOCK_TAB_SIZE)){
             FIXME("This->bindCtxTableSize: %ld is out of data limite \n",This->bindCtxTableSize);
             return E_FAIL;
-}
+        }
 
         This->bindCtxTableSize+=BLOCK_TAB_SIZE; /* new table size */
 
@@ -310,7 +308,7 @@ HRESULT WINAPI BindCtxImpl_SetBindOptions(IBindCtx* iface,LPBIND_OPTS2 pbindopts
     
     if (pbindopts->cbStruct > sizeof(BIND_OPTS2))
     {
-        WARN("invalid size");
+        WARN("invalid size\n");
         return E_INVALIDARG; /* FIXME : not verified */
     }
     memcpy(&This->bindOption2, pbindopts, pbindopts->cbStruct);
@@ -331,7 +329,7 @@ HRESULT WINAPI BindCtxImpl_GetBindOptions(IBindCtx* iface,LPBIND_OPTS2 pbindopts
 
     if (pbindopts->cbStruct > sizeof(BIND_OPTS2))
     {
-        WARN("invalid size");
+        WARN("invalid size\n");
         return E_INVALIDARG; /* FIXME : not verified */
     }
     memcpy(pbindopts, &This->bindOption2, pbindopts->cbStruct);
@@ -386,7 +384,7 @@ HRESULT WINAPI BindCtxImpl_RegisterObjectParam(IBindCtx* iface,LPOLESTR pszkey, 
         if (This->bindCtxTable[This->bindCtxTableLastIndex].pkeyObj==NULL)
             return E_OUTOFMEMORY;
         strcpyW(This->bindCtxTable[This->bindCtxTableLastIndex].pkeyObj,pszkey);
-}
+    }
 
     This->bindCtxTableLastIndex++;
     
@@ -520,7 +518,7 @@ HRESULT WINAPI CreateBindCtx16(DWORD reserved, LPBC * ppbc)
 }
 
 /******************************************************************************
- *        CreateBindCtx
+ *        CreateBindCtx (OLE32.52)
  ******************************************************************************/
 HRESULT WINAPI CreateBindCtx(DWORD reserved, LPBC * ppbc)
 {

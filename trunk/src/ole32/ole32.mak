@@ -1,4 +1,4 @@
-# $Id: ole32.mak,v 1.16 2002-02-15 13:57:40 sandervl Exp $
+# $Id: ole32.mak,v 1.17 2002-02-15 17:18:50 sandervl Exp $
 
 #
 # Odin32 API
@@ -48,7 +48,6 @@ $(OBJDIR)\initialise.obj \
 $(OBJDIR)\itemmoniker.obj \
 $(OBJDIR)\imessagefilter.obj \
 $(OBJDIR)\memlockbytes.obj \
-$(OBJDIR)\moniker.obj \
 $(OBJDIR)\oString.obj \
 $(OBJDIR)\ole2impl.obj \
 $(OBJDIR)\ole2.obj \
@@ -62,6 +61,10 @@ $(OBJDIR)\initole32.obj \
 $(OBJDIR)\stg_bigblockfile.obj \
 $(OBJDIR)\stg_stream.obj \
 $(OBJDIR)\storage32.obj \
+$(OBJDIR)\marshal.obj \
+$(OBJDIR)\oleproxy.obj \
+$(OBJDIR)\rpc.obj \
+$(OBJDIR)\moniker.obj \
 $(OBJDIR)\stubs.obj \
 $(OBJDIR)\ifs.obj \
 !if "$(DEBUG)" == "1"

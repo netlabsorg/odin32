@@ -9,7 +9,6 @@
  * Copyright 1999 Sylvain St-Germain
  * Copyright 1999 Thuy Nguyen
  */
-
 #ifdef __WIN32OS2__
 #include <odin.h>
 #include "ole32.h"
@@ -35,7 +34,6 @@
 DEFAULT_DEBUG_CHANNEL(storage);
 
 #define FILE_BEGIN 0
-
 
 
 /* Used for OleConvertIStorageToOLESTREAM and OleConvertOLESTREAMToIStorage */
@@ -166,7 +164,7 @@ static ICOM_VTABLE(IStorage) Storage32Impl_Vtbl =
     StorageImpl_SetElementTimes,
     StorageBaseImpl_SetClass,
     StorageImpl_SetStateBits,
-    StorageBaseImpl_Stat
+    StorageImpl_Stat
 };
 
 /*
@@ -342,6 +340,7 @@ HRESULT WINAPI StorageBaseImpl_OpenStream(
   StgStreamImpl*    newStream;
   StgProperty       currentProperty;
   ULONG             foundPropertyIndex;
+  HRESULT           res = STG_E_UNKNOWN;
 
   TRACE("(%p, %s, %p, %lx, %ld, %p)\n", 
 	iface, debugstr_w(pwcsName), reserved1, grfMode, reserved2, ppstm);
@@ -350,18 +349,24 @@ HRESULT WINAPI StorageBaseImpl_OpenStream(
    * Perform a sanity check on the parameters.
    */
   if ( (pwcsName==NULL) || (ppstm==0) )
-    return E_INVALIDARG;
+  {
+    res = E_INVALIDARG;
+    goto end;
+  }
   
   /*
    * Initialize the out parameter
    */
-  *ppstm = 0;
+  *ppstm = NULL;
   
   /*
    * Validate the STGM flags
    */
   if ( FAILED( validateSTGM(grfMode) ))
-    return STG_E_INVALIDFLAG;
+  {
+    res = STG_E_INVALIDFLAG;
+    goto end;
+  }
 
   /*
    * As documented.
@@ -369,7 +374,10 @@ HRESULT WINAPI StorageBaseImpl_OpenStream(
   if ( !(grfMode & STGM_SHARE_EXCLUSIVE) ||
         (grfMode & STGM_DELETEONRELEASE) ||
         (grfMode & STGM_TRANSACTED) )
-    return STG_E_INVALIDFUNCTION;
+  {
+    res = STG_E_INVALIDFUNCTION;
+    goto end;
+  }
 
   /*
    * Create a property enumeration to search the properties
@@ -410,13 +418,21 @@ HRESULT WINAPI StorageBaseImpl_OpenStream(
        */
       StgStreamImpl_AddRef(*ppstm);
       
-      return S_OK;
+      res = S_OK;
+      goto end;
     }
     
-    return E_OUTOFMEMORY;
+    res = E_OUTOFMEMORY;
+    goto end;
   }
   
-  return STG_E_FILENOTFOUND;
+  res = STG_E_FILENOTFOUND;
+
+end:
+  if (res == S_OK)
+    TRACE("<-- IStream %p\n", *ppstm);
+  TRACE("<-- %08lx\n", res);
+  return res;
 }
 
 /************************************************************************
@@ -440,6 +456,7 @@ HRESULT WINAPI StorageBaseImpl_OpenStorage(
   IEnumSTATSTGImpl*      propertyEnumeration;
   StgProperty            currentProperty;
   ULONG                  foundPropertyIndex;
+  HRESULT                res = STG_E_UNKNOWN;
 
   TRACE("(%p, %s, %p, %lx, %p, %ld, %p)\n", 
 	iface, debugstr_w(pwcsName), pstgPriority, 
@@ -449,13 +466,26 @@ HRESULT WINAPI StorageBaseImpl_OpenStorage(
    * Perform a sanity check on the parameters.
    */
   if ( (This==0) || (pwcsName==NULL) || (ppstg==0) )
-    return E_INVALIDARG;
+  {
+    res = E_INVALIDARG;
+    goto end;
+  }
+  
+  /* as documented */
+  if (snbExclude != NULL)
+  {
+    res = STG_E_INVALIDPARAMETER;
+    goto end;
+  }
   
   /*
    * Validate the STGM flags
    */
   if ( FAILED( validateSTGM(grfMode) ))
-    return STG_E_INVALIDFLAG;
+  {
+    res = STG_E_INVALIDFLAG;
+    goto end;
+  }
 
   /*
    * As documented.
@@ -463,12 +493,15 @@ HRESULT WINAPI StorageBaseImpl_OpenStorage(
   if ( !(grfMode & STGM_SHARE_EXCLUSIVE) || 
         (grfMode & STGM_DELETEONRELEASE) ||
         (grfMode & STGM_PRIORITY) )
-    return STG_E_INVALIDFUNCTION;
+  {
+    res = STG_E_INVALIDFUNCTION;
+    goto end;
+  }
 
   /*
    * Initialize the out parameter
    */
-  *ppstg = 0;
+  *ppstg = NULL;
   
   /*
    * Create a property enumeration to search the properties
@@ -513,13 +546,19 @@ HRESULT WINAPI StorageBaseImpl_OpenStorage(
        */
       StorageBaseImpl_AddRef(*ppstg);
       
-      return S_OK;
+      res = S_OK;
+      goto end;
     }
     
-    return STG_E_INSUFFICIENTMEMORY;
+    res = STG_E_INSUFFICIENTMEMORY;
+    goto end;
   }
   
-  return STG_E_FILENOTFOUND;
+  res = STG_E_FILENOTFOUND;
+
+end:
+  TRACE("<-- %08lx\n", res);
+  return res;
 }
 
 /************************************************************************
@@ -586,7 +625,8 @@ HRESULT WINAPI StorageBaseImpl_Stat(
 {
   ICOM_THIS(StorageBaseImpl,iface);
   StgProperty    curProperty;
-  BOOL         readSuccessful;
+  BOOL           readSuccessful;
+  HRESULT        res = STG_E_UNKNOWN;
 
   TRACE("(%p, %p, %lx)\n", 
 	iface, pstatstg, grfStatFlag);
@@ -595,7 +635,10 @@ HRESULT WINAPI StorageBaseImpl_Stat(
    * Perform a sanity check on the parameters.
    */
   if ( (This==0) || (pstatstg==0))
-    return E_INVALIDARG;
+  {
+    res = E_INVALIDARG;
+    goto end;
+  }
 
   /*
    * Read the information from the property.
@@ -612,10 +655,19 @@ HRESULT WINAPI StorageBaseImpl_Stat(
       &curProperty, 
       grfStatFlag);
     
-    return S_OK;
+    res = S_OK;
+    goto end;
   }
   
-  return E_FAIL;
+  res = E_FAIL;
+
+end:
+  if (res == S_OK)
+  {
+    TRACE("<-- STATSTG: pwcsName: %s, type: %ld, cbSize.Low/High: %ld/%ld, grfMode: %08lx, grfLocksSupported: %ld, grfStateBits: %08lx\n", debugstr_w(pstatstg->pwcsName), pstatstg->type, pstatstg->cbSize.s.LowPart, pstatstg->cbSize.s.HighPart, pstatstg->grfMode, pstatstg->grfLocksSupported, pstatstg->grfStateBits);
+  }
+  TRACE("<-- %08lx\n", res);
+  return res;
 }
 
 /************************************************************************
@@ -1686,6 +1738,32 @@ HRESULT WINAPI StorageImpl_DestroyElement(
 }
 
 
+/************************************************************************ 
+ * StorageImpl_Stat (IStorage) 
+ * 
+ * This method will retrieve information about this storage object. 
+ *  
+ * See Windows documentation for more details on IStorage methods. 
+ */
+HRESULT WINAPI StorageImpl_Stat( IStorage* iface,
+                                 STATSTG*  pstatstg,     /* [out] */
+                                 DWORD     grfStatFlag)  /* [in] */
+{
+  StorageImpl* const This = (StorageImpl*)iface;
+  HRESULT result = StorageBaseImpl_Stat( iface, pstatstg, grfStatFlag );
+
+  if ( !FAILED(result) && ((grfStatFlag & STATFLAG_NONAME) == 0) && This->pwcsName )
+  {
+      CoTaskMemFree(pstatstg->pwcsName);
+      pstatstg->pwcsName = CoTaskMemAlloc((lstrlenW(This->pwcsName)+1)*sizeof(WCHAR));
+      strcpyW(pstatstg->pwcsName, This->pwcsName);
+  }
+
+  return result;
+}
+
+
+
 /*********************************************************************
  *
  * Internal Method
@@ -2082,8 +2160,8 @@ HRESULT WINAPI StorageImpl_SetElementTimes(
   const FILETIME  *patime,  /* [in] */ 
   const FILETIME  *pmtime)  /* [in] */ 
 {
-  FIXME("not implemented!\n");
-  return E_NOTIMPL;
+  FIXME("(%s,...), stub!\n",debugstr_w(pwcsName));
+  return S_OK;
 }
 
 /******************************************************************************
@@ -2101,6 +2179,7 @@ HRESULT WINAPI StorageImpl_SetStateBits(
 HRESULT StorageImpl_Construct(
   StorageImpl* This,
   HANDLE       hFile,
+  LPCOLESTR    pwcsName,
   ILockBytes*  pLkbyt,
   DWORD        openFlags,
   BOOL         fileBased,
@@ -2110,20 +2189,20 @@ HRESULT StorageImpl_Construct(
   StgProperty currentProperty;
   BOOL      readSuccessful;
   ULONG       currentPropertyIndex;
-  
+
   if ( FAILED( validateSTGM(openFlags) ))
     return STG_E_INVALIDFLAG;
 
   memset(This, 0, sizeof(StorageImpl));
   
   /*
-   * Initialize the virtual fgunction table.
+   * Initialize the virtual function table.
    */
   ICOM_VTBL(This)    = &Storage32Impl_Vtbl;
   This->v_destructor = &StorageImpl_Destroy;
   
   /*
-   * This is the top-level storage so initialize the ancester pointer
+   * This is the top-level storage so initialize the ancestor pointer
    * to this.
    */
   This->ancestorStorage = This;
@@ -2133,6 +2212,17 @@ HRESULT StorageImpl_Construct(
    */
   This->hFile = hFile;
   
+  /*
+   * Store copy of file path.
+   */
+  if(pwcsName) {
+      This->pwcsName = HeapAlloc(GetProcessHeap(), 0, 
+                                (lstrlenW(pwcsName)+1)*sizeof(WCHAR));
+      if (!This->pwcsName)
+         return STG_E_INSUFFICIENTMEMORY;
+      strcpyW(This->pwcsName, pwcsName); 
+  }
+
   /*
    * Initialize the big block cache.
    */
@@ -2250,7 +2340,7 @@ HRESULT StorageImpl_Construct(
   }
 
   /*
-   * Find the ID of the root int he property sets.
+   * Find the ID of the root in the property sets.
    */
   currentPropertyIndex = 0;
   
@@ -2295,6 +2385,9 @@ void StorageImpl_Destroy(
   StorageImpl* This)
 {
   TRACE("(%p)\n", This);
+
+  if(This->pwcsName)
+    HeapFree(GetProcessHeap(), 0, This->pwcsName);
 
   BlockChainStream_Destroy(This->smallBlockRootChain);
   BlockChainStream_Destroy(This->rootBlockChain);
@@ -2880,15 +2973,19 @@ HRESULT StorageImpl_LoadFileHeader(
      * Right now, the code is making some assumptions about the size of the 
      * blocks, just make sure they are what we're expecting.
      */
-    assert( (This->bigBlockSize==DEF_BIG_BLOCK_SIZE) && 
-            (This->smallBlockSize==DEF_SMALL_BLOCK_SIZE));
+    if (This->bigBlockSize != DEF_BIG_BLOCK_SIZE ||
+	This->smallBlockSize != DEF_SMALL_BLOCK_SIZE)
+    {
+	WARN("Broken OLE storage file\n");
+	hr = STG_E_INVALIDHEADER;
+    }
+    else
+	hr = S_OK;
     
     /*
      * Release the block.
      */
     StorageImpl_ReleaseBigBlock(This, headerBigBlock);
-
-    hr = S_OK;
   }
   
   return hr;
@@ -3015,14 +3112,19 @@ BOOL StorageImpl_ReadProperty(
                     PROPSET_BLOCK_SIZE,
                     currentProperty,
                     &bytesRead);
-  
+
   if (readSuccessful)
   {
+    /* replace the name of root entry (often "Root Entry") by the file name */
+    WCHAR *propName = (index == This->rootPropertySetIndex) ?
+	    		This->filename : (WCHAR *)currentProperty+OFFSET_PS_NAME;
+
     memset(buffer->name, 0, sizeof(buffer->name));
     memcpy(
       buffer->name, 
-      currentProperty+OFFSET_PS_NAME, 
+      propName, 
       PROPERTY_NAME_BUFFER_LEN );
+    TRACE("storage name: %s\n", debugstr_w(buffer->name));
 
     memcpy(&buffer->propertyType, currentProperty + OFFSET_PS_PROPERTYTYPE, 1);
     
@@ -5367,6 +5469,7 @@ HRESULT WINAPI StgCreateDocfile(
   hr = StorageImpl_Construct(
          newStorage,
          hFile,
+        pwcsName,
          NULL,
          grfMode,
          TRUE,
@@ -5405,6 +5508,8 @@ HRESULT WINAPI StgOpenStorage(
   HANDLE       hFile = 0;
   DWORD          shareMode;
   DWORD          accessMode;
+  WCHAR          fullname[MAX_PATH];
+  WIN32_FILE_ATTRIBUTE_DATA Fad;
 
   TRACE("(%s, %p, %lx, %p, %ld, %p)\n", 
 	debugstr_w(pwcsName), pstgPriority, grfMode,
@@ -5414,13 +5519,19 @@ HRESULT WINAPI StgOpenStorage(
    * Perform a sanity check
    */
   if (( pwcsName == 0) || (ppstgOpen == 0) )
-    return STG_E_INVALIDPOINTER;
+  {
+    hr = STG_E_INVALIDPOINTER;
+    goto end;
+  }
 
   /*
    * Validate the STGM flags
    */
   if ( FAILED( validateSTGM(grfMode) ))
-    return STG_E_INVALIDFLAG;
+  {
+    hr = STG_E_INVALIDFLAG;
+    goto end;
+  }
 
   /*
    * Interpret the STGM value grfMode
@@ -5444,8 +5555,9 @@ HRESULT WINAPI StgOpenStorage(
   
   if (hFile==INVALID_HANDLE_VALUE)
   {
-    HRESULT hr = E_FAIL;
     DWORD last_error = GetLastError();
+
+    hr = E_FAIL;
 
     switch (last_error)
     {
@@ -5470,7 +5582,7 @@ HRESULT WINAPI StgOpenStorage(
         hr = E_FAIL;
     }
 
-    return hr;
+    goto end;
   }
 
   /*
@@ -5479,15 +5591,20 @@ HRESULT WINAPI StgOpenStorage(
   newStorage = HeapAlloc(GetProcessHeap(), 0, sizeof(StorageImpl));
   
   if (newStorage == 0)
-    return STG_E_INSUFFICIENTMEMORY;
+  {
+    hr = STG_E_INSUFFICIENTMEMORY;
+    goto end;
+  }
 
+  /* if the file's length was zero, initialize the storage */
   hr = StorageImpl_Construct(
          newStorage,
          hFile,
+        pwcsName,
          NULL,
          grfMode,
          TRUE,
-         FALSE);
+	 !(Fad.nFileSizeHigh || Fad.nFileSizeLow) /* FALSE */ );
   
   if (FAILED(hr))
   {
@@ -5496,10 +5613,15 @@ HRESULT WINAPI StgOpenStorage(
      * According to the docs if the file is not a storage, return STG_E_FILEALREADYEXISTS
      */
     if(hr == STG_E_INVALIDHEADER)
-	return STG_E_FILEALREADYEXISTS;
-    return hr;
+	hr = STG_E_FILEALREADYEXISTS;
+    goto end;
   }
   
+  /* prepare the file name string given in lieu of the root property name */
+  GetFullPathNameW(pwcsName, MAX_PATH, fullname, NULL);
+  memcpy(newStorage->filename, fullname, PROPERTY_NAME_BUFFER_LEN);
+  newStorage->filename[PROPERTY_NAME_BUFFER_LEN-1] = '\0';
+
   /*
    * Get an "out" pointer for the caller.
    */
@@ -5508,6 +5630,8 @@ HRESULT WINAPI StgOpenStorage(
          (REFIID)&IID_IStorage,
          (void**)ppstgOpen);
   
+end:
+  TRACE("<-- %08lx, IStorage %p\n", hr, ppstgOpen ? *ppstgOpen : NULL);
   return hr;
 }
 
@@ -5540,6 +5664,7 @@ HRESULT WINAPI StgCreateDocfileOnILockBytes(
   hr = StorageImpl_Construct(
          newStorage,
          0,
+        0,
          plkbyt,
          grfMode,
          FALSE,
@@ -5604,6 +5729,7 @@ HRESULT WINAPI StgOpenStorageOnILockBytes(
   hr = StorageImpl_Construct(
          newStorage,
          0,
+        0,
          plkbyt,
          grfMode,
          FALSE,
@@ -5628,14 +5754,14 @@ HRESULT WINAPI StgOpenStorageOnILockBytes(
 
 /******************************************************************************
  *              StgSetTimes [ole32.150]
+ *              StgSetTimes [OLE32.150]
  *
  *
  */
-HRESULT WINAPI StgSetTimes(WCHAR * str, FILETIME * a, FILETIME * b, FILETIME *c )
+HRESULT WINAPI StgSetTimes(OLECHAR *str, FILETIME *a, FILETIME *b, FILETIME *c )
 {
- 
-  FIXME("(%p, %p, %p, %p),stub!\n", str, a, b, c);
-  return FALSE;
+  FIXME("(%s, %p, %p, %p),stub!\n", debugstr_w(str), a, b, c);
+  return S_OK;
 }
 
 /******************************************************************************
@@ -5676,7 +5802,7 @@ HRESULT WINAPI WriteClassStg(IStorage* pStg, REFCLSID rclsid)
 }
 
 /***********************************************************************
- *    ReadClassStg
+ *    ReadClassStg (OLE32.134)
  *
  * This method reads the CLSID previously written to a storage object with the WriteClassStg.
  */
@@ -5701,7 +5827,7 @@ HRESULT WINAPI ReadClassStg(IStorage *pstg,CLSID *pclsid){
 }
 
 /***********************************************************************
- *    OleLoadFromStream
+ *    OleLoadFromStream (OLE32.113)
  *
  * This function loads an object from stream
  */
@@ -5735,7 +5861,7 @@ HRESULT  WINAPI OleLoadFromStream(IStream *pStm,REFIID iidInterface,void** ppvOb
 }
 
 /***********************************************************************
- *    OleSaveToStream
+ *    OleSaveToStream (OLE32.125)
  *
  * This function saves an object with the IPersistStream interface on it
  * to the specified stream.
@@ -6947,17 +7073,17 @@ HRESULT WINAPI OleConvertIStorageToOLESTREAM (
     }
     if(hRes == S_OK)
     {
-        /*Was it originaly Ole10 */
+        /* Was it originally Ole10 */
         hRes = IStorage_OpenStream(pstg, wstrStreamName, 0, STGM_READ | STGM_SHARE_EXCLUSIVE, 0, &pStream);    
         if(hRes == S_OK)
         {
             IStream_Release(pStream);
-            /*Get Presentation Data for Ole10Native */
+            /* Get Presentation Data for Ole10Native */
             OLECONVERT_GetOle10PresData(pstg, pOleStreamData);
         }
         else
         {
-            /*Get Presentation Data (OLE20)*/
+            /* Get Presentation Data (OLE20) */
             OLECONVERT_GetOle20PresData(pstg, pOleStreamData);
         }
 
@@ -6991,10 +7117,11 @@ HRESULT WINAPI GetConvertStg(LPGUID guid) {
 }
 
 #ifdef __WIN32OS2__
+
 static const BYTE STORAGE_notmagic[8]={0x0e,0x11,0xfc,0x0d,0xd0,0xcf,0x11,0xe0};
 
 /******************************************************************************
- * StgIsStorageFile16 [STORAGE.5]
+ * StgIsStorageFile [STORAGE.5]
  */
 HRESULT WINAPI StgIsStorageFile16(LPCOLESTR16 fn) {
 	HFILE		hf;
@@ -7036,10 +7163,13 @@ HRESULT WINAPI StgIsStorageFile16(LPCOLESTR16 fn) {
 HRESULT WINAPI 
 StgIsStorageFile(LPCOLESTR fn) 
 {
-	LPOLESTR16	xfn = HEAP_strdupWtoA(GetProcessHeap(),0,fn);
-	HRESULT	ret = StgIsStorageFile16(xfn);
+    HRESULT ret;
+    DWORD len = WideCharToMultiByte( CP_ACP, 0, fn, -1, NULL, 0, NULL, NULL );
+    LPSTR strA = HeapAlloc( GetProcessHeap(), 0, len );
 
-	HeapFree(GetProcessHeap(),0,xfn);
-	return ret;
+    WideCharToMultiByte( CP_ACP, 0, fn, -1, strA, len, NULL, NULL );
+    ret = StgIsStorageFile16(strA);
+    HeapFree( GetProcessHeap(), 0, strA );
+    return ret;
 }
 #endif
