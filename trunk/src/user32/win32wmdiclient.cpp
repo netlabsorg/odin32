@@ -1,4 +1,4 @@
-/* $Id: win32wmdiclient.cpp,v 1.37 2001-06-11 20:08:25 sandervl Exp $ */
+/* $Id: win32wmdiclient.cpp,v 1.38 2001-08-04 13:49:17 sandervl Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -1069,7 +1069,7 @@ BOOL Win32MDIClientWindow::restoreFrameMenu(HWND hwndChild)
 /***********************************************************************
  *           CalcChildScroll   (USER.462)
  */
-void WINAPI CalcChildScroll(HWND hwnd,WORD scroll)
+void WINAPI CalcChildScroll(HWND hwnd,INT scroll)
 {
     Win32BaseWindow *win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
     Win32BaseWindow *child;
