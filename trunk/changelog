@@ -1,17 +1,31 @@
- /* $Id: changelog,v 1.978 2000-06-08 15:28:22 achimha Exp $ */
+ /* $Id: changelog,v 1.979 2000-06-08 18:12:31 sandervl Exp $ */
 
-2000-08-03: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
-   - tools/install: Added a stram 'close' on the changelog.
-                    (4OS2 can't copy files which are opened for write(?).
-                    The changelog has to be closed after copying it into
-                    the odininst.wis file.)
-   - tools/DailyBuild:
-                    - Creates .WPI releases too.
-                      (odin32pack.cmd and odin32ftp2.cmd)
-                    - WarpIn is added to the build environment variables
-                      (odin32env.cmd).
-                    - WarpIn is added to the build environment variables
-                      (odin32env.cmd).
+ 2000-06-08: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32:     Fixed incorrect last error for OpenFile & LoadLibrary(Ex)
+                    Added null pointer check to RegQueryValueW and fixed
+                    memory leak.
+    - USER32:       Ignore weird WM_ADJUSTWINDOWPOS messages (why are they sent?)
+                    -> fixes combo box
+                    Fixed GetUpdateRect
+                    RedrawWindow changes; SetWindowPos fix (client invalidation)
+                    Call MsgNCHittest in RedrawWindow (WM_NCPAINT is not posted
+                    if update region doesn't include (part of) the nonclient area.
+                    -> fixes RealPlayer 7 titlebar, borders & menu
+                    GetTopWindow fix. (should work properly now)
+    - GDI32:        Moved clip & update region/rect functions into user32
+
+ 2000-08-03: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - tools/install: Added a stram 'close' on the changelog.
+                     (4OS2 can't copy files which are opened for write(?).
+                     The changelog has to be closed after copying it into
+                     the odininst.wis file.)
+    - tools/DailyBuild:
+                     - Creates .WPI releases too.
+                       (odin32pack.cmd and odin32ftp2.cmd)
+                     - WarpIn is added to the build environment variables
+                       (odin32env.cmd).
+                     - WarpIn is added to the build environment variables
+                       (odin32env.cmd).
 
  2000-06-07: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:       Fixed wrong dispatch of WM_NCHITTEST
