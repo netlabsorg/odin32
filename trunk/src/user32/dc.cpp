@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.37 2000-01-27 17:21:08 cbratschi Exp $ */
+/* $Id: dc.cpp,v 1.38 2000-01-28 22:25:59 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -437,12 +437,11 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
    RECTL    rect;
    HPS      hPS_ownDC = NULLHANDLE;
 
-   dprintf (("USER32: BeginPaint(%x)", hWnd));
-
    if ( !lpps )
    {
-      O32_SetLastError (ERROR_INVALID_PARAMETER);
-      return (HDC)NULLHANDLE;
+   	dprintf (("USER32: BeginPaint %x invalid parameter %x", hWnd, lpps));
+      	O32_SetLastError (ERROR_INVALID_PARAMETER);
+      	return (HDC)NULLHANDLE;
    }
 
    if(hWnd == 0x6800003a) {
@@ -458,6 +457,7 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
                 pHps = (pDCData)GpiQueryDCData(hPS_ownDC);
                 if (!pHps)
                 {
+   			dprintf (("USER32: BeginPaint %x invalid parameter %x", hWnd, lpps));
                         O32_SetLastError (ERROR_INVALID_PARAMETER);
                         return (HDC)NULLHANDLE;
                 }
@@ -503,6 +503,7 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
    WINRECT_FROM_PMRECT(lpps->rcPaint, rect);
 
    O32_SetLastError(0);
+   dprintf(("USER32: BeginPaint %x -> hdc %x", hWnd, pHps->hps));
    return (HDC)pHps->hps;
 }
 //******************************************************************************
@@ -687,8 +688,6 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
    else
       hWindow = HWND_DESKTOP;
 
-   dprintf (("User32: GetDCEx hwnd %x (%x %x) -> wnd %x", hwnd, hrgn, flags, wnd));
-
    //SvL: Hack for memory.exe (doesn't get repainted properly otherwise)
 //   isWindowOwnDC = (((hWindow == HWND_DESKTOP) ? FALSE : (wnd->isOwnDC() && wnd->getOwnDC()))
    isWindowOwnDC = (((hWindow == HWND_DESKTOP) ? FALSE : (wnd->isOwnDC()))
@@ -706,6 +705,7 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
          setPageXForm (wnd, pHps);
 
          pHps->hdcType = TYPE_1;
+    	 dprintf (("User32: GetDCEx hwnd %x (%x %x) -> wnd %x hdc %x", hwnd, hrgn, flags, wnd, hps));
          return (HDC)hps;
       }
       else
@@ -783,6 +783,7 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
    pHps->hdcType = TYPE_1;
    GpiSetDrawControl (hps, DCTL_DISPLAY, drawingAllowed ? DCTL_ON : DCTL_OFF);
 
+   dprintf (("User32: GetDCEx hwnd %x (%x %x) -> hdc %x", hwnd, hrgn, flags, pHps->hps));
    return (HDC)pHps->hps;
 
 error:

@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.52 2000-01-27 17:21:10 cbratschi Exp $ */
+/* $Id: window.cpp,v 1.53 2000-01-28 22:26:01 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -652,6 +652,7 @@ BOOL WIN32API GetWindowRect( HWND hwnd, PRECT pRect)
       window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     else
       window = windowDesktop;
+
     if(!window) {
         dprintf(("GetWindowRect, window %x not found", hwnd));
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
@@ -661,7 +662,8 @@ BOOL WIN32API GetWindowRect( HWND hwnd, PRECT pRect)
         SetLastError(ERROR_INVALID_PARAMETER);
         return FALSE;
     }
-    *pRect = *window->getWindowRect();
+    *pRect = *window->getWindowRect(); //always in screen coordinates
+
     dprintf(("GetWindowRect %x (%d,%d) (%d,%d)", hwnd, pRect->left, pRect->top, pRect->right, pRect->bottom));
     return TRUE;
 }
@@ -927,7 +929,7 @@ BOOL WIN32API ScreenToClient (HWND hwnd, LPPOINT pt)
 HWND WIN32API GetDesktopWindow(void)
 {
     HWND DesktopWindow = windowDesktop->getWindowHandle();
-    dprintf(("USER32: GetDesktopWindow, return %d\n", DesktopWindow));
+    dprintf2(("USER32: GetDesktopWindow, returned %d\n", DesktopWindow));
     return DesktopWindow;
 }
 //******************************************************************************
@@ -1052,12 +1054,13 @@ HDWP WIN32API BeginDeferWindowPos(int count)
     HDWP handle;
     DWP *pDWP;
 
-    dprintf(("USER32:  BeginDeferWindowPos\n"));
     if (count <= 0)
     {
+   	dprintf(("USER32: BeginDeferWindowPos invalid param %d", count));
         SetLastError(ERROR_INVALID_PARAMETER);
         return 0;
     }
+    dprintf(("USER32: BeginDeferWindowPos %d", count));
     handle = (HDWP)HeapAlloc(GetProcessHeap(), 0, sizeof(DWP) + (count-1)*sizeof(WINDOWPOS) );
     if (!handle)
         return 0;
@@ -1099,6 +1102,8 @@ HDWP WIN32API DeferWindowPos( HDWP hdwp, HWND hwnd, HWND hwndAfter,
         return 0;
     }
 
+    dprintf(("USER32: DeferWindowPos hdwp %x hwnd %x hwndAfter %x (%d,%d)(%d,%d) %x", hdwp, hwnd, hwndAfter,
+              x, y, cx, cy, flags));
 
 /* Numega Bounds Checker Demo dislikes the following code.
    In fact, I've not been able to find any "same parent" requirement in any docu

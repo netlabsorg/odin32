@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.82 2000-01-27 21:50:01 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.83 2000-01-28 22:25:59 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -402,10 +402,10 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
         if(wndpars->fsStatus & (WPM_CCHTEXT | WPM_TEXT))
         {
+            if(wndpars->fsStatus & WPM_TEXT)
+                win32wnd->MsgGetText(wndpars->pszText, wndpars->cchText);
             if(wndpars->fsStatus & WPM_CCHTEXT)
                 wndpars->cchText = win32wnd->MsgGetTextLength();
-            if(wndpars->fsStatus & WPM_TEXT)
-                wndpars->pszText = win32wnd->MsgGetText();
 
             wndpars->fsStatus = 0;
             wndpars->cbCtlData = 0;

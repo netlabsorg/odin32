@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.40 2000-01-27 21:50:01 sandervl Exp $ */
+/* $Id: pmframe.cpp,v 1.41 2000-01-28 22:25:59 sandervl Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -278,7 +278,8 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
           RestoreOS2TIB();
           return (MRESULT)0xf;
         }
-        goto RunDefFrameProc;
+        RestoreOS2TIB();
+        return (MRESULT)0;
     }
 
     case WM_WINDOWPOSCHANGED:

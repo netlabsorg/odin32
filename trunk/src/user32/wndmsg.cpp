@@ -1,4 +1,4 @@
-/* $Id: wndmsg.cpp,v 1.11 2000-01-27 21:50:03 sandervl Exp $ */
+/* $Id: wndmsg.cpp,v 1.12 2000-01-28 22:26:01 sandervl Exp $ */
 /*
  * Win32 window message text function for OS/2
  *
@@ -711,11 +711,6 @@ void DebugPrintMessage(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam, BOOL f
   {//sent *very* often
         if(PostSpyMessage(hwnd, Msg, wParam, lParam) == FALSE)
         {
-#if 1
-	    if(!CheckCurFS()) {
-		dprintf(("FS CORRUPT!!!!"));
-	    }
-#endif
             if(fInternalMsg) {
                     dprintf(("SendInternalMessage%c %s for %x %x %x", unicode, GetMsgText(Msg), hwnd, wParam, lParam));
             }
