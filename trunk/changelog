@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2390 2002-12-18 14:04:01 sandervl Exp $ */
+/* $Id: changelog,v 1.2391 2002-12-19 12:54:54 sandervl Exp $ */
+
+ 2001-12-19: Dietrich Teickner <Dietrich_Teickner@t-online   >
+    - KERNEL32: o GetFileTime & SetFileTime fixes; need to convert between
+                  UTC and local file time
 
  2002-12-18: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Ported listbox, combo & edit controls from ReWind
