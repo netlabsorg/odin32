@@ -1,58 +1,85 @@
-# $Id: makefile,v 1.16 2000-02-09 23:46:59 bird Exp $
+# $Id: makefile,v 1.17 2000-03-06 23:38:49 bird Exp $
 
 #
-# PD-Win32 API
+# Odin32 API
 #
 #       odincrt.dll makefile
 #
 
+# Directory macros.
 PDWIN32_INCLUDE = ..\..\include
-PDWIN32_LIB = ..\..\lib
-PDWIN32_BIN = ..\..\bin
-PDWIN32_TOOLS = ..\..\tools\bin
+PDWIN32_LIB     = ..\..\lib
+PDWIN32_BIN     = ..\..\$(OBJDIR)
+PDWIN32_TOOLS   = ..\..\tools\bin
 
+
+# Compiler, tools, and interference rules.
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 
-CXXFLAGS = $(CXXFLAGS_ODINCRT) -I$(PDWIN32_INCLUDE)
+
+# Flag overloads and local macros.
+CLEANEXTRAS = lz32rsrc.asm
+NOTEXPDEF   = 1
+
+CXXFLAGS    = $(CXXFLAGS_ODINCRT)
 IMPLIBFLAGS = $(IMPLIBFLAGS) /NOIgnoreCase
 
-TARGET = odincrt
-
 !ifdef VAC36
-RUNTIMELIBDEF=odin36.def
+RUNTIMELIBDEF   = odin36.def
 !else
-RUNTIMELIBDEF=odincrt.def
+RUNTIMELIBDEF   = odincrt.def
 !endif
 
-OBJS =  odincrt.obj initterm.obj malloc.obj string.obj file.obj
 
-all: $(TARGET).dll $(TARGET).lib
+# Object files. All objects should be prefixed with $(OBJDIR)!
+OBJS = \
+$(OBJDIR)\odincrt.obj \
+$(OBJDIR)\initterm.obj \
+$(OBJDIR)\malloc.obj \
+$(OBJDIR)\string.obj \
+$(OBJDIR)\file.obj
 
-$(TARGET).dll: $(OBJS) $(RUNTIMELIBDEF)
-    $(LD) $(LDFLAGS_ODINCRT) -Fm -Fe$@ $(OBJS) $(RUNTIMELIBDEF) $(SOMLIB)
-    $(CP) $@ $(PDWIN32_BIN)
+
+# Target name - name of the dll without extention and path.
+TARGET = odincrt
 
 
+# All rule - build objs, target dll, copies dll to bin and makes libs.
+all:    $(OBJDIR) \
+        $(OBJDIR)\$(TARGET).dll \
+        $(PDWIN32_BIN)\$(TARGET).dll \
+        lib
+
+# Lib rule - build importlibrary (and evt. other libs)
 lib: $(TARGET).lib $(PDWIN32_LIB)\$(TARGET).lib
 
-$(PDWIN32_LIB)\$(TARGET).lib: $(TARGET).lib
-    $(CP) $** $@
 
+# ImpLib rule - build importlibrary (and evt. other libs)
 $(TARGET).lib: $(TARGET).def
     $(IMPLIB) $(IMPLIBFLAGS) $@ $**
-    $(CP) $@ $(PDWIN32_LIB)
 
 
+# Dll rule - builds the target dll.
+$(OBJDIR)\$(TARGET).dll: $(OBJS) $(RUNTIMELIBDEF) $(OBJDIR)\$(TARGET).lrf
+    $(LD2) $(LD2FLAGS_ODINCRT) @$(OBJDIR)\$(TARGET).lrf
+
+
+# Linker file - creates the parameter file passed on to the linker.
+$(OBJDIR)\$(TARGET).lrf: makefile
+    @echo Creating file <<$@
+/OUT:$(OBJDIR)\$(TARGET).dll
+/MAP:$(OBJDIR)\$(TARGET).map
+$(OBJS)
+$(RUNTIMELIBDEF)
+<<keep
+
+
+# Dep rule - makes depenencies for C, C++ and Asm files.
 dep:
     $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
         *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
 
-!ifndef NODEP
-!include .depend
-!endif
 
-
-clean:
-    $(RM) *.obj *.lib *.dll *.map *.pch \
-        $(PDWIN32_BIN)\$(TARGET).dll $(PDWIN32_LIB)\$(TARGET).lib
+# Includes the common rules.
+!include $(PDWIN32_INCLUDE)/pdwin32.post
 

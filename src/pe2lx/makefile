@@ -1,9 +1,11 @@
-# $Id: makefile,v 1.9 1999-08-21 12:29:30 sandervl Exp $
+# $Id: makefile,v 1.10 2000-03-06 23:38:55 bird Exp $
 
 #
-# PD-Win32 API
+# Odin32 API
 #
-#	pe2lx.exe makefile
+#       pe2lx.exe makefile
+#
+# WARNING: This is the old PE2LX. The new Pe2Lx is found in src\win32k\pe2lx.
 #
 
 PDWIN32_INCLUDE = ..\..\include
@@ -30,7 +32,7 @@ all:  $(TARGET).exe
 
 
 $(TARGET).exe: $(OBJS)
-	$(LD) $(LDFLAGS) -Fe$@ $(OBJS) \
+        $(LD) $(LDFLAGS) -Fe$@ $(OBJS) \
         $(PDWIN32_LIB)\LIBCONV.LIB $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
         $(CP) $(TARGET).exe $(PDWIN32_BIN)
 
@@ -62,5 +64,5 @@ strings.obj: strings.cpp lx.h misc.h strings.h
 
 
 clean:
-	$(RM) *.obj *.lib *.dll *~ *.map *.pch *.exe
-	$(RM) $(PDWIN32_BIN)\$(TARGET).exe
+        $(RM) *.obj *.lib *.dll *~ *.map *.pch *.exe
+        $(RM) $(PDWIN32_BIN)\$(TARGET).exe

@@ -1,161 +1,32 @@
-# $Id: makefile,v 1.16 2000-03-04 20:18:05 bird Exp $
+# $Id: makefile,v 1.17 2000-03-06 23:33:42 bird Exp $
 #
-# PD-Win32 API
+# Odin32 API
 #
 #       opengl32.dll makefile
 #
 
+# Directories
 PDWIN32_INCLUDE = ..\..\include
-PDWIN32_LIB = ..\..\lib
-PDWIN32_BIN = ..\..\bin
-PDWIN32_TOOLS = ..\..\tools\bin
+
+# Common tools macros. (MAKE_CMD)
+!include $(PDWIN32_INCLUDE)\pdwin32.mk
 
 
-!include $(PDWIN32_INCLUDE)/pdwin32.mk
+# dummy all rule - invoking nmake withtout target caused it to do all of the targets below..
+_all: all
 
 
-#SvL: Only build the release version of glide, mesa & glu(t)
-#     There's no need for debug (even without dbg info) builds in the daily build archive
-# MAKE_CMD=nmake
-#KSO: Don't work as we use to have DEBUG defined as an enviroment variable.
-#     I have updated the opengl makefiles to consider NODEBUGINFO. If you don't wan't
-#     any debuginfo you could now add NODEBUGINFO=1 to MAKE_CMD.
-
-CFLAGS   = $(CFLAGS)   -I$(PDWIN32_INCLUDE)
-CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
-
-#TARGET1  = opengl32
-#DTARGET1 = opengl32
-TARGET2  = glu\glu32
-DTARGET2 = glu32
-TARGET3  = glut\glut32
-DTARGET3 = glut32
-TARGET4  = glide
-DTARGET4 = glide2x
-TARGET5  = mesa
-DTARGET5 = opengl32
-TARGET6  = 3dfxmesa
-
-#OBJS1=  opengl32.obj initterm.obj resource.obj
-
-#all: $(TARGET1).dll $(TARGET1).lib \
-all: $(TARGET5) $(TARGET2).dll $(TARGET2).lib \
-     $(TARGET3).dll $(TARGET3).lib $(TARGET4) $(TARGET6)
-
-#$(TARGET1).dll: $(OBJS1) $(TARGET1).def
-#    $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS1) $(TARGET1).def \
-#          $(PDWIN32_LIB)/gdi32.lib $(PDWIN32_LIB)/kernel32.lib \
-#          $(PDWIN32_LIB)/user32.lib $(PDWIN32_LIB)/odincrt.lib \
-#          OS2386.LIB $(RTLLIB_O)
-#    $(CP) $@ $(PDWIN32_BIN)
-
-
-#$(TARGET1).lib: $(TARGET1)exp.def
-#    $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET1)exp.def
-#    $(CP) $@ $(PDWIN32_LIB)
-
-#$(TARGET1)exp.def: $(TARGET1).def
-#    $(IMPDEF) $** $@
-
-
-#resource.asm: $(TARGET1).rc
-#    $(RC) $(RCFLAGS) -o resource.asm $(TARGET1).rc
-
-
-$(TARGET2).dll:
-    cd glu
-    $(MAKE_CMD)
-    cd ..
-
-$(TARGET3).dll:
-    cd glut
-    $(MAKE_CMD)
-    cd ..
-
-
-$(TARGET2).lib:
-    cd glu
-    $(MAKE_CMD) $(@F)
-    cd ..
-
-
-$(TARGET3).lib:
-    cd glut
-    $(MAKE_CMD) $(@F)
-    cd ..
-
-
-$(TARGET4):
-    cd glide
-    $(MAKE_CMD)
-    cd ..
-
-$(TARGET5):
+# All, Lib, Clean and Dep rules.
+clean dep all lib:
     cd mesa
-    $(MAKE_CMD)
-    cd ..
-
-$(TARGET6):
-    cd mesa\3dfx
-    $(MAKE_CMD)
-    cd ..\..
-
-#lib: $(TARGET1).lib $(PDWIN32_LIB)\$(DTARGET1).lib \
-lib: $(TARGET2).lib $(PDWIN32_LIB)\$(DTARGET2).lib \
-     $(TARGET3).lib $(PDWIN32_LIB)\$(DTARGET3).lib \
-     $(PDWIN32_LIB)\$(DTARGET4).lib \
-     $(PDWIN32_LIB)\$(DTARGET5).lib
-
-#$(PDWIN32_LIB)\$(DTARGET1).lib: $(TARGET1).lib
-#    $(CP) $** $@
-
-$(PDWIN32_LIB)\$(DTARGET2).lib: $(TARGET2).lib
-    $(CP) $** $@
-
-$(PDWIN32_LIB)\$(DTARGET3).lib: $(TARGET3).lib
-    $(CP) $** $@
-
-$(PDWIN32_LIB)\$(DTARGET4).lib:
-    cd glide
-    $(MAKE_CMD) lib
-    cd ..
-
-$(PDWIN32_LIB)\$(DTARGET5).lib:
-    cd mesa
-    $(MAKE_CMD) lib
-    cd ..
-
-dep:
-    $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
-        *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
-    cd glut
-    $(MAKE_CMD) dep
+    $(MAKE_CMD) $@
     cd ..\glu
-    $(MAKE_CMD) dep
+    $(MAKE_CMD) $@
+    cd ..\glut
+    $(MAKE_CMD) $@
     cd ..\glide
-    $(MAKE_CMD) dep
-    cd ..\mesa
-    $(MAKE_CMD) dep
-    cd 3dfx
-    $(MAKE_CMD) dep
-    cd ..\..
-
-!ifndef NODEP
-!include .depend
-!endif
-
-
-clean:
-    $(RM) *.obj *.lib *.dll *.map resource.asm *exp.def
-    cd glut
-    $(MAKE_CMD) clean
-    cd ..\glu
-    $(MAKE_CMD) clean
-    cd ..\glide
-    $(MAKE_CMD) clean
-    cd ..\mesa
-    $(MAKE_CMD) clean
-    cd 3dfx
-    $(MAKE_CMD) clean
+    $(MAKE_CMD) $@
+    cd ..\mesa\3dfx
+    $(MAKE_CMD) $@
     cd ..\..
 

@@ -1,110 +1,126 @@
-# $Id: makefile,v 1.21 2000-02-10 00:54:51 bird Exp $
+# $Id: makefile,v 1.22 2000-03-06 23:38:50 bird Exp $
 
 #
-# PD-Win32 API
+# Odin32 API
 #
 #       ole32.dll makefile
 #
 
+
+# Directory macros.
 PDWIN32_INCLUDE = ..\..\include
-PDWIN32_LIB = ..\..\lib
-PDWIN32_BIN = ..\..\bin
-PDWIN32_TOOLS = ..\..\tools\bin
+PDWIN32_LIB     = ..\..\lib
+PDWIN32_BIN     = ..\..\$(OBJDIR)
+PDWIN32_TOOLS   = ..\..\tools\bin
 
 
+# Compiler, tools, and interference rules.
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 
 
-CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE)
-CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
+# Flag overloads and local macros.
+CLEANEXTRAS = ole32rsrc.asm $(PDWIN32_BIN)\regsvr32.exe
 
 
-TARGET = ole32os2
-ORGTARGET = ole32
-
-OBJS =  ole32.obj \
-        antimoniker.obj \
-        bindctx.obj \
-        clsid.obj \
-        compositemoniker.obj \
-        datacache.obj \
-        defaulthandler.obj \
-        filemoniker.obj \
-        guid.obj \
-        hglobalstream.obj \
-        initialise.obj \
-        itemmoniker.obj \
-        iunknown.obj \
-        library.obj \
-        memlockbytes.obj \
-        moniker.obj \
-        oString.obj \
-        ole2.obj \
-        oleobj.obj \
-        oleClip.obj \
-        oleDrag.obj \
-        oleMenu.obj \
-        stg_bigblockfile.obj \
-        stg_stream.obj \
-        storage.obj \
-        stubs.obj \
-        taskmem.obj resource.obj  $(PDWIN32_LIB)/dllentry.obj
-
-all: $(TARGET).dll $(ORGTARGET).lib regsvr32.exe
-
-
-$(TARGET).dll: $(OBJS) $(ORGTARGET).def
-    $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(ORGTARGET).def \
-          $(PDWIN32_LIB)\user32.lib \
-          $(PDWIN32_LIB)\gdi32.lib \
-          $(PDWIN32_LIB)\comctl32.lib \
-          $(PDWIN32_LIB)\advapi32.lib \
-          $(PDWIN32_LIB)\kernel32.lib \
-          $(PDWIN32_LIB)\oleaut32.lib \
-          $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
-    $(CP) $@ $(PDWIN32_BIN)
+# Object files. All objects should be prefixed with $(OBJDIR)!
+OBJS = \
+$(OBJDIR)\ole32.obj \
+$(OBJDIR)\antimoniker.obj \
+$(OBJDIR)\bindctx.obj \
+$(OBJDIR)\clsid.obj \
+$(OBJDIR)\compositemoniker.obj \
+$(OBJDIR)\datacache.obj \
+$(OBJDIR)\defaulthandler.obj \
+$(OBJDIR)\filemoniker.obj \
+$(OBJDIR)\guid.obj \
+$(OBJDIR)\hglobalstream.obj \
+$(OBJDIR)\initialise.obj \
+$(OBJDIR)\itemmoniker.obj \
+$(OBJDIR)\iunknown.obj \
+$(OBJDIR)\library.obj \
+$(OBJDIR)\memlockbytes.obj \
+$(OBJDIR)\moniker.obj \
+$(OBJDIR)\oString.obj \
+$(OBJDIR)\ole2.obj \
+$(OBJDIR)\oleobj.obj \
+$(OBJDIR)\oleClip.obj \
+$(OBJDIR)\oleDrag.obj \
+$(OBJDIR)\oleMenu.obj \
+$(OBJDIR)\stg_bigblockfile.obj \
+$(OBJDIR)\stg_stream.obj \
+$(OBJDIR)\storage.obj \
+$(OBJDIR)\stubs.obj \
+$(OBJDIR)\taskmem.obj \
+$(OBJDIR)\ole32rsrc.obj \
+$(PDWIN32_LIB)\dllentry.obj
 
 
+# Target and original target names - names of the dll without extention and path
+TARGET      = ole32os2
+ORGTARGET   = ole32
+
+
+# All rule - build objs, target dll, copies dll to bin and makes libs.
+all:    $(OBJDIR) \
+        $(OBJDIR)\$(TARGET).dll \
+        $(PDWIN32_BIN)\$(TARGET).dll \
+        lib \
+        $(OBJDIR)\regsvr32.exe \
+        $(PDWIN32_BIN)\regsvr32.exe
+
+
+# Lib rule - build importlibrary (and evt. other libs)
 lib: $(ORGTARGET).lib $(PDWIN32_LIB)\$(ORGTARGET).lib
 
-$(PDWIN32_LIB)\$(ORGTARGET).lib: $(ORGTARGET).lib
-    $(CP) $** $@
 
-$(ORGTARGET).lib: $(ORGTARGET)exp.def
-    $(IMPLIB) $(IMPLIBFLAGS) $@ $(ORGTARGET)exp.def
-    $(CP) $@ $(PDWIN32_LIB)
-
-$(ORGTARGET)exp.def: $(ORGTARGET).def
-    $(IMPDEF) $** $@
+# Dll rule - builds the target dll.
+$(OBJDIR)\$(TARGET).dll: $(OBJS) $(ORGTARGET).def $(OBJDIR)\$(TARGET).lrf
+    $(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lrf
 
 
-resource.asm: $(ORGTARGET).rc
-    $(RC) $(RCFLAGS) -o resource.asm $(ORGTARGET).rc
+# Linker file - creates the parameter file passed on to the linker.
+$(OBJDIR)\$(TARGET).lrf: makefile
+    @echo Creating file <<$@
+/OUT:$(OBJDIR)\$(TARGET).dll
+/MAP:$(OBJDIR)\$(TARGET).map
+$(OBJS)
+$(PDWIN32_LIB)/user32.lib
+$(PDWIN32_LIB)/gdi32.lib
+$(PDWIN32_LIB)/comctl32.lib
+$(PDWIN32_LIB)/advapi32.lib
+$(PDWIN32_LIB)/kernel32.lib
+$(PDWIN32_LIB)/oleaut32.lib
+$(PDWIN32_LIB)/odincrt.lib
+OS2386.LIB
+$(RTLLIB_O)
+$(ORGTARGET).def
+<<keep
 
 
-regsvr32.obj:   regsvr32.cpp
-    $(CC) -C $(CXXFLAGS) -Ge+ -Tm+ regsvr32.cpp
 
-regsvr32.exe:   regsvr32.obj regsvr32.def \
+#
+# Regsrv32.exe rules.
+#
+$(OBJDIR)\regsvr32.obj:   regsvr32.cpp
+    $(CC) -C $(CXXFLAGS) -Ge+ -Tm+ -Fo$@ regsvr32.cpp
+
+$(OBJDIR)\regsvr32.exe:   $(OBJDIR)\regsvr32.obj regsvr32.def \
                 $(PDWIN32_LIB)/user32.lib \
                 $(PDWIN32_LIB)/kernel32.lib \
                 $(PDWIN32_LIB)/ole32.lib
     $(LD) $(LDFLAGS) -Ge+ -Fm -Fe$@ $** \
-            $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
-    $(CP) $@ $(PDWIN32_BIN)
+        $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
+
+$(PDWIN32_BIN)\regsvr32.exe: $(OBJDIR)\regsvr32.exe
+    $(CP) $** $@
 
 
+# Dep rule - makes depenencies for C, C++ and Asm files.
 dep:
     $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
         *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
 
-!ifndef NODEP
-!include .depend
-!endif
 
-
-clean:
-    $(RM) *.obj *.lib *.dll *.map *.pch *.exe \
-        $(PDWIN32_BIN)\$(TARGET).dll $(PDWIN32_LIB)\$(TARGET).lib \
-        $(PDWIN32_BIN)\regsvr32.exe resource.asm $(TARGET)exp.def
+# Includes the common rules.
+!include $(PDWIN32_INCLUDE)/pdwin32.post
 

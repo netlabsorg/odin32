@@ -1,48 +1,113 @@
-# $Id: makefile,v 1.3 2000-02-29 13:56:49 sandervl Exp $
+# $Id: makefile,v 1.4 2000-03-06 23:33:49 bird Exp $
 
 #
-# PD-Win32 API
+# Odin32 API
 #
 #       glu/nurbs/internals makefile
 #
 
+# Directory macros.
 PDWIN32_INCLUDE = ..\..\..\..\..\include
-PDWIN32_LIB = ..\..\..\..\..\lib
-PDWIN32_BIN = ..\..\..\..\..\bin
-PDWIN32_TOOLS = ..\..\..\..\..\tools\bin
+PDWIN32_LIB     = ..\..\..\..\..\lib
+PDWIN32_BIN     = ..\..\..\..\..\$(OBJDIR)
+PDWIN32_TOOLS   = ..\..\..\..\..\tools\bin
 
 
+# Local cleanup only.
+LOCALCLEAN = 1
+
+
+# Compiler, tools, and interference rules.
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 
-CINCLUDE=-I..\internals -I..\nurbtess -I..\..\..\mesa\GL -I..\..\include -I$(PDWIN32_INCLUDE)
-CDEFS=-DSTANDALONE -DLIBRARYBUILD -DNDEBUG
 
-CFLAGS = $(CFLAGS) $(CINCLUDE) $(CDEFS)
-CXXFLAGS = $(CXXFLAGS) $(CINCLUDE) $(CDEFS)
+# Flag overloads and local macros.
+CLEANEXTRAS =
 
-OBJS = arc.obj arcsorter.obj arctess.obj backend.obj basiccrveval.obj \
-       basicsurfeval.obj bin.obj bufpool.obj cachingeval.obj ccw.obj \
-       coveandtiler.obj curve.obj curvelist.obj curvesub.obj displaylist.obj \
-       flist.obj flistsorter.obj hull.obj intersect.obj knotvector.obj \
-       mapdesc.obj mapdescv.obj maplist.obj mesher.obj monotonizer.obj \
-       mycode.obj nurbsinterfac.obj nurbstess.obj patch.obj patchlist.obj \
-       quilt.obj reader.obj renderhints.obj slicer.obj sorter.obj \
-       splitarcs.obj subdivider.obj tobezier.obj trimline.obj trimregion.obj \
-       trimvertpool.obj uarray.obj varray.obj dataTransform.obj \
-       monoTriangulationBackend.obj
+CINCLUDE    = -I..\internals -I..\nurbtess -I..\..\..\mesa\GL -I..\..\include
+CDEFS       = -DSTANDALONE -DLIBRARYBUILD -DNDEBUG
 
-all: $(OBJS)
+CFLAGS      = $(CFLAGS) $(CINCLUDE) $(CDEFS)
+CXXFLAGS    = $(CXXFLAGS) $(CINCLUDE) $(CDEFS)
 
 
+# Object files. All objects should be prefixed with $(OBJDIR)!
+OBJS = \
+$(OBJDIR)\arc.obj \
+$(OBJDIR)\arcsorter.obj \
+$(OBJDIR)\arctess.obj \
+$(OBJDIR)\backend.obj \
+$(OBJDIR)\basiccrveval.obj \
+$(OBJDIR)\basicsurfeval.obj \
+$(OBJDIR)\bin.obj \
+$(OBJDIR)\bufpool.obj \
+$(OBJDIR)\cachingeval.obj \
+$(OBJDIR)\ccw.obj \
+$(OBJDIR)\coveandtiler.obj \
+$(OBJDIR)\curve.obj \
+$(OBJDIR)\curvelist.obj \
+$(OBJDIR)\curvesub.obj \
+$(OBJDIR)\displaylist.obj \
+$(OBJDIR)\flist.obj \
+$(OBJDIR)\flistsorter.obj \
+$(OBJDIR)\hull.obj \
+$(OBJDIR)\intersect.obj \
+$(OBJDIR)\knotvector.obj \
+$(OBJDIR)\mapdesc.obj \
+$(OBJDIR)\mapdescv.obj \
+$(OBJDIR)\maplist.obj \
+$(OBJDIR)\mesher.obj \
+$(OBJDIR)\monotonizer.obj \
+$(OBJDIR)\mycode.obj
+
+OBJS2 = \
+$(OBJDIR)\nurbsinterfac.obj \
+$(OBJDIR)\nurbstess.obj \
+$(OBJDIR)\patch.obj \
+$(OBJDIR)\patchlist.obj \
+$(OBJDIR)\quilt.obj \
+$(OBJDIR)\reader.obj \
+$(OBJDIR)\renderhints.obj \
+$(OBJDIR)\slicer.obj \
+$(OBJDIR)\sorter.obj \
+$(OBJDIR)\splitarcs.obj \
+$(OBJDIR)\subdivider.obj \
+$(OBJDIR)\tobezier.obj \
+$(OBJDIR)\trimline.obj \
+$(OBJDIR)\trimregion.obj \
+$(OBJDIR)\trimvertpool.obj \
+$(OBJDIR)\uarray.obj \
+$(OBJDIR)\varray.obj \
+$(OBJDIR)\dataTransform.obj \
+$(OBJDIR)\monoTriangulationBackend.obj
+
+
+# Target name - name of the library without extention and path.
+TARGET = internals
+
+
+# Create all libraries (not importlibraries)
+all:    $(OBJDIR) \
+        $(OBJDIR)\$(TARGET).lib
+
+
+# Create all libraries (not importlibraries)
+libs: all
+
+
+# Lib rule - build importlibrary (and evt. other libs)
+$(OBJDIR)\$(TARGET).lib: $(OBJS) $(OBJS2)
+    $(RM) $@
+    $(ILIB) $(ILIBFLAGS) $@ $(OBJS);
+    $(ILIB) $(ILIBFLAGS) $@ $(OBJS2);
+
+
+# Dep rule - makes depenencies for C, C++ and Asm files.
 dep:
     $(DEPEND) $(CINCLUDE) *.c *.cpp *.h *.asm *.inc  \
         ..\nurbtess\*.h ..\..\..\mesa\GL\*.h ..\..\include\*.h
 
-!ifndef NODEP
-!include .depend
-!endif
 
-
-clean:
-    $(RM) *.obj *.pch
+# Includes the common rules.
+!include $(PDWIN32_INCLUDE)/pdwin32.post
 

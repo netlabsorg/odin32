@@ -1,5 +1,0 @@
-/* $Id: shell32_xx.rc,v 1.2 1999-10-09 11:17:04 sandervl Exp $ */
-/* Language neutral resources.
- * Icons and bitmaps should go in here.
- */
-LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL

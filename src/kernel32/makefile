@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.87 2000-03-04 23:47:00 sandervl Exp $
+# $Id: makefile,v 1.88 2000-03-06 23:34:18 bird Exp $
 
 #
 # PD-Win32 API
@@ -6,25 +6,22 @@
 #       kernel32.dll makefile
 #
 
+# Directory macros.
 PDWIN32_INCLUDE = ..\..\include
-PDWIN32_LIB = ..\..\lib
-PDWIN32_BIN = ..\..\bin
-PDWIN32_TOOLS = ..\..\tools\bin
+PDWIN32_LIB     = ..\..\lib
+PDWIN32_BIN     = ..\..\$(OBJDIR)
+PDWIN32_TOOLS   = ..\..\tools\bin
 
-#SvL: Remove this when everything has been converted to the new build rules
-NEWBUILD=1
 
+# Compiler, tools, and interference rules.
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 
-RESOURCES= kernelrsrc
-CFLAGS   = $(CFLAGS) -I$(PDWIN32_INCLUDE)
-CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
-!ifdef NODEBUGINFO
-CFLAGS = $(CFLAGS) -DDEFAULT_LOGGING_OFF
-CXXFLAGS = $(CXXFLAGS) -DDEFAULT_LOGGING_OFF
-!endif
+# Flag overloads and local macros.
+CLEANEXTRAS = kernelrsrc.asm
 
+
+# Object files. All objects should be prefixed with $(OBJDIR)!
 OBJS = \
 $(OBJDIR)\KERNEL32.OBJ \
 $(OBJDIR)\KOBJECTS.OBJ \
@@ -97,7 +94,6 @@ $(OBJDIR)\wintls.obj \
 $(OBJDIR)\async.OBJ \
 $(OBJDIR)\fileio.obj \
 $(OBJDIR)\hmtoken.obj \
-$(OBJDIR)\$(RESOURCES).obj \
 $(OBJDIR)\atom.obj \
 $(OBJDIR)\disk.obj \
 $(OBJDIR)\directory.obj \
@@ -119,20 +115,37 @@ $(OBJDIR)\codepage.obj \
 $(OBJDIR)\debug.obj \
 $(OBJDIR)\oslibdebug.obj \
 $(OBJDIR)\dbglocal.obj \
-$(OBJDIR)\registry.obj
+$(OBJDIR)\registry.obj \
+$(OBJDIR)\kernelrsrc.obj
 
+
+# Target name - name of the dll without extention and path.
 TARGET = kernel32
 
-all: $(OBJDIR) $(TARGET).dll $(TARGET).LIB
 
-$(TARGET).dll: $(OBJS) $(TARGET).def $(OBJDIR)\$(TARGET).lrf
-        $(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lrf
-        rc -r console.rc console.res
-        rc console.res $@
-        $(CP) $@ $(PDWIN32_BIN)
+# All rule - build objs, target dll, copies dll to bin and makes libs.
+all:    $(OBJDIR) \
+        $(OBJDIR)\$(TARGET).dll \
+        $(PDWIN32_BIN)\$(TARGET).dll \
+        lib
 
+
+# Lib rule - build importlibrary (and evt. other libs)
+lib: $(TARGET).lib $(PDWIN32_LIB)\$(TARGET).lib
+
+
+# Dll rule - builds the target dll.
+$(OBJDIR)\$(TARGET).dll: $(OBJS) $(TARGET).def $(OBJDIR)\$(TARGET).lrf \
+                          $(OBJDIR)\console.res
+    $(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lrf
+    $(OS2RC) $(OBJDIR)\console.res $@
+
+
+# Linker file - creates the parameter file passed on to the linker.
 $(OBJDIR)\$(TARGET).lrf: makefile
-        @echo Creating file <<$(OBJDIR)\$(@B).lrf
+    @echo Creating file <<$(OBJDIR)\$(@B).lrf
+/OUT:$(OBJDIR)\$(TARGET).dll
+/MAP:$(OBJDIR)\$(TARGET).map
 $(OBJS)
 $(PDWIN32_LIB)\odincrt.lib
 $(PDWIN32_LIB)\PMWINX.LIB
@@ -143,13 +156,13 @@ $(RTLLIB_O)
 $(TARGET).def
 <<keep
 
-lib: $(TARGET).lib $(PDWIN32_LIB)\$(TARGET).lib
 
-$(RESOURCES).asm: kernel32.rc
-    $(RC) $(RCFLAGS) -o $(RESOURCES).asm kernel32.rc
-
+# Dep rule - makes depenencies for C, C++ and Asm files.
 dep:
     $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
         *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
 
+
+# Includes the common rules.
 !include $(PDWIN32_INCLUDE)/pdwin32.post
+
