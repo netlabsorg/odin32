@@ -1,8 +1,10 @@
-/* $Id: changelog,v 1.2714 2004-03-23 15:55:25 sandervl Exp $ */
+/* $Id: changelog,v 1.2715 2004-03-23 16:50:36 sandervl Exp $ */
 
  2004-03-23: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o MapVirtualKeyA: must convert return value from PM to windows
                   scancodes
+                o OSLibWinTranslateMessage: removed some strange numpad related
+                  hacks that caused problems for VK_DECIMAL processing
 
  2004-03-22: Sander van Leeuwen <sandervl@innotek   >
     - COMCTL32: o Rebar: changed resize fix again
