@@ -1,4 +1,4 @@
-# $Id: setup.mak,v 1.1.2.1 2002-03-06 02:15:10 bird Exp $
+# $Id: setup.mak,v 1.1.2.2 2002-03-10 05:25:45 bird Exp $
 
 #
 # Unix-like tools for OS/2
@@ -109,7 +109,7 @@ NAME_3=vac4
 !if "$(BUILD_ENV)" == "EMX"
 NAME_3=emx
 !endif
-!if "$(BUILD_ENV)" == "MSVC6"
+!if "$(BUILD_ENV)" == "MSCV6"
 NAME_3=mscv6
 !endif
 !if "$(BUILD_ENV)" == "WATCOM"
