@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.100 1999-12-01 18:23:29 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.101 1999-12-01 18:43:08 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -519,18 +519,23 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   {
     if (!isUnicode)
     {
-      wndNameLength = strlen(cs->lpszName);
-      windowNameA = (LPSTR)_smalloc(wndNameLength+1);
-      strcpy(windowNameA,cs->lpszName);
-      windowNameW = (LPWSTR)_smalloc((wndNameLength+1)*sizeof(WCHAR));
-      lstrcpyAtoW(windowNameW,windowNameA);
-    } else
+        wndNameLength = strlen(cs->lpszName);
+        windowNameA = (LPSTR)_smalloc(wndNameLength+1);
+        strcpy(windowNameA,cs->lpszName);
+        windowNameW = (LPWSTR)_smalloc((wndNameLength+1)*sizeof(WCHAR));
+        lstrcpyAtoW(windowNameW,windowNameA);
+        windowNameA[wndNameLength] = 0;
+        windowNameW[wndNameLength] = 0;
+    }
+    else
     {
-      wndNameLength = lstrlenW((LPWSTR)cs->lpszName);
-      windowNameA = (LPSTR)_smalloc(wndNameLength+1);
-      lstrcpyWtoA(windowNameA,(LPWSTR)cs->lpszName);
-      windowNameW = (LPWSTR)_smalloc((wndNameLength+1)*sizeof(WCHAR));
-      lstrcpyW(windowNameW,(LPWSTR)cs->lpszName);
+        wndNameLength = lstrlenW((LPWSTR)cs->lpszName);
+        windowNameA = (LPSTR)_smalloc(wndNameLength+1);
+        lstrcpyWtoA(windowNameA,(LPWSTR)cs->lpszName);
+        windowNameW = (LPWSTR)_smalloc((wndNameLength+1)*sizeof(WCHAR));
+        lstrcpyW(windowNameW,(LPWSTR)cs->lpszName);
+        windowNameA[wndNameLength] = 0;
+        windowNameW[wndNameLength] = 0;
     }
   }
 
@@ -2350,11 +2355,11 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
     {
        if (isChild())
        {
-         	Win32BaseWindow *windowParent = getParent();
-           	if(windowParent) {
-           		hParent = getParent()->getOS2WindowHandle();
-		}
-		else  	dprintf(("WARNING: Win32BaseWindow::SetWindowPos window %x is child but has no parent!!", getWindowHandle()));
+            Win32BaseWindow *windowParent = getParent();
+            if(windowParent) {
+                hParent = getParent()->getOS2WindowHandle();
+        }
+        else    dprintf(("WARNING: Win32BaseWindow::SetWindowPos window %x is child but has no parent!!", getWindowHandle()));
        }
        OSLibWinQueryWindowPos(OS2HwndFrame, &swpOld);
     }
