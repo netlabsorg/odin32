@@ -220,7 +220,6 @@ BOOL CFT2Module::Ft2GetTextExtentW(HPS hps, LONG lCount1,LPCWSTR pchString, PPOI
         SetFS(sel);
         if(ret || (ret == FALSE && ERRORIDERROR(WinGetLastError(0)) != PMERR_FUNCTION_NOT_SUPPORTED))
         {
-            //No need for scaling for printer DCs here
             calcDimensions(aptlPoints, pwidthHeight);
             return ret;
         }
