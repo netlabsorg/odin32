@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2346 2002-10-28 17:52:50 sandervl Exp $ */
+/* $Id: changelog,v 1.2347 2002-10-28 19:59:13 sandervl Exp $ */
 
  2002-10-28: Sander van Leeuwen <sandervl@innotek   >
     - GDI32:    o Workaround added for WGSS GetDIBits bug
@@ -7,6 +7,7 @@
  2002-10-28: Platon Fomichev <platon@innotek   >
     - USER32:   o Fix for WinPeekMsg bug (?); sometimes returns a message
                   we didn't ask for (filter)
+                o Fixed creation of dialog with CreateWindowExA/W
     - GDI32:    o StretchDIBits fix for partial blits & RGB conversion
 
  2002-10-24: Platon Fomichev <platon@innotek   >
