@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.35 2003-12-01 13:27:39 sandervl Exp $ */
+/* $Id: text.cpp,v 1.36 2003-12-29 10:55:49 sandervl Exp $ */
 
 /*
  * GDI32 text apis
@@ -408,7 +408,7 @@ BOOL WIN32API GetTextExtentPointW(HDC    hdc,
    POINTLOS2  widthHeight = { 0, 0};
    pDCData    pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
 
-   dprintf(("GDI32: GetTextExtentPointW %ls", lpString));
+   dprintf(("GDI32: GetTextExtentPointW %x %.*ls %d", hdc, cbString, lpString, cbString));
    if(pHps == NULL)
    {
       SetLastError(ERROR_INVALID_HANDLE);
@@ -459,7 +459,7 @@ BOOL WIN32API GetTextExtentPointW(HDC    hdc,
    astring = (char *)malloc( len + 1 );
    lstrcpynWtoA(astring, lpString, len + 1 );
 
-   BOOL ret = OSLibGpiQueryTextBox(pHps, cbString, astring, TXTBOXOS_COUNT, pts);
+   rc = OSLibGpiQueryTextBox(pHps, cbString, astring, TXTBOXOS_COUNT, pts);
    free(astring);
 
    if(rc == FALSE)
@@ -479,7 +479,7 @@ BOOL WIN32API GetTextExtentPointW(HDC    hdc,
          lpSize->cx = lpSize->cx * alArray[0] / alArray[1];
    }
 
-   dprintf(("GDI32: GetTextExtentPointW %x %ls %d returned %d (%d,%d)", hdc, lpString, cbString, rc, lpSize->cx, lpSize->cy));
+   dprintf(("GDI32: GetTextExtentPointW %x %.*ls %d returned %d (%d,%d)", hdc, cbString, lpString, cbString, rc, lpSize->cx, lpSize->cy));
    SetLastError(ERROR_SUCCESS);
    return TRUE;
 }
