@@ -1,4 +1,3 @@
-/* $Id: heapshared.h,v 1.4 2001-09-01 12:56:18 sandervl Exp $ */
 /*
  * Shared heap functions for OS/2
  *
