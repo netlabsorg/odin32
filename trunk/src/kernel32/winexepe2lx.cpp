@@ -1,4 +1,4 @@
-/* $Id: winexepe2lx.cpp,v 1.2 1999-10-14 01:37:56 bird Exp $ */
+/* $Id: winexepe2lx.cpp,v 1.3 1999-10-17 01:49:09 bird Exp $ */
 
 /*
  * Win32 PE2LX Exe class
@@ -51,6 +51,8 @@
  */
 void WIN32API RegisterPe2LxExe(ULONG ulPe2LxVersion, HINSTANCE hinstance, ULONG ulReserved)
 {
+    Win32Pe2LxExe *pWinPe2LxExe;
+
     /* I/O init. */
     if (getenv("WIN32_IOPL2"))
         io_init1();
@@ -72,23 +74,22 @@ void WIN32API RegisterPe2LxExe(ULONG ulPe2LxVersion, HINSTANCE hinstance, ULONG 
     dprintf(("RegisterPe2LxExe: name = %s\n", OSLibGetDllName(hinstance)));
 
     /* Create Pe2Lx Exe object. */
-    try
+    pWinPe2LxExe = new Win32Pe2LxExe(hinstance, (ulPe2LxVersion & 0x80000000UL) == 0x80000000UL);
+    if (pWinPe2LxExe == NULL)
     {
-        Win32Pe2LxExe *pWinPe2LxExe;
-        pWinPe2LxExe = new Win32Pe2LxExe(hinstance, (ulPe2LxVersion & 0x80000000UL) == 0x80000000UL);
-        if (pWinPe2LxExe == NULL)
-            throw ((ULONG)ERROR_NOT_ENOUGH_MEMORY);
-
-        /* Call start (which calls the entry point). */
-        /*DebugInt3();*/
-        pWinPe2LxExe->start();
-    }
-    catch (ULONG ul)
-    {
-        eprintf(("Win32Pe2LxExe creation failed! ul=%d\n", ul));
-        DebugInt3();
+        eprintf(("RegisterPe2LxExe: new returned a NULL-pointer\n"));
         return;
     }
+    if (!pWinPe2LxExe->init())
+    {
+        eprintf(("RegisterPe2LxExe: init-method failed.\n"));
+        delete pWinPe2LxExe;
+        return;
+    }
+
+    /* Call start (which calls the entry point). */
+    /*DebugInt3();*/
+    pWinPe2LxExe->start();
 }
 
 
@@ -101,24 +102,11 @@ void WIN32API RegisterPe2LxExe(ULONG ulPe2LxVersion, HINSTANCE hinstance, ULONG 
  * @author    Sander van Leeuwen, knut st. osmundsen
  * @remark    Win32Pe2LxImage may throw an exception!
  */
-Win32Pe2LxExe::Win32Pe2LxExe(HINSTANCE hinstance, BOOL fWin32k) throw(ULONG):
-    Win32ImageBase(hinstance),
+Win32Pe2LxExe::Win32Pe2LxExe(HINSTANCE hinstance, BOOL fWin32k)
+    : Win32ImageBase(hinstance),
     Win32ExeBase(hinstance),
     Win32Pe2LxImage(hinstance, fWin32k)
 {
-    fConsoleApp = pNtHdrs->OptionalHeader.Subsystem == IMAGE_SUBSYSTEM_WINDOWS_CUI;
-
-    /* console app? */
-    if (fConsoleApp)
-    {
-        APIRET rc;
-
-        dprintf(("Console application!\n"));
-
-        rc = iConsoleInit();    /* initialize console subsystem */
-        if (rc != NO_ERROR)     /* check for errors */
-            dprintf(("KERNEL32:Win32Image:Init ConsoleInit failed with %u.\n", rc));
-    }
 }
 
 
@@ -129,4 +117,38 @@ Win32Pe2LxExe::Win32Pe2LxExe(HINSTANCE hinstance, BOOL fWin32k) throw(ULONG):
  */
 Win32Pe2LxExe::~Win32Pe2LxExe()
 {
+
 }
+
+
+/**
+ * Init object.
+ * Must be called immedeately after the object construction.
+ * @returns   Success indicator. (TRUE == success)
+ * @sketch
+ * @status    completely implemented.
+ * @author    knut st. osmundsen
+ */
+BOOL Win32Pe2LxExe::init()
+{
+    if (Win32Pe2LxImage::init())
+    {
+        fConsoleApp = pNtHdrs->OptionalHeader.Subsystem == IMAGE_SUBSYSTEM_WINDOWS_CUI;
+
+        /* console app? */
+        if (fConsoleApp)
+        {
+            APIRET rc;
+
+            dprintf(("Console application!\n"));
+
+            rc = iConsoleInit();    /* initialize console subsystem */
+            if (rc != NO_ERROR)     /* check for errors */
+                dprintf(("KERNEL32:Win32Image:Init ConsoleInit failed with %u.\n", rc));
+        }
+    }
+    else
+        return FALSE;
+    return TRUE;
+}
+
