@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.87 1999-11-21 17:07:51 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.88 1999-11-21 17:34:11 achimha Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1516,6 +1516,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
           windowNameW = (LPWSTR)_smalloc((strlen(lpsz)+1)*sizeof(WCHAR));
           lstrcpyAtoW(windowNameW, windowNameA);
           wndNameLength = strlen(windowNameA)+1; //including 0 terminator
+          dprintf(("WM_SETTEXT of %d to %s\n", Win32Hwnd, lParam));
         } else
         {
           windowNameA = NULL;
