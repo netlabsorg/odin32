@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.80 2001-11-29 00:20:45 phaller Exp $ */
+/* $Id: HandleManager.cpp,v 1.81 2001-11-29 13:38:49 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -1101,8 +1101,7 @@ HFILE HMCreateFile(LPCSTR lpFileName,
 
   if (rc != NO_ERROR)     /* oops, creation failed within the device handler */
   {
-    TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
-    
+    TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;  
     
     // Note:
     // device handlers have to return an Win32-style error code
@@ -1119,13 +1118,6 @@ HFILE HMCreateFile(LPCSTR lpFileName,
            &HMHandleTemp,
            sizeof(HMHANDLEDATA));
   }
-
-
-#ifdef DEBUG_LOCAL
-  dprintf(("KERNEL32/HandleManager: CreateFile(%s)=%08xh\n",
-           lpFileName,
-           iIndexNew));
-#endif
 
   return (HFILE)iIndexNew;                             /* return valid handle */
 }

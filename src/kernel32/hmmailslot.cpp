@@ -1,4 +1,4 @@
-/* $Id: hmmailslot.cpp,v 1.4 2001-11-28 23:33:36 phaller Exp $
+/* $Id: hmmailslot.cpp,v 1.5 2001-11-29 13:38:51 sandervl Exp $
  *
  * Win32 mailslot APIs
  *
@@ -189,10 +189,10 @@ DWORD HMMailslotClass::CreateFile (HANDLE        hHandle,
   pHMHandleData->dwUserData = 0;
 
   char *pipename = (char *)alloca(strlen(lpFileName)+16);
-  if(pipename == NULL) 
-  {
-    DebugInt3();
-    return ERROR_NOT_ENOUGH_MEMORY;
+  if(pipename == NULL) {
+      DebugInt3();
+      SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+      return FALSE;
   }
   strcpy(pipename, "\\\\.\\pipe\\");
   strcat(pipename, lpFileName);
@@ -214,10 +214,9 @@ tryagain:
   }
   //todo: lookup name and fail if exists
   mailslot = new HMMailSlotInfo(lpFileName, hPipe, -1, 0, FALSE, (LPSECURITY_ATTRIBUTES)lpSecurityAttributes);
-  if(mailslot == NULL) 
-  {
-    DebugInt3();
-    return ERROR_NOT_ENOUGH_MEMORY;
+  if(mailslot == NULL) {
+      DebugInt3();
+      return ERROR_NOT_ENOUGH_MEMORY;
   }
   pHMHandleData->dwUserData = (DWORD)mailslot;
   return NO_ERROR;
