@@ -1,4 +1,4 @@
-/* $Id: hmopen32.cpp,v 1.2 1999-06-17 18:44:06 phaller Exp $ */
+/* $Id: hmopen32.cpp,v 1.3 1999-06-17 21:52:01 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -9,11 +9,16 @@
 /*****************************************************************************
  * Remark                                                                    *
  *****************************************************************************
-
- - do CreateFile + OpenFile allocate handles
- - does CloseHandle remove the handle ?
  */
 
+//#define DEBUG_LOCAL
+
+#ifdef DEBUG_LOCAL
+#  define dprintfl(a) dprintf(a)
+#else
+inline void ignore_dprintf(...){}
+#  define dprintfl(a) ignore_dprintf(a)
+#endif
 
 /*****************************************************************************
  * Includes                                                                  *
@@ -54,7 +59,7 @@ DWORD  HMDeviceOpen32Class::_DeviceRequest (PHMHANDLEDATA pHMHandleData,
                                         ULONG         arg3,
                                         ULONG         arg4)
 {
-  dprintf(("KERNEL32: HandleManager::Open32::_DeviceRequest %s(%08x,%08x) - stub?\n",
+  dprintfl(("KERNEL32: HandleManager::Open32::_DeviceRequest %s(%08x,%08x) - stub?\n",
            lpHMDeviceName,
            pHMHandleData,
            ulRequestCode));
@@ -88,7 +93,7 @@ DWORD HMDeviceOpen32Class::CreateFile (LPCSTR        lpFileName,
   HFILE hFile;
   HFILE hTemplate;
 
-  dprintf(("KERNEL32: HandleManager::Open32::CreateFile %s(%s,%08x,%08x,%08x) - stub?\n",
+  dprintfl(("KERNEL32: HandleManager::Open32::CreateFile %s(%s,%08x,%08x,%08x) - stub?\n",
            lpHMDeviceName,
            lpFileName,
            pHMHandleData,
@@ -140,12 +145,12 @@ DWORD HMDeviceOpen32Class::CloseHandle(PHMHANDLEDATA pHMHandleData)
 {
   BOOL bRC;
 
-  dprintf(("KERNEL32: HandleManager::Open32::CloseHandle(%08x)\n",
+  dprintfl(("KERNEL32: HandleManager::Open32::CloseHandle(%08x)\n",
            pHMHandleData->hWinHandle));
 
   bRC = O32_CloseHandle(pHMHandleData->hWinHandle);
 
-  dprintf(("KERNEL32: HandleManager::Open32::CloseHandle returned %08xh\n",
+  dprintfl(("KERNEL32: HandleManager::Open32::CloseHandle returned %08xh\n",
            bRC));
 
   return (DWORD)bRC;
@@ -176,7 +181,7 @@ DWORD HMDeviceOpen32Class::ReadFile(PHMHANDLEDATA pHMHandleData,
 {
   BOOL bRC;
 
-  dprintf(("KERNEL32: HandleManager::Open32::ReadFile %s(%08x,%08x,%08x,%08x,%08x) - stub?\n",
+  dprintfl(("KERNEL32: HandleManager::Open32::ReadFile %s(%08x,%08x,%08x,%08x,%08x) - stub?\n",
            lpHMDeviceName,
            pHMHandleData,
            lpBuffer,
@@ -190,7 +195,7 @@ DWORD HMDeviceOpen32Class::ReadFile(PHMHANDLEDATA pHMHandleData,
                      lpNumberOfBytesRead,
                      lpOverlapped);
 
-  dprintf(("KERNEL32: HandleManager::Open32::ReadFile returned %08xh\n",
+  dprintfl(("KERNEL32: HandleManager::Open32::ReadFile returned %08xh\n",
            bRC));
 
   return (DWORD)bRC;
@@ -221,7 +226,7 @@ DWORD HMDeviceOpen32Class::WriteFile(PHMHANDLEDATA pHMHandleData,
 {
   BOOL bRC;
 
-  dprintf(("KERNEL32: HandleManager::Open32::WriteFile %s(%08x,%08x,%08x,%08x,%08x) - stub?\n",
+  dprintfl(("KERNEL32: HandleManager::Open32::WriteFile %s(%08x,%08x,%08x,%08x,%08x) - stub?\n",
            lpHMDeviceName,
            pHMHandleData,
            lpBuffer,
@@ -235,7 +240,7 @@ DWORD HMDeviceOpen32Class::WriteFile(PHMHANDLEDATA pHMHandleData,
                       lpNumberOfBytesWritten,
                       lpOverlapped);
 
-  dprintf(("KERNEL32: HandleManager::Open32::WriteFile returned %08xh\n",
+  dprintfl(("KERNEL32: HandleManager::Open32::WriteFile returned %08xh\n",
            bRC));
 
   return (DWORD)bRC;
@@ -256,7 +261,7 @@ DWORD HMDeviceOpen32Class::WriteFile(PHMHANDLEDATA pHMHandleData,
 
 DWORD HMDeviceOpen32Class::GetFileType(PHMHANDLEDATA pHMHandleData)
 {
-  dprintf(("KERNEL32: HandleManager::Open32::GetFileType %s(%08x)\n",
+  dprintfl(("KERNEL32: HandleManager::Open32::GetFileType %s(%08x)\n",
            lpHMDeviceName,
            pHMHandleData));
 
@@ -280,7 +285,7 @@ DWORD HMDeviceOpen32Class::GetFileType(PHMHANDLEDATA pHMHandleData)
 DWORD HMDeviceOpen32Class::GetFileInformationByHandle(PHMHANDLEDATA               pHMHandleData,
                                                       BY_HANDLE_FILE_INFORMATION* pHFI)
 {
-  dprintf(("KERNEL32: HandleManager::Open32::GetFileInformationByHandle %s(%08xh,%08xh)\n",
+  dprintfl(("KERNEL32: HandleManager::Open32::GetFileInformationByHandle %s(%08xh,%08xh)\n",
            lpHMDeviceName,
            pHMHandleData,
            pHFI));
@@ -304,7 +309,7 @@ DWORD HMDeviceOpen32Class::GetFileInformationByHandle(PHMHANDLEDATA             
 
 BOOL HMDeviceOpen32Class::SetEndOfFile(PHMHANDLEDATA pHMHandleData)
 {
-  dprintf(("KERNEL32: HandleManager::Open32::SetEndOfFile %s(%08xh)\n",
+  dprintfl(("KERNEL32: HandleManager::Open32::SetEndOfFile %s(%08xh)\n",
            lpHMDeviceName,
            pHMHandleData));
 
@@ -332,7 +337,7 @@ BOOL HMDeviceOpen32Class::SetFileTime(PHMHANDLEDATA pHMHandleData,
                                       LPFILETIME pFT2,
                                       LPFILETIME pFT3)
 {
-  dprintf(("KERNEL32: HandleManager::Open32::SetFileTime %s(%08xh,%08xh,%08xh,%08xh)\n",
+  dprintfl(("KERNEL32: HandleManager::Open32::SetFileTime %s(%08xh,%08xh,%08xh,%08xh)\n",
            lpHMDeviceName,
            pHMHandleData,
            pFT1,
@@ -362,7 +367,7 @@ BOOL HMDeviceOpen32Class::SetFileTime(PHMHANDLEDATA pHMHandleData,
 DWORD HMDeviceOpen32Class::GetFileSize(PHMHANDLEDATA pHMHandleData,
                                        PDWORD        pSize)
 {
-  dprintf(("KERNEL32: HandleManager::Open32::GetFileSize %s(%08xh,%08xh)\n",
+  dprintfl(("KERNEL32: HandleManager::Open32::GetFileSize %s(%08xh,%08xh)\n",
            lpHMDeviceName,
            pHMHandleData,
            pSize));
@@ -392,7 +397,7 @@ DWORD HMDeviceOpen32Class::SetFilePointer(PHMHANDLEDATA pHMHandleData,
                                           PLONG         lpDistanceToMoveHigh,
                                           DWORD         dwMoveMethod)
 {
-  dprintf(("KERNEL32: HandleManager::Open32::SetFilePointer %s(%08xh,%08xh,%08xh,%08xh)\n",
+  dprintfl(("KERNEL32: HandleManager::Open32::SetFilePointer %s(%08xh,%08xh,%08xh,%08xh)\n",
            lpHMDeviceName,
            pHMHandleData,
            lDistanceToMove,
@@ -428,7 +433,7 @@ DWORD HMDeviceOpen32Class::LockFile(PHMHANDLEDATA pHMHandleData,
                                     DWORD         arg4,
                                     DWORD         arg5)
 {
-  dprintf(("KERNEL32: HandleManager::Open32::LockFile %s(%08xh,%08xh,%08xh,%08xh,%08xh)\n",
+  dprintfl(("KERNEL32: HandleManager::Open32::LockFile %s(%08xh,%08xh,%08xh,%08xh,%08xh)\n",
            lpHMDeviceName,
            pHMHandleData,
            arg2,
@@ -470,7 +475,7 @@ DWORD HMDeviceOpen32Class::LockFileEx(PHMHANDLEDATA pHMHandleData,
                                       LPOVERLAPPED  lpOverlapped)
 {
 
-  dprintf(("KERNEL32: HandleManager::Open32::LockFileEx %s(%08xh,%08xh,%08xh,%08xh,%08xh,%08xh)\n",
+  dprintfl(("KERNEL32: HandleManager::Open32::LockFileEx %s(%08xh,%08xh,%08xh,%08xh,%08xh,%08xh)\n",
            lpHMDeviceName,
            pHMHandleData,
            dwFlags,
@@ -512,7 +517,7 @@ DWORD HMDeviceOpen32Class::OpenFile (LPCSTR        lpFileName,
 {
   HFILE hFile;
 
-  dprintf(("KERNEL32: HandleManager::Open32::OpenFile %s(%s,%08x,%08x,%08x) - stub?\n",
+  dprintfl(("KERNEL32: HandleManager::Open32::OpenFile %s(%s,%08x,%08x,%08x) - stub?\n",
            lpHMDeviceName,
            lpFileName,
            pHMHandleData,
@@ -555,7 +560,7 @@ DWORD HMDeviceOpen32Class::UnlockFile(PHMHANDLEDATA pHMHandleData,
                                       DWORD         arg4,
                                       DWORD         arg5)
 {
-  dprintf(("KERNEL32: HandleManager::Open32::UnlockFile %s(%08xh,%08xh,%08xh,%08xh,%08xh)\n",
+  dprintfl(("KERNEL32: HandleManager::Open32::UnlockFile %s(%08xh,%08xh,%08xh,%08xh,%08xh)\n",
            lpHMDeviceName,
            pHMHandleData,
            arg2,
@@ -597,7 +602,7 @@ DWORD HMDeviceOpen32Class::UnlockFileEx(PHMHANDLEDATA pHMHandleData,
                                         LPOVERLAPPED  lpOverlapped)
 {
 
-  dprintf(("KERNEL32: HandleManager::Open32::UnlockFileEx %s(%08xh,%08xh,%08xh,%08xh,%08xh,%08xh)\n",
+  dprintfl(("KERNEL32: HandleManager::Open32::UnlockFileEx %s(%08xh,%08xh,%08xh,%08xh,%08xh,%08xh)\n",
            lpHMDeviceName,
            pHMHandleData,
            dwFlags,

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 1999-06-17 18:21:43 phaller Exp $
+# $Id: makefile,v 1.6 1999-06-17 21:52:01 phaller Exp $
 
 #
 # PD-Win32 API
@@ -19,6 +19,7 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE) /Tm+
 
 
 OBJS = KERNEL32.OBJ \
+       KOBJECTS.OBJ \
        CONSOLE.OBJ \
        CONIN.OBJ \
        CONBUFFER.OBJ \
@@ -96,6 +97,8 @@ kernel32.OBJ: kernel32.cpp \
     wprocess.h \
     os2util.h \
     $(PDWIN32_INCLUDE)\nameid.h
+
+kobjects.obj: kobjects.cpp
 
 comm.OBJ: \
     .\comm.cpp \
