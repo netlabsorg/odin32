@@ -1,4 +1,4 @@
-/* $Id: wsock2.cpp,v 1.2 2001-07-07 14:29:40 achimha Exp $ */
+/* $Id: wsock2.cpp,v 1.3 2001-10-13 18:51:08 sandervl Exp $ */
 
 /*
  *
@@ -35,7 +35,7 @@ int WINAPI WSAEventSelect(SOCKET s, WSAEVENT hEvent, LONG lEvent)
 int WINAPI WSAEnumNetworkEvents(SOCKET s, WSAEVENT hEvent, LPWSANETWORKEVENTS lpEvent)
 {
 // called too often in some apps, makes log file grow too fast
-//   dprintf(("WSAEnumNetworkEvents 0x%x 0x%x 0x%x NOT CORRECTLY IMPLEMENTED", s, hEvent, lpEvent));
+   dprintf2(("WSAEnumNetworkEvents 0x%x 0x%x 0x%x NOT CORRECTLY IMPLEMENTED", s, hEvent, lpEvent));
 
    if(!fWSAInitialized)
    {

@@ -1,4 +1,4 @@
-/* $Id: wsa.cpp,v 1.6 2000-05-02 13:09:43 bird Exp $ */
+/* $Id: wsa.cpp,v 1.7 2001-10-13 18:51:08 sandervl Exp $ */
 
 /*
  *
@@ -90,6 +90,7 @@ ODINFUNCTION0(int,WSACleanup)
     if( pwsi ) {
 	if( --num_startup > 0 ) return 0;
 
+        WSACancelAllAsyncRequests();
         winsockcleanupsockets();
 
 	fWSAInitialized = FALSE;
@@ -166,8 +167,11 @@ ODINFUNCTION2(int,__WSAFDIsSet,SOCKET, s, ws_fd_set*,set)
 {
   int i = set->fd_count;
 
-  while (i--)
-      if (set->fd_array[i] == s) return 1;
+  if(set) {
+  	while (i--) {
+      		if (set->fd_array[i] == s) return 1;
+	}
+  }
 
   return 0;
 }
