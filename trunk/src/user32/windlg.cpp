@@ -1,4 +1,4 @@
-/* $Id: windlg.cpp,v 1.6 1999-10-12 20:16:24 sandervl Exp $ */
+/* $Id: windlg.cpp,v 1.7 1999-10-17 20:18:46 sandervl Exp $ */
 /*
  * Win32 dialog apis for OS/2
  *
@@ -220,20 +220,19 @@ HWND WIN32API GetNextDlgTabItem(HWND hwndDlg, HWND hwndCtrl, BOOL fPrevious)
     return dialog->getNextDlgTabItem(hwndCtrl, fPrevious);
 }
 //******************************************************************************
-//TODO: Can be used for any parent-child pair
+//Can be used for any parent-child pair
 //******************************************************************************
 HWND WIN32API GetDlgItem(HWND hwnd, int id)
 {
-  Win32Dialog *dialog;
-  Win32BaseWindow *dlgcontrol;
+  Win32BaseWindow *dlgcontrol, *window;
 
-    dialog = (Win32Dialog *)Win32BaseWindow::GetWindowFromHandle(hwnd);
-    if(!dialog || !dialog->IsDialog()) {
+    window = (Win32Dialog *)Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if(!window) {
         dprintf(("GetDlgItem, window %x not found", hwnd));
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
-    dlgcontrol = dialog->getDlgItem(id);
+    dlgcontrol = window->FindWindowById(id);
     if(dlgcontrol) {
     	dprintf(("USER32: GetDlgItem %x %d returned %x\n", hwnd, id, dlgcontrol->getWindowHandle()));
         return dlgcontrol->getWindowHandle();

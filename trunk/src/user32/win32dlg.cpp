@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.17 1999-10-17 15:46:09 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.18 1999-10-17 20:18:45 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -1152,19 +1152,6 @@ HWND Win32Dialog::getNextDlgGroupItem(HWND hwndCtrl, BOOL fPrevious)
     retvalue = lastchild->getWindowHandle();
 END:
     return retvalue;
-}
-//******************************************************************************
-//******************************************************************************
-Win32BaseWindow *Win32Dialog::getDlgItem(int id)
-{
-    for (Win32BaseWindow *child = (Win32BaseWindow *)getFirstChild(); child; child = (Win32BaseWindow *)child->getNextChild())
-    {
-        if (child->getWindowId() == id)
-        {
-            return child;
-        }
-    }
-    return 0;
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.28 1999-10-17 16:42:40 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.29 1999-10-17 20:18:46 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -196,6 +196,8 @@ Win32BaseWindow *getTopParent();
        LRESULT  DefWndControlColor(UINT ctlType, HDC hdc);
 
          void   NotifyParent(UINT Msg, WPARAM wParam, LPARAM lParam);
+
+Win32BaseWindow *FindWindowById(int id);
 
     static HWND FindWindowEx(HWND hwndParent, HWND hwndChildAfter, LPSTR lpszClass, LPSTR lpszWindow,
                              BOOL fUnicode = 0);
