@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.109 2001-01-23 18:31:26 sandervl Exp $
+# $Id: makefile,v 1.110 2001-02-17 21:48:23 bird Exp $
 
 #
 # Odin32 API
@@ -164,6 +164,8 @@ $(OBJDIR)\exceptions.obj: exceptions.cpp
     $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -Op- \
         -Fo$(OBJDIR)\$(@B).obj -c exceptions.cpp
 !else
-!   error "Compiler is not supported yet."
+# Since this only turns off stack optimizations I take it's a VAC only fix.
+# -kso (2001-02-17)
+# !   error "Compiler is not supported yet."
 !endif
 
