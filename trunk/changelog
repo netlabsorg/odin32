@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2165 2002-06-15 12:11:45 sandervl Exp $ */
+/* $Id: changelog,v 1.2166 2002-06-15 12:32:38 sandervl Exp $ */
 
  2002-06-15: Sander van Leeuwen <sandervl@innotek.de>
     - SETUPAPI: o Wine resync + added debug wrappers
@@ -7,6 +7,7 @@
     - NTDLL:    o Forward heap functions to kernel32
     - QUARTZ:   o Removed old code (stub dll now)
     - AVIFIL32: o Resync with Wine
+    - INSTALL:  o Add MS Shell Dlg->WarpSans font conversion
 
  2002-06-13: Sander van Leeuwen <sandervl@innotek.de>
     - USER32:   o SetCustomWndHandleSemName added to override shared semaphore
