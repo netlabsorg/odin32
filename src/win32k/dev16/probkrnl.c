@@ -1,4 +1,4 @@
-/* $Id: probkrnl.c,v 1.28 2000-10-27 10:59:13 bird Exp $
+/* $Id: probkrnl.c,v 1.29 2000-12-02 23:28:51 bird Exp $
  *
  * Description:   Autoprobes the os2krnl file and os2krnl[*].sym files.
  *                Another Hack!
@@ -632,7 +632,7 @@ int LookupKrnlEntry(unsigned short usBuild, unsigned short fKernel, unsigned cha
         {   /* found matching entry! */
             int j;
             int rc;
-            register PKRNLDBENTRY pEntry = &aKrnlSymDB[i];
+            PKRNLDBENTRY pEntry = &aKrnlSymDB[i];
 
             dprintf(("LookUpKrnlEntry - found entry for this kernel!\n"));
             kstrcpy(szSymbolFile, "Win32k Symbol Database");
