@@ -1,4 +1,4 @@
-/* $Id: oslibmisc.cpp,v 1.12 2001-03-25 22:35:37 sandervl Exp $ */
+/* $Id: oslibmisc.cpp,v 1.13 2001-08-09 08:45:06 sandervl Exp $ */
 /*
  * Misc OS/2 util. procedures
  *
@@ -255,10 +255,18 @@ ULONG OSLibWinInitialize()
 //******************************************************************************
 ULONG OSLibWinQueryMsgQueue(ULONG hab)
 {
-//  ULONG hmq;
+  ULONG hmq;
 
-//  hmq = WinQueryWindowULong(HWND_DESKTOP, QWL_HMQ);
-  return (ULONG)WinCreateMsgQueue((HAB)hab, 0);
+  hmq = (ULONG)WinCreateMsgQueue((HAB)hab, 0);
+  if(!hmq) {
+      PTIB ptib;
+      PPIB ppib;
+
+      DosGetInfoBlocks(&ptib, &ppib);
+
+      hmq = WinQueueFromID(hab, ppib->pib_ulpid, ptib->tib_ptib2->tib2_ultid);
+  }
+  return hmq;
 }
 //******************************************************************************
 //******************************************************************************
