@@ -1,4 +1,4 @@
-/* $Id: comctl32undoc.cpp,v 1.7 2000-08-02 15:10:23 bird Exp $ */
+/* $Id: comctl32undoc.cpp,v 1.8 2001-03-31 13:25:26 sandervl Exp $ */
 /*
  * Undocumented functions from COMCTL32.DLL
  *
@@ -2519,19 +2519,6 @@ BOOL WINAPI comctl32_413( HWND hw, DWORD b, DWORD c, DWORD d)
    return TRUE;
 }
 
-/*************************************************************************
- * InitMUILanguage [COMCTL32.70]
- *
- * FIXME: What's this supposed to do?  Apparently some i18n thing.
- *
- */
-
-BOOL WINAPI InitMUILanguage( LANGID uiLang)
-{
-   dprintf(("COMCTL32: InitMUILanguage - empty stub!"));
-
-   return TRUE;
-}
 
 DWORD WINAPI COMCTL32_389(DWORD x1, DWORD x2)
 {
@@ -2558,56 +2545,3 @@ DWORD WINAPI COMCTL32_390(DWORD x1, DWORD x2, DWORD x3, DWORD x4)
 }
 
 
-/*****************************************************************************
- * Name      :
- * Purpose   :
- * Parameters:
- * Variables :
- * Result    :
- * Remark    : COMCTL32.9
- *             Likely to have something to do with COM object.
- * Status    : UNTESTED UNKNOWN STUB
- *
- * Author    : Patrick Haller [Sun, 2000/06/09 09:00]
- *****************************************************************************/
-
-DWORD WINAPI COMCTL32_9(DWORD arg0,
-                        DWORD arg1,
-                        DWORD arg2,
-                        DWORD arg3)
-{
-  dprintf(("COMCTL32: comctl32_9: %x %x %x %x not implemented!!",
-           arg0,
-           arg1,
-           arg2,
-           arg3));
-
-  return 0;
-}
-
-/*****************************************************************************
- * Name      :
- * Purpose   :
- * Parameters:
- * Variables :
- * Result    :
- * Remark    : COMCTL32.10
- *             Likely to have something to do with COM object.
- * Status    : UNTESTED UNKNOWN STUB
- *
- * Author    : Patrick Haller [Sun, 2000/06/09 09:00]
- *****************************************************************************/
-
-DWORD WINAPI COMCTL32_10(DWORD arg0,
-                         DWORD arg1,
-                         DWORD arg2,
-                         DWORD arg3)
-{
-  dprintf(("COMCTL32: comctl32_10: %x %x %x %x not implemented!!",
-           arg0,
-           arg1,
-           arg2,
-           arg3));
-
-  return 0;
-}

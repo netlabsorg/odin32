@@ -1,4 +1,4 @@
-/* $Id: updown.cpp,v 1.2 2000-03-18 16:17:35 cbratschi Exp $ */
+/* $Id: updown.cpp,v 1.3 2001-03-31 13:25:27 sandervl Exp $ */
 /*
  * Updown control
  *
@@ -38,6 +38,7 @@
 #include "winnls.h"
 #include "ccbase.h"
 #include "updown.h"
+#include "comctl32.h"
 
 /* Control configuration constants */
 

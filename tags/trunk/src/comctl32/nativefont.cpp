@@ -1,4 +1,4 @@
-/* $Id: nativefont.cpp,v 1.3 2000-03-21 17:30:43 cbratschi Exp $ */
+/* $Id: nativefont.cpp,v 1.4 2001-03-31 13:25:26 sandervl Exp $ */
 /*
  * Native Font control
  *
@@ -20,6 +20,7 @@
 #include "commctrl.h"
 #include "ccbase.h"
 #include "nativefont.h"
+#include "comctl32.h"
 
 #define NATIVEFONT_GetInfoPtr(hwnd) ((NATIVEFONT_INFO*)getInfoPtr(hwnd))
 

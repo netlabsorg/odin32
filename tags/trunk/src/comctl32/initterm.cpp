@@ -42,8 +42,7 @@ extern "C" {
 
 static HMODULE dllHandle = 0;
 
-void CDECL RegisterCOMCTL32WindowClasses(unsigned long hinstDLL);
-void CDECL UnregisterCOMCTL32WindowClasses(void);
+BOOL WINAPI COMCTL32_LibMain (HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved);
 
 //******************************************************************************
 //******************************************************************************
@@ -52,19 +51,16 @@ BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
    switch (fdwReason)
    {
    case DLL_PROCESS_ATTACH:
-        /* register Win32 window classes implemented in this DLL */
-        RegisterCOMCTL32WindowClasses(hinstDLL);
-	return TRUE;
-
    case DLL_THREAD_ATTACH:
    case DLL_THREAD_DETACH:
-	return TRUE;
+        return COMCTL32_LibMain(hinstDLL, fdwReason, fImpLoad);
 
    case DLL_PROCESS_DETACH:
-   	/* unregister Win32 window classes */
-   	UnregisterCOMCTL32WindowClasses();
+   {
+        BOOL ret = COMCTL32_LibMain(hinstDLL, fdwReason, fImpLoad);
    	ctordtorTerm();
-	return TRUE;
+	return ret;
+   }
    }
    return FALSE;
 }

@@ -1,4 +1,4 @@
-/* $Id: CCBase.h,v 1.11 2000-11-19 11:51:47 sandervl Exp $ */
+/* $Id: CCBase.h,v 1.12 2001-03-31 13:25:25 sandervl Exp $ */
 /*
  * COMCTL32 Base Functions and Macros for all Controls
  *
@@ -6,6 +6,8 @@
  */
 #ifndef __CCBASE_H
 #define __CCBASE_H
+
+#include <heapstring.h>
 
 #define getInfoPtr(hwnd) ((COMCTL32_HEADER*)GetWindowLongA(hwnd,0))
 #define setInfoPtr(hwnd,infoPtr) (SetWindowLongA(hwnd,0,(DWORD)infoPtr))
@@ -19,13 +21,12 @@ typedef struct
   HWND  hwndNotify;    //notify window
 } COMCTL32_HEADER;
 
-PVOID initControl(HWND hwnd,DWORD dwSize);
-VOID doneControl(HWND hwnd);
-
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+PVOID initControl(HWND hwnd,DWORD dwSize);
+VOID doneControl(HWND hwnd);
 
 LRESULT defComCtl32ProcA(HWND hwnd,UINT Msg,WPARAM wParam,LPARAM lParam);
 LRESULT defComCtl32ProcW(HWND hwnd,UINT Msg,WPARAM wParam,LPARAM lParam);
@@ -64,10 +65,11 @@ VOID drawStubControl(HWND hwnd,HDC hdc);
 INT lstrcmpAtoW(CHAR *textA,WCHAR *textW);
 INT lstrcmpAW(WCHAR *textA,BOOL textaunicode,WCHAR *textB,BOOL textbunicode);
 
+
 //read note in CCBase.cpp!!
 INT lstrcmpniA(CHAR *textA,CHAR *textB,INT len);
 INT lstrcmpniAtoW(CHAR *textA,WCHAR* textB,INT len);
-INT lstrcmpniW(WCHAR *textA,WCHAR *textB,INT len);
+////INT lstrcmpniW(WCHAR *textA,WCHAR *textB,INT len);
 INT lstrcmpniAW(WCHAR *textA,BOOL unicodeA,WCHAR *textB,BOOL unicodeB,INT len);
 
 CHAR*  lstrstrA(CHAR *text,CHAR *subtext);
