@@ -1,4 +1,4 @@
-/* $Id: cdlg.h,v 1.7 2000-10-21 18:42:09 sandervl Exp $ */
+/* $Id: cdlg.h,v 1.8 2002-06-08 07:23:52 sandervl Exp $ */
 /*
  *  Common Dialog Boxes interface (32 bit)
  *
@@ -96,12 +96,16 @@ typedef struct {
 #define PD32_MILIMETERS                       1587
 
 #include "commctrl.h"
-#include "wine/undocshell.h"
+//#include "wine/undocshell.h"
 #include "shellapi.h"
 
 /* DPA */
 #ifdef __WIN32OS2__
 #include <win\shell.h>
+
+LPVOID WINAPI SHAlloc(DWORD);
+DWORD WINAPI SHFree(LPVOID);
+BOOL WINAPI SHGetFolderPathA(HWND,int,HANDLE,DWORD,LPSTR);
 
 #define COMDLG32_DPA_Create             DPA_Create
 #define COMDLG32_DPA_GetPtr             DPA_GetPtr
