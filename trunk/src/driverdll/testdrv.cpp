@@ -1,3 +1,12 @@
+//******************************************************************************
+//******************************************************************************
+// Test sample device driver dll
+//
+// The dll needs to be registered:
+// HKEY_LOCAL_MACHINE\\System\\CurrentControlSet\\Services\\Driver_Name
+//     string key 'DllName' with path of driver dll
+//******************************************************************************
+//******************************************************************************
 #define INCL_DOSPROFILE
 #define INCL_DOSDEVICES
 #define INCL_DOSDEVIOCTL
