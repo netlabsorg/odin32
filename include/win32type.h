@@ -1,4 +1,4 @@
-/* $Id: win32type.h,v 1.37 2000-03-29 15:16:09 cbratschi Exp $ */
+/* $Id: win32type.h,v 1.38 2000-05-05 11:33:39 sandervl Exp $ */
 
 /*
  * Win32 type definitions for OS/2
@@ -377,6 +377,9 @@ typedef UINT    WPARAM;
 typedef double          DATE;
 typedef long            LONG_PTR;
 typedef unsigned long   ULONG_PTR;
+
+typedef BOOL    (* WIN32API PROPENUMPROCEXA)(HWND,LPCSTR,HANDLE,LPARAM);
+typedef BOOL    (* WIN32API PROPENUMPROCEXW)(HWND,LPCWSTR,HANDLE,LPARAM);
 
 
 #define DECLSPEC_IMPORT
