@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.54 1999-10-18 11:59:58 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.55 1999-10-19 12:52:30 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -393,12 +393,13 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   }
   else
   {
-        if (!cs->hwndParent) {
+        SetParent(windowDesktop->getWindowHandle());
+        if (!cs->hwndParent || cs->hwndParent == windowDesktop->getWindowHandle()) {
             owner = NULL;
         }
         else
         {
-            owner = GetWindowFromHandle(cs->hwndParent);
+            owner = GetWindowFromHandle(cs->hwndParent)->GetTopParent();
             if(owner == NULL)
             {
                 dprintf(("HwGetWindowHandleData couldn't find owner window %x!!!", cs->hwndParent));
@@ -2092,11 +2093,6 @@ HWND Win32BaseWindow::SetParent(HWND hwndNewParent)
    }
    else oldhwnd = 0;
 
-   if(hwndNewParent == 0) {//desktop window = parent
-        setParent(NULL);
-        OSLibWinSetParent(getOS2WindowHandle(), OSLIB_HWND_DESKTOP);
-        return oldhwnd;
-   }
    newparent = GetWindowFromHandle(hwndNewParent);
    if(newparent)
    {
@@ -2113,7 +2109,7 @@ HWND Win32BaseWindow::SetParent(HWND hwndNewParent)
 BOOL Win32BaseWindow::IsChild(HWND hwndParent)
 {
     if(getParent()) {
-        return getParent()->getWindowHandle() == hwndParent;
+          return getParent()->getWindowHandle() == hwndParent;
     }
     else  return 0;
 }
@@ -2178,7 +2174,7 @@ BOOL Win32BaseWindow::EnumChildWindows(WNDENUMPROC lpfn, LPARAM lParam)
  HWND hwnd;
  Win32BaseWindow *prevchild = 0, *child = 0;
 
-	dprintf(("EnumChildWindows of %x parameter %x %x (%x)", getWindowHandle(), lpfn, lParam, getFirstChild()));
+    dprintf(("EnumChildWindows of %x parameter %x %x (%x)", getWindowHandle(), lpfn, lParam, getFirstChild()));
     for (child = (Win32BaseWindow *)getFirstChild(); child; child = (Win32BaseWindow *)child->getNextChild())
     {
         dprintf(("EnumChildWindows: enumerating child %x", child->getWindowHandle()));
@@ -2626,19 +2622,19 @@ WORD Win32BaseWindow::SetWindowWord(int index, WORD value)
 //******************************************************************************
 WORD Win32BaseWindow::GetWindowWord(int index)
 {
-   if(index >= 0 && index/4 < nrUserWindowLong)
-   {
+    if(index >= 0 && index/4 < nrUserWindowLong)
+    {
         return ((WORD *)userWindowLong)[index/2];
-   }
-   SetLastError(ERROR_INVALID_PARAMETER);
-   return 0;
+    }
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return 0;
 }
 //******************************************************************************
 //******************************************************************************
 void Win32BaseWindow::setWindowId(DWORD id)
 {
-   windowId = id;
-   OSLibSetWindowID(OS2HwndFrame, id);
+    windowId = id;
+    OSLibSetWindowID(OS2HwndFrame, id);
 }
 //******************************************************************************
 //******************************************************************************
@@ -2646,13 +2642,13 @@ Win32BaseWindow *Win32BaseWindow::GetWindowFromHandle(HWND hwnd)
 {
  Win32BaseWindow *window;
 
-   if(hwnd == NULL && windowDesktop)
-    return windowDesktop;
+    if(hwnd == NULL && windowDesktop)
+         return windowDesktop;
 
-   if(HwGetWindowHandleData(hwnd, (DWORD *)&window) == TRUE) {
-        return window;
-   }
-   else return NULL;
+    if(HwGetWindowHandleData(hwnd, (DWORD *)&window) == TRUE) {
+         return window;
+    }
+    else return NULL;
 }
 //******************************************************************************
 //******************************************************************************

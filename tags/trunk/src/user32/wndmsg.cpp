@@ -1,4 +1,4 @@
-/* $Id: wndmsg.cpp,v 1.5 1999-10-17 20:18:47 sandervl Exp $ */
+/* $Id: wndmsg.cpp,v 1.6 1999-10-19 12:52:31 sandervl Exp $ */
 /*
  * Win32 window message text function for OS/2
  *
@@ -606,55 +606,55 @@ MSGDESC gaMsgs[] =
         0},
     { "WM_HOTKEY", WM_HOTKEY,                               // 0x0312
         MTF_TYPE_KEYBD},
-    { "WM_QUERYAFXWNDPROC", WM_QUERYAFXWNDPROC,             // 0x0360
+    { "WM_QUERYAFXWNDPROC(MFC)", WM_QUERYAFXWNDPROC,             // 0x0360
         0},
-    { "WM_SIZEPARENT", WM_SIZEPARENT,             	    // 0x0361
+    { "WM_SIZEPARENT(MFC)", WM_SIZEPARENT,             	    // 0x0361
         0},
-    { "WM_SETMESSAGESTRING", WM_SETMESSAGESTRING,      	    // 0x0362
+    { "WM_SETMESSAGESTRING(MFC)", WM_SETMESSAGESTRING,      	    // 0x0362
         0},
-    { "WM_IDLEUPDATECMDUI", WM_IDLEUPDATECMDUI,        	    // 0x0363
+    { "WM_IDLEUPDATECMDUI(MFC)", WM_IDLEUPDATECMDUI,        	    // 0x0363
         0},
-    { "WM_INITIALUPDATE", WM_INITIALUPDATE,           	    // 0x0364
+    { "WM_INITIALUPDATE(MFC)", WM_INITIALUPDATE,           	    // 0x0364
         0},
-    { "WM_COMMANDHELP", WM_COMMANDHELP,             	    // 0x0365
+    { "WM_COMMANDHELP(MFC)", WM_COMMANDHELP,             	    // 0x0365
         0},
-    { "WM_HELPHITTEST", WM_HELPHITTEST,             	    // 0x0366
+    { "WM_HELPHITTEST(MFC)", WM_HELPHITTEST,             	    // 0x0366
         0},
-    { "WM_EXITHELPMODE", WM_EXITHELPMODE,             	    // 0x0367
+    { "WM_EXITHELPMODE(MFC)", WM_EXITHELPMODE,             	    // 0x0367
         0},
-    { "WM_RECALCPARENT", WM_RECALCPARENT,             	    // 0x0368
+    { "WM_RECALCPARENT(MFC)", WM_RECALCPARENT,             	    // 0x0368
         0},
-    { "WM_SIZECHILD", WM_SIZECHILD,             	    // 0x0369
+    { "WM_SIZECHILD(MFC)", WM_SIZECHILD,             	    // 0x0369
         0},
-    { "WM_KICKIDLE", WM_KICKIDLE,	             	    // 0x036A
+    { "WM_KICKIDLE(MFC)", WM_KICKIDLE,	             	    // 0x036A
         0},
-    { "WM_QUERYCENTERWND", WM_QUERYCENTERWND,          	    // 0x036B
+    { "WM_QUERYCENTERWND(MFC)", WM_QUERYCENTERWND,          	    // 0x036B
         0},
-    { "WM_DISABLEMODAL", WM_DISABLEMODAL,          	    // 0x036C
+    { "WM_DISABLEMODAL(MFC)", WM_DISABLEMODAL,          	    // 0x036C
         0},
-    { "WM_FLOATSTATUS", WM_FLOATSTATUS,          	    // 0x036D
+    { "WM_FLOATSTATUS(MFC)", WM_FLOATSTATUS,          	    // 0x036D
         0},
-    { "WM_ACTIVATETOPLEVEL", WM_ACTIVATETOPLEVEL,      	    // 0x036E
+    { "WM_ACTIVATETOPLEVEL(MFC)", WM_ACTIVATETOPLEVEL,      	    // 0x036E
         0},
-    { "WM_QUERY3DCONTROLS", WM_QUERY3DCONTROLS,        	    // 0x036F
+    { "WM_QUERY3DCONTROLS(MFC)", WM_QUERY3DCONTROLS,        	    // 0x036F
         0},
-    { "WM_SOCKET_NOTIFY", WM_SOCKET_NOTIFY,          	    // 0x0373
+    { "WM_SOCKET_NOTIFY(MFC)", WM_SOCKET_NOTIFY,          	    // 0x0373
         0},
-    { "WM_SOCKET_DEAD", WM_SOCKET_DEAD,          	    // 0x0374
+    { "WM_SOCKET_DEAD(MFC)", WM_SOCKET_DEAD,          	    // 0x0374
         0},
-    { "WM_POPMESSAGESTRING", WM_POPMESSAGESTRING,      	    // 0x0375
+    { "WM_POPMESSAGESTRING(MFC)", WM_POPMESSAGESTRING,      	    // 0x0375
         0},
-    { "WM_OCC_LOADFROMSTREAM", WM_OCC_LOADFROMSTREAM,  	    // 0x0376
+    { "WM_OCC_LOADFROMSTREAM(MFC)", WM_OCC_LOADFROMSTREAM,  	    // 0x0376
         0},
-    { "WM_OCC_LOADFROMSTORAGE", WM_OCC_LOADFROMSTORAGE,     // 0x0377
+    { "WM_OCC_LOADFROMSTORAGE(MFC)", WM_OCC_LOADFROMSTORAGE,     // 0x0377
         0},
-    { "WM_OCC_INITNEW", WM_OCC_INITNEW,          	    // 0x0378
+    { "WM_OCC_INITNEW(MFC)", WM_OCC_INITNEW,          	    // 0x0378
         0},
-    { "WM_QUEUE_SENTINEL", WM_QUEUE_SENTINEL,               // 0x0379
+    { "WM_QUEUE_SENTINEL(MFC)", WM_QUEUE_SENTINEL,               // 0x0379
         0},
-    { "WM_OCC_LOADFROMSTREAM_EX", WM_OCC_LOADFROMSTREAM_EX, // 0x037A
+    { "WM_OCC_LOADFROMSTREAM_EX(MFC)", WM_OCC_LOADFROMSTREAM_EX, // 0x037A
         0},
-    { "WM_OCC_LOADFROMSTORAGE_EX", WM_OCC_LOADFROMSTORAGE_EX, // 0x037B
+    { "WM_OCC_LOADFROMSTORAGE_EX(MFC)", WM_OCC_LOADFROMSTORAGE_EX, // 0x037B
         0},
     { "WM_DDE_INITIATE", WM_DDE_INITIATE,                   // 0x03E0
         MTF_TYPE_DDE},
