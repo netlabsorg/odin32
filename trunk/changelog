@@ -1,14 +1,23 @@
- /* $Id: changelog,v 1.308 1999-10-12 14:48:26 sandervl Exp $ */
+ /* $Id: changelog,v 1.309 1999-10-12 18:15:31 sandervl Exp $ */
 
- 99-10-11: Sander van Leeuwen <sandervl@xs4all.nl>
+ 99-10-12: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: DrawMenuBar & DrawCaptionTempA bugfix (window handle translation)
                   Added Win32ToOS2FrameHandle method
                   Set default mouse pointer back if app doesn't process WM_MOUSEMOVE
                   message.
-                  Added support for extra messages in default window handler.
+                  Bugfix in button control -> return non-zero if WM_MOUSEMOVE
+                  message doesn't change the cursor.
+                  Same fix in edit & listbox control.
+                  Looks like the same bug is in the scrollbar code.
+                  Preliminary listbox fixes (scrollbar related)
+                  Don't show scrollbars when window is created.
+
+        - USER32: Added support for extra messages in default window handler.
                   Partial support for WM_SYSCOMMAND in default window handler.
                   MDI child bugfix (window now displayed correctly)
                   Only subclass frame when it has a 3d border.
+                  Fixed y mapping bug in OSLibMapWINDOWPOStoSWP (converted
+                  twice (win32 -> os2 -> win32))
 
  99-10-11: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: pmframe finished
