@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.64 2001-10-15 17:10:54 sandervl Exp $
+/* $Id: initterm.cpp,v 1.65 2001-11-24 13:55:57 sandervl Exp $
  *
  * KERNEL32 DLL entry point
  *
@@ -66,8 +66,6 @@ BOOL  fCustomBuild  = FALSE;
 int globLoadNr = 0;
 #pragma data_seg()
 
-static BOOL fInit = FALSE;
-
 /*-------------------------------------------------------------------*/
 /* A clean up routine registered with DosExitList must be used if    */
 /* runtime calls are required and the runtime is dynamically linked. */
@@ -99,7 +97,7 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
     if(fInit == TRUE && ulFlag == 0) {
         return 1; //already initialized
     }
-    fInit = TRUE;
+
     switch (ulFlag)
     {
         case 0 :
