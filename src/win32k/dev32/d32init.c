@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.8 2000-02-08 12:54:25 bird Exp $
+/* $Id: d32init.c,v 1.9 2000-02-18 19:27:29 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -47,14 +47,17 @@ static int      interpretFunctionProlog(char *p, BOOL fOverload);
 static int      procInit(void);
 
 
-/* externs located in 16-bit data segement */
+/* externs located in 16-bit data segement in ProbKrnl.c */
 extern ULONG    _TKSSBase16;
 extern USHORT   _R0FlatCS16;
 extern USHORT   _R0FlatDS16;
 
-
 /* extern(s) located in calltab.asm */
 extern char     callTab[NUMBER_OF_PROCS][MAXSIZE_PROLOG];
+
+/* extern(s) located in mytkExecPgm.asm  */
+extern char     mytkExecPgm;
+
 
 
 /**
@@ -563,15 +566,15 @@ static int procInit(void)
                         (unsigned)myldrOpen,
                         (unsigned)myldrClose,
                         (unsigned)myLDRQAppType,
-                        (unsigned)myldrEnum32bitRelRecs
-                        #if 0 /* Currently problems with with WS4eB */
-                        ,
+                        (unsigned)myldrEnum32bitRelRecs,
                         0,
                         0,
                         0,
                         0,
-                        0
-                        #endif
+                        0,
+                        0,
+                        0,
+                        (unsigned)&mytkExecPgm
                     };
 
                     /* copy function prolog */
