@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.41 2003-03-20 09:15:31 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.42 2003-05-16 10:59:28 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -31,6 +31,8 @@
 #include "oslibwin.h"
 #include "oslibmsg.h"
 #include "hook.h"
+#define INCL_TIMERWIN32
+#include "timer.h"
 
 #define DBG_LOCALLOG	DBG_windowmsg
 #include "dbglocal.h"
@@ -43,6 +45,25 @@ ODINDEBUGCHANNEL(USER32-WINDOWMSG)
 LONG WIN32API DispatchMessageA(const MSG * msg)
 {
     dprintf2(("DispatchMessageA %x %x %x %x %x", msg->hwnd, msg->message, msg->wParam, msg->lParam, msg->time));
+
+    /* Process timer messages */
+    if ((msg->message == WM_TIMER) || (msg->message == WM_SYSTIMER))
+    {
+	if (msg->lParam)
+        {
+/*            HOOK_CallHooks32A( WH_CALLWNDPROC, HC_ACTION, 0, FIXME ); */
+
+            /* before calling window proc, verify whether timer is still valid;
+               there's a slim chance that the application kills the timer
+	       between GetMessage and DispatchMessage API calls */
+            if (!TIMER_IsTimerValid(msg->hwnd, (UINT) msg->wParam, msg->lParam))
+                return 0; /* invalid winproc */
+
+	    return CallWindowProcA( (WNDPROC)msg->lParam, msg->hwnd,
+                                   msg->message, msg->wParam, GetTickCount() );
+        }
+    }
+
     return OSLibWinDispatchMsg((MSG *)msg);
 }
 //******************************************************************************
@@ -50,6 +71,24 @@ LONG WIN32API DispatchMessageA(const MSG * msg)
 LONG WIN32API DispatchMessageW( const MSG * msg)
 {
     dprintf2(("DispatchMessageW %x %x %x %x %x", msg->hwnd, msg->message, msg->wParam, msg->lParam, msg->time));
+
+    /* Process timer messages */
+    if ((msg->message == WM_TIMER) || (msg->message == WM_SYSTIMER))
+    {
+	if (msg->lParam)
+        {
+/*            HOOK_CallHooks32A( WH_CALLWNDPROC, HC_ACTION, 0, FIXME ); */
+
+            /* before calling window proc, verify whether timer is still valid;
+               there's a slim chance that the application kills the timer
+	       between GetMessage and DispatchMessage API calls */
+            if (!TIMER_IsTimerValid(msg->hwnd, (UINT) msg->wParam, msg->lParam))
+                return 0; /* invalid winproc */
+
+	    return CallWindowProcA( (WNDPROC)msg->lParam, msg->hwnd,
+                                   msg->message, msg->wParam, GetTickCount() );
+        }
+    }
     return OSLibWinDispatchMsg((MSG *)msg, TRUE);
 }
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: timer.cpp,v 1.15 2003-05-16 09:21:00 sandervl Exp $ */
+/* $Id: timer.cpp,v 1.16 2003-05-16 10:59:27 sandervl Exp $ */
 
 /*
  * timer functions for USER32
@@ -30,10 +30,6 @@
 #ifndef OPEN32API
 #define OPEN32API _System
 #endif
-
-#define WM_TIMER_W    0x0113
-#define WM_SYSTIMER_W 0x0118
-typedef VOID (CALLBACK *TIMERPROC)(HWND hwnd, UINT msg, UINT id, DWORD dwTime);
 
 typedef struct tagTIMER
 {
@@ -67,23 +63,49 @@ inline void LeaveCriticalSection (void)
    DosLeaveCriticalSection(&timercritsect);
 }
 
-BOOL TIMER_GetTimerInfo(HWND PMhwnd,ULONG PMid,PBOOL sys,PULONG id)
+BOOL TIMER_GetTimerInfo(HWND PMhwnd,ULONG PMid,PBOOL sys,PULONG id, PULONG proc)
 {
   int i;
   TIMER *pTimer;
 
+  EnterCriticalSection ();
   for (i = 0, pTimer = TimersArray; i < NB_TIMERS; i++, pTimer++)
       if (pTimer->inUse && (pTimer->PMhwnd == PMhwnd) && (pTimer->PMid == PMid))
           break;
+  LeaveCriticalSection();
 
   if (i == NB_TIMERS)  /* no matching timer found */
       return (FALSE);  /* forward message */
 
   *sys = pTimer->inUse == TIMER::SystemTimer;
   *id  = pTimer->id;
+  *proc = (ULONG)pTimer->proc;
 
   return TRUE;
 }
+
+/***********************************************************************
+ *           TIMER_IsTimerValid
+ */
+BOOL TIMER_IsTimerValid( HWND hwnd, UINT id, ULONG proc )
+{
+    int i;
+    TIMER *pTimer;
+    BOOL ret = FALSE;
+
+    EnterCriticalSection ();
+
+    for (i = 0, pTimer = TimersArray; i < NB_TIMERS; i++, pTimer++)
+        if ((pTimer->hwnd == hwnd) && (pTimer->id == id) && (pTimer->proc == (TIMERPROC)proc))
+        {
+            ret = TRUE;
+            break;
+        }
+
+    LeaveCriticalSection();
+    return ret;
+}
+
 
 BOOL TIMER_HandleTimer (PQMSG pMsg)
 {
@@ -92,9 +114,11 @@ BOOL TIMER_HandleTimer (PQMSG pMsg)
     HWND  PMhwnd = pMsg->hwnd;
     ULONG PMid   = (ULONG)(pMsg->mp1);
 
+    EnterCriticalSection ();
     for (i = 0, pTimer = TimersArray; i < NB_TIMERS; i++, pTimer++)
         if (pTimer->inUse && (pTimer->PMhwnd == PMhwnd) && (pTimer->PMid == PMid))
             break;
+    LeaveCriticalSection();
 
     if (i == NB_TIMERS)  /* no matching timer found */
         return (FALSE);  /* forward message */
