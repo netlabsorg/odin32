@@ -1,6 +1,7 @@
- /* $Id: ChangeLog,v 1.1092 2000-08-30 13:56:01 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1093 2000-08-30 18:04:56 sandervl Exp $ */
 
  2000-08-30: Sander van Leeuwen <sandervl@xs4all.nl>
+    - GDI32:    Workaround in StretchDIBits for PowerDVD (fixes wrong colors)
     - USER32:   WM_SETFOCUS fix (window can become invalid during processing)
                 (rename folder in file open dialog -> click outside editbox
                  -> crash)
