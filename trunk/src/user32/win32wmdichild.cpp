@@ -1,4 +1,4 @@
-/* $Id: win32wmdichild.cpp,v 1.26 2001-06-09 14:50:23 sandervl Exp $ */
+/* $Id: win32wmdichild.cpp,v 1.27 2001-06-11 20:08:25 sandervl Exp $ */
 /*
  * Win32 MDI Child Window Class for OS/2
  *
@@ -302,6 +302,7 @@ HWND Win32MDIChildWindow::createChild(Win32MDIClientWindow *client, LPMDICREATES
     /* fix window style */
     if( !(client->getStyle() & MDIS_ALLCHILDSTYLES) )
     {
+        dprintf(("Fixing MDI window style! %x -> %x", style, style | WS_VISIBLE | WS_OVERLAPPEDWINDOW));
         style &= (WS_CHILD | WS_CLIPSIBLINGS | WS_MINIMIZE | WS_MAXIMIZE |
                   WS_CLIPCHILDREN | WS_DISABLED | WS_VSCROLL | WS_HSCROLL );
         style |= (WS_VISIBLE | WS_OVERLAPPEDWINDOW);

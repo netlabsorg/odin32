@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.32 2001-06-09 14:50:18 sandervl Exp $*/
+/* $Id: menu.cpp,v 1.33 2001-06-11 20:08:23 sandervl Exp $*/
 /*
  * Menu functions
  *
@@ -982,7 +982,11 @@ static void MENU_PopupMenuCalcSize( LPPOPUPMENU lppop, HWND hwndOwner )
 
     lppop->Width = lppop->Height = 0;
     if (lppop->nItems == 0) return;
+#ifdef __WIN32OS2__
+    hdc = CreateCompatibleDC( 0 );
+#else
     hdc = GetDC( 0 );
+#endif
 
     SelectObject( hdc, hMenuFont);
 
@@ -1033,7 +1037,11 @@ static void MENU_PopupMenuCalcSize( LPPOPUPMENU lppop, HWND hwndOwner )
     lppop->Height += 2;
     lppop->Width += 2;
 
+#ifdef __WIN32OS2__
+    DeleteDC(hdc);
+#else
     ReleaseDC( 0, hdc );
+#endif
 }
 
 
