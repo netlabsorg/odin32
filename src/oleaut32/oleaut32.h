@@ -1,4 +1,4 @@
-/* $Id: oleaut32.h,v 1.2 1999-08-22 22:08:48 sandervl Exp $ */
+/* $Id: oleaut32.h,v 1.3 1999-09-02 16:23:18 sandervl Exp $ */
 /*
  * Win32 OLE stubs for OS/2
  *
@@ -14,6 +14,8 @@
 
 // ><DJR 17.05.99 Force to use C-interfaces for now to prevent CALLBACK definition compiler error
 #define CINTERFACE 1
+
+#include <odin.h>
 
 // ><DJR 17.05.99 Move standard includes to before os2win.h [memcmp]
 #include <stdarg.h>
