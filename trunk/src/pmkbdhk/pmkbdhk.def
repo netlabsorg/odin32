@@ -1,0 +1,10 @@
+; $Id: pmkbdhk.def,v 1.1 2001-10-22 23:13:39 phaller Exp $
+
+LIBRARY PMKBDHK INITGLOBAL
+DESCRIPTION 'InnoTek OS/2 Presentation Manager Keyboard Hook'
+DATA SINGLE SHARED
+CODE SHARED LOADONCALL
+
+EXPORTS
+        hookKill        @2
+        hookInit        @3

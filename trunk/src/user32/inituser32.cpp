@@ -1,4 +1,4 @@
-/* $Id: inituser32.cpp,v 1.5 2001-09-05 13:53:50 bird Exp $ */
+/* $Id: inituser32.cpp,v 1.6 2001-10-22 23:13:58 phaller Exp $ */
 /*
  * USER32 DLL entry point
  *
@@ -27,6 +27,7 @@
 #define  INCL_DOSPROCESS
 #define  INCL_DOSSEMAPHORES
 #define  INCL_DOSMISC
+#define  INCL_DOSERRORS
 #include <os2wrap.h>    //Odin32 OS/2 api wrappers
 #include <stdlib.h>
 #include <stdio.h>
@@ -62,6 +63,105 @@ extern "C" {
  extern DWORD user32_PEResTab;
 }
 DWORD hInstanceUser32 = 0;
+
+
+/**************************************************************/
+/* Try to load the Presentation Manager Keyboard Hook module. */
+/* If this fails, some hotkeys may not arrive properly at the */
+/* targetted window, but no more harmful things will happen.  */
+/**************************************************************/
+#define PMKBDHK_MODULE "PMKBDHK"
+#define PMKBDHK_HOOK_INIT "hookInit"
+#define PMKBDHK_HOOK_TERM "hookKill"
+
+static BOOL pmkbdhk_installed = FALSE;
+static HMODULE hmodPMKBDHK;
+
+static PVOID (*APIENTRY pfnHookInit)(HAB);
+static BOOL  (*APIENTRY pfnHookTerm)(void);
+
+// defined initialized in pmwindow.cpp: InitPM()
+extern HAB hab;
+
+void pmkbdhk_initialize(HAB _hab)
+{
+  APIRET rc;
+  
+  if (pmkbdhk_installed == FALSE)
+  {
+    CHAR szBuf[260];
+    
+    // load the DLL
+    rc = DosLoadModule(szBuf,
+                       sizeof(szBuf),
+                       PMKBDHK_MODULE,
+                       &hmodPMKBDHK);
+    if (NO_ERROR != rc)
+    {
+      dprintf(("USER32: pmkbdhk_initalize(%08xh) failed rc=%d\n",
+               _hab,
+               rc));
+      
+      return;
+    }
+    
+    // get the entry points
+    rc = DosQueryProcAddr(hmodPMKBDHK,
+                          0,
+                          PMKBDHK_HOOK_INIT,
+                          (PFN*)&pfnHookInit);
+    if (NO_ERROR == rc)
+      rc = DosQueryProcAddr(hmodPMKBDHK,
+                            0,
+                            PMKBDHK_HOOK_TERM,
+                            (PFN*)&pfnHookTerm);
+    
+    if (NO_ERROR != rc)
+    {
+      dprintf(("USER32: pmkbdhk_initalize(%08xh) failed importing functions, rc=%d\n",
+               _hab,
+               rc));
+      
+      // free the DLL again
+      DosFreeModule(hmodPMKBDHK);
+      hmodPMKBDHK = NULLHANDLE;
+      
+      return;
+    }
+    
+    // now finally call the initializer function
+    pfnHookInit(_hab);
+    
+    // OK, hook is armed
+    pmkbdhk_installed = TRUE;
+  }
+}
+
+void pmkbdhk_terminate(void)
+{
+  if (pmkbdhk_installed == TRUE)
+  {
+    // call the terminator function
+    pfnHookTerm();
+    
+    // OK, hook is disarmed
+    pmkbdhk_installed = TRUE;
+  }
+  
+  // unload the dll
+  if (NULLHANDLE != hmodPMKBDHK)
+  {
+    APIRET rc = DosFreeModule(hmodPMKBDHK);
+    if (NO_ERROR != rc)
+    {
+      dprintf(("USER32: pmkbdhk_terminate() failed rc=%d\n",
+               rc));
+    
+      hmodPMKBDHK = NULLHANDLE;
+    }
+  }
+}
+
 
 /****************************************************************************/
 /* _DLL_InitTerm is the function that gets called by the operating system   */
@@ -102,9 +202,12 @@ ULONG APIENTRY inittermUser32(ULONG hModule, ULONG ulFlag)
          InitSpyQueue();
 
          //SvL: Init win32 PM classes
-         if(InitPM() == FALSE) {
-                return 0UL;
-         }
+         //PH:  initializes HAB!
+         if (FALSE == InitPM())
+           return 0UL;
+     
+         // try to install the keyboard hook
+         pmkbdhk_initialize(hab);
 
          //SvL: 18-7-'98, Register system window classes (button, listbox etc etc)
          //CB: register internal classes
@@ -113,8 +216,10 @@ ULONG APIENTRY inittermUser32(ULONG hModule, ULONG ulFlag)
          //CB: initialize PM monitor driver
          MONITOR_Initialize(&MONITOR_PrimaryMonitor);
 
-         break;
-      case 1 :
+       break;
+     
+     
+       case 1 :
          if(hInstanceUser32) {
             UnregisterLxDll(hInstanceUser32);
          }
@@ -131,7 +236,11 @@ ULONG APIENTRY inittermUser32(ULONG hModule, ULONG ulFlag)
 
 void APIENTRY cleanupUser32(ULONG ulReason)
 {
-   dprintf(("user32 exit\n"));
+  dprintf(("user32 exit\n"));
+  
+  // try to unistall the keyboard hook
+  pmkbdhk_terminate();
+
 //SvL: Causes PM hangs on some (a lot?) machines. Reason unknown.
 ////   RestoreCursor();
    DestroyDesktopWindow();
