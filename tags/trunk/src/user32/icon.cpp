@@ -1,4 +1,4 @@
-/* $Id: icon.cpp,v 1.14 2002-01-07 11:17:52 sandervl Exp $ */
+/* $Id: icon.cpp,v 1.15 2003-02-24 17:02:43 sandervl Exp $ */
 
 /*
  * Win32 icon conversion functions for OS/2
@@ -354,6 +354,100 @@ void * WIN32API ConvertIconGroup(void *hdr, HINSTANCE hInstance, DWORD *ressize)
         }
 
         if(i != ihdr->wCount -1) {
+                bafh->offNext = (ULONG)&bafh->bfh2 - (ULONG)orgbafh + os2iconsize;
+        }
+        else    bafh->offNext = 0;
+
+        memcpy((char *)&bafh->bfh2, os2icon, os2iconsize);
+	free(os2icon);
+
+        bafh = (BITMAPARRAYFILEHEADER2 *)((ULONG)&bafh->bfh2 + os2iconsize);
+
+        rdir++;
+  }
+  *ressize = groupsize;
+  return (void *)orgbafh;
+}
+//******************************************************************************
+//******************************************************************************
+void *WIN32API ConvertIconGroupIndirect(void *lpIconData, DWORD iconsize,
+                                        DWORD *ressize)
+{
+ ICONDIR *ihdr = (ICONDIR *)lpIconData;
+ ICONDIRENTRY *rdir = (ICONDIRENTRY *)(ihdr + 1);
+ int i, groupsize = 0, os2iconsize;
+ BITMAPARRAYFILEHEADER2 *bafh, *orgbafh;
+ WINBITMAPINFOHEADER    *iconhdr;
+ void                   *os2icon;
+ int                     nricons = 0;
+ void                   *winicon;
+
+  dprintf(("Icon Group type :%d", ihdr->idType));
+  dprintf(("Icon Group count:%d", ihdr->idCount));
+  for(i=0;i<ihdr->idCount;i++) {
+        dprintf2(("Icon    : %x", rdir->dwImageOffset));
+        dprintf2(("Width   : %d", (int)rdir->bWidth));
+        dprintf2(("Height  : %d", (int)rdir->bHeight));
+        dprintf2(("Colors  : %d", (int)rdir->bColorCount));
+        dprintf2(("Bits    : %d", rdir->wBitCount));
+        dprintf2(("ResBytes: %d", rdir->dwBytesInRes));
+
+        winicon = (char *)lpIconData + rdir->dwImageOffset;
+        groupsize += QueryConvertedIconSize((WINBITMAPINFOHEADER *)winicon,
+                                            rdir->dwBytesInRes);
+        //add centered icon if size is 32x32
+        if(rdir->bWidth == 32 && rdir->bHeight == 32 && rdir->wBitCount >= 4) 
+        {
+            groupsize += QueryConvertedIconSize((WINBITMAPINFOHEADER *)winicon,
+                                                rdir->dwBytesInRes, TRUE);
+            //extra pixels
+            groupsize += (40*8 + 8*32)*rdir->wBitCount/8;
+            nricons++;
+        }
+        nricons++;
+        rdir++;
+  }
+  groupsize = groupsize+nricons*(sizeof(BITMAPARRAYFILEHEADER2) - sizeof(BITMAPFILEHEADER2));
+  bafh    = (BITMAPARRAYFILEHEADER2 *)malloc(groupsize);
+  memset(bafh, 0, groupsize);
+  orgbafh = bafh;
+
+  rdir = (ICONDIRENTRY *)(ihdr + 1);
+  for(i=0;i<ihdr->idCount;i++) {
+        bafh->usType    = BFT_BITMAPARRAY;
+        bafh->cbSize    = sizeof(BITMAPARRAYFILEHEADER2);
+        bafh->cxDisplay = 0;
+        bafh->cyDisplay = 0;
+
+        winicon = (char *)lpIconData + rdir->dwImageOffset;
+	iconhdr = (WINBITMAPINFOHEADER *)winicon;
+
+	os2icon = ConvertIcon(iconhdr, rdir->dwBytesInRes, &os2iconsize, (ULONG)bafh - (ULONG)orgbafh + sizeof(BITMAPARRAYFILEHEADER2)-sizeof(BITMAPFILEHEADER2));
+        if(os2icon == NULL) {
+                dprintf(("Can't convert icon!"));
+                rdir++;
+                continue;
+        }
+
+        if(rdir->bWidth == 32 && rdir->bHeight == 32 && rdir->wBitCount >= 4) 
+        {
+                //add 40x40 icon by centering 32x32 icon in 40x40 grid
+                //(resize is really ugly)
+               	bafh->offNext = (ULONG)&bafh->bfh2 - (ULONG)orgbafh + os2iconsize;
+	        memcpy((char *)&bafh->bfh2, os2icon, os2iconsize);
+		free(os2icon);
+
+	        bafh = (BITMAPARRAYFILEHEADER2 *)((ULONG)&bafh->bfh2 + os2iconsize);
+
+                os2icon = ConvertIcon(iconhdr, rdir->dwBytesInRes, &os2iconsize, (ULONG)bafh - (ULONG)orgbafh + sizeof(BITMAPARRAYFILEHEADER2)-sizeof(BITMAPFILEHEADER2), TRUE);
+        	if(os2icon == NULL) {
+                	dprintf(("Can't convert icon!"));
+	                rdir++;
+	                continue;
+	        }
+        }
+
+        if(i != ihdr->idCount -1) {
                 bafh->offNext = (ULONG)&bafh->bfh2 - (ULONG)orgbafh + os2iconsize;
         }
         else    bafh->offNext = 0;

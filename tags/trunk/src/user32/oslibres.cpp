@@ -1,4 +1,4 @@
-/* $Id: oslibres.cpp,v 1.34 2003-01-05 16:34:58 sandervl Exp $ */
+/* $Id: oslibres.cpp,v 1.35 2003-02-24 17:02:43 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -748,6 +748,7 @@ BOOL WIN32API OSLibWinCreateObject(LPSTR pszPath, LPSTR pszArgs,
    char    temp[128];
    char    szWorkDir[256];
    char    szPEGUILoaderPath[256];
+   BOOL    fWin32App;
 
    if(pszName) {
        char *tmp;
@@ -783,7 +784,13 @@ BOOL WIN32API OSLibWinCreateObject(LPSTR pszPath, LPSTR pszArgs,
                                   ((pszArgs) ? strlen(pszArgs) : 0) +
                                   ((pszWorkDir) ? strlen(pszWorkDir) : 0));
 
-   sprintf(pszSetupString, "PROGTYPE=PM;OBJECTID=<%s>;EXENAME=%s;SET BEGINLIBPATH=%s;STARTUPDIR=%s;ICONFILE=%s;PARAMETERS=\"%s\"", pszName, szPEGUILoaderPath, szSystemDir, szWorkDir, pszIcoPath, pszPath);
+   fWin32App = ODIN_IsWin32App(pszPath);
+   if(!fWin32App) 
+   {//don't use the PE loader; use the program path directly
+        sprintf(pszSetupString, "PROGTYPE=PM;OBJECTID=<%s%s>;EXENAME=%s;SET BEGINLIBPATH=%s;STARTUPDIR=%s;ICONFILE=%s;PARAMETERS=", (fDesktop) ? "DESKTOP_" : "", pszName, pszPath, szSystemDir, szWorkDir, pszIcoPath);
+   }
+   else sprintf(pszSetupString, "PROGTYPE=PM;OBJECTID=<%s%s>;EXENAME=%s;SET BEGINLIBPATH=%s;STARTUPDIR=%s;ICONFILE=%s;PARAMETERS=\"%s\"", (fDesktop) ? "DESKTOP_" : "", pszName, szPEGUILoaderPath, szSystemDir, szWorkDir, pszIcoPath, pszPath);
+
    if(pszArgs && *pszArgs) {
        strcat(pszSetupString, " ");
        strcat(pszSetupString, pszArgs);
@@ -793,6 +800,8 @@ BOOL WIN32API OSLibWinCreateObject(LPSTR pszPath, LPSTR pszArgs,
    if(fDesktop) {
        dprintf(("Name = %s", pszName));
        dprintf(("Setup string = %s", pszSetupString));
+
+       //Use a different name for desktop objects
        hObject = WinCreateObject("WPProgram", pszName, pszSetupString,
                                  "<WP_DESKTOP>", CO_REPLACEIFEXISTS);
    }
@@ -804,8 +813,13 @@ BOOL WIN32API OSLibWinCreateObject(LPSTR pszPath, LPSTR pszArgs,
        sprintf(szWorkDir, "OBJECTID=%s;", temp);
        hObject = WinCreateObject("WPFolder", pszFolder, szWorkDir,
                                  "<ODINFOLDER>", CO_UPDATEIFEXISTS);
-       hObject = WinCreateObject("WPProgram", pszName, pszSetupString,
-                                 temp, CO_REPLACEIFEXISTS);
+       if(hObject) {
+           hObject = WinCreateObject("WPProgram", pszName, pszSetupString,
+                                     temp, CO_REPLACEIFEXISTS);
+       }
+       else {
+           hObject = 1; //force silent failure
+       }
    }
 
    free(pszSetupString);
