@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.85 2002-04-30 14:54:06 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.86 2002-05-07 16:15:30 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -382,6 +382,24 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         if(fMsgRemoved == MSG_REMOVE)
         {
             MSLLHOOKSTRUCT hook;
+            ULONG          msg;
+
+            if(winMsg->message >= WINWM_NCLBUTTONDOWN && winMsg->message <= WINWM_NCMBUTTONDBLCLK) {
+                 msg = winMsg->message - WINWM_NCLBUTTONDOWN + WINWM_LBUTTONDOWN;
+            }
+            else msg = winMsg->message;
+            
+            if(msg == WINWM_LBUTTONDBLCLK) {
+                msg = WINWM_LBUTTONDOWN;
+            }
+            else
+            if(msg == WINWM_RBUTTONDBLCLK) {
+                msg = WINWM_RBUTTONDOWN;
+            }
+            else
+            if(msg == WINWM_MBUTTONDBLCLK) {
+                msg = WINWM_MBUTTONDOWN;
+            }
 
             hook.pt.x        = os2Msg->ptl.x & 0xFFFF;
             hook.pt.y        = mapScreenY(os2Msg->ptl.y);
@@ -390,7 +408,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             hook.time        = winMsg->time;
             hook.dwExtraInfo = 0;
 
-            if(HOOK_CallHooksW( WH_MOUSE_LL, HC_ACTION, winMsg->message, (LPARAM)&hook)) {
+            if(HOOK_CallHooksW( WH_MOUSE_LL, HC_ACTION, msg, (LPARAM)&hook)) {
                 goto dummymessage; //hook swallowed message
             }
         }
