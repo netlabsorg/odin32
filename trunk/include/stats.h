@@ -13,6 +13,8 @@ void _LNK_CONV getcrtstat(unsigned long *pnrcalls_malloc,
 #define LOGBRUSH void
 #define DEVMODEA void
 #define BITMAP void
+#define BITMAPINFO void
+#define BITMAPINFOHEADER void
 #endif
 
 #ifdef DEBUG
