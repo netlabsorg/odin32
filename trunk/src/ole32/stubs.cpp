@@ -1,3 +1,4 @@
+/* $Id: stubs.cpp,v 1.7 1999-09-08 11:29:28 davidr Exp $ */
 /* 
  * Win32 COM/OLE stubs for OS/2
  * 

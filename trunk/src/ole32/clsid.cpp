@@ -1,3 +1,4 @@
+/* $Id: clsid.cpp,v 1.6 1999-09-08 11:29:27 davidr Exp $ */
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT
