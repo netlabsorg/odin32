@@ -1,4 +1,13 @@
-/* $Id: ChangeLog,v 1.1679 2001-09-11 01:32:31 bird Exp $ */
+/* $Id: ChangeLog,v 1.1680 2001-09-15 09:56:25 sandervl Exp $ */
+
+ 2001-09-15: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Some focus/activation changes
+    - ODINBUG:  o Update by Herwig Bauernfeind
+    - OLEAUT32/OLE32/QUARTZ/COMDLG32:
+                o Wine updates
+    - COMCTL32: o Wine updates for toolbar, pager & rebar controls
+                o Treeview bugfix when deleting the selected item
+                  (fixes crash in UltraEdit when opening files)
 
  2001-09-11: knut st. osmundsen <kosmunds@csc.com>
     - kKrnlLib: o FYI: Win32k revamp/split-up. Not yet completed.
