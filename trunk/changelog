@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1413 2001-05-15 14:30:49 sandervl Exp $ */
+/* $Id: changelog,v 1.1414 2001-05-15 16:59:24 sandervl Exp $ */
 
  2001-05-15: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o BeginPaint must return logical points instead of device points.
@@ -8,6 +8,8 @@
                   changes the Z-order of the window being activated.
                   Also call WH_CBT hook handler (if present)
                   (fixes hotlist window in Opera)
+    - KERNEL32: o OpenFile: check if filename ptr is NULL, return ERROR_INVALID_NAME
+                  if true. (verified in NT4, SP6)
 
  2001-05-15: Dietrich Teickner <Dietrich_Teickner@t-online.de>
     - KERNEL32: o Added LOCALE_IFIRSTDAYOFWEEK case for GetLocaleInfoW
