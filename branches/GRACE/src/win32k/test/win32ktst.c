@@ -1,4 +1,4 @@
-/* $Id: win32ktst.c,v 1.1 2000-07-16 22:18:16 bird Exp $
+/* $Id: win32ktst.c,v 1.1.4.1 2000-08-11 02:22:35 bird Exp $
  *
  * Win32k test module.
  *
@@ -41,6 +41,8 @@
 #include "dev32.h"
 #include "devcmd.h"
 #include "os2krnl.h"
+#include "avl.h"
+#include "ldr.h"
 #include "ldrCalls.h"
 #include "test.h"
 #include "asmutils.h"
@@ -649,6 +651,8 @@ int CompareOptions(struct options *pOpt)
 int TestCaseExeLoad1(void)
 {
     APIRET rc;
+    int    cch;
+    char * psz;
 
     /*
      * Set global parameters... FIXME.
@@ -661,15 +665,57 @@ int TestCaseExeLoad1(void)
     rc = CalltkExecPgm(EXEC_LOAD, NULL, NULL, "win32ktst.exe");
     if (rc == NO_ERROR)
     {
+        psz = "BIN\\DEBUG\\LIBCONV.EXE\0";
         printf("--- TestcaseExeLoad1 - loading libconv.exe (LX image) ----\n");
         rc = CalltkExecPgm(EXEC_LOAD, NULL, NULL, "bin\\debug\\libconv.exe");
+        #if 0 //not implemented by CalltkExecPgm...???
+        /* check result */
+        if (memcmp(achTkExecPgmArguments, psz, strlen(psz) + 1) != 0)
+        {
+            rc  = ERROR_BAD_ARGUMENTS;
+            printf("Bad Arguments! (%s)\n", achTkExecPgmArguments);
+        }
+        #else
+        psz = psz;
+        #endif
     }
 
     if (rc == NO_ERROR)
     {
+        psz = "REXX\\TST.CMD\0OriginalArgument1 OriginalArgument2\0OriginalArgument3\0";
         printf("--- TestcaseExeLoad1 - loading rexx\\tst.cmd (REXX script) ----\n");
-        rc = CalltkExecPgm(EXEC_LOAD, NULL, NULL, "rexx\\tst.cmd");
+        rc = CalltkExecPgm(EXEC_LOAD, psz, NULL, "rexx\\tst.cmd");
+
+        /* check result */
+        psz[strlen(psz)] = ' ';
+        for (cch = 0; psz[cch] != '\0';)
+            cch += strlen(psz + cch) + 1;
+        cch++;
+        if (memcmp(achTkExecPgmArguments + strlen(achTkExecPgmArguments) + 1, psz, cch) != 0)
+        {
+            rc  = ERROR_BAD_ARGUMENTS;
+            printf("Bad Arguments! (achTkExecPgmArguments=%s).\n", achTkExecPgmArguments + strlen(achTkExecPgmArguments) + 1);
+        }
     }
+
+    if (rc == NO_ERROR)
+    {
+        psz = "TEST\\TST.SH\0OrgArg1 OrgArg2\0OrgArg3\0";
+        printf("--- TestcaseExeLoad1 - loading test\\testscript.sh (UNIX shell script) ----\n");
+        rc = CalltkExecPgm(EXEC_LOAD, psz, NULL, "test\\tst.sh");
+
+        /* check result */
+        psz[strlen(psz)] = ' ';
+        for (cch = 0; psz[cch] != '\0';)
+            cch += strlen(psz + cch) + 1;
+        cch++;
+        if (memcmp(achTkExecPgmArguments + strlen(achTkExecPgmArguments) + 1, psz, cch) != 0)
+        {
+            rc  = ERROR_BAD_ARGUMENTS;
+            printf("Bad Arguments! (achTkExecPgmArguments=%s).\n", achTkExecPgmArguments + strlen(achTkExecPgmArguments) + 1);
+        }
+    }
+
 
     if (rc == NO_ERROR)
     {
