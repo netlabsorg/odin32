@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.11 2000-07-18 07:33:15 bird Exp $
+# $Id: Makefile,v 1.12 2000-07-18 07:35:52 bird Exp $
 
 #
 # Common makefile for database utils. ICC edition

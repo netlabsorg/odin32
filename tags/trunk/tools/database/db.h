@@ -1,4 +1,4 @@
-/* $Id: db.h,v 1.9 2000-07-18 07:33:15 bird Exp $ */
+/* $Id: db.h,v 1.10 2000-07-18 07:35:00 bird Exp $ */
 /*
  * DB - contains all database routines
  *
