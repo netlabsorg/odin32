@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.135 1999-08-25 12:28:58 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.136 1999-08-25 14:25:58 sandervl Exp $ */
 
  99-08-25: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Several changes for memory mapped files.
@@ -12,6 +12,9 @@
                    To compile use i.e.: nmake DEBUG=1 CCENV=VAC36
 	- KERNEL32: Changed VIRTUAL_MapFileA/W
                     Changed OS2ImageInit from public to protected
+	- KERNEL32: Added DuplicateHandle to Handle Manager (wasn't working before)
+                    NOTE: Only works for file handles at this time!
+                          The rest still needs to be implemented.
 	- USER32\NEW: Changed loadres.cpp call to VIRTUAL_MapFileA
 
  99-08-24: Patrick Haller <phaller@gmx.net>
