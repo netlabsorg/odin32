@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.30 2002-08-20 04:39:13 bird Exp $
+# $Id: Makefile,v 1.31 2002-08-20 05:05:37 bird Exp $
 
 #
 # kKrnlLib main file.
@@ -28,7 +28,7 @@ PREMAKEFILES=\
 !ifdef WITH_KLIB
         kLibR3.mak \
 !endif
-!ifdef WITH_KKRNLIB
+!ifdef WITH_KKRNLLIB
         kKrnlLib.mak kKrnlLibR3Tst.mak
 !endif
 
