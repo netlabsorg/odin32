@@ -1,7 +1,10 @@
-/* $Id: changelog,v 1.2367 2002-11-27 13:54:18 sandervl Exp $ */
+/* $Id: changelog,v 1.2368 2002-11-27 14:27:49 sandervl Exp $ */
 
  2002-11-27: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Fixed CopyBitmap (CopyImage, IMAGE_BITMAP)
+
+ 2002-11-27: Platon Fomichev <platon@innotek   >
+    - WININET:  o Some updates (should resync with Wine!)
 
  2002-11-26: Sander van Leeuwen <sandervl@innotek   >
     - GDI32:    o Added debug wrappers for all exports
