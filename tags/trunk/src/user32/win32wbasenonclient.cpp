@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.40 2002-06-13 13:45:46 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.41 2002-08-12 15:05:43 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -354,16 +354,28 @@ VOID Win32BaseWindow::AdjustTrackInfo(PPOINT minTrackSize,PPOINT maxTrackSize)
 //******************************************************************************
 VOID Win32BaseWindow::AdjustRectOuter(LPRECT rect,BOOL menu)
 {
+    int adjust;
     if(dwStyle & WS_ICONIC) return;
 
-    if (HAS_THICKFRAME(dwStyle,dwExStyle ))
-        InflateRect( rect, GetSystemMetrics(SM_CXFRAME), GetSystemMetrics(SM_CYFRAME) );
+    if ((dwExStyle & (WS_EX_STATICEDGE|WS_EX_DLGMODALFRAME)) ==
+        WS_EX_STATICEDGE)
+    {
+        adjust = 1; /* for the outer frame always present */
+    }
     else
-    if (HAS_DLGFRAME( dwStyle, dwExStyle ))
-        InflateRect(rect, GetSystemMetrics(SM_CXDLGFRAME), GetSystemMetrics(SM_CYDLGFRAME) );
-    else
-    if (HAS_THINFRAME( dwStyle ))
-        InflateRect( rect, GetSystemMetrics(SM_CXBORDER), GetSystemMetrics(SM_CYBORDER));
+    {
+        adjust = 0;
+        if ((dwExStyle & WS_EX_DLGMODALFRAME) ||
+            (dwStyle & (WS_THICKFRAME|WS_DLGFRAME))) adjust = 2; /* outer */
+    }
+    if (dwStyle & WS_THICKFRAME)
+        adjust +=  ( GetSystemMetrics (SM_CXFRAME)
+                   - GetSystemMetrics (SM_CXDLGFRAME)); /* The resize border */
+    if ((dwStyle & (WS_BORDER|WS_DLGFRAME)) ||
+        (dwExStyle & WS_EX_DLGMODALFRAME))
+        adjust++; /* The other border */
+
+    InflateRect (rect, adjust, adjust);
 
     if ((dwStyle & WS_CAPTION) == WS_CAPTION)
     {
@@ -372,9 +384,7 @@ VOID Win32BaseWindow::AdjustRectOuter(LPRECT rect,BOOL menu)
         else
             rect->top -= GetSystemMetrics(SM_CYCAPTION);
     }
-
-    if (menu)
-        rect->top -= GetSystemMetrics(SM_CYMENU);
+    if (menu) rect->top -= GetSystemMetrics(SM_CYMENU);
 }
 //******************************************************************************
 //******************************************************************************
@@ -384,9 +394,12 @@ VOID Win32BaseWindow::AdjustRectInner(LPRECT rect)
 
   if (dwExStyle & WS_EX_CLIENTEDGE)
     InflateRect (rect, GetSystemMetrics(SM_CXEDGE), GetSystemMetrics(SM_CYEDGE));
+  
+  //@@PF Wine does not have this but inner rect shrinks when
+  //WS_EX_STATICEDGE is usedd not on a child
 
-  if (dwExStyle & WS_EX_STATICEDGE)
-    InflateRect (rect, GetSystemMetrics(SM_CXBORDER), GetSystemMetrics(SM_CYBORDER));
+  if (dwExStyle & WS_EX_STATICEDGE && (!(dwStyle & WS_CHILD)))
+    InflateRect (rect, -GetSystemMetrics(SM_CXBORDER), -GetSystemMetrics(SM_CYBORDER));
 
   if (dwStyle & WS_VSCROLL) rect->right  += GetSystemMetrics(SM_CXVSCROLL);
   if (dwStyle & WS_HSCROLL) rect->bottom += GetSystemMetrics(SM_CYHSCROLL);
