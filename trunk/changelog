@@ -1,4 +1,13 @@
-/* $Id: changelog,v 1.2295 2002-09-03 13:59:45 sandervl Exp $ */
+/* $Id: changelog,v 1.2296 2002-09-05 02:40:27 bird Exp $ */
+
+ 2002-09-04: knut st. osmundsen <bird@anduin   >
+    - FASTDEP:  o Corrected bug in caching. Didn't force rescan of files when
+                  a dependant file wasn't present any more.
+
+    - Tools/DailyBuilds:
+                o Changed odin32env.cmd to use buildenv.cmd to set up the
+                  desired build environment.
+                o Changed odin32clean.cmd to use tools\bin\rm.exe.
 
  2002-09-03: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Cleaned up clipboard code
