@@ -1,5 +1,3 @@
-/* $Id: win32api.h,v 1.23 2001-02-17 19:55:39 sandervl Exp $ */
-
 /*
  *
  * Win32 api include file for sources that include OS/2 headers
@@ -130,5 +128,8 @@ DWORD   WIN32API GetFileType(HANDLE hFile);
 BOOL    WIN32API SetWindowPos(HWND,HWND,INT,INT,INT,INT,UINT);
 HWND    WIN32API GetWindow(HWND hwnd, UINT uCmd);
 BOOL    WIN32API IntersectRect( PRECT lprcDst, const RECT * lprcSrc1, const RECT * lprcSrc2);
+
+DWORD   WIN32API GetTickCount(void);
+DWORD   WIN32API GetCurrentThreadId();
 
 #endif
