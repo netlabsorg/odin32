@@ -1,4 +1,4 @@
-/* $Id: status.c,v 1.5 1999-06-23 19:45:01 achimha Exp $ */
+/* $Id: status.c,v 1.6 1999-06-28 15:46:26 cbratschi Exp $ */
 /*
  * Interface code to StatusWindow widget/control
  *
@@ -191,7 +191,7 @@ STATUSBAR_Refresh (HWND hwnd, HDC hdc)
     }
     else {
         for (i = 0; i < infoPtr->numParts; i++) {
-	    if (infoPtr->parts[i].style & SBT_OWNERDRAW) {
+            if (infoPtr->parts[i].style & SBT_OWNERDRAW) {
                 DRAWITEMSTRUCT dis;
 
                 dis.CtlID = GetWindowLongA (hwnd, GWL_ID);
@@ -440,7 +440,7 @@ STATUSBAR_GetTipTextA (HWND hwnd, WPARAM wParam, LPARAM lParam)
         SendMessageA (infoPtr->hwndToolTip, TTM_GETTEXTA, 0, (LPARAM)&ti);
 
         if (ti.lpszText)
-            lstrcpynA ((LPSTR)lParam, ti.lpszText, HIWORD(wParam));
+            lstrcpynA ((LPSTR)lParam, ti.lpszText, MIN(HIWORD(wParam),lstrlenA(ti.lpszText)));
     }
 
     return 0;
@@ -460,7 +460,7 @@ STATUSBAR_GetTipTextW (HWND hwnd, WPARAM wParam, LPARAM lParam)
         SendMessageW (infoPtr->hwndToolTip, TTM_GETTEXTW, 0, (LPARAM)&ti);
 
         if (ti.lpszText)
-            lstrcpynW ((LPWSTR)lParam, ti.lpszText, HIWORD(wParam));
+            lstrcpynW ((LPWSTR)lParam, ti.lpszText, MIN(HIWORD(wParam),lstrlenW(ti.lpszText)));
     }
 
     return 0;
@@ -570,7 +570,7 @@ STATUSBAR_SetParts (HWND hwnd, WPARAM wParam, LPARAM lParam)
     parts = (LPINT) lParam;
     if (oldNumParts > self->numParts) {
         for (i = self->numParts ; i < oldNumParts; i++) {
-	    if (self->parts[i].text && !(self->parts[i].style & SBT_OWNERDRAW))
+            if (self->parts[i].text && !(self->parts[i].style & SBT_OWNERDRAW))
                 COMCTL32_Free (self->parts[i].text);
         }
     }
@@ -634,10 +634,10 @@ STATUSBAR_SetTextA (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
     STATUSWINDOWINFO *self = STATUSBAR_GetInfoPtr (hwnd);
     STATUSWINDOWPART *part;
-    int	part_num;
-    int	style;
+    int part_num;
+    int style;
     LPSTR text;
-    int	len;
+    int len;
     HDC hdc;
 
     text = (LPSTR) lParam;
@@ -645,24 +645,24 @@ STATUSBAR_SetTextA (HWND hwnd, WPARAM wParam, LPARAM lParam)
     style = ((INT) wParam) & 0xff00;
 
     if ((self->simple) || (self->parts==NULL) || (part_num==255))
-	part = &self->part0;
+        part = &self->part0;
     else
-	part = &self->parts[part_num];
+        part = &self->parts[part_num];
     if (!part) return FALSE;
 
     if (!(part->style & SBT_OWNERDRAW) && part->text)
-	COMCTL32_Free (part->text);
+        COMCTL32_Free (part->text);
     part->text = 0;
 
     if (style & SBT_OWNERDRAW) {
-	part->text = (LPWSTR)text;
+        part->text = (LPWSTR)text;
     }
     else {
-	/* duplicate string */
-	if (text && (len = lstrlenA(text))) {
-	    part->text = COMCTL32_Alloc ((len+1)*sizeof(WCHAR));
-	    lstrcpyAtoW (part->text, text);
-	}
+        /* duplicate string */
+        if (text && (len = lstrlenA(text))) {
+            part->text = COMCTL32_Alloc ((len+1)*sizeof(WCHAR));
+            lstrcpyAtoW (part->text, text);
+        }
     }
     part->style = style;
 
@@ -688,24 +688,24 @@ STATUSBAR_SetTextW (HWND hwnd, WPARAM wParam, LPARAM lParam)
     style = ((INT) wParam) & 0xff00;
 
     if ((self->simple) || (self->parts==NULL) || (part_num==255))
-	part = &self->part0;
+        part = &self->part0;
     else
-	part = &self->parts[part_num];
+        part = &self->parts[part_num];
     if (!part) return FALSE;
 
     if (!(part->style & SBT_OWNERDRAW) && part->text)
-	COMCTL32_Free (part->text);
+        COMCTL32_Free (part->text);
     part->text = 0;
 
     if (style & SBT_OWNERDRAW) {
-	part->text = text;
+        part->text = text;
     }
     else {
-	/* duplicate string */
-	if (text && (len = lstrlenW(text))) {
-	    part->text = COMCTL32_Alloc ((len+1)*sizeof(WCHAR));
-	    lstrcpyW(part->text, text);
-	}
+        /* duplicate string */
+        if (text && (len = lstrlenW(text))) {
+            part->text = COMCTL32_Alloc ((len+1)*sizeof(WCHAR));
+            lstrcpyW(part->text, text);
+        }
     }
     part->style = style;
 
@@ -895,23 +895,23 @@ static LRESULT
 STATUSBAR_WMDestroy (HWND hwnd)
 {
     STATUSWINDOWINFO *self = STATUSBAR_GetInfoPtr (hwnd);
-    int	i;
+    int i;
 
     for (i = 0; i < self->numParts; i++) {
-	if (self->parts[i].text && !(self->parts[i].style & SBT_OWNERDRAW))
-	    COMCTL32_Free (self->parts[i].text);
+        if (self->parts[i].text && !(self->parts[i].style & SBT_OWNERDRAW))
+            COMCTL32_Free (self->parts[i].text);
     }
     if (self->part0.text && !(self->part0.style & SBT_OWNERDRAW))
-	COMCTL32_Free (self->part0.text);
+        COMCTL32_Free (self->part0.text);
     COMCTL32_Free (self->parts);
 
     /* delete default font */
     if (self->hDefaultFont)
-	DeleteObject (self->hDefaultFont);
+        DeleteObject (self->hDefaultFont);
 
     /* delete tool tip control */
     if (self->hwndToolTip)
-	DestroyWindow (self->hwndToolTip);
+        DestroyWindow (self->hwndToolTip);
 
     COMCTL32_Free (self);
 

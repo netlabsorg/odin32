@@ -1,4 +1,4 @@
-/* $Id: toolbar.c,v 1.6 1999-06-24 16:37:45 cbratschi Exp $ */
+/* $Id: toolbar.c,v 1.7 1999-06-28 15:46:27 cbratschi Exp $ */
 /*
  * Toolbar control
  *
@@ -27,6 +27,10 @@
  *     setparnt.exe, setrows.exe, toolwnd.exe.
  *   - Microsofts controlspy examples.
  */
+
+/* CB: Odin32/WINE bugs
+  - IMAGELIST_Draw draws a line too much at the bottom of the bitmap
+*/
 
 #include <string.h>
 
@@ -1513,7 +1517,7 @@ TOOLBAR_GetButtonInfoA (HWND hwnd, WPARAM wParam, LPARAM lParam)
         if ((btnPtr->iString >= 0) || (btnPtr->iString < infoPtr->nNumStrings))
             lstrcpynA (lpTbInfo->pszText,
                          (LPSTR)infoPtr->strings[btnPtr->iString],
-                         lpTbInfo->cchText);
+                         MIN(lpTbInfo->cchText,lstrlenA((LPSTR)infoPtr->strings[btnPtr->iString])));
     }
 
     return nIndex;
@@ -2056,7 +2060,7 @@ TOOLBAR_SetBitmapSize (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
     TOOLBAR_INFO *infoPtr = TOOLBAR_GetInfoPtr (hwnd);
 
-    if ((LOWORD(lParam) <= 0) || (HIWORD(lParam)<=0)) return FALSE;
+    if ((LOWORD(lParam) <= 0) || (HIWORD(lParam) <= 0)) return FALSE;
 
     infoPtr->nBitmapWidth = (INT)LOWORD(lParam);
     infoPtr->nBitmapHeight = (INT)HIWORD(lParam);
@@ -2473,12 +2477,11 @@ TOOLBAR_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
             NMTOOLTIPSCREATED nmttc;
 
             nmttc.hdr.hwndFrom = hwnd;
-            nmttc.hdr.idFrom   = GetWindowLongA (hwnd, GWL_ID);
+            nmttc.hdr.idFrom   = GetWindowLongA(hwnd,GWL_ID);
             nmttc.hdr.code = NM_TOOLTIPSCREATED;
             nmttc.hwndToolTips = infoPtr->hwndToolTip;
 
-            SendMessageA (infoPtr->hwndNotify, WM_NOTIFY,
-                          (WPARAM)nmttc.hdr.idFrom, (LPARAM)&nmttc);
+            SendMessageA(infoPtr->hwndNotify,WM_NOTIFY,(WPARAM)nmttc.hdr.idFrom,(LPARAM)&nmttc);
         }
     }
 
@@ -2690,6 +2693,7 @@ TOOLBAR_MouseMove (HWND hwnd, WPARAM wParam, LPARAM lParam)
     POINT pt;
     INT   nHit;
     HDC   hdc;
+    DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
 
     if (infoPtr->hwndToolTip)
         TOOLBAR_RelayEvent (infoPtr->hwndToolTip,hwnd,
@@ -2710,7 +2714,7 @@ TOOLBAR_MouseMove (HWND hwnd, WPARAM wParam, LPARAM lParam)
         {
           oldBtnPtr->bHot = FALSE;
 
-          InvalidateRect (hwnd, &oldBtnPtr->rect, TRUE);
+          if (dwStyle & TBSTYLE_FLAT) InvalidateRect(hwnd,&oldBtnPtr->rect,TRUE);
         }
       }
 
@@ -2722,9 +2726,12 @@ TOOLBAR_MouseMove (HWND hwnd, WPARAM wParam, LPARAM lParam)
         {
           btnPtr->bHot = TRUE;
 
-          hdc = GetDC (hwnd);
-          TOOLBAR_DrawButton (hwnd, btnPtr, hdc);
-          ReleaseDC (hwnd, hdc);
+          if (dwStyle & TBSTYLE_FLAT)
+          {
+            hdc = GetDC (hwnd);
+            TOOLBAR_DrawButton (hwnd, btnPtr, hdc);
+            ReleaseDC (hwnd, hdc);
+          }
 
           infoPtr->nHotItem = nHit;
         }
@@ -2863,7 +2870,7 @@ TOOLBAR_Paint (HWND hwnd, WPARAM wParam)
     PAINTSTRUCT ps;
 
     TOOLBAR_CalcToolbar(hwnd);
-    hdc = wParam==0 ? BeginPaint(hwnd,&ps) : (HDC)wParam;
+    hdc = wParam == 0 ? BeginPaint(hwnd,&ps) : (HDC)wParam;
     TOOLBAR_Refresh(hwnd,hdc);
     if (!wParam) EndPaint (hwnd, &ps);
     return 0;
