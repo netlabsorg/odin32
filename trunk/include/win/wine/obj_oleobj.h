@@ -1,4 +1,4 @@
-/* $Id: obj_oleobj.h,v 1.7 2000-09-12 19:17:06 sandervl Exp $ */
+/* $Id: obj_oleobj.h,v 1.8 2000-12-24 11:23:57 sandervl Exp $ */
 /*
  * Defines IOleObject COM and other oleidl.h interfaces
  * 
@@ -68,15 +68,15 @@ typedef enum tagOLEVERBATTRIB
  * Predeclare the interfaces
  */
 DEFINE_OLEGUID(IID_IOleObject,  0x00000112L, 0, 0);
-#if defined(__WINE_OLE_H) && !defined(NO_LPOLEOBJECT)
-typedef struct IOleObject IOleObject, *LPOLEOBJECT;
-#else
+//#if defined(__WINE_OLE_H) && !defined(NO_LPOLEOBJECT)
+//typedef struct IOleObject IOleObject, *LPOLEOBJECT;
+//#else
 #if !defined(__WINE_OLE_H)
 typedef struct IOleObject IOleObject, *LPOLEOBJECT;
 #else
 typedef struct IOleObject IOleObject;
 #endif
-#endif
+//#endif
 
 DEFINE_OLEGUID(IID_IOleAdviseHolder,  0x00000111L, 0, 0);
 typedef struct IOleAdviseHolder IOleAdviseHolder, *LPOLEADVISEHOLDER;

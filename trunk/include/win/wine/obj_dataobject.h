@@ -1,4 +1,4 @@
-/* $Id: obj_dataobject.h,v 1.6 1999-09-02 19:07:18 phaller Exp $ */
+/* $Id: obj_dataobject.h,v 1.7 2000-12-24 11:23:57 sandervl Exp $ */
 /*
  * Defines the COM interfaces and APIs related to IDataObject.
  *
@@ -10,12 +10,6 @@
 #include "wine/obj_base.h"
 #include "wine/obj_moniker.h"
 #include "wine/obj_storage.h"
-
-#if defined(__cplusplus) && !defined(NONAMELESSUNION)
-#define DUMMYUNIONNAME
-#else /* defined(__cplusplus) && !defined(NONAMELESSUNION) */
-#define DUMMYUNIONNAME u
-#endif /* defined(__cplusplus) && !defined(NONAMELESSUNION) */
 
 #ifdef __cplusplus
 extern "C" {
