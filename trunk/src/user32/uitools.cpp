@@ -1,4 +1,4 @@
-/* $Id: uitools.cpp,v 1.34 2003-01-29 13:07:31 sandervl Exp $ */
+/* $Id: uitools.cpp,v 1.35 2003-02-13 12:44:53 sandervl Exp $ */
 /*
  * User Interface Functions
  *
@@ -1629,13 +1629,14 @@ BOOL WIN32API DrawFocusRect( HDC hdc, const RECT *lpRect)
     hOldBrush = SelectObject(hdc, GetStockObject(NULL_BRUSH));
     hNewPen = CreatePen(PS_ALTERNATE, 1, GetSysColor(COLOR_WINDOWTEXT));
     hOldPen = SelectObject(hdc, hNewPen);
-////    oldDrawMode = SetROP2(hdc, R2_XORPEN);
-    oldBkMode = SetBkMode(hdc, TRANSPARENT);
+    oldDrawMode = SetROP2(hdc, R2_XORPEN);
+////NOTE: This causes the problem. (WGSS bug)
+////    oldBkMode = SetBkMode(hdc, TRANSPARENT);
 
     Rectangle(hdc, lpRect->left, lpRect->top, lpRect->right, lpRect->bottom);
 
-    SetBkMode(hdc, oldBkMode);
-////    SetROP2(hdc, oldDrawMode);
+////    SetBkMode(hdc, oldBkMode);
+    SetROP2(hdc, oldDrawMode);
     SelectObject(hdc, hOldPen);
     DeleteObject(hNewPen);
     SelectObject(hdc, hOldBrush);
