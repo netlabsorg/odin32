@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.12 1999-11-11 19:10:09 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.13 1999-11-13 15:41:11 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -52,6 +52,7 @@ char szPEErrorMsg[]     = "Not a valid win32 exe. (perhaps 16 bits windows)";
 char szCPUErrorMsg[]    = "Executable doesn't run on x86 machines";
 char szExeErrorMsg[]    = "File isn't an executable";
 char szInteralErrorMsg[]= "Internal Error";
+char szErrorModule[128] = "";
 
 #ifndef max
 #define max(a, b)  ((a>b) ? a : b)
@@ -135,7 +136,6 @@ Win32PeLdrImage::~Win32PeLdrImage()
 //******************************************************************************
 BOOL Win32PeLdrImage::init(ULONG reservedMem)
 {
- char   szErrorMsg[64];
  LPVOID win32file     = NULL;
  ULONG  filesize, ulRead;
  PIMAGE_SECTION_HEADER psh;
@@ -147,8 +147,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
   fImgMapping = VIRTUAL_MapFileA(szFileName, &win32file);
 
   if (fImgMapping == -1) {
-    	sprintf(szErrorMsg, "Unable to open %32s\n", szFileName);
-        WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
+        strcpy(szErrorModule, OSLibStripPath(szFileName));
     	goto failure;
   }
 
@@ -1088,6 +1087,7 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
   		rc = DosLoadModule(szModuleFailure, sizeof(szModuleFailure), modname, (HMODULE *)&hInstanceNewDll);
   		if(rc) {
 			dprintf(("DosLoadModule returned %X for %s\n", rc, szModuleFailure));
+		    	sprintf(szErrorModule, "%s.DLL", szModuleFailure);
 			errorState = rc;
 			return(FALSE);
   		}
@@ -1112,6 +1112,7 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
 	        fout << "**********************************************************************" << endl;
 	        if(WinDll->init(0) == FALSE) {
 	            fout << "Internal WinDll error " << WinDll->getError() << endl;
+		    strcpy(szErrorModule, OSLibStripPath(modname));
 	            return(FALSE);
 	        }
 	        if(WinDll->attachProcess() == FALSE) {
