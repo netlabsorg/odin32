@@ -1,4 +1,4 @@
-/* $Id: win32k.h,v 1.12 2001-07-08 02:50:35 bird Exp $
+/* $Id: win32k.h,v 1.13 2001-07-10 05:31:36 bird Exp $
  *
  * Top level make file for the Win32k library.
  * Contains library and 32-bit IOCtl definition.
@@ -34,7 +34,8 @@
 #define K32_QUERYSYSTEMMEMINFO  0x07
 #define K32_QUERYCALLGATE       0x08
 #define K32_SETENVIRONMENT      0x09
-#define K32_LASTIOCTLFUNCTION   K32_SETENVIRONMENT
+#define K32_KILLPROCESSEX       0x0a
+#define K32_LASTIOCTLFUNCTION   K32_KILLPROCESSEX
 
 
 /*
@@ -82,6 +83,18 @@
 #define K32_SYSMEMINFO_SWAPFILE             0x01    /* Swapfile stuff is queried. */
 #define K32_SYSMEMINFO_PAGING               0x02    /* Paging and Physical memory stuff is queried. */
 #define K32_SYSMEMINFO_VM                   0x04    /* Virtual memory stuff is all queried. */
+
+
+/*
+ * DosKillProcessEx extra flags.
+ * (DKP_PROCESS and DKP_PROCESSTREE is defined in the OS/2 toolkit headers.)
+ */
+#define DKP_ALLDECENDANTS               0x00000002UL/* Kill process all its decendants. */
+#define DKP_SCREENGROUP                 0x00000003UL/* Kill all processes in that screen group. */
+#define DKP_ACTION_MASK                 0x00000003UL/* Mask for actions (validation) */
+#define DKP_FLAG_MASK                   (DKP_FLAG_KILL9) /* Mask for flags (validation) */
+#define DKP_FLAG_KILL9                  0x80000000UL/* Very forceful kill */
+                                                    /*  - not necessarily properly cleaned up. */
 
 
 /* NOINC */
@@ -419,6 +432,7 @@ struct _k32QueryCallGate
 typedef struct _k32QueryCallGate        K32QUERYCALLGATE;
 typedef struct _k32QueryCallGate *      PK32QUERYCALLGATE;
 
+
 struct _k32SetEnvironment
 {
     K32HDR      hdr;                    /* Common parameter header */
@@ -428,6 +442,16 @@ struct _k32SetEnvironment
 };
 typedef struct _k32SetEnvironment       K32SETENVIRONMENT;
 typedef struct _k32SetEnvironment *     PK32SETENVIRONMENT;
+
+
+struct _k32KillProcessEx
+{
+    K32HDR      hdr;                    /* Common parameter header */
+    ULONG       flAction;               /* Action flags. (see k32KillProcessEx for details.) */
+    PID         pid;                    /* The identity of the process or root in process tree to be killed. */
+};
+typedef struct _k32KillProcessEx        K32KILLPROCESSEX;
+typedef struct _k32KillProcessEx *      PK32KILLPROCESSEX;
 
 #pragma pack()
 
@@ -446,6 +470,7 @@ APIRET APIENTRY  libWin32kSetOptions(PK32OPTIONS pOptions);
 
 /* "Extra OS2 APIs" */
 APIRET APIENTRY  DosAllocMemEx(PPVOID ppv, ULONG cb, ULONG flag);
+APIRET APIENTRY  DosKillProcessEx(ULONG flAction, PID pid);
 APIRET APIENTRY  W32kQueryOTEs(HMODULE hMTE, PQOTEBUFFER pQOte, ULONG cbQOte);
 APIRET APIENTRY  W32kQuerySystemMemInfo(PK32SYSTEMMEMINFO pMemInfo);
 APIRET APIENTRY  W32kProcessReadWrite(PID pid, ULONG cb, PVOID pvSource, PVOID pvTarget, BOOL fRead);
