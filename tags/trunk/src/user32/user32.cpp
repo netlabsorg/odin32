@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.36 1999-09-28 16:35:06 cbratschi Exp $ */
+/* $Id: user32.cpp,v 1.37 1999-09-28 18:43:08 cbratschi Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -18,13 +18,6 @@
  * Purpose   : This module maps all Win32 functions contained in USER32.DLL
  *             to their OS/2-specific counterparts as far as possible.
  *****************************************************************************/
-
-/*
-  CB:
-  - don't replace GDI functions (hdc), only convert window handle
-  - always use OSRECTL for PM functions
-  - POINT == POINTL
-*/
 
 #include <os2win.h>
 #include "misc.h"
@@ -1752,67 +1745,91 @@ WORD WIN32API VkKeyScanA( char ch)
 #endif
     return O32_VkKeyScan(ch);
 }
-
-
-//CB: stopped here void aa(){};
-
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API MsgWaitForMultipleObjects( DWORD arg1, LPHANDLE arg2, BOOL arg3, DWORD arg4, DWORD  arg5)
+WORD WIN32API VkKeyScanW( WCHAR wch)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  VkKeyScanW\n");
+#endif
+    // NOTE: This will not work as is (needs UNICODE support)
+    return O32_VkKeyScan((char)wch);
+}
+
+/* Synchronization Functions */
+
+DWORD WIN32API MsgWaitForMultipleObjects( DWORD nCount, LPHANDLE pHandles, BOOL fWaitAll, DWORD dwMilliseconds, DWORD  dwWakeMask)
 {
 #ifdef DEBUG
     WriteLog("USER32:  MsgWaitForMultipleObjects\n");
 #endif
-    return O32_MsgWaitForMultipleObjects(arg1, arg2, arg3, arg4, arg5);
+    return O32_MsgWaitForMultipleObjects(nCount,pHandles,fWaitAll,dwMilliseconds,dwWakeMask);
 }
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API CheckRadioButton( HWND arg1, UINT arg2, UINT arg3, UINT  arg4)
+
+/* Button Functions */
+
+BOOL WIN32API CheckRadioButton( HWND hDlg, UINT nIDFirstButton, UINT nIDLastButton, UINT  nIDCheckButton)
 {
 #ifdef DEBUG
     WriteLog("USER32:  CheckRadioButton\n");
 #endif
     //CB: check radio buttons in interval
-    if (arg2 > arg3) return (FALSE);
-    for (UINT x=arg2;x <= arg3;x++)
+    if (nIDFirstButton > nIDLastButton)
     {
-     SendDlgItemMessageA(arg1,x,BM_SETCHECK,(x == arg4) ? BST_CHECKED : BST_UNCHECKED,0);
+      SetLastError(ERROR_INVALID_PARAMETER);
+      return (FALSE);
     }
+
+    hDlg = Win32Window::Win32ToOS2Handle(hDlg);
+
+    for (UINT x = nIDFirstButton;x <= nIDLastButton;x++)
+    {
+     SendDlgItemMessageA(hDlg,x,BM_SETCHECK,(x == nIDCheckButton) ? BST_CHECKED : BST_UNCHECKED,0);
+    }
+
     return (TRUE);
+}
+
+/* Window Functions */
+
+/*****************************************************************************
+ * Name      : BOOL WIN32API AnyPopup
+ * Purpose   : The AnyPopup function indicates whether an owned, visible,
+ *             top-level pop-up, or overlapped window exists on the screen. The
+ *             function searches the entire Windows screen, not just the calling
+ *             application's client area.
+ * Parameters: VOID
+ * Variables :
+ * Result    : If a pop-up window exists, the return value is TRUE even if the
+ *             pop-up window is completely covered by other windows. Otherwise,
+ *             it is FALSE.
+ * Remark    : AnyPopup is a Windows version 1.x function and is retained for
+ *             compatibility purposes. It is generally not useful.
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+BOOL WIN32API AnyPopup(VOID)
+{
+  dprintf(("USER32:AnyPopup() not implemented.\n"));
+
+  return (FALSE);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API EndDeferWindowPos( HDWP arg1)
+BOOL WIN32API EndDeferWindowPos( HDWP hWinPosInfo)
 {
 #ifdef DEBUG
     WriteLog("USER32:  EndDeferWindowPos\n");
 #endif
-    return O32_EndDeferWindowPos(arg1);
+    return O32_EndDeferWindowPos(hWinPosInfo);
 }
 //******************************************************************************
 //******************************************************************************
-INT WIN32API ExcludeUpdateRgn( HDC arg1, HWND  arg2)
+HWND WIN32API FindWindowW( LPCWSTR lpClassName, LPCWSTR lpWindowName)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  ExcludeUpdateRgn\n");
-#endif
-    return O32_ExcludeUpdateRgn(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API FillRect(HDC arg1, const RECT * arg2, HBRUSH arg3)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  FillRect (%d,%d)(%d,%d) brush %X\n", arg2->left, arg2->top, arg2->right, arg2->bottom, arg3);
-#endif
-    return O32_FillRect(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-HWND WIN32API FindWindowW( LPCWSTR arg1, LPCWSTR arg2)
-{
- char *astring1 = UnicodeToAsciiString((LPWSTR)arg1);
- char *astring2 = UnicodeToAsciiString((LPWSTR)arg2);
+ char *astring1 = UnicodeToAsciiString((LPWSTR)lpClassName);
+ char *astring2 = UnicodeToAsciiString((LPWSTR)lpWindowName);
  HWND rc;
 
 #ifdef DEBUG
@@ -1825,218 +1842,61 @@ HWND WIN32API FindWindowW( LPCWSTR arg1, LPCWSTR arg2)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API FrameRect( HDC arg1, const RECT * arg2, HBRUSH  arg3)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  FrameRect\n");
-#endif
-    return O32_FrameRect(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
 HWND WIN32API GetForegroundWindow(void)
 {
 #ifdef DEBUG
     WriteLog("USER32:  GetForegroundWindow\n");
 #endif
-    return O32_GetForegroundWindow();
+    return Win32Window::OS2ToWin32Handle(O32_GetForegroundWindow());
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API GetKeyboardType( int arg1)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetKeyboardType\n");
-#endif
-    return O32_GetKeyboardType(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-HWND WIN32API GetLastActivePopup( HWND arg1)
+HWND WIN32API GetLastActivePopup( HWND hWnd)
 {
 #ifdef DEBUG
     WriteLog("USER32:  GetLastActivePopup\n");
 #endif
-    return O32_GetLastActivePopup(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API GetQueueStatus( UINT arg1)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetQueueStatus\n");
-#endif
-    return O32_GetQueueStatus(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API GetTabbedTextExtentA( HDC arg1, LPCSTR arg2, int arg3, int arg4, int * arg5)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetTabbedTextExtentA\n");
-#endif
-    return O32_GetTabbedTextExtent(arg1, arg2, arg3, arg4, arg5);
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API GetTabbedTextExtentW( HDC arg1, LPCWSTR arg2, int arg3, int arg4, int * arg5)
-{
- char *astring = UnicodeToAsciiString((LPWSTR)arg2);
- DWORD rc;
+    hWnd = Win32Window::Win32ToOS2Handle(hWnd);
 
-#ifdef DEBUG
-    WriteLog("USER32:  GetTabbedTextExtentW\n");
-#endif
-    rc = O32_GetTabbedTextExtent(arg1, astring, arg3, arg4, arg5);
-    FreeAsciiString(astring);
-    return rc;
+    return Win32Window::OS2ToWin32Handle(O32_GetLastActivePopup(hWnd));
 }
 //******************************************************************************
 //******************************************************************************
-#if 0
-int WIN32API GetUpdateRgn( HWND arg1, HRGN arg2, BOOL  arg3)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetUpdateRgn\n");
-#endif
-    return O32_GetUpdateRgn(arg1, arg2, arg3);
-}
-#endif
-//******************************************************************************
-
-
-//******************************************************************************
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API GetWindowThreadProcessId(HWND arg1, PDWORD  arg2)
+DWORD WIN32API GetWindowThreadProcessId(HWND hWnd, PDWORD  lpdwProcessId)
 {
 #ifdef DEBUG
     WriteLog("USER32:  GetWindowThreadProcessId\n");
 #endif
-    return O32_GetWindowThreadProcessId(arg1, arg2);
+    hWnd = Win32Window::Win32ToOS2Handle(hWnd);
+
+    return O32_GetWindowThreadProcessId(hWnd,lpdwProcessId);
+}
+
+/* Painting and Drawing Functions */
+
+
+INT WIN32API ExcludeUpdateRgn( HDC hDC, HWND  hWnd)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  ExcludeUpdateRgn\n");
+#endif
+    hWnd = Win32Window::Win32ToOS2Handle(hWnd);
+
+    return O32_ExcludeUpdateRgn(hDC,hWnd);
 }
 //******************************************************************************
 //******************************************************************************
 #if 0
-BOOL WIN32API InvalidateRgn( HWND arg1, HRGN arg2, BOOL  arg3)
+int WIN32API GetUpdateRgn( HWND hWnd, HRGN hRgn, BOOL bErase)
 {
 #ifdef DEBUG
-    WriteLog("USER32:  InvalidateRgn\n");
+    WriteLog("USER32:  GetUpdateRgn\n");
 #endif
-    return O32_InvalidateRgn(arg1, arg2, arg3);
-}
-#endif
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API InvertRect( HDC arg1, const RECT * arg2)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  InvertRect\n");
-#endif
-    return O32_InvertRect(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API MapDialogRect( HWND arg1, PRECT  arg2)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  MapDialogRect\n");
-#endif
-    return O32_MapDialogRect(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API MapWindowPoints( HWND arg1, HWND arg2, LPPOINT arg3, UINT arg4)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  MapWindowPoints\n");
-#endif
-    return O32_MapWindowPoints(arg1, arg2, arg3, arg4);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API ScreenToClient (HWND hwnd, LPPOINT pt)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  ScreenToClient\n");
-#endif
-    Win32BaseWindow *wnd;
-    PRECT rcl;
+    hWnd = Win32Window::Win32ToOS2Handle(hWnd);
 
-    if (!hwnd) return (TRUE);
-    wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
-    if (!wnd) return (TRUE);
-
-    rcl   = wnd->getClientRect();
-    pt->y = ScreenHeight - pt->y;
-    OSLibWinMapWindowPoints (OSLIB_HWND_DESKTOP, wnd->getOS2WindowHandle(), (OSLIBPOINT *)pt, 1);
-    pt->y = (rcl->bottom - rcl->top) - pt->y;
-    return (TRUE);
-}
-//******************************************************************************
-//******************************************************************************
-#if 0
-BOOL WIN32API ScrollDC( HDC arg1, int arg2, int arg3, const RECT * arg4, const RECT * arg5, HRGN arg6, PRECT  arg7)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  ScrollDC\n");
-#endif
-    return O32_ScrollDC(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+    return O32_GetUpdateRgn(hWnd,hRgn,bErase);
 }
 #endif
-//******************************************************************************
-//******************************************************************************
-LONG WIN32API TabbedTextOutA( HDC arg1, int arg2, int arg3, LPCSTR arg4, int arg5, int arg6, int * arg7, int  arg8)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  TabbedTextOutA\n");
-#endif
-    return O32_TabbedTextOut(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
-}
-//******************************************************************************
-//******************************************************************************
-LONG WIN32API TabbedTextOutW( HDC arg1, int arg2, int arg3, LPCWSTR arg4, int arg5, int arg6, int * arg7, int  arg8)
-{
- char *astring = UnicodeToAsciiString((LPWSTR)arg4);
- LONG rc;
-
-#ifdef DEBUG
-    WriteLog("USER32:  TabbedTextOutW\n");
-#endif
-    rc = O32_TabbedTextOut(arg1, arg2, arg3, astring, arg5, arg6, arg7, arg8);
-    FreeAsciiString(astring);
-    return rc;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API ValidateRect( HWND arg1, const RECT * arg2)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  ValidateRect\n");
-#endif
-    return O32_ValidateRect(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API ValidateRgn( HWND arg1, HRGN  arg2)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  ValidateRgn\n");
-#endif
-    return O32_ValidateRgn(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-WORD WIN32API VkKeyScanW( WCHAR arg1)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  VkKeyScanW\n");
-#endif
-    // NOTE: This will not work as is (needs UNICODE support)
-    return O32_VkKeyScan((char)arg1);
-}
 //******************************************************************************
 //TODO: Not complete
 //******************************************************************************
@@ -2100,6 +1960,261 @@ BOOL WIN32API GrayStringW(HDC hdc, HBRUSH hBrush, GRAYSTRINGPROC lpOutputFunc,
   FreeAsciiString(astring);
   return(rc);
 }
+//******************************************************************************
+//******************************************************************************
+#if 0
+BOOL WIN32API InvalidateRgn( HWND hWnd, HRGN hRgn, BOOL bErase)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  InvalidateRgn\n");
+#endif
+    hWnd = Win32Window::Win32ToOS2Handle(hWnd);
+
+    return O32_InvalidateRgn(hWnd,hRgn,bErase);
+}
+#endif
+/*****************************************************************************
+ * Name      : BOOL WIN32API PaintDesktop
+ * Purpose   : The PaintDesktop function fills the clipping region in the
+ *             specified device context with the desktop pattern or wallpaper.
+ *             The function is provided primarily for shell desktops.
+ * Parameters:
+ * Variables :
+ * Result    : If the function succeeds, the return value is TRUE.
+ *             If the function fails, the return value is FALSE.
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+BOOL WIN32API PaintDesktop(HDC hdc)
+{
+  dprintf(("USER32:PaintDesktop (%08x) not implemented.\n",
+         hdc));
+
+  return (FALSE);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API ValidateRect( HWND hwnd, const RECT * lprc)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  ValidateRect\n");
+#endif
+    hwnd = Win32Window::Win32ToOS2Handle(hwnd);
+
+    return O32_ValidateRect(hwnd,lprc);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API ValidateRgn( HWND hwnd, HRGN  hrgn)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  ValidateRgn\n");
+#endif
+    hwnd = Win32Window::Win32ToOS2Handle(hwnd);
+
+    return O32_ValidateRgn(hwnd,hrgn);
+}
+
+/* Filled Shape Functions */
+
+
+int WIN32API FillRect(HDC hDC, const RECT * lprc, HBRUSH hbr)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  FillRect (%d,%d)(%d,%d) brush %X\n", lprc->left, lprc->top, lprc->right, lprc->bottom, hbr);
+#endif
+    return O32_FillRect(hDC,lprc,hbr);
+}
+//******************************************************************************
+//******************************************************************************
+int WIN32API FrameRect( HDC hDC, const RECT * lprc, HBRUSH  hbr)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  FrameRect\n");
+#endif
+    return O32_FrameRect(hDC,lprc,hbr);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API InvertRect( HDC hDC, const RECT * lprc)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  InvertRect\n");
+#endif
+    return O32_InvertRect(hDC,lprc);
+}
+
+/* System Information Functions */
+
+int WIN32API GetKeyboardType( int nTypeFlag)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  GetKeyboardType\n");
+#endif
+    return O32_GetKeyboardType(nTypeFlag);
+}
+/*****************************************************************************
+ * Name      : HDESK WIN32API GetThreadDesktop
+ * Purpose   : The GetThreadDesktop function returns a handle to the desktop
+ *             associated with a specified thread.
+ * Parameters: DWORD dwThreadId thread identifier
+ * Variables :
+ * Result    : If the function succeeds, the return value is the handle of the
+ *               desktop associated with the specified thread.
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+HDESK WIN32API GetThreadDesktop(DWORD dwThreadId)
+{
+  dprintf(("USER32:GetThreadDesktop (%u) not implemented.\n",
+         dwThreadId));
+
+  return (NULL);
+}
+
+/* Message and Message Queue Functions */
+
+/*****************************************************************************
+ * Name      : BOOL WIN32API GetInputState
+ * Purpose   : The GetInputState function determines whether there are
+ *             mouse-button or keyboard messages in the calling thread's message queue.
+ * Parameters:
+ * Variables :
+ * Result    : If the queue contains one or more new mouse-button or keyboard
+ *               messages, the return value is TRUE.
+ *             If the function fails, the return value is FALSE.
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+BOOL WIN32API GetInputState(VOID)
+{
+  dprintf(("USER32:GetInputState () not implemented.\n"));
+
+  return (FALSE);
+}
+//******************************************************************************
+//******************************************************************************
+DWORD WIN32API GetQueueStatus( UINT flags)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  GetQueueStatus\n");
+#endif
+    return O32_GetQueueStatus(flags);
+}
+
+/* Font and Text Functions */
+
+DWORD WIN32API GetTabbedTextExtentA( HDC hDC, LPCSTR lpString, int nCount, int nTabPositions, LPINT lpnTabStopPositions)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  GetTabbedTextExtentA\n");
+#endif
+    return O32_GetTabbedTextExtent(hDC,lpString,nCount,nTabPositions,lpnTabStopPositions);
+}
+//******************************************************************************
+//******************************************************************************
+DWORD WIN32API GetTabbedTextExtentW( HDC hDC, LPCWSTR lpString, int nCount, int nTabPositions, LPINT lpnTabStopPositions)
+{
+ char *astring = UnicodeToAsciiString((LPWSTR)lpString);
+ DWORD rc;
+
+#ifdef DEBUG
+    WriteLog("USER32:  GetTabbedTextExtentW\n");
+#endif
+    rc = O32_GetTabbedTextExtent(hDC,astring,nCount,nTabPositions,lpnTabStopPositions);
+    FreeAsciiString(astring);
+    return rc;
+}
+//******************************************************************************
+//******************************************************************************
+LONG WIN32API TabbedTextOutA( HDC hdc, int x, int y, LPCSTR lpString, int nCount, int nTabPositions, LPINT lpnTabStopPositions, int  nTabOrigin)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  TabbedTextOutA\n");
+#endif
+    return O32_TabbedTextOut(hdc,x,y,lpString,nCount,nTabPositions,lpnTabStopPositions,nTabOrigin);
+}
+//******************************************************************************
+//******************************************************************************
+LONG WIN32API TabbedTextOutW( HDC hdc, int x, int y, LPCWSTR lpString, int nCount, int nTabPositions, LPINT lpnTabStopPositions, int  nTabOrigin)
+{
+ char *astring = UnicodeToAsciiString((LPWSTR)lpString);
+ LONG rc;
+
+#ifdef DEBUG
+    WriteLog("USER32:  TabbedTextOutW\n");
+#endif
+    rc = O32_TabbedTextOut(hdc,x,y,astring,nCount,nTabPositions,lpnTabStopPositions,nTabOrigin);
+    FreeAsciiString(astring);
+    return rc;
+}
+
+/* Dialog Box Functions */
+
+BOOL WIN32API MapDialogRect( HWND hDlg, PRECT  lpRect)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  MapDialogRect\n");
+#endif
+    hDlg = Win32Window::Win32ToOS2Handle(hDlg);
+
+    return O32_MapDialogRect(hDlg,lpRect);
+}
+
+/* Coordinate Space and Transformation Functions */
+
+int WIN32API MapWindowPoints( HWND hWndFrom, HWND hWndTo, LPPOINT lpPoints, UINT cPoints)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  MapWindowPoints\n");
+#endif
+    hWndFrom = Win32Window::Win32ToOS2Handle(hWndFrom);
+    hWndTo = Win32Window::Win32ToOS2Handle(hWndTo);
+
+    return O32_MapWindowPoints(hWndFrom,hWndTo,lpPoints,cPoints);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API ScreenToClient (HWND hwnd, LPPOINT pt)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  ScreenToClient\n");
+#endif
+    Win32BaseWindow *wnd;
+    PRECT rcl;
+
+    if (!hwnd) return (TRUE);
+    wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
+    if (!wnd) return (TRUE);
+
+    rcl   = wnd->getClientRect();
+    pt->y = ScreenHeight - pt->y;
+    OSLibWinMapWindowPoints (OSLIB_HWND_DESKTOP, wnd->getOS2WindowHandle(), (OSLIBPOINT *)pt, 1);
+    pt->y = (rcl->bottom - rcl->top) - pt->y;
+    return (TRUE);
+}
+
+/* Scroll Bar Functions */
+
+#if 0
+BOOL WIN32API ScrollDC( HDC arg1, int arg2, int arg3, const RECT * arg4, const RECT * arg5, HRGN arg6, PRECT  arg7)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  ScrollDC\n");
+#endif
+    return O32_ScrollDC(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+}
+#endif
+
+/* Resource Functions */
+
+//CB: stopped here void aa(){};
 //******************************************************************************
 //TODO:
 //******************************************************************************
@@ -2274,33 +2389,6 @@ LONG WIN32API ChangeDisplaySettingsA(LPDEVMODEA  lpDevMode, DWORD dwFlags)
 }
 //******************************************************************************
 //******************************************************************************
-
-
-/*****************************************************************************
- * Name      : BOOL WIN32API AnyPopup
- * Purpose   : The AnyPopup function indicates whether an owned, visible,
- *             top-level pop-up, or overlapped window exists on the screen. The
- *             function searches the entire Windows screen, not just the calling
- *             application's client area.
- * Parameters: VOID
- * Variables :
- * Result    : If a pop-up window exists, the return value is TRUE even if the
- *             pop-up window is completely covered by other windows. Otherwise,
- *             it is FALSE.
- * Remark    : AnyPopup is a Windows version 1.x function and is retained for
- *             compatibility purposes. It is generally not useful.
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-BOOL WIN32API AnyPopup(VOID)
-{
-  dprintf(("USER32:AnyPopup() not implemented.\n"));
-
-  return (FALSE);
-}
-
 
 
 /*****************************************************************************
@@ -2720,29 +2808,6 @@ BOOL WIN32API EnumWindowStationsW(WINSTAENUMPROCW lpEnumFunc,
 
 
 /*****************************************************************************
- * Name      : BOOL WIN32API GetInputState
- * Purpose   : The GetInputState function determines whether there are
- *             mouse-button or keyboard messages in the calling thread's message queue.
- * Parameters:
- * Variables :
- * Result    : If the queue contains one or more new mouse-button or keyboard
- *               messages, the return value is TRUE.
- *             If the function fails, the return value is FALSE.
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-BOOL WIN32API GetInputState(VOID)
-{
-  dprintf(("USER32:GetInputState () not implemented.\n"));
-
-  return (FALSE);
-}
-
-
-/*****************************************************************************
  * Name      : UINT WIN32API GetKBCodePage
  * Purpose   : The GetKBCodePage function is provided for compatibility with
  *             earlier versions of Windows. In the Win32 application programming
@@ -2789,29 +2854,6 @@ HWINSTA WIN32API GetProcessWindowStation(VOID)
   return (NULL);
 }
 
-
-
-/*****************************************************************************
- * Name      : HDESK WIN32API GetThreadDesktop
- * Purpose   : The GetThreadDesktop function returns a handle to the desktop
- *             associated with a specified thread.
- * Parameters: DWORD dwThreadId thread identifier
- * Variables :
- * Result    : If the function succeeds, the return value is the handle of the
- *               desktop associated with the specified thread.
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-HDESK WIN32API GetThreadDesktop(DWORD dwThreadId)
-{
-  dprintf(("USER32:GetThreadDesktop (%u) not implemented.\n",
-         dwThreadId));
-
-  return (NULL);
-}
 
 
 /*****************************************************************************
@@ -3114,31 +3156,6 @@ HWINSTA WIN32API OpenWindowStationW(LPCTSTR lpszWinStaName,
 
   return (NULL);
 }
-
-
-/*****************************************************************************
- * Name      : BOOL WIN32API PaintDesktop
- * Purpose   : The PaintDesktop function fills the clipping region in the
- *             specified device context with the desktop pattern or wallpaper.
- *             The function is provided primarily for shell desktops.
- * Parameters:
- * Variables :
- * Result    : If the function succeeds, the return value is TRUE.
- *             If the function fails, the return value is FALSE.
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-BOOL WIN32API PaintDesktop(HDC hdc)
-{
-  dprintf(("USER32:PaintDesktop (%08x) not implemented.\n",
-         hdc));
-
-  return (FALSE);
-}
-
 
 
 /*****************************************************************************
