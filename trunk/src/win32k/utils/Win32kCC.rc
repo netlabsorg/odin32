@@ -1,4 +1,4 @@
-/* $Id: Win32kCC.rc,v 1.3 2000-09-03 23:53:19 bird Exp $
+/* $Id: Win32kCC.rc,v 1.4 2000-11-26 13:36:53 bird Exp $
  *
  * Resource File for Win32k Control Center.
  *
@@ -30,6 +30,10 @@ BEGIN
     IDS_ERR_INVALID_INFOLEVEL,  "Invalid infolevel."
     IDS_ERR_INVALID_MAXHEAPSIZE,"Invalid heapsize."
     IDS_ERR_SETPOPTIONS,        "Error occured in win32k while changing the options. (rc=0x%x)"
+    IDS_ERR_FOPEN_FAILED,       "Failed to open file %s."
+    IDS_FSIZE_FAILED,           "Failed to determin size of file %s."
+    IDS_MALLOC_FAILED,          "Error! malloc or calloc failed to allocate %d bytes of memory."
+    IDS_FWRITE_FAILED,          "Error! failed to write to file %s."
 END
 
 MESSAGETABLE
@@ -38,6 +42,7 @@ BEGIN
      * Messages.
      */
     IDM_INFO_DIRTY,             "You have changed the settings but not applied them. Sure you wan't to exit?"
+    IDM_CONFIGSYS_UPDATED,      "Config.sys was successfully updated."
 END
 
 
