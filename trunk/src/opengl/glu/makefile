@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2000-02-29 13:56:48 sandervl Exp $
+# $Id: makefile,v 1.11 2000-03-04 19:49:55 bird Exp $
 
 #
 # PD-Win32
@@ -12,18 +12,6 @@ PDWIN32_BIN = ..\..\..\bin
 PDWIN32_TOOLS = ..\..\..\tools\bin
 
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
-
-!ifdef DEBUG
-!ifdef NODEBUGINFO
-MAKE_CMD = nmake -nologo DEBUG=1 NODEBUGINFO=1
-L=/NODEBUG
-!else
-MAKE_CMD = nmake -nologo DEBUG=1
-L=/DE
-!endif
-!else
-MAKE_CMD = nmake -nologo
-!endif
 
 CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE) -I..\mesa\GL
 CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE) -I..\mesa\GL
@@ -323,7 +311,7 @@ $(TARGET).DLL: $(SOURCES) initterm.obj resource.obj $(TARGET).lrf $(TARGET).def
     cd ..\nurbs
     $(MAKE_CMD)
     cd ..
-    ILINK /FREE /NOE $(L) @$(TARGET).lrf
+    $(LD2) $(LD2FLAGS) /FREE @$(TARGET).lrf
     $(CP) $@ $(PDWIN32_BIN)
 
 
@@ -356,11 +344,11 @@ dep:
     $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win -I..\mesa\GL \
     *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
     cd util
-    $(MAKE_CMD) NODEP=1 dep
+    $(MAKE_CMD) dep
     cd ..\tess
-    $(MAKE_CMD) NODEP=1 dep
+    $(MAKE_CMD) dep
     cd ..\nurbs
-    $(MAKE_CMD) NODEP=1 dep
+    $(MAKE_CMD) dep
     cd ..
 
 !ifndef NODEP
