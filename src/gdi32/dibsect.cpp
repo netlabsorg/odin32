@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.32 2000-05-23 18:46:20 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.33 2000-05-28 17:03:18 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -101,8 +101,8 @@ DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DW
    pOS2bmp->cPlanes       = pbmi->biPlanes;
    pOS2bmp->cBitCount     = pbmi->biBitCount;
    pOS2bmp->ulCompression = pbmi->biCompression;
-   //SvL: Ignore BI_BITFIELDS type (GpiDrawBits fails otherwise)
-   if(pOS2bmp->ulCompression == BI_BITFIELDS) {
+   //SvL: Ignore BI_BITFIELDS_W type (GpiDrawBits fails otherwise)
+   if(pOS2bmp->ulCompression == BI_BITFIELDS_W) {
 	pOS2bmp->ulCompression = 0;
    }
    pOS2bmp->cbImage       = pbmi->biSizeImage;
@@ -139,9 +139,9 @@ DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DW
 	switch(pbmi->biBitCount)
    	{
            case 16:
-               	dibinfo.dsBitfields[0] = (pbmi->biCompression == BI_BITFIELDS) ? *(DWORD *)pColors : 0x7c00;
-               	dibinfo.dsBitfields[1] = (pbmi->biCompression == BI_BITFIELDS) ? *((DWORD *)pColors + 1) : 0x03e0;
-               	dibinfo.dsBitfields[2] = (pbmi->biCompression == BI_BITFIELDS) ? *((DWORD *)pColors + 2) : 0x001f;
+               	dibinfo.dsBitfields[0] = (pbmi->biCompression == BI_BITFIELDS_W) ? *(DWORD *)pColors : 0x7c00;
+               	dibinfo.dsBitfields[1] = (pbmi->biCompression == BI_BITFIELDS_W) ? *((DWORD *)pColors + 1) : 0x03e0;
+               	dibinfo.dsBitfields[2] = (pbmi->biCompression == BI_BITFIELDS_W) ? *((DWORD *)pColors + 2) : 0x001f;
                	break;
 
            case 24:
@@ -151,15 +151,15 @@ DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DW
                	break;
 
            case 32:
-               	dibinfo.dsBitfields[0] = (pbmi->biCompression == BI_BITFIELDS) ? *(DWORD *)pColors : 0xff;
-               	dibinfo.dsBitfields[1] = (pbmi->biCompression == BI_BITFIELDS) ? *((DWORD *)pColors + 1) : 0xff00;
-               	dibinfo.dsBitfields[2] = (pbmi->biCompression == BI_BITFIELDS) ? *((DWORD *)pColors + 2) : 0xff0000;
+               	dibinfo.dsBitfields[0] = (pbmi->biCompression == BI_BITFIELDS_W) ? *(DWORD *)pColors : 0xff;
+               	dibinfo.dsBitfields[1] = (pbmi->biCompression == BI_BITFIELDS_W) ? *((DWORD *)pColors + 1) : 0xff00;
+               	dibinfo.dsBitfields[2] = (pbmi->biCompression == BI_BITFIELDS_W) ? *((DWORD *)pColors + 2) : 0xff0000;
 		if(dibinfo.dsBitfields[0] != 0xff && dibinfo.dsBitfields[1] != 0xff00 && dibinfo.dsBitfields[2] != 0xff0000) {
 			dprintf(("DIBSection: unsupported bitfields for 32 bits bitmap!!"));
 		}
                	break;
        	}
-	dprintf(("BI_BITFIELDS %x %x %x", dibinfo.dsBitfields[0], dibinfo.dsBitfields[1], dibinfo.dsBitfields[2]));
+	dprintf(("BI_BITFIELDS_W %x %x %x", dibinfo.dsBitfields[0], dibinfo.dsBitfields[1], dibinfo.dsBitfields[2]));
    }
    //double buffer for rgb 555 dib sections (for conversion) or flipped sections
    if(dibinfo.dsBitfields[1] == 0x03e0 || (fFlip & FLIP_VERT)) {
@@ -315,9 +315,9 @@ int DIBSection::SetDIBits(HDC hdc, HBITMAP hbitmap, UINT startscan, UINT
 	switch(pbmi->biBitCount)
    	{
            case 16:
-               	dibinfo.dsBitfields[0] = (pbmi->biCompression == BI_BITFIELDS) ? *(DWORD *)pColors : 0x7c00;
-               	dibinfo.dsBitfields[1] = (pbmi->biCompression == BI_BITFIELDS) ? *((DWORD *)pColors + 1) : 0x03e0;
-               	dibinfo.dsBitfields[2] = (pbmi->biCompression == BI_BITFIELDS) ? *((DWORD *)pColors + 2) : 0x001f;
+               	dibinfo.dsBitfields[0] = (pbmi->biCompression == BI_BITFIELDS_W) ? *(DWORD *)pColors : 0x7c00;
+               	dibinfo.dsBitfields[1] = (pbmi->biCompression == BI_BITFIELDS_W) ? *((DWORD *)pColors + 1) : 0x03e0;
+               	dibinfo.dsBitfields[2] = (pbmi->biCompression == BI_BITFIELDS_W) ? *((DWORD *)pColors + 2) : 0x001f;
                	break;
 
            case 24:
@@ -327,15 +327,15 @@ int DIBSection::SetDIBits(HDC hdc, HBITMAP hbitmap, UINT startscan, UINT
                	break;
 
            case 32:
-               	dibinfo.dsBitfields[0] = (pbmi->biCompression == BI_BITFIELDS) ? *(DWORD *)pColors : 0xff;
-               	dibinfo.dsBitfields[1] = (pbmi->biCompression == BI_BITFIELDS) ? *((DWORD *)pColors + 1) : 0xff00;
-               	dibinfo.dsBitfields[2] = (pbmi->biCompression == BI_BITFIELDS) ? *((DWORD *)pColors + 2) : 0xff0000;
+               	dibinfo.dsBitfields[0] = (pbmi->biCompression == BI_BITFIELDS_W) ? *(DWORD *)pColors : 0xff;
+               	dibinfo.dsBitfields[1] = (pbmi->biCompression == BI_BITFIELDS_W) ? *((DWORD *)pColors + 1) : 0xff00;
+               	dibinfo.dsBitfields[2] = (pbmi->biCompression == BI_BITFIELDS_W) ? *((DWORD *)pColors + 2) : 0xff0000;
 		if(dibinfo.dsBitfields[0] != 0xff && dibinfo.dsBitfields[1] != 0xff00 && dibinfo.dsBitfields[2] != 0xff0000) {
 			dprintf(("DIBSection: unsupported bitfields for 32 bits bitmap!!"));
 		}
                	break;
        	}
-	dprintf(("BI_BITFIELDS %x %x %x", dibinfo.dsBitfields[0], dibinfo.dsBitfields[1], dibinfo.dsBitfields[2]));
+	dprintf(("BI_BITFIELDS_W %x %x %x", dibinfo.dsBitfields[0], dibinfo.dsBitfields[1], dibinfo.dsBitfields[2]));
    }
 
    //double buffer for rgb 555 dib sections (for conversion) or flipped sections
