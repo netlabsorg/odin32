@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.1 2000-01-17 05:22:59 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.2 2000-01-18 20:24:02 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -31,6 +31,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <odin.h>
+#include <win32type.h>
+#include <odinlx.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
 
 extern "C" {
@@ -73,6 +75,9 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
+	 if(RegisterLxDll(hModule, 0, 0) == FALSE) 
+		return 0UL;
+
          /*******************************************************************/
          /* A DosExitList routine must be used to clean up if runtime calls */
          /* are required and the runtime is dynamically linked.             */
@@ -84,6 +89,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
          break;
       case 1 :
+	 UnregisterLxDll(hModule);
          break;
       default  :
          return 0UL;
