@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.27 2000-11-21 15:17:12 sandervl Exp $*/
+/* $Id: menu.cpp,v 1.28 2000-12-05 13:05:50 sandervl Exp $*/
 /*
  * Menu functions
  *
@@ -30,8 +30,12 @@
 #include "controls.h"
 #include "menu.h"
 
+#ifdef __WIN32OS2__
+#include <objhandle.h>
+
 #define DBG_LOCALLOG    DBG_menu
 #include "dbglocal.h"
+#endif
 
 //DEFAULT_DEBUG_CHANNEL(menu)
 //DECLARE_DEBUG_CHANNEL(winhelp)
@@ -99,24 +103,7 @@ typedef struct
 
 #define MENU_MAGIC   0x554d  /* 'MU' */
 
-#ifdef __WIN32OS2__
-//******************************************************************************
-//Used by our menu code (we don't want any logging)
-//******************************************************************************
-BOOL IsWindowInternal(HWND hwnd)
-{
-  Win32BaseWindow *window;
-
-    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
-    if(!window) {
-        return FALSE;
-    }
-    return window->IsWindow();
-}
-#define IS_A_MENU(pmenu) ((pmenu) && !IsWindowInternal((HWND)pmenu) && (pmenu)->wMagic == MENU_MAGIC)
-#else
 #define IS_A_MENU(pmenu) ((pmenu) && (pmenu)->wMagic == MENU_MAGIC)
-#endif
 
 #define ITEM_PREV               -1
 #define ITEM_NEXT                1
@@ -342,6 +329,15 @@ VOID setSysMenu(HWND hwnd,HMENU hMenu)
  */
 POPUPMENU *MENU_GetMenu(HMENU hMenu)
 {
+#ifdef __WIN32OS2__
+    if(ObjGetHandleType(hMenu) == USEROBJ_MENU) {
+        POPUPMENU *menu;
+
+        menu = (POPUPMENU *)ObjGetHandleData(hMenu, USEROBJ_MENU);
+        return menu;
+    }
+    return NULL;
+#else
     POPUPMENU *menu;
     menu = (POPUPMENU*)hMenu;
     if (!IS_A_MENU(menu))
@@ -350,6 +346,7 @@ POPUPMENU *MENU_GetMenu(HMENU hMenu)
         menu = NULL;
     }
     return menu;
+#endif
 }
 
 /***********************************************************************
@@ -362,7 +359,11 @@ static HMENU MENU_CopySysPopup(void)
     HMENU hMenu = LoadMenuA(GetModuleHandleA("USER32"), "SYSMENU");
 
     if( hMenu ) {
+#ifdef __WIN32OS2__
+        POPUPMENU* menu = MENU_GetMenu(hMenu);
+#else
         POPUPMENU* menu = (POPUPMENU*)hMenu;
+#endif
         menu->wFlags |= MF_SYSMENU | MF_POPUP;
         SetMenuDefaultItem(hMenu, SC_CLOSE, FALSE);
     }
@@ -421,7 +422,11 @@ HMENU MENU_GetSysMenu( HWND hWnd, HMENU hPopupMenu )
     hMenu = CreateMenu();
     if (hMenu)
     {
+#ifdef __WIN32OS2__
+        POPUPMENU *menu = MENU_GetMenu(hMenu);
+#else
         POPUPMENU *menu = (POPUPMENU*)hMenu;
+#endif
         menu->wFlags = MF_SYSMENU;
         menu->hWnd = hWnd;
 
@@ -435,7 +440,11 @@ HMENU MENU_GetSysMenu( HWND hWnd, HMENU hPopupMenu )
 
             menu->items[0].fType = MF_SYSMENU | MF_POPUP;
             menu->items[0].fState = 0;
+#ifdef __WIN32OS2__
+            menu = MENU_GetMenu(hPopupMenu);
+#else
             menu = (POPUPMENU*)hPopupMenu;
+#endif
             menu->wFlags |= MF_SYSMENU;
 
             //TRACE("GetSysMenu hMenu=%04x (%04x)\n", hMenu, hPopupMenu );
@@ -561,7 +570,11 @@ static void MENU_InitSysMenuPopup( HMENU hmenu, DWORD style, DWORD clsStyle )
 static UINT  MENU_GetStartOfNextColumn(
     HMENU  hMenu )
 {
+#ifdef __WIN32OS2__
+    POPUPMENU  *menu = MENU_GetMenu(hMenu);
+#else
     POPUPMENU  *menu = (POPUPMENU*)hMenu;
+#endif
     UINT  i = menu->FocusedItem + 1;
 
     if(!menu)
@@ -589,7 +602,11 @@ static UINT  MENU_GetStartOfNextColumn(
 static UINT  MENU_GetStartOfPrevColumn(
     HMENU  hMenu )
 {
+#ifdef __WIN32OS2__
+    POPUPMENU const  *menu = MENU_GetMenu(hMenu);
+#else
     POPUPMENU const  *menu = (POPUPMENU*)hMenu;
+#endif
     UINT  i;
 
     if( !menu )
@@ -1718,7 +1735,11 @@ static void MENU_SelectItem( HWND hwndOwner, HMENU hmenu, UINT wIndex,
         if(topmenu){
             int pos;
             if((pos=MENU_FindSubMenu(&topmenu, hmenu))!=NO_SELECTED_ITEM){
+#ifdef __WIN32OS2__
+                POPUPMENU *ptm = MENU_GetMenu(topmenu);
+#else
                 POPUPMENU *ptm = (POPUPMENU*)topmenu;
+#endif
                 MENUITEM *ip = &ptm->items[pos];
                 SendMessageA( hwndOwner, WM_MENUSELECT, MAKELONG(pos,
                          ip->fType | ip->fState | MF_MOUSESELECT |
@@ -1866,10 +1887,10 @@ static MENUITEM *MENU_InsertItem( HMENU hMenu, UINT pos, UINT flags )
 
     /* Find where to insert new item */
     if (flags & MF_BYPOSITION) {
-        if (pos > menu->nItems) 
+        if (pos > menu->nItems)
             pos = menu->nItems;
     } else {
-        if (!MENU_FindItem( &hMenu, &pos, flags )) 
+        if (!MENU_FindItem( &hMenu, &pos, flags ))
             pos = menu->nItems;
         else {
             if (!(menu = MENU_GetMenu( hMenu )))
@@ -3216,7 +3237,7 @@ BOOL WINAPI TrackPopupMenu( HMENU hMenu, UINT wFlags, INT x, INT y,
     BOOL ret = FALSE;
 
     if(lpRect) {
-    	 dprintf(("USER32: TrackPopupMenu %x %x (%d,%d) %x %x (%d,%d)(%d,%d)", hMenu, wFlags, x, y, nReserved, hWnd, lpRect->left, lpRect->top, lpRect->right, lpRect->bottom));
+         dprintf(("USER32: TrackPopupMenu %x %x (%d,%d) %x %x (%d,%d)(%d,%d)", hMenu, wFlags, x, y, nReserved, hWnd, lpRect->left, lpRect->top, lpRect->right, lpRect->bottom));
     }
     else dprintf(("USER32: TrackPopupMenu %x %x (%d,%d) %x %x lpRect=NULL", hMenu, wFlags, x, y, nReserved, hWnd));
 
@@ -3501,18 +3522,18 @@ INT WINAPI GetMenuStringA(
 
     if (!str || !nMaxSiz)
     {
-	if (item && IS_STRING_ITEM(item->fType))
-	    return strlen(item->text);
-	else
-	    return 0;
+    if (item && IS_STRING_ITEM(item->fType))
+        return strlen(item->text);
+    else
+        return 0;
     }
 
     str[0] = '\0';
 
     if (item)
     {
-	if (!IS_STRING_ITEM(item->fType)) return 0;
-	lstrcpynA( str, item->text, nMaxSiz );
+    if (!IS_STRING_ITEM(item->fType)) return 0;
+    lstrcpynA( str, item->text, nMaxSiz );
     }
 
     return strlen(str);
@@ -3536,18 +3557,18 @@ INT WINAPI GetMenuStringW( HMENU hMenu, UINT wItemID,
 
     if (!str || !nMaxSiz)
     {
-	if (item && IS_STRING_ITEM(item->fType))
-	    return strlen(item->text);
-	else
-	    return 0;
+    if (item && IS_STRING_ITEM(item->fType))
+        return strlen(item->text);
+    else
+        return 0;
     }
 
     str[0] = '\0';
 
     if (item)
     {
-	if (!IS_STRING_ITEM(item->fType)) return 0;
-	lstrcpynAtoW( str, item->text, nMaxSiz );
+    if (!IS_STRING_ITEM(item->fType)) return 0;
+    lstrcpynAtoW( str, item->text, nMaxSiz );
     }
 
     return lstrlenW(str);
@@ -3882,8 +3903,13 @@ HMENU WINAPI CreateMenu(void)
 
     dprintf(("USER32: CreateMenu"));
 
+#ifdef __WIN32OS2__
+    if (!(menu = (LPPOPUPMENU)HeapAlloc(GetProcessHeap(),0,sizeof(POPUPMENU)))) return 0;
+    if(ObjAllocateHandle(&hMenu, (DWORD)menu, USEROBJ_MENU) == FALSE) return 0;
+#else
     if (!(hMenu = (HMENU)HeapAlloc(GetProcessHeap(),0,sizeof(POPUPMENU)))) return 0;
     menu = (LPPOPUPMENU)hMenu;
+#endif
 
     ZeroMemory(menu, sizeof(POPUPMENU));
     menu->wMagic = MENU_MAGIC;
@@ -3934,7 +3960,12 @@ BOOL WINAPI DestroyMenu( HMENU hMenu )
                 }
                 HeapFree(GetProcessHeap(), 0, lppop->items );
             }
+#ifdef __WIN32OS2__
+            HeapFree(GetProcessHeap(),0,(LPVOID)lppop);
+            ObjFreeHandle(hMenu);
+#else
             HeapFree(GetProcessHeap(),0,(LPVOID)hMenu);
+#endif
             MENU_ReleaseTopPopupWnd();
         }
         else
