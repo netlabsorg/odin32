@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.746 2000-02-23 00:57:10 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.747 2000-02-23 01:07:23 sandervl Exp $ */
 
  2000-02-22: Sander van Leeuwen <sandervl@xs4all.nl>
 	- WINMM/GDI32/KERNEL32/USER32: Fixed compile problems for release build
@@ -9,6 +9,8 @@
                     Fixed wrong calling convention for SetLastError calls
                     in OSLibiGetModuleHandleA
                     (only showed up in release build)
+                    Fixed wrong calling convention for SetLastError calls
+                    in oslibdos.cpp.
 
  2000-02-22: Christoph Bratschi <cbratschi@datacomm.ch>
 	- COMCTL32: merged with Corel WINE 20000212
