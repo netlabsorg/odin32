@@ -93,6 +93,7 @@ The Odin installation consists of:
   - creating empty directories in x:\odin (to create a similar directory
     structure as found in Windows)
   - creating a basic registry for executing win32 applications in OS/2
+  - adds x:\odin\system32 to the path and libpath settings in your config.sys
 
 NOTE: You MUST install Odin at least once using WarpIn (unless you know
       what you're doing). Afterwards you can use the daily build zipfiles
