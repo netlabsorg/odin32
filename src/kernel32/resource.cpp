@@ -1,4 +1,4 @@
-/* $Id: resource.cpp,v 1.9 1999-09-15 23:38:01 sandervl Exp $ */
+/* $Id: resource.cpp,v 1.10 1999-11-29 00:04:05 bird Exp $ */
 
 /*
  * Misc resource procedures
@@ -26,35 +26,23 @@ HRSRC WIN32API FindResourceA(HINSTANCE hModule, LPCSTR lpszName, LPCSTR lpszType
  Win32ImageBase *module;
 
     dprintf(("FindResourceA %X", hModule));
-    if(hModule == 0 || hModule == -1 || (WinExe != NULL && hModule ==
-       WinExe->getInstanceHandle()))
-    {
-         module = (Win32ImageBase *)WinExe;
-    }
-    else module = (Win32ImageBase *)Win32DllBase::findModule(hModule);
-
+    module = Win32ImageBase::findModule(hModule);
     if(module == NULL)
-    	return(NULL);
+      return(NULL);
 
     return module->findResourceA(lpszName, (LPSTR)lpszType);
 }
 //******************************************************************************
 //******************************************************************************
 HRSRC WIN32API FindResourceW(HINSTANCE hModule, LPCWSTR lpszName,
-                    	     LPCWSTR lpszType)
+                          LPCWSTR lpszType)
 {
  Win32ImageBase *module;
 
     dprintf(("FindResourceW %X", hModule));
-    if(hModule == 0 || hModule == -1 || (WinExe != NULL && hModule ==
-       WinExe->getInstanceHandle()))
-    {
-         module = (Win32ImageBase *)WinExe;
-    }
-    else module = (Win32ImageBase *)Win32DllBase::findModule(hModule);
-
+    module = Win32ImageBase::findModule(hModule);
     if(module == NULL)
-	return(NULL);
+        return(NULL);
 
     return module->findResourceW((LPWSTR)lpszName, (LPWSTR)lpszType);
 }
@@ -76,8 +64,8 @@ HGLOBAL WIN32API LoadResource(HINSTANCE hModule, HRSRC hRes)
 
   /* @@@PH */
   if (HIWORD(res) == NULL) {
-	dprintf(("LoadResource %x: invalid hRes %x", hModule, hRes));
-	return 0;
+   dprintf(("LoadResource %x: invalid hRes %x", hModule, hRes));
+   return 0;
   }
   else  return (HGLOBAL)res->lockResource();
 }
@@ -95,12 +83,82 @@ DWORD WIN32API SizeofResource(HINSTANCE hModule, HRSRC hRes)
     return res->getSize();
 }
 //******************************************************************************
-//******************************************************************************
-BOOL WIN32API EnumResourceNamesA(HINSTANCE hModule, LPCTSTR lpszType,
-                    ENUMRESNAMEPROCA lpEnumFunc, LONG lParam)
+
+
+
+/**
+ * The EnumResourceNames function searches a module for each
+ * resource of the specified type and passes the name of each
+ * resource it locates to an application-defined callback function
+ *
+ * @returns  If the function succeeds, the return value is nonzero.
+ *           If the function fails, the return value is zero
+ * @param    hModule       resource-module handling
+ * @param    lpszType      pointer to resource type
+ * @param    lpEnumFunc    pointer to callback function
+ * @param    lParam        application-defined parameter
+ * @status   stub
+ * @author   knut st. osmundsen
+ * @remark   The EnumResourceNames function continues to enumerate resource
+ *           names until the callback function returns FALSE or all resource
+ *           names have been enumerated
+ */
+BOOL WIN32API EnumResourceNamesA(HINSTANCE        hModule,
+                                 LPCTSTR          lpszType,
+                                 ENUMRESNAMEPROCA lpEnumFunc,
+                                 LONG             lParam)
 {
-    dprintf(("OS2EnumResourceNamesA - stub\n"));
-    return(FALSE);
+    Win32ImageBase *pModule;
+
+    dprintf(("KERNEL32:EnumResourceNamesA(%08x,%08x,%08x,%08x) not implemented\n",
+              hModule, lpszType, lpEnumFunc, lParam
+             ));
+
+    pModule = Win32ImageBase::findModule(hModule);
+    if (pModule == NULL)
+    {
+        SetLastError(ERROR_RESOURCE_DATA_NOT_FOUND);
+        return FALSE;
+    }
+
+    return pModule->enumResourceNamesA(hModule, lpszType, lpEnumFunc, lParam);
 }
-//******************************************************************************
-//******************************************************************************
+
+
+/**
+ * The EnumResourceNames function searches a module for each
+ * resource of the specified type and passes the name of each
+ * resource it locates to an application-defined callback function
+ *
+ * @returns  If the function succeeds, the return value is nonzero.
+ *           If the function fails, the return value is zero
+ * @param    hModule       resource-module handling
+ * @param    lpszType      pointer to resource type
+ * @param    lpEnumFunc    pointer to callback function
+ * @param    lParam        application-defined parameter
+ * @status   stub
+ * @author   knut st. osmundsen
+ * @remark   The EnumResourceNames function continues to enumerate resource
+ *           names until the callback function returns FALSE or all resource
+ *           names have been enumerated
+ */
+BOOL WIN32API EnumResourceNamesW(HMODULE          hModule,
+                                 LPCWSTR          lpszType,
+                                 ENUMRESNAMEPROCW lpEnumFunc,
+                                 LONG             lParam)
+{
+    Win32ImageBase *pModule;
+
+    dprintf(("KERNEL32:EnumResourceNamesW(%08x,%08x,%08x,%08x)\n",
+              hModule, lpszType, lpEnumFunc, lParam));
+
+    pModule = Win32ImageBase::findModule(hModule);
+    if (pModule == NULL)
+    {
+        SetLastError(ERROR_RESOURCE_DATA_NOT_FOUND);
+        return FALSE;
+    }
+
+    return pModule->enumResourceNamesW(hModule, lpszType, lpEnumFunc, lParam);
+}
+

@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.18 1999-11-27 00:05:39 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.19 1999-11-29 00:04:06 bird Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -278,7 +278,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
 
   nSections = NR_SECTIONS(win32file);
 
-  if(loadType == REAL_LOAD) 
+  if(loadType == REAL_LOAD)
   {
    imageSize = 0;
    if ((psh = (PIMAGE_SECTION_HEADER)SECTIONHDROFF (win32file)) != NULL) {
@@ -388,7 +388,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
    }
   }
   else {
-  	if(GetSectionHdrByName (win32file, &sh, ".rsrc")) 
+  	if(GetSectionHdrByName (win32file, &sh, ".rsrc"))
         {
             addSection(SECTION_RESOURCE, sh.PointerToRawData,
                        sh.SizeOfRawData, sh.VirtualAddress + oh.ImageBase,
@@ -406,7 +406,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
     	fout << "imageSize != imageVirtEnd - oh.ImageBase!" << endl;
     	imageSize = imageVirtEnd - oh.ImageBase;
   }
-  if(imageSize < oh.SizeOfImage) { 
+  if(imageSize < oh.SizeOfImage) {
 	imageSize = oh.SizeOfImage;
   }
 
@@ -415,7 +415,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
   	entryPoint = realBaseAddress + oh.AddressOfEntryPoint;
   }
   else {
-	fout << "EntryPoint == NULL" << endl; 
+	fout << "EntryPoint == NULL" << endl;
 	entryPoint = NULL;
   }
 
@@ -425,7 +425,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
     	goto failure;
   }
 
-  if(loadType == REAL_LOAD) 
+  if(loadType == REAL_LOAD)
   {
    if(tlsDir != NULL) {
     Section *sect = findSection(SECTION_TLS);
@@ -484,17 +484,17 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
   if(GetSectionHdrByName (win32file, &sh, ".rsrc")) {
     	//get offset in resource object of directory entry
 	pResDir = (PIMAGE_RESOURCE_DIRECTORY)(sh.VirtualAddress + realBaseAddress);
-        pResourceSectionStart = sh.VirtualAddress;
+        ulRVAResourceSection = sh.VirtualAddress;
   }
 
-  if (loadType == REAL_LOAD) 
+  if (loadType == REAL_LOAD)
   {
    if(processImports((char *)win32file) == FALSE) {
     	fout << "Failed to process imports!" << endl;
      	goto failure;
    }
   }
- 
+
   return(TRUE);
 failure:
   if(memmap) {
@@ -542,7 +542,7 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
 		offset = virtAddress - (section->realvirtaddr + section->virtualsize);
 		fileoffset = section->rawoffset + section->rawsize + offset;
 	}
-  }  
+  }
   else {
   	protflags   = section->pageflags;
   	offset      = virtAddress - section->realvirtaddr;
@@ -551,7 +551,7 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
 		//unintialized data (set to 0)
 		size = 0;
 		fileoffset = -1;
-	}  
+	}
   	else {
 		size = section->rawsize-offset;
   		fileoffset = section->rawoffset + offset;
@@ -708,7 +708,7 @@ Section *Win32PeLdrImage::findPreviousSectionByOS2Addr(ULONG addr)
 		}
 	}
   }
-  if(index == -1) 
+  if(index == -1)
   	return NULL;
 
   return &section[index];
@@ -803,7 +803,7 @@ BOOL Win32PeLdrImage::setMemFlags()
   }
 
   for(i=0;i<nrsections;i++) {
-    	switch(section[i].type) 
+    	switch(section[i].type)
 	{
         case SECTION_CODE:
         case (SECTION_CODE | SECTION_IMPORT):
@@ -854,7 +854,7 @@ BOOL Win32PeLdrImage::setFixups(ULONG virtAddress, ULONG size)
 		        int offset = prel->TypeOffset[i] & 0xFFF;
 			int fixupsize = 0;
 
-		        switch(type) 
+		        switch(type)
 			{
 		        case IMAGE_REL_BASED_HIGHLOW:
 				fixupsize = 4;
@@ -863,10 +863,10 @@ BOOL Win32PeLdrImage::setFixups(ULONG virtAddress, ULONG size)
             		case IMAGE_REL_BASED_LOW:
 				fixupsize = 2;
 				break;
-			}			
-			//If the fixup crosses the final page boundary, 
-			//then we have to load another page 
-			if(prel->VirtualAddress + offset + fixupsize > virtAddress + size) 
+			}
+			//If the fixup crosses the final page boundary,
+			//then we have to load another page
+			if(prel->VirtualAddress + offset + fixupsize > virtAddress + size)
 			{
 				newpage  = realBaseAddress + prel->VirtualAddress + offset + fixupsize;
 				newpage &= ~0xFFF;
@@ -876,7 +876,7 @@ BOOL Win32PeLdrImage::setFixups(ULONG virtAddress, ULONG size)
 					//should never happen
 					dprintf(("::setFixups -> section == NULL!!"));
 					return FALSE;
-    				}		
+    				}
 				//SvL: Read page from disk
 				commitPage(newpage, TRUE, SINGLE_PAGE);
 
@@ -884,7 +884,7 @@ BOOL Win32PeLdrImage::setFixups(ULONG virtAddress, ULONG size)
     				DosSetMem((PVOID)newpage, PAGE_SIZE, PAG_READ|PAG_WRITE);
 			}
 
-		        switch(type) 
+		        switch(type)
 			{
 		        case IMAGE_REL_BASED_ABSOLUTE:
 		        	break;  //skip
@@ -902,7 +902,7 @@ BOOL Win32PeLdrImage::setFixups(ULONG virtAddress, ULONG size)
        			default:
                 		break;
         		}
-			if(prel->VirtualAddress + offset + fixupsize > virtAddress + size) 
+			if(prel->VirtualAddress + offset + fixupsize > virtAddress + size)
 			{
     				//SvL: Restore original page protection flags
     				DosSetMem((PVOID)newpage, PAGE_SIZE, section->pageflags);
@@ -1307,7 +1307,7 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
     if(WinDll == NULL)
     {  //not found, so load it
 	char modname[CCHMAXPATH];
-	
+
 	strcpy(modname, pszCurModule);
   	//rename dll if necessary (i.e. OLE32 -> OLE32OS2)
   	Win32DllBase::renameDll(modname);
@@ -1440,9 +1440,9 @@ ULONG Win32PeLdrImage::getApi(char *name)
   char        tmp[4];
   NameExport *curexport;
   ULONG       ulAPIOrdinal;                      /* api requested by ordinal */
-  
+
   apilen = strlen(name) + 1;
-  if(apilen < 4) 
+  if(apilen < 4)
   {
 	*(ULONG *)tmp = 0;
 	strcpy(tmp, name);
@@ -1451,12 +1451,12 @@ ULONG Win32PeLdrImage::getApi(char *name)
   else	apiname = name;
 
   curexport = nameexports;
-  for(i=0; i<nrNameExports; i++) 
+  for(i=0; i<nrNameExports; i++)
   {
-    if(apilen == curexport->nlength && 
-       *(ULONG *)curexport->name == *(ULONG *)name) 
+    if(apilen == curexport->nlength &&
+       *(ULONG *)curexport->name == *(ULONG *)name)
     {
-      	if(strcmp(curexport->name, name) == 0) 
+      	if(strcmp(curexport->name, name) == 0)
         	return(curexport->virtaddr);
     }
     curexport = (NameExport *)((ULONG)curexport->name + curexport->nlength);
@@ -1477,7 +1477,7 @@ ULONG Win32PeLdrImage::getApi(int ordinal)
 		return(curexport->virtaddr);
 	curexport++;
   }
-  //Name exports also contain an ordinal, so check this 
+  //Name exports also contain an ordinal, so check this
   nexport = nameexports;
   for(i=0;i<nrNameExports;i++) {
 	if(nexport->ordinal == ordinal)
