@@ -30,4 +30,5 @@ SEGMENTS
     _VFT                class 'CONST'
     CONST32_RO          class 'CONST'
 
+    CALLTAB16           class 'CALLTAB16_DATA'
 
