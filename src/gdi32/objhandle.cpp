@@ -1,4 +1,4 @@
-/* $Id: objhandle.cpp,v 1.17 2001-08-18 03:50:32 phaller Exp $ */
+/* $Id: objhandle.cpp,v 1.18 2001-09-19 15:38:42 sandervl Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
@@ -44,7 +44,7 @@ static VMutex    objTableMutex;
 
 //******************************************************************************
 //******************************************************************************
-BOOL ObjAllocateHandle(HANDLE *hObject, DWORD dwUserData, ObjectType type)
+BOOL WIN32API ObjAllocateHandle(HANDLE *hObject, DWORD dwUserData, ObjectType type)
 {
     objTableMutex.enter(VMUTEX_WAIT_FOREVER);
     if(lowestFreeIndex == -1) {
@@ -78,7 +78,7 @@ BOOL ObjAllocateHandle(HANDLE *hObject, DWORD dwUserData, ObjectType type)
 }
 //******************************************************************************
 //******************************************************************************
-void ObjFreeHandle(HANDLE hObject)
+void WIN32API ObjFreeHandle(HANDLE hObject)
 {
     hObject &= OBJHANDLE_MAGIC_MASK;
     if(hObject < MAX_OBJECT_HANDLES) {
@@ -93,7 +93,7 @@ void ObjFreeHandle(HANDLE hObject)
 }
 //******************************************************************************
 //******************************************************************************
-DWORD ObjGetHandleData(HANDLE hObject, ObjectType type)
+DWORD WIN32API ObjGetHandleData(HANDLE hObject, ObjectType type)
 {
     hObject &= OBJHANDLE_MAGIC_MASK;
     if(hObject < MAX_OBJECT_HANDLES && type == objHandleTable[hObject].type) {
@@ -103,7 +103,7 @@ DWORD ObjGetHandleData(HANDLE hObject, ObjectType type)
 }
 //******************************************************************************
 //******************************************************************************
-ObjectType ObjGetHandleType(HANDLE hObject)
+ObjectType WIN32API ObjGetHandleType(HANDLE hObject)
 {
  DWORD objtype;
 
