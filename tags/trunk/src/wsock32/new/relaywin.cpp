@@ -1,4 +1,4 @@
-/* $Id: relaywin.cpp,v 1.1 1999-12-01 01:10:55 phaller Exp $ */
+/* $Id: relaywin.cpp,v 1.2 1999-12-01 20:29:39 phaller Exp $ */
 
 /*
  *
@@ -53,7 +53,7 @@ static char*       ODIN_WSOCK_RELAY_CLASS = "ODIN_WSOCK_RELAY";
 
 // prototype for PostMessageA
 //BOOL _Stdcall PostMessageA(HWND,UINT,WPARAM,LPARAM);
-BOOL _System PostMessageA(HWND,UINT,ULONG,ULONG);
+BOOL __stdcall PostMessageA(HWND,UINT,ULONG,ULONG);
 
 
 /*****************************************************************************
