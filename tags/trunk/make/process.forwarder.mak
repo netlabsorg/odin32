@@ -1,4 +1,4 @@
-# $Id: process.forwarder.mak,v 1.4 2002-06-19 02:16:08 bird Exp $
+# $Id: process.forwarder.mak,v 1.5 2002-08-19 15:00:25 bird Exp $
 
 #
 # Generic makefile system.
@@ -24,7 +24,7 @@
 !error Fatal error: The environment is not valid. Bad setup.mak?
 !endif
 
-!if "$(TARGET_NAME)" == "" && "$(TARGET_MODE)" != "EMPTY"
+!if "$(TARGET_NAME)" == "" && "$(TARGET_MODE)" != "EMPTY" && "$(TARGET_MODE)" != "DEPEND"
 !error Fatal error: TARGET_NAME is not defined! Should be set in the makefile.
 !endif
 
@@ -303,9 +303,14 @@ $(TARGET):
 
 
 # -----------------------------------------------------------------------------
-# The $(TARGET) rule - For EMPTY targets.
+# The $(TARGET) rule - For EMPTY & DEPEND targets.
 # -----------------------------------------------------------------------------
-!if "$(TARGET_MODE)" == "EMPTY"
+# this doesn't work as we don't have a target name. Hence not needed.
+#!if "$(TARGET_MODE)" == "EMPTY"
+#$(TARGET):
+#    @$(ECHO) .
+#!endif
+!if "$(TARGET_MODE)" == "DEPEND"
 $(TARGET):
     @$(ECHO) .
 !endif
