@@ -1,4 +1,13 @@
-/* $Id: changelog,v 1.1279 2001-02-21 18:13:41 bird Exp $ */
+/* $Id: changelog,v 1.1280 2001-02-21 20:44:32 sandervl Exp $ */
+
+ 2001-02-21: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Changes for minimizing windows. Not done yet.
+
+ 2000-02-21: Michal Necasek <mike@mendelu.cz>
+    - USER32:   o Translate WM_BUTTONxMOTIONSTART/END to WM_MOUSEMOVE
+                  Applications don't expect WM_NULL when fetching mouse
+                  messages from the queue.
+                  (fixes mouse jumping in Unreal)
 
  2000-02-20: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Win32k:   o Moved calltabs to the code segments. Clears the
