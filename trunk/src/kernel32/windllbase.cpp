@@ -1,4 +1,4 @@
-/* $Id: windllbase.cpp,v 1.35 2004-01-30 22:17:00 bird Exp $ */
+/* $Id: windllbase.cpp,v 1.36 2004-04-27 08:25:43 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
@@ -706,6 +706,12 @@ void Win32DllBase::setDefaultRenaming()
     {
         PROFILE_SetOdinIniString(DLLRENAMEWIN_SECTION, "CRTDLL",   "CRTDLL32");
         PROFILE_SetOdinIniString(DLLRENAMEOS2_SECTION, "CRTDLL32", "CRTDLL");
+    }
+    if(PROFILE_GetOdinIniString(DLLRENAMEWIN_SECTION, "IMM32", "", renameddll,
+                                sizeof(renameddll)-1) <= 1)
+    {
+        PROFILE_SetOdinIniString(DLLRENAMEWIN_SECTION, "IMM32", "IMM32OS2");
+        PROFILE_SetOdinIniString(DLLRENAMEOS2_SECTION, "IMM32OS2", "IMM32");
     }
 }
 //******************************************************************************
