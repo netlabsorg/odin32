@@ -1,4 +1,4 @@
-; $Id: buffer.asm,v 1.4 2000-02-21 05:00:53 bird Exp $
+; $Id: buffer.asm,v 1.5 2000-02-21 09:24:02 bird Exp $
 ;
 ; Simple resident buffer for use when overloading tkExecPgm.
 ;
@@ -250,14 +250,16 @@ QueryBufferPointerFromFilename PROC NEAR
 QueryBufferPointerFromFilename_loop:
     sub     edx, BUFFER_SIZE            ; edx points at the buffer being concidered.
     dec     ebx                         ; ebx points at the "semaphore" for the buffer being concidered.
-    cmp     byte ptr [edx], 1           ; Is buffer in use?
+    cmp     byte ptr [ebx], 1           ; Is buffer in use?
     jne     QueryBufferPointerFromFilename_next
 
     ; buffer is active - lets compare
     push    eax
     push    ecx
     push    edx
+    sub     esp, 8
     call    stricmp
+    add     esp, 8
     pop     edx
     pop     ecx
     or      eax, eax

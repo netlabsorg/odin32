@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.25 2000-02-20 04:27:22 bird Exp $
+# $Id: Makefile,v 1.26 2000-02-21 09:23:59 bird Exp $
 #
 # Copyright 1998-1999 knut st. osmundsen
 #
@@ -294,7 +294,9 @@ dep:
         dev16\*.c* pe2lx\*.c* k32\*.c* lib\*.c include\*.h
 
 object\asmutils.obj:            misc\asmutils.asm     include\devsegdf.inc
-object\calltab.obj:             ldr\calltab.asm
+object\buffer.obj:              misc\buffer.asm       include\devsegdf.inc
+object\calltab.obj:             ldr\calltab.asm       include\devsegdf.inc
+object\mytkExecPgm.obj:         ldr\mytkExecPgm.asm   include\devsegdf.inc
 object\d32hlp.obj:              dev32\d32hlp.asm      include\devsegdf.inc
 object\devfirst.obj:            dev32\devfirst.asm    include\devsegdf.inc
 object\devlast.obj:             dev32\devlast.asm     include\devsegdf.inc
