@@ -1,4 +1,4 @@
-/* $Id: dibsect.h,v 1.11 2000-02-02 23:45:06 sandervl Exp $ */
+/* $Id: dibsect.h,v 1.12 2000-02-10 00:36:10 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -62,7 +62,7 @@ typedef struct
 class DIBSection
 {
 public:
-              DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DWORD handle, int fFlip);
+              DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DWORD hSection, DWORD dwOffset, DWORD handle, int fFlip);
              ~DIBSection();
 
               char *GetDIBObject()           { return bmpBits;  };
@@ -95,6 +95,7 @@ protected:
 
 private:
           DWORD handle, iUsage;
+          DWORD hSection;
           HWND  hwndParent;
           HDC   hdc;
           char *bmpBits;

@@ -1,4 +1,4 @@
-/* $Id: dibitmap.cpp,v 1.2 2000-02-02 23:45:06 sandervl Exp $ */
+/* $Id: dibitmap.cpp,v 1.3 2000-02-10 00:36:10 sandervl Exp $ */
 
 /*
  * GDI32 dib & bitmap code
@@ -84,11 +84,6 @@ HBITMAP WIN32API CreateDIBSection( HDC hdc, BITMAPINFO *pbmi, UINT iUsage,
  int     iHeight, iWidth;
 
   dprintf(("GDI32: CreateDIBSection %x %x %x %x %d", hdc, iUsage, ppvBits, hSection, dwOffset));
-  if(hSection)
-  {
-    dprintf(("GDI32: CreateDIBSection, hSection != NULL, not supported!"));
-    return NULL;
-  }
 
   //SvL: 13-9-98: StarCraft uses bitmap with negative height
   iWidth = pbmi->bmiHeader.biWidth;
@@ -110,7 +105,9 @@ HBITMAP WIN32API CreateDIBSection( HDC hdc, BITMAPINFO *pbmi, UINT iUsage,
   if (res)
   {
     char PalSize;
-    DIBSection *dsect = new DIBSection((BITMAPINFOHEADER_W *)&pbmi->bmiHeader, (char *)&pbmi->bmiColors, iUsage, (DWORD)res, fFlip);
+    DIBSection *dsect;
+
+    dsect = new DIBSection((BITMAPINFOHEADER_W *)&pbmi->bmiHeader, (char *)&pbmi->bmiColors, iUsage, hSection, dwOffset, (DWORD)res, fFlip);
 
     if(dsect != NULL)
     {
