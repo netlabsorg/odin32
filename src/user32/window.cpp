@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.1 1999-09-15 23:19:02 sandervl Exp $ */
+/* $Id: window.cpp,v 1.2 1999-09-16 18:00:43 dengert Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -299,6 +299,7 @@ HWND WIN32API GetTopWindow( HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
+#if 0
 BOOL WIN32API UpdateWindow(HWND hwnd)
 {
   Win32BaseWindow *window;
@@ -311,6 +312,7 @@ BOOL WIN32API UpdateWindow(HWND hwnd)
     dprintf(("UpdateWindow %x", hwnd));
     return window->UpdateWindow();
 }
+#endif
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API IsIconic( HWND hwnd)
@@ -517,6 +519,8 @@ BOOL WIN32API LockWindowUpdate( HWND arg1)
 }
 //******************************************************************************
 //******************************************************************************
+
+#if 0
 BOOL WIN32API RedrawWindow( HWND arg1, const RECT * arg2, HRGN arg3, UINT arg4)
 {
  BOOL rc;
@@ -530,6 +534,7 @@ BOOL WIN32API RedrawWindow( HWND arg1, const RECT * arg2, HRGN arg3, UINT arg4)
   SendMessageA(arg1, WM_PAINT, 0, 0);
   return(rc);
 }
+#endif
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API GetWindowRect( HWND hwnd, PRECT pRect)
@@ -992,20 +997,20 @@ BOOL WIN32API EnumThreadWindows(DWORD dwThreadId, WNDENUMPROC lpfn, LPARAM lPara
 
   curpid = GetCurrentProcessId();
 
-  henum = OSLibWinBeginEnumWindows(OSLIB_HWND_DESKTOP);          
+  henum = OSLibWinBeginEnumWindows(OSLIB_HWND_DESKTOP);
   while ((hwndNext = OSLibWinGetNextWindow(henum)) != 0)
   {
-      	OSLibWinQueryWindowProcess(hwndNext, &pid, &tid);
-      	if(!(curpid == pid && dwThreadId == tid))
-        	continue;
+        OSLibWinQueryWindowProcess(hwndNext, &pid, &tid);
+        if(!(curpid == pid && dwThreadId == tid))
+                continue;
 
-      	window = Win32BaseWindow::GetWindowFromHandle(hwndNext);
-	if(window == NULL) {
-		//OS/2 window or non-frame window, so skip it
-		continue;
-	}
-      	if((rc = lpfn(window->getWindowHandle(), lParam)) == FALSE)
-        	break;
+        window = Win32BaseWindow::GetWindowFromHandle(hwndNext);
+        if(window == NULL) {
+                //OS/2 window or non-frame window, so skip it
+                continue;
+        }
+        if((rc = lpfn(window->getWindowHandle(), lParam)) == FALSE)
+                break;
   }
   OSLibWinEndEnumWindows (henum);
   return TRUE;
@@ -1027,19 +1032,19 @@ BOOL WIN32API EnumChildWindows(HWND hwnd, WNDENUMPROC lpfn, LPARAM lParam)
         return FALSE;
   }
 
-  henum = OSLibWinBeginEnumWindows(OSLIB_HWND_DESKTOP);          
+  henum = OSLibWinBeginEnumWindows(OSLIB_HWND_DESKTOP);
   while ((hwndNext = OSLibWinGetNextWindow(henum)) != 0)
   {
-      	window = Win32BaseWindow::GetWindowFromHandle(hwndNext);
-	if(window == NULL) {
-		//OS/2 window or non-frame window, so skip it
-		continue;
-	}
-      	if((rc = lpfn(window->getWindowHandle(), lParam)) == FALSE)
-	{
-		rc = FALSE;
-        	break;
-	}
+        window = Win32BaseWindow::GetWindowFromHandle(hwndNext);
+        if(window == NULL) {
+                //OS/2 window or non-frame window, so skip it
+                continue;
+        }
+        if((rc = lpfn(window->getWindowHandle(), lParam)) == FALSE)
+        {
+                rc = FALSE;
+                break;
+        }
   }
   OSLibWinEndEnumWindows(henum);
   return rc;
@@ -1056,22 +1061,22 @@ BOOL WIN32API EnumWindows(WNDENUMPROC lpfn, LPARAM lParam)
   dprintf(("EnumThreadWindows\n"));
 
   do {
-  	henum = OSLibWinBeginEnumWindows(hwndParent);          
-  	while ((hwndNext = OSLibWinGetNextWindow(henum)) != 0)
-  	{
-      		window = Win32BaseWindow::GetWindowFromHandle(hwndNext);
-		if(window == NULL) {
-			//OS/2 window or non-frame window, so skip it
-			continue;
-		}
-	      	if((rc = lpfn(window->getWindowHandle(), lParam)) == FALSE) {
-	        	goto Abort;
-		}
-	}
-      	if(hwndParent == OSLIB_HWND_OBJECT)
-         	break;
-      	hwndParent = OSLIB_HWND_OBJECT;
-	OSLibWinEndEnumWindows(henum);
+        henum = OSLibWinBeginEnumWindows(hwndParent);
+        while ((hwndNext = OSLibWinGetNextWindow(henum)) != 0)
+        {
+                window = Win32BaseWindow::GetWindowFromHandle(hwndNext);
+                if(window == NULL) {
+                        //OS/2 window or non-frame window, so skip it
+                        continue;
+                }
+                if((rc = lpfn(window->getWindowHandle(), lParam)) == FALSE) {
+                        goto Abort;
+                }
+        }
+        if(hwndParent == OSLIB_HWND_OBJECT)
+                break;
+        hwndParent = OSLIB_HWND_OBJECT;
+        OSLibWinEndEnumWindows(henum);
   }
   while(TRUE);
 
@@ -1092,6 +1097,7 @@ BOOL WIN32API GetUpdateRect( HWND hwnd, PRECT lpRect, BOOL  bErase)
 #endif
 //******************************************************************************
 //******************************************************************************
+#if 0
 BOOL WIN32API InvalidateRect(HWND hWnd, const RECT *lpRect, BOOL bErase)
 {
 #ifdef DEBUG
@@ -1108,6 +1114,7 @@ BOOL WIN32API InvalidateRect(HWND hWnd, const RECT *lpRect, BOOL bErase)
     }
     else return OSLibWinInvalidateRect(hWnd,NULL,bErase);
 }
+#endif
 //******************************************************************************
 //******************************************************************************
 UINT WIN32API ArrangeIconicWindows( HWND arg1)
