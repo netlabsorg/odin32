@@ -1,5 +1,3 @@
-/* $Id: ole32.h,v 1.3 1999-06-10 17:05:55 phaller Exp $ */
-
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -15,46 +13,35 @@
 #ifndef __OLE32_H__
 #define __OLE32_H__
 
-typedef ULONG           MONIKER, *PMONIKER, *LPMONIKER;
-typedef ULONG           IStorage;
-typedef ULONG           IStream;
-typedef ULONG           IOleClientSite;
-typedef ULONG           IDataAdviseHolder;
-typedef ULONG           IOleAdviseHolder;
-typedef ULONG           IDropSource;
-typedef ULONG           IDataObject;
-typedef ULONG           ILockBytes;
-typedef ULONG           IDropTarget;
-typedef ULONG           IPersistStorage;
-typedef IUnknown        UNKNOWN, *PUNKNOWN, *LPUNKNOWN;
-typedef IOleClientSite  OLECLIENTSITE, *POLECLIENTSITE, *LPOLECLIENTSITE;
-typedef ULONG           STORAGE, *PSTORAGE, *LPSTORAGE;
-typedef IDataObject     DATAOBJECT, *PDATAOBJECT, *LPDATAOBJECT;
-typedef const WCHAR *   LPCOLESTR;
-typedef WCHAR *         LPOLESTR;
-typedef ULONG           COSERVERINFO;
-typedef ULONG           STREAM, *PSTREAM, *LPSTREAM;
-typedef ULONG           MALLOC, *PMALLOC, *LPMALLOC;
-typedef ULONG           MARSHALL, *PMARSHALL, *LPMARSHALL;
-typedef ULONG           MALLOCSPY, *PMALLOCSPY, *LPMALLOCSPY;
-typedef ULONG           MESSAGEFILTER, *PMESSAGEFILTER, *LPMESSAGEFILTER;
-typedef ULONG           BC, *PBC, *LPBC;
-typedef ULONG           RUNNINGOBJECTTABLE, *PRUNNINGOBJECTTABLE, *LPRUNNINGOBJECTTABLE;
-typedef ULONG           OLESTREAM, *POLESTREAM, *LPOLESTREAM;
-typedef ULONG           CLIPFORMAT;
-typedef ULONG           DVTARGETDEVICE;
-typedef ULONG           STGMEDIUM;
-typedef ULONG           FORMATETC, *PFORMATETC, *LPFORMATETC;
-typedef ULONG           CLASSFACTORY, *PCLASSFACTORY, *LPCLASSFACTORY;
-typedef ULONG           SNB;
-typedef HMENU           HOLEMENU;
-typedef ULONG           OLEMENUGROUPWIDTHS, *POLEMENUGROUPWIDTHS, *LPOLEMENUGROUPWIDTHS;
-typedef ULONG           OLEINPLACEFRAME, *POLEINPLACEFRAME, *LPOLEINPLACEFRAME;
-typedef ULONG           OLEINPLACEACTIVEOBJECT, *POLEINPLACEACTIVEOBJECT, *LPOLEINPLACEACTIVEOBJECT;
-typedef ULONG           OLEINPLACEFRAMEINFO, *POLEINPLACEFRAMEINFO, *LPOLEINPLACEFRAMEINFO;
-typedef ULONG           CRECT, *PCRECT, *LPCRECT;
-typedef ULONG           ENUMFORMATETC, *PENUMFORMATETC, *LPENUMFORMATETC;
-typedef ULONG           ENUMOLEVERB, *PENUMOLEVERB, *LPENUMOLEVERB;
-typedef ULONG           OLEOBJECT, *POLEOBJECT, *LPOLEOBJECT;
+// ><DJR 17.05.99 Force to use C-interfaces for now to prevent CALLBACK definition compiler error
+#define CINTERFACE
+
+// ><DJR 17.05.99 Move standard includes to before os2win.h [memcmp]
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <memory.h>
+
+// ><DJR 17.05.99 Prevent CALLCONV becoming _System
+#include <winbase.h>
+#include <uconv.h>
+#undef CALLCONV
+
+#include <os2win.h>
+#include <ole2ver.h>
+#include <ole.h>
+#include <winreg.h>
+
+#include "wine/obj_base.h"
+#include "wine/obj_misc.h"
+#include "wine/obj_inplace.h"
+#include "wine/obj_dataobject.h"
+#include "wine/obj_oleobj.h"
+#include "wine/obj_marshal.h"
+#include "wine/obj_moniker.h"
+#include "wine/obj_clientserver.h"
+#include "wine/obj_dragdrop.h"
+#include "wine/obj_surrogate.h"
 
 #endif
