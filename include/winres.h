@@ -1,4 +1,4 @@
-/* $Id: winres.h,v 1.7 1999-08-31 14:39:16 sandervl Exp $ */
+/* $Id: winres.h,v 1.8 1999-08-31 17:15:53 sandervl Exp $ */
 
 /*
  * Win32 resource class
@@ -61,6 +61,8 @@ protected:
 
              ULONG ressize;
 	       int resType;
+
+	     BOOL  isUnicode;
 
                                // Linked list management
   Win32Resource*   next;               // Next Resource in module

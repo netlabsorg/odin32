@@ -1,4 +1,4 @@
-/* $Id: cvtmenu.cpp,v 1.1 1999-08-19 14:19:14 sandervl Exp $ */
+/* $Id: cvtmenu.cpp,v 1.2 1999-08-31 17:15:29 sandervl Exp $ */
 
 /*
  * PE2LX menu conversion code
@@ -27,8 +27,35 @@
 #include "cvtresource.h"
 
 static int  ProcessSubMenu(PopupMenuItem *popupitem, MT_OS2 *os2menu, MTI_OS2 *menuitem, int size, int cp);
+static int  QuerySubMenuSize(PopupMenuItem *popupitem);
 static int  ProcessMenuItem(NormalMenuItem *popupitem, MT_OS2 *os2menu, MTI_OS2 *menuitem, int size, int cp);
+static int  QueryMenuItemSize(NormalMenuItem *normalitem);
 static void menustrcpy(char *dest, char *src);
+//******************************************************************************
+//******************************************************************************
+static int QueryMenuSize(MenuHeader *menu)
+{
+  PopupMenuItem  *popupitem = (PopupMenuItem *)((char *)menu + sizeof(MenuHeader));
+  NormalMenuItem *normalitem = (NormalMenuItem *)((char *)menu + sizeof(MenuHeader));
+  int size = sizeof(MenuHeader);
+  int increment;
+
+  while(TRUE) 
+  {
+    	if(popupitem->fItemFlags & POPUP) {
+         	increment = QuerySubMenuSize(popupitem);
+    	}
+    	else 	increment = QueryMenuItemSize(normalitem);
+
+	size += increment;
+
+    	if(popupitem->fItemFlags & ENDMENU) break;
+
+    	popupitem  = (PopupMenuItem *)((char *)popupitem + increment);
+    	normalitem = (NormalMenuItem *)((char *)normalitem + increment);
+  }
+  return size;  
+}
 //******************************************************************************
 //******************************************************************************
 void *ConvertMenu(MenuHeader *menu, int size, int cp)
@@ -40,6 +67,9 @@ void *ConvertMenu(MenuHeader *menu, int size, int cp)
   int newsize;
   ULONG   ulCpSize, ulCP;
 
+  if(size == 0) {
+	size = QueryMenuSize(menu);
+  }
   os2menu           = (MT_OS2 *)malloc(size*4); //should always be sufficient
   os2menu->len      = sizeof(MT_OS2) - sizeof(MTI_OS2);
   if(cp == 0) {
@@ -181,6 +211,37 @@ static int ProcessSubMenu(PopupMenuItem *popupitem, MT_OS2 *os2menu, MTI_OS2 *me
 }
 //******************************************************************************
 //******************************************************************************
+static int QuerySubMenuSize(PopupMenuItem *popupitem)
+{
+ NormalMenuItem *normalitem;
+ int             len = 0, size, increment;
+
+  if(!(popupitem->fItemFlags & MENUBARBREAK)) {
+    	len = (UniStrlen(popupitem->szItemText)+1)*2;
+  }
+
+  size = (sizeof(PopupMenuItem)-2 + len);  /*PLF Sat  97-06-21 22:17:51*/
+
+  normalitem = (NormalMenuItem *)((char*)popupitem + sizeof(PopupMenuItem)-2);  /*PLF Sat  97-06-21 23:54:50*/
+  normalitem = (NormalMenuItem *)((int)normalitem + len);
+
+  while(TRUE) {
+        if(normalitem->fItemFlags & POPUP) {
+            	increment = QuerySubMenuSize((PopupMenuItem *)normalitem);
+        }
+        else    increment = QueryMenuItemSize(normalitem);
+
+        size += increment;
+
+        if(normalitem->fItemFlags & ENDMENU) {
+            	return(size);
+        }
+        normalitem = (NormalMenuItem *)((char *)normalitem + increment);
+  }
+  return(size);
+}
+//******************************************************************************
+//******************************************************************************
 static int ProcessMenuItem(NormalMenuItem *normalitem, MT_OS2 *os2menu, MTI_OS2 *menuitem, int size, int cp)
 {
  WCHAR *menustring;
@@ -263,6 +324,18 @@ static int ProcessMenuItem(NormalMenuItem *normalitem, MT_OS2 *os2menu, MTI_OS2 
   size -= (sizeof(NormalMenuItem)-2 + len); /*PLF Sat  97-06-21 22:19:57*/
 
   return(size);
+}
+//******************************************************************************
+//******************************************************************************
+static int QueryMenuItemSize(NormalMenuItem *normalitem)
+{
+ int    len = 0;
+
+  if(!(normalitem->fItemFlags & MENUBARBREAK)) {
+    	len = (UniStrlen(normalitem->szItemText)+1)*2;
+  }
+
+  return(sizeof(NormalMenuItem)-2 + len);
 }
 //******************************************************************************
 //******************************************************************************
