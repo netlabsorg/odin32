@@ -1,4 +1,4 @@
-/* $Id: comctl32.cpp,v 1.3 2000-04-16 18:52:38 cbratschi Exp $ */
+/* $Id: comctl32.cpp,v 1.4 2000-05-22 17:25:07 cbratschi Exp $ */
 /*
  * Win32 common controls implementation
  *
@@ -12,8 +12,8 @@
  */
 
 /*
- - Corel 20000212 level
- - WINE 20000130 level (commctrl.c)
+ - Corel 20000513 level
+ - (WINE 20000130 level (commctrl.c))
 */
 
 #include "comctl32.h"

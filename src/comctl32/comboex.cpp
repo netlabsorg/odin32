@@ -1,4 +1,4 @@
-/* $Id: comboex.cpp,v 1.3 2000-03-21 17:30:40 cbratschi Exp $ */
+/* $Id: comboex.cpp,v 1.4 2000-05-22 17:25:07 cbratschi Exp $ */
 /*
  * ComboBoxEx control
  *
@@ -17,6 +17,10 @@
  * FIXME:
  *   - should include "combo.h"
  */
+
+/*
+ - Corel WINE 20000513 level
+*/
 
 #include "winbase.h"
 #include "commctrl.h"
@@ -175,13 +179,6 @@ static LRESULT
 COMBOEX_Destroy (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
     COMBOEX_INFO *infoPtr = COMBOEX_GetInfoPtr (hwnd);
-
-
-    if (infoPtr->hwndCombo)
-        DestroyWindow (infoPtr->hwndCombo);
-
-
-
 
     /* free comboex info data */
     doneControl(hwnd);

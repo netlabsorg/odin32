@@ -1,4 +1,4 @@
-/* $Id: datetime.cpp,v 1.2 2000-02-25 17:00:15 cbratschi Exp $ */
+/* $Id: datetime.cpp,v 1.3 2000-05-22 17:25:07 cbratschi Exp $ */
 /*
  * Date and time picker control
  *
@@ -14,7 +14,7 @@
  *
  */
 
-/* WINE 20000130 level */
+/* WINE 20000513 level */
 
 #include "winbase.h"
 #include "commctrl.h"
@@ -27,12 +27,12 @@
 
 #define DATETIME_GetInfoPtr(hwnd) ((DATETIME_INFO*)getInfoPtr(hwnd))
 
-static char *days[] = {"Sunday", "Monday", "Tuesday", "Wednesday",
-                       "Thursday", "Friday", "Saturday", NULL};
+static const char *days[] = {"Sunday", "Monday", "Tuesday", "Wednesday",
+                            "Thursday", "Friday", "Saturday", NULL};
 
-static char *monthtxt[] = {"January", "February", "March", "April", "May",
-                           "June", "July", "August", "September", "October",
-                           "November", "December"};
+static const char *monthtxt[] = {"January", "February", "March", "April", "May",
+                                 "June", "July", "August", "September", "October",
+                                 "November", "December"};
 
 static LRESULT
 DATETIME_GetSystemTime (HWND hwnd, WPARAM wParam, LPARAM lParam )
