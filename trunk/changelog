@@ -1,4 +1,8 @@
- /* $Id: changelog,v 1.660 2000-01-19 01:41:21 sandervl Exp $ */
+ /* $Id: changelog,v 1.661 2000-01-20 16:47:13 cbratschi Exp $ */
+
+ 2000-01-20: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32: fixed WM_CONTEXTMENU
+		  dispatch WM_MOUSEMOVE in menu loop
 
  2000-01-18: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Removed 'old' user32 and replaced it with the new one
@@ -92,14 +96,6 @@
 	- KERNEL32:   Added DisableLogging & EnableLogging functions to
                       disable logging in parts of code. Logging will only be
                       done if the logcount is bigger than 0.
-<<<<<<< ChangeLog
-<<<<<<< ChangeLog
->>>>>>> 1.646
-=======
->>>>>>> 1.653
-
-=======
->>>>>>> 1.648
 
  2000-01-12: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32/NEW: fixed WM_CALCVALIDRECTS
