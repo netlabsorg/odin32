@@ -898,6 +898,14 @@ static ODINFUNCTION4(HRESULT, IShellFolder_fnCompareIDs,
 
 	      if (pidl1 && pidl1->mkid.cb)		/* go deeper? */	
 	      {
+#ifdef __WIN32OS2__
+                //SvL: shortcut for efficiency. might have to remove it
+                //     in the future if this method is changed
+	        pidl2 = ILGetNext(pidl2);
+	
+                nReturn = IShellFolder_CompareIDs(iface, 0, pidl1, pidl2);
+                hr = ResultFromShort(nReturn);
+#else
 	        pidlTemp = ILCloneFirst(pidl1);
 	        pidl2 = ILGetNext(pidl2);
 	
@@ -909,6 +917,7 @@ static ODINFUNCTION4(HRESULT, IShellFolder_fnCompareIDs,
 	          hr = ResultFromShort(nReturn);
 	        }
 	        ILFree(pidlTemp);
+#endif
 	      }
 	      else
 	      {
