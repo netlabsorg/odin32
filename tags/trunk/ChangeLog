@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1707 2001-09-30 01:08:51 bird Exp $ */
+/* $Id: ChangeLog,v 1.1708 2001-09-30 04:58:18 bird Exp $ */
 
  2001-09-30: knut st. osmundsen <kosmunds@csc.com>
     - Makefiles:
@@ -17,6 +17,7 @@
                   start the search in the source code directory.
                 o Corrected handling of deleted files.
                 o Increased some read and write buffers.
+    - Win32k:   o Changed PSZ to char *, since H2INC doesn't understand PSZ.
 
  2001-09-29: Sander van Leeuwen <sandervl@xs4all.nl>
     - WGSS50:   o WGSS update
