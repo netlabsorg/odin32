@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.36 2002-08-01 16:05:51 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.37 2002-08-01 16:10:51 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -933,11 +933,12 @@ DWORD WIN32API MsgWaitForMultipleObjects(DWORD nCount, LPHANDLE pHandles, BOOL f
        DebugInt3();
        return WAIT_ABANDONED;
     }
+    //if the msg queue already contains the messages defined by dwWakeMask,
+    //then return immediately
+    if(GetQueueStatus(dwWakeMask) != 0) {
+        return WAIT_OBJECT_0+nCount;
+    }
     if(dwWakeMask & QS_POSTMESSAGE) {
-        if(GetQueueStatus(dwWakeMask) != 0) {
-            return WAIT_OBJECT_0+nCount;
-        }
-
         HANDLE *pHandlesTmp = (HANDLE *)alloca((nCount+1)*sizeof(HANDLE));
         if(pHandlesTmp == NULL || !teb->o.odin.hPostMsgEvent) {
             DebugInt3();
