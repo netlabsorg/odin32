@@ -1,4 +1,4 @@
-/* $Id: undocshell.h,v 1.4 2000-08-18 02:04:23 phaller Exp $ */
+/* $Id: undocshell.h,v 1.5 2000-08-20 09:46:16 sandervl Exp $ */
 #ifndef __WINE_UNDOCSHELL_H
 #define __WINE_UNDOCSHELL_H
 
@@ -384,7 +384,11 @@ BOOL WINAPI FileMenu_AppendItem(
 
 /* FileMenu_InsertUsingPidl callback function */
 //typedef void CALLBACK (*LPFNFMCALLBACK)(LPCITEMIDLIST pidlFolder, LPCITEMIDLIST pidlFile);
-typedef void (CALLBACK *LPFNFMCALLBACK)(LPCITEMIDLIST pidlFolder, LPCITEMIDLIST pidlFile);
+#ifdef __WIN32OS2__
+typedef void (* CALLBACK LPFNFMCALLBACK)(LPCITEMIDLIST pidlFolder, LPCITEMIDLIST pidlFile);
+#else
+typedef void (CALLBACK * LPFNFMCALLBACK)(LPCITEMIDLIST pidlFolder, LPCITEMIDLIST pidlFile);
+#endif
 
 int WINAPI FileMenu_InsertUsingPidl(
 	HMENU hMenu,
@@ -710,7 +714,11 @@ LPWSTR WINAPI StrFormatByteSizeW ( DWORD dw, LPWSTR pszBuf, UINT cchBuf );
  */
 
 /* SHCreateShellFolderViewEx callback function */
+#ifdef __WIN32OS2__
+typedef HRESULT (* CALLBACK LPFNSFVCALLBACK)(
+#else
 typedef HRESULT (CALLBACK* LPFNSFVCALLBACK)(
+#endif
 	DWORD dwUser,
 	LPSHELLFOLDER pshf,
 	HWND hWnd,
@@ -902,7 +910,11 @@ BOOL WINAPI RegisterShellHook(
 
 /* SHCreateDefClassObject callback function */
 //typedef HRESULT CALLBACK (*LPFNCDCOCALLBACK)(
+#ifdef __WIN32OS2__
+typedef HRESULT (* CALLBACK LPFNCDCOCALLBACK)(
+#else
 typedef HRESULT (CALLBACK *LPFNCDCOCALLBACK)(
+#endif
 	LPUNKNOWN pUnkOuter,
 	REFIID riidObject,
 	LPVOID *ppvObject);
