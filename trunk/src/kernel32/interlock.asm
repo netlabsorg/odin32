@@ -1,4 +1,4 @@
-; $Id: interlock.asm,v 1.9 2001-05-28 12:39:33 phaller Exp $
+; $Id: interlock.asm,v 1.10 2001-06-09 19:45:42 sandervl Exp $
 
 ;/*
 ; * Interlocked apis
@@ -31,19 +31,12 @@ CODE32         SEGMENT DWORD PUBLIC USE32 'CODE'
 ;* The returned number need not be equal to the result!!!!		*
 
 _InterlockedIncrement@4 proc near
-	mov	eax, dword ptr [esp+4] ; LPLONG lpAddend
-  	lock 	inc dword ptr [eax] 
-       	mov 	eax, 0                 ; Note: must be "MOV eax,0"
-                                       ; instead of faster "XOR eax,eax"
-                                       ; because MOV doesn't tough any
-                                       ; flag register.
-                                       
-       	je   	@end                   ; not incremented?
-       	jl   	@decr
-       	inc 	eax                    ; ?
-       	jmp  	@end
-@decr: 	dec 	eax                    ; ?
-@end: 	ret 	4
+        ;we are allowed to trash edx
+	mov	edx, dword ptr [esp+4] ; LPLONG lpAddend
+        mov     eax, 1
+	lock 	xadd dword ptr [edx], eax 
+        inc     eax
+      	ret     4
 _InterlockedIncrement@4 endp
 
        public  _InterlockedDecrement@4
@@ -58,18 +51,12 @@ _InterlockedIncrement@4 endp
 ;* The returned number need not be equal to the result!!!!		*
 
 _InterlockedDecrement@4 proc near
-	mov	eax, dword ptr [esp+4] ; LPLONG lpAddend
-  	lock 	dec dword ptr [eax] 
-       	mov 	eax, 0                 ; Note: must be "MOV eax,0"
-                                       ; instead of faster "XOR eax,eax"
-                                       ; because MOV doesn't tough any
-                                       ; flag register.
-       	je   	@end                   ; not decremented?
-       	jl   	@decr
-       	inc 	eax                    ; ?
-       	jmp  	@end
-@decr:	dec 	eax                    ; ?
-@end: 	ret 	4
+        ;we are allowed to trash edx
+	mov	edx, dword ptr [esp+4] ; LPLONG lpAddend
+        mov     eax, -1
+	lock 	xadd dword ptr [edx], eax
+        dec     eax
+        ret     4
 _InterlockedDecrement@4 endp
 
 
