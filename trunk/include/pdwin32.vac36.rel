@@ -1,4 +1,4 @@
-# $Id: pdwin32.vac36.rel,v 1.10 2000-03-05 14:37:39 bird Exp $
+# $Id: pdwin32.vac36.rel,v 1.11 2000-03-05 14:52:42 bird Exp $
 # ODIN / win32os2 Project
 #
 # RELEASE makefile for the VAC 3.6.5 compiler environment
@@ -33,7 +33,7 @@ CXXFLAGS         = -Q -Si -G5 -O+ -Oi+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLU
 CXXFLAGS_ODINCRT = -Q -Si -G5 -O+ -Oi+ -Ge- -Ss+ -W3 -Gm+ /Gn- -I$(PDWIN32_INCLUDE)\Win -I. -D__WIN32OS2__ -D__WINE__ -D__i386__
 CFLAGS_WIN32APP  = -Q -Si -G5 -O+ -Oi+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLUDE)\Win -I. -D__WIN32OS2__ -D__i386__
 CXXFLAGS_WIN32APP= -Q -Si -G5 -O+ -Oi+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLUDE)\Win -I. -D__WIN32OS2__ -D__i386__
-ASFLAGS          = -Sc -Sv:ALP
+ASFLAGS          = -Mb -Sc -Sv:ALP
 LDFLAGS          = -Q -Si -G5 -O+ -Ge- -Ss+ -W3 -Gm+ /B"/noe /map /packcode /packdata /exepack:2 /nod"
 LDFLAGS_ODINCRT  = -Q -Si -G5 -O+ -Ge- -Ss+ -W3 -Gm+ /B"/noe /map /packcode /packdata /exepack:2"
 LD2FLAGS         = /nologo /noe /map /packcode /packdata /exepack:2 /nod /nodebug

@@ -1,4 +1,4 @@
-# $Id: pdwin32.vac3.dbg,v 1.20 2000-03-05 14:37:38 bird Exp $
+# $Id: pdwin32.vac3.dbg,v 1.21 2000-03-05 14:52:42 bird Exp $
 # ODIN / win32os2 Project
 #
 # DEBUG makefile for the VAC3 compiler environment
@@ -39,7 +39,7 @@ CFLAGS           = $(CFLAGS) -DDEBUG_ENABLELOG_LEVEL2
 CXXFLAGS         = $(CXXFLAGS) -DDEBUG_ENABLELOG_LEVEL2
 !endif
 
-ASFLAGS          = -Sc -Sv:ALP +Od
+ASFLAGS          = -Mb -Sc -Sv:ALP +Od
 LDFLAGS          = -Q  -Si -Ti -Ge- -Ss+ -W3 -Gm+ /B"/noe /map /NOD /dbgpack /packcode /packdata /exepack:2"
 LDFLAGS_ODINCRT  = -Q  -Si -Ti -Ge- -Ss+ -W3 -Gm+ /B"/noe /map /dbgpack /packcode /packdata /exepack:2"
 LD2FLAGS         = /nologo /DE /noe /map /NOD /dbgpack /packcode /packdata /exepack:2
