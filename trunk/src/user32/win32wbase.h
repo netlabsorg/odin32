@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.93 2000-04-18 11:13:01 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.94 2000-05-05 11:32:37 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -36,6 +36,13 @@ typedef struct {
         Win32BaseWindow *win32wnd;
         ULONG            win32CreateStruct;      //or dialog create dword
 } CUSTOMWNDDATA;
+
+typedef struct tagPROPERTY
+{
+    struct tagPROPERTY *next;     /* Next property in window list */
+    HANDLE              handle;   /* User's data */
+    LPSTR               string;   /* Property string (or atom) */
+} PROPERTY;
 
 //PostThreadMessage is done through Open32; which means the message id will be translated
 //(0xc00 added)
@@ -280,6 +287,13 @@ Win32BaseWindow *FindWindowById(int id);
 	 void   setComingToTop(BOOL fTop) 	{ fComingToTop = fTop; };
          BOOL   isInTasklist()                  { return fTaskList; };
 
+         //window property methods
+         HANDLE getProp(LPCSTR str);
+	 BOOL   setProp(LPCSTR str, HANDLE handle);
+	 HANDLE removeProp(LPCSTR str);
+	 INT    enumPropsExA(PROPENUMPROCEXA func, LPARAM lParam);
+	 INT    enumPropsExW(PROPENUMPROCEXW func, LPARAM lParam);
+
     static HWND Win32ToOS2Handle(HWND hwnd);
     static HWND Win32ToOS2FrameHandle(HWND hwnd);
     static HWND OS2ToWin32Handle(HWND hwnd);
@@ -304,6 +318,10 @@ protected:
        LRESULT  SendInternalMessageA(ULONG msg, WPARAM wParam, LPARAM lParam);
        LRESULT  SendInternalMessageW(ULONG msg, WPARAM wParam, LPARAM lParam);
         void    Init();
+
+        //called in destructor to remove all (if any) window properties
+        void    removeWindowProps();
+    PROPERTY   *findWindowProperty(LPCSTR str);
 
         HWND    OS2Hwnd;
         HWND    OS2HwndFrame;
@@ -367,6 +385,8 @@ protected:
 
         RECT    rectWindow; //relative to screen
         RECT    rectClient;  //relative to parent
+
+    PROPERTY   *propertyList;
 
 CREATESTRUCTA  *tmpcs; //temporary pointer to CREATESTRUCT used in CreateWindowEx
         ULONG   sw;    //set in CreateWindowExA, used in MsgCreate method

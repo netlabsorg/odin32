@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.183 2000-05-03 18:35:54 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.184 2000-05-05 11:32:36 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -142,6 +142,8 @@ void Win32BaseWindow::Init()
   horzScrollInfo     = NULL;
   vertScrollInfo     = NULL;
 
+  propertyList       = NULL;
+
   ownDC              = 0;
   hWindowRegion      = 0;
   hClipRegion        = 0;
@@ -203,6 +205,9 @@ Win32BaseWindow::~Win32BaseWindow()
     if(horzScrollInfo) {
         free(horzScrollInfo);
         horzScrollInfo = NULL;
+    }
+    if(propertyList) {
+	removeWindowProps();
     }
 }
 //******************************************************************************
