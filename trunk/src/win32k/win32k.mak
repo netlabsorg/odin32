@@ -1,4 +1,4 @@
-# $Id: win32k.mak,v 1.2 2000-12-11 06:28:44 bird Exp $
+# $Id: win32k.mak,v 1.3 2000-12-16 23:18:55 bird Exp $
 
 #
 # Win32k.sys makefile.
@@ -79,9 +79,9 @@ OBJS  =\
     $(WIN32KOBJ)\mytkStartProcess.obj \
     $(WIN32KOBJ)\vprntf16.obj \
     $(WIN32KOBJ)\d32init.obj \
-    $(WIN32KOBJ)\SymDB.obj \
     $(WIN32KOBJ)\d16init.obj_init \
-    $(WIN32KOBJ)\ProbKrnl.obj_init
+    $(WIN32KOBJ)\ProbKrnl.obj_init \
+    $(WIN32KOBJ)\SymDB.obj
 
 LASTOBJ =\
     $(WIN32KOBJ)\devlast.obj
@@ -102,7 +102,7 @@ $(WIN32KBIN)\$(NAME).sys:   clfix.exe \
                             $(WIN32KINCLUDE)\options.inc \
                             $(OBJS) \
                             $(LIBS) \
-                            $(WIN32KOBJ)\$(NAME)new.def \
+                            $(WIN32KOBJ)\$(NAME)bldlevel.def \
                             $(LASTOBJ) \
                             $(LIBSINIT) \
                             $(WIN32KOBJ)\$(@B).lnk \
@@ -126,7 +126,7 @@ $(WIN32KBIN)\$(NAME).sys:   clfix.exe \
 
 # Linker file.
 $(WIN32KOBJ)\$(NAME).lnk: win32k.mak makefile.inc ..\..\makefile.inc
-    echo @<<$(WIN32KOBJ)\$(NAME).lnk
+    echo Creating linkerfile: @<<$(WIN32KOBJ)\$(NAME).lnk
 /OUT:$(WIN32KBIN)\$(NAME).sys
 /MAP:$(WIN32KBIN)\$(NAME).map
 $(OBJS:  =^
@@ -135,15 +135,15 @@ $(OBJS:  =^
 $(LIBS:  =^
 )
 $(LASTOBJ)
-$(WIN32KOBJ)\$(NAME)new.def
+$(WIN32KOBJ)\$(NAME)bldlevel.def
 <<KEEP
 
-# Add bldlevel signature to win32k.def - creates temporary win32knew.def.
-$(WIN32KOBJ)\$(NAME)new.def: $(NAME).def makefile MakeDesc.cmd
+# Add bldlevel signature to win32k.def - creates temporary win32kbldlevel.def.
+$(WIN32KOBJ)\$(NAME)bldlevel.def: $(NAME).def win32k.mak MakeDesc.cmd
     -$(ECHO) Creates $@ with bldlevel signature string.
-    @$(CP) $(NAME).def $@
-    @MakeDesc.cmd $@ "ODIN" "0.05" "Odin32 Ring-0 support driver - copyright (c) 1998-2000 knut st. osmundsen"
-
+    $(BLDLEVELINF) $(NAME).def $@ -R"$(NAME).def" \
+        -V"#define=ODIN32_VERSION,$(ODIN32_INCLUDE)\versionos2.h" \
+        -M"#define=ODIN32_BUILD_NR,$(ODIN32_INCLUDE)\versionos2.h"
 
 
 #
@@ -168,7 +168,7 @@ TSTOBJS =\
     $(WIN32KOBJ)\abort.obj \
     $(WIN32KOBJ)\asmutils.obj \
     $(WIN32KOBJ)\calltaba.obj \
-    $(WIN32KOBJ)\malloc.obj_tst \
+    $(WIN32KOBJ)\malloc.obj_tst. \
     $(WIN32KOBJ)\smalloc_avl.obj \
     $(WIN32KOBJ)\avl.obj \
     $(WIN32KOBJ)\rmalloc_avl.obj \
@@ -177,7 +177,7 @@ TSTOBJS =\
     $(WIN32KOBJ)\stricmp.obj \
     $(WIN32KOBJ)\yield.obj \
     $(WIN32KOBJ)\vsprintf.obj \
-    $(WIN32KOBJ)\vprintf.obj_tst \
+    $(WIN32KOBJ)\vprintf.obj_tst. \
     $(WIN32KOBJ)\ldr.obj \
     $(WIN32KOBJ)\myldrClose.obj \
     $(WIN32KOBJ)\myldrOpen.obj \
@@ -202,11 +202,11 @@ TSTOBJS =\
     $(WIN32KOBJ)\k32SetOptions.obj \
     $(WIN32KOBJ)\mytkExecPgm.obj \
     $(WIN32KOBJ)\mytkStartProcess.obj \
-    $(WIN32KOBJ)\vprntf16.obj_tst \
-    $(WIN32KOBJ)\d32init.obj_tst \
-    $(WIN32KOBJ)\SymDB.obj \
-    $(WIN32KOBJ)\d16init.obj_tst_init \
-    $(WIN32KOBJ)\ProbKrnl.obj_tst_init
+    $(WIN32KOBJ)\vprntf16.obj_tst. \
+    $(WIN32KOBJ)\d32init.obj_tst. \
+    $(WIN32KOBJ)\d16init.obj_tst_init. \
+    $(WIN32KOBJ)\ProbKrnl.obj_tst_init. \
+    $(WIN32KOBJ)\SymDB.obj
 
 TSTLASTOBJ = $(LASTOBJ)
 
@@ -223,21 +223,30 @@ $(NAME)tst.exe: $(WIN32KBIN)\$(NAME)tst.exe
 $(WIN32KBIN)\$(NAME)tst.exe:    clfix.exe \
                                 Test\TstFakers.c \
                                 $(NAME)tst.def \
-                                $(TSTOBJS) \
+                                $(TSTOBJS:. = ) \
                                 $(TSTLIBS) \
-                                $(LASTOBJS) \
-                                makefile makefile.inc ..\..\makefile.inc
+                                $(TSTLASTOBJ) \
+                                $(WIN32KOBJ)\$(@B).lnk \
+                                win32k.mak makefile.inc ..\..\makefile.inc
     -@$(ECHO) linking: $@
-    -4 $(LD) $(LFLAGS) @<<$(WIN32KOBJ)\$(@B).lnk
+!ifdef GREP
+    -4 $(LD) $(LFLAGS) @$(WIN32KOBJ)\$(@B).lnk | $(GREP) -v LNK4001 | $(GREP) -v LNK4031
+!else
+    -4 $(LD) $(LFLAGS) @$(WIN32KOBJ)\$(@B).lnk
+!endif
+
+# Linker file.
+$(WIN32KOBJ)\$(NAME)tst.lnk: win32k.mak makefile.inc ..\..\makefile.inc
+    echo Creating linkerfile: @<<$(WIN32KOBJ)\$(NAME)tst.lnk
 /DEBUG
-/OUT:$@
-/MAP:$(WIN32KBIN)\$(@B).map
+/OUT:$(WIN32KBIN)\$(NAME)tst.exe
+/MAP:$(WIN32KBIN)\$(NAME)tst.map
 $(TSTOBJS:  =^
 )
 /IG
 $(TSTLIBS:  =^
 )
-$(LASTOBJ)
+$(TSTLASTOBJ)
 $(NAME)tst.def
 <<KEEP
 
